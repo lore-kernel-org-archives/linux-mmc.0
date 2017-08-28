@@ -1,121 +1,125 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v4 4/4] mmc: sdhci-pltfm: export
- sdhci_pltfm_suspend/resume
-Date: Mon, 28 Aug 2017 13:36:31 +0300
-Message-ID: <7b5561d0-d0d8-f542-5eee-faab891c5aef@intel.com>
-References: <1503461703-16225-1-git-send-email-yamada.masahiro@socionext.com>
- <1503461703-16225-5-git-send-email-yamada.masahiro@socionext.com>
+Subject: Re: [PATCH] mmc: sdhci-xenon: Support HS400 Enhanced Strobe feature
+Date: Mon, 28 Aug 2017 13:50:10 +0300
+Message-ID: <03f8adfa-3de9-f104-de74-079190303d64@intel.com>
+References: <1503512102-30968-1-git-send-email-zjwu@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1503461703-16225-5-git-send-email-yamada.masahiro@socionext.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga02.intel.com ([134.134.136.20]:16227 "EHLO mga02.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751157AbdH1K4s (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 28 Aug 2017 06:56:48 -0400
+In-Reply-To: <1503512102-30968-1-git-send-email-zjwu@marvell.com>
 Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>, linux-mmc@vger.kernel.org
-Cc: Piotr Sroka <piotrs@cadence.com>, Hu Ziji <huziji@marvell.com>, Christian Daudt <csd@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Zhangfei Gao <zhangfei.gao@marvell.com>, Kevin Hao <haokexin@gmail.com>, Olof Johansson <olof@lixom.net>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Zhoujie Wu <zjwu@marvell.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
+Cc: zmxu@marvell.com, jszhang@marvell.com, nadavh@marvell.com, xigu@marvell.com, dingwei@marvell.com, kostap@marvell.com, hannah@marvell.com, hongd@marvell.com, dougj@marvell.com, ygao@marvell.com, liuw@marvell.com, gregory.clement@free-electrons.com, thomas.petazzoni@free-electrons.com
 
-On 23/08/17 07:15, Masahiro Yamada wrote:
-> This will be useful when drivers want to reuse either suspend or
-> resume callback instead of whole of sdhci_pltfm_pmops.
+On 23/08/17 21:15, Zhoujie Wu wrote:
+> From: Hu Ziji <huziji@marvell.com>
 > 
-> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+> Support HS400 Enhanced Strobe feature in Xenon.
+> 
+> Enable Enhanced Strobe together with Data Strobe.
+> Disable Enhanced Strobe when eMMC is not in HS400 mode.
+> 
+> Signed-off-by: Hu Ziji <huziji@marvell.com>
+> Signed-off-by: Zhoujie Wu <zjwu@marvell.com>
 
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
+>  drivers/mmc/host/sdhci-xenon-phy.c | 34 ++++++++++++++++++++++++++++------
+>  drivers/mmc/host/sdhci-xenon.h     |  1 +
+>  2 files changed, 29 insertions(+), 6 deletions(-)
 > 
-> Changes in v4: None
-> Changes in v3: None
-> Changes in v2: None
-> 
->  drivers/mmc/host/sdhci-cadence.c | 20 +-------------------
->  drivers/mmc/host/sdhci-pltfm.c   |  6 ++++--
->  drivers/mmc/host/sdhci-pltfm.h   |  2 ++
->  3 files changed, 7 insertions(+), 21 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
-> index 3dca3b3c6436..56529c3d389a 100644
-> --- a/drivers/mmc/host/sdhci-cadence.c
-> +++ b/drivers/mmc/host/sdhci-cadence.c
-> @@ -391,24 +391,6 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
->  }
->  
->  #ifdef CONFIG_PM_SLEEP
-> -static int sdhci_cdns_suspend(struct device *dev)
-> -{
-> -	struct sdhci_host *host = dev_get_drvdata(dev);
-> -	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> -	int ret;
-> -
-> -	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
-> -		mmc_retune_needed(host->mmc);
-> -
-> -	ret = sdhci_suspend_host(host);
-> -	if (ret)
-> -		return ret;
-> -
-> -	clk_disable_unprepare(pltfm_host->clk);
-> -
-> -	return 0;
-> -}
-> -
->  static int sdhci_cdns_resume(struct device *dev)
->  {
->  	struct sdhci_host *host = dev_get_drvdata(dev);
-> @@ -438,7 +420,7 @@ static int sdhci_cdns_resume(struct device *dev)
->  #endif
->  
->  static const struct dev_pm_ops sdhci_cdns_pm_ops = {
-> -	SET_SYSTEM_SLEEP_PM_OPS(sdhci_cdns_suspend, sdhci_cdns_resume)
-> +	SET_SYSTEM_SLEEP_PM_OPS(sdhci_pltfm_suspend, sdhci_cdns_resume)
->  };
->  
->  static const struct of_device_id sdhci_cdns_match[] = {
-> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-> index 4c0135e184e9..02bea6159d79 100644
-> --- a/drivers/mmc/host/sdhci-pltfm.c
-> +++ b/drivers/mmc/host/sdhci-pltfm.c
-> @@ -209,7 +209,7 @@ int sdhci_pltfm_unregister(struct platform_device *pdev)
->  EXPORT_SYMBOL_GPL(sdhci_pltfm_unregister);
->  
->  #ifdef CONFIG_PM_SLEEP
-> -static int sdhci_pltfm_suspend(struct device *dev)
-> +int sdhci_pltfm_suspend(struct device *dev)
->  {
->  	struct sdhci_host *host = dev_get_drvdata(dev);
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> @@ -226,8 +226,9 @@ static int sdhci_pltfm_suspend(struct device *dev)
->  
+> diff --git a/drivers/mmc/host/sdhci-xenon-phy.c b/drivers/mmc/host/sdhci-xenon-phy.c
+> index f7e26b0..ec87943 100644
+> --- a/drivers/mmc/host/sdhci-xenon-phy.c
+> +++ b/drivers/mmc/host/sdhci-xenon-phy.c
+> @@ -409,17 +409,30 @@ static int xenon_emmc_phy_config_tuning(struct sdhci_host *host)
 >  	return 0;
 >  }
-> +EXPORT_SYMBOL_GPL(sdhci_pltfm_suspend);
 >  
-> -static int sdhci_pltfm_resume(struct device *dev)
-> +int sdhci_pltfm_resume(struct device *dev)
+> -static void xenon_emmc_phy_disable_data_strobe(struct sdhci_host *host)
+> +static void xenon_emmc_phy_disable_strobe(struct sdhci_host *host)
 >  {
->  	struct sdhci_host *host = dev_get_drvdata(dev);
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
+>  	u32 reg;
+>  
+> -	/* Disable SDHC Data Strobe */
+> +	/* Disable both SDHC Data Strobe and Enhanced Strobe */
+>  	reg = sdhci_readl(host, XENON_SLOT_EMMC_CTRL);
+> -	reg &= ~XENON_ENABLE_DATA_STROBE;
+> +	reg &= ~(XENON_ENABLE_DATA_STROBE | XENON_ENABLE_RESP_STROBE);
+>  	sdhci_writel(host, reg, XENON_SLOT_EMMC_CTRL);
+> +
+> +	/* Clear Strobe line Pull down or Pull up */
+> +	if (priv->phy_type == EMMC_5_0_PHY) {
+> +		reg = sdhci_readl(host, XENON_EMMC_5_0_PHY_PAD_CONTROL);
+> +		reg &= ~(XENON_EMMC5_FC_QSP_PD | XENON_EMMC5_FC_QSP_PU);
+> +		sdhci_writel(host, reg, XENON_EMMC_5_0_PHY_PAD_CONTROL);
+> +	} else {
+> +		reg = sdhci_readl(host, XENON_EMMC_PHY_PAD_CONTROL1);
+> +		reg &= ~(XENON_EMMC5_1_FC_QSP_PD | XENON_EMMC5_1_FC_QSP_PU);
+> +		sdhci_writel(host, reg, XENON_EMMC_PHY_PAD_CONTROL1);
+> +	}
+>  }
+>  
+> -/* Set HS400 Data Strobe */
+> +/* Set HS400 Data Strobe and Enhanced Strobe */
+>  static void xenon_emmc_phy_strobe_delay_adj(struct sdhci_host *host)
+>  {
 >  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> @@ -243,6 +244,7 @@ static int sdhci_pltfm_resume(struct device *dev)
+> @@ -439,6 +452,15 @@ static void xenon_emmc_phy_strobe_delay_adj(struct sdhci_host *host)
+>  	/* Enable SDHC Data Strobe */
+>  	reg = sdhci_readl(host, XENON_SLOT_EMMC_CTRL);
+>  	reg |= XENON_ENABLE_DATA_STROBE;
+> +	/*
+> +	 * Enable SDHC Enhanced Strobe if supported
+> +	 * Xenon Enhanced Strobe should be enabled only when
+> +	 * 1. card is in HS400 mode and
+> +	 * 2. SDCLK is higher than 52MHz
+> +	 * 3. DLL is enabled
+> +	 */
+> +	if (host->mmc->ios.enhanced_strobe)
+> +		reg |= XENON_ENABLE_RESP_STROBE;
+>  	sdhci_writel(host, reg, XENON_SLOT_EMMC_CTRL);
 >  
->  	return ret;
->  }
-> +EXPORT_SYMBOL_GPL(sdhci_pltfm_resume);
->  #endif
+>  	/* Set Data Strobe Pull down */
+> @@ -615,7 +637,7 @@ static void xenon_emmc_phy_set(struct sdhci_host *host,
+>  		sdhci_writel(host, phy_regs->logic_timing_val,
+>  			     phy_regs->logic_timing_adj);
+>  	else
+> -		xenon_emmc_phy_disable_data_strobe(host);
+> +		xenon_emmc_phy_disable_strobe(host);
 >  
->  const struct dev_pm_ops sdhci_pltfm_pmops = {
-> diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
-> index 957839d0fe37..1e91fb1c020e 100644
-> --- a/drivers/mmc/host/sdhci-pltfm.h
-> +++ b/drivers/mmc/host/sdhci-pltfm.h
-> @@ -109,6 +109,8 @@ static inline void *sdhci_pltfm_priv(struct sdhci_pltfm_host *host)
->  	return host->private;
->  }
+>  phy_init:
+>  	xenon_emmc_phy_init(host);
+> @@ -705,7 +727,7 @@ void xenon_soc_pad_ctrl(struct sdhci_host *host,
 >  
-> +int sdhci_pltfm_suspend(struct device *dev);
-> +int sdhci_pltfm_resume(struct device *dev);
->  extern const struct dev_pm_ops sdhci_pltfm_pmops;
+>  /*
+>   * Setting PHY when card is working in High Speed Mode.
+> - * HS400 set data strobe line.
+> + * HS400 set Data Strobe and Enhanced Strobe if it is supported.
+>   * HS200/SDR104 set tuning config to prepare for tuning.
+>   */
+>  static int xenon_hs_delay_adj(struct sdhci_host *host)
+> diff --git a/drivers/mmc/host/sdhci-xenon.h b/drivers/mmc/host/sdhci-xenon.h
+> index 73debb4..01937f1 100644
+> --- a/drivers/mmc/host/sdhci-xenon.h
+> +++ b/drivers/mmc/host/sdhci-xenon.h
+> @@ -33,6 +33,7 @@
+>  #define XENON_TUNING_STEP_DIVIDER		BIT(6)
 >  
->  #endif /* _DRIVERS_MMC_SDHCI_PLTFM_H */
+>  #define XENON_SLOT_EMMC_CTRL			0x0130
+> +#define XENON_ENABLE_RESP_STROBE		BIT(25)
+>  #define XENON_ENABLE_DATA_STROBE		BIT(24)
+>  
+>  #define XENON_SLOT_RETUNING_REQ_CTRL		0x0144
 > 
+
