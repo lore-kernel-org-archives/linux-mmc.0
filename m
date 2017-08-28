@@ -1,70 +1,223 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v2] mmc: sdhci-xenon: add set_power callback
-Date: Mon, 28 Aug 2017 12:57:43 +0300
-Message-ID: <e37d8951-7e1b-8431-5593-5e693295987f@intel.com>
-References: <1503338529-21102-1-git-send-email-zjwu@marvell.com>
+Subject: Re: [PATCH v4 1/4] mmc: sdhci-cadence: add suspend / resume support
+Date: Mon, 28 Aug 2017 13:11:30 +0300
+Message-ID: <9143e4b7-bb93-c775-30d1-a327051b820e@intel.com>
+References: <1503461703-16225-1-git-send-email-yamada.masahiro@socionext.com>
+ <1503461703-16225-2-git-send-email-yamada.masahiro@socionext.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:56587 "EHLO mga11.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751184AbdH1KES (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 28 Aug 2017 06:04:18 -0400
-In-Reply-To: <1503338529-21102-1-git-send-email-zjwu@marvell.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1503461703-16225-2-git-send-email-yamada.masahiro@socionext.com>
 Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
+To: Masahiro Yamada <yamada.masahiro@socionext.com>, linux-mmc@vger.kernel.org
+Cc: Piotr Sroka <piotrs@cadence.com>, Hu Ziji <huziji@marvell.com>, Christian Daudt <csd@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Zhangfei Gao <zhangfei.gao@marvell.com>, Kevin Hao <haokexin@gmail.com>, Olof Johansson <olof@lixom.net>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Zhoujie Wu <zjwu@marvell.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
-Cc: zmxu@marvell.com, jszhang@marvell.com, nadavh@marvell.com, xigu@marvell.com, dingwei@marvell.com, kostap@marvell.com, hannah@marvell.com, hongd@marvell.com, dougj@marvell.com, ygao@marvell.com, liuw@marvell.com, gregory.clement@free-electrons.com, thomas.petazzoni@free-electrons.com
 
-On 21/08/17 21:02, Zhoujie Wu wrote:
-> Xenon sdh controller requests proper SD bus voltage select
-> bits programmed even with vmmc power supply. Any reserved
-> value(100b-000b) programmed in this field will lead to controller
-> ignore SD bus power bit and keep its value at zero.
-> Add set_power callback to handle this.
+On 23/08/17 07:15, Masahiro Yamada wrote:
+> Currently, the probe function initializes the PHY, but PHY settings
+> are lost during the sleep state.  Restore the PHY registers when
+> resuming.
 > 
-> Signed-off-by: Zhoujie Wu <zjwu@marvell.com>
+> To facilitate this, split sdhci_cdns_phy_init() into the DT parse
+> part and PHY update part so that the latter can be invoked from the
+> resume hook.
+> 
+> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
-> Updated according to Jisheng Zhang's comment.
->  drivers/mmc/host/sdhci-xenon.c | 19 +++++++++++++++++++
->  1 file changed, 19 insertions(+)
 > 
-> diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
-> index edd4d915..a4be2fd 100644
-> --- a/drivers/mmc/host/sdhci-xenon.c
-> +++ b/drivers/mmc/host/sdhci-xenon.c
-> @@ -210,8 +210,27 @@ static void xenon_set_uhs_signaling(struct sdhci_host *host,
->  	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
+> Changes in v4:
+>  - disable clk if resume fails.
+> 
+> Changes in v3:
+>  - Use #ifdef CONFIG_PM_SLEEP instead of __maybe_unused
+>  - Add own sdhci_cdns_suspend implementation to not depend on
+>    the core change
+> 
+> Changes in v2: None
+> 
+>  drivers/mmc/host/sdhci-cadence.c | 106 +++++++++++++++++++++++++++++++++++----
+>  1 file changed, 97 insertions(+), 9 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
+> index 19d5698244b5..3dca3b3c6436 100644
+> --- a/drivers/mmc/host/sdhci-cadence.c
+> +++ b/drivers/mmc/host/sdhci-cadence.c
+> @@ -67,9 +67,16 @@
+>   */
+>  #define SDHCI_CDNS_MAX_TUNING_LOOP	40
+>  
+> +struct sdhci_cdns_phy_param {
+> +	u8 addr;
+> +	u8 data;
+> +};
+> +
+>  struct sdhci_cdns_priv {
+>  	void __iomem *hrs_addr;
+>  	bool enhanced_strobe;
+> +	unsigned int nr_phy_params;
+> +	struct sdhci_cdns_phy_param phy_params[0];
+>  };
+>  
+>  struct sdhci_cdns_phy_cfg {
+> @@ -115,9 +122,22 @@ static int sdhci_cdns_write_phy_reg(struct sdhci_cdns_priv *priv,
+>  	return 0;
 >  }
 >  
-> +static void xenon_set_power(struct sdhci_host *host, unsigned char mode,
-> +		unsigned short vdd)
-> +{
-> +	struct mmc_host *mmc = host->mmc;
-> +	u8 pwr = host->pwr;
+> -static int sdhci_cdns_phy_init(struct device_node *np,
+> -			       struct sdhci_cdns_priv *priv)
+> +static unsigned int sdhci_cdns_phy_param_count(struct device_node *np)
+>  {
+> +	unsigned int count = 0;
+> +	int i;
 > +
-> +	sdhci_set_power_noreg(host, mode, vdd);
+> +	for (i = 0; i < ARRAY_SIZE(sdhci_cdns_phy_cfgs); i++)
+> +		if (of_property_read_bool(np, sdhci_cdns_phy_cfgs[i].property))
+> +			count++;
 > +
-> +	if (host->pwr == pwr)
-> +		return;
-> +
-> +	if (host->pwr == 0)
-> +		vdd = 0;
-> +
-> +	if (!IS_ERR(mmc->supply.vmmc))
-> +		mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
+> +	return count;
 > +}
 > +
->  static const struct sdhci_ops sdhci_xenon_ops = {
->  	.set_clock		= sdhci_set_clock,
-> +	.set_power		= xenon_set_power,
->  	.set_bus_width		= sdhci_set_bus_width,
->  	.reset			= xenon_reset,
->  	.set_uhs_signaling	= xenon_set_uhs_signaling,
+> +static void sdhci_cdns_phy_param_parse(struct device_node *np,
+> +				       struct sdhci_cdns_priv *priv)
+> +{
+> +	struct sdhci_cdns_phy_param *p = priv->phy_params;
+>  	u32 val;
+>  	int ret, i;
+>  
+> @@ -127,9 +147,19 @@ static int sdhci_cdns_phy_init(struct device_node *np,
+>  		if (ret)
+>  			continue;
+>  
+> -		ret = sdhci_cdns_write_phy_reg(priv,
+> -					       sdhci_cdns_phy_cfgs[i].addr,
+> -					       val);
+> +		p->addr = sdhci_cdns_phy_cfgs[i].addr;
+> +		p->data = val;
+> +		p++;
+> +	}
+> +}
+> +
+> +static int sdhci_cdns_phy_init(struct sdhci_cdns_priv *priv)
+> +{
+> +	int ret, i;
+> +
+> +	for (i = 0; i < priv->nr_phy_params; i++) {
+> +		ret = sdhci_cdns_write_phy_reg(priv, priv->phy_params[i].addr,
+> +					       priv->phy_params[i].data);
+>  		if (ret)
+>  			return ret;
+>  	}
+> @@ -302,6 +332,8 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+>  	struct sdhci_pltfm_host *pltfm_host;
+>  	struct sdhci_cdns_priv *priv;
+>  	struct clk *clk;
+> +	size_t priv_size;
+> +	unsigned int nr_phy_params;
+>  	int ret;
+>  	struct device *dev = &pdev->dev;
+>  
+> @@ -313,7 +345,9 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+>  	if (ret)
+>  		return ret;
+>  
+> -	host = sdhci_pltfm_init(pdev, &sdhci_cdns_pltfm_data, sizeof(*priv));
+> +	nr_phy_params = sdhci_cdns_phy_param_count(dev->of_node);
+> +	priv_size = sizeof(*priv) + sizeof(priv->phy_params[0]) * nr_phy_params;
+> +	host = sdhci_pltfm_init(pdev, &sdhci_cdns_pltfm_data, priv_size);
+>  	if (IS_ERR(host)) {
+>  		ret = PTR_ERR(host);
+>  		goto disable_clk;
+> @@ -322,7 +356,8 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+>  	pltfm_host = sdhci_priv(host);
+>  	pltfm_host->clk = clk;
+>  
+> -	priv = sdhci_cdns_priv(host);
+> +	priv = sdhci_pltfm_priv(pltfm_host);
+> +	priv->nr_phy_params = nr_phy_params;
+>  	priv->hrs_addr = host->ioaddr;
+>  	priv->enhanced_strobe = false;
+>  	host->ioaddr += SDHCI_CDNS_SRS_BASE;
+> @@ -336,7 +371,9 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+>  	if (ret)
+>  		goto free;
+>  
+> -	ret = sdhci_cdns_phy_init(dev->of_node, priv);
+> +	sdhci_cdns_phy_param_parse(dev->of_node, priv);
+> +
+> +	ret = sdhci_cdns_phy_init(priv);
+>  	if (ret)
+>  		goto free;
+>  
+> @@ -353,6 +390,57 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+>  	return ret;
+>  }
+>  
+> +#ifdef CONFIG_PM_SLEEP
+> +static int sdhci_cdns_suspend(struct device *dev)
+> +{
+> +	struct sdhci_host *host = dev_get_drvdata(dev);
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	int ret;
+> +
+> +	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
+> +		mmc_retune_needed(host->mmc);
+> +
+> +	ret = sdhci_suspend_host(host);
+> +	if (ret)
+> +		return ret;
+> +
+> +	clk_disable_unprepare(pltfm_host->clk);
+> +
+> +	return 0;
+> +}
+> +
+> +static int sdhci_cdns_resume(struct device *dev)
+> +{
+> +	struct sdhci_host *host = dev_get_drvdata(dev);
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_cdns_priv *priv = sdhci_pltfm_priv(pltfm_host);
+> +	int ret;
+> +
+> +	ret = clk_prepare_enable(pltfm_host->clk);
+> +	if (ret)
+> +		return ret;
+> +
+> +	ret = sdhci_cdns_phy_init(priv);
+> +	if (ret)
+> +		goto disable_clk;
+> +
+> +	ret = sdhci_resume_host(host);
+> +	if (ret)
+> +		goto disable_clk;
+> +
+> +	return 0;
+> +
+> +disable_clk:
+> +	clk_disable_unprepare(pltfm_host->clk);
+> +
+> +	return ret;
+> +}
+> +#endif
+> +
+> +static const struct dev_pm_ops sdhci_cdns_pm_ops = {
+> +	SET_SYSTEM_SLEEP_PM_OPS(sdhci_cdns_suspend, sdhci_cdns_resume)
+> +};
+> +
+>  static const struct of_device_id sdhci_cdns_match[] = {
+>  	{ .compatible = "socionext,uniphier-sd4hc" },
+>  	{ .compatible = "cdns,sd4hc" },
+> @@ -363,7 +451,7 @@ MODULE_DEVICE_TABLE(of, sdhci_cdns_match);
+>  static struct platform_driver sdhci_cdns_driver = {
+>  	.driver = {
+>  		.name = "sdhci-cdns",
+> -		.pm = &sdhci_pltfm_pmops,
+> +		.pm = &sdhci_cdns_pm_ops,
+>  		.of_match_table = sdhci_cdns_match,
+>  	},
+>  	.probe = sdhci_cdns_probe,
 > 
-
