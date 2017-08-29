@@ -1,79 +1,75 @@
-From: Chris Paterson <Chris.Paterson2@renesas.com>
-Subject: RE: [PATCH RESEND] mmc: renesas_sdhi: Add r8a7743/5 support
-Date: Tue, 29 Aug 2017 15:05:53 +0000
-Message-ID: <TY1PR06MB0702FA2B782E1A29E40EEDCCB79F0@TY1PR06MB0702.apcprd06.prod.outlook.com>
-References: <1504014726-17288-1-git-send-email-biju.das@bp.renesas.com>
- <20170829145852.j4epebxsb2j2i3d2@ninjato>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [RFT] arm64: dts: renesas: salvator-common: enable SDR104 for SD
+ cards
+Date: Tue, 29 Aug 2017 17:42:37 +0200
+Message-ID: <20170829154237.vdt3hbtjnos2eu2c@ninjato>
+References: <20170802201311.1394-1-wsa+renesas@sang-engineering.com>
+ <20170803074351.GC19671@verge.net.au>
+ <20170803155357.GA3826@verge.net.au>
+ <20170803155520.GB3826@verge.net.au>
+ <20170808185445.GA2170@katana>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <20170829145852.j4epebxsb2j2i3d2@ninjato>
-Content-Language: en-US
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>, Biju Das <biju.das@bp.renesas.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, Fabrizio Castro <fabrizio.castro@bp.renesas.com>, Geert Uytterhoeven <geert@linux-m68k.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="v7n63g63hwhwit2t"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from sauhun.de ([88.99.104.3]:45448 "EHLO pokefinder.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751323AbdH2Pmj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 29 Aug 2017 11:42:39 -0400
+Content-Disposition: inline
+In-Reply-To: <20170808185445.GA2170@katana>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Simon Horman <horms@verge.net.au>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org
 
 
+--v7n63g63hwhwit2t
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-> From: Wolfram Sang [mailto:wsa@the-dreams.de]
-> Sent: 29 August 2017 15:59
+
+> As discussed in a chat, I tried SDR104 with my SDIO WiFi cards:
 >=20
-> On Tue, Aug 29, 2017 at 02:52:06PM +0100, Biju Das wrote:
-> > Add support for r8a7743/5 SoC.Renesas RZ/G1[ME] (R8A7743/5) SDHI is
-> > identical to the R-Car Gen2 family.
-> >
-> > Signed-off-by: Biju Das <biju.das@bp.renesas.com>
-> > ---
-> > DT binding patch for r8a7743/5 SoC is applied for mmc next. But the
-> > driver patch is still not applied for mmc next.So resending the driver =
-patch.
+> H3:
+> - one slot worked flawlessly
+> - one slot could load FW but failed to read status
+> (with SDR50: both slots work)
 >=20
-> Didn't Chris Paterson volunteer to write a new patch introducing Gen2 gen=
-eric
-> compatibles? Or did I misunderstand?
+> M3-W:
+> - both slots could not load the firmware
+> (with SDR50: one slot works, one fails to load FW)
 
-I did :)
+Update for my H3-ES2.0:
 
-But after some off-ML discussion with Geert/Simon I decided to leave it to =
-Simon as he's been doing a lot of similar work for all of the R-Car related=
- drivers.
+ - both slots could not load the firmware with SDR104
+ (with SDR50: both slots work)
 
-This may not happen immediately, and we already have the bindings/DT patche=
-s accepted based on this patch, hence the repost.
+> The cards, however, were correctly identified as SDR104 and there were
+> no tuning errors and no other SDHI related warnings.
 
-Sorry for the confusion!
+This still holds true.
 
->=20
-> >
-> > This patch is compiled and tested against mmc/next.
-> >
-> >  drivers/mmc/host/renesas_sdhi_sys_dmac.c | 2 ++
-> >  1 file changed, 2 insertions(+)
-> >
-> > diff --git a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-> > b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-> > index 160fbb2..df44654 100644
-> > --- a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-> > +++ b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-> > @@ -98,6 +98,8 @@
-> >  	{ .compatible =3D "renesas,sdhi-r7s72100", .data =3D &of_rz_compatibl=
-e, },
-> >  	{ .compatible =3D "renesas,sdhi-r8a7778", .data =3D
-> &of_rcar_gen1_compatible, },
-> >  	{ .compatible =3D "renesas,sdhi-r8a7779", .data =3D
-> > &of_rcar_gen1_compatible, },
-> > +	{ .compatible =3D "renesas,sdhi-r8a7743", .data =3D
-> &of_rcar_gen2_compatible, },
-> > +	{ .compatible =3D "renesas,sdhi-r8a7745", .data =3D
-> > +&of_rcar_gen2_compatible, },
-> >  	{ .compatible =3D "renesas,sdhi-r8a7790", .data =3D
-> &of_rcar_gen2_compatible, },
-> >  	{ .compatible =3D "renesas,sdhi-r8a7791", .data =3D
-> &of_rcar_gen2_compatible, },
-> >  	{ .compatible =3D "renesas,sdhi-r8a7792", .data =3D
-> > &of_rcar_gen2_compatible, },
-> > --
-> > 1.9.1
-> >
+
+--v7n63g63hwhwit2t
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlmli2kACgkQFA3kzBSg
+KbZNUA/+K5IYz1Xdq97zbdVG/ao9djes8S2Qbl52cTBgBRjMNSY61uWa9eU9Knh1
+GP7o2DHL+mTORIrC4ulJ1Gz4b578TTaEG6JEmTKZNafvSYdorbQpjd5fSldO4/0u
+D6+0kapgHKR1AqJSULHqbhtx18zKjeFnawb5DePa6iHBcp6pQz0CQ4Qn2PpkOPPO
+UA9QEKsSMUaoiqeJBdg/obG3G5bqGrf6WiDrfLrhDWYhC56YZg4JP+pTXOMytdXS
+iWA6xZ3P2VhIRihU0Qw0U8cZHywqed4iK6sVlkms6CU5ZINPYv4SVMxlQWCVy3/f
+QJBtxDR9KvPwC1j7vsn2BbRqf7CPuXwwLon3UELBH/A/A8TolY6ocL24Ctl4j6Dw
+ejQAJNzGcgyO9HqeDQNhvzbdIZ7Y1MVkiQ4DJYLDmmKaHkkZ6/bJXPDFoEhz/uX0
+0HzQh+oKq49IDdPd+OTYimMS5slogowa0ThRblnITHvgWiYyHopAzD2SteeHQmdE
+v/pNkkvN2TpX+mkpnvXULUxap9khzigZx+FTYF/b6QKfXQSAuh8fAR05dZ35II2N
+V7Hen8e7sZv9iLMo0jR1+N8WmRR7HvOmoZicmcM3UsEdwJop2M+4WB9kmLnJs2VX
+Ye6yHW4C93FR7+SKAbXi5ClQAe/3vWks7Bt7UTVzc6cwshbStiw=
+=u0+x
+-----END PGP SIGNATURE-----
+
+--v7n63g63hwhwit2t--
