@@ -1,133 +1,121 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v2] mmc: sdhci-xenon: add set_power callback
-Date: Tue, 29 Aug 2017 13:25:22 +0300
-Message-ID: <0895bbd0-438d-9460-b913-37d3a6ec5a59@intel.com>
-References: <1503338529-21102-1-git-send-email-zjwu@marvell.com>
- <e37d8951-7e1b-8431-5593-5e693295987f@intel.com>
- <87val76624.fsf@free-electrons.com> <59A464BA.6030401@marvell.com>
- <87bmmy65je.fsf@free-electrons.com>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: Re: [PATCH v3 3/5] dt-bindings: sdhci-omap: Add bindings for the
+ sdhci-omap controller
+Date: Tue, 29 Aug 2017 16:50:22 +0530
+Message-ID: <0c7e0705-d9c2-4499-54ba-cbd84589dc01@ti.com>
+References: <20170821142132.GH6008@atomide.com>
+ <20170823054246.23927-1-kishon@ti.com>
+ <CAPDyKFp7gchVQ+JPNqv4LktvHRm2Lzx6KakOw85zEZxDEX0OhA@mail.gmail.com>
+ <c9342689-f09e-44af-0975-d43ef122a477@ti.com>
+ <CAPDyKFqCZFM7UmHyQCm=DwwZXJvzUde3pW0HqARKrsgfgxSuaw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga07.intel.com ([134.134.136.100]:17126 "EHLO mga07.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752306AbdH2Kb5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 29 Aug 2017 06:31:57 -0400
-In-Reply-To: <87bmmy65je.fsf@free-electrons.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFqCZFM7UmHyQCm=DwwZXJvzUde3pW0HqARKrsgfgxSuaw@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Russell King <linux@armlinux.org.uk>, Ravikumar Kattekola <rk@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Gregory CLEMENT <gregory.clement@free-electrons.com>, ulf.hansson@linaro.org, Zhoujie Wu <zjwu@marvell.com>
-Cc: linux-mmc@vger.kernel.org, zmxu@marvell.com, jszhang@marvell.com, nadavh@marvell.com, xigu@marvell.com, dingwei@marvell.com, kostap@marvell.com, hannah@marvell.com, hongd@marvell.com, dougj@marvell.com, ygao@marvell.com, liuw@marvell.com, thomas.petazzoni@free-electrons.com
 
-On 29/08/17 13:18, Gregory CLEMENT wrote:
-> Hi Zhoujie,
->  
->  On lun., août 28 2017, Zhoujie Wu <zjwu@marvell.com> wrote:
-> 
->> Hi Gregory,
+Hi Uffe,
+
+On Thursday 24 August 2017 04:59 PM, Ulf Hansson wrote:
+> On 23 August 2017 at 15:56, Kishon Vijay Abraham I <kishon@ti.com> wrote:
+>> Hi Uffe,
 >>
->> On 08/28/2017 08:54 AM, Gregory CLEMENT wrote:
->>> Hi,
->>>     On lun., août 28 2017, Adrian Hunter <adrian.hunter@intel.com>
->>> wrote:
+>> On Wednesday 23 August 2017 06:37 PM, Ulf Hansson wrote:
+>>> On 23 August 2017 at 07:42, Kishon Vijay Abraham I <kishon@ti.com> wrote:
+>>>> Add binding for the TI's sdhci-omap controller. This now includes only
+>>>> a subset of properties documented in ti-omap-hsmmc.txt but will eventually
+>>>> include all the properties.
+>>>>
+>>>> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+>>>> ---
+>>>> Changes from v2:
+>>>> *) Fixed example to use the updated compatible
+>>>>
+>>>> Changes from v1:
+>>>> *) Create a new sdhci-omap.txt document for TI's sdhci-omap controller instead
+>>>>    of using the ti-omap-hsmmc.txt as suggested by Tony
+>>>>  .../devicetree/bindings/mmc/sdhci-omap.txt         | 22 ++++++++++++++++++++++
+>>>>  1 file changed, 22 insertions(+)
+>>>>  create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-omap.txt
+>>>>
+>>>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-omap.txt b/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
+>>>> new file mode 100644
+>>>> index 000000000000..139695ad2d58
+>>>> --- /dev/null
+>>>> +++ b/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
+>>>> @@ -0,0 +1,22 @@
+>>>> +* TI OMAP SDHCI Controller
+>>>> +
+>>>> +Refer to mmc.txt for standard MMC bindings.
+>>>> +
+>>>> +Required properties:
+>>>> +- compatible: Should be "ti,dra7-sdhci" for DRA7 and DRA72 controllers
+>>>> +- ti,hwmods: Must be "mmc<n>", <n> is controller instance starting 1
+>>>> +
+>>>> +Optional properties:
+>>>> +- ti,dual-volt: boolean, supports dual voltage cards
+>>>> +- ti,non-removable: non-removable slot (like eMMC)
+>>>> +
+>>>> +Example:
+>>>> +       mmc1: mmc@0x4809c000 {
+>>>> +               compatible = "ti,dra7-sdhci";
+>>>> +               reg = <0x4809c000 0x400>;
+>>>> +               ti,hwmods = "mmc1";
+>>>> +               ti,dual-volt;
+>>>> +               bus-width = <4>;
+>>>> +               vmmc-supply = <&vmmc>; /* phandle to regulator node */
+>>>> +               ti,non-removable;
+>>>> +       };
+>>>> --
+>>>> 2.11.0
+>>>>
 >>>
->>>> On 21/08/17 21:02, Zhoujie Wu wrote:
->>>>> Xenon sdh controller requests proper SD bus voltage select
->>>>> bits programmed even with vmmc power supply. Any reserved
->>>>> value(100b-000b) programmed in this field will lead to controller
->>>>> ignore SD bus power bit and keep its value at zero.
->>>>> Add set_power callback to handle this.
->>>>>
->>>>> Signed-off-by: Zhoujie Wu <zjwu@marvell.com>
->>>> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
->>> I tested this patch on the Armada 3720 DB board. And thanks to this patch
->>> and by adding a vmmc regulator in the device tree I did not have anymore
->>> the issue UHS card not detected on warm reset.
+>>> I am wondering a bit on the long term plan here.
 >>>
->>> Tested-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
->>>
->>> Actually for me this should be a fix. Indeed if I try to use a vmmc
->>> regulator without this patch then the SD card does not work at all I
->>> only have the following messages:
->>>
->>> "mmc1: Timeout waiting for hardware cmd interrupt."
->> This patch with sd vmmc power supply(must be claimed as AON, or card
->> detection can't work)enabled can solve the issue for warm reset. This
->> patch is must for xenon controller once vmmc power supply enabled,
->> since the HW will ignore any reserved value for sd bus voltage select
->> field and ignore the pwr_en in this case.
-> 
-> That's why I would like that this patch was tagged as a fix.
-> 
-> Adrian, Ulf, do you think it could be applied on the v4.13-rc or at
-> least applied with the following tags ?
-> 
-> Fixes: 3a3748dba881(" mmc: sdhci-xenon: Add Marvell Xenon SDHC core
-> functionality")
-> Cc: <stable@vger.kernel.org>
-
-I have no objections.
-
-> 
-> Thanks,
-> 
-> Gregory
-> 
->> But recently we met another issue after resume, it is similar as warm
->> reset. When resume back, SD card(UHS) is re-initialized and it is
->> recognized as HS again. It needs power-cycle before initialization to
->> solve the resume issue. But vmmc is claimed as AON, it won't be shut
->> down in standby, so vmmc and this patch won't solve resume issue. I
->> have no better idea to solve both warm reset and resume issue, I added
->> a dedicated pwrseq for a3700 sd card, it will do power cycle during
->> pre and post pwrseq, but keep power when power off the card.
->> Do you have any other better suggestion?
->>>
->>> Thanks,
->>>
->>> Gregory
->>>
->>>
->>>>> ---
->>>>> Updated according to Jisheng Zhang's comment.
->>>>>   drivers/mmc/host/sdhci-xenon.c | 19 +++++++++++++++++++
->>>>>   1 file changed, 19 insertions(+)
->>>>>
->>>>> diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
->>>>> index edd4d915..a4be2fd 100644
->>>>> --- a/drivers/mmc/host/sdhci-xenon.c
->>>>> +++ b/drivers/mmc/host/sdhci-xenon.c
->>>>> @@ -210,8 +210,27 @@ static void xenon_set_uhs_signaling(struct sdhci_host *host,
->>>>>   	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
->>>>>   }
->>>>>   +static void xenon_set_power(struct sdhci_host *host, unsigned
->>>>> char mode,
->>>>> +		unsigned short vdd)
->>>>> +{
->>>>> +	struct mmc_host *mmc = host->mmc;
->>>>> +	u8 pwr = host->pwr;
->>>>> +
->>>>> +	sdhci_set_power_noreg(host, mode, vdd);
->>>>> +
->>>>> +	if (host->pwr == pwr)
->>>>> +		return;
->>>>> +
->>>>> +	if (host->pwr == 0)
->>>>> +		vdd = 0;
->>>>> +
->>>>> +	if (!IS_ERR(mmc->supply.vmmc))
->>>>> +		mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
->>>>> +}
->>>>> +
->>>>>   static const struct sdhci_ops sdhci_xenon_ops = {
->>>>>   	.set_clock		= sdhci_set_clock,
->>>>> +	.set_power		= xenon_set_power,
->>>>>   	.set_bus_width		= sdhci_set_bus_width,
->>>>>   	.reset			= xenon_reset,
->>>>>   	.set_uhs_signaling	= xenon_set_uhs_signaling,
->>>>>
+>>> Ideally at some point in future, we would like to remove the old
+>>> omap_hsmmc driver, but from compatible string point of view, that
+>>> means we first needs to deprecate the old ones for a while. Right?
 >>
+>> right but sdhci-omap is still lacking features that was present in omap_hsmmc
+>> like context save/restore, SDIO support etc. I think we should deprecate
+>> omap_hsmmc compatible once we add all the features in sdhci-omap?
+>>>
+>>> That said, what is then the reason to why we should bring over the
+>>> existing omap_hsmmc bindings to the sdhci-omap bindings?
+>>
+>> This is mainly for old dt compatibility. Even after removing the omap_hsmmc
+>> driver, users should still be able to use newer kernel with their existing dtbs.
 > 
+> I guess we have two options.
+> 
+> 1) Allow us to invent and use new bindings - and a new compatible.
+> When everything is implemented in sdhci-omap, we can deprecate the old
+> omap_hsmmc driver and its corresponding compatible/bindings. At some
+> point later we can remove the legacy driver/bindings altogether - of
+> course that might take a while. This option allows us to re-think some
+> of the old bindings and really clean up some if its related code. For
+> example, I think "ti,dual-volt" is a bad binding. Instead it would be
+> better to use the existing mmc bindings about which speed mode the
+> controller/board supports (as the voltage level comes with it).
+> 
+> 2) Invent only a new compatible, but stick to use the old omap hsmmc
+> bindings and thus also deploy the similar code dealing with them. When
+> everything is implemented move the old omap_hsmmc compatibles into the
+> new sdhci-omap driver and them remove the old omap_hsmmc driver. At
+> that point we could also deprecate the old omap hsmmc compatibles, but
+> to me that is rather pointless.
+> 
+> The two options has different advantages, feel free to pick any of them!
 
+Okay. I'll send a new version with option '1' (new compatible/new bindings).
+
+And when we deprecate the omap_hsmmc driver (some time later), we'll add
+support for the legacy bindings in sdhci-omap driver (so that old dtbs continue
+to work). Tony, are you okay with this?
+
+Thanks
+Kishon
