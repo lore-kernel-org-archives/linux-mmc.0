@@ -1,207 +1,322 @@
 From: Zhoujie Wu <zjwu@marvell.com>
-Subject: Re: [PATCH v2] mmc: sdhci-xenon: add runtime pm support and reimplement
- standby
-Date: Tue, 29 Aug 2017 11:52:26 -0700
-Message-ID: <59A5B7EA.7090300@marvell.com>
-References: <1503946540-30777-1-git-send-email-zjwu@marvell.com>
- <e85b2790-292f-7efa-c42d-af3a2e061d22@intel.com>
+Subject: Re: [EXT] [RFT v2 PATCH] mmc: sd: try to enable UHS mode w/o power
+ cycle from S3
+Date: Tue, 29 Aug 2017 15:13:06 -0700
+Message-ID: <59A5E6F2.5000407@marvell.com>
+References: <1503978827-202915-1-git-send-email-shawn.lin@rock-chips.com>
+ <CAAXpJNvfSWHrJiLHoxmm+ENUDsGayQROnRTL=SoHr-7dX7R9+Q@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:60775 "EHLO
+Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:44228 "EHLO
         mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1751186AbdH2Swa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Aug 2017 14:52:30 -0400
-In-Reply-To: <e85b2790-292f-7efa-c42d-af3a2e061d22@intel.com>
+        by vger.kernel.org with ESMTP id S1751671AbdH2WNN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Aug 2017 18:13:13 -0400
+In-Reply-To: <CAAXpJNvfSWHrJiLHoxmm+ENUDsGayQROnRTL=SoHr-7dX7R9+Q@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
-Cc: zmxu@marvell.com, jszhang@marvell.com, nadavh@marvell.com, xigu@marvell.com, xswang@marvell.com, dingwei@marvell.com, kostap@marvell.com, hannah@marvell.com, hongd@marvell.com, dougj@marvell.com, ygao@marvell.com, liuw@marvell.com, gregory.clement@free-electrons.com, thomas.petazzoni@free-electrons.com
+To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
+Hi Shawn,
+thanks for your patch.
 
+On 08/29/2017 02:56 PM, zhoujie wu wrote:
+>
+>
+> CMD0 couldn't put the card back to 3.3v if can't do power
+> cycle for cards. The card is already in SDR12 then, so still
+> try to enable UHS mode.
+>
+> Pleas note that, if the platform use a hardware fixed
+> sd power, you should still include a regulator-fixed
+> regulator with always-on property there. So mmc core
+> could handle this as well. Otherwise you shouldn't
+> expect UHS to work for that case.
+>
+> Just compile only, please have a look and test.
+>
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+>
+> ---
+>
+>   drivers/mmc/core/card.h            | 17 +++++++++++++++++
+>   drivers/mmc/core/core.c            |  8 ++++++++
+>   drivers/mmc/core/sd.c              | 28 ++++++++++++++++++++++++++--
+>   drivers/mmc/core/sd.h              |  3 ++-
+>   drivers/mmc/core/sdio.c            |  2 +-
+>   drivers/regulator/core.c           | 14 ++++++++++++++
+>   include/linux/mmc/host.h           |  1 +
+>   include/linux/regulator/consumer.h |  6 ++++++
+>   8 files changed, 75 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
+> index f06cd91..a562110 100644
+> --- a/drivers/mmc/core/card.h
+> +++ b/drivers/mmc/core/card.h
+> @@ -218,4 +218,21 @@ static inline int mmc_card_broken_hpi(const struct
+> mmc_card *c)
+>          return c->quirks & MMC_QUIRK_BROKEN_HPI;
+>   }
+>
+> +static inline bool mmc_card_support_uhs(struct mmc_card *card)
+> +{
+> +       if (WARN_ON(!card))
+> +               return false;
+> +
+> +       switch (card->sd_bus_speed) {
+> +       case UHS_SDR104_BUS_SPEED:
+> +       case UHS_DDR50_BUS_SPEED:
+> +       case UHS_SDR50_BUS_SPEED:
+> +       case UHS_SDR25_BUS_SPEED:
+> +       case UHS_SDR12_BUS_SPEED:
+> +               return true;
+> +       default:
+> +               return false;
+> +       }
+> +}
+> +
+>   #endif
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 2643126..6b5c6c5 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1424,6 +1424,14 @@ int mmc_regulator_get_supply(struct mmc_host *mmc)
+>   }
+>   EXPORT_SYMBOL_GPL(mmc_regulator_get_supply);
+>
+> +bool mmc_regulator_can_power_off(struct regulator *supply)
+> +{
+> +       if (!IS_ERR(supply))
+> +               return regulator_is_always_on(supply);
+> +       return false;
+> +}
+> +EXPORT_SYMBOL_GPL(mmc_regulator_can_power_off);
+> +
+>   /*
+>    * Mask off any voltages we don't support and select
+>    * the lowest voltage
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index a1b0aa1..7bec61b 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -721,7 +721,8 @@ struct device_type sd_type = {
+>   /*
+>    * Fetch CID from card.
+>    */
+> -int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid, u32 *rocr)
+> +int mmc_sd_get_cid(struct mmc_host *host, struct mmc_card *card,
+> +                                  u32 ocr, u32 *cid, u32 *rocr)
+>   {
+>          int err;
+>          u32 max_current;
+> @@ -773,6 +774,27 @@ int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32
+> *cid, u32 *rocr)
+>                  return err;
+>
+>          /*
+> +        * Per SD physical specification version 4.10, section
+> +        * 3.9.4 UHS-I Bus Speed Mode Selection Sequence, once
+> +        * the signal voltage is switched to 1V8, the card continues
+> +        * 1.8V signaling regardless of CMD0. Power cycle resets the
+> +        * signal voltage to 3.3V. As a fact that some vmmc is always
+> +        * on so the card would still work with SDR12 after CMD0. So
+> +        * let's attempt to enable enable UHS mode if vmmc can't be
+> +        * powered off.
+> +        */
+> +       if (card && mmc_card_support_uhs(card) && mmc_host_uhs(host) &&
+> +           !mmc_regulator_can_power_off(host->supply.vmmc) &&
+> +           (ocr & SD_OCR_S18R)) {
+> +                       *rocr |= SD_ROCR_S18A;
+> +                       if (mmc_set_signal_voltage(host,
+> MMC_SIGNAL_VOLTAGE_180)) {
+> +                               retries = 0;
+> +                               goto try_again;
+> +                       }
+> +
+> +                       goto done;
+> +       }
+Good to have a higher level solution if the issue is common.
+I did basic test with your patch(added your regulator modification you 
+sent to me) and add vmmc-supply in board dts, I saw warning when boot up.
+I think in below case, the card is not added yet, the card is null and 
+print out the warning. I don't quite understand mmc_card_support_uhs, it 
+return true for all card speed.
 
-On 08/28/2017 11:48 PM, Adrian Hunter wrote:
-> On 28/08/17 21:55, Zhoujie Wu wrote:
->> Enable runtime pm support for xenon controller, which uses 50ms
->> auto runtime suspend by default.
->> Reimplement system standby based on runtime pm API.
->> Introduce restore_needed to restore the Xenon specific registers
->> when resume.
->>
->> Signed-off-by: Zhoujie Wu <zjwu@marvell.com>
-> There are a few small comments below.
-Thanks for your comments, updated per your suggestion.
+[    4.310003] WARNING: CPU: 1 PID: 48 at drivers/mmc/core/card.h:224 
+mmc_sd_get_cid+0x270/0x298
+
+.....
+
+[    4.549657] [<ffffff8008757e24>] mmc_sd_get_cid+0x270/0x298
+
+[    4.555510] [<ffffff800875847c>] mmc_sd_init_card+0x44/0x614
+
+[    4.561456] [<ffffff8008758bd4>] mmc_attach_sd+0x7c/0x134
+
+[    4.566951] [<ffffff8008751fb8>] mmc_rescan+0x2e4/0x35c
+
+[    4.572451] [<ffffff80080d58d8>] process_one_work+0x12c/0x28c
+
+[    4.578304] [<ffffff80080d5a90>] worker_thread+0x58/0x3b8
+
+[    4.583801] [<ffffff80080db394>] kthread+0x100/0x12c
+
+[    4.589029] [<ffffff8008082ec0>] ret_from_fork+0x10/0x50
+
+[    4.594793] ---[ end trace 58af756d1037eb51 ]---
+
+I did some modifications and let code enter the if condition any way, I 
+added some log and you can see, rocr is updated, but when it tried to 
+switch to 1.8V signal, it failed. I don't know why yet.
+So the code will try again, and use high speed to init card again.
+
+[    4.259194] before rocr = c0ff8000, ocr = 41200000
+
+[    4.359909] after rocr = c1ff8000  -- if condition meets, updated rocr
+
+[    4.364230] mmc0: 1.8V regulator output did not became stable  -- 
+mmc_set_signal_voltage 1.8V failed.
+[    4.372603] mmc0: Skipping voltage switch
+
+[    4.403225] before rocr = c0ff8000, ocr = 40200000   -- tried again 
+with no SD_OCR_S18R .
+> +       /*
+>           * In case CCS and S18A in the response is set, start Signal Voltage
+>           * Switch procedure. SPI mode doesn't support CMD11.
+>           */
+> @@ -788,6 +810,7 @@ int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32
+> *cid, u32 *rocr)
+>                  }
+>          }
 >
->> ---
->> v2: Combined two previous patches(runtime pm support and reimplement standby)
->> to one according to the suggestion from Adrian.
->>
->>   drivers/mmc/host/sdhci-xenon.c | 76 ++++++++++++++++++++++++++++++++----------
->>   drivers/mmc/host/sdhci-xenon.h |  1 +
->>   2 files changed, 60 insertions(+), 17 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
->> index 306ffaf..f97a78e 100644
->> --- a/drivers/mmc/host/sdhci-xenon.c
->> +++ b/drivers/mmc/host/sdhci-xenon.c
->> @@ -18,6 +18,8 @@
->>   #include <linux/ktime.h>
->>   #include <linux/module.h>
->>   #include <linux/of.h>
->> +#include <linux/pm.h>
->> +#include <linux/pm_runtime.h>
->>   
->>   #include "sdhci-pltfm.h"
->>   #include "sdhci-xenon.h"
->> @@ -506,13 +508,24 @@ static int xenon_probe(struct platform_device *pdev)
->>   	if (err)
->>   		goto err_clk;
->>   
->> +	pm_runtime_get_noresume(&pdev->dev);
->> +	pm_runtime_set_active(&pdev->dev);
->> +	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
->> +	pm_runtime_use_autosuspend(&pdev->dev);
->> +	pm_runtime_enable(&pdev->dev);
-> I would expect to see a corresponding pm_runtime_disable() in xenon_remove()
-> e.g.
+> +done:
+>          err = mmc_send_cid(host, cid);
+>          return err;
+>   }
+> @@ -924,7 +947,7 @@ static int mmc_sd_init_card(struct mmc_host *host, u32
+> ocr,
 >
-> 	pm_runtime_get_sync(dev);
-> 	pm_runtime_disable(dev);
-> 	pm_runtime_put_noidle(dev);
+>          WARN_ON(!host->claimed);
 >
-> 	sdhci_remove_host(host, 0);
+> -       err = mmc_sd_get_cid(host, ocr, cid, &rocr);
+> +       err = mmc_sd_get_cid(host, oldcard, ocr, cid, &rocr);
+>          if (err)
+>                  return err;
 >
->> +	pm_suspend_ignore_children(&pdev->dev, 1);
->> +
->>   	err = sdhci_add_host(host);
->>   	if (err)
->>   		goto remove_sdhc;
->>   
->> +	pm_runtime_put_autosuspend(&pdev->dev);
->> +
->>   	return 0;
->>   
->>   remove_sdhc:
->> +	pm_runtime_disable(&pdev->dev);
->> +	pm_runtime_put_noidle(&pdev->dev);
->>   	xenon_sdhc_unprepare(host);
->>   err_clk:
->>   	clk_disable_unprepare(pltfm_host->clk);
->> @@ -542,40 +555,69 @@ static int xenon_suspend(struct device *dev)
->>   {
->>   	struct sdhci_host *host = dev_get_drvdata(dev);
->>   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> +	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
->>   	int ret;
->>   
->> -	ret = sdhci_suspend_host(host);
->> -	if (ret)
->> -		return ret;
->> +	ret = pm_runtime_force_suspend(dev);
->>   
->> -	clk_disable_unprepare(pltfm_host->clk);
->> +	priv->restore_needed = true;
->>   	return ret;
->>   }
->> +#endif
->>   
->> -static int xenon_resume(struct device *dev)
->> +#ifdef CONFIG_PM
->> +static int xenon_runtime_suspend(struct device *dev)
->>   {
->>   	struct sdhci_host *host = dev_get_drvdata(dev);
->>   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> +	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
->>   	int ret;
->>   
->> -	ret = clk_prepare_enable(pltfm_host->clk);
->> -	if (ret)
->> -		return ret;
->> +	ret = sdhci_runtime_suspend_host(host);
-> Return on error.
+> @@ -995,6 +1018,7 @@ static int mmc_sd_init_card(struct mmc_host *host, u32
+> ocr,
+>                  if (err)
+>                          goto free_card;
+>          } else {
+> +
+>                  /*
+>                   * Attempt to change to high-speed (if supported)
+>                   */
+> diff --git a/drivers/mmc/core/sd.h b/drivers/mmc/core/sd.h
+> index 1ada980..9cd2482 100644
+> --- a/drivers/mmc/core/sd.h
+> +++ b/drivers/mmc/core/sd.h
+> @@ -8,7 +8,8 @@
+>   struct mmc_host;
+>   struct mmc_card;
 >
->> +
->> +	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
->> +		mmc_retune_needed(host->mmc);
->>   
->> +	clk_disable_unprepare(pltfm_host->clk);
->>   	/*
->> -	 * If SoCs power off the entire Xenon, registers setting will
->> -	 * be lost.
->> -	 * Re-configure Xenon specific register to enable current SDHC
->> +	 * Need to update the priv->clock here, or when runtime resume
->> +	 * back, phy don't aware the clock change and won't adjust phy
->> +	 * which will cause cmd err
->>   	 */
->> -	ret = xenon_sdhc_prepare(host);
->> -	if (ret)
->> +	priv->clock = 0;
->> +	return ret;
->> +}
->> +
->> +static int xenon_runtime_resume(struct device *dev)
->> +{
->> +	struct sdhci_host *host = dev_get_drvdata(dev);
->> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> +	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
->> +	int ret;
->> +
->> +	ret = clk_prepare_enable(pltfm_host->clk);
->> +	if (ret) {
->> +		dev_err(dev, "can't enable mainck\n");
->>   		return ret;
->> +	}
->> +
->> +	if (priv->restore_needed) {
->> +		xenon_sdhc_prepare(host);
-> Check for error and then clk_disable_unprepare()
+> -int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid, u32 *rocr);
+> +int mmc_sd_get_cid(struct mmc_host *host, struct mmc_card *card,
+> +                  u32 ocr, u32 *cid, u32 *rocr);
+>   int mmc_sd_get_csd(struct mmc_host *host, struct mmc_card *card);
+>   void mmc_decode_cid(struct mmc_card *card);
+>   int mmc_sd_setup_card(struct mmc_host *host, struct mmc_card *card,
+> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+> index cc43687..08e82fe 100644
+> --- a/drivers/mmc/core/sdio.c
+> +++ b/drivers/mmc/core/sdio.c
+> @@ -608,7 +608,7 @@ static int mmc_sdio_init_card(struct mmc_host *host,
+> u32 ocr,
+>          }
 >
->> +		priv->restore_needed = false;
->> +	}
->>   
->> -	return sdhci_resume_host(host);
->> +	return sdhci_runtime_resume_host(host);
-> Check for error and then clk_disable_unprepare()
+>          if ((rocr & R4_MEMORY_PRESENT) &&
+> -           mmc_sd_get_cid(host, ocr & rocr, card->raw_cid, NULL) == 0) {
+> +           mmc_sd_get_cid(host, NULL, ocr & rocr, card->raw_cid, NULL) ==
+> 0) {
+>                  card->type = MMC_TYPE_SD_COMBO;
 >
->>   }
->> -#endif
->> +#endif /* CONFIG_PM */
->> +
->> +static const struct dev_pm_ops sdhci_xenon_dev_pm_ops = {
->> +	SET_SYSTEM_SLEEP_PM_OPS(xenon_suspend,
->> +				pm_runtime_force_resume)
->> +	SET_RUNTIME_PM_OPS(xenon_runtime_suspend,
->> +			   xenon_runtime_resume,
->> +			   NULL)
->> +};
->>   
->> -static SIMPLE_DEV_PM_OPS(xenon_pmops, xenon_suspend, xenon_resume);
-> This leaves two blank lines.
+>                  if (oldcard && (oldcard->type != MMC_TYPE_SD_COMBO ||
+> diff --git a/drivers/regulator/core.c b/drivers/regulator/core.c
+> index e567fa5..edea93b0 100644
+> --- a/drivers/regulator/core.c
+> +++ b/drivers/regulator/core.c
+> @@ -2522,6 +2522,20 @@ int regulator_is_enabled(struct regulator *regulator)
+>   EXPORT_SYMBOL_GPL(regulator_is_enabled);
 >
->>   
->>   static const struct of_device_id sdhci_xenon_dt_ids[] = {
->>   	{ .compatible = "marvell,armada-ap806-sdhci",},
->> @@ -589,7 +631,7 @@ static int xenon_resume(struct device *dev)
->>   	.driver	= {
->>   		.name	= "xenon-sdhci",
->>   		.of_match_table = sdhci_xenon_dt_ids,
->> -		.pm = &xenon_pmops,
->> +		.pm = &sdhci_xenon_dev_pm_ops,
->>   	},
->>   	.probe	= xenon_probe,
->>   	.remove	= xenon_remove,
->> diff --git a/drivers/mmc/host/sdhci-xenon.h b/drivers/mmc/host/sdhci-xenon.h
->> index 01937f1..2bc0510 100644
->> --- a/drivers/mmc/host/sdhci-xenon.h
->> +++ b/drivers/mmc/host/sdhci-xenon.h
->> @@ -91,6 +91,7 @@ struct xenon_priv {
->>   	 */
->>   	void		*phy_params;
->>   	struct xenon_emmc_phy_regs *emmc_phy_regs;
->> +	bool restore_needed;
->>   };
->>   
->>   int xenon_phy_adj(struct sdhci_host *host, struct mmc_ios *ios);
->>
+>   /**
+> + * regulator_is_always_on - is the regulator output always enabled
+> + * @regulator: regulator source
+> + *
+> + * Returns positive if the regulator driver backing the source/client
+> + * has requested that the device be always on, zero if it isn't.
+> + *
+> + */
+> +inline int regulator_is_always_on(struct regulator *regulator)
+> +{
+> +       return (regulator->always_on) ? 1 : 0;
+> +}
+> +EXPORT_SYMBOL_GPL(regulator_is_always_on);
+> +
+> +/**
+>    * regulator_count_voltages - count regulator_list_voltage() selectors
+>    * @regulator: regulator source
+>    *
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index ebd1ceb..2f1206b 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -462,6 +462,7 @@ static inline int mmc_regulator_set_vqmmc(struct
+> mmc_host *mmc,
+>
+>   u32 mmc_vddrange_to_ocrmask(int vdd_min, int vdd_max);
+>   int mmc_regulator_get_supply(struct mmc_host *mmc);
+> +bool mmc_regulator_can_power_off(struct regulator *supply);
+>
+>   static inline int mmc_card_is_removable(struct mmc_host *host)
+>   {
+> diff --git a/include/linux/regulator/consumer.h b/include/linux/regulator/
+> consumer.h
+> index df176d7..46126e3 100644
+> --- a/include/linux/regulator/consumer.h
+> +++ b/include/linux/regulator/consumer.h
+> @@ -226,6 +226,7 @@ void devm_regulator_bulk_unregister_supply_alias(struct
+> device *dev,
+>   int regulator_disable(struct regulator *regulator);
+>   int regulator_force_disable(struct regulator *regulator);
+>   int regulator_is_enabled(struct regulator *regulator);
+> +int regulator_is_always_on(struct regulator *regulator);
+>   int regulator_disable_deferred(struct regulator *regulator, int ms);
+>
+>   int __must_check regulator_bulk_get(struct device *dev, int num_consumers,
+> @@ -418,6 +419,11 @@ static inline int regulator_is_enabled(struct
+> regulator *regulator)
+>          return 1;
+>   }
+>
+> +static inline int regulator_is_always_on(struct regulator *regulator)
+> +{
+> +       return 0;
+> +}
+> +
+>   static inline int regulator_bulk_get(struct device *dev,
+>                                       int num_consumers,
+>                                       struct regulator_bulk_data *consumers)
+> --
+> 1.9.1
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+>
 
