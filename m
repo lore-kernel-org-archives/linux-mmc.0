@@ -1,76 +1,88 @@
-From: Rob Herring <robh@kernel.org>
+From: Tony Lindgren <tony@atomide.com>
 Subject: Re: [PATCH v3 3/5] dt-bindings: sdhci-omap: Add bindings for the
  sdhci-omap controller
-Date: Tue, 29 Aug 2017 12:11:21 -0500
-Message-ID: <20170829171121.cxjwrzhbotdkddec@rob-hp-laptop>
+Date: Tue, 29 Aug 2017 10:39:14 -0700
+Message-ID: <20170829173913.GD6008@atomide.com>
 References: <20170821142132.GH6008@atomide.com>
  <20170823054246.23927-1-kishon@ti.com>
+ <CAPDyKFp7gchVQ+JPNqv4LktvHRm2Lzx6KakOw85zEZxDEX0OhA@mail.gmail.com>
+ <c9342689-f09e-44af-0975-d43ef122a477@ti.com>
+ <CAPDyKFqCZFM7UmHyQCm=DwwZXJvzUde3pW0HqARKrsgfgxSuaw@mail.gmail.com>
+ <0c7e0705-d9c2-4499-54ba-cbd84589dc01@ti.com>
+ <20170829115050.3axlr5uysmqlhvd2@earth>
+ <20170829135822.GR6008@atomide.com>
+ <20170829170920.xpgk5ywlvfgrtbqi@rob-hp-laptop>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oi0-f67.google.com ([209.85.218.67]:35914 "EHLO
-        mail-oi0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751180AbdH2RLY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Aug 2017 13:11:24 -0400
+Received: from muru.com ([72.249.23.125]:38646 "EHLO muru.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750822AbdH2RjS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 29 Aug 2017 13:39:18 -0400
 Content-Disposition: inline
-In-Reply-To: <20170823054246.23927-1-kishon@ti.com>
+In-Reply-To: <20170829170920.xpgk5ywlvfgrtbqi@rob-hp-laptop>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Russell King <linux@armlinux.org.uk>, Ravikumar Kattekola <rk@ti.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Rob Herring <robh@kernel.org>
+Cc: Sebastian Reichel <sebastian.reichel@collabora.co.uk>, Kishon Vijay Abraham I <kishon@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Sekhar Nori <nsekhar@ti.com>, Russell King <linux@armlinux.org.uk>, Ravikumar Kattekola <rk@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On Wed, Aug 23, 2017 at 11:12:46AM +0530, Kishon Vijay Abraham I wrote:
-> Add binding for the TI's sdhci-omap controller. This now includes only
-> a subset of properties documented in ti-omap-hsmmc.txt but will eventually
-> include all the properties.
+* Rob Herring <robh@kernel.org> [170829 10:09]:
+> On Tue, Aug 29, 2017 at 06:58:23AM -0700, Tony Lindgren wrote:
+> > * Sebastian Reichel <sebastian.reichel@collabora.co.uk> [170829 04:51]:
+> > > I would expect the conversion to look like the one done for UART,
+> > > see CONFIG_SERIAL_OMAP vs CONFIG_SERIAL_8250_OMAP. Both use the
+> > > same compatible value and you can choose using kernel configuration.
+> > 
+> > That does not work unfortunately :( We are now stuck in a situation
+> > where two drivers are attempting to probe with the same compatible
+> > and we can't enable 8250_OMAP because of the user space breakage
+> > with the device names. And I'm actuallly thinking we should add a
+> > new compatible for 8250-omap to be able to start enabling it one
+> > board at a time.
 > 
-> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
-> ---
-> Changes from v2:
-> *) Fixed example to use the updated compatible
+> Is that the only problem? Presumably, the SD driver doesn't have a 
+> userspace facing issue.
+
+No userspace issue with the sdhci-omap. But the sdhci-omap driver
+still has the issue of trying enable it for everything at once and
+expect everything to work. The sdhci-omap driver can already be
+used for boards that don't need power management for example, but
+will break things for devices running on batteries.
+
+> > It's best to enable devices to use the new compatible as things are
+> > tested rather than hope for some magic "flag day" flip that might
+> > never happen. Having two days attempting to probe with the same
+> > binding just won't work.
 > 
-> Changes from v1:
-> *) Create a new sdhci-omap.txt document for TI's sdhci-omap controller instead
->    of using the ti-omap-hsmmc.txt as suggested by Tony
->  .../devicetree/bindings/mmc/sdhci-omap.txt         | 22 ++++++++++++++++++++++
->  1 file changed, 22 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-omap.txt
+> Aren't you just picking whether the flag day is in DT or the kernel? I 
+> guess you're assuming one kernel build and it would be switching all 
+> boards at one. 
+
+Right, this would be risky and would take unnecessarily long
+to use the new driver on boards that can already use it. While
+power management won't work yet, I'd expect the sdhci-omap be
+faster on SoCs that can do ADMA.
+
+> > So yeah, I agree with Kishon that we should stick with generic
+> > and sdhci bindings. And then we can start already using it for
+> > boards that can use it, then eventually when we're ready, start
+> > parsing also the legacy bindings and maybe drop the old driver.
 > 
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-omap.txt b/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
-> new file mode 100644
-> index 000000000000..139695ad2d58
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
-> @@ -0,0 +1,22 @@
-> +* TI OMAP SDHCI Controller
-> +
-> +Refer to mmc.txt for standard MMC bindings.
-> +
-> +Required properties:
-> +- compatible: Should be "ti,dra7-sdhci" for DRA7 and DRA72 controllers
-> +- ti,hwmods: Must be "mmc<n>", <n> is controller instance starting 1
-> +
-> +Optional properties:
-> +- ti,dual-volt: boolean, supports dual voltage cards
-> +- ti,non-removable: non-removable slot (like eMMC)
+> I assume there are some other common properties you would switch to in 
+> the transition?  You could make the legacy driver bail from probe based 
+> on presence or absence of other properties. Or you could just blacklist 
+> converted platforms in the legacy driver. The point is that the problems 
+> are solvable in the kernel.
 
-Well, if you are doing a new compatible, then why aren't you using 
-common properties?
+Yes this could be done too. But let's enable it on per-board
+basis rather than attempt to flip it on at once.
 
-> +
-> +Example:
-> +	mmc1: mmc@0x4809c000 {
+> But if your really want a new compatible, I don't really care. It's 
+> only one device.
 
-Drop the '0x'.
+Both a new compatible or a check for some resource work just fine
+for me as long as the driver can be selected on per-board basis.
 
-> +		compatible = "ti,dra7-sdhci";
-> +		reg = <0x4809c000 0x400>;
-> +		ti,hwmods = "mmc1";
-> +		ti,dual-volt;
-> +		bus-width = <4>;
-> +		vmmc-supply = <&vmmc>; /* phandle to regulator node */
-> +		ti,non-removable;
-> +	};
-> -- 
-> 2.11.0
-> 
+Regards,
+
+Tony
