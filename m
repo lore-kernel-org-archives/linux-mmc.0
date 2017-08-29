@@ -1,209 +1,125 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v2] mmc: sdhci-xenon: add runtime pm support and
- reimplement standby
-Date: Tue, 29 Aug 2017 09:48:18 +0300
-Message-ID: <e85b2790-292f-7efa-c42d-af3a2e061d22@intel.com>
-References: <1503946540-30777-1-git-send-email-zjwu@marvell.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH v2 1/2] driver core: detach device's pm_domain after
+ devres_release_all
+Date: Tue, 29 Aug 2017 16:08:52 +0800
+Message-ID: <ebd40b1d-c4a2-7e39-2841-88e60edddafe@rock-chips.com>
+References: <1502786217-212887-1-git-send-email-shawn.lin@rock-chips.com>
+ <1502786217-212887-2-git-send-email-shawn.lin@rock-chips.com>
+ <20170829064231.GE12198@kroah.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=gbk; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:18209 "EHLO mga03.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750758AbdH2Gyz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 29 Aug 2017 02:54:55 -0400
-In-Reply-To: <1503946540-30777-1-git-send-email-zjwu@marvell.com>
-Content-Language: en-US
+Received: from lucky1.263xmail.com ([211.157.147.133]:52948 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751271AbdH2IIz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Aug 2017 04:08:55 -0400
+In-Reply-To: <20170829064231.GE12198@kroah.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Zhoujie Wu <zjwu@marvell.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
-Cc: zmxu@marvell.com, jszhang@marvell.com, nadavh@marvell.com, xigu@marvell.com, xswang@marvell.com, dingwei@marvell.com, kostap@marvell.com, hannah@marvell.com, hongd@marvell.com, dougj@marvell.com, ygao@marvell.com, liuw@marvell.com, gregory.clement@free-electrons.com, thomas.petazzoni@free-electrons.com
+To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: shawn.lin@rock-chips.com, Ulf Hansson <ulf.hansson@linaro.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Heiko Stuebner <heiko@sntech.de>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On 28/08/17 21:55, Zhoujie Wu wrote:
-> Enable runtime pm support for xenon controller, which uses 50ms
-> auto runtime suspend by default.
-> Reimplement system standby based on runtime pm API.
-> Introduce restore_needed to restore the Xenon specific registers
-> when resume.
+Hi Greg,
+
+On 2017/8/29 14:42, Greg Kroah-Hartman wrote:
+> On Tue, Aug 15, 2017 at 04:36:56PM +0800, Shawn Lin wrote:
+>> Move dev_pm_domain_detach after devres_release_all to avoid
+>> accessing device's registers with genpd been powered off.
 > 
-> Signed-off-by: Zhoujie Wu <zjwu@marvell.com>
+> So, what is this going to break that is working already today?  :)
 
-There are a few small comments below.
+Thanks for your comment!
 
-> ---
-> v2: Combined two previous patches(runtime pm support and reimplement standby)
-> to one according to the suggestion from Adrian.
+The background of this patch is that:
+(1) Some SoCs, including Rockchips' SoCs, couldn't support
+accessing controllers' registers w/o clk and power domain enabled.
+(2) Many common drivers use devm_request_irq to request irq for either
+shared irq or non-shared irq.
+(3) So we rely on devres_release_all to free irq automatically.
+
+So the actually race condition is:
+(1) Driver A probe failed or calling remove
+(2) power domain is detached right now
+(3) A irq triggerd cocurrently just before calling devm_irq_release..
+(4) Driver A's ISR read its register .. panic..
+
+The issue is exposed by enabing CONFIG_DEBUG_SHIRQ. Thus devres_free_irq
+will try to call the ISR as it says: "It's a shared IRQ -- the driver
+ought to be prepared for an IRQ event to happen even now it's being
+freed". So it calls the driver's ISR w/o power domain enabled, which
+hangup the system... This is theoretically help folks to make the code
+robust enough to deal with shared case.
+
+But, for no matter whether the irq is shared or non-shared, the race
+condition is there. So we possible have two choices that
+(1) Either using request_irq and free_irq directly
+(2) Or moving dev_pm_domain_detach after devres_release_all which
+makes sure we free the irq before powering off power domain.
+
+However doesn't choice(1) imply that devm_request_irq shouldn't
+exist? :) So I try to fix it like what this patch does.
+
 > 
->  drivers/mmc/host/sdhci-xenon.c | 76 ++++++++++++++++++++++++++++++++----------
->  drivers/mmc/host/sdhci-xenon.h |  1 +
->  2 files changed, 60 insertions(+), 17 deletions(-)
+>>
+>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+>> ---
+
+...
+
 > 
-> diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
-> index 306ffaf..f97a78e 100644
-> --- a/drivers/mmc/host/sdhci-xenon.c
-> +++ b/drivers/mmc/host/sdhci-xenon.c
-> @@ -18,6 +18,8 @@
->  #include <linux/ktime.h>
->  #include <linux/module.h>
->  #include <linux/of.h>
-> +#include <linux/pm.h>
-> +#include <linux/pm_runtime.h>
->  
->  #include "sdhci-pltfm.h"
->  #include "sdhci-xenon.h"
-> @@ -506,13 +508,24 @@ static int xenon_probe(struct platform_device *pdev)
->  	if (err)
->  		goto err_clk;
->  
-> +	pm_runtime_get_noresume(&pdev->dev);
-> +	pm_runtime_set_active(&pdev->dev);
-> +	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
-> +	pm_runtime_use_autosuspend(&pdev->dev);
-> +	pm_runtime_enable(&pdev->dev);
+> Why is this set to true if you have a driver remove function, but not if
+> you only have a bus remove function?  Why the difference?
+> 
+> 
 
-I would expect to see a corresponding pm_runtime_disable() in xenon_remove()
-e.g.
+Sorry, I will fix these all and always call dev_pm_domain_detach on the
+error  path.
 
-	pm_runtime_get_sync(dev);
-	pm_runtime_disable(dev);
-	pm_runtime_put_noidle(dev);
-
-	sdhci_remove_host(host, 0);
-
-> +	pm_suspend_ignore_children(&pdev->dev, 1);
-> +
->  	err = sdhci_add_host(host);
->  	if (err)
->  		goto remove_sdhc;
->  
-> +	pm_runtime_put_autosuspend(&pdev->dev);
-> +
->  	return 0;
->  
->  remove_sdhc:
-> +	pm_runtime_disable(&pdev->dev);
-> +	pm_runtime_put_noidle(&pdev->dev);
->  	xenon_sdhc_unprepare(host);
->  err_clk:
->  	clk_disable_unprepare(pltfm_host->clk);
-> @@ -542,40 +555,69 @@ static int xenon_suspend(struct device *dev)
->  {
->  	struct sdhci_host *host = dev_get_drvdata(dev);
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
->  	int ret;
->  
-> -	ret = sdhci_suspend_host(host);
-> -	if (ret)
-> -		return ret;
-> +	ret = pm_runtime_force_suspend(dev);
->  
-> -	clk_disable_unprepare(pltfm_host->clk);
-> +	priv->restore_needed = true;
->  	return ret;
->  }
-> +#endif
->  
-> -static int xenon_resume(struct device *dev)
-> +#ifdef CONFIG_PM
-> +static int xenon_runtime_suspend(struct device *dev)
->  {
->  	struct sdhci_host *host = dev_get_drvdata(dev);
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
->  	int ret;
->  
-> -	ret = clk_prepare_enable(pltfm_host->clk);
-> -	if (ret)
-> -		return ret;
-> +	ret = sdhci_runtime_suspend_host(host);
-
-Return on error.
-
-> +
-> +	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
-> +		mmc_retune_needed(host->mmc);
->  
-> +	clk_disable_unprepare(pltfm_host->clk);
->  	/*
-> -	 * If SoCs power off the entire Xenon, registers setting will
-> -	 * be lost.
-> -	 * Re-configure Xenon specific register to enable current SDHC
-> +	 * Need to update the priv->clock here, or when runtime resume
-> +	 * back, phy don't aware the clock change and won't adjust phy
-> +	 * which will cause cmd err
->  	 */
-> -	ret = xenon_sdhc_prepare(host);
-> -	if (ret)
-> +	priv->clock = 0;
-> +	return ret;
-> +}
-> +
-> +static int xenon_runtime_resume(struct device *dev)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> +	int ret;
-> +
-> +	ret = clk_prepare_enable(pltfm_host->clk);
-> +	if (ret) {
-> +		dev_err(dev, "can't enable mainck\n");
->  		return ret;
-> +	}
-> +
-> +	if (priv->restore_needed) {
-> +		xenon_sdhc_prepare(host);
-
-Check for error and then clk_disable_unprepare()
-
-> +		priv->restore_needed = false;
-> +	}
->  
-> -	return sdhci_resume_host(host);
-> +	return sdhci_runtime_resume_host(host);
-
-Check for error and then clk_disable_unprepare()
-
->  }
-> -#endif
-> +#endif /* CONFIG_PM */
-> +
-> +static const struct dev_pm_ops sdhci_xenon_dev_pm_ops = {
-> +	SET_SYSTEM_SLEEP_PM_OPS(xenon_suspend,
-> +				pm_runtime_force_resume)
-> +	SET_RUNTIME_PM_OPS(xenon_runtime_suspend,
-> +			   xenon_runtime_resume,
-> +			   NULL)
-> +};
->  
-> -static SIMPLE_DEV_PM_OPS(xenon_pmops, xenon_suspend, xenon_resume);
-
-This leaves two blank lines.
-
->  
->  static const struct of_device_id sdhci_xenon_dt_ids[] = {
->  	{ .compatible = "marvell,armada-ap806-sdhci",},
-> @@ -589,7 +631,7 @@ static int xenon_resume(struct device *dev)
->  	.driver	= {
->  		.name	= "xenon-sdhci",
->  		.of_match_table = sdhci_xenon_dt_ids,
-> -		.pm = &xenon_pmops,
-> +		.pm = &sdhci_xenon_dev_pm_ops,
->  	},
->  	.probe	= xenon_probe,
->  	.remove	= xenon_remove,
-> diff --git a/drivers/mmc/host/sdhci-xenon.h b/drivers/mmc/host/sdhci-xenon.h
-> index 01937f1..2bc0510 100644
-> --- a/drivers/mmc/host/sdhci-xenon.h
-> +++ b/drivers/mmc/host/sdhci-xenon.h
-> @@ -91,6 +91,7 @@ struct xenon_priv {
->  	 */
->  	void		*phy_params;
->  	struct xenon_emmc_phy_regs *emmc_phy_regs;
-> +	bool restore_needed;
->  };
->  
->  int xenon_phy_adj(struct sdhci_host *host, struct mmc_ios *ios);
+>> +		}
+>>   		devres_release_all(dev);
+>> +		if (do_pm_domain)
+>> +			dev_pm_domain_detach(dev, true);
+>>   		driver_sysfs_remove(dev);
+>>   		dev->driver = NULL;
+>>   		dev_set_drvdata(dev, NULL);
+>> @@ -458,6 +476,8 @@ static int really_probe(struct device *dev, struct device_driver *drv)
+>>   pinctrl_bind_failed:
+>>   	device_links_no_driver(dev);
+>>   	devres_release_all(dev);
+>> +	if (do_pm_domain)
+>> +		dev_pm_domain_detach(dev, true);
+> 
+> Can't you just always call this on the error path?
+> 
+>>   	driver_sysfs_remove(dev);
+>>   	dev->driver = NULL;
+>>   	dev_set_drvdata(dev, NULL);
+>> @@ -818,6 +838,7 @@ int driver_attach(struct device_driver *drv)
+>>   static void __device_release_driver(struct device *dev, struct device *parent)
+>>   {
+>>   	struct device_driver *drv;
+>> +	bool do_pm_domain = false;
+>>   
+>>   	drv = dev->driver;
+>>   	if (drv) {
+>> @@ -855,15 +876,19 @@ static void __device_release_driver(struct device *dev, struct device *parent)
+>>   
+>>   		pm_runtime_put_sync(dev);
+>>   
+>> -		if (dev->bus && dev->bus->remove)
+>> +		if (dev->bus && dev->bus->remove) {
+>>   			dev->bus->remove(dev);
+>> -		else if (drv->remove)
+>> +		} else if (drv->remove) {
+>> +			do_pm_domain = true;
+> 
+> Same question here about drivers and bus default functions.
+> 
+> thanks,
+> 
+> greg k-h
+> 
+> 
 > 
 
