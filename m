@@ -1,63 +1,33 @@
 From: Vijay Viswanath <vviswana@codeaurora.org>
-Subject: [PATCH v1 0/5] mmc: sdhci-msm: Corrections to implementation of power
- irq
-Date: Wed, 30 Aug 2017 18:21:44 +0530
-Message-ID: <1504097509-58983-1-git-send-email-vviswana@codeaurora.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+Subject: [PATCH v1 5/5] mmc: Kconfig: Enable CONFIG_MMC_SDHCI_IO_ACCESSORS
+Date: Wed, 30 Aug 2017 18:21:49 +0530
+Message-ID: <1504097509-58983-6-git-send-email-vviswana@codeaurora.org>
+References: <1504097509-58983-1-git-send-email-vviswana@codeaurora.org>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1504097509-58983-1-git-send-email-vviswana@codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
 To: adrian.hunter@intel.com, ulf.hansson@linaro.org, will.deacon@arm.com
-Cc: riteshh@codeaurora.org, linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Vijay Viswanath <vviswana@codeaurora.org>, stummala@codeaurora.org, subhashj@codeaurora.org, linux-arm-kernel@lists.infradead.org, asutoshd@codeaurora.org
+Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, riteshh@codeaurora.org, subhashj@codeaurora.org, Vijay Viswanath <vviswana@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Register writes which change voltage of IO lines or turn the IO bus on/off
-require sdhc controller to be ready before progressing further. Once a
-register write which affects IO lines is done, the driver should wait for
-power irq from controller. Once the irq comes, the driver should acknowledge
-the irq by writing to power control register. If the acknowledgement is not
-given to controller, the controller may not complete the corresponding
-register write action and this can mess up the controller if drivers proceeds
-without power irq completing.
+Enable CONFIG_MMC_SDHCI_IO_ACCESSORS so that SDHC controller specific
+register read and write APIs, if registered, can be used.
+---
+ drivers/mmc/host/Kconfig | 1 +
+ 1 file changed, 1 insertion(+)
 
-Changes since RFC:
-	wait_for_completion_timeout replaced with wait_event_timeout when
-	waiting for power irq.
-	Removed the spinlock within power irq handler and API which waits
-	for power irq.
-	Added comments to sdhci msm register write functions, warning that they
-	can sleep.
-	Sdhci msm register write functions will do a memory barrier before
-	writing to the register if the particular register can trigger
-	power irq.
-	Instead of enabling SDHCI IO ACCESSORS config in arm64/defconfig, it
-	will be selected in mmc/host/Kconfig if the platform is MMC_SDHCI_MSM.
-
-
-Sahitya Tummala (2):
-  mmc: sdhci-msm: Fix HW issue with power IRQ handling during reset
-  mmc: sdhci-msm: Add support to wait for power irq
-
-Subhash Jadavani (1):
-  mmc: sdhci-msm: fix issue with power irq
-
-Vijay Viswanath (2):
-  mmc: sdhci-msm: Add ops to do sdhc register write
-  mmc: Kconfig: Enable CONFIG_MMC_SDHCI_IO_ACCESSORS
-
- drivers/mmc/host/Kconfig     |   1 +
- drivers/mmc/host/sdhci-msm.c | 253 ++++++++++++++++++++++++++++++++++++++++++-
- 2 files changed, 249 insertions(+), 5 deletions(-)
-
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 2db84dd..64a9298 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -420,6 +420,7 @@ config MMC_SDHCI_MSM
+ 	tristate "Qualcomm SDHCI Controller Support"
+ 	depends on ARCH_QCOM || (ARM && COMPILE_TEST)
+ 	depends on MMC_SDHCI_PLTFM
++	select CONFIG_MMC_SDHCI_IO_ACCESSORS
+ 	help
+ 	  This selects the Secure Digital Host Controller Interface (SDHCI)
+ 	  support present in Qualcomm SOCs. The controller supports
 -- 
  Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc. 
 Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a Linux Foundation Collaborative Project.
