@@ -1,22 +1,36 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: mmci: constify amba_id
-Date: Wed, 30 Aug 2017 15:13:42 +0200
-Message-ID: <CAPDyKFrprhp2jzjDQXkHbWBtz8xQ5Ja6x8ti+2Khw==HNizkYA@mail.gmail.com>
-References: <7f877ee7a2a5eada613fcb7044e761248584922d.1503505752.git.arvind.yadav.cs@gmail.com>
+Subject: Re: [PATCH 2/2] mmc: sunxi: Reset the device at probe time
+Date: Wed, 30 Aug 2017 15:14:11 +0200
+Message-ID: <CAPDyKFqAyhB1C096YjXNz2iAPL0Vrr5-hsyoiL8meho1b0qNPg@mail.gmail.com>
+References: <20170825094953.3247-1-maxime.ripard@free-electrons.com> <20170825094953.3247-2-maxime.ripard@free-electrons.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <7f877ee7a2a5eada613fcb7044e761248584922d.1503505752.git.arvind.yadav.cs@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Arvind Yadav <arvind.yadav.cs@gmail.com>
-Cc: Russell King <linux@armlinux.org.uk>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-io0-f172.google.com ([209.85.223.172]:35142 "EHLO
+        mail-io0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751864AbdH3NOM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Aug 2017 09:14:12 -0400
+Received: by mail-io0-f172.google.com with SMTP id k22so4918450iod.2
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Aug 2017 06:14:12 -0700 (PDT)
+In-Reply-To: <20170825094953.3247-2-maxime.ripard@free-electrons.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Maxime Ripard <maxime.ripard@free-electrons.com>
+Cc: Chen-Yu Tsai <wens@csie.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-clk <linux-clk@vger.kernel.org>, Mike Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 23 August 2017 at 18:30, Arvind Yadav <arvind.yadav.cs@gmail.com> wrote:
-> amba_id are not supposed to change at runtime. All functions
-> working with const amba_id. So mark the non-const structs as const.
+On 25 August 2017 at 11:49, Maxime Ripard
+<maxime.ripard@free-electrons.com> wrote:
+> We might be into some troubles if the bootloader misconfigured the MMC
+> controller.
 >
-> Signed-off-by: Arvind Yadav <arvind.yadav.cs@gmail.com>
+> We currently only de-assert the reset line at probe time, which means that
+> if the device was already out of reset, we're going to keep whatever state
+> was set already.
+>
+> Switch to a reset instead of the deassert to have a device in a pristine
+> state when we start operating.
+>
+> Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
 
 Thanks, applied for next!
 
@@ -24,22 +38,22 @@ Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/mmci.c | 2 +-
+>  drivers/mmc/host/sunxi-mmc.c | 2 +-
 >  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index d1ca2f4..f1f54a8 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -1904,7 +1904,7 @@ static const struct dev_pm_ops mmci_dev_pm_ops = {
->         SET_RUNTIME_PM_OPS(mmci_runtime_suspend, mmci_runtime_resume, NULL)
->  };
+> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+> index da5f46a14497..53c970fe0873 100644
+> --- a/drivers/mmc/host/sunxi-mmc.c
+> +++ b/drivers/mmc/host/sunxi-mmc.c
+> @@ -1242,7 +1242,7 @@ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
+>         }
 >
-> -static struct amba_id mmci_ids[] = {
-> +static const struct amba_id mmci_ids[] = {
->         {
->                 .id     = 0x00041180,
->                 .mask   = 0xff0fffff,
+>         if (!IS_ERR(host->reset)) {
+> -               ret = reset_control_deassert(host->reset);
+> +               ret = reset_control_reset(host->reset);
+>                 if (ret) {
+>                         dev_err(&pdev->dev, "reset err %d\n", ret);
+>                         goto error_disable_clk_sample;
 > --
-> 2.7.4
+> 2.13.5
 >
