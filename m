@@ -1,59 +1,84 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/2] mmc: sunxi: Reset the device at probe time
-Date: Wed, 30 Aug 2017 15:14:11 +0200
-Message-ID: <CAPDyKFqAyhB1C096YjXNz2iAPL0Vrr5-hsyoiL8meho1b0qNPg@mail.gmail.com>
-References: <20170825094953.3247-1-maxime.ripard@free-electrons.com> <20170825094953.3247-2-maxime.ripard@free-electrons.com>
+Subject: Re: [PATCH v3 00/13] mmc: meson-gx: driver fixups and upgrades
+Date: Wed, 30 Aug 2017 15:13:57 +0200
+Message-ID: <CAPDyKFogy=L=BDKtMhKCN0nMLi-Yy5SHgAhB_=jog+CX91breA@mail.gmail.com>
+References: <20170828142915.27020-1-jbrunet@baylibre.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f172.google.com ([209.85.223.172]:35142 "EHLO
-        mail-io0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751864AbdH3NOM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Aug 2017 09:14:12 -0400
-Received: by mail-io0-f172.google.com with SMTP id k22so4918450iod.2
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Aug 2017 06:14:12 -0700 (PDT)
-In-Reply-To: <20170825094953.3247-2-maxime.ripard@free-electrons.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170828142915.27020-1-jbrunet@baylibre.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jerome Brunet <jbrunet@baylibre.com>
+Cc: Kevin Hilman <khilman@baylibre.com>, Carlo Caione <carlo@caione.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Maxime Ripard <maxime.ripard@free-electrons.com>
-Cc: Chen-Yu Tsai <wens@csie.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-clk <linux-clk@vger.kernel.org>, Mike Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 25 August 2017 at 11:49, Maxime Ripard
-<maxime.ripard@free-electrons.com> wrote:
-> We might be into some troubles if the bootloader misconfigured the MMC
-> controller.
+On 28 August 2017 at 16:29, Jerome Brunet <jbrunet@baylibre.com> wrote:
+> The patchset features several bugfixes, rework and upgrade for the
+> meson-gx MMC driver.
 >
-> We currently only de-assert the reset line at probe time, which means that
-> if the device was already out of reset, we're going to keep whatever state
-> was set already.
+> The main goal is to improve readability and enable new high speed
+> modes, such as eMMC DDR52 and sdcard UHS modes up to SDR50 (100Mhz)
 >
-> Switch to a reset instead of the deassert to have a device in a pristine
-> state when we start operating.
+> SDR104 is not working with a few cards on the p200 and the
+> libretech-cc. I suspect that 200Mhz might be a bit too fast for the PCB
+> of these boards, adding noise to the signal and eventually breaking
+> the communication with some cards. The same cards are working well on a
+> laptop or the nanopi-k2 at 200Mhz.
 >
-> Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
+> This series has been tested on gxbb-p200, gxbb-nanopi-k2 and
+> gxl-s905x-libretech-cc
+>
+> Changes since v2 [1]:
+> * Drop patches 1 to 3: Applied.
+> * Drop patch 4: Debug stuff which should not have been sent.
+> * Added fix to previous patch 3:
+>   If the clock register is not initialized before registering the clk
+>   with CCF, the framework will complain about an illegal divider value.
+>   This had gone unnoticed because it was later fixed by the clock init
+>   rework.
+>
+>   Ulf, I know it is getting late but it would be nice if patch #1 of
+>   this v3 could go with 3 patches you already applied. The rest can
+>   wait for the following cycle.
 
-Thanks, applied for next!
+I decided to pick them all, so applied for next!
+
+For patch1, I decided to update the changelog a bit, avoiding to have
+a specific fixes tag, becasue the fix might not end up having the same
+hash, when/if I rebase my branch.
+
+Thanks!
 
 Kind regards
 Uffe
 
-> ---
->  drivers/mmc/host/sunxi-mmc.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index da5f46a14497..53c970fe0873 100644
-> --- a/drivers/mmc/host/sunxi-mmc.c
-> +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -1242,7 +1242,7 @@ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
->         }
+> Changes since v1 [0]:
+> * Reorder patches to have fixes first, then rework and finally
+>   enhancements.
+> * Use CCF to manage clock phases
 >
->         if (!IS_ERR(host->reset)) {
-> -               ret = reset_control_deassert(host->reset);
-> +               ret = reset_control_reset(host->reset);
->                 if (ret) {
->                         dev_err(&pdev->dev, "reset err %d\n", ret);
->                         goto error_disable_clk_sample;
+> [0]: https://lkml.kernel.org/r/20170804174353.16486-1-jbrunet@baylibre.com
+> [1]: https://lkml.kernel.org/r/20170821160301.21899-1-jbrunet@baylibre.com
+>
+> Jerome Brunet (13):
+>   mmc: meson-gx: initialize sane clk default before clock register
+>   mmc: meson-gx: cfg init overwrite values
+>   mmc: meson-gx: rework set_ios function
+>   mmc: meson-gx: rework clk_set function
+>   mmc: meson-gx: rework clock init function
+>   mmc: meson-gx: fix dual data rate mode frequencies
+>   mmc: meson-gx: work around clk-stop issue
+>   mmc: meson-gx: simplify interrupt handler
+>   mmc: meson-gx: implement card_busy callback
+>   mmc: meson-gx: use CCF to handle the clock phases
+>   mmc: meson-gx: implement voltage switch callback
+>   mmc: meson-gx: change default tx phase
+>   mmc: meson-gx: rework tuning function
+>
+>  drivers/mmc/host/meson-gx-mmc.c | 710 ++++++++++++++++++++++++++++------------
+>  1 file changed, 493 insertions(+), 217 deletions(-)
+>
 > --
-> 2.13.5
+> 2.9.5
 >
