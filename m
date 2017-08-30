@@ -1,212 +1,133 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3] mmc: sdhci-xenon: add runtime pm support and
- reimplement standby
-Date: Wed, 30 Aug 2017 15:38:47 +0200
-Message-ID: <CAPDyKFqAqSXo+u04sbW84oa_k4z5Zx2VhwaY3E6u+dgMaOqS5A@mail.gmail.com>
-References: <1504032889-16915-1-git-send-email-zjwu@marvell.com>
+Subject: Re: [PATCH 2/2] mmc: Add mmc_force_detect_change_begin / _end functions
+Date: Wed, 30 Aug 2017 15:43:49 +0200
+Message-ID: <CAPDyKFpePxfAc20NCO7xvbGca8m=Bymc=5KBYFF570rnACViQA@mail.gmail.com>
+References: <20170721143502.1991-1-quentin.schulz@free-electrons.com>
+ <20170721143502.1991-3-quentin.schulz@free-electrons.com> <4015f7df-36ca-c762-5b9a-94a270f65475@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f179.google.com ([209.85.223.179]:33775 "EHLO
-        mail-io0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751317AbdH3Nis (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Aug 2017 09:38:48 -0400
-Received: by mail-io0-f179.google.com with SMTP id s101so5169653ioe.0
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Aug 2017 06:38:48 -0700 (PDT)
-In-Reply-To: <1504032889-16915-1-git-send-email-zjwu@marvell.com>
+Received: from mail-it0-f43.google.com ([209.85.214.43]:33765 "EHLO
+        mail-it0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751323AbdH3Nnv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Aug 2017 09:43:51 -0400
+Received: by mail-it0-f43.google.com with SMTP id t134so1097781ita.0
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Aug 2017 06:43:50 -0700 (PDT)
+In-Reply-To: <4015f7df-36ca-c762-5b9a-94a270f65475@redhat.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Zhoujie Wu <zjwu@marvell.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Victor Gu <xigu@marvell.com>, xswang@marvell.com, Wilson Ding <dingwei@marvell.com>, Kostya Porotchkin <kostap@marvell.com>, Hanna Hawa <hannah@marvell.com>, hongd@marvell.com, Doug Jones <dougj@marvell.com>, Ryan Gao <ygao@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Gregory Clement <gregory.clement@free-electrons.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+To: Hans de Goede <hdegoede@redhat.com>
+Cc: Quentin Schulz <quentin.schulz@free-electrons.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Baolin Wang <baolin.wang@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, driverdevel <devel@driverdev.osuosl.org>, Icenowy Zheng <icenowy@aosc.xyz>, Chen-Yu Tsai <wens@csie.org>
 
-On 29 August 2017 at 20:54, Zhoujie Wu <zjwu@marvell.com> wrote:
-> Enable runtime pm support for xenon controller, which uses 50ms
-> auto runtime suspend by default.
-> Reimplement system standby based on runtime pm API.
-> Introduce restore_needed to restore the Xenon specific registers
-> when resume.
+On 30 August 2017 at 14:44, Hans de Goede <hdegoede@redhat.com> wrote:
+> Hi,
 >
-> Signed-off-by: Zhoujie Wu <zjwu@marvell.com>
+>
+> On 21-07-17 16:35, Quentin Schulz wrote:
+>>
+>> From: Hans de Goede <hdegoede@redhat.com>
+>>
+>> Some sdio devices have a multiple stage bring-up process. Specifically
+>> the esp8089 (for which an out of tree driver is available) loads firmware
+>> on the first call to its sdio-drivers' probe function and then resets
+>> the device causing it to reboot from its RAM with the new firmware.
+>>
+>> When this sdio device reboots it comes back up in 1 bit 400 KHz mode
+>> again, and we need to walk through the whole ios negatiation and sdio
+>> setup
+>> again.
+>>
+>> There are 2 problems with this:
+>>
+>> 1) Typically these devices are soldered onto some (ARM) tablet / SBC
+>> PCB and as such are described in devicetree as "non-removable", which
+>> causes the mmc-core to scan them only once and not poll for the device
+>> dropping of the bus. Normally this is the right thing todo but in the
+>> eso8089 example we need the mmc-core to notice the module has disconnected
+>> (since it is now in 1 bit mode again it will not talk to the host in 4 bit
+>> mode). This can be worked around by using "broken-cd" in devicetree
+>> instead of "non-removable", but that is not a proper fix since the device
+>> really is non-removable.
+>>
+>> 2) When the mmc-core detects the device has disconnected it will poweroff
+>> the device, causing the RAM loaded firmware to be lost. This can be worked
+>> around in devicetree by using regulator-always-on (and avoiding the use of
+>> mmc-pwrseq), but again that is more of a hack then a proper fix.
+>>
+>> This commmit fixes 1) by adding a mmc_force_detect_change function which
+>> will cause scanning for device removal / insertion until a new device is
+>> detected. 2) Is fixed by a keep_power flag to the mmc_force_detect_change
+>> function which when set causes the mmc-core to keep the power to the
+>> device
+>> on during the rescan.
+>>
+>> Cc: Icenowy Zheng <icenowy@aosc.xyz>
+>> Cc: Maxime Ripard <maxime.ripard@free-electrons.com>
+>> Cc: Chen-Yu Tsai <wens@csie.org>
+>> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+>
+>
+> So when I posted this patch quite a while back, there was some discussion
+> about this and a consensus that this is not the right solution.
+>
+> So first of all lets describe the problem:
+>
+> The esp8089 sdio wifi chip is really an ARM core with a wifi phy
+> connected to it (as many wifi chipsets are).
+>
+> But this one comes up in some really generic sdio capable boot-loader
+> mode and we need to feed it firmware and then reboot it into the
+> new firmware.
+>
+> The reboot is where the problems happens. It seems to fallback
+> from the negotiated 4 wire sdio mode to single wire spi mode then.
+>
+> The out of tree version of the driver deals with this by not setting
+> the non-removable flag as well as setting the broken_cd flag so that
+> the mmc core polls the device, after the reboot the poll fails
+> because the mmc-controller and the esp8089 are using a different
+> amount of wires so the mmc-cmd the poll uses times out.
+>
+> After which the esp8089 drivers remove function gets called, and
+> the mmc stack re-discovers the esp8089 by restarting the whole
+> number of wires (and speed) used negotiation. After which the
+> esp8089 driver's probe function gets called (again) and on
+> firmware loading is has set a global flag, so now it actually
+> acts as a wifi driver rather then trying to load the firmware
+> a second time.
+>
+> Since I did not want to rely on broken_cd polling I came up
+> with the hack which is this patch.
+>
+> So when this patch was first discussed we came to the conclusion
+> that what we really need is some sort of mmc_reprobe_device
+> function which the driver can call from probe which will
+> redo the number of wires (and speed) used negotiation,
+> while keeping the sdio_function device as is so that probe can
+> simply continue after this and we also don't need the ugly
+> global flag.
+>
+> The idea would be for this function to be some wrapper
+> around mmc_init_card() which resets the ios settings as is
+> normally done on remove and then call mmc_init_card()
+> passing in the existing card the same way as is done
+> one resume, so that the existing card / sdio_function
+> devices get reused.
+>
+> IIRC Ulf would look into writing this mmc_reprobe_device
+> function and then I would test it with the esp8089, but
+> Ulf never got around to writing the function and I ended
+> up working on other things too.
 
-Thanks, applied for next!
+Thanks for summary!
+
+Just to let you know, I haven't forgot about this problem. I am
+planning for a major update of the SDIO for power management support,
+within a not too far future.
+The issue described above, is then also one of the things I also plan
+to look into.
+
+However, if there anybody that wants to hack on this, feel free to do it!
 
 Kind regards
 Uffe
-
-> ---
-> v3: Updated according to the comments from Adrian.
->
-> v2: Combined two previous patches(runtime pm support and reimplement standby)
-> to one according to the suggestion from Adrian.
->
->  drivers/mmc/host/sdhci-xenon.c | 87 ++++++++++++++++++++++++++++++++++--------
->  drivers/mmc/host/sdhci-xenon.h |  1 +
->  2 files changed, 72 insertions(+), 16 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
-> index 306ffaf..2eec2e6 100644
-> --- a/drivers/mmc/host/sdhci-xenon.c
-> +++ b/drivers/mmc/host/sdhci-xenon.c
-> @@ -18,6 +18,8 @@
->  #include <linux/ktime.h>
->  #include <linux/module.h>
->  #include <linux/of.h>
-> +#include <linux/pm.h>
-> +#include <linux/pm_runtime.h>
->
->  #include "sdhci-pltfm.h"
->  #include "sdhci-xenon.h"
-> @@ -506,13 +508,24 @@ static int xenon_probe(struct platform_device *pdev)
->         if (err)
->                 goto err_clk;
->
-> +       pm_runtime_get_noresume(&pdev->dev);
-> +       pm_runtime_set_active(&pdev->dev);
-> +       pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
-> +       pm_runtime_use_autosuspend(&pdev->dev);
-> +       pm_runtime_enable(&pdev->dev);
-> +       pm_suspend_ignore_children(&pdev->dev, 1);
-> +
->         err = sdhci_add_host(host);
->         if (err)
->                 goto remove_sdhc;
->
-> +       pm_runtime_put_autosuspend(&pdev->dev);
-> +
->         return 0;
->
->  remove_sdhc:
-> +       pm_runtime_disable(&pdev->dev);
-> +       pm_runtime_put_noidle(&pdev->dev);
->         xenon_sdhc_unprepare(host);
->  err_clk:
->         clk_disable_unprepare(pltfm_host->clk);
-> @@ -526,6 +539,10 @@ static int xenon_remove(struct platform_device *pdev)
->         struct sdhci_host *host = platform_get_drvdata(pdev);
->         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->
-> +       pm_runtime_get_sync(&pdev->dev);
-> +       pm_runtime_disable(&pdev->dev);
-> +       pm_runtime_put_noidle(&pdev->dev);
-> +
->         sdhci_remove_host(host, 0);
->
->         xenon_sdhc_unprepare(host);
-> @@ -542,40 +559,78 @@ static int xenon_suspend(struct device *dev)
->  {
->         struct sdhci_host *host = dev_get_drvdata(dev);
->         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +       struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
->         int ret;
->
-> -       ret = sdhci_suspend_host(host);
-> -       if (ret)
-> -               return ret;
-> +       ret = pm_runtime_force_suspend(dev);
->
-> -       clk_disable_unprepare(pltfm_host->clk);
-> +       priv->restore_needed = true;
->         return ret;
->  }
-> +#endif
->
-> -static int xenon_resume(struct device *dev)
-> +#ifdef CONFIG_PM
-> +static int xenon_runtime_suspend(struct device *dev)
->  {
->         struct sdhci_host *host = dev_get_drvdata(dev);
->         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +       struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
->         int ret;
->
-> -       ret = clk_prepare_enable(pltfm_host->clk);
-> +       ret = sdhci_runtime_suspend_host(host);
->         if (ret)
->                 return ret;
->
-> +       if (host->tuning_mode != SDHCI_TUNING_MODE_3)
-> +               mmc_retune_needed(host->mmc);
-> +
-> +       clk_disable_unprepare(pltfm_host->clk);
->         /*
-> -        * If SoCs power off the entire Xenon, registers setting will
-> -        * be lost.
-> -        * Re-configure Xenon specific register to enable current SDHC
-> +        * Need to update the priv->clock here, or when runtime resume
-> +        * back, phy don't aware the clock change and won't adjust phy
-> +        * which will cause cmd err
->          */
-> -       ret = xenon_sdhc_prepare(host);
-> -       if (ret)
-> +       priv->clock = 0;
-> +       return 0;
-> +}
-> +
-> +static int xenon_runtime_resume(struct device *dev)
-> +{
-> +       struct sdhci_host *host = dev_get_drvdata(dev);
-> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +       struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> +       int ret;
-> +
-> +       ret = clk_prepare_enable(pltfm_host->clk);
-> +       if (ret) {
-> +               dev_err(dev, "can't enable mainck\n");
->                 return ret;
-> +       }
->
-> -       return sdhci_resume_host(host);
-> -}
-> -#endif
-> +       if (priv->restore_needed) {
-> +               ret = xenon_sdhc_prepare(host);
-> +               if (ret)
-> +                       goto out;
-> +               priv->restore_needed = false;
-> +       }
->
-> -static SIMPLE_DEV_PM_OPS(xenon_pmops, xenon_suspend, xenon_resume);
-> +       ret = sdhci_runtime_resume_host(host);
-> +       if (ret)
-> +               goto out;
-> +       return 0;
-> +out:
-> +       clk_disable_unprepare(pltfm_host->clk);
-> +       return ret;
-> +}
-> +#endif /* CONFIG_PM */
-> +
-> +static const struct dev_pm_ops sdhci_xenon_dev_pm_ops = {
-> +       SET_SYSTEM_SLEEP_PM_OPS(xenon_suspend,
-> +                               pm_runtime_force_resume)
-> +       SET_RUNTIME_PM_OPS(xenon_runtime_suspend,
-> +                          xenon_runtime_resume,
-> +                          NULL)
-> +};
->
->  static const struct of_device_id sdhci_xenon_dt_ids[] = {
->         { .compatible = "marvell,armada-ap806-sdhci",},
-> @@ -589,7 +644,7 @@ static int xenon_resume(struct device *dev)
->         .driver = {
->                 .name   = "xenon-sdhci",
->                 .of_match_table = sdhci_xenon_dt_ids,
-> -               .pm = &xenon_pmops,
-> +               .pm = &sdhci_xenon_dev_pm_ops,
->         },
->         .probe  = xenon_probe,
->         .remove = xenon_remove,
-> diff --git a/drivers/mmc/host/sdhci-xenon.h b/drivers/mmc/host/sdhci-xenon.h
-> index 01937f1..2bc0510 100644
-> --- a/drivers/mmc/host/sdhci-xenon.h
-> +++ b/drivers/mmc/host/sdhci-xenon.h
-> @@ -91,6 +91,7 @@ struct xenon_priv {
->          */
->         void            *phy_params;
->         struct xenon_emmc_phy_regs *emmc_phy_regs;
-> +       bool restore_needed;
->  };
->
->  int xenon_phy_adj(struct sdhci_host *host, struct mmc_ios *ios);
-> --
-> 1.9.1
->
