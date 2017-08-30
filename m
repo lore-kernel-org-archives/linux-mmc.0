@@ -1,173 +1,48 @@
-From: "Rafael J. Wysocki" <rjw@rjwysocki.net>
-Subject: Re: [PATCH v3 1/2] driver core: detach device's pm_domain after devres_release_all
-Date: Wed, 30 Aug 2017 14:04:15 +0200
-Message-ID: <41800048.P6mdXSVrRr@aspire.rjw.lan>
-References: <1504056867-199188-1-git-send-email-shawn.lin@rock-chips.com> <1504056867-199188-2-git-send-email-shawn.lin@rock-chips.com>
+From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Subject: Re: [PATCH] mmc: mmci: stop building qcom dml as module
+Date: Wed, 30 Aug 2017 13:20:30 +0100
+Message-ID: <a8fc1458-2295-cdb3-d799-65d97c03ffe7@linaro.org>
+References: <20170810145418.4430-1-srinivas.kandagatla@linaro.org>
+ <CAPDyKFoVTASsnmx_Dz4MdPxVQOFVL=d6xQHiT3DVRBRJphRamw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1504056867-199188-2-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f45.google.com ([74.125.82.45]:35050 "EHLO
+        mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751302AbdH3MUd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Aug 2017 08:20:33 -0400
+Received: by mail-wm0-f45.google.com with SMTP id a80so8818320wma.0
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Aug 2017 05:20:32 -0700 (PDT)
+In-Reply-To: <CAPDyKFoVTASsnmx_Dz4MdPxVQOFVL=d6xQHiT3DVRBRJphRamw@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Wednesday, August 30, 2017 3:34:26 AM CEST Shawn Lin wrote:
-> The intention of this patch is to move dev_pm_domain_detach after
-> devres_release_all to avoid possible accessing device's registers
-> with genpd been powered off.
+
+
+>> -#ifdef CONFIG_MMC_QCOM_DML
+>> +#if IS_ENABLED(CONFIG_MMC_QCOM_DML)
 > 
-> Many common IP drivers use devm_request_irq to request irq for either
-> shared irq or non-shared irq. So we rely on devres_release_all to
-> free irq automatically. However we could see a situation that if the
-> driver use devm_request_irq to register a shared irq and unbind the
-> driver later, the irq could be triggerd cocurrently just between
-> finishing dev_pm_domain_detach and calling devm_irq_release, so that
-> driver's ISR should be called and try to access device's register, which
-> may hang up the system. The reason is that some SoCs, including Rockchips'
-> SoCs, couldn't support accessing controllers' registers w/o clk and power
-> domain enabled.
+> Because you change CONFIG_MMC_QCOM_DML beeing a bool instead of
+> tristate, then I don't think you need to change this to IS_ENABLED().
 > 
-> Also we have CONFIG_DEBUG_SHIRQ to theoretically expose this kind of
-> problem as devm_free_irq -> __free_irq says: "It's a shared IRQ -- the
-> driver ought to be prepared for an IRQ event to happen even now it's being
-> freed". That will simulate the aforementioned situation as it fires
-> extra irq action to make sure driver/system is robust enough to deal
-> with this kind of problem.
+> Correct!?
+Yep, that's correct Will respin the patch without this change
+
+
 > 
-> So now we face a two possible choices to fix this by
-> (1) either using request_irq and free_irq directly
-> (2) or moving dev_pm_domain_detach after devres_release_all which
-> makes sure we free the irq before powering off power domain.
+>>   int dml_hw_init(struct mmci_host *host, struct device_node *np);
+>>   void dml_start_xfer(struct mmci_host *host, struct mmc_data *data);
+>>   #else
+>> --
+>> 2.9.3
+>>
 > 
-> However, choice (1) implies that devm_request_irq shouldn't exist
-> or at least shouldn't be used for shared irq case. Meanwhile we don't
-> know how many drivers have this kind of issue and need to fix. So
-> choice (2) makes more sense to me, and that is the reason for why we
-> need to fix it like what this patch does.
+> Otherwise this looks good to me.
 > 
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> Kind regards
+> Uffe
 > 
-> ---
-> 
-> Changes in v3:
-> - fix the code path for consolidating the attach for both of driver
->   and bus driver, and then move detach to the error path
-> - rework the changelog
-> 
->  drivers/base/dd.c       | 16 ++++++++++++++++
->  drivers/base/platform.c | 18 ++----------------
->  2 files changed, 18 insertions(+), 16 deletions(-)
-> 
-> diff --git a/drivers/base/dd.c b/drivers/base/dd.c
-> index ad44b40..aea0bb1 100644
-> --- a/drivers/base/dd.c
-> +++ b/drivers/base/dd.c
-> @@ -25,7 +25,9 @@
->  #include <linux/kthread.h>
->  #include <linux/wait.h>
->  #include <linux/async.h>
-> +#include <linux/platform_device.h>
->  #include <linux/pm_runtime.h>
-> +#include <linux/pm_domain.h>
->  #include <linux/pinctrl/devinfo.h>
->  
->  #include "base.h"
-> @@ -356,6 +358,7 @@ static int really_probe(struct device *dev, struct device_driver *drv)
->  	int local_trigger_count = atomic_read(&deferred_trigger_count);
->  	bool test_remove = IS_ENABLED(CONFIG_DEBUG_TEST_DRIVER_REMOVE) &&
->  			   !drv->suppress_bind_attrs;
-> +	struct platform_driver *pdrv;
-
-Oh.
-
->  
->  	if (defer_all_probes) {
->  		/*
-> @@ -409,6 +412,16 @@ static int really_probe(struct device *dev, struct device_driver *drv)
->  	 */
->  	devices_kset_move_last(dev);
->  
-> +	ret = dev_pm_domain_attach(dev, true);
-
-Are you sure this can go here?
-
-> +	pdrv = to_platform_driver(dev->driver);
-
-Well, no.  There has to be a better way.
-
-> +	/* don't fail if just dev_pm_domain_attach failed */
-> +	if (pdrv && pdrv->prevent_deferred_probe &&
-> +	    ret == -EPROBE_DEFER) {
-> +		dev_warn(dev, "probe deferral not supported\n");
-> +		ret = -ENXIO;
-> +		goto probe_failed;
-> +	}
-> +
->  	if (dev->bus->probe) {
->  		ret = dev->bus->probe(dev);
->  		if (ret)
-> @@ -428,6 +441,7 @@ static int really_probe(struct device *dev, struct device_driver *drv)
->  			drv->remove(dev);
->  
->  		devres_release_all(dev);
-> +		dev_pm_domain_detach(dev, true);
->  		driver_sysfs_remove(dev);
->  		dev->driver = NULL;
->  		dev_set_drvdata(dev, NULL);
-> @@ -458,6 +472,7 @@ static int really_probe(struct device *dev, struct device_driver *drv)
->  pinctrl_bind_failed:
->  	device_links_no_driver(dev);
->  	devres_release_all(dev);
-> +	dev_pm_domain_detach(dev, true);
->  	driver_sysfs_remove(dev);
->  	dev->driver = NULL;
->  	dev_set_drvdata(dev, NULL);
-> @@ -864,6 +879,7 @@ static void __device_release_driver(struct device *dev, struct device *parent)
->  		dma_deconfigure(dev);
->  
->  		devres_release_all(dev);
-> +		dev_pm_domain_detach(dev, true);
->  		dev->driver = NULL;
->  		dev_set_drvdata(dev, NULL);
->  		if (dev->pm_domain && dev->pm_domain->dismiss)
-> diff --git a/drivers/base/platform.c b/drivers/base/platform.c
-> index d1bd992..8fa688d 100644
-> --- a/drivers/base/platform.c
-> +++ b/drivers/base/platform.c
-> @@ -572,22 +572,8 @@ static int platform_drv_probe(struct device *_dev)
->  	if (ret < 0)
->  		return ret;
->  
-> -	ret = dev_pm_domain_attach(_dev, true);
-
-There are other bus types using dev_pm_domain_attach() IIRC, so why is
-platform special?
-
-> -	if (ret != -EPROBE_DEFER) {
-> -		if (drv->probe) {
-> -			ret = drv->probe(dev);
-> -			if (ret)
-> -				dev_pm_domain_detach(_dev, true);
-> -		} else {
-> -			/* don't fail if just dev_pm_domain_attach failed */
-> -			ret = 0;
-> -		}
-> -	}
-> -
-> -	if (drv->prevent_deferred_probe && ret == -EPROBE_DEFER) {
-> -		dev_warn(_dev, "probe deferral not supported\n");
-> -		ret = -ENXIO;
-> -	}
-> +	if (drv->probe)
-> +		ret = drv->probe(dev);
->  
->  	return ret;
->  }
-> 
-
-The last part is not related to PM domains.  Why does it need to be changed?
-
-Thanks,
-Rafael
