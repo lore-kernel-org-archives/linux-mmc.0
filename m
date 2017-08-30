@@ -1,56 +1,69 @@
-From: srinivas.kandagatla@linaro.org
-Subject: [PATCH v2] mmc: mmci: stop building qcom dml as module
-Date: Wed, 30 Aug 2017 14:22:12 +0200
-Message-ID: <20170830122212.8590-1-srinivas.kandagatla@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: arnd@arndb.de, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 1/2] clk: sunxi-ng: Provide a default reset hook
+Date: Wed, 30 Aug 2017 14:29:24 +0200
+Message-ID: <CAPDyKFonXp4Uqi=DLxKf=1ecOx-2E5mUkEXqnqJPE-J57xXQcw@mail.gmail.com>
+References: <20170825094953.3247-1-maxime.ripard@free-electrons.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170825094953.3247-1-maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Cc: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-clk <linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mike Turquette <mturquette-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+On 25 August 2017 at 11:49, Maxime Ripard
+<maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org> wrote:
+> The reset hook was left implemented. Provide a dumb implementation so that
+> client drivers can depend on it.
+>
+> Signed-off-by: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
 
-It does not make sense for qcom dml code to be a seperate module, as
-this has just 2 helper functions specific to qcom, and used directly by
-mmci driver, so just compile this along with main mmci driver.
+Do you want me to pick this up via my mmc tree? If so, is that okay by
+the clock maintainers?
 
-This would also fix issues arrising due to Kconfig combinations between
-mmci and qcom dml.
+Kind regards
+Uffe
 
-Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
----
- drivers/mmc/host/Kconfig  | 2 +-
- drivers/mmc/host/Makefile | 5 +++--
- 2 files changed, 4 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 5755b69..3345384 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -15,7 +15,7 @@ config MMC_ARMMMCI
- 	  If unsure, say N.
- 
- config MMC_QCOM_DML
--	tristate "Qualcomm Data Mover for SD Card Controller"
-+	bool "Qualcomm Data Mover for SD Card Controller"
- 	depends on MMC_ARMMMCI && QCOM_BAM_DMA
- 	default y
- 	help
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index 4d45471..ef12fd2 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -2,8 +2,9 @@
- # Makefile for MMC/SD host controller drivers
- #
- 
--obj-$(CONFIG_MMC_ARMMMCI)	+= mmci.o
--obj-$(CONFIG_MMC_QCOM_DML)	+= mmci_qcom_dml.o
-+obj-$(CONFIG_MMC_ARMMMCI) += armmmci.o
-+armmmci-y := mmci.o
-+armmmci-$(CONFIG_MMC_QCOM_DML) += mmci_qcom_dml.o
- obj-$(CONFIG_MMC_PXA)		+= pxamci.o
- obj-$(CONFIG_MMC_MXC)		+= mxcmmc.o
- obj-$(CONFIG_MMC_MXS)		+= mxs-mmc.o
--- 
-2.9.3
+> ---
+>  drivers/clk/sunxi-ng/ccu_reset.c | 12 ++++++++++++
+>  1 file changed, 12 insertions(+)
+>
+> diff --git a/drivers/clk/sunxi-ng/ccu_reset.c b/drivers/clk/sunxi-ng/ccu_reset.c
+> index 6c31d48783a7..1dc4e98ea802 100644
+> --- a/drivers/clk/sunxi-ng/ccu_reset.c
+> +++ b/drivers/clk/sunxi-ng/ccu_reset.c
+> @@ -8,6 +8,7 @@
+>   * the License, or (at your option) any later version.
+>   */
+>
+> +#include <linux/delay.h>
+>  #include <linux/io.h>
+>  #include <linux/reset-controller.h>
+>
+> @@ -49,7 +50,18 @@ static int ccu_reset_deassert(struct reset_controller_dev *rcdev,
+>         return 0;
+>  }
+>
+> +static int ccu_reset_reset(struct reset_controller_dev *rcdev,
+> +                          unsigned long id)
+> +{
+> +       ccu_reset_assert(rcdev, id);
+> +       udelay(10);
+> +       ccu_reset_deassert(rcdev, id);
+> +
+> +       return 0;
+> +}
+> +
+>  const struct reset_control_ops ccu_reset_ops = {
+>         .assert         = ccu_reset_assert,
+>         .deassert       = ccu_reset_deassert,
+> +       .reset          = ccu_reset_reset,
+>  };
+> --
+> 2.13.5
+>
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
