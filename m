@@ -1,63 +1,47 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/5] mmc: sdhci: Add quirk to indicate MMC_RSP_136 has CRC
-Date: Wed, 30 Aug 2017 15:13:17 +0200
-Message-ID: <CAPDyKFqM96Ts2w6ESvCp75Kw+i91Cwr2EX39Xs9og0nUBTRLsA@mail.gmail.com>
-References: <20170821074132.4622-1-kishon@ti.com> <20170821074132.4622-3-kishon@ti.com>
+Subject: Re: [PATCH v4 0/4] mmc: sdhci: refactor PM in sdhci-pltfm add support
+ PM for cadence port
+Date: Wed, 30 Aug 2017 15:13:27 +0200
+Message-ID: <CAPDyKFr8RRjDwrbO5w+aOtULrc1BiUK6XGcVK0vftH_375QmxQ@mail.gmail.com>
+References: <1503461703-16225-1-git-send-email-yamada.masahiro@socionext.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170821074132.4622-3-kishon@ti.com>
+In-Reply-To: <1503461703-16225-1-git-send-email-yamada.masahiro@socionext.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Russell King <linux@armlinux.org.uk>, Ravikumar Kattekola <rk@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Barry Song <baohua@kernel.org>, Florian Fainelli <f.fainelli@gmail.com>, Kevin Hao <haokexin@gmail.com>, Scott Branden <sbranden@broadcom.com>, Christian Daudt <csd@broadcom.com>, Al Cooper <alcooperx@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Hu Ziji <huziji@marvell.com>, BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>, Zhangfei Gao <zhangfei.gao@marvell.com>, Gregory Fong <gregory.0xf0@gmail.com>, Olof Johansson <olof@lixom.net>, Brian Norris <computersforpeace@gmail.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Piotr Sroka <piotrs@cadence.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 21 August 2017 at 09:41, Kishon Vijay Abraham I <kishon@ti.com> wrote:
-> TI's implementation of sdhci controller used in DRA7 SoC's has
-> CRC in responses with length 136 bits. Add quirk to indicate
-> the controller has CRC in MMC_RSP_136. If this quirk is
-> set sdhci library shouldn't shift the response present in
-> SDHCI_RESPONSE register.
+On 23 August 2017 at 06:14, Masahiro Yamada
+<yamada.masahiro@socionext.com> wrote:
 >
-> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+> [1] implements suspend / resume for sdhci-cadence.c
+>
+> [2] refactor sdhci-pxav2
+>
+> [3] add clk handling for suspend/resume hooks of sdhci-pltfm.
+>     This also cleans up sdhci-brcmstb.c and sdhci-sirf.c
+>
+> [4] export sdhci_pltfm_suspend/resume to reduce code duplication
+>
+>
+> Masahiro Yamada (4):
+>   mmc: sdhci-cadence: add suspend / resume support
+>   mmc: sdhci-pxav2: switch to managed clk and sdhci_pltfm_unregister()
+>   mmc: sdhci: enable/disable the clock in sdhci_pltfm_suspend/resume
+>   mmc: sdhci-pltfm: export sdhci_pltfm_suspend/resume
+>
+>  drivers/mmc/host/sdhci-brcmstb.c | 37 +----------------
+>  drivers/mmc/host/sdhci-cadence.c | 88 ++++++++++++++++++++++++++++++++++++----
+>  drivers/mmc/host/sdhci-pltfm.c   | 28 +++++++++++--
+>  drivers/mmc/host/sdhci-pltfm.h   |  2 +
+>  drivers/mmc/host/sdhci-pxav2.c   | 30 ++++----------
+>  drivers/mmc/host/sdhci-sirf.c    | 39 +-----------------
+>  6 files changed, 114 insertions(+), 110 deletions(-)
+>
 
 Thanks, applied for next!
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/host/sdhci.c | 3 +++
->  drivers/mmc/host/sdhci.h | 2 ++
->  2 files changed, 5 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index ba639b7851cb..9c8d7428df3c 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1182,6 +1182,9 @@ static void sdhci_read_rsp_136(struct sdhci_host *host, struct mmc_command *cmd)
->                 cmd->resp[i] = sdhci_readl(host, reg);
->         }
->
-> +       if (host->quirks2 & SDHCI_QUIRK2_RSP_136_HAS_CRC)
-> +               return;
-> +
->         /* CRC is stripped so we need to do some shifting */
->         for (i = 0; i < 4; i++) {
->                 cmd->resp[i] <<= 8;
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 399edc681623..54bc444c317f 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -435,6 +435,8 @@ struct sdhci_host {
->  #define SDHCI_QUIRK2_ACMD23_BROKEN                     (1<<14)
->  /* Broken Clock divider zero in controller */
->  #define SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN             (1<<15)
-> +/* Controller has CRC in 136 bit Command Response */
-> +#define SDHCI_QUIRK2_RSP_136_HAS_CRC                   (1<<16)
->
->         int irq;                /* Device IRQ */
->         void __iomem *ioaddr;   /* Mapped address */
-> --
-> 2.11.0
->
