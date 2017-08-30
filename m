@@ -1,68 +1,134 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: mmci: stop building qcom dml as module
-Date: Wed, 30 Aug 2017 15:14:17 +0200
-Message-ID: <CAPDyKFpHcdz9ygZPRyR=6BpeCmqqER6TznaJKKt4he9zESN=Fg@mail.gmail.com>
-References: <20170830122212.8590-1-srinivas.kandagatla@linaro.org>
+Subject: Re: [PATCH V6 03/12] mmc: host: Add CQE interface
+Date: Wed, 30 Aug 2017 15:14:29 +0200
+Message-ID: <CAPDyKFqn0yjM55QdojqPGiSJB_ccPxNX4U2rvoP7c+g1Maej9w@mail.gmail.com>
+References: <1503665035-16231-1-git-send-email-adrian.hunter@intel.com> <1503665035-16231-4-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170830122212.8590-1-srinivas.kandagatla@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-io0-f179.google.com ([209.85.223.179]:38790 "EHLO
+        mail-io0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751610AbdH3NOb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Aug 2017 09:14:31 -0400
+Received: by mail-io0-f179.google.com with SMTP id 81so4846843ioj.5
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Aug 2017 06:14:30 -0700 (PDT)
+In-Reply-To: <1503665035-16231-4-git-send-email-adrian.hunter@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
-On 30 August 2017 at 14:22,  <srinivas.kandagatla@linaro.org> wrote:
-> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+On 25 August 2017 at 14:43, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> Add CQE host operations, capabilities, and host members.
 >
-> It does not make sense for qcom dml code to be a seperate module, as
-> this has just 2 helper functions specific to qcom, and used directly by
-> mmci driver, so just compile this along with main mmci driver.
->
-> This would also fix issues arrising due to Kconfig combinations between
-> mmci and qcom dml.
->
-> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Thanks, applied for next!
+I have now replaced the previous version with this one, applied for
+next! Thanks!
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/Kconfig  | 2 +-
->  drivers/mmc/host/Makefile | 5 +++--
->  2 files changed, 4 insertions(+), 3 deletions(-)
+>  include/linux/mmc/core.h |  6 ++++++
+>  include/linux/mmc/host.h | 53 ++++++++++++++++++++++++++++++++++++++++++++++++
+>  2 files changed, 59 insertions(+)
 >
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 5755b69..3345384 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -15,7 +15,7 @@ config MMC_ARMMMCI
->           If unsure, say N.
+> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+> index 178f699ac172..927519385482 100644
+> --- a/include/linux/mmc/core.h
+> +++ b/include/linux/mmc/core.h
+> @@ -156,6 +156,12 @@ struct mmc_request {
+>         struct completion       completion;
+>         struct completion       cmd_completion;
+>         void                    (*done)(struct mmc_request *);/* completion function */
+> +       /*
+> +        * Notify uppers layers (e.g. mmc block driver) that recovery is needed
+> +        * due to an error associated with the mmc_request. Currently used only
+> +        * by CQE.
+> +        */
+> +       void                    (*recovery_notifier)(struct mmc_request *);
+>         struct mmc_host         *host;
 >
->  config MMC_QCOM_DML
-> -       tristate "Qualcomm Data Mover for SD Card Controller"
-> +       bool "Qualcomm Data Mover for SD Card Controller"
->         depends on MMC_ARMMMCI && QCOM_BAM_DMA
->         default y
->         help
-> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-> index 4d45471..ef12fd2 100644
-> --- a/drivers/mmc/host/Makefile
-> +++ b/drivers/mmc/host/Makefile
-> @@ -2,8 +2,9 @@
->  # Makefile for MMC/SD host controller drivers
->  #
+>         /* Allow other commands during this ongoing data transfer or busy wait */
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index e92629518f68..f3f2d07feb2a 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -162,6 +162,50 @@ struct mmc_host_ops {
+>                                   unsigned int direction, int blk_size);
+>  };
 >
-> -obj-$(CONFIG_MMC_ARMMMCI)      += mmci.o
-> -obj-$(CONFIG_MMC_QCOM_DML)     += mmci_qcom_dml.o
-> +obj-$(CONFIG_MMC_ARMMMCI) += armmmci.o
-> +armmmci-y := mmci.o
-> +armmmci-$(CONFIG_MMC_QCOM_DML) += mmci_qcom_dml.o
->  obj-$(CONFIG_MMC_PXA)          += pxamci.o
->  obj-$(CONFIG_MMC_MXC)          += mxcmmc.o
->  obj-$(CONFIG_MMC_MXS)          += mxs-mmc.o
+> +struct mmc_cqe_ops {
+> +       /* Allocate resources, and make the CQE operational */
+> +       int     (*cqe_enable)(struct mmc_host *host, struct mmc_card *card);
+> +       /* Free resources, and make the CQE non-operational */
+> +       void    (*cqe_disable)(struct mmc_host *host);
+> +       /*
+> +        * Issue a read, write or DCMD request to the CQE. Also deal with the
+> +        * effect of ->cqe_off().
+> +        */
+> +       int     (*cqe_request)(struct mmc_host *host, struct mmc_request *mrq);
+> +       /* Free resources (e.g. DMA mapping) associated with the request */
+> +       void    (*cqe_post_req)(struct mmc_host *host, struct mmc_request *mrq);
+> +       /*
+> +        * Prepare the CQE and host controller to accept non-CQ commands. There
+> +        * is no corresponding ->cqe_on(), instead ->cqe_request() is required
+> +        * to deal with that.
+> +        */
+> +       void    (*cqe_off)(struct mmc_host *host);
+> +       /*
+> +        * Wait for all CQE tasks to complete. Return an error if recovery
+> +        * becomes necessary.
+> +        */
+> +       int     (*cqe_wait_for_idle)(struct mmc_host *host);
+> +       /*
+> +        * Notify CQE that a request has timed out. Return false if the request
+> +        * completed or true if a timeout happened in which case indicate if
+> +        * recovery is needed.
+> +        */
+> +       bool    (*cqe_timeout)(struct mmc_host *host, struct mmc_request *mrq,
+> +                              bool *recovery_needed);
+> +       /*
+> +        * Stop all CQE activity and prepare the CQE and host controller to
+> +        * accept recovery commands.
+> +        */
+> +       void    (*cqe_recovery_start)(struct mmc_host *host);
+> +       /*
+> +        * Clear the queue and call mmc_cqe_request_done() on all requests.
+> +        * Requests that errored will have the error set on the mmc_request
+> +        * (data->error or cmd->error for DCMD).  Requests that did not error
+> +        * will have zero data bytes transferred.
+> +        */
+> +       void    (*cqe_recovery_finish)(struct mmc_host *host);
+> +};
+> +
+>  struct mmc_async_req {
+>         /* active mmc request */
+>         struct mmc_request      *mrq;
+> @@ -303,6 +347,8 @@ struct mmc_host {
+>  #define MMC_CAP2_HS400_ES      (1 << 20)       /* Host supports enhanced strobe */
+>  #define MMC_CAP2_NO_SD         (1 << 21)       /* Do not send SD commands during initialization */
+>  #define MMC_CAP2_NO_MMC                (1 << 22)       /* Do not send (e)MMC commands during initialization */
+> +#define MMC_CAP2_CQE           (1 << 23)       /* Has eMMC command queue engine */
+> +#define MMC_CAP2_CQE_DCMD      (1 << 24)       /* CQE can issue a direct command */
+>
+>         mmc_pm_flag_t           pm_caps;        /* supported pm features */
+>
+> @@ -386,6 +432,13 @@ struct mmc_host {
+>         int                     dsr_req;        /* DSR value is valid */
+>         u32                     dsr;    /* optional driver stage (DSR) value */
+>
+> +       /* Command Queue Engine (CQE) support */
+> +       const struct mmc_cqe_ops *cqe_ops;
+> +       void                    *cqe_private;
+> +       int                     cqe_qdepth;
+> +       bool                    cqe_enabled;
+> +       bool                    cqe_on;
+> +
+>         unsigned long           private[0] ____cacheline_aligned;
+>  };
+>
 > --
-> 2.9.3
+> 1.9.1
 >
