@@ -1,69 +1,77 @@
 From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: [RFC 3/4] mmc: sdhci-msm: Change the desc_sz on cqe_enable/disable.
-Date: Wed, 30 Aug 2017 18:34:10 +0530
-Message-ID: <1504098251-27739-4-git-send-email-riteshh@codeaurora.org>
-References: <1504098251-27739-1-git-send-email-riteshh@codeaurora.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.29.96]:58800 "EHLO
-        smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751394AbdH3NEn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Aug 2017 09:04:43 -0400
-In-Reply-To: <1504098251-27739-1-git-send-email-riteshh@codeaurora.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [RFC 0/4] mmc: sdhci-msm: Add CQE support for sdhci-msm
+Date: Wed, 30 Aug 2017 18:34:07 +0530
+Message-ID: <1504098251-27739-1-git-send-email-riteshh@codeaurora.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: ulf.hansson@linaro.org, adrian.hunter@intel.com
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, stummala@codeaurora.org, asutoshd@codeaurora.org, Ritesh Harjani <riteshh@codeaurora.org>
+List-Id: linux-mmc@vger.kernel.org
 
-When CMDQ is halted the HW expects descriptor size to
-be same which is using in CMDQ mode.
-Thus adjust the desc_sz of sdhci accordingly.
+Hi All,
 
-Without this patch below command gives ADMA error
-when CQE is enabled.
-cat /sys/kernel/debug/mmc0/mmc0:0001/ext_csd
+Please ignore the previous patch series from a wrong email
+address. Stupid gitconfig issue. Apologies for the spam.
 
-Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
----
- drivers/mmc/host/sdhci-msm.c | 24 ++++++++++++++++++++++--
- 1 file changed, 22 insertions(+), 2 deletions(-)
+This is RFC patch series based on top of ulfh_mmc/cmdq branch
+which is based upon Adrian's CMDQ patch series.
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 346cdfb..baa3409 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -1111,9 +1111,29 @@ static u32 sdhci_msm_cqe_irq(struct sdhci_host *host, u32 intmask)
- 	return 0;
- }
- 
-+void sdhci_msm_cqe_enable(struct mmc_host *mmc)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+
-+	if (host->flags & SDHCI_USE_64_BIT_DMA)
-+		host->desc_sz = 12;
-+
-+	sdhci_cqe_enable(mmc);
-+}
-+
-+void sdhci_msm_cqe_disable(struct mmc_host *mmc, bool recovery)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+
-+	if (host->flags & SDHCI_USE_64_BIT_DMA)
-+		host->desc_sz = 16;
-+
-+	sdhci_cqe_disable(mmc, recovery);
-+}
-+
- static const struct cqhci_host_ops sdhci_msm_cqhci_ops = {
--	.enable		= sdhci_cqe_enable,
--	.disable	= sdhci_cqe_disable,
-+	.enable		= sdhci_msm_cqe_enable,
-+	.disable	= sdhci_msm_cqe_disable,
- };
- 
- #ifdef CONFIG_MMC_CQHCI
+Below patch series enables CQE for sdhci-msm platform.
+This has been tested on internal 8996 MTP which has CMDQ support.
+
+Fixes w.r.t. CMDQ:-
+There are some patches identified which were required atleast on
+MSM platform. I am not sure if these are required for any other
+CQE platform or not. Patchset 1, 3 & 4 commit text describes
+the problems.
+
+Performance related:- 
+I gave one small shot for performance and the numbers were not looking good.
+So, unless I have tested for performance completely, I should not discuss 
+on performance numbers as of now with this patchset. 
+I can try doing some more performance testing and post the results -
+though this may take some while.
+
+I used below test script for random read/write test.
+
+*randwrite-test-script*
+[global]
+bs=32k
+size=1g
+rw=randwrite
+direct=1
+directory=/data/fiotest
+
+[file1]
+filename=singlefile1
+
+*randread-test-script*
+[global]
+bs=32k
+size=1g
+rw=randread
+directory=/data/fiotest
+
+[file1]
+filename=singlefile1
+
+@Adrian,
+Thanks a lot for pursuing and bringing CMDQ patch series to it's final stages :)
+
+
+Ritesh Harjani (4):
+  mmc: cqhci: Move CQHCI_ENABLE before setting TDLBA/TDLBAU
+  mmc: sdhci-msm: Add CQHCI support for sdhci-msm
+  mmc: sdhci-msm: Change the desc_sz on cqe_enable/disable.
+  mmc: sdhci-msm: Handle unexpected interrupt case on enabling legacy
+    IRQs on CQE halt
+
+ .../devicetree/bindings/mmc/sdhci-msm.txt          |   1 +
+ drivers/mmc/host/Kconfig                           |   1 +
+ drivers/mmc/host/cqhci.c                           |   7 +-
+ drivers/mmc/host/sdhci-msm.c                       | 121 ++++++++++++++++++++-
+ 4 files changed, 125 insertions(+), 5 deletions(-)
+
 -- 
 Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc.
 Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a Linux Foundation Collaborative Project.
-
