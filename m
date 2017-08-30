@@ -1,83 +1,129 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: sdhci-xenon: add set_power callback
-Date: Wed, 30 Aug 2017 15:13:03 +0200
-Message-ID: <CAPDyKFqiaXj5LtA066BtRVrbTNB97XZM-qE2DEAz5Vc5WPDKMw@mail.gmail.com>
-References: <1503338529-21102-1-git-send-email-zjwu@marvell.com>
- <e37d8951-7e1b-8431-5593-5e693295987f@intel.com> <87val76624.fsf@free-electrons.com>
- <59A464BA.6030401@marvell.com> <87bmmy65je.fsf@free-electrons.com>
+Subject: Re: [PATCH] mmc: sdhci-xenon: Support HS400 Enhanced Strobe feature
+Date: Wed, 30 Aug 2017 15:13:22 +0200
+Message-ID: <CAPDyKFpBfvpZTFQJT6yR2Teh1Z5dq-3j6XC5URaiu1R3H4ea5A@mail.gmail.com>
+References: <1503512102-30968-1-git-send-email-zjwu@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f182.google.com ([209.85.223.182]:36888 "EHLO
-        mail-io0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751386AbdH3NNF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Aug 2017 09:13:05 -0400
-Received: by mail-io0-f182.google.com with SMTP id d78so3357680ioe.4
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Aug 2017 06:13:04 -0700 (PDT)
-In-Reply-To: <87bmmy65je.fsf@free-electrons.com>
+Received: from mail-it0-f42.google.com ([209.85.214.42]:36004 "EHLO
+        mail-it0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751768AbdH3NNX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Aug 2017 09:13:23 -0400
+Received: by mail-it0-f42.google.com with SMTP id o132so5818895itc.1
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Aug 2017 06:13:23 -0700 (PDT)
+In-Reply-To: <1503512102-30968-1-git-send-email-zjwu@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Gregory CLEMENT <gregory.clement@free-electrons.com>, Zhoujie Wu <zjwu@marvell.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Victor Gu <xigu@marvell.com>, Wilson Ding <dingwei@marvell.com>, Kostya Porotchkin <kostap@marvell.com>, Hanna Hawa <hannah@marvell.com>, hongd@marvell.com, Doug Jones <dougj@marvell.com>, Ryan Gao <ygao@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+To: Zhoujie Wu <zjwu@marvell.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Victor Gu <xigu@marvell.com>, Wilson Ding <dingwei@marvell.com>, Kostya Porotchkin <kostap@marvell.com>, Hanna Hawa <hannah@marvell.com>, hongd@marvell.com, Doug Jones <dougj@marvell.com>, Ryan Gao <ygao@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Gregory Clement <gregory.clement@free-electrons.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
 
-On 29 August 2017 at 12:18, Gregory CLEMENT
-<gregory.clement@free-electrons.com> wrote:
-> Hi Zhoujie,
+On 23 August 2017 at 20:15, Zhoujie Wu <zjwu@marvell.com> wrote:
+> From: Hu Ziji <huziji@marvell.com>
 >
->  On lun., ao=C3=BBt 28 2017, Zhoujie Wu <zjwu@marvell.com> wrote:
+> Support HS400 Enhanced Strobe feature in Xenon.
 >
->> Hi Gregory,
->>
->> On 08/28/2017 08:54 AM, Gregory CLEMENT wrote:
->>> Hi,
->>>     On lun., ao=C3=BBt 28 2017, Adrian Hunter <adrian.hunter@intel.com>
->>> wrote:
->>>
->>>> On 21/08/17 21:02, Zhoujie Wu wrote:
->>>>> Xenon sdh controller requests proper SD bus voltage select
->>>>> bits programmed even with vmmc power supply. Any reserved
->>>>> value(100b-000b) programmed in this field will lead to controller
->>>>> ignore SD bus power bit and keep its value at zero.
->>>>> Add set_power callback to handle this.
->>>>>
->>>>> Signed-off-by: Zhoujie Wu <zjwu@marvell.com>
->>>> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
->>> I tested this patch on the Armada 3720 DB board. And thanks to this pat=
-ch
->>> and by adding a vmmc regulator in the device tree I did not have anymor=
-e
->>> the issue UHS card not detected on warm reset.
->>>
->>> Tested-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
->>>
->>> Actually for me this should be a fix. Indeed if I try to use a vmmc
->>> regulator without this patch then the SD card does not work at all I
->>> only have the following messages:
->>>
->>> "mmc1: Timeout waiting for hardware cmd interrupt."
->> This patch with sd vmmc power supply(must be claimed as AON, or card
->> detection can't work)enabled can solve the issue for warm reset. This
->> patch is must for xenon controller once vmmc power supply enabled,
->> since the HW will ignore any reserved value for sd bus voltage select
->> field and ignore the pwr_en in this case.
+> Enable Enhanced Strobe together with Data Strobe.
+> Disable Enhanced Strobe when eMMC is not in HS400 mode.
 >
-> That's why I would like that this patch was tagged as a fix.
->
-> Adrian, Ulf, do you think it could be applied on the v4.13-rc or at
-> least applied with the following tags ?
->
-> Fixes: 3a3748dba881(" mmc: sdhci-xenon: Add Marvell Xenon SDHC core
-> functionality")
-> Cc: <stable@vger.kernel.org>
->
-> Thanks,
->
-> Gregory
+> Signed-off-by: Hu Ziji <huziji@marvell.com>
+> Signed-off-by: Zhoujie Wu <zjwu@marvell.com>
 
-Thanks, applied for fixes and by adding the above tags!
-
-[...]
+Thanks, applied for next!
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/sdhci-xenon-phy.c | 34 ++++++++++++++++++++++++++++------
+>  drivers/mmc/host/sdhci-xenon.h     |  1 +
+>  2 files changed, 29 insertions(+), 6 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-xenon-phy.c b/drivers/mmc/host/sdhci-xenon-phy.c
+> index f7e26b0..ec87943 100644
+> --- a/drivers/mmc/host/sdhci-xenon-phy.c
+> +++ b/drivers/mmc/host/sdhci-xenon-phy.c
+> @@ -409,17 +409,30 @@ static int xenon_emmc_phy_config_tuning(struct sdhci_host *host)
+>         return 0;
+>  }
+>
+> -static void xenon_emmc_phy_disable_data_strobe(struct sdhci_host *host)
+> +static void xenon_emmc_phy_disable_strobe(struct sdhci_host *host)
+>  {
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +       struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
+>         u32 reg;
+>
+> -       /* Disable SDHC Data Strobe */
+> +       /* Disable both SDHC Data Strobe and Enhanced Strobe */
+>         reg = sdhci_readl(host, XENON_SLOT_EMMC_CTRL);
+> -       reg &= ~XENON_ENABLE_DATA_STROBE;
+> +       reg &= ~(XENON_ENABLE_DATA_STROBE | XENON_ENABLE_RESP_STROBE);
+>         sdhci_writel(host, reg, XENON_SLOT_EMMC_CTRL);
+> +
+> +       /* Clear Strobe line Pull down or Pull up */
+> +       if (priv->phy_type == EMMC_5_0_PHY) {
+> +               reg = sdhci_readl(host, XENON_EMMC_5_0_PHY_PAD_CONTROL);
+> +               reg &= ~(XENON_EMMC5_FC_QSP_PD | XENON_EMMC5_FC_QSP_PU);
+> +               sdhci_writel(host, reg, XENON_EMMC_5_0_PHY_PAD_CONTROL);
+> +       } else {
+> +               reg = sdhci_readl(host, XENON_EMMC_PHY_PAD_CONTROL1);
+> +               reg &= ~(XENON_EMMC5_1_FC_QSP_PD | XENON_EMMC5_1_FC_QSP_PU);
+> +               sdhci_writel(host, reg, XENON_EMMC_PHY_PAD_CONTROL1);
+> +       }
+>  }
+>
+> -/* Set HS400 Data Strobe */
+> +/* Set HS400 Data Strobe and Enhanced Strobe */
+>  static void xenon_emmc_phy_strobe_delay_adj(struct sdhci_host *host)
+>  {
+>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> @@ -439,6 +452,15 @@ static void xenon_emmc_phy_strobe_delay_adj(struct sdhci_host *host)
+>         /* Enable SDHC Data Strobe */
+>         reg = sdhci_readl(host, XENON_SLOT_EMMC_CTRL);
+>         reg |= XENON_ENABLE_DATA_STROBE;
+> +       /*
+> +        * Enable SDHC Enhanced Strobe if supported
+> +        * Xenon Enhanced Strobe should be enabled only when
+> +        * 1. card is in HS400 mode and
+> +        * 2. SDCLK is higher than 52MHz
+> +        * 3. DLL is enabled
+> +        */
+> +       if (host->mmc->ios.enhanced_strobe)
+> +               reg |= XENON_ENABLE_RESP_STROBE;
+>         sdhci_writel(host, reg, XENON_SLOT_EMMC_CTRL);
+>
+>         /* Set Data Strobe Pull down */
+> @@ -615,7 +637,7 @@ static void xenon_emmc_phy_set(struct sdhci_host *host,
+>                 sdhci_writel(host, phy_regs->logic_timing_val,
+>                              phy_regs->logic_timing_adj);
+>         else
+> -               xenon_emmc_phy_disable_data_strobe(host);
+> +               xenon_emmc_phy_disable_strobe(host);
+>
+>  phy_init:
+>         xenon_emmc_phy_init(host);
+> @@ -705,7 +727,7 @@ void xenon_soc_pad_ctrl(struct sdhci_host *host,
+>
+>  /*
+>   * Setting PHY when card is working in High Speed Mode.
+> - * HS400 set data strobe line.
+> + * HS400 set Data Strobe and Enhanced Strobe if it is supported.
+>   * HS200/SDR104 set tuning config to prepare for tuning.
+>   */
+>  static int xenon_hs_delay_adj(struct sdhci_host *host)
+> diff --git a/drivers/mmc/host/sdhci-xenon.h b/drivers/mmc/host/sdhci-xenon.h
+> index 73debb4..01937f1 100644
+> --- a/drivers/mmc/host/sdhci-xenon.h
+> +++ b/drivers/mmc/host/sdhci-xenon.h
+> @@ -33,6 +33,7 @@
+>  #define XENON_TUNING_STEP_DIVIDER              BIT(6)
+>
+>  #define XENON_SLOT_EMMC_CTRL                   0x0130
+> +#define XENON_ENABLE_RESP_STROBE               BIT(25)
+>  #define XENON_ENABLE_DATA_STROBE               BIT(24)
+>
+>  #define XENON_SLOT_RETUNING_REQ_CTRL           0x0144
+> --
+> 1.9.1
+>
