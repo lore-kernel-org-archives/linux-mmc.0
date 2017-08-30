@@ -1,77 +1,128 @@
 From: Vijay Viswanath <vviswana@codeaurora.org>
-Subject: [PATCH v1 1/5] mmc: sdhci-msm: fix issue with power irq
-Date: Wed, 30 Aug 2017 18:21:45 +0530
-Message-ID: <1504097509-58983-2-git-send-email-vviswana@codeaurora.org>
+Subject: [PATCH v1 4/5] mmc: sdhci-msm: Add ops to do sdhc register write
+Date: Wed, 30 Aug 2017 18:21:48 +0530
+Message-ID: <1504097509-58983-5-git-send-email-vviswana@codeaurora.org>
 References: <1504097509-58983-1-git-send-email-vviswana@codeaurora.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
 In-Reply-To: <1504097509-58983-1-git-send-email-vviswana@codeaurora.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+Sender: linux-arm-msm-owner@vger.kernel.org
 To: adrian.hunter@intel.com, ulf.hansson@linaro.org, will.deacon@arm.com
-Cc: riteshh@codeaurora.org, linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Vijay Viswanath <vviswana@codeaurora.org>, stummala@codeaurora.org, subhashj@codeaurora.org, linux-arm-kernel@lists.infradead.org, asutoshd@codeaurora.org
+Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, riteshh@codeaurora.org, subhashj@codeaurora.org, Vijay Viswanath <vviswana@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Subhash Jadavani <subhashj@codeaurora.org>
+Register writes which change voltage of IO lines or turn the IO bus
+on/off require controller to be ready before progressing further. When
+the controller is ready, it will generate a power irq which needs to be
+handled. The thread which initiated the register write should wait for
+power irq to complete. This will be done through the new sdhc msm write
+APIs which will check whether the particular write can trigger a power
+irq and wait for it with a timeout if it is expected.
+The SDHC core power control IRQ gets triggered when -
+* There is a state change in power control bit (bit 0)
+  of SDHCI_POWER_CONTROL register.
+* There is a state change in 1.8V enable bit (bit 3) of
+  SDHCI_HOST_CONTROL2 register.
+* Bit 1 of SDHCI_SOFTWARE_RESET is set.
 
-SDCC controller reset (SW_RST) during probe may trigger power irq if
-previous status of PWRCTL was either BUS_ON or IO_HIGH_V. So before we
-enable the power irq interrupt in GIC (by registering the interrupt
-handler), we need to ensure that any pending power irq interrupt status
-is acknowledged otherwise power irq interrupt handler would be fired
-prematurely.
-
-Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
 Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
 ---
- drivers/mmc/host/sdhci-msm.c | 18 ++++++++++++++++++
- 1 file changed, 18 insertions(+)
+ drivers/mmc/host/sdhci-msm.c | 69 +++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 68 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 9d601dc..d636251 100644
+index e3e385e..a4a78b5 100644
 --- a/drivers/mmc/host/sdhci-msm.c
 +++ b/drivers/mmc/host/sdhci-msm.c
-@@ -1250,6 +1250,21 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 			       CORE_VENDOR_SPEC_CAPABILITIES0);
+@@ -1070,7 +1070,6 @@ static void sdhci_msm_check_power_status(struct sdhci_host *host, u32 req_type)
+ 			__WARN_printf("%s: pwr_irq for req: (%d) timed out\n",
+ 					mmc_hostname(host->mmc), req_type);
  	}
+-	msm_host->pwr_irq_flag = 0;
+ 	pr_debug("%s: %s: request %d done\n", mmc_hostname(host->mmc),
+ 			__func__, req_type);
+ }
+@@ -1250,6 +1249,70 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	__sdhci_msm_set_clock(host, clock);
+ }
  
-+	/*
-+	 * Power on reset state may trigger power irq if previous status of
-+	 * PWRCTL was either BUS_ON or IO_HIGH_V. So before enabling pwr irq
-+	 * interrupt in GIC, any pending power irq interrupt should be
-+	 * acknowledged. Otherwise power irq interrupt handler would be
-+	 * fired prematurely.
-+	 */
-+	sdhci_msm_voltage_switch(host);
++#ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
++/*
++ * Platform specific register write functions. This is so that, if any
++ * register write needs to be followed up by platform specific actions,
++ * they can be added here. These functions can go to sleep when writes
++ * to certain registers are done.
++ * These functions are relying on sdhci_set_ios not using spinlock.
++ */
++static int __sdhci_msm_check_write(struct sdhci_host *host, u16 val, int reg)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
++	u32 req_type = 0;
 +
-+	/*
-+	 * Ensure that above writes are propogated before interrupt enablement
-+	 * in GIC.
-+	 */
-+	mb();
++	switch (reg) {
++	case SDHCI_HOST_CONTROL2:
++		req_type = (val & SDHCI_CTRL_VDD_180) ? REQ_IO_LOW :
++			REQ_IO_HIGH;
++		break;
++	case SDHCI_SOFTWARE_RESET:
++		if (host->pwr && (val & SDHCI_RESET_ALL))
++			req_type = REQ_BUS_OFF;
++		break;
++	case SDHCI_POWER_CONTROL:
++		req_type = !val ? REQ_BUS_OFF : REQ_BUS_ON;
++		break;
++	}
 +
- 	/* Setup IRQ for handling power/voltage tasks with PMIC */
- 	msm_host->pwr_irq = platform_get_irq_byname(pdev, "pwr_irq");
- 	if (msm_host->pwr_irq < 0) {
-@@ -1259,6 +1274,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 		goto clk_disable;
- 	}
++	if (req_type) {
++		msm_host->pwr_irq_flag = 0;
++		/*
++		 * Since this register write may trigger a power irq, ensure
++		 * all previous register writes are complete by this point.
++		 */
++		mb();
++	}
++	return req_type;
++}
++
++/* This function may sleep*/
++static void sdhci_msm_writew(struct sdhci_host *host, u16 val, int reg)
++{
++	u32 req_type = 0;
++
++	req_type = __sdhci_msm_check_write(host, val, reg);
++	writew_relaxed(val, host->ioaddr + reg);
++
++	if (req_type)
++		sdhci_msm_check_power_status(host, req_type);
++}
++
++/* This function may sleep*/
++static void sdhci_msm_writeb(struct sdhci_host *host, u8 val, int reg)
++{
++	u32 req_type = 0;
++
++	req_type = __sdhci_msm_check_write(host, val, reg);
++
++	writeb_relaxed(val, host->ioaddr + reg);
++
++	if (req_type)
++		sdhci_msm_check_power_status(host, req_type);
++}
++#endif
+ static const struct of_device_id sdhci_msm_dt_match[] = {
+ 	{ .compatible = "qcom,sdhci-msm-v4" },
+ 	{},
+@@ -1264,6 +1327,10 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	.get_max_clock = sdhci_msm_get_max_clock,
+ 	.set_bus_width = sdhci_set_bus_width,
+ 	.set_uhs_signaling = sdhci_msm_set_uhs_signaling,
++#ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
++	.write_w = sdhci_msm_writew,
++	.write_b = sdhci_msm_writeb,
++#endif
+ };
  
-+	/* Enable pwr irq interrupts */
-+	writel_relaxed(INT_MASK, msm_host->core_mem + CORE_PWRCTL_MASK);
-+
- 	ret = devm_request_threaded_irq(&pdev->dev, msm_host->pwr_irq, NULL,
- 					sdhci_msm_pwr_irq, IRQF_ONESHOT,
- 					dev_name(&pdev->dev), host);
+ static const struct sdhci_pltfm_data sdhci_msm_pdata = {
 -- 
  Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc. 
 Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a Linux Foundation Collaborative Project.
