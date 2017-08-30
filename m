@@ -1,7 +1,7 @@
 From: Ritesh Harjani <rharjani@qti.qualcomm.com>
-Subject: [RFC 1/4] mmc: cqhci: Move CQHCI_ENABLE before setting TDLBA/TDLBAU
-Date: Wed, 30 Aug 2017 18:29:56 +0530
-Message-ID: <1504097999-27355-2-git-send-email-rharjani@qti.qualcomm.com>
+Subject: [RFC 3/4] mmc: sdhci-msm: Change the desc_sz on cqe_enable/disable.
+Date: Wed, 30 Aug 2017 18:29:58 +0530
+Message-ID: <1504097999-27355-4-git-send-email-rharjani@qti.qualcomm.com>
 References: <1504097999-27355-1-git-send-email-rharjani@qti.qualcomm.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1504097999-27355-1-git-send-email-rharjani@qti.qualcomm.com>
@@ -12,39 +12,55 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ritesh Harjani <riteshh@codeaurora.org>
 
-Without this patch the CQHCI registers are getting reset
-again.
+When CMDQ is halted the HW expects descriptor size to
+be same which is using in CMDQ mode.
+Thus adjust the desc_sz of sdhci accordingly.
+
+Without this patch below command gives ADMA error
+when CQE is enabled.
+cat /sys/kernel/debug/mmc0/mmc0:0001/ext_csd
 
 Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
 ---
- drivers/mmc/host/cqhci.c | 7 +++----
- 1 file changed, 3 insertions(+), 4 deletions(-)
+ drivers/mmc/host/sdhci-msm.c | 24 ++++++++++++++++++++++--
+ 1 file changed, 22 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/cqhci.c b/drivers/mmc/host/cqhci.c
-index 8650a13..2a7351c 100644
---- a/drivers/mmc/host/cqhci.c
-+++ b/drivers/mmc/host/cqhci.c
-@@ -262,6 +262,9 @@ static void __cqhci_enable(struct cqhci_host *cq_host)
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 346cdfb..baa3409 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -1111,9 +1111,29 @@ static u32 sdhci_msm_cqe_irq(struct sdhci_host *host, u32 intmask)
+ 	return 0;
+ }
  
- 	cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
- 
-+	cqcfg |= CQHCI_ENABLE;
-+	cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
++void sdhci_msm_cqe_enable(struct mmc_host *mmc)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
 +
- 	cqhci_writel(cq_host, lower_32_bits(cq_host->desc_dma_base),
- 		     CQHCI_TDLBA);
- 	cqhci_writel(cq_host, upper_32_bits(cq_host->desc_dma_base),
-@@ -271,10 +274,6 @@ static void __cqhci_enable(struct cqhci_host *cq_host)
++	if (host->flags & SDHCI_USE_64_BIT_DMA)
++		host->desc_sz = 12;
++
++	sdhci_cqe_enable(mmc);
++}
++
++void sdhci_msm_cqe_disable(struct mmc_host *mmc, bool recovery)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++
++	if (host->flags & SDHCI_USE_64_BIT_DMA)
++		host->desc_sz = 16;
++
++	sdhci_cqe_disable(mmc, recovery);
++}
++
+ static const struct cqhci_host_ops sdhci_msm_cqhci_ops = {
+-	.enable		= sdhci_cqe_enable,
+-	.disable	= sdhci_cqe_disable,
++	.enable		= sdhci_msm_cqe_enable,
++	.disable	= sdhci_msm_cqe_disable,
+ };
  
- 	cqhci_set_irqs(cq_host, 0);
- 
--	cqcfg |= CQHCI_ENABLE;
--
--	cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
--
- 	mmc->cqe_on = true;
- 
- 	if (cq_host->ops->enable)
+ #ifdef CONFIG_MMC_CQHCI
 -- 
 Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc.
 Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a Linux Foundation Collaborative Project.
