@@ -1,28 +1,28 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V6 01/12] mmc: core: Move mmc_start_areq() declaration
-Date: Wed, 30 Aug 2017 15:14:22 +0200
-Message-ID: <CAPDyKFpH7k7tTYSsMZpy25YJ4U8-Nz3_jhO8-RmvpjyqXsd0=w@mail.gmail.com>
-References: <1503665035-16231-1-git-send-email-adrian.hunter@intel.com> <1503665035-16231-2-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH v2] mmc: mmci: stop building qcom dml as module
+Date: Wed, 30 Aug 2017 15:14:17 +0200
+Message-ID: <CAPDyKFpHcdz9ygZPRyR=6BpeCmqqER6TznaJKKt4he9zESN=Fg@mail.gmail.com>
+References: <20170830122212.8590-1-srinivas.kandagatla@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f179.google.com ([209.85.223.179]:38756 "EHLO
-        mail-io0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751411AbdH3NOX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Aug 2017 09:14:23 -0400
-Received: by mail-io0-f179.google.com with SMTP id 81so4845732ioj.5
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Aug 2017 06:14:23 -0700 (PDT)
-In-Reply-To: <1503665035-16231-2-git-send-email-adrian.hunter@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170830122212.8590-1-srinivas.kandagatla@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
-On 25 August 2017 at 14:43, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> mmc_start_areq() is an internal mmc core API. Move the declaration
-> accordingly.
+On 30 August 2017 at 14:22,  <srinivas.kandagatla@linaro.org> wrote:
+> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 >
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> It does not make sense for qcom dml code to be a seperate module, as
+> this has just 2 helper functions specific to qcom, and used directly by
+> mmci driver, so just compile this along with main mmci driver.
+>
+> This would also fix issues arrising due to Kconfig combinations between
+> mmci and qcom dml.
+>
+> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 
 Thanks, applied for next!
 
@@ -30,43 +30,39 @@ Kind regards
 Uffe
 
 > ---
->  drivers/mmc/core/core.h  | 6 ++++++
->  include/linux/mmc/core.h | 4 ----
->  2 files changed, 6 insertions(+), 4 deletions(-)
+>  drivers/mmc/host/Kconfig  | 2 +-
+>  drivers/mmc/host/Makefile | 5 +++--
+>  2 files changed, 4 insertions(+), 3 deletions(-)
 >
-> diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-> index 55f543fd37c4..ca861091a776 100644
-> --- a/drivers/mmc/core/core.h
-> +++ b/drivers/mmc/core/core.h
-> @@ -107,6 +107,12 @@ static inline void mmc_unregister_pm_notifier(struct mmc_host *host) { }
->  void mmc_wait_for_req_done(struct mmc_host *host, struct mmc_request *mrq);
->  bool mmc_is_req_done(struct mmc_host *host, struct mmc_request *mrq);
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 5755b69..3345384 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -15,7 +15,7 @@ config MMC_ARMMMCI
+>           If unsure, say N.
 >
-> +struct mmc_async_req;
-> +
-> +struct mmc_async_req *mmc_start_areq(struct mmc_host *host,
-> +                                    struct mmc_async_req *areq,
-> +                                    enum mmc_blk_status *ret_stat);
-> +
->  int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
->                 unsigned int arg);
->  int mmc_can_erase(struct mmc_card *card);
-> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-> index bf1788a224e6..178f699ac172 100644
-> --- a/include/linux/mmc/core.h
-> +++ b/include/linux/mmc/core.h
-> @@ -165,11 +165,7 @@ struct mmc_request {
->  };
+>  config MMC_QCOM_DML
+> -       tristate "Qualcomm Data Mover for SD Card Controller"
+> +       bool "Qualcomm Data Mover for SD Card Controller"
+>         depends on MMC_ARMMMCI && QCOM_BAM_DMA
+>         default y
+>         help
+> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+> index 4d45471..ef12fd2 100644
+> --- a/drivers/mmc/host/Makefile
+> +++ b/drivers/mmc/host/Makefile
+> @@ -2,8 +2,9 @@
+>  # Makefile for MMC/SD host controller drivers
+>  #
 >
->  struct mmc_card;
-> -struct mmc_async_req;
->
-> -struct mmc_async_req *mmc_start_areq(struct mmc_host *host,
-> -                               struct mmc_async_req *areq,
-> -                               enum mmc_blk_status *ret_stat);
->  void mmc_wait_for_req(struct mmc_host *host, struct mmc_request *mrq);
->  int mmc_wait_for_cmd(struct mmc_host *host, struct mmc_command *cmd,
->                 int retries);
+> -obj-$(CONFIG_MMC_ARMMMCI)      += mmci.o
+> -obj-$(CONFIG_MMC_QCOM_DML)     += mmci_qcom_dml.o
+> +obj-$(CONFIG_MMC_ARMMMCI) += armmmci.o
+> +armmmci-y := mmci.o
+> +armmmci-$(CONFIG_MMC_QCOM_DML) += mmci_qcom_dml.o
+>  obj-$(CONFIG_MMC_PXA)          += pxamci.o
+>  obj-$(CONFIG_MMC_MXC)          += mxcmmc.o
+>  obj-$(CONFIG_MMC_MXS)          += mxs-mmc.o
 > --
-> 1.9.1
+> 2.9.3
 >
