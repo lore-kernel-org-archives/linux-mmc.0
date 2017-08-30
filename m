@@ -1,123 +1,63 @@
 From: Vijay Viswanath <vviswana@codeaurora.org>
-Subject: [PATCH v1 2/5] mmc: sdhci-msm: Fix HW issue with power IRQ handling during reset
-Date: Wed, 30 Aug 2017 18:21:46 +0530
-Message-ID: <1504097509-58983-3-git-send-email-vviswana@codeaurora.org>
-References: <1504097509-58983-1-git-send-email-vviswana@codeaurora.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1504097509-58983-1-git-send-email-vviswana@codeaurora.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Subject: [PATCH v1 0/5] mmc: sdhci-msm: Corrections to implementation of power
+ irq
+Date: Wed, 30 Aug 2017 18:21:44 +0530
+Message-ID: <1504097509-58983-1-git-send-email-vviswana@codeaurora.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: adrian.hunter@intel.com, ulf.hansson@linaro.org, will.deacon@arm.com
-Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, riteshh@codeaurora.org, subhashj@codeaurora.org, Vijay Viswanath <vviswana@codeaurora.org>
+Cc: riteshh@codeaurora.org, linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Vijay Viswanath <vviswana@codeaurora.org>, stummala@codeaurora.org, subhashj@codeaurora.org, linux-arm-kernel@lists.infradead.org, asutoshd@codeaurora.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Sahitya Tummala <stummala@codeaurora.org>
+Register writes which change voltage of IO lines or turn the IO bus on/off
+require sdhc controller to be ready before progressing further. Once a
+register write which affects IO lines is done, the driver should wait for
+power irq from controller. Once the irq comes, the driver should acknowledge
+the irq by writing to power control register. If the acknowledgement is not
+given to controller, the controller may not complete the corresponding
+register write action and this can mess up the controller if drivers proceeds
+without power irq completing.
 
-There is a rare scenario in HW, where the first clear pulse could
-be lost when the actual reset and clear/read of status register
-are happening at the same time. Fix this by retrying upto 10 times
-to ensure the status register gets cleared. Otherwise, this will
-lead to a spurious power IRQ which results in system instability.
+Changes since RFC:
+	wait_for_completion_timeout replaced with wait_event_timeout when
+	waiting for power irq.
+	Removed the spinlock within power irq handler and API which waits
+	for power irq.
+	Added comments to sdhci msm register write functions, warning that they
+	can sleep.
+	Sdhci msm register write functions will do a memory barrier before
+	writing to the register if the particular register can trigger
+	power irq.
+	Instead of enabling SDHCI IO ACCESSORS config in arm64/defconfig, it
+	will be selected in mmc/host/Kconfig if the platform is MMC_SDHCI_MSM.
 
-Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
-Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
----
- drivers/mmc/host/sdhci-msm.c | 46 ++++++++++++++++++++++++++++++++++++++++----
- 1 file changed, 42 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index d636251..42a65ab 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -995,17 +995,52 @@ static void sdhci_msm_set_uhs_signaling(struct sdhci_host *host,
- 		sdhci_msm_hs400(host, &mmc->ios);
- }
- 
--static void sdhci_msm_voltage_switch(struct sdhci_host *host)
-+static void sdhci_msm_dump_pwr_ctrl_regs(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+
-+	pr_err("%s: PWRCTL_STATUS: 0x%08x | PWRCTL_MASK: 0x%08x | PWRCTL_CTL: 0x%08x\n",
-+			mmc_hostname(host->mmc),
-+			readl_relaxed(msm_host->core_mem + CORE_PWRCTL_STATUS),
-+			readl_relaxed(msm_host->core_mem + CORE_PWRCTL_MASK),
-+			readl_relaxed(msm_host->core_mem + CORE_PWRCTL_CTL));
-+}
-+
-+static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
- 	u32 irq_status, irq_ack = 0;
-+	int retry = 10;
- 
- 	irq_status = readl_relaxed(msm_host->core_mem + CORE_PWRCTL_STATUS);
- 	irq_status &= INT_MASK;
- 
- 	writel_relaxed(irq_status, msm_host->core_mem + CORE_PWRCTL_CLEAR);
- 
-+	/*
-+	 * There is a rare HW scenario where the first clear pulse could be
-+	 * lost when actual reset and clear/read of status register is
-+	 * happening at a time. Hence, retry for at least 10 times to make
-+	 * sure status register is cleared. Otherwise, this will result in
-+	 * a spurious power IRQ resulting in system instability.
-+	 */
-+	while (irq_status & readl_relaxed(msm_host->core_mem +
-+				CORE_PWRCTL_STATUS)) {
-+		if (retry == 0) {
-+			pr_err("%s: Timedout clearing (0x%x) pwrctl status register\n",
-+					mmc_hostname(host->mmc), irq_status);
-+			sdhci_msm_dump_pwr_ctrl_regs(host);
-+			WARN_ON(1);
-+			break;
-+		}
-+		writel_relaxed(irq_status,
-+				msm_host->core_mem + CORE_PWRCTL_CLEAR);
-+		retry--;
-+		udelay(10);
-+	}
-+
- 	if (irq_status & (CORE_PWRCTL_BUS_ON | CORE_PWRCTL_BUS_OFF))
- 		irq_ack |= CORE_PWRCTL_BUS_SUCCESS;
- 	if (irq_status & (CORE_PWRCTL_IO_LOW | CORE_PWRCTL_IO_HIGH))
-@@ -1017,13 +1052,17 @@ static void sdhci_msm_voltage_switch(struct sdhci_host *host)
- 	 * switches are handled by the sdhci core, so just report success.
- 	 */
- 	writel_relaxed(irq_ack, msm_host->core_mem + CORE_PWRCTL_CTL);
-+
-+	pr_debug("%s: %s: Handled IRQ(%d), irq_status=0x%x, ack=0x%x\n",
-+		mmc_hostname(msm_host->mmc), __func__, irq, irq_status,
-+		irq_ack);
- }
- 
- static irqreturn_t sdhci_msm_pwr_irq(int irq, void *data)
- {
- 	struct sdhci_host *host = (struct sdhci_host *)data;
- 
--	sdhci_msm_voltage_switch(host);
-+	sdhci_msm_handle_pwr_irq(host, irq);
- 
- 	return IRQ_HANDLED;
- }
-@@ -1106,7 +1145,6 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
- 	.get_max_clock = sdhci_msm_get_max_clock,
- 	.set_bus_width = sdhci_set_bus_width,
- 	.set_uhs_signaling = sdhci_msm_set_uhs_signaling,
--	.voltage_switch = sdhci_msm_voltage_switch,
- };
- 
- static const struct sdhci_pltfm_data sdhci_msm_pdata = {
-@@ -1257,7 +1295,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 	 * acknowledged. Otherwise power irq interrupt handler would be
- 	 * fired prematurely.
- 	 */
--	sdhci_msm_voltage_switch(host);
-+	sdhci_msm_handle_pwr_irq(host, 0);
- 
- 	/*
- 	 * Ensure that above writes are propogated before interrupt enablement
+Sahitya Tummala (2):
+  mmc: sdhci-msm: Fix HW issue with power IRQ handling during reset
+  mmc: sdhci-msm: Add support to wait for power irq
+
+Subhash Jadavani (1):
+  mmc: sdhci-msm: fix issue with power irq
+
+Vijay Viswanath (2):
+  mmc: sdhci-msm: Add ops to do sdhc register write
+  mmc: Kconfig: Enable CONFIG_MMC_SDHCI_IO_ACCESSORS
+
+ drivers/mmc/host/Kconfig     |   1 +
+ drivers/mmc/host/sdhci-msm.c | 253 ++++++++++++++++++++++++++++++++++++++++++-
+ 2 files changed, 249 insertions(+), 5 deletions(-)
+
 -- 
  Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc. 
 Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a Linux Foundation Collaborative Project.
