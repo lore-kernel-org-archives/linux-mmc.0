@@ -1,61 +1,82 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V6 02/12] mmc: block: Fix block status codes
-Date: Wed, 30 Aug 2017 15:12:50 +0200
-Message-ID: <CAPDyKFqj6+wj-DCo115s+MRvY1MhfihJGX1nCyyEnTUCcrtRCA@mail.gmail.com>
-References: <1503665035-16231-1-git-send-email-adrian.hunter@intel.com> <1503665035-16231-3-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH 1/5] mmc: sdhci: Tidy reading 136-bit responses
+Date: Wed, 30 Aug 2017 15:13:12 +0200
+Message-ID: <CAPDyKFqF0TsCBj-GQnWsH3huxWMCuJnmCgbOWZ0nE88d6pCwnA@mail.gmail.com>
+References: <20170821074132.4622-1-kishon@ti.com> <20170821074132.4622-2-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <1503665035-16231-3-git-send-email-adrian.hunter@intel.com>
-Sender: linux-block-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170821074132.4622-2-kishon@ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Kishon Vijay Abraham I <kishon@ti.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Russell King <linux@armlinux.org.uk>, Ravikumar Kattekola <rk@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 25 August 2017 at 14:43, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> Commit 2a842acab109 ("block: introduce new block status code type") changed
-> the error type but not in patches merged through the mmc tree, like
-> commit 0493f6fe5bde ("mmc: block: Move boot partition locking into a driver
-> op"). Fix one error code that is incorrect and also use BLK_STS_OK in
-> preference to 0.
+On 21 August 2017 at 09:41, Kishon Vijay Abraham I <kishon@ti.com> wrote:
+> From: Adrian Hunter <adrian.hunter@intel.com>
 >
-> Fixes: 17ece345a042 ("Merge tag 'mmc-v4.13' of git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc")
+> Read each register only once and move the code to a separate function so
+> that it is not jammed against the 80 column margin.
+>
 > Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 
-Thanks, applied for fixes!
+Thanks, applied for next!
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/core/block.c | 6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
+>  drivers/mmc/host/sdhci.c | 28 ++++++++++++++++++----------
+>  1 file changed, 18 insertions(+), 10 deletions(-)
 >
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 0eebc2f726c3..2f00d11adfa9 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -1223,7 +1223,7 @@ static void mmc_blk_issue_drv_op(struct mmc_queue *mq, struct request *req)
->                 break;
->         }
->         mq_rq->drv_op_result = ret;
-> -       blk_end_request_all(req, ret);
-> +       blk_end_request_all(req, ret ? BLK_STS_IOERR : BLK_STS_OK);
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index a1ad2ddadca1..ba639b7851cb 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1173,24 +1173,32 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
 >  }
+>  EXPORT_SYMBOL_GPL(sdhci_send_command);
 >
->  static void mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
-> @@ -1728,9 +1728,9 @@ static bool mmc_blk_rw_cmd_err(struct mmc_blk_data *md, struct mmc_card *card,
->                 if (err)
->                         req_pending = old_req_pending;
->                 else
-> -                       req_pending = blk_end_request(req, 0, blocks << 9);
-> +                       req_pending = blk_end_request(req, BLK_STS_OK, blocks << 9);
->         } else {
-> -               req_pending = blk_end_request(req, 0, brq->data.bytes_xfered);
-> +               req_pending = blk_end_request(req, BLK_STS_OK, brq->data.bytes_xfered);
->         }
->         return req_pending;
->  }
+> +static void sdhci_read_rsp_136(struct sdhci_host *host, struct mmc_command *cmd)
+> +{
+> +       int i, reg;
+> +
+> +       for (i = 0; i < 4; i++) {
+> +               reg = SDHCI_RESPONSE + (3 - i) * 4;
+> +               cmd->resp[i] = sdhci_readl(host, reg);
+> +       }
+> +
+> +       /* CRC is stripped so we need to do some shifting */
+> +       for (i = 0; i < 4; i++) {
+> +               cmd->resp[i] <<= 8;
+> +               if (i != 3)
+> +                       cmd->resp[i] |= cmd->resp[i + 1] >> 24;
+> +       }
+> +}
+> +
+>  static void sdhci_finish_command(struct sdhci_host *host)
+>  {
+>         struct mmc_command *cmd = host->cmd;
+> -       int i;
+>
+>         host->cmd = NULL;
+>
+>         if (cmd->flags & MMC_RSP_PRESENT) {
+>                 if (cmd->flags & MMC_RSP_136) {
+> -                       /* CRC is stripped so we need to do some shifting. */
+> -                       for (i = 0;i < 4;i++) {
+> -                               cmd->resp[i] = sdhci_readl(host,
+> -                                       SDHCI_RESPONSE + (3-i)*4) << 8;
+> -                               if (i != 3)
+> -                                       cmd->resp[i] |=
+> -                                               sdhci_readb(host,
+> -                                               SDHCI_RESPONSE + (3-i)*4-1);
+> -                       }
+> +                       sdhci_read_rsp_136(host, cmd);
+>                 } else {
+>                         cmd->resp[0] = sdhci_readl(host, SDHCI_RESPONSE);
+>                 }
 > --
-> 1.9.1
+> 2.11.0
 >
