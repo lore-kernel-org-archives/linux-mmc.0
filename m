@@ -1,59 +1,61 @@
-From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: [RFC 4/4] mmc: sdhci-msm: Handle unexpected interrupt case on enabling legacy IRQs on CQE halt
-Date: Wed, 30 Aug 2017 18:34:11 +0530
-Message-ID: <1504098251-27739-5-git-send-email-riteshh@codeaurora.org>
-References: <1504098251-27739-1-git-send-email-riteshh@codeaurora.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.29.96]:58844 "EHLO
-        smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751399AbdH3NEq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Aug 2017 09:04:46 -0400
-In-Reply-To: <1504098251-27739-1-git-send-email-riteshh@codeaurora.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V6 02/12] mmc: block: Fix block status codes
+Date: Wed, 30 Aug 2017 15:12:50 +0200
+Message-ID: <CAPDyKFqj6+wj-DCo115s+MRvY1MhfihJGX1nCyyEnTUCcrtRCA@mail.gmail.com>
+References: <1503665035-16231-1-git-send-email-adrian.hunter@intel.com> <1503665035-16231-3-git-send-email-adrian.hunter@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <1503665035-16231-3-git-send-email-adrian.hunter@intel.com>
+Sender: linux-block-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org, adrian.hunter@intel.com
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, stummala@codeaurora.org, asutoshd@codeaurora.org, Ritesh Harjani <riteshh@codeaurora.org>
 
-There is a case when enabling the legacy IRQs and halting CQE is
-resuling into a command response interrupt without any command in
-progress. This patch handles such case here.
+On 25 August 2017 at 14:43, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> Commit 2a842acab109 ("block: introduce new block status code type") changed
+> the error type but not in patches merged through the mmc tree, like
+> commit 0493f6fe5bde ("mmc: block: Move boot partition locking into a driver
+> op"). Fix one error code that is incorrect and also use BLK_STS_OK in
+> preference to 0.
+>
+> Fixes: 17ece345a042 ("Merge tag 'mmc-v4.13' of git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc")
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Error signature without this patch:-
-mmc0: Got command interrupt 0x00000001 even though no command operation
-was in progress.
+Thanks, applied for fixes!
 
-Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
----
- drivers/mmc/host/sdhci-msm.c | 11 +++++++++++
- 1 file changed, 11 insertions(+)
+Kind regards
+Uffe
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index baa3409..8fdc2c0 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -1124,10 +1124,21 @@ void sdhci_msm_cqe_enable(struct mmc_host *mmc)
- void sdhci_msm_cqe_disable(struct mmc_host *mmc, bool recovery)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
-+	unsigned long flags;
-+	u32 ctrl;
- 
- 	if (host->flags & SDHCI_USE_64_BIT_DMA)
- 		host->desc_sz = 16;
- 
-+	spin_lock_irqsave(&host->lock, flags);
-+
-+	ctrl = sdhci_readl(host, SDHCI_INT_ENABLE);
-+	ctrl |= SDHCI_INT_RESPONSE;
-+	sdhci_writel(host,  ctrl, SDHCI_INT_ENABLE);
-+	sdhci_writel(host, SDHCI_INT_RESPONSE, SDHCI_INT_STATUS);
-+
-+	spin_unlock_irqrestore(&host->lock, flags);
-+
- 	sdhci_cqe_disable(mmc, recovery);
- }
- 
--- 
-Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc.
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a Linux Foundation Collaborative Project.
-
+> ---
+>  drivers/mmc/core/block.c | 6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index 0eebc2f726c3..2f00d11adfa9 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -1223,7 +1223,7 @@ static void mmc_blk_issue_drv_op(struct mmc_queue *mq, struct request *req)
+>                 break;
+>         }
+>         mq_rq->drv_op_result = ret;
+> -       blk_end_request_all(req, ret);
+> +       blk_end_request_all(req, ret ? BLK_STS_IOERR : BLK_STS_OK);
+>  }
+>
+>  static void mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
+> @@ -1728,9 +1728,9 @@ static bool mmc_blk_rw_cmd_err(struct mmc_blk_data *md, struct mmc_card *card,
+>                 if (err)
+>                         req_pending = old_req_pending;
+>                 else
+> -                       req_pending = blk_end_request(req, 0, blocks << 9);
+> +                       req_pending = blk_end_request(req, BLK_STS_OK, blocks << 9);
+>         } else {
+> -               req_pending = blk_end_request(req, 0, brq->data.bytes_xfered);
+> +               req_pending = blk_end_request(req, BLK_STS_OK, brq->data.bytes_xfered);
+>         }
+>         return req_pending;
+>  }
+> --
+> 1.9.1
+>
