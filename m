@@ -1,33 +1,25 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-xenon: Support HS400 Enhanced Strobe feature
-Date: Wed, 30 Aug 2017 15:13:22 +0200
-Message-ID: <CAPDyKFpBfvpZTFQJT6yR2Teh1Z5dq-3j6XC5URaiu1R3H4ea5A@mail.gmail.com>
-References: <1503512102-30968-1-git-send-email-zjwu@marvell.com>
+Subject: Re: [PATCH 2/5] mmc: sdhci: Add quirk to indicate MMC_RSP_136 has CRC
+Date: Wed, 30 Aug 2017 15:13:17 +0200
+Message-ID: <CAPDyKFqM96Ts2w6ESvCp75Kw+i91Cwr2EX39Xs9og0nUBTRLsA@mail.gmail.com>
+References: <20170821074132.4622-1-kishon@ti.com> <20170821074132.4622-3-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f42.google.com ([209.85.214.42]:36004 "EHLO
-        mail-it0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751768AbdH3NNX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Aug 2017 09:13:23 -0400
-Received: by mail-it0-f42.google.com with SMTP id o132so5818895itc.1
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Aug 2017 06:13:23 -0700 (PDT)
-In-Reply-To: <1503512102-30968-1-git-send-email-zjwu@marvell.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170821074132.4622-3-kishon@ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Kishon Vijay Abraham I <kishon@ti.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Russell King <linux@armlinux.org.uk>, Ravikumar Kattekola <rk@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Zhoujie Wu <zjwu@marvell.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Victor Gu <xigu@marvell.com>, Wilson Ding <dingwei@marvell.com>, Kostya Porotchkin <kostap@marvell.com>, Hanna Hawa <hannah@marvell.com>, hongd@marvell.com, Doug Jones <dougj@marvell.com>, Ryan Gao <ygao@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Gregory Clement <gregory.clement@free-electrons.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
 
-On 23 August 2017 at 20:15, Zhoujie Wu <zjwu@marvell.com> wrote:
-> From: Hu Ziji <huziji@marvell.com>
+On 21 August 2017 at 09:41, Kishon Vijay Abraham I <kishon@ti.com> wrote:
+> TI's implementation of sdhci controller used in DRA7 SoC's has
+> CRC in responses with length 136 bits. Add quirk to indicate
+> the controller has CRC in MMC_RSP_136. If this quirk is
+> set sdhci library shouldn't shift the response present in
+> SDHCI_RESPONSE register.
 >
-> Support HS400 Enhanced Strobe feature in Xenon.
->
-> Enable Enhanced Strobe together with Data Strobe.
-> Disable Enhanced Strobe when eMMC is not in HS400 mode.
->
-> Signed-off-by: Hu Ziji <huziji@marvell.com>
-> Signed-off-by: Zhoujie Wu <zjwu@marvell.com>
+> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 
 Thanks, applied for next!
 
@@ -35,95 +27,37 @@ Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/sdhci-xenon-phy.c | 34 ++++++++++++++++++++++++++++------
->  drivers/mmc/host/sdhci-xenon.h     |  1 +
->  2 files changed, 29 insertions(+), 6 deletions(-)
+>  drivers/mmc/host/sdhci.c | 3 +++
+>  drivers/mmc/host/sdhci.h | 2 ++
+>  2 files changed, 5 insertions(+)
 >
-> diff --git a/drivers/mmc/host/sdhci-xenon-phy.c b/drivers/mmc/host/sdhci-xenon-phy.c
-> index f7e26b0..ec87943 100644
-> --- a/drivers/mmc/host/sdhci-xenon-phy.c
-> +++ b/drivers/mmc/host/sdhci-xenon-phy.c
-> @@ -409,17 +409,30 @@ static int xenon_emmc_phy_config_tuning(struct sdhci_host *host)
->         return 0;
->  }
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index ba639b7851cb..9c8d7428df3c 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1182,6 +1182,9 @@ static void sdhci_read_rsp_136(struct sdhci_host *host, struct mmc_command *cmd)
+>                 cmd->resp[i] = sdhci_readl(host, reg);
+>         }
 >
-> -static void xenon_emmc_phy_disable_data_strobe(struct sdhci_host *host)
-> +static void xenon_emmc_phy_disable_strobe(struct sdhci_host *host)
->  {
-> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +       struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
->         u32 reg;
->
-> -       /* Disable SDHC Data Strobe */
-> +       /* Disable both SDHC Data Strobe and Enhanced Strobe */
->         reg = sdhci_readl(host, XENON_SLOT_EMMC_CTRL);
-> -       reg &= ~XENON_ENABLE_DATA_STROBE;
-> +       reg &= ~(XENON_ENABLE_DATA_STROBE | XENON_ENABLE_RESP_STROBE);
->         sdhci_writel(host, reg, XENON_SLOT_EMMC_CTRL);
+> +       if (host->quirks2 & SDHCI_QUIRK2_RSP_136_HAS_CRC)
+> +               return;
 > +
-> +       /* Clear Strobe line Pull down or Pull up */
-> +       if (priv->phy_type == EMMC_5_0_PHY) {
-> +               reg = sdhci_readl(host, XENON_EMMC_5_0_PHY_PAD_CONTROL);
-> +               reg &= ~(XENON_EMMC5_FC_QSP_PD | XENON_EMMC5_FC_QSP_PU);
-> +               sdhci_writel(host, reg, XENON_EMMC_5_0_PHY_PAD_CONTROL);
-> +       } else {
-> +               reg = sdhci_readl(host, XENON_EMMC_PHY_PAD_CONTROL1);
-> +               reg &= ~(XENON_EMMC5_1_FC_QSP_PD | XENON_EMMC5_1_FC_QSP_PU);
-> +               sdhci_writel(host, reg, XENON_EMMC_PHY_PAD_CONTROL1);
-> +       }
->  }
+>         /* CRC is stripped so we need to do some shifting */
+>         for (i = 0; i < 4; i++) {
+>                 cmd->resp[i] <<= 8;
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 399edc681623..54bc444c317f 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -435,6 +435,8 @@ struct sdhci_host {
+>  #define SDHCI_QUIRK2_ACMD23_BROKEN                     (1<<14)
+>  /* Broken Clock divider zero in controller */
+>  #define SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN             (1<<15)
+> +/* Controller has CRC in 136 bit Command Response */
+> +#define SDHCI_QUIRK2_RSP_136_HAS_CRC                   (1<<16)
 >
-> -/* Set HS400 Data Strobe */
-> +/* Set HS400 Data Strobe and Enhanced Strobe */
->  static void xenon_emmc_phy_strobe_delay_adj(struct sdhci_host *host)
->  {
->         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> @@ -439,6 +452,15 @@ static void xenon_emmc_phy_strobe_delay_adj(struct sdhci_host *host)
->         /* Enable SDHC Data Strobe */
->         reg = sdhci_readl(host, XENON_SLOT_EMMC_CTRL);
->         reg |= XENON_ENABLE_DATA_STROBE;
-> +       /*
-> +        * Enable SDHC Enhanced Strobe if supported
-> +        * Xenon Enhanced Strobe should be enabled only when
-> +        * 1. card is in HS400 mode and
-> +        * 2. SDCLK is higher than 52MHz
-> +        * 3. DLL is enabled
-> +        */
-> +       if (host->mmc->ios.enhanced_strobe)
-> +               reg |= XENON_ENABLE_RESP_STROBE;
->         sdhci_writel(host, reg, XENON_SLOT_EMMC_CTRL);
->
->         /* Set Data Strobe Pull down */
-> @@ -615,7 +637,7 @@ static void xenon_emmc_phy_set(struct sdhci_host *host,
->                 sdhci_writel(host, phy_regs->logic_timing_val,
->                              phy_regs->logic_timing_adj);
->         else
-> -               xenon_emmc_phy_disable_data_strobe(host);
-> +               xenon_emmc_phy_disable_strobe(host);
->
->  phy_init:
->         xenon_emmc_phy_init(host);
-> @@ -705,7 +727,7 @@ void xenon_soc_pad_ctrl(struct sdhci_host *host,
->
->  /*
->   * Setting PHY when card is working in High Speed Mode.
-> - * HS400 set data strobe line.
-> + * HS400 set Data Strobe and Enhanced Strobe if it is supported.
->   * HS200/SDR104 set tuning config to prepare for tuning.
->   */
->  static int xenon_hs_delay_adj(struct sdhci_host *host)
-> diff --git a/drivers/mmc/host/sdhci-xenon.h b/drivers/mmc/host/sdhci-xenon.h
-> index 73debb4..01937f1 100644
-> --- a/drivers/mmc/host/sdhci-xenon.h
-> +++ b/drivers/mmc/host/sdhci-xenon.h
-> @@ -33,6 +33,7 @@
->  #define XENON_TUNING_STEP_DIVIDER              BIT(6)
->
->  #define XENON_SLOT_EMMC_CTRL                   0x0130
-> +#define XENON_ENABLE_RESP_STROBE               BIT(25)
->  #define XENON_ENABLE_DATA_STROBE               BIT(24)
->
->  #define XENON_SLOT_RETUNING_REQ_CTRL           0x0144
+>         int irq;                /* Device IRQ */
+>         void __iomem *ioaddr;   /* Mapped address */
 > --
-> 1.9.1
+> 2.11.0
 >
