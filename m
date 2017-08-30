@@ -1,82 +1,83 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/5] mmc: sdhci: Tidy reading 136-bit responses
-Date: Wed, 30 Aug 2017 15:13:12 +0200
-Message-ID: <CAPDyKFqF0TsCBj-GQnWsH3huxWMCuJnmCgbOWZ0nE88d6pCwnA@mail.gmail.com>
-References: <20170821074132.4622-1-kishon@ti.com> <20170821074132.4622-2-kishon@ti.com>
+Subject: Re: [PATCH v2] mmc: sdhci-xenon: add set_power callback
+Date: Wed, 30 Aug 2017 15:13:03 +0200
+Message-ID: <CAPDyKFqiaXj5LtA066BtRVrbTNB97XZM-qE2DEAz5Vc5WPDKMw@mail.gmail.com>
+References: <1503338529-21102-1-git-send-email-zjwu@marvell.com>
+ <e37d8951-7e1b-8431-5593-5e693295987f@intel.com> <87val76624.fsf@free-electrons.com>
+ <59A464BA.6030401@marvell.com> <87bmmy65je.fsf@free-electrons.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170821074132.4622-2-kishon@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Russell King <linux@armlinux.org.uk>, Ravikumar Kattekola <rk@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-io0-f182.google.com ([209.85.223.182]:36888 "EHLO
+        mail-io0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751386AbdH3NNF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Aug 2017 09:13:05 -0400
+Received: by mail-io0-f182.google.com with SMTP id d78so3357680ioe.4
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Aug 2017 06:13:04 -0700 (PDT)
+In-Reply-To: <87bmmy65je.fsf@free-electrons.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Gregory CLEMENT <gregory.clement@free-electrons.com>, Zhoujie Wu <zjwu@marvell.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Victor Gu <xigu@marvell.com>, Wilson Ding <dingwei@marvell.com>, Kostya Porotchkin <kostap@marvell.com>, Hanna Hawa <hannah@marvell.com>, hongd@marvell.com, Doug Jones <dougj@marvell.com>, Ryan Gao <ygao@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
 
-On 21 August 2017 at 09:41, Kishon Vijay Abraham I <kishon@ti.com> wrote:
-> From: Adrian Hunter <adrian.hunter@intel.com>
+On 29 August 2017 at 12:18, Gregory CLEMENT
+<gregory.clement@free-electrons.com> wrote:
+> Hi Zhoujie,
 >
-> Read each register only once and move the code to a separate function so
-> that it is not jammed against the 80 column margin.
+>  On lun., ao=C3=BBt 28 2017, Zhoujie Wu <zjwu@marvell.com> wrote:
 >
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+>> Hi Gregory,
+>>
+>> On 08/28/2017 08:54 AM, Gregory CLEMENT wrote:
+>>> Hi,
+>>>     On lun., ao=C3=BBt 28 2017, Adrian Hunter <adrian.hunter@intel.com>
+>>> wrote:
+>>>
+>>>> On 21/08/17 21:02, Zhoujie Wu wrote:
+>>>>> Xenon sdh controller requests proper SD bus voltage select
+>>>>> bits programmed even with vmmc power supply. Any reserved
+>>>>> value(100b-000b) programmed in this field will lead to controller
+>>>>> ignore SD bus power bit and keep its value at zero.
+>>>>> Add set_power callback to handle this.
+>>>>>
+>>>>> Signed-off-by: Zhoujie Wu <zjwu@marvell.com>
+>>>> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+>>> I tested this patch on the Armada 3720 DB board. And thanks to this pat=
+ch
+>>> and by adding a vmmc regulator in the device tree I did not have anymor=
+e
+>>> the issue UHS card not detected on warm reset.
+>>>
+>>> Tested-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
+>>>
+>>> Actually for me this should be a fix. Indeed if I try to use a vmmc
+>>> regulator without this patch then the SD card does not work at all I
+>>> only have the following messages:
+>>>
+>>> "mmc1: Timeout waiting for hardware cmd interrupt."
+>> This patch with sd vmmc power supply(must be claimed as AON, or card
+>> detection can't work)enabled can solve the issue for warm reset. This
+>> patch is must for xenon controller once vmmc power supply enabled,
+>> since the HW will ignore any reserved value for sd bus voltage select
+>> field and ignore the pwr_en in this case.
+>
+> That's why I would like that this patch was tagged as a fix.
+>
+> Adrian, Ulf, do you think it could be applied on the v4.13-rc or at
+> least applied with the following tags ?
+>
+> Fixes: 3a3748dba881(" mmc: sdhci-xenon: Add Marvell Xenon SDHC core
+> functionality")
+> Cc: <stable@vger.kernel.org>
+>
+> Thanks,
+>
+> Gregory
 
-Thanks, applied for next!
+Thanks, applied for fixes and by adding the above tags!
+
+[...]
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/host/sdhci.c | 28 ++++++++++++++++++----------
->  1 file changed, 18 insertions(+), 10 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index a1ad2ddadca1..ba639b7851cb 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1173,24 +1173,32 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
->  }
->  EXPORT_SYMBOL_GPL(sdhci_send_command);
->
-> +static void sdhci_read_rsp_136(struct sdhci_host *host, struct mmc_command *cmd)
-> +{
-> +       int i, reg;
-> +
-> +       for (i = 0; i < 4; i++) {
-> +               reg = SDHCI_RESPONSE + (3 - i) * 4;
-> +               cmd->resp[i] = sdhci_readl(host, reg);
-> +       }
-> +
-> +       /* CRC is stripped so we need to do some shifting */
-> +       for (i = 0; i < 4; i++) {
-> +               cmd->resp[i] <<= 8;
-> +               if (i != 3)
-> +                       cmd->resp[i] |= cmd->resp[i + 1] >> 24;
-> +       }
-> +}
-> +
->  static void sdhci_finish_command(struct sdhci_host *host)
->  {
->         struct mmc_command *cmd = host->cmd;
-> -       int i;
->
->         host->cmd = NULL;
->
->         if (cmd->flags & MMC_RSP_PRESENT) {
->                 if (cmd->flags & MMC_RSP_136) {
-> -                       /* CRC is stripped so we need to do some shifting. */
-> -                       for (i = 0;i < 4;i++) {
-> -                               cmd->resp[i] = sdhci_readl(host,
-> -                                       SDHCI_RESPONSE + (3-i)*4) << 8;
-> -                               if (i != 3)
-> -                                       cmd->resp[i] |=
-> -                                               sdhci_readb(host,
-> -                                               SDHCI_RESPONSE + (3-i)*4-1);
-> -                       }
-> +                       sdhci_read_rsp_136(host, cmd);
->                 } else {
->                         cmd->resp[0] = sdhci_readl(host, SDHCI_RESPONSE);
->                 }
-> --
-> 2.11.0
->
