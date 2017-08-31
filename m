@@ -1,102 +1,80 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V7 07/10] mmc: block: Factor out mmc_setup_queue()
-Date: Thu, 31 Aug 2017 14:56:53 +0300
-Message-ID: <1504180616-14514-8-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V7 06/10] mmc: block: Prepare CQE data
+Date: Thu, 31 Aug 2017 14:56:52 +0300
+Message-ID: <1504180616-14514-7-git-send-email-adrian.hunter@intel.com>
 References: <1504180616-14514-1-git-send-email-adrian.hunter@intel.com>
-Return-path: <linux-block-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga14.intel.com ([192.55.52.115]:35193 "EHLO mga14.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751237AbdHaMEB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 31 Aug 2017 08:04:01 -0400
 In-Reply-To: <1504180616-14514-1-git-send-email-adrian.hunter@intel.com>
-Sender: linux-block-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
-List-Id: linux-mmc@vger.kernel.org
 
-Factor out some common code that will also be used with blk-mq.
+Enhance mmc_blk_data_prep() to support CQE requests. That means adding
+some things that for non-CQE requests would be encoded into the command
+arguments - such as the block address, reliable-write flag, and data tag
+flag. Also the request tag is needed to provide the command queue task id,
+and a comment is added to explain the future possibility of defining a
+priority.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/queue.c | 53 ++++++++++++++++++++++++++++--------------------
- 1 file changed, 31 insertions(+), 22 deletions(-)
+ drivers/mmc/core/block.c | 16 +++++++++++++++-
+ 1 file changed, 15 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-index affa7370ba82..14e9de9c783c 100644
---- a/drivers/mmc/core/queue.c
-+++ b/drivers/mmc/core/queue.c
-@@ -223,6 +223,36 @@ static void mmc_exit_request(struct request_queue *q, struct request *req)
- 	mq_rq->sg = NULL;
- }
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 1ec5f0bc98d2..2424c7360687 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -1554,6 +1554,7 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
+ 	memset(brq, 0, sizeof(struct mmc_blk_request));
  
-+static void mmc_setup_queue(struct mmc_queue *mq, struct mmc_card *card)
-+{
-+	struct mmc_host *host = card->host;
-+	u64 limit = BLK_BOUNCE_HIGH;
-+
-+	if (mmc_dev(host)->dma_mask && *mmc_dev(host)->dma_mask)
-+		limit = (u64)dma_max_pfn(mmc_dev(host)) << PAGE_SHIFT;
-+
-+	queue_flag_set_unlocked(QUEUE_FLAG_NONROT, mq->queue);
-+	queue_flag_clear_unlocked(QUEUE_FLAG_ADD_RANDOM, mq->queue);
-+	if (mmc_can_erase(card))
-+		mmc_queue_setup_discard(mq->queue, card);
-+
-+	card->bouncesz = mmc_queue_calc_bouncesz(host);
-+	if (card->bouncesz) {
-+		blk_queue_max_hw_sectors(mq->queue, card->bouncesz / 512);
-+		blk_queue_max_segments(mq->queue, card->bouncesz / 512);
-+		blk_queue_max_segment_size(mq->queue, card->bouncesz);
-+	} else {
-+		blk_queue_bounce_limit(mq->queue, limit);
-+		blk_queue_max_hw_sectors(mq->queue,
-+			min(host->max_blk_count, host->max_req_size / 512));
-+		blk_queue_max_segments(mq->queue, host->max_segs);
-+		blk_queue_max_segment_size(mq->queue, host->max_seg_size);
-+	}
-+
-+	/* Initialize thread_sem even if it is not used */
-+	sema_init(&mq->thread_sem, 1);
-+}
-+
- /**
-  * mmc_init_queue - initialise a queue structure.
-  * @mq: mmc queue
-@@ -236,12 +266,8 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
- 		   spinlock_t *lock, const char *subname)
- {
- 	struct mmc_host *host = card->host;
--	u64 limit = BLK_BOUNCE_HIGH;
- 	int ret = -ENOMEM;
+ 	brq->mrq.data = &brq->data;
++	brq->mrq.tag = req->tag;
  
--	if (mmc_dev(host)->dma_mask && *mmc_dev(host)->dma_mask)
--		limit = (u64)dma_max_pfn(mmc_dev(host)) << PAGE_SHIFT;
--
- 	mq->card = card;
- 	mq->queue = blk_alloc_queue(GFP_KERNEL);
- 	if (!mq->queue)
-@@ -260,25 +286,8 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+ 	brq->stop.opcode = MMC_STOP_TRANSMISSION;
+ 	brq->stop.arg = 0;
+@@ -1568,6 +1569,14 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
+ 
+ 	brq->data.blksz = 512;
+ 	brq->data.blocks = blk_rq_sectors(req);
++	brq->data.blk_addr = blk_rq_pos(req);
++
++	/*
++	 * The command queue supports 2 priorities: "high" (1) and "simple" (0).
++	 * The eMMC will give "high" priority tasks priority over "simple"
++	 * priority tasks. Here we always set "simple" priority by not setting
++	 * MMC_DATA_PRIO.
++	 */
+ 
+ 	/*
+ 	 * The block layer doesn't support all sector count
+@@ -1597,8 +1606,10 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
+ 						brq->data.blocks);
  	}
  
- 	blk_queue_prep_rq(mq->queue, mmc_prep_request);
--	queue_flag_set_unlocked(QUEUE_FLAG_NONROT, mq->queue);
--	queue_flag_clear_unlocked(QUEUE_FLAG_ADD_RANDOM, mq->queue);
--	if (mmc_can_erase(card))
--		mmc_queue_setup_discard(mq->queue, card);
+-	if (do_rel_wr)
++	if (do_rel_wr) {
+ 		mmc_apply_rel_rw(brq, card, req);
++		brq->data.flags |= MMC_DATA_REL_WR;
++	}
  
--	card->bouncesz = mmc_queue_calc_bouncesz(host);
--	if (card->bouncesz) {
--		blk_queue_max_hw_sectors(mq->queue, card->bouncesz / 512);
--		blk_queue_max_segments(mq->queue, card->bouncesz / 512);
--		blk_queue_max_segment_size(mq->queue, card->bouncesz);
--	} else {
--		blk_queue_bounce_limit(mq->queue, limit);
--		blk_queue_max_hw_sectors(mq->queue,
--			min(host->max_blk_count, host->max_req_size / 512));
--		blk_queue_max_segments(mq->queue, host->max_segs);
--		blk_queue_max_segment_size(mq->queue, host->max_seg_size);
--	}
--
--	sema_init(&mq->thread_sem, 1);
-+	mmc_setup_queue(mq, card);
+ 	/*
+ 	 * Data tag is used only during writing meta data to speed
+@@ -1610,6 +1621,9 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
+ 		      ((brq->data.blocks * brq->data.blksz) >=
+ 		       card->ext_csd.data_tag_unit_size);
  
- 	mq->thread = kthread_run(mmc_queue_thread, mq, "mmcqd/%d%s",
- 		host->index, subname ? subname : "");
++	if (do_data_tag)
++		brq->data.flags |= MMC_DATA_DAT_TAG;
++
+ 	mmc_set_data_timeout(&brq->data, card);
+ 
+ 	brq->data.sg = mqrq->sg;
 -- 
 1.9.1
+
