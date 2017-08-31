@@ -1,148 +1,147 @@
-From: Mark Brown <broonie@kernel.org>
-Subject: Applied "regulator: pbias: Select voltage table based on max-voltage" to the regulator tree
-Date: Thu, 31 Aug 2017 12:55:11 +0100
-Message-ID: <E1dnO3z-0000tI-7K@debutante>
-References: <20170831101849.9489-3-kishon@ti.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170831101849.9489-3-kishon@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ravikumar Kattekola <rk@ti.com>
-Cc: Sekhar Nori <nsekhar@ti.com>, Kishon Vijay Abraham I <kishon@ti.com>, Mark Brown <broonie@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Tony Lindgren <tony@atomide.com>, Liam Girdwood <lgirdwood@gmail.com>Mark Brown <broonie@kernel.org>Sekhar Nori <nsekhar@ti.com>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.orgkishon@ti.comlinux-kernel@vger.kernel.org
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH V7 00/10] mmc: Add Command Queue support
+Date: Thu, 31 Aug 2017 14:56:46 +0300
+Message-ID: <1504180616-14514-1-git-send-email-adrian.hunter@intel.com>
+Return-path: <linux-block-owner@vger.kernel.org>
+Sender: linux-block-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 List-Id: linux-mmc@vger.kernel.org
 
-The patch
+Hi
 
-   regulator: pbias: Select voltage table based on max-voltage
+Here is V7 of the hardware command queue patches without the software
+command queue patches, now using blk-mq.
 
-has been applied to the regulator tree at
+HW CMDQ offers 25% - 50% better random multi-threaded I/O.  I see a slight
+2% drop in sequential read speed but no change to sequential write.
 
-   git://git.kernel.org/pub/scm/linux/kernel/git/broonie/regulator.git 
 
-All being well this means that it will be integrated into the linux-next
-tree (usually sometime in the next 24 hours) and sent to Linus during
-the next merge window (or sooner if it is a bug fix), however if
-problems are discovered then the patch may be dropped or reverted.  
+Changes since V6:
+      mmc: core: Introduce host claiming by context
+	New patch.
+      mmc: core: Move mmc_start_areq() declaration
+	Dropped because it has been applied
+      mmc: block: Fix block status codes
+	Dropped because it has been applied
+      mmc: host: Add CQE interface
+	Dropped because it has been applied
+      mmc: core: Turn off CQE before sending commands
+	Dropped because it has been applied
+      mmc: block: Factor out mmc_setup_queue()
+	New patch.
+      mmc: block: Add CQE support
+	Drop legacy support and add blk-mq support
 
-You may get further e-mails resulting from automated or manual testing
-and review of the tree, please engage with people reporting problems and
-send followup patches addressing any issues that are reported if needed.
+Changes since V5:
+	Re-based
+      mmc: core: Add mmc_retune_hold_now()
+	Dropped because it has been applied
+      mmc: core: Add members to mmc_request and mmc_data for CQE's
+	Dropped because it has been applied
+      mmc: core: Move mmc_start_areq() declaration
+	New patch at Ulf's request
+      mmc: block: Fix block status codes
+	Another un-related patch
+      mmc: host: Add CQE interface
+	Move recovery_notifier() callback to struct mmc_request
+      mmc: core: Add support for handling CQE requests
+	Roll __mmc_cqe_request_done() into mmc_cqe_request_done()
+	Move function declarations requested by Ulf
+      mmc: core: Remove unused MMC_CAP2_PACKED_CMD
+	Dropped because it has been applied
+      mmc: block: Add CQE support
+	Add explanation to commit message
+	Adjustment for changed recovery_notifier() callback
+      mmc: cqhci: support for command queue enabled host
+	Adjustment for changed recovery_notifier() callback
+      mmc: sdhci-pci: Add CQHCI support for Intel GLK
+	Add DCMD capability for Intel controllers except GLK
 
-If any updates are required or you are submitting further changes they
-should be sent as incremental updates against current git, existing
-patches will not be replaced.
+Changes since V4:
+      mmc: core: Add mmc_retune_hold_now()
+	Add explanation to commit message.
+      mmc: host: Add CQE interface
+	Add comments to callback declarations.
+      mmc: core: Turn off CQE before sending commands
+	Add explanation to commit message.
+      mmc: core: Add support for handling CQE requests
+	Add comments as requested by Ulf.
+      mmc: core: Remove unused MMC_CAP2_PACKED_CMD
+	New patch.
+      mmc: mmc: Enable Command Queuing
+	Adjust for removal of MMC_CAP2_PACKED_CMD.
+	Add a comment about Packed Commands.
+      mmc: mmc: Enable CQE's
+	Remove un-necessary check for MMC_CAP2_CQE
+      mmc: block: Use local variables in mmc_blk_data_prep()
+	New patch.
+      mmc: block: Prepare CQE data
+	Adjust due to "mmc: block: Use local variables in mmc_blk_data_prep()"
+	Remove priority setting.
+	Add explanation to commit message.
+      mmc: cqhci: support for command queue enabled host
+	Fix transfer descriptor setting in cqhci_set_tran_desc() for 32-bit DMA
 
-Please add any relevant lists and maintainers to the CCs when replying
-to this mail.
+Changes since V3:
+	Adjusted ...blk_end_request...() for new block status codes
+	Fixed CQHCI transaction descriptor for "no DCMD" case
 
-Thanks,
-Mark
+Changes since V2:
+	Dropped patches that have been applied.
+	Re-based
+	Added "mmc: sdhci-pci: Add CQHCI support for Intel GLK"
 
->From 27eae9d4b9d4cd9c204ef81f46078d91362ed41c Mon Sep 17 00:00:00 2001
-From: Ravikumar Kattekola <rk@ti.com>
-Date: Thu, 31 Aug 2017 15:48:45 +0530
-Subject: [PATCH] regulator: pbias: Select voltage table based on max-voltage
-MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Changes since V1:
 
-Reference manuals of OMAP5x and DRA7x have been updated to reflect
-the PBIAS regulator max-voltage as 3.3V instead of 3.0V, while OMAP3x
-and OMAP4x are still quoting 3.0V. So, as of now, the pbias driver
-needs to support both 3.0V and 3.3V IO voltage based on the max-voltage
-supported by the PBIAS regulator.
+	"Share mmc request array between partitions" is dependent
+	on changes in "Introduce queue semantics", so added that
+	and block fixes:
 
-Document reference:
-SWPU249AF - OMAP543x Technical reference manual - August 2016
-SPRUI30C – DRA75x, DRA74x Technical reference manual November 2016
+	Added "Fix is_waiting_last_req set incorrectly"
+	Added "Fix cmd error reset failure path"
+	Added "Use local var for mqrq_cur"
+	Added "Introduce queue semantics"
 
-Tested on:
-DRA75x PG 2.0 REV H EVM
+Changes since RFC:
 
-Signed-off-by: Ravikumar Kattekola <rk@ti.com>
-Signed-off-by: Sekhar Nori <nsekhar@ti.com>
-Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
-Signed-off-by: Mark Brown <broonie@kernel.org>
----
- drivers/regulator/pbias-regulator.c | 21 ++++++++++++++++++---
- 1 file changed, 18 insertions(+), 3 deletions(-)
+	Re-based on next.
+	Added comment about command queue priority.
+	Added some acks and reviews.
 
-diff --git a/drivers/regulator/pbias-regulator.c b/drivers/regulator/pbias-regulator.c
-index 0cb76ba29e84..8f782d22fdbe 100644
---- a/drivers/regulator/pbias-regulator.c
-+++ b/drivers/regulator/pbias-regulator.c
-@@ -34,6 +34,8 @@ struct pbias_reg_info {
- 	u32 vmode;
- 	unsigned int enable_time;
- 	char *name;
-+	const unsigned int *pbias_volt_table;
-+	int n_voltages;
- };
- 
- struct pbias_regulator_data {
-@@ -49,11 +51,16 @@ struct pbias_of_data {
- 	unsigned int offset;
- };
- 
--static const unsigned int pbias_volt_table[] = {
-+static const unsigned int pbias_volt_table_3_0V[] = {
- 	1800000,
- 	3000000
- };
- 
-+static const unsigned int pbias_volt_table_3_3V[] = {
-+	1800000,
-+	3300000
-+};
-+
- static const struct regulator_ops pbias_regulator_voltage_ops = {
- 	.list_voltage = regulator_list_voltage_table,
- 	.get_voltage_sel = regulator_get_voltage_sel_regmap,
-@@ -69,6 +76,8 @@ static const struct pbias_reg_info pbias_mmc_omap2430 = {
- 	.vmode = BIT(0),
- 	.disable_val = 0,
- 	.enable_time = 100,
-+	.pbias_volt_table = pbias_volt_table_3_0V,
-+	.n_voltages = 2,
- 	.name = "pbias_mmc_omap2430"
- };
- 
-@@ -77,6 +86,8 @@ static const struct pbias_reg_info pbias_sim_omap3 = {
- 	.enable_mask = BIT(9),
- 	.vmode = BIT(8),
- 	.enable_time = 100,
-+	.pbias_volt_table = pbias_volt_table_3_0V,
-+	.n_voltages = 2,
- 	.name = "pbias_sim_omap3"
- };
- 
-@@ -86,6 +97,8 @@ static const struct pbias_reg_info pbias_mmc_omap4 = {
- 	.disable_val = BIT(25),
- 	.vmode = BIT(21),
- 	.enable_time = 100,
-+	.pbias_volt_table = pbias_volt_table_3_0V,
-+	.n_voltages = 2,
- 	.name = "pbias_mmc_omap4"
- };
- 
-@@ -95,6 +108,8 @@ static const struct pbias_reg_info pbias_mmc_omap5 = {
- 	.disable_val = BIT(25),
- 	.vmode = BIT(21),
- 	.enable_time = 100,
-+	.pbias_volt_table = pbias_volt_table_3_3V,
-+	.n_voltages = 2,
- 	.name = "pbias_mmc_omap5"
- };
- 
-@@ -199,8 +214,8 @@ static int pbias_regulator_probe(struct platform_device *pdev)
- 		drvdata[data_idx].desc.owner = THIS_MODULE;
- 		drvdata[data_idx].desc.type = REGULATOR_VOLTAGE;
- 		drvdata[data_idx].desc.ops = &pbias_regulator_voltage_ops;
--		drvdata[data_idx].desc.volt_table = pbias_volt_table;
--		drvdata[data_idx].desc.n_voltages = 2;
-+		drvdata[data_idx].desc.volt_table = info->pbias_volt_table;
-+		drvdata[data_idx].desc.n_voltages = info->n_voltages;
- 		drvdata[data_idx].desc.enable_time = info->enable_time;
- 		drvdata[data_idx].desc.vsel_reg = offset;
- 		drvdata[data_idx].desc.vsel_mask = info->vmode;
--- 
-2.14.1
+
+Adrian Hunter (9):
+      mmc: core: Introduce host claiming by context
+      mmc: core: Add support for handling CQE requests
+      mmc: mmc: Enable Command Queuing
+      mmc: mmc: Enable CQE's
+      mmc: block: Use local variables in mmc_blk_data_prep()
+      mmc: block: Prepare CQE data
+      mmc: block: Factor out mmc_setup_queue()
+      mmc: block: Add CQE support
+      mmc: sdhci-pci: Add CQHCI support for Intel GLK
+
+Venkat Gopalakrishnan (1):
+      mmc: cqhci: support for command queue enabled host
+
+ drivers/mmc/core/block.c          |  260 ++++++++-
+ drivers/mmc/core/block.h          |    7 +
+ drivers/mmc/core/bus.c            |    7 +
+ drivers/mmc/core/core.c           |  272 ++++++++-
+ drivers/mmc/core/core.h           |   12 +
+ drivers/mmc/core/mmc.c            |   29 +
+ drivers/mmc/core/queue.c          |  438 ++++++++++++--
+ drivers/mmc/core/queue.h          |   46 +-
+ drivers/mmc/host/Kconfig          |   14 +
+ drivers/mmc/host/Makefile         |    1 +
+ drivers/mmc/host/cqhci.c          | 1154 +++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/cqhci.h          |  240 ++++++++
+ drivers/mmc/host/sdhci-pci-core.c |  154 ++++-
+ include/linux/mmc/host.h          |    9 +-
+ 14 files changed, 2567 insertions(+), 76 deletions(-)
+ create mode 100644 drivers/mmc/host/cqhci.c
+ create mode 100644 drivers/mmc/host/cqhci.h
+
+
+Regards
+Adrian
