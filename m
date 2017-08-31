@@ -1,65 +1,66 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 00/13] mmc: meson-gx: driver fixups and upgrades
-Date: Thu, 31 Aug 2017 12:46:12 +0200
-Message-ID: <CAPDyKFpTkqH4qvLAraWxfxm=LOuWZv7P9nrznJ+o81y+9hDjjA@mail.gmail.com>
-References: <20170828142915.27020-1-jbrunet@baylibre.com> <CAPDyKFogy=L=BDKtMhKCN0nMLi-Yy5SHgAhB_=jog+CX91breA@mail.gmail.com>
- <7hr2vsdgj4.fsf@baylibre.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH V5 05/13] mmc: core: Add support for handling CQE requests
+Date: Thu, 31 Aug 2017 13:32:55 +0200
+Message-ID: <CACRpkdb2z5YrJe=nNwE6FWRe=myu-hLRqZOxO86BKmWiRxrVhQ@mail.gmail.com>
+References: <1502366898-23691-1-git-send-email-adrian.hunter@intel.com>
+ <1502366898-23691-6-git-send-email-adrian.hunter@intel.com>
+ <CACRpkdYxSPx7H1P3brb36C5x816bfcQ-zmuxcDk27ZfAa7odXg@mail.gmail.com> <9a5a19b8-2670-fcdb-5e9b-f67d0efb1cf4@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f174.google.com ([209.85.223.174]:38101 "EHLO
-        mail-io0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750922AbdHaKqN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Aug 2017 06:46:13 -0400
-Received: by mail-io0-f174.google.com with SMTP id 81so20220085ioj.5
-        for <linux-mmc@vger.kernel.org>; Thu, 31 Aug 2017 03:46:13 -0700 (PDT)
-In-Reply-To: <7hr2vsdgj4.fsf@baylibre.com>
+Received: from mail-oi0-f47.google.com ([209.85.218.47]:34677 "EHLO
+        mail-oi0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751074AbdHaLc6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Aug 2017 07:32:58 -0400
+Received: by mail-oi0-f47.google.com with SMTP id w10so3150588oie.1
+        for <linux-mmc@vger.kernel.org>; Thu, 31 Aug 2017 04:32:58 -0700 (PDT)
+In-Reply-To: <9a5a19b8-2670-fcdb-5e9b-f67d0efb1cf4@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kevin Hilman <khilman@baylibre.com>
-Cc: Jerome Brunet <jbrunet@baylibre.com>, Carlo Caione <carlo@caione.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>
 
-On 30 August 2017 at 21:03, Kevin Hilman <khilman@baylibre.com> wrote:
-> Hi Ulf,
->
-> Ulf Hansson <ulf.hansson@linaro.org> writes:
->
->> On 28 August 2017 at 16:29, Jerome Brunet <jbrunet@baylibre.com> wrote:
->>> The patchset features several bugfixes, rework and upgrade for the
->>> meson-gx MMC driver.
->>>
->>> The main goal is to improve readability and enable new high speed
->>> modes, such as eMMC DDR52 and sdcard UHS modes up to SDR50 (100Mhz)
->>>
->>> SDR104 is not working with a few cards on the p200 and the
->>> libretech-cc. I suspect that 200Mhz might be a bit too fast for the PCB
->>> of these boards, adding noise to the signal and eventually breaking
->>> the communication with some cards. The same cards are working well on a
->>> laptop or the nanopi-k2 at 200Mhz.
->>>
->>> This series has been tested on gxbb-p200, gxbb-nanopi-k2 and
->>> gxl-s905x-libretech-cc
->>>
->>> Changes since v2 [1]:
->>> * Drop patches 1 to 3: Applied.
->>> * Drop patch 4: Debug stuff which should not have been sent.
->>> * Added fix to previous patch 3:
->>>   If the clock register is not initialized before registering the clk
->>>   with CCF, the framework will complain about an illegal divider value.
->>>   This had gone unnoticed because it was later fixed by the clock init
->>>   rework.
->>>
->>>   Ulf, I know it is getting late but it would be nice if patch #1 of
->>>   this v3 could go with 3 patches you already applied. The rest can
->>>   wait for the following cycle.
+On Mon, Aug 21, 2017 at 11:26 AM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 20/08/17 14:39, Linus Walleij wrote:
+>> On Thu, Aug 10, 2017 at 2:08 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
 >>
->> I decided to pick them all, so applied for next!
+>>> Add core support for handling CQE requests, including starting, completing
+>>> and recovering.
+>>>
+>>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 >>
+>>
+>>> +static void __mmc_cqe_request_done(struct mmc_host *host,
+>>> +                                  struct mmc_request *mrq)
+>>
+>> We are naming too much stuff __foo now, it gets really hard to figure
+>> out from the function name and the surrounding code what is going on.
 >
-> Just to double-check, so I can plan for the DT patches
-> accordingly... you are queuing this for v4.14, right?
+> You have written several times that you don't like __foo() names, however it
+> is a normal kernel paradigm.
 
-Yes, correct!
+Normal doesn't mean "good".
 
-Kind regards
-Uffe
+I am negative to it because it has very unclear semantics. What is the
+semantic meaning of prefixing a function with __* really?
+
+I have referred to Rusty Russell's API levels:
+http://sweng.the-davies.net/Home/rustys-api-design-manifesto
+
+This is on level 3-4 and definately not at 6.
+
+So in my opinion, I have informed, founded in theory and
+valid reasons to dislike it, and I don't think it is a matter of taste or
+opinion.
+
+>> I guess people are using this like "do parts of what mmc_cqe_request_done()
+>> is doing" but it'd be nice if we could be specific.
+>>
+>> mmc_cqe_request_finalize() could work?
+>
+> It can be rolled into mmc_cqe_request_done().
+
+OK!
+
+Yours,
+Linus Walleij
