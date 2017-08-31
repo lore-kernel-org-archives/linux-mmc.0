@@ -1,73 +1,39 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: SDIO "SD2" vs. SD-card "SD3" interface on BayTrail
-Date: Thu, 31 Aug 2017 15:41:45 +0300
-Message-ID: <dc49d8be-dd15-167b-2ab4-d09d1b6ea83d@intel.com>
-References: <d7249bf2-b057-0535-334e-71cdc957e9b5@denx.de>
- <1499176431.22624.255.camel@linux.intel.com>
- <8a909116-5fec-e7d0-5d30-de8de42612df@denx.de>
+Subject: Re: [PATCH 4/5] mmc: sdhci-omap: Add OMAP SDHCI driver
+Date: Thu, 31 Aug 2017 16:02:23 +0300
+Message-ID: <dfe1b4e2-bcb5-c969-efe6-7cddd0eb0bf9@intel.com>
+References: <20170821074132.4622-1-kishon@ti.com>
+ <20170821074132.4622-5-kishon@ti.com>
+ <4f0a7225-1843-b353-1a2a-9adcb49554d3@intel.com>
+ <c7972f00-ef62-1736-822f-ebf6822b6d33@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:21243 "EHLO mga01.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751034AbdHaMsS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 31 Aug 2017 08:48:18 -0400
-In-Reply-To: <8a909116-5fec-e7d0-5d30-de8de42612df@denx.de>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <c7972f00-ef62-1736-822f-ebf6822b6d33@ti.com>
 Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
+To: Kishon Vijay Abraham I <kishon@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Rob Herring <robh+dt@kernel.org>, Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Russell King <linux@armlinux.org.uk>, Ravikumar Kattekola <rk@ti.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stefan Roese <sr@denx.de>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Cc: linux-mmc@vger.kernel.org
 
-On 31/08/17 12:38, Stefan Roese wrote:
-> Hi Andy, Hi Adrian,
-> 
-> On 04.07.2017 15:53, Andy Shevchenko wrote:
->> On Tue, 2017-07-04 at 14:53 +0200, Stefan Roese wrote:
->>> Hi,
->>>
->>> we are currently investigating, if its possible to connect a SDIO
->>> device (WLAN module) to the SD-card interface "SD3" of the BayTrail
->>> SoC instead of the SDIO interface "SD2". The BayTrail manual states,
->>> that the SDIO interface is capable of connecting SDIO devices. Is
->>> this also possible for the SD-card interface "SD3", even if its not
->>> explicitly mentioned in the manual? If not, why is this not possible?
->>>
->>> Any insight on this would be really helpful.
+On 30/08/17 16:53, Kishon Vijay Abraham I wrote:
+> On Monday 28 August 2017 02:36 PM, Adrian Hunter wrote:
+>> On 21/08/17 10:41, Kishon Vijay Abraham I wrote:
+>>> +
+>>> +static void sdhci_omap_set_clock(struct sdhci_host *host, unsigned int clock)
+>>> +{
+>>> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>>> +	struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
+>>> +	unsigned long clkdiv;
+>>> +
+>>> +	if (!clock)
+>>> +		return;
 >>
->> Hmm... I have no documentation for SD/SDIO/eMMC for BayTrail except the
->> public one. Internally I found some charts that shows similarities
->> between two. So, taking that into consideration I would suggest to try
->> it out on real hardware (MinnowBoard MAX, for example), only impediment
->> I can see is the absence of support in the drivers in Linux OS. If you
->> need it only in U-Boot, you perhaps may fix it easily.
->>
->> P.S. Adrian on vacation.
+>> Are you sure you don't want to stop the clock.
 > 
-> I hope your vacation was great!
-> 
-> Sorry for getting back to this, but I would really like to get some
-> more feedback on this. Perhaps Adrian has some additional comments
-> about the SDIO usage of the SD interface (SD3 - PCI Device ID 0x0f16)
-> on BayTrail.
-> 
-> I'm now running latest mainline Linux on this board and am trying to
-> get the Linux MMC / SDIO subsystem to just detect a device on this
-> SD PCI interface. For this I have added quite a bit of debug code to
-> the MMC / SDIO code to see, if any device is detected on the SDIO
-> port. But all command queries return timeout as far as I can tell.
+> There is never a case where the MMC core sends a request to stop the clock.
+> Maybe this check is not required at all.
 
-I would usually interpret that to mean the SDIO card is not turned on.
-
-> Adrian, do you have some additional information, if this mode of
-> operation is possible at all on this SD-card interface, even if
-> its not explicitly mentioned in the BayTrail datasheet?
-
-I have used removable SDIO cards in SD slots before.  It should work.
-
->                                                         Or do you
-> have some suggestions, how I could test such a basic SDIO connection
-> (without integrating of the WLAN driver first) in the simplest way?
-
-Only to try a removable SDIO card.
+It does when voltage switching e.g. mmc_set_uhs_voltage(), but host drivers
+should support the possibility anyway.
