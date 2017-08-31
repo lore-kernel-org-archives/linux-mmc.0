@@ -1,44 +1,34 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v2 3/6] ARM: dts: dra7: Increase max-voltage of pbias regulator
-Date: Thu, 31 Aug 2017 15:48:46 +0530
-Message-ID: <20170831101849.9489-4-kishon@ti.com>
-References: <20170831101849.9489-1-kishon@ti.com>
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH V5 11/13] mmc: block: Add CQE support
+Date: Thu, 31 Aug 2017 03:25:50 -0700
+Message-ID: <20170831102550.GB6757@infradead.org>
+References: <1502366898-23691-1-git-send-email-adrian.hunter@intel.com>
+ <1502366898-23691-12-git-send-email-adrian.hunter@intel.com>
+ <CACRpkdZ2=D2tLD0L0M1T_z0_5gMhiPKqUHuOcMgdA72PHLHG8A@mail.gmail.com>
+ <b7d28123-ecc1-8b24-28bd-18e87c475fc5@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20170831101849.9489-1-kishon@ti.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Tony Lindgren <tony@atomide.com>, Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>
-Cc: devicetree@vger.kernel.org, kishon@ti.com, Sekhar Nori <nsekhar@ti.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Russell King <linux@armlinux.org.uk>, Ravikumar Kattekola <rk@ti.com>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-block-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <b7d28123-ecc1-8b24-28bd-18e87c475fc5@intel.com>
+Sender: linux-block-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>, linux-block@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>
 List-Id: linux-mmc@vger.kernel.org
 
-RnJvbTogUmF2aWt1bWFyIEthdHRla29sYSA8cmtAdGkuY29tPgoKQXMgcGVyIHJlY2VudCBUUk0s
-IFBCSUFTIGNlbGwgb24gZHJhNyBkZXZpY2VzIHN1cHBvcnRzCjMuM1YgYW5kIG5vdCAzLjBWIGFz
-IGRvY3VtZW50ZWQgZWFybGllci4KClVwZGF0ZSBQQklBUyByZWd1bGF0b3IgbWF4IHZvbHRhZ2Ug
-dG8gbWF0Y2ggdGhpcy4KCkRvY3VtZW50IHJlZmVyZW5jZToKU1BSVUkzMEMg4oCTIERSQTc1eCwg
-RFJBNzR4IFRlY2huaWNhbCByZWZlcmVuY2UgbWFudWFsLSBOb3ZlbWJlciAyMDE2CgpUZXN0ZWQg
-b246CkRSQTc1eCBQRyAyLjAgUkVWIEggRVZNCgpTaWduZWQtb2ZmLWJ5OiBSYXZpa3VtYXIgS2F0
-dGVrb2xhIDxya0B0aS5jb20+ClNpZ25lZC1vZmYtYnk6IFNla2hhciBOb3JpIDxuc2VraGFyQHRp
-LmNvbT4KU2lnbmVkLW9mZi1ieTogS2lzaG9uIFZpamF5IEFicmFoYW0gSSA8a2lzaG9uQHRpLmNv
-bT4KLS0tCiBhcmNoL2FybS9ib290L2R0cy9kcmE3LmR0c2kgfCAyICstCiAxIGZpbGUgY2hhbmdl
-ZCwgMSBpbnNlcnRpb24oKyksIDEgZGVsZXRpb24oLSkKCmRpZmYgLS1naXQgYS9hcmNoL2FybS9i
-b290L2R0cy9kcmE3LmR0c2kgYi9hcmNoL2FybS9ib290L2R0cy9kcmE3LmR0c2kKaW5kZXggMGYw
-ZjZmNThiZDE4Li5mYzE0ZTQ4YjQ4MmUgMTAwNjQ0Ci0tLSBhL2FyY2gvYXJtL2Jvb3QvZHRzL2Ry
-YTcuZHRzaQorKysgYi9hcmNoL2FybS9ib290L2R0cy9kcmE3LmR0c2kKQEAgLTE3MCw3ICsxNzAs
-NyBAQAogCQkJCQkJcGJpYXNfbW1jX3JlZzogcGJpYXNfbW1jX29tYXA1IHsKIAkJCQkJCQlyZWd1
-bGF0b3ItbmFtZSA9ICJwYmlhc19tbWNfb21hcDUiOwogCQkJCQkJCXJlZ3VsYXRvci1taW4tbWlj
-cm92b2x0ID0gPDE4MDAwMDA+OwotCQkJCQkJCXJlZ3VsYXRvci1tYXgtbWljcm92b2x0ID0gPDMw
-MDAwMDA+OworCQkJCQkJCXJlZ3VsYXRvci1tYXgtbWljcm92b2x0ID0gPDMzMDAwMDA+OwogCQkJ
-CQkJfTsKIAkJCQkJfTsKIAotLSAKMi4xMS4wCgoKX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX18KbGludXgtYXJtLWtlcm5lbCBtYWlsaW5nIGxpc3QKbGludXgt
-YXJtLWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnCmh0dHA6Ly9saXN0cy5pbmZyYWRlYWQub3Jn
-L21haWxtYW4vbGlzdGluZm8vbGludXgtYXJtLWtlcm5lbAo=
+On Mon, Aug 21, 2017 at 12:27:30PM +0300, Adrian Hunter wrote:
+> We need to start with a legacy API because people want to backport CQ to
+> earlier kernels (we really need to get features upstream more quickly), but
+> blk-mq has been evolving a lot (e.g. elevator support), so backporters face
+> having either something quite different from upstream or trying to backport
+> great chunks of the block layer.
+
+Hell no - the point of Linux mainline development is to move forward.
+We'll need to do the right thing for long term Linux development FIRST
+and then worry about backporting SECOND.
+
+Stop thinking about all kernels while you wear your mainline kernel
+developer hat.  Yes, occasionally we can do smaller amount of reordering
+to keep a small fix first for stable backports, but not to this extent
+of using obsolete infrastructure and making an already messy driver
+worse just to please backports to long obsolete kernels.
