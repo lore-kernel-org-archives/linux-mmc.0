@@ -1,47 +1,94 @@
-From: Mark Brown <broonie@kernel.org>
-Subject: Re: Applied "regulator: pbias: Select voltage table based on
- max-voltage" to the regulator tree
-Date: Thu, 31 Aug 2017 14:50:50 +0100
-Message-ID: <20170831135050.adiek6iqqzhndgci@sirena.org.uk>
-References: <E1dnO3z-0000tI-7K@debutante>
- <64d9c623-456c-9142-9c5b-a94593628643@ti.com>
+From: Stefan Roese <sr@denx.de>
+Subject: Re: SDIO "SD2" vs. SD-card "SD3" interface on BayTrail
+Date: Thu, 31 Aug 2017 17:24:35 +0200
+Message-ID: <63d5c5f0-619f-b55b-88b3-8afe6e81227b@denx.de>
+References: <d7249bf2-b057-0535-334e-71cdc957e9b5@denx.de>
+ <1499176431.22624.255.camel@linux.intel.com>
+ <8a909116-5fec-e7d0-5d30-de8de42612df@denx.de>
+ <dc49d8be-dd15-167b-2ab4-d09d1b6ea83d@intel.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="3kk3gqfqn2gwwy4o"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <64d9c623-456c-9142-9c5b-a94593628643@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>
-Cc: Ravikumar Kattekola <rk@ti.com>, Sekhar Nori <nsekhar@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Tony Lindgren <tony@atomide.com>, Liam Girdwood <lgirdwood@gmail.com>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx1.mailbox.org ([80.241.60.212]:40643 "EHLO mx1.mailbox.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751011AbdHaPZC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 31 Aug 2017 11:25:02 -0400
+In-Reply-To: <dc49d8be-dd15-167b-2ab4-d09d1b6ea83d@intel.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Cc: linux-mmc@vger.kernel.org
 
+Hi Adrian,
 
---3kk3gqfqn2gwwy4o
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+On 31.08.2017 14:41, Adrian Hunter wrote:
+> On 31/08/17 12:38, Stefan Roese wrote:
+>> Hi Andy, Hi Adrian,
+>>
+>> On 04.07.2017 15:53, Andy Shevchenko wrote:
+>>> On Tue, 2017-07-04 at 14:53 +0200, Stefan Roese wrote:
+>>>> Hi,
+>>>>
+>>>> we are currently investigating, if its possible to connect a SDIO
+>>>> device (WLAN module) to the SD-card interface "SD3" of the BayTrail
+>>>> SoC instead of the SDIO interface "SD2". The BayTrail manual states,
+>>>> that the SDIO interface is capable of connecting SDIO devices. Is
+>>>> this also possible for the SD-card interface "SD3", even if its not
+>>>> explicitly mentioned in the manual? If not, why is this not possible?
+>>>>
+>>>> Any insight on this would be really helpful.
+>>>
+>>> Hmm... I have no documentation for SD/SDIO/eMMC for BayTrail except the
+>>> public one. Internally I found some charts that shows similarities
+>>> between two. So, taking that into consideration I would suggest to try
+>>> it out on real hardware (MinnowBoard MAX, for example), only impediment
+>>> I can see is the absence of support in the drivers in Linux OS. If you
+>>> need it only in U-Boot, you perhaps may fix it easily.
+>>>
+>>> P.S. Adrian on vacation.
+>>
+>> I hope your vacation was great!
+>>
+>> Sorry for getting back to this, but I would really like to get some
+>> more feedback on this. Perhaps Adrian has some additional comments
+>> about the SDIO usage of the SD interface (SD3 - PCI Device ID 0x0f16)
+>> on BayTrail.
+>>
+>> I'm now running latest mainline Linux on this board and am trying to
+>> get the Linux MMC / SDIO subsystem to just detect a device on this
+>> SD PCI interface. For this I have added quite a bit of debug code to
+>> the MMC / SDIO code to see, if any device is detected on the SDIO
+>> port. But all command queries return timeout as far as I can tell.
+> 
+> I would usually interpret that to mean the SDIO card is not turned on.
 
-On Thu, Aug 31, 2017 at 05:37:34PM +0530, Kishon Vijay Abraham I wrote:
+Yes, this is of course possible - or some signal issues while
+level-shifting etc. I've also thought of this possibility. One of the
+next things to do, will be to measure some of the signals.
 
-> This patch should be merged along with the 1st patch of the series "mmc: host:
-> omap_hsmmc: Remove setting PBIAS voltage". Or else it'll break MMC with
-> omap_hsmmc driver.
+>> Adrian, do you have some additional information, if this mode of
+>> operation is possible at all on this SD-card interface, even if
+>> its not explicitly mentioned in the BayTrail datasheet?
+> 
+> I have used removable SDIO cards in SD slots before.  It should work.
 
-I can sign a tag if it's needed for a cross tree merge.
+Sorry, but I need to double-check on this. You have successfully used
+some SDIO cards in this "SD-card-only controller" (as stated in the
+datasheet) on BayTrail?
 
---3kk3gqfqn2gwwy4o
-Content-Type: application/pgp-signature; name="signature.asc"
+Do you b y any chance remember, which SDIO card you have tested with?
 
------BEGIN PGP SIGNATURE-----
+>>                                                          Or do you
+>> have some suggestions, how I could test such a basic SDIO connection
+>> (without integrating of the WLAN driver first) in the simplest way?
+> 
+> Only to try a removable SDIO card.
 
-iQEzBAABCAAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAlmoFDoACgkQJNaLcl1U
-h9CwHwgAhu/tV8PTV80mZ6LlEt6Rm22iqIkUnjS7WRzHhcWaKHjUNY39a8aXoQMT
-cgwLQShDMPYPy+Sr7gqKdJRxoDSa2Opav5pR6UI9LUg7rzvzBvmVGaqNE2hZEWO0
-goK+RgIIh5XAjO2Y+y7l3eqRgqtSFF3UhWdZ1oDkSOMw65AYsFGttaPphirNp3vk
-OSq4mPbRWzwr691lBdJHNXyanyuIIYNhhRU3bNA2uPp2c+KfNR9PVMFFsozY6IpN
-w6HZRfBN/JS4LMkR5T1vpi6XCRnhsAcL25+UV/XXGYBHw9TPQIMbTEiIqDgPhhIS
-lCGDTibfaIb03zw8YuI9mnGXsouTAA==
-=+9NY
------END PGP SIGNATURE-----
+Thats not possible on this board, as this WLAN module is soldered.
+But I might find some other / alternative board, to test this. Let
+me check on this...
 
---3kk3gqfqn2gwwy4o--
+Thanks,
+Stefan
