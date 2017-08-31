@@ -1,46 +1,48 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v2 6/6] MAINTAINERS: Add TI OMAP SDHCI Maintainer
-Date: Thu, 31 Aug 2017 15:48:49 +0530
-Message-ID: <20170831101849.9489-7-kishon@ti.com>
-References: <20170831101849.9489-1-kishon@ti.com>
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH V5 11/13] mmc: block: Add CQE support
+Date: Thu, 31 Aug 2017 03:23:24 -0700
+Message-ID: <20170831102324.GA6757@infradead.org>
+References: <1502366898-23691-1-git-send-email-adrian.hunter@intel.com>
+ <1502366898-23691-12-git-send-email-adrian.hunter@intel.com>
+ <CACRpkdZ2=D2tLD0L0M1T_z0_5gMhiPKqUHuOcMgdA72PHLHG8A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from fllnx210.ext.ti.com ([198.47.19.17]:54286 "EHLO
-        fllnx210.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751109AbdHaKWG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Aug 2017 06:22:06 -0400
-In-Reply-To: <20170831101849.9489-1-kishon@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-block-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CACRpkdZ2=D2tLD0L0M1T_z0_5gMhiPKqUHuOcMgdA72PHLHG8A@mail.gmail.com>
+Sender: linux-block-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-block@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Tony Lindgren <tony@atomide.com>, Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>
-Cc: Sekhar Nori <nsekhar@ti.com>, Russell King <linux@armlinux.org.uk>, Ravikumar Kattekola <rk@ti.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, kishon@ti.com
 
-Add Maintainer for the TI OMAP SDHCI driver.
+On Sun, Aug 20, 2017 at 02:13:03PM +0200, Linus Walleij wrote:
+> So adding a new (in effect) invasive block driver needs to at least
+> be CC:ed to the block maintainers so we don't sneak anything like
+> that in under the radar.
 
-Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
----
- MAINTAINERS | 6 ++++++
- 1 file changed, 6 insertions(+)
+Yes.
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index 1c3feffb1c1c..e52af3b87404 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -11776,6 +11776,12 @@ L:	linux-mmc@vger.kernel.org
- S:	Maintained
- F:	drivers/mmc/host/sdhci-spear.c
- 
-+SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) TI OMAP DRIVER
-+M:	Kishon Vijay Abraham I <kishon@ti.com>
-+L:	linux-mmc@vger.kernel.org
-+S:	Maintained
-+F:	drivers/mmc/host/sdhci-omap.c
-+
- SECURE ENCRYPTING DEVICE (SED) OPAL DRIVER
- M:	Scott Bauer <scott.bauer@intel.com>
- M:	Jonathan Derrick <jonathan.derrick@intel.com>
--- 
-2.11.0
+> And this semaphoring and threading is just as confusing as ever and now
+> we have two of them. (Sorry, I'm grumpy.)
 
+But your are grumpy for a good reason.  The MMC driver is a pain
+to understand for even a seasons block layer developer.
+
+> What we need is an MMC stack where it is clear where blocks come in
+> and out and how they are processed by the block layer, but now we
+> already have a scary Rube Goldberg-machine and it is not getting better.
+> If people have different feelings they can tell me off right now.
+
+Agreed.
+
+> 
+> I have my hopes up that we can get the code lesser and more readable
+> with MQ, as I tried to illustrate in my attempts, which are indeed lame
+> because they don't work because of misc and SDIO use cases, but
+> I'm honestly doing my best. Currently with other clean-ups to get a
+> clean surface to do that.
+> 
+> As it stands, the MQ migration work size is in some spots doubled or
+> more than doubled after this commit :(
+
+I don't think we should merge this.
