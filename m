@@ -1,57 +1,73 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: Re: Applied "regulator: pbias: Select voltage table based on
- max-voltage" to the regulator tree
-Date: Thu, 31 Aug 2017 17:37:34 +0530
-Message-ID: <64d9c623-456c-9142-9c5b-a94593628643@ti.com>
-References: <E1dnO3z-0000tI-7K@debutante>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: SDIO "SD2" vs. SD-card "SD3" interface on BayTrail
+Date: Thu, 31 Aug 2017 15:41:45 +0300
+Message-ID: <dc49d8be-dd15-167b-2ab4-d09d1b6ea83d@intel.com>
+References: <d7249bf2-b057-0535-334e-71cdc957e9b5@denx.de>
+ <1499176431.22624.255.camel@linux.intel.com>
+ <8a909116-5fec-e7d0-5d30-de8de42612df@denx.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <E1dnO3z-0000tI-7K@debutante>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Mark Brown <broonie@kernel.org>, Ravikumar Kattekola <rk@ti.com>
-Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>, linux-mmc@vger.kernel.org, Sekhar Nori <nsekhar@ti.com>, Adrian Hunter <adrian.hunter@intel.com>, Liam Girdwood <lgirdwood@gmail.com>, Rob Herring <robh+dt@kernel.org>, linux-arm-kernel@lists.infradead.org, Russell King <linux@armlinux.org.uk>, linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga01.intel.com ([192.55.52.88]:21243 "EHLO mga01.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751034AbdHaMsS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 31 Aug 2017 08:48:18 -0400
+In-Reply-To: <8a909116-5fec-e7d0-5d30-de8de42612df@denx.de>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Stefan Roese <sr@denx.de>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Cc: linux-mmc@vger.kernel.org
 
-Hi Mark,
+On 31/08/17 12:38, Stefan Roese wrote:
+> Hi Andy, Hi Adrian,
+> 
+> On 04.07.2017 15:53, Andy Shevchenko wrote:
+>> On Tue, 2017-07-04 at 14:53 +0200, Stefan Roese wrote:
+>>> Hi,
+>>>
+>>> we are currently investigating, if its possible to connect a SDIO
+>>> device (WLAN module) to the SD-card interface "SD3" of the BayTrail
+>>> SoC instead of the SDIO interface "SD2". The BayTrail manual states,
+>>> that the SDIO interface is capable of connecting SDIO devices. Is
+>>> this also possible for the SD-card interface "SD3", even if its not
+>>> explicitly mentioned in the manual? If not, why is this not possible?
+>>>
+>>> Any insight on this would be really helpful.
+>>
+>> Hmm... I have no documentation for SD/SDIO/eMMC for BayTrail except the
+>> public one. Internally I found some charts that shows similarities
+>> between two. So, taking that into consideration I would suggest to try
+>> it out on real hardware (MinnowBoard MAX, for example), only impediment
+>> I can see is the absence of support in the drivers in Linux OS. If you
+>> need it only in U-Boot, you perhaps may fix it easily.
+>>
+>> P.S. Adrian on vacation.
+> 
+> I hope your vacation was great!
+> 
+> Sorry for getting back to this, but I would really like to get some
+> more feedback on this. Perhaps Adrian has some additional comments
+> about the SDIO usage of the SD interface (SD3 - PCI Device ID 0x0f16)
+> on BayTrail.
+> 
+> I'm now running latest mainline Linux on this board and am trying to
+> get the Linux MMC / SDIO subsystem to just detect a device on this
+> SD PCI interface. For this I have added quite a bit of debug code to
+> the MMC / SDIO code to see, if any device is detected on the SDIO
+> port. But all command queries return timeout as far as I can tell.
 
-On Thursday 31 August 2017 05:25 PM, Mark Brown wrote:
-> The patch
-> 
->    regulator: pbias: Select voltage table based on max-voltage
-> 
-> has been applied to the regulator tree at
-> 
->    git://git.kernel.org/pub/scm/linux/kernel/git/broonie/regulator.git 
-> 
-> All being well this means that it will be integrated into the linux-next
-> tree (usually sometime in the next 24 hours) and sent to Linus during
-> the next merge window (or sooner if it is a bug fix), however if
-> problems are discovered then the patch may be dropped or reverted.  
-> 
-> You may get further e-mails resulting from automated or manual testing
-> and review of the tree, please engage with people reporting problems and
-> send followup patches addressing any issues that are reported if needed.
-> 
-> If any updates are required or you are submitting further changes they
-> should be sent as incremental updates against current git, existing
-> patches will not be replaced.
-> 
-> Please add any relevant lists and maintainers to the CCs when replying
-> to this mail.
+I would usually interpret that to mean the SDIO card is not turned on.
 
-This patch should be merged along with the 1st patch of the series "mmc: host:
-omap_hsmmc: Remove setting PBIAS voltage". Or else it'll break MMC with
-omap_hsmmc driver.
+> Adrian, do you have some additional information, if this mode of
+> operation is possible at all on this SD-card interface, even if
+> its not explicitly mentioned in the BayTrail datasheet?
 
-Thanks
-Kishon
+I have used removable SDIO cards in SD slots before.  It should work.
+
+>                                                         Or do you
+> have some suggestions, how I could test such a basic SDIO connection
+> (without integrating of the WLAN driver first) in the simplest way?
+
+Only to try a removable SDIO card.
