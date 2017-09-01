@@ -1,84 +1,52 @@
-From: Mark Brown <broonie@kernel.org>
-Subject: Re: Applied "regulator: pbias: Select voltage table based on
- max-voltage" to the regulator tree
-Date: Fri, 1 Sep 2017 17:23:22 +0100
-Message-ID: <20170901162322.xrjnim4khn3wfslj@sirena.org.uk>
-References: <E1dnO3z-0000tI-7K@debutante>
- <64d9c623-456c-9142-9c5b-a94593628643@ti.com>
- <20170831135050.adiek6iqqzhndgci@sirena.org.uk>
- <CAPDyKFo=UdnVhFU7k+K1=N0e-1sniC+WZjZ4dZKSF8mXhM43Uw@mail.gmail.com>
+From: Stephen Boyd <sboyd@codeaurora.org>
+Subject: Re: [PATCH 1/2] clk: sunxi-ng: Provide a default reset hook
+Date: Fri, 1 Sep 2017 13:30:36 -0700
+Message-ID: <20170901203036.GA21656@codeaurora.org>
+References: <20170825094953.3247-1-maxime.ripard@free-electrons.com>
+ <CAPDyKFonXp4Uqi=DLxKf=1ecOx-2E5mUkEXqnqJPE-J57xXQcw@mail.gmail.com>
+ <20170830123624.vurdnh6bojbtrjal@flea.lan>
+ <CAPDyKFqw7PNs_GQXmbJx8doo-tGW6PsKSffJhzVgU3cX3-wvsg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="55ep6jw3bdsl2j5j"
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-clk-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <CAPDyKFo=UdnVhFU7k+K1=N0e-1sniC+WZjZ4dZKSF8mXhM43Uw@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
+In-Reply-To: <CAPDyKFqw7PNs_GQXmbJx8doo-tGW6PsKSffJhzVgU3cX3-wvsg@mail.gmail.com>
+Sender: linux-clk-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Kishon Vijay Abraham I <kishon@ti.com>, Ravikumar Kattekola <rk@ti.com>, Sekhar Nori <nsekhar@ti.com>, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Tony Lindgren <tony@atomide.com>, Liam Girdwood <lgirdwood@gmail.com>, Russell King <linux@armlinux.org.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Cc: Maxime Ripard <maxime.ripard@free-electrons.com>, Chen-Yu Tsai <wens@csie.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-clk <linux-clk@vger.kernel.org>, Mike Turquette <mturquette@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
+On 08/30, Ulf Hansson wrote:
+> On 30 August 2017 at 14:36, Maxime Ripard
+> <maxime.ripard@free-electrons.com> wrote:
+> > Hi Ulf,
+> >
+> > On Wed, Aug 30, 2017 at 02:29:24PM +0200, Ulf Hansson wrote:
+> >> On 25 August 2017 at 11:49, Maxime Ripard
+> >> <maxime.ripard@free-electrons.com> wrote:
+> >> > The reset hook was left implemented. Provide a dumb implementation so that
+> >> > client drivers can depend on it.
+> >> >
+> >> > Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
+> >>
+> >> Do you want me to pick this up via my mmc tree? If so, is that okay by
+> >> the clock maintainers?
+> >
+> > I also happen to be the maintainer of that part of the kernel
+> > (reporting to Mike and Stephen of course). We don't have anything
+> > touching that file in next, so unless they feel like it should go
+> > through their tree, it would be easier to keep the two changes
+> > together and merge them through your tree.
+> 
+> Alright, I have picked it up for next!
+> 
 
---55ep6jw3bdsl2j5j
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Thanks!
 
-On Fri, Sep 01, 2017 at 03:18:03PM +0200, Ulf Hansson wrote:
-> On 31 August 2017 at 15:50, Mark Brown <broonie@kernel.org> wrote:
-> > On Thu, Aug 31, 2017 at 05:37:34PM +0530, Kishon Vijay Abraham I wrote:
+Acked-by: Stephen Boyd <sboyd@codeaurora.org>
 
-> >> This patch should be merged along with the 1st patch of the series "mmc: host:
-> >> omap_hsmmc: Remove setting PBIAS voltage". Or else it'll break MMC with
-> >> omap_hsmmc driver.
+if that helps.
 
-Hang on, how can this break anything?  If it breaks things shouldn't
-there be bugfixes for incorrect constraints somewhere?
-
-> > I can sign a tag if it's needed for a cross tree merge.
-
-> Easier if you could drop it and instead just provide an ack.
-
-> Unless you believes there may conflict in your regulator tree?
-
-My main goal is to get it in during this merge window, this way either
-it goes in via my tree and the rest of the series can go in the next
-release or the whole thing makes this merge window.
-
-The following changes since commit 5771a8c08880cdca3bfb4a3fc6d309d6bba20877:
-
-  Linux v4.13-rc1 (2017-07-15 15:22:10 -0700)
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/broonie/regulator.git tags/regulator-pbias-variants
-
-for you to fetch changes up to 27eae9d4b9d4cd9c204ef81f46078d91362ed41c:
-
-  regulator: pbias: Select voltage table based on max-voltage (2017-08-31 11:55:40 +0100)
-
-----------------------------------------------------------------
-regulator: Add support for different OMAP variants in the pbias regulator
-
-----------------------------------------------------------------
-Ravikumar Kattekola (1):
-      regulator: pbias: Select voltage table based on max-voltage
-
- drivers/regulator/pbias-regulator.c | 21 ++++++++++++++++++---
- 1 file changed, 18 insertions(+), 3 deletions(-)
-
---55ep6jw3bdsl2j5j
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCAAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAlmpiXkACgkQJNaLcl1U
-h9DmgAf+MzEBF/Wa45kAX36L/OhlYNU/HDKLh2Cn4sjl4uzReK33+gX4Ildlg2t/
-nmXqx5rZu0eMcGOo+mjVrPFaqGML3R0w/0ulgTxyl5obwR/CzKBK08H6PhXa9sJT
-K5F49zQ6H1m/h7pAjLhtoS0iKh5uwKGcg08h4AWrTrghrDjzNvdCVCo+SFDCg9tU
-99vJZTwn05shxUhdZEW0mdKTn19l5buHvs7l+iXkbtuTi0KTn7LXZdoHzPy+7mla
-Uw8W4xL46jLElm+1l0wejg3MRKOEoSnIasJNAJ6ADfmVQ7bYjhi47H/WfHZucXun
-RifnH+872K4WNQgwN072i2rTPh7WgA==
-=2Dti
------END PGP SIGNATURE-----
-
---55ep6jw3bdsl2j5j--
+-- 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
