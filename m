@@ -1,50 +1,64 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH RESEND] mmc: renesas_sdhi: Add r8a7743/5 support
-Date: Fri, 1 Sep 2017 15:32:35 +0200
-Message-ID: <CAPDyKFoPyhGUVwjXHQ-1HcTN-p-3RaOE1zT+9w+GdeBeWbc1kg@mail.gmail.com>
-References: <1504014726-17288-1-git-send-email-biju.das@bp.renesas.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V7 00/10] mmc: Add Command Queue support
+Date: Fri, 1 Sep 2017 16:28:36 +0300
+Message-ID: <19b101f2-f4ea-8360-ccd2-99a085ecc416@intel.com>
+References: <1504180616-14514-1-git-send-email-adrian.hunter@intel.com>
+ <ff9eeab1-199a-3ab3-9fa8-cc2f08d52a54@intel.com>
+ <CAPDyKFriJLD-Q76tyUwXkAWJ8D3g=KOMt1rAtmufg97=Wh3jAQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <1504014726-17288-1-git-send-email-biju.das@bp.renesas.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Biju Das <biju.das@bp.renesas.com>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, Chris Paterson <chris.paterson2@renesas.com>, Fabrizio Castro <fabrizio.castro@bp.renesas.com>, Geert Uytterhoeven <geert@linux-m68k.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga05.intel.com ([192.55.52.43]:7690 "EHLO mga05.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752524AbdIANfT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 1 Sep 2017 09:35:19 -0400
+In-Reply-To: <CAPDyKFriJLD-Q76tyUwXkAWJ8D3g=KOMt1rAtmufg97=Wh3jAQ@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 
-On 29 August 2017 at 15:52, Biju Das <biju.das@bp.renesas.com> wrote:
-> Add support for r8a7743/5 SoC.Renesas RZ/G1[ME] (R8A7743/5) SDHI
-> is identical to the R-Car Gen2 family.
->
-> Signed-off-by: Biju Das <biju.das@bp.renesas.com>
+On 01/09/17 15:58, Ulf Hansson wrote:
+> + Christoph
+> 
+> On 1 September 2017 at 13:42, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> On 31/08/17 14:56, Adrian Hunter wrote:
+>>> Here is V7 of the hardware command queue patches without the software
+>>> command queue patches, now using blk-mq.
+>>>
+>>> HW CMDQ offers 25% - 50% better random multi-threaded I/O.  I see a slight
+>>> 2% drop in sequential read speed but no change to sequential write.
+>>
+>> Any comments?
+> 
+> A couple of overall comments, for now.
+> 
+> To make sure we don't overlook something when converting to mq, I
+> would prefer that we first convert the existing mmc block code to mq,
+> then we add CMDQ on top.
 
-Thanks, applied for next!
+That doesn't make sense.  This patch set is not converting the legacy driver
+to mq therefore it cannot overlook anything for converting to mq.
 
-Kind regards
-Uffe
+> 
+> Regarding patch1. in the long-term solution, we should really strive
+> towards getting rid of the big mmc host lock, as it causes us to lose
+> some of the benefits on which principles mq is designed upon.
 
-> ---
-> DT binding patch for r8a7743/5 SoC is applied for mmc next. But the driver patch
-> is still not applied for mmc next.So resending the driver patch.
->
-> This patch is compiled and tested against mmc/next.
->
->  drivers/mmc/host/renesas_sdhi_sys_dmac.c | 2 ++
->  1 file changed, 2 insertions(+)
->
-> diff --git a/drivers/mmc/host/renesas_sdhi_sys_dmac.c b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-> index 160fbb2..df44654 100644
-> --- a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-> +++ b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-> @@ -98,6 +98,8 @@
->         { .compatible = "renesas,sdhi-r7s72100", .data = &of_rz_compatible, },
->         { .compatible = "renesas,sdhi-r8a7778", .data = &of_rcar_gen1_compatible, },
->         { .compatible = "renesas,sdhi-r8a7779", .data = &of_rcar_gen1_compatible, },
-> +       { .compatible = "renesas,sdhi-r8a7743", .data = &of_rcar_gen2_compatible, },
-> +       { .compatible = "renesas,sdhi-r8a7745", .data = &of_rcar_gen2_compatible, },
->         { .compatible = "renesas,sdhi-r8a7790", .data = &of_rcar_gen2_compatible, },
->         { .compatible = "renesas,sdhi-r8a7791", .data = &of_rcar_gen2_compatible, },
->         { .compatible = "renesas,sdhi-r8a7792", .data = &of_rcar_gen2_compatible, },
-> --
-> 1.9.1
->
+Lose what benefits?
+
+> However, it may be feasible to use patch1 as an intermediate step, to
+> be able to convert to mq short term. Then we can continue doing the
+> re-factoring, to get rid of the big mmc host lock and solve other
+> relates issues/optimize things. What remains to be seen in this
+> approach, is how well mq performs, as we would still be using the big
+> mmc host lock. We may tolerate some minor regressions, but if too
+> much, there is no other way that first removing the big mmc lock.
+
+Unlike HDDs, eMMC must switch between internal partitions (LUNs) so there
+must a way to arbitrate between them.
+
+> Of course, if Linus/Christoph don't think this intermediate approach
+> is good enough, we will have to respect that as well.
