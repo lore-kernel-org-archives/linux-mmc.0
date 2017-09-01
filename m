@@ -1,51 +1,24 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v.4.13 rc8
-Date: Fri, 1 Sep 2017 13:20:16 +0200
-Message-ID: <CAPDyKFr8pOpNGG2r1fhEd1BJtg3a=YnYq2GNLtGY-1sYZsSMYQ@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V7 00/10] mmc: Add Command Queue support
+Date: Fri, 1 Sep 2017 14:42:34 +0300
+Message-ID: <ff9eeab1-199a-3ab3-9fa8-cc2f08d52a54@intel.com>
+References: <1504180616-14514-1-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus <torvalds@linux-foundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <1504180616-14514-1-git-send-email-adrian.hunter@intel.com>
+Content-Language: en-US
+Sender: linux-block-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Linus,
+On 31/08/17 14:56, Adrian Hunter wrote:
+> Here is V7 of the hardware command queue patches without the software
+> command queue patches, now using blk-mq.
+> 
+> HW CMDQ offers 25% - 50% better random multi-threaded I/O.  I see a slight
+> 2% drop in sequential read speed but no change to sequential write.
 
-Here are two more mmc fixes intended for v4.13-rc8.
-
-Details are as usual found in the signed tag. Please pull this in!
-
-Kind regards
-Ulf Hansson
-
-
-The following changes since commit cc4a41fe5541a73019a864883297bd5043aa6d98:
-
-  Linux 4.13-rc7 (2017-08-27 17:20:40 -0700)
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v4.13-rc7
-
-for you to fetch changes up to 99c14fc360dbbb583a03ab985551b12b5c5ca4f1:
-
-  mmc: sdhci-xenon: add set_power callback (2017-08-30 14:11:47 +0200)
-
-----------------------------------------------------------------
-MMC core:
- - Fix block status codes
-
-MMC host:
- - sdhci-xenon: Fix SD bus voltage select
-
-----------------------------------------------------------------
-Adrian Hunter (1):
-      mmc: block: Fix block status codes
-
-Zhoujie Wu (1):
-      mmc: sdhci-xenon: add set_power callback
-
- drivers/mmc/core/block.c       |  6 +++---
- drivers/mmc/host/sdhci-xenon.c | 19 +++++++++++++++++++
- 2 files changed, 22 insertions(+), 3 deletions(-)
+Any comments?
