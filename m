@@ -1,64 +1,84 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V7 00/10] mmc: Add Command Queue support
-Date: Fri, 1 Sep 2017 16:28:36 +0300
-Message-ID: <19b101f2-f4ea-8360-ccd2-99a085ecc416@intel.com>
-References: <1504180616-14514-1-git-send-email-adrian.hunter@intel.com>
- <ff9eeab1-199a-3ab3-9fa8-cc2f08d52a54@intel.com>
- <CAPDyKFriJLD-Q76tyUwXkAWJ8D3g=KOMt1rAtmufg97=Wh3jAQ@mail.gmail.com>
+From: Mark Brown <broonie@kernel.org>
+Subject: Re: Applied "regulator: pbias: Select voltage table based on
+ max-voltage" to the regulator tree
+Date: Fri, 1 Sep 2017 17:23:22 +0100
+Message-ID: <20170901162322.xrjnim4khn3wfslj@sirena.org.uk>
+References: <E1dnO3z-0000tI-7K@debutante>
+ <64d9c623-456c-9142-9c5b-a94593628643@ti.com>
+ <20170831135050.adiek6iqqzhndgci@sirena.org.uk>
+ <CAPDyKFo=UdnVhFU7k+K1=N0e-1sniC+WZjZ4dZKSF8mXhM43Uw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga05.intel.com ([192.55.52.43]:7690 "EHLO mga05.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752524AbdIANfT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 1 Sep 2017 09:35:19 -0400
-In-Reply-To: <CAPDyKFriJLD-Q76tyUwXkAWJ8D3g=KOMt1rAtmufg97=Wh3jAQ@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="55ep6jw3bdsl2j5j"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFo=UdnVhFU7k+K1=N0e-1sniC+WZjZ4dZKSF8mXhM43Uw@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
+Cc: Kishon Vijay Abraham I <kishon@ti.com>, Ravikumar Kattekola <rk@ti.com>, Sekhar Nori <nsekhar@ti.com>, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Tony Lindgren <tony@atomide.com>, Liam Girdwood <lgirdwood@gmail.com>, Russell King <linux@armlinux.org.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+List-Id: linux-mmc@vger.kernel.org
 
-On 01/09/17 15:58, Ulf Hansson wrote:
-> + Christoph
-> 
-> On 1 September 2017 at 13:42, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> On 31/08/17 14:56, Adrian Hunter wrote:
->>> Here is V7 of the hardware command queue patches without the software
->>> command queue patches, now using blk-mq.
->>>
->>> HW CMDQ offers 25% - 50% better random multi-threaded I/O.  I see a slight
->>> 2% drop in sequential read speed but no change to sequential write.
->>
->> Any comments?
-> 
-> A couple of overall comments, for now.
-> 
-> To make sure we don't overlook something when converting to mq, I
-> would prefer that we first convert the existing mmc block code to mq,
-> then we add CMDQ on top.
 
-That doesn't make sense.  This patch set is not converting the legacy driver
-to mq therefore it cannot overlook anything for converting to mq.
+--55ep6jw3bdsl2j5j
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-> 
-> Regarding patch1. in the long-term solution, we should really strive
-> towards getting rid of the big mmc host lock, as it causes us to lose
-> some of the benefits on which principles mq is designed upon.
+On Fri, Sep 01, 2017 at 03:18:03PM +0200, Ulf Hansson wrote:
+> On 31 August 2017 at 15:50, Mark Brown <broonie@kernel.org> wrote:
+> > On Thu, Aug 31, 2017 at 05:37:34PM +0530, Kishon Vijay Abraham I wrote:
 
-Lose what benefits?
+> >> This patch should be merged along with the 1st patch of the series "mmc: host:
+> >> omap_hsmmc: Remove setting PBIAS voltage". Or else it'll break MMC with
+> >> omap_hsmmc driver.
 
-> However, it may be feasible to use patch1 as an intermediate step, to
-> be able to convert to mq short term. Then we can continue doing the
-> re-factoring, to get rid of the big mmc host lock and solve other
-> relates issues/optimize things. What remains to be seen in this
-> approach, is how well mq performs, as we would still be using the big
-> mmc host lock. We may tolerate some minor regressions, but if too
-> much, there is no other way that first removing the big mmc lock.
+Hang on, how can this break anything?  If it breaks things shouldn't
+there be bugfixes for incorrect constraints somewhere?
 
-Unlike HDDs, eMMC must switch between internal partitions (LUNs) so there
-must a way to arbitrate between them.
+> > I can sign a tag if it's needed for a cross tree merge.
 
-> Of course, if Linus/Christoph don't think this intermediate approach
-> is good enough, we will have to respect that as well.
+> Easier if you could drop it and instead just provide an ack.
+
+> Unless you believes there may conflict in your regulator tree?
+
+My main goal is to get it in during this merge window, this way either
+it goes in via my tree and the rest of the series can go in the next
+release or the whole thing makes this merge window.
+
+The following changes since commit 5771a8c08880cdca3bfb4a3fc6d309d6bba20877:
+
+  Linux v4.13-rc1 (2017-07-15 15:22:10 -0700)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/broonie/regulator.git tags/regulator-pbias-variants
+
+for you to fetch changes up to 27eae9d4b9d4cd9c204ef81f46078d91362ed41c:
+
+  regulator: pbias: Select voltage table based on max-voltage (2017-08-31 11:55:40 +0100)
+
+----------------------------------------------------------------
+regulator: Add support for different OMAP variants in the pbias regulator
+
+----------------------------------------------------------------
+Ravikumar Kattekola (1):
+      regulator: pbias: Select voltage table based on max-voltage
+
+ drivers/regulator/pbias-regulator.c | 21 ++++++++++++++++++---
+ 1 file changed, 18 insertions(+), 3 deletions(-)
+
+--55ep6jw3bdsl2j5j
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCAAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAlmpiXkACgkQJNaLcl1U
+h9DmgAf+MzEBF/Wa45kAX36L/OhlYNU/HDKLh2Cn4sjl4uzReK33+gX4Ildlg2t/
+nmXqx5rZu0eMcGOo+mjVrPFaqGML3R0w/0ulgTxyl5obwR/CzKBK08H6PhXa9sJT
+K5F49zQ6H1m/h7pAjLhtoS0iKh5uwKGcg08h4AWrTrghrDjzNvdCVCo+SFDCg9tU
+99vJZTwn05shxUhdZEW0mdKTn19l5buHvs7l+iXkbtuTi0KTn7LXZdoHzPy+7mla
+Uw8W4xL46jLElm+1l0wejg3MRKOEoSnIasJNAJ6ADfmVQ7bYjhi47H/WfHZucXun
+RifnH+872K4WNQgwN072i2rTPh7WgA==
+=2Dti
+-----END PGP SIGNATURE-----
+
+--55ep6jw3bdsl2j5j--
