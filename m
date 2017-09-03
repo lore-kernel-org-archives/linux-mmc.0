@@ -1,117 +1,60 @@
-From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: Re: [RFC 0/4] mmc: sdhci-msm: Add CQE support for sdhci-msm
-Date: Sat, 2 Sep 2017 10:46:34 +0530
-Message-ID: <150ccb40-bdf5-4668-033c-289a45c8c297@codeaurora.org>
-References: <1504098251-27739-1-git-send-email-riteshh@codeaurora.org>
- <e086ebd1-0602-f1bf-c586-55dbc99c1f73@intel.com>
+From: Colin King <colin.king@canonical.com>
+Subject: [PATCH] mmc: dw_mmc: make const arrays mszs static
+Date: Sun,  3 Sep 2017 14:39:50 +0100
+Message-ID: <20170903133950.7348-1-colin.king@canonical.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.29.96]:55640 "EHLO
-        smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751147AbdIBFQn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 2 Sep 2017 01:16:43 -0400
-In-Reply-To: <e086ebd1-0602-f1bf-c586-55dbc99c1f73@intel.com>
-Content-Language: en-US
+Received: from youngberry.canonical.com ([91.189.89.112]:41299 "EHLO
+        youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752806AbdICNjx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 3 Sep 2017 09:39:53 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, stummala@codeaurora.org, asutoshd@codeaurora.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc: kernel-janitors@vger.kernel.org, linux-kernel@vger.kernel.org
 
+From: Colin Ian King <colin.king@canonical.com>
 
-On 8/31/2017 2:09 PM, Adrian Hunter wrote:
-> On 30/08/17 16:04, Ritesh Harjani wrote:
->> Hi All,
->>
->> Please ignore the previous patch series from a wrong email
->> address. Stupid gitconfig issue. Apologies for the spam.
->>
->> This is RFC patch series based on top of ulfh_mmc/cmdq branch
->> which is based upon Adrian's CMDQ patch series.
->>
->> Below patch series enables CQE for sdhci-msm platform.
->> This has been tested on internal 8996 MTP which has CMDQ support.
->>
->> Fixes w.r.t. CMDQ:-
->> There are some patches identified which were required atleast on
->> MSM platform. I am not sure if these are required for any other
->> CQE platform or not. Patchset 1, 3 & 4 commit text describes
->> the problems.
->>
->> Performance related:-
->> I gave one small shot for performance and the numbers were not looking good.
->> So, unless I have tested for performance completely, I should not discuss
->> on performance numbers as of now with this patchset.
->> I can try doing some more performance testing and post the results -
->> though this may take some while.
-> 
-> You might also need custom Send Status Configuration.
+Don't populate the const arrays mszs on the stack, instead make them
+static. Makes the object code smaller by over 310 bytes:
 
-Yes, I will check that once.
-I think for the single job I/O this may not would have matter much.
-But sure, I will check on this, if re-configuring is needed.
+Before:
+   text	   data	    bss	    dec	    hex	filename
+  47527	   8528	    320	  56375	   dc37	drivers/mmc/host/dw_mmc.o
 
-> 
->>
->> I used below test script for random read/write test.
->>
->> *randwrite-test-script*
->> [global]
->> bs=32k
->> size=1g
->> rw=randwrite
->> direct=1
->> directory=/data/fiotest
-> 
-> Random write results can vary a lot.  It is important to know if the eMMC
-> has lots of un-mapped blocks or not. e.g. for ext4 is the "-o discard"
-> option being used.  I find I get more consistent results if I always have
-> discards enabled.
-> 
->>
->> [file1]
->> filename=singlefile1
->>
->> *randread-test-script*
->> [global]
->> bs=32k
->> size=1g
->> rw=randread
->> directory=/data/fiotest
-> 
-> If you don't set numjobs > 1 then there is little benefit of the queue.
-> Also still need direct=1
+After:
+   text	   data	    bss	    dec	    hex	filename
+  47055	   8688	    320	  56063	   daff	drivers/mmc/host/dw_mmc.o
 
-Yes, silly me. But still I got lower results with single job then.
-But anyways let me again check this out. Thanks.
+Signed-off-by: Colin Ian King <colin.king@canonical.com>
+---
+ drivers/mmc/host/dw_mmc.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-> 
->>
->> [file1]
->> filename=singlefile1
->>
->> @Adrian,
->> Thanks a lot for pursuing and bringing CMDQ patch series to it's final stages :)
->>
->>
->> Ritesh Harjani (4):
->>    mmc: cqhci: Move CQHCI_ENABLE before setting TDLBA/TDLBAU
->>    mmc: sdhci-msm: Add CQHCI support for sdhci-msm
->>    mmc: sdhci-msm: Change the desc_sz on cqe_enable/disable.
->>    mmc: sdhci-msm: Handle unexpected interrupt case on enabling legacy
->>      IRQs on CQE halt
->>
->>   .../devicetree/bindings/mmc/sdhci-msm.txt          |   1 +
->>   drivers/mmc/host/Kconfig                           |   1 +
->>   drivers/mmc/host/cqhci.c                           |   7 +-
->>   drivers/mmc/host/sdhci-msm.c                       | 121 ++++++++++++++++++++-
->>   4 files changed, 125 insertions(+), 5 deletions(-)
->>
-> 
-
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 860313bd952a..45289c5e0295 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -796,7 +796,7 @@ static int dw_mci_edmac_start_dma(struct dw_mci *host,
+ 	struct dma_slave_config cfg;
+ 	struct dma_async_tx_descriptor *desc = NULL;
+ 	struct scatterlist *sgl = host->data->sg;
+-	const u32 mszs[] = {1, 4, 8, 16, 32, 64, 128, 256};
++	static const u32 mszs[] = {1, 4, 8, 16, 32, 64, 128, 256};
+ 	u32 sg_elems = host->data->sg_len;
+ 	u32 fifoth_val;
+ 	u32 fifo_offset = host->fifo_reg - host->regs;
+@@ -1003,7 +1003,7 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
+ static void dw_mci_adjust_fifoth(struct dw_mci *host, struct mmc_data *data)
+ {
+ 	unsigned int blksz = data->blksz;
+-	const u32 mszs[] = {1, 4, 8, 16, 32, 64, 128, 256};
++	static const u32 mszs[] = {1, 4, 8, 16, 32, 64, 128, 256};
+ 	u32 fifo_width = 1 << host->data_shift;
+ 	u32 blksz_depth = blksz / fifo_width, fifoth_val;
+ 	u32 msize = 0, rx_wmark = 1, tx_wmark, tx_wmark_invers;
 -- 
-Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, 
-Inc.
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a 
-Linux Foundation Collaborative Project.
+2.14.1
+
