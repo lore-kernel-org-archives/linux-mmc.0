@@ -1,63 +1,81 @@
-From: Mark Brown <broonie@kernel.org>
-Subject: Re: Applied "regulator: pbias: Select voltage table based on
- max-voltage" to the regulator tree
-Date: Mon, 4 Sep 2017 17:48:09 +0100
-Message-ID: <20170904164809.5coe6vhgyc7iwy6q@sirena.org.uk>
-References: <E1dnO3z-0000tI-7K@debutante>
- <64d9c623-456c-9142-9c5b-a94593628643@ti.com>
- <20170831135050.adiek6iqqzhndgci@sirena.org.uk>
- <CAPDyKFo=UdnVhFU7k+K1=N0e-1sniC+WZjZ4dZKSF8mXhM43Uw@mail.gmail.com>
- <20170901162322.xrjnim4khn3wfslj@sirena.org.uk>
- <f50319d6-9b18-0538-4eb1-6ff4226cac02@ti.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V7 00/10] mmc: Add Command Queue support
+Date: Mon, 4 Sep 2017 21:32:55 +0300
+Message-ID: <e3610014-7eab-6b9f-759a-39771ea2d8df@intel.com>
+References: <1504180616-14514-1-git-send-email-adrian.hunter@intel.com>
+ <ff9eeab1-199a-3ab3-9fa8-cc2f08d52a54@intel.com>
+ <CAPDyKFriJLD-Q76tyUwXkAWJ8D3g=KOMt1rAtmufg97=Wh3jAQ@mail.gmail.com>
+ <19b101f2-f4ea-8360-ccd2-99a085ecc416@intel.com>
+ <8e636dd3-89e1-30b2-2c16-626ea33a12fd@intel.com>
+ <CAPDyKFqVmaTeyA4e3J2ck6tFmO4fnEyOxAkS7zNGtx811MXRMA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="r5bvgvhkxf5hn5ix"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from heliosphere.sirena.org.uk ([172.104.155.198]:39922 "EHLO
-        heliosphere.sirena.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752687AbdIDQsb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Sep 2017 12:48:31 -0400
-Content-Disposition: inline
-In-Reply-To: <f50319d6-9b18-0538-4eb1-6ff4226cac02@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFqVmaTeyA4e3J2ck6tFmO4fnEyOxAkS7zNGtx811MXRMA@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-block-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-mmc@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Ravikumar Kattekola <rk@ti.com>, Sekhar Nori <nsekhar@ti.com>, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Tony Lindgren <tony@atomide.com>, Liam Girdwood <lgirdwood@gmail.com>, Russell King <linux@armlinux.org.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
+On 09/04/2017 04:48 PM, Ulf Hansson wrote:
+> On 4 September 2017 at 09:06, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> On 01/09/17 16:28, Adrian Hunter wrote:
+>>> On 01/09/17 15:58, Ulf Hansson wrote:
+>>>> + Christoph
+>>>>
+>>>> On 1 September 2017 at 13:42, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>>> On 31/08/17 14:56, Adrian Hunter wrote:
+>>>>>> Here is V7 of the hardware command queue patches without the software
+>>>>>> command queue patches, now using blk-mq.
+>>>>>>
+>>>>>> HW CMDQ offers 25% - 50% better random multi-threaded I/O.  I see a slight
+>>>>>> 2% drop in sequential read speed but no change to sequential write.
+>>>>>
+>>>>> Any comments?
+>>>>
+>>>> A couple of overall comments, for now.
+>>>>
+>>>> To make sure we don't overlook something when converting to mq, I
+>>>> would prefer that we first convert the existing mmc block code to mq,
+>>>> then we add CMDQ on top.
+>>>
+>>> That doesn't make sense.  This patch set is not converting the legacy driver
+>>> to mq therefore it cannot overlook anything for converting to mq.
+>>
+>> And then you go silent again.
+> 
+> We have weekends in Sweden - and I also work on other things than mmc :-).
+> 
+> I do however admit, that I could have been reviewing a bit faster
+> throughout the re-spins. Apologize for that, but I am only doing my
+> best.
+> 
+>>
+>> I can send blk-mq support for legacy requests in a few days if you like, but
+>> I want to hear a better explanation of why you are delaying CQE support.
+> 
+> That would be very nice, however be aware of that we are in the merge
+> window, so I am not picking new material for 4.14 from this point. I
+> assume you understand why.
 
---r5bvgvhkxf5hn5ix
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Nope.  This is new functionality - doesn't affect anyone who doesn't have a
+command queue engine.  Next to no chance of regressions.  Tested by several
+in the community.  Substantially unchanged since February.  It is not even
+very much code in the block driver.
 
-On Mon, Sep 04, 2017 at 11:16:54AM +0530, Kishon Vijay Abraham I wrote:
-> On Friday 01 September 2017 09:53 PM, Mark Brown wrote:
+> 
+> Still, big changes is always nice to queue up early for a release
+> cycle. Let's aim for that!
 
-> > Hang on, how can this break anything?  If it breaks things shouldn't
-> > there be bugfixes for incorrect constraints somewhere?
+You said that in February.  Never happened.  You said you wanted blk-mq, so
+I waited to re-base on top, but it never appeared.
 
-> omap_hsmmc sets the pbias voltage to 3V. But here we program the volt table to
-> support either 1.8V or 3.3V (Initially the volt table was programmed to support
-> 3V because of a bug in TRM). So set_voltage of pbias voltage in omap_hsmmc will
-> fail.
+> Moreover, I am not delaying CQE, but really want it to be merged asap!
+> However, I am also having the role as a maintainer and the things that
+> comes with it. For example, I would like the community to reach
+> consensus around how to move forward with CQE, before I decide to pick
+> it up.
 
-Oh, that's appauling.  I guess this is some voltage that doesn't get
-presented to cards because otherwise I'm surprised nobody noticed.
-Anyway I've dropped the commit from my pull request for now, it'll not
-go for v4.14, but the pull request is still there.
-
---r5bvgvhkxf5hn5ix
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCAAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAlmtg8gACgkQJNaLcl1U
-h9B5Zgf/TDLrsvs7hGxL/iwhRobHGhAMdZYWPpy8z1g4OC2XUYp95pT50Ebw6JS2
-R/3Rv6EDJzUHgcA77yWLVqgC9w906a3bbTigKaRY2s+c0I90LwxkXgzOXujlIgQh
-rzebytXHdAEj2EYRu/XdlNtXhsuIcS/OF/28nt5qsFslIp0ZIkh2M4ycXHp5ktn1
-jNu08aZ0mOVH6woHS7w8ZmjCqYXvudIja/4/Rw8GHWAdkAxe147mL9zqx3R0oCe9
-d5Qe1AE0b8Z9l9pmHzARNAcoXfQhSUNYc0e+ZE+LgUk8idE7HhI9i3YSyS7kIv02
-3DBD60YtXVzCrLTCI0XD3UNHvITAQg==
-=PRU/
------END PGP SIGNATURE-----
-
---r5bvgvhkxf5hn5ix--
+It has been more than 6 months.  That is enough time to wait for "consensus".
