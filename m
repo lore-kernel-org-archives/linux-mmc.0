@@ -1,45 +1,46 @@
-From: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
-Subject: Re: Applied "regulator: pbias: Select voltage table based on
- max-voltage" to the regulator tree
-Date: Mon, 4 Sep 2017 11:16:54 +0530
-Message-ID: <f50319d6-9b18-0538-4eb1-6ff4226cac02@ti.com>
-References: <E1dnO3z-0000tI-7K@debutante>
- <64d9c623-456c-9142-9c5b-a94593628643@ti.com>
- <20170831135050.adiek6iqqzhndgci@sirena.org.uk>
- <CAPDyKFo=UdnVhFU7k+K1=N0e-1sniC+WZjZ4dZKSF8mXhM43Uw@mail.gmail.com>
- <20170901162322.xrjnim4khn3wfslj@sirena.org.uk>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V7 00/10] mmc: Add Command Queue support
+Date: Mon, 4 Sep 2017 10:06:25 +0300
+Message-ID: <8e636dd3-89e1-30b2-2c16-626ea33a12fd@intel.com>
+References: <1504180616-14514-1-git-send-email-adrian.hunter@intel.com>
+ <ff9eeab1-199a-3ab3-9fa8-cc2f08d52a54@intel.com>
+ <CAPDyKFriJLD-Q76tyUwXkAWJ8D3g=KOMt1rAtmufg97=Wh3jAQ@mail.gmail.com>
+ <19b101f2-f4ea-8360-ccd2-99a085ecc416@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170901162322.xrjnim4khn3wfslj-GFdadSzt00ze9xe1eoZjHA@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Ravikumar Kattekola <rk-l0cyMroinI0@public.gmane.org>, Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Liam Girdwood <lgirdwood-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-omap <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <19b101f2-f4ea-8360-ccd2-99a085ecc416@intel.com>
+Content-Language: en-US
+Sender: linux-block-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Mark,
-
-On Friday 01 September 2017 09:53 PM, Mark Brown wrote:
-> On Fri, Sep 01, 2017 at 03:18:03PM +0200, Ulf Hansson wrote:
->> On 31 August 2017 at 15:50, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
->>> On Thu, Aug 31, 2017 at 05:37:34PM +0530, Kishon Vijay Abraham I wrote:
+On 01/09/17 16:28, Adrian Hunter wrote:
+> On 01/09/17 15:58, Ulf Hansson wrote:
+>> + Christoph
+>>
+>> On 1 September 2017 at 13:42, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>> On 31/08/17 14:56, Adrian Hunter wrote:
+>>>> Here is V7 of the hardware command queue patches without the software
+>>>> command queue patches, now using blk-mq.
+>>>>
+>>>> HW CMDQ offers 25% - 50% better random multi-threaded I/O.  I see a slight
+>>>> 2% drop in sequential read speed but no change to sequential write.
+>>>
+>>> Any comments?
+>>
+>> A couple of overall comments, for now.
+>>
+>> To make sure we don't overlook something when converting to mq, I
+>> would prefer that we first convert the existing mmc block code to mq,
+>> then we add CMDQ on top.
 > 
->>>> This patch should be merged along with the 1st patch of the series "mmc: host:
->>>> omap_hsmmc: Remove setting PBIAS voltage". Or else it'll break MMC with
->>>> omap_hsmmc driver.
-> 
-> Hang on, how can this break anything?  If it breaks things shouldn't
-> there be bugfixes for incorrect constraints somewhere?
+> That doesn't make sense.  This patch set is not converting the legacy driver
+> to mq therefore it cannot overlook anything for converting to mq.
 
-omap_hsmmc sets the pbias voltage to 3V. But here we program the volt table to
-support either 1.8V or 3.3V (Initially the volt table was programmed to support
-3V because of a bug in TRM). So set_voltage of pbias voltage in omap_hsmmc will
-fail.
+And then you go silent again.
 
-Thanks
-Kishon
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I can send blk-mq support for legacy requests in a few days if you like, but
+I want to hear a better explanation of why you are delaying CQE support.
