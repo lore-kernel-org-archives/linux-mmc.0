@@ -1,90 +1,60 @@
-From: Philippe Reynes <philippe.reynes@sagemcom.com>
-Subject: [RESEND][PATCH] Add a commande extcsd write <offset> <value> <device>
-Date: Tue, 5 Sep 2017 14:28:58 +0200
-Message-ID: <15d06e9d-0cf7-448d-88aa-2856a986b690@EXDRUEARSGC008.eq1sgc.local>
+From: Pali =?utf-8?q?Roh=C3=A1r?= <pali.rohar@gmail.com>
+Subject: Distinguish eMMC and uSD in userspace
+Date: Tue, 5 Sep 2017 16:19:03 +0200
+Message-ID: <201709051619.03417@pali>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: multipart/signed;
+  boundary="nextPart2467708.NcMWabavBP";
+  protocol="application/pgp-signature";
+  micalg=pgp-sha1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sgc-chev-fe1.sgc.gmessaging.net ([194.51.18.91]:50926 "EHLO
-        sgc-chev-fe1.sgc.gmessaging.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751350AbdIEMgd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Sep 2017 08:36:33 -0400
-Received: from sgc-chev-fe1.sgc.gmessaging.net (localhost.localdomain [127.0.0.1])
-        by localhost.sgc.gmessaging.net (Postfix) with SMTP id 3xmmHG3nPzzqF3G
-        for <linux-mmc@vger.kernel.org>; Tue,  5 Sep 2017 14:29:14 +0200 (CEST)
+Received: from mail-wm0-f49.google.com ([74.125.82.49]:38113 "EHLO
+        mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751737AbdIEOTH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Sep 2017 10:19:07 -0400
+Received: by mail-wm0-f49.google.com with SMTP id 187so19976294wmn.1
+        for <linux-mmc@vger.kernel.org>; Tue, 05 Sep 2017 07:19:06 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: chris@printf.net
-Cc: linux-mmc@vger.kernel.org, Philippe Reynes <philippe.reynes@sagemcom.com>
+To: linux-mmc@vger.kernel.org
+Cc: Vratislav Podzimek <vpodzime@redhat.com>
 
-There was a command to read the extcsd and some command
-to enable or configure feature, but not generic write in
-the extcsd. Such generic write may be usefull for the
-manufacturer registers.
+--nextPart2467708.NcMWabavBP
+Content-Type: text/plain;
+  charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
 
-Signed-off-by: Philippe Reynes <philippe.reynes@sagemcom.com>
----
- mmc.c      |    5 +++++
- mmc_cmds.c |   30 ++++++++++++++++++++++++++++++
- 2 files changed, 35 insertions(+)
+Hello!
 
-diff --git a/mmc.c b/mmc.c
-index 50c9c9e..de820eb 100644
---- a/mmc.c
-+++ b/mmc.c
-@@ -58,6 +58,11 @@ static struct Command commands[] = {
- 		"Print extcsd data from <device>.",
- 	  NULL
- 	},
-+	{ do_write_extcsd, -1,
-+	  "extcsd write", "<offset> " "<value> " "<device>\n"
-+		"Write <value> at offset <offset> to <device> extcsd.",
-+	  NULL
-+	},
- 	{ do_writeprotect_boot_get, -1,
- 	  "writeprotect boot get", "<device>\n"
- 		"Print the boot partitions write protect status for <device>.",
-diff --git a/mmc_cmds.c b/mmc_cmds.c
-index 6b86115..ba79ffe 100644
---- a/mmc_cmds.c
-+++ b/mmc_cmds.c
-@@ -1750,6 +1750,36 @@ out_free:
- 	return ret;
- }
- 
-+int do_write_extcsd(int nargs, char **argv)
-+{
-+	int fd, ret;
-+	int offset, value;
-+	char *device;
-+
-+	CHECK(nargs != 4, "Usage: mmc extcsd write <offset> <value> </path/to/mmcblkX>\n",
-+			  exit(1));
-+
-+	offset = strtol(argv[1], NULL, 0);
-+	value  = strtol(argv[2], NULL, 0);
-+	device = argv[3];
-+
-+	fd = open(device, O_RDWR);
-+	if (fd < 0) {
-+		perror("open");
-+		exit(1);
-+	}
-+
-+	ret = write_extcsd_value(fd, offset, value);
-+	if (ret) {
-+		fprintf(stderr,
-+			"Could not write 0x%02x to EXT_CSD[%d] in %s\n",
-+			value, offset, device);
-+		exit(1);
-+	}
-+
-+	return ret;
-+}
-+
- int do_sanitize(int nargs, char **argv)
- {
- 	int fd, ret;
--- 
-1.7.9.5
+I would like to ask... if I get /dev/mmcblk device, how to check in=20
+userspace if it is non-removable eMMC memory or it is removable SD card?
 
+udisks project would like to report correct information and provides=20
+correct "icon" to GUI file managers about state if device is removable=20
+or not.
+
+See reported ticket:
+https://github.com/storaged-project/udisks/issues/358
+
+Apparently RM filed in lsblk nor removable sysfs entry=20
+(/sys/block/mmcblk0/removable) could not be used as both of them could=20
+not be used for distinguish between eMMC or uSD card.
+
+=2D-=20
+Pali Roh=C3=A1r
+pali.rohar@gmail.com
+
+--nextPart2467708.NcMWabavBP
+Content-Type: application/pgp-signature; name=signature.asc 
+Content-Description: This is a digitally signed message part.
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+
+iEYEABECAAYFAlmuslcACgkQi/DJPQPkQ1L+RwCfXpxEESDIDo3sWgvJR8xiv8HD
+dMwAn35FGlxb/h5C7z1M7vS+DXpaWaLo
+=qOjS
+-----END PGP SIGNATURE-----
+
+--nextPart2467708.NcMWabavBP--
