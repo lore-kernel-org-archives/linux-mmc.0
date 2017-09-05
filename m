@@ -1,55 +1,90 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: Re: [PATCH 4/5] mmc: sdhci-omap: Add OMAP SDHCI driver
-Date: Tue, 5 Sep 2017 14:27:05 +0530
-Message-ID: <3782edd2-af90-c6c9-1358-1721a1dae28f@ti.com>
-References: <20170821074132.4622-1-kishon@ti.com>
- <20170821074132.4622-5-kishon@ti.com>
- <4f0a7225-1843-b353-1a2a-9adcb49554d3@intel.com>
- <c7972f00-ef62-1736-822f-ebf6822b6d33@ti.com>
- <dfe1b4e2-bcb5-c969-efe6-7cddd0eb0bf9@intel.com>
+From: Philippe Reynes <philippe.reynes@sagemcom.com>
+Subject: [RESEND][PATCH] Add a commande extcsd write <offset> <value> <device>
+Date: Tue, 5 Sep 2017 14:28:58 +0200
+Message-ID: <15d06e9d-0cf7-448d-88aa-2856a986b690@EXDRUEARSGC008.eq1sgc.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <dfe1b4e2-bcb5-c969-efe6-7cddd0eb0bf9@intel.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: devicetree@vger.kernel.org, Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, linux-mmc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, Ravikumar Kattekola <rk@ti.com>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from sgc-chev-fe1.sgc.gmessaging.net ([194.51.18.91]:50926 "EHLO
+        sgc-chev-fe1.sgc.gmessaging.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751350AbdIEMgd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Sep 2017 08:36:33 -0400
+Received: from sgc-chev-fe1.sgc.gmessaging.net (localhost.localdomain [127.0.0.1])
+        by localhost.sgc.gmessaging.net (Postfix) with SMTP id 3xmmHG3nPzzqF3G
+        for <linux-mmc@vger.kernel.org>; Tue,  5 Sep 2017 14:29:14 +0200 (CEST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: chris@printf.net
+Cc: linux-mmc@vger.kernel.org, Philippe Reynes <philippe.reynes@sagemcom.com>
 
-Hi,
+There was a command to read the extcsd and some command
+to enable or configure feature, but not generic write in
+the extcsd. Such generic write may be usefull for the
+manufacturer registers.
 
-On Thursday 31 August 2017 06:32 PM, Adrian Hunter wrote:
-> On 30/08/17 16:53, Kishon Vijay Abraham I wrote:
->> On Monday 28 August 2017 02:36 PM, Adrian Hunter wrote:
->>> On 21/08/17 10:41, Kishon Vijay Abraham I wrote:
->>>> +
->>>> +static void sdhci_omap_set_clock(struct sdhci_host *host, unsigned int clock)
->>>> +{
->>>> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->>>> +	struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
->>>> +	unsigned long clkdiv;
->>>> +
->>>> +	if (!clock)
->>>> +		return;
->>>
->>> Are you sure you don't want to stop the clock.
->>
->> There is never a case where the MMC core sends a request to stop the clock.
->> Maybe this check is not required at all.
-> 
-> It does when voltage switching e.g. mmc_set_uhs_voltage(), but host drivers
-> should support the possibility anyway.
+Signed-off-by: Philippe Reynes <philippe.reynes@sagemcom.com>
+---
+ mmc.c      |    5 +++++
+ mmc_cmds.c |   30 ++++++++++++++++++++++++++++++
+ 2 files changed, 35 insertions(+)
 
-Indeed! Will fix it and send a new revision once everyone agrees on the dt binding.
+diff --git a/mmc.c b/mmc.c
+index 50c9c9e..de820eb 100644
+--- a/mmc.c
++++ b/mmc.c
+@@ -58,6 +58,11 @@ static struct Command commands[] = {
+ 		"Print extcsd data from <device>.",
+ 	  NULL
+ 	},
++	{ do_write_extcsd, -1,
++	  "extcsd write", "<offset> " "<value> " "<device>\n"
++		"Write <value> at offset <offset> to <device> extcsd.",
++	  NULL
++	},
+ 	{ do_writeprotect_boot_get, -1,
+ 	  "writeprotect boot get", "<device>\n"
+ 		"Print the boot partitions write protect status for <device>.",
+diff --git a/mmc_cmds.c b/mmc_cmds.c
+index 6b86115..ba79ffe 100644
+--- a/mmc_cmds.c
++++ b/mmc_cmds.c
+@@ -1750,6 +1750,36 @@ out_free:
+ 	return ret;
+ }
+ 
++int do_write_extcsd(int nargs, char **argv)
++{
++	int fd, ret;
++	int offset, value;
++	char *device;
++
++	CHECK(nargs != 4, "Usage: mmc extcsd write <offset> <value> </path/to/mmcblkX>\n",
++			  exit(1));
++
++	offset = strtol(argv[1], NULL, 0);
++	value  = strtol(argv[2], NULL, 0);
++	device = argv[3];
++
++	fd = open(device, O_RDWR);
++	if (fd < 0) {
++		perror("open");
++		exit(1);
++	}
++
++	ret = write_extcsd_value(fd, offset, value);
++	if (ret) {
++		fprintf(stderr,
++			"Could not write 0x%02x to EXT_CSD[%d] in %s\n",
++			value, offset, device);
++		exit(1);
++	}
++
++	return ret;
++}
++
+ int do_sanitize(int nargs, char **argv)
+ {
+ 	int fd, ret;
+-- 
+1.7.9.5
 
-Thanks
-Kishon
