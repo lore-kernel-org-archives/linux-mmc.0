@@ -1,43 +1,27 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: 4.13 on thinkpad x220: oops when writing to SD card
-Date: Thu, 7 Sep 2017 17:03:41 +0200
-Message-ID: <CAPDyKFrcY55yJQZOpJmCrL=qhaQxUQEa7wy9SzmiUJSsAniBCQ@mail.gmail.com>
-References: <20170905194739.GA31241@amd> <8f0f7310-ea4d-a200-75fd-23509947fb38@rock-chips.com>
- <6689241f-a4d8-7a3e-9f0b-482b034e5710@intel.com> <CAPDyKFqXaDFrJH1-YSSCx0xPXfMN99AM_Wu_sWQf5A6bw+zjdQ@mail.gmail.com>
- <f36b194b-f74b-20de-3122-0243774b74c2@intel.com> <CAPDyKFp3QdVm3oxkMvozuf+hifJi64Fn8T27Gy7Mq8SVpAYTSQ@mail.gmail.com>
- <20170907125514.GA6587@amd>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH v3 0/3] mmc: Add OMAP SDHCI driver
+Date: Thu, 7 Sep 2017 09:30:13 -0700
+Message-ID: <20170907163009.GQ5024@atomide.com>
+References: <20170906114556.32532-1-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170907125514.GA6587@amd>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Pavel Machek <pavel@ucw.cz>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, kernel list <linux-kernel@vger.kernel.org>, Seraphime Kirkovski <kirkseraph@gmail.com>, Linus Walleij <linus.walleij@linaro.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from muru.com ([72.249.23.125]:40070 "EHLO muru.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750763AbdIGQaR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 7 Sep 2017 12:30:17 -0400
+Content-Disposition: inline
+In-Reply-To: <20170906114556.32532-1-kishon@ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Kishon Vijay Abraham I <kishon@ti.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, Sekhar Nori <nsekhar@ti.com>, Russell King <linux@armlinux.org.uk>, Ravikumar Kattekola <rk@ti.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On 7 September 2017 at 14:55, Pavel Machek <pavel@ucw.cz> wrote:
-> On Thu 2017-09-07 14:06:52, Ulf Hansson wrote:
->> [...]
->>
->> >
->> > From: Adrian Hunter <adrian.hunter@intel.com>
->> > Date: Thu, 7 Sep 2017 10:40:35 +0300
->> > Subject: [PATCH] mmc: block: Fix incorrectly initialized requests
->> >
->> > mmc_init_request() depends on card->bouncesz so it must be calculated
->> > before blk_init_allocated_queue() starts allocating requests.
->> >
->> > Reported-by: Seraphime Kirkovski <kirkseraph@gmail.com>
->> > Fixes: 304419d8a7e92 ("mmc: core: Allocate per-request data using the block layer core")
->> > Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
->>
->> Thanks, applied for fixes!
->
-> Thanks. I believe this one should get cc: stable markups, so
-> eventually 4.13 does get fixed, too....
->                                                                 Pavel
+* Kishon Vijay Abraham I <kishon@ti.com> [170906 04:47]:
+> This is the first step in deprecating omap_hsmmc driver completely
+> and moving to sdhci-omap driver which uses the sdhci library.
 
-Yeah, correct and added!
+Looks good to me. A beverage coming your way at some conf
+on me for sure for dealing with this :)
 
-Kind regards
-Uffe
+Acked-by: Tony Lindgren <tony@atomide.com>
