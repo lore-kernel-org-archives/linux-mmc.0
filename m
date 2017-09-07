@@ -1,114 +1,44 @@
-From: Jan Glauber <jan.glauber@caviumnetworks.com>
-Subject: Re: [PATCH] mmc: cavium: Fix use-after-free in
- of_platform_device_destroy
-Date: Thu, 7 Sep 2017 20:14:09 +0200
-Message-ID: <20170907181409.GA27717@hc>
-References: <20170907112417.21495-1-jglauber@cavium.com>
- <CAL_JsqJcG_dtGA7uje1gEeQUT=7P89-3r8=zuFiGJPu6hmsDUQ@mail.gmail.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: 4.13 on thinkpad x220: oops when writing to SD card
+Date: Thu, 7 Sep 2017 21:58:31 +0200
+Message-ID: <CACRpkdYt_b72zFA6Oqg5rcaqPnz=knr7DWnXp-pjz3gpf89THw@mail.gmail.com>
+References: <20170905194739.GA31241@amd> <8f0f7310-ea4d-a200-75fd-23509947fb38@rock-chips.com>
+ <6689241f-a4d8-7a3e-9f0b-482b034e5710@intel.com> <CAPDyKFqXaDFrJH1-YSSCx0xPXfMN99AM_Wu_sWQf5A6bw+zjdQ@mail.gmail.com>
+ <f36b194b-f74b-20de-3122-0243774b74c2@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn3nam01on0089.outbound.protection.outlook.com ([104.47.33.89]:28736
-        "EHLO NAM01-BN3-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1755172AbdIGSOY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 7 Sep 2017 14:14:24 -0400
-Content-Disposition: inline
-In-Reply-To: <CAL_JsqJcG_dtGA7uje1gEeQUT=7P89-3r8=zuFiGJPu6hmsDUQ@mail.gmail.com>
+Received: from mail-oi0-f49.google.com ([209.85.218.49]:35094 "EHLO
+        mail-oi0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752375AbdIGT6c (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Sep 2017 15:58:32 -0400
+Received: by mail-oi0-f49.google.com with SMTP id z73so970006oia.2
+        for <linux-mmc@vger.kernel.org>; Thu, 07 Sep 2017 12:58:31 -0700 (PDT)
+In-Reply-To: <f36b194b-f74b-20de-3122-0243774b74c2@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Rob Herring <robh+dt@kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, David Daney <david.daney@cavium.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Pavel Machek <pavel@ucw.cz>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, kernel list <linux-kernel@vger.kernel.org>, Seraphime Kirkovski <kirkseraph@gmail.com>
 
-On Thu, Sep 07, 2017 at 11:58:58AM -0500, Rob Herring wrote:
-> On Thu, Sep 7, 2017 at 6:24 AM, Jan Glauber <jglauber@cavium.com> wrote:
-> > KASAN reported the following:
-> >
-> > [   19.338655] ==================================================================
-> > [   19.345946] BUG: KASAN: use-after-free in of_platform_device_destroy+0x88/0x100
-> > [   19.345966] Read of size 8 at addr fffffe01aa6f1468 by task systemd-udevd/264
-> >
-> > [   19.345983] CPU: 1 PID: 264 Comm: systemd-udevd Not tainted 4.13.0-jang+ #737
-> > [   19.345989] Hardware name: Cavium ThunderX CN81XX board (DT)
-> > [   19.345995] Call trace:
-> > [   19.346013] [<fffffc800808b1b0>] dump_backtrace+0x0/0x368
-> > [   19.346026] [<fffffc800808b6bc>] show_stack+0x24/0x30
-> > [   19.346040] [<fffffc8008cbb944>] dump_stack+0xa4/0xc8
-> > [   19.346057] [<fffffc80082c2870>] print_address_description+0x68/0x258
-> > [   19.346070] [<fffffc80082c2d70>] kasan_report+0x238/0x2f8
-> > [   19.346082] [<fffffc80082c14a8>] __asan_load8+0x88/0xb8
-> > [   19.346098] [<fffffc8008aacee0>] of_platform_device_destroy+0x88/0x100
-> > [   19.346131] [<fffffc8000e02fa4>] thunder_mmc_probe+0x314/0x550 [thunderx_mmc]
-> > [   19.346147] [<fffffc800879d560>] pci_device_probe+0x158/0x1f8
-> > [   19.346162] [<fffffc800886e53c>] driver_probe_device+0x394/0x5f8
-> > [   19.346174] [<fffffc800886e8f4>] __driver_attach+0x154/0x158
-> > [   19.346185] [<fffffc800886b12c>] bus_for_each_dev+0xdc/0x140
-> > [   19.346196] [<fffffc800886d9f8>] driver_attach+0x38/0x48
-> > [   19.346207] [<fffffc800886d148>] bus_add_driver+0x290/0x3c8
-> > [   19.346219] [<fffffc800886fc5c>] driver_register+0xbc/0x1a0
-> > [   19.346232] [<fffffc800879b78c>] __pci_register_driver+0xc4/0xd8
-> > [   19.346260] [<fffffc8000e80024>] thunder_mmc_driver_init+0x24/0x10000 [thunderx_mmc]
-> > [   19.346273] [<fffffc8008083a80>] do_one_initcall+0x98/0x1c0
-> > [   19.346289] [<fffffc8008177b54>] do_init_module+0xe0/0x2cc
-> > [   19.346303] [<fffffc8008175cf0>] load_module+0x3238/0x35c0
-> > [   19.346318] [<fffffc8008176438>] SyS_finit_module+0x190/0x1a0
-> > [   19.346329] [<fffffc80080834a0>] __sys_trace_return+0x0/0x4
-> >
-> > This is caused by:
-> >
-> >   platform_device_register()
-> >    -> platform_device_unregister(to_platform_device(dev))
-> >         freeing struct device
-> >    -> of_node_clear_flag(dev->of_node, ...)
-> >         writing to the freed device
-> >
-> > The issue is solved by increasing the reference count before calling
-> > of_platform_device_destroy() so freeing the device is postponed after
-> > the call.
-> >
-> > Fixes: 8fb83b142823 ("mmc: cavium: Fix probing race with regulator")
-> > Signed-off-by: Jan Glauber <jglauber@cavium.com>
-> > ---
-> >  drivers/mmc/host/cavium-thunderx.c | 6 +++++-
-> >  1 file changed, 5 insertions(+), 1 deletion(-)
-> >
-> > diff --git a/drivers/mmc/host/cavium-thunderx.c b/drivers/mmc/host/cavium-thunderx.c
-> > index b9cc95998799..eee08d81b242 100644
-> > --- a/drivers/mmc/host/cavium-thunderx.c
-> > +++ b/drivers/mmc/host/cavium-thunderx.c
-> > @@ -7,6 +7,7 @@
-> >   *
-> >   * Copyright (C) 2016 Cavium Inc.
-> >   */
-> > +#include <linux/device.h>
-> >  #include <linux/dma-mapping.h>
-> >  #include <linux/interrupt.h>
-> >  #include <linux/mmc/mmc.h>
-> > @@ -149,8 +150,11 @@ static int thunder_mmc_probe(struct pci_dev *pdev,
-> >         for (i = 0; i < CAVIUM_MAX_MMC; i++) {
-> >                 if (host->slot[i])
-> >                         cvm_mmc_of_slot_remove(host->slot[i]);
-> > -               if (host->slot_pdev[i])
-> > +               if (host->slot_pdev[i]) {
-> > +                       get_device(&host->slot_pdev[i]->dev);
-> >                         of_platform_device_destroy(&host->slot_pdev[i]->dev, NULL);
-> > +                       put_device(&host->slot_pdev[i]->dev);
-> 
-> Why do you think this is Cavium specific?
+On Thu, Sep 7, 2017 at 9:53 AM, Adrian Hunter <adrian.hunter@intel.com> wrote:
 
-First, the usage in the Cavium driver is quite special. The device
-is not a platform device, I create this as a dummy device because
-mmc_parse_of would not work otherwise.
+> From: Adrian Hunter <adrian.hunter@intel.com>
+> Date: Thu, 7 Sep 2017 10:40:35 +0300
+> Subject: [PATCH] mmc: block: Fix incorrectly initialized requests
+>
+> mmc_init_request() depends on card->bouncesz so it must be calculated
+> before blk_init_allocated_queue() starts allocating requests.
+>
+> Reported-by: Seraphime Kirkovski <kirkseraph@gmail.com>
+> Fixes: 304419d8a7e92 ("mmc: core: Allocate per-request data using the block layer core")
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Second, I assumed the of_node_clear_flag() after removal of the device
-is a more general pattern and only not working for our case because
-of the dummy device hack. I've not looked too closely at the platform
-code, so I might be wrong here.
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 
-> >From my look of it, the problem is in of_platform_device_destroy. We
-> should save the node ptr before the unregister call and use that to
-> clear the flags.
+Really neat and quick fix, thanks a lot Adrian.
 
-This would be a larger patch and would need much more testing I guess.
+My fault for not finding more systems actually *using* these
+bounce buffers. :( :(
 
---Jan
+Yours,
+Linus Walleij
