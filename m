@@ -1,73 +1,45 @@
-From: Pavel Machek <pavel@ucw.cz>
-Subject: Re: 4.13 on thinkpad x220: oops when writing to SD card
-Date: Fri, 8 Sep 2017 11:29:53 +0200
-Message-ID: <20170908092953.GD18365@amd>
-References: <20170906082035.t76xm5umzincncwm@macchiaveli>
+From: Krishna Reddy <vdumpa@nvidia.com>
+Subject: [PATCH] mmc: tegra: Mark 64 bit dma broken on Tegra186
+Date: Fri, 8 Sep 2017 12:48:33 -0700
+Message-ID: <1504900113-8983-1-git-send-email-vdumpa@nvidia.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="SFyWQ0h3ruR435lw"
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20170906082035.t76xm5umzincncwm@macchiaveli>
 Sender: linux-kernel-owner@vger.kernel.org
-To: 6689241f-a4d8-7a3e-9f0b-482b034e5710@intel.com
-Cc: adrian.hunter@intel.com, shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org, thierry.reding@gmail.com, jonathanh@nvidia.com, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Krishna Reddy <vdumpa@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
+SDHCI controllers on Tegra186 support 40 bit addressing.
+IOVA addresses are 48-bit wide on Tegra186.
+SDHCI host common code sets dma mask as either 32-bit or 64-bit.
+To avoid access issues when SMMU is enabled, disable 64-bit dma.
 
---SFyWQ0h3ruR435lw
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Signed-off-by: Krishna Reddy <vdumpa@nvidia.com>
+---
+ drivers/mmc/host/sdhci-tegra.c | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
 
-On Wed 2017-09-06 10:20:35, Seraphime Kirkovski wrote:
-> Hi,
->=20
-> > > Seems 4.13-rc4 was already broken for that but unfortuantely
-> > > I didn't
-> > > reproduce that. So maybe Seraphime can do git-bisect as he said "I=20
-> > > get
-> > > it everytime" for which I assume it could be easy for him to find=20
-> > > out
-> > > the problematic commit?
->=20
-> I can reliably reproduce it, although sometimes it needs some more work.
-> For example, I couldn't trigger it while writing less than 1 gigabyte
-> and sometimes I have to do it more than once. It helps if the machine is
-> doing something else in meantime, I do kernel builds.
->=20
-> > Another unrelated issue with mmc_init_request() is that
-> > mmc_exit_request()
-> > is not called if mmc_init_request() fails, which means=20
-> > mmc_init_request()
-> > must free anything it allocates when it fails.
->=20
-> I'm running your patch for 45 minutes now, it looks like it's fixing the=
-=20
-> issue on 4.13 81a84ad3cb5711cec79.
->=20
-> P.S. Sorry about the formatting, have to fix my editor
-
-Thanks for quick testing :-). And your formatting is still better than
-some...
-
-
-									Pavel
---=20
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blo=
-g.html
-
---SFyWQ0h3ruR435lw
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iEYEARECAAYFAlmyYxEACgkQMOfwapXb+vJvrwCfVgpgcc55/YRWBImhpHpYAMwG
-QRoAoLNQZ1tUCgD+w1Ek9rj6wTWeNXtf
-=YxNZ
------END PGP SIGNATURE-----
-
---SFyWQ0h3ruR435lw--
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index 0cd6fa80db66..b877c13184c2 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -422,7 +422,15 @@ static const struct sdhci_pltfm_data sdhci_tegra186_pdata = {
+ 		  SDHCI_QUIRK_NO_HISPD_BIT |
+ 		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
+ 		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+-	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
++	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
++		   /* SDHCI controllers on Tegra186 support 40-bit addressing.
++		    * IOVA addresses are 48-bit wide on Tegra186.
++		    * With 64-bit dma mask used for SDHCI, accesses can
++		    * be broken. Disable 64-bit dma, which would fall back
++		    * to 32-bit dma mask. Ideally 40-bit dma mask would work,
++		    * But it is not supported as of now.
++		    */
++		   SDHCI_QUIRK2_BROKEN_64_BIT_DMA,
+ 	.ops  = &tegra114_sdhci_ops,
+ };
+ 
+-- 
+2.1.4
