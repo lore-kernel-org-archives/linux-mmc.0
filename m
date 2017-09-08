@@ -1,77 +1,67 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
+From: Pavel Machek <pavel@ucw.cz>
 Subject: Re: 4.13 on thinkpad x220: oops when writing to SD card
-Date: Fri, 8 Sep 2017 10:51:49 +0800
-Message-ID: <b640c98b-c534-9d66-3136-d7ca47387af9@rock-chips.com>
+Date: Fri, 8 Sep 2017 10:51:09 +0200
+Message-ID: <20170908085109.GA16834@amd>
 References: <20170905194739.GA31241@amd>
  <8f0f7310-ea4d-a200-75fd-23509947fb38@rock-chips.com>
  <6689241f-a4d8-7a3e-9f0b-482b034e5710@intel.com>
  <CAPDyKFqXaDFrJH1-YSSCx0xPXfMN99AM_Wu_sWQf5A6bw+zjdQ@mail.gmail.com>
- <CACRpkdb263SS-7H1wcp0THAwzKO7A-kE0DVUdTiuxTnuXtWVVw@mail.gmail.com>
+ <f36b194b-f74b-20de-3122-0243774b74c2@intel.com>
+ <CAPDyKFp3QdVm3oxkMvozuf+hifJi64Fn8T27Gy7Mq8SVpAYTSQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="liOOAslEiF7prFVr"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CACRpkdb263SS-7H1wcp0THAwzKO7A-kE0DVUdTiuxTnuXtWVVw@mail.gmail.com>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFp3QdVm3oxkMvozuf+hifJi64Fn8T27Gy7Mq8SVpAYTSQ@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: shawn.lin@rock-chips.com, Adrian Hunter <adrian.hunter@intel.com>, Pavel Machek <pavel@ucw.cz>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, kernel list <linux-kernel@vger.kernel.org>, Seraphime Kirkovski <kirkseraph@gmail.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, kernel list <linux-kernel@vger.kernel.org>, Seraphime Kirkovski <kirkseraph@gmail.com>, Linus Walleij <linus.walleij@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 2017/9/8 4:02, Linus Walleij wrote:
-> On Thu, Sep 7, 2017 at 9:18 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> 
->> Even if this fixes the problem it seems like we are papering over the
->> real issue, which earlier fixes also did during the release cycle for
->> v4.13.
-> 
-> I think this is the real solution to the issue.
-> 
->>> Another unrelated issue with mmc_init_request() is that mmc_exit_request()
->>> is not called if mmc_init_request() fails, which means mmc_init_request()
->>> must free anything it allocates when it fails.
->>
->> Yes, the situations it's just too fragile. We need to fix the behavior
->> properly, although I haven't myself been able to investigate exactly
->> how yet.
->>
->> Adding, Linus, perhaps he has some ideas.
-> 
-> Maybe we should simply bite the bullet and do what was suggested
-> by another contributor when I refactored the bounce buffer handling:
-> simply delete the bounce buffer code and let any remaining (few?)
-> legacy devices suffer a bit (performancewise) at the gain of way
-> simpler code?
 
-Are you in the same page with what Adrian pointed to?
+--liOOAslEiF7prFVr
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-IIUC, the issue is:
-init_rq_fn will be called each time when trying to create new reuqest
-from the pre-allocated request_list memeory pool, and exit_rq_fn will is
-in the corresponding routine to free request from request_list
-(blk_free_request) when finished. But if alloc_request_size fails, it
-won't call exit_rq_fn, so you need to prevent memory leak on your own
-error path of init_rq_fn.
+On Thu 2017-09-07 14:06:52, Ulf Hansson wrote:
+> [...]
+>=20
+> >
+> > From: Adrian Hunter <adrian.hunter@intel.com>
+> > Date: Thu, 7 Sep 2017 10:40:35 +0300
+> > Subject: [PATCH] mmc: block: Fix incorrectly initialized requests
+> >
+> > mmc_init_request() depends on card->bouncesz so it must be calculated
+> > before blk_init_allocated_queue() starts allocating requests.
+> >
+> > Reported-by: Seraphime Kirkovski <kirkseraph@gmail.com>
+> > Fixes: 304419d8a7e92 ("mmc: core: Allocate per-request data using the b=
+lock layer core")
+> > Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+>=20
+> Thanks, applied for fixes!
 
-But you seem to talk about removing the bounce buffer and so finally
-get rid of registering init_rq_fn/exit_rq_fn? That is another thing,
-and what we right now need to do is to fix the pontential memory leak.
-It's quite a simple action, right? :)
+Tested-by: Pavel Machek <pavel@ucw.cz>
 
+Thanks,
+									Pavel
+--=20
+(english) http://www.livejournal.com/~pavelmachek
+(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blo=
+g.html
 
-> 
-> I am a bit hesitant about that because Pierre Ossman said it was
-> actually a big win on the SDHC hosts that made use of it at one
-> point.
+--liOOAslEiF7prFVr
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
 
-You had removed packed cmd support to simplify the code, so I think
-this is another trade-off need to ask: What you want? and keep
-consistent with the direction you insisted on.
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
 
+iEYEARECAAYFAlmyWf0ACgkQMOfwapXb+vJQxACfXyiTS5MhvJc+sflO25FbPSNA
+XjcAnRLJ6+tGkLBRHBolSN7SAdvzxj9B
+=clFE
+-----END PGP SIGNATURE-----
 
-
-> 
-> Yours,
-> Linus Walleij
-> 
-> 
-> 
+--liOOAslEiF7prFVr--
