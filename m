@@ -1,77 +1,40 @@
-From: Christoph Fritz <chf.fritz@googlemail.com>
-Subject: [PATCH v2] mmc: core: apply NO_CMD23 quirk to an ATP card
-Date: Sun, 10 Sep 2017 01:44:47 +0200
-Message-ID: <1505000687.23171.20.camel@googlemail.com>
-References: <1504998772.4004.2.camel@googlemail.com>
-Reply-To: chf.fritz@googlemail.com
+From: Jerome Brunet <jbrunet@baylibre.com>
+Subject: Re: Problems after recent changes to meson-gx-mmc driver
+Date: Sun, 10 Sep 2017 17:08:25 +0200
+Message-ID: <1505056105.24771.53.camel@baylibre.com>
+References: <e2171288-84ef-82db-2efc-300935e6c062@gmail.com>
+         <1504965959.24771.42.camel@baylibre.com>
+         <763e9339-92a4-c2c4-bbe6-ee9f831148ec@gmail.com>
+         <6a4baa6c-e5f0-fe51-f958-adde9e39b4c9@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wr0-f195.google.com ([209.85.128.195]:37609 "EHLO
-        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751667AbdIIXot (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 9 Sep 2017 19:44:49 -0400
-Received: by mail-wr0-f195.google.com with SMTP id u48so2769797wrf.4
-        for <linux-mmc@vger.kernel.org>; Sat, 09 Sep 2017 16:44:49 -0700 (PDT)
-In-Reply-To: <1504998772.4004.2.camel@googlemail.com>
+Received: from mail-wr0-f178.google.com ([209.85.128.178]:38668 "EHLO
+        mail-wr0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750709AbdIJPI2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 10 Sep 2017 11:08:28 -0400
+Received: by mail-wr0-f178.google.com with SMTP id 108so10517851wra.5
+        for <linux-mmc@vger.kernel.org>; Sun, 10 Sep 2017 08:08:28 -0700 (PDT)
+In-Reply-To: <6a4baa6c-e5f0-fe51-f958-adde9e39b4c9@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: Heiner Kallweit <hkallweit1@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
 
-To get an ATP card work reliable on a high speed bus, CMD23 needs
-to be disabled.
+On Sat, 2017-09-09 at 22:20 +0200, Heiner Kallweit wrote:
+> I checked further and setting the tx clock phase back to 0 fixes the issue for
+> me.
+> ("mmc: meson-gx: change default tx phase" changes it from 0 to 270.)
+> But as you write 0 seems to break certain other systems.
 
-Without this patch:
+That was my second guess ...
 
- $ dd if=/dev/urandom of=/mnt/test bs=1M count=10
+As I mentioned in the commit message, 270 is working fine for the setups I have
+tested but I always wondered if that would be the case for every possible
+setups/boards/modes.
 
-    <mmc0: starting CMD23 arg 00000400 flags 00000015>
-    mmc0: starting CMD25 arg 00a71f00 flags 000000b5
-    mmc0:     blksz 512 blocks 1024 flags 00000100 tsac 3000 ms nsac 0
-    mmc0:     CMD12 arg 00000000 flags 0000049d
-    sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
-    mmc0: Timeout waiting for hardware interrupt.
-
-Signed-off-by: Christoph Fritz <chf.fritz@googlemail.com>
----
-Changes since v1:
- - s/CMD32/CMD23
-
- drivers/mmc/core/card.h   | 1 +
- drivers/mmc/core/quirks.h | 6 ++++++
- 2 files changed, 7 insertions(+)
-
-diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
-index f06cd91..af9c48c 100644
---- a/drivers/mmc/core/card.h
-+++ b/drivers/mmc/core/card.h
-@@ -75,6 +75,7 @@ struct mmc_fixup {
- #define EXT_CSD_REV_ANY (-1u)
- 
- #define CID_MANFID_SANDISK      0x2
-+#define CID_MANFID_ATP          0x9
- #define CID_MANFID_TOSHIBA      0x11
- #define CID_MANFID_MICRON       0x13
- #define CID_MANFID_SAMSUNG      0x15
-diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
-index fb72593..3205f0e 100644
---- a/drivers/mmc/core/quirks.h
-+++ b/drivers/mmc/core/quirks.h
-@@ -52,6 +52,12 @@ static const struct mmc_fixup mmc_blk_fixups[] = {
- 		  MMC_QUIRK_BLK_NO_CMD23),
- 
- 	/*
-+	 * Some SD cards lockup while using CMD23 multiblock transfers.
-+	 */
-+	MMC_FIXUP("AF SD", CID_MANFID_ATP, CID_OEMID_ANY, add_quirk_sd,
-+		  MMC_QUIRK_BLK_NO_CMD23),
-+
-+	/*
- 	 * Some MMC cards need longer data read timeout than indicated in CSD.
- 	 */
- 	MMC_FIXUP(CID_NAME_ANY, CID_MANFID_MICRON, 0x200, add_quirk_mmc,
--- 
-2.1.4
-
+Would you mind testing 90 and 180 as well with your setup ? I'll make another
+pass on the different setups I have access to. Please stick to hs200 and drop
+hs400 for this test. I'm still unsure if doubling the clock after doing the
+tuning may affect the phase tuning ... lets keep that out of the way for now.
