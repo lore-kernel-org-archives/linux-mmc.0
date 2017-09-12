@@ -1,80 +1,74 @@
-From: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-Subject: [PATCH 02/12] arm64: dts: mt8173: remove "mediatek,
- mt8135-mmc" from mmc nodes
-Date: Tue, 12 Sep 2017 17:07:42 +0800
-Message-ID: <1505207272-16983-3-git-send-email-chaotian.jing@mediatek.com>
+From: Chaotian Jing <chaotian.jing@mediatek.com>
+Subject: [PATCH 04/12] mmc: mediatek: make hs400_tune_response only for mt8173
+Date: Tue, 12 Sep 2017 17:07:44 +0800
+Message-ID: <1505207272-16983-5-git-send-email-chaotian.jing@mediatek.com>
 References: <1505207272-16983-1-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <1505207272-16983-1-git-send-email-chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mediatek>,
- <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-mediatek/>
-List-Post: <mailto:linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mediatek>,
- <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-mediatek" <linux-mediatek-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, yong mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Phong LE <ple-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Javier Martinez Canillas <javier-JPH+aEBZ4P+UEJcrhfAQsw@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Heiner Kallweit <hkallweit1-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1505207272-16983-1-git-send-email-chaotian.jing@mediatek.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, srv_heupstream@mediatek.com, Catalin Marinas <catalin.marinas@arm.com>, Linus Walleij <linus.walleij@linaro.org>, Will Deacon <will.deacon@arm.com>, linux-kernel@vger.kernel.org, yong mao <yong.mao@mediatek.com>, Phong LE <ple@baylibre.com>, Javier Martinez Canillas <javier@osg.samsung.com>, Rob Herring <robh+dt@kernel.org>, linux-mediatek@lists.infradead.org, linux-arm-kernel@lists.infradead.org, Matthias Brugger <matthias.bgg@gmail.com>, linux-mmc@vger.kernel.org, Chaotian Jing <chaotian.jing@mediatek.com>, Heiner Kallweit <hkallweit1@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-devicetree bindings has been updated to support multi-platforms,
-so that each platform has its owns compatible name.
-And, this compatible name may used in driver to distinguish with
-other platform.
+the origin design of hs400_tune_response is for mt8173 because of
+mt8173 has a special design. for doing that, we add a new member
+"compatible", by now it's only for mt8173.
 
-Signed-off-by: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
 ---
- arch/arm64/boot/dts/mediatek/mt8173.dtsi | 12 ++++--------
- 1 file changed, 4 insertions(+), 8 deletions(-)
+ drivers/mmc/host/mtk-sd.c | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
 
-diff --git a/arch/arm64/boot/dts/mediatek/mt8173.dtsi b/arch/arm64/boot/dts/mediatek/mt8173.dtsi
-index b99a273..26396ef 100644
---- a/arch/arm64/boot/dts/mediatek/mt8173.dtsi
-+++ b/arch/arm64/boot/dts/mediatek/mt8173.dtsi
-@@ -682,8 +682,7 @@
- 		};
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index 643c795..e8f8ad9 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -317,6 +317,7 @@ struct msdc_delay_phase {
+ struct msdc_host {
+ 	struct device *dev;
+ 	const struct mtk_mmc_compatible *dev_comp;
++	const char *compatible;
+ 	struct mmc_host *mmc;	/* mmc structure */
+ 	int cmd_rsp;
  
- 		mmc0: mmc@11230000 {
--			compatible = "mediatek,mt8173-mmc",
--				     "mediatek,mt8135-mmc";
-+			compatible = "mediatek,mt8173-mmc";
- 			reg = <0 0x11230000 0 0x1000>;
- 			interrupts = <GIC_SPI 71 IRQ_TYPE_LEVEL_LOW>;
- 			clocks = <&pericfg CLK_PERI_MSDC30_0>,
-@@ -693,8 +692,7 @@
- 		};
+@@ -666,7 +667,8 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
+ 		       host->base + PAD_CMD_TUNE);
+ 	}
  
- 		mmc1: mmc@11240000 {
--			compatible = "mediatek,mt8173-mmc",
--				     "mediatek,mt8135-mmc";
-+			compatible = "mediatek,mt8173-mmc";
- 			reg = <0 0x11240000 0 0x1000>;
- 			interrupts = <GIC_SPI 72 IRQ_TYPE_LEVEL_LOW>;
- 			clocks = <&pericfg CLK_PERI_MSDC30_1>,
-@@ -704,8 +702,7 @@
- 		};
+-	if (timing == MMC_TIMING_MMC_HS400)
++	if (timing == MMC_TIMING_MMC_HS400 &&
++	    !strcmp(host->compatible, "mediatek,mt8173-mmc"))
+ 		sdr_set_field(host->base + PAD_CMD_TUNE,
+ 			      MSDC_PAD_TUNE_CMDRRDLY,
+ 			      host->hs400_cmd_int_delay);
+@@ -1594,7 +1596,8 @@ static int msdc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	struct msdc_host *host = mmc_priv(mmc);
+ 	int ret;
  
- 		mmc2: mmc@11250000 {
--			compatible = "mediatek,mt8173-mmc",
--				     "mediatek,mt8135-mmc";
-+			compatible = "mediatek,mt8173-mmc";
- 			reg = <0 0x11250000 0 0x1000>;
- 			interrupts = <GIC_SPI 73 IRQ_TYPE_LEVEL_LOW>;
- 			clocks = <&pericfg CLK_PERI_MSDC30_2>,
-@@ -715,8 +712,7 @@
- 		};
+-	if (host->hs400_mode)
++	if (host->hs400_mode &&
++	    !strcmp(host->compatible, "mediatek,mt8173-mmc"))
+ 		ret = hs400_tune_response(mmc, opcode);
+ 	else
+ 		ret = msdc_tune_response(mmc, opcode);
+@@ -1745,6 +1748,7 @@ static int msdc_drv_probe(struct platform_device *pdev)
  
- 		mmc3: mmc@11260000 {
--			compatible = "mediatek,mt8173-mmc",
--				     "mediatek,mt8135-mmc";
-+			compatible = "mediatek,mt8173-mmc";
- 			reg = <0 0x11260000 0 0x1000>;
- 			interrupts = <GIC_SPI 74 IRQ_TYPE_LEVEL_LOW>;
- 			clocks = <&pericfg CLK_PERI_MSDC30_3>,
+ 	host->dev = &pdev->dev;
+ 	host->dev_comp = of_id->data;
++	host->compatible = of_id->compatible;
+ 	host->mmc = mmc;
+ 	host->src_clk_freq = clk_get_rate(host->src_clk);
+ 	/* Set host parameters to mmc */
 -- 
 1.8.1.1.dirty
