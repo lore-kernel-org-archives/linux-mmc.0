@@ -1,74 +1,178 @@
 From: Chaotian Jing <chaotian.jing@mediatek.com>
-Subject: [PATCH 04/12] mmc: mediatek: make hs400_tune_response only for mt8173
-Date: Tue, 12 Sep 2017 17:07:44 +0800
-Message-ID: <1505207272-16983-5-git-send-email-chaotian.jing@mediatek.com>
+Subject: [PATCH 06/12] mmc: mediatek: add async fifo and data tune support
+Date: Tue, 12 Sep 2017 17:07:46 +0800
+Message-ID: <1505207272-16983-7-git-send-email-chaotian.jing@mediatek.com>
 References: <1505207272-16983-1-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1505207272-16983-1-git-send-email-chaotian.jing@mediatek.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, srv_heupstream@mediatek.com, Catalin Marinas <catalin.marinas@arm.com>, Linus Walleij <linus.walleij@linaro.org>, Will Deacon <will.deacon@arm.com>, linux-kernel@vger.kernel.org, yong mao <yong.mao@mediatek.com>, Phong LE <ple@baylibre.com>, Javier Martinez Canillas <javier@osg.samsung.com>, Rob Herring <robh+dt@kernel.org>, linux-mediatek@lists.infradead.org, linux-arm-kernel@lists.infradead.org, Matthias Brugger <matthias.bgg@gmail.com>, linux-mmc@vger.kernel.org, Chaotian Jing <chaotian.jing@mediatek.com>, Heiner Kallweit <hkallweit1@gmail.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Matthias Brugger <matthias.bgg@gmail.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Chaotian Jing <chaotian.jing@mediatek.com>, yong mao <yong.mao@mediatek.com>, Linus Walleij <linus.walleij@linaro.org>, Javier Martinez Canillas <javier@osg.samsung.com>, Heiner Kallweit <hkallweit1@gmail.com>, Phong LE <ple@baylibre.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, srv_heupstream@mediatek.com
 List-Id: linux-mmc@vger.kernel.org
 
-the origin design of hs400_tune_response is for mt8173 because of
-mt8173 has a special design. for doing that, we add a new member
-"compatible", by now it's only for mt8173.
+mt2701/mt2712 supports async fifo & data tune, which can improve
+host stability.
 
 Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
 ---
- drivers/mmc/host/mtk-sd.c | 8 ++++++--
- 1 file changed, 6 insertions(+), 2 deletions(-)
+ drivers/mmc/host/mtk-sd.c | 52 +++++++++++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 50 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 643c795..e8f8ad9 100644
+index 43144e1..e7462fe 100644
 --- a/drivers/mmc/host/mtk-sd.c
 +++ b/drivers/mmc/host/mtk-sd.c
-@@ -317,6 +317,7 @@ struct msdc_delay_phase {
- struct msdc_host {
- 	struct device *dev;
- 	const struct mtk_mmc_compatible *dev_comp;
-+	const char *compatible;
- 	struct mmc_host *mmc;	/* mmc structure */
- 	int cmd_rsp;
+@@ -74,6 +74,7 @@
+ #define MSDC_DMA_CFG     0x9c
+ #define MSDC_PATCH_BIT   0xb0
+ #define MSDC_PATCH_BIT1  0xb4
++#define MSDC_PATCH_BIT2  0xb8
+ #define MSDC_PAD_TUNE    0xec
+ #define MSDC_PAD_TUNE0   0xf0
+ #define PAD_DS_TUNE      0x188
+@@ -216,11 +217,20 @@
+ #define MSDC_PATCH_BIT_SPCPUSH    (0x1 << 29)	/* RW */
+ #define MSDC_PATCH_BIT_DECRCTMO   (0x1 << 30)	/* RW */
  
-@@ -666,7 +667,8 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
- 		       host->base + PAD_CMD_TUNE);
++#define MSDC_PATCH_BIT2_CFGRESP   (0x1 << 15)   /* RW */
++#define MSDC_PATCH_BIT2_CFGCRCSTS (0x1 << 28)   /* RW */
++#define MSDC_PB2_RESPWAIT         (0x3 << 2)    /* RW */
++#define MSDC_PB2_RESPSTSENSEL     (0x7 << 16)   /* RW */
++#define MSDC_PB2_CRCSTSENSEL      (0x7 << 29)   /* RW */
++
+ #define MSDC_PAD_TUNE_DATWRDLY	  (0x1f <<  0)	/* RW */
+ #define MSDC_PAD_TUNE_DATRRDLY	  (0x1f <<  8)	/* RW */
+ #define MSDC_PAD_TUNE_CMDRDLY	  (0x1f << 16)  /* RW */
+ #define MSDC_PAD_TUNE_CMDRRDLY	  (0x1f << 22)	/* RW */
+ #define MSDC_PAD_TUNE_CLKTDLY	  (0x1f << 27)  /* RW */
++#define MSDC_PAD_TUNE_RXDLYSEL	  (0x1 << 15)   /* RW */
++#define MSDC_PAD_TUNE_RD_SEL	  (0x1 << 13)   /* RW */
++#define MSDC_PAD_TUNE_CMD_SEL	  (0x1 << 21)   /* RW */
+ 
+ #define PAD_DS_TUNE_DLY1	  (0x1f << 2)   /* RW */
+ #define PAD_DS_TUNE_DLY2	  (0x1f << 7)   /* RW */
+@@ -294,6 +304,7 @@ struct msdc_save_para {
+ 	u32 pad_tune;
+ 	u32 patch_bit0;
+ 	u32 patch_bit1;
++	u32 patch_bit2;
+ 	u32 pad_ds_tune;
+ 	u32 pad_cmd_tune;
+ 	u32 emmc50_cfg0;
+@@ -302,6 +313,8 @@ struct msdc_save_para {
+ struct mtk_mmc_compatible {
+ 	u8 clk_div_bits;
+ 	bool pad_tune0;
++	bool async_fifo;
++	bool data_tune;
+ };
+ 
+ struct msdc_tune_para {
+@@ -364,21 +377,29 @@ struct msdc_host {
+ static const struct mtk_mmc_compatible mt8135_compat = {
+ 	.clk_div_bits = 8,
+ 	.pad_tune0 = false,
++	.async_fifo = false,
++	.data_tune = false,
+ };
+ 
+ static const struct mtk_mmc_compatible mt8173_compat = {
+ 	.clk_div_bits = 8,
+ 	.pad_tune0 = false,
++	.async_fifo = false,
++	.data_tune = false,
+ };
+ 
+ static const struct mtk_mmc_compatible mt2701_compat = {
+ 	.clk_div_bits = 12,
+ 	.pad_tune0 = true,
++	.async_fifo = true,
++	.data_tune = true,
+ };
+ 
+ static const struct mtk_mmc_compatible mt2712_compat = {
+ 	.clk_div_bits = 12,
+ 	.pad_tune0 = true,
++	.async_fifo = true,
++	.data_tune = true,
+ };
+ 
+ static const struct of_device_id msdc_of_ids[] = {
+@@ -1253,8 +1274,29 @@ static void msdc_init_hw(struct msdc_host *host)
+ 	sdr_set_field(host->base + MSDC_IOCON, MSDC_IOCON_DDLSEL, 0);
+ 	writel(0x403c0046, host->base + MSDC_PATCH_BIT);
+ 	sdr_set_field(host->base + MSDC_PATCH_BIT, MSDC_CKGEN_MSDC_DLY_SEL, 1);
+-	writel(0xffff0089, host->base + MSDC_PATCH_BIT1);
++	writel(0xffff4089, host->base + MSDC_PATCH_BIT1);
+ 	sdr_set_bits(host->base + EMMC50_CFG0, EMMC50_CFG_CFCSTS_SEL);
++	if (host->dev_comp->async_fifo) {
++		sdr_set_field(host->base + MSDC_PATCH_BIT2,
++			      MSDC_PB2_RESPWAIT, 3);
++		sdr_set_field(host->base + MSDC_PATCH_BIT2,
++			      MSDC_PB2_RESPSTSENSEL, 2);
++		sdr_set_field(host->base + MSDC_PATCH_BIT2,
++			      MSDC_PB2_CRCSTSENSEL, 2);
++		/* use async fifo, then no need tune internal delay */
++		sdr_clr_bits(host->base + MSDC_PATCH_BIT2,
++			     MSDC_PATCH_BIT2_CFGRESP);
++		sdr_set_bits(host->base + MSDC_PATCH_BIT2,
++			     MSDC_PATCH_BIT2_CFGCRCSTS);
++	}
++
++	if (host->dev_comp->data_tune) {
++		sdr_set_bits(host->base + tune_reg,
++			     MSDC_PAD_TUNE_RD_SEL | MSDC_PAD_TUNE_CMD_SEL);
++	} else {
++		/* choose clock tune */
++		sdr_set_bits(host->base + tune_reg, MSDC_PAD_TUNE_RXDLYSEL);
++	}
+ 
+ 	/* Configure to enable SDIO mode.
+ 	 * it's must otherwise sdio cmd5 failed
+@@ -1269,6 +1311,8 @@ static void msdc_init_hw(struct msdc_host *host)
+ 
+ 	host->def_tune_para.iocon = readl(host->base + MSDC_IOCON);
+ 	host->def_tune_para.pad_tune = readl(host->base + tune_reg);
++	host->saved_tune_para.iocon = readl(host->base + MSDC_IOCON);
++	host->saved_tune_para.pad_tune = readl(host->base + tune_reg);
+ 	dev_dbg(host->dev, "init hardware done!");
+ }
+ 
+@@ -1484,7 +1528,7 @@ static int msdc_tune_response(struct mmc_host *mmc, u32 opcode)
+ 			      final_fall_delay.final_phase);
+ 		final_delay = final_fall_delay.final_phase;
  	}
+-	if (host->hs200_cmd_int_delay)
++	if (host->dev_comp->async_fifo || host->hs200_cmd_int_delay)
+ 		goto skip_internal;
  
--	if (timing == MMC_TIMING_MMC_HS400)
-+	if (timing == MMC_TIMING_MMC_HS400 &&
-+	    !strcmp(host->compatible, "mediatek,mt8173-mmc"))
- 		sdr_set_field(host->base + PAD_CMD_TUNE,
- 			      MSDC_PAD_TUNE_CMDRRDLY,
- 			      host->hs400_cmd_int_delay);
-@@ -1594,7 +1596,8 @@ static int msdc_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	struct msdc_host *host = mmc_priv(mmc);
- 	int ret;
+ 	for (i = 0; i < PAD_DELAY_MAX; i++) {
+@@ -1648,6 +1692,8 @@ static int msdc_prepare_hs400_tuning(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	host->hs400_mode = true;
  
--	if (host->hs400_mode)
-+	if (host->hs400_mode &&
-+	    !strcmp(host->compatible, "mediatek,mt8173-mmc"))
- 		ret = hs400_tune_response(mmc, opcode);
- 	else
- 		ret = msdc_tune_response(mmc, opcode);
-@@ -1745,6 +1748,7 @@ static int msdc_drv_probe(struct platform_device *pdev)
+ 	writel(host->hs400_ds_delay, host->base + PAD_DS_TUNE);
++	/* hs400 mode must set it to 0 */
++	sdr_clr_bits(host->base + MSDC_PATCH_BIT2, MSDC_PATCH_BIT2_CFGCRCSTS);
+ 	return 0;
+ }
  
- 	host->dev = &pdev->dev;
- 	host->dev_comp = of_id->data;
-+	host->compatible = of_id->compatible;
- 	host->mmc = mmc;
- 	host->src_clk_freq = clk_get_rate(host->src_clk);
- 	/* Set host parameters to mmc */
+@@ -1889,6 +1935,7 @@ static void msdc_save_reg(struct msdc_host *host)
+ 	host->save_para.pad_tune = readl(host->base + tune_reg);
+ 	host->save_para.patch_bit0 = readl(host->base + MSDC_PATCH_BIT);
+ 	host->save_para.patch_bit1 = readl(host->base + MSDC_PATCH_BIT1);
++	host->save_para.patch_bit2 = readl(host->base + MSDC_PATCH_BIT2);
+ 	host->save_para.pad_ds_tune = readl(host->base + PAD_DS_TUNE);
+ 	host->save_para.pad_cmd_tune = readl(host->base + PAD_CMD_TUNE);
+ 	host->save_para.emmc50_cfg0 = readl(host->base + EMMC50_CFG0);
+@@ -1906,6 +1953,7 @@ static void msdc_restore_reg(struct msdc_host *host)
+ 	writel(host->save_para.pad_tune, host->base + tune_reg);
+ 	writel(host->save_para.patch_bit0, host->base + MSDC_PATCH_BIT);
+ 	writel(host->save_para.patch_bit1, host->base + MSDC_PATCH_BIT1);
++	writel(host->save_para.patch_bit2, host->base + MSDC_PATCH_BIT2);
+ 	writel(host->save_para.pad_ds_tune, host->base + PAD_DS_TUNE);
+ 	writel(host->save_para.pad_cmd_tune, host->base + PAD_CMD_TUNE);
+ 	writel(host->save_para.emmc50_cfg0, host->base + EMMC50_CFG0);
 -- 
 1.8.1.1.dirty
