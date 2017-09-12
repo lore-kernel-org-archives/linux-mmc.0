@@ -1,61 +1,72 @@
-From: Chaotian Jing <chaotian.jing@mediatek.com>
-Subject: [PATCH 10/12] mmc: mediatek: add latch-ck support
-Date: Tue, 12 Sep 2017 17:07:50 +0800
-Message-ID: <1505207272-16983-11-git-send-email-chaotian.jing@mediatek.com>
-References: <1505207272-16983-1-git-send-email-chaotian.jing@mediatek.com>
+From: Vijay Viswanath <vviswana@codeaurora.org>
+Subject: Re: [PATCH v1 0/5] mmc: sdhci-msm: Corrections to implementation of
+ power irq
+Date: Tue, 12 Sep 2017 14:57:09 +0530
+Message-ID: <45f67de0-ba85-74b8-0dea-5b8e8a337dbe@codeaurora.org>
+References: <1504097509-58983-1-git-send-email-vviswana@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailgw01.mediatek.com ([210.61.82.183]:23170 "EHLO
-        mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1751562AbdILJI1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Sep 2017 05:08:27 -0400
-In-Reply-To: <1505207272-16983-1-git-send-email-chaotian.jing@mediatek.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1504097509-58983-1-git-send-email-vviswana@codeaurora.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org, will.deacon@arm.com
+Cc: riteshh@codeaurora.org, linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, stummala@codeaurora.org, subhashj@codeaurora.org, linux-arm-kernel@lists.infradead.org, asutoshd@codeaurora.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Matthias Brugger <matthias.bgg@gmail.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Chaotian Jing <chaotian.jing@mediatek.com>, yong mao <yong.mao@mediatek.com>, Linus Walleij <linus.walleij@linaro.org>, Javier Martinez Canillas <javier@osg.samsung.com>, Heiner Kallweit <hkallweit1@gmail.com>, Phong LE <ple@baylibre.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, srv_heupstream@mediatek.com
 
-some platform(eg.mt2701) does not support "stop clk fix", in
-this case, need set correct latch-ck to avoid crc error caused
-by stop clock block-internally.
+Hi Adrian, Ulf,
 
-Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
----
- drivers/mmc/host/mtk-sd.c | 6 ++++++
- 1 file changed, 6 insertions(+)
+I have addressed the comments on previous patch series. Can you please 
+tell how I should proceed from here?
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 522fd0a..3328d59 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -378,6 +378,7 @@ struct msdc_host {
- 	u32 sclk;		/* SD/MS bus clock frequency */
- 	unsigned char timing;
- 	bool vqmmc_enabled;
-+	u32 latch_ck;
- 	u32 hs400_ds_delay;
- 	u32 hs200_cmd_int_delay; /* cmd internal delay for HS200/SDR104 */
- 	u32 hs400_cmd_int_delay; /* cmd internal delay for HS400 */
-@@ -1668,6 +1669,8 @@ static int msdc_tune_data(struct mmc_host *mmc, u32 opcode)
- 	if (host->dev_comp->pad_tune0)
- 		tune_reg = MSDC_PAD_TUNE0;
- 
-+	sdr_set_field(host->base + MSDC_PATCH_BIT, MSDC_INT_DAT_LATCH_CK_SEL,
-+		      host->latch_ck);
- 	sdr_clr_bits(host->base + MSDC_IOCON, MSDC_IOCON_DSPL);
- 	sdr_clr_bits(host->base + MSDC_IOCON, MSDC_IOCON_W_DSPL);
- 	for (i = 0 ; i < PAD_DELAY_MAX; i++) {
-@@ -1783,6 +1786,9 @@ static void msdc_hw_reset(struct mmc_host *mmc)
- static void msdc_of_property_parse(struct platform_device *pdev,
- 				   struct msdc_host *host)
- {
-+	of_property_read_u32(pdev->dev.of_node, "mediatek,latch-ck",
-+			     &host->latch_ck);
-+
- 	of_property_read_u32(pdev->dev.of_node, "hs400-ds-delay",
- 			     &host->hs400_ds_delay);
- 
--- 
-1.8.1.1.dirty
+Thanks,
+Vijay
 
+On 8/30/2017 6:21 PM, Vijay Viswanath wrote:
+> Register writes which change voltage of IO lines or turn the IO bus on/off
+> require sdhc controller to be ready before progressing further. Once a
+> register write which affects IO lines is done, the driver should wait for
+> power irq from controller. Once the irq comes, the driver should acknowledge
+> the irq by writing to power control register. If the acknowledgement is not
+> given to controller, the controller may not complete the corresponding
+> register write action and this can mess up the controller if drivers proceeds
+> without power irq completing.
+> 
+> Changes since RFC:
+> 	wait_for_completion_timeout replaced with wait_event_timeout when
+> 	waiting for power irq.
+> 	Removed the spinlock within power irq handler and API which waits
+> 	for power irq.
+> 	Added comments to sdhci msm register write functions, warning that they
+> 	can sleep.
+> 	Sdhci msm register write functions will do a memory barrier before
+> 	writing to the register if the particular register can trigger
+> 	power irq.
+> 	Instead of enabling SDHCI IO ACCESSORS config in arm64/defconfig, it
+> 	will be selected in mmc/host/Kconfig if the platform is MMC_SDHCI_MSM.
+> 
+> 
+> Sahitya Tummala (2):
+>    mmc: sdhci-msm: Fix HW issue with power IRQ handling during reset
+>    mmc: sdhci-msm: Add support to wait for power irq
+> 
+> Subhash Jadavani (1):
+>    mmc: sdhci-msm: fix issue with power irq
+> 
+> Vijay Viswanath (2):
+>    mmc: sdhci-msm: Add ops to do sdhc register write
+>    mmc: Kconfig: Enable CONFIG_MMC_SDHCI_IO_ACCESSORS
+> 
+>   drivers/mmc/host/Kconfig     |   1 +
+>   drivers/mmc/host/sdhci-msm.c | 253 ++++++++++++++++++++++++++++++++++++++++++-
+>   2 files changed, 249 insertions(+), 5 deletions(-)
+> 
