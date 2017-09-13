@@ -1,51 +1,77 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V8 03/14] mmc: mmc: Enable Command Queuing
-Date: Wed, 13 Sep 2017 14:40:03 +0300
-Message-ID: <1505302814-19313-4-git-send-email-adrian.hunter@intel.com>
-References: <1505302814-19313-1-git-send-email-adrian.hunter@intel.com>
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <1505302814-19313-1-git-send-email-adrian.hunter@intel.com>
-Sender: linux-block-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
+From: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 01/12] mmc: dt-bindings: update Mediatek MMC bindings
+Date: Wed, 13 Sep 2017 09:10:26 -0500
+Message-ID: <20170913141026.43oh4n4foipmahsk@rob-hp-laptop>
+References: <1505207272-16983-1-git-send-email-chaotian.jing@mediatek.com>
+ <1505207272-16983-2-git-send-email-chaotian.jing@mediatek.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1505207272-16983-2-git-send-email-chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, yong mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Javier Martinez Canillas <javier-JPH+aEBZ4P+UEJcrhfAQsw@public.gmane.org>, Heiner Kallweit <hkallweit1-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Phong LE <ple-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Enable the Command Queue if the host controller supports a command queue
-engine. It is not compatible with Packed Commands, so make a note of that in the
-comment.
+On Tue, Sep 12, 2017 at 05:07:41PM +0800, Chaotian Jing wrote:
+> Change the comptiable for support of multi-platform
+> Add description for reg
+> Add description for source_cg
+> Add description for mediatek,latch-ck
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/core/mmc.c | 17 +++++++++++++++++
- 1 file changed, 17 insertions(+)
+This is at least the 3rd patch with exactly the same vague subject. 
+Please make the subject somewhat unique.
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index a7eb623f8daa..194cf2082e73 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1784,6 +1784,23 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 	}
- 
- 	/*
-+	 * Enable Command Queue if supported. Note that Packed Commands cannot
-+	 * be used with Command Queue.
-+	 */
-+	card->ext_csd.cmdq_en = false;
-+	if (card->ext_csd.cmdq_support && host->caps2 & MMC_CAP2_CQE) {
-+		err = mmc_cmdq_enable(card);
-+		if (err && err != -EBADMSG)
-+			goto free_card;
-+		if (err) {
-+			pr_warn("%s: Enabling CMDQ failed\n",
-+				mmc_hostname(card->host));
-+			card->ext_csd.cmdq_support = false;
-+			card->ext_csd.cmdq_depth = 0;
-+			err = 0;
-+		}
-+	}
-+	/*
- 	 * In some cases (e.g. RPMB or mmc_test), the Command Queue must be
- 	 * disabled for a time, so a flag is needed to indicate to re-enable the
- 	 * Command Queue.
--- 
-1.9.1
+> 
+> Signed-off-by: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+> ---
+>  Documentation/devicetree/bindings/mmc/mtk-sd.txt | 13 ++++++++++---
+>  1 file changed, 10 insertions(+), 3 deletions(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.txt b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+> index 4182ea3..405cd06 100644
+> --- a/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+> @@ -7,10 +7,15 @@ This file documents differences between the core properties in mmc.txt
+>  and the properties used by the msdc driver.
+>  
+>  Required properties:
+> -- compatible: Should be "mediatek,mt8173-mmc","mediatek,mt8135-mmc"
+> +- compatible: value should be either of the following.
+> +	"mediatek,mt8135-mmc": for mmc host ip compatible with mt8135
+> +	"mediatek,mt8173-mmc": for mmc host ip compatible with mt8173
+> +	"mediatek,mt2701-mmc": for mmc host ip compatible with mt2701
+> +	"mediatek,mt2712-mmc": for mmc host ip compatible with mt2712
+> +- reg: physical base address of the controller and length
+>  - interrupts: Should contain MSDC interrupt number
+> -- clocks: MSDC source clock, HCLK
+> -- clock-names: "source", "hclk"
+> +- clocks: MSDC source clock, HCLK, source_cg
+> +- clock-names: "source", "hclk", "source_cg"
+
+All chips support source_cg? That's not backwards compatible for 
+existing compatible strings if the driver requires it.
+
+>  - pinctrl-names: should be "default", "state_uhs"
+>  - pinctrl-0: should contain default/high speed pin ctrl
+>  - pinctrl-1: should contain uhs mode pin ctrl
+> @@ -30,6 +35,8 @@ Optional properties:
+>  - mediatek,hs400-cmd-resp-sel-rising:  HS400 command response sample selection
+>  				       If present,HS400 command responses are sampled on rising edges.
+>  				       If not present,HS400 command responses are sampled on falling edges.
+> +- mediatek,latch-ck: Some projects do not support enhance_rx, need set correct latch-ck to avoid data crc
+
+What's a project?
+
+> +		     error caused by stop clock(fifo full)
+>  
+>  Examples:
+>  mmc0: mmc@11230000 {
+> -- 
+> 1.8.1.1.dirty
+> 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
