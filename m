@@ -1,72 +1,80 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V8 04/14] mmc: mmc: Enable CQE's
-Date: Wed, 13 Sep 2017 14:40:04 +0300
-Message-ID: <1505302814-19313-5-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V8 06/14] mmc: block: Prepare CQE data
+Date: Wed, 13 Sep 2017 14:40:06 +0300
+Message-ID: <1505302814-19313-7-git-send-email-adrian.hunter@intel.com>
 References: <1505302814-19313-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga01.intel.com ([192.55.52.88]:35944 "EHLO mga01.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752047AbdIMLrQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 13 Sep 2017 07:47:16 -0400
+        id S1752249AbdIMLr0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 13 Sep 2017 07:47:26 -0400
 In-Reply-To: <1505302814-19313-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 
-Enable or disable CQE when a card is added or removed respectively.
+Enhance mmc_blk_data_prep() to support CQE requests. That means adding
+some things that for non-CQE requests would be encoded into the command
+arguments - such as the block address, reliable-write flag, and data tag
+flag. Also the request tag is needed to provide the command queue task id,
+and a comment is added to explain the future possibility of defining a
+priority.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/bus.c |  7 +++++++
- drivers/mmc/core/mmc.c | 12 ++++++++++++
- 2 files changed, 19 insertions(+)
+ drivers/mmc/core/block.c | 16 +++++++++++++++-
+ 1 file changed, 15 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-index 301246513a37..a4b49e25fe96 100644
---- a/drivers/mmc/core/bus.c
-+++ b/drivers/mmc/core/bus.c
-@@ -369,10 +369,17 @@ int mmc_add_card(struct mmc_card *card)
-  */
- void mmc_remove_card(struct mmc_card *card)
- {
-+	struct mmc_host *host = card->host;
-+
- #ifdef CONFIG_DEBUG_FS
- 	mmc_remove_card_debugfs(card);
- #endif
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 1ec5f0bc98d2..2424c7360687 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -1554,6 +1554,7 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
+ 	memset(brq, 0, sizeof(struct mmc_blk_request));
  
-+	if (host->cqe_enabled) {
-+		host->cqe_ops->cqe_disable(host);
-+		host->cqe_enabled = false;
+ 	brq->mrq.data = &brq->data;
++	brq->mrq.tag = req->tag;
+ 
+ 	brq->stop.opcode = MMC_STOP_TRANSMISSION;
+ 	brq->stop.arg = 0;
+@@ -1568,6 +1569,14 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
+ 
+ 	brq->data.blksz = 512;
+ 	brq->data.blocks = blk_rq_sectors(req);
++	brq->data.blk_addr = blk_rq_pos(req);
++
++	/*
++	 * The command queue supports 2 priorities: "high" (1) and "simple" (0).
++	 * The eMMC will give "high" priority tasks priority over "simple"
++	 * priority tasks. Here we always set "simple" priority by not setting
++	 * MMC_DATA_PRIO.
++	 */
+ 
+ 	/*
+ 	 * The block layer doesn't support all sector count
+@@ -1597,8 +1606,10 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
+ 						brq->data.blocks);
+ 	}
+ 
+-	if (do_rel_wr)
++	if (do_rel_wr) {
+ 		mmc_apply_rel_rw(brq, card, req);
++		brq->data.flags |= MMC_DATA_REL_WR;
 +	}
-+
- 	if (mmc_card_present(card)) {
- 		if (mmc_host_is_spi(card->host)) {
- 			pr_info("%s: SPI card removed\n",
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 194cf2082e73..0dcbd25126a1 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1807,6 +1807,18 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 	 */
- 	card->reenable_cmdq = card->ext_csd.cmdq_en;
  
-+	if (card->ext_csd.cmdq_en && !host->cqe_enabled) {
-+		err = host->cqe_ops->cqe_enable(host, card);
-+		if (err) {
-+			pr_err("%s: Failed to enable CQE, error %d\n",
-+				mmc_hostname(host), err);
-+		} else {
-+			host->cqe_enabled = true;
-+			pr_info("%s: Command Queue Engine enabled\n",
-+				mmc_hostname(host));
-+		}
-+	}
-+
- 	if (!oldcard)
- 		host->card = card;
+ 	/*
+ 	 * Data tag is used only during writing meta data to speed
+@@ -1610,6 +1621,9 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
+ 		      ((brq->data.blocks * brq->data.blksz) >=
+ 		       card->ext_csd.data_tag_unit_size);
  
++	if (do_data_tag)
++		brq->data.flags |= MMC_DATA_DAT_TAG;
++
+ 	mmc_set_data_timeout(&brq->data, card);
+ 
+ 	brq->data.sg = mqrq->sg;
 -- 
 1.9.1
 
