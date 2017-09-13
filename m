@@ -1,241 +1,72 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V8 01/14] mmc: core: Introduce host claiming by context
-Date: Wed, 13 Sep 2017 14:40:01 +0300
-Message-ID: <1505302814-19313-2-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V8 04/14] mmc: mmc: Enable CQE's
+Date: Wed, 13 Sep 2017 14:40:04 +0300
+Message-ID: <1505302814-19313-5-git-send-email-adrian.hunter@intel.com>
 References: <1505302814-19313-1-git-send-email-adrian.hunter@intel.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga01.intel.com ([192.55.52.88]:35944 "EHLO mga01.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752047AbdIMLrQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 13 Sep 2017 07:47:16 -0400
 In-Reply-To: <1505302814-19313-1-git-send-email-adrian.hunter@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
-List-Id: linux-mmc@vger.kernel.org
 
-Currently the host can be claimed by a task.  Change this so that the host
-can be claimed by a context that may or may not be a task.  This provides
-for the host to be claimed by a block driver queue to support blk-mq, while
-maintaining compatibility with the existing use of mmc_claim_host().
+Enable or disable CQE when a card is added or removed respectively.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/core.c  | 92 ++++++++++++++++++++++++++++++++++++++++++++----
- drivers/mmc/core/core.h  |  6 ++++
- include/linux/mmc/host.h |  7 +++-
- 3 files changed, 97 insertions(+), 8 deletions(-)
+ drivers/mmc/core/bus.c |  7 +++++++
+ drivers/mmc/core/mmc.c | 12 ++++++++++++
+ 2 files changed, 19 insertions(+)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 66c9cf49ad2f..09fdc467b804 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -832,9 +832,38 @@ unsigned int mmc_align_data_size(struct mmc_card *card, unsigned int sz)
- }
- EXPORT_SYMBOL(mmc_align_data_size);
- 
-+/*
-+ * Allow claiming an already claimed host if the context is the same or there is
-+ * no context but the task is the same.
-+ */
-+static inline bool mmc_ctx_matches(struct mmc_host *host, struct mmc_ctx *ctx,
-+				   struct task_struct *task)
-+{
-+	return host->claimer == ctx ||
-+	       (!ctx && task && host->claimer->task == task);
-+}
-+
-+static inline void mmc_ctx_set_claimer(struct mmc_host *host,
-+				       struct mmc_ctx *ctx,
-+				       struct task_struct *task)
-+{
-+	if (!host->claimer) {
-+		if (ctx)
-+			host->claimer = ctx;
-+		else
-+			host->claimer = &host->default_ctx;
-+	}
-+	if (task)
-+		host->claimer->task = task;
-+}
-+
- /**
-- *	__mmc_claim_host - exclusively claim a host
-+ *	__mmc_ctx_task_claim_host - exclusively claim a host
-  *	@host: mmc host to claim
-+ *	@ctx: context that claims the host or NULL in which case the default
-+ *	context will be used
-+ *	@task: task that claims the host or NULL in which case @ctx must be
-+ *	provided
-  *	@abort: whether or not the operation should be aborted
-  *
-  *	Claim a host for a set of operations.  If @abort is non null and
-@@ -842,7 +871,8 @@ unsigned int mmc_align_data_size(struct mmc_card *card, unsigned int sz)
-  *	that non-zero value without acquiring the lock.  Returns zero
-  *	with the lock held otherwise.
+diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+index 301246513a37..a4b49e25fe96 100644
+--- a/drivers/mmc/core/bus.c
++++ b/drivers/mmc/core/bus.c
+@@ -369,10 +369,17 @@ int mmc_add_card(struct mmc_card *card)
   */
--int __mmc_claim_host(struct mmc_host *host, atomic_t *abort)
-+static int __mmc_ctx_task_claim_host(struct mmc_host *host, struct mmc_ctx *ctx,
-+				     struct task_struct *task, atomic_t *abort)
+ void mmc_remove_card(struct mmc_card *card)
  {
- 	DECLARE_WAITQUEUE(wait, current);
- 	unsigned long flags;
-@@ -856,7 +886,7 @@ int __mmc_claim_host(struct mmc_host *host, atomic_t *abort)
- 	while (1) {
- 		set_current_state(TASK_UNINTERRUPTIBLE);
- 		stop = abort ? atomic_read(abort) : 0;
--		if (stop || !host->claimed || host->claimer == current)
-+		if (stop || !host->claimed || mmc_ctx_matches(host, ctx, task))
- 			break;
- 		spin_unlock_irqrestore(&host->lock, flags);
- 		schedule();
-@@ -865,7 +895,7 @@ int __mmc_claim_host(struct mmc_host *host, atomic_t *abort)
- 	set_current_state(TASK_RUNNING);
- 	if (!stop) {
- 		host->claimed = 1;
--		host->claimer = current;
-+		mmc_ctx_set_claimer(host, ctx, task);
- 		host->claim_cnt += 1;
- 		if (host->claim_cnt == 1)
- 			pm = true;
-@@ -879,8 +909,19 @@ int __mmc_claim_host(struct mmc_host *host, atomic_t *abort)
- 
- 	return stop;
- }
++	struct mmc_host *host = card->host;
 +
-+int __mmc_claim_host(struct mmc_host *host, atomic_t *abort)
-+{
-+	return __mmc_ctx_task_claim_host(host, NULL, current, abort);
-+}
- EXPORT_SYMBOL(__mmc_claim_host);
- 
-+void mmc_ctx_claim_host(struct mmc_host *host, struct mmc_ctx *ctx)
-+{
-+	__mmc_ctx_task_claim_host(host, ctx, NULL, NULL);
-+}
-+EXPORT_SYMBOL(mmc_ctx_claim_host);
-+
- /**
-  *	mmc_release_host - release a host
-  *	@host: mmc host to release
-@@ -888,18 +929,17 @@ int __mmc_claim_host(struct mmc_host *host, atomic_t *abort)
-  *	Release a MMC host, allowing others to claim the host
-  *	for their operations.
-  */
--void mmc_release_host(struct mmc_host *host)
-+static void __mmc_release_host(struct mmc_host *host)
- {
- 	unsigned long flags;
- 
--	WARN_ON(!host->claimed);
--
- 	spin_lock_irqsave(&host->lock, flags);
- 	if (--host->claim_cnt) {
- 		/* Release for nested claim */
- 		spin_unlock_irqrestore(&host->lock, flags);
- 	} else {
- 		host->claimed = 0;
-+		host->claimer->task = NULL;
- 		host->claimer = NULL;
- 		spin_unlock_irqrestore(&host->lock, flags);
- 		wake_up(&host->wq);
-@@ -907,8 +947,23 @@ void mmc_release_host(struct mmc_host *host)
- 		pm_runtime_put_autosuspend(mmc_dev(host));
- 	}
- }
-+
-+void mmc_release_host(struct mmc_host *host)
-+{
-+	WARN_ON(!host->claimed);
-+
-+	__mmc_release_host(host);
-+}
- EXPORT_SYMBOL(mmc_release_host);
- 
-+void mmc_ctx_release_host(struct mmc_host *host, struct mmc_ctx *ctx)
-+{
-+	WARN_ON(!host->claimed || host->claimer != ctx);
-+
-+	__mmc_release_host(host);
-+}
-+EXPORT_SYMBOL(mmc_ctx_release_host);
-+
- /*
-  * This is a helper function, which fetches a runtime pm reference for the
-  * card device and also claims the host.
-@@ -921,6 +976,17 @@ void mmc_get_card(struct mmc_card *card)
- EXPORT_SYMBOL(mmc_get_card);
- 
- /*
-+ * This is a helper function, which fetches a runtime pm reference for the
-+ * card device and also claims the host for the mmc context.
-+ */
-+void mmc_ctx_get_card(struct mmc_card *card, struct mmc_ctx *ctx)
-+{
-+	pm_runtime_get_sync(&card->dev);
-+	mmc_ctx_claim_host(card->host, ctx);
-+}
-+EXPORT_SYMBOL(mmc_ctx_get_card);
-+
-+/*
-  * This is a helper function, which releases the host and drops the runtime
-  * pm reference for the card device.
-  */
-@@ -933,6 +999,18 @@ void mmc_put_card(struct mmc_card *card)
- EXPORT_SYMBOL(mmc_put_card);
- 
- /*
-+ * This is a helper function, which releases the host and drops the runtime
-+ * pm reference for the card device.
-+ */
-+void mmc_ctx_put_card(struct mmc_card *card, struct mmc_ctx *ctx)
-+{
-+	mmc_ctx_release_host(card->host, ctx);
-+	pm_runtime_mark_last_busy(&card->dev);
-+	pm_runtime_put_autosuspend(&card->dev);
-+}
-+EXPORT_SYMBOL(mmc_ctx_put_card);
-+
-+/*
-  * Internal function that does the actual ios call to the host driver,
-  * optionally printing some debug output.
-  */
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index ca861091a776..a294c836a143 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -144,4 +144,10 @@ static inline void mmc_claim_host(struct mmc_host *host)
- 	__mmc_claim_host(host, NULL);
- }
- 
-+void mmc_ctx_claim_host(struct mmc_host *host, struct mmc_ctx *ctx);
-+void mmc_ctx_release_host(struct mmc_host *host, struct mmc_ctx *ctx);
-+
-+void mmc_ctx_get_card(struct mmc_card *card, struct mmc_ctx *ctx);
-+void mmc_ctx_put_card(struct mmc_card *card, struct mmc_ctx *ctx);
-+
+ #ifdef CONFIG_DEBUG_FS
+ 	mmc_remove_card_debugfs(card);
  #endif
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index f3f2d07feb2a..228a493c3b25 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -255,6 +255,10 @@ struct mmc_supply {
- 	struct regulator *vqmmc;	/* Optional Vccq supply */
- };
  
-+struct mmc_ctx {
-+	struct task_struct *task;
-+};
++	if (host->cqe_enabled) {
++		host->cqe_ops->cqe_disable(host);
++		host->cqe_enabled = false;
++	}
 +
- struct mmc_host {
- 	struct device		*parent;
- 	struct device		class_dev;
-@@ -388,8 +392,9 @@ struct mmc_host {
- 	struct mmc_card		*card;		/* device attached to this host */
+ 	if (mmc_card_present(card)) {
+ 		if (mmc_host_is_spi(card->host)) {
+ 			pr_info("%s: SPI card removed\n",
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 194cf2082e73..0dcbd25126a1 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1807,6 +1807,18 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 	 */
+ 	card->reenable_cmdq = card->ext_csd.cmdq_en;
  
- 	wait_queue_head_t	wq;
--	struct task_struct	*claimer;	/* task that has host claimed */
-+	struct mmc_ctx		*claimer;	/* context that has host claimed */
- 	int			claim_cnt;	/* "claim" nesting count */
-+	struct mmc_ctx		default_ctx;	/* default context */
++	if (card->ext_csd.cmdq_en && !host->cqe_enabled) {
++		err = host->cqe_ops->cqe_enable(host, card);
++		if (err) {
++			pr_err("%s: Failed to enable CQE, error %d\n",
++				mmc_hostname(host), err);
++		} else {
++			host->cqe_enabled = true;
++			pr_info("%s: Command Queue Engine enabled\n",
++				mmc_hostname(host));
++		}
++	}
++
+ 	if (!oldcard)
+ 		host->card = card;
  
- 	struct delayed_work	detect;
- 	int			detect_change;	/* card detect flag */
 -- 
 1.9.1
+
