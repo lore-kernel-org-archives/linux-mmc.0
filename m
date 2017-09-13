@@ -1,57 +1,92 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V8 09/14] mmc: core: Remove unnecessary host claim
-Date: Wed, 13 Sep 2017 14:40:09 +0300
-Message-ID: <1505302814-19313-10-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V8 05/14] mmc: block: Use local variables in mmc_blk_data_prep()
+Date: Wed, 13 Sep 2017 14:40:05 +0300
+Message-ID: <1505302814-19313-6-git-send-email-adrian.hunter@intel.com>
 References: <1505302814-19313-1-git-send-email-adrian.hunter@intel.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:29880 "EHLO mga01.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751922AbdIMLrm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 13 Sep 2017 07:47:42 -0400
+Return-path: <linux-block-owner@vger.kernel.org>
 In-Reply-To: <1505302814-19313-1-git-send-email-adrian.hunter@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-block-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
+List-Id: linux-mmc@vger.kernel.org
 
-Callers already have the host claimed, so remove the unnecessary
-calls to mmc_claim_host() and mmc_release_host().
+Use local variables in mmc_blk_data_prep() in preparation for adding CQE
+support which doesn't use the output variables.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/mmc_ops.c | 5 +----
- 1 file changed, 1 insertion(+), 4 deletions(-)
+ drivers/mmc/core/block.c | 29 ++++++++++++++++++-----------
+ 1 file changed, 18 insertions(+), 11 deletions(-)
 
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 54686ca4bfb7..a6b0a232f24a 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -977,7 +977,6 @@ void mmc_start_bkops(struct mmc_card *card, bool from_exception)
- 	    from_exception)
- 		return;
- 
--	mmc_claim_host(card->host);
- 	if (card->ext_csd.raw_bkops_status >= EXT_CSD_BKOPS_LEVEL_2) {
- 		timeout = MMC_OPS_TIMEOUT_MS;
- 		use_busy_signal = true;
-@@ -995,7 +994,7 @@ void mmc_start_bkops(struct mmc_card *card, bool from_exception)
- 		pr_warn("%s: Error %d starting bkops\n",
- 			mmc_hostname(card->host), err);
- 		mmc_retune_release(card->host);
--		goto out;
-+		return;
- 	}
- 
- 	/*
-@@ -1007,8 +1006,6 @@ void mmc_start_bkops(struct mmc_card *card, bool from_exception)
- 		mmc_card_set_doing_bkops(card);
- 	else
- 		mmc_retune_release(card->host);
--out:
--	mmc_release_host(card->host);
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 29fc1e662891..1ec5f0bc98d2 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -1534,21 +1534,22 @@ static enum mmc_blk_status mmc_blk_err_check(struct mmc_card *card,
  }
  
- /*
+ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
+-			      int disable_multi, bool *do_rel_wr,
+-			      bool *do_data_tag)
++			      int disable_multi, bool *do_rel_wr_p,
++			      bool *do_data_tag_p)
+ {
+ 	struct mmc_blk_data *md = mq->blkdata;
+ 	struct mmc_card *card = md->queue.card;
+ 	struct mmc_blk_request *brq = &mqrq->brq;
+ 	struct request *req = mmc_queue_req_to_req(mqrq);
++	bool do_rel_wr, do_data_tag;
+ 
+ 	/*
+ 	 * Reliable writes are used to implement Forced Unit Access and
+ 	 * are supported only on MMCs.
+ 	 */
+-	*do_rel_wr = (req->cmd_flags & REQ_FUA) &&
+-		     rq_data_dir(req) == WRITE &&
+-		     (md->flags & MMC_BLK_REL_WR);
++	do_rel_wr = (req->cmd_flags & REQ_FUA) &&
++		    rq_data_dir(req) == WRITE &&
++		    (md->flags & MMC_BLK_REL_WR);
+ 
+ 	memset(brq, 0, sizeof(struct mmc_blk_request));
+ 
+@@ -1596,18 +1597,18 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
+ 						brq->data.blocks);
+ 	}
+ 
+-	if (*do_rel_wr)
++	if (do_rel_wr)
+ 		mmc_apply_rel_rw(brq, card, req);
+ 
+ 	/*
+ 	 * Data tag is used only during writing meta data to speed
+ 	 * up write and any subsequent read of this meta data
+ 	 */
+-	*do_data_tag = card->ext_csd.data_tag_unit_size &&
+-		       (req->cmd_flags & REQ_META) &&
+-		       (rq_data_dir(req) == WRITE) &&
+-		       ((brq->data.blocks * brq->data.blksz) >=
+-			card->ext_csd.data_tag_unit_size);
++	do_data_tag = card->ext_csd.data_tag_unit_size &&
++		      (req->cmd_flags & REQ_META) &&
++		      (rq_data_dir(req) == WRITE) &&
++		      ((brq->data.blocks * brq->data.blksz) >=
++		       card->ext_csd.data_tag_unit_size);
+ 
+ 	mmc_set_data_timeout(&brq->data, card);
+ 
+@@ -1636,6 +1637,12 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
+ 	mqrq->areq.mrq = &brq->mrq;
+ 
+ 	mmc_queue_bounce_pre(mqrq);
++
++	if (do_rel_wr_p)
++		*do_rel_wr_p = do_rel_wr;
++
++	if (do_data_tag_p)
++		*do_data_tag_p = do_data_tag;
+ }
+ 
+ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
 -- 
 1.9.1
-
