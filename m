@@ -1,181 +1,184 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: 4.13 on thinkpad x220: oops when writing to SD card
-Date: Wed, 13 Sep 2017 12:04:39 +0800
-Message-ID: <a1683a2f-1940-a787-645e-fbf63b50e8a8@rock-chips.com>
-References: <20170905194739.GA31241@amd>
- <8f0f7310-ea4d-a200-75fd-23509947fb38@rock-chips.com>
- <6689241f-a4d8-7a3e-9f0b-482b034e5710@intel.com>
- <CAPDyKFqXaDFrJH1-YSSCx0xPXfMN99AM_Wu_sWQf5A6bw+zjdQ@mail.gmail.com>
- <CACRpkdb263SS-7H1wcp0THAwzKO7A-kE0DVUdTiuxTnuXtWVVw@mail.gmail.com>
- <b640c98b-c534-9d66-3136-d7ca47387af9@rock-chips.com>
- <CACRpkdb84DnU=f8RpRH2fiUcT6OYcbVLUEiLBfOdApo9g9Ehww@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.134]:60540 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750728AbdIMEFD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Sep 2017 00:05:03 -0400
-In-Reply-To: <CACRpkdb84DnU=f8RpRH2fiUcT6OYcbVLUEiLBfOdApo9g9Ehww@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH V8 00/14] mmc: Add Command Queue support
+Date: Wed, 13 Sep 2017 14:40:00 +0300
+Message-ID: <1505302814-19313-1-git-send-email-adrian.hunter@intel.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: shawn.lin@rock-chips.com, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Pavel Machek <pavel@ucw.cz>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, kernel list <linux-kernel@vger.kernel.org>, Seraphime Kirkovski <kirkseraph@gmail.com>
+
+Hi
+
+Here is V8 of the hardware command queue patches without the software
+command queue patches, now using blk-mq and now with blk-mq support for
+non-CQE I/O.
+
+After the unacceptable debacle of the last release cycle, I expect an
+immediate response to these patches.
+
+HW CMDQ offers 25% - 50% better random multi-threaded I/O.  I see a slight
+2% drop in sequential read speed but no change to sequential write.
+
+Non-CQE blk-mq showed a 3% decrease in sequential read performance.  This
+seemed to be coming from the inferior latency of running work items compared
+with a dedicated thread.  Hacking blk-mq workqueue to be unbound reduced the
+performance degradation from 3% to 1%.
+
+While we should look at changing blk-mq to give better workqueue performance,
+a bigger gain is likely to be made by adding a new host API to enable the
+next already-prepared request to be issued directly from within ->done()
+callback of the current request.
 
 
-On 2017/9/12 17:42, Linus Walleij wrote:
-> On Fri, Sep 8, 2017 at 4:51 AM, Shawn Lin <shawn.lin@rock-chips.com> wrote:
->> On 2017/9/8 4:02, Linus Walleij wrote:
->>> On Thu, Sep 7, 2017 at 9:18 AM, Ulf Hansson <ulf.hansson@linaro.org>
->>> wrote:
->>>
->>>> Even if this fixes the problem it seems like we are papering over the
->>>> real issue, which earlier fixes also did during the release cycle for
->>>> v4.13.
->>>
->>>
->>> I think this is the real solution to the issue.
->>>
->>>>> Another unrelated issue with mmc_init_request() is that
->>>>> mmc_exit_request()
->>>>> is not called if mmc_init_request() fails, which means
->>>>> mmc_init_request()
->>>>> must free anything it allocates when it fails.
->>>>
->>>>
->>>> Yes, the situations it's just too fragile. We need to fix the behavior
->>>> properly, although I haven't myself been able to investigate exactly
->>>> how yet.
->>>>
->>>> Adding, Linus, perhaps he has some ideas.
->>>
->>>
->>> Maybe we should simply bite the bullet and do what was suggested
->>> by another contributor when I refactored the bounce buffer handling:
->>> simply delete the bounce buffer code and let any remaining (few?)
->>> legacy devices suffer a bit (performancewise) at the gain of way
->>> simpler code?
->>
->> Are you in the same page with what Adrian pointed to?
->>
->> IIUC, the issue is:
->> init_rq_fn will be called each time when trying to create new reuqest
->> from the pre-allocated request_list memeory pool, and exit_rq_fn will is
->> in the corresponding routine to free request from request_list
->> (blk_free_request) when finished. But if alloc_request_size fails, it
->> won't call exit_rq_fn, so you need to prevent memory leak on your own
->> error path of init_rq_fn.
-> 
-> Yes and that is what the current patch fixes, is it not?
+Changes since V7:
+	Re-based
+      mmc: core: Introduce host claiming by context
+	Slightly simplified
+      mmc: core: Add parameter use_blk_mq
+	New patch.
+      mmc: core: Remove unnecessary host claim
+	New patch.
+      mmc: core: Export mmc_start_bkops()
+	New patch.
+      mmc: core: Export mmc_start_request()
+	New patch.
+      mmc: block: Add CQE and blk-mq support
+	Add blk-mq support for non_CQE requests
 
-Nope. It fixed the *out-of-bound* memory usage as request queue will
-hold 4 requests by default and only use these four requests when meeting
-memory pressure. But the code didn't place the correct bouncesz so that
-the 4 pre-allocated requests didn't have valid memory page when
-allocated.  But in runtime, normally the request queue asks for new
-request from request list by dynamically allocating it. So your
-init_rq_fn will be called each time. However the mmc_init_request
-didn't handle the error path properly。
+Changes since V6:
+      mmc: core: Introduce host claiming by context
+	New patch.
+      mmc: core: Move mmc_start_areq() declaration
+	Dropped because it has been applied
+      mmc: block: Fix block status codes
+	Dropped because it has been applied
+      mmc: host: Add CQE interface
+	Dropped because it has been applied
+      mmc: core: Turn off CQE before sending commands
+	Dropped because it has been applied
+      mmc: block: Factor out mmc_setup_queue()
+	New patch.
+      mmc: block: Add CQE support
+	Drop legacy support and add blk-mq support
+
+Changes since V5:
+	Re-based
+      mmc: core: Add mmc_retune_hold_now()
+	Dropped because it has been applied
+      mmc: core: Add members to mmc_request and mmc_data for CQE's
+	Dropped because it has been applied
+      mmc: core: Move mmc_start_areq() declaration
+	New patch at Ulf's request
+      mmc: block: Fix block status codes
+	Another un-related patch
+      mmc: host: Add CQE interface
+	Move recovery_notifier() callback to struct mmc_request
+      mmc: core: Add support for handling CQE requests
+	Roll __mmc_cqe_request_done() into mmc_cqe_request_done()
+	Move function declarations requested by Ulf
+      mmc: core: Remove unused MMC_CAP2_PACKED_CMD
+	Dropped because it has been applied
+      mmc: block: Add CQE support
+	Add explanation to commit message
+	Adjustment for changed recovery_notifier() callback
+      mmc: cqhci: support for command queue enabled host
+	Adjustment for changed recovery_notifier() callback
+      mmc: sdhci-pci: Add CQHCI support for Intel GLK
+	Add DCMD capability for Intel controllers except GLK
+
+Changes since V4:
+      mmc: core: Add mmc_retune_hold_now()
+	Add explanation to commit message.
+      mmc: host: Add CQE interface
+	Add comments to callback declarations.
+      mmc: core: Turn off CQE before sending commands
+	Add explanation to commit message.
+      mmc: core: Add support for handling CQE requests
+	Add comments as requested by Ulf.
+      mmc: core: Remove unused MMC_CAP2_PACKED_CMD
+	New patch.
+      mmc: mmc: Enable Command Queuing
+	Adjust for removal of MMC_CAP2_PACKED_CMD.
+	Add a comment about Packed Commands.
+      mmc: mmc: Enable CQE's
+	Remove un-necessary check for MMC_CAP2_CQE
+      mmc: block: Use local variables in mmc_blk_data_prep()
+	New patch.
+      mmc: block: Prepare CQE data
+	Adjust due to "mmc: block: Use local variables in mmc_blk_data_prep()"
+	Remove priority setting.
+	Add explanation to commit message.
+      mmc: cqhci: support for command queue enabled host
+	Fix transfer descriptor setting in cqhci_set_tran_desc() for 32-bit DMA
+
+Changes since V3:
+	Adjusted ...blk_end_request...() for new block status codes
+	Fixed CQHCI transaction descriptor for "no DCMD" case
+
+Changes since V2:
+	Dropped patches that have been applied.
+	Re-based
+	Added "mmc: sdhci-pci: Add CQHCI support for Intel GLK"
+
+Changes since V1:
+
+	"Share mmc request array between partitions" is dependent
+	on changes in "Introduce queue semantics", so added that
+	and block fixes:
+
+	Added "Fix is_waiting_last_req set incorrectly"
+	Added "Fix cmd error reset failure path"
+	Added "Use local var for mqrq_cur"
+	Added "Introduce queue semantics"
+
+Changes since RFC:
+
+	Re-based on next.
+	Added comment about command queue priority.
+	Added some acks and reviews.
 
 
-I simply add SDHCI_QUIRK_BROKEN_ADMA for my SDHCI to force it use
-SDMA so that the host->max_segs should be 1. Then add some a hack to
-simulate some random failure for mmc_alloc_sg and then after some iozone
-stress test, the memory is exhausted finally.
+Adrian Hunter (13):
+      mmc: core: Introduce host claiming by context
+      mmc: core: Add support for handling CQE requests
+      mmc: mmc: Enable Command Queuing
+      mmc: mmc: Enable CQE's
+      mmc: block: Use local variables in mmc_blk_data_prep()
+      mmc: block: Prepare CQE data
+      mmc: block: Factor out mmc_setup_queue()
+      mmc: core: Add parameter use_blk_mq
+      mmc: core: Remove unnecessary host claim
+      mmc: core: Export mmc_start_bkops()
+      mmc: core: Export mmc_start_request()
+      mmc: block: Add CQE and blk-mq support
+      mmc: sdhci-pci: Add CQHCI support for Intel GLK
 
-+static u64 skip = 0;
-  static struct scatterlist *mmc_alloc_sg(int sg_len, gfp_t gfp)
-  {
-         struct scatterlist *sg;
-+       u32 random = 0;
-+
-+       /* Simply skip the bootup stage */
-+       if (skip++ >= 0x800)
-+               random = get_random_int();
-+
-+       if (unlikely((random & 0xf) > 0xd)) {
-+               printk("mmc_alloc_sg: make fake failure, random =
-0x%x\n", random);
-+               return NULL;
-+       }
+Venkat Gopalakrishnan (1):
+      mmc: cqhci: support for command queue enabled host
+
+ drivers/mmc/Kconfig               |   11 +
+ drivers/mmc/core/block.c          |  777 ++++++++++++++++++++++++-
+ drivers/mmc/core/block.h          |    8 +
+ drivers/mmc/core/bus.c            |    7 +
+ drivers/mmc/core/core.c           |  265 ++++++++-
+ drivers/mmc/core/core.h           |   14 +
+ drivers/mmc/core/host.c           |    2 +
+ drivers/mmc/core/host.h           |    4 +
+ drivers/mmc/core/mmc.c            |   29 +
+ drivers/mmc/core/mmc_ops.c        |    6 +-
+ drivers/mmc/core/queue.c          |  479 +++++++++++++--
+ drivers/mmc/core/queue.h          |   54 +-
+ drivers/mmc/host/Kconfig          |   14 +
+ drivers/mmc/host/Makefile         |    1 +
+ drivers/mmc/host/cqhci.c          | 1154 +++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/cqhci.h          |  240 ++++++++
+ drivers/mmc/host/sdhci-pci-core.c |  154 ++++-
+ include/linux/mmc/host.h          |   10 +-
+ 18 files changed, 3146 insertions(+), 83 deletions(-)
+ create mode 100644 drivers/mmc/host/cqhci.c
+ create mode 100644 drivers/mmc/host/cqhci.h
 
 
-[  540.507195] iozone invoked oom-killer: 
-gfp_mask=0x16040c0(GFP_KERNEL|__GFP_COMP|__GFP_NOTRACK), 
-nodemask=(null),  order=0, oom_score_adj=0
-[  540.508302] iozone cpuset=/ mems_allowed=0
-[  540.508727] CPU: 2 PID: 3039 Comm: iozone Not tainted 
-4.13.0-next-20170912-00003-g01cc0dd5-dirty #110
-[  540.509537] Hardware name: Firefly-RK3399 Board (DT)
-[  540.509977] Call trace:
-[  540.510221] [<ffff20000808b3d0>] dump_backtrace+0x0/0x480
-[  540.510707] [<ffff20000808b864>] show_stack+0x14/0x20
-[  540.511164] [<ffff200008dfbabc>] dump_stack+0xa4/0xc8
-[  540.511621] [<ffff2000081fc744>] dump_header+0xc4/0x2e8
-[  540.512091] [<ffff2000081fb888>] oom_kill_process+0x3a8/0x728
-[  540.512605] [<ffff2000081fc090>] out_of_memory+0x1a8/0x6d8
-[  540.513099] [<ffff200008203ea8>] __alloc_pages_nodemask+0xef8/0xf80
-[  540.513660] [<ffff200008275d6c>] alloc_pages_current+0x9c/0x128
-[  540.514191] [<ffff200008281f60>] new_slab+0x488/0x5d8
-[  540.514645] [<ffff200008284198>] ___slab_alloc+0x378/0x5d0
-[  540.515138] [<ffff200008284414>] __slab_alloc.isra.23+0x24/0x38
-[  540.515668] [<ffff200008284d44>] kmem_cache_alloc+0x1ec/0x218
-[  540.516183] [<ffff20000830dc30>] __blockdev_direct_IO+0x220/0x4a00
-
-> 
->> But you seem to talk about removing the bounce buffer and so finally
->> get rid of registering init_rq_fn/exit_rq_fn?
-> 
-> That is in direct response to Ulf's statement
-> "the situations it's just too fragile" and what can be done about
-> that is not make the code even more complex but make it
-> simpler and easier to follow.
-> 
-> One way to achieve that in the long term, is to delete bounce
-> buffer handling since it adds overhead and complexity.
-> 
->> That is another thing,
->> and what we right now need to do is to fix the pontential memory leak.
->> It's quite a simple action, right? :)
-> 
-> It is another thing.
-> 
-> This patch fixes a memory leak, but Ulf is asking how we may
-> avoid fragile behaviour.
-> 
->>> I am a bit hesitant about that because Pierre Ossman said it was
->>> actually a big win on the SDHC hosts that made use of it at one
->>> point.
->>
->> You had removed packed cmd support to simplify the code, so I think
->> this is another trade-off need to ask: What you want? and keep
->> consistent with the direction you insisted on.
-> 
-> Packed command could be removed because it was not used by
-> any in-tree code. See
-> commit 03d640ae1f9b24b1d2a11f747143a1ecc0745019
-> 
-
-Ok, I was surprised that no any in-tree host enabled it, but if some
-host did, the situation was similar with this one.
-
-> Bounce buffers on the other hand, as this patch shows, is very much
-> in use. So if they e.g. improve throughput on these systems
-> (mainly laptops I think?) it should definately be kept around.
-> 
-> It might be a good idea to make a patch to remove the bounce
-> buffers and ask people to do before/after throughput tests,
-> because I do not have this hardware myself. If it doesn't provide
-> any throughput improvements to any system in use, it should
-> be deleted. But I don't know that yet.
-
-yeap, sounds good but it's up to Ulf.
-
-> 
-> Yours,
-> Linus Walleij
-> 
-> 
-> 
-
+Regards
+Adrian
