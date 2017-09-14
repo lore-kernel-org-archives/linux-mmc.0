@@ -1,85 +1,86 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: dw_mmc: busy check incomplete?
-Date: Thu, 14 Sep 2017 15:49:09 +0800
-Message-ID: <fafd41ff-79fb-5cf6-41a8-2bedcbda4fde@rock-chips.com>
-References: <FD897F46D140444CAB8DC80B08F0742B0185AAE994@PFDE-MX10.EU.P-F.BIZ>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.134]:59218 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751104AbdINHto (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Sep 2017 03:49:44 -0400
-In-Reply-To: <FD897F46D140444CAB8DC80B08F0742B0185AAE994@PFDE-MX10.EU.P-F.BIZ>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Subject: [PATCH] mmc: tmio: remove broken and noisy debug macro
+Date: Thu, 14 Sep 2017 14:30:43 +0200
+Message-ID: <20170914123043.21451-1-wsa+renesas@sang-engineering.com>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-renesas-soc@vger.kernel.org, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Goldschmidt Simon <sgoldschmidt@de.pepperl-fuchs.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, shawn.lin@rock-chips.com
 
+Some change for v4.14 broke the debug output for TMIO. But since it was
+not helpful to me and too noisy for my taste anyhow, let's just remove
+it instead of fixing it. We'll find something better if we'd need it...
 
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
+ drivers/mmc/host/tmio_mmc_core.c | 47 ----------------------------------------
+ 1 file changed, 47 deletions(-)
 
-On 2017/9/14 13:33, Goldschmidt Simon wrote:
-> Hi,
-> 
-> I stumbled accross what seems to be a bug in dw_mmc's busy check
-> (implemented in dw_mci_wait_while_busy): repeatedly sending cmd 6
-> (to write extcsd) results in a timeout. Here are the details:
-> 
-> When trying to set my eMMC to pSCL via "mmc-utils enhanced_area set",
-> I get a command timeout error:
-> 
-> # mmc enh_area set -n 0 3792896 /dev/mmcblk0
-> [ 3284.753472] dw_mmc ff704000.dwmmc0: __mmc_blk_ioctl_cmd: cmd error -110
-> ioctl: Connection timed out
-> Could not write 0x00 to EXT_CSD[139] in /dev/mmcblk0
-> 
-> Analysing the interface pins with an oscilloscope, I see that the eMMC
-> asserts the busy condition after the first request (cmd 6: write
-> EXT_CSD_ERASE_GROUP_DEF), which is expected (reading the JEDEC eMMC spec).
-> 
-> However, the dw_mmc host sends the next request before the eMMC is
-> ready again (busy still asserted). So the eMMC does not handle the
-> command and it times out. The dw_mmc host only checks the busy condition
-> for commands including data, which cmd 6 doesn't. (This code has been
-> added with commit 0bdbd0e "mmc: dw_mmc: Don't start commands while
-> busy")
-> 
-> Always waiting for the busy condition to pass fixes this for me. But
-> this is most probably not the correct fix, so the algorithm as to when
-> checking the busy condition might probably have to be revised? I am not
-> too familiar with other eMMC hosts and how they do this, though.
-> 
-> I'm running 4.9.33-rt23 on a socfpga_cyclone5 with mmc-utils 0.1 (from
-> debian strecth). However, checking the newest versions of both the
-> kernel and mmc-utils, I do not see relevant changes.
-
-The situation of busy check was bad and all R1b shoule be handled by
-core but not by individual host. dwmmc only handle some special
-fsm busy internally noted by databook but left others for core.
-Some improvement was introduced but I think you backport
-all that for your 4.9 stock kernel if it doesn't contain these:
-
-mainline:  git log drivers/mmc,
-from commit 20348d1981  ~  e173f8911f091f
-
-
-> 
-> 
-> As a side note, the JEDEC spec says the result of cmd6 should be read
-> back after busy is deasserted. This is also not covered by the dw_mmc/
-> mmc-utils combination. I wonder where this read-back should be
-> implemented, in the driver or in mmc-utils? Or was this read-back
-> left out on purpose?
-> 
-> 
-> Thanks,
-> Simon
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
-> 
-
+diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+index 12cf8288d6635e..a7293e186e03fc 100644
+--- a/drivers/mmc/host/tmio_mmc_core.c
++++ b/drivers/mmc/host/tmio_mmc_core.c
+@@ -129,50 +129,6 @@ static int tmio_mmc_next_sg(struct tmio_mmc_host *host)
+ 
+ #define CMDREQ_TIMEOUT	5000
+ 
+-#ifdef CONFIG_MMC_DEBUG
+-
+-#define STATUS_TO_TEXT(a, status, i) \
+-	do { \
+-		if ((status) & TMIO_STAT_##a) { \
+-			if ((i)++) \
+-				printk(KERN_DEBUG " | "); \
+-			printk(KERN_DEBUG #a); \
+-		} \
+-	} while (0)
+-
+-static void pr_debug_status(u32 status)
+-{
+-	int i = 0;
+-
+-	pr_debug("status: %08x = ", status);
+-	STATUS_TO_TEXT(CARD_REMOVE, status, i);
+-	STATUS_TO_TEXT(CARD_INSERT, status, i);
+-	STATUS_TO_TEXT(SIGSTATE, status, i);
+-	STATUS_TO_TEXT(WRPROTECT, status, i);
+-	STATUS_TO_TEXT(CARD_REMOVE_A, status, i);
+-	STATUS_TO_TEXT(CARD_INSERT_A, status, i);
+-	STATUS_TO_TEXT(SIGSTATE_A, status, i);
+-	STATUS_TO_TEXT(CMD_IDX_ERR, status, i);
+-	STATUS_TO_TEXT(STOPBIT_ERR, status, i);
+-	STATUS_TO_TEXT(ILL_FUNC, status, i);
+-	STATUS_TO_TEXT(CMD_BUSY, status, i);
+-	STATUS_TO_TEXT(CMDRESPEND, status, i);
+-	STATUS_TO_TEXT(DATAEND, status, i);
+-	STATUS_TO_TEXT(CRCFAIL, status, i);
+-	STATUS_TO_TEXT(DATATIMEOUT, status, i);
+-	STATUS_TO_TEXT(CMDTIMEOUT, status, i);
+-	STATUS_TO_TEXT(RXOVERFLOW, status, i);
+-	STATUS_TO_TEXT(TXUNDERRUN, status, i);
+-	STATUS_TO_TEXT(RXRDY, status, i);
+-	STATUS_TO_TEXT(TXRQ, status, i);
+-	STATUS_TO_TEXT(ILL_ACCESS, status, i);
+-	printk("\n");
+-}
+-
+-#else
+-#define pr_debug_status(s)  do { } while (0)
+-#endif
+-
+ static void tmio_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
+ {
+ 	struct tmio_mmc_host *host = mmc_priv(mmc);
+@@ -762,9 +718,6 @@ irqreturn_t tmio_mmc_irq(int irq, void *devid)
+ 	status = sd_ctrl_read16_and_16_as_32(host, CTL_STATUS);
+ 	ireg = status & TMIO_MASK_IRQ & ~host->sdcard_irq_mask;
+ 
+-	pr_debug_status(status);
+-	pr_debug_status(ireg);
+-
+ 	/* Clear the status except the interrupt status */
+ 	sd_ctrl_write32_as_16_and_16(host, CTL_STATUS, TMIO_MASK_IRQ);
+ 
+-- 
+2.11.0
