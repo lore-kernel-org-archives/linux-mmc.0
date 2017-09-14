@@ -1,86 +1,64 @@
-From: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-Subject: Re: [PATCH 01/12] mmc: dt-bindings: update Mediatek MMC bindings
-Date: Thu, 14 Sep 2017 10:10:21 +0800
-Message-ID: <1505355021.8308.4.camel@mhfsdcap03>
-References: <1505207272-16983-1-git-send-email-chaotian.jing@mediatek.com>
-         <1505207272-16983-2-git-send-email-chaotian.jing@mediatek.com>
-         <20170913141026.43oh4n4foipmahsk@rob-hp-laptop>
+From: Goldschmidt Simon <sgoldschmidt@de.pepperl-fuchs.com>
+Subject: dw_mmc: busy check incomplete?
+Date: Thu, 14 Sep 2017 05:33:31 +0000
+Message-ID: <FD897F46D140444CAB8DC80B08F0742B0185AAE994@PFDE-MX10.EU.P-F.BIZ>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170913141026.43oh4n4foipmahsk@rob-hp-laptop>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, yong mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Javier Martinez Canillas <javier-JPH+aEBZ4P+UEJcrhfAQsw@public.gmane.org>, Heiner Kallweit <hkallweit1-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Phong LE <ple-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout.pepperl-fuchs.com ([212.21.166.229]:37938 "EHLO
+        mailout.pepperl-fuchs.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750798AbdINFj2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Sep 2017 01:39:28 -0400
+Received: from PFDE-CAS1.EU.P-F.BIZ (pfde-cas1.eu.p-f.biz [172.24.5.133])
+        by mailout.pepperl-fuchs.com (Postfix) with ESMTP id 59FC6819F4
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Sep 2017 07:33:32 +0200 (CEST)
+Content-Language: de-DE
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Wed, 2017-09-13 at 09:10 -0500, Rob Herring wrote:
-> On Tue, Sep 12, 2017 at 05:07:41PM +0800, Chaotian Jing wrote:
-> > Change the comptiable for support of multi-platform
-> > Add description for reg
-> > Add description for source_cg
-> > Add description for mediatek,latch-ck
-> 
-> This is at least the 3rd patch with exactly the same vague subject. 
-> Please make the subject somewhat unique.
-> 
-Thx, will change the subject at next version
-> > 
-> > Signed-off-by: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-> > ---
-> >  Documentation/devicetree/bindings/mmc/mtk-sd.txt | 13 ++++++++++---
-> >  1 file changed, 10 insertions(+), 3 deletions(-)
-> > 
-> > diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.txt b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-> > index 4182ea3..405cd06 100644
-> > --- a/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-> > +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-> > @@ -7,10 +7,15 @@ This file documents differences between the core properties in mmc.txt
-> >  and the properties used by the msdc driver.
-> >  
-> >  Required properties:
-> > -- compatible: Should be "mediatek,mt8173-mmc","mediatek,mt8135-mmc"
-> > +- compatible: value should be either of the following.
-> > +	"mediatek,mt8135-mmc": for mmc host ip compatible with mt8135
-> > +	"mediatek,mt8173-mmc": for mmc host ip compatible with mt8173
-> > +	"mediatek,mt2701-mmc": for mmc host ip compatible with mt2701
-> > +	"mediatek,mt2712-mmc": for mmc host ip compatible with mt2712
-> > +- reg: physical base address of the controller and length
-> >  - interrupts: Should contain MSDC interrupt number
-> > -- clocks: MSDC source clock, HCLK
-> > -- clock-names: "source", "hclk"
-> > +- clocks: MSDC source clock, HCLK, source_cg
-> > +- clock-names: "source", "hclk", "source_cg"
-> 
-> All chips support source_cg? That's not backwards compatible for 
-> existing compatible strings if the driver requires it.
-Not all chips support source_cg, for chips which do not support
-source_cg, no need source_cg here, and the driver will parse it
-to know if current chip support it.
-> 
-> >  - pinctrl-names: should be "default", "state_uhs"
-> >  - pinctrl-0: should contain default/high speed pin ctrl
-> >  - pinctrl-1: should contain uhs mode pin ctrl
-> > @@ -30,6 +35,8 @@ Optional properties:
-> >  - mediatek,hs400-cmd-resp-sel-rising:  HS400 command response sample selection
-> >  				       If present,HS400 command responses are sampled on rising edges.
-> >  				       If not present,HS400 command responses are sampled on falling edges.
-> > +- mediatek,latch-ck: Some projects do not support enhance_rx, need set correct latch-ck to avoid data crc
-> 
-> What's a project?
-eg, MT2701
-> 
-> > +		     error caused by stop clock(fifo full)
-> >  
-> >  Examples:
-> >  mmc0: mmc@11230000 {
-> > -- 
-> > 1.8.1.1.dirty
-> > 
+Hi,
+
+I stumbled accross what seems to be a bug in dw_mmc's busy check
+(implemented in dw_mci_wait_while_busy): repeatedly sending cmd 6
+(to write extcsd) results in a timeout. Here are the details:
+
+When trying to set my eMMC to pSCL via "mmc-utils enhanced_area set",
+I get a command timeout error:
+
+# mmc enh_area set -n 0 3792896 /dev/mmcblk0
+[ 3284.753472] dw_mmc ff704000.dwmmc0: __mmc_blk_ioctl_cmd: cmd error -110
+ioctl: Connection timed out
+Could not write 0x00 to EXT_CSD[139] in /dev/mmcblk0
+
+Analysing the interface pins with an oscilloscope, I see that the eMMC
+asserts the busy condition after the first request (cmd 6: write
+EXT_CSD_ERASE_GROUP_DEF), which is expected (reading the JEDEC eMMC spec).
+
+However, the dw_mmc host sends the next request before the eMMC is
+ready again (busy still asserted). So the eMMC does not handle the
+command and it times out. The dw_mmc host only checks the busy condition
+for commands including data, which cmd 6 doesn't. (This code has been
+added with commit 0bdbd0e "mmc: dw_mmc: Don't start commands while
+busy")
+
+Always waiting for the busy condition to pass fixes this for me. But
+this is most probably not the correct fix, so the algorithm as to when
+checking the busy condition might probably have to be revised? I am not
+too familiar with other eMMC hosts and how they do this, though.
+
+I'm running 4.9.33-rt23 on a socfpga_cyclone5 with mmc-utils 0.1 (from
+debian strecth). However, checking the newest versions of both the
+kernel and mmc-utils, I do not see relevant changes.
 
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+As a side note, the JEDEC spec says the result of cmd6 should be read
+back after busy is deasserted. This is also not covered by the dw_mmc/
+mmc-utils combination. I wonder where this read-back should be
+implemented, in the driver or in mmc-utils? Or was this read-back
+left out on purpose?
+
+
+Thanks,
+Simon
