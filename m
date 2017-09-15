@@ -1,44 +1,54 @@
-From: Goldschmidt Simon <sgoldschmidt@de.pepperl-fuchs.com>
-Subject: Re: dw_mmc: busy check incomplete?
-Date: Fri, 15 Sep 2017 04:38:41 +0000
-Message-ID: <FD897F46D140444CAB8DC80B08F0742B0185AAEB0B@PFDE-MX10.EU.P-F.BIZ>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout.pepperl-fuchs.com ([212.21.166.229]:56855 "EHLO
-        mailout.pepperl-fuchs.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750720AbdIOEip (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Sep 2017 00:38:45 -0400
-Received: from PFDE-CAS1.EU.P-F.BIZ (pfde-cas1.eu.p-f.biz [172.24.5.133])
-        by mailout.pepperl-fuchs.com (Postfix) with ESMTP id C0EBD819F6
-        for <linux-mmc@vger.kernel.org>; Fri, 15 Sep 2017 06:38:42 +0200 (CEST)
-Content-Language: de-DE
-Sender: linux-mmc-owner@vger.kernel.org
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Subject: [RFC PATCH 0/3] mmc: support eMMC driver type selection with DT
+Date: Fri, 15 Sep 2017 20:02:58 +0200
+Message-ID: <20170915180301.29175-1-wsa+renesas@sang-engineering.com>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-renesas-soc@vger.kernel.org, Simon Horman <horms@verge.net.au>, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh@kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 2017/9/14 09:49, Shawn Lin wrote:
-> On 2017/9/14 13:33, Goldschmidt Simon wrote:
->> [..]
->> I'm running 4.9.33-rt23 on a socfpga_cyclone5 with mmc-utils 0.1 (from
->> debian strecth). However, checking the newest versions of both the
->> kernel and mmc-utils, I do not see relevant changes.
-> 
-> The situation of busy check was bad and all R1b shoule be handled by
-> core but not by individual host. dwmmc only handle some special
-> fsm busy internally noted by databook but left others for core.
-> Some improvement was introduced but I think you backport
-> all that for your 4.9 stock kernel if it doesn't contain these:
-> 
-> mainline:  git log drivers/mmc,
-> from commit 20348d1981  ~  e173f8911f091f
+Some of the Renesas R-Car boards need to set the eMMC driver type to type 1 to
+get stable HS200/400 speeds (HS400 support not upstream yet). Because the eMMC
+memories are fixed (and thus the drive type), I decided to implement the DT
+setup in a similar fashion to ACPI [1]. While implementing, I realized that all
+I did was not Renesas specific but generic, so I ended up putting it into the
+core.
 
-Reading the git log, those commits were before 4.9 final and I am
-running a stock 4.9.33 (only addition is the rt patch).
+So, whenever the new property (introduced in patch 1) is used, and there is no
+host driver specific select_drive_strength callback, then the generic callback
+(introduced in patch 2) is used. An example usage can be found in patch 3.
 
-I also just tested a clean 4.13.2 (no rt patch) and it shows the same
-result. Does that mean the dw_mmc driver handles R1b the wrong way?
+Note that currently only eMMC is handled, but the code is designed for easy SD
+addition if that ever becomes necessary.
 
+A branch for the Salvator-XS board can be found here:
 
-Simon
+git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/topic/emmc-drive-strength
+
+A wiki page describing my test procedure can be found here:
+
+http://elinux.org/Tests:eMMC-fixed-drive-strength
+
+Looking forward to comments about this approach.
+
+All the best,
+
+   Wolfram
+
+[1] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=51ced59cc02e0d08f61772c888480b9b1749cef1
+
+Wolfram Sang (3):
+  mmc: describe new eMMC binding for fixed driver type
+  mmc: parse new binding for eMMC fixed driver type
+  arm64: renesas: salvator-xs: set driver type for eMMC
+
+ Documentation/devicetree/bindings/mmc/mmc.txt      |  3 +++
+ .../arm64/boot/dts/renesas/r8a7795-salvator-xs.dts |  4 ++++
+ drivers/mmc/core/core.c                            | 28 ++++++++++++++++++----
+ drivers/mmc/core/host.c                            | 11 ++++++++-
+ include/linux/mmc/host.h                           |  2 ++
+ 5 files changed, 42 insertions(+), 6 deletions(-)
+
+-- 
+2.11.0
