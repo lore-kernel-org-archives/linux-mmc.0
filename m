@@ -1,86 +1,44 @@
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH] mmc: tmio: remove broken and noisy debug macro
-Date: Thu, 14 Sep 2017 14:30:43 +0200
-Message-ID: <20170914123043.21451-1-wsa+renesas@sang-engineering.com>
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-renesas-soc@vger.kernel.org, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>
+From: Goldschmidt Simon <sgoldschmidt@de.pepperl-fuchs.com>
+Subject: Re: dw_mmc: busy check incomplete?
+Date: Fri, 15 Sep 2017 04:38:41 +0000
+Message-ID: <FD897F46D140444CAB8DC80B08F0742B0185AAEB0B@PFDE-MX10.EU.P-F.BIZ>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout.pepperl-fuchs.com ([212.21.166.229]:56855 "EHLO
+        mailout.pepperl-fuchs.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750720AbdIOEip (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Sep 2017 00:38:45 -0400
+Received: from PFDE-CAS1.EU.P-F.BIZ (pfde-cas1.eu.p-f.biz [172.24.5.133])
+        by mailout.pepperl-fuchs.com (Postfix) with ESMTP id C0EBD819F6
+        for <linux-mmc@vger.kernel.org>; Fri, 15 Sep 2017 06:38:42 +0200 (CEST)
+Content-Language: de-DE
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Some change for v4.14 broke the debug output for TMIO. But since it was
-not helpful to me and too noisy for my taste anyhow, let's just remove
-it instead of fixing it. We'll find something better if we'd need it...
+On 2017/9/14 09:49, Shawn Lin wrote:
+> On 2017/9/14 13:33, Goldschmidt Simon wrote:
+>> [..]
+>> I'm running 4.9.33-rt23 on a socfpga_cyclone5 with mmc-utils 0.1 (from
+>> debian strecth). However, checking the newest versions of both the
+>> kernel and mmc-utils, I do not see relevant changes.
+> 
+> The situation of busy check was bad and all R1b shoule be handled by
+> core but not by individual host. dwmmc only handle some special
+> fsm busy internally noted by databook but left others for core.
+> Some improvement was introduced but I think you backport
+> all that for your 4.9 stock kernel if it doesn't contain these:
+> 
+> mainline:  git log drivers/mmc,
+> from commit 20348d1981  ~  e173f8911f091f
 
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
- drivers/mmc/host/tmio_mmc_core.c | 47 ----------------------------------------
- 1 file changed, 47 deletions(-)
+Reading the git log, those commits were before 4.9 final and I am
+running a stock 4.9.33 (only addition is the rt patch).
 
-diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-index 12cf8288d6635e..a7293e186e03fc 100644
---- a/drivers/mmc/host/tmio_mmc_core.c
-+++ b/drivers/mmc/host/tmio_mmc_core.c
-@@ -129,50 +129,6 @@ static int tmio_mmc_next_sg(struct tmio_mmc_host *host)
- 
- #define CMDREQ_TIMEOUT	5000
- 
--#ifdef CONFIG_MMC_DEBUG
--
--#define STATUS_TO_TEXT(a, status, i) \
--	do { \
--		if ((status) & TMIO_STAT_##a) { \
--			if ((i)++) \
--				printk(KERN_DEBUG " | "); \
--			printk(KERN_DEBUG #a); \
--		} \
--	} while (0)
--
--static void pr_debug_status(u32 status)
--{
--	int i = 0;
--
--	pr_debug("status: %08x = ", status);
--	STATUS_TO_TEXT(CARD_REMOVE, status, i);
--	STATUS_TO_TEXT(CARD_INSERT, status, i);
--	STATUS_TO_TEXT(SIGSTATE, status, i);
--	STATUS_TO_TEXT(WRPROTECT, status, i);
--	STATUS_TO_TEXT(CARD_REMOVE_A, status, i);
--	STATUS_TO_TEXT(CARD_INSERT_A, status, i);
--	STATUS_TO_TEXT(SIGSTATE_A, status, i);
--	STATUS_TO_TEXT(CMD_IDX_ERR, status, i);
--	STATUS_TO_TEXT(STOPBIT_ERR, status, i);
--	STATUS_TO_TEXT(ILL_FUNC, status, i);
--	STATUS_TO_TEXT(CMD_BUSY, status, i);
--	STATUS_TO_TEXT(CMDRESPEND, status, i);
--	STATUS_TO_TEXT(DATAEND, status, i);
--	STATUS_TO_TEXT(CRCFAIL, status, i);
--	STATUS_TO_TEXT(DATATIMEOUT, status, i);
--	STATUS_TO_TEXT(CMDTIMEOUT, status, i);
--	STATUS_TO_TEXT(RXOVERFLOW, status, i);
--	STATUS_TO_TEXT(TXUNDERRUN, status, i);
--	STATUS_TO_TEXT(RXRDY, status, i);
--	STATUS_TO_TEXT(TXRQ, status, i);
--	STATUS_TO_TEXT(ILL_ACCESS, status, i);
--	printk("\n");
--}
--
--#else
--#define pr_debug_status(s)  do { } while (0)
--#endif
--
- static void tmio_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
- {
- 	struct tmio_mmc_host *host = mmc_priv(mmc);
-@@ -762,9 +718,6 @@ irqreturn_t tmio_mmc_irq(int irq, void *devid)
- 	status = sd_ctrl_read16_and_16_as_32(host, CTL_STATUS);
- 	ireg = status & TMIO_MASK_IRQ & ~host->sdcard_irq_mask;
- 
--	pr_debug_status(status);
--	pr_debug_status(ireg);
--
- 	/* Clear the status except the interrupt status */
- 	sd_ctrl_write32_as_16_and_16(host, CTL_STATUS, TMIO_MASK_IRQ);
- 
--- 
-2.11.0
+I also just tested a clean 4.13.2 (no rt patch) and it shows the same
+result. Does that mean the dw_mmc driver handles R1b the wrong way?
+
+
+Simon
