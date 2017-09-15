@@ -1,30 +1,32 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [RFC PATCH 1/3] mmc: describe new eMMC binding for fixed driver type
-Date: Fri, 15 Sep 2017 13:18:52 -0500
-Message-ID: <CAL_Jsq+X9R3R8CdHESyhRVj2P-nzF9i19viip1AFSOYgnw6A4w@mail.gmail.com>
-References: <20170915180301.29175-1-wsa+renesas@sang-engineering.com> <20170915180301.29175-2-wsa+renesas@sang-engineering.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <20170915180301.29175-2-wsa+renesas@sang-engineering.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "open list:MEDIA DRIVERS FOR RENESAS - FCP" <linux-renesas-soc@vger.kernel.org>, Simon Horman <horms@verge.net.au>, Adrian Hunter <adrian.hunter@intel.com>
+From: Bjorn Andersson <bjorn.andersson@linaro.org>
+Subject: [PATCH v2 0/2] Support SDHCI on 8974pro devices
+Date: Fri, 15 Sep 2017 16:35:22 -0700
+Message-ID: <20170915233524.1375-1-bjorn.andersson@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pg0-f47.google.com ([74.125.83.47]:44462 "EHLO
+        mail-pg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751197AbdIOXf3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Sep 2017 19:35:29 -0400
+Received: by mail-pg0-f47.google.com with SMTP id j16so2324024pga.1
+        for <linux-mmc@vger.kernel.org>; Fri, 15 Sep 2017 16:35:29 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, Venkat Gopalakrishnan <venkatg@codeaurora.org>, Ritesh Harjani <riteshh@codeaurora.org>, devicetree@vger.kernel.org
 
-Needs to go to DT list and "dt-bindings: mmc: " is the preferred subject prefix.
+The calibration clocks for the delay circut should be enabled, as done in the
+downstream kernel, in order for reset of the SDHCI not to fail on some Qualcomm
+platforms (e.g. 8974pro). These patches makes it possible to reference these
+clocks.
 
-On Fri, Sep 15, 2017 at 1:02 PM, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
-> Some boards may have to use a certain driver type (or drive strength) to
-> achieve stable eMMC communication. Describe a binding to set this up via
-> DT.
->
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> ---
->  Documentation/devicetree/bindings/mmc/mmc.txt | 3 +++
->  1 file changed, 3 insertions(+)
+Bjorn Andersson (2):
+  mmc: sdhci-msm: Utilize bulk clock API
+  mmc: sdhci-msm: Enable delay circuit calibration clocks
 
-Otherwise,
+ .../devicetree/bindings/mmc/sdhci-msm.txt          |  2 +
+ drivers/mmc/host/sdhci-msm.c                       | 90 +++++++++++-----------
+ 2 files changed, 46 insertions(+), 46 deletions(-)
 
-Acked-by: Rob Herring <robh@kernel.org>
+-- 
+2.12.0
+
