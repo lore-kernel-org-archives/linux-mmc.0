@@ -1,61 +1,47 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v.4.14-rc2
-Date: Sun, 17 Sep 2017 23:50:10 -0700
-Message-ID: <1505717410-7041-1-git-send-email-ulf.hansson@linaro.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: sdhci-pci: remove outdated declaration
+Date: Mon, 18 Sep 2017 10:04:09 +0300
+Message-ID: <03bc3268-d50f-6ba3-09fa-be012474cbe6@intel.com>
+References: <20170915181328.31510-1-wsa+renesas@sang-engineering.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f48.google.com ([209.85.215.48]:43518 "EHLO
-        mail-lf0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751673AbdIRGuO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Sep 2017 02:50:14 -0400
-Received: by mail-lf0-f48.google.com with SMTP id c80so6912361lfh.0
-        for <linux-mmc@vger.kernel.org>; Sun, 17 Sep 2017 23:50:13 -0700 (PDT)
+Received: from mga01.intel.com ([192.55.52.88]:32030 "EHLO mga01.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752523AbdIRHKw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 18 Sep 2017 03:10:52 -0400
+In-Reply-To: <20170915181328.31510-1-wsa+renesas@sang-engineering.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org
+Cc: linux-renesas-soc@vger.kernel.org
 
-Hi Linus,
+On 15/09/17 21:13, Wolfram Sang wrote:
+> The function was removed half a year ago, so this declaration can go,
+> too.
+> 
+> Fixes: 51ced59cc02e0d ("mmc: sdhci-pci: Use ACPI DSM to get driver strength for some Intel devices")
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-Here's a PR with a couple of MMC fixes intended for v4.14-rc2.
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Details about the highlights are as usual found in the signed tag. Please pull
-this in!
+> ---
+>  include/linux/mmc/sdhci-pci-data.h | 3 ---
+>  1 file changed, 3 deletions(-)
+> 
+> diff --git a/include/linux/mmc/sdhci-pci-data.h b/include/linux/mmc/sdhci-pci-data.h
+> index fda15b6d4135d3..618f90d6e1ba1a 100644
+> --- a/include/linux/mmc/sdhci-pci-data.h
+> +++ b/include/linux/mmc/sdhci-pci-data.h
+> @@ -14,7 +14,4 @@ struct sdhci_pci_data {
+>  
+>  extern struct sdhci_pci_data *(*sdhci_pci_get_data)(struct pci_dev *pdev,
+>  				int slotno);
+> -
+> -extern int sdhci_pci_spt_drive_strength;
+> -
+>  #endif
+> 
 
-Kind regards
-Ulf Hansson
-
-
-The following changes since commit c16a854e4463078aedad601fac76341760a66dd1:
-
-  mmc: renesas_sdhi: Add r8a7743/5 support (2017-09-01 15:31:01 +0200)
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v4.14-2
-
-for you to fetch changes up to b917c6d18c031cfce11ec35139033845f205b1d0:
-
-  mmc: cavium: Fix use-after-free in of_platform_device_destroy (2017-09-08 15:38:22 +0200)
-
-----------------------------------------------------------------
-MMC core:
- - Fix trivial typo in Kconfig
- - Fixup initialization of mmc block requests
-
-MMC host:
- - cavium: Fix use-after-free bug reported by KASAN
-
-----------------------------------------------------------------
-Adrian Hunter (1):
-      mmc: block: Fix incorrectly initialized requests
-
-Jan Glauber (1):
-      mmc: cavium: Fix use-after-free in of_platform_device_destroy
-
-Wolfram Sang (1):
-      mmc: host: fix typo after MMC_DEBUG move
-
- drivers/mmc/core/queue.c           | 7 ++++++-
- drivers/mmc/host/Kconfig           | 2 +-
- drivers/mmc/host/cavium-thunderx.c | 6 +++++-
- 3 files changed, 12 insertions(+), 3 deletions(-)
