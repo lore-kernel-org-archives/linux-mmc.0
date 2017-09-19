@@ -1,61 +1,103 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v1 5/5] mmc: Kconfig: Enable CONFIG_MMC_SDHCI_IO_ACCESSORS
-Date: Tue, 19 Sep 2017 08:44:26 +0300
-Message-ID: <33605097-6881-50a3-4526-a2ac6448a60d@intel.com>
-References: <1504097509-58983-1-git-send-email-vviswana@codeaurora.org>
- <1504097509-58983-6-git-send-email-vviswana@codeaurora.org>
- <f10addc2-5d67-3d0e-fb61-50d42f96125e@intel.com>
- <b2ea12b5-f502-097f-c9cf-aa9e7e6e18be@codeaurora.org>
+From: Jerome Brunet <jbrunet@baylibre.com>
+Subject: Re: [PATCH/RFT] mmc: meson-gx: include tx phase in the tuning
+ process
+Date: Tue, 19 Sep 2017 13:08:57 +0200
+Message-ID: <1505819337.2703.40.camel@baylibre.com>
+References: <b31253d8-38a3-dd25-1d74-6afde6ae8362@gmail.com>
+         <20170918134431.17520-1-jbrunet@baylibre.com>
+         <3fd34a04-9a22-83e7-fb48-833b72bbea9f@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <b2ea12b5-f502-097f-c9cf-aa9e7e6e18be@codeaurora.org>
-Content-Language: en-US
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Vijay Viswanath <vviswana@codeaurora.org>, ulf.hansson@linaro.org, will.deacon@arm.com
-Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, riteshh@codeaurora.org, subhashj@codeaurora.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wr0-f175.google.com ([209.85.128.175]:45927 "EHLO
+        mail-wr0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751237AbdISLJA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Sep 2017 07:09:00 -0400
+Received: by mail-wr0-f175.google.com with SMTP id m18so2762164wrm.2
+        for <linux-mmc@vger.kernel.org>; Tue, 19 Sep 2017 04:08:59 -0700 (PDT)
+In-Reply-To: <3fd34a04-9a22-83e7-fb48-833b72bbea9f@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Heiner Kallweit <hkallweit1@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>
+Cc: Carlo Caione <carlo@caione.org>, linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org
 
-On 19/09/17 07:03, Vijay Viswanath wrote:
+On Mon, 2017-09-18 at 21:11 +0200, Heiner Kallweit wrote:
+> Am 18.09.2017 um 15:44 schrieb Jerome Brunet:
+> > diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-
+> > mmc.c
+> > index c885c2d4b904..0254d8bfd536 100644
+> > --- a/drivers/mmc/host/meson-gx-mmc.c
+> > +++ b/drivers/mmc/host/meson-gx-mmc.c
+> > @@ -717,6 +717,22 @@ static int meson_mmc_clk_phase_tuning(struct mmc_host
+> > *mmc, u32 opcode,
+> >  static int meson_mmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+> >  {
+> >  	struct meson_host *host = mmc_priv(mmc);
+> > +	int ret;
+> > +
+> > +	/*
+> > +	 * If this is the initial tuning, try to get a sane Rx starting
+> > +	 * phase before doing the actual tuning.
+> > +	 */
+> > +	if (!mmc->doing_retune) {
+> > +		ret = meson_mmc_clk_phase_tuning(mmc, opcode, host-
+> > >rx_clk);
+> > +
+> > +		if (ret)
+> > +			return ret;
+> > +	}
+> > +
+> > +	ret = meson_mmc_clk_phase_tuning(mmc, opcode, host->tx_clk);
+> > +	if (ret)
+> > +		return ret;
+> >  
+> >  	return meson_mmc_clk_phase_tuning(mmc, opcode, host->rx_clk);
+> >  }
+> > -- 2.13.5
 > 
-> 
-> On 9/14/2017 12:04 PM, Adrian Hunter wrote:
->> On 30/08/17 15:51, Vijay Viswanath wrote:
->>> Enable CONFIG_MMC_SDHCI_IO_ACCESSORS so that SDHC controller specific
->>> register read and write APIs, if registered, can be used.
->>
->> Missing signed-off
->>
->> Why don't you put this patch earlier in the patch set and then you don't
->> need all the ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS ?
->>
-> 
-> This will involve merging the current patches 3 & 4 into one (Some functions
-> defined under ifdef in patch 3 are used only in patch 4). Will that be fine ?
+> Unfortunately this still doesn't fix the issue here.
+> Tuning rx and tx clk sequentially assumes both are independent, what they
+> IMHO are not. So meybe we have to check all combinations of rx/tx clk phase.
 
-Sure
+Interesting, I would be curious to know what tuning value you ended with,
+compared to the "hard-coded' working value you have set.
+
+You can get that fairly easily now, using CCF in debugfs, in
+<debugfs>/clk/clk_summary, the different phase are reported
+
+What makes you think that tx and rx phase depends on one another ?
+I have done a lot of tests on all the phase different settings while working on
+this series and could see that:
+
+1) For a fixed Tx and Core phase, Rx phase tuning tends to give a constant
+result
+2) For a fixed Tx, Rx phase tuning tends to rotate with the core phase
+3) For a fixed Core phase, Rx phase tuning tends to remain constant for any
+values of Tx phase
+
+>From what I understand of the HW, this would make sense:
+* Tx phase would be the phase at which the data are sent compared to the core
+clock
+* Rx phase would be the phase at which the data are sampled compared to the core
+clock
+
+This would make me conclude that both Tx and Rx phases depends on the core phase
+but are independent of one another. Of course, if you have evidence showing
+otherwise, I'm happy to reconsider.
+ATM, I don't see the added value of testing all the combination.
+
+Another thing to consider is that, with the current driver, we set the Tx and Rx
+with a precision of 30 degrees -> 12 possible phase settings.
+
+* 2 sequential tuning => 24 test
+* all combination of 2 phases => 144 test
+
+Also, remember that this tuning is as much based on the working tuning point as
+it is on the failing ones. I looks for the center of the tuning window, so
+failing tests are very valuable. Looking for all the combination, you would have
+you look for this "center" in 2D ... not impossible, but complex and annoying. 
+  
 
 > 
->>> ---
->>>   drivers/mmc/host/Kconfig | 1 +
->>>   1 file changed, 1 insertion(+)
->>>
->>> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
->>> index 2db84dd..64a9298 100644
->>> --- a/drivers/mmc/host/Kconfig
->>> +++ b/drivers/mmc/host/Kconfig
->>> @@ -420,6 +420,7 @@ config MMC_SDHCI_MSM
->>>       tristate "Qualcomm SDHCI Controller Support"
->>>       depends on ARCH_QCOM || (ARM && COMPILE_TEST)
->>>       depends on MMC_SDHCI_PLTFM
->>> +    select CONFIG_MMC_SDHCI_IO_ACCESSORS
->>
->> CONFIG_MMC_SDHCI_IO_ACCESSORS -> MMC_SDHCI_IO_ACCESSORS
->>
->>>       help
->>>         This selects the Secure Digital Host Controller Interface (SDHCI)
->>>         support present in Qualcomm SOCs. The controller supports
->>>
->>
-> 
+
