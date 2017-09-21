@@ -1,69 +1,47 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V8 12/14] mmc: block: Add CQE and blk-mq support
-Date: Thu, 21 Sep 2017 11:59:06 +0200
-Message-ID: <CAPDyKFrJSsF-QLBe13c6huOvJngirm5D1m=JJSkbX2n9ruoFQg@mail.gmail.com>
-References: <1505302814-19313-1-git-send-email-adrian.hunter@intel.com> <1505302814-19313-13-git-send-email-adrian.hunter@intel.com>
+From: Jeremy McNicoll <jmcnicol@redhat.com>
+Subject: Re: [PATCH v2 0/2] Support SDHCI on 8974pro devices
+Date: Thu, 21 Sep 2017 03:13:08 -0700
+Message-ID: <20170921101308.GA10466@mini-rhel.redhat.com>
+References: <20170915233524.1375-1-bjorn.andersson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f170.google.com ([209.85.223.170]:48974 "EHLO
-        mail-io0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751283AbdIUJ7I (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Sep 2017 05:59:08 -0400
-Received: by mail-io0-f170.google.com with SMTP id n69so9627341ioi.5
-        for <linux-mmc@vger.kernel.org>; Thu, 21 Sep 2017 02:59:07 -0700 (PDT)
-In-Reply-To: <1505302814-19313-13-git-send-email-adrian.hunter@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20170915233524.1375-1-bjorn.andersson@linaro.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Bjorn Andersson <bjorn.andersson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, Venkat Gopalakrishnan <venkatg@codeaurora.org>, Ritesh Harjani <riteshh@codeaurora.org>, devicetree@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 
-On 13 September 2017 at 13:40, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> Add CQE support to the block driver, including:
->     - optionally using DCMD for flush requests
->     - "manually" issuing discard requests
->     - issuing read / write requests to the CQE
->     - supporting block-layer timeouts
->     - handling recovery
->     - supporting re-tuning
+On Fri, Sep 15, 2017 at 04:35:22PM -0700, Bjorn Andersson wrote:
+> The calibration clocks for the delay circut should be enabled, as done in the
+> downstream kernel, in order for reset of the SDHCI not to fail on some Qualcomm
+> platforms (e.g. 8974pro). These patches makes it possible to reference these
+> clocks.
+> 
+> Bjorn Andersson (2):
+>   mmc: sdhci-msm: Utilize bulk clock API
+>   mmc: sdhci-msm: Enable delay circuit calibration clocks
+> 
+>  .../devicetree/bindings/mmc/sdhci-msm.txt          |  2 +
+>  drivers/mmc/host/sdhci-msm.c                       | 90 +++++++++++-----------
+>  2 files changed, 46 insertions(+), 46 deletions(-)
 >
-> CQE offers 25% - 50% better random multi-threaded I/O.  There is a slight
-> (e.g. 2%) drop in sequential read speed but no observable change to sequential
-> write.
->
-> CQE automatically sends the commands to complete requests.  However it only
-> supports reads / writes and so-called "direct commands" (DCMD).  Furthermore
-> DCMD is limited to one command at a time, but discards require 3 commands.
-> That makes issuing discards through CQE very awkward, but some CQE's don't
-> support DCMD anyway.  So for discards, the existing non-CQE approach is
-> taken, where the mmc core code issues the 3 commands one at a time i.e.
-> mmc_erase(). Where DCMD is used, is for issuing flushes.
->
-> For host controllers without CQE support, blk-mq support is extended to
-> synchronous reads/writes or, if the host supports CAP_WAIT_WHILE_BUSY,
-> asynchonous reads/writes.  The advantage of asynchronous reads/writes is
-> that it allows the preparation of the next request while the current
-> request is in progress.
->
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> ---
->  drivers/mmc/core/block.c | 734 ++++++++++++++++++++++++++++++++++++++++++++++-
->  drivers/mmc/core/block.h |   8 +
->  drivers/mmc/core/queue.c | 428 +++++++++++++++++++++++++--
->  drivers/mmc/core/queue.h |  54 +++-
->  4 files changed, 1192 insertions(+), 32 deletions(-)
 
-Adrian, this is just too hard for me to review. Please, can you split this up?
 
-At least enabling mq support should be done in a separate and first
-step, then you could add the CQE bits on top.
+Thanks!  This fixes my Nexus5X (msm8992) and now expected messages such
+as:
 
-I think that is important, because we want to make sure the mq
-deployment is done correctly first. Otherwise it becomes impossible to
-narrow down problems, because those could then be either CQE related
-or mq related.
+   mmc0: new HS400 MMC card at address 0001
+   mmcblk0: mmc0:0001 016G72 14.7 GiB 
+   mmcblk0boot0: mmc0:0001 016G72 partition 1 4.00 MiB
+   mmcblk0boot1: mmc0:0001 016G72 partition 2 4.00 MiB
+   mmcblk0rpmb: mmc0:0001 016G72 partition 3 4.00 MiB
+   mmcblk0: p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 p12 p13 p14 p15....
 
-[....]
+are appearing in my boot messages / debug spew.  
 
-Kind regards
-Uffe
+Tested-by: Jeremy McNicoll <jeremymc@redhat.com>
+
+
+-jeremy
