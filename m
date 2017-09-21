@@ -1,59 +1,54 @@
-From: Chaotian Jing <chaotian.jing@mediatek.com>
-Subject: [PATCH v2] mmc: dt-bindings: Add reg/source_cg/latch-ck for Mediatek MMC bindings
-Date: Thu, 21 Sep 2017 09:52:54 +0800
-Message-ID: <1505958774-14410-1-git-send-email-chaotian.jing@mediatek.com>
+From: Yangbo Lu <yangbo.lu@nxp.com>
+Subject: [PATCH] mmc: sdhci-of-esdhc: disable SD clock for clock value 0
+Date: Thu, 21 Sep 2017 13:42:38 +0800
+Message-ID: <20170921054238.46666-1-yangbo.lu@nxp.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Rob Herring <robh+dt@kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Matthias Brugger <matthias.bgg@gmail.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Chaotian Jing <chaotian.jing@mediatek.com>, yong mao <yong.mao@mediatek.com>, Linus Walleij <linus.walleij@linaro.org>, Javier Martinez Canillas <javier@osg.samsung.com>, Heiner Kallweit <hkallweit1@gmail.com>, Phong LE <ple@baylibre.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, srv_heupstream@mediatek.com
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-by2nam01on0068.outbound.protection.outlook.com ([104.47.34.68]:33504
+        "EHLO NAM01-BY2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751641AbdIUGAD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 21 Sep 2017 02:00:03 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Yangbo Lu <yangbo.lu@nxp.com>
 
-Change the comptiable for support of multi-platform
-Add description for reg
-Add description for source_cg
-Add description for mediatek,latch-ck
-Note that source_cg and mediatek,latch-ck are optional for some projects,
-eg, MT2701 do not have source_cg, and MT2712 do not need
-mediatek,latch-ck
+SD clock should be disabled for clock value 0. It's not
+right to just return. This may cause failure of signal
+voltage switching.
 
-Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
 ---
- Documentation/devicetree/bindings/mmc/mtk-sd.txt | 13 ++++++++++---
- 1 file changed, 10 insertions(+), 3 deletions(-)
+ drivers/mmc/host/sdhci-of-esdhc.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.txt b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-index 4182ea3..405cd06 100644
---- a/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-+++ b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-@@ -7,10 +7,15 @@ This file documents differences between the core properties in mmc.txt
- and the properties used by the msdc driver.
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index d96a057a7db8..b21008729aeb 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -36,6 +36,8 @@ struct sdhci_esdhc {
+ 	unsigned int peripheral_clock;
+ };
  
- Required properties:
--- compatible: Should be "mediatek,mt8173-mmc","mediatek,mt8135-mmc"
-+- compatible: value should be either of the following.
-+	"mediatek,mt8135-mmc": for mmc host ip compatible with mt8135
-+	"mediatek,mt8173-mmc": for mmc host ip compatible with mt8173
-+	"mediatek,mt2701-mmc": for mmc host ip compatible with mt2701
-+	"mediatek,mt2712-mmc": for mmc host ip compatible with mt2712
-+- reg: physical base address of the controller and length
- - interrupts: Should contain MSDC interrupt number
--- clocks: MSDC source clock, HCLK
--- clock-names: "source", "hclk"
-+- clocks: MSDC source clock, HCLK, source_cg
-+- clock-names: "source", "hclk", "source_cg"
- - pinctrl-names: should be "default", "state_uhs"
- - pinctrl-0: should contain default/high speed pin ctrl
- - pinctrl-1: should contain uhs mode pin ctrl
-@@ -30,6 +35,8 @@ Optional properties:
- - mediatek,hs400-cmd-resp-sel-rising:  HS400 command response sample selection
- 				       If present,HS400 command responses are sampled on rising edges.
- 				       If not present,HS400 command responses are sampled on falling edges.
-+- mediatek,latch-ck: Some projects do not support enhance_rx, need set correct latch-ck to avoid data crc
-+		     error caused by stop clock(fifo full)
++static void esdhc_clock_enable(struct sdhci_host *host, bool enable);
++
+ /**
+  * esdhc_read*_fixup - Fixup the value read from incompatible eSDHC register
+  *		       to make it compatible with SD spec.
+@@ -469,8 +471,10 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
  
- Examples:
- mmc0: mmc@11230000 {
+ 	host->mmc->actual_clock = 0;
+ 
+-	if (clock == 0)
++	if (clock == 0) {
++		esdhc_clock_enable(host, false);
+ 		return;
++	}
+ 
+ 	/* Workaround to start pre_div at 2 for VNN < VENDOR_V_23 */
+ 	if (esdhc->vendor_ver < VENDOR_V_23)
 -- 
-1.8.1.1.dirty
+2.14.1
+
