@@ -1,43 +1,51 @@
-From: "Steven J. Hill" <Steven.Hill@cavium.com>
-Subject: Re: [PATCH] mmc: Delete bounce buffer handling
-Date: Thu, 21 Sep 2017 11:35:18 -0500
-Message-ID: <b70aea82-0e15-e27f-b443-078301ee5375@cavium.com>
-References: <20170920085614.22697-1-linus.walleij@linaro.org>
+From: Kyle Roeschley <kyle.roeschley@ni.com>
+Subject: [PATCH] mmc: core: Wait for Vdd to settle on card power off
+Date: Thu, 21 Sep 2017 12:47:54 -0500
+Message-ID: <20170921174754.13648-1-kyle.roeschley@ni.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2nam01on0055.outbound.protection.outlook.com ([104.47.34.55]:43280
-        "EHLO NAM01-BY2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751436AbdIUQf2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 21 Sep 2017 12:35:28 -0400
-In-Reply-To: <20170920085614.22697-1-linus.walleij@linaro.org>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org
 
-On 09/20/2017 03:56 AM, Linus Walleij wrote:
+The SD spec version 6.0 section 6.4.1.5 requires that Vdd must be
+lowered to less than 0.5V for a minimum of 1 ms when powering off a
+card. Increase our wait to 10 ms so that voltage has time to drain down
+to 0.5V and cards can power off correctly.
 
-[...]
-> 
-> I am pretty positively convinced that software
-> scatter-gather emulation will do for any host controller what
-> the bounce buffers were doing. Essentially, the bounce buffer
-> was a reimplementation of software scatter-gather-emulation in
-> the MMC subsystem, and it should be done away with.
-> 
-> Cc: Pierre Ossman <pierre@ossman.eu>
-> Cc: Juha Yrjola <juha.yrjola@solidboot.com>
-> Cc: Steven J. Hill <Steven.Hill@cavium.com>
-> Cc: Shawn Lin <shawn.lin@rock-chips.com>
-> Cc: Adrian Hunter <adrian.hunter@intel.com>
-> Suggested-by: Steven J. Hill <Steven.Hill@cavium.com>
-> Suggested-by: Shawn Lin <shawn.lin@rock-chips.com>
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
-> Linus,
+Signed-off-by: Kyle Roeschley <kyle.roeschley@ni.com>
+---
+ drivers/mmc/core/core.c | 10 ++++------
+ 1 file changed, 4 insertions(+), 6 deletions(-)
 
-Thank you for doing all the research and getting this code removed.
-
--Steve
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 66c9cf49ad2f..38630246de26 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1679,18 +1679,16 @@ void mmc_power_off(struct mmc_host *host)
+ 	mmc_set_initial_state(host);
+ 
+ 	/*
+-	 * Some configurations, such as the 802.11 SDIO card in the OLPC
+-	 * XO-1.5, require a short delay after poweroff before the card
+-	 * can be successfully turned on again.
++	 * The SD spec requires at least 1 ms with Vdd at less than 0.5 V
++	 * before a card can be re-powered, but we need to wait longer so that
++	 * the voltage has time to drain.
+ 	 */
+-	mmc_delay(1);
++	mmc_delay(10);
+ }
+ 
+ void mmc_power_cycle(struct mmc_host *host, u32 ocr)
+ {
+ 	mmc_power_off(host);
+-	/* Wait at least 1 ms according to SD spec */
+-	mmc_delay(1);
+ 	mmc_power_up(host, ocr);
+ }
+ 
+-- 
+2.14.1
