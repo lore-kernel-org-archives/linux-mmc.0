@@ -1,68 +1,37 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V8 12/14] mmc: block: Add CQE and blk-mq support
-Date: Thu, 21 Sep 2017 14:17:24 +0300
-Message-ID: <013d1177-7c6e-4d32-bacb-5912d9e66753@intel.com>
-References: <1505302814-19313-1-git-send-email-adrian.hunter@intel.com>
- <1505302814-19313-13-git-send-email-adrian.hunter@intel.com>
- <CAPDyKFrJSsF-QLBe13c6huOvJngirm5D1m=JJSkbX2n9ruoFQg@mail.gmail.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH 01/12] mmc: dt-bindings: update Mediatek MMC bindings
+Date: Thu, 21 Sep 2017 13:38:27 +0200
+Message-ID: <CACRpkdbfCFL3w6bMzT2D2rukhVkzdHPpsfZO6vYQtv_SHSjgOQ@mail.gmail.com>
+References: <1505207272-16983-1-git-send-email-chaotian.jing@mediatek.com>
+ <1505207272-16983-2-git-send-email-chaotian.jing@mediatek.com>
+ <20170913141026.43oh4n4foipmahsk@rob-hp-laptop> <1505355021.8308.4.camel@mhfsdcap03>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFrJSsF-QLBe13c6huOvJngirm5D1m=JJSkbX2n9ruoFQg@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-it0-f54.google.com ([209.85.214.54]:56351 "EHLO
+        mail-it0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751606AbdIULi3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Sep 2017 07:38:29 -0400
+Received: by mail-it0-f54.google.com with SMTP id g18so232442itg.5
+        for <linux-mmc@vger.kernel.org>; Thu, 21 Sep 2017 04:38:28 -0700 (PDT)
+In-Reply-To: <1505355021.8308.4.camel@mhfsdcap03>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chaotian Jing <chaotian.jing@mediatek.com>
+Cc: Rob Herring <robh@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Matthias Brugger <matthias.bgg@gmail.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, yong mao <yong.mao@mediatek.com>, Javier Martinez Canillas <javier@osg.samsung.com>, Heiner Kallweit <hkallweit1@gmail.com>, Phong LE <ple@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "moderated list:ARM/Mediatek SoC support" <linux-mediatek@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, srv_heupstream@mediatek.com
 
-On 21/09/17 12:59, Ulf Hansson wrote:
-> On 13 September 2017 at 13:40, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> Add CQE support to the block driver, including:
->>     - optionally using DCMD for flush requests
->>     - "manually" issuing discard requests
->>     - issuing read / write requests to the CQE
->>     - supporting block-layer timeouts
->>     - handling recovery
->>     - supporting re-tuning
->>
->> CQE offers 25% - 50% better random multi-threaded I/O.  There is a slight
->> (e.g. 2%) drop in sequential read speed but no observable change to sequential
->> write.
->>
->> CQE automatically sends the commands to complete requests.  However it only
->> supports reads / writes and so-called "direct commands" (DCMD).  Furthermore
->> DCMD is limited to one command at a time, but discards require 3 commands.
->> That makes issuing discards through CQE very awkward, but some CQE's don't
->> support DCMD anyway.  So for discards, the existing non-CQE approach is
->> taken, where the mmc core code issues the 3 commands one at a time i.e.
->> mmc_erase(). Where DCMD is used, is for issuing flushes.
->>
->> For host controllers without CQE support, blk-mq support is extended to
->> synchronous reads/writes or, if the host supports CAP_WAIT_WHILE_BUSY,
->> asynchonous reads/writes.  The advantage of asynchronous reads/writes is
->> that it allows the preparation of the next request while the current
->> request is in progress.
->>
->> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
->> ---
->>  drivers/mmc/core/block.c | 734 ++++++++++++++++++++++++++++++++++++++++++++++-
->>  drivers/mmc/core/block.h |   8 +
->>  drivers/mmc/core/queue.c | 428 +++++++++++++++++++++++++--
->>  drivers/mmc/core/queue.h |  54 +++-
->>  4 files changed, 1192 insertions(+), 32 deletions(-)
-> 
-> Adrian, this is just too hard for me to review. Please, can you split this up?
-> 
-> At least enabling mq support should be done in a separate and first
-> step, then you could add the CQE bits on top.
-> 
-> I think that is important, because we want to make sure the mq
-> deployment is done correctly first. Otherwise it becomes impossible to
-> narrow down problems, because those could then be either CQE related
-> or mq related.
+On Thu, Sep 14, 2017 at 4:10 AM, Chaotian Jing
+<chaotian.jing@mediatek.com> wrote:
+> On Wed, 2017-09-13 at 09:10 -0500, Rob Herring wrote:
+>> On Tue, Sep 12, 2017 at 05:07:41PM +0800, Chaotian Jing wrote:
 
-I looked at splitting it up, but it makes more sense together.  Things are
-the way they are to support all the different issue types.  It reads much
-better together.  The CQE functions are named appropriately and practically
-all the code is new, so it is not as though there are any intermediate steps.
+>> > +- mediatek,latch-ck: Some projects do not support enhance_rx, need set correct latch-ck to avoid data crc
+>>
+>> What's a project?
+> eg, MT2701
+
+Replace the word "project" with the word "system" or "SoC" in
+your patch.
+
+Yours,
+Linus Walleij
