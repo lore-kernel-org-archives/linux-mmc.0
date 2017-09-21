@@ -1,59 +1,59 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH v2 2/2] mmc: sdhci-msm: Enable delay circuit calibration
- clocks
-Date: Wed, 20 Sep 2017 15:52:38 -0500
-Message-ID: <20170920133051.pqmae3ggomr5bm5k@rob-hp-laptop>
-References: <20170915233524.1375-1-bjorn.andersson@linaro.org>
- <20170915233524.1375-3-bjorn.andersson@linaro.org>
+From: Chaotian Jing <chaotian.jing@mediatek.com>
+Subject: [PATCH v2] mmc: dt-bindings: Add reg/source_cg/latch-ck for Mediatek MMC bindings
+Date: Thu, 21 Sep 2017 09:52:54 +0800
+Message-ID: <1505958774-14410-1-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20170915233524.1375-3-bjorn.andersson@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Bjorn Andersson <bjorn.andersson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, Venkat Gopalakrishnan <venkatg@codeaurora.org>, Ritesh Harjani <riteshh@codeaurora.org>, devicetree@vger.kernel.org
+To: Rob Herring <robh+dt@kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Matthias Brugger <matthias.bgg@gmail.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Chaotian Jing <chaotian.jing@mediatek.com>, yong mao <yong.mao@mediatek.com>, Linus Walleij <linus.walleij@linaro.org>, Javier Martinez Canillas <javier@osg.samsung.com>, Heiner Kallweit <hkallweit1@gmail.com>, Phong LE <ple@baylibre.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, srv_heupstream@mediatek.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Sep 15, 2017 at 04:35:24PM -0700, Bjorn Andersson wrote:
-> The delay circuit used to support HS400 is calibrated based on two
-> additional clocks. When these clocks are not available and
-> FF_CLK_SW_RST_DIS is not set in CORE_HC_MODE, reset might fail. But on
-> some platforms this doesn't work properly and below dump can be seen in
-> the kernel log.
-> 
->   mmc0: Reset 0x1 never completed.
->   mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
->   mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00001102
->   mmc0: sdhci: Blk size:  0x00004000 | Blk cnt:  0x00000000
->   mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x00000000
->   mmc0: sdhci: Present:   0x01f80000 | Host ctl: 0x00000000
->   mmc0: sdhci: Power:     0x00000000 | Blk gap:  0x00000000
->   mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00000002
->   mmc0: sdhci: Timeout:   0x00000000 | Int stat: 0x00000000
->   mmc0: sdhci: Int enab:  0x00000000 | Sig enab: 0x00000000
->   mmc0: sdhci: AC12 err:  0x00000000 | Slot int: 0x00000000
->   mmc0: sdhci: Caps:      0x742dc8b2 | Caps_1:   0x00008007
->   mmc0: sdhci: Cmd:       0x00000000 | Max curr: 0x00000000
->   mmc0: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
->   mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
->   mmc0: sdhci: Host ctl2: 0x00000000
->   mmc0: sdhci: ============================================
-> 
-> Add support for the additional calibration clocks to allow these
-> platforms to be configured appropriately.
-> 
-> Cc: Venkat Gopalakrishnan <venkatg@codeaurora.org>
-> Cc: Ritesh Harjani <riteshh@codeaurora.org>
-> Signed-off-by: Bjorn Andersson <bjorn.andersson@linaro.org>
-> ---
-> 
-> Changes since v1:
-> - Add new clocks to DT binding
-> 
->  Documentation/devicetree/bindings/mmc/sdhci-msm.txt |  2 ++
+Change the comptiable for support of multi-platform
+Add description for reg
+Add description for source_cg
+Add description for mediatek,latch-ck
+Note that source_cg and mediatek,latch-ck are optional for some projects,
+eg, MT2701 do not have source_cg, and MT2712 do not need
+mediatek,latch-ck
 
-Acked-by: Rob Herring <robh@kernel.org>
+Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+---
+ Documentation/devicetree/bindings/mmc/mtk-sd.txt | 13 ++++++++++---
+ 1 file changed, 10 insertions(+), 3 deletions(-)
 
->  drivers/mmc/host/sdhci-msm.c                        | 12 +++++++++++-
->  2 files changed, 13 insertions(+), 1 deletion(-)
+diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.txt b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+index 4182ea3..405cd06 100644
+--- a/Documentation/devicetree/bindings/mmc/mtk-sd.txt
++++ b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+@@ -7,10 +7,15 @@ This file documents differences between the core properties in mmc.txt
+ and the properties used by the msdc driver.
+ 
+ Required properties:
+-- compatible: Should be "mediatek,mt8173-mmc","mediatek,mt8135-mmc"
++- compatible: value should be either of the following.
++	"mediatek,mt8135-mmc": for mmc host ip compatible with mt8135
++	"mediatek,mt8173-mmc": for mmc host ip compatible with mt8173
++	"mediatek,mt2701-mmc": for mmc host ip compatible with mt2701
++	"mediatek,mt2712-mmc": for mmc host ip compatible with mt2712
++- reg: physical base address of the controller and length
+ - interrupts: Should contain MSDC interrupt number
+-- clocks: MSDC source clock, HCLK
+-- clock-names: "source", "hclk"
++- clocks: MSDC source clock, HCLK, source_cg
++- clock-names: "source", "hclk", "source_cg"
+ - pinctrl-names: should be "default", "state_uhs"
+ - pinctrl-0: should contain default/high speed pin ctrl
+ - pinctrl-1: should contain uhs mode pin ctrl
+@@ -30,6 +35,8 @@ Optional properties:
+ - mediatek,hs400-cmd-resp-sel-rising:  HS400 command response sample selection
+ 				       If present,HS400 command responses are sampled on rising edges.
+ 				       If not present,HS400 command responses are sampled on falling edges.
++- mediatek,latch-ck: Some projects do not support enhance_rx, need set correct latch-ck to avoid data crc
++		     error caused by stop clock(fifo full)
+ 
+ Examples:
+ mmc0: mmc@11230000 {
+-- 
+1.8.1.1.dirty
