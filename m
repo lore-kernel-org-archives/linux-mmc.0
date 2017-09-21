@@ -1,47 +1,68 @@
-From: Jeremy McNicoll <jmcnicol@redhat.com>
-Subject: Re: [PATCH v2 0/2] Support SDHCI on 8974pro devices
-Date: Thu, 21 Sep 2017 03:13:08 -0700
-Message-ID: <20170921101308.GA10466@mini-rhel.redhat.com>
-References: <20170915233524.1375-1-bjorn.andersson@linaro.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V8 12/14] mmc: block: Add CQE and blk-mq support
+Date: Thu, 21 Sep 2017 14:17:24 +0300
+Message-ID: <013d1177-7c6e-4d32-bacb-5912d9e66753@intel.com>
+References: <1505302814-19313-1-git-send-email-adrian.hunter@intel.com>
+ <1505302814-19313-13-git-send-email-adrian.hunter@intel.com>
+ <CAPDyKFrJSsF-QLBe13c6huOvJngirm5D1m=JJSkbX2n9ruoFQg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20170915233524.1375-1-bjorn.andersson@linaro.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Bjorn Andersson <bjorn.andersson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, Venkat Gopalakrishnan <venkatg@codeaurora.org>, Ritesh Harjani <riteshh@codeaurora.org>, devicetree@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFrJSsF-QLBe13c6huOvJngirm5D1m=JJSkbX2n9ruoFQg@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Sep 15, 2017 at 04:35:22PM -0700, Bjorn Andersson wrote:
-> The calibration clocks for the delay circut should be enabled, as done in the
-> downstream kernel, in order for reset of the SDHCI not to fail on some Qualcomm
-> platforms (e.g. 8974pro). These patches makes it possible to reference these
-> clocks.
+On 21/09/17 12:59, Ulf Hansson wrote:
+> On 13 September 2017 at 13:40, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> Add CQE support to the block driver, including:
+>>     - optionally using DCMD for flush requests
+>>     - "manually" issuing discard requests
+>>     - issuing read / write requests to the CQE
+>>     - supporting block-layer timeouts
+>>     - handling recovery
+>>     - supporting re-tuning
+>>
+>> CQE offers 25% - 50% better random multi-threaded I/O.  There is a slight
+>> (e.g. 2%) drop in sequential read speed but no observable change to sequential
+>> write.
+>>
+>> CQE automatically sends the commands to complete requests.  However it only
+>> supports reads / writes and so-called "direct commands" (DCMD).  Furthermore
+>> DCMD is limited to one command at a time, but discards require 3 commands.
+>> That makes issuing discards through CQE very awkward, but some CQE's don't
+>> support DCMD anyway.  So for discards, the existing non-CQE approach is
+>> taken, where the mmc core code issues the 3 commands one at a time i.e.
+>> mmc_erase(). Where DCMD is used, is for issuing flushes.
+>>
+>> For host controllers without CQE support, blk-mq support is extended to
+>> synchronous reads/writes or, if the host supports CAP_WAIT_WHILE_BUSY,
+>> asynchonous reads/writes.  The advantage of asynchronous reads/writes is
+>> that it allows the preparation of the next request while the current
+>> request is in progress.
+>>
+>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+>> ---
+>>  drivers/mmc/core/block.c | 734 ++++++++++++++++++++++++++++++++++++++++++++++-
+>>  drivers/mmc/core/block.h |   8 +
+>>  drivers/mmc/core/queue.c | 428 +++++++++++++++++++++++++--
+>>  drivers/mmc/core/queue.h |  54 +++-
+>>  4 files changed, 1192 insertions(+), 32 deletions(-)
 > 
-> Bjorn Andersson (2):
->   mmc: sdhci-msm: Utilize bulk clock API
->   mmc: sdhci-msm: Enable delay circuit calibration clocks
+> Adrian, this is just too hard for me to review. Please, can you split this up?
 > 
->  .../devicetree/bindings/mmc/sdhci-msm.txt          |  2 +
->  drivers/mmc/host/sdhci-msm.c                       | 90 +++++++++++-----------
->  2 files changed, 46 insertions(+), 46 deletions(-)
->
+> At least enabling mq support should be done in a separate and first
+> step, then you could add the CQE bits on top.
+> 
+> I think that is important, because we want to make sure the mq
+> deployment is done correctly first. Otherwise it becomes impossible to
+> narrow down problems, because those could then be either CQE related
+> or mq related.
 
-
-Thanks!  This fixes my Nexus5X (msm8992) and now expected messages such
-as:
-
-   mmc0: new HS400 MMC card at address 0001
-   mmcblk0: mmc0:0001 016G72 14.7 GiB 
-   mmcblk0boot0: mmc0:0001 016G72 partition 1 4.00 MiB
-   mmcblk0boot1: mmc0:0001 016G72 partition 2 4.00 MiB
-   mmcblk0rpmb: mmc0:0001 016G72 partition 3 4.00 MiB
-   mmcblk0: p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 p12 p13 p14 p15....
-
-are appearing in my boot messages / debug spew.  
-
-Tested-by: Jeremy McNicoll <jeremymc@redhat.com>
-
-
--jeremy
+I looked at splitting it up, but it makes more sense together.  Things are
+the way they are to support all the different issue types.  It reads much
+better together.  The CQE functions are named appropriately and practically
+all the code is new, so it is not as though there are any intermediate steps.
