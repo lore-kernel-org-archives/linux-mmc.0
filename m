@@ -1,356 +1,240 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: Delete bounce buffer handling
-Date: Fri, 22 Sep 2017 11:46:53 +0200
-Message-ID: <CAPDyKFoQAbtvnCX1grGzUX9d0wyt73CuT=rvAge9ZzfT3im4-A@mail.gmail.com>
-References: <20170920085614.22697-1-linus.walleij@linaro.org>
+Subject: Re: [PATCH RFC] mmc: sd: Fix signal voltage when there is no power cycle
+Date: Fri, 22 Sep 2017 12:00:58 +0200
+Message-ID: <CAPDyKFpEdgC5gRqk4D-jg3V3Hoc5eyUDQnhw_pLAO3TzwgiCDA@mail.gmail.com>
+References: <1503978827-202915-1-git-send-email-shawn.lin@rock-chips.com>
+ <CAAXpJNvfSWHrJiLHoxmm+ENUDsGayQROnRTL=SoHr-7dX7R9+Q@mail.gmail.com>
+ <59A5E6F2.5000407@marvell.com> <745b195b-bdd1-e675-a36a-ca22eb41feaa@rock-chips.com>
+ <59A9E5CD.3000703@marvell.com> <12498751-b7cc-03a4-efa5-cd0134dd57d3@rock-chips.com>
+ <a367a679-28f7-898a-c043-27df8c9c9aba@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f179.google.com ([209.85.223.179]:49196 "EHLO
-        mail-io0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751900AbdIVJqz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Sep 2017 05:46:55 -0400
-Received: by mail-io0-f179.google.com with SMTP id 21so1827902iof.6
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Sep 2017 02:46:54 -0700 (PDT)
-In-Reply-To: <20170920085614.22697-1-linus.walleij@linaro.org>
+Received: from mail-io0-f169.google.com ([209.85.223.169]:46710 "EHLO
+        mail-io0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751878AbdIVKA7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Sep 2017 06:00:59 -0400
+Received: by mail-io0-f169.google.com with SMTP id d16so1907688ioj.3
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Sep 2017 03:00:59 -0700 (PDT)
+In-Reply-To: <a367a679-28f7-898a-c043-27df8c9c9aba@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Pierre Ossman <pierre@ossman.eu>, Juha Yrjola <juha.yrjola@solidboot.com>, "Steven J . Hill" <Steven.Hill@cavium.com>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Shawn Lin <shawn.lin@rock-chips.com>, Zhoujie Wu <zjwu@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 20 September 2017 at 10:56, Linus Walleij <linus.walleij@linaro.org> wrote:
-> In may, Steven sent a patch deleting the bounce buffer handling
-> and the CONFIG_MMC_BLOCK_BOUNCE option.
->
-> I chose the less invasive path of making it a runtime config
-> option, and we merged that successfully for kernel v4.12.
->
-> The code is however just standing in the way and taking up
-> space for seemingly no gain on any systems in wide use today.
->
-> Pierre says the code was there to improve speed on TI SDHCI
-> controllers on certain HP laptops and possibly some Ricoh
-> controllers as well. Early SDHCI controllers lacked the
-> scatter-gather feature, which made software bounce buffers
-> a significant speed boost.
->
-> We are clearly talking about the list of SDHCI PCI-based
-> MMC/SD card readers found in the pci_ids[] list in
-> drivers/mmc/host/sdhci-pci-core.c.
->
-> The TI SDHCI derivative is not supported by the upstream
-> kernel. This leaves the Ricoh.
->
-> What we can however notice is that the x86 defconfigs in the
-> kernel did not enable CONFIG_MMC_BLOCK_BOUNCE option, which
-> means that any such laptop would have to have a custom
-> configured kernel to actually take advantage of this
-> bounce buffer speed-up. It simply seems like there was
-> a speed optimization for the Ricoh controllers that noone
-> was using. (I have not checked the distro defconfigs but
-> I am pretty sure the situation is the same there.)
->
-> Bounce buffers increased performance on the OMAP HSMMC
-> at one point, and was part of the original submission in
-> commit a45c6cb81647 ("[ARM] 5369/1: omap mmc: Add new
->    omap hsmmc controller for 2430 and 34xx, v3")
->
-> This optimization was removed in
-> commit 0ccd76d4c236 ("omap_hsmmc: Implement scatter-gather
->    emulation")
-> which found that scatter-gather emulation provided even
-> better performance.
->
-> The same was introduced for SDHCI in
-> commit 2134a922c6e7 ("sdhci: scatter-gather (ADMA) support")
->
-> I am pretty positively convinced that software
-> scatter-gather emulation will do for any host controller what
-> the bounce buffers were doing. Essentially, the bounce buffer
-> was a reimplementation of software scatter-gather-emulation in
-> the MMC subsystem, and it should be done away with.
->
-> Cc: Pierre Ossman <pierre@ossman.eu>
-> Cc: Juha Yrjola <juha.yrjola@solidboot.com>
-> Cc: Steven J. Hill <Steven.Hill@cavium.com>
-> Cc: Shawn Lin <shawn.lin@rock-chips.com>
-> Cc: Adrian Hunter <adrian.hunter@intel.com>
-> Suggested-by: Steven J. Hill <Steven.Hill@cavium.com>
-> Suggested-by: Shawn Lin <shawn.lin@rock-chips.com>
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+On 21 September 2017 at 09:44, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> If the card has not been power cycled, it may still be using 1.8V
+> signaling. According to the SD spec., the Bus Speed Mode (function group 1)
 
-Thanks, applied for next!
+Could you elaborate a bit more on what particular use case this is
+about in the change log. My first impression was that this is about
+suspend/resume, but that isn't the case.
 
-I needed to a minor and trivial re-base of this change, however no
-worries this time.
+> bits 2 to 4 are zero if the card is initialized at 3.3V signal level. Thus
+> they can be used to determine if the card has already switched to 1.8V
+> signaling. Detect that situation and try to initialize a UHS-I (1.8V)
+> transfer mode.
+
+Seems like a good approach to fix the problem.
+
+>
+> Tested with the following cards:
+>   Transcend 4GB High Speed
+>   Kingston 64GB SDR104
+>   Lexar by Micron HIGH-PERFORMANCE 300x 16GB DDR50
+>   SanDisk Ultra 8GB DDR50
+>   Transcend Ultimate 600x 16GB SDR104
+>   Transcend Premium 300x 64GB SDR104
+>   Lexar by Micron Professional 1000x 32GB UHS-II SDR104
+>   SanDisk Extreme Pro 16GB SDR104
+>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> ---
+>
+>
+> Here is an alternative approach to Shawn's that uses CMD6 to identify the
+> card's signal voltage.
+>
+> It has the advantages that it does not depend on knowing about the regulator,
+> and it works even when unbinding / re-binding the host controller.
+>
+>
+>  drivers/mmc/core/core.c | 38 ++++++++++++++++++++++++--------------
+>  drivers/mmc/core/core.h |  1 +
+>  drivers/mmc/core/sd.c   | 47 +++++++++++++++++++++++++++++++++++++++++++++--
+>  3 files changed, 70 insertions(+), 16 deletions(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 24a73f387482..161c1d105d91 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1723,11 +1723,33 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage)
+>
+>  }
+>
+> +int mmc_host_set_uhs_voltage(struct mmc_host *host)
+> +{
+> +       u32 clock;
+> +
+> +       /*
+> +        * During a signal voltage level switch, the clock must be gated
+> +        * for 5 ms according to the SD spec
+> +        */
+> +       clock = host->ios.clock;
+> +       host->ios.clock = 0;
+> +       mmc_set_ios(host);
+> +
+> +       if (mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180))
+> +               return -EAGAIN;
+> +
+> +       /* Keep clock gated for at least 10 ms, though spec only says 5 ms */
+> +       mmc_delay(10);
+> +       host->ios.clock = clock;
+> +       mmc_set_ios(host);
+> +
+> +       return 0;
+> +}
+> +
+>  int mmc_set_uhs_voltage(struct mmc_host *host, u32 ocr)
+>  {
+>         struct mmc_command cmd = {};
+>         int err = 0;
+> -       u32 clock;
+>
+>         /*
+>          * If we cannot switch voltages, return failure so the caller
+> @@ -1759,15 +1781,8 @@ int mmc_set_uhs_voltage(struct mmc_host *host, u32 ocr)
+>                 err = -EAGAIN;
+>                 goto power_cycle;
+>         }
+> -       /*
+> -        * During a signal voltage level switch, the clock must be gated
+> -        * for 5 ms according to the SD spec
+> -        */
+> -       clock = host->ios.clock;
+> -       host->ios.clock = 0;
+> -       mmc_set_ios(host);
+>
+> -       if (mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180)) {
+> +       if (mmc_host_set_uhs_voltage(host)) {
+>                 /*
+>                  * Voltages may not have been switched, but we've already
+>                  * sent CMD11, so a power cycle is required anyway
+> @@ -1776,11 +1791,6 @@ int mmc_set_uhs_voltage(struct mmc_host *host, u32 ocr)
+>                 goto power_cycle;
+>         }
+>
+> -       /* Keep clock gated for at least 10 ms, though spec only says 5 ms */
+> -       mmc_delay(10);
+> -       host->ios.clock = clock;
+> -       mmc_set_ios(host);
+> -
+>         /* Wait for at least 1 ms according to spec */
+>         mmc_delay(1);
+
+The above seems like a nice re-factoring, could you perhaps make that
+a separate change, as it then becomes more clear what change is needed
+to really fix the problem.
+
+>
+> diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+> index 03e0f8384b1c..2b2690d0d877 100644
+> --- a/drivers/mmc/core/core.h
+> +++ b/drivers/mmc/core/core.h
+> @@ -51,6 +51,7 @@ struct device_node *mmc_of_find_child_device(struct mmc_host *host,
+>  void mmc_set_bus_width(struct mmc_host *host, unsigned int width);
+>  u32 mmc_select_voltage(struct mmc_host *host, u32 ocr);
+>  int mmc_set_uhs_voltage(struct mmc_host *host, u32 ocr);
+> +int mmc_host_set_uhs_voltage(struct mmc_host *host);
+>  int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage);
+>  void mmc_set_timing(struct mmc_host *host, unsigned int timing);
+>  void mmc_set_driver_type(struct mmc_host *host, unsigned int drv_type);
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index 4fd1620b732d..35e1f52cb3f9 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -908,6 +908,18 @@ unsigned mmc_sd_get_max_clock(struct mmc_card *card)
+>         return max_dtr;
+>  }
+>
+> +static bool mmc_sd_card_using_v18(struct mmc_card *card)
+> +{
+> +       /*
+> +        * According to the SD spec., the Bus Speed Mode (function group 1) bits
+> +        * 2 to 4 are zero if the card is initialized at 3.3V signal level. Thus
+> +        * they can be used to determine if the card has already switched to
+> +        * 1.8V signaling.
+> +        */
+> +       return card->sw_caps.sd3_bus_mode &
+> +              (SD_MODE_UHS_SDR50 | SD_MODE_UHS_SDR104 | SD_MODE_UHS_DDR50);
+> +}
+> +
+>  /*
+>   * Handle the detection and initialisation of a card.
+>   *
+> @@ -921,9 +933,10 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
+>         int err;
+>         u32 cid[4];
+>         u32 rocr = 0;
+> +       bool v18_fixup_failed = false;
+>
+>         WARN_ON(!host->claimed);
+> -
+> +retry:
+>         err = mmc_sd_get_cid(host, ocr, cid, &rocr);
+>         if (err)
+>                 return err;
+> @@ -989,6 +1002,36 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
+>         if (err)
+>                 goto free_card;
+>
+> +       /*
+> +        * If the card has not been power cycled, it may still be using 1.8V
+> +        * signaling. Detect that situation and try to initialize a UHS-I (1.8V)
+> +        * transfer mode.
+> +        */
+> +       if (!v18_fixup_failed && !mmc_host_is_spi(host) && mmc_host_uhs(host) &&
+> +           mmc_sd_card_using_v18(card) &&
+> +           host->ios.signal_voltage != MMC_SIGNAL_VOLTAGE_180) {
+> +               /*
+> +                * Re-read switch information in case it has changed since
+> +                * oldcard was initialized.
+> +                */
+> +               if (oldcard) {
+> +                       err = mmc_read_switch(card);
+> +                       if (err)
+> +                               goto free_card;
+> +               }
+> +               if (mmc_sd_card_using_v18(card)) {
+> +                       if (mmc_host_set_uhs_voltage(host) ||
+> +                           mmc_sd_init_uhs_card(card)) {
+> +                               v18_fixup_failed = true;
+> +                               mmc_power_cycle(host, ocr);
+> +                               if (!oldcard)
+> +                                       mmc_remove_card(card);
+> +                               goto retry;
+> +                       }
+> +                       goto done;
+> +               }
+> +       }
+> +
+>         /* Initialization sequence for UHS-I cards */
+>         if (rocr & SD_ROCR_S18A) {
+>                 err = mmc_sd_init_uhs_card(card);
+> @@ -1021,7 +1064,7 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
+>                         mmc_set_bus_width(host, MMC_BUS_WIDTH_4);
+>                 }
+>         }
+> -
+> +done:
+>         host->card = card;
+>         return 0;
+>
+> --
+> 1.9.1
+>
+
+Besides the minor nitpicks, this looks good to me.
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/core/block.c  |   3 --
->  drivers/mmc/core/queue.c  | 120 ++++------------------------------------------
->  drivers/mmc/core/queue.h  |   6 ---
->  drivers/mmc/host/cavium.c |   2 +-
->  drivers/mmc/host/pxamci.c |   6 +--
->  include/linux/mmc/host.h  |   2 +-
->  6 files changed, 12 insertions(+), 127 deletions(-)
->
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 48521376b17e..ab9c780df750 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -1675,8 +1675,6 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
->         }
->
->         mqrq->areq.mrq = &brq->mrq;
-> -
-> -       mmc_queue_bounce_pre(mqrq);
->  }
->
->  static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
-> @@ -1870,7 +1868,6 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *new_req)
->                 brq = &mq_rq->brq;
->                 old_req = mmc_queue_req_to_req(mq_rq);
->                 type = rq_data_dir(old_req) == READ ? MMC_BLK_READ : MMC_BLK_WRITE;
-> -               mmc_queue_bounce_post(mq_rq);
->
->                 switch (status) {
->                 case MMC_BLK_SUCCESS:
-> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-> index 3baccbf16f3d..f74f9ef460cc 100644
-> --- a/drivers/mmc/core/queue.c
-> +++ b/drivers/mmc/core/queue.c
-> @@ -23,8 +23,6 @@
->  #include "core.h"
->  #include "card.h"
->
-> -#define MMC_QUEUE_BOUNCESZ     65536
-> -
->  /*
->   * Prepare a MMC request. This just filters out odd stuff.
->   */
-> @@ -150,26 +148,6 @@ static void mmc_queue_setup_discard(struct request_queue *q,
->                 queue_flag_set_unlocked(QUEUE_FLAG_SECERASE, q);
->  }
->
-> -static unsigned int mmc_queue_calc_bouncesz(struct mmc_host *host)
-> -{
-> -       unsigned int bouncesz = MMC_QUEUE_BOUNCESZ;
-> -
-> -       if (host->max_segs != 1 || (host->caps & MMC_CAP_NO_BOUNCE_BUFF))
-> -               return 0;
-> -
-> -       if (bouncesz > host->max_req_size)
-> -               bouncesz = host->max_req_size;
-> -       if (bouncesz > host->max_seg_size)
-> -               bouncesz = host->max_seg_size;
-> -       if (bouncesz > host->max_blk_count * 512)
-> -               bouncesz = host->max_blk_count * 512;
-> -
-> -       if (bouncesz <= 512)
-> -               return 0;
-> -
-> -       return bouncesz;
-> -}
-> -
->  /**
->   * mmc_init_request() - initialize the MMC-specific per-request data
->   * @q: the request queue
-> @@ -184,26 +162,9 @@ static int mmc_init_request(struct request_queue *q, struct request *req,
->         struct mmc_card *card = mq->card;
->         struct mmc_host *host = card->host;
->
-> -       if (card->bouncesz) {
-> -               mq_rq->bounce_buf = kmalloc(card->bouncesz, gfp);
-> -               if (!mq_rq->bounce_buf)
-> -                       return -ENOMEM;
-> -               if (card->bouncesz > 512) {
-> -                       mq_rq->sg = mmc_alloc_sg(1, gfp);
-> -                       if (!mq_rq->sg)
-> -                               return -ENOMEM;
-> -                       mq_rq->bounce_sg = mmc_alloc_sg(card->bouncesz / 512,
-> -                                                       gfp);
-> -                       if (!mq_rq->bounce_sg)
-> -                               return -ENOMEM;
-> -               }
-> -       } else {
-> -               mq_rq->bounce_buf = NULL;
-> -               mq_rq->bounce_sg = NULL;
-> -               mq_rq->sg = mmc_alloc_sg(host->max_segs, gfp);
-> -               if (!mq_rq->sg)
-> -                       return -ENOMEM;
-> -       }
-> +       mq_rq->sg = mmc_alloc_sg(host->max_segs, gfp);
-> +       if (!mq_rq->sg)
-> +               return -ENOMEM;
->
->         return 0;
->  }
-> @@ -212,13 +173,6 @@ static void mmc_exit_request(struct request_queue *q, struct request *req)
->  {
->         struct mmc_queue_req *mq_rq = req_to_mmc_queue_req(req);
->
-> -       /* It is OK to kfree(NULL) so this will be smooth */
-> -       kfree(mq_rq->bounce_sg);
-> -       mq_rq->bounce_sg = NULL;
-> -
-> -       kfree(mq_rq->bounce_buf);
-> -       mq_rq->bounce_buf = NULL;
-> -
->         kfree(mq_rq->sg);
->         mq_rq->sg = NULL;
->  }
-> @@ -265,18 +219,11 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
->         if (mmc_can_erase(card))
->                 mmc_queue_setup_discard(mq->queue, card);
->
-> -       card->bouncesz = mmc_queue_calc_bouncesz(host);
-> -       if (card->bouncesz) {
-> -               blk_queue_max_hw_sectors(mq->queue, card->bouncesz / 512);
-> -               blk_queue_max_segments(mq->queue, card->bouncesz / 512);
-> -               blk_queue_max_segment_size(mq->queue, card->bouncesz);
-> -       } else {
-> -               blk_queue_bounce_limit(mq->queue, limit);
-> -               blk_queue_max_hw_sectors(mq->queue,
-> -                       min(host->max_blk_count, host->max_req_size / 512));
-> -               blk_queue_max_segments(mq->queue, host->max_segs);
-> -               blk_queue_max_segment_size(mq->queue, host->max_seg_size);
-> -       }
-> +       blk_queue_bounce_limit(mq->queue, limit);
-> +       blk_queue_max_hw_sectors(mq->queue,
-> +               min(host->max_blk_count, host->max_req_size / 512));
-> +       blk_queue_max_segments(mq->queue, host->max_segs);
-> +       blk_queue_max_segment_size(mq->queue, host->max_seg_size);
->
->         sema_init(&mq->thread_sem, 1);
->
-> @@ -365,56 +312,7 @@ void mmc_queue_resume(struct mmc_queue *mq)
->   */
->  unsigned int mmc_queue_map_sg(struct mmc_queue *mq, struct mmc_queue_req *mqrq)
->  {
-> -       unsigned int sg_len;
-> -       size_t buflen;
-> -       struct scatterlist *sg;
->         struct request *req = mmc_queue_req_to_req(mqrq);
-> -       int i;
-> -
-> -       if (!mqrq->bounce_buf)
-> -               return blk_rq_map_sg(mq->queue, req, mqrq->sg);
-> -
-> -       sg_len = blk_rq_map_sg(mq->queue, req, mqrq->bounce_sg);
-> -
-> -       mqrq->bounce_sg_len = sg_len;
-> -
-> -       buflen = 0;
-> -       for_each_sg(mqrq->bounce_sg, sg, sg_len, i)
-> -               buflen += sg->length;
-> -
-> -       sg_init_one(mqrq->sg, mqrq->bounce_buf, buflen);
-> -
-> -       return 1;
-> -}
-> -
-> -/*
-> - * If writing, bounce the data to the buffer before the request
-> - * is sent to the host driver
-> - */
-> -void mmc_queue_bounce_pre(struct mmc_queue_req *mqrq)
-> -{
-> -       if (!mqrq->bounce_buf)
-> -               return;
-> -
-> -       if (rq_data_dir(mmc_queue_req_to_req(mqrq)) != WRITE)
-> -               return;
-> -
-> -       sg_copy_to_buffer(mqrq->bounce_sg, mqrq->bounce_sg_len,
-> -               mqrq->bounce_buf, mqrq->sg[0].length);
-> -}
-> -
-> -/*
-> - * If reading, bounce the data from the buffer after the request
-> - * has been handled by the host driver
-> - */
-> -void mmc_queue_bounce_post(struct mmc_queue_req *mqrq)
-> -{
-> -       if (!mqrq->bounce_buf)
-> -               return;
-> -
-> -       if (rq_data_dir(mmc_queue_req_to_req(mqrq)) != READ)
-> -               return;
->
-> -       sg_copy_from_buffer(mqrq->bounce_sg, mqrq->bounce_sg_len,
-> -               mqrq->bounce_buf, mqrq->sg[0].length);
-> +       return blk_rq_map_sg(mq->queue, req, mqrq->sg);
->  }
-> diff --git a/drivers/mmc/core/queue.h b/drivers/mmc/core/queue.h
-> index 7649ed6cbef7..68f68ecd94ea 100644
-> --- a/drivers/mmc/core/queue.h
-> +++ b/drivers/mmc/core/queue.h
-> @@ -51,9 +51,6 @@ enum mmc_drv_op {
->  struct mmc_queue_req {
->         struct mmc_blk_request  brq;
->         struct scatterlist      *sg;
-> -       char                    *bounce_buf;
-> -       struct scatterlist      *bounce_sg;
-> -       unsigned int            bounce_sg_len;
->         struct mmc_async_req    areq;
->         enum mmc_drv_op         drv_op;
->         int                     drv_op_result;
-> @@ -83,10 +80,7 @@ extern int mmc_init_queue(struct mmc_queue *, struct mmc_card *, spinlock_t *,
->  extern void mmc_cleanup_queue(struct mmc_queue *);
->  extern void mmc_queue_suspend(struct mmc_queue *);
->  extern void mmc_queue_resume(struct mmc_queue *);
-> -
->  extern unsigned int mmc_queue_map_sg(struct mmc_queue *,
->                                      struct mmc_queue_req *);
-> -extern void mmc_queue_bounce_pre(struct mmc_queue_req *);
-> -extern void mmc_queue_bounce_post(struct mmc_queue_req *);
->
->  #endif
-> diff --git a/drivers/mmc/host/cavium.c b/drivers/mmc/host/cavium.c
-> index 27fb625cbcf3..fbd29f00fca0 100644
-> --- a/drivers/mmc/host/cavium.c
-> +++ b/drivers/mmc/host/cavium.c
-> @@ -1038,7 +1038,7 @@ int cvm_mmc_of_slot_probe(struct device *dev, struct cvm_mmc_host *host)
->          */
->         mmc->caps |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
->                      MMC_CAP_ERASE | MMC_CAP_CMD23 | MMC_CAP_POWER_OFF_CARD |
-> -                    MMC_CAP_3_3V_DDR | MMC_CAP_NO_BOUNCE_BUFF;
-> +                    MMC_CAP_3_3V_DDR;
->
->         if (host->use_sg)
->                 mmc->max_segs = 16;
-> diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
-> index 59ab194cb009..c763b404510f 100644
-> --- a/drivers/mmc/host/pxamci.c
-> +++ b/drivers/mmc/host/pxamci.c
-> @@ -702,11 +702,7 @@ static int pxamci_probe(struct platform_device *pdev)
->
->         pxamci_init_ocr(host);
->
-> -       /*
-> -        * This architecture used to disable bounce buffers through its
-> -        * defconfig, now it is done at runtime as a host property.
-> -        */
-> -       mmc->caps = MMC_CAP_NO_BOUNCE_BUFF;
-> +       mmc->caps = 0;
->         host->cmdat = 0;
->         if (!cpu_is_pxa25x()) {
->                 mmc->caps |= MMC_CAP_4_BIT_DATA | MMC_CAP_SDIO_IRQ;
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index f3f2d07feb2a..9a43763a68ad 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -316,7 +316,7 @@ struct mmc_host {
->  #define MMC_CAP_UHS_SDR50      (1 << 18)       /* Host supports UHS SDR50 mode */
->  #define MMC_CAP_UHS_SDR104     (1 << 19)       /* Host supports UHS SDR104 mode */
->  #define MMC_CAP_UHS_DDR50      (1 << 20)       /* Host supports UHS DDR50 mode */
-> -#define MMC_CAP_NO_BOUNCE_BUFF (1 << 21)       /* Disable bounce buffers on host */
-> +/* (1 << 21) is free for reuse */
->  #define MMC_CAP_DRIVER_TYPE_A  (1 << 23)       /* Host supports Driver Type A */
->  #define MMC_CAP_DRIVER_TYPE_C  (1 << 24)       /* Host supports Driver Type C */
->  #define MMC_CAP_DRIVER_TYPE_D  (1 << 25)       /* Host supports Driver Type D */
-> --
-> 2.13.5
->
