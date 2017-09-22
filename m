@@ -1,240 +1,226 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH RFC] mmc: sd: Fix signal voltage when there is no power cycle
-Date: Fri, 22 Sep 2017 12:00:58 +0200
-Message-ID: <CAPDyKFpEdgC5gRqk4D-jg3V3Hoc5eyUDQnhw_pLAO3TzwgiCDA@mail.gmail.com>
-References: <1503978827-202915-1-git-send-email-shawn.lin@rock-chips.com>
- <CAAXpJNvfSWHrJiLHoxmm+ENUDsGayQROnRTL=SoHr-7dX7R9+Q@mail.gmail.com>
- <59A5E6F2.5000407@marvell.com> <745b195b-bdd1-e675-a36a-ca22eb41feaa@rock-chips.com>
- <59A9E5CD.3000703@marvell.com> <12498751-b7cc-03a4-efa5-cd0134dd57d3@rock-chips.com>
- <a367a679-28f7-898a-c043-27df8c9c9aba@intel.com>
+Subject: Re: [PATCH v2 1/2] mmc: sdhci-msm: Utilize bulk clock API
+Date: Fri, 22 Sep 2017 13:22:17 +0200
+Message-ID: <CAPDyKFpE9AmRF79Fqd5WM-WYi8=3WNgEcrVyKDTHgyjnDwP_sg@mail.gmail.com>
+References: <20170915233524.1375-1-bjorn.andersson@linaro.org> <20170915233524.1375-2-bjorn.andersson@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f169.google.com ([209.85.223.169]:46710 "EHLO
-        mail-io0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751878AbdIVKA7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Sep 2017 06:00:59 -0400
-Received: by mail-io0-f169.google.com with SMTP id d16so1907688ioj.3
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Sep 2017 03:00:59 -0700 (PDT)
-In-Reply-To: <a367a679-28f7-898a-c043-27df8c9c9aba@intel.com>
+Received: from mail-io0-f182.google.com ([209.85.223.182]:45441 "EHLO
+        mail-io0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751933AbdIVLWS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Sep 2017 07:22:18 -0400
+Received: by mail-io0-f182.google.com with SMTP id g32so2309613ioj.2
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Sep 2017 04:22:18 -0700 (PDT)
+In-Reply-To: <20170915233524.1375-2-bjorn.andersson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, Zhoujie Wu <zjwu@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Bjorn Andersson <bjorn.andersson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Venkat Gopalakrishnan <venkatg@codeaurora.org>, Ritesh Harjani <riteshh@codeaurora.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
 
-On 21 September 2017 at 09:44, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> If the card has not been power cycled, it may still be using 1.8V
-> signaling. According to the SD spec., the Bus Speed Mode (function group 1)
+On 16 September 2017 at 01:35, Bjorn Andersson
+<bjorn.andersson@linaro.org> wrote:
+> By stuffing the runtime controlled clocks into a clk_bulk_data array we
+> can utilize the newly introduced bulk clock operations and clean up the
+> error paths. This allow us to handle additional clocks in subsequent
+> patch, without the added complexity.
+>
+> Cc: Ritesh Harjani <riteshh@codeaurora.org>
+> Signed-off-by: Bjorn Andersson <bjorn.andersson@linaro.org>
 
-Could you elaborate a bit more on what particular use case this is
-about in the change log. My first impression was that this is about
-suspend/resume, but that isn't the case.
+Apparently clk_bulk_* isn't exported, which triggers the follow build errors.
 
-> bits 2 to 4 are zero if the card is initialized at 3.3V signal level. Thus
-> they can be used to determine if the card has already switched to 1.8V
-> signaling. Detect that situation and try to initialize a UHS-I (1.8V)
-> transfer mode.
+https://storage.kernelci.org/ulfh/next/v4.14-rc1-23-g22a5146dde6b/arm64/allmodconfig/build.log
 
-Seems like a good approach to fix the problem.
-
->
-> Tested with the following cards:
->   Transcend 4GB High Speed
->   Kingston 64GB SDR104
->   Lexar by Micron HIGH-PERFORMANCE 300x 16GB DDR50
->   SanDisk Ultra 8GB DDR50
->   Transcend Ultimate 600x 16GB SDR104
->   Transcend Premium 300x 64GB SDR104
->   Lexar by Micron Professional 1000x 32GB UHS-II SDR104
->   SanDisk Extreme Pro 16GB SDR104
->
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> ---
->
->
-> Here is an alternative approach to Shawn's that uses CMD6 to identify the
-> card's signal voltage.
->
-> It has the advantages that it does not depend on knowing about the regulator,
-> and it works even when unbinding / re-binding the host controller.
->
->
->  drivers/mmc/core/core.c | 38 ++++++++++++++++++++++++--------------
->  drivers/mmc/core/core.h |  1 +
->  drivers/mmc/core/sd.c   | 47 +++++++++++++++++++++++++++++++++++++++++++++--
->  3 files changed, 70 insertions(+), 16 deletions(-)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 24a73f387482..161c1d105d91 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -1723,11 +1723,33 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage)
->
->  }
->
-> +int mmc_host_set_uhs_voltage(struct mmc_host *host)
-> +{
-> +       u32 clock;
-> +
-> +       /*
-> +        * During a signal voltage level switch, the clock must be gated
-> +        * for 5 ms according to the SD spec
-> +        */
-> +       clock = host->ios.clock;
-> +       host->ios.clock = 0;
-> +       mmc_set_ios(host);
-> +
-> +       if (mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180))
-> +               return -EAGAIN;
-> +
-> +       /* Keep clock gated for at least 10 ms, though spec only says 5 ms */
-> +       mmc_delay(10);
-> +       host->ios.clock = clock;
-> +       mmc_set_ios(host);
-> +
-> +       return 0;
-> +}
-> +
->  int mmc_set_uhs_voltage(struct mmc_host *host, u32 ocr)
->  {
->         struct mmc_command cmd = {};
->         int err = 0;
-> -       u32 clock;
->
->         /*
->          * If we cannot switch voltages, return failure so the caller
-> @@ -1759,15 +1781,8 @@ int mmc_set_uhs_voltage(struct mmc_host *host, u32 ocr)
->                 err = -EAGAIN;
->                 goto power_cycle;
->         }
-> -       /*
-> -        * During a signal voltage level switch, the clock must be gated
-> -        * for 5 ms according to the SD spec
-> -        */
-> -       clock = host->ios.clock;
-> -       host->ios.clock = 0;
-> -       mmc_set_ios(host);
->
-> -       if (mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180)) {
-> +       if (mmc_host_set_uhs_voltage(host)) {
->                 /*
->                  * Voltages may not have been switched, but we've already
->                  * sent CMD11, so a power cycle is required anyway
-> @@ -1776,11 +1791,6 @@ int mmc_set_uhs_voltage(struct mmc_host *host, u32 ocr)
->                 goto power_cycle;
->         }
->
-> -       /* Keep clock gated for at least 10 ms, though spec only says 5 ms */
-> -       mmc_delay(10);
-> -       host->ios.clock = clock;
-> -       mmc_set_ios(host);
-> -
->         /* Wait for at least 1 ms according to spec */
->         mmc_delay(1);
-
-The above seems like a nice re-factoring, could you perhaps make that
-a separate change, as it then becomes more clear what change is needed
-to really fix the problem.
-
->
-> diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-> index 03e0f8384b1c..2b2690d0d877 100644
-> --- a/drivers/mmc/core/core.h
-> +++ b/drivers/mmc/core/core.h
-> @@ -51,6 +51,7 @@ struct device_node *mmc_of_find_child_device(struct mmc_host *host,
->  void mmc_set_bus_width(struct mmc_host *host, unsigned int width);
->  u32 mmc_select_voltage(struct mmc_host *host, u32 ocr);
->  int mmc_set_uhs_voltage(struct mmc_host *host, u32 ocr);
-> +int mmc_host_set_uhs_voltage(struct mmc_host *host);
->  int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage);
->  void mmc_set_timing(struct mmc_host *host, unsigned int timing);
->  void mmc_set_driver_type(struct mmc_host *host, unsigned int drv_type);
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index 4fd1620b732d..35e1f52cb3f9 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -908,6 +908,18 @@ unsigned mmc_sd_get_max_clock(struct mmc_card *card)
->         return max_dtr;
->  }
->
-> +static bool mmc_sd_card_using_v18(struct mmc_card *card)
-> +{
-> +       /*
-> +        * According to the SD spec., the Bus Speed Mode (function group 1) bits
-> +        * 2 to 4 are zero if the card is initialized at 3.3V signal level. Thus
-> +        * they can be used to determine if the card has already switched to
-> +        * 1.8V signaling.
-> +        */
-> +       return card->sw_caps.sd3_bus_mode &
-> +              (SD_MODE_UHS_SDR50 | SD_MODE_UHS_SDR104 | SD_MODE_UHS_DDR50);
-> +}
-> +
->  /*
->   * Handle the detection and initialisation of a card.
->   *
-> @@ -921,9 +933,10 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
->         int err;
->         u32 cid[4];
->         u32 rocr = 0;
-> +       bool v18_fixup_failed = false;
->
->         WARN_ON(!host->claimed);
-> -
-> +retry:
->         err = mmc_sd_get_cid(host, ocr, cid, &rocr);
->         if (err)
->                 return err;
-> @@ -989,6 +1002,36 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
->         if (err)
->                 goto free_card;
->
-> +       /*
-> +        * If the card has not been power cycled, it may still be using 1.8V
-> +        * signaling. Detect that situation and try to initialize a UHS-I (1.8V)
-> +        * transfer mode.
-> +        */
-> +       if (!v18_fixup_failed && !mmc_host_is_spi(host) && mmc_host_uhs(host) &&
-> +           mmc_sd_card_using_v18(card) &&
-> +           host->ios.signal_voltage != MMC_SIGNAL_VOLTAGE_180) {
-> +               /*
-> +                * Re-read switch information in case it has changed since
-> +                * oldcard was initialized.
-> +                */
-> +               if (oldcard) {
-> +                       err = mmc_read_switch(card);
-> +                       if (err)
-> +                               goto free_card;
-> +               }
-> +               if (mmc_sd_card_using_v18(card)) {
-> +                       if (mmc_host_set_uhs_voltage(host) ||
-> +                           mmc_sd_init_uhs_card(card)) {
-> +                               v18_fixup_failed = true;
-> +                               mmc_power_cycle(host, ocr);
-> +                               if (!oldcard)
-> +                                       mmc_remove_card(card);
-> +                               goto retry;
-> +                       }
-> +                       goto done;
-> +               }
-> +       }
-> +
->         /* Initialization sequence for UHS-I cards */
->         if (rocr & SD_ROCR_S18A) {
->                 err = mmc_sd_init_uhs_card(card);
-> @@ -1021,7 +1064,7 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
->                         mmc_set_bus_width(host, MMC_BUS_WIDTH_4);
->                 }
->         }
-> -
-> +done:
->         host->card = card;
->         return 0;
->
-> --
-> 1.9.1
->
-
-Besides the minor nitpicks, this looks good to me.
+Can you perhaps send a patch exporting them, and tell Mike/Stephen to
+pick it up as a part of the 4.14 rcs?
 
 Kind regards
 Uffe
+
+> ---
+>
+> Changes since v1:
+> - Dropped "clk" and "pclk" from sdhci_msm_host
+>
+>  drivers/mmc/host/sdhci-msm.c | 80 +++++++++++++++++++-------------------------
+>  1 file changed, 34 insertions(+), 46 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 9d601dc0d646..b9ca1b1ef9a8 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -127,10 +127,9 @@ struct sdhci_msm_host {
+>         struct platform_device *pdev;
+>         void __iomem *core_mem; /* MSM SDCC mapped address */
+>         int pwr_irq;            /* power irq */
+> -       struct clk *clk;        /* main SD/MMC bus clock */
+> -       struct clk *pclk;       /* SDHC peripheral bus clock */
+>         struct clk *bus_clk;    /* SDHC bus voter clock */
+>         struct clk *xo_clk;     /* TCXO clk needed for FLL feature of cm_dll*/
+> +       struct clk_bulk_data bulk_clks[2]; /* core, iface clocks */
+>         unsigned long clk_rate;
+>         struct mmc_host *mmc;
+>         bool use_14lpp_dll_reset;
+> @@ -164,10 +163,11 @@ static void msm_set_clock_rate_for_bus_mode(struct sdhci_host *host,
+>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>         struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+>         struct mmc_ios curr_ios = host->mmc->ios;
+> +       struct clk *core_clk = msm_host->bulk_clks[0].clk;
+>         int rc;
+>
+>         clock = msm_get_clock_rate_for_bus_mode(host, clock);
+> -       rc = clk_set_rate(msm_host->clk, clock);
+> +       rc = clk_set_rate(core_clk, clock);
+>         if (rc) {
+>                 pr_err("%s: Failed to set clock at rate %u at timing %d\n",
+>                        mmc_hostname(host->mmc), clock,
+> @@ -176,7 +176,7 @@ static void msm_set_clock_rate_for_bus_mode(struct sdhci_host *host,
+>         }
+>         msm_host->clk_rate = clock;
+>         pr_debug("%s: Setting clock at rate %lu at timing %d\n",
+> -                mmc_hostname(host->mmc), clk_get_rate(msm_host->clk),
+> +                mmc_hostname(host->mmc), clk_get_rate(core_clk),
+>                  curr_ios.timing);
+>  }
+>
+> @@ -1032,8 +1032,9 @@ static unsigned int sdhci_msm_get_max_clock(struct sdhci_host *host)
+>  {
+>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>         struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> +       struct clk *core_clk = msm_host->bulk_clks[0].clk;
+>
+> -       return clk_round_rate(msm_host->clk, ULONG_MAX);
+> +       return clk_round_rate(core_clk, ULONG_MAX);
+>  }
+>
+>  static unsigned int sdhci_msm_get_min_clock(struct sdhci_host *host)
+> @@ -1124,6 +1125,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>         struct sdhci_pltfm_host *pltfm_host;
+>         struct sdhci_msm_host *msm_host;
+>         struct resource *core_memres;
+> +       struct clk *clk;
+>         int ret;
+>         u16 host_version, core_minor;
+>         u32 core_version, config;
+> @@ -1159,24 +1161,32 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>         }
+>
+>         /* Setup main peripheral bus clock */
+> -       msm_host->pclk = devm_clk_get(&pdev->dev, "iface");
+> -       if (IS_ERR(msm_host->pclk)) {
+> -               ret = PTR_ERR(msm_host->pclk);
+> +       clk = devm_clk_get(&pdev->dev, "iface");
+> +       if (IS_ERR(clk)) {
+> +               ret = PTR_ERR(clk);
+>                 dev_err(&pdev->dev, "Peripheral clk setup failed (%d)\n", ret);
+>                 goto bus_clk_disable;
+>         }
+> -
+> -       ret = clk_prepare_enable(msm_host->pclk);
+> -       if (ret)
+> -               goto bus_clk_disable;
+> +       msm_host->bulk_clks[1].clk = clk;
+>
+>         /* Setup SDC MMC clock */
+> -       msm_host->clk = devm_clk_get(&pdev->dev, "core");
+> -       if (IS_ERR(msm_host->clk)) {
+> -               ret = PTR_ERR(msm_host->clk);
+> +       clk = devm_clk_get(&pdev->dev, "core");
+> +       if (IS_ERR(clk)) {
+> +               ret = PTR_ERR(clk);
+>                 dev_err(&pdev->dev, "SDC MMC clk setup failed (%d)\n", ret);
+> -               goto pclk_disable;
+> +               goto bus_clk_disable;
+>         }
+> +       msm_host->bulk_clks[0].clk = clk;
+> +
+> +       /* Vote for maximum clock rate for maximum performance */
+> +       ret = clk_set_rate(clk, INT_MAX);
+> +       if (ret)
+> +               dev_warn(&pdev->dev, "core clock boost failed\n");
+> +
+> +       ret = clk_bulk_prepare_enable(ARRAY_SIZE(msm_host->bulk_clks),
+> +                                     msm_host->bulk_clks);
+> +       if (ret)
+> +               goto bus_clk_disable;
+>
+>         /*
+>          * xo clock is needed for FLL feature of cm_dll.
+> @@ -1188,15 +1198,6 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>                 dev_warn(&pdev->dev, "TCXO clk not present (%d)\n", ret);
+>         }
+>
+> -       /* Vote for maximum clock rate for maximum performance */
+> -       ret = clk_set_rate(msm_host->clk, INT_MAX);
+> -       if (ret)
+> -               dev_warn(&pdev->dev, "core clock boost failed\n");
+> -
+> -       ret = clk_prepare_enable(msm_host->clk);
+> -       if (ret)
+> -               goto pclk_disable;
+> -
+>         core_memres = platform_get_resource(pdev, IORESOURCE_MEM, 1);
+>         msm_host->core_mem = devm_ioremap_resource(&pdev->dev, core_memres);
+>
+> @@ -1289,9 +1290,8 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>         pm_runtime_set_suspended(&pdev->dev);
+>         pm_runtime_put_noidle(&pdev->dev);
+>  clk_disable:
+> -       clk_disable_unprepare(msm_host->clk);
+> -pclk_disable:
+> -       clk_disable_unprepare(msm_host->pclk);
+> +       clk_bulk_disable_unprepare(ARRAY_SIZE(msm_host->bulk_clks),
+> +                                  msm_host->bulk_clks);
+>  bus_clk_disable:
+>         if (!IS_ERR(msm_host->bus_clk))
+>                 clk_disable_unprepare(msm_host->bus_clk);
+> @@ -1314,8 +1314,8 @@ static int sdhci_msm_remove(struct platform_device *pdev)
+>         pm_runtime_disable(&pdev->dev);
+>         pm_runtime_put_noidle(&pdev->dev);
+>
+> -       clk_disable_unprepare(msm_host->clk);
+> -       clk_disable_unprepare(msm_host->pclk);
+> +       clk_bulk_disable_unprepare(ARRAY_SIZE(msm_host->bulk_clks),
+> +                                  msm_host->bulk_clks);
+>         if (!IS_ERR(msm_host->bus_clk))
+>                 clk_disable_unprepare(msm_host->bus_clk);
+>         sdhci_pltfm_free(pdev);
+> @@ -1329,8 +1329,8 @@ static int sdhci_msm_runtime_suspend(struct device *dev)
+>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>         struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+>
+> -       clk_disable_unprepare(msm_host->clk);
+> -       clk_disable_unprepare(msm_host->pclk);
+> +       clk_bulk_disable_unprepare(ARRAY_SIZE(msm_host->bulk_clks),
+> +                                  msm_host->bulk_clks);
+>
+>         return 0;
+>  }
+> @@ -1340,21 +1340,9 @@ static int sdhci_msm_runtime_resume(struct device *dev)
+>         struct sdhci_host *host = dev_get_drvdata(dev);
+>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>         struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> -       int ret;
+>
+> -       ret = clk_prepare_enable(msm_host->clk);
+> -       if (ret) {
+> -               dev_err(dev, "clk_enable failed for core_clk: %d\n", ret);
+> -               return ret;
+> -       }
+> -       ret = clk_prepare_enable(msm_host->pclk);
+> -       if (ret) {
+> -               dev_err(dev, "clk_enable failed for iface_clk: %d\n", ret);
+> -               clk_disable_unprepare(msm_host->clk);
+> -               return ret;
+> -       }
+> -
+> -       return 0;
+> +       return clk_bulk_prepare_enable(ARRAY_SIZE(msm_host->bulk_clks),
+> +                                      msm_host->bulk_clks);
+>  }
+>  #endif
+>
+> --
+> 2.12.0
+>
