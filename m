@@ -1,51 +1,37 @@
-From: Allen Pais <allen.lkml@gmail.com>
-Subject: [PATCH 3/4] mmc-host: vub300: use setup_timer() helper.
-Date: Fri, 22 Sep 2017 17:37:25 +0530
-Message-ID: <1506082046-6878-4-git-send-email-allen.lkml@gmail.com>
-References: <1506082046-6878-1-git-send-email-allen.lkml@gmail.com>
+From: Sascha El-Sharkawy <elscha@sse.uni-hildesheim.de>
+Subject: [Patch] MULTIMEDIA CARD (MMC): Avoid useless selection of
+ MMC_RICOH_MMC quirk
+Date: Fri, 22 Sep 2017 14:21:13 +0200
+Message-ID: <F6127EC53C695C46907CD6EE43F3462352911290BD@messagesink.samelson.uni-hildesheim.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pf0-f196.google.com ([209.85.192.196]:35974 "EHLO
-        mail-pf0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752303AbdIVMHo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Sep 2017 08:07:44 -0400
-Received: by mail-pf0-f196.google.com with SMTP id f84so382993pfj.3
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Sep 2017 05:07:43 -0700 (PDT)
-In-Reply-To: <1506082046-6878-1-git-send-email-allen.lkml@gmail.com>
+Received: from messagesink.samelson.uni-hildesheim.de ([147.172.172.66]:52642
+        "EHLO messagesink.samelson.uni-hildesheim.de" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1752148AbdIVM1K (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Sep 2017 08:27:10 -0400
+Content-Language: de-DE
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: brucechang@via.com.tw, tony.olech@elandigitalsystems.com, pierre@ossman.eu, linux-mmc@vger.kernel.org, Allen Pais <allen.lkml@gmail.com>
+To: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-   Use setup_timer function instead of initializing timer with the
-   function and data fields.
-
-Signed-off-by: Allen Pais <allen.lkml@gmail.com>
----
- drivers/mmc/host/vub300.c | 10 ++++------
- 1 file changed, 4 insertions(+), 6 deletions(-)
-
-diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
-index 8f569d2..c1a1698 100644
---- a/drivers/mmc/host/vub300.c
-+++ b/drivers/mmc/host/vub300.c
-@@ -2323,13 +2323,11 @@ static int vub300_probe(struct usb_interface *interface,
- 	INIT_WORK(&vub300->cmndwork, vub300_cmndwork_thread);
- 	INIT_WORK(&vub300->deadwork, vub300_deadwork_thread);
- 	kref_init(&vub300->kref);
--	init_timer(&vub300->sg_transfer_timer);
--	vub300->sg_transfer_timer.data = (unsigned long)vub300;
--	vub300->sg_transfer_timer.function = vub300_sg_timed_out;
-+	setup_timer(&vub300->sg_transfer_timer, vub300_sg_timed_out,
-+		    (unsigned long)vub300);
- 	kref_get(&vub300->kref);
--	init_timer(&vub300->inactivity_timer);
--	vub300->inactivity_timer.data = (unsigned long)vub300;
--	vub300->inactivity_timer.function = vub300_inactivity_timer_expired;
-+	setup_timer(&vub300->inactivity_timer,
-+		    vub300_inactivity_timer_expired, (unsigned long)vub300);
- 	vub300->inactivity_timer.expires = jiffies + HZ;
- 	add_timer(&vub300->inactivity_timer);
- 	if (vub300->card_present)
--- 
-2.7.4
-
+RW5zdXJlIGNvcnJlY3QgZnVuY3Rpb25hbGl0eSBvZiBNTUNfUklDT0hfTU1DIHBjaSBxdWlyay4N
+Cg0KTU1DX1JJQ09IX01NQyBpcyBhIHBjaSBxdWlyayAocmVhbGl6ZWQgaW4gL2RyaXZlcnMvcGNp
+L3F1aXJrcy5jIGxpbmVzIDI4NzcNCi0gMjk1OSksIHdoaWNoIGluIHR1cm4gZGVwZW5kIG9uIFBD
+SV9RVUlSS1MuIEhvd2V2ZXIsIE1NQ19SSUNPSF9NTUMgY2FuIGJlDQpzZWxlY3RlZCBldmVuIGlm
+IHBjaSBxdWlya3MgKFBDSV9RVUlSS1MpIGFyZSBnbG9iYWxseSBkaXNhYmxlZC4gVGhpcyBwYXRj
+aA0KYWRkcyB0aGUgbWlzc2luZyBkZXBlbmRlbmN5IHRvIE1NQ19SSUNPSF9NTUMgdG8gZW5zdXJl
+IHRoYXQgaXQgY2FuIG9ubHkgYmUNCnNlbGVjdGVkIGlmIHBjaSBxdWlya3MgYXJlIGFjdGl2ZS4N
+Cg0KU2lnbmVkLW9mZi1ieTogIFNhc2NoYSBFbC1TaGFya2F3eSA8ZWxzY2hhQHNzZS51bmktaGls
+ZGVzaGVpbS5kZT4NCi0tLQ0KIGRyaXZlcnMvbW1jL2hvc3QvS2NvbmZpZyB8ICAgIDIgKy0NCiAx
+IGZpbGUgY2hhbmdlZCwgMSBpbnNlcnRpb24oKyksIDEgZGVsZXRpb24oLSkNCg0KZGlmZiAtLWdp
+dCBhL2RyaXZlcnMvbW1jL2hvc3QvS2NvbmZpZyBiL2RyaXZlcnMvbW1jL2hvc3QvS2NvbmZpZw0K
+aW5kZXggOGMxNTYzNy4uODExNDNmYiAxMDA2NDQNCi0tLSBhL2RyaXZlcnMvbW1jL2hvc3QvS2Nv
+bmZpZw0KKysrIGIvZHJpdmVycy9tbWMvaG9zdC9LY29uZmlnDQpAQCAtOTEsNyArOTEsNyBAQCBj
+b25maWcgTU1DX1NESENJX1BDSQ0KIA0KIGNvbmZpZyBNTUNfUklDT0hfTU1DDQogCWJvb2wgIlJp
+Y29oIE1NQyBDb250cm9sbGVyIERpc2FibGVyIg0KLQlkZXBlbmRzIG9uIE1NQ19TREhDSV9QQ0kN
+CisJZGVwZW5kcyBvbiBNTUNfU0RIQ0lfUENJICYmIFBDSV9RVUlSS1MNCiAJZGVmYXVsdCB5DQog
+CWhlbHANCiAJICBUaGlzIGFkZHMgYSBwY2kgcXVpcmsgdG8gZGlzYWJsZSBSaWNvaCBNTUMgQ29u
+dHJvbGxlci4gVGhpcw0K
