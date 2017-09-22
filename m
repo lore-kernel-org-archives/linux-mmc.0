@@ -1,55 +1,109 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] mmc: tegra: Mark 64 bit dma broken on Tegra186
-Date: Fri, 22 Sep 2017 11:45:18 +0200
-Message-ID: <CAPDyKFrGMcU5Q=Y8CPinZfqan1NVP4Be-d96FAdV9nEL=N6ohg@mail.gmail.com>
-References: <1504900113-8983-1-git-send-email-vdumpa@nvidia.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: tmio: remove broken and noisy debug macro
+Date: Fri, 22 Sep 2017 11:45:25 +0200
+Message-ID: <CAPDyKFokU_SVGyHH8ipsRA=dTffR99DsczHY194HoX0mckbucQ@mail.gmail.com>
+References: <20170914123043.21451-1-wsa+renesas@sang-engineering.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1504900113-8983-1-git-send-email-vdumpa-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Krishna Reddy <vdumpa-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Cc: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-io0-f172.google.com ([209.85.223.172]:49845 "EHLO
+        mail-io0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751892AbdIVJp1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Sep 2017 05:45:27 -0400
+Received: by mail-io0-f172.google.com with SMTP id 21so1820825iof.6
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Sep 2017 02:45:26 -0700 (PDT)
+In-Reply-To: <20170914123043.21451-1-wsa+renesas@sang-engineering.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Simon Horman <horms@verge.net.au>
 
-On 8 September 2017 at 21:48, Krishna Reddy <vdumpa-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org> wrote:
-> SDHCI controllers on Tegra186 support 40 bit addressing.
-> IOVA addresses are 48-bit wide on Tegra186.
-> SDHCI host common code sets dma mask as either 32-bit or 64-bit.
-> To avoid access issues when SMMU is enabled, disable 64-bit dma.
+On 14 September 2017 at 14:30, Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
+> Some change for v4.14 broke the debug output for TMIO. But since it was
+> not helpful to me and too noisy for my taste anyhow, let's just remove
+> it instead of fixing it. We'll find something better if we'd need it...
 >
-> Signed-off-by: Krishna Reddy <vdumpa-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-Thanks, applied for next!
+Thanks, applied for fixes!
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/sdhci-tegra.c | 10 +++++++++-
->  1 file changed, 9 insertions(+), 1 deletion(-)
+>  drivers/mmc/host/tmio_mmc_core.c | 47 ----------------------------------------
+>  1 file changed, 47 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index 0cd6fa80db66..b877c13184c2 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -422,7 +422,15 @@ static const struct sdhci_pltfm_data sdhci_tegra186_pdata = {
->                   SDHCI_QUIRK_NO_HISPD_BIT |
->                   SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
->                   SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-> -       .quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
-> +       .quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-> +                  /* SDHCI controllers on Tegra186 support 40-bit addressing.
-> +                   * IOVA addresses are 48-bit wide on Tegra186.
-> +                   * With 64-bit dma mask used for SDHCI, accesses can
-> +                   * be broken. Disable 64-bit dma, which would fall back
-> +                   * to 32-bit dma mask. Ideally 40-bit dma mask would work,
-> +                   * But it is not supported as of now.
-> +                   */
-> +                  SDHCI_QUIRK2_BROKEN_64_BIT_DMA,
->         .ops  = &tegra114_sdhci_ops,
->  };
+> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+> index 12cf8288d6635e..a7293e186e03fc 100644
+> --- a/drivers/mmc/host/tmio_mmc_core.c
+> +++ b/drivers/mmc/host/tmio_mmc_core.c
+> @@ -129,50 +129,6 @@ static int tmio_mmc_next_sg(struct tmio_mmc_host *host)
+>
+>  #define CMDREQ_TIMEOUT 5000
+>
+> -#ifdef CONFIG_MMC_DEBUG
+> -
+> -#define STATUS_TO_TEXT(a, status, i) \
+> -       do { \
+> -               if ((status) & TMIO_STAT_##a) { \
+> -                       if ((i)++) \
+> -                               printk(KERN_DEBUG " | "); \
+> -                       printk(KERN_DEBUG #a); \
+> -               } \
+> -       } while (0)
+> -
+> -static void pr_debug_status(u32 status)
+> -{
+> -       int i = 0;
+> -
+> -       pr_debug("status: %08x = ", status);
+> -       STATUS_TO_TEXT(CARD_REMOVE, status, i);
+> -       STATUS_TO_TEXT(CARD_INSERT, status, i);
+> -       STATUS_TO_TEXT(SIGSTATE, status, i);
+> -       STATUS_TO_TEXT(WRPROTECT, status, i);
+> -       STATUS_TO_TEXT(CARD_REMOVE_A, status, i);
+> -       STATUS_TO_TEXT(CARD_INSERT_A, status, i);
+> -       STATUS_TO_TEXT(SIGSTATE_A, status, i);
+> -       STATUS_TO_TEXT(CMD_IDX_ERR, status, i);
+> -       STATUS_TO_TEXT(STOPBIT_ERR, status, i);
+> -       STATUS_TO_TEXT(ILL_FUNC, status, i);
+> -       STATUS_TO_TEXT(CMD_BUSY, status, i);
+> -       STATUS_TO_TEXT(CMDRESPEND, status, i);
+> -       STATUS_TO_TEXT(DATAEND, status, i);
+> -       STATUS_TO_TEXT(CRCFAIL, status, i);
+> -       STATUS_TO_TEXT(DATATIMEOUT, status, i);
+> -       STATUS_TO_TEXT(CMDTIMEOUT, status, i);
+> -       STATUS_TO_TEXT(RXOVERFLOW, status, i);
+> -       STATUS_TO_TEXT(TXUNDERRUN, status, i);
+> -       STATUS_TO_TEXT(RXRDY, status, i);
+> -       STATUS_TO_TEXT(TXRQ, status, i);
+> -       STATUS_TO_TEXT(ILL_ACCESS, status, i);
+> -       printk("\n");
+> -}
+> -
+> -#else
+> -#define pr_debug_status(s)  do { } while (0)
+> -#endif
+> -
+>  static void tmio_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
+>  {
+>         struct tmio_mmc_host *host = mmc_priv(mmc);
+> @@ -762,9 +718,6 @@ irqreturn_t tmio_mmc_irq(int irq, void *devid)
+>         status = sd_ctrl_read16_and_16_as_32(host, CTL_STATUS);
+>         ireg = status & TMIO_MASK_IRQ & ~host->sdcard_irq_mask;
+>
+> -       pr_debug_status(status);
+> -       pr_debug_status(ireg);
+> -
+>         /* Clear the status except the interrupt status */
+>         sd_ctrl_write32_as_16_and_16(host, CTL_STATUS, TMIO_MASK_IRQ);
 >
 > --
-> 2.1.4
+> 2.11.0
 >
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
