@@ -1,38 +1,62 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V9 10/15] mmc: core: Export mmc_start_bkops()
-Date: Fri, 22 Sep 2017 15:36:59 +0300
-Message-ID: <1506083824-4024-11-git-send-email-adrian.hunter@intel.com>
-References: <1506083824-4024-1-git-send-email-adrian.hunter@intel.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [Patch] MULTIMEDIA CARD (MMC): Avoid useless selection of
+ MMC_RICOH_MMC quirk
+Date: Fri, 22 Sep 2017 21:29:09 +0800
+Message-ID: <6bee0df0-1414-6b92-5fee-b69a1564ad8e@rock-chips.com>
+References: <F6127EC53C695C46907CD6EE43F3462352911290BD@messagesink.samelson.uni-hildesheim.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:31203 "EHLO mga09.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752530AbdIVMoo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 22 Sep 2017 08:44:44 -0400
-In-Reply-To: <1506083824-4024-1-git-send-email-adrian.hunter@intel.com>
+Received: from lucky1.263xmail.com ([211.157.147.131]:53833 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751875AbdIVN3t (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Sep 2017 09:29:49 -0400
+In-Reply-To: <F6127EC53C695C46907CD6EE43F3462352911290BD@messagesink.samelson.uni-hildesheim.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
+To: Sascha El-Sharkawy <elscha@sse.uni-hildesheim.de>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+Cc: shawn.lin@rock-chips.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Export mmc_start_bkops() so that the block driver can use it.
+On 2017/9/22 20:21, Sascha El-Sharkawy wrote:
+> Ensure correct functionality of MMC_RICOH_MMC pci quirk.
+>
+> MMC_RICOH_MMC is a pci quirk (realized in /drivers/pci/quirks.c lines 2877
+> - 2959), which in turn depend on PCI_QUIRKS. However, MMC_RICOH_MMC can be
+> selected even if pci quirks (PCI_QUIRKS) are globally disabled. This patch
+> adds the missing dependency to MMC_RICOH_MMC to ensure that it can only be
+> selected if pci quirks are active.
+>
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/core/mmc_ops.c | 1 +
- 1 file changed, 1 insertion(+)
+The commit title should be something like:
+mmc: ricoh: Avoid ........
 
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index a6b0a232f24a..908e4db03535 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -1007,6 +1007,7 @@ void mmc_start_bkops(struct mmc_card *card, bool from_exception)
- 	else
- 		mmc_retune_release(card->host);
- }
-+EXPORT_SYMBOL(mmc_start_bkops);
- 
- /*
-  * Flush the cache to the non-volatile storage.
+> Signed-off-by:  Sascha El-Sharkawy <elscha@sse.uni-hildesheim.de>
+> ---
+>  drivers/mmc/host/Kconfig |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 8c15637..81143fb 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -91,7 +91,7 @@ config MMC_SDHCI_PCI
+>
+>  config MMC_RICOH_MMC
+>  	bool "Ricoh MMC Controller Disabler"
+> -	depends on MMC_SDHCI_PCI
+> +	depends on MMC_SDHCI_PCI && PCI_QUIRKS
+
+So why not select PCI_QUIRKS directly here?
+
+>  	default y
+>  	help
+>  	  This adds a pci quirk to disable Ricoh MMC Controller. This
+> N�����r��y���b�X��ǧv�^�)޺{.n�+����{��g"��^n�r���z���h����&���G���h�(�階�ݢj"���m�����z�ޖ���f���h���~�mml==
+>
+
+
 -- 
-1.9.1
+Best Regards
+Shawn Lin
 
