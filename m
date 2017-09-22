@@ -1,7 +1,7 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V9 07/15] mmc: block: Prepare CQE data
-Date: Fri, 22 Sep 2017 15:36:56 +0300
-Message-ID: <1506083824-4024-8-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V9 08/15] mmc: block: Factor out mmc_setup_queue()
+Date: Fri, 22 Sep 2017 15:36:57 +0300
+Message-ID: <1506083824-4024-9-git-send-email-adrian.hunter@intel.com>
 References: <1506083824-4024-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1506083824-4024-1-git-send-email-adrian.hunter@intel.com>
@@ -10,66 +10,79 @@ To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-mmc@vger.kernel.org
 
-Enhance mmc_blk_data_prep() to support CQE requests. That means adding
-some things that for non-CQE requests would be encoded into the command
-arguments - such as the block address, reliable-write flag, and data tag
-flag. Also the request tag is needed to provide the command queue task id,
-and a comment is added to explain the future possibility of defining a
-priority.
+Factor out some common code that will also be used with blk-mq.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/block.c | 16 +++++++++++++++-
- 1 file changed, 15 insertions(+), 1 deletion(-)
+ drivers/mmc/core/queue.c | 39 ++++++++++++++++++++++++---------------
+ 1 file changed, 24 insertions(+), 15 deletions(-)
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index a52653ce2d3a..c29dbcec7c61 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -1595,6 +1595,7 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
- 	memset(brq, 0, sizeof(struct mmc_blk_request));
+diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+index f74f9ef460cc..4f33d277b125 100644
+--- a/drivers/mmc/core/queue.c
++++ b/drivers/mmc/core/queue.c
+@@ -177,6 +177,29 @@ static void mmc_exit_request(struct request_queue *q, struct request *req)
+ 	mq_rq->sg = NULL;
+ }
  
- 	brq->mrq.data = &brq->data;
-+	brq->mrq.tag = req->tag;
- 
- 	brq->stop.opcode = MMC_STOP_TRANSMISSION;
- 	brq->stop.arg = 0;
-@@ -1609,6 +1610,14 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
- 
- 	brq->data.blksz = 512;
- 	brq->data.blocks = blk_rq_sectors(req);
-+	brq->data.blk_addr = blk_rq_pos(req);
++static void mmc_setup_queue(struct mmc_queue *mq, struct mmc_card *card)
++{
++	struct mmc_host *host = card->host;
++	u64 limit = BLK_BOUNCE_HIGH;
 +
-+	/*
-+	 * The command queue supports 2 priorities: "high" (1) and "simple" (0).
-+	 * The eMMC will give "high" priority tasks priority over "simple"
-+	 * priority tasks. Here we always set "simple" priority by not setting
-+	 * MMC_DATA_PRIO.
-+	 */
++	if (mmc_dev(host)->dma_mask && *mmc_dev(host)->dma_mask)
++		limit = (u64)dma_max_pfn(mmc_dev(host)) << PAGE_SHIFT;
++
++	queue_flag_set_unlocked(QUEUE_FLAG_NONROT, mq->queue);
++	queue_flag_clear_unlocked(QUEUE_FLAG_ADD_RANDOM, mq->queue);
++	if (mmc_can_erase(card))
++		mmc_queue_setup_discard(mq->queue, card);
++
++	blk_queue_bounce_limit(mq->queue, limit);
++	blk_queue_max_hw_sectors(mq->queue,
++		min(host->max_blk_count, host->max_req_size / 512));
++	blk_queue_max_segments(mq->queue, host->max_segs);
++	blk_queue_max_segment_size(mq->queue, host->max_seg_size);
++
++	/* Initialize thread_sem even if it is not used */
++	sema_init(&mq->thread_sem, 1);
++}
++
+ /**
+  * mmc_init_queue - initialise a queue structure.
+  * @mq: mmc queue
+@@ -190,12 +213,8 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+ 		   spinlock_t *lock, const char *subname)
+ {
+ 	struct mmc_host *host = card->host;
+-	u64 limit = BLK_BOUNCE_HIGH;
+ 	int ret = -ENOMEM;
  
- 	/*
- 	 * The block layer doesn't support all sector count
-@@ -1638,8 +1647,10 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
- 						brq->data.blocks);
+-	if (mmc_dev(host)->dma_mask && *mmc_dev(host)->dma_mask)
+-		limit = (u64)dma_max_pfn(mmc_dev(host)) << PAGE_SHIFT;
+-
+ 	mq->card = card;
+ 	mq->queue = blk_alloc_queue(GFP_KERNEL);
+ 	if (!mq->queue)
+@@ -214,18 +233,8 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
  	}
  
--	if (do_rel_wr)
-+	if (do_rel_wr) {
- 		mmc_apply_rel_rw(brq, card, req);
-+		brq->data.flags |= MMC_DATA_REL_WR;
-+	}
+ 	blk_queue_prep_rq(mq->queue, mmc_prep_request);
+-	queue_flag_set_unlocked(QUEUE_FLAG_NONROT, mq->queue);
+-	queue_flag_clear_unlocked(QUEUE_FLAG_ADD_RANDOM, mq->queue);
+-	if (mmc_can_erase(card))
+-		mmc_queue_setup_discard(mq->queue, card);
  
- 	/*
- 	 * Data tag is used only during writing meta data to speed
-@@ -1651,6 +1662,9 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
- 		      ((brq->data.blocks * brq->data.blksz) >=
- 		       card->ext_csd.data_tag_unit_size);
+-	blk_queue_bounce_limit(mq->queue, limit);
+-	blk_queue_max_hw_sectors(mq->queue,
+-		min(host->max_blk_count, host->max_req_size / 512));
+-	blk_queue_max_segments(mq->queue, host->max_segs);
+-	blk_queue_max_segment_size(mq->queue, host->max_seg_size);
+-
+-	sema_init(&mq->thread_sem, 1);
++	mmc_setup_queue(mq, card);
  
-+	if (do_data_tag)
-+		brq->data.flags |= MMC_DATA_DAT_TAG;
-+
- 	mmc_set_data_timeout(&brq->data, card);
- 
- 	brq->data.sg = mqrq->sg;
+ 	mq->thread = kthread_run(mmc_queue_thread, mq, "mmcqd/%d%s",
+ 		host->index, subname ? subname : "");
 -- 
 1.9.1
