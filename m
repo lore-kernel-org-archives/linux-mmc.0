@@ -1,7 +1,7 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V9 11/15] mmc: core: Export mmc_start_request()
-Date: Fri, 22 Sep 2017 15:37:00 +0300
-Message-ID: <1506083824-4024-12-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V9 12/15] mmc: core: Export mmc_retune_hold_now() and mmc_retune_release()
+Date: Fri, 22 Sep 2017 15:37:01 +0300
+Message-ID: <1506083824-4024-13-git-send-email-adrian.hunter@intel.com>
 References: <1506083824-4024-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1506083824-4024-1-git-send-email-adrian.hunter@intel.com>
@@ -10,47 +10,62 @@ To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-mmc@vger.kernel.org
 
-Export mmc_start_request() so that the block driver can use it.
+Export mmc_retune_hold_now() and mmc_retune_release() so they can be used
+by the block driver.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/core.c | 3 ++-
- drivers/mmc/core/core.h | 2 ++
- 2 files changed, 4 insertions(+), 1 deletion(-)
+ drivers/mmc/core/host.c | 7 +------
+ drivers/mmc/core/host.h | 7 ++++++-
+ 2 files changed, 7 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 10d7101164e4..eaa6ece946b2 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -344,7 +344,7 @@ static int mmc_mrq_prep(struct mmc_host *host, struct mmc_request *mrq)
- 	return 0;
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index b624dbb6cd15..1539ce0da196 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -111,12 +111,6 @@ void mmc_retune_hold(struct mmc_host *host)
+ 	host->hold_retune += 1;
  }
  
--static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
-+int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+-void mmc_retune_hold_now(struct mmc_host *host)
+-{
+-	host->retune_now = 0;
+-	host->hold_retune += 1;
+-}
+-
+ void mmc_retune_release(struct mmc_host *host)
  {
- 	int err;
- 
-@@ -366,6 +366,7 @@ static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
- 
- 	return 0;
+ 	if (host->hold_retune)
+@@ -124,6 +118,7 @@ void mmc_retune_release(struct mmc_host *host)
+ 	else
+ 		WARN_ON(1);
  }
-+EXPORT_SYMBOL(mmc_start_request);
++EXPORT_SYMBOL(mmc_retune_release);
  
- /*
-  * mmc_wait_data_done() - done callback for data request
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index 159b2ca301ec..92d157246271 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -109,6 +109,8 @@ static inline void mmc_unregister_pm_notifier(struct mmc_host *host) { }
- void mmc_wait_for_req_done(struct mmc_host *host, struct mmc_request *mrq);
- bool mmc_is_req_done(struct mmc_host *host, struct mmc_request *mrq);
+ int mmc_retune(struct mmc_host *host)
+ {
+diff --git a/drivers/mmc/core/host.h b/drivers/mmc/core/host.h
+index 170fe5947087..6eaf558e62d6 100644
+--- a/drivers/mmc/core/host.h
++++ b/drivers/mmc/core/host.h
+@@ -19,12 +19,17 @@
+ void mmc_retune_enable(struct mmc_host *host);
+ void mmc_retune_disable(struct mmc_host *host);
+ void mmc_retune_hold(struct mmc_host *host);
+-void mmc_retune_hold_now(struct mmc_host *host);
+ void mmc_retune_release(struct mmc_host *host);
+ int mmc_retune(struct mmc_host *host);
+ void mmc_retune_pause(struct mmc_host *host);
+ void mmc_retune_unpause(struct mmc_host *host);
  
-+int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq);
++static inline void mmc_retune_hold_now(struct mmc_host *host)
++{
++	host->retune_now = 0;
++	host->hold_retune += 1;
++}
 +
- struct mmc_async_req;
- 
- struct mmc_async_req *mmc_start_areq(struct mmc_host *host,
+ static inline void mmc_retune_recheck(struct mmc_host *host)
+ {
+ 	if (host->hold_retune <= 1)
 -- 
 1.9.1
