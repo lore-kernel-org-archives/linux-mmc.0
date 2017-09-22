@@ -1,115 +1,90 @@
-From: <rui_feng@realsil.com.cn>
-Subject: [PATCH] mmc: rtsx: fix tuning fail on gen3 PCI-Express
-Date: Fri, 22 Sep 2017 16:07:35 +0800
-Message-ID: <1506067655-30190-1-git-send-email-rui_feng@realsil.com.cn>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2] mmc: core: apply NO_CMD23 quirk to an ATP card
+Date: Fri, 22 Sep 2017 10:42:41 +0200
+Message-ID: <CAPDyKFp5JJUp7Rec=eFZd_m9yVKbO91CNR_HbN+rpUm5KTYJgA@mail.gmail.com>
+References: <1504998772.4004.2.camel@googlemail.com> <1505000687.23171.20.camel@googlemail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from rtits2.realtek.com ([211.75.126.72]:37900 "EHLO
-        rtits2.realtek.com.tw" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751704AbdIVIHv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Sep 2017 04:07:51 -0400
+Received: from mail-it0-f45.google.com ([209.85.214.45]:54026 "EHLO
+        mail-it0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751808AbdIVImm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Sep 2017 04:42:42 -0400
+Received: by mail-it0-f45.google.com with SMTP id 85so646211ith.2
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Sep 2017 01:42:42 -0700 (PDT)
+In-Reply-To: <1505000687.23171.20.camel@googlemail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: rui_feng <rui_feng@realsil.com.cn>
+To: chf.fritz@googlemail.com
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-From: rui_feng <rui_feng@realsil.com.cn>
+On 10 September 2017 at 01:44, Christoph Fritz <chf.fritz@googlemail.com> wrote:
+> To get an ATP card work reliable on a high speed bus, CMD23 needs
+> to be disabled.
+>
+> Without this patch:
+>
+>  $ dd if=/dev/urandom of=/mnt/test bs=1M count=10
+>
+>     <mmc0: starting CMD23 arg 00000400 flags 00000015>
+>     mmc0: starting CMD25 arg 00a71f00 flags 000000b5
+>     mmc0:     blksz 512 blocks 1024 flags 00000100 tsac 3000 ms nsac 0
+>     mmc0:     CMD12 arg 00000000 flags 0000049d
+>     sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
+>     mmc0: Timeout waiting for hardware interrupt.
 
-On gen3 PCI-Express we should send command one by one.
-If sending many commands in one packet will lead to a failure.
+Seems like you are using some sdhci variant. Would it be possible for
+you to test this card on another platform? That to make sure it's not
+a driver thing.
 
-Signed-off-by: rui_feng <rui_feng@realsil.com.cn>
----
- drivers/mmc/host/rtsx_pci_sdmmc.c | 38 ++++++++++++++++++--------------------
- include/linux/mfd/rtsx_pci.h      |  1 +
- 2 files changed, 19 insertions(+), 20 deletions(-)
+>
+> Signed-off-by: Christoph Fritz <chf.fritz@googlemail.com>
+> ---
+> Changes since v1:
+>  - s/CMD32/CMD23
+>
+>  drivers/mmc/core/card.h   | 1 +
+>  drivers/mmc/core/quirks.h | 6 ++++++
+>  2 files changed, 7 insertions(+)
+>
+> diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
+> index f06cd91..af9c48c 100644
+> --- a/drivers/mmc/core/card.h
+> +++ b/drivers/mmc/core/card.h
+> @@ -75,6 +75,7 @@ struct mmc_fixup {
+>  #define EXT_CSD_REV_ANY (-1u)
+>
+>  #define CID_MANFID_SANDISK      0x2
+> +#define CID_MANFID_ATP          0x9
+>  #define CID_MANFID_TOSHIBA      0x11
+>  #define CID_MANFID_MICRON       0x13
+>  #define CID_MANFID_SAMSUNG      0x15
+> diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
+> index fb72593..3205f0e 100644
+> --- a/drivers/mmc/core/quirks.h
+> +++ b/drivers/mmc/core/quirks.h
+> @@ -52,6 +52,12 @@ static const struct mmc_fixup mmc_blk_fixups[] = {
+>                   MMC_QUIRK_BLK_NO_CMD23),
+>
+>         /*
+> +        * Some SD cards lockup while using CMD23 multiblock transfers.
+> +        */
+> +       MMC_FIXUP("AF SD", CID_MANFID_ATP, CID_OEMID_ANY, add_quirk_sd,
+> +                 MMC_QUIRK_BLK_NO_CMD23),
 
-diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-index 41b5771..0848dc0 100644
---- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-@@ -618,29 +618,22 @@ static int sd_change_phase(struct realtek_pci_sdmmc *host,
- 		u8 sample_point, bool rx)
- {
- 	struct rtsx_pcr *pcr = host->pcr;
--	int err;
- 
- 	dev_dbg(sdmmc_dev(host), "%s(%s): sample_point = %d\n",
- 			__func__, rx ? "RX" : "TX", sample_point);
- 
--	rtsx_pci_init_cmd(pcr);
--
--	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, CLK_CTL, CHANGE_CLK, CHANGE_CLK);
-+	rtsx_pci_write_register(pcr, CLK_CTL, CHANGE_CLK, CHANGE_CLK);
- 	if (rx)
--		rtsx_pci_add_cmd(pcr, WRITE_REG_CMD,
--				SD_VPRX_CTL, 0x1F, sample_point);
-+		rtsx_pci_write_register(pcr, SD_VPRX_CTL,
-+			PHASE_SELECT_MASK, sample_point);
- 	else
--		rtsx_pci_add_cmd(pcr, WRITE_REG_CMD,
--				SD_VPTX_CTL, 0x1F, sample_point);
--	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_VPCLK0_CTL, PHASE_NOT_RESET, 0);
--	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_VPCLK0_CTL,
--			PHASE_NOT_RESET, PHASE_NOT_RESET);
--	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, CLK_CTL, CHANGE_CLK, 0);
--	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_CFG1, SD_ASYNC_FIFO_NOT_RST, 0);
--
--	err = rtsx_pci_send_cmd(pcr, 100);
--	if (err < 0)
--		return err;
-+		rtsx_pci_write_register(pcr, SD_VPTX_CTL,
-+			PHASE_SELECT_MASK, sample_point);
-+	rtsx_pci_write_register(pcr, SD_VPCLK0_CTL, PHASE_NOT_RESET, 0);
-+	rtsx_pci_write_register(pcr, SD_VPCLK0_CTL, PHASE_NOT_RESET,
-+				PHASE_NOT_RESET);
-+	rtsx_pci_write_register(pcr, CLK_CTL, CHANGE_CLK, 0);
-+	rtsx_pci_write_register(pcr, SD_CFG1, SD_ASYNC_FIFO_NOT_RST, 0);
- 
- 	return 0;
- }
-@@ -708,10 +701,12 @@ static int sd_tuning_rx_cmd(struct realtek_pci_sdmmc *host,
- {
- 	int err;
- 	struct mmc_command cmd = {};
-+	struct rtsx_pcr *pcr = host->pcr;
- 
--	err = sd_change_phase(host, sample_point, true);
--	if (err < 0)
--		return err;
-+	sd_change_phase(host, sample_point, true);
-+
-+	rtsx_pci_write_register(pcr, SD_CFG3, SD_RSP_80CLK_TIMEOUT_EN,
-+		SD_RSP_80CLK_TIMEOUT_EN);
- 
- 	cmd.opcode = opcode;
- 	err = sd_read_data(host, &cmd, 0x40, NULL, 0, 100);
-@@ -719,9 +714,12 @@ static int sd_tuning_rx_cmd(struct realtek_pci_sdmmc *host,
- 		/* Wait till SD DATA IDLE */
- 		sd_wait_data_idle(host);
- 		sd_clear_error(host);
-+		rtsx_pci_write_register(pcr, SD_CFG3,
-+			SD_RSP_80CLK_TIMEOUT_EN, 0);
- 		return err;
- 	}
- 
-+	rtsx_pci_write_register(pcr, SD_CFG3, SD_RSP_80CLK_TIMEOUT_EN, 0);
- 	return 0;
- }
- 
-diff --git a/include/linux/mfd/rtsx_pci.h b/include/linux/mfd/rtsx_pci.h
-index a40abaa..84a5dde 100644
---- a/include/linux/mfd/rtsx_pci.h
-+++ b/include/linux/mfd/rtsx_pci.h
-@@ -334,6 +334,7 @@
- #define DCM_DRP_RD_DATA_H		0xFC29
- #define SD_VPCLK0_CTL			0xFC2A
- #define SD_VPCLK1_CTL			0xFC2B
-+#define   PHASE_SELECT_MASK		0x1F
- #define SD_DCMPS0_CTL			0xFC2C
- #define SD_DCMPS1_CTL			0xFC2D
- #define SD_VPTX_CTL			SD_VPCLK0_CTL
--- 
-1.9.1
+Is really all ATP cards having this problem? Perhaps we should
+consider making this a bit more fine grained?
 
+On the other hand, this may be the safest way to do it...
+
+> +
+> +       /*
+>          * Some MMC cards need longer data read timeout than indicated in CSD.
+>          */
+>         MMC_FIXUP(CID_NAME_ANY, CID_MANFID_MICRON, 0x200, add_quirk_mmc,
+> --
+> 2.1.4
+>
+
+Kind regards
+Uffe
