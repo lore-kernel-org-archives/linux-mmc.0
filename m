@@ -1,58 +1,47 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [Patch] MULTIMEDIA CARD (MMC): Avoid useless selection of
- MMC_RICOH_MMC quirk
-Date: Fri, 22 Sep 2017 21:29:09 +0800
-Message-ID: <6bee0df0-1414-6b92-5fee-b69a1564ad8e@rock-chips.com>
-References: <F6127EC53C695C46907CD6EE43F3462352911290BD@messagesink.samelson.uni-hildesheim.de>
+Subject: Re: [PATCH 0/4] use setup_timer() helper function.
+Date: Fri, 22 Sep 2017 21:34:06 +0800
+Message-ID: <06107213-d41b-e66b-060d-9a1b16a19fb1@rock-chips.com>
+References: <1506082046-6878-1-git-send-email-allen.lkml@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=gbk; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.131]:53833 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.132]:32919 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751875AbdIVN3t (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Sep 2017 09:29:49 -0400
-In-Reply-To: <F6127EC53C695C46907CD6EE43F3462352911290BD@messagesink.samelson.uni-hildesheim.de>
+        with ESMTP id S1752018AbdIVNeg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Sep 2017 09:34:36 -0400
+In-Reply-To: <1506082046-6878-1-git-send-email-allen.lkml@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sascha El-Sharkawy <elscha@sse.uni-hildesheim.de>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
-Cc: shawn.lin@rock-chips.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Allen Pais <allen.lkml@gmail.com>
+Cc: ulf.hansson@linaro.org, shawn.lin@rock-chips.com, brucechang@via.com.tw, tony.olech@elandigitalsystems.com, pierre@ossman.eu, linux-mmc@vger.kernel.org
 
-On 2017/9/22 20:21, Sascha El-Sharkawy wrote:
-> Ensure correct functionality of MMC_RICOH_MMC pci quirk.
->
-> MMC_RICOH_MMC is a pci quirk (realized in /drivers/pci/quirks.c lines 2877
-> - 2959), which in turn depend on PCI_QUIRKS. However, MMC_RICOH_MMC can be
-> selected even if pci quirks (PCI_QUIRKS) are globally disabled. This patch
-> adds the missing dependency to MMC_RICOH_MMC to ensure that it can only be
-> selected if pci quirks are active.
+On 2017/9/22 20:07, Allen Pais wrote:
+> This series uses setup_timer() helper function. The series
+> addresses the files under drivers/mmc/host/*.
 >
 
-The commit title should be something like:
-mmc: ricoh: Avoid ........
+Better to provide some solid info if that is done by some static tools
+like coccinelle?
 
-> Signed-off-by:  Sascha El-Sharkawy <elscha@sse.uni-hildesheim.de>
-> ---
->  drivers/mmc/host/Kconfig |    2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+But looks like a nice cleanup,
+
+Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+
+
 >
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 8c15637..81143fb 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -91,7 +91,7 @@ config MMC_SDHCI_PCI
+> Allen Pais (4):
+>   mmc-host: wbsd: use setup_timer() helper.
+>   mmc-host: via: use setup_timer() helper.
+>   mmc-host: vub300: use setup_timer() helper.
+>   mmc-host: mxcmmc: use setup_timer() helper.
 >
->  config MMC_RICOH_MMC
->  	bool "Ricoh MMC Controller Disabler"
-> -	depends on MMC_SDHCI_PCI
-> +	depends on MMC_SDHCI_PCI && PCI_QUIRKS
-
-So why not select PCI_QUIRKS directly here?
-
->  	default y
->  	help
->  	  This adds a pci quirk to disable Ricoh MMC Controller. This
-> N�����r��y���b�X��ǧv�^�)޺{.n�+����{��g"��^n�r���z���h����&���G���h�(�階�ݢj"���m�����z�ޖ���f���h���~�mml==
+>  drivers/mmc/host/mxcmmc.c    |  4 +---
+>  drivers/mmc/host/via-sdmmc.c |  4 +---
+>  drivers/mmc/host/vub300.c    | 10 ++++------
+>  drivers/mmc/host/wbsd.c      |  5 ++---
+>  4 files changed, 8 insertions(+), 15 deletions(-)
 >
 
 
