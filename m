@@ -1,53 +1,50 @@
-From: Fabrizio Castro <fabrizio.castro@bp.renesas.com>
-Subject: [RFC PATCH] mmc: tmio: check mmc_regulator_get_supply return value
-Date: Fri, 22 Sep 2017 12:22:17 +0100
-Message-ID: <1506079337-12882-1-git-send-email-fabrizio.castro@bp.renesas.com>
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Simon Horman <horms+renesas@verge.net.au>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, kuninori.morimoto.gx@renesas.com, Chris Paterson <Chris.Paterson2@renesas.com>, Biju Das <biju.das@bp.renesas.com>, Fabrizio Castro <fabrizio.castro@bp.renesas.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH V8 01/14] mmc: core: Introduce host claiming by context
+Date: Fri, 22 Sep 2017 13:23:48 +0200
+Message-ID: <CACRpkdbf3vvaXQchKws-0vhKh6dL66u_tU4itP1Yx0AKeD+FDg@mail.gmail.com>
+References: <1505302814-19313-1-git-send-email-adrian.hunter@intel.com> <1505302814-19313-2-git-send-email-adrian.hunter@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <1505302814-19313-2-git-send-email-adrian.hunter@intel.com>
+Sender: linux-block-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-mmc@vger.kernel.org
 
-mmc_regulator_get_supply returns -EPROBE_DEFER if either vmmc or
-vqmmc regulators had their probing deferred.
-vqmmc regulator is needed by UHS to work properly, therefore this
-patch checks the value returned by mmc_regulator_get_supply to
-make sure we have a reference to both vmmc and vqmmc (if found in
-the DT).
+On Wed, Sep 13, 2017 at 1:40 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
 
-Signed-off-by: Fabrizio Castro <fabrizio.castro@bp.renesas.com>
----
+> Currently the host can be claimed by a task.  Change this so that the host
+> can be claimed by a context that may or may not be a task.  This provides
+> for the host to be claimed by a block driver queue to support blk-mq, while
+> maintaining compatibility with the existing use of mmc_claim_host().
+>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 
-I believe this patch is in order for UHS to work properly on the RZ/G1 platforms
-as the signal voltage needs to be switched from 3.3V to 1.8V, and therefore we
-need to make sure we hold a reference to vqmmc. Without this patch there is a
-chance that the regulator driver gets probed later on and therefore we end up
-without control over the power regulator. I have seen an RZ/G1E based platform
-failing the transition to UHS because of this.
-However, there are side effects to it as the mmc devices will be enumerated
-in a different order (due to -EPROBE_DEFER), this means this patch would likely
-break existing platforms.
-Please, let me know your comments.
+I think this is a reasonable intermediate step as well.
+I am working to kill off the "big MMC host lock" by the following
+plan:
 
- drivers/mmc/host/tmio_mmc_core.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+DONE:
+- Convert all ioctl() ops to custom block layer requests (done)
+- Convert all debugfs ops to custom block layer requests (done)
+- Convert RPMB access to a character device to avoid one
+  partition switch (just merged)
 
-diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-index 88a9435..3df0413 100644
---- a/drivers/mmc/host/tmio_mmc_core.c
-+++ b/drivers/mmc/host/tmio_mmc_core.c
-@@ -1153,8 +1153,11 @@ static int tmio_mmc_init_ocr(struct tmio_mmc_host *host)
- {
- 	struct tmio_mmc_data *pdata = host->pdata;
- 	struct mmc_host *mmc = host->mmc;
-+	int err;
- 
--	mmc_regulator_get_supply(mmc);
-+	err = mmc_regulator_get_supply(mmc);
-+	if (err)
-+		return err;
- 
- 	/* use ocr_mask if no regulator */
- 	if (!mmc->ocr_avail)
--- 
-2.7.4
+REMAINS:
+- Convert boot and "general" partitions to be part of the main
+  block device. Because they are. (This is really tricky and
+  may require changes in the core kernel partition handling.)
+- Delete the dual mode card support. (No-one seems to be
+  using it.)
+- Split the world in block access and SDIO with something
+  like a simple mutex: either the host is a block device OR
+  it is SDIO, and that state has the same lifetime as a card,
+  since they are now either block devices or SDIO not both
+  at the same time.
+- Implement a lighter lock for SDIO host claiming.
+- Now the lock should be gone...
+
+As you can see it is not entirely trivial :/
+
+Linus
