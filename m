@@ -1,8 +1,8 @@
-From: Zhoujie Wu <zjwu@marvell.com>
-Subject: Re: [EXT] [PATCH RFC] mmc: sd: Fix signal voltage when there is no
- power cycle
-Date: Thu, 21 Sep 2017 14:52:53 -0700
-Message-ID: <59C434B5.5090707@marvell.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH RFC] mmc: sd: Fix signal voltage when there is no power
+ cycle
+Date: Fri, 22 Sep 2017 08:39:33 +0800
+Message-ID: <58f030eb-dbfb-f96e-f665-39c9c176bb9f@rock-chips.com>
 References: <1503978827-202915-1-git-send-email-shawn.lin@rock-chips.com>
  <CAAXpJNvfSWHrJiLHoxmm+ENUDsGayQROnRTL=SoHr-7dX7R9+Q@mail.gmail.com>
  <59A5E6F2.5000407@marvell.com>
@@ -11,41 +11,27 @@ References: <1503978827-202915-1-git-send-email-shawn.lin@rock-chips.com>
  <12498751-b7cc-03a4-efa5-cd0134dd57d3@rock-chips.com>
  <a367a679-28f7-898a-c043-27df8c9c9aba@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0b-0016f401.pphosted.com ([67.231.156.173]:33201 "EHLO
-        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751697AbdIUVxC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Sep 2017 17:53:02 -0400
+Received: from lucky1.263xmail.com ([211.157.147.131]:36160 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751765AbdIVAjg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Sep 2017 20:39:36 -0400
 In-Reply-To: <a367a679-28f7-898a-c043-27df8c9c9aba@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Zhoujie Wu <zjwu@marvell.com>, shawn.lin@rock-chips.com, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi Adrian,
-This patch can solve uhs card can only be recognized as hs card on 
-armada3700 board after warm reset or suspend/resume sequence(both have 
-no power cycle for sd card).
-It looks good for me and tested on armada3700 board with following cards:
-Two sandisk 8G uhs card DDR50
-Apacer 8G uhs card DDR50
-Can it be an official patch? Thanks for your help.
-
-Tested-by: Zhoujie Wu <zjwu@marvell.com>
-
-On 09/21/2017 12:44 AM, Adrian Hunter wrote:
-> External Email
->
-> ----------------------------------------------------------------------
+On 2017/9/21 15:44, Adrian Hunter wrote:
 > If the card has not been power cycled, it may still be using 1.8V
 > signaling. According to the SD spec., the Bus Speed Mode (function group 1)
 > bits 2 to 4 are zero if the card is initialized at 3.3V signal level. Thus
 > they can be used to determine if the card has already switched to 1.8V
 > signaling. Detect that situation and try to initialize a UHS-I (1.8V)
 > transfer mode.
->
+> 
 > Tested with the following cards:
 >    Transcend 4GB High Speed
 >    Kingston 64GB SDR104
@@ -55,23 +41,28 @@ On 09/21/2017 12:44 AM, Adrian Hunter wrote:
 >    Transcend Premium 300x 64GB SDR104
 >    Lexar by Micron Professional 1000x 32GB UHS-II SDR104
 >    SanDisk Extreme Pro 16GB SDR104
->
+> 
 > Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 > ---
->
->
+> 
+> 
 > Here is an alternative approach to Shawn's that uses CMD6 to identify the
 > card's signal voltage.
->
+> 
 > It has the advantages that it does not depend on knowing about the regulator,
 > and it works even when unbinding / re-binding the host controller.
->
->
+> 
+
+Your approach looks great!
+
+Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+
+> 
 >   drivers/mmc/core/core.c | 38 ++++++++++++++++++++++++--------------
 >   drivers/mmc/core/core.h |  1 +
 >   drivers/mmc/core/sd.c   | 47 +++++++++++++++++++++++++++++++++++++++++++++--
 >   3 files changed, 70 insertions(+), 16 deletions(-)
->
+> 
 > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
 > index 24a73f387482..161c1d105d91 100644
 > --- a/drivers/mmc/core/core.c
@@ -233,4 +224,5 @@ On 09/21/2017 12:44 AM, Adrian Hunter wrote:
 >   	host->card = card;
 >   	return 0;
 >   
+> 
 
