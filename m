@@ -1,98 +1,70 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: core: add driver strength selection when selecting
- hs400es
-Date: Mon, 25 Sep 2017 13:34:15 +0300
-Message-ID: <fe5fae84-e860-716d-16f7-e77bcae859f8@intel.com>
-References: <1506329785-12340-1-git-send-email-chanho.min@lge.com>
+From: Christoph Fritz <chf.fritz@googlemail.com>
+Subject: Re: [PATCH v2] mmc: core: apply NO_CMD23 quirk to an ATP card
+Date: Mon, 25 Sep 2017 13:23:03 +0200
+Message-ID: <1506338583.2143.5.camel@googlemail.com>
+References: <1504998772.4004.2.camel@googlemail.com>
+         <1505000687.23171.20.camel@googlemail.com>
+         <CAPDyKFp5JJUp7Rec=eFZd_m9yVKbO91CNR_HbN+rpUm5KTYJgA@mail.gmail.com>
+         <27444e34-fcad-2244-5125-fc31a5755a12@rock-chips.com>
+         <1506196286.1683.7.camel@googlemail.com>
+         <10a81e7b-fe56-be68-dc46-4cf2870fd7a2@rock-chips.com>
+Reply-To: chf.fritz@googlemail.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1506329785-12340-1-git-send-email-chanho.min@lge.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chanho Min <chanho.min@lge.com>, Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Linus Walleij <linus.walleij@linaro.org>, Uri Yanai <uri.yanai@sandisk.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Hankyung Yu <hankyung.yu@lge.com>, Gunho Lee <gunho.lee@lge.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:37726 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934105AbdIYLXG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Sep 2017 07:23:06 -0400
+Received: by mail-wm0-f66.google.com with SMTP id f4so6907848wmh.4
+        for <linux-mmc@vger.kernel.org>; Mon, 25 Sep 2017 04:23:06 -0700 (PDT)
+In-Reply-To: <10a81e7b-fe56-be68-dc46-4cf2870fd7a2@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, info@atpinc.com
 
-On 25/09/17 11:56, Chanho Min wrote:
-> From: "hankyung.yu" <hankyung.yu@lge.com>
+On Mon, 2017-09-25 at 11:33 +0800, Shawn Lin wrote:
+> >> I'm just curious about if these ATP cards could work for ACMD23?
+> >>
+> >> Could you kindly try this patch?
+> >>
+> >> |https://patchwork.kernel.org/patch/9887651/
+> > 
+> > By looking at your patch I can see that bool variable 'need_acmd23' is
+> > only set when card does not support CMD23. But here this card (falsely)
+> > claims to support CMD23, which is the whole point of the NO_CMD23 quirk.
+> > 
+> > So testing your patch would not make any difference, because its
 > 
-> The drive strength setting is missed and required when selecting
-> hs400es. So, It is added here.
-> 
-> Signed-off-by: Hankyung Yu <hankyung.yu@lge.com>
-> Signed-off-by: Chanho Min <chanho.min@lge.com>
+> yup, sorry fot that. I mean you could hack it a little to mask
+> CMD23 support and let ACMD23 take effect, and see how it would
+> go?
 
-Looks right.  I guess we should add:
+forcing ACMD23 instead of CMD23 works fine:
 
-Fixes: 81ac2af65793ecf ("mmc: core: implement enhanced strobe support")
-Cc: stable@vger.kernel.org
+dd if=/dev/urandom of=/mnt/test bs=1M count=100 conv=fsync
+100+0 records in
+100+0 records out
+104857600 bytes (105 MB) copied, 9.9496 s, 10.5 MB/s
 
+It's as fast as using my NO_CMD23 quirk.
 
-> ---
->  drivers/mmc/core/mmc.c | 36 +++++++++++++++++++-----------------
->  1 file changed, 19 insertions(+), 17 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 07516f3..bc7586c 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1249,6 +1249,23 @@ out_err:
->  	return err;
->  }
->  
-> +static void mmc_select_driver_type(struct mmc_card *card)
-> +{
-> +	int card_drv_type, drive_strength, drv_type;
-> +
-> +	card_drv_type = card->ext_csd.raw_driver_strength |
-> +			mmc_driver_type_mask(0);
-> +
-> +	drive_strength = mmc_select_drive_strength(card,
-> +						   card->ext_csd.hs200_max_dtr,
-> +						   card_drv_type, &drv_type);
-> +
-> +	card->drive_strength = drive_strength;
-> +
-> +	if (drv_type)
-> +		mmc_set_driver_type(card->host, drv_type);
-> +}
-> +
->  static int mmc_select_hs400es(struct mmc_card *card)
->  {
->  	struct mmc_host *host = card->host;
-> @@ -1300,6 +1317,8 @@ static int mmc_select_hs400es(struct mmc_card *card)
->  		goto out_err;
->  	}
->  
-> +	mmc_select_driver_type(card);
-> +
->  	/* Switch card to HS400 */
->  	val = EXT_CSD_TIMING_HS400 |
->  	      card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
-> @@ -1333,23 +1352,6 @@ out_err:
->  	return err;
->  }
->  
-> -static void mmc_select_driver_type(struct mmc_card *card)
-> -{
-> -	int card_drv_type, drive_strength, drv_type;
-> -
-> -	card_drv_type = card->ext_csd.raw_driver_strength |
-> -			mmc_driver_type_mask(0);
-> -
-> -	drive_strength = mmc_select_drive_strength(card,
-> -						   card->ext_csd.hs200_max_dtr,
-> -						   card_drv_type, &drv_type);
-> -
-> -	card->drive_strength = drive_strength;
-> -
-> -	if (drv_type)
-> -		mmc_set_driver_type(card->host, drv_type);
-> -}
-> -
->  /*
->   * For device supporting HS200 mode, the following sequence
->   * should be done before executing the tuning process.
-> 
+> >>>>           /*
+> >>>> +        * Some SD cards lockup while using CMD23 multiblock transfers.
+> >>>> +        */
+> >>>> +       MMC_FIXUP("AF SD", CID_MANFID_ATP, CID_OEMID_ANY, add_quirk_sd,
+> >>>> +                 MMC_QUIRK_BLK_NO_CMD23),
+> >>>
+> >>> Is really all ATP cards having this problem? Perhaps we should
+> >>> consider making this a bit more fine grained?
+> >>>
+> >>> On the other hand, this may be the safest way to do it...
+> > 
+> > I also thought about this and set CID_OEMID_ANY because I wanted to be
+> > on the safe side. Maybe ATP can comment on this (in CC)?
+
+Thanks
+ -- Christoph
+
