@@ -1,220 +1,130 @@
-From: Bough Chen <haibo.chen@nxp.com>
-Subject: RE: [PATCH V9 14/15] mmc: cqhci: support for command queue enabled
- host
-Date: Mon, 25 Sep 2017 02:39:33 +0000
-Message-ID: <AM4PR0401MB23242EB93D53E48BD31C95F7907A0@AM4PR0401MB2324.eurprd04.prod.outlook.com>
-References: <1506083824-4024-1-git-send-email-adrian.hunter@intel.com>
- <1506083824-4024-15-git-send-email-adrian.hunter@intel.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH v2] mmc: core: apply NO_CMD23 quirk to an ATP card
+Date: Mon, 25 Sep 2017 11:33:36 +0800
+Message-ID: <10a81e7b-fe56-be68-dc46-4cf2870fd7a2@rock-chips.com>
+References: <1504998772.4004.2.camel@googlemail.com>
+ <1505000687.23171.20.camel@googlemail.com>
+ <CAPDyKFp5JJUp7Rec=eFZd_m9yVKbO91CNR_HbN+rpUm5KTYJgA@mail.gmail.com>
+ <27444e34-fcad-2244-5125-fc31a5755a12@rock-chips.com>
+ <1506196286.1683.7.camel@googlemail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <1506083824-4024-15-git-send-email-adrian.hunter@intel.com>
-Content-Language: en-US
-Sender: linux-block-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.132]:59916 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753088AbdIYDdr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 24 Sep 2017 23:33:47 -0400
+In-Reply-To: <1506196286.1683.7.camel@googlemail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: chf.fritz@googlemail.com
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, shawn.lin@rock-chips.com, linux-mmc <linux-mmc@vger.kernel.org>, info@atpinc.com
 
-> -----Original Message-----
-> From: Adrian Hunter [mailto:adrian.hunter@intel.com]
-> Sent: Friday, September 22, 2017 8:37 PM
-> To: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: linux-mmc <linux-mmc@vger.kernel.org>; linux-block <linux-
-> block@vger.kernel.org>; linux-kernel <linux-kernel@vger.kernel.org>; Boug=
-h
-> Chen <haibo.chen@nxp.com>; Alex Lemberg <alex.lemberg@sandisk.com>;
-> Mateusz Nowak <mateusz.nowak@intel.com>; Yuliy Izrailov
-> <Yuliy.Izrailov@sandisk.com>; Jaehoon Chung <jh80.chung@samsung.com>;
-> Dong Aisheng <dongas86@gmail.com>; Das Asutosh
-> <asutoshd@codeaurora.org>; Zhangfei Gao <zhangfei.gao@gmail.com>;
-> Sahitya Tummala <stummala@codeaurora.org>; Harjani Ritesh
-> <riteshh@codeaurora.org>; Venu Byravarasu <vbyravarasu@nvidia.com>;
-> Linus Walleij <linus.walleij@linaro.org>; Shawn Lin <shawn.lin@rock-
-> chips.com>; Christoph Hellwig <hch@lst.de>
-> Subject: [PATCH V9 14/15] mmc: cqhci: support for command queue enabled
-> host
->=20
-> From: Venkat Gopalakrishnan <venkatg@codeaurora.org>
->=20
-> This patch adds CMDQ support for command-queue compatible hosts.
->=20
-> Command queue is added in eMMC-5.1 specification. This enables the
-> controller to process upto 32 requests at a time.
->=20
-> Adrian Hunter contributed renaming to cqhci, recovery, suspend and resume=
-,
-> cqhci_off, cqhci_wait_for_idle, and external timeout handling.
->=20
-> Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
-> Signed-off-by: Sujit Reddy Thumma <sthumma@codeaurora.org>
-> Signed-off-by: Konstantin Dorfman <kdorfman@codeaurora.org>
-> Signed-off-by: Venkat Gopalakrishnan <venkatg@codeaurora.org>
-> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
-> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> ---
->  drivers/mmc/host/Kconfig  |   13 +
->  drivers/mmc/host/Makefile |    1 +
->  drivers/mmc/host/cqhci.c  | 1154
-> +++++++++++++++++++++++++++++++++++++++++++++
->  drivers/mmc/host/cqhci.h  |  240 ++++++++++
->  4 files changed, 1408 insertions(+)
->  create mode 100644 drivers/mmc/host/cqhci.c  create mode 100644
-> drivers/mmc/host/cqhci.h
->=20
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig index
-> 17afe1ad3a03..f2751465bc54 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -843,6 +843,19 @@ config MMC_SUNXI
->  	  This selects support for the SD/MMC Host Controller on
->  	  Allwinner sunxi SoCs.
->=20
-> +config MMC_CQHCI
-> +	tristate "Command Queue Host Controller Interface support"
-> +	depends on HAS_DMA
-> +	help
-> +	  This selects the Command Queue Host Controller Interface (CQHCI)
-> +	  support present in host controllers of Qualcomm Technologies, Inc
-> +	  amongst others.
-> +	  This controller supports eMMC devices with command queue support.
-> +
-> +	  If you have a controller with this interface, say Y or M here.
-> +
-> +	  If unsure, say N.
-> +
->  config MMC_TOSHIBA_PCI
->  	tristate "Toshiba Type A SD/MMC Card Interface Driver"
->  	depends on PCI
-> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile index
-> 2b5a8133948d..f01d9915304d 100644
-> --- a/drivers/mmc/host/Makefile
-> +++ b/drivers/mmc/host/Makefile
-> @@ -90,6 +90,7 @@ obj-$(CONFIG_MMC_SDHCI_ST)		+=3D sdhci-st.o
->  obj-$(CONFIG_MMC_SDHCI_MICROCHIP_PIC32)	+=3D sdhci-pic32.o
->  obj-$(CONFIG_MMC_SDHCI_BRCMSTB)		+=3D sdhci-brcmstb.o
->  obj-$(CONFIG_MMC_SDHCI_OMAP)		+=3D sdhci-omap.o
-> +obj-$(CONFIG_MMC_CQHCI)			+=3D cqhci.o
->=20
->  ifeq ($(CONFIG_CB710_DEBUG),y)
->  	CFLAGS-cb710-mmc	+=3D -DDEBUG
-> diff --git a/drivers/mmc/host/cqhci.c b/drivers/mmc/host/cqhci.c new file
-> mode 100644 index 000000000000..eb3c1695b0c7
-> --- /dev/null
-> +++ b/drivers/mmc/host/cqhci.c
-> @@ -0,0 +1,1154 @@
-> +/* Copyright (c) 2015, The Linux Foundation. All rights reserved.
-> + *
-> + * This program is free software; you can redistribute it and/or modify
-> + * it under the terms of the GNU General Public License version 2 and
-> + * only version 2 as published by the Free Software Foundation.
-> + *
-> + * This program is distributed in the hope that it will be useful,
-> + * but WITHOUT ANY WARRANTY; without even the implied warranty of
-> + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> + * GNU General Public License for more details.
-> + */
-> +
-> +#include <linux/delay.h>
-> +#include <linux/highmem.h>
-> +#include <linux/io.h>
-> +#include <linux/module.h>
-> +#include <linux/dma-mapping.h>
-> +#include <linux/slab.h>
-> +#include <linux/scatterlist.h>
-> +#include <linux/platform_device.h>
-> +#include <linux/ktime.h>
-> +
-> +#include <linux/mmc/mmc.h>
-> +#include <linux/mmc/host.h>
-> +#include <linux/mmc/card.h>
-> +
-> +#include "cqhci.h"
-> +
-> +#define DCMD_SLOT 31
-> +#define NUM_SLOTS 32
-> +
-> +struct cqhci_slot {
-> +	struct mmc_request *mrq;
-> +	unsigned int flags;
-> +#define CQHCI_EXTERNAL_TIMEOUT	BIT(0)
-> +#define CQHCI_COMPLETED		BIT(1)
-> +#define CQHCI_HOST_CRC		BIT(2)
-> +#define CQHCI_HOST_TIMEOUT	BIT(3)
-> +#define CQHCI_HOST_OTHER	BIT(4)
-> +};
-> +
-> +static inline u8 *get_desc(struct cqhci_host *cq_host, u8 tag) {
-> +	return cq_host->desc_base + (tag * cq_host->slot_sz); }
-> +
-> +static inline u8 *get_link_desc(struct cqhci_host *cq_host, u8 tag) {
-> +	u8 *desc =3D get_desc(cq_host, tag);
-> +
-> +	return desc + cq_host->task_desc_len;
-> +}
-> +
-> +static inline dma_addr_t get_trans_desc_dma(struct cqhci_host *cq_host,
-> +u8 tag) {
-> +	return cq_host->trans_desc_dma_base +
-> +		(cq_host->mmc->max_segs * tag *
-> +		 cq_host->trans_desc_len);
-> +}
-> +
-> +static inline u8 *get_trans_desc(struct cqhci_host *cq_host, u8 tag) {
-> +	return cq_host->trans_desc_base +
-> +		(cq_host->trans_desc_len * cq_host->mmc->max_segs * tag); }
-> +
-> +static void setup_trans_desc(struct cqhci_host *cq_host, u8 tag) {
-> +	u8 *link_temp;
-> +	dma_addr_t trans_temp;
-> +
-> +	link_temp =3D get_link_desc(cq_host, tag);
-> +	trans_temp =3D get_trans_desc_dma(cq_host, tag);
-> +
-> +	memset(link_temp, 0, cq_host->link_desc_len);
-> +	if (cq_host->link_desc_len > 8)
-> +		*(link_temp + 8) =3D 0;
-> +
-> +	if (tag =3D=3D DCMD_SLOT && (cq_host->mmc->caps2 &
-> MMC_CAP2_CQE_DCMD)) {
-> +		*link_temp =3D CQHCI_VALID(0) | CQHCI_ACT(0) |
-> CQHCI_END(1);
-> +		return;
-> +	}
-> +
-> +	*link_temp =3D CQHCI_VALID(1) | CQHCI_ACT(0x6) | CQHCI_END(0);
-> +
-> +	if (cq_host->dma64) {
-> +		__le64 *data_addr =3D (__le64 __force *)(link_temp + 4);
-> +
-> +		data_addr[0] =3D cpu_to_le64(trans_temp);
-> +	} else {
-> +		__le32 *data_addr =3D (__le32 __force *)(link_temp + 4);
-> +
-> +		data_addr[0] =3D cpu_to_le32(trans_temp);
-> +	}
-> +}
-> +
-> +static void cqhci_set_irqs(struct cqhci_host *cq_host, u32 set) {
-> +	u32 ier;
-> +
-> +	ier =3D cqhci_readl(cq_host, CQHCI_ISTE);
-> +	ier |=3D set;
+Hi，
 
-Hi Adrian,
+On 2017/9/24 3:51, Christoph Fritz wrote:
+> Hi Ulf and Shawn,
+> 
+>   thanks for your input, I'm replying to both of you by this mail, please
+> see comments below.
+> 
+> On Fri, 2017-09-22 at 17:26 +0800, Shawn Lin wrote:
+>> Hi
+>>
+>> On 2017/9/22 16:42, Ulf Hansson wrote:
+>>> On 10 September 2017 at 01:44, Christoph Fritz <chf.fritz@googlemail.com> wrote:
+>>>> To get an ATP card work reliable on a high speed bus, CMD23 needs
+>>>> to be disabled.
+>>>>
+>>>> Without this patch:
+>>>>
+>>>>    $ dd if=/dev/urandom of=/mnt/test bs=1M count=10
+>>>>
+>>>>       <mmc0: starting CMD23 arg 00000400 flags 00000015>
+>>>>       mmc0: starting CMD25 arg 00a71f00 flags 000000b5
+>>>>       mmc0:     blksz 512 blocks 1024 flags 00000100 tsac 3000 ms nsac 0
+>>>>       mmc0:     CMD12 arg 00000000 flags 0000049d
+>>>>       sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
+>>>>       mmc0: Timeout waiting for hardware interrupt.
+>>>
+>>> Seems like you are using some sdhci variant. Would it be possible for
+>>> you to test this card on another platform? That to make sure it's not
+>>> a driver thing.
+> 
+> SoC am335x (omap_hsmmc) works fine because it lacks CMD23 host support.
+> My RK3288 board supports only micro-SD cards. If you want me to, I could
+> get an adapter (micro-SD -> SD) but the shipping takes ~40 days.
+> 
+>>>
+>>
+>> I'm just curious about if these ATP cards could work for ACMD23?
+>>
+>> Could you kindly try this patch?
+>>
+>> |https://patchwork.kernel.org/patch/9887651/
+> 
+> By looking at your patch I can see that bool variable 'need_acmd23' is
+> only set when card does not support CMD23. But here this card (falsely)
+> claims to support CMD23, which is the whole point of the NO_CMD23 quirk.
+> 
+> So testing your patch would not make any difference, because its
 
-I think operation ' |=3D ' is not correct, since we will also call cqhci_se=
-t_irqs(cq_host, 0),
-Which means to mask all cmdq irq,  so I think better to directly write the =
-parameter
- 'set' to ISTE and ISGE.
+yup, sorry fot that. I mean you could hack it a little to mask
+CMD23 support and let ACMD23 take effect, and see how it would
+go?
 
-Best Regards,
-Haibo Chen
+> functionality would be disabled, or do I miss something?
+> 
+>>
+>>
+>>>>
+>>>> Signed-off-by: Christoph Fritz <chf.fritz@googlemail.com>
+>>>> ---
+>>>> Changes since v1:
+>>>>    - s/CMD32/CMD23
+>>>>
+>>>>    drivers/mmc/core/card.h   | 1 +
+>>>>    drivers/mmc/core/quirks.h | 6 ++++++
+>>>>    2 files changed, 7 insertions(+)
+>>>>
+>>>> diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
+>>>> index f06cd91..af9c48c 100644
+>>>> --- a/drivers/mmc/core/card.h
+>>>> +++ b/drivers/mmc/core/card.h
+>>>> @@ -75,6 +75,7 @@ struct mmc_fixup {
+>>>>    #define EXT_CSD_REV_ANY (-1u)
+>>>>
+>>>>    #define CID_MANFID_SANDISK      0x2
+>>>> +#define CID_MANFID_ATP          0x9
+>>>>    #define CID_MANFID_TOSHIBA      0x11
+>>>>    #define CID_MANFID_MICRON       0x13
+>>>>    #define CID_MANFID_SAMSUNG      0x15
+>>>> diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
+>>>> index fb72593..3205f0e 100644
+>>>> --- a/drivers/mmc/core/quirks.h
+>>>> +++ b/drivers/mmc/core/quirks.h
+>>>> @@ -52,6 +52,12 @@ static const struct mmc_fixup mmc_blk_fixups[] = {
+>>>>                     MMC_QUIRK_BLK_NO_CMD23),
+>>>>
+>>>>           /*
+>>>> +        * Some SD cards lockup while using CMD23 multiblock transfers.
+>>>> +        */
+>>>> +       MMC_FIXUP("AF SD", CID_MANFID_ATP, CID_OEMID_ANY, add_quirk_sd,
+>>>> +                 MMC_QUIRK_BLK_NO_CMD23),
+>>>
+>>> Is really all ATP cards having this problem? Perhaps we should
+>>> consider making this a bit more fine grained?
+>>>
+>>> On the other hand, this may be the safest way to do it...
+> 
+> I also thought about this and set CID_OEMID_ANY because I wanted to be
+> on the safe side. Maybe ATP can comment on this (in CC)?
+> 
+> Thanks
+>   -- Christoph
+> 
+> 
+> 
+> 
 
-> +	cqhci_writel(cq_host, ier, CQHCI_ISTE);
-> +	cqhci_writel(cq_host, ier, CQHCI_ISGE); }
-> +
-> +#define DRV_NAME "cqhci"
-> +
