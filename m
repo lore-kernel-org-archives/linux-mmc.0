@@ -1,70 +1,72 @@
-From: Christoph Fritz <chf.fritz@googlemail.com>
-Subject: Re: [PATCH v2] mmc: core: apply NO_CMD23 quirk to an ATP card
-Date: Mon, 25 Sep 2017 13:23:03 +0200
-Message-ID: <1506338583.2143.5.camel@googlemail.com>
-References: <1504998772.4004.2.camel@googlemail.com>
-         <1505000687.23171.20.camel@googlemail.com>
-         <CAPDyKFp5JJUp7Rec=eFZd_m9yVKbO91CNR_HbN+rpUm5KTYJgA@mail.gmail.com>
-         <27444e34-fcad-2244-5125-fc31a5755a12@rock-chips.com>
-         <1506196286.1683.7.camel@googlemail.com>
-         <10a81e7b-fe56-be68-dc46-4cf2870fd7a2@rock-chips.com>
-Reply-To: chf.fritz@googlemail.com
+From: Sascha El-Sharkawy <elscha@sse.uni-hildesheim.de>
+Subject: RE: [Patch] mmc:: ricoh: Avoid useless selection of MMC_RICOH_MMC
+ quirk
+Date: Mon, 25 Sep 2017 17:16:50 +0200
+Message-ID: <F6127EC53C695C46907CD6EE43F3462352911290D9@messagesink.samelson.uni-hildesheim.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:37726 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934105AbdIYLXG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Sep 2017 07:23:06 -0400
-Received: by mail-wm0-f66.google.com with SMTP id f4so6907848wmh.4
-        for <linux-mmc@vger.kernel.org>; Mon, 25 Sep 2017 04:23:06 -0700 (PDT)
-In-Reply-To: <10a81e7b-fe56-be68-dc46-4cf2870fd7a2@rock-chips.com>
+Received: from messagesink.samelson.uni-hildesheim.de ([147.172.172.66]:21630
+        "EHLO messagesink.samelson.uni-hildesheim.de" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S932107AbdIYPRa (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Sep 2017 11:17:30 -0400
+Content-Language: de-DE
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, info@atpinc.com
+To: Shawn Lin <shawn.lin@rock-chips.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Mon, 2017-09-25 at 11:33 +0800, Shawn Lin wrote:
-> >> I'm just curious about if these ATP cards could work for ACMD23?
-> >>
-> >> Could you kindly try this patch?
-> >>
-> >> |https://patchwork.kernel.org/patch/9887651/
-> > 
-> > By looking at your patch I can see that bool variable 'need_acmd23' is
-> > only set when card does not support CMD23. But here this card (falsely)
-> > claims to support CMD23, which is the whole point of the NO_CMD23 quirk.
-> > 
-> > So testing your patch would not make any difference, because its
-> 
-> yup, sorry fot that. I mean you could hack it a little to mask
-> CMD23 support and let ACMD23 take effect, and see how it would
-> go?
-
-forcing ACMD23 instead of CMD23 works fine:
-
-dd if=/dev/urandom of=/mnt/test bs=1M count=100 conv=fsync
-100+0 records in
-100+0 records out
-104857600 bytes (105 MB) copied, 9.9496 s, 10.5 MB/s
-
-It's as fast as using my NO_CMD23 quirk.
-
-> >>>>           /*
-> >>>> +        * Some SD cards lockup while using CMD23 multiblock transfers.
-> >>>> +        */
-> >>>> +       MMC_FIXUP("AF SD", CID_MANFID_ATP, CID_OEMID_ANY, add_quirk_sd,
-> >>>> +                 MMC_QUIRK_BLK_NO_CMD23),
-> >>>
-> >>> Is really all ATP cards having this problem? Perhaps we should
-> >>> consider making this a bit more fine grained?
-> >>>
-> >>> On the other hand, this may be the safest way to do it...
-> > 
-> > I also thought about this and set CID_OEMID_ANY because I wanted to be
-> > on the safe side. Maybe ATP can comment on this (in CC)?
-
-Thanks
- -- Christoph
-
+RGVhciBTaGF3biwNCg0KVGhhbmsgeW91IGZvciB5b3VyIGhlbHAsIEknbSBuZXcgaGVyZSA6LSkg
+SSBob3BlIHRoZSB0aXRsZSBpcyBuIG93IG9rLg0KT2YgY291cnNlIHNlbGVjdGlvbiB3b3VsZCBh
+bHNvIGJlIG9rLiBJIHRob3VnaHQgYWJvdXQgYm90aCBzb2x1dGlvbnMgYW5kIEkgd2FzIG5vdCBz
+dXJlIHdoYXQgeW91IHByZWZlci4gSSBjaG9vc2UgdGhlIGRlcGVuZHMgb24gIHNvbHV0aW9uLCBi
+ZWNhdXNlIG9mIHRoZSBLY29uZmlnIGxhbmd1YWdlIHNwZWNpZmljYXRpb24gcmVjb21tZW5kcyBu
+b3QgdG8gc2VsZWN0IG9mIHZpc2libGUgY29uZmlnIG9wdGlvbnMgKHNlZSByZXZlcnNlIGRlcGVu
+ZGVuY2llcyBpbiBodHRwczovL3d3dy5rZXJuZWwub3JnL2RvYy9Eb2N1bWVudGF0aW9uL2tidWls
+ZC9rY29uZmlnLWxhbmd1YWdlLnR4dCksIGJlY2F1c2UgdGhlIHNlbGVjdGlvbiB3aWxsIGlnbm9y
+ZSBhbnkgZGVwZW5kcyBvbiBjb25zdHJhaW50cy4NCkhvd2V2ZXIsIEkgYWxyZWFkeSBub3cgc29t
+ZSBzaW1pbGFyIGV4YW1wbGVzIG9mIHNlbGVjdGVkIHZpc2libGUgdmFyaWFibGVzLiBUaHVzLCBJ
+IHRoaW5rIGl0IHdvdWxkIGFsc28gYmUgb2sgdG8gc2VsZWN0IHRoZSBQQ0lfUVVJUktTIGluIHRo
+aXMgc2l0dWF0aW9uLg0KDQpTaGFsbCBJIGNyZWF0ZSBhIG5ldyBwYXRjaD8NCg0KQmVzdCByZWdh
+cmRzLA0KU2FzY2hhIEVsLVNoYXJrYXd5DQoNCi0tIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQpTYXNjaGEgRWwt
+U2hhcmthd3ksIE1TYyANClVuaXZlcnNpdHkgb2YgSGlsZGVzaGVpbcKgwqDCoMKgwqDCoMKgwqDC
+oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqBUZWwuOiArNDkgKDApIDUxMjEgLyA4ODMtNDAzMzbCoCAN
+Ckluc3RpdHV0ZSBvZiBDb21wdXRlciBTY2llbmNlwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
+oMKgRmF4OiAgKzQ5ICgwKSA1MTIxIC8gODgzLTQwMzM3DQpVbml2ZXJzaXTDpHRzcGxhdHogMSAg
+IMKgwqDCoMKgwqDCoMKgwqDCoCDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoCBlbHNjaGFAc3Nl
+LnVuaS1oaWxkZXNoZWltLmRlDQpELTMxMTQxIEhpbGRlc2hlaW0sIEdlcm1hbnnCoMKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqDCoMKgIGh0dHA6Ly93d3cuc3NlLnVuaS1oaWxkZXNoZWltLmRlDQoNCj4g
+LS0tLS1VcnNwcsO8bmdsaWNoZSBOYWNocmljaHQtLS0tLQ0KPiBWb246IFNoYXduIExpbiBbbWFp
+bHRvOnNoYXduLmxpbkByb2NrLWNoaXBzLmNvbV0NCj4gR2VzZW5kZXQ6IEZyZWl0YWcsIDIyLiBT
+ZXB0ZW1iZXIgMjAxNyAxNToyOQ0KPiBBbjogU2FzY2hhIEVsLVNoYXJrYXd5OyB1bGYuaGFuc3Nv
+bkBsaW5hcm8ub3JnDQo+IENjOiBzaGF3bi5saW5Acm9jay1jaGlwcy5jb207IGxpbnV4LW1tY0B2
+Z2VyLmtlcm5lbC5vcmcNCj4gQmV0cmVmZjogUmU6IFtQYXRjaF0gTVVMVElNRURJQSBDQVJEIChN
+TUMpOiBBdm9pZCB1c2VsZXNzIHNlbGVjdGlvbiBvZg0KPiBNTUNfUklDT0hfTU1DIHF1aXJrDQo+
+IA0KPiBPbiAyMDE3LzkvMjIgMjA6MjEsIFNhc2NoYSBFbC1TaGFya2F3eSB3cm90ZToNCj4gPiBF
+bnN1cmUgY29ycmVjdCBmdW5jdGlvbmFsaXR5IG9mIE1NQ19SSUNPSF9NTUMgcGNpIHF1aXJrLg0K
+PiA+DQo+ID4gTU1DX1JJQ09IX01NQyBpcyBhIHBjaSBxdWlyayAocmVhbGl6ZWQgaW4gL2RyaXZl
+cnMvcGNpL3F1aXJrcy5jIGxpbmVzDQo+ID4gMjg3Nw0KPiA+IC0gMjk1OSksIHdoaWNoIGluIHR1
+cm4gZGVwZW5kIG9uIFBDSV9RVUlSS1MuIEhvd2V2ZXIsDQo+IE1NQ19SSUNPSF9NTUMNCj4gPiBj
+YW4gYmUgc2VsZWN0ZWQgZXZlbiBpZiBwY2kgcXVpcmtzIChQQ0lfUVVJUktTKSBhcmUgZ2xvYmFs
+bHkgZGlzYWJsZWQuDQo+ID4gVGhpcyBwYXRjaCBhZGRzIHRoZSBtaXNzaW5nIGRlcGVuZGVuY3kg
+dG8gTU1DX1JJQ09IX01NQyB0byBlbnN1cmUNCj4gdGhhdA0KPiA+IGl0IGNhbiBvbmx5IGJlIHNl
+bGVjdGVkIGlmIHBjaSBxdWlya3MgYXJlIGFjdGl2ZS4NCj4gPg0KPiANCj4gVGhlIGNvbW1pdCB0
+aXRsZSBzaG91bGQgYmUgc29tZXRoaW5nIGxpa2U6DQo+IG1tYzogcmljb2g6IEF2b2lkIC4uLi4u
+Li4uDQo+IA0KPiA+IFNpZ25lZC1vZmYtYnk6ICBTYXNjaGEgRWwtU2hhcmthd3kgPGVsc2NoYUBz
+c2UudW5pLWhpbGRlc2hlaW0uZGU+DQo+ID4gLS0tDQo+ID4gIGRyaXZlcnMvbW1jL2hvc3QvS2Nv
+bmZpZyB8ICAgIDIgKy0NCj4gPiAgMSBmaWxlIGNoYW5nZWQsIDEgaW5zZXJ0aW9uKCspLCAxIGRl
+bGV0aW9uKC0pDQo+ID4NCj4gPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9LY29uZmln
+IGIvZHJpdmVycy9tbWMvaG9zdC9LY29uZmlnIGluZGV4DQo+ID4gOGMxNTYzNy4uODExNDNmYiAx
+MDA2NDQNCj4gPiAtLS0gYS9kcml2ZXJzL21tYy9ob3N0L0tjb25maWcNCj4gPiArKysgYi9kcml2
+ZXJzL21tYy9ob3N0L0tjb25maWcNCj4gPiBAQCAtOTEsNyArOTEsNyBAQCBjb25maWcgTU1DX1NE
+SENJX1BDSQ0KPiA+DQo+ID4gIGNvbmZpZyBNTUNfUklDT0hfTU1DDQo+ID4gIAlib29sICJSaWNv
+aCBNTUMgQ29udHJvbGxlciBEaXNhYmxlciINCj4gPiAtCWRlcGVuZHMgb24gTU1DX1NESENJX1BD
+SQ0KPiA+ICsJZGVwZW5kcyBvbiBNTUNfU0RIQ0lfUENJICYmIFBDSV9RVUlSS1MNCj4gDQo+IFNv
+IHdoeSBub3Qgc2VsZWN0IFBDSV9RVUlSS1MgZGlyZWN0bHkgaGVyZT8NCj4gDQo+ID4gIAlkZWZh
+dWx0IHkNCj4gPiAgCWhlbHANCj4gPiAgCSAgVGhpcyBhZGRzIGEgcGNpIHF1aXJrIHRvIGRpc2Fi
+bGUgUmljb2ggTU1DIENvbnRyb2xsZXIuIFRoaXMNCj4gPiBOICAgICByICB5ICAgYiBYICDHp3Yg
+XiAp3rp7Lm4gKyAgICB7ICBnIiAgXm4gciAgIHogGiAgaCAgICAmICAeIEcgICBoIAMNCj4gPiAo
+IOmajiDdomoiICAaIBttICAgICB6IN6WICAgZiAgIGggICB+IG1tbD09DQo+ID4NCj4gDQo+IA0K
+PiAtLQ0KPiBCZXN0IFJlZ2FyZHMNCj4gU2hhd24gTGluDQoNCg==
