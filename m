@@ -1,62 +1,26 @@
-From: Colin King <colin.king@canonical.com>
-Subject: [PATCH][sdhci-next] mmc: sdhci-omap: make three functions static, fixes warnings
-Date: Tue, 26 Sep 2017 15:55:46 +0100
-Message-ID: <20170926145546.17206-1-colin.king@canonical.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH V9 03/15] mmc: core: Add support for handling CQE requests
+Date: Tue, 26 Sep 2017 17:31:59 +0200
+Message-ID: <CACRpkdZaHAmJ-ROHvKzc8tKj6_FWrCFmz_i-ue0itC1ZDrj9rw@mail.gmail.com>
+References: <1506083824-4024-1-git-send-email-adrian.hunter@intel.com> <1506083824-4024-4-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1506083824-4024-4-git-send-email-adrian.hunter@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc: kernel-janitors@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Colin Ian King <colin.king@canonical.com>
+On Fri, Sep 22, 2017 at 2:36 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
 
-The functions sdhci_omap_set_ios, sdhci_omap_set_power and
-sdhci_omap_get_min_clock are local to the source and do not need
-to be in global scope, so make them static.
+> Add core support for handling CQE requests, including starting, completing
+> and recovering.
+>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Cleans up sparse warnings:
-symbol 'sdhci_omap_set_ios' was not declared. Should it be static?
-symbol 'sdhci_omap_set_power' was not declared. Should it be static?
-symbol 'sdhci_omap_get_min_clock' was not declared. Should it be static?
+Looks straight-forward to me.
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 
-Signed-off-by: Colin Ian King <colin.king@canonical.com>
----
- drivers/mmc/host/sdhci-omap.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-index 5ddae39816b7..628bfe9a3d17 100644
---- a/drivers/mmc/host/sdhci-omap.c
-+++ b/drivers/mmc/host/sdhci-omap.c
-@@ -262,7 +262,7 @@ static void sdhci_omap_set_bus_mode(struct sdhci_omap_host *omap_host,
- 	omap_host->bus_mode = mode;
- }
- 
--void sdhci_omap_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-+static void sdhci_omap_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
- 	struct sdhci_pltfm_host *pltfm_host;
-@@ -323,7 +323,7 @@ static void sdhci_omap_set_clock(struct sdhci_host *host, unsigned int clock)
- 	sdhci_omap_start_clock(omap_host);
- }
- 
--void sdhci_omap_set_power(struct sdhci_host *host, unsigned char mode,
-+static void sdhci_omap_set_power(struct sdhci_host *host, unsigned char mode,
- 			  unsigned short vdd)
- {
- 	struct mmc_host *mmc = host->mmc;
-@@ -344,7 +344,7 @@ static int sdhci_omap_enable_dma(struct sdhci_host *host)
- 	return 0;
- }
- 
--unsigned int sdhci_omap_get_min_clock(struct sdhci_host *host)
-+static unsigned int sdhci_omap_get_min_clock(struct sdhci_host *host)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 
--- 
-2.14.1
+Yours,
+Linus Walleij
