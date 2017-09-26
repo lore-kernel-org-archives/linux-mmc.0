@@ -1,86 +1,204 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH v2] mmc: core: apply NO_CMD23 quirk to an ATP card
-Date: Tue, 26 Sep 2017 08:56:38 +0800
-Message-ID: <54d00dd9-a733-0319-e6d2-6ea77a49afa2@rock-chips.com>
-References: <1504998772.4004.2.camel@googlemail.com>
- <1505000687.23171.20.camel@googlemail.com>
- <CAPDyKFp5JJUp7Rec=eFZd_m9yVKbO91CNR_HbN+rpUm5KTYJgA@mail.gmail.com>
- <27444e34-fcad-2244-5125-fc31a5755a12@rock-chips.com>
- <1506196286.1683.7.camel@googlemail.com>
- <10a81e7b-fe56-be68-dc46-4cf2870fd7a2@rock-chips.com>
- <1506338583.2143.5.camel@googlemail.com>
+From: Chaotian Jing <chaotian.jing@mediatek.com>
+Subject: Re: [PATCH 03/12] mmc: mediatek: add support of mt2701/mt2712
+Date: Tue, 26 Sep 2017 09:38:30 +0800
+Message-ID: <1506389910.8495.0.camel@mhfsdcap03>
+References: <1505207272-16983-1-git-send-email-chaotian.jing@mediatek.com>
+         <1505207272-16983-4-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.131]:58901 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S965341AbdIZA4p (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Sep 2017 20:56:45 -0400
-In-Reply-To: <1506338583.2143.5.camel@googlemail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1505207272-16983-4-git-send-email-chaotian.jing@mediatek.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Matthias Brugger <matthias.bgg@gmail.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, yong mao <yong.mao@mediatek.com>, Linus Walleij <linus.walleij@linaro.org>, Javier Martinez Canillas <javier@osg.samsung.com>, Heiner Kallweit <hkallweit1@gmail.com>, Phong LE <ple@baylibre.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, srv_heupstream@mediatek.com
 List-Id: linux-mmc@vger.kernel.org
-To: chf.fritz@googlemail.com
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, shawn.lin@rock-chips.com, linux-mmc <linux-mmc@vger.kernel.org>, info@atpinc.com
 
+Hi Ulf,
 
-
-On 2017/9/25 19:23, Christoph Fritz wrote:
-> On Mon, 2017-09-25 at 11:33 +0800, Shawn Lin wrote:
->>>> I'm just curious about if these ATP cards could work for ACMD23?
->>>>
->>>> Could you kindly try this patch?
->>>>
->>>> |https://patchwork.kernel.org/patch/9887651/
->>>
->>> By looking at your patch I can see that bool variable 'need_acmd23' is
->>> only set when card does not support CMD23. But here this card (falsely)
->>> claims to support CMD23, which is the whole point of the NO_CMD23 quirk.
->>>
->>> So testing your patch would not make any difference, because its
->>
->> yup, sorry fot that. I mean you could hack it a little to mask
->> CMD23 support and let ACMD23 take effect, and see how it would
->> go?
+Sorry to disturb you, Do you have some comments of these series of
+patch ?
+Thx!
+On Tue, 2017-09-12 at 17:07 +0800, Chaotian Jing wrote:
+> mt2701/mt2712 has 12bit clock div, which is not compatible with
+> mt8135/mt8173. and, some additional features will be added in
+> mt2701/mt2712, so that need distinguish it by comatibale name.
 > 
-> forcing ACMD23 instead of CMD23 works fine:
+> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+> ---
+>  drivers/mmc/host/mtk-sd.c | 82 +++++++++++++++++++++++++++++++++++++++--------
+>  1 file changed, 69 insertions(+), 13 deletions(-)
 > 
-> dd if=/dev/urandom of=/mnt/test bs=1M count=100 conv=fsync
-> 100+0 records in
-> 100+0 records out
-> 104857600 bytes (105 MB) copied, 9.9496 s, 10.5 MB/s
-> 
-> It's as fast as using my NO_CMD23 quirk.
-
-Thanks for the test. Given that ACMD23 is mandatory but very few sd
-cards claim to support CMD23, maybe force ACMD23 support is better than
-current CMD23/open-ending combo.
-
-Back to $subject patch, It still need to verify this conclusion on other
-platforms or get acknowledgement from the vendor.
-
-
-
-
-> 
->>>>>>            /*
->>>>>> +        * Some SD cards lockup while using CMD23 multiblock transfers.
->>>>>> +        */
->>>>>> +       MMC_FIXUP("AF SD", CID_MANFID_ATP, CID_OEMID_ANY, add_quirk_sd,
->>>>>> +                 MMC_QUIRK_BLK_NO_CMD23),
->>>>>
->>>>> Is really all ATP cards having this problem? Perhaps we should
->>>>> consider making this a bit more fine grained?
->>>>>
->>>>> On the other hand, this may be the safest way to do it...
->>>
->>> I also thought about this and set CID_OEMID_ANY because I wanted to be
->>> on the safe side. Maybe ATP can comment on this (in CC)?
-> 
-> Thanks
->   -- Christoph
-> 
-> 
-> 
-> 
-
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index 267f7ab..643c795 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -95,6 +95,9 @@
+>  #define MSDC_CFG_CKDIV          (0xff << 8)	/* RW */
+>  #define MSDC_CFG_CKMOD          (0x3 << 16)	/* RW */
+>  #define MSDC_CFG_HS400_CK_MODE  (0x1 << 18)	/* RW */
+> +#define MSDC_CFG_HS400_CK_MODE_EXTRA  (0x1 << 22)	/* RW */
+> +#define MSDC_CFG_CKDIV_EXTRA    (0xfff << 8)	/* RW */
+> +#define MSDC_CFG_CKMOD_EXTRA    (0x3 << 20)	/* RW */
+>  
+>  /* MSDC_IOCON mask */
+>  #define MSDC_IOCON_SDR104CKS    (0x1 << 0)	/* RW */
+> @@ -295,6 +298,10 @@ struct msdc_save_para {
+>  	u32 emmc50_cfg0;
+>  };
+>  
+> +struct mtk_mmc_compatible {
+> +	u8 clk_div_bits;
+> +};
+> +
+>  struct msdc_tune_para {
+>  	u32 iocon;
+>  	u32 pad_tune;
+> @@ -309,6 +316,7 @@ struct msdc_delay_phase {
+>  
+>  struct msdc_host {
+>  	struct device *dev;
+> +	const struct mtk_mmc_compatible *dev_comp;
+>  	struct mmc_host *mmc;	/* mmc structure */
+>  	int cmd_rsp;
+>  
+> @@ -350,6 +358,31 @@ struct msdc_host {
+>  	struct msdc_tune_para saved_tune_para; /* tune result of CMD21/CMD19 */
+>  };
+>  
+> +static const struct mtk_mmc_compatible mt8135_compat = {
+> +	.clk_div_bits = 8,
+> +};
+> +
+> +static const struct mtk_mmc_compatible mt8173_compat = {
+> +	.clk_div_bits = 8,
+> +};
+> +
+> +static const struct mtk_mmc_compatible mt2701_compat = {
+> +	.clk_div_bits = 12,
+> +};
+> +
+> +static const struct mtk_mmc_compatible mt2712_compat = {
+> +	.clk_div_bits = 12,
+> +};
+> +
+> +static const struct of_device_id msdc_of_ids[] = {
+> +	{ .compatible = "mediatek,mt8135-mmc", .data = &mt8135_compat},
+> +	{ .compatible = "mediatek,mt8173-mmc", .data = &mt8173_compat},
+> +	{ .compatible = "mediatek,mt2701-mmc", .data = &mt2701_compat},
+> +	{ .compatible = "mediatek,mt2712-mmc", .data = &mt2712_compat},
+> +	{}
+> +};
+> +MODULE_DEVICE_TABLE(of, msdc_of_ids);
+> +
+>  static void sdr_set_bits(void __iomem *reg, u32 bs)
+>  {
+>  	u32 val = readl(reg);
+> @@ -509,7 +542,12 @@ static void msdc_set_timeout(struct msdc_host *host, u32 ns, u32 clks)
+>  		timeout = (ns + clk_ns - 1) / clk_ns + clks;
+>  		/* in 1048576 sclk cycle unit */
+>  		timeout = (timeout + (0x1 << 20) - 1) >> 20;
+> -		sdr_get_field(host->base + MSDC_CFG, MSDC_CFG_CKMOD, &mode);
+> +		if (host->dev_comp->clk_div_bits == 8)
+> +			sdr_get_field(host->base + MSDC_CFG,
+> +				      MSDC_CFG_CKMOD, &mode);
+> +		else
+> +			sdr_get_field(host->base + MSDC_CFG,
+> +				      MSDC_CFG_CKMOD_EXTRA, &mode);
+>  		/*DDR mode will double the clk cycles for data timeout */
+>  		timeout = mode >= 2 ? timeout * 2 : timeout;
+>  		timeout = timeout > 1 ? timeout - 1 : 0;
+> @@ -548,7 +586,11 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
+>  
+>  	flags = readl(host->base + MSDC_INTEN);
+>  	sdr_clr_bits(host->base + MSDC_INTEN, flags);
+> -	sdr_clr_bits(host->base + MSDC_CFG, MSDC_CFG_HS400_CK_MODE);
+> +	if (host->dev_comp->clk_div_bits == 8)
+> +		sdr_clr_bits(host->base + MSDC_CFG, MSDC_CFG_HS400_CK_MODE);
+> +	else
+> +		sdr_clr_bits(host->base + MSDC_CFG,
+> +			     MSDC_CFG_HS400_CK_MODE_EXTRA);
+>  	if (timing == MMC_TIMING_UHS_DDR50 ||
+>  	    timing == MMC_TIMING_MMC_DDR52 ||
+>  	    timing == MMC_TIMING_MMC_HS400) {
+> @@ -568,8 +610,12 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
+>  
+>  		if (timing == MMC_TIMING_MMC_HS400 &&
+>  		    hz >= (host->src_clk_freq >> 1)) {
+> -			sdr_set_bits(host->base + MSDC_CFG,
+> -				     MSDC_CFG_HS400_CK_MODE);
+> +			if (host->dev_comp->clk_div_bits == 8)
+> +				sdr_set_bits(host->base + MSDC_CFG,
+> +					     MSDC_CFG_HS400_CK_MODE);
+> +			else
+> +				sdr_set_bits(host->base + MSDC_CFG,
+> +					     MSDC_CFG_HS400_CK_MODE_EXTRA);
+>  			sclk = host->src_clk_freq >> 1;
+>  			div = 0; /* div is ignore when bit18 is set */
+>  		}
+> @@ -587,8 +633,15 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
+>  			sclk = (host->src_clk_freq >> 2) / div;
+>  		}
+>  	}
+> -	sdr_set_field(host->base + MSDC_CFG, MSDC_CFG_CKMOD | MSDC_CFG_CKDIV,
+> -		      (mode << 8) | div);
+> +	if (host->dev_comp->clk_div_bits == 8)
+> +		sdr_set_field(host->base + MSDC_CFG,
+> +			      MSDC_CFG_CKMOD | MSDC_CFG_CKDIV,
+> +			      (mode << 8) | div);
+> +	else
+> +		sdr_set_field(host->base + MSDC_CFG,
+> +			      MSDC_CFG_CKMOD_EXTRA | MSDC_CFG_CKDIV_EXTRA,
+> +			      (mode << 12) | div);
+> +
+>  	sdr_set_bits(host->base + MSDC_CFG, MSDC_CFG_CKPDN);
+>  	while (!(readl(host->base + MSDC_CFG) & MSDC_CFG_CKSTB))
+>  		cpu_relax();
+> @@ -1617,12 +1670,17 @@ static int msdc_drv_probe(struct platform_device *pdev)
+>  	struct mmc_host *mmc;
+>  	struct msdc_host *host;
+>  	struct resource *res;
+> +	const struct of_device_id *of_id;
+>  	int ret;
+>  
+>  	if (!pdev->dev.of_node) {
+>  		dev_err(&pdev->dev, "No DT found\n");
+>  		return -EINVAL;
+>  	}
+> +
+> +	of_id = of_match_node(msdc_of_ids, pdev->dev.of_node);
+> +	if (!of_id)
+> +		return -EINVAL;
+>  	/* Allocate MMC host for this device */
+>  	mmc = mmc_alloc_host(sizeof(struct msdc_host), &pdev->dev);
+>  	if (!mmc)
+> @@ -1686,11 +1744,15 @@ static int msdc_drv_probe(struct platform_device *pdev)
+>  	msdc_of_property_parse(pdev, host);
+>  
+>  	host->dev = &pdev->dev;
+> +	host->dev_comp = of_id->data;
+>  	host->mmc = mmc;
+>  	host->src_clk_freq = clk_get_rate(host->src_clk);
+>  	/* Set host parameters to mmc */
+>  	mmc->ops = &mt_msdc_ops;
+> -	mmc->f_min = DIV_ROUND_UP(host->src_clk_freq, 4 * 255);
+> +	if (host->dev_comp->clk_div_bits == 8)
+> +		mmc->f_min = DIV_ROUND_UP(host->src_clk_freq, 4 * 255);
+> +	else
+> +		mmc->f_min = DIV_ROUND_UP(host->src_clk_freq, 4 * 4095);
+>  
+>  	mmc->caps |= MMC_CAP_ERASE | MMC_CAP_CMD23;
+>  	/* MMC core transfer sizes tunable parameters */
+> @@ -1839,12 +1901,6 @@ static int msdc_runtime_resume(struct device *dev)
+>  	SET_RUNTIME_PM_OPS(msdc_runtime_suspend, msdc_runtime_resume, NULL)
+>  };
+>  
+> -static const struct of_device_id msdc_of_ids[] = {
+> -	{   .compatible = "mediatek,mt8135-mmc", },
+> -	{}
+> -};
+> -MODULE_DEVICE_TABLE(of, msdc_of_ids);
+> -
+>  static struct platform_driver mt_msdc_driver = {
+>  	.probe = msdc_drv_probe,
+>  	.remove = msdc_drv_remove,
