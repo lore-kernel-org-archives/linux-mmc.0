@@ -1,204 +1,130 @@
-From: Chaotian Jing <chaotian.jing@mediatek.com>
-Subject: Re: [PATCH 03/12] mmc: mediatek: add support of mt2701/mt2712
-Date: Tue, 26 Sep 2017 09:38:30 +0800
-Message-ID: <1506389910.8495.0.camel@mhfsdcap03>
-References: <1505207272-16983-1-git-send-email-chaotian.jing@mediatek.com>
-         <1505207272-16983-4-git-send-email-chaotian.jing@mediatek.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1505207272-16983-4-git-send-email-chaotian.jing@mediatek.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Matthias Brugger <matthias.bgg@gmail.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, yong mao <yong.mao@mediatek.com>, Linus Walleij <linus.walleij@linaro.org>, Javier Martinez Canillas <javier@osg.samsung.com>, Heiner Kallweit <hkallweit1@gmail.com>, Phong LE <ple@baylibre.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, srv_heupstream@mediatek.com
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH v4] mmc: dw_mmc: fix potential system abort
+Date: Tue, 26 Sep 2017 16:46:06 +0800
+Message-ID: <1506415566-115405-1-git-send-email-shawn.lin@rock-chips.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.132]:56497 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S936810AbdIZIrL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Sep 2017 04:47:11 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-Hi Ulf,
+dw_mmc allows the variant drivers to register the interrupt
+as a shared irq, which means dw_mmc should guarantee to properly
+handle the irq at any time, even if the irq isn't belong to itself.
+So there is a timing gap that the dw_mmc is being removed but the
+shared irq comes concurrently. The clock/reset controller/power
+domain for accessing the controller had been off before the irq
+comes in, so that the irq handler, dw_mci_interrupt, would still
+try to read the MINTSTS to see if the irq belongs to this controller.
+However, at least for rockchip platforms, it doesn't allow to access
+the controller w/o clock and power domain be in the active state.
 
-Sorry to disturb you, Do you have some comments of these series of
-patch ?
-Thx!
-On Tue, 2017-09-12 at 17:07 +0800, Chaotian Jing wrote:
-> mt2701/mt2712 has 12bit clock div, which is not compatible with
-> mt8135/mt8173. and, some additional features will be added in
-> mt2701/mt2712, so that need distinguish it by comatibale name.
-> 
-> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
-> ---
->  drivers/mmc/host/mtk-sd.c | 82 +++++++++++++++++++++++++++++++++++++++--------
->  1 file changed, 69 insertions(+), 13 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 267f7ab..643c795 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -95,6 +95,9 @@
->  #define MSDC_CFG_CKDIV          (0xff << 8)	/* RW */
->  #define MSDC_CFG_CKMOD          (0x3 << 16)	/* RW */
->  #define MSDC_CFG_HS400_CK_MODE  (0x1 << 18)	/* RW */
-> +#define MSDC_CFG_HS400_CK_MODE_EXTRA  (0x1 << 22)	/* RW */
-> +#define MSDC_CFG_CKDIV_EXTRA    (0xfff << 8)	/* RW */
-> +#define MSDC_CFG_CKMOD_EXTRA    (0x3 << 20)	/* RW */
->  
->  /* MSDC_IOCON mask */
->  #define MSDC_IOCON_SDR104CKS    (0x1 << 0)	/* RW */
-> @@ -295,6 +298,10 @@ struct msdc_save_para {
->  	u32 emmc50_cfg0;
->  };
->  
-> +struct mtk_mmc_compatible {
-> +	u8 clk_div_bits;
-> +};
-> +
->  struct msdc_tune_para {
->  	u32 iocon;
->  	u32 pad_tune;
-> @@ -309,6 +316,7 @@ struct msdc_delay_phase {
->  
->  struct msdc_host {
->  	struct device *dev;
-> +	const struct mtk_mmc_compatible *dev_comp;
->  	struct mmc_host *mmc;	/* mmc structure */
->  	int cmd_rsp;
->  
-> @@ -350,6 +358,31 @@ struct msdc_host {
->  	struct msdc_tune_para saved_tune_para; /* tune result of CMD21/CMD19 */
->  };
->  
-> +static const struct mtk_mmc_compatible mt8135_compat = {
-> +	.clk_div_bits = 8,
-> +};
-> +
-> +static const struct mtk_mmc_compatible mt8173_compat = {
-> +	.clk_div_bits = 8,
-> +};
-> +
-> +static const struct mtk_mmc_compatible mt2701_compat = {
-> +	.clk_div_bits = 12,
-> +};
-> +
-> +static const struct mtk_mmc_compatible mt2712_compat = {
-> +	.clk_div_bits = 12,
-> +};
-> +
-> +static const struct of_device_id msdc_of_ids[] = {
-> +	{ .compatible = "mediatek,mt8135-mmc", .data = &mt8135_compat},
-> +	{ .compatible = "mediatek,mt8173-mmc", .data = &mt8173_compat},
-> +	{ .compatible = "mediatek,mt2701-mmc", .data = &mt2701_compat},
-> +	{ .compatible = "mediatek,mt2712-mmc", .data = &mt2712_compat},
-> +	{}
-> +};
-> +MODULE_DEVICE_TABLE(of, msdc_of_ids);
-> +
->  static void sdr_set_bits(void __iomem *reg, u32 bs)
->  {
->  	u32 val = readl(reg);
-> @@ -509,7 +542,12 @@ static void msdc_set_timeout(struct msdc_host *host, u32 ns, u32 clks)
->  		timeout = (ns + clk_ns - 1) / clk_ns + clks;
->  		/* in 1048576 sclk cycle unit */
->  		timeout = (timeout + (0x1 << 20) - 1) >> 20;
-> -		sdr_get_field(host->base + MSDC_CFG, MSDC_CFG_CKMOD, &mode);
-> +		if (host->dev_comp->clk_div_bits == 8)
-> +			sdr_get_field(host->base + MSDC_CFG,
-> +				      MSDC_CFG_CKMOD, &mode);
-> +		else
-> +			sdr_get_field(host->base + MSDC_CFG,
-> +				      MSDC_CFG_CKMOD_EXTRA, &mode);
->  		/*DDR mode will double the clk cycles for data timeout */
->  		timeout = mode >= 2 ? timeout * 2 : timeout;
->  		timeout = timeout > 1 ? timeout - 1 : 0;
-> @@ -548,7 +586,11 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
->  
->  	flags = readl(host->base + MSDC_INTEN);
->  	sdr_clr_bits(host->base + MSDC_INTEN, flags);
-> -	sdr_clr_bits(host->base + MSDC_CFG, MSDC_CFG_HS400_CK_MODE);
-> +	if (host->dev_comp->clk_div_bits == 8)
-> +		sdr_clr_bits(host->base + MSDC_CFG, MSDC_CFG_HS400_CK_MODE);
-> +	else
-> +		sdr_clr_bits(host->base + MSDC_CFG,
-> +			     MSDC_CFG_HS400_CK_MODE_EXTRA);
->  	if (timing == MMC_TIMING_UHS_DDR50 ||
->  	    timing == MMC_TIMING_MMC_DDR52 ||
->  	    timing == MMC_TIMING_MMC_HS400) {
-> @@ -568,8 +610,12 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
->  
->  		if (timing == MMC_TIMING_MMC_HS400 &&
->  		    hz >= (host->src_clk_freq >> 1)) {
-> -			sdr_set_bits(host->base + MSDC_CFG,
-> -				     MSDC_CFG_HS400_CK_MODE);
-> +			if (host->dev_comp->clk_div_bits == 8)
-> +				sdr_set_bits(host->base + MSDC_CFG,
-> +					     MSDC_CFG_HS400_CK_MODE);
-> +			else
-> +				sdr_set_bits(host->base + MSDC_CFG,
-> +					     MSDC_CFG_HS400_CK_MODE_EXTRA);
->  			sclk = host->src_clk_freq >> 1;
->  			div = 0; /* div is ignore when bit18 is set */
->  		}
-> @@ -587,8 +633,15 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
->  			sclk = (host->src_clk_freq >> 2) / div;
->  		}
->  	}
-> -	sdr_set_field(host->base + MSDC_CFG, MSDC_CFG_CKMOD | MSDC_CFG_CKDIV,
-> -		      (mode << 8) | div);
-> +	if (host->dev_comp->clk_div_bits == 8)
-> +		sdr_set_field(host->base + MSDC_CFG,
-> +			      MSDC_CFG_CKMOD | MSDC_CFG_CKDIV,
-> +			      (mode << 8) | div);
-> +	else
-> +		sdr_set_field(host->base + MSDC_CFG,
-> +			      MSDC_CFG_CKMOD_EXTRA | MSDC_CFG_CKDIV_EXTRA,
-> +			      (mode << 12) | div);
-> +
->  	sdr_set_bits(host->base + MSDC_CFG, MSDC_CFG_CKPDN);
->  	while (!(readl(host->base + MSDC_CFG) & MSDC_CFG_CKSTB))
->  		cpu_relax();
-> @@ -1617,12 +1670,17 @@ static int msdc_drv_probe(struct platform_device *pdev)
->  	struct mmc_host *mmc;
->  	struct msdc_host *host;
->  	struct resource *res;
-> +	const struct of_device_id *of_id;
->  	int ret;
->  
->  	if (!pdev->dev.of_node) {
->  		dev_err(&pdev->dev, "No DT found\n");
->  		return -EINVAL;
->  	}
-> +
-> +	of_id = of_match_node(msdc_of_ids, pdev->dev.of_node);
-> +	if (!of_id)
-> +		return -EINVAL;
->  	/* Allocate MMC host for this device */
->  	mmc = mmc_alloc_host(sizeof(struct msdc_host), &pdev->dev);
->  	if (!mmc)
-> @@ -1686,11 +1744,15 @@ static int msdc_drv_probe(struct platform_device *pdev)
->  	msdc_of_property_parse(pdev, host);
->  
->  	host->dev = &pdev->dev;
-> +	host->dev_comp = of_id->data;
->  	host->mmc = mmc;
->  	host->src_clk_freq = clk_get_rate(host->src_clk);
->  	/* Set host parameters to mmc */
->  	mmc->ops = &mt_msdc_ops;
-> -	mmc->f_min = DIV_ROUND_UP(host->src_clk_freq, 4 * 255);
-> +	if (host->dev_comp->clk_div_bits == 8)
-> +		mmc->f_min = DIV_ROUND_UP(host->src_clk_freq, 4 * 255);
-> +	else
-> +		mmc->f_min = DIV_ROUND_UP(host->src_clk_freq, 4 * 4095);
->  
->  	mmc->caps |= MMC_CAP_ERASE | MMC_CAP_CMD23;
->  	/* MMC core transfer sizes tunable parameters */
-> @@ -1839,12 +1901,6 @@ static int msdc_runtime_resume(struct device *dev)
->  	SET_RUNTIME_PM_OPS(msdc_runtime_suspend, msdc_runtime_resume, NULL)
->  };
->  
-> -static const struct of_device_id msdc_of_ids[] = {
-> -	{   .compatible = "mediatek,mt8135-mmc", },
-> -	{}
-> -};
-> -MODULE_DEVICE_TABLE(of, msdc_of_ids);
-> -
->  static struct platform_driver mt_msdc_driver = {
->  	.probe = msdc_drv_probe,
->  	.remove = msdc_drv_remove,
+To quick reproduce that, we could enable CONFIG_DEBUG_SHIRQ.
+the irq tear down routine would still access the irq handler registed
+as a shard irq. Per the comment within the function of __free_irq, it
+says "It's a shared IRQ -- the driver ought to be prepared for an IRQ
+event to happen even now it's being freed". So whenever we fail to probe
+the driver or unbind the driver, the system abort.
+
+Synopsys Designware Multimedia Card Interface Driver
+dwmmc_rockchip fe320000.dwmmc: IDMAC supports 32-bit address mode.
+dwmmc_rockchip fe320000.dwmmc: Using internal DMA controller.
+dwmmc_rockchip fe320000.dwmmc: Version ID is 270a
+CPU: 0 PID: 1 Comm: swapper/0 Not tainted
+4.13.0-rc3-next-20170807-00004-g93d3644-dirty #5
+Hardware name: Firefly-RK3399 Board (DT)
+Call trace:
+[<ffff20000808b5a0>] dump_backtrace+0x0/0x300
+[<ffff20000808ba1c>] show_stack+0x14/0x20
+[<ffff200008dc480c>] dump_stack+0xa4/0xc8
+[<ffff200008b9691c>] dw_mci_interrupt+0x3c/0x6a8
+[<ffff200008157450>] __free_irq+0x308/0x410
+[<ffff20000815760c>] free_irq+0x54/0xb0
+[<ffff20000815d630>] devm_irq_release+0x30/0x40
+[<ffff2000087f0174>] release_nodes+0x1e4/0x390
+[<ffff2000087f04c0>] devres_release_all+0x50/0x78
+[<ffff2000087e9bc0>] driver_probe_device+0x128/0x3b8
+[<ffff2000087e9f34>] __driver_attach+0xe4/0xe8
+[<ffff2000087e7048>] bus_for_each_dev+0xe0/0x138
+[<ffff2000087e93b8>] driver_attach+0x30/0x40
+[<ffff2000087e8c00>] bus_add_driver+0x1d0/0x328
+[<ffff2000087ead0c>] driver_register+0xb4/0x198
+[<ffff2000087ec98c>] __platform_driver_register+0x7c/0x88
+[<ffff2000095bc564>] dw_mci_rockchip_pltfm_driver_init+0x18/0x20
+[<ffff200008083a8c>] do_one_initcall+0x14c/0x1b8
+[<ffff200009560ff8>] kernel_init_freeable+0x238/0x2d8
+[<ffff200008dde500>] kernel_init+0x10/0x110
+[<ffff2000080836c0>] ret_from_fork+0x10/0x50
+Synchronous External Abort: synchronous external abort (0x96000010) at
+0xffff20000aaa4040
+Internal error: : 96000010 [#1] PREEMPT SMP
+Modules linked in:
+CPU: 0 PID: 1 Comm: swapper/0 Not tainted
+task: ffff80006ba28080 task.stack: ffff80006ba24000
+PC is at dw_mci_interrupt+0x4c/0x6a8
+LR is at dw_mci_interrupt+0x44/0x6a8
+pc : [<ffff200008b9692c>] lr : [<ffff200008b96924>] pstate: 600001c5
+
+In order to fix this more visible, we introduce new bool variable
+'driver_removed' to bail out early from the irq handler if the driver
+had been removed.
+
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+
+---
+
+Changes in v4:
+- remove the driver core change from v3 and add new flag to solve this
+issue instead of adding devm_add_action_or_reset.
+
+ drivers/mmc/host/dw_mmc.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 860313b..bb4c608 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -2595,6 +2595,9 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+ 	u32 pending;
+ 	struct dw_mci_slot *slot = host->slot;
+ 
++	if (host->driver_removed)
++		return IRQ_NONE;
++
+ 	pending = mci_readl(host, MINTSTS); /* read-only mask reg */
+ 
+ 	if (pending) {
+@@ -3221,6 +3224,8 @@ int dw_mci_probe(struct dw_mci *host)
+ 	else
+ 		host->fifo_reg = host->regs + DATA_240A_OFFSET;
+ 
++	host->driver_removed = false;
++
+ 	tasklet_init(&host->tasklet, dw_mci_tasklet_func, (unsigned long)host);
+ 	ret = devm_request_irq(host->dev, host->irq, dw_mci_interrupt,
+ 			       host->irq_flags, "dw-mci", host);
+@@ -3266,6 +3271,7 @@ int dw_mci_probe(struct dw_mci *host)
+ err_clk_biu:
+ 	clk_disable_unprepare(host->biu_clk);
+ 
++	host->driver_removed = true;
+ 	return ret;
+ }
+ EXPORT_SYMBOL(dw_mci_probe);
+@@ -3291,6 +3297,8 @@ void dw_mci_remove(struct dw_mci *host)
+ 
+ 	clk_disable_unprepare(host->ciu_clk);
+ 	clk_disable_unprepare(host->biu_clk);
++
++	host->driver_removed = true;
+ }
+ EXPORT_SYMBOL(dw_mci_remove);
+ 
+-- 
+1.9.1
+
+
