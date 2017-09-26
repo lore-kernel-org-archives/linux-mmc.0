@@ -1,30 +1,50 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH V9 08/15] mmc: block: Factor out mmc_setup_queue()
-Date: Tue, 26 Sep 2017 17:38:14 +0200
-Message-ID: <CACRpkdYj9=PHXfb3ngz2UnDdDxS_XkK7yO2bXRamUL-BYAcYUQ@mail.gmail.com>
-References: <1506083824-4024-1-git-send-email-adrian.hunter@intel.com> <1506083824-4024-9-git-send-email-adrian.hunter@intel.com>
+From: Mark Brown <broonie@kernel.org>
+Subject: Re: next-20170926 build: 2 failures 1 warnings (next-20170926)
+Date: Tue, 26 Sep 2017 09:11:00 -0700
+Message-ID: <20170926161100.nzyb33o6l6lad2da@sirena.org.uk>
+References: <E1dwn6w-0002eY-VE@optimist>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f54.google.com ([209.85.214.54]:44878 "EHLO
-        mail-it0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S937341AbdIZPiP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Sep 2017 11:38:15 -0400
-Received: by mail-it0-f54.google.com with SMTP id d192so8750391itd.1
-        for <linux-mmc@vger.kernel.org>; Tue, 26 Sep 2017 08:38:15 -0700 (PDT)
-In-Reply-To: <1506083824-4024-9-git-send-email-adrian.hunter@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="pekkr6qutk5glbfy"
+Return-path: <linux-next-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <E1dwn6w-0002eY-VE@optimist>
+Sender: linux-next-owner@vger.kernel.org
+To: Ritesh Harjani <riteshh@codeaurora.org>, Bjorn Andersson <bjorn.andersson@linaro.org>, Jeremy McNicoll <jeremymc@redhat.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: kernel-build-reports@lists.linaro.org, linaro-kernel@lists.linaro.org, linux-next@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 
-On Fri, Sep 22, 2017 at 2:36 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
 
-> Factor out some common code that will also be used with blk-mq.
->
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+--pekkr6qutk5glbfy
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+On Tue, Sep 26, 2017 at 11:29:06AM +0100, Build bot for Mark Brown wrote:
 
-Yours,
-Linus Walleij
+Today's -next fails to build an arm and arm64 allmodconfig with:
+
+> 	arm64-allmodconfig
+> ERROR: "clk_bulk_prepare" [drivers/mmc/host/sdhci-msm.ko] undefined!
+>=20
+> 	arm-allmodconfig
+> ERROR: "clk_bulk_prepare" [drivers/mmc/host/sdhci-msm.ko] undefined!
+
+caused by d8034e3379a83 (mmc: sdhci-msm: Utilize bulk clock API).
+
+--pekkr6qutk5glbfy
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAlnKfAgACgkQJNaLcl1U
+h9BROwf/drgL2Z0Me1u4e8gZ8a3mB5kMmuQ1RMrckrH7X75fkc1W/lIeILGUzP92
+Yvb3vMxU34qzcmShNUaSFhnTOBKkFhkwrOSkAMg47ChqY8qYQcVN5l+YWF3tpTIV
+buVuQueP/PbJJlKxDqCTOVdVC/I4v4h7AKT82FhpiPgRltSXIranMlKA3CDptMIQ
+xgBPQN7vKugsMtRevN8Aj2LoB1d8WJxAOd1ygqBMlgVwEXbhDq9CeyMiJwAQh8lX
+0VuHDLQLbub/4fqu6EvlLzmmRST6jAqSXluGenyjEEdsmm+ti3xpe9agUlFz2uqG
+Oyh7wmVCwGgghaxnrIlYCrAGxTZdBg==
+=BLH9
+-----END PGP SIGNATURE-----
+
+--pekkr6qutk5glbfy--
