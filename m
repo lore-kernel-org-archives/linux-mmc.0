@@ -1,87 +1,86 @@
-From: Chanho Min <chanho.min@lge.com>
-Subject: [PATCH v2] mmc: core: add driver strength selection when selecting hs400es
-Date: Tue, 26 Sep 2017 09:03:40 +0900
-Message-ID: <1506384220-5108-1-git-send-email-chanho.min@lge.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Linus Walleij <linus.walleij@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Uri Yanai <uri.yanai@sandisk.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Hankyung Yu <hankyung.yu@lge.com>, Gunho Lee <gunho.lee@lge.com>, stable@vger.kernel.org, Chanho Min <chanho.min@lge.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH v2] mmc: core: apply NO_CMD23 quirk to an ATP card
+Date: Tue, 26 Sep 2017 08:56:38 +0800
+Message-ID: <54d00dd9-a733-0319-e6d2-6ea77a49afa2@rock-chips.com>
+References: <1504998772.4004.2.camel@googlemail.com>
+ <1505000687.23171.20.camel@googlemail.com>
+ <CAPDyKFp5JJUp7Rec=eFZd_m9yVKbO91CNR_HbN+rpUm5KTYJgA@mail.gmail.com>
+ <27444e34-fcad-2244-5125-fc31a5755a12@rock-chips.com>
+ <1506196286.1683.7.camel@googlemail.com>
+ <10a81e7b-fe56-be68-dc46-4cf2870fd7a2@rock-chips.com>
+ <1506338583.2143.5.camel@googlemail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.131]:58901 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S965341AbdIZA4p (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Sep 2017 20:56:45 -0400
+In-Reply-To: <1506338583.2143.5.camel@googlemail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: chf.fritz@googlemail.com
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, shawn.lin@rock-chips.com, linux-mmc <linux-mmc@vger.kernel.org>, info@atpinc.com
 
-The driver strength selection is missed and required when selecting
-hs400es. So, It is added here.
 
-v2: add stable tag.
 
-Fixes: 81ac2af65793ecf ("mmc: core: implement enhanced strobe support")
-Cc: stable@vger.kernel.org
-Signed-off-by: Hankyung Yu <hankyung.yu@lge.com>
-Signed-off-by: Chanho Min <chanho.min@lge.com>
-Reviewed-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/core/mmc.c | 36 +++++++++++++++++++-----------------
- 1 file changed, 19 insertions(+), 17 deletions(-)
+On 2017/9/25 19:23, Christoph Fritz wrote:
+> On Mon, 2017-09-25 at 11:33 +0800, Shawn Lin wrote:
+>>>> I'm just curious about if these ATP cards could work for ACMD23?
+>>>>
+>>>> Could you kindly try this patch?
+>>>>
+>>>> |https://patchwork.kernel.org/patch/9887651/
+>>>
+>>> By looking at your patch I can see that bool variable 'need_acmd23' is
+>>> only set when card does not support CMD23. But here this card (falsely)
+>>> claims to support CMD23, which is the whole point of the NO_CMD23 quirk.
+>>>
+>>> So testing your patch would not make any difference, because its
+>>
+>> yup, sorry fot that. I mean you could hack it a little to mask
+>> CMD23 support and let ACMD23 take effect, and see how it would
+>> go?
+> 
+> forcing ACMD23 instead of CMD23 works fine:
+> 
+> dd if=/dev/urandom of=/mnt/test bs=1M count=100 conv=fsync
+> 100+0 records in
+> 100+0 records out
+> 104857600 bytes (105 MB) copied, 9.9496 s, 10.5 MB/s
+> 
+> It's as fast as using my NO_CMD23 quirk.
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index a7eb623..36217ad 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1286,6 +1286,23 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
- 	return err;
- }
- 
-+static void mmc_select_driver_type(struct mmc_card *card)
-+{
-+	int card_drv_type, drive_strength, drv_type;
-+
-+	card_drv_type = card->ext_csd.raw_driver_strength |
-+			mmc_driver_type_mask(0);
-+
-+	drive_strength = mmc_select_drive_strength(card,
-+						   card->ext_csd.hs200_max_dtr,
-+						   card_drv_type, &drv_type);
-+
-+	card->drive_strength = drive_strength;
-+
-+	if (drv_type)
-+		mmc_set_driver_type(card->host, drv_type);
-+}
-+
- static int mmc_select_hs400es(struct mmc_card *card)
- {
- 	struct mmc_host *host = card->host;
-@@ -1341,6 +1358,8 @@ static int mmc_select_hs400es(struct mmc_card *card)
- 		goto out_err;
- 	}
- 
-+	mmc_select_driver_type(card);
-+
- 	/* Switch card to HS400 */
- 	val = EXT_CSD_TIMING_HS400 |
- 	      card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
-@@ -1374,23 +1393,6 @@ static int mmc_select_hs400es(struct mmc_card *card)
- 	return err;
- }
- 
--static void mmc_select_driver_type(struct mmc_card *card)
--{
--	int card_drv_type, drive_strength, drv_type;
--
--	card_drv_type = card->ext_csd.raw_driver_strength |
--			mmc_driver_type_mask(0);
--
--	drive_strength = mmc_select_drive_strength(card,
--						   card->ext_csd.hs200_max_dtr,
--						   card_drv_type, &drv_type);
--
--	card->drive_strength = drive_strength;
--
--	if (drv_type)
--		mmc_set_driver_type(card->host, drv_type);
--}
--
- /*
-  * For device supporting HS200 mode, the following sequence
-  * should be done before executing the tuning process.
--- 
-2.1.4
+Thanks for the test. Given that ACMD23 is mandatory but very few sd
+cards claim to support CMD23, maybe force ACMD23 support is better than
+current CMD23/open-ending combo.
+
+Back to $subject patch, It still need to verify this conclusion on other
+platforms or get acknowledgement from the vendor.
+
+
+
+
+> 
+>>>>>>            /*
+>>>>>> +        * Some SD cards lockup while using CMD23 multiblock transfers.
+>>>>>> +        */
+>>>>>> +       MMC_FIXUP("AF SD", CID_MANFID_ATP, CID_OEMID_ANY, add_quirk_sd,
+>>>>>> +                 MMC_QUIRK_BLK_NO_CMD23),
+>>>>>
+>>>>> Is really all ATP cards having this problem? Perhaps we should
+>>>>> consider making this a bit more fine grained?
+>>>>>
+>>>>> On the other hand, this may be the safest way to do it...
+>>>
+>>> I also thought about this and set CID_OEMID_ANY because I wanted to be
+>>> on the safe side. Maybe ATP can comment on this (in CC)?
+> 
+> Thanks
+>   -- Christoph
+> 
+> 
+> 
+> 
+
