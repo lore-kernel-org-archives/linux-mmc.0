@@ -1,82 +1,52 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 02/12] arm64: dts: mt8173: remove "mediatek,mt8135-mmc"
- from mmc nodes
-Date: Wed, 27 Sep 2017 00:37:00 +0200
-Message-ID: <CAPDyKFo7rC5UVWw9VyJ7ws1wW4kCvSW7Jcsgqd6gY_nifB6fTw@mail.gmail.com>
-References: <1505207272-16983-1-git-send-email-chaotian.jing@mediatek.com> <1505207272-16983-3-git-send-email-chaotian.jing@mediatek.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH V9 09/15] mmc: core: Add parameter use_blk_mq
+Date: Wed, 27 Sep 2017 01:42:17 +0200
+Message-ID: <CACRpkdZWtSHxQfkgZZDvzX562Jy_KenP__ruszLoeKKn+AkKig@mail.gmail.com>
+References: <1506083824-4024-1-git-send-email-adrian.hunter@intel.com> <1506083824-4024-10-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1505207272-16983-3-git-send-email-chaotian.jing@mediatek.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chaotian Jing <chaotian.jing@mediatek.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Matthias Brugger <matthias.bgg@gmail.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, yong mao <yong.mao@mediatek.com>, Linus Walleij <linus.walleij@linaro.org>, Javier Martinez Canillas <javier@osg.samsung.com>, Heiner Kallweit <hkallweit1@gmail.com>, Phong LE <ple@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mediatek@lists.infradead.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, srv_heupstream <srv_heupstream@mediatek.com>
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <1506083824-4024-10-git-send-email-adrian.hunter@intel.com>
+Sender: linux-block-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-mmc@vger.kernel.org
 
-On 12 September 2017 at 11:07, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
-> devicetree bindings has been updated to support multi-platforms,
-> so that each platform has its owns compatible name.
-> And, this compatible name may used in driver to distinguish with
-> other platform.
+On Fri, Sep 22, 2017 at 2:36 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
 
-This does not seems to be DT backwards compatible.
+> Until mmc has blk-mq support fully implemented and tested, add a
+> parameter use_blk_mq, default to false unless config option MMC_MQ_DEFAULT
+> is selected.
+>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 
-If the driver starts interpreting the "mt8135-mmc" differently,
-wouldn't that lead to old DTBs to become broken?
+> +config MMC_MQ_DEFAULT
+> +       bool "MMC: use blk-mq I/O path by default"
+> +       depends on MMC && BLOCK
 
-Kind regards
-Uffe
+I would say:
+default y
 
->
-> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
-> ---
->  arch/arm64/boot/dts/mediatek/mt8173.dtsi | 12 ++++--------
->  1 file changed, 4 insertions(+), 8 deletions(-)
->
-> diff --git a/arch/arm64/boot/dts/mediatek/mt8173.dtsi b/arch/arm64/boot/dts/mediatek/mt8173.dtsi
-> index b99a273..26396ef 100644
-> --- a/arch/arm64/boot/dts/mediatek/mt8173.dtsi
-> +++ b/arch/arm64/boot/dts/mediatek/mt8173.dtsi
-> @@ -682,8 +682,7 @@
->                 };
->
->                 mmc0: mmc@11230000 {
-> -                       compatible = "mediatek,mt8173-mmc",
-> -                                    "mediatek,mt8135-mmc";
-> +                       compatible = "mediatek,mt8173-mmc";
->                         reg = <0 0x11230000 0 0x1000>;
->                         interrupts = <GIC_SPI 71 IRQ_TYPE_LEVEL_LOW>;
->                         clocks = <&pericfg CLK_PERI_MSDC30_0>,
-> @@ -693,8 +692,7 @@
->                 };
->
->                 mmc1: mmc@11240000 {
-> -                       compatible = "mediatek,mt8173-mmc",
-> -                                    "mediatek,mt8135-mmc";
-> +                       compatible = "mediatek,mt8173-mmc";
->                         reg = <0 0x11240000 0 0x1000>;
->                         interrupts = <GIC_SPI 72 IRQ_TYPE_LEVEL_LOW>;
->                         clocks = <&pericfg CLK_PERI_MSDC30_1>,
-> @@ -704,8 +702,7 @@
->                 };
->
->                 mmc2: mmc@11250000 {
-> -                       compatible = "mediatek,mt8173-mmc",
-> -                                    "mediatek,mt8135-mmc";
-> +                       compatible = "mediatek,mt8173-mmc";
->                         reg = <0 0x11250000 0 0x1000>;
->                         interrupts = <GIC_SPI 73 IRQ_TYPE_LEVEL_LOW>;
->                         clocks = <&pericfg CLK_PERI_MSDC30_2>,
-> @@ -715,8 +712,7 @@
->                 };
->
->                 mmc3: mmc@11260000 {
-> -                       compatible = "mediatek,mt8173-mmc",
-> -                                    "mediatek,mt8135-mmc";
-> +                       compatible = "mediatek,mt8173-mmc";
->                         reg = <0 0x11260000 0 0x1000>;
->                         interrupts = <GIC_SPI 74 IRQ_TYPE_LEVEL_LOW>;
->                         clocks = <&pericfg CLK_PERI_MSDC30_3>,
-> --
-> 1.8.1.1.dirty
->
+Why not. SCSI is starting to enable this by default so IMO we should
+not take the
+intermediate step of having this as optional. Otherwise it never gets tested.
+
+Set it to default y and after two kernel releases, if nothing happens, we simply
+delete the old block layer path.
+
+> +#ifdef CONFIG_MMC_MQ_DEFAULT
+> +bool mmc_use_blk_mq = true;
+> +#else
+> +bool mmc_use_blk_mq = false;
+> +#endif
+> +module_param_named(use_blk_mq, mmc_use_blk_mq, bool, S_IWUSR | S_IRUGO);
+
+Are people really modprobing this so it needs to be a module parameter?
+
+Maybe I'm the only developer stupid enough to just recompile and reboot
+the whole kernel, I guess this makes sense if you're testing on the same
+machine you're developing on (no cross-compilation and remote target)
+which I guess is what some Intel people are doing with their laptops.
+
+Yours,
+Linus Walleij
