@@ -1,72 +1,87 @@
-From: Sascha El-Sharkawy <elscha@sse.uni-hildesheim.de>
-Subject: RE: [Patch] mmc:: ricoh: Avoid useless selection of MMC_RICOH_MMC
- quirk
-Date: Mon, 25 Sep 2017 17:16:50 +0200
-Message-ID: <F6127EC53C695C46907CD6EE43F3462352911290D9@messagesink.samelson.uni-hildesheim.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from messagesink.samelson.uni-hildesheim.de ([147.172.172.66]:21630
-        "EHLO messagesink.samelson.uni-hildesheim.de" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S932107AbdIYPRa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Sep 2017 11:17:30 -0400
-Content-Language: de-DE
-Sender: linux-mmc-owner@vger.kernel.org
+From: Chanho Min <chanho.min@lge.com>
+Subject: [PATCH v2] mmc: core: add driver strength selection when selecting hs400es
+Date: Tue, 26 Sep 2017 09:03:40 +0900
+Message-ID: <1506384220-5108-1-git-send-email-chanho.min@lge.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Linus Walleij <linus.walleij@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Uri Yanai <uri.yanai@sandisk.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Hankyung Yu <hankyung.yu@lge.com>, Gunho Lee <gunho.lee@lge.com>, stable@vger.kernel.org, Chanho Min <chanho.min@lge.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-RGVhciBTaGF3biwNCg0KVGhhbmsgeW91IGZvciB5b3VyIGhlbHAsIEknbSBuZXcgaGVyZSA6LSkg
-SSBob3BlIHRoZSB0aXRsZSBpcyBuIG93IG9rLg0KT2YgY291cnNlIHNlbGVjdGlvbiB3b3VsZCBh
-bHNvIGJlIG9rLiBJIHRob3VnaHQgYWJvdXQgYm90aCBzb2x1dGlvbnMgYW5kIEkgd2FzIG5vdCBz
-dXJlIHdoYXQgeW91IHByZWZlci4gSSBjaG9vc2UgdGhlIGRlcGVuZHMgb24gIHNvbHV0aW9uLCBi
-ZWNhdXNlIG9mIHRoZSBLY29uZmlnIGxhbmd1YWdlIHNwZWNpZmljYXRpb24gcmVjb21tZW5kcyBu
-b3QgdG8gc2VsZWN0IG9mIHZpc2libGUgY29uZmlnIG9wdGlvbnMgKHNlZSByZXZlcnNlIGRlcGVu
-ZGVuY2llcyBpbiBodHRwczovL3d3dy5rZXJuZWwub3JnL2RvYy9Eb2N1bWVudGF0aW9uL2tidWls
-ZC9rY29uZmlnLWxhbmd1YWdlLnR4dCksIGJlY2F1c2UgdGhlIHNlbGVjdGlvbiB3aWxsIGlnbm9y
-ZSBhbnkgZGVwZW5kcyBvbiBjb25zdHJhaW50cy4NCkhvd2V2ZXIsIEkgYWxyZWFkeSBub3cgc29t
-ZSBzaW1pbGFyIGV4YW1wbGVzIG9mIHNlbGVjdGVkIHZpc2libGUgdmFyaWFibGVzLiBUaHVzLCBJ
-IHRoaW5rIGl0IHdvdWxkIGFsc28gYmUgb2sgdG8gc2VsZWN0IHRoZSBQQ0lfUVVJUktTIGluIHRo
-aXMgc2l0dWF0aW9uLg0KDQpTaGFsbCBJIGNyZWF0ZSBhIG5ldyBwYXRjaD8NCg0KQmVzdCByZWdh
-cmRzLA0KU2FzY2hhIEVsLVNoYXJrYXd5DQoNCi0tIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQpTYXNjaGEgRWwt
-U2hhcmthd3ksIE1TYyANClVuaXZlcnNpdHkgb2YgSGlsZGVzaGVpbcKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqBUZWwuOiArNDkgKDApIDUxMjEgLyA4ODMtNDAzMzbCoCAN
-Ckluc3RpdHV0ZSBvZiBDb21wdXRlciBTY2llbmNlwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgRmF4OiAgKzQ5ICgwKSA1MTIxIC8gODgzLTQwMzM3DQpVbml2ZXJzaXTDpHRzcGxhdHogMSAg
-IMKgwqDCoMKgwqDCoMKgwqDCoCDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoCBlbHNjaGFAc3Nl
-LnVuaS1oaWxkZXNoZWltLmRlDQpELTMxMTQxIEhpbGRlc2hlaW0sIEdlcm1hbnnCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgIGh0dHA6Ly93d3cuc3NlLnVuaS1oaWxkZXNoZWltLmRlDQoNCj4g
-LS0tLS1VcnNwcsO8bmdsaWNoZSBOYWNocmljaHQtLS0tLQ0KPiBWb246IFNoYXduIExpbiBbbWFp
-bHRvOnNoYXduLmxpbkByb2NrLWNoaXBzLmNvbV0NCj4gR2VzZW5kZXQ6IEZyZWl0YWcsIDIyLiBT
-ZXB0ZW1iZXIgMjAxNyAxNToyOQ0KPiBBbjogU2FzY2hhIEVsLVNoYXJrYXd5OyB1bGYuaGFuc3Nv
-bkBsaW5hcm8ub3JnDQo+IENjOiBzaGF3bi5saW5Acm9jay1jaGlwcy5jb207IGxpbnV4LW1tY0B2
-Z2VyLmtlcm5lbC5vcmcNCj4gQmV0cmVmZjogUmU6IFtQYXRjaF0gTVVMVElNRURJQSBDQVJEIChN
-TUMpOiBBdm9pZCB1c2VsZXNzIHNlbGVjdGlvbiBvZg0KPiBNTUNfUklDT0hfTU1DIHF1aXJrDQo+
-IA0KPiBPbiAyMDE3LzkvMjIgMjA6MjEsIFNhc2NoYSBFbC1TaGFya2F3eSB3cm90ZToNCj4gPiBF
-bnN1cmUgY29ycmVjdCBmdW5jdGlvbmFsaXR5IG9mIE1NQ19SSUNPSF9NTUMgcGNpIHF1aXJrLg0K
-PiA+DQo+ID4gTU1DX1JJQ09IX01NQyBpcyBhIHBjaSBxdWlyayAocmVhbGl6ZWQgaW4gL2RyaXZl
-cnMvcGNpL3F1aXJrcy5jIGxpbmVzDQo+ID4gMjg3Nw0KPiA+IC0gMjk1OSksIHdoaWNoIGluIHR1
-cm4gZGVwZW5kIG9uIFBDSV9RVUlSS1MuIEhvd2V2ZXIsDQo+IE1NQ19SSUNPSF9NTUMNCj4gPiBj
-YW4gYmUgc2VsZWN0ZWQgZXZlbiBpZiBwY2kgcXVpcmtzIChQQ0lfUVVJUktTKSBhcmUgZ2xvYmFs
-bHkgZGlzYWJsZWQuDQo+ID4gVGhpcyBwYXRjaCBhZGRzIHRoZSBtaXNzaW5nIGRlcGVuZGVuY3kg
-dG8gTU1DX1JJQ09IX01NQyB0byBlbnN1cmUNCj4gdGhhdA0KPiA+IGl0IGNhbiBvbmx5IGJlIHNl
-bGVjdGVkIGlmIHBjaSBxdWlya3MgYXJlIGFjdGl2ZS4NCj4gPg0KPiANCj4gVGhlIGNvbW1pdCB0
-aXRsZSBzaG91bGQgYmUgc29tZXRoaW5nIGxpa2U6DQo+IG1tYzogcmljb2g6IEF2b2lkIC4uLi4u
-Li4uDQo+IA0KPiA+IFNpZ25lZC1vZmYtYnk6ICBTYXNjaGEgRWwtU2hhcmthd3kgPGVsc2NoYUBz
-c2UudW5pLWhpbGRlc2hlaW0uZGU+DQo+ID4gLS0tDQo+ID4gIGRyaXZlcnMvbW1jL2hvc3QvS2Nv
-bmZpZyB8ICAgIDIgKy0NCj4gPiAgMSBmaWxlIGNoYW5nZWQsIDEgaW5zZXJ0aW9uKCspLCAxIGRl
-bGV0aW9uKC0pDQo+ID4NCj4gPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9LY29uZmln
-IGIvZHJpdmVycy9tbWMvaG9zdC9LY29uZmlnIGluZGV4DQo+ID4gOGMxNTYzNy4uODExNDNmYiAx
-MDA2NDQNCj4gPiAtLS0gYS9kcml2ZXJzL21tYy9ob3N0L0tjb25maWcNCj4gPiArKysgYi9kcml2
-ZXJzL21tYy9ob3N0L0tjb25maWcNCj4gPiBAQCAtOTEsNyArOTEsNyBAQCBjb25maWcgTU1DX1NE
-SENJX1BDSQ0KPiA+DQo+ID4gIGNvbmZpZyBNTUNfUklDT0hfTU1DDQo+ID4gIAlib29sICJSaWNv
-aCBNTUMgQ29udHJvbGxlciBEaXNhYmxlciINCj4gPiAtCWRlcGVuZHMgb24gTU1DX1NESENJX1BD
-SQ0KPiA+ICsJZGVwZW5kcyBvbiBNTUNfU0RIQ0lfUENJICYmIFBDSV9RVUlSS1MNCj4gDQo+IFNv
-IHdoeSBub3Qgc2VsZWN0IFBDSV9RVUlSS1MgZGlyZWN0bHkgaGVyZT8NCj4gDQo+ID4gIAlkZWZh
-dWx0IHkNCj4gPiAgCWhlbHANCj4gPiAgCSAgVGhpcyBhZGRzIGEgcGNpIHF1aXJrIHRvIGRpc2Fi
-bGUgUmljb2ggTU1DIENvbnRyb2xsZXIuIFRoaXMNCj4gPiBOICAgICByICB5ICAgYiBYICDHp3Yg
-XiAp3rp7Lm4gKyAgICB7ICBnIiAgXm4gciAgIHogGiAgaCAgICAmICAeIEcgICBoIAMNCj4gPiAo
-IOmajiDdomoiICAaIBttICAgICB6IN6WICAgZiAgIGggICB+IG1tbD09DQo+ID4NCj4gDQo+IA0K
-PiAtLQ0KPiBCZXN0IFJlZ2FyZHMNCj4gU2hhd24gTGluDQoNCg==
+The driver strength selection is missed and required when selecting
+hs400es. So, It is added here.
+
+v2: add stable tag.
+
+Fixes: 81ac2af65793ecf ("mmc: core: implement enhanced strobe support")
+Cc: stable@vger.kernel.org
+Signed-off-by: Hankyung Yu <hankyung.yu@lge.com>
+Signed-off-by: Chanho Min <chanho.min@lge.com>
+Reviewed-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/core/mmc.c | 36 +++++++++++++++++++-----------------
+ 1 file changed, 19 insertions(+), 17 deletions(-)
+
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index a7eb623..36217ad 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1286,6 +1286,23 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
+ 	return err;
+ }
+ 
++static void mmc_select_driver_type(struct mmc_card *card)
++{
++	int card_drv_type, drive_strength, drv_type;
++
++	card_drv_type = card->ext_csd.raw_driver_strength |
++			mmc_driver_type_mask(0);
++
++	drive_strength = mmc_select_drive_strength(card,
++						   card->ext_csd.hs200_max_dtr,
++						   card_drv_type, &drv_type);
++
++	card->drive_strength = drive_strength;
++
++	if (drv_type)
++		mmc_set_driver_type(card->host, drv_type);
++}
++
+ static int mmc_select_hs400es(struct mmc_card *card)
+ {
+ 	struct mmc_host *host = card->host;
+@@ -1341,6 +1358,8 @@ static int mmc_select_hs400es(struct mmc_card *card)
+ 		goto out_err;
+ 	}
+ 
++	mmc_select_driver_type(card);
++
+ 	/* Switch card to HS400 */
+ 	val = EXT_CSD_TIMING_HS400 |
+ 	      card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
+@@ -1374,23 +1393,6 @@ static int mmc_select_hs400es(struct mmc_card *card)
+ 	return err;
+ }
+ 
+-static void mmc_select_driver_type(struct mmc_card *card)
+-{
+-	int card_drv_type, drive_strength, drv_type;
+-
+-	card_drv_type = card->ext_csd.raw_driver_strength |
+-			mmc_driver_type_mask(0);
+-
+-	drive_strength = mmc_select_drive_strength(card,
+-						   card->ext_csd.hs200_max_dtr,
+-						   card_drv_type, &drv_type);
+-
+-	card->drive_strength = drive_strength;
+-
+-	if (drv_type)
+-		mmc_set_driver_type(card->host, drv_type);
+-}
+-
+ /*
+  * For device supporting HS200 mode, the following sequence
+  * should be done before executing the tuning process.
+-- 
+2.1.4
