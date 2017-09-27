@@ -1,123 +1,63 @@
-From: Vijay Viswanath <vviswana@codeaurora.org>
-Subject: [PATCH v2 2/4] mmc: sdhci-msm: Fix HW issue with power IRQ handling during reset
-Date: Wed, 27 Sep 2017 11:04:41 +0530
-Message-ID: <1506490483-46871-3-git-send-email-vviswana@codeaurora.org>
-References: <1506490483-46871-1-git-send-email-vviswana@codeaurora.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1506490483-46871-1-git-send-email-vviswana@codeaurora.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org, will.deacon@arm.com
-Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, riteshh@codeaurora.org, subhashj@codeaurora.org, Vijay Viswanath <vviswana@codeaurora.org>
+From: Pierre Ossman <pierre@ossman.eu>
+Subject: Re: bounce limit in mmc?
+Date: Wed, 27 Sep 2017 07:54:21 +0200
+Message-ID: <d387ccaa-6534-9d3d-1c7a-bc9e534b768c@ossman.eu>
+References: <20170828174808.GA8384@infradead.org>
+ <9df8e5a2-b802-72fb-f28e-13c60ba27c49@rock-chips.com>
+ <CAG8K7gS7Lo2GL9ve7ze-huTT9ETNQMwdzjM6hb7_f8-GsSEF4A@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from saehrimnir.ossman.eu ([193.12.253.10]:46650 "EHLO
+        smtp-relay.ossman.eu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750805AbdI0GEj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Sep 2017 02:04:39 -0400
+In-Reply-To: <CAG8K7gS7Lo2GL9ve7ze-huTT9ETNQMwdzjM6hb7_f8-GsSEF4A@mail.gmail.com>
+Content-Language: en-GB
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Avri Altman <avri.altman@gmail.com>, Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Christoph Hellwig <hch@infradead.org>, linux-mmc@vger.kernel.org
 
-From: Sahitya Tummala <stummala@codeaurora.org>
+On 30/08/17 15:09, Avri Altman wrote:
+> better ask the author -  (mmc: bounce requests for simple hosts) and
+> (mmc_block: bounce buffer highmem support).
+> 
 
-There is a rare scenario in HW, where the first clear pulse could
-be lost when the actual reset and clear/read of status register
-are happening at the same time. Fix this by retrying upto 10 times
-to ensure the status register gets cleared. Otherwise, this will
-lead to a spurious power IRQ which results in system instability.
+Sorry for the late reply. This got lost in my inbox.
 
-Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
-Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
----
- drivers/mmc/host/sdhci-msm.c | 46 ++++++++++++++++++++++++++++++++++++++++----
- 1 file changed, 42 insertions(+), 4 deletions(-)
+> On Wed, Aug 30, 2017 at 9:14 AM, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> 
+>> Hi Christoph,
+>>
+>> On 2017/8/29 1:48, Christoph Hellwig wrote:
+>>
+>>> Hi all, any idea why the mmc driver defaults to bouncing highmem
+>>> pages if the device doesn't have a DMA mask?  highmem is defined
+>>> different on different architectures or even based on config options,
+>>> so it seems like a very odd choice.
+>>>
+>>
+>> Not sure why mmc stack defaults to use BLK_BOUNCE_HIGH as it seems that
+>> it has been there when mmc was added into linux.
+>>
+>> I *guess* this is a copy-and-paste from other block drivers, especially
+>> see drivers/memstick/core/ms_block.c which does actual the same thing.
+>>
+>> And that raises another question that if mmc stack doesn't defaults to
+>> boucing highmem pages but host drivers don't provide DMA mask either, so
+>> what should we use for saftly limiting bouncing for DMA capable?
+>>
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index d636251..42a65ab 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -995,17 +995,52 @@ static void sdhci_msm_set_uhs_signaling(struct sdhci_host *host,
- 		sdhci_msm_hs400(host, &mmc->ios);
- }
- 
--static void sdhci_msm_voltage_switch(struct sdhci_host *host)
-+static void sdhci_msm_dump_pwr_ctrl_regs(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+
-+	pr_err("%s: PWRCTL_STATUS: 0x%08x | PWRCTL_MASK: 0x%08x | PWRCTL_CTL: 0x%08x\n",
-+			mmc_hostname(host->mmc),
-+			readl_relaxed(msm_host->core_mem + CORE_PWRCTL_STATUS),
-+			readl_relaxed(msm_host->core_mem + CORE_PWRCTL_MASK),
-+			readl_relaxed(msm_host->core_mem + CORE_PWRCTL_CTL));
-+}
-+
-+static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
- 	u32 irq_status, irq_ack = 0;
-+	int retry = 10;
- 
- 	irq_status = readl_relaxed(msm_host->core_mem + CORE_PWRCTL_STATUS);
- 	irq_status &= INT_MASK;
- 
- 	writel_relaxed(irq_status, msm_host->core_mem + CORE_PWRCTL_CLEAR);
- 
-+	/*
-+	 * There is a rare HW scenario where the first clear pulse could be
-+	 * lost when actual reset and clear/read of status register is
-+	 * happening at a time. Hence, retry for at least 10 times to make
-+	 * sure status register is cleared. Otherwise, this will result in
-+	 * a spurious power IRQ resulting in system instability.
-+	 */
-+	while (irq_status & readl_relaxed(msm_host->core_mem +
-+				CORE_PWRCTL_STATUS)) {
-+		if (retry == 0) {
-+			pr_err("%s: Timedout clearing (0x%x) pwrctl status register\n",
-+					mmc_hostname(host->mmc), irq_status);
-+			sdhci_msm_dump_pwr_ctrl_regs(host);
-+			WARN_ON(1);
-+			break;
-+		}
-+		writel_relaxed(irq_status,
-+				msm_host->core_mem + CORE_PWRCTL_CLEAR);
-+		retry--;
-+		udelay(10);
-+	}
-+
- 	if (irq_status & (CORE_PWRCTL_BUS_ON | CORE_PWRCTL_BUS_OFF))
- 		irq_ack |= CORE_PWRCTL_BUS_SUCCESS;
- 	if (irq_status & (CORE_PWRCTL_IO_LOW | CORE_PWRCTL_IO_HIGH))
-@@ -1017,13 +1052,17 @@ static void sdhci_msm_voltage_switch(struct sdhci_host *host)
- 	 * switches are handled by the sdhci core, so just report success.
- 	 */
- 	writel_relaxed(irq_ack, msm_host->core_mem + CORE_PWRCTL_CTL);
-+
-+	pr_debug("%s: %s: Handled IRQ(%d), irq_status=0x%x, ack=0x%x\n",
-+		mmc_hostname(msm_host->mmc), __func__, irq, irq_status,
-+		irq_ack);
- }
- 
- static irqreturn_t sdhci_msm_pwr_irq(int irq, void *data)
- {
- 	struct sdhci_host *host = (struct sdhci_host *)data;
- 
--	sdhci_msm_voltage_switch(host);
-+	sdhci_msm_handle_pwr_irq(host, irq);
- 
- 	return IRQ_HANDLED;
- }
-@@ -1106,7 +1145,6 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
- 	.get_max_clock = sdhci_msm_get_max_clock,
- 	.set_bus_width = sdhci_set_bus_width,
- 	.set_uhs_signaling = sdhci_msm_set_uhs_signaling,
--	.voltage_switch = sdhci_msm_voltage_switch,
- };
- 
- static const struct sdhci_pltfm_data sdhci_msm_pdata = {
-@@ -1257,7 +1295,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 	 * acknowledged. Otherwise power irq interrupt handler would be
- 	 * fired prematurely.
- 	 */
--	sdhci_msm_voltage_switch(host);
-+	sdhci_msm_handle_pwr_irq(host, 0);
- 
- 	/*
- 	 * Ensure that above writes are propogated before interrupt enablement
+I'm afraid it's way too long ago, so I don't really remember. git blame 
+seems to suggest it has been there since before I took over though. RMK 
+was the one in charge before me.
+
+The only thing I do remember is that the original bounce stuff was done 
+for the wbsd driver, which is a ISA bus device so it had to work around 
+the limitations of that system.
+
+Regards
 -- 
- Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc. 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a Linux Foundation Collaborative Project.
+Pierre Ossman
