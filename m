@@ -1,49 +1,40 @@
-From: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
-Subject: Re: [PATCH v2] mmc: sdhci-xenon: Fix clock resource by adding an
- optional bus clock
-Date: Sat, 30 Sep 2017 14:17:53 +0800
-Message-ID: <20170930141753.7c4e34ea@xhacker.debian>
-References: <20170929130435.6805-1-gregory.clement@free-electrons.com>
-        <20170930104109.60853202@xhacker.debian>
-        <20170930080710.119c0258@windsurf>
+From: Bernd Edlinger <bernd.edlinger@hotmail.de>
+Subject: [PATCH] mmc: dw_mmc: Increase the timeout in mci_send_cmd to 5 sec
+Date: Sat, 30 Sep 2017 15:38:49 +0000
+Message-ID: <AM5PR0701MB2657301FD402EEAA4B83917CE47F0@AM5PR0701MB2657.eurprd07.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20170930080710.119c0258@windsurf>
-Sender: stable-owner@vger.kernel.org
-To: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
-Cc: Gregory CLEMENT <gregory.clement@free-electrons.com>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, linux-arm-kernel@lists.infradead.org, Antoine Tenart <antoine.tenart@free-electrons.com>, =?UTF-8?B?TWlxdcOo?= =?UTF-8?B?bA==?= Raynal <miquel.raynal@free-electrons.com>, Nadav Haklai <nadavh@marvell.com>, Shadi Ammouri <shadi@marvell.com>, Yehuda Yitschak <yehuday@marvell.com>, Omri Itach <omrii@marvell.com>, Hanna Hawa <hannah@marvell.com>, Igal Liberman <igall@marvell.com>, Marcin Wojtas <mw@semihal>
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-oln040092067068.outbound.protection.outlook.com ([40.92.67.68]:12716
+        "EHLO EUR02-AM5-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751099AbdI3Piv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sat, 30 Sep 2017 11:38:51 -0400
+Content-Language: de-DE
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>
 
-Hi Thomas,
 
-On Sat, 30 Sep 2017 08:07:10 +0200 Thomas Petazzoni wrote:
+Signed-off-by: Bernd Edlinger <bernd.edlinger@hotmail.de>
+---
+ drivers/mmc/host/dw_mmc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-> Hello,
-> 
-> On Sat, 30 Sep 2017 10:41:09 +0800, Jisheng Zhang wrote:
-> 
-> > > +	priv->axi_clk = devm_clk_get(&pdev->dev, "axi");
-> > > +	if (IS_ERR(priv->axi_clk)) {
-> > > +		err = PTR_ERR(priv->axi_clk);
-> > > +		if (err == -EPROBE_DEFER)
-> > > +			goto err_clk;
-> > > +		priv->axi_clk = NULL;    
-> > 
-> > IMHO, this assignment could be removed. What do you think?  
-> 
-> No, because if the clock is not present in the Device Tree,
-> priv->axi_clk will contain an error code encoded as a pointer, so
-> priv->axi_clk will not be NULL. Hence the rest of the code that will
-
-FWICT, the clk_disable_unprepare() could also check whether the clk
-is err, am I wrong?
-
-> operate on this clock will believe there is a valid clock pointed by
-> priv->axi_clk. So we really want to reset it to NULL when there was an
-> error getting the clock.
-> 
-> Best regards,
-> 
-> Thomas
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 80bc4f3..0489707 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -285,7 +285,7 @@ static void mci_send_cmd(struct dw_mci_slot *slot, u32 cmd, u32 arg)
+ 
+ 	if (readl_poll_timeout_atomic(host->regs + SDMMC_CMD, cmd_status,
+ 				      !(cmd_status & SDMMC_CMD_START),
+-				      1, 500 * USEC_PER_MSEC))
++				      1, 5000 * USEC_PER_MSEC))
+ 		dev_err(&slot->mmc->class_dev,
+ 			"Timeout sending command (cmd %#x arg %#x status %#x)\n",
+ 			cmd, arg, cmd_status);
+-- 
+2.7.4
