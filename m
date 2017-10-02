@@ -1,70 +1,43 @@
-From: Pavel Machek <pavel@ucw.cz>
-Subject: Re: 4.14-rc2 on thinkpad x220: out of memory when inserting mmc card
-Date: Mon, 2 Oct 2017 15:03:53 +0200
-Message-ID: <20171002130353.GA25433@amd>
-References: <20170905194739.GA31241@amd>
- <20171001093704.GA12626@amd>
- <20171001102647.GA23908@amd>
- <201710011957.ICF15708.OOLOHFSQMFFVJt@I-love.SAKURA.ne.jp>
- <72c93a69-610f-027e-c028-379b97b6f388@intel.com>
- <20171002084131.GA24414@amd>
- <CACRpkdbatrt0Uxf8653iiV-OKkgcc0Ziog_L4oDVTJVNqtNN0Q@mail.gmail.com>
+From: Bernd Edlinger <bernd.edlinger@hotmail.de>
+Subject: Re: [PATCH] mmc: dw_mmc: Increase the timeout in mci_send_cmd to 5
+ sec
+Date: Mon, 2 Oct 2017 13:29:50 +0000
+Message-ID: <3c46c1a6-edd2-698e-3286-e30d04b99103@hotmail.de>
+References: <AM5PR0701MB2657301FD402EEAA4B83917CE47F0@AM5PR0701MB2657.eurprd07.prod.outlook.com>
+ <CAPDyKFojY21yTMu2E9M8tec6QPZfFuVwJMZO0vY8V2kG7=yRCg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="UugvWAfsgieZRqgk"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CACRpkdbatrt0Uxf8653iiV-OKkgcc0Ziog_L4oDVTJVNqtNN0Q@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Tetsuo Handa <penguin-kernel@i-love.sakura.ne.jp>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-mm@kvack.org
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-oln040092065107.outbound.protection.outlook.com ([40.92.65.107]:58603
+        "EHLO EUR01-HE1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751062AbdJBN3x (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 2 Oct 2017 09:29:53 -0400
+In-Reply-To: <CAPDyKFojY21yTMu2E9M8tec6QPZfFuVwJMZO0vY8V2kG7=yRCg@mail.gmail.com>
+Content-Language: de-DE
+Content-ID: <04547DAEF91F0B4685CCEC78B4663532@sct-15-1-1199-6-msonline-outlook-20107.templateTenant>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>
+
+On 10/02/17 09:13, Ulf Hansson wrote:
+> On 30 September 2017 at 17:38, Bernd Edlinger <bernd.edlinger@hotmail.de> wrote:
+>>
+>> Signed-off-by: Bernd Edlinger <bernd.edlinger@hotmail.de>
+> 
+> Why?
+> 
+
+Obviously the 0.5 seconds time-out was not sufficent for me.
+I experienced a time-out I believe it was with an erase command,
+that took around one second to complete.  Not all brands of SD
+card behave this way, but some do.
+
+Incidentally I had a similar problem with a completely different
+hardware, see: https://bugzilla.kernel.org/show_bug.cgi?id=107811
+Should I send a patch for that as well?
 
 
---UugvWAfsgieZRqgk
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-On Mon 2017-10-02 14:06:03, Linus Walleij wrote:
-> On Mon, Oct 2, 2017 at 10:41 AM, Pavel Machek <pavel@ucw.cz> wrote:
->=20
-> >> Bounce buffers are being removed from v4.15
->=20
-> As Adrian states, this would make any last bugs go away. I would
-> even consider putting this patch this into fixes if it solves the problem.
->=20
-> > although you may experience
-> >> performance regression with that:
-> >>
-> >>       https://marc.info/?l=3Dlinux-mmc&m=3D150589778700551
-> >
-> > Hmm. The performance of this is already pretty bad, I really hope it
-> > does not get any worse.
->=20
-> Did you use bounce buffers? Those were improving performance on
-> some laptops with TI or Ricoh host controllers and nothing else was
-> ever really using it (as can be seen from the commit).
-
-Thinkpad X220... how do I tell if I was using them? I believe so,
-because I uncovered bug in them before.
-
-									Pavel
---=20
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blo=
-g.html
-
---UugvWAfsgieZRqgk
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iEYEARECAAYFAlnSOTkACgkQMOfwapXb+vLC7QCZAfSSy+2u+u9pvrLC579qxsqd
-kM4An1/hp9y9gOLAHZ4nUdVxRMlPs0+k
-=iLSc
------END PGP SIGNATURE-----
-
---UugvWAfsgieZRqgk--
+Bernd.
