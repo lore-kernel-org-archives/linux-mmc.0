@@ -1,205 +1,67 @@
-From: Gregory CLEMENT <gregory.clement@free-electrons.com>
-Subject: [PATCH v3] mmc: sdhci-xenon: Fix clock resource by adding an optional bus clock
-Date: Mon,  2 Oct 2017 16:58:52 +0200
-Message-ID: <20171002145852.24729-1-gregory.clement@free-electrons.com>
+From: David Daney <ddaney@caviumnetworks.com>
+Subject: Re: [PATCH] mmc: cavium: Depend on GPIO driver
+Date: Mon, 2 Oct 2017 10:06:05 -0700
+Message-ID: <b822ae64-42a3-2ffd-a6bd-8534f8c3d46b@caviumnetworks.com>
+References: <1506945761-23482-1-git-send-email-jglauber@cavium.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.free-electrons.com ([62.4.15.54]:51050 "EHLO
-        mail.free-electrons.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751193AbdJBO7E (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Oct 2017 10:59:04 -0400
+Received: from mail-dm3nam03on0069.outbound.protection.outlook.com ([104.47.41.69]:34492
+        "EHLO NAM03-DM3-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1750957AbdJBRGM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 2 Oct 2017 13:06:12 -0400
+In-Reply-To: <1506945761-23482-1-git-send-email-jglauber@cavium.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org
-Cc: Jisheng Zhang <Jisheng.Zhang@synaptics.com>, Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-arm-kernel@lists.infradead.org, Antoine Tenart <antoine.tenart@free-electrons.com>, =?UTF-8?q?Miqu=C3=A8l=20Raynal?= <miquel.raynal@free-electrons.com>, Nadav Haklai <nadavh@marvell.com>, Shadi Ammouri <shadi@marvell.com>, Yehuda Yitschak <yehuday@marvell.com>, Omri Itach <omrii@marvell.com>, Hanna Hawa <hannah@marvell.com>, Igal Liberman <igall@marvell.com>, Marcin Wojtas <mw@semihalf.com>, Stable <stable@vge>
+To: Jan Glauber <jglauber@cavium.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, David Daney <david.daney@cavium.com>, "Steven J. Hill" <Steven.Hill@cavium.com>
 
-On Armada 7K/8K we need to explicitly enable the bus clock. The bus clock
-is optional because not all the SoCs need them but at least for Armada
-7K/8K it is actually mandatory.
+On 10/02/2017 05:02 AM, Jan Glauber wrote:
+> Without the ThunderX/OcteonTx GPIO driver the MMC driver
+> would not power up any MMC devices. Therefore add a
+> dependency to the GPIO driver and remove the unneeded GPIOLIB
+> dependency.
+> 
+> Signed-off-by: Jan Glauber <jglauber@cavium.com>
+> ---
+>   drivers/mmc/host/Kconfig | 2 +-
+>   1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 8c15637178ff..a47a2f1d8ae4 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -663,7 +663,7 @@ config MMC_CAVIUM_OCTEON
+>   config MMC_CAVIUM_THUNDERX
+>   	tristate "Cavium ThunderX SD/MMC Card Interface support"
+>   	depends on PCI && 64BIT && (ARM64 || COMPILE_TEST)
+> -	depends on GPIOLIB
+> +	depends on GPIO_THUNDERX
 
-The binding documentation is updating accordingly.
+We could just "select" GPIO_THUNDERX instead so that people aren't 
+forced to manually unwind all the dependencies.
 
-Without this patch the kernel hand during boot if the mvpp2.2 network
-driver was not present in the kernel. Indeed the clock needed by the
-xenon controller was set by the network driver.
+Also, what do we do if the required GPIO lines are on I2C expanders? 
+This patch doesn't help in this hypothetical case.  In the end it is the 
+responsibility if the system designer to ensure the proper drivers are 
+available in their kernels.  I think the patch is a step in the right 
+direction, but just wanted to note that it doesn't cover all possible cases.
 
-Fixes: 3a3748dba881 ("mmc: sdhci-xenon: Add Marvell Xenon SDHC core
-functionality)"
-CC: Stable <stable@vger.kernel.org>
-Tested-by: Zhoujie Wu <zjwu@marvell.com>
-Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
----
-Hi Ulf and Adrian,
+In any event, you can add ...:
 
-This patch should be merged in 4.14-rc, as it fixes real issues.
+Acked-by: David Daney <david.daney@cavium.com>
 
-This patch may looks like just as a nice clean-up but it is not. On
-the earlier version of the series adding the support for the xenon
-controller there was already this axi bus clock. But at this moment
-the documentation for the clock on the Armada 7K/8K was missing and
-there was no driver for it, so we just use the clock set by the
-bootloader and never change them that's why it worked without any
-visible problem.
+... to either this version, or an alternative patch that does the 
+"select" instead.
 
-Then as explained in the commit log the network driver enabled the
-clock for us, and it happened that it was setup before the xenon
-driver. It is only thanks the new information we received on the
-clocks of the SoC and with more exhaustive testes that we found this
-issue and the fix for it.
+Thanks
 
-Thanks,
 
-Gregory
-
-Changelog:
-v2->v3:
- - remove useless test on clk pointer
- - added tested-by from  Zhoujie Wu
-
-v1->v2:
- - manage the -EPROBE_DEFER case
- - remove warning message when axi clock is not present
- - remove useless test before clk_disable_unprepare()
-
- .../bindings/mmc/marvell,xenon-sdhci.txt           | 12 ++++++-----
- drivers/mmc/host/sdhci-xenon.c                     | 24 ++++++++++++++++++----
- drivers/mmc/host/sdhci-xenon.h                     |  1 +
- 3 files changed, 28 insertions(+), 9 deletions(-)
-
-diff --git a/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt b/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt
-index b878a1e305af..ed1456f5c94d 100644
---- a/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt
-+++ b/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt
-@@ -16,11 +16,13 @@ Required Properties:
- 
- - clocks:
-   Array of clocks required for SDHC.
--  Require at least input clock for Xenon IP core.
-+  Require at least input clock for Xenon IP core. For Armada AP806 and
-+  CP110, the AXI clock is also mandatory.
- 
- - clock-names:
-   Array of names corresponding to clocks property.
-   The input clock for Xenon IP core should be named as "core".
-+  The input clock for the AXI bus must be named as "axi".
- 
- - reg:
-   * For "marvell,armada-3700-sdhci", two register areas.
-@@ -106,8 +108,8 @@ Example:
- 		compatible = "marvell,armada-ap806-sdhci";
- 		reg = <0xaa0000 0x1000>;
- 		interrupts = <GIC_SPI 13 IRQ_TYPE_LEVEL_HIGH>
--		clocks = <&emmc_clk>;
--		clock-names = "core";
-+		clocks = <&emmc_clk>,<&axi_clk>;
-+		clock-names = "core", "axi";
- 		bus-width = <4>;
- 		marvell,xenon-phy-slow-mode;
- 		marvell,xenon-tun-count = <11>;
-@@ -126,8 +128,8 @@ Example:
- 		interrupts = <GIC_SPI 55 IRQ_TYPE_LEVEL_HIGH>
- 		vqmmc-supply = <&sd_vqmmc_regulator>;
- 		vmmc-supply = <&sd_vmmc_regulator>;
--		clocks = <&sdclk>;
--		clock-names = "core";
-+		clocks = <&sdclk>, <&axi_clk>;
-+		clock-names = "core", "axi";
- 		bus-width = <4>;
- 		marvell,xenon-tun-count = <9>;
- 	};
-diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
-index 2eec2e652c53..0842bbc2d7ad 100644
---- a/drivers/mmc/host/sdhci-xenon.c
-+++ b/drivers/mmc/host/sdhci-xenon.c
-@@ -466,6 +466,7 @@ static int xenon_probe(struct platform_device *pdev)
- {
- 	struct sdhci_pltfm_host *pltfm_host;
- 	struct sdhci_host *host;
-+	struct xenon_priv *priv;
- 	int err;
- 
- 	host = sdhci_pltfm_init(pdev, &sdhci_xenon_pdata,
-@@ -474,6 +475,7 @@ static int xenon_probe(struct platform_device *pdev)
- 		return PTR_ERR(host);
- 
- 	pltfm_host = sdhci_priv(host);
-+	priv = sdhci_pltfm_priv(pltfm_host);
- 
- 	/*
- 	 * Link Xenon specific mmc_host_ops function,
-@@ -491,9 +493,20 @@ static int xenon_probe(struct platform_device *pdev)
- 	if (err)
- 		goto free_pltfm;
- 
-+	priv->axi_clk = devm_clk_get(&pdev->dev, "axi");
-+	if (IS_ERR(priv->axi_clk)) {
-+		err = PTR_ERR(priv->axi_clk);
-+		if (err == -EPROBE_DEFER)
-+			goto err_clk;
-+	} else {
-+		err = clk_prepare_enable(priv->axi_clk);
-+		if (err)
-+			goto err_clk;
-+	}
-+
- 	err = mmc_of_parse(host->mmc);
- 	if (err)
--		goto err_clk;
-+		goto err_clk_axi;
- 
- 	sdhci_get_of_property(pdev);
- 
-@@ -502,11 +515,11 @@ static int xenon_probe(struct platform_device *pdev)
- 	/* Xenon specific dt parse */
- 	err = xenon_probe_dt(pdev);
- 	if (err)
--		goto err_clk;
-+		goto err_clk_axi;
- 
- 	err = xenon_sdhc_prepare(host);
- 	if (err)
--		goto err_clk;
-+		goto err_clk_axi;
- 
- 	pm_runtime_get_noresume(&pdev->dev);
- 	pm_runtime_set_active(&pdev->dev);
-@@ -527,6 +540,8 @@ static int xenon_probe(struct platform_device *pdev)
- 	pm_runtime_disable(&pdev->dev);
- 	pm_runtime_put_noidle(&pdev->dev);
- 	xenon_sdhc_unprepare(host);
-+err_clk_axi:
-+	clk_disable_unprepare(priv->axi_clk);
- err_clk:
- 	clk_disable_unprepare(pltfm_host->clk);
- free_pltfm:
-@@ -538,6 +553,7 @@ static int xenon_remove(struct platform_device *pdev)
- {
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
- 
- 	pm_runtime_get_sync(&pdev->dev);
- 	pm_runtime_disable(&pdev->dev);
-@@ -546,7 +562,7 @@ static int xenon_remove(struct platform_device *pdev)
- 	sdhci_remove_host(host, 0);
- 
- 	xenon_sdhc_unprepare(host);
--
-+	clk_disable_unprepare(priv->axi_clk);
- 	clk_disable_unprepare(pltfm_host->clk);
- 
- 	sdhci_pltfm_free(pdev);
-diff --git a/drivers/mmc/host/sdhci-xenon.h b/drivers/mmc/host/sdhci-xenon.h
-index 2bc0510c0769..9994995c7c56 100644
---- a/drivers/mmc/host/sdhci-xenon.h
-+++ b/drivers/mmc/host/sdhci-xenon.h
-@@ -83,6 +83,7 @@ struct xenon_priv {
- 	unsigned char	bus_width;
- 	unsigned char	timing;
- 	unsigned int	clock;
-+	struct clk      *axi_clk;
- 
- 	int		phy_type;
- 	/*
--- 
-2.14.1
+>   	depends on OF_ADDRESS
+>   	help
+>   	  This selects Cavium ThunderX SD/MMC Card Interface.
+> 
 
