@@ -1,48 +1,110 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: dw_mmc: Increase the timeout in mci_send_cmd to 5 sec
-Date: Mon, 2 Oct 2017 09:13:19 +0200
-Message-ID: <CAPDyKFojY21yTMu2E9M8tec6QPZfFuVwJMZO0vY8V2kG7=yRCg@mail.gmail.com>
-References: <AM5PR0701MB2657301FD402EEAA4B83917CE47F0@AM5PR0701MB2657.eurprd07.prod.outlook.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [RFC v2 1/2] dt-bindings: mmc: Document the Amlogic Meson8 and
+ Meson8b SDIO bindings
+Date: Mon, 2 Oct 2017 09:55:32 +0200
+Message-ID: <CAPDyKFohh0_aONKyoc2deN+L8TCzY8tdEs5-fja3t5oVL2Gs7w@mail.gmail.com>
+References: <20170924190528.21841-1-martin.blumenstingl@googlemail.com> <20170924190528.21841-2-martin.blumenstingl@googlemail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f45.google.com ([209.85.214.45]:56826 "EHLO
-        mail-it0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750852AbdJBHNU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Oct 2017 03:13:20 -0400
-Received: by mail-it0-f45.google.com with SMTP id g18so6238410itg.5
-        for <linux-mmc@vger.kernel.org>; Mon, 02 Oct 2017 00:13:20 -0700 (PDT)
-In-Reply-To: <AM5PR0701MB2657301FD402EEAA4B83917CE47F0@AM5PR0701MB2657.eurprd07.prod.outlook.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170924190528.21841-2-martin.blumenstingl-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Martin Blumenstingl <martin.blumenstingl-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
+Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Carlo Caione <carlo-KA+7E9HrN00dnm+yROfE0A@public.gmane.org>, Kevin Hilman <khilman-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Carlo Caione <carlo-6IF/jdPJHihWk0Htik3J/w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Bernd Edlinger <bernd.edlinger@hotmail.de>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>
 
-On 30 September 2017 at 17:38, Bernd Edlinger <bernd.edlinger@hotmail.de> wrote:
+On 24 September 2017 at 21:05, Martin Blumenstingl
+<martin.blumenstingl-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org> wrote:
+> From: Carlo Caione <carlo-6IF/jdPJHihWk0Htik3J/w@public.gmane.org>
 >
-> Signed-off-by: Bernd Edlinger <bernd.edlinger@hotmail.de>
-
-Why?
-
+> This documents the devicetree bindings for the SDIO/MMC host found in
+> Amlogic Meson8 and Meson8b SoCs. It supports the SD specification v2.0
+> and the eMMC specification v4.41.
+> It has an internal "mux" which allows connecting up to three MMC devices
+> to it. The maximum supported bus-width is 4-bits.
+>
+> Amlogic's GPL kernel sources call it "SDIO" to differentiate it from the
+> other MMC controller in (at least the Meson8 and Meson8b) the SoCs (they
+> call the other one "SDHC", which supports a bus-width of up to 8-bits).
+>
+> Signed-off-by: Carlo Caione <carlo-6IF/jdPJHihWk0Htik3J/w@public.gmane.org>
+> Signed-off-by: Martin Blumenstingl <martin.blumenstingl-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
 > ---
->  drivers/mmc/host/dw_mmc.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  .../bindings/mmc/amlogic,meson-mx-sdio.txt         | 52 ++++++++++++++++++++++
+>  1 file changed, 52 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.txt
 >
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 80bc4f3..0489707 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -285,7 +285,7 @@ static void mci_send_cmd(struct dw_mci_slot *slot, u32 cmd, u32 arg)
->
->         if (readl_poll_timeout_atomic(host->regs + SDMMC_CMD, cmd_status,
->                                       !(cmd_status & SDMMC_CMD_START),
-> -                                     1, 500 * USEC_PER_MSEC))
-> +                                     1, 5000 * USEC_PER_MSEC))
->                 dev_err(&slot->mmc->class_dev,
->                         "Timeout sending command (cmd %#x arg %#x status %#x)\n",
->                         cmd, arg, cmd_status);
+> diff --git a/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.txt b/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.txt
+> new file mode 100644
+> index 000000000000..124ea362eec9
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.txt
+> @@ -0,0 +1,52 @@
+> +* Amlogic Meson6, Meson8 and Meson8b SDIO/MMC controller
+> +
+> +The highspeed MMC host controller on Amlogic SoCs provides an interface
+> +for MMC, SD, SDIO and SDHC types of memory cards.
+> +
+> +Supported maximum speeds are the ones of the eMMC standard 4.41 as well
+> +as the speed of SD standard 2.0.
+> +
+> +The hardware provides an internal "mux" which allows up to three slots
+> +to be controlled. Only one slot can be accessed at a time.
+
+This is good information, however as the driver won't support multiple
+slots, at least short term, I think we need to mention that. Otherwise
+people may think that three slots is actually supported, while in fact
+it isn't.
+
+> +
+> +Required properties:
+> + - compatible : must be one of
+> +       - "amlogic,meson8-sdio"
+> +       - "amlogic,meson8b-sdio"
+> +       along with the generic "amlogic,meson-mx-sdio"
+> + - reg : mmc controller base registers
+> + - interrupts : mmc controller interrupt
+> + - #address-cells : must be 1
+> + - size-cells : must be 0
+> + - clocks : phandle to clock providers
+> + - clock-names : must contain "core" and "clkin"
+> +
+> +Required child nodes:
+> +A node for each slot provided by the MMC controller is required.
+> +
+> +Required properties on each child node (= slot):
+> + - compatible : must be "mmc-slot" (see mmc.txt within this directory)
+> + - reg : the slot (or "port") ID
+> +
+> +Optional properties on each child node (= slot):
+> + - bus-width : must be 1 or 4 (8-bit bus is not supported)
+> + - for cd and all other additional generic mmc parameters
+> +   please refer to mmc.txt within this directory
+> +
+> +Examples:
+> +       mmc@c1108c20 {
+> +               compatible = "amlogic,meson8-sdio", "amlogic,meson-mx-sdio";
+> +               reg = <0xc1108c20 0x20>;
+> +               interrupts = <0 28 1>;
+> +               #address-cells = <1>;
+> +               #size-cells = <0>;
+> +               clocks = <&clkc CLKID_SDIO>, <&clkc CLKID_CLK81>;
+> +               clock-names = "core", "clkin";
+> +
+> +               slot@1 {
+> +                       compatible = "mmc-slot";
+> +                       reg = <1>;
+> +
+> +                       bus-width = <4>;
+> +               };
+> +       };
 > --
-> 2.7.4
+> 2.14.1
+>
 
 Kind regards
 Uffe
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
