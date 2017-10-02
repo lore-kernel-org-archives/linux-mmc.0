@@ -1,90 +1,100 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V9 12/15] mmc: core: Export mmc_retune_hold_now() and mmc_retune_release()
-Date: Mon, 2 Oct 2017 10:30:47 +0200
-Message-ID: <CAPDyKFpWFOBuv9khnn4tmx49KTuXKGk8P+BqCCJ9rjTvsACioA@mail.gmail.com>
-References: <1506083824-4024-1-git-send-email-adrian.hunter@intel.com> <1506083824-4024-13-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH v2] mmc: core: add driver strength selection when
+ selecting hs400es
+Date: Mon, 2 Oct 2017 10:31:00 +0200
+Message-ID: <CAPDyKFoyPFHZhxCRe4z3LRZsSoGGMCH2Fvyw1VCkgMWzOeTOVA@mail.gmail.com>
+References: <1506384220-5108-1-git-send-email-chanho.min@lge.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f47.google.com ([209.85.214.47]:54473 "EHLO
-        mail-it0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751079AbdJBIat (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Oct 2017 04:30:49 -0400
-Received: by mail-it0-f47.google.com with SMTP id e134so6430668ite.3
-        for <linux-mmc@vger.kernel.org>; Mon, 02 Oct 2017 01:30:48 -0700 (PDT)
-In-Reply-To: <1506083824-4024-13-git-send-email-adrian.hunter@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1506384220-5108-1-git-send-email-chanho.min@lge.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chanho Min <chanho.min@lge.com>
+Cc: Shawn Lin <shawn.lin@rock-chips.com>, Linus Walleij <linus.walleij@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Uri Yanai <uri.yanai@sandisk.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Hankyung Yu <hankyung.yu@lge.com>, Gunho Lee <gunho.lee@lge.com>, "# 4.0+" <stable@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 
-On 22 September 2017 at 14:37, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> Export mmc_retune_hold_now() and mmc_retune_release() so they can be used
-> by the block driver.
+On 26 September 2017 at 02:03, Chanho Min <chanho.min@lge.com> wrote:
+> The driver strength selection is missed and required when selecting
+> hs400es. So, It is added here.
 >
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> v2: add stable tag.
+>
+> Fixes: 81ac2af65793ecf ("mmc: core: implement enhanced strobe support")
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Hankyung Yu <hankyung.yu@lge.com>
+> Signed-off-by: Chanho Min <chanho.min@lge.com>
+> Reviewed-by: Adrian Hunter <adrian.hunter@intel.com>
 
-I decided to squash patch 10/11/12 as those are all related to the
-same problem when porting to blkmq.
-
-So, thanks - applied for next!
+Thanks, applied for fixes - and removed the version history from the changelog!
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/core/host.c | 7 +------
->  drivers/mmc/core/host.h | 7 ++++++-
->  2 files changed, 7 insertions(+), 7 deletions(-)
+>  drivers/mmc/core/mmc.c | 36 +++++++++++++++++++-----------------
+>  1 file changed, 19 insertions(+), 17 deletions(-)
 >
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> index b624dbb6cd15..1539ce0da196 100644
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -111,12 +111,6 @@ void mmc_retune_hold(struct mmc_host *host)
->         host->hold_retune += 1;
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index a7eb623..36217ad 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1286,6 +1286,23 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
+>         return err;
 >  }
 >
-> -void mmc_retune_hold_now(struct mmc_host *host)
-> -{
-> -       host->retune_now = 0;
-> -       host->hold_retune += 1;
-> -}
-> -
->  void mmc_retune_release(struct mmc_host *host)
->  {
->         if (host->hold_retune)
-> @@ -124,6 +118,7 @@ void mmc_retune_release(struct mmc_host *host)
->         else
->                 WARN_ON(1);
->  }
-> +EXPORT_SYMBOL(mmc_retune_release);
->
->  int mmc_retune(struct mmc_host *host)
->  {
-> diff --git a/drivers/mmc/core/host.h b/drivers/mmc/core/host.h
-> index 170fe5947087..6eaf558e62d6 100644
-> --- a/drivers/mmc/core/host.h
-> +++ b/drivers/mmc/core/host.h
-> @@ -19,12 +19,17 @@
->  void mmc_retune_enable(struct mmc_host *host);
->  void mmc_retune_disable(struct mmc_host *host);
->  void mmc_retune_hold(struct mmc_host *host);
-> -void mmc_retune_hold_now(struct mmc_host *host);
->  void mmc_retune_release(struct mmc_host *host);
->  int mmc_retune(struct mmc_host *host);
->  void mmc_retune_pause(struct mmc_host *host);
->  void mmc_retune_unpause(struct mmc_host *host);
->
-> +static inline void mmc_retune_hold_now(struct mmc_host *host)
+> +static void mmc_select_driver_type(struct mmc_card *card)
 > +{
-> +       host->retune_now = 0;
-> +       host->hold_retune += 1;
+> +       int card_drv_type, drive_strength, drv_type;
+> +
+> +       card_drv_type = card->ext_csd.raw_driver_strength |
+> +                       mmc_driver_type_mask(0);
+> +
+> +       drive_strength = mmc_select_drive_strength(card,
+> +                                                  card->ext_csd.hs200_max_dtr,
+> +                                                  card_drv_type, &drv_type);
+> +
+> +       card->drive_strength = drive_strength;
+> +
+> +       if (drv_type)
+> +               mmc_set_driver_type(card->host, drv_type);
 > +}
 > +
->  static inline void mmc_retune_recheck(struct mmc_host *host)
+>  static int mmc_select_hs400es(struct mmc_card *card)
 >  {
->         if (host->hold_retune <= 1)
+>         struct mmc_host *host = card->host;
+> @@ -1341,6 +1358,8 @@ static int mmc_select_hs400es(struct mmc_card *card)
+>                 goto out_err;
+>         }
+>
+> +       mmc_select_driver_type(card);
+> +
+>         /* Switch card to HS400 */
+>         val = EXT_CSD_TIMING_HS400 |
+>               card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
+> @@ -1374,23 +1393,6 @@ static int mmc_select_hs400es(struct mmc_card *card)
+>         return err;
+>  }
+>
+> -static void mmc_select_driver_type(struct mmc_card *card)
+> -{
+> -       int card_drv_type, drive_strength, drv_type;
+> -
+> -       card_drv_type = card->ext_csd.raw_driver_strength |
+> -                       mmc_driver_type_mask(0);
+> -
+> -       drive_strength = mmc_select_drive_strength(card,
+> -                                                  card->ext_csd.hs200_max_dtr,
+> -                                                  card_drv_type, &drv_type);
+> -
+> -       card->drive_strength = drive_strength;
+> -
+> -       if (drv_type)
+> -               mmc_set_driver_type(card->host, drv_type);
+> -}
+> -
+>  /*
+>   * For device supporting HS200 mode, the following sequence
+>   * should be done before executing the tuning process.
 > --
-> 1.9.1
+> 2.1.4
 >
