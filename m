@@ -1,29 +1,30 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH][sdhci-next] mmc: sdhci-omap: make three functions static,
- fixes warnings
-Date: Mon, 2 Oct 2017 10:29:50 +0200
-Message-ID: <CAPDyKFqhu+2jozYoBZbNzuOeNi_0Pt33HYhObk=DeNjOLhuoFQ@mail.gmail.com>
-References: <20170926145546.17206-1-colin.king@canonical.com>
+Subject: Re: [PATCH] mmc: dw_mmc: make const arrays mszs static
+Date: Mon, 2 Oct 2017 10:30:01 +0200
+Message-ID: <CAPDyKFodu1eK+=FJm7XrqQYvXO2g1JWZ0+c4NhZPhmxjMKr_dQ@mail.gmail.com>
+References: <20170903133950.7348-1-colin.king@canonical.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170926145546.17206-1-colin.king@canonical.com>
+In-Reply-To: <20170903133950.7348-1-colin.king@canonical.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Colin King <colin.king@canonical.com>
-Cc: Kishon Vijay Abraham I <kishon@ti.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, kernel-janitors@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, kernel-janitors@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 26 September 2017 at 16:55, Colin King <colin.king@canonical.com> wrote:
+On 3 September 2017 at 15:39, Colin King <colin.king@canonical.com> wrote:
 > From: Colin Ian King <colin.king@canonical.com>
 >
-> The functions sdhci_omap_set_ios, sdhci_omap_set_power and
-> sdhci_omap_get_min_clock are local to the source and do not need
-> to be in global scope, so make them static.
+> Don't populate the const arrays mszs on the stack, instead make them
+> static. Makes the object code smaller by over 310 bytes:
 >
-> Cleans up sparse warnings:
-> symbol 'sdhci_omap_set_ios' was not declared. Should it be static?
-> symbol 'sdhci_omap_set_power' was not declared. Should it be static?
-> symbol 'sdhci_omap_get_min_clock' was not declared. Should it be static?
+> Before:
+>    text    data     bss     dec     hex filename
+>   47527    8528     320   56375    dc37 drivers/mmc/host/dw_mmc.o
+>
+> After:
+>    text    data     bss     dec     hex filename
+>   47055    8688     320   56063    daff drivers/mmc/host/dw_mmc.o
 >
 > Signed-off-by: Colin Ian King <colin.king@canonical.com>
 
@@ -33,40 +34,31 @@ Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/sdhci-omap.c | 6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
+>  drivers/mmc/host/dw_mmc.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-> index 5ddae39816b7..628bfe9a3d17 100644
-> --- a/drivers/mmc/host/sdhci-omap.c
-> +++ b/drivers/mmc/host/sdhci-omap.c
-> @@ -262,7 +262,7 @@ static void sdhci_omap_set_bus_mode(struct sdhci_omap_host *omap_host,
->         omap_host->bus_mode = mode;
->  }
->
-> -void sdhci_omap_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> +static void sdhci_omap_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 860313bd952a..45289c5e0295 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -796,7 +796,7 @@ static int dw_mci_edmac_start_dma(struct dw_mci *host,
+>         struct dma_slave_config cfg;
+>         struct dma_async_tx_descriptor *desc = NULL;
+>         struct scatterlist *sgl = host->data->sg;
+> -       const u32 mszs[] = {1, 4, 8, 16, 32, 64, 128, 256};
+> +       static const u32 mszs[] = {1, 4, 8, 16, 32, 64, 128, 256};
+>         u32 sg_elems = host->data->sg_len;
+>         u32 fifoth_val;
+>         u32 fifo_offset = host->fifo_reg - host->regs;
+> @@ -1003,7 +1003,7 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
+>  static void dw_mci_adjust_fifoth(struct dw_mci *host, struct mmc_data *data)
 >  {
->         struct sdhci_host *host = mmc_priv(mmc);
->         struct sdhci_pltfm_host *pltfm_host;
-> @@ -323,7 +323,7 @@ static void sdhci_omap_set_clock(struct sdhci_host *host, unsigned int clock)
->         sdhci_omap_start_clock(omap_host);
->  }
->
-> -void sdhci_omap_set_power(struct sdhci_host *host, unsigned char mode,
-> +static void sdhci_omap_set_power(struct sdhci_host *host, unsigned char mode,
->                           unsigned short vdd)
->  {
->         struct mmc_host *mmc = host->mmc;
-> @@ -344,7 +344,7 @@ static int sdhci_omap_enable_dma(struct sdhci_host *host)
->         return 0;
->  }
->
-> -unsigned int sdhci_omap_get_min_clock(struct sdhci_host *host)
-> +static unsigned int sdhci_omap_get_min_clock(struct sdhci_host *host)
->  {
->         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->
+>         unsigned int blksz = data->blksz;
+> -       const u32 mszs[] = {1, 4, 8, 16, 32, 64, 128, 256};
+> +       static const u32 mszs[] = {1, 4, 8, 16, 32, 64, 128, 256};
+>         u32 fifo_width = 1 << host->data_shift;
+>         u32 blksz_depth = blksz / fifo_width, fifoth_val;
+>         u32 msize = 0, rx_wmark = 1, tx_wmark, tx_wmark_invers;
 > --
 > 2.14.1
 >
