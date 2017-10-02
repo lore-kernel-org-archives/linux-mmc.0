@@ -1,86 +1,102 @@
-From: Tetsuo Handa <penguin-kernel@I-love.SAKURA.ne.jp>
-Subject: Re: 4.14-rc2 on thinkpad x220: out of memory when inserting mmc card
-Date: Sun, 1 Oct 2017 19:57:09 +0900
-Message-ID: <201710011957.ICF15708.OOLOHFSQMFFVJt@I-love.SAKURA.ne.jp>
-References: <20170905194739.GA31241@amd>
-	<20171001093704.GA12626@amd>
-	<20171001102647.GA23908@amd>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 01/12] mmc: dt-bindings: update Mediatek MMC bindings
+Date: Mon, 2 Oct 2017 08:53:37 +0200
+Message-ID: <CAPDyKFoiJJ=NM8EZ7mh+91Nj=EBYcAJmvZ3Z+xskeU3qB40HEw@mail.gmail.com>
+References: <1505207272-16983-1-git-send-email-chaotian.jing@mediatek.com>
+ <1505207272-16983-2-git-send-email-chaotian.jing@mediatek.com>
+ <20170913141026.43oh4n4foipmahsk@rob-hp-laptop> <1505355021.8308.4.camel@mhfsdcap03>
+ <CAPDyKFrUe-0hEsxVRQSZvujcXY8WrR6m-0DMW=VwDDLvz7Lexw@mail.gmail.com>
+ <1506475100.19851.9.camel@mhfsdcap03> <1506650162.19851.12.camel@mhfsdcap03>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20171001102647.GA23908@amd>
-Sender: owner-linux-mm@kvack.org
-To: pavel@ucw.cz
-Cc: linux-kernel@vger.kernel.org, adrian.hunter@intel.com, linux-mmc@vger.kernel.org, linux-mm@kvack.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-it0-f52.google.com ([209.85.214.52]:52401 "EHLO
+        mail-it0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750798AbdJBGxi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Oct 2017 02:53:38 -0400
+Received: by mail-it0-f52.google.com with SMTP id c195so6242023itb.1
+        for <linux-mmc@vger.kernel.org>; Sun, 01 Oct 2017 23:53:38 -0700 (PDT)
+In-Reply-To: <1506650162.19851.12.camel@mhfsdcap03>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chaotian Jing <chaotian.jing@mediatek.com>
+Cc: Rob Herring <robh@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Matthias Brugger <matthias.bgg@gmail.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, yong mao <yong.mao@mediatek.com>, Linus Walleij <linus.walleij@linaro.org>, Javier Martinez Canillas <javier@osg.samsung.com>, Heiner Kallweit <hkallweit1@gmail.com>, Phong LE <ple@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mediatek@lists.infradead.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, srv_heupstream <srv_heupstream@mediatek.com>
 
-Pavel Machek wrote:
-> Hi!
-> 
-> > I inserted u-SD card, only to realize that it is not detected as it
-> > should be. And dmesg indeed reveals:
-> 
-> Tetsuo asked me to report this to linux-mm.
-> 
-> But 2^4 is 16 pages, IIRC that can't be expected to work reliably, and
-> thus this sounds like MMC bug, not mm bug.
+[...]
 
-Yes, 16 pages is costly allocations which will fail without invoking the
-OOM killer. But I thought this is an interesting case, for mempool
-allocation should be able to handle memory allocation failure except
-initial allocations, and initial allocation is failing.
+>> > >> >  Required properties:
+>> > >> > -- compatible: Should be "mediatek,mt8173-mmc","mediatek,mt8135-mmc"
+>> > >> > +- compatible: value should be either of the following.
+>> > >> > +   "mediatek,mt8135-mmc": for mmc host ip compatible with mt8135
+>> > >> > +   "mediatek,mt8173-mmc": for mmc host ip compatible with mt8173
+>> > >> > +   "mediatek,mt2701-mmc": for mmc host ip compatible with mt2701
+>> > >> > +   "mediatek,mt2712-mmc": for mmc host ip compatible with mt2712
+>> > >> > +- reg: physical base address of the controller and length
+>> > >> >  - interrupts: Should contain MSDC interrupt number
+>> > >> > -- clocks: MSDC source clock, HCLK
+>> > >> > -- clock-names: "source", "hclk"
+>> > >> > +- clocks: MSDC source clock, HCLK, source_cg
+>> > >> > +- clock-names: "source", "hclk", "source_cg"
+>> > >>
+>> > >> All chips support source_cg? That's not backwards compatible for
+>> > >> existing compatible strings if the driver requires it.
+>> > > Not all chips support source_cg, for chips which do not support
+>> > > source_cg, no need source_cg here, and the driver will parse it
+>> > > to know if current chip support it.
+>> >
+>> > In such case you must not add add a required binding for it. I think
+>> > that is what Rob is trying to point out for you.
+>> >
+>> > [...]
+>> >
+>> > Kind regards
+>> > Uffe
+>> The source_cg is required(MUST) at MT2712 and future SoCs, but not
+>> required(do not have it) at previous SoCs, so that put it at required
+>> properties, let the driver to handle it.
 
-I think that using kvmalloc() (and converting corresponding kfree() to
-kvfree()) will make initial allocations succeed, but that might cause
-needlessly succeeding subsequent mempool allocations under memory pressure?
+Then you must explain that in the binding...
 
-> 
-> > [10994.299846] mmc0: new high speed SDHC card at address 0003
-> > [10994.302196] kworker/2:1: page allocation failure: order:4,
-> > mode:0x16040c0(GFP_KERNEL|__GFP_COMP|__GFP_NOTRACK), nodemask=(null)
-> > [10994.302212] CPU: 2 PID: 9500 Comm: kworker/2:1 Not tainted
-> > 4.14.0-rc2 #135
-> > [10994.302215] Hardware name: LENOVO 42872WU/42872WU, BIOS 8DET73WW
-> > (1.43 ) 10/12/2016
-> > [10994.302222] Workqueue: events_freezable mmc_rescan
-> > [10994.302227] Call Trace:
-> > [10994.302233]  dump_stack+0x4d/0x67
-> > [10994.302239]  warn_alloc+0xde/0x180
-> > [10994.302243]  __alloc_pages_nodemask+0xaa4/0xd30
-> > [10994.302249]  ? cache_alloc_refill+0xb73/0xc10
-> > [10994.302252]  cache_alloc_refill+0x101/0xc10
-> > [10994.302258]  ? mmc_init_request+0x2d/0xd0
-> > [10994.302262]  ? mmc_init_request+0x2d/0xd0
-> > [10994.302265]  __kmalloc+0xaf/0xe0
-> > [10994.302269]  mmc_init_request+0x2d/0xd0
-> > [10994.302273]  alloc_request_size+0x45/0x60
-> > [10994.302276]  ? free_request_size+0x30/0x30
-> > [10994.302280]  mempool_create_node+0xd7/0x130
-> > [10994.302283]  ? alloc_request_simple+0x20/0x20
-> > [10994.302287]  blk_init_rl+0xe8/0x110
-> > [10994.302290]  blk_init_allocated_queue+0x70/0x180
-> > [10994.302294]  mmc_init_queue+0xdd/0x370
-> > [10994.302297]  mmc_blk_alloc_req+0xf6/0x340
-> > [10994.302301]  mmc_blk_probe+0x18b/0x4e0
-> > [10994.302305]  mmc_bus_probe+0x12/0x20
-> > [10994.302309]  driver_probe_device+0x2f4/0x490
-> > 
-> > Order 4 allocations are not supposed to be reliable...
-> > 
-> > Any ideas?
-> > 
-> > Thanks,
-> > 									Pavel
-> > 
-> 
-> 
-> 
-> -- 
-> (english) http://www.livejournal.com/~pavelmachek
-> (cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+On 29 September 2017 at 03:56, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
+> On Wed, 2017-09-27 at 09:18 +0800, Chaotian Jing wrote:
+>> On Wed, 2017-09-27 at 00:33 +0200, Ulf Hansson wrote:
+>> > On 14 September 2017 at 04:10, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
+>> > > On Wed, 2017-09-13 at 09:10 -0500, Rob Herring wrote:
+>> > >> On Tue, Sep 12, 2017 at 05:07:41PM +0800, Chaotian Jing wrote:
+>> > >> > Change the comptiable for support of multi-platform
+>> > >> > Add description for reg
+>> > >> > Add description for source_cg
+>> > >> > Add description for mediatek,latch-ck
+>> > >>
+>> > >> This is at least the 3rd patch with exactly the same vague subject.
+>> > >> Please make the subject somewhat unique.
+>> > >>
+>> > > Thx, will change the subject at next version
+>> > >> >
+>> > >> > Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+>> > >> > ---
+>> > >> >  Documentation/devicetree/bindings/mmc/mtk-sd.txt | 13 ++++++++++---
+>> > >> >  1 file changed, 10 insertions(+), 3 deletions(-)
+>> > >> >
+>> > >> > diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.txt b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+>> > >> > index 4182ea3..405cd06 100644
+>> > >> > --- a/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+>> > >> > +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+>> > >> > @@ -7,10 +7,15 @@ This file documents differences between the core properties in mmc.txt
+>> > >> >  and the properties used by the msdc driver.
+>> > >> >
+>
+> Any other comments about it ? still must not add a required binding for
+> it ? if add a optional binding for it, how to add it ? as cannot
+> duplicate "clocks" & "clock-names" in one node.
+>
+>
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+I suggest you keep the description of the new clock name part of the
+"Required properties:" header. However, after each clock name,
+explicit state when the clock is required/optional. Something along
+the lines as sdhci-msm does it.
+Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+
+Kind regards
+Uffe
