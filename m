@@ -1,110 +1,109 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [RFC v2 1/2] dt-bindings: mmc: Document the Amlogic Meson8 and
- Meson8b SDIO bindings
-Date: Mon, 2 Oct 2017 09:55:32 +0200
-Message-ID: <CAPDyKFohh0_aONKyoc2deN+L8TCzY8tdEs5-fja3t5oVL2Gs7w@mail.gmail.com>
-References: <20170924190528.21841-1-martin.blumenstingl@googlemail.com> <20170924190528.21841-2-martin.blumenstingl@googlemail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: 4.14-rc2 on thinkpad x220: out of memory when inserting mmc card
+Date: Mon, 2 Oct 2017 10:52:46 +0300
+Message-ID: <72c93a69-610f-027e-c028-379b97b6f388@intel.com>
+References: <20170905194739.GA31241@amd> <20171001093704.GA12626@amd>
+ <20171001102647.GA23908@amd>
+ <201710011957.ICF15708.OOLOHFSQMFFVJt@I-love.SAKURA.ne.jp>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170924190528.21841-2-martin.blumenstingl-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Martin Blumenstingl <martin.blumenstingl-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
-Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Carlo Caione <carlo-KA+7E9HrN00dnm+yROfE0A@public.gmane.org>, Kevin Hilman <khilman-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Carlo Caione <carlo-6IF/jdPJHihWk0Htik3J/w@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <201710011957.ICF15708.OOLOHFSQMFFVJt@I-love.SAKURA.ne.jp>
+Content-Language: en-US
+Sender: owner-linux-mm@kvack.org
+To: Tetsuo Handa <penguin-kernel@I-love.SAKURA.ne.jp>, pavel@ucw.cz
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-mm@kvack.org, linus walleij <linus.walleij@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 24 September 2017 at 21:05, Martin Blumenstingl
-<martin.blumenstingl-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org> wrote:
-> From: Carlo Caione <carlo-6IF/jdPJHihWk0Htik3J/w@public.gmane.org>
->
-> This documents the devicetree bindings for the SDIO/MMC host found in
-> Amlogic Meson8 and Meson8b SoCs. It supports the SD specification v2.0
-> and the eMMC specification v4.41.
-> It has an internal "mux" which allows connecting up to three MMC devices
-> to it. The maximum supported bus-width is 4-bits.
->
-> Amlogic's GPL kernel sources call it "SDIO" to differentiate it from the
-> other MMC controller in (at least the Meson8 and Meson8b) the SoCs (they
-> call the other one "SDHC", which supports a bus-width of up to 8-bits).
->
-> Signed-off-by: Carlo Caione <carlo-6IF/jdPJHihWk0Htik3J/w@public.gmane.org>
-> Signed-off-by: Martin Blumenstingl <martin.blumenstingl-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
-> ---
->  .../bindings/mmc/amlogic,meson-mx-sdio.txt         | 52 ++++++++++++++++++++++
->  1 file changed, 52 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.txt
->
-> diff --git a/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.txt b/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.txt
-> new file mode 100644
-> index 000000000000..124ea362eec9
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.txt
-> @@ -0,0 +1,52 @@
-> +* Amlogic Meson6, Meson8 and Meson8b SDIO/MMC controller
-> +
-> +The highspeed MMC host controller on Amlogic SoCs provides an interface
-> +for MMC, SD, SDIO and SDHC types of memory cards.
-> +
-> +Supported maximum speeds are the ones of the eMMC standard 4.41 as well
-> +as the speed of SD standard 2.0.
-> +
-> +The hardware provides an internal "mux" which allows up to three slots
-> +to be controlled. Only one slot can be accessed at a time.
+The memory allocation used to be optional but became mandatory with:
 
-This is good information, however as the driver won't support multiple
-slots, at least short term, I think we need to mention that. Otherwise
-people may think that three slots is actually supported, while in fact
-it isn't.
+  commit 304419d8a7e9204c5d19b704467b814df8c8f5b1
+  Author: Linus Walleij <linus.walleij@linaro.org>
+  Date:   Thu May 18 11:29:32 2017 +0200
 
-> +
-> +Required properties:
-> + - compatible : must be one of
-> +       - "amlogic,meson8-sdio"
-> +       - "amlogic,meson8b-sdio"
-> +       along with the generic "amlogic,meson-mx-sdio"
-> + - reg : mmc controller base registers
-> + - interrupts : mmc controller interrupt
-> + - #address-cells : must be 1
-> + - size-cells : must be 0
-> + - clocks : phandle to clock providers
-> + - clock-names : must contain "core" and "clkin"
-> +
-> +Required child nodes:
-> +A node for each slot provided by the MMC controller is required.
-> +
-> +Required properties on each child node (= slot):
-> + - compatible : must be "mmc-slot" (see mmc.txt within this directory)
-> + - reg : the slot (or "port") ID
-> +
-> +Optional properties on each child node (= slot):
-> + - bus-width : must be 1 or 4 (8-bit bus is not supported)
-> + - for cd and all other additional generic mmc parameters
-> +   please refer to mmc.txt within this directory
-> +
-> +Examples:
-> +       mmc@c1108c20 {
-> +               compatible = "amlogic,meson8-sdio", "amlogic,meson-mx-sdio";
-> +               reg = <0xc1108c20 0x20>;
-> +               interrupts = <0 28 1>;
-> +               #address-cells = <1>;
-> +               #size-cells = <0>;
-> +               clocks = <&clkc CLKID_SDIO>, <&clkc CLKID_CLK81>;
-> +               clock-names = "core", "clkin";
-> +
-> +               slot@1 {
-> +                       compatible = "mmc-slot";
-> +                       reg = <1>;
-> +
-> +                       bus-width = <4>;
-> +               };
-> +       };
-> --
-> 2.14.1
->
+      mmc: core: Allocate per-request data using the block layer core
 
-Kind regards
-Uffe
+There is also a bug in mmc_init_request() where it doesn't free it's
+allocations on the error path, so you might want to check if you are leaking
+memory.
+
+Bounce buffers are being removed from v4.15 although you may experience
+performance regression with that:
+
+	https://marc.info/?l=linux-mmc&m=150589778700551
+
+
+
+On 01/10/17 13:57, Tetsuo Handa wrote:
+> Pavel Machek wrote:
+>> Hi!
+>>
+>>> I inserted u-SD card, only to realize that it is not detected as it
+>>> should be. And dmesg indeed reveals:
+>>
+>> Tetsuo asked me to report this to linux-mm.
+>>
+>> But 2^4 is 16 pages, IIRC that can't be expected to work reliably, and
+>> thus this sounds like MMC bug, not mm bug.
+> 
+> Yes, 16 pages is costly allocations which will fail without invoking the
+> OOM killer. But I thought this is an interesting case, for mempool
+> allocation should be able to handle memory allocation failure except
+> initial allocations, and initial allocation is failing.
+> 
+> I think that using kvmalloc() (and converting corresponding kfree() to
+> kvfree()) will make initial allocations succeed, but that might cause
+> needlessly succeeding subsequent mempool allocations under memory pressure?
+> 
+>>
+>>> [10994.299846] mmc0: new high speed SDHC card at address 0003
+>>> [10994.302196] kworker/2:1: page allocation failure: order:4,
+>>> mode:0x16040c0(GFP_KERNEL|__GFP_COMP|__GFP_NOTRACK), nodemask=(null)
+>>> [10994.302212] CPU: 2 PID: 9500 Comm: kworker/2:1 Not tainted
+>>> 4.14.0-rc2 #135
+>>> [10994.302215] Hardware name: LENOVO 42872WU/42872WU, BIOS 8DET73WW
+>>> (1.43 ) 10/12/2016
+>>> [10994.302222] Workqueue: events_freezable mmc_rescan
+>>> [10994.302227] Call Trace:
+>>> [10994.302233]  dump_stack+0x4d/0x67
+>>> [10994.302239]  warn_alloc+0xde/0x180
+>>> [10994.302243]  __alloc_pages_nodemask+0xaa4/0xd30
+>>> [10994.302249]  ? cache_alloc_refill+0xb73/0xc10
+>>> [10994.302252]  cache_alloc_refill+0x101/0xc10
+>>> [10994.302258]  ? mmc_init_request+0x2d/0xd0
+>>> [10994.302262]  ? mmc_init_request+0x2d/0xd0
+>>> [10994.302265]  __kmalloc+0xaf/0xe0
+>>> [10994.302269]  mmc_init_request+0x2d/0xd0
+>>> [10994.302273]  alloc_request_size+0x45/0x60
+>>> [10994.302276]  ? free_request_size+0x30/0x30
+>>> [10994.302280]  mempool_create_node+0xd7/0x130
+>>> [10994.302283]  ? alloc_request_simple+0x20/0x20
+>>> [10994.302287]  blk_init_rl+0xe8/0x110
+>>> [10994.302290]  blk_init_allocated_queue+0x70/0x180
+>>> [10994.302294]  mmc_init_queue+0xdd/0x370
+>>> [10994.302297]  mmc_blk_alloc_req+0xf6/0x340
+>>> [10994.302301]  mmc_blk_probe+0x18b/0x4e0
+>>> [10994.302305]  mmc_bus_probe+0x12/0x20
+>>> [10994.302309]  driver_probe_device+0x2f4/0x490
+>>>
+>>> Order 4 allocations are not supposed to be reliable...
+>>>
+>>> Any ideas?
+>>>
+>>> Thanks,
+>>> 									Pavel
+>>>
+>>
+>>
+>>
+>> -- 
+>> (english) http://www.livejournal.com/~pavelmachek
+>> (cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+> 
+
 --
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
