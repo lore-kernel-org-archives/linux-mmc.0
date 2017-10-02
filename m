@@ -1,68 +1,40 @@
-From: Gregory CLEMENT <gregory.clement@free-electrons.com>
-Subject: Re: [PATCH v2] mmc: sdhci-xenon: Fix clock resource by adding an optional bus clock
-Date: Mon, 02 Oct 2017 16:32:23 +0200
-Message-ID: <87fub1mxhk.fsf@free-electrons.com>
-References: <20170929130435.6805-1-gregory.clement@free-electrons.com>
-        <20170930104109.60853202@xhacker.debian>
-        <20170930080710.119c0258@windsurf>
-        <20170930141753.7c4e34ea@xhacker.debian>
+From: Michal Hocko <mhocko@kernel.org>
+Subject: Re: 4.14-rc2 on thinkpad x220: out of memory when inserting mmc card
+Date: Mon, 2 Oct 2017 16:44:18 +0200
+Message-ID: <20171002144418.35mag5uormoqoay5@dhcp22.suse.cz>
+References: <20170905194739.GA31241@amd>
+ <20171001093704.GA12626@amd>
+ <20171001102647.GA23908@amd>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20170930141753.7c4e34ea@xhacker.debian> (Jisheng Zhang's message
-        of "Sat, 30 Sep 2017 14:17:53 +0800")
-Sender: stable-owner@vger.kernel.org
-To: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
-Cc: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, linux-arm-kernel@lists.infradead.org, Antoine Tenart <antoine.tenart@free-electrons.com>, =?utf-8?Q?Miqu=C3=A8l?= Raynal <miquel.raynal@free-electrons.com>, Nadav Haklai <nadavh@marvell.com>, Shadi Ammouri <shadi@marvell.com>, Yehuda Yitschak <yehuday@marvell.com>, Omri Itach <omrii@marvell.com>, Hanna Hawa <hannah@marvell.com>, Igal Liberman <igall@marvell.com>, Marcin Wojtas <mw@semihalf.com>, Stabl
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx2.suse.de ([195.135.220.15]:60558 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1750957AbdJBOoU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 2 Oct 2017 10:44:20 -0400
+Content-Disposition: inline
+In-Reply-To: <20171001102647.GA23908@amd>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Pavel Machek <pavel@ucw.cz>
+Cc: kernel list <linux-kernel@vger.kernel.org>, adrian.hunter@intel.com, linux-mmc@vger.kernel.org, linux-mm@kvack.org, penguin-kernel@I-love.SAKURA.ne.jp
 
-Hi Jisheng,
- 
- On sam., sept. 30 2017, Jisheng Zhang <Jisheng.Zhang@synaptics.com> wrote:
+On Sun 01-10-17 12:26:47, Pavel Machek wrote:
+> Hi!
+> 
+> > I inserted u-SD card, only to realize that it is not detected as it
+> > should be. And dmesg indeed reveals:
+> 
+> Tetsuo asked me to report this to linux-mm.
+> 
+> But 2^4 is 16 pages, IIRC that can't be expected to work reliably, and
+> thus this sounds like MMC bug, not mm bug.
 
-> Hi Thomas,
->
-> On Sat, 30 Sep 2017 08:07:10 +0200 Thomas Petazzoni wrote:
->
->> Hello,
->> 
->> On Sat, 30 Sep 2017 10:41:09 +0800, Jisheng Zhang wrote:
->> 
->> > > +	priv->axi_clk = devm_clk_get(&pdev->dev, "axi");
->> > > +	if (IS_ERR(priv->axi_clk)) {
->> > > +		err = PTR_ERR(priv->axi_clk);
->> > > +		if (err == -EPROBE_DEFER)
->> > > +			goto err_clk;
->> > > +		priv->axi_clk = NULL;    
->> > 
->> > IMHO, this assignment could be removed. What do you think?  
->> 
->> No, because if the clock is not present in the Device Tree,
->> priv->axi_clk will contain an error code encoded as a pointer, so
->> priv->axi_clk will not be NULL. Hence the rest of the code that will
->
-> FWICT, the clk_disable_unprepare() could also check whether the clk
-> is err, am I wrong?
-
-You're right, I've jsut checked it.
-So I will remove it to have a smaller fix.
-
-Thanks,
-
-Gregory
-
->
->> operate on this clock will believe there is a valid clock pointed by
->> priv->axi_clk. So we really want to reset it to NULL when there was an
->> error getting the clock.
->> 
->> Best regards,
->> 
->> Thomas
->
-
+Well, I cannot comment on why MMC needs such a large allocation and
+whether it can safely fall back to vmalloc but __GFP_RETRY_MAYFAIL
+might help to try harder and require compaction to do more work.
+Relying on that for correctness is, of course, a different story and
+a very unreliable under memory pressure or long term fragmented memory.
 -- 
-Gregory Clement, Free Electrons
-Kernel, drivers, real-time and embedded Linux
-development, consulting, training and support.
-http://free-electrons.com
+Michal Hocko
+SUSE Labs
