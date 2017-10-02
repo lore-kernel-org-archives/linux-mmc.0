@@ -1,109 +1,179 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: 4.14-rc2 on thinkpad x220: out of memory when inserting mmc card
-Date: Mon, 2 Oct 2017 10:52:46 +0300
-Message-ID: <72c93a69-610f-027e-c028-379b97b6f388@intel.com>
-References: <20170905194739.GA31241@amd> <20171001093704.GA12626@amd>
- <20171001102647.GA23908@amd>
- <201710011957.ICF15708.OOLOHFSQMFFVJt@I-love.SAKURA.ne.jp>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [RFC v2 2/2] mmc: meson-mx-sdio: Add a driver for the Amlogic
+ Meson8 and Meson8b SoCs
+Date: Mon, 2 Oct 2017 10:08:09 +0200
+Message-ID: <CAPDyKFqj1CkhHO4SvUySEV4OnKcTeHRu6YAfBPSN4hvkQpHKfA@mail.gmail.com>
+References: <20170924190528.21841-1-martin.blumenstingl@googlemail.com> <20170924190528.21841-3-martin.blumenstingl@googlemail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <201710011957.ICF15708.OOLOHFSQMFFVJt@I-love.SAKURA.ne.jp>
-Content-Language: en-US
-Sender: owner-linux-mm@kvack.org
-To: Tetsuo Handa <penguin-kernel@I-love.SAKURA.ne.jp>, pavel@ucw.cz
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-mm@kvack.org, linus walleij <linus.walleij@linaro.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170924190528.21841-3-martin.blumenstingl-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Martin Blumenstingl <martin.blumenstingl-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
+Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Carlo Caione <carlo-KA+7E9HrN00dnm+yROfE0A@public.gmane.org>, Kevin Hilman <khilman-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Carlo Caione <carlo-6IF/jdPJHihWk0Htik3J/w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-The memory allocation used to be optional but became mandatory with:
+[...]
 
-  commit 304419d8a7e9204c5d19b704467b814df8c8f5b1
-  Author: Linus Walleij <linus.walleij@linaro.org>
-  Date:   Thu May 18 11:29:32 2017 +0200
+> +#define MESON_MX_SDIO_MAX_SLOTS                                        3
+> +
+> +struct meson_mx_mmc_slot {
+> +       struct device                   *dev;
+> +       struct mmc_host                 *mmc;
+> +       struct meson_mx_mmc_host        *host;
+> +
+> +       struct mmc_request              *mrq;
+> +       struct mmc_command              *cmd;
+> +       int                             error;
+> +
+> +       unsigned int                    id;
+> +};
 
-      mmc: core: Allocate per-request data using the block layer core
+If I recall correctly, we agreed on postponing the multiple slot
+support for now as to start simple.
+Therefore, can you please remove all that code, and instead only use
+the struct meson_mx_mmc_host for the data needed.
 
-There is also a bug in mmc_init_request() where it doesn't free it's
-allocations on the error path, so you might want to check if you are leaking
-memory.
+Just to be clear, I am fine having using the mmc slot bindings, as we
+agreed. However as only one slot is supported in this stage, we don't
+need a separate struct for that.
 
-Bounce buffers are being removed from v4.15 although you may experience
-performance regression with that:
+> +
+> +struct meson_mx_mmc_host {
+> +       struct device                   *dev;
+> +
+> +       struct clk                      *parent_clk;
+> +       struct clk                      *core_clk;
+> +       struct clk_divider              cfg_div;
+> +       struct clk                      *cfg_div_clk;
+> +       struct clk_fixed_factor         fixed_factor;
+> +       struct clk                      *fixed_factor_clk;
+> +
+> +       void __iomem                    *base;
+> +       int                             irq;
+> +       spinlock_t                      irq_lock;
+> +
+> +       struct timer_list               cmd_timeout;
+> +
+> +       struct meson_mx_mmc_slot        *slot;
+> +};
+> +
 
-	https://marc.info/?l=linux-mmc&m=150589778700551
+[...]
 
+> +static int meson_mx_mmc_slot_probe(struct device *slot_dev,
+> +                                  struct meson_mx_mmc_host *host)
+> +{
+> +       struct meson_mx_mmc_slot *slot;
+> +       struct mmc_host *mmc;
+> +       unsigned int id;
+> +       int ret;
+> +
+> +       if (of_property_read_u32(slot_dev->of_node, "reg", &id)) {
+> +               dev_err(slot_dev, "missing 'reg' property\n");
+> +               return -EINVAL;
+> +       }
+> +
+> +       if (id >= MESON_MX_SDIO_MAX_SLOTS) {
+> +               dev_err(slot_dev, "invalid 'reg' property value %d\n", id);
+> +               return -EINVAL;
+> +       }
+> +
+> +       mmc = mmc_alloc_host(sizeof(*slot), slot_dev);
+> +       if (!mmc)
+> +               return -ENOMEM;
+> +
+> +       slot = mmc_priv(mmc);
+> +       slot->dev = slot_dev;
+> +       slot->mmc = mmc;
+> +       slot->id = id;
+> +       slot->host = host;
+> +
+> +       host->slot = slot;
+> +
+> +       /* Get regulators and the supported OCR mask */
+> +       ret = mmc_regulator_get_supply(mmc);
+> +       if (ret == -EPROBE_DEFER)
+> +               goto error_free_host;
+> +
+> +       mmc->max_req_size = MESON_MX_SDIO_BOUNCE_REQ_SIZE;
+> +       mmc->max_seg_size = mmc->max_req_size;
+> +       mmc->max_blk_count =
+> +               FIELD_GET(MESON_MX_SDIO_SEND_REPEAT_PACKAGE_TIMES_MASK,
+> +                         0xffffffff);
+> +       mmc->max_blk_size = FIELD_GET(MESON_MX_SDIO_EXT_DATA_RW_NUMBER_MASK,
+> +                                     0xffffffff);
+> +       mmc->max_blk_size -= (4 * MESON_MX_SDIO_RESPONSE_CRC16_BITS);
+> +       mmc->max_blk_size /= BITS_PER_BYTE;
+> +
+> +       /* Get the min and max supported clock rates */
+> +       mmc->f_min = clk_round_rate(host->cfg_div_clk, 1);
+> +       mmc->f_max = clk_round_rate(host->cfg_div_clk,
+> +                                   clk_get_rate(host->parent_clk));
+> +
+> +       mmc->caps |= MMC_CAP_ERASE | MMC_CAP_CMD23;
+> +       mmc->ops = &meson_mx_mmc_ops;
+> +
+> +       ret = mmc_of_parse(mmc);
+> +       if (ret)
+> +               goto error_free_host;
+> +
+> +       ret = mmc_add_host(mmc);
+> +       if (ret)
+> +               goto error_free_host;
+> +
+> +       return 0;
+> +
+> +error_free_host:
+> +       mmc_free_host(mmc);
+> +       return ret;
+> +}
+> +
+> +static int meson_mx_mmc_probe_slots(struct meson_mx_mmc_host *host)
+> +{
+> +       struct device_node *slot_node;
+> +       struct platform_device *slot_pdev;
+> +       int ret;
+> +
+> +       for_each_child_of_node(host->dev->of_node, slot_node) {
+> +               if (!of_device_is_compatible(slot_node, "mmc-slot"))
+> +                       continue;
+> +
+> +               /*
+> +                * TODO: the MMC core framework currently does not support
+> +                * controllers with multiple slots properly.
+> +                */
+> +               if (host->slot) {
+> +                       dev_warn(host->dev,
+> +                                "skipping slot other than the first\n");
+> +                       continue;
+> +               }
+> +
+> +               slot_pdev = of_platform_device_create(slot_node, NULL,
+> +                                                     host->dev);
+> +               if (!slot_pdev)
+> +                       continue;
+> +
+> +               ret = meson_mx_mmc_slot_probe(&slot_pdev->dev, host);
+> +               if (ret) {
+> +                       of_platform_device_destroy(&slot_pdev->dev, NULL);
+> +                       return ret;
+> +               }
+> +       }
+> +
+> +       return 0;
+> +}
 
+For the above two functions, please simplify the code by limiting them
+to deal with only one valid mmc-slot.
 
-On 01/10/17 13:57, Tetsuo Handa wrote:
-> Pavel Machek wrote:
->> Hi!
->>
->>> I inserted u-SD card, only to realize that it is not detected as it
->>> should be. And dmesg indeed reveals:
->>
->> Tetsuo asked me to report this to linux-mm.
->>
->> But 2^4 is 16 pages, IIRC that can't be expected to work reliably, and
->> thus this sounds like MMC bug, not mm bug.
-> 
-> Yes, 16 pages is costly allocations which will fail without invoking the
-> OOM killer. But I thought this is an interesting case, for mempool
-> allocation should be able to handle memory allocation failure except
-> initial allocations, and initial allocation is failing.
-> 
-> I think that using kvmalloc() (and converting corresponding kfree() to
-> kvfree()) will make initial allocations succeed, but that might cause
-> needlessly succeeding subsequent mempool allocations under memory pressure?
-> 
->>
->>> [10994.299846] mmc0: new high speed SDHC card at address 0003
->>> [10994.302196] kworker/2:1: page allocation failure: order:4,
->>> mode:0x16040c0(GFP_KERNEL|__GFP_COMP|__GFP_NOTRACK), nodemask=(null)
->>> [10994.302212] CPU: 2 PID: 9500 Comm: kworker/2:1 Not tainted
->>> 4.14.0-rc2 #135
->>> [10994.302215] Hardware name: LENOVO 42872WU/42872WU, BIOS 8DET73WW
->>> (1.43 ) 10/12/2016
->>> [10994.302222] Workqueue: events_freezable mmc_rescan
->>> [10994.302227] Call Trace:
->>> [10994.302233]  dump_stack+0x4d/0x67
->>> [10994.302239]  warn_alloc+0xde/0x180
->>> [10994.302243]  __alloc_pages_nodemask+0xaa4/0xd30
->>> [10994.302249]  ? cache_alloc_refill+0xb73/0xc10
->>> [10994.302252]  cache_alloc_refill+0x101/0xc10
->>> [10994.302258]  ? mmc_init_request+0x2d/0xd0
->>> [10994.302262]  ? mmc_init_request+0x2d/0xd0
->>> [10994.302265]  __kmalloc+0xaf/0xe0
->>> [10994.302269]  mmc_init_request+0x2d/0xd0
->>> [10994.302273]  alloc_request_size+0x45/0x60
->>> [10994.302276]  ? free_request_size+0x30/0x30
->>> [10994.302280]  mempool_create_node+0xd7/0x130
->>> [10994.302283]  ? alloc_request_simple+0x20/0x20
->>> [10994.302287]  blk_init_rl+0xe8/0x110
->>> [10994.302290]  blk_init_allocated_queue+0x70/0x180
->>> [10994.302294]  mmc_init_queue+0xdd/0x370
->>> [10994.302297]  mmc_blk_alloc_req+0xf6/0x340
->>> [10994.302301]  mmc_blk_probe+0x18b/0x4e0
->>> [10994.302305]  mmc_bus_probe+0x12/0x20
->>> [10994.302309]  driver_probe_device+0x2f4/0x490
->>>
->>> Order 4 allocations are not supposed to be reliable...
->>>
->>> Any ideas?
->>>
->>> Thanks,
->>> 									Pavel
->>>
->>
->>
->>
->> -- 
->> (english) http://www.livejournal.com/~pavelmachek
->> (cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
-> 
+[...]
 
+Besides the comments on the multiple slot support, this looks good to me.
+
+Kind regards
+Uffe
 --
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
