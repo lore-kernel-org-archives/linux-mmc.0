@@ -1,63 +1,68 @@
-From: Bernd Edlinger <bernd.edlinger@hotmail.de>
-Subject: Re: [PATCH] mmc: dw_mmc: Add support for multiple SD cards on one
- host interface
-Date: Mon, 2 Oct 2017 14:31:59 +0000
-Message-ID: <ed12bab0-1270-af10-0313-ad9e2f32173e@hotmail.de>
-References: <AM5PR0701MB2657094CA5D94164E6D63A8DE47F0@AM5PR0701MB2657.eurprd07.prod.outlook.com>
- <CAPDyKFr3==eZQOojPac4fse8baHa+UXweOezdb9vFiSB9jae_Q@mail.gmail.com>
+From: Gregory CLEMENT <gregory.clement@free-electrons.com>
+Subject: Re: [PATCH v2] mmc: sdhci-xenon: Fix clock resource by adding an optional bus clock
+Date: Mon, 02 Oct 2017 16:32:23 +0200
+Message-ID: <87fub1mxhk.fsf@free-electrons.com>
+References: <20170929130435.6805-1-gregory.clement@free-electrons.com>
+        <20170930104109.60853202@xhacker.debian>
+        <20170930080710.119c0258@windsurf>
+        <20170930141753.7c4e34ea@xhacker.debian>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oln040092071010.outbound.protection.outlook.com ([40.92.71.10]:8672
-        "EHLO EUR03-DB5-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751131AbdJBOcD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 2 Oct 2017 10:32:03 -0400
-In-Reply-To: <CAPDyKFr3==eZQOojPac4fse8baHa+UXweOezdb9vFiSB9jae_Q@mail.gmail.com>
-Content-Language: de-DE
-Content-ID: <5DC1D082CB6F974EAA3DCA8D4F7F8A37@sct-15-1-1199-6-msonline-outlook-20107.templateTenant>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20170930141753.7c4e34ea@xhacker.debian> (Jisheng Zhang's message
+        of "Sat, 30 Sep 2017 14:17:53 +0800")
+Sender: stable-owner@vger.kernel.org
+To: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+Cc: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, linux-arm-kernel@lists.infradead.org, Antoine Tenart <antoine.tenart@free-electrons.com>, =?utf-8?Q?Miqu=C3=A8l?= Raynal <miquel.raynal@free-electrons.com>, Nadav Haklai <nadavh@marvell.com>, Shadi Ammouri <shadi@marvell.com>, Yehuda Yitschak <yehuday@marvell.com>, Omri Itach <omrii@marvell.com>, Hanna Hawa <hannah@marvell.com>, Igal Liberman <igall@marvell.com>, Marcin Wojtas <mw@semihalf.com>, Stabl
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>
 
-On 10/02/17 09:12, Ulf Hansson wrote:
-> On 30 September 2017 at 17:39, Bernd Edlinger <bernd.edlinger@hotmail.de> wrote:
->>
->> Needs external logic to multiplex the clock signal,
->> which is controlled by a GPIO output pin.
->>
->> Only the selected SD card receives the clock,
->> while the other SD card's clock is forced to LOW.
->> DATA and CMD lines can be connected to both SD cards.
->>
->> On warm-start UBOOT should use a sequence of
->> CMD12 and CMD7 with RCA=0 to force any active SD card
->> to stop transmission and release the DATA bus.
-> 
-> I doubt that is sufficient to support multiple slots.
-> 
+Hi Jisheng,
+ 
+ On sam., sept. 30 2017, Jisheng Zhang <Jisheng.Zhang@synaptics.com> wrote:
 
-A hardware exists and AFAICT works as expected,
-with bus speeds up to 50 MHz.
-We have a use case with internal peripherals.
+> Hi Thomas,
+>
+> On Sat, 30 Sep 2017 08:07:10 +0200 Thomas Petazzoni wrote:
+>
+>> Hello,
+>> 
+>> On Sat, 30 Sep 2017 10:41:09 +0800, Jisheng Zhang wrote:
+>> 
+>> > > +	priv->axi_clk = devm_clk_get(&pdev->dev, "axi");
+>> > > +	if (IS_ERR(priv->axi_clk)) {
+>> > > +		err = PTR_ERR(priv->axi_clk);
+>> > > +		if (err == -EPROBE_DEFER)
+>> > > +			goto err_clk;
+>> > > +		priv->axi_clk = NULL;    
+>> > 
+>> > IMHO, this assignment could be removed. What do you think?  
+>> 
+>> No, because if the clock is not present in the Device Tree,
+>> priv->axi_clk will contain an error code encoded as a pointer, so
+>> priv->axi_clk will not be NULL. Hence the rest of the code that will
+>
+> FWICT, the clk_disable_unprepare() could also check whether the clk
+> is err, am I wrong?
 
-> Sometimes the mmc core needs to perform a sequence of operations
-> towards *one* host/card and that must be done in guaranteed manner, to
-> that no other operations are performed for another card/host
-> in-between.
-> 
+You're right, I've jsut checked it.
+So I will remove it to have a smaller fix.
 
-Could you please elaborate on this?
+Thanks,
 
-> Perhaps if you are lucky you may get something that is very fragile to
-> work, but in the end I think the core needs to play along. Moreover,
-> dw_mmc has recently removed its multiple slot support - simply because
-> the complexity wasn't worth it.
-> 
+Gregory
 
-I was not overly happy to see this removed, when I re-based to current master :-(
+>
+>> operate on this clock will believe there is a valid clock pointed by
+>> priv->axi_clk. So we really want to reset it to NULL when there was an
+>> error getting the clock.
+>> 
+>> Best regards,
+>> 
+>> Thomas
+>
 
-
-Bernd
+-- 
+Gregory Clement, Free Electrons
+Kernel, drivers, real-time and embedded Linux
+development, consulting, training and support.
+http://free-electrons.com
