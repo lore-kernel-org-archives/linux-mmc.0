@@ -1,67 +1,41 @@
-From: David Daney <ddaney@caviumnetworks.com>
-Subject: Re: [PATCH] mmc: cavium: Depend on GPIO driver
-Date: Mon, 2 Oct 2017 10:06:05 -0700
-Message-ID: <b822ae64-42a3-2ffd-a6bd-8534f8c3d46b@caviumnetworks.com>
-References: <1506945761-23482-1-git-send-email-jglauber@cavium.com>
+From: Kevin Hilman <khilman@baylibre.com>
+Subject: Re: [PATCH 0/3] mmc: meson-gx: fixes for v4.14
+Date: Mon, 02 Oct 2017 11:33:20 -0700
+Message-ID: <7hk20d8knj.fsf@baylibre.com>
+References: <20171002122743.32334-1-jbrunet@baylibre.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-dm3nam03on0069.outbound.protection.outlook.com ([104.47.41.69]:34492
-        "EHLO NAM03-DM3-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750957AbdJBRGM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 2 Oct 2017 13:06:12 -0400
-In-Reply-To: <1506945761-23482-1-git-send-email-jglauber@cavium.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20171002122743.32334-1-jbrunet@baylibre.com> (Jerome Brunet's
+        message of "Mon, 2 Oct 2017 14:27:40 +0200")
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jerome Brunet <jbrunet@baylibre.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Carlo Caione <carlo@caione.org>, Heiner Kallweit <hkallweit1@gmail.com>, linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jan Glauber <jglauber@cavium.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, David Daney <david.daney@cavium.com>, "Steven J. Hill" <Steven.Hill@cavium.com>
 
-On 10/02/2017 05:02 AM, Jan Glauber wrote:
-> Without the ThunderX/OcteonTx GPIO driver the MMC driver
-> would not power up any MMC devices. Therefore add a
-> dependency to the GPIO driver and remove the unneeded GPIOLIB
-> dependency.
-> 
-> Signed-off-by: Jan Glauber <jglauber@cavium.com>
-> ---
->   drivers/mmc/host/Kconfig | 2 +-
->   1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 8c15637178ff..a47a2f1d8ae4 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -663,7 +663,7 @@ config MMC_CAVIUM_OCTEON
->   config MMC_CAVIUM_THUNDERX
->   	tristate "Cavium ThunderX SD/MMC Card Interface support"
->   	depends on PCI && 64BIT && (ARM64 || COMPILE_TEST)
-> -	depends on GPIOLIB
-> +	depends on GPIO_THUNDERX
+Jerome Brunet <jbrunet@baylibre.com> writes:
 
-We could just "select" GPIO_THUNDERX instead so that people aren't 
-forced to manually unwind all the dependencies.
+> This patchset fixes the issues reported by Heiner [0] with the odroid-c2.
+> In a nutshell, this series does the following:
+>
+> * Make sure the mmc clock rate is not set higher than what is requested
+> * Reset the tuning values on mmc power cycle instead of POWER_ON
+> * Add tuning of the tx phase to the tuning function.
+>
+> This fixes the problem seen on the odroid-c2, both for hs200 and hs400.
+> To check for regression, this series has also been tested on the gxl
+> libretech-cc
+>
+> Ulf, could you please pick this as fixes for v4.14 ?
+>
+> [0]: https://lkml.kernel.org/r/e2171288-84ef-82db-2efc-300935e6c062@gmail.com
+>
+> Jerome Brunet (3):
+>   mmc: meson-gx: make sure the clock is rounded down
+>   mmc: meson-gx: fix rx phase reset
+>   mmc: meson-gx: include tx phase in the tuning process
+>
+>  drivers/mmc/host/meson-gx-mmc.c | 26 ++++++++++++++++++++++----
+>  1 file changed, 22 insertions(+), 4 deletions(-)
 
-Also, what do we do if the required GPIO lines are on I2C expanders? 
-This patch doesn't help in this hypothetical case.  In the end it is the 
-responsibility if the system designer to ensure the proper drivers are 
-available in their kernels.  I think the patch is a step in the right 
-direction, but just wanted to note that it doesn't cover all possible cases.
-
-In any event, you can add ...:
-
-Acked-by: David Daney <david.daney@cavium.com>
-
-... to either this version, or an alternative patch that does the 
-"select" instead.
-
-Thanks
-
-
->   	depends on OF_ADDRESS
->   	help
->   	  This selects Cavium ThunderX SD/MMC Card Interface.
-> 
-
+Reviewed-by: Kevin Hilman <khilman@baylibre.com>
