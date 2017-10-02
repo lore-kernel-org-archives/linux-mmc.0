@@ -1,179 +1,72 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [RFC v2 2/2] mmc: meson-mx-sdio: Add a driver for the Amlogic
- Meson8 and Meson8b SoCs
-Date: Mon, 2 Oct 2017 10:08:09 +0200
-Message-ID: <CAPDyKFqj1CkhHO4SvUySEV4OnKcTeHRu6YAfBPSN4hvkQpHKfA@mail.gmail.com>
-References: <20170924190528.21841-1-martin.blumenstingl@googlemail.com> <20170924190528.21841-3-martin.blumenstingl@googlemail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH][sdhci-next] mmc: sdhci-omap: make three functions static,
+ fixes warnings
+Date: Mon, 2 Oct 2017 10:29:50 +0200
+Message-ID: <CAPDyKFqhu+2jozYoBZbNzuOeNi_0Pt33HYhObk=DeNjOLhuoFQ@mail.gmail.com>
+References: <20170926145546.17206-1-colin.king@canonical.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170924190528.21841-3-martin.blumenstingl-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Martin Blumenstingl <martin.blumenstingl-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
-Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Carlo Caione <carlo-KA+7E9HrN00dnm+yROfE0A@public.gmane.org>, Kevin Hilman <khilman-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Carlo Caione <carlo-6IF/jdPJHihWk0Htik3J/w@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170926145546.17206-1-colin.king@canonical.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Colin King <colin.king@canonical.com>
+Cc: Kishon Vijay Abraham I <kishon@ti.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, kernel-janitors@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-[...]
+On 26 September 2017 at 16:55, Colin King <colin.king@canonical.com> wrote:
+> From: Colin Ian King <colin.king@canonical.com>
+>
+> The functions sdhci_omap_set_ios, sdhci_omap_set_power and
+> sdhci_omap_get_min_clock are local to the source and do not need
+> to be in global scope, so make them static.
+>
+> Cleans up sparse warnings:
+> symbol 'sdhci_omap_set_ios' was not declared. Should it be static?
+> symbol 'sdhci_omap_set_power' was not declared. Should it be static?
+> symbol 'sdhci_omap_get_min_clock' was not declared. Should it be static?
+>
+> Signed-off-by: Colin Ian King <colin.king@canonical.com>
 
-> +#define MESON_MX_SDIO_MAX_SLOTS                                        3
-> +
-> +struct meson_mx_mmc_slot {
-> +       struct device                   *dev;
-> +       struct mmc_host                 *mmc;
-> +       struct meson_mx_mmc_host        *host;
-> +
-> +       struct mmc_request              *mrq;
-> +       struct mmc_command              *cmd;
-> +       int                             error;
-> +
-> +       unsigned int                    id;
-> +};
-
-If I recall correctly, we agreed on postponing the multiple slot
-support for now as to start simple.
-Therefore, can you please remove all that code, and instead only use
-the struct meson_mx_mmc_host for the data needed.
-
-Just to be clear, I am fine having using the mmc slot bindings, as we
-agreed. However as only one slot is supported in this stage, we don't
-need a separate struct for that.
-
-> +
-> +struct meson_mx_mmc_host {
-> +       struct device                   *dev;
-> +
-> +       struct clk                      *parent_clk;
-> +       struct clk                      *core_clk;
-> +       struct clk_divider              cfg_div;
-> +       struct clk                      *cfg_div_clk;
-> +       struct clk_fixed_factor         fixed_factor;
-> +       struct clk                      *fixed_factor_clk;
-> +
-> +       void __iomem                    *base;
-> +       int                             irq;
-> +       spinlock_t                      irq_lock;
-> +
-> +       struct timer_list               cmd_timeout;
-> +
-> +       struct meson_mx_mmc_slot        *slot;
-> +};
-> +
-
-[...]
-
-> +static int meson_mx_mmc_slot_probe(struct device *slot_dev,
-> +                                  struct meson_mx_mmc_host *host)
-> +{
-> +       struct meson_mx_mmc_slot *slot;
-> +       struct mmc_host *mmc;
-> +       unsigned int id;
-> +       int ret;
-> +
-> +       if (of_property_read_u32(slot_dev->of_node, "reg", &id)) {
-> +               dev_err(slot_dev, "missing 'reg' property\n");
-> +               return -EINVAL;
-> +       }
-> +
-> +       if (id >= MESON_MX_SDIO_MAX_SLOTS) {
-> +               dev_err(slot_dev, "invalid 'reg' property value %d\n", id);
-> +               return -EINVAL;
-> +       }
-> +
-> +       mmc = mmc_alloc_host(sizeof(*slot), slot_dev);
-> +       if (!mmc)
-> +               return -ENOMEM;
-> +
-> +       slot = mmc_priv(mmc);
-> +       slot->dev = slot_dev;
-> +       slot->mmc = mmc;
-> +       slot->id = id;
-> +       slot->host = host;
-> +
-> +       host->slot = slot;
-> +
-> +       /* Get regulators and the supported OCR mask */
-> +       ret = mmc_regulator_get_supply(mmc);
-> +       if (ret == -EPROBE_DEFER)
-> +               goto error_free_host;
-> +
-> +       mmc->max_req_size = MESON_MX_SDIO_BOUNCE_REQ_SIZE;
-> +       mmc->max_seg_size = mmc->max_req_size;
-> +       mmc->max_blk_count =
-> +               FIELD_GET(MESON_MX_SDIO_SEND_REPEAT_PACKAGE_TIMES_MASK,
-> +                         0xffffffff);
-> +       mmc->max_blk_size = FIELD_GET(MESON_MX_SDIO_EXT_DATA_RW_NUMBER_MASK,
-> +                                     0xffffffff);
-> +       mmc->max_blk_size -= (4 * MESON_MX_SDIO_RESPONSE_CRC16_BITS);
-> +       mmc->max_blk_size /= BITS_PER_BYTE;
-> +
-> +       /* Get the min and max supported clock rates */
-> +       mmc->f_min = clk_round_rate(host->cfg_div_clk, 1);
-> +       mmc->f_max = clk_round_rate(host->cfg_div_clk,
-> +                                   clk_get_rate(host->parent_clk));
-> +
-> +       mmc->caps |= MMC_CAP_ERASE | MMC_CAP_CMD23;
-> +       mmc->ops = &meson_mx_mmc_ops;
-> +
-> +       ret = mmc_of_parse(mmc);
-> +       if (ret)
-> +               goto error_free_host;
-> +
-> +       ret = mmc_add_host(mmc);
-> +       if (ret)
-> +               goto error_free_host;
-> +
-> +       return 0;
-> +
-> +error_free_host:
-> +       mmc_free_host(mmc);
-> +       return ret;
-> +}
-> +
-> +static int meson_mx_mmc_probe_slots(struct meson_mx_mmc_host *host)
-> +{
-> +       struct device_node *slot_node;
-> +       struct platform_device *slot_pdev;
-> +       int ret;
-> +
-> +       for_each_child_of_node(host->dev->of_node, slot_node) {
-> +               if (!of_device_is_compatible(slot_node, "mmc-slot"))
-> +                       continue;
-> +
-> +               /*
-> +                * TODO: the MMC core framework currently does not support
-> +                * controllers with multiple slots properly.
-> +                */
-> +               if (host->slot) {
-> +                       dev_warn(host->dev,
-> +                                "skipping slot other than the first\n");
-> +                       continue;
-> +               }
-> +
-> +               slot_pdev = of_platform_device_create(slot_node, NULL,
-> +                                                     host->dev);
-> +               if (!slot_pdev)
-> +                       continue;
-> +
-> +               ret = meson_mx_mmc_slot_probe(&slot_pdev->dev, host);
-> +               if (ret) {
-> +                       of_platform_device_destroy(&slot_pdev->dev, NULL);
-> +                       return ret;
-> +               }
-> +       }
-> +
-> +       return 0;
-> +}
-
-For the above two functions, please simplify the code by limiting them
-to deal with only one valid mmc-slot.
-
-[...]
-
-Besides the comments on the multiple slot support, this looks good to me.
+Thanks, applied for next!
 
 Kind regards
 Uffe
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+> ---
+>  drivers/mmc/host/sdhci-omap.c | 6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+> index 5ddae39816b7..628bfe9a3d17 100644
+> --- a/drivers/mmc/host/sdhci-omap.c
+> +++ b/drivers/mmc/host/sdhci-omap.c
+> @@ -262,7 +262,7 @@ static void sdhci_omap_set_bus_mode(struct sdhci_omap_host *omap_host,
+>         omap_host->bus_mode = mode;
+>  }
+>
+> -void sdhci_omap_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+> +static void sdhci_omap_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>  {
+>         struct sdhci_host *host = mmc_priv(mmc);
+>         struct sdhci_pltfm_host *pltfm_host;
+> @@ -323,7 +323,7 @@ static void sdhci_omap_set_clock(struct sdhci_host *host, unsigned int clock)
+>         sdhci_omap_start_clock(omap_host);
+>  }
+>
+> -void sdhci_omap_set_power(struct sdhci_host *host, unsigned char mode,
+> +static void sdhci_omap_set_power(struct sdhci_host *host, unsigned char mode,
+>                           unsigned short vdd)
+>  {
+>         struct mmc_host *mmc = host->mmc;
+> @@ -344,7 +344,7 @@ static int sdhci_omap_enable_dma(struct sdhci_host *host)
+>         return 0;
+>  }
+>
+> -unsigned int sdhci_omap_get_min_clock(struct sdhci_host *host)
+> +static unsigned int sdhci_omap_get_min_clock(struct sdhci_host *host)
+>  {
+>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>
+> --
+> 2.14.1
+>
