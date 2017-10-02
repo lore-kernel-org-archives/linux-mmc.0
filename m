@@ -1,83 +1,63 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: 4.14-rc2 on thinkpad x220: out of memory when inserting mmc card
-Date: Mon, 2 Oct 2017 16:09:57 +0200
-Message-ID: <CACRpkdYirC+rh_KALgVqKZMjq2DgbW4oi9MJkmrzwn+1O+94-g@mail.gmail.com>
-References: <20170905194739.GA31241@amd> <20171001093704.GA12626@amd>
- <20171001102647.GA23908@amd> <201710011957.ICF15708.OOLOHFSQMFFVJt@I-love.SAKURA.ne.jp>
+From: Bernd Edlinger <bernd.edlinger@hotmail.de>
+Subject: Re: [PATCH] mmc: dw_mmc: Add support for multiple SD cards on one
+ host interface
+Date: Mon, 2 Oct 2017 14:31:59 +0000
+Message-ID: <ed12bab0-1270-af10-0313-ad9e2f32173e@hotmail.de>
+References: <AM5PR0701MB2657094CA5D94164E6D63A8DE47F0@AM5PR0701MB2657.eurprd07.prod.outlook.com>
+ <CAPDyKFr3==eZQOojPac4fse8baHa+UXweOezdb9vFiSB9jae_Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f170.google.com ([209.85.223.170]:54649 "EHLO
-        mail-io0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751101AbdJBOJ7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Oct 2017 10:09:59 -0400
-Received: by mail-io0-f170.google.com with SMTP id h66so4801898ioh.11
-        for <linux-mmc@vger.kernel.org>; Mon, 02 Oct 2017 07:09:58 -0700 (PDT)
-In-Reply-To: <201710011957.ICF15708.OOLOHFSQMFFVJt@I-love.SAKURA.ne.jp>
+Received: from mail-oln040092071010.outbound.protection.outlook.com ([40.92.71.10]:8672
+        "EHLO EUR03-DB5-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751131AbdJBOcD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 2 Oct 2017 10:32:03 -0400
+In-Reply-To: <CAPDyKFr3==eZQOojPac4fse8baHa+UXweOezdb9vFiSB9jae_Q@mail.gmail.com>
+Content-Language: de-DE
+Content-ID: <5DC1D082CB6F974EAA3DCA8D4F7F8A37@sct-15-1-1199-6-msonline-outlook-20107.templateTenant>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tetsuo Handa <penguin-kernel@i-love.sakura.ne.jp>
-Cc: Pavel Machek <pavel@ucw.cz>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-mm@kvack.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>
 
-On Sun, Oct 1, 2017 at 12:57 PM, Tetsuo Handa
-<penguin-kernel@i-love.sakura.ne.jp> wrote:
-
->> > I inserted u-SD card, only to realize that it is not detected as it
->> > should be. And dmesg indeed reveals:
+On 10/02/17 09:12, Ulf Hansson wrote:
+> On 30 September 2017 at 17:39, Bernd Edlinger <bernd.edlinger@hotmail.de> wrote:
 >>
->> Tetsuo asked me to report this to linux-mm.
+>> Needs external logic to multiplex the clock signal,
+>> which is controlled by a GPIO output pin.
 >>
->> But 2^4 is 16 pages, IIRC that can't be expected to work reliably, and
->> thus this sounds like MMC bug, not mm bug.
+>> Only the selected SD card receives the clock,
+>> while the other SD card's clock is forced to LOW.
+>> DATA and CMD lines can be connected to both SD cards.
+>>
+>> On warm-start UBOOT should use a sequence of
+>> CMD12 and CMD7 with RCA=0 to force any active SD card
+>> to stop transmission and release the DATA bus.
+> 
+> I doubt that is sufficient to support multiple slots.
+> 
+
+A hardware exists and AFAICT works as expected,
+with bus speeds up to 50 MHz.
+We have a use case with internal peripherals.
+
+> Sometimes the mmc core needs to perform a sequence of operations
+> towards *one* host/card and that must be done in guaranteed manner, to
+> that no other operations are performed for another card/host
+> in-between.
+> 
+
+Could you please elaborate on this?
+
+> Perhaps if you are lucky you may get something that is very fragile to
+> work, but in the end I think the core needs to play along. Moreover,
+> dw_mmc has recently removed its multiple slot support - simply because
+> the complexity wasn't worth it.
+> 
+
+I was not overly happy to see this removed, when I re-based to current master :-(
 
 
-I'm not sure I fully understand this error message:
-"worker/2:1: page allocation failure: order:4"
-
-What I guess from context is that the mmc_init_request()
-call is failing to allocate 16 pages, meaning for 4K pages
-64KB which is the typical bounce buffer.
-
-This is what the code has always allocated as bounce buffer,
-but it used to happen upfront, when probing the MMC block layer,
-rather than when allocating the requests.
-
-Now it happens later, and that fails sometimes apparently.
-
-> Yes, 16 pages is costly allocations which will fail without invoking the
-> OOM killer. But I thought this is an interesting case, for mempool
-> allocation should be able to handle memory allocation failure except
-> initial allocations, and initial allocation is failing.
->
-> I think that using kvmalloc() (and converting corresponding kfree() to
-> kvfree()) will make initial allocations succeed, but that might cause
-> needlessly succeeding subsequent mempool allocations under memory pressure?
-
-Using kvmalloc() is against the design of the bounce buffer if that
-means we allocate virtual (non-contigous) memory. These bounce
-buffers exist exactly to be contigous.
-
-I think it is better to delete the bounce buffer handling altogether since
-it anyways turns out that noone is using them or getting any
-benefit from them. AFAICT.
-i.e. just cherry-pick commit a16a2cc4f37d4a35df7cdc5c976465f9867985c2
-("mmc: Delete bounce buffer handling").
-
-This should be fine to cherry-pick for fixes.
-
-What we figured out is that bounce buffers are almost always enabled
-but very seldom actually used by the drivers. It is only used by
-drivers with max_segs == 1.
-
-This MMC host driver (which one?) appears to be having max_segs == 1.
-This doesn't mean that the bounce buffers actually provide a speedup.
-Most probably not. It just happens that code enables them if
-you have max_segs == 1.
-
-Can you try cherry-picking the above patch, also here:
-https://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git/commit/?h=next&id=a16a2cc4f37d4a35df7cdc5c976465f9867985c2
-
-And see if this solves your problem?
-
-Yours,
-Linus Walleij
+Bernd
