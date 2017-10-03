@@ -1,73 +1,73 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: block: Fix bug when removing RPMB chardev
-Date: Tue, 3 Oct 2017 14:07:19 +0300
-Message-ID: <2d54cc9e-7c2c-20b8-9bc9-64f4c0605db7@intel.com>
-References: <20171002115918.11035-1-linus.walleij@linaro.org>
- <94d90383-c6de-910d-627e-f445f242f6f1@intel.com>
- <CACRpkdZ5=u3YtdgGFj1gk+4mSP36Cj2YD6z-nm7SEbM5cgkFWg@mail.gmail.com>
+From: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Subject: Re: [RFC v2 0/2] Add support for Meson MX "SDIO" MMC controller
+Date: Tue, 3 Oct 2017 13:19:08 +0200
+Message-ID: <CAFBinCDrEmj27ewWQ4+rNXtFSWR3dUoF5H2qZmn2=bpP6OXSZw@mail.gmail.com>
+References: <20170924190528.21841-1-martin.blumenstingl@googlemail.com> <20170927193616.32gxszmk4cjjoqmo@rob-hp-laptop>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga06.intel.com ([134.134.136.31]:38606 "EHLO mga06.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750720AbdJCLOF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 3 Oct 2017 07:14:05 -0400
-In-Reply-To: <CACRpkdZ5=u3YtdgGFj1gk+4mSP36Cj2YD6z-nm7SEbM5cgkFWg@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-io0-f193.google.com ([209.85.223.193]:34942 "EHLO
+        mail-io0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750720AbdJCLT3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Oct 2017 07:19:29 -0400
+In-Reply-To: <20170927193616.32gxszmk4cjjoqmo@rob-hp-laptop>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
+To: Rob Herring <robh@kernel.org>
+Cc: ulf.hansson@linaro.org, mark.rutland@arm.com, carlo@caione.org, khilman@baylibre.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org
 
-On 03/10/17 13:00, Linus Walleij wrote:
-> On Tue, Oct 3, 2017 at 10:32 AM, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> Also I noticed this function:
->>
->> static int mmc_rpmb_chrdev_release(struct inode *inode, struct file *filp)
->> {
->>         struct mmc_rpmb_data *rpmb = container_of(inode->i_cdev,
->>                                                   struct mmc_rpmb_data, chrdev);
->>
->>         put_device(&rpmb->dev);
->>         mutex_lock(&open_lock);
->>         rpmb->md->usage--;
->>         mutex_unlock(&open_lock);
->>
->>         return 0;
->> }
->>
->> What is going on with 'usage'?  It looks weird.
-> 
-> It is the same reference counting as was present before the patch
-> converting the block device to a character device. Not my invention.
-> It's been there since the conception of the MMC stack.
-> 
-> While the get_device()/put_device() is reference counting the
-> RPMB device per se, this is refcounting the block device that
-> is backing the RPMB char device, so that the block device
-> cannot be removed if the character device is using it for
-> RPMB access.
-> 
->> What happens if you do this:
->>         open the rpmb device
->>         unbind the host controller
->>         try to use an ioctl
->>         close the rpmb device
-> 
-> It's analogous to the similar usecase I had in GPIO:
-> 
-> What if you're holding (in userspace) a reference to a resource and
-> the hardware backing the resource goes away?
-> 
-> In GPIO I chose to "numb" the device so that any further ioctl()s
-> would just be silently ignored but for RPMB I guess we should
-> simply start returning errors.
-> 
-> Since I'm still supporting the old refcounting with md->usage
-> as described above, it should behave the same as the old
-> codebase, which might not be very good behaviour but atleast
-> it is not a regression.
+Hi Rob,
 
-How do you know you are not dropping the last reference when you do
-md->usage-- ?
+On Wed, Sep 27, 2017 at 9:36 PM, Rob Herring <robh@kernel.org> wrote:
+> On Sun, Sep 24, 2017 at 09:05:26PM +0200, Martin Blumenstingl wrote:
+>> This is the successor to Carlo Caione's "Add support for Amlogic Meson
+>> MMC driver" series (v5) from [0].
+>> This new driver is for the "SDIO" controller found in Amlogic Meson6,
+>> Meson8 and Meson8b SoCs and supports an internal mux to allow connecting
+>> three cards to it.
+>>
+>>
+>> changes since RFC v1 at [1]:
+>> - added COMMON_CLK dependency as reported by the kbuild test robot
+>> - use of_platform_device_{create,destroy} instead of open-coding it's
+>>   logic
+>> - moved struct device (which was an array) from meson_mx_mmc_host to
+>>   the corresponding meson_mx_mmc_slot
+>> - use struct mmc_command's busy_timeout instead of hard-coding the
+>>   timeout values in meson_mx_mmc_start_cmd()
+>> - don't use arrays with only one element for the clock parents in
+>>   meson_mx_mmc_register_clks()
+>> - removed the wrapper functions meson_mx_mmc_readl() meson_mx_mmc_writel()
+>> - allow setting the MMC clock to 0 for UHS speed mode (the actual
+>>   hardware clock cannot be gated as far as I know, so instead the
+>>   lowest supported rate is chosen)
+>> - remove unused #include <linux/init.h>
+>> - add MMC_CAP_ERASE
+>> - removed multiple slot support after discussing this with Ulf
+>>   (this is a feature that needs to be part of the MMC core before drivers
+>>   can use it)
+>> - removed SDIO interrupt support (as I currently don't have a way to
+>>   test it)
+>> - merge meson_mx_mmc_apply_ios into meson_mx_mmc_set_ios (as that's
+>>   the only place where it's needed after removing multiple slot support)
+>> - updated the commit message of the driver patch to indicate the
+>>   difference between the meson-mx-sdio.c and meson-gx.c (and the "still
+>>   missing SDHC") driver
+>> - NOTE: I did not add Rob's ACK on the dt-bindings patch because I
+>>   introduced the "mmc-slot" compatible for the child nodes as suggested
+>>   by Ulf (and I want confirmation from the DT maintainers that I did this
+>>   correctly)
+>
+> Didn't slot support get removed as no h/w really uses that feature?
+I have at least one boards which uses it: Endless Mini (EC-100)
+the SoC itself has two MMC controllers, but that board has:
+- an eMMC module (connected to a yet unsupported MMC controller)
+- an internal SD card (connected to the SDIO controller from this patch)
+- a RTL8723BS wifi SDIO card (also connected to the SDIO controller
+from this patch)
+
+so it's pretty rare - but such hardware exists.
+
+
+Regards,
+Martin
