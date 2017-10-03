@@ -1,117 +1,50 @@
-From: Martin Blumenstingl <martin.blumenstingl-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
-Subject: Re: [RFC v2 1/2] dt-bindings: mmc: Document the Amlogic Meson8 and
- Meson8b SDIO bindings
-Date: Mon, 2 Oct 2017 20:47:48 +0200
-Message-ID: <CAFBinCA6HfKTNSLczx=V3dtfsrUSMKJw-nLAp6s9m55dJ9nQxA@mail.gmail.com>
-References: <20170924190528.21841-1-martin.blumenstingl@googlemail.com>
- <20170924190528.21841-2-martin.blumenstingl@googlemail.com> <CAPDyKFohh0_aONKyoc2deN+L8TCzY8tdEs5-fja3t5oVL2Gs7w@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: 4.14-rc2 on thinkpad x220: out of memory when inserting mmc card
+Date: Tue, 3 Oct 2017 09:27:30 +0300
+Message-ID: <184b3552-851c-7015-dd80-76f6eebc33cc@intel.com>
+References: <20170905194739.GA31241@amd> <20171001093704.GA12626@amd>
+ <20171001102647.GA23908@amd>
+ <201710011957.ICF15708.OOLOHFSQMFFVJt@I-love.SAKURA.ne.jp>
+ <72c93a69-610f-027e-c028-379b97b6f388@intel.com> <20171002084131.GA24414@amd>
+ <CACRpkdbatrt0Uxf8653iiV-OKkgcc0Ziog_L4oDVTJVNqtNN0Q@mail.gmail.com>
+ <20171002130353.GA25433@amd>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAPDyKFohh0_aONKyoc2deN+L8TCzY8tdEs5-fja3t5oVL2Gs7w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Carlo Caione <carlo-KA+7E9HrN00dnm+yROfE0A@public.gmane.org>, Kevin Hilman <khilman-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Carlo Caione <carlo-6IF/jdPJHihWk0Htik3J/w@public.gmane.org>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga04.intel.com ([192.55.52.120]:62894 "EHLO mga04.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750767AbdJCGeQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 3 Oct 2017 02:34:16 -0400
+In-Reply-To: <20171002130353.GA25433@amd>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Pavel Machek <pavel@ucw.cz>, Linus Walleij <linus.walleij@linaro.org>
+Cc: Tetsuo Handa <penguin-kernel@i-love.sakura.ne.jp>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-mm@kvack.org
 
-On Mon, Oct 2, 2017 at 9:55 AM, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> On 24 September 2017 at 21:05, Martin Blumenstingl
-> <martin.blumenstingl-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org> wrote:
->> From: Carlo Caione <carlo-6IF/jdPJHihWk0Htik3J/w@public.gmane.org>
+On 02/10/17 16:03, Pavel Machek wrote:
+> On Mon 2017-10-02 14:06:03, Linus Walleij wrote:
+>> On Mon, Oct 2, 2017 at 10:41 AM, Pavel Machek <pavel@ucw.cz> wrote:
 >>
->> This documents the devicetree bindings for the SDIO/MMC host found in
->> Amlogic Meson8 and Meson8b SoCs. It supports the SD specification v2.0
->> and the eMMC specification v4.41.
->> It has an internal "mux" which allows connecting up to three MMC devices
->> to it. The maximum supported bus-width is 4-bits.
+>>>> Bounce buffers are being removed from v4.15
 >>
->> Amlogic's GPL kernel sources call it "SDIO" to differentiate it from the
->> other MMC controller in (at least the Meson8 and Meson8b) the SoCs (they
->> call the other one "SDHC", which supports a bus-width of up to 8-bits).
+>> As Adrian states, this would make any last bugs go away. I would
+>> even consider putting this patch this into fixes if it solves the problem.
 >>
->> Signed-off-by: Carlo Caione <carlo-6IF/jdPJHihWk0Htik3J/w@public.gmane.org>
->> Signed-off-by: Martin Blumenstingl <martin.blumenstingl-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
->> ---
->>  .../bindings/mmc/amlogic,meson-mx-sdio.txt         | 52 ++++++++++++++++++++++
->>  1 file changed, 52 insertions(+)
->>  create mode 100644 Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.txt
+>>> although you may experience
+>>>> performance regression with that:
+>>>>
+>>>>       https://marc.info/?l=linux-mmc&m=150589778700551
+>>>
+>>> Hmm. The performance of this is already pretty bad, I really hope it
+>>> does not get any worse.
 >>
->> diff --git a/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.txt b/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.txt
->> new file mode 100644
->> index 000000000000..124ea362eec9
->> --- /dev/null
->> +++ b/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.txt
->> @@ -0,0 +1,52 @@
->> +* Amlogic Meson6, Meson8 and Meson8b SDIO/MMC controller
->> +
->> +The highspeed MMC host controller on Amlogic SoCs provides an interface
->> +for MMC, SD, SDIO and SDHC types of memory cards.
->> +
->> +Supported maximum speeds are the ones of the eMMC standard 4.41 as well
->> +as the speed of SD standard 2.0.
->> +
->> +The hardware provides an internal "mux" which allows up to three slots
->> +to be controlled. Only one slot can be accessed at a time.
->
-> This is good information, however as the driver won't support multiple
-> slots, at least short term, I think we need to mention that. Otherwise
-> people may think that three slots is actually supported, while in fact
-> it isn't.
-OK, I'll add a note when I re-spin this series
+>> Did you use bounce buffers? Those were improving performance on
+>> some laptops with TI or Ricoh host controllers and nothing else was
+>> ever really using it (as can be seen from the commit).
+> 
+> Thinkpad X220... how do I tell if I was using them? I believe so,
+> because I uncovered bug in them before.
 
->> +
->> +Required properties:
->> + - compatible : must be one of
->> +       - "amlogic,meson8-sdio"
->> +       - "amlogic,meson8b-sdio"
->> +       along with the generic "amlogic,meson-mx-sdio"
->> + - reg : mmc controller base registers
->> + - interrupts : mmc controller interrupt
->> + - #address-cells : must be 1
->> + - size-cells : must be 0
->> + - clocks : phandle to clock providers
->> + - clock-names : must contain "core" and "clkin"
->> +
->> +Required child nodes:
->> +A node for each slot provided by the MMC controller is required.
->> +
->> +Required properties on each child node (= slot):
->> + - compatible : must be "mmc-slot" (see mmc.txt within this directory)
->> + - reg : the slot (or "port") ID
->> +
->> +Optional properties on each child node (= slot):
->> + - bus-width : must be 1 or 4 (8-bit bus is not supported)
->> + - for cd and all other additional generic mmc parameters
->> +   please refer to mmc.txt within this directory
->> +
->> +Examples:
->> +       mmc@c1108c20 {
->> +               compatible = "amlogic,meson8-sdio", "amlogic,meson-mx-sdio";
->> +               reg = <0xc1108c20 0x20>;
->> +               interrupts = <0 28 1>;
->> +               #address-cells = <1>;
->> +               #size-cells = <0>;
->> +               clocks = <&clkc CLKID_SDIO>, <&clkc CLKID_CLK81>;
->> +               clock-names = "core", "clkin";
->> +
->> +               slot@1 {
->> +                       compatible = "mmc-slot";
->> +                       reg = <1>;
->> +
->> +                       bus-width = <4>;
->> +               };
->> +       };
->> --
->> 2.14.1
->>
->
-> Kind regards
-> Uffe
-
-
-Regards,
-Martin
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+You are certainly using bounce buffers.  What does lspci -knn show?
