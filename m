@@ -1,156 +1,69 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: [PATCH v3] mmc: block: Fix bug when removing RPMB chardev
-Date: Tue,  3 Oct 2017 15:51:23 +0200
-Message-ID: <20171003135123.4934-1-linus.walleij@linaro.org>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH 3/3] mmc: dw_mmc: Add locking to the CTO timer
+Date: Tue, 3 Oct 2017 11:45:50 -0700
+Message-ID: <CAD=FV=U78WfojBJYEObr1M6aR=zxNC1MkOLuREnGXABFoqYXPw@mail.gmail.com>
+References: <20170927205631.31559-1-dianders@chromium.org> <20170927205631.31559-4-dianders@chromium.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f46.google.com ([209.85.215.46]:43810 "EHLO
-        mail-lf0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751238AbdJCNv3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Oct 2017 09:51:29 -0400
-Received: by mail-lf0-f46.google.com with SMTP id o125so5188174lfe.0
-        for <linux-mmc@vger.kernel.org>; Tue, 03 Oct 2017 06:51:28 -0700 (PDT)
+Received: from mail-qt0-f179.google.com ([209.85.216.179]:47148 "EHLO
+        mail-qt0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751072AbdJCSpw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Oct 2017 14:45:52 -0400
+Received: by mail-qt0-f179.google.com with SMTP id z50so9776360qtj.4
+        for <linux-mmc@vger.kernel.org>; Tue, 03 Oct 2017 11:45:52 -0700 (PDT)
+In-Reply-To: <20170927205631.31559-4-dianders@chromium.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Brian Norris <briannorris@chromium.org>, Alexandru M Stan <amstan@chromium.org>, Ziyuan Xu <xzy.xu@rock-chips.com>, Douglas Anderson <dianders@chromium.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>
 
-I forgot to account for the fact that the device core holds a
-reference to a device added with device_initialize() that need
-to be released with a corresponding put_device() to reach a 0
-refcount at the end of the lifecycle.
+Hi,
 
-This led to a NULL pointer reference when freeing the device
-when e.g. unbidning the host device in sysfs.
+On Wed, Sep 27, 2017 at 1:56 PM, Douglas Anderson <dianders@chromium.org> wrote:
+> This attempts to instill a bit of paranoia to the code dealing with
+> the CTO timer.  It's believed that this will make the CTO timer more
+> robust in the case that we're having very long interrupt latencies.
+>
+> Note that I originally thought that perhaps this patch was being
+> overly paranoid and wasn't really needed, but then while I was running
+> mmc_test on an rk3399 board I saw one instance of the message:
+>   dwmmc_rockchip fe320000.dwmmc: Unexpected interrupt latency
+>
+> I had debug prints in the CTO timer code and I found that it was
+> running CMD 13 at the time.
+>
+> ...so even though this patch seems like it might be overly paranoid,
+> maybe it really isn't?
+>
+> Presumably the bad interrupt latency experienced was due to the fact
+> that I had serial console enabled as serial console is typically where
+> I place blame when I see absurdly large interrupt latencies.  In this
+> particular case there was an (unrelated) printout to the serial
+> console just before I saw the "Unexpected interrupt latency" printout.
+>
+> ...and actually, I managed to even reproduce the problems by running
+> "iw mlan0 scan > /dev/null" while mmc_test was running.  That not only
+> does a bunch of PCIe traffic but it also (on my system) outputs some
+> SELinux log spam.
+>
+> Fixes: 03de19212ea3 ("mmc: dw_mmc: introduce timer for broken command transfer over scheme")
+> Signed-off-by: Douglas Anderson <dianders@chromium.org>
+> ---
+>
+>  drivers/mmc/host/dw_mmc.c | 92 +++++++++++++++++++++++++++++++++++++++++------
+>  1 file changed, 82 insertions(+), 10 deletions(-)
 
-Fix this and use the device .release() callback to free the
-IDA and free:ing the memory used by the RPMB device.
+I'm hoping that someone upstream might have some time to test and
+review these three patches since I believe that they fix a regression
+in 4.14.  I pinged Shawn Lin and found that it's a Chinese holiday
+right now so he won't be able to test util next week, but presumably
+others might be noticing problems with SD cards or eMMC using dw_mmc
+on kernel 4.14, especially with serial console enabled?
 
-Before this patch:
+Adding linux-rockchip to the CC here.  Original patches can be found
+on patchwork.kernel.org...
 
-/sys/bus/amba/drivers/mmci-pl18x$ echo 80114000.sdi4_per2 > unbind
-[   29.797332] mmc3: card 0001 removed
-[   29.810791] Unable to handle kernel NULL pointer dereference at
-               virtual address 00000050
-[   29.818878] pgd = de70c000
-[   29.821624] [00000050] *pgd=1e70a831, *pte=00000000, *ppte=00000000
-[   29.827911] Internal error: Oops: 17 [#1] PREEMPT SMP ARM
-[   29.833282] Modules linked in:
-[   29.836334] CPU: 1 PID: 154 Comm: sh Not tainted
-               4.14.0-rc3-00039-g83318e309566-dirty #736
-[   29.844604] Hardware name: ST-Ericsson Ux5x0 platform (Device Tree Support)
-[   29.851562] task: de572700 task.stack: de742000
-[   29.856079] PC is at kernfs_find_ns+0x8/0x100
-[   29.860443] LR is at kernfs_find_and_get_ns+0x30/0x48
+Thanks!
 
-After this patch:
-
-/sys/bus/amba/drivers/mmci-pl18x$ echo 80005000.sdi4_per2 > unbind
-[   20.623382] mmc3: card 0001 removed
-
-Fixes: 0ab0c7c0e65a ("mmc: block: Convert RPMB to a character device")
-Reported-by: Adrian Hunter <adrian.hunter@intel.com>
-Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
----
-ChangeLog v2->v3:
-- Fix the block device reference counting: instead of manipulating
-  md->usage directly, call the proper refcounting functions
-  mmc_blk_get() and mmc_blk_put().
-ChangeLog v1->v2:
-- Drop the print from removing the RPMB partition
-- Refactor the error path of the RPMB to use refcounting
-- Drop the verbose comment on refcounts
----
- drivers/mmc/core/block.c | 28 ++++++++++++++++++----------
- 1 file changed, 18 insertions(+), 10 deletions(-)
-
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index c29dbcec7c61..46ecbaec8035 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -2299,7 +2299,7 @@ static int mmc_rpmb_chrdev_open(struct inode *inode, struct file *filp)
- 	get_device(&rpmb->dev);
- 	filp->private_data = rpmb;
- 	mutex_lock(&open_lock);
--	rpmb->md->usage++;
-+	mmc_blk_get(rpmb->md->disk);
- 	mutex_unlock(&open_lock);
- 
- 	return nonseekable_open(inode, filp);
-@@ -2312,7 +2312,7 @@ static int mmc_rpmb_chrdev_release(struct inode *inode, struct file *filp)
- 
- 	put_device(&rpmb->dev);
- 	mutex_lock(&open_lock);
--	rpmb->md->usage--;
-+	mmc_blk_put(rpmb->md);
- 	mutex_unlock(&open_lock);
- 
- 	return 0;
-@@ -2329,6 +2329,13 @@ static const struct file_operations mmc_rpmb_fileops = {
- #endif
- };
- 
-+static void mmc_blk_rpmb_device_release(struct device *dev)
-+{
-+	struct mmc_rpmb_data *rpmb = dev_get_drvdata(dev);
-+
-+	ida_simple_remove(&mmc_rpmb_ida, rpmb->id);
-+	kfree(rpmb);
-+}
- 
- static int mmc_blk_alloc_rpmb_part(struct mmc_card *card,
- 				   struct mmc_blk_data *md,
-@@ -2347,8 +2354,10 @@ static int mmc_blk_alloc_rpmb_part(struct mmc_card *card,
- 		return devidx;
- 
- 	rpmb = kzalloc(sizeof(*rpmb), GFP_KERNEL);
--	if (!rpmb)
-+	if (!rpmb) {
-+		ida_simple_remove(&mmc_rpmb_ida, devidx);
- 		return -ENOMEM;
-+	}
- 
- 	snprintf(rpmb_name, sizeof(rpmb_name),
- 		 "mmcblk%u%s", card->host->index, subname ? subname : "");
-@@ -2359,6 +2368,7 @@ static int mmc_blk_alloc_rpmb_part(struct mmc_card *card,
- 	rpmb->dev.bus = &mmc_rpmb_bus_type;
- 	rpmb->dev.devt = MKDEV(MAJOR(mmc_rpmb_devt), rpmb->id);
- 	rpmb->dev.parent = &card->dev;
-+	rpmb->dev.release = mmc_blk_rpmb_device_release;
- 	device_initialize(&rpmb->dev);
- 	dev_set_drvdata(&rpmb->dev, rpmb);
- 	rpmb->md = md;
-@@ -2368,7 +2378,7 @@ static int mmc_blk_alloc_rpmb_part(struct mmc_card *card,
- 	ret = cdev_device_add(&rpmb->chrdev, &rpmb->dev);
- 	if (ret) {
- 		pr_err("%s: could not add character device\n", rpmb_name);
--		goto out_remove_ida;
-+		goto out_put_device;
- 	}
- 
- 	list_add(&rpmb->node, &md->rpmbs);
-@@ -2383,18 +2393,16 @@ static int mmc_blk_alloc_rpmb_part(struct mmc_card *card,
- 
- 	return 0;
- 
--out_remove_ida:
--	ida_simple_remove(&mmc_rpmb_ida, rpmb->id);
--	kfree(rpmb);
-+out_put_device:
-+	put_device(&rpmb->dev);
- 	return ret;
- }
- 
- static void mmc_blk_remove_rpmb_part(struct mmc_rpmb_data *rpmb)
-+
- {
- 	cdev_device_del(&rpmb->chrdev, &rpmb->dev);
--	device_del(&rpmb->dev);
--	ida_simple_remove(&mmc_rpmb_ida, rpmb->id);
--	kfree(rpmb);
-+	put_device(&rpmb->dev);
- }
- 
- /* MMC Physical partitions consist of two boot partitions and
--- 
-2.13.5
-
+-Doug
