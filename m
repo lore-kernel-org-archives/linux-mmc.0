@@ -1,42 +1,40 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v2 3/4] mmc: Kconfig: Enable CONFIG_MMC_SDHCI_IO_ACCESSORS
-Date: Tue, 3 Oct 2017 14:44:34 +0300
-Message-ID: <35266316-e199-30a7-dc7d-bb31f173e018@intel.com>
-References: <1506490483-46871-1-git-send-email-vviswana@codeaurora.org>
- <1506490483-46871-4-git-send-email-vviswana@codeaurora.org>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH] mmc: block: Fix bug when removing RPMB chardev
+Date: Tue, 3 Oct 2017 15:47:27 +0200
+Message-ID: <CACRpkdbF-VL5nyriAv=P1kgXOMKqELjLqjCO+z6y8rdiZXgDAg@mail.gmail.com>
+References: <20171002115918.11035-1-linus.walleij@linaro.org>
+ <94d90383-c6de-910d-627e-f445f242f6f1@intel.com> <CACRpkdZ5=u3YtdgGFj1gk+4mSP36Cj2YD6z-nm7SEbM5cgkFWg@mail.gmail.com>
+ <2d54cc9e-7c2c-20b8-9bc9-64f4c0605db7@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1506490483-46871-4-git-send-email-vviswana@codeaurora.org>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Vijay Viswanath <vviswana@codeaurora.org>, ulf.hansson@linaro.org, will.deacon@arm.com
-Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, riteshh@codeaurora.org, subhashj@codeaurora.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-io0-f171.google.com ([209.85.223.171]:56156 "EHLO
+        mail-io0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751116AbdJCNr3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Oct 2017 09:47:29 -0400
+Received: by mail-io0-f171.google.com with SMTP id z187so7646328ioz.12
+        for <linux-mmc@vger.kernel.org>; Tue, 03 Oct 2017 06:47:28 -0700 (PDT)
+In-Reply-To: <2d54cc9e-7c2c-20b8-9bc9-64f4c0605db7@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
 
-On 27/09/17 08:34, Vijay Viswanath wrote:
-> Enable CONFIG_MMC_SDHCI_IO_ACCESSORS so that SDHC controller specific
-> register read and write APIs, if registered, can be used.
-> 
-> Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
+On Tue, Oct 3, 2017 at 1:07 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 03/10/17 13:00, Linus Walleij wrote:
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+>> Since I'm still supporting the old refcounting with md->usage
+>> as described above, it should behave the same as the old
+>> codebase, which might not be very good behaviour but atleast
+>> it is not a regression.
+>
+> How do you know you are not dropping the last reference when you do
+> md->usage-- ?
 
-> ---
->  drivers/mmc/host/Kconfig | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 2db84dd..11bfb82 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -420,6 +420,7 @@ config MMC_SDHCI_MSM
->  	tristate "Qualcomm SDHCI Controller Support"
->  	depends on ARCH_QCOM || (ARM && COMPILE_TEST)
->  	depends on MMC_SDHCI_PLTFM
-> +	select MMC_SDHCI_IO_ACCESSORS
->  	help
->  	  This selects the Secure Digital Host Controller Interface (SDHCI)
->  	  support present in Qualcomm SOCs. The controller supports
-> 
+Ah dammit what was I thinking... OK converting to mmc_blk_get()
++mmc_blk_put() that should do it.
+
+Sorry for silly mistakes. :/
+
+Yours,
+Linus Walleij
