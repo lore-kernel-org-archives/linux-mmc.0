@@ -1,57 +1,155 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: 4.14-rc2 on thinkpad x220: out of memory when inserting mmc card
-Date: Tue, 3 Oct 2017 09:30:18 +0300
-Message-ID: <7b423dc8-00aa-9cde-3557-8c72863001fd@intel.com>
-References: <20170905194739.GA31241@amd> <20171001093704.GA12626@amd>
- <20171001102647.GA23908@amd>
- <201710011957.ICF15708.OOLOHFSQMFFVJt@I-love.SAKURA.ne.jp>
- <CACRpkdYirC+rh_KALgVqKZMjq2DgbW4oi9MJkmrzwn+1O+94-g@mail.gmail.com>
+Subject: Re: [PATCH] mmc: block: Fix bug when removing RPMB chardev
+Date: Tue, 3 Oct 2017 11:32:00 +0300
+Message-ID: <94d90383-c6de-910d-627e-f445f242f6f1@intel.com>
+References: <20171002115918.11035-1-linus.walleij@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <CACRpkdYirC+rh_KALgVqKZMjq2DgbW4oi9MJkmrzwn+1O+94-g@mail.gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga01.intel.com ([192.55.52.88]:29382 "EHLO mga01.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751128AbdJCIiq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 3 Oct 2017 04:38:46 -0400
+In-Reply-To: <20171002115918.11035-1-linus.walleij@linaro.org>
 Content-Language: en-US
-Sender: owner-linux-mm@kvack.org
-To: Linus Walleij <linus.walleij@linaro.org>, Tetsuo Handa <penguin-kernel@i-love.sakura.ne.jp>
-Cc: Pavel Machek <pavel@ucw.cz>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-mm@kvack.org
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 
-On 02/10/17 17:09, Linus Walleij wrote:
-> On Sun, Oct 1, 2017 at 12:57 PM, Tetsuo Handa
-> <penguin-kernel@i-love.sakura.ne.jp> wrote:
+On 02/10/17 14:59, Linus Walleij wrote:
+> I forgot to account for the fact that the device core holds a
+> reference to a device added with device_initialize() that need
+> to be released with a corresponding put_device() to reach a 0
+> refcount at the end of the lifecycle.
 > 
->>>> I inserted u-SD card, only to realize that it is not detected as it
->>>> should be. And dmesg indeed reveals:
->>>
->>> Tetsuo asked me to report this to linux-mm.
->>>
->>> But 2^4 is 16 pages, IIRC that can't be expected to work reliably, and
->>> thus this sounds like MMC bug, not mm bug.
+> This led to a NULL pointer reference when freeing the device
+> when e.g. unbidning the host device in sysfs.
 > 
+> Fix this and use the device .release() callback to free the
+> IDA and free:ing the memory used by the RPMB device.
 > 
-> I'm not sure I fully understand this error message:
-> "worker/2:1: page allocation failure: order:4"
+> Before this patch:
 > 
-> What I guess from context is that the mmc_init_request()
-> call is failing to allocate 16 pages, meaning for 4K pages
-> 64KB which is the typical bounce buffer.
+> /sys/bus/amba/drivers/mmci-pl18x$ echo 80114000.sdi4_per2 > unbind
+> [   29.797332] mmc3: card 0001 removed
+> [   29.810791] Unable to handle kernel NULL pointer dereference at
+>                virtual address 00000050
+> [   29.818878] pgd = de70c000
+> [   29.821624] [00000050] *pgd=1e70a831, *pte=00000000, *ppte=00000000
+> [   29.827911] Internal error: Oops: 17 [#1] PREEMPT SMP ARM
+> [   29.833282] Modules linked in:
+> [   29.836334] CPU: 1 PID: 154 Comm: sh Not tainted
+>                4.14.0-rc3-00039-g83318e309566-dirty #736
+> [   29.844604] Hardware name: ST-Ericsson Ux5x0 platform (Device Tree Support)
+> [   29.851562] task: de572700 task.stack: de742000
+> [   29.856079] PC is at kernfs_find_ns+0x8/0x100
+> [   29.860443] LR is at kernfs_find_and_get_ns+0x30/0x48
 > 
-> This is what the code has always allocated as bounce buffer,
-> but it used to happen upfront, when probing the MMC block layer,
-> rather than when allocating the requests.
+> After this patch:
+> 
+> /sys/bus/amba/drivers/mmci-pl18x$ echo 80005000.sdi4_per2 > unbind
+> [   20.623382] mmc3: card 0001 removed
+> [   20.627288] mmc_rpmb mmcblk3rpmb: removed
+> 
+> Fixes: 0ab0c7c0e65a ("mmc: block: Convert RPMB to a character device")
+> Reported-by: Adrian Hunter <adrian.hunter@intel.com>
+> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+> ---
+>  drivers/mmc/core/block.c | 21 ++++++++++++++++++---
+>  1 file changed, 18 insertions(+), 3 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index c29dbcec7c61..2033a71bacc3 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -2329,6 +2329,14 @@ static const struct file_operations mmc_rpmb_fileops = {
+>  #endif
+>  };
+>  
+> +static void mmc_blk_rpmb_device_release(struct device *dev)
+> +{
+> +	struct mmc_rpmb_data *rpmb = dev_get_drvdata(dev);
+> +
+> +	dev_info(dev, "removed\n");
 
-That is not exactly right.  As I already wrote, the memory allocation used
-to be optional but became mandatory with:
+Do we really need this message?
 
-  commit 304419d8a7e9204c5d19b704467b814df8c8f5b1
-  Author: Linus Walleij <linus.walleij@linaro.org>
-  Date:   Thu May 18 11:29:32 2017 +0200
+> +	ida_simple_remove(&mmc_rpmb_ida, rpmb->id);
+> +	kfree(rpmb);
+> +}
+>  
+>  static int mmc_blk_alloc_rpmb_part(struct mmc_card *card,
+>  				   struct mmc_blk_data *md,
+> @@ -2371,6 +2379,8 @@ static int mmc_blk_alloc_rpmb_part(struct mmc_card *card,
+>  		goto out_remove_ida;
+>  	}
+>  
+> +	/* From this point, the .release() function cleans up the device */
+> +	rpmb->dev.release = mmc_blk_rpmb_device_release;
 
-      mmc: core: Allocate per-request data using the block layer core
+This should be before device_initialize(&rpmb->dev) then the error path
+becomes just put_device(&rpmb->dev).
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+But further up is:
+	rpmb = kzalloc(sizeof(*rpmb), GFP_KERNEL);
+	if (!rpmb)
+		return -ENOMEM;
+where it looks like you are leaking the ida.
+
+>  	list_add(&rpmb->node, &md->rpmbs);
+>  
+>  	string_get_size((u64)size, 512, STRING_UNITS_2,
+> @@ -2384,17 +2394,22 @@ static int mmc_blk_alloc_rpmb_part(struct mmc_card *card,
+>  	return 0;
+>  
+>  out_remove_ida:
+> +	put_device(&rpmb->dev);
+>  	ida_simple_remove(&mmc_rpmb_ida, rpmb->id);
+>  	kfree(rpmb);
+>  	return ret;
+>  }
+>  
+>  static void mmc_blk_remove_rpmb_part(struct mmc_rpmb_data *rpmb)
+> +
+>  {
+>  	cdev_device_del(&rpmb->chrdev, &rpmb->dev);
+> -	device_del(&rpmb->dev);
+> -	ida_simple_remove(&mmc_rpmb_ida, rpmb->id);
+> -	kfree(rpmb);
+> +	/*
+> +	 * Unless something is holding a reference to the device, this
+> +	 * drops the last reference and triggers the device to cleanup
+> +	 * and calls the .remove() callback.
+> +	 */
+
+This comment seems redundant since it is just describing how reference
+counting works.
+
+> +	put_device(&rpmb->dev);
+>  }
+>  
+>  /* MMC Physical partitions consist of two boot partitions and
+> 
+
+Also I noticed this function:
+
+static int mmc_rpmb_chrdev_release(struct inode *inode, struct file *filp)
+{
+	struct mmc_rpmb_data *rpmb = container_of(inode->i_cdev,
+						  struct mmc_rpmb_data, chrdev);
+
+	put_device(&rpmb->dev);
+	mutex_lock(&open_lock);
+	rpmb->md->usage--;
+	mutex_unlock(&open_lock);
+
+	return 0;
+}
+
+What is going on with 'usage'?  It looks weird.
+What happens if you do this:
+	open the rpmb device
+	unbind the host controller
+	try to use an ioctl
+	close the rpmb device
