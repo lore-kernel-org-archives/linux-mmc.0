@@ -1,36 +1,37 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
 Subject: Re: [PATCH v4] mmc: block: Fix bug when removing RPMB chardev
-Date: Wed, 4 Oct 2017 15:27:01 +0300
-Message-ID: <2b7c5bea-c9c2-398b-083b-7abff40f43c6@intel.com>
+Date: Wed, 4 Oct 2017 14:57:12 +0200
+Message-ID: <CAPDyKFq+9-HFW2h7VQZn0UZWkJ+cGXR3n2xS=nWBhN_ejhcDDA@mail.gmail.com>
 References: <20171004091007.26729-1-linus.walleij@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:43198 "EHLO mga09.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751699AbdJDMds (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 4 Oct 2017 08:33:48 -0400
+Received: from mail-it0-f48.google.com ([209.85.214.48]:49792 "EHLO
+        mail-it0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751742AbdJDM5O (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Oct 2017 08:57:14 -0400
+Received: by mail-it0-f48.google.com with SMTP id c195so16034533itb.4
+        for <linux-mmc@vger.kernel.org>; Wed, 04 Oct 2017 05:57:13 -0700 (PDT)
 In-Reply-To: <20171004091007.26729-1-linus.walleij@linaro.org>
-Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
 
-On 04/10/17 12:10, Linus Walleij wrote:
+On 4 October 2017 at 11:10, Linus Walleij <linus.walleij@linaro.org> wrote:
 > I forgot to account for the fact that the device core holds a
 > reference to a device added with device_initialize() that need
 > to be released with a corresponding put_device() to reach a 0
 > refcount at the end of the lifecycle.
-> 
+>
 > This led to a NULL pointer reference when freeing the device
 > when e.g. unbidning the host device in sysfs.
-> 
+>
 > Fix this and use the device .release() callback to free the
 > IDA and free:ing the memory used by the RPMB device.
-> 
+>
 > Before this patch:
-> 
+>
 > /sys/bus/amba/drivers/mmci-pl18x$ echo 80114000.sdi4_per2 > unbind
 > [   29.797332] mmc3: card 0001 removed
 > [   29.810791] Unable to handle kernel NULL pointer dereference at
@@ -45,19 +46,20 @@ On 04/10/17 12:10, Linus Walleij wrote:
 > [   29.851562] task: de572700 task.stack: de742000
 > [   29.856079] PC is at kernfs_find_ns+0x8/0x100
 > [   29.860443] LR is at kernfs_find_and_get_ns+0x30/0x48
-> 
+>
 > After this patch:
-> 
+>
 > /sys/bus/amba/drivers/mmci-pl18x$ echo 80005000.sdi4_per2 > unbind
 > [   20.623382] mmc3: card 0001 removed
-> 
+>
 > Fixes: 0ab0c7c0e65a ("mmc: block: Convert RPMB to a character device")
 > Reported-by: Adrian Hunter <adrian.hunter@intel.com>
 > Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 
+Thanks, applied for next!
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-
+Kind regards
+Uffe
 
 > ---
 > ChangeLog v3->v4:
@@ -74,98 +76,99 @@ Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 > ---
 >  drivers/mmc/core/block.c | 32 ++++++++++++++++++--------------
 >  1 file changed, 18 insertions(+), 14 deletions(-)
-> 
+>
 > diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
 > index c29dbcec7c61..ea80ff4cd7f9 100644
 > --- a/drivers/mmc/core/block.c
 > +++ b/drivers/mmc/core/block.c
 > @@ -2298,9 +2298,7 @@ static int mmc_rpmb_chrdev_open(struct inode *inode, struct file *filp)
->  
->  	get_device(&rpmb->dev);
->  	filp->private_data = rpmb;
-> -	mutex_lock(&open_lock);
-> -	rpmb->md->usage++;
-> -	mutex_unlock(&open_lock);
-> +	mmc_blk_get(rpmb->md->disk);
->  
->  	return nonseekable_open(inode, filp);
+>
+>         get_device(&rpmb->dev);
+>         filp->private_data = rpmb;
+> -       mutex_lock(&open_lock);
+> -       rpmb->md->usage++;
+> -       mutex_unlock(&open_lock);
+> +       mmc_blk_get(rpmb->md->disk);
+>
+>         return nonseekable_open(inode, filp);
 >  }
 > @@ -2311,9 +2309,7 @@ static int mmc_rpmb_chrdev_release(struct inode *inode, struct file *filp)
->  						  struct mmc_rpmb_data, chrdev);
->  
->  	put_device(&rpmb->dev);
-> -	mutex_lock(&open_lock);
-> -	rpmb->md->usage--;
-> -	mutex_unlock(&open_lock);
-> +	mmc_blk_put(rpmb->md);
->  
->  	return 0;
+>                                                   struct mmc_rpmb_data, chrdev);
+>
+>         put_device(&rpmb->dev);
+> -       mutex_lock(&open_lock);
+> -       rpmb->md->usage--;
+> -       mutex_unlock(&open_lock);
+> +       mmc_blk_put(rpmb->md);
+>
+>         return 0;
 >  }
 > @@ -2329,6 +2325,13 @@ static const struct file_operations mmc_rpmb_fileops = {
 >  #endif
 >  };
->  
+>
 > +static void mmc_blk_rpmb_device_release(struct device *dev)
 > +{
-> +	struct mmc_rpmb_data *rpmb = dev_get_drvdata(dev);
+> +       struct mmc_rpmb_data *rpmb = dev_get_drvdata(dev);
 > +
-> +	ida_simple_remove(&mmc_rpmb_ida, rpmb->id);
-> +	kfree(rpmb);
+> +       ida_simple_remove(&mmc_rpmb_ida, rpmb->id);
+> +       kfree(rpmb);
 > +}
->  
+>
 >  static int mmc_blk_alloc_rpmb_part(struct mmc_card *card,
->  				   struct mmc_blk_data *md,
+>                                    struct mmc_blk_data *md,
 > @@ -2347,8 +2350,10 @@ static int mmc_blk_alloc_rpmb_part(struct mmc_card *card,
->  		return devidx;
->  
->  	rpmb = kzalloc(sizeof(*rpmb), GFP_KERNEL);
-> -	if (!rpmb)
-> +	if (!rpmb) {
-> +		ida_simple_remove(&mmc_rpmb_ida, devidx);
->  		return -ENOMEM;
-> +	}
->  
->  	snprintf(rpmb_name, sizeof(rpmb_name),
->  		 "mmcblk%u%s", card->host->index, subname ? subname : "");
+>                 return devidx;
+>
+>         rpmb = kzalloc(sizeof(*rpmb), GFP_KERNEL);
+> -       if (!rpmb)
+> +       if (!rpmb) {
+> +               ida_simple_remove(&mmc_rpmb_ida, devidx);
+>                 return -ENOMEM;
+> +       }
+>
+>         snprintf(rpmb_name, sizeof(rpmb_name),
+>                  "mmcblk%u%s", card->host->index, subname ? subname : "");
 > @@ -2359,6 +2364,7 @@ static int mmc_blk_alloc_rpmb_part(struct mmc_card *card,
->  	rpmb->dev.bus = &mmc_rpmb_bus_type;
->  	rpmb->dev.devt = MKDEV(MAJOR(mmc_rpmb_devt), rpmb->id);
->  	rpmb->dev.parent = &card->dev;
-> +	rpmb->dev.release = mmc_blk_rpmb_device_release;
->  	device_initialize(&rpmb->dev);
->  	dev_set_drvdata(&rpmb->dev, rpmb);
->  	rpmb->md = md;
+>         rpmb->dev.bus = &mmc_rpmb_bus_type;
+>         rpmb->dev.devt = MKDEV(MAJOR(mmc_rpmb_devt), rpmb->id);
+>         rpmb->dev.parent = &card->dev;
+> +       rpmb->dev.release = mmc_blk_rpmb_device_release;
+>         device_initialize(&rpmb->dev);
+>         dev_set_drvdata(&rpmb->dev, rpmb);
+>         rpmb->md = md;
 > @@ -2368,7 +2374,7 @@ static int mmc_blk_alloc_rpmb_part(struct mmc_card *card,
->  	ret = cdev_device_add(&rpmb->chrdev, &rpmb->dev);
->  	if (ret) {
->  		pr_err("%s: could not add character device\n", rpmb_name);
-> -		goto out_remove_ida;
-> +		goto out_put_device;
->  	}
->  
->  	list_add(&rpmb->node, &md->rpmbs);
+>         ret = cdev_device_add(&rpmb->chrdev, &rpmb->dev);
+>         if (ret) {
+>                 pr_err("%s: could not add character device\n", rpmb_name);
+> -               goto out_remove_ida;
+> +               goto out_put_device;
+>         }
+>
+>         list_add(&rpmb->node, &md->rpmbs);
 > @@ -2383,18 +2389,16 @@ static int mmc_blk_alloc_rpmb_part(struct mmc_card *card,
->  
->  	return 0;
->  
+>
+>         return 0;
+>
 > -out_remove_ida:
-> -	ida_simple_remove(&mmc_rpmb_ida, rpmb->id);
-> -	kfree(rpmb);
+> -       ida_simple_remove(&mmc_rpmb_ida, rpmb->id);
+> -       kfree(rpmb);
 > +out_put_device:
-> +	put_device(&rpmb->dev);
->  	return ret;
+> +       put_device(&rpmb->dev);
+>         return ret;
 >  }
->  
+>
 >  static void mmc_blk_remove_rpmb_part(struct mmc_rpmb_data *rpmb)
 > +
 >  {
->  	cdev_device_del(&rpmb->chrdev, &rpmb->dev);
-> -	device_del(&rpmb->dev);
-> -	ida_simple_remove(&mmc_rpmb_ida, rpmb->id);
-> -	kfree(rpmb);
-> +	put_device(&rpmb->dev);
+>         cdev_device_del(&rpmb->chrdev, &rpmb->dev);
+> -       device_del(&rpmb->dev);
+> -       ida_simple_remove(&mmc_rpmb_ida, rpmb->id);
+> -       kfree(rpmb);
+> +       put_device(&rpmb->dev);
 >  }
->  
+>
 >  /* MMC Physical partitions consist of two boot partitions and
-> 
-
+> --
+> 2.13.5
+>
