@@ -1,27 +1,35 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: dw_mmc-k3: make array hs_timing_cfg static
-Date: Wed, 4 Oct 2017 10:59:50 +0200
-Message-ID: <CAPDyKFqdGAcyTytiQHAwDu0NAkF1HMq1-KMzB0e51uTv-YQAZg@mail.gmail.com>
-References: <20171003095654.25802-1-colin.king@canonical.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v3 1/2] dt-bindings: mmc: Document the Amlogic Meson8 and
+ Meson8b SDIO bindings
+Date: Wed, 4 Oct 2017 11:00:00 +0200
+Message-ID: <CAPDyKFqkDdpe3qcyTAEL6E_WwmWZ2pWzkUM0M+=gWH6YOtohrg@mail.gmail.com>
+References: <20171003112417.31860-1-martin.blumenstingl@googlemail.com> <20171003112417.31860-2-martin.blumenstingl@googlemail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20171003095654.25802-1-colin.king@canonical.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Colin King <colin.king@canonical.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, kernel-janitors@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20171003112417.31860-2-martin.blumenstingl-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Martin Blumenstingl <martin.blumenstingl-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
+Cc: "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Carlo Caione <carlo-KA+7E9HrN00dnm+yROfE0A@public.gmane.org>, Kevin Hilman <khilman-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Carlo Caione <carlo-6IF/jdPJHihWk0Htik3J/w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 3 October 2017 at 11:56, Colin King <colin.king@canonical.com> wrote:
-> From: Colin Ian King <colin.king@canonical.com>
+On 3 October 2017 at 13:24, Martin Blumenstingl
+<martin.blumenstingl-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org> wrote:
+> From: Carlo Caione <carlo-6IF/jdPJHihWk0Htik3J/w@public.gmane.org>
 >
-> The array hs_timing_cfg is local to the source and does not need to
-> be in global scope, so make it static.
+> This documents the devicetree bindings for the SDIO/MMC host found in
+> Amlogic Meson8 and Meson8b SoCs. It supports the SD specification v2.0
+> and the eMMC specification v4.41.
+> It has an internal "mux" which allows connecting up to three MMC devices
+> to it. The maximum supported bus-width is 4-bits.
 >
-> Cleans up sparse warning:
-> symbol 'hs_timing_cfg' was not declared. Should it be static?
+> Amlogic's GPL kernel sources call it "SDIO" to differentiate it from the
+> other MMC controller in (at least the Meson8 and Meson8b) the SoCs (they
+> call the other one "SDHC", which supports a bus-width of up to 8-bits).
 >
-> Signed-off-by: Colin Ian King <colin.king@canonical.com>
+> Signed-off-by: Carlo Caione <carlo-6IF/jdPJHihWk0Htik3J/w@public.gmane.org>
+> Signed-off-by: Martin Blumenstingl <martin.blumenstingl-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
+> Acked-by: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 
 Thanks, applied for next!
 
@@ -29,22 +37,74 @@ Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/dw_mmc-k3.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  .../bindings/mmc/amlogic,meson-mx-sdio.txt         | 54 ++++++++++++++++++++++
+>  1 file changed, 54 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.txt
 >
-> diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
-> index 64cda84b2302..73fd75c3c824 100644
-> --- a/drivers/mmc/host/dw_mmc-k3.c
-> +++ b/drivers/mmc/host/dw_mmc-k3.c
-> @@ -75,7 +75,7 @@ struct hs_timing {
->         u32 smpl_phase_min;
->  };
->
-> -struct hs_timing hs_timing_cfg[TIMING_MODE][TIMING_CFG_NUM] = {
-> +static struct hs_timing hs_timing_cfg[TIMING_MODE][TIMING_CFG_NUM] = {
->         { /* reserved */ },
->         { /* SD */
->                 {7, 0, 15, 15,},  /* 0: LEGACY 400k */
+> diff --git a/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.txt b/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.txt
+> new file mode 100644
+> index 000000000000..8765c605e6bc
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.txt
+> @@ -0,0 +1,54 @@
+> +* Amlogic Meson6, Meson8 and Meson8b SDIO/MMC controller
+> +
+> +The highspeed MMC host controller on Amlogic SoCs provides an interface
+> +for MMC, SD, SDIO and SDHC types of memory cards.
+> +
+> +Supported maximum speeds are the ones of the eMMC standard 4.41 as well
+> +as the speed of SD standard 2.0.
+> +
+> +The hardware provides an internal "mux" which allows up to three slots
+> +to be controlled. Only one slot can be accessed at a time.
+> +
+> +Required properties:
+> + - compatible : must be one of
+> +       - "amlogic,meson8-sdio"
+> +       - "amlogic,meson8b-sdio"
+> +       along with the generic "amlogic,meson-mx-sdio"
+> + - reg : mmc controller base registers
+> + - interrupts : mmc controller interrupt
+> + - #address-cells : must be 1
+> + - size-cells : must be 0
+> + - clocks : phandle to clock providers
+> + - clock-names : must contain "core" and "clkin"
+> +
+> +Required child nodes:
+> +A node for each slot provided by the MMC controller is required.
+> +NOTE: due to a driver limitation currently only one slot (= child node)
+> +      is supported!
+> +
+> +Required properties on each child node (= slot):
+> + - compatible : must be "mmc-slot" (see mmc.txt within this directory)
+> + - reg : the slot (or "port") ID
+> +
+> +Optional properties on each child node (= slot):
+> + - bus-width : must be 1 or 4 (8-bit bus is not supported)
+> + - for cd and all other additional generic mmc parameters
+> +   please refer to mmc.txt within this directory
+> +
+> +Examples:
+> +       mmc@c1108c20 {
+> +               compatible = "amlogic,meson8-sdio", "amlogic,meson-mx-sdio";
+> +               reg = <0xc1108c20 0x20>;
+> +               interrupts = <0 28 1>;
+> +               #address-cells = <1>;
+> +               #size-cells = <0>;
+> +               clocks = <&clkc CLKID_SDIO>, <&clkc CLKID_CLK81>;
+> +               clock-names = "core", "clkin";
+> +
+> +               slot@1 {
+> +                       compatible = "mmc-slot";
+> +                       reg = <1>;
+> +
+> +                       bus-width = <4>;
+> +               };
+> +       };
 > --
-> 2.14.1
+> 2.14.2
 >
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
