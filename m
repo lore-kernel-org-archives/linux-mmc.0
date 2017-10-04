@@ -1,174 +1,133 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v4] mmc: block: Fix bug when removing RPMB chardev
-Date: Wed, 4 Oct 2017 14:57:12 +0200
-Message-ID: <CAPDyKFq+9-HFW2h7VQZn0UZWkJ+cGXR3n2xS=nWBhN_ejhcDDA@mail.gmail.com>
-References: <20171004091007.26729-1-linus.walleij@linaro.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V9 13/15] mmc: block: Add CQE and blk-mq support
+Date: Wed, 4 Oct 2017 16:27:44 +0300
+Message-ID: <5f3e64c4-f16e-5fa9-7ebe-4baa7502c3e1@intel.com>
+References: <1506083824-4024-1-git-send-email-adrian.hunter@intel.com>
+ <1506083824-4024-14-git-send-email-adrian.hunter@intel.com>
+ <CACRpkdYZFW6zdt5ig3wNDxQAaVV6OYnrG5zPfcvzixwh8VbXig@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f48.google.com ([209.85.214.48]:49792 "EHLO
-        mail-it0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751742AbdJDM5O (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Oct 2017 08:57:14 -0400
-Received: by mail-it0-f48.google.com with SMTP id c195so16034533itb.4
-        for <linux-mmc@vger.kernel.org>; Wed, 04 Oct 2017 05:57:13 -0700 (PDT)
-In-Reply-To: <20171004091007.26729-1-linus.walleij@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <CACRpkdYZFW6zdt5ig3wNDxQAaVV6OYnrG5zPfcvzixwh8VbXig@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-block-owner@vger.kernel.org
 To: Linus Walleij <linus.walleij@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
+List-Id: linux-mmc@vger.kernel.org
 
-On 4 October 2017 at 11:10, Linus Walleij <linus.walleij@linaro.org> wrote:
-> I forgot to account for the fact that the device core holds a
-> reference to a device added with device_initialize() that need
-> to be released with a corresponding put_device() to reach a 0
-> refcount at the end of the lifecycle.
->
-> This led to a NULL pointer reference when freeing the device
-> when e.g. unbidning the host device in sysfs.
->
-> Fix this and use the device .release() callback to free the
-> IDA and free:ing the memory used by the RPMB device.
->
-> Before this patch:
->
-> /sys/bus/amba/drivers/mmci-pl18x$ echo 80114000.sdi4_per2 > unbind
-> [   29.797332] mmc3: card 0001 removed
-> [   29.810791] Unable to handle kernel NULL pointer dereference at
->                virtual address 00000050
-> [   29.818878] pgd = de70c000
-> [   29.821624] [00000050] *pgd=1e70a831, *pte=00000000, *ppte=00000000
-> [   29.827911] Internal error: Oops: 17 [#1] PREEMPT SMP ARM
-> [   29.833282] Modules linked in:
-> [   29.836334] CPU: 1 PID: 154 Comm: sh Not tainted
->                4.14.0-rc3-00039-g83318e309566-dirty #736
-> [   29.844604] Hardware name: ST-Ericsson Ux5x0 platform (Device Tree Support)
-> [   29.851562] task: de572700 task.stack: de742000
-> [   29.856079] PC is at kernfs_find_ns+0x8/0x100
-> [   29.860443] LR is at kernfs_find_and_get_ns+0x30/0x48
->
-> After this patch:
->
-> /sys/bus/amba/drivers/mmci-pl18x$ echo 80005000.sdi4_per2 > unbind
-> [   20.623382] mmc3: card 0001 removed
->
-> Fixes: 0ab0c7c0e65a ("mmc: block: Convert RPMB to a character device")
-> Reported-by: Adrian Hunter <adrian.hunter@intel.com>
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+On 04/10/17 10:39, Linus Walleij wrote:
+> On Fri, Sep 22, 2017 at 2:37 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> 
+>> Add CQE support to the block driver, including:
+>>     - optionally using DCMD for flush requests
+>>     - "manually" issuing discard requests
+>>     - issuing read / write requests to the CQE
+>>     - supporting block-layer timeouts
+>>     - handling recovery
+>>     - supporting re-tuning
+>>
+>> CQE offers 25% - 50% better random multi-threaded I/O.  There is a slight
+>> (e.g. 2%) drop in sequential read speed but no observable change to sequential
+>> write.
+>>
+>> CQE automatically sends the commands to complete requests.  However it only
+>> supports reads / writes and so-called "direct commands" (DCMD).  Furthermore
+>> DCMD is limited to one command at a time, but discards require 3 commands.
+>> That makes issuing discards through CQE very awkward, but some CQE's don't
+>> support DCMD anyway.  So for discards, the existing non-CQE approach is
+>> taken, where the mmc core code issues the 3 commands one at a time i.e.
+>> mmc_erase(). Where DCMD is used, is for issuing flushes.
+>>
+>> For host controllers without CQE support, blk-mq support is extended to
+>> synchronous reads/writes or, if the host supports CAP_WAIT_WHILE_BUSY,
+>> asynchonous reads/writes.  The advantage of asynchronous reads/writes is
+>> that it allows the preparation of the next request while the current
+>> request is in progress.
+>>
+>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> 
+> I am trying to wrap my head around this large patch. The size makes it hard
+> but I am doing my best.
+> 
+> Some overarching questions:
+> 
+> - Is the CQE only available on the MQ path (i.e. if you enabled MQ) or
+>   on both paths?
 
-Thanks, applied for next!
+Only MQ.
 
-Kind regards
-Uffe
+> 
+> I think it is reasonable that if we introduce a new feature like this
+> it will only
+> be available for the new block path. This reflects how the block maintainers
+> e.g. only allow new scheduling policies to be merged on the MQ path.
+> The old block layer is legacy and should not be extended with new cool
+> features that can then be regarded as "regressions" if they don't work
+> properly with MQ. Better to only implement them for MQ then.
 
-> ---
-> ChangeLog v3->v4:
-> - Also skip the lock now that we take it inside mmc_blk_get()/
->   mmc_blk_put()
-> ChangeLog v2->v3:
-> - Fix the block device reference counting: instead of manipulating
->   md->usage directly, call the proper refcounting functions
->   mmc_blk_get() and mmc_blk_put().
-> ChangeLog v1->v2:
-> - Drop the print from removing the RPMB partition
-> - Refactor the error path of the RPMB to use refcounting
-> - Drop the verbose comment on refcounts
-> ---
->  drivers/mmc/core/block.c | 32 ++++++++++++++++++--------------
->  1 file changed, 18 insertions(+), 14 deletions(-)
->
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index c29dbcec7c61..ea80ff4cd7f9 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -2298,9 +2298,7 @@ static int mmc_rpmb_chrdev_open(struct inode *inode, struct file *filp)
->
->         get_device(&rpmb->dev);
->         filp->private_data = rpmb;
-> -       mutex_lock(&open_lock);
-> -       rpmb->md->usage++;
-> -       mutex_unlock(&open_lock);
-> +       mmc_blk_get(rpmb->md->disk);
->
->         return nonseekable_open(inode, filp);
->  }
-> @@ -2311,9 +2309,7 @@ static int mmc_rpmb_chrdev_release(struct inode *inode, struct file *filp)
->                                                   struct mmc_rpmb_data, chrdev);
->
->         put_device(&rpmb->dev);
-> -       mutex_lock(&open_lock);
-> -       rpmb->md->usage--;
-> -       mutex_unlock(&open_lock);
-> +       mmc_blk_put(rpmb->md);
->
->         return 0;
->  }
-> @@ -2329,6 +2325,13 @@ static const struct file_operations mmc_rpmb_fileops = {
->  #endif
->  };
->
-> +static void mmc_blk_rpmb_device_release(struct device *dev)
-> +{
-> +       struct mmc_rpmb_data *rpmb = dev_get_drvdata(dev);
-> +
-> +       ida_simple_remove(&mmc_rpmb_ida, rpmb->id);
-> +       kfree(rpmb);
-> +}
->
->  static int mmc_blk_alloc_rpmb_part(struct mmc_card *card,
->                                    struct mmc_blk_data *md,
-> @@ -2347,8 +2350,10 @@ static int mmc_blk_alloc_rpmb_part(struct mmc_card *card,
->                 return devidx;
->
->         rpmb = kzalloc(sizeof(*rpmb), GFP_KERNEL);
-> -       if (!rpmb)
-> +       if (!rpmb) {
-> +               ida_simple_remove(&mmc_rpmb_ida, devidx);
->                 return -ENOMEM;
-> +       }
->
->         snprintf(rpmb_name, sizeof(rpmb_name),
->                  "mmcblk%u%s", card->host->index, subname ? subname : "");
-> @@ -2359,6 +2364,7 @@ static int mmc_blk_alloc_rpmb_part(struct mmc_card *card,
->         rpmb->dev.bus = &mmc_rpmb_bus_type;
->         rpmb->dev.devt = MKDEV(MAJOR(mmc_rpmb_devt), rpmb->id);
->         rpmb->dev.parent = &card->dev;
-> +       rpmb->dev.release = mmc_blk_rpmb_device_release;
->         device_initialize(&rpmb->dev);
->         dev_set_drvdata(&rpmb->dev, rpmb);
->         rpmb->md = md;
-> @@ -2368,7 +2374,7 @@ static int mmc_blk_alloc_rpmb_part(struct mmc_card *card,
->         ret = cdev_device_add(&rpmb->chrdev, &rpmb->dev);
->         if (ret) {
->                 pr_err("%s: could not add character device\n", rpmb_name);
-> -               goto out_remove_ida;
-> +               goto out_put_device;
->         }
->
->         list_add(&rpmb->node, &md->rpmbs);
-> @@ -2383,18 +2389,16 @@ static int mmc_blk_alloc_rpmb_part(struct mmc_card *card,
->
->         return 0;
->
-> -out_remove_ida:
-> -       ida_simple_remove(&mmc_rpmb_ida, rpmb->id);
-> -       kfree(rpmb);
-> +out_put_device:
-> +       put_device(&rpmb->dev);
->         return ret;
->  }
->
->  static void mmc_blk_remove_rpmb_part(struct mmc_rpmb_data *rpmb)
-> +
->  {
->         cdev_device_del(&rpmb->chrdev, &rpmb->dev);
-> -       device_del(&rpmb->dev);
-> -       ida_simple_remove(&mmc_rpmb_ida, rpmb->id);
-> -       kfree(rpmb);
-> +       put_device(&rpmb->dev);
->  }
->
->  /* MMC Physical partitions consist of two boot partitions and
-> --
-> 2.13.5
->
+I don't agree that holding up features for years and years is an ideal outcome.
+
+> 
+> - Performance before/after path on MQ?
+
+When the host controller supports asynchronous requests, it should be the
+same, but as I wrote on the cover message, the block layer workqueue had
+worse latency than a dedicated thread.  It seems that is related to it being
+bound to a CPU.
+
+> 
+> I tested this very extensively when working with my (now dormant) MQ
+> patch set. Better/equal/worse?
+> (https://marc.info/?l=linux-mmc&m=148665788227015&w=2)
+> 
+> The reason my patch set contained refactorings of async post-processing,
+> removed the waitqueues and the context info, up to the point where I
+> can issue requests in parallel, i.e. complete requests from the ->done()
+> callback on the host and immediately let the core issue the next one,
+> was due to performance issues.
+
+Asynchronous requests are completed in the ->done() callback.
+
+It is not exactly accurate to say that requests can be issued in parallel.
+eMMC/SD cards can only do one thing at a time.  Asynchronous requests
+facilitate the driver to prepare the next request without first having to
+wait for the previous request.
+
+> 
+> It's these patches from the old patch set:
+> 
+>   mmc: core: move some code in mmc_start_areq()
+>   mmc: core: refactor asynchronous request finalization
+>   mmc: core: refactor mmc_request_done()
+>   mmc: core: move the asynchronous post-processing
+>   mmc: core: add a kthread for completing requests
+>   mmc: core: replace waitqueue with worker
+>   mmc: core: do away with is_done_rcv
+>   mmc: core: do away with is_new_req
+>   mmc: core: kill off the context info
+>   mmc: queue: simplify queue logic
+>   mmc: block: shuffle retry and error handling
+>   mmc: queue: stop flushing the pipeline with NULL
+>   mmc: queue: issue struct mmc_queue_req items
+>   mmc: queue: get/put struct mmc_queue_req
+>   mmc: queue: issue requests in massive parallel
+> 
+> I.e. I made 15 patches just to make sure the new block layer did not
+> regress performance. The MQ-switch patch was just the final step of
+> these 16 patches.
+> 
+> Most energy went into that and I think it will be necessary still to work
+> with MQ in the long haul.
+> 
+> I am worried that this could add a second MQ execution path that
+> performs worse than the legacy block path for the above reason, i.e.
+> it doesn't really take advantage of the MQ speedups by marshalling
+> the requests and not doing away with the waitqueues and not
+> completing the requests out-of-order, so we get stuck with a lump of
+> MQ code that doesn't perform and therefore we cannot switch seamlessly
+> to MQ.
+
+The new patches have support for asynchronous requests and, consequently,
+the preparation of the next request before waiting for the previous request.
+ There is no need for another execution path.
