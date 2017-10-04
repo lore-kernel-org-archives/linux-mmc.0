@@ -1,35 +1,29 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3 1/2] dt-bindings: mmc: Document the Amlogic Meson8 and
- Meson8b SDIO bindings
-Date: Wed, 4 Oct 2017 11:00:00 +0200
-Message-ID: <CAPDyKFqkDdpe3qcyTAEL6E_WwmWZ2pWzkUM0M+=gWH6YOtohrg@mail.gmail.com>
-References: <20171003112417.31860-1-martin.blumenstingl@googlemail.com> <20171003112417.31860-2-martin.blumenstingl@googlemail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: sdhci-of-at91: make function sdhci_at91_set_uhs_signaling
+ static
+Date: Wed, 4 Oct 2017 10:59:55 +0200
+Message-ID: <CAPDyKFrLQdjd2nG3iH1_VQAFHSq7TQ44GUBhZXPHeO6b24KRBg@mail.gmail.com>
+References: <20171003100636.26124-1-colin.king@canonical.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20171003112417.31860-2-martin.blumenstingl-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Martin Blumenstingl <martin.blumenstingl-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
-Cc: "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Carlo Caione <carlo-KA+7E9HrN00dnm+yROfE0A@public.gmane.org>, Kevin Hilman <khilman-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Carlo Caione <carlo-6IF/jdPJHihWk0Htik3J/w@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20171003100636.26124-1-colin.king@canonical.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Colin King <colin.king@canonical.com>
+Cc: Ludovic Desroches <ludovic.desroches@microchip.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, kernel-janitors@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 3 October 2017 at 13:24, Martin Blumenstingl
-<martin.blumenstingl-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org> wrote:
-> From: Carlo Caione <carlo-6IF/jdPJHihWk0Htik3J/w@public.gmane.org>
+On 3 October 2017 at 12:06, Colin King <colin.king@canonical.com> wrote:
+> From: Colin Ian King <colin.king@canonical.com>
 >
-> This documents the devicetree bindings for the SDIO/MMC host found in
-> Amlogic Meson8 and Meson8b SoCs. It supports the SD specification v2.0
-> and the eMMC specification v4.41.
-> It has an internal "mux" which allows connecting up to three MMC devices
-> to it. The maximum supported bus-width is 4-bits.
+> The function sdhci_at91_set_uhs_signaling  is local to the source and does
+> not need to be in global scope, so make it static.
 >
-> Amlogic's GPL kernel sources call it "SDIO" to differentiate it from the
-> other MMC controller in (at least the Meson8 and Meson8b) the SoCs (they
-> call the other one "SDHC", which supports a bus-width of up to 8-bits).
+> Cleans up sparse warning:
+> symbol 'sdhci_at91_set_uhs_signaling' was not declared. Should it be
+> static?
 >
-> Signed-off-by: Carlo Caione <carlo-6IF/jdPJHihWk0Htik3J/w@public.gmane.org>
-> Signed-off-by: Martin Blumenstingl <martin.blumenstingl-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
-> Acked-by: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+> Signed-off-by: Colin Ian King <colin.king@canonical.com>
 
 Thanks, applied for next!
 
@@ -37,74 +31,23 @@ Kind regards
 Uffe
 
 > ---
->  .../bindings/mmc/amlogic,meson-mx-sdio.txt         | 54 ++++++++++++++++++++++
->  1 file changed, 54 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.txt
+>  drivers/mmc/host/sdhci-of-at91.c | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.txt b/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.txt
-> new file mode 100644
-> index 000000000000..8765c605e6bc
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.txt
-> @@ -0,0 +1,54 @@
-> +* Amlogic Meson6, Meson8 and Meson8b SDIO/MMC controller
-> +
-> +The highspeed MMC host controller on Amlogic SoCs provides an interface
-> +for MMC, SD, SDIO and SDHC types of memory cards.
-> +
-> +Supported maximum speeds are the ones of the eMMC standard 4.41 as well
-> +as the speed of SD standard 2.0.
-> +
-> +The hardware provides an internal "mux" which allows up to three slots
-> +to be controlled. Only one slot can be accessed at a time.
-> +
-> +Required properties:
-> + - compatible : must be one of
-> +       - "amlogic,meson8-sdio"
-> +       - "amlogic,meson8b-sdio"
-> +       along with the generic "amlogic,meson-mx-sdio"
-> + - reg : mmc controller base registers
-> + - interrupts : mmc controller interrupt
-> + - #address-cells : must be 1
-> + - size-cells : must be 0
-> + - clocks : phandle to clock providers
-> + - clock-names : must contain "core" and "clkin"
-> +
-> +Required child nodes:
-> +A node for each slot provided by the MMC controller is required.
-> +NOTE: due to a driver limitation currently only one slot (= child node)
-> +      is supported!
-> +
-> +Required properties on each child node (= slot):
-> + - compatible : must be "mmc-slot" (see mmc.txt within this directory)
-> + - reg : the slot (or "port") ID
-> +
-> +Optional properties on each child node (= slot):
-> + - bus-width : must be 1 or 4 (8-bit bus is not supported)
-> + - for cd and all other additional generic mmc parameters
-> +   please refer to mmc.txt within this directory
-> +
-> +Examples:
-> +       mmc@c1108c20 {
-> +               compatible = "amlogic,meson8-sdio", "amlogic,meson-mx-sdio";
-> +               reg = <0xc1108c20 0x20>;
-> +               interrupts = <0 28 1>;
-> +               #address-cells = <1>;
-> +               #size-cells = <0>;
-> +               clocks = <&clkc CLKID_SDIO>, <&clkc CLKID_CLK81>;
-> +               clock-names = "core", "clkin";
-> +
-> +               slot@1 {
-> +                       compatible = "mmc-slot";
-> +                       reg = <1>;
-> +
-> +                       bus-width = <4>;
-> +               };
-> +       };
+> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+> index 4e47ed6bc716..682c573e20a7 100644
+> --- a/drivers/mmc/host/sdhci-of-at91.c
+> +++ b/drivers/mmc/host/sdhci-of-at91.c
+> @@ -114,7 +114,8 @@ static void sdhci_at91_set_power(struct sdhci_host *host, unsigned char mode,
+>         sdhci_set_power_noreg(host, mode, vdd);
+>  }
+>
+> -void sdhci_at91_set_uhs_signaling(struct sdhci_host *host, unsigned int timing)
+> +static void sdhci_at91_set_uhs_signaling(struct sdhci_host *host,
+> +                                        unsigned int timing)
+>  {
+>         if (timing == MMC_TIMING_MMC_DDR52)
+>                 sdhci_writeb(host, SDMMC_MC1R_DDR, SDMMC_MC1R);
 > --
-> 2.14.2
+> 2.14.1
 >
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
