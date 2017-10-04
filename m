@@ -1,133 +1,75 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V9 13/15] mmc: block: Add CQE and blk-mq support
-Date: Wed, 4 Oct 2017 16:27:44 +0300
-Message-ID: <5f3e64c4-f16e-5fa9-7ebe-4baa7502c3e1@intel.com>
-References: <1506083824-4024-1-git-send-email-adrian.hunter@intel.com>
- <1506083824-4024-14-git-send-email-adrian.hunter@intel.com>
- <CACRpkdYZFW6zdt5ig3wNDxQAaVV6OYnrG5zPfcvzixwh8VbXig@mail.gmail.com>
+From: Jan Glauber <jan.glauber@caviumnetworks.com>
+Subject: Re: [PATCH] mmc: cavium: Depend on GPIO driver
+Date: Wed, 4 Oct 2017 16:12:38 +0200
+Message-ID: <20171004141238.GA15989@hc>
+References: <1506945761-23482-1-git-send-email-jglauber@cavium.com>
+ <b822ae64-42a3-2ffd-a6bd-8534f8c3d46b@caviumnetworks.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <CACRpkdYZFW6zdt5ig3wNDxQAaVV6OYnrG5zPfcvzixwh8VbXig@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-block-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-sn1nam02on0056.outbound.protection.outlook.com ([104.47.36.56]:51708
+        "EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752255AbdJDOMv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 4 Oct 2017 10:12:51 -0400
+Content-Disposition: inline
+In-Reply-To: <b822ae64-42a3-2ffd-a6bd-8534f8c3d46b@caviumnetworks.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: David Daney <ddaney@caviumnetworks.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, David Daney <david.daney@cavium.com>, "Steven J. Hill" <Steven.Hill@cavium.com>
 
-On 04/10/17 10:39, Linus Walleij wrote:
-> On Fri, Sep 22, 2017 at 2:37 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+On Mon, Oct 02, 2017 at 10:06:05AM -0700, David Daney wrote:
+> On 10/02/2017 05:02 AM, Jan Glauber wrote:
+> >Without the ThunderX/OcteonTx GPIO driver the MMC driver
+> >would not power up any MMC devices. Therefore add a
+> >dependency to the GPIO driver and remove the unneeded GPIOLIB
+> >dependency.
+> >
+> >Signed-off-by: Jan Glauber <jglauber@cavium.com>
+> >---
+> >  drivers/mmc/host/Kconfig | 2 +-
+> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> >
+> >diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> >index 8c15637178ff..a47a2f1d8ae4 100644
+> >--- a/drivers/mmc/host/Kconfig
+> >+++ b/drivers/mmc/host/Kconfig
+> >@@ -663,7 +663,7 @@ config MMC_CAVIUM_OCTEON
+> >  config MMC_CAVIUM_THUNDERX
+> >  	tristate "Cavium ThunderX SD/MMC Card Interface support"
+> >  	depends on PCI && 64BIT && (ARM64 || COMPILE_TEST)
+> >-	depends on GPIOLIB
+> >+	depends on GPIO_THUNDERX
 > 
->> Add CQE support to the block driver, including:
->>     - optionally using DCMD for flush requests
->>     - "manually" issuing discard requests
->>     - issuing read / write requests to the CQE
->>     - supporting block-layer timeouts
->>     - handling recovery
->>     - supporting re-tuning
->>
->> CQE offers 25% - 50% better random multi-threaded I/O.  There is a slight
->> (e.g. 2%) drop in sequential read speed but no observable change to sequential
->> write.
->>
->> CQE automatically sends the commands to complete requests.  However it only
->> supports reads / writes and so-called "direct commands" (DCMD).  Furthermore
->> DCMD is limited to one command at a time, but discards require 3 commands.
->> That makes issuing discards through CQE very awkward, but some CQE's don't
->> support DCMD anyway.  So for discards, the existing non-CQE approach is
->> taken, where the mmc core code issues the 3 commands one at a time i.e.
->> mmc_erase(). Where DCMD is used, is for issuing flushes.
->>
->> For host controllers without CQE support, blk-mq support is extended to
->> synchronous reads/writes or, if the host supports CAP_WAIT_WHILE_BUSY,
->> asynchonous reads/writes.  The advantage of asynchronous reads/writes is
->> that it allows the preparation of the next request while the current
->> request is in progress.
->>
->> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> 
-> I am trying to wrap my head around this large patch. The size makes it hard
-> but I am doing my best.
-> 
-> Some overarching questions:
-> 
-> - Is the CQE only available on the MQ path (i.e. if you enabled MQ) or
->   on both paths?
+> We could just "select" GPIO_THUNDERX instead so that people aren't
+> forced to manually unwind all the dependencies.
 
-Only MQ.
+I thought about select vs. depends, but the Documentation prefers
+depends as a select would not automatically enable everything
+GPIO_THUNDERX needs. See in Documentation/kbuild/kconfig-language.txt
+the note about select.
 
-> 
-> I think it is reasonable that if we introduce a new feature like this
-> it will only
-> be available for the new block path. This reflects how the block maintainers
-> e.g. only allow new scheduling policies to be merged on the MQ path.
-> The old block layer is legacy and should not be extended with new cool
-> features that can then be regarded as "regressions" if they don't work
-> properly with MQ. Better to only implement them for MQ then.
+--Jan
 
-I don't agree that holding up features for years and years is an ideal outcome.
-
+> Also, what do we do if the required GPIO lines are on I2C expanders?
+> This patch doesn't help in this hypothetical case.  In the end it is
+> the responsibility if the system designer to ensure the proper
+> drivers are available in their kernels.  I think the patch is a step
+> in the right direction, but just wanted to note that it doesn't
+> cover all possible cases.
 > 
-> - Performance before/after path on MQ?
-
-When the host controller supports asynchronous requests, it should be the
-same, but as I wrote on the cover message, the block layer workqueue had
-worse latency than a dedicated thread.  It seems that is related to it being
-bound to a CPU.
-
+> In any event, you can add ...:
 > 
-> I tested this very extensively when working with my (now dormant) MQ
-> patch set. Better/equal/worse?
-> (https://marc.info/?l=linux-mmc&m=148665788227015&w=2)
+> Acked-by: David Daney <david.daney@cavium.com>
 > 
-> The reason my patch set contained refactorings of async post-processing,
-> removed the waitqueues and the context info, up to the point where I
-> can issue requests in parallel, i.e. complete requests from the ->done()
-> callback on the host and immediately let the core issue the next one,
-> was due to performance issues.
-
-Asynchronous requests are completed in the ->done() callback.
-
-It is not exactly accurate to say that requests can be issued in parallel.
-eMMC/SD cards can only do one thing at a time.  Asynchronous requests
-facilitate the driver to prepare the next request without first having to
-wait for the previous request.
-
+> ... to either this version, or an alternative patch that does the
+> "select" instead.
 > 
-> It's these patches from the old patch set:
+> Thanks
 > 
->   mmc: core: move some code in mmc_start_areq()
->   mmc: core: refactor asynchronous request finalization
->   mmc: core: refactor mmc_request_done()
->   mmc: core: move the asynchronous post-processing
->   mmc: core: add a kthread for completing requests
->   mmc: core: replace waitqueue with worker
->   mmc: core: do away with is_done_rcv
->   mmc: core: do away with is_new_req
->   mmc: core: kill off the context info
->   mmc: queue: simplify queue logic
->   mmc: block: shuffle retry and error handling
->   mmc: queue: stop flushing the pipeline with NULL
->   mmc: queue: issue struct mmc_queue_req items
->   mmc: queue: get/put struct mmc_queue_req
->   mmc: queue: issue requests in massive parallel
 > 
-> I.e. I made 15 patches just to make sure the new block layer did not
-> regress performance. The MQ-switch patch was just the final step of
-> these 16 patches.
-> 
-> Most energy went into that and I think it will be necessary still to work
-> with MQ in the long haul.
-> 
-> I am worried that this could add a second MQ execution path that
-> performs worse than the legacy block path for the above reason, i.e.
-> it doesn't really take advantage of the MQ speedups by marshalling
-> the requests and not doing away with the waitqueues and not
-> completing the requests out-of-order, so we get stuck with a lump of
-> MQ code that doesn't perform and therefore we cannot switch seamlessly
-> to MQ.
-
-The new patches have support for asynchronous requests and, consequently,
-the preparation of the next request before waiting for the previous request.
- There is no need for another execution path.
+> >  	depends on OF_ADDRESS
+> >  	help
+> >  	  This selects Cavium ThunderX SD/MMC Card Interface.
+> >
