@@ -1,48 +1,57 @@
-From: Fabrizio Castro <fabrizio.castro@bp.renesas.com>
-Subject: RE: [RFC PATCH] mmc: tmio: check mmc_regulator_get_supply return
- value
-Date: Wed, 4 Oct 2017 10:50:54 +0000
-Message-ID: <TY1PR06MB089584E681911E2C49953F29C0730@TY1PR06MB0895.apcprd06.prod.outlook.com>
-References: <1506079337-12882-1-git-send-email-fabrizio.castro@bp.renesas.com>
- <7e1bdda1-d790-0db2-540c-69fabe22850a@rock-chips.com>
- <20170922160405.wfpi4fyziz3sxtmh@katana>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v3] mmc: block: Fix bug when removing RPMB chardev
+Date: Wed, 4 Oct 2017 14:58:19 +0300
+Message-ID: <fcf32b47-40bf-7b52-aa5b-6b8e517fa10e@intel.com>
+References: <20171003135123.4934-1-linus.walleij@linaro.org>
+ <c5f4052a-7c44-00a7-588b-a226a00a918e@intel.com>
+ <CACRpkdYE9S+RML6Y_MU0LO0oWFJYsu2qfrxbuqhVQb=ktuTUNA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <20170922160405.wfpi4fyziz3sxtmh@katana>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga05.intel.com ([192.55.52.43]:43029 "EHLO mga05.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751934AbdJDMFF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 4 Oct 2017 08:05:05 -0400
+In-Reply-To: <CACRpkdYE9S+RML6Y_MU0LO0oWFJYsu2qfrxbuqhVQb=ktuTUNA@mail.gmail.com>
 Content-Language: en-US
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>, Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Simon Horman <horms+renesas@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Chris Paterson <Chris.Paterson2@renesas.com>, Biju Das <biju.das@bp.renesas.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
 
-Thank you guys for your comments!
+On 04/10/17 12:09, Linus Walleij wrote:
+> On Wed, Oct 4, 2017 at 9:39 AM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> 
+>>> @@ -2299,7 +2299,7 @@ static int mmc_rpmb_chrdev_open(struct inode *inode, struct file *filp)
+>>>       get_device(&rpmb->dev);
+>>>       filp->private_data = rpmb;
+>>>       mutex_lock(&open_lock);
+>>> -     rpmb->md->usage++;
+>>> +     mmc_blk_get(rpmb->md->disk);
+>>
+>> mmc_blk_get() also tries to mutex_lock(&open_lock)
+> 
+> Yeah :/ I fix.
+> Sorry for this flunky (too)...
+> 
+>> But how do you know md still exists?
+> 
+> I was thinking that the reference counting is exactly for making sure
+> it exists across open()/close()?
 
-> > > However, there are side effects to it as the mmc devices will be enum=
-erated
-> > > in a different order (due to -EPROBE_DEFER), this means this patch wo=
-uld likely
-> > > break existing platforms.
-> >
-> > However this doesn't. The user daemon should never relies on the
-> > sequency of probing the mmc block part. We neither support to provide
-> > alias for the device id, nor guarantee the first probed controller get
-> > the first block id. Please use PARTUUID for rootfs, etc. So this
-> > shouldn't be a big deal.
->
-> That's exactly what I thought as well...
->
-> Thanks for the patch! Will test it the next days, but it looks good
-> already.
+Previously the device being opened was the block device which had to exist.
 
-How is the testing going? Any problem with the patch?
+But I think it is OK to assume md exists in mmc_rpmb_chrdev_open() because
+rpmb->chrdev is removed before the main disk.
 
-Thanks,
-Fabrizio
+> 
+>>  Looks like you need
+>> to make the disk the parent of the rpmb device and then
+>> use the disk to get a reference to md.
+> 
+> That sounds like it can be done relatively easily. Sounds like it should be a
+> separate patch though, let me iterate this one first so we plug the biggest
+> holes and then I try to come up with something for that too.
 
-
-
-Renesas Electronics Europe Ltd, Dukes Meadow, Millboard Road, Bourne End, B=
-uckinghamshire, SL8 5FH, UK. Registered in England & Wales under Registered=
- No. 04586709.
+OK.  What about the "capable(CAP_SYS_RAWIO)" question?
