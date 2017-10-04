@@ -1,111 +1,78 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: 4.14-rc2 on thinkpad x220: out of memory when inserting mmc card
-Date: Wed, 4 Oct 2017 10:01:45 +0200
-Message-ID: <CAPDyKFo+KehnATz5RWJN0JngZAYdCEd-EEjXbv9y8oU_Q1Leaw@mail.gmail.com>
-References: <20170905194739.GA31241@amd> <20171001093704.GA12626@amd>
- <20171001102647.GA23908@amd> <201710011957.ICF15708.OOLOHFSQMFFVJt@I-love.SAKURA.ne.jp>
- <CACRpkdYirC+rh_KALgVqKZMjq2DgbW4oi9MJkmrzwn+1O+94-g@mail.gmail.com>
- <7b423dc8-00aa-9cde-3557-8c72863001fd@intel.com> <CACRpkdYPn3xxZQP+xXggPpoHercBL3L7dmMBnbXww5SEsFx5tg@mail.gmail.com>
+Subject: Re: [PATCH 3/7] mmc: sdhci-s3c: Fix driver data for Exynos4 SoCs
+Date: Wed, 4 Oct 2017 10:08:29 +0200
+Message-ID: <CAPDyKFp5KBFjXtV2uHNCZ94OSDMEqGh17JyrvYrtbhK8tvtq_g@mail.gmail.com>
+References: <CGME20171004063835eucas1p1082954a0113f374f11ff364cf4b95408@eucas1p1.samsung.com>
+ <20171004063828.22068-1-m.szyprowski@samsung.com> <20171004063828.22068-4-m.szyprowski@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <CACRpkdYPn3xxZQP+xXggPpoHercBL3L7dmMBnbXww5SEsFx5tg@mail.gmail.com>
-Sender: owner-linux-mm@kvack.org
-To: Linus Walleij <linus.walleij@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: Tetsuo Handa <penguin-kernel@i-love.sakura.ne.jp>, Pavel Machek <pavel@ucw.cz>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-mm@kvack.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <20171004063828.22068-4-m.szyprowski@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Marek Szyprowski <m.szyprowski@samsung.com>
+Cc: linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Sylwester Nawrocki <s.nawrocki@samsung.com>, Krzysztof Kozlowski <krzk@kernel.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 4 October 2017 at 09:53, Linus Walleij <linus.walleij@linaro.org> wrote:
-> On Tue, Oct 3, 2017 at 8:30 AM, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> On 02/10/17 17:09, Linus Walleij wrote:
->>> On Sun, Oct 1, 2017 at 12:57 PM, Tetsuo Handa
->>> <penguin-kernel@i-love.sakura.ne.jp> wrote:
->>>
->>>>>> I inserted u-SD card, only to realize that it is not detected as it
->>>>>> should be. And dmesg indeed reveals:
->>>>>
->>>>> Tetsuo asked me to report this to linux-mm.
->>>>>
->>>>> But 2^4 is 16 pages, IIRC that can't be expected to work reliably, and
->>>>> thus this sounds like MMC bug, not mm bug.
->>>
->>>
->>> I'm not sure I fully understand this error message:
->>> "worker/2:1: page allocation failure: order:4"
->>>
->>> What I guess from context is that the mmc_init_request()
->>> call is failing to allocate 16 pages, meaning for 4K pages
->>> 64KB which is the typical bounce buffer.
->>>
->>> This is what the code has always allocated as bounce buffer,
->>> but it used to happen upfront, when probing the MMC block layer,
->>> rather than when allocating the requests.
->>
->> That is not exactly right.  As I already wrote, the memory allocation used
->> to be optional but became mandatory with:
->>
->>   commit 304419d8a7e9204c5d19b704467b814df8c8f5b1
->>   Author: Linus Walleij <linus.walleij@linaro.org>
->>   Date:   Thu May 18 11:29:32 2017 +0200
->>
->>       mmc: core: Allocate per-request data using the block layer core
+On 4 October 2017 at 08:38, Marek Szyprowski <m.szyprowski@samsung.com> wrote:
+> Support for non-dt based initialization for Exynos SoCs has been removed,
+> so there is no need to keep driver IDs for this case. While touching this,
+> replace odd conditional code for instantiating driver data for Exynos4
+> SoCs with a simple reference and move that driver data under CONFIG_OF.
 >
-> Yes you are right, it used to look like this, with the bounce buffer
-> hiding behind a Kconfig symbol:
->
-> #ifdef CONFIG_MMC_BLOCK_BOUNCE
->     if (host->max_segs == 1) {
->         unsigned int bouncesz;
->
->         bouncesz = MMC_QUEUE_BOUNCESZ;
->
->         if (bouncesz > host->max_req_size)
->             bouncesz = host->max_req_size;
->         if (bouncesz > host->max_seg_size)
->             bouncesz = host->max_seg_size;
->         if (bouncesz > (host->max_blk_count * 512))
->             bouncesz = host->max_blk_count * 512;
->
->         if (bouncesz > 512 &&
->             mmc_queue_alloc_bounce_bufs(mq, bouncesz)) {
->             blk_queue_bounce_limit(mq->queue, BLK_BOUNCE_ANY);
->             blk_queue_max_hw_sectors(mq->queue, bouncesz / 512);
->             blk_queue_max_segments(mq->queue, bouncesz / 512);
->             blk_queue_max_segment_size(mq->queue, bouncesz);
->
->             ret = mmc_queue_alloc_bounce_sgs(mq, bouncesz);
->             if (ret)
->                 goto cleanup_queue;
->             bounce = true;
->         }
->     }
-> #endif
->
-> I recently concluded that I find no evidence whatsoever that anyone
-> turned this symbol on. Actually. (Checked defconfigs and distro configs.)
-> The option was just sitting there unused.
-> This code was never exercised except by some people who turned it
-> on on their custom kernels in the past. It's in practice dead code.
->
-> My patch started to allocate and use bounce buffers for all hosts
-> with max_segs == 1, unless specifically flagged NOT to use bounce
-> buffers.
->
-> That wasn't smart, I should have just deleted them. Mea culpa.
->
-> So that is why I asked Ulf to simply put the patch deleting the bounce
-> buffers that noone is using to fixes, and it should fix this problem.
+> Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
 
-Adrian, Linus,
-
-Thanks for looking into the problem! I am queuing up the patch
-deleting bounce buffers for fixes asap!
+Are there some dependency to any other earlier patches in this series,
+or is it safe to apply standalone to my mmc tree?
 
 Kind regards
 Uffe
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+> ---
+>  drivers/mmc/host/sdhci-s3c.c | 18 +++++-------------
+>  1 file changed, 5 insertions(+), 13 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+> index d328fcf284d1..cda83ccb2702 100644
+> --- a/drivers/mmc/host/sdhci-s3c.c
+> +++ b/drivers/mmc/host/sdhci-s3c.c
+> @@ -761,32 +761,24 @@ static const struct dev_pm_ops sdhci_s3c_pmops = {
+>                            NULL)
+>  };
+>
+> -#if defined(CONFIG_CPU_EXYNOS4210) || defined(CONFIG_SOC_EXYNOS4212)
+> -static struct sdhci_s3c_drv_data exynos4_sdhci_drv_data = {
+> -       .no_divider = true,
+> -};
+> -#define EXYNOS4_SDHCI_DRV_DATA ((kernel_ulong_t)&exynos4_sdhci_drv_data)
+> -#else
+> -#define EXYNOS4_SDHCI_DRV_DATA ((kernel_ulong_t)NULL)
+> -#endif
+> -
+>  static const struct platform_device_id sdhci_s3c_driver_ids[] = {
+>         {
+>                 .name           = "s3c-sdhci",
+>                 .driver_data    = (kernel_ulong_t)NULL,
+> -       }, {
+> -               .name           = "exynos4-sdhci",
+> -               .driver_data    = EXYNOS4_SDHCI_DRV_DATA,
+>         },
+>         { }
+>  };
+>  MODULE_DEVICE_TABLE(platform, sdhci_s3c_driver_ids);
+>
+>  #ifdef CONFIG_OF
+> +static struct sdhci_s3c_drv_data exynos4_sdhci_drv_data = {
+> +       .no_divider = true,
+> +};
+> +
+>  static const struct of_device_id sdhci_s3c_dt_match[] = {
+>         { .compatible = "samsung,s3c6410-sdhci", },
+>         { .compatible = "samsung,exynos4210-sdhci",
+> -               .data = (void *)EXYNOS4_SDHCI_DRV_DATA },
+> +               .data = &exynos4_sdhci_drv_data },
+>         {},
+>  };
+>  MODULE_DEVICE_TABLE(of, sdhci_s3c_dt_match);
+> --
+> 2.14.2
+>
