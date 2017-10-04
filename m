@@ -1,95 +1,90 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [RFC PATCH] mmc: tmio: check mmc_regulator_get_supply return
- value
-Date: Wed, 4 Oct 2017 20:30:24 +0200
-Message-ID: <20171004183024.zv6oir7bc4te4k24@ninjato>
-References: <1506079337-12882-1-git-send-email-fabrizio.castro@bp.renesas.com>
- <7e1bdda1-d790-0db2-540c-69fabe22850a@rock-chips.com>
- <20170922160405.wfpi4fyziz3sxtmh@katana>
- <TY1PR06MB089584E681911E2C49953F29C0730@TY1PR06MB0895.apcprd06.prod.outlook.com>
+From: "Hunter, Adrian" <adrian.hunter@intel.com>
+Subject: RE: [PATCH V9 13/15] mmc: block: Add CQE and blk-mq support
+Date: Wed, 4 Oct 2017 19:23:07 +0000
+Message-ID: <363DA0ED52042842948283D2FC38E4649BF33EFD@IRSMSX106.ger.corp.intel.com>
+References: <1506083824-4024-1-git-send-email-adrian.hunter@intel.com>
+        <1506083824-4024-14-git-send-email-adrian.hunter@intel.com>
+        <CACRpkdYZFW6zdt5ig3wNDxQAaVV6OYnrG5zPfcvzixwh8VbXig@mail.gmail.com>
+        <CGME20171004093941epcas1p1d5277f64b4cc5a78bf185bf9d5b1abfb@epcas1p1.samsung.com>
+ <2384661.GfpEZ6rEzz@amdc3058>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="j7eg6qu7bcxyfs3o"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([88.99.104.3]:36148 "EHLO pokefinder.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750937AbdJDSa0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 4 Oct 2017 14:30:26 -0400
-Content-Disposition: inline
-In-Reply-To: <TY1PR06MB089584E681911E2C49953F29C0730@TY1PR06MB0895.apcprd06.prod.outlook.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <2384661.GfpEZ6rEzz@amdc3058>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Linus Walleij <linus.walleij@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, "Nowak, Mateusz" <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-mmc@vger.kernel.org
-To: Fabrizio Castro <fabrizio.castro@bp.renesas.com>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>, Simon Horman <horms+renesas@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Chris Paterson <Chris.Paterson2@renesas.com>, Biju Das <biju.das@bp.renesas.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
 
-
---j7eg6qu7bcxyfs3o
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-Hi Fabrizio,
-
-On Wed, Oct 04, 2017 at 10:50:54AM +0000, Fabrizio Castro wrote:
-> Thank you guys for your comments!
->=20
-> > > > However, there are side effects to it as the mmc devices will be en=
-umerated
-> > > > in a different order (due to -EPROBE_DEFER), this means this patch =
-would likely
-> > > > break existing platforms.
+> -----Original Message-----
+> From: Bartlomiej Zolnierkiewicz [mailto:b.zolnierkie@samsung.com]
+> Sent: Wednesday, October 4, 2017 12:40 PM
+> To: Linus Walleij <linus.walleij@linaro.org>
+> Cc: Hunter, Adrian <adrian.hunter@intel.com>; Ulf Hansson
+> <ulf.hansson@linaro.org>; linux-mmc <linux-mmc@vger.kernel.org>; linux-
+> block <linux-block@vger.kernel.org>; linux-kernel <linux-
+> kernel@vger.kernel.org>; Bough Chen <haibo.chen@nxp.com>; Alex
+> Lemberg <alex.lemberg@sandisk.com>; Nowak, Mateusz
+> <mateusz.nowak@intel.com>; Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>;
+> Jaehoon Chung <jh80.chung@samsung.com>; Dong Aisheng
+> <dongas86@gmail.com>; Das Asutosh <asutoshd@codeaurora.org>;
+> Zhangfei Gao <zhangfei.gao@gmail.com>; Sahitya Tummala
+> <stummala@codeaurora.org>; Harjani Ritesh <riteshh@codeaurora.org>;
+> Venu Byravarasu <vbyravarasu@nvidia.com>; Shawn Lin <shawn.lin@rock-
+> chips.com>; Christoph Hellwig <hch@lst.de>
+> Subject: Re: [PATCH V9 13/15] mmc: block: Add CQE and blk-mq support
+> 
+> 
+> Hi,
+> 
+> On Wednesday, October 04, 2017 09:39:45 AM Linus Walleij wrote:
+> > On Fri, Sep 22, 2017 at 2:37 PM, Adrian Hunter <adrian.hunter@intel.com>
+> wrote:
+> >
+> > > Add CQE support to the block driver, including:
+> > >     - optionally using DCMD for flush requests
+> > >     - "manually" issuing discard requests
+> > >     - issuing read / write requests to the CQE
+> > >     - supporting block-layer timeouts
+> > >     - handling recovery
+> > >     - supporting re-tuning
 > > >
-> > > However this doesn't. The user daemon should never relies on the
-> > > sequency of probing the mmc block part. We neither support to provide
-> > > alias for the device id, nor guarantee the first probed controller get
-> > > the first block id. Please use PARTUUID for rootfs, etc. So this
-> > > shouldn't be a big deal.
+> > > CQE offers 25% - 50% better random multi-threaded I/O.  There is a
+> > > slight (e.g. 2%) drop in sequential read speed but no observable
+> > > change to sequential write.
+> > >
+> > > CQE automatically sends the commands to complete requests.  However
+> > > it only supports reads / writes and so-called "direct commands"
+> > > (DCMD).  Furthermore DCMD is limited to one command at a time, but
+> discards require 3 commands.
+> > > That makes issuing discards through CQE very awkward, but some CQE's
+> > > don't support DCMD anyway.  So for discards, the existing non-CQE
+> > > approach is taken, where the mmc core code issues the 3 commands one
+> at a time i.e.
+> > > mmc_erase(). Where DCMD is used, is for issuing flushes.
+> > >
+> > > For host controllers without CQE support, blk-mq support is extended
+> > > to synchronous reads/writes or, if the host supports
+> > > CAP_WAIT_WHILE_BUSY, asynchonous reads/writes.  The advantage of
+> > > asynchronous reads/writes is that it allows the preparation of the
+> > > next request while the current request is in progress.
+> > >
+> > > Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 > >
-> > That's exactly what I thought as well...
-> >
-> > Thanks for the patch! Will test it the next days, but it looks good
-> > already.
->=20
-> How is the testing going? Any problem with the patch?
+> > I am trying to wrap my head around this large patch. The size makes it
+> > hard but I am doing my best.
+> 
+> I also think that this patch should be split on two patches. The 1st one
+> introducing blk-mq and the 2nd one adding CQE support.
+> 
+> [ I don't agree that they make more sense together, on the contrary,
+>   it is very difficult to properly analyze blk-mq changes on their
+>   own while there are mixed with CQE related ones. ]
 
-Sorry for the delay, there were some other things in the queue...
+The CQE and non-CQE code paths are clearly marked.  But maybe you
+are asking what the code would look like if we *never* had to support CQE.
+And my point is we *do* have to support CQE. 
 
-Well, the good news is that it didn't cause a regression for me on R-Car
-E2 (Alt board) and H3 (Salvator X board).
-
-Sadly, it doesn't also fix the SDR104 problems on Alt. I had a little
-hope this could be the culprit, but sadly it is not. But this is not a
-problem with this patch. It still fixes a valid issue.
-
-Looking how other drivers deal with the issue, though, I noticed they
-only bail out on -EPROBE_DEFER and would continue on other errors (if
-mmc_regulator_get_supply would throw them, but it doesn't). So some
-digging why other drivers do it that way seems to be apropriate to me.
-Or asking Ulf :)
-
-Kind regards,
-
-   Wolfram
-
-
---j7eg6qu7bcxyfs3o
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlnVKLwACgkQFA3kzBSg
-KbZTOBAAnmGc6G/l49u0I4l0BoobBR2G4iL8BM96U7Rkky58oVUO5dgxzDEv/R3D
-Ts9Sg94iDd0VsAdRtNh3XDSOfg/VDZfIxkQZJM7rS9/PWijc/p/lGSJJxYbbQVC1
-dQp/IcBI058+iPSXZDrVzqPoYc0LohU4FnKLBps7nhv1pcon+ah6xKA/4vl4tipy
-q+ZCMNidDLvxEPqRasal8xM/LTCDB+au+OIpxqkgIW2NCGs/+Y17tfduMGnsjY6k
-J2bUEC8IPViJCXOvlNVzxxLFszoeDUFSCAl+IJjiZtxcCDNz9Kr5Ms2SN1cY46Bi
-CWpi2jl2/Q2dNsEdRxp1taMNK3UVsf/PbMjAuMTx0xk+avyyInRc20DmYDtwhd5J
-1CYTCgh7fm3V3jh45Uhp2X3KAaCuDWZftGpfBodK9k1OvjjULwOEsa+XK0QPevbt
-B1Abx9DDiJTs2ZsclA5fe92hd4K2Bhi845mBvTxaecnzZcBwoCt1wQv1HTzvHIwo
-Bgv6eomIZHkHMWTqSo7eOTw1MVW3Jiy/5/6UHI1LPzVFRme+Tjdl1TLhYJxZ2uZv
-segI+/SdaJvNSPQzFXcC98dZ8JOhISMHA6CHlmai79oYQ9PYGLFibNUyyO8h0yvj
-5q99i+cUYhdqOW0Z1BYskMDmlVoqgr4cXGhjVJ3bHPN0xTv/SNI=
-=Lskd
------END PGP SIGNATURE-----
-
---j7eg6qu7bcxyfs3o--
+Do you have any questions about the code?
