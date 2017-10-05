@@ -1,8 +1,8 @@
-From: Fabrizio Castro <fabrizio.castro@bp.renesas.com>
-Subject: RE: [RFC PATCH] mmc: tmio: check mmc_regulator_get_supply return
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [RFC PATCH] mmc: tmio: check mmc_regulator_get_supply return
  value
-Date: Thu, 5 Oct 2017 12:30:07 +0000
-Message-ID: <TY1PR06MB089531502611698D9F02F563C0700@TY1PR06MB0895.apcprd06.prod.outlook.com>
+Date: Thu, 5 Oct 2017 14:43:00 +0200
+Message-ID: <20171005124300.wpm7qvba4hgoclz3@ninjato>
 References: <1506079337-12882-1-git-send-email-fabrizio.castro@bp.renesas.com>
  <7e1bdda1-d790-0db2-540c-69fabe22850a@rock-chips.com>
  <20170922160405.wfpi4fyziz3sxtmh@katana>
@@ -10,62 +10,53 @@ References: <1506079337-12882-1-git-send-email-fabrizio.castro@bp.renesas.com>
  <20171004183024.zv6oir7bc4te4k24@ninjato>
  <TY1PR06MB08956748EF3D3A4A530903C0C0700@TY1PR06MB0895.apcprd06.prod.outlook.com>
  <CAPDyKFokf_5eOOGf2kzVQtqSLCwpV9bf8Jp=1P63A4fnz6Bf7g@mail.gmail.com>
+ <TY1PR06MB089531502611698D9F02F563C0700@TY1PR06MB0895.apcprd06.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="s7unmqd6zkvw34tb"
 Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFokf_5eOOGf2kzVQtqSLCwpV9bf8Jp=1P63A4fnz6Bf7g@mail.gmail.com>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <TY1PR06MB089531502611698D9F02F563C0700@TY1PR06MB0895.apcprd06.prod.outlook.com>
 Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa@the-dreams.de>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, Simon Horman <horms+renesas@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Chris Paterson <Chris.Paterson2@renesas.com>, Biju Das <biju.das@bp.renesas.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
+To: Fabrizio Castro <fabrizio.castro@bp.renesas.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Simon Horman <horms+renesas@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Chris Paterson <Chris.Paterson2@renesas.com>, Biju Das <biju.das@bp.renesas.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-DQo+IFsuLi5dDQo+DQo+ID4+DQo+ID4+IFdlbGwsIHRoZSBnb29kIG5ld3MgaXMgdGhhdCBpdCBk
-aWRuJ3QgY2F1c2UgYSByZWdyZXNzaW9uIGZvciBtZSBvbiBSLUNhcg0KPiA+PiBFMiAoQWx0IGJv
-YXJkKSBhbmQgSDMgKFNhbHZhdG9yIFggYm9hcmQpLg0KPiA+Pg0KPiA+PiBTYWRseSwgaXQgZG9l
-c24ndCBhbHNvIGZpeCB0aGUgU0RSMTA0IHByb2JsZW1zIG9uIEFsdC4gSSBoYWQgYSBsaXR0bGUN
-Cj4gPj4gaG9wZSB0aGlzIGNvdWxkIGJlIHRoZSBjdWxwcml0LCBidXQgc2FkbHkgaXQgaXMgbm90
-LiBCdXQgdGhpcyBpcyBub3QgYQ0KPiA+PiBwcm9ibGVtIHdpdGggdGhpcyBwYXRjaC4gSXQgc3Rp
-bGwgZml4ZXMgYSB2YWxpZCBpc3N1ZS4NCj4gPj4NCj4gPj4gTG9va2luZyBob3cgb3RoZXIgZHJp
-dmVycyBkZWFsIHdpdGggdGhlIGlzc3VlLCB0aG91Z2gsIEkgbm90aWNlZCB0aGV5DQo+ID4+IG9u
-bHkgYmFpbCBvdXQgb24gLUVQUk9CRV9ERUZFUiBhbmQgd291bGQgY29udGludWUgb24gb3RoZXIg
-ZXJyb3JzIChpZg0KPiA+PiBtbWNfcmVndWxhdG9yX2dldF9zdXBwbHkgd291bGQgdGhyb3cgdGhl
-bSwgYnV0IGl0IGRvZXNuJ3QpLiBTbyBzb21lDQo+ID4+IGRpZ2dpbmcgd2h5IG90aGVyIGRyaXZl
-cnMgZG8gaXQgdGhhdCB3YXkgc2VlbXMgdG8gYmUgYXByb3ByaWF0ZSB0byBtZS4NCj4gPg0KPiA+
-IEdvb2QgcG9pbnQhDQo+ID4gTWF5YmUgaWYgdGhpcyBwYXRjaCBleHBsaWNpdGx5IHRlc3RlZCBm
-b3IgLUVQUk9CRV9ERUZFUiB0aGUgbWFpbnRlbmFuY2UNCj4gPiBvZiBtbWNfcmVndWxhdG9yX2dl
-dF9zdXBwbHkgd291bGQgYmUgZWFzaWVyIGFzIGFsbCBvZiB0aGUgZHJpdmVycyBiZWhhdmVkDQo+
-ID4gc2ltaWxhcmx5Lg0KPiA+IE9uIHRoZSBvdGhlciBoYW5kLCBib3RoICJ2bW1jIiBhbmQgInZx
-bW1jIiBhcmUgY29uc2lkZXJlZCBvcHRpb25hbCBieQ0KPiA+IG1tY19yZWd1bGF0b3JfZ2V0X3N1
-cHBseSwgdGhlcmVmb3JlIHRoZWlyIGFic2VuY2UgaXMgdG9sZXJhdGVkICgwIGlzDQo+ID4gcmV0
-dXJuZWQpLCBhbmQgYXMgeW91IHNhaWQgdGhlIG9ubHkgb3RoZXIgcG9zc2libGUgdmFsdWUgcmV0
-dXJuZWQgYnkNCj4gPiBtbWNfcmVndWxhdG9yX2dldF9zdXBwbHkgaXMgLUVQUk9CRV9ERUZFUi4N
-Cj4gPiBJZiBpbiB0aGUgZnV0dXJlIHRoZSBsb2dpYyBvZiBtbWNfcmVndWxhdG9yX2dldF9zdXBw
-bHkgY2hhbmdlcywgSSBndWVzcw0KPiA+IGV2ZW4gdGhlIGRyaXZlciBuZWVkcyB0byBhZGFwdCBh
-cyB0aGVyZSBtYXkgYmUgc29tZXRoaW5nIHdyb25nIHdpdGggdGhlDQo+ID4gcmVndWxhdG9ycywg
-dGhlcmVmb3JlIEkgcGVyc29uYWxseSByYXRoZXIgdGhlIGRyaXZlciB0byBiYWlsIG91dCB3aGF0
-ZXZlcg0KPiA+IHRoZSBlcnJvciByZXR1cm5lZCBieSBtbWNfcmVndWxhdG9yX2dldF9zdXBwbHku
-IExvb2tpbmcgYXQgdGhlIGhpc3RvcnkNCj4gPiBvZiB0aGUgb3RoZXIgZHJpdmVycyBJIGNvdWxk
-bid0IHNwb3QgYW55IG1lYW5pbmdmdWwgY29tbWVudCBjb25uZWN0ZWQNCj4gPiB0byB0aGUgcmV0
-dXJuIHZhbHVlIG9mIG1tY19yZWd1bGF0b3JfZ2V0X3N1cHBseS4NCj4NCj4gSXQgaGFzIGJlZW4g
-YSBiaXQgdHJpY2t5IHRvIGRlYWwgd2l0aCB0aGVzZSByZWd1bGF0b3JzIGluICpvbmUqIGNvbW1v
-bg0KPiB3YXkuIEZvciBzb21lIHBsYXRmb3JtcyBhIHJlZ3VsYXRvciBhcmUgb3B0aW9uYWwsIHdo
-aWxlIGZvciBvdGhlciBpdA0KPiBpc24ndC4NCj4NCj4gSW4gdGhlIGVuZCB3ZSBkZWNpZGVkIHRv
-IHBpY2sgdGhlICJvcHRpb25hbCIgd2F5IGZvciBib3RoIHZtbWMgYW5kDQo+IHZxbW1jLCBhbmQg
-dGhlbiBsZWF2ZSB0aGUgZGV0YWlscyBpbiB0aGUgZXJyb3IgcGF0aCB0byBiZSBzb3J0ZWQgb3V0
-DQo+IGJ5IGVhY2ggYW4gZXZlcnkgbW1jIGhvc3QgZHJpdmVyLg0KPg0KPiA+DQo+ID4+IE9yIGFz
-a2luZyBVbGYgOikNCj4gPg0KPiA+IEkgZ3Vlc3MgeW91IGFyZSByaWdodCEgOykNCj4gPg0KPiA+
-IFVsZiwgd2hhdCdzIHRoZSBiZXN0IG9wdGlvbiBoZXJlPw0KPg0KPiBJIHRoaW5rIGl0J3MgcGVy
-ZmVjdGx5IG9rYXkgdG8gcmV0dXJuIGFuIGVycm9yIGlmDQo+IG1tY19yZWd1bGF0b3JfZ2V0X3N1
-cHBseSgpIHByb3BhZ2F0ZXMgdGhhdC4gVGhhdCdzIGxpa2VseSB3aGF0IGFsbA0KPiBob3N0IGRy
-aXZlciBzaG91bGQgYmUgZG9pbmcsIGluc3RlYWQgb2YgZXhwbGljaXRseSBjaGVjayBmb3INCj4g
-LUVQUk9CRV9ERUZFUi4NCg0KVGhhbmsgeW91IFVmZmUuIEkgZ3Vlc3MgdGhlIHBhdGNoIGlzIGFs
-cmlnaHQgdGhlbi4NCg0KV29sZnJhbSwgZG8geW91IHdhbnQgdG8gYWRkIGEgVGVzdGVkLWJ5Pw0K
-DQpLaW5kIHJlZ2FyZHMsDQpGYWJyaXppbw0KDQo+DQo+IE9mIGNvdXJzZSwgZXZlbiB3aGVuIG1t
-Y19yZWd1bGF0b3JfZ2V0X3N1cHBseSgpIHJldHVybnMgMCwgdGhhdCdzIG5vdA0KPiBhIGd1YXJh
-bnRlZSB0aGF0IHRoZSByZWd1bGF0b3Iocykgd2FzIGFjdHVhbGx5IGhvb2tlZCB1cC4NCj4NCj4g
-S2luZCByZWdhcmRzDQo+IFVmZmUNCg0KDQoNClJlbmVzYXMgRWxlY3Ryb25pY3MgRXVyb3BlIEx0
-ZCwgRHVrZXMgTWVhZG93LCBNaWxsYm9hcmQgUm9hZCwgQm91cm5lIEVuZCwgQnVja2luZ2hhbXNo
-aXJlLCBTTDggNUZILCBVSy4gUmVnaXN0ZXJlZCBpbiBFbmdsYW5kICYgV2FsZXMgdW5kZXIgUmVn
-aXN0ZXJlZCBOby4gMDQ1ODY3MDkuDQo=
+
+--s7unmqd6zkvw34tb
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+
+> Thank you Uffe. I guess the patch is alright then.
+>=20
+> Wolfram, do you want to add a Tested-by?
+
+Sure:
+
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+
+
+--s7unmqd6zkvw34tb
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlnWKNQACgkQFA3kzBSg
+KbZqlQ/9Gyw/UB4SJYvcgqdT8VUqgfVCyRlZWdvL4MezoP4bem/6zG2sVihaKK02
+eo5LE3SGWrseU+5FG1kAxnyfkXkAdjRszQOupNSzj5tU+t13EWJz7BeWjtjqML5j
+3g0670t4Sj7RIHeAonhI8kRv+Ez5ET/aAUgJjB3PXDTQLpH7pza9C+Ha8dManS53
+TvonH9jRgzWmyJWQjrvol4lJD8rXZiBDhpLkv2IhJtLpgffmBO/NHJ8WDgUgAUcG
+z0nLjjIF9xecGZ6PlwMaDFh9sG5t+h2ogdzVshDt63hgvE+Jq3nwqw2b3wPh2CO8
+pjoDRtD4KndZ9v9apbBeqswtEEQ784OiAJzWq5XtRNb554fHz1qLv0Dsz7xx22dp
+FY8UV5XR/DSaN0GaTkZI7OBp5rlV5v+4+8KYEQLUVx+gSGK56M8eshMz7cn8WIvq
+vYTiOJWun14BExkVzoXWKSzcRvPLCW4Ez3j50+MqeNdhiYdjAHdKYXKz5xS6rQuw
+vnDdF1JkejI6w9b2lCSuqw1oIadN/w77TYFkO04FgOPBSIjAhgFtletE0MdTSuk3
+3LOqqCdAIOC3qvUloDiRyqCCzLgqwv6egqTOvFOpJZ+unk/CntUr52BgIUCNrozd
+Aeomo+aIAvRjRDUhlaFBMGYDfxqlf5DXbitdkUQlaqGOOElkBo0=
+=4evJ
+-----END PGP SIGNATURE-----
+
+--s7unmqd6zkvw34tb--
