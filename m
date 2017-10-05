@@ -1,102 +1,69 @@
-From: Fabrizio Castro <fabrizio.castro@bp.renesas.com>
-Subject: RE: [RFC PATCH] mmc: tmio: check mmc_regulator_get_supply return
- value
-Date: Thu, 5 Oct 2017 09:44:17 +0000
-Message-ID: <TY1PR06MB08956748EF3D3A4A530903C0C0700@TY1PR06MB0895.apcprd06.prod.outlook.com>
-References: <1506079337-12882-1-git-send-email-fabrizio.castro@bp.renesas.com>
- <7e1bdda1-d790-0db2-540c-69fabe22850a@rock-chips.com>
- <20170922160405.wfpi4fyziz3sxtmh@katana>
- <TY1PR06MB089584E681911E2C49953F29C0730@TY1PR06MB0895.apcprd06.prod.outlook.com>
- <20171004183024.zv6oir7bc4te4k24@ninjato>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH v3] mmc: block: Fix bug when removing RPMB chardev
+Date: Thu, 5 Oct 2017 12:48:12 +0200
+Message-ID: <CACRpkdbNtsNkrLUaAywWG3raBdJhb4RMT-MAWW-XuAk7smC+TQ@mail.gmail.com>
+References: <20171003135123.4934-1-linus.walleij@linaro.org>
+ <c5f4052a-7c44-00a7-588b-a226a00a918e@intel.com> <CACRpkdYE9S+RML6Y_MU0LO0oWFJYsu2qfrxbuqhVQb=ktuTUNA@mail.gmail.com>
+ <fcf32b47-40bf-7b52-aa5b-6b8e517fa10e@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <20171004183024.zv6oir7bc4te4k24@ninjato>
-Content-Language: en-US
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, Simon Horman <horms+renesas@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Chris Paterson <Chris.Paterson2@renesas.com>, Biju Das <biju.das@bp.renesas.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-io0-f180.google.com ([209.85.223.180]:50718 "EHLO
+        mail-io0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751484AbdJEKsN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Oct 2017 06:48:13 -0400
+Received: by mail-io0-f180.google.com with SMTP id 97so689306iok.7
+        for <linux-mmc@vger.kernel.org>; Thu, 05 Oct 2017 03:48:13 -0700 (PDT)
+In-Reply-To: <fcf32b47-40bf-7b52-aa5b-6b8e517fa10e@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
 
-Hi Wolfram, Ulf
+On Wed, Oct 4, 2017 at 1:58 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 04/10/17 12:09, Linus Walleij wrote:
 
-> Hi Fabrizio,
+>>> But how do you know md still exists?
+>>
+>> I was thinking that the reference counting is exactly for making sure
+>> it exists across open()/close()?
 >
-> On Wed, Oct 04, 2017 at 10:50:54AM +0000, Fabrizio Castro wrote:
-> > Thank you guys for your comments!
-> >
-> > > > > However, there are side effects to it as the mmc devices will be =
-enumerated
-> > > > > in a different order (due to -EPROBE_DEFER), this means this patc=
-h would likely
-> > > > > break existing platforms.
-> > > >
-> > > > However this doesn't. The user daemon should never relies on the
-> > > > sequency of probing the mmc block part. We neither support to provi=
-de
-> > > > alias for the device id, nor guarantee the first probed controller =
-get
-> > > > the first block id. Please use PARTUUID for rootfs, etc. So this
-> > > > shouldn't be a big deal.
-> > >
-> > > That's exactly what I thought as well...
-> > >
-> > > Thanks for the patch! Will test it the next days, but it looks good
-> > > already.
-> >
-> > How is the testing going? Any problem with the patch?
+> Previously the device being opened was the block device which had to exist.
 >
-> Sorry for the delay, there were some other things in the queue...
+> But I think it is OK to assume md exists in mmc_rpmb_chrdev_open() because
+> rpmb->chrdev is removed before the main disk.
 
-No worries at all!
-And thank you for getting back to me.
+That's my thought too. But thinking it over there could be a race if e.g.
+you write a script with a loop hammering the device in/out with bind/unbind
+at the same time opening and closing the RPMB chardev and holding
+a handle to it.
 
->
-> Well, the good news is that it didn't cause a regression for me on R-Car
-> E2 (Alt board) and H3 (Salvator X board).
->
-> Sadly, it doesn't also fix the SDR104 problems on Alt. I had a little
-> hope this could be the culprit, but sadly it is not. But this is not a
-> problem with this patch. It still fixes a valid issue.
->
-> Looking how other drivers deal with the issue, though, I noticed they
-> only bail out on -EPROBE_DEFER and would continue on other errors (if
-> mmc_regulator_get_supply would throw them, but it doesn't). So some
-> digging why other drivers do it that way seems to be apropriate to me.
+It is not a very realistic usecase but I will try to provoke it anyways.
 
-Good point!
-Maybe if this patch explicitly tested for -EPROBE_DEFER the maintenance
-of mmc_regulator_get_supply would be easier as all of the drivers behaved
-similarly.
-On the other hand, both "vmmc" and "vqmmc" are considered optional by
-mmc_regulator_get_supply, therefore their absence is tolerated (0 is
-returned), and as you said the only other possible value returned by
-mmc_regulator_get_supply is -EPROBE_DEFER.
-If in the future the logic of mmc_regulator_get_supply changes, I guess
-even the driver needs to adapt as there may be something wrong with the
-regulators, therefore I personally rather the driver to bail out whatever
-the error returned by mmc_regulator_get_supply. Looking at the history
-of the other drivers I couldn't spot any meaningful comment connected
-to the return value of mmc_regulator_get_supply.
+> OK.  What about the "capable(CAP_SYS_RAWIO)" question?
 
-> Or asking Ulf :)
+The flag has a very strange definition in
+include/uapi/linux/capability.h:
 
-I guess you are right! ;)
+/* Allow sending USB messages to any device via /dev/bus/usb */
+#define CAP_SYS_RAWIO        17
 
-Ulf, what's the best option here?
+So I read in the codebase how this flag is actuallt used. It seems to
+universally apply for cases where userspace is allowed to read or
+write directly into device registers.
 
-Kind regards,
-Fabrizio
+So I dropped that since the character device is only able to do ioctl()s,
+no raw I/O. RPMB is and always was strictly ioctl-based.
+We should simply plug the hole and not letting people shoot themselves
+in the foot with this.
 
->
-> Kind regards,
->
->    Wolfram
+I think it is bogus that we have it even for the block device, but it may
+be argued that the stuff returned from the ioctl reading card info
+is "kind of" RAWIO. I guess that is why it's there. But we are using well
+structured ioctls so it is really irrelevant. The flag is not
+needed or used for anything (the subsystems using it is checking for
+it explicitly, it is not checked in the core fs code or anything), we could
+just drop it from the block devices too.
 
-
-
-
-Renesas Electronics Europe Ltd, Dukes Meadow, Millboard Road, Bourne End, B=
-uckinghamshire, SL8 5FH, UK. Registered in England & Wales under Registered=
- No. 04586709.
+Yours,
+Linus Walleij
