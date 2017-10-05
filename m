@@ -1,112 +1,71 @@
-From: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
-Subject: Re: [PATCH V9 13/15] mmc: block: Add CQE and blk-mq support
-Date: Thu, 05 Oct 2017 14:00:48 +0200
-Message-ID: <1591139.5Ihy91Pq6o@amdc3058>
-References: <1506083824-4024-1-git-send-email-adrian.hunter@intel.com>
-        <2384661.GfpEZ6rEzz@amdc3058>
-        <363DA0ED52042842948283D2FC38E4649BF33EFD@IRSMSX106.ger.corp.intel.com>
-        <CGME20171005120050epcas1p12545f3cd0939b83010aa5e0355ac9818@epcas1p1.samsung.com>
+From: Fabrizio Castro <fabrizio.castro@bp.renesas.com>
+Subject: RE: [RFC PATCH] mmc: tmio: check mmc_regulator_get_supply return
+ value
+Date: Thu, 5 Oct 2017 12:30:07 +0000
+Message-ID: <TY1PR06MB089531502611698D9F02F563C0700@TY1PR06MB0895.apcprd06.prod.outlook.com>
+References: <1506079337-12882-1-git-send-email-fabrizio.castro@bp.renesas.com>
+ <7e1bdda1-d790-0db2-540c-69fabe22850a@rock-chips.com>
+ <20170922160405.wfpi4fyziz3sxtmh@katana>
+ <TY1PR06MB089584E681911E2C49953F29C0730@TY1PR06MB0895.apcprd06.prod.outlook.com>
+ <20171004183024.zv6oir7bc4te4k24@ninjato>
+ <TY1PR06MB08956748EF3D3A4A530903C0C0700@TY1PR06MB0895.apcprd06.prod.outlook.com>
+ <CAPDyKFokf_5eOOGf2kzVQtqSLCwpV9bf8Jp=1P63A4fnz6Bf7g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <363DA0ED52042842948283D2FC38E4649BF33EFD@IRSMSX106.ger.corp.intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Hunter, Adrian" <adrian.hunter@intel.com>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, "Nowak, Mateusz" <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFokf_5eOOGf2kzVQtqSLCwpV9bf8Jp=1P63A4fnz6Bf7g@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa@the-dreams.de>
+Cc: Shawn Lin <shawn.lin@rock-chips.com>, Simon Horman <horms+renesas@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Chris Paterson <Chris.Paterson2@renesas.com>, Biju Das <biju.das@bp.renesas.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-
-Hi,
-
-On Wednesday, October 04, 2017 07:23:07 PM Hunter, Adrian wrote:
-> > -----Original Message-----
-> > From: Bartlomiej Zolnierkiewicz [mailto:b.zolnierkie@samsung.com]
-> > Sent: Wednesday, October 4, 2017 12:40 PM
-> > To: Linus Walleij <linus.walleij@linaro.org>
-> > Cc: Hunter, Adrian <adrian.hunter@intel.com>; Ulf Hansson
-> > <ulf.hansson@linaro.org>; linux-mmc <linux-mmc@vger.kernel.org>; linux-
-> > block <linux-block@vger.kernel.org>; linux-kernel <linux-
-> > kernel@vger.kernel.org>; Bough Chen <haibo.chen@nxp.com>; Alex
-> > Lemberg <alex.lemberg@sandisk.com>; Nowak, Mateusz
-> > <mateusz.nowak@intel.com>; Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>;
-> > Jaehoon Chung <jh80.chung@samsung.com>; Dong Aisheng
-> > <dongas86@gmail.com>; Das Asutosh <asutoshd@codeaurora.org>;
-> > Zhangfei Gao <zhangfei.gao@gmail.com>; Sahitya Tummala
-> > <stummala@codeaurora.org>; Harjani Ritesh <riteshh@codeaurora.org>;
-> > Venu Byravarasu <vbyravarasu@nvidia.com>; Shawn Lin <shawn.lin@rock-
-> > chips.com>; Christoph Hellwig <hch@lst.de>
-> > Subject: Re: [PATCH V9 13/15] mmc: block: Add CQE and blk-mq support
-> > 
-> > 
-> > Hi,
-> > 
-> > On Wednesday, October 04, 2017 09:39:45 AM Linus Walleij wrote:
-> > > On Fri, Sep 22, 2017 at 2:37 PM, Adrian Hunter <adrian.hunter@intel.com>
-> > wrote:
-> > >
-> > > > Add CQE support to the block driver, including:
-> > > >     - optionally using DCMD for flush requests
-> > > >     - "manually" issuing discard requests
-> > > >     - issuing read / write requests to the CQE
-> > > >     - supporting block-layer timeouts
-> > > >     - handling recovery
-> > > >     - supporting re-tuning
-> > > >
-> > > > CQE offers 25% - 50% better random multi-threaded I/O.  There is a
-> > > > slight (e.g. 2%) drop in sequential read speed but no observable
-> > > > change to sequential write.
-> > > >
-> > > > CQE automatically sends the commands to complete requests.  However
-> > > > it only supports reads / writes and so-called "direct commands"
-> > > > (DCMD).  Furthermore DCMD is limited to one command at a time, but
-> > discards require 3 commands.
-> > > > That makes issuing discards through CQE very awkward, but some CQE's
-> > > > don't support DCMD anyway.  So for discards, the existing non-CQE
-> > > > approach is taken, where the mmc core code issues the 3 commands one
-> > at a time i.e.
-> > > > mmc_erase(). Where DCMD is used, is for issuing flushes.
-> > > >
-> > > > For host controllers without CQE support, blk-mq support is extended
-> > > > to synchronous reads/writes or, if the host supports
-> > > > CAP_WAIT_WHILE_BUSY, asynchonous reads/writes.  The advantage of
-> > > > asynchronous reads/writes is that it allows the preparation of the
-> > > > next request while the current request is in progress.
-> > > >
-> > > > Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> > >
-> > > I am trying to wrap my head around this large patch. The size makes it
-> > > hard but I am doing my best.
-> > 
-> > I also think that this patch should be split on two patches. The 1st one
-> > introducing blk-mq and the 2nd one adding CQE support.
-> > 
-> > [ I don't agree that they make more sense together, on the contrary,
-> >   it is very difficult to properly analyze blk-mq changes on their
-> >   own while there are mixed with CQE related ones. ]
-> 
-> The CQE and non-CQE code paths are clearly marked.  But maybe you
-
-The combined patch is > 1 kLOC which is a lot and since the CQE and
-non-CQE code paths are clearly marked it should be really easy to
-split them.
-
-> are asking what the code would look like if we *never* had to support CQE.
-> And my point is we *do* have to support CQE. 
-
-We *do* but not in the same step, it is just normal kernel engineering
-practice to split patches on logical changes. This is not asking about
-something extraordinary.
-
-> Do you have any questions about the code?
-
-I would really hope to see more documentation about blk-mq changes
-first before starting to review it. The patch description documents
-CQE changes but not blk-mq ones and the code itself is also lacking
-in-code documentation describing new functions added for blk-mq.
-
-Best regards,
---
-Bartlomiej Zolnierkiewicz
-Samsung R&D Institute Poland
-Samsung Electronics
+DQo+IFsuLi5dDQo+DQo+ID4+DQo+ID4+IFdlbGwsIHRoZSBnb29kIG5ld3MgaXMgdGhhdCBpdCBk
+aWRuJ3QgY2F1c2UgYSByZWdyZXNzaW9uIGZvciBtZSBvbiBSLUNhcg0KPiA+PiBFMiAoQWx0IGJv
+YXJkKSBhbmQgSDMgKFNhbHZhdG9yIFggYm9hcmQpLg0KPiA+Pg0KPiA+PiBTYWRseSwgaXQgZG9l
+c24ndCBhbHNvIGZpeCB0aGUgU0RSMTA0IHByb2JsZW1zIG9uIEFsdC4gSSBoYWQgYSBsaXR0bGUN
+Cj4gPj4gaG9wZSB0aGlzIGNvdWxkIGJlIHRoZSBjdWxwcml0LCBidXQgc2FkbHkgaXQgaXMgbm90
+LiBCdXQgdGhpcyBpcyBub3QgYQ0KPiA+PiBwcm9ibGVtIHdpdGggdGhpcyBwYXRjaC4gSXQgc3Rp
+bGwgZml4ZXMgYSB2YWxpZCBpc3N1ZS4NCj4gPj4NCj4gPj4gTG9va2luZyBob3cgb3RoZXIgZHJp
+dmVycyBkZWFsIHdpdGggdGhlIGlzc3VlLCB0aG91Z2gsIEkgbm90aWNlZCB0aGV5DQo+ID4+IG9u
+bHkgYmFpbCBvdXQgb24gLUVQUk9CRV9ERUZFUiBhbmQgd291bGQgY29udGludWUgb24gb3RoZXIg
+ZXJyb3JzIChpZg0KPiA+PiBtbWNfcmVndWxhdG9yX2dldF9zdXBwbHkgd291bGQgdGhyb3cgdGhl
+bSwgYnV0IGl0IGRvZXNuJ3QpLiBTbyBzb21lDQo+ID4+IGRpZ2dpbmcgd2h5IG90aGVyIGRyaXZl
+cnMgZG8gaXQgdGhhdCB3YXkgc2VlbXMgdG8gYmUgYXByb3ByaWF0ZSB0byBtZS4NCj4gPg0KPiA+
+IEdvb2QgcG9pbnQhDQo+ID4gTWF5YmUgaWYgdGhpcyBwYXRjaCBleHBsaWNpdGx5IHRlc3RlZCBm
+b3IgLUVQUk9CRV9ERUZFUiB0aGUgbWFpbnRlbmFuY2UNCj4gPiBvZiBtbWNfcmVndWxhdG9yX2dl
+dF9zdXBwbHkgd291bGQgYmUgZWFzaWVyIGFzIGFsbCBvZiB0aGUgZHJpdmVycyBiZWhhdmVkDQo+
+ID4gc2ltaWxhcmx5Lg0KPiA+IE9uIHRoZSBvdGhlciBoYW5kLCBib3RoICJ2bW1jIiBhbmQgInZx
+bW1jIiBhcmUgY29uc2lkZXJlZCBvcHRpb25hbCBieQ0KPiA+IG1tY19yZWd1bGF0b3JfZ2V0X3N1
+cHBseSwgdGhlcmVmb3JlIHRoZWlyIGFic2VuY2UgaXMgdG9sZXJhdGVkICgwIGlzDQo+ID4gcmV0
+dXJuZWQpLCBhbmQgYXMgeW91IHNhaWQgdGhlIG9ubHkgb3RoZXIgcG9zc2libGUgdmFsdWUgcmV0
+dXJuZWQgYnkNCj4gPiBtbWNfcmVndWxhdG9yX2dldF9zdXBwbHkgaXMgLUVQUk9CRV9ERUZFUi4N
+Cj4gPiBJZiBpbiB0aGUgZnV0dXJlIHRoZSBsb2dpYyBvZiBtbWNfcmVndWxhdG9yX2dldF9zdXBw
+bHkgY2hhbmdlcywgSSBndWVzcw0KPiA+IGV2ZW4gdGhlIGRyaXZlciBuZWVkcyB0byBhZGFwdCBh
+cyB0aGVyZSBtYXkgYmUgc29tZXRoaW5nIHdyb25nIHdpdGggdGhlDQo+ID4gcmVndWxhdG9ycywg
+dGhlcmVmb3JlIEkgcGVyc29uYWxseSByYXRoZXIgdGhlIGRyaXZlciB0byBiYWlsIG91dCB3aGF0
+ZXZlcg0KPiA+IHRoZSBlcnJvciByZXR1cm5lZCBieSBtbWNfcmVndWxhdG9yX2dldF9zdXBwbHku
+IExvb2tpbmcgYXQgdGhlIGhpc3RvcnkNCj4gPiBvZiB0aGUgb3RoZXIgZHJpdmVycyBJIGNvdWxk
+bid0IHNwb3QgYW55IG1lYW5pbmdmdWwgY29tbWVudCBjb25uZWN0ZWQNCj4gPiB0byB0aGUgcmV0
+dXJuIHZhbHVlIG9mIG1tY19yZWd1bGF0b3JfZ2V0X3N1cHBseS4NCj4NCj4gSXQgaGFzIGJlZW4g
+YSBiaXQgdHJpY2t5IHRvIGRlYWwgd2l0aCB0aGVzZSByZWd1bGF0b3JzIGluICpvbmUqIGNvbW1v
+bg0KPiB3YXkuIEZvciBzb21lIHBsYXRmb3JtcyBhIHJlZ3VsYXRvciBhcmUgb3B0aW9uYWwsIHdo
+aWxlIGZvciBvdGhlciBpdA0KPiBpc24ndC4NCj4NCj4gSW4gdGhlIGVuZCB3ZSBkZWNpZGVkIHRv
+IHBpY2sgdGhlICJvcHRpb25hbCIgd2F5IGZvciBib3RoIHZtbWMgYW5kDQo+IHZxbW1jLCBhbmQg
+dGhlbiBsZWF2ZSB0aGUgZGV0YWlscyBpbiB0aGUgZXJyb3IgcGF0aCB0byBiZSBzb3J0ZWQgb3V0
+DQo+IGJ5IGVhY2ggYW4gZXZlcnkgbW1jIGhvc3QgZHJpdmVyLg0KPg0KPiA+DQo+ID4+IE9yIGFz
+a2luZyBVbGYgOikNCj4gPg0KPiA+IEkgZ3Vlc3MgeW91IGFyZSByaWdodCEgOykNCj4gPg0KPiA+
+IFVsZiwgd2hhdCdzIHRoZSBiZXN0IG9wdGlvbiBoZXJlPw0KPg0KPiBJIHRoaW5rIGl0J3MgcGVy
+ZmVjdGx5IG9rYXkgdG8gcmV0dXJuIGFuIGVycm9yIGlmDQo+IG1tY19yZWd1bGF0b3JfZ2V0X3N1
+cHBseSgpIHByb3BhZ2F0ZXMgdGhhdC4gVGhhdCdzIGxpa2VseSB3aGF0IGFsbA0KPiBob3N0IGRy
+aXZlciBzaG91bGQgYmUgZG9pbmcsIGluc3RlYWQgb2YgZXhwbGljaXRseSBjaGVjayBmb3INCj4g
+LUVQUk9CRV9ERUZFUi4NCg0KVGhhbmsgeW91IFVmZmUuIEkgZ3Vlc3MgdGhlIHBhdGNoIGlzIGFs
+cmlnaHQgdGhlbi4NCg0KV29sZnJhbSwgZG8geW91IHdhbnQgdG8gYWRkIGEgVGVzdGVkLWJ5Pw0K
+DQpLaW5kIHJlZ2FyZHMsDQpGYWJyaXppbw0KDQo+DQo+IE9mIGNvdXJzZSwgZXZlbiB3aGVuIG1t
+Y19yZWd1bGF0b3JfZ2V0X3N1cHBseSgpIHJldHVybnMgMCwgdGhhdCdzIG5vdA0KPiBhIGd1YXJh
+bnRlZSB0aGF0IHRoZSByZWd1bGF0b3Iocykgd2FzIGFjdHVhbGx5IGhvb2tlZCB1cC4NCj4NCj4g
+S2luZCByZWdhcmRzDQo+IFVmZmUNCg0KDQoNClJlbmVzYXMgRWxlY3Ryb25pY3MgRXVyb3BlIEx0
+ZCwgRHVrZXMgTWVhZG93LCBNaWxsYm9hcmQgUm9hZCwgQm91cm5lIEVuZCwgQnVja2luZ2hhbXNo
+aXJlLCBTTDggNUZILCBVSy4gUmVnaXN0ZXJlZCBpbiBFbmdsYW5kICYgV2FsZXMgdW5kZXIgUmVn
+aXN0ZXJlZCBOby4gMDQ1ODY3MDkuDQo=
