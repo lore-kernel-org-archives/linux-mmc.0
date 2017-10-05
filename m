@@ -1,103 +1,102 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 2/3] mmc: parse new binding for eMMC fixed driver type
-Date: Thu, 5 Oct 2017 11:27:06 +0200
-Message-ID: <CAPDyKFptoNbNGbUUcjka778P7X9FBNMsa6GUe=1_voYfzj8uEg@mail.gmail.com>
-References: <20171004173920.15232-1-wsa+renesas@sang-engineering.com> <20171004173920.15232-3-wsa+renesas@sang-engineering.com>
+From: Fabrizio Castro <fabrizio.castro@bp.renesas.com>
+Subject: RE: [RFC PATCH] mmc: tmio: check mmc_regulator_get_supply return
+ value
+Date: Thu, 5 Oct 2017 09:44:17 +0000
+Message-ID: <TY1PR06MB08956748EF3D3A4A530903C0C0700@TY1PR06MB0895.apcprd06.prod.outlook.com>
+References: <1506079337-12882-1-git-send-email-fabrizio.castro@bp.renesas.com>
+ <7e1bdda1-d790-0db2-540c-69fabe22850a@rock-chips.com>
+ <20170922160405.wfpi4fyziz3sxtmh@katana>
+ <TY1PR06MB089584E681911E2C49953F29C0730@TY1PR06MB0895.apcprd06.prod.outlook.com>
+ <20171004183024.zv6oir7bc4te4k24@ninjato>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f176.google.com ([209.85.223.176]:49144 "EHLO
-        mail-io0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751317AbdJEJ1H (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Oct 2017 05:27:07 -0400
-Received: by mail-io0-f176.google.com with SMTP id f72so6407900ioj.5
-        for <linux-mmc@vger.kernel.org>; Thu, 05 Oct 2017 02:27:07 -0700 (PDT)
-In-Reply-To: <20171004173920.15232-3-wsa+renesas@sang-engineering.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20171004183024.zv6oir7bc4te4k24@ninjato>
+Content-Language: en-US
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Shawn Lin <shawn.lin@rock-chips.com>, Simon Horman <horms+renesas@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Chris Paterson <Chris.Paterson2@renesas.com>, Biju Das <biju.das@bp.renesas.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Simon Horman <horms@verge.net.au>, Adrian Hunter <adrian.hunter@intel.com>, Marek Vasut <marek.vasut@gmail.com>
 
-On 4 October 2017 at 19:39, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
-> Parse the new binding and store it in the host struct after doing some
-> sanity checks. The code is designed to support fixed SD driver type if
-> we ever need that.
->
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> ---
-> Changes since RFC v1:
-> * rebased to mmc/next based on 4.14-rc3
->
->  drivers/mmc/core/core.c  | 28 +++++++++++++++++++++++-----
->  drivers/mmc/core/host.c  | 11 ++++++++++-
->  include/linux/mmc/host.h |  2 ++
->  3 files changed, 35 insertions(+), 6 deletions(-)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index c287d297710aa4..64b454efc924c5 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -1785,6 +1785,18 @@ void mmc_set_driver_type(struct mmc_host *host, unsigned int drv_type)
->         mmc_set_ios(host);
->  }
->
-> +static int mmc_select_fixed_drive_strength(struct mmc_card *card,
-> +                                      unsigned int max_dtr, int host_drv,
-> +                                      int card_drv, int *drv_type)
-> +{
-> +       int ret = 0, preset = card->host->fixed_drv_type;
-> +
-> +       if (card->type == MMC_TYPE_MMC)
-> +               ret = card_drv & mmc_driver_type_mask(preset) ? preset : 0;
-> +
-> +       return ret;
-> +}
+Hi Wolfram, Ulf
 
-After a second thought, I would rather prefer to have this code
-implemented in mmc.c, in mmc_select_driver_type(). If we later find a
-case for SD/SDIO, we can consider to move this to core.c.
-
-Moreover, I think when host->fixed_drv_type has a value set, using
-that value should take precedence over calling
-mmc_select_drive_strength(). That is not the case below.
-
-Sorry for not realizing this in v1.
-
-> +
->  int mmc_select_drive_strength(struct mmc_card *card, unsigned int max_dtr,
->                               int card_drv_type, int *drv_type)
->  {
-> @@ -1793,7 +1805,7 @@ int mmc_select_drive_strength(struct mmc_card *card, unsigned int max_dtr,
+> Hi Fabrizio,
 >
->         *drv_type = 0;
+> On Wed, Oct 04, 2017 at 10:50:54AM +0000, Fabrizio Castro wrote:
+> > Thank you guys for your comments!
+> >
+> > > > > However, there are side effects to it as the mmc devices will be =
+enumerated
+> > > > > in a different order (due to -EPROBE_DEFER), this means this patc=
+h would likely
+> > > > > break existing platforms.
+> > > >
+> > > > However this doesn't. The user daemon should never relies on the
+> > > > sequency of probing the mmc block part. We neither support to provi=
+de
+> > > > alias for the device id, nor guarantee the first probed controller =
+get
+> > > > the first block id. Please use PARTUUID for rootfs, etc. So this
+> > > > shouldn't be a big deal.
+> > >
+> > > That's exactly what I thought as well...
+> > >
+> > > Thanks for the patch! Will test it the next days, but it looks good
+> > > already.
+> >
+> > How is the testing going? Any problem with the patch?
 >
-> -       if (!host->ops->select_drive_strength)
-> +       if (!host->ops->select_drive_strength && !host->fixed_drv_type)
->                 return 0;
+> Sorry for the delay, there were some other things in the queue...
+
+No worries at all!
+And thank you for getting back to me.
+
 >
->         /* Use SD definition of driver strength for hosts */
-> @@ -1812,10 +1824,16 @@ int mmc_select_drive_strength(struct mmc_card *card, unsigned int max_dtr,
->          * information and let the hardware specific code
->          * return what is possible given the options
->          */
-> -       return host->ops->select_drive_strength(card, max_dtr,
-> -                                               host_drv_type,
-> -                                               card_drv_type,
-> -                                               drv_type);
-> +       if (host->ops->select_drive_strength)
-> +               return host->ops->select_drive_strength(card, max_dtr,
-> +                                                       host_drv_type,
-> +                                                       card_drv_type,
-> +                                                       drv_type);
-> +       else
-> +               return mmc_select_fixed_drive_strength(card, max_dtr,
-> +                                                       host_drv_type,
-> +                                                       card_drv_type,
-> +                                                       drv_type);
->  }
+> Well, the good news is that it didn't cause a regression for me on R-Car
+> E2 (Alt board) and H3 (Salvator X board).
+>
+> Sadly, it doesn't also fix the SDR104 problems on Alt. I had a little
+> hope this could be the culprit, but sadly it is not. But this is not a
+> problem with this patch. It still fixes a valid issue.
+>
+> Looking how other drivers deal with the issue, though, I noticed they
+> only bail out on -EPROBE_DEFER and would continue on other errors (if
+> mmc_regulator_get_supply would throw them, but it doesn't). So some
+> digging why other drivers do it that way seems to be apropriate to me.
 
-[...]
+Good point!
+Maybe if this patch explicitly tested for -EPROBE_DEFER the maintenance
+of mmc_regulator_get_supply would be easier as all of the drivers behaved
+similarly.
+On the other hand, both "vmmc" and "vqmmc" are considered optional by
+mmc_regulator_get_supply, therefore their absence is tolerated (0 is
+returned), and as you said the only other possible value returned by
+mmc_regulator_get_supply is -EPROBE_DEFER.
+If in the future the logic of mmc_regulator_get_supply changes, I guess
+even the driver needs to adapt as there may be something wrong with the
+regulators, therefore I personally rather the driver to bail out whatever
+the error returned by mmc_regulator_get_supply. Looking at the history
+of the other drivers I couldn't spot any meaningful comment connected
+to the return value of mmc_regulator_get_supply.
 
-Kind regards
-Uffe
+> Or asking Ulf :)
+
+I guess you are right! ;)
+
+Ulf, what's the best option here?
+
+Kind regards,
+Fabrizio
+
+>
+> Kind regards,
+>
+>    Wolfram
+
+
+
+
+Renesas Electronics Europe Ltd, Dukes Meadow, Millboard Road, Bourne End, B=
+uckinghamshire, SL8 5FH, UK. Registered in England & Wales under Registered=
+ No. 04586709.
