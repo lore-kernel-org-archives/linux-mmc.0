@@ -1,62 +1,59 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [RFC PATCH] mmc: tmio: check mmc_regulator_get_supply return
- value
-Date: Thu, 5 Oct 2017 14:43:00 +0200
-Message-ID: <20171005124300.wpm7qvba4hgoclz3@ninjato>
-References: <1506079337-12882-1-git-send-email-fabrizio.castro@bp.renesas.com>
- <7e1bdda1-d790-0db2-540c-69fabe22850a@rock-chips.com>
- <20170922160405.wfpi4fyziz3sxtmh@katana>
- <TY1PR06MB089584E681911E2C49953F29C0730@TY1PR06MB0895.apcprd06.prod.outlook.com>
- <20171004183024.zv6oir7bc4te4k24@ninjato>
- <TY1PR06MB08956748EF3D3A4A530903C0C0700@TY1PR06MB0895.apcprd06.prod.outlook.com>
- <CAPDyKFokf_5eOOGf2kzVQtqSLCwpV9bf8Jp=1P63A4fnz6Bf7g@mail.gmail.com>
- <TY1PR06MB089531502611698D9F02F563C0700@TY1PR06MB0895.apcprd06.prod.outlook.com>
+From: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+Subject: Re: [PATCH V9 13/15] mmc: block: Add CQE and blk-mq support
+Date: Thu, 05 Oct 2017 16:14:45 +0200
+Message-ID: <1916712.dEBEVKDoTZ@amdc3058>
+References: <1506083824-4024-1-git-send-email-adrian.hunter@intel.com>
+        <363DA0ED52042842948283D2FC38E4649BF33EFD@IRSMSX106.ger.corp.intel.com>
+        <1591139.5Ihy91Pq6o@amdc3058>
+        <CGME20171005141447epcas1p42fc9f210c5c00824d19824ebb01906b6@epcas1p4.samsung.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="s7unmqd6zkvw34tb"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <TY1PR06MB089531502611698D9F02F563C0700@TY1PR06MB0895.apcprd06.prod.outlook.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Fabrizio Castro <fabrizio.castro@bp.renesas.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Simon Horman <horms+renesas@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Chris Paterson <Chris.Paterson2@renesas.com>, Biju Das <biju.das@bp.renesas.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-reply-to: <1591139.5Ihy91Pq6o@amdc3058>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Hunter, Adrian" <adrian.hunter@intel.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, "Nowak, Mateusz" <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-mmc@vger.kernel.org
 
+On Thursday, October 05, 2017 02:00:48 PM Bartlomiej Zolnierkiewicz wrote:
 
---s7unmqd6zkvw34tb
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+> > > > I am trying to wrap my head around this large patch. The size makes it
+> > > > hard but I am doing my best.
+> > > 
+> > > I also think that this patch should be split on two patches. The 1st one
+> > > introducing blk-mq and the 2nd one adding CQE support.
+> > > 
+> > > [ I don't agree that they make more sense together, on the contrary,
+> > >   it is very difficult to properly analyze blk-mq changes on their
+> > >   own while there are mixed with CQE related ones. ]
+> > 
+> > The CQE and non-CQE code paths are clearly marked.  But maybe you
+> 
+> The combined patch is > 1 kLOC which is a lot and since the CQE and
+> non-CQE code paths are clearly marked it should be really easy to
+> split them.
+> 
+> > are asking what the code would look like if we *never* had to support CQE.
+> > And my point is we *do* have to support CQE. 
+> 
+> We *do* but not in the same step, it is just normal kernel engineering
+> practice to split patches on logical changes. This is not asking about
+> something extraordinary.
 
+BTW:
 
-> Thank you Uffe. I guess the patch is alright then.
->=20
-> Wolfram, do you want to add a Tested-by?
+I sympathize with you that it takes long time to get CQE merged
+upstream and that you weren't told earlier that no new users of
+the old block API are welcomed.
 
-Sure:
+However since "mmc-mq" support has to be added as a preparation for
+CQE please try do it *properly* and also consider that many people
+may want just "mmc-mq" without CQE as their hardware simply doesn't
+support CQE.
 
-Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-
-
---s7unmqd6zkvw34tb
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlnWKNQACgkQFA3kzBSg
-KbZqlQ/9Gyw/UB4SJYvcgqdT8VUqgfVCyRlZWdvL4MezoP4bem/6zG2sVihaKK02
-eo5LE3SGWrseU+5FG1kAxnyfkXkAdjRszQOupNSzj5tU+t13EWJz7BeWjtjqML5j
-3g0670t4Sj7RIHeAonhI8kRv+Ez5ET/aAUgJjB3PXDTQLpH7pza9C+Ha8dManS53
-TvonH9jRgzWmyJWQjrvol4lJD8rXZiBDhpLkv2IhJtLpgffmBO/NHJ8WDgUgAUcG
-z0nLjjIF9xecGZ6PlwMaDFh9sG5t+h2ogdzVshDt63hgvE+Jq3nwqw2b3wPh2CO8
-pjoDRtD4KndZ9v9apbBeqswtEEQ784OiAJzWq5XtRNb554fHz1qLv0Dsz7xx22dp
-FY8UV5XR/DSaN0GaTkZI7OBp5rlV5v+4+8KYEQLUVx+gSGK56M8eshMz7cn8WIvq
-vYTiOJWun14BExkVzoXWKSzcRvPLCW4Ez3j50+MqeNdhiYdjAHdKYXKz5xS6rQuw
-vnDdF1JkejI6w9b2lCSuqw1oIadN/w77TYFkO04FgOPBSIjAhgFtletE0MdTSuk3
-3LOqqCdAIOC3qvUloDiRyqCCzLgqwv6egqTOvFOpJZ+unk/CntUr52BgIUCNrozd
-Aeomo+aIAvRjRDUhlaFBMGYDfxqlf5DXbitdkUQlaqGOOElkBo0=
-=4evJ
------END PGP SIGNATURE-----
-
---s7unmqd6zkvw34tb--
+Best regards,
+--
+Bartlomiej Zolnierkiewicz
+Samsung R&D Institute Poland
+Samsung Electronics
