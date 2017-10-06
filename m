@@ -1,7 +1,7 @@
 From: Liming Sun <lsun@mellanox.com>
-Subject: [PATCH 7/9] Revert "mmc: dw_mmc: deprecated the "num-slots" property"
-Date: Fri,  6 Oct 2017 15:21:30 -0400
-Message-ID: <8a128c02687629bee2cda9ca02ca5895be8202c4.1507315433.git.lsun@mellanox.com>
+Subject: [PATCH 9/9] mmc: dw_mmc: Parse slot-specific configuration
+Date: Fri,  6 Oct 2017 15:21:32 -0400
+Message-ID: <d41a16f96273b31771310608df9718caaadd72a0.1507315433.git.lsun@mellanox.com>
 References: <cover.1507315433.git.lsun@mellanox.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <cover.1507315433.git.lsun@mellanox.com>
@@ -12,53 +12,77 @@ To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Liming Sun <lsun@mellanox.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-This reverts commit d30a8f7bdf6498e47bd3a6f31e5028f239deb208.
+This commit adds code to parse the child-nodes for slot specific
+configuration in the dw_mmc host driver according to
+linux/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
 
-The Mellanox BlueField SoC requires multiple slot dw-mmc support.
+This change is needed when the cards have different configuration
+like the 'bus-width'.
 
 Signed-off-by: Liming Sun <lsun@mellanox.com>
+Reviewed-by: Chris Metcalf <cmetcalf@mellanox.com>
 ---
- drivers/mmc/host/dw_mmc.c | 21 +++++++++++++--------
- 1 file changed, 13 insertions(+), 8 deletions(-)
+ drivers/mmc/host/dw_mmc.c | 37 +++++++++++++++++++++++++++++++++++++
+ 1 file changed, 37 insertions(+)
 
 diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index ef36e05..150cd05 100644
+index a3188c2..9d870db 100644
 --- a/drivers/mmc/host/dw_mmc.c
 +++ b/drivers/mmc/host/dw_mmc.c
-@@ -3018,8 +3018,7 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
- 	}
+@@ -2766,6 +2766,39 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+ 	return IRQ_HANDLED;
+ }
  
- 	/* find out number of slots supported */
--	if (!device_property_read_u32(dev, "num-slots", &pdata->num_slots))
--		dev_info(dev, "'num-slots' was deprecated.\n");
-+	device_property_read_u32(dev, "num-slots", &pdata->num_slots);
- 
- 	if (device_property_read_u32(dev, "fifo-depth", &pdata->fifo_depth))
- 		dev_info(dev,
-@@ -3252,12 +3251,18 @@ int dw_mci_probe(struct dw_mci *host)
- 	if (ret)
- 		goto err_dmaunmap;
- 
--	/*
--	 * Even though dwmmc IP is provided the multiple slots,
--	 * there is no use case in mmc subsystem.
--	 * dwmmc host controller needs to initialize the one slot per an IP.
--	 */
--	host->num_slots = 1;
-+	if (host->pdata->num_slots)
-+		host->num_slots = host->pdata->num_slots;
-+	else
-+		host->num_slots = 1;
++static void mmc_parse_slot_cfg(struct mmc_host *mmc)
++{
++	struct dw_mci_slot *slot = mmc_priv(mmc);
++	struct fwnode_handle *child;
++	u32 bus_width, id;
 +
-+	if (host->num_slots < 1 ||
-+	    host->num_slots > SDMMC_GET_SLOT_NUM(mci_readl(host, HCON))) {
-+		dev_err(host->dev,
-+			"Platform data must supply correct num_slots.\n");
-+		ret = -ENODEV;
-+		goto err_clk_ciu;
++	/* Find the node for this card. */
++	device_for_each_child_node(mmc->parent, child) {
++		if (!fwnode_property_read_u32(child, "reg", &id) &&
++		    id == slot->id)
++			break;
 +	}
++
++	if (!child)
++		return;
++
++	if (!fwnode_property_read_u32(child, "bus-width", &bus_width)) {
++		switch (bus_width) {
++		case 8:
++			mmc->caps |= MMC_CAP_8_BIT_DATA;
++			/* Hosts capable of 8-bit can also do 4 bits. */
++		case 4:
++			mmc->caps |= MMC_CAP_4_BIT_DATA;
++			break;
++		default:
++			break;
++		}
++	}
++
++	if (fwnode_property_read_bool(child, "disable-wp"))
++		mmc->caps2 |= MMC_CAP2_NO_WRITE_PROTECT;
++}
++
+ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ {
+ 	struct mmc_host *mmc;
+@@ -2830,10 +2863,14 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ 	if (host->pdata->caps2)
+ 		mmc->caps2 = host->pdata->caps2;
  
- 	/*
- 	 * Enable interrupts for command done, data over, data empty,
++	/* Parse common configuration. */
+ 	ret = mmc_of_parse(mmc);
+ 	if (ret)
+ 		goto err_host_allocated;
+ 
++	/* Check per-slot configuration. */
++	mmc_parse_slot_cfg(mmc);
++
+ 	/* Process SDIO IRQs through the sdio_irq_work. */
+ 	if (mmc->caps & MMC_CAP_SDIO_IRQ)
+ 		mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;
 -- 
 1.8.3.1
