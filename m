@@ -1,72 +1,78 @@
 From: Liming Sun <lsun@mellanox.com>
-Subject: [PATCH 2/9] Revert "mmc: dw_mmc: remove the unnecessary slot variable"
-Date: Fri,  6 Oct 2017 15:21:25 -0400
-Message-ID: <0e89c1c60e1f6ed2210a71f0ec436f9292d2a1ad.1507315433.git.lsun@mellanox.com>
+Subject: [PATCH 1/9] Revert "Documentation: dw-mshc: deprecate num-slots"
+Date: Fri,  6 Oct 2017 15:21:24 -0400
+Message-ID: <7deccd8a59339ef0ca5c1d54eb453d040b7df594.1507315433.git.lsun@mellanox.com>
 References: <cover.1507315433.git.lsun@mellanox.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-il-dmz.mellanox.com ([193.47.165.129]:39996 "EHLO
+        mellanox.co.il" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1752343AbdJFTWD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Oct 2017 15:22:03 -0400
 In-Reply-To: <cover.1507315433.git.lsun@mellanox.com>
 In-Reply-To: <cover.1507315433.git.lsun@mellanox.com>
 References: <cover.1507315433.git.lsun@mellanox.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Liming Sun <lsun@mellanox.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>
+Cc: Liming Sun <lsun@mellanox.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 
-This reverts commit e47c0b96678c5fd731c125dca677880e06d6394c.
+This reverts commit 3f5b4b79d4c0fa71fd7d74c2a44bbc0869c04c9b.
 
 The Mellanox BlueField SoC requires multiple slot dw-mmc support.
 
 Signed-off-by: Liming Sun <lsun@mellanox.com>
 ---
- drivers/mmc/host/dw_mmc.c | 13 ++++++++-----
- 1 file changed, 8 insertions(+), 5 deletions(-)
+ .../devicetree/bindings/mmc/synopsys-dw-mshc.txt         | 16 +++++++++-------
+ 1 file changed, 9 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 860313b..c9f81db 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -3040,15 +3040,17 @@ static void dw_mci_enable_cd(struct dw_mci *host)
- {
- 	unsigned long irqflags;
- 	u32 temp;
-+	struct dw_mci_slot *slot;
+diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+index ef3e5f1..9cb55ca 100644
+--- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
++++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+@@ -12,12 +12,12 @@ Required Properties:
+ * #address-cells: should be 1.
+ * #size-cells: should be 0.
  
- 	/*
- 	 * No need for CD if all slots have a non-error GPIO
- 	 * as well as broken card detection is found.
- 	 */
--	if (host->slot->mmc->caps & MMC_CAP_NEEDS_POLL)
-+	slot = host->slot;
-+	if (slot->mmc->caps & MMC_CAP_NEEDS_POLL)
- 		return;
+-# Slots (DEPRECATED): The slot specific information are contained within
+-  child-nodes with each child-node representing a supported slot. There should
+-  be atleast one child node representing a card slot. The name of the child node
+-  representing the slot is recommended to be slot@n where n is the unique number
+-  of the slot connected to the controller. The following are optional properties
+-  which can be included in the slot child node.
++# Slots: The slot specific information are contained within child-nodes with
++  each child-node representing a supported slot. There should be atleast one
++  child node representing a card slot. The name of the child node representing
++  the slot is recommended to be slot@n where n is the unique number of the slot
++  connected to the controller. The following are optional properties which
++  can be included in the slot child node.
  
--	if (mmc_gpio_get_cd(host->slot->mmc) < 0) {
-+	if (mmc_gpio_get_cd(slot->mmc) < 0) {
- 		spin_lock_irqsave(&host->irq_lock, irqflags);
- 		temp = mci_readl(host, INTMASK);
- 		temp  |= SDMMC_INT_CD;
-@@ -3319,6 +3321,7 @@ int dw_mci_runtime_resume(struct device *dev)
- {
- 	int ret = 0;
- 	struct dw_mci *host = dev_get_drvdata(dev);
-+	struct dw_mci_slot *slot = host->slot;
+ 	* reg: specifies the physical slot number. The valid values of this
+ 	  property is 0 to (num-slots -1), where num-slots is the value
+@@ -63,7 +63,7 @@ Optional properties:
+   clock(cclk_out). If it's not specified, max is 200MHZ and min is 400KHz by default.
+ 	  (Use the "max-frequency" instead of "clock-freq-min-max".)
  
- 	if (host->slot &&
- 	    (mmc_can_gpio_cd(host->slot->mmc) ||
-@@ -3358,11 +3361,11 @@ int dw_mci_runtime_resume(struct device *dev)
- 	mci_writel(host, CTRL, SDMMC_CTRL_INT_ENABLE);
- 
- 
--	if (host->slot->mmc->pm_flags & MMC_PM_KEEP_POWER)
--		dw_mci_set_ios(host->slot->mmc, &host->slot->mmc->ios);
-+	if (slot->mmc->pm_flags & MMC_PM_KEEP_POWER)
-+		dw_mci_set_ios(slot->mmc, &slot->mmc->ios);
- 
- 	/* Force setup bus to guarantee available clock output */
--	dw_mci_setup_bus(host->slot, true);
-+	dw_mci_setup_bus(slot, true);
- 
- 	/* Now that slots are all setup, we can enable card detect */
- 	dw_mci_enable_cd(host);
+-* num-slots (DEPRECATED): specifies the number of slots supported by the controller.
++* num-slots: specifies the number of slots supported by the controller.
+   The number of physical slots actually used could be equal or less than the
+   value specified by num-slots. If this property is not specified, the value
+   of num-slot property is assumed to be 1.
+@@ -124,6 +124,7 @@ board specific portions as listed below.
+ 	dwmmc0@12200000 {
+ 		clock-frequency = <400000000>;
+ 		clock-freq-min-max = <400000 200000000>;
++		num-slots = <1>;
+ 		broken-cd;
+ 		fifo-depth = <0x80>;
+ 		card-detect-delay = <200>;
+@@ -138,6 +139,7 @@ board specific portions as listed below.
+ 	dwmmc0@12200000 {
+ 		clock-frequency = <400000000>;
+ 		clock-freq-min-max = <400000 200000000>;
++		num-slots = <1>;
+ 		broken-cd;
+ 		fifo-depth = <0x80>;
+ 		card-detect-delay = <200>;
 -- 
 1.8.3.1
+
