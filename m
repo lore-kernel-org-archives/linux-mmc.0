@@ -1,52 +1,72 @@
 From: Liming Sun <lsun@mellanox.com>
-Subject: [PATCH 0/9] Enable dw-mmc multi-card support
-Date: Fri,  6 Oct 2017 15:21:23 -0400
-Message-ID: <cover.1507315433.git.lsun@mellanox.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-il-dmz.mellanox.com ([193.47.165.129]:39994 "EHLO
-        mellanox.co.il" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1751639AbdJFTWD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Oct 2017 15:22:03 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Subject: [PATCH 2/9] Revert "mmc: dw_mmc: remove the unnecessary slot variable"
+Date: Fri,  6 Oct 2017 15:21:25 -0400
+Message-ID: <0e89c1c60e1f6ed2210a71f0ec436f9292d2a1ad.1507315433.git.lsun@mellanox.com>
+References: <cover.1507315433.git.lsun@mellanox.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <cover.1507315433.git.lsun@mellanox.com>
+In-Reply-To: <cover.1507315433.git.lsun@mellanox.com>
+References: <cover.1507315433.git.lsun@mellanox.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Liming Sun <lsun@mellanox.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Jaehoon Chung <jh80.chung@samsung.com>, Kukjin Kim <kgene@kernel.org>, Krzysztof Kozlowski <krzk@kernel.org>
-Cc: Liming Sun <lsun@mellanox.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org
 
-This series of commits enables the multi-card support for the dw-mmc
-controller. It includes two parts as below.
+This reverts commit e47c0b96678c5fd731c125dca677880e06d6394c.
 
-The first part (patches 1-7) reverts the series of recent commits that
-removed the multi-card support with comments saying there was no such
-use case in the real world. Actually this feature is being used in
-Mellanox Bluefield SoC and has been requested by customers.
+The Mellanox BlueField SoC requires multiple slot dw-mmc support.
 
-The second part (patches 8-9) fixes the DesignWare multi-card support
-according to the dw-mmc databook (synnopsys: DesignWare Cores Mobile
-Storage Host Databook, 2.70a). It has changes to set the card number
-into the CMD register to multiplex requests to different cards when
-working in SD_MMC_CEATA mode, set the CTYPE / CLKENA / CDTHRCTL
-registers properly according to the spec, and parse the per-card
-configuration to match the Linux Documentation
-(bindings/mmc/synopsys-dw-mshc.txt).
+Signed-off-by: Liming Sun <lsun@mellanox.com>
+---
+ drivers/mmc/host/dw_mmc.c | 13 ++++++++-----
+ 1 file changed, 8 insertions(+), 5 deletions(-)
 
-Liming Sun (9):
-  Revert "Documentation: dw-mshc: deprecate num-slots"
-  Revert "mmc: dw_mmc: remove the unnecessary slot variable"
-  Revert "mmc: dw_mmc: use the 'slot' instead of 'cur_slot'"
-  Revert "mmc: dw_mmc: remove the 'id' arguments about functions
-    relevant to slot"
-  Revert "mmc: dw_mmc: change the array of slots"
-  Revert "mmc: dw_mmc: remove the loop about finding slots"
-  Revert "mmc: dw_mmc: deprecated the "num-slots" property"
-  mmc: dw_mmc: Support two SD_MMC_CE-ATA cards
-  mmc: dw_mmc: Parse slot-specific configuration
-
- .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |  16 +-
- drivers/mmc/host/dw_mmc-exynos.c                   |   4 +-
- drivers/mmc/host/dw_mmc.c                          | 277 ++++++++++++++++-----
- drivers/mmc/host/dw_mmc.h                          |  17 +-
- 4 files changed, 236 insertions(+), 78 deletions(-)
-
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 860313b..c9f81db 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -3040,15 +3040,17 @@ static void dw_mci_enable_cd(struct dw_mci *host)
+ {
+ 	unsigned long irqflags;
+ 	u32 temp;
++	struct dw_mci_slot *slot;
+ 
+ 	/*
+ 	 * No need for CD if all slots have a non-error GPIO
+ 	 * as well as broken card detection is found.
+ 	 */
+-	if (host->slot->mmc->caps & MMC_CAP_NEEDS_POLL)
++	slot = host->slot;
++	if (slot->mmc->caps & MMC_CAP_NEEDS_POLL)
+ 		return;
+ 
+-	if (mmc_gpio_get_cd(host->slot->mmc) < 0) {
++	if (mmc_gpio_get_cd(slot->mmc) < 0) {
+ 		spin_lock_irqsave(&host->irq_lock, irqflags);
+ 		temp = mci_readl(host, INTMASK);
+ 		temp  |= SDMMC_INT_CD;
+@@ -3319,6 +3321,7 @@ int dw_mci_runtime_resume(struct device *dev)
+ {
+ 	int ret = 0;
+ 	struct dw_mci *host = dev_get_drvdata(dev);
++	struct dw_mci_slot *slot = host->slot;
+ 
+ 	if (host->slot &&
+ 	    (mmc_can_gpio_cd(host->slot->mmc) ||
+@@ -3358,11 +3361,11 @@ int dw_mci_runtime_resume(struct device *dev)
+ 	mci_writel(host, CTRL, SDMMC_CTRL_INT_ENABLE);
+ 
+ 
+-	if (host->slot->mmc->pm_flags & MMC_PM_KEEP_POWER)
+-		dw_mci_set_ios(host->slot->mmc, &host->slot->mmc->ios);
++	if (slot->mmc->pm_flags & MMC_PM_KEEP_POWER)
++		dw_mci_set_ios(slot->mmc, &slot->mmc->ios);
+ 
+ 	/* Force setup bus to guarantee available clock output */
+-	dw_mci_setup_bus(host->slot, true);
++	dw_mci_setup_bus(slot, true);
+ 
+ 	/* Now that slots are all setup, we can enable card detect */
+ 	dw_mci_enable_cd(host);
 -- 
 1.8.3.1
-
