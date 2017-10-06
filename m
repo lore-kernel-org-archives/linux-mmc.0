@@ -1,78 +1,64 @@
 From: Liming Sun <lsun@mellanox.com>
-Subject: [PATCH 1/9] Revert "Documentation: dw-mshc: deprecate num-slots"
-Date: Fri,  6 Oct 2017 15:21:24 -0400
-Message-ID: <7deccd8a59339ef0ca5c1d54eb453d040b7df594.1507315433.git.lsun@mellanox.com>
+Subject: [PATCH 7/9] Revert "mmc: dw_mmc: deprecated the "num-slots" property"
+Date: Fri,  6 Oct 2017 15:21:30 -0400
+Message-ID: <8a128c02687629bee2cda9ca02ca5895be8202c4.1507315433.git.lsun@mellanox.com>
 References: <cover.1507315433.git.lsun@mellanox.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-il-dmz.mellanox.com ([193.47.165.129]:39996 "EHLO
-        mellanox.co.il" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1752343AbdJFTWD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Oct 2017 15:22:03 -0400
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <cover.1507315433.git.lsun@mellanox.com>
 In-Reply-To: <cover.1507315433.git.lsun@mellanox.com>
 References: <cover.1507315433.git.lsun@mellanox.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Liming Sun <lsun@mellanox.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>
-Cc: Liming Sun <lsun@mellanox.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 
-This reverts commit 3f5b4b79d4c0fa71fd7d74c2a44bbc0869c04c9b.
+This reverts commit d30a8f7bdf6498e47bd3a6f31e5028f239deb208.
 
 The Mellanox BlueField SoC requires multiple slot dw-mmc support.
 
 Signed-off-by: Liming Sun <lsun@mellanox.com>
 ---
- .../devicetree/bindings/mmc/synopsys-dw-mshc.txt         | 16 +++++++++-------
- 1 file changed, 9 insertions(+), 7 deletions(-)
+ drivers/mmc/host/dw_mmc.c | 21 +++++++++++++--------
+ 1 file changed, 13 insertions(+), 8 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
-index ef3e5f1..9cb55ca 100644
---- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
-+++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
-@@ -12,12 +12,12 @@ Required Properties:
- * #address-cells: should be 1.
- * #size-cells: should be 0.
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index ef36e05..150cd05 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -3018,8 +3018,7 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+ 	}
  
--# Slots (DEPRECATED): The slot specific information are contained within
--  child-nodes with each child-node representing a supported slot. There should
--  be atleast one child node representing a card slot. The name of the child node
--  representing the slot is recommended to be slot@n where n is the unique number
--  of the slot connected to the controller. The following are optional properties
--  which can be included in the slot child node.
-+# Slots: The slot specific information are contained within child-nodes with
-+  each child-node representing a supported slot. There should be atleast one
-+  child node representing a card slot. The name of the child node representing
-+  the slot is recommended to be slot@n where n is the unique number of the slot
-+  connected to the controller. The following are optional properties which
-+  can be included in the slot child node.
+ 	/* find out number of slots supported */
+-	if (!device_property_read_u32(dev, "num-slots", &pdata->num_slots))
+-		dev_info(dev, "'num-slots' was deprecated.\n");
++	device_property_read_u32(dev, "num-slots", &pdata->num_slots);
  
- 	* reg: specifies the physical slot number. The valid values of this
- 	  property is 0 to (num-slots -1), where num-slots is the value
-@@ -63,7 +63,7 @@ Optional properties:
-   clock(cclk_out). If it's not specified, max is 200MHZ and min is 400KHz by default.
- 	  (Use the "max-frequency" instead of "clock-freq-min-max".)
+ 	if (device_property_read_u32(dev, "fifo-depth", &pdata->fifo_depth))
+ 		dev_info(dev,
+@@ -3252,12 +3251,18 @@ int dw_mci_probe(struct dw_mci *host)
+ 	if (ret)
+ 		goto err_dmaunmap;
  
--* num-slots (DEPRECATED): specifies the number of slots supported by the controller.
-+* num-slots: specifies the number of slots supported by the controller.
-   The number of physical slots actually used could be equal or less than the
-   value specified by num-slots. If this property is not specified, the value
-   of num-slot property is assumed to be 1.
-@@ -124,6 +124,7 @@ board specific portions as listed below.
- 	dwmmc0@12200000 {
- 		clock-frequency = <400000000>;
- 		clock-freq-min-max = <400000 200000000>;
-+		num-slots = <1>;
- 		broken-cd;
- 		fifo-depth = <0x80>;
- 		card-detect-delay = <200>;
-@@ -138,6 +139,7 @@ board specific portions as listed below.
- 	dwmmc0@12200000 {
- 		clock-frequency = <400000000>;
- 		clock-freq-min-max = <400000 200000000>;
-+		num-slots = <1>;
- 		broken-cd;
- 		fifo-depth = <0x80>;
- 		card-detect-delay = <200>;
+-	/*
+-	 * Even though dwmmc IP is provided the multiple slots,
+-	 * there is no use case in mmc subsystem.
+-	 * dwmmc host controller needs to initialize the one slot per an IP.
+-	 */
+-	host->num_slots = 1;
++	if (host->pdata->num_slots)
++		host->num_slots = host->pdata->num_slots;
++	else
++		host->num_slots = 1;
++
++	if (host->num_slots < 1 ||
++	    host->num_slots > SDMMC_GET_SLOT_NUM(mci_readl(host, HCON))) {
++		dev_err(host->dev,
++			"Platform data must supply correct num_slots.\n");
++		ret = -ENODEV;
++		goto err_clk_ciu;
++	}
+ 
+ 	/*
+ 	 * Enable interrupts for command done, data over, data empty,
 -- 
 1.8.3.1
-
