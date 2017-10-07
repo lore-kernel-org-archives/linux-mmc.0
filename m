@@ -1,226 +1,78 @@
-From: Liming Sun <lsun@mellanox.com>
-Subject: [PATCH 6/9] Revert "mmc: dw_mmc: remove the loop about finding slots"
-Date: Fri,  6 Oct 2017 15:21:29 -0400
-Message-ID: <6afec6ed816a424fe78a2d8a300fbfeef0bf8bc2.1507315433.git.lsun@mellanox.com>
-References: <cover.1507315433.git.lsun@mellanox.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <cover.1507315433.git.lsun@mellanox.com>
-In-Reply-To: <cover.1507315433.git.lsun@mellanox.com>
-References: <cover.1507315433.git.lsun@mellanox.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Liming Sun <lsun@mellanox.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v.4.14-rc4
+Date: Sat,  7 Oct 2017 09:33:30 +0200
+Message-ID: <1507361610-31577-1-git-send-email-ulf.hansson@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lf0-f47.google.com ([209.85.215.47]:46684 "EHLO
+        mail-lf0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750855AbdJGHdf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 7 Oct 2017 03:33:35 -0400
+Received: by mail-lf0-f47.google.com with SMTP id g70so6883066lfl.3
+        for <linux-mmc@vger.kernel.org>; Sat, 07 Oct 2017 00:33:35 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
 
-This reverts commit 58870241a67453be7dc9ab368d5a0cdc9c404616.
+Hi Linus,
 
-The Mellanox BlueField SoC requires multiple slot dw-mmc support.
+Here's a PR with a couple of MMC fixes intended for v4.14-rc4. Details about the
+highlights are as usual found in the signed tag.
 
-Signed-off-by: Liming Sun <lsun@mellanox.com>
----
- drivers/mmc/host/dw_mmc.c | 115 +++++++++++++++++++++++++++++++---------------
- 1 file changed, 79 insertions(+), 36 deletions(-)
+Please pull this in!
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index d11b8d7..ef36e05 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -2582,21 +2582,26 @@ static void dw_mci_cmd_interrupt(struct dw_mci *host, u32 status)
- 
- static void dw_mci_handle_cd(struct dw_mci *host)
- {
--	int i = 0;
--	struct dw_mci_slot *slot = host->slot[i];
-+	int i;
-+
-+	for (i = 0; i < host->num_slots; i++) {
-+		struct dw_mci_slot *slot = host->slot[i];
-+
-+		if (!slot)
-+			continue;
- 
--	if (slot->mmc->ops->card_event)
--		slot->mmc->ops->card_event(slot->mmc);
--	mmc_detect_change(slot->mmc,
--		msecs_to_jiffies(host->pdata->detect_delay_ms));
-+		if (slot->mmc->ops->card_event)
-+			slot->mmc->ops->card_event(slot->mmc);
-+		mmc_detect_change(slot->mmc,
-+			msecs_to_jiffies(host->pdata->detect_delay_ms));
-+	}
- }
- 
- static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
- {
- 	struct dw_mci *host = dev_id;
- 	u32 pending;
--	int i = 0;
--	struct dw_mci_slot *slot = host->slot[i];
-+	int i;
- 
- 	pending = mci_readl(host, MINTSTS); /* read-only mask reg */
- 
-@@ -2675,11 +2680,19 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
- 			dw_mci_handle_cd(host);
- 		}
- 
--		if (pending & SDMMC_INT_SDIO(slot->sdio_id)) {
--			mci_writel(host, RINTSTS,
--				   SDMMC_INT_SDIO(slot->sdio_id));
--			__dw_mci_enable_sdio_irq(slot, 0);
--			sdio_signal_irq(slot->mmc);
-+		/* Handle SDIO Interrupts */
-+		for (i = 0; i < host->num_slots; i++) {
-+			struct dw_mci_slot *slot = host->slot[i];
-+
-+			if (!slot)
-+				continue;
-+
-+			if (pending & SDMMC_INT_SDIO(slot->sdio_id)) {
-+				mci_writel(host, RINTSTS,
-+					   SDMMC_INT_SDIO(slot->sdio_id));
-+				__dw_mci_enable_sdio_irq(slot, 0);
-+				sdio_signal_irq(slot->mmc);
-+			}
- 		}
- 
- 	}
-@@ -3043,24 +3056,29 @@ static void dw_mci_enable_cd(struct dw_mci *host)
- {
- 	unsigned long irqflags;
- 	u32 temp;
--	int i = 0;
-+	int i;
- 	struct dw_mci_slot *slot;
- 
- 	/*
- 	 * No need for CD if all slots have a non-error GPIO
- 	 * as well as broken card detection is found.
- 	 */
--	slot = host->slot[i];
--	if (slot->mmc->caps & MMC_CAP_NEEDS_POLL)
--		return;
-+	for (i = 0; i < host->num_slots; i++) {
-+		slot = host->slot[i];
-+		if (slot->mmc->caps & MMC_CAP_NEEDS_POLL)
-+			return;
- 
--	if (mmc_gpio_get_cd(slot->mmc) < 0) {
--		spin_lock_irqsave(&host->irq_lock, irqflags);
--		temp = mci_readl(host, INTMASK);
--		temp  |= SDMMC_INT_CD;
--		mci_writel(host, INTMASK, temp);
--		spin_unlock_irqrestore(&host->irq_lock, irqflags);
-+		if (mmc_gpio_get_cd(slot->mmc) < 0)
-+			break;
- 	}
-+	if (i == host->num_slots)
-+		return;
-+
-+	spin_lock_irqsave(&host->irq_lock, irqflags);
-+	temp = mci_readl(host, INTMASK);
-+	temp  |= SDMMC_INT_CD;
-+	mci_writel(host, INTMASK, temp);
-+	spin_unlock_irqrestore(&host->irq_lock, irqflags);
- }
- 
- int dw_mci_probe(struct dw_mci *host)
-@@ -3068,6 +3086,7 @@ int dw_mci_probe(struct dw_mci *host)
- 	const struct dw_mci_drv_data *drv_data = host->drv_data;
- 	int width, i, ret = 0;
- 	u32 fifo_size;
-+	int init_slots = 0;
- 
- 	if (!host->pdata) {
- 		host->pdata = dw_mci_parse_dt(host);
-@@ -3234,6 +3253,13 @@ int dw_mci_probe(struct dw_mci *host)
- 		goto err_dmaunmap;
- 
- 	/*
-+	 * Even though dwmmc IP is provided the multiple slots,
-+	 * there is no use case in mmc subsystem.
-+	 * dwmmc host controller needs to initialize the one slot per an IP.
-+	 */
-+	host->num_slots = 1;
-+
-+	/*
- 	 * Enable interrupts for command done, data over, data empty,
- 	 * receive ready and error such as transmit, receive timeout, crc error
- 	 */
-@@ -3248,9 +3274,20 @@ int dw_mci_probe(struct dw_mci *host)
- 		 host->irq, width, fifo_size);
- 
- 	/* We need at least one slot to succeed */
--	ret = dw_mci_init_slot(host, 0);
--	if (ret) {
--		dev_dbg(host->dev, "slot %d init failed\n", i);
-+	for (i = 0; i < host->num_slots; i++) {
-+		ret = dw_mci_init_slot(host, i);
-+		if (ret)
-+			dev_dbg(host->dev, "slot %d init failed\n", i);
-+		else
-+			init_slots++;
-+	}
-+
-+	if (init_slots) {
-+		dev_info(host->dev, "%d slots initialized\n", init_slots);
-+	} else {
-+		dev_dbg(host->dev,
-+			"attempted to initialize %d slots, but failed on all\n",
-+			host->num_slots);
- 		goto err_dmaunmap;
- 	}
- 
-@@ -3278,11 +3315,13 @@ int dw_mci_probe(struct dw_mci *host)
- 
- void dw_mci_remove(struct dw_mci *host)
- {
--	int i = 0;
-+	int i;
- 
--	dev_dbg(host->dev, "remove slot %d\n", i);
--	if (host->slot[i])
--		dw_mci_cleanup_slot(host->slot[i], i);
-+	for (i = 0; i < host->num_slots; i++) {
-+		dev_dbg(host->dev, "remove slot %d\n", i);
-+		if (host->slot[i])
-+			dw_mci_cleanup_slot(host->slot[i], i);
-+	}
- 
- 	mci_writel(host, RINTSTS, 0xFFFFFFFF);
- 	mci_writel(host, INTMASK, 0); /* disable all mmc interrupt first */
-@@ -3325,9 +3364,8 @@ int dw_mci_runtime_suspend(struct device *dev)
- 
- int dw_mci_runtime_resume(struct device *dev)
- {
--	int i = 0, ret = 0;
-+	int i, ret = 0;
- 	struct dw_mci *host = dev_get_drvdata(dev);
--	struct dw_mci_slot *slot = host->slot[i];
- 
- 	if (host->cur_slot &&
- 	    (mmc_can_gpio_cd(host->cur_slot->mmc) ||
-@@ -3366,12 +3404,17 @@ int dw_mci_runtime_resume(struct device *dev)
- 		   DW_MCI_ERROR_FLAGS);
- 	mci_writel(host, CTRL, SDMMC_CTRL_INT_ENABLE);
- 
-+	for (i = 0; i < host->num_slots; i++) {
-+		struct dw_mci_slot *slot = host->slot[i];
- 
--	if (slot->mmc->pm_flags & MMC_PM_KEEP_POWER)
--		dw_mci_set_ios(slot->mmc, &slot->mmc->ios);
-+		if (!slot)
-+			continue;
-+		if (slot->mmc->pm_flags & MMC_PM_KEEP_POWER)
-+			dw_mci_set_ios(slot->mmc, &slot->mmc->ios);
- 
--	/* Force setup bus to guarantee available clock output */
--	dw_mci_setup_bus(slot, true);
-+		/* Force setup bus to guarantee available clock output */
-+		dw_mci_setup_bus(slot, true);
-+	}
- 
- 	/* Now that slots are all setup, we can enable card detect */
- 	dw_mci_enable_cd(host);
--- 
-1.8.3.1
+Kind regards
+Ulf Hansson
+
+
+The following changes since commit 9e66317d3c92ddaab330c125dfe9d06eee268aff:
+
+  Linux 4.14-rc3 (2017-10-01 14:54:54 -0700)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v4.14-rc3
+
+for you to fetch changes up to bb16ea1742c8f35a9349b7508dc45d3a922db5f5:
+
+  mmc: sdhci-xenon: Fix clock resource by adding an optional bus clock (2017-10-04 10:50:36 +0200)
+
+----------------------------------------------------------------
+MMC core:
+ - Fix driver strength selection when selecting hs400es
+ - Delete bounce buffer handling:
+   This change fixes a problem related to how bounce buffers are being
+   allocated. However, instead of trying to fix that, let's just remove
+   the mmc bounce buffer code altogether, as it has practically no use.
+
+MMC host:
+ - meson-gx: A couple of fixes related to clock/phase/tuning
+ - sdhci-xenon: Fix clock resource by adding an optional bus clock
+
+----------------------------------------------------------------
+Chanho Min (1):
+      mmc: core: add driver strength selection when selecting hs400es
+
+Gregory CLEMENT (1):
+      mmc: sdhci-xenon: Fix clock resource by adding an optional bus clock
+
+Jerome Brunet (3):
+      mmc: meson-gx: make sure the clock is rounded down
+      mmc: meson-gx: fix rx phase reset
+      mmc: meson-gx: include tx phase in the tuning process
+
+Linus Walleij (1):
+      mmc: Delete bounce buffer handling
+
+ .../bindings/mmc/marvell,xenon-sdhci.txt           |  12 +-
+ drivers/mmc/core/block.c                           |   3 -
+ drivers/mmc/core/mmc.c                             |  36 +++---
+ drivers/mmc/core/queue.c                           | 125 ++-------------------
+ drivers/mmc/core/queue.h                           |   6 -
+ drivers/mmc/host/cavium.c                          |   2 +-
+ drivers/mmc/host/meson-gx-mmc.c                    |  26 ++++-
+ drivers/mmc/host/pxamci.c                          |   6 +-
+ drivers/mmc/host/sdhci-xenon.c                     |  24 +++-
+ drivers/mmc/host/sdhci-xenon.h                     |   1 +
+ include/linux/mmc/host.h                           |   2 +-
+ 11 files changed, 81 insertions(+), 162 deletions(-)
