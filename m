@@ -1,7 +1,7 @@
 From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH 09/11] mmc: omap_hsmmc: catch all errors when getting regulators
-Date: Sat,  7 Oct 2017 12:36:56 +0200
-Message-ID: <20171007103658.16868-10-wsa+renesas@sang-engineering.com>
+Subject: [PATCH 05/11] mmc: meson-mx-sdio: catch all errors when getting regulators
+Date: Sat,  7 Oct 2017 12:36:52 +0200
+Message-ID: <20171007103658.16868-6-wsa+renesas@sang-engineering.com>
 References: <20171007103658.16868-1-wsa+renesas@sang-engineering.com>
 Return-path: <linux-renesas-soc-owner@vger.kernel.org>
 In-Reply-To: <20171007103658.16868-1-wsa+renesas@sang-engineering.com>
@@ -19,21 +19,21 @@ be future proof and b) have driver code which is easier to understand.
 
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
- drivers/mmc/host/omap_hsmmc.c | 2 +-
+ drivers/mmc/host/meson-mx-sdio.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index f2a1137be8bc4b..071693ebfe1891 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -445,7 +445,7 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+diff --git a/drivers/mmc/host/meson-mx-sdio.c b/drivers/mmc/host/meson-mx-sdio.c
+index 19b499bbe6912f..fcbc469a5b0e74 100644
+--- a/drivers/mmc/host/meson-mx-sdio.c
++++ b/drivers/mmc/host/meson-mx-sdio.c
+@@ -551,7 +551,7 @@ static int meson_mx_mmc_add_host(struct meson_mx_mmc_host *host)
  
- 
+ 	/* Get regulators and the supported OCR mask */
  	ret = mmc_regulator_get_supply(mmc);
 -	if (ret == -EPROBE_DEFER)
 +	if (ret)
  		return ret;
  
- 	/* Allow an aux regulator */
+ 	mmc->max_req_size = MESON_MX_SDIO_BOUNCE_REQ_SIZE;
 -- 
 2.11.0
