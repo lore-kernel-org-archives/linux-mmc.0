@@ -1,18 +1,14 @@
 From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH 11/11] mmc: usdhi6rol0: catch all errors when getting regulators
-Date: Sat,  7 Oct 2017 12:36:58 +0200
-Message-ID: <20171007103658.16868-12-wsa+renesas@sang-engineering.com>
+Subject: [PATCH 08/11] mmc: mxcmmc: catch all errors when getting regulators
+Date: Sat,  7 Oct 2017 12:36:55 +0200
+Message-ID: <20171007103658.16868-9-wsa+renesas@sang-engineering.com>
 References: <20171007103658.16868-1-wsa+renesas@sang-engineering.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([88.99.104.3]:46649 "EHLO pokefinder.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752884AbdJGKhM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sat, 7 Oct 2017 06:37:12 -0400
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
 In-Reply-To: <20171007103658.16868-1-wsa+renesas@sang-engineering.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-renesas-soc-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-renesas-soc@vger.kernel.org, Fabrizio Castro <fabrizio.castro@bp.renesas.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>
+List-Id: linux-mmc@vger.kernel.org
 
 Bail out everytime when mmc_regulator_get_supply() returns an errno, not only
 when probing gets deferred. This is currently a no-op, because this function
@@ -23,22 +19,21 @@ be future proof and b) have driver code which is easier to understand.
 
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
- drivers/mmc/host/usdhi6rol0.c | 2 +-
+ drivers/mmc/host/mxcmmc.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/usdhi6rol0.c b/drivers/mmc/host/usdhi6rol0.c
-index 64da6a88cfb90e..cdfeb15b6f0511 100644
---- a/drivers/mmc/host/usdhi6rol0.c
-+++ b/drivers/mmc/host/usdhi6rol0.c
-@@ -1757,7 +1757,7 @@ static int usdhi6_probe(struct platform_device *pdev)
- 		return -ENOMEM;
+diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+index 328484b96620e8..8bd9f060be2ae0 100644
+--- a/drivers/mmc/host/mxcmmc.c
++++ b/drivers/mmc/host/mxcmmc.c
+@@ -1075,7 +1075,7 @@ static int mxcmci_probe(struct platform_device *pdev)
+ 		dat3_card_detect = true;
  
  	ret = mmc_regulator_get_supply(mmc);
 -	if (ret == -EPROBE_DEFER)
 +	if (ret)
- 		goto e_free_mmc;
+ 		goto out_free;
  
- 	ret = mmc_of_parse(mmc);
+ 	if (!mmc->ocr_avail) {
 -- 
 2.11.0
-
