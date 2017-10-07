@@ -1,14 +1,18 @@
 From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH 04/11] mmc: meson-gx-mmc: catch all errors when getting regulators
-Date: Sat,  7 Oct 2017 12:36:51 +0200
-Message-ID: <20171007103658.16868-5-wsa+renesas@sang-engineering.com>
+Subject: [PATCH 07/11] mmc: mtk-sd: catch all errors when getting regulators
+Date: Sat,  7 Oct 2017 12:36:54 +0200
+Message-ID: <20171007103658.16868-8-wsa+renesas@sang-engineering.com>
 References: <20171007103658.16868-1-wsa+renesas@sang-engineering.com>
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from sauhun.de ([88.99.104.3]:46652 "EHLO pokefinder.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751600AbdJGKhL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sat, 7 Oct 2017 06:37:11 -0400
 In-Reply-To: <20171007103658.16868-1-wsa+renesas@sang-engineering.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-renesas-soc@vger.kernel.org, Fabrizio Castro <fabrizio.castro@bp.renesas.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>
-List-Id: linux-mmc@vger.kernel.org
 
 Bail out everytime when mmc_regulator_get_supply() returns an errno, not only
 when probing gets deferred. This is currently a no-op, because this function
@@ -19,21 +23,22 @@ be future proof and b) have driver code which is easier to understand.
 
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
- drivers/mmc/host/meson-gx-mmc.c | 2 +-
+ drivers/mmc/host/mtk-sd.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index 85745ef179e22b..e0862d3f65b346 100644
---- a/drivers/mmc/host/meson-gx-mmc.c
-+++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -1190,7 +1190,7 @@ static int meson_mmc_probe(struct platform_device *pdev)
- 	/* Get regulators and the supported OCR mask */
- 	host->vqmmc_enabled = false;
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index 267f7ab08420eb..7c518a560089ce 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -1641,7 +1641,7 @@ static int msdc_drv_probe(struct platform_device *pdev)
+ 	}
+ 
  	ret = mmc_regulator_get_supply(mmc);
 -	if (ret == -EPROBE_DEFER)
 +	if (ret)
- 		goto free_host;
+ 		goto host_free;
  
- 	ret = mmc_of_parse(mmc);
+ 	host->src_clk = devm_clk_get(&pdev->dev, "source");
 -- 
 2.11.0
+
