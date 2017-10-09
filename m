@@ -1,71 +1,76 @@
-From: Bjorn Helgaas <helgaas@kernel.org>
-Subject: Re: [PATCH] mmc: sdhci-pci: Remove D3 delays for Intel BYT-related
- host controllers
-Date: Mon, 9 Oct 2017 08:41:54 -0500
-Message-ID: <20171009134154.GJ25517@bhelgaas-glaptop.roam.corp.google.com>
-References: <1507294259-20438-1-git-send-email-adrian.hunter@intel.com>
- <20171006162048.GC25517@bhelgaas-glaptop.roam.corp.google.com>
- <ada41e9b-6fb3-82ab-e458-af4942adba2d@intel.com>
+From: Matthias Brugger <matthias.bgg@gmail.com>
+Subject: Re: [PATCH v2 01/13] mmc: dt-bindings: Add reg/source_cg/latch-ck for
+ Mediatek MMC bindings
+Date: Mon, 9 Oct 2017 16:53:20 +0200
+Message-ID: <48f6a9fc-96df-e284-2d44-e5e84dc3cd65@gmail.com>
+References: <1507548926-9555-1-git-send-email-chaotian.jing@mediatek.com>
+ <1507548926-9555-2-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-pci-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <ada41e9b-6fb3-82ab-e458-af4942adba2d@intel.com>
-Sender: linux-pci-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-pci <linux-pci@vger.kernel.org>, Bjorn Helgaas <bhelgaas@google.com>, linux-acpi <linux-acpi@vger.kernel.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Alan Cox <alan@linux.intel.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1507548926-9555-2-git-send-email-chaotian.jing@mediatek.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chaotian Jing <chaotian.jing@mediatek.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, yong mao <yong.mao@mediatek.com>, Linus Walleij <linus.walleij@linaro.org>, Javier Martinez Canillas <javier@osg.samsung.com>, Heiner Kallweit <hkallweit1@gmail.com>, Phong LE <ple@baylibre.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, srv_heupstream@mediatek.com
 List-Id: linux-mmc@vger.kernel.org
 
-[+cc Alan]
 
-On Mon, Oct 09, 2017 at 11:56:43AM +0300, Adrian Hunter wrote:
-> On 06/10/17 19:20, Bjorn Helgaas wrote:
-> > On Fri, Oct 06, 2017 at 03:50:59PM +0300, Adrian Hunter wrote:
-> >> The default D3 cold delay of 100 ms can cause pauses when streaming audio
-> >> from eMMC.
-> >>
-> >> Intel BYT-related host controllers do not need PCI D3 delays. Although the
-> >> delays can be set to zero via an ACPI _DSM, unfortunately that is not being
-> >> used in all cases. So just set the delays to zero in the driver.
-> >>
-> >> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> >> ---
-> >>  drivers/mmc/host/sdhci-pci-core.c | 17 +++++++++++++----
-> >>  1 file changed, 13 insertions(+), 4 deletions(-)
-> >>
-> >> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> >> index 5f3f7b51299f..14ef99b6e5b7 100644
-> >> --- a/drivers/mmc/host/sdhci-pci-core.c
-> >> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> >> @@ -592,9 +592,18 @@ static void byt_read_dsm(struct sdhci_pci_slot *slot)
-> >>  	slot->chip->rpm_retune = intel_host->d3_retune;
-> >>  }
-> >>  
-> >> -static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
-> >> +static void byt_common_setup(struct sdhci_pci_slot *slot)
-> >>  {
-> >>  	byt_read_dsm(slot);
-> >> +
-> >> +	/* PCI D3 delays are not needed */
-> >> +	slot->chip->pdev->d3_delay = 0;
-> >> +	slot->chip->pdev->d3cold_delay = 0;
-> > 
-> > The fact that it doesn't need D3 delays sounds like a property of the
-> > device itself, regardless of which (if any) driver claims it.
-> > 
-> > Can this be done as a quirk instead, maybe something in
-> > arch/x86/pci/fixup.c?  Maybe quirk_remove_d3_delay() could be used
-> > directly, or something like pci_d3_delay_fixup()?
+
+On 10/09/2017 01:35 PM, Chaotian Jing wrote:
+> Change the comptiable for support of multi-platform
+> Add description for reg
+> Add description for source_cg
+> Add description for mediatek,latch-ck
+> Note that source_cg and mediatek,latch-ck are optional for some projects,
+> eg, MT2701 do not have source_cg, and MT2712 do not need
+> mediatek,latch-ck
 > 
-> A quirk would work, but that would mean setting the quirk for each device
-> (28 so far) and then, when we have new ids, adding them there and to the
-> driver, so it is more convenient just to do it in the driver.  Certainly,
-> this is the only driver we have for these Intel SDHCI PCI host controllers.
+> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+> ---
+>   Documentation/devicetree/bindings/mmc/mtk-sd.txt | 16 +++++++++++++---
+>   1 file changed, 13 insertions(+), 3 deletions(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.txt b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+> index 4182ea3..3e0a97c 100644
+> --- a/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+> @@ -7,10 +7,18 @@ This file documents differences between the core properties in mmc.txt
+>   and the properties used by the msdc driver.
+>   
+>   Required properties:
+> -- compatible: Should be "mediatek,mt8173-mmc","mediatek,mt8135-mmc"
+> +- compatible: value should be either of the following.
+> +	"mediatek,mt8173-mmc","mediatek,mt8135-mmc": for mmc host ip compatible with mt8135
 
-pci_d3_delay_fixup() has code that mitigates the problem of adding new
-IDs.  Maybe that quirk should simply be moved to arch/x86/pci/fixup.c?
+Looks like a typo. You don't need mt8173-mmc binding if you what to use mt8135.
 
-If we put this in the driver, won't we have the unnecessary delays on
-systems where the driver isn't in use?
+Regards,
+Matthias
 
-Bjorn
+> +	"mediatek,mt8173-mmc","mediatek,mt8135-mmc": for mmc host ip compatible with mt8173
+> +	"mediatek,mt2701-mmc": for mmc host ip compatible with mt2701
+> +	"mediatek,mt2712-mmc": for mmc host ip compatible with mt2712
+> +- reg: physical base address of the controller and length
+>   - interrupts: Should contain MSDC interrupt number
+> -- clocks: MSDC source clock, HCLK
+> -- clock-names: "source", "hclk"
+> +- clocks: Should contain phandle for the clock feeding the MMC controller
+> +- clock-names: Should contain the following:
+> +	"source" - source clock (required)
+> +	"hclk" - HCLK which used for host (required)
+> +	"source_cg" - independent source clock gate (required for MT2712)
+>   - pinctrl-names: should be "default", "state_uhs"
+>   - pinctrl-0: should contain default/high speed pin ctrl
+>   - pinctrl-1: should contain uhs mode pin ctrl
+> @@ -30,6 +38,8 @@ Optional properties:
+>   - mediatek,hs400-cmd-resp-sel-rising:  HS400 command response sample selection
+>   				       If present,HS400 command responses are sampled on rising edges.
+>   				       If not present,HS400 command responses are sampled on falling edges.
+> +- mediatek,latch-ck: Some SoCs do not support enhance_rx, need set correct latch-ck to avoid data crc
+> +		     error caused by stop clock(fifo full)
+>   
+>   Examples:
+>   mmc0: mmc@11230000 {
+> 
