@@ -1,151 +1,96 @@
-From: "ojab //" <ojab@ojab.ru>
-Subject: Re: HP Chromebook 13 G1 eMMC is broken since 4.12
-Date: Mon, 9 Oct 2017 10:13:45 +0000
-Message-ID: <CAKzrAgQ-CCvE0cnfb1fpt8PYvf2M8AD4dQ+1Y83o+_=Kecp3kw@mail.gmail.com>
-References: <CAKzrAgSR+j7-XeVEH4Db1nSyNtJAUOei1dfOvJuRKsUOzeoDeQ@mail.gmail.com>
- <e568ad32-588f-8506-c52b-57e42cc7cdeb@intel.com>
+From: Fabrizio Castro <fabrizio.castro@bp.renesas.com>
+Subject: RE: [PATCH 00/11] mmc: document mmc_regulator_get_supply and fix
+ users
+Date: Mon, 9 Oct 2017 10:34:20 +0000
+Message-ID: <TY1PR06MB089514378005B338B7FEF16FC0740@TY1PR06MB0895.apcprd06.prod.outlook.com>
+References: <20171007103658.16868-1-wsa+renesas@sang-engineering.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ua0-f196.google.com ([209.85.217.196]:33783 "EHLO
-        mail-ua0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750828AbdJIKNr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Oct 2017 06:13:47 -0400
-Received: by mail-ua0-f196.google.com with SMTP id 103so5616739uas.0
-        for <linux-mmc@vger.kernel.org>; Mon, 09 Oct 2017 03:13:46 -0700 (PDT)
-In-Reply-To: <e568ad32-588f-8506-c52b-57e42cc7cdeb@intel.com>
+Received: from relmlor1.renesas.com ([210.160.252.171]:17714 "EHLO
+        relmlie4.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1753964AbdJIKeZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Oct 2017 06:34:25 -0400
+In-Reply-To: <20171007103658.16868-1-wsa+renesas@sang-engineering.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
 
-That was quick, thanks.
+Hi Wolfram,
 
->From my limited testing, 4.14-rc4 with the patch work fine, so
-Reported-and-tested-by: ojab <ojab@ojab.ru>
+thank you for putting me in CC, and of course I agree with the changes you =
+are
+suggesting. Have you tried running ./scripts/checkpatch.pl?
 
-//wbr ojab
+Thanks,
+Fab
 
-On Mon, Oct 9, 2017 at 7:24 AM, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 07/10/17 03:16, ojab // wrote:
->> [Please CC me, since I'm not subscribed to the list]
->>
->> Oh hai!
->>
->> Since linux-4.12 I have eMMC-related errors in dmesg and it's
->> completely unusable (_very_ slow):
->>
->> Oct 05 18:24:11 ojab-notebook kernel: print_req_error: I/O error, dev
->> mmcblk0, sector 118656
->> Oct 05 18:24:11 ojab-notebook dracut-initqueue[378]: /dev/mmcblk0p8:
->> read failed after 0 of 4096 at 16711680: Input/output error
->> Oct 05 18:24:11 ojab-notebook dracut-initqueue[378]: /dev/mmcblk0rpmb:
->> read failed after 0 of 4096 at 4128768: Input/output error
->> Oct 05 18:24:11 ojab-notebook dracut-initqueue[378]: /dev/mmcblk0rpmb:
->> read failed after 0 of 4096 at 4186112: Input/output error
->> Oct 05 18:24:11 ojab-notebook dracut-initqueue[378]: /dev/mmcblk0rpmb:
->> read failed after 0 of 4096 at 0: Input/output error
->> Oct 05 18:24:11 ojab-notebook dracut-initqueue[378]: /dev/mmcblk0rpmb:
->> read failed after 0 of 4096 at 4096: Input/output error
->> ...
->> Oct 05 18:24:26 ojab-notebook kernel: mmc0: Timeout waiting for
->> hardware interrupt.
->> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci: ============ SDHCI
->> REGISTER DUMP ===========
->> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci: Sys addr:
->> 0x00000008 | Version:  0x00001002
->> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci: Blk size:
->> 0x00007200 | Blk cnt:  0x00000008
->> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci: Argument:
->> 0x0001cf80 | Trn mode: 0x0000003b
->> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci: Present:
->> 0x1fff0001 | Host ctl: 0x0000003d
->> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci: Power:
->> 0x0000000b | Blk gap:  0x00000080
->> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci: Wake-up:
->> 0x00000000 | Clock:    0x00000007
->> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci: Timeout:
->> 0x00000005 | Int stat: 0x00000000
->> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci: Int enab:
->> 0x02ff000b | Sig enab: 0x02ff000b
->> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci: AC12 err:
->> 0x00000000 | Slot int: 0x00000000
->> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci: Caps:
->> 0x546ec881 | Caps_1:   0x80000807
->> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci: Cmd:
->> 0x0000123a | Max curr: 0x00000000
->> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci: Resp[0]:
->> 0x00000000 | Resp[1]:  0x00000000
->> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci: Resp[2]:
->> 0x00000000 | Resp[3]:  0x00001900
->> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci: Host ctl2: 0x0000000d
->> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci: ADMA Err:
->> 0x00000000 | ADMA Ptr: 0x000000026de25200
->> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci:
->> ============================================
->> Oct 05 18:24:26 ojab-notebook kernel: mmcblk0: error -84 sending
->> status command, retrying
->> Oct 05 18:24:26 ojab-notebook kernel: mmcblk0: error -110 sending stop
->> command, original cmd response 0x0, card status 0x900
->> Oct 05 18:24:26 ojab-notebook kernel: mmcblk0: error -110 transferring
->> data, sector 118656, nr 8, cmd response 0x0, card status 0x0
->> ...
->>
->> `git bisect` told me that
->>
->> c959a6b00ff589c652373e27bced5a700bd450f2 is the first bad commit
->> commit c959a6b00ff589c652373e27bced5a700bd450f2
->> Author: Adrian Hunter <adrian.hunter@intel.com>
->> Date:   Mon Mar 20 19:50:34 2017 +0200
->>
->>     mmc: sdhci-pci: Don't re-tune with runtime pm for some Intel devices
->>
->>     Make use  of an Intel ACPI _DSM that indicates if re-tuning is needed after
->>     D3.
->>
->>     Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
->>     Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
->>     Tested-by: Ludovic Desroches <ludovic.desroches@microchip.com>
->>
->> :040000 040000 e6b59f520ed0beadb7e3ae609f237c2e4a03dfa1
->> c9726a0a3ef41a9c59137bbc52a808a6c91e0d81 M      drivers
->>
->>
->> It's HP Chromebook 13 G1 (CHELL) with stock firmware (SeaBIOS/legacy
->> boot mode), vanilla kernel is used, `acpidump` output can be found in
->> the attached file.
 >
-> Please try this:
+> Fix the drivers and add some docs according to the outcome of this discus=
+sion
+> [1] we had recently. The motivation from the patch description:
 >
-> From: Adrian Hunter <adrian.hunter@intel.com>
-> Date: Mon, 9 Oct 2017 10:06:57 +0300
-> Subject: [PATCH] mmc: sdhci-pci: Fix default d3_retune for Intel host
->  controllers
+> Bail out everytime when mmc_regulator_get_supply() returns an errno, not =
+only
+> when probing gets deferred. This is currently a no-op, because this funct=
+ion
+> only returns -EPROBE_DEFER or 0 right now. But if it will throw another e=
+rror
+> somewhen, it will be for a reason. (This still doesn't change that gettin=
+g
+> regulators is optional, so 0 can still mean no regulators found). So, let=
+ us a)
+> be future proof and b) have driver code which is easier to understand.
 >
-> The default for d3_retune is true, but that was not being set in all cases,
-> which results in eMMC errors because re-tuning has not been done.
-> Fix by initializing d3_retune to true.
+> The patches have been created with coccinelle. A branch can be found here=
+:
 >
-> Reported-by: ojab <ojab@ojab.ru>
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> Fixes: c959a6b00ff5 ("mmc: sdhci-pci: Don't re-tune with runtime pm for some Intel devices")
-> Cc: stable@vger.kernel.org # v4.12+
-> ---
->  drivers/mmc/host/sdhci-pci-core.c | 2 ++
->  1 file changed, 2 insertions(+)
+> git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/mmc-g=
+et-supply-docs
 >
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index 5f3f7b51299f..e854ee5d7f4a 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -448,6 +448,8 @@ static void intel_dsm_init(struct intel_host *intel_host, struct device *dev,
->         int err;
->         u32 val;
+> Looking forward to comments!
 >
-> +       intel_host->d3_retune = true;
-> +
->         err = __intel_dsm(intel_host, dev, INTEL_DSM_FNS, &intel_host->dsm_fns);
->         if (err) {
->                 pr_debug("%s: DSM not supported, error %d\n",
+> Kind regards,
+>
+>    Wolfram
+>
+> [1] https://patchwork.kernel.org/patch/9965823/
+>
+> Wolfram Sang (11):
+>   mmc: add kerneldoc to mmc_regulator_get_supply()
+>   mmc: cavium: catch all errors when getting regulators
+>   mmc: dw_mmc: catch all errors when getting regulators
+>   mmc: meson-gx-mmc: catch all errors when getting regulators
+>   mmc: meson-mx-sdio: catch all errors when getting regulators
+>   mmc: mmci: catch all errors when getting regulators
+>   mmc: mtk-sd: catch all errors when getting regulators
+>   mmc: mxcmmc: catch all errors when getting regulators
+>   mmc: omap_hsmmc: catch all errors when getting regulators
+>   mmc: sdhci: catch all errors when getting regulators
+>   mmc: usdhi6rol0: catch all errors when getting regulators
+>
+>  drivers/mmc/core/core.c          | 10 ++++++++++
+>  drivers/mmc/host/cavium.c        |  2 +-
+>  drivers/mmc/host/dw_mmc.c        |  2 +-
+>  drivers/mmc/host/meson-gx-mmc.c  |  2 +-
+>  drivers/mmc/host/meson-mx-sdio.c |  2 +-
+>  drivers/mmc/host/mmci.c          |  2 +-
+>  drivers/mmc/host/mtk-sd.c        |  2 +-
+>  drivers/mmc/host/mxcmmc.c        |  2 +-
+>  drivers/mmc/host/omap_hsmmc.c    |  2 +-
+>  drivers/mmc/host/sdhci.c         |  2 +-
+>  drivers/mmc/host/usdhi6rol0.c    |  2 +-
+>  11 files changed, 20 insertions(+), 10 deletions(-)
+>
 > --
-> 1.9.1
+> 2.11.0
+
+
+
+
+Renesas Electronics Europe Ltd, Dukes Meadow, Millboard Road, Bourne End, B=
+uckinghamshire, SL8 5FH, UK. Registered in England & Wales under Registered=
+ No. 04586709.
