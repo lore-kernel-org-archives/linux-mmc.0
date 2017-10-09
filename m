@@ -1,80 +1,71 @@
-From: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-Subject: [PATCH v2 04/13] arm64: dts: mt8173: remove "mediatek,
- mt8135-mmc" from mmc nodes
-Date: Mon, 9 Oct 2017 19:35:17 +0800
-Message-ID: <1507548926-9555-5-git-send-email-chaotian.jing@mediatek.com>
-References: <1507548926-9555-1-git-send-email-chaotian.jing@mediatek.com>
+From: Bjorn Helgaas <helgaas@kernel.org>
+Subject: Re: [PATCH] mmc: sdhci-pci: Remove D3 delays for Intel BYT-related
+ host controllers
+Date: Mon, 9 Oct 2017 08:41:54 -0500
+Message-ID: <20171009134154.GJ25517@bhelgaas-glaptop.roam.corp.google.com>
+References: <1507294259-20438-1-git-send-email-adrian.hunter@intel.com>
+ <20171006162048.GC25517@bhelgaas-glaptop.roam.corp.google.com>
+ <ada41e9b-6fb3-82ab-e458-af4942adba2d@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <1507548926-9555-1-git-send-email-chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mediatek>,
- <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-mediatek/>
-List-Post: <mailto:linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mediatek>,
- <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-mediatek" <linux-mediatek-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, yong mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Phong LE <ple-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Javier Martinez Canillas <javier-JPH+aEBZ4P+UEJcrhfAQsw@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Heiner Kallweit <hkallweit1-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-pci-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <ada41e9b-6fb3-82ab-e458-af4942adba2d@intel.com>
+Sender: linux-pci-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-pci <linux-pci@vger.kernel.org>, Bjorn Helgaas <bhelgaas@google.com>, linux-acpi <linux-acpi@vger.kernel.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Alan Cox <alan@linux.intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-devicetree bindings has been updated to support multi-platforms,
-so that each platform has its owns compatible name.
-And, this compatible name may used in driver to distinguish with
-other platform.
+[+cc Alan]
 
-Signed-off-by: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
----
- arch/arm64/boot/dts/mediatek/mt8173.dtsi | 12 ++++--------
- 1 file changed, 4 insertions(+), 8 deletions(-)
+On Mon, Oct 09, 2017 at 11:56:43AM +0300, Adrian Hunter wrote:
+> On 06/10/17 19:20, Bjorn Helgaas wrote:
+> > On Fri, Oct 06, 2017 at 03:50:59PM +0300, Adrian Hunter wrote:
+> >> The default D3 cold delay of 100 ms can cause pauses when streaming audio
+> >> from eMMC.
+> >>
+> >> Intel BYT-related host controllers do not need PCI D3 delays. Although the
+> >> delays can be set to zero via an ACPI _DSM, unfortunately that is not being
+> >> used in all cases. So just set the delays to zero in the driver.
+> >>
+> >> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> >> ---
+> >>  drivers/mmc/host/sdhci-pci-core.c | 17 +++++++++++++----
+> >>  1 file changed, 13 insertions(+), 4 deletions(-)
+> >>
+> >> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+> >> index 5f3f7b51299f..14ef99b6e5b7 100644
+> >> --- a/drivers/mmc/host/sdhci-pci-core.c
+> >> +++ b/drivers/mmc/host/sdhci-pci-core.c
+> >> @@ -592,9 +592,18 @@ static void byt_read_dsm(struct sdhci_pci_slot *slot)
+> >>  	slot->chip->rpm_retune = intel_host->d3_retune;
+> >>  }
+> >>  
+> >> -static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
+> >> +static void byt_common_setup(struct sdhci_pci_slot *slot)
+> >>  {
+> >>  	byt_read_dsm(slot);
+> >> +
+> >> +	/* PCI D3 delays are not needed */
+> >> +	slot->chip->pdev->d3_delay = 0;
+> >> +	slot->chip->pdev->d3cold_delay = 0;
+> > 
+> > The fact that it doesn't need D3 delays sounds like a property of the
+> > device itself, regardless of which (if any) driver claims it.
+> > 
+> > Can this be done as a quirk instead, maybe something in
+> > arch/x86/pci/fixup.c?  Maybe quirk_remove_d3_delay() could be used
+> > directly, or something like pci_d3_delay_fixup()?
+> 
+> A quirk would work, but that would mean setting the quirk for each device
+> (28 so far) and then, when we have new ids, adding them there and to the
+> driver, so it is more convenient just to do it in the driver.  Certainly,
+> this is the only driver we have for these Intel SDHCI PCI host controllers.
 
-diff --git a/arch/arm64/boot/dts/mediatek/mt8173.dtsi b/arch/arm64/boot/dts/mediatek/mt8173.dtsi
-index b99a273..26396ef 100644
---- a/arch/arm64/boot/dts/mediatek/mt8173.dtsi
-+++ b/arch/arm64/boot/dts/mediatek/mt8173.dtsi
-@@ -682,8 +682,7 @@
- 		};
- 
- 		mmc0: mmc@11230000 {
--			compatible = "mediatek,mt8173-mmc",
--				     "mediatek,mt8135-mmc";
-+			compatible = "mediatek,mt8173-mmc";
- 			reg = <0 0x11230000 0 0x1000>;
- 			interrupts = <GIC_SPI 71 IRQ_TYPE_LEVEL_LOW>;
- 			clocks = <&pericfg CLK_PERI_MSDC30_0>,
-@@ -693,8 +692,7 @@
- 		};
- 
- 		mmc1: mmc@11240000 {
--			compatible = "mediatek,mt8173-mmc",
--				     "mediatek,mt8135-mmc";
-+			compatible = "mediatek,mt8173-mmc";
- 			reg = <0 0x11240000 0 0x1000>;
- 			interrupts = <GIC_SPI 72 IRQ_TYPE_LEVEL_LOW>;
- 			clocks = <&pericfg CLK_PERI_MSDC30_1>,
-@@ -704,8 +702,7 @@
- 		};
- 
- 		mmc2: mmc@11250000 {
--			compatible = "mediatek,mt8173-mmc",
--				     "mediatek,mt8135-mmc";
-+			compatible = "mediatek,mt8173-mmc";
- 			reg = <0 0x11250000 0 0x1000>;
- 			interrupts = <GIC_SPI 73 IRQ_TYPE_LEVEL_LOW>;
- 			clocks = <&pericfg CLK_PERI_MSDC30_2>,
-@@ -715,8 +712,7 @@
- 		};
- 
- 		mmc3: mmc@11260000 {
--			compatible = "mediatek,mt8173-mmc",
--				     "mediatek,mt8135-mmc";
-+			compatible = "mediatek,mt8173-mmc";
- 			reg = <0 0x11260000 0 0x1000>;
- 			interrupts = <GIC_SPI 74 IRQ_TYPE_LEVEL_LOW>;
- 			clocks = <&pericfg CLK_PERI_MSDC30_3>,
--- 
-1.8.1.1.dirty
+pci_d3_delay_fixup() has code that mitigates the problem of adding new
+IDs.  Maybe that quirk should simply be moved to arch/x86/pci/fixup.c?
+
+If we put this in the driver, won't we have the unnecessary delays on
+systems where the driver isn't in use?
+
+Bjorn
