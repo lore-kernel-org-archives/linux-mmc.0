@@ -1,264 +1,130 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH 3/3] mmc: dw_mmc: Add locking to the CTO timer
-Date: Mon, 9 Oct 2017 15:41:21 +0800
-Message-ID: <fa1eff8e-0fbe-caa5-6311-168e3b4c55b7@rock-chips.com>
-References: <20170927205631.31559-1-dianders@chromium.org>
- <20170927205631.31559-4-dianders@chromium.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: SDIO "SD2" vs. SD-card "SD3" interface on BayTrail
+Date: Mon, 9 Oct 2017 11:07:39 +0300
+Message-ID: <00e1d3fa-87b1-6247-7894-806ba0fa7fbd@intel.com>
+References: <d7249bf2-b057-0535-334e-71cdc957e9b5@denx.de>
+ <1499176431.22624.255.camel@linux.intel.com>
+ <8a909116-5fec-e7d0-5d30-de8de42612df@denx.de>
+ <dc49d8be-dd15-167b-2ab4-d09d1b6ea83d@intel.com>
+ <849da4e5-4333-39c4-d546-8e87ae794954@denx.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.131]:43639 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751180AbdJIHlf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Oct 2017 03:41:35 -0400
-In-Reply-To: <20170927205631.31559-4-dianders@chromium.org>
+Received: from mga04.intel.com ([192.55.52.120]:57676 "EHLO mga04.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750795AbdJIIPQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 9 Oct 2017 04:15:16 -0400
+In-Reply-To: <849da4e5-4333-39c4-d546-8e87ae794954@denx.de>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Douglas Anderson <dianders@chromium.org>
-Cc: jh80.chung@samsung.com, ulf.hansson@linaro.org, shawn.lin@rock-chips.com, briannorris@chromium.org, amstan@chromium.org, xzy.xu@rock-chips.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Stefan Roese <sr@denx.de>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Cc: linux-mmc@vger.kernel.org
 
-Hi Doug,
-
-On 2017/9/28 4:56, Douglas Anderson wrote:
-> This attempts to instill a bit of paranoia to the code dealing with
-> the CTO timer.  It's believed that this will make the CTO timer more
-> robust in the case that we're having very long interrupt latencies.
+On 07/10/17 11:25, Stefan Roese wrote:
+> Hi,
 > 
-
-I have already got reports about the similar problem that on one of
-the Rockchip platforms, some IP cyclicity idle the bus too long,
-so that cto timer fires but actually it shouldn't.
-
-> Note that I originally thought that perhaps this patch was being
-> overly paranoid and wasn't really needed, but then while I was running
-> mmc_test on an rk3399 board I saw one instance of the message:
->    dwmmc_rockchip fe320000.dwmmc: Unexpected interrupt latency
+> On 31.08.2017 14:41, Adrian Hunter wrote:
+>> On 31/08/17 12:38, Stefan Roese wrote:
+>>> Hi Andy, Hi Adrian,
+>>>
+>>> On 04.07.2017 15:53, Andy Shevchenko wrote:
+>>>> On Tue, 2017-07-04 at 14:53 +0200, Stefan Roese wrote:
+>>>>> Hi,
+>>>>>
+>>>>> we are currently investigating, if its possible to connect a SDIO
+>>>>> device (WLAN module) to the SD-card interface "SD3" of the BayTrail
+>>>>> SoC instead of the SDIO interface "SD2". The BayTrail manual states,
+>>>>> that the SDIO interface is capable of connecting SDIO devices. Is
+>>>>> this also possible for the SD-card interface "SD3", even if its not
+>>>>> explicitly mentioned in the manual? If not, why is this not possible?
+>>>>>
+>>>>> Any insight on this would be really helpful.
+>>>>
+>>>> Hmm... I have no documentation for SD/SDIO/eMMC for BayTrail except the
+>>>> public one. Internally I found some charts that shows similarities
+>>>> between two. So, taking that into consideration I would suggest to try
+>>>> it out on real hardware (MinnowBoard MAX, for example), only impediment
+>>>> I can see is the absence of support in the drivers in Linux OS. If you
+>>>> need it only in U-Boot, you perhaps may fix it easily.
+>>>>
+>>>> P.S. Adrian on vacation.
+>>>
+>>> I hope your vacation was great!
+>>>
+>>> Sorry for getting back to this, but I would really like to get some
+>>> more feedback on this. Perhaps Adrian has some additional comments
+>>> about the SDIO usage of the SD interface (SD3 - PCI Device ID 0x0f16)
+>>> on BayTrail.
+>>>
+>>> I'm now running latest mainline Linux on this board and am trying to
+>>> get the Linux MMC / SDIO subsystem to just detect a device on this
+>>> SD PCI interface. For this I have added quite a bit of debug code to
+>>> the MMC / SDIO code to see, if any device is detected on the SDIO
+>>> port. But all command queries return timeout as far as I can tell.
+>>
+>> I would usually interpret that to mean the SDIO card is not turned on.
+>>
+>>> Adrian, do you have some additional information, if this mode of
+>>> operation is possible at all on this SD-card interface, even if
+>>> its not explicitly mentioned in the BayTrail datasheet?
+>>
+>> I have used removable SDIO cards in SD slots before.  It should work.
 > 
+> A quick update with another question below:
+> 
+> After getting back to this issue, I now have the SD-card detection
+> working, if I boot into Linux using U-Boot as bootloader on this
+> BayTrail based board. But when I boot via original BIOS, the card
+> detection fails. While debugging, I found that one register differs
+> in both setups:
+> 
+> U-Boot:
+> [    2.374751] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+> [    2.374761] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x0000b502
+> [    2.374768] mmc0: sdhci: Blk size:  0x00000000 | Blk cnt:  0x00000000
+> [    2.374774] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x00000000
+> [    2.374781] mmc0: sdhci: Present:   0x1fff0000 | Host ctl: 0x00000000
+> [    2.374787] mmc0: sdhci: Power:     0x00000000 | Blk gap:  0x00000000
+> [    2.374793] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00000000
+> [    2.374799] mmc0: sdhci: Timeout:   0x00000000 | Int stat: 0x00000000
+> [    2.374806] mmc0: sdhci: Int enab:  0x00ff0003 | Sig enab: 0x00ff0003
+> [    2.374812] mmc0: sdhci: AC12 err:  0x00000000 | Slot int: 0x00000000
+> [    2.374819] mmc0: sdhci: Caps:      0x076864b2 | Caps_1:   0x00000000
+> [    2.374825] mmc0: sdhci: Cmd:       0x00000000 | Max curr: 0x00000000
+> [    2.374831] mmc0: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
+> [    2.374837] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+> [    2.374842] mmc0: sdhci: Host ctl2: 0x00000000
+> [    2.374849] mmc0: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0x00000000
+> [    2.374853] mmc0: sdhci: ============================================
+> 
+> BIOS:
+> [    3.435179] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+> [    3.435485] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x0000b502
+> [    3.435756] mmc0: sdhci: Blk size:  0x00000000 | Blk cnt:  0x00000000
+> [    3.436066] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x00000000
+> [    3.436338] mmc0: sdhci: Present:   0x01ff0000 | Host ctl: 0x00000000
+> [    3.436603] mmc0: sdhci: Power:     0x00000000 | Blk gap:  0x00000000
+> [    3.436868] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00000000
+> [    3.437166] mmc0: sdhci: Timeout:   0x00000000 | Int stat: 0x00000000
+> [    3.437437] mmc0: sdhci: Int enab:  0x00ff0003 | Sig enab: 0x00ff0003
+> [    3.437704] mmc0: sdhci: AC12 err:  0x00000000 | Slot int: 0x00000000
+> [    3.437969] mmc0: sdhci: Caps:      0x076864b2 | Caps_1:   0x00000000
+> [    3.438266] mmc0: sdhci: Cmd:       0x00000000 | Max curr: 0x00000000
+> [    3.438537] mmc0: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
+> [    3.438802] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+> [    3.439135] mmc0: sdhci: Host ctl2: 0x00000000
+> [    3.439334] mmc0: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0x00000000
+> [    3.439598] mmc0: sdhci: ============================================
+> 
+> As you can see, the "present" register (SDHCI_PRESENT_STATE at 0x24) is
+> different. Its read-only - do you have any idea, why this register is
+> set to the non-default value of 0x01ff0000 in the BIOS case?
+> 
+> BTW: Its set to the default value of 0x1fff0000 for the eMMC controller
+> in the BIOS case as well. So only the SD controller has this different
 
-The intention of introducing CTO and DRTO timers is simply to break the
-dead loop due to the bug of controller itself but it seems the timer
-should take more factors into consideration. So it's more complicated
-than expected, expecially we should also fix the drto case like what
-this patch does...
-
-How about combining the cto and drto timer and re-new a catch-all
-timer like what SDHCI did?
-
-
-> I had debug prints in the CTO timer code and I found that it was
-> running CMD 13 at the time.
-> 
-> ...so even though this patch seems like it might be overly paranoid,
-> maybe it really isn't?
-> 
-> Presumably the bad interrupt latency experienced was due to the fact
-> that I had serial console enabled as serial console is typically where
-> I place blame when I see absurdly large interrupt latencies.  In this
-> particular case there was an (unrelated) printout to the serial
-> console just before I saw the "Unexpected interrupt latency" printout.
->  > ...and actually, I managed to even reproduce the problems by running
-> "iw mlan0 scan > /dev/null" while mmc_test was running.  That not only
-> does a bunch of PCIe traffic but it also (on my system) outputs some
-> SELinux log spam.
-> 
-> Fixes: 03de19212ea3 ("mmc: dw_mmc: introduce timer for broken command transfer over scheme")
-> Signed-off-by: Douglas Anderson <dianders@chromium.org>
-> ---
-> 
->   drivers/mmc/host/dw_mmc.c | 92 +++++++++++++++++++++++++++++++++++++++++------
->   1 file changed, 82 insertions(+), 10 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 16516c528a88..6ecfe35094dd 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -403,6 +403,7 @@ static inline void dw_mci_set_cto(struct dw_mci *host)
->   	unsigned int cto_clks;
->   	unsigned int cto_div;
->   	unsigned int cto_ms;
-> +	unsigned long irqflags;
->   
->   	cto_clks = mci_readl(host, TMOUT) & 0xff;
->   	cto_div = (mci_readl(host, CLKDIV) & 0xff) * 2;
-> @@ -413,8 +414,24 @@ static inline void dw_mci_set_cto(struct dw_mci *host)
->   	/* add a bit spare time */
->   	cto_ms += 10;
->   
-> -	mod_timer(&host->cto_timer,
-> -		  jiffies + msecs_to_jiffies(cto_ms) + 1);
-> +	/*
-> +	 * The durations we're working with are fairly short so we have to be
-> +	 * extra careful about synchronization here.  Specifically in hardware a
-> +	 * command timeout is _at most_ 5.1 ms, so that means we expect an
-> +	 * interrupt (either command done or timeout) to come rather quickly
-> +	 * after the mci_writel.  ...but just in case we have a long interrupt
-> +	 * latency let's add a bit of paranoia.
-> +	 *
-> +	 * In general we'll assume that at least an interrupt will be asserted
-> +	 * in hardware by the time the cto_timer runs.  ...and if it hasn't
-> +	 * been asserted in hardware by that time then we'll assume it'll never
-> +	 * come.
-> +	 */
-> +	spin_lock_irqsave(&host->irq_lock, irqflags);
-> +	if (!test_bit(EVENT_CMD_COMPLETE, &host->pending_events))
-> +		mod_timer(&host->cto_timer,
-> +			jiffies + msecs_to_jiffies(cto_ms) + 1);
-> +	spin_unlock_irqrestore(&host->irq_lock, irqflags);
->   }
->   
->   static void dw_mci_start_command(struct dw_mci *host,
-> @@ -429,11 +446,11 @@ static void dw_mci_start_command(struct dw_mci *host,
->   	wmb(); /* drain writebuffer */
->   	dw_mci_wait_while_busy(host, cmd_flags);
->   
-> +	mci_writel(host, CMD, cmd_flags | SDMMC_CMD_START);
-> +
->   	/* response expected command only */
->   	if (cmd_flags & SDMMC_CMD_RESP_EXP)
->   		dw_mci_set_cto(host);
-> -
-> -	mci_writel(host, CMD, cmd_flags | SDMMC_CMD_START);
->   }
->   
->   static inline void send_stop_abort(struct dw_mci *host, struct mmc_data *data)
-> @@ -1930,6 +1947,24 @@ static void dw_mci_set_drto(struct dw_mci *host)
->   	mod_timer(&host->dto_timer, jiffies + msecs_to_jiffies(drto_ms));
->   }
->   
-> +static bool dw_mci_clear_pending_cmd_complete(struct dw_mci *host)
-> +{
-> +	if (!test_bit(EVENT_CMD_COMPLETE, &host->pending_events))
-> +		return false;
-> +
-> +	/*
-> +	 * Really be certain that the timer has stopped.  This is a bit of
-> +	 * paranoia and could only really happen if we had really bad
-> +	 * interrupt latency and the interrupt routine and timeout were
-> +	 * running concurrently so that the del_timer() in the interrupt
-> +	 * handler couldn't run.
-> +	 */
-> +	WARN_ON(del_timer_sync(&host->cto_timer));
-> +	clear_bit(EVENT_CMD_COMPLETE, &host->pending_events);
-> +
-> +	return true;
-> +}
-> +
->   static void dw_mci_tasklet_func(unsigned long priv)
->   {
->   	struct dw_mci *host = (struct dw_mci *)priv;
-> @@ -1956,8 +1991,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
->   
->   		case STATE_SENDING_CMD11:
->   		case STATE_SENDING_CMD:
-> -			if (!test_and_clear_bit(EVENT_CMD_COMPLETE,
-> -						&host->pending_events))
-> +			if (!dw_mci_clear_pending_cmd_complete(host))
->   				break;
->   
->   			cmd = host->cmd;
-> @@ -2126,8 +2160,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
->   			/* fall through */
->   
->   		case STATE_SENDING_STOP:
-> -			if (!test_and_clear_bit(EVENT_CMD_COMPLETE,
-> -						&host->pending_events))
-> +			if (!dw_mci_clear_pending_cmd_complete(host))
->   				break;
->   
->   			/* CMD error in data command */
-> @@ -2600,6 +2633,8 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
->   	struct dw_mci *host = dev_id;
->   	u32 pending;
->   	struct dw_mci_slot *slot = host->slot;
-> +	unsigned long irqflags;
-> +	int i;
->   
->   	pending = mci_readl(host, MINTSTS); /* read-only mask reg */
->   
-> @@ -2607,8 +2642,6 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
->   		/* Check volt switch first, since it can look like an error */
->   		if ((host->state == STATE_SENDING_CMD11) &&
->   		    (pending & SDMMC_INT_VOLT_SWITCH)) {
-> -			unsigned long irqflags;
-> -
->   			mci_writel(host, RINTSTS, SDMMC_INT_VOLT_SWITCH);
->   			pending &= ~SDMMC_INT_VOLT_SWITCH;
->   
-> @@ -2624,11 +2657,15 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
->   		}
->   
->   		if (pending & DW_MCI_CMD_ERROR_FLAGS) {
-> +			spin_lock_irqsave(&host->irq_lock, irqflags);
-> +
->   			del_timer(&host->cto_timer);
->   			mci_writel(host, RINTSTS, DW_MCI_CMD_ERROR_FLAGS);
->   			host->cmd_status = pending;
->   			smp_wmb(); /* drain writebuffer */
->   			set_bit(EVENT_CMD_COMPLETE, &host->pending_events);
-> +
-> +			spin_unlock_irqrestore(&host->irq_lock, irqflags);
->   		}
->   
->   		if (pending & DW_MCI_DATA_ERROR_FLAGS) {
-> @@ -2668,8 +2705,12 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
->   		}
->   
->   		if (pending & SDMMC_INT_CMD_DONE) {
-> +			spin_lock_irqsave(&host->irq_lock, irqflags);
-> +
->   			mci_writel(host, RINTSTS, SDMMC_INT_CMD_DONE);
->   			dw_mci_cmd_interrupt(host, pending);
-> +
-> +			spin_unlock_irqrestore(&host->irq_lock, irqflags);
->   		}
->   
->   		if (pending & SDMMC_INT_CD) {
-> @@ -2943,7 +2984,35 @@ static void dw_mci_cmd11_timer(unsigned long arg)
->   static void dw_mci_cto_timer(unsigned long arg)
->   {
->   	struct dw_mci *host = (struct dw_mci *)arg;
-> +	unsigned long irqflags;
-> +	u32 pending;
->   
-> +	spin_lock_irqsave(&host->irq_lock, irqflags);
-> +
-> +	/*
-> +	 * If somehow we have very bad interrupt latency it's remotely possible
-> +	 * that the timer could fire while the interrupt is still pending or
-> +	 * while the interrupt is midway through running.  Let's be paranoid
-> +	 * and detect those two cases.  Note that this is paranoia is somewhat
-> +	 * justified because in this function we don't actually cancel the
-> +	 * pending command in the controller--we just assume it will never come.
-> +	 */
-> +	pending = mci_readl(host, MINTSTS); /* read-only mask reg */
-> +	if (pending & (DW_MCI_CMD_ERROR_FLAGS | SDMMC_INT_CMD_DONE)) {
-> +		/* The interrupt should fire; no need to act but we can warn */
-> +		dev_warn(host->dev, "Unexpected interrupt latency\n");
-> +		goto exit;
-> +	}
-> +	if (test_bit(EVENT_CMD_COMPLETE, &host->pending_events)) {
-> +		/* Presumably interrupt handler couldn't delete the timer */
-> +		dev_warn(host->dev, "CTO timeout when already completed\n");
-> +		goto exit;
-> +	}
-> +
-> +	/*
-> +	 * Continued paranoia to make sure we're in the state we expect.
-> +	 * This paranoia isn't really justified but it seems good to be safe.
-> +	 */
->   	switch (host->state) {
->   	case STATE_SENDING_CMD11:
->   	case STATE_SENDING_CMD:
-> @@ -2962,6 +3031,9 @@ static void dw_mci_cto_timer(unsigned long arg)
->   			 host->state);
->   		break;
->   	}
-> +
-> +exit:
-> +	spin_unlock_irqrestore(&host->irq_lock, irqflags);
->   }
->   
->   static void dw_mci_dto_timer(unsigned long arg)
-> 
-
+Those pins are DAT[7:4] line signal level.  SD has only 4 lines so the
+values perhaps change depending on what the setup has been done for the pin
+controller.
