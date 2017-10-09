@@ -1,57 +1,65 @@
 From: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-Subject: [PATCH v2 00/13] mmc: mediatek: add support of mt2701/mt2712
-Date: Mon, 9 Oct 2017 19:35:13 +0800
-Message-ID: <1507548926-9555-1-git-send-email-chaotian.jing@mediatek.com>
+Subject: [PATCH v2 01/13] mmc: dt-bindings: Add reg/source_cg/latch-ck for Mediatek MMC bindings
+Date: Mon, 9 Oct 2017 19:35:14 +0800
+Message-ID: <1507548926-9555-2-git-send-email-chaotian.jing@mediatek.com>
+References: <1507548926-9555-1-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1507548926-9555-1-git-send-email-chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
 Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, yong mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Javier Martinez Canillas <javier-JPH+aEBZ4P+UEJcrhfAQsw@public.gmane.org>, Heiner Kallweit <hkallweit1-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Phong LE <ple-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-  This serial of patches are adding support of mt2701/mt2712.
-there are many changes and HW improvement between mt8173 and
-mt2701/mt2712, below is a list of these changes:
-  1. enlarge CLKDIV bits from 8 to 12
-  2. remove the PAD_TUNE register and add a new PAD_TUNE0 register
-  3. add data sync and async fifo feature
-  4. add busy_check feature
-  5. add stop_clk fix
-  6. add enhance_rx support
-  7. add a seperate CG of source clock
+Change the comptiable for support of multi-platform
+Add description for reg
+Add description for source_cg
+Add description for mediatek,latch-ck
+Note that source_cg and mediatek,latch-ck are optional for some projects,
+eg, MT2701 do not have source_cg, and MT2712 do not need
+mediatek,latch-ck
 
-  mt2712 supports full of these features, mt2701 supports part of it, and
-add a "mediatek,latch-ck" to work-around as it do not support stop-clk fix.
+Signed-off-by: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+---
+ Documentation/devicetree/bindings/mmc/mtk-sd.txt | 16 +++++++++++++---
+ 1 file changed, 13 insertions(+), 3 deletions(-)
 
-Note: As Pinctrl/CCF are not ready now, so that current patches do not
-include DTS part.
-
-Changed vs 1:
-  based on Ulf/Rob/Matthias's comments of DTS binding file, make the binding
-file clearly and fix probe issue.
-
-
-Chaotian Jing (13):
-  mmc: dt-bindings: Add reg/source_cg/latch-ck for Mediatek MMC bindings
-  mmc: mediatek: add support of mt2701/mt2712
-  mmc: dt-bindings: make compatible explicit
-  arm64: dts: mt8173: remove "mediatek,mt8135-mmc" from mmc nodes
-  mmc: mediatek: make hs400_tune_response only for mt8173
-  mmc: mediatek: add pad_tune0 support
-  mmc: mediatek: add async fifo and data tune support
-  mmc: mediatek: add busy_check support
-  mmc: mediatek: add stop_clk fix and enhance_rx support
-  mmc: mediatek: add support of source_cg clock
-  mmc: mediatek: add latch-ck support
-  mmc: mediatek: improve eMMC hs400 mode read performance
-  mmc: mediatek: perfer to use rise edge latching for cmd line
-
- Documentation/devicetree/bindings/mmc/mtk-sd.txt |  16 +-
- arch/arm64/boot/dts/mediatek/mt8173.dtsi         |  12 +-
- drivers/mmc/host/mtk-sd.c                        | 298 ++++++++++++++++++++---
- 3 files changed, 278 insertions(+), 48 deletions(-)
-
+diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.txt b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+index 4182ea3..3e0a97c 100644
+--- a/Documentation/devicetree/bindings/mmc/mtk-sd.txt
++++ b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+@@ -7,10 +7,18 @@ This file documents differences between the core properties in mmc.txt
+ and the properties used by the msdc driver.
+ 
+ Required properties:
+-- compatible: Should be "mediatek,mt8173-mmc","mediatek,mt8135-mmc"
++- compatible: value should be either of the following.
++	"mediatek,mt8173-mmc","mediatek,mt8135-mmc": for mmc host ip compatible with mt8135
++	"mediatek,mt8173-mmc","mediatek,mt8135-mmc": for mmc host ip compatible with mt8173
++	"mediatek,mt2701-mmc": for mmc host ip compatible with mt2701
++	"mediatek,mt2712-mmc": for mmc host ip compatible with mt2712
++- reg: physical base address of the controller and length
+ - interrupts: Should contain MSDC interrupt number
+-- clocks: MSDC source clock, HCLK
+-- clock-names: "source", "hclk"
++- clocks: Should contain phandle for the clock feeding the MMC controller
++- clock-names: Should contain the following:
++	"source" - source clock (required)
++	"hclk" - HCLK which used for host (required)
++	"source_cg" - independent source clock gate (required for MT2712)
+ - pinctrl-names: should be "default", "state_uhs"
+ - pinctrl-0: should contain default/high speed pin ctrl
+ - pinctrl-1: should contain uhs mode pin ctrl
+@@ -30,6 +38,8 @@ Optional properties:
+ - mediatek,hs400-cmd-resp-sel-rising:  HS400 command response sample selection
+ 				       If present,HS400 command responses are sampled on rising edges.
+ 				       If not present,HS400 command responses are sampled on falling edges.
++- mediatek,latch-ck: Some SoCs do not support enhance_rx, need set correct latch-ck to avoid data crc
++		     error caused by stop clock(fifo full)
+ 
+ Examples:
+ mmc0: mmc@11230000 {
 -- 
 1.8.1.1.dirty
 
