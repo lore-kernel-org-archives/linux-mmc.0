@@ -1,158 +1,61 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: HP Chromebook 13 G1 eMMC is broken since 4.12
-Date: Mon, 9 Oct 2017 14:11:12 +0300
-Message-ID: <7f18e19c-52cd-947d-5dbe-7cec52aa13eb@intel.com>
-References: <CAKzrAgSR+j7-XeVEH4Db1nSyNtJAUOei1dfOvJuRKsUOzeoDeQ@mail.gmail.com>
- <e568ad32-588f-8506-c52b-57e42cc7cdeb@intel.com>
- <CAKzrAgQ-CCvE0cnfb1fpt8PYvf2M8AD4dQ+1Y83o+_=Kecp3kw@mail.gmail.com>
+From: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Subject: [PATCH v2 00/13] mmc: mediatek: add support of mt2701/mt2712
+Date: Mon, 9 Oct 2017 19:35:13 +0800
+Message-ID: <1507548926-9555-1-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:35425 "EHLO mga14.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751598AbdJILSI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 9 Oct 2017 07:18:08 -0400
-In-Reply-To: <CAKzrAgQ-CCvE0cnfb1fpt8PYvf2M8AD4dQ+1Y83o+_=Kecp3kw@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, yong mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Javier Martinez Canillas <javier-JPH+aEBZ4P+UEJcrhfAQsw@public.gmane.org>, Heiner Kallweit <hkallweit1-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Phong LE <ple-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: ojab <ojab@ojab.ru>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org
 
-On 09/10/17 13:13, ojab // wrote:
-> That was quick, thanks.
-> 
->>From my limited testing, 4.14-rc4 with the patch work fine, so
-> Reported-and-tested-by: ojab <ojab@ojab.ru>
+  This serial of patches are adding support of mt2701/mt2712.
+there are many changes and HW improvement between mt8173 and
+mt2701/mt2712, below is a list of these changes:
+  1. enlarge CLKDIV bits from 8 to 12
+  2. remove the PAD_TUNE register and add a new PAD_TUNE0 register
+  3. add data sync and async fifo feature
+  4. add busy_check feature
+  5. add stop_clk fix
+  6. add enhance_rx support
+  7. add a seperate CG of source clock
 
-Ulf, can you take this?
+  mt2712 supports full of these features, mt2701 supports part of it, and
+add a "mediatek,latch-ck" to work-around as it do not support stop-clk fix.
 
-> 
-> //wbr ojab
-> 
-> On Mon, Oct 9, 2017 at 7:24 AM, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> On 07/10/17 03:16, ojab // wrote:
->>> [Please CC me, since I'm not subscribed to the list]
->>>
->>> Oh hai!
->>>
->>> Since linux-4.12 I have eMMC-related errors in dmesg and it's
->>> completely unusable (_very_ slow):
->>>
->>> Oct 05 18:24:11 ojab-notebook kernel: print_req_error: I/O error, dev
->>> mmcblk0, sector 118656
->>> Oct 05 18:24:11 ojab-notebook dracut-initqueue[378]: /dev/mmcblk0p8:
->>> read failed after 0 of 4096 at 16711680: Input/output error
->>> Oct 05 18:24:11 ojab-notebook dracut-initqueue[378]: /dev/mmcblk0rpmb:
->>> read failed after 0 of 4096 at 4128768: Input/output error
->>> Oct 05 18:24:11 ojab-notebook dracut-initqueue[378]: /dev/mmcblk0rpmb:
->>> read failed after 0 of 4096 at 4186112: Input/output error
->>> Oct 05 18:24:11 ojab-notebook dracut-initqueue[378]: /dev/mmcblk0rpmb:
->>> read failed after 0 of 4096 at 0: Input/output error
->>> Oct 05 18:24:11 ojab-notebook dracut-initqueue[378]: /dev/mmcblk0rpmb:
->>> read failed after 0 of 4096 at 4096: Input/output error
->>> ...
->>> Oct 05 18:24:26 ojab-notebook kernel: mmc0: Timeout waiting for
->>> hardware interrupt.
->>> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci: ============ SDHCI
->>> REGISTER DUMP ===========
->>> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci: Sys addr:
->>> 0x00000008 | Version:  0x00001002
->>> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci: Blk size:
->>> 0x00007200 | Blk cnt:  0x00000008
->>> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci: Argument:
->>> 0x0001cf80 | Trn mode: 0x0000003b
->>> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci: Present:
->>> 0x1fff0001 | Host ctl: 0x0000003d
->>> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci: Power:
->>> 0x0000000b | Blk gap:  0x00000080
->>> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci: Wake-up:
->>> 0x00000000 | Clock:    0x00000007
->>> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci: Timeout:
->>> 0x00000005 | Int stat: 0x00000000
->>> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci: Int enab:
->>> 0x02ff000b | Sig enab: 0x02ff000b
->>> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci: AC12 err:
->>> 0x00000000 | Slot int: 0x00000000
->>> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci: Caps:
->>> 0x546ec881 | Caps_1:   0x80000807
->>> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci: Cmd:
->>> 0x0000123a | Max curr: 0x00000000
->>> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci: Resp[0]:
->>> 0x00000000 | Resp[1]:  0x00000000
->>> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci: Resp[2]:
->>> 0x00000000 | Resp[3]:  0x00001900
->>> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci: Host ctl2: 0x0000000d
->>> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci: ADMA Err:
->>> 0x00000000 | ADMA Ptr: 0x000000026de25200
->>> Oct 05 18:24:26 ojab-notebook kernel: mmc0: sdhci:
->>> ============================================
->>> Oct 05 18:24:26 ojab-notebook kernel: mmcblk0: error -84 sending
->>> status command, retrying
->>> Oct 05 18:24:26 ojab-notebook kernel: mmcblk0: error -110 sending stop
->>> command, original cmd response 0x0, card status 0x900
->>> Oct 05 18:24:26 ojab-notebook kernel: mmcblk0: error -110 transferring
->>> data, sector 118656, nr 8, cmd response 0x0, card status 0x0
->>> ...
->>>
->>> `git bisect` told me that
->>>
->>> c959a6b00ff589c652373e27bced5a700bd450f2 is the first bad commit
->>> commit c959a6b00ff589c652373e27bced5a700bd450f2
->>> Author: Adrian Hunter <adrian.hunter@intel.com>
->>> Date:   Mon Mar 20 19:50:34 2017 +0200
->>>
->>>     mmc: sdhci-pci: Don't re-tune with runtime pm for some Intel devices
->>>
->>>     Make use  of an Intel ACPI _DSM that indicates if re-tuning is needed after
->>>     D3.
->>>
->>>     Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
->>>     Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
->>>     Tested-by: Ludovic Desroches <ludovic.desroches@microchip.com>
->>>
->>> :040000 040000 e6b59f520ed0beadb7e3ae609f237c2e4a03dfa1
->>> c9726a0a3ef41a9c59137bbc52a808a6c91e0d81 M      drivers
->>>
->>>
->>> It's HP Chromebook 13 G1 (CHELL) with stock firmware (SeaBIOS/legacy
->>> boot mode), vanilla kernel is used, `acpidump` output can be found in
->>> the attached file.
->>
->> Please try this:
->>
->> From: Adrian Hunter <adrian.hunter@intel.com>
->> Date: Mon, 9 Oct 2017 10:06:57 +0300
->> Subject: [PATCH] mmc: sdhci-pci: Fix default d3_retune for Intel host
->>  controllers
->>
->> The default for d3_retune is true, but that was not being set in all cases,
->> which results in eMMC errors because re-tuning has not been done.
->> Fix by initializing d3_retune to true.
->>
->> Reported-by: ojab <ojab@ojab.ru>
->> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
->> Fixes: c959a6b00ff5 ("mmc: sdhci-pci: Don't re-tune with runtime pm for some Intel devices")
->> Cc: stable@vger.kernel.org # v4.12+
->> ---
->>  drivers/mmc/host/sdhci-pci-core.c | 2 ++
->>  1 file changed, 2 insertions(+)
->>
->> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
->> index 5f3f7b51299f..e854ee5d7f4a 100644
->> --- a/drivers/mmc/host/sdhci-pci-core.c
->> +++ b/drivers/mmc/host/sdhci-pci-core.c
->> @@ -448,6 +448,8 @@ static void intel_dsm_init(struct intel_host *intel_host, struct device *dev,
->>         int err;
->>         u32 val;
->>
->> +       intel_host->d3_retune = true;
->> +
->>         err = __intel_dsm(intel_host, dev, INTEL_DSM_FNS, &intel_host->dsm_fns);
->>         if (err) {
->>                 pr_debug("%s: DSM not supported, error %d\n",
->> --
->> 1.9.1
-> 
+Note: As Pinctrl/CCF are not ready now, so that current patches do not
+include DTS part.
 
+Changed vs 1:
+  based on Ulf/Rob/Matthias's comments of DTS binding file, make the binding
+file clearly and fix probe issue.
+
+
+Chaotian Jing (13):
+  mmc: dt-bindings: Add reg/source_cg/latch-ck for Mediatek MMC bindings
+  mmc: mediatek: add support of mt2701/mt2712
+  mmc: dt-bindings: make compatible explicit
+  arm64: dts: mt8173: remove "mediatek,mt8135-mmc" from mmc nodes
+  mmc: mediatek: make hs400_tune_response only for mt8173
+  mmc: mediatek: add pad_tune0 support
+  mmc: mediatek: add async fifo and data tune support
+  mmc: mediatek: add busy_check support
+  mmc: mediatek: add stop_clk fix and enhance_rx support
+  mmc: mediatek: add support of source_cg clock
+  mmc: mediatek: add latch-ck support
+  mmc: mediatek: improve eMMC hs400 mode read performance
+  mmc: mediatek: perfer to use rise edge latching for cmd line
+
+ Documentation/devicetree/bindings/mmc/mtk-sd.txt |  16 +-
+ arch/arm64/boot/dts/mediatek/mt8173.dtsi         |  12 +-
+ drivers/mmc/host/mtk-sd.c                        | 298 ++++++++++++++++++++---
+ 3 files changed, 278 insertions(+), 48 deletions(-)
+
+-- 
+1.8.1.1.dirty
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
