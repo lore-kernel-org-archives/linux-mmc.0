@@ -1,46 +1,44 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: [PATCH] mmc: sdhci-msm: fix x86 build error
-Date: Tue, 10 Oct 2017 11:14:16 +0200
-Message-ID: <20171010091427.2244260-1-arnd@arndb.de>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, Ritesh Harjani <riteshh@codeaurora.org>, Sahitya Tummala <stummala@codeaurora.org>, Venkat Gopalakrishnan <venkatg@codeaurora.org>, Subhash Jadavani <subhashj@codeaurora.org>, Bjorn Andersson <bjorn.andersson@linaro.org>, Vijay Viswanath <vviswana@codeaurora.org>, Pramod Gurav <pramod.gurav@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Carlo Caione <carlo@endlessm.com>
+Subject: Re: SD card reader problems on Cherry-Trail
+Date: Tue, 10 Oct 2017 11:22:35 +0200
+Message-ID: <CAL9uMOEk83d2Ua6v9FSKPBpb33KGEj6ExYo_FBiC_sF1VPkMgQ@mail.gmail.com>
+References: <CAL9uMOGXVgHP8iNdZbEWv3pSRjZ++hhswu6c+ZiPydGiw9SPEw@mail.gmail.com>
+ <CAPDyKFpoHGKGhDyYRTdWMPTxOM0GLNDQjMTDThX5mvFDyVTwnw@mail.gmail.com>
+ <CAL9uMOGog77MDUhVisEDcbSFXANGNfzecee1PzgXdwvZwexmUA@mail.gmail.com>
+ <32d4293d-7e9d-8f0d-966f-235a8283182f@intel.com> <CAL9uMOHbx4+bEfaiX-NP5q_OzUqbo0O-fb4_oSPQGs0h4tOdtQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ua0-f171.google.com ([209.85.217.171]:47450 "EHLO
+        mail-ua0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755221AbdJJJWg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Oct 2017 05:22:36 -0400
+Received: by mail-ua0-f171.google.com with SMTP id e46so10168745uaa.4
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Oct 2017 02:22:35 -0700 (PDT)
+In-Reply-To: <CAL9uMOHbx4+bEfaiX-NP5q_OzUqbo0O-fb4_oSPQGs0h4tOdtQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-The __WARN_printf() function is not portable across architectures
-and causes a compile-time error on x86 and others that don't use
-the asm-generic version of asm/bug.h:
+On Thu, Oct 5, 2017 at 10:26 AM, Carlo Caione <carlo@endlessm.com> wrote:
 
-drivers/mmc/host/sdhci-msm.c: In function 'sdhci_msm_check_power_status':
-drivers/mmc/host/sdhci-msm.c:1066:4: error: implicit declaration of function '__WARN_printf'; did you mean '__dev_printk'? [-Werror=implicit-function-declaration]
-    __WARN_printf("%s: pwr_irq for req: (%d) timed out\n",
-    ^~~~~~~~~~~~~
+/cut
+>>> - Reproduced with the latest master on linus repo (4.14.0-rc3)
+>>> - No idea if this is a regression or not. This is a new hardware we
+>>> are trying to enable and I have never seen it working fine (I should
+>>> blindly try some old kernel)
+>>> - Windows is working fine so not an HW issue
+>>> - CPU is x5-Z8350
+>>
+>> Can you provide an acpidump?
+>
+> DSDT https://paste.fedoraproject.org/paste/DXlkVidxM7U9LS2OpqvLGQ/raw
 
-I assume that dev_warn() is the function that was meant to be used
-here, so I'm changing it over to that.
+Hey Adrian,
+any idea about this issue?
 
-Fixes: 6cdf3287f490 ("mmc: sdhci-msm: Add sdhci msm register write APIs which wait for pwr irq")
-Signed-off-by: Arnd Bergmann <arnd@arndb.de>
----
- drivers/mmc/host/sdhci-msm.c | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+Cheers,
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 85a882b4c541..3fb7d2eec93f 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -1063,8 +1063,9 @@ static void sdhci_msm_check_power_status(struct sdhci_host *host, u32 req_type)
- 		if (!wait_event_timeout(msm_host->pwr_irq_wait,
- 				msm_host->pwr_irq_flag,
- 				msecs_to_jiffies(MSM_PWR_IRQ_TIMEOUT_MS)))
--			__WARN_printf("%s: pwr_irq for req: (%d) timed out\n",
--					mmc_hostname(host->mmc), req_type);
-+			dev_warn(&msm_host->pdev->dev,
-+				 "%s: pwr_irq for req: (%d) timed out\n",
-+				 mmc_hostname(host->mmc), req_type);
- 	}
- 	pr_debug("%s: %s: request %d done\n", mmc_hostname(host->mmc),
- 			__func__, req_type);
 -- 
-2.9.0
+Carlo Caione  |  +39.340.80.30.096  |  Endless
