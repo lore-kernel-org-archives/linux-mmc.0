@@ -1,118 +1,106 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V8 00/14] mmc: Add Command Queue support
-Date: Tue, 10 Oct 2017 16:31:57 +0300
-Message-ID: <d41eee41-796a-db93-d388-b36123ecc364@intel.com>
-References: <1505302814-19313-1-git-send-email-adrian.hunter@intel.com>
- <CAPDyKFr-XbMOmOkz1yXwmG1t=77eSsUO2kU7kKV0V1wrfcmWKg@mail.gmail.com>
- <2cd4c5fc-cc04-ba44-bea6-4547d84de3e2@intel.com>
- <CAPDyKFqE7UYOYrjykpV0GnQ+hg2oGXpALgn_8yKsQk19Y4nmSQ@mail.gmail.com>
- <9a789f9b-a8c4-8ae7-8f93-0d76f674bded@intel.com>
- <CAPDyKFoLa_aX3j693_tfkuaSKNvGB-ERdf2-9r4iF-+c0NnP9g@mail.gmail.com>
+From: Julien Thierry <julien.thierry@arm.com>
+Subject: Re: [PATCH v4 05/12] mmc: mediatek: add pad_tune0 support
+Date: Tue, 10 Oct 2017 17:57:26 +0100
+Message-ID: <afac6efe-d721-acae-6c07-adf4cfff962d@arm.com>
+References: <1507627831-29323-1-git-send-email-chaotian.jing@mediatek.com>
+ <1507627831-29323-6-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFoLa_aX3j693_tfkuaSKNvGB-ERdf2-9r4iF-+c0NnP9g@mail.gmail.com>
+In-Reply-To: <1507627831-29323-6-git-send-email-chaotian.jing@mediatek.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
+To: Chaotian Jing <chaotian.jing@mediatek.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, srv_heupstream@mediatek.com, Catalin Marinas <catalin.marinas@arm.com>, Linus Walleij <linus.walleij@linaro.org>, Will Deacon <will.deacon@arm.com>, linux-kernel@vger.kernel.org, yong mao <yong.mao@mediatek.com>, Phong LE <ple@baylibre.com>, Rob Herring <robh+dt@kernel.org>, linux-mediatek@lists.infradead.org, linux-arm-kernel@lists.infradead.org, Matthias Brugger <matthias.bgg@gmail.com>, linux-mmc@vger.kernel.org, Heiner Kallweit <hkallweit1@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 10/10/17 16:08, Ulf Hansson wrote:
-> [...]
-> 
->>>>>
->>>>> I have also run some test on my ux500 board and enabling the blkmq
->>>>> path via the new MMC Kconfig option. My idea was to run some iozone
->>>>> comparisons between the legacy path and the new blkmq path, but I just
->>>>> couldn't get to that point because of the following errors.
->>>>>
->>>>> I am using a Kingston 4GB SDHC card, which is detected and mounted
->>>>> nicely. However, when I decide to do some writes to the card I get the
->>>>> following errors.
->>>>>
->>>>> root@ME:/mnt/sdcard dd if=/dev/zero of=testfile bs=8192 count=5000 conv=fsync
->>>>> [  463.714294] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
->>>>> [  464.722656] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
->>>>> [  466.081481] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
->>>>> [  467.111236] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
->>>>> [  468.669647] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
->>>>> [  469.685699] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
->>>>> [  471.043334] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
->>>>> [  472.052337] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
->>>>> [  473.342651] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
->>>>> [  474.323760] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
->>>>> [  475.544769] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
->>>>> [  476.539031] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
->>>>> [  477.748474] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
->>>>> [  478.724182] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
->>>>>
->>>>> I haven't yet got the point of investigating this any further, and
->>>>> unfortunate I have a busy schedule with traveling next week. I will do
->>>>> my best to look into this as soon as I can.
->>>>>
->>>>> Perhaps you have some ideas?
->>>>
->>>> The behaviour depends on whether you have MMC_CAP_WAIT_WHILE_BUSY. Try
->>>> changing that and see if it makes a difference.
->>>
->>> Yes, it does! I disabled MMC_CAP_WAIT_WHILE_BUSY (and its
->>> corresponding code in mmci.c) and the errors goes away.
->>>
->>> When I use MMC_CAP_WAIT_WHILE_BUSY I get these problems:
->>>
->>> [  223.820983] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
->>> [  224.815795] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
->>> [  226.034881] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
->>> [  227.112884] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
->>> [  227.220275] mmc0: Card stuck in wrong state! mmcblk0 mmc_blk_card_stuck
->>> [  228.686798] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
->>> [  229.892150] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
->>> [  231.031890] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
->>> [  232.239013] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
->>> 5000+0 records in
->>> 5000+0 records out
->>> root@ME:/mnt/sdcard
->>>
->>> I looked at the new blkmq code from patch v10 13/15. It seems like the
->>> MMC_CAP_WAIT_WHILE_BUSY is used to determine whether the async request
->>> mechanism should be used or not. Perhaps I didn't looked close enough,
->>> but maybe you could elaborate on why this seems to be the case!?
->>
->> MMC_CAP_WAIT_WHILE_BUSY is necessary because it means that a data transfer
->> request has finished when the host controller calls mmc_request_done(). i.e.
->> polling the card is not necessary.
-> 
-> Well, that is a rather big change on its own. Earlier we polled with
-> CMD13 to verify that the card has moved back to the transfer state, in
-> case it was a write. And that was no matter of MMC_CAP_WAIT_WHILE_BUSY
-> was set or not. Right!?
+Hi,
 
-Yes
+On 10/10/17 10:30, Chaotian Jing wrote:
+> from mt2701, the register of PAD_TUNE has been phased out,
+> while there is a new register of PAD_TUNE0
+> 
+> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+> ---
+>   drivers/mmc/host/mtk-sd.c | 69 ++++++++++++++++++++++++++++++++++-------------
+>   1 file changed, 51 insertions(+), 18 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index ab2fbbb..0dc45b3 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -75,6 +75,7 @@
+>   #define MSDC_PATCH_BIT   0xb0
+>   #define MSDC_PATCH_BIT1  0xb4
+>   #define MSDC_PAD_TUNE    0xec
+> +#define MSDC_PAD_TUNE0   0xf0
+>   #define PAD_DS_TUNE      0x188
+>   #define PAD_CMD_TUNE     0x18c
+>   #define EMMC50_CFG0      0x208
+> @@ -301,6 +302,7 @@ struct msdc_save_para {
+>   struct mtk_mmc_compatible {
+>   	u8 clk_div_bits;
+>   	bool hs400_tune; /* only used for MT8173 */
+> +	bool pad_tune0;
 
-> 
-> I am not sure it's a good idea to bypass that validation, it seems
-> fragile to rely only on the busy detection on DAT line for writes.
+You only use this to decide whether to use MDSC_PAD_TUNE or 
+MSDC_PAD_TUNE0 as tune regs.
 
-Can you cite something from the specifications that backs that up, because I
-couldn't find anything to suggest that CMD13 polling was expected.
+Couldn't this field directly be a 'u32' that is either MDSC_PAD_TUNE or 
+MDSC_PAD_TUNE0 rather than a bool?
 
-> 
->>
->> Have you tried V9 or V10.  There was a fix in V9 related to calling
->> ->post_req() which could mess up DMA.
-> 
-> I have used V10.
-> 
->>
->> The other thing that could go wrong with DMA is if it cannot accept
->> ->post_req() being called from mmc_request_done().
-> 
-> I don't think mmci has a problem with that, however why do you want to
-> do this? Wouldn't that defeat some of the benefits with the async
-> request mechanism?
+>   };
+>   
+>   struct msdc_tune_para {
+> @@ -362,21 +364,25 @@ struct msdc_host {
+>   static const struct mtk_mmc_compatible mt8135_compat = {
+>   	.clk_div_bits = 8,
+>   	.hs400_tune = false,
+> +	.pad_tune0 = false,
 
-Perhaps - but it would need to be tested.  If there are more requests
-waiting, one optimization could be to defer ->post_req() until after the
-next request is started.
+and here we could have (field could be renamed accordingly of course):
+
+	.pad_tune0 = MDSC_PAD_TUNE,
+
+>   };
+>   
+>   static const struct mtk_mmc_compatible mt8173_compat = {
+>   	.clk_div_bits = 8,
+>   	.hs400_tune = true,
+> +	.pad_tune0 = false,
+>   };
+>   
+>   static const struct mtk_mmc_compatible mt2701_compat = {
+>   	.clk_div_bits = 12,
+>   	.hs400_tune = false,
+> +	.pad_tune0 = true,
+
+here:
+	.pad_tune0 = MDSC_PAD_TUNE0,
+
+>   };
+>   
+>   static const struct mtk_mmc_compatible mt2712_compat = {
+>   	.clk_div_bits = 12,
+>   	.hs400_tune = false,
+> +	.pad_tune0 = true,
+>   };
+>   
+>   static const struct of_device_id msdc_of_ids[] = {
+> @@ -581,6 +587,10 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
+>   	u32 flags;
+>   	u32 div;
+>   	u32 sclk;
+> +	u32 tune_reg = MSDC_PAD_TUNE;
+> +
+> +	if (host->dev_comp->pad_tune0)
+> +		tune_reg = MSDC_PAD_TUNE0;
+
+And this would not be needed here nor in the other functions, it could 
+just be replaced by host->dev_comp->pad_tune0.
+
+Thanks,
+
+-- 
+Julien Thierry
