@@ -1,59 +1,65 @@
-From: Chris Brandt <Chris.Brandt@renesas.com>
-Subject: renesas sdhi driver and DMA
-Date: Tue, 10 Oct 2017 19:05:03 +0000
-Message-ID: <SG2PR06MB1165F16A63D6793DBEC419688A750@SG2PR06MB1165.apcprd06.prod.outlook.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: renesas sdhi driver and DMA
+Date: Tue, 10 Oct 2017 22:32:29 +0200
+Message-ID: <20171010203229.rrwxkrczuk7piqh6@tetsubishi>
+References: <SG2PR06MB1165F16A63D6793DBEC419688A750@SG2PR06MB1165.apcprd06.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="r6pje7me2lhs7nil"
 Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <SG2PR06MB1165F16A63D6793DBEC419688A750@SG2PR06MB1165.apcprd06.prod.outlook.com>
 Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Chris Brandt <Chris.Brandt@renesas.com>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hello Wolfram,
 
-For my RZ/A1 DMA driver (it's a work in progress), the patch
+--r6pje7me2lhs7nil
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-52ad9a8e854c ("mmc: host: tmio: ensure end of DMA and SD access are in sync=
-")
+Hi Chris,
 
-now causes a "BUG: scheduling while atomic"
+> [<bf9921e7>] (tmio_mmc_dma_callback) from [<bf908e1b>] (rzadma_tasklet+0x=
+23/0x98)
 
-Starting logging: BUG: scheduling while atomic: S01logging/434/0x00000100
-CPU: 0 PID: 434 Comm: S01logging Not tainted 4.9.49-g845fe5990-dirty #29
-Hardware name: Generic R7S72100 (Flattened Device Tree)
-[<bf808d41>] (unwind_backtrace) from [<bf8075f3>] (show_stack+0xb/0xc)
-[<bf8075f3>] (show_stack) from [<bf82038d>] (__schedule_bug+0x39/0x58)
-[<bf82038d>] (__schedule_bug) from [<bfa2fba9>] (__schedule+0x21/0x238)
-[<bfa2fba9>] (__schedule) from [<bfa2fe2d>] (schedule+0x51/0x58)
-[<bfa2fe2d>] (schedule) from [<bfa313ad>] (schedule_timeout+0x15/0xcc)
-[<bfa313ad>] (schedule_timeout) from [<bfa30427>] (wait_for_common+0x9b/0xb=
-c)
-[<bfa30427>] (wait_for_common) from [<bf9921e7>] (tmio_mmc_dma_callback+0xb=
-/0x74)
-[<bf9921e7>] (tmio_mmc_dma_callback) from [<bf908e1b>] (rzadma_tasklet+0x23=
-/0x98)
-[<bf908e1b>] (rzadma_tasklet) from [<bf810d9b>] (tasklet_action+0x3f/0x5c)
-[<bf810d9b>] (tasklet_action) from [<bf810a47>] (__do_softirq+0x7f/0x144)
-[<bf810a47>] (__do_softirq) from [<bf829917>] (__handle_domain_irq+0x51/0x6=
-a)
-[<bf829917>] (__handle_domain_irq) from [<bf80128b>] (gic_handle_irq+0x37/0=
-x58)
-[<bf80128b>] (gic_handle_irq) from [<bf807d25>] (__irq_svc+0x65/0x94)
+For SYS-DMAC, this is a callback called by the dmaengine core once the
+DMA is completed. My guess is you call it directly from an interrupt
+handler? It would be easier to talk over code here, I guess.
+
+> Is it now a requirement that I have to register my DMA channel=20
+> interrupts as devm_request_threaded_irq?
+>=20
+> Will that fix my issue?
+
+I can't say yet if this alone will do. Likely not. Can you share the
+code already? Isn't it SYS-DMAC compatible (sigh)?
+
+Regards,
+
+   Wolfram
 
 
-I noticed that in rcar-dmac.c, the DMA channel IRQs are threaded:
+--r6pje7me2lhs7nil
+Content-Type: application/pgp-signature; name="signature.asc"
 
-	ret =3D devm_request_threaded_irq(dmac->dev, irq, rcar_dmac_isr_channel,
-					rcar_dmac_isr_channel_thread, 0,
-					irqname, rchan);
+-----BEGIN PGP SIGNATURE-----
 
-Is it now a requirement that I have to register my DMA channel=20
-interrupts as devm_request_threaded_irq?
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlndLlUACgkQFA3kzBSg
+KbZHAA//fovE1GKGxHsCFa/6/q0vW3LFfhvWo1k/opgy+pxTuAFDivb6kP4dep7r
+Pvpqvb7qjpmBiKS2QCs9O5tVt73oLh2VNz7JCHzw78H7SLBY59SZyzi1SB/1NyCC
+We7BPdObrDejOyVzoDT6M8wV5ewp3QbUF3SCLNFPpoJ26n8mfAorIbnjyMCZ1pGw
+hlRFRAmsuxjOgTqZnVmEfXRvnAWGfGpuscwDvTqSMSRETE0v+0mWT9PmLqikZAmt
+m/M1xsmYbv569d4+UnhgbqBHMdmWDUrrCsK9abP3DD+OO2bkg0cjEYf39/LWyHdR
+/Y6EZKSav7rROizxLBD1diaw/5XvtBMgCBb2wmqMyPN8qUiv0B+KeSrNwUgQ3K37
+AHJR16Bw6JrGorFcPkXX47UuFF6ZRPWQkdjteG1A4/CPyYQQHHfqJXqWK+w65ecb
+XejK1d6KiRQJDWVisUQe2nCd/MWWEC5TUHFrj++tyPB75ExHiwqZNRNwRMncvA1C
+C27SjlslDRv/qTfga5Sjw8VD0GJdL9x3x+HS6mILI5h7bRGNBFef72PE7dvRpviC
+rPQGzjK7ylt2Rqm2qZEwNyIIJ3gl9IpiJYpqt4yLnRQ1rtGngV165VU2VaVY6hAr
+12Zx9O9dhllWbkwOTwzBndOMXGhQE9jL0NRK5V8xJkKPaBVzNGY=
+=Irx9
+-----END PGP SIGNATURE-----
 
-Will that fix my issue?
-
-Thank you,
-Chris
+--r6pje7me2lhs7nil--
