@@ -1,44 +1,43 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: SD card reader problems on Cherry-Trail
-Date: Tue, 10 Oct 2017 12:22:28 +0300
-Message-ID: <17f28f0f-ab5b-3095-4d52-8908bee409b4@intel.com>
-References: <CAL9uMOGXVgHP8iNdZbEWv3pSRjZ++hhswu6c+ZiPydGiw9SPEw@mail.gmail.com>
- <CAPDyKFpoHGKGhDyYRTdWMPTxOM0GLNDQjMTDThX5mvFDyVTwnw@mail.gmail.com>
- <CAL9uMOGog77MDUhVisEDcbSFXANGNfzecee1PzgXdwvZwexmUA@mail.gmail.com>
- <32d4293d-7e9d-8f0d-966f-235a8283182f@intel.com>
- <CAL9uMOHbx4+bEfaiX-NP5q_OzUqbo0O-fb4_oSPQGs0h4tOdtQ@mail.gmail.com>
- <CAL9uMOEk83d2Ua6v9FSKPBpb33KGEj6ExYo_FBiC_sF1VPkMgQ@mail.gmail.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: mmc: exceeding card's volts
+Date: Tue, 10 Oct 2017 12:08:03 +0200
+Message-ID: <CAMuHMdUGwTRsJdfkG90hY6kvCr6qknRGv5V66qBPfUY1x+MciQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:1915 "EHLO mga03.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1756011AbdJJJv2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 10 Oct 2017 05:51:28 -0400
-In-Reply-To: <CAL9uMOEk83d2Ua6v9FSKPBpb33KGEj6ExYo_FBiC_sF1VPkMgQ@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Linux MMC List <linux-mmc@vger.kernel.org>
+Cc: Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms+renesas@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
-To: Carlo Caione <carlo@endlessm.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 10/10/17 12:22, Carlo Caione wrote:
-> On Thu, Oct 5, 2017 at 10:26 AM, Carlo Caione <carlo@endlessm.com> wrote:
-> 
-> /cut
->>>> - Reproduced with the latest master on linus repo (4.14.0-rc3)
->>>> - No idea if this is a regression or not. This is a new hardware we
->>>> are trying to enable and I have never seen it working fine (I should
->>>> blindly try some old kernel)
->>>> - Windows is working fine so not an HW issue
->>>> - CPU is x5-Z8350
->>>
->>> Can you provide an acpidump?
->>
->> DSDT https://paste.fedoraproject.org/paste/DXlkVidxM7U9LS2OpqvLGQ/raw
-> 
-> Hey Adrian,
-> any idea about this issue?
+Hi all,
 
-Yes, but it is complicated so I don't have a patch ready just yet.
+For the first time ever, I saw a dangerous looking "exceeding card's volts"
+on Salvator-X with R-Car M3-W ES1.0:
+
+ NET: Registered protocol family 15
+ can: controller area network core (rev 20170425 abi 9)
+ NET: Registered protocol family 29
++renesas_sdhi_internal_dmac ee140000.sd: Tuning procedure failed
++mmc0: tuning execution failed: -5
++mmc0: error -5 whilst initialising MMC card
+ can: raw protocol (rev 20170425)
+ can: broadcast manager protocol (rev 20170425 t)
+ can: netlink gateway (rev 20170425) max_hops=1
++renesas_sdhi_internal_dmac ee140000.sd: exceeding card's volts
+ renesas_irqc e61c0000.interrupt-controller: adding to PM domain always-on
++mmc0: error -110 whilst initialising MMC card
+ renesas_irqc e61c0000.interrupt-controller: driving 6 irqs
+
+During next boot, everything was back to normal again...
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
