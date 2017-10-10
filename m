@@ -1,74 +1,62 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 00/11] mmc: document mmc_regulator_get_supply and fix users
-Date: Tue, 10 Oct 2017 09:03:59 +0200
-Message-ID: <CAPDyKFoAZri8N79eZMFJeT6bN19XZPCvCD6oBmr5EXCj_KSTVQ@mail.gmail.com>
-References: <20171007103658.16868-1-wsa+renesas@sang-engineering.com>
+Subject: Re: [PATCH v2 03/13] mmc: dt-bindings: make compatible explicit
+Date: Tue, 10 Oct 2017 09:19:14 +0200
+Message-ID: <CAPDyKFpzuctUJ7FB9thMi0h602iJZc=kbs7iaVb+0oNCC4K4ng@mail.gmail.com>
+References: <1507548926-9555-1-git-send-email-chaotian.jing@mediatek.com>
+ <1507548926-9555-4-git-send-email-chaotian.jing@mediatek.com>
+ <e4e5fa8b-b6a5-dc70-fbfc-6328493cd073@gmail.com> <1507599473.19789.1.camel@mhfsdcap03>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <20171007103658.16868-1-wsa+renesas@sang-engineering.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Fabrizio Castro <fabrizio.castro@bp.renesas.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-it0-f51.google.com ([209.85.214.51]:56263 "EHLO
+        mail-it0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752305AbdJJHTP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Oct 2017 03:19:15 -0400
+Received: by mail-it0-f51.google.com with SMTP id l196so1285172itl.4
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Oct 2017 00:19:15 -0700 (PDT)
+In-Reply-To: <1507599473.19789.1.camel@mhfsdcap03>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chaotian Jing <chaotian.jing@mediatek.com>
+Cc: Matthias Brugger <matthias.bgg@gmail.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, yong mao <yong.mao@mediatek.com>, Linus Walleij <linus.walleij@linaro.org>, Javier Martinez Canillas <javier@osg.samsung.com>, Heiner Kallweit <hkallweit1@gmail.com>, Phong LE <ple@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mediatek@lists.infradead.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, srv_heupstream <srv_heupstream@mediatek.com>
 
-On 7 October 2017 at 12:36, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
-> Fix the drivers and add some docs according to the outcome of this discussion
-> [1] we had recently. The motivation from the patch description:
+On 10 October 2017 at 03:37, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
+> On Mon, 2017-10-09 at 16:54 +0200, Matthias Brugger wrote:
+>>
+>> On 10/09/2017 01:35 PM, Chaotian Jing wrote:
+>> > the driver has updated to have an explicit compatible, so update
+>> > binding file according to the driver change.
+>> >
+>> > Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+>> > ---
+>> >   Documentation/devicetree/bindings/mmc/mtk-sd.txt | 4 ++--
+>> >   1 file changed, 2 insertions(+), 2 deletions(-)
+>> >
+>> > diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.txt b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+>> > index 3e0a97c..2bb585b 100644
+>> > --- a/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+>> > +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+>> > @@ -8,8 +8,8 @@ and the properties used by the msdc driver.
+>> >
+>> >   Required properties:
+>> >   - compatible: value should be either of the following.
+>> > -   "mediatek,mt8173-mmc","mediatek,mt8135-mmc": for mmc host ip compatible with mt8135
+>> > -   "mediatek,mt8173-mmc","mediatek,mt8135-mmc": for mmc host ip compatible with mt8173
+>> > +   "mediatek,mt8135-mmc": for mmc host ip compatible with mt8135
+>> > +   "mediatek,mt8173-mmc": for mmc host ip compatible with mt8173
+>>
+>> You can merge this with patch 1.
 >
-> Bail out everytime when mmc_regulator_get_supply() returns an errno, not only
-> when probing gets deferred. This is currently a no-op, because this function
-> only returns -EPROBE_DEFER or 0 right now. But if it will throw another error
-> somewhen, it will be for a reason. (This still doesn't change that getting
-> regulators is optional, so 0 can still mean no regulators found). So, let us a)
-> be future proof and b) have driver code which is easier to understand.
->
-> The patches have been created with coccinelle. A branch can be found here:
->
-> git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/mmc-get-supply-docs
->
-> Looking forward to comments!
->
-> Kind regards,
->
->    Wolfram
->
-> [1] https://patchwork.kernel.org/patch/9965823/
->
-> Wolfram Sang (11):
->   mmc: add kerneldoc to mmc_regulator_get_supply()
->   mmc: cavium: catch all errors when getting regulators
->   mmc: dw_mmc: catch all errors when getting regulators
->   mmc: meson-gx-mmc: catch all errors when getting regulators
->   mmc: meson-mx-sdio: catch all errors when getting regulators
->   mmc: mmci: catch all errors when getting regulators
->   mmc: mtk-sd: catch all errors when getting regulators
->   mmc: mxcmmc: catch all errors when getting regulators
->   mmc: omap_hsmmc: catch all errors when getting regulators
->   mmc: sdhci: catch all errors when getting regulators
->   mmc: usdhi6rol0: catch all errors when getting regulators
->
->  drivers/mmc/core/core.c          | 10 ++++++++++
->  drivers/mmc/host/cavium.c        |  2 +-
->  drivers/mmc/host/dw_mmc.c        |  2 +-
->  drivers/mmc/host/meson-gx-mmc.c  |  2 +-
->  drivers/mmc/host/meson-mx-sdio.c |  2 +-
->  drivers/mmc/host/mmci.c          |  2 +-
->  drivers/mmc/host/mtk-sd.c        |  2 +-
->  drivers/mmc/host/mxcmmc.c        |  2 +-
->  drivers/mmc/host/omap_hsmmc.c    |  2 +-
->  drivers/mmc/host/sdhci.c         |  2 +-
->  drivers/mmc/host/usdhi6rol0.c    |  2 +-
->  11 files changed, 20 insertions(+), 10 deletions(-)
->
-> --
+> OK, will merge it in next patch.
 
-Looks good to me, however as pointed out by Fabrizio, you could run a
-round of checkpatch (mainly about commit message format).
+No, please don't!
 
-Or perhaps even coccinelle needs an update to be adopted to
-requirement from checkpatch?
+I would like DT documentation changes to be posted in separate
+patches. Moreover, those should be before driver changes, when you
+order the changes in your series.
+
+In this way, the bindings can be reviewed and acked separately, which
+makes it more convenient.
 
 Kind regards
 Uffe
