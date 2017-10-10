@@ -1,66 +1,80 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC PATCH] mmc: tmio: check mmc_regulator_get_supply return value
-Date: Tue, 10 Oct 2017 09:40:30 +0200
-Message-ID: <CAPDyKFqXBrKThAcvWijwsaAXo4=20p4KuCe+APGxKvfYwoa3jA@mail.gmail.com>
-References: <1506079337-12882-1-git-send-email-fabrizio.castro@bp.renesas.com>
+Subject: Re: [PATCH] mmc: dw_mmc: Add support for multiple SD cards on one
+ host interface
+Date: Tue, 10 Oct 2017 09:59:35 +0200
+Message-ID: <CAPDyKFqwajTGCyexd8Bxj-jEtKJCDb3b8q1HqOrYoNAMSdevcg@mail.gmail.com>
+References: <AM5PR0701MB2657094CA5D94164E6D63A8DE47F0@AM5PR0701MB2657.eurprd07.prod.outlook.com>
+ <CAPDyKFr3==eZQOojPac4fse8baHa+UXweOezdb9vFiSB9jae_Q@mail.gmail.com> <ed12bab0-1270-af10-0313-ad9e2f32173e@hotmail.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <1506079337-12882-1-git-send-email-fabrizio.castro@bp.renesas.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Fabrizio Castro <fabrizio.castro@bp.renesas.com>
-Cc: Simon Horman <horms+renesas@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Morimoto <kuninori.morimoto.gx@renesas.com>, Chris Paterson <Chris.Paterson2@renesas.com>, Biju Das <biju.das@bp.renesas.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-it0-f47.google.com ([209.85.214.47]:49631 "EHLO
+        mail-it0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755650AbdJJH7g (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Oct 2017 03:59:36 -0400
+Received: by mail-it0-f47.google.com with SMTP id y15so1396165ita.4
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Oct 2017 00:59:36 -0700 (PDT)
+In-Reply-To: <ed12bab0-1270-af10-0313-ad9e2f32173e@hotmail.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Bernd Edlinger <bernd.edlinger@hotmail.de>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>
 
-On 22 September 2017 at 13:22, Fabrizio Castro
-<fabrizio.castro@bp.renesas.com> wrote:
-> mmc_regulator_get_supply returns -EPROBE_DEFER if either vmmc or
-> vqmmc regulators had their probing deferred.
-> vqmmc regulator is needed by UHS to work properly, therefore this
-> patch checks the value returned by mmc_regulator_get_supply to
-> make sure we have a reference to both vmmc and vqmmc (if found in
-> the DT).
+On 2 October 2017 at 16:31, Bernd Edlinger <bernd.edlinger@hotmail.de> wrote:
+> On 10/02/17 09:12, Ulf Hansson wrote:
+>> On 30 September 2017 at 17:39, Bernd Edlinger <bernd.edlinger@hotmail.de> wrote:
+>>>
+>>> Needs external logic to multiplex the clock signal,
+>>> which is controlled by a GPIO output pin.
+>>>
+>>> Only the selected SD card receives the clock,
+>>> while the other SD card's clock is forced to LOW.
+>>> DATA and CMD lines can be connected to both SD cards.
+>>>
+>>> On warm-start UBOOT should use a sequence of
+>>> CMD12 and CMD7 with RCA=0 to force any active SD card
+>>> to stop transmission and release the DATA bus.
+>>
+>> I doubt that is sufficient to support multiple slots.
+>>
 >
-> Signed-off-by: Fabrizio Castro <fabrizio.castro@bp.renesas.com>
+> A hardware exists and AFAICT works as expected,
+> with bus speeds up to 50 MHz.
+> We have a use case with internal peripherals.
+>
+>> Sometimes the mmc core needs to perform a sequence of operations
+>> towards *one* host/card and that must be done in guaranteed manner, to
+>> that no other operations are performed for another card/host
+>> in-between.
+>>
+>
+> Could you please elaborate on this?
 
-Thanks, applied for next!
+mmc_claim|release_host() is used by the core to get exclusive access
+to the host and its controller.
+
+That's needed for a several reasons, both good and bad. In the case I
+am referring to, it's about running a sequence of operations as to
+follow the MMC/SD/SDIO spec. The sequence may involve calling several
+of the host ops callbacks (->set_ios() ->request() etc) in a row,
+without having any other to interfere with the same host.
+
+Now, because those host drivers that *tries* to support multiple
+cards, registers one host per card slot, the above assumption from the
+core falls apart. In other words, the core can no longer guarantee to
+follow the specs.
+
+>
+>> Perhaps if you are lucky you may get something that is very fragile to
+>> work, but in the end I think the core needs to play along. Moreover,
+>> dw_mmc has recently removed its multiple slot support - simply because
+>> the complexity wasn't worth it.
+>>
+>
+> I was not overly happy to see this removed, when I re-based to current master :-(
+
+Sorry, but the code has never worked. And because no one complained,
+it for sure made sense to remove it.
 
 Kind regards
 Uffe
-
-> ---
->
-> I believe this patch is in order for UHS to work properly on the RZ/G1 platforms
-> as the signal voltage needs to be switched from 3.3V to 1.8V, and therefore we
-> need to make sure we hold a reference to vqmmc. Without this patch there is a
-> chance that the regulator driver gets probed later on and therefore we end up
-> without control over the power regulator. I have seen an RZ/G1E based platform
-> failing the transition to UHS because of this.
-> However, there are side effects to it as the mmc devices will be enumerated
-> in a different order (due to -EPROBE_DEFER), this means this patch would likely
-> break existing platforms.
-> Please, let me know your comments.
->
->  drivers/mmc/host/tmio_mmc_core.c | 5 ++++-
->  1 file changed, 4 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-> index 88a9435..3df0413 100644
-> --- a/drivers/mmc/host/tmio_mmc_core.c
-> +++ b/drivers/mmc/host/tmio_mmc_core.c
-> @@ -1153,8 +1153,11 @@ static int tmio_mmc_init_ocr(struct tmio_mmc_host *host)
->  {
->         struct tmio_mmc_data *pdata = host->pdata;
->         struct mmc_host *mmc = host->mmc;
-> +       int err;
->
-> -       mmc_regulator_get_supply(mmc);
-> +       err = mmc_regulator_get_supply(mmc);
-> +       if (err)
-> +               return err;
->
->         /* use ocr_mask if no regulator */
->         if (!mmc->ocr_avail)
-> --
-> 2.7.4
->
