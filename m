@@ -1,46 +1,97 @@
-From: Bjorn Helgaas <helgaas@kernel.org>
-Subject: Re: [PATCH] mmc: sdhci-pci: Remove D3 delays for Intel BYT-related
- host controllers
-Date: Tue, 10 Oct 2017 06:03:51 -0500
-Message-ID: <20171010110351.GU25517@bhelgaas-glaptop.roam.corp.google.com>
-References: <1507294259-20438-1-git-send-email-adrian.hunter@intel.com>
- <20171006162048.GC25517@bhelgaas-glaptop.roam.corp.google.com>
- <ada41e9b-6fb3-82ab-e458-af4942adba2d@intel.com>
- <20171009134154.GJ25517@bhelgaas-glaptop.roam.corp.google.com>
- <363DA0ED52042842948283D2FC38E4649BF3590E@IRSMSX106.ger.corp.intel.com>
- <20171009202502.GN25517@bhelgaas-glaptop.roam.corp.google.com>
- <1507626095.26339.5.camel@linux.intel.com>
+From: Matthias Brugger <matthias.bgg@gmail.com>
+Subject: Re: [PATCH v4 03/12] arm64: dts: mt8173: remove "mediatek,mt8135-mmc"
+ from mmc nodes
+Date: Tue, 10 Oct 2017 13:06:42 +0200
+Message-ID: <bbbe8b1e-4ac8-95cf-5e47-24a9cac8cffc@gmail.com>
+References: <1507627831-29323-1-git-send-email-chaotian.jing@mediatek.com>
+ <1507627831-29323-4-git-send-email-chaotian.jing@mediatek.com>
+ <CAPDyKFrtBr_f2HxsNsLQ1s+-9Toni8pC82gFdVcHY+oQSPqOBA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-acpi-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1507626095.26339.5.camel@linux.intel.com>
-Sender: linux-acpi-owner@vger.kernel.org
-To: Alan Cox <alan@linux.intel.com>
-Cc: "Hunter, Adrian" <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-pci <linux-pci@vger.kernel.org>, Bjorn Helgaas <bhelgaas@google.com>, linux-acpi <linux-acpi@vger.kernel.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFrtBr_f2HxsNsLQ1s+-9Toni8pC82gFdVcHY+oQSPqOBA@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, yong mao <yong.mao@mediatek.com>, Linus Walleij <linus.walleij@linaro.org>, Heiner Kallweit <hkallweit1@gmail.com>, Phong LE <ple@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mediatek@lists.infradead.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, srv_heupstream <srv_heupstream@mediatek.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Oct 10, 2017 at 10:01:35AM +0100, Alan Cox wrote:
-> > Your concern was that a quirk would require a long list of device IDs
-> > and we'd have to add new ones.  I share that concern,
+
+
+On 10/10/2017 12:49 PM, Ulf Hansson wrote:
+> On 10 October 2017 at 11:30, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
+>> devicetree bindings has been updated to support multi-platforms,
+>> so that each platform has its owns compatible name.
+>> And, this compatible name may used in driver to distinguish with
+>> other platform.
+>>
+>> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
 > 
-> I'm not sure I do. The bus topology tells you what is on die, and the
-> id of the root bridge tells you if it's one of the parts you can do
-> this.
+> I assume there is no dependency to the rest or the series on this, so
+> this can go via arm soc?
+> 
 
-Your a49d25364dfb ("staging/atomisp: Add support for the Intel IPU
-v2") added the most generic version (pci_d3_delay_fixup() uses
 
-  DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_INTEL, PCI_ANY_ID, pci_d3_delay_fixup);
+Not in the sense of a merge conflict or something, but mt8173-mmc won't work 
+until patch 2/12 is merged as well. If we want to be conservative, we should 
+wait for this patch until the next kernel release. In the end it's just a 
+cleanup of the dtsi.
 
-so there's no list of device IDs.  If this is really a property of the
-family (BYT/CHT/etc), it makes sense to me to do it that way, but if
-you think it's better to have a list, that's OK too.
+Regards,
+Matthias
 
-The more interesting question to me is whether the quirk should be in
-an optional driver or in the always-present arch code.  My assumption
-is that putting it in the driver means that if the driver isn't
-enabled, we're doing unnecessary delays.
-
-Bjorn
+> Kind regards
+> Uffe
+> 
+>> ---
+>>   arch/arm64/boot/dts/mediatek/mt8173.dtsi | 12 ++++--------
+>>   1 file changed, 4 insertions(+), 8 deletions(-)
+>>
+>> diff --git a/arch/arm64/boot/dts/mediatek/mt8173.dtsi b/arch/arm64/boot/dts/mediatek/mt8173.dtsi
+>> index b99a273..26396ef 100644
+>> --- a/arch/arm64/boot/dts/mediatek/mt8173.dtsi
+>> +++ b/arch/arm64/boot/dts/mediatek/mt8173.dtsi
+>> @@ -682,8 +682,7 @@
+>>                  };
+>>
+>>                  mmc0: mmc@11230000 {
+>> -                       compatible = "mediatek,mt8173-mmc",
+>> -                                    "mediatek,mt8135-mmc";
+>> +                       compatible = "mediatek,mt8173-mmc";
+>>                          reg = <0 0x11230000 0 0x1000>;
+>>                          interrupts = <GIC_SPI 71 IRQ_TYPE_LEVEL_LOW>;
+>>                          clocks = <&pericfg CLK_PERI_MSDC30_0>,
+>> @@ -693,8 +692,7 @@
+>>                  };
+>>
+>>                  mmc1: mmc@11240000 {
+>> -                       compatible = "mediatek,mt8173-mmc",
+>> -                                    "mediatek,mt8135-mmc";
+>> +                       compatible = "mediatek,mt8173-mmc";
+>>                          reg = <0 0x11240000 0 0x1000>;
+>>                          interrupts = <GIC_SPI 72 IRQ_TYPE_LEVEL_LOW>;
+>>                          clocks = <&pericfg CLK_PERI_MSDC30_1>,
+>> @@ -704,8 +702,7 @@
+>>                  };
+>>
+>>                  mmc2: mmc@11250000 {
+>> -                       compatible = "mediatek,mt8173-mmc",
+>> -                                    "mediatek,mt8135-mmc";
+>> +                       compatible = "mediatek,mt8173-mmc";
+>>                          reg = <0 0x11250000 0 0x1000>;
+>>                          interrupts = <GIC_SPI 73 IRQ_TYPE_LEVEL_LOW>;
+>>                          clocks = <&pericfg CLK_PERI_MSDC30_2>,
+>> @@ -715,8 +712,7 @@
+>>                  };
+>>
+>>                  mmc3: mmc@11260000 {
+>> -                       compatible = "mediatek,mt8173-mmc",
+>> -                                    "mediatek,mt8135-mmc";
+>> +                       compatible = "mediatek,mt8173-mmc";
+>>                          reg = <0 0x11260000 0 0x1000>;
+>>                          interrupts = <GIC_SPI 74 IRQ_TYPE_LEVEL_LOW>;
+>>                          clocks = <&pericfg CLK_PERI_MSDC30_3>,
+>> --
+>> 1.8.1.1.dirty
+>>
