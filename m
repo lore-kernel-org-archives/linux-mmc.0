@@ -1,78 +1,75 @@
-From: Chaotian Jing <chaotian.jing@mediatek.com>
-Subject: [PATCH v3 11/12] mmc: mediatek: improve eMMC hs400 mode read performance
-Date: Tue, 10 Oct 2017 11:01:19 +0800
-Message-ID: <1507604480-23246-12-git-send-email-chaotian.jing@mediatek.com>
+From: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Subject: [PATCH v3 02/12] mmc: dt-bindings: Add reg/source_cg/latch-ck for
+ Mediatek MMC bindings
+Date: Tue, 10 Oct 2017 11:01:10 +0800
+Message-ID: <1507604480-23246-3-git-send-email-chaotian.jing@mediatek.com>
 References: <1507604480-23246-1-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1507604480-23246-1-git-send-email-chaotian.jing@mediatek.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Matthias Brugger <matthias.bgg@gmail.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Chaotian Jing <chaotian.jing@mediatek.com>, yong mao <yong.mao@mediatek.com>, Linus Walleij <linus.walleij@linaro.org>, Heiner Kallweit <hkallweit1@gmail.com>, Phong LE <ple@baylibre.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, srv_heupstream@mediatek.com
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <1507604480-23246-1-git-send-email-chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mediatek>,
+ <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mediatek/>
+List-Post: <mailto:linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mediatek>,
+ <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-mediatek" <linux-mediatek-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, yong mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Phong LE <ple-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Heiner Kallweit <hkallweit1-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-enlarge outstanding value to improve read performance
+Change the comptiable for support of multi-platform
+Make compatible explicit
+Add description for reg
+Add description for source_cg
+Add description for mediatek,latch-ck
+Note that source_cg and mediatek,latch-ck are optional for some projects,
+eg, MT2701 do not have source_cg, and MT2712 do not need
+mediatek,latch-ck
 
-Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+Signed-off-by: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
 ---
- drivers/mmc/host/mtk-sd.c | 9 +++++++++
- 1 file changed, 9 insertions(+)
+ Documentation/devicetree/bindings/mmc/mtk-sd.txt | 16 +++++++++++++---
+ 1 file changed, 13 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 3a1756a..4cffc04 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -81,6 +81,7 @@
- #define PAD_DS_TUNE      0x188
- #define PAD_CMD_TUNE     0x18c
- #define EMMC50_CFG0      0x208
-+#define EMMC50_CFG3      0x220
- #define SDC_FIFO_CFG     0x228
+diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.txt b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+index 4182ea3..2bb585b 100644
+--- a/Documentation/devicetree/bindings/mmc/mtk-sd.txt
++++ b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+@@ -7,10 +7,18 @@ This file documents differences between the core properties in mmc.txt
+ and the properties used by the msdc driver.
  
- /*--------------------------------------------------------------------------*/
-@@ -249,6 +250,8 @@
- #define EMMC50_CFG_CRCSTS_EDGE    (0x1 << 3)   /* RW */
- #define EMMC50_CFG_CFCSTS_SEL     (0x1 << 4)   /* RW */
+ Required properties:
+-- compatible: Should be "mediatek,mt8173-mmc","mediatek,mt8135-mmc"
++- compatible: value should be either of the following.
++	"mediatek,mt8135-mmc": for mmc host ip compatible with mt8135
++	"mediatek,mt8173-mmc": for mmc host ip compatible with mt8173
++	"mediatek,mt2701-mmc": for mmc host ip compatible with mt2701
++	"mediatek,mt2712-mmc": for mmc host ip compatible with mt2712
++- reg: physical base address of the controller and length
+ - interrupts: Should contain MSDC interrupt number
+-- clocks: MSDC source clock, HCLK
+-- clock-names: "source", "hclk"
++- clocks: Should contain phandle for the clock feeding the MMC controller
++- clock-names: Should contain the following:
++	"source" - source clock (required)
++	"hclk" - HCLK which used for host (required)
++	"source_cg" - independent source clock gate (required for MT2712)
+ - pinctrl-names: should be "default", "state_uhs"
+ - pinctrl-0: should contain default/high speed pin ctrl
+ - pinctrl-1: should contain uhs mode pin ctrl
+@@ -30,6 +38,8 @@ Optional properties:
+ - mediatek,hs400-cmd-resp-sel-rising:  HS400 command response sample selection
+ 				       If present,HS400 command responses are sampled on rising edges.
+ 				       If not present,HS400 command responses are sampled on falling edges.
++- mediatek,latch-ck: Some SoCs do not support enhance_rx, need set correct latch-ck to avoid data crc
++		     error caused by stop clock(fifo full)
  
-+#define EMMC50_CFG3_OUTS_WR       (0x1f << 0)  /* RW */
-+
- #define SDC_FIFO_CFG_WRVALIDSEL   (0x1 << 24)  /* RW */
- #define SDC_FIFO_CFG_RDVALIDSEL   (0x1 << 25)  /* RW */
- 
-@@ -318,6 +321,7 @@ struct msdc_save_para {
- 	u32 pad_ds_tune;
- 	u32 pad_cmd_tune;
- 	u32 emmc50_cfg0;
-+	u32 emmc50_cfg3;
- 	u32 sdc_fifo_cfg;
- };
- 
-@@ -1761,6 +1765,9 @@ static int msdc_prepare_hs400_tuning(struct mmc_host *mmc, struct mmc_ios *ios)
- 	writel(host->hs400_ds_delay, host->base + PAD_DS_TUNE);
- 	/* hs400 mode must set it to 0 */
- 	sdr_clr_bits(host->base + MSDC_PATCH_BIT2, MSDC_PATCH_BIT2_CFGCRCSTS);
-+	/* to improve read performance, set outstanding to 2 */
-+	sdr_set_field(host->base + EMMC50_CFG3, EMMC50_CFG3_OUTS_WR, 2);
-+
- 	return 0;
- }
- 
-@@ -2013,6 +2020,7 @@ static void msdc_save_reg(struct msdc_host *host)
- 	host->save_para.pad_ds_tune = readl(host->base + PAD_DS_TUNE);
- 	host->save_para.pad_cmd_tune = readl(host->base + PAD_CMD_TUNE);
- 	host->save_para.emmc50_cfg0 = readl(host->base + EMMC50_CFG0);
-+	host->save_para.emmc50_cfg3 = readl(host->base + EMMC50_CFG3);
- 	host->save_para.sdc_fifo_cfg = readl(host->base + SDC_FIFO_CFG);
- }
- 
-@@ -2032,6 +2040,7 @@ static void msdc_restore_reg(struct msdc_host *host)
- 	writel(host->save_para.pad_ds_tune, host->base + PAD_DS_TUNE);
- 	writel(host->save_para.pad_cmd_tune, host->base + PAD_CMD_TUNE);
- 	writel(host->save_para.emmc50_cfg0, host->base + EMMC50_CFG0);
-+	writel(host->save_para.emmc50_cfg3, host->base + EMMC50_CFG3);
- 	writel(host->save_para.sdc_fifo_cfg, host->base + SDC_FIFO_CFG);
- }
- 
+ Examples:
+ mmc0: mmc@11230000 {
 -- 
 1.8.1.1.dirty
