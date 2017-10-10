@@ -1,97 +1,47 @@
-From: Matthias Brugger <matthias.bgg@gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
 Subject: Re: [PATCH v4 03/12] arm64: dts: mt8173: remove "mediatek,mt8135-mmc"
  from mmc nodes
-Date: Tue, 10 Oct 2017 13:06:42 +0200
-Message-ID: <bbbe8b1e-4ac8-95cf-5e47-24a9cac8cffc@gmail.com>
+Date: Tue, 10 Oct 2017 13:10:15 +0200
+Message-ID: <CAPDyKFoGhq_+iiRS4dZscpBw+ttCOY1EzA_okXgpWwOdWUMKNw@mail.gmail.com>
 References: <1507627831-29323-1-git-send-email-chaotian.jing@mediatek.com>
  <1507627831-29323-4-git-send-email-chaotian.jing@mediatek.com>
- <CAPDyKFrtBr_f2HxsNsLQ1s+-9Toni8pC82gFdVcHY+oQSPqOBA@mail.gmail.com>
+ <CAPDyKFrtBr_f2HxsNsLQ1s+-9Toni8pC82gFdVcHY+oQSPqOBA@mail.gmail.com> <bbbe8b1e-4ac8-95cf-5e47-24a9cac8cffc@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFrtBr_f2HxsNsLQ1s+-9Toni8pC82gFdVcHY+oQSPqOBA@mail.gmail.com>
-Content-Language: en-US
+In-Reply-To: <bbbe8b1e-4ac8-95cf-5e47-24a9cac8cffc@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, yong mao <yong.mao@mediatek.com>, Linus Walleij <linus.walleij@linaro.org>, Heiner Kallweit <hkallweit1@gmail.com>, Phong LE <ple@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mediatek@lists.infradead.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, srv_heupstream <srv_heupstream@mediatek.com>
+To: Matthias Brugger <matthias.bgg@gmail.com>
+Cc: Chaotian Jing <chaotian.jing@mediatek.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, yong mao <yong.mao@mediatek.com>, Linus Walleij <linus.walleij@linaro.org>, Heiner Kallweit <hkallweit1@gmail.com>, Phong LE <ple@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mediatek@lists.infradead.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, srv_heupstream <srv_heupstream@mediatek.com>
 List-Id: linux-mmc@vger.kernel.org
 
+On 10 October 2017 at 13:06, Matthias Brugger <matthias.bgg@gmail.com> wrote:
+>
+>
+> On 10/10/2017 12:49 PM, Ulf Hansson wrote:
+>>
+>> On 10 October 2017 at 11:30, Chaotian Jing <chaotian.jing@mediatek.com>
+>> wrote:
+>>>
+>>> devicetree bindings has been updated to support multi-platforms,
+>>> so that each platform has its owns compatible name.
+>>> And, this compatible name may used in driver to distinguish with
+>>> other platform.
+>>>
+>>> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+>>
+>>
+>> I assume there is no dependency to the rest or the series on this, so
+>> this can go via arm soc?
+>>
+>
+>
+> Not in the sense of a merge conflict or something, but mt8173-mmc won't work
+> until patch 2/12 is merged as well. If we want to be conservative, we should
+> wait for this patch until the next kernel release. In the end it's just a
+> cleanup of the dtsi.
 
+In such case I can pick it part of this series, just need your ack.
 
-On 10/10/2017 12:49 PM, Ulf Hansson wrote:
-> On 10 October 2017 at 11:30, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
->> devicetree bindings has been updated to support multi-platforms,
->> so that each platform has its owns compatible name.
->> And, this compatible name may used in driver to distinguish with
->> other platform.
->>
->> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
-> 
-> I assume there is no dependency to the rest or the series on this, so
-> this can go via arm soc?
-> 
-
-
-Not in the sense of a merge conflict or something, but mt8173-mmc won't work 
-until patch 2/12 is merged as well. If we want to be conservative, we should 
-wait for this patch until the next kernel release. In the end it's just a 
-cleanup of the dtsi.
-
-Regards,
-Matthias
-
-> Kind regards
-> Uffe
-> 
->> ---
->>   arch/arm64/boot/dts/mediatek/mt8173.dtsi | 12 ++++--------
->>   1 file changed, 4 insertions(+), 8 deletions(-)
->>
->> diff --git a/arch/arm64/boot/dts/mediatek/mt8173.dtsi b/arch/arm64/boot/dts/mediatek/mt8173.dtsi
->> index b99a273..26396ef 100644
->> --- a/arch/arm64/boot/dts/mediatek/mt8173.dtsi
->> +++ b/arch/arm64/boot/dts/mediatek/mt8173.dtsi
->> @@ -682,8 +682,7 @@
->>                  };
->>
->>                  mmc0: mmc@11230000 {
->> -                       compatible = "mediatek,mt8173-mmc",
->> -                                    "mediatek,mt8135-mmc";
->> +                       compatible = "mediatek,mt8173-mmc";
->>                          reg = <0 0x11230000 0 0x1000>;
->>                          interrupts = <GIC_SPI 71 IRQ_TYPE_LEVEL_LOW>;
->>                          clocks = <&pericfg CLK_PERI_MSDC30_0>,
->> @@ -693,8 +692,7 @@
->>                  };
->>
->>                  mmc1: mmc@11240000 {
->> -                       compatible = "mediatek,mt8173-mmc",
->> -                                    "mediatek,mt8135-mmc";
->> +                       compatible = "mediatek,mt8173-mmc";
->>                          reg = <0 0x11240000 0 0x1000>;
->>                          interrupts = <GIC_SPI 72 IRQ_TYPE_LEVEL_LOW>;
->>                          clocks = <&pericfg CLK_PERI_MSDC30_1>,
->> @@ -704,8 +702,7 @@
->>                  };
->>
->>                  mmc2: mmc@11250000 {
->> -                       compatible = "mediatek,mt8173-mmc",
->> -                                    "mediatek,mt8135-mmc";
->> +                       compatible = "mediatek,mt8173-mmc";
->>                          reg = <0 0x11250000 0 0x1000>;
->>                          interrupts = <GIC_SPI 73 IRQ_TYPE_LEVEL_LOW>;
->>                          clocks = <&pericfg CLK_PERI_MSDC30_2>,
->> @@ -715,8 +712,7 @@
->>                  };
->>
->>                  mmc3: mmc@11260000 {
->> -                       compatible = "mediatek,mt8173-mmc",
->> -                                    "mediatek,mt8135-mmc";
->> +                       compatible = "mediatek,mt8173-mmc";
->>                          reg = <0 0x11260000 0 0x1000>;
->>                          interrupts = <GIC_SPI 74 IRQ_TYPE_LEVEL_LOW>;
->>                          clocks = <&pericfg CLK_PERI_MSDC30_3>,
->> --
->> 1.8.1.1.dirty
->>
+Kind regards
+Uffe
