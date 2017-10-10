@@ -1,90 +1,74 @@
-From: Chaotian Jing <chaotian.jing@mediatek.com>
-Subject: [PATCH v3 04/12] mmc: mediatek: make hs400_tune_response only for
- mt8173
-Date: Tue, 10 Oct 2017 11:01:12 +0800
-Message-ID: <1507604480-23246-5-git-send-email-chaotian.jing@mediatek.com>
-References: <1507604480-23246-1-git-send-email-chaotian.jing@mediatek.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 00/11] mmc: document mmc_regulator_get_supply and fix users
+Date: Tue, 10 Oct 2017 09:03:59 +0200
+Message-ID: <CAPDyKFoAZri8N79eZMFJeT6bN19XZPCvCD6oBmr5EXCj_KSTVQ@mail.gmail.com>
+References: <20171007103658.16868-1-wsa+renesas@sang-engineering.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1507604480-23246-1-git-send-email-chaotian.jing@mediatek.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, srv_heupstream@mediatek.com, Catalin Marinas <catalin.marinas@arm.com>, Linus Walleij <linus.walleij@linaro.org>, Will Deacon <will.deacon@arm.com>, linux-kernel@vger.kernel.org, yong mao <yong.mao@mediatek.com>, Phong LE <ple@baylibre.com>, Rob Herring <robh+dt@kernel.org>, linux-mediatek@lists.infradead.org, linux-arm-kernel@lists.infradead.org, Matthias Brugger <matthias.bgg@gmail.com>, linux-mmc@vger.kernel.org, Chaotian Jing <chaotian.jing@mediatek.com>, Heiner Kallweit <hkallweit1@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20171007103658.16868-1-wsa+renesas@sang-engineering.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Fabrizio Castro <fabrizio.castro@bp.renesas.com>
 List-Id: linux-mmc@vger.kernel.org
 
-the origin design of hs400_tune_response is for mt8173 because of
-mt8173 has a special design. for doing that, we add a new member
-"compatible", by now it's only for mt8173.
+On 7 October 2017 at 12:36, Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
+> Fix the drivers and add some docs according to the outcome of this discussion
+> [1] we had recently. The motivation from the patch description:
+>
+> Bail out everytime when mmc_regulator_get_supply() returns an errno, not only
+> when probing gets deferred. This is currently a no-op, because this function
+> only returns -EPROBE_DEFER or 0 right now. But if it will throw another error
+> somewhen, it will be for a reason. (This still doesn't change that getting
+> regulators is optional, so 0 can still mean no regulators found). So, let us a)
+> be future proof and b) have driver code which is easier to understand.
+>
+> The patches have been created with coccinelle. A branch can be found here:
+>
+> git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/mmc-get-supply-docs
+>
+> Looking forward to comments!
+>
+> Kind regards,
+>
+>    Wolfram
+>
+> [1] https://patchwork.kernel.org/patch/9965823/
+>
+> Wolfram Sang (11):
+>   mmc: add kerneldoc to mmc_regulator_get_supply()
+>   mmc: cavium: catch all errors when getting regulators
+>   mmc: dw_mmc: catch all errors when getting regulators
+>   mmc: meson-gx-mmc: catch all errors when getting regulators
+>   mmc: meson-mx-sdio: catch all errors when getting regulators
+>   mmc: mmci: catch all errors when getting regulators
+>   mmc: mtk-sd: catch all errors when getting regulators
+>   mmc: mxcmmc: catch all errors when getting regulators
+>   mmc: omap_hsmmc: catch all errors when getting regulators
+>   mmc: sdhci: catch all errors when getting regulators
+>   mmc: usdhi6rol0: catch all errors when getting regulators
+>
+>  drivers/mmc/core/core.c          | 10 ++++++++++
+>  drivers/mmc/host/cavium.c        |  2 +-
+>  drivers/mmc/host/dw_mmc.c        |  2 +-
+>  drivers/mmc/host/meson-gx-mmc.c  |  2 +-
+>  drivers/mmc/host/meson-mx-sdio.c |  2 +-
+>  drivers/mmc/host/mmci.c          |  2 +-
+>  drivers/mmc/host/mtk-sd.c        |  2 +-
+>  drivers/mmc/host/mxcmmc.c        |  2 +-
+>  drivers/mmc/host/omap_hsmmc.c    |  2 +-
+>  drivers/mmc/host/sdhci.c         |  2 +-
+>  drivers/mmc/host/usdhi6rol0.c    |  2 +-
+>  11 files changed, 20 insertions(+), 10 deletions(-)
+>
+> --
 
-Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
----
- drivers/mmc/host/mtk-sd.c | 11 +++++++++--
- 1 file changed, 9 insertions(+), 2 deletions(-)
+Looks good to me, however as pointed out by Fabrizio, you could run a
+round of checkpatch (mainly about commit message format).
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 643c795..ab2fbbb 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -300,6 +300,7 @@ struct msdc_save_para {
- 
- struct mtk_mmc_compatible {
- 	u8 clk_div_bits;
-+	bool hs400_tune; /* only used for MT8173 */
- };
- 
- struct msdc_tune_para {
-@@ -360,18 +361,22 @@ struct msdc_host {
- 
- static const struct mtk_mmc_compatible mt8135_compat = {
- 	.clk_div_bits = 8,
-+	.hs400_tune = false,
- };
- 
- static const struct mtk_mmc_compatible mt8173_compat = {
- 	.clk_div_bits = 8,
-+	.hs400_tune = true,
- };
- 
- static const struct mtk_mmc_compatible mt2701_compat = {
- 	.clk_div_bits = 12,
-+	.hs400_tune = false,
- };
- 
- static const struct mtk_mmc_compatible mt2712_compat = {
- 	.clk_div_bits = 12,
-+	.hs400_tune = false,
- };
- 
- static const struct of_device_id msdc_of_ids[] = {
-@@ -666,7 +671,8 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
- 		       host->base + PAD_CMD_TUNE);
- 	}
- 
--	if (timing == MMC_TIMING_MMC_HS400)
-+	if (timing == MMC_TIMING_MMC_HS400 &&
-+	    host->dev_comp->hs400_tune)
- 		sdr_set_field(host->base + PAD_CMD_TUNE,
- 			      MSDC_PAD_TUNE_CMDRRDLY,
- 			      host->hs400_cmd_int_delay);
-@@ -1594,7 +1600,8 @@ static int msdc_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	struct msdc_host *host = mmc_priv(mmc);
- 	int ret;
- 
--	if (host->hs400_mode)
-+	if (host->hs400_mode &&
-+	    host->dev_comp->hs400_tune)
- 		ret = hs400_tune_response(mmc, opcode);
- 	else
- 		ret = msdc_tune_response(mmc, opcode);
--- 
-1.8.1.1.dirty
+Or perhaps even coccinelle needs an update to be adopted to
+requirement from checkpatch?
+
+Kind regards
+Uffe
