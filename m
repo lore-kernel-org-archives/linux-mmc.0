@@ -1,65 +1,47 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC PATCH] mmc: sunxi: drop superfluous error message
-Date: Tue, 10 Oct 2017 09:33:34 +0200
-Message-ID: <CAPDyKFoT=La2LHhT6SvjZ=FtLYEYbisJ2RZD0REmhpO3MK8WVQ@mail.gmail.com>
-References: <20171008145009.17550-1-wsa+renesas@sang-engineering.com>
+From: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Subject: Re: [PATCH v3 01/12] mmc: mediatek: add support of mt2701/mt2712
+Date: Tue, 10 Oct 2017 15:35:51 +0800
+Message-ID: <1507620951.19789.7.camel@mhfsdcap03>
+References: <1507604480-23246-1-git-send-email-chaotian.jing@mediatek.com>
+         <1507604480-23246-2-git-send-email-chaotian.jing@mediatek.com>
+         <CAPDyKFrqv5tt8Exq1msUBbMEROam2c+YnStazsf5SPj-NLrGSg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <20171008145009.17550-1-wsa+renesas@sang-engineering.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAPDyKFrqv5tt8Exq1msUBbMEROam2c+YnStazsf5SPj-NLrGSg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, yong mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Heiner Kallweit <hkallweit1-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Phong LE <ple-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, srv_heupstream <srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 8 October 2017 at 16:50, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
-> This error message can go because a) currently nothing else than
-> EPROBE_DEFER is returned and b) if this is going to change a much more
-> detailed error message should come from mmc_regulator_get_supply()
-> anyhow.
->
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+On Tue, 2017-10-10 at 09:26 +0200, Ulf Hansson wrote:
+> [...]
+> 
+> > +
+> > +static const struct of_device_id msdc_of_ids[] = {
+> > +       { .compatible = "mediatek,mt8135-mmc", .data = &mt8135_compat},
+> > +       { .compatible = "mediatek,mt8173-mmc", .data = &mt8173_compat},
+> > +       { .compatible = "mediatek,mt2701-mmc", .data = &mt2701_compat},
+> > +       { .compatible = "mediatek,mt2712-mmc", .data = &mt2712_compat},
+> > +       {}
+> > +};
+> > +MODULE_DEVICE_TABLE(of, msdc_of_ids);
+> 
+> As already stated in the other reply. These new compatible changes
+> needs to be discussed and acked before the driver starts using them.
+> 
+> In other words, make patch3 to precede this one.
+but, then there will have a probe issue as mentioned in previous mail
+list. that's why I separate the binding file changes to 2 patches.
+> 
+> [...]
+> 
+> Kind regards
+> Uffe
 
-Thanks, applied for next!
 
-Kind regards
-Uffe
-
-> ---
->
-> While I think this patch is correct as is (because of this discussion [1]), I
-> still wonder about the intention of the now removed message. Because a not
-> supplied vmmc is not determined by the return value of *_get_supply(), but by a
-> check if mmc->supply.vmmc is populated afterwards. So, if this was the original
-> intention such a check would need to be implemented on top of this patch.
->
-> [1] https://patchwork.kernel.org/patch/9965823/
->
->  drivers/mmc/host/sunxi-mmc.c | 5 +----
->  1 file changed, 1 insertion(+), 4 deletions(-)
->
-> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index 53c970fe087397..cc98355dbdb9cc 100644
-> --- a/drivers/mmc/host/sunxi-mmc.c
-> +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -1175,11 +1175,8 @@ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
->                 return -EINVAL;
->
->         ret = mmc_regulator_get_supply(host->mmc);
-> -       if (ret) {
-> -               if (ret != -EPROBE_DEFER)
-> -                       dev_err(&pdev->dev, "Could not get vmmc supply\n");
-> +       if (ret)
->                 return ret;
-> -       }
->
->         host->reg_base = devm_ioremap_resource(&pdev->dev,
->                               platform_get_resource(pdev, IORESOURCE_MEM, 0));
-> --
-> 2.11.0
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
