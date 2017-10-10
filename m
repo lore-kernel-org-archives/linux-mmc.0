@@ -1,80 +1,45 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: dw_mmc: Add support for multiple SD cards on one
- host interface
-Date: Tue, 10 Oct 2017 09:59:35 +0200
-Message-ID: <CAPDyKFqwajTGCyexd8Bxj-jEtKJCDb3b8q1HqOrYoNAMSdevcg@mail.gmail.com>
-References: <AM5PR0701MB2657094CA5D94164E6D63A8DE47F0@AM5PR0701MB2657.eurprd07.prod.outlook.com>
- <CAPDyKFr3==eZQOojPac4fse8baHa+UXweOezdb9vFiSB9jae_Q@mail.gmail.com> <ed12bab0-1270-af10-0313-ad9e2f32173e@hotmail.de>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v3 01/12] mmc: mediatek: add support of mt2701/mt2712
+Date: Tue, 10 Oct 2017 10:09:49 +0200
+Message-ID: <CAPDyKFppTCdaMizSGTjrfgsbMuHCsNi+knHVf9ibxgrAQ0GD2w@mail.gmail.com>
+References: <1507604480-23246-1-git-send-email-chaotian.jing@mediatek.com>
+ <1507604480-23246-2-git-send-email-chaotian.jing@mediatek.com>
+ <CAPDyKFrqv5tt8Exq1msUBbMEROam2c+YnStazsf5SPj-NLrGSg@mail.gmail.com> <1507620951.19789.7.camel@mhfsdcap03>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f47.google.com ([209.85.214.47]:49631 "EHLO
-        mail-it0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755650AbdJJH7g (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Oct 2017 03:59:36 -0400
-Received: by mail-it0-f47.google.com with SMTP id y15so1396165ita.4
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Oct 2017 00:59:36 -0700 (PDT)
-In-Reply-To: <ed12bab0-1270-af10-0313-ad9e2f32173e@hotmail.de>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1507620951.19789.7.camel@mhfsdcap03>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, yong mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Heiner Kallweit <hkallweit1-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Phong LE <ple-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, srv_heupstream <srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Bernd Edlinger <bernd.edlinger@hotmail.de>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>
 
-On 2 October 2017 at 16:31, Bernd Edlinger <bernd.edlinger@hotmail.de> wrote:
-> On 10/02/17 09:12, Ulf Hansson wrote:
->> On 30 September 2017 at 17:39, Bernd Edlinger <bernd.edlinger@hotmail.de> wrote:
->>>
->>> Needs external logic to multiplex the clock signal,
->>> which is controlled by a GPIO output pin.
->>>
->>> Only the selected SD card receives the clock,
->>> while the other SD card's clock is forced to LOW.
->>> DATA and CMD lines can be connected to both SD cards.
->>>
->>> On warm-start UBOOT should use a sequence of
->>> CMD12 and CMD7 with RCA=0 to force any active SD card
->>> to stop transmission and release the DATA bus.
+On 10 October 2017 at 09:35, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org> wrote:
+> On Tue, 2017-10-10 at 09:26 +0200, Ulf Hansson wrote:
+>> [...]
 >>
->> I doubt that is sufficient to support multiple slots.
+>> > +
+>> > +static const struct of_device_id msdc_of_ids[] = {
+>> > +       { .compatible = "mediatek,mt8135-mmc", .data = &mt8135_compat},
+>> > +       { .compatible = "mediatek,mt8173-mmc", .data = &mt8173_compat},
+>> > +       { .compatible = "mediatek,mt2701-mmc", .data = &mt2701_compat},
+>> > +       { .compatible = "mediatek,mt2712-mmc", .data = &mt2712_compat},
+>> > +       {}
+>> > +};
+>> > +MODULE_DEVICE_TABLE(of, msdc_of_ids);
 >>
->
-> A hardware exists and AFAICT works as expected,
-> with bus speeds up to 50 MHz.
-> We have a use case with internal peripherals.
->
->> Sometimes the mmc core needs to perform a sequence of operations
->> towards *one* host/card and that must be done in guaranteed manner, to
->> that no other operations are performed for another card/host
->> in-between.
+>> As already stated in the other reply. These new compatible changes
+>> needs to be discussed and acked before the driver starts using them.
 >>
->
-> Could you please elaborate on this?
+>> In other words, make patch3 to precede this one.
+> but, then there will have a probe issue as mentioned in previous mail
+> list. that's why I separate the binding file changes to 2 patches.
 
-mmc_claim|release_host() is used by the core to get exclusive access
-to the host and its controller.
-
-That's needed for a several reasons, both good and bad. In the case I
-am referring to, it's about running a sequence of operations as to
-follow the MMC/SD/SDIO spec. The sequence may involve calling several
-of the host ops callbacks (->set_ios() ->request() etc) in a row,
-without having any other to interfere with the same host.
-
-Now, because those host drivers that *tries* to support multiple
-cards, registers one host per card slot, the above assumption from the
-core falls apart. In other words, the core can no longer guarantee to
-follow the specs.
-
->
->> Perhaps if you are lucky you may get something that is very fragile to
->> work, but in the end I think the core needs to play along. Moreover,
->> dw_mmc has recently removed its multiple slot support - simply because
->> the complexity wasn't worth it.
->>
->
-> I was not overly happy to see this removed, when I re-based to current master :-(
-
-Sorry, but the code has never worked. And because no one complained,
-it for sure made sense to remove it.
+That sounds seriously wrong. Aren't the bindings backwards compatible?
 
 Kind regards
 Uffe
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
