@@ -1,79 +1,199 @@
 From: Chaotian Jing <chaotian.jing@mediatek.com>
-Subject: Re: [PATCH v2 05/13] mmc: mediatek: make hs400_tune_response only
- for mt8173
-Date: Tue, 10 Oct 2017 09:39:20 +0800
-Message-ID: <1507599560.19789.3.camel@mhfsdcap03>
+Subject: Re: [PATCH v2 09/13] mmc: mediatek: add stop_clk fix and enhance_rx
+ support
+Date: Tue, 10 Oct 2017 09:39:57 +0800
+Message-ID: <1507599597.19789.4.camel@mhfsdcap03>
 References: <1507548926-9555-1-git-send-email-chaotian.jing@mediatek.com>
-         <1507548926-9555-6-git-send-email-chaotian.jing@mediatek.com>
-         <a01a245c-1e5b-74c7-9185-548cb0d8f183@gmail.com>
+         <1507548926-9555-10-git-send-email-chaotian.jing@mediatek.com>
+         <f3bea03b-9fc3-ba60-da2d-63438df96e27@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <a01a245c-1e5b-74c7-9185-548cb0d8f183@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailgw01.mediatek.com ([218.249.47.110]:52088 "EHLO
+        mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1755908AbdJJBkE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Oct 2017 21:40:04 -0400
+In-Reply-To: <f3bea03b-9fc3-ba60-da2d-63438df96e27@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Matthias Brugger <matthias.bgg@gmail.com>
 Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, yong mao <yong.mao@mediatek.com>, Linus Walleij <linus.walleij@linaro.org>, Javier Martinez Canillas <javier@osg.samsung.com>, Heiner Kallweit <hkallweit1@gmail.com>, Phong LE <ple@baylibre.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, srv_heupstream@mediatek.com
-List-Id: linux-mmc@vger.kernel.org
 
-On Mon, 2017-10-09 at 16:58 +0200, Matthias Brugger wrote:
+On Mon, 2017-10-09 at 17:00 +0200, Matthias Brugger wrote:
 > 
 > On 10/09/2017 01:35 PM, Chaotian Jing wrote:
-> > the origin design of hs400_tune_response is for mt8173 because of
-> > mt8173 has a special design. for doing that, we add a new member
-> > "compatible", by now it's only for mt8173.
+> > mt2712 supports stop_clk fix and enhance_rx, which can improve
+> > host stability.
 > > 
 > > Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
 > > ---
-> >   drivers/mmc/host/mtk-sd.c | 8 ++++++--
-> >   1 file changed, 6 insertions(+), 2 deletions(-)
+> >   drivers/mmc/host/mtk-sd.c | 47 +++++++++++++++++++++++++++++++++++++++++++----
+> >   1 file changed, 43 insertions(+), 4 deletions(-)
 > > 
 > > diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> > index 643c795..e8f8ad9 100644
+> > index 555824d..5d99e05 100644
 > > --- a/drivers/mmc/host/mtk-sd.c
 > > +++ b/drivers/mmc/host/mtk-sd.c
-> > @@ -317,6 +317,7 @@ struct msdc_delay_phase {
-> >   struct msdc_host {
-> >   	struct device *dev;
-> >   	const struct mtk_mmc_compatible *dev_comp;
-> > +	const char *compatible;
-> >   	struct mmc_host *mmc;	/* mmc structure */
-> >   	int cmd_rsp;
+> > @@ -67,6 +67,7 @@
+> >   #define SDC_RESP2        0x48
+> >   #define SDC_RESP3        0x4c
+> >   #define SDC_BLK_NUM      0x50
+> > +#define SDC_ADV_CFG0     0x64
+> >   #define EMMC_IOCON       0x7c
+> >   #define SDC_ACMD_RESP    0x80
+> >   #define MSDC_DMA_SA      0x90
+> > @@ -80,6 +81,7 @@
+> >   #define PAD_DS_TUNE      0x188
+> >   #define PAD_CMD_TUNE     0x18c
+> >   #define EMMC50_CFG0      0x208
+> > +#define SDC_FIFO_CFG     0x228
 > >   
-> > @@ -666,7 +667,8 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
-> >   		       host->base + PAD_CMD_TUNE);
-> >   	}
+> >   /*--------------------------------------------------------------------------*/
+> >   /* Register Mask                                                            */
+> > @@ -188,6 +190,9 @@
+> >   #define SDC_STS_CMDBUSY         (0x1 << 1)	/* RW */
+> >   #define SDC_STS_SWR_COMPL       (0x1 << 31)	/* RW */
 > >   
-> > -	if (timing == MMC_TIMING_MMC_HS400)
-> > +	if (timing == MMC_TIMING_MMC_HS400 &&
-> > +	    !strcmp(host->compatible, "mediatek,mt8173-mmc"))
+> > +/* SDC_ADV_CFG0 mask */
+> > +#define SDC_RX_ENHANCE_EN	(0x1 << 20)	/* RW */
+> > +
+> >   /* MSDC_DMA_CTRL mask */
+> >   #define MSDC_DMA_CTRL_START     (0x1 << 0)	/* W */
+> >   #define MSDC_DMA_CTRL_STOP      (0x1 << 1)	/* W */
+> > @@ -217,6 +222,8 @@
+> >   #define MSDC_PATCH_BIT_SPCPUSH    (0x1 << 29)	/* RW */
+> >   #define MSDC_PATCH_BIT_DECRCTMO   (0x1 << 30)	/* RW */
+> >   
+> > +#define MSDC_PATCH_BIT1_STOP_DLY  (0xf << 8)    /* RW */
+> > +
+> >   #define MSDC_PATCH_BIT2_CFGRESP   (0x1 << 15)   /* RW */
+> >   #define MSDC_PATCH_BIT2_CFGCRCSTS (0x1 << 28)   /* RW */
+> >   #define MSDC_PB2_RESPWAIT         (0x3 << 2)    /* RW */
+> > @@ -242,6 +249,9 @@
+> >   #define EMMC50_CFG_CRCSTS_EDGE    (0x1 << 3)   /* RW */
+> >   #define EMMC50_CFG_CFCSTS_SEL     (0x1 << 4)   /* RW */
+> >   
+> > +#define SDC_FIFO_CFG_WRVALIDSEL   (0x1 << 24)  /* RW */
+> > +#define SDC_FIFO_CFG_RDVALIDSEL   (0x1 << 25)  /* RW */
+> > +
+> >   #define REQ_CMD_EIO  (0x1 << 0)
+> >   #define REQ_CMD_TMO  (0x1 << 1)
+> >   #define REQ_DAT_ERR  (0x1 << 2)
+> > @@ -308,6 +318,7 @@ struct msdc_save_para {
+> >   	u32 pad_ds_tune;
+> >   	u32 pad_cmd_tune;
+> >   	u32 emmc50_cfg0;
+> > +	u32 sdc_fifo_cfg;
+> >   };
+> >   
+> >   struct mtk_mmc_compatible {
+> > @@ -316,6 +327,8 @@ struct mtk_mmc_compatible {
+> >   	bool async_fifo;
+> >   	bool data_tune;
+> >   	bool busy_check;
+> > +	bool stop_clk_fix;
+> > +	bool enhance_rx;
+> >   };
+> >   
+> >   struct msdc_tune_para {
+> > @@ -381,6 +394,8 @@ struct msdc_host {
+> >   	.async_fifo = false,
+> >   	.data_tune = false,
+> >   	.busy_check = false,
+> > +	.stop_clk_fix = false,
+> > +	.enhance_rx = false,
+> >   };
+> >   
+> >   static const struct mtk_mmc_compatible mt8173_compat = {
+> > @@ -389,6 +404,8 @@ struct msdc_host {
+> >   	.async_fifo = false,
+> >   	.data_tune = false,
+> >   	.busy_check = false,
+> > +	.stop_clk_fix = false,
+> > +	.enhance_rx = false,
+> >   };
+> >   
 > 
-> You can add another value to mtk_mmc_compatible as you did in all the following 
-> patches.
-Ok, will do that at next version.
+> If you add a flag for hs400_tune then mt8173_compat and mt8135_compat will be 
+> actually different and therefore it will make sense that they exist both in the 
+> driver code.
 > 
+Sure, it's okay.
 > Regards,
 > Matthias
 > 
-> >   		sdr_set_field(host->base + PAD_CMD_TUNE,
-> >   			      MSDC_PAD_TUNE_CMDRRDLY,
-> >   			      host->hs400_cmd_int_delay);
-> > @@ -1594,7 +1596,8 @@ static int msdc_execute_tuning(struct mmc_host *mmc, u32 opcode)
-> >   	struct msdc_host *host = mmc_priv(mmc);
-> >   	int ret;
+> >   static const struct mtk_mmc_compatible mt2701_compat = {
+> > @@ -397,6 +414,8 @@ struct msdc_host {
+> >   	.async_fifo = true,
+> >   	.data_tune = true,
+> >   	.busy_check = false,
+> > +	.stop_clk_fix = false,
+> > +	.enhance_rx = false,
+> >   };
 > >   
-> > -	if (host->hs400_mode)
-> > +	if (host->hs400_mode &&
-> > +	    !strcmp(host->compatible, "mediatek,mt8173-mmc"))
-> >   		ret = hs400_tune_response(mmc, opcode);
-> >   	else
-> >   		ret = msdc_tune_response(mmc, opcode);
-> > @@ -1745,6 +1748,7 @@ static int msdc_drv_probe(struct platform_device *pdev)
+> >   static const struct mtk_mmc_compatible mt2712_compat = {
+> > @@ -405,6 +424,8 @@ struct msdc_host {
+> >   	.async_fifo = true,
+> >   	.data_tune = true,
+> >   	.busy_check = true,
+> > +	.stop_clk_fix = true,
+> > +	.enhance_rx = true,
+> >   };
 > >   
-> >   	host->dev = &pdev->dev;
-> >   	host->dev_comp = of_id->data;
-> > +	host->compatible = of_id->compatible;
-> >   	host->mmc = mmc;
-> >   	host->src_clk_freq = clk_get_rate(host->src_clk);
-> >   	/* Set host parameters to mmc */
+> >   static const struct of_device_id msdc_of_ids[] = {
+> > @@ -1281,15 +1302,31 @@ static void msdc_init_hw(struct msdc_host *host)
+> >   	sdr_set_field(host->base + MSDC_PATCH_BIT, MSDC_CKGEN_MSDC_DLY_SEL, 1);
+> >   	writel(0xffff4089, host->base + MSDC_PATCH_BIT1);
+> >   	sdr_set_bits(host->base + EMMC50_CFG0, EMMC50_CFG_CFCSTS_SEL);
+> > +
+> > +	if (host->dev_comp->stop_clk_fix) {
+> > +		sdr_set_field(host->base + MSDC_PATCH_BIT1,
+> > +			      MSDC_PATCH_BIT1_STOP_DLY, 3);
+> > +		sdr_clr_bits(host->base + SDC_FIFO_CFG,
+> > +			     SDC_FIFO_CFG_WRVALIDSEL);
+> > +		sdr_clr_bits(host->base + SDC_FIFO_CFG,
+> > +			     SDC_FIFO_CFG_RDVALIDSEL);
+> > +	}
+> > +
+> >   	if (host->dev_comp->busy_check)
+> >   		sdr_clr_bits(host->base + MSDC_PATCH_BIT1, (1 << 7));
+> > +
+> >   	if (host->dev_comp->async_fifo) {
+> >   		sdr_set_field(host->base + MSDC_PATCH_BIT2,
+> >   			      MSDC_PB2_RESPWAIT, 3);
+> > -		sdr_set_field(host->base + MSDC_PATCH_BIT2,
+> > -			      MSDC_PB2_RESPSTSENSEL, 2);
+> > -		sdr_set_field(host->base + MSDC_PATCH_BIT2,
+> > -			      MSDC_PB2_CRCSTSENSEL, 2);
+> > +		if (host->dev_comp->enhance_rx) {
+> > +			sdr_set_bits(host->base + SDC_ADV_CFG0,
+> > +				     SDC_RX_ENHANCE_EN);
+> > +		} else {
+> > +			sdr_set_field(host->base + MSDC_PATCH_BIT2,
+> > +				      MSDC_PB2_RESPSTSENSEL, 2);
+> > +			sdr_set_field(host->base + MSDC_PATCH_BIT2,
+> > +				      MSDC_PB2_CRCSTSENSEL, 2);
+> > +		}
+> >   		/* use async fifo, then no need tune internal delay */
+> >   		sdr_clr_bits(host->base + MSDC_PATCH_BIT2,
+> >   			     MSDC_PATCH_BIT2_CFGRESP);
+> > @@ -1946,6 +1983,7 @@ static void msdc_save_reg(struct msdc_host *host)
+> >   	host->save_para.pad_ds_tune = readl(host->base + PAD_DS_TUNE);
+> >   	host->save_para.pad_cmd_tune = readl(host->base + PAD_CMD_TUNE);
+> >   	host->save_para.emmc50_cfg0 = readl(host->base + EMMC50_CFG0);
+> > +	host->save_para.sdc_fifo_cfg = readl(host->base + SDC_FIFO_CFG);
+> >   }
+> >   
+> >   static void msdc_restore_reg(struct msdc_host *host)
+> > @@ -1964,6 +2002,7 @@ static void msdc_restore_reg(struct msdc_host *host)
+> >   	writel(host->save_para.pad_ds_tune, host->base + PAD_DS_TUNE);
+> >   	writel(host->save_para.pad_cmd_tune, host->base + PAD_CMD_TUNE);
+> >   	writel(host->save_para.emmc50_cfg0, host->base + EMMC50_CFG0);
+> > +	writel(host->save_para.sdc_fifo_cfg, host->base + SDC_FIFO_CFG);
+> >   }
+> >   
+> >   static int msdc_runtime_suspend(struct device *dev)
 > > 
+
+
