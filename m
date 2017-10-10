@@ -1,61 +1,90 @@
-From: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-Subject: [PATCH v3 10/12] mmc: mediatek: add latch-ck support
-Date: Tue, 10 Oct 2017 11:01:18 +0800
-Message-ID: <1507604480-23246-11-git-send-email-chaotian.jing@mediatek.com>
+From: Chaotian Jing <chaotian.jing@mediatek.com>
+Subject: [PATCH v3 04/12] mmc: mediatek: make hs400_tune_response only for
+ mt8173
+Date: Tue, 10 Oct 2017 11:01:12 +0800
+Message-ID: <1507604480-23246-5-git-send-email-chaotian.jing@mediatek.com>
 References: <1507604480-23246-1-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1507604480-23246-1-git-send-email-chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, yong mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Heiner Kallweit <hkallweit1-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Phong LE <ple-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1507604480-23246-1-git-send-email-chaotian.jing@mediatek.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, srv_heupstream@mediatek.com, Catalin Marinas <catalin.marinas@arm.com>, Linus Walleij <linus.walleij@linaro.org>, Will Deacon <will.deacon@arm.com>, linux-kernel@vger.kernel.org, yong mao <yong.mao@mediatek.com>, Phong LE <ple@baylibre.com>, Rob Herring <robh+dt@kernel.org>, linux-mediatek@lists.infradead.org, linux-arm-kernel@lists.infradead.org, Matthias Brugger <matthias.bgg@gmail.com>, linux-mmc@vger.kernel.org, Chaotian Jing <chaotian.jing@mediatek.com>, Heiner Kallweit <hkallweit1@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-some platform(eg.mt2701) does not support "stop clk fix", in
-this case, need set correct latch-ck to avoid crc error caused
-by stop clock block-internally.
+the origin design of hs400_tune_response is for mt8173 because of
+mt8173 has a special design. for doing that, we add a new member
+"compatible", by now it's only for mt8173.
 
-Signed-off-by: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
 ---
- drivers/mmc/host/mtk-sd.c | 6 ++++++
- 1 file changed, 6 insertions(+)
+ drivers/mmc/host/mtk-sd.c | 11 +++++++++--
+ 1 file changed, 9 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index d3833f3..3a1756a 100644
+index 643c795..ab2fbbb 100644
 --- a/drivers/mmc/host/mtk-sd.c
 +++ b/drivers/mmc/host/mtk-sd.c
-@@ -378,6 +378,7 @@ struct msdc_host {
- 	u32 sclk;		/* SD/MS bus clock frequency */
- 	unsigned char timing;
- 	bool vqmmc_enabled;
-+	u32 latch_ck;
- 	u32 hs400_ds_delay;
- 	u32 hs200_cmd_int_delay; /* cmd internal delay for HS200/SDR104 */
- 	u32 hs400_cmd_int_delay; /* cmd internal delay for HS400 */
-@@ -1672,6 +1673,8 @@ static int msdc_tune_data(struct mmc_host *mmc, u32 opcode)
- 	if (host->dev_comp->pad_tune0)
- 		tune_reg = MSDC_PAD_TUNE0;
+@@ -300,6 +300,7 @@ struct msdc_save_para {
  
-+	sdr_set_field(host->base + MSDC_PATCH_BIT, MSDC_INT_DAT_LATCH_CK_SEL,
-+		      host->latch_ck);
- 	sdr_clr_bits(host->base + MSDC_IOCON, MSDC_IOCON_DSPL);
- 	sdr_clr_bits(host->base + MSDC_IOCON, MSDC_IOCON_W_DSPL);
- 	for (i = 0 ; i < PAD_DELAY_MAX; i++) {
-@@ -1787,6 +1790,9 @@ static void msdc_hw_reset(struct mmc_host *mmc)
- static void msdc_of_property_parse(struct platform_device *pdev,
- 				   struct msdc_host *host)
- {
-+	of_property_read_u32(pdev->dev.of_node, "mediatek,latch-ck",
-+			     &host->latch_ck);
-+
- 	of_property_read_u32(pdev->dev.of_node, "hs400-ds-delay",
- 			     &host->hs400_ds_delay);
+ struct mtk_mmc_compatible {
+ 	u8 clk_div_bits;
++	bool hs400_tune; /* only used for MT8173 */
+ };
  
+ struct msdc_tune_para {
+@@ -360,18 +361,22 @@ struct msdc_host {
+ 
+ static const struct mtk_mmc_compatible mt8135_compat = {
+ 	.clk_div_bits = 8,
++	.hs400_tune = false,
+ };
+ 
+ static const struct mtk_mmc_compatible mt8173_compat = {
+ 	.clk_div_bits = 8,
++	.hs400_tune = true,
+ };
+ 
+ static const struct mtk_mmc_compatible mt2701_compat = {
+ 	.clk_div_bits = 12,
++	.hs400_tune = false,
+ };
+ 
+ static const struct mtk_mmc_compatible mt2712_compat = {
+ 	.clk_div_bits = 12,
++	.hs400_tune = false,
+ };
+ 
+ static const struct of_device_id msdc_of_ids[] = {
+@@ -666,7 +671,8 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
+ 		       host->base + PAD_CMD_TUNE);
+ 	}
+ 
+-	if (timing == MMC_TIMING_MMC_HS400)
++	if (timing == MMC_TIMING_MMC_HS400 &&
++	    host->dev_comp->hs400_tune)
+ 		sdr_set_field(host->base + PAD_CMD_TUNE,
+ 			      MSDC_PAD_TUNE_CMDRRDLY,
+ 			      host->hs400_cmd_int_delay);
+@@ -1594,7 +1600,8 @@ static int msdc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	struct msdc_host *host = mmc_priv(mmc);
+ 	int ret;
+ 
+-	if (host->hs400_mode)
++	if (host->hs400_mode &&
++	    host->dev_comp->hs400_tune)
+ 		ret = hs400_tune_response(mmc, opcode);
+ 	else
+ 		ret = msdc_tune_response(mmc, opcode);
 -- 
 1.8.1.1.dirty
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
