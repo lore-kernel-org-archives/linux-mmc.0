@@ -1,65 +1,128 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: renesas sdhi driver and DMA
-Date: Tue, 10 Oct 2017 22:32:29 +0200
-Message-ID: <20171010203229.rrwxkrczuk7piqh6@tetsubishi>
+From: Chris Brandt <Chris.Brandt@renesas.com>
+Subject: RE: renesas sdhi driver and DMA
+Date: Tue, 10 Oct 2017 20:46:19 +0000
+Message-ID: <SG2PR06MB11659A9EF153FF4A41575D3F8A750@SG2PR06MB1165.apcprd06.prod.outlook.com>
 References: <SG2PR06MB1165F16A63D6793DBEC419688A750@SG2PR06MB1165.apcprd06.prod.outlook.com>
+ <20171010203229.rrwxkrczuk7piqh6@tetsubishi>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="r6pje7me2lhs7nil"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <SG2PR06MB1165F16A63D6793DBEC419688A750@SG2PR06MB1165.apcprd06.prod.outlook.com>
+In-Reply-To: <20171010203229.rrwxkrczuk7piqh6@tetsubishi>
+Content-Language: en-US
 Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Chris Brandt <Chris.Brandt@renesas.com>
+To: Wolfram Sang <wsa@the-dreams.de>
 Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
+Hi Wolfram,
 
---r6pje7me2lhs7nil
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-Hi Chris,
-
-> [<bf9921e7>] (tmio_mmc_dma_callback) from [<bf908e1b>] (rzadma_tasklet+0x=
-23/0x98)
-
-For SYS-DMAC, this is a callback called by the dmaengine core once the
-DMA is completed. My guess is you call it directly from an interrupt
-handler? It would be easier to talk over code here, I guess.
-
-> Is it now a requirement that I have to register my DMA channel=20
-> interrupts as devm_request_threaded_irq?
+> > [<bf9921e7>] (tmio_mmc_dma_callback) from [<bf908e1b>]
+> (rzadma_tasklet+0x23/0x98)
 >=20
-> Will that fix my issue?
+> For SYS-DMAC, this is a callback called by the dmaengine core once the
+> DMA is completed. My guess is you call it directly from an interrupt
+> handler? It would be easier to talk over code here, I guess.
+>=20
+> > Is it now a requirement that I have to register my DMA channel
+> > interrupts as devm_request_threaded_irq?
+> >
+> > Will that fix my issue?
+>=20
+> I can't say yet if this alone will do. Likely not. Can you share the
+> code already?
 
-I can't say yet if this alone will do. Likely not. Can you share the
-code already? Isn't it SYS-DMAC compatible (sigh)?
-
-Regards,
-
-   Wolfram
+The interrupt handler is starting a tasklet, and then the tasklet calls=20
+the callback. I thought tasklets didn't run in an interrupt context?????
 
 
---r6pje7me2lhs7nil
-Content-Type: application/pgp-signature; name="signature.asc"
+As a code snippet, here is the irq hander and the tasket. Of course I=20
+can send the entire file if you want as well if you need to see more.
 
------BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlndLlUACgkQFA3kzBSg
-KbZHAA//fovE1GKGxHsCFa/6/q0vW3LFfhvWo1k/opgy+pxTuAFDivb6kP4dep7r
-Pvpqvb7qjpmBiKS2QCs9O5tVt73oLh2VNz7JCHzw78H7SLBY59SZyzi1SB/1NyCC
-We7BPdObrDejOyVzoDT6M8wV5ewp3QbUF3SCLNFPpoJ26n8mfAorIbnjyMCZ1pGw
-hlRFRAmsuxjOgTqZnVmEfXRvnAWGfGpuscwDvTqSMSRETE0v+0mWT9PmLqikZAmt
-m/M1xsmYbv569d4+UnhgbqBHMdmWDUrrCsK9abP3DD+OO2bkg0cjEYf39/LWyHdR
-/Y6EZKSav7rROizxLBD1diaw/5XvtBMgCBb2wmqMyPN8qUiv0B+KeSrNwUgQ3K37
-AHJR16Bw6JrGorFcPkXX47UuFF6ZRPWQkdjteG1A4/CPyYQQHHfqJXqWK+w65ecb
-XejK1d6KiRQJDWVisUQe2nCd/MWWEC5TUHFrj++tyPB75ExHiwqZNRNwRMncvA1C
-C27SjlslDRv/qTfga5Sjw8VD0GJdL9x3x+HS6mILI5h7bRGNBFef72PE7dvRpviC
-rPQGzjK7ylt2Rqm2qZEwNyIIJ3gl9IpiJYpqt4yLnRQ1rtGngV165VU2VaVY6hAr
-12Zx9O9dhllWbkwOTwzBndOMXGhQE9jL0NRK5V8xJkKPaBVzNGY=
-=Irx9
------END PGP SIGNATURE-----
+static void dma_irq_handle_channel(struct rzadma_channel *rzadmac)
+{
+	u32 chstat, chctrl;
+	struct rzadma_engine *rzadma =3D rzadmac->rzadma;
+	int channel =3D rzadmac->channel;
 
---r6pje7me2lhs7nil--
+	chstat =3D rzadma_ch_readl(rzadmac, CHSTAT, 1);
+	if (chstat & CHSTAT_ER) {
+		dev_dbg(rzadma->dev, "CHSTAT_%d =3D %08X\n", channel, chstat);
+		rzadma_ch_writel(rzadmac,
+				CHCTRL_DEFAULT,
+				CHCTRL, 1);
+		goto schedule;
+	}
+	if (!(chstat & CHSTAT_END))
+		return;
+
+	chctrl =3D rzadma_ch_readl(rzadmac, CHCTRL, 1);
+	dev_dbg(rzadma->dev,"2. chctrl_%d=3D%08X\n", channel, chctrl);
+	rzadma_ch_writel(rzadmac,
+			chctrl | CHCTRL_CLREND | CHCTRL_CLRRQ,
+			CHCTRL, 1);
+schedule:
+	/* Tasklet irq */
+	tasklet_schedule(&rzadmac->dma_tasklet);
+}
+
+
+static void rzadma_tasklet(unsigned long data)
+{
+	struct rzadma_channel *rzadmac =3D (void *)data;
+	struct rzadma_engine *rzadma =3D rzadmac->rzadma;
+	struct rzadma_desc *desc;
+	unsigned long flags;
+
+	/* Protection of critical section */
+	spin_lock_irqsave(&rzadma->lock, flags);
+
+	if (list_empty(&rzadmac->ld_active)) {
+		/* Someone might have called terminate all */
+		goto out;
+	}
+
+	desc =3D list_first_entry(&rzadmac->ld_active, struct rzadma_desc, node);
+
+	if (desc->desc.callback)
+		desc->desc.callback(desc->desc.callback_param);
+
+	dma_cookie_complete(&desc->desc);
+
+	if (list_empty(&rzadmac->ld_active)) {
+		goto out;
+	}else{
+		list_move_tail(rzadmac->ld_active.next, &rzadmac->ld_free);
+	}
+
+	if (!list_empty(&rzadmac->ld_queue)) {
+		desc =3D list_first_entry(&rzadmac->ld_queue, struct rzadma_desc,
+					node);
+		if (rzadma_xfer_desc(desc) < 0){
+			dev_err(rzadma->dev, "%s: channel: %d couldn't xfer desc\n",
+				 __func__, rzadmac->channel);
+		}else{
+			list_move_tail(rzadmac->ld_queue.next, &rzadmac->ld_active);
+		}
+	}
+out:
+	spin_unlock_irqrestore(&rzadma->lock, flags);
+}
+
+
+
+> Isn't it SYS-DMAC compatible (sigh)?
+
+My first goal is to just get this DMA platform driver we made a couple=20
+years ago working with DT (ie, you can't go passing in slave IDs anymore=20
+via platform data structures).
+
+Technically, it is working now (after I revert your patch), but I=20
+probably have more things that have to change before I can think about=20
+submitting it upstream for review.
+
+
+Thank you!
+
+Chris
