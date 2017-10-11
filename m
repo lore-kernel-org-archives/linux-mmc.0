@@ -1,80 +1,78 @@
-From: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-Subject: [PATCH v5 03/12] arm64: dts: mt8173: remove "mediatek,
- mt8135-mmc" from mmc nodes
-Date: Wed, 11 Oct 2017 10:41:27 +0800
-Message-ID: <1507689696-25928-4-git-send-email-chaotian.jing@mediatek.com>
+From: Chaotian Jing <chaotian.jing@mediatek.com>
+Subject: [PATCH v5 07/12] mmc: mediatek: add busy_check support
+Date: Wed, 11 Oct 2017 10:41:31 +0800
+Message-ID: <1507689696-25928-8-git-send-email-chaotian.jing@mediatek.com>
 References: <1507689696-25928-1-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <1507689696-25928-1-git-send-email-chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mediatek>,
- <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-mediatek/>
-List-Post: <mailto:linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mediatek>,
- <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-mediatek" <linux-mediatek-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, yong mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Phong LE <ple-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Heiner Kallweit <hkallweit1-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1507689696-25928-1-git-send-email-chaotian.jing@mediatek.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Matthias Brugger <matthias.bgg@gmail.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Chaotian Jing <chaotian.jing@mediatek.com>, yong mao <yong.mao@mediatek.com>, Linus Walleij <linus.walleij@linaro.org>, Heiner Kallweit <hkallweit1@gmail.com>, Phong LE <ple@baylibre.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, srv_heupstream@mediatek.com
 List-Id: linux-mmc@vger.kernel.org
 
-devicetree bindings has been updated to support multi-platforms,
-so that each platform has its owns compatible name.
-And, this compatible name may used in driver to distinguish with
-other platform.
+bit7 of PATCH_BIT1 has different meaning in new design, to
+compatible with previous platform, clear this bit in new
+platform.
 
-Signed-off-by: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
 ---
- arch/arm64/boot/dts/mediatek/mt8173.dtsi | 12 ++++--------
- 1 file changed, 4 insertions(+), 8 deletions(-)
+ drivers/mmc/host/mtk-sd.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
 
-diff --git a/arch/arm64/boot/dts/mediatek/mt8173.dtsi b/arch/arm64/boot/dts/mediatek/mt8173.dtsi
-index b99a273..26396ef 100644
---- a/arch/arm64/boot/dts/mediatek/mt8173.dtsi
-+++ b/arch/arm64/boot/dts/mediatek/mt8173.dtsi
-@@ -682,8 +682,7 @@
- 		};
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index 8113bac..eceaee8 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -316,6 +316,7 @@ struct mtk_mmc_compatible {
+ 	u32 pad_tune_reg;
+ 	bool async_fifo;
+ 	bool data_tune;
++	bool busy_check;
+ };
  
- 		mmc0: mmc@11230000 {
--			compatible = "mediatek,mt8173-mmc",
--				     "mediatek,mt8135-mmc";
-+			compatible = "mediatek,mt8173-mmc";
- 			reg = <0 0x11230000 0 0x1000>;
- 			interrupts = <GIC_SPI 71 IRQ_TYPE_LEVEL_LOW>;
- 			clocks = <&pericfg CLK_PERI_MSDC30_0>,
-@@ -693,8 +692,7 @@
- 		};
+ struct msdc_tune_para {
+@@ -380,6 +381,7 @@ struct msdc_host {
+ 	.pad_tune_reg = MSDC_PAD_TUNE,
+ 	.async_fifo = false,
+ 	.data_tune = false,
++	.busy_check = false,
+ };
  
- 		mmc1: mmc@11240000 {
--			compatible = "mediatek,mt8173-mmc",
--				     "mediatek,mt8135-mmc";
-+			compatible = "mediatek,mt8173-mmc";
- 			reg = <0 0x11240000 0 0x1000>;
- 			interrupts = <GIC_SPI 72 IRQ_TYPE_LEVEL_LOW>;
- 			clocks = <&pericfg CLK_PERI_MSDC30_1>,
-@@ -704,8 +702,7 @@
- 		};
+ static const struct mtk_mmc_compatible mt8173_compat = {
+@@ -388,6 +390,7 @@ struct msdc_host {
+ 	.pad_tune_reg = MSDC_PAD_TUNE,
+ 	.async_fifo = false,
+ 	.data_tune = false,
++	.busy_check = false,
+ };
  
- 		mmc2: mmc@11250000 {
--			compatible = "mediatek,mt8173-mmc",
--				     "mediatek,mt8135-mmc";
-+			compatible = "mediatek,mt8173-mmc";
- 			reg = <0 0x11250000 0 0x1000>;
- 			interrupts = <GIC_SPI 73 IRQ_TYPE_LEVEL_LOW>;
- 			clocks = <&pericfg CLK_PERI_MSDC30_2>,
-@@ -715,8 +712,7 @@
- 		};
+ static const struct mtk_mmc_compatible mt2701_compat = {
+@@ -396,6 +399,7 @@ struct msdc_host {
+ 	.pad_tune_reg = MSDC_PAD_TUNE0,
+ 	.async_fifo = true,
+ 	.data_tune = true,
++	.busy_check = false,
+ };
  
- 		mmc3: mmc@11260000 {
--			compatible = "mediatek,mt8173-mmc",
--				     "mediatek,mt8135-mmc";
-+			compatible = "mediatek,mt8173-mmc";
- 			reg = <0 0x11260000 0 0x1000>;
- 			interrupts = <GIC_SPI 74 IRQ_TYPE_LEVEL_LOW>;
- 			clocks = <&pericfg CLK_PERI_MSDC30_3>,
+ static const struct mtk_mmc_compatible mt2712_compat = {
+@@ -404,6 +408,7 @@ struct msdc_host {
+ 	.pad_tune_reg = MSDC_PAD_TUNE0,
+ 	.async_fifo = true,
+ 	.data_tune = true,
++	.busy_check = true,
+ };
+ 
+ static const struct of_device_id msdc_of_ids[] = {
+@@ -1275,6 +1280,8 @@ static void msdc_init_hw(struct msdc_host *host)
+ 	sdr_set_field(host->base + MSDC_PATCH_BIT, MSDC_CKGEN_MSDC_DLY_SEL, 1);
+ 	writel(0xffff4089, host->base + MSDC_PATCH_BIT1);
+ 	sdr_set_bits(host->base + EMMC50_CFG0, EMMC50_CFG_CFCSTS_SEL);
++	if (host->dev_comp->busy_check)
++		sdr_clr_bits(host->base + MSDC_PATCH_BIT1, (1 << 7));
+ 	if (host->dev_comp->async_fifo) {
+ 		sdr_set_field(host->base + MSDC_PATCH_BIT2,
+ 			      MSDC_PB2_RESPWAIT, 3);
 -- 
 1.8.1.1.dirty
