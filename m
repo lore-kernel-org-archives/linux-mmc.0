@@ -1,131 +1,60 @@
-From: Heiner Kallweit <hkallweit1@gmail.com>
-Subject: eMMC tuning issue on Odroid C2 and a possible solution
-Date: Wed, 11 Oct 2017 22:46:19 +0200
-Message-ID: <b931985f-16b2-0a90-e73b-b6c349ad7d6c@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+From: Jin Qian <jinqian@android.com>
+Subject: [PATCHv2 1/1] ANDROID: mmc: core: export emmc revision
+Date: Wed, 11 Oct 2017 13:51:26 -0700
+Message-ID: <20171011205152.173299-1-jinqian@android.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:52628 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752178AbdJKUq3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Oct 2017 16:46:29 -0400
-Received: by mail-wm0-f65.google.com with SMTP id k4so8206010wmc.1
-        for <linux-mmc@vger.kernel.org>; Wed, 11 Oct 2017 13:46:28 -0700 (PDT)
+Received: from mail-pf0-f169.google.com ([209.85.192.169]:51122 "EHLO
+        mail-pf0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752862AbdJKUxB (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Oct 2017 16:53:01 -0400
+Received: by mail-pf0-f169.google.com with SMTP id m63so2009771pfk.7
+        for <linux-mmc@vger.kernel.org>; Wed, 11 Oct 2017 13:53:01 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jerome Brunet <jbrunet@baylibre.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, Kevin Hilman <khilman@baylibre.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Jin Qian <jinqian@google.com>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Uri Yanai <uri.yanai@sandisk.com>, Chanho Min <chanho.min@lge.com>, Jungseung Lee <js07.lee@samsung.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: Jin Qian <jinqian@android.com>
 
-Hi Jerome,
+From: Jin Qian <jinqian@google.com>
 
-we have the known issue that the latest next kernel still fails on
-Odroid C2 with a 128GB eMMC card (w/o adjusting the initial tx phase).
+Expose emmc revision as part of device attributes.
 
-I found the time to dig a little deeper into it and reason is that
-there are certain rx/tx phase combinations which are perfectly fine
-when tuning but fail in real life.
-Don't ask me how this can happen, I just see it happen.
-
-To deal with such cases I added some code to avoid known invalid phase
-values when retuning. In addition I added some code to deal with the
-following (more or less corner) case:
-Let's say we have rx = 0° and tx = 0° and working is only combination
-rx = 180° and tx = 180°.
-Then just tuning rx only or tx only will never result in a working
-combination.
-
-Following patch makes my system work. I just see one CRC error when
-the initally tuned rx/tx phase combination fails and then the
-retuning results in a stable system w/o further errors.
-
-I'd appreciate if you could check that this patch doesn't break any
-of your systems.
-
-Rgds, Heiner
-
+Signed-off-by: Jin Qian <jinqian@android.com>
 ---
- drivers/mmc/host/meson-gx-mmc.c | 29 ++++++++++++++++++++++-------
- 1 file changed, 22 insertions(+), 7 deletions(-)
+ Documentation/ABI/testing/sysfs-bus-mmc | 4 ++++
+ drivers/mmc/core/mmc.c                  | 2 ++
+ 2 files changed, 6 insertions(+)
+ create mode 100644 Documentation/ABI/testing/sysfs-bus-mmc
 
-diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index 85745ef1..95cb439d 100644
---- a/drivers/mmc/host/meson-gx-mmc.c
-+++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -120,6 +120,7 @@
- #define SD_EMMC_DESC_CHAIN_MODE BIT(1)
- 
- #define MUX_CLK_NUM_PARENTS 2
-+#define MAX_TUNING_ATTEMPTS 10
- 
- struct sd_emmc_desc {
- 	u32 cmd_cfg;
-@@ -687,15 +688,23 @@ static int meson_mmc_find_tuning_point(unsigned long *test)
- static int meson_mmc_clk_phase_tuning(struct mmc_host *mmc, u32 opcode,
- 				      struct clk *clk)
- {
--	int point, ret;
-+	int point, ret, old_phase;
- 	DECLARE_BITMAP(test, CLK_PHASE_POINT_NUM);
- 
-+	old_phase = clk_get_phase(clk);
-+	if (old_phase < 0)
-+		return old_phase;
-+
- 	dev_dbg(mmc_dev(mmc), "%s phase/delay tunning...\n",
- 		__clk_get_name(clk));
- 	bitmap_zero(test, CLK_PHASE_POINT_NUM);
- 
- 	/* Explore tuning points */
- 	for (point = 0; point < CLK_PHASE_POINT_NUM; point++) {
-+		/* when retuning avoid the surrounding of where we failed */
-+		if (mmc->doing_retune)
-+			if (abs(point * CLK_PHASE_STEP - old_phase) <= 45)
-+				continue;
- 		clk_set_phase(clk, point * CLK_PHASE_STEP);
- 		ret = mmc_send_tuning(mmc, opcode, NULL);
- 		if (!ret)
-@@ -704,8 +713,11 @@ static int meson_mmc_clk_phase_tuning(struct mmc_host *mmc, u32 opcode,
- 
- 	/* Find the optimal tuning point and apply it */
- 	point = meson_mmc_find_tuning_point(test);
--	if (point < 0)
-+	if (point < 0) {
-+		/* prevent from getting stuck if we failed */
-+		clk_set_phase(clk, (old_phase + 90) % 360);
- 		return point; /* tuning failed */
-+	}
- 
- 	clk_set_phase(clk, point * CLK_PHASE_STEP);
- 	dev_dbg(mmc_dev(mmc), "success with phase: %d\n",
-@@ -716,7 +728,7 @@ static int meson_mmc_clk_phase_tuning(struct mmc_host *mmc, u32 opcode,
- static int meson_mmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
- {
- 	struct meson_host *host = mmc_priv(mmc);
--	int ret;
-+	int i, ret;
- 
- 	/*
- 	 * If this is the initial tuning, try to get a sane Rx starting
-@@ -729,11 +741,14 @@ static int meson_mmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 			return ret;
- 	}
- 
--	ret = meson_mmc_clk_phase_tuning(mmc, opcode, host->tx_clk);
--	if (ret)
--		return ret;
-+	for (i = 0; i < MAX_TUNING_ATTEMPTS; i++) {
-+		meson_mmc_clk_phase_tuning(mmc, opcode, host->tx_clk);
-+		ret = meson_mmc_clk_phase_tuning(mmc, opcode, host->rx_clk);
-+		if (!ret)
-+			return 0;
-+	}
- 
--	return meson_mmc_clk_phase_tuning(mmc, opcode, host->rx_clk);
-+	return ret;
- }
- 
- static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+diff --git a/Documentation/ABI/testing/sysfs-bus-mmc b/Documentation/ABI/testing/sysfs-bus-mmc
+new file mode 100644
+index 000000000000..519f028d19cc
+--- /dev/null
++++ b/Documentation/ABI/testing/sysfs-bus-mmc
+@@ -0,0 +1,4 @@
++What:		/sys/bus/mmc/devices/.../rev
++Date:		October 2017
++Contact:	Jin Qian <jinqian@android.com>
++Description:	Extended CSD revision number
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 36217ad5e9b1..4aa4cfb2c9e1 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -780,6 +780,7 @@ MMC_DEV_ATTR(manfid, "0x%06x\n", card->cid.manfid);
+ MMC_DEV_ATTR(name, "%s\n", card->cid.prod_name);
+ MMC_DEV_ATTR(oemid, "0x%04x\n", card->cid.oemid);
+ MMC_DEV_ATTR(prv, "0x%x\n", card->cid.prv);
++MMC_DEV_ATTR(rev, "0x%x\n", card->ext_csd.rev);
+ MMC_DEV_ATTR(pre_eol_info, "%02x\n", card->ext_csd.pre_eol_info);
+ MMC_DEV_ATTR(life_time, "0x%02x 0x%02x\n",
+ 	card->ext_csd.device_life_time_est_typ_a,
+@@ -838,6 +839,7 @@ static struct attribute *mmc_std_attrs[] = {
+ 	&dev_attr_name.attr,
+ 	&dev_attr_oemid.attr,
+ 	&dev_attr_prv.attr,
++	&dev_attr_rev.attr,
+ 	&dev_attr_pre_eol_info.attr,
+ 	&dev_attr_life_time.attr,
+ 	&dev_attr_serial.attr,
 -- 
-2.14.2
+2.15.0.rc0.271.g36b669edcc-goog
 
