@@ -1,60 +1,85 @@
-From: Jin Qian <jinqian@android.com>
-Subject: [PATCHv2 1/1] ANDROID: mmc: core: export emmc revision
-Date: Wed, 11 Oct 2017 13:51:26 -0700
-Message-ID: <20171011205152.173299-1-jinqian@android.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH 3/3] mmc: dw_mmc: Add locking to the CTO timer
+Date: Wed, 11 Oct 2017 16:53:45 -0700
+Message-ID: <CAD=FV=UcV20_Kt1LU6taXt8H-a1pmoRKjN+-XTGVZgrrS2J=EQ@mail.gmail.com>
+References: <20170927205631.31559-1-dianders@chromium.org> <20170927205631.31559-4-dianders@chromium.org>
+ <fa1eff8e-0fbe-caa5-6311-168e3b4c55b7@rock-chips.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pf0-f169.google.com ([209.85.192.169]:51122 "EHLO
-        mail-pf0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752862AbdJKUxB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Oct 2017 16:53:01 -0400
-Received: by mail-pf0-f169.google.com with SMTP id m63so2009771pfk.7
-        for <linux-mmc@vger.kernel.org>; Wed, 11 Oct 2017 13:53:01 -0700 (PDT)
+Received: from mail-ua0-f170.google.com ([209.85.217.170]:46512 "EHLO
+        mail-ua0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751459AbdJKXxr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Oct 2017 19:53:47 -0400
+Received: by mail-ua0-f170.google.com with SMTP id w45so2090769uac.3
+        for <linux-mmc@vger.kernel.org>; Wed, 11 Oct 2017 16:53:46 -0700 (PDT)
+In-Reply-To: <fa1eff8e-0fbe-caa5-6311-168e3b4c55b7@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Jin Qian <jinqian@google.com>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Uri Yanai <uri.yanai@sandisk.com>, Chanho Min <chanho.min@lge.com>, Jungseung Lee <js07.lee@samsung.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: Jin Qian <jinqian@android.com>
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Brian Norris <briannorris@chromium.org>, Alexandru M Stan <amstan@chromium.org>, Ziyuan Xu <xzy.xu@rock-chips.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Emil Renner Berthing <kernel@esmil.dk>
 
-From: Jin Qian <jinqian@google.com>
+Hi,
 
-Expose emmc revision as part of device attributes.
+On Mon, Oct 9, 2017 at 12:41 AM, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> Hi Doug,
+>
+> On 2017/9/28 4:56, Douglas Anderson wrote:
+>>
+>> This attempts to instill a bit of paranoia to the code dealing with
+>> the CTO timer.  It's believed that this will make the CTO timer more
+>> robust in the case that we're having very long interrupt latencies.
+>>
+>
+> I have already got reports about the similar problem that on one of
+> the Rockchip platforms, some IP cyclicity idle the bus too long,
+> so that cto timer fires but actually it shouldn't.
 
-Signed-off-by: Jin Qian <jinqian@android.com>
----
- Documentation/ABI/testing/sysfs-bus-mmc | 4 ++++
- drivers/mmc/core/mmc.c                  | 2 ++
- 2 files changed, 6 insertions(+)
- create mode 100644 Documentation/ABI/testing/sysfs-bus-mmc
+So presumably this patch fixes them?
 
-diff --git a/Documentation/ABI/testing/sysfs-bus-mmc b/Documentation/ABI/testing/sysfs-bus-mmc
-new file mode 100644
-index 000000000000..519f028d19cc
---- /dev/null
-+++ b/Documentation/ABI/testing/sysfs-bus-mmc
-@@ -0,0 +1,4 @@
-+What:		/sys/bus/mmc/devices/.../rev
-+Date:		October 2017
-+Contact:	Jin Qian <jinqian@android.com>
-+Description:	Extended CSD revision number
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 36217ad5e9b1..4aa4cfb2c9e1 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -780,6 +780,7 @@ MMC_DEV_ATTR(manfid, "0x%06x\n", card->cid.manfid);
- MMC_DEV_ATTR(name, "%s\n", card->cid.prod_name);
- MMC_DEV_ATTR(oemid, "0x%04x\n", card->cid.oemid);
- MMC_DEV_ATTR(prv, "0x%x\n", card->cid.prv);
-+MMC_DEV_ATTR(rev, "0x%x\n", card->ext_csd.rev);
- MMC_DEV_ATTR(pre_eol_info, "%02x\n", card->ext_csd.pre_eol_info);
- MMC_DEV_ATTR(life_time, "0x%02x 0x%02x\n",
- 	card->ext_csd.device_life_time_est_typ_a,
-@@ -838,6 +839,7 @@ static struct attribute *mmc_std_attrs[] = {
- 	&dev_attr_name.attr,
- 	&dev_attr_oemid.attr,
- 	&dev_attr_prv.attr,
-+	&dev_attr_rev.attr,
- 	&dev_attr_pre_eol_info.attr,
- 	&dev_attr_life_time.attr,
- 	&dev_attr_serial.attr,
--- 
-2.15.0.rc0.271.g36b669edcc-goog
 
+>> Note that I originally thought that perhaps this patch was being
+>> overly paranoid and wasn't really needed, but then while I was running
+>> mmc_test on an rk3399 board I saw one instance of the message:
+>>    dwmmc_rockchip fe320000.dwmmc: Unexpected interrupt latency
+>>
+>
+> The intention of introducing CTO and DRTO timers is simply to break the
+> dead loop due to the bug of controller itself but it seems the timer
+> should take more factors into consideration. So it's more complicated
+> than expected, expecially we should also fix the drto case like what
+> this patch does...
+>
+> How about combining the cto and drto timer and re-new a catch-all
+> timer like what SDHCI did?
+
+I don't think that having separate timers really adds a lot of
+overhead though, does it?  gdb shows "struct timer_list" on arm64 as
+being 112 bytes so I guess there's some overhead there.  ...but
+presumably you'd then need to add some code to differentiate the
+command timeout and data timeout.  That adds more code and more
+changes and makes this patch series riskier to backport to stable
+trees (and, since it fixes a regression, I think it should be
+backported assuming we don't land this in time for 4.14, which is
+looking unlikely).
+
+So I guess I'd say I'll keep them as separate timers in my patch
+series unless someone is really upset by it and if someone wants to
+see if things are cleaner by changing it to one timer then it'd be
+great!
+
+
+>> @@ -2600,6 +2633,8 @@ static irqreturn_t dw_mci_interrupt(int irq, void
+>> *dev_id)
+>>         struct dw_mci *host = dev_id;
+>>         u32 pending;
+>>         struct dw_mci_slot *slot = host->slot;
+>> +       unsigned long irqflags;
+>> +       int i;
+
+It was pointed out by Emil that I messed up while merging this from
+the Chromium OS tree (on kernel 4.4) and accidentally added "i" in
+here.  While the patch submitted compiles and works it introduces a
+stupid compiler warning.
+
+I'll re-post tomorrow.
