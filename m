@@ -1,43 +1,61 @@
-From: Chaotian Jing <chaotian.jing@mediatek.com>
-Subject: [PATCH v5 12/12] mmc: mediatek: perfer to use rise edge latching for cmd line
-Date: Wed, 11 Oct 2017 10:41:36 +0800
-Message-ID: <1507689696-25928-13-git-send-email-chaotian.jing@mediatek.com>
+From: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Subject: [PATCH v5 10/12] mmc: mediatek: add latch-ck support
+Date: Wed, 11 Oct 2017 10:41:34 +0800
+Message-ID: <1507689696-25928-11-git-send-email-chaotian.jing@mediatek.com>
 References: <1507689696-25928-1-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailgw02.mediatek.com ([210.61.82.184]:53560 "EHLO
-        mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S932768AbdJKCm2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Oct 2017 22:42:28 -0400
-In-Reply-To: <1507689696-25928-1-git-send-email-chaotian.jing@mediatek.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1507689696-25928-1-git-send-email-chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, yong mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Heiner Kallweit <hkallweit1-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Phong LE <ple-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Matthias Brugger <matthias.bgg@gmail.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Chaotian Jing <chaotian.jing@mediatek.com>, yong mao <yong.mao@mediatek.com>, Linus Walleij <linus.walleij@linaro.org>, Heiner Kallweit <hkallweit1@gmail.com>, Phong LE <ple@baylibre.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, srv_heupstream@mediatek.com
 
-data lines have applied to perfer to use rise edge, also need
-apply it to cmd line.
+some platform(eg.mt2701) does not support "stop clk fix", in
+this case, need set correct latch-ck to avoid crc error caused
+by stop clock block-internally.
 
-Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+Signed-off-by: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
 ---
- drivers/mmc/host/mtk-sd.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ drivers/mmc/host/mtk-sd.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
 diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 95759bb..27a6225 100644
+index a2f26c9..d75a93d 100644
 --- a/drivers/mmc/host/mtk-sd.c
 +++ b/drivers/mmc/host/mtk-sd.c
-@@ -1550,7 +1550,8 @@ static int msdc_tune_response(struct mmc_host *mmc, u32 opcode)
- 	}
- 	final_rise_delay = get_best_delay(host, rise_delay);
- 	/* if rising edge has enough margin, then do not scan falling edge */
--	if (final_rise_delay.maxlen >= 12 && final_rise_delay.start < 4)
-+	if (final_rise_delay.maxlen >= 12 ||
-+	    (final_rise_delay.start == 0 && final_rise_delay.maxlen >= 4))
- 		goto skip_fall;
+@@ -378,6 +378,7 @@ struct msdc_host {
+ 	u32 sclk;		/* SD/MS bus clock frequency */
+ 	unsigned char timing;
+ 	bool vqmmc_enabled;
++	u32 latch_ck;
+ 	u32 hs400_ds_delay;
+ 	u32 hs200_cmd_int_delay; /* cmd internal delay for HS200/SDR104 */
+ 	u32 hs400_cmd_int_delay; /* cmd internal delay for HS400 */
+@@ -1661,6 +1662,8 @@ static int msdc_tune_data(struct mmc_host *mmc, u32 opcode)
+ 	u32 tune_reg = host->dev_comp->pad_tune_reg;
+ 	int i, ret;
  
- 	sdr_set_bits(host->base + MSDC_IOCON, MSDC_IOCON_RSPL);
++	sdr_set_field(host->base + MSDC_PATCH_BIT, MSDC_INT_DAT_LATCH_CK_SEL,
++		      host->latch_ck);
+ 	sdr_clr_bits(host->base + MSDC_IOCON, MSDC_IOCON_DSPL);
+ 	sdr_clr_bits(host->base + MSDC_IOCON, MSDC_IOCON_W_DSPL);
+ 	for (i = 0 ; i < PAD_DELAY_MAX; i++) {
+@@ -1773,6 +1776,9 @@ static void msdc_hw_reset(struct mmc_host *mmc)
+ static void msdc_of_property_parse(struct platform_device *pdev,
+ 				   struct msdc_host *host)
+ {
++	of_property_read_u32(pdev->dev.of_node, "mediatek,latch-ck",
++			     &host->latch_ck);
++
+ 	of_property_read_u32(pdev->dev.of_node, "hs400-ds-delay",
+ 			     &host->hs400_ds_delay);
+ 
 -- 
 1.8.1.1.dirty
 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
