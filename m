@@ -1,46 +1,65 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH 2/3] mmc: dw_mmc: Fix the CTO timeout calculation
-Date: Wed, 11 Oct 2017 16:55:31 -0700
-Message-ID: <CAD=FV=VnFyC8Z5iD+HF7OVVAyNjOoAJZKj9SO7jaL8q+0h8qxg@mail.gmail.com>
-References: <20170927205631.31559-1-dianders@chromium.org> <20170927205631.31559-3-dianders@chromium.org>
- <baeb929b-a712-0c69-2963-feb00c0165d9@rock-chips.com>
+From: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+Subject: Re: [PATCHv2 1/1] ANDROID: mmc: core: export emmc revision
+Date: Thu, 12 Oct 2017 10:35:47 +0800
+Message-ID: <20171012103547.27b415ca@xhacker.debian>
+References: <20171011205152.173299-1-jinqian@android.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vk0-f49.google.com ([209.85.213.49]:50628 "EHLO
-        mail-vk0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751587AbdJKXzd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Oct 2017 19:55:33 -0400
-Received: by mail-vk0-f49.google.com with SMTP id q80so1849060vka.7
-        for <linux-mmc@vger.kernel.org>; Wed, 11 Oct 2017 16:55:32 -0700 (PDT)
-In-Reply-To: <baeb929b-a712-0c69-2963-feb00c0165d9@rock-chips.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20171011205152.173299-1-jinqian@android.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jin Qian <jinqian@android.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Jin Qian <jinqian@google.com>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Uri Yanai <uri.yanai@sandisk.com>, Chanho Min <chanho.min@lge.com>, Jungseung Lee <js07.lee@samsung.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Brian Norris <briannorris@chromium.org>, Alexandru M Stan <amstan@chromium.org>, Ziyuan Xu <xzy.xu@rock-chips.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Emil Renner Berthing <kernel@esmil.dk>
 
-Hi,
+On Wed, 11 Oct 2017 13:51:26 -0700
+Jin Qian <jinqian@android.com> wrote:
 
-On Mon, Oct 9, 2017 at 12:03 AM, Shawn Lin <shawn.lin@rock-chips.com> wrote:
-> Hi
->
-> On 2017/9/28 4:56, Douglas Anderson wrote:
->>
->> In the commit 03de19212ea3 ("mmc: dw_mmc: introduce timer for broken
->> command transfer over scheme") we tried to calculate the expected
->> hardware command timeout value.  Unfortunately that calculation isn't
->> quite correct in all cases.  It used "bus_hz" but, as far as I can
->> tell, it's supposed to use the card clock.  Let's account for the div
->> value, which is documented as 2x the value stored in the register, or
->> 1 if the register is 0.
->
->
-> Good catch.
-> Would you mind appending a new patch to fix the drto case?
+> From: Jin Qian <jinqian@google.com>
+> 
+> Expose emmc revision as part of device attributes.
 
-I can add it to the series.  It'll be a separate patch, though, since
-I wouldn't suggest backporting that one.  The DRTO timeout is so long
-that it's really hard to hit it in this way so I think the argument is
-much more academic there.  Still good to fix it, though.
+>> ANDROID: mmc: core: export emmc revision
 
--Doug
+This commit probably back port from android linux kernel repo. Could we
+remove the ANDROID prefix
+
+> 
+> Signed-off-by: Jin Qian <jinqian@android.com>
+> ---
+>  Documentation/ABI/testing/sysfs-bus-mmc | 4 ++++
+>  drivers/mmc/core/mmc.c                  | 2 ++
+>  2 files changed, 6 insertions(+)
+>  create mode 100644 Documentation/ABI/testing/sysfs-bus-mmc
+> 
+> diff --git a/Documentation/ABI/testing/sysfs-bus-mmc b/Documentation/ABI/testing/sysfs-bus-mmc
+> new file mode 100644
+> index 000000000000..519f028d19cc
+> --- /dev/null
+> +++ b/Documentation/ABI/testing/sysfs-bus-mmc
+> @@ -0,0 +1,4 @@
+> +What:		/sys/bus/mmc/devices/.../rev
+> +Date:		October 2017
+> +Contact:	Jin Qian <jinqian@android.com>
+> +Description:	Extended CSD revision number
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 36217ad5e9b1..4aa4cfb2c9e1 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -780,6 +780,7 @@ MMC_DEV_ATTR(manfid, "0x%06x\n", card->cid.manfid);
+>  MMC_DEV_ATTR(name, "%s\n", card->cid.prod_name);
+>  MMC_DEV_ATTR(oemid, "0x%04x\n", card->cid.oemid);
+>  MMC_DEV_ATTR(prv, "0x%x\n", card->cid.prv);
+> +MMC_DEV_ATTR(rev, "0x%x\n", card->ext_csd.rev);
+>  MMC_DEV_ATTR(pre_eol_info, "%02x\n", card->ext_csd.pre_eol_info);
+>  MMC_DEV_ATTR(life_time, "0x%02x 0x%02x\n",
+>  	card->ext_csd.device_life_time_est_typ_a,
+> @@ -838,6 +839,7 @@ static struct attribute *mmc_std_attrs[] = {
+>  	&dev_attr_name.attr,
+>  	&dev_attr_oemid.attr,
+>  	&dev_attr_prv.attr,
+> +	&dev_attr_rev.attr,
+>  	&dev_attr_pre_eol_info.attr,
+>  	&dev_attr_life_time.attr,
+>  	&dev_attr_serial.attr,
