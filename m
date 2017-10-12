@@ -1,12 +1,18 @@
 From: Jin Qian <jinqian@android.com>
-Subject: [PATCHv2 1/1] ANDROID: mmc: core: export emmc revision
-Date: Thu, 12 Oct 2017 10:43:10 -0700
-Message-ID: <20171012174314.34815-1-jinqian@android.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Subject: [PATCHv3 1/1] mmc: core: export emmc revision
+Date: Thu, 12 Oct 2017 10:46:59 -0700
+Message-ID: <20171012174703.44680-1-jinqian@android.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pf0-f178.google.com ([209.85.192.178]:56551 "EHLO
+        mail-pf0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750729AbdJLRr0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Oct 2017 13:47:26 -0400
+Received: by mail-pf0-f178.google.com with SMTP id b85so5870114pfj.13
+        for <linux-mmc@vger.kernel.org>; Thu, 12 Oct 2017 10:47:26 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Jin Qian <jinqian@google.com>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Uri Yanai <uri.yanai@sandisk.com>, Chanho Min <chanho.min@lge.com>, Jungseung Lee <js07.lee@samsung.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 Cc: Jin Qian <jinqian@android.com>
-List-Id: linux-mmc@vger.kernel.org
 
 From: Jin Qian <jinqian@google.com>
 
@@ -51,3 +57,4 @@ index 36217ad5e9b1..4aa4cfb2c9e1 100644
  	&dev_attr_serial.attr,
 -- 
 2.15.0.rc0.271.g36b669edcc-goog
+
