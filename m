@@ -1,40 +1,62 @@
 From: Douglas Anderson <dianders@chromium.org>
-Subject: [PATCH v2 0/5] mmc: dw_mmc: Fix the CTO timer patch, plus the DTO timer
-Date: Thu, 12 Oct 2017 13:11:13 -0700
-Message-ID: <20171012201118.23570-1-dianders@chromium.org>
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
+Subject: [PATCH v2 2/5] mmc: dw_mmc: Fix the CTO timeout calculation
+Date: Thu, 12 Oct 2017 13:11:15 -0700
+Message-ID: <20171012201118.23570-3-dianders@chromium.org>
+References: <20171012201118.23570-1-dianders@chromium.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20171012201118.23570-1-dianders@chromium.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: jh80.chung@samsung.com, ulf.hansson@linaro.org, shawn.lin@rock-chips.com
 Cc: xzy.xu@rock-chips.com, amstan@chromium.org, linux-rockchip@lists.infradead.org, briannorris@chromium.org, linux-samsung-soc@vger.kernel.org, kernel@esmil.dk, Douglas Anderson <dianders@chromium.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Recently we landed 03de19212ea3 ("mmc: dw_mmc: introduce timer for
-broken command transfer over scheme").  I found a bunch of problems
-with that patch, so this series attempts to solve some of them.
+In the commit 03de19212ea3 ("mmc: dw_mmc: introduce timer for broken
+command transfer over scheme") we tried to calculate the expected
+hardware command timeout value.  Unfortunately that calculation isn't
+quite correct in all cases.  It used "bus_hz" but, as far as I can
+tell, it's supposed to use the card clock.  Let's account for the div
+value, which is documented as 2x the value stored in the register, or
+1 if the register is 0.
 
-This also fixes the DTO timer in some of the same ways even though I
-haven't personally seen problems with the DTO timer.
+NOTE: It's not expected that this will actually fix anything important
+since the 10 ms margin added by the function will pretty much dwarf
+any calculations.  The card clock should be 100 kHz at minimum and:
+  1000 ms/s * (255 * 2) / 100000 Hz.
+Gives us 5.1 ms.
 
-NOTE: this series has only been lighly tested so far.  I can at least
-reproduce the need for the CTO timer on one of my devices and so I can
-confirm that part still works.  As mentioned in the 3rd patch I also
-ran the mmc_test kernel module on this and did manage to see the 3rd
-patch doing something useful.
+...so really the point of this patch is just to make the code more
+"correct" in case anyone ever tries to remove the 10 ms buffer.
 
-Changes in v2:
-- Removed extra "int i"
-- Fix the DTO timeout calculation new for v2
-- Cleanup the DTO timer new for v2
+Fixes: 03de19212ea3 ("mmc: dw_mmc: introduce timer for broken command transfer over scheme")
+Tested-by: Emil Renner Berthing <kernel@esmil.dk>
+Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+Signed-off-by: Douglas Anderson <dianders@chromium.org>
+---
 
-Douglas Anderson (5):
-  mmc: dw_mmc: cancel the CTO timer after a voltage switch
-  mmc: dw_mmc: Fix the CTO timeout calculation
-  mmc: dw_mmc: Add locking to the CTO timer
-  mmc: dw_mmc: Fix the DTO timeout calculation
-  mmc: dw_mmc: Cleanup the DTO timer like the CTO one
+Changes in v2: None
 
- drivers/mmc/host/dw_mmc.c | 162 +++++++++++++++++++++++++++++++++++++++++-----
- 1 file changed, 146 insertions(+), 16 deletions(-)
+ drivers/mmc/host/dw_mmc.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index f5b2bb4b4d98..16516c528a88 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -401,10 +401,14 @@ static u32 dw_mci_prep_stop_abort(struct dw_mci *host, struct mmc_command *cmd)
+ static inline void dw_mci_set_cto(struct dw_mci *host)
+ {
+ 	unsigned int cto_clks;
++	unsigned int cto_div;
+ 	unsigned int cto_ms;
+ 
+ 	cto_clks = mci_readl(host, TMOUT) & 0xff;
+-	cto_ms = DIV_ROUND_UP(cto_clks, host->bus_hz / 1000);
++	cto_div = (mci_readl(host, CLKDIV) & 0xff) * 2;
++	if (cto_div == 0)
++		cto_div = 1;
++	cto_ms = DIV_ROUND_UP(MSEC_PER_SEC * cto_clks * cto_div, host->bus_hz);
+ 
+ 	/* add a bit spare time */
+ 	cto_ms += 10;
 -- 
 2.15.0.rc0.271.g36b669edcc-goog
