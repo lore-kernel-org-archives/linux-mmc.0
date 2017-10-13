@@ -1,131 +1,73 @@
-From: Heiner Kallweit <hkallweit1@gmail.com>
-Subject: Re: eMMC tuning issue on Odroid C2 and a possible solution
-Date: Thu, 12 Oct 2017 23:04:50 +0200
-Message-ID: <4c7bb23a-e072-1c5d-e74d-c4c222beec5b@gmail.com>
-References: <b931985f-16b2-0a90-e73b-b6c349ad7d6c@gmail.com>
- <1507821759.16356.225.camel@baylibre.com>
- <aa13028e-b42a-094f-7bd1-ef22e8cdacbd@gmail.com>
- <1507836874.16356.258.camel@baylibre.com>
- <fa52e311-bafe-0a6a-1b85-ac8f40db62ed@gmail.com>
- <1507838745.16356.270.camel@baylibre.com>
- <08c2642a-06b2-f36b-80b1-3be82c346887@gmail.com>
- <1507841952.16356.285.camel@baylibre.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH v2 4/5] mmc: dw_mmc: Fix the DTO timeout calculation
+Date: Fri, 13 Oct 2017 09:02:24 +0800
+Message-ID: <90e49214-e7da-8b83-7f45-a0bbb18d6709@rock-chips.com>
+References: <20171012201118.23570-1-dianders@chromium.org>
+ <20171012201118.23570-5-dianders@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=gbk; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f45.google.com ([74.125.82.45]:56028 "EHLO
-        mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751900AbdJLVE5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Oct 2017 17:04:57 -0400
-Received: by mail-wm0-f45.google.com with SMTP id u138so16728716wmu.4
-        for <linux-mmc@vger.kernel.org>; Thu, 12 Oct 2017 14:04:56 -0700 (PDT)
-In-Reply-To: <1507841952.16356.285.camel@baylibre.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <20171012201118.23570-5-dianders@chromium.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Douglas Anderson <dianders@chromium.org>
+Cc: jh80.chung@samsung.com, ulf.hansson@linaro.org, shawn.lin@rock-chips.com, xzy.xu@rock-chips.com, amstan@chromium.org, linux-rockchip@lists.infradead.org, briannorris@chromium.org, linux-samsung-soc@vger.kernel.org, kernel@esmil.dk, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jerome Brunet <jbrunet@baylibre.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, Kevin Hilman <khilman@baylibre.com>
 
-Am 12.10.2017 um 22:59 schrieb Jerome Brunet:
-> On Thu, 2017-10-12 at 22:29 +0200, Heiner Kallweit wrote:
->> Am 12.10.2017 um 22:05 schrieb Jerome Brunet:
->>> On Thu, 2017-10-12 at 21:49 +0200, Heiner Kallweit wrote:
->>>>> The result of the tuning does not depends on starting point, so I don't
->>>>> really
->>>>> understand how it would significantly change things.
->>>>>
->>>>
->>>> I think it depends on the tx phase starting point.
->>>>
->>>
->>> If the result of the tuning is not independent of the starting, instead of
->>> just
->>> telling me, it is fairly easy for you to give actual result, like I asked
->>> you:
->>>
->>
->> With hs200@200 and tx phase starting point 0 I get the following with no
->> further CRC errors.
->>
->> [    0.726572] meson-gx-mmc d0074000.mmc: d0074000.mmc#rx phase/delay
->> tunning...
->> [    0.728664] hctosys: unable to open rtc device (rtc0)
->> [    0.728827] USB_OTG_PWR: disabling
->> [    0.728831] TFLASH_VDD: disabling
->> [    0.728833] TF_IO: disabling
->> [    0.753183] Waiting for root device /dev/mmcblk0p1...
->> [    0.754352] meson-gx-mmc d0074000.mmc: success with phase: 270
->> [    0.758386] meson-gx-mmc d0074000.mmc: d0074000.mmc#tx phase/delay
->> tunning...
->> [    0.768050] meson-gx-mmc d0074000.mmc: success with phase: 120
->> [    0.771235] meson-gx-mmc d0074000.mmc: d0074000.mmc#rx phase/delay
->> tunning...
->> [    0.780902] meson-gx-mmc d0074000.mmc: success with phase: 0
->> [    0.784036] mmc0: new HS200 MMC card at address 0001
->> [    0.789090] mmcblk0: mmc0:0001 DJNB4R 116 GiB
->> [    0.793328] mmcblk0boot0: mmc0:0001 DJNB4R partition 1 4.00 MiB
->> [    0.799198] mmcblk0boot1: mmc0:0001 DJNB4R partition 2 4.00 MiB
->> [    0.805048] mmcblk0rpmb: mmc0:0001 DJNB4R partition 3 4.00 MiB, chardev
->> (249:0)
->> [    0.812799] mmcblk0: response CRC error sending r/w cmd command, card
->> status 0x900
->> [    0.819727] meson-gx-mmc d0074000.mmc: d0074000.mmc#tx phase/delay
->> tunning...
->> [    0.827007] meson-gx-mmc d0074000.mmc: success with phase: 210
->> [    0.832559] meson-gx-mmc d0074000.mmc: d0074000.mmc#rx phase/delay
->> tunning...
->> [    0.839848] meson-gx-mmc d0074000.mmc: success with phase: 0
->>
->>
->>>>> Ok, starting from Rx:0 Tx:270 then tuning gives you Tx:300 Rx:90
->>>>> And what different did it gives you starting Rx:0/Tx:0 ?
->>>
->>> And if the result are indeed vastly different, let's debug and get a real
->>> explanation.
->>>
->>>> Tuning does:
->>>> rx phase tuning
->>>> tx phase tuning
->>>> rx phase tuning
->>>>
->>>> Result of each step depends on result of previous step.
->>>
->>> Again, we don't agree. 
->>>
->>>> So also the initial
->>>> rx phase tuning result depends on the starting point of tx phase.
->>>
->>> The first Rx tuning is there only to get a sane starting point for the tx
->>> tuning
->>> ,as explained in the code. This is the reason why is not done when re-
->>> tuning.
->>>
-> 
-> Heiner, This is the same story again and again !
-> Getting clear status is just really painful. It's like half the message is
-> ignored each time. 
-> 
-> I can clearly see that, this result comes from your hack, and this hack makes no
-> sense. I don't care about this result. This is not what I asked.
-> 
-No, the log provided is w/o my hack. The debugfs values just represent the current
-values, interesting is how they change from tuning step to tuning step.
 
-> What I asked is:
-> 1) From linux-next what is tuning result in hs200@200Mhz with the starting :
-> * Rx:0/Tx:270/Core:180 (current setting)
-> * Rx:0/Tx:0/Core:180 (the setting you keep on mentioning)
+On 2017/10/13 4:11, Douglas Anderson wrote:
+> Just like the CTO timeout calculation introduced recently, the DTO
+> timeout calculation was incorrect.  It used "bus_hz" but, as far as I
+> can tell, it's supposed to use the card clock.  Let's account for the
+> div value, which is documented as 2x the value stored in the register,
+> or 1 if the register is 0.
 > 
-> Please don't send your logs: the phase set are displayed in
-> debugfs/clk?clk_summary
+> NOTE: This was likely not terribly important until commit 16a34574c6ca
+> ("mmc: dw_mmc: remove the quirks flags") landed because "DIV" is
+> documented on Rockchip SoCs (the ones that used to define the quirk)
+> to always be 0 or 1.  ...and, in fact, it's documented to only be 1
+> with EMMC in 8-bit DDR52 mode.  Thus before the quirk was applied to
+> everyone it was mostly OK to ignore the DIV value.
 > 
-> 2) Try to come up with a real explanation: "It just happens ..." is not an
-> explanation. 
+> I haven't personally observed any problems that are fixed by this
+> patch but I also haven't tested this anywhere with a DIV other an 0.
+> AKA: this problem was found simply by code inspection and I have no
+> failing test cases that are fixed by it.  Presumably this could fix
+> real bugs for someone out there, though.
 > 
->>>
->>>
->>
->>
-> 
-> 
+> Fixes: 16a34574c6ca ("mmc: dw_mmc: remove the quirks flags")
+> Signed-off-by: Douglas Anderson <dianders@chromium.org>
 
+Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+
+> ---
+> 
+> Changes in v2:
+> - Fix the DTO timeout calculation new for v2
+> 
+>   drivers/mmc/host/dw_mmc.c | 8 +++++++-
+>   1 file changed, 7 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 50148991f30e..6bc87b1385a9 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1936,10 +1936,16 @@ static int dw_mci_data_complete(struct dw_mci *host, struct mmc_data *data)
+>   static void dw_mci_set_drto(struct dw_mci *host)
+>   {
+>   	unsigned int drto_clks;
+> +	unsigned int drto_div;
+>   	unsigned int drto_ms;
+> +	unsigned long irqflags;
+>   
+>   	drto_clks = mci_readl(host, TMOUT) >> 8;
+> -	drto_ms = DIV_ROUND_UP(drto_clks, host->bus_hz / 1000);
+> +	drto_div = (mci_readl(host, CLKDIV) & 0xff) * 2;
+> +	if (drto_div == 0)
+> +		drto_div = 1;
+> +	drto_ms = DIV_ROUND_UP(MSEC_PER_SEC * drto_clks * drto_div,
+> +			       host->bus_hz);
+>   
+>   	/* add a bit spare time */
+>   	drto_ms += 10;
+> 
