@@ -1,7 +1,7 @@
 From: Simon Horman <horms+renesas@verge.net.au>
-Subject: [PATCH 1/3] dt-bindings: mmc: renesas_sdhi: provide example in bindings documentation
-Date: Fri, 13 Oct 2017 12:38:10 +0200
-Message-ID: <20171013103812.30826-2-horms+renesas@verge.net.au>
+Subject: [PATCH 3/3] mmc: renesas_sdhi: implement R-Car Gen[123] fallback compatibility strings
+Date: Fri, 13 Oct 2017 12:38:12 +0200
+Message-ID: <20171013103812.30826-4-horms+renesas@verge.net.au>
 References: <20171013103812.30826-1-horms+renesas@verge.net.au>
 Return-path: <linux-renesas-soc-owner@vger.kernel.org>
 In-Reply-To: <20171013103812.30826-1-horms+renesas@verge.net.au>
@@ -10,75 +10,66 @@ To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@li
 Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Simon Horman <horms+renesas@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
 
-Provide an example of the usage of the DT bindings for TMIO
-in their documentation. The example given is for the r8a7790 (R-Car H1).
+Implement fallback compatibility strings for R-Car Gen 1, 2 and 3.
+
+In the case of Renesas R-Car hardware we know that there are generations of
+SoCs, f.e. Gen 1 and 2. But beyond that its not clear what the relationship
+between IP blocks might be. For example, I believe that r8a7790 is older
+than r8a7791 but that doesn't imply that the latter is a descendant of the
+former or vice versa.
+
+We can, however, by examining the documentation and behaviour of the
+hardware at run-time observe that the current driver implementation appears
+to be compatible with the IP blocks on SoCs within a given generation.
+
+For the above reasons and convenience when enabling new SoCs a
+per-generation fallback compatibility string scheme being adopted for
+drivers for Renesas SoCs.
+
+Also, improve readability by listing the shmobile fallback compatibility
+string after the more-specific compatibility strings they provide a
+fallback for.
 
 Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
 ---
- Documentation/devicetree/bindings/mmc/tmio_mmc.txt | 54 ++++++++++++++++++++++
- 1 file changed, 54 insertions(+)
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c | 1 +
+ drivers/mmc/host/renesas_sdhi_sys_dmac.c      | 5 ++++-
+ 2 files changed, 5 insertions(+), 1 deletion(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-index 54ef642f23a0..99be4e7e7391 100644
---- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-@@ -43,3 +43,57 @@ Optional properties:
- - pinctrl-names: should be "default", "state_uhs"
- - pinctrl-0: should contain default/high speed pin ctrl
- - pinctrl-1: should contain uhs mode pin ctrl
-+
-+Example: R8A7779 (R-Car H1) SDHI controller nodes
-+
-+	sdhi0: sd@ee100000 {
-+		compatible = "renesas,sdhi-r8a7790";
-+		reg = <0 0xee100000 0 0x328>;
-+		interrupts = <GIC_SPI 165 IRQ_TYPE_LEVEL_HIGH>;
-+		clocks = <&mstp3_clks R8A7790_CLK_SDHI0>;
-+		dmas = <&dmac0 0xcd>, <&dmac0 0xce>,
-+		       <&dmac1 0xcd>, <&dmac1 0xce>;
-+		dma-names = "tx", "rx", "tx", "rx";
-+		max-frequency = <195000000>;
-+		power-domains = <&sysc R8A7790_PD_ALWAYS_ON>;
-+		status = "disabled";
-+	};
-+
-+	sdhi1: sd@ee120000 {
-+		compatible = "renesas,sdhi-r8a7790";
-+		reg = <0 0xee120000 0 0x328>;
-+		interrupts = <GIC_SPI 166 IRQ_TYPE_LEVEL_HIGH>;
-+		clocks = <&mstp3_clks R8A7790_CLK_SDHI1>;
-+		dmas = <&dmac0 0xc9>, <&dmac0 0xca>,
-+		       <&dmac1 0xc9>, <&dmac1 0xca>;
-+		dma-names = "tx", "rx", "tx", "rx";
-+		max-frequency = <195000000>;
-+		power-domains = <&sysc R8A7790_PD_ALWAYS_ON>;
-+		status = "disabled";
-+	};
-+
-+	sdhi2: sd@ee140000 {
-+		compatible = "renesas,sdhi-r8a7790";
-+		reg = <0 0xee140000 0 0x100>;
-+		interrupts = <GIC_SPI 167 IRQ_TYPE_LEVEL_HIGH>;
-+		clocks = <&mstp3_clks R8A7790_CLK_SDHI2>;
-+		dmas = <&dmac0 0xc1>, <&dmac0 0xc2>,
-+		       <&dmac1 0xc1>, <&dmac1 0xc2>;
-+		dma-names = "tx", "rx", "tx", "rx";
-+		max-frequency = <97500000>;
-+		power-domains = <&sysc R8A7790_PD_ALWAYS_ON>;
-+		status = "disabled";
-+	};
-+
-+	sdhi3: sd@ee160000 {
-+		compatible = "renesas,sdhi-r8a7790";
-+		reg = <0 0xee160000 0 0x100>;
-+		interrupts = <GIC_SPI 168 IRQ_TYPE_LEVEL_HIGH>;
-+		clocks = <&mstp3_clks R8A7790_CLK_SDHI3>;
-+		dmas = <&dmac0 0xd3>, <&dmac0 0xd4>,
-+		       <&dmac1 0xd3>, <&dmac1 0xd4>;
-+		dma-names = "tx", "rx", "tx", "rx";
-+		max-frequency = <97500000>;
-+		power-domains = <&sysc R8A7790_PD_ALWAYS_ON>;
-+		status = "disabled";
-+	};
+diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+index f905f2361d12..637c27057ac2 100644
+--- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
++++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+@@ -88,6 +88,7 @@ static const struct renesas_sdhi_of_data of_rcar_gen3_compatible = {
+ static const struct of_device_id renesas_sdhi_internal_dmac_of_match[] = {
+ 	{ .compatible = "renesas,sdhi-r8a7795", .data = &of_rcar_gen3_compatible, },
+ 	{ .compatible = "renesas,sdhi-r8a7796", .data = &of_rcar_gen3_compatible, },
++	{ .compatible = "renesas,rcar-gen3-sdhi", .data = &of_rcar_gen3_compatible, },
+ 	{},
+ };
+ MODULE_DEVICE_TABLE(of, renesas_sdhi_internal_dmac_of_match);
+diff --git a/drivers/mmc/host/renesas_sdhi_sys_dmac.c b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+index df4465439e13..9ab10436e4b8 100644
+--- a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
++++ b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+@@ -91,7 +91,6 @@ static const struct renesas_sdhi_of_data of_rcar_gen3_compatible = {
+ };
+ 
+ static const struct of_device_id renesas_sdhi_sys_dmac_of_match[] = {
+-	{ .compatible = "renesas,sdhi-shmobile" },
+ 	{ .compatible = "renesas,sdhi-sh73a0", .data = &of_default_cfg, },
+ 	{ .compatible = "renesas,sdhi-r8a73a4", .data = &of_default_cfg, },
+ 	{ .compatible = "renesas,sdhi-r8a7740", .data = &of_default_cfg, },
+@@ -107,6 +106,10 @@ static const struct of_device_id renesas_sdhi_sys_dmac_of_match[] = {
+ 	{ .compatible = "renesas,sdhi-r8a7794", .data = &of_rcar_gen2_compatible, },
+ 	{ .compatible = "renesas,sdhi-r8a7795", .data = &of_rcar_gen3_compatible, },
+ 	{ .compatible = "renesas,sdhi-r8a7796", .data = &of_rcar_gen3_compatible, },
++	{ .compatible = "renesas,rcar-gen1-sdhi", .data = &of_rcar_gen1_compatible, },
++	{ .compatible = "renesas,rcar-gen2-sdhi", .data = &of_rcar_gen2_compatible, },
++	{ .compatible = "renesas,rcar-gen3-sdhi", .data = &of_rcar_gen3_compatible, },
++	{ .compatible = "renesas,sdhi-shmobile" },
+ 	{},
+ };
+ MODULE_DEVICE_TABLE(of, renesas_sdhi_sys_dmac_of_match);
 -- 
 2.11.0
