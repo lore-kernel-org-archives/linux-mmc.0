@@ -1,68 +1,82 @@
-From: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
-Subject: Re: [PATCHv3 1/1] mmc: core: export emmc revision
-Date: Fri, 13 Oct 2017 14:57:18 +0800
-Message-ID: <20171013145718.390bc4ef@xhacker.debian>
-References: <20171012174703.44680-1-jinqian@android.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: dw_mmc: busy check incomplete?
+Date: Fri, 13 Oct 2017 18:00:29 +0800
+Message-ID: <948b84f0-b9b3-696a-4e0d-da8a8e347960@rock-chips.com>
+References: <FD897F46D140444CAB8DC80B08F0742B0185ABC5E7@PFDE-MX11.EU.P-F.BIZ>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset=gbk; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-sn1nam02on0068.outbound.protection.outlook.com ([104.47.36.68]:10863
-        "EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751418AbdJMG5q (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 13 Oct 2017 02:57:46 -0400
-In-Reply-To: <20171012174703.44680-1-jinqian@android.com>
+Received: from lucky1.263xmail.com ([211.157.147.133]:55854 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751611AbdJMKA3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Oct 2017 06:00:29 -0400
+In-Reply-To: <FD897F46D140444CAB8DC80B08F0742B0185ABC5E7@PFDE-MX11.EU.P-F.BIZ>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jin Qian <jinqian@android.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Jin Qian <jinqian@google.com>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Uri Yanai <uri.yanai@sandisk.com>, Chanho Min <chanho.min@lge.com>, Jungseung Lee <js07.lee@samsung.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+To: Goldschmidt Simon <sgoldschmidt@de.pepperl-fuchs.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Thu, 12 Oct 2017 10:46:59 -0700 Jin Qian wrote:
++ Ulf
 
-> From: Jin Qian <jinqian@google.com>
+On 2017/10/12 20:27, Goldschmidt Simon wrote:
+>> On 2017/9/22 17:40, Shawn Lin wrote:
+>> Still think that should be part of mmc core's behaviour. I try to make
+>> sure the following ugly patch could work for you? And we could move
+>> forward later to see how to do it more gracefully.
 > 
-> Expose emmc revision as part of device attributes.
+> Thanks for your response and sorry my answer comes with three weeks delay.
+> Unfortunately, I had other problems with the board in question up to now.
 > 
-> Signed-off-by: Jin Qian <jinqian@android.com>
-> ---
-
-A trivial point: when you send newer version, could you add change log
-so that it's clearly expressed what's updated/addressed.
-
->  Documentation/ABI/testing/sysfs-bus-mmc | 4 ++++
->  drivers/mmc/core/mmc.c                  | 2 ++
->  2 files changed, 6 insertions(+)
->  create mode 100644 Documentation/ABI/testing/sysfs-bus-mmc
+> I can confirm the patch works for me. On the oscilloscope shots, I can clearly
+> see that the next request gets delayed when R1b tells the host the "card" is busy.
 > 
-> diff --git a/Documentation/ABI/testing/sysfs-bus-mmc b/Documentation/ABI/testing/sysfs-bus-mmc
-> new file mode 100644
-> index 000000000000..519f028d19cc
-> --- /dev/null
-> +++ b/Documentation/ABI/testing/sysfs-bus-mmc
-> @@ -0,0 +1,4 @@
-> +What:		/sys/bus/mmc/devices/.../rev
-> +Date:		October 2017
-> +Contact:	Jin Qian <jinqian@android.com>
-> +Description:	Extended CSD revision number
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 36217ad5e9b1..4aa4cfb2c9e1 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -780,6 +780,7 @@ MMC_DEV_ATTR(manfid, "0x%06x\n", card->cid.manfid);
->  MMC_DEV_ATTR(name, "%s\n", card->cid.prod_name);
->  MMC_DEV_ATTR(oemid, "0x%04x\n", card->cid.oemid);
->  MMC_DEV_ATTR(prv, "0x%x\n", card->cid.prv);
-> +MMC_DEV_ATTR(rev, "0x%x\n", card->ext_csd.rev);
->  MMC_DEV_ATTR(pre_eol_info, "%02x\n", card->ext_csd.pre_eol_info);
->  MMC_DEV_ATTR(life_time, "0x%02x 0x%02x\n",
->  	card->ext_csd.device_life_time_est_typ_a,
-> @@ -838,6 +839,7 @@ static struct attribute *mmc_std_attrs[] = {
->  	&dev_attr_name.attr,
->  	&dev_attr_oemid.attr,
->  	&dev_attr_prv.attr,
-> +	&dev_attr_rev.attr,
->  	&dev_attr_pre_eol_info.attr,
->  	&dev_attr_life_time.attr,
->  	&dev_attr_serial.attr,
+
+Thanks for testing.
+
+> How can we move forward to a clean fix here?
+
+I think mmc core haven't considered this case that we issue a R1b
+command from usersapce and check the busy(or poll the CMD13 to get it
+right). I was thinking of adding some check for that case but I'm aslo
+now thinking could we reuse the functions from mmc_ops.c instead of
+directly sending this command to the host drivers. That we better reuse
+the checking logic of the existing code, for instance, mmc_switch.
+
+Ulf, do you have some comment here?
+
+> 
+> Regards,
+> Simon
+> 
+>>
+>>
+>> @@ -546,6 +546,24 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card
+>> *card, struct mmc_blk_data *md,
+>>                           return err;
+>>           }
+>>
+>> +       /*
+>> +         * Don't try to rely on the host drivers to check the busy status
+>> +         * and do it for here. Maybe it's worth more condiction check
+>> +         * to see if this cmd use data line or not, as we could still
+>> support
+>> +         * cmd in flight even the the device is busy, for instance CQE.
+>> Andt
+>> +         * not sure how much time need to be a proper arbitrary, so bindly
+>> +         * resort to MMC_BLK_TIMEOUT_MS. Also not sure if we need to take
+>> +         * poll mathod if no card_busy available.
+>> +         */
+>> +       if (card->host->ops->card_busy) {
+>> +               int tries = MMC_BLK_TIMEOUT_MS;
+>> +               while (host->ops->card_busy(card->host) && --tries)
+>> +                       mmc_delay(1);
+>> +
+>> +               if (tries == 0)
+>> +                       return -ETIMEDOUT;
+>> +       }
+> 
+> 
+> 
+> 
 
