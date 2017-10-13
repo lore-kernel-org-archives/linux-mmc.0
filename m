@@ -1,36 +1,31 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH 1/3] dt-bindings: mmc: renesas_sdhi: provide example in
- bindings documentation
-Date: Fri, 13 Oct 2017 14:35:28 +0200
-Message-ID: <20171013123527.cbchvltkltv6vijv@verge.net.au>
-References: <20171013103812.30826-1-horms+renesas@verge.net.au>
- <20171013103812.30826-2-horms+renesas@verge.net.au>
- <CAMuHMdVW-LPaDSLXaDwS_x2WmxZE5DnzvsuDPB71i5+su6rpNg@mail.gmail.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCHv3 1/1] mmc: core: export emmc revision
+Date: Fri, 13 Oct 2017 14:38:55 +0200
+Message-ID: <CACRpkdYyvr2TNeXxq8sq9KBGzA7m=y9Cik_32QrW6DcAxp3C4w@mail.gmail.com>
+References: <20171012174703.44680-1-jinqian@android.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:56190 "EHLO
-        kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753231AbdJMMfr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Oct 2017 08:35:47 -0400
-Content-Disposition: inline
-In-Reply-To: <CAMuHMdVW-LPaDSLXaDwS_x2WmxZE5DnzvsuDPB71i5+su6rpNg@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20171012174703.44680-1-jinqian@android.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jin Qian <jinqian@android.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Jin Qian <jinqian@google.com>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, Uri Yanai <uri.yanai@sandisk.com>, Chanho Min <chanho.min@lge.com>, Jungseung Lee <js07.lee@samsung.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 
-On Fri, Oct 13, 2017 at 01:19:20PM +0200, Geert Uytterhoeven wrote:
-> Hi Simon,
-> 
-> On Fri, Oct 13, 2017 at 12:38 PM, Simon Horman
-> <horms+renesas@verge.net.au> wrote:
-> > Provide an example of the usage of the DT bindings for TMIO
-> > in their documentation. The example given is for the r8a7790 (R-Car H1).
-> 
-> r8a7790 == R-Car H2?
+On Thu, Oct 12, 2017 at 7:46 PM, Jin Qian <jinqian@android.com> wrote:
 
-Sorry, it should be r8a7790 (R-Car H2).
+> From: Jin Qian <jinqian@google.com>
+>
+> Expose emmc revision as part of device attributes.
+>
+> Signed-off-by: Jin Qian <jinqian@android.com>
+(...)
 
-I'll let the series sit for a bit to see if there are is any other
-feedback.
+> +MMC_DEV_ATTR(rev, "0x%x\n", card->ext_csd.rev);
+
+This will be 0x0000 on ordinary MMC cards right?
+
+Have you tested it?
+
+Yours,
+Linus Walleij
