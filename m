@@ -1,58 +1,42 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH 00/11] mmc: document mmc_regulator_get_supply and fix
- users
-Date: Sat, 14 Oct 2017 21:15:24 +0200
-Message-ID: <20171014191524.uwvtueyctyozzjzx@ninjato>
-References: <20171007103658.16868-1-wsa+renesas@sang-engineering.com>
- <CAPDyKFoAZri8N79eZMFJeT6bN19XZPCvCD6oBmr5EXCj_KSTVQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="25h4426ancotwraq"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([88.99.104.3]:44270 "EHLO pokefinder.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751660AbdJNTP1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sat, 14 Oct 2017 15:15:27 -0400
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFoAZri8N79eZMFJeT6bN19XZPCvCD6oBmr5EXCj_KSTVQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Subject: [PATCH v2 01/11] mmc: add kerneldoc to mmc_regulator_get_supply()
+Date: Sat, 14 Oct 2017 21:17:09 +0200
+Message-ID: <20171014191719.2129-2-wsa+renesas@sang-engineering.com>
+References: <20171014191719.2129-1-wsa+renesas@sang-engineering.com>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20171014191719.2129-1-wsa+renesas@sang-engineering.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-renesas-soc@vger.kernel.org, Fabrizio Castro <fabrizio.castro@bp.renesas.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Fabrizio Castro <fabrizio.castro@bp.renesas.com>
 
+Especially, make clear what the return value means.
 
---25h4426ancotwraq
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
+ drivers/mmc/core/core.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
 
-
-> Or perhaps even coccinelle needs an update to be adopted to
-> requirement from checkpatch?
-
-No, it was my scripts. I missed to set the gitcommit filetype when
-editing the message template. I fixed that in my scripts and will resend
-in a minute. And I missed to set the flag for checkpatch checking. It is
-now default. Thanks!
-
-
---25h4426ancotwraq
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlniYkgACgkQFA3kzBSg
-Kbbk4A/+NJwHDnqrxTmRhbQRTV+tgECBJPs5Pefg7l5kKL9DudLufB19cvjFPUa/
-XgOpAVnuxFliOmf+Nm7IS+vDFzWwuuoJydAKANTpk1PDsBZADp05i2Qqi/y7ASGX
-L5AL3PN0nNRIcQuG2KAIr5UI2S8J33Vod5hfCBqg+jhqEWQ6AV6jf5Ca8RUcHG80
-yvULX4SutQcI/Mt8sjkAjLe4hoF2F7DMrAkyFt0pat+v3KtqtfMPALB95glSsOzb
-7jdjL8qwZpHWiz3drfcBNJoA0ZrAwc++dEPyiiNy5O+fA3V4a72AJ4UwUmC4Ox0r
-5kS5ik7rJ4966H7QVRxI1oyR2rXZCQDXG9f4IjE3Lo8A683+NfGeJG65yo5hlx3a
-wjIOpBFyo4Qlsyc81Jrq3qOUa5SSFO6tC1w9WFgPABd9BkkzOMNSlSdg1xKX4R0/
-lVBwxfCaY1fF9hbqsyOaMHpu4C2WfKatW6AAIdgxIVQAT4esmbziYtPS2JrjbomT
-lGMcQQNMilwypQkwSDBpP99xPbWS1m6pKHvLHETu39gdFEV3ACYcT2neluc/WJDx
-nuSio1bX+Zzy/pLzWAZgM5xa1OUOc7i855OZOtkwryT5dA2BzLUDD3OGBkGFZ845
-pbBn463WSNsdJjz5m4HurAuGzKQ0xpge1N/DhF/T+wsYuLzUUKY=
-=/NXv
------END PGP SIGNATURE-----
-
---25h4426ancotwraq--
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index c287d297710aa4..7859bb617a2f60 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1595,6 +1595,16 @@ EXPORT_SYMBOL_GPL(mmc_regulator_set_vqmmc);
+ 
+ #endif /* CONFIG_REGULATOR */
+ 
++/**
++ * mmc_regulator_get_supply - try to get VMMC and VQMMC regulators for a host
++ * @mmc: the host to regulate
++ *
++ * Returns 0 or errno. errno should be handled, it is either a critical error
++ * or -EPROBE_DEFER. 0 means no critical error but it does not mean all
++ * regulators have been found because they all are optional. If you require
++ * certain regulators, you need to check separately in your driver if they got
++ * populated after calling this function.
++ */
+ int mmc_regulator_get_supply(struct mmc_host *mmc)
+ {
+ 	struct device *dev = mmc_dev(mmc);
+-- 
+2.11.0
