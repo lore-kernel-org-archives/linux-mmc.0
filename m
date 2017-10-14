@@ -1,7 +1,7 @@
 From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH v2 11/11] mmc: usdhi6rol0: catch all errors when getting regulators
-Date: Sat, 14 Oct 2017 21:17:19 +0200
-Message-ID: <20171014191719.2129-12-wsa+renesas@sang-engineering.com>
+Subject: [PATCH v2 02/11] mmc: cavium: catch all errors when getting regulators
+Date: Sat, 14 Oct 2017 21:17:10 +0200
+Message-ID: <20171014191719.2129-3-wsa+renesas@sang-engineering.com>
 References: <20171014191719.2129-1-wsa+renesas@sang-engineering.com>
 Return-path: <linux-renesas-soc-owner@vger.kernel.org>
 In-Reply-To: <20171014191719.2129-1-wsa+renesas@sang-engineering.com>
@@ -20,21 +20,21 @@ easier to understand.
 
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
- drivers/mmc/host/usdhi6rol0.c | 2 +-
+ drivers/mmc/host/cavium.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/usdhi6rol0.c b/drivers/mmc/host/usdhi6rol0.c
-index 64da6a88cfb90e..cdfeb15b6f0511 100644
---- a/drivers/mmc/host/usdhi6rol0.c
-+++ b/drivers/mmc/host/usdhi6rol0.c
-@@ -1757,7 +1757,7 @@ static int usdhi6_probe(struct platform_device *pdev)
- 		return -ENOMEM;
+diff --git a/drivers/mmc/host/cavium.c b/drivers/mmc/host/cavium.c
+index fbd29f00fca05e..ed5cefb8376838 100644
+--- a/drivers/mmc/host/cavium.c
++++ b/drivers/mmc/host/cavium.c
+@@ -967,7 +967,7 @@ static int cvm_mmc_of_parse(struct device *dev, struct cvm_mmc_slot *slot)
+ 	}
  
  	ret = mmc_regulator_get_supply(mmc);
 -	if (ret == -EPROBE_DEFER)
 +	if (ret)
- 		goto e_free_mmc;
- 
- 	ret = mmc_of_parse(mmc);
+ 		return ret;
+ 	/*
+ 	 * Legacy Octeon firmware has no regulator entry, fall-back to
 -- 
 2.11.0
