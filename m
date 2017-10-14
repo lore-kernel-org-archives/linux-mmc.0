@@ -1,13 +1,13 @@
 From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH v2 04/11] mmc: meson-gx-mmc: catch all errors when getting regulators
-Date: Sat, 14 Oct 2017 21:17:12 +0200
-Message-ID: <20171014191719.2129-5-wsa+renesas@sang-engineering.com>
+Subject: [PATCH v2 08/11] mmc: mxcmmc: catch all errors when getting regulators
+Date: Sat, 14 Oct 2017 21:17:16 +0200
+Message-ID: <20171014191719.2129-9-wsa+renesas@sang-engineering.com>
 References: <20171014191719.2129-1-wsa+renesas@sang-engineering.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([88.99.104.3]:44311 "EHLO pokefinder.org"
+Received: from sauhun.de ([88.99.104.3]:44323 "EHLO pokefinder.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751576AbdJNTRj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sat, 14 Oct 2017 15:17:39 -0400
+        id S1751636AbdJNTRl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sat, 14 Oct 2017 15:17:41 -0400
 In-Reply-To: <20171014191719.2129-1-wsa+renesas@sang-engineering.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -24,22 +24,22 @@ easier to understand.
 
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
- drivers/mmc/host/meson-gx-mmc.c | 2 +-
+ drivers/mmc/host/mxcmmc.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index 85745ef179e22b..e0862d3f65b346 100644
---- a/drivers/mmc/host/meson-gx-mmc.c
-+++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -1190,7 +1190,7 @@ static int meson_mmc_probe(struct platform_device *pdev)
- 	/* Get regulators and the supported OCR mask */
- 	host->vqmmc_enabled = false;
+diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+index 328484b96620e8..8bd9f060be2ae0 100644
+--- a/drivers/mmc/host/mxcmmc.c
++++ b/drivers/mmc/host/mxcmmc.c
+@@ -1075,7 +1075,7 @@ static int mxcmci_probe(struct platform_device *pdev)
+ 		dat3_card_detect = true;
+ 
  	ret = mmc_regulator_get_supply(mmc);
 -	if (ret == -EPROBE_DEFER)
 +	if (ret)
- 		goto free_host;
+ 		goto out_free;
  
- 	ret = mmc_of_parse(mmc);
+ 	if (!mmc->ocr_avail) {
 -- 
 2.11.0
 
