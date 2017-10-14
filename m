@@ -1,13 +1,13 @@
 From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH v2 08/11] mmc: mxcmmc: catch all errors when getting regulators
-Date: Sat, 14 Oct 2017 21:17:16 +0200
-Message-ID: <20171014191719.2129-9-wsa+renesas@sang-engineering.com>
+Subject: [PATCH v2 07/11] mmc: mtk-sd: catch all errors when getting regulators
+Date: Sat, 14 Oct 2017 21:17:15 +0200
+Message-ID: <20171014191719.2129-8-wsa+renesas@sang-engineering.com>
 References: <20171014191719.2129-1-wsa+renesas@sang-engineering.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([88.99.104.3]:44323 "EHLO pokefinder.org"
+Received: from sauhun.de ([88.99.104.3]:44320 "EHLO pokefinder.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751636AbdJNTRl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sat, 14 Oct 2017 15:17:41 -0400
+        id S1751660AbdJNTRk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sat, 14 Oct 2017 15:17:40 -0400
 In-Reply-To: <20171014191719.2129-1-wsa+renesas@sang-engineering.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -24,22 +24,22 @@ easier to understand.
 
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
- drivers/mmc/host/mxcmmc.c | 2 +-
+ drivers/mmc/host/mtk-sd.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-index 328484b96620e8..8bd9f060be2ae0 100644
---- a/drivers/mmc/host/mxcmmc.c
-+++ b/drivers/mmc/host/mxcmmc.c
-@@ -1075,7 +1075,7 @@ static int mxcmci_probe(struct platform_device *pdev)
- 		dat3_card_detect = true;
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index 267f7ab08420eb..7c518a560089ce 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -1641,7 +1641,7 @@ static int msdc_drv_probe(struct platform_device *pdev)
+ 	}
  
  	ret = mmc_regulator_get_supply(mmc);
 -	if (ret == -EPROBE_DEFER)
 +	if (ret)
- 		goto out_free;
+ 		goto host_free;
  
- 	if (!mmc->ocr_avail) {
+ 	host->src_clk = devm_clk_get(&pdev->dev, "source");
 -- 
 2.11.0
 
