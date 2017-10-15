@@ -1,219 +1,58 @@
-From: CK Hu <ck.hu-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-Subject: Re: [PATCH v5 02/12] mmc: mediatek: add support of mt2701/mt2712
-Date: Sun, 15 Oct 2017 16:26:18 +0800
-Message-ID: <1508055978.8978.5.camel@mtksdaap41>
-References: <1507689696-25928-1-git-send-email-chaotian.jing@mediatek.com>
-         <1507689696-25928-3-git-send-email-chaotian.jing@mediatek.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1507689696-25928-3-git-send-email-chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, yong mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Phong LE <ple-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Heiner Kallweit <hkallweit1-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Subject: [PATCH v3 0/3] mmc: support eMMC driver type selection with DT
+Date: Sun, 15 Oct 2017 14:46:12 +0200
+Message-ID: <20171015124615.31391-1-wsa+renesas@sang-engineering.com>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-renesas-soc@vger.kernel.org, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi, Chaotian:
+Some of the Renesas R-Car boards need to set the eMMC driver type to type 1 to
+get stable HS200/400 speeds (HS400 support not upstream yet). Because the eMMC
+memories are fixed (and thus the drive type), I decided to implement the DT
+setup in a similar fashion to ACPI [1]. While implementing, I realized that all
+I did was not Renesas specific but generic, so I ended up putting it into the
+core.
 
-On Wed, 2017-10-11 at 10:41 +0800, Chaotian Jing wrote:
-> mt2701/mt2712 has 12bit clock div, which is not compatible with
-> mt8135/mt8173. and, some additional features will be added in
-> mt2701/mt2712, so that need distinguish it by comatibale name.
-> 
-> Signed-off-by: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-> ---
->  drivers/mmc/host/mtk-sd.c | 82 +++++++++++++++++++++++++++++++++++++++--------
->  1 file changed, 69 insertions(+), 13 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 267f7ab..643c795 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -95,6 +95,9 @@
->  #define MSDC_CFG_CKDIV          (0xff << 8)	/* RW */
->  #define MSDC_CFG_CKMOD          (0x3 << 16)	/* RW */
->  #define MSDC_CFG_HS400_CK_MODE  (0x1 << 18)	/* RW */
-> +#define MSDC_CFG_HS400_CK_MODE_EXTRA  (0x1 << 22)	/* RW */
-> +#define MSDC_CFG_CKDIV_EXTRA    (0xfff << 8)	/* RW */
-> +#define MSDC_CFG_CKMOD_EXTRA    (0x3 << 20)	/* RW */
->  
->  /* MSDC_IOCON mask */
->  #define MSDC_IOCON_SDR104CKS    (0x1 << 0)	/* RW */
-> @@ -295,6 +298,10 @@ struct msdc_save_para {
->  	u32 emmc50_cfg0;
->  };
->  
-> +struct mtk_mmc_compatible {
-> +	u8 clk_div_bits;
-> +};
-> +
->  struct msdc_tune_para {
->  	u32 iocon;
->  	u32 pad_tune;
-> @@ -309,6 +316,7 @@ struct msdc_delay_phase {
->  
->  struct msdc_host {
->  	struct device *dev;
-> +	const struct mtk_mmc_compatible *dev_comp;
->  	struct mmc_host *mmc;	/* mmc structure */
->  	int cmd_rsp;
->  
-> @@ -350,6 +358,31 @@ struct msdc_host {
->  	struct msdc_tune_para saved_tune_para; /* tune result of CMD21/CMD19 */
->  };
->  
-> +static const struct mtk_mmc_compatible mt8135_compat = {
-> +	.clk_div_bits = 8,
-> +};
-> +
-> +static const struct mtk_mmc_compatible mt8173_compat = {
-> +	.clk_div_bits = 8,
-> +};
-> +
-> +static const struct mtk_mmc_compatible mt2701_compat = {
-> +	.clk_div_bits = 12,
-> +};
-> +
-> +static const struct mtk_mmc_compatible mt2712_compat = {
-> +	.clk_div_bits = 12,
-> +};
-> +
-> +static const struct of_device_id msdc_of_ids[] = {
-> +	{ .compatible = "mediatek,mt8135-mmc", .data = &mt8135_compat},
-> +	{ .compatible = "mediatek,mt8173-mmc", .data = &mt8173_compat},
+So, whenever the new property (introduced in patch 1) is used, its value will
+be used regardless of a potentially implemented host driver specific
+select_drive_strength callback (patch 2). An example usage can be found in
+patch 3. Note that currently only eMMC is handled
 
-Because mt8135_compat is equal to mt8173_compat, so I think the
-compatible of "mediatek,mt8173-mmc" is redundant. You could just keep
-compatible of "mediatek,mt8135-mmc" in driver, and use
-"mediatek,mt8135-mmc" for both mt8135.dtsi and mt8173.dtsi.
+A branch for the Salvator-X(S) boards can be found here:
 
-> +	{ .compatible = "mediatek,mt2701-mmc", .data = &mt2701_compat},
-> +	{ .compatible = "mediatek,mt2712-mmc", .data = &mt2712_compat},
+git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/topic/emmc-drive-strength
 
-Ditto.
+A wiki page describing my test procedure can be found here:
 
-Regards,
-CK
+http://elinux.org/Tests:eMMC-fixed-drive-strength
 
-> +	{}
-> +};
-> +MODULE_DEVICE_TABLE(of, msdc_of_ids);
-> +
->  static void sdr_set_bits(void __iomem *reg, u32 bs)
->  {
->  	u32 val = readl(reg);
-> @@ -509,7 +542,12 @@ static void msdc_set_timeout(struct msdc_host *host, u32 ns, u32 clks)
->  		timeout = (ns + clk_ns - 1) / clk_ns + clks;
->  		/* in 1048576 sclk cycle unit */
->  		timeout = (timeout + (0x1 << 20) - 1) >> 20;
-> -		sdr_get_field(host->base + MSDC_CFG, MSDC_CFG_CKMOD, &mode);
-> +		if (host->dev_comp->clk_div_bits == 8)
-> +			sdr_get_field(host->base + MSDC_CFG,
-> +				      MSDC_CFG_CKMOD, &mode);
-> +		else
-> +			sdr_get_field(host->base + MSDC_CFG,
-> +				      MSDC_CFG_CKMOD_EXTRA, &mode);
->  		/*DDR mode will double the clk cycles for data timeout */
->  		timeout = mode >= 2 ? timeout * 2 : timeout;
->  		timeout = timeout > 1 ? timeout - 1 : 0;
-> @@ -548,7 +586,11 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
->  
->  	flags = readl(host->base + MSDC_INTEN);
->  	sdr_clr_bits(host->base + MSDC_INTEN, flags);
-> -	sdr_clr_bits(host->base + MSDC_CFG, MSDC_CFG_HS400_CK_MODE);
-> +	if (host->dev_comp->clk_div_bits == 8)
-> +		sdr_clr_bits(host->base + MSDC_CFG, MSDC_CFG_HS400_CK_MODE);
-> +	else
-> +		sdr_clr_bits(host->base + MSDC_CFG,
-> +			     MSDC_CFG_HS400_CK_MODE_EXTRA);
->  	if (timing == MMC_TIMING_UHS_DDR50 ||
->  	    timing == MMC_TIMING_MMC_DDR52 ||
->  	    timing == MMC_TIMING_MMC_HS400) {
-> @@ -568,8 +610,12 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
->  
->  		if (timing == MMC_TIMING_MMC_HS400 &&
->  		    hz >= (host->src_clk_freq >> 1)) {
-> -			sdr_set_bits(host->base + MSDC_CFG,
-> -				     MSDC_CFG_HS400_CK_MODE);
-> +			if (host->dev_comp->clk_div_bits == 8)
-> +				sdr_set_bits(host->base + MSDC_CFG,
-> +					     MSDC_CFG_HS400_CK_MODE);
-> +			else
-> +				sdr_set_bits(host->base + MSDC_CFG,
-> +					     MSDC_CFG_HS400_CK_MODE_EXTRA);
->  			sclk = host->src_clk_freq >> 1;
->  			div = 0; /* div is ignore when bit18 is set */
->  		}
-> @@ -587,8 +633,15 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
->  			sclk = (host->src_clk_freq >> 2) / div;
->  		}
->  	}
-> -	sdr_set_field(host->base + MSDC_CFG, MSDC_CFG_CKMOD | MSDC_CFG_CKDIV,
-> -		      (mode << 8) | div);
-> +	if (host->dev_comp->clk_div_bits == 8)
-> +		sdr_set_field(host->base + MSDC_CFG,
-> +			      MSDC_CFG_CKMOD | MSDC_CFG_CKDIV,
-> +			      (mode << 8) | div);
-> +	else
-> +		sdr_set_field(host->base + MSDC_CFG,
-> +			      MSDC_CFG_CKMOD_EXTRA | MSDC_CFG_CKDIV_EXTRA,
-> +			      (mode << 12) | div);
-> +
->  	sdr_set_bits(host->base + MSDC_CFG, MSDC_CFG_CKPDN);
->  	while (!(readl(host->base + MSDC_CFG) & MSDC_CFG_CKSTB))
->  		cpu_relax();
-> @@ -1617,12 +1670,17 @@ static int msdc_drv_probe(struct platform_device *pdev)
->  	struct mmc_host *mmc;
->  	struct msdc_host *host;
->  	struct resource *res;
-> +	const struct of_device_id *of_id;
->  	int ret;
->  
->  	if (!pdev->dev.of_node) {
->  		dev_err(&pdev->dev, "No DT found\n");
->  		return -EINVAL;
->  	}
-> +
-> +	of_id = of_match_node(msdc_of_ids, pdev->dev.of_node);
-> +	if (!of_id)
-> +		return -EINVAL;
->  	/* Allocate MMC host for this device */
->  	mmc = mmc_alloc_host(sizeof(struct msdc_host), &pdev->dev);
->  	if (!mmc)
-> @@ -1686,11 +1744,15 @@ static int msdc_drv_probe(struct platform_device *pdev)
->  	msdc_of_property_parse(pdev, host);
->  
->  	host->dev = &pdev->dev;
-> +	host->dev_comp = of_id->data;
->  	host->mmc = mmc;
->  	host->src_clk_freq = clk_get_rate(host->src_clk);
->  	/* Set host parameters to mmc */
->  	mmc->ops = &mt_msdc_ops;
-> -	mmc->f_min = DIV_ROUND_UP(host->src_clk_freq, 4 * 255);
-> +	if (host->dev_comp->clk_div_bits == 8)
-> +		mmc->f_min = DIV_ROUND_UP(host->src_clk_freq, 4 * 255);
-> +	else
-> +		mmc->f_min = DIV_ROUND_UP(host->src_clk_freq, 4 * 4095);
->  
->  	mmc->caps |= MMC_CAP_ERASE | MMC_CAP_CMD23;
->  	/* MMC core transfer sizes tunable parameters */
-> @@ -1839,12 +1901,6 @@ static int msdc_runtime_resume(struct device *dev)
->  	SET_RUNTIME_PM_OPS(msdc_runtime_suspend, msdc_runtime_resume, NULL)
->  };
->  
-> -static const struct of_device_id msdc_of_ids[] = {
-> -	{   .compatible = "mediatek,mt8135-mmc", },
-> -	{}
-> -};
-> -MODULE_DEVICE_TABLE(of, msdc_of_ids);
-> -
->  static struct platform_driver mt_msdc_driver = {
->  	.probe = msdc_drv_probe,
->  	.remove = msdc_drv_remove,
+Changes since RFC v2 are described per patch. It is mainly a rebase to mmc/next
+and addressing Ulf's comments. Tested on Salvator-X (R-Car H3 ES1.0) and
+Salvator-XS (R-Car H3 ES2.0).
+
+I know that patch 3 needs to go via Simon, but I still include it here for
+completeness.
+
+Thanks,
+
+   Wolfram
+
+[1] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=51ced59cc02e0d08f61772c888480b9b1749cef1
 
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Wolfram Sang (3):
+  dt-bindings: mmc: describe new eMMC binding for fixed driver type
+  mmc: parse new binding for eMMC fixed driver type
+  arm64: renesas: salvator: set driver type for eMMC
+
+ Documentation/devicetree/bindings/mmc/mmc.txt    |  3 +++
+ arch/arm64/boot/dts/renesas/salvator-common.dtsi |  1 +
+ drivers/mmc/core/host.c                          | 13 ++++++++++++-
+ drivers/mmc/core/mmc.c                           | 11 ++++++++---
+ include/linux/mmc/host.h                         |  2 ++
+ 5 files changed, 26 insertions(+), 4 deletions(-)
+
+-- 
+2.11.0
