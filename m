@@ -1,126 +1,159 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-acpi: Add support for ACPI HID of AMD
- Controller with HS400
-Date: Mon, 16 Oct 2017 10:26:19 +0200
-Message-ID: <CAPDyKFqK9qBCh-prF17F56MEyqFSm22aO_y7d9bZnOXz0gD1EA@mail.gmail.com>
-References: <1507803468-26313-1-git-send-email-Nehal-bakulchandra.Shah@amd.com>
- <83dfe4d0-8084-e1b5-0d87-ff42c3e5ca4c@amd.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: mainline 4.14-rc4: renesas_sdhi_internal_dmac ee100000.sd:
+ swiotlb buffer is full?
+Date: Mon, 16 Oct 2017 11:02:03 +0200
+Message-ID: <CAMuHMdV=3_9af-aTGnWBLemg3Hrh-D4im1Vxk0mTXstiz0vVUA@mail.gmail.com>
+References: <50d1a9ac-fe5f-d0a1-62bc-ff3e252e99da@de.bosch.com>
+ <CAMuHMdXPYyi_pXcdtNJkT737dSXnwG88vqETN0Kbe-3AAJ0zOg@mail.gmail.com>
+ <f7596566-2f98-d4a1-612c-77caa51b892e@de.bosch.com> <CAMuHMdXEXwwdNPmoFa+peivR_8Bv06r39bg1pAsL7498xrod6A@mail.gmail.com>
+ <5ccf4c75-6dd5-0818-54de-2a99a786a5c4@de.bosch.com> <aecf1ec0-7172-ec41-1759-be261f3e0dd2@de.bosch.com>
+ <TY1PR06MB0992FAD2C2CD90FFF71E1807D84F0@TY1PR06MB0992.apcprd06.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f54.google.com ([209.85.214.54]:47974 "EHLO
-        mail-it0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751196AbdJPI0U (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Oct 2017 04:26:20 -0400
-Received: by mail-it0-f54.google.com with SMTP id p138so217028itp.2
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Oct 2017 01:26:20 -0700 (PDT)
-In-Reply-To: <83dfe4d0-8084-e1b5-0d87-ff42c3e5ca4c@amd.com>
+Received: from mail-wm0-f49.google.com ([74.125.82.49]:46985 "EHLO
+        mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750914AbdJPJCF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Oct 2017 05:02:05 -0400
+In-Reply-To: <TY1PR06MB0992FAD2C2CD90FFF71E1807D84F0@TY1PR06MB0992.apcprd06.prod.outlook.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Shah, Nehal-bakulchandra" <Nehal-Bakulchandra.shah@amd.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "S-k, Shyam-sundar" <Shyam-sundar.S-k@amd.com>, sandeep.singh@amd.com, "Agrawal, Nitesh-kumar" <Nitesh-kumar.Agrawal@amd.com>
+To: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Linus Walleij <linus.walleij@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "REE dirk.behme@de.bosch.com" <dirk.behme@de.bosch.com>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>
 
-On 12 October 2017 at 12:32, Shah, Nehal-bakulchandra
-<Nehal-Bakulchandra.shah@amd.com> wrote:
-> From: Shah Nehal-Bakulchandra <Nehal-bakulchandra.Shah@amd.com>
+CC LinusW, Ulf, linux-mmc
+
+On Mon, Oct 16, 2017 at 10:36 AM, Yoshihiro Shimoda
+<yoshihiro.shimoda.uh@renesas.com> wrote:
+>> From: Dirk Behme, Sent: Thursday, October 12, 2017 6:13 PM
+>> On 12.10.2017 10:20, Dirk Behme wrote:
+>> > On 11.10.2017 15:20, Geert Uytterhoeven wrote:
+>> >> On Wed, Oct 11, 2017 at 2:57 PM, Dirk Behme <dirk.behme@de.bosch.com>
+>> >> wrote:
+>> >>> On 11.10.2017 14:42, Geert Uytterhoeven wrote:
+>> >>>> On Wed, Oct 11, 2017 at 2:23 PM, Dirk Behme <dirk.behme@de.bosch.com>
+>> >>>> wrote:
+>> >>>>> trying to boot recent mainline v4.14-rc4 on a custom H3 ES2.0 board
+>> >>>>> with
+>> >>>>> rootfs on SD card I'm getting [1].
+>> >>>>>
+>> >>>>> Last time I think I used v4.13 in the same environment and I think it
+>> >>>>> worked
+>> >>>>> fine, most probably because renesas_sdhi_internal_dmac wasn't
+>> >>>>> there, yet
+>> >>>>> ;)
+>> >>>>>
+>> >>>>> I checked renesas-drivers-2017-10-03-v4.14-rc3 if there is anything
+>> >>>>> newer
+>> >>>>> regarding drivers/mmc/host/renesas_sdhi_internal_dmac.c but doesn't
+>> >>>>> look
+>> >>>>> so.
+>> >>>>>
+>> >>>>> Any idea what I missed?
+>> >>>>>
+>> >>>> How much swiotlb memory do you have? The default is 64 MiB:
+>> >>>>
+>> >>>>       software IO TLB [mem 0x77fff000-0x7bfff000] (64MB) mapped at
+>> >>>> [ffffffc037fff000-ffffffc03bffefff]
+>> >>>
+>> >>> Same here:
+>> >>
+>> >> OK.
+>> >>
+>> >>>> Then, who else is consuming lots of swiotlb memory?
+>> >>
+>> >> Or, not freeing allocated memory.
+>> >>
+>> >>> Hmm, any idea how to find that?
+>> >>>
+>> >>> The dmesg doesn't seem to have more infos about that (?)
+>> >>
+>> >> I'm afraid you have to add some prints to swiotlb_tbl_map_single()
+>> >> (and swiotlb_tbl_unmap_single())...
+>> >
+>> >
+>> > With [1] I'm getting [2]. What doesn't look that bad, at least quite
+>> > symmetric. Having a quick look I can't find any obvious not freed mem.
+>> > Hmm ...
+>>
+>>
+>> Ok, it seems to be somehow easy ;) It seems that the 524288 bytes them
+>> self are the issue, independent on the usage of the swiotlb memory.
+>>
+>> Doing a hack like [3], i.e. trying to map 524288 bytes at the first
+>> access, already, crashes, too [4].
+>>
+>> So seems we have two issues?
+>>
+>> a) swiotlb_tbl_map_single() can't handle 524288 bytes
+>>
+>> and
+>>
+>> b) failing swiotlb_tbl_map_single() results in a kernel crash
+>>
+>>
+>> Now, I'm not sure whom to address both to? Is it an issue of
+>> renesas_sdhi_internal_dmac() which shouldn't call swiotlb with 524288
+>> bytes? Or is this an error of swiotlb? Same for the kernel crash.
 >
-> This patch supports HS400 for AMD upcoming emmc 5.0 controller.The
-> HS400 and HS200 mode requires hardware work around also. This patch
-> adds the quirks for the same.
-
-By looking at the changes in the patch, obviously you make changes to
-the core, but I think the reasons to why explicitly needs to be stated
-also in the change log.
-
+> Our team also reproduced this issue if we did the following command on H3.
+>  # dd if=/dev/mmcblk0 of=/dev/null bs=512k count=200
 >
-> Signed-off-by: Shah Nehal-Bakulchandra <Nehal-bakulchandra.Shah@amd.com>
-> ---
->  drivers/mmc/core/mmc.c        |  6 +--
->  drivers/mmc/host/sdhci-acpi.c | 89 +++++++++++++++++++++++++++++++++++++++++++
->  drivers/mmc/host/sdhci.c      |  3 +-
->  drivers/mmc/host/sdhci.h      |  5 +++
->  include/linux/mmc/host.h      |  6 +++
->  5 files changed, 105 insertions(+), 4 deletions(-)
-
-Please split the core changes into a separate patch.
-
+> I investigate the issue and then if I modified the value of IO_TLB_SEGSIZE to 256,
+> the issue disappeared. However, other issue happens if I dropped "count=200"...
+> So, I will investigate the issues more...
 >
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 4ffea14..7bf3736 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1164,7 +1164,7 @@ static int mmc_select_hs400(struct mmc_card *card)
+> IIUC,
+> - Since the MMC_BOUNCE disappeared in v4.14-rc1, the MMC core will request a command with 64kbyte+ size.
+>  - So, swiotlb will got request 64kbyte+ size. This is different with previous version.
 >
->         /* Set host controller to HS timing */
->         mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
-> -
-> +       host->ios.transition = HS200_TO_HS_TO_HS400;
->         /* Reduce frequency to HS frequency */
->         max_dtr = card->ext_csd.hs_max_dtr;
->         mmc_set_clock(host, max_dtr);
-> @@ -1196,7 +1196,7 @@ static int mmc_select_hs400(struct mmc_card *card)
->                          mmc_hostname(host), err);
->                 return err;
->         }
-> -
-> +       host->ios.transition = SWITCHING_TO_HS400;
->         /* Set host controller to HS400 timing and frequency */
->         mmc_set_timing(host, MMC_TIMING_MMC_HS400);
->         mmc_set_bus_speed(card);
-> @@ -1204,7 +1204,7 @@ static int mmc_select_hs400(struct mmc_card *card)
->         err = mmc_switch_status(card);
->         if (err)
->                 goto out_err;
-> -
-> +       host->ios.transition = SWITCHED_TO_HS400;
->         return 0;
-
-We have some other host drivers that also needs to follow a specific
-sequence while switching to HS400. Those drivers makes use of the
-->prepare_hs400_tuning() callback. Have you explored that option, and
-if so, why exactly doesn't it work for you?
-
-[...]
-
->  /*
->   * End of controller registers.
->   */
-> @@ -571,6 +574,8 @@ struct sdhci_ops {
->         void            (*set_bus_width)(struct sdhci_host *host, int width);
->         void (*platform_send_init_74_clocks)(struct sdhci_host *host,
->                                              u8 power_mode);
-> +       /* ios for transiton phase for going to hs400 */
-> +       void (*set_platform_hs400_transition)(struct sdhci_host *host);
-
-In general we avoid adding new sdhci callbacks, but instead we try to
-use the sdhci core as a set of library functions.
-
-However, I leave this to managed by Adrian, as we decide this on case
-by case basis.
-
->         unsigned int    (*get_ro)(struct sdhci_host *host);
->         void            (*reset)(struct sdhci_host *host, u8 mask);
->         int     (*platform_execute_tuning)(struct sdhci_host *host, u32 opcode);
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index ebd1ceb..0d0d5d3 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -77,6 +77,12 @@ struct mmc_ios {
->  #define MMC_SET_DRIVER_TYPE_D  3
+> Best regards,
+> Yoshihiro Shimoda
 >
->         bool enhanced_strobe;                   /* hs400es selection */
-> +
-> +       unsigned int transition;      /* track transition modes (hs200 hs400) */
-> +
-> +#define HS200_TO_HS_TO_HS400   1
-> +#define SWITCHING_TO_HS400     2
-> +#define SWITCHED_TO_HS400      3
->  };
->
->  struct mmc_host;
-> --
-> 1.9.1
->
+>>
+>> Best regards
+>>
+>> Dirk
+>>
+>> [3]
+>>
+>> --- a/lib/swiotlb.c
+>> +++ b/lib/swiotlb.c
+>> @@ -510,6 +510,10 @@ phys_addr_t swiotlb_tbl_map_single(struct device
+>> *hwdev,
+>>          if (sme_active())
+>>                  pr_warn_once("SME is active and system is using DMA
+>> bounce buffers\n");
+>>
+>> +       dev_warn(hwdev, "swiotlb_tbl_map_single: trying to map %zd
+>> bytes\n", size);
+>> +       size = (size_t)524288;
+>> +       dev_warn(hwdev, "swiotlb_tbl_map_single: test: size modified to
+>> %zd bytes\n", size);
+>> +
+>>          mask = dma_get_seg_boundary(hwdev);
+>>
+>>          tbl_dma_addr &= mask;
+>>
+>> [4]
+>>
+>> renesas_sdhi_internal_dmac ee100000.sd: swiotlb_tbl_map_single: trying
+>> to map 8 bytes
+>> renesas_sdhi_internal_dmac ee100000.sd: swiotlb_tbl_map_single: test:
+>> size modified to 524288 bytes
+>> renesas_sdhi_internal_dmac ee100000.sd: swiotlb buffer is full (sz:
+>> 524288 bytes)
+>> renesas_sdhi_internal_dmac ee100000.sd: DMA: Out of SW-IOMMU space for 8
+>> bytes
+>> Unable to handle kernel paging request at virtual address ffffffffc0000000
 
-Kind regards
-Uffe
+Gr{oetje,eeting}s,
+
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
