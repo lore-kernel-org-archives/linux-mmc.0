@@ -1,75 +1,69 @@
 From: Chaotian Jing <chaotian.jing@mediatek.com>
-Subject: [PATCH v6 00/12] mmc: mediatek: add support of mt2701/mt2712
-Date: Mon, 16 Oct 2017 09:46:27 +0800
-Message-ID: <1508118399-21828-1-git-send-email-chaotian.jing@mediatek.com>
+Subject: [PATCH v6 01/12] mmc: dt-bindings: Add reg/source_cg/latch-ck for Mediatek MMC bindings
+Date: Mon, 16 Oct 2017 09:46:28 +0800
+Message-ID: <1508118399-21828-2-git-send-email-chaotian.jing@mediatek.com>
+References: <1508118399-21828-1-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailgw02.mediatek.com ([210.61.82.184]:27715 "EHLO
-        mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1751506AbdJPBq5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 15 Oct 2017 21:46:57 -0400
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1508118399-21828-1-git-send-email-chaotian.jing@mediatek.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Matthias Brugger <matthias.bgg@gmail.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Chaotian Jing <chaotian.jing@mediatek.com>, yong mao <yong.mao@mediatek.com>, Linus Walleij <linus.walleij@linaro.org>, Heiner Kallweit <hkallweit1@gmail.com>, Phong LE <ple@baylibre.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, srv_heupstream@mediatek.com
+List-Id: linux-mmc@vger.kernel.org
 
-  This serial of patches are adding support of mt2701/mt2712.
-there are many changes and HW improvement between mt8173 and
-mt2701/mt2712, below is a list of these changes:
-  1. enlarge CLKDIV bits from 8 to 12
-  2. remove the PAD_TUNE register and add a new PAD_TUNE0 register
-  3. add data sync and async fifo feature
-  4. add busy_check feature
-  5. add stop_clk fix
-  6. add enhance_rx support
-  7. add a seperate CG of source clock
+Change the comptiable for support of multi-platform
+Make compatible explicit, as MMC host of mt8173 has difference with
+mt8135(mt8173 supports hs400 and hs400_tune),so that need separate
+mt8173/mt8135 compatible name.
+Add description for reg
+Add description for source_cg
+Add description for mediatek,latch-ck
+Note that source_cg and mediatek,latch-ck are optional for some projects,
+eg, MT2701 do not have source_cg, and MT2712 do not need
+mediatek,latch-ck
 
-  mt2712 supports full of these features, mt2701 supports part of it, and
-add a "mediatek,latch-ck" to work-around as it do not support stop-clk fix.
+Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+---
+ Documentation/devicetree/bindings/mmc/mtk-sd.txt | 18 +++++++++++++++---
+ 1 file changed, 15 insertions(+), 3 deletions(-)
 
-Note: As Pinctrl/CCF are not ready now, so that current patches do not
-include DTS part.
-
-Changed vs v5:
-  based on Rob's comments, explain why MT8173 no longer compatible with
-driver that supports "mediatek,mt8135-mmc", add more clearly description
-of "mediatek,latch-ck".
-
-Changed vs v4:
-  based on Julien's comment, change the "bool pad_tune0" to "u32 pad_tune_reg".
-
-Changed vs v3:
-  based on Ulf's comments, make the bindings change to be the first patch.
-
-Changed vs v2:
-  based on Matthias's comments, merge binding file changes to one patch,
-add "hs400_tune" flag in dev_comp.
-
-Changed vs v1:
-  based on Ulf/Rob/Matthias's comments of DTS binding file, make the binding
-file clearly and fix probe issue.
-
-
-Chaotian Jing (12):
-  mmc: dt-bindings: Add reg/source_cg/latch-ck for Mediatek MMC bindings
-  mmc: mediatek: add support of mt2701/mt2712
-  arm64: dts: mt8173: remove "mediatek,mt8135-mmc" from mmc nodes
-  mmc: mediatek: make hs400_tune_response only for mt8173
-  mmc: mediatek: add pad_tune0 support
-  mmc: mediatek: add async fifo and data tune support
-  mmc: mediatek: add busy_check support
-  mmc: mediatek: add stop_clk fix and enhance_rx support
-  mmc: mediatek: add support of source_cg clock
-  mmc: mediatek: add latch-ck support
-  mmc: mediatek: improve eMMC hs400 mode read performance
-  mmc: mediatek: perfer to use rise edge latching for cmd line
-
- Documentation/devicetree/bindings/mmc/mtk-sd.txt |  18 +-
- arch/arm64/boot/dts/mediatek/mt8173.dtsi         |  12 +-
- drivers/mmc/host/mtk-sd.c                        | 283 ++++++++++++++++++++---
- 3 files changed, 265 insertions(+), 48 deletions(-)
-
+diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.txt b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+index 4182ea3..72d2a73 100644
+--- a/Documentation/devicetree/bindings/mmc/mtk-sd.txt
++++ b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+@@ -7,10 +7,18 @@ This file documents differences between the core properties in mmc.txt
+ and the properties used by the msdc driver.
+ 
+ Required properties:
+-- compatible: Should be "mediatek,mt8173-mmc","mediatek,mt8135-mmc"
++- compatible: value should be either of the following.
++	"mediatek,mt8135-mmc": for mmc host ip compatible with mt8135
++	"mediatek,mt8173-mmc": for mmc host ip compatible with mt8173
++	"mediatek,mt2701-mmc": for mmc host ip compatible with mt2701
++	"mediatek,mt2712-mmc": for mmc host ip compatible with mt2712
++- reg: physical base address of the controller and length
+ - interrupts: Should contain MSDC interrupt number
+-- clocks: MSDC source clock, HCLK
+-- clock-names: "source", "hclk"
++- clocks: Should contain phandle for the clock feeding the MMC controller
++- clock-names: Should contain the following:
++	"source" - source clock (required)
++	"hclk" - HCLK which used for host (required)
++	"source_cg" - independent source clock gate (required for MT2712)
+ - pinctrl-names: should be "default", "state_uhs"
+ - pinctrl-0: should contain default/high speed pin ctrl
+ - pinctrl-1: should contain uhs mode pin ctrl
+@@ -30,6 +38,10 @@ Optional properties:
+ - mediatek,hs400-cmd-resp-sel-rising:  HS400 command response sample selection
+ 				       If present,HS400 command responses are sampled on rising edges.
+ 				       If not present,HS400 command responses are sampled on falling edges.
++- mediatek,latch-ck: Some SoCs do not support enhance_rx, need set correct latch-ck to avoid data crc
++		     error caused by stop clock(fifo full)
++		     Valid range = [0:0x7]. if not present, default value is 0.
++		     applied to compatible "mediatek,mt2701-mmc".
+ 
+ Examples:
+ mmc0: mmc@11230000 {
 -- 
 1.8.1.1.dirty
-
