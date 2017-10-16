@@ -1,7 +1,7 @@
 From: Chaotian Jing <chaotian.jing@mediatek.com>
-Subject: [PATCH v6 09/12] mmc: mediatek: add support of source_cg clock
-Date: Mon, 16 Oct 2017 09:46:36 +0800
-Message-ID: <1508118399-21828-10-git-send-email-chaotian.jing@mediatek.com>
+Subject: [PATCH v6 12/12] mmc: mediatek: perfer to use rise edge latching for cmd line
+Date: Mon, 16 Oct 2017 09:46:39 +0800
+Message-ID: <1508118399-21828-13-git-send-email-chaotian.jing@mediatek.com>
 References: <1508118399-21828-1-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,85 +12,27 @@ To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Matthias Brugger <matthias.bgg@gmail.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Chaotian Jing <chaotian.jing@mediatek.com>, yong mao <yong.mao@mediatek.com>, Linus Walleij <linus.walleij@linaro.org>, Heiner Kallweit <hkallweit1@gmail.com>, Phong LE <ple@baylibre.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, srv_heupstream@mediatek.com
 List-Id: linux-mmc@vger.kernel.org
 
-source clock need an independent cg to control, when doing clk mode
-switch, need gate source clock to avoid hw issue(multi-bit sync hw hang)
+data lines have applied to perfer to use rise edge, also need
+apply it to cmd line.
 
 Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
 ---
- drivers/mmc/host/mtk-sd.c | 23 ++++++++++++++++++++++-
- 1 file changed, 22 insertions(+), 1 deletion(-)
+ drivers/mmc/host/mtk-sd.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 94d16a3..a2f26c9 100644
+index 95759bb..27a6225 100644
 --- a/drivers/mmc/host/mtk-sd.c
 +++ b/drivers/mmc/host/mtk-sd.c
-@@ -372,6 +372,7 @@ struct msdc_host {
- 
- 	struct clk *src_clk;	/* msdc source clock */
- 	struct clk *h_clk;      /* msdc h_clk */
-+	struct clk *src_clk_cg; /* msdc source clock control gate */
- 	u32 mclk;		/* mmc subsystem clock frequency */
- 	u32 src_clk_freq;	/* source clock frequency */
- 	u32 sclk;		/* SD/MS bus clock frequency */
-@@ -616,6 +617,7 @@ static void msdc_set_timeout(struct msdc_host *host, u32 ns, u32 clks)
- 
- static void msdc_gate_clock(struct msdc_host *host)
- {
-+	clk_disable_unprepare(host->src_clk_cg);
- 	clk_disable_unprepare(host->src_clk);
- 	clk_disable_unprepare(host->h_clk);
- }
-@@ -624,6 +626,7 @@ static void msdc_ungate_clock(struct msdc_host *host)
- {
- 	clk_prepare_enable(host->h_clk);
- 	clk_prepare_enable(host->src_clk);
-+	clk_prepare_enable(host->src_clk_cg);
- 	while (!(readl(host->base + MSDC_CFG) & MSDC_CFG_CKSTB))
- 		cpu_relax();
- }
-@@ -692,6 +695,15 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
- 			sclk = (host->src_clk_freq >> 2) / div;
- 		}
+@@ -1550,7 +1550,8 @@ static int msdc_tune_response(struct mmc_host *mmc, u32 opcode)
  	}
-+	sdr_clr_bits(host->base + MSDC_CFG, MSDC_CFG_CKPDN);
-+	/*
-+	 * As src_clk/HCLK use the same bit to gate/ungate,
-+	 * So if want to only gate src_clk, need gate its parent(mux).
-+	 */
-+	if (host->src_clk_cg)
-+		clk_disable_unprepare(host->src_clk_cg);
-+	else
-+		clk_disable_unprepare(clk_get_parent(host->src_clk));
- 	if (host->dev_comp->clk_div_bits == 8)
- 		sdr_set_field(host->base + MSDC_CFG,
- 			      MSDC_CFG_CKMOD | MSDC_CFG_CKDIV,
-@@ -700,10 +712,14 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
- 		sdr_set_field(host->base + MSDC_CFG,
- 			      MSDC_CFG_CKMOD_EXTRA | MSDC_CFG_CKDIV_EXTRA,
- 			      (mode << 12) | div);
-+	if (host->src_clk_cg)
-+		clk_prepare_enable(host->src_clk_cg);
-+	else
-+		clk_prepare_enable(clk_get_parent(host->src_clk));
+ 	final_rise_delay = get_best_delay(host, rise_delay);
+ 	/* if rising edge has enough margin, then do not scan falling edge */
+-	if (final_rise_delay.maxlen >= 12 && final_rise_delay.start < 4)
++	if (final_rise_delay.maxlen >= 12 ||
++	    (final_rise_delay.start == 0 && final_rise_delay.maxlen >= 4))
+ 		goto skip_fall;
  
--	sdr_set_bits(host->base + MSDC_CFG, MSDC_CFG_CKPDN);
- 	while (!(readl(host->base + MSDC_CFG) & MSDC_CFG_CKSTB))
- 		cpu_relax();
-+	sdr_set_bits(host->base + MSDC_CFG, MSDC_CFG_CKPDN);
- 	host->sclk = sclk;
- 	host->mclk = hz;
- 	host->timing = timing;
-@@ -1822,6 +1838,11 @@ static int msdc_drv_probe(struct platform_device *pdev)
- 		goto host_free;
- 	}
- 
-+	/*source clock control gate is optional clock*/
-+	host->src_clk_cg = devm_clk_get(&pdev->dev, "source_cg");
-+	if (IS_ERR(host->src_clk_cg))
-+		host->src_clk_cg = NULL;
-+
- 	host->irq = platform_get_irq(pdev, 0);
- 	if (host->irq < 0) {
- 		ret = -EINVAL;
+ 	sdr_set_bits(host->base + MSDC_IOCON, MSDC_IOCON_RSPL);
 -- 
 1.8.1.1.dirty
