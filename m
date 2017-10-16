@@ -1,112 +1,75 @@
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH v3 2/3] mmc: parse new binding for eMMC fixed driver type
-Date: Sun, 15 Oct 2017 14:46:14 +0200
-Message-ID: <20171015124615.31391-3-wsa+renesas@sang-engineering.com>
-References: <20171015124615.31391-1-wsa+renesas@sang-engineering.com>
+From: Chaotian Jing <chaotian.jing@mediatek.com>
+Subject: [PATCH v6 00/12] mmc: mediatek: add support of mt2701/mt2712
+Date: Mon, 16 Oct 2017 09:46:27 +0800
+Message-ID: <1508118399-21828-1-git-send-email-chaotian.jing@mediatek.com>
+Mime-Version: 1.0
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([88.99.104.3]:46255 "EHLO pokefinder.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750924AbdJOMq1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sun, 15 Oct 2017 08:46:27 -0400
-In-Reply-To: <20171015124615.31391-1-wsa+renesas@sang-engineering.com>
+Received: from mailgw02.mediatek.com ([210.61.82.184]:27715 "EHLO
+        mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1751506AbdJPBq5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 15 Oct 2017 21:46:57 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-renesas-soc@vger.kernel.org, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Matthias Brugger <matthias.bgg@gmail.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Chaotian Jing <chaotian.jing@mediatek.com>, yong mao <yong.mao@mediatek.com>, Linus Walleij <linus.walleij@linaro.org>, Heiner Kallweit <hkallweit1@gmail.com>, Phong LE <ple@baylibre.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, srv_heupstream@mediatek.com
 
-Parse the new binding and store it in the host struct after doing some
-sanity checks. The code is designed to support fixed SD driver type if
-we ever need that.
+  This serial of patches are adding support of mt2701/mt2712.
+there are many changes and HW improvement between mt8173 and
+mt2701/mt2712, below is a list of these changes:
+  1. enlarge CLKDIV bits from 8 to 12
+  2. remove the PAD_TUNE register and add a new PAD_TUNE0 register
+  3. add data sync and async fifo feature
+  4. add busy_check feature
+  5. add stop_clk fix
+  6. add enhance_rx support
+  7. add a seperate CG of source clock
 
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
+  mt2712 supports full of these features, mt2701 supports part of it, and
+add a "mediatek,latch-ck" to work-around as it do not support stop-clk fix.
 
-Changes since V2:
- * moved from core.c to mmc.c and adapted the code to the new place
- * fixed setting now always has highest priority
+Note: As Pinctrl/CCF are not ready now, so that current patches do not
+include DTS part.
 
- drivers/mmc/core/host.c  | 13 ++++++++++++-
- drivers/mmc/core/mmc.c   | 11 ++++++++---
- include/linux/mmc/host.h |  2 ++
- 3 files changed, 22 insertions(+), 4 deletions(-)
+Changed vs v5:
+  based on Rob's comments, explain why MT8173 no longer compatible with
+driver that supports "mediatek,mt8135-mmc", add more clearly description
+of "mediatek,latch-ck".
 
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index e58be39b15685e..35a9e4fd1a9f51 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -179,7 +179,7 @@ static void mmc_retune_timer(unsigned long data)
- int mmc_of_parse(struct mmc_host *host)
- {
- 	struct device *dev = host->parent;
--	u32 bus_width;
-+	u32 bus_width, drv_type;
- 	int ret;
- 	bool cd_cap_invert, cd_gpio_invert = false;
- 	bool ro_cap_invert, ro_gpio_invert = false;
-@@ -321,6 +321,15 @@ int mmc_of_parse(struct mmc_host *host)
- 	if (device_property_read_bool(dev, "no-mmc"))
- 		host->caps2 |= MMC_CAP2_NO_MMC;
- 
-+	/* Must be after "non-removable" check */
-+	if (device_property_read_u32(dev, "fixed-emmc-driver-type", &drv_type) == 0) {
-+		if (host->caps & MMC_CAP_NONREMOVABLE)
-+			host->fixed_drv_type = drv_type;
-+		else
-+			dev_err(host->parent,
-+				"can't use fixed driver type, media is removable\n");
-+	}
-+
- 	host->dsr_req = !device_property_read_u32(dev, "dsr", &host->dsr);
- 	if (host->dsr_req && (host->dsr & ~0xffff)) {
- 		dev_err(host->parent,
-@@ -393,6 +402,8 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
- 	host->max_blk_size = 512;
- 	host->max_blk_count = PAGE_SIZE / 512;
- 
-+	host->fixed_drv_type = -EINVAL;
-+
- 	return host;
- }
- 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 44d67ee8bf7bf2..5e58c5a1508db4 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1289,13 +1289,18 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
- static void mmc_select_driver_type(struct mmc_card *card)
- {
- 	int card_drv_type, drive_strength, drv_type;
-+	int fixed_drv_type = card->host->fixed_drv_type;
- 
- 	card_drv_type = card->ext_csd.raw_driver_strength |
- 			mmc_driver_type_mask(0);
- 
--	drive_strength = mmc_select_drive_strength(card,
--						   card->ext_csd.hs200_max_dtr,
--						   card_drv_type, &drv_type);
-+	if (fixed_drv_type >= 0)
-+		drive_strength = card_drv_type & mmc_driver_type_mask(fixed_drv_type)
-+				 ? fixed_drv_type : 0;
-+	else
-+		drive_strength = mmc_select_drive_strength(card,
-+							   card->ext_csd.hs200_max_dtr,
-+							   card_drv_type, &drv_type);
- 
- 	card->drive_strength = drive_strength;
- 
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index c296f4351c1da4..e7743eca102196 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -354,6 +354,8 @@ struct mmc_host {
- #define MMC_CAP2_CQE		(1 << 23)	/* Has eMMC command queue engine */
- #define MMC_CAP2_CQE_DCMD	(1 << 24)	/* CQE can issue a direct command */
- 
-+	int			fixed_drv_type;	/* fixed driver type for non-removable media */
-+
- 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
- 
- 	/* host specific block data */
+Changed vs v4:
+  based on Julien's comment, change the "bool pad_tune0" to "u32 pad_tune_reg".
+
+Changed vs v3:
+  based on Ulf's comments, make the bindings change to be the first patch.
+
+Changed vs v2:
+  based on Matthias's comments, merge binding file changes to one patch,
+add "hs400_tune" flag in dev_comp.
+
+Changed vs v1:
+  based on Ulf/Rob/Matthias's comments of DTS binding file, make the binding
+file clearly and fix probe issue.
+
+
+Chaotian Jing (12):
+  mmc: dt-bindings: Add reg/source_cg/latch-ck for Mediatek MMC bindings
+  mmc: mediatek: add support of mt2701/mt2712
+  arm64: dts: mt8173: remove "mediatek,mt8135-mmc" from mmc nodes
+  mmc: mediatek: make hs400_tune_response only for mt8173
+  mmc: mediatek: add pad_tune0 support
+  mmc: mediatek: add async fifo and data tune support
+  mmc: mediatek: add busy_check support
+  mmc: mediatek: add stop_clk fix and enhance_rx support
+  mmc: mediatek: add support of source_cg clock
+  mmc: mediatek: add latch-ck support
+  mmc: mediatek: improve eMMC hs400 mode read performance
+  mmc: mediatek: perfer to use rise edge latching for cmd line
+
+ Documentation/devicetree/bindings/mmc/mtk-sd.txt |  18 +-
+ arch/arm64/boot/dts/mediatek/mt8173.dtsi         |  12 +-
+ drivers/mmc/host/mtk-sd.c                        | 283 ++++++++++++++++++++---
+ 3 files changed, 265 insertions(+), 48 deletions(-)
+
 -- 
-2.11.0
+1.8.1.1.dirty
 
