@@ -1,72 +1,73 @@
-From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: Re: [PATCH 0/9] Enable dw-mmc multi-card support
-Date: Tue, 17 Oct 2017 09:36:07 +0800
-Message-ID: <8e433531-8f67-d575-635e-c6ced29f6804@rock-chips.com>
-References: <cover.1507315433.git.lsun@mellanox.com>
+From: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Subject: RE: mainline 4.14-rc4: renesas_sdhi_internal_dmac ee100000.sd:
+ swiotlb buffer is full?
+Date: Tue, 17 Oct 2017 04:51:36 +0000
+Message-ID: <TY1PR06MB09924402AE9EAA79CCD9E194D84C0@TY1PR06MB0992.apcprd06.prod.outlook.com>
+References: <50d1a9ac-fe5f-d0a1-62bc-ff3e252e99da@de.bosch.com>
+ <CAMuHMdXPYyi_pXcdtNJkT737dSXnwG88vqETN0Kbe-3AAJ0zOg@mail.gmail.com>
+ <f7596566-2f98-d4a1-612c-77caa51b892e@de.bosch.com>
+ <CAMuHMdXEXwwdNPmoFa+peivR_8Bv06r39bg1pAsL7498xrod6A@mail.gmail.com>
+ <5ccf4c75-6dd5-0818-54de-2a99a786a5c4@de.bosch.com>
+ <aecf1ec0-7172-ec41-1759-be261f3e0dd2@de.bosch.com>
+ <TY1PR06MB0992FAD2C2CD90FFF71E1807D84F0@TY1PR06MB0992.apcprd06.prod.outlook.com>
+ <CAMuHMdV=3_9af-aTGnWBLemg3Hrh-D4im1Vxk0mTXstiz0vVUA@mail.gmail.com>
+ <CACRpkdZbdhAbFUa9Dh9j8WtY7iYNhB27Ar4XzTZLrTz=gPPsvQ@mail.gmail.com>
+ <CAMuHMdVdfZT-X1bNSBfzBOS=BWgi3d6XySUAJvfz+tvh1=twwQ@mail.gmail.com>
+ <CACRpkdZoXpMt7+5_-aEyA4V06cc-ofuA_BQVhYOuVoZDDn_Kbw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <cover.1507315433.git.lsun-VPRAkNaXOzVWk0Htik3J/w@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Liming Sun <lsun-VPRAkNaXOzVWk0Htik3J/w@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Kukjin Kim <kgene-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Krzysztof Kozlowski <krzk-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <CACRpkdZoXpMt7+5_-aEyA4V06cc-ofuA_BQVhYOuVoZDDn_Kbw@mail.gmail.com>
+Content-Language: ja-JP
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>, Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: "REE dirk.behme@de.bosch.com" <dirk.behme@de.bosch.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-
-On 2017/10/7 3:21, Liming Sun wrote:
-> This series of commits enables the multi-card support for the dw-mmc
-> controller. It includes two parts as below.
-> 
-> The first part (patches 1-7) reverts the series of recent commits that
-> removed the multi-card support with comments saying there was no such
-> use case in the real world. Actually this feature is being used in
-> Mellanox Bluefield SoC and has been requested by customers.
-
-Hrm.... it's so unlucky that your patchset comes a little late. As
-your patch 8 and 9 said, you need them to fix problem for multi-card
-support, so definitely there was no such use case, and even the code
-was buggy to support it right? That makes the code hard to read and
-maintain, so we decide to remove it.
-
-> 
-> The second part (patches 8-9) fixes the DesignWare multi-card support
-> according to the dw-mmc databook (synnopsys: DesignWare Cores Mobile
-> Storage Host Databook, 2.70a). It has changes to set the card number
-> into the CMD register to multiplex requests to different cards when
-> working in SD_MMC_CEATA mode, set the CTYPE / CLKENA / CDTHRCTL
-> registers properly according to the spec, and parse the per-card
-> configuration to match the Linux Documentation
-> (bindings/mmc/synopsys-dw-mshc.txt).
-
-Havn'e check the databook for details yet, but I think it's ok
-to re-introduce multi-slot support if a real user benefits from
-it. But you need a new patch to silent the log "num-slots property not
-found, assuming 1 slot is available" as we removed all the num-slots
-from DT at that time.
-
-
-> 
-> Liming Sun (9):
->    Revert "Documentation: dw-mshc: deprecate num-slots"
->    Revert "mmc: dw_mmc: remove the unnecessary slot variable"
->    Revert "mmc: dw_mmc: use the 'slot' instead of 'cur_slot'"
->    Revert "mmc: dw_mmc: remove the 'id' arguments about functions
->      relevant to slot"
->    Revert "mmc: dw_mmc: change the array of slots"
->    Revert "mmc: dw_mmc: remove the loop about finding slots"
->    Revert "mmc: dw_mmc: deprecated the "num-slots" property"
->    mmc: dw_mmc: Support two SD_MMC_CE-ATA cards
->    mmc: dw_mmc: Parse slot-specific configuration
-> 
->   .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |  16 +-
->   drivers/mmc/host/dw_mmc-exynos.c                   |   4 +-
->   drivers/mmc/host/dw_mmc.c                          | 277 ++++++++++++++++-----
->   drivers/mmc/host/dw_mmc.h                          |  17 +-
->   4 files changed, 236 insertions(+), 78 deletions(-)
-> 
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGkgTGludXMtc2FuLA0KDQo+IEZyb206IExpbnVzIFdhbGxlaWosIFNlbnQ6IE1vbmRheSwgT2N0
+b2JlciAxNiwgMjAxNyA5OjIyIFBNDQo+IA0KPiBPbiBNb24sIE9jdCAxNiwgMjAxNyBhdCAyOjA3
+IFBNLCBHZWVydCBVeXR0ZXJob2V2ZW4NCj4gPGdlZXJ0QGxpbnV4LW02OGsub3JnPiB3cm90ZToN
+Cj4gPiBPbiBNb24sIE9jdCAxNiwgMjAxNyBhdCAxOjQxIFBNLCBMaW51cyBXYWxsZWlqIDxsaW51
+cy53YWxsZWlqQGxpbmFyby5vcmc+IHdyb3RlOg0KPiA+PiBPbiBNb24sIE9jdCAxNiwgMjAxNyBh
+dCAxMTowMiBBTSwgR2VlcnQgVXl0dGVyaG9ldmVuDQo+ID4+IDxnZWVydEBsaW51eC1tNjhrLm9y
+Zz4gd3JvdGU6DQo+ID4+Pj4gSUlVQywNCj4gPj4+PiAtIFNpbmNlIHRoZSBNTUNfQk9VTkNFIGRp
+c2FwcGVhcmVkIGluIHY0LjE0LXJjMSwgdGhlIE1NQyBjb3JlIHdpbGwgcmVxdWVzdCBhIGNvbW1h
+bmQgd2l0aCA2NGtieXRlKyBzaXplLg0KPiA+Pj4+ICAtIFNvLCBzd2lvdGxiIHdpbGwgZ290IHJl
+cXVlc3QgNjRrYnl0ZSsgc2l6ZS4gVGhpcyBpcyBkaWZmZXJlbnQgd2l0aCBwcmV2aW91cyB2ZXJz
+aW9uLg0KPiA+Pg0KPiA+PiBPdGhlciBwZW9wbGUgcmVwb3J0ZWQgcHJvYmxlbXMgd2l0aCB0aGF0
+LiBTb3JyeSBhYm91dCB0aGlzLi4uDQo+ID4+DQo+ID4+IFRoaXMgcHJvYmxlbSBzaG91bGQgYmUg
+c29sdmVkIGJ5IHVwc3RyZWFtDQo+ID4+IGNvbW1pdCBkZTNlZTk5YjA5N2RkNTE5MzgyNzZlM2Fm
+Mzg4Y2Q0YWQwZjI3NTBhDQo+ID4+ICJtbWM6IERlbGV0ZSBib3VuY2UgYnVmZmVyIGhhbmRsaW5n
+Ig0KPiA+Pg0KPiA+PiBJIGp1c3Qga2lsbGVkIG9mZiB0aGUgYm91bmNlIGJ1ZmZlcnMgc28gdGhl
+eSBjYW4ndCBodXJ0IGFueW9uZSBhbnltb3JlLg0KPiA+Pg0KPiA+PiBDYW4geW91IGNoZWNrIHRo
+YXQgeW91IGhhdmUgdGhpcyBwYXRjaCBpbiB5b3VyIHRyZWU/DQo+ID4NCj4gPiBHaXZlbiBEaXJr
+IHNhdyB0aGUgaXNzdWUgd2l0aCB2NC4xNC1yYzQsIEknbSBhZnJhaWQgdGhhdCBwYXRjaCBpcyBh
+bHJlYWR5DQo+ID4gaW5jbHVkZWQgOi0oDQo+IA0KPiBTbyB0aGUgZmlyc3QgaXNzdWUgaXMgZGVm
+aW5hdGVseSBnb25lLg0KPiANCj4gVGhlbiBpdCBzZWVtcyB0aGUgZHJpdmVyIGlzIHNwZWNpZnlp
+bmcgdG8gaGlnaCAtPm1heF9zZWdfc2l6ZQ0KPiBzaW5jZSB0aGUgYnVmZmVyIGNhbm5vdCBiZSBt
+YXBwZWQ/DQo+IA0KPiBVbmxlc3MgeW91J3JlIHVzaW5nIEFETUEgZHJpdmVycy9tbWMvaG9zdC9z
+ZGhjaS5jIHNldHMgaXQgYXM6DQo+IG1tYy0+bWF4X3NlZ19zaXplID0gbW1jLT5tYXhfcmVxX3Np
+emU7DQoNClRoYW5rIHlvdSBmb3IgdGhlIGNvbW1lbnQhDQpPbiBSLUNhciBHZW4zLCBpdCdzIHVz
+aW5nIGRyaXZlcnMvbW1jL2hvc3QvcmVuZXNhc19zZGhpX2ludGVybmFsX2RtYWMuYywNCmFuZCBz
+ZXRzIHRoZSBtYXhfc2VnX3NpemUgdG8gdmVyeSBiaWcgc2l6ZSAoMHhmZmZmZmZmZiAqIDUxMikg
+bm93Li4uDQoNClNvLCBJIG1vZGlmaWVkIHRoZSB2YWx1ZSB0byAyNjIxNDQgYW5kIHJlYmFzZSB0
+aGUga2VybmVsIHRvIHY0LjE0LXJjNQ0KKC1yYzQgc2VlbXMgaGF2ZSBvdGhlciBpc3N1ZSBpbiBi
+bG9jayBkcml2ZXIuKSwgdGhlICJzd2lvdGxiIGJ1ZmZlciBpcyBmdWxsIiBpc3N1ZSBkaXNhcHBl
+YXJlZC4NCg0KPiBBbmQ6DQo+IG1tYy0+bWF4X3JlcV9zaXplID0gNTI0Mjg4Ow0KPiANCj4gPj4g
+cmVuZXNhc19zZGhpX2ludGVybmFsX2RtYWMgZWUxMDAwMDAuc2Q6IHN3aW90bGJfdGJsX21hcF9z
+aW5nbGU6IHRlc3Q6DQo+ID4+IHNpemUgbW9kaWZpZWQgdG8gNTI0Mjg4IGJ5dGVzDQo+ID4+IHJl
+bmVzYXNfc2RoaV9pbnRlcm5hbF9kbWFjIGVlMTAwMDAwLnNkOiBzd2lvdGxiIGJ1ZmZlciBpcyBm
+dWxsIChzejoNCj4gPj4gNTI0Mjg4IGJ5dGVzKQ0KPiANCj4gU28gaWYgeW91ciBkcml2ZXIgY2Fu
+bm90IGhhbmRsZSA1MjQyODggYnl0ZXMsIHdoeSBpcyBpdCBzYXlpbmcgaXQgY2FuDQo+IGhhbmRs
+ZSA1MjQyODggYnl0ZXM/DQoNCkkgdGhpbmsgdGhlICJzd2lvdGxiIGJ1ZmZlciBpcyBmdWxsIiBj
+YW1lIGZyb20gbGliL3N3aW90bGIuYy4NCkknbSBub3Qgc3VyZSB0aGUgZGV0YWlsIG9mIHN3aW90
+bGIuYywgYnV0IElJVUMsIGl0IGhhcyBhIG1lbW9yeSBzaXplIGxpbWl0YXRpb24uDQoNCi0gSW4g
+bGliL3N3aW90bGIuYywgaXQgY2FsY3VsYXRlcyBuc2xvdHMuDQogLSBUaGUgc2l6ZSBvZiBvbmUg
+c2xvdCBpcyAyMDQ4IGJ5dGVzIGJlY2F1c2UgSU9fVExCX1NISUZUIGluIGluY2x1ZGUvbGludXgv
+c3dpb3RsYi5oIGlzIHNldCB0byAxMS4NCi0gSU9fVExCX1NFR1NJWkUgaXMgc2V0IHRvIDEyOCBp
+biBpbmNsdWRlL2xpbnV4L3N3aW90bGIuaC4NCiAtIFRoaXMgdmFsdWUgaXMgbnVtYmVyIG9mIG1h
+eGltdW0gc2xvdHMuDQogIC0gU28sIG1heGltdW0gc2l6ZSBmb3IgYSBzaW5nbGUgbWFwIG9mIHN3
+aW90bGIgaXMgMjU2a2J5dGVzICgyMDQ4ICogMTI4KS4NCg0KU28sIEkgd2lsbCBzdWJtaXQgYSBw
+YXRjaCB0byBzZXQgdGhlIG1heF9yZXFfc2l6ZSB0byAyNTZrYnl0ZXMgdG9kYXkuDQoNCkJlc3Qg
+cmVnYXJkcywNCllvc2hpaGlybyBTaGltb2RhDQoNCg==
