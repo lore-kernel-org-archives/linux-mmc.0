@@ -1,84 +1,59 @@
-From: Simon Horman <horms+renesas@verge.net.au>
-Subject: [PATCH v4 3/3] mmc: renesas_sdhi: implement R-Car Gen[123] fallback compatibility strings
-Date: Wed, 18 Oct 2017 09:00:23 +0200
-Message-ID: <20171018070023.3878-4-horms+renesas@verge.net.au>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH v4 1/3] dt-bindings: mmc: renesas_sdhi: provide example
+ in bindings documentation
+Date: Wed, 18 Oct 2017 09:24:43 +0200
+Message-ID: <20171018072443.uccran7syhlfcjfl@ninjato>
 References: <20171018070023.3878-1-horms+renesas@verge.net.au>
+ <20171018070023.3878-2-horms+renesas@verge.net.au>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="scovxudyx3fa3crw"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:57269 "EHLO
-        kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932290AbdJRHBG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Oct 2017 03:01:06 -0400
-In-Reply-To: <20171018070023.3878-1-horms+renesas@verge.net.au>
+Received: from sauhun.de ([88.99.104.3]:56103 "EHLO pokefinder.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752387AbdJRHYq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 18 Oct 2017 03:24:46 -0400
+Content-Disposition: inline
+In-Reply-To: <20171018070023.3878-2-horms+renesas@verge.net.au>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Simon Horman <horms+renesas@verge.net.au>
+To: Simon Horman <horms+renesas@verge.net.au>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
 
-Implement fallback compatibility strings for R-Car Gen 1, 2 and 3.
 
-In the case of Renesas R-Car hardware we know that there are generations of
-SoCs, f.e. Gen 1 and 2. But beyond that its not clear what the relationship
-between IP blocks might be. For example, I believe that r8a7790 is older
-than r8a7791 but that doesn't imply that the latter is a descendant of the
-former or vice versa.
+--scovxudyx3fa3crw
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-We can, however, by examining the documentation and behaviour of the
-hardware at run-time observe that the current driver implementation appears
-to be compatible with the IP blocks on SoCs within a given generation.
+On Wed, Oct 18, 2017 at 09:00:21AM +0200, Simon Horman wrote:
+> Provide an example of the usage of the DT bindings for TMIO
+> in their documentation. The example given is for the r8a7790 (R-Car H2).
+>=20
+> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+> Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
-For the above reasons and convenience when enabling new SoCs a
-per-generation fallback compatibility string scheme is being adopted for
-drivers for Renesas SoCs.
+Acked-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-Also, improve readability by listing the shmobile fallback compatibility
-string after the more-specific compatibility strings they provide a
-fallback for.
 
-Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
-Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
----
-v4
-* Corrected typo in changelog
----
- drivers/mmc/host/renesas_sdhi_internal_dmac.c | 1 +
- drivers/mmc/host/renesas_sdhi_sys_dmac.c      | 5 ++++-
- 2 files changed, 5 insertions(+), 1 deletion(-)
+--scovxudyx3fa3crw
+Content-Type: application/pgp-signature; name="signature.asc"
 
-diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-index f905f2361d12..637c27057ac2 100644
---- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-+++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-@@ -88,6 +88,7 @@ static const struct renesas_sdhi_of_data of_rcar_gen3_compatible = {
- static const struct of_device_id renesas_sdhi_internal_dmac_of_match[] = {
- 	{ .compatible = "renesas,sdhi-r8a7795", .data = &of_rcar_gen3_compatible, },
- 	{ .compatible = "renesas,sdhi-r8a7796", .data = &of_rcar_gen3_compatible, },
-+	{ .compatible = "renesas,rcar-gen3-sdhi", .data = &of_rcar_gen3_compatible, },
- 	{},
- };
- MODULE_DEVICE_TABLE(of, renesas_sdhi_internal_dmac_of_match);
-diff --git a/drivers/mmc/host/renesas_sdhi_sys_dmac.c b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-index df4465439e13..9ab10436e4b8 100644
---- a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-+++ b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-@@ -91,7 +91,6 @@ static const struct renesas_sdhi_of_data of_rcar_gen3_compatible = {
- };
- 
- static const struct of_device_id renesas_sdhi_sys_dmac_of_match[] = {
--	{ .compatible = "renesas,sdhi-shmobile" },
- 	{ .compatible = "renesas,sdhi-sh73a0", .data = &of_default_cfg, },
- 	{ .compatible = "renesas,sdhi-r8a73a4", .data = &of_default_cfg, },
- 	{ .compatible = "renesas,sdhi-r8a7740", .data = &of_default_cfg, },
-@@ -107,6 +106,10 @@ static const struct of_device_id renesas_sdhi_sys_dmac_of_match[] = {
- 	{ .compatible = "renesas,sdhi-r8a7794", .data = &of_rcar_gen2_compatible, },
- 	{ .compatible = "renesas,sdhi-r8a7795", .data = &of_rcar_gen3_compatible, },
- 	{ .compatible = "renesas,sdhi-r8a7796", .data = &of_rcar_gen3_compatible, },
-+	{ .compatible = "renesas,rcar-gen1-sdhi", .data = &of_rcar_gen1_compatible, },
-+	{ .compatible = "renesas,rcar-gen2-sdhi", .data = &of_rcar_gen2_compatible, },
-+	{ .compatible = "renesas,rcar-gen3-sdhi", .data = &of_rcar_gen3_compatible, },
-+	{ .compatible = "renesas,sdhi-shmobile" },
- 	{},
- };
- MODULE_DEVICE_TABLE(of, renesas_sdhi_sys_dmac_of_match);
--- 
-2.11.0
+-----BEGIN PGP SIGNATURE-----
 
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlnnAbcACgkQFA3kzBSg
+KbZ1TQ//Y+hfw7Ny+vAPIlf76f7ZCvDHZRMLalGwhFaXWjbw8PyCoKrVPjP2NglR
+s4bz5CYN0+gbh8ZVI0vu5w2pVUPHmfZbabruLqObnKg7YGZ53Amk1QX1+K/wNoXV
+LnqoSxd/dixcjNh2zcp8X2OoFXY9/EIUSLrhun+NiWX5bfZv4DdRC/m9xLjgIBuv
+L2iEww0m4Kvvl7V7wvL6IFsoMF8cauYQYsWg/1eGd13SOamg22uZCoFTKs7NMgal
+EizkzL98BkaPncW6nT/obW1OgRCaFBcm9vtKkoyYdVeR6GyCLPrzIxJ7+d07Jcvg
+Yn1ZrexQ6Vh1zyFE0ev4QgnWNVUbEajAPc1stX56RKTJFhpyzqaRn9GvbnbE7nmD
+bED5+0pmFU09Iy5JLrtKTh6x28dO8aIOxTIamSBlXEs3hAp2QV88gydMw3FAd1Pl
+QaDzKVLYxOL5qEvUUyXWhkJDe1JnmfX9IqVdoN8CAc22E2XjHuICjl7uSw9KEUeu
+WNC/pYlUpidLgCT16TnJjmLstQ05Z970puvFyWA5pJQRsXwBYk+QopvSuSBXpZbo
+KGN6nXRSVeteNO0Hvhb1rx2rvgq7x67VmyBeLNpgqncNWfdHCNMgy8u/iqm5/lmD
+jgLx2Nq1+6SGKrAXAonhzBvPeeA7bNKtfKiEKAUn+Ztki+ljgDU=
+=go1s
+-----END PGP SIGNATURE-----
+
+--scovxudyx3fa3crw--
