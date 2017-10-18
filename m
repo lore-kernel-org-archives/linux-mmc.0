@@ -1,251 +1,98 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH v2 3/5] mmc: dw_mmc: Add locking to the CTO timer
-Date: Tue, 17 Oct 2017 09:40:03 -0700
-Message-ID: <CAD=FV=W7u0_kr9HXHpKmw=Hgco2P=u3jeSb8v0OoVvD+2kJorw@mail.gmail.com>
-References: <20171012201118.23570-1-dianders@chromium.org> <20171012201118.23570-4-dianders@chromium.org>
- <41ae1571-4723-2700-1f03-7215e874c42e@rock-chips.com> <CAD=FV=UMuJBKV2-pNo4yiyfxXxYJo_tX6RkxCCzm_UFg9XyjyQ@mail.gmail.com>
- <d6acce96-b292-ee4e-8f9b-1d524c14e0fc@rock-chips.com>
+From: CK Hu <ck.hu-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Subject: Re: [PATCH v5 02/12] mmc: mediatek: add support of mt2701/mt2712
+Date: Wed, 18 Oct 2017 09:46:35 +0800
+Message-ID: <1508291195.30936.7.camel@mtksdaap41>
+References: <1507689696-25928-1-git-send-email-chaotian.jing@mediatek.com>
+         <1507689696-25928-3-git-send-email-chaotian.jing@mediatek.com>
+         <1508055978.8978.5.camel@mtksdaap41>
+         <a506506b-a326-6d54-9827-4fd82680700d@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <d6acce96-b292-ee4e-8f9b-1d524c14e0fc@rock-chips.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Ziyuan Xu <xzy.xu@rock-chips.com>, Alexandru M Stan <amstan@chromium.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Brian Norris <briannorris@chromium.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Emil Renner Berthing <kernel@esmil.dk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <a506506b-a326-6d54-9827-4fd82680700d-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, yong mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Phong LE <ple-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Heiner Kallweit <hkallweit1-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+Hi, Matthias:
 
-On Mon, Oct 16, 2017 at 5:54 PM, Shawn Lin <shawn.lin@rock-chips.com> wrote:
-> Hi Doug
->
->
-> On 2017/10/13 12:20, Doug Anderson wrote:
->>
->> Shawn,
->>
->> On Thu, Oct 12, 2017 at 6:32 PM, Shawn Lin <shawn.lin@rock-chips.com>
->> wrote:
->>>
->>>
->>> On 2017/10/13 4:11, Douglas Anderson wrote:
->>>>
->>>>
->>>> This attempts to instill a bit of paranoia to the code dealing with
->>>> the CTO timer.  It's believed that this will make the CTO timer more
->>>> robust in the case that we're having very long interrupt latencies.
->>>>
->>>
->>> Ack. It could help fix some problems observed.
->>>
->>>
->>>> Note that I originally thought that perhaps this patch was being
->>>> overly paranoid and wasn't really needed, but then while I was running
->>>> mmc_test on an rk3399 board I saw one instance of the message:
->>>>     dwmmc_rockchip fe320000.dwmmc: Unexpected interrupt latency
->>>>
->>>> I had debug prints in the CTO timer code and I found that it was
->>>> running CMD 13 at the time.
->>>>
->>>> ...so even though this patch seems like it might be overly paranoid,
->>>> maybe it really isn't?
->>>>
->>>> Presumably the bad interrupt latency experienced was due to the fact
->>>> that I had serial console enabled as serial console is typically where
->>>> I place blame when I see absurdly large interrupt latencies.  In this
->>>> particular case there was an (unrelated) printout to the serial
->>>> console just before I saw the "Unexpected interrupt latency" printout.
->>>>
->>>> ...and actually, I managed to even reproduce the problems by running
->>>> "iw mlan0 scan > /dev/null" while mmc_test was running.  That not only
->>>> does a bunch of PCIe traffic but it also (on my system) outputs some
->>>> SELinux log spam.
->>>>>
->>>>> Fixes: 03de19212ea3 ("mmc: dw_mmc: introduce timer for broken command
->>>
->>>
->>> transfer over scheme")
->>>>
->>>>
->>>> Tested-by: Emil Renner Berthing <kernel@esmil.dk>
->>>> Signed-off-by: Douglas Anderson <dianders@chromium.org>
->>>> ---
->>>>
->>>> Changes in v2:
->>>> - Removed extra "int i"
->>>>
->>>>    drivers/mmc/host/dw_mmc.c | 91
->>>> +++++++++++++++++++++++++++++++++++++++++------
->>>>    1 file changed, 81 insertions(+), 10 deletions(-)
->>>>
->>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->>>> index 16516c528a88..50148991f30e 100644
->>>> --- a/drivers/mmc/host/dw_mmc.c
->>>> +++ b/drivers/mmc/host/dw_mmc.c
->>>> @@ -403,6 +403,7 @@ static inline void dw_mci_set_cto(struct dw_mci
->>>> *host)
->>>>          unsigned int cto_clks;
->>>>          unsigned int cto_div;
->>>>          unsigned int cto_ms;
->>>> +       unsigned long irqflags;
->>>>          cto_clks = mci_readl(host, TMOUT) & 0xff;
->>>>          cto_div = (mci_readl(host, CLKDIV) & 0xff) * 2;
->>>> @@ -413,8 +414,24 @@ static inline void dw_mci_set_cto(struct dw_mci
->>>> *host)
->>>>          /* add a bit spare time */
->>>>          cto_ms += 10;
->>>>    -     mod_timer(&host->cto_timer,
->>>> -                 jiffies + msecs_to_jiffies(cto_ms) + 1);
->>>> +       /*
->>>> +        * The durations we're working with are fairly short so we have
->>>> to
->>>> be
->>>> +        * extra careful about synchronization here.  Specifically in
->>>> hardware a
->>>> +        * command timeout is _at most_ 5.1 ms, so that means we expect
->>>> an
->>>> +        * interrupt (either command done or timeout) to come rather
->>>> quickly
->>>> +        * after the mci_writel.  ...but just in case we have a long
->>>> interrupt
->>>> +        * latency let's add a bit of paranoia.
->>>> +        *
->>>> +        * In general we'll assume that at least an interrupt will be
->>>> asserted
->>>> +        * in hardware by the time the cto_timer runs.  ...and if it
->>>> hasn't
->>>> +        * been asserted in hardware by that time then we'll assume
->>>> it'll
->>>> never
->>>> +        * come.
->>>> +        */
->>>> +       spin_lock_irqsave(&host->irq_lock, irqflags);
->>>> +       if (!test_bit(EVENT_CMD_COMPLETE, &host->pending_events))
->>>> +               mod_timer(&host->cto_timer,
->>>> +                       jiffies + msecs_to_jiffies(cto_ms) + 1);
->>>> +       spin_unlock_irqrestore(&host->irq_lock, irqflags);
->>>
->>>
->>>
->>> IIUC, this change is beacuse you move
->>> mci_writel(host, CMD, cmd_flags | SDMMC_CMD_START) before
->>> setting up the timer, so there is a timing gap that the cmd_done
->>> already comes and handled by dw_mci_interrupt->dw_mci_cmd_interrupt.
->>> At this point, we don't need the cto timer at all.
->>
->>
->> As per below, if I don't move the mci_writel() before setting up the
->> timer then there's still a race.  ...and actually that race was harder
->> for me to write code for, but I invite you to try to see if it's
->> somehow cleaner.
->>
->>
->>>>    }
->>>>      static void dw_mci_start_command(struct dw_mci *host,
->>>> @@ -429,11 +446,11 @@ static void dw_mci_start_command(struct dw_mci
->>>> *host,
->>>>          wmb(); /* drain writebuffer */
->>>>          dw_mci_wait_while_busy(host, cmd_flags);
->>>>    +     mci_writel(host, CMD, cmd_flags | SDMMC_CMD_START);
->>>> +
->>>>          /* response expected command only */
->>>>          if (cmd_flags & SDMMC_CMD_RESP_EXP)
->>>>                  dw_mci_set_cto(host);
->>>> -
->>>> -       mci_writel(host, CMD, cmd_flags | SDMMC_CMD_START);
->>>
->>>
->>>
->>>
->>> But why? If we still keep the original logic, it's always correct
->>> that cmd_done comes after setting up the cto timer. So could you
->>> eleborate a bit more to help me understand the real intention here?
->>
->>
->> No matter which order you put things, there's a race one way or the
->> other.  You need a lock.
->>
->> Let's think about the old code you wrote.  You did this:
->> 1. Start the CTO timer.
->> 2. Start the command.
->>
->> Now if you (somehow) take 20 ms to handle the interrupt, then this
->> happens:
->>
->> 1. Start the CTO timer.
->> 2. Start the command.
->> 3. Interrupt is pending, but interrupt handler doesn't run yet.
->> 4. CTO timer fires and enqueues CTO timeout.
->> 5. Interrupt finally fires.
->
->
-> OK, got it.
->
->
->>
->>
->> Now normally things are pretty bad if you've got an interrupt latency
->> of 20 ms.  ...and, in fact, I originally wrote up a commit that simply
->> explained why the race didn't matter and was thinking of posting that
->> instead of this one.  I wrote up:
->>
->>       * Start a timer to detect missing cmd timeout if we expect a
->> response.
->>       *
->>       * Note that we need to be a little careful about race conditions
->> here
->>       * since our timer will be racing with the actual hardware interrupt
->>       * and things would get confused if both of them happened.
->>       *
->>       * We end up avoiding races here mostly because of our 10 ms "spare
->>       * time" buffer above.  That's probably reliable enough because:
->>       * - There's "guaranteed" "very little" time between setting the
->> timer
->>       *   and starting the command.  We're holding a spinlock (host->lock)
->>       *   in all calls to this function so we won't get preempted.
->> Possibly
->>       *   we could get interrupts still, but that shouldn't add up to
->>       *   anything like the 10 ms spare time.
->>       * - We expect that when the actual interrupt fires that our
->> interrupt
->>       *   routine should get called "relatively quickly" (compared to the
->>       *   10 ms buffer) and will be able to cancel this timer.
->>
->> ...but then I ran a whole bunch of tests and I found that, as far as I
->> could tell, we actually _were_ getting a super long interrupt latency.
->> Specifically I saw the printout "Unexpected interrupt latency" in my
->> patch.  In order to see that printout in my patch (which even starts
->> the command _before_ the CTO timer), the only explanation is bad
->> interrupt latency, right?  Also: based on my past experience I believe
->> it is possible to get upwards of 100 ms interrupt latency if you've
->> got serial console enabled.  printk, especially printk from an
->> interrupt context, can do some funny things.
->>
->
-> Right! It makes sense to me now.
->
->>
->> ...but this stuff is always hard to get right, so if I messed up the
->> above please let me know!  I tried to think of all of the cases so it
->> would work no matter if delays happened in any random place but
->> concurrency is hard.
->
->
-> Yes, it looks hard to get concurrency right. I have a comment for your
-> DRTO case(patch 5). Let's do some brainstorm there.
+On Mon, 2017-10-16 at 09:49 +0200, Matthias Brugger wrote:
+> 
+> On 10/15/2017 10:26 AM, CK Hu wrote:
+> > Hi, Chaotian:
+> > 
+> > On Wed, 2017-10-11 at 10:41 +0800, Chaotian Jing wrote:
+> >> mt2701/mt2712 has 12bit clock div, which is not compatible with
+> >> mt8135/mt8173. and, some additional features will be added in
+> >> mt2701/mt2712, so that need distinguish it by comatibale name.
+> >>
+> >> Signed-off-by: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+> >> ---
+> >>   drivers/mmc/host/mtk-sd.c | 82 +++++++++++++++++++++++++++++++++++++++--------
+> >>   1 file changed, 69 insertions(+), 13 deletions(-)
+> >>
+> >> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> >> index 267f7ab..643c795 100644
+> >> --- a/drivers/mmc/host/mtk-sd.c
+> >> +++ b/drivers/mmc/host/mtk-sd.c
+> [...]
+> >> @@ -350,6 +358,31 @@ struct msdc_host {
+> >>   	struct msdc_tune_para saved_tune_para; /* tune result of CMD21/CMD19 */
+> >>   };
+> >>   
+> >> +static const struct mtk_mmc_compatible mt8135_compat = {
+> >> +	.clk_div_bits = 8,
+> >> +};
+> >> +
+> >> +static const struct mtk_mmc_compatible mt8173_compat = {
+> >> +	.clk_div_bits = 8,
+> >> +};
+> >> +
+> >> +static const struct mtk_mmc_compatible mt2701_compat = {
+> >> +	.clk_div_bits = 12,
+> >> +};
+> >> +
+> >> +static const struct mtk_mmc_compatible mt2712_compat = {
+> >> +	.clk_div_bits = 12,
+> >> +};
+> >> +
+> >> +static const struct of_device_id msdc_of_ids[] = {
+> >> +	{ .compatible = "mediatek,mt8135-mmc", .data = &mt8135_compat},
+> >> +	{ .compatible = "mediatek,mt8173-mmc", .data = &mt8173_compat},
+> > 
+> > Because mt8135_compat is equal to mt8173_compat, so I think the
+> > compatible of "mediatek,mt8173-mmc" is redundant. You could just keep
+> > compatible of "mediatek,mt8135-mmc" in driver, and use
+> > "mediatek,mt8135-mmc" for both mt8135.dtsi and mt8173.dtsi.
+> > 
+> 
+> Well thing is, that in the follow-up patches, new data types get added to the 
+> different compat structures and in the end all four a different.
 
-Since your comments in this patch are positive and you've now added
-your Reviewed-by to patch #5, I'm going to assume that you'd also like
-your Reviewed-by on this patch?
+You are right, these modification are necessary. If so, adding
+"mediatek,mt8173-mmc" in the patch of "add support of mt2701/mt2712"
+looks irrelevant. Maybe the title should be modified as "add support of
+mt8173/mt2701/mt2712" or move mt8173 part to another patch.
+
+Regards,
+CK
+
+> 
+> >> +	{ .compatible = "mediatek,mt2701-mmc", .data = &mt2701_compat},
+> >> +	{ .compatible = "mediatek,mt2712-mmc", .data = &mt2712_compat},
+> > 
+> > Ditto.
+> > 
+> 
+> Same here.
+> 
+> Regards,
+> Matthias
 
 
-Jaehoon: I think I have Shawn's review on all this series.  It would
-be great if you could review them yourself and/or pick them up in your
-tree.  Since they fix a regression on 4.14 we really don't want to
-delay too long.  If you're busy, please yell and we can figure out a
-way to get these in (either through Ulf directly or we should find
-someone else to make a git tree and send a pull request).
-
-Thanks!
-
--Doug
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
