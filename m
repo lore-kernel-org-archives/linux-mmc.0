@@ -1,86 +1,170 @@
-From: Jiancheng Xue <xuejiancheng@hisilicon.com>
-Subject: [PATCH 1/2] dt-bindings: mmc: add bindings for hi3798cv200-dw-mshc
-Date: Wed, 18 Oct 2017 07:16:27 -0400
-Message-ID: <1508325388-7260-2-git-send-email-xuejiancheng@hisilicon.com>
-References: <1508325388-7260-1-git-send-email-xuejiancheng@hisilicon.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V8 00/14] mmc: Add Command Queue support
+Date: Wed, 18 Oct 2017 09:16:07 +0300
+Message-ID: <376e4bb9-cc86-36ae-91b6-48fef69e059a@intel.com>
+References: <1505302814-19313-1-git-send-email-adrian.hunter@intel.com>
+ <CAPDyKFr-XbMOmOkz1yXwmG1t=77eSsUO2kU7kKV0V1wrfcmWKg@mail.gmail.com>
+ <2cd4c5fc-cc04-ba44-bea6-4547d84de3e2@intel.com>
+ <CAPDyKFqE7UYOYrjykpV0GnQ+hg2oGXpALgn_8yKsQk19Y4nmSQ@mail.gmail.com>
+ <9a789f9b-a8c4-8ae7-8f93-0d76f674bded@intel.com>
+ <CAPDyKFoLa_aX3j693_tfkuaSKNvGB-ERdf2-9r4iF-+c0NnP9g@mail.gmail.com>
+ <d41eee41-796a-db93-d388-b36123ecc364@intel.com>
+ <CAPDyKFrMqXWagkPOtPk-PBThSUrSogUP=iL+9XeyD9E8qkp=bw@mail.gmail.com>
+ <1b8bec1b-7340-cb89-65c0-e09b17037ca4@intel.com>
+ <CAPDyKFqoMVemtCSHBzfK5YTqLsGEr_v_z7o=HOKCwEdVz0tH_w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1508325388-7260-1-git-send-email-xuejiancheng@hisilicon.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, robh+dt@kernel.org, jh80.chung@samsung.com
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.guo@linaro.org, project-aspen-dev@linaro.org, xuejiancheng@hisilicon.com, hermit.wangheming@hisilicon.com, tianshuliang <tianshuliang@hisilicon.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga01.intel.com ([192.55.52.88]:23428 "EHLO mga01.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1760867AbdJRGXC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 18 Oct 2017 02:23:02 -0400
+In-Reply-To: <CAPDyKFqoMVemtCSHBzfK5YTqLsGEr_v_z7o=HOKCwEdVz0tH_w@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 
-From: tianshuliang <tianshuliang@hisilicon.com>
+On 11/10/17 16:58, Ulf Hansson wrote:
+> On 11 October 2017 at 14:58, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> On 11/10/17 15:13, Ulf Hansson wrote:
+>>> On 10 October 2017 at 15:31, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>> On 10/10/17 16:08, Ulf Hansson wrote:
+>>>>> [...]
+>>>>>
+>>>>>>>>>
+>>>>>>>>> I have also run some test on my ux500 board and enabling the blkmq
+>>>>>>>>> path via the new MMC Kconfig option. My idea was to run some iozone
+>>>>>>>>> comparisons between the legacy path and the new blkmq path, but I just
+>>>>>>>>> couldn't get to that point because of the following errors.
+>>>>>>>>>
+>>>>>>>>> I am using a Kingston 4GB SDHC card, which is detected and mounted
+>>>>>>>>> nicely. However, when I decide to do some writes to the card I get the
+>>>>>>>>> following errors.
+>>>>>>>>>
+>>>>>>>>> root@ME:/mnt/sdcard dd if=/dev/zero of=testfile bs=8192 count=5000 conv=fsync
+>>>>>>>>> [  463.714294] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>>> [  464.722656] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>>> [  466.081481] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>>> [  467.111236] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>>> [  468.669647] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>>> [  469.685699] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>>> [  471.043334] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>>> [  472.052337] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>>> [  473.342651] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>>> [  474.323760] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>>> [  475.544769] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>>> [  476.539031] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>>> [  477.748474] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>>> [  478.724182] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>>>
+>>>>>>>>> I haven't yet got the point of investigating this any further, and
+>>>>>>>>> unfortunate I have a busy schedule with traveling next week. I will do
+>>>>>>>>> my best to look into this as soon as I can.
+>>>>>>>>>
+>>>>>>>>> Perhaps you have some ideas?
+>>>>>>>>
+>>>>>>>> The behaviour depends on whether you have MMC_CAP_WAIT_WHILE_BUSY. Try
+>>>>>>>> changing that and see if it makes a difference.
+>>>>>>>
+>>>>>>> Yes, it does! I disabled MMC_CAP_WAIT_WHILE_BUSY (and its
+>>>>>>> corresponding code in mmci.c) and the errors goes away.
+>>>>>>>
+>>>>>>> When I use MMC_CAP_WAIT_WHILE_BUSY I get these problems:
+>>>>>>>
+>>>>>>> [  223.820983] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>> [  224.815795] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>> [  226.034881] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>> [  227.112884] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>> [  227.220275] mmc0: Card stuck in wrong state! mmcblk0 mmc_blk_card_stuck
+>>>>>>> [  228.686798] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>> [  229.892150] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>> [  231.031890] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>> [  232.239013] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>> 5000+0 records in
+>>>>>>> 5000+0 records out
+>>>>>>> root@ME:/mnt/sdcard
+>>>>>>>
+>>>>>>> I looked at the new blkmq code from patch v10 13/15. It seems like the
+>>>>>>> MMC_CAP_WAIT_WHILE_BUSY is used to determine whether the async request
+>>>>>>> mechanism should be used or not. Perhaps I didn't looked close enough,
+>>>>>>> but maybe you could elaborate on why this seems to be the case!?
+>>>>>>
+>>>>>> MMC_CAP_WAIT_WHILE_BUSY is necessary because it means that a data transfer
+>>>>>> request has finished when the host controller calls mmc_request_done(). i.e.
+>>>>>> polling the card is not necessary.
+>>>>>
+>>>>> Well, that is a rather big change on its own. Earlier we polled with
+>>>>> CMD13 to verify that the card has moved back to the transfer state, in
+>>>>> case it was a write. And that was no matter of MMC_CAP_WAIT_WHILE_BUSY
+>>>>> was set or not. Right!?
+>>>>
+>>>> Yes
+>>>>
+>>>>>
+>>>>> I am not sure it's a good idea to bypass that validation, it seems
+>>>>> fragile to rely only on the busy detection on DAT line for writes.
+>>>>
+>>>> Can you cite something from the specifications that backs that up, because I
+>>>> couldn't find anything to suggest that CMD13 polling was expected.
+>>>
+>>> No I can't, but I don't see why that matters.
+>>>
+>>> My point is, if we want to go down that road by avoiding the CMD13
+>>> polling, that needs to be a separate change, which we can test and
+>>> confirm on its own.
+>>>
+>>>>
+>>>>>
+>>>>>>
+>>>>>> Have you tried V9 or V10.  There was a fix in V9 related to calling
+>>>>>> ->post_req() which could mess up DMA.
+>>>>>
+>>>>> I have used V10.
+>>>>>
+>>>>>>
+>>>>>> The other thing that could go wrong with DMA is if it cannot accept
+>>>>>> ->post_req() being called from mmc_request_done().
+>>>>>
+>>>>> I don't think mmci has a problem with that, however why do you want to
+>>>>> do this? Wouldn't that defeat some of the benefits with the async
+>>>>> request mechanism?
+>>>>
+>>>> Perhaps - but it would need to be tested.  If there are more requests
+>>>> waiting, one optimization could be to defer ->post_req() until after the
+>>>> next request is started.
+>>>
+>>> This is already proven, because this how the existing mmc async
+>>> request mechanism works.
+>>>
+>>> In ->post_req() callbacks, host drivers may do dma_unmap_sg(), which
+>>> is something that could be costly and therefore it's better to start a
+>>> new request before, such these things can go on in parallel.
+>>
+>> OK I will make a patch that takes care of both issues.  That will also mean
+>> the request is not completed in the ->done() callback because ->post_req()
+>> must precede block layer completion.
+> 
+> Right.
+> 
+> Actually completing the request in the ->done callback, may still be
+> possible, because in principle it only needs to inform the other
+> prepared request that it may start, before it continues to post
+> process/completes the current one.
+> 
+> However, by looking at for example how mmci.c works, it actually holds
+> its spinlock while it calls mmc_request_done(). The same spinlock is
+> taken in the ->request() function, but not in the ->post_req()
+> function. In other words, completing the request in the ->done()
+> callback, would make mmci to keep the spinlock held throughout the
+> post processing cycle, which then prevents the next request from being
+> started.
+> 
+> So my conclusion is, let's start a as you suggested, by not completing
+> the request in ->done() as to maintain existing behavior. Then we can
+> address optimizations on top, which very likely will involve doing
+> changes to host drivers as well.
 
-Hisilicon hi3798cv200 SoC extends the dw-mshc controller
-for additional clock control. Add device tree bindings for
-hi3798cv200-dw-mshc.
-
-Signed-off-by: tianshuliang <tianshuliang@hisilicon.com>
-Signed-off-by: Jiancheng Xue <xuejiancheng@hisilicon.com>
----
- .../bindings/mmc/hi3798cv200-dw-mshc.txt           | 51 ++++++++++++++++++++++
- 1 file changed, 51 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/hi3798cv200-dw-mshc.txt
-
-diff --git a/Documentation/devicetree/bindings/mmc/hi3798cv200-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/hi3798cv200-dw-mshc.txt
-new file mode 100644
-index 0000000..845c32c
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/hi3798cv200-dw-mshc.txt
-@@ -0,0 +1,51 @@
-+* Hisilicon specific extensions to the Synopsys Designware Mobile
-+  Storage Host Controller
-+
-+Read synopsys-dw-mshc.txt for more details
-+
-+The Synopsys designware mobile storage host controller is used to interface
-+a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
-+differences between the core Synopsys dw mshc controller properties described
-+by synopsys-dw-mshc.txt and the properties used by the Hisilicon specific
-+extensions to the Synopsys Designware Mobile Storage Host Controller.
-+
-+Required Properties:
-+
-+* compatible: should be one of the following.
-+  - "hisilicon,hi3798cv200-dw-mshc": for controllers with hi3798cv200 specific extensions.
-+
-+Optional Properties:
-+* clocks: from common clock binding: if ciu-drive and ciu-sample are
-+  specified in clock-names, should contain handles to these clocks.
-+
-+* clock-names:Apart from the clock-names described in synopsys-dw-mshc.txt
-+  two more clocks "ciu-drive" and "ciu-sample" are supported. They are used
-+  to control the clock phases, "ciu-sample" is required for tuning high-speed modes.
-+
-+Example:
-+
-+	/* for Hi3798cv200 */
-+
-+	/* SoC portion */
-+	emmc: mmc@9830000 {
-+		compatible = "hisilicon,hi3798cv200-dw-mshc";
-+		reg = <0x9830000 0x10000>;
-+		interrupts = <GIC_SPI 35 IRQ_TYPE_LEVEL_HIGH>;
-+		clocks = <&crg HISTB_MMC_CIU_CLK>,
-+			 <&crg HISTB_MMC_BIU_CLK>,
-+			 <&crg HISTB_MMC_SAMPLE_CLK>;
-+		clock-names = "ciu", "biu", "ciu-sample";
-+	};
-+
-+	/* Board portion */
-+	&emmc {
-+		status = "okay";
-+		num-slots = <1>;
-+		fifo-depth = <256>;
-+		clock-frequency = <200000000>;
-+		cap-mmc-highspeed;
-+		mmc-ddr-1_8v;
-+		mmc-hs200-1_8v;
-+		non-removable;
-+		bus-width = <8>;
-+	};
--- 
-2.7.4
+Have you tested the latest version now?
