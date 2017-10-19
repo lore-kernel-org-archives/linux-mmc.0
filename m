@@ -1,39 +1,96 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 1/4] mmc: sdhci-acpi: Use helper function acpi_device_uid()
-Date: Thu, 19 Oct 2017 13:41:43 +0300
-Message-ID: <1508409706-27026-2-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH 3/4] mmc: sdhci-acpi: Let devices define their own private data
+Date: Thu, 19 Oct 2017 13:41:45 +0300
+Message-ID: <1508409706-27026-4-git-send-email-adrian.hunter@intel.com>
 References: <1508409706-27026-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga01.intel.com ([192.55.52.88]:21701 "EHLO mga01.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751897AbdJSKsj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 19 Oct 2017 06:48:39 -0400
+        id S1751897AbdJSKsl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 19 Oct 2017 06:48:41 -0400
 In-Reply-To: <1508409706-27026-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-Make use of acpi_device_uid() instead of open coding.
+Let devices define their own private data to facilitate device-specific
+operations. The size of the private structure is specified in the
+sdhci_acpi_slot structure, then sdhci_acpi_probe() will allocate extra
+space for it, and sdhci_acpi_priv() can be used to get a reference to it.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci-acpi.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-acpi.c | 16 ++++++++++++++--
+ 1 file changed, 14 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index 08ae0ff13513..e4b7fac5efb2 100644
+index 640be5b618fc..5bb5880403b2 100644
 --- a/drivers/mmc/host/sdhci-acpi.c
 +++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -443,7 +443,7 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
- 		return -ENODEV;
+@@ -73,6 +73,7 @@ struct sdhci_acpi_slot {
+ 	unsigned int	caps2;
+ 	mmc_pm_flag_t	pm_caps;
+ 	unsigned int	flags;
++	size_t		priv_size;
+ 	int (*probe_slot)(struct platform_device *, const char *, const char *);
+ 	int (*remove_slot)(struct platform_device *);
+ };
+@@ -82,8 +83,14 @@ struct sdhci_acpi_host {
+ 	const struct sdhci_acpi_slot	*slot;
+ 	struct platform_device		*pdev;
+ 	bool				use_runtime_pm;
++	unsigned long			private[0] ____cacheline_aligned;
+ };
  
++static inline void *sdhci_acpi_priv(struct sdhci_acpi_host *c)
++{
++	return (void *)c->private;
++}
++
+ static inline bool sdhci_acpi_flag(struct sdhci_acpi_host *c, unsigned int flag)
+ {
+ 	return c->slot && (c->slot->flags & flag);
+@@ -393,11 +400,13 @@ static const struct sdhci_acpi_slot *sdhci_acpi_get_slot(const char *hid,
+ static int sdhci_acpi_probe(struct platform_device *pdev)
+ {
+ 	struct device *dev = &pdev->dev;
++	const struct sdhci_acpi_slot *slot;
+ 	struct acpi_device *device, *child;
+ 	struct sdhci_acpi_host *c;
+ 	struct sdhci_host *host;
+ 	struct resource *iomem;
+ 	resource_size_t len;
++	size_t priv_size;
+ 	const char *hid;
+ 	const char *uid;
+ 	int err;
+@@ -409,6 +418,8 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
  	hid = acpi_device_hid(device);
--	uid = device->pnp.unique_id;
-+	uid = acpi_device_uid(device);
+ 	uid = acpi_device_uid(device);
  
++	slot = sdhci_acpi_get_slot(hid, uid);
++
  	/* Power on the SDHCI controller and its children */
  	acpi_device_fix_up_power(device);
+ 	if (!sdhci_acpi_no_fixup_child_power(hid, uid)) {
+@@ -431,13 +442,14 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+ 	if (!devm_request_mem_region(dev, iomem->start, len, dev_name(dev)))
+ 		return -ENOMEM;
+ 
+-	host = sdhci_alloc_host(dev, sizeof(struct sdhci_acpi_host));
++	priv_size = slot ? slot->priv_size : 0;
++	host = sdhci_alloc_host(dev, sizeof(struct sdhci_acpi_host) + priv_size);
+ 	if (IS_ERR(host))
+ 		return PTR_ERR(host);
+ 
+ 	c = sdhci_priv(host);
+ 	c->host = host;
+-	c->slot = sdhci_acpi_get_slot(hid, uid);
++	c->slot = slot;
+ 	c->pdev = pdev;
+ 	c->use_runtime_pm = sdhci_acpi_flag(c, SDHCI_ACPI_RUNTIME_PM);
+ 
 -- 
 1.9.1
 
