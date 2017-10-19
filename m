@@ -1,91 +1,115 @@
-From: Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>
-Subject: Re: [PATCH 1/2] mmc: renesas_sdhi: fix swiotlb buffer is full
-Date: Thu, 19 Oct 2017 10:34:02 +0200
-Message-ID: <CAMuHMdUs+dLq8LJTJoUQEUzJAKXCfD0JBtVnHPyN6XdppVy5qQ@mail.gmail.com>
-References: <1508225421-25405-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-	<1508225421-25405-2-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-	<CAMuHMdXyY-gvQGn2UxhUDsdhdWUMmTA80z73PF14otvcKuTMaw@mail.gmail.com>
-	<20171019002412.GA14493@localhost.localdomain>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: sdhci-cadence: use bitfield access macros for
+ cleanup
+Date: Thu, 19 Oct 2017 11:37:53 +0300
+Message-ID: <2ed276f9-5869-93ed-766f-a122f4942591@intel.com>
+References: <1507899031-1245-1-git-send-email-yamada.masahiro@socionext.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <20171019002412.GA14493-bi+AKbBUZKY6gyzm1THtWbp2dZbC/Bob@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Konrad Rzeszutek Wilk <konrad-Gq0aWv8utHQdnm+yROfE0A@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux-Renesas <linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1507899031-1245-1-git-send-email-yamada.masahiro@socionext.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Masahiro Yamada <yamada.masahiro@socionext.com>, linux-mmc@vger.kernel.org
+Cc: Piotr Sroka <piotrs@cadence.com>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Konrad,
+On 13/10/17 15:50, Masahiro Yamada wrote:
+> Accessing register fields generally need mask and shift part.
+> Defining them separately, like SDHCI_CDNS_HRS06_TUNE_{SHIFT,MASK},
+> is tedious.
+> 
+> Register fields can be always defined by GENMASK (or, BIT if it it
+> a single bit).  They are nicely handled by FIELD_* macros.
+> 
+> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 
-On Thu, Oct 19, 2017 at 2:24 AM, Konrad Rzeszutek Wilk
-<konrad-Gq0aWv8utHQdnm+yROfE0A@public.gmane.org> wrote:
-> On Tue, Oct 17, 2017 at 10:02:50AM +0200, Geert Uytterhoeven wrote:
->> On Tue, Oct 17, 2017 at 9:30 AM, Yoshihiro Shimoda
->> <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org> wrote:
->> > Since the commit de3ee99b097d ("mmc: Delete bounce buffer handling")
->> > deletes the bounce buffer handling, a request data size will be referred
->> > to max_{req,seg}_size instead of MMC_QUEUE_BOUNCESZ (64k bytes).
->> >
->> > In other hand, renesas_sdhi_internal_dmac.c will set very big value of
->> > max_{req,seg}_size because the max_blk_count is set to 0xffffffff.
->> > And then, "swiotlb buffer is full" happens because swiotlb can handle
->> > a memory size up to 256k bytes only (IO_TLB_SEGSIZE = 128 and
->> > IO_TLB_SHIFT = 11).
->> >
->> > So, this patch fixes the issue to set max_blk_count to 512. Then,
->> > the max_{req,seg}_size will be set to 256k bytes.
->> >
->> > Reported-by: Dirk Behme <dirk.behme-V5te9oGctAVWk0Htik3J/w@public.gmane.org>
->> > Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
->>
->> Thanks for your patch!
->>
->> > ---
->> >  drivers/mmc/host/renesas_sdhi_internal_dmac.c | 5 +++--
->> >  1 file changed, 3 insertions(+), 2 deletions(-)
->> >
->> > diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
->> > index f905f23..6c9b4b2 100644
->> > --- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
->> > +++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
->> > @@ -80,8 +80,9 @@
->> >         .scc_offset     = 0x1000,
->> >         .taps           = rcar_gen3_scc_taps,
->> >         .taps_num       = ARRAY_SIZE(rcar_gen3_scc_taps),
->> > -       /* Gen3 SDHI DMAC can handle 0xffffffff blk count, but seg = 1 */
->> > -       .max_blk_count  = 0xffffffff,
->> > +       /* The swiotlb can handle memory size up to 256 kbytes for now. */
->> > +       .max_blk_count  = 512,
->>
->> Fixing this in the individual drivers feels like the wrong solution to me.
->>
->> iommu: Is there a better (generic) way to handle this?
->
-> Yes. See 7453c549f5f6485c0d79cad7844870dcc7d1b34d, aka swiotlb_max_segment
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Thanks for the pointer!
-
-While I agree this can be used to avoid the swiotlb buffer full issue,
-I believe it is a suboptimal solution if the device actually uses an IOMMU.
-It limits the mapping size if CONFIG_SWIOTLB=y, which is always the
-case for arm/arm64 these days.
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+> ---
+> 
+>  drivers/mmc/host/sdhci-cadence.c | 28 ++++++++++++++--------------
+>  1 file changed, 14 insertions(+), 14 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
+> index 56529c3..0f589e2 100644
+> --- a/drivers/mmc/host/sdhci-cadence.c
+> +++ b/drivers/mmc/host/sdhci-cadence.c
+> @@ -13,6 +13,7 @@
+>   * GNU General Public License for more details.
+>   */
+>  
+> +#include <linux/bitfield.h>
+>  #include <linux/bitops.h>
+>  #include <linux/iopoll.h>
+>  #include <linux/module.h>
+> @@ -27,15 +28,14 @@
+>  #define   SDHCI_CDNS_HRS04_ACK			BIT(26)
+>  #define   SDHCI_CDNS_HRS04_RD			BIT(25)
+>  #define   SDHCI_CDNS_HRS04_WR			BIT(24)
+> -#define   SDHCI_CDNS_HRS04_RDATA_SHIFT		16
+> -#define   SDHCI_CDNS_HRS04_WDATA_SHIFT		8
+> -#define   SDHCI_CDNS_HRS04_ADDR_SHIFT		0
+> +#define   SDHCI_CDNS_HRS04_RDATA		GENMASK(23, 16)
+> +#define   SDHCI_CDNS_HRS04_WDATA		GENMASK(15, 8)
+> +#define   SDHCI_CDNS_HRS04_ADDR			GENMASK(5, 0)
+>  
+>  #define SDHCI_CDNS_HRS06		0x18		/* eMMC control */
+>  #define   SDHCI_CDNS_HRS06_TUNE_UP		BIT(15)
+> -#define   SDHCI_CDNS_HRS06_TUNE_SHIFT		8
+> -#define   SDHCI_CDNS_HRS06_TUNE_MASK		0x3f
+> -#define   SDHCI_CDNS_HRS06_MODE_MASK		0x7
+> +#define   SDHCI_CDNS_HRS06_TUNE			GENMASK(13, 8)
+> +#define   SDHCI_CDNS_HRS06_MODE			GENMASK(2, 0)
+>  #define   SDHCI_CDNS_HRS06_MODE_SD		0x0
+>  #define   SDHCI_CDNS_HRS06_MODE_MMC_SDR		0x2
+>  #define   SDHCI_CDNS_HRS06_MODE_MMC_DDR		0x3
+> @@ -105,8 +105,8 @@ static int sdhci_cdns_write_phy_reg(struct sdhci_cdns_priv *priv,
+>  	u32 tmp;
+>  	int ret;
+>  
+> -	tmp = (data << SDHCI_CDNS_HRS04_WDATA_SHIFT) |
+> -	      (addr << SDHCI_CDNS_HRS04_ADDR_SHIFT);
+> +	tmp = FIELD_PREP(SDHCI_CDNS_HRS04_WDATA, data) |
+> +	      FIELD_PREP(SDHCI_CDNS_HRS04_ADDR, addr);
+>  	writel(tmp, reg);
+>  
+>  	tmp |= SDHCI_CDNS_HRS04_WR;
+> @@ -189,8 +189,8 @@ static void sdhci_cdns_set_emmc_mode(struct sdhci_cdns_priv *priv, u32 mode)
+>  
+>  	/* The speed mode for eMMC is selected by HRS06 register */
+>  	tmp = readl(priv->hrs_addr + SDHCI_CDNS_HRS06);
+> -	tmp &= ~SDHCI_CDNS_HRS06_MODE_MASK;
+> -	tmp |= mode;
+> +	tmp &= ~SDHCI_CDNS_HRS06_MODE;
+> +	tmp |= FIELD_PREP(SDHCI_CDNS_HRS06_MODE, mode);
+>  	writel(tmp, priv->hrs_addr + SDHCI_CDNS_HRS06);
+>  }
+>  
+> @@ -199,7 +199,7 @@ static u32 sdhci_cdns_get_emmc_mode(struct sdhci_cdns_priv *priv)
+>  	u32 tmp;
+>  
+>  	tmp = readl(priv->hrs_addr + SDHCI_CDNS_HRS06);
+> -	return tmp & SDHCI_CDNS_HRS06_MODE_MASK;
+> +	return FIELD_GET(SDHCI_CDNS_HRS06_MODE, tmp);
+>  }
+>  
+>  static void sdhci_cdns_set_uhs_signaling(struct sdhci_host *host,
+> @@ -254,12 +254,12 @@ static int sdhci_cdns_set_tune_val(struct sdhci_host *host, unsigned int val)
+>  	void __iomem *reg = priv->hrs_addr + SDHCI_CDNS_HRS06;
+>  	u32 tmp;
+>  
+> -	if (WARN_ON(val > SDHCI_CDNS_HRS06_TUNE_MASK))
+> +	if (WARN_ON(!FIELD_FIT(SDHCI_CDNS_HRS06_TUNE, val)))
+>  		return -EINVAL;
+>  
+>  	tmp = readl(reg);
+> -	tmp &= ~(SDHCI_CDNS_HRS06_TUNE_MASK << SDHCI_CDNS_HRS06_TUNE_SHIFT);
+> -	tmp |= val << SDHCI_CDNS_HRS06_TUNE_SHIFT;
+> +	tmp &= ~SDHCI_CDNS_HRS06_TUNE;
+> +	tmp |= FIELD_PREP(SDHCI_CDNS_HRS06_TUNE, val);
+>  	tmp |= SDHCI_CDNS_HRS06_TUNE_UP;
+>  	writel(tmp, reg);
+>  
+> 
