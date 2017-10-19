@@ -1,93 +1,73 @@
-From: Matthias Brugger <matthias.bgg@gmail.com>
-Subject: Re: [PATCH v5 02/12] mmc: mediatek: add support of mt2701/mt2712
-Date: Wed, 18 Oct 2017 12:00:31 +0200
-Message-ID: <42effbc0-ec5d-d99a-ca00-bdeaf3bcdc8d@gmail.com>
-References: <1507689696-25928-1-git-send-email-chaotian.jing@mediatek.com>
- <1507689696-25928-3-git-send-email-chaotian.jing@mediatek.com>
- <1508055978.8978.5.camel@mtksdaap41>
- <a506506b-a326-6d54-9827-4fd82680700d@gmail.com>
- <1508291195.30936.7.camel@mtksdaap41>
+From: Konrad Rzeszutek Wilk <konrad-Gq0aWv8utHQdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 1/2] mmc: renesas_sdhi: fix swiotlb buffer is full
+Date: Wed, 18 Oct 2017 20:24:14 -0400
+Message-ID: <20171019002412.GA14493@localhost.localdomain>
+References: <1508225421-25405-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+	<1508225421-25405-2-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+	<CAMuHMdXyY-gvQGn2UxhUDsdhdWUMmTA80z73PF14otvcKuTMaw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:47093 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1763301AbdJRKAe (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Oct 2017 06:00:34 -0400
-In-Reply-To: <1508291195.30936.7.camel@mtksdaap41>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CAMuHMdXyY-gvQGn2UxhUDsdhdWUMmTA80z73PF14otvcKuTMaw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux-Renesas <linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: CK Hu <ck.hu@mediatek.com>
-Cc: Chaotian Jing <chaotian.jing@mediatek.com>, Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, srv_heupstream@mediatek.com, Catalin Marinas <catalin.marinas@arm.com>, Linus Walleij <linus.walleij@linaro.org>, Will Deacon <will.deacon@arm.com>, linux-kernel@vger.kernel.org, yong mao <yong.mao@mediatek.com>, Phong LE <ple@baylibre.com>, Rob Herring <robh+dt@kernel.org>, linux-mediatek@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Heiner Kallweit <hkallweit1@gmail.com>
 
-
-
-On 10/18/2017 03:46 AM, CK Hu wrote:
-> Hi, Matthias:
+On Tue, Oct 17, 2017 at 10:02:50AM +0200, Geert Uytterhoeven wrote:
+> Hi Shimoda-san,
 > 
-> On Mon, 2017-10-16 at 09:49 +0200, Matthias Brugger wrote:
->>
->> On 10/15/2017 10:26 AM, CK Hu wrote:
->>> Hi, Chaotian:
->>>
->>> On Wed, 2017-10-11 at 10:41 +0800, Chaotian Jing wrote:
->>>> mt2701/mt2712 has 12bit clock div, which is not compatible with
->>>> mt8135/mt8173. and, some additional features will be added in
->>>> mt2701/mt2712, so that need distinguish it by comatibale name.
->>>>
->>>> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
->>>> ---
->>>>    drivers/mmc/host/mtk-sd.c | 82 +++++++++++++++++++++++++++++++++++++++--------
->>>>    1 file changed, 69 insertions(+), 13 deletions(-)
->>>>
->>>> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
->>>> index 267f7ab..643c795 100644
->>>> --- a/drivers/mmc/host/mtk-sd.c
->>>> +++ b/drivers/mmc/host/mtk-sd.c
->> [...]
->>>> @@ -350,6 +358,31 @@ struct msdc_host {
->>>>    	struct msdc_tune_para saved_tune_para; /* tune result of CMD21/CMD19 */
->>>>    };
->>>>    
->>>> +static const struct mtk_mmc_compatible mt8135_compat = {
->>>> +	.clk_div_bits = 8,
->>>> +};
->>>> +
->>>> +static const struct mtk_mmc_compatible mt8173_compat = {
->>>> +	.clk_div_bits = 8,
->>>> +};
->>>> +
->>>> +static const struct mtk_mmc_compatible mt2701_compat = {
->>>> +	.clk_div_bits = 12,
->>>> +};
->>>> +
->>>> +static const struct mtk_mmc_compatible mt2712_compat = {
->>>> +	.clk_div_bits = 12,
->>>> +};
->>>> +
->>>> +static const struct of_device_id msdc_of_ids[] = {
->>>> +	{ .compatible = "mediatek,mt8135-mmc", .data = &mt8135_compat},
->>>> +	{ .compatible = "mediatek,mt8173-mmc", .data = &mt8173_compat},
->>>
->>> Because mt8135_compat is equal to mt8173_compat, so I think the
->>> compatible of "mediatek,mt8173-mmc" is redundant. You could just keep
->>> compatible of "mediatek,mt8135-mmc" in driver, and use
->>> "mediatek,mt8135-mmc" for both mt8135.dtsi and mt8173.dtsi.
->>>
->>
->> Well thing is, that in the follow-up patches, new data types get added to the
->> different compat structures and in the end all four a different.
+> CC iommu
 > 
-> You are right, these modification are necessary. If so, adding
-> "mediatek,mt8173-mmc" in the patch of "add support of mt2701/mt2712"
-> looks irrelevant. Maybe the title should be modified as "add support of
-> mt8173/mt2701/mt2712" or move mt8173 part to another patch.
+> On Tue, Oct 17, 2017 at 9:30 AM, Yoshihiro Shimoda
+> <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org> wrote:
+> > Since the commit de3ee99b097d ("mmc: Delete bounce buffer handling")
+> > deletes the bounce buffer handling, a request data size will be referred
+> > to max_{req,seg}_size instead of MMC_QUEUE_BOUNCESZ (64k bytes).
+> >
+> > In other hand, renesas_sdhi_internal_dmac.c will set very big value of
+> > max_{req,seg}_size because the max_blk_count is set to 0xffffffff.
+> > And then, "swiotlb buffer is full" happens because swiotlb can handle
+> > a memory size up to 256k bytes only (IO_TLB_SEGSIZE = 128 and
+> > IO_TLB_SHIFT = 11).
+> >
+> > So, this patch fixes the issue to set max_blk_count to 512. Then,
+> > the max_{req,seg}_size will be set to 256k bytes.
+> >
+> > Reported-by: Dirk Behme <dirk.behme-V5te9oGctAVWk0Htik3J/w@public.gmane.org>
+> > Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
 > 
+> Thanks for your patch!
+> 
+> > ---
+> >  drivers/mmc/host/renesas_sdhi_internal_dmac.c | 5 +++--
+> >  1 file changed, 3 insertions(+), 2 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+> > index f905f23..6c9b4b2 100644
+> > --- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+> > +++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+> > @@ -80,8 +80,9 @@
+> >         .scc_offset     = 0x1000,
+> >         .taps           = rcar_gen3_scc_taps,
+> >         .taps_num       = ARRAY_SIZE(rcar_gen3_scc_taps),
+> > -       /* Gen3 SDHI DMAC can handle 0xffffffff blk count, but seg = 1 */
+> > -       .max_blk_count  = 0xffffffff,
+> > +       /* The swiotlb can handle memory size up to 256 kbytes for now. */
+> > +       .max_blk_count  = 512,
+> 
+> Fixing this in the individual drivers feels like the wrong solution to me.
+> 
+> iommu: Is there a better (generic) way to handle this?
 
-I would prefer to split it in two patches. But I leave that to Ulf to decide 
-what he prefers.
-
-Regards,
-Matthias
+Yes. See 7453c549f5f6485c0d79cad7844870dcc7d1b34d, aka swiotlb_max_segment
