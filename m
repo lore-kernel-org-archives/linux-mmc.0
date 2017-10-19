@@ -1,96 +1,43 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 3/4] mmc: sdhci-acpi: Let devices define their own private data
-Date: Thu, 19 Oct 2017 13:41:45 +0300
-Message-ID: <1508409706-27026-4-git-send-email-adrian.hunter@intel.com>
-References: <1508409706-27026-1-git-send-email-adrian.hunter@intel.com>
+From: Carlo Caione <carlo@endlessm.com>
+Subject: Re: SD card reader problems on Cherry-Trail
+Date: Thu, 19 Oct 2017 12:19:34 +0100
+Message-ID: <CAL9uMOE=jkDYu0rSDNMQa__2thnOu+T9UvU7SD6MqRmr_9X6PQ@mail.gmail.com>
+References: <CAL9uMOGXVgHP8iNdZbEWv3pSRjZ++hhswu6c+ZiPydGiw9SPEw@mail.gmail.com>
+ <CAPDyKFpoHGKGhDyYRTdWMPTxOM0GLNDQjMTDThX5mvFDyVTwnw@mail.gmail.com>
+ <CAL9uMOGog77MDUhVisEDcbSFXANGNfzecee1PzgXdwvZwexmUA@mail.gmail.com>
+ <32d4293d-7e9d-8f0d-966f-235a8283182f@intel.com> <CAL9uMOHbx4+bEfaiX-NP5q_OzUqbo0O-fb4_oSPQGs0h4tOdtQ@mail.gmail.com>
+ <CAL9uMOEk83d2Ua6v9FSKPBpb33KGEj6ExYo_FBiC_sF1VPkMgQ@mail.gmail.com>
+ <17f28f0f-ab5b-3095-4d52-8908bee409b4@intel.com> <CAL9uMOGxtTv0xogL14njR=+-d-4OsAbu=v=ZK4pNiSNjt0=Hdw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:21701 "EHLO mga01.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751897AbdJSKsl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 19 Oct 2017 06:48:41 -0400
-In-Reply-To: <1508409706-27026-1-git-send-email-adrian.hunter@intel.com>
+Received: from mail-ua0-f181.google.com ([209.85.217.181]:51463 "EHLO
+        mail-ua0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751915AbdJSLTf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Oct 2017 07:19:35 -0400
+Received: by mail-ua0-f181.google.com with SMTP id 47so5710737uas.8
+        for <linux-mmc@vger.kernel.org>; Thu, 19 Oct 2017 04:19:35 -0700 (PDT)
+In-Reply-To: <CAL9uMOGxtTv0xogL14njR=+-d-4OsAbu=v=ZK4pNiSNjt0=Hdw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Linux Upstreaming Team <linux@endlessm.com>
 
-Let devices define their own private data to facilitate device-specific
-operations. The size of the private structure is specified in the
-sdhci_acpi_slot structure, then sdhci_acpi_probe() will allocate extra
-space for it, and sdhci_acpi_priv() can be used to get a reference to it.
+On Tue, Oct 10, 2017 at 10:31 AM, Carlo Caione <carlo@endlessm.com> wrote:
+> On Tue, Oct 10, 2017 at 11:22 AM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> On 10/10/17 12:22, Carlo Caione wrote:
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/sdhci-acpi.c | 16 ++++++++++++++--
- 1 file changed, 14 insertions(+), 2 deletions(-)
+/cut
+>> Yes, but it is complicated so I don't have a patch ready just yet.
+>
+> Alright, can you explain a bit what's the problem?
+>
+> Thank you for looking into this,
 
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index 640be5b618fc..5bb5880403b2 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -73,6 +73,7 @@ struct sdhci_acpi_slot {
- 	unsigned int	caps2;
- 	mmc_pm_flag_t	pm_caps;
- 	unsigned int	flags;
-+	size_t		priv_size;
- 	int (*probe_slot)(struct platform_device *, const char *, const char *);
- 	int (*remove_slot)(struct platform_device *);
- };
-@@ -82,8 +83,14 @@ struct sdhci_acpi_host {
- 	const struct sdhci_acpi_slot	*slot;
- 	struct platform_device		*pdev;
- 	bool				use_runtime_pm;
-+	unsigned long			private[0] ____cacheline_aligned;
- };
- 
-+static inline void *sdhci_acpi_priv(struct sdhci_acpi_host *c)
-+{
-+	return (void *)c->private;
-+}
-+
- static inline bool sdhci_acpi_flag(struct sdhci_acpi_host *c, unsigned int flag)
- {
- 	return c->slot && (c->slot->flags & flag);
-@@ -393,11 +400,13 @@ static const struct sdhci_acpi_slot *sdhci_acpi_get_slot(const char *hid,
- static int sdhci_acpi_probe(struct platform_device *pdev)
- {
- 	struct device *dev = &pdev->dev;
-+	const struct sdhci_acpi_slot *slot;
- 	struct acpi_device *device, *child;
- 	struct sdhci_acpi_host *c;
- 	struct sdhci_host *host;
- 	struct resource *iomem;
- 	resource_size_t len;
-+	size_t priv_size;
- 	const char *hid;
- 	const char *uid;
- 	int err;
-@@ -409,6 +418,8 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
- 	hid = acpi_device_hid(device);
- 	uid = acpi_device_uid(device);
- 
-+	slot = sdhci_acpi_get_slot(hid, uid);
-+
- 	/* Power on the SDHCI controller and its children */
- 	acpi_device_fix_up_power(device);
- 	if (!sdhci_acpi_no_fixup_child_power(hid, uid)) {
-@@ -431,13 +442,14 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
- 	if (!devm_request_mem_region(dev, iomem->start, len, dev_name(dev)))
- 		return -ENOMEM;
- 
--	host = sdhci_alloc_host(dev, sizeof(struct sdhci_acpi_host));
-+	priv_size = slot ? slot->priv_size : 0;
-+	host = sdhci_alloc_host(dev, sizeof(struct sdhci_acpi_host) + priv_size);
- 	if (IS_ERR(host))
- 		return PTR_ERR(host);
- 
- 	c = sdhci_priv(host);
- 	c->host = host;
--	c->slot = sdhci_acpi_get_slot(hid, uid);
-+	c->slot = slot;
- 	c->pdev = pdev;
- 	c->use_runtime_pm = sdhci_acpi_flag(c, SDHCI_ACPI_RUNTIME_PM);
- 
+Hey Adrian,
+any news (or just some more information) about this issue?
+
+Cheers,
+
 -- 
-1.9.1
-
+Carlo Caione  |  +39.340.80.30.096  |  Endless
