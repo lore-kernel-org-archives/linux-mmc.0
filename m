@@ -1,88 +1,175 @@
-From: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Subject: RE: [PATCH 1/2] mmc: renesas_sdhi: fix swiotlb buffer is full
-Date: Thu, 19 Oct 2017 11:39:08 +0000
-Message-ID: <TY1PR06MB09928E11C2AFFD55EF68961CD8420@TY1PR06MB0992.apcprd06.prod.outlook.com>
-References: <1508225421-25405-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
- <1508225421-25405-2-git-send-email-yoshihiro.shimoda.uh@renesas.com>
- <CAMuHMdXyY-gvQGn2UxhUDsdhdWUMmTA80z73PF14otvcKuTMaw@mail.gmail.com>
- <20171019002412.GA14493@localhost.localdomain>
- <CAMuHMdUs+dLq8LJTJoUQEUzJAKXCfD0JBtVnHPyN6XdppVy5qQ@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V8 00/14] mmc: Add Command Queue support
+Date: Thu, 19 Oct 2017 14:44:03 +0300
+Message-ID: <b594f4e0-06ea-c9fc-fc2d-dd93bc401c6f@intel.com>
+References: <1505302814-19313-1-git-send-email-adrian.hunter@intel.com>
+ <CAPDyKFr-XbMOmOkz1yXwmG1t=77eSsUO2kU7kKV0V1wrfcmWKg@mail.gmail.com>
+ <2cd4c5fc-cc04-ba44-bea6-4547d84de3e2@intel.com>
+ <CAPDyKFqE7UYOYrjykpV0GnQ+hg2oGXpALgn_8yKsQk19Y4nmSQ@mail.gmail.com>
+ <9a789f9b-a8c4-8ae7-8f93-0d76f674bded@intel.com>
+ <CAPDyKFoLa_aX3j693_tfkuaSKNvGB-ERdf2-9r4iF-+c0NnP9g@mail.gmail.com>
+ <d41eee41-796a-db93-d388-b36123ecc364@intel.com>
+ <CAPDyKFrMqXWagkPOtPk-PBThSUrSogUP=iL+9XeyD9E8qkp=bw@mail.gmail.com>
+ <1b8bec1b-7340-cb89-65c0-e09b17037ca4@intel.com>
+ <CAPDyKFqoMVemtCSHBzfK5YTqLsGEr_v_z7o=HOKCwEdVz0tH_w@mail.gmail.com>
+ <376e4bb9-cc86-36ae-91b6-48fef69e059a@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <CAMuHMdUs+dLq8LJTJoUQEUzJAKXCfD0JBtVnHPyN6XdppVy5qQ@mail.gmail.com>
-Content-Language: ja-JP
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Geert Uytterhoeven <geert@linux-m68k.org>, Konrad Rzeszutek Wilk <konrad@darnok.org>
-Cc: Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linux MMC List <linux-mmc@vger.kernel.org>, "iommu@lists.linux-foundation.org" <iommu@lists.linux-foundation.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga05.intel.com ([192.55.52.43]:63450 "EHLO mga05.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752927AbdJSLu7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 19 Oct 2017 07:50:59 -0400
+In-Reply-To: <376e4bb9-cc86-36ae-91b6-48fef69e059a@intel.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 
-SGkgR2VlcnQtc2FuLCBLb25yYWQtc2FuLA0KDQo+IEZyb206IEdlZXJ0IFV5dHRlcmhvZXZlbiwg
-U2VudDogVGh1cnNkYXksIE9jdG9iZXIgMTksIDIwMTcgNTozNCBQTQ0KPiANCj4gSGkgS29ucmFk
-LA0KPiANCj4gT24gVGh1LCBPY3QgMTksIDIwMTcgYXQgMjoyNCBBTSwgS29ucmFkIFJ6ZXN6dXRl
-ayBXaWxrDQo+IDxrb25yYWRAZGFybm9rLm9yZz4gd3JvdGU6DQo+ID4gT24gVHVlLCBPY3QgMTcs
-IDIwMTcgYXQgMTA6MDI6NTBBTSArMDIwMCwgR2VlcnQgVXl0dGVyaG9ldmVuIHdyb3RlOg0KPiA+
-PiBPbiBUdWUsIE9jdCAxNywgMjAxNyBhdCA5OjMwIEFNLCBZb3NoaWhpcm8gU2hpbW9kYQ0KPiA+
-PiA8eW9zaGloaXJvLnNoaW1vZGEudWhAcmVuZXNhcy5jb20+IHdyb3RlOg0KPiA+PiA+IFNpbmNl
-IHRoZSBjb21taXQgZGUzZWU5OWIwOTdkICgibW1jOiBEZWxldGUgYm91bmNlIGJ1ZmZlciBoYW5k
-bGluZyIpDQo+ID4+ID4gZGVsZXRlcyB0aGUgYm91bmNlIGJ1ZmZlciBoYW5kbGluZywgYSByZXF1
-ZXN0IGRhdGEgc2l6ZSB3aWxsIGJlIHJlZmVycmVkDQo+ID4+ID4gdG8gbWF4X3tyZXEsc2VnfV9z
-aXplIGluc3RlYWQgb2YgTU1DX1FVRVVFX0JPVU5DRVNaICg2NGsgYnl0ZXMpLg0KPiA+PiA+DQo+
-ID4+ID4gSW4gb3RoZXIgaGFuZCwgcmVuZXNhc19zZGhpX2ludGVybmFsX2RtYWMuYyB3aWxsIHNl
-dCB2ZXJ5IGJpZyB2YWx1ZSBvZg0KPiA+PiA+IG1heF97cmVxLHNlZ31fc2l6ZSBiZWNhdXNlIHRo
-ZSBtYXhfYmxrX2NvdW50IGlzIHNldCB0byAweGZmZmZmZmZmLg0KPiA+PiA+IEFuZCB0aGVuLCAi
-c3dpb3RsYiBidWZmZXIgaXMgZnVsbCIgaGFwcGVucyBiZWNhdXNlIHN3aW90bGIgY2FuIGhhbmRs
-ZQ0KPiA+PiA+IGEgbWVtb3J5IHNpemUgdXAgdG8gMjU2ayBieXRlcyBvbmx5IChJT19UTEJfU0VH
-U0laRSA9IDEyOCBhbmQNCj4gPj4gPiBJT19UTEJfU0hJRlQgPSAxMSkuDQo+ID4+ID4NCj4gPj4g
-PiBTbywgdGhpcyBwYXRjaCBmaXhlcyB0aGUgaXNzdWUgdG8gc2V0IG1heF9ibGtfY291bnQgdG8g
-NTEyLiBUaGVuLA0KPiA+PiA+IHRoZSBtYXhfe3JlcSxzZWd9X3NpemUgd2lsbCBiZSBzZXQgdG8g
-MjU2ayBieXRlcy4NCj4gPj4gPg0KPiA+PiA+IFJlcG9ydGVkLWJ5OiBEaXJrIEJlaG1lIDxkaXJr
-LmJlaG1lQGRlLmJvc2NoLmNvbT4NCj4gPj4gPiBTaWduZWQtb2ZmLWJ5OiBZb3NoaWhpcm8gU2hp
-bW9kYSA8eW9zaGloaXJvLnNoaW1vZGEudWhAcmVuZXNhcy5jb20+DQo+ID4+DQo+ID4+IFRoYW5r
-cyBmb3IgeW91ciBwYXRjaCENCj4gPj4NCj4gPj4gPiAtLS0NCj4gPj4gPiAgZHJpdmVycy9tbWMv
-aG9zdC9yZW5lc2FzX3NkaGlfaW50ZXJuYWxfZG1hYy5jIHwgNSArKystLQ0KPiA+PiA+ICAxIGZp
-bGUgY2hhbmdlZCwgMyBpbnNlcnRpb25zKCspLCAyIGRlbGV0aW9ucygtKQ0KPiA+PiA+DQo+ID4+
-ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3QvcmVuZXNhc19zZGhpX2ludGVybmFsX2Rt
-YWMuYyBiL2RyaXZlcnMvbW1jL2hvc3QvcmVuZXNhc19zZGhpX2ludGVybmFsX2RtYWMuYw0KPiA+
-PiA+IGluZGV4IGY5MDVmMjMuLjZjOWI0YjIgMTAwNjQ0DQo+ID4+ID4gLS0tIGEvZHJpdmVycy9t
-bWMvaG9zdC9yZW5lc2FzX3NkaGlfaW50ZXJuYWxfZG1hYy5jDQo+ID4+ID4gKysrIGIvZHJpdmVy
-cy9tbWMvaG9zdC9yZW5lc2FzX3NkaGlfaW50ZXJuYWxfZG1hYy5jDQo+ID4+ID4gQEAgLTgwLDgg
-KzgwLDkgQEANCj4gPj4gPiAgICAgICAgIC5zY2Nfb2Zmc2V0ICAgICA9IDB4MTAwMCwNCj4gPj4g
-PiAgICAgICAgIC50YXBzICAgICAgICAgICA9IHJjYXJfZ2VuM19zY2NfdGFwcywNCj4gPj4gPiAg
-ICAgICAgIC50YXBzX251bSAgICAgICA9IEFSUkFZX1NJWkUocmNhcl9nZW4zX3NjY190YXBzKSwN
-Cj4gPj4gPiAtICAgICAgIC8qIEdlbjMgU0RISSBETUFDIGNhbiBoYW5kbGUgMHhmZmZmZmZmZiBi
-bGsgY291bnQsIGJ1dCBzZWcgPSAxICovDQo+ID4+ID4gLSAgICAgICAubWF4X2Jsa19jb3VudCAg
-PSAweGZmZmZmZmZmLA0KPiA+PiA+ICsgICAgICAgLyogVGhlIHN3aW90bGIgY2FuIGhhbmRsZSBt
-ZW1vcnkgc2l6ZSB1cCB0byAyNTYga2J5dGVzIGZvciBub3cuICovDQo+ID4+ID4gKyAgICAgICAu
-bWF4X2Jsa19jb3VudCAgPSA1MTIsDQo+ID4+DQo+ID4+IEZpeGluZyB0aGlzIGluIHRoZSBpbmRp
-dmlkdWFsIGRyaXZlcnMgZmVlbHMgbGlrZSB0aGUgd3Jvbmcgc29sdXRpb24gdG8gbWUuDQo+ID4+
-DQo+ID4+IGlvbW11OiBJcyB0aGVyZSBhIGJldHRlciAoZ2VuZXJpYykgd2F5IHRvIGhhbmRsZSB0
-aGlzPw0KPiA+DQo+ID4gWWVzLiBTZWUgNzQ1M2M1NDlmNWY2NDg1YzBkNzljYWQ3ODQ0ODcwZGNj
-N2QxYjM0ZCwgYWthIHN3aW90bGJfbWF4X3NlZ21lbnQNCj4gDQo+IFRoYW5rcyBmb3IgdGhlIHBv
-aW50ZXIhDQo+IA0KPiBXaGlsZSBJIGFncmVlIHRoaXMgY2FuIGJlIHVzZWQgdG8gYXZvaWQgdGhl
-IHN3aW90bGIgYnVmZmVyIGZ1bGwgaXNzdWUsDQo+IEkgYmVsaWV2ZSBpdCBpcyBhIHN1Ym9wdGlt
-YWwgc29sdXRpb24gaWYgdGhlIGRldmljZSBhY3R1YWxseSB1c2VzIGFuIElPTU1VLg0KPiBJdCBs
-aW1pdHMgdGhlIG1hcHBpbmcgc2l6ZSBpZiBDT05GSUdfU1dJT1RMQj15LCB3aGljaCBpcyBhbHdh
-eXMgdGhlDQo+IGNhc2UgZm9yIGFybS9hcm02NCB0aGVzZSBkYXlzLg0KDQpJJ20gYWZyYWlkIGJ1
-dCBJIG1pc3VuZGVyc3Rvb2QgdGhpcyBBUEkncyBzcGVjIHdoZW4gSSByZWFkIGl0IGF0IGZpcnN0
-Lg0KQWZ0ZXIgSSB0cmllZCB0byB1c2UgaXQsIEkgZm91bmQgdGhlIEFQSSBjYW5ub3QgYmUgdXNl
-ZCBmb3IgYSB3b3JrYXJvdW5kIGJlY2F1c2UNCnRoaXMgQVBJIHJldHVybnMgdG90YWwgc2l6ZSBv
-ZiBzd2lvdGxiLg0KDQpGb3IgZXhhbXBsZToNCiAtIFRoZSBzd2lvdGxiX21heF9zZWdtZW50KCkg
-cmV0dXJucyA2NE0gYnl0ZXMgZnJvbSB0aGUgQVBJIHdoZW4gYSBkZWZhdWx0IHNldHRpbmcuDQog
-IC0gSW4gdGhpcyBjYXNlLCB0aGUgbWF4aW11bSBzaXplIHBlciBhIG1hcCBpcyAyNTZrIGJ5dGVz
-Lg0KIC0gVGhlIHN3aW90bGJfbWF4X3NlZ21lbnQoKSByZXR1cm5zIDEyOE0gYnl0ZXMgZnJvbSB0
-aGUgQVBJIHdoZW4gSSBhZGRlZCBzd2lvdGxiPTY1NTM2DQogICBpbnRvIHRoZSBrZXJuZWwgcGFy
-YW1ldGVyIG9uIGFybTY0Lg0KICAtIEluIHRoaXMgY2FzZSwgdGhlIG1heGltdW0gc2l6ZSBwZXIg
-YSBtYXAgaXMgc3RpbGwgMjU2ayBieXRlcyBiZWNhdXNlDQogICAgdGhlIHN3aW90bGIgaGFzIGhh
-cmRjb2RlZCB0aGUgc2l6ZSBieSB0aGUgZm9sbG93aW5nIGNvZGU6DQogICAgIGh0dHBzOi8vZ2l0
-Lmtlcm5lbC5vcmcvcHViL3NjbS9saW51eC9rZXJuZWwvZ2l0L3RvcnZhbGRzL2xpbnV4LmdpdC90
-cmVlL2xpYi9zd2lvdGxiLmM/aD12NC4xNC1yYzUjbjI1NA0KDQpTbywgaG93IGRvIHdlIGhhbmRs
-ZSB0byByZXNvbHZlIChvciBhdm9pZCkgdGhlIGlzc3VlPw0KDQpCZXN0IHJlZ2FyZHMsDQpZb3No
-aWhpcm8gU2hpbW9kYQ0KDQo+IEdye29ldGplLGVldGluZ31zLA0KPiANCj4gICAgICAgICAgICAg
-ICAgICAgICAgICAgR2VlcnQNCj4gDQo+IC0tDQo+IEdlZXJ0IFV5dHRlcmhvZXZlbiAtLSBUaGVy
-ZSdzIGxvdHMgb2YgTGludXggYmV5b25kIGlhMzIgLS0gZ2VlcnRAbGludXgtbTY4ay5vcmcNCj4g
-DQo+IEluIHBlcnNvbmFsIGNvbnZlcnNhdGlvbnMgd2l0aCB0ZWNobmljYWwgcGVvcGxlLCBJIGNh
-bGwgbXlzZWxmIGEgaGFja2VyLiBCdXQNCj4gd2hlbiBJJ20gdGFsa2luZyB0byBqb3VybmFsaXN0
-cyBJIGp1c3Qgc2F5ICJwcm9ncmFtbWVyIiBvciBzb21ldGhpbmcgbGlrZSB0aGF0Lg0KPiAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgIC0tIExpbnVzIFRvcnZhbGRzDQo=
+On 18/10/17 09:16, Adrian Hunter wrote:
+> On 11/10/17 16:58, Ulf Hansson wrote:
+>> On 11 October 2017 at 14:58, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>> On 11/10/17 15:13, Ulf Hansson wrote:
+>>>> On 10 October 2017 at 15:31, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>>> On 10/10/17 16:08, Ulf Hansson wrote:
+>>>>>> [...]
+>>>>>>
+>>>>>>>>>>
+>>>>>>>>>> I have also run some test on my ux500 board and enabling the blkmq
+>>>>>>>>>> path via the new MMC Kconfig option. My idea was to run some iozone
+>>>>>>>>>> comparisons between the legacy path and the new blkmq path, but I just
+>>>>>>>>>> couldn't get to that point because of the following errors.
+>>>>>>>>>>
+>>>>>>>>>> I am using a Kingston 4GB SDHC card, which is detected and mounted
+>>>>>>>>>> nicely. However, when I decide to do some writes to the card I get the
+>>>>>>>>>> following errors.
+>>>>>>>>>>
+>>>>>>>>>> root@ME:/mnt/sdcard dd if=/dev/zero of=testfile bs=8192 count=5000 conv=fsync
+>>>>>>>>>> [  463.714294] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>>>> [  464.722656] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>>>> [  466.081481] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>>>> [  467.111236] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>>>> [  468.669647] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>>>> [  469.685699] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>>>> [  471.043334] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>>>> [  472.052337] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>>>> [  473.342651] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>>>> [  474.323760] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>>>> [  475.544769] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>>>> [  476.539031] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>>>> [  477.748474] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>>>> [  478.724182] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>>>>
+>>>>>>>>>> I haven't yet got the point of investigating this any further, and
+>>>>>>>>>> unfortunate I have a busy schedule with traveling next week. I will do
+>>>>>>>>>> my best to look into this as soon as I can.
+>>>>>>>>>>
+>>>>>>>>>> Perhaps you have some ideas?
+>>>>>>>>>
+>>>>>>>>> The behaviour depends on whether you have MMC_CAP_WAIT_WHILE_BUSY. Try
+>>>>>>>>> changing that and see if it makes a difference.
+>>>>>>>>
+>>>>>>>> Yes, it does! I disabled MMC_CAP_WAIT_WHILE_BUSY (and its
+>>>>>>>> corresponding code in mmci.c) and the errors goes away.
+>>>>>>>>
+>>>>>>>> When I use MMC_CAP_WAIT_WHILE_BUSY I get these problems:
+>>>>>>>>
+>>>>>>>> [  223.820983] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>> [  224.815795] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>> [  226.034881] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>> [  227.112884] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>> [  227.220275] mmc0: Card stuck in wrong state! mmcblk0 mmc_blk_card_stuck
+>>>>>>>> [  228.686798] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>> [  229.892150] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>> [  231.031890] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>> [  232.239013] mmci-pl18x 80126000.sdi0_per1: error during DMA transfer!
+>>>>>>>> 5000+0 records in
+>>>>>>>> 5000+0 records out
+>>>>>>>> root@ME:/mnt/sdcard
+>>>>>>>>
+>>>>>>>> I looked at the new blkmq code from patch v10 13/15. It seems like the
+>>>>>>>> MMC_CAP_WAIT_WHILE_BUSY is used to determine whether the async request
+>>>>>>>> mechanism should be used or not. Perhaps I didn't looked close enough,
+>>>>>>>> but maybe you could elaborate on why this seems to be the case!?
+>>>>>>>
+>>>>>>> MMC_CAP_WAIT_WHILE_BUSY is necessary because it means that a data transfer
+>>>>>>> request has finished when the host controller calls mmc_request_done(). i.e.
+>>>>>>> polling the card is not necessary.
+>>>>>>
+>>>>>> Well, that is a rather big change on its own. Earlier we polled with
+>>>>>> CMD13 to verify that the card has moved back to the transfer state, in
+>>>>>> case it was a write. And that was no matter of MMC_CAP_WAIT_WHILE_BUSY
+>>>>>> was set or not. Right!?
+>>>>>
+>>>>> Yes
+>>>>>
+>>>>>>
+>>>>>> I am not sure it's a good idea to bypass that validation, it seems
+>>>>>> fragile to rely only on the busy detection on DAT line for writes.
+>>>>>
+>>>>> Can you cite something from the specifications that backs that up, because I
+>>>>> couldn't find anything to suggest that CMD13 polling was expected.
+>>>>
+>>>> No I can't, but I don't see why that matters.
+>>>>
+>>>> My point is, if we want to go down that road by avoiding the CMD13
+>>>> polling, that needs to be a separate change, which we can test and
+>>>> confirm on its own.
+>>>>
+>>>>>
+>>>>>>
+>>>>>>>
+>>>>>>> Have you tried V9 or V10.  There was a fix in V9 related to calling
+>>>>>>> ->post_req() which could mess up DMA.
+>>>>>>
+>>>>>> I have used V10.
+>>>>>>
+>>>>>>>
+>>>>>>> The other thing that could go wrong with DMA is if it cannot accept
+>>>>>>> ->post_req() being called from mmc_request_done().
+>>>>>>
+>>>>>> I don't think mmci has a problem with that, however why do you want to
+>>>>>> do this? Wouldn't that defeat some of the benefits with the async
+>>>>>> request mechanism?
+>>>>>
+>>>>> Perhaps - but it would need to be tested.  If there are more requests
+>>>>> waiting, one optimization could be to defer ->post_req() until after the
+>>>>> next request is started.
+>>>>
+>>>> This is already proven, because this how the existing mmc async
+>>>> request mechanism works.
+>>>>
+>>>> In ->post_req() callbacks, host drivers may do dma_unmap_sg(), which
+>>>> is something that could be costly and therefore it's better to start a
+>>>> new request before, such these things can go on in parallel.
+>>>
+>>> OK I will make a patch that takes care of both issues.  That will also mean
+>>> the request is not completed in the ->done() callback because ->post_req()
+>>> must precede block layer completion.
+>>
+>> Right.
+>>
+>> Actually completing the request in the ->done callback, may still be
+>> possible, because in principle it only needs to inform the other
+>> prepared request that it may start, before it continues to post
+>> process/completes the current one.
+>>
+>> However, by looking at for example how mmci.c works, it actually holds
+>> its spinlock while it calls mmc_request_done(). The same spinlock is
+>> taken in the ->request() function, but not in the ->post_req()
+>> function. In other words, completing the request in the ->done()
+>> callback, would make mmci to keep the spinlock held throughout the
+>> post processing cycle, which then prevents the next request from being
+>> started.
+>>
+>> So my conclusion is, let's start a as you suggested, by not completing
+>> the request in ->done() as to maintain existing behavior. Then we can
+>> address optimizations on top, which very likely will involve doing
+>> changes to host drivers as well.
+> 
+> Have you tested the latest version now?
+> 
+
+Ping?
