@@ -1,41 +1,57 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/2] mmc: meson-mx-sdio: return correct error code
-Date: Fri, 20 Oct 2017 12:02:41 +0200
-Message-ID: <CAPDyKFpT78pzBAArnPT=poc6Mm5kQaTgnUKA2DyR3vm1wdfpBg@mail.gmail.com>
-References: <20171013111943.zyp5myiwb3pp56vh@mwanda>
+Subject: Re: [PATCH v3 1/3] dt-bindings: mmc: describe new eMMC binding for
+ fixed driver type
+Date: Fri, 20 Oct 2017 12:03:04 +0200
+Message-ID: <CAPDyKFoAwbki4LEy3UmNqFi9dNSBHeT4oRELw28+LSdaHW4_Bg@mail.gmail.com>
+References: <20171015124615.31391-1-wsa+renesas@sang-engineering.com> <20171015124615.31391-2-wsa+renesas@sang-engineering.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <kernel-janitors-owner@vger.kernel.org>
-In-Reply-To: <20171013111943.zyp5myiwb3pp56vh@mwanda>
-Sender: kernel-janitors-owner@vger.kernel.org
-To: Dan Carpenter <dan.carpenter@oracle.com>
-Cc: Carlo Caione <carlo@endlessm.com>, Carlo Caione <carlo@caione.org>, Kevin Hilman <khilman@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, kernel-janitors@vger.kernel.org
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20171015124615.31391-2-wsa+renesas@sang-engineering.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Simon Horman <horms@verge.net.au>, Rob Herring <robh@kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 13 October 2017 at 13:19, Dan Carpenter <dan.carpenter@oracle.com> wrote:
-> This has a copy and paste bug so we use "host->fixed_factor_clk" which
-> is a valid pointer instead of "host->cfg_div_clk" which holds the error
-> code.
+On 15 October 2017 at 14:46, Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
+> Some boards may have to use a certain driver type (or drive strength) to
+> achieve stable eMMC communication. Describe a binding to set this up via
+> DT.
 >
-> Fixes: 0aa0fb9cd239 ("mmc: meson-mx-sdio: Add a driver for the Amlogic Meson8 and Meson8b SoCs")
-> Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Acked-by: Rob Herring <robh@kernel.org>
 
 Thanks, applied for next!
 
 Kind regards
 Uffe
 
+> ---
 >
-> diff --git a/drivers/mmc/host/meson-mx-sdio.c b/drivers/mmc/host/meson-mx-sdio.c
-> index 19b499bbe691..dc30ed5e964b 100644
-> --- a/drivers/mmc/host/meson-mx-sdio.c
-> +++ b/drivers/mmc/host/meson-mx-sdio.c
-> @@ -621,7 +621,7 @@ static int meson_mx_mmc_register_clks(struct meson_mx_mmc_host *host)
->         host->cfg_div_clk = devm_clk_register(host->controller_dev,
->                                               &host->cfg_div.hw);
->         if (WARN_ON(PTR_ERR_OR_ZERO(host->cfg_div_clk)))
-> -               return PTR_ERR(host->fixed_factor_clk);
-> +               return PTR_ERR(host->cfg_div_clk);
+> no changes since v2
 >
->         return 0;
->  }
+>  Documentation/devicetree/bindings/mmc/mmc.txt | 3 +++
+>  1 file changed, 3 insertions(+)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+> index b32ade645ad97c..94a90b49a6925d 100644
+> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+> @@ -53,6 +53,9 @@ Optional properties:
+>  - no-sdio: controller is limited to send sdio cmd during initialization
+>  - no-sd: controller is limited to send sd cmd during initialization
+>  - no-mmc: controller is limited to send mmc cmd during initialization
+> +- fixed-emmc-driver-type: for non-removable eMMC, enforce this driver type.
+> +  The value <n> is the driver type as specified in the eMMC specification
+> +  (table 206 in spec version 5.1).
+>
+>  *NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
+>  polarity properties, we have to fix the meaning of the "normal" and "inverted"
+> --
+> 2.11.0
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
