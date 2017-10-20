@@ -1,101 +1,179 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 0/9] Enable dw-mmc multi-card support
-Date: Fri, 20 Oct 2017 23:06:07 +0900
-Message-ID: <f71d94dc-7277-8675-c21e-9c2ec77174e7@samsung.com>
+From: Liming Sun <lsun-VPRAkNaXOzVWk0Htik3J/w@public.gmane.org>
+Subject: RE: [PATCH 0/9] Enable dw-mmc multi-card support
+Date: Fri, 20 Oct 2017 15:07:40 +0000
+Message-ID: <AM2PR05MB07537D50A18D391CD2295D84A1430@AM2PR05MB0753.eurprd05.prod.outlook.com>
 References: <cover.1507315433.git.lsun@mellanox.com>
         <8e433531-8f67-d575-635e-c6ced29f6804@rock-chips.com>
         <CGME20171017155217epcas3p4de2f27b921ce77234a2d3e46e4b17473@epcas3p4.samsung.com>
         <AM2PR05MB07533A822C7CCBA7111FD58FA14C0@AM2PR05MB0753.eurprd05.prod.outlook.com>
+ <f71d94dc-7277-8675-c21e-9c2ec77174e7@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <AM2PR05MB07533A822C7CCBA7111FD58FA14C0@AM2PR05MB0753.eurprd05.prod.outlook.com>
-Content-language: en-US
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Liming Sun <lsun@mellanox.com>, Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Kukjin Kim <kgene@kernel.org>, Krzysztof Kozlowski <krzk@kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, Chris Metcalf <cmetcalf@mellanox.com>
+Content-Transfer-Encoding: base64
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <f71d94dc-7277-8675-c21e-9c2ec77174e7-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Content-Language: en-US
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Kukjin Kim <kgene-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Krzysztof Kozlowski <krzk-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Chris Metcalf <cmetcalf-VPRAkNaXOzVWk0Htik3J/w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Sorry for late this..
-
-On 10/18/2017 12:52 AM, Liming Sun wrote:
->>> Hrm.... it's so unlucky that your patchset comes a little late. As your patch 8 and 9 said, you need them to fix problem for multi-card support, so definitely there was no such use case, and even the code was buggy to support it right? That makes the code hard to read and maintain, so we decide to remove it.
-> 
-> Thanks for the feedback. Yes, earlier the multi-card support was buggy indeed. We spent some time to debug it and got it working.
-> 
->>> Havn'e check the databook for details yet, but I think it's ok to re-introduce multi-slot support if a real user benefits from it. But you need a new patch to silent the log "num-slots property not found, assuming 1 slot is available" as we removed all the num-slots from DT at that time.
-> 
-> The " num-slots property not found..." log message has already been removed by 8a629d26f back in 2016. Looks like we're good on this one. In dw_mci_probe (), it has code to check pdata->num_slots. If 0, the host->num_slots will be set to 1. So the logic of setting default num_slots seems already there. But correct me if I am wrong.
-> 
-> Thanks,
-> Liming
-> 
-> -----Original Message-----
-> From: Shawn Lin [mailto:shawn.lin@rock-chips.com] 
-> Sent: Monday, October 16, 2017 9:36 PM
-> To: Liming Sun <lsun@mellanox.com>; Jaehoon Chung <jh80.chung@samsung.com>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>; Rob Herring <robh+dt@kernel.org>; Mark Rutland <mark.rutland@arm.com>; Kukjin Kim <kgene@kernel.org>; Krzysztof Kozlowski <krzk@kernel.org>; shawn.lin@rock-chips.com; linux-mmc@vger.kernel.org; devicetree@vger.kernel.org; linux-kernel@vger.kernel.org; linux-arm-kernel@lists.infradead.org; linux-samsung-soc@vger.kernel.org
-> Subject: Re: [PATCH 0/9] Enable dw-mmc multi-card support
-> 
-> 
-> On 2017/10/7 3:21, Liming Sun wrote:
->> This series of commits enables the multi-card support for the dw-mmc 
->> controller. It includes two parts as below.
->>
->> The first part (patches 1-7) reverts the series of recent commits that 
->> removed the multi-card support with comments saying there was no such 
->> use case in the real world. Actually this feature is being used in 
->> Mellanox Bluefield SoC and has been requested by customers.
-> 
-> Hrm.... it's so unlucky that your patchset comes a little late. As your patch 8 and 9 said, you need them to fix problem for multi-card support, so definitely there was no such use case, and even the code was buggy to support it right? That makes the code hard to read and maintain, so we decide to remove it.
-
-Hmm..
-Well, if i missed your reply for my removing patch, it's my fault..but i didn't see any reply..
-At that time, we didn't see any usage and also now...
-
-Are there any patches for using multi slot? 
-e,g) device-tree file or your own driver
-
-If there are big benefits to revert them,  i don't want to back them..during almost 6 years, never use it..
-
-> 
->>
->> The second part (patches 8-9) fixes the DesignWare multi-card support 
->> according to the dw-mmc databook (synnopsys: DesignWare Cores Mobile 
->> Storage Host Databook, 2.70a). It has changes to set the card number 
->> into the CMD register to multiplex requests to different cards when 
->> working in SD_MMC_CEATA mode, set the CTYPE / CLKENA / CDTHRCTL 
->> registers properly according to the spec, and parse the per-card 
->> configuration to match the Linux Documentation 
->> (bindings/mmc/synopsys-dw-mshc.txt).
-
-the second part seems that it's only support since v2.70a..?
-
-> 
-> Havn'e check the databook for details yet, but I think it's ok to re-introduce multi-slot support if a real user benefits from it. But you need a new patch to silent the log "num-slots property not found, assuming 1 slot is available" as we removed all the num-slots from DT at that time.
-> 
-> 
->>
->> Liming Sun (9):
->>    Revert "Documentation: dw-mshc: deprecate num-slots"
->>    Revert "mmc: dw_mmc: remove the unnecessary slot variable"
->>    Revert "mmc: dw_mmc: use the 'slot' instead of 'cur_slot'"
->>    Revert "mmc: dw_mmc: remove the 'id' arguments about functions
->>      relevant to slot"
->>    Revert "mmc: dw_mmc: change the array of slots"
->>    Revert "mmc: dw_mmc: remove the loop about finding slots"
->>    Revert "mmc: dw_mmc: deprecated the "num-slots" property"
->>    mmc: dw_mmc: Support two SD_MMC_CE-ATA cards
->>    mmc: dw_mmc: Parse slot-specific configuration
->>
->>   .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |  16 +-
->>   drivers/mmc/host/dw_mmc-exynos.c                   |   4 +-
->>   drivers/mmc/host/dw_mmc.c                          | 277 ++++++++++++++++-----
->>   drivers/mmc/host/dw_mmc.h                          |  17 +-
->>   4 files changed, 236 insertions(+), 78 deletions(-)
->>
-> 
-> 
-> 
-> 
+VGhhbmtzIEphZWhvb24uIFBsZWFzZSBhbHNvIHNlZSBteSByZXNwb25zZSBpbmxpbmUuDQoNCi0g
+TGltaW5nDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogSmFlaG9vbiBD
+aHVuZyBbbWFpbHRvOmpoODAuY2h1bmdAc2Ftc3VuZy5jb21dDQo+IFNlbnQ6IEZyaWRheSwgT2N0
+b2JlciAyMCwgMjAxNyAxMDowNiBBTQ0KPiBUbzogTGltaW5nIFN1biA8bHN1bkBtZWxsYW5veC5j
+b20+OyBTaGF3biBMaW4gPHNoYXduLmxpbkByb2NrLQ0KPiBjaGlwcy5jb20+DQo+IENjOiBVbGYg
+SGFuc3NvbiA8dWxmLmhhbnNzb25AbGluYXJvLm9yZz47IFJvYiBIZXJyaW5nDQo+IDxyb2JoK2R0
+QGtlcm5lbC5vcmc+OyBNYXJrIFJ1dGxhbmQgPG1hcmsucnV0bGFuZEBhcm0uY29tPjsgS3Vramlu
+IEtpbQ0KPiA8a2dlbmVAa2VybmVsLm9yZz47IEtyenlzenRvZiBLb3psb3dza2kgPGtyemtAa2Vy
+bmVsLm9yZz47IGxpbnV4LQ0KPiBtbWNAdmdlci5rZXJuZWwub3JnOyBkZXZpY2V0cmVlQHZnZXIu
+a2VybmVsLm9yZzsgbGludXgtDQo+IGtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc7IGxpbnV4LWFybS1r
+ZXJuZWxAbGlzdHMuaW5mcmFkZWFkLm9yZzsgbGludXgtDQo+IHNhbXN1bmctc29jQHZnZXIua2Vy
+bmVsLm9yZzsgQ2hyaXMgTWV0Y2FsZiA8Y21ldGNhbGZAbWVsbGFub3guY29tPg0KPiBTdWJqZWN0
+OiBSZTogW1BBVENIIDAvOV0gRW5hYmxlIGR3LW1tYyBtdWx0aS1jYXJkIHN1cHBvcnQNCj4gDQo+
+IFNvcnJ5IGZvciBsYXRlIHRoaXMuLg0KPiANCj4gT24gMTAvMTgvMjAxNyAxMjo1MiBBTSwgTGlt
+aW5nIFN1biB3cm90ZToNCj4gPj4+IEhybS4uLi4gaXQncyBzbyB1bmx1Y2t5IHRoYXQgeW91ciBw
+YXRjaHNldCBjb21lcyBhIGxpdHRsZSBsYXRlLiBBcyB5b3VyIHBhdGNoDQo+IDggYW5kIDkgc2Fp
+ZCwgeW91IG5lZWQgdGhlbSB0byBmaXggcHJvYmxlbSBmb3IgbXVsdGktY2FyZCBzdXBwb3J0LCBz
+bw0KPiBkZWZpbml0ZWx5IHRoZXJlIHdhcyBubyBzdWNoIHVzZSBjYXNlLCBhbmQgZXZlbiB0aGUg
+Y29kZSB3YXMgYnVnZ3kgdG8NCj4gc3VwcG9ydCBpdCByaWdodD8gVGhhdCBtYWtlcyB0aGUgY29k
+ZSBoYXJkIHRvIHJlYWQgYW5kIG1haW50YWluLCBzbyB3ZQ0KPiBkZWNpZGUgdG8gcmVtb3ZlIGl0
+Lg0KPiA+DQo+ID4gVGhhbmtzIGZvciB0aGUgZmVlZGJhY2suIFllcywgZWFybGllciB0aGUgbXVs
+dGktY2FyZCBzdXBwb3J0IHdhcyBidWdneQ0KPiBpbmRlZWQuIFdlIHNwZW50IHNvbWUgdGltZSB0
+byBkZWJ1ZyBpdCBhbmQgZ290IGl0IHdvcmtpbmcuDQo+ID4NCj4gPj4+IEhhdm4nZSBjaGVjayB0
+aGUgZGF0YWJvb2sgZm9yIGRldGFpbHMgeWV0LCBidXQgSSB0aGluayBpdCdzIG9rIHRvIHJlLQ0K
+PiBpbnRyb2R1Y2UgbXVsdGktc2xvdCBzdXBwb3J0IGlmIGEgcmVhbCB1c2VyIGJlbmVmaXRzIGZy
+b20gaXQuIEJ1dCB5b3UgbmVlZCBhDQo+IG5ldyBwYXRjaCB0byBzaWxlbnQgdGhlIGxvZyAibnVt
+LXNsb3RzIHByb3BlcnR5IG5vdCBmb3VuZCwgYXNzdW1pbmcgMSBzbG90IGlzDQo+IGF2YWlsYWJs
+ZSIgYXMgd2UgcmVtb3ZlZCBhbGwgdGhlIG51bS1zbG90cyBmcm9tIERUIGF0IHRoYXQgdGltZS4N
+Cj4gPg0KPiA+IFRoZSAiIG51bS1zbG90cyBwcm9wZXJ0eSBub3QgZm91bmQuLi4iIGxvZyBtZXNz
+YWdlIGhhcyBhbHJlYWR5IGJlZW4NCj4gcmVtb3ZlZCBieSA4YTYyOWQyNmYgYmFjayBpbiAyMDE2
+LiBMb29rcyBsaWtlIHdlJ3JlIGdvb2Qgb24gdGhpcyBvbmUuIEluDQo+IGR3X21jaV9wcm9iZSAo
+KSwgaXQgaGFzIGNvZGUgdG8gY2hlY2sgcGRhdGEtPm51bV9zbG90cy4gSWYgMCwgdGhlIGhvc3Qt
+DQo+ID5udW1fc2xvdHMgd2lsbCBiZSBzZXQgdG8gMS4gU28gdGhlIGxvZ2ljIG9mIHNldHRpbmcg
+ZGVmYXVsdCBudW1fc2xvdHMgc2VlbXMNCj4gYWxyZWFkeSB0aGVyZS4gQnV0IGNvcnJlY3QgbWUg
+aWYgSSBhbSB3cm9uZy4NCj4gPg0KPiA+IFRoYW5rcywNCj4gPiBMaW1pbmcNCj4gPg0KPiA+IC0t
+LS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+ID4gRnJvbTogU2hhd24gTGluIFttYWlsdG86c2hh
+d24ubGluQHJvY2stY2hpcHMuY29tXQ0KPiA+IFNlbnQ6IE1vbmRheSwgT2N0b2JlciAxNiwgMjAx
+NyA5OjM2IFBNDQo+ID4gVG86IExpbWluZyBTdW4gPGxzdW5AbWVsbGFub3guY29tPjsgSmFlaG9v
+biBDaHVuZw0KPiA+IDxqaDgwLmNodW5nQHNhbXN1bmcuY29tPg0KPiA+IENjOiBVbGYgSGFuc3Nv
+biA8dWxmLmhhbnNzb25AbGluYXJvLm9yZz47IFJvYiBIZXJyaW5nDQo+ID4gPHJvYmgrZHRAa2Vy
+bmVsLm9yZz47IE1hcmsgUnV0bGFuZCA8bWFyay5ydXRsYW5kQGFybS5jb20+OyBLdWtqaW4NCj4g
+S2ltDQo+ID4gPGtnZW5lQGtlcm5lbC5vcmc+OyBLcnp5c3p0b2YgS296bG93c2tpIDxrcnprQGtl
+cm5lbC5vcmc+Ow0KPiA+IHNoYXduLmxpbkByb2NrLWNoaXBzLmNvbTsgbGludXgtbW1jQHZnZXIu
+a2VybmVsLm9yZzsNCj4gPiBkZXZpY2V0cmVlQHZnZXIua2VybmVsLm9yZzsgbGludXgta2VybmVs
+QHZnZXIua2VybmVsLm9yZzsNCj4gPiBsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5v
+cmc7DQo+ID4gbGludXgtc2Ftc3VuZy1zb2NAdmdlci5rZXJuZWwub3JnDQo+ID4gU3ViamVjdDog
+UmU6IFtQQVRDSCAwLzldIEVuYWJsZSBkdy1tbWMgbXVsdGktY2FyZCBzdXBwb3J0DQo+ID4NCj4g
+Pg0KPiA+IE9uIDIwMTcvMTAvNyAzOjIxLCBMaW1pbmcgU3VuIHdyb3RlOg0KPiA+PiBUaGlzIHNl
+cmllcyBvZiBjb21taXRzIGVuYWJsZXMgdGhlIG11bHRpLWNhcmQgc3VwcG9ydCBmb3IgdGhlIGR3
+LW1tYw0KPiA+PiBjb250cm9sbGVyLiBJdCBpbmNsdWRlcyB0d28gcGFydHMgYXMgYmVsb3cuDQo+
+ID4+DQo+ID4+IFRoZSBmaXJzdCBwYXJ0IChwYXRjaGVzIDEtNykgcmV2ZXJ0cyB0aGUgc2VyaWVz
+IG9mIHJlY2VudCBjb21taXRzDQo+ID4+IHRoYXQgcmVtb3ZlZCB0aGUgbXVsdGktY2FyZCBzdXBw
+b3J0IHdpdGggY29tbWVudHMgc2F5aW5nIHRoZXJlIHdhcyBubw0KPiA+PiBzdWNoIHVzZSBjYXNl
+IGluIHRoZSByZWFsIHdvcmxkLiBBY3R1YWxseSB0aGlzIGZlYXR1cmUgaXMgYmVpbmcgdXNlZA0K
+PiA+PiBpbiBNZWxsYW5veCBCbHVlZmllbGQgU29DIGFuZCBoYXMgYmVlbiByZXF1ZXN0ZWQgYnkg
+Y3VzdG9tZXJzLg0KPiA+DQo+ID4gSHJtLi4uLiBpdCdzIHNvIHVubHVja3kgdGhhdCB5b3VyIHBh
+dGNoc2V0IGNvbWVzIGEgbGl0dGxlIGxhdGUuIEFzIHlvdXIgcGF0Y2ggOA0KPiBhbmQgOSBzYWlk
+LCB5b3UgbmVlZCB0aGVtIHRvIGZpeCBwcm9ibGVtIGZvciBtdWx0aS1jYXJkIHN1cHBvcnQsIHNv
+IGRlZmluaXRlbHkNCj4gdGhlcmUgd2FzIG5vIHN1Y2ggdXNlIGNhc2UsIGFuZCBldmVuIHRoZSBj
+b2RlIHdhcyBidWdneSB0byBzdXBwb3J0IGl0IHJpZ2h0Pw0KPiBUaGF0IG1ha2VzIHRoZSBjb2Rl
+IGhhcmQgdG8gcmVhZCBhbmQgbWFpbnRhaW4sIHNvIHdlIGRlY2lkZSB0byByZW1vdmUgaXQuDQo+
+IA0KPiBIbW0uLg0KPiBXZWxsLCBpZiBpIG1pc3NlZCB5b3VyIHJlcGx5IGZvciBteSByZW1vdmlu
+ZyBwYXRjaCwgaXQncyBteSBmYXVsdC4uYnV0IGkgZGlkbid0DQo+IHNlZSBhbnkgcmVwbHkuLg0K
+PiBBdCB0aGF0IHRpbWUsIHdlIGRpZG4ndCBzZWUgYW55IHVzYWdlIGFuZCBhbHNvIG5vdy4uLg0K
+DQpbTGltaW5nXSBJdCBpcyBkZWZpbml0ZWx5IG5vdCBhbnlib2R5J3MgZmF1bHQuIE15IGFwb2xv
+Z3kgdGhhdCBJIHNob3VsZCBoYXZlIG1hZGUgaXQgdmVyeSBjbGVhci4NClRoaXMgaXMgYSBuZXcg
+U29DIHdoaWNoIHVzZXMgdHdvIGVNTUMgY2FyZHMuIFRoaXMgZmVhdHVyZSBoYXMgYmVlbiByZXF1
+ZXN0ZWQgYnkgY3VzdG9tZXIuDQpXZSBtYWRlIGl0IHdvcmtpbmcgd2l0aCBwYXRjaGVzLCB0aGVu
+IHJlYWxpemVkIHRoYXQgdGhlIHN1cHBvcnQgZm9yIHRoZSAybmQgY2FyZCB3YXMgcmVtb3ZlZCBy
+ZWNlbnRseSBmcm9tIHVwc3RyZWFtIGtlcm5lbC4NClRvIGF2b2lkIHJlaW52ZW50aW5nIHRoZSB3
+aGVlbCwgYSBiZXR0ZXIgYXBwcm9hY2ggYXBwZWFycyB0byBicmluZyBiYWNrIHRoZSBjaGFuZ2Vz
+Lg0KDQo+IA0KPiBBcmUgdGhlcmUgYW55IHBhdGNoZXMgZm9yIHVzaW5nIG11bHRpIHNsb3Q/DQo+
+IGUsZykgZGV2aWNlLXRyZWUgZmlsZSBvciB5b3VyIG93biBkcml2ZXINCg0KW0xpbWluZ10gUGF0
+Y2ggOS84IGFuZCA5LzkgYXJlIHRoZSBjaGFuZ2VzIHRvIGZpeCB0aGUgbXVsdGktc2xvdCBzdXBw
+b3J0Lg0KV2UgZm9sbG93IHRoZSBvcmlnaW5hbCAiRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2Jp
+bmRpbmdzL21tYy9zeW5vcHN5cy1kdy1tc2hjLnR4dCIgZm9yIGRldmljZSBjb25maWd1cmF0aW9u
+Lg0KVGhlcmUgaXMgbm8gZGV2aWNlLXRyZWUgcGF0Y2hlcyBzaW5jZSB0aGVyZSBpcyBubyBjaGFu
+Z2VzIHRvIGFueSBvZiB0aGUgZG9jdW1lbnRhdGlvbiBzeW50YXguDQoNCkp1c3QgaW4gY2FzZSB5
+b3UgbWlnaHQgYmUgaW50ZXJlc3RlZCwgYmVsb3cgaXMgdGhlIEFDUEkgdGFibGUgd2UgdXNlZCB0
+byBpbmNsdWRlIHRoZSB0d28gc2xvdHMuIEl0J3MgZGVmaW5lZCBhY2NvcmRpbmcgdG8gc3lub3Bz
+eXMtZHctbXNoYy50eHQgYW5kIHNlZW1zIHdvcmtpbmcuDQoNCiAgICBEZXZpY2UgKE1NQzApIHsN
+CiAgICAgIE5hbWUgKF9ISUQsICJQUlAwMDAxIikNCiAgICAgIE5hbWUgKF9VSUQsIFplcm8pDQog
+ICAgICBOYW1lIChfQ0NBLCAxKQ0KICAgICAgTmFtZSAoX0NSUywgUmVzb3VyY2VUZW1wbGF0ZSgp
+IHsNCiAgICAgICAgTWVtb3J5MzJGaXhlZChSZWFkV3JpdGUsIDB4NjAwODAwMCwgMHg0MDApDQog
+ICAgICAgIEludGVycnVwdChSZXNvdXJjZUNvbnN1bWVyLCBMZXZlbCwgQWN0aXZlSGlnaCwgRXhj
+bHVzaXZlKSB7IDY0IH0NCiAgICAgIH0pDQoNCiAgICAgIC8vIENvbW1vbiBjb25maWd1cmF0aW9u
+DQogICAgICBOYW1lKF9EU0QsIFBhY2thZ2UoKSB7DQogICAgICAgIFRvVVVJRCgiZGFmZmQ4MTQt
+NmViYS00ZDhjLThhOTEtYmM5YmJmNGFhMzAxIiksDQogICAgICAgIFBhY2thZ2UoKSB7DQogICAg
+ICAgICAgUGFja2FnZSAoKSB7ICJjb21wYXRpYmxlIiwgUGFja2FnZSAoKSB7InNucHMsZHctbXNo
+YyJ9fSwNCiAgICAgICAgICBQYWNrYWdlICgpIHsgImZpZm8tZGVwdGgiLCAweDEwMCB9LA0KICAg
+ICAgICAgIFBhY2thZ2UgKCkgeyAiY2xvY2stZnJlcXVlbmN5IiwgMjQwMDAwMDAgfSwNCiAgICAg
+ICAgICBQYWNrYWdlICgpIHsgImNhcC1tbWMtaGlnaHNwZWVkIiwgMSB9LA0KICAgICAgICAgIFBh
+Y2thZ2UgKCkgeyAiY2FyZC1kZXRlY3QtZGVsYXkiLCAyMDAgfSwNCiAgICAgICAgICBQYWNrYWdl
+ICgpIHsgIm51bS1zbG90cyIsIDIgfQ0KICAgICAgICB9DQogICAgICB9KQ0KDQogICAgICAvLyBT
+bG90LTANCiAgICAgIERldmljZSAoU0xUMCkgew0KICAgICAgICBOYW1lKF9EU0QsIFBhY2thZ2Uo
+KSB7DQogICAgICAgICAgVG9VVUlEKCJkYWZmZDgxNC02ZWJhLTRkOGMtOGE5MS1iYzliYmY0YWEz
+MDEiKSwNCiAgICAgICAgICBQYWNrYWdlKCkgew0KICAgICAgICAgICAgUGFja2FnZSAoKSB7ICJy
+ZWciLCAwIH0sICAgICAgICAgICAgICAvLyBwaHlzaWNhbCBzbG90IG51bWJlcg0KICAgICAgICAg
+ICAgUGFja2FnZSAoKSB7ICJidXMtd2lkdGgiLCA4IH0gICAgICAgICAvLyBidXMgd2lkdGggKDgt
+Yml0KQ0KICAgICAgICAgIH0NCiAgICAgICAgfSkNCiAgICAgIH0NCg0KICAgICAgLy8gU2xvdC0x
+DQogICAgICBEZXZpY2UgKFNMVDEpIHsNCiAgICAgICAgTmFtZShfRFNELCBQYWNrYWdlKCkgew0K
+ICAgICAgICAgIFRvVVVJRCgiZGFmZmQ4MTQtNmViYS00ZDhjLThhOTEtYmM5YmJmNGFhMzAxIiks
+DQogICAgICAgICAgUGFja2FnZSgpIHsNCiAgICAgICAgICAgIFBhY2thZ2UgKCkgeyAicmVnIiwg
+MSB9LCAgICAgICAgICAgICAgLy8gcGh5c2ljYWwgc2xvdCBudW1iZXINCiAgICAgICAgICAgIFBh
+Y2thZ2UgKCkgeyAiYnVzLXdpZHRoIiwgNCB9ICAgICAgICAgLy8gYnVzIHdpZHRoICg0LWJpdCkN
+CiAgICAgICAgICB9DQogICAgICAgIH0pDQogICAgICB9DQogICAgfQ0KPiANCj4gSWYgdGhlcmUg
+YXJlIGJpZyBiZW5lZml0cyB0byByZXZlcnQgdGhlbSwgIGkgZG9uJ3Qgd2FudCB0byBiYWNrIHRo
+ZW0uLmR1cmluZw0KPiBhbG1vc3QgNiB5ZWFycywgbmV2ZXIgdXNlIGl0Li4NCg0KW0xpbWluZ10g
+WWVhaCwgSSBjb3VsZCBpbWFnaW5lIGl0LiBFYXJsaWVyIHRoZSBtdWx0aS1zbG90IGRpZG4ndCB3
+b3JrIHdlbGwgYXQgYWxsLg0KV2UgZGVidWcgaXQgb24gSFcgZW11bGF0aW9uIHRvIGZpZ3VyZSBp
+dCBvdXQuIFRoZSBjaGFuZ2VzIGFyZSBub3QgYmlnIHRob3VnaC4gDQpXZSBoYXZlIGN1c3RvbWVy
+cyBhc2tpbmcgZm9yIGl0LiBJdCdsbCBiZSB2ZXJ5IGhlbHBmdWwgdG8gcmUtZW5hYmxlIHRoZSBt
+dWx0aS1jYXJkIHN1cHBvcnQuDQoNCj4gDQo+ID4NCj4gPj4NCj4gPj4gVGhlIHNlY29uZCBwYXJ0
+IChwYXRjaGVzIDgtOSkgZml4ZXMgdGhlIERlc2lnbldhcmUgbXVsdGktY2FyZCBzdXBwb3J0DQo+
+ID4+IGFjY29yZGluZyB0byB0aGUgZHctbW1jIGRhdGFib29rIChzeW5ub3BzeXM6IERlc2lnbldh
+cmUgQ29yZXMNCj4gTW9iaWxlDQo+ID4+IFN0b3JhZ2UgSG9zdCBEYXRhYm9vaywgMi43MGEpLiBJ
+dCBoYXMgY2hhbmdlcyB0byBzZXQgdGhlIGNhcmQgbnVtYmVyDQo+ID4+IGludG8gdGhlIENNRCBy
+ZWdpc3RlciB0byBtdWx0aXBsZXggcmVxdWVzdHMgdG8gZGlmZmVyZW50IGNhcmRzIHdoZW4NCj4g
+Pj4gd29ya2luZyBpbiBTRF9NTUNfQ0VBVEEgbW9kZSwgc2V0IHRoZSBDVFlQRSAvIENMS0VOQSAv
+IENEVEhSQ1RMDQo+ID4+IHJlZ2lzdGVycyBwcm9wZXJseSBhY2NvcmRpbmcgdG8gdGhlIHNwZWMs
+IGFuZCBwYXJzZSB0aGUgcGVyLWNhcmQNCj4gPj4gY29uZmlndXJhdGlvbiB0byBtYXRjaCB0aGUg
+TGludXggRG9jdW1lbnRhdGlvbg0KPiA+PiAoYmluZGluZ3MvbW1jL3N5bm9wc3lzLWR3LW1zaGMu
+dHh0KS4NCj4gDQo+IHRoZSBzZWNvbmQgcGFydCBzZWVtcyB0aGF0IGl0J3Mgb25seSBzdXBwb3J0
+IHNpbmNlIHYyLjcwYS4uPw0KDQpbTGltaW5nXSBUaGlzIG9uZSBpcyB0aGUgc3BlYyBJIHVzZWQg
+YXMgcmVmZXJlbmNlIGZvciBhbGwgdGhlIGNoYW5nZXMgYW5kIHRlc3RpbmcuDQpJIGRpZG4ndCBn
+byB0aHJvdWdoIHByZXZpb3VzIHZlcnNpb25zIGR1ZSB0byB0aGUgbGltaXRhdGlvbiBvZiB0ZXN0
+aW5nIGVudmlyb25tZW50IEkgaGF2ZS4NCkFzIHlvdSBtZW50aW9uZWQsIHRoZXJlIGlzIG5vIG11
+bHRpLWNhcmQgdXNhZ2UgZWFybGllciBhbmQgdGhpcyBTb0MgaXMgcHJvYmFibHkgdGhlIGZpcnN0
+DQpwcm9kdWN0IHRvIHVzZSBpdCBpbiByZWFsLXdvcmxkLiBTbyBhZGRpbmcgYSB2ZXJzaW9uIGNo
+ZWNrIHNlZW1zIHNhZmUgKHNvIGl0IHdvbid0DQp1bm5lY2Vzc2FyaWx5IGJyZWFrIGFueXRoaW5n
+IGp1c3QgaW4gY2FzZSkgLiBBbnkgc3VnZ2VzdGlvbnM/DQoNCj4gDQo+ID4NCj4gPiBIYXZuJ2Ug
+Y2hlY2sgdGhlIGRhdGFib29rIGZvciBkZXRhaWxzIHlldCwgYnV0IEkgdGhpbmsgaXQncyBvayB0
+byByZS1pbnRyb2R1Y2UNCj4gbXVsdGktc2xvdCBzdXBwb3J0IGlmIGEgcmVhbCB1c2VyIGJlbmVm
+aXRzIGZyb20gaXQuIEJ1dCB5b3UgbmVlZCBhIG5ldyBwYXRjaCB0bw0KPiBzaWxlbnQgdGhlIGxv
+ZyAibnVtLXNsb3RzIHByb3BlcnR5IG5vdCBmb3VuZCwgYXNzdW1pbmcgMSBzbG90IGlzIGF2YWls
+YWJsZSIgYXMNCj4gd2UgcmVtb3ZlZCBhbGwgdGhlIG51bS1zbG90cyBmcm9tIERUIGF0IHRoYXQg
+dGltZS4NCj4gPg0KPiA+DQo+ID4+DQo+ID4+IExpbWluZyBTdW4gKDkpOg0KPiA+PiAgICBSZXZl
+cnQgIkRvY3VtZW50YXRpb246IGR3LW1zaGM6IGRlcHJlY2F0ZSBudW0tc2xvdHMiDQo+ID4+ICAg
+IFJldmVydCAibW1jOiBkd19tbWM6IHJlbW92ZSB0aGUgdW5uZWNlc3Nhcnkgc2xvdCB2YXJpYWJs
+ZSINCj4gPj4gICAgUmV2ZXJ0ICJtbWM6IGR3X21tYzogdXNlIHRoZSAnc2xvdCcgaW5zdGVhZCBv
+ZiAnY3VyX3Nsb3QnIg0KPiA+PiAgICBSZXZlcnQgIm1tYzogZHdfbW1jOiByZW1vdmUgdGhlICdp
+ZCcgYXJndW1lbnRzIGFib3V0IGZ1bmN0aW9ucw0KPiA+PiAgICAgIHJlbGV2YW50IHRvIHNsb3Qi
+DQo+ID4+ICAgIFJldmVydCAibW1jOiBkd19tbWM6IGNoYW5nZSB0aGUgYXJyYXkgb2Ygc2xvdHMi
+DQo+ID4+ICAgIFJldmVydCAibW1jOiBkd19tbWM6IHJlbW92ZSB0aGUgbG9vcCBhYm91dCBmaW5k
+aW5nIHNsb3RzIg0KPiA+PiAgICBSZXZlcnQgIm1tYzogZHdfbW1jOiBkZXByZWNhdGVkIHRoZSAi
+bnVtLXNsb3RzIiBwcm9wZXJ0eSINCj4gPj4gICAgbW1jOiBkd19tbWM6IFN1cHBvcnQgdHdvIFNE
+X01NQ19DRS1BVEEgY2FyZHMNCj4gPj4gICAgbW1jOiBkd19tbWM6IFBhcnNlIHNsb3Qtc3BlY2lm
+aWMgY29uZmlndXJhdGlvbg0KPiA+Pg0KPiA+PiAgIC4uLi9kZXZpY2V0cmVlL2JpbmRpbmdzL21t
+Yy9zeW5vcHN5cy1kdy1tc2hjLnR4dCAgIHwgIDE2ICstDQo+ID4+ICAgZHJpdmVycy9tbWMvaG9z
+dC9kd19tbWMtZXh5bm9zLmMgICAgICAgICAgICAgICAgICAgfCAgIDQgKy0NCj4gPj4gICBkcml2
+ZXJzL21tYy9ob3N0L2R3X21tYy5jICAgICAgICAgICAgICAgICAgICAgICAgICB8IDI3NyArKysr
+KysrKysrKysrKysrLS0tLQ0KPiAtDQo+ID4+ICAgZHJpdmVycy9tbWMvaG9zdC9kd19tbWMuaCAg
+ICAgICAgICAgICAgICAgICAgICAgICAgfCAgMTcgKy0NCj4gPj4gICA0IGZpbGVzIGNoYW5nZWQs
+IDIzNiBpbnNlcnRpb25zKCspLCA3OCBkZWxldGlvbnMoLSkNCj4gPj4NCj4gPg0KPiA+DQo+ID4N
+Cj4gPg0KDQo=
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
