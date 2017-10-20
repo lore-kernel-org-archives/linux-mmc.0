@@ -1,23 +1,22 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCHv3 1/1] mmc: core: export emmc revision
-Date: Fri, 20 Oct 2017 12:02:34 +0200
-Message-ID: <CAPDyKFqrXTwp70iH=cu_mtjFSkyaMdi25c=uJ4zneg71DdC6WQ@mail.gmail.com>
-References: <20171012174703.44680-1-jinqian@android.com>
+Subject: Re: [PATCH 2/2] mmc: meson-mx-sdio: Cleanup IS_ERR() checks
+Date: Fri, 20 Oct 2017 12:02:46 +0200
+Message-ID: <CAPDyKFrm_RmRid2hD=E2Pkf++FS2rZ30ONynVbJ6h_42xjUFqQ@mail.gmail.com>
+References: <20171013111943.zyp5myiwb3pp56vh@mwanda> <20171013112049.rdcdqv6ooktlv5wz@mwanda>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20171012174703.44680-1-jinqian@android.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jin Qian <jinqian@android.com>
-Cc: Jin Qian <jinqian@google.com>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Uri Yanai <uri.yanai@sandisk.com>, Chanho Min <chanho.min@lge.com>, Jungseung Lee <js07.lee@samsung.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Return-path: <kernel-janitors-owner@vger.kernel.org>
+In-Reply-To: <20171013112049.rdcdqv6ooktlv5wz@mwanda>
+Sender: kernel-janitors-owner@vger.kernel.org
+To: Dan Carpenter <dan.carpenter@oracle.com>
+Cc: Carlo Caione <carlo@endlessm.com>, Carlo Caione <carlo@caione.org>, Kevin Hilman <khilman@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, kernel-janitors@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 12 October 2017 at 19:46, Jin Qian <jinqian@android.com> wrote:
-> From: Jin Qian <jinqian@google.com>
+On 13 October 2017 at 13:20, Dan Carpenter <dan.carpenter@oracle.com> wrote:
+> Using PTR_ERR_OR_ZERO() instead of IS_ERR() works, but it's not how
+> you're supposed to write these conditions.
 >
-> Expose emmc revision as part of device attributes.
->
-> Signed-off-by: Jin Qian <jinqian@android.com>
+> Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
 
 Thanks, applied for next!
 
@@ -25,41 +24,28 @@ Kind regards
 Uffe
 
 > ---
->  Documentation/ABI/testing/sysfs-bus-mmc | 4 ++++
->  drivers/mmc/core/mmc.c                  | 2 ++
->  2 files changed, 6 insertions(+)
->  create mode 100644 Documentation/ABI/testing/sysfs-bus-mmc
+> I really hope it doesn't become a trend on to wrap all error checks in a
+> WARN_ON() macro...
 >
-> diff --git a/Documentation/ABI/testing/sysfs-bus-mmc b/Documentation/ABI/testing/sysfs-bus-mmc
-> new file mode 100644
-> index 000000000000..519f028d19cc
-> --- /dev/null
-> +++ b/Documentation/ABI/testing/sysfs-bus-mmc
-> @@ -0,0 +1,4 @@
-> +What:          /sys/bus/mmc/devices/.../rev
-> +Date:          October 2017
-> +Contact:       Jin Qian <jinqian@android.com>
-> +Description:   Extended CSD revision number
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 36217ad5e9b1..4aa4cfb2c9e1 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -780,6 +780,7 @@ MMC_DEV_ATTR(manfid, "0x%06x\n", card->cid.manfid);
->  MMC_DEV_ATTR(name, "%s\n", card->cid.prod_name);
->  MMC_DEV_ATTR(oemid, "0x%04x\n", card->cid.oemid);
->  MMC_DEV_ATTR(prv, "0x%x\n", card->cid.prv);
-> +MMC_DEV_ATTR(rev, "0x%x\n", card->ext_csd.rev);
->  MMC_DEV_ATTR(pre_eol_info, "%02x\n", card->ext_csd.pre_eol_info);
->  MMC_DEV_ATTR(life_time, "0x%02x 0x%02x\n",
->         card->ext_csd.device_life_time_est_typ_a,
-> @@ -838,6 +839,7 @@ static struct attribute *mmc_std_attrs[] = {
->         &dev_attr_name.attr,
->         &dev_attr_oemid.attr,
->         &dev_attr_prv.attr,
-> +       &dev_attr_rev.attr,
->         &dev_attr_pre_eol_info.attr,
->         &dev_attr_life_time.attr,
->         &dev_attr_serial.attr,
-> --
-> 2.15.0.rc0.271.g36b669edcc-goog
+> diff --git a/drivers/mmc/host/meson-mx-sdio.c b/drivers/mmc/host/meson-mx-sdio.c
+> index dc30ed5e964b..d0d921e0e589 100644
+> --- a/drivers/mmc/host/meson-mx-sdio.c
+> +++ b/drivers/mmc/host/meson-mx-sdio.c
+> @@ -602,7 +602,7 @@ static int meson_mx_mmc_register_clks(struct meson_mx_mmc_host *host)
 >
+>         host->fixed_factor_clk = devm_clk_register(host->controller_dev,
+>                                                  &host->fixed_factor.hw);
+> -       if (WARN_ON(PTR_ERR_OR_ZERO(host->fixed_factor_clk)))
+> +       if (WARN_ON(IS_ERR(host->fixed_factor_clk)))
+>                 return PTR_ERR(host->fixed_factor_clk);
+>
+>         clk_div_parent = __clk_get_name(host->fixed_factor_clk);
+> @@ -620,7 +620,7 @@ static int meson_mx_mmc_register_clks(struct meson_mx_mmc_host *host)
+>
+>         host->cfg_div_clk = devm_clk_register(host->controller_dev,
+>                                               &host->cfg_div.hw);
+> -       if (WARN_ON(PTR_ERR_OR_ZERO(host->cfg_div_clk)))
+> +       if (WARN_ON(IS_ERR(host->cfg_div_clk)))
+>                 return PTR_ERR(host->cfg_div_clk);
+>
+>         return 0;
