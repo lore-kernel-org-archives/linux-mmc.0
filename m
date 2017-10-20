@@ -1,179 +1,250 @@
-From: Liming Sun <lsun-VPRAkNaXOzVWk0Htik3J/w@public.gmane.org>
-Subject: RE: [PATCH 0/9] Enable dw-mmc multi-card support
-Date: Fri, 20 Oct 2017 15:07:40 +0000
-Message-ID: <AM2PR05MB07537D50A18D391CD2295D84A1430@AM2PR05MB0753.eurprd05.prod.outlook.com>
-References: <cover.1507315433.git.lsun@mellanox.com>
-        <8e433531-8f67-d575-635e-c6ced29f6804@rock-chips.com>
-        <CGME20171017155217epcas3p4de2f27b921ce77234a2d3e46e4b17473@epcas3p4.samsung.com>
-        <AM2PR05MB07533A822C7CCBA7111FD58FA14C0@AM2PR05MB0753.eurprd05.prod.outlook.com>
- <f71d94dc-7277-8675-c21e-9c2ec77174e7@samsung.com>
+From: Bjorn Andersson <bjorn.andersson@linaro.org>
+Subject: Re: [PATCH v2 4/4] mmc: sdhci-msm: Add sdhci msm register write APIs
+ which wait for pwr irq
+Date: Fri, 20 Oct 2017 11:05:29 -0700
+Message-ID: <20171020180529.GC1165@minitux>
+References: <1506490483-46871-1-git-send-email-vviswana@codeaurora.org>
+ <1506490483-46871-5-git-send-email-vviswana@codeaurora.org>
+ <20171014073118.GD1575@tuxbook>
+ <cf405901-e711-4ef9-dffd-1e94a023c4a1@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <f71d94dc-7277-8675-c21e-9c2ec77174e7-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Content-Language: en-US
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Kukjin Kim <kgene-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Krzysztof Kozlowski <krzk-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Chris Metcalf <cmetcalf-VPRAkNaXOzVWk0Htik3J/w@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pf0-f196.google.com ([209.85.192.196]:52294 "EHLO
+        mail-pf0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752900AbdJTSFd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Oct 2017 14:05:33 -0400
+Received: by mail-pf0-f196.google.com with SMTP id e64so12102104pfk.9
+        for <linux-mmc@vger.kernel.org>; Fri, 20 Oct 2017 11:05:33 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <cf405901-e711-4ef9-dffd-1e94a023c4a1@codeaurora.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Vijay Viswanath <vviswana@codeaurora.org>
+Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, will.deacon@arm.com, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, riteshh@codeaurora.org, subhashj@codeaurora.org
 
-VGhhbmtzIEphZWhvb24uIFBsZWFzZSBhbHNvIHNlZSBteSByZXNwb25zZSBpbmxpbmUuDQoNCi0g
-TGltaW5nDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogSmFlaG9vbiBD
-aHVuZyBbbWFpbHRvOmpoODAuY2h1bmdAc2Ftc3VuZy5jb21dDQo+IFNlbnQ6IEZyaWRheSwgT2N0
-b2JlciAyMCwgMjAxNyAxMDowNiBBTQ0KPiBUbzogTGltaW5nIFN1biA8bHN1bkBtZWxsYW5veC5j
-b20+OyBTaGF3biBMaW4gPHNoYXduLmxpbkByb2NrLQ0KPiBjaGlwcy5jb20+DQo+IENjOiBVbGYg
-SGFuc3NvbiA8dWxmLmhhbnNzb25AbGluYXJvLm9yZz47IFJvYiBIZXJyaW5nDQo+IDxyb2JoK2R0
-QGtlcm5lbC5vcmc+OyBNYXJrIFJ1dGxhbmQgPG1hcmsucnV0bGFuZEBhcm0uY29tPjsgS3Vramlu
-IEtpbQ0KPiA8a2dlbmVAa2VybmVsLm9yZz47IEtyenlzenRvZiBLb3psb3dza2kgPGtyemtAa2Vy
-bmVsLm9yZz47IGxpbnV4LQ0KPiBtbWNAdmdlci5rZXJuZWwub3JnOyBkZXZpY2V0cmVlQHZnZXIu
-a2VybmVsLm9yZzsgbGludXgtDQo+IGtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc7IGxpbnV4LWFybS1r
-ZXJuZWxAbGlzdHMuaW5mcmFkZWFkLm9yZzsgbGludXgtDQo+IHNhbXN1bmctc29jQHZnZXIua2Vy
-bmVsLm9yZzsgQ2hyaXMgTWV0Y2FsZiA8Y21ldGNhbGZAbWVsbGFub3guY29tPg0KPiBTdWJqZWN0
-OiBSZTogW1BBVENIIDAvOV0gRW5hYmxlIGR3LW1tYyBtdWx0aS1jYXJkIHN1cHBvcnQNCj4gDQo+
-IFNvcnJ5IGZvciBsYXRlIHRoaXMuLg0KPiANCj4gT24gMTAvMTgvMjAxNyAxMjo1MiBBTSwgTGlt
-aW5nIFN1biB3cm90ZToNCj4gPj4+IEhybS4uLi4gaXQncyBzbyB1bmx1Y2t5IHRoYXQgeW91ciBw
-YXRjaHNldCBjb21lcyBhIGxpdHRsZSBsYXRlLiBBcyB5b3VyIHBhdGNoDQo+IDggYW5kIDkgc2Fp
-ZCwgeW91IG5lZWQgdGhlbSB0byBmaXggcHJvYmxlbSBmb3IgbXVsdGktY2FyZCBzdXBwb3J0LCBz
-bw0KPiBkZWZpbml0ZWx5IHRoZXJlIHdhcyBubyBzdWNoIHVzZSBjYXNlLCBhbmQgZXZlbiB0aGUg
-Y29kZSB3YXMgYnVnZ3kgdG8NCj4gc3VwcG9ydCBpdCByaWdodD8gVGhhdCBtYWtlcyB0aGUgY29k
-ZSBoYXJkIHRvIHJlYWQgYW5kIG1haW50YWluLCBzbyB3ZQ0KPiBkZWNpZGUgdG8gcmVtb3ZlIGl0
-Lg0KPiA+DQo+ID4gVGhhbmtzIGZvciB0aGUgZmVlZGJhY2suIFllcywgZWFybGllciB0aGUgbXVs
-dGktY2FyZCBzdXBwb3J0IHdhcyBidWdneQ0KPiBpbmRlZWQuIFdlIHNwZW50IHNvbWUgdGltZSB0
-byBkZWJ1ZyBpdCBhbmQgZ290IGl0IHdvcmtpbmcuDQo+ID4NCj4gPj4+IEhhdm4nZSBjaGVjayB0
-aGUgZGF0YWJvb2sgZm9yIGRldGFpbHMgeWV0LCBidXQgSSB0aGluayBpdCdzIG9rIHRvIHJlLQ0K
-PiBpbnRyb2R1Y2UgbXVsdGktc2xvdCBzdXBwb3J0IGlmIGEgcmVhbCB1c2VyIGJlbmVmaXRzIGZy
-b20gaXQuIEJ1dCB5b3UgbmVlZCBhDQo+IG5ldyBwYXRjaCB0byBzaWxlbnQgdGhlIGxvZyAibnVt
-LXNsb3RzIHByb3BlcnR5IG5vdCBmb3VuZCwgYXNzdW1pbmcgMSBzbG90IGlzDQo+IGF2YWlsYWJs
-ZSIgYXMgd2UgcmVtb3ZlZCBhbGwgdGhlIG51bS1zbG90cyBmcm9tIERUIGF0IHRoYXQgdGltZS4N
-Cj4gPg0KPiA+IFRoZSAiIG51bS1zbG90cyBwcm9wZXJ0eSBub3QgZm91bmQuLi4iIGxvZyBtZXNz
-YWdlIGhhcyBhbHJlYWR5IGJlZW4NCj4gcmVtb3ZlZCBieSA4YTYyOWQyNmYgYmFjayBpbiAyMDE2
-LiBMb29rcyBsaWtlIHdlJ3JlIGdvb2Qgb24gdGhpcyBvbmUuIEluDQo+IGR3X21jaV9wcm9iZSAo
-KSwgaXQgaGFzIGNvZGUgdG8gY2hlY2sgcGRhdGEtPm51bV9zbG90cy4gSWYgMCwgdGhlIGhvc3Qt
-DQo+ID5udW1fc2xvdHMgd2lsbCBiZSBzZXQgdG8gMS4gU28gdGhlIGxvZ2ljIG9mIHNldHRpbmcg
-ZGVmYXVsdCBudW1fc2xvdHMgc2VlbXMNCj4gYWxyZWFkeSB0aGVyZS4gQnV0IGNvcnJlY3QgbWUg
-aWYgSSBhbSB3cm9uZy4NCj4gPg0KPiA+IFRoYW5rcywNCj4gPiBMaW1pbmcNCj4gPg0KPiA+IC0t
-LS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+ID4gRnJvbTogU2hhd24gTGluIFttYWlsdG86c2hh
-d24ubGluQHJvY2stY2hpcHMuY29tXQ0KPiA+IFNlbnQ6IE1vbmRheSwgT2N0b2JlciAxNiwgMjAx
-NyA5OjM2IFBNDQo+ID4gVG86IExpbWluZyBTdW4gPGxzdW5AbWVsbGFub3guY29tPjsgSmFlaG9v
-biBDaHVuZw0KPiA+IDxqaDgwLmNodW5nQHNhbXN1bmcuY29tPg0KPiA+IENjOiBVbGYgSGFuc3Nv
-biA8dWxmLmhhbnNzb25AbGluYXJvLm9yZz47IFJvYiBIZXJyaW5nDQo+ID4gPHJvYmgrZHRAa2Vy
-bmVsLm9yZz47IE1hcmsgUnV0bGFuZCA8bWFyay5ydXRsYW5kQGFybS5jb20+OyBLdWtqaW4NCj4g
-S2ltDQo+ID4gPGtnZW5lQGtlcm5lbC5vcmc+OyBLcnp5c3p0b2YgS296bG93c2tpIDxrcnprQGtl
-cm5lbC5vcmc+Ow0KPiA+IHNoYXduLmxpbkByb2NrLWNoaXBzLmNvbTsgbGludXgtbW1jQHZnZXIu
-a2VybmVsLm9yZzsNCj4gPiBkZXZpY2V0cmVlQHZnZXIua2VybmVsLm9yZzsgbGludXgta2VybmVs
-QHZnZXIua2VybmVsLm9yZzsNCj4gPiBsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5v
-cmc7DQo+ID4gbGludXgtc2Ftc3VuZy1zb2NAdmdlci5rZXJuZWwub3JnDQo+ID4gU3ViamVjdDog
-UmU6IFtQQVRDSCAwLzldIEVuYWJsZSBkdy1tbWMgbXVsdGktY2FyZCBzdXBwb3J0DQo+ID4NCj4g
-Pg0KPiA+IE9uIDIwMTcvMTAvNyAzOjIxLCBMaW1pbmcgU3VuIHdyb3RlOg0KPiA+PiBUaGlzIHNl
-cmllcyBvZiBjb21taXRzIGVuYWJsZXMgdGhlIG11bHRpLWNhcmQgc3VwcG9ydCBmb3IgdGhlIGR3
-LW1tYw0KPiA+PiBjb250cm9sbGVyLiBJdCBpbmNsdWRlcyB0d28gcGFydHMgYXMgYmVsb3cuDQo+
-ID4+DQo+ID4+IFRoZSBmaXJzdCBwYXJ0IChwYXRjaGVzIDEtNykgcmV2ZXJ0cyB0aGUgc2VyaWVz
-IG9mIHJlY2VudCBjb21taXRzDQo+ID4+IHRoYXQgcmVtb3ZlZCB0aGUgbXVsdGktY2FyZCBzdXBw
-b3J0IHdpdGggY29tbWVudHMgc2F5aW5nIHRoZXJlIHdhcyBubw0KPiA+PiBzdWNoIHVzZSBjYXNl
-IGluIHRoZSByZWFsIHdvcmxkLiBBY3R1YWxseSB0aGlzIGZlYXR1cmUgaXMgYmVpbmcgdXNlZA0K
-PiA+PiBpbiBNZWxsYW5veCBCbHVlZmllbGQgU29DIGFuZCBoYXMgYmVlbiByZXF1ZXN0ZWQgYnkg
-Y3VzdG9tZXJzLg0KPiA+DQo+ID4gSHJtLi4uLiBpdCdzIHNvIHVubHVja3kgdGhhdCB5b3VyIHBh
-dGNoc2V0IGNvbWVzIGEgbGl0dGxlIGxhdGUuIEFzIHlvdXIgcGF0Y2ggOA0KPiBhbmQgOSBzYWlk
-LCB5b3UgbmVlZCB0aGVtIHRvIGZpeCBwcm9ibGVtIGZvciBtdWx0aS1jYXJkIHN1cHBvcnQsIHNv
-IGRlZmluaXRlbHkNCj4gdGhlcmUgd2FzIG5vIHN1Y2ggdXNlIGNhc2UsIGFuZCBldmVuIHRoZSBj
-b2RlIHdhcyBidWdneSB0byBzdXBwb3J0IGl0IHJpZ2h0Pw0KPiBUaGF0IG1ha2VzIHRoZSBjb2Rl
-IGhhcmQgdG8gcmVhZCBhbmQgbWFpbnRhaW4sIHNvIHdlIGRlY2lkZSB0byByZW1vdmUgaXQuDQo+
-IA0KPiBIbW0uLg0KPiBXZWxsLCBpZiBpIG1pc3NlZCB5b3VyIHJlcGx5IGZvciBteSByZW1vdmlu
-ZyBwYXRjaCwgaXQncyBteSBmYXVsdC4uYnV0IGkgZGlkbid0DQo+IHNlZSBhbnkgcmVwbHkuLg0K
-PiBBdCB0aGF0IHRpbWUsIHdlIGRpZG4ndCBzZWUgYW55IHVzYWdlIGFuZCBhbHNvIG5vdy4uLg0K
-DQpbTGltaW5nXSBJdCBpcyBkZWZpbml0ZWx5IG5vdCBhbnlib2R5J3MgZmF1bHQuIE15IGFwb2xv
-Z3kgdGhhdCBJIHNob3VsZCBoYXZlIG1hZGUgaXQgdmVyeSBjbGVhci4NClRoaXMgaXMgYSBuZXcg
-U29DIHdoaWNoIHVzZXMgdHdvIGVNTUMgY2FyZHMuIFRoaXMgZmVhdHVyZSBoYXMgYmVlbiByZXF1
-ZXN0ZWQgYnkgY3VzdG9tZXIuDQpXZSBtYWRlIGl0IHdvcmtpbmcgd2l0aCBwYXRjaGVzLCB0aGVu
-IHJlYWxpemVkIHRoYXQgdGhlIHN1cHBvcnQgZm9yIHRoZSAybmQgY2FyZCB3YXMgcmVtb3ZlZCBy
-ZWNlbnRseSBmcm9tIHVwc3RyZWFtIGtlcm5lbC4NClRvIGF2b2lkIHJlaW52ZW50aW5nIHRoZSB3
-aGVlbCwgYSBiZXR0ZXIgYXBwcm9hY2ggYXBwZWFycyB0byBicmluZyBiYWNrIHRoZSBjaGFuZ2Vz
-Lg0KDQo+IA0KPiBBcmUgdGhlcmUgYW55IHBhdGNoZXMgZm9yIHVzaW5nIG11bHRpIHNsb3Q/DQo+
-IGUsZykgZGV2aWNlLXRyZWUgZmlsZSBvciB5b3VyIG93biBkcml2ZXINCg0KW0xpbWluZ10gUGF0
-Y2ggOS84IGFuZCA5LzkgYXJlIHRoZSBjaGFuZ2VzIHRvIGZpeCB0aGUgbXVsdGktc2xvdCBzdXBw
-b3J0Lg0KV2UgZm9sbG93IHRoZSBvcmlnaW5hbCAiRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2Jp
-bmRpbmdzL21tYy9zeW5vcHN5cy1kdy1tc2hjLnR4dCIgZm9yIGRldmljZSBjb25maWd1cmF0aW9u
-Lg0KVGhlcmUgaXMgbm8gZGV2aWNlLXRyZWUgcGF0Y2hlcyBzaW5jZSB0aGVyZSBpcyBubyBjaGFu
-Z2VzIHRvIGFueSBvZiB0aGUgZG9jdW1lbnRhdGlvbiBzeW50YXguDQoNCkp1c3QgaW4gY2FzZSB5
-b3UgbWlnaHQgYmUgaW50ZXJlc3RlZCwgYmVsb3cgaXMgdGhlIEFDUEkgdGFibGUgd2UgdXNlZCB0
-byBpbmNsdWRlIHRoZSB0d28gc2xvdHMuIEl0J3MgZGVmaW5lZCBhY2NvcmRpbmcgdG8gc3lub3Bz
-eXMtZHctbXNoYy50eHQgYW5kIHNlZW1zIHdvcmtpbmcuDQoNCiAgICBEZXZpY2UgKE1NQzApIHsN
-CiAgICAgIE5hbWUgKF9ISUQsICJQUlAwMDAxIikNCiAgICAgIE5hbWUgKF9VSUQsIFplcm8pDQog
-ICAgICBOYW1lIChfQ0NBLCAxKQ0KICAgICAgTmFtZSAoX0NSUywgUmVzb3VyY2VUZW1wbGF0ZSgp
-IHsNCiAgICAgICAgTWVtb3J5MzJGaXhlZChSZWFkV3JpdGUsIDB4NjAwODAwMCwgMHg0MDApDQog
-ICAgICAgIEludGVycnVwdChSZXNvdXJjZUNvbnN1bWVyLCBMZXZlbCwgQWN0aXZlSGlnaCwgRXhj
-bHVzaXZlKSB7IDY0IH0NCiAgICAgIH0pDQoNCiAgICAgIC8vIENvbW1vbiBjb25maWd1cmF0aW9u
-DQogICAgICBOYW1lKF9EU0QsIFBhY2thZ2UoKSB7DQogICAgICAgIFRvVVVJRCgiZGFmZmQ4MTQt
-NmViYS00ZDhjLThhOTEtYmM5YmJmNGFhMzAxIiksDQogICAgICAgIFBhY2thZ2UoKSB7DQogICAg
-ICAgICAgUGFja2FnZSAoKSB7ICJjb21wYXRpYmxlIiwgUGFja2FnZSAoKSB7InNucHMsZHctbXNo
-YyJ9fSwNCiAgICAgICAgICBQYWNrYWdlICgpIHsgImZpZm8tZGVwdGgiLCAweDEwMCB9LA0KICAg
-ICAgICAgIFBhY2thZ2UgKCkgeyAiY2xvY2stZnJlcXVlbmN5IiwgMjQwMDAwMDAgfSwNCiAgICAg
-ICAgICBQYWNrYWdlICgpIHsgImNhcC1tbWMtaGlnaHNwZWVkIiwgMSB9LA0KICAgICAgICAgIFBh
-Y2thZ2UgKCkgeyAiY2FyZC1kZXRlY3QtZGVsYXkiLCAyMDAgfSwNCiAgICAgICAgICBQYWNrYWdl
-ICgpIHsgIm51bS1zbG90cyIsIDIgfQ0KICAgICAgICB9DQogICAgICB9KQ0KDQogICAgICAvLyBT
-bG90LTANCiAgICAgIERldmljZSAoU0xUMCkgew0KICAgICAgICBOYW1lKF9EU0QsIFBhY2thZ2Uo
-KSB7DQogICAgICAgICAgVG9VVUlEKCJkYWZmZDgxNC02ZWJhLTRkOGMtOGE5MS1iYzliYmY0YWEz
-MDEiKSwNCiAgICAgICAgICBQYWNrYWdlKCkgew0KICAgICAgICAgICAgUGFja2FnZSAoKSB7ICJy
-ZWciLCAwIH0sICAgICAgICAgICAgICAvLyBwaHlzaWNhbCBzbG90IG51bWJlcg0KICAgICAgICAg
-ICAgUGFja2FnZSAoKSB7ICJidXMtd2lkdGgiLCA4IH0gICAgICAgICAvLyBidXMgd2lkdGggKDgt
-Yml0KQ0KICAgICAgICAgIH0NCiAgICAgICAgfSkNCiAgICAgIH0NCg0KICAgICAgLy8gU2xvdC0x
-DQogICAgICBEZXZpY2UgKFNMVDEpIHsNCiAgICAgICAgTmFtZShfRFNELCBQYWNrYWdlKCkgew0K
-ICAgICAgICAgIFRvVVVJRCgiZGFmZmQ4MTQtNmViYS00ZDhjLThhOTEtYmM5YmJmNGFhMzAxIiks
-DQogICAgICAgICAgUGFja2FnZSgpIHsNCiAgICAgICAgICAgIFBhY2thZ2UgKCkgeyAicmVnIiwg
-MSB9LCAgICAgICAgICAgICAgLy8gcGh5c2ljYWwgc2xvdCBudW1iZXINCiAgICAgICAgICAgIFBh
-Y2thZ2UgKCkgeyAiYnVzLXdpZHRoIiwgNCB9ICAgICAgICAgLy8gYnVzIHdpZHRoICg0LWJpdCkN
-CiAgICAgICAgICB9DQogICAgICAgIH0pDQogICAgICB9DQogICAgfQ0KPiANCj4gSWYgdGhlcmUg
-YXJlIGJpZyBiZW5lZml0cyB0byByZXZlcnQgdGhlbSwgIGkgZG9uJ3Qgd2FudCB0byBiYWNrIHRo
-ZW0uLmR1cmluZw0KPiBhbG1vc3QgNiB5ZWFycywgbmV2ZXIgdXNlIGl0Li4NCg0KW0xpbWluZ10g
-WWVhaCwgSSBjb3VsZCBpbWFnaW5lIGl0LiBFYXJsaWVyIHRoZSBtdWx0aS1zbG90IGRpZG4ndCB3
-b3JrIHdlbGwgYXQgYWxsLg0KV2UgZGVidWcgaXQgb24gSFcgZW11bGF0aW9uIHRvIGZpZ3VyZSBp
-dCBvdXQuIFRoZSBjaGFuZ2VzIGFyZSBub3QgYmlnIHRob3VnaC4gDQpXZSBoYXZlIGN1c3RvbWVy
-cyBhc2tpbmcgZm9yIGl0LiBJdCdsbCBiZSB2ZXJ5IGhlbHBmdWwgdG8gcmUtZW5hYmxlIHRoZSBt
-dWx0aS1jYXJkIHN1cHBvcnQuDQoNCj4gDQo+ID4NCj4gPj4NCj4gPj4gVGhlIHNlY29uZCBwYXJ0
-IChwYXRjaGVzIDgtOSkgZml4ZXMgdGhlIERlc2lnbldhcmUgbXVsdGktY2FyZCBzdXBwb3J0DQo+
-ID4+IGFjY29yZGluZyB0byB0aGUgZHctbW1jIGRhdGFib29rIChzeW5ub3BzeXM6IERlc2lnbldh
-cmUgQ29yZXMNCj4gTW9iaWxlDQo+ID4+IFN0b3JhZ2UgSG9zdCBEYXRhYm9vaywgMi43MGEpLiBJ
-dCBoYXMgY2hhbmdlcyB0byBzZXQgdGhlIGNhcmQgbnVtYmVyDQo+ID4+IGludG8gdGhlIENNRCBy
-ZWdpc3RlciB0byBtdWx0aXBsZXggcmVxdWVzdHMgdG8gZGlmZmVyZW50IGNhcmRzIHdoZW4NCj4g
-Pj4gd29ya2luZyBpbiBTRF9NTUNfQ0VBVEEgbW9kZSwgc2V0IHRoZSBDVFlQRSAvIENMS0VOQSAv
-IENEVEhSQ1RMDQo+ID4+IHJlZ2lzdGVycyBwcm9wZXJseSBhY2NvcmRpbmcgdG8gdGhlIHNwZWMs
-IGFuZCBwYXJzZSB0aGUgcGVyLWNhcmQNCj4gPj4gY29uZmlndXJhdGlvbiB0byBtYXRjaCB0aGUg
-TGludXggRG9jdW1lbnRhdGlvbg0KPiA+PiAoYmluZGluZ3MvbW1jL3N5bm9wc3lzLWR3LW1zaGMu
-dHh0KS4NCj4gDQo+IHRoZSBzZWNvbmQgcGFydCBzZWVtcyB0aGF0IGl0J3Mgb25seSBzdXBwb3J0
-IHNpbmNlIHYyLjcwYS4uPw0KDQpbTGltaW5nXSBUaGlzIG9uZSBpcyB0aGUgc3BlYyBJIHVzZWQg
-YXMgcmVmZXJlbmNlIGZvciBhbGwgdGhlIGNoYW5nZXMgYW5kIHRlc3RpbmcuDQpJIGRpZG4ndCBn
-byB0aHJvdWdoIHByZXZpb3VzIHZlcnNpb25zIGR1ZSB0byB0aGUgbGltaXRhdGlvbiBvZiB0ZXN0
-aW5nIGVudmlyb25tZW50IEkgaGF2ZS4NCkFzIHlvdSBtZW50aW9uZWQsIHRoZXJlIGlzIG5vIG11
-bHRpLWNhcmQgdXNhZ2UgZWFybGllciBhbmQgdGhpcyBTb0MgaXMgcHJvYmFibHkgdGhlIGZpcnN0
-DQpwcm9kdWN0IHRvIHVzZSBpdCBpbiByZWFsLXdvcmxkLiBTbyBhZGRpbmcgYSB2ZXJzaW9uIGNo
-ZWNrIHNlZW1zIHNhZmUgKHNvIGl0IHdvbid0DQp1bm5lY2Vzc2FyaWx5IGJyZWFrIGFueXRoaW5n
-IGp1c3QgaW4gY2FzZSkgLiBBbnkgc3VnZ2VzdGlvbnM/DQoNCj4gDQo+ID4NCj4gPiBIYXZuJ2Ug
-Y2hlY2sgdGhlIGRhdGFib29rIGZvciBkZXRhaWxzIHlldCwgYnV0IEkgdGhpbmsgaXQncyBvayB0
-byByZS1pbnRyb2R1Y2UNCj4gbXVsdGktc2xvdCBzdXBwb3J0IGlmIGEgcmVhbCB1c2VyIGJlbmVm
-aXRzIGZyb20gaXQuIEJ1dCB5b3UgbmVlZCBhIG5ldyBwYXRjaCB0bw0KPiBzaWxlbnQgdGhlIGxv
-ZyAibnVtLXNsb3RzIHByb3BlcnR5IG5vdCBmb3VuZCwgYXNzdW1pbmcgMSBzbG90IGlzIGF2YWls
-YWJsZSIgYXMNCj4gd2UgcmVtb3ZlZCBhbGwgdGhlIG51bS1zbG90cyBmcm9tIERUIGF0IHRoYXQg
-dGltZS4NCj4gPg0KPiA+DQo+ID4+DQo+ID4+IExpbWluZyBTdW4gKDkpOg0KPiA+PiAgICBSZXZl
-cnQgIkRvY3VtZW50YXRpb246IGR3LW1zaGM6IGRlcHJlY2F0ZSBudW0tc2xvdHMiDQo+ID4+ICAg
-IFJldmVydCAibW1jOiBkd19tbWM6IHJlbW92ZSB0aGUgdW5uZWNlc3Nhcnkgc2xvdCB2YXJpYWJs
-ZSINCj4gPj4gICAgUmV2ZXJ0ICJtbWM6IGR3X21tYzogdXNlIHRoZSAnc2xvdCcgaW5zdGVhZCBv
-ZiAnY3VyX3Nsb3QnIg0KPiA+PiAgICBSZXZlcnQgIm1tYzogZHdfbW1jOiByZW1vdmUgdGhlICdp
-ZCcgYXJndW1lbnRzIGFib3V0IGZ1bmN0aW9ucw0KPiA+PiAgICAgIHJlbGV2YW50IHRvIHNsb3Qi
-DQo+ID4+ICAgIFJldmVydCAibW1jOiBkd19tbWM6IGNoYW5nZSB0aGUgYXJyYXkgb2Ygc2xvdHMi
-DQo+ID4+ICAgIFJldmVydCAibW1jOiBkd19tbWM6IHJlbW92ZSB0aGUgbG9vcCBhYm91dCBmaW5k
-aW5nIHNsb3RzIg0KPiA+PiAgICBSZXZlcnQgIm1tYzogZHdfbW1jOiBkZXByZWNhdGVkIHRoZSAi
-bnVtLXNsb3RzIiBwcm9wZXJ0eSINCj4gPj4gICAgbW1jOiBkd19tbWM6IFN1cHBvcnQgdHdvIFNE
-X01NQ19DRS1BVEEgY2FyZHMNCj4gPj4gICAgbW1jOiBkd19tbWM6IFBhcnNlIHNsb3Qtc3BlY2lm
-aWMgY29uZmlndXJhdGlvbg0KPiA+Pg0KPiA+PiAgIC4uLi9kZXZpY2V0cmVlL2JpbmRpbmdzL21t
-Yy9zeW5vcHN5cy1kdy1tc2hjLnR4dCAgIHwgIDE2ICstDQo+ID4+ICAgZHJpdmVycy9tbWMvaG9z
-dC9kd19tbWMtZXh5bm9zLmMgICAgICAgICAgICAgICAgICAgfCAgIDQgKy0NCj4gPj4gICBkcml2
-ZXJzL21tYy9ob3N0L2R3X21tYy5jICAgICAgICAgICAgICAgICAgICAgICAgICB8IDI3NyArKysr
-KysrKysrKysrKysrLS0tLQ0KPiAtDQo+ID4+ICAgZHJpdmVycy9tbWMvaG9zdC9kd19tbWMuaCAg
-ICAgICAgICAgICAgICAgICAgICAgICAgfCAgMTcgKy0NCj4gPj4gICA0IGZpbGVzIGNoYW5nZWQs
-IDIzNiBpbnNlcnRpb25zKCspLCA3OCBkZWxldGlvbnMoLSkNCj4gPj4NCj4gPg0KPiA+DQo+ID4N
-Cj4gPg0KDQo=
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Fri 20 Oct 03:54 PDT 2017, Vijay Viswanath wrote:
+
+> On 10/14/2017 1:01 PM, Bjorn Andersson wrote:
+> > On Tue 26 Sep 22:34 PDT 2017, Vijay Viswanath wrote:
+> > 
+> > > diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> > [..]
+> > > +	if (!done) {
+> > > +		if (!wait_event_timeout(msm_host->pwr_irq_wait,
+> > > +				msm_host->pwr_irq_flag,
+> > > +				msecs_to_jiffies(MSM_PWR_IRQ_TIMEOUT_MS)))
+> > > +			__WARN_printf("%s: pwr_irq for req: (%d) timed out\n",
+> > > +					mmc_hostname(host->mmc), req_type);
+> > 
+> > Bumped my MSM8974AB device to latest linux-next and found this patch; I
+> > see this print every five seconds during boot and the eMMC never comes
+> > up.
+> > 
+> > Regards,
+> > Bjorn
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> 
+> Hi Bjorn,
+> 
+
+Hi Vijay,
+
+> I couldn't get one 8974 device. I tested the latest linux-next on db410c and
+> its not showing any issue. 8974 is an older msm and has some differences in
+> the controller like your "mmc: sdhci-msm: Enable delay circuit calibration
+> clocks" patch.
+> 
+
+In particular there seems to be some quirks that appeared in 8974pro
+(which this is).
+
+> I am currently going through the programming guide to see what could be the
+> reason. Can you please share the full logs from the device with me so that I
+> can focus my search?
+> 
+
+Of course, sorry for the drive-by report without much to go on. I did
+some more testing and you can find an extract of the kernel log below.
+I was apparently not patient enough before, after 124 seconds we're
+through all the timeouts and my eMMC is "functional" - so things are
+working, but we're getting stuck waiting for the timeout every time
+we're waiting for the pwr irq.
+
+
+As you can see below we get sdhci_msm_handle_pwr_irq() with status
+BUS_ON, so we set io-level HIGH. Then we don't get any more pwr
+interrupts, so the io_level remains "high" - although I believe we're
+actually low (vqmmc is always 1.8V on this board).
+
+Worth noting is the large comment in sdhci_msm_check_power_status()
+related to !host->pwr, host->pwr is always 0 on this board.
+
+# dmesg |grep mmc0
+[    1.734573] mmc0: sdhci_msm_handle_pwr_irq: Handled IRQ(0), irq_status=0x0, ack=0x0
+[    1.857611] mmc0: sdhci_msm_handle_pwr_irq: Handled IRQ(0), irq_status=0x0, ack=0x0
+[    1.889400] mmc0: sdhci_msm_handle_pwr_irq: Handled IRQ(0), irq_status=0x0, ack=0x0
+[    2.141634] mmc0: sdhci_msm_handle_pwr_irq: Handled IRQ(0), irq_status=0x0, ack=0x0
+[    2.163023] mmc0: sdhci_msm_handle_pwr_irq: Handled IRQ(0), irq_status=0x0, ack=0x0
+[    2.238875] mmc0: sdhci_msm_handle_pwr_irq: Handled IRQ(0), irq_status=0x0, ack=0x0
+[    2.509617] mmc0: sdhci_msm_check_power_status: request 2 curr_pwr_state 0 curr_io_level 0
+[    2.509710] mmc0: sdhci_msm_pwr_irq()
+[    2.509723] mmc0: sdhci_msm_handle_pwr_irq: Handled IRQ(30), irq_status=0x2, ack=0x1
+[    2.536468] mmc0: sdhci_msm_check_power_status: request 2 done
+[    2.546363] mmc0: sdhci_msm_check_power_status: request 8 curr_pwr_state 2 curr_io_level 8
+[    2.551220] mmc0: do not wait for power IRQ that never comes, req_type: 8
+[    2.559502] sdhci_msm f9824900.sdhci: mmc0: clock=0 uhs=0 ctrl_2=0x0
+[    2.572777] mmc0: sdhci_msm_check_power_status: request 8 curr_pwr_state 2 curr_io_level 8
+[    2.577353] mmc0: do not wait for power IRQ that never comes, req_type: 8
+[    2.592564] mmc0: sdhci_msm_check_power_status: request 8 curr_pwr_state 2 curr_io_level 8
+[    2.597230] mmc0: do not wait for power IRQ that never comes, req_type: 8
+[    2.605589] mmc0: Switching to 3.3V signalling voltage failed
+[    2.618172] mmc0: sdhci_msm_check_power_status: request 4 curr_pwr_state 2 curr_io_level 8
+[    7.687764] sdhci_msm f9824900.sdhci: mmc0: pwr_irq for req: (4) timed out
+[    7.687795] mmc0: sdhci_msm_check_power_status: request 4 done
+[    7.717799] mmc0: Setting clock at rate 400000 at timing 0
+[    7.717887] mmc0: sdhci_msm_check_power_status: request 2 curr_pwr_state 2 curr_io_level 8
+[    7.722170] mmc0: sdhci_msm_check_power_status: request 2 done
+[    7.736229] mmc0: sdhci_msm_check_power_status: request 4 curr_pwr_state 2 curr_io_level 8
+[   12.807757] sdhci_msm f9824900.sdhci: mmc0: pwr_irq for req: (4) timed out
+[   12.807785] mmc0: sdhci_msm_check_power_status: request 4 done
+[   12.813531] sdhci_msm f9824900.sdhci: mmc0: clock=400000 uhs=0 ctrl_2=0x8
+[   12.826189] mmc0: sdhci_msm_check_power_status: request 4 curr_pwr_state 2 curr_io_level 8
+[   17.847757] sdhci_msm f9824900.sdhci: mmc0: pwr_irq for req: (4) timed out
+[   17.847784] mmc0: sdhci_msm_check_power_status: request 4 done
+[   17.853520] mmc0: Setting clock at rate 400000 at timing 0
+[   17.887757] mmc0: SDHCI controller on f9824900.sdhci [f9824900.sdhci] using ADMA 64-bit
+[   17.897018] mmc0: sdhci_msm_check_power_status: request 2 curr_pwr_state 2 curr_io_level 8
+[   17.902821] mmc0: sdhci_msm_check_power_status: request 2 done
+[   17.916694] mmc0: sdhci_msm_check_power_status: request 4 curr_pwr_state 2 curr_io_level 8
+[   22.967759] sdhci_msm f9824900.sdhci: mmc0: pwr_irq for req: (4) timed out
+[   22.967787] mmc0: sdhci_msm_check_power_status: request 4 done
+[   22.973533] sdhci_msm f9824900.sdhci: mmc0: clock=400000 uhs=0 ctrl_2=0x8
+[   22.986192] mmc0: sdhci_msm_check_power_status: request 4 curr_pwr_state 2 curr_io_level 8
+[   28.007753] sdhci_msm f9824900.sdhci: mmc0: pwr_irq for req: (4) timed out
+[   28.007777] mmc0: sdhci_msm_check_power_status: request 4 done
+[   28.013515] mmc0: Setting clock at rate 400000 at timing 0
+[   28.021738] mmc0: sdhci_msm_check_power_status: request 2 curr_pwr_state 2 curr_io_level 8
+[   28.024798] mmc0: sdhci_msm_check_power_status: request 2 done
+[   28.038879] mmc0: sdhci_msm_check_power_status: request 4 curr_pwr_state 2 curr_io_level 8
+[   33.047769] sdhci_msm f9824900.sdhci: mmc0: pwr_irq for req: (4) timed out
+[   33.047793] mmc0: sdhci_msm_check_power_status: request 4 done
+[   33.053536] sdhci_msm f9824900.sdhci: mmc0: clock=400000 uhs=0 ctrl_2=0x8
+[   33.066199] mmc0: sdhci_msm_check_power_status: request 4 curr_pwr_state 2 curr_io_level 8
+[   38.087755] sdhci_msm f9824900.sdhci: mmc0: pwr_irq for req: (4) timed out
+[   38.087779] mmc0: sdhci_msm_check_power_status: request 4 done
+[   38.093514] mmc0: Setting clock at rate 400000 at timing 0
+[   38.105722] mmc0: sdhci_msm_check_power_status: request 2 curr_pwr_state 2 curr_io_level 8
+[   38.105748] mmc0: sdhci_msm_check_power_status: request 2 done
+[   38.118881] mmc0: sdhci_msm_check_power_status: request 4 curr_pwr_state 2 curr_io_level 8
+[   43.127756] sdhci_msm f9824900.sdhci: mmc0: pwr_irq for req: (4) timed out
+[   43.127780] mmc0: sdhci_msm_check_power_status: request 4 done
+[   43.133523] sdhci_msm f9824900.sdhci: mmc0: clock=400000 uhs=0 ctrl_2=0x8
+[   43.146184] mmc0: sdhci_msm_check_power_status: request 4 curr_pwr_state 2 curr_io_level 8
+[   48.167756] sdhci_msm f9824900.sdhci: mmc0: pwr_irq for req: (4) timed out
+[   48.167780] mmc0: sdhci_msm_check_power_status: request 4 done
+[   48.173515] mmc0: Setting clock at rate 400000 at timing 0
+[   48.179810] mmc0: sdhci_msm_check_power_status: request 2 curr_pwr_state 2 curr_io_level 8
+[   48.184800] mmc0: sdhci_msm_check_power_status: request 2 done
+[   48.198880] mmc0: sdhci_msm_check_power_status: request 4 curr_pwr_state 2 curr_io_level 8
+[   53.207753] sdhci_msm f9824900.sdhci: mmc0: pwr_irq for req: (4) timed out
+[   53.207777] mmc0: sdhci_msm_check_power_status: request 4 done
+[   53.213518] sdhci_msm f9824900.sdhci: mmc0: clock=400000 uhs=0 ctrl_2=0x8
+[   53.226181] mmc0: sdhci_msm_check_power_status: request 4 curr_pwr_state 2 curr_io_level 8
+[   58.247754] sdhci_msm f9824900.sdhci: mmc0: pwr_irq for req: (4) timed out
+[   58.247777] mmc0: sdhci_msm_check_power_status: request 4 done
+[   58.253513] mmc0: Setting clock at rate 400000 at timing 0
+[   58.259414] mmc0: sdhci_msm_check_power_status: request 2 curr_pwr_state 2 curr_io_level 8
+[   58.264797] mmc0: sdhci_msm_check_power_status: request 2 done
+[   58.278877] mmc0: sdhci_msm_check_power_status: request 4 curr_pwr_state 2 curr_io_level 8
+[   63.287754] sdhci_msm f9824900.sdhci: mmc0: pwr_irq for req: (4) timed out
+[   63.287779] mmc0: sdhci_msm_check_power_status: request 4 done
+[   63.293521] sdhci_msm f9824900.sdhci: mmc0: clock=400000 uhs=0 ctrl_2=0x8
+[   63.306184] mmc0: sdhci_msm_check_power_status: request 4 curr_pwr_state 2 curr_io_level 8
+[   68.327764] sdhci_msm f9824900.sdhci: mmc0: pwr_irq for req: (4) timed out
+[   68.327792] mmc0: sdhci_msm_check_power_status: request 4 done
+[   68.333530] mmc0: Setting clock at rate 400000 at timing 0
+[   68.341746] mmc0: sdhci_msm_check_power_status: request 2 curr_pwr_state 2 curr_io_level 8
+[   68.344812] mmc0: sdhci_msm_check_power_status: request 2 done
+[   68.358891] mmc0: sdhci_msm_check_power_status: request 4 curr_pwr_state 2 curr_io_level 8
+[   73.367756] sdhci_msm f9824900.sdhci: mmc0: pwr_irq for req: (4) timed out
+[   73.367783] mmc0: sdhci_msm_check_power_status: request 4 done
+[   73.373525] sdhci_msm f9824900.sdhci: mmc0: clock=400000 uhs=0 ctrl_2=0x8
+[   73.386186] mmc0: sdhci_msm_check_power_status: request 4 curr_pwr_state 2 curr_io_level 8
+[   78.407759] sdhci_msm f9824900.sdhci: mmc0: pwr_irq for req: (4) timed out
+[   78.407786] mmc0: sdhci_msm_check_power_status: request 4 done
+[   78.413521] mmc0: Setting clock at rate 400000 at timing 0
+[   78.449337] mmc0: sdhci_msm_check_power_status: request 2 curr_pwr_state 2 curr_io_level 8
+[   78.449363] mmc0: sdhci_msm_check_power_status: request 2 done
+[   78.462325] mmc0: sdhci_msm_check_power_status: request 4 curr_pwr_state 2 curr_io_level 8
+[   83.527756] sdhci_msm f9824900.sdhci: mmc0: pwr_irq for req: (4) timed out
+[   83.527781] mmc0: sdhci_msm_check_power_status: request 4 done
+[   83.533524] sdhci_msm f9824900.sdhci: mmc0: clock=400000 uhs=0 ctrl_2=0x8
+[   83.546187] mmc0: sdhci_msm_check_power_status: request 4 curr_pwr_state 2 curr_io_level 8
+[   88.567758] sdhci_msm f9824900.sdhci: mmc0: pwr_irq for req: (4) timed out
+[   88.567786] mmc0: sdhci_msm_check_power_status: request 4 done
+[   88.573522] mmc0: Setting clock at rate 400000 at timing 0
+[   88.611069] mmc0: sdhci_msm_check_power_status: request 4 curr_pwr_state 2 curr_io_level 8
+[   93.687759] sdhci_msm f9824900.sdhci: mmc0: pwr_irq for req: (4) timed out
+[   93.687788] mmc0: sdhci_msm_check_power_status: request 4 done
+[   93.694461] mmc0: sdhci_msm_check_power_status: request 2 curr_pwr_state 2 curr_io_level 8
+[   93.699369] mmc0: sdhci_msm_check_power_status: request 2 done
+[   93.713422] mmc0: sdhci_msm_check_power_status: request 4 curr_pwr_state 2 curr_io_level 8
+[   98.727752] sdhci_msm f9824900.sdhci: mmc0: pwr_irq for req: (4) timed out
+[   98.727779] mmc0: sdhci_msm_check_power_status: request 4 done
+[   98.733523] sdhci_msm f9824900.sdhci: mmc0: clock=400000 uhs=0 ctrl_2=0x8
+[   98.746184] mmc0: sdhci_msm_check_power_status: request 4 curr_pwr_state 2 curr_io_level 8
+[  103.767770] sdhci_msm f9824900.sdhci: mmc0: pwr_irq for req: (4) timed out
+[  103.767795] mmc0: sdhci_msm_check_power_status: request 4 done
+[  103.773531] mmc0: Setting clock at rate 400000 at timing 0
+[  103.799563] mmc0: sdhci_msm_check_power_status: request 2 curr_pwr_state 2 curr_io_level 8
+[  103.799589] mmc0: sdhci_msm_check_power_status: request 2 done
+[  103.812552] mmc0: sdhci_msm_check_power_status: request 4 curr_pwr_state 2 curr_io_level 8
+[  108.887755] sdhci_msm f9824900.sdhci: mmc0: pwr_irq for req: (4) timed out
+[  108.887779] mmc0: sdhci_msm_check_power_status: request 4 done
+[  108.893522] sdhci_msm f9824900.sdhci: mmc0: clock=400000 uhs=9 ctrl_2=0x8
+[  108.906185] mmc0: sdhci_msm_check_power_status: request 4 curr_pwr_state 2 curr_io_level 8
+[  113.927755] sdhci_msm f9824900.sdhci: mmc0: pwr_irq for req: (4) timed out
+[  113.927778] mmc0: sdhci_msm_check_power_status: request 4 done
+[  113.933513] mmc0: Setting clock at rate 400000 at timing 9
+[  113.939901] mmc0: Setting clock at rate 200000000 at timing 9
+[  113.944801] mmc0: sdhci_msm_check_power_status: request 2 curr_pwr_state 2 curr_io_level 8
+[  113.950642] mmc0: sdhci_msm_check_power_status: request 2 done
+[  113.964587] mmc0: sdhci_msm_check_power_status: request 4 curr_pwr_state 2 curr_io_level 8
+[  119.047754] sdhci_msm f9824900.sdhci: mmc0: pwr_irq for req: (4) timed out
+[  119.047778] mmc0: sdhci_msm_check_power_status: request 4 done
+[  119.053513] sdhci_msm f9824900.sdhci: mmc0: clock=200000000 uhs=9 ctrl_2=0xb
+[  119.066531] mmc0: sdhci_msm_check_power_status: request 4 curr_pwr_state 2 curr_io_level 8
+[  124.087755] sdhci_msm f9824900.sdhci: mmc0: pwr_irq for req: (4) timed out
+[  124.087779] mmc0: sdhci_msm_check_power_status: request 4 done
+[  124.093514] mmc0: Setting clock at rate 200000000 at timing 9
+[  124.099657] sdhci_msm f9824900.sdhci: mmc0: Found good phase = 0
+[  124.105439] sdhci_msm f9824900.sdhci: mmc0: Found good phase = 1
+[  124.111537] sdhci_msm f9824900.sdhci: mmc0: Found good phase = 2
+[  124.117501] sdhci_msm f9824900.sdhci: mmc0: Found good phase = 3
+[  124.123514] sdhci_msm f9824900.sdhci: mmc0: Found good phase = 4
+[  124.129501] sdhci_msm f9824900.sdhci: mmc0: Found good phase = 5
+[  124.135411] sdhci_msm f9824900.sdhci: mmc0: Found good phase = 6
+[  124.141423] sdhci_msm f9824900.sdhci: mmc0: Found good phase = 7
+[  124.147389] sdhci_msm f9824900.sdhci: mmc0: Found good phase = 8
+[  124.153403] sdhci_msm f9824900.sdhci: mmc0: Found good phase = 9
+[  124.159448] sdhci_msm f9824900.sdhci: mmc0: Found good phase = 10
+[  124.165417] sdhci_msm f9824900.sdhci: mmc0: Found good phase = 11
+[  124.171433] sdhci_msm f9824900.sdhci: mmc0: Found good phase = 12
+[  124.177483] sdhci_msm f9824900.sdhci: mmc0: Found good phase = 13
+[  124.183709] sdhci_msm f9824900.sdhci: mmc0: Setting the tuning phase to 9
+[  124.189943] mmc0: new HS200 MMC card at address 0001
+[  124.198091] mmcblk0: mmc0:0001 MAG2GC 14.6 GiB 
+[  124.201538] mmcblk0boot0: mmc0:0001 MAG2GC partition 1 4.00 MiB
+[  124.205695] mmcblk0boot1: mmc0:0001 MAG2GC partition 2 4.00 MiB
+[  124.211637] mmcblk0rpmb: mmc0:0001 MAG2GC partition 3 4.00 MiB, chardev (247:0)
+
+
+Please let me know if I can assist you with anything additional!
+
+Regards,
+Bjorn
