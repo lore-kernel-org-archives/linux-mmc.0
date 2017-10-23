@@ -1,85 +1,39 @@
-From: Pavel Machek <pavel@ucw.cz>
-Subject: Re: 4.14-rc2 on thinkpad x220: out of memory when inserting mmc card
-Date: Mon, 23 Oct 2017 23:27:41 +0200
-Message-ID: <20171023212741.GA12782@amd>
-References: <20171001093704.GA12626@amd>
- <20171001102647.GA23908@amd>
- <201710011957.ICF15708.OOLOHFSQMFFVJt@I-love.SAKURA.ne.jp>
- <72c93a69-610f-027e-c028-379b97b6f388@intel.com>
- <20171002084131.GA24414@amd>
- <CACRpkdbatrt0Uxf8653iiV-OKkgcc0Ziog_L4oDVTJVNqtNN0Q@mail.gmail.com>
- <20171002130353.GA25433@amd>
- <184b3552-851c-7015-dd80-76f6eebc33cc@intel.com>
- <20171023093109.GI32228@amd>
- <CACRpkdaa6qq91+dQ43EZDvDefbM3tjwLX5e+nNZouwXM0xJ=4w@mail.gmail.com>
+From: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v6 01/12] mmc: dt-bindings: Add reg/source_cg/latch-ck
+ for Mediatek MMC bindings
+Date: Mon, 23 Oct 2017 17:36:12 -0500
+Message-ID: <20171023223612.uzl52ux26nuujkt3@rob-hp-laptop>
+References: <1508118399-21828-1-git-send-email-chaotian.jing@mediatek.com>
+ <1508118399-21828-2-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="oyUTqETQ0mS9luUI"
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <CACRpkdaa6qq91+dQ43EZDvDefbM3tjwLX5e+nNZouwXM0xJ=4w@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Tetsuo Handa <penguin-kernel@i-love.sakura.ne.jp>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-mm@kvack.org
+In-Reply-To: <1508118399-21828-2-git-send-email-chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, yong mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Heiner Kallweit <hkallweit1-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Phong LE <ple-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
+On Mon, Oct 16, 2017 at 09:46:28AM +0800, Chaotian Jing wrote:
+> Change the comptiable for support of multi-platform
+> Make compatible explicit, as MMC host of mt8173 has difference with
+> mt8135(mt8173 supports hs400 and hs400_tune),so that need separate
+> mt8173/mt8135 compatible name.
+> Add description for reg
+> Add description for source_cg
+> Add description for mediatek,latch-ck
+> Note that source_cg and mediatek,latch-ck are optional for some projects,
+> eg, MT2701 do not have source_cg, and MT2712 do not need
+> mediatek,latch-ck
+> 
+> Signed-off-by: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+> ---
+>  Documentation/devicetree/bindings/mmc/mtk-sd.txt | 18 +++++++++++++++---
+>  1 file changed, 15 insertions(+), 3 deletions(-)
 
---oyUTqETQ0mS9luUI
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-On Mon 2017-10-23 14:16:40, Linus Walleij wrote:
-> On Mon, Oct 23, 2017 at 11:31 AM, Pavel Machek <pavel@ucw.cz> wrote:
->=20
-> >> > Thinkpad X220... how do I tell if I was using them? I believe so,
-> >> > because I uncovered bug in them before.
-> >>
-> >> You are certainly using bounce buffers.  What does lspci -knn show?
-> >
-> > Here is the output:
-> > 0d:00.0 System peripheral [0880]: Ricoh Co Ltd PCIe SDXC/MMC Host Contr=
-oller [1180:e823] (rev 07)
-> >         Subsystem: Lenovo Device [17aa:21da]
-> >         Kernel driver in use: sdhci-pci
->=20
-> So that is a Ricoh driver, one of the few that was supposed to benefit
-> from bounce buffers.
->=20
-> Except that if you actually turned it on:
-> > [10994.302196] kworker/2:1: page allocation failure: order:4,
-> so it doesn't have enough memory to use these bounce buffers
-> anyway.
-
-Well, look at archives: driver failed completely when allocation failed.=20
-
-> I'm now feel it was the right thing to delete them.
-
-Which means I may have been geting benefit -- when it worked. I
-believe solution is to allocate at driver probing time.
-
-(OTOH ... SPI is slow compared to rest of the system, right? Where
-does the benefit come from?)
-
-									Pavel
-
-
-
---=20
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blo=
-g.html
-
---oyUTqETQ0mS9luUI
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iEYEARECAAYFAlnuXs0ACgkQMOfwapXb+vIYcwCeI58Zgqs30Jwo2akGea9juTmi
-eccAn1EdAgek8vxV8IKC9nYpZdbzdage
-=0tO5
------END PGP SIGNATURE-----
-
---oyUTqETQ0mS9luUI--
+Acked-by: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
