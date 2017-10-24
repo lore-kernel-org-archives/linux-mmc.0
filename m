@@ -1,68 +1,58 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: 4.14-rc2 on thinkpad x220: out of memory when inserting mmc card
-Date: Tue, 24 Oct 2017 09:59:33 +0300
-Message-ID: <a920ce93-5421-003d-6b19-194f8ea3ee5b@intel.com>
-References: <20171001093704.GA12626@amd> <20171001102647.GA23908@amd>
- <201710011957.ICF15708.OOLOHFSQMFFVJt@I-love.SAKURA.ne.jp>
- <72c93a69-610f-027e-c028-379b97b6f388@intel.com> <20171002084131.GA24414@amd>
- <CACRpkdbatrt0Uxf8653iiV-OKkgcc0Ziog_L4oDVTJVNqtNN0Q@mail.gmail.com>
- <20171002130353.GA25433@amd> <184b3552-851c-7015-dd80-76f6eebc33cc@intel.com>
- <20171023093109.GI32228@amd>
- <CACRpkdaa6qq91+dQ43EZDvDefbM3tjwLX5e+nNZouwXM0xJ=4w@mail.gmail.com>
- <20171023212741.GA12782@amd>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V8 00/14] mmc: Add Command Queue support
+Date: Tue, 24 Oct 2017 09:39:42 +0200
+Message-ID: <CAPDyKFrz3ko-vhHR8Yj+i2JhnE9gG6xViAbFyqO7cGxFmBxUMw@mail.gmail.com>
+References: <1505302814-19313-1-git-send-email-adrian.hunter@intel.com>
+ <CAPDyKFr-XbMOmOkz1yXwmG1t=77eSsUO2kU7kKV0V1wrfcmWKg@mail.gmail.com>
+ <2cd4c5fc-cc04-ba44-bea6-4547d84de3e2@intel.com> <CAPDyKFqE7UYOYrjykpV0GnQ+hg2oGXpALgn_8yKsQk19Y4nmSQ@mail.gmail.com>
+ <9a789f9b-a8c4-8ae7-8f93-0d76f674bded@intel.com> <CAPDyKFoLa_aX3j693_tfkuaSKNvGB-ERdf2-9r4iF-+c0NnP9g@mail.gmail.com>
+ <d41eee41-796a-db93-d388-b36123ecc364@intel.com> <CAPDyKFrMqXWagkPOtPk-PBThSUrSogUP=iL+9XeyD9E8qkp=bw@mail.gmail.com>
+ <1b8bec1b-7340-cb89-65c0-e09b17037ca4@intel.com> <CAPDyKFqoMVemtCSHBzfK5YTqLsGEr_v_z7o=HOKCwEdVz0tH_w@mail.gmail.com>
+ <376e4bb9-cc86-36ae-91b6-48fef69e059a@intel.com> <b594f4e0-06ea-c9fc-fc2d-dd93bc401c6f@intel.com>
+ <0e1f4dd2-2ab6-115b-11fd-72c3be3c61a8@intel.com> <14a149bb-32a8-cd78-e8b7-42dd89bbe5b1@intel.com>
+ <CAPDyKFq23Ak6g0HFRThvwToyxrPHsxZVgyw=BHhASdMMSb9JhQ@mail.gmail.com> <2ff0a8ab-62dd-d46f-8554-2b8214a78740@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20171023212741.GA12782@amd>
-Content-Language: en-US
-Sender: owner-linux-mm@kvack.org
-To: Pavel Machek <pavel@ucw.cz>, Linus Walleij <linus.walleij@linaro.org>
-Cc: Tetsuo Handa <penguin-kernel@i-love.sakura.ne.jp>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-mm@kvack.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <2ff0a8ab-62dd-d46f-8554-2b8214a78740@intel.com>
+Sender: linux-block-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 24/10/17 00:27, Pavel Machek wrote:
-> On Mon 2017-10-23 14:16:40, Linus Walleij wrote:
->> On Mon, Oct 23, 2017 at 11:31 AM, Pavel Machek <pavel@ucw.cz> wrote:
->>
->>>>> Thinkpad X220... how do I tell if I was using them? I believe so,
->>>>> because I uncovered bug in them before.
->>>>
->>>> You are certainly using bounce buffers.  What does lspci -knn show?
->>>
->>> Here is the output:
->>> 0d:00.0 System peripheral [0880]: Ricoh Co Ltd PCIe SDXC/MMC Host Controller [1180:e823] (rev 07)
->>>         Subsystem: Lenovo Device [17aa:21da]
->>>         Kernel driver in use: sdhci-pci
->>
->> So that is a Ricoh driver, one of the few that was supposed to benefit
->> from bounce buffers.
->>
->> Except that if you actually turned it on:
->>> [10994.302196] kworker/2:1: page allocation failure: order:4,
->> so it doesn't have enough memory to use these bounce buffers
->> anyway.
-> 
-> Well, look at archives: driver failed completely when allocation failed. 
-> 
->> I'm now feel it was the right thing to delete them.
-> 
-> Which means I may have been geting benefit -- when it worked. I
-> believe solution is to allocate at driver probing time.
-> 
-> (OTOH ... SPI is slow compared to rest of the system, right? Where
-> does the benefit come from?)
+[...]
 
-Do you mean what is the benefit of the bounce buffer?  With SDMA, only a
-single segment is transferred at a time - that can mean just a single page
-i.e. 4k.  But the buffer is a single segment so it should enable larger
-transfer sizes (i.e. buffer size 64k) which performs better.
+>> However, you have completely ignored mine, Linus and Bartlomiej's
+>> comments about that we want the blkmq port being a separate patch(es)
+>> and then make the CMDQ patches on top. This worries me, because it
+>> seems like our messages don't reach you.
+>
+> Rubbish!  I gave a very good reason for keeping the CQE code in - it is
+> designed to work together.  I also pointed out that it is trivial to see the
+> CQE code and that it is all '+' lines anyway.
 
-You need to compare performance with and without the bounce buffer
-(particularly when memory is fragmented) to determine how much benefit you get.
+You gave reasons, but none of us bought them.
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+>
+> But not one question in response!  Where is a single example of why it is
+> difficult like it is.  Where are the questions!  Not even a request for
+> documentation!  How I am supposed to know what you do or don't understand if
+> you don't ask any questions! There is no evidence that you guys have read a
+> single line!
+
+I have and I have also tested it, finding it not working. As reported.
+
+However, I have also told you that I am having a *hard time* to review
+it, because it implements both blkmq and CMDQ in the same patch to
+code changes get complex.
+
+>
+> So, what are your plans for the patches?  What don't you understand?
+
+I have told you this several time, so has Linus and Bartlomiej.
+
+If you can split it up such the blkmq support comes first, then I can
+review/test and pick it up.
+
+Kind regards
+Uffe
