@@ -1,58 +1,239 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V8 00/14] mmc: Add Command Queue support
-Date: Tue, 24 Oct 2017 09:39:42 +0200
-Message-ID: <CAPDyKFrz3ko-vhHR8Yj+i2JhnE9gG6xViAbFyqO7cGxFmBxUMw@mail.gmail.com>
-References: <1505302814-19313-1-git-send-email-adrian.hunter@intel.com>
- <CAPDyKFr-XbMOmOkz1yXwmG1t=77eSsUO2kU7kKV0V1wrfcmWKg@mail.gmail.com>
- <2cd4c5fc-cc04-ba44-bea6-4547d84de3e2@intel.com> <CAPDyKFqE7UYOYrjykpV0GnQ+hg2oGXpALgn_8yKsQk19Y4nmSQ@mail.gmail.com>
- <9a789f9b-a8c4-8ae7-8f93-0d76f674bded@intel.com> <CAPDyKFoLa_aX3j693_tfkuaSKNvGB-ERdf2-9r4iF-+c0NnP9g@mail.gmail.com>
- <d41eee41-796a-db93-d388-b36123ecc364@intel.com> <CAPDyKFrMqXWagkPOtPk-PBThSUrSogUP=iL+9XeyD9E8qkp=bw@mail.gmail.com>
- <1b8bec1b-7340-cb89-65c0-e09b17037ca4@intel.com> <CAPDyKFqoMVemtCSHBzfK5YTqLsGEr_v_z7o=HOKCwEdVz0tH_w@mail.gmail.com>
- <376e4bb9-cc86-36ae-91b6-48fef69e059a@intel.com> <b594f4e0-06ea-c9fc-fc2d-dd93bc401c6f@intel.com>
- <0e1f4dd2-2ab6-115b-11fd-72c3be3c61a8@intel.com> <14a149bb-32a8-cd78-e8b7-42dd89bbe5b1@intel.com>
- <CAPDyKFq23Ak6g0HFRThvwToyxrPHsxZVgyw=BHhASdMMSb9JhQ@mail.gmail.com> <2ff0a8ab-62dd-d46f-8554-2b8214a78740@intel.com>
+From: Sean Wang <sean.wang@mediatek.com>
+Subject: Re: [PATCH v6 02/12] mmc: mediatek: add support of mt2701/mt2712
+Date: Tue, 24 Oct 2017 15:58:26 +0800
+Message-ID: <1508831906.29850.42.camel@mtkswgap22>
+References: <1508118399-21828-1-git-send-email-chaotian.jing@mediatek.com>
+         <1508118399-21828-3-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <2ff0a8ab-62dd-d46f-8554-2b8214a78740@intel.com>
-Sender: linux-block-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailgw01.mediatek.com ([210.61.82.183]:2386 "EHLO
+        mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1751343AbdJXH6b (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Oct 2017 03:58:31 -0400
+In-Reply-To: <1508118399-21828-3-git-send-email-chaotian.jing@mediatek.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chaotian Jing <chaotian.jing@mediatek.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, srv_heupstream@mediatek.com, Catalin Marinas <catalin.marinas@arm.com>, Linus Walleij <linus.walleij@linaro.org>, Will Deacon <will.deacon@arm.com>, linux-kernel@vger.kernel.org, yong mao <yong.mao@mediatek.com>, Phong LE <ple@baylibre.com>, Rob Herring <robh+dt@kernel.org>, linux-mediatek@lists.infradead.org, linux-arm-kernel@lists.infradead.org, Matthias Brugger <matthias.bgg@gmail.com>, linux-mmc@vger.kernel.org, Heiner Kallweit <hkallweit1@gmail.com>
 
-[...]
+Hi, 
 
->> However, you have completely ignored mine, Linus and Bartlomiej's
->> comments about that we want the blkmq port being a separate patch(es)
->> and then make the CMDQ patches on top. This worries me, because it
->> seems like our messages don't reach you.
->
-> Rubbish!  I gave a very good reason for keeping the CQE code in - it is
-> designed to work together.  I also pointed out that it is trivial to see the
-> CQE code and that it is all '+' lines anyway.
+I've tested those patches on the bpi-r2 board [1] and so far they work
+fine correctly. The below are some tests using lmdd on the board.
 
-You gave reasons, but none of us bought them.
+a. emmc with high-speed mode
 
->
-> But not one question in response!  Where is a single example of why it is
-> difficult like it is.  Where are the questions!  Not even a request for
-> documentation!  How I am supposed to know what you do or don't understand if
-> you don't ask any questions! There is no evidence that you guys have read a
-> single line!
+reading
+# lmdd of=internal if=/dev/mmcblk0p3 count=100000  fsync=1
+819.2000 MB in 34.5092 secs, 23.7386 MB/sec
 
-I have and I have also tested it, finding it not working. As reported.
+writing
+# lmdd if=internal of=/dev/mmcblk0p3 count=100000  fsync=1
+819.2000 MB in 42.9084 secs, 19.0918 MB/sec
 
-However, I have also told you that I am having a *hard time* to review
-it, because it implements both blkmq and CMDQ in the same patch to
-code changes get complex.
+b. sd card with Apacer 16G, high-speed speed
 
->
-> So, what are your plans for the patches?  What don't you understand?
+reading
+# lmdd of=internal if=/dev/mmcblk1p1 count=100000  fsync=1             
+819.2000 MB in 36.8891 secs, 22.2071 MB/sec
 
-I have told you this several time, so has Linus and Bartlomiej.
+writing
+# lmdd if=internal of=/dev/mmcblk1p1 count=100000  fsync=1
+819.2000 MB in 81.7611 secs, 10.0194 MB/sec
+                                                                                                       
+Since mmc on mt7623 is almost identical to to mt2701, once the whole
+series is being applied, I will change all nodes in dts with mt7623 to
+use mt2701-mmc fallbacks instead of mt8135-mmc ones.
 
-If you can split it up such the blkmq support comes first, then I can
-review/test and pick it up.
+Tested-by: Sean Wang <sean.wang@mediatek.com>
 
-Kind regards
-Uffe
+[1] http://forum.banana-pi.org/c/Banana-Pi-BPI-R2
+
+
+On Mon, 2017-10-16 at 09:46 +0800, Chaotian Jing wrote:
+> mt2701/mt2712 has 12bit clock div, which is not compatible with
+> mt8135/mt8173. and, some additional features will be added in
+> mt2701/mt2712, so that need distinguish it by comatibale name.
+> 
+> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+> ---
+>  drivers/mmc/host/mtk-sd.c | 82 +++++++++++++++++++++++++++++++++++++++--------
+>  1 file changed, 69 insertions(+), 13 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index 267f7ab..643c795 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -95,6 +95,9 @@
+>  #define MSDC_CFG_CKDIV          (0xff << 8)	/* RW */
+>  #define MSDC_CFG_CKMOD          (0x3 << 16)	/* RW */
+>  #define MSDC_CFG_HS400_CK_MODE  (0x1 << 18)	/* RW */
+> +#define MSDC_CFG_HS400_CK_MODE_EXTRA  (0x1 << 22)	/* RW */
+> +#define MSDC_CFG_CKDIV_EXTRA    (0xfff << 8)	/* RW */
+> +#define MSDC_CFG_CKMOD_EXTRA    (0x3 << 20)	/* RW */
+>  
+>  /* MSDC_IOCON mask */
+>  #define MSDC_IOCON_SDR104CKS    (0x1 << 0)	/* RW */
+> @@ -295,6 +298,10 @@ struct msdc_save_para {
+>  	u32 emmc50_cfg0;
+>  };
+>  
+> +struct mtk_mmc_compatible {
+> +	u8 clk_div_bits;
+> +};
+> +
+>  struct msdc_tune_para {
+>  	u32 iocon;
+>  	u32 pad_tune;
+> @@ -309,6 +316,7 @@ struct msdc_delay_phase {
+>  
+>  struct msdc_host {
+>  	struct device *dev;
+> +	const struct mtk_mmc_compatible *dev_comp;
+>  	struct mmc_host *mmc;	/* mmc structure */
+>  	int cmd_rsp;
+>  
+> @@ -350,6 +358,31 @@ struct msdc_host {
+>  	struct msdc_tune_para saved_tune_para; /* tune result of CMD21/CMD19 */
+>  };
+>  
+> +static const struct mtk_mmc_compatible mt8135_compat = {
+> +	.clk_div_bits = 8,
+> +};
+> +
+> +static const struct mtk_mmc_compatible mt8173_compat = {
+> +	.clk_div_bits = 8,
+> +};
+> +
+> +static const struct mtk_mmc_compatible mt2701_compat = {
+> +	.clk_div_bits = 12,
+> +};
+> +
+> +static const struct mtk_mmc_compatible mt2712_compat = {
+> +	.clk_div_bits = 12,
+> +};
+> +
+> +static const struct of_device_id msdc_of_ids[] = {
+> +	{ .compatible = "mediatek,mt8135-mmc", .data = &mt8135_compat},
+> +	{ .compatible = "mediatek,mt8173-mmc", .data = &mt8173_compat},
+> +	{ .compatible = "mediatek,mt2701-mmc", .data = &mt2701_compat},
+> +	{ .compatible = "mediatek,mt2712-mmc", .data = &mt2712_compat},
+> +	{}
+> +};
+> +MODULE_DEVICE_TABLE(of, msdc_of_ids);
+> +
+>  static void sdr_set_bits(void __iomem *reg, u32 bs)
+>  {
+>  	u32 val = readl(reg);
+> @@ -509,7 +542,12 @@ static void msdc_set_timeout(struct msdc_host *host, u32 ns, u32 clks)
+>  		timeout = (ns + clk_ns - 1) / clk_ns + clks;
+>  		/* in 1048576 sclk cycle unit */
+>  		timeout = (timeout + (0x1 << 20) - 1) >> 20;
+> -		sdr_get_field(host->base + MSDC_CFG, MSDC_CFG_CKMOD, &mode);
+> +		if (host->dev_comp->clk_div_bits == 8)
+> +			sdr_get_field(host->base + MSDC_CFG,
+> +				      MSDC_CFG_CKMOD, &mode);
+> +		else
+> +			sdr_get_field(host->base + MSDC_CFG,
+> +				      MSDC_CFG_CKMOD_EXTRA, &mode);
+>  		/*DDR mode will double the clk cycles for data timeout */
+>  		timeout = mode >= 2 ? timeout * 2 : timeout;
+>  		timeout = timeout > 1 ? timeout - 1 : 0;
+> @@ -548,7 +586,11 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
+>  
+>  	flags = readl(host->base + MSDC_INTEN);
+>  	sdr_clr_bits(host->base + MSDC_INTEN, flags);
+> -	sdr_clr_bits(host->base + MSDC_CFG, MSDC_CFG_HS400_CK_MODE);
+> +	if (host->dev_comp->clk_div_bits == 8)
+> +		sdr_clr_bits(host->base + MSDC_CFG, MSDC_CFG_HS400_CK_MODE);
+> +	else
+> +		sdr_clr_bits(host->base + MSDC_CFG,
+> +			     MSDC_CFG_HS400_CK_MODE_EXTRA);
+>  	if (timing == MMC_TIMING_UHS_DDR50 ||
+>  	    timing == MMC_TIMING_MMC_DDR52 ||
+>  	    timing == MMC_TIMING_MMC_HS400) {
+> @@ -568,8 +610,12 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
+>  
+>  		if (timing == MMC_TIMING_MMC_HS400 &&
+>  		    hz >= (host->src_clk_freq >> 1)) {
+> -			sdr_set_bits(host->base + MSDC_CFG,
+> -				     MSDC_CFG_HS400_CK_MODE);
+> +			if (host->dev_comp->clk_div_bits == 8)
+> +				sdr_set_bits(host->base + MSDC_CFG,
+> +					     MSDC_CFG_HS400_CK_MODE);
+> +			else
+> +				sdr_set_bits(host->base + MSDC_CFG,
+> +					     MSDC_CFG_HS400_CK_MODE_EXTRA);
+>  			sclk = host->src_clk_freq >> 1;
+>  			div = 0; /* div is ignore when bit18 is set */
+>  		}
+> @@ -587,8 +633,15 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
+>  			sclk = (host->src_clk_freq >> 2) / div;
+>  		}
+>  	}
+> -	sdr_set_field(host->base + MSDC_CFG, MSDC_CFG_CKMOD | MSDC_CFG_CKDIV,
+> -		      (mode << 8) | div);
+> +	if (host->dev_comp->clk_div_bits == 8)
+> +		sdr_set_field(host->base + MSDC_CFG,
+> +			      MSDC_CFG_CKMOD | MSDC_CFG_CKDIV,
+> +			      (mode << 8) | div);
+> +	else
+> +		sdr_set_field(host->base + MSDC_CFG,
+> +			      MSDC_CFG_CKMOD_EXTRA | MSDC_CFG_CKDIV_EXTRA,
+> +			      (mode << 12) | div);
+> +
+>  	sdr_set_bits(host->base + MSDC_CFG, MSDC_CFG_CKPDN);
+>  	while (!(readl(host->base + MSDC_CFG) & MSDC_CFG_CKSTB))
+>  		cpu_relax();
+> @@ -1617,12 +1670,17 @@ static int msdc_drv_probe(struct platform_device *pdev)
+>  	struct mmc_host *mmc;
+>  	struct msdc_host *host;
+>  	struct resource *res;
+> +	const struct of_device_id *of_id;
+>  	int ret;
+>  
+>  	if (!pdev->dev.of_node) {
+>  		dev_err(&pdev->dev, "No DT found\n");
+>  		return -EINVAL;
+>  	}
+> +
+> +	of_id = of_match_node(msdc_of_ids, pdev->dev.of_node);
+> +	if (!of_id)
+> +		return -EINVAL;
+>  	/* Allocate MMC host for this device */
+>  	mmc = mmc_alloc_host(sizeof(struct msdc_host), &pdev->dev);
+>  	if (!mmc)
+> @@ -1686,11 +1744,15 @@ static int msdc_drv_probe(struct platform_device *pdev)
+>  	msdc_of_property_parse(pdev, host);
+>  
+>  	host->dev = &pdev->dev;
+> +	host->dev_comp = of_id->data;
+>  	host->mmc = mmc;
+>  	host->src_clk_freq = clk_get_rate(host->src_clk);
+>  	/* Set host parameters to mmc */
+>  	mmc->ops = &mt_msdc_ops;
+> -	mmc->f_min = DIV_ROUND_UP(host->src_clk_freq, 4 * 255);
+> +	if (host->dev_comp->clk_div_bits == 8)
+> +		mmc->f_min = DIV_ROUND_UP(host->src_clk_freq, 4 * 255);
+> +	else
+> +		mmc->f_min = DIV_ROUND_UP(host->src_clk_freq, 4 * 4095);
+>  
+>  	mmc->caps |= MMC_CAP_ERASE | MMC_CAP_CMD23;
+>  	/* MMC core transfer sizes tunable parameters */
+> @@ -1839,12 +1901,6 @@ static int msdc_runtime_resume(struct device *dev)
+>  	SET_RUNTIME_PM_OPS(msdc_runtime_suspend, msdc_runtime_resume, NULL)
+>  };
+>  
+> -static const struct of_device_id msdc_of_ids[] = {
+> -	{   .compatible = "mediatek,mt8135-mmc", },
+> -	{}
+> -};
+> -MODULE_DEVICE_TABLE(of, msdc_of_ids);
+> -
+>  static struct platform_driver mt_msdc_driver = {
+>  	.probe = msdc_drv_probe,
+>  	.remove = msdc_drv_remove,
+
+
