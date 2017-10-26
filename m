@@ -1,87 +1,116 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: 4.14-rc2 on thinkpad x220: out of memory when inserting mmc card
-Date: Thu, 26 Oct 2017 15:44:55 +0200
-Message-ID: <CACRpkdbKuEA6d8647xYP8pWFAdZ92vTM-2WmWZ24ABkZ=bhYZA@mail.gmail.com>
-References: <20171001093704.GA12626@amd> <20171001102647.GA23908@amd>
- <201710011957.ICF15708.OOLOHFSQMFFVJt@I-love.SAKURA.ne.jp>
- <72c93a69-610f-027e-c028-379b97b6f388@intel.com> <20171002084131.GA24414@amd>
- <CACRpkdbatrt0Uxf8653iiV-OKkgcc0Ziog_L4oDVTJVNqtNN0Q@mail.gmail.com>
- <20171002130353.GA25433@amd> <184b3552-851c-7015-dd80-76f6eebc33cc@intel.com>
- <20171023093109.GI32228@amd> <CACRpkdaa6qq91+dQ43EZDvDefbM3tjwLX5e+nNZouwXM0xJ=4w@mail.gmail.com>
- <20171023212741.GA12782@amd>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V12 0/5] mmc: Add Command Queue support
+Date: Thu, 26 Oct 2017 16:49:03 +0300
+Message-ID: <c40aa526-3ea5-205a-ba7c-c1f4ae004f4b@intel.com>
+References: <1508834428-4360-1-git-send-email-adrian.hunter@intel.com>
+ <CACRpkdZQEkvLB_-6H12Uo4xizLEV93KrLReONUq=Fq=cryKz8A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f178.google.com ([209.85.223.178]:50018 "EHLO
-        mail-io0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932199AbdJZNo4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Oct 2017 09:44:56 -0400
-Received: by mail-io0-f178.google.com with SMTP id n137so5460404iod.6
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Oct 2017 06:44:56 -0700 (PDT)
-In-Reply-To: <20171023212741.GA12782@amd>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <CACRpkdZQEkvLB_-6H12Uo4xizLEV93KrLReONUq=Fq=cryKz8A@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-block-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-mmc@vger.kernel.org
-To: Pavel Machek <pavel@ucw.cz>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Tetsuo Handa <penguin-kernel@i-love.sakura.ne.jp>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-mm@kvack.org
 
-On Mon, Oct 23, 2017 at 11:27 PM, Pavel Machek <pavel@ucw.cz> wrote:
-> On Mon 2017-10-23 14:16:40, Linus Walleij wrote:
->> On Mon, Oct 23, 2017 at 11:31 AM, Pavel Machek <pavel@ucw.cz> wrote:
->>
->> >> > Thinkpad X220... how do I tell if I was using them? I believe so,
->> >> > because I uncovered bug in them before.
->> >>
->> >> You are certainly using bounce buffers.  What does lspci -knn show?
->> >
->> > Here is the output:
->> > 0d:00.0 System peripheral [0880]: Ricoh Co Ltd PCIe SDXC/MMC Host Controller [1180:e823] (rev 07)
->> >         Subsystem: Lenovo Device [17aa:21da]
->> >         Kernel driver in use: sdhci-pci
->>
->> So that is a Ricoh driver, one of the few that was supposed to benefit
->> from bounce buffers.
->>
->> Except that if you actually turned it on:
->> > [10994.302196] kworker/2:1: page allocation failure: order:4,
->> so it doesn't have enough memory to use these bounce buffers
->> anyway.
->
-> Well, look at archives: driver failed completely when allocation failed.
+On 26/10/17 16:32, Linus Walleij wrote:
+> On Tue, Oct 24, 2017 at 10:40 AM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> 
+>> Here is V12 of the hardware command queue patches without the software
+>> command queue patches, now using blk-mq and now with blk-mq support for
+>> non-CQE I/O.
+> 
+> Since I had my test setup going I gave this a spin with the same set
+> of tests that I used before/after my MQ patches.
+> 
+> It is using the same setup and same eMMC, but I hade to rebase onto
+> Ulf's very latest next branch to apply your patches.
+> 
+> I default-enabled multiqueue.
+> 
+> Results:
+> 
+> sync
+> echo 3 > /proc/sys/vm/drop_caches
+> sync
+> time dd if=/dev/mmcblk3 of=/dev/null bs=1M count=1024
+> 1024+0 records in
+> 1024+0 records out
+> 1073741824 bytes (1.0GB) copied, 24.251922 seconds, 42.2MB/s
+> real    0m 24.25s
+> user    0m 0.03s
+> sys     0m 3.80s
+> 
+> mount /dev/mmcblk3p1 /mnt/
+> cd /mnt/
+> sync
+> echo 3 > /proc/sys/vm/drop_caches
+> sync
+> time find . > /dev/null
+> real    0m 3.24s
+> user    0m 0.22s
+> sys     0m 1.23s
+> 
+> sync
+> echo 3 > /proc/sys/vm/drop_caches
+> sync
+> iozone -az -i0 -i1 -i2 -s 20m -I -f /mnt/foo.test
+> 
+>                                                    random    random
+>    kB  reclen    write  rewrite    read    reread    read     write
+> 20480       4     1615     1571     6612     6714     6494      531
+> 20480       8     2143     2295    11559    11563    11499     1164
+> 20480      16     3894     4202    17826    17823    17755     1369
+> 20480      32     5816     7489    23741    23759    23709     3016
+> 20480      64     7393     9167    27532    27526    27502     3591
+> 20480     128     7328     8097    29184    29161    29159     5592
+> 20480     256     7194     8752    29424    29434    29424     6700
+> 20480     512     8984     9930    29903    29911    29909     7420
+> 20480    1024     7072     7446    27684    27685    27681     7444
+> 20480    2048     6840     8199    27398    27420    27418     6766
+> 20480    4096     8137     6805    28091    28089    28093     8209
+> 20480    8192     7255     7485    28386    28384    28383     7479
+> 20480   16384     7078     7448    28584    28585    28585     7447
+> 
+> In short: no performance regressions.
 
-What I mean is that the allocation probably failed if you
-explicitly turned on the bounce buffer also *before*
-my patches (like if you were shopping for performance with
-the Ricoh driver and turn on bounce buffers) but I haven't tested
-it so what do I know.
+You really need to test cards that are fast.  A decent UHS-I SD card can do
+over 80 MB/s for reads and of course HS400 eMMC can do over 300 MB/s.
 
-You could check out b5b6a5f4f06c0624886b2166e2e8580327f0b943
-and enable MMC_BLOCK_BOUNCE and see what happens.
-And/or benchmark to see if it was actually improving your
-system or not.
+> 
+> Performance-wise this is on par with my own patch set for MQ.
+> 
+> As you know my pet peeve is "enable MQ by default" and I see no
+> reason from a performance perspective not to enable MQ by default
+> on this patch set or mine for that matter.
 
->> I'm now feel it was the right thing to delete them.
->
-> Which means I may have been geting benefit -- when it worked. I
-> believe solution is to allocate at driver probing time.
+That is a side-issue.  A single small patch can change that.
 
-I think the right way to get this benefit is to enhance the
-Ricoh SDMA path with something similar to:
-commit 0ccd76d4c236 ("omap_hsmmc: Implement scatter-gather
-       emulation")
+> 
+>> While we should look at changing blk-mq to give better workqueue performance,
+>> a bigger gain is likely to be made by adding a new host API to enable the
+>> next already-prepared request to be issued directly from within ->done()
+>> callback of the current request.
+> 
+> My patch series switches the stack around to make it possible
+> to do this. But it doesn't go the whole way to complete the requests
+> from interrupt context.
+> 
+> Since we have to send commands for retune etc request finalization
+> cannot easily be done from interrupt context.
 
-What it does is loop over the sglist and smatter out one DMA
-transfer per sg index.
+Re-tuning and background operations are rare and slow, so there is no reason
+to try to start them from interrupt context.
 
-It's likely faster than copying back and forth to a bounce
-buffer even if there is a deal of HW talk back and forth.
+> 
+> But I am thinking about testing to hack it
+> using some ugly approaches ... like assuming we don't need any
+> retune etc and just say all is fine and optimistically complete the
+> request directly in the interrupt handler if all was OK and wait
+> for errors to happen before retuning.
 
-> (OTOH ... SPI is slow compared to rest of the system, right? Where
-> does the benefit come from?)
-
-I do not think you will see much performance improvement
-on an SPI-based host. Pierre just vaguely remembered "some
-Ricoh controllers" would get a benefit from bounce buffers,
-no specifics, sorry...
-
-Yours,
-Linus Walleij
+It already works that way.  Re-tuning happens before you start a request.
+We prevent re-tuning in between dependent requests, like between starting a
+transfer and CMD13 polling for completion.
