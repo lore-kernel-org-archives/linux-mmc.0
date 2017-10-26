@@ -1,56 +1,77 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH V12 0/5] mmc: Add Command Queue support
-Date: Thu, 26 Oct 2017 16:25:15 +0200
-Message-ID: <CACRpkdaLifRdH0hcnXX1LzC_7TqrhSgmYSvYvRBy_j9WbXoRbw@mail.gmail.com>
-References: <1508834428-4360-1-git-send-email-adrian.hunter@intel.com>
- <CACRpkdZQEkvLB_-6H12Uo4xizLEV93KrLReONUq=Fq=cryKz8A@mail.gmail.com> <c40aa526-3ea5-205a-ba7c-c1f4ae004f4b@intel.com>
+From: "Hunter, Adrian" <adrian.hunter@intel.com>
+Subject: RE: [PATCH 00/12 v4] multiqueue for MMC/SD
+Date: Thu, 26 Oct 2017 19:27:28 +0000
+Message-ID: <363DA0ED52042842948283D2FC38E4649BF396BD@IRSMSX106.ger.corp.intel.com>
+References: <20171026125757.10200-1-linus.walleij@linaro.org>
+ <0ab6b0b7-74e7-f7d3-9137-baf259282914@intel.com>
+ <CACRpkdb_ZN+3YKYJ2L-5JNt1SgUqyCS3G-HER4e+LRcV64Jfag@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f170.google.com ([209.85.223.170]:53671 "EHLO
-        mail-io0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932386AbdJZOZQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Oct 2017 10:25:16 -0400
-Received: by mail-io0-f170.google.com with SMTP id 189so5736800iow.10
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Oct 2017 07:25:16 -0700 (PDT)
-In-Reply-To: <c40aa526-3ea5-205a-ba7c-c1f4ae004f4b@intel.com>
+Received: from mga02.intel.com ([134.134.136.20]:20028 "EHLO mga02.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932326AbdJZT1c (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 26 Oct 2017 15:27:32 -0400
+In-Reply-To: <CACRpkdb_ZN+3YKYJ2L-5JNt1SgUqyCS3G-HER4e+LRcV64Jfag@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-block <linux-block@vger.kernel.org>, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Avri Altman <Avri.Altman@sandisk.com>
 
-On Thu, Oct 26, 2017 at 3:49 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 26/10/17 16:32, Linus Walleij wrote:
-
->> My patch series switches the stack around to make it possible
->> to do this. But it doesn't go the whole way to complete the requests
->> from interrupt context.
->>
->> Since we have to send commands for retune etc request finalization
->> cannot easily be done from interrupt context.
->
-> Re-tuning and background operations are rare and slow, so there is no reason
-> to try to start them from interrupt context.
-
-OK I will try to get them out of the way and see what happens,
-hehe :)
-
-What I mean is that we were checking - on every command -
-if BKOPS or retune needs to happen. And then doing it. Thus
-all was done in process context.
-
->> But I am thinking about testing to hack it
->> using some ugly approaches ... like assuming we don't need any
->> retune etc and just say all is fine and optimistically complete the
->> request directly in the interrupt handler if all was OK and wait
->> for errors to happen before retuning.
->
-> It already works that way.  Re-tuning happens before you start a request.
-> We prevent re-tuning in between dependent requests, like between starting a
-> transfer and CMD13 polling for completion.
-
-Ah that is what these if()s do ... right. I'll see if I can get around
-this then.
-
-Yours,
-Linus Walleij
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBMaW51cyBXYWxsZWlqIFttYWls
+dG86bGludXMud2FsbGVpakBsaW5hcm8ub3JnXQ0KPiBTZW50OiBUaHVyc2RheSwgT2N0b2JlciAy
+NiwgMjAxNyA1OjIwIFBNDQo+IFRvOiBIdW50ZXIsIEFkcmlhbiA8YWRyaWFuLmh1bnRlckBpbnRl
+bC5jb20+DQo+IENjOiBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOyBVbGYgSGFuc3NvbiA8dWxm
+LmhhbnNzb25AbGluYXJvLm9yZz47DQo+IGxpbnV4LWJsb2NrIDxsaW51eC1ibG9ja0B2Z2VyLmtl
+cm5lbC5vcmc+OyBKZW5zIEF4Ym9lIDxheGJvZUBrZXJuZWwuZGs+Ow0KPiBDaHJpc3RvcGggSGVs
+bHdpZyA8aGNoQGxzdC5kZT47IEFybmQgQmVyZ21hbm4gPGFybmRAYXJuZGIuZGU+Ow0KPiBCYXJ0
+bG9taWVqIFpvbG5pZXJraWV3aWN6IDxiLnpvbG5pZXJraWVAc2Ftc3VuZy5jb20+OyBQYW9sbyBW
+YWxlbnRlDQo+IDxwYW9sby52YWxlbnRlQGxpbmFyby5vcmc+OyBBdnJpIEFsdG1hbiA8QXZyaS5B
+bHRtYW5Ac2FuZGlzay5jb20+DQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0ggMDAvMTIgdjRdIG11bHRp
+cXVldWUgZm9yIE1NQy9TRA0KPiANCj4gT24gVGh1LCBPY3QgMjYsIDIwMTcgYXQgMzozNCBQTSwg
+QWRyaWFuIEh1bnRlciA8YWRyaWFuLmh1bnRlckBpbnRlbC5jb20+DQo+IHdyb3RlOg0KPiA+IE9u
+IDI2LzEwLzE3IDE1OjU3LCBMaW51cyBXYWxsZWlqIHdyb3RlOg0KPiA+PiBJbiBteSBvcGluaW9u
+IHRoaXMgaXMgYWxzbyBhIGJldHRlciBmaXQgZm9yIGNvbW1hbmQgcXVldWV1aW5nLg0KPiA+DQo+
+ID4gTm90IHRydWUuICBDUUUgc3VwcG9ydCB3b3JrZWQgcGVyZmVjdGx5IGJlZm9yZSBibGstbXEg
+YW5kIGRpZCBub3QNCj4gPiBkZXBlbmQgb24gYmxrLW1xIGluIGFueSB3YXkuICBPYnZpb3VzbHkg
+dGhlIGN1cnJlbnQgQ1FFIHBhdGNoIHNldA0KPiA+IGFjdHVhbGx5IGltcGxlbWVudHMgdGhlIENR
+RSByZXF1aXJlbWVudHMgZm9yIGJsay1tcSAtIHdoaWNoIHRoaXMgcGF0Y2ggc2V0DQo+IGRvZXMg
+bm90Lg0KPiANCj4gV2hhdCBJIG1lYW4gaXMgdGhhdCB0aGUgQ1FFIGNvZGUgd2lsbCBsaWtlbHkg
+bG9vayBiZXR0ZXIgb24gdG9wIG9mIHRoZXNlDQo+IHJlZmFjdG9yaW5ncy4NCj4gDQo+IEJ1dCBh
+cyBJIHNheSBpdCBpcyBhIG1hdHRlciBvZiB0YXN0ZS4gSSBqdXN0IGxvdmUgdGhlIGxvb2tzIG9m
+IG15IG93biBjb2RlIGFzDQo+IG11Y2ggYXMgdGhlIG5leHQgcHJvZ3JhbW1lciBzbyBJIGNhbid0
+IGp1ZGdlIHRoYXQuIExldCdzIHNlZSB3aGF0IHRoZQ0KPiByZXZpZXdlcnMgc2F5Lg0KDQpJdCBk
+b2Vzbid0IGxvb2sgcmVhZHkuICBUaGVyZSBzZWVtcyBzdGlsbCB0byBiZSAyIHRhc2sgc3dpdGNo
+ZXMgYmV0d2Vlbg0KZWFjaCB0cmFuc2Zlci4gIG1tY19ibGtfcndfZG9uZV9lcnJvcigpIGlzIHN0
+aWxsIHVzaW5nIHRoZSBtZXNzeSBlcnJvcg0KaGFuZGxpbmcgYW5kIGRvZXNu4oCZdCBoYW5kbGUg
+cmV0cmllcyBlLmcuICdyZXRyeScgaXMgYSBsb2NhbCB2YXJpYWJsZSBzbyBpdCBjYW4ndA0KY291
+bnQgdGhlIG51bWJlciBvZiByZXRyaWVzIG5vdyB0aGF0IHRoZXJlIGlzIG5vIGxvb3AuDQoNCj4g
+Pj4gSXQgc291bmRzIHNpbXBsZSBidXQgSSBiZXQgdGhpcyBkcml2ZXMgYSB0cnVjayB0aHJvdWdo
+IEFkcmlhbnMgcGF0Y2gNCj4gPj4gc2VyaWVzLiBTb3JyeS4gOigNCj4gPg0KPiA+IEkgd2FpdGVk
+IGEgbG9uZyB0aW1lIGZvciB5b3VyIHBhdGNoZXMgYnV0IEkgaGFkIHRvIGdpdmUgdXAgd2FpdGlu
+Zw0KPiA+IHdoZW4gVWxmIGJlbGF0ZWQgaW5zaXN0ZWQgb24gYmxrLW1xIGJlZm9yZSBDUUUuICBJ
+IGFtIG5vdCBzdXJlIHdoYXQNCj4gPiB5b3UgYXJlIGV4cGVjdGluZyBub3cgaXQgc2VlbXMgdG9v
+IGxhdGUuDQo+IA0KPiBUb28gbGF0ZSBmb3Igd2hhdD8gSXQncyBqdXN0IGEgcGF0Y2ggc2V0LCBJ
+IGRvbid0IHJlYWxseSBoYXZlIGEgZGVhZGxpbmUgZm9yIHRoaXMgb3INCj4gYW55dGhpbmcuIEFz
+IEkgZXhwbGFpbmVkIGFib3ZlIEkgaGF2ZSBiZWVuIHdvcmtpbmcgb24gdGhpcyBhbGwgdGhlIHRp
+bWUsIHRoZQ0KPiBwcm9ibGVtIHdhcyB0aGF0IEkgd2FzL2FtIG5vdCBzbWFydCBlbm91Z2ggdG8g
+ZmluZCB0aGF0IHNvbHV0aW9uIGZvciBob3N0DQo+IGNsYWltaW5nIGJ5IGNvbnRleHQuDQoNClRv
+byBsYXRlIHRvIGdvIGJlZm9yZSBDUUUuICBBbGwgdGhlIGJsay1tcSB3b3JrIGlzIG5vdyBpbiB0
+aGUgQ1FFIHBhdGNoc2V0Lg0KDQo+IA0KPiBUaGUgaG9zdCBjbGFpbWluZyBieSBjb250ZXh0IHdh
+cyBtZXJnZWQgYSBtb250aCBhZ28gYW5kIG5vdyBJIGhhdmUNCj4gdW5kZXJzdG9vZCB0aGF0IEkg
+Y2FuIHVzZSB0aGF0IGFuZCByZWJhc2VkIG15IHBhdGNoZXMgb24gaXQuIFNsb3cgbGVhcm5lciwg
+SQ0KPiBndWVzcy4NCj4gDQo+IElmIHlvdSBmZWVsIGl0IGlzIHVuZ3JhdGVmdWwgdGhhdCB5b3Ug
+aGF2ZSBwdXQgaW4gc28gbXVjaCB3b3JrIGFuZCB0aGluZ3MgYXJlDQo+IG5vdCBnZXR0aW5nIG1l
+cmdlZCwgYW5kIHlvdSBmZWVsIHlvdXIgcGF0Y2hlcyBkZXNlcnZlIHRvIGJlIG1lcmdlZCBmaXJz
+dA0KPiAoYmVjYXVzZSBvZiBodW1hbiBuYXR1cmUgcmVhc29ucykgSSBjYW4gZW1wYXRoaXplIHdp
+dGggdGhhdC4gSXQncyBzYWQgdGhhdA0KPiB5b3VyIHBhdGNoZXMgYXJlIGF0IHYxMi4gQWxzbyBJ
+IHNlZSB0aGF0IHBhdGNoIDQgYmVhcnMgdGhlIHNpZ25vZmZzIG9mIGENCj4gc2lnbmlmaWNhbnQg
+dGVhbSBhdCBDb2RlQXVyb3JhLCBzbyB0aGV5IGFyZSBsaWtlbHkgYXMgaW1wYXRpZW50Lg0KDQpJ
+dCBpcyBpbXBvcnRhbnQgdGhhdCB5b3UgdW5kZXJzdGFuZCB0aGF0IHRoaXMgaGFzIG5vdGhpbmcg
+dG8gZG8gd2l0aA0KImh1bWFuIG5hdHVyZSByZWFzb25zIi4gICAgTGludXggZGlzdHJpYnV0aW9u
+cyB1c2UgdXBzdHJlYW0ga2VybmVscy4gDQpDaHJvbWVPUyAgaGFzIGFuICJ1cHN0cmVhbSBmaXJz
+dCIgcG9saWN5LiAgRGVsYXlpbmcgZmVhdHVyZXMgZm9yIGxvbmcNCnBlcmlvZHMgaGFzIHJlYWwt
+d29ybGQgY29uc2VxdWVuY2VzLiAgV2hlbiBwZW9wbGUgYXNrLCB3aGF0IGtlcm5lbA0Kc2hvdWxk
+IHRoZXkgdXNlLCB3ZSBleHBlY3QgdG8gcmVwbHksIGp1c3QgdXNlIG1haW5saW5lLg0KDQo=
