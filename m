@@ -1,87 +1,87 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 00/12 v4] multiqueue for MMC/SD
-Date: Thu, 26 Oct 2017 16:34:35 +0300
-Message-ID: <0ab6b0b7-74e7-f7d3-9137-baf259282914@intel.com>
-References: <20171026125757.10200-1-linus.walleij@linaro.org>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: 4.14-rc2 on thinkpad x220: out of memory when inserting mmc card
+Date: Thu, 26 Oct 2017 15:44:55 +0200
+Message-ID: <CACRpkdbKuEA6d8647xYP8pWFAdZ92vTM-2WmWZ24ABkZ=bhYZA@mail.gmail.com>
+References: <20171001093704.GA12626@amd> <20171001102647.GA23908@amd>
+ <201710011957.ICF15708.OOLOHFSQMFFVJt@I-love.SAKURA.ne.jp>
+ <72c93a69-610f-027e-c028-379b97b6f388@intel.com> <20171002084131.GA24414@amd>
+ <CACRpkdbatrt0Uxf8653iiV-OKkgcc0Ziog_L4oDVTJVNqtNN0Q@mail.gmail.com>
+ <20171002130353.GA25433@amd> <184b3552-851c-7015-dd80-76f6eebc33cc@intel.com>
+ <20171023093109.GI32228@amd> <CACRpkdaa6qq91+dQ43EZDvDefbM3tjwLX5e+nNZouwXM0xJ=4w@mail.gmail.com>
+ <20171023212741.GA12782@amd>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:46462 "EHLO mga09.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932198AbdJZNld (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 26 Oct 2017 09:41:33 -0400
-In-Reply-To: <20171026125757.10200-1-linus.walleij@linaro.org>
-Content-Language: en-US
+Received: from mail-io0-f178.google.com ([209.85.223.178]:50018 "EHLO
+        mail-io0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932199AbdJZNo4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Oct 2017 09:44:56 -0400
+Received: by mail-io0-f178.google.com with SMTP id n137so5460404iod.6
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Oct 2017 06:44:56 -0700 (PDT)
+In-Reply-To: <20171023212741.GA12782@amd>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Avri Altman <Avri.Altman@sandisk.com>
+To: Pavel Machek <pavel@ucw.cz>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Tetsuo Handa <penguin-kernel@i-love.sakura.ne.jp>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-mm@kvack.org
 
-On 26/10/17 15:57, Linus Walleij wrote:
-> This switches the MMC/SD stack over to unconditionally
-> using the multiqueue block interface for block access.
-> This modernizes the MMC/SD stack and makes it possible
-> to enable BFQ scheduling on these single-queue devices.
-> 
-> This is the v4 version of this v3 patch set from february:
-> https://marc.info/?l=linux-mmc&m=148665788227015&w=2
-> 
-> The patches are available in a git branch:
-> https://git.kernel.org/pub/scm/linux/kernel/git/linusw/linux-stericsson.git/log/?h=mmc-mq-v4.14-rc4
-> 
-> You can pull it to a clean kernel tree like this:
-> git checkout -b mmc-test v4.14-rc4
-> git pull git://git.kernel.org/pub/scm/linux/kernel/git/linusw/linux-stericsson.git mmc-mq-v4.14-rc4
-> 
-> I have now worked on it for more than a year. I was side
-> tracked to clean up some code, move request allocation to
-> be handled by the block layer, delete bounce buffer handling
-> and refactoring the RPMB support. With the changes to request
-> allocation, the patch set is a better fit and has shrunk
-> from 16 to 12 patches as a result.
+On Mon, Oct 23, 2017 at 11:27 PM, Pavel Machek <pavel@ucw.cz> wrote:
+> On Mon 2017-10-23 14:16:40, Linus Walleij wrote:
+>> On Mon, Oct 23, 2017 at 11:31 AM, Pavel Machek <pavel@ucw.cz> wrote:
+>>
+>> >> > Thinkpad X220... how do I tell if I was using them? I believe so,
+>> >> > because I uncovered bug in them before.
+>> >>
+>> >> You are certainly using bounce buffers.  What does lspci -knn show?
+>> >
+>> > Here is the output:
+>> > 0d:00.0 System peripheral [0880]: Ricoh Co Ltd PCIe SDXC/MMC Host Controller [1180:e823] (rev 07)
+>> >         Subsystem: Lenovo Device [17aa:21da]
+>> >         Kernel driver in use: sdhci-pci
+>>
+>> So that is a Ricoh driver, one of the few that was supposed to benefit
+>> from bounce buffers.
+>>
+>> Except that if you actually turned it on:
+>> > [10994.302196] kworker/2:1: page allocation failure: order:4,
+>> so it doesn't have enough memory to use these bounce buffers
+>> anyway.
+>
+> Well, look at archives: driver failed completely when allocation failed.
 
-None of which was necessary for blk-mq support.
+What I mean is that the allocation probably failed if you
+explicitly turned on the bounce buffer also *before*
+my patches (like if you were shopping for performance with
+the Ricoh driver and turn on bounce buffers) but I haven't tested
+it so what do I know.
 
-> 
-> It is still quite invasive. Yet it is something I think would
-> be nice to merge for v4.16...
-> 
-> The rationale for this approach was Arnd's suggestion to try to
-> switch the MMC/SD stack around so as to complete requests as
-> quickly as possible when they return from the device driver
-> so that new requests can be issued. We are doing this now:
-> the polling loop that was pulling NULL out of the request
-> queue and driving the pipeline with a loop is gone with
-> the next-to last patch ("block: issue requests in massive
-> parallel"). This sets the stage for MQ to go in and hammer
-> requests on the asynchronous issuing layer.
-> 
-> We use the trick to set the queue depth to 2 to get two
-> parallel requests pushed down to the host. I tried to set this
-> to 4, the code survives it, the queue just have three items
-> waiting to be submitted all the time.
+You could check out b5b6a5f4f06c0624886b2166e2e8580327f0b943
+and enable MMC_BLOCK_BOUNCE and see what happens.
+And/or benchmark to see if it was actually improving your
+system or not.
 
-The queue depth also sets the number of requests, so you are strangling the
-I/O scheduler.
+>> I'm now feel it was the right thing to delete them.
+>
+> Which means I may have been geting benefit -- when it worked. I
+> believe solution is to allocate at driver probing time.
 
-> 
-> In my opinion this is also a better fit for command queueuing.
+I think the right way to get this benefit is to enhance the
+Ricoh SDMA path with something similar to:
+commit 0ccd76d4c236 ("omap_hsmmc: Implement scatter-gather
+       emulation")
 
-Not true.  CQE support worked perfectly before blk-mq and did not depend on
-blk-mq in any way.  Obviously the current CQE patch set actually implements
-the CQE requirements for blk-mq - which this patch set does not.
+What it does is loop over the sglist and smatter out one DMA
+transfer per sg index.
 
-> Handling command queueing needs to happen in the asynchronous
-> submission codepath, so instead of waiting on a pending
-> areq, we just stack up requests in the command queue.
+It's likely faster than copying back and forth to a bounce
+buffer even if there is a deal of HW talk back and forth.
 
-That is how CQE has always worked.  It worked that way just fine without blk-mq.
+> (OTOH ... SPI is slow compared to rest of the system, right? Where
+> does the benefit come from?)
 
-> 
-> It sounds simple but I bet this drives a truck through Adrians
-> patch series. Sorry. :(
+I do not think you will see much performance improvement
+on an SPI-based host. Pierre just vaguely remembered "some
+Ricoh controllers" would get a benefit from bounce buffers,
+no specifics, sorry...
 
-I waited a long time for your patches but I had to give up waiting when Ulf
-belated insisted on blk-mq before CQE.  I am not sure what you are expecting
-now it seems too late.
+Yours,
+Linus Walleij
