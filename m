@@ -1,116 +1,128 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V12 0/5] mmc: Add Command Queue support
-Date: Thu, 26 Oct 2017 16:49:03 +0300
-Message-ID: <c40aa526-3ea5-205a-ba7c-c1f4ae004f4b@intel.com>
-References: <1508834428-4360-1-git-send-email-adrian.hunter@intel.com>
- <CACRpkdZQEkvLB_-6H12Uo4xizLEV93KrLReONUq=Fq=cryKz8A@mail.gmail.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH 00/12 v4] multiqueue for MMC/SD
+Date: Thu, 26 Oct 2017 16:20:13 +0200
+Message-ID: <CACRpkdb_ZN+3YKYJ2L-5JNt1SgUqyCS3G-HER4e+LRcV64Jfag@mail.gmail.com>
+References: <20171026125757.10200-1-linus.walleij@linaro.org> <0ab6b0b7-74e7-f7d3-9137-baf259282914@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <CACRpkdZQEkvLB_-6H12Uo4xizLEV93KrLReONUq=Fq=cryKz8A@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-block-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-io0-f181.google.com ([209.85.223.181]:54897 "EHLO
+        mail-io0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932370AbdJZOUP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Oct 2017 10:20:15 -0400
+Received: by mail-io0-f181.google.com with SMTP id e89so5695949ioi.11
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Oct 2017 07:20:14 -0700 (PDT)
+In-Reply-To: <0ab6b0b7-74e7-f7d3-9137-baf259282914@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-block <linux-block@vger.kernel.org>, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Avri Altman <Avri.Altman@sandisk.com>
 
-On 26/10/17 16:32, Linus Walleij wrote:
-> On Tue, Oct 24, 2017 at 10:40 AM, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> 
->> Here is V12 of the hardware command queue patches without the software
->> command queue patches, now using blk-mq and now with blk-mq support for
->> non-CQE I/O.
-> 
-> Since I had my test setup going I gave this a spin with the same set
-> of tests that I used before/after my MQ patches.
-> 
-> It is using the same setup and same eMMC, but I hade to rebase onto
-> Ulf's very latest next branch to apply your patches.
-> 
-> I default-enabled multiqueue.
-> 
-> Results:
-> 
-> sync
-> echo 3 > /proc/sys/vm/drop_caches
-> sync
-> time dd if=/dev/mmcblk3 of=/dev/null bs=1M count=1024
-> 1024+0 records in
-> 1024+0 records out
-> 1073741824 bytes (1.0GB) copied, 24.251922 seconds, 42.2MB/s
-> real    0m 24.25s
-> user    0m 0.03s
-> sys     0m 3.80s
-> 
-> mount /dev/mmcblk3p1 /mnt/
-> cd /mnt/
-> sync
-> echo 3 > /proc/sys/vm/drop_caches
-> sync
-> time find . > /dev/null
-> real    0m 3.24s
-> user    0m 0.22s
-> sys     0m 1.23s
-> 
-> sync
-> echo 3 > /proc/sys/vm/drop_caches
-> sync
-> iozone -az -i0 -i1 -i2 -s 20m -I -f /mnt/foo.test
-> 
->                                                    random    random
->    kB  reclen    write  rewrite    read    reread    read     write
-> 20480       4     1615     1571     6612     6714     6494      531
-> 20480       8     2143     2295    11559    11563    11499     1164
-> 20480      16     3894     4202    17826    17823    17755     1369
-> 20480      32     5816     7489    23741    23759    23709     3016
-> 20480      64     7393     9167    27532    27526    27502     3591
-> 20480     128     7328     8097    29184    29161    29159     5592
-> 20480     256     7194     8752    29424    29434    29424     6700
-> 20480     512     8984     9930    29903    29911    29909     7420
-> 20480    1024     7072     7446    27684    27685    27681     7444
-> 20480    2048     6840     8199    27398    27420    27418     6766
-> 20480    4096     8137     6805    28091    28089    28093     8209
-> 20480    8192     7255     7485    28386    28384    28383     7479
-> 20480   16384     7078     7448    28584    28585    28585     7447
-> 
-> In short: no performance regressions.
+On Thu, Oct 26, 2017 at 3:34 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 26/10/17 15:57, Linus Walleij wrote:
 
-You really need to test cards that are fast.  A decent UHS-I SD card can do
-over 80 MB/s for reads and of course HS400 eMMC can do over 300 MB/s.
+>> I have now worked on it for more than a year. I was side
+>> tracked to clean up some code, move request allocation to
+>> be handled by the block layer, delete bounce buffer handling
+>> and refactoring the RPMB support. With the changes to request
+>> allocation, the patch set is a better fit and has shrunk
+>> from 16 to 12 patches as a result.
+>
+> None of which was necessary for blk-mq support.
 
-> 
-> Performance-wise this is on par with my own patch set for MQ.
-> 
-> As you know my pet peeve is "enable MQ by default" and I see no
-> reason from a performance perspective not to enable MQ by default
-> on this patch set or mine for that matter.
+I was not smart enough to realize that it was possible to do what
+you did in
+commit d685f5d5fcf75c30ef009771d3067f7438cd8baf
+"mmc: core: Introduce host claiming by context"
+this simple and clever solution simply didn't occur to me
+at all.
 
-That is a side-issue.  A single small patch can change that.
+And now it uses that solution, as you can see :)
 
-> 
->> While we should look at changing blk-mq to give better workqueue performance,
->> a bigger gain is likely to be made by adding a new host API to enable the
->> next already-prepared request to be issued directly from within ->done()
->> callback of the current request.
-> 
-> My patch series switches the stack around to make it possible
-> to do this. But it doesn't go the whole way to complete the requests
-> from interrupt context.
-> 
-> Since we have to send commands for retune etc request finalization
-> cannot easily be done from interrupt context.
+But since I didn't have that simple solution, the other
+solution was to get rid of the lock altogether (which we should
+anyways...) getting rid of the RPMB "partition" for example
+removes some locks. (I guess I still will have to go on and
+find a solution for the boot and generic partitions but it's no
+blocker for MQ anymore.)
 
-Re-tuning and background operations are rare and slow, so there is no reason
-to try to start them from interrupt context.
+My patch set was dependent on solving that. As I already wrote
+to you on sep 13:
+https://marc.info/?l=linux-mmc&m=150607944524752&w=2
 
-> 
-> But I am thinking about testing to hack it
-> using some ugly approaches ... like assuming we don't need any
-> retune etc and just say all is fine and optimistically complete the
-> request directly in the interrupt handler if all was OK and wait
-> for errors to happen before retuning.
+My patches for allocating the struct mmc_queue_req from the
+block layer was actually originally a part of this series
+so the old patches
+  mmc: queue: issue struct mmc_queue_req items
+  mmc: queue: get/put struct mmc_queue_req
+was doing a stupid homebrewn solution to what the block
+layer already can do, mea culpa. (Yeah I was educating
+myself in the block layer too...)
 
-It already works that way.  Re-tuning happens before you start a request.
-We prevent re-tuning in between dependent requests, like between starting a
-transfer and CMD13 polling for completion.
+Anyways, all of this happened in the context of moving
+forward with my MQ patch set, not as random activity.
+
+Now it looks like I'm defending myself from a project leader,
+haha :D
+
+Well for better or worse, this was how I was working.
+
+>> We use the trick to set the queue depth to 2 to get two
+>> parallel requests pushed down to the host. I tried to set this
+>> to 4, the code survives it, the queue just have three items
+>> waiting to be submitted all the time.
+>
+> The queue depth also sets the number of requests, so you are strangling the
+> I/O scheduler.
+
+Yup. Just did it to see if it survives.
+
+>> In my opinion this is also a better fit for command queueuing.
+>
+> Not true.  CQE support worked perfectly before blk-mq and did not depend on
+> blk-mq in any way.  Obviously the current CQE patch set actually implements
+> the CQE requirements for blk-mq - which this patch set does not.
+
+What I mean is that the CQE code will likely look better on top
+of these refactorings.
+
+But as I say it is a matter of taste. I just love the looks of my own code
+as much as the next programmer so I can't judge that. Let's see what
+the reviewers say.
+
+>> Handling command queueing needs to happen in the asynchronous
+>> submission codepath, so instead of waiting on a pending
+>> areq, we just stack up requests in the command queue.
+>
+> That is how CQE has always worked.  It worked that way just fine without blk-mq.
+
+Okay nice.
+
+>> It sounds simple but I bet this drives a truck through Adrians
+>> patch series. Sorry. :(
+>
+> I waited a long time for your patches but I had to give up waiting when Ulf
+> belated insisted on blk-mq before CQE.  I am not sure what you are expecting
+> now it seems too late.
+
+Too late for what? It's just a patch set, I don't really have a deadline
+for this or anything. As I explained above I have
+been working on this all the time, the problem was that I was/am not
+smart enough to find that solution for host claiming by context.
+
+The host claiming by context was merged a month ago and now I have
+understood that I can use that and rebased my patches on it. Slow
+learner, I guess.
+
+If you feel it is ungrateful that you have put in so much work and things
+are not getting merged, and you feel your patches deserve to be
+merged first (because of human nature reasons) I can empathize with
+that. It's sad that your patches are at v12. Also I see that patch 4 bears
+the signoffs of a significant team at CodeAurora, so they are likely
+as impatient.
+
+I would just rebase my remaining work on top of the CQE patches if
+they end up being merged first, no big deal, just work.
+
+Yours,
+Linus Walleij
