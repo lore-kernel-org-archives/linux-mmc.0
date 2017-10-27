@@ -1,269 +1,144 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V12 2/5] mmc: block: Add blk-mq support
-Date: Fri, 27 Oct 2017 15:44:30 +0200
-Message-ID: <CAPDyKFqJBx6OoYZO-=wcyrhAhQvVgWp67eruRJKOYCrf=H2c3A@mail.gmail.com>
-References: <1508834428-4360-1-git-send-email-adrian.hunter@intel.com>
- <1508834428-4360-3-git-send-email-adrian.hunter@intel.com>
- <CAPDyKFrunZ9q6vHZLDX3ZkH+0jgZQqD6=8Qj4LTJ+4J5yYstMg@mail.gmail.com> <39cc79f4-9272-cf4d-7843-a9752c9f624b@intel.com>
+Subject: Re: [PATCH 11/12 v4] mmc: block: issue requests in massive parallel
+Date: Fri, 27 Oct 2017 16:19:42 +0200
+Message-ID: <CAPDyKFoxYOk+BgxHRukB7f=r04TY2EE2gqMhAHM0q3JomzifMA@mail.gmail.com>
+References: <20171026125757.10200-1-linus.walleij@linaro.org> <20171026125757.10200-12-linus.walleij@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f174.google.com ([209.85.223.174]:56598 "EHLO
-        mail-io0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752195AbdJ0Nob (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Oct 2017 09:44:31 -0400
-Received: by mail-io0-f174.google.com with SMTP id m81so12776434ioi.13
-        for <linux-mmc@vger.kernel.org>; Fri, 27 Oct 2017 06:44:31 -0700 (PDT)
-In-Reply-To: <39cc79f4-9272-cf4d-7843-a9752c9f624b@intel.com>
+Received: from mail-io0-f178.google.com ([209.85.223.178]:45418 "EHLO
+        mail-io0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751027AbdJ0OTo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Oct 2017 10:19:44 -0400
+Received: by mail-io0-f178.google.com with SMTP id i38so13028316iod.2
+        for <linux-mmc@vger.kernel.org>; Fri, 27 Oct 2017 07:19:43 -0700 (PDT)
+In-Reply-To: <20171026125757.10200-12-linus.walleij@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Avri Altman <Avri.Altman@sandisk.com>, Adrian Hunter <adrian.hunter@intel.com>
 
->>>
->>> -#define CMD_ERRORS                                                     \
->>> -       (R1_OUT_OF_RANGE |      /* Command argument out of range */     \
->>> -        R1_ADDRESS_ERROR |     /* Misaligned address */                \
->>> +#define CMD_ERRORS_EXCL_OOR                                            \
->>> +       (R1_ADDRESS_ERROR |     /* Misaligned address */                \
->>
->> This looks unrelated to blkmq support.
+On 26 October 2017 at 14:57, Linus Walleij <linus.walleij@linaro.org> wrote:
+> This makes a crucial change to the issueing mechanism for the
+> MMC requests:
 >
-> No, it is preserving existing oor functionality.
+> Before commit "mmc: core: move the asynchronous post-processing"
+> some parallelism on the read/write requests was achieved by
+> speculatively postprocessing a request and re-preprocess and
+> re-issue the request if something went wrong, which we discover
+> later when checking for an error.
+>
+> This is kind of ugly. Instead we need a mechanism like here:
+>
+> We issue requests, and when they come back from the hardware,
+> we know if they finished successfully or not. If the request
+> was successful, we complete the asynchronous request and let a
+> new request immediately start on the hardware. If, and only if,
+> it returned an error from the hardware we go down the error
+> path.
+>
+> This is achieved by splitting the work path from the hardware
+> in two: a successful path ending up calling down to
+> mmc_blk_rw_done() and completing quickly, and an errorpath
+> calling down to mmc_blk_rw_done_error().
+>
+> This has a profound effect: we reintroduce the parallelism on
+> the successful path as mmc_post_req() can now be called in
+> while the next request is in transit (just like prior to
+> commit "mmc: core: move the asynchronous post-processing")
+> and blk_end_request() is called while the next request is
+> already on the hardware.
+>
+> The latter has the profound effect of issuing a new request
+> again so that we actually may have three requests
+> in transit at the same time: one on the hardware, one being
+> prepared (such as DMA flushing) and one being prepared for
+> issuing next by the block layer. This shows up when we
+> transit to multiqueue, where this can be exploited.
 
-So why change it in this patch?
+So this change should more or less restore the behavior we had before
+this series. I would actually be interested to see a comparison in
+throughput towards that, before moving on to the last patch12, which
+converts to blkmq.
+
+Also, if I get things right so far, you have manged to get rid off a
+waitqueue but instead introduced a worker, so from context switching
+point of view, it would be interesting to see how/if that affects
+things.
+
+I do some tests myself and let you know the results.
 
 [...]
 
->>> +       /*
->>> +        * Do not assume data transferred correctly if there are any error bits
->>> +        * set.
->>> +        */
->>> +       if (!err && status & mmc_blk_stop_err_bits(&mqrq->brq)) {
->>> +               mqrq->brq.data.bytes_xfered = 0;
->>> +               err = -EIO;
->>> +       }
->>> +
->>> +       /* Copy the exception bit so it will be seen later on */
->>> +       if (mmc_card_mmc(card) && status & R1_EXCEPTION_EVENT)
->>> +               mqrq->brq.cmd.resp[0] |= R1_EXCEPTION_EVENT;
->>> +
->>> +       return err;
->>> +}
->>> +
->>> +static inline void mmc_blk_rw_reset_success(struct mmc_queue *mq,
->>> +                                           struct request *req)
->>> +{
->>> +       int type = rq_data_dir(req) == READ ? MMC_BLK_READ : MMC_BLK_WRITE;
->>> +
->>> +       mmc_blk_reset_success(mq->blkdata, type);
->>> +}
->>
->> I understand that all the above new line and code (around 300 lines)
->> is something you need for the blkmq support, in the rest of this
->> patch.
->>
->> However, it looks like you are adding completely new code that either
->> already exists in the legacy request path (in some slightly different
->> format), or could serve as clean up/re-factorization of the legacy
->> request path.
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 209ebb8a7f3f..0f57e9fe66b6 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -735,15 +735,35 @@ void mmc_finalize_areq(struct work_struct *work)
+>                 mmc_start_bkops(host->card, true);
+>         }
 >
-> The legacy error handling is a non-starter.  Messy and convoluted.  There is
-> no reason to keep using it.  Structurally it doesn't fit with blk-mq because
-> it is split in different places and mixes in logic that is not related with
-> error-handling.
+> -       /* Successfully postprocess the old request at this point */
+> -       mmc_post_req(host, areq->mrq, 0);
+> -
+> -       /* Call back with status, this will trigger retry etc if needed */
+> -       if (areq->report_done_status)
+> -               areq->report_done_status(areq, status);
+> -
+> -       /* This opens the gate for the next request to start on the host */
+> -       complete(&areq->complete);
+> +       /*
+> +        * Here we postprocess the request differently depending on if
+> +        * we go on the success path or error path. The success path will
+> +        * immediately let new requests hit the host, whereas the error
+> +        * path will hold off new requests until we have retried and
+> +        * succeeded or failed the current asynchronous request.
+> +        */
+> +       if (status == MMC_BLK_SUCCESS) {
+> +               /*
+> +                * This immediately opens the gate for the next request
+> +                * to start on the host while we perform post-processing
+> +                * and report back to the block layer.
+> +                */
+> +               host->areq = NULL;
+> +               complete(&areq->complete);
+> +               mmc_post_req(host, areq->mrq, 0);
+> +               if (areq->report_done_status)
+> +                       areq->report_done_status(areq, MMC_BLK_SUCCESS);
+> +       } else {
+> +               mmc_post_req(host, areq->mrq, 0);
+> +               /*
+> +                * Call back with error status, this will trigger retry
+> +                * etc if needed
+> +                */
+> +               if (areq->report_done_status)
+> +                       areq->report_done_status(areq, status);
 
-No matter you like it or not, the legacy request error path is what we got now.
+I was trying to wrap my head around what this really means from a
+request preparation point of view.
 
-The way forward is not to just through it away and start over, but
-instead to take small steps and make parts useful also for blkmq.
+Can't we end up here having a new request being prepared, but then
+doing error handling and re-trying with the current one?
 
-Yes, it's more work, but on the other hand, small changes which moves
-things in the right direction are also more easy to review.
+It's been a long week, so I should probably stop reviewing code by now. :-)
 
-So, no, sorry, I don't buy it!
+Anyway, it seems like this error path really needs to be properly
+tested/triggered, especially to make sure so the above still plays
+nicely.
 
+Earlier experiences also tells me that doing a card hotplug in the
+middle of transactions could trigger interesting errors, related to
+this path.
+
+> +               host->areq = NULL;
+> +               complete(&areq->complete);
+> +       }
+>  }
+>  EXPORT_SYMBOL(mmc_finalize_areq);
 >
->>
->> This is not the way you should format a path for converting to blkmq.
->> The reasons are:
->> *) It makes it hard to review.
+> --
+> 2.13.6
 >
-> But the few comments in this email suggest you have spent maybe 30 minutes.
-> It really looks like you haven't tried.  Where are the questions?
-
-On this version, I spent a few hours on it, but really, it isn't easy
-to look at ~1000 new lines in one single patch, especially changes
-that re-implements the entire mmc request layer.
-
->
->> **) There is no need to through away *all* old mmc blk/core code,
->> which I assume is your plan for next step. Instead the proper way is
->> to re-factor it, an make it possible to re-use those parts that makes
->> sense.
->
-> That is just nonsense.  We definitely want to throw away the messy
-> convoluted legacy code.  The new code is much simpler.  Did you read it?
-
-Yes, the new code is simpler, but as stated, re-factoring some of the
-old code that can be re-used, is the way forward.
-
-[...]
-
->>> +static bool mmc_blk_urgent_bkops_needed(struct mmc_queue *mq,
->>> +                                       struct mmc_queue_req *mqrq)
->>> +{
->>> +       return mmc_card_mmc(mq->card) &&
->>> +              (mqrq->brq.cmd.resp[0] & R1_EXCEPTION_EVENT ||
->>> +               mqrq->brq.stop.resp[0] & R1_EXCEPTION_EVENT);
->>> +}
->>> +
->>> +static void mmc_blk_urgent_bkops(struct mmc_queue *mq,
->>> +                                struct mmc_queue_req *mqrq)
->>> +{
->>> +       if (mmc_blk_urgent_bkops_needed(mq, mqrq))
->>> +               mmc_start_bkops(mq->card, true);
->>> +}
->>
->> Ditto for the two above functions.
->
-> Again it is the same functionality.  In what way is it different?
-
-These checks are being done also in the legacy path, so in principle
-adding these and not using them there, means open-coding to me.
-
->
->>
->>> +
->>> +void mmc_blk_mq_complete(struct request *req)
->>> +{
->>> +       struct mmc_queue *mq = req->q->queuedata;
->>> +
->>> +       mmc_blk_mq_complete_rq(mq, req);
->>> +}
->>> +
->>> +static void mmc_blk_mq_poll_completion(struct mmc_queue *mq,
->>> +                                      struct request *req)
->>> +{
->>> +       struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
->>> +       struct mmc_host *host = mq->card->host;
->>> +       bool failed;
->>> +
->>> +       failed = mmc_blk_rq_error(&mqrq->brq) ||
->>> +                mmc_blk_card_busy(mq->card, req);
->>> +
->>> +       if (!mmc_queue_direct_complete(host))
->>
->> Can you please make the changes related to completing the request in
->> the mmc_request_done() into a separate patch.
->>
->> It's better to first get the default behavior in place, then we can
->> improve things on top. Again, that also makes it easier to review.
->
-> I am not sure what you mean.  Did you read the code?
-> mmc_queue_direct_complete() is a capability that is not yet used, the
-> default behavior is preserved the way you asked.  You can keep asked for the
-> same lines of code to be in different patches, but it isn't going to change
-> the code.
-
-Let me try to make this more clear then.
-
-This is about keeping patches reviewable and about making one change per patch.
-
-More precisely, move all code related to MMC_CAP_DIRECT_COMPLETE (the
-new cap which you introduce in this patch), into a separate patch on
-top of this one. That makes it both easy to review this patch, but
-also the one that introduces the new cap.
-
->
->>
->> No I am giving up reaching this point. I didn't even get the actual
->> blkmq converting part, which is the core part I should be spending my
->> time to review. Sorry!
->
-> It looks much more like you are not trying.  Not a single technical issue
-> raised!  Not a single technical question!
->
->>
->> Some final comments around the system-wide PM support below.
->>
->> [...]
->>
->>>
->>> +static void mmc_mq_queue_suspend(struct mmc_queue *mq)
->>> +{
->>> +       blk_mq_quiesce_queue(mq->queue);
->>> +
->>> +       /*
->>> +        * The host remains claimed while there are outstanding requests, so
->>> +        * simply claiming and releasing here ensures there are none.
->>> +        */
->>> +       mmc_claim_host(mq->card->host);
->>> +       mmc_release_host(mq->card->host);
->>
->> This looks fragile.
->
-> It isn't.  The driver would already be broken if we could have requests in
-> flight but not have the host claimed.
-
-Yes, but this boils done to that I am not sure what
-blk_mq_quiesce_queue() really means from dispatching point of view.
-
-Would it possible that a dispatched request became preempted just
-before we was about to call mmc_claim_host() for it, thus the above
-mmc_claim_host() claims the host before?
-
-Are you sure that can't happen?
-
->
->>
->> Seems like an interface in blkmq with flushes the queue and suspend it
->> is missing, however there are of course reasons why it doesn't exist.
->>
->> I assume the blk_mq_quiesce_queue() guarantees no new requests is
->> being pushed to us after calling it, but it still seem a bit racy to
->> rely on the host claim/release thing.
->
-> Race with what?
-
-See above.
-
->
->>
->> Let's bring this up as question for the block people experts.
->
-> You have had almost a year to learn about blk-mq.  What have you been doing?
-
-Sorry, I haven't looked closely enough at the PM support. Obviously my bad.
-
->
-> And what are you going to do to get an answer from "the block people
-> experts" - there is a good chance few of those cc'ed will read this.
->
-> This all looks like a weak excuse to do nothing.
->
-> You need to stop playing games.  If you are not prepared to put the effort
-> in, then let the CQE code go in.  After all the dependency is a figment of
-> your imagination.  CQE has been ready to go for ages.  Why are you making up
-> reasons for delaying it?
->
-> Another possibility is to make me maintainer of the block driver since it
-> seems I am the one that knows most about it.
-
-Adrian, I have appreciated your contributions to mmc under a very long
-time, and I still am. I don't doubt your expertise in the area!
-
-However, it seems like you don't want to listen to peoples opinions
-regarding this series - and I really don't get what's the deal. A man
-of your skills should easily be able to address those comments, but
-you have mostly been arguing and chosen to ignore them.
-
-As long as I have something to say in this community, I will never
-accept poorly written patches, at least that goes for the mmc core
-layer.
-
-That said, if other people think are better suited than me, please go
-ahead and make a formal suggestion.
 
 Kind regards
 Uffe
