@@ -1,83 +1,79 @@
-From: SF Markus Elfring <elfring-Rn4VEauK+AKRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-Subject: [PATCH] mmc: vub300: Use common code in
- __download_offload_pseudocode()
-Date: Fri, 27 Oct 2017 21:31:47 +0200
-Message-ID: <7b418db1-ec35-4c85-5d06-45edde56822c@users.sourceforge.net>
+From: Chris Brandt <Chris.Brandt@renesas.com>
+Subject: RE: renesas sdhi driver and DMA
+Date: Fri, 27 Oct 2017 21:11:39 +0000
+Message-ID: <SG2PR06MB11658C446725E77967BF22598A5A0@SG2PR06MB1165.apcprd06.prod.outlook.com>
+References: <SG2PR06MB1165F16A63D6793DBEC419688A750@SG2PR06MB1165.apcprd06.prod.outlook.com>
+ <20171010203229.rrwxkrczuk7piqh6@tetsubishi>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Language: en-GB
-Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Tony Olech <tony.olech-ze5PQcJzaeOs0fm86SgGizGjJy/sRE9J@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, kernel-janitors-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Content-Language: en-US
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Markus Elfring <elfring-Rn4VEauK+AKRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-Date: Fri, 27 Oct 2017 21:21:40 +0200
+Hi Wolfram,
 
-Add a jump target so that a specific string copy operation is stored
-only once at the end of this function implementation.
-Replace two calls of the function "strncpy" by goto statements.
+Sorry, back on this subject...
 
-This issue was detected by using the Coccinelle software.
+> > > [<bf9921e7>] (tmio_mmc_dma_callback) from [<bf908e1b>]
+> > (rzadma_tasklet+0x23/0x98)
+> >
+> > For SYS-DMAC, this is a callback called by the dmaengine core once the
+> > DMA is completed. My guess is you call it directly from an interrupt
+> > handler? It would be easier to talk over code here, I guess.
+> >
+> > > Is it now a requirement that I have to register my DMA channel
+> > > interrupts as devm_request_threaded_irq?
+> > >
+> > > Will that fix my issue?
+> >
+> > I can't say yet if this alone will do. Likely not. Can you share the
+> > code already?
+>=20
+> The interrupt handler is starting a tasklet, and then the tasklet calls
+> the callback. I thought tasklets didn't run in an interrupt context?????
 
-Signed-off-by: Markus Elfring <elfring-Rn4VEauK+AKRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
----
- drivers/mmc/host/vub300.c | 22 ++++++++++------------
- 1 file changed, 10 insertions(+), 12 deletions(-)
 
-diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
-index c1a169843f99..c898a45a84c5 100644
---- a/drivers/mmc/host/vub300.c
-+++ b/drivers/mmc/host/vub300.c
-@@ -1244,12 +1244,8 @@ static void __download_offload_pseudocode(struct vub300_mmc_host *vub300,
- 						USB_RECIP_DEVICE, 0x0000, 0x0000,
- 						xfer_buffer, xfer_length, HZ);
- 			kfree(xfer_buffer);
--			if (retval < 0) {
--				strncpy(vub300->vub_name,
--					"SDIO pseudocode download failed",
--					sizeof(vub300->vub_name));
--				return;
--			}
-+			if (retval < 0)
-+				goto copy_error_message;
- 		} else {
- 			dev_err(&vub300->udev->dev,
- 				"not enough memory for xfer buffer to send"
-@@ -1291,12 +1287,8 @@ static void __download_offload_pseudocode(struct vub300_mmc_host *vub300,
- 						USB_RECIP_DEVICE, 0x0000, 0x0000,
- 						xfer_buffer, xfer_length, HZ);
- 			kfree(xfer_buffer);
--			if (retval < 0) {
--				strncpy(vub300->vub_name,
--					"SDIO pseudocode download failed",
--					sizeof(vub300->vub_name));
--				return;
--			}
-+			if (retval < 0)
-+				goto copy_error_message;
- 		} else {
- 			dev_err(&vub300->udev->dev,
- 				"not enough memory for xfer buffer to send"
-@@ -1349,6 +1341,12 @@ static void __download_offload_pseudocode(struct vub300_mmc_host *vub300,
- 			sizeof(vub300->vub_name));
- 		return;
- 	}
-+
-+	return;
-+
-+copy_error_message:
-+	strncpy(vub300->vub_name, "SDIO pseudocode download failed",
-+		sizeof(vub300->vub_name));
- }
- 
- /*
--- 
-2.14.3
+So here's what I found.
 
---
-To unsubscribe from this list: send the line "unsubscribe linux-usb" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+According to:
+
+https://www.kernel.org/doc/Documentation/dmaengine/client.txt
+
+It says:
+"Note that callbacks will always be invoked from the DMA engines=20
+tasklet, never from interrupt context."
+
+
+My DMA driver was calling the SDHI callback from within a tasklet (ie,=20
+softirq). Almost all the other DMA drivers doing the same thing.
+
+All was fine until that patch you submitted (52ad9a8e854c) that now adds
+a wait_for_completion() in the SDHI callback.
+
+Now I get the "BUG: scheduling while atomic".
+
+The R-Car driver uses a threaded irq to call the callbacks, not a=20
+tasklet.
+
+So I hacked my code to also call the callbacks from a threaded irq like=20
+rcar-dma.c.
+And....that works (no more scheduling while atomic).
+
+So, the question is, which of these statements are correct?
+
+  1. wait_for_completion should not be called in a DMA callback
+
+  2. DMA engine drivers should use threaded IRQs instead of tasklets
+
+
+The issue with #2 is that mic_x100_dma.c, sh/rcar-dmac.c and=20
+sh/shdma-base.c are the only ones calling request_threaded_irq,
+so you would think that tasklets are the correct method.
+
+
+Thanks,
+Chris
