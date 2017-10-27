@@ -1,144 +1,54 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 11/12 v4] mmc: block: issue requests in massive parallel
-Date: Fri, 27 Oct 2017 16:19:42 +0200
-Message-ID: <CAPDyKFoxYOk+BgxHRukB7f=r04TY2EE2gqMhAHM0q3JomzifMA@mail.gmail.com>
-References: <20171026125757.10200-1-linus.walleij@linaro.org> <20171026125757.10200-12-linus.walleij@linaro.org>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH 00/12 v4] multiqueue for MMC/SD
+Date: Fri, 27 Oct 2017 16:29:05 +0200
+Message-ID: <CACRpkdYT6SJeECBp-KJtbqsjV9yYNW5oyxB2j-Zc_MAMEJaiAw@mail.gmail.com>
+References: <20171026125757.10200-1-linus.walleij@linaro.org>
+ <0ab6b0b7-74e7-f7d3-9137-baf259282914@intel.com> <CACRpkdb_ZN+3YKYJ2L-5JNt1SgUqyCS3G-HER4e+LRcV64Jfag@mail.gmail.com>
+ <363DA0ED52042842948283D2FC38E4649BF396BD@IRSMSX106.ger.corp.intel.com>
+ <CACRpkdb795LnNkpo=Jg_fnn1mJwnE0A+FXwj5NjcUqCDhp32Ww@mail.gmail.com> <f9e25794-7619-bc61-7e90-f09e73853deb@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f178.google.com ([209.85.223.178]:45418 "EHLO
-        mail-io0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751027AbdJ0OTo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Oct 2017 10:19:44 -0400
-Received: by mail-io0-f178.google.com with SMTP id i38so13028316iod.2
-        for <linux-mmc@vger.kernel.org>; Fri, 27 Oct 2017 07:19:43 -0700 (PDT)
-In-Reply-To: <20171026125757.10200-12-linus.walleij@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <f9e25794-7619-bc61-7e90-f09e73853deb@intel.com>
+Sender: linux-block-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-block <linux-block@vger.kernel.org>, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Avri Altman <Avri.Altman@sandisk.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Avri Altman <Avri.Altman@sandisk.com>, Adrian Hunter <adrian.hunter@intel.com>
 
-On 26 October 2017 at 14:57, Linus Walleij <linus.walleij@linaro.org> wrote:
-> This makes a crucial change to the issueing mechanism for the
-> MMC requests:
+On Fri, Oct 27, 2017 at 2:59 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 27/10/17 14:25, Linus Walleij wrote:
+
+>> It is indeed tough to juggle this with the pressure to "upstream
+>> first" the BFQ scheduler policy that we are working on in Linaro
+>> to increase interactivity. We need to enable this on devices
+>> pronto and that means migrating MMC/SD to MQ and MQ only.
+>> I have shared this motivation since the start, so it should come
+>> as no surprise.
 >
-> Before commit "mmc: core: move the asynchronous post-processing"
-> some parallelism on the read/write requests was achieved by
-> speculatively postprocessing a request and re-preprocess and
-> re-issue the request if something went wrong, which we discover
-> later when checking for an error.
+> IMHO BFQ is just another example of unnecessary delay.
+
+I do not see it as a delay to anything, it is a motivation for
+my work. I am telling you why I am still working on my patch
+set, what is driving and motivating it.
+
+I guess CQE is driving and motivating your work?
+
+>> So I also have some pressure to "Get This Feature In Now".
 >
-> This is kind of ugly. Instead we need a mechanism like here:
->
-> We issue requests, and when they come back from the hardware,
-> we know if they finished successfully or not. If the request
-> was successful, we complete the asynchronous request and let a
-> new request immediately start on the hardware. If, and only if,
-> it returned an error from the hardware we go down the error
-> path.
->
-> This is achieved by splitting the work path from the hardware
-> in two: a successful path ending up calling down to
-> mmc_blk_rw_done() and completing quickly, and an errorpath
-> calling down to mmc_blk_rw_done_error().
->
-> This has a profound effect: we reintroduce the parallelism on
-> the successful path as mmc_post_req() can now be called in
-> while the next request is in transit (just like prior to
-> commit "mmc: core: move the asynchronous post-processing")
-> and blk_end_request() is called while the next request is
-> already on the hardware.
->
-> The latter has the profound effect of issuing a new request
-> again so that we actually may have three requests
-> in transit at the same time: one on the hardware, one being
-> prepared (such as DMA flushing) and one being prepared for
-> issuing next by the block layer. This shows up when we
-> transit to multiqueue, where this can be exploited.
+> It has nothing to do with pressure.  It is about what is reasonable.
+> Features should go in as soon as they are ready.  Ideally queued up in the
+> same release cycle they are submitted.  If the code doesn't work right, then
+> it can't go in straight away, but fake reasons for delaying things needs to
+> stop.
 
-So this change should more or less restore the behavior we had before
-this series. I would actually be interested to see a comparison in
-throughput towards that, before moving on to the last patch12, which
-converts to blkmq.
+I don't understand who you are addressing or accusing.
 
-Also, if I get things right so far, you have manged to get rid off a
-waitqueue but instead introduced a worker, so from context switching
-point of view, it would be interesting to see how/if that affects
-things.
+Nobody wants to delay CQE if that is what you are implying,
+I want to see it supported as much as you do.
 
-I do some tests myself and let you know the results.
+I just prefer to see MQ happen first, and now you say your patch
+set does that and that is great, so I just need to review the code
+better I guess?
 
-[...]
-
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 209ebb8a7f3f..0f57e9fe66b6 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -735,15 +735,35 @@ void mmc_finalize_areq(struct work_struct *work)
->                 mmc_start_bkops(host->card, true);
->         }
->
-> -       /* Successfully postprocess the old request at this point */
-> -       mmc_post_req(host, areq->mrq, 0);
-> -
-> -       /* Call back with status, this will trigger retry etc if needed */
-> -       if (areq->report_done_status)
-> -               areq->report_done_status(areq, status);
-> -
-> -       /* This opens the gate for the next request to start on the host */
-> -       complete(&areq->complete);
-> +       /*
-> +        * Here we postprocess the request differently depending on if
-> +        * we go on the success path or error path. The success path will
-> +        * immediately let new requests hit the host, whereas the error
-> +        * path will hold off new requests until we have retried and
-> +        * succeeded or failed the current asynchronous request.
-> +        */
-> +       if (status == MMC_BLK_SUCCESS) {
-> +               /*
-> +                * This immediately opens the gate for the next request
-> +                * to start on the host while we perform post-processing
-> +                * and report back to the block layer.
-> +                */
-> +               host->areq = NULL;
-> +               complete(&areq->complete);
-> +               mmc_post_req(host, areq->mrq, 0);
-> +               if (areq->report_done_status)
-> +                       areq->report_done_status(areq, MMC_BLK_SUCCESS);
-> +       } else {
-> +               mmc_post_req(host, areq->mrq, 0);
-> +               /*
-> +                * Call back with error status, this will trigger retry
-> +                * etc if needed
-> +                */
-> +               if (areq->report_done_status)
-> +                       areq->report_done_status(areq, status);
-
-I was trying to wrap my head around what this really means from a
-request preparation point of view.
-
-Can't we end up here having a new request being prepared, but then
-doing error handling and re-trying with the current one?
-
-It's been a long week, so I should probably stop reviewing code by now. :-)
-
-Anyway, it seems like this error path really needs to be properly
-tested/triggered, especially to make sure so the above still plays
-nicely.
-
-Earlier experiences also tells me that doing a card hotplug in the
-middle of transactions could trigger interesting errors, related to
-this path.
-
-> +               host->areq = NULL;
-> +               complete(&areq->complete);
-> +       }
->  }
->  EXPORT_SYMBOL(mmc_finalize_areq);
->
-> --
-> 2.13.6
->
-
-Kind regards
-Uffe
+Yours,
+Linus Walleij
