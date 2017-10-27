@@ -1,77 +1,88 @@
-From: "Hunter, Adrian" <adrian.hunter@intel.com>
-Subject: RE: [PATCH 00/12 v4] multiqueue for MMC/SD
-Date: Thu, 26 Oct 2017 19:27:28 +0000
-Message-ID: <363DA0ED52042842948283D2FC38E4649BF396BD@IRSMSX106.ger.corp.intel.com>
-References: <20171026125757.10200-1-linus.walleij@linaro.org>
- <0ab6b0b7-74e7-f7d3-9137-baf259282914@intel.com>
- <CACRpkdb_ZN+3YKYJ2L-5JNt1SgUqyCS3G-HER4e+LRcV64Jfag@mail.gmail.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH 1/3] mmc: core: activate pre-erased multiple write support
+ for sd card
+Date: Fri, 27 Oct 2017 09:46:32 +0800
+Message-ID: <b7acd6a7-6a17-47be-5659-bf5c264d7552@rock-chips.com>
+References: <1506483638-115756-1-git-send-email-shawn.lin@rock-chips.com>
+ <699af9d0-c69b-e02b-54c1-7b0dd3f5369c@rock-chips.com>
+ <CAPDyKFrdXPp4+Gu_2uE_Kdw0vLFC3uQ7ZBc9kYa+HKCgYc06Vg@mail.gmail.com>
+ <20171026110316.GD12640@hc>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=gbk; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:20028 "EHLO mga02.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932326AbdJZT1c (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 26 Oct 2017 15:27:32 -0400
-In-Reply-To: <CACRpkdb_ZN+3YKYJ2L-5JNt1SgUqyCS3G-HER4e+LRcV64Jfag@mail.gmail.com>
-Content-Language: en-US
+Received: from lucky1.263xmail.com ([211.157.147.131]:46409 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751305AbdJ0Bqk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Oct 2017 21:46:40 -0400
+In-Reply-To: <20171026110316.GD12640@hc>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-block <linux-block@vger.kernel.org>, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Avri Altman <Avri.Altman@sandisk.com>
+To: Jan Glauber <jan.glauber@caviumnetworks.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, shawn.lin@rock-chips.com, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, "Steven J. Hill" <Steven.Hill@cavium.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBMaW51cyBXYWxsZWlqIFttYWls
-dG86bGludXMud2FsbGVpakBsaW5hcm8ub3JnXQ0KPiBTZW50OiBUaHVyc2RheSwgT2N0b2JlciAy
-NiwgMjAxNyA1OjIwIFBNDQo+IFRvOiBIdW50ZXIsIEFkcmlhbiA8YWRyaWFuLmh1bnRlckBpbnRl
-bC5jb20+DQo+IENjOiBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOyBVbGYgSGFuc3NvbiA8dWxm
-LmhhbnNzb25AbGluYXJvLm9yZz47DQo+IGxpbnV4LWJsb2NrIDxsaW51eC1ibG9ja0B2Z2VyLmtl
-cm5lbC5vcmc+OyBKZW5zIEF4Ym9lIDxheGJvZUBrZXJuZWwuZGs+Ow0KPiBDaHJpc3RvcGggSGVs
-bHdpZyA8aGNoQGxzdC5kZT47IEFybmQgQmVyZ21hbm4gPGFybmRAYXJuZGIuZGU+Ow0KPiBCYXJ0
-bG9taWVqIFpvbG5pZXJraWV3aWN6IDxiLnpvbG5pZXJraWVAc2Ftc3VuZy5jb20+OyBQYW9sbyBW
-YWxlbnRlDQo+IDxwYW9sby52YWxlbnRlQGxpbmFyby5vcmc+OyBBdnJpIEFsdG1hbiA8QXZyaS5B
-bHRtYW5Ac2FuZGlzay5jb20+DQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0ggMDAvMTIgdjRdIG11bHRp
-cXVldWUgZm9yIE1NQy9TRA0KPiANCj4gT24gVGh1LCBPY3QgMjYsIDIwMTcgYXQgMzozNCBQTSwg
-QWRyaWFuIEh1bnRlciA8YWRyaWFuLmh1bnRlckBpbnRlbC5jb20+DQo+IHdyb3RlOg0KPiA+IE9u
-IDI2LzEwLzE3IDE1OjU3LCBMaW51cyBXYWxsZWlqIHdyb3RlOg0KPiA+PiBJbiBteSBvcGluaW9u
-IHRoaXMgaXMgYWxzbyBhIGJldHRlciBmaXQgZm9yIGNvbW1hbmQgcXVldWV1aW5nLg0KPiA+DQo+
-ID4gTm90IHRydWUuICBDUUUgc3VwcG9ydCB3b3JrZWQgcGVyZmVjdGx5IGJlZm9yZSBibGstbXEg
-YW5kIGRpZCBub3QNCj4gPiBkZXBlbmQgb24gYmxrLW1xIGluIGFueSB3YXkuICBPYnZpb3VzbHkg
-dGhlIGN1cnJlbnQgQ1FFIHBhdGNoIHNldA0KPiA+IGFjdHVhbGx5IGltcGxlbWVudHMgdGhlIENR
-RSByZXF1aXJlbWVudHMgZm9yIGJsay1tcSAtIHdoaWNoIHRoaXMgcGF0Y2ggc2V0DQo+IGRvZXMg
-bm90Lg0KPiANCj4gV2hhdCBJIG1lYW4gaXMgdGhhdCB0aGUgQ1FFIGNvZGUgd2lsbCBsaWtlbHkg
-bG9vayBiZXR0ZXIgb24gdG9wIG9mIHRoZXNlDQo+IHJlZmFjdG9yaW5ncy4NCj4gDQo+IEJ1dCBh
-cyBJIHNheSBpdCBpcyBhIG1hdHRlciBvZiB0YXN0ZS4gSSBqdXN0IGxvdmUgdGhlIGxvb2tzIG9m
-IG15IG93biBjb2RlIGFzDQo+IG11Y2ggYXMgdGhlIG5leHQgcHJvZ3JhbW1lciBzbyBJIGNhbid0
-IGp1ZGdlIHRoYXQuIExldCdzIHNlZSB3aGF0IHRoZQ0KPiByZXZpZXdlcnMgc2F5Lg0KDQpJdCBk
-b2Vzbid0IGxvb2sgcmVhZHkuICBUaGVyZSBzZWVtcyBzdGlsbCB0byBiZSAyIHRhc2sgc3dpdGNo
-ZXMgYmV0d2Vlbg0KZWFjaCB0cmFuc2Zlci4gIG1tY19ibGtfcndfZG9uZV9lcnJvcigpIGlzIHN0
-aWxsIHVzaW5nIHRoZSBtZXNzeSBlcnJvcg0KaGFuZGxpbmcgYW5kIGRvZXNu4oCZdCBoYW5kbGUg
-cmV0cmllcyBlLmcuICdyZXRyeScgaXMgYSBsb2NhbCB2YXJpYWJsZSBzbyBpdCBjYW4ndA0KY291
-bnQgdGhlIG51bWJlciBvZiByZXRyaWVzIG5vdyB0aGF0IHRoZXJlIGlzIG5vIGxvb3AuDQoNCj4g
-Pj4gSXQgc291bmRzIHNpbXBsZSBidXQgSSBiZXQgdGhpcyBkcml2ZXMgYSB0cnVjayB0aHJvdWdo
-IEFkcmlhbnMgcGF0Y2gNCj4gPj4gc2VyaWVzLiBTb3JyeS4gOigNCj4gPg0KPiA+IEkgd2FpdGVk
-IGEgbG9uZyB0aW1lIGZvciB5b3VyIHBhdGNoZXMgYnV0IEkgaGFkIHRvIGdpdmUgdXAgd2FpdGlu
-Zw0KPiA+IHdoZW4gVWxmIGJlbGF0ZWQgaW5zaXN0ZWQgb24gYmxrLW1xIGJlZm9yZSBDUUUuICBJ
-IGFtIG5vdCBzdXJlIHdoYXQNCj4gPiB5b3UgYXJlIGV4cGVjdGluZyBub3cgaXQgc2VlbXMgdG9v
-IGxhdGUuDQo+IA0KPiBUb28gbGF0ZSBmb3Igd2hhdD8gSXQncyBqdXN0IGEgcGF0Y2ggc2V0LCBJ
-IGRvbid0IHJlYWxseSBoYXZlIGEgZGVhZGxpbmUgZm9yIHRoaXMgb3INCj4gYW55dGhpbmcuIEFz
-IEkgZXhwbGFpbmVkIGFib3ZlIEkgaGF2ZSBiZWVuIHdvcmtpbmcgb24gdGhpcyBhbGwgdGhlIHRp
-bWUsIHRoZQ0KPiBwcm9ibGVtIHdhcyB0aGF0IEkgd2FzL2FtIG5vdCBzbWFydCBlbm91Z2ggdG8g
-ZmluZCB0aGF0IHNvbHV0aW9uIGZvciBob3N0DQo+IGNsYWltaW5nIGJ5IGNvbnRleHQuDQoNClRv
-byBsYXRlIHRvIGdvIGJlZm9yZSBDUUUuICBBbGwgdGhlIGJsay1tcSB3b3JrIGlzIG5vdyBpbiB0
-aGUgQ1FFIHBhdGNoc2V0Lg0KDQo+IA0KPiBUaGUgaG9zdCBjbGFpbWluZyBieSBjb250ZXh0IHdh
-cyBtZXJnZWQgYSBtb250aCBhZ28gYW5kIG5vdyBJIGhhdmUNCj4gdW5kZXJzdG9vZCB0aGF0IEkg
-Y2FuIHVzZSB0aGF0IGFuZCByZWJhc2VkIG15IHBhdGNoZXMgb24gaXQuIFNsb3cgbGVhcm5lciwg
-SQ0KPiBndWVzcy4NCj4gDQo+IElmIHlvdSBmZWVsIGl0IGlzIHVuZ3JhdGVmdWwgdGhhdCB5b3Ug
-aGF2ZSBwdXQgaW4gc28gbXVjaCB3b3JrIGFuZCB0aGluZ3MgYXJlDQo+IG5vdCBnZXR0aW5nIG1l
-cmdlZCwgYW5kIHlvdSBmZWVsIHlvdXIgcGF0Y2hlcyBkZXNlcnZlIHRvIGJlIG1lcmdlZCBmaXJz
-dA0KPiAoYmVjYXVzZSBvZiBodW1hbiBuYXR1cmUgcmVhc29ucykgSSBjYW4gZW1wYXRoaXplIHdp
-dGggdGhhdC4gSXQncyBzYWQgdGhhdA0KPiB5b3VyIHBhdGNoZXMgYXJlIGF0IHYxMi4gQWxzbyBJ
-IHNlZSB0aGF0IHBhdGNoIDQgYmVhcnMgdGhlIHNpZ25vZmZzIG9mIGENCj4gc2lnbmlmaWNhbnQg
-dGVhbSBhdCBDb2RlQXVyb3JhLCBzbyB0aGV5IGFyZSBsaWtlbHkgYXMgaW1wYXRpZW50Lg0KDQpJ
-dCBpcyBpbXBvcnRhbnQgdGhhdCB5b3UgdW5kZXJzdGFuZCB0aGF0IHRoaXMgaGFzIG5vdGhpbmcg
-dG8gZG8gd2l0aA0KImh1bWFuIG5hdHVyZSByZWFzb25zIi4gICAgTGludXggZGlzdHJpYnV0aW9u
-cyB1c2UgdXBzdHJlYW0ga2VybmVscy4gDQpDaHJvbWVPUyAgaGFzIGFuICJ1cHN0cmVhbSBmaXJz
-dCIgcG9saWN5LiAgRGVsYXlpbmcgZmVhdHVyZXMgZm9yIGxvbmcNCnBlcmlvZHMgaGFzIHJlYWwt
-d29ybGQgY29uc2VxdWVuY2VzLiAgV2hlbiBwZW9wbGUgYXNrLCB3aGF0IGtlcm5lbA0Kc2hvdWxk
-IHRoZXkgdXNlLCB3ZSBleHBlY3QgdG8gcmVwbHksIGp1c3QgdXNlIG1haW5saW5lLg0KDQo=
+Hi Jan,
+
+On 2017/10/26 19:03, Jan Glauber wrote:
+> On Thu, Oct 26, 2017 at 12:46:02PM +0200, Ulf Hansson wrote:
+>> On 26 October 2017 at 03:19, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+>>> Hi, Ulf
+>>>
+>>> On 2017/9/27 11:40, Shawn Lin wrote:
+>>>>
+>>>> Per SD specification version 4.10, section 4.3.4, it says "pre-erased
+>>>> (ACMD23) will make a following Multiple Block Write operation faster
+>>>> compared to the same operation without preceding ACMD23". ACMD23 is
+>>>> mandatory for all sd cards and the spec also says "Command STOP_TRAN
+>>>> (CMD12) shall be used to stop the transmission in Write Multiple Block
+>>>> whether or not the preerase (ACMD23) feature is used."
+>>>
+>>>
+>>> Ping... :)
+>>
+>> Hi Shawn,
+>>
+>> Actually I was waiting for confirmation from Jan about his tests.
+> 
+> The patches worked for me but I'm not sure I've actually tested ACMD23.
+> Do I need to trigger ACMD23 somehow?
+
+Thanks for testing!
+
+You need a card which doesn't support CMD23 and try to write something
+to the card to see if it works well. But given that it's not
+easy to identify whether a card support CMD23, I suggest to hack the
+code for force all SD cards to use ACMD23.
+
+
+Could you kindly try this on top of this series? And do some write test
+for the SD cards.
+
+@@ -2210,9 +2210,9 @@ static struct mmc_blk_data 
+*mmc_blk_alloc_req(struct mmc_card *card,
+
+         if (mmc_host_cmd23(card->host)) {
+                 if ((mmc_card_mmc(card) &&
+-                    card->csd.mmca_vsn >= CSD_SPEC_VER_3) ||
+-                   (mmc_card_sd(card) &&
+-                    card->scr.cmds & SD_SCR_CMD23_SUPPORT))
++                    card->csd.mmca_vsn >= CSD_SPEC_VER_3))
++                   //(mmc_card_sd(card) &&
++                    //card->scr.cmds & SD_SCR_CMD23_SUPPORT))
+                         md->flags |= MMC_BLK_CMD23;
+
+
+Thanks.
+
+
+> 
+> --Jan
+> 
+>> However, overall the series looks reasonable to me.
+>>
+>> Kind regards
+>> Uffe
+> 
+> 
+> 
+
