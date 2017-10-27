@@ -1,54 +1,69 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH 00/12 v4] multiqueue for MMC/SD
-Date: Fri, 27 Oct 2017 16:29:05 +0200
-Message-ID: <CACRpkdYT6SJeECBp-KJtbqsjV9yYNW5oyxB2j-Zc_MAMEJaiAw@mail.gmail.com>
-References: <20171026125757.10200-1-linus.walleij@linaro.org>
- <0ab6b0b7-74e7-f7d3-9137-baf259282914@intel.com> <CACRpkdb_ZN+3YKYJ2L-5JNt1SgUqyCS3G-HER4e+LRcV64Jfag@mail.gmail.com>
- <363DA0ED52042842948283D2FC38E4649BF396BD@IRSMSX106.ger.corp.intel.com>
- <CACRpkdb795LnNkpo=Jg_fnn1mJwnE0A+FXwj5NjcUqCDhp32Ww@mail.gmail.com> <f9e25794-7619-bc61-7e90-f09e73853deb@intel.com>
+From: SF Markus Elfring <elfring@users.sourceforge.net>
+Subject: [PATCH] mmc: tmio: Use common error handling code in
+ tmio_mmc_host_probe()
+Date: Fri, 27 Oct 2017 19:17:24 +0200
+Message-ID: <7fdea92c-2ca7-8911-28da-4388103e1b04@users.sourceforge.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <f9e25794-7619-bc61-7e90-f09e73853deb@intel.com>
-Sender: linux-block-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-block <linux-block@vger.kernel.org>, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Avri Altman <Avri.Altman@sandisk.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Language: en-GB
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Oct 27, 2017 at 2:59 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 27/10/17 14:25, Linus Walleij wrote:
+From: Markus Elfring <elfring@users.sourceforge.net>
+Date: Fri, 27 Oct 2017 19:09:17 +0200
 
->> It is indeed tough to juggle this with the pressure to "upstream
->> first" the BFQ scheduler policy that we are working on in Linaro
->> to increase interactivity. We need to enable this on devices
->> pronto and that means migrating MMC/SD to MQ and MQ only.
->> I have shared this motivation since the start, so it should come
->> as no surprise.
->
-> IMHO BFQ is just another example of unnecessary delay.
+* Add a jump target so that a bit of exception handling can be better
+  reused at the end of this function.
 
-I do not see it as a delay to anything, it is a motivation for
-my work. I am telling you why I am still working on my patch
-set, what is driving and motivating it.
+* Adjust condition checks.
 
-I guess CQE is driving and motivating your work?
+This issue was detected by using the Coccinelle software.
 
->> So I also have some pressure to "Get This Feature In Now".
->
-> It has nothing to do with pressure.  It is about what is reasonable.
-> Features should go in as soon as they are ready.  Ideally queued up in the
-> same release cycle they are submitted.  If the code doesn't work right, then
-> it can't go in straight away, but fake reasons for delaying things needs to
-> stop.
+Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
+---
+ drivers/mmc/host/tmio_mmc_core.c | 17 +++++++++--------
+ 1 file changed, 9 insertions(+), 8 deletions(-)
 
-I don't understand who you are addressing or accusing.
-
-Nobody wants to delay CQE if that is what you are implying,
-I want to see it supported as much as you do.
-
-I just prefer to see MQ happen first, and now you say your patch
-set does that and that is great, so I just need to review the code
-better I guess?
-
-Yours,
-Linus Walleij
+diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+index a7293e186e03..2e85d4048cec 100644
+--- a/drivers/mmc/host/tmio_mmc_core.c
++++ b/drivers/mmc/host/tmio_mmc_core.c
+@@ -1286,23 +1286,24 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
+ 	pm_runtime_enable(&pdev->dev);
+ 
+ 	ret = mmc_add_host(mmc);
+-	if (ret < 0) {
+-		tmio_mmc_host_remove(_host);
+-		return ret;
+-	}
++	if (ret)
++		goto remove_host;
+ 
+ 	dev_pm_qos_expose_latency_limit(&pdev->dev, 100);
+ 
+ 	if (pdata->flags & TMIO_MMC_USE_GPIO_CD) {
+ 		ret = mmc_gpio_request_cd(mmc, pdata->cd_gpio, 0);
+-		if (ret < 0) {
+-			tmio_mmc_host_remove(_host);
+-			return ret;
+-		}
++		if (ret)
++			goto remove_host;
++
+ 		mmc_gpiod_request_cd_irq(mmc);
+ 	}
+ 
+ 	return 0;
++
++remove_host:
++	tmio_mmc_host_remove(_host);
++	return ret;
+ }
+ EXPORT_SYMBOL_GPL(tmio_mmc_host_probe);
+ 
+-- 
+2.14.3
