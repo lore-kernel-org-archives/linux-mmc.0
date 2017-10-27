@@ -1,549 +1,139 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V12 2/5] mmc: block: Add blk-mq support
-Date: Fri, 27 Oct 2017 11:23:24 +0200
-Message-ID: <CAPDyKFrunZ9q6vHZLDX3ZkH+0jgZQqD6=8Qj4LTJ+4J5yYstMg@mail.gmail.com>
-References: <1508834428-4360-1-git-send-email-adrian.hunter@intel.com> <1508834428-4360-3-git-send-email-adrian.hunter@intel.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH 00/12 v4] multiqueue for MMC/SD
+Date: Fri, 27 Oct 2017 13:25:02 +0200
+Message-ID: <CACRpkdb795LnNkpo=Jg_fnn1mJwnE0A+FXwj5NjcUqCDhp32Ww@mail.gmail.com>
+References: <20171026125757.10200-1-linus.walleij@linaro.org>
+ <0ab6b0b7-74e7-f7d3-9137-baf259282914@intel.com> <CACRpkdb_ZN+3YKYJ2L-5JNt1SgUqyCS3G-HER4e+LRcV64Jfag@mail.gmail.com>
+ <363DA0ED52042842948283D2FC38E4649BF396BD@IRSMSX106.ger.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1508834428-4360-3-git-send-email-adrian.hunter@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <363DA0ED52042842948283D2FC38E4649BF396BD@IRSMSX106.ger.corp.intel.com>
+Sender: linux-block-owner@vger.kernel.org
+To: "Hunter, Adrian" <adrian.hunter@intel.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-block <linux-block@vger.kernel.org>, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Avri Altman <Avri.Altman@sandisk.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 24 October 2017 at 10:40, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> Define and use a blk-mq queue. Discards and flushes are processed
-> synchronously, but reads and writes asynchronously. In order to support
-> slow DMA unmapping, DMA unmapping is not done until after the next request
-> is started. That means the request is not completed until then. If there is
-> no next request then the completion is done by queued work.
+On Thu, Oct 26, 2017 at 9:27 PM, Hunter, Adrian <adrian.hunter@intel.com> w=
+rote:
+> On Thu, Oct 26, 2017 at 3:34 PM, Adrian Hunter <adrian.hunter@intel.com>
+
+>> What I mean is that the CQE code will likely look better on top of these
+>> refactorings.
+>>
+>> But as I say it is a matter of taste. I just love the looks of my own co=
+de as
+>> much as the next programmer so I can't judge that. Let's see what the
+>> reviewers say.
 >
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> ---
->  drivers/mmc/core/block.c | 655 ++++++++++++++++++++++++++++++++++++++++++++++-
->  drivers/mmc/core/block.h |  10 +
->  drivers/mmc/core/queue.c | 302 ++++++++++++++++++++--
->  drivers/mmc/core/queue.h |  41 +++
->  include/linux/mmc/host.h |   1 +
->  5 files changed, 979 insertions(+), 30 deletions(-)
+> It doesn't look ready.  There seems still to be 2 task switches between
+> each transfer.
+
+IIUC there is a task in blk-mq submitting the requests, and that goes
+all the way to starting it on the host. Then as an interrupt comes back
+I kick the worker and that reports back to the block layer. So that
+is one task switch per request and then one switch back to the MQ
+layer.
+
+But I am experimenting as we speak to get rid of the worker
+for all simple cases that don't require retune or BKOPS and that's
+pretty cool if it can be made to work :)
+
+> mmc_blk_rw_done_error() is still using the messy error
+> handling and doesn=E2=80=99t handle retries e.g. 'retry' is a local varia=
+ble so it can't
+> count the number of retries now that there is no loop.
+
+Right! Nice catch.
+
+I will update the patch and put that in the struct mmc_async_req so
+it survives the retry rounds.
+
+>> >> It sounds simple but I bet this drives a truck through Adrians patch
+>> >> series. Sorry. :(
+>> >
+>> > I waited a long time for your patches but I had to give up waiting
+>> > when Ulf belated insisted on blk-mq before CQE.  I am not sure what
+>> > you are expecting now it seems too late.
+>>
+>> Too late for what? It's just a patch set, I don't really have a deadline=
+ for this or
+>> anything. As I explained above I have been working on this all the time,=
+ the
+>> problem was that I was/am not smart enough to find that solution for hos=
+t
+>> claiming by context.
 >
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index ea80ff4cd7f9..002446e8dc5d 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -1264,7 +1264,10 @@ static void mmc_blk_issue_drv_op(struct mmc_queue *mq, struct request *req)
->                 break;
->         }
->         mq_rq->drv_op_result = ret;
-> -       blk_end_request_all(req, ret ? BLK_STS_IOERR : BLK_STS_OK);
-> +       if (req->mq_ctx)
-> +               blk_mq_end_request(req, ret ? BLK_STS_IOERR : BLK_STS_OK);
-> +       else
-> +               blk_end_request_all(req, ret ? BLK_STS_IOERR : BLK_STS_OK);
->  }
+> Too late to go before CQE.  All the blk-mq work is now in the CQE patchse=
+t.
+
+You seem to have an either/or stance.
+
+Mine if more of a both/and.
+
+It is not even necessary to have one set of these patches on
+top of each other, they can also be mixed in some order.
+
+A lot of factors influence this I think, like structure of code and
+maintainability, performance, block layer interaction semantics,
+etc etc.
+
+We definately need input from Ulf and Bartlomiej (who was actually
+the first to work on MQ for MMC/SD).
+
+>> The host claiming by context was merged a month ago and now I have
+>> understood that I can use that and rebased my patches on it. Slow learne=
+r, I
+>> guess.
+>>
+>> If you feel it is ungrateful that you have put in so much work and thing=
+s are
+>> not getting merged, and you feel your patches deserve to be merged first
+>> (because of human nature reasons) I can empathize with that. It's sad th=
+at
+>> your patches are at v12. Also I see that patch 4 bears the signoffs of a
+>> significant team at CodeAurora, so they are likely as impatient.
 >
->  static void mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
-> @@ -1307,7 +1310,10 @@ static void mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
->         else
->                 mmc_blk_reset_success(md, type);
->  fail:
-> -       blk_end_request(req, status, blk_rq_bytes(req));
-> +       if (req->mq_ctx)
-> +               blk_mq_end_request(req, status);
-> +       else
-> +               blk_end_request(req, status, blk_rq_bytes(req));
->  }
->
->  static void mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
-> @@ -1377,7 +1383,10 @@ static void mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
->         if (!err)
->                 mmc_blk_reset_success(md, type);
->  out:
-> -       blk_end_request(req, status, blk_rq_bytes(req));
-> +       if (req->mq_ctx)
-> +               blk_mq_end_request(req, status);
-> +       else
-> +               blk_end_request(req, status, blk_rq_bytes(req));
->  }
->
->  static void mmc_blk_issue_flush(struct mmc_queue *mq, struct request *req)
-> @@ -1387,7 +1396,10 @@ static void mmc_blk_issue_flush(struct mmc_queue *mq, struct request *req)
->         int ret = 0;
->
->         ret = mmc_flush_cache(card);
-> -       blk_end_request_all(req, ret ? BLK_STS_IOERR : BLK_STS_OK);
-> +       if (req->mq_ctx)
-> +               blk_mq_end_request(req, ret ? BLK_STS_IOERR : BLK_STS_OK);
-> +       else
-> +               blk_end_request_all(req, ret ? BLK_STS_IOERR : BLK_STS_OK);
->  }
->
->  /*
-> @@ -1413,15 +1425,18 @@ static inline void mmc_apply_rel_rw(struct mmc_blk_request *brq,
->         }
->  }
->
-> -#define CMD_ERRORS                                                     \
-> -       (R1_OUT_OF_RANGE |      /* Command argument out of range */     \
-> -        R1_ADDRESS_ERROR |     /* Misaligned address */                \
-> +#define CMD_ERRORS_EXCL_OOR                                            \
-> +       (R1_ADDRESS_ERROR |     /* Misaligned address */                \
+> It is important that you understand that this has nothing to do with
+> "human nature reasons".
 
-This looks unrelated to blkmq support.
+You do come across as a bit hard-headed.
 
->          R1_BLOCK_LEN_ERROR |   /* Transferred block length incorrect */\
->          R1_WP_VIOLATION |      /* Tried to write to protected block */ \
->          R1_CARD_ECC_FAILED |   /* Card ECC failed */                   \
->          R1_CC_ERROR |          /* Card controller error */             \
->          R1_ERROR)              /* General/unknown error */
->
-> +#define CMD_ERRORS                                                     \
-> +       (CMD_ERRORS_EXCL_OOR |                                          \
-> +        R1_OUT_OF_RANGE)       /* Command argument out of range */     \
-> +
+But I think it is better to focus on the code per se.
 
-Ditto.
+I would suggest we go and review each others patch series to
+learn from each codebase what was done in a good way for the
+MMC/SD stack and what was not, you tossed out a nice review
+comment above for example.
 
->  static void mmc_blk_eval_resp_error(struct mmc_blk_request *brq)
->  {
->         u32 val;
-> @@ -1766,6 +1781,632 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
->         mqrq->areq.err_check = mmc_blk_err_check;
->  }
->
-> +#define MMC_MAX_RETRIES                5
-> +#define MMC_DATA_RETRIES       2
-> +#define MMC_NO_RETRIES         (MMC_MAX_RETRIES + 1)
+>  Linux distributions use upstream kernels.
+> ChromeOS  has an "upstream first" policy.  Delaying features for long
+> periods has real-world consequences.  When people ask, what kernel
+> should they use, we expect to reply, just use mainline.
 
-What's are these defines about? Do you intend to use different retries
-for the blkmq case comparing to the legacy request path? If so, why?
+We are in violent agreement.
 
-> +
-> +/* Single sector read during recovery */
-> +static void mmc_blk_ss_read(struct mmc_queue *mq, struct request *req)
-> +{
-> +       struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
-> +       blk_status_t status;
-> +
-> +       while (1) {
-> +               mmc_blk_rw_rq_prep(mqrq, mq->card, 1, mq);
-> +
-> +               mmc_wait_for_req(mq->card->host, &mqrq->brq.mrq);
-> +
-> +               /*
-> +                * Not expecting command errors, so just give up in that case.
-> +                * If there are retries remaining, the request will get
-> +                * requeued.
-> +                */
-> +               if (mqrq->brq.cmd.error)
-> +                       return;
-> +
-> +               if (blk_rq_bytes(req) <= 512)
-> +                       break;
-> +
-> +               status = mqrq->brq.data.error ? BLK_STS_IOERR : BLK_STS_OK;
-> +
-> +               blk_update_request(req, status, 512);
-> +       }
-> +
-> +       mqrq->retries = MMC_NO_RETRIES;
-> +}
-> +
-> +static inline bool mmc_blk_oor_valid(struct mmc_blk_request *brq)
-> +{
-> +       return !!brq->mrq.sbc;
-> +}
-> +
-> +static inline u32 mmc_blk_stop_err_bits(struct mmc_blk_request *brq)
-> +{
-> +       return mmc_blk_oor_valid(brq) ? CMD_ERRORS : CMD_ERRORS_EXCL_OOR;
-> +}
+I take it that you are working on ChromeOS context and that since
+they have this policy, they, through their influence over Intel as a
+supplier is putting heavy pressure on you personally to get this
+merged.
 
-Again, this seems like a non blkmq specific thing.
+Is that correctly understood?
 
-> +
-> +static inline bool mmc_blk_in_tran_state(u32 status)
-> +{
-> +       /*
-> +        * Some cards mishandle the status bits, so make sure to check both the
-> +        * busy indication and the card state.
-> +        */
-> +       return status & R1_READY_FOR_DATA &&
-> +              (R1_CURRENT_STATE(status) == R1_STATE_TRAN);
-> +}
-> +
-> +/*
-> + * Check for errors the host controller driver might not have seen such as
-> + * response mode errors or invalid card state.
-> + */
-> +static bool mmc_blk_status_error(struct request *req, u32 status)
-> +{
-> +       struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
-> +       struct mmc_blk_request *brq = &mqrq->brq;
-> +       u32 stop_err_bits = mmc_blk_stop_err_bits(brq);
-> +
-> +       return brq->cmd.resp[0]  & CMD_ERRORS    ||
-> +              brq->stop.resp[0] & stop_err_bits ||
-> +              status            & stop_err_bits ||
-> +              (rq_data_dir(req) == WRITE && !mmc_blk_in_tran_state(status));
-> +}
-> +
-> +static inline bool mmc_blk_cmd_started(struct mmc_blk_request *brq)
-> +{
-> +       return !brq->sbc.error && !brq->cmd.error &&
-> +              !(brq->cmd.resp[0] & CMD_ERRORS);
-> +}
-> +
-> +static unsigned int mmc_blk_clock_khz(struct mmc_host *host)
-> +{
-> +       if (host->actual_clock)
-> +               return host->actual_clock / 1000;
-> +
-> +       /* Clock may be subject to a divisor, fudge it by a factor of 2. */
-> +       if (host->ios.clock)
-> +               return host->ios.clock / 2000;
-> +
-> +       /* How can there be no clock */
-> +       WARN_ON_ONCE(1);
-> +       return 100; /* 100 kHz is minimum possible value */
-> +}
-> +
-> +static unsigned long mmc_blk_data_timeout_jiffies(struct mmc_host *host,
-> +                                                 struct mmc_data *data)
-> +{
-> +       unsigned int ms = DIV_ROUND_UP(data->timeout_ns, 1000000);
-> +       unsigned int khz;
-> +
-> +       if (data->timeout_clks) {
-> +               khz = mmc_blk_clock_khz(host);
-> +               ms += DIV_ROUND_UP(data->timeout_clks, khz);
-> +       }
-> +
-> +       return msecs_to_jiffies(ms);
-> +}
-> +
-> +static int mmc_blk_card_stuck(struct mmc_card *card, struct request *req,
-> +                             u32 *resp_errs)
-> +{
-> +       struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
-> +       struct mmc_data *data = &mqrq->brq.data;
-> +       unsigned long timeout;
-> +       u32 status;
-> +       int err;
-> +
-> +       timeout = jiffies + mmc_blk_data_timeout_jiffies(card->host, data);
-> +
-> +       while (1) {
-> +               bool done = time_after(jiffies, timeout);
-> +
-> +               err = __mmc_send_status(card, &status, 5);
-> +               if (err) {
-> +                       pr_err("%s: error %d requesting status\n",
-> +                              req->rq_disk->disk_name, err);
-> +                       break;
-> +               }
-> +
-> +               /* Accumulate any response error bits seen */
-> +               if (resp_errs)
-> +                       *resp_errs |= status;
-> +
-> +               if (mmc_blk_in_tran_state(status))
-> +                       break;
-> +
-> +               /* Timeout if the device never becomes ready */
-> +               if (done) {
-> +                       pr_err("%s: Card stuck in wrong state! %s %s\n",
-> +                               mmc_hostname(card->host),
-> +                               req->rq_disk->disk_name, __func__);
-> +                       err = -ETIMEDOUT;
-> +                       break;
-> +               }
-> +       }
-> +
-> +       return err;
-> +}
-> +
-> +static int mmc_blk_send_stop(struct mmc_card *card)
-> +{
-> +       struct mmc_command cmd = {
-> +               .opcode = MMC_STOP_TRANSMISSION,
-> +               .flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC,
-> +       };
-> +
-> +       return mmc_wait_for_cmd(card->host, &cmd, 5);
-> +}
-> +
-> +static int mmc_blk_fix_state(struct mmc_card *card, struct request *req)
-> +{
-> +       int err;
-> +
-> +       mmc_retune_hold_now(card->host);
-> +
-> +       mmc_blk_send_stop(card);
-> +
-> +       err = mmc_blk_card_stuck(card, req, NULL);
-> +
-> +       mmc_retune_release(card->host);
-> +
-> +       return err;
-> +}
-> +
-> +static void mmc_blk_rw_recovery(struct mmc_queue *mq, struct request *req)
-> +{
-> +       int type = rq_data_dir(req) == READ ? MMC_BLK_READ : MMC_BLK_WRITE;
-> +       struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
-> +       struct mmc_blk_request *brq = &mqrq->brq;
-> +       struct mmc_blk_data *md = mq->blkdata;
-> +       struct mmc_card *card = mq->card;
-> +       u32 status;
-> +       u32 blocks;
-> +       int err;
-> +
-> +       /*
-> +        * Status error bits might get lost during re-tuning so don't allow
-> +        * re-tuning yet.
-> +        */
-> +       mmc_retune_hold_now(card->host);
-> +
-> +       /*
-> +        * Some errors the host driver might not have seen. Set the number of
-> +        * bytes transferred to zero in that case.
-> +        */
-> +       err = __mmc_send_status(card, &status, 0);
-> +       if (err || mmc_blk_status_error(req, status))
-> +               brq->data.bytes_xfered = 0;
-> +
-> +       mmc_retune_release(card->host);
-> +
-> +       /*
-> +        * Try again to get the status. This also provides an opportunity for
-> +        * re-tuning.
-> +        */
-> +       if (err)
-> +               err = __mmc_send_status(card, &status, 0);
-> +
-> +       /*
-> +        * Nothing more to do after the number of bytes transferred has been
-> +        * updated and there is no card.
-> +        */
-> +       if (err && mmc_detect_card_removed(card->host))
-> +               return;
-> +
-> +       /* Try to get back to "tran" state */
-> +       if (err || !mmc_blk_in_tran_state(status))
-> +               err = mmc_blk_fix_state(mq->card, req);
-> +
-> +       /*
-> +        * Special case for SD cards where the card might record the number of
-> +        * blocks written.
-> +        */
-> +       if (!err && mmc_blk_cmd_started(brq) && mmc_card_sd(card) &&
-> +           rq_data_dir(req) == WRITE && !mmc_sd_num_wr_blocks(card, &blocks))
-> +               brq->data.bytes_xfered = blocks << 9;
-> +
-> +       /* Reset if the card is in a bad state */
-> +       if (err && mmc_blk_reset(md, card->host, type)) {
-> +               pr_err("%s: recovery failed!\n", req->rq_disk->disk_name);
-> +               mqrq->retries = MMC_NO_RETRIES;
-> +               return;
-> +       }
-> +
-> +       /*
-> +        * If anything was done, just return and if there is anything remaining
-> +        * on the request it will get requeued.
-> +        */
-> +       if (brq->data.bytes_xfered)
-> +               return;
-> +
-> +       /* Reset before last retry */
-> +       if (mqrq->retries + 1 == MMC_MAX_RETRIES)
-> +               mmc_blk_reset(md, card->host, type);
-> +
-> +       /* Command errors fail fast, so use all MMC_MAX_RETRIES */
-> +       if (brq->sbc.error || brq->cmd.error)
-> +               return;
-> +
-> +       /* Reduce the remaining retries for data errors */
-> +       if (mqrq->retries < MMC_MAX_RETRIES - MMC_DATA_RETRIES) {
-> +               mqrq->retries = MMC_MAX_RETRIES - MMC_DATA_RETRIES;
-> +               return;
-> +       }
-> +
-> +       /* FIXME: Missing single sector read for large sector size */
-> +       if (rq_data_dir(req) == READ && !mmc_large_sector(card)) {
-> +               /* Read one sector at a time */
-> +               mmc_blk_ss_read(mq, req);
-> +               return;
-> +       }
-> +}
-> +
-> +static inline bool mmc_blk_rq_error(struct mmc_blk_request *brq)
-> +{
-> +       mmc_blk_eval_resp_error(brq);
-> +
-> +       return brq->sbc.error || brq->cmd.error || brq->stop.error ||
-> +              brq->data.error || brq->cmd.resp[0] & CMD_ERRORS;
-> +}
-> +
-> +static int mmc_blk_card_busy(struct mmc_card *card, struct request *req)
-> +{
-> +       struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
-> +       u32 status = 0;
-> +       int err;
-> +
-> +       if (mmc_host_is_spi(card->host) || rq_data_dir(req) == READ)
-> +               return 0;
-> +
-> +       mmc_retune_hold_now(card->host);
-> +
-> +       err = mmc_blk_card_stuck(card, req, &status);
-> +
-> +       mmc_retune_release(card->host);
-> +
-> +       /*
-> +        * Do not assume data transferred correctly if there are any error bits
-> +        * set.
-> +        */
-> +       if (!err && status & mmc_blk_stop_err_bits(&mqrq->brq)) {
-> +               mqrq->brq.data.bytes_xfered = 0;
-> +               err = -EIO;
-> +       }
-> +
-> +       /* Copy the exception bit so it will be seen later on */
-> +       if (mmc_card_mmc(card) && status & R1_EXCEPTION_EVENT)
-> +               mqrq->brq.cmd.resp[0] |= R1_EXCEPTION_EVENT;
-> +
-> +       return err;
-> +}
-> +
-> +static inline void mmc_blk_rw_reset_success(struct mmc_queue *mq,
-> +                                           struct request *req)
-> +{
-> +       int type = rq_data_dir(req) == READ ? MMC_BLK_READ : MMC_BLK_WRITE;
-> +
-> +       mmc_blk_reset_success(mq->blkdata, type);
-> +}
+That would explain your increasing pushing to get this
+upstream pretty well, especially if you have tech leads and
+managers hovering over your shoulder every week asking how
+the CQE upstream work is progressing.
 
-I understand that all the above new line and code (around 300 lines)
-is something you need for the blkmq support, in the rest of this
-patch.
+It is indeed tough to juggle this with the pressure to "upstream
+first" the BFQ scheduler policy that we are working on in Linaro
+to increase interactivity. We need to enable this on devices
+pronto and that means migrating MMC/SD to MQ and MQ only.
+I have shared this motivation since the start, so it should come
+as no surprise.
 
-However, it looks like you are adding completely new code that either
-already exists in the legacy request path (in some slightly different
-format), or could serve as clean up/re-factorization of the legacy
-request path.
+So I also have some pressure to "Get This Feature In Now".
 
-This is not the way you should format a path for converting to blkmq.
-The reasons are:
-*) It makes it hard to review.
-**) There is no need to through away *all* old mmc blk/core code,
-which I assume is your plan for next step. Instead the proper way is
-to re-factor it, an make it possible to re-use those parts that makes
-sense.
-
-> +
-> +static void mmc_blk_mq_complete_rq(struct mmc_queue *mq, struct request *req)
-> +{
-> +       struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
-> +       unsigned int nr_bytes = mqrq->brq.data.bytes_xfered;
-> +
-> +       if (nr_bytes) {
-> +               if (blk_update_request(req, BLK_STS_OK, nr_bytes))
-> +                       blk_mq_requeue_request(req, true);
-> +               else
-> +                       __blk_mq_end_request(req, BLK_STS_OK);
-> +       } else if (mqrq->retries++ < MMC_MAX_RETRIES) {
-> +               blk_mq_requeue_request(req, true);
-> +       } else {
-> +               if (mmc_card_removed(mq->card))
-> +                       req->rq_flags |= RQF_QUIET;
-> +               blk_mq_end_request(req, BLK_STS_IOERR);
-> +       }
-> +}
-> +
-> +static bool mmc_blk_urgent_bkops_needed(struct mmc_queue *mq,
-> +                                       struct mmc_queue_req *mqrq)
-> +{
-> +       return mmc_card_mmc(mq->card) &&
-> +              (mqrq->brq.cmd.resp[0] & R1_EXCEPTION_EVENT ||
-> +               mqrq->brq.stop.resp[0] & R1_EXCEPTION_EVENT);
-> +}
-> +
-> +static void mmc_blk_urgent_bkops(struct mmc_queue *mq,
-> +                                struct mmc_queue_req *mqrq)
-> +{
-> +       if (mmc_blk_urgent_bkops_needed(mq, mqrq))
-> +               mmc_start_bkops(mq->card, true);
-> +}
-
-Ditto for the two above functions.
-
-> +
-> +void mmc_blk_mq_complete(struct request *req)
-> +{
-> +       struct mmc_queue *mq = req->q->queuedata;
-> +
-> +       mmc_blk_mq_complete_rq(mq, req);
-> +}
-> +
-> +static void mmc_blk_mq_poll_completion(struct mmc_queue *mq,
-> +                                      struct request *req)
-> +{
-> +       struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
-> +       struct mmc_host *host = mq->card->host;
-> +       bool failed;
-> +
-> +       failed = mmc_blk_rq_error(&mqrq->brq) ||
-> +                mmc_blk_card_busy(mq->card, req);
-> +
-> +       if (!mmc_queue_direct_complete(host))
-
-Can you please make the changes related to completing the request in
-the mmc_request_done() into a separate patch.
-
-It's better to first get the default behavior in place, then we can
-improve things on top. Again, that also makes it easier to review.
-
-No I am giving up reaching this point. I didn't even get the actual
-blkmq converting part, which is the core part I should be spending my
-time to review. Sorry!
-
-Some final comments around the system-wide PM support below.
-
-[...]
-
->
-> +static void mmc_mq_queue_suspend(struct mmc_queue *mq)
-> +{
-> +       blk_mq_quiesce_queue(mq->queue);
-> +
-> +       /*
-> +        * The host remains claimed while there are outstanding requests, so
-> +        * simply claiming and releasing here ensures there are none.
-> +        */
-> +       mmc_claim_host(mq->card->host);
-> +       mmc_release_host(mq->card->host);
-
-This looks fragile.
-
-Seems like an interface in blkmq with flushes the queue and suspend it
-is missing, however there are of course reasons why it doesn't exist.
-
-I assume the blk_mq_quiesce_queue() guarantees no new requests is
-being pushed to us after calling it, but it still seem a bit racy to
-rely on the host claim/release thing.
-
-Let's bring this up as question for the block people experts.
-
-BTW, I was talking with Bart and Rafael about generic suspend issues
-for block/fs at Kernelsummit the other day. I will try to follow up on
-that to make sure we also do the right things in mmc.
-
-> +}
-> +
-
-[...]
-
-Kind regards
-Uffe
+Yours,
+Linus Walleij
