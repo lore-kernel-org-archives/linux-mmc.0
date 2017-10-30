@@ -1,48 +1,52 @@
-From: "Tobin C. Harding" <me@tobin.cc>
-Subject: [PATCH] mmc: fix white space around call to request_irq
-Date: Mon, 30 Oct 2017 17:08:58 +1100
-Message-ID: <1509343738-19411-1-git-send-email-me@tobin.cc>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v.4.14-rc8
+Date: Mon, 30 Oct 2017 11:19:31 +0100
+Message-ID: <1509358771-5865-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from out4-smtp.messagingengine.com ([66.111.4.28]:49341 "EHLO
-        out4-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1750931AbdJ3GJI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Oct 2017 02:09:08 -0400
+Received: from mail-lf0-f65.google.com ([209.85.215.65]:51530 "EHLO
+        mail-lf0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932578AbdJ3KTe (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Oct 2017 06:19:34 -0400
+Received: by mail-lf0-f65.google.com with SMTP id r129so14284486lff.8
+        for <linux-mmc@vger.kernel.org>; Mon, 30 Oct 2017 03:19:34 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Bruce Chang <brucechang@via.com.tw>, Harald Welte <HaraldWelte@viatech.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "Tobin C. Harding" <me@tobin.cc>, linux-mmc@vger.kernel.org
+To: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
 
-Currently call to request_irq() contains a line break between the
-function call and the assignment variable. This gives false positives
-when attempting to audit (grep) kernel code for correct handling of
-return value for the function. We can save future developers some time
-by removing the line break. This arguably makes the code a little
-cleaner also.
+Hi Linus,
 
-Remove line break from between function call and return value
-assignment.
+Here's a PR with a couple of MMC fixes intended for v4.14-rc8. Details about the
+highlights are as usual found in the signed tag.
 
-Signed-off-by: Tobin C. Harding <me@tobin.cc>
----
- drivers/mmc/host/via-sdmmc.c | 5 ++---
- 1 file changed, 2 insertions(+), 3 deletions(-)
+Please pull this in!
 
-diff --git a/drivers/mmc/host/via-sdmmc.c b/drivers/mmc/host/via-sdmmc.c
-index a838bf5480d8..9b9a447f26fe 100644
---- a/drivers/mmc/host/via-sdmmc.c
-+++ b/drivers/mmc/host/via-sdmmc.c
-@@ -1144,9 +1144,8 @@ static int via_sd_probe(struct pci_dev *pcidev,
- 
- 	via_init_mmc_host(sdhost);
- 
--	ret =
--	    request_irq(pcidev->irq, via_sdc_isr, IRQF_SHARED, DRV_NAME,
--			sdhost);
-+	ret = request_irq(pcidev->irq, via_sdc_isr, IRQF_SHARED,
-+			  DRV_NAME, sdhost);
- 	if (ret)
- 		goto unmap;
- 
--- 
-2.7.4
+Kind regards
+Ulf Hansson
 
+
+The following changes since commit eb701ce16a45ed9880897c48f05ee608d77c72e3:
+
+  mmc: sdhci-pci: Fix default d3_retune for Intel host controllers (2017-10-10 08:40:04 +0200)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v4.14-rc4-2
+
+for you to fetch changes up to 48e1dc10a9440872c0fc07a7fbcfce177f996fd4:
+
+  mmc: renesas_sdhi: fix kernel panic in _internal_dmac.c (2017-10-20 11:24:58 +0200)
+
+----------------------------------------------------------------
+MMC host:
+ - renesas_sdhi: fix kernel panic
+ - tmio: fix swiotlb buffer is full
+
+----------------------------------------------------------------
+Yoshihiro Shimoda (2):
+      mmc: tmio: fix swiotlb buffer is full
+      mmc: renesas_sdhi: fix kernel panic in _internal_dmac.c
+
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c | 17 ++++++++++-------
+ drivers/mmc/host/tmio_mmc_core.c              | 13 +++++++++++++
+ 2 files changed, 23 insertions(+), 7 deletions(-)
