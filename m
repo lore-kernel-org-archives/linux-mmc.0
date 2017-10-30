@@ -1,30 +1,36 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 4/4] mmc: sdhci-acpi: Fix voltage switch for some Intel
- host controllers
-Date: Mon, 30 Oct 2017 12:40:21 +0100
-Message-ID: <CAPDyKFrFX-J6seyFfemcQ2LWicZvfBKL5d=T4RMKUHnT5XcJnw@mail.gmail.com>
-References: <1508409706-27026-1-git-send-email-adrian.hunter@intel.com> <1508409706-27026-5-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: tmio: Use common error handling code in tmio_mmc_host_probe()
+Date: Mon, 30 Oct 2017 12:40:33 +0100
+Message-ID: <CAPDyKFqoQ10sVfw-kDzFm4O3Fq28XcYRQPHD6fjOFKquRQEUog@mail.gmail.com>
+References: <7fdea92c-2ca7-8911-28da-4388103e1b04@users.sourceforge.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f193.google.com ([209.85.223.193]:49691 "EHLO
+Received: from mail-io0-f193.google.com ([209.85.223.193]:44192 "EHLO
         mail-io0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932294AbdJ3LkX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Oct 2017 07:40:23 -0400
-Received: by mail-io0-f193.google.com with SMTP id n137so26442544iod.6
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Oct 2017 04:40:22 -0700 (PDT)
-In-Reply-To: <1508409706-27026-5-git-send-email-adrian.hunter@intel.com>
+        with ESMTP id S932483AbdJ3Lke (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Oct 2017 07:40:34 -0400
+Received: by mail-io0-f193.google.com with SMTP id m16so26415938iod.1
+        for <linux-mmc@vger.kernel.org>; Mon, 30 Oct 2017 04:40:34 -0700 (PDT)
+In-Reply-To: <7fdea92c-2ca7-8911-28da-4388103e1b04@users.sourceforge.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: SF Markus Elfring <elfring@users.sourceforge.net>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org
 
-On 19 October 2017 at 12:41, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> Some Intel host controllers use an ACPI device-specific method to ensure
-> correct voltage switching. Fix voltage switch for those, by adding a call
-> to the DSM.
+On 27 October 2017 at 19:17, SF Markus Elfring
+<elfring@users.sourceforge.net> wrote:
+> From: Markus Elfring <elfring@users.sourceforge.net>
+> Date: Fri, 27 Oct 2017 19:09:17 +0200
 >
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> * Add a jump target so that a bit of exception handling can be better
+>   reused at the end of this function.
+>
+> * Adjust condition checks.
+>
+> This issue was detected by using the Coccinelle software.
+>
+> Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
 
 Thanks, applied for next!
 
@@ -32,163 +38,46 @@ Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/sdhci-acpi.c | 108 ++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 108 insertions(+)
+>  drivers/mmc/host/tmio_mmc_core.c | 17 +++++++++--------
+>  1 file changed, 9 insertions(+), 8 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-> index 5bb5880403b2..b988997a1e80 100644
-> --- a/drivers/mmc/host/sdhci-acpi.c
-> +++ b/drivers/mmc/host/sdhci-acpi.c
-> @@ -96,6 +96,105 @@ static inline bool sdhci_acpi_flag(struct sdhci_acpi_host *c, unsigned int flag)
->         return c->slot && (c->slot->flags & flag);
->  }
+> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+> index a7293e186e03..2e85d4048cec 100644
+> --- a/drivers/mmc/host/tmio_mmc_core.c
+> +++ b/drivers/mmc/host/tmio_mmc_core.c
+> @@ -1286,23 +1286,24 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
+>         pm_runtime_enable(&pdev->dev);
 >
-> +enum {
-> +       INTEL_DSM_FNS           =  0,
-> +       INTEL_DSM_V18_SWITCH    =  3,
-> +       INTEL_DSM_V33_SWITCH    =  4,
-> +};
-> +
-> +struct intel_host {
-> +       u32     dsm_fns;
-> +};
-> +
-> +static const guid_t intel_dsm_guid =
-> +       GUID_INIT(0xF6C13EA5, 0x65CD, 0x461F,
-> +                 0xAB, 0x7A, 0x29, 0xF7, 0xE8, 0xD5, 0xBD, 0x61);
-> +
-> +static int __intel_dsm(struct intel_host *intel_host, struct device *dev,
-> +                      unsigned int fn, u32 *result)
-> +{
-> +       union acpi_object *obj;
-> +       int err = 0;
-> +
-> +       obj = acpi_evaluate_dsm(ACPI_HANDLE(dev), &intel_dsm_guid, 0, fn, NULL);
-> +       if (!obj)
-> +               return -EOPNOTSUPP;
-> +
-> +       if (obj->type == ACPI_TYPE_INTEGER) {
-> +               *result = obj->integer.value;
-> +       } else if (obj->type == ACPI_TYPE_BUFFER && obj->buffer.length > 0) {
-> +               size_t len = min_t(size_t, obj->buffer.length, 4);
-> +
-> +               *result = 0;
-> +               memcpy(result, obj->buffer.pointer, len);
-> +       } else {
-> +               dev_err(dev, "%s DSM fn %u obj->type %d obj->buffer.length %d\n",
-> +                       __func__, fn, obj->type, obj->buffer.length);
-> +               err = -EINVAL;
-> +       }
-> +
-> +       ACPI_FREE(obj);
-> +
-> +       return err;
-> +}
-> +
-> +static int intel_dsm(struct intel_host *intel_host, struct device *dev,
-> +                    unsigned int fn, u32 *result)
-> +{
-> +       if (fn > 31 || !(intel_host->dsm_fns & (1 << fn)))
-> +               return -EOPNOTSUPP;
-> +
-> +       return __intel_dsm(intel_host, dev, fn, result);
-> +}
-> +
-> +static void intel_dsm_init(struct intel_host *intel_host, struct device *dev,
-> +                          struct mmc_host *mmc)
-> +{
-> +       int err;
-> +
-> +       err = __intel_dsm(intel_host, dev, INTEL_DSM_FNS, &intel_host->dsm_fns);
-> +       if (err) {
-> +               pr_debug("%s: DSM not supported, error %d\n",
-> +                        mmc_hostname(mmc), err);
-> +               return;
-> +       }
-> +
-> +       pr_debug("%s: DSM function mask %#x\n",
-> +                mmc_hostname(mmc), intel_host->dsm_fns);
-> +}
-> +
-> +static int intel_start_signal_voltage_switch(struct mmc_host *mmc,
-> +                                            struct mmc_ios *ios)
-> +{
-> +       struct device *dev = mmc_dev(mmc);
-> +       struct sdhci_acpi_host *c = dev_get_drvdata(dev);
-> +       struct intel_host *intel_host = sdhci_acpi_priv(c);
-> +       unsigned int fn;
-> +       u32 result = 0;
-> +       int err;
-> +
-> +       err = sdhci_start_signal_voltage_switch(mmc, ios);
-> +       if (err)
-> +               return err;
-> +
-> +       switch (ios->signal_voltage) {
-> +       case MMC_SIGNAL_VOLTAGE_330:
-> +               fn = INTEL_DSM_V33_SWITCH;
-> +               break;
-> +       case MMC_SIGNAL_VOLTAGE_180:
-> +               fn = INTEL_DSM_V18_SWITCH;
-> +               break;
-> +       default:
-> +               return 0;
-> +       }
-> +
-> +       err = intel_dsm(intel_host, dev, fn, &result);
-> +       pr_debug("%s: %s DSM fn %u error %d result %u\n",
-> +                mmc_hostname(mmc), __func__, fn, err, result);
-> +
-> +       return 0;
-> +}
-> +
->  static void sdhci_acpi_int_hw_reset(struct sdhci_host *host)
->  {
->         u8 reg;
-> @@ -280,6 +379,7 @@ static int intel_probe_slot(struct platform_device *pdev, const char *hid,
->                             const char *uid)
->  {
->         struct sdhci_acpi_host *c = platform_get_drvdata(pdev);
-> +       struct intel_host *intel_host = sdhci_acpi_priv(c);
->         struct sdhci_host *host = c->host;
+>         ret = mmc_add_host(mmc);
+> -       if (ret < 0) {
+> -               tmio_mmc_host_remove(_host);
+> -               return ret;
+> -       }
+> +       if (ret)
+> +               goto remove_host;
 >
->         if (hid && uid && !strcmp(hid, "80860F14") && !strcmp(uid, "1") &&
-> @@ -290,6 +390,11 @@ static int intel_probe_slot(struct platform_device *pdev, const char *hid,
->         if (hid && !strcmp(hid, "80865ACA"))
->                 host->mmc_host_ops.get_cd = bxt_get_cd;
+>         dev_pm_qos_expose_latency_limit(&pdev->dev, 100);
 >
-> +       intel_dsm_init(intel_host, &pdev->dev, host->mmc);
+>         if (pdata->flags & TMIO_MMC_USE_GPIO_CD) {
+>                 ret = mmc_gpio_request_cd(mmc, pdata->cd_gpio, 0);
+> -               if (ret < 0) {
+> -                       tmio_mmc_host_remove(_host);
+> -                       return ret;
+> -               }
+> +               if (ret)
+> +                       goto remove_host;
 > +
-> +       host->mmc_host_ops.start_signal_voltage_switch =
-> +                                       intel_start_signal_voltage_switch;
-> +
+>                 mmc_gpiod_request_cd_irq(mmc);
+>         }
+>
 >         return 0;
+> +
+> +remove_host:
+> +       tmio_mmc_host_remove(_host);
+> +       return ret;
 >  }
+>  EXPORT_SYMBOL_GPL(tmio_mmc_host_probe);
 >
-> @@ -304,6 +409,7 @@ static int intel_probe_slot(struct platform_device *pdev, const char *hid,
->                    SDHCI_QUIRK2_STOP_WITH_TC |
->                    SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400,
->         .probe_slot     = intel_probe_slot,
-> +       .priv_size      = sizeof(struct intel_host),
->  };
->
->  static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sdio = {
-> @@ -315,6 +421,7 @@ static int intel_probe_slot(struct platform_device *pdev, const char *hid,
->         .flags   = SDHCI_ACPI_RUNTIME_PM,
->         .pm_caps = MMC_PM_KEEP_POWER,
->         .probe_slot     = intel_probe_slot,
-> +       .priv_size      = sizeof(struct intel_host),
->  };
->
->  static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sd = {
-> @@ -325,6 +432,7 @@ static int intel_probe_slot(struct platform_device *pdev, const char *hid,
->                    SDHCI_QUIRK2_STOP_WITH_TC,
->         .caps    = MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_AGGRESSIVE_PM,
->         .probe_slot     = intel_probe_slot,
-> +       .priv_size      = sizeof(struct intel_host),
->  };
->
->  static const struct sdhci_acpi_slot sdhci_acpi_slot_qcom_sd_3v = {
 > --
-> 1.9.1
+> 2.14.3
 >
