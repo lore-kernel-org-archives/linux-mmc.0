@@ -1,52 +1,83 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v.4.14-rc8
-Date: Mon, 30 Oct 2017 11:19:31 +0100
-Message-ID: <1509358771-5865-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f65.google.com ([209.85.215.65]:51530 "EHLO
-        mail-lf0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932578AbdJ3KTe (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Oct 2017 06:19:34 -0400
-Received: by mail-lf0-f65.google.com with SMTP id r129so14284486lff.8
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Oct 2017 03:19:34 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v6 00/12] mmc: mediatek: add support of mt2701/mt2712
+Date: Mon, 30 Oct 2017 12:39:59 +0100
+Message-ID: <CAPDyKFr+Zc_u=YYhtzF0tRS0Pp08cKkGrJwoGDQympOF4M=HwA@mail.gmail.com>
+References: <1508118399-21828-1-git-send-email-chaotian.jing@mediatek.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1508118399-21828-1-git-send-email-chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, yong mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Heiner Kallweit <hkallweit1-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Phong LE <ple-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, srv_heupstream <srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
 
-Hi Linus,
+On 16 October 2017 at 03:46, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org> wrote:
+>   This serial of patches are adding support of mt2701/mt2712.
+> there are many changes and HW improvement between mt8173 and
+> mt2701/mt2712, below is a list of these changes:
+>   1. enlarge CLKDIV bits from 8 to 12
+>   2. remove the PAD_TUNE register and add a new PAD_TUNE0 register
+>   3. add data sync and async fifo feature
+>   4. add busy_check feature
+>   5. add stop_clk fix
+>   6. add enhance_rx support
+>   7. add a seperate CG of source clock
+>
+>   mt2712 supports full of these features, mt2701 supports part of it, and
+> add a "mediatek,latch-ck" to work-around as it do not support stop-clk fix.
+>
+> Note: As Pinctrl/CCF are not ready now, so that current patches do not
+> include DTS part.
+>
+> Changed vs v5:
+>   based on Rob's comments, explain why MT8173 no longer compatible with
+> driver that supports "mediatek,mt8135-mmc", add more clearly description
+> of "mediatek,latch-ck".
+>
+> Changed vs v4:
+>   based on Julien's comment, change the "bool pad_tune0" to "u32 pad_tune_reg".
+>
+> Changed vs v3:
+>   based on Ulf's comments, make the bindings change to be the first patch.
+>
+> Changed vs v2:
+>   based on Matthias's comments, merge binding file changes to one patch,
+> add "hs400_tune" flag in dev_comp.
+>
+> Changed vs v1:
+>   based on Ulf/Rob/Matthias's comments of DTS binding file, make the binding
+> file clearly and fix probe issue.
+>
+>
+> Chaotian Jing (12):
+>   mmc: dt-bindings: Add reg/source_cg/latch-ck for Mediatek MMC bindings
+>   mmc: mediatek: add support of mt2701/mt2712
+>   arm64: dts: mt8173: remove "mediatek,mt8135-mmc" from mmc nodes
+>   mmc: mediatek: make hs400_tune_response only for mt8173
+>   mmc: mediatek: add pad_tune0 support
+>   mmc: mediatek: add async fifo and data tune support
+>   mmc: mediatek: add busy_check support
+>   mmc: mediatek: add stop_clk fix and enhance_rx support
+>   mmc: mediatek: add support of source_cg clock
+>   mmc: mediatek: add latch-ck support
+>   mmc: mediatek: improve eMMC hs400 mode read performance
+>   mmc: mediatek: perfer to use rise edge latching for cmd line
+>
+>  Documentation/devicetree/bindings/mmc/mtk-sd.txt |  18 +-
+>  arch/arm64/boot/dts/mediatek/mt8173.dtsi         |  12 +-
+>  drivers/mmc/host/mtk-sd.c                        | 283 ++++++++++++++++++++---
+>  3 files changed, 265 insertions(+), 48 deletions(-)
+>
 
-Here's a PR with a couple of MMC fixes intended for v4.14-rc8. Details about the
-highlights are as usual found in the signed tag.
+Thanks, applied the hole series on my next branch.
 
-Please pull this in!
+If Matthias wants to pick/ack the DT change (patch3), I either add his
+ack or drop that patch from my tree.
 
 Kind regards
-Ulf Hansson
-
-
-The following changes since commit eb701ce16a45ed9880897c48f05ee608d77c72e3:
-
-  mmc: sdhci-pci: Fix default d3_retune for Intel host controllers (2017-10-10 08:40:04 +0200)
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v4.14-rc4-2
-
-for you to fetch changes up to 48e1dc10a9440872c0fc07a7fbcfce177f996fd4:
-
-  mmc: renesas_sdhi: fix kernel panic in _internal_dmac.c (2017-10-20 11:24:58 +0200)
-
-----------------------------------------------------------------
-MMC host:
- - renesas_sdhi: fix kernel panic
- - tmio: fix swiotlb buffer is full
-
-----------------------------------------------------------------
-Yoshihiro Shimoda (2):
-      mmc: tmio: fix swiotlb buffer is full
-      mmc: renesas_sdhi: fix kernel panic in _internal_dmac.c
-
- drivers/mmc/host/renesas_sdhi_internal_dmac.c | 17 ++++++++++-------
- drivers/mmc/host/tmio_mmc_core.c              | 13 +++++++++++++
- 2 files changed, 23 insertions(+), 7 deletions(-)
+Uffe
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
