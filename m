@@ -1,54 +1,107 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 0/5] mmc: dw_mmc: Fix the CTO timer patch, plus the DTO timer
-Date: Mon, 30 Oct 2017 12:40:08 +0100
-Message-ID: <CAPDyKFqaZxGJyJRB36-K3zVK_-V637ge1S6bpiQjbfDe_5PhLw@mail.gmail.com>
-References: <20171012201118.23570-1-dianders@chromium.org>
+Subject: Re: [PATCH 3/4] mmc: sdhci-acpi: Let devices define their own private data
+Date: Mon, 30 Oct 2017 12:40:27 +0100
+Message-ID: <CAPDyKFqeowHBVdBdboxPpKP0DJ=Gh=OP9w7inaGmtJD4P-09HQ@mail.gmail.com>
+References: <1508409706-27026-1-git-send-email-adrian.hunter@intel.com> <1508409706-27026-4-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20171012201118.23570-1-dianders@chromium.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Douglas Anderson <dianders@chromium.org>, Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, Ziyuan Xu <xzy.xu@rock-chips.com>, Alexandru Stan <amstan@chromium.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Brian Norris <briannorris@chromium.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, kernel@esmil.dk, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-io0-f194.google.com ([209.85.223.194]:45300 "EHLO
+        mail-io0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932294AbdJ3Lk2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Oct 2017 07:40:28 -0400
+Received: by mail-io0-f194.google.com with SMTP id i38so26395503iod.2
+        for <linux-mmc@vger.kernel.org>; Mon, 30 Oct 2017 04:40:28 -0700 (PDT)
+In-Reply-To: <1508409706-27026-4-git-send-email-adrian.hunter@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 12 October 2017 at 22:11, Douglas Anderson <dianders@chromium.org> wrote:
-> Recently we landed 03de19212ea3 ("mmc: dw_mmc: introduce timer for
-> broken command transfer over scheme").  I found a bunch of problems
-> with that patch, so this series attempts to solve some of them.
+On 19 October 2017 at 12:41, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> Let devices define their own private data to facilitate device-specific
+> operations. The size of the private structure is specified in the
+> sdhci_acpi_slot structure, then sdhci_acpi_probe() will allocate extra
+> space for it, and sdhci_acpi_priv() can be used to get a reference to it.
 >
-> This also fixes the DTO timer in some of the same ways even though I
-> haven't personally seen problems with the DTO timer.
->
-> NOTE: this series has only been lighly tested so far.  I can at least
-> reproduce the need for the CTO timer on one of my devices and so I can
-> confirm that part still works.  As mentioned in the 3rd patch I also
-> ran the mmc_test kernel module on this and did manage to see the 3rd
-> patch doing something useful.
->
-> Changes in v2:
-> - Removed extra "int i"
-> - Fix the DTO timeout calculation new for v2
-> - Cleanup the DTO timer new for v2
->
-> Douglas Anderson (5):
->   mmc: dw_mmc: cancel the CTO timer after a voltage switch
->   mmc: dw_mmc: Fix the CTO timeout calculation
->   mmc: dw_mmc: Add locking to the CTO timer
->   mmc: dw_mmc: Fix the DTO timeout calculation
->   mmc: dw_mmc: Cleanup the DTO timer like the CTO one
->
->  drivers/mmc/host/dw_mmc.c | 162 +++++++++++++++++++++++++++++++++++++++++-----
->  1 file changed, 146 insertions(+), 16 deletions(-)
->
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Douglas, Jaehoon,
-
-I decided to pick patch 1->4 for fixes and the patch 5 for next, that
-should help us to get them more tested, while Jaehoon is still
-catching up.
-
-I can add ack/drop patches for yet a couple of days this week.
+Thanks, applied for next!
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/sdhci-acpi.c | 16 ++++++++++++++--
+>  1 file changed, 14 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+> index 640be5b618fc..5bb5880403b2 100644
+> --- a/drivers/mmc/host/sdhci-acpi.c
+> +++ b/drivers/mmc/host/sdhci-acpi.c
+> @@ -73,6 +73,7 @@ struct sdhci_acpi_slot {
+>         unsigned int    caps2;
+>         mmc_pm_flag_t   pm_caps;
+>         unsigned int    flags;
+> +       size_t          priv_size;
+>         int (*probe_slot)(struct platform_device *, const char *, const char *);
+>         int (*remove_slot)(struct platform_device *);
+>  };
+> @@ -82,8 +83,14 @@ struct sdhci_acpi_host {
+>         const struct sdhci_acpi_slot    *slot;
+>         struct platform_device          *pdev;
+>         bool                            use_runtime_pm;
+> +       unsigned long                   private[0] ____cacheline_aligned;
+>  };
+>
+> +static inline void *sdhci_acpi_priv(struct sdhci_acpi_host *c)
+> +{
+> +       return (void *)c->private;
+> +}
+> +
+>  static inline bool sdhci_acpi_flag(struct sdhci_acpi_host *c, unsigned int flag)
+>  {
+>         return c->slot && (c->slot->flags & flag);
+> @@ -393,11 +400,13 @@ static const struct sdhci_acpi_slot *sdhci_acpi_get_slot(const char *hid,
+>  static int sdhci_acpi_probe(struct platform_device *pdev)
+>  {
+>         struct device *dev = &pdev->dev;
+> +       const struct sdhci_acpi_slot *slot;
+>         struct acpi_device *device, *child;
+>         struct sdhci_acpi_host *c;
+>         struct sdhci_host *host;
+>         struct resource *iomem;
+>         resource_size_t len;
+> +       size_t priv_size;
+>         const char *hid;
+>         const char *uid;
+>         int err;
+> @@ -409,6 +418,8 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+>         hid = acpi_device_hid(device);
+>         uid = acpi_device_uid(device);
+>
+> +       slot = sdhci_acpi_get_slot(hid, uid);
+> +
+>         /* Power on the SDHCI controller and its children */
+>         acpi_device_fix_up_power(device);
+>         if (!sdhci_acpi_no_fixup_child_power(hid, uid)) {
+> @@ -431,13 +442,14 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+>         if (!devm_request_mem_region(dev, iomem->start, len, dev_name(dev)))
+>                 return -ENOMEM;
+>
+> -       host = sdhci_alloc_host(dev, sizeof(struct sdhci_acpi_host));
+> +       priv_size = slot ? slot->priv_size : 0;
+> +       host = sdhci_alloc_host(dev, sizeof(struct sdhci_acpi_host) + priv_size);
+>         if (IS_ERR(host))
+>                 return PTR_ERR(host);
+>
+>         c = sdhci_priv(host);
+>         c->host = host;
+> -       c->slot = sdhci_acpi_get_slot(hid, uid);
+> +       c->slot = slot;
+>         c->pdev = pdev;
+>         c->use_runtime_pm = sdhci_acpi_flag(c, SDHCI_ACPI_RUNTIME_PM);
+>
+> --
+> 1.9.1
+>
