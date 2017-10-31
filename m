@@ -1,78 +1,87 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH v2 0/5] mmc: dw_mmc: Fix the CTO timer patch, plus the DTO
- timer
-Date: Tue, 31 Oct 2017 15:05:20 +0800
-Message-ID: <da14d1a3-c85f-b415-1cb6-b5d1f3a1ed7a@rock-chips.com>
-References: <20171012201118.23570-1-dianders@chromium.org>
- <CAPDyKFqaZxGJyJRB36-K3zVK_-V637ge1S6bpiQjbfDe_5PhLw@mail.gmail.com>
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: Re: [PATCH] mmc: vub300: Use common code in
+ __download_offload_pseudocode()
+Date: Tue, 31 Oct 2017 11:45:52 +0300
+Message-ID: <20171031084552.mvvn73pfew4rebsd@mwanda>
+References: <7b418db1-ec35-4c85-5d06-45edde56822c@users.sourceforge.net>
+ <CAPDyKFp6h_DAcDvDEMft_WApEakdPQiMw0v8t2fPVxS+H1KkOA@mail.gmail.com>
+ <20171030121508.zfnsvpsrt25prhr4@mwanda>
+ <CAPDyKFqaaX3i5wLu-aORRB765Kjac705384UM4nCbV8n1Kfc3w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFqaZxGJyJRB36-K3zVK_-V637ge1S6bpiQjbfDe_5PhLw@mail.gmail.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Douglas Anderson <dianders@chromium.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, shawn.lin@rock-chips.com, Ziyuan Xu <xzy.xu@rock-chips.com>, Alexandru Stan <amstan@chromium.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Brian Norris <briannorris@chromium.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, kernel@esmil.dk, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFqaaX3i5wLu-aORRB765Kjac705384UM4nCbV8n1Kfc3w@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: SF Markus Elfring <elfring@users.sourceforge.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux USB List <linux-usb@vger.kernel.org>, Tony Olech <tony.olech@elandigitalsystems.com>, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Ulf,
-
-On 2017/10/30 19:40, Ulf Hansson wrote:
-> On 12 October 2017 at 22:11, Douglas Anderson <dianders@chromium.org> wrote:
->> Recently we landed 03de19212ea3 ("mmc: dw_mmc: introduce timer for
->> broken command transfer over scheme").  I found a bunch of problems
->> with that patch, so this series attempts to solve some of them.
->>
->> This also fixes the DTO timer in some of the same ways even though I
->> haven't personally seen problems with the DTO timer.
->>
->> NOTE: this series has only been lighly tested so far.  I can at least
->> reproduce the need for the CTO timer on one of my devices and so I can
->> confirm that part still works.  As mentioned in the 3rd patch I also
->> ran the mmc_test kernel module on this and did manage to see the 3rd
->> patch doing something useful.
->>
->> Changes in v2:
->> - Removed extra "int i"
->> - Fix the DTO timeout calculation new for v2
->> - Cleanup the DTO timer new for v2
->>
->> Douglas Anderson (5):
->>    mmc: dw_mmc: cancel the CTO timer after a voltage switch
->>    mmc: dw_mmc: Fix the CTO timeout calculation
->>    mmc: dw_mmc: Add locking to the CTO timer
->>    mmc: dw_mmc: Fix the DTO timeout calculation
->>    mmc: dw_mmc: Cleanup the DTO timer like the CTO one
->>
->>   drivers/mmc/host/dw_mmc.c | 162 +++++++++++++++++++++++++++++++++++++++++-----
->>   1 file changed, 146 insertions(+), 16 deletions(-)
->>
+On Mon, Oct 30, 2017 at 02:03:13PM +0100, Ulf Hansson wrote:
+> On 30 October 2017 at 13:15, Dan Carpenter <dan.carpenter@oracle.com> wrote:
+> > On Mon, Oct 30, 2017 at 12:40:39PM +0100, Ulf Hansson wrote:
+> >> On 27 October 2017 at 21:31, SF Markus Elfring
+> >> <elfring@users.sourceforge.net> wrote:
+> >> > From: Markus Elfring <elfring@users.sourceforge.net>
+> >> > Date: Fri, 27 Oct 2017 21:21:40 +0200
+> >> >
+> >> > Add a jump target so that a specific string copy operation is stored
+> >> > only once at the end of this function implementation.
+> >> > Replace two calls of the function "strncpy" by goto statements.
+> >> >
+> >> > This issue was detected by using the Coccinelle software.
+> >> >
+> >> > Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
+> >>
+> >> Thanks, applied for next!
+> >>
+> >
+> > What's the advantage of this patch?  The new code seems more complicated
+> > to me and GCC automatically reuses duplicate constant strings so there
+> > is no memory savings.
 > 
-> Douglas, Jaehoon,
+> It looked to me that the error path got a bit cleaner. However, I
+> guess it's matter of taste.
 > 
-> I decided to pick patch 1->4 for fixes and the patch 5 for next, that
-> should help us to get them more tested, while Jaehoon is still
-> catching up.
-> 
-> I can add ack/drop patches for yet a couple of days this week.
+> If you insist, I can drop it.
 
-Patch 4 introduce a warning:
+I'm on the kernel-janitors list so I am CC'd on all of Markus's patches.
+It's not my code and I'm tired of being the anti-Markus guy so this
+patch is fine.  Markus has a tool that finds duplicate strings and he
+uses gotos to avoid them.  I don't think duplicate strings are a problem
+or that it's a good idea to send over a hundred patches using this
+method.  But many people have explained that to Markus already and
+that's not the bigger picture which is about error handling and labels.
 
-warning: unused variable ‘irqflags’ [-Wunused-variable]
+What I like are labels that are necessary and self explanatory.  Things
+like "goto unlock" are a good example, because we know we need to unlock
+and the goto tells us what the label does.  Or here is another example:
 
-irqflags should be introduced in patch 5 in the same place.
-As it seems patch 5 will be candidate for 4.15, so could you please
-help fix patch 4 and 5 manually? Or Doug need to resend patch 4 and 5?
+	foo = alloc_foo();
+	if (!foo)
+		return -ENOMEM;
 
+	bar = alloc_bar();
+	if (!foo) {
+		err = -ENOMEM;
+		goto free_foo;
+	}
 
+>From reading the code, you know that you have to free foo and the label
+name is clear so you literally don't need to scroll down to the bottom
+of the function when you're reading this code.  A bad label is like
+this:
 
-> 
-> Kind regards
-> Uffe
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
-> 
+	foo = alloc_foo();
+	if (!foo)
+		goto err;
+
+You're reading along and you're like "what happens at the err" label?
+So then you have to scroll down to the bottom and read the code, then
+you have to think about how the variables line up with the variables
+in the above code, then you have to scroll back and find your place
+again and by that point you've forgotten what you were doing when you
+started.
+
+regards,
+dan carpenter
