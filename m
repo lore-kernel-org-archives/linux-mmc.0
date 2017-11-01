@@ -1,84 +1,62 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 0/5] mmc: dw_mmc: Fix the CTO timer patch, plus the DTO timer
-Date: Wed, 1 Nov 2017 15:18:59 +0100
-Message-ID: <CAPDyKFo68qK3pgnJJsM1TdbxTuKpwYGwWpzYxGXTgAE73878nw@mail.gmail.com>
-References: <20171012201118.23570-1-dianders@chromium.org> <CAPDyKFqaZxGJyJRB36-K3zVK_-V637ge1S6bpiQjbfDe_5PhLw@mail.gmail.com>
- <da14d1a3-c85f-b415-1cb6-b5d1f3a1ed7a@rock-chips.com> <CAD=FV=UFmKBonWJVRT-OPb-FY0GzHgf0HZo=NAZuxSk0e6URWA@mail.gmail.com>
+From: kbuild test robot <fengguang.wu@intel.com>
+Subject: [ulf.hansson-mmc:next 84/84] drivers/mmc/host/dw_mmc.c:1953:9:
+ sparse: incompatible types in comparison expression (different type sizes)
+Date: Thu, 2 Nov 2017 02:19:11 +0800
+Message-ID: <201711020209.Ik9aC6Yo%fengguang.wu@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <CAD=FV=UFmKBonWJVRT-OPb-FY0GzHgf0HZo=NAZuxSk0e6URWA@mail.gmail.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ziyuan Xu <xzy.xu@rock-chips.com>, Alexandru Stan <amstan@chromium.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Brian Norris <briannorris@chromium.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Emil Renner Berthing <kernel@esmil.dk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga14.intel.com ([192.55.52.115]:47777 "EHLO mga14.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751344AbdKASTr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 1 Nov 2017 14:19:47 -0400
+Content-Disposition: inline
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Douglas Anderson <dianders@chromium.org>
+Cc: kbuild-all@01.org, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
-On 31 October 2017 at 19:14, Doug Anderson <dianders@chromium.org> wrote:
-> Hi,
->
-> On Tue, Oct 31, 2017 at 12:05 AM, Shawn Lin <shawn.lin@rock-chips.com> wr=
-ote:
->> Hi Ulf,
->>
->>
->> On 2017/10/30 19:40, Ulf Hansson wrote:
->>>
->>> On 12 October 2017 at 22:11, Douglas Anderson <dianders@chromium.org>
->>> wrote:
->>>>
->>>> Recently we landed 03de19212ea3 ("mmc: dw_mmc: introduce timer for
->>>> broken command transfer over scheme").  I found a bunch of problems
->>>> with that patch, so this series attempts to solve some of them.
->>>>
->>>> This also fixes the DTO timer in some of the same ways even though I
->>>> haven't personally seen problems with the DTO timer.
->>>>
->>>> NOTE: this series has only been lighly tested so far.  I can at least
->>>> reproduce the need for the CTO timer on one of my devices and so I can
->>>> confirm that part still works.  As mentioned in the 3rd patch I also
->>>> ran the mmc_test kernel module on this and did manage to see the 3rd
->>>> patch doing something useful.
->>>>
->>>> Changes in v2:
->>>> - Removed extra "int i"
->>>> - Fix the DTO timeout calculation new for v2
->>>> - Cleanup the DTO timer new for v2
->>>>
->>>> Douglas Anderson (5):
->>>>    mmc: dw_mmc: cancel the CTO timer after a voltage switch
->>>>    mmc: dw_mmc: Fix the CTO timeout calculation
->>>>    mmc: dw_mmc: Add locking to the CTO timer
->>>>    mmc: dw_mmc: Fix the DTO timeout calculation
->>>>    mmc: dw_mmc: Cleanup the DTO timer like the CTO one
->>>>
->>>>   drivers/mmc/host/dw_mmc.c | 162
->>>> +++++++++++++++++++++++++++++++++++++++++-----
->>>>   1 file changed, 146 insertions(+), 16 deletions(-)
->>>>
->>>
->>> Douglas, Jaehoon,
->>>
->>> I decided to pick patch 1->4 for fixes and the patch 5 for next, that
->>> should help us to get them more tested, while Jaehoon is still
->>> catching up.
->>>
->>> I can add ack/drop patches for yet a couple of days this week.
->>
->>
->> Patch 4 introduce a warning:
->>
->> warning: unused variable =E2=80=98irqflags=E2=80=99 [-Wunused-variable]
->>
->> irqflags should be introduced in patch 5 in the same place.
->> As it seems patch 5 will be candidate for 4.15, so could you please
->> help fix patch 4 and 5 manually? Or Doug need to resend patch 4 and 5?
->
-> Thanks for catching this and sorry for the dumb screwup.  Ulf: I'm
-> happy to do do whatever makes it easiest for you.  If you want me to
-> re-post it should be very quick.
+tree:   git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git next
+head:   80a2a5a7745b1f65198fb11da9a8d1d38c3003d5
+commit: 80a2a5a7745b1f65198fb11da9a8d1d38c3003d5 [84/84] mmc: dw_mmc: Cleanup the DTO timer like the CTO one
+reproduce:
+        # apt-get install sparse
+        git checkout 80a2a5a7745b1f65198fb11da9a8d1d38c3003d5
+        make ARCH=x86_64 allmodconfig
+        make C=1 CF=-D__CHECK_ENDIAN__
 
-I fixed it myself, by amending the commits, no worries this time!
 
-Kind regards
-Uffe
+sparse warnings: (new ones prefixed by >>)
+
+
+vim +1953 drivers/mmc/host/dw_mmc.c
+
+  1935	
+  1936	static void dw_mci_set_drto(struct dw_mci *host)
+  1937	{
+  1938		unsigned int drto_clks;
+  1939		unsigned int drto_div;
+  1940		unsigned int drto_ms;
+  1941		unsigned int irqflags;
+  1942	
+  1943		drto_clks = mci_readl(host, TMOUT) >> 8;
+  1944		drto_div = (mci_readl(host, CLKDIV) & 0xff) * 2;
+  1945		if (drto_div == 0)
+  1946			drto_div = 1;
+  1947		drto_ms = DIV_ROUND_UP(MSEC_PER_SEC * drto_clks * drto_div,
+  1948				       host->bus_hz);
+  1949	
+  1950		/* add a bit spare time */
+  1951		drto_ms += 10;
+  1952	
+> 1953		spin_lock_irqsave(&host->irq_lock, irqflags);
+  1954		if (!test_bit(EVENT_DATA_COMPLETE, &host->pending_events))
+  1955			mod_timer(&host->dto_timer,
+  1956				  jiffies + msecs_to_jiffies(drto_ms));
+  1957		spin_unlock_irqrestore(&host->irq_lock, irqflags);
+  1958	}
+  1959	
+
+---
+0-DAY kernel test infrastructure                Open Source Technology Center
+https://lists.01.org/pipermail/kbuild-all                   Intel Corporation
