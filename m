@@ -1,41 +1,55 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v6 03/12] arm64: dts: mt8173: remove "mediatek,mt8135-mmc"
- from mmc nodes
-Date: Thu, 2 Nov 2017 15:13:47 +0100
-Message-ID: <CAPDyKFp5Ez_NXWtSeTt+nsgJtesS3t_tbUpgFco8ZVAPj+PgoA@mail.gmail.com>
-References: <1508118399-21828-1-git-send-email-chaotian.jing@mediatek.com>
- <1508118399-21828-4-git-send-email-chaotian.jing@mediatek.com>
- <CAPDyKFrRVT8YFXvy3Wuf_jga5oourScOdas34U=YkeLRzHoWMg@mail.gmail.com> <b24d12e4-251f-6f79-1ed9-5b52f8f39625@gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: make irq flags 'unsigned long'
+Date: Thu, 2 Nov 2017 15:15:01 +0100
+Message-ID: <CAPDyKFq-QyZ2bAdo_-y_Y9b7iNdQ0M2mGsdNO4dCtPMoZUcyXg@mail.gmail.com>
+References: <20171102111655.3834051-1-arnd@arndb.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <b24d12e4-251f-6f79-1ed9-5b52f8f39625@gmail.com>
+In-Reply-To: <20171102111655.3834051-1-arnd@arndb.de>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Matthias Brugger <matthias.bgg@gmail.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, yong mao <yong.mao@mediatek.com>, Linus Walleij <linus.walleij@linaro.org>, Heiner Kallweit <hkallweit1@gmail.com>, Phong LE <ple@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mediatek@lists.infradead.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, srv_heupstream <srv_heupstream@mediatek.com>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Shawn Lin <shawn.lin@rock-chips.com>, Douglas Anderson <dianders@chromium.org>, Addy Ke <addy.ke@rock-chips.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 2 November 2017 at 12:50, Matthias Brugger <matthias.bgg@gmail.com> wrote:
+On 2 November 2017 at 12:16, Arnd Bergmann <arnd@arndb.de> wrote:
+> The newly added spin_lock_irqsave() passes an argument of the
+> wrong type, leading to a warning about non-portable code:
 >
+> drivers/mmc/host/dw_mmc.c: In function 'dw_mci_set_drto':
+> include/linux/typecheck.h:11:18: error: comparison of distinct pointer types lacks a cast [-Werror]
+>   (void)(&__dummy == &__dummy2); \
+> drivers/mmc/host/dw_mmc.c:1953:2: note: in expansion of macro 'spin_lock_irqsave'
+>   spin_lock_irqsave(&host->irq_lock, irqflags);
 >
-> On 10/25/2017 11:11 PM, Ulf Hansson wrote:
->> On 16 October 2017 at 03:46, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
->>> devicetree bindings has been updated to support multi-platforms,
->>> so that each platform has its owns compatible name.
->>> And, this compatible name may used in driver to distinguish with
->>> other platform.
->>>
->>> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
->>
->> Matthias, do you intend to pick this? Else I can do it with your ack...
->>
+> This changes the type to 'unsigned long' as it should be.
 >
-> If it's not too late, feel free to take it. Otherwise I will queue it for the
-> next merge window:
->
-> Acked-by: Matthias Brugger <matthias.bgg@gmail.com>
+> Fixes: 80a2a5a7745b ("mmc: dw_mmc: Cleanup the DTO timer like the CTO one")
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 
-Thanks, I have queued it up for 4.15 and will add your ack.
+Thanks, however this has already been taken care of. It was a silly
+mistake made by me when I amended an original commit.
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/dw_mmc.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 31f5744a50e0..37b55b095daf 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1938,7 +1938,7 @@ static void dw_mci_set_drto(struct dw_mci *host)
+>         unsigned int drto_clks;
+>         unsigned int drto_div;
+>         unsigned int drto_ms;
+> -       unsigned int irqflags;
+> +       unsigned long irqflags;
+>
+>         drto_clks = mci_readl(host, TMOUT) >> 8;
+>         drto_div = (mci_readl(host, CLKDIV) & 0xff) * 2;
+> --
+> 2.9.0
+>
