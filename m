@@ -1,107 +1,167 @@
-From: Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-Subject: RE: [PATCH 1/2] mmc: renesas_sdhi: fix swiotlb buffer is full
-Date: Thu, 2 Nov 2017 04:10:46 +0000
-Message-ID: <TY1PR06MB0992CBE1B122C62BD5E1C227D85C0@TY1PR06MB0992.apcprd06.prod.outlook.com>
-References: <1508225421-25405-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-	<1508225421-25405-2-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-	<CAMuHMdXyY-gvQGn2UxhUDsdhdWUMmTA80z73PF14otvcKuTMaw@mail.gmail.com>
-	<20171019002412.GA14493@localhost.localdomain>
-	<CAMuHMdUs+dLq8LJTJoUQEUzJAKXCfD0JBtVnHPyN6XdppVy5qQ@mail.gmail.com>
-	<TY1PR06MB09928E11C2AFFD55EF68961CD8420@TY1PR06MB0992.apcprd06.prod.outlook.com>
-	<TY1PR06MB09929A4BF1E2A5DBD54845DED8430@TY1PR06MB0992.apcprd06.prod.outlook.com>
-	<20171101132639.GA24821@x230.dumpdata.com>
+From: Ivid Suvarna <ivid.suvarna@gmail.com>
+Subject: USB is not resumed(disconnected) after suspend to disk
+Date: Thu, 2 Nov 2017 10:19:44 +0530
+Message-ID: <CABXF_ACakK+zYQQW6OuzJbCqq0k3WGtGhRds8YjU8nn21fAEuA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <20171101132639.GA24821-sHAKZZqAc8NKMcnDSFYBzAC/G2K4zDHf@public.gmane.org>
-Content-Language: ja-JP
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Konrad Rzeszutek Wilk <konrad-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux-Renesas <linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, "iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org" <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>, Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>, Konrad Rzeszutek Wilk <konrad-Gq0aWv8utHQdnm+yROfE0A@public.gmane.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-usb@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, "ivid.suvarna" <ivid.suvarna@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+Hi all,
 
-> From: Konrad Rzeszutek, Sent: Wednesday, November 1, 2017 10:27 PM
-> 
-> On Fri, Oct 20, 2017 at 03:18:55AM +0000, Yoshihiro Shimoda wrote:
-> > Hi again!
-> >
-> > > From: Yoshihiro Shimoda, Sent: Thursday, October 19, 2017 8:39 PM
-> > >
-> > > Hi Geert-san, Konrad-san,
-> > >
-> > > > From: Geert Uytterhoeven, Sent: Thursday, October 19, 2017 5:34 PM
-> > > >
-> > > > Hi Konrad,
-> > > >
-> > > > On Thu, Oct 19, 2017 at 2:24 AM, Konrad Rzeszutek Wilk
-> > > > <konrad-Gq0aWv8utHQdnm+yROfE0A@public.gmane.org> wrote:
-> > < snip >
-> > > > >> > diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-> > > > >> > index f905f23..6c9b4b2 100644
-> > > > >> > --- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-> > > > >> > +++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-> > > > >> > @@ -80,8 +80,9 @@
-> > > > >> >         .scc_offset     = 0x1000,
-> > > > >> >         .taps           = rcar_gen3_scc_taps,
-> > > > >> >         .taps_num       = ARRAY_SIZE(rcar_gen3_scc_taps),
-> > > > >> > -       /* Gen3 SDHI DMAC can handle 0xffffffff blk count, but seg = 1 */
-> > > > >> > -       .max_blk_count  = 0xffffffff,
-> > > > >> > +       /* The swiotlb can handle memory size up to 256 kbytes for now. */
-> > > > >> > +       .max_blk_count  = 512,
-> > > > >>
-> > > > >> Fixing this in the individual drivers feels like the wrong solution to me.
-> > > > >>
-> > > > >> iommu: Is there a better (generic) way to handle this?
-> > > > >
-> > > > > Yes. See 7453c549f5f6485c0d79cad7844870dcc7d1b34d, aka swiotlb_max_segment
-> > > >
-> > > > Thanks for the pointer!
-> > > >
-> > > > While I agree this can be used to avoid the swiotlb buffer full issue,
-> > > > I believe it is a suboptimal solution if the device actually uses an IOMMU.
-> > > > It limits the mapping size if CONFIG_SWIOTLB=y, which is always the
-> > > > case for arm/arm64 these days.
-> > >
-> > > I'm afraid but I misunderstood this API's spec when I read it at first.
-> > > After I tried to use it, I found the API cannot be used for a workaround because
-> > > this API returns total size of swiotlb.
-> > >
-> > > For example:
-> > >  - The swiotlb_max_segment() returns 64M bytes from the API when a default setting.
-> > >   - In this case, the maximum size per a map is 256k bytes.
-> > >  - The swiotlb_max_segment() returns 128M bytes from the API when I added swiotlb=65536
-> > >    into the kernel parameter on arm64.
-> > >   - In this case, the maximum size per a map is still 256k bytes because
-> > >     the swiotlb has hardcoded the size by the following code:
-> > >      https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/lib/swiotlb.c?h=v4.14-rc5#n254
-> > >
-> > > So, how do we handle to resolve (or avoid) the issue?
-> >
-> > Anyway, I made v2 patches by using swiotlb related definitions. Would you check it?
-> 
-> Did I miss that email? As in was I cc-ed?
+I am trying to support suspend to disk(hibernate) on Hikey with 4.4
+kernel. During suspend, I could see the usb devices getting reset and I
+can access them properly. Message can be seen as below:
 
-This was my fault. When I submitted v2 patches, I didn't include your email and iommu mailing list...
+usb 1-1: reset high-speed USB device number 2 using dwc2
+usb 1-1.2: reset high-speed USB device number 3 using dwc2
+usb 1-1.2.4: reset high-speed USB device number 4 using dwc2
 
-> > https://patchwork.kernel.org/patch/10018879/
-> 
-> Why not use IO_TLB_SEGSIZE << IO_TLB_SHIFT or alternatively
-> swiotlb_max_segment?  See 5584f1b1d73e9
 
-I already made such a patch as v2 and it was merged into mmc.git / fixes branch.
+But after resume, usb gets disconnected and I could not access it
+anymore:
 
-https://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git/commit/?h=fixes&id=e90e8da72ad694a16a4ffa6e5adae3610208f73b
+usb 1-1: USB disconnect, device number 2
+usb 1-1.2: USB disconnect, device number 3
+usb 1-1.2.4: USB disconnect, device number 4
 
-Best regards,
-Yoshihiro Shimoda
+However "dwc2 f72c0000.usb" gets setup properly. I guess it is OTG. I
+have connected only keyboard to USB Type-A. OTG is not connected.
+
+Is the dwc2_suspend() and dwc2_resume() functions support only suspend
+to mem? Is there any hack such that we can forcefully reset the
+USB(dwc2) on resume in dwc2_resume() code path. I tried adding
+usb_reset_device() to dwc2_resume() path but that gave a panic as
+expected. I tried to skip suspend in dwc2_suspend(), but still the usb
+disconnects.
+
+I added "dwc2_lowlevel_hw_init" to resume path just to check but still
+no use. Is the power to hub lost or clock is not set properly or
+something because I could not understand what is the problem.
+
+Below is some more dmesg log:
+
+ivid@ivid:~# dmesg | grep usb
+[    0.408019] usbcore: registered new interface driver usbfs
+[    0.408099] usbcore: registered new interface driver hub
+[    0.408224] usbcore: registered new device driver usb
+[    0.486321] usbcore: registered new interface driver asix
+[    0.486403] usbcore: registered new interface driver ax88179_178a
+[    0.486583] dwc2 f72c0000.usb: Configuration mismatch. Forcing host
+mode
+[    0.487491] usbcore: registered new interface driver usb-storage
+[    0.581006] usbcore: registered new interface driver usbhid
+[    0.581052] usbhid: USB HID core driver
+[    2.054331] dwc2 f72c0000.usb: Configuration mismatch. Forcing host
+mode
+[    2.059779] f72c0000.usb supply vusb_d not found, using dummy
+regulator
+[    2.065133] f72c0000.usb supply vusb_a not found, using dummy
+regulator
+[    2.939845] dwc2 f72c0000.usb: DWC OTG Controller
+[    2.943587] dwc2 f72c0000.usb: new USB bus registered, assigned bus
+number 1
+[    2.951537] dwc2 f72c0000.usb: irq 37, io mem 0x00000000
+[    3.342725] usb 1-1: new high-speed USB device number 2 using dwc2
+
+Below are some additional debug logs.
+
+* During suspend:
+
+dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
+dwc2 f72c0000.usb:   urb->status = -104
+dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
+dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
+dwc2 f72c0000.usb:   urb->status = -104
+dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
+dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
+dwc2 f72c0000.usb:   urb->status = -104
+dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
+dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
+dwc2 f72c0000.usb:   urb->status = -104
+dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
+dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
+dwc2 f72c0000.usb:   urb->status = -104
+dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
+dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
+dwc2 f72c0000.usb:   urb->status = -104
+dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
+dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
+dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
+dwc2 f72c0000.usb:   urb->status = -104
+dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
+dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
+dwc2 f72c0000.usb:   urb->status = -104
+dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
+dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
+dwc2 f72c0000.usb:   urb->status = -104
+dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
+dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
+dwc2 f72c0000.usb:   urb->status = -104
+dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
+dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
+dwc2 f72c0000.usb:   urb->status = -104
+dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
+dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
+dwc2 f72c0000.usb:   urb->status = -104
+dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
+dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
+dwc2 f72c0000.usb:   urb->status = -104
+dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
+dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
+dwc2 f72c0000.usb:   urb->status = -104
+dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
+dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
+dwc2 f72c0000.usb:   urb->status = -104
+dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
+dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
+dwc2 f72c0000.usb:   urb->status = -104
+dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
+dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
+dwc2 f72c0000.usb:   urb->status = -104
+dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
+dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
+dwc2 f72c0000.usb:   urb->status = -104
+dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
+dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
+dwc2 f72c0000.usb:   urb->status = -2
+dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
+dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
+dwc2 f72c0000.usb:   urb->status = -2
+
+* During resume:
+
+dwc2 f72c0000.usb: ClearPortFeature USB_PORT_FEAT_ENABLE
+usb 1-1: USB disconnect, device number 2
+done.
+usb 1-1.2: USB disconnect, device number 3
+asix 1-1.2:1.0 eth0: unregister 'asix' usb-f72c0000.usb-1.2, ASIX
+AX88772 USB 2.0 Ethernet
+dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x00,
+ep->hcpriv=ffffffc02ee7d900
+dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x00,
+ep->hcpriv=          (null)
+dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x81,
+ep->hcpriv=ffffffc02e823f00
+dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x82,
+ep->hcpriv=ffffffc02e827e00
+dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x03,
+ep->hcpriv=ffffffc02eeb7800
+dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x00,
+ep->hcpriv=ffffffc02e827000
+dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x00,
+ep->hcpriv=          (null)
+dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x81,
+ep->hcpriv=ffffffc02ee7d800
+dwc2 f72c0000.usb: SetPortFeature
+dwc2 f72c0000.usb: SetPortFeature - USB_PORT_FEAT_POWER
+
+* I changed the hibernation default value to 1 in
+"drivers/usb/dwc2/platform.c" in params_hi6220 since hibernation by
+default is disabled, but no use.
+
+Thanks,
+Ivid
