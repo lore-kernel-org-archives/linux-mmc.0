@@ -1,167 +1,201 @@
-From: Ivid Suvarna <ivid.suvarna@gmail.com>
-Subject: USB is not resumed(disconnected) after suspend to disk
-Date: Thu, 2 Nov 2017 10:19:44 +0530
-Message-ID: <CABXF_ACakK+zYQQW6OuzJbCqq0k3WGtGhRds8YjU8nn21fAEuA@mail.gmail.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH v4] mmc: dw_mmc: fix potential system abort
+Date: Thu, 2 Nov 2017 15:38:42 +0800
+Message-ID: <66b8a110-e794-343c-6a7f-5b53505004be@rock-chips.com>
+References: <1506415566-115405-1-git-send-email-shawn.lin@rock-chips.com>
+ <CAPDyKFoLY5wPOa9cxWbQ0xre8pgsxjet9=w6BtT=g8wcByvh8A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-usb@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, "ivid.suvarna" <ivid.suvarna@gmail.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.130]:42658 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752253AbdKBHiq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Nov 2017 03:38:46 -0400
+In-Reply-To: <CAPDyKFoLY5wPOa9cxWbQ0xre8pgsxjet9=w6BtT=g8wcByvh8A@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: shawn.lin@rock-chips.com, Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi all,
+Hi Ulf,
 
-I am trying to support suspend to disk(hibernate) on Hikey with 4.4
-kernel. During suspend, I could see the usb devices getting reset and I
-can access them properly. Message can be seen as below:
+On 2017/11/1 21:51, Ulf Hansson wrote:
+> On 26 September 2017 at 10:46, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+>> dw_mmc allows the variant drivers to register the interrupt
+>> as a shared irq, which means dw_mmc should guarantee to properly
+>> handle the irq at any time, even if the irq isn't belong to itself.
+>> So there is a timing gap that the dw_mmc is being removed but the
+>> shared irq comes concurrently. The clock/reset controller/power
+>> domain for accessing the controller had been off before the irq
+>> comes in, so that the irq handler, dw_mci_interrupt, would still
+>> try to read the MINTSTS to see if the irq belongs to this controller.
+>> However, at least for rockchip platforms, it doesn't allow to access
+>> the controller w/o clock and power domain be in the active state.
+>>
+>> To quick reproduce that, we could enable CONFIG_DEBUG_SHIRQ.
+>> the irq tear down routine would still access the irq handler registed
+>> as a shard irq. Per the comment within the function of __free_irq, it
+>> says "It's a shared IRQ -- the driver ought to be prepared for an IRQ
+>> event to happen even now it's being freed". So whenever we fail to probe
+>> the driver or unbind the driver, the system abort.
+>>
+>> Synopsys Designware Multimedia Card Interface Driver
+>> dwmmc_rockchip fe320000.dwmmc: IDMAC supports 32-bit address mode.
+>> dwmmc_rockchip fe320000.dwmmc: Using internal DMA controller.
+>> dwmmc_rockchip fe320000.dwmmc: Version ID is 270a
+>> CPU: 0 PID: 1 Comm: swapper/0 Not tainted
+>> 4.13.0-rc3-next-20170807-00004-g93d3644-dirty #5
+>> Hardware name: Firefly-RK3399 Board (DT)
+>> Call trace:
+>> [<ffff20000808b5a0>] dump_backtrace+0x0/0x300
+>> [<ffff20000808ba1c>] show_stack+0x14/0x20
+>> [<ffff200008dc480c>] dump_stack+0xa4/0xc8
+>> [<ffff200008b9691c>] dw_mci_interrupt+0x3c/0x6a8
+>> [<ffff200008157450>] __free_irq+0x308/0x410
+>> [<ffff20000815760c>] free_irq+0x54/0xb0
+>> [<ffff20000815d630>] devm_irq_release+0x30/0x40
+>> [<ffff2000087f0174>] release_nodes+0x1e4/0x390
+>> [<ffff2000087f04c0>] devres_release_all+0x50/0x78
+>> [<ffff2000087e9bc0>] driver_probe_device+0x128/0x3b8
+>> [<ffff2000087e9f34>] __driver_attach+0xe4/0xe8
+>> [<ffff2000087e7048>] bus_for_each_dev+0xe0/0x138
+>> [<ffff2000087e93b8>] driver_attach+0x30/0x40
+>> [<ffff2000087e8c00>] bus_add_driver+0x1d0/0x328
+>> [<ffff2000087ead0c>] driver_register+0xb4/0x198
+>> [<ffff2000087ec98c>] __platform_driver_register+0x7c/0x88
+>> [<ffff2000095bc564>] dw_mci_rockchip_pltfm_driver_init+0x18/0x20
+>> [<ffff200008083a8c>] do_one_initcall+0x14c/0x1b8
+>> [<ffff200009560ff8>] kernel_init_freeable+0x238/0x2d8
+>> [<ffff200008dde500>] kernel_init+0x10/0x110
+>> [<ffff2000080836c0>] ret_from_fork+0x10/0x50
+>> Synchronous External Abort: synchronous external abort (0x96000010) at
+>> 0xffff20000aaa4040
+>> Internal error: : 96000010 [#1] PREEMPT SMP
+>> Modules linked in:
+>> CPU: 0 PID: 1 Comm: swapper/0 Not tainted
+>> task: ffff80006ba28080 task.stack: ffff80006ba24000
+>> PC is at dw_mci_interrupt+0x4c/0x6a8
+>> LR is at dw_mci_interrupt+0x44/0x6a8
+>> pc : [<ffff200008b9692c>] lr : [<ffff200008b96924>] pstate: 600001c5
+>>
+>> In order to fix this more visible, we introduce new bool variable
+>> 'driver_removed' to bail out early from the irq handler if the driver
+>> had been removed.
+> 
+> Shawn, apologize for the earlier lack of response.
+> 
+> As you also stated earlier, to me, this a generic problem, not even
+> specific to the ->remove() case.
+> 
+> In principle, as soon as the device enters a suspend state (at remove,
+> probe failure, runtime_suspend, system-wide suspend), we need a way to
+> either bail out early in the irq handler or actually preventing it
+> from being called.
+> 
 
-usb 1-1: reset high-speed USB device number 2 using dwc2
-usb 1-1.2: reset high-speed USB device number 3 using dwc2
-usb 1-1.2.4: reset high-speed USB device number 4 using dwc2
+Exactly. My very first try was to touch the device core to fix that.
+But still more things should be considered pointed out by Rafael.
 
+> However, even if this is a generic problem, I agree/suggest that we
+> should take care of this locally in dw_mmc for now. In a second step,
+> we should explore a more generic solution, by perhaps adding some
+> genirq API, mainly to avoid lots of boiler plate code to each an every
+> driver.
+> 
+> So my overall comments is, can you please take care of the other cases
+> (runtime suspend, system-wide suspend) as well? Perhaps in separate
+> patches on top!?
 
-But after resume, usb gets disconnected and I could not access it
-anymore:
+So, yes!
 
-usb 1-1: USB disconnect, device number 2
-usb 1-1.2: USB disconnect, device number 3
-usb 1-1.2.4: USB disconnect, device number 4
+> 
+> More comments below..
+> 
+>>
+>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+>>
+>> ---
+>>
+>> Changes in v4:
+>> - remove the driver core change from v3 and add new flag to solve this
+>> issue instead of adding devm_add_action_or_reset.
+>>
+>>   drivers/mmc/host/dw_mmc.c | 8 ++++++++
+>>   1 file changed, 8 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index 860313b..bb4c608 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -2595,6 +2595,9 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+>>          u32 pending;
+>>          struct dw_mci_slot *slot = host->slot;
+>>
+>> +       if (host->driver_removed)
+> 
+> I would rather rename this flag to host->suspended, to better reflect
+> its purpose.
 
-However "dwc2 f72c0000.usb" gets setup properly. I guess it is OTG. I
-have connected only keyboard to USB Type-A. OTG is not connected.
+host->suspended doesn't look ideal to me either.
 
-Is the dwc2_suspend() and dwc2_resume() functions support only suspend
-to mem? Is there any hack such that we can forcefully reset the
-USB(dwc2) on resume in dwc2_resume() code path. I tried adding
-usb_reset_device() to dwc2_resume() path but that gave a panic as
-expected. I tried to skip suspend in dwc2_suspend(), but still the usb
-disconnects.
+As you figure out that this flag should reflect the situation that
+whether dw_mmc has been removed/runtime-suspended/system-wide-suspended.
+That says the driver should be halted in all these three status.
 
-I added "dwc2_lowlevel_hw_init" to resume path just to check but still
-no use. Is the power to hub lost or clock is not set properly or
-something because I could not understand what is the problem.
+So, how about renaming it to driver_halted?
 
-Below is some more dmesg log:
+> 
+>> +               return IRQ_NONE;
+>> +
+>>          pending = mci_readl(host, MINTSTS); /* read-only mask reg */
+>>
+>>          if (pending) {
+>> @@ -3221,6 +3224,8 @@ int dw_mci_probe(struct dw_mci *host)
+>>          else
+>>                  host->fifo_reg = host->regs + DATA_240A_OFFSET;
+>>
+>> +       host->driver_removed = false;
+>> +
+>>          tasklet_init(&host->tasklet, dw_mci_tasklet_func, (unsigned long)host);
+>>          ret = devm_request_irq(host->dev, host->irq, dw_mci_interrupt,
+>>                                 host->irq_flags, "dw-mci", host);
+>> @@ -3266,6 +3271,7 @@ int dw_mci_probe(struct dw_mci *host)
+>>   err_clk_biu:
+>>          clk_disable_unprepare(host->biu_clk);
+>>
+>> +       host->driver_removed = true;
+>>          return ret;
+>>   }
+>>   EXPORT_SYMBOL(dw_mci_probe);
+>> @@ -3291,6 +3297,8 @@ void dw_mci_remove(struct dw_mci *host)
+>>
+>>          clk_disable_unprepare(host->ciu_clk);
+>>          clk_disable_unprepare(host->biu_clk);
+>> +
+>> +       host->driver_removed = true;
+> 
+> First, it seems like you should move this a little further up, to the
+> point where you actually can't allow the irq handler to run. I assume
+> that is at least before the clk gating thingy.
+> 
+> Second, it seems like this flag also needs to be protected by a
+> spin_lock (host->irq_lock), unless I am missing something.
+> 
+>>   }
+>>   EXPORT_SYMBOL(dw_mci_remove);
+>>
+> 
+> I didn't find the "driver_removed" flag being added in the struct
+> dw_mci *host, I guess you missed to include that?
+> 
+> Kind regards
+> Uffe
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+> 
 
-ivid@ivid:~# dmesg | grep usb
-[    0.408019] usbcore: registered new interface driver usbfs
-[    0.408099] usbcore: registered new interface driver hub
-[    0.408224] usbcore: registered new device driver usb
-[    0.486321] usbcore: registered new interface driver asix
-[    0.486403] usbcore: registered new interface driver ax88179_178a
-[    0.486583] dwc2 f72c0000.usb: Configuration mismatch. Forcing host
-mode
-[    0.487491] usbcore: registered new interface driver usb-storage
-[    0.581006] usbcore: registered new interface driver usbhid
-[    0.581052] usbhid: USB HID core driver
-[    2.054331] dwc2 f72c0000.usb: Configuration mismatch. Forcing host
-mode
-[    2.059779] f72c0000.usb supply vusb_d not found, using dummy
-regulator
-[    2.065133] f72c0000.usb supply vusb_a not found, using dummy
-regulator
-[    2.939845] dwc2 f72c0000.usb: DWC OTG Controller
-[    2.943587] dwc2 f72c0000.usb: new USB bus registered, assigned bus
-number 1
-[    2.951537] dwc2 f72c0000.usb: irq 37, io mem 0x00000000
-[    3.342725] usb 1-1: new high-speed USB device number 2 using dwc2
-
-Below are some additional debug logs.
-
-* During suspend:
-
-dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
-dwc2 f72c0000.usb:   urb->status = -104
-dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
-dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
-dwc2 f72c0000.usb:   urb->status = -104
-dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
-dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
-dwc2 f72c0000.usb:   urb->status = -104
-dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
-dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
-dwc2 f72c0000.usb:   urb->status = -104
-dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
-dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
-dwc2 f72c0000.usb:   urb->status = -104
-dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
-dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
-dwc2 f72c0000.usb:   urb->status = -104
-dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
-dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
-dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
-dwc2 f72c0000.usb:   urb->status = -104
-dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
-dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
-dwc2 f72c0000.usb:   urb->status = -104
-dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
-dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
-dwc2 f72c0000.usb:   urb->status = -104
-dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
-dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
-dwc2 f72c0000.usb:   urb->status = -104
-dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
-dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
-dwc2 f72c0000.usb:   urb->status = -104
-dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
-dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
-dwc2 f72c0000.usb:   urb->status = -104
-dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
-dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
-dwc2 f72c0000.usb:   urb->status = -104
-dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
-dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
-dwc2 f72c0000.usb:   urb->status = -104
-dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
-dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
-dwc2 f72c0000.usb:   urb->status = -104
-dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
-dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
-dwc2 f72c0000.usb:   urb->status = -104
-dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
-dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
-dwc2 f72c0000.usb:   urb->status = -104
-dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
-dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
-dwc2 f72c0000.usb:   urb->status = -104
-dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
-dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
-dwc2 f72c0000.usb:   urb->status = -2
-dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
-dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
-dwc2 f72c0000.usb:   urb->status = -2
-
-* During resume:
-
-dwc2 f72c0000.usb: ClearPortFeature USB_PORT_FEAT_ENABLE
-usb 1-1: USB disconnect, device number 2
-done.
-usb 1-1.2: USB disconnect, device number 3
-asix 1-1.2:1.0 eth0: unregister 'asix' usb-f72c0000.usb-1.2, ASIX
-AX88772 USB 2.0 Ethernet
-dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x00,
-ep->hcpriv=ffffffc02ee7d900
-dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x00,
-ep->hcpriv=          (null)
-dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x81,
-ep->hcpriv=ffffffc02e823f00
-dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x82,
-ep->hcpriv=ffffffc02e827e00
-dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x03,
-ep->hcpriv=ffffffc02eeb7800
-dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x00,
-ep->hcpriv=ffffffc02e827000
-dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x00,
-ep->hcpriv=          (null)
-dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x81,
-ep->hcpriv=ffffffc02ee7d800
-dwc2 f72c0000.usb: SetPortFeature
-dwc2 f72c0000.usb: SetPortFeature - USB_PORT_FEAT_POWER
-
-* I changed the hibernation default value to 1 in
-"drivers/usb/dwc2/platform.c" in params_hi6220 since hibernation by
-default is disabled, but no use.
-
-Thanks,
-Ivid
