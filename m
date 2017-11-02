@@ -1,42 +1,96 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: [PATCH] mmc: dw_mmc: make irq flags 'unsigned long'
-Date: Thu,  2 Nov 2017 12:16:46 +0100
-Message-ID: <20171102111655.3834051-1-arnd@arndb.de>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, Shawn Lin <shawn.lin@rock-chips.com>, Douglas Anderson <dianders@chromium.org>, Addy Ke <addy.ke@rock-chips.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Matthias Brugger <matthias.bgg@gmail.com>
+Subject: Re: [PATCH v6 03/12] arm64: dts: mt8173: remove "mediatek,mt8135-mmc"
+ from mmc nodes
+Date: Thu, 2 Nov 2017 12:50:43 +0100
+Message-ID: <b24d12e4-251f-6f79-1ed9-5b52f8f39625@gmail.com>
+References: <1508118399-21828-1-git-send-email-chaotian.jing@mediatek.com>
+ <1508118399-21828-4-git-send-email-chaotian.jing@mediatek.com>
+ <CAPDyKFrRVT8YFXvy3Wuf_jga5oourScOdas34U=YkeLRzHoWMg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:49665 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751370AbdKBLus (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Nov 2017 07:50:48 -0400
+In-Reply-To: <CAPDyKFrRVT8YFXvy3Wuf_jga5oourScOdas34U=YkeLRzHoWMg@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Rob Herring <robh+dt@kernel.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, yong mao <yong.mao@mediatek.com>, Linus Walleij <linus.walleij@linaro.org>, Heiner Kallweit <hkallweit1@gmail.com>, Phong LE <ple@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mediatek@lists.infradead.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, srv_heupstream <srv_heupstream@mediatek.com>
 
-The newly added spin_lock_irqsave() passes an argument of the
-wrong type, leading to a warning about non-portable code:
 
-drivers/mmc/host/dw_mmc.c: In function 'dw_mci_set_drto':
-include/linux/typecheck.h:11:18: error: comparison of distinct pointer types lacks a cast [-Werror]
-  (void)(&__dummy == &__dummy2); \
-drivers/mmc/host/dw_mmc.c:1953:2: note: in expansion of macro 'spin_lock_irqsave'
-  spin_lock_irqsave(&host->irq_lock, irqflags);
 
-This changes the type to 'unsigned long' as it should be.
+On 10/25/2017 11:11 PM, Ulf Hansson wrote:
+> On 16 October 2017 at 03:46, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
+>> devicetree bindings has been updated to support multi-platforms,
+>> so that each platform has its owns compatible name.
+>> And, this compatible name may used in driver to distinguish with
+>> other platform.
+>>
+>> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+> 
+> Matthias, do you intend to pick this? Else I can do it with your ack...
+> 
 
-Fixes: 80a2a5a7745b ("mmc: dw_mmc: Cleanup the DTO timer like the CTO one")
-Signed-off-by: Arnd Bergmann <arnd@arndb.de>
----
- drivers/mmc/host/dw_mmc.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+If it's not too late, feel free to take it. Otherwise I will queue it for the
+next merge window:
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 31f5744a50e0..37b55b095daf 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1938,7 +1938,7 @@ static void dw_mci_set_drto(struct dw_mci *host)
- 	unsigned int drto_clks;
- 	unsigned int drto_div;
- 	unsigned int drto_ms;
--	unsigned int irqflags;
-+	unsigned long irqflags;
- 
- 	drto_clks = mci_readl(host, TMOUT) >> 8;
- 	drto_div = (mci_readl(host, CLKDIV) & 0xff) * 2;
--- 
-2.9.0
+Acked-by: Matthias Brugger <matthias.bgg@gmail.com>
+
+> Kind regards
+> Uffe
+> 
+>> ---
+>>  arch/arm64/boot/dts/mediatek/mt8173.dtsi | 12 ++++--------
+>>  1 file changed, 4 insertions(+), 8 deletions(-)
+>>
+>> diff --git a/arch/arm64/boot/dts/mediatek/mt8173.dtsi b/arch/arm64/boot/dts/mediatek/mt8173.dtsi
+>> index b99a273..26396ef 100644
+>> --- a/arch/arm64/boot/dts/mediatek/mt8173.dtsi
+>> +++ b/arch/arm64/boot/dts/mediatek/mt8173.dtsi
+>> @@ -682,8 +682,7 @@
+>>                 };
+>>
+>>                 mmc0: mmc@11230000 {
+>> -                       compatible = "mediatek,mt8173-mmc",
+>> -                                    "mediatek,mt8135-mmc";
+>> +                       compatible = "mediatek,mt8173-mmc";
+>>                         reg = <0 0x11230000 0 0x1000>;
+>>                         interrupts = <GIC_SPI 71 IRQ_TYPE_LEVEL_LOW>;
+>>                         clocks = <&pericfg CLK_PERI_MSDC30_0>,
+>> @@ -693,8 +692,7 @@
+>>                 };
+>>
+>>                 mmc1: mmc@11240000 {
+>> -                       compatible = "mediatek,mt8173-mmc",
+>> -                                    "mediatek,mt8135-mmc";
+>> +                       compatible = "mediatek,mt8173-mmc";
+>>                         reg = <0 0x11240000 0 0x1000>;
+>>                         interrupts = <GIC_SPI 72 IRQ_TYPE_LEVEL_LOW>;
+>>                         clocks = <&pericfg CLK_PERI_MSDC30_1>,
+>> @@ -704,8 +702,7 @@
+>>                 };
+>>
+>>                 mmc2: mmc@11250000 {
+>> -                       compatible = "mediatek,mt8173-mmc",
+>> -                                    "mediatek,mt8135-mmc";
+>> +                       compatible = "mediatek,mt8173-mmc";
+>>                         reg = <0 0x11250000 0 0x1000>;
+>>                         interrupts = <GIC_SPI 73 IRQ_TYPE_LEVEL_LOW>;
+>>                         clocks = <&pericfg CLK_PERI_MSDC30_2>,
+>> @@ -715,8 +712,7 @@
+>>                 };
+>>
+>>                 mmc3: mmc@11260000 {
+>> -                       compatible = "mediatek,mt8173-mmc",
+>> -                                    "mediatek,mt8135-mmc";
+>> +                       compatible = "mediatek,mt8173-mmc";
+>>                         reg = <0 0x11260000 0 0x1000>;
+>>                         interrupts = <GIC_SPI 74 IRQ_TYPE_LEVEL_LOW>;
+>>                         clocks = <&pericfg CLK_PERI_MSDC30_3>,
+>> --
+>> 1.8.1.1.dirty
+>>
