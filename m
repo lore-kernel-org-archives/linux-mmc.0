@@ -1,104 +1,101 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: dw_mmc: Convert timers to use timer_setup()
-Date: Thu, 2 Nov 2017 15:21:52 +0100
-Message-ID: <CAPDyKFrkwhw+=AG4GRBk5cr0h8vZsF1jngC77J+L9NikN7m+4A@mail.gmail.com>
-References: <20171030214500.GA72041@beast>
+From: Vincent Yang <vincent.cw.yang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH] sdhci-fujitsu: add support for setting the CMD_DAT_DELAY attribute
+Date: Fri, 3 Nov 2017 11:29:05 +0800
+Message-ID: <CAKR0VNJ0xzRebUEZprRfQVp1LGjPG4khyumSYKsRtxCPTGkxYQ@mail.gmail.com>
+References: <20171101002132.13500-1-ard.biesheuvel@linaro.org>
+ <20171102000814.ih2ggtfpmfsx3xap@rob-hp-laptop> <CAKv+Gu8UPpsobJ_d4+OCdufSkLLhGdRFxPO92X3YKvnyBY5b7w@mail.gmail.com>
+ <CAPDyKFpaKdvnwL98UZKzNmR+yXtWJL6hPDPfTXtY8nqmDRsomQ@mail.gmail.com>
+ <CAKv+Gu8nd7i+iaL-B55WbutGrOKaCsCdrQtFZgFs1TJaSqx-xw@mail.gmail.com> <CAPDyKFpKe-TaUeuWdenGf9tHV8+UkGkkdcp8Z+Yu9Q-haHsYsA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f194.google.com ([209.85.223.194]:50245 "EHLO
-        mail-io0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932312AbdKBOVx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Nov 2017 10:21:53 -0400
-Received: by mail-io0-f194.google.com with SMTP id 97so14332551iok.7
-        for <linux-mmc@vger.kernel.org>; Thu, 02 Nov 2017 07:21:53 -0700 (PDT)
-In-Reply-To: <20171030214500.GA72041@beast>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAPDyKFpKe-TaUeuWdenGf9tHV8+UkGkkdcp8Z+Yu9Q-haHsYsA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Vincent Yang <vincent.yang.fujitsu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Vincent Yang <Vincent.Yang-l16TxrwUIHTQFUHtdCDX3A@public.gmane.org>, Vincent Yang <vincent.yang-uWyLwvC0a2jby3iVrkZq2A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Kees Cook <keescook@chromium.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 30 October 2017 at 22:45, Kees Cook <keescook@chromium.org> wrote:
-> In preparation for unconditionally passing the struct timer_list pointer to
-> all timer callbacks, switch to using the new timer_setup() and from_timer()
-> to pass the timer pointer explicitly.
+2017-11-02 19:00 GMT+08:00 Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>:
+> + Vincent Yang (several emails, don't know which works)
 >
-> Cc: Jaehoon Chung <jh80.chung@samsung.com>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: linux-mmc@vger.kernel.org
-> Signed-off-by: Kees Cook <keescook@chromium.org>
+> On 2 November 2017 at 11:49, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>> On 2 November 2017 at 10:48, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>>> On 2 November 2017 at 01:12, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>>>> On 2 November 2017 at 00:08, Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
+>>>>> On Wed, Nov 01, 2017 at 12:21:32AM +0000, Ard Biesheuvel wrote:
+>>>>>> The Socionext SynQuacer SoC inherits this IP from Fujitsu, but
+>>>>>> requires the F_SDH30_CMD_DAT_DELAY bit to be set in the
+>>>>>> F_SDH30_ESD_CONTROL control register.
+>>>>>>
+>>>>>> So let's add an optional property to this device's binding, and
+>>>>>> set the attribute if it is present in the DT node.
+>>>>>>
+>>>>>> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>>>>>> ---
+>>>>>>  Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt |  2 ++
+>>>>>>  drivers/mmc/host/sdhci_f_sdh30.c                        | 18 +++++++++++++++++-
+>>>>>>  2 files changed, 19 insertions(+), 1 deletion(-)
+>>>>>>
+>>>>>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt b/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
+>>>>>> index de2c53cff4f1..9ad02f743ad0 100644
+>>>>>> --- a/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
+>>>>>> +++ b/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
+>>>>>> @@ -15,6 +15,8 @@ Required properties:
+>>>>>>  Optional properties:
+>>>>>>  - vqmmc-supply: phandle to the regulator device tree node, mentioned
+>>>>>>    as the VCCQ/VDD_IO supply in the eMMC/SD specs.
+>>>>>> +- cmd-dat-delay-select: boolean property indicating that this host requires
+>>>>>> +  the CMD_DAT_DELAY control to be enabled.
+>>>>>
+>>>>> Needs a vendor prefix unless this is a standard SDHCI bit (in which
+>>>>> case it should be documented in a common spot).
+>>>>>
+>>>>
+>>>> I suspect this is a non-standard thing, so I'll add the fujitsu prefix. Ulf?
+>>>
+>>> This is specific to the Fujitsu variant.
+>>>
+>>> However, what puzzles me is why this bit is needed for the Socionext
+>>> SynQuacer SoC, but not for other SoCs that uses this IP. That seems
+>>> weird (probably wrong).
+>>>
+>>> Moreover, the F_SDH30_CMD_DAT_DELAY register define is already there,
+>>> so I would rather suspect that it's something that did got fully
+>>> implemented. In other words, I don't think you need a new DT binding,
+>>> but rather try to implement it generically for the sdhci-f_sdh30
+>>> driver. Do you think that will work?
+>>>
+>>
+>> Do you mean set it unconditionally? That works for me, but I have no
+>
+> Yes.
+>
+>> way of testing whether it still works on other SoCs that use this IP.
+>
+> Me neither!
 
-Thanks, applied for next!
+Hi all, I can not yet get contact with IP owner because it is a
+holiday in Japan.
+Around two years ago, F_SDH30_CMD_DAT_DELAY was a new feature of this IP.
+I will update the latest information as soon as I get it.
+
+>
+> Apparently there are no DTS in the kernel git that uses the
+> "fujitsu,mb86s70-sdhci-3.0".
+
+Around two years ago, sdhci_f_sdh30_driver was a portion for mb86s70 SoC
+patch series, but finally the patch series did not fully go upstream.
 
 Kind regards
-Uffe
+Vincent
 
-> ---
->  drivers/mmc/host/dw_mmc.c | 23 +++++++++--------------
->  1 file changed, 9 insertions(+), 14 deletions(-)
 >
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 37b55b095daf..0aa39975f33b 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -2991,9 +2991,9 @@ static void dw_mci_init_dma(struct dw_mci *host)
->         host->use_dma = TRANS_MODE_PIO;
->  }
+> I looped in Vincent Yang, let's hope he can provide us with some more
+> information.
 >
-> -static void dw_mci_cmd11_timer(unsigned long arg)
-> +static void dw_mci_cmd11_timer(struct timer_list *t)
->  {
-> -       struct dw_mci *host = (struct dw_mci *)arg;
-> +       struct dw_mci *host = from_timer(host, t, cmd11_timer);
->
->         if (host->state != STATE_SENDING_CMD11) {
->                 dev_warn(host->dev, "Unexpected CMD11 timeout\n");
-> @@ -3005,9 +3005,9 @@ static void dw_mci_cmd11_timer(unsigned long arg)
->         tasklet_schedule(&host->tasklet);
->  }
->
-> -static void dw_mci_cto_timer(unsigned long arg)
-> +static void dw_mci_cto_timer(struct timer_list *t)
->  {
-> -       struct dw_mci *host = (struct dw_mci *)arg;
-> +       struct dw_mci *host = from_timer(host, t, cto_timer);
->         unsigned long irqflags;
->         u32 pending;
->
-> @@ -3060,9 +3060,9 @@ static void dw_mci_cto_timer(unsigned long arg)
->         spin_unlock_irqrestore(&host->irq_lock, irqflags);
->  }
->
-> -static void dw_mci_dto_timer(unsigned long arg)
-> +static void dw_mci_dto_timer(struct timer_list *t)
->  {
-> -       struct dw_mci *host = (struct dw_mci *)arg;
-> +       struct dw_mci *host = from_timer(host, t, dto_timer);
->         unsigned long irqflags;
->         u32 pending;
->
-> @@ -3257,14 +3257,9 @@ int dw_mci_probe(struct dw_mci *host)
->                 }
->         }
->
-> -       setup_timer(&host->cmd11_timer,
-> -                   dw_mci_cmd11_timer, (unsigned long)host);
-> -
-> -       setup_timer(&host->cto_timer,
-> -                   dw_mci_cto_timer, (unsigned long)host);
-> -
-> -       setup_timer(&host->dto_timer,
-> -                   dw_mci_dto_timer, (unsigned long)host);
-> +       timer_setup(&host->cmd11_timer, dw_mci_cmd11_timer, 0);
-> +       timer_setup(&host->cto_timer, dw_mci_cto_timer, 0);
-> +       timer_setup(&host->dto_timer, dw_mci_dto_timer, 0);
->
->         spin_lock_init(&host->lock);
->         spin_lock_init(&host->irq_lock);
-> --
-> 2.7.4
->
->
-> --
-> Kees Cook
-> Pixel Security
+> Kind regards
+> Uffe
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
