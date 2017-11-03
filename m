@@ -1,263 +1,121 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V13 00/10] mmc: Add Command Queue support
-Date: Fri,  3 Nov 2017 15:20:10 +0200
-Message-ID: <1509715220-31885-1-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V13 01/10] mmc: core: Add parameter use_blk_mq
+Date: Fri,  3 Nov 2017 15:20:11 +0200
+Message-ID: <1509715220-31885-2-git-send-email-adrian.hunter@intel.com>
+References: <1509715220-31885-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1509715220-31885-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi
+Until mmc has blk-mq support fully implemented and tested, add a
+parameter use_blk_mq, default to false unless config option MMC_MQ_DEFAULT
+is selected.
 
-Here is V13 of the hardware command queue patches without the software
-command queue patches, now using blk-mq and now with blk-mq support for
-non-CQE I/O.
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/Kconfig      | 11 +++++++++++
+ drivers/mmc/core/core.c  |  7 +++++++
+ drivers/mmc/core/core.h  |  2 ++
+ drivers/mmc/core/host.c  |  2 ++
+ drivers/mmc/core/host.h  |  4 ++++
+ include/linux/mmc/host.h |  1 +
+ 6 files changed, 27 insertions(+)
 
-HW CMDQ offers 25% - 50% better random multi-threaded I/O.  I see a slight
-2% drop in sequential read speed but no change to sequential write.
-
-Non-CQE blk-mq showed a 3% decrease in sequential read performance.  This
-seemed to be coming from the inferior latency of running work items compared
-with a dedicated thread.  Hacking blk-mq workqueue to be unbound reduced the
-performance degradation from 3% to 1%.
-
-While we should look at changing blk-mq to give better workqueue performance,
-a bigger gain is likely to be made by adding a new host API to enable the
-next already-prepared request to be issued directly from within ->done()
-callback of the current request.
-
-
-Changes since V12:
-      mmc: block: Add error-handling comments
-	New patch.
-      mmc: block: Add blk-mq support
-	Use legacy error handling
-      mmc: block: Add CQE support
-	Re-base
-      mmc: block: blk-mq: Add support for direct completion
-	New patch.
-      mmc: block: blk-mq: Separate card polling from recovery
-	New patch.
-      mmc: block: blk-mq: Stop using card_busy_detect()
-	New patch.
-      mmc: block: blk-mq: Stop using legacy recovery
-	New patch.
-
-Changes since V11:
-      Split "mmc: block: Add CQE and blk-mq support" into 2 patches
-
-Changes since V10:
-      mmc: core: Remove unnecessary host claim
-      mmc: core: Introduce host claiming by context
-      mmc: core: Add support for handling CQE requests
-      mmc: mmc: Enable Command Queuing
-      mmc: mmc: Enable CQE's
-      mmc: block: Use local variables in mmc_blk_data_prep()
-      mmc: block: Prepare CQE data
-      mmc: block: Factor out mmc_setup_queue()
-      mmc: core: Add parameter use_blk_mq
-      mmc: core: Export mmc_start_bkops()
-      mmc: core: Export mmc_start_request()
-      mmc: core: Export mmc_retune_hold_now() and mmc_retune_release()
-	Dropped because they have been applied
-      mmc: block: Add CQE and blk-mq support
-	Extend blk-mq support for asynchronous read / writes to all host
-	controllers including those that require polling. The direct
-	completion path is still available but depends on a new capability
-	flag.
-	Drop blk-mq support for synchronous read / writes.
-
-Venkat Gopalakrishnan (1):
-      mmc: cqhci: support for command queue enabled host
-
-Changes since V9:
-      mmc: block: Add CQE and blk-mq support
-	- reinstate mq support for REQ_OP_DRV_IN/OUT that was removed because
-	it was incorrectly assumed to be handled by the rpmb character device
-	- don't check for rpmb block device anymore
-      mmc: cqhci: support for command queue enabled host
-	Fix cqhci_set_irqs() as per Haibo Chen
-
-Changes since V8:
-	Re-based
-      mmc: core: Introduce host claiming by context
-	Slightly simplified as per Ulf
-      mmc: core: Export mmc_retune_hold_now() and mmc_retune_release()
-	New patch.
-      mmc: block: Add CQE and blk-mq support
-	Fix missing ->post_req() on the error path
-
-Changes since V7:
-	Re-based
-      mmc: core: Introduce host claiming by context
-	Slightly simplified
-      mmc: core: Add parameter use_blk_mq
-	New patch.
-      mmc: core: Remove unnecessary host claim
-	New patch.
-      mmc: core: Export mmc_start_bkops()
-	New patch.
-      mmc: core: Export mmc_start_request()
-	New patch.
-      mmc: block: Add CQE and blk-mq support
-	Add blk-mq support for non_CQE requests
-
-Changes since V6:
-      mmc: core: Introduce host claiming by context
-	New patch.
-      mmc: core: Move mmc_start_areq() declaration
-	Dropped because it has been applied
-      mmc: block: Fix block status codes
-	Dropped because it has been applied
-      mmc: host: Add CQE interface
-	Dropped because it has been applied
-      mmc: core: Turn off CQE before sending commands
-	Dropped because it has been applied
-      mmc: block: Factor out mmc_setup_queue()
-	New patch.
-      mmc: block: Add CQE support
-	Drop legacy support and add blk-mq support
-
-Changes since V5:
-	Re-based
-      mmc: core: Add mmc_retune_hold_now()
-	Dropped because it has been applied
-      mmc: core: Add members to mmc_request and mmc_data for CQE's
-	Dropped because it has been applied
-      mmc: core: Move mmc_start_areq() declaration
-	New patch at Ulf's request
-      mmc: block: Fix block status codes
-	Another un-related patch
-      mmc: host: Add CQE interface
-	Move recovery_notifier() callback to struct mmc_request
-      mmc: core: Add support for handling CQE requests
-	Roll __mmc_cqe_request_done() into mmc_cqe_request_done()
-	Move function declarations requested by Ulf
-      mmc: core: Remove unused MMC_CAP2_PACKED_CMD
-	Dropped because it has been applied
-      mmc: block: Add CQE support
-	Add explanation to commit message
-	Adjustment for changed recovery_notifier() callback
-      mmc: cqhci: support for command queue enabled host
-	Adjustment for changed recovery_notifier() callback
-      mmc: sdhci-pci: Add CQHCI support for Intel GLK
-	Add DCMD capability for Intel controllers except GLK
-
-Changes since V4:
-      mmc: core: Add mmc_retune_hold_now()
-	Add explanation to commit message.
-      mmc: host: Add CQE interface
-	Add comments to callback declarations.
-      mmc: core: Turn off CQE before sending commands
-	Add explanation to commit message.
-      mmc: core: Add support for handling CQE requests
-	Add comments as requested by Ulf.
-      mmc: core: Remove unused MMC_CAP2_PACKED_CMD
-	New patch.
-      mmc: mmc: Enable Command Queuing
-	Adjust for removal of MMC_CAP2_PACKED_CMD.
-	Add a comment about Packed Commands.
-      mmc: mmc: Enable CQE's
-	Remove un-necessary check for MMC_CAP2_CQE
-      mmc: block: Use local variables in mmc_blk_data_prep()
-	New patch.
-      mmc: block: Prepare CQE data
-	Adjust due to "mmc: block: Use local variables in mmc_blk_data_prep()"
-	Remove priority setting.
-	Add explanation to commit message.
-      mmc: cqhci: support for command queue enabled host
-	Fix transfer descriptor setting in cqhci_set_tran_desc() for 32-bit DMA
-
-Changes since V3:
-	Adjusted ...blk_end_request...() for new block status codes
-	Fixed CQHCI transaction descriptor for "no DCMD" case
-
-Changes since V2:
-	Dropped patches that have been applied.
-	Re-based
-	Added "mmc: sdhci-pci: Add CQHCI support for Intel GLK"
-
-Changes since V1:
-
-	"Share mmc request array between partitions" is dependent
-	on changes in "Introduce queue semantics", so added that
-	and block fixes:
-
-	Added "Fix is_waiting_last_req set incorrectly"
-	Added "Fix cmd error reset failure path"
-	Added "Use local var for mqrq_cur"
-	Added "Introduce queue semantics"
-
-Changes since RFC:
-
-	Re-based on next.
-	Added comment about command queue priority.
-	Added some acks and reviews.
-
-
-Adrian Hunter (9):
-      mmc: core: Add parameter use_blk_mq
-      mmc: block: Add error-handling comments
-      mmc: block: Add blk-mq support
-      mmc: block: Add CQE support
-      mmc: sdhci-pci: Add CQHCI support for Intel GLK
-      mmc: block: blk-mq: Add support for direct completion
-      mmc: block: blk-mq: Separate card polling from recovery
-      mmc: block: blk-mq: Stop using card_busy_detect()
-      mmc: block: blk-mq: Stop using legacy recovery
-
-Venkat Gopalakrishnan (1):
-      mmc: cqhci: support for command queue enabled host
-
- drivers/mmc/Kconfig               |   11 +
- drivers/mmc/core/block.c          |  850 ++++++++++++++++++++++++++-
- drivers/mmc/core/block.h          |   12 +
- drivers/mmc/core/core.c           |    7 +
- drivers/mmc/core/core.h           |    2 +
- drivers/mmc/core/host.c           |    2 +
- drivers/mmc/core/host.h           |    4 +
- drivers/mmc/core/queue.c          |  426 +++++++++++++-
- drivers/mmc/core/queue.h          |   56 ++
- drivers/mmc/host/Kconfig          |   14 +
- drivers/mmc/host/Makefile         |    1 +
- drivers/mmc/host/cqhci.c          | 1150 +++++++++++++++++++++++++++++++++++++
- drivers/mmc/host/cqhci.h          |  240 ++++++++
- drivers/mmc/host/sdhci-pci-core.c |  155 ++++-
- include/linux/mmc/host.h          |    2 +
- 15 files changed, 2900 insertions(+), 32 deletions(-)
- create mode 100644 drivers/mmc/host/cqhci.c
- create mode 100644 drivers/mmc/host/cqhci.h
-
+diff --git a/drivers/mmc/Kconfig b/drivers/mmc/Kconfig
+index ec21388311db..98202934bd29 100644
+--- a/drivers/mmc/Kconfig
++++ b/drivers/mmc/Kconfig
+@@ -12,6 +12,17 @@ menuconfig MMC
+ 	  If you want MMC/SD/SDIO support, you should say Y here and
+ 	  also to your specific host controller driver.
  
-Adrian Hunter (4):
-      mmc: core: Add parameter use_blk_mq
-      mmc: block: Add blk-mq support
-      mmc: block: Add CQE support
-      mmc: sdhci-pci: Add CQHCI support for Intel GLK
-
-Venkat Gopalakrishnan (1):
-      mmc: cqhci: support for command queue enabled host
-
- drivers/mmc/Kconfig               |   11 +
- drivers/mmc/core/block.c          |  801 +++++++++++++++++++++++++-
- drivers/mmc/core/block.h          |   12 +
- drivers/mmc/core/core.c           |    7 +
- drivers/mmc/core/core.h           |    2 +
- drivers/mmc/core/host.c           |    2 +
- drivers/mmc/core/host.h           |    4 +
- drivers/mmc/core/queue.c          |  426 +++++++++++++-
- drivers/mmc/core/queue.h          |   56 ++
- drivers/mmc/host/Kconfig          |   14 +
- drivers/mmc/host/Makefile         |    1 +
- drivers/mmc/host/cqhci.c          | 1150 +++++++++++++++++++++++++++++++++++++
- drivers/mmc/host/cqhci.h          |  240 ++++++++
- drivers/mmc/host/sdhci-pci-core.c |  155 ++++-
- include/linux/mmc/host.h          |    2 +
- 15 files changed, 2852 insertions(+), 31 deletions(-)
- create mode 100644 drivers/mmc/host/cqhci.c
- create mode 100644 drivers/mmc/host/cqhci.h
-
-
-Regards
-Adrian
++config MMC_MQ_DEFAULT
++	bool "MMC: use blk-mq I/O path by default"
++	depends on MMC && BLOCK
++	---help---
++	  This option enables the new blk-mq based I/O path for MMC block
++	  devices by default.  With the option the mmc_core.use_blk_mq
++	  module/boot option defaults to Y, without it to N, but it can
++	  still be overridden either way.
++
++	  If unsure say N.
++
+ if MMC
+ 
+ source "drivers/mmc/core/Kconfig"
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 1f0f44f4dd5f..5df03cb73be7 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -66,6 +66,13 @@
+ bool use_spi_crc = 1;
+ module_param(use_spi_crc, bool, 0);
+ 
++#ifdef CONFIG_MMC_MQ_DEFAULT
++bool mmc_use_blk_mq = true;
++#else
++bool mmc_use_blk_mq = false;
++#endif
++module_param_named(use_blk_mq, mmc_use_blk_mq, bool, S_IWUSR | S_IRUGO);
++
+ static int mmc_schedule_delayed_work(struct delayed_work *work,
+ 				     unsigned long delay)
+ {
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index 71e6c6d7ceb7..8c5dd8d31400 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -35,6 +35,8 @@ struct mmc_bus_ops {
+ 	int (*reset)(struct mmc_host *);
+ };
+ 
++extern bool mmc_use_blk_mq;
++
+ void mmc_attach_bus(struct mmc_host *host, const struct mmc_bus_ops *ops);
+ void mmc_detach_bus(struct mmc_host *host);
+ 
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 35a9e4fd1a9f..62ef6cb0ece4 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -404,6 +404,8 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+ 
+ 	host->fixed_drv_type = -EINVAL;
+ 
++	host->use_blk_mq = mmc_use_blk_mq;
++
+ 	return host;
+ }
+ 
+diff --git a/drivers/mmc/core/host.h b/drivers/mmc/core/host.h
+index fb689a1065ed..6eaf558e62d6 100644
+--- a/drivers/mmc/core/host.h
++++ b/drivers/mmc/core/host.h
+@@ -74,6 +74,10 @@ static inline bool mmc_card_hs400es(struct mmc_card *card)
+ 	return card->host->ios.enhanced_strobe;
+ }
+ 
++static inline bool mmc_host_use_blk_mq(struct mmc_host *host)
++{
++	return host->use_blk_mq;
++}
+ 
+ #endif
+ 
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index e7743eca1021..ce2075d6f429 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -380,6 +380,7 @@ struct mmc_host {
+ 	unsigned int		doing_retune:1;	/* re-tuning in progress */
+ 	unsigned int		retune_now:1;	/* do re-tuning at next req */
+ 	unsigned int		retune_paused:1; /* re-tuning is temporarily disabled */
++	unsigned int		use_blk_mq:1;	/* use blk-mq */
+ 
+ 	int			rescan_disable;	/* disable card detection */
+ 	int			rescan_entered;	/* used with nonremovable devices */
+-- 
+1.9.1
