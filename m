@@ -1,101 +1,52 @@
-From: Vincent Yang <vincent.cw.yang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH] sdhci-fujitsu: add support for setting the CMD_DAT_DELAY attribute
-Date: Fri, 3 Nov 2017 11:29:05 +0800
-Message-ID: <CAKR0VNJ0xzRebUEZprRfQVp1LGjPG4khyumSYKsRtxCPTGkxYQ@mail.gmail.com>
-References: <20171101002132.13500-1-ard.biesheuvel@linaro.org>
- <20171102000814.ih2ggtfpmfsx3xap@rob-hp-laptop> <CAKv+Gu8UPpsobJ_d4+OCdufSkLLhGdRFxPO92X3YKvnyBY5b7w@mail.gmail.com>
- <CAPDyKFpaKdvnwL98UZKzNmR+yXtWJL6hPDPfTXtY8nqmDRsomQ@mail.gmail.com>
- <CAKv+Gu8nd7i+iaL-B55WbutGrOKaCsCdrQtFZgFs1TJaSqx-xw@mail.gmail.com> <CAPDyKFpKe-TaUeuWdenGf9tHV8+UkGkkdcp8Z+Yu9Q-haHsYsA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAPDyKFpKe-TaUeuWdenGf9tHV8+UkGkkdcp8Z+Yu9Q-haHsYsA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Vincent Yang <vincent.yang.fujitsu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Vincent Yang <Vincent.Yang-l16TxrwUIHTQFUHtdCDX3A@public.gmane.org>, Vincent Yang <vincent.yang-uWyLwvC0a2jby3iVrkZq2A@public.gmane.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v.4.14-rc8 take 2
+Date: Fri,  3 Nov 2017 08:15:34 +0100
+Message-ID: <1509693334-23331-1-git-send-email-ulf.hansson@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lf0-f65.google.com ([209.85.215.65]:47610 "EHLO
+        mail-lf0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751284AbdKCHPj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Nov 2017 03:15:39 -0400
+Received: by mail-lf0-f65.google.com with SMTP id k40so2051854lfi.4
+        for <linux-mmc@vger.kernel.org>; Fri, 03 Nov 2017 00:15:39 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
 
-2017-11-02 19:00 GMT+08:00 Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>:
-> + Vincent Yang (several emails, don't know which works)
->
-> On 2 November 2017 at 11:49, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->> On 2 November 2017 at 10:48, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->>> On 2 November 2017 at 01:12, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->>>> On 2 November 2017 at 00:08, Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
->>>>> On Wed, Nov 01, 2017 at 12:21:32AM +0000, Ard Biesheuvel wrote:
->>>>>> The Socionext SynQuacer SoC inherits this IP from Fujitsu, but
->>>>>> requires the F_SDH30_CMD_DAT_DELAY bit to be set in the
->>>>>> F_SDH30_ESD_CONTROL control register.
->>>>>>
->>>>>> So let's add an optional property to this device's binding, and
->>>>>> set the attribute if it is present in the DT node.
->>>>>>
->>>>>> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->>>>>> ---
->>>>>>  Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt |  2 ++
->>>>>>  drivers/mmc/host/sdhci_f_sdh30.c                        | 18 +++++++++++++++++-
->>>>>>  2 files changed, 19 insertions(+), 1 deletion(-)
->>>>>>
->>>>>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt b/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
->>>>>> index de2c53cff4f1..9ad02f743ad0 100644
->>>>>> --- a/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
->>>>>> +++ b/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
->>>>>> @@ -15,6 +15,8 @@ Required properties:
->>>>>>  Optional properties:
->>>>>>  - vqmmc-supply: phandle to the regulator device tree node, mentioned
->>>>>>    as the VCCQ/VDD_IO supply in the eMMC/SD specs.
->>>>>> +- cmd-dat-delay-select: boolean property indicating that this host requires
->>>>>> +  the CMD_DAT_DELAY control to be enabled.
->>>>>
->>>>> Needs a vendor prefix unless this is a standard SDHCI bit (in which
->>>>> case it should be documented in a common spot).
->>>>>
->>>>
->>>> I suspect this is a non-standard thing, so I'll add the fujitsu prefix. Ulf?
->>>
->>> This is specific to the Fujitsu variant.
->>>
->>> However, what puzzles me is why this bit is needed for the Socionext
->>> SynQuacer SoC, but not for other SoCs that uses this IP. That seems
->>> weird (probably wrong).
->>>
->>> Moreover, the F_SDH30_CMD_DAT_DELAY register define is already there,
->>> so I would rather suspect that it's something that did got fully
->>> implemented. In other words, I don't think you need a new DT binding,
->>> but rather try to implement it generically for the sdhci-f_sdh30
->>> driver. Do you think that will work?
->>>
->>
->> Do you mean set it unconditionally? That works for me, but I have no
->
-> Yes.
->
->> way of testing whether it still works on other SoCs that use this IP.
->
-> Me neither!
+Hi Linus,
 
-Hi all, I can not yet get contact with IP owner because it is a
-holiday in Japan.
-Around two years ago, F_SDH30_CMD_DAT_DELAY was a new feature of this IP.
-I will update the latest information as soon as I get it.
+Here's a PR with a couple of MMC fixes intended for v4.14-rc8. Details about the
+highlights are as usual found in the signed tag.
 
->
-> Apparently there are no DTS in the kernel git that uses the
-> "fujitsu,mb86s70-sdhci-3.0".
-
-Around two years ago, sdhci_f_sdh30_driver was a portion for mb86s70 SoC
-patch series, but finally the patch series did not fully go upstream.
+Please pull this in!
 
 Kind regards
-Vincent
+Ulf Hansson
 
->
-> I looped in Vincent Yang, let's hope he can provide us with some more
-> information.
->
-> Kind regards
-> Uffe
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+The following changes since commit 48e1dc10a9440872c0fc07a7fbcfce177f996fd4:
+
+  mmc: renesas_sdhi: fix kernel panic in _internal_dmac.c (2017-10-20 11:24:58 +0200)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v4.14-rc4-3
+
+for you to fetch changes up to 9d9491a7da2a4ce9fed32bd8611992ea3471523a:
+
+  mmc: dw_mmc: Fix the DTO timeout calculation (2017-11-01 15:13:45 +0100)
+
+----------------------------------------------------------------
+MMC host:
+ - dw_mmc: Fix request timeout issues
+
+----------------------------------------------------------------
+Douglas Anderson (4):
+      mmc: dw_mmc: cancel the CTO timer after a voltage switch
+      mmc: dw_mmc: Fix the CTO timeout calculation
+      mmc: dw_mmc: Add locking to the CTO timer
+      mmc: dw_mmc: Fix the DTO timeout calculation
+
+ drivers/mmc/host/dw_mmc.c | 107 ++++++++++++++++++++++++++++++++++++++++------
+ 1 file changed, 94 insertions(+), 13 deletions(-)
