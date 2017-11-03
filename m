@@ -1,7 +1,7 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V13 09/10] mmc: block: blk-mq: Stop using card_busy_detect()
-Date: Fri,  3 Nov 2017 15:20:19 +0200
-Message-ID: <1509715220-31885-10-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V13 06/10] mmc: sdhci-pci: Add CQHCI support for Intel GLK
+Date: Fri,  3 Nov 2017 15:20:16 +0200
+Message-ID: <1509715220-31885-7-git-send-email-adrian.hunter@intel.com>
 References: <1509715220-31885-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1509715220-31885-1-git-send-email-adrian.hunter@intel.com>
@@ -10,167 +10,238 @@ To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-mmc@vger.kernel.org
 
-card_busy_detect() doesn't set a correct timeout, and it doesn't take care
-of error status bits. Stop using it for blk-mq.
+Add CQHCI initialization and implement CQHCI operations for Intel GLK.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/block.c | 117 +++++++++++++++++++++++++++++++++++++++++++----
- 1 file changed, 109 insertions(+), 8 deletions(-)
+ drivers/mmc/host/Kconfig          |   1 +
+ drivers/mmc/host/sdhci-pci-core.c | 155 +++++++++++++++++++++++++++++++++++++-
+ 2 files changed, 155 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 0c29b1d8d545..5c5ff3c34313 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -1426,15 +1426,18 @@ static inline void mmc_apply_rel_rw(struct mmc_blk_request *brq,
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 3092b7085cb5..2b02a9788bb6 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -81,6 +81,7 @@ config MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER
+ config MMC_SDHCI_PCI
+ 	tristate "SDHCI support on PCI bus"
+ 	depends on MMC_SDHCI && PCI
++	select MMC_CQHCI
+ 	help
+ 	  This selects the PCI Secure Digital Host Controller Interface.
+ 	  Most controllers found today are PCI devices.
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 3e4f04fd5175..110c634cfb43 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -30,6 +30,8 @@
+ #include <linux/mmc/sdhci-pci-data.h>
+ #include <linux/acpi.h>
+ 
++#include "cqhci.h"
++
+ #include "sdhci.h"
+ #include "sdhci-pci.h"
+ 
+@@ -116,6 +118,28 @@ int sdhci_pci_resume_host(struct sdhci_pci_chip *chip)
+ 
+ 	return 0;
+ }
++
++static int sdhci_cqhci_suspend(struct sdhci_pci_chip *chip)
++{
++	int ret;
++
++	ret = cqhci_suspend(chip->slots[0]->host->mmc);
++	if (ret)
++		return ret;
++
++	return sdhci_pci_suspend_host(chip);
++}
++
++static int sdhci_cqhci_resume(struct sdhci_pci_chip *chip)
++{
++	int ret;
++
++	ret = sdhci_pci_resume_host(chip);
++	if (ret)
++		return ret;
++
++	return cqhci_resume(chip->slots[0]->host->mmc);
++}
+ #endif
+ 
+ #ifdef CONFIG_PM
+@@ -166,8 +190,48 @@ static int sdhci_pci_runtime_resume_host(struct sdhci_pci_chip *chip)
+ 
+ 	return 0;
+ }
++
++static int sdhci_cqhci_runtime_suspend(struct sdhci_pci_chip *chip)
++{
++	int ret;
++
++	ret = cqhci_suspend(chip->slots[0]->host->mmc);
++	if (ret)
++		return ret;
++
++	return sdhci_pci_runtime_suspend_host(chip);
++}
++
++static int sdhci_cqhci_runtime_resume(struct sdhci_pci_chip *chip)
++{
++	int ret;
++
++	ret = sdhci_pci_runtime_resume_host(chip);
++	if (ret)
++		return ret;
++
++	return cqhci_resume(chip->slots[0]->host->mmc);
++}
+ #endif
+ 
++static u32 sdhci_cqhci_irq(struct sdhci_host *host, u32 intmask)
++{
++	int cmd_error = 0;
++	int data_error = 0;
++
++	if (!sdhci_cqe_irq(host, intmask, &cmd_error, &data_error))
++		return intmask;
++
++	cqhci_irq(host->mmc, intmask, cmd_error, data_error);
++
++	return 0;
++}
++
++static void sdhci_pci_dumpregs(struct mmc_host *mmc)
++{
++	sdhci_dumpregs(mmc_priv(mmc));
++}
++
+ /*****************************************************************************\
+  *                                                                           *
+  * Hardware specific quirk handling                                          *
+@@ -583,6 +647,18 @@ static void sdhci_intel_voltage_switch(struct sdhci_host *host)
+ 	.voltage_switch		= sdhci_intel_voltage_switch,
+ };
+ 
++static const struct sdhci_ops sdhci_intel_glk_ops = {
++	.set_clock		= sdhci_set_clock,
++	.set_power		= sdhci_intel_set_power,
++	.enable_dma		= sdhci_pci_enable_dma,
++	.set_bus_width		= sdhci_set_bus_width,
++	.reset			= sdhci_reset,
++	.set_uhs_signaling	= sdhci_set_uhs_signaling,
++	.hw_reset		= sdhci_pci_hw_reset,
++	.voltage_switch		= sdhci_intel_voltage_switch,
++	.irq			= sdhci_cqhci_irq,
++};
++
+ static void byt_read_dsm(struct sdhci_pci_slot *slot)
+ {
+ 	struct intel_host *intel_host = sdhci_pci_priv(slot);
+@@ -612,12 +688,80 @@ static int glk_emmc_probe_slot(struct sdhci_pci_slot *slot)
+ {
+ 	int ret = byt_emmc_probe_slot(slot);
+ 
++	slot->host->mmc->caps2 |= MMC_CAP2_CQE;
++
+ 	if (slot->chip->pdev->device != PCI_DEVICE_ID_INTEL_GLK_EMMC) {
+ 		slot->host->mmc->caps2 |= MMC_CAP2_HS400_ES,
+ 		slot->host->mmc_host_ops.hs400_enhanced_strobe =
+ 						intel_hs400_enhanced_strobe;
++		slot->host->mmc->caps2 |= MMC_CAP2_CQE_DCMD;
++	}
++
++	return ret;
++}
++
++static void glk_cqe_enable(struct mmc_host *mmc)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++	u32 reg;
++
++	/*
++	 * CQE gets stuck if it sees Buffer Read Enable bit set, which can be
++	 * the case after tuning, so ensure the buffer is drained.
++	 */
++	reg = sdhci_readl(host, SDHCI_PRESENT_STATE);
++	while (reg & SDHCI_DATA_AVAILABLE) {
++		sdhci_readl(host, SDHCI_BUFFER);
++		reg = sdhci_readl(host, SDHCI_PRESENT_STATE);
++	}
++
++	sdhci_cqe_enable(mmc);
++}
++
++static const struct cqhci_host_ops glk_cqhci_ops = {
++	.enable		= glk_cqe_enable,
++	.disable	= sdhci_cqe_disable,
++	.dumpregs	= sdhci_pci_dumpregs,
++};
++
++static int glk_emmc_add_host(struct sdhci_pci_slot *slot)
++{
++	struct device *dev = &slot->chip->pdev->dev;
++	struct sdhci_host *host = slot->host;
++	struct cqhci_host *cq_host;
++	bool dma64;
++	int ret;
++
++	ret = sdhci_setup_host(host);
++	if (ret)
++		return ret;
++
++	cq_host = devm_kzalloc(dev, sizeof(*cq_host), GFP_KERNEL);
++	if (!cq_host) {
++		ret = -ENOMEM;
++		goto cleanup;
  	}
+ 
++	cq_host->mmio = host->ioaddr + 0x200;
++	cq_host->quirks |= CQHCI_QUIRK_SHORT_TXFR_DESC_SZ;
++	cq_host->ops = &glk_cqhci_ops;
++
++	dma64 = host->flags & SDHCI_USE_64_BIT_DMA;
++	if (dma64)
++		cq_host->caps |= CQHCI_TASK_DESC_SZ_128;
++
++	ret = cqhci_init(cq_host, host->mmc, dma64);
++	if (ret)
++		goto cleanup;
++
++	ret = __sdhci_add_host(host);
++	if (ret)
++		goto cleanup;
++
++	return 0;
++
++cleanup:
++	sdhci_cleanup_host(host);
+ 	return ret;
  }
  
--#define CMD_ERRORS							\
--	(R1_OUT_OF_RANGE |	/* Command argument out of range */	\
--	 R1_ADDRESS_ERROR |	/* Misaligned address */		\
-+#define CMD_ERRORS_EXCL_OOR						\
-+	(R1_ADDRESS_ERROR |	/* Misaligned address */		\
- 	 R1_BLOCK_LEN_ERROR |	/* Transferred block length incorrect */\
- 	 R1_WP_VIOLATION |	/* Tried to write to protected block */	\
- 	 R1_CARD_ECC_FAILED |	/* Card ECC failed */			\
- 	 R1_CC_ERROR |		/* Card controller error */		\
- 	 R1_ERROR)		/* General/unknown error */
+@@ -699,11 +843,20 @@ static int byt_sd_probe_slot(struct sdhci_pci_slot *slot)
+ static const struct sdhci_pci_fixes sdhci_intel_glk_emmc = {
+ 	.allow_runtime_pm	= true,
+ 	.probe_slot		= glk_emmc_probe_slot,
++	.add_host		= glk_emmc_add_host,
++#ifdef CONFIG_PM_SLEEP
++	.suspend		= sdhci_cqhci_suspend,
++	.resume			= sdhci_cqhci_resume,
++#endif
++#ifdef CONFIG_PM
++	.runtime_suspend	= sdhci_cqhci_runtime_suspend,
++	.runtime_resume		= sdhci_cqhci_runtime_resume,
++#endif
+ 	.quirks			= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
+ 	.quirks2		= SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
+ 				  SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400 |
+ 				  SDHCI_QUIRK2_STOP_WITH_TC,
+-	.ops			= &sdhci_intel_byt_ops,
++	.ops			= &sdhci_intel_glk_ops,
+ 	.priv_size		= sizeof(struct intel_host),
+ };
  
-+#define CMD_ERRORS							\
-+	(CMD_ERRORS_EXCL_OOR |						\
-+	 R1_OUT_OF_RANGE)	/* Command argument out of range */	\
-+
- static void mmc_blk_eval_resp_error(struct mmc_blk_request *brq)
- {
- 	u32 val;
-@@ -1951,6 +1954,95 @@ static void mmc_blk_ss_read(struct mmc_queue *mq, struct request *req)
- 	mqrq->retries = MMC_NO_RETRIES;
- }
- 
-+static inline bool mmc_blk_oor_valid(struct mmc_blk_request *brq)
-+{
-+	return !!brq->mrq.sbc;
-+}
-+
-+static inline u32 mmc_blk_stop_err_bits(struct mmc_blk_request *brq)
-+{
-+	return mmc_blk_oor_valid(brq) ? CMD_ERRORS : CMD_ERRORS_EXCL_OOR;
-+}
-+
-+static inline bool mmc_blk_in_tran_state(u32 status)
-+{
-+	/*
-+	 * Some cards mishandle the status bits, so make sure to check both the
-+	 * busy indication and the card state.
-+	 */
-+	return status & R1_READY_FOR_DATA &&
-+	       (R1_CURRENT_STATE(status) == R1_STATE_TRAN);
-+}
-+
-+static unsigned int mmc_blk_clock_khz(struct mmc_host *host)
-+{
-+	if (host->actual_clock)
-+		return host->actual_clock / 1000;
-+
-+	/* Clock may be subject to a divisor, fudge it by a factor of 2. */
-+	if (host->ios.clock)
-+		return host->ios.clock / 2000;
-+
-+	/* How can there be no clock */
-+	WARN_ON_ONCE(1);
-+	return 100; /* 100 kHz is minimum possible value */
-+}
-+
-+static unsigned long mmc_blk_data_timeout_jiffies(struct mmc_host *host,
-+						  struct mmc_data *data)
-+{
-+	unsigned int ms = DIV_ROUND_UP(data->timeout_ns, 1000000);
-+	unsigned int khz;
-+
-+	if (data->timeout_clks) {
-+		khz = mmc_blk_clock_khz(host);
-+		ms += DIV_ROUND_UP(data->timeout_clks, khz);
-+	}
-+
-+	return msecs_to_jiffies(ms);
-+}
-+
-+static int mmc_blk_card_stuck(struct mmc_card *card, struct request *req,
-+			      u32 *resp_errs)
-+{
-+	struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
-+	struct mmc_data *data = &mqrq->brq.data;
-+	unsigned long timeout;
-+	u32 status;
-+	int err;
-+
-+	timeout = jiffies + mmc_blk_data_timeout_jiffies(card->host, data);
-+
-+	while (1) {
-+		bool done = time_after(jiffies, timeout);
-+
-+		err = __mmc_send_status(card, &status, 5);
-+		if (err) {
-+			pr_err("%s: error %d requesting status\n",
-+			       req->rq_disk->disk_name, err);
-+			break;
-+		}
-+
-+		/* Accumulate any response error bits seen */
-+		if (resp_errs)
-+			*resp_errs |= status;
-+
-+		if (mmc_blk_in_tran_state(status))
-+			break;
-+
-+		/* Timeout if the device never becomes ready */
-+		if (done) {
-+			pr_err("%s: Card stuck in wrong state! %s %s\n",
-+				mmc_hostname(card->host),
-+				req->rq_disk->disk_name, __func__);
-+			err = -ETIMEDOUT;
-+			break;
-+		}
-+	}
-+
-+	return err;
-+}
-+
- static void mmc_blk_rw_recovery(struct mmc_queue *mq, struct request *req)
- {
- 	int type = rq_data_dir(req) == READ ? MMC_BLK_READ : MMC_BLK_WRITE;
-@@ -2097,17 +2189,26 @@ static inline bool mmc_blk_rq_error(struct mmc_blk_request *brq)
- static int mmc_blk_card_busy(struct mmc_card *card, struct request *req)
- {
- 	struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
--	bool gen_err = false;
-+	u32 status = 0;
- 	int err;
- 
- 	if (mmc_host_is_spi(card->host) || rq_data_dir(req) == READ)
- 		return 0;
- 
--	err = card_busy_detect(card, MMC_BLK_TIMEOUT_MS, false, req, &gen_err);
-+	err = mmc_blk_card_stuck(card, req, &status);
-+
-+	/*
-+	 * Do not assume data transferred correctly if there are any error bits
-+	 * set.
-+	 */
-+	if (!err && status & mmc_blk_stop_err_bits(&mqrq->brq)) {
-+		mqrq->brq.data.bytes_xfered = 0;
-+		err = -EIO;
-+	}
- 
--	/* Copy the general error bit so it will be seen later on */
--	if (gen_err)
--		mqrq->brq.stop.resp[0] |= R1_ERROR;
-+	/* Copy the exception bit so it will be seen later on */
-+	if (mmc_card_mmc(card) && status & R1_EXCEPTION_EVENT)
-+		mqrq->brq.cmd.resp[0] |= R1_EXCEPTION_EVENT;
- 
- 	return err;
- }
 -- 
 1.9.1
