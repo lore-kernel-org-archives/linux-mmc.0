@@ -1,121 +1,118 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V13 01/10] mmc: core: Add parameter use_blk_mq
-Date: Fri,  3 Nov 2017 15:20:11 +0200
-Message-ID: <1509715220-31885-2-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V13 02/10] mmc: block: Add error-handling comments
+Date: Fri,  3 Nov 2017 15:20:12 +0200
+Message-ID: <1509715220-31885-3-git-send-email-adrian.hunter@intel.com>
 References: <1509715220-31885-1-git-send-email-adrian.hunter@intel.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga09.intel.com ([134.134.136.24]:11465 "EHLO mga09.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1756217AbdKCNUo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 3 Nov 2017 09:20:44 -0400
 In-Reply-To: <1509715220-31885-1-git-send-email-adrian.hunter@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
-List-Id: linux-mmc@vger.kernel.org
 
-Until mmc has blk-mq support fully implemented and tested, add a
-parameter use_blk_mq, default to false unless config option MMC_MQ_DEFAULT
-is selected.
+Add error-handling comments to explain what would also be done for blk-mq
+if it used the legacy error-handling.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/Kconfig      | 11 +++++++++++
- drivers/mmc/core/core.c  |  7 +++++++
- drivers/mmc/core/core.h  |  2 ++
- drivers/mmc/core/host.c  |  2 ++
- drivers/mmc/core/host.h  |  4 ++++
- include/linux/mmc/host.h |  1 +
- 6 files changed, 27 insertions(+)
+ drivers/mmc/core/block.c | 36 +++++++++++++++++++++++++++++++++++-
+ 1 file changed, 35 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/Kconfig b/drivers/mmc/Kconfig
-index ec21388311db..98202934bd29 100644
---- a/drivers/mmc/Kconfig
-+++ b/drivers/mmc/Kconfig
-@@ -12,6 +12,17 @@ menuconfig MMC
- 	  If you want MMC/SD/SDIO support, you should say Y here and
- 	  also to your specific host controller driver.
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index ea80ff4cd7f9..ad72fa19f082 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -1894,7 +1894,11 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *new_req)
+ 		case MMC_BLK_SUCCESS:
+ 		case MMC_BLK_PARTIAL:
+ 			/*
+-			 * A block was successfully transferred.
++			 * Reset success, and accept bytes_xfered. For
++			 * MMC_BLK_PARTIAL re-submit the remaining request. For
++			 * MMC_BLK_SUCCESS error out the remaining request (it
++			 * could not be re-submitted anyway if a next request
++			 * had already begun).
+ 			 */
+ 			mmc_blk_reset_success(md, type);
  
-+config MMC_MQ_DEFAULT
-+	bool "MMC: use blk-mq I/O path by default"
-+	depends on MMC && BLOCK
-+	---help---
-+	  This option enables the new blk-mq based I/O path for MMC block
-+	  devices by default.  With the option the mmc_core.use_blk_mq
-+	  module/boot option defaults to Y, without it to N, but it can
-+	  still be overridden either way.
-+
-+	  If unsure say N.
-+
- if MMC
+@@ -1914,6 +1918,14 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *new_req)
+ 			}
+ 			break;
+ 		case MMC_BLK_CMD_ERR:
++			/*
++			 * For SD cards, get bytes written, but do not accept
++			 * bytes_xfered if that fails. For MMC cards accept
++			 * bytes_xfered. Then try to reset. If reset fails then
++			 * error out the remaining request, otherwise retry
++			 * once (N.B mmc_blk_reset() will not succeed twice in a
++			 * row).
++			 */
+ 			req_pending = mmc_blk_rw_cmd_err(md, card, brq, old_req, req_pending);
+ 			if (mmc_blk_reset(md, card->host, type)) {
+ 				if (req_pending)
+@@ -1930,11 +1942,20 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *new_req)
+ 			}
+ 			break;
+ 		case MMC_BLK_RETRY:
++			/*
++			 * Do not accept bytes_xfered, but retry up to 5 times,
++			 * otherwise same as abort.
++			 */
+ 			retune_retry_done = brq->retune_retry_done;
+ 			if (retry++ < 5)
+ 				break;
+ 			/* Fall through */
+ 		case MMC_BLK_ABORT:
++			/*
++			 * Do not accept bytes_xfered, but try to reset. If
++			 * reset succeeds, try once more, otherwise error out
++			 * the request.
++			 */
+ 			if (!mmc_blk_reset(md, card->host, type))
+ 				break;
+ 			mmc_blk_rw_cmd_abort(mq, card, old_req, mq_rq);
+@@ -1943,6 +1964,13 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *new_req)
+ 		case MMC_BLK_DATA_ERR: {
+ 			int err;
  
- source "drivers/mmc/core/Kconfig"
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 1f0f44f4dd5f..5df03cb73be7 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -66,6 +66,13 @@
- bool use_spi_crc = 1;
- module_param(use_spi_crc, bool, 0);
- 
-+#ifdef CONFIG_MMC_MQ_DEFAULT
-+bool mmc_use_blk_mq = true;
-+#else
-+bool mmc_use_blk_mq = false;
-+#endif
-+module_param_named(use_blk_mq, mmc_use_blk_mq, bool, S_IWUSR | S_IRUGO);
-+
- static int mmc_schedule_delayed_work(struct delayed_work *work,
- 				     unsigned long delay)
- {
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index 71e6c6d7ceb7..8c5dd8d31400 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -35,6 +35,8 @@ struct mmc_bus_ops {
- 	int (*reset)(struct mmc_host *);
- };
- 
-+extern bool mmc_use_blk_mq;
-+
- void mmc_attach_bus(struct mmc_host *host, const struct mmc_bus_ops *ops);
- void mmc_detach_bus(struct mmc_host *host);
- 
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 35a9e4fd1a9f..62ef6cb0ece4 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -404,6 +404,8 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
- 
- 	host->fixed_drv_type = -EINVAL;
- 
-+	host->use_blk_mq = mmc_use_blk_mq;
-+
- 	return host;
- }
- 
-diff --git a/drivers/mmc/core/host.h b/drivers/mmc/core/host.h
-index fb689a1065ed..6eaf558e62d6 100644
---- a/drivers/mmc/core/host.h
-+++ b/drivers/mmc/core/host.h
-@@ -74,6 +74,10 @@ static inline bool mmc_card_hs400es(struct mmc_card *card)
- 	return card->host->ios.enhanced_strobe;
- }
- 
-+static inline bool mmc_host_use_blk_mq(struct mmc_host *host)
-+{
-+	return host->use_blk_mq;
-+}
- 
- #endif
- 
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index e7743eca1021..ce2075d6f429 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -380,6 +380,7 @@ struct mmc_host {
- 	unsigned int		doing_retune:1;	/* re-tuning in progress */
- 	unsigned int		retune_now:1;	/* do re-tuning at next req */
- 	unsigned int		retune_paused:1; /* re-tuning is temporarily disabled */
-+	unsigned int		use_blk_mq:1;	/* use blk-mq */
- 
- 	int			rescan_disable;	/* disable card detection */
- 	int			rescan_entered;	/* used with nonremovable devices */
++			/*
++			 * Do not accept bytes_xfered, but try to reset. If
++			 * reset succeeds, try once more. If reset fails with
++			 * ENODEV which means the partition is wrong, then error
++			 * out the request. Otherwise attempt to read one sector
++			 * at a time.
++			 */
+ 			err = mmc_blk_reset(md, card->host, type);
+ 			if (!err)
+ 				break;
+@@ -1954,6 +1982,10 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *new_req)
+ 			/* Fall through */
+ 		}
+ 		case MMC_BLK_ECC_ERR:
++			/*
++			 * Do not accept bytes_xfered. If reading more than one
++			 * sector, try reading one sector at a time.
++			 */
+ 			if (brq->data.blocks > 1) {
+ 				/* Redo read one sector at a time */
+ 				pr_warn("%s: retrying using single block read\n",
+@@ -1975,10 +2007,12 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *new_req)
+ 			}
+ 			break;
+ 		case MMC_BLK_NOMEDIUM:
++			/* Do not accept bytes_xfered. Error out the request */
+ 			mmc_blk_rw_cmd_abort(mq, card, old_req, mq_rq);
+ 			mmc_blk_rw_try_restart(mq, new_req, mqrq_cur);
+ 			return;
+ 		default:
++			/* Do not accept bytes_xfered. Error out the request */
+ 			pr_err("%s: Unhandled return value (%d)",
+ 					old_req->rq_disk->disk_name, status);
+ 			mmc_blk_rw_cmd_abort(mq, card, old_req, mq_rq);
 -- 
 1.9.1
+
