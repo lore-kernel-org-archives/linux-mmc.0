@@ -1,68 +1,351 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V13 08/10] mmc: block: blk-mq: Separate card polling from recovery
-Date: Fri,  3 Nov 2017 15:20:18 +0200
-Message-ID: <1509715220-31885-9-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V13 10/10] mmc: block: blk-mq: Stop using legacy recovery
+Date: Fri,  3 Nov 2017 15:20:20 +0200
+Message-ID: <1509715220-31885-11-git-send-email-adrian.hunter@intel.com>
 References: <1509715220-31885-1-git-send-email-adrian.hunter@intel.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-block-owner@vger.kernel.org>
 In-Reply-To: <1509715220-31885-1-git-send-email-adrian.hunter@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-block-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-mmc@vger.kernel.org
 
-Recovery is simpler to understand if it is only used for errors. Create a
-separate function for card polling.
+There are only a few things the recovery needs to do. Primarily, it just
+needs to:
+	Determine the number of bytes transferred
+	Get the card back to transfer state
+	Determine whether to retry
+
+There are also a couple of additional features:
+	Reset the card before the last retry
+	Read one sector at a time
+
+The legacy code spent much effort analyzing command errors, but commands
+fail fast, so it is simpler just to give all command errors the same number
+of retries.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/block.c | 27 ++++++++++++++++++++++++++-
- 1 file changed, 26 insertions(+), 1 deletion(-)
+ drivers/mmc/core/block.c | 261 ++++++++++++++++++++++++-----------------------
+ 1 file changed, 135 insertions(+), 126 deletions(-)
 
 diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index cbb4b35a592d..0c29b1d8d545 100644
+index 5c5ff3c34313..623fa2be7077 100644
 --- a/drivers/mmc/core/block.c
 +++ b/drivers/mmc/core/block.c
-@@ -2094,6 +2094,24 @@ static inline bool mmc_blk_rq_error(struct mmc_blk_request *brq)
- 	       brq->data.error || brq->cmd.resp[0] & CMD_ERRORS;
+@@ -1480,9 +1480,11 @@ static void mmc_blk_eval_resp_error(struct mmc_blk_request *brq)
+ 	}
  }
  
-+static int mmc_blk_card_busy(struct mmc_card *card, struct request *req)
+-static enum mmc_blk_status __mmc_blk_err_check(struct mmc_card *card,
+-					       struct mmc_queue_req *mq_mrq)
++static enum mmc_blk_status mmc_blk_err_check(struct mmc_card *card,
++					     struct mmc_async_req *areq)
+ {
++	struct mmc_queue_req *mq_mrq = container_of(areq, struct mmc_queue_req,
++						    areq);
+ 	struct mmc_blk_request *brq = &mq_mrq->brq;
+ 	struct request *req = mmc_queue_req_to_req(mq_mrq);
+ 	int need_retune = card->host->need_retune;
+@@ -1588,15 +1590,6 @@ static enum mmc_blk_status __mmc_blk_err_check(struct mmc_card *card,
+ 	return MMC_BLK_SUCCESS;
+ }
+ 
+-static enum mmc_blk_status mmc_blk_err_check(struct mmc_card *card,
+-					     struct mmc_async_req *areq)
+-{
+-	struct mmc_queue_req *mq_mrq = container_of(areq, struct mmc_queue_req,
+-						    areq);
+-
+-	return __mmc_blk_err_check(card, mq_mrq);
+-}
+-
+ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
+ 			      int disable_multi, bool *do_rel_wr_p,
+ 			      bool *do_data_tag_p)
+@@ -1922,6 +1915,7 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+ }
+ 
+ #define MMC_MAX_RETRIES		5
++#define MMC_DATA_RETRIES	2
+ #define MMC_NO_RETRIES		(MMC_MAX_RETRIES + 1)
+ 
+ /* Single sector read during recovery */
+@@ -1974,6 +1968,28 @@ static inline bool mmc_blk_in_tran_state(u32 status)
+ 	       (R1_CURRENT_STATE(status) == R1_STATE_TRAN);
+ }
+ 
++/*
++ * Check for errors the host controller driver might not have seen such as
++ * response mode errors or invalid card state.
++ */
++static bool mmc_blk_status_error(struct request *req, u32 status)
 +{
 +	struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
-+	bool gen_err = false;
++	struct mmc_blk_request *brq = &mqrq->brq;
++	u32 stop_err_bits = mmc_blk_stop_err_bits(brq);
++
++	return brq->cmd.resp[0]  & CMD_ERRORS    ||
++	       brq->stop.resp[0] & stop_err_bits ||
++	       status            & stop_err_bits ||
++	       (rq_data_dir(req) == WRITE && !mmc_blk_in_tran_state(status));
++}
++
++static inline bool mmc_blk_cmd_started(struct mmc_blk_request *brq)
++{
++	return !brq->sbc.error && !brq->cmd.error &&
++	       !(brq->cmd.resp[0] & CMD_ERRORS);
++}
++
+ static unsigned int mmc_blk_clock_khz(struct mmc_host *host)
+ {
+ 	if (host->actual_clock)
+@@ -2043,6 +2059,47 @@ static int mmc_blk_card_stuck(struct mmc_card *card, struct request *req,
+ 	return err;
+ }
+ 
++static int mmc_blk_send_stop(struct mmc_card *card)
++{
++	struct mmc_command cmd = {
++		.opcode = MMC_STOP_TRANSMISSION,
++		.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC,
++	};
++
++	return mmc_wait_for_cmd(card->host, &cmd, 5);
++}
++
++static int mmc_blk_fix_state(struct mmc_card *card, struct request *req)
++{
 +	int err;
 +
-+	if (mmc_host_is_spi(card->host) || rq_data_dir(req) == READ)
-+		return 0;
++	mmc_retune_hold_now(card->host);
 +
-+	err = card_busy_detect(card, MMC_BLK_TIMEOUT_MS, false, req, &gen_err);
++	mmc_blk_send_stop(card);
 +
-+	/* Copy the general error bit so it will be seen later on */
-+	if (gen_err)
-+		mqrq->brq.stop.resp[0] |= R1_ERROR;
++	err = mmc_blk_card_stuck(card, req, NULL);
++
++	mmc_retune_release(card->host);
 +
 +	return err;
 +}
 +
- static inline void mmc_blk_rw_reset_success(struct mmc_queue *mq,
- 					    struct request *req)
++/*
++ * Requests are completed by mmc_blk_mq_complete_rq() which sets simple
++ * policy:
++ * 1. A request that has transferred at least some data is considered
++ * successful and will be requeued if there is remaining data to
++ * transfer.
++ * 2. Otherwise the number of retries is incremented and the request
++ * will be requeued if there are remaining retries.
++ * 3. Otherwise the request will be errored out.
++ * That means mmc_blk_mq_complete_rq() is controlled by bytes_xfered and
++ * mqrq->retries. So there are only 4 possible actions here:
++ *	1. do not accept the bytes_xfered value i.e. set it to zero
++ *	2. change mqrq->retries to determine the number of retries
++ *	3. try to reset the card
++ *	4. read one sector at a time
++ */
+ static void mmc_blk_rw_recovery(struct mmc_queue *mq, struct request *req)
  {
-@@ -2150,8 +2168,15 @@ static void mmc_blk_mq_poll_completion(struct mmc_queue *mq,
- 				       struct request *req)
- {
- 	struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
-+	struct mmc_host *host = mq->card->host;
+ 	int type = rq_data_dir(req) == READ ? MMC_BLK_READ : MMC_BLK_WRITE;
+@@ -2050,131 +2107,83 @@ static void mmc_blk_rw_recovery(struct mmc_queue *mq, struct request *req)
+ 	struct mmc_blk_request *brq = &mqrq->brq;
+ 	struct mmc_blk_data *md = mq->blkdata;
+ 	struct mmc_card *card = mq->card;
+-	static enum mmc_blk_status status;
+-
+-	brq->retune_retry_done = mqrq->retries;
++	u32 status;
++	u32 blocks;
++	int err;
  
--	mmc_blk_rw_recovery(mq, req);
-+	if (mmc_blk_rq_error(&mqrq->brq) ||
-+	    mmc_blk_card_busy(mq->card, req)) {
-+		mmc_blk_rw_recovery(mq, req);
-+	} else {
-+		mmc_blk_rw_reset_success(mq, req);
-+		mmc_retune_release(host);
+-	status = __mmc_blk_err_check(card, mqrq);
++	/*
++	 * Some errors the host driver might not have seen. Set the number of
++	 * bytes transferred to zero in that case.
++	 */
++	err = __mmc_send_status(card, &status, 0);
++	if (err || mmc_blk_status_error(req, status))
++		brq->data.bytes_xfered = 0;
+ 
+ 	mmc_retune_release(card->host);
+ 
+ 	/*
+-	 * Requests are completed by mmc_blk_mq_complete_rq() which sets simple
+-	 * policy:
+-	 * 1. A request that has transferred at least some data is considered
+-	 * successful and will be requeued if there is remaining data to
+-	 * transfer.
+-	 * 2. Otherwise the number of retries is incremented and the request
+-	 * will be requeued if there are remaining retries.
+-	 * 3. Otherwise the request will be errored out.
+-	 * That means mmc_blk_mq_complete_rq() is controlled by bytes_xfered and
+-	 * mqrq->retries. So there are only 4 possible actions here:
+-	 *	1. do not accept the bytes_xfered value i.e. set it to zero
+-	 *	2. change mqrq->retries to determine the number of retries
+-	 *	3. try to reset the card
+-	 *	4. read one sector at a time
++	 * Try again to get the status. This also provides an opportunity for
++	 * re-tuning.
+ 	 */
+-	switch (status) {
+-	case MMC_BLK_SUCCESS:
+-	case MMC_BLK_PARTIAL:
+-		/* Reset success, and accept bytes_xfered */
+-		mmc_blk_reset_success(md, type);
+-		break;
+-	case MMC_BLK_CMD_ERR:
+-		/*
+-		 * For SD cards, get bytes written, but do not accept
+-		 * bytes_xfered if that fails. For MMC cards accept
+-		 * bytes_xfered. Then try to reset. If reset fails then
+-		 * error out the remaining request, otherwise retry
+-		 * once (N.B mmc_blk_reset() will not succeed twice in a
+-		 * row).
+-		 */
+-		if (mmc_card_sd(card)) {
+-			u32 blocks;
+-			int err;
++	if (err)
++		err = __mmc_send_status(card, &status, 0);
+ 
+-			err = mmc_sd_num_wr_blocks(card, &blocks);
+-			if (err)
+-				brq->data.bytes_xfered = 0;
+-			else
+-				brq->data.bytes_xfered = blocks << 9;
+-		}
+-		if (mmc_blk_reset(md, card->host, type))
+-			mqrq->retries = MMC_NO_RETRIES;
+-		else
+-			mqrq->retries = MMC_MAX_RETRIES - 1;
+-		break;
+-	case MMC_BLK_RETRY:
+-		/*
+-		 * Do not accept bytes_xfered, but retry up to 5 times,
+-		 * otherwise same as abort.
+-		 */
+-		brq->data.bytes_xfered = 0;
+-		if (mqrq->retries < MMC_MAX_RETRIES)
+-			break;
+-		/* Fall through */
+-	case MMC_BLK_ABORT:
+-		/*
+-		 * Do not accept bytes_xfered, but try to reset. If
+-		 * reset succeeds, try once more, otherwise error out
+-		 * the request.
+-		 */
+-		brq->data.bytes_xfered = 0;
+-		if (mmc_blk_reset(md, card->host, type))
+-			mqrq->retries = MMC_NO_RETRIES;
+-		else
+-			mqrq->retries = MMC_MAX_RETRIES - 1;
+-		break;
+-	case MMC_BLK_DATA_ERR: {
+-		int err;
++	/*
++	 * Nothing more to do after the number of bytes transferred has been
++	 * updated and there is no card.
++	 */
++	if (err && mmc_detect_card_removed(card->host))
++		return;
+ 
+-		/*
+-		 * Do not accept bytes_xfered, but try to reset. If
+-		 * reset succeeds, try once more. If reset fails with
+-		 * ENODEV which means the partition is wrong, then error
+-		 * out the request. Otherwise attempt to read one sector
+-		 * at a time.
+-		 */
+-		brq->data.bytes_xfered = 0;
+-		err = mmc_blk_reset(md, card->host, type);
+-		if (!err) {
+-			mqrq->retries = MMC_MAX_RETRIES - 1;
+-			break;
+-		}
+-		if (err == -ENODEV) {
+-			mqrq->retries = MMC_NO_RETRIES;
+-			break;
+-		}
+-		/* Fall through */
++	/* Try to get back to "tran" state */
++	if (err || !mmc_blk_in_tran_state(status))
++		err = mmc_blk_fix_state(mq->card, req);
++
++	/*
++	 * Special case for SD cards where the card might record the number of
++	 * blocks written.
++	 */
++	if (!err && mmc_blk_cmd_started(brq) && mmc_card_sd(card) &&
++	    rq_data_dir(req) == WRITE) {
++		if (mmc_sd_num_wr_blocks(card, &blocks))
++			brq->data.bytes_xfered = 0;
++		else
++			brq->data.bytes_xfered = blocks << 9;
+ 	}
+-	case MMC_BLK_ECC_ERR:
+-		/*
+-		 * Do not accept bytes_xfered. If reading more than one
+-		 * sector, try reading one sector at a time.
+-		 */
+-		brq->data.bytes_xfered = 0;
+-		/* FIXME: Missing single sector read for large sector size */
+-		if (brq->data.blocks > 1 && !mmc_large_sector(card)) {
+-			/* Redo read one sector at a time */
+-			pr_warn("%s: retrying using single block read\n",
+-				req->rq_disk->disk_name);
+-			mmc_blk_ss_read(mq, req);
+-		} else {
+-			mqrq->retries = MMC_NO_RETRIES;
+-		}
+-		break;
+-	case MMC_BLK_NOMEDIUM:
+-		/* Do not accept bytes_xfered. Error out the request */
+-		brq->data.bytes_xfered = 0;
+-		mqrq->retries = MMC_NO_RETRIES;
+-		break;
+-	default:
+-		/* Do not accept bytes_xfered. Error out the request */
+-		brq->data.bytes_xfered = 0;
++
++	/* Reset if the card is in a bad state */
++	if (err && mmc_blk_reset(md, card->host, type)) {
++		pr_err("%s: recovery failed!\n", req->rq_disk->disk_name);
+ 		mqrq->retries = MMC_NO_RETRIES;
+-		pr_err("%s: Unhandled return value (%d)",
+-		       req->rq_disk->disk_name, status);
+-		break;
++		return;
 +	}
- 
- 	mmc_blk_urgent_bkops(mq, mqrq);
++
++	/*
++	 * If anything was done, just return and if there is anything remaining
++	 * on the request it will get requeued.
++	 */
++	if (brq->data.bytes_xfered)
++		return;
++
++	/* Reset before last retry */
++	if (mqrq->retries + 1 == MMC_MAX_RETRIES)
++		mmc_blk_reset(md, card->host, type);
++
++	/* Command errors fail fast, so use all MMC_MAX_RETRIES */
++	if (brq->sbc.error || brq->cmd.error)
++		return;
++
++	/* Reduce the remaining retries for data errors */
++	if (mqrq->retries < MMC_MAX_RETRIES - MMC_DATA_RETRIES) {
++		mqrq->retries = MMC_MAX_RETRIES - MMC_DATA_RETRIES;
++		return;
++	}
++
++	/* FIXME: Missing single sector read for large sector size */
++	if (rq_data_dir(req) == READ && !mmc_large_sector(card)) {
++		/* Read one sector at a time */
++		mmc_blk_ss_read(mq, req);
++		return;
+ 	}
  }
+ 
 -- 
 1.9.1
