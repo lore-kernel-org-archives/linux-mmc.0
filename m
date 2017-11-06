@@ -1,104 +1,112 @@
-From: Konrad Rzeszutek Wilk <konrad-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 1/2] mmc: renesas_sdhi: fix swiotlb buffer is full
-Date: Fri, 3 Nov 2017 10:17:50 -0400
-Message-ID: <20171103141750.GB19352@x230.dumpdata.com>
-References: <1508225421-25405-2-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-	<CAMuHMdXyY-gvQGn2UxhUDsdhdWUMmTA80z73PF14otvcKuTMaw@mail.gmail.com>
-	<20171019002412.GA14493@localhost.localdomain>
-	<CAMuHMdUs+dLq8LJTJoUQEUzJAKXCfD0JBtVnHPyN6XdppVy5qQ@mail.gmail.com>
-	<TY1PR06MB09928E11C2AFFD55EF68961CD8420@TY1PR06MB0992.apcprd06.prod.outlook.com>
-	<TY1PR06MB09929A4BF1E2A5DBD54845DED8430@TY1PR06MB0992.apcprd06.prod.outlook.com>
-	<20171101132639.GA24821@x230.dumpdata.com>
-	<TY1PR06MB0992CBE1B122C62BD5E1C227D85C0@TY1PR06MB0992.apcprd06.prod.outlook.com>
-	<20171103132322.GA19352@x230.dumpdata.com>
-	<CAMuHMdWxWu-6Hi+4P2GhEyjfu=mhbNUUOoBUC7JrsL=ki35c5w@mail.gmail.com>
+From: Vincent Yang <vincent.cw.yang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH] sdhci-fujitsu: add support for setting the CMD_DAT_DELAY attribute
+Date: Mon, 6 Nov 2017 10:54:34 +0800
+Message-ID: <CAKR0VN+ATuiOdZ+n=t=h+Ru5WdzRfyq-41t0P8J=4LAUFGo+dA@mail.gmail.com>
+References: <20171101002132.13500-1-ard.biesheuvel@linaro.org>
+ <20171102000814.ih2ggtfpmfsx3xap@rob-hp-laptop> <CAKv+Gu8UPpsobJ_d4+OCdufSkLLhGdRFxPO92X3YKvnyBY5b7w@mail.gmail.com>
+ <CAPDyKFpaKdvnwL98UZKzNmR+yXtWJL6hPDPfTXtY8nqmDRsomQ@mail.gmail.com>
+ <CAKv+Gu8nd7i+iaL-B55WbutGrOKaCsCdrQtFZgFs1TJaSqx-xw@mail.gmail.com>
+ <CAPDyKFpKe-TaUeuWdenGf9tHV8+UkGkkdcp8Z+Yu9Q-haHsYsA@mail.gmail.com> <CAKR0VNJ0xzRebUEZprRfQVp1LGjPG4khyumSYKsRtxCPTGkxYQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAMuHMdWxWu-6Hi+4P2GhEyjfu=mhbNUUOoBUC7JrsL=ki35c5w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux-Renesas <linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, "iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org" <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>, Konrad Rzeszutek Wilk <konrad-Gq0aWv8utHQdnm+yROfE0A@public.gmane.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAKR0VNJ0xzRebUEZprRfQVp1LGjPG4khyumSYKsRtxCPTGkxYQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Vincent Yang <vincent.yang.fujitsu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Vincent Yang <Vincent.Yang-l16TxrwUIHTQFUHtdCDX3A@public.gmane.org>, Vincent Yang <vincent.yang-uWyLwvC0a2jby3iVrkZq2A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Nov 03, 2017 at 03:01:12PM +0100, Geert Uytterhoeven wrote:
-> Hi Konrad,
-> 
-> On Fri, Nov 3, 2017 at 2:23 PM, Konrad Rzeszutek Wilk <konrad-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
-> > ..snip..
-> >> > >
-> >> > > Anyway, I made v2 patches by using swiotlb related definitions. Would you check it?
-> >> >
-> >> > Did I miss that email? As in was I cc-ed?
-> >>
-> >> This was my fault. When I submitted v2 patches, I didn't include your email and iommu mailing list...
-> >
-> > No problem.
-> >>
-> >> > > https://patchwork.kernel.org/patch/10018879/
-> >> >
-> >> > Why not use IO_TLB_SEGSIZE << IO_TLB_SHIFT or alternatively
-> >> > swiotlb_max_segment?  See 5584f1b1d73e9
-> >>
-> >> I already made such a patch as v2 and it was merged into mmc.git / fixes branch.
-> >>
-> >> https://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git/commit/?h=fixes&id=e90e8da72ad694a16a4ffa6e5adae3610208f73b
-> >
-> > What happens if the user has swiotlb=4096 on the command line (meaning
-> > less than the default value)? Your max value will be incorrect. Could you use
-> > swiotlb_max_segment?
-> 
-> No, as that's the total size of the swiotlb buffer, not the maximum size of
-> a single segment.
+2017-11-03 11:29 GMT+08:00 Vincent Yang <vincent.cw.yang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>:
+> 2017-11-02 19:00 GMT+08:00 Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>:
+>> + Vincent Yang (several emails, don't know which works)
+>>
+>> On 2 November 2017 at 11:49, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>>> On 2 November 2017 at 10:48, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>>>> On 2 November 2017 at 01:12, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>>>>> On 2 November 2017 at 00:08, Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
+>>>>>> On Wed, Nov 01, 2017 at 12:21:32AM +0000, Ard Biesheuvel wrote:
+>>>>>>> The Socionext SynQuacer SoC inherits this IP from Fujitsu, but
+>>>>>>> requires the F_SDH30_CMD_DAT_DELAY bit to be set in the
+>>>>>>> F_SDH30_ESD_CONTROL control register.
+>>>>>>>
+>>>>>>> So let's add an optional property to this device's binding, and
+>>>>>>> set the attribute if it is present in the DT node.
+>>>>>>>
+>>>>>>> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>>>>>>> ---
+>>>>>>>  Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt |  2 ++
+>>>>>>>  drivers/mmc/host/sdhci_f_sdh30.c                        | 18 +++++++++++++++++-
+>>>>>>>  2 files changed, 19 insertions(+), 1 deletion(-)
+>>>>>>>
+>>>>>>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt b/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
+>>>>>>> index de2c53cff4f1..9ad02f743ad0 100644
+>>>>>>> --- a/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
+>>>>>>> +++ b/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
+>>>>>>> @@ -15,6 +15,8 @@ Required properties:
+>>>>>>>  Optional properties:
+>>>>>>>  - vqmmc-supply: phandle to the regulator device tree node, mentioned
+>>>>>>>    as the VCCQ/VDD_IO supply in the eMMC/SD specs.
+>>>>>>> +- cmd-dat-delay-select: boolean property indicating that this host requires
+>>>>>>> +  the CMD_DAT_DELAY control to be enabled.
+>>>>>>
+>>>>>> Needs a vendor prefix unless this is a standard SDHCI bit (in which
+>>>>>> case it should be documented in a common spot).
+>>>>>>
+>>>>>
+>>>>> I suspect this is a non-standard thing, so I'll add the fujitsu prefix. Ulf?
+>>>>
+>>>> This is specific to the Fujitsu variant.
+>>>>
+>>>> However, what puzzles me is why this bit is needed for the Socionext
+>>>> SynQuacer SoC, but not for other SoCs that uses this IP. That seems
+>>>> weird (probably wrong).
+>>>>
+>>>> Moreover, the F_SDH30_CMD_DAT_DELAY register define is already there,
+>>>> so I would rather suspect that it's something that did got fully
+>>>> implemented. In other words, I don't think you need a new DT binding,
+>>>> but rather try to implement it generically for the sdhci-f_sdh30
+>>>> driver. Do you think that will work?
+>>>>
+>>>
+>>> Do you mean set it unconditionally? That works for me, but I have no
+>>
+>> Yes.
+>>
+>>> way of testing whether it still works on other SoCs that use this IP.
+>>
+>> Me neither!
+>
+> Hi all, I can not yet get contact with IP owner because it is a
+> holiday in Japan.
+> Around two years ago, F_SDH30_CMD_DAT_DELAY was a new feature of this IP.
+> I will update the latest information as soon as I get it.
+>
+I got a response from IP owner.
+He explains F_SDH30_CMD_DAT_DELAY is intended to adjust signal timing of
+CMD/DAT lines, and it is necessary to change its value according to
+SoC/board design.
+So he advises us to make F_SDH30_CMD_DAT_DELAY adjustable by a DT binding.
 
+Kind regards
+Vincent
 
-Aaah, then you are all fine! Thanks for the quote!
-> 
-> Quoting an earlier part of the thread:
-> 
-> On Thu, Oct 19, 2017 at 1:39 PM, Yoshihiro Shimoda
-> <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org> wrote:
-> >> >> iommu: Is there a better (generic) way to handle this?
-> >> >
-> >> > Yes. See 7453c549f5f6485c0d79cad7844870dcc7d1b34d, aka swiotlb_max_segment
-> >>
-> >> Thanks for the pointer!
-> >>
-> >> While I agree this can be used to avoid the swiotlb buffer full issue,
-> >> I believe it is a suboptimal solution if the device actually uses an IOMMU.
-> >> It limits the mapping size if CONFIG_SWIOTLB=y, which is always the
-> >> case for arm/arm64 these days.
-> >
-> > I'm afraid but I misunderstood this API's spec when I read it at first.
-> > After I tried to use it, I found the API cannot be used for a workaround because
-> > this API returns total size of swiotlb.
-> >
-> > For example:
-> >  - The swiotlb_max_segment() returns 64M bytes from the API when a default setting.
-> >   - In this case, the maximum size per a map is 256k bytes.
-> >  - The swiotlb_max_segment() returns 128M bytes from the API when I added swiotlb=65536
-> >    into the kernel parameter on arm64.
-> >   - In this case, the maximum size per a map is still 256k bytes because
-> >     the swiotlb has hardcoded the size by the following code:
-> >      https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/lib/swiotlb.c?h=v4.14-rc5#n254
-> 
-> Gr{oetje,eeting}s,
-> 
->                         Geert
-> 
-> --
-> Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org
-> 
-> In personal conversations with technical people, I call myself a hacker. But
-> when I'm talking to journalists I just say "programmer" or something like that.
->                                 -- Linus Torvalds
+>>
+>> Apparently there are no DTS in the kernel git that uses the
+>> "fujitsu,mb86s70-sdhci-3.0".
+>
+> Around two years ago, sdhci_f_sdh30_driver was a portion for mb86s70 SoC
+> patch series, but finally the patch series did not fully go upstream.
+>
+> Kind regards
+> Vincent
+>
+>>
+>> I looped in Vincent Yang, let's hope he can provide us with some more
+>> information.
+>>
+>> Kind regards
+>> Uffe
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
