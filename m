@@ -1,66 +1,52 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] sdhci-fujitsu: add support for setting the CMD_DAT_DELAY attribute
-Date: Mon, 6 Nov 2017 08:17:58 +0100
-Message-ID: <CAPDyKFp92YTqGNZ8s4mGQOpbmbEKxj9vpL0tj0rB-RbirWKCjw@mail.gmail.com>
-References: <20171101002132.13500-1-ard.biesheuvel@linaro.org>
- <20171102000814.ih2ggtfpmfsx3xap@rob-hp-laptop> <CAKv+Gu8UPpsobJ_d4+OCdufSkLLhGdRFxPO92X3YKvnyBY5b7w@mail.gmail.com>
- <CAPDyKFpaKdvnwL98UZKzNmR+yXtWJL6hPDPfTXtY8nqmDRsomQ@mail.gmail.com>
- <CAKv+Gu8nd7i+iaL-B55WbutGrOKaCsCdrQtFZgFs1TJaSqx-xw@mail.gmail.com>
- <CAPDyKFpKe-TaUeuWdenGf9tHV8+UkGkkdcp8Z+Yu9Q-haHsYsA@mail.gmail.com>
- <CAKR0VNJ0xzRebUEZprRfQVp1LGjPG4khyumSYKsRtxCPTGkxYQ@mail.gmail.com> <CAKR0VN+ATuiOdZ+n=t=h+Ru5WdzRfyq-41t0P8J=4LAUFGo+dA@mail.gmail.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH V13 01/10] mmc: core: Add parameter use_blk_mq
+Date: Mon, 6 Nov 2017 09:38:15 +0100
+Message-ID: <CACRpkdZxZ0Dc2XxtRmREF-_J-ii2nWEn9vuX5peijUk82rbsQg@mail.gmail.com>
+References: <1509715220-31885-1-git-send-email-adrian.hunter@intel.com> <1509715220-31885-2-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f175.google.com ([209.85.223.175]:48123 "EHLO
-        mail-io0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751056AbdKFHSA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Nov 2017 02:18:00 -0500
-Received: by mail-io0-f175.google.com with SMTP id h70so14670534ioi.4
-        for <linux-mmc@vger.kernel.org>; Sun, 05 Nov 2017 23:17:59 -0800 (PST)
-In-Reply-To: <CAKR0VN+ATuiOdZ+n=t=h+Ru5WdzRfyq-41t0P8J=4LAUFGo+dA@mail.gmail.com>
+Received: from mail-it0-f66.google.com ([209.85.214.66]:50056 "EHLO
+        mail-it0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750853AbdKFIiQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Nov 2017 03:38:16 -0500
+Received: by mail-it0-f66.google.com with SMTP id y15so4348137ita.4
+        for <linux-mmc@vger.kernel.org>; Mon, 06 Nov 2017 00:38:16 -0800 (PST)
+In-Reply-To: <1509715220-31885-2-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Vincent Yang <vincent.cw.yang@gmail.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Rob Herring <robh@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Vincent Yang <vincent.yang.fujitsu@gmail.com>, Vincent Yang <Vincent.Yang@tw.fujitsu.com>, Vincent Yang <vincent.yang@socionext.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 
-[...]
+On Fri, Nov 3, 2017 at 2:20 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
 
->>>>
->>>> Do you mean set it unconditionally? That works for me, but I have no
->>>
->>> Yes.
->>>
->>>> way of testing whether it still works on other SoCs that use this IP.
->>>
->>> Me neither!
->>
->> Hi all, I can not yet get contact with IP owner because it is a
->> holiday in Japan.
->> Around two years ago, F_SDH30_CMD_DAT_DELAY was a new feature of this IP.
->> I will update the latest information as soon as I get it.
->>
-> I got a response from IP owner.
-> He explains F_SDH30_CMD_DAT_DELAY is intended to adjust signal timing of
-> CMD/DAT lines, and it is necessary to change its value according to
-> SoC/board design.
-> So he advises us to make F_SDH30_CMD_DAT_DELAY adjustable by a DT binding.
+> Until mmc has blk-mq support fully implemented and tested, add a
+> parameter use_blk_mq, default to false unless config option MMC_MQ_DEFAULT
+> is selected.
 >
-> Kind regards
-> Vincent
->
->>>
->>> Apparently there are no DTS in the kernel git that uses the
->>> "fujitsu,mb86s70-sdhci-3.0".
->>
->> Around two years ago, sdhci_f_sdh30_driver was a portion for mb86s70 SoC
->> patch series, but finally the patch series did not fully go upstream.
->>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+(...)
 
-Vincent, thanks for all the help in this!
+> +config MMC_MQ_DEFAULT
+> +       bool "MMC: use blk-mq I/O path by default"
+> +       depends on MMC && BLOCK
 
-Ard, one thing, could you please split the DT doc change into a
-separate patch, preceding the change that actually do the parsing of
-the new binding.
+default y
 
-Kind regards
-Uffe
+The reason being: I want it to be tested, I want it to be deployed.
+We should rather use it as a fallback option if something turns out
+to be problematic with MQ which, at this point, is highly unlikely.
+
+> +++ b/include/linux/mmc/host.h
+> @@ -380,6 +380,7 @@ struct mmc_host {
+>         unsigned int            doing_retune:1; /* re-tuning in progress */
+>         unsigned int            retune_now:1;   /* do re-tuning at next req */
+>         unsigned int            retune_paused:1; /* re-tuning is temporarily disabled */
+> +       unsigned int            use_blk_mq:1;   /* use blk-mq */
+
+unsigned int foo:1 is really a weird way of saying "bool".
+
+We should just fix it I guess, but it's another patch.
+
+Yours,
+Linus Walleij
