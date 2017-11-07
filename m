@@ -1,38 +1,81 @@
 From: Jungseung Lee <js07.lee@samsung.com>
-Subject: [PATCH 1/2] mmc : Add unmmapped zero quirk flag
-Date: Tue, 07 Nov 2017 16:02:58 +0900
-Message-ID: <20171107070259.11664-1-js07.lee@samsung.com>
-References: <CGME20171107070318eucas1p18f1f745136c9cea51468a20004a55666@eucas1p1.samsung.com>
+Subject: [PATCH 2/2] mmc : implement REQ_OP_WRITE_ZEROES
+Date: Tue, 07 Nov 2017 16:02:59 +0900
+Message-ID: <20171107070259.11664-2-js07.lee@samsung.com>
+References: <20171107070259.11664-1-js07.lee@samsung.com>
+        <CGME20171107070328eucas1p12d563f31022e62a4ac6daac26fb0b81d@eucas1p1.samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.w1.samsung.com ([210.118.77.11]:44086 "EHLO
-        mailout1.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755085AbdKGHDW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Nov 2017 02:03:22 -0500
+Received: from mailout2.w1.samsung.com ([210.118.77.12]:38008 "EHLO
+        mailout2.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755085AbdKGHDc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Nov 2017 02:03:32 -0500
+In-reply-to: <20171107070259.11664-1-js07.lee@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Christoph Hellwig <hch@lst.de>, js07.lee@gmail.com, linux-mmc@vger.kernel.org
 Cc: Jungseung Lee <js07.lee@samsung.com>
 
 Some devices return zeroes on read to unmmaped logical blocks.
-This patch adds a flag to the mmc quirk list for the devices work that way.
+Use this behavior to implement REQ_OP_WRITES_ZEROES.
+
+Send TRIM operation for the non-partial erase at a convenient time.
 
 Signed-off-by: Jungseung Lee <js07.lee@samsung.com>
 ---
- include/linux/mmc/card.h | 1 +
- 1 file changed, 1 insertion(+)
+ drivers/mmc/core/block.c | 8 ++++++--
+ drivers/mmc/core/queue.c | 4 ++++
+ 2 files changed, 10 insertions(+), 2 deletions(-)
 
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 279b390..f032cb0 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -268,6 +268,7 @@ struct mmc_card {
- #define MMC_QUIRK_BROKEN_IRQ_POLLING	(1<<11)	/* Polling SDIO_CCCR_INTx could create a fake interrupt */
- #define MMC_QUIRK_TRIM_BROKEN	(1<<12)		/* Skip trim */
- #define MMC_QUIRK_BROKEN_HPI	(1<<13)		/* Disable broken HPI support */
-+#define MMC_QUIRK_UNMAPPED_ZEROES	(1<<14)	/* Return 0's on read to unmmaped logical blocks */
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index ea80ff4..41c4ec1 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -1273,9 +1273,10 @@ static void mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
+ 	struct mmc_card *card = md->queue.card;
+ 	unsigned int from, nr, arg;
+ 	int err = 0, type = MMC_BLK_DISCARD;
++	int force_trim = (req_op(req) == REQ_OP_WRITE_ZEROES);
+ 	blk_status_t status = BLK_STS_OK;
  
- 	bool			reenable_cmdq;	/* Re-enable Command Queue */
+-	if (!mmc_can_erase(card)) {
++	if (!mmc_can_erase(card) || (!mmc_can_trim(card) && force_trim)) {
+ 		status = BLK_STS_NOTSUPP;
+ 		goto fail;
+ 	}
+@@ -1283,7 +1284,9 @@ static void mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
+ 	from = blk_rq_pos(req);
+ 	nr = blk_rq_sectors(req);
  
+-	if (mmc_can_discard(card))
++	if (force_trim)
++		arg = MMC_TRIM_ARG;
++	else if (mmc_can_discard(card))
+ 		arg = MMC_DISCARD_ARG;
+ 	else if (mmc_can_trim(card))
+ 		arg = MMC_TRIM_ARG;
+@@ -2032,6 +2035,7 @@ void mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+ 				mmc_blk_issue_rw_rq(mq, NULL);
+ 			mmc_blk_issue_drv_op(mq, req);
+ 			break;
++		case REQ_OP_WRITE_ZEROES:
+ 		case REQ_OP_DISCARD:
+ 			/*
+ 			 * Complete ongoing async transfer before issuing
+diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+index 4f33d27..dc95b3a 100644
+--- a/drivers/mmc/core/queue.c
++++ b/drivers/mmc/core/queue.c
+@@ -144,6 +144,10 @@ static void mmc_queue_setup_discard(struct request_queue *q,
+ 	/* granularity must not be greater than max. discard */
+ 	if (card->pref_erase > max_discard)
+ 		q->limits.discard_granularity = 0;
++
++	if (card->quirks & MMC_QUIRK_UNMAPPED_ZEROES)
++		blk_queue_max_write_zeroes_sectors(q, UINT_MAX);
++
+ 	if (mmc_can_secure_erase_trim(card))
+ 		queue_flag_set_unlocked(QUEUE_FLAG_SECERASE, q);
+ }
 -- 
 2.10.1
 
