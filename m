@@ -1,30 +1,25 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 1/2] dt-bindings: sdhci-fujitsu: document cmd-dat-delay property
-Date: Tue, 7 Nov 2017 14:23:46 +0100
-Message-ID: <CAPDyKFq51ZqkBt7y18Jw49ggJbANLnCLur5S6mX=J=h2shZtiw@mail.gmail.com>
-References: <20171106152923.32114-1-ard.biesheuvel@linaro.org>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v3 2/2] sdhci-fujitsu: add support for setting the
+ CMD_DAT_DELAY attribute
+Date: Tue, 7 Nov 2017 14:23:51 +0100
+Message-ID: <CAPDyKFrpTM8CvKeMMbkrLk5hz0QKKy4mAW3KpLnEtDQPa3e8Ww@mail.gmail.com>
+References: <20171106152923.32114-1-ard.biesheuvel@linaro.org> <20171106152923.32114-2-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f68.google.com ([209.85.214.68]:46616 "EHLO
-        mail-it0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933608AbdKGNXs (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Nov 2017 08:23:48 -0500
-Received: by mail-it0-f68.google.com with SMTP id f187so2379917itb.1
-        for <linux-mmc@vger.kernel.org>; Tue, 07 Nov 2017 05:23:47 -0800 (PST)
-In-Reply-To: <20171106152923.32114-1-ard.biesheuvel@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20171106152923.32114-2-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
 
-On 6 November 2017 at 16:29, Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
-> Document a new boolean property of the sdhci-fujitsu binding that
-> indicates whether the CMD_DAT_DELAY bit needs to be set in the
-> F_SDH30_ESD_CONTROL register.
+On 6 November 2017 at 16:29, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> The Socionext SynQuacer SoC inherits this IP from Fujitsu, but
+> requires the F_SDH30_CMD_DAT_DELAY bit to be set in the
+> F_SDH30_ESD_CONTROL control register. So set this bit if the
+> DT node has the 'fujitsu,cmd-dat-delay-select' property.
 >
-> Acked-by: Rob Herring <robh@kernel.org>
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
 Thanks, applied for next!
 
@@ -32,25 +27,67 @@ Kind regards
 Uffe
 
 > ---
-> v3: added Rob's ack
-> v2: use vendor prefix
+> v3: don't reorder struct members to reduce padding
+>     remove pr_info() and simplify conditional assignment
+> v2: no change
 >
->  Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt | 2 ++
->  1 file changed, 2 insertions(+)
+>  drivers/mmc/host/sdhci_f_sdh30.c | 14 ++++++++++++++
+>  1 file changed, 14 insertions(+)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt b/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
-> index de2c53cff4f1..3ee9263adf73 100644
-> --- a/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
-> @@ -15,6 +15,8 @@ Required properties:
->  Optional properties:
->  - vqmmc-supply: phandle to the regulator device tree node, mentioned
->    as the VCCQ/VDD_IO supply in the eMMC/SD specs.
-> +- fujitsu,cmd-dat-delay-select: boolean property indicating that this host
-> +  requires the CMD_DAT_DELAY control to be enabled.
+> diff --git a/drivers/mmc/host/sdhci_f_sdh30.c b/drivers/mmc/host/sdhci_f_sdh30.c
+> index 111b66f5439b..04ca0d33a521 100644
+> --- a/drivers/mmc/host/sdhci_f_sdh30.c
+> +++ b/drivers/mmc/host/sdhci_f_sdh30.c
+> @@ -13,6 +13,7 @@
+>  #include <linux/err.h>
+>  #include <linux/delay.h>
+>  #include <linux/module.h>
+> +#include <linux/property.h>
+>  #include <linux/clk.h>
 >
->  Example:
+>  #include "sdhci-pltfm.h"
+> @@ -47,6 +48,7 @@ struct f_sdhost_priv {
+>         struct clk *clk;
+>         u32 vendor_hs200;
+>         struct device *dev;
+> +       bool enable_cmd_dat_delay;
+>  };
 >
+>  static void sdhci_f_sdh30_soft_voltage_switch(struct sdhci_host *host)
+> @@ -84,10 +86,19 @@ static unsigned int sdhci_f_sdh30_get_min_clock(struct sdhci_host *host)
+>
+>  static void sdhci_f_sdh30_reset(struct sdhci_host *host, u8 mask)
+>  {
+> +       struct f_sdhost_priv *priv = sdhci_priv(host);
+> +       u32 ctl;
+> +
+>         if (sdhci_readw(host, SDHCI_CLOCK_CONTROL) == 0)
+>                 sdhci_writew(host, 0xBC01, SDHCI_CLOCK_CONTROL);
+>
+>         sdhci_reset(host, mask);
+> +
+> +       if (priv->enable_cmd_dat_delay) {
+> +               ctl = sdhci_readl(host, F_SDH30_ESD_CONTROL);
+> +               ctl |= F_SDH30_CMD_DAT_DELAY;
+> +               sdhci_writel(host, ctl, F_SDH30_ESD_CONTROL);
+> +       }
+>  }
+>
+>  static const struct sdhci_ops sdhci_f_sdh30_ops = {
+> @@ -126,6 +137,9 @@ static int sdhci_f_sdh30_probe(struct platform_device *pdev)
+>         host->quirks2 = SDHCI_QUIRK2_SUPPORT_SINGLE |
+>                         SDHCI_QUIRK2_TUNING_WORK_AROUND;
+>
+> +       priv->enable_cmd_dat_delay = device_property_read_bool(dev,
+> +                                               "fujitsu,cmd-dat-delay-select");
+> +
+>         ret = mmc_of_parse(host->mmc);
+>         if (ret)
+>                 goto err;
 > --
 > 2.11.0
 >
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
