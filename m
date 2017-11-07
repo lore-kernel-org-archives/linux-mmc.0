@@ -1,75 +1,88 @@
 From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: [PATCH 6/6] mmc: tmio: move mmc_of_parse() out of tmio_mmc_host_probe()
-Date: Tue,  7 Nov 2017 17:09:32 +0900
-Message-ID: <1510042172-27220-7-git-send-email-yamada.masahiro@socionext.com>
-References: <1510042172-27220-1-git-send-email-yamada.masahiro@socionext.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1510042172-27220-1-git-send-email-yamada.masahiro@socionext.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org
-Cc: Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH] mfd: tmio: move register macros to tmio_core.c
+Date: Tue,  7 Nov 2017 17:14:12 +0900
+Message-ID: <1510042453-27619-1-git-send-email-yamada.masahiro@socionext.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from conuserg-10.nifty.com ([210.131.2.77]:35897 "EHLO
+        conuserg-10.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932229AbdKGIRM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Nov 2017 03:17:12 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Lee Jones <lee.jones@linaro.org>
+Cc: Simon Horman <simon.horman@netronome.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-mmc_of_parse() parses various DT properties and sets capability flags
-accordingly.  However, drivers have no chance to run platform init
-code depending on such flags because mmc_of_parse() is called from
-tmio_mmc_host_probe().
-
-Move mmc_of_parse() out of tmio_mmc_host_probe() so that drivers can
-handle capabilities before mmc_add_host().
+These registers are only used in drivers/mfd/tmio_core.c
 
 Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 ---
 
- drivers/mmc/host/renesas_sdhi_core.c | 4 ++++
- drivers/mmc/host/tmio_mmc.c          | 4 ++++
- drivers/mmc/host/tmio_mmc_core.c     | 4 ----
- 3 files changed, 8 insertions(+), 4 deletions(-)
+ drivers/mfd/tmio_core.c  | 20 ++++++++++++++++++++
+ include/linux/mfd/tmio.h | 20 --------------------
+ 2 files changed, 20 insertions(+), 20 deletions(-)
 
-diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index 7bb0252..4658fb5 100644
---- a/drivers/mmc/host/renesas_sdhi_core.c
-+++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -526,6 +526,10 @@ int renesas_sdhi_probe(struct platform_device *pdev,
- 	if (!host)
- 		return -ENOMEM;
+diff --git a/drivers/mfd/tmio_core.c b/drivers/mfd/tmio_core.c
+index 83af78c..ebf54cc 100644
+--- a/drivers/mfd/tmio_core.c
++++ b/drivers/mfd/tmio_core.c
+@@ -9,6 +9,26 @@
+ #include <linux/export.h>
+ #include <linux/mfd/tmio.h>
  
-+	ret = mmc_of_parse(host->mmc);
-+	if (ret)
-+		goto efree;
++#define CNF_CMD     0x04
++#define CNF_CTL_BASE   0x10
++#define CNF_INT_PIN  0x3d
++#define CNF_STOP_CLK_CTL 0x40
++#define CNF_GCLK_CTL 0x41
++#define CNF_SD_CLK_MODE 0x42
++#define CNF_PIN_STATUS 0x44
++#define CNF_PWR_CTL_1 0x48
++#define CNF_PWR_CTL_2 0x49
++#define CNF_PWR_CTL_3 0x4a
++#define CNF_CARD_DETECT_MODE 0x4c
++#define CNF_SD_SLOT 0x50
++#define CNF_EXT_GCLK_CTL_1 0xf0
++#define CNF_EXT_GCLK_CTL_2 0xf1
++#define CNF_EXT_GCLK_CTL_3 0xf9
++#define CNF_SD_LED_EN_1 0xfa
++#define CNF_SD_LED_EN_2 0xfe
 +
- 	if (of_data) {
- 		mmc_data->flags |= of_data->tmio_flags;
- 		mmc_data->ocr_mask = of_data->tmio_ocr_mask;
-diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
-index ccfbc15..87052b3 100644
---- a/drivers/mmc/host/tmio_mmc.c
-+++ b/drivers/mmc/host/tmio_mmc.c
-@@ -96,6 +96,10 @@ static int tmio_mmc_probe(struct platform_device *pdev)
- 	if (!host)
- 		goto cell_disable;
- 
-+	ret = mmc_of_parse(host->mmc);
-+	if (ret)
-+		goto host_free;
++#define   SDCREN 0x2   /* Enable access to MMC CTL regs. (flag in COMMAND_REG)*/
 +
- 	/* SD control register space size is 0x200, 0x400 for bus_shift=1 */
- 	host->bus_shift = resource_size(res) >> 10;
+ int tmio_core_mmc_enable(void __iomem *cnf, int shift, unsigned long base)
+ {
+ 	/* Enable the MMC/SD Control registers */
+diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
+index e1cfe91..396a103c 100644
+--- a/include/linux/mfd/tmio.h
++++ b/include/linux/mfd/tmio.h
+@@ -25,26 +25,6 @@
+ 		writew((val) >> 16, (addr) + 2); \
+ 	} while (0)
  
-diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-index 695b4f4..c2f759b 100644
---- a/drivers/mmc/host/tmio_mmc_core.c
-+++ b/drivers/mmc/host/tmio_mmc_core.c
-@@ -1188,10 +1188,6 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
- 	if (IS_ERR(_host->ctl))
- 		return PTR_ERR(_host->ctl);
- 
--	ret = mmc_of_parse(mmc);
--	if (ret < 0)
--		return ret;
+-#define CNF_CMD     0x04
+-#define CNF_CTL_BASE   0x10
+-#define CNF_INT_PIN  0x3d
+-#define CNF_STOP_CLK_CTL 0x40
+-#define CNF_GCLK_CTL 0x41
+-#define CNF_SD_CLK_MODE 0x42
+-#define CNF_PIN_STATUS 0x44
+-#define CNF_PWR_CTL_1 0x48
+-#define CNF_PWR_CTL_2 0x49
+-#define CNF_PWR_CTL_3 0x4a
+-#define CNF_CARD_DETECT_MODE 0x4c
+-#define CNF_SD_SLOT 0x50
+-#define CNF_EXT_GCLK_CTL_1 0xf0
+-#define CNF_EXT_GCLK_CTL_2 0xf1
+-#define CNF_EXT_GCLK_CTL_3 0xf9
+-#define CNF_SD_LED_EN_1 0xfa
+-#define CNF_SD_LED_EN_2 0xfe
 -
- 	_host->pdata = pdata;
- 	platform_set_drvdata(pdev, _host);
- 
+-#define   SDCREN 0x2   /* Enable access to MMC CTL regs. (flag in COMMAND_REG)*/
+-
+ #define sd_config_write8(base, shift, reg, val) \
+ 	tmio_iowrite8((val), (base) + ((reg) << (shift)))
+ #define sd_config_write16(base, shift, reg, val) \
 -- 
 2.7.4
+
