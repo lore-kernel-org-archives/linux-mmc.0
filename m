@@ -1,7 +1,7 @@
 From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: [PATCH 5/6] mmc: tmio, renesas_sdhi: set mmc_host_ops hooks directly
-Date: Tue,  7 Nov 2017 17:09:31 +0900
-Message-ID: <1510042172-27220-6-git-send-email-yamada.masahiro@socionext.com>
+Subject: [PATCH 2/6] mmc: tmio: set tmio_mmc_host to driver data
+Date: Tue,  7 Nov 2017 17:09:28 +0900
+Message-ID: <1510042172-27220-3-git-send-email-yamada.masahiro@socionext.com>
 References: <1510042172-27220-1-git-send-email-yamada.masahiro@socionext.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1510042172-27220-1-git-send-email-yamada.masahiro@socionext.com>
@@ -10,60 +10,88 @@ To: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org
 Cc: Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Drivers can set any mmc_host_ops hooks between tmio_mmc_host_alloc()
-and tmio_mmc_host_probe().  Remove duplicated hooks in tmio_mmc_host.
+The remove, suspend, resume hooks need tmio_mmc_host.  It is tedious
+to get mmc_host from the driver_data and pass it to mmc_priv().
+We can directly set tmio_mmc_host to driver data to clean up the code.
 
 Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 ---
 
- drivers/mmc/host/renesas_sdhi_core.c | 4 ++--
- drivers/mmc/host/tmio_mmc.h          | 3 ---
- drivers/mmc/host/tmio_mmc_core.c     | 4 ----
- 3 files changed, 2 insertions(+), 9 deletions(-)
+ drivers/mmc/host/renesas_sdhi_core.c |  3 +--
+ drivers/mmc/host/tmio_mmc.c          | 12 ++++--------
+ drivers/mmc/host/tmio_mmc_core.c     |  8 +++-----
+ 3 files changed, 8 insertions(+), 15 deletions(-)
 
 diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index 23c250e..7bb0252 100644
+index 4b7a4e2..23c250e 100644
 --- a/drivers/mmc/host/renesas_sdhi_core.c
 +++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -548,8 +548,8 @@ int renesas_sdhi_probe(struct platform_device *pdev,
- 	/* SDR speeds are only available on Gen2+ */
- 	if (mmc_data->flags & TMIO_MMC_MIN_RCAR2) {
- 		/* card_busy caused issues on r8a73a4 (pre-Gen2) CD-less SDHI */
--		host->card_busy	= renesas_sdhi_card_busy;
--		host->start_signal_voltage_switch =
-+		host->mmc_host_ops.card_busy = renesas_sdhi_card_busy;
-+		host->mmc_host_ops.start_signal_voltage_switch =
- 			renesas_sdhi_start_signal_voltage_switch;
- 	}
+@@ -656,8 +656,7 @@ EXPORT_SYMBOL_GPL(renesas_sdhi_probe);
  
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index b251f1c..319a2d6 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -186,9 +186,6 @@ struct tmio_mmc_host {
- 	void (*clk_disable)(struct tmio_mmc_host *host);
- 	int (*multi_io_quirk)(struct mmc_card *card,
- 			      unsigned int direction, int blk_size);
--	int (*card_busy)(struct mmc_host *mmc);
--	int (*start_signal_voltage_switch)(struct mmc_host *mmc,
--					   struct mmc_ios *ios);
- 	int (*write16_hook)(struct tmio_mmc_host *host, int addr);
- 	void (*hw_reset)(struct tmio_mmc_host *host);
- 	void (*prepare_tuning)(struct tmio_mmc_host *host, unsigned long tap);
+ int renesas_sdhi_remove(struct platform_device *pdev)
+ {
+-	struct mmc_host *mmc = platform_get_drvdata(pdev);
+-	struct tmio_mmc_host *host = mmc_priv(mmc);
++	struct tmio_mmc_host *host = platform_get_drvdata(pdev);
+ 
+ 	tmio_mmc_host_remove(host);
+ 
+diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
+index 64b7e9f..ccfbc15 100644
+--- a/drivers/mmc/host/tmio_mmc.c
++++ b/drivers/mmc/host/tmio_mmc.c
+@@ -128,15 +128,11 @@ static int tmio_mmc_probe(struct platform_device *pdev)
+ static int tmio_mmc_remove(struct platform_device *pdev)
+ {
+ 	const struct mfd_cell *cell = mfd_get_cell(pdev);
+-	struct mmc_host *mmc = platform_get_drvdata(pdev);
++	struct tmio_mmc_host *host = platform_get_drvdata(pdev);
+ 
+-	if (mmc) {
+-		struct tmio_mmc_host *host = mmc_priv(mmc);
+-
+-		tmio_mmc_host_remove(host);
+-		if (cell->disable)
+-			cell->disable(pdev);
+-	}
++	tmio_mmc_host_remove(host);
++	if (cell->disable)
++		cell->disable(pdev);
+ 
+ 	return 0;
+ }
 diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-index 3c84044..695b4f4 100644
+index 9c4e619..9b8ef73 100644
 --- a/drivers/mmc/host/tmio_mmc_core.c
 +++ b/drivers/mmc/host/tmio_mmc_core.c
-@@ -1202,10 +1202,6 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
- 	if (ret < 0)
+@@ -1190,7 +1190,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
  		return ret;
  
--	_host->mmc_host_ops.card_busy = _host->card_busy;
--	_host->mmc_host_ops.start_signal_voltage_switch =
--		_host->start_signal_voltage_switch;
--
- 	mmc->caps |= MMC_CAP_4_BIT_DATA | pdata->capabilities;
- 	mmc->caps2 |= pdata->capabilities2;
- 	mmc->max_segs = pdata->max_segs ? : 32;
+ 	_host->pdata = pdata;
+-	platform_set_drvdata(pdev, mmc);
++	platform_set_drvdata(pdev, _host);
+ 
+ 	_host->set_pwr = pdata->set_pwr;
+ 	_host->set_clk_div = pdata->set_clk_div;
+@@ -1347,8 +1347,7 @@ EXPORT_SYMBOL_GPL(tmio_mmc_host_remove);
+ #ifdef CONFIG_PM
+ int tmio_mmc_host_runtime_suspend(struct device *dev)
+ {
+-	struct mmc_host *mmc = dev_get_drvdata(dev);
+-	struct tmio_mmc_host *host = mmc_priv(mmc);
++	struct tmio_mmc_host *host = dev_get_drvdata(dev);
+ 
+ 	tmio_mmc_disable_mmc_irqs(host, TMIO_MASK_ALL);
+ 
+@@ -1368,8 +1367,7 @@ static bool tmio_mmc_can_retune(struct tmio_mmc_host *host)
+ 
+ int tmio_mmc_host_runtime_resume(struct device *dev)
+ {
+-	struct mmc_host *mmc = dev_get_drvdata(dev);
+-	struct tmio_mmc_host *host = mmc_priv(mmc);
++	struct tmio_mmc_host *host = dev_get_drvdata(dev);
+ 
+ 	tmio_mmc_reset(host);
+ 	tmio_mmc_clk_enable(host);
 -- 
 2.7.4
