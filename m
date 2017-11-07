@@ -1,104 +1,108 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/2] mmc : implement REQ_OP_WRITE_ZEROES
-Date: Tue, 7 Nov 2017 13:54:18 +0100
-Message-ID: <CAPDyKFpj+rfuhXAd5sB9nxfyRU4i6eUF=V3d1bm9RKqi1ZwXVw@mail.gmail.com>
-References: <CGME20171107070328eucas1p12d563f31022e62a4ac6daac26fb0b81d@eucas1p1.samsung.com>
- <20171107070259.11664-1-js07.lee@samsung.com> <20171107070259.11664-2-js07.lee@samsung.com>
+Subject: Re: [PATCH] mmc: tmio: Replace msleep() of 20ms or less with usleep_range()
+Date: Tue, 7 Nov 2017 14:23:40 +0100
+Message-ID: <CAPDyKFqQZXvtf2CJ2qxrWNjKuAof-RbE21Mrni9rBTJKZpJVwA@mail.gmail.com>
+References: <20171103093628.13108-1-horms+renesas@verge.net.au>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f66.google.com ([209.85.214.66]:43074 "EHLO
-        mail-it0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755441AbdKGMyU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Nov 2017 07:54:20 -0500
-Received: by mail-it0-f66.google.com with SMTP id k70so6370901itk.0
-        for <linux-mmc@vger.kernel.org>; Tue, 07 Nov 2017 04:54:19 -0800 (PST)
-In-Reply-To: <20171107070259.11664-2-js07.lee@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20171103093628.13108-1-horms+renesas@verge.net.au>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Simon Horman <horms+renesas@verge.net.au>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Magnus Damm <magnus.damm@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Jungseung Lee <js07.lee@samsung.com>
-Cc: Christoph Hellwig <hch@lst.de>, js07.lee@gmail.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 7 November 2017 at 08:02, Jungseung Lee <js07.lee@samsung.com> wrote:
-> Some devices return zeroes on read to unmmaped logical blocks.
-> Use this behavior to implement REQ_OP_WRITES_ZEROES.
+On 3 November 2017 at 10:36, Simon Horman <horms+renesas@verge.net.au> wrote:
+> From: Masaharu Hayakawa <masaharu.hayakawa.ry@renesas.com>
 >
-> Send TRIM operation for the non-partial erase at a convenient time.
+> As documented in Documentation/timers/timers-howto.txt
+> as follows, replace msleep() with usleep_range().
+>
+> msleep(1~20) may not do what the caller intends, and
+> will often sleep longer (~20 ms actual sleep for any
+> value given in the 1~20ms range). In many cases this
+> is not the desired behavior.
+>
+> Signed-off-by: Masaharu Hayakawa <masaharu.hayakawa.ry@renesas.com>
+> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
 
-This doesn't explain the problem enough.
-
-What does unmapped logical blocks means for an eMMC device? Isn't all
-logical blocks that is accessible being mapped?
-
-Please elaborate for my understanding.
-
-Also, there is no need to split patch1 and patch2, those can go together.
-
-And finally, please follow Christoph's suggestion, so we can see when
-this new quirk is going to be used.
+Thanks, applied for next!
 
 Kind regards
 Uffe
 
->
-> Signed-off-by: Jungseung Lee <js07.lee@samsung.com>
 > ---
->  drivers/mmc/core/block.c | 8 ++++++--
->  drivers/mmc/core/queue.c | 4 ++++
->  2 files changed, 10 insertions(+), 2 deletions(-)
+> v1 [Simon Horman]
+> * Extend to cover all instances of msleep(<20);
 >
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index ea80ff4..41c4ec1 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -1273,9 +1273,10 @@ static void mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
->         struct mmc_card *card = md->queue.card;
->         unsigned int from, nr, arg;
->         int err = 0, type = MMC_BLK_DISCARD;
-> +       int force_trim = (req_op(req) == REQ_OP_WRITE_ZEROES);
->         blk_status_t status = BLK_STS_OK;
+> v0 [Masaharu Hayakawa]
 >
-> -       if (!mmc_can_erase(card)) {
-> +       if (!mmc_can_erase(card) || (!mmc_can_trim(card) && force_trim)) {
->                 status = BLK_STS_NOTSUPP;
->                 goto fail;
+> This patch is based on a patch in BSP v3.5.6
+> ---
+>  drivers/mmc/host/tmio_mmc_core.c | 14 +++++++-------
+>  1 file changed, 7 insertions(+), 7 deletions(-)
+>
+> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+> index 4c8198f8b04a..583bf3262df5 100644
+> --- a/drivers/mmc/host/tmio_mmc_core.c
+> +++ b/drivers/mmc/host/tmio_mmc_core.c
+> @@ -167,11 +167,11 @@ static void tmio_mmc_clk_start(struct tmio_mmc_host *host)
+>
+>         /* HW engineers overrode docs: no sleep needed on R-Car2+ */
+>         if (!(host->pdata->flags & TMIO_MMC_MIN_RCAR2))
+> -               msleep(10);
+> +               usleep_range(10000, 11000);
+>
+>         if (host->pdata->flags & TMIO_MMC_HAVE_HIGH_REG) {
+>                 sd_ctrl_write16(host, CTL_CLK_AND_WAIT_CTL, 0x0100);
+> -               msleep(10);
+> +               usleep_range(10000, 11000);
 >         }
-> @@ -1283,7 +1284,9 @@ static void mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
->         from = blk_rq_pos(req);
->         nr = blk_rq_sectors(req);
->
-> -       if (mmc_can_discard(card))
-> +       if (force_trim)
-> +               arg = MMC_TRIM_ARG;
-> +       else if (mmc_can_discard(card))
->                 arg = MMC_DISCARD_ARG;
->         else if (mmc_can_trim(card))
->                 arg = MMC_TRIM_ARG;
-> @@ -2032,6 +2035,7 @@ void mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
->                                 mmc_blk_issue_rw_rq(mq, NULL);
->                         mmc_blk_issue_drv_op(mq, req);
->                         break;
-> +               case REQ_OP_WRITE_ZEROES:
->                 case REQ_OP_DISCARD:
->                         /*
->                          * Complete ongoing async transfer before issuing
-> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-> index 4f33d27..dc95b3a 100644
-> --- a/drivers/mmc/core/queue.c
-> +++ b/drivers/mmc/core/queue.c
-> @@ -144,6 +144,10 @@ static void mmc_queue_setup_discard(struct request_queue *q,
->         /* granularity must not be greater than max. discard */
->         if (card->pref_erase > max_discard)
->                 q->limits.discard_granularity = 0;
-> +
-> +       if (card->quirks & MMC_QUIRK_UNMAPPED_ZEROES)
-> +               blk_queue_max_write_zeroes_sectors(q, UINT_MAX);
-> +
->         if (mmc_can_secure_erase_trim(card))
->                 queue_flag_set_unlocked(QUEUE_FLAG_SECERASE, q);
 >  }
+>
+> @@ -179,7 +179,7 @@ static void tmio_mmc_clk_stop(struct tmio_mmc_host *host)
+>  {
+>         if (host->pdata->flags & TMIO_MMC_HAVE_HIGH_REG) {
+>                 sd_ctrl_write16(host, CTL_CLK_AND_WAIT_CTL, 0x0000);
+> -               msleep(10);
+> +               usleep_range(10000, 11000);
+>         }
+>
+>         sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, ~CLK_CTL_SCLKEN &
+> @@ -187,7 +187,7 @@ static void tmio_mmc_clk_stop(struct tmio_mmc_host *host)
+>
+>         /* HW engineers overrode docs: no sleep needed on R-Car2+ */
+>         if (!(host->pdata->flags & TMIO_MMC_MIN_RCAR2))
+> -               msleep(10);
+> +               usleep_range(10000, 11000);
+>  }
+>
+>  static void tmio_mmc_set_clock(struct tmio_mmc_host *host,
+> @@ -219,7 +219,7 @@ static void tmio_mmc_set_clock(struct tmio_mmc_host *host,
+>                         sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
+>         sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, clk & CLK_CTL_DIV_MASK);
+>         if (!(host->pdata->flags & TMIO_MMC_MIN_RCAR2))
+> -               msleep(10);
+> +               usleep_range(10000, 11000);
+>
+>         tmio_mmc_clk_start(host);
+>  }
+> @@ -230,11 +230,11 @@ static void tmio_mmc_reset(struct tmio_mmc_host *host)
+>         sd_ctrl_write16(host, CTL_RESET_SD, 0x0000);
+>         if (host->pdata->flags & TMIO_MMC_HAVE_HIGH_REG)
+>                 sd_ctrl_write16(host, CTL_RESET_SDIO, 0x0000);
+> -       msleep(10);
+> +       usleep_range(10000, 11000);
+>         sd_ctrl_write16(host, CTL_RESET_SD, 0x0001);
+>         if (host->pdata->flags & TMIO_MMC_HAVE_HIGH_REG)
+>                 sd_ctrl_write16(host, CTL_RESET_SDIO, 0x0001);
+> -       msleep(10);
+> +       usleep_range(10000, 11000);
+>
+>         if (host->pdata->flags & TMIO_MMC_SDIO_IRQ) {
+>                 sd_ctrl_write16(host, CTL_SDIO_IRQ_MASK, host->sdio_irq_mask);
 > --
-> 2.10.1
+> 2.11.0
 >
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
