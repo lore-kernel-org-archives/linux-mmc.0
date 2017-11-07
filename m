@@ -1,228 +1,106 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: sdhci-acpi: Add support for ACPI HID of AMD
- Controller with HS400
-Date: Tue, 7 Nov 2017 11:24:56 +0200
-Message-ID: <f67d8250-4455-d797-f9f6-1d27024b33ae@intel.com>
-References: <1507803468-26313-1-git-send-email-Nehal-bakulchandra.Shah@amd.com>
- <83dfe4d0-8084-e1b5-0d87-ff42c3e5ca4c@amd.com>
- <c53c41c5-3d17-e6c4-5219-9d16c7a7f4b9@intel.com>
- <95f094fa-0121-f848-d210-05614b91429e@amd.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 2/2] mmc : implement REQ_OP_WRITE_ZEROES
+Date: Tue, 7 Nov 2017 13:54:18 +0100
+Message-ID: <CAPDyKFpj+rfuhXAd5sB9nxfyRU4i6eUF=V3d1bm9RKqi1ZwXVw@mail.gmail.com>
+References: <CGME20171107070328eucas1p12d563f31022e62a4ac6daac26fb0b81d@eucas1p1.samsung.com>
+ <20171107070259.11664-1-js07.lee@samsung.com> <20171107070259.11664-2-js07.lee@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:16403 "EHLO mga09.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932873AbdKGJZK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 7 Nov 2017 04:25:10 -0500
-In-Reply-To: <95f094fa-0121-f848-d210-05614b91429e@amd.com>
-Content-Language: en-US
+Received: from mail-it0-f66.google.com ([209.85.214.66]:43074 "EHLO
+        mail-it0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755441AbdKGMyU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Nov 2017 07:54:20 -0500
+Received: by mail-it0-f66.google.com with SMTP id k70so6370901itk.0
+        for <linux-mmc@vger.kernel.org>; Tue, 07 Nov 2017 04:54:19 -0800 (PST)
+In-Reply-To: <20171107070259.11664-2-js07.lee@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Shah, Nehal-bakulchandra" <Nehal-Bakulchandra.shah@amd.com>, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, "S-k, Shyam-sundar" <Shyam-sundar.S-k@amd.com>, sandeep.singh@amd.com, Nitesh-kumar.Agrawal@amd.com
+To: Jungseung Lee <js07.lee@samsung.com>
+Cc: Christoph Hellwig <hch@lst.de>, js07.lee@gmail.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 03/11/17 11:23, Shah, Nehal-bakulchandra wrote:
-> Hi Adrian 
-> 
-> On 10/19/2017 3:32 PM, Adrian Hunter wrote:
->> On 12/10/17 13:32, Shah, Nehal-bakulchandra wrote:
->>> From: Shah Nehal-Bakulchandra <Nehal-bakulchandra.Shah@amd.com>
->>>
->>> This patch supports HS400 for AMD upcoming emmc 5.0 controller.The
->>> HS400 and HS200 mode requires hardware work around also. This patch
->>> adds the quirks for the same.
->>>
->>> Signed-off-by: Shah Nehal-Bakulchandra <Nehal-bakulchandra.Shah@amd.com>
->>
->> This is V2 of this patch.  In future, please put the version number in the
->> subject and describe the changes since the previous version in a cover email
->> or after the "---" below.
->>
->>> ---
->>>  drivers/mmc/core/mmc.c        |  6 +--
->>>  drivers/mmc/host/sdhci-acpi.c | 89 +++++++++++++++++++++++++++++++++++++++++++
->>>  drivers/mmc/host/sdhci.c      |  3 +-
->>>  drivers/mmc/host/sdhci.h      |  5 +++
->>>  include/linux/mmc/host.h      |  6 +++
->>>  5 files changed, 105 insertions(+), 4 deletions(-)
->>>
->>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->>> index 4ffea14..7bf3736 100644
->>> --- a/drivers/mmc/core/mmc.c
->>> +++ b/drivers/mmc/core/mmc.c
->>> @@ -1164,7 +1164,7 @@ static int mmc_select_hs400(struct mmc_card *card)
->>>  
->>>  	/* Set host controller to HS timing */
->>>  	mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
->>> -
->>> +	host->ios.transition = HS200_TO_HS_TO_HS400;
->>>  	/* Reduce frequency to HS frequency */
->>>  	max_dtr = card->ext_csd.hs_max_dtr;
->>>  	mmc_set_clock(host, max_dtr);
->>> @@ -1196,7 +1196,7 @@ static int mmc_select_hs400(struct mmc_card *card)
->>>  			 mmc_hostname(host), err);
->>>  		return err;
->>>  	}
->>> -
->>> +	host->ios.transition = SWITCHING_TO_HS400;
->>>  	/* Set host controller to HS400 timing and frequency */
->>>  	mmc_set_timing(host, MMC_TIMING_MMC_HS400);
->>>  	mmc_set_bus_speed(card);
->>> @@ -1204,7 +1204,7 @@ static int mmc_select_hs400(struct mmc_card *card)
->>>  	err = mmc_switch_status(card);
->>>  	if (err)
->>>  		goto out_err;
->>> -
->>> +	host->ios.transition = SWITCHED_TO_HS400;
->>>  	return 0;
->>>  
->>>  out_err:
->>> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
->>> index ac678e9..a3456be 100644
->>> --- a/drivers/mmc/host/sdhci-acpi.c
->>> +++ b/drivers/mmc/host/sdhci-acpi.c
->>> @@ -89,6 +89,47 @@ static inline bool sdhci_acpi_flag(struct sdhci_acpi_host *c, unsigned int flag)
->>>  	return c->slot && (c->slot->flags & flag);
->>>  }
->>>  
->>> + /*AMD Driver Strength function*/
->>
->> This comment is redundant - please omit it.
->>
->>> +
->>> +static int amd_select_drive_strength(struct mmc_card *card,
->>> +				     unsigned int max_dtr, int host_drv,
->>> +				     int card_drv, int *drv_type)
->>> +{
->>> +	return MMC_SET_DRIVER_TYPE_A;
->>> +}
->>> +
->>> +static void sdhci_acpi_amd_hs400_dll(struct sdhci_host *host)
->>> +{
->>> +	/*AMD Platform requires dll setting*/
->>> +	sdhci_writel(host, 0x40003210, SDHCI_AMD_REST_DLL_REGISTER);
->>> +	usleep_range(10, 20);
->>> +	sdhci_writel(host, 0x40033210, SDHCI_AMD_REST_DLL_REGISTER);
->>> +}
->>> +
->>> +/*
->>> + * For AMD Platform it is required to disable the tuning
->>> + * bit first controller to bring to HS Mode from HS200
->>> + * mode, later enable to tune to HS400 mode.
->>> + */
->>> +
->>
->> Why can't you hook ->set_ios() e.g.
->>
->> 	host->mmc_host_ops.set_ios = amd_set_ios;
->>
->> static void amd_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->> {
->> 	sdhci_set_ios(mmc, ios);
->>
->> 	if (ios->timing == MMC_TIMING_MMC_HS400) {
->> 		sdhci_writew(host, 0x80, SDHCI_HOST_CONTROL2);
->> 		sdhci_acpi_amd_hs400_dll(host);
->> 	}
->> }
->>
->>
->>> +static void sdhci_amd_set_hs400_transition(struct sdhci_host *host)
->>> +{
->>> +	switch (host->mmc->ios.transition) {
->>> +	case HS200_TO_HS_TO_HS400:
->>> +		sdhci_writew(host, 0x9, SDHCI_HOST_CONTROL2);
->>
->> Maybe better to just change the bits in SDHCI_HOST_CONTROL2 that you need
->> and leave the other bits alone.
->>
->> We know when we do tuning whether it is for HS400, so maybe you could hook
->> ->execute_tuning() for this e.g.
->>
->> 	host->mmc_host_ops.execute_tuning = amd_execute_tuning;
->>
->> static int amd_execute_tuning(struct mmc_host *mmc, u32 opcode)
->> {
->> 	bool hs400_tuning = host->flags & SDHCI_HS400_TUNING;
->> 	int err;
->>
->> 	err = sdhci_execute_tuning(mmc, opcode);
->> 	if (err)
->> 		return err;
->>
->> 	/* Disable tuning during switch to HS400 */
->> 	if (hs400_tuning)
->> 		sdhci_writew(host, 0x9, SDHCI_HOST_CONTROL2);
->> }
->>
->>> +		break;
->>> +
->>> +	case SWITCHING_TO_HS400:
->>
->> This case is always ios->timing == MMC_TIMING_MMC_HS400 so you don't need
->> the ios.transition for this
->>
->>> +		sdhci_writew(host, 0x80, SDHCI_HOST_CONTROL2);
->>
->> Maybe better to just change the bits in SDHCI_HOST_CONTROL2 that you need
->> and leave the other bits alone.
->>
->>> +		sdhci_acpi_amd_hs400_dll(host);
->>> +		break;
->>> +
->>> +	case SWITCHED_TO_HS400:
->>> +	default:
->>> +		break;
->>> +	}
->>> +}
->>> +
-> Liked your suggestions and tried but doesn't work.Because The changes are required in transition phase i.e in case of switching to HS400 just after "mmc_set_timing(card->host, MMC_TIMING_MMC_HS)" call so these changes are intermediate as we have issue with the IP. Now Hooking with execute_tuning makes the functionality non working as execute_tuning gets called before. So is there any better way to handle intermediate transition? Can you please suggest. So instead of using execute_tuning hook up can be done in set_ios however still it requires the transition cases. Something like this
+On 7 November 2017 at 08:02, Jungseung Lee <js07.lee@samsung.com> wrote:
+> Some devices return zeroes on read to unmmaped logical blocks.
+> Use this behavior to implement REQ_OP_WRITES_ZEROES.
+>
+> Send TRIM operation for the non-partial erase at a convenient time.
 
-But what about below:
+This doesn't explain the problem enough.
 
-> 
-> static void amd_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> {
->         struct sdhci_host *host = mmc_priv(mmc);
+What does unmapped logical blocks means for an eMMC device? Isn't all
+logical blocks that is accessible being mapped?
 
-	unsigned old_timing = host->timing;
+Please elaborate for my understanding.
 
->         sdhci_set_ios(mmc, ios);
-> 
-> 
->        switch (host->mmc->ios.transition) {
->        case HS200_TO_HS_TO_HS400:
+Also, there is no need to split patch1 and patch2, those can go together.
 
-	if (old_timing == MMC_TIMING_MMC_HS200 &&
-	    ios->timing == MMC_TIMING_SD_HS)
+And finally, please follow Christoph's suggestion, so we can see when
+this new quirk is going to be used.
 
-If you want to know if this is the HS400 case, you could record whether the
-SDHCI_HS400_TUNING flag was set during tuning.
+Kind regards
+Uffe
 
->        {
->            printk(KERN_ERR "Sandeep transition HS200 to HS to HS400 \n");
->            sdhci_writew(host, 0x9, SDHCI_HOST_CONTROL2);
->        }
->        break;
-> 
->        case SWITCHING_TO_HS400:
-
-	if (old_timing != MMC_TIMING_MMC_HS400 &&
-	    ios->timing == MMC_TIMING_MMC_HS400)
-
->        {
-> 
->         printk(KERN_ERR "Sandeep transition Switching to HS400 \n");
->                sdhci_writew(host, 0x80, SDHCI_HOST_CONTROL2);
-> 
->                sdhci_acpi_amd_hs400_dll(host);
->        }
->        break;
-> 
->        case SWITCHED_TO_HS400:
->        default:
->        break;
->        }
-> 
-> }
+>
+> Signed-off-by: Jungseung Lee <js07.lee@samsung.com>
+> ---
+>  drivers/mmc/core/block.c | 8 ++++++--
+>  drivers/mmc/core/queue.c | 4 ++++
+>  2 files changed, 10 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index ea80ff4..41c4ec1 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -1273,9 +1273,10 @@ static void mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
+>         struct mmc_card *card = md->queue.card;
+>         unsigned int from, nr, arg;
+>         int err = 0, type = MMC_BLK_DISCARD;
+> +       int force_trim = (req_op(req) == REQ_OP_WRITE_ZEROES);
+>         blk_status_t status = BLK_STS_OK;
+>
+> -       if (!mmc_can_erase(card)) {
+> +       if (!mmc_can_erase(card) || (!mmc_can_trim(card) && force_trim)) {
+>                 status = BLK_STS_NOTSUPP;
+>                 goto fail;
+>         }
+> @@ -1283,7 +1284,9 @@ static void mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
+>         from = blk_rq_pos(req);
+>         nr = blk_rq_sectors(req);
+>
+> -       if (mmc_can_discard(card))
+> +       if (force_trim)
+> +               arg = MMC_TRIM_ARG;
+> +       else if (mmc_can_discard(card))
+>                 arg = MMC_DISCARD_ARG;
+>         else if (mmc_can_trim(card))
+>                 arg = MMC_TRIM_ARG;
+> @@ -2032,6 +2035,7 @@ void mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+>                                 mmc_blk_issue_rw_rq(mq, NULL);
+>                         mmc_blk_issue_drv_op(mq, req);
+>                         break;
+> +               case REQ_OP_WRITE_ZEROES:
+>                 case REQ_OP_DISCARD:
+>                         /*
+>                          * Complete ongoing async transfer before issuing
+> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+> index 4f33d27..dc95b3a 100644
+> --- a/drivers/mmc/core/queue.c
+> +++ b/drivers/mmc/core/queue.c
+> @@ -144,6 +144,10 @@ static void mmc_queue_setup_discard(struct request_queue *q,
+>         /* granularity must not be greater than max. discard */
+>         if (card->pref_erase > max_discard)
+>                 q->limits.discard_granularity = 0;
+> +
+> +       if (card->quirks & MMC_QUIRK_UNMAPPED_ZEROES)
+> +               blk_queue_max_write_zeroes_sectors(q, UINT_MAX);
+> +
+>         if (mmc_can_secure_erase_trim(card))
+>                 queue_flag_set_unlocked(QUEUE_FLAG_SECERASE, q);
+>  }
+> --
+> 2.10.1
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
