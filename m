@@ -1,30 +1,30 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: tmio: Replace msleep() of 20ms or less with usleep_range()
-Date: Tue, 7 Nov 2017 14:23:40 +0100
-Message-ID: <CAPDyKFqQZXvtf2CJ2qxrWNjKuAof-RbE21Mrni9rBTJKZpJVwA@mail.gmail.com>
-References: <20171103093628.13108-1-horms+renesas@verge.net.au>
+Subject: Re: [PATCH v3 1/2] dt-bindings: sdhci-fujitsu: document cmd-dat-delay property
+Date: Tue, 7 Nov 2017 14:23:46 +0100
+Message-ID: <CAPDyKFq51ZqkBt7y18Jw49ggJbANLnCLur5S6mX=J=h2shZtiw@mail.gmail.com>
+References: <20171106152923.32114-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <20171103093628.13108-1-horms+renesas@verge.net.au>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Simon Horman <horms+renesas@verge.net.au>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Magnus Damm <magnus.damm@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-it0-f68.google.com ([209.85.214.68]:46616 "EHLO
+        mail-it0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933608AbdKGNXs (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Nov 2017 08:23:48 -0500
+Received: by mail-it0-f68.google.com with SMTP id f187so2379917itb.1
+        for <linux-mmc@vger.kernel.org>; Tue, 07 Nov 2017 05:23:47 -0800 (PST)
+In-Reply-To: <20171106152923.32114-1-ard.biesheuvel@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
 
-On 3 November 2017 at 10:36, Simon Horman <horms+renesas@verge.net.au> wrote:
-> From: Masaharu Hayakawa <masaharu.hayakawa.ry@renesas.com>
+On 6 November 2017 at 16:29, Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
+> Document a new boolean property of the sdhci-fujitsu binding that
+> indicates whether the CMD_DAT_DELAY bit needs to be set in the
+> F_SDH30_ESD_CONTROL register.
 >
-> As documented in Documentation/timers/timers-howto.txt
-> as follows, replace msleep() with usleep_range().
->
-> msleep(1~20) may not do what the caller intends, and
-> will often sleep longer (~20 ms actual sleep for any
-> value given in the 1~20ms range). In many cases this
-> is not the desired behavior.
->
-> Signed-off-by: Masaharu Hayakawa <masaharu.hayakawa.ry@renesas.com>
-> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+> Acked-by: Rob Herring <robh@kernel.org>
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
 Thanks, applied for next!
 
@@ -32,79 +32,25 @@ Kind regards
 Uffe
 
 > ---
-> v1 [Simon Horman]
-> * Extend to cover all instances of msleep(<20);
+> v3: added Rob's ack
+> v2: use vendor prefix
 >
-> v0 [Masaharu Hayakawa]
+>  Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt | 2 ++
+>  1 file changed, 2 insertions(+)
 >
-> This patch is based on a patch in BSP v3.5.6
-> ---
->  drivers/mmc/host/tmio_mmc_core.c | 14 +++++++-------
->  1 file changed, 7 insertions(+), 7 deletions(-)
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt b/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
+> index de2c53cff4f1..3ee9263adf73 100644
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
+> @@ -15,6 +15,8 @@ Required properties:
+>  Optional properties:
+>  - vqmmc-supply: phandle to the regulator device tree node, mentioned
+>    as the VCCQ/VDD_IO supply in the eMMC/SD specs.
+> +- fujitsu,cmd-dat-delay-select: boolean property indicating that this host
+> +  requires the CMD_DAT_DELAY control to be enabled.
 >
-> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-> index 4c8198f8b04a..583bf3262df5 100644
-> --- a/drivers/mmc/host/tmio_mmc_core.c
-> +++ b/drivers/mmc/host/tmio_mmc_core.c
-> @@ -167,11 +167,11 @@ static void tmio_mmc_clk_start(struct tmio_mmc_host *host)
+>  Example:
 >
->         /* HW engineers overrode docs: no sleep needed on R-Car2+ */
->         if (!(host->pdata->flags & TMIO_MMC_MIN_RCAR2))
-> -               msleep(10);
-> +               usleep_range(10000, 11000);
->
->         if (host->pdata->flags & TMIO_MMC_HAVE_HIGH_REG) {
->                 sd_ctrl_write16(host, CTL_CLK_AND_WAIT_CTL, 0x0100);
-> -               msleep(10);
-> +               usleep_range(10000, 11000);
->         }
->  }
->
-> @@ -179,7 +179,7 @@ static void tmio_mmc_clk_stop(struct tmio_mmc_host *host)
->  {
->         if (host->pdata->flags & TMIO_MMC_HAVE_HIGH_REG) {
->                 sd_ctrl_write16(host, CTL_CLK_AND_WAIT_CTL, 0x0000);
-> -               msleep(10);
-> +               usleep_range(10000, 11000);
->         }
->
->         sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, ~CLK_CTL_SCLKEN &
-> @@ -187,7 +187,7 @@ static void tmio_mmc_clk_stop(struct tmio_mmc_host *host)
->
->         /* HW engineers overrode docs: no sleep needed on R-Car2+ */
->         if (!(host->pdata->flags & TMIO_MMC_MIN_RCAR2))
-> -               msleep(10);
-> +               usleep_range(10000, 11000);
->  }
->
->  static void tmio_mmc_set_clock(struct tmio_mmc_host *host,
-> @@ -219,7 +219,7 @@ static void tmio_mmc_set_clock(struct tmio_mmc_host *host,
->                         sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
->         sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, clk & CLK_CTL_DIV_MASK);
->         if (!(host->pdata->flags & TMIO_MMC_MIN_RCAR2))
-> -               msleep(10);
-> +               usleep_range(10000, 11000);
->
->         tmio_mmc_clk_start(host);
->  }
-> @@ -230,11 +230,11 @@ static void tmio_mmc_reset(struct tmio_mmc_host *host)
->         sd_ctrl_write16(host, CTL_RESET_SD, 0x0000);
->         if (host->pdata->flags & TMIO_MMC_HAVE_HIGH_REG)
->                 sd_ctrl_write16(host, CTL_RESET_SDIO, 0x0000);
-> -       msleep(10);
-> +       usleep_range(10000, 11000);
->         sd_ctrl_write16(host, CTL_RESET_SD, 0x0001);
->         if (host->pdata->flags & TMIO_MMC_HAVE_HIGH_REG)
->                 sd_ctrl_write16(host, CTL_RESET_SDIO, 0x0001);
-> -       msleep(10);
-> +       usleep_range(10000, 11000);
->
->         if (host->pdata->flags & TMIO_MMC_SDIO_IRQ) {
->                 sd_ctrl_write16(host, CTL_SDIO_IRQ_MASK, host->sdio_irq_mask);
 > --
 > 2.11.0
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
