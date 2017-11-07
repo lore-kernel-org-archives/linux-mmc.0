@@ -1,7 +1,7 @@
 From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: [PATCH 2/6] mmc: tmio: set tmio_mmc_host to driver data
-Date: Tue,  7 Nov 2017 17:09:28 +0900
-Message-ID: <1510042172-27220-3-git-send-email-yamada.masahiro@socionext.com>
+Subject: [PATCH 6/6] mmc: tmio: move mmc_of_parse() out of tmio_mmc_host_probe()
+Date: Tue,  7 Nov 2017 17:09:32 +0900
+Message-ID: <1510042172-27220-7-git-send-email-yamada.masahiro@socionext.com>
 References: <1510042172-27220-1-git-send-email-yamada.masahiro@socionext.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1510042172-27220-1-git-send-email-yamada.masahiro@socionext.com>
@@ -10,88 +10,66 @@ To: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org
 Cc: Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-The remove, suspend, resume hooks need tmio_mmc_host.  It is tedious
-to get mmc_host from the driver_data and pass it to mmc_priv().
-We can directly set tmio_mmc_host to driver data to clean up the code.
+mmc_of_parse() parses various DT properties and sets capability flags
+accordingly.  However, drivers have no chance to run platform init
+code depending on such flags because mmc_of_parse() is called from
+tmio_mmc_host_probe().
+
+Move mmc_of_parse() out of tmio_mmc_host_probe() so that drivers can
+handle capabilities before mmc_add_host().
 
 Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 ---
 
- drivers/mmc/host/renesas_sdhi_core.c |  3 +--
- drivers/mmc/host/tmio_mmc.c          | 12 ++++--------
- drivers/mmc/host/tmio_mmc_core.c     |  8 +++-----
- 3 files changed, 8 insertions(+), 15 deletions(-)
+ drivers/mmc/host/renesas_sdhi_core.c | 4 ++++
+ drivers/mmc/host/tmio_mmc.c          | 4 ++++
+ drivers/mmc/host/tmio_mmc_core.c     | 4 ----
+ 3 files changed, 8 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index 4b7a4e2..23c250e 100644
+index 7bb0252..4658fb5 100644
 --- a/drivers/mmc/host/renesas_sdhi_core.c
 +++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -656,8 +656,7 @@ EXPORT_SYMBOL_GPL(renesas_sdhi_probe);
+@@ -526,6 +526,10 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+ 	if (!host)
+ 		return -ENOMEM;
  
- int renesas_sdhi_remove(struct platform_device *pdev)
- {
--	struct mmc_host *mmc = platform_get_drvdata(pdev);
--	struct tmio_mmc_host *host = mmc_priv(mmc);
-+	struct tmio_mmc_host *host = platform_get_drvdata(pdev);
- 
- 	tmio_mmc_host_remove(host);
- 
++	ret = mmc_of_parse(host->mmc);
++	if (ret)
++		goto efree;
++
+ 	if (of_data) {
+ 		mmc_data->flags |= of_data->tmio_flags;
+ 		mmc_data->ocr_mask = of_data->tmio_ocr_mask;
 diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
-index 64b7e9f..ccfbc15 100644
+index ccfbc15..87052b3 100644
 --- a/drivers/mmc/host/tmio_mmc.c
 +++ b/drivers/mmc/host/tmio_mmc.c
-@@ -128,15 +128,11 @@ static int tmio_mmc_probe(struct platform_device *pdev)
- static int tmio_mmc_remove(struct platform_device *pdev)
- {
- 	const struct mfd_cell *cell = mfd_get_cell(pdev);
--	struct mmc_host *mmc = platform_get_drvdata(pdev);
-+	struct tmio_mmc_host *host = platform_get_drvdata(pdev);
+@@ -96,6 +96,10 @@ static int tmio_mmc_probe(struct platform_device *pdev)
+ 	if (!host)
+ 		goto cell_disable;
  
--	if (mmc) {
--		struct tmio_mmc_host *host = mmc_priv(mmc);
--
--		tmio_mmc_host_remove(host);
--		if (cell->disable)
--			cell->disable(pdev);
--	}
-+	tmio_mmc_host_remove(host);
-+	if (cell->disable)
-+		cell->disable(pdev);
++	ret = mmc_of_parse(host->mmc);
++	if (ret)
++		goto host_free;
++
+ 	/* SD control register space size is 0x200, 0x400 for bus_shift=1 */
+ 	host->bus_shift = resource_size(res) >> 10;
  
- 	return 0;
- }
 diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-index 9c4e619..9b8ef73 100644
+index 695b4f4..c2f759b 100644
 --- a/drivers/mmc/host/tmio_mmc_core.c
 +++ b/drivers/mmc/host/tmio_mmc_core.c
-@@ -1190,7 +1190,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
- 		return ret;
+@@ -1188,10 +1188,6 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
+ 	if (IS_ERR(_host->ctl))
+ 		return PTR_ERR(_host->ctl);
  
+-	ret = mmc_of_parse(mmc);
+-	if (ret < 0)
+-		return ret;
+-
  	_host->pdata = pdata;
--	platform_set_drvdata(pdev, mmc);
-+	platform_set_drvdata(pdev, _host);
+ 	platform_set_drvdata(pdev, _host);
  
- 	_host->set_pwr = pdata->set_pwr;
- 	_host->set_clk_div = pdata->set_clk_div;
-@@ -1347,8 +1347,7 @@ EXPORT_SYMBOL_GPL(tmio_mmc_host_remove);
- #ifdef CONFIG_PM
- int tmio_mmc_host_runtime_suspend(struct device *dev)
- {
--	struct mmc_host *mmc = dev_get_drvdata(dev);
--	struct tmio_mmc_host *host = mmc_priv(mmc);
-+	struct tmio_mmc_host *host = dev_get_drvdata(dev);
- 
- 	tmio_mmc_disable_mmc_irqs(host, TMIO_MASK_ALL);
- 
-@@ -1368,8 +1367,7 @@ static bool tmio_mmc_can_retune(struct tmio_mmc_host *host)
- 
- int tmio_mmc_host_runtime_resume(struct device *dev)
- {
--	struct mmc_host *mmc = dev_get_drvdata(dev);
--	struct tmio_mmc_host *host = mmc_priv(mmc);
-+	struct tmio_mmc_host *host = dev_get_drvdata(dev);
- 
- 	tmio_mmc_reset(host);
- 	tmio_mmc_clk_enable(host);
 -- 
 2.7.4
