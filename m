@@ -1,7 +1,7 @@
 From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: [PATCH 3/6] mmc: tmio: use devm_ioremap_resource() instead of devm_ioremap()
-Date: Tue,  7 Nov 2017 17:09:29 +0900
-Message-ID: <1510042172-27220-4-git-send-email-yamada.masahiro@socionext.com>
+Subject: [PATCH 4/6] mmc: tmio: move mmc_host_ops to struct tmio_mmc_host from static data
+Date: Tue,  7 Nov 2017 17:09:30 +0900
+Message-ID: <1510042172-27220-5-git-send-email-yamada.masahiro@socionext.com>
 References: <1510042172-27220-1-git-send-email-yamada.masahiro@socionext.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1510042172-27220-1-git-send-email-yamada.masahiro@socionext.com>
@@ -10,42 +10,69 @@ To: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org
 Cc: Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-The TMIO core misses to request_mem_region().  devm_ioremap_resource()
-takes care of it and makes the code cleaner.
+Currently, tmio_mmc_ops is static data and tmio_mmc_host_probe()
+updates some hooks in the static data.  This is a problem when
+two or more instances call tmio_mmc_host_probe() and each of them
+requests to use its own card_busy/start_signal_voltage_switch.
+
+We can borrow a solution from sdhci_alloc_host().  Copy the whole
+ops structure to host->mmc_host_ops, then override the hooks in
+malloc'ed data.  Constify tmio_mmc_ops since it is a template ops
+used by default.
 
 Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 ---
 
- drivers/mmc/host/tmio_mmc_core.c | 10 +++-------
- 1 file changed, 3 insertions(+), 7 deletions(-)
+ drivers/mmc/host/tmio_mmc.h      | 1 +
+ drivers/mmc/host/tmio_mmc_core.c | 9 +++++----
+ 2 files changed, 6 insertions(+), 4 deletions(-)
 
+diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+index 3e6ff89..b251f1c 100644
+--- a/drivers/mmc/host/tmio_mmc.h
++++ b/drivers/mmc/host/tmio_mmc.h
+@@ -134,6 +134,7 @@ struct tmio_mmc_host {
+ 	struct mmc_request      *mrq;
+ 	struct mmc_data         *data;
+ 	struct mmc_host         *mmc;
++	struct mmc_host_ops     mmc_host_ops;
+ 
+ 	/* Callbacks for clock / power control */
+ 	void (*set_pwr)(struct platform_device *host, int state);
 diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-index 9b8ef73..0db6cac 100644
+index 0db6cac..3c84044 100644
 --- a/drivers/mmc/host/tmio_mmc_core.c
 +++ b/drivers/mmc/host/tmio_mmc_core.c
-@@ -1182,8 +1182,9 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
- 		_host->write16_hook = NULL;
+@@ -1098,7 +1098,7 @@ static int tmio_multi_io_quirk(struct mmc_card *card,
+ 	return blk_size;
+ }
  
- 	res_ctl = platform_get_resource(pdev, IORESOURCE_MEM, 0);
--	if (!res_ctl)
--		return -EINVAL;
-+	_host->ctl = devm_ioremap_resource(&pdev->dev, res_ctl);
-+	if (IS_ERR(_host->ctl))
-+		return PTR_ERR(_host->ctl);
+-static struct mmc_host_ops tmio_mmc_ops = {
++static const struct mmc_host_ops tmio_mmc_ops = {
+ 	.request	= tmio_mmc_request,
+ 	.set_ios	= tmio_mmc_set_ios,
+ 	.get_ro         = tmio_mmc_get_ro,
+@@ -1155,6 +1155,8 @@ tmio_mmc_host_alloc(struct platform_device *pdev)
+ 	host = mmc_priv(mmc);
+ 	host->mmc = mmc;
+ 	host->pdev = pdev;
++	host->mmc_host_ops = tmio_mmc_ops;
++	mmc->ops = &host->mmc_host_ops;
  
- 	ret = mmc_of_parse(mmc);
- 	if (ret < 0)
-@@ -1199,11 +1200,6 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
+ 	return host;
+ }
+@@ -1200,10 +1202,9 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
  	if (ret < 0)
  		return ret;
  
--	_host->ctl = devm_ioremap(&pdev->dev,
--				  res_ctl->start, resource_size(res_ctl));
--	if (!_host->ctl)
--		return -ENOMEM;
--
- 	tmio_mmc_ops.card_busy = _host->card_busy;
- 	tmio_mmc_ops.start_signal_voltage_switch =
+-	tmio_mmc_ops.card_busy = _host->card_busy;
+-	tmio_mmc_ops.start_signal_voltage_switch =
++	_host->mmc_host_ops.card_busy = _host->card_busy;
++	_host->mmc_host_ops.start_signal_voltage_switch =
  		_host->start_signal_voltage_switch;
+-	mmc->ops = &tmio_mmc_ops;
+ 
+ 	mmc->caps |= MMC_CAP_4_BIT_DATA | pdata->capabilities;
+ 	mmc->caps2 |= pdata->capabilities2;
 -- 
 2.7.4
