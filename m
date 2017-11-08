@@ -1,56 +1,70 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: [PATCH 1/3] mmc: tmio: move mmc_gpio_request_cd() before mmc_add_host()
-Date: Wed,  8 Nov 2017 19:16:58 +0900
-Message-ID: <1510136220-31853-2-git-send-email-yamada.masahiro@socionext.com>
-References: <1510136220-31853-1-git-send-email-yamada.masahiro@socionext.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1510136220-31853-1-git-send-email-yamada.masahiro@socionext.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org
-Cc: Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V13 04/10] mmc: block: Add CQE support
+Date: Wed, 8 Nov 2017 15:20:21 +0200
+Message-ID: <24ce2510-0b66-a9ff-ffd0-b04b095f7d1a@intel.com>
+References: <1509715220-31885-1-git-send-email-adrian.hunter@intel.com>
+ <1509715220-31885-5-git-send-email-adrian.hunter@intel.com>
+ <CACRpkda8znQ=jAN-b_SCMzSJU11PZwEyw6dzOE07T-2hf9T6XA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <CACRpkda8znQ=jAN-b_SCMzSJU11PZwEyw6dzOE07T-2hf9T6XA@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-block-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-mmc@vger.kernel.org
 
-Drivers do not need to call mmc_gpiod_request_cd_irq() explicitly
-because mmc_start_host() calls it.  To make it work, cd_gpio must
-be set before mmc_add_host().
+On 08/11/17 11:00, Linus Walleij wrote:
+> On Fri, Nov 3, 2017 at 2:20 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> 
+>> @@ -2188,11 +2327,18 @@ enum mmc_issued mmc_blk_mq_issue_rq(struct mmc_queue *mq, struct request *req)
+>>                         return MMC_REQ_FAILED_TO_START;
+>>                 }
+>>                 return MMC_REQ_FINISHED;
+>> +       case MMC_ISSUE_DCMD:
+>>         case MMC_ISSUE_ASYNC:
+>>                 switch (req_op(req)) {
+>> +               case REQ_OP_FLUSH:
+>> +                       ret = mmc_blk_cqe_issue_flush(mq, req);
+>> +                       break;
+>>                 case REQ_OP_READ:
+>>                 case REQ_OP_WRITE:
+>> -                       ret = mmc_blk_mq_issue_rw_rq(mq, req);
+>> +                       if (mq->use_cqe)
+>> +                               ret = mmc_blk_cqe_issue_rw_rq(mq, req);
+>> +                       else
+>> +                               ret = mmc_blk_mq_issue_rw_rq(mq, req);
+>>                         break;
+>>                 default:
+>>                         WARN_ON_ONCE(1);
+> 
+> This and other bits gives me the feeling CQE is now actually ONLY
+> working on the MQ path.
 
-Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
----
+I was not allowed to support non-mq.
 
- drivers/mmc/host/tmio_mmc_core.c | 14 ++++++--------
- 1 file changed, 6 insertions(+), 8 deletions(-)
+> 
+> That is good. We only add new functionality on the MQ path,
+> yay!
+> 
+> But this fact (only abailable iff MQ==true) should at least be
+> mentioned in the commit message I think?
 
-diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-index 2abc6bc..7c0e952 100644
---- a/drivers/mmc/host/tmio_mmc_core.c
-+++ b/drivers/mmc/host/tmio_mmc_core.c
-@@ -1201,6 +1201,12 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
- 	if (ret < 0)
- 		return ret;
- 
-+	if (pdata->flags & TMIO_MMC_USE_GPIO_CD) {
-+		ret = mmc_gpio_request_cd(mmc, pdata->cd_gpio, 0);
-+		if (ret)
-+			return ret;
-+	}
-+
- 	mmc->caps |= MMC_CAP_4_BIT_DATA | pdata->capabilities;
- 	mmc->caps2 |= pdata->capabilities2;
- 	mmc->max_segs = pdata->max_segs ? : 32;
-@@ -1296,14 +1302,6 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
- 
- 	dev_pm_qos_expose_latency_limit(&pdev->dev, 100);
- 
--	if (pdata->flags & TMIO_MMC_USE_GPIO_CD) {
--		ret = mmc_gpio_request_cd(mmc, pdata->cd_gpio, 0);
--		if (ret)
--			goto remove_host;
--
--		mmc_gpiod_request_cd_irq(mmc);
--	}
--
- 	return 0;
- 
- remove_host:
--- 
-2.7.4
+Why?  CQE is MQ only.
+
+> 
+> So why not ditch the old block layer or at least make MQ default?
+
+CQE is MQ only.
+
+> 
+> When you keep it like this people have to reconfigure
+> their kernel to enable MQ before they see the benefits of MQ+CQE
+> combined, I think that should rather be the default experience.
+
+Not at all.  I guess you are confusing the legacy mmc with CQE.  CQE is not
+a layer on top of legacy mmc.  It is an alternative to legacy mmc.  CQE
+does not sit on top of the legacy mmc blk-mq support.  You don't have to
+enable legacy mmc blk-mq support to use CQE.
