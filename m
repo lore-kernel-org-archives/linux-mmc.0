@@ -1,59 +1,64 @@
 From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: [PATCH] mmc: slot-gpio: call gpiod_to_irq() only when MMC_CAP_NEEDS_POLL is unset
-Date: Wed,  8 Nov 2017 15:34:54 +0900
-Message-ID: <1510122894-9296-1-git-send-email-yamada.masahiro@socionext.com>
+Subject: Re: [PATCH 2/2] mmc: renesas_shci: remove wrong depends on to enable
+ compile test
+Date: Wed, 8 Nov 2017 15:41:02 +0900
+Message-ID: <CAK7LNAT5vQcmDhuhjU0pVw9Fjfea_9N6GocaeU0vYQo_6CZpwQ@mail.gmail.com>
+References: <1510041442-15176-1-git-send-email-yamada.masahiro@socionext.com> <1510041442-15176-3-git-send-email-yamada.masahiro@socionext.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from conuserg-08.nifty.com ([210.131.2.75]:64401 "EHLO
-        conuserg-08.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751910AbdKHGgJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Nov 2017 01:36:09 -0500
+Received: from conssluserg-03.nifty.com ([210.131.2.82]:56109 "EHLO
+        conssluserg-03.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753294AbdKHGmI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Nov 2017 01:42:08 -0500
+In-Reply-To: <1510041442-15176-3-git-send-email-yamada.masahiro@socionext.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Masahiro Yamada <yamada.masahiro@socionext.com>, Adrian Hunter <adrian.hunter@intel.com>, linux-kernel@vger.kernel.org, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
 
-It is not efficient to call gpiod_to_irq() regardless the flag, then
-ignore the returned irq if MMC_CAP_NEEDS_POLL.
+2017-11-07 16:57 GMT+09:00 Masahiro Yamada <yamada.masahiro@socionext.com>:
+> ARCH_RENESAS is a stronger condition than (ARM || ARM64).
+> If ARCH_RENESAS is enabled, (ARM || ARM64) is met as well.
+>
+> What is worse, the first depends on line prevents COMPILE_TEST from
+> enabling this driver.  It should be removed.
+>
+> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+> ---
 
-Move gpiod_to_irq() after the MMC_CAP_NEEDS_POLL check.
+A typo in the subject.
 
-Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
----
+renesas_shci  ->  renesas_sdhc
 
- drivers/mmc/core/slot-gpio.c | 14 ++++++--------
- 1 file changed, 6 insertions(+), 8 deletions(-)
 
-diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
-index 863f1db..f7c6e05 100644
---- a/drivers/mmc/core/slot-gpio.c
-+++ b/drivers/mmc/core/slot-gpio.c
-@@ -121,20 +121,18 @@ EXPORT_SYMBOL(mmc_gpio_request_ro);
- void mmc_gpiod_request_cd_irq(struct mmc_host *host)
- {
- 	struct mmc_gpio *ctx = host->slot.handler_priv;
--	int ret, irq;
-+	int irq = -EINVAL;
-+	int ret;
- 
- 	if (host->slot.cd_irq >= 0 || !ctx || !ctx->cd_gpio)
- 		return;
- 
--	irq = gpiod_to_irq(ctx->cd_gpio);
--
- 	/*
--	 * Even if gpiod_to_irq() returns a valid IRQ number, the platform might
--	 * still prefer to poll, e.g., because that IRQ number is already used
--	 * by another unit and cannot be shared.
-+	 * Do not use IRQ if the platform prefers to poll, e.g., because that
-+	 * IRQ number is already used by another unit and cannot be shared.
- 	 */
--	if (irq >= 0 && host->caps & MMC_CAP_NEEDS_POLL)
--		irq = -EINVAL;
-+	if (!(host->caps & MMC_CAP_NEEDS_POLL))
-+		irq = gpiod_to_irq(ctx->cd_gpio);
- 
- 	if (irq >= 0) {
- 		if (!ctx->cd_gpio_isr)
+
+
+>  drivers/mmc/host/Kconfig | 1 -
+>  1 file changed, 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 5420da5..5bc6388 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -581,7 +581,6 @@ config MMC_TMIO
+>
+>  config MMC_SDHI
+>         tristate "Renesas SDHI SD/SDIO controller support"
+> -       depends on SUPERH || ARM || ARM64
+>         depends on SUPERH || ARCH_RENESAS || COMPILE_TEST
+>         select MMC_TMIO_CORE
+>         help
+> --
+> 2.7.4
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
 -- 
-2.7.4
-
+Best Regards
+Masahiro Yamada
