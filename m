@@ -1,93 +1,59 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3 2/2] sdhci-fujitsu: add support for setting the
- CMD_DAT_DELAY attribute
-Date: Tue, 7 Nov 2017 14:23:51 +0100
-Message-ID: <CAPDyKFrpTM8CvKeMMbkrLk5hz0QKKy4mAW3KpLnEtDQPa3e8Ww@mail.gmail.com>
-References: <20171106152923.32114-1-ard.biesheuvel@linaro.org> <20171106152923.32114-2-ard.biesheuvel@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20171106152923.32114-2-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Subject: [PATCH] mmc: slot-gpio: call gpiod_to_irq() only when MMC_CAP_NEEDS_POLL is unset
+Date: Wed,  8 Nov 2017 15:34:54 +0900
+Message-ID: <1510122894-9296-1-git-send-email-yamada.masahiro@socionext.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from conuserg-08.nifty.com ([210.131.2.75]:64401 "EHLO
+        conuserg-08.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751910AbdKHGgJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Nov 2017 01:36:09 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Masahiro Yamada <yamada.masahiro@socionext.com>, Adrian Hunter <adrian.hunter@intel.com>, linux-kernel@vger.kernel.org, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
 
-On 6 November 2017 at 16:29, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> The Socionext SynQuacer SoC inherits this IP from Fujitsu, but
-> requires the F_SDH30_CMD_DAT_DELAY bit to be set in the
-> F_SDH30_ESD_CONTROL control register. So set this bit if the
-> DT node has the 'fujitsu,cmd-dat-delay-select' property.
->
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+It is not efficient to call gpiod_to_irq() regardless the flag, then
+ignore the returned irq if MMC_CAP_NEEDS_POLL.
 
-Thanks, applied for next!
+Move gpiod_to_irq() after the MMC_CAP_NEEDS_POLL check.
 
-Kind regards
-Uffe
+Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+---
 
-> ---
-> v3: don't reorder struct members to reduce padding
->     remove pr_info() and simplify conditional assignment
-> v2: no change
->
->  drivers/mmc/host/sdhci_f_sdh30.c | 14 ++++++++++++++
->  1 file changed, 14 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci_f_sdh30.c b/drivers/mmc/host/sdhci_f_sdh30.c
-> index 111b66f5439b..04ca0d33a521 100644
-> --- a/drivers/mmc/host/sdhci_f_sdh30.c
-> +++ b/drivers/mmc/host/sdhci_f_sdh30.c
-> @@ -13,6 +13,7 @@
->  #include <linux/err.h>
->  #include <linux/delay.h>
->  #include <linux/module.h>
-> +#include <linux/property.h>
->  #include <linux/clk.h>
->
->  #include "sdhci-pltfm.h"
-> @@ -47,6 +48,7 @@ struct f_sdhost_priv {
->         struct clk *clk;
->         u32 vendor_hs200;
->         struct device *dev;
-> +       bool enable_cmd_dat_delay;
->  };
->
->  static void sdhci_f_sdh30_soft_voltage_switch(struct sdhci_host *host)
-> @@ -84,10 +86,19 @@ static unsigned int sdhci_f_sdh30_get_min_clock(struct sdhci_host *host)
->
->  static void sdhci_f_sdh30_reset(struct sdhci_host *host, u8 mask)
->  {
-> +       struct f_sdhost_priv *priv = sdhci_priv(host);
-> +       u32 ctl;
-> +
->         if (sdhci_readw(host, SDHCI_CLOCK_CONTROL) == 0)
->                 sdhci_writew(host, 0xBC01, SDHCI_CLOCK_CONTROL);
->
->         sdhci_reset(host, mask);
-> +
-> +       if (priv->enable_cmd_dat_delay) {
-> +               ctl = sdhci_readl(host, F_SDH30_ESD_CONTROL);
-> +               ctl |= F_SDH30_CMD_DAT_DELAY;
-> +               sdhci_writel(host, ctl, F_SDH30_ESD_CONTROL);
-> +       }
->  }
->
->  static const struct sdhci_ops sdhci_f_sdh30_ops = {
-> @@ -126,6 +137,9 @@ static int sdhci_f_sdh30_probe(struct platform_device *pdev)
->         host->quirks2 = SDHCI_QUIRK2_SUPPORT_SINGLE |
->                         SDHCI_QUIRK2_TUNING_WORK_AROUND;
->
-> +       priv->enable_cmd_dat_delay = device_property_read_bool(dev,
-> +                                               "fujitsu,cmd-dat-delay-select");
-> +
->         ret = mmc_of_parse(host->mmc);
->         if (ret)
->                 goto err;
-> --
-> 2.11.0
->
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+ drivers/mmc/core/slot-gpio.c | 14 ++++++--------
+ 1 file changed, 6 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
+index 863f1db..f7c6e05 100644
+--- a/drivers/mmc/core/slot-gpio.c
++++ b/drivers/mmc/core/slot-gpio.c
+@@ -121,20 +121,18 @@ EXPORT_SYMBOL(mmc_gpio_request_ro);
+ void mmc_gpiod_request_cd_irq(struct mmc_host *host)
+ {
+ 	struct mmc_gpio *ctx = host->slot.handler_priv;
+-	int ret, irq;
++	int irq = -EINVAL;
++	int ret;
+ 
+ 	if (host->slot.cd_irq >= 0 || !ctx || !ctx->cd_gpio)
+ 		return;
+ 
+-	irq = gpiod_to_irq(ctx->cd_gpio);
+-
+ 	/*
+-	 * Even if gpiod_to_irq() returns a valid IRQ number, the platform might
+-	 * still prefer to poll, e.g., because that IRQ number is already used
+-	 * by another unit and cannot be shared.
++	 * Do not use IRQ if the platform prefers to poll, e.g., because that
++	 * IRQ number is already used by another unit and cannot be shared.
+ 	 */
+-	if (irq >= 0 && host->caps & MMC_CAP_NEEDS_POLL)
+-		irq = -EINVAL;
++	if (!(host->caps & MMC_CAP_NEEDS_POLL))
++		irq = gpiod_to_irq(ctx->cd_gpio);
+ 
+ 	if (irq >= 0) {
+ 		if (!ctx->cd_gpio_isr)
+-- 
+2.7.4
+
