@@ -1,118 +1,120 @@
-From: Jungseung Lee <js07.lee@gmail.com>
-Subject: Re: [PATCH 2/2] mmc : implement REQ_OP_WRITE_ZEROES
-Date: Wed, 8 Nov 2017 23:25:26 +0900
-Message-ID: <CAPP0e=O2p68jewHDpG0nJtFitrVmpWHO1DU0f32LxF22Hsbapw@mail.gmail.com>
-References: <CGME20171107070328eucas1p12d563f31022e62a4ac6daac26fb0b81d@eucas1p1.samsung.com>
- <20171107070259.11664-1-js07.lee@samsung.com> <20171107070259.11664-2-js07.lee@samsung.com>
- <CAPDyKFpj+rfuhXAd5sB9nxfyRU4i6eUF=V3d1bm9RKqi1ZwXVw@mail.gmail.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: More TMIO MMC variant. What is a preferred name?
+Date: Wed, 8 Nov 2017 18:53:20 +0100
+Message-ID: <20171108175320.wnq3d2x7lmpaya7s@ninjato>
+References: <CAK7LNARB+-SzgNF+7KsG80o4Q=TZsEeyMLjR2Ve0bXCrQ5tc0w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="dpieyx7twuryuz7d"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pg0-f65.google.com ([74.125.83.65]:55331 "EHLO
-        mail-pg0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751495AbdKHOZ2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Nov 2017 09:25:28 -0500
-Received: by mail-pg0-f65.google.com with SMTP id 15so1958145pgc.12
-        for <linux-mmc@vger.kernel.org>; Wed, 08 Nov 2017 06:25:28 -0800 (PST)
-In-Reply-To: <CAPDyKFpj+rfuhXAd5sB9nxfyRU4i6eUF=V3d1bm9RKqi1ZwXVw@mail.gmail.com>
+Received: from sauhun.de ([88.99.104.3]:33526 "EHLO pokefinder.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751344AbdKHRxV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 8 Nov 2017 12:53:21 -0500
+Content-Disposition: inline
+In-Reply-To: <CAK7LNARB+-SzgNF+7KsG80o4Q=TZsEeyMLjR2Ve0bXCrQ5tc0w@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jungseung Lee <js07.lee@samsung.com>, Christoph Hellwig <hch@lst.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms+renesas@verge.net.au>, linux-mmc <linux-mmc@vger.kernel.org>, Marek Vasut <marek.vasut+renesas@gmail.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 
-On Tue, Nov 7, 2017 at 9:54 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 7 November 2017 at 08:02, Jungseung Lee <js07.lee@samsung.com> wrote:
->> Some devices return zeroes on read to unmmaped logical blocks.
->> Use this behavior to implement REQ_OP_WRITES_ZEROES.
->>
->> Send TRIM operation for the non-partial erase at a convenient time.
->
-> This doesn't explain the problem enough.
->
-> What does unmapped logical blocks means for an eMMC device? Isn't all
-> logical blocks that is accessible being mapped?
->
-Right. There is no unmapped logical block.
-Only unmapped host address space on eMMC device exist in the spec.
 
-"The contents of a write block where the trim function has been applied
-shall be '0' or '1' depending on different memory technology"
+--dpieyx7twuryuz7d
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-I'd like to fix the name as trimmed block. Is it more clear and reasonable?
+Yamada-san,
 
-> Please elaborate for my understanding.
->
-> Also, there is no need to split patch1 and patch2, those can go together.
->
-> And finally, please follow Christoph's suggestion, so we can see when
-> this new quirk is going to be used.
->
-OK, I'll send new patch. thanks for the review.
+Thank you for the detailed write up. I hope we find a good solution,
+too.
 
-> Kind regards
-> Uffe
->
->>
->> Signed-off-by: Jungseung Lee <js07.lee@samsung.com>
->> ---
->>  drivers/mmc/core/block.c | 8 ++++++--
->>  drivers/mmc/core/queue.c | 4 ++++
->>  2 files changed, 10 insertions(+), 2 deletions(-)
->>
->> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
->> index ea80ff4..41c4ec1 100644
->> --- a/drivers/mmc/core/block.c
->> +++ b/drivers/mmc/core/block.c
->> @@ -1273,9 +1273,10 @@ static void mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
->>         struct mmc_card *card = md->queue.card;
->>         unsigned int from, nr, arg;
->>         int err = 0, type = MMC_BLK_DISCARD;
->> +       int force_trim = (req_op(req) == REQ_OP_WRITE_ZEROES);
->>         blk_status_t status = BLK_STS_OK;
->>
->> -       if (!mmc_can_erase(card)) {
->> +       if (!mmc_can_erase(card) || (!mmc_can_trim(card) && force_trim)) {
->>                 status = BLK_STS_NOTSUPP;
->>                 goto fail;
->>         }
->> @@ -1283,7 +1284,9 @@ static void mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
->>         from = blk_rq_pos(req);
->>         nr = blk_rq_sectors(req);
->>
->> -       if (mmc_can_discard(card))
->> +       if (force_trim)
->> +               arg = MMC_TRIM_ARG;
->> +       else if (mmc_can_discard(card))
->>                 arg = MMC_DISCARD_ARG;
->>         else if (mmc_can_trim(card))
->>                 arg = MMC_TRIM_ARG;
->> @@ -2032,6 +2035,7 @@ void mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
->>                                 mmc_blk_issue_rw_rq(mq, NULL);
->>                         mmc_blk_issue_drv_op(mq, req);
->>                         break;
->> +               case REQ_OP_WRITE_ZEROES:
->>                 case REQ_OP_DISCARD:
->>                         /*
->>                          * Complete ongoing async transfer before issuing
->> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
->> index 4f33d27..dc95b3a 100644
->> --- a/drivers/mmc/core/queue.c
->> +++ b/drivers/mmc/core/queue.c
->> @@ -144,6 +144,10 @@ static void mmc_queue_setup_discard(struct request_queue *q,
->>         /* granularity must not be greater than max. discard */
->>         if (card->pref_erase > max_discard)
->>                 q->limits.discard_granularity = 0;
->> +
->> +       if (card->quirks & MMC_QUIRK_UNMAPPED_ZEROES)
->> +               blk_queue_max_write_zeroes_sectors(q, UINT_MAX);
->> +
->>         if (mmc_can_secure_erase_trim(card))
->>                 queue_flag_set_unlocked(QUEUE_FLAG_SECERASE, q);
->>  }
->> --
->> 2.10.1
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I've got a few questions first:
+
+> I know this is a big churn, but I'd like
+> to propose renaming like follows in a long run:
+>=20
+> tmio_mmc_core.c      ->  mnsd.c              Core code of this IP
+> tmio_mmc.c           ->  mnsd-tmio.c         For MMC integrated in TMIO M=
+FD
+> renesas_sdhi_core.c  ->  mnsd-renesas-core.c For Renesas SoCs
+> (or, mnsd-sdhi-core.c or whatever. please choose any favorite name)
+>                          mnsd-uniphier.c     For Socionext UniPhier SoCS
+
+Do you want to just change the filenames or the function names as well?
+
+> I see more strangeness.  Those mmc drivers must include <linux/mfd/tmio.h=
+>,
+> but TMIO is unrelated to Renesas, Socionext.
+> We need to fix the interface.
+
+What kind of fix do you have in mind? Changing filenames or change
+everything which has TMIO or tmio in the name?
+
+> If I can get consensus, I am very happy to
+> contribute for better organizing this IP variants.
+>=20
+> CCing Marek Vasut, a contractor working for Renesas.
+> He and I are also working on SD card driver in U-Boot.
+> I want to introduce correct and systematic naming scheme
+> for a long-run maintainability and applicable to other projects
+> since Linux has a big influence in OSS.
+
+Can you explain a bit more why the long-run maintainability gets improved?
+I don't really see that yet and will try to explain below.
+
+Disclaimer: I am contracted by Renesas but the views I am going to share
+come from my personal point of view as the maintainer of this driver.
+
+Preface: For me, names are just names. We have a few examples where the
+"historical" names are kept because they just happened to be first. The
+AT24 driver supports way more than only Atmel chips, and all the STMPE
+have kept their names, although the SoC is called MXS these days. Which
+also proves that names are just names, IP cores and companies are easily
+renamed.
+
+If we can rename things easily to match reality, I am not against it. In
+this case, I wonder, though, if the rename is really easy? If you just
+change the filenames, then we got a strange mix, because the function
+names are still using tmio_*. If you change those function names, too,
+then the resulting change is very intrusive. It could introduce errors,
+looking up git history becomes a tad more tedious, and users may get
+confused what is what. Seeing all this, I don't think such a change
+would be helpful for the long-run maintainability.
+
+I'd be much happier with a paragraph at the beginning of the "TMIO" core
+file (or maybe all "TMIO" files, I don't care much) explaining the
+situation like you did with your mail. But keeping the code largely
+as-is.
+
+I am open for discussion, though.
+
+Again, this is my personal view. We will discuss things internally, too,
+to see if there is also an "official" statement from Renesas.
+
+Thanks,
+
+   Wolfram
+
+
+--dpieyx7twuryuz7d
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAloDRIwACgkQFA3kzBSg
+KbZ9HQ/+JDyzNSnxjYpH8LMbSUQEzYktcOUNNwHH6MPYupaLWj0a1QXZK/z3biAy
+Cveuj3yXPVsEePGmjf8ip/0JfDDGYd9bXheDRyPptVjlBcPLtjLeMc6R0XnuId/O
+oN/OIa0+uqhNWP62WrzrN/O7Y4+5OGuK0+KeUNwor2YogXGPqDPbG48H+efNH2QD
+kf+lIYkPnfUqEqURC4+5y1BEWlPgQJigsoPPQRDq8JPuwhsoQzFFANfqtwMjtN+3
+Yam+GKMVLCKpjDTciySylWBlf97Plzfvk6OlEAvc9QQJ3qAbSWdzzFoqxIx4P85s
+Pm1FIexJ43yV6xBeOGRY/JgkCdQmRXHRvWevdHFDzcmhwC7gbK2juEvI55+tWPC9
+wHpwry/zZ7dGiTPulW81hYy3ZS+T4xJJIdgfvcVU5Om0ERyZsblG1KSAiyumJZoJ
+TalSJ/Vr+GPgDVtqpTCzSdy1oj/crW4emp4GbsR39glIhMmeMQtaqDLS9nIDVU8f
+nWoXxgJ33ADKs7lpPuSNYg+0uMyriKZGlbgTf0BcyYwmxE10Wq0zUeyJbGhR1l6a
+1aGn8iL0FkKMQFAOBw1NxbHR2gHOgFFUeMv2TD8FZHBOrfeg3N2lWo952ti+Bk21
+U46Finvwi79c4E0gCjrs0UoFuVgYkv+CyCzT75yqbOsA3kYesUk=
+=diQx
+-----END PGP SIGNATURE-----
+
+--dpieyx7twuryuz7d--
