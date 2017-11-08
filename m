@@ -1,52 +1,58 @@
-From: Boris Brezillon <boris.brezillon@free-electrons.com>
-Subject: Re: [PATCH v5 0/9] mtd: sharpslpart partition parser
-Date: Wed, 8 Nov 2017 08:54:46 +0100
-Message-ID: <20171108085446.718a2ff5@bbrezillon>
-References: <1502743720-28672-1-git-send-email-andrea.adami@gmail.com>
-        <20170821221339.70cfcfb7@bbrezillon>
-        <87pobmoz8n.fsf@belgarion.home>
-        <CAAQYJAv8bNrxJ_ESgC0fOAdry7i5mstzgQ3P74q1D=C-xsJprg@mail.gmail.com>
-        <20170824114631.089d2628@bbrezillon>
-        <87inh6pw9e.fsf@belgarion.home>
-        <87376uezjs.fsf@belgarion.home>
+From: <yinbo.zhu@nxp.com>
+Subject: [PATCH v1] mmc: sdhci-of-esdhc: fix eMMC couldn't work after kexec
+Date: Wed, 8 Nov 2017 15:40:09 +0800
+Message-ID: <20171108074009.28914-1-yinbo.zhu@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <87376uezjs.fsf@belgarion.home>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Robert Jarzmik <robert.jarzmik@free.fr>
-Cc: Andrea Adami <andrea.adami@gmail.com>, linux-mtd@lists.infradead.org, Wolfram Sang <wsa+renesas@sang-engineering.com>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, Richard Weinberger <richard@nod.at>, linux-mmc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, Haojian Zhuang <haojian.zhuang@gmail.com>, linux-kernel@vger.kernel.org, Marek Vasut <marek.vasut@gmail.com>, linux-arm-kernel@lists.infradead.org, Cyrille Pitchen <cyrille.pitchen@wedev4u.fr>, Lee Jones <lee.jones@linaro.org>, Brian Norris <computersforpeace@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Linus Walleij <linus.walleij@linaro.org>, Daniel Mack <daniel@zonque.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-sn1nam01on0060.outbound.protection.outlook.com ([104.47.32.60]:43424
+        "EHLO NAM01-SN1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751318AbdKHH61 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 8 Nov 2017 02:58:27 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: yinbo.zhu@nxp.com, Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc@vger.kernel.org, yangbo.lu@nxp.com
 
-On Sun, 08 Oct 2017 11:53:11 +0200
-Robert Jarzmik <robert.jarzmik@free.fr> wrote:
+From: "yinbo.zhu" <yinbo.zhu@nxp.com>
 
-> Robert Jarzmik <robert.jarzmik@free.fr> writes:
-> 
-> > Boris Brezillon <boris.brezillon@free-electrons.com> writes:
-> >  
-> >> Hi Robert,
-> >> Wait a bit before applying. I think patches 6 to 9 have a dependency on
-> >> patch 1 (it's not a build dependency, but NAND partitioning might be
-> >> wrong if you apply them), so we need to sync. What release is
-> >> pxa/for-next targeting? If it's 4.15 I can apply patch 1 just after
-> >> 4.14-rc1 is out and provide an immutable branch for you to pull in
-> >> pxa/for-next.  
-> >
-> > Hi Boris,
-> >
-> > It's targeting 4.15 right now. And we can do as you like, either an immutable
-> > branch, or I wait to include these patches into my pxa/for-next until you give
-> > me your go, it's as you like.  
-> 
-> Hi Boris,
-> 
-> So what's the status about the sync, should I pick the patches, and have the
-> others make it to your for-next branch ?
+The bit eSDHC_TBCTL[TB_EN] couldn't be reset by eSDHC_SYSCTL[RSTA] which is
+used to reset for all. The driver should make sure it's cleared before card
+initialization, otherwise the initialization would fail.
 
-It's been merged in l2-mtd/master (our -next branch) which is
-targeting 4.15. Unfortunately we didn't create a topic branch, which
-means you'll have to wait 4.15-rc1 before pushing patches 6 to 9 if you
-want avoid regressions. Anyway, I guess it's already too late to send
-PRs to arm-soc for 4.15.
+Signed-off-by: yinbo.zhu <yinbo.zhu@nxp.com>
+---
+ drivers/mmc/host/sdhci-esdhc.h    | 1 +
+ drivers/mmc/host/sdhci-of-esdhc.c | 3 +++
+ 2 files changed, 4 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
+index dfa58f8b8dfa..74b42dbc1ef6 100644
+--- a/drivers/mmc/host/sdhci-esdhc.h
++++ b/drivers/mmc/host/sdhci-esdhc.h
+@@ -60,6 +60,7 @@
+ /* Tuning Block Control Register */
+ #define ESDHC_TBCTL			0x120
+ #define ESDHC_TB_EN			0x00000004
++#define ESDHC_TB_DIS			(0x1 << 2)
+ 
+ /* Control Register for DMA transfer */
+ #define ESDHC_DMA_SYSCTL		0x40c
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index d96a057a7db8..b89de8e55330 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -783,6 +783,9 @@ static void esdhc_init(struct platform_device *pdev, struct sdhci_host *host)
+ 	pltfm_host = sdhci_priv(host);
+ 	esdhc = sdhci_pltfm_priv(pltfm_host);
+ 
++	val = sdhci_readl(host, ESDHC_TBCTL);
++	val &= ~ESDHC_TB_DIS;
++	sdhci_writel(host, val, ESDHC_TBCTL);
+ 	host_ver = sdhci_readw(host, SDHCI_HOST_VERSION);
+ 	esdhc->vendor_ver = (host_ver & SDHCI_VENDOR_VER_MASK) >>
+ 			     SDHCI_VENDOR_VER_SHIFT;
+-- 
+2.14.1
+
