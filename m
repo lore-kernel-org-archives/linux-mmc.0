@@ -1,64 +1,52 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: Re: [PATCH 2/2] mmc: renesas_shci: remove wrong depends on to enable
- compile test
-Date: Wed, 8 Nov 2017 15:41:02 +0900
-Message-ID: <CAK7LNAT5vQcmDhuhjU0pVw9Fjfea_9N6GocaeU0vYQo_6CZpwQ@mail.gmail.com>
-References: <1510041442-15176-1-git-send-email-yamada.masahiro@socionext.com> <1510041442-15176-3-git-send-email-yamada.masahiro@socionext.com>
+From: Boris Brezillon <boris.brezillon@free-electrons.com>
+Subject: Re: [PATCH v5 0/9] mtd: sharpslpart partition parser
+Date: Wed, 8 Nov 2017 08:54:46 +0100
+Message-ID: <20171108085446.718a2ff5@bbrezillon>
+References: <1502743720-28672-1-git-send-email-andrea.adami@gmail.com>
+        <20170821221339.70cfcfb7@bbrezillon>
+        <87pobmoz8n.fsf@belgarion.home>
+        <CAAQYJAv8bNrxJ_ESgC0fOAdry7i5mstzgQ3P74q1D=C-xsJprg@mail.gmail.com>
+        <20170824114631.089d2628@bbrezillon>
+        <87inh6pw9e.fsf@belgarion.home>
+        <87376uezjs.fsf@belgarion.home>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from conssluserg-03.nifty.com ([210.131.2.82]:56109 "EHLO
-        conssluserg-03.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753294AbdKHGmI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Nov 2017 01:42:08 -0500
-In-Reply-To: <1510041442-15176-3-git-send-email-yamada.masahiro@socionext.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <87376uezjs.fsf@belgarion.home>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Robert Jarzmik <robert.jarzmik@free.fr>
+Cc: Andrea Adami <andrea.adami@gmail.com>, linux-mtd@lists.infradead.org, Wolfram Sang <wsa+renesas@sang-engineering.com>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, Richard Weinberger <richard@nod.at>, linux-mmc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, Haojian Zhuang <haojian.zhuang@gmail.com>, linux-kernel@vger.kernel.org, Marek Vasut <marek.vasut@gmail.com>, linux-arm-kernel@lists.infradead.org, Cyrille Pitchen <cyrille.pitchen@wedev4u.fr>, Lee Jones <lee.jones@linaro.org>, Brian Norris <computersforpeace@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Linus Walleij <linus.walleij@linaro.org>, Daniel Mack <daniel@zonque.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc <linux-mmc@vger.kernel.org>
-Cc: Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
 
-2017-11-07 16:57 GMT+09:00 Masahiro Yamada <yamada.masahiro@socionext.com>:
-> ARCH_RENESAS is a stronger condition than (ARM || ARM64).
-> If ARCH_RENESAS is enabled, (ARM || ARM64) is met as well.
->
-> What is worse, the first depends on line prevents COMPILE_TEST from
-> enabling this driver.  It should be removed.
->
-> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
-> ---
+On Sun, 08 Oct 2017 11:53:11 +0200
+Robert Jarzmik <robert.jarzmik@free.fr> wrote:
 
-A typo in the subject.
+> Robert Jarzmik <robert.jarzmik@free.fr> writes:
+> 
+> > Boris Brezillon <boris.brezillon@free-electrons.com> writes:
+> >  
+> >> Hi Robert,
+> >> Wait a bit before applying. I think patches 6 to 9 have a dependency on
+> >> patch 1 (it's not a build dependency, but NAND partitioning might be
+> >> wrong if you apply them), so we need to sync. What release is
+> >> pxa/for-next targeting? If it's 4.15 I can apply patch 1 just after
+> >> 4.14-rc1 is out and provide an immutable branch for you to pull in
+> >> pxa/for-next.  
+> >
+> > Hi Boris,
+> >
+> > It's targeting 4.15 right now. And we can do as you like, either an immutable
+> > branch, or I wait to include these patches into my pxa/for-next until you give
+> > me your go, it's as you like.  
+> 
+> Hi Boris,
+> 
+> So what's the status about the sync, should I pick the patches, and have the
+> others make it to your for-next branch ?
 
-renesas_shci  ->  renesas_sdhc
-
-
-
-
->  drivers/mmc/host/Kconfig | 1 -
->  1 file changed, 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 5420da5..5bc6388 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -581,7 +581,6 @@ config MMC_TMIO
->
->  config MMC_SDHI
->         tristate "Renesas SDHI SD/SDIO controller support"
-> -       depends on SUPERH || ARM || ARM64
->         depends on SUPERH || ARCH_RENESAS || COMPILE_TEST
->         select MMC_TMIO_CORE
->         help
-> --
-> 2.7.4
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
--- 
-Best Regards
-Masahiro Yamada
+It's been merged in l2-mtd/master (our -next branch) which is
+targeting 4.15. Unfortunately we didn't create a topic branch, which
+means you'll have to wait 4.15-rc1 before pushing patches 6 to 9 if you
+want avoid regressions. Anyway, I guess it's already too late to send
+PRs to arm-soc for 4.15.
