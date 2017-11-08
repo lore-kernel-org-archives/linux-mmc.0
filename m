@@ -1,120 +1,73 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: More TMIO MMC variant. What is a preferred name?
-Date: Wed, 8 Nov 2017 18:53:20 +0100
-Message-ID: <20171108175320.wnq3d2x7lmpaya7s@ninjato>
-References: <CAK7LNARB+-SzgNF+7KsG80o4Q=TZsEeyMLjR2Ve0bXCrQ5tc0w@mail.gmail.com>
+Subject: Re: [PATCH 0/2] mmc: renesas_sdhi: clean-up and fix CONFIG stuff for
+ renesas_sdhi
+Date: Wed, 8 Nov 2017 18:58:00 +0100
+Message-ID: <20171108175800.rd36g5mrldzqdmpe@ninjato>
+References: <1510041442-15176-1-git-send-email-yamada.masahiro@socionext.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="dpieyx7twuryuz7d"
+        protocol="application/pgp-signature"; boundary="g2paxnjzyb7uyjcy"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([88.99.104.3]:33526 "EHLO pokefinder.org"
+Received: from sauhun.de ([88.99.104.3]:33568 "EHLO pokefinder.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751344AbdKHRxV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 8 Nov 2017 12:53:21 -0500
+        id S1751168AbdKHR6C (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 8 Nov 2017 12:58:02 -0500
 Content-Disposition: inline
-In-Reply-To: <CAK7LNARB+-SzgNF+7KsG80o4Q=TZsEeyMLjR2Ve0bXCrQ5tc0w@mail.gmail.com>
+In-Reply-To: <1510041442-15176-1-git-send-email-yamada.masahiro@socionext.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms+renesas@verge.net.au>, linux-mmc <linux-mmc@vger.kernel.org>, Marek Vasut <marek.vasut+renesas@gmail.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 
 
---dpieyx7twuryuz7d
+--g2paxnjzyb7uyjcy
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-Yamada-san,
+On Tue, Nov 07, 2017 at 04:57:20PM +0900, Masahiro Yamada wrote:
 
-Thank you for the detailed write up. I hope we find a good solution,
-too.
+Ulf, Yamada-san:
 
-I've got a few questions first:
+All of Yamada-san's patches look good from a glimpse. However, I am
+currently swamped with work and will probably need 1-2 weeks for review.
+I am sorry about that! However, since 4.16 is far away enough, I don't
+think this will cause a miss for the next merge window. I'll try to
+review it earlier but please bear with me.
 
-> I know this is a big churn, but I'd like
-> to propose renaming like follows in a long run:
 >=20
-> tmio_mmc_core.c      ->  mnsd.c              Core code of this IP
-> tmio_mmc.c           ->  mnsd-tmio.c         For MMC integrated in TMIO M=
-FD
-> renesas_sdhi_core.c  ->  mnsd-renesas-core.c For Renesas SoCs
-> (or, mnsd-sdhi-core.c or whatever. please choose any favorite name)
->                          mnsd-uniphier.c     For Socionext UniPhier SoCS
-
-Do you want to just change the filenames or the function names as well?
-
-> I see more strangeness.  Those mmc drivers must include <linux/mfd/tmio.h=
->,
-> but TMIO is unrelated to Renesas, Socionext.
-> We need to fix the interface.
-
-What kind of fix do you have in mind? Changing filenames or change
-everything which has TMIO or tmio in the name?
-
-> If I can get consensus, I am very happy to
-> contribute for better organizing this IP variants.
 >=20
-> CCing Marek Vasut, a contractor working for Renesas.
-> He and I are also working on SD card driver in U-Boot.
-> I want to introduce correct and systematic naming scheme
-> for a long-run maintainability and applicable to other projects
-> since Linux has a big influence in OSS.
+>=20
+> Masahiro Yamada (2):
+>   mmc: renesas_sdhi: consilidate DMAC CONFIG options
+>   mmc: renesas_shci: remove wrong depends on to enable compile test
+>=20
+>  drivers/mmc/host/Kconfig  | 5 ++---
+>  drivers/mmc/host/Makefile | 8 ++------
+>  2 files changed, 4 insertions(+), 9 deletions(-)
+>=20
+> --=20
+> 2.7.4
+>=20
 
-Can you explain a bit more why the long-run maintainability gets improved?
-I don't really see that yet and will try to explain below.
-
-Disclaimer: I am contracted by Renesas but the views I am going to share
-come from my personal point of view as the maintainer of this driver.
-
-Preface: For me, names are just names. We have a few examples where the
-"historical" names are kept because they just happened to be first. The
-AT24 driver supports way more than only Atmel chips, and all the STMPE
-have kept their names, although the SoC is called MXS these days. Which
-also proves that names are just names, IP cores and companies are easily
-renamed.
-
-If we can rename things easily to match reality, I am not against it. In
-this case, I wonder, though, if the rename is really easy? If you just
-change the filenames, then we got a strange mix, because the function
-names are still using tmio_*. If you change those function names, too,
-then the resulting change is very intrusive. It could introduce errors,
-looking up git history becomes a tad more tedious, and users may get
-confused what is what. Seeing all this, I don't think such a change
-would be helpful for the long-run maintainability.
-
-I'd be much happier with a paragraph at the beginning of the "TMIO" core
-file (or maybe all "TMIO" files, I don't care much) explaining the
-situation like you did with your mail. But keeping the code largely
-as-is.
-
-I am open for discussion, though.
-
-Again, this is my personal view. We will discuss things internally, too,
-to see if there is also an "official" statement from Renesas.
-
-Thanks,
-
-   Wolfram
-
-
---dpieyx7twuryuz7d
+--g2paxnjzyb7uyjcy
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAloDRIwACgkQFA3kzBSg
-KbZ9HQ/+JDyzNSnxjYpH8LMbSUQEzYktcOUNNwHH6MPYupaLWj0a1QXZK/z3biAy
-Cveuj3yXPVsEePGmjf8ip/0JfDDGYd9bXheDRyPptVjlBcPLtjLeMc6R0XnuId/O
-oN/OIa0+uqhNWP62WrzrN/O7Y4+5OGuK0+KeUNwor2YogXGPqDPbG48H+efNH2QD
-kf+lIYkPnfUqEqURC4+5y1BEWlPgQJigsoPPQRDq8JPuwhsoQzFFANfqtwMjtN+3
-Yam+GKMVLCKpjDTciySylWBlf97Plzfvk6OlEAvc9QQJ3qAbSWdzzFoqxIx4P85s
-Pm1FIexJ43yV6xBeOGRY/JgkCdQmRXHRvWevdHFDzcmhwC7gbK2juEvI55+tWPC9
-wHpwry/zZ7dGiTPulW81hYy3ZS+T4xJJIdgfvcVU5Om0ERyZsblG1KSAiyumJZoJ
-TalSJ/Vr+GPgDVtqpTCzSdy1oj/crW4emp4GbsR39glIhMmeMQtaqDLS9nIDVU8f
-nWoXxgJ33ADKs7lpPuSNYg+0uMyriKZGlbgTf0BcyYwmxE10Wq0zUeyJbGhR1l6a
-1aGn8iL0FkKMQFAOBw1NxbHR2gHOgFFUeMv2TD8FZHBOrfeg3N2lWo952ti+Bk21
-U46Finvwi79c4E0gCjrs0UoFuVgYkv+CyCzT75yqbOsA3kYesUk=
-=diQx
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAloDRagACgkQFA3kzBSg
+KbZe3w/+MBR4ph4k0nh3+mRP7ho30un97c553yTA9OXolKMCJQoYLDPGtbUUyJge
+N6NJHxE4w2MWq3veheBsIC816kuTXzpIWQzZJM/HODdUG/ks8vT5fMX5Ko7hK784
+wbH3j8Q9j8pUOUnPMogn7wxMMLRgVYrBZYJgaOFz+DOvo6KXMugXFqR8ltNeaa5L
+jnrAukhE9+zzko56WpAcO4/OnHZ0nlBLHRhAr8jYhgfnYOGl4vvzQNvRbOhhZkhM
+fbH0c2j5h5OxgJZRpxg6VwO+Z3xnbPeJzsgxFW9JuoST4AGQ4gyh2lHk0Ap2DKg5
+mfA6WE4pPN/bwf5+yd/+pE6DQuGiY1Ot+b5n3gTbeYhnTBk/wzovrH26HhdwquBT
+xa0Btje1GodSM2t2qfXLYlm3Fc+kAGsg/KEV8SVqXURQtbCbFk7icVetrs4GBDLk
+6L9PBaFqmKiCT/qnqJGwfCj/YJrDeHoFn790vpGuaK3gG/IS9jBEt5ZNjt6MRjbW
+m/k2KwSwVWy9RjQPTxp5V6F4taQJRgTOaSURE1COJkUw/WEyrk4fr9aVsobYMCkl
+koCtwPeadgI4bFze5j9jlQAMJnAmZfLHc5ImGkBW4/GABEUsF8Hjyt1HWtViWVB1
+GpE7NZy18jwTQfPUn3+QnpQzaloHUPyZmbJmPkEj1WuK3BAH0gY=
+=DRVa
 -----END PGP SIGNATURE-----
 
---dpieyx7twuryuz7d--
+--g2paxnjzyb7uyjcy--
