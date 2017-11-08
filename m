@@ -1,190 +1,118 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V13 05/10] mmc: cqhci: support for command queue enabled
- host
-Date: Wed, 8 Nov 2017 16:14:55 +0200
-Message-ID: <a9eb7e73-31b4-6ff6-4a0d-1416c938039b@intel.com>
-References: <1509715220-31885-1-git-send-email-adrian.hunter@intel.com>
- <1509715220-31885-6-git-send-email-adrian.hunter@intel.com>
- <CACRpkdYY_a3fuayN3z5xn952t=YYJ8LA6wqXDtd=7ea03a187w@mail.gmail.com>
+From: Jungseung Lee <js07.lee@gmail.com>
+Subject: Re: [PATCH 2/2] mmc : implement REQ_OP_WRITE_ZEROES
+Date: Wed, 8 Nov 2017 23:25:26 +0900
+Message-ID: <CAPP0e=O2p68jewHDpG0nJtFitrVmpWHO1DU0f32LxF22Hsbapw@mail.gmail.com>
+References: <CGME20171107070328eucas1p12d563f31022e62a4ac6daac26fb0b81d@eucas1p1.samsung.com>
+ <20171107070259.11664-1-js07.lee@samsung.com> <20171107070259.11664-2-js07.lee@samsung.com>
+ <CAPDyKFpj+rfuhXAd5sB9nxfyRU4i6eUF=V3d1bm9RKqi1ZwXVw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CACRpkdYY_a3fuayN3z5xn952t=YYJ8LA6wqXDtd=7ea03a187w@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pg0-f65.google.com ([74.125.83.65]:55331 "EHLO
+        mail-pg0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751495AbdKHOZ2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Nov 2017 09:25:28 -0500
+Received: by mail-pg0-f65.google.com with SMTP id 15so1958145pgc.12
+        for <linux-mmc@vger.kernel.org>; Wed, 08 Nov 2017 06:25:28 -0800 (PST)
+In-Reply-To: <CAPDyKFpj+rfuhXAd5sB9nxfyRU4i6eUF=V3d1bm9RKqi1ZwXVw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jungseung Lee <js07.lee@samsung.com>, Christoph Hellwig <hch@lst.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 08/11/17 11:22, Linus Walleij wrote:
-> On Fri, Nov 3, 2017 at 2:20 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> 
->> From: Venkat Gopalakrishnan <venkatg@codeaurora.org>
+On Tue, Nov 7, 2017 at 9:54 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 7 November 2017 at 08:02, Jungseung Lee <js07.lee@samsung.com> wrote:
+>> Some devices return zeroes on read to unmmaped logical blocks.
+>> Use this behavior to implement REQ_OP_WRITES_ZEROES.
 >>
->> This patch adds CMDQ support for command-queue compatible
->> hosts.
+>> Send TRIM operation for the non-partial erase at a convenient time.
+>
+> This doesn't explain the problem enough.
+>
+> What does unmapped logical blocks means for an eMMC device? Isn't all
+> logical blocks that is accessible being mapped?
+>
+Right. There is no unmapped logical block.
+Only unmapped host address space on eMMC device exist in the spec.
+
+"The contents of a write block where the trim function has been applied
+shall be '0' or '1' depending on different memory technology"
+
+I'd like to fix the name as trimmed block. Is it more clear and reasonable?
+
+> Please elaborate for my understanding.
+>
+> Also, there is no need to split patch1 and patch2, those can go together.
+>
+> And finally, please follow Christoph's suggestion, so we can see when
+> this new quirk is going to be used.
+>
+OK, I'll send new patch. thanks for the review.
+
+> Kind regards
+> Uffe
+>
 >>
->> Command queue is added in eMMC-5.1 specification. This
->> enables the controller to process upto 32 requests at
->> a time.
+>> Signed-off-by: Jungseung Lee <js07.lee@samsung.com>
+>> ---
+>>  drivers/mmc/core/block.c | 8 ++++++--
+>>  drivers/mmc/core/queue.c | 4 ++++
+>>  2 files changed, 10 insertions(+), 2 deletions(-)
 >>
->> Adrian Hunter contributed renaming to cqhci, recovery, suspend
->> and resume, cqhci_off, cqhci_wait_for_idle, and external timeout
->> handling.
+>> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+>> index ea80ff4..41c4ec1 100644
+>> --- a/drivers/mmc/core/block.c
+>> +++ b/drivers/mmc/core/block.c
+>> @@ -1273,9 +1273,10 @@ static void mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
+>>         struct mmc_card *card = md->queue.card;
+>>         unsigned int from, nr, arg;
+>>         int err = 0, type = MMC_BLK_DISCARD;
+>> +       int force_trim = (req_op(req) == REQ_OP_WRITE_ZEROES);
+>>         blk_status_t status = BLK_STS_OK;
 >>
->> Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
->> Signed-off-by: Sujit Reddy Thumma <sthumma@codeaurora.org>
->> Signed-off-by: Konstantin Dorfman <kdorfman@codeaurora.org>
->> Signed-off-by: Venkat Gopalakrishnan <venkatg@codeaurora.org>
->> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
->> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
->> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> 
-> (...)
->> +config MMC_CQHCI
->> +       tristate "Command Queue Host Controller Interface support"
->> +       depends on HAS_DMA
-> 
-> If the CQE implementation depends on MQ, should this not
-> also select MMC_MQ_DEFAULT?
-
-No, there is no dependency on MMC_MQ_DEFAULT.
-
-> 
-> And if the CQE implementation depens on MQ, isn't it dangerous
-> to even have a boot option to disable it?
-
-No, there is no dependency on MMC_MQ_DEFAULT.
-
-> 
-> Again I push the point that things are easier to keep in line
-> if we just support one block request path (MQ), sorry for
-> hammering.
-> 
->> +int cqhci_suspend(struct mmc_host *mmc)
->> +{
->> +       struct cqhci_host *cq_host = mmc->cqe_private;
+>> -       if (!mmc_can_erase(card)) {
+>> +       if (!mmc_can_erase(card) || (!mmc_can_trim(card) && force_trim)) {
+>>                 status = BLK_STS_NOTSUPP;
+>>                 goto fail;
+>>         }
+>> @@ -1283,7 +1284,9 @@ static void mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
+>>         from = blk_rq_pos(req);
+>>         nr = blk_rq_sectors(req);
+>>
+>> -       if (mmc_can_discard(card))
+>> +       if (force_trim)
+>> +               arg = MMC_TRIM_ARG;
+>> +       else if (mmc_can_discard(card))
+>>                 arg = MMC_DISCARD_ARG;
+>>         else if (mmc_can_trim(card))
+>>                 arg = MMC_TRIM_ARG;
+>> @@ -2032,6 +2035,7 @@ void mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+>>                                 mmc_blk_issue_rw_rq(mq, NULL);
+>>                         mmc_blk_issue_drv_op(mq, req);
+>>                         break;
+>> +               case REQ_OP_WRITE_ZEROES:
+>>                 case REQ_OP_DISCARD:
+>>                         /*
+>>                          * Complete ongoing async transfer before issuing
+>> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+>> index 4f33d27..dc95b3a 100644
+>> --- a/drivers/mmc/core/queue.c
+>> +++ b/drivers/mmc/core/queue.c
+>> @@ -144,6 +144,10 @@ static void mmc_queue_setup_discard(struct request_queue *q,
+>>         /* granularity must not be greater than max. discard */
+>>         if (card->pref_erase > max_discard)
+>>                 q->limits.discard_granularity = 0;
 >> +
->> +       if (cq_host->enabled)
->> +               __cqhci_disable(cq_host);
+>> +       if (card->quirks & MMC_QUIRK_UNMAPPED_ZEROES)
+>> +               blk_queue_max_write_zeroes_sectors(q, UINT_MAX);
 >> +
->> +       return 0;
->> +}
->> +EXPORT_SYMBOL(cqhci_suspend);
->> +
->> +int cqhci_resume(struct mmc_host *mmc)
->> +{
->> +       /* Re-enable is done upon first request */
->> +       return 0;
->> +}
->> +EXPORT_SYMBOL(cqhci_resume);
-> 
-> Why would the CQE case require special suspend/resume
-> functionality?
-
-Seems like a very strange question. Obviously CQHCI has to be configured
-after suspend.
-
-Also please don't confuse CQE and CQHCI.  CQHCI is an implementation of a
-CQE.  We currently do not expect to have another implementation, but it is
-not impossible.
-
-> 
-> This seems two much like on the side CQE-silo engineering,
-> just use the device .[runtime]_suspend/resume callbacks like
-> everyone else, make it possible for the host to figure out
-> if it is in CQE mode or not (I guess it should know already
-> since cqhci .enable() has been called?) and handle it
-> from there.
-
-That is how it works!  The host controller has to decide how to handle
-suspend / resume.
-
-cqhci_suspend() / cqhci_resume() are helper functions that the host
-controller can use, but doesn't have to.
-
-> 
->> +struct cqhci_host_ops {
->> +       void (*dumpregs)(struct mmc_host *mmc);
->> +       void (*write_l)(struct cqhci_host *host, u32 val, int reg);
->> +       u32 (*read_l)(struct cqhci_host *host, int reg);
->> +       void (*enable)(struct mmc_host *mmc);
->> +       void (*disable)(struct mmc_host *mmc, bool recovery);
->> +};
->> +
->> +static inline void cqhci_writel(struct cqhci_host *host, u32 val, int reg)
->> +{
->> +       if (unlikely(host->ops->write_l))
->> +               host->ops->write_l(host, val, reg);
->> +       else
->> +               writel_relaxed(val, host->mmio + reg);
->> +}
-> 
-> Why would CQE hosts need special accessors and the rest
-> of the host not need it?
-
-Special accessors can be used to fix up registers that don't work exactly
-the way the standard specified.
-
-> 
-> This seems to be a bit hackish "just for CQE" approach,
-> abstract callbacks like ->dumpregs(), ->write_l() and
-> ->read_l() seems to be something that should be in the
-> generic struct mmc_host_ops and not tied to CQE, if
-> needed at all.
-
-They are nothing to do with CQE or mmc ops.  These are for hosts that have a
-CQHCI compatible CQE.
-
-> 
-> ->enable and ->disable() for just CQE seem reasonable.
-> But that leaves just two new ops.
-> 
-> So why not just put .cqe_enable() and .cqe_disable()
-> ops into mmc_host_ops as optional and be done with it?
-
-Ok so you are not understanding this at all.
-
-As a CQE implementation, CQHCI interfaces with the upper layers through the
-CQE ops etc.
-
-But CQHCI also has to work with any host controller driver, so it needs an
-interface for that, which is what cqhci_host_ops is for.  All the ops serve
-useful purposes.
-
-> 
->> +irqreturn_t cqhci_irq(struct mmc_host *mmc, u32 intmask, int cmd_error,
->> +                     int data_error);
->> +int cqhci_init(struct cqhci_host *cq_host, struct mmc_host *mmc, bool dma64);
->> +struct cqhci_host *cqhci_pltfm_init(struct platform_device *pdev);
->> +int cqhci_suspend(struct mmc_host *mmc);
->> +int cqhci_resume(struct mmc_host *mmc);
-> 
-> This seems overall too much bolted on the side.
-
-The whole point is to prove a library that can work with any host controller
-driver.  That means it must provide functions and callbacks.
-
-> 
-> I think the above approach to put any CQE-specific callbacks
-> directly into the struct mmc_host_ops is way more viable.
-
-Nothing to do with CQE.  This is CQHCI.  Please try to get the difference.
-
-> 
-> If special CQE init is needed, why a special cqhci_init()
-> call? And cqhci_pltfm_init()? It's confusing. Can't
-> you just call this by default from the core if the host is
-> CQE capable? Ass a .cqhci_init() callback into mmc_host_ops
-> if need be.
-
-Yeah, so CQHCI is just one of theoretically any number of CQE
-implementations.  This has nothing to do with the core.  It is entirely up
-to the host driver.  cqhci_pltfm_init() allows the mmio space to be defined
-by platform resources, whereas cqhci_init() does all the rest of the
-initialization.
-
-> 
-> cqhci_irq() seems necessary though, I see something like this is
-> probably necessary.
+>>         if (mmc_can_secure_erase_trim(card))
+>>                 queue_flag_set_unlocked(QUEUE_FLAG_SECERASE, q);
+>>  }
+>> --
+>> 2.10.1
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
