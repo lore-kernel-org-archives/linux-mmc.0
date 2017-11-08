@@ -1,49 +1,56 @@
-From: <yinbo.zhu@nxp.com>
-Subject: [PATCH v2] mmc: sdhci-of-esdhc: fix eMMC couldn't work after kexec
-Date: Wed, 8 Nov 2017 17:09:50 +0800
-Message-ID: <20171108090950.4900-1-yinbo.zhu@nxp.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH V13 10/10] mmc: block: blk-mq: Stop using legacy recovery
+Date: Wed, 8 Nov 2017 10:38:07 +0100
+Message-ID: <CACRpkdZNcd7Nu2dAajqBcn44c05jY76BUNOM5vBPzfhVub_HhQ@mail.gmail.com>
+References: <1509715220-31885-1-git-send-email-adrian.hunter@intel.com> <1509715220-31885-11-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-co1nam03on0067.outbound.protection.outlook.com ([104.47.40.67]:47872
-        "EHLO NAM03-CO1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751295AbdKHJ2H (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 8 Nov 2017 04:28:07 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1509715220-31885-11-git-send-email-adrian.hunter@intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-mmc@vger.kernel.org
-To: yinbo.zhu@nxp.com, Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org, yangbo.lu@nxp.com
 
-From: "yinbo.zhu" <yinbo.zhu@nxp.com>
+On Fri, Nov 3, 2017 at 2:20 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
 
-The bit eSDHC_TBCTL[TB_EN] couldn't be reset by eSDHC_SYSCTL[RSTA] which is
-used to reset for all. The driver should make sure it's cleared before card
-initialization, otherwise the initialization would fail.
+> There are only a few things the recovery needs to do. Primarily, it just
+> needs to:
+>         Determine the number of bytes transferred
+>         Get the card back to transfer state
+>         Determine whether to retry
+>
+> There are also a couple of additional features:
+>         Reset the card before the last retry
+>         Read one sector at a time
+>
+> The legacy code spent much effort analyzing command errors, but commands
+> fail fast, so it is simpler just to give all command errors the same number
+> of retries.
+>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Signed-off-by: yinbo.zhu <yinbo.zhu@nxp.com>
----
-Change in v2:
-		Replace ESDHC_TB_DIS with default register bit ESDHC_TB_EN
+I have nothing against the patch as such. In fact something
+like this makes a lot of sense (to me).
 
- drivers/mmc/host/sdhci-of-esdhc.c | 4 ++++
- 1 file changed, 4 insertions(+)
+But this just makes mmc_blk_rw_recovery() look really nice.
 
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index d96a057a7db8..023c24bd0d94 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -783,6 +783,10 @@ static void esdhc_init(struct platform_device *pdev, struct sdhci_host *host)
- 	pltfm_host = sdhci_priv(host);
- 	esdhc = sdhci_pltfm_priv(pltfm_host);
- 
-+	val = sdhci_readl(host, ESDHC_TBCTL);
-+	val &= ~ESDHC_TB_EN;
-+	sdhci_writel(host, val, ESDHC_TBCTL);
-+
- 	host_ver = sdhci_readw(host, SDHCI_HOST_VERSION);
- 	esdhc->vendor_ver = (host_ver & SDHCI_VENDOR_VER_MASK) >>
- 			     SDHCI_VENDOR_VER_SHIFT;
--- 
-2.14.1
+And leaves a very ugly mmc_blk_issue_rw_rq() with the legacy
+error handling in-tree.
 
+The former function isn't even named with some *mq* infix
+making it clear that the new recovery path only happens
+in the MQ case.
+
+If newcomers read this code in the MMC stack they will
+just tear their hair, scream and run away. Even faster than
+before.
+
+How are they supposed to know which functions are used on
+which path? Run ftrace?
+
+This illustrates firmly why we need to refactor and/or kill off
+the old block layer interface *first* then add MQ on top.
+
+Yours,
+Linus Walleij
