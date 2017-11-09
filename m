@@ -1,121 +1,177 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH V13 05/10] mmc: cqhci: support for command queue enabled host
-Date: Thu, 9 Nov 2017 13:26:05 +0100
-Message-ID: <CACRpkdZ2Xr9xKg-FD1QB_Kq=E6TpBDg-3giamAVbuykAxi=9vw@mail.gmail.com>
-References: <1509715220-31885-1-git-send-email-adrian.hunter@intel.com>
- <1509715220-31885-6-git-send-email-adrian.hunter@intel.com>
- <CACRpkdYY_a3fuayN3z5xn952t=YYJ8LA6wqXDtd=7ea03a187w@mail.gmail.com> <a9eb7e73-31b4-6ff6-4a0d-1416c938039b@intel.com>
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Subject: Re: More TMIO MMC variant. What is a preferred name?
+Date: Thu, 9 Nov 2017 21:31:31 +0900
+Message-ID: <CAK7LNASN8kjmiNHvX7zrgVv=5d81ovfGNRdHm8TXiJNgr+H9MA@mail.gmail.com>
+References: <CAK7LNARB+-SzgNF+7KsG80o4Q=TZsEeyMLjR2Ve0bXCrQ5tc0w@mail.gmail.com>
+ <20171108175320.wnq3d2x7lmpaya7s@ninjato>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <a9eb7e73-31b4-6ff6-4a0d-1416c938039b@intel.com>
-Sender: linux-block-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from conssluserg-03.nifty.com ([210.131.2.82]:37196 "EHLO
+        conssluserg-03.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754484AbdKIMcP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Nov 2017 07:32:15 -0500
+Received: from mail-yw0-f175.google.com (mail-yw0-f175.google.com [209.85.161.175]) (authenticated)
+        by conssluserg-03.nifty.com with ESMTP id vA9CWC4p014749
+        for <linux-mmc@vger.kernel.org>; Thu, 9 Nov 2017 21:32:13 +0900
+Received: by mail-yw0-f175.google.com with SMTP id i198so5117471ywe.7
+        for <linux-mmc@vger.kernel.org>; Thu, 09 Nov 2017 04:32:13 -0800 (PST)
+In-Reply-To: <20171108175320.wnq3d2x7lmpaya7s@ninjato>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms+renesas@verge.net.au>, linux-mmc <linux-mmc@vger.kernel.org>, Marek Vasut <marek.vasut+renesas@gmail.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 
-On Wed, Nov 8, 2017 at 3:14 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 08/11/17 11:22, Linus Walleij wrote:
->> On Fri, Nov 3, 2017 at 2:20 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+Hi Wolfram,
 
->> (...)
+Thanks for your comments.
 
->>> +EXPORT_SYMBOL(cqhci_resume);
+
+2017-11-09 2:53 GMT+09:00 Wolfram Sang <wsa@the-dreams.de>:
+> Yamada-san,
+>
+> Thank you for the detailed write up. I hope we find a good solution,
+> too.
+>
+> I've got a few questions first:
+>
+>> I know this is a big churn, but I'd like
+>> to propose renaming like follows in a long run:
 >>
->> Why would the CQE case require special suspend/resume
->> functionality?
+>> tmio_mmc_core.c      ->  mnsd.c              Core code of this IP
+>> tmio_mmc.c           ->  mnsd-tmio.c         For MMC integrated in TMIO MFD
+>> renesas_sdhi_core.c  ->  mnsd-renesas-core.c For Renesas SoCs
+>> (or, mnsd-sdhi-core.c or whatever. please choose any favorite name)
+>>                          mnsd-uniphier.c     For Socionext UniPhier SoCS
 >
-> Seems like a very strange question.
+> Do you want to just change the filenames or the function names as well?
 
-Please realize that patch review is partly about education.
+If we decide to rename files,
+functions and macros should be also renamed for consistency.
 
-Educating me or anyone about your patch set involves
-being humbe and not seeing your peers as lesser.
+(I know this is a very invasive...)
 
-Making your reviewer feel stupid by saying the ask
-"strange" or outright stupid questions is not helping
-your cause.
 
-> Obviously CQHCI has to be configured
-> after suspend.
-
-Yeah. I think I misunderstood is such that:
-
-> Also please don't confuse CQE and CQHCI.  CQHCI is an implementation of a
-> CQE.  We currently do not expect to have another implementation, but it is
-> not impossible.
-
-OK now you educated me, see it's not that hard without
-using belitteling language.
-
->> This seems two much like on the side CQE-silo engineering,
->> just use the device .[runtime]_suspend/resume callbacks like
->> everyone else, make it possible for the host to figure out
->> if it is in CQE mode or not (I guess it should know already
->> since cqhci .enable() has been called?) and handle it
->> from there.
+>> I see more strangeness.  Those mmc drivers must include <linux/mfd/tmio.h>,
+>> but TMIO is unrelated to Renesas, Socionext.
+>> We need to fix the interface.
 >
-> That is how it works!  The host controller has to decide how to handle
-> suspend / resume.
+> What kind of fix do you have in mind? Changing filenames or change
+> everything which has TMIO or tmio in the name?
 
-OK.
+Sorry, I missed lots of legacy boards under arch/sh/boards/.
 
-> cqhci_suspend() / cqhci_resume() are helper functions that the host
-> controller can use, but doesn't have to.
+At first, I imagined <linux/mfd/tmio.h> was used
+for passing parameters from MFD to tmio-mmc.
+Then, I thought it would be possible to copy parameters
+to tmio_mmc_host in drivers/mmc/host/tmio_mmc.c
+But, actually renesas also depends on platform-data,
+so it does not seem so easy as I had imagined first.
 
-OK.
 
->> Why would CQE hosts need special accessors and the rest
->> of the host not need it?
->
-> Special accessors can be used to fix up registers that don't work exactly
-> the way the standard specified.
+We could split tmio_mmc_data out to include/linux/platform_data/tmio-mmc.h
+but ideal goal might be split DT drivers and legacy board drivers.
+(just an idea, not looking into the detail.)
 
-Yeah this is fine as it is for CQHCI, I didn't get that
-part :)
 
->> ->enable and ->disable() for just CQE seem reasonable.
->> But that leaves just two new ops.
+>> If I can get consensus, I am very happy to
+>> contribute for better organizing this IP variants.
 >>
->> So why not just put .cqe_enable() and .cqe_disable()
->> ops into mmc_host_ops as optional and be done with it?
+>> CCing Marek Vasut, a contractor working for Renesas.
+>> He and I are also working on SD card driver in U-Boot.
+>> I want to introduce correct and systematic naming scheme
+>> for a long-run maintainability and applicable to other projects
+>> since Linux has a big influence in OSS.
 >
-> Ok so you are not understanding this at all.
-
-No I did not get it. But I do now (I think).
-
-> As a CQE implementation, CQHCI interfaces with the upper layers through the
-> CQE ops etc.
+> Can you explain a bit more why the long-run maintainability gets improved?
+> I don't really see that yet and will try to explain below.
 >
-> But CQHCI also has to work with any host controller driver, so it needs an
-> interface for that, which is what cqhci_host_ops is for.  All the ops serve
-> useful purposes.
-(...)
-> The whole point is to prove a library that can work with any host controller
-> driver.  That means it must provide functions and callbacks.
-
-OK
-
->> I think the above approach to put any CQE-specific callbacks
->> directly into the struct mmc_host_ops is way more viable.
+> Disclaimer: I am contracted by Renesas but the views I am going to share
+> come from my personal point of view as the maintainer of this driver.
 >
-> Nothing to do with CQE.  This is CQHCI.  Please try to get the difference.
-
-I am trying, please try to think about your language.
-
->> If special CQE init is needed, why a special cqhci_init()
->> call? And cqhci_pltfm_init()? It's confusing. Can't
->> you just call this by default from the core if the host is
->> CQE capable? Ass a .cqhci_init() callback into mmc_host_ops
->> if need be.
+> Preface: For me, names are just names. We have a few examples where the
+> "historical" names are kept because they just happened to be first. The
+> AT24 driver supports way more than only Atmel chips, and all the STMPE
+> have kept their names, although the SoC is called MXS these days. Which
+> also proves that names are just names, IP cores and companies are easily
+> renamed.
 >
-> Yeah, so CQHCI is just one of theoretically any number of CQE
-> implementations.  This has nothing to do with the core.  It is entirely up
-> to the host driver.  cqhci_pltfm_init() allows the mmio space to be defined
-> by platform resources, whereas cqhci_init() does all the rest of the
-> initialization.
+> If we can rename things easily to match reality, I am not against it. In
+> this case, I wonder, though, if the rename is really easy? If you just
+> change the filenames, then we got a strange mix, because the function
+> names are still using tmio_*. If you change those function names, too,
+> then the resulting change is very intrusive.
 
-It's fair.
+Right.  This is a discussion point.
 
-Yours,
-Linus Walleij
+I admit it it a huge churn, but (I hope) one-time churn.
+
+
+All functions / macros are prefixed with tmio_,
+so sed scripts will do a good job.
+It is just renaming, so no functional change will be added.
+If we find a build error (probably reported by 0-day bot),
+it will be easy to fix.
+
+
+> It could introduce errors,
+> looking up git history becomes a tad more tedious, and users may get
+> confused what is what. Seeing all this, I don't think such a change
+> would be helpful for the long-run maintainability.
+
+
+Probably this could be the last chance for matching the code to reality
+if we had (or, maybe it is too late...).
+
+So, before adding a new driver for this IP,
+this is worth discussing.
+
+For DW and SDHCI, the naming scheme is really clean.
+Kconfig options are prefixed with CONFIG_MMC_DW / CONFIG_MMC_SDHCI.
+Same for file names and function names.
+
+It is true that names are just names, but having a good name-space
+is helpful to understand the code structure.
+
+
+
+If my suggestion is NACK, do you have any suggestion for naming
+new drivers?
+
+If we make 'tmio_mmc_core' is really the right name,
+do we want to do like  CONFIG_MMC_TMIO_UNIPHIER, tmio_mmc_uniphier.c?
+(then rename renesas ones likewise, or maybe not?)
+
+Or, is it completely "don't care" things, like Renesas is currently doing?
+
+
+Linux is in a special position in open source world.
+Various projects get influence from Linux.
+U-Boot borrow code, ideas, and names from Linux
+(barebox is more linux-addicted), so if we fix the history,
+I thought this should be discussed in Linux community.
+
+
+> I'd be much happier with a paragraph at the beginning of the "TMIO" core
+> file (or maybe all "TMIO" files, I don't care much) explaining the
+> situation like you did with your mail. But keeping the code largely
+> as-is.
+>
+> I am open for discussion, though.
+>
+> Again, this is my personal view. We will discuss things internally, too,
+> to see if there is also an "official" statement from Renesas.
+
+OK.  Thanks.
+
+
+> Thanks,
+>
+>    Wolfram
+>
+
+
+
+-- 
+Best Regards
+Masahiro Yamada
