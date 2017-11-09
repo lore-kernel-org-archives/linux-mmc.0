@@ -1,53 +1,41 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V13 07/10] mmc: block: blk-mq: Add support for direct
- completion
-Date: Thu, 9 Nov 2017 09:27:38 +0200
-Message-ID: <fcba7824-db15-d331-e580-7e26f07e6939@intel.com>
-References: <1509715220-31885-1-git-send-email-adrian.hunter@intel.com>
- <1509715220-31885-8-git-send-email-adrian.hunter@intel.com>
- <CACRpkdb_ggnC6tguEajiiyMaC=NiNQ-pdOydNJ5w69HgQ05SmQ@mail.gmail.com>
+From: Robert Jarzmik <robert.jarzmik@free.fr>
+Subject: Re: [PATCH v5 0/9] mtd: sharpslpart partition parser
+Date: Thu, 09 Nov 2017 08:27:50 +0100
+Message-ID: <8760aj9aix.fsf@belgarion.home>
+References: <1502743720-28672-1-git-send-email-andrea.adami@gmail.com>
+        <20170821221339.70cfcfb7@bbrezillon> <87pobmoz8n.fsf@belgarion.home>
+        <CAAQYJAv8bNrxJ_ESgC0fOAdry7i5mstzgQ3P74q1D=C-xsJprg@mail.gmail.com>
+        <20170824114631.089d2628@bbrezillon> <87inh6pw9e.fsf@belgarion.home>
+        <87376uezjs.fsf@belgarion.home> <20171108085446.718a2ff5@bbrezillon>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CACRpkdb_ggnC6tguEajiiyMaC=NiNQ-pdOydNJ5w69HgQ05SmQ@mail.gmail.com>
-Content-Language: en-US
+In-Reply-To: <20171108085446.718a2ff5@bbrezillon> (Boris Brezillon's message
+        of "Wed, 8 Nov 2017 08:54:46 +0100")
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
+To: Boris Brezillon <boris.brezillon@free-electrons.com>
+Cc: Andrea Adami <andrea.adami@gmail.com>, linux-mtd@lists.infradead.org, Wolfram Sang <wsa+renesas@sang-engineering.com>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, Richard Weinberger <richard@nod.at>, linux-mmc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, Haojian Zhuang <haojian.zhuang@gmail.com>, linux-kernel@vger.kernel.org, Marek Vasut <marek.vasut@gmail.com>, linux-arm-kernel@lists.infradead.org, Cyrille Pitchen <cyrille.pitchen@wedev4u.fr>, Lee Jones <lee.jones@linaro.org>, Brian Norris <computersforpeace@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Linus Walleij <linus.walleij@linaro.org>, Daniel Mack <daniel@zonque.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 08/11/17 11:28, Linus Walleij wrote:
-> On Fri, Nov 3, 2017 at 2:20 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> 
->> For blk-mq, add support for completing requests directly in the ->done
->> callback. That means that error handling and urgent background operations
->> must be handled by recovery_work in that case.
->>
->> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> 
-> I tried enabling this on my MMC host (mmci) but I got weird
-> DMA error messages when I did.
-> 
-> I guess this has not been tested on a non-DMA-coherent
-> system?
+Boris Brezillon <boris.brezillon@free-electrons.com> writes:
 
-I don't see what DMA-coherence has to do with anything.
+>> Hi Boris,
+>> 
+>> So what's the status about the sync, should I pick the patches, and have the
+>> others make it to your for-next branch ?
+>
+> It's been merged in l2-mtd/master (our -next branch) which is
+> targeting 4.15. Unfortunately we didn't create a topic branch, which
+> means you'll have to wait 4.15-rc1 before pushing patches 6 to 9 if you
+> want avoid regressions. Anyway, I guess it's already too late to send
+> PRs to arm-soc for 4.15.
 
-Possibilities:
-	- DMA unmapping doesn't work in an atomic context
-	- requests' DMA operations have to be synchronized with each other
+Right, my next pull request is targetting v4.16.
 
-> I think I might be seeing this because the .pre and .post
-> callbacks need to be strictly sequenced, and this is
-> maybe not taken into account here?
+Andrea, would you be so kind as to resend the serie (patches 6 - 9) on the
+mailing list and to me, so that I review and apply the correct version.
 
-I looked at mmci but that did not seem to be the case.
+Thanks.
 
-> Isn't there as risk
-> that the .post callback of the next request is called before
-> the .post callback of the previous request has returned
-> for example?
-
-Of course, the requests are treated as independent.  If the separate DMA
-operations require synchronization, that is for the host driver to fix.
+-- 
+Robert
