@@ -1,144 +1,115 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH V13 10/10] mmc: block: blk-mq: Stop using legacy recovery
-Date: Thu, 9 Nov 2017 13:45:39 +0100
-Message-ID: <CACRpkdbDWmOTOP1JmriFkpH_rEYJQv17_OhBvNbHY-4Y6m61qA@mail.gmail.com>
-References: <1509715220-31885-1-git-send-email-adrian.hunter@intel.com>
- <1509715220-31885-11-git-send-email-adrian.hunter@intel.com>
- <CACRpkdZNcd7Nu2dAajqBcn44c05jY76BUNOM5vBPzfhVub_HhQ@mail.gmail.com> <3608285c-614a-36cc-5f7b-5fb5708c1a84@intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <3608285c-614a-36cc-5f7b-5fb5708c1a84@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
+From: Jungseung Lee <js07.lee@samsung.com>
+Subject: [PATCH v2] mmc : implement REQ_OP_WRITE_ZEROES
+Date: Thu, 09 Nov 2017 21:50:51 +0900
+Message-ID: <20171109125051.12772-1-js07.lee@samsung.com>
+References: <CGME20171109125101eucas1p2c824f0baade3fef0f15cea043e77caa5@eucas1p2.samsung.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout2.w1.samsung.com ([210.118.77.12]:39180 "EHLO
+        mailout2.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753305AbdKIMvF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Nov 2017 07:51:05 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, js07.lee@gmail.com, Christoph Hellwig <hch@lst.de>
+Cc: Jungseung Lee <js07.lee@samsung.com>
 
-On Thu, Nov 9, 2017 at 8:43 AM, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 08/11/17 11:38, Linus Walleij wrote:
->> On Fri, Nov 3, 2017 at 2:20 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>
->>> There are only a few things the recovery needs to do. Primarily, it just
->>> needs to:
->>>         Determine the number of bytes transferred
->>>         Get the card back to transfer state
->>>         Determine whether to retry
->>>
->>> There are also a couple of additional features:
->>>         Reset the card before the last retry
->>>         Read one sector at a time
->>>
->>> The legacy code spent much effort analyzing command errors, but commands
->>> fail fast, so it is simpler just to give all command errors the same number
->>> of retries.
->>>
->>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
->>
->> I have nothing against the patch as such. In fact something
->> like this makes a lot of sense (to me).
->>
->> But this just makes mmc_blk_rw_recovery() look really nice.
->>
->> And leaves a very ugly mmc_blk_issue_rw_rq() with the legacy
->> error handling in-tree.
->>
->> The former function isn't even named with some *mq* infix
->> making it clear that the new recovery path only happens
->> in the MQ case.
->>
->> If newcomers read this code in the MMC stack they will
->> just tear their hair, scream and run away. Even faster than
->> before.
->>
->> How are they supposed to know which functions are used on
->> which path? Run ftrace?
->
-> You're kidding me right?  You don't know how to find where a function used?
+The contents of a write block where the trim function has been applied
+shall be '0' or '1' and so some of eMMC devices return zeroes on read to
+the trimmed blocks.
 
-What I mean is that there are now several functions in the same
-file doing similar things, and it is pretty hard for a newcomer
-already (IMO) to understand how the MMC/SD stack works.
+Use the behavior to implement REQ_OP_WRITES_ZEROES. We can only know the
+behavior based on individual device modles, so this patch adds a flag to
+the mmc quirk list for devices works that way. It also sets the new flag
+for one such known device.
 
-This phenomenon of code complexity is not just making me
-frustrated but also you, because you get annoyed that people
-like me don't "just get it".
+Signed-off-by: Jungseung Lee <js07.lee@samsung.com>
+---
+ drivers/mmc/core/block.c  | 8 ++++++--
+ drivers/mmc/core/queue.c  | 4 ++++
+ drivers/mmc/core/quirks.h | 7 +++++++
+ include/linux/mmc/card.h  | 1 +
+ 4 files changed, 18 insertions(+), 2 deletions(-)
 
->> This illustrates firmly why we need to refactor and/or kill off
->> the old block layer interface *first* then add MQ on top.
->
-> No it doesn't!  You are playing games!
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index ea80ff4..41c4ec1 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -1273,9 +1273,10 @@ static void mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
+ 	struct mmc_card *card = md->queue.card;
+ 	unsigned int from, nr, arg;
+ 	int err = 0, type = MMC_BLK_DISCARD;
++	int force_trim = (req_op(req) == REQ_OP_WRITE_ZEROES);
+ 	blk_status_t status = BLK_STS_OK;
+ 
+-	if (!mmc_can_erase(card)) {
++	if (!mmc_can_erase(card) || (!mmc_can_trim(card) && force_trim)) {
+ 		status = BLK_STS_NOTSUPP;
+ 		goto fail;
+ 	}
+@@ -1283,7 +1284,9 @@ static void mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
+ 	from = blk_rq_pos(req);
+ 	nr = blk_rq_sectors(req);
+ 
+-	if (mmc_can_discard(card))
++	if (force_trim)
++		arg = MMC_TRIM_ARG;
++	else if (mmc_can_discard(card))
+ 		arg = MMC_DISCARD_ARG;
+ 	else if (mmc_can_trim(card))
+ 		arg = MMC_TRIM_ARG;
+@@ -2032,6 +2035,7 @@ void mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+ 				mmc_blk_issue_rw_rq(mq, NULL);
+ 			mmc_blk_issue_drv_op(mq, req);
+ 			break;
++		case REQ_OP_WRITE_ZEROES:
+ 		case REQ_OP_DISCARD:
+ 			/*
+ 			 * Complete ongoing async transfer before issuing
+diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+index 4f33d27..c18d2a1 100644
+--- a/drivers/mmc/core/queue.c
++++ b/drivers/mmc/core/queue.c
+@@ -144,6 +144,10 @@ static void mmc_queue_setup_discard(struct request_queue *q,
+ 	/* granularity must not be greater than max. discard */
+ 	if (card->pref_erase > max_discard)
+ 		q->limits.discard_granularity = 0;
++
++	if (card->quirks & MMC_QUIRK_TRIM_ZEROES)
++		blk_queue_max_write_zeroes_sectors(q, UINT_MAX);
++
+ 	if (mmc_can_secure_erase_trim(card))
+ 		queue_flag_set_unlocked(QUEUE_FLAG_SECERASE, q);
+ }
+diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
+index fb72593..58871ac 100644
+--- a/drivers/mmc/core/quirks.h
++++ b/drivers/mmc/core/quirks.h
+@@ -90,6 +90,13 @@ static const struct mmc_fixup mmc_blk_fixups[] = {
+ 	MMC_FIXUP("V10016", CID_MANFID_KINGSTON, CID_OEMID_ANY, add_quirk_mmc,
+ 		  MMC_QUIRK_TRIM_BROKEN),
+ 
++	/*
++	 * Some MMC cards deterministically returns zeroes on reads to
++	 * trimmed logical blocks.
++	 */
++	MMC_FIXUP("8GME4R", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
++		  MMC_QUIRK_TRIM_ZEROES),
++
+ 	END_FIXUP
+ };
+ 
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 279b390..d328d1f 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -268,6 +268,7 @@ struct mmc_card {
+ #define MMC_QUIRK_BROKEN_IRQ_POLLING	(1<<11)	/* Polling SDIO_CCCR_INTx could create a fake interrupt */
+ #define MMC_QUIRK_TRIM_BROKEN	(1<<12)		/* Skip trim */
+ #define MMC_QUIRK_BROKEN_HPI	(1<<13)		/* Disable broken HPI support */
++#define MMC_QUIRK_TRIM_ZEROES	(1<<14)		/* Return 0's on read to trimmed logical blocks */
+ 
+ 	bool			reenable_cmdq;	/* Re-enable Command Queue */
+ 
+-- 
+2.10.1
 
-You need to stop your snarky and undfriendly attitude.
-
-Look Adrian: you have one (1) person reviewing your patches.
-That is me.
-
-I think need to quote Documentation/process/6.Followthrough.rst
-in verbatim (it's an awesome piece of text!)
-
-----8<--------8<-------8<------
-
-Working with reviewers
-----------------------
-
-A patch of any significance will result in a number of comments from other
-developers as they review the code.  Working with reviewers can be, for
-many developers, the most intimidating part of the kernel development
-process.  Life can be made much easier, though, if you keep a few things in
-mind:
-
- - If you have explained your patch well, reviewers will understand its
-   value and why you went to the trouble of writing it.  But that value
-   will not keep them from asking a fundamental question: what will it be
-   like to maintain a kernel with this code in it five or ten years later?
-   Many of the changes you may be asked to make - from coding style tweaks
-   to substantial rewrites - come from the understanding that Linux will
-   still be around and under development a decade from now.
-
- - Code review is hard work, and it is a relatively thankless occupation;
-   people remember who wrote kernel code, but there is little lasting fame
-   for those who reviewed it.  So reviewers can get grumpy, especially when
-   they see the same mistakes being made over and over again.  If you get a
-   review which seems angry, insulting, or outright offensive, resist the
-   impulse to respond in kind.  Code review is about the code, not about
-   the people, and code reviewers are not attacking you personally.
-
- - Similarly, code reviewers are not trying to promote their employers'
-   agendas at the expense of your own.  Kernel developers often expect to
-   be working on the kernel years from now, but they understand that their
-   employer could change.  They truly are, almost without exception,
-   working toward the creation of the best kernel they can; they are not
-   trying to create discomfort for their employers' competitors.
-
-What all of this comes down to is that, when reviewers send you comments,
-you need to pay attention to the technical observations that they are
-making.  Do not let their form of expression or your own pride keep that
-from happening.  When you get review comments on a patch, take the time to
-understand what the reviewer is trying to say.  If possible, fix the things
-that the reviewer is asking you to fix.  And respond back to the reviewer:
-thank them, and describe how you will answer their questions.
-
-----8<--------8<-------8<------
-
-> One function could be named
-> differently, so that is evidence the whole patch set should be ignored.
-
-No I was not pointing to that at all.
-
-> The old code is rubbish.  There is nothing worth keeping.  Churning it
-> around is a waste of everybody's time.  Review and test the new code.
-> Delete the old code.  Much much simpler!
-
-Yeah, but you do not delete the old code in your patch
-set so why are you are saying this?
-
-The essence of my response to patch 3 was exactly that if
-you have this "my way or the highway" (i.e. delete all the old
-code paths) attitude to the code (which I kind of understand)
-Then go all in and actually delete it.
-
-As it is, here, at the end of the patch set, the old legacy block
-path and combersome error handling still exists.
-
-Yours,
-Linus Walleij
