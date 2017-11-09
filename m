@@ -1,41 +1,67 @@
-From: Robert Jarzmik <robert.jarzmik@free.fr>
-Subject: Re: [PATCH v5 0/9] mtd: sharpslpart partition parser
-Date: Thu, 09 Nov 2017 08:27:50 +0100
-Message-ID: <8760aj9aix.fsf@belgarion.home>
-References: <1502743720-28672-1-git-send-email-andrea.adami@gmail.com>
-        <20170821221339.70cfcfb7@bbrezillon> <87pobmoz8n.fsf@belgarion.home>
-        <CAAQYJAv8bNrxJ_ESgC0fOAdry7i5mstzgQ3P74q1D=C-xsJprg@mail.gmail.com>
-        <20170824114631.089d2628@bbrezillon> <87inh6pw9e.fsf@belgarion.home>
-        <87376uezjs.fsf@belgarion.home> <20171108085446.718a2ff5@bbrezillon>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V13 10/10] mmc: block: blk-mq: Stop using legacy recovery
+Date: Thu, 9 Nov 2017 09:43:44 +0200
+Message-ID: <3608285c-614a-36cc-5f7b-5fb5708c1a84@intel.com>
+References: <1509715220-31885-1-git-send-email-adrian.hunter@intel.com>
+ <1509715220-31885-11-git-send-email-adrian.hunter@intel.com>
+ <CACRpkdZNcd7Nu2dAajqBcn44c05jY76BUNOM5vBPzfhVub_HhQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20171108085446.718a2ff5@bbrezillon> (Boris Brezillon's message
-        of "Wed, 8 Nov 2017 08:54:46 +0100")
-Sender: linux-kernel-owner@vger.kernel.org
-To: Boris Brezillon <boris.brezillon@free-electrons.com>
-Cc: Andrea Adami <andrea.adami@gmail.com>, linux-mtd@lists.infradead.org, Wolfram Sang <wsa+renesas@sang-engineering.com>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, Richard Weinberger <richard@nod.at>, linux-mmc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, Haojian Zhuang <haojian.zhuang@gmail.com>, linux-kernel@vger.kernel.org, Marek Vasut <marek.vasut@gmail.com>, linux-arm-kernel@lists.infradead.org, Cyrille Pitchen <cyrille.pitchen@wedev4u.fr>, Lee Jones <lee.jones@linaro.org>, Brian Norris <computersforpeace@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Linus Walleij <linus.walleij@linaro.org>, Daniel Mack <daniel@zonque.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <CACRpkdZNcd7Nu2dAajqBcn44c05jY76BUNOM5vBPzfhVub_HhQ@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-block-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-mmc@vger.kernel.org
 
-Boris Brezillon <boris.brezillon@free-electrons.com> writes:
+On 08/11/17 11:38, Linus Walleij wrote:
+> On Fri, Nov 3, 2017 at 2:20 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> 
+>> There are only a few things the recovery needs to do. Primarily, it just
+>> needs to:
+>>         Determine the number of bytes transferred
+>>         Get the card back to transfer state
+>>         Determine whether to retry
+>>
+>> There are also a couple of additional features:
+>>         Reset the card before the last retry
+>>         Read one sector at a time
+>>
+>> The legacy code spent much effort analyzing command errors, but commands
+>> fail fast, so it is simpler just to give all command errors the same number
+>> of retries.
+>>
+>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> 
+> I have nothing against the patch as such. In fact something
+> like this makes a lot of sense (to me).
+> 
+> But this just makes mmc_blk_rw_recovery() look really nice.
+> 
+> And leaves a very ugly mmc_blk_issue_rw_rq() with the legacy
+> error handling in-tree.
+> 
+> The former function isn't even named with some *mq* infix
+> making it clear that the new recovery path only happens
+> in the MQ case.
+> 
+> If newcomers read this code in the MMC stack they will
+> just tear their hair, scream and run away. Even faster than
+> before.
+> 
+> How are they supposed to know which functions are used on
+> which path? Run ftrace?
 
->> Hi Boris,
->> 
->> So what's the status about the sync, should I pick the patches, and have the
->> others make it to your for-next branch ?
->
-> It's been merged in l2-mtd/master (our -next branch) which is
-> targeting 4.15. Unfortunately we didn't create a topic branch, which
-> means you'll have to wait 4.15-rc1 before pushing patches 6 to 9 if you
-> want avoid regressions. Anyway, I guess it's already too late to send
-> PRs to arm-soc for 4.15.
+You're kidding me right?  You don't know how to find where a function used?
 
-Right, my next pull request is targetting v4.16.
+> This illustrates firmly why we need to refactor and/or kill off
+> the old block layer interface *first* then add MQ on top.
 
-Andrea, would you be so kind as to resend the serie (patches 6 - 9) on the
-mailing list and to me, so that I review and apply the correct version.
+No it doesn't!  You are playing games!  One function could be named
+differently, so that is evidence the whole patch set should be ignored.
 
-Thanks.
-
--- 
-Robert
+The old code is rubbish.  There is nothing worth keeping.  Churning it
+around is a waste of everybody's time.  Review and test the new code.
+Delete the old code.  Much much simpler!
