@@ -1,49 +1,77 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/2] mmc : implement REQ_OP_WRITE_ZEROES
-Date: Thu, 9 Nov 2017 13:33:35 +0100
-Message-ID: <CAPDyKFoof180HstY-xq85nu1KB9W1khVRFUb09tiqswUu6tSCg@mail.gmail.com>
-References: <CGME20171107070328eucas1p12d563f31022e62a4ac6daac26fb0b81d@eucas1p1.samsung.com>
- <20171107070259.11664-1-js07.lee@samsung.com> <20171107070259.11664-2-js07.lee@samsung.com>
- <CAPDyKFpj+rfuhXAd5sB9nxfyRU4i6eUF=V3d1bm9RKqi1ZwXVw@mail.gmail.com> <CAPP0e=O2p68jewHDpG0nJtFitrVmpWHO1DU0f32LxF22Hsbapw@mail.gmail.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH V13 07/10] mmc: block: blk-mq: Add support for direct completion
+Date: Thu, 9 Nov 2017 13:34:16 +0100
+Message-ID: <CACRpkdb2AZbqU=J8X8EtS5WG1vORgOhTuq8TgENUAnv9A7O5VQ@mail.gmail.com>
+References: <1509715220-31885-1-git-send-email-adrian.hunter@intel.com>
+ <1509715220-31885-8-git-send-email-adrian.hunter@intel.com>
+ <CACRpkdb_ggnC6tguEajiiyMaC=NiNQ-pdOydNJ5w69HgQ05SmQ@mail.gmail.com> <fcba7824-db15-d331-e580-7e26f07e6939@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f171.google.com ([209.85.223.171]:47725 "EHLO
-        mail-io0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754268AbdKIMdh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Nov 2017 07:33:37 -0500
-Received: by mail-io0-f171.google.com with SMTP id h70so9649705ioi.4
-        for <linux-mmc@vger.kernel.org>; Thu, 09 Nov 2017 04:33:36 -0800 (PST)
-In-Reply-To: <CAPP0e=O2p68jewHDpG0nJtFitrVmpWHO1DU0f32LxF22Hsbapw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <fcba7824-db15-d331-e580-7e26f07e6939@intel.com>
+Sender: linux-block-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-mmc@vger.kernel.org
-To: Jungseung Lee <js07.lee@gmail.com>
-Cc: Jungseung Lee <js07.lee@samsung.com>, Christoph Hellwig <hch@lst.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 8 November 2017 at 15:25, Jungseung Lee <js07.lee@gmail.com> wrote:
-> On Tue, Nov 7, 2017 at 9:54 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->> On 7 November 2017 at 08:02, Jungseung Lee <js07.lee@samsung.com> wrote:
->>> Some devices return zeroes on read to unmmaped logical blocks.
->>> Use this behavior to implement REQ_OP_WRITES_ZEROES.
+On Thu, Nov 9, 2017 at 8:27 AM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 08/11/17 11:28, Linus Walleij wrote:
+>> On Fri, Nov 3, 2017 at 2:20 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>
+>>> For blk-mq, add support for completing requests directly in the ->done
+>>> callback. That means that error handling and urgent background operations
+>>> must be handled by recovery_work in that case.
 >>>
->>> Send TRIM operation for the non-partial erase at a convenient time.
+>>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 >>
->> This doesn't explain the problem enough.
+>> I tried enabling this on my MMC host (mmci) but I got weird
+>> DMA error messages when I did.
 >>
->> What does unmapped logical blocks means for an eMMC device? Isn't all
->> logical blocks that is accessible being mapped?
->>
-> Right. There is no unmapped logical block.
-> Only unmapped host address space on eMMC device exist in the spec.
+>> I guess this has not been tested on a non-DMA-coherent
+>> system?
 >
-> "The contents of a write block where the trim function has been applied
-> shall be '0' or '1' depending on different memory technology"
+> I don't see what DMA-coherence has to do with anything.
 >
-> I'd like to fix the name as trimmed block. Is it more clear and reasonable?
+> Possibilities:
+>         - DMA unmapping doesn't work in an atomic context
+>         - requests' DMA operations have to be synchronized with each other
 
-Yes, thanks!
+So since MMCI need the post_req() hook called with
+an error code to properly tear down any DMA operations,
+I was worried that maybe your error path is not doing this
+(passing an error code or calling in the right order).
 
-[...]
+I had a bunch of fallouts in my own patch set relating
+to that.
 
-Kind regards
-Uffe
+>> I think I might be seeing this because the .pre and .post
+>> callbacks need to be strictly sequenced, and this is
+>> maybe not taken into account here?
+>
+> I looked at mmci but that did not seem to be the case.
+>
+>> Isn't there as risk
+>> that the .post callback of the next request is called before
+>> the .post callback of the previous request has returned
+>> for example?
+>
+> Of course, the requests are treated as independent.  If the separate DMA
+> operations require synchronization, that is for the host driver to fix.
+
+They are treated as independent by the block layer but
+it is the subsystems duty to serialize them for the hardware,
+
+MMCI strictly requires that pre/post hooks per request
+happen in the right order, so if you have prepared a second
+request after submitting the first, and the first fails, you have
+to back out by unpreparing the second one before unpreparing
+the first. It is also the only host driver requireing to be passed
+an error code in the last parameter to the post hook in
+order to work properly.
+
+I think your patch set handles that nicely though, because I
+haven't seen any errors, it's just when we do this direct
+completion I see problems.
+
+Yours,
+Linus Walleij
