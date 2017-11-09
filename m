@@ -1,33 +1,53 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V13 06/10] mmc: sdhci-pci: Add CQHCI support for Intel GLK
-Date: Thu, 9 Nov 2017 09:12:35 +0200
-Message-ID: <03cc4d87-940c-797e-69e0-fffa630adc16@intel.com>
+Subject: Re: [PATCH V13 07/10] mmc: block: blk-mq: Add support for direct
+ completion
+Date: Thu, 9 Nov 2017 09:27:38 +0200
+Message-ID: <fcba7824-db15-d331-e580-7e26f07e6939@intel.com>
 References: <1509715220-31885-1-git-send-email-adrian.hunter@intel.com>
- <1509715220-31885-7-git-send-email-adrian.hunter@intel.com>
- <CACRpkdaf8nt1P32M+uYD3xSTTHMO8YMnP=Y56H179XiB9mvakQ@mail.gmail.com>
+ <1509715220-31885-8-git-send-email-adrian.hunter@intel.com>
+ <CACRpkdb_ggnC6tguEajiiyMaC=NiNQ-pdOydNJ5w69HgQ05SmQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CACRpkdaf8nt1P32M+uYD3xSTTHMO8YMnP=Y56H179XiB9mvakQ@mail.gmail.com>
+In-Reply-To: <CACRpkdb_ggnC6tguEajiiyMaC=NiNQ-pdOydNJ5w69HgQ05SmQ@mail.gmail.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
 To: Linus Walleij <linus.walleij@linaro.org>
 Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-mmc@vger.kernel.org
 
-On 08/11/17 11:24, Linus Walleij wrote:
+On 08/11/17 11:28, Linus Walleij wrote:
 > On Fri, Nov 3, 2017 at 2:20 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
 > 
->> Add CQHCI initialization and implement CQHCI operations for Intel GLK.
+>> For blk-mq, add support for completing requests directly in the ->done
+>> callback. That means that error handling and urgent background operations
+>> must be handled by recovery_work in that case.
 >>
 >> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 > 
-> This patch seems OK in context, but it merely illustrates the
-> weirdness of .[runtime]_suspend/resume calling into CQE-specific
-> APIs rather than using generic host callbacks.
+> I tried enabling this on my MMC host (mmci) but I got weird
+> DMA error messages when I did.
+> 
+> I guess this has not been tested on a non-DMA-coherent
+> system?
 
-Your comment makes no sense at all.  The host driver has
-[runtime]_suspend/resume callbacks and it is up to the host driver to decide
-what to do.  CQHCI provides helpers since that is the whole point of having
-a CQHCI library.
+I don't see what DMA-coherence has to do with anything.
+
+Possibilities:
+	- DMA unmapping doesn't work in an atomic context
+	- requests' DMA operations have to be synchronized with each other
+
+> I think I might be seeing this because the .pre and .post
+> callbacks need to be strictly sequenced, and this is
+> maybe not taken into account here?
+
+I looked at mmci but that did not seem to be the case.
+
+> Isn't there as risk
+> that the .post callback of the next request is called before
+> the .post callback of the previous request has returned
+> for example?
+
+Of course, the requests are treated as independent.  If the separate DMA
+operations require synchronization, that is for the host driver to fix.
