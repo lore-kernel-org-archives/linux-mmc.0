@@ -1,77 +1,73 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH V13 07/10] mmc: block: blk-mq: Add support for direct completion
-Date: Thu, 9 Nov 2017 13:34:16 +0100
-Message-ID: <CACRpkdb2AZbqU=J8X8EtS5WG1vORgOhTuq8TgENUAnv9A7O5VQ@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V13 04/10] mmc: block: Add CQE support
+Date: Thu, 9 Nov 2017 14:39:48 +0200
+Message-ID: <09d283ab-ede5-3e1f-0233-39e222d35248@intel.com>
 References: <1509715220-31885-1-git-send-email-adrian.hunter@intel.com>
- <1509715220-31885-8-git-send-email-adrian.hunter@intel.com>
- <CACRpkdb_ggnC6tguEajiiyMaC=NiNQ-pdOydNJ5w69HgQ05SmQ@mail.gmail.com> <fcba7824-db15-d331-e580-7e26f07e6939@intel.com>
+ <1509715220-31885-5-git-send-email-adrian.hunter@intel.com>
+ <CACRpkda8znQ=jAN-b_SCMzSJU11PZwEyw6dzOE07T-2hf9T6XA@mail.gmail.com>
+ <24ce2510-0b66-a9ff-ffd0-b04b095f7d1a@intel.com>
+ <CACRpkdYWbNKAcY1VFXYDL0DRxDxStqZXnFZCUTfNfG0spie9ew@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <fcba7824-db15-d331-e580-7e26f07e6939@intel.com>
-Sender: linux-block-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from [134.134.136.24] ([134.134.136.24]:4996 "EHLO mga09.intel.com"
+        rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1754211AbdKIMkE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 9 Nov 2017 07:40:04 -0500
+In-Reply-To: <CACRpkdYWbNKAcY1VFXYDL0DRxDxStqZXnFZCUTfNfG0spie9ew@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 
-On Thu, Nov 9, 2017 at 8:27 AM, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 08/11/17 11:28, Linus Walleij wrote:
->> On Fri, Nov 3, 2017 at 2:20 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+On 09/11/17 14:04, Linus Walleij wrote:
+> On Wed, Nov 8, 2017 at 2:20 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> On 08/11/17 11:00, Linus Walleij wrote:
+> 
+>>> This and other bits gives me the feeling CQE is now actually ONLY
+>>> working on the MQ path.
 >>
->>> For blk-mq, add support for completing requests directly in the ->done
->>> callback. That means that error handling and urgent background operations
->>> must be handled by recovery_work in that case.
+>> I was not allowed to support non-mq.
+> 
+> Fair enough.
+> 
+>>> That is good. We only add new functionality on the MQ path,
+>>> yay!
 >>>
->>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+>>> But this fact (only abailable iff MQ==true) should at least be
+>>> mentioned in the commit message I think?
 >>
->> I tried enabling this on my MMC host (mmci) but I got weird
->> DMA error messages when I did.
+>> Why?  CQE is MQ only.
+> 
+> So if you read what I say, I think the commit message should
+> say that CQE is MQ only so that people know that CQE is
+> MQ only.
+
+Alright
+
+> 
+>>> So why not ditch the old block layer or at least make MQ default?
 >>
->> I guess this has not been tested on a non-DMA-coherent
->> system?
->
-> I don't see what DMA-coherence has to do with anything.
->
-> Possibilities:
->         - DMA unmapping doesn't work in an atomic context
->         - requests' DMA operations have to be synchronized with each other
+>> CQE is MQ only.
+> 
+> Yeah? So why keep it around for everything else?
 
-So since MMCI need the post_req() hook called with
-an error code to properly tear down any DMA operations,
-I was worried that maybe your error path is not doing this
-(passing an error code or calling in the right order).
+Never said we should keep it around.  As soon as blk-mq is ready and tested,
+delete it.
 
-I had a bunch of fallouts in my own patch set relating
-to that.
+> 
+>>> When you keep it like this people have to reconfigure
+>>> their kernel to enable MQ before they see the benefits of MQ+CQE
+>>> combined, I think that should rather be the default experience.
+>>
+>> Not at all.  I guess you are confusing the legacy mmc with CQE.  CQE is not
+>> a layer on top of legacy mmc.  It is an alternative to legacy mmc.  CQE
+>> does not sit on top of the legacy mmc blk-mq support.  You don't have to
+>> enable legacy mmc blk-mq support to use CQE.
+> 
+> Now I am confused. I can't parse the last sentence. There is no
+> such thing as legcay blk-mq?
 
->> I think I might be seeing this because the .pre and .post
->> callbacks need to be strictly sequenced, and this is
->> maybe not taken into account here?
->
-> I looked at mmci but that did not seem to be the case.
->
->> Isn't there as risk
->> that the .post callback of the next request is called before
->> the .post callback of the previous request has returned
->> for example?
->
-> Of course, the requests are treated as independent.  If the separate DMA
-> operations require synchronization, that is for the host driver to fix.
-
-They are treated as independent by the block layer but
-it is the subsystems duty to serialize them for the hardware,
-
-MMCI strictly requires that pre/post hooks per request
-happen in the right order, so if you have prepared a second
-request after submitting the first, and the first fails, you have
-to back out by unpreparing the second one before unpreparing
-the first. It is also the only host driver requireing to be passed
-an error code in the last parameter to the post hook in
-order to work properly.
-
-I think your patch set handles that nicely though, because I
-haven't seen any errors, it's just when we do this direct
-completion I see problems.
-
-Yours,
-Linus Walleij
+Don't need non-CQE mmc blk-mq support for CQE support.
