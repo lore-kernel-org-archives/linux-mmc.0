@@ -1,210 +1,86 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V13 09/10] mmc: block: blk-mq: Stop using
- card_busy_detect()
-Date: Thu, 9 Nov 2017 17:24:28 +0200
-Message-ID: <2206058b-c7d6-caec-a4fb-411d635eea11@intel.com>
+Subject: Re: [PATCH V13 07/10] mmc: block: blk-mq: Add support for direct
+ completion
+Date: Thu, 9 Nov 2017 17:33:03 +0200
+Message-ID: <44da3008-8dfd-01e4-39c1-15df20cef0e2@intel.com>
 References: <1509715220-31885-1-git-send-email-adrian.hunter@intel.com>
- <1509715220-31885-10-git-send-email-adrian.hunter@intel.com>
- <CAPDyKFpZOMMOkXCoiO4N4+dqppRuvkX+WRtMQfyrYMz0uheR+w@mail.gmail.com>
+ <1509715220-31885-8-git-send-email-adrian.hunter@intel.com>
+ <CACRpkdb_ggnC6tguEajiiyMaC=NiNQ-pdOydNJ5w69HgQ05SmQ@mail.gmail.com>
+ <fcba7824-db15-d331-e580-7e26f07e6939@intel.com>
+ <CACRpkdb2AZbqU=J8X8EtS5WG1vORgOhTuq8TgENUAnv9A7O5VQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFpZOMMOkXCoiO4N4+dqppRuvkX+WRtMQfyrYMz0uheR+w@mail.gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CACRpkdb2AZbqU=J8X8EtS5WG1vORgOhTuq8TgENUAnv9A7O5VQ@mail.gmail.com>
 Content-Language: en-US
-Sender: linux-block-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-mmc@vger.kernel.org
 
-On 09/11/17 15:36, Ulf Hansson wrote:
-> On 3 November 2017 at 14:20, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> card_busy_detect() doesn't set a correct timeout, and it doesn't take care
->> of error status bits. Stop using it for blk-mq.
+On 09/11/17 14:34, Linus Walleij wrote:
+> On Thu, Nov 9, 2017 at 8:27 AM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> On 08/11/17 11:28, Linus Walleij wrote:
+>>> On Fri, Nov 3, 2017 at 2:20 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>
+>>>> For blk-mq, add support for completing requests directly in the ->done
+>>>> callback. That means that error handling and urgent background operations
+>>>> must be handled by recovery_work in that case.
+>>>>
+>>>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+>>>
+>>> I tried enabling this on my MMC host (mmci) but I got weird
+>>> DMA error messages when I did.
+>>>
+>>> I guess this has not been tested on a non-DMA-coherent
+>>> system?
+>>
+>> I don't see what DMA-coherence has to do with anything.
+>>
+>> Possibilities:
+>>         - DMA unmapping doesn't work in an atomic context
+>>         - requests' DMA operations have to be synchronized with each other
 > 
-> I think this changelog isn't very descriptive. Could you please work
-> on that for the next version.
+> So since MMCI need the post_req() hook called with
+> an error code to properly tear down any DMA operations,
+> I was worried that maybe your error path is not doing this
+> (passing an error code or calling in the right order).
+> 
+> I had a bunch of fallouts in my own patch set relating
+> to that.
+> 
+>>> I think I might be seeing this because the .pre and .post
+>>> callbacks need to be strictly sequenced, and this is
+>>> maybe not taken into account here?
+>>
+>> I looked at mmci but that did not seem to be the case.
+>>
+>>> Isn't there as risk
+>>> that the .post callback of the next request is called before
+>>> the .post callback of the previous request has returned
+>>> for example?
+>>
+>> Of course, the requests are treated as independent.  If the separate DMA
+>> operations require synchronization, that is for the host driver to fix.
+> 
+> They are treated as independent by the block layer but
+> it is the subsystems duty to serialize them for the hardware,
+> 
+> MMCI strictly requires that pre/post hooks per request
+> happen in the right order, so if you have prepared a second
+> request after submitting the first, and the first fails, you have
+> to back out by unpreparing the second one before unpreparing
+> the first. It is also the only host driver requireing to be passed
+> an error code in the last parameter to the post hook in
+> order to work properly.
+> 
+> I think your patch set handles that nicely though, because I
+> haven't seen any errors, it's just when we do this direct
+> completion I see problems.
 
-Ok
-
-> 
->>
->> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
->> ---
->>  drivers/mmc/core/block.c | 117 +++++++++++++++++++++++++++++++++++++++++++----
->>  1 file changed, 109 insertions(+), 8 deletions(-)
->>
->> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
->> index 0c29b1d8d545..5c5ff3c34313 100644
->> --- a/drivers/mmc/core/block.c
->> +++ b/drivers/mmc/core/block.c
->> @@ -1426,15 +1426,18 @@ static inline void mmc_apply_rel_rw(struct mmc_blk_request *brq,
->>         }
->>  }
->>
->> -#define CMD_ERRORS                                                     \
->> -       (R1_OUT_OF_RANGE |      /* Command argument out of range */     \
->> -        R1_ADDRESS_ERROR |     /* Misaligned address */                \
->> +#define CMD_ERRORS_EXCL_OOR                                            \
->> +       (R1_ADDRESS_ERROR |     /* Misaligned address */                \
->>          R1_BLOCK_LEN_ERROR |   /* Transferred block length incorrect */\
->>          R1_WP_VIOLATION |      /* Tried to write to protected block */ \
->>          R1_CARD_ECC_FAILED |   /* Card ECC failed */                   \
->>          R1_CC_ERROR |          /* Card controller error */             \
->>          R1_ERROR)              /* General/unknown error */
->>
->> +#define CMD_ERRORS                                                     \
->> +       (CMD_ERRORS_EXCL_OOR |                                          \
->> +        R1_OUT_OF_RANGE)       /* Command argument out of range */     \
->> +
->>  static void mmc_blk_eval_resp_error(struct mmc_blk_request *brq)
->>  {
->>         u32 val;
->> @@ -1951,6 +1954,95 @@ static void mmc_blk_ss_read(struct mmc_queue *mq, struct request *req)
->>         mqrq->retries = MMC_NO_RETRIES;
->>  }
->>
->> +static inline bool mmc_blk_oor_valid(struct mmc_blk_request *brq)
->> +{
->> +       return !!brq->mrq.sbc;
->> +}
->> +
->> +static inline u32 mmc_blk_stop_err_bits(struct mmc_blk_request *brq)
->> +{
->> +       return mmc_blk_oor_valid(brq) ? CMD_ERRORS : CMD_ERRORS_EXCL_OOR;
->> +}
->> +
->> +static inline bool mmc_blk_in_tran_state(u32 status)
->> +{
->> +       /*
->> +        * Some cards mishandle the status bits, so make sure to check both the
->> +        * busy indication and the card state.
->> +        */
->> +       return status & R1_READY_FOR_DATA &&
->> +              (R1_CURRENT_STATE(status) == R1_STATE_TRAN);
->> +}
->> +
->> +static unsigned int mmc_blk_clock_khz(struct mmc_host *host)
->> +{
->> +       if (host->actual_clock)
->> +               return host->actual_clock / 1000;
->> +
->> +       /* Clock may be subject to a divisor, fudge it by a factor of 2. */
->> +       if (host->ios.clock)
->> +               return host->ios.clock / 2000;
->> +
->> +       /* How can there be no clock */
->> +       WARN_ON_ONCE(1);
->> +       return 100; /* 100 kHz is minimum possible value */
->> +}
->> +
->> +static unsigned long mmc_blk_data_timeout_jiffies(struct mmc_host *host,
->> +                                                 struct mmc_data *data)
->> +{
->> +       unsigned int ms = DIV_ROUND_UP(data->timeout_ns, 1000000);
->> +       unsigned int khz;
->> +
->> +       if (data->timeout_clks) {
->> +               khz = mmc_blk_clock_khz(host);
->> +               ms += DIV_ROUND_UP(data->timeout_clks, khz);
->> +       }
->> +
->> +       return msecs_to_jiffies(ms);
->> +}
->> +
->> +static int mmc_blk_card_stuck(struct mmc_card *card, struct request *req,
->> +                             u32 *resp_errs)
->> +{
->> +       struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
->> +       struct mmc_data *data = &mqrq->brq.data;
->> +       unsigned long timeout;
->> +       u32 status;
->> +       int err;
->> +
->> +       timeout = jiffies + mmc_blk_data_timeout_jiffies(card->host, data);
->> +
->> +       while (1) {
->> +               bool done = time_after(jiffies, timeout);
->> +
->> +               err = __mmc_send_status(card, &status, 5);
->> +               if (err) {
->> +                       pr_err("%s: error %d requesting status\n",
->> +                              req->rq_disk->disk_name, err);
->> +                       break;
->> +               }
->> +
->> +               /* Accumulate any response error bits seen */
->> +               if (resp_errs)
->> +                       *resp_errs |= status;
->> +
->> +               if (mmc_blk_in_tran_state(status))
->> +                       break;
->> +
->> +               /* Timeout if the device never becomes ready */
->> +               if (done) {
->> +                       pr_err("%s: Card stuck in wrong state! %s %s\n",
->> +                               mmc_hostname(card->host),
->> +                               req->rq_disk->disk_name, __func__);
->> +                       err = -ETIMEDOUT;
->> +                       break;
->> +               }
->> +       }
->> +
->> +       return err;
->> +}
-> 
-> The new function here, mmc_blk_card_stuck() looks very similar to
-> card_busy_detect().
-> 
-> Why can't you instead fixup card_busy_detect() so it behaves like the
-> new mmc_blk_card_stuck(), rather than re-implementing most of it?
-
-I saw an advantage in keeping the legacy code separate so that it didn't
-then also need testing.
-
-I guess it doesn't hurt to try to fix up the old code.
-
-> 
->> +
->>  static void mmc_blk_rw_recovery(struct mmc_queue *mq, struct request *req)
->>  {
->>         int type = rq_data_dir(req) == READ ? MMC_BLK_READ : MMC_BLK_WRITE;
->> @@ -2097,17 +2189,26 @@ static inline bool mmc_blk_rq_error(struct mmc_blk_request *brq)
->>  static int mmc_blk_card_busy(struct mmc_card *card, struct request *req)
->>  {
->>         struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
->> -       bool gen_err = false;
->> +       u32 status = 0;
->>         int err;
->>
->>         if (mmc_host_is_spi(card->host) || rq_data_dir(req) == READ)
->>                 return 0;
->>
->> -       err = card_busy_detect(card, MMC_BLK_TIMEOUT_MS, false, req, &gen_err);
->> +       err = mmc_blk_card_stuck(card, req, &status);
->> +
->> +       /*
->> +        * Do not assume data transferred correctly if there are any error bits
->> +        * set.
->> +        */
->> +       if (!err && status & mmc_blk_stop_err_bits(&mqrq->brq)) {
->> +               mqrq->brq.data.bytes_xfered = 0;
->> +               err = -EIO;
->> +       }
->>
->> -       /* Copy the general error bit so it will be seen later on */
->> -       if (gen_err)
->> -               mqrq->brq.stop.resp[0] |= R1_ERROR;
->> +       /* Copy the exception bit so it will be seen later on */
->> +       if (mmc_card_mmc(card) && status & R1_EXCEPTION_EVENT)
->> +               mqrq->brq.cmd.resp[0] |= R1_EXCEPTION_EVENT;
->>
->>         return err;
->>  }
->> --
->> 1.9.1
->>
-> 
-> Kind regards
-> Uffe
-> 
+If a request gets an error, then we always do the post_req before starting
+another request, so the driver can assume that the first request finished
+successfully if it is asked to do post_req on the second request.  So the
+driver does have enough information to keep the DMA unmapping in order if
+necessary.
