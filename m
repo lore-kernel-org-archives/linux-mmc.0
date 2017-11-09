@@ -1,49 +1,210 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V13 05/10] mmc: cqhci: support for command queue enabled
- host
-Date: Thu, 9 Nov 2017 16:20:59 +0200
-Message-ID: <bb2943ec-0aa6-6dfe-dfdc-7c659644a101@intel.com>
+Subject: Re: [PATCH V13 09/10] mmc: block: blk-mq: Stop using
+ card_busy_detect()
+Date: Thu, 9 Nov 2017 17:24:28 +0200
+Message-ID: <2206058b-c7d6-caec-a4fb-411d635eea11@intel.com>
 References: <1509715220-31885-1-git-send-email-adrian.hunter@intel.com>
- <1509715220-31885-6-git-send-email-adrian.hunter@intel.com>
- <CAPDyKFq-CYwO207iqAmtXwGmouFXxna0zRPW-53CvknsRC1toQ@mail.gmail.com>
+ <1509715220-31885-10-git-send-email-adrian.hunter@intel.com>
+ <CAPDyKFpZOMMOkXCoiO4N4+dqppRuvkX+WRtMQfyrYMz0uheR+w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFq-CYwO207iqAmtXwGmouFXxna0zRPW-53CvknsRC1toQ@mail.gmail.com>
+In-Reply-To: <CAPDyKFpZOMMOkXCoiO4N4+dqppRuvkX+WRtMQfyrYMz0uheR+w@mail.gmail.com>
 Content-Language: en-US
 Sender: linux-block-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-mmc@vger.kernel.org
 
-On 09/11/17 15:41, Ulf Hansson wrote:
+On 09/11/17 15:36, Ulf Hansson wrote:
 > On 3 November 2017 at 14:20, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> From: Venkat Gopalakrishnan <venkatg@codeaurora.org>
->>
->> This patch adds CMDQ support for command-queue compatible
->> hosts.
->>
->> Command queue is added in eMMC-5.1 specification. This
->> enables the controller to process upto 32 requests at
->> a time.
->>
->> Adrian Hunter contributed renaming to cqhci, recovery, suspend
->> and resume, cqhci_off, cqhci_wait_for_idle, and external timeout
->> handling.
->>
->> Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
->> Signed-off-by: Sujit Reddy Thumma <sthumma@codeaurora.org>
->> Signed-off-by: Konstantin Dorfman <kdorfman@codeaurora.org>
->> Signed-off-by: Venkat Gopalakrishnan <venkatg@codeaurora.org>
->> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
->> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
->> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+>> card_busy_detect() doesn't set a correct timeout, and it doesn't take care
+>> of error status bits. Stop using it for blk-mq.
 > 
-> Overall this looks good to me.
-> 
-> However, I didn't see MAINTAINERS being updated. Is anybody above
-> volunteering to maintain cqhci.*?
+> I think this changelog isn't very descriptive. Could you please work
+> on that for the next version.
 
-I have hardware that I can use for testing so I can maintain it if no one
-else wants to, however if anyone else is keen please feel free to offer too.
+Ok
+
+> 
+>>
+>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+>> ---
+>>  drivers/mmc/core/block.c | 117 +++++++++++++++++++++++++++++++++++++++++++----
+>>  1 file changed, 109 insertions(+), 8 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+>> index 0c29b1d8d545..5c5ff3c34313 100644
+>> --- a/drivers/mmc/core/block.c
+>> +++ b/drivers/mmc/core/block.c
+>> @@ -1426,15 +1426,18 @@ static inline void mmc_apply_rel_rw(struct mmc_blk_request *brq,
+>>         }
+>>  }
+>>
+>> -#define CMD_ERRORS                                                     \
+>> -       (R1_OUT_OF_RANGE |      /* Command argument out of range */     \
+>> -        R1_ADDRESS_ERROR |     /* Misaligned address */                \
+>> +#define CMD_ERRORS_EXCL_OOR                                            \
+>> +       (R1_ADDRESS_ERROR |     /* Misaligned address */                \
+>>          R1_BLOCK_LEN_ERROR |   /* Transferred block length incorrect */\
+>>          R1_WP_VIOLATION |      /* Tried to write to protected block */ \
+>>          R1_CARD_ECC_FAILED |   /* Card ECC failed */                   \
+>>          R1_CC_ERROR |          /* Card controller error */             \
+>>          R1_ERROR)              /* General/unknown error */
+>>
+>> +#define CMD_ERRORS                                                     \
+>> +       (CMD_ERRORS_EXCL_OOR |                                          \
+>> +        R1_OUT_OF_RANGE)       /* Command argument out of range */     \
+>> +
+>>  static void mmc_blk_eval_resp_error(struct mmc_blk_request *brq)
+>>  {
+>>         u32 val;
+>> @@ -1951,6 +1954,95 @@ static void mmc_blk_ss_read(struct mmc_queue *mq, struct request *req)
+>>         mqrq->retries = MMC_NO_RETRIES;
+>>  }
+>>
+>> +static inline bool mmc_blk_oor_valid(struct mmc_blk_request *brq)
+>> +{
+>> +       return !!brq->mrq.sbc;
+>> +}
+>> +
+>> +static inline u32 mmc_blk_stop_err_bits(struct mmc_blk_request *brq)
+>> +{
+>> +       return mmc_blk_oor_valid(brq) ? CMD_ERRORS : CMD_ERRORS_EXCL_OOR;
+>> +}
+>> +
+>> +static inline bool mmc_blk_in_tran_state(u32 status)
+>> +{
+>> +       /*
+>> +        * Some cards mishandle the status bits, so make sure to check both the
+>> +        * busy indication and the card state.
+>> +        */
+>> +       return status & R1_READY_FOR_DATA &&
+>> +              (R1_CURRENT_STATE(status) == R1_STATE_TRAN);
+>> +}
+>> +
+>> +static unsigned int mmc_blk_clock_khz(struct mmc_host *host)
+>> +{
+>> +       if (host->actual_clock)
+>> +               return host->actual_clock / 1000;
+>> +
+>> +       /* Clock may be subject to a divisor, fudge it by a factor of 2. */
+>> +       if (host->ios.clock)
+>> +               return host->ios.clock / 2000;
+>> +
+>> +       /* How can there be no clock */
+>> +       WARN_ON_ONCE(1);
+>> +       return 100; /* 100 kHz is minimum possible value */
+>> +}
+>> +
+>> +static unsigned long mmc_blk_data_timeout_jiffies(struct mmc_host *host,
+>> +                                                 struct mmc_data *data)
+>> +{
+>> +       unsigned int ms = DIV_ROUND_UP(data->timeout_ns, 1000000);
+>> +       unsigned int khz;
+>> +
+>> +       if (data->timeout_clks) {
+>> +               khz = mmc_blk_clock_khz(host);
+>> +               ms += DIV_ROUND_UP(data->timeout_clks, khz);
+>> +       }
+>> +
+>> +       return msecs_to_jiffies(ms);
+>> +}
+>> +
+>> +static int mmc_blk_card_stuck(struct mmc_card *card, struct request *req,
+>> +                             u32 *resp_errs)
+>> +{
+>> +       struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
+>> +       struct mmc_data *data = &mqrq->brq.data;
+>> +       unsigned long timeout;
+>> +       u32 status;
+>> +       int err;
+>> +
+>> +       timeout = jiffies + mmc_blk_data_timeout_jiffies(card->host, data);
+>> +
+>> +       while (1) {
+>> +               bool done = time_after(jiffies, timeout);
+>> +
+>> +               err = __mmc_send_status(card, &status, 5);
+>> +               if (err) {
+>> +                       pr_err("%s: error %d requesting status\n",
+>> +                              req->rq_disk->disk_name, err);
+>> +                       break;
+>> +               }
+>> +
+>> +               /* Accumulate any response error bits seen */
+>> +               if (resp_errs)
+>> +                       *resp_errs |= status;
+>> +
+>> +               if (mmc_blk_in_tran_state(status))
+>> +                       break;
+>> +
+>> +               /* Timeout if the device never becomes ready */
+>> +               if (done) {
+>> +                       pr_err("%s: Card stuck in wrong state! %s %s\n",
+>> +                               mmc_hostname(card->host),
+>> +                               req->rq_disk->disk_name, __func__);
+>> +                       err = -ETIMEDOUT;
+>> +                       break;
+>> +               }
+>> +       }
+>> +
+>> +       return err;
+>> +}
+> 
+> The new function here, mmc_blk_card_stuck() looks very similar to
+> card_busy_detect().
+> 
+> Why can't you instead fixup card_busy_detect() so it behaves like the
+> new mmc_blk_card_stuck(), rather than re-implementing most of it?
+
+I saw an advantage in keeping the legacy code separate so that it didn't
+then also need testing.
+
+I guess it doesn't hurt to try to fix up the old code.
+
+> 
+>> +
+>>  static void mmc_blk_rw_recovery(struct mmc_queue *mq, struct request *req)
+>>  {
+>>         int type = rq_data_dir(req) == READ ? MMC_BLK_READ : MMC_BLK_WRITE;
+>> @@ -2097,17 +2189,26 @@ static inline bool mmc_blk_rq_error(struct mmc_blk_request *brq)
+>>  static int mmc_blk_card_busy(struct mmc_card *card, struct request *req)
+>>  {
+>>         struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
+>> -       bool gen_err = false;
+>> +       u32 status = 0;
+>>         int err;
+>>
+>>         if (mmc_host_is_spi(card->host) || rq_data_dir(req) == READ)
+>>                 return 0;
+>>
+>> -       err = card_busy_detect(card, MMC_BLK_TIMEOUT_MS, false, req, &gen_err);
+>> +       err = mmc_blk_card_stuck(card, req, &status);
+>> +
+>> +       /*
+>> +        * Do not assume data transferred correctly if there are any error bits
+>> +        * set.
+>> +        */
+>> +       if (!err && status & mmc_blk_stop_err_bits(&mqrq->brq)) {
+>> +               mqrq->brq.data.bytes_xfered = 0;
+>> +               err = -EIO;
+>> +       }
+>>
+>> -       /* Copy the general error bit so it will be seen later on */
+>> -       if (gen_err)
+>> -               mqrq->brq.stop.resp[0] |= R1_ERROR;
+>> +       /* Copy the exception bit so it will be seen later on */
+>> +       if (mmc_card_mmc(card) && status & R1_EXCEPTION_EVENT)
+>> +               mqrq->brq.cmd.resp[0] |= R1_EXCEPTION_EVENT;
+>>
+>>         return err;
+>>  }
+>> --
+>> 1.9.1
+>>
+> 
+> Kind regards
+> Uffe
+> 
