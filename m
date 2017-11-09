@@ -1,269 +1,194 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V13 07/10] mmc: block: blk-mq: Add support for direct
- completion
-Date: Thu, 9 Nov 2017 15:15:18 +0200
-Message-ID: <3343be68-ba0c-878a-043e-8b8302342d4f@intel.com>
-References: <1509715220-31885-1-git-send-email-adrian.hunter@intel.com>
- <1509715220-31885-8-git-send-email-adrian.hunter@intel.com>
- <CAPDyKFrpaHKymPJAmkH8Jbw2Umwd1BPhPDhmydy293ziZ9SFqg@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V13 09/10] mmc: block: blk-mq: Stop using card_busy_detect()
+Date: Thu, 9 Nov 2017 14:36:05 +0100
+Message-ID: <CAPDyKFpZOMMOkXCoiO4N4+dqppRuvkX+WRtMQfyrYMz0uheR+w@mail.gmail.com>
+References: <1509715220-31885-1-git-send-email-adrian.hunter@intel.com> <1509715220-31885-10-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFrpaHKymPJAmkH8Jbw2Umwd1BPhPDhmydy293ziZ9SFqg@mail.gmail.com>
-Content-Language: en-US
+In-Reply-To: <1509715220-31885-10-git-send-email-adrian.hunter@intel.com>
 Sender: linux-block-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
+To: Adrian Hunter <adrian.hunter@intel.com>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-mmc@vger.kernel.org
 
-On 09/11/17 15:07, Ulf Hansson wrote:
-> On 3 November 2017 at 14:20, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> For blk-mq, add support for completing requests directly in the ->done
->> callback. That means that error handling and urgent background operations
->> must be handled by recovery_work in that case.
-> 
-> As the mmc docs sucks, I think it's important that we elaborate a bit
-> more on the constraints this has on the host driver, here in the
-> changelog.
-> 
-> Something along the lines, "Using MMC_CAP_DIRECT_COMPLETE requires the
-> host driver, when calling mmc_request_done(), to cope with that its
-> ->post_req() callback may be called immediately from the same context,
-> etc.."
+On 3 November 2017 at 14:20, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> card_busy_detect() doesn't set a correct timeout, and it doesn't take care
+> of error status bits. Stop using it for blk-mq.
 
-Yes, I will expand it.  It is also a stepping stone to getting to support
-for issuing the next request from the ->done() callback.
+I think this changelog isn't very descriptive. Could you please work
+on that for the next version.
 
-> 
-> Otherwise this looks good to me.
-> 
-> Kind regards
-> Uffe
-> 
->>
->> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
->> ---
->>  drivers/mmc/core/block.c | 100 +++++++++++++++++++++++++++++++++++++++++------
->>  drivers/mmc/core/block.h |   1 +
->>  drivers/mmc/core/queue.c |   5 ++-
->>  drivers/mmc/core/queue.h |   6 +++
->>  include/linux/mmc/host.h |   1 +
->>  5 files changed, 101 insertions(+), 12 deletions(-)
->>
->> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
->> index e8be17152884..cbb4b35a592d 100644
->> --- a/drivers/mmc/core/block.c
->> +++ b/drivers/mmc/core/block.c
->> @@ -2086,6 +2086,22 @@ static void mmc_blk_rw_recovery(struct mmc_queue *mq, struct request *req)
->>         }
->>  }
->>
->> +static inline bool mmc_blk_rq_error(struct mmc_blk_request *brq)
->> +{
->> +       mmc_blk_eval_resp_error(brq);
->> +
->> +       return brq->sbc.error || brq->cmd.error || brq->stop.error ||
->> +              brq->data.error || brq->cmd.resp[0] & CMD_ERRORS;
->> +}
->> +
->> +static inline void mmc_blk_rw_reset_success(struct mmc_queue *mq,
->> +                                           struct request *req)
->> +{
->> +       int type = rq_data_dir(req) == READ ? MMC_BLK_READ : MMC_BLK_WRITE;
->> +
->> +       mmc_blk_reset_success(mq->blkdata, type);
->> +}
->> +
->>  static void mmc_blk_mq_complete_rq(struct mmc_queue *mq, struct request *req)
->>  {
->>         struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
->> @@ -2167,14 +2183,43 @@ static void mmc_blk_mq_post_req(struct mmc_queue *mq, struct request *req)
->>         if (host->ops->post_req)
->>                 host->ops->post_req(host, mrq, 0);
->>
->> -       blk_mq_complete_request(req);
->> +       /*
->> +        * Block layer timeouts race with completions which means the normal
->> +        * completion path cannot be used during recovery.
->> +        */
->> +       if (mq->in_recovery)
->> +               mmc_blk_mq_complete_rq(mq, req);
->> +       else
->> +               blk_mq_complete_request(req);
->>
->>         mmc_blk_mq_acct_req_done(mq, req);
->>  }
->>
->> +void mmc_blk_mq_recovery(struct mmc_queue *mq)
->> +{
->> +       struct request *req = mq->recovery_req;
->> +       struct mmc_host *host = mq->card->host;
->> +       struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
->> +
->> +       mq->recovery_req = NULL;
->> +       mq->rw_wait = false;
->> +
->> +       if (mmc_blk_rq_error(&mqrq->brq)) {
->> +               mmc_retune_hold_now(host);
->> +               mmc_blk_rw_recovery(mq, req);
->> +       }
->> +
->> +       mmc_blk_urgent_bkops(mq, mqrq);
->> +
->> +       mmc_blk_mq_post_req(mq, req);
->> +}
->> +
->>  static void mmc_blk_mq_complete_prev_req(struct mmc_queue *mq,
->>                                          struct request **prev_req)
->>  {
->> +       if (mmc_queue_direct_complete(mq->card->host))
->> +               return;
->> +
->>         mutex_lock(&mq->complete_lock);
->>
->>         if (!mq->complete_req)
->> @@ -2208,19 +2253,43 @@ static void mmc_blk_mq_req_done(struct mmc_request *mrq)
->>         struct request *req = mmc_queue_req_to_req(mqrq);
->>         struct request_queue *q = req->q;
->>         struct mmc_queue *mq = q->queuedata;
->> +       struct mmc_host *host = mq->card->host;
->>         unsigned long flags;
->> -       bool waiting;
->>
->> -       spin_lock_irqsave(q->queue_lock, flags);
->> -       mq->complete_req = req;
->> -       mq->rw_wait = false;
->> -       waiting = mq->waiting;
->> -       spin_unlock_irqrestore(q->queue_lock, flags);
->> +       if (!mmc_queue_direct_complete(host)) {
->> +               bool waiting;
->> +
->> +               spin_lock_irqsave(q->queue_lock, flags);
->> +               mq->complete_req = req;
->> +               mq->rw_wait = false;
->> +               waiting = mq->waiting;
->> +               spin_unlock_irqrestore(q->queue_lock, flags);
->> +
->> +               if (waiting)
->> +                       wake_up(&mq->wait);
->> +               else
->> +                       kblockd_schedule_work(&mq->complete_work);
->>
->> -       if (waiting)
->> +               return;
->> +       }
->> +
->> +       if (mmc_blk_rq_error(&mqrq->brq) ||
->> +           mmc_blk_urgent_bkops_needed(mq, mqrq)) {
->> +               spin_lock_irqsave(q->queue_lock, flags);
->> +               mq->recovery_needed = true;
->> +               mq->recovery_req = req;
->> +               spin_unlock_irqrestore(q->queue_lock, flags);
->>                 wake_up(&mq->wait);
->> -       else
->> -               kblockd_schedule_work(&mq->complete_work);
->> +               schedule_work(&mq->recovery_work);
->> +               return;
->> +       }
->> +
->> +       mmc_blk_rw_reset_success(mq, req);
->> +
->> +       mq->rw_wait = false;
->> +       wake_up(&mq->wait);
->> +
->> +       mmc_blk_mq_post_req(mq, req);
->>  }
->>
->>  static bool mmc_blk_rw_wait_cond(struct mmc_queue *mq, int *err)
->> @@ -2230,7 +2299,12 @@ static bool mmc_blk_rw_wait_cond(struct mmc_queue *mq, int *err)
->>         bool done;
->>
->>         spin_lock_irqsave(q->queue_lock, flags);
->> -       done = !mq->rw_wait;
->> +       if (mq->recovery_needed) {
->> +               *err = -EBUSY;
->> +               done = true;
->> +       } else {
->> +               done = !mq->rw_wait;
->> +       }
->>         mq->waiting = !done;
->>         spin_unlock_irqrestore(q->queue_lock, flags);
->>
->> @@ -2277,6 +2351,10 @@ static int mmc_blk_mq_issue_rw_rq(struct mmc_queue *mq,
->>         if (err)
->>                 mq->rw_wait = false;
->>
->> +       /* Release re-tuning here where there is no synchronization required */
->> +       if (mmc_queue_direct_complete(host))
->> +               mmc_retune_release(host);
->> +
->>  out_post_req:
->>         if (err && host->ops->post_req)
->>                 host->ops->post_req(host, &mqrq->brq.mrq, err);
->> diff --git a/drivers/mmc/core/block.h b/drivers/mmc/core/block.h
->> index 6c0e98c1af71..5ad22c1c0318 100644
->> --- a/drivers/mmc/core/block.h
->> +++ b/drivers/mmc/core/block.h
->> @@ -12,6 +12,7 @@
->>
->>  enum mmc_issued mmc_blk_mq_issue_rq(struct mmc_queue *mq, struct request *req);
->>  void mmc_blk_mq_complete(struct request *req);
->> +void mmc_blk_mq_recovery(struct mmc_queue *mq);
->>
->>  struct work_struct;
->>
->> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
->> index 971f97698866..bcba2995c767 100644
->> --- a/drivers/mmc/core/queue.c
->> +++ b/drivers/mmc/core/queue.c
->> @@ -165,7 +165,10 @@ static void mmc_mq_recovery_handler(struct work_struct *work)
->>
->>         mq->in_recovery = true;
->>
->> -       mmc_blk_cqe_recovery(mq);
->> +       if (mq->use_cqe)
->> +               mmc_blk_cqe_recovery(mq);
->> +       else
->> +               mmc_blk_mq_recovery(mq);
->>
->>         mq->in_recovery = false;
->>
->> diff --git a/drivers/mmc/core/queue.h b/drivers/mmc/core/queue.h
->> index f05b5a9d2f87..9bbfbb1fad7b 100644
->> --- a/drivers/mmc/core/queue.h
->> +++ b/drivers/mmc/core/queue.h
->> @@ -102,6 +102,7 @@ struct mmc_queue {
->>         bool                    waiting;
->>         struct work_struct      recovery_work;
->>         wait_queue_head_t       wait;
->> +       struct request          *recovery_req;
->>         struct request          *complete_req;
->>         struct mutex            complete_lock;
->>         struct work_struct      complete_work;
->> @@ -133,4 +134,9 @@ static inline int mmc_cqe_qcnt(struct mmc_queue *mq)
->>                mq->in_flight[MMC_ISSUE_ASYNC];
->>  }
->>
->> +static inline bool mmc_queue_direct_complete(struct mmc_host *host)
->> +{
->> +       return host->caps & MMC_CAP_DIRECT_COMPLETE;
->> +}
->> +
->>  #endif
->> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
->> index ce2075d6f429..4b68a95a8818 100644
->> --- a/include/linux/mmc/host.h
->> +++ b/include/linux/mmc/host.h
->> @@ -324,6 +324,7 @@ struct mmc_host {
->>  #define MMC_CAP_DRIVER_TYPE_A  (1 << 23)       /* Host supports Driver Type A */
->>  #define MMC_CAP_DRIVER_TYPE_C  (1 << 24)       /* Host supports Driver Type C */
->>  #define MMC_CAP_DRIVER_TYPE_D  (1 << 25)       /* Host supports Driver Type D */
->> +#define MMC_CAP_DIRECT_COMPLETE        (1 << 27)       /* RW reqs can be completed within mmc_request_done() */
->>  #define MMC_CAP_CD_WAKE                (1 << 28)       /* Enable card detect wake */
->>  #define MMC_CAP_CMD_DURING_TFR (1 << 29)       /* Commands during data transfer */
->>  #define MMC_CAP_CMD23          (1 << 30)       /* CMD23 supported. */
->> --
->> 1.9.1
->>
-> 
+>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> ---
+>  drivers/mmc/core/block.c | 117 +++++++++++++++++++++++++++++++++++++++++++----
+>  1 file changed, 109 insertions(+), 8 deletions(-)
+>
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index 0c29b1d8d545..5c5ff3c34313 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -1426,15 +1426,18 @@ static inline void mmc_apply_rel_rw(struct mmc_blk_request *brq,
+>         }
+>  }
+>
+> -#define CMD_ERRORS                                                     \
+> -       (R1_OUT_OF_RANGE |      /* Command argument out of range */     \
+> -        R1_ADDRESS_ERROR |     /* Misaligned address */                \
+> +#define CMD_ERRORS_EXCL_OOR                                            \
+> +       (R1_ADDRESS_ERROR |     /* Misaligned address */                \
+>          R1_BLOCK_LEN_ERROR |   /* Transferred block length incorrect */\
+>          R1_WP_VIOLATION |      /* Tried to write to protected block */ \
+>          R1_CARD_ECC_FAILED |   /* Card ECC failed */                   \
+>          R1_CC_ERROR |          /* Card controller error */             \
+>          R1_ERROR)              /* General/unknown error */
+>
+> +#define CMD_ERRORS                                                     \
+> +       (CMD_ERRORS_EXCL_OOR |                                          \
+> +        R1_OUT_OF_RANGE)       /* Command argument out of range */     \
+> +
+>  static void mmc_blk_eval_resp_error(struct mmc_blk_request *brq)
+>  {
+>         u32 val;
+> @@ -1951,6 +1954,95 @@ static void mmc_blk_ss_read(struct mmc_queue *mq, struct request *req)
+>         mqrq->retries = MMC_NO_RETRIES;
+>  }
+>
+> +static inline bool mmc_blk_oor_valid(struct mmc_blk_request *brq)
+> +{
+> +       return !!brq->mrq.sbc;
+> +}
+> +
+> +static inline u32 mmc_blk_stop_err_bits(struct mmc_blk_request *brq)
+> +{
+> +       return mmc_blk_oor_valid(brq) ? CMD_ERRORS : CMD_ERRORS_EXCL_OOR;
+> +}
+> +
+> +static inline bool mmc_blk_in_tran_state(u32 status)
+> +{
+> +       /*
+> +        * Some cards mishandle the status bits, so make sure to check both the
+> +        * busy indication and the card state.
+> +        */
+> +       return status & R1_READY_FOR_DATA &&
+> +              (R1_CURRENT_STATE(status) == R1_STATE_TRAN);
+> +}
+> +
+> +static unsigned int mmc_blk_clock_khz(struct mmc_host *host)
+> +{
+> +       if (host->actual_clock)
+> +               return host->actual_clock / 1000;
+> +
+> +       /* Clock may be subject to a divisor, fudge it by a factor of 2. */
+> +       if (host->ios.clock)
+> +               return host->ios.clock / 2000;
+> +
+> +       /* How can there be no clock */
+> +       WARN_ON_ONCE(1);
+> +       return 100; /* 100 kHz is minimum possible value */
+> +}
+> +
+> +static unsigned long mmc_blk_data_timeout_jiffies(struct mmc_host *host,
+> +                                                 struct mmc_data *data)
+> +{
+> +       unsigned int ms = DIV_ROUND_UP(data->timeout_ns, 1000000);
+> +       unsigned int khz;
+> +
+> +       if (data->timeout_clks) {
+> +               khz = mmc_blk_clock_khz(host);
+> +               ms += DIV_ROUND_UP(data->timeout_clks, khz);
+> +       }
+> +
+> +       return msecs_to_jiffies(ms);
+> +}
+> +
+> +static int mmc_blk_card_stuck(struct mmc_card *card, struct request *req,
+> +                             u32 *resp_errs)
+> +{
+> +       struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
+> +       struct mmc_data *data = &mqrq->brq.data;
+> +       unsigned long timeout;
+> +       u32 status;
+> +       int err;
+> +
+> +       timeout = jiffies + mmc_blk_data_timeout_jiffies(card->host, data);
+> +
+> +       while (1) {
+> +               bool done = time_after(jiffies, timeout);
+> +
+> +               err = __mmc_send_status(card, &status, 5);
+> +               if (err) {
+> +                       pr_err("%s: error %d requesting status\n",
+> +                              req->rq_disk->disk_name, err);
+> +                       break;
+> +               }
+> +
+> +               /* Accumulate any response error bits seen */
+> +               if (resp_errs)
+> +                       *resp_errs |= status;
+> +
+> +               if (mmc_blk_in_tran_state(status))
+> +                       break;
+> +
+> +               /* Timeout if the device never becomes ready */
+> +               if (done) {
+> +                       pr_err("%s: Card stuck in wrong state! %s %s\n",
+> +                               mmc_hostname(card->host),
+> +                               req->rq_disk->disk_name, __func__);
+> +                       err = -ETIMEDOUT;
+> +                       break;
+> +               }
+> +       }
+> +
+> +       return err;
+> +}
+
+The new function here, mmc_blk_card_stuck() looks very similar to
+card_busy_detect().
+
+Why can't you instead fixup card_busy_detect() so it behaves like the
+new mmc_blk_card_stuck(), rather than re-implementing most of it?
+
+> +
+>  static void mmc_blk_rw_recovery(struct mmc_queue *mq, struct request *req)
+>  {
+>         int type = rq_data_dir(req) == READ ? MMC_BLK_READ : MMC_BLK_WRITE;
+> @@ -2097,17 +2189,26 @@ static inline bool mmc_blk_rq_error(struct mmc_blk_request *brq)
+>  static int mmc_blk_card_busy(struct mmc_card *card, struct request *req)
+>  {
+>         struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
+> -       bool gen_err = false;
+> +       u32 status = 0;
+>         int err;
+>
+>         if (mmc_host_is_spi(card->host) || rq_data_dir(req) == READ)
+>                 return 0;
+>
+> -       err = card_busy_detect(card, MMC_BLK_TIMEOUT_MS, false, req, &gen_err);
+> +       err = mmc_blk_card_stuck(card, req, &status);
+> +
+> +       /*
+> +        * Do not assume data transferred correctly if there are any error bits
+> +        * set.
+> +        */
+> +       if (!err && status & mmc_blk_stop_err_bits(&mqrq->brq)) {
+> +               mqrq->brq.data.bytes_xfered = 0;
+> +               err = -EIO;
+> +       }
+>
+> -       /* Copy the general error bit so it will be seen later on */
+> -       if (gen_err)
+> -               mqrq->brq.stop.resp[0] |= R1_ERROR;
+> +       /* Copy the exception bit so it will be seen later on */
+> +       if (mmc_card_mmc(card) && status & R1_EXCEPTION_EVENT)
+> +               mqrq->brq.cmd.resp[0] |= R1_EXCEPTION_EVENT;
+>
+>         return err;
+>  }
+> --
+> 1.9.1
+>
+
+Kind regards
+Uffe
