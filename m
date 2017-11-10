@@ -1,79 +1,74 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: [PATCH 00/12 v5] Multiqueue for MMC/SD
-Date: Fri, 10 Nov 2017 11:01:31 +0100
-Message-ID: <20171110100143.12256-1-linus.walleij@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f41.google.com ([209.85.215.41]:49715 "EHLO
-        mail-lf0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751410AbdKJKBv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Nov 2017 05:01:51 -0500
-Received: by mail-lf0-f41.google.com with SMTP id w21so10371569lfc.6
-        for <linux-mmc@vger.kernel.org>; Fri, 10 Nov 2017 02:01:51 -0800 (PST)
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [PATCH 01/12 v5] mmc: core: move the asynchronous post-processing
+Date: Fri, 10 Nov 2017 11:01:32 +0100
+Message-ID: <20171110100143.12256-2-linus.walleij@linaro.org>
+References: <20171110100143.12256-1-linus.walleij@linaro.org>
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <20171110100143.12256-1-linus.walleij@linaro.org>
+Sender: linux-block-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Avri Altman <Avri.Altman@sandisk.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>
+List-Id: linux-mmc@vger.kernel.org
 
-This is the fifth iteration of this patch set.
+This moves the asynchronous post-processing of a request over
+to the finalization function.
 
-I *HOPE* that we can scrap this patch set and merge Adrian's
-patches instead, because they also bring CQE support which is
-nice. I had some review comments on his series, mainly that
-it needs to kill off the legacy block layer code path that
-noone likes anyway.
+The patch has a slight semantic change:
 
-So this is mainly an academic and inspirational exercise.
-Whatever remains of this refactoring, if anything, I can
-certainly do on top of Adrian's patches as well.
+Both places will be in the code path for if (host->areq) and
+in the same sequence, but before this patch, the next request
+was started before performing post-processing.
 
-What changed since v4 is the error path, since Adrian pointed
-out that the error handling seems to be fragile. It was indeed
-fragile... To make sure things work properly I have run long
-test rounds with fault injection, essentially:
+The effect is that whereas before, the post- and preprocessing
+happened after starting the next request, now the preprocessing
+will happen after the request is done and before the next has
+started which would cut half of the pre/post optimizations out.
 
-Enable FAULT_INJECTION, FAULT_INJECTION_DEBUG_FS,
-       FAIL_MMC_REQUEST
-cd /debug/mmc3/fail_mmc_request/
-echo 1 > probability
-echo -1 > times
+In the later patch named "mmc: core: replace waitqueue with
+worker" we move the finalization to a worker started by
+mmc_request_done() and in the patch named
+"mmc: block: issue requests in massive parallel" we introduce
+a forked success/failure path that can quickly complete
+requests when they come back from the hardware.
 
-Then running a dd to the card, also increased the error rate
-to 10% and completed tests successfully, but at this error
-rate the MMC stack sometimes exceeds the retry limit and the
-dd command fails (as is appropriate).
+These two later patches together restore the same optimization
+but in a more elegant manner that avoids the need to flush the
+two-stage pipleline with NULL, something we remove between these
+two patches in the commit named
+"mmc: queue: stop flushing the pipeline with NULL".
 
-Removing a card during I/O does not work well however :/
-So I guess I would need to work on that if this series should
-continue. (Hopefully unlikely.)
+Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+---
+ChangeLog v1->v5:
+- Rebasing on the "next" branch in the MMC tree.
+---
+ drivers/mmc/core/core.c | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
 
-
-Linus Walleij (12):
-  mmc: core: move the asynchronous post-processing
-  mmc: core: add a workqueue for completing requests
-  mmc: core: replace waitqueue with worker
-  mmc: core: do away with is_done_rcv
-  mmc: core: do away with is_new_req
-  mmc: core: kill off the context info
-  mmc: queue: simplify queue logic
-  mmc: block: shuffle retry and error handling
-  mmc: queue: stop flushing the pipeline with NULL
-  mmc: queue/block: pass around struct mmc_queue_req*s
-  mmc: block: issue requests in massive parallel
-  mmc: switch MMC/SD to use blk-mq multiqueueing v5
-
- drivers/mmc/core/block.c    | 557 +++++++++++++++++++++++---------------------
- drivers/mmc/core/block.h    |   5 +-
- drivers/mmc/core/bus.c      |   1 -
- drivers/mmc/core/core.c     | 217 ++++++++++-------
- drivers/mmc/core/core.h     |  11 +-
- drivers/mmc/core/host.c     |   1 -
- drivers/mmc/core/mmc_test.c |  31 +--
- drivers/mmc/core/queue.c    | 252 ++++++++------------
- drivers/mmc/core/queue.h    |  16 +-
- include/linux/mmc/core.h    |   3 +-
- include/linux/mmc/host.h    |  31 +--
- 11 files changed, 557 insertions(+), 568 deletions(-)
-
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 1f0f44f4dd5f..e2366a82eebe 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -746,6 +746,9 @@ static enum mmc_blk_status mmc_finalize_areq(struct mmc_host *host)
+ 		mmc_start_bkops(host->card, true);
+ 	}
+ 
++	/* Successfully postprocess the old request at this point */
++	mmc_post_req(host, host->areq->mrq, 0);
++
+ 	return status;
+ }
+ 
+@@ -790,10 +793,6 @@ struct mmc_async_req *mmc_start_areq(struct mmc_host *host,
+ 	if (status == MMC_BLK_SUCCESS && areq)
+ 		start_err = __mmc_start_data_req(host, areq->mrq);
+ 
+-	/* Postprocess the old request at this point */
+-	if (host->areq)
+-		mmc_post_req(host, host->areq->mrq, 0);
+-
+ 	/* Cancel a prepared request if it was not started. */
+ 	if ((status != MMC_BLK_SUCCESS || start_err) && areq)
+ 		mmc_post_req(host, areq->mrq, -EINVAL);
 -- 
 2.13.6
-
