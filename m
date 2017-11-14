@@ -1,43 +1,65 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH 00/12 v5] Multiqueue for MMC/SD
-Date: Tue, 14 Nov 2017 22:19:05 +0100
-Message-ID: <CACRpkdY3JGJtkN6z1cdn2jxfNbNwRyP+CryOv98mC99uTQNDcA@mail.gmail.com>
-References: <CGME20171110104657epcas1p278e62237982d200175480c28080cb708@epcas1p2.samsung.com>
- <20171110100143.12256-1-linus.walleij@linaro.org> <44451616.XazKDfAUO2@amdc3058>
- <3035686.4xzDXYcRrr@amdc3058>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <3035686.4xzDXYcRrr@amdc3058>
-Sender: linux-block-owner@vger.kernel.org
-To: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-block <linux-block@vger.kernel.org>, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Paolo Valente <paolo.valente@linaro.org>, Avri Altman <Avri.Altman@sandisk.com>, Adrian Hunter <adrian.hunter@intel.com>
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Subject: [PATCH RFT] mmc: tmio: use usleep_range consistently
+Date: Tue, 14 Nov 2017 23:51:04 +0100
+Message-ID: <20171114225104.6743-1-wsa+renesas@sang-engineering.com>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-renesas-soc@vger.kernel.org, Simon Horman <horms@verge.net.au>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Nov 14, 2017 at 2:30 PM, Bartlomiej Zolnierkiewicz
-<b.zolnierkie@samsung.com> wrote:
-> On Tuesday, November 14, 2017 01:17:34 PM Bartlomiej Zolnierkiewicz wrote:
->
->> This works much better than initial version and a simple dd read
->> test shows more consistent results than with vanilla kernel.
->>
->> However there are still some issues:
->>
->> 1. 30 seconds delay on "Waiting for /dev to be fully populated..."
->>    during boot
->>
->> 2. reboot command no longer works (there is a livelock after
->>    "The system is going down for reboot NOW!" message)
->>
->> Full log (together with SysRq-l & SysRq-t outputs) attached.
->
-> BTW: these problems are not present in Adrian's V13 patchset
-> (with mmc-mq enabled by default).
+There are a few udelay() left which are in a range that they should be
+usleep_range() these days.
 
-Yes, as I even say in the cover letter I think his patches are
-better so we should use those.
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
 
-Bart can you provide a Tested-by for Adrian' patch set?
+Works fine for me on Lager (R-Car H2) and Salvator-X (R-Car M3-W).
+Testing on other platforms very welcome even though this should be
+independent of the IP core.
 
-Yours,
-Linus Walleij
+ drivers/mmc/host/tmio_mmc_core.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+index 583bf3262df5d4..d6ca57be16c2fd 100644
+--- a/drivers/mmc/host/tmio_mmc_core.c
++++ b/drivers/mmc/host/tmio_mmc_core.c
+@@ -806,7 +806,7 @@ static int tmio_mmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 		if (ret == 0)
+ 			set_bit(i, host->taps);
+ 
+-		mdelay(1);
++		usleep_range(1000, 1200);
+ 	}
+ 
+ 	ret = host->select_tuning(host);
+@@ -958,7 +958,7 @@ static void tmio_mmc_power_on(struct tmio_mmc_host *host, unsigned short vdd)
+ 		 * 100us were not enough. Is this the same 140us delay, as in
+ 		 * tmio_mmc_set_ios()?
+ 		 */
+-		udelay(200);
++		usleep_range(200, 300);
+ 	}
+ 	/*
+ 	 * It seems, VccQ should be switched on after Vcc, this is also what the
+@@ -966,7 +966,7 @@ static void tmio_mmc_power_on(struct tmio_mmc_host *host, unsigned short vdd)
+ 	 */
+ 	if (!IS_ERR(mmc->supply.vqmmc) && !ret) {
+ 		ret = regulator_enable(mmc->supply.vqmmc);
+-		udelay(200);
++		usleep_range(200, 300);
+ 	}
+ 
+ 	if (ret < 0)
+@@ -1059,7 +1059,7 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	}
+ 
+ 	/* Let things settle. delay taken from winCE driver */
+-	udelay(140);
++	usleep_range(140, 200);
+ 	if (PTR_ERR(host->mrq) == -EINTR)
+ 		dev_dbg(&host->pdev->dev,
+ 			"%s.%d: IOS interrupted: clk %u, mode %u",
+-- 
+2.11.0
