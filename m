@@ -1,51 +1,143 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH RFT] mmc: core: use usleep_range rather than HZ magic in mmc_delay()
-Date: Wed, 15 Nov 2017 13:51:31 +0100
-Message-ID: <CAMuHMdWXXUCKMs94NK_40BQj-6YVGeu41Z6DJAjwqRf1yZe_-A@mail.gmail.com>
-References: <20171114225520.6793-1-wsa+renesas@sang-engineering.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V13 03/10] mmc: block: Add blk-mq support
+Date: Wed, 15 Nov 2017 15:07:56 +0200
+Message-ID: <a1d26e3a-f9bc-a6ba-9abd-a31cf760473d@intel.com>
+References: <1509715220-31885-1-git-send-email-adrian.hunter@intel.com>
+ <1509715220-31885-4-git-send-email-adrian.hunter@intel.com>
+ <CACRpkdbLRc8PMguqHOokhyZVUua2TGLL11BCxTawQoWdD2ZaGg@mail.gmail.com>
+ <416a00a8-3ea0-b600-aa60-b0d176c967a3@intel.com>
+ <CACRpkdakoJ+Ktyz-NyR=Ut7Qff+9yMdZQa9hqL7jAXdWwtLxjQ@mail.gmail.com>
+ <000ada93-ff28-a166-c95d-542a01cf926a@intel.com>
+ <CACRpkdY1Jn+=rs0KDX3wrQy56KP3mJKCS7Hs7_DqusvQXNJMjg@mail.gmail.com>
+ <CAPDyKFossXeuRsRfe13U0_Qokwm66S5batLB3VPBSMa2HHhQDA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qt0-f193.google.com ([209.85.216.193]:51628 "EHLO
-        mail-qt0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752876AbdKOMvd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Nov 2017 07:51:33 -0500
-In-Reply-To: <20171114225520.6793-1-wsa+renesas@sang-engineering.com>
+Received: from mga07.intel.com ([134.134.136.100]:46876 "EHLO mga07.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932193AbdKONIO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 15 Nov 2017 08:08:14 -0500
+In-Reply-To: <CAPDyKFossXeuRsRfe13U0_Qokwm66S5batLB3VPBSMa2HHhQDA@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Simon Horman <horms@verge.net.au>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 
-Hi Wolfram,
+On 15/11/17 12:55, Ulf Hansson wrote:
+> Linus, Adrian,
+> 
+> Apologize for sidetracking the discussion, just wanted to add some
+> minor comments.
+> 
+> [...]
+> 
+>>
+>>>> But what I think is nice in doing it around
+>>>> each request is that since mmc_put_card() calls mmc_release_host()
+>>>> contains this:
+>>>>
+>>>> if (--host->claim_cnt) { (...)
+>>>>
+>>>> So there is a counter inside the claim/release host functions
+>>>> and now there is another counter keeping track if the in-flight
+>>>> requests as well and it gives me the feeling we are maintaining
+>>>> two counters when we only need one.
+>>>
+>>> The gets / puts also get runtime pm for the card.  It is a lot a messing
+>>> around for the sake of a quick check for the number of requests inflight -
+>>> which is needed anyway for CQE.
+> 
+> Actually the get / puts for runtime PM of the card is already done
+> taking the host->claim_cnt into account.
 
-On Tue, Nov 14, 2017 at 11:55 PM, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
-> Documentation/timers/timers-howto.txt recommends to use usleep_range for
-> delays 1-20ms. Let's adhere to it. No need for messing with HZ and still
-> do busy looping these days.
->
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> ---
->
-> Here is a more detailed test page for this describing my tests:
->
-> https://elinux.org/Tests:mmc-delay-refactor
->
-> I did mainly test the insert/eject cycle because powering up the cards
-> seemed to trigger most delays. Transferring data did not cause any calls
-> to mmc_delay() for me. Please let me know if someone knows a test pattern
-> which should be included before applying this change.
+We do pm_runtime_get_sync(&card->dev) always i.e.
 
-JFTR, with CONFIG_DEBUG_ATOMIC_SLEEP=y, I assume ?
-(also for the other patch)
+void mmc_get_card(struct mmc_card *card, struct mmc_ctx *ctx)
+{
+	pm_runtime_get_sync(&card->dev);
+	__mmc_claim_host(card->host, ctx, NULL);
+}
 
-Gr{oetje,eeting}s,
+> 
+> In other words, the additional in-flight counter does not provide an
+> additional improvement in this regards.
+> 
+> For that reason, perhaps the in-flight counter should be added in the
+> CQE patch instead, because it seems like it is there it really
+> belongs?
+> 
+> [...]
+> 
+>>
+>> OK I guess I'm more forging ahead with such things. But we could
+>> at least enable it by default so whoever checks out and builds
+>> and tests linux-next with their MMC/SD controllers will then be
+>> testing this for us in the next kernel cycle.
+>>
+>>>> But I think I would prefer that if a big slew of new code is
+>>>> introduced it needs to be put to wide use and any bugs
+>>>> smoked out during the -rc phase, and we are now
+>>>> hiding it behind a Kconfig option so it's unlikely to see testing
+>>>> until that option is turned on, and that is not good.
+>>>
+>>> And if you find a big problem in rc7, then what do you do?  At least with
+>>> the config option, the revert is trivial.
+>>
+>> I see your point. I guess it is up to Ulf how he feels about
+>> trust wrt the code. If a problem appears at -rc7 it's indeed
+>> nice if we can leave the code in-tree and work on it.
+> 
+> Well, it's not an easy decision, simply because it moves the code in
+> an even worse situation maintenance wise. So, if you guys just
+> suddenly have to move on to do something else, then it becomes my
+> problem to work out. :-)
+> 
+> However, as I trust both of you, and that you seems to agree on the
+> path forward, I am fine keeping the old code for while.
+> 
+> Although, please make sure the Kconfig option starts out by being
+> enabled by default, so we can get some test coverage of the mq path.
 
-                        Geert
+Ok
 
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+> 
+> Of course, then we need to work on the card removal problem asap, and
+> hopefully we manage to fix them. If not, or other strange errors
+> happens, we would need to change the default value to 'n' of the
+> Kconfig.
+> 
+> [...]
+> 
+>>>> Hm! What you are saying sounds correct, and we really need to
+>>>> consider the multi-CPU aspects of this, maybe not now. I am
+>>>> happy as long as we have equal performance as before and
+>>>> maintainable code.
+>>>
+>>> Well I saw 3% drop in sequential read performance, improving to 1% when an
+>>> unbound workqueue was used.
+> 
+> Can you please make this improvement as a standalone patch on top of
+> the mq patch?
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+Unfortunately it was just a hack to the blk-mq core - the block layer does
+not have an unbound workqueue.  I have not had time to consider a proper
+fix.  It will have to wait, but I agree 3% is not enough to delay going forward.
+
+> 
+> I think that would be good, because it points out some generic
+> problems with mq, which we then, at least short term, tries to address
+> locally in MMC.
+> 
+> [...]
+> 
+>>
+>>>> If you just make a series also deleteing the old block layer
+>>>> I will test it so it doesn't break anything and then you can
+>>>> probably expect a big Acked-by on the whole shebang.
+>>>
+>>> I will add patches for that - let's see what happens.
+> 
+> Yes, please. However, I will as stated, be withholding that change for
+> a while, until we fixed any showstoppers in the mq path.
