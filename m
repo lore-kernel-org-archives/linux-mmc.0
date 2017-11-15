@@ -1,110 +1,127 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 00/12 v5] Multiqueue for MMC/SD
-Date: Wed, 15 Nov 2017 11:24:04 +0100
-Message-ID: <CAPDyKFr05nOt7ekvsvSEwPEDobM0JKT0Ln65S=AiLa7r22+pOw@mail.gmail.com>
-References: <20171110100143.12256-1-linus.walleij@linaro.org>
- <CAPDyKFpaeRpqea6dy+3nxEtYwBTLUTYoRsYrRHrvfmNX_afxwg@mail.gmail.com> <CACRpkdZ-_1vFLLUcRTXWPYdDomP8Pen9wBwEMUGgr2cd_y3eBQ@mail.gmail.com>
+Subject: Re: [PATCH V13 03/10] mmc: block: Add blk-mq support
+Date: Wed, 15 Nov 2017 11:55:24 +0100
+Message-ID: <CAPDyKFossXeuRsRfe13U0_Qokwm66S5batLB3VPBSMa2HHhQDA@mail.gmail.com>
+References: <1509715220-31885-1-git-send-email-adrian.hunter@intel.com>
+ <1509715220-31885-4-git-send-email-adrian.hunter@intel.com>
+ <CACRpkdbLRc8PMguqHOokhyZVUua2TGLL11BCxTawQoWdD2ZaGg@mail.gmail.com>
+ <416a00a8-3ea0-b600-aa60-b0d176c967a3@intel.com> <CACRpkdakoJ+Ktyz-NyR=Ut7Qff+9yMdZQa9hqL7jAXdWwtLxjQ@mail.gmail.com>
+ <000ada93-ff28-a166-c95d-542a01cf926a@intel.com> <CACRpkdY1Jn+=rs0KDX3wrQy56KP3mJKCS7Hs7_DqusvQXNJMjg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <CACRpkdZ-_1vFLLUcRTXWPYdDomP8Pen9wBwEMUGgr2cd_y3eBQ@mail.gmail.com>
-Sender: linux-block-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Avri Altman <Avri.Altman@sandisk.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-io0-f177.google.com ([209.85.223.177]:39151 "EHLO
+        mail-io0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752365AbdKOKzZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Nov 2017 05:55:25 -0500
+Received: by mail-io0-f177.google.com with SMTP id x63so1148795ioe.6
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Nov 2017 02:55:25 -0800 (PST)
+In-Reply-To: <CACRpkdY1Jn+=rs0KDX3wrQy56KP3mJKCS7Hs7_DqusvQXNJMjg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
+
+Linus, Adrian,
+
+Apologize for sidetracking the discussion, just wanted to add some
+minor comments.
 
 [...]
 
->> Moreover, for reasons brought up while reviewing Adrian's series,
->> regarding if mq is "ready", and because I see that the diff for patch
->> 12 is small, I suggest that we just skip the step adding a Kconfig
->> option to allow an opt-in of the mq path. In other words, *the* patch
->> that makes the switch to mq, should also remove the entire left over
->> of rubbish code, from the legacy request path. That's also what you do
->> in patch12, nice!
 >
-> Partly true.
->
-> Adrian also pointed out the rubbishness of the error handling code
-> in the old stack, and my patch set does *not* fix that. It is also a part
-> of his patch set I like very much and a reason why I would prefer to
-> use Adrian's patches if possible.
->
-> We have the following risk factors:
->
-> - Observed performance degradation of 1% (on x86 SDHI I guess)
+>>> But what I think is nice in doing it around
+>>> each request is that since mmc_put_card() calls mmc_release_host()
+>>> contains this:
+>>>
+>>> if (--host->claim_cnt) { (...)
+>>>
+>>> So there is a counter inside the claim/release host functions
+>>> and now there is another counter keeping track if the in-flight
+>>> requests as well and it gives me the feeling we are maintaining
+>>> two counters when we only need one.
+>>
+>> The gets / puts also get runtime pm for the card.  It is a lot a messing
+>> around for the sake of a quick check for the number of requests inflight -
+>> which is needed anyway for CQE.
 
-I don't think that small degradation is a reason for not enabling mq,
-although for sure we should continue to investigate why it is.
+Actually the get / puts for runtime PM of the card is already done
+taking the host->claim_cnt into account.
 
-> - The kernel crashes if SD card is removed (both patch sets)
+In other words, the additional in-flight counter does not provide an
+additional improvement in this regards.
 
-Yep, this needs to be fixed.
+For that reason, perhaps the in-flight counter should be added in the
+CQE patch instead, because it seems like it is there it really
+belongs?
 
-> - The risk of something nasty happening we don't know of
-
-:-)
+[...]
 
 >
->> Finally, I understand that you would be happy to scrap this series,
->> but instead let Adrian's series, when re-posted, to go first. Could
->> you perhaps re-consider that, because I wonder if it may not be
->> smother and less risky, to actually apply everything up to patch 11 in
->> this series?
+> OK I guess I'm more forging ahead with such things. But we could
+> at least enable it by default so whoever checks out and builds
+> and tests linux-next with their MMC/SD controllers will then be
+> testing this for us in the next kernel cycle.
 >
-> This is possible.
+>>> But I think I would prefer that if a big slew of new code is
+>>> introduced it needs to be put to wide use and any bugs
+>>> smoked out during the -rc phase, and we are now
+>>> hiding it behind a Kconfig option so it's unlikely to see testing
+>>> until that option is turned on, and that is not good.
+>>
+>> And if you find a big problem in rc7, then what do you do?  At least with
+>> the config option, the revert is trivial.
 >
-> But I think it is preferred to proceed with Adrian's patches.
-> I really like the looks of the code. He says he's coming back with
-> a set that also kills off the old block layer, and I am pretty
-> positive I will just ACK the whole thing.
+> I see your point. I guess it is up to Ulf how he feels about
+> trust wrt the code. If a problem appears at -rc7 it's indeed
+> nice if we can leave the code in-tree and work on it.
 
-Alright, let's go with this option!
+Well, it's not an easy decision, simply because it moves the code in
+an even worse situation maintenance wise. So, if you guys just
+suddenly have to move on to do something else, then it becomes my
+problem to work out. :-)
+
+However, as I trust both of you, and that you seems to agree on the
+path forward, I am fine keeping the old code for while.
+
+Although, please make sure the Kconfig option starts out by being
+enabled by default, so we can get some test coverage of the mq path.
+
+Of course, then we need to work on the card removal problem asap, and
+hopefully we manage to fix them. If not, or other strange errors
+happens, we would need to change the default value to 'n' of the
+Kconfig.
+
+[...]
+
+>>> Hm! What you are saying sounds correct, and we really need to
+>>> consider the multi-CPU aspects of this, maybe not now. I am
+>>> happy as long as we have equal performance as before and
+>>> maintainable code.
+>>
+>> Well I saw 3% drop in sequential read performance, improving to 1% when an
+>> unbound workqueue was used.
+
+Can you please make this improvement as a standalone patch on top of
+the mq patch?
+
+I think that would be good, because it points out some generic
+problems with mq, which we then, at least short term, tries to address
+locally in MMC.
+
+[...]
 
 >
-> I optimistically think we can jointly fix the card removal issue
-> and possible also mitigate or root-cause the performance
-> degradation observed by Adrian
->
-> In the best of worlds, Ming Lei's patches will just fix this too
-> (we'll see, we can probably get a branch from the block people
-> to try it) else we can use tracing and perf to drill into it I guess.
+>>> If you just make a series also deleteing the old block layer
+>>> I will test it so it doesn't break anything and then you can
+>>> probably expect a big Acked-by on the whole shebang.
+>>
+>> I will add patches for that - let's see what happens.
 
-I think most of Ming's patches addressing performance issues should be
-in Linus' master already, so once I have a my next branch based on
-4.15rc1, we should be able to run a new round of test.
+Yes, please. However, I will as stated, be withholding that change for
+a while, until we fixed any showstoppers in the mq path.
 
-Anyway, if anything else is needed from the generic block layer, sure
-I am open to pull in a branch if needed.
-
->
->> I noticed that you reported issues with card removal during I/O (for
->> both yours and Adrian's mq patch), but does those problems exists at
->> patch 11 - or is those explicitly introduced with the mk patch (patch
->> 12)?
->
-> I tested it and it is present earlier in the series. I would have to
-> revisit and hash it out.
-
-Right. So, let's then forget about my suggested approach and spend
-time more wisely on Adrian's series.
-
->
->> Of course, I realize that if we apply everything up to patch11, that
->> would require a massive re-base of Adrian's mq/CQE series, but on the
->> other hand, then matter which mq patch we decide to go with, it should
->> be a rather small diff, thus easy to review and less risky.
->
-> At this point I would prefer to use Adrian's series. He has explained
-> pretty well his reasoning and when I tested the code it was performing
-> well. I have some outstanding thingies, but this I can just as well do
-> on top of his patches.
-
-Yep. As stated above, let's go for that solution.
-
-I will then be awaiting a new version from Adrian, hopefully I can
-apply his series already when rc1 is out, to make sure we get enough
-time to smoke out any remaining problems.
+[...]
 
 Kind regards
 Uffe
