@@ -1,56 +1,110 @@
-From: <yinbo.zhu@nxp.com>
-Subject: [PATCH v1] mmc: sdhci-of-esdhc: Workaround for reducing the maximum speed on ls1021atwr
-Date: Wed, 15 Nov 2017 17:01:03 +0800
-Message-ID: <20171115090103.25366-1-yinbo.zhu@nxp.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 00/12 v5] Multiqueue for MMC/SD
+Date: Wed, 15 Nov 2017 11:24:04 +0100
+Message-ID: <CAPDyKFr05nOt7ekvsvSEwPEDobM0JKT0Ln65S=AiLa7r22+pOw@mail.gmail.com>
+References: <20171110100143.12256-1-linus.walleij@linaro.org>
+ <CAPDyKFpaeRpqea6dy+3nxEtYwBTLUTYoRsYrRHrvfmNX_afxwg@mail.gmail.com> <CACRpkdZ-_1vFLLUcRTXWPYdDomP8Pen9wBwEMUGgr2cd_y3eBQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-sn1nam02on0067.outbound.protection.outlook.com ([104.47.36.67]:43741
-        "EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1757260AbdKOJT2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 15 Nov 2017 04:19:28 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <CACRpkdZ-_1vFLLUcRTXWPYdDomP8Pen9wBwEMUGgr2cd_y3eBQ@mail.gmail.com>
+Sender: linux-block-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Avri Altman <Avri.Altman@sandisk.com>
 List-Id: linux-mmc@vger.kernel.org
-To: adrian.hunter@intel.com
-Cc: yangbo.lu@nxp.com, yinbo.zhu@nxp.com, linux-mmc@vger.kernel.org
 
-From: "yinbo.zhu" <yinbo.zhu@nxp.com>
+[...]
 
-In SDHC high speed AC timing, the tshivkh parameter
-is defined as input setup times:SDHC_CMD, SDHC_DATx,
-to SDHC_CLK. The value of the tshivkh should be 2.5 ns
-considering the round trip delay, board/data skew.
-However, because of this erratum, it needs
-at least 4.1 ns.
+>> Moreover, for reasons brought up while reviewing Adrian's series,
+>> regarding if mq is "ready", and because I see that the diff for patch
+>> 12 is small, I suggest that we just skip the step adding a Kconfig
+>> option to allow an opt-in of the mq path. In other words, *the* patch
+>> that makes the switch to mq, should also remove the entire left over
+>> of rubbish code, from the legacy request path. That's also what you do
+>> in patch12, nice!
+>
+> Partly true.
+>
+> Adrian also pointed out the rubbishness of the error handling code
+> in the old stack, and my patch set does *not* fix that. It is also a part
+> of his patch set I like very much and a reason why I would prefer to
+> use Adrian's patches if possible.
+>
+> We have the following risk factors:
+>
+> - Observed performance degradation of 1% (on x86 SDHI I guess)
 
-eSDHC cannot run at the maximum clock speed for the
-high speed mode, or there is a limit on the length
-of the trace on the board for data, command, and
-clock lines of the SDHC.
+I don't think that small degradation is a reason for not enabling mq,
+although for sure we should continue to investigate why it is.
 
-Signed-off-by: yinbo.zhu <yinbo.zhu@nxp.com>
----
- drivers/mmc/host/sdhci-of-esdhc.c | 6 ++++++
- 1 file changed, 6 insertions(+)
+> - The kernel crashes if SD card is removed (both patch sets)
 
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 023c24bd0d94..2744dd58a573 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -498,6 +498,12 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
- 			clock -= 5000000;
- 	}
- 
-+	/* Workaround to reduce the clock frequency for ls1021a esdhc */
-+	if (of_find_compatible_node(NULL, NULL, "fsl,ls1021a-esdhc")) {
-+		if (clock == 50000000)
-+			clock = 46500000;
-+	}
-+
- 	temp = sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
- 	temp &= ~(ESDHC_CLOCK_SDCLKEN | ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN |
- 		  ESDHC_CLOCK_PEREN | ESDHC_CLOCK_MASK);
--- 
-2.14.1
+Yep, this needs to be fixed.
 
+> - The risk of something nasty happening we don't know of
+
+:-)
+
+>
+>> Finally, I understand that you would be happy to scrap this series,
+>> but instead let Adrian's series, when re-posted, to go first. Could
+>> you perhaps re-consider that, because I wonder if it may not be
+>> smother and less risky, to actually apply everything up to patch 11 in
+>> this series?
+>
+> This is possible.
+>
+> But I think it is preferred to proceed with Adrian's patches.
+> I really like the looks of the code. He says he's coming back with
+> a set that also kills off the old block layer, and I am pretty
+> positive I will just ACK the whole thing.
+
+Alright, let's go with this option!
+
+>
+> I optimistically think we can jointly fix the card removal issue
+> and possible also mitigate or root-cause the performance
+> degradation observed by Adrian
+>
+> In the best of worlds, Ming Lei's patches will just fix this too
+> (we'll see, we can probably get a branch from the block people
+> to try it) else we can use tracing and perf to drill into it I guess.
+
+I think most of Ming's patches addressing performance issues should be
+in Linus' master already, so once I have a my next branch based on
+4.15rc1, we should be able to run a new round of test.
+
+Anyway, if anything else is needed from the generic block layer, sure
+I am open to pull in a branch if needed.
+
+>
+>> I noticed that you reported issues with card removal during I/O (for
+>> both yours and Adrian's mq patch), but does those problems exists at
+>> patch 11 - or is those explicitly introduced with the mk patch (patch
+>> 12)?
+>
+> I tested it and it is present earlier in the series. I would have to
+> revisit and hash it out.
+
+Right. So, let's then forget about my suggested approach and spend
+time more wisely on Adrian's series.
+
+>
+>> Of course, I realize that if we apply everything up to patch11, that
+>> would require a massive re-base of Adrian's mq/CQE series, but on the
+>> other hand, then matter which mq patch we decide to go with, it should
+>> be a rather small diff, thus easy to review and less risky.
+>
+> At this point I would prefer to use Adrian's series. He has explained
+> pretty well his reasoning and when I tested the code it was performing
+> well. I have some outstanding thingies, but this I can just as well do
+> on top of his patches.
+
+Yep. As stated above, let's go for that solution.
+
+I will then be awaiting a new version from Adrian, hopefully I can
+apply his series already when rc1 is out, to make sure we get enough
+time to smoke out any remaining problems.
+
+Kind regards
+Uffe
