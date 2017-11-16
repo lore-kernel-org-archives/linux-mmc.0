@@ -1,49 +1,66 @@
-From: Bastian Stender <bst@pengutronix.de>
-Subject: [PATCH] mmc: core: prepend 0x to hex numbers in sysfs
-Date: Thu, 16 Nov 2017 12:30:00 +0100
-Message-ID: <20171116113000.25044-1-bst@pengutronix.de>
+From: Xinming Hu <huxm@marvell.com>
+Subject: RE: [PATCH v4 1/2] mmc: API for accessing host supported maximum
+ segment count and size
+Date: Thu, 16 Nov 2017 13:57:28 +0000
+Message-ID: <5852c8610b7f46fea0a812e8750fbfd1@SC-EXCH02.marvell.com>
+References: <1466069006-10757-1-git-send-email-akarwar@marvell.com>
+ <ee910d6f6d1f4d218586bddd5a7627b0@SC-EXCH04.marvell.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.4.pengutronix.de ([92.198.50.35]:39361 "EHLO
-        metis.ext.4.pengutronix.de" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S933136AbdKPLaW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Nov 2017 06:30:22 -0500
+Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:50576 "EHLO
+        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S935141AbdKPN5f (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Nov 2017 08:57:35 -0500
+In-Reply-To: <ee910d6f6d1f4d218586bddd5a7627b0@SC-EXCH04.marvell.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Bojan Prtvar <prtvar.b@gmail.com>, Jungseung Lee <js07.lee@samsung.com>, linux-mmc@vger.kernel.org, kernel@pengutronix.de, Bastian Stender <bst@pengutronix.de>
+Cc: Nishant Sarmukadam <nishants@marvell.com>, Wei-Ning Huang <wnhuang@chromium.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Cathy Luo <cluo@marvell.com>, Zhiyuan Yang <yangzy@marvell.com>, Tim Song <songtao@marvell.com>, "Xu (Shanghai) Wang" <xwang4@marvell.com>, James Cao <jcao@marvell.com>, Ganapathi Bhat <gbhat@marvell.com>
 
-The sysfs entries "pre_eol_info" and "ocr" were missing the 0x prefix
-to identify them as hex formatted.
-
-Fixes: 5fb06af7a33b ("mmc: core: Extend sysfs with OCR register")
-Fixes: 46bc5c408e4e ("mmc: core: Export device lifetime information through sysfs")
-Signed-off-by: Bastian Stender <bst@pengutronix.de>
----
- drivers/mmc/core/mmc.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 36217ad5e9b1..bad5c1bf4ed9 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -780,7 +780,7 @@ MMC_DEV_ATTR(manfid, "0x%06x\n", card->cid.manfid);
- MMC_DEV_ATTR(name, "%s\n", card->cid.prod_name);
- MMC_DEV_ATTR(oemid, "0x%04x\n", card->cid.oemid);
- MMC_DEV_ATTR(prv, "0x%x\n", card->cid.prv);
--MMC_DEV_ATTR(pre_eol_info, "%02x\n", card->ext_csd.pre_eol_info);
-+MMC_DEV_ATTR(pre_eol_info, "0x%02x\n", card->ext_csd.pre_eol_info);
- MMC_DEV_ATTR(life_time, "0x%02x 0x%02x\n",
- 	card->ext_csd.device_life_time_est_typ_a,
- 	card->ext_csd.device_life_time_est_typ_b);
-@@ -790,7 +790,7 @@ MMC_DEV_ATTR(enhanced_area_offset, "%llu\n",
- MMC_DEV_ATTR(enhanced_area_size, "%u\n", card->ext_csd.enhanced_area_size);
- MMC_DEV_ATTR(raw_rpmb_size_mult, "%#x\n", card->ext_csd.raw_rpmb_size_mult);
- MMC_DEV_ATTR(rel_sectors, "%#x\n", card->ext_csd.rel_sectors);
--MMC_DEV_ATTR(ocr, "%08x\n", card->ocr);
-+MMC_DEV_ATTR(ocr, "0x%08x\n", card->ocr);
- MMC_DEV_ATTR(cmdq_en, "%d\n", card->ext_csd.cmdq_en);
- 
- static ssize_t mmc_fwrev_show(struct device *dev,
--- 
-2.11.0
-
+SGkgVWxmLA0KDQpDb3VsZCB5b3UgcGxlYXNlIGxldCB1cyBrbm93IGlmIHlvdSBoYXZlIGFueSBm
+dXJ0aGVyIHJldmlldyBjb21tZW50cyBvbiB0aGlzIHBhdGNoIHNlcmllcy4NCg0KUmVnYXJkcywN
+ClNpbW9uDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogQW1pdGt1bWFy
+IEthcndhcg0KPiBTZW50OiAyMDE2xOo41MI5yNUgMTg6MTYNCj4gVG86IFVsZiBIYW5zc29uIDx1
+bGYuaGFuc3NvbkBsaW5hcm8ub3JnPg0KPiBDYzogTmlzaGFudCBTYXJtdWthZGFtIDxuaXNoYW50
+c0BtYXJ2ZWxsLmNvbT47IFdlaS1OaW5nIEh1YW5nDQo+IDx3bmh1YW5nQGNocm9taXVtLm9yZz47
+IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc7IENhdGh5IEx1bw0KPiA8Y2x1b0BtYXJ2ZWxsLmNv
+bT47IFhpbm1pbmcgSHUgPGh1eG1AbWFydmVsbC5jb20+DQo+IFN1YmplY3Q6IFJFOiBbUEFUQ0gg
+djQgMS8yXSBtbWM6IEFQSSBmb3IgYWNjZXNzaW5nIGhvc3Qgc3VwcG9ydGVkIG1heGltdW0NCj4g
+c2VnbWVudCBjb3VudCBhbmQgc2l6ZQ0KPiANCj4gSGkgVWxmLA0KPiANCj4gPiBGcm9tOiBBbWl0
+a3VtYXIgS2Fyd2FyIFttYWlsdG86YWthcndhckBtYXJ2ZWxsLmNvbV0NCj4gPiBTZW50OiBUaHVy
+c2RheSwgSnVuZSAxNiwgMjAxNiAyOjUzIFBNDQo+ID4gVG86IGxpbnV4LXdpcmVsZXNzQHZnZXIu
+a2VybmVsLm9yZw0KPiA+IENjOiBOaXNoYW50IFNhcm11a2FkYW07IFdlaS1OaW5nIEh1YW5nOyBs
+aW51eC1tbWNAdmdlci5rZXJuZWwub3JnOw0KPiA+IENhdGh5IEx1bzsgWGlubWluZyBIdTsgQW1p
+dGt1bWFyIEthcndhcg0KPiA+IFN1YmplY3Q6IFtQQVRDSCB2NCAxLzJdIG1tYzogQVBJIGZvciBh
+Y2Nlc3NpbmcgaG9zdCBzdXBwb3J0ZWQgbWF4aW11bQ0KPiA+IHNlZ21lbnQgY291bnQgYW5kIHNp
+emUNCj4gPg0KPiA+IEZyb206IFhpbm1pbmcgSHUgPGh1eG1AbWFydmVsbC5jb20+DQo+ID4NCj4g
+PiBzZGlvIGRldmljZSBkcml2ZXJzIG5lZWQgYmUgYWJsZSB0byBnZXQgdGhlIGhvc3Qgc3VwcG9y
+dGVkIG1heF9zZWdzDQo+ID4gYW5kIG1heF9zZWdfc2l6ZSwgc28gdGhhdCB0aGV5IGtub3cgdGhl
+IGJ1ZmZlciBzaXplIHRvIGFsbG9jYXRlIHdoaWxlDQo+ID4gdXRpbGl6aW5nIHRoZSBzY2F0dGVy
+L2dhdGhlciBETUEgYnVmZmVyIGxpc3QuDQo+ID4NCj4gPiBUaGlzIHBhdGNoIHByb3ZpZGVzIEFQ
+SSBmb3IgdGhpcyBwdXJwb3NlLg0KPiA+DQo+ID4gU2lnbmVkLW9mZi1ieTogWGlubWluZyBIdSA8
+aHV4bUBtYXJ2ZWxsLmNvbT4NCj4gPiBTaWduZWQtb2ZmLWJ5OiBBbWl0a3VtYXIgS2Fyd2FyIDxh
+a2Fyd2FyQG1hcnZlbGwuY29tPg0KPiA+IC0tLQ0KPiA+IHYyOiB2MiB3YXMgc3VibWl0dGVkIHdp
+dGggbWlub3IgaW1wcm92ZW1lbnQgbGlrZSByZXBsYWNpbmcgQlVHX09OKCkNCj4gPiB3aXRoDQo+
+ID4gV0FSTl9PTigpDQo+ID4gdjM6IEFkZHJlc3NlZCBiZWxvdyByZXZpZXcgY29tbWVudHMgZnJv
+bSBVbGYgSGFuc3Nvbg0KPiA+ICAgICBhKSBJbiB2MywgcGF0Y2ggaGFzIGJlZW4gc3BsaXQgaW50
+byB0d28gc2VwYXJhdGUgcGF0Y2hlcy4NCj4gPiAgICAgYikgUGF0Y2ggMS8yIGludHJvZHVjZXMg
+YW4gQVBJIHRvIGZldGNoIG1heF9zZWdfc2l6ZSBhbmQgbWF4X3NlZ3MNCj4gPiAgICAgYykgUmVw
+bGFjZWQgV0FSTl9PTigpIHdpdGggcHJvcGVyIGVycm9yIGNvZGUgd2hlbiBzZ19wdHItPmxlbmd0
+aA0KPiA+IGlzIGludmFsaWQNCj4gPiAgICAgZCkgSW5zdGVhZCBvZiBkdXBsaWNhdGluZyB0aGUg
+Y29kZSBpbiBtbWNfaW9fcndfZXh0ZW5kZWQoKSwgZXh0cmENCj4gPiBib29sIHBhcmFtZXRlcg0K
+PiA+ICAgICAgICBoYXMgYmVlbiBhZGRlZCB0byB0aGlzIGZ1bmN0aW9uIGFuZCB1c2VkIGl0IGlu
+IG5ldyBBUElzIGZvciBTRy4NCj4gPiB2NDogUmVtb3ZlZCBXQVJOX09OKCkgY2FsbHMgaW4gbmV3
+bHkgYWRkZWQgQVBJcy4gSXQncyBnZXRzIGNhbGxlZCBpbg0KPiA+IHByb2JlIGhhbmRsZXIuDQo+
+ID4gICAgIENhbGxlciBhbHJlYWR5IHRha2VzIGNhcmUgb2YgaXQoU2hhd24gTGluKS4NCj4gPiAt
+LS0NCj4gPiAgZHJpdmVycy9tbWMvY29yZS9zZGlvX2lvLmMgICAgICAgICAgICAgICAgICAgICAg
+ICAgIHwgMjENCj4gPiArKysrKysrKysrKysrKysrKysrKysNCj4gPiAgLi4uL3dpcmVsZXNzL2Jy
+b2FkY29tL2JyY204MDIxMS9icmNtZm1hYy9iY21zZGguYyAgIHwgIDYgKysrLS0tDQo+ID4gIGlu
+Y2x1ZGUvbGludXgvbW1jL3NkaW9fZnVuYy5oICAgICAgICAgICAgICAgICAgICAgICB8ICAzICsr
+Kw0KPiA+ICAzIGZpbGVzIGNoYW5nZWQsIDI3IGluc2VydGlvbnMoKyksIDMgZGVsZXRpb25zKC0p
+DQo+ID4NCj4gDQo+IFBsZWFzZSBsZXQgbWUga25vdyBpZiB5b3UgaGF2ZSBhbnkgZnVydGhlciBy
+ZXZpZXcgY29tbWVudHMgZm9yIHRoaXMgcGF0Y2gNCj4gc2VyaWVzLg0KPiANCj4gUmVnYXJkcywN
+Cj4gQW1pdGt1bWFyDQo=
