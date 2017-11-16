@@ -1,63 +1,43 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH 3/4] arm64: dts: r8a77995: draak: enable SDHI2
-Date: Thu, 16 Nov 2017 10:43:35 +0100
-Message-ID: <CAMuHMdXFMsvjMcbmBLCBL9+Ow1=cqQeosEd3hUygjhT_Z=L49w@mail.gmail.com>
-References: <1510759549-30404-1-git-send-email-ulrich.hecht+renesas@gmail.com> <1510759549-30404-4-git-send-email-ulrich.hecht+renesas@gmail.com>
+From: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+Subject: Re: [PATCH V13 00/10] mmc: Add Command Queue support
+Date: Thu, 16 Nov 2017 10:46:40 +0100
+Message-ID: <1716036.6EalJ2kXtr@amdc3058>
+References: <1509715220-31885-1-git-send-email-adrian.hunter@intel.com>
+        <CGME20171116094642epcas1p14018cb1c475efa38942109dc24cd6da9@epcas1p1.samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <1510759549-30404-4-git-send-email-ulrich.hecht+renesas@gmail.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Ulrich Hecht <ulrich.hecht+renesas@gmail.com>
-Cc: Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa@the-dreams.de>, Magnus Damm <magnus.damm@gmail.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Marek Vasut <marek.vasut@gmail.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-block-owner@vger.kernel.org>
+In-reply-to: <1509715220-31885-1-git-send-email-adrian.hunter@intel.com>
+Sender: linux-block-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Uli,
+On Friday, November 03, 2017 03:20:10 PM Adrian Hunter wrote:
+> Hi
+> 
+> Here is V13 of the hardware command queue patches without the software
+> command queue patches, now using blk-mq and now with blk-mq support for
+> non-CQE I/O.
+> 
+> HW CMDQ offers 25% - 50% better random multi-threaded I/O.  I see a slight
+> 2% drop in sequential read speed but no change to sequential write.
+> 
+> Non-CQE blk-mq showed a 3% decrease in sequential read performance.  This
+> seemed to be coming from the inferior latency of running work items compared
+> with a dedicated thread.  Hacking blk-mq workqueue to be unbound reduced the
+> performance degradation from 3% to 1%.
+> 
+> While we should look at changing blk-mq to give better workqueue performance,
+> a bigger gain is likely to be made by adding a new host API to enable the
+> next already-prepared request to be issued directly from within ->done()
+> callback of the current request.
 
-On Wed, Nov 15, 2017 at 4:25 PM, Ulrich Hecht
-<ulrich.hecht+renesas@gmail.com> wrote:
-> The single SDHI controller is connected to eMMC.
->
-> Signed-off-by: Ulrich Hecht <ulrich.hecht+renesas@gmail.com>
+Tested-by: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com> [ for non-CQE changes ]
 
-Thanks for your patch!
-
-> --- a/arch/arm64/boot/dts/renesas/r8a77995-draak.dts
-> +++ b/arch/arm64/boot/dts/renesas/r8a77995-draak.dts
-> @@ -32,6 +32,24 @@
->                 /* first 128MB is reserved for secure area. */
->                 reg = <0x0 0x48000000 0x0 0x18000000>;
->         };
-> +
-> +       reg_1p8v: regulator0 {
-> +               compatible = "regulator-fixed";
-> +               regulator-name = "fixed-1.8V";
-> +               regulator-min-microvolt = <1800000>;
-> +               regulator-max-microvolt = <1800000>;
-> +               regulator-boot-on;
-> +               regulator-always-on;
-> +       };
-> +
-> +       reg_3p3v: regulator1 {
-> +               compatible = "regulator-fixed";
-> +               regulator-name = "fixed-3.3V";
-> +               regulator-min-microvolt = <3300000>;
-> +               regulator-max-microvolt = <3300000>;
-> +               regulator-boot-on;
-> +               regulator-always-on;
-> +       };
-
-As the eMMC is 1.8V only, I'll defer the review to the people looking
-into the need
-to specify the 3.3V pinctrl on other R-Car Gen3 boards.
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
+Best regards,
 --
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+Bartlomiej Zolnierkiewicz
+Samsung R&D Institute Poland
+Samsung Electronics
