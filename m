@@ -1,66 +1,67 @@
-From: Xinming Hu <huxm@marvell.com>
-Subject: RE: [PATCH v4 1/2] mmc: API for accessing host supported maximum
- segment count and size
-Date: Thu, 16 Nov 2017 13:57:28 +0000
-Message-ID: <5852c8610b7f46fea0a812e8750fbfd1@SC-EXCH02.marvell.com>
-References: <1466069006-10757-1-git-send-email-akarwar@marvell.com>
- <ee910d6f6d1f4d218586bddd5a7627b0@SC-EXCH04.marvell.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH RFT] mmc: core: use usleep_range rather than HZ magic in
+ mmc_delay()
+Date: Fri, 17 Nov 2017 08:59:42 +0800
+Message-ID: <8549da0b-1007-b36a-71e9-1878bb205468@rock-chips.com>
+References: <20171114225520.6793-1-wsa+renesas@sang-engineering.com>
+ <CAPDyKFrgO0JRatud5JRDONS=VTNef8WS+qvRAUo1AXep9wMpZg@mail.gmail.com>
+ <2b56ea8c-3040-2c47-41e5-ed52f97ff75e@rock-chips.com>
+ <CAPDyKFpvA2q5KwtcrXzv5ownKM54hcZTyfXKVBJhb95k2o6tyw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:50576 "EHLO
-        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S935141AbdKPN5f (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Nov 2017 08:57:35 -0500
-In-Reply-To: <ee910d6f6d1f4d218586bddd5a7627b0@SC-EXCH04.marvell.com>
-Content-Language: en-US
+Received: from lucky1.263xmail.com ([211.157.147.134]:37847 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753861AbdKQA7n (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Nov 2017 19:59:43 -0500
+In-Reply-To: <CAPDyKFpvA2q5KwtcrXzv5ownKM54hcZTyfXKVBJhb95k2o6tyw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Nishant Sarmukadam <nishants@marvell.com>, Wei-Ning Huang <wnhuang@chromium.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Cathy Luo <cluo@marvell.com>, Zhiyuan Yang <yangzy@marvell.com>, Tim Song <songtao@marvell.com>, "Xu (Shanghai) Wang" <xwang4@marvell.com>, James Cao <jcao@marvell.com>, Ganapathi Bhat <gbhat@marvell.com>
+Cc: shawn.lin@rock-chips.com, Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Simon Horman <horms@verge.net.au>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 
-SGkgVWxmLA0KDQpDb3VsZCB5b3UgcGxlYXNlIGxldCB1cyBrbm93IGlmIHlvdSBoYXZlIGFueSBm
-dXJ0aGVyIHJldmlldyBjb21tZW50cyBvbiB0aGlzIHBhdGNoIHNlcmllcy4NCg0KUmVnYXJkcywN
-ClNpbW9uDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogQW1pdGt1bWFy
-IEthcndhcg0KPiBTZW50OiAyMDE2xOo41MI5yNUgMTg6MTYNCj4gVG86IFVsZiBIYW5zc29uIDx1
-bGYuaGFuc3NvbkBsaW5hcm8ub3JnPg0KPiBDYzogTmlzaGFudCBTYXJtdWthZGFtIDxuaXNoYW50
-c0BtYXJ2ZWxsLmNvbT47IFdlaS1OaW5nIEh1YW5nDQo+IDx3bmh1YW5nQGNocm9taXVtLm9yZz47
-IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc7IENhdGh5IEx1bw0KPiA8Y2x1b0BtYXJ2ZWxsLmNv
-bT47IFhpbm1pbmcgSHUgPGh1eG1AbWFydmVsbC5jb20+DQo+IFN1YmplY3Q6IFJFOiBbUEFUQ0gg
-djQgMS8yXSBtbWM6IEFQSSBmb3IgYWNjZXNzaW5nIGhvc3Qgc3VwcG9ydGVkIG1heGltdW0NCj4g
-c2VnbWVudCBjb3VudCBhbmQgc2l6ZQ0KPiANCj4gSGkgVWxmLA0KPiANCj4gPiBGcm9tOiBBbWl0
-a3VtYXIgS2Fyd2FyIFttYWlsdG86YWthcndhckBtYXJ2ZWxsLmNvbV0NCj4gPiBTZW50OiBUaHVy
-c2RheSwgSnVuZSAxNiwgMjAxNiAyOjUzIFBNDQo+ID4gVG86IGxpbnV4LXdpcmVsZXNzQHZnZXIu
-a2VybmVsLm9yZw0KPiA+IENjOiBOaXNoYW50IFNhcm11a2FkYW07IFdlaS1OaW5nIEh1YW5nOyBs
-aW51eC1tbWNAdmdlci5rZXJuZWwub3JnOw0KPiA+IENhdGh5IEx1bzsgWGlubWluZyBIdTsgQW1p
-dGt1bWFyIEthcndhcg0KPiA+IFN1YmplY3Q6IFtQQVRDSCB2NCAxLzJdIG1tYzogQVBJIGZvciBh
-Y2Nlc3NpbmcgaG9zdCBzdXBwb3J0ZWQgbWF4aW11bQ0KPiA+IHNlZ21lbnQgY291bnQgYW5kIHNp
-emUNCj4gPg0KPiA+IEZyb206IFhpbm1pbmcgSHUgPGh1eG1AbWFydmVsbC5jb20+DQo+ID4NCj4g
-PiBzZGlvIGRldmljZSBkcml2ZXJzIG5lZWQgYmUgYWJsZSB0byBnZXQgdGhlIGhvc3Qgc3VwcG9y
-dGVkIG1heF9zZWdzDQo+ID4gYW5kIG1heF9zZWdfc2l6ZSwgc28gdGhhdCB0aGV5IGtub3cgdGhl
-IGJ1ZmZlciBzaXplIHRvIGFsbG9jYXRlIHdoaWxlDQo+ID4gdXRpbGl6aW5nIHRoZSBzY2F0dGVy
-L2dhdGhlciBETUEgYnVmZmVyIGxpc3QuDQo+ID4NCj4gPiBUaGlzIHBhdGNoIHByb3ZpZGVzIEFQ
-SSBmb3IgdGhpcyBwdXJwb3NlLg0KPiA+DQo+ID4gU2lnbmVkLW9mZi1ieTogWGlubWluZyBIdSA8
-aHV4bUBtYXJ2ZWxsLmNvbT4NCj4gPiBTaWduZWQtb2ZmLWJ5OiBBbWl0a3VtYXIgS2Fyd2FyIDxh
-a2Fyd2FyQG1hcnZlbGwuY29tPg0KPiA+IC0tLQ0KPiA+IHYyOiB2MiB3YXMgc3VibWl0dGVkIHdp
-dGggbWlub3IgaW1wcm92ZW1lbnQgbGlrZSByZXBsYWNpbmcgQlVHX09OKCkNCj4gPiB3aXRoDQo+
-ID4gV0FSTl9PTigpDQo+ID4gdjM6IEFkZHJlc3NlZCBiZWxvdyByZXZpZXcgY29tbWVudHMgZnJv
-bSBVbGYgSGFuc3Nvbg0KPiA+ICAgICBhKSBJbiB2MywgcGF0Y2ggaGFzIGJlZW4gc3BsaXQgaW50
-byB0d28gc2VwYXJhdGUgcGF0Y2hlcy4NCj4gPiAgICAgYikgUGF0Y2ggMS8yIGludHJvZHVjZXMg
-YW4gQVBJIHRvIGZldGNoIG1heF9zZWdfc2l6ZSBhbmQgbWF4X3NlZ3MNCj4gPiAgICAgYykgUmVw
-bGFjZWQgV0FSTl9PTigpIHdpdGggcHJvcGVyIGVycm9yIGNvZGUgd2hlbiBzZ19wdHItPmxlbmd0
-aA0KPiA+IGlzIGludmFsaWQNCj4gPiAgICAgZCkgSW5zdGVhZCBvZiBkdXBsaWNhdGluZyB0aGUg
-Y29kZSBpbiBtbWNfaW9fcndfZXh0ZW5kZWQoKSwgZXh0cmENCj4gPiBib29sIHBhcmFtZXRlcg0K
-PiA+ICAgICAgICBoYXMgYmVlbiBhZGRlZCB0byB0aGlzIGZ1bmN0aW9uIGFuZCB1c2VkIGl0IGlu
-IG5ldyBBUElzIGZvciBTRy4NCj4gPiB2NDogUmVtb3ZlZCBXQVJOX09OKCkgY2FsbHMgaW4gbmV3
-bHkgYWRkZWQgQVBJcy4gSXQncyBnZXRzIGNhbGxlZCBpbg0KPiA+IHByb2JlIGhhbmRsZXIuDQo+
-ID4gICAgIENhbGxlciBhbHJlYWR5IHRha2VzIGNhcmUgb2YgaXQoU2hhd24gTGluKS4NCj4gPiAt
-LS0NCj4gPiAgZHJpdmVycy9tbWMvY29yZS9zZGlvX2lvLmMgICAgICAgICAgICAgICAgICAgICAg
-ICAgIHwgMjENCj4gPiArKysrKysrKysrKysrKysrKysrKysNCj4gPiAgLi4uL3dpcmVsZXNzL2Jy
-b2FkY29tL2JyY204MDIxMS9icmNtZm1hYy9iY21zZGguYyAgIHwgIDYgKysrLS0tDQo+ID4gIGlu
-Y2x1ZGUvbGludXgvbW1jL3NkaW9fZnVuYy5oICAgICAgICAgICAgICAgICAgICAgICB8ICAzICsr
-Kw0KPiA+ICAzIGZpbGVzIGNoYW5nZWQsIDI3IGluc2VydGlvbnMoKyksIDMgZGVsZXRpb25zKC0p
-DQo+ID4NCj4gDQo+IFBsZWFzZSBsZXQgbWUga25vdyBpZiB5b3UgaGF2ZSBhbnkgZnVydGhlciBy
-ZXZpZXcgY29tbWVudHMgZm9yIHRoaXMgcGF0Y2gNCj4gc2VyaWVzLg0KPiANCj4gUmVnYXJkcywN
-Cj4gQW1pdGt1bWFyDQo=
+Hi
+
+On 2017/11/16 18:42, Ulf Hansson wrote:
+> On 16 November 2017 at 08:59, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+>> Hi,
+>>
+>> On 2017/11/16 15:47, Ulf Hansson wrote:
+>>>
+>>> On 14 November 2017 at 23:55, Wolfram Sang
+>>> <wsa+renesas@sang-engineering.com> wrote:
+>>>>
+>>>> Documentation/timers/timers-howto.txt recommends to use usleep_range for
+>>>> delays 1-20ms. Let's adhere to it. No need for messing with HZ and still
+>>>> do busy looping these days.
+>>>>
+>>
+>> Sorry for chime in this topic but I think for some cases, for instance,
+>> mmc_host_set_uhs_voltage calls mmc_delay and it should guarantee the
+>> delay is accurate, especially for the comment"Keep clock gated for at
+>> least 10 ms, though spec only says 5 ms"
+>>
+>> But the usleep_range won't guarantee that, see
+>>
+>> https://patchwork.kernel.org/patch/9369963/
+>>
+>> It wasn't fixed at the end, so you should carefully modify
+>> this fundamentally.
+> 
+> git tag --contains 6c5e9059692567740a4ee51530dffe51a4b9584d
+> 
+> It should be fixed, however, thanks for pointing to an interesting patch. :-)
+
+Ah, I wasn't continuing tracing that topic and from the argue of v2,
+I thought it wasn't fixed... So it seems fine now.
+
+> 
+> [...]
+> 
+> Kind regards
+> Uffe
+> 
+> 
+> 
+
