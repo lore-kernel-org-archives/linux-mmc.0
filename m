@@ -1,13 +1,13 @@
 From: Arvind Yadav <arvind.yadav.cs@gmail.com>
-Subject: [PATCH 4/6] mmc: sdhci-spear: Handle return value of platform_get_irq
-Date: Sat, 18 Nov 2017 01:58:20 +0530
-Message-ID: <1510950502-22565-5-git-send-email-arvind.yadav.cs@gmail.com>
+Subject: [PATCH 3/6] mmc: sdhci-acpi: Handle return value of platform_get_irq
+Date: Sat, 18 Nov 2017 01:58:19 +0530
+Message-ID: <1510950502-22565-4-git-send-email-arvind.yadav.cs@gmail.com>
 References: <1510950502-22565-1-git-send-email-arvind.yadav.cs@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pf0-f196.google.com ([209.85.192.196]:34343 "EHLO
-        mail-pf0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1758621AbdKQU2s (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Nov 2017 15:28:48 -0500
+Received: from mail-pf0-f193.google.com ([209.85.192.193]:44413 "EHLO
+        mail-pf0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1761011AbdKQU2o (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Nov 2017 15:28:44 -0500
 In-Reply-To: <1510950502-22565-1-git-send-email-arvind.yadav.cs@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -18,24 +18,24 @@ platform_get_irq() can fail here and we must check its return value.
 
 Signed-off-by: Arvind Yadav <arvind.yadav.cs@gmail.com>
 ---
- drivers/mmc/host/sdhci-spear.c | 4 ++++
+ drivers/mmc/host/sdhci-acpi.c | 4 ++++
  1 file changed, 4 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
-index 8c0f884..900838b 100644
---- a/drivers/mmc/host/sdhci-spear.c
-+++ b/drivers/mmc/host/sdhci-spear.c
-@@ -82,6 +82,10 @@ static int sdhci_probe(struct platform_device *pdev)
- 	host->hw_name = "sdhci";
- 	host->ops = &sdhci_pltfm_ops;
- 	host->irq = platform_get_irq(pdev, 0);
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index b988997..dd8129e 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -566,6 +566,10 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+ 	host->hw_name	= "ACPI";
+ 	host->ops	= &sdhci_acpi_ops_dflt;
+ 	host->irq	= platform_get_irq(pdev, 0);
 +	if (host->irq < 0) {
-+		ret = host->irq;
-+		goto err_host;
++		err = host->irq;
++		goto err_free;
 +	}
- 	host->quirks = SDHCI_QUIRK_BROKEN_ADMA;
  
- 	sdhci = sdhci_priv(host);
+ 	host->ioaddr = devm_ioremap_nocache(dev, iomem->start,
+ 					    resource_size(iomem));
 -- 
 2.7.4
 
