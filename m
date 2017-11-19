@@ -1,20 +1,22 @@
 From: Arvind Yadav <arvind.yadav.cs@gmail.com>
-Subject: [PATCH 2/6 v3] mmc: s3cmci: Fix platform_get_irq's error checking
-Date: Sun, 19 Nov 2017 10:22:44 +0530
-Message-ID: <870b1a28108a8c0f3885bd345f3d27dda67621d5.1511066652.git.arvind.yadav.cs@gmail.com>
+Subject: [PATCH 3/6 v3] mmc: sdhci-acpi: Handle return value of platform_get_irq
+Date: Sun, 19 Nov 2017 10:22:45 +0530
+Message-ID: <ecd11732b6a29aee23a1be94616755e575b0d438.1511066652.git.arvind.yadav.cs@gmail.com>
 References: <c1c27676e9f141ace1254b40807bf2dc03f072c6.1511066652.git.arvind.yadav.cs@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pg0-f66.google.com ([74.125.83.66]:45536 "EHLO
+        mail-pg0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750932AbdKSExJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 18 Nov 2017 23:53:09 -0500
 In-Reply-To: <c1c27676e9f141ace1254b40807bf2dc03f072c6.1511066652.git.arvind.yadav.cs@gmail.com>
 In-Reply-To: <c1c27676e9f141ace1254b40807bf2dc03f072c6.1511066652.git.arvind.yadav.cs@gmail.com>
 References: <c1c27676e9f141ace1254b40807bf2dc03f072c6.1511066652.git.arvind.yadav.cs@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: ben-linux@fluff.org, ulf.hansson@linaro.org, adrian.hunter@intel.com, vireshk@kernel.org, maxime.ripard@free-electrons.com, wens@csie.org, linux@armlinux.org.uk, carlo@caione.org, khilman@baylibre.com
 Cc: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org
-List-Id: linux-mmc@vger.kernel.org
 
-The platform_get_irq() function returns negative if an error occurs.
-zero or positive number on success. platform_get_irq() error checking
-for zero is not correct.
+platform_get_irq() can fail here and we must check its return value.
 
 Signed-off-by: Arvind Yadav <arvind.yadav.cs@gmail.com>
 ---
@@ -23,21 +25,24 @@ changes in v2 :
 changes in v3 :
               return -EINVAL instead of host->irq.
 
- drivers/mmc/host/s3cmci.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-acpi.c | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
-index f7f157a..36daee1 100644
---- a/drivers/mmc/host/s3cmci.c
-+++ b/drivers/mmc/host/s3cmci.c
-@@ -1658,7 +1658,7 @@ static int s3cmci_probe(struct platform_device *pdev)
- 	}
- 
- 	host->irq = platform_get_irq(pdev, 0);
--	if (host->irq == 0) {
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index b988997..0d9965b 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -566,6 +566,10 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+ 	host->hw_name	= "ACPI";
+ 	host->ops	= &sdhci_acpi_ops_dflt;
+ 	host->irq	= platform_get_irq(pdev, 0);
 +	if (host->irq <= 0) {
- 		dev_err(&pdev->dev, "failed to get interrupt resource.\n");
- 		ret = -EINVAL;
- 		goto probe_iounmap;
++		err = -EINVAL;
++		goto err_free;
++	}
+ 
+ 	host->ioaddr = devm_ioremap_nocache(dev, iomem->start,
+ 					    resource_size(iomem));
 -- 
 2.7.4
+
