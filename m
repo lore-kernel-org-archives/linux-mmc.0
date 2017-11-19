@@ -1,50 +1,44 @@
-From: Arvind Yadav <arvind.yadav.cs@gmail.com>
-Subject: [PATCH 5/6 v2] mmc: sh_mmcif: Handle return value of platform_get_irq
-Date: Sat, 18 Nov 2017 15:03:47 +0530
-Message-ID: <59e155d8c3eff4adf39cd343c56e52530020f64d.1510997223.git.arvind.yadav.cs@gmail.com>
-References: <130df0c2c60ed6a0f460b68c586cc0a4167aed0b.1510997223.git.arvind.yadav.cs@gmail.com>
+From: Randy Dunlap <rdunlap@infradead.org>
+Subject: [PATCH] mmc: core/block.c: fix comment typos
+Date: Sat, 18 Nov 2017 18:01:18 -0800
+Message-ID: <cc03c62b-881d-62bd-f0ec-21fc66df4ee9@infradead.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <130df0c2c60ed6a0f460b68c586cc0a4167aed0b.1510997223.git.arvind.yadav.cs@gmail.com>
-In-Reply-To: <130df0c2c60ed6a0f460b68c586cc0a4167aed0b.1510997223.git.arvind.yadav.cs@gmail.com>
-References: <130df0c2c60ed6a0f460b68c586cc0a4167aed0b.1510997223.git.arvind.yadav.cs@gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: ben-linux@fluff.org, ulf.hansson@linaro.org, adrian.hunter@intel.com, vireshk@kernel.org, maxime.ripard@free-electrons.com, wens@csie.org, linux@armlinux.org.uk, carlo@caione.org, khilman@baylibre.com
-Cc: linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from bombadil.infradead.org ([65.50.211.133]:37176 "EHLO
+        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750909AbdKSCBV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 18 Nov 2017 21:01:21 -0500
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>
+Cc: Shawn Lin <shawn.lin@rock-chips.com>
 
-platform_get_irq() can fail here and we must check its return value.
+From: Randy Dunlap <rdunlap@infradead.org>
 
-Signed-off-by: Arvind Yadav <arvind.yadav.cs@gmail.com>
+Fix comment typos.
+
+Signed-off-by: Randy Dunlap <rdunlap@infradead.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Linus Walleij <linus.walleij@linaro.org>
+Cc: Shawn Lin <shawn.lin@rock-chips.com>
 ---
-changes in v2 :
-              Add failure case '<= 0' instead of '< 0'. IRQ0 is not valid.
+ drivers/mmc/core/block.c |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
- drivers/mmc/host/sh_mmcif.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+--- lnx-414.orig/drivers/mmc/core/block.c
++++ lnx-414/drivers/mmc/core/block.c
+@@ -2033,8 +2033,8 @@ static struct mmc_blk_data *mmc_blk_allo
+ 	devidx = ida_simple_get(&mmc_blk_ida, 0, max_devices, GFP_KERNEL);
+ 	if (devidx < 0) {
+ 		/*
+-		 * We get -ENOSPC because there are no more any available
+-		 * devidx. The reason may be that, either userspace haven't yet
++		 * We get -ENOSPC because there are not any available devidx
++		 * entries. The reason may be that, either userspace hasn't yet
+ 		 * unmounted the partitions, which postpones mmc_blk_release()
+ 		 * from being called, or the device has more partitions than
+ 		 * what we support.
 
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index 53fb18b..481f2c4 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -1405,7 +1405,7 @@ static int sh_mmcif_probe(struct platform_device *pdev)
- 
- 	irq[0] = platform_get_irq(pdev, 0);
- 	irq[1] = platform_get_irq(pdev, 1);
--	if (irq[0] < 0) {
-+	if (irq[0] <= 0 || irq[1] <= 0) {
- 		dev_err(dev, "Get irq error\n");
- 		return -ENXIO;
- 	}
--- 
-2.7.4
