@@ -1,44 +1,44 @@
-From: Randy Dunlap <rdunlap@infradead.org>
-Subject: [PATCH] mmc: core/block.c: fix comment typos
-Date: Sat, 18 Nov 2017 18:01:18 -0800
-Message-ID: <cc03c62b-881d-62bd-f0ec-21fc66df4ee9@infradead.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+From: Arvind Yadav <arvind.yadav.cs@gmail.com>
+Subject: [PATCH 1/6 v3] mmc: meson-gx-mmc: Fix platform_get_irq's error checking
+Date: Sun, 19 Nov 2017 10:22:43 +0530
+Message-ID: <c1c27676e9f141ace1254b40807bf2dc03f072c6.1511066652.git.arvind.yadav.cs@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bombadil.infradead.org ([65.50.211.133]:37176 "EHLO
-        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750909AbdKSCBV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 18 Nov 2017 21:01:21 -0500
-Content-Language: en-US
+Received: from mail-pg0-f68.google.com ([74.125.83.68]:42921 "EHLO
+        mail-pg0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750745AbdKSExA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 18 Nov 2017 23:53:00 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>
+To: ben-linux@fluff.org, ulf.hansson@linaro.org, adrian.hunter@intel.com, vireshk@kernel.org, maxime.ripard@free-electrons.com, wens@csie.org, linux@armlinux.org.uk, carlo@caione.org, khilman@baylibre.com
+Cc: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org
 
-From: Randy Dunlap <rdunlap@infradead.org>
+The platform_get_irq() function returns negative if an error occurs.
+zero or positive number on success. platform_get_irq() error checking
+for zero is not correct.
 
-Fix comment typos.
-
-Signed-off-by: Randy Dunlap <rdunlap@infradead.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Linus Walleij <linus.walleij@linaro.org>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>
+Signed-off-by: Arvind Yadav <arvind.yadav.cs@gmail.com>
 ---
- drivers/mmc/core/block.c |    4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+changes in v2 :
+              Add failure case '<= 0' instead of '< 0'. IRQ0 is not valid.
+changes in v3 :
+              return -EINVAL instead of irq.
 
---- lnx-414.orig/drivers/mmc/core/block.c
-+++ lnx-414/drivers/mmc/core/block.c
-@@ -2033,8 +2033,8 @@ static struct mmc_blk_data *mmc_blk_allo
- 	devidx = ida_simple_get(&mmc_blk_ida, 0, max_devices, GFP_KERNEL);
- 	if (devidx < 0) {
- 		/*
--		 * We get -ENOSPC because there are no more any available
--		 * devidx. The reason may be that, either userspace haven't yet
-+		 * We get -ENOSPC because there are not any available devidx
-+		 * entries. The reason may be that, either userspace hasn't yet
- 		 * unmounted the partitions, which postpones mmc_blk_release()
- 		 * from being called, or the device has more partitions than
- 		 * what we support.
+ drivers/mmc/host/meson-gx-mmc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+index e0862d3..32a6a22 100644
+--- a/drivers/mmc/host/meson-gx-mmc.c
++++ b/drivers/mmc/host/meson-gx-mmc.c
+@@ -1208,7 +1208,7 @@ static int meson_mmc_probe(struct platform_device *pdev)
+ 	}
+ 
+ 	irq = platform_get_irq(pdev, 0);
+-	if (!irq) {
++	if (irq <= 0) {
+ 		dev_err(&pdev->dev, "failed to get interrupt resource.\n");
+ 		ret = -EINVAL;
+ 		goto free_host;
+-- 
+2.7.4
 
