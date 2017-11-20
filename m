@@ -1,81 +1,87 @@
-From: Bjorn Andersson <bjorn.andersson@linaro.org>
-Subject: [PATCH v2] mmc: sdhci-msm: Optionally wait for signal level changes
-Date: Mon, 20 Nov 2017 11:56:47 -0800
-Message-ID: <20171120195647.22677-1-bjorn.andersson@linaro.org>
-References: <20171120183451.18966-1-bjorn.andersson@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pg0-f67.google.com ([74.125.83.67]:47083 "EHLO
-        mail-pg0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752398AbdKTT4w (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Nov 2017 14:56:52 -0500
-Received: by mail-pg0-f67.google.com with SMTP id z184so8201388pgd.13
-        for <linux-mmc@vger.kernel.org>; Mon, 20 Nov 2017 11:56:52 -0800 (PST)
-In-Reply-To: <20171120183451.18966-1-bjorn.andersson@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Marek Vasut <marek.vasut@gmail.com>
+Subject: Re: [PATCH 3/4] arm64: dts: r8a77995: draak: enable SDHI2
+Date: Mon, 20 Nov 2017 21:07:02 +0100
+Message-ID: <ae0e2924-7e5d-7760-ed82-b0622765b1f8@gmail.com>
+References: <1510759549-30404-1-git-send-email-ulrich.hecht+renesas@gmail.com>
+ <1510759549-30404-4-git-send-email-ulrich.hecht+renesas@gmail.com>
+ <CAMuHMdXFMsvjMcbmBLCBL9+Ow1=cqQeosEd3hUygjhT_Z=L49w@mail.gmail.com>
+ <20171117143507.yovg64u2znjwj4wh@verge.net.au>
+ <ee3b50ce-3da7-eff1-6bb6-9eb5d61faf42@gmail.com>
+ <20171120094327.pnrvraysv2tm6jhm@verge.net.au>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20171120094327.pnrvraysv2tm6jhm@verge.net.au>
+Content-Language: en-US
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Simon Horman <horms@verge.net.au>
+Cc: Geert Uytterhoeven <geert@linux-m68k.org>, Ulrich Hecht <ulrich.hecht+renesas@gmail.com>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Wolfram Sang <wsa@the-dreams.de>, Magnus Damm <magnus.damm@gmail.com>, Linux MMC List <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, Stephen Boyd <sboyd@codeaurora.org>, Sahitya Tummala <stummala@codeaurora.org>, Vijay Viswanath <vviswana@codeaurora.org>
 
-Not all instances of the SDCC core supports changing signal voltage and
-as such will not generate a power interrupt when the software attempts
-to change the voltage. This results in probing the eMMC on some devices
-to take over 2 minutes.
+On 11/20/2017 10:43 AM, Simon Horman wrote:
+> On Fri, Nov 17, 2017 at 08:08:27PM +0100, Marek Vasut wrote:
+>> On 11/17/2017 03:35 PM, Simon Horman wrote:
+>>> On Thu, Nov 16, 2017 at 10:43:35AM +0100, Geert Uytterhoeven wrote:
+>>>> Hi Uli,
+>>>>
+>>>> On Wed, Nov 15, 2017 at 4:25 PM, Ulrich Hecht
+>>>> <ulrich.hecht+renesas@gmail.com> wrote:
+>>>>> The single SDHI controller is connected to eMMC.
+>>>>>
+>>>>> Signed-off-by: Ulrich Hecht <ulrich.hecht+renesas@gmail.com>
+>>>>
+>>>> Thanks for your patch!
+>>>>
+>>>>> --- a/arch/arm64/boot/dts/renesas/r8a77995-draak.dts
+>>>>> +++ b/arch/arm64/boot/dts/renesas/r8a77995-draak.dts
+>>>>> @@ -32,6 +32,24 @@
+>>>>>                 /* first 128MB is reserved for secure area. */
+>>>>>                 reg = <0x0 0x48000000 0x0 0x18000000>;
+>>>>>         };
+>>>>> +
+>>>>> +       reg_1p8v: regulator0 {
+>>>>> +               compatible = "regulator-fixed";
+>>>>> +               regulator-name = "fixed-1.8V";
+>>>>> +               regulator-min-microvolt = <1800000>;
+>>>>> +               regulator-max-microvolt = <1800000>;
+>>>>> +               regulator-boot-on;
+>>>>> +               regulator-always-on;
+>>>>> +       };
+>>>>> +
+>>>>> +       reg_3p3v: regulator1 {
+>>>>> +               compatible = "regulator-fixed";
+>>>>> +               regulator-name = "fixed-3.3V";
+>>>>> +               regulator-min-microvolt = <3300000>;
+>>>>> +               regulator-max-microvolt = <3300000>;
+>>>>> +               regulator-boot-on;
+>>>>> +               regulator-always-on;
+>>>>> +       };
+>>>>
+>>>> As the eMMC is 1.8V only, I'll defer the review to the people looking
+>>>> into the need
+>>>> to specify the 3.3V pinctrl on other R-Car Gen3 boards.
+>>>
+>>> I don't see any harm in describing the hardware present in DT.
+>>>
+>> The hardware present has 1V8 only bus interface. The 3V3 rail connected
+>> to the eMMC is used for the flash array only, not for the bus interface.
+>> The bus interface has a separate power rail, 1V8 one.
+> 
+> Ok, so a better description of the hardware would be one that
+> does not include the reg_3p3v node?
 
-Check that the SWITCHABLE_SIGNALING_VOLTAGE bit in MCI_GENERICS is set
-before waiting for the power interrupt.
+Nope.
 
-Cc: Sahitya Tummala <stummala@codeaurora.org>
-Cc: Vijay Viswanath <vviswana@codeaurora.org>
-Fixes: c0309b3803fe ("mmc: sdhci-msm: Add sdhci msm register write APIs which wait for pwr irq")
-Signed-off-by: Bjorn Andersson <bjorn.andersson@linaro.org>
----
+The VCC is used to supply the memory array and that needs 3V3 (because
+otherwise the charge pump which is used to erase blocks cannot operate).
 
-The offending patch is part of your v4.15 pull request, so please pick
-this up for the -rcs.
+The VCCQ is used to supply IO and that is 1V8 or 3V3 or a few other
+options inbetween, but in this case it's 1V8 only according to the DT.
 
-Changes since v1:
-- Fixed spelling of swichable...
+So what you want to fix is sdhi2_pins power-source node and make it 1800
+(mV) .
 
- drivers/mmc/host/sdhci-msm.c | 14 ++++++++++++++
- 1 file changed, 14 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 3fb7d2eec93f..c283291db705 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -29,6 +29,9 @@
- #define CORE_VERSION_MAJOR_MASK		(0xf << CORE_VERSION_MAJOR_SHIFT)
- #define CORE_VERSION_MINOR_MASK		0xff
- 
-+#define CORE_MCI_GENERICS		0x70
-+#define SWITCHABLE_SIGNALING_VOLTAGE	BIT(29)
-+
- #define CORE_HC_MODE		0x78
- #define HC_MODE_EN		0x1
- #define CORE_POWER		0x0
-@@ -1028,11 +1031,22 @@ static void sdhci_msm_check_power_status(struct sdhci_host *host, u32 req_type)
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
- 	bool done = false;
-+	u32 val;
- 
- 	pr_debug("%s: %s: request %d curr_pwr_state %x curr_io_level %x\n",
- 			mmc_hostname(host->mmc), __func__, req_type,
- 			msm_host->curr_pwr_state, msm_host->curr_io_level);
- 
-+	/*
-+	 * The power interrupt will not be generated for signal voltage
-+	 * switches if SWITCHABLE_SIGNALING_VOLTAGE in MCI_GENERICS is not set.
-+	 */
-+	val = readl(msm_host->core_mem + CORE_MCI_GENERICS);
-+	if ((req_type & REQ_IO_HIGH || req_type & REQ_IO_LOW) &&
-+	    !(val & SWITCHABLE_SIGNALING_VOLTAGE)) {
-+		return;
-+	}
-+
- 	/*
- 	 * The IRQ for request type IO High/LOW will be generated when -
- 	 * there is a state change in 1.8V enable bit (bit 3) of
 -- 
-2.15.0
-
+Best regards,
+Marek Vasut
