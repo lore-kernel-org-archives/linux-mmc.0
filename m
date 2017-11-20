@@ -1,57 +1,83 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH RFT] mmc: core: use usleep_range rather than HZ magic in
- mmc_delay()
-Date: Sun, 19 Nov 2017 22:22:11 +0100
-Message-ID: <20171119212211.kfp2poxos5ilvdpq@tetsubishi>
-References: <20171114225520.6793-1-wsa+renesas@sang-engineering.com>
- <CAPDyKFrgO0JRatud5JRDONS=VTNef8WS+qvRAUo1AXep9wMpZg@mail.gmail.com>
+From: Park Huijin <bbang.huijin.park@gmail.com>
+Subject: Re: [PATCH] mmc: card: increase wait time
+Date: Mon, 20 Nov 2017 13:50:56 +0900
+Message-ID: <CAFwFC8QL4oyz9oDyidjkByRUCqWo_UufHiHgMf1GEho+TMmnpg@mail.gmail.com>
+References: <CGME20171114024825eucas1p218873c4ff649c17d4061b6660aa6264f@eucas1p2.samsung.com>
+ <1510627683-5209-1-git-send-email-huijin.park@samsung.com> <CAPDyKFo6M+TzrtPmfc2xJzKUaRhbiFp9UR8f+AQf_RgKYu5M9w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="vbq2tsubcdgifvha"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFrgO0JRatud5JRDONS=VTNef8WS+qvRAUo1AXep9wMpZg@mail.gmail.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Simon Horman <horms@verge.net.au>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-io0-f182.google.com ([209.85.223.182]:40660 "EHLO
+        mail-io0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750764AbdKTEu5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 19 Nov 2017 23:50:57 -0500
+Received: by mail-io0-f182.google.com with SMTP id 71so14431855ior.7
+        for <linux-mmc@vger.kernel.org>; Sun, 19 Nov 2017 20:50:57 -0800 (PST)
+In-Reply-To: <CAPDyKFo6M+TzrtPmfc2xJzKUaRhbiFp9UR8f+AQf_RgKYu5M9w@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Huijin Park <huijin.park@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, js07.lee@gmail.com
 
+2017-11-15 18:13 GMT+09:00 Ulf Hansson <ulf.hansson@linaro.org>:
+>
+> On 14 November 2017 at 03:48, Huijin Park <huijin.park@samsung.com> wrote:
+> > Some eMMC products keep busy time a little longer intermittently.
+> > (eg. prepare free blocks, garbage collection...)
+> > In this case, we recommend to wait a little longer than fail.
+>
+> Is this an rpmb specific problem, because the code seems only to change that.
+>
+> Is it write and read or only write?
+Yes. It's rpmb specific problem.
+RPMB R/W use same flow. but only 'write' case makes the problem(long
+busy state) sometimes.
+When I test it, the 5~25ms is not enough although there is not max
+busy time in the spec.
 
---vbq2tsubcdgifvha
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+>
+> >
+> > Signed-off-by: Huijin Park <huijin.park@samsung.com>
+> > ---
+> >  drivers/mmc/core/block.c | 2 +-
+> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> >
+> > diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> > index ea80ff4..b5b0fe6 100644
+> > --- a/drivers/mmc/core/block.c
+> > +++ b/drivers/mmc/core/block.c
+> > @@ -584,7 +584,7 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+> >                  * Ensure RPMB command has completed by polling CMD13
+> >                  * "Send Status".
+> >                  */
+> > -               err = ioctl_rpmb_card_status_poll(card, &status, 5);
+> > +               err = ioctl_rpmb_card_status_poll(card, &status, 50);
+>
+> First, you are changing "re-tries" not a timeout value, which would
+> seem like a better approach.
+I will modify it. Thanks.
 
+>
+> Second, it seems like we should remove the
+> ioctl_rpmb_card_status_poll() function altogether and instead make use
+> of the more generic card_busy_detect() function here.
+>
+> Then if card_busy_detect() needs to be adopted to suite rpmb, then we
+> should do that instead.
+I agree that. But the two function are different a little.
+'ioctl_rpmb_card_status_poll()' has interval(1~5ms) that prevent to
+poll too frequently.
+So I suggest to improve 'card_busy_detect()' about interval time in
+another patch.
+Then the 'ioctl_rpmb_card_status_poll()' can replaced by 'card_busy_detect()'
 
-> This means we get usleep_range(20000, 25000) for the worst case.
->=20
-> Perhaps we want "ms <=3D 16" instead, thus getting usleep
-> usleep_range(16000, 20000) for the worst case? No?
-
-I read the timers-howto that ms <=3D 20 is for the min value. If you think
-25ms is too much for max in that case, maybe we can find a better
-formula for max? My honest opinion is, it won't matter much in practice,
-though. Especially, since we are not busy-looping anymore...
-
-
---vbq2tsubcdgifvha
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAloR9fwACgkQFA3kzBSg
-Kbb6DBAAjg5Ijw/k74bgKPGsgQPHztN6EU0EdR1JUJJlLlY3fNtoWv8b/rkCoq0c
-WXQQUlFhIRf5gnbvZm8/8BoxEtfgvPr7T6ovZmsjjbFQMQURYVdhqH8qA4cTncSl
-Dj2j+gjOcEHcfh8S83f/K0DzyYveoVQ94UTynPwnu6E1oNHAk0vHboI8Bij8zUTx
-50P4dO/gxVA9SfVmGZPDOEIyOhDNEyfWYg/oWPXPy9cCW79XZPS7qQy/LwIj+PCQ
-zxmRc8IPXGnagNNYJpVMqN7mQP6SG7sAdzcmaX0yv6+smt8dEdvbZEwgER39NNpg
-B/HIod7BhqVMs+KQPHxfYUTO670WM0zOJKewmNwvodrg4Z9eynNYHF3U1zqGVNeU
-tkdlvjwK1RvY3nR/185jFdbJqN2fPHhoHn2ESs5o8qVXdjAjCnzAauo57mcOr2mn
-gtbV2pZwhTZFI/xJbP9HAEk1AWVXwFPLN20/34UgHIBPHqlfRbjTG/keNaRCllcM
-ydt709J79gC/aGitLL3fc1vxwTjAgXtTmejofdEkfPN83LQWoxEMIgOy9fN66FLM
-fwPFCsYv4BhyFYk158iNyM0ah+VDuKZWWVvBnjTvUOJ2N7P3FD9pR9BUQw6X4q1Y
-b6Gljg0/OP/vJjSUkywTyI7uMwW6Zsi8XemFzAR77Q+v53jve9I=
-=ZSnv
------END PGP SIGNATURE-----
-
---vbq2tsubcdgifvha--
+>
+> >                 if (err)
+> >                         dev_err(mmc_dev(card->host),
+> >                                         "%s: Card Status=0x%08X, error %d\n",
+> > --
+> > 1.9.1
+> >
+>
+> Kind regards
+> Uffe
