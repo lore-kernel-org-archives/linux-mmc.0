@@ -1,54 +1,55 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH 2/6] mmc: tmio: set tmio_mmc_host to driver data
-Date: Mon, 20 Nov 2017 21:40:39 +0100
-Message-ID: <20171120204039.ubskujnlclwr7pwb@ninjato>
+Subject: Re: [PATCH 3/6] mmc: tmio: use devm_ioremap_resource() instead of
+ devm_ioremap()
+Date: Mon, 20 Nov 2017 21:42:40 +0100
+Message-ID: <20171120204240.kfzphgfjf3qherzt@ninjato>
 References: <1510042172-27220-1-git-send-email-yamada.masahiro@socionext.com>
- <1510042172-27220-3-git-send-email-yamada.masahiro@socionext.com>
+ <1510042172-27220-4-git-send-email-yamada.masahiro@socionext.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="2cshlbkuthi73czh"
+        protocol="application/pgp-signature"; boundary="nf7xwdbjcsltzv32"
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1510042172-27220-3-git-send-email-yamada.masahiro@socionext.com>
+In-Reply-To: <1510042172-27220-4-git-send-email-yamada.masahiro@socionext.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Masahiro Yamada <yamada.masahiro@socionext.com>
 Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
 
---2cshlbkuthi73czh
+--nf7xwdbjcsltzv32
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, Nov 07, 2017 at 05:09:28PM +0900, Masahiro Yamada wrote:
-> The remove, suspend, resume hooks need tmio_mmc_host.  It is tedious
-> to get mmc_host from the driver_data and pass it to mmc_priv().
-> We can directly set tmio_mmc_host to driver data to clean up the code.
+On Tue, Nov 07, 2017 at 05:09:29PM +0900, Masahiro Yamada wrote:
+> The TMIO core misses to request_mem_region().  devm_ioremap_resource()
+> takes care of it and makes the code cleaner.
 >=20
 > Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 
-Acked-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
 
---2cshlbkuthi73czh
+--nf7xwdbjcsltzv32
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAloTPccACgkQFA3kzBSg
-Kba/lRAAhRQTPjvX8OTCM57ilXZluF62gn2K/FCH7mb2it1tfyoI59sQE+yD+45N
-XHLr6oZXt03oXo00PcOCEmJMEKC5s0um42UfVZvuj7oHLkf/xq1NMcsNgvntpGWZ
-I5ZY7Le1in+CddIw+Epw8ICFE3Jfv0u8lp5wb3KJiMg1ZWq6US5Y+6dyU5q8EfCQ
-4nDcGZVe5U+A2Eu8IeqtfAw83ek3HZ0ljLcc/H1Wn7MlBAXhlKREyHRwY+SlO3uU
-GH6/FwT7Ac6mxBkJAPI1gpiBoYXimAf/A2VBPSwSZO1KwQQdSqTCu6lL49eRWR0x
-POkTOFJFNOvHSuykHPrd4rnpLzHHRPnSz/PrS4UeT2UMtW7EFTToWG4ZUzcVhN8s
-CAg+4VkZWQ4sq84JVB5cBdrhqNp03Tjwk3dFncA0rrMoydY31axV09wtdacLcHl7
-438MU5DkVHhlCIHTw4kWLmrnmZmcxm5WmhZZk6/Hf3yXJY1Q4AQk+sas4oPjoxZQ
-HHN4fOWOyYKxvk46T26/IxnB07RNndm86r1XSBELP9tWqbeCAb8KCAtGcwTrJbbO
-LTpmv1YrBMASPRC9EZR6Vdu31E7wmzXrbkp5MzZJX1zulIZdywi6zgbQpe/r4YJG
-mZj3BMHwuEeBDUyqejfJcYtsvcAPVcPlYo8wlghs0Dkn/tOIRzE=
-=dRUz
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAloTPkAACgkQFA3kzBSg
+KbZ/Ug//cXMJsNfDP6IrFy0NH+suvSci5Cx2/SSx4r0xQXCmDYGYPpKOHXAch9+V
+/M/Z4QNZcSwolaeJ8z9T6e7luSTMekseXslAKLuZIf6YOk1hHIdc9KY9BRxw+b2h
+BXo8Dhq7HhJuIso0MFiAywzWQrgLtIOwz935mVg//8vUrq3CvOLsmdmoiNP6Gb4S
+RYDtmtSgUdhpW6Tj6Ht9jXd6CpeNMeYPUM5w5JvGP1XELgWtjBBXAPysKNfFEbfb
+86rvj3DSZYNyukg7wF97PPcRRoLuSNreT6owrnomE3laDuFivsjU1TYS4+yppWac
+ZkhjczDA+Dehn0GEhJRh80bz9fh8/sc419mL5JfmEn3clROSR+LTOMm1lF+Ybxry
+5JzUBGo/crzknZOg9BRNLGQHs4d4pV2t2+1QSGr13NRQWTt3EPgxVjfk9R/nGA8N
+LbnQjbj72wHw4m5WU+3Bi7nkiQ9M+lJpLTJ25by+1HAquCxyaFP8QwV4g1Y259qt
+ODSIRGCurdRBcBr6gJeYP+Byy7+7EK2c0rcSg7D+hMoojNQLPE6h9E/lMfpQILHW
+kzPVRbM0urwLn7W2ZC1x64ozBDlb7H4YPJbMZXmXtnIrgHGIax/2w4Nd4D1rXZID
+Gk143B2rg74vVPeiOsucAtRUI0m2btLOwjCuLlVzxQ+yxSpuWs0=
+=lRW0
 -----END PGP SIGNATURE-----
 
---2cshlbkuthi73czh--
+--nf7xwdbjcsltzv32--
