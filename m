@@ -1,63 +1,75 @@
 From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: Re: [PATCH 2/6] mmc: tmio: set tmio_mmc_host to driver data
-Date: Tue, 21 Nov 2017 00:14:04 +0900
-Message-ID: <CAK7LNARAQwARu8ELhnZ4A4LmhpVjzgcch4ahgpEWYHvvVXGfcw@mail.gmail.com>
-References: <1510042172-27220-1-git-send-email-yamada.masahiro@socionext.com>
- <1510042172-27220-3-git-send-email-yamada.masahiro@socionext.com>
- <20171119194930.npqfzqvmh4zbcb34@tetsubishi> <CAK7LNAQZQ13O1pSd5Ah7VDWrZF1MSkLT_QoTDS+uT7C-r09b+g@mail.gmail.com>
- <20171120092023.nc3oxnawxqwa3ofs@tetsubishi> <CAK7LNARsiyNegE-jFg1hi66+eW_jeK2h+QKWpoUs6RLweQVTKQ@mail.gmail.com>
- <20171120132255.kybz6nbtaviygsu7@tetsubishi>
+Subject: Re: [PATCH 2/3] mmc: tmio: use mmc_can_gpio_cd() instead of checking TMIO_MMC_USE_GPIO_CD
+Date: Tue, 21 Nov 2017 00:39:50 +0900
+Message-ID: <CAK7LNARB17X701AXujOfT0kO-BouqiXxQxb2+fsJW=fw8CpejA@mail.gmail.com>
+References: <1510136220-31853-1-git-send-email-yamada.masahiro@socionext.com>
+ <1510136220-31853-3-git-send-email-yamada.masahiro@socionext.com> <20171119194719.v72z24ugpb2j2q32@tetsubishi>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20171120132255.kybz6nbtaviygsu7@tetsubishi>
+In-Reply-To: <20171119194719.v72z24ugpb2j2q32@tetsubishi>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Wolfram Sang <wsa@the-dreams.de>
 Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc <linux-mmc@vger.kernel.org>, Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Wolfram,
-
-2017-11-20 22:22 GMT+09:00 Wolfram Sang <wsa@the-dreams.de>:
->
->> Last week I was working on the TMIO driver
->> and I have more bug-fix and clean-up patches in hand now.
->> (about 20 patches)
+2017-11-20 4:47 GMT+09:00 Wolfram Sang <wsa@the-dreams.de>:
+> On Wed, Nov 08, 2017 at 07:16:59PM +0900, Masahiro Yamada wrote:
+>> To use a GPIO line for card detection, TMIO_MMC_USE_GPIO_CD is used
+>> by a legacy board (arch/sh/boards/mach-ecovec24).
 >>
->> The patch order is getting a mess,
->> so I am planning to put all patches in one series.
+>> For DT platforms, the "cd-gpios" property is a legitimate way for that
+>> in case the IP-builtin card detection can not be used for some reason.
+>> mmc_of_parse() calls mmc_gpiod_request_cd() to set up ctx->cd_gpio if
+>> the "cd-gpios" property is specified.
+>
+> So, it fixed the DT not recognized via TMIO_MMC_USE_GPIO_CD? Did I get
+> this right?
+>
 >>
->> If not in hurry, can you wait for a little?
->
-> So, did I get this correct: all your current patches are obsolete
-> meanwhile? And I don't need to test or tag them until your new series
-> comes out?
->
+>> To cater to both cases, mmc_can_gpio_cd() is a correct way to check
+>> which card detection logic is used.
+>>
+>> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+>> ---
+>>
+>>  drivers/mmc/host/tmio_mmc_core.c | 2 +-
+>>  1 file changed, 1 insertion(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+>> index 7c0e952..9fd0874 100644
+>> --- a/drivers/mmc/host/tmio_mmc_core.c
+>> +++ b/drivers/mmc/host/tmio_mmc_core.c
+>> @@ -1228,7 +1228,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
+>>       }
+>>       mmc->max_seg_size = mmc->max_req_size;
+>>
+>> -     _host->native_hotplug = !(pdata->flags & TMIO_MMC_USE_GPIO_CD ||
+>> +     _host->native_hotplug = !(mmc_can_gpio_cd(mmc) ||
+>>                                 mmc->caps & MMC_CAP_NEEDS_POLL ||
+>>                                 !mmc_card_is_removable(mmc));
+>>
 
-No, that is not what I meant.
+I do not think I fully understand
+how TMIO / Renesas platforms detect the card removal/insertion.
 
-I a bit felt sorry to ask you to test my patches several times.
-I thought I could ask you to test for a larger chunk
-(since 4.16 is far away anyway),
-but if you do not mind it, please go a head for testing
-the current patches.
-
-I fixed some typos, but no change in the code diff.
-Once you test them and issue Reviewed-by,
-you do not need to re-review them.
+I see TMIO_MMC_USE_GPIO_CD only in
+arch/sh/boards/mach-ecovec24/setup.c
 
 
-Please let me postpone only the following one:
-https://patchwork.kernel.org/patch/10045861/
+As far as I understood, ->native_hotplug flag
+decides the interrupt (TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT).
 
-I had two ideas in my mind
- [1] move mmc_of_parse() to each driver's probe
- [2] move mmc_of_parse() to tmio_mmc_host_alloc()
-
-After I thought a bit, perhaps [2] might be cleaner...
+If you use GPIO, enabling such IRQs is pointless.
 
 
-Thanks!
+However, currently only GPIO is supported for CD
+as I addressed:
+https://patchwork.kernel.org/patch/10048239/
+
+
+I am puzzled by this driver.
+
 
 -- 
 Best Regards
