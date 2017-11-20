@@ -1,54 +1,73 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: Re: [PATCH 2/6] mmc: tmio: set tmio_mmc_host to driver data
-Date: Mon, 20 Nov 2017 18:30:12 +0900
-Message-ID: <CAK7LNARsiyNegE-jFg1hi66+eW_jeK2h+QKWpoUs6RLweQVTKQ@mail.gmail.com>
-References: <1510042172-27220-1-git-send-email-yamada.masahiro@socionext.com>
- <1510042172-27220-3-git-send-email-yamada.masahiro@socionext.com>
- <20171119194930.npqfzqvmh4zbcb34@tetsubishi> <CAK7LNAQZQ13O1pSd5Ah7VDWrZF1MSkLT_QoTDS+uT7C-r09b+g@mail.gmail.com>
- <20171120092023.nc3oxnawxqwa3ofs@tetsubishi>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH 3/4] arm64: dts: r8a77995: draak: enable SDHI2
+Date: Mon, 20 Nov 2017 10:43:27 +0100
+Message-ID: <20171120094327.pnrvraysv2tm6jhm@verge.net.au>
+References: <1510759549-30404-1-git-send-email-ulrich.hecht+renesas@gmail.com>
+ <1510759549-30404-4-git-send-email-ulrich.hecht+renesas@gmail.com>
+ <CAMuHMdXFMsvjMcbmBLCBL9+Ow1=cqQeosEd3hUygjhT_Z=L49w@mail.gmail.com>
+ <20171117143507.yovg64u2znjwj4wh@verge.net.au>
+ <ee3b50ce-3da7-eff1-6bb6-9eb5d61faf42@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from conssluserg-03.nifty.com ([210.131.2.82]:61759 "EHLO
-        conssluserg-03.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750764AbdKTJa5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Nov 2017 04:30:57 -0500
-In-Reply-To: <20171120092023.nc3oxnawxqwa3ofs@tetsubishi>
+Received: from kirsty.vergenet.net ([202.4.237.240]:54260 "EHLO
+        kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750790AbdKTJng (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Nov 2017 04:43:36 -0500
+Content-Disposition: inline
+In-Reply-To: <ee3b50ce-3da7-eff1-6bb6-9eb5d61faf42@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc <linux-mmc@vger.kernel.org>, Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
+To: Marek Vasut <marek.vasut@gmail.com>
+Cc: Geert Uytterhoeven <geert@linux-m68k.org>, Ulrich Hecht <ulrich.hecht+renesas@gmail.com>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Wolfram Sang <wsa@the-dreams.de>, Magnus Damm <magnus.damm@gmail.com>, Linux MMC List <linux-mmc@vger.kernel.org>
 
-2017-11-20 18:20 GMT+09:00 Wolfram Sang <wsa@the-dreams.de>:
-> Yamada-san,
->
->> My best guess is unnecessary if-conditional was added
->> and overlooked in the review process.
->
-> I agree.
->
-> So, from visual review, most patches look good to me. I will give them
-> testing on HW this evening and add my Reviewed-by tags then. I'll also
-> reply to the driver rename thread later today.
->
-> Thanks!
->
->    Wolfram
->
+On Fri, Nov 17, 2017 at 08:08:27PM +0100, Marek Vasut wrote:
+> On 11/17/2017 03:35 PM, Simon Horman wrote:
+> > On Thu, Nov 16, 2017 at 10:43:35AM +0100, Geert Uytterhoeven wrote:
+> >> Hi Uli,
+> >>
+> >> On Wed, Nov 15, 2017 at 4:25 PM, Ulrich Hecht
+> >> <ulrich.hecht+renesas@gmail.com> wrote:
+> >>> The single SDHI controller is connected to eMMC.
+> >>>
+> >>> Signed-off-by: Ulrich Hecht <ulrich.hecht+renesas@gmail.com>
+> >>
+> >> Thanks for your patch!
+> >>
+> >>> --- a/arch/arm64/boot/dts/renesas/r8a77995-draak.dts
+> >>> +++ b/arch/arm64/boot/dts/renesas/r8a77995-draak.dts
+> >>> @@ -32,6 +32,24 @@
+> >>>                 /* first 128MB is reserved for secure area. */
+> >>>                 reg = <0x0 0x48000000 0x0 0x18000000>;
+> >>>         };
+> >>> +
+> >>> +       reg_1p8v: regulator0 {
+> >>> +               compatible = "regulator-fixed";
+> >>> +               regulator-name = "fixed-1.8V";
+> >>> +               regulator-min-microvolt = <1800000>;
+> >>> +               regulator-max-microvolt = <1800000>;
+> >>> +               regulator-boot-on;
+> >>> +               regulator-always-on;
+> >>> +       };
+> >>> +
+> >>> +       reg_3p3v: regulator1 {
+> >>> +               compatible = "regulator-fixed";
+> >>> +               regulator-name = "fixed-3.3V";
+> >>> +               regulator-min-microvolt = <3300000>;
+> >>> +               regulator-max-microvolt = <3300000>;
+> >>> +               regulator-boot-on;
+> >>> +               regulator-always-on;
+> >>> +       };
+> >>
+> >> As the eMMC is 1.8V only, I'll defer the review to the people looking
+> >> into the need
+> >> to specify the 3.3V pinctrl on other R-Car Gen3 boards.
+> > 
+> > I don't see any harm in describing the hardware present in DT.
+> > 
+> The hardware present has 1V8 only bus interface. The 3V3 rail connected
+> to the eMMC is used for the flash array only, not for the bus interface.
+> The bus interface has a separate power rail, 1V8 one.
 
-Last week I was working on the TMIO driver
-and I have more bug-fix and clean-up patches in hand now.
-(about 20 patches)
-
-The patch order is getting a mess,
-so I am planning to put all patches in one series.
-
-If not in hurry, can you wait for a little?
-
-
-
-
-
--- 
-Best Regards
-Masahiro Yamada
+Ok, so a better description of the hardware would be one that
+does not include the reg_3p3v node?
