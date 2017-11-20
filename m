@@ -1,30 +1,37 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH 3/6] mmc: tmio: use devm_ioremap_resource() instead of
- devm_ioremap()
-Date: Mon, 20 Nov 2017 21:42:40 +0100
-Message-ID: <20171120204240.kfzphgfjf3qherzt@ninjato>
+Subject: Re: [PATCH 4/6] mmc: tmio: move mmc_host_ops to struct tmio_mmc_host
+ from static data
+Date: Mon, 20 Nov 2017 21:45:00 +0100
+Message-ID: <20171120204500.gqysj63b32rveahm@ninjato>
 References: <1510042172-27220-1-git-send-email-yamada.masahiro@socionext.com>
- <1510042172-27220-4-git-send-email-yamada.masahiro@socionext.com>
+ <1510042172-27220-5-git-send-email-yamada.masahiro@socionext.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="nf7xwdbjcsltzv32"
+        protocol="application/pgp-signature"; boundary="2tvphu7xbraelwml"
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1510042172-27220-4-git-send-email-yamada.masahiro@socionext.com>
+In-Reply-To: <1510042172-27220-5-git-send-email-yamada.masahiro@socionext.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Masahiro Yamada <yamada.masahiro@socionext.com>
 Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
 
---nf7xwdbjcsltzv32
+--2tvphu7xbraelwml
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, Nov 07, 2017 at 05:09:29PM +0900, Masahiro Yamada wrote:
-> The TMIO core misses to request_mem_region().  devm_ioremap_resource()
-> takes care of it and makes the code cleaner.
+On Tue, Nov 07, 2017 at 05:09:30PM +0900, Masahiro Yamada wrote:
+> Currently, tmio_mmc_ops is static data and tmio_mmc_host_probe()
+> updates some hooks in the static data.  This is a problem when
+> two or more instances call tmio_mmc_host_probe() and each of them
+> requests to use its own card_busy/start_signal_voltage_switch.
+>=20
+> We can borrow a solution from sdhci_alloc_host().  Copy the whole
+> ops structure to host->mmc_host_ops, then override the hooks in
+> malloc'ed data.  Constify tmio_mmc_ops since it is a template ops
+> used by default.
 >=20
 > Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 
@@ -32,24 +39,24 @@ Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
 
---nf7xwdbjcsltzv32
+--2tvphu7xbraelwml
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAloTPkAACgkQFA3kzBSg
-KbZ/Ug//cXMJsNfDP6IrFy0NH+suvSci5Cx2/SSx4r0xQXCmDYGYPpKOHXAch9+V
-/M/Z4QNZcSwolaeJ8z9T6e7luSTMekseXslAKLuZIf6YOk1hHIdc9KY9BRxw+b2h
-BXo8Dhq7HhJuIso0MFiAywzWQrgLtIOwz935mVg//8vUrq3CvOLsmdmoiNP6Gb4S
-RYDtmtSgUdhpW6Tj6Ht9jXd6CpeNMeYPUM5w5JvGP1XELgWtjBBXAPysKNfFEbfb
-86rvj3DSZYNyukg7wF97PPcRRoLuSNreT6owrnomE3laDuFivsjU1TYS4+yppWac
-ZkhjczDA+Dehn0GEhJRh80bz9fh8/sc419mL5JfmEn3clROSR+LTOMm1lF+Ybxry
-5JzUBGo/crzknZOg9BRNLGQHs4d4pV2t2+1QSGr13NRQWTt3EPgxVjfk9R/nGA8N
-LbnQjbj72wHw4m5WU+3Bi7nkiQ9M+lJpLTJ25by+1HAquCxyaFP8QwV4g1Y259qt
-ODSIRGCurdRBcBr6gJeYP+Byy7+7EK2c0rcSg7D+hMoojNQLPE6h9E/lMfpQILHW
-kzPVRbM0urwLn7W2ZC1x64ozBDlb7H4YPJbMZXmXtnIrgHGIax/2w4Nd4D1rXZID
-Gk143B2rg74vVPeiOsucAtRUI0m2btLOwjCuLlVzxQ+yxSpuWs0=
-=lRW0
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAloTPswACgkQFA3kzBSg
+KbaazA/5AXrMlPQGVeiNeorpjLSkMOiQelpBaGXtzKOOFPLzKypZ2Mfjpj+2LZwH
+UQBcYI+W9/3QYXaWOmIzTl8uY69oJMvoWbTC6POc0sYVu98hYqqSjaEKgydz2bVL
+lKBozEJPjPoGBvczdTiuTI8WbmAGRFYoAbOawPzc1FzqSs6/wiUfZv9Ro8klhozc
+belpgvhlLfbVt9/dQ/9GqoUr7yZd+aqKYTFOHAbAKjBUV+3aErx23V7QAOCmG56R
+TcD7Y3MlQuh05SCZrrnAaaB82JJhp+sw+FHfnq9du0oBuhk3gXmf+1y7Ag9b1HLg
+m8Xpi1orUZPm55ozDTvrbMKPEUknuoM1muxIjSVOaRqH2c3FFK3SFhjel8NZprY+
+A+JH3MIEen+quSqA+lNs4PGnDJm+LDw46ZfsnDrC7HbTCkcXZuMVRBNLq/F/8cj2
+/F3cw79ghmniC0YLtQ0IfwkhXoKCgDIm2GMAuX6yrvkbsyJv56kMP1VR77FzrKyx
+nnpJiHo3Ty+ZFSbLkR4BCAp1CupBLJJEQWHBodUKNxO7XmVrFTtwRxuCiTfp7GKX
+cGDERWoNqlnTJUgcyUt02hybmaPmWKXwm1BcE58VIExIvE2QoA+wq4xiUblNlo3O
+yQvWavkNKUctHrePOvfn9hCQyy5sUzt3PgUy+mW0yYanh87YjgM=
+=uTaW
 -----END PGP SIGNATURE-----
 
---nf7xwdbjcsltzv32--
+--2tvphu7xbraelwml--
