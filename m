@@ -1,63 +1,58 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH 6/6] mmc: tmio: move mmc_of_parse() out of
- tmio_mmc_host_probe()
-Date: Mon, 20 Nov 2017 21:47:11 +0100
-Message-ID: <20171120204711.vze5j6lvpkl5op3z@ninjato>
+Subject: Re: [PATCH 4/6] mmc: tmio: move mmc_host_ops to struct tmio_mmc_host
+ from static data
+Date: Mon, 20 Nov 2017 21:48:34 +0100
+Message-ID: <20171120204834.c4ckog3rxeeojh2b@ninjato>
 References: <1510042172-27220-1-git-send-email-yamada.masahiro@socionext.com>
- <1510042172-27220-7-git-send-email-yamada.masahiro@socionext.com>
+ <1510042172-27220-5-git-send-email-yamada.masahiro@socionext.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="5ddzgtkuntpjy7d7"
-Return-path: <linux-kernel-owner@vger.kernel.org>
+        protocol="application/pgp-signature"; boundary="o3axn3omayfqnokn"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from sauhun.de ([88.99.104.3]:50769 "EHLO pokefinder.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752546AbdKTUsg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 20 Nov 2017 15:48:36 -0500
 Content-Disposition: inline
-In-Reply-To: <1510042172-27220-7-git-send-email-yamada.masahiro@socionext.com>
-Sender: linux-kernel-owner@vger.kernel.org
+In-Reply-To: <1510042172-27220-5-git-send-email-yamada.masahiro@socionext.com>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Masahiro Yamada <yamada.masahiro@socionext.com>
 Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-List-Id: linux-mmc@vger.kernel.org
 
 
---5ddzgtkuntpjy7d7
+--o3axn3omayfqnokn
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-On Tue, Nov 07, 2017 at 05:09:32PM +0900, Masahiro Yamada wrote:
-> mmc_of_parse() parses various DT properties and sets capability flags
-> accordingly.  However, drivers have no chance to run platform init
-> code depending on such flags because mmc_of_parse() is called from
-> tmio_mmc_host_probe().
->=20
-> Move mmc_of_parse() out of tmio_mmc_host_probe() so that drivers can
-> handle capabilities before mmc_add_host().
->=20
-> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
-
-I'll just add this:
-
-Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-
-because you wanted to still try which solution is better.
 
 
---5ddzgtkuntpjy7d7
+> +	struct mmc_host_ops     mmc_host_ops;
+
+Just came to think of it: maybe a shorter name?
+
+ host->ops
+
+is still nicely readable, I'd think...
+
+
+--o3axn3omayfqnokn
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAloTP08ACgkQFA3kzBSg
-Kbb4IQ/+Oq/I/eSh9wkJ2+/w3nGF9ujLToAtiOJH97L6xYgYjKSFwWNSjHIM9O4v
-Vs19YW2f4wwkbVpRLYnjINV8sQCU4IoFsUy83S9cWlplel4SJaeRLYaoAKBhhsLY
-HN/WXVJrh7Bse1jmo1kNHNKYV5YKbqXpJMRpLEBkBzCJIKN/u6YkkBO3OuyKn+Op
-gyZAhNyFMcfAHdAPrNMjeJ3MmmIzwmr5p9dMur8hIbqktyRHMgMBea25XEwJ8cbV
-HrQp2OSdb2NhKP8aW3WXV4f/JlUroePPydLiS755zIxxK2gvDHKLSUblNTAIi7iv
-R2YmdPxzy4DlwnDCC53/+hf6nGcf/VjPbk55wN4JHP863LhNmXraLx3t8f6Huunh
-Mp/ja7rnkRxBokWCYzG7BvHIl7VOrxVwJrvZiP+IqHL1dWLpDRuA8tUo6G+khcq0
-0XnKzgYiYbRtPaNdqlZyKBrqmRW5tAo7GCyvqVzx4EVwL8e1Fbg/v/CpFVIbxfny
-39gOD4dCQQKnE9motMXGrr6ypcHyYHg8xeToCgCtNrNKWX2hEcEOzi0puS7AGWl3
-nH28gEoZCp08sq3SgMlfAEk5Vuvgt6e7Vfh7OR9ZQb6oVcagWIe5ZVgo5TvOTdot
-s+2z4xEF25biDkGJ4Ukz72ZeOJ+SYDBlu1VcZ6bpOUh16gRdbWo=
-=72Gm
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAloTP6IACgkQFA3kzBSg
+KbYf1A//dyP7hYph1h/fOG/ZgEy1gV8MAj9LI2GETsZCgirC9We0XWCJnzwIEOsr
+RK24+u5hZh2Sc2qELUUl6zHdA7+jaSPmhT/hRz0nAwYiZl1b+/Vb/iBqxn3A6Vxm
+wdp9Ndt5NpVm8voXrDXokf2QgcYrXOzUgQUjKYKtoxlZXWH+PlyyEI9peC6wI9Ox
+GBuGydwgi64NhXEg9osC5Gvlxc7I9AmdU1u85kmq7rEX3N65AZYbN8KhHbeGnzRt
+Onx4ZyU5sTgjkI0C0WXzbjkMcHv+En9uZk12osenhpjU6twwqMY2iLeg2F+BbvhC
+t9NZB6319zydVqbWb6Wy782vy0dSQx65Kg65m4J7LvTMtk/iFXdmwLlBvBzDFKuR
+jNT2asHMR+m19o0eaNbBjNY8WM7+vuOQrn/pV9msYQdk7Vd/R14yypdozJmSu/id
+VzRCQWqTog3NsdbjTEq35diCmuEKPTozs2CH9IPdOtMQ88ODWKyiYHgLT1ZIC9V1
+kMd1DWALlluHYZaUFL3HmmnLetTT/K2nZQqKyIRKB9vvGaYLneg+rxQYk+Sq5jVd
+SNM6PgYOAof+QEFow6IPlS0bsE7Wvcjnu8oiwbueePkqkd+SBOdZfVcm6x1uqYTm
+v/gwdCrbdlj5aZL8SL9ht6YtyxjjKwumf4yRVrMV2PfHvxMGsC0=
+=Tm4c
 -----END PGP SIGNATURE-----
 
---5ddzgtkuntpjy7d7--
+--o3axn3omayfqnokn--
