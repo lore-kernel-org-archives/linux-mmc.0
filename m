@@ -1,56 +1,83 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH 2/3] mmc: tmio: use mmc_can_gpio_cd() instead of checking
- TMIO_MMC_USE_GPIO_CD
-Date: Mon, 20 Nov 2017 21:54:16 +0100
-Message-ID: <20171120205416.e2a7oqwqwxkddj5u@ninjato>
-References: <1510136220-31853-1-git-send-email-yamada.masahiro@socionext.com>
- <1510136220-31853-3-git-send-email-yamada.masahiro@socionext.com>
- <20171119194719.v72z24ugpb2j2q32@tetsubishi>
- <CAK7LNARB17X701AXujOfT0kO-BouqiXxQxb2+fsJW=fw8CpejA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="oulfr2rkzupd5qox"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAK7LNARB17X701AXujOfT0kO-BouqiXxQxb2+fsJW=fw8CpejA@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc <linux-mmc@vger.kernel.org>, Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
+From: Jesse Chan <jc@linux.com>
+Subject: [PATCH] mmc: renesas_sdhi: add missing MODULE_DESCRIPTION/AUTHOR/LICENSE
+Date: Mon, 20 Nov 2017 13:32:36 -0800
+Message-ID: <20171120213236.53266-1-jc@linux.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pf0-f194.google.com ([209.85.192.194]:38938 "EHLO
+        mail-pf0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753161AbdKTVcm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Nov 2017 16:32:42 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+Cc: Jesse Chan <jc@linux.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
+This change resolves a new compile-time warning
+when built as a loadable module:
 
---oulfr2rkzupd5qox
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+WARNING: modpost: missing MODULE_LICENSE() in drivers/mmc/host/renesas_sdhi_core.o
+see include/linux/module.h for more information
 
+This adds the license as "GPL v2", which matches the header of the file.
 
-> I am puzzled by this driver.
+MODULE_DESCRIPTION and MODULE_AUTHOR are also added.
 
-And now imagine that it is already cleaned up :)
+Signed-off-by: Jesse Chan <jc@linux.com>
+---
+ drivers/mmc/host/renesas_sdhi.h               | 1 +
+ drivers/mmc/host/renesas_sdhi_core.c          | 5 +++++
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c | 1 -
+ drivers/mmc/host/renesas_sdhi_sys_dmac.c      | 1 -
+ 4 files changed, 6 insertions(+), 2 deletions(-)
 
-I will check these CD patches tomorrow. I need a fresh brain for that.
+diff --git a/drivers/mmc/host/renesas_sdhi.h b/drivers/mmc/host/renesas_sdhi.h
+index b9dfea5d8193..090cf86d7cd3 100644
+--- a/drivers/mmc/host/renesas_sdhi.h
++++ b/drivers/mmc/host/renesas_sdhi.h
+@@ -13,6 +13,7 @@
+ #define RENESAS_SDHI_H
+ 
+ #include <linux/platform_device.h>
++#include <linux/module.h>
+ #include "tmio_mmc.h"
+ 
+ struct renesas_sdhi_scc {
+diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+index fcf7235d5742..0a0daa7a342f 100644
+--- a/drivers/mmc/host/renesas_sdhi_core.c
++++ b/drivers/mmc/host/renesas_sdhi_core.c
+@@ -667,3 +667,8 @@ int renesas_sdhi_remove(struct platform_device *pdev)
+ 	return 0;
+ }
+ EXPORT_SYMBOL_GPL(renesas_sdhi_remove);
++
++MODULE_DESCRIPTION("Renesas SDHI driver");
++MODULE_AUTHOR("Phil Blundell <pb@handhelds.org>");
++MODULE_AUTHOR("Samuel Ortiz <sameo@openedhand.com>");
++MODULE_LICENSE("GPL v2");
+diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+index 41cbe84c1d18..a9b452b42fac 100644
+--- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
++++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+@@ -15,7 +15,6 @@
+ #include <linux/mfd/tmio.h>
+ #include <linux/mmc/host.h>
+ #include <linux/mod_devicetable.h>
+-#include <linux/module.h>
+ #include <linux/pagemap.h>
+ #include <linux/scatterlist.h>
+ #include <linux/sys_soc.h>
+diff --git a/drivers/mmc/host/renesas_sdhi_sys_dmac.c b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+index 9ab10436e4b8..fe6a09f14682 100644
+--- a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
++++ b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+@@ -17,7 +17,6 @@
+ #include <linux/mfd/tmio.h>
+ #include <linux/mmc/host.h>
+ #include <linux/mod_devicetable.h>
+-#include <linux/module.h>
+ #include <linux/of_device.h>
+ #include <linux/pagemap.h>
+ #include <linux/scatterlist.h>
+-- 
+2.14.1
 
-Thanks for the work!
-
-
---oulfr2rkzupd5qox
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAloTQPgACgkQFA3kzBSg
-KbbUWBAAkUjVwsURCzhDw4lCpYSuOiToFmXIk+Ord9OfmIPOnAutcImEeTD8O3cM
-IBTFVDLxtVUWcfaB8D75weU8Tns55x9vFmgOvlqvozp2ZQ9MiKgSpYSb9afEXvIe
-xb2LQF3/0vXbgvQYXyZ56Ud2yilQitGMOqEPZOaSEBDvUz59XMnobHcW9r/CmBRq
-8JLgFqdVc/7xto4+5CYFfmrpQWDJHX6QyCgJDWzSlbccLG89ifN96dVeNY3JmbJF
-dHCTCg/To15O+Nmwh8fdRoGXv8KYGMA4lSzG2KFoet2nIddSQNIBi5Sld0xhuxA/
-oTn9UQ0D8oxq+migECEEroysypVXNA1+4DF02qzzLWZ4SZGMKaRCBuAJf4zi+2AM
-+Xpd56ovqM3LStgQ9OxpTXklzspuYMSu/DVaZ7wS4TFo6b3aPZ6p9CKYMRifCUPG
-Pm9h+eScqWOcfsiZs61BtYELvDr0238nt83D7CtWlnUIAZE3SsCDQTLr+za6rbH4
-RCsUsc3vmPWZgUlwmabLYBgiuKAt4OoYefkG2FcQjbd6Ck/OEVbbUyP3vsQaafga
-oLybmwebfgGo79ynKOgaznH+IYUWuxmDgDlfQHWHdVJwHXcw73y2+mkfMVUpIZDJ
-jb2r5d/le9T2UJwXv+cu9JbUGYR2+aOJ+xOgMaEgpssJCo+YHxc=
-=dKsD
------END PGP SIGNATURE-----
-
---oulfr2rkzupd5qox--
