@@ -1,57 +1,56 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH] mfd: tmio: move register macros to tmio_core.c
-Date: Mon, 20 Nov 2017 21:52:02 +0100
-Message-ID: <20171120205202.3f3ikjyp4zfwbjqr@ninjato>
-References: <1510042453-27619-1-git-send-email-yamada.masahiro@socionext.com>
+Subject: Re: [PATCH 2/3] mmc: tmio: use mmc_can_gpio_cd() instead of checking
+ TMIO_MMC_USE_GPIO_CD
+Date: Mon, 20 Nov 2017 21:54:16 +0100
+Message-ID: <20171120205416.e2a7oqwqwxkddj5u@ninjato>
+References: <1510136220-31853-1-git-send-email-yamada.masahiro@socionext.com>
+ <1510136220-31853-3-git-send-email-yamada.masahiro@socionext.com>
+ <20171119194719.v72z24ugpb2j2q32@tetsubishi>
+ <CAK7LNARB17X701AXujOfT0kO-BouqiXxQxb2+fsJW=fw8CpejA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="dpjrbdvlfxdo4l2k"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([88.99.104.3]:50797 "EHLO pokefinder.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752402AbdKTUwD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 20 Nov 2017 15:52:03 -0500
+        protocol="application/pgp-signature"; boundary="oulfr2rkzupd5qox"
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1510042453-27619-1-git-send-email-yamada.masahiro@socionext.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+In-Reply-To: <CAK7LNARB17X701AXujOfT0kO-BouqiXxQxb2+fsJW=fw8CpejA@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: Lee Jones <lee.jones@linaro.org>, Simon Horman <simon.horman@netronome.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc <linux-mmc@vger.kernel.org>, Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
+List-Id: linux-mmc@vger.kernel.org
 
 
---dpjrbdvlfxdo4l2k
+--oulfr2rkzupd5qox
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-On Tue, Nov 07, 2017 at 05:14:12PM +0900, Masahiro Yamada wrote:
-> These registers are only used in drivers/mfd/tmio_core.c
->=20
-> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
-
-Well, yes, why not...
-
-Acked-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
 
---dpjrbdvlfxdo4l2k
+> I am puzzled by this driver.
+
+And now imagine that it is already cleaned up :)
+
+I will check these CD patches tomorrow. I need a fresh brain for that.
+
+Thanks for the work!
+
+
+--oulfr2rkzupd5qox
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAloTQHEACgkQFA3kzBSg
-KbZYlQ/8Ca46kybykuHqvJb9hG5OLMTJEt5jpKMSESBHMV84yfCRn57MIbj8Qdx9
-E1tpztU6QHKHwSUNh1SS5shh2CnP536HHWQHYuLI8xLLTe/5FL2M5JD7sLW0PUV8
-/ueBeDBG/4Gb6YOoEqezwhoAp4UBOGpcBHDxrLR9NA0Wq3TKw3QPjdzBiblCAqCj
-qCvTLkBnX5raM3B4AnJx+qsvIxqg0n/FR0E7yUqkouJM7VEIb9SvDAsgbo7CqBG8
-hVAPjHx0jd9zeAUsnzr03eb+CkbpKRXSggG2OLUcS0cDbJSkaTbJP7h1fg9KK5o0
-NjoaBxgtc7Cue8PXUpxXAtFgISEakVeLDXlaX3KtcONqOUToQiED8fN4skbSGuwl
-yDqVnQ0NufeuApXB08N0cWOH7fvojis108Fcjixcs7ogqmOSx/ZVyhW2EjMzKU/C
-J+mlGWVKzkSBc4AcLDR9IrJo0xYtNdmqC1QTuE8PMGywzmPWy/2JTGapqU8NwnKq
-y1dNvtKoUI0/pPYzMeZDZ/wRMwX1qRuC9+KtICN94Xv6SiEUMDRBQNA9pLZrGQmI
-3CK2n1cXEQmaD/U2NXvwPoQ/tJSz6ghL8LOeoMKM4prh0ib5ddz6aSD1OvtNhebm
-ogZ/VyWn6qn07NFmPhHywsIAp9816jI9awteV/w3YlpYgmXOjus=
-=Qwag
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAloTQPgACgkQFA3kzBSg
+KbbUWBAAkUjVwsURCzhDw4lCpYSuOiToFmXIk+Ord9OfmIPOnAutcImEeTD8O3cM
+IBTFVDLxtVUWcfaB8D75weU8Tns55x9vFmgOvlqvozp2ZQ9MiKgSpYSb9afEXvIe
+xb2LQF3/0vXbgvQYXyZ56Ud2yilQitGMOqEPZOaSEBDvUz59XMnobHcW9r/CmBRq
+8JLgFqdVc/7xto4+5CYFfmrpQWDJHX6QyCgJDWzSlbccLG89ifN96dVeNY3JmbJF
+dHCTCg/To15O+Nmwh8fdRoGXv8KYGMA4lSzG2KFoet2nIddSQNIBi5Sld0xhuxA/
+oTn9UQ0D8oxq+migECEEroysypVXNA1+4DF02qzzLWZ4SZGMKaRCBuAJf4zi+2AM
++Xpd56ovqM3LStgQ9OxpTXklzspuYMSu/DVaZ7wS4TFo6b3aPZ6p9CKYMRifCUPG
+Pm9h+eScqWOcfsiZs61BtYELvDr0238nt83D7CtWlnUIAZE3SsCDQTLr+za6rbH4
+RCsUsc3vmPWZgUlwmabLYBgiuKAt4OoYefkG2FcQjbd6Ck/OEVbbUyP3vsQaafga
+oLybmwebfgGo79ynKOgaznH+IYUWuxmDgDlfQHWHdVJwHXcw73y2+mkfMVUpIZDJ
+jb2r5d/le9T2UJwXv+cu9JbUGYR2+aOJ+xOgMaEgpssJCo+YHxc=
+=dKsD
 -----END PGP SIGNATURE-----
 
---dpjrbdvlfxdo4l2k--
+--oulfr2rkzupd5qox--
