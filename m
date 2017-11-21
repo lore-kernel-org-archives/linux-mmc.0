@@ -1,7 +1,7 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V14 09/24] mmc: block: Make card_busy_detect() accumulate all response error bits
-Date: Tue, 21 Nov 2017 15:42:35 +0200
-Message-ID: <1511271770-3444-10-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V14 08/24] mmc: block: Check for transfer state in card_busy_detect()
+Date: Tue, 21 Nov 2017 15:42:34 +0200
+Message-ID: <1511271770-3444-9-git-send-email-adrian.hunter@intel.com>
 References: <1511271770-3444-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1511271770-3444-1-git-send-email-adrian.hunter@intel.com>
@@ -10,82 +10,57 @@ To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-mmc@vger.kernel.org
 
-Make card_busy_detect() accumulate all response error bits. Later patches
-will make use of this.
+The card is required to return to transfer state. Since that is the state
+required to start another transfer, check for that state instead of
+programming state.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/block.c | 30 ++++++++++++++++++++++--------
- 1 file changed, 22 insertions(+), 8 deletions(-)
+ drivers/mmc/core/block.c | 17 +++++++++++++----
+ 1 file changed, 13 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 130ce94fdaf2..607774fcb9f5 100644
+index 0874ab3e5c92..130ce94fdaf2 100644
 --- a/drivers/mmc/core/block.c
 +++ b/drivers/mmc/core/block.c
-@@ -959,7 +959,7 @@ static inline bool mmc_blk_in_tran_state(u32 status)
+@@ -948,6 +948,16 @@ static unsigned long mmc_blk_data_timeout_jiffies(struct mmc_host *host,
+ 	return msecs_to_jiffies(ms);
  }
  
- static int card_busy_detect(struct mmc_card *card, bool hw_busy_detect,
--			    struct request *req, bool *gen_err)
-+			    struct request *req, u32 *resp_errs)
- {
- 	struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
- 	struct mmc_data *data = &mqrq->brq.data;
-@@ -979,11 +979,9 @@ static int card_busy_detect(struct mmc_card *card, bool hw_busy_detect,
- 			return err;
- 		}
- 
--		if (status & R1_ERROR) {
--			pr_err("%s: %s: error sending status cmd, status %#x\n",
--				req->rq_disk->disk_name, __func__, status);
--			*gen_err = true;
--		}
-+		/* Accumulate any response error bits seen */
-+		if (resp_errs)
-+			*resp_errs |= status;
- 
- 		/* We may rely on the host hw to handle busy detection.*/
- 		if ((card->host->caps & MMC_CAP_WAIT_WHILE_BUSY) &&
-@@ -1011,6 +1009,22 @@ static int card_busy_detect(struct mmc_card *card, bool hw_busy_detect,
- 	return err;
- }
- 
-+static int card_busy_detect_err(struct mmc_card *card, bool hw_busy_detect,
-+				struct request *req, bool *gen_err)
++static inline bool mmc_blk_in_tran_state(u32 status)
 +{
-+	u32 resp_errs = 0;
-+	int err;
-+
-+	err = card_busy_detect(card, hw_busy_detect, req, &resp_errs);
-+	if (resp_errs & R1_ERROR) {
-+		pr_err("%s: %s: error sending status cmd, status %#x\n",
-+		       req->rq_disk->disk_name, __func__, resp_errs);
-+		*gen_err = true;
-+	}
-+
-+	return err;
++	/*
++	 * Some cards mishandle the status bits, so make sure to check both the
++	 * busy indication and the card state.
++	 */
++	return status & R1_READY_FOR_DATA &&
++	       (R1_CURRENT_STATE(status) == R1_STATE_TRAN);
 +}
 +
- static int send_stop(struct mmc_card *card, unsigned int timeout_ms,
- 		struct request *req, bool *gen_err, u32 *stop_status)
+ static int card_busy_detect(struct mmc_card *card, bool hw_busy_detect,
+ 			    struct request *req, bool *gen_err)
  {
-@@ -1053,7 +1067,7 @@ static int send_stop(struct mmc_card *card, unsigned int timeout_ms,
- 		*gen_err = true;
- 	}
- 
--	return card_busy_detect(card, use_r1b_resp, req, gen_err);
-+	return card_busy_detect_err(card, use_r1b_resp, req, gen_err);
- }
- 
- #define ERR_NOMEDIUM	3
-@@ -1588,7 +1602,7 @@ static enum mmc_blk_status mmc_blk_err_check(struct mmc_card *card,
- 			gen_err = true;
+@@ -985,9 +995,9 @@ static int card_busy_detect(struct mmc_card *card, bool hw_busy_detect,
+ 		 * leaves the program state.
+ 		 */
+ 		if (done) {
+-			pr_err("%s: Card stuck in programming state! %s %s\n",
++			pr_err("%s: Card stuck in wrong state! %s %s status: %#x\n",
+ 				mmc_hostname(card->host),
+-				req->rq_disk->disk_name, __func__);
++				req->rq_disk->disk_name, __func__, status);
+ 			return -ETIMEDOUT;
  		}
  
--		err = card_busy_detect(card, false, req, &gen_err);
-+		err = card_busy_detect_err(card, false, req, &gen_err);
- 		if (err)
- 			return MMC_BLK_CMD_ERR;
- 	}
+@@ -996,8 +1006,7 @@ static int card_busy_detect(struct mmc_card *card, bool hw_busy_detect,
+ 		 * so make sure to check both the busy
+ 		 * indication and the card state.
+ 		 */
+-	} while (!(status & R1_READY_FOR_DATA) ||
+-		 (R1_CURRENT_STATE(status) == R1_STATE_PRG));
++	} while (!mmc_blk_in_tran_state(status));
+ 
+ 	return err;
+ }
 -- 
 1.9.1
