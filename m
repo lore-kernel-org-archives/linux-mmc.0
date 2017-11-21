@@ -1,39 +1,33 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [EXT] Re: [PATCH v4 1/2] mmc: API for accessing host supported
- maximum segment count and size
-Date: Tue, 21 Nov 2017 16:13:08 +0100
-Message-ID: <CAPDyKFrwVmQ__ioGKn4YqEQo9WspMyDreo=NG614_GjhxaEMpA@mail.gmail.com>
-References: <1466069006-10757-1-git-send-email-akarwar@marvell.com>
- <ee910d6f6d1f4d218586bddd5a7627b0@SC-EXCH04.marvell.com> <5852c8610b7f46fea0a812e8750fbfd1@SC-EXCH02.marvell.com>
- <CAPDyKFqZqbNHgtqnNoXAA_htqWDbPqvcz6hOZWQvfa5dZ5pj2Q@mail.gmail.com> <1511265515364.63169@marvell.com>
+From: Jiri Slaby <jslaby@suse.cz>
+Subject: Re: sdhci broke in 4.14 [was: MMC fixes for v.4.14-rc4]
+Date: Tue, 21 Nov 2017 16:13:22 +0100
+Message-ID: <312d520e-9d80-4750-0ca2-df2a7c5be804@suse.cz>
+References: <1507361610-31577-1-git-send-email-ulf.hansson@linaro.org>
+ <2248b8b6-a80f-52ef-943f-54c1351d5a36@suse.cz>
+ <CAPDyKFrzVaE=upRbJ+sq2rRcR1uitw2QEvTzt=pjtoNh1bij9Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f66.google.com ([209.85.214.66]:40299 "EHLO
-        mail-it0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751185AbdKUPNJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Nov 2017 10:13:09 -0500
-Received: by mail-it0-f66.google.com with SMTP id 72so2389253itl.5
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Nov 2017 07:13:09 -0800 (PST)
-In-Reply-To: <1511265515364.63169@marvell.com>
+Received: from mail-wm0-f54.google.com ([74.125.82.54]:38075 "EHLO
+        mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750794AbdKUPN0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Nov 2017 10:13:26 -0500
+In-Reply-To: <CAPDyKFrzVaE=upRbJ+sq2rRcR1uitw2QEvTzt=pjtoNh1bij9Q@mail.gmail.com>
+Content-Language: en-GB
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Xinming Hu <huxm@marvell.com>
-Cc: Nishant Sarmukadam <nishants@marvell.com>, Wei-Ning Huang <wnhuang@chromium.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Cathy Luo <cluo@marvell.com>, Zhiyuan Yang <yangzy@marvell.com>, Tim Song <songtao@marvell.com>, "Xu (Shanghai) Wang" <xwang4@marvell.com>, James Cao <jcao@marvell.com>, Ganapathi Bhat <gbhat@marvell.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Linus <torvalds@linux-foundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Geert Uytterhoeven <geert+renesas@glider.be>, Konrad Rzeszutek Wilk <konrad@kernel.org>
 
-On 21 November 2017 at 12:58, Xinming Hu <huxm@marvell.com> wrote:
-> Hi Ulf,
->
-> Would you mind re-posting a re-based series instead? In that way
-> you hopefully get some more people's attention as well.
->>>> Sure. Could you please point the latest mmc git code base ? I guess it is
-> https://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git/
-> But looks quite old.
+On 11/21/2017, 04:08 PM, Ulf Hansson wrote:
+> It seems like we need something along those lines for the sdhci-pci
+> case as well. I cooked a patch, perhaps you have some time for test?
 
-I am not using the master branch, but the next and fixes branch.
-Please have a look again.
+Sure, but before I start, I want to double check: don't you want me to
+stick some pr_info in there to see if the computation is correct?
 
-[...]
-
-Br
-Uffe
+thanks,
+-- 
+js
+suse labs
