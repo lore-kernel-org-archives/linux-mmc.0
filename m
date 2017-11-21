@@ -1,7 +1,7 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V14 19/24] mmc: block: blk-mq: Check error bits and save the exception bit when polling card busy
-Date: Tue, 21 Nov 2017 15:42:45 +0200
-Message-ID: <1511271770-3444-20-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V14 21/24] mmc: mmc_test: Do not use mmc_start_areq() anymore
+Date: Tue, 21 Nov 2017 15:42:47 +0200
+Message-ID: <1511271770-3444-22-git-send-email-adrian.hunter@intel.com>
 References: <1511271770-3444-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1511271770-3444-1-git-send-email-adrian.hunter@intel.com>
@@ -10,83 +10,217 @@ To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-mmc@vger.kernel.org
 
-Check error bits and save the exception bit when polling card busy.
+The block driver's blk-mq paths do not use mmc_start_areq(). In order to
+remove mmc_start_areq() entirely, start by removing it from mmc_test.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/block.c | 38 ++++++++++++++++++++++++++++++--------
- 1 file changed, 30 insertions(+), 8 deletions(-)
+ drivers/mmc/core/mmc_test.c | 122 ++++++++++++++++++++------------------------
+ 1 file changed, 54 insertions(+), 68 deletions(-)
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 7eb55f2dffa9..ac976c84571f 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -1495,15 +1495,18 @@ static inline void mmc_apply_rel_rw(struct mmc_blk_request *brq,
- 	}
+diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
+index 478869805b96..9311c8de2061 100644
+--- a/drivers/mmc/core/mmc_test.c
++++ b/drivers/mmc/core/mmc_test.c
+@@ -171,11 +171,6 @@ struct mmc_test_multiple_rw {
+ 	enum mmc_test_prep_media prepare;
+ };
+ 
+-struct mmc_test_async_req {
+-	struct mmc_async_req areq;
+-	struct mmc_test_card *test;
+-};
+-
+ /*******************************************************************/
+ /*  General helper functions                                       */
+ /*******************************************************************/
+@@ -741,30 +736,6 @@ static int mmc_test_check_result(struct mmc_test_card *test,
+ 	return ret;
  }
  
--#define CMD_ERRORS							\
--	(R1_OUT_OF_RANGE |	/* Command argument out of range */	\
--	 R1_ADDRESS_ERROR |	/* Misaligned address */		\
-+#define CMD_ERRORS_EXCL_OOR						\
-+	(R1_ADDRESS_ERROR |	/* Misaligned address */		\
- 	 R1_BLOCK_LEN_ERROR |	/* Transferred block length incorrect */\
- 	 R1_WP_VIOLATION |	/* Tried to write to protected block */	\
- 	 R1_CARD_ECC_FAILED |	/* Card ECC failed */			\
- 	 R1_CC_ERROR |		/* Card controller error */		\
- 	 R1_ERROR)		/* General/unknown error */
- 
-+#define CMD_ERRORS							\
-+	(CMD_ERRORS_EXCL_OOR |						\
-+	 R1_OUT_OF_RANGE)	/* Command argument out of range */	\
-+
- static void mmc_blk_eval_resp_error(struct mmc_blk_request *brq)
- {
- 	u32 val;
-@@ -2162,20 +2165,39 @@ static inline bool mmc_blk_rq_error(struct mmc_blk_request *brq)
- 	       brq->data.error || brq->cmd.resp[0] & CMD_ERRORS;
+-static enum mmc_blk_status mmc_test_check_result_async(struct mmc_card *card,
+-				       struct mmc_async_req *areq)
+-{
+-	struct mmc_test_async_req *test_async =
+-		container_of(areq, struct mmc_test_async_req, areq);
+-	int ret;
+-
+-	mmc_test_wait_busy(test_async->test);
+-
+-	/*
+-	 * FIXME: this would earlier just casts a regular error code,
+-	 * either of the kernel type -ERRORCODE or the local test framework
+-	 * RESULT_* errorcode, into an enum mmc_blk_status and return as
+-	 * result check. Instead, convert it to some reasonable type by just
+-	 * returning either MMC_BLK_SUCCESS or MMC_BLK_CMD_ERR.
+-	 * If possible, a reasonable error code should be returned.
+-	 */
+-	ret = mmc_test_check_result(test_async->test, areq->mrq);
+-	if (ret)
+-		return MMC_BLK_CMD_ERR;
+-
+-	return MMC_BLK_SUCCESS;
+-}
+-
+ /*
+  * Checks that a "short transfer" behaved as expected
+  */
+@@ -831,6 +802,45 @@ static struct mmc_test_req *mmc_test_req_alloc(void)
+ 	return rq;
  }
  
-+static inline bool mmc_blk_oor_valid(struct mmc_blk_request *brq)
++static void mmc_test_wait_done(struct mmc_request *mrq)
 +{
-+	return !!brq->mrq.sbc;
++	complete(&mrq->completion);
 +}
 +
-+static inline u32 mmc_blk_stop_err_bits(struct mmc_blk_request *brq)
++static int mmc_test_start_areq(struct mmc_test_card *test,
++			       struct mmc_request *mrq,
++			       struct mmc_request *prev_mrq)
 +{
-+	return mmc_blk_oor_valid(brq) ? CMD_ERRORS : CMD_ERRORS_EXCL_OOR;
-+}
++	struct mmc_host *host = test->card->host;
++	int err = 0;
 +
- static int mmc_blk_card_busy(struct mmc_card *card, struct request *req)
- {
- 	struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
--	bool gen_err = false;
-+	u32 status = 0;
- 	int err;
- 
- 	if (mmc_host_is_spi(card->host) || rq_data_dir(req) == READ)
- 		return 0;
- 
--	err = card_busy_detect_err(card, true, req, &gen_err);
-+	err = card_busy_detect(card, true, req, &status);
-+
-+	/*
-+	 * Do not assume data transferred correctly if there are any error bits
-+	 * set.
-+	 */
-+	if (!err && status & mmc_blk_stop_err_bits(&mqrq->brq)) {
-+		mqrq->brq.data.bytes_xfered = 0;
-+		err = -EIO;
++	if (mrq) {
++		init_completion(&mrq->completion);
++		mrq->done = mmc_test_wait_done;
++		mmc_pre_req(host, mrq);
 +	}
++
++	if (prev_mrq) {
++		wait_for_completion(&prev_mrq->completion);
++		err = mmc_test_wait_busy(test);
++		if (!err)
++			err = mmc_test_check_result(test, prev_mrq);
++	}
++
++	if (!err && mrq) {
++		err = mmc_start_request(host, mrq);
++		if (err)
++			mmc_retune_release(host);
++	}
++
++	if (prev_mrq)
++		mmc_post_req(host, prev_mrq, 0);
++
++	if (err && mrq)
++		mmc_post_req(host, mrq, err);
++
++	return err;
++}
  
--	/* Copy the general error bit so it will be seen later on */
--	if (gen_err)
--		mqrq->brq.stop.resp[0] |= R1_ERROR;
-+	/* Copy the exception bit so it will be seen later on */
-+	if (mmc_card_mmc(card) && status & R1_EXCEPTION_EVENT)
-+		mqrq->brq.cmd.resp[0] |= R1_EXCEPTION_EVENT;
+ static int mmc_test_nonblock_transfer(struct mmc_test_card *test,
+ 				      struct scatterlist *sg, unsigned sg_len,
+@@ -838,17 +848,10 @@ static int mmc_test_nonblock_transfer(struct mmc_test_card *test,
+ 				      unsigned blksz, int write, int count)
+ {
+ 	struct mmc_test_req *rq1, *rq2;
+-	struct mmc_test_async_req test_areq[2];
+-	struct mmc_async_req *done_areq;
+-	struct mmc_async_req *cur_areq = &test_areq[0].areq;
+-	struct mmc_async_req *other_areq = &test_areq[1].areq;
+-	enum mmc_blk_status status;
++	struct mmc_request *mrq, *prev_mrq;
+ 	int i;
+ 	int ret = RESULT_OK;
  
- 	return err;
- }
+-	test_areq[0].test = test;
+-	test_areq[1].test = test;
+-
+ 	rq1 = mmc_test_req_alloc();
+ 	rq2 = mmc_test_req_alloc();
+ 	if (!rq1 || !rq2) {
+@@ -856,33 +859,25 @@ static int mmc_test_nonblock_transfer(struct mmc_test_card *test,
+ 		goto err;
+ 	}
+ 
+-	cur_areq->mrq = &rq1->mrq;
+-	cur_areq->err_check = mmc_test_check_result_async;
+-	other_areq->mrq = &rq2->mrq;
+-	other_areq->err_check = mmc_test_check_result_async;
++	mrq = &rq1->mrq;
++	prev_mrq = NULL;
+ 
+ 	for (i = 0; i < count; i++) {
+-		mmc_test_prepare_mrq(test, cur_areq->mrq, sg, sg_len, dev_addr,
+-				     blocks, blksz, write);
+-		done_areq = mmc_start_areq(test->card->host, cur_areq, &status);
+-
+-		if (status != MMC_BLK_SUCCESS || (!done_areq && i > 0)) {
+-			ret = RESULT_FAIL;
++		mmc_test_req_reset(container_of(mrq, struct mmc_test_req, mrq));
++		mmc_test_prepare_mrq(test, mrq, sg, sg_len, dev_addr, blocks,
++				     blksz, write);
++		ret = mmc_test_start_areq(test, mrq, prev_mrq);
++		if (ret)
+ 			goto err;
+-		}
+ 
+-		if (done_areq)
+-			mmc_test_req_reset(container_of(done_areq->mrq,
+-						struct mmc_test_req, mrq));
++		if (!prev_mrq)
++			prev_mrq = &rq2->mrq;
+ 
+-		swap(cur_areq, other_areq);
++		swap(mrq, prev_mrq);
+ 		dev_addr += blocks;
+ 	}
+ 
+-	done_areq = mmc_start_areq(test->card->host, NULL, &status);
+-	if (status != MMC_BLK_SUCCESS)
+-		ret = RESULT_FAIL;
+-
++	ret = mmc_test_start_areq(test, NULL, prev_mrq);
+ err:
+ 	kfree(rq1);
+ 	kfree(rq2);
+@@ -2356,11 +2351,9 @@ static int mmc_test_ongoing_transfer(struct mmc_test_card *test,
+ 	struct mmc_test_req *rq = mmc_test_req_alloc();
+ 	struct mmc_host *host = test->card->host;
+ 	struct mmc_test_area *t = &test->area;
+-	struct mmc_test_async_req test_areq = { .test = test };
+ 	struct mmc_request *mrq;
+ 	unsigned long timeout;
+ 	bool expired = false;
+-	enum mmc_blk_status blkstat = MMC_BLK_SUCCESS;
+ 	int ret = 0, cmd_ret;
+ 	u32 status = 0;
+ 	int count = 0;
+@@ -2373,9 +2366,6 @@ static int mmc_test_ongoing_transfer(struct mmc_test_card *test,
+ 		mrq->sbc = &rq->sbc;
+ 	mrq->cap_cmd_during_tfr = true;
+ 
+-	test_areq.areq.mrq = mrq;
+-	test_areq.areq.err_check = mmc_test_check_result_async;
+-
+ 	mmc_test_prepare_mrq(test, mrq, t->sg, t->sg_len, dev_addr, t->blocks,
+ 			     512, write);
+ 
+@@ -2388,11 +2378,9 @@ static int mmc_test_ongoing_transfer(struct mmc_test_card *test,
+ 
+ 	/* Start ongoing data request */
+ 	if (use_areq) {
+-		mmc_start_areq(host, &test_areq.areq, &blkstat);
+-		if (blkstat != MMC_BLK_SUCCESS) {
+-			ret = RESULT_FAIL;
++		ret = mmc_test_start_areq(test, mrq, NULL);
++		if (ret)
+ 			goto out_free;
+-		}
+ 	} else {
+ 		mmc_wait_for_req(host, mrq);
+ 	}
+@@ -2426,9 +2414,7 @@ static int mmc_test_ongoing_transfer(struct mmc_test_card *test,
+ 
+ 	/* Wait for data request to complete */
+ 	if (use_areq) {
+-		mmc_start_areq(host, NULL, &blkstat);
+-		if (blkstat != MMC_BLK_SUCCESS)
+-			ret = RESULT_FAIL;
++		ret = mmc_test_start_areq(test, NULL, mrq);
+ 	} else {
+ 		mmc_wait_for_req_done(test->card->host, mrq);
+ 	}
 -- 
 1.9.1
