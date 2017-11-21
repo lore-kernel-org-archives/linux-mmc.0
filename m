@@ -1,31 +1,50 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v4 1/2] mmc: API for accessing host supported maximum
- segment count and size
-Date: Tue, 21 Nov 2017 12:44:41 +0100
-Message-ID: <CAPDyKFqZqbNHgtqnNoXAA_htqWDbPqvcz6hOZWQvfa5dZ5pj2Q@mail.gmail.com>
+From: Xinming Hu <huxm@marvell.com>
+Subject: Re: [EXT] Re: [PATCH v4 1/2] mmc: API for accessing host supported
+ maximum segment count and size
+Date: Tue, 21 Nov 2017 11:58:35 +0000
+Message-ID: <1511265515364.63169@marvell.com>
 References: <1466069006-10757-1-git-send-email-akarwar@marvell.com>
- <ee910d6f6d1f4d218586bddd5a7627b0@SC-EXCH04.marvell.com> <5852c8610b7f46fea0a812e8750fbfd1@SC-EXCH02.marvell.com>
+ <ee910d6f6d1f4d218586bddd5a7627b0@SC-EXCH04.marvell.com>
+ <5852c8610b7f46fea0a812e8750fbfd1@SC-EXCH02.marvell.com>,<CAPDyKFqZqbNHgtqnNoXAA_htqWDbPqvcz6hOZWQvfa5dZ5pj2Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="iso-2022-jp"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f195.google.com ([209.85.223.195]:33741 "EHLO
-        mail-io0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751772AbdKULom (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Nov 2017 06:44:42 -0500
-Received: by mail-io0-f195.google.com with SMTP id i184so11710747ioa.0
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Nov 2017 03:44:42 -0800 (PST)
-In-Reply-To: <5852c8610b7f46fea0a812e8750fbfd1@SC-EXCH02.marvell.com>
+Received: from mx0b-0016f401.pphosted.com ([67.231.156.173]:58480 "EHLO
+        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751317AbdKUL6m (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Nov 2017 06:58:42 -0500
+In-Reply-To: <CAPDyKFqZqbNHgtqnNoXAA_htqWDbPqvcz6hOZWQvfa5dZ5pj2Q@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Xinming Hu <huxm@marvell.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Nishant Sarmukadam <nishants@marvell.com>, Wei-Ning Huang <wnhuang@chromium.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Cathy Luo <cluo@marvell.com>, Zhiyuan Yang <yangzy@marvell.com>, Tim Song <songtao@marvell.com>, "Xu (Shanghai) Wang" <xwang4@marvell.com>, James Cao <jcao@marvell.com>, Ganapathi Bhat <gbhat@marvell.com>
 
+Hi Ulf,
+
+Would you mind re-posting a re-based series instead? In that way
+you hopefully get some more people's attention as well.
+>>> Sure. Could you please point the latest mmc git code base ? I guess it is
+https://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git/
+But looks quite old.
+ 
+Regards,
+Simon
+________________________________________
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Sent: Tuesday, November 21, 2017 19:44
+To: Xinming Hu
+Cc: Nishant Sarmukadam; Wei-Ning Huang; linux-mmc@vger.kernel.org; Cathy Luo; Zhiyuan Yang; Tim Song; Xu (Shanghai) Wang; James Cao; Ganapathi Bhat
+Subject: [EXT] Re: [PATCH v4 1/2] mmc: API for accessing host supported maximum segment count and size
+
+External Email
+
+----------------------------------------------------------------------
 On 16 November 2017 at 14:57, Xinming Hu <huxm@marvell.com> wrote:
 > Hi Ulf,
 >
-> Could you please let us know if you have any further review comments on t=
-his patch series.
+> Could you please let us know if you have any further review comments on this patch series.
 
 Seems like this fallen through the cracks.
 
@@ -43,13 +62,12 @@ Uffe
 >
 >> -----Original Message-----
 >> From: Amitkumar Karwar
->> Sent: 2016=E5=B9=B48=E6=9C=889=E6=97=A5 18:16
+>> Sent: 2016年8月9日 18:16
 >> To: Ulf Hansson <ulf.hansson@linaro.org>
 >> Cc: Nishant Sarmukadam <nishants@marvell.com>; Wei-Ning Huang
 >> <wnhuang@chromium.org>; linux-mmc@vger.kernel.org; Cathy Luo
 >> <cluo@marvell.com>; Xinming Hu <huxm@marvell.com>
->> Subject: RE: [PATCH v4 1/2] mmc: API for accessing host supported maximu=
-m
+>> Subject: RE: [PATCH v4 1/2] mmc: API for accessing host supported maximum
 >> segment count and size
 >>
 >> Hi Ulf,
@@ -95,8 +113,7 @@ m
 >> >  3 files changed, 27 insertions(+), 3 deletions(-)
 >> >
 >>
->> Please let me know if you have any further review comments for this patc=
-h
+>> Please let me know if you have any further review comments for this patch
 >> series.
 >>
 >> Regards,
