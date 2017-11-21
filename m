@@ -1,7 +1,7 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V14 04/24] mmc: block: Ensure that debugfs files are removed
-Date: Tue, 21 Nov 2017 15:42:30 +0200
-Message-ID: <1511271770-3444-5-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V14 07/24] mmc: block: Use data timeout in card_busy_detect()
+Date: Tue, 21 Nov 2017 15:42:33 +0200
+Message-ID: <1511271770-3444-8-git-send-email-adrian.hunter@intel.com>
 References: <1511271770-3444-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1511271770-3444-1-git-send-email-adrian.hunter@intel.com>
@@ -10,134 +10,105 @@ To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-mmc@vger.kernel.org
 
-The card is not necessarily being removed, but the debugfs files must be
-removed when the driver is removed, otherwise they will continue to exist
-after unbinding the card from the driver. e.g.
+card_busy_detect() has a 10 minute timeout. However the correct timeout is
+the data timeout. Change card_busy_detect() to use the data timeout.
 
-  # echo "mmc1:0001" > /sys/bus/mmc/drivers/mmcblk/unbind
-  # cat /sys/kernel/debug/mmc1/mmc1\:0001/ext_csd
-  [  173.634584] BUG: unable to handle kernel NULL pointer dereference at 0000000000000050
-  [  173.643356] IP: mmc_ext_csd_open+0x5e/0x170
-
-A complication is that the debugfs_root may have already been removed, so
-check for that too.
-
-Fixes: 627c3ccfb46a ("mmc: debugfs: Move block debugfs into block module")
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/block.c   | 44 +++++++++++++++++++++++++++++++++++++-------
- drivers/mmc/core/debugfs.c |  1 +
- 2 files changed, 38 insertions(+), 7 deletions(-)
+ drivers/mmc/core/block.c | 48 ++++++++++++++++++++++++++++++++++++++++--------
+ 1 file changed, 40 insertions(+), 8 deletions(-)
 
 diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 4a319ddbd956..ccfa98af1dd3 100644
+index e44f6d90aeb4..0874ab3e5c92 100644
 --- a/drivers/mmc/core/block.c
 +++ b/drivers/mmc/core/block.c
-@@ -122,6 +122,10 @@ struct mmc_blk_data {
- 	struct device_attribute force_ro;
- 	struct device_attribute power_ro_lock;
- 	int	area_type;
-+
-+	/* debugfs files (only in main mmc_blk_data) */
-+	struct dentry *status_dentry;
-+	struct dentry *ext_csd_dentry;
- };
+@@ -63,7 +63,6 @@
+ #endif
+ #define MODULE_PARAM_PREFIX "mmcblk."
  
- /* Device type for RPMB character devices */
-@@ -2653,7 +2657,7 @@ static int mmc_ext_csd_release(struct inode *inode, struct file *file)
- 	.llseek		= default_llseek,
- };
+-#define MMC_BLK_TIMEOUT_MS  (10 * 60 * 1000)        /* 10 minute timeout */
+ #define MMC_SANITIZE_REQ_TIMEOUT 240000
+ #define MMC_EXTRACT_INDEX_FROM_ARG(x) ((x & 0x00FF0000) >> 16)
  
--static int mmc_blk_add_debugfs(struct mmc_card *card)
-+static int mmc_blk_add_debugfs(struct mmc_card *card, struct mmc_blk_data *md)
- {
- 	struct dentry *root;
- 
-@@ -2663,28 +2667,53 @@ static int mmc_blk_add_debugfs(struct mmc_card *card)
- 	root = card->debugfs_root;
- 
- 	if (mmc_card_mmc(card) || mmc_card_sd(card)) {
--		if (!debugfs_create_file("status", S_IRUSR, root, card,
--					 &mmc_dbg_card_status_fops))
-+		md->status_dentry =
-+			debugfs_create_file("status", S_IRUSR, root, card,
-+					    &mmc_dbg_card_status_fops);
-+		if (!md->status_dentry)
- 			return -EIO;
- 	}
- 
- 	if (mmc_card_mmc(card)) {
--		if (!debugfs_create_file("ext_csd", S_IRUSR, root, card,
--					 &mmc_dbg_ext_csd_fops))
-+		md->ext_csd_dentry =
-+			debugfs_create_file("ext_csd", S_IRUSR, root, card,
-+					    &mmc_dbg_ext_csd_fops);
-+		if (!md->ext_csd_dentry)
- 			return -EIO;
- 	}
- 
+@@ -921,14 +920,48 @@ static int mmc_sd_num_wr_blocks(struct mmc_card *card, u32 *written_blocks)
  	return 0;
  }
  
-+static void mmc_blk_remove_debugfs(struct mmc_card *card,
-+				   struct mmc_blk_data *md)
-+{
-+	if (!card->debugfs_root)
-+		return;
-+
-+	if (!IS_ERR_OR_NULL(md->status_dentry)) {
-+		debugfs_remove(md->status_dentry);
-+		md->status_dentry = NULL;
-+	}
-+
-+	if (!IS_ERR_OR_NULL(md->ext_csd_dentry)) {
-+		debugfs_remove(md->ext_csd_dentry);
-+		md->ext_csd_dentry = NULL;
-+	}
-+}
- 
- #else
- 
--static int mmc_blk_add_debugfs(struct mmc_card *card)
-+static int mmc_blk_add_debugfs(struct mmc_card *card, struct mmc_blk_data *md)
+-static int card_busy_detect(struct mmc_card *card, unsigned int timeout_ms,
+-		bool hw_busy_detect, struct request *req, bool *gen_err)
++static unsigned int mmc_blk_clock_khz(struct mmc_host *host)
  {
- 	return 0;
- }
- 
-+static void mmc_blk_remove_debugfs(struct mmc_card *card,
-+				   struct mmc_blk_data *md)
-+{
+-	unsigned long timeout = jiffies + msecs_to_jiffies(timeout_ms);
++	if (host->actual_clock)
++		return host->actual_clock / 1000;
++
++	/* Clock may be subject to a divisor, fudge it by a factor of 2. */
++	if (host->ios.clock)
++		return host->ios.clock / 2000;
++
++	/* How can there be no clock */
++	WARN_ON_ONCE(1);
++	return 100; /* 100 kHz is minimum possible value */
 +}
 +
- #endif /* CONFIG_DEBUG_FS */
++static unsigned long mmc_blk_data_timeout_jiffies(struct mmc_host *host,
++						  struct mmc_data *data)
++{
++	unsigned int ms = DIV_ROUND_UP(data->timeout_ns, 1000000);
++	unsigned int khz;
++
++	if (data->timeout_clks) {
++		khz = mmc_blk_clock_khz(host);
++		ms += DIV_ROUND_UP(data->timeout_clks, khz);
++	}
++
++	return msecs_to_jiffies(ms);
++}
++
++static int card_busy_detect(struct mmc_card *card, bool hw_busy_detect,
++			    struct request *req, bool *gen_err)
++{
++	struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
++	struct mmc_data *data = &mqrq->brq.data;
++	unsigned long timeout;
+ 	int err = 0;
+ 	u32 status;
  
- static int mmc_blk_probe(struct mmc_card *card)
-@@ -2724,7 +2753,7 @@ static int mmc_blk_probe(struct mmc_card *card)
++	timeout = jiffies + mmc_blk_data_timeout_jiffies(card->host, data);
++
+ 	do {
++		bool done = time_after(jiffies, timeout);
++
+ 		err = __mmc_send_status(card, &status, 5);
+ 		if (err) {
+ 			pr_err("%s: error %d requesting status\n",
+@@ -951,7 +984,7 @@ static int card_busy_detect(struct mmc_card *card, unsigned int timeout_ms,
+ 		 * Timeout if the device never becomes ready for data and never
+ 		 * leaves the program state.
+ 		 */
+-		if (time_after(jiffies, timeout)) {
++		if (done) {
+ 			pr_err("%s: Card stuck in programming state! %s %s\n",
+ 				mmc_hostname(card->host),
+ 				req->rq_disk->disk_name, __func__);
+@@ -1011,7 +1044,7 @@ static int send_stop(struct mmc_card *card, unsigned int timeout_ms,
+ 		*gen_err = true;
  	}
  
- 	/* Add two debugfs entries */
--	mmc_blk_add_debugfs(card);
-+	mmc_blk_add_debugfs(card, md);
- 
- 	pm_runtime_set_autosuspend_delay(&card->dev, 3000);
- 	pm_runtime_use_autosuspend(&card->dev);
-@@ -2750,6 +2779,7 @@ static void mmc_blk_remove(struct mmc_card *card)
- {
- 	struct mmc_blk_data *md = dev_get_drvdata(&card->dev);
- 
-+	mmc_blk_remove_debugfs(card, md);
- 	mmc_blk_remove_parts(card, md);
- 	pm_runtime_get_sync(&card->dev);
- 	mmc_claim_host(card->host);
-diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
-index 01e459a34f33..0f4a7d7b2626 100644
---- a/drivers/mmc/core/debugfs.c
-+++ b/drivers/mmc/core/debugfs.c
-@@ -314,4 +314,5 @@ void mmc_add_card_debugfs(struct mmc_card *card)
- void mmc_remove_card_debugfs(struct mmc_card *card)
- {
- 	debugfs_remove_recursive(card->debugfs_root);
-+	card->debugfs_root = NULL;
+-	return card_busy_detect(card, timeout_ms, use_r1b_resp, req, gen_err);
++	return card_busy_detect(card, use_r1b_resp, req, gen_err);
  }
+ 
+ #define ERR_NOMEDIUM	3
+@@ -1546,8 +1579,7 @@ static enum mmc_blk_status mmc_blk_err_check(struct mmc_card *card,
+ 			gen_err = true;
+ 		}
+ 
+-		err = card_busy_detect(card, MMC_BLK_TIMEOUT_MS, false, req,
+-					&gen_err);
++		err = card_busy_detect(card, false, req, &gen_err);
+ 		if (err)
+ 			return MMC_BLK_CMD_ERR;
+ 	}
 -- 
 1.9.1
