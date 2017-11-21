@@ -1,34 +1,79 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: sdhci broke in 4.14 [was: MMC fixes for v.4.14-rc4]
-Date: Tue, 21 Nov 2017 17:13:13 +0100
-Message-ID: <CAPDyKFrBAKUjnN372vr6sOMRpi1RJbevtmgz75zfuOnes0kKQw@mail.gmail.com>
-References: <1507361610-31577-1-git-send-email-ulf.hansson@linaro.org>
- <2248b8b6-a80f-52ef-943f-54c1351d5a36@suse.cz> <CAPDyKFrzVaE=upRbJ+sq2rRcR1uitw2QEvTzt=pjtoNh1bij9Q@mail.gmail.com>
- <312d520e-9d80-4750-0ca2-df2a7c5be804@suse.cz>
+From: Luca Weiss <luca@z3ntu.xyz>
+Subject: Re: [v2] mmc: sdhci-msm: Optionally wait for signal level changes
+Date: Tue, 21 Nov 2017 20:38:31 +0100
+Message-ID: <2689768.7AuDOzprkX@g550jk>
+References: <20171120195647.22677-1-bjorn.andersson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f173.google.com ([209.85.223.173]:37401 "EHLO
-        mail-io0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751494AbdKUQNO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Nov 2017 11:13:14 -0500
-Received: by mail-io0-f173.google.com with SMTP id v21so20034381ioi.4
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Nov 2017 08:13:14 -0800 (PST)
-In-Reply-To: <312d520e-9d80-4750-0ca2-df2a7c5be804@suse.cz>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <20171120195647.22677-1-bjorn.andersson@linaro.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Bjorn Andersson <bjorn.andersson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, Stephen Boyd <sboyd@codeaurora.org>, Sahitya Tummala <stummala@codeaurora.org>, Vijay Viswanath <vviswana@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Jiri Slaby <jslaby@suse.cz>
-Cc: Linus <torvalds@linux-foundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Geert Uytterhoeven <geert+renesas@glider.be>, Konrad Rzeszutek Wilk <konrad@kernel.org>
 
-On 21 November 2017 at 16:13, Jiri Slaby <jslaby@suse.cz> wrote:
-> On 11/21/2017, 04:08 PM, Ulf Hansson wrote:
->> It seems like we need something along those lines for the sdhci-pci
->> case as well. I cooked a patch, perhaps you have some time for test?
->
-> Sure, but before I start, I want to double check: don't you want me to
-> stick some pr_info in there to see if the computation is correct?
-
-Yeah, that seems like a good idea. :-)
-
-Br
-Uffe
+On Montag, 20. November 2017 20:56:47 CET Bjorn Andersson wrote:
+> Not all instances of the SDCC core supports changing signal voltage and
+> as such will not generate a power interrupt when the software attempts
+> to change the voltage. This results in probing the eMMC on some devices
+> to take over 2 minutes.
+> 
+> Check that the SWITCHABLE_SIGNALING_VOLTAGE bit in MCI_GENERICS is set
+> before waiting for the power interrupt.
+> 
+> Cc: Sahitya Tummala <stummala@codeaurora.org>
+> Cc: Vijay Viswanath <vviswana@codeaurora.org>
+> Fixes: c0309b3803fe ("mmc: sdhci-msm: Add sdhci msm register write APIs
+> which wait for pwr irq") Signed-off-by: Bjorn Andersson
+> <bjorn.andersson@linaro.org>
+Tested-by: Luca Weiss <luca@z3ntu.xyz>
+> ---
+> 
+> The offending patch is part of your v4.15 pull request, so please pick
+> this up for the -rcs.
+> 
+> Changes since v1:
+> - Fixed spelling of swichable...
+> 
+>  drivers/mmc/host/sdhci-msm.c | 14 ++++++++++++++
+>  1 file changed, 14 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 3fb7d2eec93f..c283291db705 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -29,6 +29,9 @@
+>  #define CORE_VERSION_MAJOR_MASK		(0xf << CORE_VERSION_MAJOR_SHIFT)
+>  #define CORE_VERSION_MINOR_MASK		0xff
+> 
+> +#define CORE_MCI_GENERICS		0x70
+> +#define SWITCHABLE_SIGNALING_VOLTAGE	BIT(29)
+> +
+>  #define CORE_HC_MODE		0x78
+>  #define HC_MODE_EN		0x1
+>  #define CORE_POWER		0x0
+> @@ -1028,11 +1031,22 @@ static void sdhci_msm_check_power_status(struct
+> sdhci_host *host, u32 req_type) struct sdhci_pltfm_host *pltfm_host =
+> sdhci_priv(host);
+>  	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+>  	bool done = false;
+> +	u32 val;
+> 
+>  	pr_debug("%s: %s: request %d curr_pwr_state %x curr_io_level %x\n",
+>  			mmc_hostname(host->mmc), __func__, req_type,
+>  			msm_host->curr_pwr_state, msm_host->curr_io_level);
+> 
+> +	/*
+> +	 * The power interrupt will not be generated for signal voltage
+> +	 * switches if SWITCHABLE_SIGNALING_VOLTAGE in MCI_GENERICS is not set.
+> +	 */
+> +	val = readl(msm_host->core_mem + CORE_MCI_GENERICS);
+> +	if ((req_type & REQ_IO_HIGH || req_type & REQ_IO_LOW) &&
+> +	    !(val & SWITCHABLE_SIGNALING_VOLTAGE)) {
+> +		return;
+> +	}
+> +
+>  	/*
+>  	 * The IRQ for request type IO High/LOW will be generated when -
+>  	 * there is a state change in 1.8V enable bit (bit 3) of
