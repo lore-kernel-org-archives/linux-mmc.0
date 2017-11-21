@@ -1,79 +1,91 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V14 06/24] mmc: block: Simplify cleaning up the queue
-Date: Tue, 21 Nov 2017 15:42:32 +0200
-Message-ID: <1511271770-3444-7-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V14 09/24] mmc: block: Make card_busy_detect() accumulate all response error bits
+Date: Tue, 21 Nov 2017 15:42:35 +0200
+Message-ID: <1511271770-3444-10-git-send-email-adrian.hunter@intel.com>
 References: <1511271770-3444-1-git-send-email-adrian.hunter@intel.com>
-Return-path: <linux-block-owner@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1511271770-3444-1-git-send-email-adrian.hunter@intel.com>
-Sender: linux-block-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-mmc@vger.kernel.org
 
-Use blk_cleanup_queue() to shutdown the queue when the driver is removed,
-and instead get an extra reference to the queue to prevent the queue being
-freed before the final mmc_blk_put().
+Make card_busy_detect() accumulate all response error bits. Later patches
+will make use of this.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/block.c | 17 ++++++++++++-----
- drivers/mmc/core/queue.c |  2 ++
- 2 files changed, 14 insertions(+), 5 deletions(-)
+ drivers/mmc/core/block.c | 30 ++++++++++++++++++++++--------
+ 1 file changed, 22 insertions(+), 8 deletions(-)
 
 diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index ccfa98af1dd3..e44f6d90aeb4 100644
+index 130ce94fdaf2..607774fcb9f5 100644
 --- a/drivers/mmc/core/block.c
 +++ b/drivers/mmc/core/block.c
-@@ -189,7 +189,7 @@ static void mmc_blk_put(struct mmc_blk_data *md)
- 	md->usage--;
- 	if (md->usage == 0) {
- 		int devidx = mmc_get_devidx(md->disk);
--		blk_cleanup_queue(md->queue.queue);
-+		blk_put_queue(md->queue.queue);
- 		ida_simple_remove(&mmc_blk_ida, devidx);
- 		put_disk(md->disk);
- 		kfree(md);
-@@ -2156,6 +2156,17 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
- 
- 	md->queue.blkdata = md;
- 
-+	/*
-+	 * Keep an extra reference to the queue so that we can shutdown the
-+	 * queue (i.e. call blk_cleanup_queue()) while there are still
-+	 * references to the 'md'. The corresponding blk_put_queue() is in
-+	 * mmc_blk_put().
-+	 */
-+	if (!blk_get_queue(md->queue.queue)) {
-+		mmc_cleanup_queue(&md->queue);
-+		goto err_putdisk;
-+	}
-+
- 	md->disk->major	= MMC_BLOCK_MAJOR;
- 	md->disk->first_minor = devidx * perdev_minors;
- 	md->disk->fops = &mmc_bdops;
-@@ -2471,10 +2482,6 @@ static void mmc_blk_remove_req(struct mmc_blk_data *md)
- 		 * from being accepted.
- 		 */
- 		card = md->queue.card;
--		spin_lock_irq(md->queue.queue->queue_lock);
--		queue_flag_set(QUEUE_FLAG_BYPASS, md->queue.queue);
--		spin_unlock_irq(md->queue.queue->queue_lock);
--		blk_set_queue_dying(md->queue.queue);
- 		mmc_cleanup_queue(&md->queue);
- 		if (md->disk->flags & GENHD_FL_UP) {
- 			device_remove_file(disk_to_dev(md->disk), &md->force_ro);
-diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-index 26f8da30ebe5..ae6d9da68735 100644
---- a/drivers/mmc/core/queue.c
-+++ b/drivers/mmc/core/queue.c
-@@ -268,6 +268,8 @@ void mmc_cleanup_queue(struct mmc_queue *mq)
- 	blk_start_queue(q);
- 	spin_unlock_irqrestore(q->queue_lock, flags);
- 
-+	blk_cleanup_queue(q);
-+
- 	mq->card = NULL;
+@@ -959,7 +959,7 @@ static inline bool mmc_blk_in_tran_state(u32 status)
  }
  
+ static int card_busy_detect(struct mmc_card *card, bool hw_busy_detect,
+-			    struct request *req, bool *gen_err)
++			    struct request *req, u32 *resp_errs)
+ {
+ 	struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
+ 	struct mmc_data *data = &mqrq->brq.data;
+@@ -979,11 +979,9 @@ static int card_busy_detect(struct mmc_card *card, bool hw_busy_detect,
+ 			return err;
+ 		}
+ 
+-		if (status & R1_ERROR) {
+-			pr_err("%s: %s: error sending status cmd, status %#x\n",
+-				req->rq_disk->disk_name, __func__, status);
+-			*gen_err = true;
+-		}
++		/* Accumulate any response error bits seen */
++		if (resp_errs)
++			*resp_errs |= status;
+ 
+ 		/* We may rely on the host hw to handle busy detection.*/
+ 		if ((card->host->caps & MMC_CAP_WAIT_WHILE_BUSY) &&
+@@ -1011,6 +1009,22 @@ static int card_busy_detect(struct mmc_card *card, bool hw_busy_detect,
+ 	return err;
+ }
+ 
++static int card_busy_detect_err(struct mmc_card *card, bool hw_busy_detect,
++				struct request *req, bool *gen_err)
++{
++	u32 resp_errs = 0;
++	int err;
++
++	err = card_busy_detect(card, hw_busy_detect, req, &resp_errs);
++	if (resp_errs & R1_ERROR) {
++		pr_err("%s: %s: error sending status cmd, status %#x\n",
++		       req->rq_disk->disk_name, __func__, resp_errs);
++		*gen_err = true;
++	}
++
++	return err;
++}
++
+ static int send_stop(struct mmc_card *card, unsigned int timeout_ms,
+ 		struct request *req, bool *gen_err, u32 *stop_status)
+ {
+@@ -1053,7 +1067,7 @@ static int send_stop(struct mmc_card *card, unsigned int timeout_ms,
+ 		*gen_err = true;
+ 	}
+ 
+-	return card_busy_detect(card, use_r1b_resp, req, gen_err);
++	return card_busy_detect_err(card, use_r1b_resp, req, gen_err);
+ }
+ 
+ #define ERR_NOMEDIUM	3
+@@ -1588,7 +1602,7 @@ static enum mmc_blk_status mmc_blk_err_check(struct mmc_card *card,
+ 			gen_err = true;
+ 		}
+ 
+-		err = card_busy_detect(card, false, req, &gen_err);
++		err = card_busy_detect_err(card, false, req, &gen_err);
+ 		if (err)
+ 			return MMC_BLK_CMD_ERR;
+ 	}
 -- 
 1.9.1
