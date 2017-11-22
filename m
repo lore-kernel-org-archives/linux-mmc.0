@@ -1,63 +1,93 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: More TMIO MMC variant. What is a preferred name?
-Date: Tue, 21 Nov 2017 21:14:04 +0100
-Message-ID: <CAPDyKFo6X+Z6bORzPow=79Q7jXZOu4SMA9dh1fDsD-_JrBRtgA@mail.gmail.com>
-References: <CAK7LNARB+-SzgNF+7KsG80o4Q=TZsEeyMLjR2Ve0bXCrQ5tc0w@mail.gmail.com>
- <20171108175320.wnq3d2x7lmpaya7s@ninjato> <CAK7LNASN8kjmiNHvX7zrgVv=5d81ovfGNRdHm8TXiJNgr+H9MA@mail.gmail.com>
- <20171120201142.n4l4jelxsmmtwjj6@tetsubishi> <CAPDyKFq_uVvBKBhATNYhq2mSMmNXA7tPSSPMESCnTDtQt9XrZA@mail.gmail.com>
- <20171121200111.vrpmsubme55356qv@ninjato>
+From: "Xu (Shanghai) Wang" <xwang4@marvell.com>
+Subject: RE: [PATCH v4 1/2] mmc: API for accessing host supported maximum
+ segment count and size
+Date: Wed, 22 Nov 2017 00:52:23 +0000
+Message-ID: <65b3b07bb7f646bab0882bf87ee9379a@SC-EXCH02.marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f46.google.com ([209.85.214.46]:40123 "EHLO
-        mail-it0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751067AbdKUUOF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Nov 2017 15:14:05 -0500
-Received: by mail-it0-f46.google.com with SMTP id 72so3547376itl.5
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Nov 2017 12:14:05 -0800 (PST)
-In-Reply-To: <20171121200111.vrpmsubme55356qv@ninjato>
+Received: from mx0b-0016f401.pphosted.com ([67.231.156.173]:40848 "EHLO
+        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751408AbdKVAwb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Nov 2017 19:52:31 -0500
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: Masahiro Yamada <yamada.masahiro@socionext.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms+renesas@verge.net.au>, linux-mmc <linux-mmc@vger.kernel.org>, Marek Vasut <marek.vasut+renesas@gmail.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+To: Xinming Hu <huxm@marvell.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Nishant Sarmukadam <nishants@marvell.com>, Wei-Ning Huang <wnhuang@chromium.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Cathy Luo <cluo@marvell.com>, Zhiyuan Yang <yangzy@marvell.com>, Tim Song <songtao@marvell.com>, James Cao <jcao@marvell.com>, Ganapathi Bhat <gbhat@marvell.com>, Bob Tan <tanbo@marvell.com>
 
-On 21 November 2017 at 21:01, Wolfram Sang <wsa@the-dreams.de> wrote:
-> Hi Ulf,
->
-> thanks for the feedback!
->
->> So what do you think of this?:
->>
->> 1) Rename tmio_core.c to tmio.c, and fold in some more information
->> about the history of the IP in the header of the file. Yeah, "tmio"
->> may not be the absolutely correct name, but on the other hand it
->> preserves consistency and I there are no need to rename any functions.
->> 2) Rename tmio_mmc.h to tmio.h - and move potential tmio_mmc specific
->> bits to tmio_mmc.c.
->> 3) Rename renesas_sdhi_core.c to tmio_renesas_sdhi.c. Again, I don't
->> think we need any functions to be renamed because of this change.
->> 4) Rename renesas_sdhi.h to tmio_renesas_sdhi.h.
->
-> I can agree to that. Clarifying 3), I think though, we should have:
->         tmio_sdhi.c
->
-> and on top of that:
->
->         tmio_sdhi_internal_dmac.c
->         tmio_sdhi_sys_dmac.c
->
-> ?
-
-Even better!
-
->
->> Following the naming strategy from the above, I the new file name for
->> new tmio variant should be tmio_uniphier.c.
->
-> Yes.
->
-
-Great!
-
-Br
-Uffe
+KysNCg0KVGhhbmtzLA0KWHUNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IFhp
+bm1pbmcgSHUgDQpTZW50OiAyMDE3xOoxMdTCMjHI1SAxOTo1OQ0KVG86IFVsZiBIYW5zc29uIDx1
+bGYuaGFuc3NvbkBsaW5hcm8ub3JnPg0KQ2M6IE5pc2hhbnQgU2FybXVrYWRhbSA8bmlzaGFudHNA
+bWFydmVsbC5jb20+OyBXZWktTmluZyBIdWFuZyA8d25odWFuZ0BjaHJvbWl1bS5vcmc+OyBsaW51
+eC1tbWNAdmdlci5rZXJuZWwub3JnOyBDYXRoeSBMdW8gPGNsdW9AbWFydmVsbC5jb20+OyBaaGl5
+dWFuIFlhbmcgPHlhbmd6eUBtYXJ2ZWxsLmNvbT47IFRpbSBTb25nIDxzb25ndGFvQG1hcnZlbGwu
+Y29tPjsgWHUgKFNoYW5naGFpKSBXYW5nIDx4d2FuZzRAbWFydmVsbC5jb20+OyBKYW1lcyBDYW8g
+PGpjYW9AbWFydmVsbC5jb20+OyBHYW5hcGF0aGkgQmhhdCA8Z2JoYXRAbWFydmVsbC5jb20+DQpT
+dWJqZWN0OiBSRTogW1BBVENIIHY0IDEvMl0gbW1jOiBBUEkgZm9yIGFjY2Vzc2luZyBob3N0IHN1
+cHBvcnRlZCBtYXhpbXVtIHNlZ21lbnQgY291bnQgYW5kIHNpemUNCg0KSGkgVWxmLA0KDQpXb3Vs
+ZCB5b3UgbWluZCByZS1wb3N0aW5nIGEgcmUtYmFzZWQgc2VyaWVzIGluc3RlYWQ/IEluIHRoYXQg
+d2F5IHlvdSBob3BlZnVsbHkgZ2V0IHNvbWUgbW9yZSBwZW9wbGUncyBhdHRlbnRpb24gYXMgd2Vs
+bC4NCj4+PiBTdXJlLiBDb3VsZCB5b3UgcGxlYXNlIHBvaW50IHRoZSBsYXRlc3QgbW1jIGdpdCBj
+b2RlIGJhc2UgPyBJIGd1ZXNzIA0KPj4+IGl0IGlzDQpodHRwczovL2dpdC5rZXJuZWwub3JnL3B1
+Yi9zY20vbGludXgva2VybmVsL2dpdC91bGZoL21tYy5naXQvDQpCdXQgbG9va3MgcXVpdGUgb2xk
+Lg0KIA0KUmVnYXJkcywNClNpbW9uDQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fDQpGcm9tOiBVbGYgSGFuc3NvbiA8dWxmLmhhbnNzb25AbGluYXJvLm9yZz4NClNlbnQ6
+IFR1ZXNkYXksIE5vdmVtYmVyIDIxLCAyMDE3IDE5OjQ0DQpUbzogWGlubWluZyBIdQ0KQ2M6IE5p
+c2hhbnQgU2FybXVrYWRhbTsgV2VpLU5pbmcgSHVhbmc7IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5v
+cmc7IENhdGh5IEx1bzsgWmhpeXVhbiBZYW5nOyBUaW0gU29uZzsgWHUgKFNoYW5naGFpKSBXYW5n
+OyBKYW1lcyBDYW87IEdhbmFwYXRoaSBCaGF0DQpTdWJqZWN0OiBbRVhUXSBSZTogW1BBVENIIHY0
+IDEvMl0gbW1jOiBBUEkgZm9yIGFjY2Vzc2luZyBob3N0IHN1cHBvcnRlZCBtYXhpbXVtIHNlZ21l
+bnQgY291bnQgYW5kIHNpemUNCg0KRXh0ZXJuYWwgRW1haWwNCg0KLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KT24g
+MTYgTm92ZW1iZXIgMjAxNyBhdCAxNDo1NywgWGlubWluZyBIdSA8aHV4bUBtYXJ2ZWxsLmNvbT4g
+d3JvdGU6DQo+IEhpIFVsZiwNCj4NCj4gQ291bGQgeW91IHBsZWFzZSBsZXQgdXMga25vdyBpZiB5
+b3UgaGF2ZSBhbnkgZnVydGhlciByZXZpZXcgY29tbWVudHMgb24gdGhpcyBwYXRjaCBzZXJpZXMu
+DQoNClNlZW1zIGxpa2UgdGhpcyBmYWxsZW4gdGhyb3VnaCB0aGUgY3JhY2tzLg0KDQpXb3VsZCB5
+b3UgbWluZCByZS1wb3N0aW5nIGEgcmUtYmFzZWQgc2VyaWVzIGluc3RlYWQ/IEluIHRoYXQgd2F5
+IHlvdSBob3BlZnVsbHkgZ2V0IHNvbWUgbW9yZSBwZW9wbGUncyBhdHRlbnRpb24gYXMgd2VsbC4N
+Cg0KS2luZCByZWdhcmRzDQpVZmZlDQoNCj4NCj4gUmVnYXJkcywNCj4gU2ltb24NCg0KDQo+DQo+
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPj4gRnJvbTogQW1pdGt1bWFyIEthcndhcg0K
+Pj4gU2VudDogMjAxNsTqONTCOcjVIDE4OjE2DQo+PiBUbzogVWxmIEhhbnNzb24gPHVsZi5oYW5z
+c29uQGxpbmFyby5vcmc+DQo+PiBDYzogTmlzaGFudCBTYXJtdWthZGFtIDxuaXNoYW50c0BtYXJ2
+ZWxsLmNvbT47IFdlaS1OaW5nIEh1YW5nIA0KPj4gPHduaHVhbmdAY2hyb21pdW0ub3JnPjsgbGlu
+dXgtbW1jQHZnZXIua2VybmVsLm9yZzsgQ2F0aHkgTHVvIA0KPj4gPGNsdW9AbWFydmVsbC5jb20+
+OyBYaW5taW5nIEh1IDxodXhtQG1hcnZlbGwuY29tPg0KPj4gU3ViamVjdDogUkU6IFtQQVRDSCB2
+NCAxLzJdIG1tYzogQVBJIGZvciBhY2Nlc3NpbmcgaG9zdCBzdXBwb3J0ZWQgDQo+PiBtYXhpbXVt
+IHNlZ21lbnQgY291bnQgYW5kIHNpemUNCj4+DQo+PiBIaSBVbGYsDQo+Pg0KPj4gPiBGcm9tOiBB
+bWl0a3VtYXIgS2Fyd2FyIFttYWlsdG86YWthcndhckBtYXJ2ZWxsLmNvbV0NCj4+ID4gU2VudDog
+VGh1cnNkYXksIEp1bmUgMTYsIDIwMTYgMjo1MyBQTQ0KPj4gPiBUbzogbGludXgtd2lyZWxlc3NA
+dmdlci5rZXJuZWwub3JnDQo+PiA+IENjOiBOaXNoYW50IFNhcm11a2FkYW07IFdlaS1OaW5nIEh1
+YW5nOyBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOyANCj4+ID4gQ2F0aHkgTHVvOyBYaW5taW5n
+IEh1OyBBbWl0a3VtYXIgS2Fyd2FyDQo+PiA+IFN1YmplY3Q6IFtQQVRDSCB2NCAxLzJdIG1tYzog
+QVBJIGZvciBhY2Nlc3NpbmcgaG9zdCBzdXBwb3J0ZWQgDQo+PiA+IG1heGltdW0gc2VnbWVudCBj
+b3VudCBhbmQgc2l6ZQ0KPj4gPg0KPj4gPiBGcm9tOiBYaW5taW5nIEh1IDxodXhtQG1hcnZlbGwu
+Y29tPg0KPj4gPg0KPj4gPiBzZGlvIGRldmljZSBkcml2ZXJzIG5lZWQgYmUgYWJsZSB0byBnZXQg
+dGhlIGhvc3Qgc3VwcG9ydGVkIG1heF9zZWdzIA0KPj4gPiBhbmQgbWF4X3NlZ19zaXplLCBzbyB0
+aGF0IHRoZXkga25vdyB0aGUgYnVmZmVyIHNpemUgdG8gYWxsb2NhdGUgDQo+PiA+IHdoaWxlIHV0
+aWxpemluZyB0aGUgc2NhdHRlci9nYXRoZXIgRE1BIGJ1ZmZlciBsaXN0Lg0KPj4gPg0KPj4gPiBU
+aGlzIHBhdGNoIHByb3ZpZGVzIEFQSSBmb3IgdGhpcyBwdXJwb3NlLg0KPj4gPg0KPj4gPiBTaWdu
+ZWQtb2ZmLWJ5OiBYaW5taW5nIEh1IDxodXhtQG1hcnZlbGwuY29tPg0KPj4gPiBTaWduZWQtb2Zm
+LWJ5OiBBbWl0a3VtYXIgS2Fyd2FyIDxha2Fyd2FyQG1hcnZlbGwuY29tPg0KPj4gPiAtLS0NCj4+
+ID4gdjI6IHYyIHdhcyBzdWJtaXR0ZWQgd2l0aCBtaW5vciBpbXByb3ZlbWVudCBsaWtlIHJlcGxh
+Y2luZyBCVUdfT04oKSANCj4+ID4gd2l0aA0KPj4gPiBXQVJOX09OKCkNCj4+ID4gdjM6IEFkZHJl
+c3NlZCBiZWxvdyByZXZpZXcgY29tbWVudHMgZnJvbSBVbGYgSGFuc3Nvbg0KPj4gPiAgICAgYSkg
+SW4gdjMsIHBhdGNoIGhhcyBiZWVuIHNwbGl0IGludG8gdHdvIHNlcGFyYXRlIHBhdGNoZXMuDQo+
+PiA+ICAgICBiKSBQYXRjaCAxLzIgaW50cm9kdWNlcyBhbiBBUEkgdG8gZmV0Y2ggbWF4X3NlZ19z
+aXplIGFuZCBtYXhfc2Vncw0KPj4gPiAgICAgYykgUmVwbGFjZWQgV0FSTl9PTigpIHdpdGggcHJv
+cGVyIGVycm9yIGNvZGUgd2hlbiANCj4+ID4gc2dfcHRyLT5sZW5ndGggaXMgaW52YWxpZA0KPj4g
+PiAgICAgZCkgSW5zdGVhZCBvZiBkdXBsaWNhdGluZyB0aGUgY29kZSBpbiBtbWNfaW9fcndfZXh0
+ZW5kZWQoKSwgDQo+PiA+IGV4dHJhIGJvb2wgcGFyYW1ldGVyDQo+PiA+ICAgICAgICBoYXMgYmVl
+biBhZGRlZCB0byB0aGlzIGZ1bmN0aW9uIGFuZCB1c2VkIGl0IGluIG5ldyBBUElzIGZvciBTRy4N
+Cj4+ID4gdjQ6IFJlbW92ZWQgV0FSTl9PTigpIGNhbGxzIGluIG5ld2x5IGFkZGVkIEFQSXMuIEl0
+J3MgZ2V0cyBjYWxsZWQgDQo+PiA+IGluIHByb2JlIGhhbmRsZXIuDQo+PiA+ICAgICBDYWxsZXIg
+YWxyZWFkeSB0YWtlcyBjYXJlIG9mIGl0KFNoYXduIExpbikuDQo+PiA+IC0tLQ0KPj4gPiAgZHJp
+dmVycy9tbWMvY29yZS9zZGlvX2lvLmMgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjENCj4+
+ID4gKysrKysrKysrKysrKysrKysrKysrDQo+PiA+ICAuLi4vd2lyZWxlc3MvYnJvYWRjb20vYnJj
+bTgwMjExL2JyY21mbWFjL2JjbXNkaC5jICAgfCAgNiArKystLS0NCj4+ID4gIGluY2x1ZGUvbGlu
+dXgvbW1jL3NkaW9fZnVuYy5oICAgICAgICAgICAgICAgICAgICAgICB8ICAzICsrKw0KPj4gPiAg
+MyBmaWxlcyBjaGFuZ2VkLCAyNyBpbnNlcnRpb25zKCspLCAzIGRlbGV0aW9ucygtKQ0KPj4gPg0K
+Pj4NCj4+IFBsZWFzZSBsZXQgbWUga25vdyBpZiB5b3UgaGF2ZSBhbnkgZnVydGhlciByZXZpZXcg
+Y29tbWVudHMgZm9yIHRoaXMgDQo+PiBwYXRjaCBzZXJpZXMuDQo+Pg0KPj4gUmVnYXJkcywNCj4+
+IEFtaXRrdW1hcg0K
