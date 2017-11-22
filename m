@@ -1,212 +1,571 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v3] mmc: sdhci-acpi: Add support for ACPI HID of AMD
- Controller with HS400
-Date: Wed, 22 Nov 2017 11:21:26 +0200
-Message-ID: <6641b6c4-81f5-5523-6429-7de76623eb59@intel.com>
-References: <1510310488-13413-1-git-send-email-Nehal-Bakulchandra.Shah@amd.com>
+From: Jon Hunter <jonathanh@nvidia.com>
+Subject: Re: [tegra186]: emmc resume failing after booting from snapshot image
+Date: Wed, 22 Nov 2017 10:40:15 +0000
+Message-ID: <b607c51f-559e-0315-6843-c0d9d07cb81e@nvidia.com>
+References: <CAOuPNLjWvqvcb+eDp52GsXEfvtzAcTneUxGhQc9bPWYGsqxpEQ@mail.gmail.com>
+ <d2b3b1e3-dd08-2aad-c027-2c51e4b72459@kapsi.fi>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga06.intel.com ([134.134.136.31]:12471 "EHLO mga06.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751247AbdKVJVo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 22 Nov 2017 04:21:44 -0500
-In-Reply-To: <1510310488-13413-1-git-send-email-Nehal-Bakulchandra.Shah@amd.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-pm-owner@vger.kernel.org>
+In-Reply-To: <d2b3b1e3-dd08-2aad-c027-2c51e4b72459@kapsi.fi>
 Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Sender: linux-pm-owner@vger.kernel.org
+To: Mikko Perttunen <cyndis@kapsi.fi>, Pintu Kumar <pintu.ping@gmail.com>, linux-pm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shah Nehal-Bakulchandra <Nehal-Bakulchandra.Shah@amd.com>, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, Shyam-sundar.S-k@amd.com, Sandeep.Singh@amd.com, Nitesh-kumar.Agrawal@amd.com
 
-On 10/11/17 12:41, Shah Nehal-Bakulchandra wrote:
-> From: Shah Nehal-Bakulchandra <Nehal-bakulchandra.Shah@amd.com>
+Hi Pintu,
+
+I think that the appropriate place to ask about this issue is on the TX2
+forum [0]. Someone should be able to help you there.
+
+Cheers
+Jon
+
+[0] https://devtalk.nvidia.com/default/board/188/jetson-tx2/
+
+On 22/11/17 09:11, Mikko Perttunen wrote:
+> The upstream kernel currently has no core rail suspend support (LP0/SC7)
+> on Tegras - in general the downstream kernel (used e.g. in L4T) is the
+> reference that has the most functionality on Tegra.
 > 
-> This patch supports HS400 for AMD upcoming emmc 5.0 controller.The
-> HS400 and HS200 mode requires hardware work around also. This patch
-> adds the quirks for the same.
+> IIRC the MMC subsystem and Tegra MMC driver between upstream and
+> downstream are currently quite diverged so the upstream folks are
+> unlikely to be able to help with issues with the downstream code.
 > 
-> Signed-off-by: Nehal-bakulchandra Shah <Nehal-bakulchandra.Shah@amd.com>
-
-Looks good, but needs re-basing plus a couple of minor comments below.
-
-> ---
+> Mikko
 > 
-> Changes since v1:(https://patchwork.kernel.org/patch/9813945/)
-> *Reworked on review comments received which has the following:
-> -> Created amd probe slot function.
-> -> Reduce mmc core dependency changes
-> -> Fix some alignment problems.
-> 
-> Changes since v2:(https://patchwork.kernel.org/patch/10001487/)
-> -> Implemented set_ios method as suggested by Adrian.
-> -> completely removed mmc core dependencies in the patch.
-> -> moved AMD DLL register definitions to sdhci-acpi.c
-> 
-> 
->  drivers/mmc/host/sdhci-acpi.c | 80 +++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 80 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-> index ac678e9..f171fee 100644
-> --- a/drivers/mmc/host/sdhci-acpi.c
-> +++ b/drivers/mmc/host/sdhci-acpi.c
-> @@ -49,6 +49,8 @@
->  #endif
->  
->  #include "sdhci.h"
-> +/* AMD sdhci reset dll register.*/
-> +#define SDHCI_AMD_REST_DLL_REGISTER    0x908
+> On 22.11.2017 08:41, Pintu Kumar wrote:
+>> Hi,
+>>
+>> I am trying to bring up suspend-to-disk (snapshot boot) on jetson-tx2
+>> board (nvidia tegra186).
+>> Suspend is working fine, but during boot with snapshot image, emmc
+>> resume is failing.
+>> Kernel version: 4.4
+>> Repo: https://nv-tegra.nvidia.com/gitweb/?p=linux-4.4.git;a=summary
+>> repo: tegra-l4t-r27.1
+>>
+>>
+>> It returns with:
+>> mmc0: error -110 during resume (card was removed?)
+>>
+>> Please see the complete logs below.
+>>
+>> I tried to add some prints in mmc driver to check the cause.
+>> It seems that mmc is not responding during resume.
+>> [  137.125314] mmc_sleep: ERROR: mmc_wait_for_cmd, ret: -110
+>> When I check more, I found that CMD5 (Sleep/Awake) is failing to
+>> response.
+>> It is not able to wakeup the mmc from sleep.
+>>
+>> What could be cause of this problem?
+>> Any pointers or suggestions about this issue will be really helpful....
+>>
+>> When I see the linux kernel mainline kernel-4.14 (latest), I could see
+>> that there are some patches in drivers/mmc/core/* which are missing in
+>> jetson tx2 kernel version-4.4.
+>> Do you think any of the latest patches may help to solve this issue?
+>> If yes, can you point to some of relevant once?
+>>
+>>
+>> Please help.
+>>
+>>
+>> Thanks,
+>> Pintu
+>>
+>> LOGS:
+>> -----------------------------------------------------------
+>> ## Booting ...
+>> [ 117.079061] sdhci-tegra 3400000.sdhci: Tuning already done,
+>> restoring the best tap value : 112
+>> [ 117.081179] xhci-tegra 3530000.xhci: exiting ELPG
+>> [ 117.081798] xhci-tegra 3530000.xhci: Firmware timestamp: 2016-09-01
+>> 11:32:41 UTC, Version: 55.05 release
+>> [ 117.085202] xhci-tegra 3530000.xhci: exiting ELPG done
+>> [ 117.085204] xhci-tegra 3530000.xhci: entering ELPG
+>> [ 117.087770] xhci-tegra 3530000.xhci: entering ELPG done
+>> [ 117.087775] Wake76 for irq=199
+>> [ 117.087777] Wake77 for irq=199
+>> [ 117.087778] Wake78 for irq=199
+>> [ 117.087779] Wake79 for irq=199
+>> [ 117.087780] Wake80 for irq=199
+>> [ 117.087781] Wake81 for irq=199
+>> [ 117.087782] Wake82 for irq=199
+>> [ 117.087784] Enabling wake76
+>> [ 117.087785] Enabling wake77
+>> [ 117.087786] Enabling wake78
+>> [ 117.087787] Enabling wake79
+>> [ 117.087788] Enabling wake80
+>> [ 117.087789] Enabling wake81
+>> [ 117.087790] Enabling wake82
+>> [ 117.087891] tegra186-cam-rtcpu b000000.rtcpu: sce gets halted
+>> [ 117.090012] Wake24 for irq=241
+>> [ 117.090015] Enabling wake24
+>> [ 117.090598] nct1008_nct72 7-004c: success in disabling tmp451 VDD rail
+>> [ 117.090654] gpio tegra-gpio-aon wake29 for gpio=56(FF:0)
+>> [ 117.090655] Enabling wake29
+>> [ 117.090774] gpio tegra-gpio wake53 for gpio=159(X:5)
+>> [ 117.090775] Enabling wake53
+>> [ 117.111219] tegradc 15210000.nvdisplay: suspend
+>> [ 117.111422] Wake73 for irq=42
+>> [ 117.111424] Enabling wake73
+>> [ 117.111597] bcm54xx_low_power_mode(): put phy in iddq-lp mode
+>> [ 117.113533] gpio tegra-gpio wake71 for gpio=125(P:6)
+>> [ 117.113535] Enabling wake71
+>> [ 117.113632] PM: suspend of devices complete after 34.680 msecs
+>> [ 117.114829] host1x 13e10000.host1x: suspended
+>> [ 117.114898] PM: late suspend of devices complete after 1.262 msecs
+>> [ 117.133746] PM: noirq suspend of devices complete after 18.841 msecs
+>> [ 117.133971] Disabling non-boot CPUs ...
+>> [ 117.134249] CPU3: shutdown
+>> [ 117.148582] psci: Retrying again to check for CPU kill
+>> [ 117.148586] psci: CPU3 killed.
+>> [ 117.149097] CPU4: shutdown
+>> [ 117.164584] psci: Retrying again to check for CPU kill
+>> [ 117.164589] psci: CPU4 killed.
+>> [ 117.165041] CPU5: shutdown
+>> [ 117.180572] psci: Retrying again to check for CPU kill
+>> [ 117.180576] psci: CPU5 killed.
+>> [ 117.180834] Entered SC7
+>> [ 117.180834] Wake[31-0] level=0x40000000
+>> [ 117.180834] Wake[63-32] level=0x0
+>> [ 117.180834] Wake[95-64] level=0x7f2a0
+>> [ 117.180834] Wake[31-0] enable=0x21000000
+>> [ 117.180834] Wake[63-32] enable=0x200000
+>> [ 117.180834] Wake[95-64] enable=0x7f280
+>> [ 117.180834] Wake[31-0] route=0x21000000
+>> [ 117.180834] Wake[63-32] route=0x200000
+>> [ 117.180834] Wake[95-64] route=0x7f280
+>> ----
+>> [ 117.180834] Wake[32:0] status=0x0
+>> [ 117.180834] Wake[64:32] status=0x0
+>> [ 117.180834] Wake[96:64] status=0x0
+>> [ 117.180834] Exited SC7
+>> [ 117.180834] bpmp: waiting for handshake
+>> [ 117.180834] bpmp: synchronizing channels
+>> [ 117.180834] bpmp: channels synchronized
+>> [ 117.180869] Enabling non-boot CPUs ...
+>> [ 117.181067] CPU3: Booted secondary processor [411fd073]
+>> [ 117.181198] CPU3 is up
+>> [ 117.181353] CPU4: Booted secondary processor [411fd073]
+>> [ 117.181455] CPU4 is up
+>> [ 117.181609] CPU5: Booted secondary processor [411fd073]
+>> [ 117.181721] CPU5 is up
+>> [ 117.182740] xhci-tegra 3530000.xhci: exiting ELPG
+>> [ 117.183221] xhci-tegra 3530000.xhci: Firmware timestamp: 2016-09-01
+>> 11:32:41 UTC, Version: 55.05 release
+>> [ 117.381630] xhci-tegra 3530000.xhci: XHCI Controller not ready.
+>> Falcon state: 0x10
+>> [ 117.381633] xhci-tegra 3530000.xhci: exiting ELPG failed
+>> [ 117.381643] dpm_run_callback(): tegra_xhci_resume_noirq+0x0/0x48
+>> returns -14
+>> [ 117.381653] PM: Device 3530000.xhci failed to resume noirq: error -14
+>> [ 117.381724] PM: noirq resume of devices complete after 199.999 msecs
+>> [ 117.383100] PM: early resume of devices complete after 1.236 msecs
+>> [ 117.390964] gpio tegra-gpio wake71 for gpio=125(P:6)
+>> [ 117.390966] Disabling wake71
+>> [ 117.392317] pad_id 26: PMC_IMPL_E_33V_PWR_0 = [0x79]
+>> [ 117.392317] sdhci-tegra 3400000.sdhci: Tuning already done,
+>> restoring the best tap value : 112
+>> [ 117.392380] sdhci-tegra 3400000.sdhci: Tuning already done,
+>> restoring the best tap value : 112
+>> [ 117.393492] skipping ...
+>> [ 117.393495] skipping ...
+>> [ 117.393496] skipping ...
+>> [ 117.393498] skipping ...
+>> [ 117.393499] skipping ...
+>> [ 117.393510] skipping ...
+>> [ 117.393511] skipping ...
+>> [ 117.393512] skipping ...
+>> [ 117.461448] gpio tegra-gpio wake18 for gpio=101(M:3)
+>> [ 117.461611] Wake73 for irq=42
+>> [ 117.461613] Disabling wake73
+>> [ 117.461636] tegradc 15210000.nvdisplay: resume
+>> [ 117.461640] PD DISP0 index2 UP
+>> [ 117.462067] PD DISP1 index3 UP
+>> [ 117.462156] PD DISP2 index4 UP
+>> [ 117.468176] gk20a 17000000.gp10b: gk20a_init_fifo_setup_hw: bar1
+>> broken @ gk20a: CPU wrote 0x33, GPU read 0xbad0ac05
+>> [ 117.468179] gk20a 17000000.gp10b: gk20a_pm_finalize_poweron: failed
+>> to init gk20a fifo
+>> [ 117.481847] dpm_run_callback(): platform_pm_resume+0x0/0x58 returns -22
+>> [ 117.481850] PM: Device 17000000.gp10b failed to resume: error -22
+>> [ 117.484872] gpio tegra-gpio wake53 for gpio=159(X:5)
+>> [ 117.484874] Disabling wake53
+>> [ 117.486434] extcon-gpio-states external-connection:extcon@1: Cable
+>> state 0
+>> [ 117.486544] pwm_fan_driver pwm-fan: Enabled vdd-fan
+>> [ 117.486646] gpio tegra-gpio-aon wake29 for gpio=56(FF:0)
+>> [ 117.486647] Disabling wake29
+>> [ 117.487977] nct1008_nct72 7-004c: success in enabling tmp451 VDD rail
+>> [ 117.487982] nct1008_nct72 7-004c: nct1008_read_reg: err -16
+>> [ 117.487985] nct1008_nct72 7-004c: nct1008_write_reg: err -16
+>> [ 117.487988] nct1008_nct72 7-004c:
+>> [ 117.487988] exit nct1008_configure_sensor, err=-16
+>> [ 117.487990] nct1008_nct72 7-004c: nct1008_write_reg: err -16
+>> [ 117.487993] nct1008_nct72 7-004c: nct1008_enable, line=1174, i2c
+>> write error=-16
+>> [ 117.487996] nct1008_nct72 7-004c: Error: nct1008_resume_powerdown,
+>> error=-16
+>> [ 117.488004] dpm_run_callback(): nct1008_resume+0x0/0x140 returns -16
+>> [ 117.488006] PM: Device 7-004c failed to resume: error -16
+>> [ 117.540893] Wake24 for irq=241
+>> [ 117.540895] Disabling wake24
+>> [ 117.541684] tegra-xudc-new 3550000.xudc: exiting ELPG
+>> [ 117.542833] tegra-xudc-new 3550000.xudc: exiting ELPG done
+>> [ 117.543777] tegra186-cam-rtcpu b000000.rtcpu: booting sce with
+>> Camera RTCPU FW
+>> [ 117.543781] tegra186-cam-rtcpu b000000.rtcpu: sce gets unhalted
+>> [ 117.543825] tegra186-cam-rtcpu b000000.rtcpu: enabling tracing
+>> [ 117.543872] xhci-tegra 3530000.xhci: exiting ELPG
+>> [ 117.544128] xhci-tegra 3530000.xhci: Firmware already loaded, Falcon
+>> state 0x10
+>> [ 118.044718] xhci-tegra 3530000.xhci: exiting ELPG done
+>> [ 118.044733] Wake76 for irq=199
+>> [ 118.044735] Wake77 for irq=199
+>> [ 118.044736] Wake78 for irq=199
+>> [ 118.044737] Wake79 for irq=199
+>> [ 118.044738] Wake80 for irq=199
+>> [ 118.044739] Wake81 for irq=199
+>> [ 118.044740] Wake82 for irq=199
+>> [ 118.044742] Disabling wake76
+>> [ 118.044743] Disabling wake77
+>> [ 118.044744] Disabling wake78
+>> [ 118.044745] Disabling wake79
+>> [ 118.044746] Disabling wake80
+>> [ 118.044747] Disabling wake81
+>> [ 118.044748] Disabling wake82
+>> [ 118.044783] pwm_fan_driver pwm-fan: Disabled vdd-fan
+>> [ 118.044784] _mmc_resume: [PINTU]: Enter
+>> [ 118.044787] _mmc_resume: [PINTU]: mmc_card_in_sleep
+>> [ 118.044821] _mmc_resume: [PINTU]: Done
+>> [ 118.044824] mmc0: error -110 during resume (card was removed?)
+>> [ 118.234270] pad_id 26: PMC_IMPL_E_33V_PWR_0 = [0x79]
+>> [ 118.258208] pad_id 26: PMC_IMPL_E_33V_PWR_0 = [0x69]
+>> [ 118.258208] sdhci-tegra 3400000.sdhci: Tuning already done,
+>> restoring the best tap value : 112
+>> [ 120.496556] tegra-hda 3510000.hda: azx_get_response timeout,
+>> switching to polling mode: last cmd=0x30170500
+>> [ 121.500555] tegra-hda 3510000.hda: azx_get_response timeout,
+>> switching to single_cmd mode: last cmd=0x30170500
+>> [ 121.501139] PM: resume of devices complete after 4118.033 msecs
+>> [ 121.517871] eqos 2490000.ether_qos eth0: Link is Up - 100Mbps/Full -
+>> flow control rx/tx
+>> -- 
+>> [ 122.335653] Restarting tasks ...
+>> [ 122.339023] tegra-xudc-new 3550000.xudc: entering ELPG
+>> [ 122.345787] xhci-tegra 3530000.xhci: entering ELPG
+>> [ 122.347145] tegra-xudc-new 3550000.xudc: entering ELPG done
+>> [ 122.347558] nct1008_nct72 7-004c: nct1008_read_reg: err -16
+>> [ 122.347561] thermal thermal_zone5: failed to read out thermal zone (-1)
+>> [ 122.347565] nct1008_nct72 7-004c: nct1008_read_reg: err -16
+>> [ 122.347568] thermal thermal_zone6: failed to read out thermal zone (-1)
+>> [ 122.385092] PM: suspend exit 2016-05-06 05:42:04.775600032 UTC
+>> [ 122.386487] xhci-tegra 3530000.xhci: entering ELPG done
+>> [ 124.605296] mmcblk0: error -110 sending status command, retrying
+>> [ 124.613771] mmcblk0: error -110 sending status command, retrying
+>> [ 124.622175] mmcblk0: error -110 sending status command, aborting
+>> [ 124.631538] mmc_reset: [PINTU]: Enter
+>> [ 124.638572] blk_update_request: I/O error, dev mmcblk0, sector 59745989
+>> [ 124.648740] blk_update_request: I/O error, dev mmcblk0, sector 59745990
+>> [ 124.658768] blk_update_request: I/O error, dev mmcblk0, sector 59745991
+>> [ 124.668689] blk_update_request: I/O error, dev mmcblk0, sector 59745992
+>> [ 124.678609] blk_update_request: I/O error, dev mmcblk0, sector 59745993
+>> [ 124.688666] mmcblk0: error -110 sending status command, retrying
+>> [ 124.697840] mmcblk0: error -110 sending status command, retrying
+>> [ 124.706903] mmcblk0: error -110 sending status command, aborting
+>> [ 124.715858] blk_update_request: I/O error, dev mmcblk0, sector 59745994
+>> [ 124.725339] blk_update_request: I/O error, dev mmcblk0, sector 59745995
+>> [ 124.734690] blk_update_request: I/O error, dev mmcblk0, sector 59745996
+>> [ 124.743936] blk_update_request: I/O error, dev mmcblk0, sector 59745997
+>> [ 124.753041] blk_update_request: I/O error, dev mmcblk0, sector 59745998
+>> [ 124.762252] mmcblk0: error -110 sending status command, retrying
+>> [ 124.770656] mmcblk0: error -110 sending status command, retrying
+>> [ 124.778977] mmcblk0: error -110 sending status command, aborting
+>> [ 124.789002] mmcblk0: error -110 sending status command, retrying
+>> [ 124.797177] mmcblk0: error -110 sending status command, retrying
+>> [ 124.805285] mmcblk0: error -110 sending status command, aborting
+>> [ 124.814281] mmcblk0: error -110 sending status command, retrying
+>> [ 124.822247] mmcblk0: error -110 sending status command, retrying
+>> [ 124.830092] mmcblk0: error -110 sending status command, aborting
+>> [ 124.837840] FAT-fs (mmcblk0p17): FAT read failed (blocknr 32)
+>>
+>> -----------------------------------------------------------------------------------------------------
+>>
+>>
+>>
+>>
+>>
+>> On Mon, Nov 20, 2017 at 12:48 PM, Pintu Kumar <pintu.ping@gmail.com>
+>> wrote:
+>>> Hi,
+>>>
+>>> I am trying to verify suspend-to-disk on jetson-tx2 board (nvidia
+>>> tegra186).
+>>> Suspend is working fine, but during resume emmc is failing to resume.
+>>> Kernel version: 4.4
+>>> Repo: https://nv-tegra.nvidia.com/gitweb/?p=linux-4.4.git;a=summary
+>>>
+>>>
+>>> It returns with:
+>>> mmc0: error -110 during resume (card was removed?)
+>>>
+>>> Please see the complete logs below.
+>>>
+>>> I tried to add some prints in mmc driver to check the cause.
+>>> It seems that mmc is not responding during resume.
+>>> [  137.125314] mmc_sleep: ERROR: mmc_wait_for_cmd, ret: -110
+>>>
+>>> Do you have any pointers to fix/debug this issue?
+>>> When I see the linux kernel mainline kernel-4.14 (latest), I could see
+>>> that there are some patches in drivers/mmc/core/* which are missing in
+>>> jetson tx2 kernel version-4.4.
+>>> Do you think any of the latest patches may help to solve this issue?
+>>> If yes, can you point to some of relevant once?
+>>>
+>>>
+>>> Please help.
+>>>
+>>>
+>>> Thanks,
+>>> Pintu
+>>>
+>>> LOGS:
+>>> -----------------------------------------------------------
+>>> ## Booting ...
+>>> [ 117.079061] sdhci-tegra 3400000.sdhci: Tuning already done,
+>>> restoring the best tap value : 112
+>>> [ 117.081179] xhci-tegra 3530000.xhci: exiting ELPG
+>>> [ 117.081798] xhci-tegra 3530000.xhci: Firmware timestamp: 2016-09-01
+>>> 11:32:41 UTC, Version: 55.05 release
+>>> [ 117.085202] xhci-tegra 3530000.xhci: exiting ELPG done
+>>> [ 117.085204] xhci-tegra 3530000.xhci: entering ELPG
+>>> [ 117.087770] xhci-tegra 3530000.xhci: entering ELPG done
+>>> [ 117.087775] Wake76 for irq=199
+>>> [ 117.087777] Wake77 for irq=199
+>>> [ 117.087778] Wake78 for irq=199
+>>> [ 117.087779] Wake79 for irq=199
+>>> [ 117.087780] Wake80 for irq=199
+>>> [ 117.087781] Wake81 for irq=199
+>>> [ 117.087782] Wake82 for irq=199
+>>> [ 117.087784] Enabling wake76
+>>> [ 117.087785] Enabling wake77
+>>> [ 117.087786] Enabling wake78
+>>> [ 117.087787] Enabling wake79
+>>> [ 117.087788] Enabling wake80
+>>> [ 117.087789] Enabling wake81
+>>> [ 117.087790] Enabling wake82
+>>> [ 117.087891] tegra186-cam-rtcpu b000000.rtcpu: sce gets halted
+>>> [ 117.090012] Wake24 for irq=241
+>>> [ 117.090015] Enabling wake24
+>>> [ 117.090598] nct1008_nct72 7-004c: success in disabling tmp451 VDD rail
+>>> [ 117.090654] gpio tegra-gpio-aon wake29 for gpio=56(FF:0)
+>>> [ 117.090655] Enabling wake29
+>>> [ 117.090774] gpio tegra-gpio wake53 for gpio=159(X:5)
+>>> [ 117.090775] Enabling wake53
+>>> [ 117.111219] tegradc 15210000.nvdisplay: suspend
+>>> [ 117.111422] Wake73 for irq=42
+>>> [ 117.111424] Enabling wake73
+>>> [ 117.111597] bcm54xx_low_power_mode(): put phy in iddq-lp mode
+>>> [ 117.113533] gpio tegra-gpio wake71 for gpio=125(P:6)
+>>> [ 117.113535] Enabling wake71
+>>> [ 117.113632] PM: suspend of devices complete after 34.680 msecs
+>>> [ 117.114829] host1x 13e10000.host1x: suspended
+>>> [ 117.114898] PM: late suspend of devices complete after 1.262 msecs
+>>> [ 117.133746] PM: noirq suspend of devices complete after 18.841 msecs
+>>> [ 117.133971] Disabling non-boot CPUs ...
+>>> [ 117.134249] CPU3: shutdown
+>>> [ 117.148582] psci: Retrying again to check for CPU kill
+>>> [ 117.148586] psci: CPU3 killed.
+>>> [ 117.149097] CPU4: shutdown
+>>> [ 117.164584] psci: Retrying again to check for CPU kill
+>>> [ 117.164589] psci: CPU4 killed.
+>>> [ 117.165041] CPU5: shutdown
+>>> [ 117.180572] psci: Retrying again to check for CPU kill
+>>> [ 117.180576] psci: CPU5 killed.
+>>> [ 117.180834] Entered SC7
+>>> [ 117.180834] Wake[31-0] level=0x40000000
+>>> [ 117.180834] Wake[63-32] level=0x0
+>>> [ 117.180834] Wake[95-64] level=0x7f2a0
+>>> [ 117.180834] Wake[31-0] enable=0x21000000
+>>> [ 117.180834] Wake[63-32] enable=0x200000
+>>> [ 117.180834] Wake[95-64] enable=0x7f280
+>>> [ 117.180834] Wake[31-0] route=0x21000000
+>>> [ 117.180834] Wake[63-32] route=0x200000
+>>> [ 117.180834] Wake[95-64] route=0x7f280
+>>> ----
+>>> [ 117.180834] Wake[32:0] status=0x0
+>>> [ 117.180834] Wake[64:32] status=0x0
+>>> [ 117.180834] Wake[96:64] status=0x0
+>>> [ 117.180834] Exited SC7
+>>> [ 117.180834] bpmp: waiting for handshake
+>>> [ 117.180834] bpmp: synchronizing channels
+>>> [ 117.180834] bpmp: channels synchronized
+>>> [ 117.180869] Enabling non-boot CPUs ...
+>>> [ 117.181067] CPU3: Booted secondary processor [411fd073]
+>>> [ 117.181198] CPU3 is up
+>>> [ 117.181353] CPU4: Booted secondary processor [411fd073]
+>>> [ 117.181455] CPU4 is up
+>>> [ 117.181609] CPU5: Booted secondary processor [411fd073]
+>>> [ 117.181721] CPU5 is up
+>>> [ 117.182740] xhci-tegra 3530000.xhci: exiting ELPG
+>>> [ 117.183221] xhci-tegra 3530000.xhci: Firmware timestamp: 2016-09-01
+>>> 11:32:41 UTC, Version: 55.05 release
+>>> [ 117.381630] xhci-tegra 3530000.xhci: XHCI Controller not ready.
+>>> Falcon state: 0x10
+>>> [ 117.381633] xhci-tegra 3530000.xhci: exiting ELPG failed
+>>> [ 117.381643] dpm_run_callback(): tegra_xhci_resume_noirq+0x0/0x48
+>>> returns -14
+>>> [ 117.381653] PM: Device 3530000.xhci failed to resume noirq: error -14
+>>> [ 117.381724] PM: noirq resume of devices complete after 199.999 msecs
+>>> [ 117.383100] PM: early resume of devices complete after 1.236 msecs
+>>> [ 117.390964] gpio tegra-gpio wake71 for gpio=125(P:6)
+>>> [ 117.390966] Disabling wake71
+>>> [ 117.392317] pad_id 26: PMC_IMPL_E_33V_PWR_0 = [0x79]
+>>> [ 117.392317] sdhci-tegra 3400000.sdhci: Tuning already done,
+>>> restoring the best tap value : 112
+>>> [ 117.392380] sdhci-tegra 3400000.sdhci: Tuning already done,
+>>> restoring the best tap value : 112
+>>> [ 117.393492] skipping ...
+>>> [ 117.393495] skipping ...
+>>> [ 117.393496] skipping ...
+>>> [ 117.393498] skipping ...
+>>> [ 117.393499] skipping ...
+>>> [ 117.393510] skipping ...
+>>> [ 117.393511] skipping ...
+>>> [ 117.393512] skipping ...
+>>> [ 117.461448] gpio tegra-gpio wake18 for gpio=101(M:3)
+>>> [ 117.461611] Wake73 for irq=42
+>>> [ 117.461613] Disabling wake73
+>>> [ 117.461636] tegradc 15210000.nvdisplay: resume
+>>> [ 117.461640] PD DISP0 index2 UP
+>>> [ 117.462067] PD DISP1 index3 UP
+>>> [ 117.462156] PD DISP2 index4 UP
+>>> [ 117.468176] gk20a 17000000.gp10b: gk20a_init_fifo_setup_hw: bar1
+>>> broken @ gk20a: CPU wrote 0x33, GPU read 0xbad0ac05
+>>> [ 117.468179] gk20a 17000000.gp10b: gk20a_pm_finalize_poweron: failed
+>>> to init gk20a fifo
+>>> [ 117.481847] dpm_run_callback(): platform_pm_resume+0x0/0x58 returns
+>>> -22
+>>> [ 117.481850] PM: Device 17000000.gp10b failed to resume: error -22
+>>> [ 117.484872] gpio tegra-gpio wake53 for gpio=159(X:5)
+>>> [ 117.484874] Disabling wake53
+>>> [ 117.486434] extcon-gpio-states external-connection:extcon@1: Cable
+>>> state 0
+>>> [ 117.486544] pwm_fan_driver pwm-fan: Enabled vdd-fan
+>>> [ 117.486646] gpio tegra-gpio-aon wake29 for gpio=56(FF:0)
+>>> [ 117.486647] Disabling wake29
+>>> [ 117.487977] nct1008_nct72 7-004c: success in enabling tmp451 VDD rail
+>>> [ 117.487982] nct1008_nct72 7-004c: nct1008_read_reg: err -16
+>>> [ 117.487985] nct1008_nct72 7-004c: nct1008_write_reg: err -16
+>>> [ 117.487988] nct1008_nct72 7-004c:
+>>> [ 117.487988] exit nct1008_configure_sensor, err=-16
+>>> [ 117.487990] nct1008_nct72 7-004c: nct1008_write_reg: err -16
+>>> [ 117.487993] nct1008_nct72 7-004c: nct1008_enable, line=1174, i2c
+>>> write error=-16
+>>> [ 117.487996] nct1008_nct72 7-004c: Error: nct1008_resume_powerdown,
+>>> error=-16
+>>> [ 117.488004] dpm_run_callback(): nct1008_resume+0x0/0x140 returns -16
+>>> [ 117.488006] PM: Device 7-004c failed to resume: error -16
+>>> [ 117.540893] Wake24 for irq=241
+>>> [ 117.540895] Disabling wake24
+>>> [ 117.541684] tegra-xudc-new 3550000.xudc: exiting ELPG
+>>> [ 117.542833] tegra-xudc-new 3550000.xudc: exiting ELPG done
+>>> [ 117.543777] tegra186-cam-rtcpu b000000.rtcpu: booting sce with
+>>> Camera RTCPU FW
+>>> [ 117.543781] tegra186-cam-rtcpu b000000.rtcpu: sce gets unhalted
+>>> [ 117.543825] tegra186-cam-rtcpu b000000.rtcpu: enabling tracing
+>>> [ 117.543872] xhci-tegra 3530000.xhci: exiting ELPG
+>>> [ 117.544128] xhci-tegra 3530000.xhci: Firmware already loaded, Falcon
+>>> state 0x10
+>>> [ 118.044718] xhci-tegra 3530000.xhci: exiting ELPG done
+>>> [ 118.044733] Wake76 for irq=199
+>>> [ 118.044735] Wake77 for irq=199
+>>> [ 118.044736] Wake78 for irq=199
+>>> [ 118.044737] Wake79 for irq=199
+>>> [ 118.044738] Wake80 for irq=199
+>>> [ 118.044739] Wake81 for irq=199
+>>> [ 118.044740] Wake82 for irq=199
+>>> [ 118.044742] Disabling wake76
+>>> [ 118.044743] Disabling wake77
+>>> [ 118.044744] Disabling wake78
+>>> [ 118.044745] Disabling wake79
+>>> [ 118.044746] Disabling wake80
+>>> [ 118.044747] Disabling wake81
+>>> [ 118.044748] Disabling wake82
+>>> [ 118.044783] pwm_fan_driver pwm-fan: Disabled vdd-fan
+>>> [ 118.044784] _mmc_resume: [PINTU]: Enter
+>>> [ 118.044787] _mmc_resume: [PINTU]: mmc_card_in_sleep
+>>> [ 118.044821] _mmc_resume: [PINTU]: Done
+>>> [ 118.044824] mmc0: error -110 during resume (card was removed?)
+>>> [ 118.234270] pad_id 26: PMC_IMPL_E_33V_PWR_0 = [0x79]
+>>> [ 118.258208] pad_id 26: PMC_IMPL_E_33V_PWR_0 = [0x69]
+>>> [ 118.258208] sdhci-tegra 3400000.sdhci: Tuning already done,
+>>> restoring the best tap value : 112
+>>> [ 120.496556] tegra-hda 3510000.hda: azx_get_response timeout,
+>>> switching to polling mode: last cmd=0x30170500
+>>> [ 121.500555] tegra-hda 3510000.hda: azx_get_response timeout,
+>>> switching to single_cmd mode: last cmd=0x30170500
+>>> [ 121.501139] PM: resume of devices complete after 4118.033 msecs
+>>> [ 121.517871] eqos 2490000.ether_qos eth0: Link is Up - 100Mbps/Full -
+>>> flow control rx/tx
+>>> -- 
+>>> [ 122.335653] Restarting tasks ...
+>>> [ 122.339023] tegra-xudc-new 3550000.xudc: entering ELPG
+>>> [ 122.345787] xhci-tegra 3530000.xhci: entering ELPG
+>>> [ 122.347145] tegra-xudc-new 3550000.xudc: entering ELPG done
+>>> [ 122.347558] nct1008_nct72 7-004c: nct1008_read_reg: err -16
+>>> [ 122.347561] thermal thermal_zone5: failed to read out thermal zone
+>>> (-1)
+>>> [ 122.347565] nct1008_nct72 7-004c: nct1008_read_reg: err -16
+>>> [ 122.347568] thermal thermal_zone6: failed to read out thermal zone
+>>> (-1)
+>>> [ 122.385092] PM: suspend exit 2016-05-06 05:42:04.775600032 UTC
+>>> [ 122.386487] xhci-tegra 3530000.xhci: entering ELPG done
+>>> [ 124.605296] mmcblk0: error -110 sending status command, retrying
+>>> [ 124.613771] mmcblk0: error -110 sending status command, retrying
+>>> [ 124.622175] mmcblk0: error -110 sending status command, aborting
+>>> [ 124.631538] mmc_reset: [PINTU]: Enter
+>>> [ 124.638572] blk_update_request: I/O error, dev mmcblk0, sector
+>>> 59745989
+>>> [ 124.648740] blk_update_request: I/O error, dev mmcblk0, sector
+>>> 59745990
+>>> [ 124.658768] blk_update_request: I/O error, dev mmcblk0, sector
+>>> 59745991
+>>> [ 124.668689] blk_update_request: I/O error, dev mmcblk0, sector
+>>> 59745992
+>>> [ 124.678609] blk_update_request: I/O error, dev mmcblk0, sector
+>>> 59745993
+>>> [ 124.688666] mmcblk0: error -110 sending status command, retrying
+>>> [ 124.697840] mmcblk0: error -110 sending status command, retrying
+>>> [ 124.706903] mmcblk0: error -110 sending status command, aborting
+>>> [ 124.715858] blk_update_request: I/O error, dev mmcblk0, sector
+>>> 59745994
+>>> [ 124.725339] blk_update_request: I/O error, dev mmcblk0, sector
+>>> 59745995
+>>> [ 124.734690] blk_update_request: I/O error, dev mmcblk0, sector
+>>> 59745996
+>>> [ 124.743936] blk_update_request: I/O error, dev mmcblk0, sector
+>>> 59745997
+>>> [ 124.753041] blk_update_request: I/O error, dev mmcblk0, sector
+>>> 59745998
+>>> [ 124.762252] mmcblk0: error -110 sending status command, retrying
+>>> [ 124.770656] mmcblk0: error -110 sending status command, retrying
+>>> [ 124.778977] mmcblk0: error -110 sending status command, aborting
+>>> [ 124.789002] mmcblk0: error -110 sending status command, retrying
+>>> [ 124.797177] mmcblk0: error -110 sending status command, retrying
+>>> [ 124.805285] mmcblk0: error -110 sending status command, aborting
+>>> [ 124.814281] mmcblk0: error -110 sending status command, retrying
+>>> [ 124.822247] mmcblk0: error -110 sending status command, retrying
+>>> [ 124.830092] mmcblk0: error -110 sending status command, aborting
+>>> [ 124.837840] FAT-fs (mmcblk0p17): FAT read failed (blocknr 32)
+>> -- 
+>> To unsubscribe from this list: send the line "unsubscribe linux-tegra" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
 
-Let's keep all the AMD code together.  i.e. excluding the ids, you have
-about 5 chunks but it could be just 1.
-
->  
->  enum {
->  	SDHCI_ACPI_SD_CD		= BIT(0),
-> @@ -89,6 +91,43 @@ static inline bool sdhci_acpi_flag(struct sdhci_acpi_host *c, unsigned int flag)
->  	return c->slot && (c->slot->flags & flag);
->  }
->  
-> +static int amd_select_drive_strength(struct mmc_card *card,
-> +				     unsigned int max_dtr, int host_drv,
-> +				     int card_drv, int *drv_type)
-> +{
-> +	return MMC_SET_DRIVER_TYPE_A;
-> +}
-> +
-> +static void sdhci_acpi_amd_hs400_dll(struct sdhci_host *host)
-> +{
-> +	/*AMD Platform requires dll setting*/
-
-Please add a space after /* and before */
-
-> +	sdhci_writel(host, 0x40003210, SDHCI_AMD_REST_DLL_REGISTER);
-> +	usleep_range(10, 20);
-> +	sdhci_writel(host, 0x40033210, SDHCI_AMD_REST_DLL_REGISTER);
-> +}
-> +
-> +/*
-> + * For AMD Platform it is required to disable the tuning
-> + * bit first controller to bring to HS Mode from HS200
-> + * mode, later enable to tune to HS400 mode.
-> + */
-> +
-
-Please remove this blank line.
-
-> +static void amd_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> +{
-> +	struct sdhci_host *host = mmc_priv(mmc);
-> +	unsigned int old_timing = host->timing;
-> +
-> +	sdhci_set_ios(mmc, ios);
-> +	if (old_timing == MMC_TIMING_MMC_HS200 &&
-> +	    ios->timing == MMC_TIMING_MMC_HS)
-> +		sdhci_writew(host, 0x9, SDHCI_HOST_CONTROL2);
-> +	if (old_timing != MMC_TIMING_MMC_HS400 &&
-> +	    ios->timing == MMC_TIMING_MMC_HS400){
-
-Please add a space before {
-
-> +		sdhci_writew(host, 0x80, SDHCI_HOST_CONTROL2);
-> +		sdhci_acpi_amd_hs400_dll(host);
-> +	}
-> +}
-> +
->  static void sdhci_acpi_int_hw_reset(struct sdhci_host *host)
->  {
->  	u8 reg;
-> @@ -123,6 +162,17 @@ static const struct sdhci_acpi_chip sdhci_acpi_chip_int = {
->  	.ops = &sdhci_acpi_ops_int,
->  };
->  
-> +static const struct sdhci_ops sdhci_acpi_ops_amd = {
-> +	.set_clock = sdhci_set_clock,
-> +	.set_bus_width = sdhci_set_bus_width,
-> +	.reset = sdhci_reset,
-> +	.set_uhs_signaling = sdhci_set_uhs_signaling,
-> +};
-> +
-> +static const struct sdhci_acpi_chip sdhci_acpi_chip_amd = {
-> +	.ops = &sdhci_acpi_ops_amd,
-> +};
-> +
->  #ifdef CONFIG_X86
->  
->  static bool sdhci_acpi_byt(void)
-> @@ -269,6 +319,26 @@ static int bxt_get_cd(struct mmc_host *mmc)
->  	return ret;
->  }
->  
-> +static int sdhci_acpi_emmc_amd_probe_slot(struct platform_device *pdev,
-> +					  const char *hid, const char *uid)
-> +{
-> +	struct sdhci_acpi_host *c = platform_get_drvdata(pdev);
-> +	struct sdhci_host *host;
-
-Please make this:
-	struct sdhci_host *host = c->host;
-
-> +
-> +	host = c->host;
-
-As above, initialize when declaring.
-
-> +	sdhci_read_caps(host);
-> +	if (host->caps1 & SDHCI_SUPPORT_DDR50)
-> +		host->mmc->caps = MMC_CAP_1_8V_DDR;
-> +
-> +	if ((host->caps1 & SDHCI_SUPPORT_SDR104) &&
-> +	    (host->mmc->caps & MMC_CAP_1_8V_DDR))
-> +		host->mmc->caps2 = MMC_CAP2_HS400_1_8V;
-> +
-> +	host->mmc_host_ops.select_drive_strength = amd_select_drive_strength;
-> +	host->mmc_host_ops.set_ios = amd_set_ios;
-> +	return 0;
-> +}
-> +
->  static int sdhci_acpi_emmc_probe_slot(struct platform_device *pdev,
->  				      const char *hid, const char *uid)
->  {
-> @@ -370,6 +440,14 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_qcom_sd = {
->  	.caps    = MMC_CAP_NONREMOVABLE,
->  };
->  
-> +static const struct sdhci_acpi_slot sdhci_acpi_slot_amd_emmc = {
-> +	.chip   = &sdhci_acpi_chip_amd,
-> +	.caps   = MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE |  MMC_CAP_HW_RESET,
-
-You add MMC_CAP_HW_RESET but don't have a hw_reset callback in
-sdhci_acpi_ops_amd.  Is that right?
-
-> +	.quirks = SDHCI_QUIRK_32BIT_DMA_ADDR | SDHCI_QUIRK_32BIT_DMA_SIZE |
-> +		  SDHCI_QUIRK_32BIT_ADMA_SIZE,
-> +	.probe_slot     = sdhci_acpi_emmc_amd_probe_slot,
-> +};
-> +
-
-As I wrote above, you could put all the AMD code altogther in one chunk
-right here.
-
->  struct sdhci_acpi_uid_slot {
->  	const char *hid;
->  	const char *uid;
-> @@ -393,6 +471,7 @@ static const struct sdhci_acpi_uid_slot sdhci_acpi_uids[] = {
->  	{ "PNP0D40"  },
->  	{ "QCOM8051", NULL, &sdhci_acpi_slot_qcom_sd_3v },
->  	{ "QCOM8052", NULL, &sdhci_acpi_slot_qcom_sd },
-> +	{ "AMDI0040", NULL, &sdhci_acpi_slot_amd_emmc},
->  	{ },
->  };
->  
-> @@ -409,6 +488,7 @@ static const struct acpi_device_id sdhci_acpi_ids[] = {
->  	{ "PNP0D40"  },
->  	{ "QCOM8051" },
->  	{ "QCOM8052" },
-> +	{ "AMDI0040" },
->  	{ },
->  };
->  MODULE_DEVICE_TABLE(acpi, sdhci_acpi_ids);
-> 
-
+-- 
+nvpublic
