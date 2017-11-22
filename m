@@ -1,93 +1,106 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V14 07/24] mmc: block: Use data timeout in card_busy_detect()
-Date: Wed, 22 Nov 2017 15:43:07 +0100
-Message-ID: <CAPDyKFp14kk-81Hn3T7E6EAQrZBKgL3HvPWYKb1DO0uDETQm1Q@mail.gmail.com>
-References: <1511271770-3444-1-git-send-email-adrian.hunter@intel.com>
- <1511271770-3444-8-git-send-email-adrian.hunter@intel.com>
- <CAPDyKFovzm6DuNGiJq3kBpa59zRwq35xAfw5dL6Cbq7FG1wapw@mail.gmail.com> <be5cdd62-92ba-12f5-946f-1b29493e6dc4@intel.com>
+Subject: Re: More TMIO MMC variant. What is a preferred name?
+Date: Wed, 22 Nov 2017 16:18:56 +0100
+Message-ID: <CAPDyKFrBduuejARVJ1__jYy0C+WrRw9kVeD+Hszm_JvkR-10ww@mail.gmail.com>
+References: <CAK7LNARB+-SzgNF+7KsG80o4Q=TZsEeyMLjR2Ve0bXCrQ5tc0w@mail.gmail.com>
+ <20171108175320.wnq3d2x7lmpaya7s@ninjato> <CAK7LNASN8kjmiNHvX7zrgVv=5d81ovfGNRdHm8TXiJNgr+H9MA@mail.gmail.com>
+ <20171120201142.n4l4jelxsmmtwjj6@tetsubishi> <CAPDyKFq_uVvBKBhATNYhq2mSMmNXA7tPSSPMESCnTDtQt9XrZA@mail.gmail.com>
+ <20171121200111.vrpmsubme55356qv@ninjato> <CAPDyKFo6X+Z6bORzPow=79Q7jXZOu4SMA9dh1fDsD-_JrBRtgA@mail.gmail.com>
+ <CAK7LNARpchnGL8ZGWcFs=bxmH2FK71Voyd5K1E6=3bHTjd-gyw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <be5cdd62-92ba-12f5-946f-1b29493e6dc4@intel.com>
-Sender: linux-block-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Christoph Hellwig <hch@lst.de>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-it0-f46.google.com ([209.85.214.46]:39963 "EHLO
+        mail-it0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751516AbdKVPS5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Nov 2017 10:18:57 -0500
+Received: by mail-it0-f46.google.com with SMTP id 72so6737266itl.5
+        for <linux-mmc@vger.kernel.org>; Wed, 22 Nov 2017 07:18:57 -0800 (PST)
+In-Reply-To: <CAK7LNARpchnGL8ZGWcFs=bxmH2FK71Voyd5K1E6=3bHTjd-gyw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: Wolfram Sang <wsa@the-dreams.de>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms+renesas@verge.net.au>, linux-mmc <linux-mmc@vger.kernel.org>, Marek Vasut <marek.vasut+renesas@gmail.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 
-On 22 November 2017 at 08:40, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 21/11/17 17:39, Ulf Hansson wrote:
->> On 21 November 2017 at 14:42, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>> card_busy_detect() has a 10 minute timeout. However the correct timeout is
->>> the data timeout. Change card_busy_detect() to use the data timeout.
+On 22 November 2017 at 02:16, Masahiro Yamada
+<yamada.masahiro@socionext.com> wrote:
+> 2017-11-22 5:14 GMT+09:00 Ulf Hansson <ulf.hansson@linaro.org>:
+>> On 21 November 2017 at 21:01, Wolfram Sang <wsa@the-dreams.de> wrote:
+>>> Hi Ulf,
+>>>
+>>> thanks for the feedback!
+>>>
+>>>> So what do you think of this?:
+>>>>
+>>>> 1) Rename tmio_core.c to tmio.c, and fold in some more information
+>>>> about the history of the IP in the header of the file. Yeah, "tmio"
+>>>> may not be the absolutely correct name, but on the other hand it
+>>>> preserves consistency and I there are no need to rename any functions.
+>>>> 2) Rename tmio_mmc.h to tmio.h - and move potential tmio_mmc specific
+>>>> bits to tmio_mmc.c.
+>>>> 3) Rename renesas_sdhi_core.c to tmio_renesas_sdhi.c. Again, I don't
+>>>> think we need any functions to be renamed because of this change.
+>>>> 4) Rename renesas_sdhi.h to tmio_renesas_sdhi.h.
+>>>
+>>> I can agree to that. Clarifying 3), I think though, we should have:
+>>>         tmio_sdhi.c
+>>>
+>>> and on top of that:
+>>>
+>>>         tmio_sdhi_internal_dmac.c
+>>>         tmio_sdhi_sys_dmac.c
+>>>
+>>> ?
 >>
->> Unfortunate I don't think there is "correct" timeout for this case.
+>> Even better!
 >>
->> The data->timeout_ns is to indicate for the host to how long the
->> maximum time it's allowed to take between blocks that are written to
->> the data lines.
+>>>
+>>>> Following the naming strategy from the above, I the new file name for
+>>>> new tmio variant should be tmio_uniphier.c.
+>>>
+>>> Yes.
+>>>
 >>
->> I haven't found a definition of the busy timeout, after the data write
->> has completed. The spec only mentions that the device moves to
->> programming state and pulls DAT0 to indicate busy.
->
-> To me it reads more like the timeout is for each block, including the last
-> i.e. the same timeout for "busy".  Note the card is also busy between blocks.
-
-I don't think that is the same timeout. Or maybe it is.
-
-In the eMMC 5.1 spec, there are mentions about "buffer busy signal"
-and "programming busy signal", see section 6.15.3 (Timings - Data
-Write).
-
-Anyway, whether any of them is specified, is to me unclear.
-
->
-> Equally it is the timeout we give the host controller.  So either the host
-> controller does not have a timeout for "busy" - which begs the question why
-> it has a timeout at all - or it invents its own "busy" timeout - which begs
-> the question why it isn't in the spec.
-
-Well, there are some vague hints in section 6.8.2 (Time-out
-conditions), but I don't find these timeouts values being referred to
-in 6.15 (Timings). And that puzzles me.
-
-Moreover, the below is quoted from section 6.6.8.1 (Block write):
-------
-Some Devices may require long and unpredictable times to write a block
-of data. After receiving a block of data and completing the CRC check,
-the Device will begin writing and hold the DAT0 line low. The host may
-poll the status of the Device with a SEND_STATUS command (CMD13) at
-any time, and the Device will respond with its status (except in Sleep
-state). The status bit READY_FOR_DATA indicates whether the Device can
-accept new data or not. The host may deselect the Device by issuing
-CMD7 that will then displace the Device into the Disconnect State and
-release the DAT0 line without interrupting the write operation. When
-reselecting the Device, it will reactivate busy indication by pulling
-DAT0 to low. See 6.15 for details of busy indication.
-------
-
->
+>> Great!
 >>
->> Sure, 10 min seems crazy, perhaps something along the lines of 10-20 s
->> is more reasonable. What do you think?
+>> Br
+>> Uffe
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
-> We give SD cards a generous 3 seconds for writes.  SDHCI has long had a 10
-> second software timer for the whole request, which strongly suggests that
-> requests have always completed within 10 seconds.  So that puts the range of
-> an arbitrary timeout 3-10 s.
+>
+> In my understanding, TMIO is a name of MFD
+> that includes some built-in peripherals:
+> drivers/usb/host/ohci-tmio.c
+> drivers/mtd/nand/tmio_nand.c
+>
+>
+>
+> If you use "tmio" as a prefix of a group of MMC drivers,
+> it will look odd.
+>
+> # core
+> obj-$(CONFIG_MMC_TMIO)          += tmio.o
+> # TMIO-builtin
+> obj-$(CONFIG_MMC_TMIO_MMC)      += tmio_mmc.o
+> # Renesas SoCs
+> obj-$(CONFIG_MMC_TMIO_SDHI)     += tmio_sdhi.o
+> # UniPhier SoCs
+> obj-$(CONFIG_MMC_TMIO_UNIPHIER) += tmio_uniphier.o
+>
+> This is funny,
+> especially the relation between tmio.o and tmio_mmc.o
+>
+> The "mmc" in the "tmio_mmc.o"
+> is not a platform name.
+>
+> This is even confusing.
 
->From the reasoning above, I guess we could try out 10 s. That is at
-least a lot better than 10 minutes.
+Well, still I think it's quite much better than what we have today.
 
-I also see that we have at three different places (switch, erase,
-block data transfers) implementing busy signal detection. It would be
-nice to try to align those pieces of code, because they are quite
-similar. Of course, this deserves it's own separate task to try to fix
-up.
-
-BTW, perhaps we should move this to a separate change on top of the
-series? Or is there as specific need for this in regards to blkmq and
-CQE?
+[...]
 
 Kind regards
 Uffe
