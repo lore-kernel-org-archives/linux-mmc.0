@@ -1,230 +1,78 @@
-From: Xinming Hu <huxm@marvell.com>
-Subject: [PATCH v5 2/2] mmc: sdio support external scatter gather list
-Date: Wed, 22 Nov 2017 15:53:42 +0800
-Message-ID: <1511337222-6397-1-git-send-email-huxm@marvell.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: More TMIO MMC variant. What is a preferred name?
+Date: Wed, 22 Nov 2017 08:59:38 +0100
+Message-ID: <20171122075937.knc2soqu5axdufzy@ninjato>
+References: <CAK7LNARB+-SzgNF+7KsG80o4Q=TZsEeyMLjR2Ve0bXCrQ5tc0w@mail.gmail.com>
+ <20171108175320.wnq3d2x7lmpaya7s@ninjato>
+ <CAK7LNASN8kjmiNHvX7zrgVv=5d81ovfGNRdHm8TXiJNgr+H9MA@mail.gmail.com>
+ <20171120201142.n4l4jelxsmmtwjj6@tetsubishi>
+ <CAPDyKFq_uVvBKBhATNYhq2mSMmNXA7tPSSPMESCnTDtQt9XrZA@mail.gmail.com>
+ <20171121200111.vrpmsubme55356qv@ninjato>
+ <CAPDyKFo6X+Z6bORzPow=79Q7jXZOu4SMA9dh1fDsD-_JrBRtgA@mail.gmail.com>
+ <CAK7LNARpchnGL8ZGWcFs=bxmH2FK71Voyd5K1E6=3bHTjd-gyw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="nfa7ghjlplwohzr6"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0b-0016f401.pphosted.com ([67.231.156.173]:50060 "EHLO
-        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751460AbdKVHxy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Nov 2017 02:53:54 -0500
+Received: from sauhun.de ([88.99.104.3]:57010 "EHLO pokefinder.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751425AbdKVH7k (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 22 Nov 2017 02:59:40 -0500
+Content-Disposition: inline
+In-Reply-To: <CAK7LNARpchnGL8ZGWcFs=bxmH2FK71Voyd5K1E6=3bHTjd-gyw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linux MMC <linux-mmc@vger.kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Zhiyuan Yang <yangzy@marvell.com>, Tim Song <songtao@marvell.com>, Cathy Luo <cluo@marvell.com>, James Cao <jcao@marvell.com>, Ganapathi Bhat <gbhat@marvell.com>, Xu Wang <xwang4@marvell.com>, Bob Tan <tanbo@marvell.com>, Xinming Hu <huxm@marvell.com>, Amitkumar Karwar <akarwar@marvell.com>
+To: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms+renesas@verge.net.au>, linux-mmc <linux-mmc@vger.kernel.org>, Marek Vasut <marek.vasut+renesas@gmail.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 
-Currently sdio device drivers need to prepare a big continuous
-physical memory for large data transfer. mmc stack will construct
-scatter/gather buffer list to make use of ADMA2.
 
-According to the sdio host controller specification version 4.00
-chapter 1.13.2, sdio device drivers have the ability to construct
-scatter/gather DMA buffer list. In this way, they do not need to allocate
-big memory.
+--nfa7ghjlplwohzr6
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-This patch refactors current sdio command 53 wrapper mmc_io_rw_extended,
-so that it can accept external scatter/gather buffer list from its caller,
-such as the sdio device driver. This patch is very useful on some embedded
-systems where large memory allocation fails sometimes. It gives 10 to 15%
-better throughput performance compared to a case in which small single
-data transfers are done.
 
-Signed-off-by: Xinming Hu <huxm@marvell.com>
-Signed-off-by: Amitkumar Karwar <akarwar@marvell.com>
----
-v4: same as v3/v2/v1
-v5: rebased on latest codebase
----
- drivers/mmc/core/sdio_io.c    | 22 ++++++++++++++++--
- drivers/mmc/core/sdio_ops.c   | 53 +++++++++++++++++++++++++++++++++++++++----
- drivers/mmc/core/sdio_ops.h   |  3 ++-
- include/linux/mmc/sdio_func.h |  6 +++++
- 4 files changed, 76 insertions(+), 8 deletions(-)
+> If we use "tmio_mmc" prefix (like "dw_mmc"),
+>=20
+> # core
+> obj-$(CONFIG_MMC_TMIO)          +=3D tmio_mmc.o
+> # TMIO-builtin MMC
+> obj-$(CONFIG_MMC_TMIO_TMIO)     +=3D tmio_mmc_tmio.o
+> # Reneses
+> obj-$(CONFIG_MMC_TMIO_SDHI)     +=3D tmio_mmc_sdhi.o
+> # UniPhier
+> obj-$(CONFIG_MMC_TMIO_UNIPHIER) +=3D tmio_mmc_uniphier.o
+>=20
+>=20
+> tmio_mmc_tmio.o  is a crazy name, but the syntax is clear.
+>=20
+> The first "tmio_mmc"  means the IP name
+> (since we decide this is the right name)
+>=20
+> The second "tmio" is the platform name
+> the comes from the TMIO MFD.
 
-diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
-index 4806521..6046511 100644
---- a/drivers/mmc/core/sdio_io.c
-+++ b/drivers/mmc/core/sdio_io.c
-@@ -327,7 +327,7 @@ static int sdio_io_rw_ext_helper(struct sdio_func *func, int write,
- 			size = blocks * func->cur_blksize;
- 
- 			ret = mmc_io_rw_extended(func->card, write,
--				func->num, addr, incr_addr, buf,
-+				func->num, addr, incr_addr, false, buf,
- 				blocks, func->cur_blksize);
- 			if (ret)
- 				return ret;
-@@ -345,7 +345,7 @@ static int sdio_io_rw_ext_helper(struct sdio_func *func, int write,
- 
- 		/* Indicate byte mode by setting "blocks" = 0 */
- 		ret = mmc_io_rw_extended(func->card, write, func->num, addr,
--			 incr_addr, buf, 0, size);
-+			 incr_addr, false, buf, 0, size);
- 		if (ret)
- 			return ret;
- 
-@@ -513,6 +513,24 @@ int sdio_writesb(struct sdio_func *func, unsigned int addr, void *src,
- }
- EXPORT_SYMBOL_GPL(sdio_writesb);
- 
-+int sdio_readsb_sg_enh(struct sdio_func *func, unsigned int addr,
-+		       struct sg_table *dst)
-+{
-+	return mmc_io_rw_extended(func->card, 0, func->num,
-+				  addr, 0, true,
-+				  dst, 0, func->cur_blksize);
-+}
-+EXPORT_SYMBOL_GPL(sdio_readsb_sg_enh);
-+
-+int sdio_writesb_sg_enh(struct sdio_func *func, unsigned int addr,
-+			struct sg_table *src)
-+{
-+	return mmc_io_rw_extended(func->card, 1, func->num,
-+				  addr, 0, true,
-+				  src, 0, func->cur_blksize);
-+}
-+EXPORT_SYMBOL_GPL(sdio_writesb_sg_enh);
-+
- /**
-  *	sdio_readw - read a 16 bit integer from a SDIO function
-  *	@func: SDIO function to access
-diff --git a/drivers/mmc/core/sdio_ops.c b/drivers/mmc/core/sdio_ops.c
-index abaaba3..2310a2a 100644
---- a/drivers/mmc/core/sdio_ops.c
-+++ b/drivers/mmc/core/sdio_ops.c
-@@ -115,16 +115,39 @@ int mmc_io_rw_direct(struct mmc_card *card, int write, unsigned fn,
- 	return mmc_io_rw_direct_host(card->host, write, fn, addr, in, out);
- }
- 
-+/**
-+ *     mmc_io_rw_extended - wrapper for sdio command 53 read/write operation
-+ *     @card: destination device for read/write
-+ *     @write: zero indcate read, non-zero indicate write.
-+ *     @fn: SDIO function to access
-+ *     @addr: address of (single byte) FIFO
-+ *     @incr_addr: set to 1 indicate read or write multiple bytes
-+		of data to/from an IO register address that
-+		increment by 1 after each operation.
-+ *     @sg_enhance: if set true, the caller of this function will
-+		prepare scatter gather dma buffer list.
-+ *     @buf: buffer that contains the data to write. if sg_enhance
-+		is set, it point to SG dma buffer list.
-+ *     @blocks: number of blocks of data transfer.
-+		if set zero, indicate byte mode
-+		if set non-zero, indicate block mode
-+		if sg_enhance is set, this parameter will not be used.
-+ *     @blksz: block size for block mode data transfer.
-+ *
-+ */
- int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
--	unsigned addr, int incr_addr, u8 *buf, unsigned blocks, unsigned blksz)
-+		       unsigned int addr, int incr_addr, bool sg_enhance,
-+		       void *buf, unsigned int blocks, unsigned int blksz)
- {
- 	struct mmc_request mrq = {};
- 	struct mmc_command cmd = {};
- 	struct mmc_data data = {};
- 	struct scatterlist sg, *sg_ptr;
- 	struct sg_table sgtable;
-+	struct sg_table *sgtable_external;
- 	unsigned int nents, left_size, i;
- 	unsigned int seg_size = card->host->max_seg_size;
-+	unsigned int sg_blocks = 0;
- 
- 	WARN_ON(blksz == 0);
- 
-@@ -140,16 +163,35 @@ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
- 	cmd.arg |= fn << 28;
- 	cmd.arg |= incr_addr ? 0x04000000 : 0x00000000;
- 	cmd.arg |= addr << 9;
-+	cmd.flags = MMC_RSP_SPI_R5 | MMC_RSP_R5 | MMC_CMD_ADTC;
-+
-+	data.flags = write ? MMC_DATA_WRITE : MMC_DATA_READ;
-+	data.blksz = blksz;
-+
-+	if (sg_enhance) {
-+		sgtable_external = buf;
-+
-+		for_each_sg(sgtable_external->sgl, sg_ptr,
-+			    sgtable_external->nents, i) {
-+			if (sg_ptr->length > card->host->max_seg_size)
-+				return -EINVAL;
-+			sg_blocks += DIV_ROUND_UP(sg_ptr->length, blksz);
-+		}
-+
-+		cmd.arg |= 0x08000000 | sg_blocks;
-+		data.blocks = sg_blocks;
-+		data.sg = sgtable_external->sgl;
-+		data.sg_len = sgtable_external->nents;
-+		goto mmc_data_req;
-+	}
-+
- 	if (blocks == 0)
- 		cmd.arg |= (blksz == 512) ? 0 : blksz;	/* byte mode */
- 	else
- 		cmd.arg |= 0x08000000 | blocks;		/* block mode */
--	cmd.flags = MMC_RSP_SPI_R5 | MMC_RSP_R5 | MMC_CMD_ADTC;
- 
--	data.blksz = blksz;
- 	/* Code in host drivers/fwk assumes that "blocks" always is >=1 */
- 	data.blocks = blocks ? blocks : 1;
--	data.flags = write ? MMC_DATA_WRITE : MMC_DATA_READ;
- 
- 	left_size = data.blksz * data.blocks;
- 	nents = DIV_ROUND_UP(left_size, seg_size);
-@@ -172,11 +214,12 @@ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
- 		sg_init_one(&sg, buf, left_size);
- 	}
- 
-+mmc_data_req:
- 	mmc_set_data_timeout(&data, card);
- 
- 	mmc_wait_for_req(card->host, &mrq);
- 
--	if (nents > 1)
-+	if (!sg_enhance && nents > 1)
- 		sg_free_table(&sgtable);
- 
- 	if (cmd.error)
-diff --git a/drivers/mmc/core/sdio_ops.h b/drivers/mmc/core/sdio_ops.h
-index 96945ca..2d75100 100644
---- a/drivers/mmc/core/sdio_ops.h
-+++ b/drivers/mmc/core/sdio_ops.h
-@@ -23,7 +23,8 @@
- int mmc_io_rw_direct(struct mmc_card *card, int write, unsigned fn,
- 	unsigned addr, u8 in, u8* out);
- int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
--	unsigned addr, int incr_addr, u8 *buf, unsigned blocks, unsigned blksz);
-+		       unsigned int addr, int incr_addr, bool sg_enhance,
-+		       void *buf, unsigned int blocks, unsigned int blksz);
- int sdio_reset(struct mmc_host *host);
- unsigned int mmc_align_data_size(struct mmc_card *card, unsigned int sz);
- void sdio_irq_work(struct work_struct *work);
-diff --git a/include/linux/mmc/sdio_func.h b/include/linux/mmc/sdio_func.h
-index 72d4de4..d36ba47 100644
---- a/include/linux/mmc/sdio_func.h
-+++ b/include/linux/mmc/sdio_func.h
-@@ -14,6 +14,7 @@
- 
- #include <linux/device.h>
- #include <linux/mod_devicetable.h>
-+#include <linux/scatterlist.h>
- 
- #include <linux/mmc/pm.h>
- 
-@@ -136,6 +137,11 @@ extern int sdio_memcpy_fromio(struct sdio_func *func, void *dst,
- extern int sdio_readsb(struct sdio_func *func, void *dst,
- 	unsigned int addr, int count);
- 
-+int sdio_readsb_sg_enh(struct sdio_func *func, unsigned int addr,
-+		       struct sg_table *dst);
-+int sdio_writesb_sg_enh(struct sdio_func *func, unsigned int addr,
-+			struct sg_table *src);
-+
- extern void sdio_writeb(struct sdio_func *func, u8 b,
- 	unsigned int addr, int *err_ret);
- extern void sdio_writew(struct sdio_func *func, u16 b,
--- 
-1.9.1
+Also fine with me.
 
+
+--nfa7ghjlplwohzr6
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAloVLmUACgkQFA3kzBSg
+KbYzdQ//bYQIoocztY1SQsKldVAuJs1Evkq0jkt304ruYFnhGbu2vLwOrPsAYkRj
+cvpF+ZyHmZby/AtN92wmSaZ8Br1/F1u0DURvJNJpT2/LtpF1pWYtTZOprpp+iUgq
+ohwpXUbpEPig5t5i1wN4GBdWQAEX8vU9jh9drLO/cDZlIz85BgVX8tfRKCfdKcb2
+DdQ7h85XqEQnXWxiWpouMnskMgNy2PXKqfQPCCoLv88q0UYvlWCP85cpMrHLg56F
+bN0bM5H6IBQQTMDb2HpGg3ZTlyBkWe3JvrhlAcuU/zmjZsd2jfEONvMXjzkYx/o7
+ei3p8qejI+8fZSqC6R8ek/XzMWkUuck8c14lyNyx2U9gKEuXFdOiuAgdujO4mdAc
+oTM0wjRy6vCVbOuGgh1XJ5Jh7mEmlpY51GrkMuzq/mPX1ByZOZ6ESobXgo9ul+v1
+9Rdf5tR34X6/FRJK0vhn1P4ORSxRN05NarVDuqVDq57gZ40GTrZ6DhbxGUgVDlkp
+y4RpOMpWm7dnkNTf8UdB+Ki0MZugTP8Ib9w46VA0RwMdSRHkEm0hPs41ejSIVi8I
+c3l+ztD+DeVt4lE+FAkgEVthav0GU6hIw8WNiOF2NPIuBYwaSNEUuqMfeZ4Ijq/6
+6qimSFjx+i3w7hRkxLr0pdQKm7skNNdfm5c7EtHTmnNeD9mfxhA=
+=HizX
+-----END PGP SIGNATURE-----
+
+--nfa7ghjlplwohzr6--
