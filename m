@@ -1,153 +1,85 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V14 04/24] mmc: block: Ensure that debugfs files are removed
-Date: Thu, 23 Nov 2017 19:13:09 +0100
-Message-ID: <CAPDyKFpGG2mFH7xDmZjK8DSvDiEBSvuUv+fYhHpYvc-WXQO7_w@mail.gmail.com>
-References: <1511271770-3444-1-git-send-email-adrian.hunter@intel.com> <1511271770-3444-5-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH v2] mmc: sdhci-msm: Optionally wait for signal level changes
+Date: Thu, 23 Nov 2017 19:13:21 +0100
+Message-ID: <CAPDyKFq4neYkd+qNKwRcbwLMY4h7O3OyOUPia4emwGna0L5C9w@mail.gmail.com>
+References: <20171120183451.18966-1-bjorn.andersson@linaro.org> <20171120195647.22677-1-bjorn.andersson@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1511271770-3444-5-git-send-email-adrian.hunter@intel.com>
+In-Reply-To: <20171120195647.22677-1-bjorn.andersson@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Christoph Hellwig <hch@lst.de>
+To: Bjorn Andersson <bjorn.andersson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Stephen Boyd <sboyd@codeaurora.org>, Sahitya Tummala <stummala@codeaurora.org>, Vijay Viswanath <vviswana@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 21 November 2017 at 14:42, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> The card is not necessarily being removed, but the debugfs files must be
-> removed when the driver is removed, otherwise they will continue to exist
-> after unbinding the card from the driver. e.g.
+On 20 November 2017 at 20:56, Bjorn Andersson
+<bjorn.andersson@linaro.org> wrote:
+> Not all instances of the SDCC core supports changing signal voltage and
+> as such will not generate a power interrupt when the software attempts
+> to change the voltage. This results in probing the eMMC on some devices
+> to take over 2 minutes.
 >
->   # echo "mmc1:0001" > /sys/bus/mmc/drivers/mmcblk/unbind
->   # cat /sys/kernel/debug/mmc1/mmc1\:0001/ext_csd
->   [  173.634584] BUG: unable to handle kernel NULL pointer dereference at 0000000000000050
->   [  173.643356] IP: mmc_ext_csd_open+0x5e/0x170
+> Check that the SWITCHABLE_SIGNALING_VOLTAGE bit in MCI_GENERICS is set
+> before waiting for the power interrupt.
 >
-> A complication is that the debugfs_root may have already been removed, so
-> check for that too.
->
-> Fixes: 627c3ccfb46a ("mmc: debugfs: Move block debugfs into block module")
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> Cc: Sahitya Tummala <stummala@codeaurora.org>
+> Cc: Vijay Viswanath <vviswana@codeaurora.org>
+> Fixes: c0309b3803fe ("mmc: sdhci-msm: Add sdhci msm register write APIs which wait for pwr irq")
+> Signed-off-by: Bjorn Andersson <bjorn.andersson@linaro.org>
 
-Thanks, applied for fixes and added a stable tag!
+Thanks, applied for fixes!
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/core/block.c   | 44 +++++++++++++++++++++++++++++++++++++-------
->  drivers/mmc/core/debugfs.c |  1 +
->  2 files changed, 38 insertions(+), 7 deletions(-)
 >
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 4a319ddbd956..ccfa98af1dd3 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -122,6 +122,10 @@ struct mmc_blk_data {
->         struct device_attribute force_ro;
->         struct device_attribute power_ro_lock;
->         int     area_type;
+> The offending patch is part of your v4.15 pull request, so please pick
+> this up for the -rcs.
+>
+> Changes since v1:
+> - Fixed spelling of swichable...
+>
+>  drivers/mmc/host/sdhci-msm.c | 14 ++++++++++++++
+>  1 file changed, 14 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 3fb7d2eec93f..c283291db705 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -29,6 +29,9 @@
+>  #define CORE_VERSION_MAJOR_MASK                (0xf << CORE_VERSION_MAJOR_SHIFT)
+>  #define CORE_VERSION_MINOR_MASK                0xff
+>
+> +#define CORE_MCI_GENERICS              0x70
+> +#define SWITCHABLE_SIGNALING_VOLTAGE   BIT(29)
 > +
-> +       /* debugfs files (only in main mmc_blk_data) */
-> +       struct dentry *status_dentry;
-> +       struct dentry *ext_csd_dentry;
->  };
+>  #define CORE_HC_MODE           0x78
+>  #define HC_MODE_EN             0x1
+>  #define CORE_POWER             0x0
+> @@ -1028,11 +1031,22 @@ static void sdhci_msm_check_power_status(struct sdhci_host *host, u32 req_type)
+>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>         struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+>         bool done = false;
+> +       u32 val;
 >
->  /* Device type for RPMB character devices */
-> @@ -2653,7 +2657,7 @@ static int mmc_ext_csd_release(struct inode *inode, struct file *file)
->         .llseek         = default_llseek,
->  };
+>         pr_debug("%s: %s: request %d curr_pwr_state %x curr_io_level %x\n",
+>                         mmc_hostname(host->mmc), __func__, req_type,
+>                         msm_host->curr_pwr_state, msm_host->curr_io_level);
 >
-> -static int mmc_blk_add_debugfs(struct mmc_card *card)
-> +static int mmc_blk_add_debugfs(struct mmc_card *card, struct mmc_blk_data *md)
->  {
->         struct dentry *root;
->
-> @@ -2663,28 +2667,53 @@ static int mmc_blk_add_debugfs(struct mmc_card *card)
->         root = card->debugfs_root;
->
->         if (mmc_card_mmc(card) || mmc_card_sd(card)) {
-> -               if (!debugfs_create_file("status", S_IRUSR, root, card,
-> -                                        &mmc_dbg_card_status_fops))
-> +               md->status_dentry =
-> +                       debugfs_create_file("status", S_IRUSR, root, card,
-> +                                           &mmc_dbg_card_status_fops);
-> +               if (!md->status_dentry)
->                         return -EIO;
->         }
->
->         if (mmc_card_mmc(card)) {
-> -               if (!debugfs_create_file("ext_csd", S_IRUSR, root, card,
-> -                                        &mmc_dbg_ext_csd_fops))
-> +               md->ext_csd_dentry =
-> +                       debugfs_create_file("ext_csd", S_IRUSR, root, card,
-> +                                           &mmc_dbg_ext_csd_fops);
-> +               if (!md->ext_csd_dentry)
->                         return -EIO;
->         }
->
->         return 0;
->  }
->
-> +static void mmc_blk_remove_debugfs(struct mmc_card *card,
-> +                                  struct mmc_blk_data *md)
-> +{
-> +       if (!card->debugfs_root)
+> +       /*
+> +        * The power interrupt will not be generated for signal voltage
+> +        * switches if SWITCHABLE_SIGNALING_VOLTAGE in MCI_GENERICS is not set.
+> +        */
+> +       val = readl(msm_host->core_mem + CORE_MCI_GENERICS);
+> +       if ((req_type & REQ_IO_HIGH || req_type & REQ_IO_LOW) &&
+> +           !(val & SWITCHABLE_SIGNALING_VOLTAGE)) {
 > +               return;
-> +
-> +       if (!IS_ERR_OR_NULL(md->status_dentry)) {
-> +               debugfs_remove(md->status_dentry);
-> +               md->status_dentry = NULL;
 > +       }
 > +
-> +       if (!IS_ERR_OR_NULL(md->ext_csd_dentry)) {
-> +               debugfs_remove(md->ext_csd_dentry);
-> +               md->ext_csd_dentry = NULL;
-> +       }
-> +}
->
->  #else
->
-> -static int mmc_blk_add_debugfs(struct mmc_card *card)
-> +static int mmc_blk_add_debugfs(struct mmc_card *card, struct mmc_blk_data *md)
->  {
->         return 0;
->  }
->
-> +static void mmc_blk_remove_debugfs(struct mmc_card *card,
-> +                                  struct mmc_blk_data *md)
-> +{
-> +}
-> +
->  #endif /* CONFIG_DEBUG_FS */
->
->  static int mmc_blk_probe(struct mmc_card *card)
-> @@ -2724,7 +2753,7 @@ static int mmc_blk_probe(struct mmc_card *card)
->         }
->
->         /* Add two debugfs entries */
-> -       mmc_blk_add_debugfs(card);
-> +       mmc_blk_add_debugfs(card, md);
->
->         pm_runtime_set_autosuspend_delay(&card->dev, 3000);
->         pm_runtime_use_autosuspend(&card->dev);
-> @@ -2750,6 +2779,7 @@ static void mmc_blk_remove(struct mmc_card *card)
->  {
->         struct mmc_blk_data *md = dev_get_drvdata(&card->dev);
->
-> +       mmc_blk_remove_debugfs(card, md);
->         mmc_blk_remove_parts(card, md);
->         pm_runtime_get_sync(&card->dev);
->         mmc_claim_host(card->host);
-> diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
-> index 01e459a34f33..0f4a7d7b2626 100644
-> --- a/drivers/mmc/core/debugfs.c
-> +++ b/drivers/mmc/core/debugfs.c
-> @@ -314,4 +314,5 @@ void mmc_add_card_debugfs(struct mmc_card *card)
->  void mmc_remove_card_debugfs(struct mmc_card *card)
->  {
->         debugfs_remove_recursive(card->debugfs_root);
-> +       card->debugfs_root = NULL;
->  }
+>         /*
+>          * The IRQ for request type IO High/LOW will be generated when -
+>          * there is a state change in 1.8V enable bit (bit 3) of
 > --
-> 1.9.1
+> 2.15.0
 >
