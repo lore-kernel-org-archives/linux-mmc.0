@@ -1,118 +1,68 @@
 From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: Re: [PATCH] mmc: renesas_sdhi: add missing MODULE_DESCRIPTION/AUTHOR/LICENSE
-Date: Sat, 25 Nov 2017 00:42:09 +0900
-Message-ID: <CAK7LNASHxODKVztu8VsWfqPdYC5gaDBHuWp4M_VjTEMJcVRH4w@mail.gmail.com>
-References: <20171120213236.53266-1-jc@linux.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Subject: [PATCH v2 10/22] mmc: tmio: support IP-builtin card detection logic
+Date: Sat, 25 Nov 2017 01:24:45 +0900
+Message-ID: <1511540697-27387-11-git-send-email-yamada.masahiro@socionext.com>
+References: <1511540697-27387-1-git-send-email-yamada.masahiro@socionext.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from conssluserg-05.nifty.com ([210.131.2.90]:38198 "EHLO
-        conssluserg-05.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753139AbdKXPnD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Nov 2017 10:43:03 -0500
-In-Reply-To: <20171120213236.53266-1-jc@linux.com>
+Received: from conuserg-11.nifty.com ([210.131.2.78]:61404 "EHLO
+        conuserg-11.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752224AbdKXQZ6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Nov 2017 11:25:58 -0500
+In-Reply-To: <1511540697-27387-1-git-send-email-yamada.masahiro@socionext.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jesse Chan <jc@linux.com>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: linux-mmc@vger.kernel.org, Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-renesas-soc@vger.kernel.org, Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 
-2017-11-21 6:32 GMT+09:00 Jesse Chan <jc@linux.com>:
-> This change resolves a new compile-time warning
-> when built as a loadable module:
->
-> WARNING: modpost: missing MODULE_LICENSE() in drivers/mmc/host/renesas_sdhi_core.o
-> see include/linux/module.h for more information
->
-> This adds the license as "GPL v2", which matches the header of the file.
->
-> MODULE_DESCRIPTION and MODULE_AUTHOR are also added.
->
-> Signed-off-by: Jesse Chan <jc@linux.com>
-> ---
->  drivers/mmc/host/renesas_sdhi.h               | 1 +
->  drivers/mmc/host/renesas_sdhi_core.c          | 5 +++++
->  drivers/mmc/host/renesas_sdhi_internal_dmac.c | 1 -
->  drivers/mmc/host/renesas_sdhi_sys_dmac.c      | 1 -
->  4 files changed, 6 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/renesas_sdhi.h b/drivers/mmc/host/renesas_sdhi.h
-> index b9dfea5d8193..090cf86d7cd3 100644
-> --- a/drivers/mmc/host/renesas_sdhi.h
-> +++ b/drivers/mmc/host/renesas_sdhi.h
-> @@ -13,6 +13,7 @@
->  #define RENESAS_SDHI_H
->
->  #include <linux/platform_device.h>
-> +#include <linux/module.h>
->  #include "tmio_mmc.h"
->
->  struct renesas_sdhi_scc {
+A card detect GPIO is set up only for platforms with "cd-gpios"
+DT property or TMIO_MMC_USE_GPIO_CD flag.  However, the driver
+core always uses mmc_gpio_get_cd, which just fails with -ENOSYS
+if ctx->cd_gpio is unset.
 
+The bit 5 of the status register provides the current signal level
+of the CD line.  Allow to use it if the GPIO is unused.
 
+Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+---
 
-Why did you move <linux/module.h> to this header?
+Changes in v2: None
 
-I do not see anything that requires <linux/module.h>
-in this header.
+ drivers/mmc/host/tmio_mmc_core.c | 15 ++++++++++++++-
+ 1 file changed, 14 insertions(+), 1 deletion(-)
 
-
-
-> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-> index fcf7235d5742..0a0daa7a342f 100644
-> --- a/drivers/mmc/host/renesas_sdhi_core.c
-> +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> @@ -667,3 +667,8 @@ int renesas_sdhi_remove(struct platform_device *pdev)
->         return 0;
->  }
->  EXPORT_SYMBOL_GPL(renesas_sdhi_remove);
-> +
-> +MODULE_DESCRIPTION("Renesas SDHI driver");
-> +MODULE_AUTHOR("Phil Blundell <pb@handhelds.org>");
-> +MODULE_AUTHOR("Samuel Ortiz <sameo@openedhand.com>");
-> +MODULE_LICENSE("GPL v2");
-
-
-Including <linux/module.h> from this file is fine.
-
-
-
-
-
-
-> diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-> index 41cbe84c1d18..a9b452b42fac 100644
-> --- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-> +++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-> @@ -15,7 +15,6 @@
->  #include <linux/mfd/tmio.h>
->  #include <linux/mmc/host.h>
->  #include <linux/mod_devicetable.h>
-> -#include <linux/module.h>
->  #include <linux/pagemap.h>
->  #include <linux/scatterlist.h>
->  #include <linux/sys_soc.h>
-> diff --git a/drivers/mmc/host/renesas_sdhi_sys_dmac.c b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-> index 9ab10436e4b8..fe6a09f14682 100644
-> --- a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-> +++ b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-> @@ -17,7 +17,6 @@
->  #include <linux/mfd/tmio.h>
->  #include <linux/mmc/host.h>
->  #include <linux/mod_devicetable.h>
-> -#include <linux/module.h>
->  #include <linux/of_device.h>
->  #include <linux/pagemap.h>
->  #include <linux/scatterlist.h>
-> --
-> 2.14.1
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
+diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+index 610f26f..b51bb06 100644
+--- a/drivers/mmc/host/tmio_mmc_core.c
++++ b/drivers/mmc/host/tmio_mmc_core.c
+@@ -1087,6 +1087,19 @@ static int tmio_mmc_get_ro(struct mmc_host *mmc)
+ 	return ret;
+ }
+ 
++static int tmio_mmc_get_cd(struct mmc_host *mmc)
++{
++	struct tmio_mmc_host *host = mmc_priv(mmc);
++	int ret;
++
++	ret = mmc_gpio_get_cd(mmc);
++	if (ret >= 0)
++		return ret;
++
++	return !!(sd_ctrl_read16_and_16_as_32(host, CTL_STATUS) &
++							TMIO_STAT_SIGSTATE);
++}
++
+ static int tmio_multi_io_quirk(struct mmc_card *card,
+ 			       unsigned int direction, int blk_size)
+ {
+@@ -1102,7 +1115,7 @@ static const struct mmc_host_ops tmio_mmc_ops = {
+ 	.request	= tmio_mmc_request,
+ 	.set_ios	= tmio_mmc_set_ios,
+ 	.get_ro         = tmio_mmc_get_ro,
+-	.get_cd		= mmc_gpio_get_cd,
++	.get_cd		= tmio_mmc_get_cd,
+ 	.enable_sdio_irq = tmio_mmc_enable_sdio_irq,
+ 	.multi_io_quirk	= tmio_multi_io_quirk,
+ 	.hw_reset	= tmio_mmc_hw_reset,
 -- 
-Best Regards
-Masahiro Yamada
+2.7.4
+
