@@ -1,156 +1,65 @@
-From: Shah Nehal-Bakulchandra <Nehal-Bakulchandra.Shah@amd.com>
-Subject: [PATCH v4] mmc: sdhci-acpi: Add support for ACPI HID of AMD Controller with HS400
-Date: Fri, 24 Nov 2017 15:52:35 +0530
-Message-ID: <1511518955-29641-1-git-send-email-Nehal-Bakulchandra.Shah@amd.com>
+From: Jiri Slaby <jslaby@suse.cz>
+Subject: Re: sdhci broke in 4.14 [was: MMC fixes for v.4.14-rc4]
+Date: Fri, 24 Nov 2017 16:15:58 +0100
+Message-ID: <1861ba33-1d08-ef18-8208-174942be5395@suse.cz>
+References: <1507361610-31577-1-git-send-email-ulf.hansson@linaro.org>
+ <2248b8b6-a80f-52ef-943f-54c1351d5a36@suse.cz>
+ <CAPDyKFrzVaE=upRbJ+sq2rRcR1uitw2QEvTzt=pjtoNh1bij9Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2nam03on0073.outbound.protection.outlook.com ([104.47.42.73]:35424
-        "EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1753247AbdKXKXJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 24 Nov 2017 05:23:09 -0500
+Received: from mail-wm0-f43.google.com ([74.125.82.43]:37424 "EHLO
+        mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751590AbdKXPQC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Nov 2017 10:16:02 -0500
+In-Reply-To: <CAPDyKFrzVaE=upRbJ+sq2rRcR1uitw2QEvTzt=pjtoNh1bij9Q@mail.gmail.com>
+Content-Language: en-GB
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org, adrian.hunter@intel.com
-Cc: linux-mmc@vger.kernel.org, Shyam-sundar.S-k@amd.com, Sandeep.Singh@amd.com, Nitesh-kumar.Agrawal@amd.com, Shah Nehal-Bakulchandra <Nehal-bakulchandra.Shah@amd.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Linus <torvalds@linux-foundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Geert Uytterhoeven <geert+renesas@glider.be>, Konrad Rzeszutek Wilk <konrad@kernel.org>
 
-From: Shah Nehal-Bakulchandra <Nehal-bakulchandra.Shah@amd.com>
+On 11/21/2017, 04:08 PM, Ulf Hansson wrote:
+> Subject: [PATCH] mmc: sdhci: Fix bounce buffer overflow
+...
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+...
+> @@ -3651,22 +3652,29 @@ int sdhci_setup_host(struct sdhci_host *host)
+>         spin_lock_init(&host->lock);
+> 
+>         /*
+> +        * Maximum number of sectors in one transfer. Limited by SDMA boundary
+> +        * size (512KiB). Note some tuning modes impose a 4MiB limit, but this
+> +        * is less anyway.
+> +        */
+> +       mmc->max_req_size = 524288;
+> +
+> +       /*
+>          * Maximum number of segments. Depends on if the hardware
+>          * can do scatter/gather or not.
+>          */
+> -       if (host->flags & SDHCI_USE_ADMA)
+> +       if (host->flags & SDHCI_USE_ADMA) {
+>                 mmc->max_segs = SDHCI_MAX_SEGS;
+> -       else if (host->flags & SDHCI_USE_SDMA)
+> +       } else if (host->flags & SDHCI_USE_SDMA) {
+>                 mmc->max_segs = 1;
+> -       else /* PIO */
+> +               if (swiotlb_max_segment()) {
+> +                       unsigned int max_req_size = (1 << IO_TLB_SHIFT) *
+> +                                               IO_TLB_SEGSIZE;
+> +                       mmc->max_req_size = min(mmc->max_req_size,
+> +                                               max_req_size);
+> +               }
+> +       } else { /* PIO */
+>                 mmc->max_segs = SDHCI_MAX_SEGS;
 
-This patch supports HS400 for AMD upcoming emmc 5.0 controller.
-HS400 and HS200 mode requires hardware work around also. This patch
-adds the quirks for the same.
+It seems to work fine. FWIW the debug output is:
+[    0.708312] mmc0: max_segs=1 max_req_size=262144 h->flags=00004001
 
-Signed-off-by: Nehal-bakulchandra Shah <Nehal-bakulchandra.Shah@amd.com>
----
-
-Changes since v1:(https://patchwork.kernel.org/patch/9813945/)
-*Reworked on review comments received which has the following:
-->Created amd probe slot function.
-->Reduce mmc core dependency changes
-->Fix some alignment problems.
- 
-Changes since v2:(https://patchwork.kernel.org/patch/10001487/)
-->Implemented set_ios method as suggested by Adrian.
-->completely removed mmc core dependencies in the patch.
-->moved AMD DLL register definitions to sdhci-acpi.c
-
-Changes since v3:(https://patchwork.kernel.org/patch/10052811/)
-->Minor alignment changes suggested by Adrain 
-
- drivers/mmc/host/sdhci-acpi.c | 78 +++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 78 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index ac678e9..0b968e6 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -49,6 +49,8 @@
- #endif
- 
- #include "sdhci.h"
-+/* AMD sdhci reset dll register. */
-+#define SDHCI_AMD_RESET_DLL_REGISTER    0x908
- 
- enum {
- 	SDHCI_ACPI_SD_CD		= BIT(0),
-@@ -370,6 +372,80 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_qcom_sd = {
- 	.caps    = MMC_CAP_NONREMOVABLE,
- };
- 
-+static int amd_select_drive_strength(struct mmc_card *card,
-+				     unsigned int max_dtr, int host_drv,
-+				     int card_drv, int *drv_type)
-+{
-+	return MMC_SET_DRIVER_TYPE_A;
-+}
-+
-+static void sdhci_acpi_amd_hs400_dll(struct sdhci_host *host)
-+{
-+	/* AMD Platform requires dll setting */
-+	sdhci_writel(host, 0x40003210, SDHCI_AMD_RESET_DLL_REGISTER);
-+	usleep_range(10, 20);
-+	sdhci_writel(host, 0x40033210, SDHCI_AMD_RESET_DLL_REGISTER);
-+}
-+
-+/*
-+ * For AMD Platform it is required to disable the tuning
-+ * bit first and controller is required to bring to HS Mode from HS200
-+ * mode.Later enable tuning bit to bring to HS400 mode.
-+ */
-+static void amd_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	unsigned int old_timing = host->timing;
-+
-+	sdhci_set_ios(mmc, ios);
-+	if (old_timing == MMC_TIMING_MMC_HS200 &&
-+	    ios->timing == MMC_TIMING_MMC_HS)
-+		sdhci_writew(host, 0x9, SDHCI_HOST_CONTROL2);
-+	if (old_timing != MMC_TIMING_MMC_HS400 &&
-+	    ios->timing == MMC_TIMING_MMC_HS400) {
-+		sdhci_writew(host, 0x80, SDHCI_HOST_CONTROL2);
-+		sdhci_acpi_amd_hs400_dll(host);
-+	}
-+}
-+
-+static const struct sdhci_ops sdhci_acpi_ops_amd = {
-+	.set_clock	= sdhci_set_clock,
-+	.set_bus_width	= sdhci_set_bus_width,
-+	.reset		= sdhci_reset,
-+	.set_uhs_signaling = sdhci_set_uhs_signaling,
-+};
-+
-+static const struct sdhci_acpi_chip sdhci_acpi_chip_amd = {
-+	.ops = &sdhci_acpi_ops_amd,
-+};
-+
-+static int sdhci_acpi_emmc_amd_probe_slot(struct platform_device *pdev,
-+					  const char *hid, const char *uid)
-+{
-+	struct sdhci_acpi_host *c = platform_get_drvdata(pdev);
-+	struct sdhci_host *host   = c->host;
-+
-+	sdhci_read_caps(host);
-+	if (host->caps1 & SDHCI_SUPPORT_DDR50)
-+		host->mmc->caps = MMC_CAP_1_8V_DDR;
-+
-+	if ((host->caps1 & SDHCI_SUPPORT_SDR104) &&
-+	    (host->mmc->caps & MMC_CAP_1_8V_DDR))
-+		host->mmc->caps2 = MMC_CAP2_HS400_1_8V;
-+
-+	host->mmc_host_ops.select_drive_strength = amd_select_drive_strength;
-+	host->mmc_host_ops.set_ios = amd_set_ios;
-+	return 0;
-+}
-+
-+static const struct sdhci_acpi_slot sdhci_acpi_slot_amd_emmc = {
-+	.chip   = &sdhci_acpi_chip_amd,
-+	.caps   = MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE,
-+	.quirks = SDHCI_QUIRK_32BIT_DMA_ADDR | SDHCI_QUIRK_32BIT_DMA_SIZE |
-+			SDHCI_QUIRK_32BIT_ADMA_SIZE,
-+	.probe_slot     = sdhci_acpi_emmc_amd_probe_slot,
-+};
-+
- struct sdhci_acpi_uid_slot {
- 	const char *hid;
- 	const char *uid;
-@@ -393,6 +469,7 @@ static const struct sdhci_acpi_uid_slot sdhci_acpi_uids[] = {
- 	{ "PNP0D40"  },
- 	{ "QCOM8051", NULL, &sdhci_acpi_slot_qcom_sd_3v },
- 	{ "QCOM8052", NULL, &sdhci_acpi_slot_qcom_sd },
-+	{ "AMDI0040", NULL, &sdhci_acpi_slot_amd_emmc },
- 	{ },
- };
- 
-@@ -409,6 +486,7 @@ static const struct acpi_device_id sdhci_acpi_ids[] = {
- 	{ "PNP0D40"  },
- 	{ "QCOM8051" },
- 	{ "QCOM8052" },
-+	{ "AMDI0040" },
- 	{ },
- };
- MODULE_DEVICE_TABLE(acpi, sdhci_acpi_ids);
+thanks,
 -- 
-2.7.4
-
+js
+suse labs
