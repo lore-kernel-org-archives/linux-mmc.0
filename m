@@ -1,68 +1,68 @@
 From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: [PATCH v2 10/22] mmc: tmio: support IP-builtin card detection logic
-Date: Sat, 25 Nov 2017 01:24:45 +0900
-Message-ID: <1511540697-27387-11-git-send-email-yamada.masahiro@socionext.com>
-References: <1511540697-27387-1-git-send-email-yamada.masahiro@socionext.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from conuserg-11.nifty.com ([210.131.2.78]:61404 "EHLO
-        conuserg-11.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752224AbdKXQZ6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Nov 2017 11:25:58 -0500
-In-Reply-To: <1511540697-27387-1-git-send-email-yamada.masahiro@socionext.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [PATCH v2 00/22] mmc: tmio: various fixes and cleanups
+Date: Sat, 25 Nov 2017 01:24:35 +0900
+Message-ID: <1511540697-27387-1-git-send-email-yamada.masahiro@socionext.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Wolfram Sang <wsa+renesas@sang-engineering.com>
 Cc: Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-renesas-soc@vger.kernel.org, Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+List-Id: linux-mmc@vger.kernel.org
 
-A card detect GPIO is set up only for platforms with "cd-gpios"
-DT property or TMIO_MMC_USE_GPIO_CD flag.  However, the driver
-core always uses mmc_gpio_get_cd, which just fails with -ENOSYS
-if ctx->cd_gpio is unset.
 
-The bit 5 of the status register provides the current signal level
-of the CD line.  Allow to use it if the GPIO is unused.
+I am working on this IP for Socionext SoCs.
 
-Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
----
+I was hit by several issues, and noticed various
+clean-up candidates.
 
-Changes in v2: None
+ - Fix and clean-up Kconfig
+ - Fix various card detection problems
+ - Move Renesas private data out of TMIO core
+ - Allow to perform platform-specific settings before MMC host starts
+ - Fix weird IRQ handling
 
- drivers/mmc/host/tmio_mmc_core.c | 15 ++++++++++++++-
- 1 file changed, 14 insertions(+), 1 deletion(-)
+I am getting more and more patches for TMIO.
+I put all in a single series to clarify the patch order.
 
-diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-index 610f26f..b51bb06 100644
---- a/drivers/mmc/host/tmio_mmc_core.c
-+++ b/drivers/mmc/host/tmio_mmc_core.c
-@@ -1087,6 +1087,19 @@ static int tmio_mmc_get_ro(struct mmc_host *mmc)
- 	return ret;
- }
- 
-+static int tmio_mmc_get_cd(struct mmc_host *mmc)
-+{
-+	struct tmio_mmc_host *host = mmc_priv(mmc);
-+	int ret;
-+
-+	ret = mmc_gpio_get_cd(mmc);
-+	if (ret >= 0)
-+		return ret;
-+
-+	return !!(sd_ctrl_read16_and_16_as_32(host, CTL_STATUS) &
-+							TMIO_STAT_SIGSTATE);
-+}
-+
- static int tmio_multi_io_quirk(struct mmc_card *card,
- 			       unsigned int direction, int blk_size)
- {
-@@ -1102,7 +1115,7 @@ static const struct mmc_host_ops tmio_mmc_ops = {
- 	.request	= tmio_mmc_request,
- 	.set_ios	= tmio_mmc_set_ios,
- 	.get_ro         = tmio_mmc_get_ro,
--	.get_cd		= mmc_gpio_get_cd,
-+	.get_cd		= tmio_mmc_get_cd,
- 	.enable_sdio_irq = tmio_mmc_enable_sdio_irq,
- 	.multi_io_quirk	= tmio_multi_io_quirk,
- 	.hw_reset	= tmio_mmc_hw_reset,
+1, 2, 4, 5, 6, 7 were already acked or reviewed by Wolfram Sang.
+
+
+Masahiro Yamada (22):
+  mmc: renesas_sdhi: consolidate DMAC CONFIG options
+  mmc: renesas_sdhi: remove wrong depends on to enable compile test
+  mmc: renesas_sdhi: remove eprobe jump label
+  mmc: tmio: set tmio_mmc_host to driver data
+  mmc: tmio: use devm_ioremap_resource() instead of devm_ioremap()
+  mmc: tmio: move mmc_host_ops to struct tmio_mmc_host from static data
+  mmc: tmio, renesas_sdhi: set mmc_host_ops hooks directly
+  mmc: tmio: move mmc_gpio_request_cd() before mmc_add_host()
+  mmc: tmio: use mmc_can_gpio_cd() instead of checking
+    TMIO_MMC_USE_GPIO_CD
+  mmc: tmio: support IP-builtin card detection logic
+  mmc: renesas_sdhi: remove always false condition
+  mmc: tmio,renesas_sdhi: move struct tmio_mmc_dma to renesas_sdhi.h
+  mmc: tmio,renesas_sdhi: move Renesas-specific DMA data to
+    renesas_sdhi.h
+  mmc: tmio,renesas_sdhi: move ssc_tappos to renesas_sdhi.h
+  mmc: tmio: change bus_shift to unsigned int
+  mmc: tmio: fix never-detected card insertion bug
+  mmc: tmio: move TMIO_MASK_{READOP,WRITEOP} handling to correct place
+  mmc: tmio: remove useless TMIO_MASK_CMD handling in
+    tmio_mmc_host_probe()
+  mmc: tmio: ioremap memory resource in tmio_mmc_host_alloc()
+  mmc: tmio: move clk_enable/disable out of tmio_mmc_host_probe()
+  mmc: tmio: move {tmio_}mmc_of_parse() to tmio_mmc_host_alloc()
+  mmc: tmio: remove dma_ops from tmio_mmc_host_probe() argument
+
+ drivers/mmc/host/Kconfig                      |   5 +-
+ drivers/mmc/host/Makefile                     |   8 +-
+ drivers/mmc/host/renesas_sdhi.h               |  22 ++++
+ drivers/mmc/host/renesas_sdhi_core.c          |  49 ++++-----
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c |  14 ++-
+ drivers/mmc/host/renesas_sdhi_sys_dmac.c      |  35 +++---
+ drivers/mmc/host/tmio_mmc.c                   |  23 ++--
+ drivers/mmc/host/tmio_mmc.h                   |  23 +---
+ drivers/mmc/host/tmio_mmc_core.c              | 149 +++++++++++++-------------
+ 9 files changed, 170 insertions(+), 158 deletions(-)
+
 -- 
 2.7.4
-
