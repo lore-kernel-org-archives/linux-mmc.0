@@ -1,587 +1,156 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V14 13/24] mmc: block: Add blk-mq support
-Date: Fri, 24 Nov 2017 11:12:53 +0100
-Message-ID: <CAPDyKFrA5NVQ2Ei7rf7o7N0iHCHLHkntObnPP9hjToKrLr-TAg@mail.gmail.com>
-References: <1511271770-3444-1-git-send-email-adrian.hunter@intel.com> <1511271770-3444-14-git-send-email-adrian.hunter@intel.com>
+From: Shah Nehal-Bakulchandra <Nehal-Bakulchandra.Shah@amd.com>
+Subject: [PATCH v4] mmc: sdhci-acpi: Add support for ACPI HID of AMD Controller with HS400
+Date: Fri, 24 Nov 2017 15:52:35 +0530
+Message-ID: <1511518955-29641-1-git-send-email-Nehal-Bakulchandra.Shah@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <1511271770-3444-14-git-send-email-adrian.hunter@intel.com>
-Sender: linux-block-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Christoph Hellwig <hch@lst.de>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-by2nam03on0073.outbound.protection.outlook.com ([104.47.42.73]:35424
+        "EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1753247AbdKXKXJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 24 Nov 2017 05:23:09 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org, adrian.hunter@intel.com
+Cc: linux-mmc@vger.kernel.org, Shyam-sundar.S-k@amd.com, Sandeep.Singh@amd.com, Nitesh-kumar.Agrawal@amd.com, Shah Nehal-Bakulchandra <Nehal-bakulchandra.Shah@amd.com>
 
-[...]
+From: Shah Nehal-Bakulchandra <Nehal-bakulchandra.Shah@amd.com>
 
-> +/* Single sector read during recovery */
-> +static void mmc_blk_ss_read(struct mmc_queue *mq, struct request *req)
+This patch supports HS400 for AMD upcoming emmc 5.0 controller.
+HS400 and HS200 mode requires hardware work around also. This patch
+adds the quirks for the same.
 
-Nitpick: I think mmc_blk_read_single() would be better as it is a more
-clear name. Would you mind changing it?
+Signed-off-by: Nehal-bakulchandra Shah <Nehal-bakulchandra.Shah@amd.com>
+---
 
-> +{
-> +       struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
-> +       blk_status_t status;
-> +
-> +       while (1) {
-> +               mmc_blk_rw_rq_prep(mqrq, mq->card, 1, mq);
-> +
-> +               mmc_wait_for_req(mq->card->host, &mqrq->brq.mrq);
-> +
-> +               /*
-> +                * Not expecting command errors, so just give up in that case.
-> +                * If there are retries remaining, the request will get
-> +                * requeued.
-> +                */
-> +               if (mqrq->brq.cmd.error)
-> +                       return;
+Changes since v1:(https://patchwork.kernel.org/patch/9813945/)
+*Reworked on review comments received which has the following:
+->Created amd probe slot function.
+->Reduce mmc core dependency changes
+->Fix some alignment problems.
+ 
+Changes since v2:(https://patchwork.kernel.org/patch/10001487/)
+->Implemented set_ios method as suggested by Adrian.
+->completely removed mmc core dependencies in the patch.
+->moved AMD DLL register definitions to sdhci-acpi.c
 
-What happens here if the reason to the error is because the card was removed?
+Changes since v3:(https://patchwork.kernel.org/patch/10052811/)
+->Minor alignment changes suggested by Adrain 
 
-I guess next time __blk_err_check() is called from the
-mmc_blk_mq_rw_recovery(), this will be detected and managed?
+ drivers/mmc/host/sdhci-acpi.c | 78 +++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 78 insertions(+)
 
-> +
-> +               if (blk_rq_bytes(req) <= 512)
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index ac678e9..0b968e6 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -49,6 +49,8 @@
+ #endif
+ 
+ #include "sdhci.h"
++/* AMD sdhci reset dll register. */
++#define SDHCI_AMD_RESET_DLL_REGISTER    0x908
+ 
+ enum {
+ 	SDHCI_ACPI_SD_CD		= BIT(0),
+@@ -370,6 +372,80 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_qcom_sd = {
+ 	.caps    = MMC_CAP_NONREMOVABLE,
+ };
+ 
++static int amd_select_drive_strength(struct mmc_card *card,
++				     unsigned int max_dtr, int host_drv,
++				     int card_drv, int *drv_type)
++{
++	return MMC_SET_DRIVER_TYPE_A;
++}
++
++static void sdhci_acpi_amd_hs400_dll(struct sdhci_host *host)
++{
++	/* AMD Platform requires dll setting */
++	sdhci_writel(host, 0x40003210, SDHCI_AMD_RESET_DLL_REGISTER);
++	usleep_range(10, 20);
++	sdhci_writel(host, 0x40033210, SDHCI_AMD_RESET_DLL_REGISTER);
++}
++
++/*
++ * For AMD Platform it is required to disable the tuning
++ * bit first and controller is required to bring to HS Mode from HS200
++ * mode.Later enable tuning bit to bring to HS400 mode.
++ */
++static void amd_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++	unsigned int old_timing = host->timing;
++
++	sdhci_set_ios(mmc, ios);
++	if (old_timing == MMC_TIMING_MMC_HS200 &&
++	    ios->timing == MMC_TIMING_MMC_HS)
++		sdhci_writew(host, 0x9, SDHCI_HOST_CONTROL2);
++	if (old_timing != MMC_TIMING_MMC_HS400 &&
++	    ios->timing == MMC_TIMING_MMC_HS400) {
++		sdhci_writew(host, 0x80, SDHCI_HOST_CONTROL2);
++		sdhci_acpi_amd_hs400_dll(host);
++	}
++}
++
++static const struct sdhci_ops sdhci_acpi_ops_amd = {
++	.set_clock	= sdhci_set_clock,
++	.set_bus_width	= sdhci_set_bus_width,
++	.reset		= sdhci_reset,
++	.set_uhs_signaling = sdhci_set_uhs_signaling,
++};
++
++static const struct sdhci_acpi_chip sdhci_acpi_chip_amd = {
++	.ops = &sdhci_acpi_ops_amd,
++};
++
++static int sdhci_acpi_emmc_amd_probe_slot(struct platform_device *pdev,
++					  const char *hid, const char *uid)
++{
++	struct sdhci_acpi_host *c = platform_get_drvdata(pdev);
++	struct sdhci_host *host   = c->host;
++
++	sdhci_read_caps(host);
++	if (host->caps1 & SDHCI_SUPPORT_DDR50)
++		host->mmc->caps = MMC_CAP_1_8V_DDR;
++
++	if ((host->caps1 & SDHCI_SUPPORT_SDR104) &&
++	    (host->mmc->caps & MMC_CAP_1_8V_DDR))
++		host->mmc->caps2 = MMC_CAP2_HS400_1_8V;
++
++	host->mmc_host_ops.select_drive_strength = amd_select_drive_strength;
++	host->mmc_host_ops.set_ios = amd_set_ios;
++	return 0;
++}
++
++static const struct sdhci_acpi_slot sdhci_acpi_slot_amd_emmc = {
++	.chip   = &sdhci_acpi_chip_amd,
++	.caps   = MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE,
++	.quirks = SDHCI_QUIRK_32BIT_DMA_ADDR | SDHCI_QUIRK_32BIT_DMA_SIZE |
++			SDHCI_QUIRK_32BIT_ADMA_SIZE,
++	.probe_slot     = sdhci_acpi_emmc_amd_probe_slot,
++};
++
+ struct sdhci_acpi_uid_slot {
+ 	const char *hid;
+ 	const char *uid;
+@@ -393,6 +469,7 @@ static const struct sdhci_acpi_uid_slot sdhci_acpi_uids[] = {
+ 	{ "PNP0D40"  },
+ 	{ "QCOM8051", NULL, &sdhci_acpi_slot_qcom_sd_3v },
+ 	{ "QCOM8052", NULL, &sdhci_acpi_slot_qcom_sd },
++	{ "AMDI0040", NULL, &sdhci_acpi_slot_amd_emmc },
+ 	{ },
+ };
+ 
+@@ -409,6 +486,7 @@ static const struct acpi_device_id sdhci_acpi_ids[] = {
+ 	{ "PNP0D40"  },
+ 	{ "QCOM8051" },
+ 	{ "QCOM8052" },
++	{ "AMDI0040" },
+ 	{ },
+ };
+ MODULE_DEVICE_TABLE(acpi, sdhci_acpi_ids);
+-- 
+2.7.4
 
-Shouldn't you check "if (blk_rq_bytes(req) <  512)"? How would you
-otherwise read the last 512 bytes block?
-
-> +                       break;
-> +
-> +               status = mqrq->brq.data.error ? BLK_STS_IOERR : BLK_STS_OK;
-> +
-> +               blk_update_request(req, status, 512);
-
-Shouldn't we actually bail out, unless the error is a data ECC error?
-On the other hand, I guess if it a more severe error, cmd.error will
-anyway be set above!?
-
-One more question, if there is a data error, we may want to try to
-recover by sending a stop command? How do we manage that?
-
-> +       }
-> +
-> +       mqrq->retries = MMC_NO_RETRIES;
-> +}
-> +
-> +static void mmc_blk_mq_rw_recovery(struct mmc_queue *mq, struct request *req)
-> +{
-> +       int type = rq_data_dir(req) == READ ? MMC_BLK_READ : MMC_BLK_WRITE;
-> +       struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
-> +       struct mmc_blk_request *brq = &mqrq->brq;
-> +       struct mmc_blk_data *md = mq->blkdata;
-> +       struct mmc_card *card = mq->card;
-> +       static enum mmc_blk_status status;
-> +
-> +       brq->retune_retry_done = mqrq->retries;
-> +
-> +       status = __mmc_blk_err_check(card, mqrq);
-> +
-> +       mmc_retune_release(card->host);
-> +
-> +       /*
-> +        * Requests are completed by mmc_blk_mq_complete_rq() which sets simple
-> +        * policy:
-> +        * 1. A request that has transferred at least some data is considered
-> +        * successful and will be requeued if there is remaining data to
-> +        * transfer.
-> +        * 2. Otherwise the number of retries is incremented and the request
-> +        * will be requeued if there are remaining retries.
-> +        * 3. Otherwise the request will be errored out.
-> +        * That means mmc_blk_mq_complete_rq() is controlled by bytes_xfered and
-> +        * mqrq->retries. So there are only 4 possible actions here:
-> +        *      1. do not accept the bytes_xfered value i.e. set it to zero
-> +        *      2. change mqrq->retries to determine the number of retries
-> +        *      3. try to reset the card
-> +        *      4. read one sector at a time
-> +        */
-> +       switch (status) {
-> +       case MMC_BLK_SUCCESS:
-> +       case MMC_BLK_PARTIAL:
-> +               /* Reset success, and accept bytes_xfered */
-> +               mmc_blk_reset_success(md, type);
-> +               break;
-> +       case MMC_BLK_CMD_ERR:
-> +               /*
-> +                * For SD cards, get bytes written, but do not accept
-> +                * bytes_xfered if that fails. For MMC cards accept
-> +                * bytes_xfered. Then try to reset. If reset fails then
-> +                * error out the remaining request, otherwise retry
-> +                * once (N.B mmc_blk_reset() will not succeed twice in a
-> +                * row).
-> +                */
-> +               if (mmc_card_sd(card)) {
-> +                       u32 blocks;
-> +                       int err;
-> +
-> +                       err = mmc_sd_num_wr_blocks(card, &blocks);
-> +                       if (err)
-> +                               brq->data.bytes_xfered = 0;
-> +                       else
-> +                               brq->data.bytes_xfered = blocks << 9;
-> +               }
-> +               if (mmc_blk_reset(md, card->host, type))
-> +                       mqrq->retries = MMC_NO_RETRIES;
-> +               else
-> +                       mqrq->retries = MMC_MAX_RETRIES - 1;
-> +               break;
-> +       case MMC_BLK_RETRY:
-> +               /*
-> +                * Do not accept bytes_xfered, but retry up to 5 times,
-> +                * otherwise same as abort.
-> +                */
-> +               brq->data.bytes_xfered = 0;
-> +               if (mqrq->retries < MMC_MAX_RETRIES)
-> +                       break;
-> +               /* Fall through */
-> +       case MMC_BLK_ABORT:
-> +               /*
-> +                * Do not accept bytes_xfered, but try to reset. If
-> +                * reset succeeds, try once more, otherwise error out
-> +                * the request.
-> +                */
-> +               brq->data.bytes_xfered = 0;
-> +               if (mmc_blk_reset(md, card->host, type))
-> +                       mqrq->retries = MMC_NO_RETRIES;
-> +               else
-> +                       mqrq->retries = MMC_MAX_RETRIES - 1;
-> +               break;
-> +       case MMC_BLK_DATA_ERR: {
-> +               int err;
-> +
-> +               /*
-> +                * Do not accept bytes_xfered, but try to reset. If
-> +                * reset succeeds, try once more. If reset fails with
-> +                * ENODEV which means the partition is wrong, then error
-> +                * out the request. Otherwise attempt to read one sector
-> +                * at a time.
-> +                */
-> +               brq->data.bytes_xfered = 0;
-> +               err = mmc_blk_reset(md, card->host, type);
-> +               if (!err) {
-> +                       mqrq->retries = MMC_MAX_RETRIES - 1;
-> +                       break;
-> +               }
-> +               if (err == -ENODEV) {
-> +                       mqrq->retries = MMC_NO_RETRIES;
-> +                       break;
-> +               }
-> +               /* Fall through */
-> +       }
-> +       case MMC_BLK_ECC_ERR:
-> +               /*
-> +                * Do not accept bytes_xfered. If reading more than one
-> +                * sector, try reading one sector at a time.
-> +                */
-> +               brq->data.bytes_xfered = 0;
-> +               /* FIXME: Missing single sector read for large sector size */
-> +               if (brq->data.blocks > 1 && !mmc_large_sector(card)) {
-> +                       /* Redo read one sector at a time */
-> +                       pr_warn("%s: retrying using single block read\n",
-> +                               req->rq_disk->disk_name);
-> +                       mmc_blk_ss_read(mq, req);
-> +               } else {
-> +                       mqrq->retries = MMC_NO_RETRIES;
-> +               }
-> +               break;
-> +       case MMC_BLK_NOMEDIUM:
-> +               /* Do not accept bytes_xfered. Error out the request */
-> +               brq->data.bytes_xfered = 0;
-> +               mqrq->retries = MMC_NO_RETRIES;
-> +               break;
-> +       default:
-> +               /* Do not accept bytes_xfered. Error out the request */
-> +               brq->data.bytes_xfered = 0;
-> +               mqrq->retries = MMC_NO_RETRIES;
-> +               pr_err("%s: Unhandled return value (%d)",
-> +                      req->rq_disk->disk_name, status);
-> +               break;
-> +       }
-> +}
-> +
-
-[...]
-
-> +
-> +static void mmc_blk_mq_poll_completion(struct mmc_queue *mq,
-> +                                      struct request *req)
-> +{
-> +       struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
-> +
-> +       mmc_blk_mq_rw_recovery(mq, req);
-> +
-> +       mmc_blk_urgent_bkops(mq, mqrq);
-> +}
-> +
-> +static void mmc_blk_mq_acct_req_done(struct mmc_queue *mq, struct request *req)
-
-Nitpick: Can we please try to find a better name for this function. I
-don't think "acct" is good abbreviation because, to me, it's not
-self-explaining.
-
-> +{
-> +       struct request_queue *q = req->q;
-> +       unsigned long flags;
-> +       bool put_card;
-> +
-> +       spin_lock_irqsave(q->queue_lock, flags);
-> +
-> +       mq->in_flight[mmc_issue_type(mq, req)] -= 1;
-> +
-> +       put_card = (mmc_tot_in_flight(mq) == 0);
-> +
-> +       spin_unlock_irqrestore(q->queue_lock, flags);
-> +
-> +       if (put_card)
-> +               mmc_put_card(mq->card, &mq->ctx);
-
-I have tried to convince myself that the protection of calling
-mmc_get|put_card() is safe, but I am not sure.
-
-I am wondering whether there could be races for mmc_get|put_card().
-Please see some more related comments below.
-
-[...]
-
-> +static void mmc_blk_mq_req_done(struct mmc_request *mrq)
-> +{
-> +       struct mmc_queue_req *mqrq = container_of(mrq, struct mmc_queue_req,
-> +                                                 brq.mrq);
-> +       struct request *req = mmc_queue_req_to_req(mqrq);
-> +       struct request_queue *q = req->q;
-> +       struct mmc_queue *mq = q->queuedata;
-> +       unsigned long flags;
-> +       bool waiting;
-> +
-> +       spin_lock_irqsave(q->queue_lock, flags);
-> +       mq->complete_req = req;
-> +       mq->rw_wait = false;
-> +       waiting = mq->waiting;
-
-The synchronization methods is one of the most complex part of
-$subject patch, yet also very elegant!
-
-Anyway, would you mind adding some more comments here and there in the
-code, to explain a bit about what goes on and why?
-
-> +       spin_unlock_irqrestore(q->queue_lock, flags);
-> +
-> +       if (waiting)
-> +               wake_up(&mq->wait);
-
-For example, a comment here about: "In case there is a new request
-prepared, leave it to that, to deal with finishing and post processing
-of the request, else schedule a work to do it - and see what comes
-first."
-
-> +       else
-> +               kblockd_schedule_work(&mq->complete_work);
-> +}
-> +
-> +static bool mmc_blk_rw_wait_cond(struct mmc_queue *mq, int *err)
-> +{
-> +       struct request_queue *q = mq->queue;
-> +       unsigned long flags;
-> +       bool done;
-> +
-> +       spin_lock_irqsave(q->queue_lock, flags);
-> +       done = !mq->rw_wait;
-> +       mq->waiting = !done;
-
-Also here it would be nice with some comments about the
-synchronization. I stop from mentioning this from now on, because it
-applies to a couple of more places.
-
-I leave it to you to decide how and where it makes sense to add these
-kind of comments.
-
-> +       spin_unlock_irqrestore(q->queue_lock, flags);
-> +
-> +       return done;
-> +}
-> +
-> +static int mmc_blk_rw_wait(struct mmc_queue *mq, struct request **prev_req)
-> +{
-> +       int err = 0;
-> +
-> +       wait_event(mq->wait, mmc_blk_rw_wait_cond(mq, &err));
-> +
-> +       mmc_blk_mq_complete_prev_req(mq, prev_req);
-> +
-> +       return err;
-> +}
-> +
-> +static int mmc_blk_mq_issue_rw_rq(struct mmc_queue *mq,
-> +                                 struct request *req)
-> +{
-> +       struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
-> +       struct mmc_host *host = mq->card->host;
-> +       struct request *prev_req = NULL;
-> +       int err = 0;
-> +
-> +       mmc_blk_rw_rq_prep(mqrq, mq->card, 0, mq);
-> +
-> +       mqrq->brq.mrq.done = mmc_blk_mq_req_done;
-> +
-> +       mmc_pre_req(host, &mqrq->brq.mrq);
-
-To be honest, using a queue_depth of 64, puzzles me! According to my
-understanding we should use a queue_depth of 2, in case the host
-implements the ->pre|post_req() callbacks, else we should set it to 1.
-
-Although I may be missing some information about how to really use
-this, because for example UBI (mtd) also uses 64 as queue depth!?
-
-My interpretation of the queue_depth is that the blkmq layer will use
-it to understand the maximum number of request a block device are able
-to operate on simultaneously (when having one HW queue), thus the
-number of outstanding dispatched requests for the block evice driver,
-may be as close as possible to the queue_depth, but never above. I may
-be totally wrong about this. :-)
-
-Anyway, then if using a queue_depth of 64, how will you make sure that
-you not end up having > 1 requests being prepared at the same time
-(not counting the one that may be in transfer)?
-
->
-> +       err = mmc_blk_rw_wait(mq, &prev_req);
-> +       if (err)
-> +               goto out_post_req;
-> +
-> +       mq->rw_wait = true;
-> +
-> +       err = mmc_start_request(host, &mqrq->brq.mrq);
-> +
-> +       if (prev_req)
-> +               mmc_blk_mq_post_req(mq, prev_req);
-> +
-> +       if (err) {
-> +               mq->rw_wait = false;
-> +               mmc_retune_release(host);
-> +       }
-> +
-> +out_post_req:
-> +       if (err)
-> +               mmc_post_req(host, &mqrq->brq.mrq, err);
-> +
-> +       return err;
-> +}
-> +
-> +static int mmc_blk_wait_for_idle(struct mmc_queue *mq, struct mmc_host *host)
-> +{
-> +       return mmc_blk_rw_wait(mq, NULL);
-> +}
-> +
-> +enum mmc_issued mmc_blk_mq_issue_rq(struct mmc_queue *mq, struct request *req)
-> +{
-> +       struct mmc_blk_data *md = mq->blkdata;
-> +       struct mmc_card *card = md->queue.card;
-> +       struct mmc_host *host = card->host;
-> +       int ret;
-> +
-> +       ret = mmc_blk_part_switch(card, md->part_type);
-
-What if there is an ongoing request, shouldn't you wait for that to
-complete before switching partition?
-
-> +       if (ret)
-> +               return MMC_REQ_FAILED_TO_START;
-> +
-> +       switch (mmc_issue_type(mq, req)) {
-> +       case MMC_ISSUE_SYNC:
-> +               ret = mmc_blk_wait_for_idle(mq, host);
-> +               if (ret)
-> +                       return MMC_REQ_BUSY;
-
-Wouldn't it be possible that yet a new SYNC request becomes queued in
-parallel with this current one. Then, when reaching this point, how do
-you make sure that new request waits for the current "SYNC" request?
-
-I mean is the above mmc_blk_wait_for_idle(), really sufficient to deal
-with synchronization?
-
-I guess we could use mmc_claim_host(no-ctx) in some clever way to deal
-with this, or perhaps there is a better option?
-
-BTW, I guess the problem is also present if there is SYNC request
-ongoing and then is a new ASYNC request coming in. Is the ASYNC
-request really waiting for the SYNC request to finish?
-
-Or maybe I just missed these parts in $subject patch.
-
-> +               switch (req_op(req)) {
-> +               case REQ_OP_DRV_IN:
-> +               case REQ_OP_DRV_OUT:
-> +                       mmc_blk_issue_drv_op(mq, req);
-> +                       break;
-> +               case REQ_OP_DISCARD:
-> +                       mmc_blk_issue_discard_rq(mq, req);
-> +                       break;
-> +               case REQ_OP_SECURE_ERASE:
-> +                       mmc_blk_issue_secdiscard_rq(mq, req);
-> +                       break;
-> +               case REQ_OP_FLUSH:
-> +                       mmc_blk_issue_flush(mq, req);
-> +                       break;
-> +               default:
-> +                       WARN_ON_ONCE(1);
-> +                       return MMC_REQ_FAILED_TO_START;
-> +               }
-> +               return MMC_REQ_FINISHED;
-> +       case MMC_ISSUE_ASYNC:
-> +               switch (req_op(req)) {
-> +               case REQ_OP_READ:
-> +               case REQ_OP_WRITE:
-> +                       ret = mmc_blk_mq_issue_rw_rq(mq, req);
-> +                       break;
-> +               default:
-> +                       WARN_ON_ONCE(1);
-> +                       ret = -EINVAL;
-> +               }
-> +               if (!ret)
-> +                       return MMC_REQ_STARTED;
-> +               return ret == -EBUSY ? MMC_REQ_BUSY : MMC_REQ_FAILED_TO_START;
-> +       default:
-> +               WARN_ON_ONCE(1);
-> +               return MMC_REQ_FAILED_TO_START;
-> +       }
-> +}
-> +
-
-[...]
-
-> +static blk_status_t mmc_mq_queue_rq(struct blk_mq_hw_ctx *hctx,
-> +                                   const struct blk_mq_queue_data *bd)
-> +{
-> +       struct request *req = bd->rq;
-> +       struct request_queue *q = req->q;
-> +       struct mmc_queue *mq = q->queuedata;
-> +       struct mmc_card *card = mq->card;
-> +       enum mmc_issue_type issue_type;
-> +       enum mmc_issued issued;
-> +       bool get_card;
-> +       int ret;
-> +
-> +       if (mmc_card_removed(mq->card)) {
-> +               req->rq_flags |= RQF_QUIET;
-> +               return BLK_STS_IOERR;
-> +       }
-> +
-> +       issue_type = mmc_issue_type(mq, req);
-> +
-> +       spin_lock_irq(q->queue_lock);
-> +
-> +       switch (issue_type) {
-> +       case MMC_ISSUE_ASYNC:
-> +               break;
-> +       default:
-> +               /*
-> +                * Timeouts are handled by mmc core, and we don't have a host
-> +                * API to abort requests, so we can't handle the timeout anyway.
-> +                * However, when the timeout happens, blk_mq_complete_request()
-> +                * no longer works (to stop the request disappearing under us).
-> +                * To avoid racing with that, set a large timeout.
-> +                */
-> +               req->timeout = 600 * HZ;
-> +               break;
-> +       }
-> +
-> +       mq->in_flight[issue_type] += 1;
-> +       get_card = (mmc_tot_in_flight(mq) == 1);
-> +
-> +       spin_unlock_irq(q->queue_lock);
-> +
-> +       if (!(req->rq_flags & RQF_DONTPREP)) {
-> +               req_to_mmc_queue_req(req)->retries = 0;
-> +               req->rq_flags |= RQF_DONTPREP;
-> +       }
-> +
-> +       if (get_card)
-
-Coming back to the get_card() thingy, which I wonder if it's fragile.
-
-A request that finds get_card == true here, doesn't necessarily have
-to reach to this point first (the task may be preempted), in case
-there is another request being queued in parallel (or that can't
-happen?).
-
-That could then lead to that the following steps become executed for
-the other requests, prior anybody calling mmc_get_card().
-
-> +               mmc_get_card(card, &mq->ctx);
-> +
-> +       blk_mq_start_request(req);
-> +
-> +       issued = mmc_blk_mq_issue_rq(mq, req);
-> +
-> +       switch (issued) {
-> +       case MMC_REQ_BUSY:
-> +               ret = BLK_STS_RESOURCE;
-> +               break;
-> +       case MMC_REQ_FAILED_TO_START:
-> +               ret = BLK_STS_IOERR;
-> +               break;
-> +       default:
-> +               ret = BLK_STS_OK;
-> +               break;
-> +       }
-> +
-> +       if (issued != MMC_REQ_STARTED) {
-> +               bool put_card = false;
-> +
-> +               spin_lock_irq(q->queue_lock);
-> +               mq->in_flight[issue_type] -= 1;
-> +               if (mmc_tot_in_flight(mq) == 0)
-> +                       put_card = true;
-> +               spin_unlock_irq(q->queue_lock);
-> +               if (put_card)
-> +                       mmc_put_card(card, &mq->ctx);
-
-For the similar reasons as above, this also looks fragile.
-
-> +       }
-> +
-> +       return ret;
-> +}
-> +
-> +static const struct blk_mq_ops mmc_mq_ops = {
-> +       .queue_rq       = mmc_mq_queue_rq,
-> +       .init_request   = mmc_mq_init_request,
-> +       .exit_request   = mmc_mq_exit_request,
-> +       .complete       = mmc_blk_mq_complete,
-> +       .timeout        = mmc_mq_timed_out,
-> +};
-
-[...]
-
-> +#define MMC_QUEUE_DEPTH 64
-> +
-> +static int mmc_mq_init(struct mmc_queue *mq, struct mmc_card *card,
-> +                        spinlock_t *lock)
-> +{
-> +       int q_depth;
-> +       int ret;
-> +
-> +       q_depth = MMC_QUEUE_DEPTH;
-
-I already mentioned my thoughts around the queue_depth... and again I
-may be totally wrong. :-)
-
-> +
-> +       ret = mmc_mq_init_queue(mq, q_depth, &mmc_mq_ops, lock);
-> +       if (ret)
-> +               return ret;
-> +
-> +       blk_queue_rq_timeout(mq->queue, 60 * HZ);
-> +
-> +       mmc_setup_queue(mq, card);
-> +
-> +       return 0;
->  }
-
-[...]
-
-Kind regards
-Uffe
