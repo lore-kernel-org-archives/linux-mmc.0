@@ -1,85 +1,288 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: sdhci-msm: Optionally wait for signal level changes
-Date: Thu, 23 Nov 2017 19:13:21 +0100
-Message-ID: <CAPDyKFq4neYkd+qNKwRcbwLMY4h7O3OyOUPia4emwGna0L5C9w@mail.gmail.com>
-References: <20171120183451.18966-1-bjorn.andersson@linaro.org> <20171120195647.22677-1-bjorn.andersson@linaro.org>
+From: Xinming Hu <huxm@marvell.com>
+Subject: RE: [PATCH v5 2/2] mmc: sdio support external scatter gather list
+Date: Fri, 24 Nov 2017 07:12:47 +0000
+Message-ID: <1511507566220.54630@marvell.com>
+References: <1511337222-6397-1-git-send-email-huxm@marvell.com>
+ <20171123083405.GA30345@infradead.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20171120195647.22677-1-bjorn.andersson@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Bjorn Andersson <bjorn.andersson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Stephen Boyd <sboyd@codeaurora.org>, Sahitya Tummala <stummala@codeaurora.org>, Vijay Viswanath <vviswana@codeaurora.org>
+Content-Type: text/plain; charset="iso-2022-jp"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:35596 "EHLO
+        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1751546AbdKXHNY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Nov 2017 02:13:24 -0500
+In-Reply-To: <20171123083405.GA30345@infradead.org>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Christoph Hellwig <hch@infradead.org>
+Cc: Linux MMC <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Zhiyuan Yang <yangzy@marvell.com>, Tim Song <songtao@marvell.com>, Cathy Luo <cluo@marvell.com>, James Cao <jcao@marvell.com>, Ganapathi Bhat <gbhat@marvell.com>, "Xu (Shanghai) Wang" <xwang4@marvell.com>, Bob Tan <tanbo@marvell.com>, Amitkumar Karwar <akarwar@marvell.com>
 
-On 20 November 2017 at 20:56, Bjorn Andersson
-<bjorn.andersson@linaro.org> wrote:
-> Not all instances of the SDCC core supports changing signal voltage and
-> as such will not generate a power interrupt when the software attempts
-> to change the voltage. This results in probing the eMMC on some devices
-> to take over 2 minutes.
->
-> Check that the SWITCHABLE_SIGNALING_VOLTAGE bit in MCI_GENERICS is set
-> before waiting for the power interrupt.
->
-> Cc: Sahitya Tummala <stummala@codeaurora.org>
-> Cc: Vijay Viswanath <vviswana@codeaurora.org>
-> Fixes: c0309b3803fe ("mmc: sdhci-msm: Add sdhci msm register write APIs which wait for pwr irq")
-> Signed-off-by: Bjorn Andersson <bjorn.andersson@linaro.org>
+Hi Christoph,
 
-Thanks, applied for fixes!
+Thanks for the review, please check our comments below,
 
-Kind regards
-Uffe
+> -----Original Message-----
+> From: Christoph Hellwig [mailto:hch@infradead.org]
+> Sent: 2017年11月23日 16:34
+> To: Xinming Hu <huxm@marvell.com>
+> Cc: Linux MMC <linux-mmc@vger.kernel.org>; Ulf Hansson
+> <ulf.hansson@linaro.org>; Zhiyuan Yang <yangzy@marvell.com>; Tim Song
+> <songtao@marvell.com>; Cathy Luo <cluo@marvell.com>; James Cao
+> <jcao@marvell.com>; Ganapathi Bhat <gbhat@marvell.com>; Xu (Shanghai)
+> Wang <xwang4@marvell.com>; Bob Tan <tanbo@marvell.com>; Amitkumar
+> Karwar <akarwar@marvell.com>
+> Subject: Re: [PATCH v5 2/2] mmc: sdio support external scatter gather list
+> 
+> Please just clean the API up to allways pass a struct scatterlist
 
-> ---
->
-> The offending patch is part of your v4.15 pull request, so please pick
-> this up for the -rcs.
->
-> Changes since v1:
-> - Fixed spelling of swichable...
->
->  drivers/mmc/host/sdhci-msm.c | 14 ++++++++++++++
->  1 file changed, 14 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 3fb7d2eec93f..c283291db705 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -29,6 +29,9 @@
->  #define CORE_VERSION_MAJOR_MASK                (0xf << CORE_VERSION_MAJOR_SHIFT)
->  #define CORE_VERSION_MINOR_MASK                0xff
->
-> +#define CORE_MCI_GENERICS              0x70
-> +#define SWITCHABLE_SIGNALING_VOLTAGE   BIT(29)
-> +
->  #define CORE_HC_MODE           0x78
->  #define HC_MODE_EN             0x1
->  #define CORE_POWER             0x0
-> @@ -1028,11 +1031,22 @@ static void sdhci_msm_check_power_status(struct sdhci_host *host, u32 req_type)
->         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->         struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
->         bool done = false;
-> +       u32 val;
->
->         pr_debug("%s: %s: request %d curr_pwr_state %x curr_io_level %x\n",
->                         mmc_hostname(host->mmc), __func__, req_type,
->                         msm_host->curr_pwr_state, msm_host->curr_io_level);
->
-> +       /*
-> +        * The power interrupt will not be generated for signal voltage
-> +        * switches if SWITCHABLE_SIGNALING_VOLTAGE in MCI_GENERICS is not set.
-> +        */
-> +       val = readl(msm_host->core_mem + CORE_MCI_GENERICS);
-> +       if ((req_type & REQ_IO_HIGH || req_type & REQ_IO_LOW) &&
-> +           !(val & SWITCHABLE_SIGNALING_VOLTAGE)) {
-> +               return;
-> +       }
-> +
->         /*
->          * The IRQ for request type IO High/LOW will be generated when -
->          * there is a state change in 1.8V enable bit (bit 3) of
-> --
-> 2.15.0
->
+Per the "grep" operation in the latest kernel, the sdio command 53 read/write operation is heavily used
+in many device drivers, many of these caller might not need to utilize the scatter gather memory consumption benefits.
+on the other hand, construction of the external scatter gather table puts heavy burden on these callers.
+
+To be able to compatible with the generic user case, and also consider the memory-limited host demands, 
+We need a trade-off here.
+
+please correct me if I have any misunderstanding.
+ 
+
+> and just expose a maximumber number of segments value.
+> 
+Sorry, I don't get the idea, do you mean the "max_segs" in "[v5,1/2] mmc: API for accessing host supported maximum segment count and size" ?
+
+> Last but not least please send this along with the actual consumers of your API.
+> 
+
+Yes, we will send the user case used in mwifiex wireless sdio driver after this changes applied.
+
+Thanks
+Simon
+
+> On Wed, Nov 22, 2017 at 03:53:42PM +0800, Xinming Hu wrote:
+> > Currently sdio device drivers need to prepare a big continuous
+> > physical memory for large data transfer. mmc stack will construct
+> > scatter/gather buffer list to make use of ADMA2.
+> >
+> > According to the sdio host controller specification version 4.00
+> > chapter 1.13.2, sdio device drivers have the ability to construct
+> > scatter/gather DMA buffer list. In this way, they do not need to
+> > allocate big memory.
+> >
+> > This patch refactors current sdio command 53 wrapper
+> > mmc_io_rw_extended, so that it can accept external scatter/gather
+> > buffer list from its caller, such as the sdio device driver. This
+> > patch is very useful on some embedded systems where large memory
+> > allocation fails sometimes. It gives 10 to 15% better throughput
+> > performance compared to a case in which small single data transfers are
+> done.
+> >
+> > Signed-off-by: Xinming Hu <huxm@marvell.com>
+> > Signed-off-by: Amitkumar Karwar <akarwar@marvell.com>
+> > ---
+> > v4: same as v3/v2/v1
+> > v5: rebased on latest codebase
+> > ---
+> >  drivers/mmc/core/sdio_io.c    | 22 ++++++++++++++++--
+> >  drivers/mmc/core/sdio_ops.c   | 53
+> +++++++++++++++++++++++++++++++++++++++----
+> >  drivers/mmc/core/sdio_ops.h   |  3 ++-
+> >  include/linux/mmc/sdio_func.h |  6 +++++
+> >  4 files changed, 76 insertions(+), 8 deletions(-)
+> >
+> > diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
+> > index 4806521..6046511 100644
+> > --- a/drivers/mmc/core/sdio_io.c
+> > +++ b/drivers/mmc/core/sdio_io.c
+> > @@ -327,7 +327,7 @@ static int sdio_io_rw_ext_helper(struct sdio_func
+> *func, int write,
+> >  			size = blocks * func->cur_blksize;
+> >
+> >  			ret = mmc_io_rw_extended(func->card, write,
+> > -				func->num, addr, incr_addr, buf,
+> > +				func->num, addr, incr_addr, false, buf,
+> >  				blocks, func->cur_blksize);
+> >  			if (ret)
+> >  				return ret;
+> > @@ -345,7 +345,7 @@ static int sdio_io_rw_ext_helper(struct sdio_func
+> > *func, int write,
+> >
+> >  		/* Indicate byte mode by setting "blocks" = 0 */
+> >  		ret = mmc_io_rw_extended(func->card, write, func->num, addr,
+> > -			 incr_addr, buf, 0, size);
+> > +			 incr_addr, false, buf, 0, size);
+> >  		if (ret)
+> >  			return ret;
+> >
+> > @@ -513,6 +513,24 @@ int sdio_writesb(struct sdio_func *func, unsigned
+> > int addr, void *src,  }  EXPORT_SYMBOL_GPL(sdio_writesb);
+> >
+> > +int sdio_readsb_sg_enh(struct sdio_func *func, unsigned int addr,
+> > +		       struct sg_table *dst)
+> > +{
+> > +	return mmc_io_rw_extended(func->card, 0, func->num,
+> > +				  addr, 0, true,
+> > +				  dst, 0, func->cur_blksize);
+> > +}
+> > +EXPORT_SYMBOL_GPL(sdio_readsb_sg_enh);
+> > +
+> > +int sdio_writesb_sg_enh(struct sdio_func *func, unsigned int addr,
+> > +			struct sg_table *src)
+> > +{
+> > +	return mmc_io_rw_extended(func->card, 1, func->num,
+> > +				  addr, 0, true,
+> > +				  src, 0, func->cur_blksize);
+> > +}
+> > +EXPORT_SYMBOL_GPL(sdio_writesb_sg_enh);
+> > +
+> >  /**
+> >   *	sdio_readw - read a 16 bit integer from a SDIO function
+> >   *	@func: SDIO function to access
+> > diff --git a/drivers/mmc/core/sdio_ops.c b/drivers/mmc/core/sdio_ops.c
+> > index abaaba3..2310a2a 100644
+> > --- a/drivers/mmc/core/sdio_ops.c
+> > +++ b/drivers/mmc/core/sdio_ops.c
+> > @@ -115,16 +115,39 @@ int mmc_io_rw_direct(struct mmc_card *card, int
+> write, unsigned fn,
+> >  	return mmc_io_rw_direct_host(card->host, write, fn, addr, in, out);
+> > }
+> >
+> > +/**
+> > + *     mmc_io_rw_extended - wrapper for sdio command 53 read/write
+> operation
+> > + *     @card: destination device for read/write
+> > + *     @write: zero indcate read, non-zero indicate write.
+> > + *     @fn: SDIO function to access
+> > + *     @addr: address of (single byte) FIFO
+> > + *     @incr_addr: set to 1 indicate read or write multiple bytes
+> > +		of data to/from an IO register address that
+> > +		increment by 1 after each operation.
+> > + *     @sg_enhance: if set true, the caller of this function will
+> > +		prepare scatter gather dma buffer list.
+> > + *     @buf: buffer that contains the data to write. if sg_enhance
+> > +		is set, it point to SG dma buffer list.
+> > + *     @blocks: number of blocks of data transfer.
+> > +		if set zero, indicate byte mode
+> > +		if set non-zero, indicate block mode
+> > +		if sg_enhance is set, this parameter will not be used.
+> > + *     @blksz: block size for block mode data transfer.
+> > + *
+> > + */
+> >  int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
+> > -	unsigned addr, int incr_addr, u8 *buf, unsigned blocks, unsigned blksz)
+> > +		       unsigned int addr, int incr_addr, bool sg_enhance,
+> > +		       void *buf, unsigned int blocks, unsigned int blksz)
+> >  {
+> >  	struct mmc_request mrq = {};
+> >  	struct mmc_command cmd = {};
+> >  	struct mmc_data data = {};
+> >  	struct scatterlist sg, *sg_ptr;
+> >  	struct sg_table sgtable;
+> > +	struct sg_table *sgtable_external;
+> >  	unsigned int nents, left_size, i;
+> >  	unsigned int seg_size = card->host->max_seg_size;
+> > +	unsigned int sg_blocks = 0;
+> >
+> >  	WARN_ON(blksz == 0);
+> >
+> > @@ -140,16 +163,35 @@ int mmc_io_rw_extended(struct mmc_card *card,
+> int write, unsigned fn,
+> >  	cmd.arg |= fn << 28;
+> >  	cmd.arg |= incr_addr ? 0x04000000 : 0x00000000;
+> >  	cmd.arg |= addr << 9;
+> > +	cmd.flags = MMC_RSP_SPI_R5 | MMC_RSP_R5 | MMC_CMD_ADTC;
+> > +
+> > +	data.flags = write ? MMC_DATA_WRITE : MMC_DATA_READ;
+> > +	data.blksz = blksz;
+> > +
+> > +	if (sg_enhance) {
+> > +		sgtable_external = buf;
+> > +
+> > +		for_each_sg(sgtable_external->sgl, sg_ptr,
+> > +			    sgtable_external->nents, i) {
+> > +			if (sg_ptr->length > card->host->max_seg_size)
+> > +				return -EINVAL;
+> > +			sg_blocks += DIV_ROUND_UP(sg_ptr->length, blksz);
+> > +		}
+> > +
+> > +		cmd.arg |= 0x08000000 | sg_blocks;
+> > +		data.blocks = sg_blocks;
+> > +		data.sg = sgtable_external->sgl;
+> > +		data.sg_len = sgtable_external->nents;
+> > +		goto mmc_data_req;
+> > +	}
+> > +
+> >  	if (blocks == 0)
+> >  		cmd.arg |= (blksz == 512) ? 0 : blksz;	/* byte mode */
+> >  	else
+> >  		cmd.arg |= 0x08000000 | blocks;		/* block mode */
+> > -	cmd.flags = MMC_RSP_SPI_R5 | MMC_RSP_R5 | MMC_CMD_ADTC;
+> >
+> > -	data.blksz = blksz;
+> >  	/* Code in host drivers/fwk assumes that "blocks" always is >=1 */
+> >  	data.blocks = blocks ? blocks : 1;
+> > -	data.flags = write ? MMC_DATA_WRITE : MMC_DATA_READ;
+> >
+> >  	left_size = data.blksz * data.blocks;
+> >  	nents = DIV_ROUND_UP(left_size, seg_size); @@ -172,11 +214,12 @@
+> int
+> > mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
+> >  		sg_init_one(&sg, buf, left_size);
+> >  	}
+> >
+> > +mmc_data_req:
+> >  	mmc_set_data_timeout(&data, card);
+> >
+> >  	mmc_wait_for_req(card->host, &mrq);
+> >
+> > -	if (nents > 1)
+> > +	if (!sg_enhance && nents > 1)
+> >  		sg_free_table(&sgtable);
+> >
+> >  	if (cmd.error)
+> > diff --git a/drivers/mmc/core/sdio_ops.h b/drivers/mmc/core/sdio_ops.h
+> > index 96945ca..2d75100 100644
+> > --- a/drivers/mmc/core/sdio_ops.h
+> > +++ b/drivers/mmc/core/sdio_ops.h
+> > @@ -23,7 +23,8 @@
+> >  int mmc_io_rw_direct(struct mmc_card *card, int write, unsigned fn,
+> >  	unsigned addr, u8 in, u8* out);
+> >  int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
+> > -	unsigned addr, int incr_addr, u8 *buf, unsigned blocks, unsigned blksz);
+> > +		       unsigned int addr, int incr_addr, bool sg_enhance,
+> > +		       void *buf, unsigned int blocks, unsigned int blksz);
+> >  int sdio_reset(struct mmc_host *host);  unsigned int
+> > mmc_align_data_size(struct mmc_card *card, unsigned int sz);  void
+> > sdio_irq_work(struct work_struct *work); diff --git
+> > a/include/linux/mmc/sdio_func.h b/include/linux/mmc/sdio_func.h index
+> > 72d4de4..d36ba47 100644
+> > --- a/include/linux/mmc/sdio_func.h
+> > +++ b/include/linux/mmc/sdio_func.h
+> > @@ -14,6 +14,7 @@
+> >
+> >  #include <linux/device.h>
+> >  #include <linux/mod_devicetable.h>
+> > +#include <linux/scatterlist.h>
+> >
+> >  #include <linux/mmc/pm.h>
+> >
+> > @@ -136,6 +137,11 @@ extern int sdio_memcpy_fromio(struct sdio_func
+> > *func, void *dst,  extern int sdio_readsb(struct sdio_func *func, void *dst,
+> >  	unsigned int addr, int count);
+> >
+> > +int sdio_readsb_sg_enh(struct sdio_func *func, unsigned int addr,
+> > +		       struct sg_table *dst);
+> > +int sdio_writesb_sg_enh(struct sdio_func *func, unsigned int addr,
+> > +			struct sg_table *src);
+> > +
+> >  extern void sdio_writeb(struct sdio_func *func, u8 b,
+> >  	unsigned int addr, int *err_ret);
+> >  extern void sdio_writew(struct sdio_func *func, u16 b,
+> > --
+> > 1.9.1
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc"
+> > in the body of a message to majordomo@vger.kernel.org More majordomo
+> > info at  http://vger.kernel.org/majordomo-info.html
+> ---end quoted text---
