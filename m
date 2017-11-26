@@ -1,58 +1,42 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: [PATCH v2 08/22] mmc: tmio: move mmc_gpio_request_cd() before mmc_add_host()
-Date: Sat, 25 Nov 2017 01:24:43 +0900
-Message-ID: <1511540697-27387-9-git-send-email-yamada.masahiro@socionext.com>
-References: <1511540697-27387-1-git-send-email-yamada.masahiro@socionext.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1511540697-27387-1-git-send-email-yamada.masahiro@socionext.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-renesas-soc@vger.kernel.org, Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH v2 02/22] mmc: renesas_sdhi: remove wrong depends on to
+ enable compile test
+Date: Sun, 26 Nov 2017 10:02:59 +0100
+Message-ID: <CAMuHMdV4q1n6tPe8Q_g6s3G+0P1_xCxvt6X4tW4FGyubM4WOjA@mail.gmail.com>
+References: <1511540697-27387-1-git-send-email-yamada.masahiro@socionext.com> <1511540697-27387-3-git-send-email-yamada.masahiro@socionext.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qt0-f195.google.com ([209.85.216.195]:40453 "EHLO
+        mail-qt0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752064AbdKZJDA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 26 Nov 2017 04:03:00 -0500
+In-Reply-To: <1511540697-27387-3-git-send-email-yamada.masahiro@socionext.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
 
-Drivers do not need to call mmc_gpiod_request_cd_irq() explicitly
-because mmc_start_host() calls it.  To make it work, cd_gpio must
-be set before mmc_add_host().
+On Fri, Nov 24, 2017 at 5:24 PM, Masahiro Yamada
+<yamada.masahiro@socionext.com> wrote:
+> ARCH_RENESAS is a stronger condition than (ARM || ARM64).
+> If ARCH_RENESAS is enabled, (ARM || ARM64) is met as well.
+>
+> What is worse, the first depends on line prevents COMPILE_TEST from
+> enabling this driver.  It should be removed.
+>
+> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+> Acked-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
----
+Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
-Changes in v2: None
+Gr{oetje,eeting}s,
 
- drivers/mmc/host/tmio_mmc_core.c | 14 ++++++--------
- 1 file changed, 6 insertions(+), 8 deletions(-)
+                        Geert
 
-diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-index 46f77c3..efffb04 100644
---- a/drivers/mmc/host/tmio_mmc_core.c
-+++ b/drivers/mmc/host/tmio_mmc_core.c
-@@ -1205,6 +1205,12 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
- 	if (ret < 0)
- 		return ret;
- 
-+	if (pdata->flags & TMIO_MMC_USE_GPIO_CD) {
-+		ret = mmc_gpio_request_cd(mmc, pdata->cd_gpio, 0);
-+		if (ret)
-+			return ret;
-+	}
-+
- 	mmc->caps |= MMC_CAP_4_BIT_DATA | pdata->capabilities;
- 	mmc->caps2 |= pdata->capabilities2;
- 	mmc->max_segs = pdata->max_segs ? : 32;
-@@ -1300,14 +1306,6 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
- 
- 	dev_pm_qos_expose_latency_limit(&pdev->dev, 100);
- 
--	if (pdata->flags & TMIO_MMC_USE_GPIO_CD) {
--		ret = mmc_gpio_request_cd(mmc, pdata->cd_gpio, 0);
--		if (ret)
--			goto remove_host;
--
--		mmc_gpiod_request_cd_irq(mmc);
--	}
--
- 	return 0;
- 
- remove_host:
--- 
-2.7.4
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
