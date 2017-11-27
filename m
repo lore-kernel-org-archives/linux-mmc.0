@@ -1,32 +1,23 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: slot-gpio: call gpiod_to_irq() only when
- MMC_CAP_NEEDS_POLL is unset
-Date: Mon, 27 Nov 2017 10:57:30 +0100
-Message-ID: <CAPDyKFrdikOFB2mvdfDY6D8sGz=hw1NxcLMvvZn_vh5czrKUtg@mail.gmail.com>
-References: <1510122894-9296-1-git-send-email-yamada.masahiro@socionext.com>
+Subject: Re: [PATCH RFT] mmc: tmio: use usleep_range consistently
+Date: Mon, 27 Nov 2017 10:57:41 +0100
+Message-ID: <CAPDyKFrNCa2HDhVm8GV3fKUso_-yToGKQj-89z1bEyBLOrqMag@mail.gmail.com>
+References: <20171114225104.6743-1-wsa+renesas@sang-engineering.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f195.google.com ([209.85.223.195]:43395 "EHLO
-        mail-io0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751631AbdK0J5b (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Nov 2017 04:57:31 -0500
-Received: by mail-io0-f195.google.com with SMTP id s37so24738306ioe.10
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Nov 2017 01:57:31 -0800 (PST)
-In-Reply-To: <1510122894-9296-1-git-send-email-yamada.masahiro@socionext.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20171114225104.6743-1-wsa+renesas@sang-engineering.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Simon Horman <horms@verge.net.au>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Shawn Lin <shawn.lin@rock-chips.com>
 
-On 8 November 2017 at 07:34, Masahiro Yamada
-<yamada.masahiro@socionext.com> wrote:
-> It is not efficient to call gpiod_to_irq() regardless the flag, then
-> ignore the returned irq if MMC_CAP_NEEDS_POLL.
+On 14 November 2017 at 23:51, Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
+> There are a few udelay() left which are in a range that they should be
+> usleep_range() these days.
 >
-> Move gpiod_to_irq() after the MMC_CAP_NEEDS_POLL check.
->
-> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
 Thanks, applied for next!
 
@@ -35,40 +26,57 @@ Uffe
 
 > ---
 >
->  drivers/mmc/core/slot-gpio.c | 14 ++++++--------
->  1 file changed, 6 insertions(+), 8 deletions(-)
+> Works fine for me on Lager (R-Car H2) and Salvator-X (R-Car M3-W).
+> Testing on other platforms very welcome even though this should be
+> independent of the IP core.
 >
-> diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
-> index 863f1db..f7c6e05 100644
-> --- a/drivers/mmc/core/slot-gpio.c
-> +++ b/drivers/mmc/core/slot-gpio.c
-> @@ -121,20 +121,18 @@ EXPORT_SYMBOL(mmc_gpio_request_ro);
->  void mmc_gpiod_request_cd_irq(struct mmc_host *host)
->  {
->         struct mmc_gpio *ctx = host->slot.handler_priv;
-> -       int ret, irq;
-> +       int irq = -EINVAL;
-> +       int ret;
+>  drivers/mmc/host/tmio_mmc_core.c | 8 ++++----
+>  1 file changed, 4 insertions(+), 4 deletions(-)
 >
->         if (host->slot.cd_irq >= 0 || !ctx || !ctx->cd_gpio)
->                 return;
+> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+> index 583bf3262df5d4..d6ca57be16c2fd 100644
+> --- a/drivers/mmc/host/tmio_mmc_core.c
+> +++ b/drivers/mmc/host/tmio_mmc_core.c
+> @@ -806,7 +806,7 @@ static int tmio_mmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>                 if (ret == 0)
+>                         set_bit(i, host->taps);
 >
-> -       irq = gpiod_to_irq(ctx->cd_gpio);
-> -
+> -               mdelay(1);
+> +               usleep_range(1000, 1200);
+>         }
+>
+>         ret = host->select_tuning(host);
+> @@ -958,7 +958,7 @@ static void tmio_mmc_power_on(struct tmio_mmc_host *host, unsigned short vdd)
+>                  * 100us were not enough. Is this the same 140us delay, as in
+>                  * tmio_mmc_set_ios()?
+>                  */
+> -               udelay(200);
+> +               usleep_range(200, 300);
+>         }
 >         /*
-> -        * Even if gpiod_to_irq() returns a valid IRQ number, the platform might
-> -        * still prefer to poll, e.g., because that IRQ number is already used
-> -        * by another unit and cannot be shared.
-> +        * Do not use IRQ if the platform prefers to poll, e.g., because that
-> +        * IRQ number is already used by another unit and cannot be shared.
+>          * It seems, VccQ should be switched on after Vcc, this is also what the
+> @@ -966,7 +966,7 @@ static void tmio_mmc_power_on(struct tmio_mmc_host *host, unsigned short vdd)
 >          */
-> -       if (irq >= 0 && host->caps & MMC_CAP_NEEDS_POLL)
-> -               irq = -EINVAL;
-> +       if (!(host->caps & MMC_CAP_NEEDS_POLL))
-> +               irq = gpiod_to_irq(ctx->cd_gpio);
+>         if (!IS_ERR(mmc->supply.vqmmc) && !ret) {
+>                 ret = regulator_enable(mmc->supply.vqmmc);
+> -               udelay(200);
+> +               usleep_range(200, 300);
+>         }
 >
->         if (irq >= 0) {
->                 if (!ctx->cd_gpio_isr)
+>         if (ret < 0)
+> @@ -1059,7 +1059,7 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>         }
+>
+>         /* Let things settle. delay taken from winCE driver */
+> -       udelay(140);
+> +       usleep_range(140, 200);
+>         if (PTR_ERR(host->mrq) == -EINTR)
+>                 dev_dbg(&host->pdev->dev,
+>                         "%s.%d: IOS interrupted: clk %u, mode %u",
 > --
-> 2.7.4
+> 2.11.0
 >
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
