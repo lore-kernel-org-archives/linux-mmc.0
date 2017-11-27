@@ -1,308 +1,125 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V14 13/24] mmc: block: Add blk-mq support
-Date: Mon, 27 Nov 2017 16:15:24 +0200
-Message-ID: <4e7a58f7-39ef-9937-c54c-da6fe9edd1e3@intel.com>
-References: <1511271770-3444-1-git-send-email-adrian.hunter@intel.com>
- <1511271770-3444-14-git-send-email-adrian.hunter@intel.com>
- <CAPDyKFrA5NVQ2Ei7rf7o7N0iHCHLHkntObnPP9hjToKrLr-TAg@mail.gmail.com>
- <1d7de4aa-f528-c3f8-bfc4-7d69301f8591@intel.com>
- <CAPDyKFr8tiJXSL-weQjGJ3DfRrfv8ZAFY8=ZECLNgSe_43S8Rw@mail.gmail.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH v2 00/22] mmc: tmio: various fixes and cleanups
+Date: Mon, 27 Nov 2017 18:13:24 +0100
+Message-ID: <20171127171324.sprmzsu4dkeo3gon@ninjato>
+References: <1511540697-27387-1-git-send-email-yamada.masahiro@socionext.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="kb3pclpwd4quu47y"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga05.intel.com ([192.55.52.43]:48202 "EHLO mga05.intel.com"
+Received: from sauhun.de ([88.99.104.3]:47657 "EHLO pokefinder.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751467AbdK0OPr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 27 Nov 2017 09:15:47 -0500
-In-Reply-To: <CAPDyKFr8tiJXSL-weQjGJ3DfRrfv8ZAFY8=ZECLNgSe_43S8Rw@mail.gmail.com>
-Content-Language: en-US
+        id S1753109AbdK0RN1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 27 Nov 2017 12:13:27 -0500
+Content-Disposition: inline
+In-Reply-To: <1511540697-27387-1-git-send-email-yamada.masahiro@socionext.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Christoph Hellwig <hch@lst.de>
+To: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: linux-mmc@vger.kernel.org, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 
-On 27/11/17 13:23, Ulf Hansson wrote:
-> On 27 November 2017 at 11:20, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> On 24/11/17 12:12, Ulf Hansson wrote:
->>> [...]
->>>
->>>> +/* Single sector read during recovery */
->>>> +static void mmc_blk_ss_read(struct mmc_queue *mq, struct request *req)
->>>
->>> Nitpick: I think mmc_blk_read_single() would be better as it is a more
->>> clear name. Would you mind changing it?
->>>
->>>> +{
->>>> +       struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
->>>> +       blk_status_t status;
->>>> +
->>>> +       while (1) {
->>>> +               mmc_blk_rw_rq_prep(mqrq, mq->card, 1, mq);
->>>> +
->>>> +               mmc_wait_for_req(mq->card->host, &mqrq->brq.mrq);
->>>> +
->>>> +               /*
->>>> +                * Not expecting command errors, so just give up in that case.
->>>> +                * If there are retries remaining, the request will get
->>>> +                * requeued.
->>>> +                */
->>>> +               if (mqrq->brq.cmd.error)
->>>> +                       return;
->>>
->>> What happens here if the reason to the error is because the card was removed?
->>
->> Assuming the rescan is waiting for the host claim, the next read / write
->> request will end up calling mmc_detect_card_removed() in the recovery.
->> After that all following requests will error immediately because
->> mmc_mq_queue_rq() calls mmc_card_removed().
-> 
-> Yep, that seems reasonable. I have also tested this, so it seems to
-> work as expected and similar as before.
-> 
->>
->>>
->>> I guess next time __blk_err_check() is called from the
->>> mmc_blk_mq_rw_recovery(), this will be detected and managed?
->>>
->>>> +
->>>> +               if (blk_rq_bytes(req) <= 512)
->>>
->>> Shouldn't you check "if (blk_rq_bytes(req) <  512)"? How would you
->>> otherwise read the last 512 bytes block?
->>
->> At this point we have read the last sector but not updated the request, so
->> the number of bytes left should be 512.  The reason we don't update the
->> request is so that the logic in mmc_blk_mq_complete_rq() will work.  I will
->> add a comment.
-> 
-> Not sure I get that, but I assume the comment will help me understand. :-)
-> 
->>
->>>
->>>> +                       break;
->>>> +
->>>> +               status = mqrq->brq.data.error ? BLK_STS_IOERR : BLK_STS_OK;
->>>> +
->>>> +               blk_update_request(req, status, 512);
->>>
->>> Shouldn't we actually bail out, unless the error is a data ECC error?
->>> On the other hand, I guess if it a more severe error, cmd.error will
->>> anyway be set above!?
->>>
->>> One more question, if there is a data error, we may want to try to
->>> recover by sending a stop command? How do we manage that?
->>
->> I was thinking a single-block read would not need a stop.  I will think
->> some more about error handling here.
-> 
-> Great!
-> 
-> Anyway, you may be right -  and perhaps it may not be worth adding
-> error handling, especially if it complicates the code a lot.
-> 
-> [...]
-> 
->>>> +static void mmc_blk_mq_acct_req_done(struct mmc_queue *mq, struct request *req)
->>>
->>> Nitpick: Can we please try to find a better name for this function. I
->>> don't think "acct" is good abbreviation because, to me, it's not
->>> self-explaining.
->>
->> What about mmc_blk_mq_decrement_in_flight() ?
-> 
-> Looks good, or perhaps even: mmc_blk_mq_dec_in_flight().
-> 
->>
->>>
->>>> +{
->>>> +       struct request_queue *q = req->q;
->>>> +       unsigned long flags;
->>>> +       bool put_card;
->>>> +
->>>> +       spin_lock_irqsave(q->queue_lock, flags);
->>>> +
->>>> +       mq->in_flight[mmc_issue_type(mq, req)] -= 1;
->>>> +
->>>> +       put_card = (mmc_tot_in_flight(mq) == 0);
->>>> +
->>>> +       spin_unlock_irqrestore(q->queue_lock, flags);
->>>> +
->>>> +       if (put_card)
->>>> +               mmc_put_card(mq->card, &mq->ctx);
->>>
->>> I have tried to convince myself that the protection of calling
->>> mmc_get|put_card() is safe, but I am not sure.
->>>
->>> I am wondering whether there could be races for mmc_get|put_card().
->>> Please see some more related comments below.
->>
->> mmc_put_card() is safe and necessary if we have seen mmc_tot_in_flight(mq)
->> == 0.  When the next request arrives it will have to do a mmc_get_card()
->> because it is changing the number of requests in flight from 0 to 1.  It
->> doesn't matter if that mmc_get_card() comes before or after or during this
->> mmc_put_card().
->>
->>>
->>> [...]
-> 
-> [...]
-> 
->>>
->>> Anyway, then if using a queue_depth of 64, how will you make sure that
->>> you not end up having > 1 requests being prepared at the same time
->>> (not counting the one that may be in transfer)?
->>
->> We are currently single-threaded since every request goes through
->> hctx->run_work when BLK_MQ_F_BLOCKING and nr_hw_queues == 1.  It might be
->> worth adding a mutex to ensure that never changes.
->>
->> This point also answers some of the questions below, since there can be no
->> parallel dispatches.
-> 
-> Yeah, it clearly does. Thanks!
-> 
->>>> +
->>>> +enum mmc_issued mmc_blk_mq_issue_rq(struct mmc_queue *mq, struct request *req)
->>>> +{
->>>> +       struct mmc_blk_data *md = mq->blkdata;
->>>> +       struct mmc_card *card = md->queue.card;
->>>> +       struct mmc_host *host = card->host;
->>>> +       int ret;
->>>> +
->>>> +       ret = mmc_blk_part_switch(card, md->part_type);
->>>
->>> What if there is an ongoing request, shouldn't you wait for that to
->>> complete before switching partition?
->>
->> Two requests on the same queue cannot be on different partitions because we
->> have a different queue (and block device) for each partition.
-> 
-> That's not true for RPMB anymore I am afraid.
-> 
-> RPMB shares the same queue as for the main eMMC partition, which is
-> because we strive towards fair I/O scheduling across the hole device.
 
-I hadn't thought of RPMB, but I think the logic is OK, which is good because
-it is the same as we presently have.  Here the md->part_type will be the
-main area even for RPMB.  So this switch won't do anything if we have a
-request in flight.  Then inside __mmc_blk_ioctl_cmd() the switch to RPMB is
-done, and afterwards mmc_blk_issue_drv_op() switches it back again.
+--kb3pclpwd4quu47y
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-> 
->>
->>>
->>>> +       if (ret)
->>>> +               return MMC_REQ_FAILED_TO_START;
->>>> +
->>>> +       switch (mmc_issue_type(mq, req)) {
->>>> +       case MMC_ISSUE_SYNC:
->>>> +               ret = mmc_blk_wait_for_idle(mq, host);
->>>> +               if (ret)
->>>> +                       return MMC_REQ_BUSY;
->>>
->>> Wouldn't it be possible that yet a new SYNC request becomes queued in
->>> parallel with this current one. Then, when reaching this point, how do
->>> you make sure that new request waits for the current "SYNC" request?
->>
->> As mentioned above, there are no parallel dispatches.
->>
->>>
->>> I mean is the above mmc_blk_wait_for_idle(), really sufficient to deal
->>> with synchronization?
->>
->> So long as there are no parallel dispatches.
->>
->>>
->>> I guess we could use mmc_claim_host(no-ctx) in some clever way to deal
->>> with this, or perhaps there is a better option?
->>
->> We are relying on there being no parallel dispatches.  That is the case now,
->> but if it weren't we could use a mutex in mmc_mq_queue_rq().
->>
-> 
-> Yeah, but then leave that until needed.
-> 
->>>
->>> BTW, I guess the problem is also present if there is SYNC request
->>> ongoing and then is a new ASYNC request coming in. Is the ASYNC
->>> request really waiting for the SYNC request to finish?
->>
->> With no parallel dispatches, the SYNC request runs to completion before
->> another request can be dispatched.
-> 
-> Yes, I get it now. Thanks for clarifying this!
-> 
-> [...]
-> 
->>>> +static blk_status_t mmc_mq_queue_rq(struct blk_mq_hw_ctx *hctx,
->>>> +                                   const struct blk_mq_queue_data *bd)
->>>> +{
->>>> +       struct request *req = bd->rq;
->>>> +       struct request_queue *q = req->q;
->>>> +       struct mmc_queue *mq = q->queuedata;
->>>> +       struct mmc_card *card = mq->card;
->>>> +       enum mmc_issue_type issue_type;
->>>> +       enum mmc_issued issued;
->>>> +       bool get_card;
->>>> +       int ret;
->>>> +
->>>> +       if (mmc_card_removed(mq->card)) {
->>>> +               req->rq_flags |= RQF_QUIET;
->>>> +               return BLK_STS_IOERR;
->>>> +       }
->>>> +
->>>> +       issue_type = mmc_issue_type(mq, req);
->>>> +
->>>> +       spin_lock_irq(q->queue_lock);
->>>> +
->>>> +       switch (issue_type) {
->>>> +       case MMC_ISSUE_ASYNC:
->>>> +               break;
->>>> +       default:
->>>> +               /*
->>>> +                * Timeouts are handled by mmc core, and we don't have a host
->>>> +                * API to abort requests, so we can't handle the timeout anyway.
->>>> +                * However, when the timeout happens, blk_mq_complete_request()
->>>> +                * no longer works (to stop the request disappearing under us).
->>>> +                * To avoid racing with that, set a large timeout.
->>>> +                */
->>>> +               req->timeout = 600 * HZ;
->>>> +               break;
->>>> +       }
->>>> +
->>>> +       mq->in_flight[issue_type] += 1;
->>>> +       get_card = (mmc_tot_in_flight(mq) == 1);
->>>> +
->>>> +       spin_unlock_irq(q->queue_lock);
->>>> +
->>>> +       if (!(req->rq_flags & RQF_DONTPREP)) {
->>>> +               req_to_mmc_queue_req(req)->retries = 0;
->>>> +               req->rq_flags |= RQF_DONTPREP;
->>>> +       }
->>>> +
->>>> +       if (get_card)
->>>
->>> Coming back to the get_card() thingy, which I wonder if it's fragile.
->>>
->>> A request that finds get_card == true here, doesn't necessarily have
->>> to reach to this point first (the task may be preempted), in case
->>> there is another request being queued in parallel (or that can't
->>> happen?).
->>>
->>> That could then lead to that the following steps become executed for
->>> the other requests, prior anybody calling mmc_get_card().
->>
->> You are right, this logic does not support parallel dispatches.
->>
-> 
-> This do raises a question, don't you think it would be beneficial,
-> especially for CQE to allow parallel dispatches?
-> 
-> I am not saying we should change this at this point, just that we may
-> consider changing this for future improvements.
 
-I think the benefit is limited because the time to dispatch a request is
-small compared with the time to complete a request. i.e. a number of
-requests can be queued before the first one has completed.  But yes, it is
-something to keep in mind.
+> I am getting more and more patches for TMIO.
+> I put all in a single series to clarify the patch order.
+
+Hmmm, that makes reviewing harder in my opinion.
+
+I really liked the small serieses which could be improved, acked, and
+applied. This big one will take much longer to review and resending will
+cause quite some noise.
+
+For clarifying patch order in small series, it should be enough to state
+the dependencies in the cover letter. Super helpful is providing a
+public git branch where ppl can pull from.
+
+Also, can you state what kind of testing you did on what platforms? My
+gut feeling says that the card detect changes might be easy to catch
+regressions on old platforms, so we'd need to be extra cautious. I/we
+can do testing on some Renesas platforms, too.
+
+Other changes like moving stuff from tmio_core to renesas_sdhi is less
+critical. Either it works or not, so that is easy to spot :)
+
+Which might be another argument for multiple smaller patch series.
+
+Nonetheless, I'll try to get this reviewed in the next days...
+
+All the best,
+
+   Wolfram
+
+
+>=20
+> 1, 2, 4, 5, 6, 7 were already acked or reviewed by Wolfram Sang.
+>=20
+>=20
+> Masahiro Yamada (22):
+>   mmc: renesas_sdhi: consolidate DMAC CONFIG options
+>   mmc: renesas_sdhi: remove wrong depends on to enable compile test
+>   mmc: renesas_sdhi: remove eprobe jump label
+>   mmc: tmio: set tmio_mmc_host to driver data
+>   mmc: tmio: use devm_ioremap_resource() instead of devm_ioremap()
+>   mmc: tmio: move mmc_host_ops to struct tmio_mmc_host from static data
+>   mmc: tmio, renesas_sdhi: set mmc_host_ops hooks directly
+>   mmc: tmio: move mmc_gpio_request_cd() before mmc_add_host()
+>   mmc: tmio: use mmc_can_gpio_cd() instead of checking
+>     TMIO_MMC_USE_GPIO_CD
+>   mmc: tmio: support IP-builtin card detection logic
+>   mmc: renesas_sdhi: remove always false condition
+>   mmc: tmio,renesas_sdhi: move struct tmio_mmc_dma to renesas_sdhi.h
+>   mmc: tmio,renesas_sdhi: move Renesas-specific DMA data to
+>     renesas_sdhi.h
+>   mmc: tmio,renesas_sdhi: move ssc_tappos to renesas_sdhi.h
+>   mmc: tmio: change bus_shift to unsigned int
+>   mmc: tmio: fix never-detected card insertion bug
+>   mmc: tmio: move TMIO_MASK_{READOP,WRITEOP} handling to correct place
+>   mmc: tmio: remove useless TMIO_MASK_CMD handling in
+>     tmio_mmc_host_probe()
+>   mmc: tmio: ioremap memory resource in tmio_mmc_host_alloc()
+>   mmc: tmio: move clk_enable/disable out of tmio_mmc_host_probe()
+>   mmc: tmio: move {tmio_}mmc_of_parse() to tmio_mmc_host_alloc()
+>   mmc: tmio: remove dma_ops from tmio_mmc_host_probe() argument
+>=20
+>  drivers/mmc/host/Kconfig                      |   5 +-
+>  drivers/mmc/host/Makefile                     |   8 +-
+>  drivers/mmc/host/renesas_sdhi.h               |  22 ++++
+>  drivers/mmc/host/renesas_sdhi_core.c          |  49 ++++-----
+>  drivers/mmc/host/renesas_sdhi_internal_dmac.c |  14 ++-
+>  drivers/mmc/host/renesas_sdhi_sys_dmac.c      |  35 +++---
+>  drivers/mmc/host/tmio_mmc.c                   |  23 ++--
+>  drivers/mmc/host/tmio_mmc.h                   |  23 +---
+>  drivers/mmc/host/tmio_mmc_core.c              | 149 +++++++++++++-------=
+------
+>  9 files changed, 170 insertions(+), 158 deletions(-)
+>=20
+> --=20
+> 2.7.4
+>=20
+
+--kb3pclpwd4quu47y
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlocR7MACgkQFA3kzBSg
+Kba1aQ//SP5yIKtDG4DxWYQpVSgen3yYmgw7Md/1ldbWSZfCQAMv7WIdC5wYCYFf
+u4iFioMyQgrBDrOqMt8i+AAeBe+HwAwpVPQDqJLpJ3WZSuuVbJ4TwEhWmwAM6Gw9
+rdlUe5ij1PYb9VgxTDduSmfdI5QlZ8tbolYLotaYcsRtlt3+vGT7RdoAIdwou/A0
+Rovg6RJ55mgsG6J2wKroktbwm5+rZVWCTWCDDMrWfiQEv6mRFnOs2ja2wVzDREDI
+AX0s4ZbilGEm2VJwPnR6pr5z8IPHhutRoaQDxQPnCs2B11Phx+zr/b1Zua75Z/dC
+408ubM5MvdYzrtANkirWKVqRRAbIndThDw4orNjHCjplE+V1B5sWWIBuYFAfE3EL
+cpwWSSKMSE65gHJgSP6lKzbI5Iza2Sjiz6k4hZqnPMsPH7FDdTT9hAZ/DrTjgXGd
+IgI91h/h+f3n+G2irfc8uYXppW9lZrT9r3rJc8II6FZoNTMw9s/64hNL+F73FROQ
+bHsoXbrYIxrzXG2VBFLSl6UkIVMa1l+SxtSoB0Nm3vcPFnVApeM3J8UKldiikwqJ
+V/G8liDCJI84h5Fw+4A9kSmHzEiApP3zCkx06QkXbWaLz98EuiKl8JitkyB/WSm3
+ANBt6F9n3pX1Z0kDr8L6Tc9lUSmC8v6NFU3MkMRrX0RZDp0wcm8=
+=fRMF
+-----END PGP SIGNATURE-----
+
+--kb3pclpwd4quu47y--
