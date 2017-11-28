@@ -1,65 +1,89 @@
-From: Maxime Ripard <maxime.ripard@free-electrons.com>
-Subject: Re: [PATCH] mmc: sunxi: fix mojibake in module metadata
-Date: Tue, 28 Nov 2017 08:36:30 +0100
-Message-ID: <20171128073630.7gxuyv775ateta62@flea.home>
-References: <20171128034455.10344-1-kilobyte@angband.pl>
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Subject: Re: More TMIO MMC variant. What is a preferred name?
+Date: Tue, 28 Nov 2017 17:04:26 +0900
+Message-ID: <CAK7LNAQtLdXBw_JzW2dYdVtC0b6eGCvO5KByXfKKJVxi02i61g@mail.gmail.com>
+References: <CAK7LNARB+-SzgNF+7KsG80o4Q=TZsEeyMLjR2Ve0bXCrQ5tc0w@mail.gmail.com>
+ <20171108175320.wnq3d2x7lmpaya7s@ninjato> <CAK7LNASN8kjmiNHvX7zrgVv=5d81ovfGNRdHm8TXiJNgr+H9MA@mail.gmail.com>
+ <20171120201142.n4l4jelxsmmtwjj6@tetsubishi> <CAPDyKFq_uVvBKBhATNYhq2mSMmNXA7tPSSPMESCnTDtQt9XrZA@mail.gmail.com>
+ <20171121200111.vrpmsubme55356qv@ninjato> <CAPDyKFo6X+Z6bORzPow=79Q7jXZOu4SMA9dh1fDsD-_JrBRtgA@mail.gmail.com>
+ <CAK7LNARpchnGL8ZGWcFs=bxmH2FK71Voyd5K1E6=3bHTjd-gyw@mail.gmail.com>
+ <20171122170815.o3o5umayra7kbdg3@ninjato> <CAPDyKFpuiurgT5Zwo--EcaWOjZOdmSYotHrwH=c-byq3nkaxYw@mail.gmail.com>
+ <20171127171401.o7ch26oot2au5oux@ninjato>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="uovrehrebwdavoot"
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.free-electrons.com ([62.4.15.54]:52671 "EHLO
-        mail.free-electrons.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750907AbdK1Hgc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Nov 2017 02:36:32 -0500
-Content-Disposition: inline
-In-Reply-To: <20171128034455.10344-1-kilobyte@angband.pl>
+Received: from conssluserg-03.nifty.com ([210.131.2.82]:38859 "EHLO
+        conssluserg-03.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750907AbdK1IFR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Nov 2017 03:05:17 -0500
+Received: from mail-yw0-f180.google.com (mail-yw0-f180.google.com [209.85.161.180]) (authenticated)
+        by conssluserg-03.nifty.com with ESMTP id vAS857NR003088
+        for <linux-mmc@vger.kernel.org>; Tue, 28 Nov 2017 17:05:07 +0900
+Received: by mail-yw0-f180.google.com with SMTP id p74so12944906ywe.2
+        for <linux-mmc@vger.kernel.org>; Tue, 28 Nov 2017 00:05:07 -0800 (PST)
+In-Reply-To: <20171127171401.o7ch26oot2au5oux@ninjato>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adam Borowski <kilobyte@angband.pl>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, David =?iso-8859-1?Q?Lanzend=F6rfer?= <david.lanzendoerfer@o2s.ch>, linux-mmc@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms+renesas@verge.net.au>, linux-mmc <linux-mmc@vger.kernel.org>, Marek Vasut <marek.vasut+renesas@gmail.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+
+2017-11-28 2:14 GMT+09:00 Wolfram Sang <wsa@the-dreams.de>:
+>
+>> > Another try:
+>> >
+>> >> # core
+>> >> obj-$(CONFIG_MMC_TMIO_CORE)           += tmio_mmc_core.o
+>> >> # TMIO-builtin MMC
+>> >> obj-$(CONFIG_MMC_TMIO)                += tmio_mmc_original.o
+>> >> # Reneses
+>> >> obj-$(CONFIG_MMC_SDHI)                += tmio_mmc_sdhi_core.o
+>> >> # UniPhier
+>> >> obj-$(CONFIG_MMC_UNIPHIER)            += tmio_mmc_uniphier.o
+>> >
+>> > I left the Kconfig symbols for easier updating and concentrated on the
+>> > filenames for now.
+>> >
+>>
+>> Looks good to me!
+>
+> Yamada-san?
+
+Basically, looks good to me,
+although I'd like to know our goal before we agree with it.
+
+How about CONFIG names and functions?
+Prefix CONFIG options with CONFIG_MMC_TMIO ?
 
 
---uovrehrebwdavoot
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+# core
+obj-$(CONFIG_MMC_TMIO_CORE)           += tmio_mmc_core.o
+# TMIO-builtin MMC
+obj-$(CONFIG_MMC_TMIO)                += tmio_mmc_original.o
+# Reneses
+obj-$(CONFIG_MMC_TMIO_SDHI)           += tmio_mmc_sdhi_core.o
+# UniPhier
+obj-$(CONFIG_MMC_TMIO_UNIPHIER)       += tmio_mmc_uniphier.o
 
-On Tue, Nov 28, 2017 at 04:44:55AM +0100, Adam Borowski wrote:
-> It had an U+FFFD: not a corrupted character but a literal well-formed
-> replacement marker.
->=20
-> Signed-off-by: Adam Borowski <kilobyte@angband.pl>
 
-Ah, I always forgot to fix it :)
+Or, like follows?
 
-Acked-by: Maxime Ripard <maxime.ripard@free-electrons.com>
+# core
+obj-$(CONFIG_MMC_TMIO)                += tmio_mmc.o
+# TMIO-builtin MMC
+obj-$(CONFIG_MMC_TMIO_ORIGINAL)       += tmio_mmc_original.o
+# Reneses
+obj-$(CONFIG_MMC_TMIO_SDHI)           += tmio_mmc_sdhi_core.o
+# UniPhier
+obj-$(CONFIG_MMC_TMIO_UNIPHIER)       += tmio_mmc_uniphier.o
 
-Thanks!
-Maxime
 
---=20
-Maxime Ripard, Free Electrons
-Embedded Linux and Kernel engineering
-http://free-electrons.com
 
---uovrehrebwdavoot
-Content-Type: application/pgp-signature; name="signature.asc"
+What should I do for function names?
+Shall I start with tmio_mmc_uniphier_ ?
 
------BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEE0VqZU19dR2zEVaqr0rTAlCFNr3QFAlodEfoACgkQ0rTAlCFN
-r3TLpBAAlqCNj5XT9tzTthByvfJL4y3LTGIU9PCTEVFIbdKaTRsFMaktCl8yL2+d
-l/g+5NayHLxqffb/4yShUp/czZLv+IjmmJ7fd9xT93mGvIoy2IwbNr1mu9LHPpqD
-y4aOuOUOpTj1O6Y8IzvPMywHC3wz7RM+L37lRinwBi9c1/YDCgEIVWk2BKxbZIi6
-G2pJBkON1lbO25aMVtCLf+fng4ysKOWL6PRj4E9HDyuUlKEJLjhEDJNfRGDRR2Ey
-8EX/xQHzfJSvudIGksEkINp6y9bn2NW/+7HXyou2S9ebGVXoM1o2NpwM1qWY0xiw
-+oApPb7Q7dOOibAnF+uVbI1D4ci6wiOWeQG+jK7ZK2y8rc2ERn8WANPTrUw+aoaa
-UWKwOL2hZ6FVNwhQvAyTGkVXNFx3XktFk78cvqeP+BsslayARhq/mMUi3j49aabq
-ojLbubP0DTMKhcThEXV/MXejTzaFahYRO4MDWhsYlwAGoH/04ZU/EpZRXGqVEWa4
-cvNahFFApsLMQwScsnFnazXi7UpYVRWQayFuiBf4Q2ah57uxRuVz10pta+kUr7XZ
-mxbVdoBPNWuOOyZ/s/NYKLWcmlXpHK20H/w44szl6baF/0m0iVEigO6Exbbacxq6
-4Si9HTY8A2kH7AxtOTtwORAzUy6+XW48n2b3qJZkCgWxnzLxbzU=
-=mvbj
------END PGP SIGNATURE-----
 
---uovrehrebwdavoot--
+
+-- 
+Best Regards
+Masahiro Yamada
