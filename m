@@ -1,48 +1,61 @@
-From: Adam Borowski <kilobyte@angband.pl>
-Subject: [PATCH] mmc: sunxi: fix mojibake in module metadata
-Date: Tue, 28 Nov 2017 04:44:55 +0100
-Message-ID: <20171128034455.10344-1-kilobyte@angband.pl>
+From: "Y.b. Lu" <yangbo.lu@nxp.com>
+Subject: RE: [PATCH v1] mmc: sdhci-of-esdhc: fix the mmc error after sleep on
+ ls1046ardb
+Date: Tue, 28 Nov 2017 04:58:21 +0000
+Message-ID: <DB6PR0401MB2536F64115301C26BF1F4A9CF83A0@DB6PR0401MB2536.eurprd04.prod.outlook.com>
+References: <20171128035706.16939-1-yinbo.zhu@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tartarus.angband.pl ([89.206.35.136]:50638 "EHLO
-        tartarus.angband.pl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752028AbdK1DpL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Nov 2017 22:45:11 -0500
+Received: from mail-db5eur01on0049.outbound.protection.outlook.com ([104.47.2.49]:30880
+        "EHLO EUR01-DB5-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S932070AbdK1E6Z (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 27 Nov 2017 23:58:25 -0500
+In-Reply-To: <20171128035706.16939-1-yinbo.zhu@nxp.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, =?UTF-8?q?David=20Lanzend=C3=B6rfer?= <david.lanzendoerfer@o2s.ch>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-mmc@vger.kernel.org
-Cc: Adam Borowski <kilobyte@angband.pl>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Xiaobo Xie <xiaobo.xie@nxp.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Yinbo Zhu <yinbo.zhu@nxp.com>
 
-It had an U+FFFD: not a corrupted character but a literal well-formed
-replacement marker.
-
-Signed-off-by: Adam Borowski <kilobyte@angband.pl>
----
- drivers/mmc/host/sunxi-mmc.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index cc98355dbdb9..8fef5c17696e 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -3,7 +3,7 @@
-  * (C) Copyright 2007-2011 Reuuimlla Technology Co., Ltd.
-  * (C) Copyright 2007-2011 Aaron Maoye <leafy.myeh@reuuimllatech.com>
-  * (C) Copyright 2013-2014 O2S GmbH <www.o2s.ch>
-- * (C) Copyright 2013-2014 David Lanzend�rfer <david.lanzendoerfer@o2s.ch>
-+ * (C) Copyright 2013-2014 David Lanzendörfer <david.lanzendoerfer@o2s.ch>
-  * (C) Copyright 2013-2014 Hans de Goede <hdegoede@redhat.com>
-  * (C) Copyright 2017 Sootech SA
-  *
-@@ -1393,5 +1393,5 @@ module_platform_driver(sunxi_mmc_driver);
- 
- MODULE_DESCRIPTION("Allwinner's SD/MMC Card Controller Driver");
- MODULE_LICENSE("GPL v2");
--MODULE_AUTHOR("David Lanzend�rfer <david.lanzendoerfer@o2s.ch>");
-+MODULE_AUTHOR("David Lanzendörfer <david.lanzendoerfer@o2s.ch>");
- MODULE_ALIAS("platform:sunxi-mmc");
--- 
-2.15.0
-
+SXQgbWFrZXMgc2Vuc2UuDQoNCkFja2VkLWJ5OiBZYW5nYm8gTHUgPHlhbmdiby5sdUBueHAuY29t
+Pg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IHlpbmJvLnpodUBueHAu
+Y29tIFttYWlsdG86eWluYm8uemh1QG54cC5jb21dDQo+IFNlbnQ6IDIwMTflubQxMeaciDI45pel
+IDExOjU3DQo+IFRvOiBBZHJpYW4gSHVudGVyIDxhZHJpYW4uaHVudGVyQGludGVsLmNvbT4NCj4g
+Q2M6IFhpYW9ibyBYaWUgPHhpYW9iby54aWVAbnhwLmNvbT47IFkuYi4gTHUgPHlhbmdiby5sdUBu
+eHAuY29tPjsNCj4gbGludXgtbW1jQHZnZXIua2VybmVsLm9yZzsgWWluYm8gWmh1IDx5aW5iby56
+aHVAbnhwLmNvbT4NCj4gU3ViamVjdDogW1BBVENIIHYxXSBtbWM6IHNkaGNpLW9mLWVzZGhjOiBm
+aXggdGhlIG1tYyBlcnJvciBhZnRlciBzbGVlcCBvbg0KPiBsczEwNDZhcmRiDQo+IA0KPiBGcm9t
+OiAieWluYm8uemh1IiA8eWluYm8uemh1QG54cC5jb20+DQo+IA0KPiBXaGVuIHN5c3RlbSB3YWtl
+cyB1cCBmcm9tIHNsZWVwIG9uIGxzMTA0NmFyZGIsIHRoZSBTRCBvcGVyYXRpb24gZmFpbHMgd2l0
+aA0KPiBtbWMgZXJyb3IgbWVzc2FnZXMgc2luY2UgRVNESENfVEJfRU4gYml0IGNvdWxkbuKAmXQg
+YmUgY2xlYW5lZCBieQ0KPiBlU0RIQ19TWVNDVExbUlNUQV0uIEl0J3MgcHJvcGVyIHRvIGNsZWFu
+IHRoaXMgYml0IGluIGVzZGhjX3Jlc2V0KCkgcmF0aGVyIHRoYW4gaW4NCj4gcHJvYmUuDQo+IA0K
+PiBTaWduZWQtb2ZmLWJ5OiB5aW5iby56aHUgPHlpbmJvLnpodUBueHAuY29tPg0KPiAtLS0NCj4g
+IGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtZXNkaGMuYyB8IDEyICsrKysrKysrLS0tLQ0KPiAg
+MSBmaWxlIGNoYW5nZWQsIDggaW5zZXJ0aW9ucygrKSwgNCBkZWxldGlvbnMoLSkNCj4gDQo+IGRp
+ZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWVzZGhjLmMNCj4gYi9kcml2ZXJz
+L21tYy9ob3N0L3NkaGNpLW9mLWVzZGhjLmMNCj4gaW5kZXggYWMyNTA1YTk1NDAzLi41ZWUwZDg2
+YTJmNGQgMTAwNjQ0DQo+IC0tLSBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtZXNkaGMuYw0K
+PiArKysgYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWVzZGhjLmMNCj4gQEAgLTU3OCwxMCAr
+NTc4LDE4IEBAIHN0YXRpYyB2b2lkIGVzZGhjX2Nsb2NrX2VuYWJsZShzdHJ1Y3Qgc2RoY2lfaG9z
+dA0KPiAqaG9zdCwgYm9vbCBlbmFibGUpDQo+IA0KPiAgc3RhdGljIHZvaWQgZXNkaGNfcmVzZXQo
+c3RydWN0IHNkaGNpX2hvc3QgKmhvc3QsIHU4IG1hc2spICB7DQo+ICsJdTMyIHZhbDsNCj4gKw0K
+PiAgCXNkaGNpX3Jlc2V0KGhvc3QsIG1hc2spOw0KPiANCj4gIAlzZGhjaV93cml0ZWwoaG9zdCwg
+aG9zdC0+aWVyLCBTREhDSV9JTlRfRU5BQkxFKTsNCj4gIAlzZGhjaV93cml0ZWwoaG9zdCwgaG9z
+dC0+aWVyLCBTREhDSV9TSUdOQUxfRU5BQkxFKTsNCj4gKw0KPiArCWlmIChtYXNrICYgU0RIQ0lf
+UkVTRVRfQUxMKSB7DQo+ICsJCXZhbCA9IHNkaGNpX3JlYWRsKGhvc3QsIEVTREhDX1RCQ1RMKTsN
+Cj4gKwkJdmFsICY9IH5FU0RIQ19UQl9FTjsNCj4gKwkJc2RoY2lfd3JpdGVsKGhvc3QsIHZhbCwg
+RVNESENfVEJDVEwpOw0KPiArCX0NCj4gIH0NCj4gDQo+ICAvKiBUaGUgU0NGRywgU3VwcGxlbWVu
+dGFsIENvbmZpZ3VyYXRpb24gVW5pdCwgcHJvdmlkZXMgU29DIHNwZWNpZmljIEBADQo+IC03NzEs
+MTAgKzc3OSw2IEBAIHN0YXRpYyB2b2lkIGVzZGhjX2luaXQoc3RydWN0IHBsYXRmb3JtX2Rldmlj
+ZSAqcGRldiwgc3RydWN0DQo+IHNkaGNpX2hvc3QgKmhvc3QpDQo+ICAJcGx0Zm1faG9zdCA9IHNk
+aGNpX3ByaXYoaG9zdCk7DQo+ICAJZXNkaGMgPSBzZGhjaV9wbHRmbV9wcml2KHBsdGZtX2hvc3Qp
+Ow0KPiANCj4gLQl2YWwgPSBzZGhjaV9yZWFkbChob3N0LCBFU0RIQ19UQkNUTCk7DQo+IC0JdmFs
+ICY9IH5FU0RIQ19UQl9FTjsNCj4gLQlzZGhjaV93cml0ZWwoaG9zdCwgdmFsLCBFU0RIQ19UQkNU
+TCk7DQo+IC0NCj4gIAlob3N0X3ZlciA9IHNkaGNpX3JlYWR3KGhvc3QsIFNESENJX0hPU1RfVkVS
+U0lPTik7DQo+ICAJZXNkaGMtPnZlbmRvcl92ZXIgPSAoaG9zdF92ZXIgJiBTREhDSV9WRU5ET1Jf
+VkVSX01BU0spID4+DQo+ICAJCQkgICAgIFNESENJX1ZFTkRPUl9WRVJfU0hJRlQ7DQo+IC0tDQo+
+IDIuMTQuMQ0KDQo=
