@@ -1,89 +1,47 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: Re: More TMIO MMC variant. What is a preferred name?
-Date: Tue, 28 Nov 2017 17:04:26 +0900
-Message-ID: <CAK7LNAQtLdXBw_JzW2dYdVtC0b6eGCvO5KByXfKKJVxi02i61g@mail.gmail.com>
-References: <CAK7LNARB+-SzgNF+7KsG80o4Q=TZsEeyMLjR2Ve0bXCrQ5tc0w@mail.gmail.com>
- <20171108175320.wnq3d2x7lmpaya7s@ninjato> <CAK7LNASN8kjmiNHvX7zrgVv=5d81ovfGNRdHm8TXiJNgr+H9MA@mail.gmail.com>
- <20171120201142.n4l4jelxsmmtwjj6@tetsubishi> <CAPDyKFq_uVvBKBhATNYhq2mSMmNXA7tPSSPMESCnTDtQt9XrZA@mail.gmail.com>
- <20171121200111.vrpmsubme55356qv@ninjato> <CAPDyKFo6X+Z6bORzPow=79Q7jXZOu4SMA9dh1fDsD-_JrBRtgA@mail.gmail.com>
- <CAK7LNARpchnGL8ZGWcFs=bxmH2FK71Voyd5K1E6=3bHTjd-gyw@mail.gmail.com>
- <20171122170815.o3o5umayra7kbdg3@ninjato> <CAPDyKFpuiurgT5Zwo--EcaWOjZOdmSYotHrwH=c-byq3nkaxYw@mail.gmail.com>
- <20171127171401.o7ch26oot2au5oux@ninjato>
+From: Bastian Stender <bst@pengutronix.de>
+Subject: Re: [PATCH v2 1/2] mmc: core: prepend 0x to OCR entry in sysfs
+Date: Tue, 28 Nov 2017 09:14:52 +0100
+Message-ID: <8a4f00d5-0d01-7860-7a20-a360d67f2617@pengutronix.de>
+References: <20171127131721.865-1-bst@pengutronix.de>
+ <CAOmT4fTBTiQZBSQqR5Y+dQG_bsOdNtnAFETMECgFROj8qa1hrA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from conssluserg-03.nifty.com ([210.131.2.82]:38859 "EHLO
-        conssluserg-03.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750907AbdK1IFR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Nov 2017 03:05:17 -0500
-Received: from mail-yw0-f180.google.com (mail-yw0-f180.google.com [209.85.161.180]) (authenticated)
-        by conssluserg-03.nifty.com with ESMTP id vAS857NR003088
-        for <linux-mmc@vger.kernel.org>; Tue, 28 Nov 2017 17:05:07 +0900
-Received: by mail-yw0-f180.google.com with SMTP id p74so12944906ywe.2
-        for <linux-mmc@vger.kernel.org>; Tue, 28 Nov 2017 00:05:07 -0800 (PST)
-In-Reply-To: <20171127171401.o7ch26oot2au5oux@ninjato>
+Received: from metis.ext.4.pengutronix.de ([92.198.50.35]:49655 "EHLO
+        metis.ext.4.pengutronix.de" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1752037AbdK1IPB (ORCPT
+        <rfc822;linux-mmc@vger.kernel.ORG>); Tue, 28 Nov 2017 03:15:01 -0500
+In-Reply-To: <CAOmT4fTBTiQZBSQqR5Y+dQG_bsOdNtnAFETMECgFROj8qa1hrA@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms+renesas@verge.net.au>, linux-mmc <linux-mmc@vger.kernel.org>, Marek Vasut <marek.vasut+renesas@gmail.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+To: bojan prtvar <prtvar.b@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Jungseung Lee <js07.lee@samsung.com>, Sascha Hauer <kernel@pengutronix.de>
 
-2017-11-28 2:14 GMT+09:00 Wolfram Sang <wsa@the-dreams.de>:
->
->> > Another try:
->> >
->> >> # core
->> >> obj-$(CONFIG_MMC_TMIO_CORE)           += tmio_mmc_core.o
->> >> # TMIO-builtin MMC
->> >> obj-$(CONFIG_MMC_TMIO)                += tmio_mmc_original.o
->> >> # Reneses
->> >> obj-$(CONFIG_MMC_SDHI)                += tmio_mmc_sdhi_core.o
->> >> # UniPhier
->> >> obj-$(CONFIG_MMC_UNIPHIER)            += tmio_mmc_uniphier.o
->> >
->> > I left the Kconfig symbols for easier updating and concentrated on the
->> > filenames for now.
->> >
+On 11/28/2017 07:44 AM, bojan prtvar wrote:
+> Hi Bastian,
+> 
+> On Mon, Nov 27, 2017 at 2:17 PM, Bastian Stender <bst@pengutronix.de> wrote:
 >>
->> Looks good to me!
->
-> Yamada-san?
+>> The sysfs entry "ocr" was missing the 0x prefix to identify it as hex
+>> formatted.
+>>
+>>
+>> -MMC_DEV_ATTR(pre_eol_info, "%02x\n", card->ext_csd.pre_eol_info);
+>> +MMC_DEV_ATTR(pre_eol_info, "0x%02x\n", card->ext_csd.pre_eol_info);
+> 
+> 
+> Commit messages are swapped for pre_eol_info and ocr patches.
 
-Basically, looks good to me,
-although I'd like to know our goal before we agree with it.
+Argh, yes, you are right, thanks. Will send v3.
 
-How about CONFIG names and functions?
-Prefix CONFIG options with CONFIG_MMC_TMIO ?
-
-
-# core
-obj-$(CONFIG_MMC_TMIO_CORE)           += tmio_mmc_core.o
-# TMIO-builtin MMC
-obj-$(CONFIG_MMC_TMIO)                += tmio_mmc_original.o
-# Reneses
-obj-$(CONFIG_MMC_TMIO_SDHI)           += tmio_mmc_sdhi_core.o
-# UniPhier
-obj-$(CONFIG_MMC_TMIO_UNIPHIER)       += tmio_mmc_uniphier.o
-
-
-Or, like follows?
-
-# core
-obj-$(CONFIG_MMC_TMIO)                += tmio_mmc.o
-# TMIO-builtin MMC
-obj-$(CONFIG_MMC_TMIO_ORIGINAL)       += tmio_mmc_original.o
-# Reneses
-obj-$(CONFIG_MMC_TMIO_SDHI)           += tmio_mmc_sdhi_core.o
-# UniPhier
-obj-$(CONFIG_MMC_TMIO_UNIPHIER)       += tmio_mmc_uniphier.o
-
-
-
-What should I do for function names?
-Shall I start with tmio_mmc_uniphier_ ?
-
-
-
+Regards,
+Bastian
 
 -- 
-Best Regards
-Masahiro Yamada
+Pengutronix e.K.
+Industrial Linux Solutions
+http://www.pengutronix.de/
+Peiner Str. 6-8, 31137 Hildesheim, Germany
+Amtsgericht Hildesheim, HRA 2686
