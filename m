@@ -1,50 +1,75 @@
-From: Milan Stevanovic <milan.o.stevanovic@gmail.com>
-Subject: [PATCH] mmc: sdhci-of-arasan: Add sdhci_arasan_set_power
-Date: Tue, 28 Nov 2017 01:02:57 +0100
-Message-ID: <1511827377-2021-1-git-send-email-milan.o.stevanovic@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: michal.simek@xilinx.com, adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, milan.o.stevanovic@gmail.com
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Subject: Re: [PATCH v2 00/22] mmc: tmio: various fixes and cleanups
+Date: Tue, 28 Nov 2017 11:18:04 +0900
+Message-ID: <CAK7LNAQggGy8xMdURXMNEd_vHCWBVpUYp=H2jP=KGt63HBT5tg@mail.gmail.com>
+References: <1511540697-27387-1-git-send-email-yamada.masahiro@socionext.com> <20171127171324.sprmzsu4dkeo3gon@ninjato>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from conssluserg-02.nifty.com ([210.131.2.81]:17340 "EHLO
+        conssluserg-02.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753527AbdK1CSt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Nov 2017 21:18:49 -0500
+In-Reply-To: <20171127171324.sprmzsu4dkeo3gon@ninjato>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-renesas-soc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
 
-The power register needs to have a valid voltage set
-even when the power supply is managed by  an external regulator.
+Hi Wolfram,
 
-Signed-off-by: Milan Stevanovic <milan.o.stevanovic@gmail.com>
----
- drivers/mmc/host/sdhci-of-arasan.c | 12 ++++++++++++
- 1 file changed, 12 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index 0720ea7..fb57206 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -262,6 +262,17 @@ static int sdhci_arasan_voltage_switch(struct mmc_host *mmc,
- 	return -EINVAL;
- }
- 
-+static void sdhci_arasan_set_power(struct sdhci_host *host, unsigned char mode,
-+		     unsigned short vdd)
-+{
-+	if (!IS_ERR(host->mmc->supply.vmmc)) {
-+		struct mmc_host *mmc = host->mmc;
-+
-+		mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
-+	}
-+	sdhci_set_power_noreg(host, mode, vdd);
-+}
-+
- static const struct sdhci_ops sdhci_arasan_ops = {
- 	.set_clock = sdhci_arasan_set_clock,
- 	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
-@@ -269,6 +280,7 @@ static const struct sdhci_ops sdhci_arasan_ops = {
- 	.set_bus_width = sdhci_set_bus_width,
- 	.reset = sdhci_arasan_reset,
- 	.set_uhs_signaling = sdhci_set_uhs_signaling,
-+	.set_power = sdhci_arasan_set_power,
- };
- 
- static const struct sdhci_pltfm_data sdhci_arasan_pdata = {
+2017-11-28 2:13 GMT+09:00 Wolfram Sang <wsa@the-dreams.de>:
+>
+>> I am getting more and more patches for TMIO.
+>> I put all in a single series to clarify the patch order.
+>
+> Hmmm, that makes reviewing harder in my opinion.
+
+
+I think this depends on people.
+
+You are the maintainer of TMIO MMC, so
+I will try my best to adjust to your opinion next time.
+
+
+
+> I really liked the small serieses which could be improved, acked, and
+> applied. This big one will take much longer to review and resending will
+> cause quite some noise.
+>
+> For clarifying patch order in small series, it should be enough to state
+> the dependencies in the cover letter. Super helpful is providing a
+> public git branch where ppl can pull from.
+>
+> Also, can you state what kind of testing you did on what platforms?
+
+I have no Renesas boards.
+
+I tested this series on UniPhier boards.
+(arch/arm/boot/dts/uniphier*.dts,  arch/arm64/boot/dts/socionext/uniphier*.dts)
+
+
+> My
+> gut feeling says that the card detect changes might be easy to catch
+> regressions on old platforms, so we'd need to be extra cautious. I/we
+> can do testing on some Renesas platforms, too.
+>
+> Other changes like moving stuff from tmio_core to renesas_sdhi is less
+> critical. Either it works or not, so that is easy to spot :)
+>
+> Which might be another argument for multiple smaller patch series.
+>
+> Nonetheless, I'll try to get this reviewed in the next days...
+
+Thanks!
+
+
+> All the best,
+>
+>    Wolfram
+>
+>
 -- 
-2.7.4
+Best Regards
+Masahiro Yamada
