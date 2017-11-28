@@ -1,7 +1,7 @@
 From: Milan Stevanovic <milan.o.stevanovic@gmail.com>
 Subject: [PATCH] mmc: sdhci-of-arasan: Add sdhci_arasan_set_power
-Date: Tue, 28 Nov 2017 00:51:57 +0100
-Message-ID: <1511826717-8777-1-git-send-email-milan.o.stevanovic@gmail.com>
+Date: Tue, 28 Nov 2017 01:02:57 +0100
+Message-ID: <1511827377-2021-1-git-send-email-milan.o.stevanovic@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: michal.simek@xilinx.com, adrian.hunter@intel.com, ulf.hansson@linaro.org
