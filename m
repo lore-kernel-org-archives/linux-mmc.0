@@ -1,63 +1,66 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 1/2] mmc: core: prepend 0x to pre_eol_info entry in sysfs
-Date: Wed, 29 Nov 2017 11:03:52 +0100
-Message-ID: <CAPDyKFqNsuYk_KbHEwNxKhnWuxfLmcxzP3r9sF8FWg286c4inw@mail.gmail.com>
-References: <20171128082407.22303-1-bst@pengutronix.de>
+Subject: Re: [PATCH] mmc: sunxi: fix mojibake in module metadata
+Date: Wed, 29 Nov 2017 11:03:57 +0100
+Message-ID: <CAPDyKFqWJeZ4e7BYj3gWCiKen2jaU-+DQzpNjCgsN3Atbxs+YA@mail.gmail.com>
+References: <20171128034455.10344-1-kilobyte@angband.pl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f68.google.com ([209.85.214.68]:39094 "EHLO
+Received: from mail-it0-f68.google.com ([209.85.214.68]:36015 "EHLO
         mail-it0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752412AbdK2KDx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Nov 2017 05:03:53 -0500
-Received: by mail-it0-f68.google.com with SMTP id 68so3439716ite.4
-        for <linux-mmc@vger.kernel.org>; Wed, 29 Nov 2017 02:03:53 -0800 (PST)
-In-Reply-To: <20171128082407.22303-1-bst@pengutronix.de>
+        with ESMTP id S1752480AbdK2KD6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Nov 2017 05:03:58 -0500
+Received: by mail-it0-f68.google.com with SMTP id d16so3459128itj.1
+        for <linux-mmc@vger.kernel.org>; Wed, 29 Nov 2017 02:03:58 -0800 (PST)
+In-Reply-To: <20171128034455.10344-1-kilobyte@angband.pl>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Bastian Stender <bst@pengutronix.de>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Bojan Prtvar <prtvar.b@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, Jungseung Lee <js07.lee@samsung.com>, Sascha Hauer <kernel@pengutronix.de>
+To: Adam Borowski <kilobyte@angband.pl>
+Cc: =?UTF-8?Q?David_Lanzend=C3=B6rfer?= <david.lanzendoerfer@o2s.ch>, Maxime Ripard <maxime.ripard@free-electrons.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 28 November 2017 at 09:24, Bastian Stender <bst@pengutronix.de> wrote:
-> The sysfs entry "pre_eol_info" was missing the 0x prefix to identify it
-> as hex formatted.
+On 28 November 2017 at 04:44, Adam Borowski <kilobyte@angband.pl> wrote:
+> It had an U+FFFD: not a corrupted character but a literal well-formed
+> replacement marker.
 >
-> Fixes: 46bc5c408e4e ("mmc: core: Export device lifetime information through sysfs")
-> Signed-off-by: Bastian Stender <bst@pengutronix.de>
+> Signed-off-by: Adam Borowski <kilobyte@angband.pl>
 
-Thanks, applied for fixes!
-
-I added a stable tag and also took the liberty of amending the change
-to cover SD-cards (as that was also a part of the commit you fix).
+Thanks, applied for next!
 
 Kind regards
 Uffe
 
 > ---
-> Changes since (implicit) v1 ("mmc: core: prepend 0x to hex numbers in sysfs"):
->   - split into two patches, each fixing its introducing commit (as
->       requested by Ulf Hansson)
+>  drivers/mmc/host/sunxi-mmc.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 >
-> Changes since v2:
->   - commit messages were accidentally swapped, fix it
->   - fix typo in commit message
-> ---
->  drivers/mmc/core/mmc.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+> index cc98355dbdb9..8fef5c17696e 100644
+> --- a/drivers/mmc/host/sunxi-mmc.c
+> +++ b/drivers/mmc/host/sunxi-mmc.c
+> @@ -3,7 +3,7 @@
+>   * (C) Copyright 2007-2011 Reuuimlla Technology Co., Ltd.
+>   * (C) Copyright 2007-2011 Aaron Maoye <leafy.myeh@reuuimllatech.com>
+>   * (C) Copyright 2013-2014 O2S GmbH <www.o2s.ch>
+> - * (C) Copyright 2013-2014 David Lanzend=EF=BF=BDrfer <david.lanzendoerf=
+er@o2s.ch>
+> + * (C) Copyright 2013-2014 David Lanzend=C3=B6rfer <david.lanzendoerfer@=
+o2s.ch>
+>   * (C) Copyright 2013-2014 Hans de Goede <hdegoede@redhat.com>
+>   * (C) Copyright 2017 Sootech SA
+>   *
+> @@ -1393,5 +1393,5 @@ module_platform_driver(sunxi_mmc_driver);
 >
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 36217ad5e9b1..b935ad895701 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -780,7 +780,7 @@ MMC_DEV_ATTR(manfid, "0x%06x\n", card->cid.manfid);
->  MMC_DEV_ATTR(name, "%s\n", card->cid.prod_name);
->  MMC_DEV_ATTR(oemid, "0x%04x\n", card->cid.oemid);
->  MMC_DEV_ATTR(prv, "0x%x\n", card->cid.prv);
-> -MMC_DEV_ATTR(pre_eol_info, "%02x\n", card->ext_csd.pre_eol_info);
-> +MMC_DEV_ATTR(pre_eol_info, "0x%02x\n", card->ext_csd.pre_eol_info);
->  MMC_DEV_ATTR(life_time, "0x%02x 0x%02x\n",
->         card->ext_csd.device_life_time_est_typ_a,
->         card->ext_csd.device_life_time_est_typ_b);
+>  MODULE_DESCRIPTION("Allwinner's SD/MMC Card Controller Driver");
+>  MODULE_LICENSE("GPL v2");
+> -MODULE_AUTHOR("David Lanzend=EF=BF=BDrfer <david.lanzendoerfer@o2s.ch>")=
+;
+> +MODULE_AUTHOR("David Lanzend=C3=B6rfer <david.lanzendoerfer@o2s.ch>");
+>  MODULE_ALIAS("platform:sunxi-mmc");
 > --
-> 2.11.0
+> 2.15.0
 >
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
