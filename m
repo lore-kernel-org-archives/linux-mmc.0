@@ -1,7 +1,7 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V15 02/22] mmc: block: Simplify cleaning up the queue
-Date: Wed, 29 Nov 2017 15:40:59 +0200
-Message-ID: <1511962879-24262-3-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V15 04/22] mmc: block: Add error-handling comments
+Date: Wed, 29 Nov 2017 15:41:01 +0200
+Message-ID: <1511962879-24262-5-git-send-email-adrian.hunter@intel.com>
 References: <1511962879-24262-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1511962879-24262-1-git-send-email-adrian.hunter@intel.com>
@@ -10,70 +10,104 @@ To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-mmc@vger.kernel.org
 
-Use blk_cleanup_queue() to shutdown the queue when the driver is removed,
-and instead get an extra reference to the queue to prevent the queue being
-freed before the final mmc_blk_put().
+Add error-handling comments to explain what would also be done for blk-mq
+if it used the legacy error-handling.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/block.c | 17 ++++++++++++-----
- drivers/mmc/core/queue.c |  2 ++
- 2 files changed, 14 insertions(+), 5 deletions(-)
+ drivers/mmc/core/block.c | 36 +++++++++++++++++++++++++++++++++++-
+ 1 file changed, 35 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index ccfa98af1dd3..e44f6d90aeb4 100644
+index e44f6d90aeb4..7dcd5d5b203b 100644
 --- a/drivers/mmc/core/block.c
 +++ b/drivers/mmc/core/block.c
-@@ -189,7 +189,7 @@ static void mmc_blk_put(struct mmc_blk_data *md)
- 	md->usage--;
- 	if (md->usage == 0) {
- 		int devidx = mmc_get_devidx(md->disk);
--		blk_cleanup_queue(md->queue.queue);
-+		blk_put_queue(md->queue.queue);
- 		ida_simple_remove(&mmc_blk_ida, devidx);
- 		put_disk(md->disk);
- 		kfree(md);
-@@ -2156,6 +2156,17 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+@@ -1911,7 +1911,11 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *new_req)
+ 		case MMC_BLK_SUCCESS:
+ 		case MMC_BLK_PARTIAL:
+ 			/*
+-			 * A block was successfully transferred.
++			 * Reset success, and accept bytes_xfered. For
++			 * MMC_BLK_PARTIAL re-submit the remaining request. For
++			 * MMC_BLK_SUCCESS error out the remaining request (it
++			 * could not be re-submitted anyway if a next request
++			 * had already begun).
+ 			 */
+ 			mmc_blk_reset_success(md, type);
  
- 	md->queue.blkdata = md;
+@@ -1931,6 +1935,14 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *new_req)
+ 			}
+ 			break;
+ 		case MMC_BLK_CMD_ERR:
++			/*
++			 * For SD cards, get bytes written, but do not accept
++			 * bytes_xfered if that fails. For MMC cards accept
++			 * bytes_xfered. Then try to reset. If reset fails then
++			 * error out the remaining request, otherwise retry
++			 * once (N.B mmc_blk_reset() will not succeed twice in a
++			 * row).
++			 */
+ 			req_pending = mmc_blk_rw_cmd_err(md, card, brq, old_req, req_pending);
+ 			if (mmc_blk_reset(md, card->host, type)) {
+ 				if (req_pending)
+@@ -1947,11 +1959,20 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *new_req)
+ 			}
+ 			break;
+ 		case MMC_BLK_RETRY:
++			/*
++			 * Do not accept bytes_xfered, but retry up to 5 times,
++			 * otherwise same as abort.
++			 */
+ 			retune_retry_done = brq->retune_retry_done;
+ 			if (retry++ < 5)
+ 				break;
+ 			/* Fall through */
+ 		case MMC_BLK_ABORT:
++			/*
++			 * Do not accept bytes_xfered, but try to reset. If
++			 * reset succeeds, try once more, otherwise error out
++			 * the request.
++			 */
+ 			if (!mmc_blk_reset(md, card->host, type))
+ 				break;
+ 			mmc_blk_rw_cmd_abort(mq, card, old_req, mq_rq);
+@@ -1960,6 +1981,13 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *new_req)
+ 		case MMC_BLK_DATA_ERR: {
+ 			int err;
  
-+	/*
-+	 * Keep an extra reference to the queue so that we can shutdown the
-+	 * queue (i.e. call blk_cleanup_queue()) while there are still
-+	 * references to the 'md'. The corresponding blk_put_queue() is in
-+	 * mmc_blk_put().
-+	 */
-+	if (!blk_get_queue(md->queue.queue)) {
-+		mmc_cleanup_queue(&md->queue);
-+		goto err_putdisk;
-+	}
-+
- 	md->disk->major	= MMC_BLOCK_MAJOR;
- 	md->disk->first_minor = devidx * perdev_minors;
- 	md->disk->fops = &mmc_bdops;
-@@ -2471,10 +2482,6 @@ static void mmc_blk_remove_req(struct mmc_blk_data *md)
- 		 * from being accepted.
- 		 */
- 		card = md->queue.card;
--		spin_lock_irq(md->queue.queue->queue_lock);
--		queue_flag_set(QUEUE_FLAG_BYPASS, md->queue.queue);
--		spin_unlock_irq(md->queue.queue->queue_lock);
--		blk_set_queue_dying(md->queue.queue);
- 		mmc_cleanup_queue(&md->queue);
- 		if (md->disk->flags & GENHD_FL_UP) {
- 			device_remove_file(disk_to_dev(md->disk), &md->force_ro);
-diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-index 26f8da30ebe5..ae6d9da68735 100644
---- a/drivers/mmc/core/queue.c
-+++ b/drivers/mmc/core/queue.c
-@@ -268,6 +268,8 @@ void mmc_cleanup_queue(struct mmc_queue *mq)
- 	blk_start_queue(q);
- 	spin_unlock_irqrestore(q->queue_lock, flags);
- 
-+	blk_cleanup_queue(q);
-+
- 	mq->card = NULL;
- }
- 
++			/*
++			 * Do not accept bytes_xfered, but try to reset. If
++			 * reset succeeds, try once more. If reset fails with
++			 * ENODEV which means the partition is wrong, then error
++			 * out the request. Otherwise attempt to read one sector
++			 * at a time.
++			 */
+ 			err = mmc_blk_reset(md, card->host, type);
+ 			if (!err)
+ 				break;
+@@ -1971,6 +1999,10 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *new_req)
+ 			/* Fall through */
+ 		}
+ 		case MMC_BLK_ECC_ERR:
++			/*
++			 * Do not accept bytes_xfered. If reading more than one
++			 * sector, try reading one sector at a time.
++			 */
+ 			if (brq->data.blocks > 1) {
+ 				/* Redo read one sector at a time */
+ 				pr_warn("%s: retrying using single block read\n",
+@@ -1992,10 +2024,12 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *new_req)
+ 			}
+ 			break;
+ 		case MMC_BLK_NOMEDIUM:
++			/* Do not accept bytes_xfered. Error out the request */
+ 			mmc_blk_rw_cmd_abort(mq, card, old_req, mq_rq);
+ 			mmc_blk_rw_try_restart(mq, new_req, mqrq_cur);
+ 			return;
+ 		default:
++			/* Do not accept bytes_xfered. Error out the request */
+ 			pr_err("%s: Unhandled return value (%d)",
+ 					old_req->rq_disk->disk_name, status);
+ 			mmc_blk_rw_cmd_abort(mq, card, old_req, mq_rq);
 -- 
 1.9.1
