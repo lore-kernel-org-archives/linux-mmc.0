@@ -1,7 +1,7 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V15 13/22] mmc: block: blk-mq: Check error bits and save the exception bit when polling card busy
-Date: Wed, 29 Nov 2017 15:41:10 +0200
-Message-ID: <1511962879-24262-14-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V15 15/22] mmc: block: Check for transfer state in card_busy_detect()
+Date: Wed, 29 Nov 2017 15:41:12 +0200
+Message-ID: <1511962879-24262-16-git-send-email-adrian.hunter@intel.com>
 References: <1511962879-24262-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1511962879-24262-1-git-send-email-adrian.hunter@intel.com>
@@ -10,85 +10,57 @@ To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-mmc@vger.kernel.org
 
-Check error bits and save the exception bit when polling card busy.
+The card is required to return to transfer state. Since that is the state
+required to start another transfer, check for that state instead of
+programming state.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/block.c | 37 ++++++++++++++++++++++++++++---------
- 1 file changed, 28 insertions(+), 9 deletions(-)
+ drivers/mmc/core/block.c | 17 +++++++++++++----
+ 1 file changed, 13 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 30fc012353ae..c446d17b48c4 100644
+index f7c387c27ac0..0b40fc2ebf77 100644
 --- a/drivers/mmc/core/block.c
 +++ b/drivers/mmc/core/block.c
-@@ -1457,15 +1457,18 @@ static inline void mmc_apply_rel_rw(struct mmc_blk_request *brq,
- 	}
+@@ -922,6 +922,16 @@ static int mmc_sd_num_wr_blocks(struct mmc_card *card, u32 *written_blocks)
+ 	return 0;
  }
  
--#define CMD_ERRORS							\
--	(R1_OUT_OF_RANGE |	/* Command argument out of range */	\
--	 R1_ADDRESS_ERROR |	/* Misaligned address */		\
-+#define CMD_ERRORS_EXCL_OOR						\
-+	(R1_ADDRESS_ERROR |	/* Misaligned address */		\
- 	 R1_BLOCK_LEN_ERROR |	/* Transferred block length incorrect */\
- 	 R1_WP_VIOLATION |	/* Tried to write to protected block */	\
- 	 R1_CARD_ECC_FAILED |	/* Card ECC failed */			\
- 	 R1_CC_ERROR |		/* Card controller error */		\
- 	 R1_ERROR)		/* General/unknown error */
- 
-+#define CMD_ERRORS							\
-+	(CMD_ERRORS_EXCL_OOR |						\
-+	 R1_OUT_OF_RANGE)	/* Command argument out of range */	\
-+
- static void mmc_blk_eval_resp_error(struct mmc_blk_request *brq)
- {
- 	u32 val;
-@@ -2157,24 +2160,40 @@ static inline bool mmc_blk_rq_error(struct mmc_blk_request *brq)
- 	       brq->data.error || brq->cmd.resp[0] & CMD_ERRORS;
- }
- 
-+static inline bool mmc_blk_oor_valid(struct mmc_blk_request *brq)
++static inline bool mmc_blk_in_tran_state(u32 status)
 +{
-+	return !!brq->mrq.sbc;
-+}
-+
-+static inline u32 mmc_blk_stop_err_bits(struct mmc_blk_request *brq)
-+{
-+	return mmc_blk_oor_valid(brq) ? CMD_ERRORS : CMD_ERRORS_EXCL_OOR;
-+}
-+
- static int mmc_blk_card_busy(struct mmc_card *card, struct request *req)
- {
- 	struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
--	bool gen_err = false;
-+	u32 status = 0;
- 	int err;
- 
- 	if (mmc_host_is_spi(card->host) || rq_data_dir(req) == READ)
- 		return 0;
- 
--	err = card_busy_detect_err(card, MMC_BLK_TIMEOUT_MS, false, req,
--				   &gen_err);
-+	err = card_busy_detect(card, MMC_BLK_TIMEOUT_MS, false, req, &status);
- 
--	/* Copy the general error bit so it will be seen later on */
--	if (gen_err) {
--		mqrq->brq.stop.resp[0] |= R1_ERROR;
 +	/*
-+	 * Do not assume data transferred correctly if there are any error bits
-+	 * set.
++	 * Some cards mishandle the status bits, so make sure to check both the
++	 * busy indication and the card state.
 +	 */
-+	if (status & mmc_blk_stop_err_bits(&mqrq->brq)) {
-+		mqrq->brq.data.bytes_xfered = 0;
- 		err = err ? err : -EIO;
- 	}
- 
-+	/* Copy the exception bit so it will be seen later on */
-+	if (mmc_card_mmc(card) && status & R1_EXCEPTION_EVENT)
-+		mqrq->brq.cmd.resp[0] |= R1_EXCEPTION_EVENT;
++	return status & R1_READY_FOR_DATA &&
++	       (R1_CURRENT_STATE(status) == R1_STATE_TRAN);
++}
 +
+ static int card_busy_detect(struct mmc_card *card, unsigned int timeout_ms,
+ 			    bool hw_busy_detect, struct request *req,
+ 			    u32 *resp_errs)
+@@ -954,9 +964,9 @@ static int card_busy_detect(struct mmc_card *card, unsigned int timeout_ms,
+ 		 * leaves the program state.
+ 		 */
+ 		if (done) {
+-			pr_err("%s: Card stuck in programming state! %s %s\n",
++			pr_err("%s: Card stuck in wrong state! %s %s status: %#x\n",
+ 				mmc_hostname(card->host),
+-				req->rq_disk->disk_name, __func__);
++				req->rq_disk->disk_name, __func__, status);
+ 			return -ETIMEDOUT;
+ 		}
+ 
+@@ -965,8 +975,7 @@ static int card_busy_detect(struct mmc_card *card, unsigned int timeout_ms,
+ 		 * so make sure to check both the busy
+ 		 * indication and the card state.
+ 		 */
+-	} while (!(status & R1_READY_FOR_DATA) ||
+-		 (R1_CURRENT_STATE(status) == R1_STATE_PRG));
++	} while (!mmc_blk_in_tran_state(status));
+ 
  	return err;
  }
- 
 -- 
 1.9.1
