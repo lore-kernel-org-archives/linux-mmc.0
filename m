@@ -1,42 +1,58 @@
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH] mmc: core: properly init drv_type
-Date: Thu, 30 Nov 2017 15:49:10 +0100
-Message-ID: <20171130144910.4320-1-wsa+renesas@sang-engineering.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([88.99.104.3]:58675 "EHLO pokefinder.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752713AbdK3Otc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 30 Nov 2017 09:49:32 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+From: Philippe Ombredanne <pombredanne@nexb.com>
+Subject: Re: [PATCH V4] mmc:host:sdhci-pci:Addition of Arasan PCI Controller
+ with integrated phy.
+Date: Thu, 30 Nov 2017 17:14:32 +0100
+Message-ID: <CAOFm3uFvY0DQjs0wMWfMFSn=gDLA-Awm3sRo+K6G4HefHt25sw@mail.gmail.com>
+References: <1511910201-6095-1-git-send-email-agarg@arasan.com> <4616254b-d58b-53f3-eb51-a6ed3c210139@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <4616254b-d58b-53f3-eb51-a6ed3c210139@intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Atul Garg <agarg@arasan.com>, linux-mmc@vger.kernel.org, kishon@ti.com, rk@ti.com, nm@ti.com, nsekhar@ti.com, ulf.hansson@linaro.org, LKML <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-renesas-soc@vger.kernel.org, Simon Horman <horms@verge.net.au>, Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Colin Ian King <colin.king@canonical.com>, Dan Carpenter <dan.carpenter@oracle.com>
 
-When the latest version of parsing the new eMMC bindings was moved from
-core.c to mmc.c, it was overlooked that drv_type could be used
-uninitialized. Fix it!
+On Thu, Nov 30, 2017 at 3:29 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 29/11/17 01:03, Atul Garg wrote:
+[]
+>> diff --git a/drivers/mmc/host/sdhci-pci-arasan.c b/drivers/mmc/host/sdhci-pci-arasan.c
+>> new file mode 100644
+>> index 0000000..6529f30
+>> --- /dev/null
+>> +++ b/drivers/mmc/host/sdhci-pci-arasan.c
+>> @@ -0,0 +1,314 @@
+>> +/*
+>> + * Copyright (C) 2017 Arasan Chip Systems Inc.,
+>> + *
+>> + * Author: Atul Garg <agarg@arasan.com>
+>> + *
+>> + * This software is licensed under the terms of the GNU General Public
+>> + * License version 2, as published by the Free Software Foundation, and
+>> + * may be copied, distributed, and modified under those terms.
+>> + *
+>> + * This program is distributed in the hope that it will be useful,
+>> + * but WITHOUT ANY WARRANTY; without even the implied warranty of
+>> + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+>> + * GNU General Public License for more details.
+>> + *
+>> + */
 
-Fixes: 6186d06c519e21 ("mmc: parse new binding for eMMC fixed driver type")
-Reported-by: Colin Ian King <colin.king@canonical.com>
-Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
- drivers/mmc/core/mmc.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Would it make sense to use the new SPDX ids here?
+e.g something like this instead?
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index a552f61060d212..0d1c6b025ca596 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1290,7 +1290,7 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
- 
- static void mmc_select_driver_type(struct mmc_card *card)
- {
--	int card_drv_type, drive_strength, drv_type;
-+	int card_drv_type, drive_strength, drv_type = 0;
- 	int fixed_drv_type = card->host->fixed_drv_type;
- 
- 	card_drv_type = card->ext_csd.raw_driver_strength |
--- 
-2.11.0
+>> +// SPDX-License-Identifier: GPL-2.0
+>> +/*
+>> + * Copyright (C) 2017 Arasan Chip Systems Inc.
+>> + *
+>> + * Author: Atul Garg <agarg@arasan.com>
+>> + */
 
+Shorter and cleaner!
+
+In any case you likely do not want a trailing comma after Arasan Chip
+Systems Inc.
+
+--
+Cordially
+Philippe Ombredanne
