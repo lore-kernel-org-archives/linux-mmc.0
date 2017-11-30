@@ -1,58 +1,43 @@
-From: Philippe Ombredanne <pombredanne@nexb.com>
-Subject: Re: [PATCH V4] mmc:host:sdhci-pci:Addition of Arasan PCI Controller
- with integrated phy.
-Date: Thu, 30 Nov 2017 17:14:32 +0100
-Message-ID: <CAOFm3uFvY0DQjs0wMWfMFSn=gDLA-Awm3sRo+K6G4HefHt25sw@mail.gmail.com>
-References: <1511910201-6095-1-git-send-email-agarg@arasan.com> <4616254b-d58b-53f3-eb51-a6ed3c210139@intel.com>
+From: Simon Horman <horms@verge.net.au>
+Subject: Possible regression due to "arm64: renesas: salvator: set driver
+ type for eMMC"
+Date: Thu, 30 Nov 2017 17:18:03 +0100
+Message-ID: <20171130161759.47tjyfqefoffpus3@verge.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <4616254b-d58b-53f3-eb51-a6ed3c210139@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Atul Garg <agarg@arasan.com>, linux-mmc@vger.kernel.org, kishon@ti.com, rk@ti.com, nm@ti.com, nsekhar@ti.com, ulf.hansson@linaro.org, LKML <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from kirsty.vergenet.net ([202.4.237.240]:49629 "EHLO
+        kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751486AbdK3QSI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Nov 2017 11:18:08 -0500
+Content-Disposition: inline
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 
-On Thu, Nov 30, 2017 at 3:29 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 29/11/17 01:03, Atul Garg wrote:
-[]
->> diff --git a/drivers/mmc/host/sdhci-pci-arasan.c b/drivers/mmc/host/sdhci-pci-arasan.c
->> new file mode 100644
->> index 0000000..6529f30
->> --- /dev/null
->> +++ b/drivers/mmc/host/sdhci-pci-arasan.c
->> @@ -0,0 +1,314 @@
->> +/*
->> + * Copyright (C) 2017 Arasan Chip Systems Inc.,
->> + *
->> + * Author: Atul Garg <agarg@arasan.com>
->> + *
->> + * This software is licensed under the terms of the GNU General Public
->> + * License version 2, as published by the Free Software Foundation, and
->> + * may be copied, distributed, and modified under those terms.
->> + *
->> + * This program is distributed in the hope that it will be useful,
->> + * but WITHOUT ANY WARRANTY; without even the implied warranty of
->> + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
->> + * GNU General Public License for more details.
->> + *
->> + */
+Hi Wolfram,
 
-Would it make sense to use the new SPDX ids here?
-e.g something like this instead?
+I have observed the following behaviour in renesas-devel-20171130-v4.15-rc1
+which I have bisected down to being caused by d3decc2c34c8 ("arm64: dts:
+renesas: salvator: set driver type for eMMC"). The patch in question is
+based on v4.15-rc1.
 
->> +// SPDX-License-Identifier: GPL-2.0
->> +/*
->> + * Copyright (C) 2017 Arasan Chip Systems Inc.
->> + *
->> + * Author: Atul Garg <agarg@arasan.com>
->> + */
+I am compiling using renesas_defconfig
 
-Shorter and cleaner!
+The problem manifests on Salvator-X / H3 ES1.0.
 
-In any case you likely do not want a trailing comma after Arasan Chip
-Systems Inc.
+[    2.567304] renesas_sdhi_internal_dmac ee140000.sd: mmc0 base at 0xee140000 max clock rate 200 MHz
+[    2.700110] mmc0: tuning execution failed: -5
+[    2.704591] mmc0: error -5 whilst initialising MMC card
+[    2.783042] mmc0: tuning execution failed: -5
+[    2.783057] mmc0: error -5 whilst initialising MMC card
+[    2.935219] mmc0: tuning execution failed: -5
+[    2.939676] mmc0: error -5 whilst initialising MMC card
+[    3.103876] renesas_sdhi_internal_dmac ee100000.sd: mmc1 base at 0xee100000 max clock rate 200 MHz
+[    3.174033] mmc0: tuning execution failed: -5
 
---
-Cordially
-Philippe Ombredanne
+The behaviour on Salvator-XS / H3 ES2.0 seems inconsistent.
+
+And on Salvator-X / M3-W ES1.0 I do not see the problem regardless of
+the presence of the patch.
