@@ -1,53 +1,49 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 2/2] mmc: mmc_test: Ensure command queue is disabled for testing
-Date: Fri,  1 Dec 2017 14:55:31 +0200
-Message-ID: <1512132931-12380-3-git-send-email-adrian.hunter@intel.com>
-References: <1512132931-12380-1-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH V15 00/22] mmc: Add Command Queue support
+Date: Fri, 1 Dec 2017 15:13:46 +0200
+Message-ID: <d35cff56-0923-cd9e-72ac-087819d4fed6@intel.com>
+References: <1511962879-24262-1-git-send-email-adrian.hunter@intel.com>
+ <CAPDyKFrgC91Z3P-5U22gjKDqs_aZiQncGUrShWpFggkWzrRMjw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga05.intel.com ([192.55.52.43]:2863 "EHLO mga05.intel.com"
+Received: from mga09.intel.com ([134.134.136.24]:17906 "EHLO mga09.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752348AbdLAMzy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 1 Dec 2017 07:55:54 -0500
-In-Reply-To: <1512132931-12380-1-git-send-email-adrian.hunter@intel.com>
+        id S1752745AbdLANOK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 1 Dec 2017 08:14:10 -0500
+In-Reply-To: <CAPDyKFrgC91Z3P-5U22gjKDqs_aZiQncGUrShWpFggkWzrRMjw@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Christoph Hellwig <hch@lst.de>
 
-mmc_test disables the command queue because none of the tests use the
-command queue. However the Reset Test will re-enable it, so disable it in
-that case too.
+On 29/11/17 17:47, Ulf Hansson wrote:
+> Hi Adrian,
+> 
+> On 29 November 2017 at 14:40, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> Hi
+>>
+>> Here is V15 of the hardware command queue patches without the software
+>> command queue patches, now using blk-mq and now with blk-mq support for
+>> non-CQE I/O.
+> 
+> I have applied patches 1->19 for next.  Deferring patch 21->23 for a while.
 
-Fixes: 9d4579a85c84 ("mmc: mmc_test: Disable Command Queue while mmc_test is used")
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/core/mmc_test.c | 11 +++++++++--
- 1 file changed, 9 insertions(+), 2 deletions(-)
+Thank you!
 
-diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
-index f96bbb8014e1..ef18daeaa4cc 100644
---- a/drivers/mmc/core/mmc_test.c
-+++ b/drivers/mmc/core/mmc_test.c
-@@ -2320,10 +2320,17 @@ static int mmc_test_reset(struct mmc_test_card *test)
- 	int err;
- 
- 	err = mmc_hw_reset(host);
--	if (!err)
-+	if (!err) {
-+		/*
-+		 * Reset will re-enable the card's command queue, but tests
-+		 * expect it to be disabled.
-+		 */
-+		if (card->ext_csd.cmdq_en)
-+			mmc_cmdq_disable(card);
- 		return RESULT_OK;
--	else if (err == -EOPNOTSUPP)
-+	} else if (err == -EOPNOTSUPP) {
- 		return RESULT_UNSUP_HOST;
-+	}
- 
- 	return RESULT_FAIL;
- }
--- 
-1.9.1
+> 
+> For those patches that was more or less the same as in v14, I added Linus' ack.
+> 
+> Hopefully we get some help for the community to test this series on
+> different HW (and I will be checking kernelci's boot reports). I
+> haven't added Bartlomiej's tested-by and neither Linus' (because of
+> the changes that has been made), so I hoping that will happen sooner
+> or later.
+> 
+> Moreover, I will gladly add more peoples acks/reviewed-by and
+> tested-by tags, at any point during this release cycle.
 
+I also encourage anyone testing to report their results even if they don't
+want to have a tested-by tag.
