@@ -1,153 +1,73 @@
-From: Shah Nehal-Bakulchandra <Nehal-Bakulchandra.Shah@amd.com>
-Subject: [PATCH v5] mmc: sdhci-acpi: Add support for ACPI HID of AMD Controller with HS400
-Date: Fri,  1 Dec 2017 15:38:52 +0530
-Message-ID: <1512122932-24836-1-git-send-email-Nehal-Bakulchandra.Shah@amd.com>
-Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-sn1nam02on0055.outbound.protection.outlook.com ([104.47.36.55]:37855
-        "EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751771AbdLAKJe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 1 Dec 2017 05:09:34 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v.4.15-rc2
+Date: Fri,  1 Dec 2017 11:25:12 +0100
+Message-ID: <1512123912-11498-1-git-send-email-ulf.hansson@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org, adrian.hunter@intel.com
-Cc: linux-mmc@vger.kernel.org, Shyam-sundar.S-k@amd.com, Sandeep.Singh@amd.com, Nitesh-kumar.Agrawal@amd.com, Shah Nehal-Bakulchandra <Nehal-bakulchandra.Shah@amd.com>
 
-From: Shah Nehal-Bakulchandra <Nehal-bakulchandra.Shah@amd.com>
+Hi Linus,
 
-This patch supports HS400 for AMD upcoming emmc 5.0 controller.The
-HS400 and HS200 mode requires hardware work around also. This patch
-adds the quirks for the same.
+Here's a PR with a couple of MMC fixes intended for v4.15-rc2. The changes as
+based on a commit during the mergewindow and have been tested in linux-next for
+a while by now.
 
-Signed-off-by: Nehal-bakulchandra Shah <Nehal-bakulchandra.Shah@amd.com>
----
+Details about the highlights are as usual found in the signed tag.
 
-Changes since v1:(https://patchwork.kernel.org/patch/9813945/)
-*Reworked on review comments received which has the following:
-->Created amd probe slot function.
-->Reduce mmc core dependency changes
-->Fix some alignment problems.
- 
-Changes since v2:(https://patchwork.kernel.org/patch/10001487/)
-->Implemented set_ios method as suggested by Adrian.
-->completely removed mmc core dependencies in the patch.
-->moved AMD DLL register definitions to sdhci-acpi.c
+Please pull this in!
 
-Changes since v3:(https://patchwork.kernel.org/patch/10052811/)
-->Minor alignment changes suggested by Adrian
+Kind regards
+Ulf Hansson
 
-Changes since v4:(https://patchwork.kernel.org/patch/10073921/)
-->Moved AMD specific macros to AMD specific code
 
- drivers/mmc/host/sdhci-acpi.c | 79 +++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 79 insertions(+)
+The following changes since commit 5a787756b809888e8925d722862167f1229b58f7:
 
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index ac678e9..3fb0e2d 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -370,6 +370,83 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_qcom_sd = {
- 	.caps    = MMC_CAP_NONREMOVABLE,
- };
- 
-+/* AMD sdhci reset dll register. */
-+#define SDHCI_AMD_RESET_DLL_REGISTER    0x908
-+
-+static int amd_select_drive_strength(struct mmc_card *card,
-+				     unsigned int max_dtr, int host_drv,
-+				     int card_drv, int *drv_type)
-+{
-+	return MMC_SET_DRIVER_TYPE_A;
-+}
-+
-+static void sdhci_acpi_amd_hs400_dll(struct sdhci_host *host)
-+{
-+	/* AMD Platform requires dll setting */
-+	sdhci_writel(host, 0x40003210, SDHCI_AMD_RESET_DLL_REGISTER);
-+	usleep_range(10, 20);
-+	sdhci_writel(host, 0x40033210, SDHCI_AMD_RESET_DLL_REGISTER);
-+}
-+
-+/*
-+ * For AMD Platform it is required to disable the tuning
-+ * bit first controller to bring to HS Mode from HS200
-+ * mode, later enable to tune to HS400 mode.
-+ */
-+static void amd_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	unsigned int old_timing = host->timing;
-+
-+	sdhci_set_ios(mmc, ios);
-+	if (old_timing == MMC_TIMING_MMC_HS200 &&
-+	    ios->timing == MMC_TIMING_MMC_HS)
-+		sdhci_writew(host, 0x9, SDHCI_HOST_CONTROL2);
-+	if (old_timing != MMC_TIMING_MMC_HS400 &&
-+	    ios->timing == MMC_TIMING_MMC_HS400) {
-+		sdhci_writew(host, 0x80, SDHCI_HOST_CONTROL2);
-+		sdhci_acpi_amd_hs400_dll(host);
-+	}
-+}
-+
-+static const struct sdhci_ops sdhci_acpi_ops_amd = {
-+	.set_clock	= sdhci_set_clock,
-+	.set_bus_width	= sdhci_set_bus_width,
-+	.reset		= sdhci_reset,
-+	.set_uhs_signaling = sdhci_set_uhs_signaling,
-+};
-+
-+static const struct sdhci_acpi_chip sdhci_acpi_chip_amd = {
-+	.ops = &sdhci_acpi_ops_amd,
-+};
-+
-+static int sdhci_acpi_emmc_amd_probe_slot(struct platform_device *pdev,
-+					  const char *hid, const char *uid)
-+{
-+	struct sdhci_acpi_host *c = platform_get_drvdata(pdev);
-+	struct sdhci_host *host   = c->host;
-+
-+	sdhci_read_caps(host);
-+	if (host->caps1 & SDHCI_SUPPORT_DDR50)
-+		host->mmc->caps = MMC_CAP_1_8V_DDR;
-+
-+	if ((host->caps1 & SDHCI_SUPPORT_SDR104) &&
-+	    (host->mmc->caps & MMC_CAP_1_8V_DDR))
-+		host->mmc->caps2 = MMC_CAP2_HS400_1_8V;
-+
-+	host->mmc_host_ops.select_drive_strength = amd_select_drive_strength;
-+	host->mmc_host_ops.set_ios = amd_set_ios;
-+	return 0;
-+}
-+
-+static const struct sdhci_acpi_slot sdhci_acpi_slot_amd_emmc = {
-+	.chip   = &sdhci_acpi_chip_amd,
-+	.caps   = MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE,
-+	.quirks = SDHCI_QUIRK_32BIT_DMA_ADDR | SDHCI_QUIRK_32BIT_DMA_SIZE |
-+			SDHCI_QUIRK_32BIT_ADMA_SIZE,
-+	.probe_slot     = sdhci_acpi_emmc_amd_probe_slot,
-+};
-+
- struct sdhci_acpi_uid_slot {
- 	const char *hid;
- 	const char *uid;
-@@ -393,6 +470,7 @@ static const struct sdhci_acpi_uid_slot sdhci_acpi_uids[] = {
- 	{ "PNP0D40"  },
- 	{ "QCOM8051", NULL, &sdhci_acpi_slot_qcom_sd_3v },
- 	{ "QCOM8052", NULL, &sdhci_acpi_slot_qcom_sd },
-+	{ "AMDI0040", NULL, &sdhci_acpi_slot_amd_emmc },
- 	{ },
- };
- 
-@@ -409,6 +487,7 @@ static const struct acpi_device_id sdhci_acpi_ids[] = {
- 	{ "PNP0D40"  },
- 	{ "QCOM8051" },
- 	{ "QCOM8052" },
-+	{ "AMDI0040" },
- 	{ },
- };
- MODULE_DEVICE_TABLE(acpi, sdhci_acpi_ids);
--- 
-2.7.4
+  Merge tag 'pwm/for-4.15-rc1' of git://git.kernel.org/pub/scm/linux/kernel/git/thierry.reding/linux-pwm (2017-11-22 21:09:18 -1000)
 
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v4.15-2
+
+for you to fetch changes up to c892b0d81705c566f575e489efc3c50762db1bde:
+
+  mmc: core: prepend 0x to OCR entry in sysfs (2017-11-29 10:46:53 +0100)
+
+----------------------------------------------------------------
+MMC core:
+ - Ensure that debugfs files are removed properly
+ - Fix missing blk_put_request()
+ - Deal with errors from blk_get_request()
+ - Rewind mmc bus suspend operations at failures
+ - Prepend '0x' to ocr and pre_eol_info in sysfs to identify as hex
+
+MMC host:
+ - sdhci-msm: Make it optional to wait for signal level changes
+ - sdhci: Avoid swiotlb buffer being full
+
+----------------------------------------------------------------
+Adrian Hunter (4):
+      mmc: block: Fix missing blk_put_request()
+      mmc: block: Check return value of blk_get_request()
+      mmc: core: Do not leave the block driver in a suspended state
+      mmc: block: Ensure that debugfs files are removed
+
+Bastian Stender (2):
+      mmc: core: prepend 0x to pre_eol_info entry in sysfs
+      mmc: core: prepend 0x to OCR entry in sysfs
+
+Bjorn Andersson (1):
+      mmc: sdhci-msm: Optionally wait for signal level changes
+
+Ulf Hansson (1):
+      mmc: sdhci: Avoid swiotlb buffer being full
+
+ drivers/mmc/core/block.c     | 67 ++++++++++++++++++++++++++++++++++++++------
+ drivers/mmc/core/bus.c       |  3 ++
+ drivers/mmc/core/debugfs.c   |  1 +
+ drivers/mmc/core/mmc.c       |  4 +--
+ drivers/mmc/core/sd.c        |  2 +-
+ drivers/mmc/host/sdhci-msm.c | 14 +++++++++
+ drivers/mmc/host/sdhci.c     | 28 +++++++++++-------
+ 7 files changed, 98 insertions(+), 21 deletions(-)
