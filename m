@@ -1,49 +1,39 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V15 00/22] mmc: Add Command Queue support
-Date: Fri, 1 Dec 2017 15:13:46 +0200
-Message-ID: <d35cff56-0923-cd9e-72ac-087819d4fed6@intel.com>
-References: <1511962879-24262-1-git-send-email-adrian.hunter@intel.com>
- <CAPDyKFrgC91Z3P-5U22gjKDqs_aZiQncGUrShWpFggkWzrRMjw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+From: Axel Lin <axel.lin@ingics.com>
+Subject: [PATCH] mmc: meson-gx-mmc: Fix checking return value of platform_get_irq
+Date: Sun,  3 Dec 2017 11:40:07 +0800
+Message-ID: <20171203034007.10097-1-axel.lin@ingics.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:17906 "EHLO mga09.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752745AbdLANOK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 1 Dec 2017 08:14:10 -0500
-In-Reply-To: <CAPDyKFrgC91Z3P-5U22gjKDqs_aZiQncGUrShWpFggkWzrRMjw@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-pl0-f65.google.com ([209.85.160.65]:39918 "EHLO
+        mail-pl0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751851AbdLCDkW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 2 Dec 2017 22:40:22 -0500
+Received: by mail-pl0-f65.google.com with SMTP id bi12so8491685plb.6
+        for <linux-mmc@vger.kernel.org>; Sat, 02 Dec 2017 19:40:21 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Christoph Hellwig <hch@lst.de>
+Cc: Jerome Brunet <jbrunet@baylibre.com>, Carlo Caione <carlo@caione.org>, Kevin Hilman <khilman@baylibre.com>, linux-mmc@vger.kernel.org, Axel Lin <axel.lin@ingics.com>
 
-On 29/11/17 17:47, Ulf Hansson wrote:
-> Hi Adrian,
-> 
-> On 29 November 2017 at 14:40, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> Hi
->>
->> Here is V15 of the hardware command queue patches without the software
->> command queue patches, now using blk-mq and now with blk-mq support for
->> non-CQE I/O.
-> 
-> I have applied patches 1->19 for next.  Deferring patch 21->23 for a while.
+platform_get_irq() returns negative value on failure.
 
-Thank you!
+Signed-off-by: Axel Lin <axel.lin@ingics.com>
+---
+ drivers/mmc/host/meson-gx-mmc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-> 
-> For those patches that was more or less the same as in v14, I added Linus' ack.
-> 
-> Hopefully we get some help for the community to test this series on
-> different HW (and I will be checking kernelci's boot reports). I
-> haven't added Bartlomiej's tested-by and neither Linus' (because of
-> the changes that has been made), so I hoping that will happen sooner
-> or later.
-> 
-> Moreover, I will gladly add more peoples acks/reviewed-by and
-> tested-by tags, at any point during this release cycle.
+diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+index e0862d3f65b3..11c467b52902 100644
+--- a/drivers/mmc/host/meson-gx-mmc.c
++++ b/drivers/mmc/host/meson-gx-mmc.c
+@@ -1208,7 +1208,7 @@ static int meson_mmc_probe(struct platform_device *pdev)
+ 	}
+ 
+ 	irq = platform_get_irq(pdev, 0);
+-	if (!irq) {
++	if (irq < 0) {
+ 		dev_err(&pdev->dev, "failed to get interrupt resource.\n");
+ 		ret = -EINVAL;
+ 		goto free_host;
+-- 
+2.11.0
 
-I also encourage anyone testing to report their results even if they don't
-want to have a tested-by tag.
