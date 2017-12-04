@@ -1,55 +1,57 @@
-From: LinuxPatchCommit <LinuxPatchCommit@bayhubtech.com>
-Subject: [PATCH 3/3] mmc: sdhci: Modify sdhci o2 quirk for eMMC HS200 tuning
- case
-Date: Mon, 4 Dec 2017 10:10:57 +0000
-Message-ID: <CY4PR04MB047345A73648C7A212D505D7ED3C0@CY4PR04MB0473.namprd04.prod.outlook.com>
-References: <BN1PR04MB4543C8987923D893F407934893C0@BN1PR04MB454.namprd04.prod.outlook.com>
+From: Christoph Fritz <chf.fritz@googlemail.com>
+Subject: Re: [PATCH v2] mmc: core: apply NO_CMD23 quirk to an ATP card
+Date: Mon, 04 Dec 2017 14:38:37 +0100
+Message-ID: <1512394717.27568.11.camel@googlemail.com>
+References: <1504998772.4004.2.camel@googlemail.com>
+         <1505000687.23171.20.camel@googlemail.com>
+         <CAPDyKFp5JJUp7Rec=eFZd_m9yVKbO91CNR_HbN+rpUm5KTYJgA@mail.gmail.com>
+         <27444e34-fcad-2244-5125-fc31a5755a12@rock-chips.com>
+         <1506196286.1683.7.camel@googlemail.com>
+         <10a81e7b-fe56-be68-dc46-4cf2870fd7a2@rock-chips.com>
+         <1506338583.2143.5.camel@googlemail.com>
+         <54d00dd9-a733-0319-e6d2-6ea77a49afa2@rock-chips.com>
+Reply-To: chf.fritz@googlemail.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2nam03on0135.outbound.protection.outlook.com ([104.47.42.135]:46808
-        "EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751636AbdLDKK7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 4 Dec 2017 05:10:59 -0500
-In-Reply-To: <BN1PR04MB4543C8987923D893F407934893C0@BN1PR04MB454.namprd04.prod.outlook.com>
-Content-Language: en-US
+Received: from mail-wr0-f180.google.com ([209.85.128.180]:46270 "EHLO
+        mail-wr0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753594AbdLDNik (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Dec 2017 08:38:40 -0500
+Received: by mail-wr0-f180.google.com with SMTP id x49so17312250wrb.13
+        for <linux-mmc@vger.kernel.org>; Mon, 04 Dec 2017 05:38:39 -0800 (PST)
+In-Reply-To: <54d00dd9-a733-0319-e6d2-6ea77a49afa2@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Cc: LinuxPatchCommit <LinuxPatchCommit@bayhubtech.com>, "Shirley Her (SC)" <shirley.her@bayhubtech.com>
+To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-Dear all,
+Hi Shawn and Ulf
 
-Don't clear transfer mode register in sdhci_set_transfer_mode().
+On Tue, 2017-09-26 at 08:56 +0800, Shawn Lin wrote:
+> Back to $subject patch, It still need to verify this conclusion on other
+> platforms or get acknowledgement from the vendor.
 
-In sdhci_set_transfer_mode(), clear transfer mode quirk2 will clear SD host=
- transfer mode register for non-data commands. This quirk is used for the b=
-ug of O2micro/Bayhubtech devices. In eMMC HS200 tuning case, the tuning pro=
-cess uses hardware tuning and it needs to set transfer mode register for tu=
-ning command.
+to quote myself:
 
-Signed-off-by: ernest.zhang <ernest.zhang@bayhubtech.com>
----
- drivers/mmc/host/sdhci.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+On Sat, 2017-09-23 at 21:51 +0200, Christoph Fritz wrote:
+> > SoC am335x (omap_hsmmc) works fine because it lacks CMD23 host support.
+> > My RK3288 board supports only micro-SD cards. If you want me to, I could
+> > get an adapter (micro-SD -> SD) but the shipping takes ~40 days.
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c index 0d5f=
-cca18c9e..d5b19fc9ea56 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -918,7 +918,9 @@ static void sdhci_set_transfer_mode(struct sdhci_host *=
-host,
- 	if (data =3D=3D NULL) {
- 		if (host->quirks2 &
- 			SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD) {
--			sdhci_writew(host, 0x0, SDHCI_TRANSFER_MODE);
-+			/* cannot clear transfer mode register when tuning */
-+			if (cmd->opcode !=3D MMC_SEND_TUNING_BLOCK_HS200)
-+				sdhci_writew(host, 0x0, SDHCI_TRANSFER_MODE);
- 		} else {
- 		/* clear Auto CMD settings for no data CMDs */
- 			mode =3D sdhci_readw(host, SDHCI_TRANSFER_MODE);
---
-2.14.1
+Finally I got this microSD to SD adapter to test the ATP card on RK3288
+platform too. As expected, card fails without the patch:
+
+ $ dd if=/dev/urandom of=./test bs=1M count=10
+
+does freeze system without any response
+
+So I can verify failing CMD23 behaviour on imx6 and rk3288 running
+kernel 4.14. Applying the patch does fix the issue on both platforms.
+
+Could you queue up this patch now?
+
+Thanks
+  -- Christoph
+
