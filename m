@@ -1,16 +1,19 @@
 From: LinuxPatchCommit <LinuxPatchCommit@bayhubtech.com>
-Subject: [PATCH 2/3] mmc: sdhci-pci-o2micro: Add eMMC HS200 support
-Date: Mon, 4 Dec 2017 10:10:10 +0000
-Message-ID: <CY4PR04MB047374AC40568EF03031F49CED3C0@CY4PR04MB0473.namprd04.prod.outlook.com>
+Subject: [PATCH 3/3] mmc: sdhci: Modify sdhci o2 quirk for eMMC HS200 tuning
+ case
+Date: Mon, 4 Dec 2017 10:10:57 +0000
+Message-ID: <CY4PR04MB047345A73648C7A212D505D7ED3C0@CY4PR04MB0473.namprd04.prod.outlook.com>
+References: <BN1PR04MB4543C8987923D893F407934893C0@BN1PR04MB454.namprd04.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2nam03on0135.outbound.protection.outlook.com ([104.47.42.135]:51904
+Received: from mail-by2nam03on0135.outbound.protection.outlook.com ([104.47.42.135]:46808
         "EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752922AbdLDKKN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 4 Dec 2017 05:10:13 -0500
+        id S1751636AbdLDKK7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 4 Dec 2017 05:10:59 -0500
+In-Reply-To: <BN1PR04MB4543C8987923D893F407934893C0@BN1PR04MB454.namprd04.prod.outlook.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -19,35 +22,34 @@ Cc: LinuxPatchCommit <LinuxPatchCommit@bayhubtech.com>, "Shirley Her (SC)" <shir
 
 Dear all,
 
-Add register definition for eMMC HS200 mode.
-Add hardware tuning for eMMC HS200 mode.
+Don't clear transfer mode register in sdhci_set_transfer_mode().
+
+In sdhci_set_transfer_mode(), clear transfer mode quirk2 will clear SD host=
+ transfer mode register for non-data commands. This quirk is used for the b=
+ug of O2micro/Bayhubtech devices. In eMMC HS200 tuning case, the tuning pro=
+cess uses hardware tuning and it needs to set transfer mode register for tu=
+ning command.
 
 Signed-off-by: ernest.zhang <ernest.zhang@bayhubtech.com>
 ---
- drivers/mmc/host/sdhci-pci-o2micro.h | 3 +++
- 1 file changed, 3 insertions(+)
+ drivers/mmc/host/sdhci.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-pci-o2micro.h b/drivers/mmc/host/sdhci-=
-pci-o2micro.h
-index 770f53857211..3fb957729315 100644
---- a/drivers/mmc/host/sdhci-pci-o2micro.h
-+++ b/drivers/mmc/host/sdhci-pci-o2micro.h
-@@ -49,6 +49,7 @@
- #define O2_SD_MISC_CTRL4	0xFC
- #define O2_SD_TUNING_CTRL	0x300
- #define O2_SD_PLL_SETTING	0x304
-+#define O2_SD_MISC_SETTING	0x308
- #define O2_SD_CLK_SETTING	0x328
- #define O2_SD_CAP_REG2		0x330
- #define O2_SD_CAP_REG0		0x334
-@@ -62,6 +63,8 @@
- #define O2_SD_FREG4_ENABLE_CLK_SET	BIT(22)
-=20
- #define O2_SD_VENDOR_SETTING	0x110
-+#define O2_SD_HW_TUNING_ENABLE BIT(4)
-+
- #define O2_SD_VENDOR_SETTING2	0x1C8
-=20
- extern int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot);
---=20
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c index 0d5f=
+cca18c9e..d5b19fc9ea56 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -918,7 +918,9 @@ static void sdhci_set_transfer_mode(struct sdhci_host *=
+host,
+ 	if (data =3D=3D NULL) {
+ 		if (host->quirks2 &
+ 			SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD) {
+-			sdhci_writew(host, 0x0, SDHCI_TRANSFER_MODE);
++			/* cannot clear transfer mode register when tuning */
++			if (cmd->opcode !=3D MMC_SEND_TUNING_BLOCK_HS200)
++				sdhci_writew(host, 0x0, SDHCI_TRANSFER_MODE);
+ 		} else {
+ 		/* clear Auto CMD settings for no data CMDs */
+ 			mode =3D sdhci_readw(host, SDHCI_TRANSFER_MODE);
+--
 2.14.1
