@@ -1,127 +1,250 @@
 From: Simon Horman <horms+renesas@verge.net.au>
-Subject: [PATCH/RFT 1/3] mmc: tmio: Add eMMC HS400 mode support
-Date: Tue,  5 Dec 2017 13:37:54 +0100
-Message-ID: <20171205123756.18424-2-horms+renesas@verge.net.au>
+Subject: [PATCH/RFT 2/3] mmc: renesas_sdhi: Add eMMC HS400 mode support
+Date: Tue,  5 Dec 2017 13:37:55 +0100
+Message-ID: <20171205123756.18424-3-horms+renesas@verge.net.au>
 References: <20171205123756.18424-1-horms+renesas@verge.net.au>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:60439 "EHLO
-        kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752562AbdLEMiL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Dec 2017 07:38:11 -0500
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
 In-Reply-To: <20171205123756.18424-1-horms+renesas@verge.net.au>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-renesas-soc-owner@vger.kernel.org
 To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Ai Kyuse <ai.kyuse.uw@renesas.com>, Masaharu Hayakawa <masaharu.hayakawa.ry@renesas.com>, Simon Horman <horms+renesas@verge.net.au>
+List-Id: linux-mmc@vger.kernel.org
 
 From: Ai Kyuse <ai.kyuse.uw@renesas.com>
 
-Add eMMC HS400 support to the core TMIO code.
+Add eMMC HS400 support to SDHI driver.
 
-Regarding tuning: Tune in HS200 mode before changing to HS400 mode.  When
-retuning, return to HS200 mode and tune.  HS400 and HS200/SDR104 have
-different CPG settings, HS400 sets to 400MHz to distinguish the CPG
-settings.
+In this mode of operation tuning uses 4 taps rather than 8 on
+hardware currently supported in mainline.
 
 Signed-off-by: Ai Kyuse <ai.kyuse.uw@renesas.com>
 Signed-off-by: Masaharu Hayakawa <masaharu.hayakawa.ry@renesas.com>
 Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
 ---
 v1 [Simon Horman]
-- Combined patches by Ai Kyuse and Masaharu Hayakawa.
+- Combined patched by Ai Kyuse and Masaharu Hayakawa
 - Rebase
-- Minor clean-up
 
 v0 [Ai Kyuse]
 ---
- drivers/mmc/host/tmio_mmc.h      |  5 +++++
- drivers/mmc/host/tmio_mmc_core.c | 29 +++++++++++++++++++++++++++--
- 2 files changed, 32 insertions(+), 2 deletions(-)
+ drivers/mmc/host/renesas_sdhi_core.c | 123 ++++++++++++++++++++++++++++++-----
+ 1 file changed, 107 insertions(+), 16 deletions(-)
 
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index 3e6ff8921440..60f5935db368 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -46,6 +46,7 @@
- #define CTL_DMA_ENABLE 0xd8
- #define CTL_RESET_SD 0xe0
- #define CTL_VERSION 0xe2
-+#define CTL_SDIF_MODE 0xe6
- #define CTL_SDIO_REGS 0x100
- #define CTL_CLK_AND_WAIT_CTL 0x138
- #define CTL_RESET_SDIO 0x1e0
-@@ -203,6 +204,10 @@ struct tmio_mmc_host {
- 	/* Tuning values: 1 for success, 0 for failure */
- 	DECLARE_BITMAP(taps, BITS_PER_BYTE * sizeof(long));
- 	unsigned int tap_num;
-+	unsigned long tap_set;
-+	void (*prepare_hs400_tuning)(struct mmc_host *mmc, struct mmc_ios *ios);
-+	void (*reset_hs400_mode)(struct mmc_host *mmc);
-+	void (*disable_scc)(struct mmc_host *mmc);
+diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+index fcf7235d5742..73b963e506ab 100644
+--- a/drivers/mmc/host/renesas_sdhi_core.c
++++ b/drivers/mmc/host/renesas_sdhi_core.c
+@@ -223,6 +223,7 @@ static int renesas_sdhi_start_signal_voltage_switch(struct mmc_host *mmc,
+ #define SH_MOBILE_SDHI_SCC_CKSEL	0x006
+ #define SH_MOBILE_SDHI_SCC_RVSCNTL	0x008
+ #define SH_MOBILE_SDHI_SCC_RVSREQ	0x00A
++#define SH_MOBILE_SDHI_SCC_TMPPORT2	0x00E
  
- 	const struct tmio_mmc_dma_ops *dma_ops;
- };
-diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-index d6ca57be16c2..a65c10302904 100644
---- a/drivers/mmc/host/tmio_mmc_core.c
-+++ b/drivers/mmc/host/tmio_mmc_core.c
-@@ -199,6 +199,13 @@ static void tmio_mmc_set_clock(struct tmio_mmc_host *host,
- 		tmio_mmc_clk_stop(host);
- 		return;
+ /* Definitions for values the SH_MOBILE_SDHI_SCC_DTCNTL register */
+ #define SH_MOBILE_SDHI_SCC_DTCNTL_TAPEN		BIT(0)
+@@ -235,6 +236,9 @@ static int renesas_sdhi_start_signal_voltage_switch(struct mmc_host *mmc,
+ #define SH_MOBILE_SDHI_SCC_RVSCNTL_RVSEN	BIT(0)
+ /* Definitions for values the SH_MOBILE_SDHI_SCC_RVSREQ register */
+ #define SH_MOBILE_SDHI_SCC_RVSREQ_RVSERR	BIT(2)
++/* Definitions for values the SH_MOBILE_SDHI_SCC_TMPPORT2 register */
++#define SH_MOBILE_SDHI_SCC_TMPPORT2_HS400EN	BIT(31)
++#define SH_MOBILE_SDHI_SCC_TMPPORT2_HS400OSEL	BIT(4)
+ 
+ static inline u32 sd_scc_read32(struct tmio_mmc_host *host,
+ 				struct renesas_sdhi *priv, int addr)
+@@ -249,39 +253,57 @@ static inline void sd_scc_write32(struct tmio_mmc_host *host,
+ 	writel(val, priv->scc_ctl + (addr << host->bus_shift));
+ }
+ 
++
++static void renesas_sdhi_disable_scc(struct mmc_host *mmc)
++{
++	struct tmio_mmc_host *host = mmc_priv(mmc);
++	struct renesas_sdhi *priv = host_to_priv(host);
++
++	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, ~CLK_CTL_SCLKEN &
++	sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
++
++	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_CKSEL,
++		       ~SH_MOBILE_SDHI_SCC_CKSEL_DTSEL &
++		       sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_CKSEL));
++
++	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_DTCNTL,
++		       ~SH_MOBILE_SDHI_SCC_DTCNTL_TAPEN &
++		       sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_DTCNTL));
++
++	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, CLK_CTL_SCLKEN |
++	sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
++}
++
+ static unsigned int renesas_sdhi_init_tuning(struct tmio_mmc_host *host)
+ {
+ 	struct renesas_sdhi *priv;
+ 
+ 	priv = host_to_priv(host);
+ 
+-	/* set sampling clock selection range */
+-	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_DTCNTL,
+-		       0x8 << SH_MOBILE_SDHI_SCC_DTCNTL_TAPNUM_SHIFT);
+-
+ 	/* Initialize SCC */
+ 	sd_ctrl_write32_as_16_and_16(host, CTL_STATUS, 0x0);
+ 
+-	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_DTCNTL,
+-		       SH_MOBILE_SDHI_SCC_DTCNTL_TAPEN |
+-		       sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_DTCNTL));
+-
+ 	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, ~CLK_CTL_SCLKEN &
+ 			sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
+ 
++	/* set sampling clock selection range */
++	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_DTCNTL,
++		       SH_MOBILE_SDHI_SCC_DTCNTL_TAPEN |
++		       0x8 << SH_MOBILE_SDHI_SCC_DTCNTL_TAPNUM_SHIFT);
++
+ 	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_CKSEL,
+ 		       SH_MOBILE_SDHI_SCC_CKSEL_DTSEL |
+ 		       sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_CKSEL));
+ 
+-	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, CLK_CTL_SCLKEN |
+-			sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
+-
+ 	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_RVSCNTL,
+ 		       ~SH_MOBILE_SDHI_SCC_RVSCNTL_RVSEN &
+ 		       sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_RVSCNTL));
+ 
+ 	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_DT2FF, host->scc_tappos);
+ 
++	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, CLK_CTL_SCLKEN |
++			sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
++
+ 	/* Read TAPNUM */
+ 	return (sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_DTCNTL) >>
+ 		SH_MOBILE_SDHI_SCC_DTCNTL_TAPNUM_SHIFT) &
+@@ -297,13 +319,69 @@ static void renesas_sdhi_prepare_tuning(struct tmio_mmc_host *host,
+ 	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TAPSET, tap);
+ }
+ 
++static void renesas_sdhi_prepare_hs400_tuning(struct mmc_host *mmc,
++					struct mmc_ios *ios)
++{
++	struct tmio_mmc_host *host = mmc_priv(mmc);
++	struct renesas_sdhi *priv = host_to_priv(host);
++
++	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, ~CLK_CTL_SCLKEN &
++			sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
++
++	/* Set HS400 mode */
++	sd_ctrl_write16(host, CTL_SDIF_MODE, 0x0001 |
++			sd_ctrl_read16(host, CTL_SDIF_MODE));
++	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2,
++		       SH_MOBILE_SDHI_SCC_TMPPORT2_HS400EN |
++		       SH_MOBILE_SDHI_SCC_TMPPORT2_HS400OSEL |
++		       sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2));
++
++
++	/* HS400 mode sets sampling clock selection range to 4 */
++	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_DTCNTL,
++		       SH_MOBILE_SDHI_SCC_DTCNTL_TAPEN |
++		       0x4 << SH_MOBILE_SDHI_SCC_DTCNTL_TAPNUM_SHIFT);
++
++	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TAPSET,
++		       host->tap_set / 2);
++
++	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_CKSEL,
++		       SH_MOBILE_SDHI_SCC_CKSEL_DTSEL |
++		       sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_CKSEL));
++
++	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, CLK_CTL_SCLKEN |
++			sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
++}
++
++static void renesas_sdhi_reset_hs400_mode(struct mmc_host *mmc)
++{
++	struct tmio_mmc_host *host = mmc_priv(mmc);
++	struct renesas_sdhi *priv = host_to_priv(host);
++
++	if (!priv->scc_ctl)
++		return;
++
++	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, ~CLK_CTL_SCLKEN &
++			sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
++
++	/* Reset HS400 mode */
++	sd_ctrl_write16(host, CTL_SDIF_MODE, ~0x0001 &
++			sd_ctrl_read16(host, CTL_SDIF_MODE));
++	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2,
++		       ~(SH_MOBILE_SDHI_SCC_TMPPORT2_HS400EN |
++			 SH_MOBILE_SDHI_SCC_TMPPORT2_HS400OSEL) &
++		       sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2));
++
++	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, CLK_CTL_SCLKEN |
++			sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
++}
++
+ #define SH_MOBILE_SDHI_MAX_TAP 3
+ 
+ static int renesas_sdhi_select_tuning(struct tmio_mmc_host *host)
+ {
+ 	struct renesas_sdhi *priv = host_to_priv(host);
+ 	unsigned long tap_cnt;  /* counter of tuning success */
+-	unsigned long tap_set;  /* tap position */
+ 	unsigned long tap_start;/* start position of tuning success */
+ 	unsigned long tap_end;  /* end position of tuning success */
+ 	unsigned long ntap;     /* temporary counter of tuning success */
+@@ -341,12 +419,12 @@ static int renesas_sdhi_select_tuning(struct tmio_mmc_host *host)
  	}
-+	/*
-+	 * Both HS400 and HS200/SD104 set 200MHz, but HS400 sets 400MHz
-+	 * to distinguish the CPG settings.
-+	 */
-+	if (host->mmc->ios.timing == MMC_TIMING_MMC_HS400 &&
-+			new_clock == 200000000)
-+		new_clock = 400000000;
  
- 	if (host->clk_update)
- 		clock = host->clk_update(host, new_clock) / 512;
-@@ -209,8 +216,13 @@ static void tmio_mmc_set_clock(struct tmio_mmc_host *host,
- 		clock <<= 1;
+ 	if (tap_cnt >= SH_MOBILE_SDHI_MAX_TAP)
+-		tap_set = (tap_start + tap_end) / 2 % host->tap_num;
++		host->tap_set = (tap_start + tap_end) / 2 % host->tap_num;
+ 	else
+ 		return -EIO;
  
- 	/* 1/1 clock is option */
--	if ((host->pdata->flags & TMIO_MMC_CLK_ACTUAL) && ((clk >> 22) & 0x1))
--		clk |= 0xff;
-+	if ((host->pdata->flags & TMIO_MMC_CLK_ACTUAL) &&
-+	    ((clk >> 22) & 0x1)) {
-+		if (!(host->mmc->ios.timing == MMC_TIMING_MMC_HS400))
-+			clk |= 0xff;
-+		else
-+			clk &= ~0xff;
-+	}
+ 	/* Set SCC */
+-	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TAPSET, tap_set);
++	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TAPSET, host->tap_set);
  
- 	if (host->set_clk_div)
- 		host->set_clk_div(host->pdev, (clk >> 22) & 1);
-@@ -1015,6 +1027,15 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	struct device *dev = &host->pdev->dev;
- 	unsigned long flags;
+ 	/* Enable auto re-tuning */
+ 	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_RVSCNTL,
+@@ -387,6 +465,14 @@ static void renesas_sdhi_hw_reset(struct tmio_mmc_host *host)
+ 		       ~SH_MOBILE_SDHI_SCC_CKSEL_DTSEL &
+ 		       sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_CKSEL));
  
++	/* Reset HS400 mode */
++	sd_ctrl_write16(host, CTL_SDIF_MODE, ~0x0001 &
++			sd_ctrl_read16(host, CTL_SDIF_MODE));
++	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2,
++			~(SH_MOBILE_SDHI_SCC_TMPPORT2_HS400EN |
++			SH_MOBILE_SDHI_SCC_TMPPORT2_HS400OSEL) &
++			sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2));
 +
-+	if (ios->timing != MMC_TIMING_UHS_SDR104 &&
-+	    ios->timing != MMC_TIMING_MMC_HS200 &&
-+	    ios->timing != MMC_TIMING_MMC_HS400 && host->disable_scc)
-+		host->disable_scc(mmc);
-+
-+	if (ios->timing != MMC_TIMING_MMC_HS400 && host->reset_hs400_mode)
-+		host->reset_hs400_mode(mmc);
-+
- 	mutex_lock(&host->ios_lock);
+ 	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, CLK_CTL_SCLKEN |
+ 			sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
  
- 	spin_lock_irqsave(&host->lock, flags);
-@@ -1065,6 +1086,10 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 			"%s.%d: IOS interrupted: clk %u, mode %u",
- 			current->comm, task_pid_nr(current),
- 			ios->clock, ios->power_mode);
-+
-+	if (ios->timing == MMC_TIMING_MMC_HS400 && host->prepare_hs400_tuning)
-+		host->prepare_hs400_tuning(mmc, ios);
-+
- 	host->mrq = NULL;
+@@ -597,7 +683,8 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+ 	/* Enable tuning iff we have an SCC and a supported mode */
+ 	if (of_data && of_data->scc_offset &&
+ 	    (host->mmc->caps & MMC_CAP_UHS_SDR104 ||
+-	     host->mmc->caps2 & MMC_CAP2_HS200_1_8V_SDR)) {
++	     host->mmc->caps2 & (MMC_CAP2_HS200_1_8V_SDR |
++				 MMC_CAP2_HS400_1_8V))) {
+ 		const struct renesas_sdhi_scc *taps = of_data->taps;
+ 		bool hit = false;
  
- 	host->clk_cache = ios->clock;
+@@ -619,8 +706,12 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+ 		host->init_tuning = renesas_sdhi_init_tuning;
+ 		host->prepare_tuning = renesas_sdhi_prepare_tuning;
+ 		host->select_tuning = renesas_sdhi_select_tuning;
+-		host->check_scc_error = renesas_sdhi_check_scc_error;
++		if (!(host->mmc->caps2 & MMC_CAP2_HS400_1_8V))
++			host->check_scc_error = renesas_sdhi_check_scc_error;
+ 		host->hw_reset = renesas_sdhi_hw_reset;
++		host->disable_scc = renesas_sdhi_disable_scc;
++		host->prepare_hs400_tuning = renesas_sdhi_prepare_hs400_tuning;
++		host->reset_hs400_mode = renesas_sdhi_reset_hs400_mode;
+ 	}
+ 
+ 	i = 0;
 -- 
 2.11.0
-
