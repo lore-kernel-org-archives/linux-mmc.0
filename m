@@ -1,44 +1,42 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: Re: [PATCH v2 02/22] mmc: renesas_sdhi: remove wrong depends on to
- enable compile test
-Date: Tue, 5 Dec 2017 13:16:37 +0900
-Message-ID: <CAK7LNAQ6bQ98nYj4+7js2f2HOMN1_A0GALYWXLXqabFnvVCUpQ@mail.gmail.com>
-References: <1511540697-27387-1-git-send-email-yamada.masahiro@socionext.com>
- <1511540697-27387-3-git-send-email-yamada.masahiro@socionext.com> <20171204152533.w5ykfqtkk6kzydet@ninjato>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH V15 00/22] mmc: Add Command Queue support
+Date: Tue, 5 Dec 2017 11:10:34 +0100
+Message-ID: <CACRpkda-hgDdTi6rEu3cL41QDzXGxBkY1x6CXJE8kUbLAR-uQQ@mail.gmail.com>
+References: <1511962879-24262-1-git-send-email-adrian.hunter@intel.com> <CAPDyKFrgC91Z3P-5U22gjKDqs_aZiQncGUrShWpFggkWzrRMjw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from conssluserg-02.nifty.com ([210.131.2.81]:42150 "EHLO
-        conssluserg-02.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751934AbdLEER2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Dec 2017 23:17:28 -0500
-In-Reply-To: <20171204152533.w5ykfqtkk6kzydet@ninjato>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFrgC91Z3P-5U22gjKDqs_aZiQncGUrShWpFggkWzrRMjw@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-renesas-soc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
 
-2017-12-05 0:25 GMT+09:00 Wolfram Sang <wsa@the-dreams.de>:
-> On Sat, Nov 25, 2017 at 01:24:37AM +0900, Masahiro Yamada wrote:
->> ARCH_RENESAS is a stronger condition than (ARM || ARM64).
->> If ARCH_RENESAS is enabled, (ARM || ARM64) is met as well.
->>
->> What is worse, the first depends on line prevents COMPILE_TEST from
->> enabling this driver.  It should be removed.
->>
->> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
->> Acked-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
->
-> Because COMPILE_TEST now works, buildbot spotted something:
->
-> https://www.spinics.net/lists/linux-i2c/msg32556.html
->
-> Likely, we should include linux/io.h in the header?
->
+On Wed, Nov 29, 2017 at 4:47 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
 
-Yes.  Can you insert a patch before this one?
+> I have applied patches 1->19 for next.  Deferring patch 21->23 for a while.
+>
+> For those patches that was more or less the same as in v14, I added Linus' ack.
 
+My ACK goes for the new set as well.
 
--- 
-Best Regards
-Masahiro Yamada
+> Hopefully we get some help for the community to test this series on
+> different HW (and I will be checking kernelci's boot reports). I
+> haven't added Bartlomiej's tested-by and neither Linus' (because of
+> the changes that has been made), so I hoping that will happen sooner
+> or later.
+
+I have run some tests yesterday and today using dd, find and
+iozone, vanilla and with fault injection of 1% errors and 10%
+errors, then stressing it additionally by ejecting the card
+in flight randomly a few times. Everything survived, it's rock solid
+from what I can tell!
+
+Tested-by: Linus Walleij <linus.walleij@linaro.org>
+
+I am eager to see 21->23 applied too so I can see the end result
+and figure out if there is anything left in my patches that need
+to be catered for or if I can just focus on other stuff.
+
+Yours,
+Linus Walleij
