@@ -1,52 +1,50 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V15 00/22] mmc: Add Command Queue support
-Date: Tue, 5 Dec 2017 16:53:16 +0100
-Message-ID: <CAPDyKFrSpVaQ6kMD4kyZRdjpJLKD6P27FoEJjFfb-aUNBwrW6A@mail.gmail.com>
-References: <1511962879-24262-1-git-send-email-adrian.hunter@intel.com>
- <CAPDyKFrgC91Z3P-5U22gjKDqs_aZiQncGUrShWpFggkWzrRMjw@mail.gmail.com> <CACRpkda-hgDdTi6rEu3cL41QDzXGxBkY1x6CXJE8kUbLAR-uQQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: properly init drv_type
+Date: Tue, 5 Dec 2017 17:24:28 +0100
+Message-ID: <CAPDyKFqitcRpRjrvhw+yrP0tC5EGwX_XormEwEbWfr011UDVww@mail.gmail.com>
+References: <20171130144910.4320-1-wsa+renesas@sang-engineering.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <CACRpkda-hgDdTi6rEu3cL41QDzXGxBkY1x6CXJE8kUbLAR-uQQ@mail.gmail.com>
-Sender: linux-block-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Christoph Hellwig <hch@lst.de>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20171130144910.4320-1-wsa+renesas@sang-engineering.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Simon Horman <horms@verge.net.au>, Colin Ian King <colin.king@canonical.com>, Dan Carpenter <dan.carpenter@oracle.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 5 December 2017 at 11:10, Linus Walleij <linus.walleij@linaro.org> wrote:
-> On Wed, Nov 29, 2017 at 4:47 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+On 30 November 2017 at 15:49, Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
+> When the latest version of parsing the new eMMC bindings was moved from
+> core.c to mmc.c, it was overlooked that drv_type could be used
+> uninitialized. Fix it!
 >
->> I have applied patches 1->19 for next.  Deferring patch 21->23 for a while.
->>
->> For those patches that was more or less the same as in v14, I added Linus' ack.
->
-> My ACK goes for the new set as well.
+> Fixes: 6186d06c519e21 ("mmc: parse new binding for eMMC fixed driver type")
+> Reported-by: Colin Ian King <colin.king@canonical.com>
+> Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-Great, I add it!
-
->
->> Hopefully we get some help for the community to test this series on
->> different HW (and I will be checking kernelci's boot reports). I
->> haven't added Bartlomiej's tested-by and neither Linus' (because of
->> the changes that has been made), so I hoping that will happen sooner
->> or later.
->
-> I have run some tests yesterday and today using dd, find and
-> iozone, vanilla and with fault injection of 1% errors and 10%
-> errors, then stressing it additionally by ejecting the card
-> in flight randomly a few times. Everything survived, it's rock solid
-> from what I can tell!
->
-> Tested-by: Linus Walleij <linus.walleij@linaro.org>
-
-Great, I add this as well.
-
->
-> I am eager to see 21->23 applied too so I can see the end result
-> and figure out if there is anything left in my patches that need
-> to be catered for or if I can just focus on other stuff.
-
-Yeah, if nothing happens, I may apply them early next week.
+Thanks, applied for fixes!
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/core/mmc.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index a552f61060d212..0d1c6b025ca596 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1290,7 +1290,7 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
+>
+>  static void mmc_select_driver_type(struct mmc_card *card)
+>  {
+> -       int card_drv_type, drive_strength, drv_type;
+> +       int card_drv_type, drive_strength, drv_type = 0;
+>         int fixed_drv_type = card->host->fixed_drv_type;
+>
+>         card_drv_type = card->ext_csd.raw_driver_strength |
+> --
+> 2.11.0
+>
