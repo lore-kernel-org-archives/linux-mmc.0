@@ -1,65 +1,52 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH v2 10/22] mmc: tmio: support IP-builtin card detection
- logic
-Date: Tue, 5 Dec 2017 16:28:39 +0100
-Message-ID: <20171205152839.czialo64b7nsgadu@ninjato>
-References: <1511540697-27387-1-git-send-email-yamada.masahiro@socionext.com>
- <1511540697-27387-11-git-send-email-yamada.masahiro@socionext.com>
- <20171204151320.4ypa2y5r335hcg7j@ninjato>
- <CAK7LNATeFZMVocscnfkYTU=5=dyRSNrrgVoh0rEvLyQvku9VSQ@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V15 00/22] mmc: Add Command Queue support
+Date: Tue, 5 Dec 2017 16:53:16 +0100
+Message-ID: <CAPDyKFrSpVaQ6kMD4kyZRdjpJLKD6P27FoEJjFfb-aUNBwrW6A@mail.gmail.com>
+References: <1511962879-24262-1-git-send-email-adrian.hunter@intel.com>
+ <CAPDyKFrgC91Z3P-5U22gjKDqs_aZiQncGUrShWpFggkWzrRMjw@mail.gmail.com> <CACRpkda-hgDdTi6rEu3cL41QDzXGxBkY1x6CXJE8kUbLAR-uQQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="7m4afatkbay4psrq"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([88.99.104.3]:48834 "EHLO pokefinder.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752548AbdLEP2l (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 5 Dec 2017 10:28:41 -0500
-Content-Disposition: inline
-In-Reply-To: <CAK7LNATeFZMVocscnfkYTU=5=dyRSNrrgVoh0rEvLyQvku9VSQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <CACRpkda-hgDdTi6rEu3cL41QDzXGxBkY1x6CXJE8kUbLAR-uQQ@mail.gmail.com>
+Sender: linux-block-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-mmc@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-renesas-soc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
 
+On 5 December 2017 at 11:10, Linus Walleij <linus.walleij@linaro.org> wrote:
+> On Wed, Nov 29, 2017 at 4:47 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+>> I have applied patches 1->19 for next.  Deferring patch 21->23 for a while.
+>>
+>> For those patches that was more or less the same as in v14, I added Linus' ack.
+>
+> My ACK goes for the new set as well.
 
---7m4afatkbay4psrq
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Great, I add it!
 
+>
+>> Hopefully we get some help for the community to test this series on
+>> different HW (and I will be checking kernelci's boot reports). I
+>> haven't added Bartlomiej's tested-by and neither Linus' (because of
+>> the changes that has been made), so I hoping that will happen sooner
+>> or later.
+>
+> I have run some tests yesterday and today using dd, find and
+> iozone, vanilla and with fault injection of 1% errors and 10%
+> errors, then stressing it additionally by ejecting the card
+> in flight randomly a few times. Everything survived, it's rock solid
+> from what I can tell!
+>
+> Tested-by: Linus Walleij <linus.walleij@linaro.org>
 
-> Another possibility would select this in _probe().
-> We would need to evaluate mmc_can_gpio_cd() only once when probing.
+Great, I add this as well.
 
-I like this, too.
+>
+> I am eager to see 21->23 applied too so I can see the end result
+> and figure out if there is anything left in my patches that need
+> to be catered for or if I can just focus on other stuff.
 
-Maybe like this to be more obvious:
+Yeah, if nothing happens, I may apply them early next week.
 
-	if (mmc_can_gpio_cd(mmc))
-		 _host->ops.get_cd = mmc_gpio_get_cd;
-	else
-		 _host->ops.get_cd = tmio...
-
-?
-
---7m4afatkbay4psrq
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlomuyQACgkQFA3kzBSg
-KbbFaw/9FvN3QaM4/Kee3sgPSsOQA987U7+pbDj+TG0znyCpxno1EOv1G2BXKkOM
-Tr6mYLTF2+Bu7Rd9p+Alb35k8W87fRbM55IFfxnJvEo7IdkDbLR+DlbqPcFanWUp
-EriyU3Qe3pOvtE1IhYkO+v12t4VuvPXW+NhI4EjoBww+vbSx3THyZlnhQTvLmPu6
-bYNF43EGWri3X+448mRBqaC1Yhu8SkmOV9a884rqIuogKeA3t05IY9LGR2bLZ3rp
-iVoIU3kf6GR86DGOQb8gS0xk/0Ctmn4FbUOCO0vJeF6joaUZOsM++kkozxDCm8ou
-h+pwNsEC8gZbFmZey9fFNtkQdAv1Tc5ZH4Ptuc6Vp6qBrJqUMv8YGAwk8Tq7Mdnn
-VqMYFYg1dXTvGuwGbubVkJ+3iV/4G+obsQ01wdSoz69xcwmnW2vzsP/JywFAcRcJ
-ou5zEVrk/GJL+12eaNkJPvj2imIH4DJuGS+0Bldzn61ElW/T/mcu1R/pbYSjCOtR
-09hx+GSH1EiB1F5e8MIni9AozNaF15vmsZyxxPuDl2GB6AYgnmv0djWZfd45inSV
-7qZfWoyGYmyFaZ4CwlcLER0/YPNEjpG7hxel7hkekQ49mCIBwVYWYOOmXRWarGcO
-Sa2Zx2EwYx2sve0Ugr1i16WgdjUBAPM/ITVFA/i3DRx+D8mDICg=
-=AEIz
------END PGP SIGNATURE-----
-
---7m4afatkbay4psrq--
+Kind regards
+Uffe
