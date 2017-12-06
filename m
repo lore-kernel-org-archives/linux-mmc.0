@@ -1,77 +1,65 @@
-From: "Y.b. Lu" <yangbo.lu@nxp.com>
-Subject: RE: [v2] mmc: sdhci-of-esdhc: fix the mmc error after sleep on
- ls1046ardb
-Date: Wed, 6 Dec 2017 02:56:02 +0000
-Message-ID: <DB6PR0401MB2536E50693B49873DF01F4B9F8320@DB6PR0401MB2536.eurprd04.prod.outlook.com>
-References: <20171201070934.47380-1-yangbo.lu@nxp.com>
- <CAPDyKFr7kn1P7QtJo_QRdVNuN_uyG7RUPc5rjGk7VaWS5vpHUA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Daniel Drake <drake@endlessm.com>
+Subject: [PATCH] mmc: allow rescan of non-removable hosts on resume
+Date: Wed,  6 Dec 2017 10:57:24 +0000
+Message-ID: <20171206105724.5603-1-drake@endlessm.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-eopbgr50076.outbound.protection.outlook.com ([40.107.5.76]:55936
-        "EHLO EUR03-VE1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1754345AbdLFC4G (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 5 Dec 2017 21:56:06 -0500
-In-Reply-To: <CAPDyKFr7kn1P7QtJo_QRdVNuN_uyG7RUPc5rjGk7VaWS5vpHUA@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-wr0-f196.google.com ([209.85.128.196]:34769 "EHLO
+        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752084AbdLFK53 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Dec 2017 05:57:29 -0500
+Received: by mail-wr0-f196.google.com with SMTP id y21so3429485wrc.1
+        for <linux-mmc@vger.kernel.org>; Wed, 06 Dec 2017 02:57:29 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Yinbo Zhu <yinbo.zhu@nxp.com>
+To: ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux@endlessm.com, matthew.leeds@endlessm.com
 
-SGkgVWZmZSwNCg0KSSdtIHNvcnJ5IGZvciB0aGUgcmVkdW5kYW50IGVtYWlscyBmcm9tIHVzLg0K
-WWluYm8gZm91bmQgaGlzIGVtYWlsIGNvdWxkbuKAmXQgcmVhY2ggcGF0Y2h3b3JrIGJ1dCBkaWRu
-4oCZdCBrbm93IHdoeSB0aGlzIGhhcHBlbmVkLg0KU28gSSBoZWxwZWQgaGltIHRvIHJlc2VuZCBv
-bmUuIEp1c3QgZ290IHNhbWUgcHJvYmxlbS4NClN0cmFuZ2UsIHdlIHN0aWxsIGRvbuKAmXQga25v
-dyB0aGUgcmVhc29uLg0KDQpUaGFua3MgYSBsb3QuDQoNCg0KQmVzdCByZWdhcmRzLA0KWWFuZ2Jv
-IEx1DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogVWxmIEhhbnNzb24g
-W21haWx0bzp1bGYuaGFuc3NvbkBsaW5hcm8ub3JnXQ0KPiBTZW50OiAyMDE35bm0MTLmnIg25pel
-IDA6MjkNCj4gVG86IFkuYi4gTHUgPHlhbmdiby5sdUBueHAuY29tPg0KPiBDYzogbGludXgtbW1j
-QHZnZXIua2VybmVsLm9yZzsgQWRyaWFuIEh1bnRlciA8YWRyaWFuLmh1bnRlckBpbnRlbC5jb20+
-Ow0KPiBZaW5ibyBaaHUgPHlpbmJvLnpodUBueHAuY29tPg0KPiBTdWJqZWN0OiBSZTogW3YyXSBt
-bWM6IHNkaGNpLW9mLWVzZGhjOiBmaXggdGhlIG1tYyBlcnJvciBhZnRlciBzbGVlcCBvbg0KPiBs
-czEwNDZhcmRiDQo+IA0KPiBPbiAxIERlY2VtYmVyIDIwMTcgYXQgMDg6MDksIFlhbmdibyBMdSA8
-eWFuZ2JvLmx1QG54cC5jb20+IHdyb3RlOg0KPiA+IEZyb206ICJ5aW5iby56aHUiIDx5aW5iby56
-aHVAbnhwLmNvbT4NCj4gPg0KPiA+IFdoZW4gc3lzdGVtIHdha2VzIHVwIGZyb20gc2xlZXAgb24g
-bHMxMDQ2YXJkYiwgdGhlIFNEIG9wZXJhdGlvbiBmYWlscw0KPiA+IHdpdGggbW1jIGVycm9yIG1l
-c3NhZ2VzIHNpbmNlIEVTREhDX1RCX0VOIGJpdCBjb3VsZG4ndCBiZSBjbGVhbmVkIGJ5DQo+ID4g
-ZVNESENfU1lTQ1RMW1JTVEFdLiBJdCdzIHByb3BlciB0byBjbGVhbiB0aGlzIGJpdCBpbiBlc2Ro
-Y19yZXNldCgpDQo+ID4gcmF0aGVyIHRoYW4gaW4gcHJvYmUuDQo+ID4NCj4gPiBTaWduZWQtb2Zm
-LWJ5OiB5aW5iby56aHUgPHlpbmJvLnpodUBueHAuY29tPg0KPiA+IEFja2VkLWJ5OiBZYW5nYm8g
-THUgPHlhbmdiby5sdUBueHAuY29tPg0KPiA+IEFja2VkLWJ5OiBBZHJpYW4gSHVudGVyIDxhZHJp
-YW4uaHVudGVyQGludGVsLmNvbT4NCj4gDQo+IFRoYW5rcywgYXBwbGllZCBmb3IgbmV4dC4NCj4g
-DQo+IEkgZG9uJ3Qga25vdyB3aHkgeW91IGd1eXMgZGlkIHNlbmQgc2V2ZXJhbCB2ZXJzaW9uIG9u
-IHRvcCwgdGhlIG9ubHkgY2hhbmdlIEkNCj4gY291bGQgZmluZCB3YXMgdGhlIGFja2VkLWJ5IHRh
-Zy4gUmlnaHQ/DQo+IA0KPiBLaW5kIHJlZ2FyZHMNCj4gVWZmZQ0KPiANCj4gPiAtLS0NCj4gPiBD
-aGFuZ2VzIGZvciB2MjoNCj4gPiAgICAgICAgIC0gQWRkZWQgQWNrZWQtYnkgb2YgWWFuZ2JvIGFu
-ZCBBZHJpYW4uDQo+ID4gLS0tDQo+ID4gIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtZXNkaGMu
-YyB8IDEyICsrKysrKysrLS0tLQ0KPiA+ICAxIGZpbGUgY2hhbmdlZCwgOCBpbnNlcnRpb25zKCsp
-LCA0IGRlbGV0aW9ucygtKQ0KPiA+DQo+ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qv
-c2RoY2ktb2YtZXNkaGMuYw0KPiA+IGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1lc2RoYy5j
-DQo+ID4gaW5kZXggZDc0MDMwZjNiZDEyLi40ZmZhNmIxNzNhMjEgMTAwNjQ0DQo+ID4gLS0tIGEv
-ZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1lc2RoYy5jDQo+ID4gKysrIGIvZHJpdmVycy9tbWMv
-aG9zdC9zZGhjaS1vZi1lc2RoYy5jDQo+ID4gQEAgLTU4OSwxMCArNTg5LDE4IEBAIHN0YXRpYyB2
-b2lkIGVzZGhjX3BsdGZtX3NldF9idXNfd2lkdGgoc3RydWN0DQo+ID4gc2RoY2lfaG9zdCAqaG9z
-dCwgaW50IHdpZHRoKQ0KPiA+DQo+ID4gIHN0YXRpYyB2b2lkIGVzZGhjX3Jlc2V0KHN0cnVjdCBz
-ZGhjaV9ob3N0ICpob3N0LCB1OCBtYXNrKSAgew0KPiA+ICsgICAgICAgdTMyIHZhbDsNCj4gPiAr
-DQo+ID4gICAgICAgICBzZGhjaV9yZXNldChob3N0LCBtYXNrKTsNCj4gPg0KPiA+ICAgICAgICAg
-c2RoY2lfd3JpdGVsKGhvc3QsIGhvc3QtPmllciwgU0RIQ0lfSU5UX0VOQUJMRSk7DQo+ID4gICAg
-ICAgICBzZGhjaV93cml0ZWwoaG9zdCwgaG9zdC0+aWVyLCBTREhDSV9TSUdOQUxfRU5BQkxFKTsN
-Cj4gPiArDQo+ID4gKyAgICAgICBpZiAobWFzayAmIFNESENJX1JFU0VUX0FMTCkgew0KPiA+ICsg
-ICAgICAgICAgICAgICB2YWwgPSBzZGhjaV9yZWFkbChob3N0LCBFU0RIQ19UQkNUTCk7DQo+ID4g
-KyAgICAgICAgICAgICAgIHZhbCAmPSB+RVNESENfVEJfRU47DQo+ID4gKyAgICAgICAgICAgICAg
-IHNkaGNpX3dyaXRlbChob3N0LCB2YWwsIEVTREhDX1RCQ1RMKTsNCj4gPiArICAgICAgIH0NCj4g
-PiAgfQ0KPiA+DQo+ID4gIC8qIFRoZSBTQ0ZHLCBTdXBwbGVtZW50YWwgQ29uZmlndXJhdGlvbiBV
-bml0LCBwcm92aWRlcyBTb0Mgc3BlY2lmaWMNCj4gPiBAQCAtNzg1LDEwICs3OTMsNiBAQCBzdGF0
-aWMgdm9pZCBlc2RoY19pbml0KHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2UgKnBkZXYsDQo+IHN0cnVj
-dCBzZGhjaV9ob3N0ICpob3N0KQ0KPiA+ICAgICAgICAgcGx0Zm1faG9zdCA9IHNkaGNpX3ByaXYo
-aG9zdCk7DQo+ID4gICAgICAgICBlc2RoYyA9IHNkaGNpX3BsdGZtX3ByaXYocGx0Zm1faG9zdCk7
-DQo+ID4NCj4gPiAtICAgICAgIHZhbCA9IHNkaGNpX3JlYWRsKGhvc3QsIEVTREhDX1RCQ1RMKTsN
-Cj4gPiAtICAgICAgIHZhbCAmPSB+RVNESENfVEJfRU47DQo+ID4gLSAgICAgICBzZGhjaV93cml0
-ZWwoaG9zdCwgdmFsLCBFU0RIQ19UQkNUTCk7DQo+ID4gLQ0KPiA+ICAgICAgICAgaG9zdF92ZXIg
-PSBzZGhjaV9yZWFkdyhob3N0LCBTREhDSV9IT1NUX1ZFUlNJT04pOw0KPiA+ICAgICAgICAgZXNk
-aGMtPnZlbmRvcl92ZXIgPSAoaG9zdF92ZXIgJiBTREhDSV9WRU5ET1JfVkVSX01BU0spID4+DQo+
-ID4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICBTREhDSV9WRU5ET1JfVkVSX1NISUZUOw0K
-PiA+IC0tDQo+ID4gMi4xNC4xDQo+ID4NCg==
+The Weibu F3C MiniPC has an onboard AP6255 module, presenting
+two SDIO functions on a single MMC host (Bluetooth/btsdio and
+WiFi/brcmfmac), and the mmc layer correctly detects this as
+non-removable.
+
+After suspend/resume, the wifi and bluetooth interfaces disappear
+and do not get probed again.
+
+The conditions here are:
+
+ 1. During suspend, we reach mmc_pm_notify()
+
+ 2. mmc_pm_notify() calls mmc_sdio_pre_suspend() to see if we can
+    suspend the SDIO host. However, mmc_sdio_pre_suspend() returns
+    -ENOSYS because btsdio_driver does not have a suspend method.
+
+ 3. mmc_pm_notify() proceeds to remove the card
+
+ 4. Upon resume, mmc_rescan() does nothing with this host, because of
+    the rescan_entered check which aims to only scan a non-removable
+    device a single time (i.e. during boot).
+
+Fix the loss of functionality by permitting another rescan of
+non-removable devices when we forcefully remove a card under these
+conditions.
+
+Signed-off-by: Daniel Drake <drake@endlessm.com>
+---
+ drivers/mmc/core/core.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 1f0f44f4dd5f..e436cde50bc4 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2966,6 +2966,10 @@ static int mmc_pm_notify(struct notifier_block *notify_block,
+ 		mmc_power_off(host);
+ 		mmc_release_host(host);
+ 		host->pm_flags = 0;
++
++		/* Force a rescan on resume, even for non-removable cards */
++		host->rescan_entered = 0;
++
+ 		break;
+ 
+ 	case PM_POST_SUSPEND:
+-- 
+2.14.1
+
