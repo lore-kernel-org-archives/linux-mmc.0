@@ -1,439 +1,77 @@
-From: LinuxPatchCommit <LinuxPatchCommit@bayhubtech.com>
-Subject: [PATCH 1/3] mmc: sdhci-pci-o2micro: Add hardware tuning for eMMC
-Date: Wed, 6 Dec 2017 03:46:40 +0000
-Message-ID: <BN1PR04MB454DB2F2AA570CACFA71EF889320@BN1PR04MB454.namprd04.prod.outlook.com>
-References: <CY4PR04MB047375B124358A33FB077C6EED3C0@CY4PR04MB0473.namprd04.prod.outlook.com>
+From: "Y.b. Lu" <yangbo.lu@nxp.com>
+Subject: RE: [v2] mmc: sdhci-of-esdhc: fix the mmc error after sleep on
+ ls1046ardb
+Date: Wed, 6 Dec 2017 02:56:02 +0000
+Message-ID: <DB6PR0401MB2536E50693B49873DF01F4B9F8320@DB6PR0401MB2536.eurprd04.prod.outlook.com>
+References: <20171201070934.47380-1-yangbo.lu@nxp.com>
+ <CAPDyKFr7kn1P7QtJo_QRdVNuN_uyG7RUPc5rjGk7VaWS5vpHUA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CY4PR04MB047375B124358A33FB077C6EED3C0@CY4PR04MB0473.namprd04.prod.outlook.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-eopbgr50076.outbound.protection.outlook.com ([40.107.5.76]:55936
+        "EHLO EUR03-VE1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1754345AbdLFC4G (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 5 Dec 2017 21:56:06 -0500
+In-Reply-To: <CAPDyKFr7kn1P7QtJo_QRdVNuN_uyG7RUPc5rjGk7VaWS5vpHUA@mail.gmail.com>
 Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: LinuxPatchCommit <LinuxPatchCommit@bayhubtech.com>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Cc: "Shirley Her (SC)" <shirley.her@bayhubtech.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Yinbo Zhu <yinbo.zhu@nxp.com>
 
-For O2micro/Bayhubtech SD Host DeviceID 8620, eMMC HS200 mode is
-working at 1.8v and it uses hardware tuning. The hardware tuning
-only needs to send one tuning command instead of multiple tuning
-commands with software tuning.
-
-Signed-off-by: ernest.zhang <ernest.zhang@bayhubtech.com>
----
- drivers/mmc/host/sdhci-pci-o2micro.c | 275 ++++++++++++++++++++++++++++++-=
-----
- 1 file changed, 238 insertions(+), 37 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-=
-pci-o2micro.c
-index 14273ca00641..4e4a301a54f5 100644
---- a/drivers/mmc/host/sdhci-pci-o2micro.c
-+++ b/drivers/mmc/host/sdhci-pci-o2micro.c
-@@ -16,22 +16,223 @@
-  */
-=20
- #include <linux/pci.h>
--
-+#include <linux/platform_device.h>
-+#include <linux/regulator/fixed.h>
-+#include <linux/regulator/machine.h>
-+#include <linux/mmc/host.h>
-+#include <linux/mmc/mmc.h>
-+#include <linux/delay.h>
- #include "sdhci.h"
- #include "sdhci-pci.h"
- #include "sdhci-pci-o2micro.h"
-=20
-+static void sdhci_o2_start_tuning(struct sdhci_host *host)
-+{
-+	u16 ctrl;
-+
-+	ctrl =3D sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+	ctrl |=3D SDHCI_CTRL_EXEC_TUNING;
-+	if (host->quirks2 & SDHCI_QUIRK2_TUNING_WORK_AROUND)
-+		ctrl |=3D SDHCI_CTRL_TUNED_CLK;
-+	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
-+
-+	/*
-+	 * As per the Host Controller spec v3.00, tuning command
-+	 * generates Buffer Read Ready interrupt, so enable that.
-+	 *
-+	 * Note: The spec clearly says that when tuning sequence
-+	 * is being performed, the controller does not generate
-+	 * interrupts other than Buffer Read Ready interrupt. But
-+	 * to make sure we don't hit a controller bug, we _only_
-+	 * enable Buffer Read Ready interrupt here.
-+	 */
-+	sdhci_writel(host, SDHCI_INT_DATA_AVAIL, SDHCI_INT_ENABLE);
-+	sdhci_writel(host, SDHCI_INT_DATA_AVAIL, SDHCI_SIGNAL_ENABLE);
-+}
-+
-+static void sdhci_o2_end_tuning(struct sdhci_host *host)
-+{
-+	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
-+	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
-+}
-+
-+static inline bool sdhci_data_line_cmd(struct mmc_command *cmd)
-+{
-+	return cmd->data || cmd->flags & MMC_RSP_BUSY;
-+}
-+
-+static void sdhci_del_timer(struct sdhci_host *host, struct mmc_request *m=
-rq)
-+{
-+	if (sdhci_data_line_cmd(mrq->cmd))
-+		del_timer(&host->data_timer);
-+	else
-+		del_timer(&host->timer);
-+}
-+
-+static void sdhci_o2_set_tuning_mode(struct sdhci_host *host, bool hw)
-+{
-+	u16 reg;
-+
-+	if (hw) {
-+		// enable hardware tuning
-+		reg =3D sdhci_readw(host, O2_SD_VENDOR_SETTING);
-+		reg &=3D (~O2_SD_HW_TUNING_ENABLE);
-+		sdhci_writew(host, reg, O2_SD_VENDOR_SETTING);
-+	} else {
-+		reg =3D sdhci_readw(host, O2_SD_VENDOR_SETTING);
-+		reg |=3D O2_SD_HW_TUNING_ENABLE;
-+		sdhci_writew(host, reg, O2_SD_VENDOR_SETTING);
-+	}
-+}
-+
-+static u8 data_buf[64];
-+
-+static void sdhci_o2_send_tuning(struct sdhci_host *host, u32 opcode)
-+{
-+	struct mmc_command cmd =3D { };
-+	struct mmc_data data =3D { };
-+	struct scatterlist sg;
-+	struct mmc_request mrq =3D { };
-+	unsigned long flags;
-+	u32 b =3D host->sdma_boundary;
-+	int size =3D sizeof(data_buf);
-+
-+	cmd.opcode =3D opcode;
-+	cmd.flags =3D MMC_RSP_PRESENT | MMC_RSP_OPCODE | MMC_RSP_CRC;
-+	cmd.mrq =3D &mrq;
-+	mrq.cmd =3D &cmd;
-+	mrq.data =3D &data;
-+	data.blksz =3D size;
-+	data.blocks =3D 1;
-+	data.flags =3D MMC_DATA_READ;
-+
-+	data.timeout_ns =3D 150 * NSEC_PER_MSEC;
-+
-+	data.sg =3D &sg;
-+	data.sg_len =3D 1;
-+	sg_init_one(&sg, data_buf, size);
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+
-+	sdhci_writew(host, SDHCI_MAKE_BLKSZ(b, 64), SDHCI_BLOCK_SIZE);
-+
-+	/*
-+	 * The tuning block is sent by the card to the host controller.
-+	 * So we set the TRNS_READ bit in the Transfer Mode register.
-+	 * This also takes care of setting DMA Enable and Multi Block
-+	 * Select in the same register to 0.
-+	 */
-+	sdhci_writew(host, SDHCI_TRNS_READ, SDHCI_TRANSFER_MODE);
-+
-+	sdhci_send_command(host, &cmd);
-+
-+	host->cmd =3D NULL;
-+
-+	sdhci_del_timer(host, &mrq);
-+
-+	host->tuning_done =3D 0;
-+
-+	mmiowb();
-+	spin_unlock_irqrestore(&host->lock, flags);
-+
-+	/* Wait for Buffer Read Ready interrupt */
-+	wait_event_timeout(host->buf_ready_int, (host->tuning_done =3D=3D 1),
-+			   msecs_to_jiffies(50));
-+
-+}
-+
-+static void sdhci_o2_reset_tuning(struct sdhci_host *host)
-+{
-+	u16 ctrl;
-+
-+	ctrl =3D sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+	ctrl &=3D ~SDHCI_CTRL_TUNED_CLK;
-+	ctrl &=3D ~SDHCI_CTRL_EXEC_TUNING;
-+	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
-+}
-+
-+static void __sdhci_o2_execute_tuning(struct sdhci_host *host, u32 opcode)
-+{
-+
-+	int i;
-+
-+	sdhci_o2_send_tuning(host, MMC_SEND_TUNING_BLOCK_HS200);
-+
-+	for (i =3D 0; i < 150; i++) {
-+		u16 ctrl =3D sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+
-+		if (!(ctrl & SDHCI_CTRL_EXEC_TUNING)) {
-+			if (ctrl & SDHCI_CTRL_TUNED_CLK) {
-+				pr_info("%s: HW tuning ok !\n",
-+					mmc_hostname(host->mmc));
-+				host->tuning_done =3D true;
-+				return;
-+			}
-+			pr_warn("%s: HW tuning failed !\n",
-+				mmc_hostname(host->mmc));
-+
-+			break;
-+		}
-+
-+		mdelay(1);
-+	}
-+
-+	pr_info("%s: Tuning failed, falling back to fixed sampling clock\n",
-+		mmc_hostname(host->mmc));
-+	sdhci_o2_reset_tuning(host);
-+
-+}
-+
-+static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
-+{
-+	struct sdhci_host *host =3D mmc_priv(mmc);
-+	int current_bus_width =3D 0;
-+
-+	/*
-+	 * This handler only implements the eMMC tuning that is specific to
-+	 * this controller.  Fall back to the standard method for other TINMING.
-+	 */
-+	if (host->timing !=3D MMC_TIMING_MMC_HS200)
-+		return sdhci_execute_tuning(mmc, opcode);
-+
-+	if (WARN_ON(opcode !=3D MMC_SEND_TUNING_BLOCK_HS200))
-+		return -EINVAL;
-+
-+	/*
-+	 * o2 sdhci host didn't support 8bit emmc tuning
-+	 */
-+	if (mmc->ios.bus_width =3D=3D MMC_BUS_WIDTH_8) {
-+		current_bus_width =3D mmc->ios.bus_width;
-+		mmc->ios.bus_width =3D MMC_BUS_WIDTH_4;
-+		mmc->ops->set_ios(mmc, &mmc->ios);
-+	}
-+
-+	sdhci_o2_set_tuning_mode(host, true);
-+
-+	sdhci_o2_start_tuning(host);
-+
-+	__sdhci_o2_execute_tuning(host, opcode);
-+
-+	sdhci_o2_end_tuning(host);
-+
-+	if (current_bus_width =3D=3D MMC_BUS_WIDTH_8) {
-+		mmc->ios.bus_width =3D current_bus_width;
-+		mmc->ops->set_ios(mmc, &mmc->ios);
-+	}
-+
-+	host->flags &=3D ~SDHCI_HS400_TUNING;
-+	return 0;
-+}
-+
- static void o2_pci_set_baseclk(struct sdhci_pci_chip *chip, u32 value)
- {
- 	u32 scratch_32;
--	pci_read_config_dword(chip->pdev,
--			      O2_SD_PLL_SETTING, &scratch_32);
-+	pci_read_config_dword(chip->pdev, O2_SD_PLL_SETTING, &scratch_32);
-=20
- 	scratch_32 &=3D 0x0000FFFF;
- 	scratch_32 |=3D value;
-=20
--	pci_write_config_dword(chip->pdev,
--			       O2_SD_PLL_SETTING, scratch_32);
-+	pci_write_config_dword(chip->pdev, O2_SD_PLL_SETTING, scratch_32);
- }
-=20
- static void o2_pci_led_enable(struct sdhci_pci_chip *chip)
-@@ -40,23 +241,19 @@ static void o2_pci_led_enable(struct sdhci_pci_chip *c=
-hip)
- 	u32 scratch_32;
-=20
- 	/* Set led of SD host function enable */
--	ret =3D pci_read_config_dword(chip->pdev,
--				    O2_SD_FUNC_REG0, &scratch_32);
-+	ret =3D pci_read_config_dword(chip->pdev, O2_SD_FUNC_REG0, &scratch_32);
- 	if (ret)
- 		return;
-=20
- 	scratch_32 &=3D ~O2_SD_FREG0_LEDOFF;
--	pci_write_config_dword(chip->pdev,
--			       O2_SD_FUNC_REG0, scratch_32);
-+	pci_write_config_dword(chip->pdev, O2_SD_FUNC_REG0, scratch_32);
-=20
--	ret =3D pci_read_config_dword(chip->pdev,
--				    O2_SD_TEST_REG, &scratch_32);
-+	ret =3D pci_read_config_dword(chip->pdev, O2_SD_TEST_REG, &scratch_32);
- 	if (ret)
- 		return;
-=20
- 	scratch_32 |=3D O2_SD_LED_ENABLE;
--	pci_write_config_dword(chip->pdev,
--			       O2_SD_TEST_REG, scratch_32);
-+	pci_write_config_dword(chip->pdev, O2_SD_TEST_REG, scratch_32);
-=20
- }
-=20
-@@ -104,8 +301,7 @@ static void sdhci_pci_o2_fujin2_pci_init(struct sdhci_p=
-ci_chip *chip)
- 	scratch_32 |=3D 0x00CC;
- 	pci_write_config_dword(chip->pdev, O2_SD_CAP_REG0, scratch_32);
- 	/* Set DLL Tuning Window */
--	ret =3D pci_read_config_dword(chip->pdev,
--				    O2_SD_TUNING_CTRL, &scratch_32);
-+	ret =3D pci_read_config_dword(chip->pdev, O2_SD_TUNING_CTRL, &scratch_32)=
-;
- 	if (ret)
- 		return;
- 	scratch_32 &=3D ~(0x000000FF);
-@@ -137,8 +333,7 @@ static void sdhci_pci_o2_fujin2_pci_init(struct sdhci_p=
-ci_chip *chip)
- 	scratch_32 |=3D 0x30000000;
- 	pci_write_config_dword(chip->pdev, O2_SD_CAPS, scratch_32);
-=20
--	ret =3D pci_read_config_dword(chip->pdev,
--				    O2_SD_MISC_CTRL4, &scratch_32);
-+	ret =3D pci_read_config_dword(chip->pdev, O2_SD_MISC_CTRL4, &scratch_32);
- 	if (ret)
- 		return;
- 	scratch_32 &=3D ~(0x000f0000);
-@@ -151,6 +346,7 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot=
-)
- 	struct sdhci_pci_chip *chip;
- 	struct sdhci_host *host;
- 	u32 reg;
-+	int ret;
-=20
- 	chip =3D slot->chip;
- 	host =3D slot->host;
-@@ -164,6 +360,21 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slo=
-t)
- 		if (reg & 0x1)
- 			host->quirks |=3D SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
-=20
-+		if (chip->pdev->device =3D=3D PCI_DEVICE_ID_O2_SEABIRD0) {
-+			ret =3D pci_read_config_dword(chip->pdev,
-+						    O2_SD_MISC_SETTING, &reg);
-+			if (ret)
-+				return -EIO;
-+			if (reg & (1 << 4)) {
-+				pr_info("%s: emmc 1.8v flag is set, force 1.8v signaling voltage\n",
-+					mmc_hostname(host->mmc));
-+				host->flags &=3D ~(SDHCI_SIGNALING_330);
-+				host->flags |=3D SDHCI_SIGNALING_180;
-+			}
-+		}
-+
-+		host->mmc_host_ops.execute_tuning =3D sdhci_o2_execute_tuning;
-+
- 		if (chip->pdev->device !=3D PCI_DEVICE_ID_O2_FUJIN2)
- 			break;
- 		/* set dll watch dog timer */
-@@ -191,8 +402,7 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
- 	case PCI_DEVICE_ID_O2_8320:
- 	case PCI_DEVICE_ID_O2_8321:
- 		/* This extra setup is required due to broken ADMA. */
--		ret =3D pci_read_config_byte(chip->pdev,
--				O2_SD_LOCK_WP, &scratch);
-+		ret =3D pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch);
- 		if (ret)
- 			return ret;
- 		scratch &=3D 0x7f;
-@@ -202,8 +412,7 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
- 		pci_write_config_byte(chip->pdev, O2_SD_MULTI_VCC3V, 0x08);
-=20
- 		/* Disable CLK_REQ# support after media DET */
--		ret =3D pci_read_config_byte(chip->pdev,
--				O2_SD_CLKREQ, &scratch);
-+		ret =3D pci_read_config_byte(chip->pdev, O2_SD_CLKREQ, &scratch);
- 		if (ret)
- 			return ret;
- 		scratch |=3D 0x20;
-@@ -224,16 +433,14 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
- 		pci_write_config_byte(chip->pdev, O2_SD_ADMA2, 0x08);
-=20
- 		/* Disable the infinite transfer mode */
--		ret =3D pci_read_config_byte(chip->pdev,
--				O2_SD_INF_MOD, &scratch);
-+		ret =3D pci_read_config_byte(chip->pdev, O2_SD_INF_MOD, &scratch);
- 		if (ret)
- 			return ret;
- 		scratch |=3D 0x08;
- 		pci_write_config_byte(chip->pdev, O2_SD_INF_MOD, scratch);
-=20
- 		/* Lock WP */
--		ret =3D pci_read_config_byte(chip->pdev,
--				O2_SD_LOCK_WP, &scratch);
-+		ret =3D pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch);
- 		if (ret)
- 			return ret;
- 		scratch |=3D 0x80;
-@@ -243,8 +450,7 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
- 	case PCI_DEVICE_ID_O2_SDS1:
- 	case PCI_DEVICE_ID_O2_FUJIN2:
- 		/* UnLock WP */
--		ret =3D pci_read_config_byte(chip->pdev,
--				O2_SD_LOCK_WP, &scratch);
-+		ret =3D pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch);
- 		if (ret)
- 			return ret;
-=20
-@@ -319,15 +525,13 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
- 		if (ret)
- 			return ret;
- 		scratch_32 &=3D ~(0xE0);
--		pci_write_config_dword(chip->pdev,
--				       O2_SD_CAP_REG2, scratch_32);
-+		pci_write_config_dword(chip->pdev, O2_SD_CAP_REG2, scratch_32);
-=20
- 		if (chip->pdev->device =3D=3D PCI_DEVICE_ID_O2_FUJIN2)
- 			sdhci_pci_o2_fujin2_pci_init(chip);
-=20
- 		/* Lock WP */
--		ret =3D pci_read_config_byte(chip->pdev,
--					   O2_SD_LOCK_WP, &scratch);
-+		ret =3D pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch);
- 		if (ret)
- 			return ret;
- 		scratch |=3D 0x80;
-@@ -336,8 +540,7 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
- 	case PCI_DEVICE_ID_O2_SEABIRD0:
- 	case PCI_DEVICE_ID_O2_SEABIRD1:
- 		/* UnLock WP */
--		ret =3D pci_read_config_byte(chip->pdev,
--				O2_SD_LOCK_WP, &scratch);
-+		ret =3D pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch);
- 		if (ret)
- 			return ret;
-=20
-@@ -369,11 +572,9 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
- 		}
-=20
- 		/* Set Tuning Windows to 5 */
--		pci_write_config_byte(chip->pdev,
--				O2_SD_TUNING_CTRL, 0x55);
-+		pci_write_config_byte(chip->pdev, O2_SD_TUNING_CTRL, 0x55);
- 		/* Lock WP */
--		ret =3D pci_read_config_byte(chip->pdev,
--					   O2_SD_LOCK_WP, &scratch);
-+		ret =3D pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch);
- 		if (ret)
- 			return ret;
- 		scratch |=3D 0x80;
---=20
-2.14.1
+SGkgVWZmZSwNCg0KSSdtIHNvcnJ5IGZvciB0aGUgcmVkdW5kYW50IGVtYWlscyBmcm9tIHVzLg0K
+WWluYm8gZm91bmQgaGlzIGVtYWlsIGNvdWxkbuKAmXQgcmVhY2ggcGF0Y2h3b3JrIGJ1dCBkaWRu
+4oCZdCBrbm93IHdoeSB0aGlzIGhhcHBlbmVkLg0KU28gSSBoZWxwZWQgaGltIHRvIHJlc2VuZCBv
+bmUuIEp1c3QgZ290IHNhbWUgcHJvYmxlbS4NClN0cmFuZ2UsIHdlIHN0aWxsIGRvbuKAmXQga25v
+dyB0aGUgcmVhc29uLg0KDQpUaGFua3MgYSBsb3QuDQoNCg0KQmVzdCByZWdhcmRzLA0KWWFuZ2Jv
+IEx1DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogVWxmIEhhbnNzb24g
+W21haWx0bzp1bGYuaGFuc3NvbkBsaW5hcm8ub3JnXQ0KPiBTZW50OiAyMDE35bm0MTLmnIg25pel
+IDA6MjkNCj4gVG86IFkuYi4gTHUgPHlhbmdiby5sdUBueHAuY29tPg0KPiBDYzogbGludXgtbW1j
+QHZnZXIua2VybmVsLm9yZzsgQWRyaWFuIEh1bnRlciA8YWRyaWFuLmh1bnRlckBpbnRlbC5jb20+
+Ow0KPiBZaW5ibyBaaHUgPHlpbmJvLnpodUBueHAuY29tPg0KPiBTdWJqZWN0OiBSZTogW3YyXSBt
+bWM6IHNkaGNpLW9mLWVzZGhjOiBmaXggdGhlIG1tYyBlcnJvciBhZnRlciBzbGVlcCBvbg0KPiBs
+czEwNDZhcmRiDQo+IA0KPiBPbiAxIERlY2VtYmVyIDIwMTcgYXQgMDg6MDksIFlhbmdibyBMdSA8
+eWFuZ2JvLmx1QG54cC5jb20+IHdyb3RlOg0KPiA+IEZyb206ICJ5aW5iby56aHUiIDx5aW5iby56
+aHVAbnhwLmNvbT4NCj4gPg0KPiA+IFdoZW4gc3lzdGVtIHdha2VzIHVwIGZyb20gc2xlZXAgb24g
+bHMxMDQ2YXJkYiwgdGhlIFNEIG9wZXJhdGlvbiBmYWlscw0KPiA+IHdpdGggbW1jIGVycm9yIG1l
+c3NhZ2VzIHNpbmNlIEVTREhDX1RCX0VOIGJpdCBjb3VsZG4ndCBiZSBjbGVhbmVkIGJ5DQo+ID4g
+ZVNESENfU1lTQ1RMW1JTVEFdLiBJdCdzIHByb3BlciB0byBjbGVhbiB0aGlzIGJpdCBpbiBlc2Ro
+Y19yZXNldCgpDQo+ID4gcmF0aGVyIHRoYW4gaW4gcHJvYmUuDQo+ID4NCj4gPiBTaWduZWQtb2Zm
+LWJ5OiB5aW5iby56aHUgPHlpbmJvLnpodUBueHAuY29tPg0KPiA+IEFja2VkLWJ5OiBZYW5nYm8g
+THUgPHlhbmdiby5sdUBueHAuY29tPg0KPiA+IEFja2VkLWJ5OiBBZHJpYW4gSHVudGVyIDxhZHJp
+YW4uaHVudGVyQGludGVsLmNvbT4NCj4gDQo+IFRoYW5rcywgYXBwbGllZCBmb3IgbmV4dC4NCj4g
+DQo+IEkgZG9uJ3Qga25vdyB3aHkgeW91IGd1eXMgZGlkIHNlbmQgc2V2ZXJhbCB2ZXJzaW9uIG9u
+IHRvcCwgdGhlIG9ubHkgY2hhbmdlIEkNCj4gY291bGQgZmluZCB3YXMgdGhlIGFja2VkLWJ5IHRh
+Zy4gUmlnaHQ/DQo+IA0KPiBLaW5kIHJlZ2FyZHMNCj4gVWZmZQ0KPiANCj4gPiAtLS0NCj4gPiBD
+aGFuZ2VzIGZvciB2MjoNCj4gPiAgICAgICAgIC0gQWRkZWQgQWNrZWQtYnkgb2YgWWFuZ2JvIGFu
+ZCBBZHJpYW4uDQo+ID4gLS0tDQo+ID4gIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtZXNkaGMu
+YyB8IDEyICsrKysrKysrLS0tLQ0KPiA+ICAxIGZpbGUgY2hhbmdlZCwgOCBpbnNlcnRpb25zKCsp
+LCA0IGRlbGV0aW9ucygtKQ0KPiA+DQo+ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qv
+c2RoY2ktb2YtZXNkaGMuYw0KPiA+IGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1lc2RoYy5j
+DQo+ID4gaW5kZXggZDc0MDMwZjNiZDEyLi40ZmZhNmIxNzNhMjEgMTAwNjQ0DQo+ID4gLS0tIGEv
+ZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1lc2RoYy5jDQo+ID4gKysrIGIvZHJpdmVycy9tbWMv
+aG9zdC9zZGhjaS1vZi1lc2RoYy5jDQo+ID4gQEAgLTU4OSwxMCArNTg5LDE4IEBAIHN0YXRpYyB2
+b2lkIGVzZGhjX3BsdGZtX3NldF9idXNfd2lkdGgoc3RydWN0DQo+ID4gc2RoY2lfaG9zdCAqaG9z
+dCwgaW50IHdpZHRoKQ0KPiA+DQo+ID4gIHN0YXRpYyB2b2lkIGVzZGhjX3Jlc2V0KHN0cnVjdCBz
+ZGhjaV9ob3N0ICpob3N0LCB1OCBtYXNrKSAgew0KPiA+ICsgICAgICAgdTMyIHZhbDsNCj4gPiAr
+DQo+ID4gICAgICAgICBzZGhjaV9yZXNldChob3N0LCBtYXNrKTsNCj4gPg0KPiA+ICAgICAgICAg
+c2RoY2lfd3JpdGVsKGhvc3QsIGhvc3QtPmllciwgU0RIQ0lfSU5UX0VOQUJMRSk7DQo+ID4gICAg
+ICAgICBzZGhjaV93cml0ZWwoaG9zdCwgaG9zdC0+aWVyLCBTREhDSV9TSUdOQUxfRU5BQkxFKTsN
+Cj4gPiArDQo+ID4gKyAgICAgICBpZiAobWFzayAmIFNESENJX1JFU0VUX0FMTCkgew0KPiA+ICsg
+ICAgICAgICAgICAgICB2YWwgPSBzZGhjaV9yZWFkbChob3N0LCBFU0RIQ19UQkNUTCk7DQo+ID4g
+KyAgICAgICAgICAgICAgIHZhbCAmPSB+RVNESENfVEJfRU47DQo+ID4gKyAgICAgICAgICAgICAg
+IHNkaGNpX3dyaXRlbChob3N0LCB2YWwsIEVTREhDX1RCQ1RMKTsNCj4gPiArICAgICAgIH0NCj4g
+PiAgfQ0KPiA+DQo+ID4gIC8qIFRoZSBTQ0ZHLCBTdXBwbGVtZW50YWwgQ29uZmlndXJhdGlvbiBV
+bml0LCBwcm92aWRlcyBTb0Mgc3BlY2lmaWMNCj4gPiBAQCAtNzg1LDEwICs3OTMsNiBAQCBzdGF0
+aWMgdm9pZCBlc2RoY19pbml0KHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2UgKnBkZXYsDQo+IHN0cnVj
+dCBzZGhjaV9ob3N0ICpob3N0KQ0KPiA+ICAgICAgICAgcGx0Zm1faG9zdCA9IHNkaGNpX3ByaXYo
+aG9zdCk7DQo+ID4gICAgICAgICBlc2RoYyA9IHNkaGNpX3BsdGZtX3ByaXYocGx0Zm1faG9zdCk7
+DQo+ID4NCj4gPiAtICAgICAgIHZhbCA9IHNkaGNpX3JlYWRsKGhvc3QsIEVTREhDX1RCQ1RMKTsN
+Cj4gPiAtICAgICAgIHZhbCAmPSB+RVNESENfVEJfRU47DQo+ID4gLSAgICAgICBzZGhjaV93cml0
+ZWwoaG9zdCwgdmFsLCBFU0RIQ19UQkNUTCk7DQo+ID4gLQ0KPiA+ICAgICAgICAgaG9zdF92ZXIg
+PSBzZGhjaV9yZWFkdyhob3N0LCBTREhDSV9IT1NUX1ZFUlNJT04pOw0KPiA+ICAgICAgICAgZXNk
+aGMtPnZlbmRvcl92ZXIgPSAoaG9zdF92ZXIgJiBTREhDSV9WRU5ET1JfVkVSX01BU0spID4+DQo+
+ID4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICBTREhDSV9WRU5ET1JfVkVSX1NISUZUOw0K
+PiA+IC0tDQo+ID4gMi4xNC4xDQo+ID4NCg==
