@@ -1,18 +1,23 @@
 From: Kevin Hilman <khilman@baylibre.com>
-Subject: Re: [PATCH 1/6] mmc: meson-gx-mmc: Fix platform_get_irq's error checking
-Date: Wed, 06 Dec 2017 16:55:08 -0800
-Message-ID: <7hfu8nmk5v.fsf@baylibre.com>
-References: <1510950502-22565-1-git-send-email-arvind.yadav.cs@gmail.com>
-        <1510950502-22565-2-git-send-email-arvind.yadav.cs@gmail.com>
+Subject: Re: [PATCH 1/6 v3] mmc: meson-gx-mmc: Fix platform_get_irq's error checking
+Date: Wed, 06 Dec 2017 16:58:27 -0800
+Message-ID: <7h4lp3mk0c.fsf@baylibre.com>
+References: <c1c27676e9f141ace1254b40807bf2dc03f072c6.1511066652.git.arvind.yadav.cs@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1510950502-22565-2-git-send-email-arvind.yadav.cs@gmail.com>
-        (Arvind Yadav's message of "Sat, 18 Nov 2017 01:58:17 +0530")
-Sender: linux-kernel-owner@vger.kernel.org
-To: Arvind Yadav <arvind.yadav.cs@gmail.com>
-Cc: ulf.hansson@linaro.org, carlo@caione.org, ben-linux@fluff.org, adrian.hunter@intel.com, vireshk@kernel.org, maxime.ripard@free-electrons.com, wens@csie.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pg0-f46.google.com ([74.125.83.46]:38382 "EHLO
+        mail-pg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751941AbdLGA6a (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Dec 2017 19:58:30 -0500
+Received: by mail-pg0-f46.google.com with SMTP id f12so3238607pgo.5
+        for <linux-mmc@vger.kernel.org>; Wed, 06 Dec 2017 16:58:30 -0800 (PST)
+In-Reply-To: <c1c27676e9f141ace1254b40807bf2dc03f072c6.1511066652.git.arvind.yadav.cs@gmail.com>
+        (Arvind Yadav's message of "Sun, 19 Nov 2017 10:22:43 +0530")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Arvind Yadav <arvind.yadav.cs@gmail.com>
+Cc: ben-linux@fluff.org, ulf.hansson@linaro.org, adrian.hunter@intel.com, vireshk@kernel.org, maxime.ripard@free-electrons.com, wens@csie.org, linux@armlinux.org.uk, carlo@caione.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org
 
 Arvind Yadav <arvind.yadav.cs@gmail.com> writes:
 
@@ -22,4 +27,4 @@ Arvind Yadav <arvind.yadav.cs@gmail.com> writes:
 >
 > Signed-off-by: Arvind Yadav <arvind.yadav.cs@gmail.com>
 
-Reviewed-by: Kevin Hilman <khilman@baylibre.com>
+Acked-by: Kevin Hilman <khilman@baylibre.com>
