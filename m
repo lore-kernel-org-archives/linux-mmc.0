@@ -1,43 +1,25 @@
-From: Pravin Shedge <pravin.shedge4linux@gmail.com>
-Subject: [PATCH 12/45] drivers: mmc: remove duplicate includes
-Date: Wed,  6 Dec 2017 22:27:03 +0530
-Message-ID: <1512579423-5405-1-git-send-email-pravin.shedge4linux@gmail.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pf0-f194.google.com ([209.85.192.194]:38734 "EHLO
-        mail-pf0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752119AbdLFQ5M (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Dec 2017 11:57:12 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+From: Kevin Hilman <khilman@baylibre.com>
+Subject: Re: [PATCH 1/6] mmc: meson-gx-mmc: Fix platform_get_irq's error checking
+Date: Wed, 06 Dec 2017 16:55:08 -0800
+Message-ID: <7hfu8nmk5v.fsf@baylibre.com>
+References: <1510950502-22565-1-git-send-email-arvind.yadav.cs@gmail.com>
+        <1510950502-22565-2-git-send-email-arvind.yadav.cs@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1510950502-22565-2-git-send-email-arvind.yadav.cs@gmail.com>
+        (Arvind Yadav's message of "Sat, 18 Nov 2017 01:58:17 +0530")
+Sender: linux-kernel-owner@vger.kernel.org
+To: Arvind Yadav <arvind.yadav.cs@gmail.com>
+Cc: ulf.hansson@linaro.org, carlo@caione.org, ben-linux@fluff.org, adrian.hunter@intel.com, vireshk@kernel.org, maxime.ripard@free-electrons.com, wens@csie.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, hkallweit1@gmail.com
-Cc: linux-kernel@vger.kernel.org, pravin.shedge4linux@gmail.com
 
-These duplicate includes have been found with scripts/checkincludes.pl but
-they have been removed manually to avoid removing false positives.
+Arvind Yadav <arvind.yadav.cs@gmail.com> writes:
 
-Signed-off-by: Pravin Shedge <pravin.shedge4linux@gmail.com>
----
- drivers/mmc/host/android-goldfish.c | 2 --
- 1 file changed, 2 deletions(-)
+> The platform_get_irq() function returns negative if an error occurs.
+> zero or positive number on success. platform_get_irq() error checking
+> for zero is not correct.
+>
+> Signed-off-by: Arvind Yadav <arvind.yadav.cs@gmail.com>
 
-diff --git a/drivers/mmc/host/android-goldfish.c b/drivers/mmc/host/android-goldfish.c
-index 63fe509..63d2758 100644
---- a/drivers/mmc/host/android-goldfish.c
-+++ b/drivers/mmc/host/android-goldfish.c
-@@ -42,13 +42,11 @@
- #include <linux/spinlock.h>
- #include <linux/timer.h>
- #include <linux/clk.h>
--#include <linux/scatterlist.h>
- 
- #include <asm/io.h>
- #include <asm/irq.h>
- 
- #include <asm/types.h>
--#include <asm/io.h>
- #include <linux/uaccess.h>
- 
- #define DRIVER_NAME "goldfish_mmc"
--- 
-2.7.4
-
+Reviewed-by: Kevin Hilman <khilman@baylibre.com>
