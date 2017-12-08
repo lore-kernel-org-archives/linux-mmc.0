@@ -1,94 +1,38 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH] mmc: cqhci: Ensure macro parameters are wrapped in parentheses
-Date: Fri,  8 Dec 2017 09:31:06 +0200
-Message-ID: <1512718266-31261-1-git-send-email-adrian.hunter@intel.com>
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: [PATCH] mmc: block: blk-mq: Potential NULL deref on
+ mmc_blk_alloc_req() failure
+Date: Fri, 8 Dec 2017 14:55:16 +0300
+Message-ID: <20171208115516.3h55rvjq54hyfecq@mwanda>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga12.intel.com ([192.55.52.136]:50957 "EHLO mga12.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751021AbdLHHk4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 8 Dec 2017 02:40:56 -0500
+Received: from aserp2120.oracle.com ([141.146.126.78]:38148 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753303AbdLHLzi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Dec 2017 06:55:38 -0500
+Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Dan Carpenter <dan.carpenter@oracle.com>, Harjani Ritesh <riteshh@codeaurora.org>, Shawn Lin <shawn.lin@rock-chips.com>, Bough Chen <haibo.chen@nxp.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, linux-mmc@vger.kernel.org, kernel-janitors@vger.kernel.org
 
-Absence of parentheses is not affecting current code, but ensure macro
-parameters are wrapped in parentheses.
+mmc_blk_alloc_req() is supposed to return error pointers but there is
+one path where we forget to set the error code and accidentally return
+NULL.  The callers are not expecting that and will have a NULL pointer
+dereference.
 
-Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
-Fixes: adcb39141800 ("mmc: cqhci: support for command queue enabled host")
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/cqhci.h | 42 +++++++++++++++++++++---------------------
- 1 file changed, 21 insertions(+), 21 deletions(-)
+Fixes: 23da8bed11f2 ("mmc: block: Simplify cleaning up the queue")
+Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
 
-diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
-index 2d39d361b322..9e68286a07b4 100644
---- a/drivers/mmc/host/cqhci.h
-+++ b/drivers/mmc/host/cqhci.h
-@@ -61,9 +61,9 @@
- #define CQHCI_IC_ENABLE			BIT(31)
- #define CQHCI_IC_RESET			BIT(16)
- #define CQHCI_IC_ICCTHWEN		BIT(15)
--#define CQHCI_IC_ICCTH(x)		((x & 0x1F) << 8)
-+#define CQHCI_IC_ICCTH(x)		(((x) & 0x1F) << 8)
- #define CQHCI_IC_ICTOVALWEN		BIT(7)
--#define CQHCI_IC_ICTOVAL(x)		(x & 0x7F)
-+#define CQHCI_IC_ICTOVAL(x)		((x) & 0x7F)
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index ab384ba6cb37..6af2b660b1f7 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -3037,6 +3037,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 	 */
+ 	if (!blk_get_queue(md->queue.queue)) {
+ 		mmc_cleanup_queue(&md->queue);
++		ret = -ENODEV;
+ 		goto err_putdisk;
+ 	}
  
- /* task list base address */
- #define CQHCI_TDLBA			0x20
-@@ -119,31 +119,31 @@
- #define CQHCI_IC_DEFAULT_ICTOVAL	1
- 
- /* attribute fields */
--#define CQHCI_VALID(x)			((x & 1) << 0)
--#define CQHCI_END(x)			((x & 1) << 1)
--#define CQHCI_INT(x)			((x & 1) << 2)
--#define CQHCI_ACT(x)			((x & 0x7) << 3)
-+#define CQHCI_VALID(x)			(((x) & 1) << 0)
-+#define CQHCI_END(x)			(((x) & 1) << 1)
-+#define CQHCI_INT(x)			(((x) & 1) << 2)
-+#define CQHCI_ACT(x)			(((x) & 0x7) << 3)
- 
- /* data command task descriptor fields */
--#define CQHCI_FORCED_PROG(x)		((x & 1) << 6)
--#define CQHCI_CONTEXT(x)		((x & 0xF) << 7)
--#define CQHCI_DATA_TAG(x)		((x & 1) << 11)
--#define CQHCI_DATA_DIR(x)		((x & 1) << 12)
--#define CQHCI_PRIORITY(x)		((x & 1) << 13)
--#define CQHCI_QBAR(x)			((x & 1) << 14)
--#define CQHCI_REL_WRITE(x)		((x & 1) << 15)
--#define CQHCI_BLK_COUNT(x)		((x & 0xFFFF) << 16)
--#define CQHCI_BLK_ADDR(x)		((x & 0xFFFFFFFF) << 32)
-+#define CQHCI_FORCED_PROG(x)		(((x) & 1) << 6)
-+#define CQHCI_CONTEXT(x)		(((x) & 0xF) << 7)
-+#define CQHCI_DATA_TAG(x)		(((x) & 1) << 11)
-+#define CQHCI_DATA_DIR(x)		(((x) & 1) << 12)
-+#define CQHCI_PRIORITY(x)		(((x) & 1) << 13)
-+#define CQHCI_QBAR(x)			(((x) & 1) << 14)
-+#define CQHCI_REL_WRITE(x)		(((x) & 1) << 15)
-+#define CQHCI_BLK_COUNT(x)		(((x) & 0xFFFF) << 16)
-+#define CQHCI_BLK_ADDR(x)		(((x) & 0xFFFFFFFF) << 32)
- 
- /* direct command task descriptor fields */
--#define CQHCI_CMD_INDEX(x)		((x & 0x3F) << 16)
--#define CQHCI_CMD_TIMING(x)		((x & 1) << 22)
--#define CQHCI_RESP_TYPE(x)		((x & 0x3) << 23)
-+#define CQHCI_CMD_INDEX(x)		(((x) & 0x3F) << 16)
-+#define CQHCI_CMD_TIMING(x)		(((x) & 1) << 22)
-+#define CQHCI_RESP_TYPE(x)		(((x) & 0x3) << 23)
- 
- /* transfer descriptor fields */
--#define CQHCI_DAT_LENGTH(x)		((x & 0xFFFF) << 16)
--#define CQHCI_DAT_ADDR_LO(x)		((x & 0xFFFFFFFF) << 32)
--#define CQHCI_DAT_ADDR_HI(x)		((x & 0xFFFFFFFF) << 0)
-+#define CQHCI_DAT_LENGTH(x)		(((x) & 0xFFFF) << 16)
-+#define CQHCI_DAT_ADDR_LO(x)		(((x) & 0xFFFFFFFF) << 32)
-+#define CQHCI_DAT_ADDR_HI(x)		(((x) & 0xFFFFFFFF) << 0)
- 
- struct cqhci_host_ops;
- struct mmc_host;
--- 
-1.9.1
-
