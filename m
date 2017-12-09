@@ -1,87 +1,53 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: More TMIO MMC variant. What is a preferred name?
-Date: Fri, 8 Dec 2017 15:59:56 +0100
-Message-ID: <20171208145955.av4uhpluldbhshog@ninjato>
-References: <CAK7LNASN8kjmiNHvX7zrgVv=5d81ovfGNRdHm8TXiJNgr+H9MA@mail.gmail.com>
- <20171120201142.n4l4jelxsmmtwjj6@tetsubishi>
- <CAPDyKFq_uVvBKBhATNYhq2mSMmNXA7tPSSPMESCnTDtQt9XrZA@mail.gmail.com>
- <20171121200111.vrpmsubme55356qv@ninjato>
- <CAPDyKFo6X+Z6bORzPow=79Q7jXZOu4SMA9dh1fDsD-_JrBRtgA@mail.gmail.com>
- <CAK7LNARpchnGL8ZGWcFs=bxmH2FK71Voyd5K1E6=3bHTjd-gyw@mail.gmail.com>
- <20171122170815.o3o5umayra7kbdg3@ninjato>
- <CAPDyKFpuiurgT5Zwo--EcaWOjZOdmSYotHrwH=c-byq3nkaxYw@mail.gmail.com>
- <20171127171401.o7ch26oot2au5oux@ninjato>
- <CAK7LNAQtLdXBw_JzW2dYdVtC0b6eGCvO5KByXfKKJVxi02i61g@mail.gmail.com>
+From: Christoph Fritz <chf.fritz@googlemail.com>
+Subject: Re: [PATCH v2] mmc: core: apply NO_CMD23 quirk to an ATP card
+Date: Sat, 09 Dec 2017 23:44:25 +0100
+Message-ID: <1512859465.7186.4.camel@googlemail.com>
+References: <1504998772.4004.2.camel@googlemail.com>
+         <1505000687.23171.20.camel@googlemail.com>
+         <CAPDyKFp5JJUp7Rec=eFZd_m9yVKbO91CNR_HbN+rpUm5KTYJgA@mail.gmail.com>
+         <27444e34-fcad-2244-5125-fc31a5755a12@rock-chips.com>
+         <1506196286.1683.7.camel@googlemail.com>
+         <10a81e7b-fe56-be68-dc46-4cf2870fd7a2@rock-chips.com>
+         <1506338583.2143.5.camel@googlemail.com>
+         <54d00dd9-a733-0319-e6d2-6ea77a49afa2@rock-chips.com>
+         <1512394717.27568.11.camel@googlemail.com>
+Reply-To: chf.fritz@googlemail.com
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="wj424ilakl3w5maw"
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([88.99.104.3]:60036 "EHLO pokefinder.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753567AbdLHPAF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 8 Dec 2017 10:00:05 -0500
-Content-Disposition: inline
-In-Reply-To: <CAK7LNAQtLdXBw_JzW2dYdVtC0b6eGCvO5KByXfKKJVxi02i61g@mail.gmail.com>
+Received: from mail-wr0-f178.google.com ([209.85.128.178]:35933 "EHLO
+        mail-wr0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751401AbdLIWoa (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 9 Dec 2017 17:44:30 -0500
+Received: by mail-wr0-f178.google.com with SMTP id v105so13993761wrc.3
+        for <linux-mmc@vger.kernel.org>; Sat, 09 Dec 2017 14:44:30 -0800 (PST)
+In-Reply-To: <1512394717.27568.11.camel@googlemail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms+renesas@verge.net.au>, linux-mmc <linux-mmc@vger.kernel.org>, Marek Vasut <marek.vasut+renesas@gmail.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Shawn Lin <shawn.lin@rock-chips.com>, linux-mmc <linux-mmc@vger.kernel.org>
 
+On Mon, 2017-12-04 at 14:38 +0100, Christoph Fritz wrote:
+> Finally I got this microSD to SD adapter to test the ATP card on RK3288
+> platform too. As expected, card fails without the patch:
+> 
+>  $ dd if=/dev/urandom of=./test bs=1M count=10
+> 
+> does freeze system without any response
+> 
+> So I can verify failing CMD23 behaviour on imx6 and rk3288 running
+> kernel 4.14. Applying the patch does fix the issue on both platforms.
+> 
+> Could you queue up this patch now?
 
---wj424ilakl3w5maw
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+*ping*
 
-Yamada-san, Ulf,
+Meanwhile I found another card which fails CMD23 by testing it on rk3288
+and i.MX6.
 
-> How about CONFIG names and functions?
-> Prefix CONFIG options with CONFIG_MMC_TMIO ?
+I'll send a patch for both cards as v3 of this Patch.
 
-To be precise, I'd favour this:
+best regards
+ -- Christoph
 
-# core
-obj-$(CONFIG_MMC_TMIO_CORE)           += tmio_mmc_core.o
-# TMIO-builtin MMC
-obj-$(CONFIG_MMC_TMIO_ORIGINAL)       += tmio_mmc_original.o
-# Reneses
-obj-$(CONFIG_MMC_TMIO_SDHI_CORE)      += tmio_mmc_sdhi_core.o
-# UniPhier
-obj-$(CONFIG_MMC_TMIO_UNIPHIER)       += tmio_mmc_uniphier.o
-
-But I am not sure if renaming CONFIG_MMC_TMIO to
-CONFIG_MMC_TMIO_ORIGINAL is a regression risk?
-
-> What should I do for function names?
-> Shall I start with tmio_mmc_uniphier_ ?
-
-I'll leave this to you and Ulf. If we e.g. rename "renesas_sdhi_core.c"
-to "tmio_mmc_sdhi_core.c", I would still leave the function names as is
-(prefixed with 'renesas_sdhi_*'). I wouldn't mind your functions
-starting with "uniphier_mmc_" even, but that's just me.
-
-Thanks,
-
-   Wolfram
-
-
---wj424ilakl3w5maw
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAloqqOcACgkQFA3kzBSg
-Kbb12Q//WMQjrDmAQ5bs5mq1OwDZN91274UTRbyv913XWIFwAezypXwQlSNfWHdM
-1ECXhNOjtR+6tpUqQPnk7U1BiYphs+OqANj0KAr6oznEdruPr1R9Zodzy72zHEMn
-cycrN+p/7dcGjz9dVMYkUY7vjdSIn/+IAOBKAXTgrDPZIrhziqBXST/6ym67KXne
-b3Hu6vzyLkUc/+CXAPZrTkvCdPimoNkeDBAnAOzbDTp721SIhW6WEFlJuVHBIaEU
-YSR+4YvqZOAmQc2rq1aOHpZOngo048dzBiBWlAVOm7Mwm3HjBfB89oU4U1g2NCCG
-WPPi0rtnvL73ulN/NctKgiCWzQV/G4LThEIzQs1Xgb9I+7G+Vyvdac7jFX4t2Lye
-2ncTfguNOT21O65nGbWv3px4FUvnfNdSANNic1oZiUvYmxgtxFNjWdtigT4ruFc5
-pl9NygktpNUTEgPFzGwx5SG+E9JHUF57cUNbEjTxMYngXcs1DkPI0rbbNRkSTbjx
-AZn3UFptI08JUMtsWSm+vM5Ib5wqOm7ucJ6esq2F11bR641jc5OHT04W4d43OuOY
-REe+yJKPAE8BVX90ioqU9Ucnps8z2biOMpXFWGSS9plUOhLZJi2wIgnOKYMC6ytz
-+kZXJr9t4fi7C5TDjkvdBzsabJE8dM1mfV5gPtVjq8hXwEW0/HM=
-=CZCx
------END PGP SIGNATURE-----
-
---wj424ilakl3w5maw--
