@@ -1,115 +1,87 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3] mmc: core: apply NO_CMD23 quirk to some specific cards
-Date: Mon, 11 Dec 2017 14:00:37 +0100
-Message-ID: <CAPDyKFpo5JC6W2SFeS9_bkWO=bH6JFT48o3dQpMYKSi6FKu+yQ@mail.gmail.com>
-References: <1504998772.4004.2.camel@googlemail.com> <1505000687.23171.20.camel@googlemail.com>
- <CAPDyKFp5JJUp7Rec=eFZd_m9yVKbO91CNR_HbN+rpUm5KTYJgA@mail.gmail.com>
- <27444e34-fcad-2244-5125-fc31a5755a12@rock-chips.com> <1506196286.1683.7.camel@googlemail.com>
- <10a81e7b-fe56-be68-dc46-4cf2870fd7a2@rock-chips.com> <1506338583.2143.5.camel@googlemail.com>
- <54d00dd9-a733-0319-e6d2-6ea77a49afa2@rock-chips.com> <1512394717.27568.11.camel@googlemail.com>
- <1512859465.7186.4.camel@googlemail.com> <1512859675.7186.8.camel@googlemail.com>
+Subject: Re: [PATCH] mmc: allow rescan of non-removable hosts on resume
+Date: Mon, 11 Dec 2017 14:11:23 +0100
+Message-ID: <CAPDyKFpuSMpS+Mz3ApQ_jXsR7ggaMv-nMF79Wmy-DzqhERXUcg@mail.gmail.com>
+References: <20171206105724.5603-1-drake@endlessm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f65.google.com ([209.85.214.65]:37613 "EHLO
-        mail-it0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751688AbdLKNAk (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Dec 2017 08:00:40 -0500
-Received: by mail-it0-f65.google.com with SMTP id d137so15539121itc.2
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Dec 2017 05:00:40 -0800 (PST)
-In-Reply-To: <1512859675.7186.8.camel@googlemail.com>
+Received: from mail-it0-f67.google.com ([209.85.214.67]:42503 "EHLO
+        mail-it0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751871AbdLKNLY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Dec 2017 08:11:24 -0500
+Received: by mail-it0-f67.google.com with SMTP id p139so15722731itb.1
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Dec 2017 05:11:24 -0800 (PST)
+In-Reply-To: <20171206105724.5603-1-drake@endlessm.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Christoph Fritz <chf.fritz@googlemail.com>, Shawn Lin <shawn.lin@rock-chips.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: Daniel Drake <drake@endlessm.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux@endlessm.com, matthew.leeds@endlessm.com
 
-On 9 December 2017 at 23:47, Christoph Fritz <chf.fritz@googlemail.com> wrote:
-> To get an usdhc Apacer and some ATP SD cards work reliable, CMD23 needs
-> to be disabled.  This has been tested on i.MX6 (sdhci-esdhc) and rk3288
-> (dw_mmc-rockchip).
+On 6 December 2017 at 11:57, Daniel Drake <drake@endlessm.com> wrote:
+> The Weibu F3C MiniPC has an onboard AP6255 module, presenting
+> two SDIO functions on a single MMC host (Bluetooth/btsdio and
+> WiFi/brcmfmac), and the mmc layer correctly detects this as
+> non-removable.
 >
-> Without this patch on i.MX6 (sdhci-esdhc):
+> After suspend/resume, the wifi and bluetooth interfaces disappear
+> and do not get probed again.
 >
->  $ dd if=/dev/urandom of=/mnt/test bs=1M count=10 conv=fsync
+> The conditions here are:
 >
->     | <mmc0: starting CMD23 arg 00000400 flags 00000015>
->     | mmc0: starting CMD25 arg 00a71f00 flags 000000b5
->     | mmc0:     blksz 512 blocks 1024 flags 00000100 tsac 3000 ms nsac 0
->     | mmc0:     CMD12 arg 00000000 flags 0000049d
->     | sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
->     | mmc0: Timeout waiting for hardware interrupt.
+>  1. During suspend, we reach mmc_pm_notify()
 >
-> Without this patch on rk3288 (dw_mmc-rockchip):
+>  2. mmc_pm_notify() calls mmc_sdio_pre_suspend() to see if we can
+>     suspend the SDIO host. However, mmc_sdio_pre_suspend() returns
+>     -ENOSYS because btsdio_driver does not have a suspend method.
 >
->     | mmc1: Card stuck in programming state! mmcblk1 card_busy_detect
->     | dwmmc_rockchip ff0c0000.dwmmc: Busy; trying anyway
->     | mmc_host mmc1: Bus speed (slot 0) = 400000Hz (slot req 400000Hz,
->     | actual 400000HZ div = 0)
->     | mmc1: card never left busy state
->     | mmc1: tried to reset card, got error -110
->     | blk_update_request: I/O error, dev mmcblk1, sector 139778
->     | Buffer I/O error on dev mmcblk1p1, logical block 131586, lost async
->     | page write
+>  3. mmc_pm_notify() proceeds to remove the card
 >
-> Signed-off-by: Christoph Fritz <chf.fritz@googlemail.com>
+>  4. Upon resume, mmc_rescan() does nothing with this host, because of
+>     the rescan_entered check which aims to only scan a non-removable
+>     device a single time (i.e. during boot).
 
-Thanks, applied for fixes and added a stable tag (4.14+, since the
-patch didn't apply to earlier versions).
+Thanks for detailed description of the problem, it really helps!
 
-If/when Shawn find some time to re-spin his series, adding support for
-ACMD23 [1], we may be able to revert this change. Let's see.
+>
+> Fix the loss of functionality by permitting another rescan of
+> non-removable devices when we forcefully remove a card under these
+> conditions.
 
-However, using the quirks as a fix for stable is certainly a good approach.
+No, I don't like this solution, simply because I think it's a
+workaround rather than a proper fix.
+
+I think the SDIO func drivers should implement the suspend/resume
+callbacks instead.
+
+One may argue that the mmc_pm_notify() then shouldn't have removed the
+card in first place if the cards are non-removable. Maybe we should
+just print a warning in that case instead.
+
+>
+> Signed-off-by: Daniel Drake <drake@endlessm.com>
+> ---
+>  drivers/mmc/core/core.c | 4 ++++
+>  1 file changed, 4 insertions(+)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 1f0f44f4dd5f..e436cde50bc4 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2966,6 +2966,10 @@ static int mmc_pm_notify(struct notifier_block *notify_block,
+>                 mmc_power_off(host);
+>                 mmc_release_host(host);
+>                 host->pm_flags = 0;
+> +
+> +               /* Force a rescan on resume, even for non-removable cards */
+> +               host->rescan_entered = 0;
+> +
+>                 break;
+>
+>         case PM_POST_SUSPEND:
+> --
+> 2.14.1
+>
 
 Kind regards
 Uffe
-
-> ---
-> Changes since v1:
->  - s/CMD32/CMD23
-> Changes since v2:
->  - add an Apacer card
->  - adapt comment
->
->  drivers/mmc/core/card.h   | 2 ++
->  drivers/mmc/core/quirks.h | 8 ++++++++
->  2 files changed, 10 insertions(+)
->
-> diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
-> index f06cd91..79a5b98 100644
-> --- a/drivers/mmc/core/card.h
-> +++ b/drivers/mmc/core/card.h
-> @@ -75,9 +75,11 @@ struct mmc_fixup {
->  #define EXT_CSD_REV_ANY (-1u)
->
->  #define CID_MANFID_SANDISK      0x2
-> +#define CID_MANFID_ATP          0x9
->  #define CID_MANFID_TOSHIBA      0x11
->  #define CID_MANFID_MICRON       0x13
->  #define CID_MANFID_SAMSUNG      0x15
-> +#define CID_MANFID_APACER       0x27
->  #define CID_MANFID_KINGSTON     0x70
->  #define CID_MANFID_HYNIX       0x90
->
-> diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
-> index 9107f0b..d4ff9d8 100644
-> --- a/drivers/mmc/core/quirks.h
-> +++ b/drivers/mmc/core/quirks.h
-> @@ -53,6 +53,14 @@ static const struct mmc_fixup mmc_blk_fixups[] = {
->                   MMC_QUIRK_BLK_NO_CMD23),
->
->         /*
-> +        * Some SD cards lockup while using CMD23 multiblock transfers.
-> +        */
-> +       MMC_FIXUP("AF SD", CID_MANFID_ATP, CID_OEMID_ANY, add_quirk_sd,
-> +                 MMC_QUIRK_BLK_NO_CMD23),
-> +       MMC_FIXUP("APUSD", CID_MANFID_APACER, 0x5048, add_quirk_sd,
-> +                 MMC_QUIRK_BLK_NO_CMD23),
-> +
-> +       /*
->          * Some MMC cards need longer data read timeout than indicated in CSD.
->          */
->         MMC_FIXUP(CID_NAME_ANY, CID_MANFID_MICRON, 0x200, add_quirk_mmc,
-> --
-> 2.1.4
->
