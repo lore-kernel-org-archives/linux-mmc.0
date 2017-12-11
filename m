@@ -1,28 +1,30 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/2] mmc: sdhci-acpi: Add setup_host() callback
-Date: Mon, 11 Dec 2017 13:29:42 +0100
-Message-ID: <CAPDyKFo8PXhieVZ+g72zEbp7bypuUSVuRNwV06MQB+GpBwTGOA@mail.gmail.com>
-References: <1512738299-5650-1-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH 2/2] mmc: sdhci-acpi: Avoid broken UHS transfer modes on
+ Intel CHT
+Date: Mon, 11 Dec 2017 13:29:49 +0100
+Message-ID: <CAPDyKFoyDe4DLsdbOnxP6WBSQ+pjqhpM-+v9yvNBE2zemSHADA@mail.gmail.com>
+References: <1512738299-5650-1-git-send-email-adrian.hunter@intel.com> <1512738498-5812-1-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f68.google.com ([209.85.214.68]:38275 "EHLO
-        mail-it0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751347AbdLKM3n (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Dec 2017 07:29:43 -0500
-Received: by mail-it0-f68.google.com with SMTP id r6so15330516itr.3
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Dec 2017 04:29:43 -0800 (PST)
-In-Reply-To: <1512738299-5650-1-git-send-email-adrian.hunter@intel.com>
+Received: from mail-it0-f67.google.com ([209.85.214.67]:43324 "EHLO
+        mail-it0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751956AbdLKM3u (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Dec 2017 07:29:50 -0500
+Received: by mail-it0-f67.google.com with SMTP id u62so15446856ita.2
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Dec 2017 04:29:49 -0800 (PST)
+In-Reply-To: <1512738498-5812-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Carlo Caione <carlo@endlessm.com>
 
-On 8 December 2017 at 14:04, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> Add a ->setup_host() callback so that device-specific changes can be made
-> to the mmc host controller before it is added.
+On 8 December 2017 at 14:08, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> Intel DSM function 8 has been used to identify transfer modes that are not
+> working on some CHT boards. Add support for that.
 >
 > Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> Tested-by: Carlo Caione <carlo@endlessm.com>
 
 Thanks, applied for next!
 
@@ -31,52 +33,104 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/sdhci-acpi.c | 15 ++++++++++++++-
->  1 file changed, 14 insertions(+), 1 deletion(-)
+>  drivers/mmc/host/sdhci-acpi.c | 34 ++++++++++++++++++++++++++++++++++
+>  1 file changed, 34 insertions(+)
 >
 > diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-> index 1b1ce804d2d7..f7445cf8f7dd 100644
+> index f7445cf8f7dd..264f10327bf9 100644
 > --- a/drivers/mmc/host/sdhci-acpi.c
 > +++ b/drivers/mmc/host/sdhci-acpi.c
-> @@ -76,6 +76,7 @@ struct sdhci_acpi_slot {
->         size_t          priv_size;
->         int (*probe_slot)(struct platform_device *, const char *, const char *);
->         int (*remove_slot)(struct platform_device *);
-> +       int (*setup_host)(struct platform_device *pdev);
+> @@ -97,14 +97,21 @@ static inline bool sdhci_acpi_flag(struct sdhci_acpi_host *c, unsigned int flag)
+>         return c->slot && (c->slot->flags & flag);
+>  }
+>
+> +#define INTEL_DSM_HS_CAPS_SDR25                BIT(0)
+> +#define INTEL_DSM_HS_CAPS_DDR50                BIT(1)
+> +#define INTEL_DSM_HS_CAPS_SDR50                BIT(2)
+> +#define INTEL_DSM_HS_CAPS_SDR104       BIT(3)
+> +
+>  enum {
+>         INTEL_DSM_FNS           =  0,
+>         INTEL_DSM_V18_SWITCH    =  3,
+>         INTEL_DSM_V33_SWITCH    =  4,
+> +       INTEL_DSM_HS_CAPS       =  8,
 >  };
 >
->  struct sdhci_acpi_host {
-> @@ -688,10 +689,20 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
->                 }
->         }
+>  struct intel_host {
+>         u32     dsm_fns;
+> +       u32     hs_caps;
+>  };
 >
-> -       err = sdhci_add_host(host);
-> +       err = sdhci_setup_host(host);
->         if (err)
->                 goto err_free;
+>  static const guid_t intel_dsm_guid =
+> @@ -153,6 +160,8 @@ static void intel_dsm_init(struct intel_host *intel_host, struct device *dev,
+>  {
+>         int err;
 >
-> +       if (c->slot && c->slot->setup_host) {
-> +               err = c->slot->setup_host(pdev);
-> +               if (err)
-> +                       goto err_cleanup;
-> +       }
+> +       intel_host->hs_caps = ~0;
 > +
-> +       err = __sdhci_add_host(host);
-> +       if (err)
-> +               goto err_cleanup;
-> +
->         if (c->use_runtime_pm) {
->                 pm_runtime_set_active(dev);
->                 pm_suspend_ignore_children(dev, 1);
-> @@ -704,6 +715,8 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+>         err = __intel_dsm(intel_host, dev, INTEL_DSM_FNS, &intel_host->dsm_fns);
+>         if (err) {
+>                 pr_debug("%s: DSM not supported, error %d\n",
+> @@ -162,6 +171,8 @@ static void intel_dsm_init(struct intel_host *intel_host, struct device *dev,
 >
+>         pr_debug("%s: DSM function mask %#x\n",
+>                  mmc_hostname(mmc), intel_host->dsm_fns);
+> +
+> +       intel_dsm(intel_host, dev, INTEL_DSM_HS_CAPS, &intel_host->hs_caps);
+>  }
+>
+>  static int intel_start_signal_voltage_switch(struct mmc_host *mmc,
+> @@ -399,6 +410,26 @@ static int intel_probe_slot(struct platform_device *pdev, const char *hid,
 >         return 0;
+>  }
 >
-> +err_cleanup:
-> +       sdhci_cleanup_host(c->host);
->  err_free:
->         sdhci_free_host(c->host);
->         return err;
+> +static int intel_setup_host(struct platform_device *pdev)
+> +{
+> +       struct sdhci_acpi_host *c = platform_get_drvdata(pdev);
+> +       struct intel_host *intel_host = sdhci_acpi_priv(c);
+> +
+> +       if (!(intel_host->hs_caps & INTEL_DSM_HS_CAPS_SDR25))
+> +               c->host->mmc->caps &= ~MMC_CAP_UHS_SDR25;
+> +
+> +       if (!(intel_host->hs_caps & INTEL_DSM_HS_CAPS_SDR50))
+> +               c->host->mmc->caps &= ~MMC_CAP_UHS_SDR50;
+> +
+> +       if (!(intel_host->hs_caps & INTEL_DSM_HS_CAPS_DDR50))
+> +               c->host->mmc->caps &= ~MMC_CAP_UHS_DDR50;
+> +
+> +       if (!(intel_host->hs_caps & INTEL_DSM_HS_CAPS_SDR104))
+> +               c->host->mmc->caps &= ~MMC_CAP_UHS_SDR104;
+> +
+> +       return 0;
+> +}
+> +
+>  static const struct sdhci_acpi_slot sdhci_acpi_slot_int_emmc = {
+>         .chip    = &sdhci_acpi_chip_int,
+>         .caps    = MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE |
+> @@ -410,6 +441,7 @@ static int intel_probe_slot(struct platform_device *pdev, const char *hid,
+>                    SDHCI_QUIRK2_STOP_WITH_TC |
+>                    SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400,
+>         .probe_slot     = intel_probe_slot,
+> +       .setup_host     = intel_setup_host,
+>         .priv_size      = sizeof(struct intel_host),
+>  };
+>
+> @@ -422,6 +454,7 @@ static int intel_probe_slot(struct platform_device *pdev, const char *hid,
+>         .flags   = SDHCI_ACPI_RUNTIME_PM,
+>         .pm_caps = MMC_PM_KEEP_POWER,
+>         .probe_slot     = intel_probe_slot,
+> +       .setup_host     = intel_setup_host,
+>         .priv_size      = sizeof(struct intel_host),
+>  };
+>
+> @@ -433,6 +466,7 @@ static int intel_probe_slot(struct platform_device *pdev, const char *hid,
+>                    SDHCI_QUIRK2_STOP_WITH_TC,
+>         .caps    = MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_AGGRESSIVE_PM,
+>         .probe_slot     = intel_probe_slot,
+> +       .setup_host     = intel_setup_host,
+>         .priv_size      = sizeof(struct intel_host),
+>  };
+>
 > --
 > 1.9.1
 >
