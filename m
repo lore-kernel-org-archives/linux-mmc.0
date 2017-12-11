@@ -1,136 +1,115 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/2] mmc: sdhci-acpi: Avoid broken UHS transfer modes on
- Intel CHT
-Date: Mon, 11 Dec 2017 13:29:49 +0100
-Message-ID: <CAPDyKFoyDe4DLsdbOnxP6WBSQ+pjqhpM-+v9yvNBE2zemSHADA@mail.gmail.com>
-References: <1512738299-5650-1-git-send-email-adrian.hunter@intel.com> <1512738498-5812-1-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH v3] mmc: core: apply NO_CMD23 quirk to some specific cards
+Date: Mon, 11 Dec 2017 14:00:37 +0100
+Message-ID: <CAPDyKFpo5JC6W2SFeS9_bkWO=bH6JFT48o3dQpMYKSi6FKu+yQ@mail.gmail.com>
+References: <1504998772.4004.2.camel@googlemail.com> <1505000687.23171.20.camel@googlemail.com>
+ <CAPDyKFp5JJUp7Rec=eFZd_m9yVKbO91CNR_HbN+rpUm5KTYJgA@mail.gmail.com>
+ <27444e34-fcad-2244-5125-fc31a5755a12@rock-chips.com> <1506196286.1683.7.camel@googlemail.com>
+ <10a81e7b-fe56-be68-dc46-4cf2870fd7a2@rock-chips.com> <1506338583.2143.5.camel@googlemail.com>
+ <54d00dd9-a733-0319-e6d2-6ea77a49afa2@rock-chips.com> <1512394717.27568.11.camel@googlemail.com>
+ <1512859465.7186.4.camel@googlemail.com> <1512859675.7186.8.camel@googlemail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f67.google.com ([209.85.214.67]:43324 "EHLO
-        mail-it0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751956AbdLKM3u (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Dec 2017 07:29:50 -0500
-Received: by mail-it0-f67.google.com with SMTP id u62so15446856ita.2
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Dec 2017 04:29:49 -0800 (PST)
-In-Reply-To: <1512738498-5812-1-git-send-email-adrian.hunter@intel.com>
+Received: from mail-it0-f65.google.com ([209.85.214.65]:37613 "EHLO
+        mail-it0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751688AbdLKNAk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Dec 2017 08:00:40 -0500
+Received: by mail-it0-f65.google.com with SMTP id d137so15539121itc.2
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Dec 2017 05:00:40 -0800 (PST)
+In-Reply-To: <1512859675.7186.8.camel@googlemail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Carlo Caione <carlo@endlessm.com>
+To: Christoph Fritz <chf.fritz@googlemail.com>, Shawn Lin <shawn.lin@rock-chips.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 8 December 2017 at 14:08, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> Intel DSM function 8 has been used to identify transfer modes that are not
-> working on some CHT boards. Add support for that.
+On 9 December 2017 at 23:47, Christoph Fritz <chf.fritz@googlemail.com> wrote:
+> To get an usdhc Apacer and some ATP SD cards work reliable, CMD23 needs
+> to be disabled.  This has been tested on i.MX6 (sdhci-esdhc) and rk3288
+> (dw_mmc-rockchip).
 >
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> Tested-by: Carlo Caione <carlo@endlessm.com>
+> Without this patch on i.MX6 (sdhci-esdhc):
+>
+>  $ dd if=/dev/urandom of=/mnt/test bs=1M count=10 conv=fsync
+>
+>     | <mmc0: starting CMD23 arg 00000400 flags 00000015>
+>     | mmc0: starting CMD25 arg 00a71f00 flags 000000b5
+>     | mmc0:     blksz 512 blocks 1024 flags 00000100 tsac 3000 ms nsac 0
+>     | mmc0:     CMD12 arg 00000000 flags 0000049d
+>     | sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
+>     | mmc0: Timeout waiting for hardware interrupt.
+>
+> Without this patch on rk3288 (dw_mmc-rockchip):
+>
+>     | mmc1: Card stuck in programming state! mmcblk1 card_busy_detect
+>     | dwmmc_rockchip ff0c0000.dwmmc: Busy; trying anyway
+>     | mmc_host mmc1: Bus speed (slot 0) = 400000Hz (slot req 400000Hz,
+>     | actual 400000HZ div = 0)
+>     | mmc1: card never left busy state
+>     | mmc1: tried to reset card, got error -110
+>     | blk_update_request: I/O error, dev mmcblk1, sector 139778
+>     | Buffer I/O error on dev mmcblk1p1, logical block 131586, lost async
+>     | page write
+>
+> Signed-off-by: Christoph Fritz <chf.fritz@googlemail.com>
 
-Thanks, applied for next!
+Thanks, applied for fixes and added a stable tag (4.14+, since the
+patch didn't apply to earlier versions).
+
+If/when Shawn find some time to re-spin his series, adding support for
+ACMD23 [1], we may be able to revert this change. Let's see.
+
+However, using the quirks as a fix for stable is certainly a good approach.
 
 Kind regards
 Uffe
 
-
 > ---
->  drivers/mmc/host/sdhci-acpi.c | 34 ++++++++++++++++++++++++++++++++++
->  1 file changed, 34 insertions(+)
+> Changes since v1:
+>  - s/CMD32/CMD23
+> Changes since v2:
+>  - add an Apacer card
+>  - adapt comment
 >
-> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-> index f7445cf8f7dd..264f10327bf9 100644
-> --- a/drivers/mmc/host/sdhci-acpi.c
-> +++ b/drivers/mmc/host/sdhci-acpi.c
-> @@ -97,14 +97,21 @@ static inline bool sdhci_acpi_flag(struct sdhci_acpi_host *c, unsigned int flag)
->         return c->slot && (c->slot->flags & flag);
->  }
+>  drivers/mmc/core/card.h   | 2 ++
+>  drivers/mmc/core/quirks.h | 8 ++++++++
+>  2 files changed, 10 insertions(+)
 >
-> +#define INTEL_DSM_HS_CAPS_SDR25                BIT(0)
-> +#define INTEL_DSM_HS_CAPS_DDR50                BIT(1)
-> +#define INTEL_DSM_HS_CAPS_SDR50                BIT(2)
-> +#define INTEL_DSM_HS_CAPS_SDR104       BIT(3)
+> diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
+> index f06cd91..79a5b98 100644
+> --- a/drivers/mmc/core/card.h
+> +++ b/drivers/mmc/core/card.h
+> @@ -75,9 +75,11 @@ struct mmc_fixup {
+>  #define EXT_CSD_REV_ANY (-1u)
+>
+>  #define CID_MANFID_SANDISK      0x2
+> +#define CID_MANFID_ATP          0x9
+>  #define CID_MANFID_TOSHIBA      0x11
+>  #define CID_MANFID_MICRON       0x13
+>  #define CID_MANFID_SAMSUNG      0x15
+> +#define CID_MANFID_APACER       0x27
+>  #define CID_MANFID_KINGSTON     0x70
+>  #define CID_MANFID_HYNIX       0x90
+>
+> diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
+> index 9107f0b..d4ff9d8 100644
+> --- a/drivers/mmc/core/quirks.h
+> +++ b/drivers/mmc/core/quirks.h
+> @@ -53,6 +53,14 @@ static const struct mmc_fixup mmc_blk_fixups[] = {
+>                   MMC_QUIRK_BLK_NO_CMD23),
+>
+>         /*
+> +        * Some SD cards lockup while using CMD23 multiblock transfers.
+> +        */
+> +       MMC_FIXUP("AF SD", CID_MANFID_ATP, CID_OEMID_ANY, add_quirk_sd,
+> +                 MMC_QUIRK_BLK_NO_CMD23),
+> +       MMC_FIXUP("APUSD", CID_MANFID_APACER, 0x5048, add_quirk_sd,
+> +                 MMC_QUIRK_BLK_NO_CMD23),
 > +
->  enum {
->         INTEL_DSM_FNS           =  0,
->         INTEL_DSM_V18_SWITCH    =  3,
->         INTEL_DSM_V33_SWITCH    =  4,
-> +       INTEL_DSM_HS_CAPS       =  8,
->  };
->
->  struct intel_host {
->         u32     dsm_fns;
-> +       u32     hs_caps;
->  };
->
->  static const guid_t intel_dsm_guid =
-> @@ -153,6 +160,8 @@ static void intel_dsm_init(struct intel_host *intel_host, struct device *dev,
->  {
->         int err;
->
-> +       intel_host->hs_caps = ~0;
-> +
->         err = __intel_dsm(intel_host, dev, INTEL_DSM_FNS, &intel_host->dsm_fns);
->         if (err) {
->                 pr_debug("%s: DSM not supported, error %d\n",
-> @@ -162,6 +171,8 @@ static void intel_dsm_init(struct intel_host *intel_host, struct device *dev,
->
->         pr_debug("%s: DSM function mask %#x\n",
->                  mmc_hostname(mmc), intel_host->dsm_fns);
-> +
-> +       intel_dsm(intel_host, dev, INTEL_DSM_HS_CAPS, &intel_host->hs_caps);
->  }
->
->  static int intel_start_signal_voltage_switch(struct mmc_host *mmc,
-> @@ -399,6 +410,26 @@ static int intel_probe_slot(struct platform_device *pdev, const char *hid,
->         return 0;
->  }
->
-> +static int intel_setup_host(struct platform_device *pdev)
-> +{
-> +       struct sdhci_acpi_host *c = platform_get_drvdata(pdev);
-> +       struct intel_host *intel_host = sdhci_acpi_priv(c);
-> +
-> +       if (!(intel_host->hs_caps & INTEL_DSM_HS_CAPS_SDR25))
-> +               c->host->mmc->caps &= ~MMC_CAP_UHS_SDR25;
-> +
-> +       if (!(intel_host->hs_caps & INTEL_DSM_HS_CAPS_SDR50))
-> +               c->host->mmc->caps &= ~MMC_CAP_UHS_SDR50;
-> +
-> +       if (!(intel_host->hs_caps & INTEL_DSM_HS_CAPS_DDR50))
-> +               c->host->mmc->caps &= ~MMC_CAP_UHS_DDR50;
-> +
-> +       if (!(intel_host->hs_caps & INTEL_DSM_HS_CAPS_SDR104))
-> +               c->host->mmc->caps &= ~MMC_CAP_UHS_SDR104;
-> +
-> +       return 0;
-> +}
-> +
->  static const struct sdhci_acpi_slot sdhci_acpi_slot_int_emmc = {
->         .chip    = &sdhci_acpi_chip_int,
->         .caps    = MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE |
-> @@ -410,6 +441,7 @@ static int intel_probe_slot(struct platform_device *pdev, const char *hid,
->                    SDHCI_QUIRK2_STOP_WITH_TC |
->                    SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400,
->         .probe_slot     = intel_probe_slot,
-> +       .setup_host     = intel_setup_host,
->         .priv_size      = sizeof(struct intel_host),
->  };
->
-> @@ -422,6 +454,7 @@ static int intel_probe_slot(struct platform_device *pdev, const char *hid,
->         .flags   = SDHCI_ACPI_RUNTIME_PM,
->         .pm_caps = MMC_PM_KEEP_POWER,
->         .probe_slot     = intel_probe_slot,
-> +       .setup_host     = intel_setup_host,
->         .priv_size      = sizeof(struct intel_host),
->  };
->
-> @@ -433,6 +466,7 @@ static int intel_probe_slot(struct platform_device *pdev, const char *hid,
->                    SDHCI_QUIRK2_STOP_WITH_TC,
->         .caps    = MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_AGGRESSIVE_PM,
->         .probe_slot     = intel_probe_slot,
-> +       .setup_host     = intel_setup_host,
->         .priv_size      = sizeof(struct intel_host),
->  };
->
+> +       /*
+>          * Some MMC cards need longer data read timeout than indicated in CSD.
+>          */
+>         MMC_FIXUP(CID_NAME_ANY, CID_MANFID_MICRON, 0x200, add_quirk_mmc,
 > --
-> 1.9.1
+> 2.1.4
 >
