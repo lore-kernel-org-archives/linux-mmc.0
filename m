@@ -1,72 +1,73 @@
-From: Michal Simek <michal.simek@xilinx.com>
-Subject: Re: [PATCH] mmc: sdhci-of-arasan: Disable clk_xin clock in the remove
-Date: Tue, 12 Dec 2017 10:37:22 +0100
-Message-ID: <3d975547-3f25-eaab-29fe-c06ee4cb206b@xilinx.com>
-References: <20171212081955.2309-1-flavio.ceolin@intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+From: Daniel Drake <drake@endlessm.com>
+Subject: [PATCH] mmc: avoid removing non-removable hosts during suspend
+Date: Tue, 12 Dec 2017 10:49:02 +0000
+Message-ID: <20171212104902.11793-1-drake@endlessm.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2nam01on0059.outbound.protection.outlook.com ([104.47.34.59]:34496
-        "EHLO NAM01-BY2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750715AbdLLJhi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 12 Dec 2017 04:37:38 -0500
-In-Reply-To: <20171212081955.2309-1-flavio.ceolin@intel.com>
-Content-Language: en-US
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:43986 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751643AbdLLKtH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Dec 2017 05:49:07 -0500
+Received: by mail-wm0-f67.google.com with SMTP id n138so19790011wmg.2
+        for <linux-mmc@vger.kernel.org>; Tue, 12 Dec 2017 02:49:07 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Flavio Ceolin <flavio.ceolin@intel.com>, linux-kernel@vger.kernel.org
-Cc: Michal Simek <michal.simek@xilinx.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, "moderated list:ARM/ZYNQ ARCHITECTURE" <linux-arm-kernel@lists.infradead.org>, "open list:SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI...)" <linux-mmc@vger.kernel.org>
+To: ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux@endlessm.com, matthew.leeds@endlessm.com
 
-On 12.12.2017 09:19, Flavio Ceolin wrote:
-> clk_xin is properly prepared/enabled on sdhci_arasan_probe(), and
-> unprepared/disabled in the error path, but it is not being
-> unprepared/disabled on sdhci_arasan_remove().
-> 
-> Found by Linux Driver Verification project (linuxtesting.org).
-> 
-> Signed-off-by: Flavio Ceolin <flavio.ceolin@intel.com>
-> ---
->  drivers/mmc/host/sdhci-of-arasan.c | 4 ++++
->  1 file changed, 4 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index 0720ea7..69bd260 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -692,6 +692,7 @@ static int sdhci_arasan_remove(struct platform_device *pdev)
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->  	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
->  	struct clk *clk_ahb = sdhci_arasan->clk_ahb;
-> +	struct clk *clk_xin = devm_clk_get(&pdev->dev, "clk_xin");
+The Weibu F3C MiniPC has an onboard AP6255 module, presenting
+two SDIO functions on a single MMC host (Bluetooth/btsdio and
+WiFi/brcmfmac), and the mmc layer correctly detects this as
+non-removable.
 
-I don't think this is right. You have already asked for this clock in
-probe. It means you should reuse pltfm_host->clk = clk_xin;
+After suspend/resume, the wifi and bluetooth interfaces disappear
+and do not get probed again.
 
-And if you look at sdhci_pltfm_unregister you will find out that
-clk_disable_unprepare(pltfm_host->clk);
-is called there.
+The conditions here are:
 
->  
->  	if (!IS_ERR(sdhci_arasan->phy)) {
->  		if (sdhci_arasan->is_phy_on)
-> @@ -705,6 +706,9 @@ static int sdhci_arasan_remove(struct platform_device *pdev)
->  
->  	clk_disable_unprepare(clk_ahb);
->  
-> +	if (!IS_ERR(clk_xin))
+ 1. During suspend, we reach mmc_pm_notify()
 
-And clk_xin is required property.
+ 2. mmc_pm_notify() calls mmc_sdio_pre_suspend() to see if we can
+    suspend the SDIO host. However, mmc_sdio_pre_suspend() returns
+    -ENOSYS because btsdio_driver does not have a suspend method.
 
-> +		clk_disable_unprepare(clk_xin);
-> +
->  	return ret;
->  }
->  
-> 
+ 3. mmc_pm_notify() proceeds to remove the card
 
-It means NACK from me.
+ 4. Upon resume, mmc_rescan() does nothing with this host, because of
+    the rescan_entered check which aims to only scan a non-removable
+    device a single time (i.e. during boot).
 
-Thanks,
-Michal
+Fix the loss of functionality by detecting that we are unable to
+suspend a non-removable host, so avoid the forced removal in that
+case. The comment above this function already indicates that this
+code was only intended for removable devices.
+
+Signed-off-by: Daniel Drake <drake@endlessm.com>
+---
+ drivers/mmc/core/core.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+Replaces previous approach:
+  [PATCH] mmc: allow rescan of non-removable hosts on resume
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 26431267a3e2..6f815a264285 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2763,6 +2763,14 @@ static int mmc_pm_notify(struct notifier_block *notify_block,
+ 		if (!err)
+ 			break;
+ 
++		if (!mmc_card_is_removable(host)) {
++			dev_warn(mmc_dev(host),
++				 "pre_suspend failed for non-removable host: "
++				 "%d\n", err);
++			/* Avoid removing non-removable hosts */
++			break;
++		}
++
+ 		/* Calling bus_ops->remove() with a claimed host can deadlock */
+ 		host->bus_ops->remove(host);
+ 		mmc_claim_host(host);
+-- 
+2.14.1
+
