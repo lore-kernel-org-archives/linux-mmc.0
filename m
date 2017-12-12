@@ -1,45 +1,56 @@
-From: Christoph Fritz <chf.fritz@googlemail.com>
-Subject: Re: [PATCH v3] mmc: core: apply NO_CMD23 quirk to some specific
- cards
-Date: Mon, 11 Dec 2017 21:19:23 +0100
-Message-ID: <1513023563.9782.26.camel@googlemail.com>
-References: <1504998772.4004.2.camel@googlemail.com>
-         <1505000687.23171.20.camel@googlemail.com>
-         <CAPDyKFp5JJUp7Rec=eFZd_m9yVKbO91CNR_HbN+rpUm5KTYJgA@mail.gmail.com>
-         <27444e34-fcad-2244-5125-fc31a5755a12@rock-chips.com>
-         <1506196286.1683.7.camel@googlemail.com>
-         <10a81e7b-fe56-be68-dc46-4cf2870fd7a2@rock-chips.com>
-         <1506338583.2143.5.camel@googlemail.com>
-         <54d00dd9-a733-0319-e6d2-6ea77a49afa2@rock-chips.com>
-         <1512394717.27568.11.camel@googlemail.com>
-         <1512859465.7186.4.camel@googlemail.com>
-         <1512859675.7186.8.camel@googlemail.com>
-         <CAPDyKFpo5JC6W2SFeS9_bkWO=bH6JFT48o3dQpMYKSi6FKu+yQ@mail.gmail.com>
-Reply-To: chf.fritz@googlemail.com
+From: Flavio Ceolin <flavio.ceolin@intel.com>
+Subject: [PATCH] mmc: sdhci-of-arasan: Disable clk_xin clock in the remove
+Date: Tue, 12 Dec 2017 00:19:55 -0800
+Message-ID: <20171212081955.2309-1-flavio.ceolin@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f53.google.com ([74.125.82.53]:44317 "EHLO
-        mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750929AbdLKUT0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Dec 2017 15:19:26 -0500
-Received: by mail-wm0-f53.google.com with SMTP id t8so16791352wmc.3
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Dec 2017 12:19:26 -0800 (PST)
-In-Reply-To: <CAPDyKFpo5JC6W2SFeS9_bkWO=bH6JFT48o3dQpMYKSi6FKu+yQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-kernel@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, "open list:SECURE DIGITAL HOST CONTROLLER INTERFACE SDHCI..." <linux-mmc@vger.kernel.org>, Michal Simek <michal.simek@xilinx.com>, Adrian Hunter <adrian.hunter@intel.com>, Flavio Ceolin <flavio.ceolin@intel.com>, "moderated list:ARM/ZYNQ ARCHITECTURE" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On Mon, 2017-12-11 at 14:00 +0100, Ulf Hansson wrote:
-> If/when Shawn find some time to re-spin his series, adding support for
-> ACMD23 [1], we may be able to revert this change. Let's see.
+clk_xin is properly prepared/enabled on sdhci_arasan_probe(), and
+unprepared/disabled in the error path, but it is not being
+unprepared/disabled on sdhci_arasan_remove().
 
-If you or Shawn want me to test then again, please give me a head up.
+Found by Linux Driver Verification project (linuxtesting.org).
 
-> However, using the quirks as a fix for stable is certainly a good approach.
+Signed-off-by: Flavio Ceolin <flavio.ceolin@intel.com>
+---
+ drivers/mmc/host/sdhci-of-arasan.c | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-Thanks
- -- Christoph
-
+diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+index 0720ea7..69bd260 100644
+--- a/drivers/mmc/host/sdhci-of-arasan.c
++++ b/drivers/mmc/host/sdhci-of-arasan.c
+@@ -692,6 +692,7 @@ static int sdhci_arasan_remove(struct platform_device *pdev)
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
+ 	struct clk *clk_ahb = sdhci_arasan->clk_ahb;
++	struct clk *clk_xin = devm_clk_get(&pdev->dev, "clk_xin");
+ 
+ 	if (!IS_ERR(sdhci_arasan->phy)) {
+ 		if (sdhci_arasan->is_phy_on)
+@@ -705,6 +706,9 @@ static int sdhci_arasan_remove(struct platform_device *pdev)
+ 
+ 	clk_disable_unprepare(clk_ahb);
+ 
++	if (!IS_ERR(clk_xin))
++		clk_disable_unprepare(clk_xin);
++
+ 	return ret;
+ }
+ 
+-- 
+2.9.5
