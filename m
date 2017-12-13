@@ -1,61 +1,46 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH] mmc: renesas_sdhi: Add MODULE_LICENSE
-Date: Wed, 13 Dec 2017 17:52:21 +0100
-Message-ID: <20171213165221.zu6o676d4lsjvwh5@ninjato>
-References: <1513132380-7421-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+From: Zhoujie Wu <zjwu@marvell.com>
+Subject: [PATCH] mmc: sdhci: wait 5ms after set 1.8V signal enable
+Date: Wed, 13 Dec 2017 15:41:30 -0800
+Message-ID: <1513208490-13278-1-git-send-email-zjwu@marvell.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="qvrjf257zbsnyamo"
-Return-path: <stable-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1513132380-7421-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-Sender: stable-owner@vger.kernel.org
-To: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Cc: wsa+renesas@sang-engineering.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, stable@vger.kernel.org, Masaharu Hayakawa <masaharu.hayakawa.ry@renesas.com>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:43592 "EHLO
+        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1750745AbdLMXlS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Dec 2017 18:41:18 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org, adrian.hunter@intel.com, linux-mmc@vger.kernel.org
+Cc: zmxu@marvell.com, jszhang@marvell.com, nadavh@marvell.com, xigu@marvell.com, xswang@marvell.com, dingwei@marvell.com, kostap@marvell.com, hannah@marvell.com, hongd@marvell.com, dougj@marvell.com, ygao@marvell.com, liuw@marvell.com, gregory.clement@free-electrons.com, thomas.petazzoni@free-electrons.com, Zhoujie Wu <zjwu@marvell.com>
 
+According to SD spec 3.00 3.6.1 signal voltage switch
+procedure, host should wait 5ms after set 1.8V signal
+enable bit in Host Control 2 register and check if 1.8V
+is stable or not.
 
---qvrjf257zbsnyamo
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+On some cards, found without the delay would see "1.8V
+regulator output did not became stable" err log.
 
-On Wed, Dec 13, 2017 at 11:33:00AM +0900, Yoshihiro Shimoda wrote:
-> From: Masaharu Hayakawa <masaharu.hayakawa.ry@renesas.com>
->=20
-> The following error occurs when loading renesas_sdhi_core.c module,
-> so add MODULE_LICENSE("GPL v2").
->=20
->  renesas_sdhi_core: module license 'unspecified' taints kernel.
->=20
-> Signed-off-by: Masaharu Hayakawa <masaharu.hayakawa.ry@renesas.com>
-> Fixes: 9d08428afb72 ("mmc: renesas-sdhi: make renesas_sdhi_sys_dmac main =
-module file")
-> Cc: <stable@vger.kernel.org> # v4.13+
-> [Shimoda: Added Fixes tag and Cc to the stable ML]
-> Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Signed-off-by: Zhoujie Wu <zjwu@marvell.com>
+---
+ drivers/mmc/host/sdhci.c | 3 +++
+ 1 file changed, 3 insertions(+)
 
-Acked-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index e9290a3..fe5f208 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1933,6 +1933,9 @@ int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+ 		if (host->ops->voltage_switch)
+ 			host->ops->voltage_switch(host);
+ 
++		/* Wait for 5ms */
++		usleep_range(5000, 5500);
++
+ 		/* 1.8V regulator output should be stable within 5 ms */
+ 		ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+ 		if (ctrl & SDHCI_CTRL_VDD_180)
+-- 
+1.9.1
 
-
---qvrjf257zbsnyamo
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAloxWsIACgkQFA3kzBSg
-KbYbjw/+MzXbIoebzd9TGz1s37K5twXXS9Tga+kvrIPts0GBJ0tm1+QG4nifZ4Eg
-jP/auYH61vkjKCWPmHOVWvBPbGxBXqObgguxV6qDN6WL4kaXy1L0lH0EOi/8LEEY
-n5a3qB4EC6OeQApX+URhFT7FQqNBWNY245ew0b3BtMw38rZhVRjljJDkpsQ4DhfO
-gluGYUYNkKw93tjTKRSaBJyAIKMhKTDr32Q6rNCVVj84p+ajYQPw8fBU/ndWfses
-MtNBNN3kb/dKiAPpvuYiXbTPMPhzL5UJZzBR/XJnsaL/gZFIz06+pixuLNwYO1Z9
-gUDjP1pH2iSdmF/7bxn7OErATHvX6zj5MsklysKFRSwhcptd5Hms2PffoT0ZTHzv
-Ehw7RMHR+ilCudEdAr+GtUZ+idnqdeFTUD8yYOAqL1g5abSCr92qrztJRHKeer7q
-w0anUUe9OX4pNCFrvQGZhxR9sdfbfOA6JJovVUuViaS6e+TUpIeFM481qcLU9xXv
-XaDmPZpjkgv6YTX8AcOQvC1rpupTwJu41HdtmTqNJYewOjUzEWxlOJYZKycclHhx
-4t1nS+aFW7Y2sCUZLdwJwjF7y2cxwi3NID5TyZcFLVsZiiZpRfu0zMxU4vLsOP8+
-V3TTQXWJZXd5hO29JnI4wFYU0Iwtir91G8QqCYJ/aeowFLLOiA4=
-=o3yS
------END PGP SIGNATURE-----
-
---qvrjf257zbsnyamo--
