@@ -1,71 +1,72 @@
-From: Philippe Ombredanne <pombredanne@nexb.com>
-Subject: Re: [PATCH 08/12] mmc: sdhci-omap: Add support to override f_max and
- iodelay from pdata
-Date: Thu, 14 Dec 2017 15:04:22 +0100
-Message-ID: <CAOFm3uH0qvwE6fqkMoNAz9Qf_2VaaBvf78tPVTsyfGPRMz7TkA@mail.gmail.com>
-References: <20171214130941.26666-1-kishon@ti.com> <20171214130941.26666-9-kishon@ti.com>
+From: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [PATCH 06/12] mmc: sdhci_omap: Add support to set IODELAY values
+Date: Thu, 14 Dec 2017 07:04:57 -0800
+Message-ID: <20171214150457.GH14441@atomide.com>
+References: <20171214130941.26666-1-kishon@ti.com>
+ <20171214130941.26666-7-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20171214130941.26666-9-kishon@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Tony Lindgren <tony@atomide.com>, Adrian Hunter <adrian.hunter@intel.com>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, linux-omap@vger.kernel.org, "moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE" <linux-arm-kernel@lists.infradead.org>, nsekhar@ti.com
+Content-Type: text/plain; charset=us-ascii
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20171214130941.26666-7-kishon-l0cyMroinI0@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, nsekhar-l0cyMroinI0@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Kishon,
+Hi,
 
-On Thu, Dec 14, 2017 at 2:09 PM, Kishon Vijay Abraham I <kishon@ti.com> wrote:
-> DRA74x EVM Rev H EVM comes with revision 2.0 silicon. However, earlier
-> versions of EVM can come with either revision 1.1 or revision 1.0 of
-> silicon.
->
-> The device-tree file is written to support rev 2.0 of silicon.
-> pdata-quirks are used to then override the settings needed for
-> PG 1.1 silicon.
->
-> PG 1.1 silicon has limitations w.r.t frequencies at which MMC1/2/3
-> can operate as well as different IOdelay numbers.
->
-> Add support in sdhci-omap driver to get platform data if available
-> (added using pdata quirks) and override the data (max-frequency and
-> iodelay data) obtained from device tree.
->
-> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+* Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org> [171214 13:13]:
+> The data manual of J6/J6 Eco recommends to set different IODELAY values
+> depending on the mode in which the MMC/SD is enumerated in order to
+> ensure IO timings are met.
+> 
+> Add support to set the IODELAY values depending on the various MMC
+> modes using the pinctrl APIs.
+...
 
-<snip>
+> --- a/drivers/mmc/host/sdhci-omap.c
+> +++ b/drivers/mmc/host/sdhci-omap.c
+> @@ -105,6 +109,20 @@ struct sdhci_omap_host {
+>  	struct sdhci_host	*host;
+>  	u8			bus_mode;
+>  	u8			power_mode;
+> +	u8			timing;
+> +	u8			flags;
+> +
+> +	struct pinctrl		*pinctrl;
+> +	struct pinctrl_state	*pinctrl_state;
+> +	struct pinctrl_state	*default_pinctrl_state;
+> +	struct pinctrl_state	*sdr104_pinctrl_state;
+> +	struct pinctrl_state	*hs200_1_8v_pinctrl_state;
+> +	struct pinctrl_state	*ddr50_pinctrl_state;
+> +	struct pinctrl_state	*sdr50_pinctrl_state;
+> +	struct pinctrl_state	*sdr25_pinctrl_state;
+> +	struct pinctrl_state	*sdr12_pinctrl_state;
+> +	struct pinctrl_state	*hs_pinctrl_state;
+> +	struct pinctrl_state	*ddr_1_8v_pinctrl_state;
+>  };
 
-> --- /dev/null
-> +++ b/include/linux/platform_data/sdhci-omap.h
-> @@ -0,0 +1,35 @@
-> +/**
-> + * SDHCI Controller Platform Data for TI's OMAP SoCs
-> + *
-> + * Copyright (C) 2017 Texas Instruments
-> + * Author: Kishon Vijay Abraham I <kishon@ti.com>
-> + *
-> + * This program is free software: you can redistribute it and/or modify
-> + * it under the terms of the GNU General Public License version 2 of
-> + * the License as published by the Free Software Foundation.
-> + *
-> + * This program is distributed in the hope that it will be useful,
-> + * but WITHOUT ANY WARRANTY; without even the implied warranty of
-> + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> + * GNU General Public License for more details.
-> + *
-> + * You should have received a copy of the GNU General Public License
-> + * along with this program.  If not, see <http://www.gnu.org/licenses/>.
-> + */
 
-Could you use the new SPDX tags instead of this fine and long boilerplate? See
-Thomas doc for details [1]
+You can make the pinctrl code more generic by allocating an array
+of states and have just:
 
-[1] https://lkml.org/lkml/2017/12/4/934
+	struct pinctrl_state **pinctrl_state;
 
-Thanks!
-PS: if you could spread the word out in your team too, this would be
-much welcomed!
+Then access it with omap_host->pinctrl_state[MMC_TIMING_MMC_HS200]
+and so on.
 
--- 
-Cordially
-Philippe Ombredanne
+This way the code gets simplified and you can do a generic function
+to initialize things and call it from a for loop etc.
+
+Just remember that pinctrl use can be optional as the pins can be
+set up in the bootloader alone. Then you can just continue with the
+default iodelay state like we are currently doing.
+
+Regards,
+
+Tony
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
