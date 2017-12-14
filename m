@@ -1,43 +1,90 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: sdhci: wait 5ms after set 1.8V signal enable
-Date: Thu, 14 Dec 2017 09:41:11 +0100
-Message-ID: <CAPDyKFp=B2EBBOVky=x89Bcqw77XZyXcW1Hyn_LEHOkhtyAyFA@mail.gmail.com>
-References: <1513208929-13578-1-git-send-email-zjwu@marvell.com>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: [PATCH 03/12] mmc: sdhci-omap: Add custom set_uhs_signaling sdhci_host ops
+Date: Thu, 14 Dec 2017 18:39:32 +0530
+Message-ID: <20171214130941.26666-4-kishon@ti.com>
+References: <20171214130941.26666-1-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f41.google.com ([209.85.214.41]:43014 "EHLO
-        mail-it0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751173AbdLNIlM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Dec 2017 03:41:12 -0500
-Received: by mail-it0-f41.google.com with SMTP id u62so9613322ita.2
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Dec 2017 00:41:12 -0800 (PST)
-In-Reply-To: <1513208929-13578-1-git-send-email-zjwu@marvell.com>
+Received: from fllnx210.ext.ti.com ([198.47.19.17]:50702 "EHLO
+        fllnx210.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752277AbdLNNLO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Dec 2017 08:11:14 -0500
+In-Reply-To: <20171214130941.26666-1-kishon@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Zhoujie Wu <zjwu@marvell.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Nadav Haklai <nadavh@marvell.com>, Victor Gu <xigu@marvell.com>, xswang@marvell.com, Wilson Ding <dingwei@marvell.com>, Kostya Porotchkin <kostap@marvell.com>, Hanna Hawa <hannah@marvell.com>, hongd@marvell.com, Doug Jones <dougj@marvell.com>, Ryan Gao <ygao@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Gregory Clement <gregory.clement@free-electrons.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Tony Lindgren <tony@atomide.com>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, nsekhar@ti.com, kishon@ti.com
 
-On 14 December 2017 at 00:48, Zhoujie Wu <zjwu@marvell.com> wrote:
-> According to SD spec 3.00 3.6.1 signal voltage switch
-> procedure, host should wait 5ms after set 1.8V signal
-> enable bit in Host Control 2 register and check if 1.8V
-> is stable or not.
->
+UHS-1 DDR50 and MMC DDR52 mode require DDR bit to be
+set in the configuration register (MMCHS_CON). Add
+sdhci-omap specific set_uhs_signaling ops to set
+this bit. Also while setting the UHSMS bit, clock should be
+disabled.
 
-The core already deals with this. See mmc_set_uhs_voltage() and
-mmc_host_set_uhs_voltage().
+Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+---
+ drivers/mmc/host/sdhci-omap.c | 26 +++++++++++++++++++++++++-
+ 1 file changed, 25 insertions(+), 1 deletion(-)
 
-We even have a retry mechanism in place.
+diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+index defe4eac020d..8f7239e2edc2 100644
+--- a/drivers/mmc/host/sdhci-omap.c
++++ b/drivers/mmc/host/sdhci-omap.c
+@@ -31,6 +31,7 @@
+ #define SDHCI_OMAP_CON		0x12c
+ #define CON_DW8			BIT(5)
+ #define CON_DMA_MASTER		BIT(20)
++#define CON_DDR			BIT(19)
+ #define CON_CLKEXTFREE		BIT(16)
+ #define CON_PADEN		BIT(15)
+ #define CON_INIT		BIT(1)
+@@ -93,6 +94,9 @@ struct sdhci_omap_host {
+ 	u8			power_mode;
+ };
+ 
++static void sdhci_omap_start_clock(struct sdhci_omap_host *omap_host);
++static void sdhci_omap_stop_clock(struct sdhci_omap_host *omap_host);
++
+ static inline u32 sdhci_omap_readl(struct sdhci_omap_host *host,
+ 				   unsigned int offset)
+ {
+@@ -471,6 +475,26 @@ static void sdhci_omap_init_74_clocks(struct sdhci_host *host, u8 power_mode)
+ 	enable_irq(host->irq);
+ }
+ 
++static void sdhci_omap_set_uhs_signaling(struct sdhci_host *host,
++					 unsigned int timing)
++{
++	u32 reg;
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
++
++	sdhci_omap_stop_clock(omap_host);
++
++	reg = sdhci_omap_readl(omap_host, SDHCI_OMAP_CON);
++	if (timing == MMC_TIMING_UHS_DDR50 || timing == MMC_TIMING_MMC_DDR52)
++		reg |= CON_DDR;
++	else
++		reg &= ~CON_DDR;
++	sdhci_omap_writel(omap_host, SDHCI_OMAP_CON, reg);
++
++	sdhci_set_uhs_signaling(host, timing);
++	sdhci_omap_start_clock(omap_host);
++}
++
+ static struct sdhci_ops sdhci_omap_ops = {
+ 	.set_clock = sdhci_omap_set_clock,
+ 	.set_power = sdhci_omap_set_power,
+@@ -480,7 +504,7 @@ static struct sdhci_ops sdhci_omap_ops = {
+ 	.set_bus_width = sdhci_omap_set_bus_width,
+ 	.platform_send_init_74_clocks = sdhci_omap_init_74_clocks,
+ 	.reset = sdhci_reset,
+-	.set_uhs_signaling = sdhci_set_uhs_signaling,
++	.set_uhs_signaling = sdhci_omap_set_uhs_signaling,
+ };
+ 
+ static int sdhci_omap_set_capabilities(struct sdhci_omap_host *omap_host)
+-- 
+2.11.0
 
-> On some cards, found without the delay would see "1.8V
-> regulator output did not became stable" err log.
-
-Seems like you need to fix the regulator instead.
-
-BTW, is this a regression? No?
-
-[...]
-
-Kind regards
-Uffe
