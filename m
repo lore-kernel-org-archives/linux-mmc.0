@@ -1,53 +1,67 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH 04/14] ARM: dts: dra76x: Create a common file with MMC/SD
- IOdelay data
-Date: Thu, 14 Dec 2017 07:15:31 -0800
-Message-ID: <20171214151531.GI14441@atomide.com>
-References: <20171214134054.7749-1-kishon@ti.com>
- <20171214134054.7749-5-kishon@ti.com>
+From: Zhoujie Wu <zjwu@marvell.com>
+Subject: Re: [EXT] Re: [PATCH v2] mmc: sdhci: wait 5ms after set 1.8V signal
+ enable
+Date: Thu, 14 Dec 2017 11:04:28 -0800
+Message-ID: <5A32CB3C.4060105@marvell.com>
+References: <1513208929-13578-1-git-send-email-zjwu@marvell.com>
+ <CAPDyKFp=B2EBBOVky=x89Bcqw77XZyXcW1Hyn_LEHOkhtyAyFA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20171214134054.7749-5-kishon@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>
-Cc: bcousson@baylibre.com, Santosh Shilimkar <ssantosh@kernel.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, nsekhar@ti.com
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:60660 "EHLO
+        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1753742AbdLNTEd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Dec 2017 14:04:33 -0500
+In-Reply-To: <CAPDyKFp=B2EBBOVky=x89Bcqw77XZyXcW1Hyn_LEHOkhtyAyFA@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Nadav Haklai <nadavh@marvell.com>, Victor Gu <xigu@marvell.com>, xswang@marvell.com, Wilson Ding <dingwei@marvell.com>, Kostya Porotchkin <kostap@marvell.com>, Hanna Hawa <hannah@marvell.com>, hongd@marvell.com, Doug Jones <dougj@marvell.com>, Ryan Gao <ygao@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Gregory Clement <gregory.clement@free-electrons.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
 
-* Kishon Vijay Abraham I <kishon@ti.com> [171214 13:44]:
-> +&dra7_pmx_core {
-> +	mmc1_pins_default: mmc1_pins_default {
-> +		pinctrl-single,pins = <
-> +			DRA7XX_CORE_IOPAD(0x3754, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_clk.clk */
-> +			DRA7XX_CORE_IOPAD(0x3758, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_cmd.cmd */
-> +			DRA7XX_CORE_IOPAD(0x375c, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_dat0.dat0 */
-> +			DRA7XX_CORE_IOPAD(0x3760, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_dat1.dat1 */
-> +			DRA7XX_CORE_IOPAD(0x3764, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_dat2.dat2 */
-> +			DRA7XX_CORE_IOPAD(0x3768, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_dat3.dat3 */
-> +		>;
-> +	};
-> +
-> +	mmc1_pins_sdr12: mmc1_pins_sdr12 {
-> +		pinctrl-single,pins = <
-> +			DRA7XX_CORE_IOPAD(0x3754, PIN_INPUT_PULLUP | MUX_MODE0)	/* mmc1_clk.clk */
-> +			DRA7XX_CORE_IOPAD(0x3758, PIN_INPUT_PULLUP | MUX_MODE0)	/* mmc1_cmd.cmd */
-> +			DRA7XX_CORE_IOPAD(0x375c, PIN_INPUT_PULLUP | MUX_MODE0)	/* mmc1_dat0.dat0 */
-> +			DRA7XX_CORE_IOPAD(0x3760, PIN_INPUT_PULLUP | MUX_MODE0)	/* mmc1_dat1.dat1 */
-> +			DRA7XX_CORE_IOPAD(0x3764, PIN_INPUT_PULLUP | MUX_MODE0)	/* mmc1_dat2.dat2 */
-> +			DRA7XX_CORE_IOPAD(0x3768, PIN_INPUT_PULLUP | MUX_MODE0)	/* mmc1_dat3.dat3 */
-> +		>;
-> +	};
+Hi Ulf,
 
-Can't you just do:
+On 12/14/2017 12:41 AM, Ulf Hansson wrote:
+> External Email
+>
+> ----------------------------------------------------------------------
+> On 14 December 2017 at 00:48, Zhoujie Wu <zjwu@marvell.com> wrote:
+>> According to SD spec 3.00 3.6.1 signal voltage switch
+>> procedure, host should wait 5ms after set 1.8V signal
+>> enable bit in Host Control 2 register and check if 1.8V
+>> is stable or not.
+>>
+> The core already deals with this. See mmc_set_uhs_voltage() and
+> mmc_host_set_uhs_voltage().
+>
+> We even have a retry mechanism in place.
+I checked these functions, they just make sure when do signal voltage 
+switch, gate the clock to SD card 5ms and wait 1ms before check data lines.
+This patch is following below spec requirement when switching signal 
+voltage to 1.8V, wait 5ms after set 1.8V signal Enable bit in Host 
+control 2 register.
+Current code will set 1.8V Signal Enable bit and check if this bit is 
+cleared by host right after that,  the bit is not cleared and host 
+report "1.8V regulator output did not became stable".
 
-pinctrl-0 = <&mmc1_pins_default>;
-pinctrl-1 = <&mmc1_pins_default>;
-pinctrl-2 = <&mmc1_pins_hs>;
-pinctrl-names = "default", "sdr12", "sdr25";
+You can find the steps at SD spec 3.0 3.6.1.
+(6) Set 1.8V Signal Enable in the Host Control 2 register.
+(7) Wait 5ms. 1.8V voltage regulator shall be stable within this period.
+(8) If 1.8V Signal Enable is cleared by Host Controller, go to step (12).
+>
+>> On some cards, found without the delay would see "1.8V
+>> regulator output did not became stable" err log.
+> Seems like you need to fix the regulator instead.
+>
+> BTW, is this a regression? No?
+It is not regulator related, the regulator already output 1.8V and add 
+delay after regulator set voltage didn't help.
+The only solution is to add 5ms after set 1.8V signal enable bit .
+Not a regression issue, we recently found it when enabling uhs on some 
+platforms since they didn't enable it previously.
+>
+> [...]
+>
+> Kind regards
+> Uffe
 
-And avoid defining duplicate pinctrl groups that way?
-
-Regards,
-
-Tony
