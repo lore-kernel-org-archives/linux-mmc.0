@@ -1,58 +1,71 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH 10/14] ARM: dts: dra71-evm: Correct evm_sd regulator max
- voltage
-Date: Thu, 14 Dec 2017 19:10:50 +0530
-Message-ID: <20171214134054.7749-11-kishon@ti.com>
-References: <20171214134054.7749-1-kishon@ti.com>
+From: Philippe Ombredanne <pombredanne@nexb.com>
+Subject: Re: [PATCH 08/12] mmc: sdhci-omap: Add support to override f_max and
+ iodelay from pdata
+Date: Thu, 14 Dec 2017 15:04:22 +0100
+Message-ID: <CAOFm3uH0qvwE6fqkMoNAz9Qf_2VaaBvf78tPVTsyfGPRMz7TkA@mail.gmail.com>
+References: <20171214130941.26666-1-kishon@ti.com> <20171214130941.26666-9-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20171214134054.7749-1-kishon@ti.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Tony Lindgren <tony@atomide.com>, bcousson@baylibre.com, Santosh Shilimkar <ssantosh@kernel.org>
-Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, kishon@ti.com, nsekhar@ti.com, linux-mmc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, Ravikumar Kattekola <rk@ti.com>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20171214130941.26666-9-kishon@ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Kishon Vijay Abraham I <kishon@ti.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Tony Lindgren <tony@atomide.com>, Adrian Hunter <adrian.hunter@intel.com>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, linux-omap@vger.kernel.org, "moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE" <linux-arm-kernel@lists.infradead.org>, nsekhar@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-From: Ravikumar Kattekola <rk@ti.com>
+Kishon,
 
-Correct vpo_sd_1v8_3v3 regulator max voltage to 3.3V
+On Thu, Dec 14, 2017 at 2:09 PM, Kishon Vijay Abraham I <kishon@ti.com> wrote:
+> DRA74x EVM Rev H EVM comes with revision 2.0 silicon. However, earlier
+> versions of EVM can come with either revision 1.1 or revision 1.0 of
+> silicon.
+>
+> The device-tree file is written to support rev 2.0 of silicon.
+> pdata-quirks are used to then override the settings needed for
+> PG 1.1 silicon.
+>
+> PG 1.1 silicon has limitations w.r.t frequencies at which MMC1/2/3
+> can operate as well as different IOdelay numbers.
+>
+> Add support in sdhci-omap driver to get platform data if available
+> (added using pdata quirks) and override the data (max-frequency and
+> iodelay data) obtained from device tree.
+>
+> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 
-Fixes: 9868bc585ae2 ("ARM: dts: Add support for dra718-evm")
-Signed-off-by: Ravikumar Kattekola <rk@ti.com>
-Signed-off-by: Sekhar Nori <nsekhar@ti.com>
-Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
----
- arch/arm/boot/dts/dra71-evm.dts | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+<snip>
 
-diff --git a/arch/arm/boot/dts/dra71-evm.dts b/arch/arm/boot/dts/dra71-evm.dts
-index 41c9132eb550..64363f75c01a 100644
---- a/arch/arm/boot/dts/dra71-evm.dts
-+++ b/arch/arm/boot/dts/dra71-evm.dts
-@@ -24,13 +24,13 @@
- 
- 		regulator-name = "vddshv8";
- 		regulator-min-microvolt = <1800000>;
--		regulator-max-microvolt = <3000000>;
-+		regulator-max-microvolt = <3300000>;
- 		regulator-boot-on;
- 		vin-supply = <&evm_5v0>;
- 
- 		gpios = <&gpio7 11 GPIO_ACTIVE_HIGH>;
- 		states = <1800000 0x0
--			  3000000 0x1>;
-+			  3300000 0x1>;
- 	};
- 
- 	evm_1v8_sw: fixedregulator-evm_1v8 {
+> --- /dev/null
+> +++ b/include/linux/platform_data/sdhci-omap.h
+> @@ -0,0 +1,35 @@
+> +/**
+> + * SDHCI Controller Platform Data for TI's OMAP SoCs
+> + *
+> + * Copyright (C) 2017 Texas Instruments
+> + * Author: Kishon Vijay Abraham I <kishon@ti.com>
+> + *
+> + * This program is free software: you can redistribute it and/or modify
+> + * it under the terms of the GNU General Public License version 2 of
+> + * the License as published by the Free Software Foundation.
+> + *
+> + * This program is distributed in the hope that it will be useful,
+> + * but WITHOUT ANY WARRANTY; without even the implied warranty of
+> + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> + * GNU General Public License for more details.
+> + *
+> + * You should have received a copy of the GNU General Public License
+> + * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+> + */
+
+Could you use the new SPDX tags instead of this fine and long boilerplate? See
+Thomas doc for details [1]
+
+[1] https://lkml.org/lkml/2017/12/4/934
+
+Thanks!
+PS: if you could spread the word out in your team too, this would be
+much welcomed!
+
 -- 
-2.11.0
+Cordially
+Philippe Ombredanne
