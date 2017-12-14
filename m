@@ -1,73 +1,63 @@
-From: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
-Subject: [PATCH 05/12] mmc: sdhci-omap: Workaround for Errata i802
-Date: Thu, 14 Dec 2017 18:39:34 +0530
-Message-ID: <20171214130941.26666-6-kishon@ti.com>
-References: <20171214130941.26666-1-kishon@ti.com>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: [PATCH 00/12] mmc: sdhci-omap: Add UHS/HS200 mode support
+Date: Thu, 14 Dec 2017 18:39:29 +0530
+Message-ID: <20171214130941.26666-1-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 8bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20171214130941.26666-1-kishon-l0cyMroinI0@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, nsekhar-l0cyMroinI0@public.gmane.org, kishon-l0cyMroinI0@public.gmane.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Tony Lindgren <tony@atomide.com>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, nsekhar@ti.com, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-Errata i802 in AM572x Sitara Processors Silicon Revision 2.0, 1.1
-(SPRZ429K July 2014–Revised March 2017 [1]) mentions
-DCRC error interrupts (MMCHS_STAT[21] DCRC=0x1) can occur
-during the tuning procedure and it has to be disabled during the
-tuning procedure Implement workaround for Errata i802 here..
+Add UHS/HS200 mode support in sdhci-omap. The programming sequence
+for voltage switching, tuning is followed from AM572x TRM
+http://www.ti.com/lit/ug/spruhz6i/spruhz6i.pdf
+(Similar to all AM57x/DRA7x SoCs). The patch series also implements
+workaround for errata published in
+http://www.ti.com/lit/er/sprz429k/sprz429k.pdf.
 
-[1] -> http://www.ti.com/lit/er/sprz429k/sprz429k.pdf
+While most of this series is specific to sdhci-omap, it also
+patches sdhci to use software timer when the requested timeout
+is greater than hardware capablility. This re-uses the SW data timer
+already implemented in sdhci while disabling the HW timeout (so that
+spurious timeout is not observed). The patch for sdhci.c is based on
+an earlier patch that was done specific to omap_hsmmc.c
+(https://patchwork.kernel.org/patch/9791449/)
 
-Signed-off-by: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
----
- drivers/mmc/host/sdhci-omap.c | 13 +++++++++++++
- 1 file changed, 13 insertions(+)
+It also includes a pdata-quirk patch since both pdata-quirks and
+sdhci-omap uses struct sdhci_omap_platform_data.
 
-diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-index df8a0a472996..b20f4c79ccc6 100644
---- a/drivers/mmc/host/sdhci-omap.c
-+++ b/drivers/mmc/host/sdhci-omap.c
-@@ -266,6 +266,7 @@ static int sdhci_omap_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	struct sdhci_pltfm_host *pltfm_host;
- 	struct sdhci_omap_host *omap_host;
- 	struct device *dev;
-+	u32 ier = host->ier;
- 
- 	pltfm_host = sdhci_priv(host);
- 	omap_host = sdhci_pltfm_priv(pltfm_host);
-@@ -283,6 +284,16 @@ static int sdhci_omap_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	reg |= DLL_SWT;
- 	sdhci_omap_writel(omap_host, SDHCI_OMAP_DLL, reg);
- 
-+	/*
-+	 * OMAP5/DRA74X/DRA72x Errata i802:
-+	 * DCRC error interrupts (MMCHS_STAT[21] DCRC=0x1) can occur
-+	 * during the tuning procedure. So disable it during the
-+	 * tuning procedure.
-+	 */
-+	ier &= ~SDHCI_INT_DATA_CRC;
-+	sdhci_writel(host, ier, SDHCI_INT_ENABLE);
-+	sdhci_writel(host, ier, SDHCI_SIGNAL_ENABLE);
-+
- 	while (phase_delay <= MAX_PHASE_DELAY) {
- 		sdhci_omap_set_dll(omap_host, phase_delay);
- 
-@@ -328,6 +339,8 @@ static int sdhci_omap_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 
- ret:
- 	sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
-+	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
-+	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
- 	return ret;
- }
- 
+The dt patches enabling UHS/HS200 will be follow this patch series.
+
+This series is created on
+git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git next
+
+Kishon Vijay Abraham I (12):
+  mmc: sdhci-omap: Update 'power_mode' outside sdhci_omap_init_74_clocks
+  mmc: sdhci-omap: Add card_busy host ops
+  mmc: sdhci-omap: Add custom set_uhs_signaling sdhci_host ops
+  mmc: sdhci-omap: Add tuning support
+  mmc: sdhci-omap: Workaround for Errata i802
+  mmc: sdhci_omap: Add support to set IODELAY values
+  mmc: sdhci_omap: Fix sdhci-omap quirks
+  mmc: sdhci-omap: Add support to override f_max and iodelay from pdata
+  mmc: sdhci: Use software timer when timeout greater than hardware
+    capablility
+  dt-bindings: sdhci-omap: Add K2G specific binding
+  mmc: sdhci-omap: Add support for MMC/SD controller in k2g SoC
+  ARM: OMAP2+: Use sdhci-omap specific pdata-quirks for MMC/SD on DRA74x
+    EVM
+
+ .../devicetree/bindings/mmc/sdhci-omap.txt         |   2 +
+ arch/arm/mach-omap2/pdata-quirks.c                 |  34 +-
+ drivers/mmc/host/sdhci-omap.c                      | 446 ++++++++++++++++++++-
+ drivers/mmc/host/sdhci.c                           |  41 +-
+ drivers/mmc/host/sdhci.h                           |  11 +
+ include/linux/platform_data/sdhci-omap.h           |  35 ++
+ 6 files changed, 544 insertions(+), 25 deletions(-)
+ create mode 100644 include/linux/platform_data/sdhci-omap.h
+
 -- 
 2.11.0
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
