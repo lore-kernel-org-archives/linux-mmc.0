@@ -1,7 +1,7 @@
 From: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
-Subject: [PATCH 02/14] ARM: omap2plus_defconfig: Enable CONFIG_MMC_SDHCI_OMAP
-Date: Thu, 14 Dec 2017 19:10:42 +0530
-Message-ID: <20171214134054.7749-3-kishon@ti.com>
+Subject: [PATCH 06/14] ARM: dts: dra76-evm: Add pinctrl data for higher speed MMC/SD modes
+Date: Thu, 14 Dec 2017 19:10:46 +0530
+Message-ID: <20171214134054.7749-7-kishon@ti.com>
 References: <20171214134054.7749-1-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,30 +12,48 @@ To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, bcousson-rdvid
 Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, nsekhar-l0cyMroinI0@public.gmane.org, kishon-l0cyMroinI0@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Enable CONFIG_MMC_SDHCI_OMAP so that TI's dra7 based SoC's
-can use sdhci-omap driver for eMMC/SD/SDIO controller.
+From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
 
+The SD card interface on DRA76x EVM can support
+high speed SD cards. The eMMC onboard can support
+upto HS200 mode.
+
+Enable support for these higher speed modes in the
+device-tree file.
+
+Signed-off-by: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
 Signed-off-by: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
 ---
- arch/arm/configs/omap2plus_defconfig | 3 +++
- 1 file changed, 3 insertions(+)
+ arch/arm/boot/dts/dra76-evm.dts | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
 
-diff --git a/arch/arm/configs/omap2plus_defconfig b/arch/arm/configs/omap2plus_defconfig
-index 7b97200c1d64..c70a00e1ff6a 100644
---- a/arch/arm/configs/omap2plus_defconfig
-+++ b/arch/arm/configs/omap2plus_defconfig
-@@ -423,8 +423,11 @@ CONFIG_USB_ZERO=m
- CONFIG_USB_G_NOKIA=m
- CONFIG_MMC=y
- CONFIG_SDIO_UART=y
-+CONFIG_MMC_SDHCI=y
-+CONFIG_MMC_SDHCI_PLTFM=y
- CONFIG_MMC_OMAP=y
- CONFIG_MMC_OMAP_HS=y
-+CONFIG_MMC_SDHCI_OMAP=y
- CONFIG_NEW_LEDS=y
- CONFIG_LEDS_CLASS=m
- CONFIG_LEDS_CPCAP=m
+diff --git a/arch/arm/boot/dts/dra76-evm.dts b/arch/arm/boot/dts/dra76-evm.dts
+index 2770f6d3e1cb..ec8af5841061 100644
+--- a/arch/arm/boot/dts/dra76-evm.dts
++++ b/arch/arm/boot/dts/dra76-evm.dts
+@@ -313,16 +313,20 @@
+ 	 * is always hardwired.
+ 	 */
+ 	cd-gpios = <&gpio6 27 GPIO_ACTIVE_LOW>;
+-	pinctrl-names = "default";
++	pinctrl-names = "default", "hs";
+ 	pinctrl-0 = <&mmc1_pins_default>;
++	pinctrl-1 = <&mmc1_pins_hs>;
+ };
+ 
+ &mmc2 {
+ 	status = "okay";
+ 	vmmc-supply = <&vio_1v8>;
+ 	bus-width = <8>;
+-	pinctrl-names = "default";
++	pinctrl-names = "default", "hs", "ddr_1_8v", "hs200_1_8v";
+ 	pinctrl-0 = <&mmc2_pins_default>;
++	pinctrl-1 = <&mmc2_pins_hs>;
++	pinctrl-2 = <&mmc2_pins_ddr>;
++	pinctrl-3 = <&mmc2_pins_hs200 &mmc2_iodelay_hs200_conf>;
+ };
+ 
+ /* No RTC on this device */
 -- 
 2.11.0
 
