@@ -1,148 +1,150 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [RFC PATCH 09/12] mmc: sdhci: Use software timer when timeout greater than hardware capablility
-Date: Thu, 14 Dec 2017 18:39:38 +0530
-Message-ID: <20171214130941.26666-10-kishon@ti.com>
+Subject: [PATCH 08/12] mmc: sdhci-omap: Add support to override f_max and
+ iodelay from pdata
+Date: Thu, 14 Dec 2017 18:39:37 +0530
+Message-ID: <20171214130941.26666-9-kishon@ti.com>
 References: <20171214130941.26666-1-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <20171214130941.26666-1-kishon@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Tony Lindgren <tony@atomide.com>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, nsekhar@ti.com, kishon@ti.com
+Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, kishon@ti.com, nsekhar@ti.com, linux-mmc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Errata i834 in AM572x Sitara Processors Silicon Revision 2.0, 1.1
-(SPRZ429K July 2014–Revised March 2017 [1]) mentions
-Under high speed HS200 and SDR104 modes, the functional clock for MMC
-modules will reach up to 192 MHz. At this frequency, the maximum obtainable
-timeout (DTO = 0xE) through MMC host controller is (1/192MHz)*2^27 = 700ms.
-Commands taking longer than 700ms may be affected by this small window
-frame. Workaround for this errata is use a software timer instead of
-hardware timer to provide the delay requested by the upper layer.
+DRA74x EVM Rev H EVM comes with revision 2.0 silicon. However, earlier
+versions of EVM can come with either revision 1.1 or revision 1.0 of
+silicon.
 
-While this errata is specific to AM572x, it is applicable to all sdhci
-based controllers when a particular request require timeout greater
-than hardware capability.
+The device-tree file is written to support rev 2.0 of silicon.
+pdata-quirks are used to then override the settings needed for
+PG 1.1 silicon.
 
-Re-use the software timer already implemented in sdhci to program the
-correct timeout value and also disable the hardware timeout when
-the required timeout is greater than hardware capabiltiy in order to
-avoid spurious timeout interrupts.
+PG 1.1 silicon has limitations w.r.t frequencies at which MMC1/2/3
+can operate as well as different IOdelay numbers.
 
-This patch is based on the earlier patch implemented for omap_hsmmc [2]
-
-[1] -> http://www.ti.com/lit/er/sprz429k/sprz429k.pdf
-[2] -> https://patchwork.kernel.org/patch/9791449/
+Add support in sdhci-omap driver to get platform data if available
+(added using pdata quirks) and override the data (max-frequency and
+iodelay data) obtained from device tree.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- drivers/mmc/host/sdhci.c | 41 +++++++++++++++++++++++++++++++++++++++--
- drivers/mmc/host/sdhci.h | 11 +++++++++++
- 2 files changed, 50 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sdhci-omap.c            | 17 ++++++++++++++++
+ include/linux/platform_data/sdhci-omap.h | 35 ++++++++++++++++++++++++++++++++
+ 2 files changed, 52 insertions(+)
+ create mode 100644 include/linux/platform_data/sdhci-omap.h
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index e9290a3439d5..d0655e1d2cc7 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -673,6 +673,27 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
- 	}
- }
- 
-+static void sdhci_calc_sw_timeout(struct sdhci_host *host,
-+				  struct mmc_command *cmd,
-+				  unsigned int target_timeout)
-+{
-+	struct mmc_host *mmc = host->mmc;
-+	struct mmc_ios *ios = &mmc->ios;
-+	struct mmc_data *data = cmd->data;
-+	unsigned long long transfer_time;
-+
-+	if (data) {
-+		transfer_time = MMC_BLOCK_TRANSFER_TIME_MS(data->blksz,
-+							   ios->bus_width,
-+							   ios->clock);
-+		/* calculate timeout for the entire data */
-+		host->data_timeout = (data->blocks * (target_timeout +
-+						      transfer_time));
-+	} else if (cmd->flags & MMC_RSP_BUSY) {
-+		host->data_timeout = cmd->busy_timeout * MSEC_PER_SEC;
-+	}
-+}
-+
- static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
- {
- 	u8 count;
-@@ -732,8 +753,12 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
- 	}
- 
- 	if (count >= 0xF) {
--		DBG("Too large timeout 0x%x requested for CMD%d!\n",
--		    count, cmd->opcode);
-+		DBG("Too large timeout.. using SW timeout for CMD%d!\n",
-+		    cmd->opcode);
-+		sdhci_calc_sw_timeout(host, cmd, target_timeout);
-+		host->ier &= ~SDHCI_INT_DATA_TIMEOUT;
-+		sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
-+		sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
- 		count = 0xE;
- 	}
- 
-@@ -1198,6 +1223,14 @@ static void sdhci_finish_command(struct sdhci_host *host)
- {
- 	struct mmc_command *cmd = host->cmd;
- 
-+	if (host->data_timeout) {
-+		unsigned long timeout;
-+
-+		timeout = jiffies +
-+			  msecs_to_jiffies(host->data_timeout);
-+		sdhci_mod_timer(host, host->cmd->mrq, timeout);
-+	}
-+
- 	host->cmd = NULL;
- 
- 	if (cmd->flags & MMC_RSP_PRESENT) {
-@@ -2341,6 +2374,10 @@ static bool sdhci_request_done(struct sdhci_host *host)
- 		return true;
- 	}
- 
-+	host->data_timeout = 0;
-+	host->ier |= SDHCI_INT_DATA_TIMEOUT;
-+	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
-+	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
- 	sdhci_del_timer(host, mrq);
- 
- 	/*
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 54bc444c317f..e6e0278bea1a 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -332,6 +332,15 @@ struct sdhci_adma2_64_desc {
- /* Allow for a a command request and a data request at the same time */
- #define SDHCI_MAX_MRQS		2
- 
-+/*
-+ * Time taken for transferring one block. It is multiplied by a constant
-+ * factor '2' to account for any errors
-+ */
-+#define MMC_BLOCK_TRANSFER_TIME_MS(blksz, bus_width, freq)		\
-+				   ((unsigned long long)		\
-+				   (2 * (((blksz) * MSEC_PER_SEC *	\
-+				   (8 / (bus_width))) / (freq))))
-+
- enum sdhci_cookie {
- 	COOKIE_UNMAPPED,
- 	COOKIE_PRE_MAPPED,	/* mapped by sdhci_pre_req() */
-@@ -546,6 +555,8 @@ struct sdhci_host {
- 	/* Host SDMA buffer boundary. */
- 	u32			sdma_boundary;
- 
-+	unsigned long long	data_timeout;
-+
- 	unsigned long private[0] ____cacheline_aligned;
+diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+index 6dee275b2e57..cddc3ad1331f 100644
+--- a/drivers/mmc/host/sdhci-omap.c
++++ b/drivers/mmc/host/sdhci-omap.c
+@@ -22,6 +22,7 @@
+ #include <linux/module.h>
+ #include <linux/of.h>
+ #include <linux/of_device.h>
++#include <linux/platform_data/sdhci-omap.h>
+ #include <linux/platform_device.h>
+ #include <linux/pm_runtime.h>
+ #include <linux/regulator/consumer.h>
+@@ -102,6 +103,7 @@ struct sdhci_omap_data {
  };
  
+ struct sdhci_omap_host {
++	char			*version;
+ 	void __iomem		*base;
+ 	struct device		*dev;
+ 	struct	regulator	*pbias;
+@@ -781,11 +783,18 @@ static struct pinctrl_state
+ 				  u32 *caps, u32 capmask)
+ {
+ 	struct device *dev = omap_host->dev;
++	char *version = omap_host->version;
+ 	struct pinctrl_state *pinctrl_state = ERR_PTR(-ENODEV);
++	char str[20];
+ 
+ 	if (!(*caps & capmask))
+ 		goto ret;
+ 
++	if (version) {
++		sprintf(str, "%s-%s", mode, version);
++		pinctrl_state = pinctrl_lookup_state(omap_host->pinctrl, str);
++	}
++
+ 	pinctrl_state = pinctrl_lookup_state(omap_host->pinctrl, mode);
+ 	if (IS_ERR(pinctrl_state)) {
+ 		dev_err(dev, "no pinctrl state for %s mode", mode);
+@@ -879,6 +888,7 @@ static int sdhci_omap_probe(struct platform_device *pdev)
+ 	struct mmc_host *mmc;
+ 	const struct of_device_id *match;
+ 	struct sdhci_omap_data *data;
++	struct sdhci_omap_platform_data *platform_data;
+ 
+ 	match = of_match_device(omap_sdhci_match, dev);
+ 	if (!match)
+@@ -913,6 +923,13 @@ static int sdhci_omap_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		goto err_pltfm_free;
+ 
++	platform_data = dev_get_platdata(dev);
++	if (platform_data) {
++		omap_host->version = platform_data->version;
++		if (platform_data->max_freq)
++			mmc->f_max = platform_data->max_freq;
++	}
++
+ 	pltfm_host->clk = devm_clk_get(dev, "fck");
+ 	if (IS_ERR(pltfm_host->clk)) {
+ 		ret = PTR_ERR(pltfm_host->clk);
+diff --git a/include/linux/platform_data/sdhci-omap.h b/include/linux/platform_data/sdhci-omap.h
+new file mode 100644
+index 000000000000..a46e1240956a
+--- /dev/null
++++ b/include/linux/platform_data/sdhci-omap.h
+@@ -0,0 +1,35 @@
++/**
++ * SDHCI Controller Platform Data for TI's OMAP SoCs
++ *
++ * Copyright (C) 2017 Texas Instruments
++ * Author: Kishon Vijay Abraham I <kishon@ti.com>
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 of
++ * the License as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
++ */
++#ifndef __SDHCI_OMAP_PDATA_H__
++#define __SDHCI_OMAP_PDATA_H__
++
++struct sdhci_omap_platform_data {
++	const char *name;
++
++	/*
++	 * set if your board has components or wiring that limits the
++	 * maximum frequency on the MMC bus
++	 */
++	unsigned int max_freq;
++
++	/* string specifying a particular variant of hardware */
++	char *version;
++};
++
++#endif
 -- 
 2.11.0
