@@ -1,80 +1,61 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 00/22] mmc: tmio: various fixes and cleanups
-Date: Fri, 15 Dec 2017 10:18:13 +0100
-Message-ID: <CAPDyKFqE7Pg8fJFyOtihdRnma+dFQd3+YPWGn6pXbpzhpERK9Q@mail.gmail.com>
-References: <1511540697-27387-1-git-send-email-yamada.masahiro@socionext.com>
+Subject: Re: [PATCH 12/45] drivers: mmc: remove duplicate includes
+Date: Fri, 15 Dec 2017 10:18:27 +0100
+Message-ID: <CAPDyKFoQCJdNVCWth7yQ5FExwmR5FoNROCo9bhOiKh9QaHLv5A@mail.gmail.com>
+References: <1512579423-5405-1-git-send-email-pravin.shedge4linux@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <1511540697-27387-1-git-send-email-yamada.masahiro@socionext.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-it0-f65.google.com ([209.85.214.65]:33329 "EHLO
+        mail-it0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755220AbdLOJS2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Dec 2017 04:18:28 -0500
+Received: by mail-it0-f65.google.com with SMTP id o130so28772301itg.0
+        for <linux-mmc@vger.kernel.org>; Fri, 15 Dec 2017 01:18:28 -0800 (PST)
+In-Reply-To: <1512579423-5405-1-git-send-email-pravin.shedge4linux@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Pravin Shedge <pravin.shedge4linux@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Heiner Kallweit <hkallweit1@gmail.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 24 November 2017 at 17:24, Masahiro Yamada
-<yamada.masahiro@socionext.com> wrote:
+On 6 December 2017 at 17:57, Pravin Shedge
+<pravin.shedge4linux@gmail.com> wrote:
+> These duplicate includes have been found with scripts/checkincludes.pl but
+> they have been removed manually to avoid removing false positives.
 >
-> I am working on this IP for Socionext SoCs.
->
-> I was hit by several issues, and noticed various
-> clean-up candidates.
->
->  - Fix and clean-up Kconfig
->  - Fix various card detection problems
->  - Move Renesas private data out of TMIO core
->  - Allow to perform platform-specific settings before MMC host starts
->  - Fix weird IRQ handling
->
-> I am getting more and more patches for TMIO.
-> I put all in a single series to clarify the patch order.
->
-> 1, 2, 4, 5, 6, 7 were already acked or reviewed by Wolfram Sang.
->
->
-> Masahiro Yamada (22):
->   mmc: renesas_sdhi: consolidate DMAC CONFIG options
->   mmc: renesas_sdhi: remove wrong depends on to enable compile test
->   mmc: renesas_sdhi: remove eprobe jump label
->   mmc: tmio: set tmio_mmc_host to driver data
->   mmc: tmio: use devm_ioremap_resource() instead of devm_ioremap()
->   mmc: tmio: move mmc_host_ops to struct tmio_mmc_host from static data
->   mmc: tmio, renesas_sdhi: set mmc_host_ops hooks directly
->   mmc: tmio: move mmc_gpio_request_cd() before mmc_add_host()
->   mmc: tmio: use mmc_can_gpio_cd() instead of checking
->     TMIO_MMC_USE_GPIO_CD
->   mmc: tmio: support IP-builtin card detection logic
->   mmc: renesas_sdhi: remove always false condition
->   mmc: tmio,renesas_sdhi: move struct tmio_mmc_dma to renesas_sdhi.h
->   mmc: tmio,renesas_sdhi: move Renesas-specific DMA data to
->     renesas_sdhi.h
->   mmc: tmio,renesas_sdhi: move ssc_tappos to renesas_sdhi.h
->   mmc: tmio: change bus_shift to unsigned int
->   mmc: tmio: fix never-detected card insertion bug
->   mmc: tmio: move TMIO_MASK_{READOP,WRITEOP} handling to correct place
->   mmc: tmio: remove useless TMIO_MASK_CMD handling in
->     tmio_mmc_host_probe()
->   mmc: tmio: ioremap memory resource in tmio_mmc_host_alloc()
->   mmc: tmio: move clk_enable/disable out of tmio_mmc_host_probe()
->   mmc: tmio: move {tmio_}mmc_of_parse() to tmio_mmc_host_alloc()
->   mmc: tmio: remove dma_ops from tmio_mmc_host_probe() argument
->
->  drivers/mmc/host/Kconfig                      |   5 +-
->  drivers/mmc/host/Makefile                     |   8 +-
->  drivers/mmc/host/renesas_sdhi.h               |  22 ++++
->  drivers/mmc/host/renesas_sdhi_core.c          |  49 ++++-----
->  drivers/mmc/host/renesas_sdhi_internal_dmac.c |  14 ++-
->  drivers/mmc/host/renesas_sdhi_sys_dmac.c      |  35 +++---
->  drivers/mmc/host/tmio_mmc.c                   |  23 ++--
->  drivers/mmc/host/tmio_mmc.h                   |  23 +---
->  drivers/mmc/host/tmio_mmc_core.c              | 149 +++++++++++++-------------
->  9 files changed, 170 insertions(+), 158 deletions(-)
->
-> --
-> 2.7.4
->
+> Signed-off-by: Pravin Shedge <pravin.shedge4linux@gmail.com>
 
-To get this moving, I have applied patch 1->8 for next, thanks!
+Thanks, applied for next with an updated prefix of the commit msg header!
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/android-goldfish.c | 2 --
+>  1 file changed, 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/android-goldfish.c b/drivers/mmc/host/android-goldfish.c
+> index 63fe509..63d2758 100644
+> --- a/drivers/mmc/host/android-goldfish.c
+> +++ b/drivers/mmc/host/android-goldfish.c
+> @@ -42,13 +42,11 @@
+>  #include <linux/spinlock.h>
+>  #include <linux/timer.h>
+>  #include <linux/clk.h>
+> -#include <linux/scatterlist.h>
+>
+>  #include <asm/io.h>
+>  #include <asm/irq.h>
+>
+>  #include <asm/types.h>
+> -#include <asm/io.h>
+>  #include <linux/uaccess.h>
+>
+>  #define DRIVER_NAME "goldfish_mmc"
+> --
+> 2.7.4
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
