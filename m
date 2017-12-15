@@ -1,59 +1,80 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 6/6 v3] mmc: sunxi-mmc: Handle return value of platform_get_irq
-Date: Fri, 15 Dec 2017 10:18:03 +0100
-Message-ID: <CAPDyKFrNsTr9=fpzz2K+aQSS04ziOnLs1KxV-K0StzN=Tb=4MQ@mail.gmail.com>
-References: <c1c27676e9f141ace1254b40807bf2dc03f072c6.1511066652.git.arvind.yadav.cs@gmail.com>
- <6ad5c6077b96353a77ea30d1b64651c77d5622f6.1511066652.git.arvind.yadav.cs@gmail.com>
+Subject: Re: [PATCH v2 00/22] mmc: tmio: various fixes and cleanups
+Date: Fri, 15 Dec 2017 10:18:13 +0100
+Message-ID: <CAPDyKFqE7Pg8fJFyOtihdRnma+dFQd3+YPWGn6pXbpzhpERK9Q@mail.gmail.com>
+References: <1511540697-27387-1-git-send-email-yamada.masahiro@socionext.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f67.google.com ([209.85.214.67]:46654 "EHLO
-        mail-it0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755089AbdLOJSE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Dec 2017 04:18:04 -0500
-Received: by mail-it0-f67.google.com with SMTP id t1so17924248ite.5
-        for <linux-mmc@vger.kernel.org>; Fri, 15 Dec 2017 01:18:04 -0800 (PST)
-In-Reply-To: <6ad5c6077b96353a77ea30d1b64651c77d5622f6.1511066652.git.arvind.yadav.cs@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <1511540697-27387-1-git-send-email-yamada.masahiro@socionext.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Arvind Yadav <arvind.yadav.cs@gmail.com>
-Cc: Ben Dooks <ben-linux@fluff.org>, Adrian Hunter <adrian.hunter@intel.com>, Viresh Kumar <vireshk@kernel.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Chen-Yu Tsai <wens@csie.org>, Russell King <linux@armlinux.org.uk>, Carlo Caione <carlo@caione.org>, Kevin Hilman <khilman@baylibre.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>
 
-On 19 November 2017 at 05:52, Arvind Yadav <arvind.yadav.cs@gmail.com> wrote:
-> platform_get_irq() can fail here and we must check its return value.
+On 24 November 2017 at 17:24, Masahiro Yamada
+<yamada.masahiro@socionext.com> wrote:
 >
-> Signed-off-by: Arvind Yadav <arvind.yadav.cs@gmail.com>
-
-Thanks, applied for next!
-
-Kind regards
-Uffe
-
-> ---
-> changes in v2 :
->               Add failure case '<= 0' instead of '< 0'. IRQ0 is not valid.
-> changes in v3 :
->               return -EINVAL instead of host->irq.
+> I am working on this IP for Socionext SoCs.
 >
->  drivers/mmc/host/sunxi-mmc.c | 5 +++++
->  1 file changed, 5 insertions(+)
+> I was hit by several issues, and noticed various
+> clean-up candidates.
 >
-> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index cc98355d..c926ac8 100644
-> --- a/drivers/mmc/host/sunxi-mmc.c
-> +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -1255,6 +1255,11 @@ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
->                 goto error_assert_reset;
+>  - Fix and clean-up Kconfig
+>  - Fix various card detection problems
+>  - Move Renesas private data out of TMIO core
+>  - Allow to perform platform-specific settings before MMC host starts
+>  - Fix weird IRQ handling
 >
->         host->irq = platform_get_irq(pdev, 0);
-> +       if (host->irq <= 0) {
-> +               ret = -EINVAL;
-> +               goto error_assert_reset;
-> +       }
-> +
->         return devm_request_threaded_irq(&pdev->dev, host->irq, sunxi_mmc_irq,
->                         sunxi_mmc_handle_manual_stop, 0, "sunxi-mmc", host);
+> I am getting more and more patches for TMIO.
+> I put all in a single series to clarify the patch order.
+>
+> 1, 2, 4, 5, 6, 7 were already acked or reviewed by Wolfram Sang.
+>
+>
+> Masahiro Yamada (22):
+>   mmc: renesas_sdhi: consolidate DMAC CONFIG options
+>   mmc: renesas_sdhi: remove wrong depends on to enable compile test
+>   mmc: renesas_sdhi: remove eprobe jump label
+>   mmc: tmio: set tmio_mmc_host to driver data
+>   mmc: tmio: use devm_ioremap_resource() instead of devm_ioremap()
+>   mmc: tmio: move mmc_host_ops to struct tmio_mmc_host from static data
+>   mmc: tmio, renesas_sdhi: set mmc_host_ops hooks directly
+>   mmc: tmio: move mmc_gpio_request_cd() before mmc_add_host()
+>   mmc: tmio: use mmc_can_gpio_cd() instead of checking
+>     TMIO_MMC_USE_GPIO_CD
+>   mmc: tmio: support IP-builtin card detection logic
+>   mmc: renesas_sdhi: remove always false condition
+>   mmc: tmio,renesas_sdhi: move struct tmio_mmc_dma to renesas_sdhi.h
+>   mmc: tmio,renesas_sdhi: move Renesas-specific DMA data to
+>     renesas_sdhi.h
+>   mmc: tmio,renesas_sdhi: move ssc_tappos to renesas_sdhi.h
+>   mmc: tmio: change bus_shift to unsigned int
+>   mmc: tmio: fix never-detected card insertion bug
+>   mmc: tmio: move TMIO_MASK_{READOP,WRITEOP} handling to correct place
+>   mmc: tmio: remove useless TMIO_MASK_CMD handling in
+>     tmio_mmc_host_probe()
+>   mmc: tmio: ioremap memory resource in tmio_mmc_host_alloc()
+>   mmc: tmio: move clk_enable/disable out of tmio_mmc_host_probe()
+>   mmc: tmio: move {tmio_}mmc_of_parse() to tmio_mmc_host_alloc()
+>   mmc: tmio: remove dma_ops from tmio_mmc_host_probe() argument
+>
+>  drivers/mmc/host/Kconfig                      |   5 +-
+>  drivers/mmc/host/Makefile                     |   8 +-
+>  drivers/mmc/host/renesas_sdhi.h               |  22 ++++
+>  drivers/mmc/host/renesas_sdhi_core.c          |  49 ++++-----
+>  drivers/mmc/host/renesas_sdhi_internal_dmac.c |  14 ++-
+>  drivers/mmc/host/renesas_sdhi_sys_dmac.c      |  35 +++---
+>  drivers/mmc/host/tmio_mmc.c                   |  23 ++--
+>  drivers/mmc/host/tmio_mmc.h                   |  23 +---
+>  drivers/mmc/host/tmio_mmc_core.c              | 149 +++++++++++++-------------
+>  9 files changed, 170 insertions(+), 158 deletions(-)
 >
 > --
 > 2.7.4
 >
+
+To get this moving, I have applied patch 1->8 for next, thanks!
+
+Kind regards
+Uffe
