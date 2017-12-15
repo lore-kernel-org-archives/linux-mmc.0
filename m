@@ -1,69 +1,75 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH v2 00/22] mmc: tmio: various fixes and cleanups
-Date: Fri, 15 Dec 2017 17:30:55 +0100
-Message-ID: <20171215163055.vxxiswgsvfybf4hi@katana>
-References: <1511540697-27387-1-git-send-email-yamada.masahiro@socionext.com>
- <CAPDyKFqE7Pg8fJFyOtihdRnma+dFQd3+YPWGn6pXbpzhpERK9Q@mail.gmail.com>
- <CAK7LNASQfsnQY6henk5RvAysQUh3=cPXV1GPNeWeXgBxZvadAw@mail.gmail.com>
- <20171215111225.ekrau5e27xknb3jf@ninjato>
- <CAPDyKFopKm2psU19vGQfGL6WizXQA0vvzQubqsypvytbpRtyAA@mail.gmail.com>
+From: Zhoujie Wu <zjwu@marvell.com>
+Subject: Re: [EXT] Re: [PATCH v2] mmc: sdhci: wait 5ms after set 1.8V signal
+ enable
+Date: Fri, 15 Dec 2017 10:53:38 -0800
+Message-ID: <5A341A32.9000209@marvell.com>
+References: <1513208929-13578-1-git-send-email-zjwu@marvell.com>
+ <CAPDyKFp=B2EBBOVky=x89Bcqw77XZyXcW1Hyn_LEHOkhtyAyFA@mail.gmail.com>
+ <5A32CB3C.4060105@marvell.com>
+ <CAPDyKFqhsdC43RL1KWK6TtXRcbSkDAk-3iiwoCUB+jewkNuPtA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="hap2cul7cpxi6p4d"
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from www.zeus03.de ([194.117.254.33]:53426 "EHLO mail.zeus03.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932512AbdLOQhi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 15 Dec 2017 11:37:38 -0500
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFopKm2psU19vGQfGL6WizXQA0vvzQubqsypvytbpRtyAA@mail.gmail.com>
+Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:47376 "EHLO
+        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1755834AbdLOSxs (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Dec 2017 13:53:48 -0500
+In-Reply-To: <CAPDyKFqhsdC43RL1KWK6TtXRcbSkDAk-3iiwoCUB+jewkNuPtA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Masahiro Yamada <yamada.masahiro@socionext.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Nadav Haklai <nadavh@marvell.com>, Victor Gu <xigu@marvell.com>, xswang@marvell.com, Wilson Ding <dingwei@marvell.com>, Kostya Porotchkin <kostap@marvell.com>, Hanna Hawa <hannah@marvell.com>, hongd@marvell.com, Doug Jones <dougj@marvell.com>, Ryan Gao <ygao@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Gregory Clement <gregory.clement@free-electrons.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
 
 
---hap2cul7cpxi6p4d
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
 
+On 12/14/2017 11:05 PM, Ulf Hansson wrote:
+> On 14 December 2017 at 20:04, Zhoujie Wu <zjwu@marvell.com> wrote:
+>> Hi Ulf,
+>>
+>> On 12/14/2017 12:41 AM, Ulf Hansson wrote:
+>>> External Email
+>>>
+>>> ----------------------------------------------------------------------
+>>> On 14 December 2017 at 00:48, Zhoujie Wu <zjwu@marvell.com> wrote:
+>>>> According to SD spec 3.00 3.6.1 signal voltage switch
+>>>> procedure, host should wait 5ms after set 1.8V signal
+>>>> enable bit in Host Control 2 register and check if 1.8V
+>>>> is stable or not.
+>>>>
+>>> The core already deals with this. See mmc_set_uhs_voltage() and
+>>> mmc_host_set_uhs_voltage().
+>>>
+>>> We even have a retry mechanism in place.
+>> I checked these functions, they just make sure when do signal voltage
+>> switch, gate the clock to SD card 5ms and wait 1ms before check data lines.
+>> This patch is following below spec requirement when switching signal voltage
+>> to 1.8V, wait 5ms after set 1.8V signal Enable bit in Host control 2
+>> register.
+> Right, so this is an SDHCI controller requirement. Could you perhaps
+> clarify that in the changlog, then I  am happy.
+Sure, I will give more details in comment to avoid confusing:)
+>> Current code will set 1.8V Signal Enable bit and check if this bit is
+>> cleared by host right after that,  the bit is not cleared and host report
+>> "1.8V regulator output did not became stable".
+>>
+>> You can find the steps at SD spec 3.0 3.6.1.
+>> (6) Set 1.8V Signal Enable in the Host Control 2 register.
+>> (7) Wait 5ms. 1.8V voltage regulator shall be stable within this period.
+>> (8) If 1.8V Signal Enable is cleared by Host Controller, go to step (12).
+>>>
+>>>> On some cards, found without the delay would see "1.8V
+>>>> regulator output did not became stable" err log.
+>>> Seems like you need to fix the regulator instead.
+>>>
+>>> BTW, is this a regression? No?
+>> It is not regulator related, the regulator already output 1.8V and add delay
+>> after regulator set voltage didn't help.
+>> The only solution is to add 5ms after set 1.8V signal enable bit .
+>> Not a regression issue, we recently found it when enabling uhs on some
+>> platforms since they didn't enable it previously.
+> I see, thanks for clarifying.
+>
+> Kind regards
+> Uffe
 
-> > Ulf, this patch then in deed should ideally be applied before 1-8 here.
->=20
-> Okay, once you post it to linux-mmc I will pick it up, and put it in fron=
-t.
-
-Bad news, that patch didn't help. The problem is that sparc64 doesn't
-include 'asm-generic/io.h' and also has no own 'readsw'. No surprise
-that just adding this include will cause lots of redefines which are way
-too much to handle as a side-task.
-
-So, the best option I see here is to drop COMPILE_TEST for now, report
-this to the sparc64 maintainers (I assume they know already), and see if
-they can fix it.
-
-Other thoughts?
-
-
---hap2cul7cpxi6p4d
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAloz+LoACgkQFA3kzBSg
-KbYCEQ/9F0JemgG6APDVBDDiD7bdz8pirpaoUI9A3WiyjaospSzaTwO5NTlNEIHc
-qsnzMexXBKjyGQNV0Z/v0NUv5XxaY+LAGvXVOkD6wZ+wjTbw/73yALJ5cVWN4mXC
-WY/MXoCBNvPjHLHY7Ibkf/2axSd3umc4kGqzsPUhLAM4LE/aAOZOBxD0P3PLZEPg
-sYjUwsEzAHRCc6adF2iIS1Rj9R2ZuwJXRqayJ7C3OBlXLxz2TaMv97XA9Ec/t+T9
-H/rrHMtnkrOPi0htzzpTZYerhVTeRxbxfmAW1ikS6FiWg6EEWRJxn5FV1pEHGjnn
-9v0v0vDWHhEan/rl7RiDjfgVfkQ93HGpsMIRHqe9DT9ozqZ8t/eQtCK2GKMk0EYt
-AN1urJ5j1Ut86BHszrOOx95r1wv6R3DywDcWXCGyPgKmqzD1r+iNin00ID1c7hGA
-CqZ7e5jBPMQxdHfo532Cy+PTKMh20jF2JX0EcwCpg/qQG1/WBV8l+l1VSrJOndlJ
-3hrxt8H25bZgrE7eaMyolJx+Ag0PlwgV78suGpBofv69Ye/prQdMNgSORO92MH1g
-JNb4mRdPG7yar7hqyuNNP1UbEPiA5NpN1X6w7lUOiCkgRb/cH+WkwVce1aIkmmxI
-RvOqcsq/c+ZctwsQ/+jKd9TgQ5w5r79BCAXNK5PuhNn3ZbgH2LQ=
-=+uPw
------END PGP SIGNATURE-----
-
---hap2cul7cpxi6p4d--
