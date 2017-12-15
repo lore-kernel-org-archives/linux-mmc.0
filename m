@@ -1,61 +1,84 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 12/45] drivers: mmc: remove duplicate includes
-Date: Fri, 15 Dec 2017 10:18:27 +0100
-Message-ID: <CAPDyKFoQCJdNVCWth7yQ5FExwmR5FoNROCo9bhOiKh9QaHLv5A@mail.gmail.com>
-References: <1512579423-5405-1-git-send-email-pravin.shedge4linux@gmail.com>
+Subject: Re: [PATCH] mmc: avoid removing non-removable hosts during suspend
+Date: Fri, 15 Dec 2017 10:18:38 +0100
+Message-ID: <CAPDyKFor5UK_Qfa3EMkFD1Zw3s37pEaN8b5iMkGsDwmTp=TcWw@mail.gmail.com>
+References: <20171212104902.11793-1-drake@endlessm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f65.google.com ([209.85.214.65]:33329 "EHLO
-        mail-it0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755220AbdLOJS2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Dec 2017 04:18:28 -0500
-Received: by mail-it0-f65.google.com with SMTP id o130so28772301itg.0
-        for <linux-mmc@vger.kernel.org>; Fri, 15 Dec 2017 01:18:28 -0800 (PST)
-In-Reply-To: <1512579423-5405-1-git-send-email-pravin.shedge4linux@gmail.com>
+Received: from mail-it0-f66.google.com ([209.85.214.66]:39639 "EHLO
+        mail-it0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755011AbdLOJSl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Dec 2017 04:18:41 -0500
+Received: by mail-it0-f66.google.com with SMTP id 68so17455306ite.4
+        for <linux-mmc@vger.kernel.org>; Fri, 15 Dec 2017 01:18:41 -0800 (PST)
+In-Reply-To: <20171212104902.11793-1-drake@endlessm.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Pravin Shedge <pravin.shedge4linux@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Heiner Kallweit <hkallweit1@gmail.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Daniel Drake <drake@endlessm.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux@endlessm.com, matthew.leeds@endlessm.com
 
-On 6 December 2017 at 17:57, Pravin Shedge
-<pravin.shedge4linux@gmail.com> wrote:
-> These duplicate includes have been found with scripts/checkincludes.pl but
-> they have been removed manually to avoid removing false positives.
+On 12 December 2017 at 11:49, Daniel Drake <drake@endlessm.com> wrote:
+> The Weibu F3C MiniPC has an onboard AP6255 module, presenting
+> two SDIO functions on a single MMC host (Bluetooth/btsdio and
+> WiFi/brcmfmac), and the mmc layer correctly detects this as
+> non-removable.
 >
-> Signed-off-by: Pravin Shedge <pravin.shedge4linux@gmail.com>
+> After suspend/resume, the wifi and bluetooth interfaces disappear
+> and do not get probed again.
+>
+> The conditions here are:
+>
+>  1. During suspend, we reach mmc_pm_notify()
+>
+>  2. mmc_pm_notify() calls mmc_sdio_pre_suspend() to see if we can
+>     suspend the SDIO host. However, mmc_sdio_pre_suspend() returns
+>     -ENOSYS because btsdio_driver does not have a suspend method.
+>
+>  3. mmc_pm_notify() proceeds to remove the card
+>
+>  4. Upon resume, mmc_rescan() does nothing with this host, because of
+>     the rescan_entered check which aims to only scan a non-removable
+>     device a single time (i.e. during boot).
+>
+> Fix the loss of functionality by detecting that we are unable to
+> suspend a non-removable host, so avoid the forced removal in that
+> case. The comment above this function already indicates that this
+> code was only intended for removable devices.
+>
+> Signed-off-by: Daniel Drake <drake@endlessm.com>
 
-Thanks, applied for next with an updated prefix of the commit msg header!
+Thanks, applied for next!
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/android-goldfish.c | 2 --
->  1 file changed, 2 deletions(-)
+>  drivers/mmc/core/core.c | 8 ++++++++
+>  1 file changed, 8 insertions(+)
 >
-> diff --git a/drivers/mmc/host/android-goldfish.c b/drivers/mmc/host/android-goldfish.c
-> index 63fe509..63d2758 100644
-> --- a/drivers/mmc/host/android-goldfish.c
-> +++ b/drivers/mmc/host/android-goldfish.c
-> @@ -42,13 +42,11 @@
->  #include <linux/spinlock.h>
->  #include <linux/timer.h>
->  #include <linux/clk.h>
-> -#include <linux/scatterlist.h>
+> Replaces previous approach:
+>   [PATCH] mmc: allow rescan of non-removable hosts on resume
 >
->  #include <asm/io.h>
->  #include <asm/irq.h>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 26431267a3e2..6f815a264285 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2763,6 +2763,14 @@ static int mmc_pm_notify(struct notifier_block *notify_block,
+>                 if (!err)
+>                         break;
 >
->  #include <asm/types.h>
-> -#include <asm/io.h>
->  #include <linux/uaccess.h>
->
->  #define DRIVER_NAME "goldfish_mmc"
+> +               if (!mmc_card_is_removable(host)) {
+> +                       dev_warn(mmc_dev(host),
+> +                                "pre_suspend failed for non-removable host: "
+> +                                "%d\n", err);
+> +                       /* Avoid removing non-removable hosts */
+> +                       break;
+> +               }
+> +
+>                 /* Calling bus_ops->remove() with a claimed host can deadlock */
+>                 host->bus_ops->remove(host);
+>                 mmc_claim_host(host);
 > --
-> 2.7.4
+> 2.14.1
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
