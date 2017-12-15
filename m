@@ -1,92 +1,97 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: core: Send SLEEP_NOTIFICATION for eMMC 5.x device
-Date: Fri, 15 Dec 2017 10:24:47 +0100
-Message-ID: <CAPDyKFqH3w4j-K0QJj5o9ag42BTDxkpjT5DbqErcZxNK8-Da+w@mail.gmail.com>
-References: <20171118010634.1111-1-gwendal@chromium.org> <CAPDyKFozbQR8MBKrN1CTnQ_G=_5v_FFd4YqGZVX9LjnwqZ=jEQ@mail.gmail.com>
- <CAPDyKFrSmX_MbErW71tjwQui6LExQUfHjWL6UVNuJekvgrCc7Q@mail.gmail.com>
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Subject: Re: [PATCH v2 00/22] mmc: tmio: various fixes and cleanups
+Date: Fri, 15 Dec 2017 19:08:36 +0900
+Message-ID: <CAK7LNASQfsnQY6henk5RvAysQUh3=cPXV1GPNeWeXgBxZvadAw@mail.gmail.com>
+References: <1511540697-27387-1-git-send-email-yamada.masahiro@socionext.com> <CAPDyKFqE7Pg8fJFyOtihdRnma+dFQd3+YPWGn6pXbpzhpERK9Q@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f47.google.com ([209.85.214.47]:43202 "EHLO
-        mail-it0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755578AbdLOJYt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Dec 2017 04:24:49 -0500
-Received: by mail-it0-f47.google.com with SMTP id u62so18098807ita.2
-        for <linux-mmc@vger.kernel.org>; Fri, 15 Dec 2017 01:24:48 -0800 (PST)
-In-Reply-To: <CAPDyKFrSmX_MbErW71tjwQui6LExQUfHjWL6UVNuJekvgrCc7Q@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFqE7Pg8fJFyOtihdRnma+dFQd3+YPWGn6pXbpzhpERK9Q@mail.gmail.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Gwendal Grignou <gwendal@chromium.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>, Chris Ball <cjb@laptop.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>, Thierry Escande <thierry.escande@collabora.com>
 
-On 29 November 2017 at 15:14, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> [...]
->
->>>  static int mmc_poweroff_notify(struct mmc_card *card, unsigned int notify_type)
->>>  {
->>> -       unsigned int timeout = card->ext_csd.generic_cmd6_time;
->>> +       unsigned int timeout;
->>> +       bool use_busy_signal = true;
->>>         int err;
->>>
->>> -       /* Use EXT_CSD_POWER_OFF_SHORT as default notification type. */
->>> -       if (notify_type == EXT_CSD_POWER_OFF_LONG)
->>> +       switch (notify_type) {
->>> +       case EXT_CSD_POWER_OFF_LONG:
->>>                 timeout = card->ext_csd.power_off_longtime;
->>> +               break;
->>> +       case EXT_CSD_SLEEP_NOTIFICATION:
->>> +               timeout = card->ext_csd.sleep_notification_time;
->>> +               use_busy_signal = false;
+2017-12-15 18:18 GMT+09:00 Ulf Hansson <ulf.hansson@linaro.org>:
+> On 24 November 2017 at 17:24, Masahiro Yamada
+> <yamada.masahiro@socionext.com> wrote:
 >>
->> This is wrong.
+>> I am working on this IP for Socionext SoCs.
 >>
->> If you set use_busy_signal to false, it means that we don't care about
->> waiting for the card to stop signaling busy on DAT0 after setting
->> EXT_CSD_SLEEP_NOTIFICATION. This then becomes a violation of the eMMC
->> spec, because we must not issue a CMD5 before the card have stopped
->> signaling busy.
+>> I was hit by several issues, and noticed various
+>> clean-up candidates.
 >>
->> I realize that for those devices that don't support
->> MMC_CAP_WAIT_WHILE_BUSY or have the ->card_busy() callback
->> implemented, the consequence may be that mmc_poll_for_busy() may call
->> mmc_delay() with a very big timeout. This could be a big problem, I
->> guess.
->
-> Well, it may also be a big problem even if the host supports
-> ->card_busy() and/or MMC_CAP_WAIT_WHILE_BUSY (but maybe not as big),
-> simply because we can't be waiting here for several seconds to allow
-> the card to deal with background operations.
->
-> I guess we need to try and see what happens. Perhaps you can share
-> some data about the timeouts you get?
->
+>>  - Fix and clean-up Kconfig
+>>  - Fix various card detection problems
+>>  - Move Renesas private data out of TMIO core
+>>  - Allow to perform platform-specific settings before MMC host starts
+>>  - Fix weird IRQ handling
 >>
->>> +               break;
->>> +       default:
->>> +               /* Use EXT_CSD_POWER_OFF_SHORT as default notification type. */
->>> +               timeout = card->ext_csd.generic_cmd6_time;
->>> +       }
->>>
->>>         err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->>>                         EXT_CSD_POWER_OFF_NOTIFICATION,
->>> -                       notify_type, timeout, 0, true, false, false);
->>> +                       notify_type, timeout, 0, use_busy_signal, false, false);
->>>         if (err)
->>>                 pr_err("%s: Power Off Notification timed out, %u\n",
->>>                        mmc_hostname(card->host), timeout);
+>> I am getting more and more patches for TMIO.
+>> I put all in a single series to clarify the patch order.
+>>
+>> 1, 2, 4, 5, 6, 7 were already acked or reviewed by Wolfram Sang.
+>>
+>>
+>> Masahiro Yamada (22):
+>>   mmc: renesas_sdhi: consolidate DMAC CONFIG options
+>>   mmc: renesas_sdhi: remove wrong depends on to enable compile test
+>>   mmc: renesas_sdhi: remove eprobe jump label
+>>   mmc: tmio: set tmio_mmc_host to driver data
+>>   mmc: tmio: use devm_ioremap_resource() instead of devm_ioremap()
+>>   mmc: tmio: move mmc_host_ops to struct tmio_mmc_host from static data
+>>   mmc: tmio, renesas_sdhi: set mmc_host_ops hooks directly
+>>   mmc: tmio: move mmc_gpio_request_cd() before mmc_add_host()
+>>   mmc: tmio: use mmc_can_gpio_cd() instead of checking
+>>     TMIO_MMC_USE_GPIO_CD
+>>   mmc: tmio: support IP-builtin card detection logic
+>>   mmc: renesas_sdhi: remove always false condition
+>>   mmc: tmio,renesas_sdhi: move struct tmio_mmc_dma to renesas_sdhi.h
+>>   mmc: tmio,renesas_sdhi: move Renesas-specific DMA data to
+>>     renesas_sdhi.h
+>>   mmc: tmio,renesas_sdhi: move ssc_tappos to renesas_sdhi.h
+>>   mmc: tmio: change bus_shift to unsigned int
+>>   mmc: tmio: fix never-detected card insertion bug
+>>   mmc: tmio: move TMIO_MASK_{READOP,WRITEOP} handling to correct place
+>>   mmc: tmio: remove useless TMIO_MASK_CMD handling in
+>>     tmio_mmc_host_probe()
+>>   mmc: tmio: ioremap memory resource in tmio_mmc_host_alloc()
+>>   mmc: tmio: move clk_enable/disable out of tmio_mmc_host_probe()
+>>   mmc: tmio: move {tmio_}mmc_of_parse() to tmio_mmc_host_alloc()
+>>   mmc: tmio: remove dma_ops from tmio_mmc_host_probe() argument
+>>
+>>  drivers/mmc/host/Kconfig                      |   5 +-
+>>  drivers/mmc/host/Makefile                     |   8 +-
+>>  drivers/mmc/host/renesas_sdhi.h               |  22 ++++
+>>  drivers/mmc/host/renesas_sdhi_core.c          |  49 ++++-----
+>>  drivers/mmc/host/renesas_sdhi_internal_dmac.c |  14 ++-
+>>  drivers/mmc/host/renesas_sdhi_sys_dmac.c      |  35 +++---
+>>  drivers/mmc/host/tmio_mmc.c                   |  23 ++--
+>>  drivers/mmc/host/tmio_mmc.h                   |  23 +---
+>>  drivers/mmc/host/tmio_mmc_core.c              | 149 +++++++++++++-------------
+>>  9 files changed, 170 insertions(+), 158 deletions(-)
+>>
+>> --
+>> 2.7.4
+>>
 >
-> [...]
+> To get this moving, I have applied patch 1->8 for next, thanks!
 >
 > Kind regards
 > Uffe
 
-Gwendal, any news on this?
 
-As changes for the SLEEP_NOTIFICATION keeps being posted, clearly
-there is a need for us to deal with it in some way. I have been
-thinking of a fall-back solution, if we can't get it it work, but
-anyway I am eager to find a solution so we finally can sort this out.
 
-Kind regards
-Uffe
+After 2, COMPILE_TEST will work correctly.
+
+Then, Wolfram mentioned we would need to include <linux/io.h> from tmio_mmc.h
+
+https://patchwork.kernel.org/patch/10074333/
+
+
+I was waiting for a patch from him.
+
+
+-- 
+Best Regards
+Masahiro Yamada
