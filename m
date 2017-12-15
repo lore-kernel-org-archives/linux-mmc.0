@@ -1,49 +1,44 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v.4.15-rc4
-Date: Fri, 15 Dec 2017 17:32:18 +0100
-Message-ID: <1513355538-31655-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2 00/22] mmc: tmio: various fixes and cleanups
+Date: Fri, 15 Dec 2017 17:34:51 +0100
+Message-ID: <CAPDyKFpUE1s8+OXuyyRszFnpt5CN4G8d2vhwRhs-PkaL_VU7oQ@mail.gmail.com>
+References: <1511540697-27387-1-git-send-email-yamada.masahiro@socionext.com>
+ <CAPDyKFqE7Pg8fJFyOtihdRnma+dFQd3+YPWGn6pXbpzhpERK9Q@mail.gmail.com>
+ <CAK7LNASQfsnQY6henk5RvAysQUh3=cPXV1GPNeWeXgBxZvadAw@mail.gmail.com>
+ <20171215111225.ekrau5e27xknb3jf@ninjato> <CAPDyKFopKm2psU19vGQfGL6WizXQA0vvzQubqsypvytbpRtyAA@mail.gmail.com>
+ <20171215163055.vxxiswgsvfybf4hi@katana>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20171215163055.vxxiswgsvfybf4hi@katana>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: Masahiro Yamada <yamada.masahiro@socionext.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Linus,
+On 15 December 2017 at 17:30, Wolfram Sang <wsa@the-dreams.de> wrote:
+>
+>> > Ulf, this patch then in deed should ideally be applied before 1-8 here.
+>>
+>> Okay, once you post it to linux-mmc I will pick it up, and put it in front.
+>
+> Bad news, that patch didn't help. The problem is that sparc64 doesn't
+> include 'asm-generic/io.h' and also has no own 'readsw'. No surprise
+> that just adding this include will cause lots of redefines which are way
+> too much to handle as a side-task.
+>
+> So, the best option I see here is to drop COMPILE_TEST for now, report
+> this to the sparc64 maintainers (I assume they know already), and see if
+> they can fix it.
 
-Here's a PR with a couple of MMC fixes intended for v4.15-rc4. Details about the
-highlights are as usual found in the signed tag.
+Okay!
 
-Please pull this in!
+If some of you send a patch on top, I can fold it into the offending commit.
+
+>
+> Other thoughts?
+
+Nope.
 
 Kind regards
-Ulf Hansson
-
-
-The following changes since commit ae64f9bd1d3621b5e60d7363bc20afb46aede215:
-
-  Linux 4.15-rc2 (2017-12-03 11:01:47 -0500)
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v4.15-rc2
-
-for you to fetch changes up to 91516a2a4734614d62ee3ed921f8f88acc67c000:
-
-  mmc: core: apply NO_CMD23 quirk to some specific cards (2017-12-11 13:43:27 +0100)
-
-----------------------------------------------------------------
-MMC core:
- - Fix use of uninitialized drv_typ variable
- - Apply NO_CMD23 quirk to some specific SD cards to make them work
-
-----------------------------------------------------------------
-Christoph Fritz (1):
-      mmc: core: apply NO_CMD23 quirk to some specific cards
-
-Wolfram Sang (1):
-      mmc: core: properly init drv_type
-
- drivers/mmc/core/card.h   | 2 ++
- drivers/mmc/core/mmc.c    | 2 +-
- drivers/mmc/core/quirks.h | 8 ++++++++
- 3 files changed, 11 insertions(+), 1 deletion(-)
+Uffe
