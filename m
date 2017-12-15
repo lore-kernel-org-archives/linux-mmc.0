@@ -1,84 +1,65 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: avoid removing non-removable hosts during suspend
-Date: Fri, 15 Dec 2017 10:18:38 +0100
-Message-ID: <CAPDyKFor5UK_Qfa3EMkFD1Zw3s37pEaN8b5iMkGsDwmTp=TcWw@mail.gmail.com>
-References: <20171212104902.11793-1-drake@endlessm.com>
+Subject: Re: [PATCH] mmc: renesas_sdhi: Add MODULE_LICENSE
+Date: Fri, 15 Dec 2017 10:18:46 +0100
+Message-ID: <CAPDyKFoKdQ4YU9nCe2P1dwp1jV=bhRWRZGGPk62FuJE=PnZ5ig@mail.gmail.com>
+References: <1513132380-7421-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f66.google.com ([209.85.214.66]:39639 "EHLO
-        mail-it0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755011AbdLOJSl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Dec 2017 04:18:41 -0500
-Received: by mail-it0-f66.google.com with SMTP id 68so17455306ite.4
-        for <linux-mmc@vger.kernel.org>; Fri, 15 Dec 2017 01:18:41 -0800 (PST)
-In-Reply-To: <20171212104902.11793-1-drake@endlessm.com>
+Received: from mail-it0-f68.google.com ([209.85.214.68]:41232 "EHLO
+        mail-it0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755236AbdLOJSr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Dec 2017 04:18:47 -0500
+Received: by mail-it0-f68.google.com with SMTP id x28so18106628ita.0
+        for <linux-mmc@vger.kernel.org>; Fri, 15 Dec 2017 01:18:47 -0800 (PST)
+In-Reply-To: <1513132380-7421-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Daniel Drake <drake@endlessm.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux@endlessm.com, matthew.leeds@endlessm.com
+To: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, "# 4.0+" <stable@vger.kernel.org>, Masaharu Hayakawa <masaharu.hayakawa.ry@renesas.com>
 
-On 12 December 2017 at 11:49, Daniel Drake <drake@endlessm.com> wrote:
-> The Weibu F3C MiniPC has an onboard AP6255 module, presenting
-> two SDIO functions on a single MMC host (Bluetooth/btsdio and
-> WiFi/brcmfmac), and the mmc layer correctly detects this as
-> non-removable.
+On 13 December 2017 at 03:33, Yoshihiro Shimoda
+<yoshihiro.shimoda.uh@renesas.com> wrote:
+> From: Masaharu Hayakawa <masaharu.hayakawa.ry@renesas.com>
 >
-> After suspend/resume, the wifi and bluetooth interfaces disappear
-> and do not get probed again.
+> The following error occurs when loading renesas_sdhi_core.c module,
+> so add MODULE_LICENSE("GPL v2").
 >
-> The conditions here are:
+>  renesas_sdhi_core: module license 'unspecified' taints kernel.
 >
->  1. During suspend, we reach mmc_pm_notify()
->
->  2. mmc_pm_notify() calls mmc_sdio_pre_suspend() to see if we can
->     suspend the SDIO host. However, mmc_sdio_pre_suspend() returns
->     -ENOSYS because btsdio_driver does not have a suspend method.
->
->  3. mmc_pm_notify() proceeds to remove the card
->
->  4. Upon resume, mmc_rescan() does nothing with this host, because of
->     the rescan_entered check which aims to only scan a non-removable
->     device a single time (i.e. during boot).
->
-> Fix the loss of functionality by detecting that we are unable to
-> suspend a non-removable host, so avoid the forced removal in that
-> case. The comment above this function already indicates that this
-> code was only intended for removable devices.
->
-> Signed-off-by: Daniel Drake <drake@endlessm.com>
+> Signed-off-by: Masaharu Hayakawa <masaharu.hayakawa.ry@renesas.com>
+> Fixes: 9d08428afb72 ("mmc: renesas-sdhi: make renesas_sdhi_sys_dmac main module file")
+> Cc: <stable@vger.kernel.org> # v4.13+
+> [Shimoda: Added Fixes tag and Cc to the stable ML]
+> Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 
-Thanks, applied for next!
+Thanks, applied for fixes!
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/core/core.c | 8 ++++++++
->  1 file changed, 8 insertions(+)
+>  drivers/mmc/host/renesas_sdhi_core.c | 3 +++
+>  1 file changed, 3 insertions(+)
 >
-> Replaces previous approach:
->   [PATCH] mmc: allow rescan of non-removable hosts on resume
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 26431267a3e2..6f815a264285 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -2763,6 +2763,14 @@ static int mmc_pm_notify(struct notifier_block *notify_block,
->                 if (!err)
->                         break;
->
-> +               if (!mmc_card_is_removable(host)) {
-> +                       dev_warn(mmc_dev(host),
-> +                                "pre_suspend failed for non-removable host: "
-> +                                "%d\n", err);
-> +                       /* Avoid removing non-removable hosts */
-> +                       break;
-> +               }
+> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+> index fcf7235..157e1d9 100644
+> --- a/drivers/mmc/host/renesas_sdhi_core.c
+> +++ b/drivers/mmc/host/renesas_sdhi_core.c
+> @@ -24,6 +24,7 @@
+>  #include <linux/kernel.h>
+>  #include <linux/clk.h>
+>  #include <linux/slab.h>
+> +#include <linux/module.h>
+>  #include <linux/of_device.h>
+>  #include <linux/platform_device.h>
+>  #include <linux/mmc/host.h>
+> @@ -667,3 +668,5 @@ int renesas_sdhi_remove(struct platform_device *pdev)
+>         return 0;
+>  }
+>  EXPORT_SYMBOL_GPL(renesas_sdhi_remove);
 > +
->                 /* Calling bus_ops->remove() with a claimed host can deadlock */
->                 host->bus_ops->remove(host);
->                 mmc_claim_host(host);
+> +MODULE_LICENSE("GPL v2");
 > --
-> 2.14.1
+> 1.9.1
 >
