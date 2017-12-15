@@ -1,40 +1,68 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 00/22] mmc: tmio: various fixes and cleanups
-Date: Fri, 15 Dec 2017 14:34:26 +0100
-Message-ID: <CAPDyKFopKm2psU19vGQfGL6WizXQA0vvzQubqsypvytbpRtyAA@mail.gmail.com>
-References: <1511540697-27387-1-git-send-email-yamada.masahiro@socionext.com>
- <CAPDyKFqE7Pg8fJFyOtihdRnma+dFQd3+YPWGn6pXbpzhpERK9Q@mail.gmail.com>
- <CAK7LNASQfsnQY6henk5RvAysQUh3=cPXV1GPNeWeXgBxZvadAw@mail.gmail.com> <20171215111225.ekrau5e27xknb3jf@ninjato>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mm/block: logical error fix to avoid memory leak
+Date: Fri, 15 Dec 2017 16:34:30 +0200
+Message-ID: <f9294d5a-bd24-8b95-3666-fa75d681bec1@intel.com>
+References: <20171214050305.GA135779@sofia>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20171215111225.ekrau5e27xknb3jf@ninjato>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: Masahiro Yamada <yamada.masahiro@socionext.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga14.intel.com ([192.55.52.115]:41190 "EHLO mga14.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1755322AbdLOOe4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 15 Dec 2017 09:34:56 -0500
+In-Reply-To: <20171214050305.GA135779@sofia>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "Liu, Changcheng" <changcheng.liu@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>
+Cc: linux-mmc@vger.kernel.org, akpm@linux-foundation.org
 
-On 15 December 2017 at 12:12, Wolfram Sang <wsa@the-dreams.de> wrote:
->
->> After 2, COMPILE_TEST will work correctly.
->>
->> Then, Wolfram mentioned we would need to include <linux/io.h> from tmio_mmc.h
->>
->> https://patchwork.kernel.org/patch/10074333/
->>
->>
->> I was waiting for a patch from him.
->
-> Yes, I am sorry. I am currently swamped with I2C work, not so much time
-> for SDHI. However, I did this patch now and pushed the branch out to see
-> if buildbot is happy.
+On 14/12/17 07:03, Liu, Changcheng wrote:
+> function:  mmc_ext_csd_open
+> {
+> +-- 33 lines: struct mmc_card *card = inode->i_private;--
+>     if (n != EXT_CSD_STR_LEN) {
+>         err = -EINVAL;
+>         goto out_free;  //==>should free ext_csd firstly.
+>     }
+> +--  2 lines: filp->private_data = buf;------------------
+>     kfree(ext_csd);
+>     return 0;
+> 
+> out_free:
+>     kfree(buf);
+>     return err;
+> }
+> 
+> Signed-off-by: Liu Changcheng <changcheng.liu@intel.com>
 
-Great!
+Well I don't really follow the commit message, but the patch is OK.
+How about this:
 
->
-> Ulf, this patch then in deed should ideally be applied before 1-8 here.
 
-Okay, once you post it to linux-mmc I will pick it up, and put it in front.
+mmc: block: fix logical error to avoid memory leak
 
-Kind regards
-Uffe
+If the MMC_DRV_OP_GET_EXT_CSD request completes successfully, then
+ext_csd must be freed, but in one case it was not. Fix that.
+
+
+Otherwise:
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
+> 
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index ccfa98a..b737a95 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -2623,6 +2623,7 @@ static int mmc_ext_csd_open(struct inode *inode, struct file *filp)
+>  
+>  	if (n != EXT_CSD_STR_LEN) {
+>  		err = -EINVAL;
+> +		kfree(ext_csd);
+>  		goto out_free;
+>  	}
+>  
+> 
+
