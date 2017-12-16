@@ -1,29 +1,33 @@
-From: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 10/12] dt-bindings: sdhci-omap: Add K2G specific binding
-Date: Sat, 16 Dec 2017 10:49:42 -0600
-Message-ID: <20171216164942.2t4jvy5j5vkai6pk@rob-hp-laptop>
-References: <20171214130941.26666-1-kishon@ti.com>
- <20171214130941.26666-11-kishon@ti.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH v2] mmc: block: fix logical error to avoid memory leak
+Date: Sat, 16 Dec 2017 20:07:19 +0100
+Message-ID: <CACRpkdYBnvD0syBQrx_H-rQaTWYU9LFCxMCX+_LG3XuEtfLyPQ@mail.gmail.com>
+References: <20171214050305.GA135779@sofia> <f9294d5a-bd24-8b95-3666-fa75d681bec1@intel.com>
+ <20171216151545.GA138678@sofia>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20171214130941.26666-11-kishon-l0cyMroinI0@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, nsekhar-l0cyMroinI0@public.gmane.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-io0-f181.google.com ([209.85.223.181]:38115 "EHLO
+        mail-io0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1756694AbdLPTHU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 16 Dec 2017 14:07:20 -0500
+Received: by mail-io0-f181.google.com with SMTP id 87so1744187ior.5
+        for <linux-mmc@vger.kernel.org>; Sat, 16 Dec 2017 11:07:20 -0800 (PST)
+In-Reply-To: <20171216151545.GA138678@sofia>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "Liu, Changcheng" <changcheng.liu@intel.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>
 
-On Thu, Dec 14, 2017 at 06:39:39PM +0530, Kishon Vijay Abraham I wrote:
-> Add binding for the TI's sdhci-omap controller present in K2G.
-> 
-> Signed-off-by: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
-> ---
->  Documentation/devicetree/bindings/mmc/sdhci-omap.txt | 2 ++
->  1 file changed, 2 insertions(+)
+On Sat, Dec 16, 2017 at 4:15 PM, Liu, Changcheng
+<changcheng.liu@intel.com> wrote:
 
-Reviewed-by: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> If the MMC_DRV_OP_GET_EXT_CSD request completes successfully, then
+> ext_csd must be freed, but in one case it was not. Fix that.
+>
+> Signed-off-by: Liu Changcheng <changcheng.liu@intel.com>
+
+Acked-by: Linus Walleij <linus.walleij@linaro.org>
+
+Yours,
+Linus Walleij
