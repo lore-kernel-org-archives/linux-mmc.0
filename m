@@ -1,65 +1,51 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v5 1/2] mmc: API for accessing host supported maximum
- segment count and size
-Date: Tue, 19 Dec 2017 09:36:17 +0100
-Message-ID: <CAPDyKFp5dufLwv=ingG6PFKtHZGAfco5ii3qgVco3rpcGTMJ-w@mail.gmail.com>
-References: <1511336987-21263-1-git-send-email-huxm@marvell.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 3/3] mmc: sdhci: Modify sdhci o2 quirk for eMMC HS200
+ tuning case
+Date: Tue, 19 Dec 2017 10:37:13 +0200
+Message-ID: <381dcaa4-49ed-9145-58bf-4e28ba077041@intel.com>
+References: <BN1PR04MB4543C8987923D893F407934893C0@BN1PR04MB454.namprd04.prod.outlook.com>
+ <CY4PR04MB047345A73648C7A212D505D7ED3C0@CY4PR04MB0473.namprd04.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f196.google.com ([209.85.223.196]:44232 "EHLO
-        mail-io0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1758963AbdLSIgS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Dec 2017 03:36:18 -0500
-Received: by mail-io0-f196.google.com with SMTP id w127so12735150iow.11
-        for <linux-mmc@vger.kernel.org>; Tue, 19 Dec 2017 00:36:18 -0800 (PST)
-In-Reply-To: <1511336987-21263-1-git-send-email-huxm@marvell.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CY4PR04MB047345A73648C7A212D505D7ED3C0@CY4PR04MB0473.namprd04.prod.outlook.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: LinuxPatchCommit <LinuxPatchCommit@bayhubtech.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: "Shirley Her (SC)" <shirley.her@bayhubtech.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Xinming Hu <huxm@marvell.com>
-Cc: Linux MMC <linux-mmc@vger.kernel.org>, Zhiyuan Yang <yangzy@marvell.com>, Tim Song <songtao@marvell.com>, Cathy Luo <cluo@marvell.com>, James Cao <jcao@marvell.com>, Ganapathi Bhat <gbhat@marvell.com>, Amitkumar Karwar <akarwar@marvell.com>
 
-On 22 November 2017 at 08:49, Xinming Hu <huxm@marvell.com> wrote:
-> sdio device drivers need be able to get the host supported max_segs
-> and max_seg_size, so that they know the buffer size to allocate while
-> utilizing the scatter/gather DMA buffer list.
->
-> This patch provides API for this purpose.
-
-Apologize for the delay.
-
-Overall, this makes perfect sense to me. However some minor comment, see below.
-
->
-> Signed-off-by: Xinming Hu <huxm@marvell.com>
-> Signed-off-by: Amitkumar Karwar <akarwar@marvell.com>
+On 04/12/17 12:10, LinuxPatchCommit wrote:
+> Dear all,
+> 
+> Don't clear transfer mode register in sdhci_set_transfer_mode().
+> 
+> In sdhci_set_transfer_mode(), clear transfer mode quirk2 will clear SD host transfer mode register for non-data commands. This quirk is used for the bug of O2micro/Bayhubtech devices. In eMMC HS200 tuning case, the tuning process uses hardware tuning and it needs to set transfer mode register for tuning command.
+> 
+> Signed-off-by: ernest.zhang <ernest.zhang@bayhubtech.com>
 > ---
-> v2: v2 was submitted with minor improvement like replacing BUG_ON() with WARN_ON()
-> v3: Addressed below review comments from Ulf Hansson
->     a) In v3, patch has been split into two separate patches.
->     b) Patch 1/2 introduces an API to fetch max_seg_size and max_segs
->     c) Replaced WARN_ON() with proper error code when sg_ptr->length is invalid
->     d) Instead of duplicating the code in mmc_io_rw_extended(), extra bool parameter
->        has been added to this function and used it in new APIs for SG.
-> v4: Removed WARN_ON() calls in newly added APIs. It's gets called in probe handler.
->     Caller already takes care of it(Shawn Lin).
-> v5: Rebased on latest code base.
-> ---
->  drivers/mmc/core/sdio_io.c                          | 21 +++++++++++++++++++++
->  .../wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c   |  6 +++---
+>  drivers/mmc/host/sdhci.c | 4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c index 0d5fcca18c9e..d5b19fc9ea56 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -918,7 +918,9 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
+>  	if (data == NULL) {
+>  		if (host->quirks2 &
+>  			SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD) {
+> -			sdhci_writew(host, 0x0, SDHCI_TRANSFER_MODE);
+> +			/* cannot clear transfer mode register when tuning */
+> +			if (cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200)
+> +				sdhci_writew(host, 0x0, SDHCI_TRANSFER_MODE);
 
-The changes to the wifi driver, could please make that a separate
-patch on top of this one?
+In the HS200 case you are sending the tuning command with data, so I do not
+understand why you need this i.e. you will never get here
 
-There are actually a couple of more wireless drivers that should
-convert to use these new API, I would appreciate if you could fold in
-patches in the series for each of them as well (don't forget to cc
-correct people for them), then I intend to apply all of them via my
-tree, if no objections.
-
-Otherwise this change looks good to me!
-
-[...]
-
-Kind regards
-Uffe
+>  		} else {
+>  		/* clear Auto CMD settings for no data CMDs */
+>  			mode = sdhci_readw(host, SDHCI_TRANSFER_MODE);
+> --
+> 2.14.1
+> 
