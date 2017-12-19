@@ -1,65 +1,65 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 2/3] mmc: sdhci-pci-o2micro: Add eMMC HS200 support
-Date: Tue, 19 Dec 2017 10:02:46 +0200
-Message-ID: <b5fa6218-906a-0dc6-810b-372b41f76907@intel.com>
-References: <CY4PR04MB047374AC40568EF03031F49CED3C0@CY4PR04MB0473.namprd04.prod.outlook.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v5 1/2] mmc: API for accessing host supported maximum
+ segment count and size
+Date: Tue, 19 Dec 2017 09:36:17 +0100
+Message-ID: <CAPDyKFp5dufLwv=ingG6PFKtHZGAfco5ii3qgVco3rpcGTMJ-w@mail.gmail.com>
+References: <1511336987-21263-1-git-send-email-huxm@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga04.intel.com ([192.55.52.120]:11047 "EHLO mga04.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752723AbdLSIDM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 19 Dec 2017 03:03:12 -0500
-In-Reply-To: <CY4PR04MB047374AC40568EF03031F49CED3C0@CY4PR04MB0473.namprd04.prod.outlook.com>
-Content-Language: en-US
+Received: from mail-io0-f196.google.com ([209.85.223.196]:44232 "EHLO
+        mail-io0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1758963AbdLSIgS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Dec 2017 03:36:18 -0500
+Received: by mail-io0-f196.google.com with SMTP id w127so12735150iow.11
+        for <linux-mmc@vger.kernel.org>; Tue, 19 Dec 2017 00:36:18 -0800 (PST)
+In-Reply-To: <1511336987-21263-1-git-send-email-huxm@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: LinuxPatchCommit <LinuxPatchCommit@bayhubtech.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Cc: "Shirley Her (SC)" <shirley.her@bayhubtech.com>
+To: Xinming Hu <huxm@marvell.com>
+Cc: Linux MMC <linux-mmc@vger.kernel.org>, Zhiyuan Yang <yangzy@marvell.com>, Tim Song <songtao@marvell.com>, Cathy Luo <cluo@marvell.com>, James Cao <jcao@marvell.com>, Ganapathi Bhat <gbhat@marvell.com>, Amitkumar Karwar <akarwar@marvell.com>
 
-On 04/12/17 12:10, LinuxPatchCommit wrote:
-> Dear all,
+On 22 November 2017 at 08:49, Xinming Hu <huxm@marvell.com> wrote:
+> sdio device drivers need be able to get the host supported max_segs
+> and max_seg_size, so that they know the buffer size to allocate while
+> utilizing the scatter/gather DMA buffer list.
+>
+> This patch provides API for this purpose.
 
-A greeting is not needed in a commit message.
+Apologize for the delay.
 
-> 
-> Add register definition for eMMC HS200 mode.
-> Add hardware tuning for eMMC HS200 mode.
-> 
-> Signed-off-by: ernest.zhang <ernest.zhang@bayhubtech.com>
+Overall, this makes perfect sense to me. However some minor comment, see below.
+
+>
+> Signed-off-by: Xinming Hu <huxm@marvell.com>
+> Signed-off-by: Amitkumar Karwar <akarwar@marvell.com>
 > ---
->  drivers/mmc/host/sdhci-pci-o2micro.h | 3 +++
+> v2: v2 was submitted with minor improvement like replacing BUG_ON() with WARN_ON()
+> v3: Addressed below review comments from Ulf Hansson
+>     a) In v3, patch has been split into two separate patches.
+>     b) Patch 1/2 introduces an API to fetch max_seg_size and max_segs
+>     c) Replaced WARN_ON() with proper error code when sg_ptr->length is invalid
+>     d) Instead of duplicating the code in mmc_io_rw_extended(), extra bool parameter
+>        has been added to this function and used it in new APIs for SG.
+> v4: Removed WARN_ON() calls in newly added APIs. It's gets called in probe handler.
+>     Caller already takes care of it(Shawn Lin).
+> v5: Rebased on latest code base.
+> ---
+>  drivers/mmc/core/sdio_io.c                          | 21 +++++++++++++++++++++
+>  .../wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c   |  6 +++---
 
-sdhci-pci-o2micro.h was removed by commit 361eeda0ca16 ("mmc: sdhci-pci:
-Tidy o2micro definitions").  Please re-base.
+The changes to the wifi driver, could please make that a separate
+patch on top of this one?
 
->  1 file changed, 3 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.h b/drivers/mmc/host/sdhci-pci-o2micro.h
-> index 770f53857211..3fb957729315 100644
-> --- a/drivers/mmc/host/sdhci-pci-o2micro.h
-> +++ b/drivers/mmc/host/sdhci-pci-o2micro.h
-> @@ -49,6 +49,7 @@
->  #define O2_SD_MISC_CTRL4	0xFC
->  #define O2_SD_TUNING_CTRL	0x300
->  #define O2_SD_PLL_SETTING	0x304
-> +#define O2_SD_MISC_SETTING	0x308
->  #define O2_SD_CLK_SETTING	0x328
->  #define O2_SD_CAP_REG2		0x330
->  #define O2_SD_CAP_REG0		0x334
-> @@ -62,6 +63,8 @@
->  #define O2_SD_FREG4_ENABLE_CLK_SET	BIT(22)
->  
->  #define O2_SD_VENDOR_SETTING	0x110
-> +#define O2_SD_HW_TUNING_ENABLE BIT(4)
+There are actually a couple of more wireless drivers that should
+convert to use these new API, I would appreciate if you could fold in
+patches in the series for each of them as well (don't forget to cc
+correct people for them), then I intend to apply all of them via my
+tree, if no objections.
 
-Both these definitions are needed in patch 1.  It would be better to add
-them in that patch.
+Otherwise this change looks good to me!
 
-> +
->  #define O2_SD_VENDOR_SETTING2	0x1C8
->  
->  extern int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot);
-> 
+[...]
 
+Kind regards
+Uffe
