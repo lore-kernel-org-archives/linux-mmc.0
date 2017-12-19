@@ -1,77 +1,74 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [RFC PATCH] mmc: tmio: use ioread* for repeated access to a
- register
-Date: Tue, 19 Dec 2017 14:20:24 +0100
-Message-ID: <20171219132024.wa3vbqqbwwrmrb2m@ninjato>
-References: <20171218000021.16655-1-wsa+renesas@sang-engineering.com>
- <CAPDyKFr5A7Qma_Ef5JMjvG1f_Er+f9K-tnj39_q0Wg2aQ7nY5w@mail.gmail.com>
- <CAK7LNAS_rRp0RDbmEhahKPkcYJ=Yopj7WGRcuhQLz5WP+FFE1w@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="zmhyfsy72dpmylqo"
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Subject: [PATCH] mmc: tmio: use io* accessors consistently
+Date: Tue, 19 Dec 2017 14:34:03 +0100
+Message-ID: <20171219133403.788-1-wsa+renesas@sang-engineering.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([88.99.104.3]:44135 "EHLO pokefinder.org"
+Received: from sauhun.de ([88.99.104.3]:44181 "EHLO pokefinder.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S965422AbdLSNU0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 19 Dec 2017 08:20:26 -0500
-Content-Disposition: inline
-In-Reply-To: <CAK7LNAS_rRp0RDbmEhahKPkcYJ=Yopj7WGRcuhQLz5WP+FFE1w@mail.gmail.com>
+        id S1763016AbdLSNeI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 19 Dec 2017 08:34:08 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Simon Horman <horms@verge.net.au>
+To: linux-mmc@vger.kernel.org
+Cc: linux-renesas-soc@vger.kernel.org, Masahiro Yamada <yamada.masahiro@socionext.com>, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>
 
+Because we started using io*_rep accessors previously because they are
+more widely defined across architectures, let's be consistent and use
+this family for all accessor wrappers.
 
---zmhyfsy72dpmylqo
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
 
-Yamada-san,
+And here is the follow-up patch. Tested on a R-Car M3-W; still could checksum a
+huge file from SD without performance regressions.
 
-> BTW, is ioread* preferred to read*?
+ drivers/mmc/host/tmio_mmc.h | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
 
-Technically, yes. In reality, mostly not.
+diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+index 03519c4ca0aa1a..e7d651352dc90f 100644
+--- a/drivers/mmc/host/tmio_mmc.h
++++ b/drivers/mmc/host/tmio_mmc.h
+@@ -227,7 +227,7 @@ int tmio_mmc_host_runtime_resume(struct device *dev);
+ 
+ static inline u16 sd_ctrl_read16(struct tmio_mmc_host *host, int addr)
+ {
+-	return readw(host->ctl + (addr << host->bus_shift));
++	return ioread16(host->ctl + (addr << host->bus_shift));
+ }
+ 
+ static inline void sd_ctrl_read16_rep(struct tmio_mmc_host *host, int addr,
+@@ -239,8 +239,8 @@ static inline void sd_ctrl_read16_rep(struct tmio_mmc_host *host, int addr,
+ static inline u32 sd_ctrl_read16_and_16_as_32(struct tmio_mmc_host *host,
+ 					      int addr)
+ {
+-	return readw(host->ctl + (addr << host->bus_shift)) |
+-	       readw(host->ctl + ((addr + 2) << host->bus_shift)) << 16;
++	return ioread16(host->ctl + (addr << host->bus_shift)) |
++	       ioread16(host->ctl + ((addr + 2) << host->bus_shift)) << 16;
+ }
+ 
+ static inline void sd_ctrl_read32_rep(struct tmio_mmc_host *host, int addr,
+@@ -257,7 +257,7 @@ static inline void sd_ctrl_write16(struct tmio_mmc_host *host, int addr,
+ 	 */
+ 	if (host->write16_hook && host->write16_hook(host, addr))
+ 		return;
+-	writew(val, host->ctl + (addr << host->bus_shift));
++	iowrite16(val, host->ctl + (addr << host->bus_shift));
+ }
+ 
+ static inline void sd_ctrl_write16_rep(struct tmio_mmc_host *host, int addr,
+@@ -269,8 +269,8 @@ static inline void sd_ctrl_write16_rep(struct tmio_mmc_host *host, int addr,
+ static inline void sd_ctrl_write32_as_16_and_16(struct tmio_mmc_host *host,
+ 						int addr, u32 val)
+ {
+-	writew(val & 0xffff, host->ctl + (addr << host->bus_shift));
+-	writew(val >> 16, host->ctl + ((addr + 2) << host->bus_shift));
++	iowrite16(val & 0xffff, host->ctl + (addr << host->bus_shift));
++	iowrite16(val >> 16, host->ctl + ((addr + 2) << host->bus_shift));
+ }
+ 
+ static inline void sd_ctrl_write32_rep(struct tmio_mmc_host *host, int addr,
+-- 
+2.11.0
 
-> We need to eliminate the root cause.
-> Other drivers using reads* cannot enable COMPILE_TEST for the same reason.
-
-Sure, I understand this. There are not many left, however. I'd assume
-most switched to io*_rep. The sparc64 issue is known for at least two
-years.
-
-> Wolfram,
-> Can you send a patch for sparc64?
-
-As I wrote here already [1], this is too much of a side task for me. But
-if you like, please have a go...
-
-But I'll send the consistency patch for tmio in a second.
-
-Kind regards,
-
-   Wolfram
-
-
-[1] https://lkml.org/lkml/2017/12/15/816
-
---zmhyfsy72dpmylqo
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlo5EhQACgkQFA3kzBSg
-KbaaZBAAhD3QQQhq5VcY9J3VcbM8HWOZC0HoPAtav5qtKII0HsG4ubnlLbsg2wXM
-ga2cLvZKjxIkuTgGh57A7d7ksL2vJAupiEECNc3GVZEr5HsbFD4+pdOJAwxGbyZ0
-7iRMOLBuR53+JshUSqDYc0lKQkgsUedcn9bbbRBxBBx2uJ2Oy2qxi0PgUyG6lmB6
-xp0qhryxZxLPQmOXA69jNoZ1nf68RE64aX2ScLIKCvol8ZhVbJmfkrn2Vv93qepq
-fcyIdHTMYNVLNI3BHevpwi+uPhbLOrQshEEUMU7ijpvWQRW8KK/MQuO30+00nIn9
-CQA4MPP/3NA/p+KAx1ITdHViOMZzwOnm0X0pkYwZiHV+0Pw+YqIBXtubJZh/bFVX
-l/lLaROLagC3aH1wKQia5QieXdrTIzufxbQ+2vcFAcUE/wB3GtuqPGJnLSlbYefl
-eUP/WLQW1nx7zI4OmBQddYNxdou6on/DbIN4Psc1XCLX6fa1weWzQx54Hke1AsAm
-H4D69Gwa6MIMwSahGf9dR+9Tw9oX59j0kUKXY05lQmVCEAVFlnyAy+3Zg45ZAzZN
-DzitoqUHPYkNuoA1tvdXrTQnHKJAG2/mdKdUe9503oydStrIIwweEAkxkYaZSsB3
-EptAO4jIzZBrioskybEV4XPFddTJjQOWhSdmCjeYQmZqyLTVM+4=
-=ygn7
------END PGP SIGNATURE-----
-
---zmhyfsy72dpmylqo--
