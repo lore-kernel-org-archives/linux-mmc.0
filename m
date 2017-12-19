@@ -1,74 +1,61 @@
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH] mmc: tmio: use io* accessors consistently
-Date: Tue, 19 Dec 2017 14:34:03 +0100
-Message-ID: <20171219133403.788-1-wsa+renesas@sang-engineering.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([88.99.104.3]:44181 "EHLO pokefinder.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1763016AbdLSNeI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 19 Dec 2017 08:34:08 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+From: Philippe Ombredanne <pombredanne@nexb.com>
+Subject: Re: [PATCH V5] mmc:host:sdhci-pci:Addition of Arasan PCI Controller
+ with integrated phy.
+Date: Tue, 19 Dec 2017 17:00:51 +0100
+Message-ID: <CAOFm3uHr5he9fbjMQ0jch-Zs3dCtrni8ZHUOajheA=f8+P2LVQ@mail.gmail.com>
+References: <1513098128-4776-1-git-send-email-agarg@arasan.com> <1f026a6e-aabc-66b3-2753-00c23bf61a27@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1f026a6e-aabc-66b3-2753-00c23bf61a27@intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Atul Garg <agarg@arasan.com>
+Cc: linux-mmc@vger.kernel.org, Kishon Vijay Abraham I <kishon@ti.com>, rk@ti.com, nm@ti.com, nsekhar@ti.com, Ulf Hansson <ulf.hansson@linaro.org>, LKML <linux-kernel@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-renesas-soc@vger.kernel.org, Masahiro Yamada <yamada.masahiro@socionext.com>, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-Because we started using io*_rep accessors previously because they are
-more widely defined across architectures, let's be consistent and use
-this family for all accessor wrappers.
+Atul,
 
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
+On Tue, Dec 19, 2017 at 1:18 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 12/12/17 19:02, Atul Garg wrote:
+>> The Arasan Controller is based on a FPGA platform and has integrated phy
+>> with specific registers used during initialization and
+>> management of different modes. The phy and the controller are integrated
+>> and registers are very specific to Arasan.
+>>
+>> Arasan being an IP provider, licenses these IPs to various companies for
+>> integration of IP in custom SOCs. The custom SOCs define own register
+>> map depending on how bits are tied inside the SOC for phy registers,
+>> depending on SOC memory plan and hence will require own platform drivers.
+>>
 
-And here is the follow-up patch. Tested on a R-Car M3-W; still could checksum a
-huge file from SD without performance regressions.
+<snip>
 
- drivers/mmc/host/tmio_mmc.h | 12 ++++++------
- 1 file changed, 6 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index 03519c4ca0aa1a..e7d651352dc90f 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -227,7 +227,7 @@ int tmio_mmc_host_runtime_resume(struct device *dev);
- 
- static inline u16 sd_ctrl_read16(struct tmio_mmc_host *host, int addr)
- {
--	return readw(host->ctl + (addr << host->bus_shift));
-+	return ioread16(host->ctl + (addr << host->bus_shift));
- }
- 
- static inline void sd_ctrl_read16_rep(struct tmio_mmc_host *host, int addr,
-@@ -239,8 +239,8 @@ static inline void sd_ctrl_read16_rep(struct tmio_mmc_host *host, int addr,
- static inline u32 sd_ctrl_read16_and_16_as_32(struct tmio_mmc_host *host,
- 					      int addr)
- {
--	return readw(host->ctl + (addr << host->bus_shift)) |
--	       readw(host->ctl + ((addr + 2) << host->bus_shift)) << 16;
-+	return ioread16(host->ctl + (addr << host->bus_shift)) |
-+	       ioread16(host->ctl + ((addr + 2) << host->bus_shift)) << 16;
- }
- 
- static inline void sd_ctrl_read32_rep(struct tmio_mmc_host *host, int addr,
-@@ -257,7 +257,7 @@ static inline void sd_ctrl_write16(struct tmio_mmc_host *host, int addr,
- 	 */
- 	if (host->write16_hook && host->write16_hook(host, addr))
- 		return;
--	writew(val, host->ctl + (addr << host->bus_shift));
-+	iowrite16(val, host->ctl + (addr << host->bus_shift));
- }
- 
- static inline void sd_ctrl_write16_rep(struct tmio_mmc_host *host, int addr,
-@@ -269,8 +269,8 @@ static inline void sd_ctrl_write16_rep(struct tmio_mmc_host *host, int addr,
- static inline void sd_ctrl_write32_as_16_and_16(struct tmio_mmc_host *host,
- 						int addr, u32 val)
- {
--	writew(val & 0xffff, host->ctl + (addr << host->bus_shift));
--	writew(val >> 16, host->ctl + ((addr + 2) << host->bus_shift));
-+	iowrite16(val & 0xffff, host->ctl + (addr << host->bus_shift));
-+	iowrite16(val >> 16, host->ctl + ((addr + 2) << host->bus_shift));
- }
- 
- static inline void sd_ctrl_write32_rep(struct tmio_mmc_host *host, int addr,
+>> --- /dev/null
+>> +++ b/drivers/mmc/host/sdhci-pci-arasan.c
+>> @@ -0,0 +1,341 @@
+>> +/*
+>> + * Copyright (C) 2017 Arasan Chip Systems Inc.
+>> + *
+>> + * Author: Atul Garg <agarg@arasan.com>
+>> + *
+>> + * This software is licensed under the terms of the GNU General Public
+>> + * License version 2, as published by the Free Software Foundation, and
+>> + * may be copied, distributed, and modified under those terms.
+>> + *
+>> + * This program is distributed in the hope that it will be useful,
+>> + * but WITHOUT ANY WARRANTY; without even the implied warranty of
+>> + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+>> + * GNU General Public License for more details.
+>> + */
+
+Could you consider using the new SPDX tags documented in Thomas patch set
+[1] rather than this fine but longer legalese?
+
+Thank you!
+
+[1] https://lkml.org/lkml/2017/12/4/934
+
 -- 
-2.11.0
-
+Cordially
+Philippe Ombredanne
