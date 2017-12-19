@@ -1,67 +1,85 @@
 From: Xinming Hu <huxm@marvell.com>
-Subject: Re: Re: [PATCH v5 1/2] mmc: API for accessing host supported maximum
- segment count and size
-Date: Tue, 19 Dec 2017 12:06:26 +0000
-Message-ID: <ea1c8fef37cf4820961e55ea9874fef6@SC-EXCH02.marvell.com>
+Subject: [PATCH v6 1/4] mmc: API for accessing host supported maximum segment count and size
+Date: Tue, 19 Dec 2017 20:06:47 +0800
+Message-ID: <1513685211-640-1-git-send-email-huxm@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:43326 "EHLO
+Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:43388 "EHLO
         mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1751671AbdLSMG3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Dec 2017 07:06:29 -0500
-Content-Language: en-US
+        by vger.kernel.org with ESMTP id S1751599AbdLSMHO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Dec 2017 07:07:14 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Linux MMC <linux-mmc@vger.kernel.org>, Zhiyuan Yang <yangzy@marvell.com>, Tim Song <songtao@marvell.com>, Cathy Luo <cluo@marvell.com>, James Cao <jcao@marvell.com>, Ganapathi Bhat <gbhat@marvell.com>, Amitkumar Karwar <akarwar@marvell.com>
+To: Linux MMC <linux-mmc@vger.kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Kalle Valo <kvalo@qca.qualcomm.com>, Arend van Spriel <arend.vanspriel@broadcom.com>, Franky Lin <franky.lin@broadcom.com>, Hante Meuleman <hante.meuleman@broadcom.com>, Chi-Hsien Lin <chi-hsien.lin@cypress.com>, Wright Feng <wright.feng@cypress.com>, Zhiyuan Yang <yangzy@marvell.com>, Tim Song <songtao@marvell.com>, Cathy Luo <cluo@marvell.com>, James Cao <jcao@marvell.com>, Ganapathi Bhat <gbhat@marvell.com>, Xu Wang <xwang4@marvell.com>, Bob Tan <tanbo@marvell.com>, Xinming Hu <huxm@marvell.com>, Amitkumar Karwar <akarwar@marvell.com>
 
-SGkgVWxmLA0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IFVsZiBIYW5z
-c29uIFttYWlsdG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4gU2VudDogMjAxN+W5tDEy5pyI
-MTnml6UgMTY6MzYNCj4gVG86IFhpbm1pbmcgSHUgPGh1eG1AbWFydmVsbC5jb20+DQo+IENjOiBM
-aW51eCBNTUMgPGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc+OyBaaGl5dWFuIFlhbmcNCj4gPHlh
-bmd6eUBtYXJ2ZWxsLmNvbT47IFRpbSBTb25nIDxzb25ndGFvQG1hcnZlbGwuY29tPjsgQ2F0aHkg
-THVvDQo+IDxjbHVvQG1hcnZlbGwuY29tPjsgSmFtZXMgQ2FvIDxqY2FvQG1hcnZlbGwuY29tPjsg
-R2FuYXBhdGhpIEJoYXQNCj4gPGdiaGF0QG1hcnZlbGwuY29tPjsgQW1pdGt1bWFyIEthcndhciA8
-YWthcndhckBtYXJ2ZWxsLmNvbT4NCj4gU3ViamVjdDogW0VYVF0gUmU6IFtQQVRDSCB2NSAxLzJd
-IG1tYzogQVBJIGZvciBhY2Nlc3NpbmcgaG9zdCBzdXBwb3J0ZWQNCj4gbWF4aW11bSBzZWdtZW50
-IGNvdW50IGFuZCBzaXplDQo+IA0KPiBFeHRlcm5hbCBFbWFpbA0KPiANCj4gLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LQ0KPiBPbiAyMiBOb3ZlbWJlciAyMDE3IGF0IDA4OjQ5LCBYaW5taW5nIEh1IDxodXhtQG1hcnZl
-bGwuY29tPiB3cm90ZToNCj4gPiBzZGlvIGRldmljZSBkcml2ZXJzIG5lZWQgYmUgYWJsZSB0byBn
-ZXQgdGhlIGhvc3Qgc3VwcG9ydGVkIG1heF9zZWdzDQo+ID4gYW5kIG1heF9zZWdfc2l6ZSwgc28g
-dGhhdCB0aGV5IGtub3cgdGhlIGJ1ZmZlciBzaXplIHRvIGFsbG9jYXRlIHdoaWxlDQo+ID4gdXRp
-bGl6aW5nIHRoZSBzY2F0dGVyL2dhdGhlciBETUEgYnVmZmVyIGxpc3QuDQo+ID4NCj4gPiBUaGlz
-IHBhdGNoIHByb3ZpZGVzIEFQSSBmb3IgdGhpcyBwdXJwb3NlLg0KPiANCj4gQXBvbG9naXplIGZv
-ciB0aGUgZGVsYXkuDQo+IA0KPiBPdmVyYWxsLCB0aGlzIG1ha2VzIHBlcmZlY3Qgc2Vuc2UgdG8g
-bWUuIEhvd2V2ZXIgc29tZSBtaW5vciBjb21tZW50LCBzZWUNCj4gYmVsb3cuDQo+IA0KDQpPaywg
-Z3JlYXQgbmV3cyAhDQoNCj4gPg0KPiA+IFNpZ25lZC1vZmYtYnk6IFhpbm1pbmcgSHUgPGh1eG1A
-bWFydmVsbC5jb20+DQo+ID4gU2lnbmVkLW9mZi1ieTogQW1pdGt1bWFyIEthcndhciA8YWthcndh
-ckBtYXJ2ZWxsLmNvbT4NCj4gPiAtLS0NCj4gPiB2MjogdjIgd2FzIHN1Ym1pdHRlZCB3aXRoIG1p
-bm9yIGltcHJvdmVtZW50IGxpa2UgcmVwbGFjaW5nIEJVR19PTigpDQo+ID4gd2l0aCBXQVJOX09O
-KCkNCj4gPiB2MzogQWRkcmVzc2VkIGJlbG93IHJldmlldyBjb21tZW50cyBmcm9tIFVsZiBIYW5z
-c29uDQo+ID4gICAgIGEpIEluIHYzLCBwYXRjaCBoYXMgYmVlbiBzcGxpdCBpbnRvIHR3byBzZXBh
-cmF0ZSBwYXRjaGVzLg0KPiA+ICAgICBiKSBQYXRjaCAxLzIgaW50cm9kdWNlcyBhbiBBUEkgdG8g
-ZmV0Y2ggbWF4X3NlZ19zaXplIGFuZCBtYXhfc2Vncw0KPiA+ICAgICBjKSBSZXBsYWNlZCBXQVJO
-X09OKCkgd2l0aCBwcm9wZXIgZXJyb3IgY29kZSB3aGVuIHNnX3B0ci0+bGVuZ3RoIGlzDQo+IGlu
-dmFsaWQNCj4gPiAgICAgZCkgSW5zdGVhZCBvZiBkdXBsaWNhdGluZyB0aGUgY29kZSBpbiBtbWNf
-aW9fcndfZXh0ZW5kZWQoKSwgZXh0cmEgYm9vbA0KPiBwYXJhbWV0ZXINCj4gPiAgICAgICAgaGFz
-IGJlZW4gYWRkZWQgdG8gdGhpcyBmdW5jdGlvbiBhbmQgdXNlZCBpdCBpbiBuZXcgQVBJcyBmb3Ig
-U0cuDQo+ID4gdjQ6IFJlbW92ZWQgV0FSTl9PTigpIGNhbGxzIGluIG5ld2x5IGFkZGVkIEFQSXMu
-IEl0J3MgZ2V0cyBjYWxsZWQgaW4gcHJvYmUNCj4gaGFuZGxlci4NCj4gPiAgICAgQ2FsbGVyIGFs
-cmVhZHkgdGFrZXMgY2FyZSBvZiBpdChTaGF3biBMaW4pLg0KPiA+IHY1OiBSZWJhc2VkIG9uIGxh
-dGVzdCBjb2RlIGJhc2UuDQo+ID4gLS0tDQo+ID4gIGRyaXZlcnMvbW1jL2NvcmUvc2Rpb19pby5j
-ICAgICAgICAgICAgICAgICAgICAgICAgICB8IDIxDQo+ICsrKysrKysrKysrKysrKysrKysrKw0K
-PiA+ICAuLi4vd2lyZWxlc3MvYnJvYWRjb20vYnJjbTgwMjExL2JyY21mbWFjL2JjbXNkaC5jICAg
-fCAgNiArKystLS0NCj4gDQo+IFRoZSBjaGFuZ2VzIHRvIHRoZSB3aWZpIGRyaXZlciwgY291bGQg
-cGxlYXNlIG1ha2UgdGhhdCBhIHNlcGFyYXRlIHBhdGNoIG9uIHRvcA0KPiBvZiB0aGlzIG9uZT8N
-Cj4gDQo+IFRoZXJlIGFyZSBhY3R1YWxseSBhIGNvdXBsZSBvZiBtb3JlIHdpcmVsZXNzIGRyaXZl
-cnMgdGhhdCBzaG91bGQgY29udmVydCB0byB1c2UNCj4gdGhlc2UgbmV3IEFQSSwgSSB3b3VsZCBh
-cHByZWNpYXRlIGlmIHlvdSBjb3VsZCBmb2xkIGluIHBhdGNoZXMgaW4gdGhlIHNlcmllcyBmb3IN
-Cj4gZWFjaCBvZiB0aGVtIGFzIHdlbGwgKGRvbid0IGZvcmdldCB0byBjYyBjb3JyZWN0IHBlb3Bs
-ZSBmb3IgdGhlbSksIHRoZW4gSSBpbnRlbmQNCj4gdG8gYXBwbHkgYWxsIG9mIHRoZW0gdmlhIG15
-IHRyZWUsIGlmIG5vIG9iamVjdGlvbnMuDQoNCk9rYXksIEkgd2lsbCBpbmNsdWRlIHRoZSBjaGFu
-Z2VzIGluIHY2Lg0KPiANCj4gT3RoZXJ3aXNlIHRoaXMgY2hhbmdlIGxvb2tzIGdvb2QgdG8gbWUh
-DQo+IA0KDQpUaGFua3MgZm9yIHRoZSByZXZpZXchDQoNClJlZ2FyZHMsDQpTaW1vbg0KPiBbLi4u
-XQ0KPiANCj4gS2luZCByZWdhcmRzDQo+IFVmZmUNCg==
+sdio device drivers need be able to get the host supported max_segs
+and max_seg_size, so that they know the buffer size to allocate while
+utilizing the scatter/gather DMA buffer list.
+
+This patch provides API for this purpose.
+
+Signed-off-by: Xinming Hu <huxm@marvell.com>
+Signed-off-by: Amitkumar Karwar <akarwar@marvell.com>
+---
+v2: v2 was submitted with minor improvement like replacing BUG_ON() with WARN_ON()
+v3: Addressed below review comments from Ulf Hansson
+    a) In v3, patch has been split into two separate patches.
+    b) Patch 1/2 introduces an API to fetch max_seg_size and max_segs
+    c) Replaced WARN_ON() with proper error code when sg_ptr->length is invalid
+    d) Instead of duplicating the code in mmc_io_rw_extended(), extra bool parameter
+       has been added to this function and used it in new APIs for SG.
+v4: Removed WARN_ON() calls in newly added APIs. It's gets called in probe handler.
+    Caller already takes care of it(Shawn Lin).
+v5: Rebased on latest code base.
+v6: Split driver caller to separate patch.
+---
+ drivers/mmc/core/sdio_io.c    | 21 +++++++++++++++++++++
+ include/linux/mmc/sdio_func.h |  3 +++
+ 2 files changed, 24 insertions(+)
+
+diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
+index d40744b..4806521 100644
+--- a/drivers/mmc/core/sdio_io.c
++++ b/drivers/mmc/core/sdio_io.c
+@@ -725,3 +725,24 @@ int sdio_set_host_pm_flags(struct sdio_func *func, mmc_pm_flag_t flags)
+ 	return 0;
+ }
+ EXPORT_SYMBOL_GPL(sdio_set_host_pm_flags);
++
++/**
++ *	sdio_get_host_max_seg_size - get host maximum segment size
++ *	@func: SDIO function attached to host
++ */
++unsigned int sdio_get_host_max_seg_size(struct sdio_func *func)
++{
++	return func->card->host->max_seg_size;
++}
++EXPORT_SYMBOL_GPL(sdio_get_host_max_seg_size);
++
++/**
++ *	sdio_get_host_max_seg_count - get host maximum segment count
++ *	@func: SDIO function attached to host
++ */
++unsigned short sdio_get_host_max_seg_count(struct sdio_func *func)
++{
++	return func->card->host->max_segs;
++}
++EXPORT_SYMBOL_GPL(sdio_get_host_max_seg_count);
++
+diff --git a/include/linux/mmc/sdio_func.h b/include/linux/mmc/sdio_func.h
+index 97ca105..72d4de4 100644
+--- a/include/linux/mmc/sdio_func.h
++++ b/include/linux/mmc/sdio_func.h
+@@ -159,4 +159,7 @@ extern void sdio_f0_writeb(struct sdio_func *func, unsigned char b,
+ extern mmc_pm_flag_t sdio_get_host_pm_caps(struct sdio_func *func);
+ extern int sdio_set_host_pm_flags(struct sdio_func *func, mmc_pm_flag_t flags);
+ 
++unsigned short sdio_get_host_max_seg_count(struct sdio_func *func);
++unsigned int sdio_get_host_max_seg_size(struct sdio_func *func);
++
+ #endif /* LINUX_MMC_SDIO_FUNC_H */
+-- 
+1.9.1
+
