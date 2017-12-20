@@ -1,113 +1,47 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 9/9] mmc: sdhci-pci: Respect PM flags when enabling card detect GPIO IRQ wakeup
-Date: Wed, 20 Dec 2017 10:18:53 +0200
-Message-ID: <1513757933-11232-10-git-send-email-adrian.hunter@intel.com>
-References: <1513757933-11232-1-git-send-email-adrian.hunter@intel.com>
+From: Maxime Ripard <maxime.ripard@free-electrons.com>
+Subject: [PATCH 0/2] mmc: sunxi: Add runtime PM support
+Date: Wed, 20 Dec 2017 11:50:33 +0100
+Message-ID: <cover.ac66a754953bedbb7529436b40a7996f4ba3cb95.1513766964.git-series.maxime.ripard@free-electrons.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga05.intel.com ([192.55.52.43]:36192 "EHLO mga05.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932260AbdLTITe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 20 Dec 2017 03:19:34 -0500
-In-Reply-To: <1513757933-11232-1-git-send-email-adrian.hunter@intel.com>
+Received: from mail.free-electrons.com ([62.4.15.54]:54087 "EHLO
+        mail.free-electrons.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753283AbdLTKuu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Dec 2017 05:50:50 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Haridhar Kalvala <haridhar.kalvala@intel.com>
+To: Chen-Yu Tsai <wens@csie.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 
-Commit 03dbaa04a2e5 ("mmc: slot-gpio: Add support to enable irq wake on
-cd_irq") enabled wakeup irrespective of the host controller's PM flags.
-However, users also want to control it from sysfs power/wakeup attribute.
-That means the driver needs to check the PM flags before enabling it in the
-suspend callback. Add support for that in sdhci-pci, which is the only
-driver presently using the MMC_CAP_CD_WAKE flag, and remove the enabling in
-mmc_gpiod_request_cd_irq().
+Hi,
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/core/slot-gpio.c      |  2 --
- drivers/mmc/host/sdhci-pci-core.c | 18 ++++++++++++++----
- drivers/mmc/host/sdhci.c          |  4 ++++
- 3 files changed, 18 insertions(+), 6 deletions(-)
+Since it's introduction, our MMC controller has had its external clocks
+running all the time.
 
-diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
-index 3a30535c2f31..74dd534905f7 100644
---- a/drivers/mmc/core/slot-gpio.c
-+++ b/drivers/mmc/core/slot-gpio.c
-@@ -149,8 +149,6 @@ void mmc_gpiod_request_cd_irq(struct mmc_host *host)
- 
- 	if (irq < 0)
- 		host->caps |= MMC_CAP_NEEDS_POLL;
--	else if ((host->caps & MMC_CAP_CD_WAKE) && !enable_irq_wake(irq))
--		host->slot.cd_wake_enabled = true;
- }
- EXPORT_SYMBOL(mmc_gpiod_request_cd_irq);
- 
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 96ec4aa7cb27..eeb4bd5797a0 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -42,18 +42,25 @@
- static int sdhci_pci_init_wakeup(struct sdhci_pci_chip *chip)
- {
- 	mmc_pm_flag_t pm_flags = 0;
-+	bool cap_cd_wake = false;
- 	int i;
- 
- 	for (i = 0; i < chip->num_slots; i++) {
- 		struct sdhci_pci_slot *slot = chip->slots[i];
- 
--		if (slot)
-+		if (slot) {
- 			pm_flags |= slot->host->mmc->pm_flags;
-+			if (slot->host->mmc->caps & MMC_CAP_CD_WAKE)
-+				cap_cd_wake = true;
-+		}
- 	}
- 
--	return device_set_wakeup_enable(&chip->pdev->dev,
--					(pm_flags & MMC_PM_KEEP_POWER) &&
--					(pm_flags & MMC_PM_WAKE_SDIO_IRQ));
-+	if ((pm_flags & MMC_PM_KEEP_POWER) && (pm_flags & MMC_PM_WAKE_SDIO_IRQ))
-+		return device_wakeup_enable(&chip->pdev->dev);
-+	else if (!cap_cd_wake)
-+		return device_wakeup_disable(&chip->pdev->dev);
-+
-+	return 0;
- }
- 
- static int sdhci_pci_suspend_host(struct sdhci_pci_chip *chip)
-@@ -1687,6 +1694,9 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
- 	if (device_can_wakeup(&pdev->dev))
- 		host->mmc->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
- 
-+	if (host->mmc->caps & MMC_CAP_CD_WAKE)
-+		device_init_wakeup(&pdev->dev, true);
-+
- 	if (slot->cd_idx >= 0) {
- 		ret = mmc_gpiod_request_cd(host->mmc, NULL, slot->cd_idx,
- 					   slot->cd_override_level, 0, NULL);
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index c82fd16dd14e..883b55077231 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2891,6 +2891,8 @@ int sdhci_suspend_host(struct sdhci_host *host)
- 		free_irq(host->irq, host);
- 	}
- 
-+	mmc_gpio_set_cd_wake(host->mmc, true);
-+
- 	return 0;
- }
- 
-@@ -2918,6 +2920,8 @@ int sdhci_resume_host(struct sdhci_host *host)
- 		mmiowb();
- 	}
- 
-+	mmc_gpio_set_cd_wake(host->mmc, false);
-+
- 	if (host->irq_wake_enabled) {
- 		sdhci_disable_irq_wakeups(host);
- 	} else {
+While that was working great, the power usage and most importantly the EMI
+that it generated was pretty bad.
+
+Let's implement some runtime_pm hooks with an autosuspend to cut the
+external clock when the MMC is not active.
+
+I didn't get all the way to also shutdown the bus clocks since on some
+older SoCs (before the A31), it also means that the controler will be reset
+which has some quite important implications obviously. And I couldn't make
+it work reliably at the moment. Anyway, it can always be implemented as a
+second step if needed.
+
+(Quite simple) benchmarks have shown no noticeable regressions since the
+controller state is maintained.
+
+Let me know what you think,
+Maxime
+
+Maxime Ripard (2):
+  mmc: sunxi: Reorder the headers
+  mmc: sunxi: Add runtime_pm support
+
+ drivers/mmc/host/sunxi-mmc.c | 133 +++++++++++++++++++++---------------
+ 1 file changed, 80 insertions(+), 53 deletions(-)
+
+base-commit: 4fbd8d194f06c8a3fd2af1ce560ddb31f7ec8323
 -- 
-1.9.1
-
+git-series 0.9.1
