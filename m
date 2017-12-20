@@ -1,261 +1,186 @@
-From: Xinming Hu <huxm@marvell.com>
-Subject: RE: [EXT] Re: [PATCH v6 4/4] mmc: sdio support external scatter
- gather list
-Date: Wed, 20 Dec 2017 12:59:24 +0000
-Message-ID: <56aafa8f51434aa8ae7702b400c6916a@SC-EXCH02.marvell.com>
-References: <1513685211-640-1-git-send-email-huxm@marvell.com>
- <1513685211-640-4-git-send-email-huxm@marvell.com>
- <CAPDyKFrCjsUhmh3ccwemkGoUuXJ2RkjNZHuAf0J_ddHaAMrqyg@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [RFC PATCH 09/12] mmc: sdhci: Use software timer when timeout
+ greater than hardware capablility
+Date: Wed, 20 Dec 2017 16:11:10 +0200
+Message-ID: <74170f0a-329a-2c66-7ad4-a1fedb9747df@intel.com>
+References: <20171214130941.26666-1-kishon@ti.com>
+ <20171214130941.26666-10-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0b-0016f401.pphosted.com ([67.231.156.173]:37512 "EHLO
-        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1754310AbdLTM7b (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Dec 2017 07:59:31 -0500
-In-Reply-To: <CAPDyKFrCjsUhmh3ccwemkGoUuXJ2RkjNZHuAf0J_ddHaAMrqyg@mail.gmail.com>
+Received: from mga09.intel.com ([134.134.136.24]:31506 "EHLO mga09.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754337AbdLTOLq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 20 Dec 2017 09:11:46 -0500
+In-Reply-To: <20171214130941.26666-10-kishon@ti.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Linux MMC <linux-mmc@vger.kernel.org>, Kalle Valo <kvalo@qca.qualcomm.com>, Arend van Spriel <arend.vanspriel@broadcom.com>, Franky Lin <franky.lin@broadcom.com>, Hante Meuleman <hante.meuleman@broadcom.com>, Chi-Hsien Lin <chi-hsien.lin@cypress.com>, Wright Feng <wright.feng@cypress.com>, Zhiyuan Yang <yangzy@marvell.com>, Tim Song <songtao@marvell.com>, Cathy Luo <cluo@marvell.com>, James Cao <jcao@marvell.com>, Ganapathi Bhat <gbhat@marvell.com>, "Xu (Shanghai) Wang" <xwang4@marvell.com>, Bob Tan <tanbo@marvell.com>, Amitkumar Karwar <akarwar@marvell.com>
+To: Kishon Vijay Abraham I <kishon@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Tony Lindgren <tony@atomide.com>
+Cc: Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, nsekhar@ti.com
 
-SGkgVWxmLA0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IFVsZiBIYW5z
-c29uIFttYWlsdG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4gU2VudDogMjAxN+W5tDEy5pyI
-MTnml6UgMjA6NDANCj4gVG86IFhpbm1pbmcgSHUgPGh1eG1AbWFydmVsbC5jb20+DQo+IENjOiBM
-aW51eCBNTUMgPGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc+OyBLYWxsZSBWYWxvDQo+IDxrdmFs
-b0BxY2EucXVhbGNvbW0uY29tPjsgQXJlbmQgdmFuIFNwcmllbA0KPiA8YXJlbmQudmFuc3ByaWVs
-QGJyb2FkY29tLmNvbT47IEZyYW5reSBMaW4gPGZyYW5reS5saW5AYnJvYWRjb20uY29tPjsNCj4g
-SGFudGUgTWV1bGVtYW4gPGhhbnRlLm1ldWxlbWFuQGJyb2FkY29tLmNvbT47IENoaS1Ic2llbiBM
-aW4NCj4gPGNoaS1oc2llbi5saW5AY3lwcmVzcy5jb20+OyBXcmlnaHQgRmVuZyA8d3JpZ2h0LmZl
-bmdAY3lwcmVzcy5jb20+Ow0KPiBaaGl5dWFuIFlhbmcgPHlhbmd6eUBtYXJ2ZWxsLmNvbT47IFRp
-bSBTb25nIDxzb25ndGFvQG1hcnZlbGwuY29tPjsNCj4gQ2F0aHkgTHVvIDxjbHVvQG1hcnZlbGwu
-Y29tPjsgSmFtZXMgQ2FvIDxqY2FvQG1hcnZlbGwuY29tPjsgR2FuYXBhdGhpDQo+IEJoYXQgPGdi
-aGF0QG1hcnZlbGwuY29tPjsgWHUgKFNoYW5naGFpKSBXYW5nIDx4d2FuZzRAbWFydmVsbC5jb20+
-Ow0KPiBCb2IgVGFuIDx0YW5ib0BtYXJ2ZWxsLmNvbT47IEFtaXRrdW1hciBLYXJ3YXIgPGFrYXJ3
-YXJAbWFydmVsbC5jb20+DQo+IFN1YmplY3Q6IFtFWFRdIFJlOiBbUEFUQ0ggdjYgNC80XSBtbWM6
-IHNkaW8gc3VwcG9ydCBleHRlcm5hbCBzY2F0dGVyIGdhdGhlciBsaXN0DQo+IA0KPiBFeHRlcm5h
-bCBFbWFpbA0KPiANCj4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KPiBPbiAxOSBEZWNlbWJlciAyMDE3IGF0IDEz
-OjA2LCBYaW5taW5nIEh1IDxodXhtQG1hcnZlbGwuY29tPiB3cm90ZToNCj4gPiBDdXJyZW50bHkg
-c2RpbyBkZXZpY2UgZHJpdmVycyBuZWVkIHRvIHByZXBhcmUgYSBiaWcgY29udGludW91cw0KPiA+
-IHBoeXNpY2FsIG1lbW9yeSBmb3IgbGFyZ2UgZGF0YSB0cmFuc2Zlci4gbW1jIHN0YWNrIHdpbGwg
-Y29uc3RydWN0DQo+ID4gc2NhdHRlci9nYXRoZXIgYnVmZmVyIGxpc3QgdG8gbWFrZSB1c2Ugb2Yg
-QURNQTIuDQo+ID4NCj4gPiBBY2NvcmRpbmcgdG8gdGhlIHNkaW8gaG9zdCBjb250cm9sbGVyIHNw
-ZWNpZmljYXRpb24gdmVyc2lvbiA0LjAwDQo+ID4gY2hhcHRlciAxLjEzLjIsIHNkaW8gZGV2aWNl
-IGRyaXZlcnMgaGF2ZSB0aGUgYWJpbGl0eSB0byBjb25zdHJ1Y3QNCj4gPiBzY2F0dGVyL2dhdGhl
-ciBETUEgYnVmZmVyIGxpc3QuIEluIHRoaXMgd2F5LCB0aGV5IGRvIG5vdCBuZWVkIHRvDQo+ID4g
-YWxsb2NhdGUgYmlnIG1lbW9yeS4NCj4gPg0KPiA+IFRoaXMgcGF0Y2ggcmVmYWN0b3JzIGN1cnJl
-bnQgc2RpbyBjb21tYW5kIDUzIHdyYXBwZXINCj4gPiBtbWNfaW9fcndfZXh0ZW5kZWQsIHNvIHRo
-YXQgaXQgY2FuIGFjY2VwdCBleHRlcm5hbCBzY2F0dGVyL2dhdGhlcg0KPiA+IGJ1ZmZlciBsaXN0
-IGZyb20gaXRzIGNhbGxlciwgc3VjaCBhcyB0aGUgc2RpbyBkZXZpY2UgZHJpdmVyLiBUaGlzDQo+
-ID4gcGF0Y2ggaXMgdmVyeSB1c2VmdWwgb24gc29tZSBlbWJlZGRlZCBzeXN0ZW1zIHdoZXJlIGxh
-cmdlIG1lbW9yeQ0KPiA+IGFsbG9jYXRpb24gZmFpbHMgc29tZXRpbWVzLiBJdCBnaXZlcyAxMCB0
-byAxNSUgYmV0dGVyIHRocm91Z2hwdXQNCj4gPiBwZXJmb3JtYW5jZSBjb21wYXJlZCB0byBhIGNh
-c2UgaW4gd2hpY2ggc21hbGwgc2luZ2xlIGRhdGEgdHJhbnNmZXJzIGFyZQ0KPiBkb25lLg0KPiA+
-DQo+ID4gU2lnbmVkLW9mZi1ieTogWGlubWluZyBIdSA8aHV4bUBtYXJ2ZWxsLmNvbT4NCj4gPiBT
-aWduZWQtb2ZmLWJ5OiBBbWl0a3VtYXIgS2Fyd2FyIDxha2Fyd2FyQG1hcnZlbGwuY29tPg0KPiA+
-IC0tLQ0KPiA+IHY0OiBzYW1lIGFzIHYzL3YyL3YxDQo+ID4gdjU6IHJlYmFzZWQgb24gbGF0ZXN0
-IGNvZGViYXNlDQo+ID4gdjY6IHNhbWUgYXMgdjUNCj4gPiAtLS0NCj4gPiAgZHJpdmVycy9tbWMv
-Y29yZS9zZGlvX2lvLmMgICAgfCAyMiArKysrKysrKysrKysrKysrLS0NCj4gPiAgZHJpdmVycy9t
-bWMvY29yZS9zZGlvX29wcy5jICAgfCA1Mw0KPiArKysrKysrKysrKysrKysrKysrKysrKysrKysr
-KysrKysrKysrKystLS0tDQo+ID4gIGRyaXZlcnMvbW1jL2NvcmUvc2Rpb19vcHMuaCAgIHwgIDMg
-KystDQo+ID4gIGluY2x1ZGUvbGludXgvbW1jL3NkaW9fZnVuYy5oIHwgIDYgKysrKysNCj4gPiAg
-NCBmaWxlcyBjaGFuZ2VkLCA3NiBpbnNlcnRpb25zKCspLCA4IGRlbGV0aW9ucygtKQ0KPiA+DQo+
-ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2NvcmUvc2Rpb19pby5jIGIvZHJpdmVycy9tbWMv
-Y29yZS9zZGlvX2lvLmMNCj4gPiBpbmRleCA0ODA2NTIxLi42MDQ2NTExIDEwMDY0NA0KPiA+IC0t
-LSBhL2RyaXZlcnMvbW1jL2NvcmUvc2Rpb19pby5jDQo+ID4gKysrIGIvZHJpdmVycy9tbWMvY29y
-ZS9zZGlvX2lvLmMNCj4gPiBAQCAtMzI3LDcgKzMyNyw3IEBAIHN0YXRpYyBpbnQgc2Rpb19pb19y
-d19leHRfaGVscGVyKHN0cnVjdCBzZGlvX2Z1bmMNCj4gKmZ1bmMsIGludCB3cml0ZSwNCj4gPiAg
-ICAgICAgICAgICAgICAgICAgICAgICBzaXplID0gYmxvY2tzICogZnVuYy0+Y3VyX2Jsa3NpemU7
-DQo+ID4NCj4gPiAgICAgICAgICAgICAgICAgICAgICAgICByZXQgPSBtbWNfaW9fcndfZXh0ZW5k
-ZWQoZnVuYy0+Y2FyZCwgd3JpdGUsDQo+ID4gLSAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICBmdW5jLT5udW0sIGFkZHIsIGluY3JfYWRkciwgYnVmLA0KPiA+ICsgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgZnVuYy0+bnVtLCBhZGRyLCBpbmNyX2FkZHIsIGZhbHNlLA0KPiA+ICsg
-YnVmLA0KPiA+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgYmxvY2tzLCBmdW5jLT5j
-dXJfYmxrc2l6ZSk7DQo+ID4gICAgICAgICAgICAgICAgICAgICAgICAgaWYgKHJldCkNCj4gPiAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHJldHVybiByZXQ7IEBAIC0zNDUsNyArMzQ1
-LDcgQEANCj4gc3RhdGljDQo+ID4gaW50IHNkaW9faW9fcndfZXh0X2hlbHBlcihzdHJ1Y3Qgc2Rp
-b19mdW5jICpmdW5jLCBpbnQgd3JpdGUsDQo+ID4NCj4gPiAgICAgICAgICAgICAgICAgLyogSW5k
-aWNhdGUgYnl0ZSBtb2RlIGJ5IHNldHRpbmcgImJsb2NrcyIgPSAwICovDQo+ID4gICAgICAgICAg
-ICAgICAgIHJldCA9IG1tY19pb19yd19leHRlbmRlZChmdW5jLT5jYXJkLCB3cml0ZSwNCj4gZnVu
-Yy0+bnVtLCBhZGRyLA0KPiA+IC0gICAgICAgICAgICAgICAgICAgICAgICBpbmNyX2FkZHIsIGJ1
-ZiwgMCwgc2l6ZSk7DQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgIGluY3JfYWRkciwgZmFs
-c2UsIGJ1ZiwgMCwgc2l6ZSk7DQo+ID4gICAgICAgICAgICAgICAgIGlmIChyZXQpDQo+ID4gICAg
-ICAgICAgICAgICAgICAgICAgICAgcmV0dXJuIHJldDsNCj4gPg0KPiA+IEBAIC01MTMsNiArNTEz
-LDI0IEBAIGludCBzZGlvX3dyaXRlc2Ioc3RydWN0IHNkaW9fZnVuYyAqZnVuYywgdW5zaWduZWQN
-Cj4gPiBpbnQgYWRkciwgdm9pZCAqc3JjLCAgfSAgRVhQT1JUX1NZTUJPTF9HUEwoc2Rpb193cml0
-ZXNiKTsNCj4gPg0KPiA+ICtpbnQgc2Rpb19yZWFkc2Jfc2dfZW5oKHN0cnVjdCBzZGlvX2Z1bmMg
-KmZ1bmMsIHVuc2lnbmVkIGludCBhZGRyLA0KPiANCj4gQ291bGQgeW91IHBsZWFzZSByZW5hbWUg
-dGhpcyB0byBzZGlvX3JlYWRzYl9zZygpIGluc3RlYWQ/DQoNCk9rLCBzdXJlLg0KPiANCj4gPiAr
-ICAgICAgICAgICAgICAgICAgICAgIHN0cnVjdCBzZ190YWJsZSAqZHN0KQ0KPiANCj4gSSB0aGlu
-ayB3aGF0IENocmlzdG9waCBzdWdnZXN0ZWQgYW5kIEkgYWdyZWUgd2l0aCwgaXMgdG8gdXNlIGEg
-InN0cnVjdA0KPiBzY2F0dGVybGlzdCAqc2ciIGluc3RlYWQgb2YgInN0cnVjdCBzZ190YWJsZSAq
-ZHN0IiBhcyB0aGUgaW4tcGFyYW1ldGVyLg0KPiANCj4gVGhlIHNpbWlsYXIgYXBwbGllcyBmb3Ig
-dGhlIHdyaXRlIEFQSSwgb2YgY291cnNlLg0KDQpPaCwgSSBhbSBub3QgY29tcGxldGVseSB1bmRl
-cnN0YW5kIHRoaXMgcG9pbnQsIGNvdWxkIHlvdSBzaGFyZSBtb3JlIGluZm9ybWF0aW9uPw0KSWYg
-dXNpbmcgc2NhdHRlcl9saXN0LCB3ZSBuZWVkIHRyYXZlbCBlYWNoIG5vZGUgdXNpbmcgc2dfbmV4
-dCgpDQpTZ190YWJsZSB3aXRoIG5lbnRzIGNvdWxkIGJlIGFibGUgdG8gdXNlIGZvcl9lYWNoX3Nn
-IGluIHRoZSBBUEksIGxvb2tzIGJldHRlciBoZXJlLg0KDQpJIGd1ZXNzLCBtYXliZSBzY2F0dGVy
-X2xpc3QgaXMgYSBtb3JlIGdlbmVyaWMgZGF0YSBzdHJ1Y3R1cmUgdG8gYmUgZW5jb3VyYWdlZCB0
-byB1c2UsIHJpZ2h0ID8NCklmIHNvLCBJIHdpbGwgYmUgZmluZS4NCg0KPiANCj4gPiArew0KPiA+
-ICsgICAgICAgcmV0dXJuIG1tY19pb19yd19leHRlbmRlZChmdW5jLT5jYXJkLCAwLCBmdW5jLT5u
-dW0sDQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGFkZHIsIDAsIHRydWUs
-DQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGRzdCwgMCwgZnVuYy0+Y3Vy
-X2Jsa3NpemUpOyB9DQo+ID4gK0VYUE9SVF9TWU1CT0xfR1BMKHNkaW9fcmVhZHNiX3NnX2VuaCk7
-DQo+ID4gKw0KPiA+ICtpbnQgc2Rpb193cml0ZXNiX3NnX2VuaChzdHJ1Y3Qgc2Rpb19mdW5jICpm
-dW5jLCB1bnNpZ25lZCBpbnQgYWRkciwNCj4gDQo+IENvdWxkIHlvdSBwbGVhc2UgcmVuYW1lIHRo
-aXMgdG8gc2Rpb193cml0ZXNiX3NnKCkgaW5zdGVhZD8NCg0KT2suDQoNCj4gDQo+ID4gKyAgICAg
-ICAgICAgICAgICAgICAgICAgc3RydWN0IHNnX3RhYmxlICpzcmMpIHsNCj4gPiArICAgICAgIHJl
-dHVybiBtbWNfaW9fcndfZXh0ZW5kZWQoZnVuYy0+Y2FyZCwgMSwgZnVuYy0+bnVtLA0KPiA+ICsg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBhZGRyLCAwLCB0cnVlLA0KPiA+ICsgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICBzcmMsIDAsIGZ1bmMtPmN1cl9ibGtzaXplKTsg
-fQ0KPiA+ICtFWFBPUlRfU1lNQk9MX0dQTChzZGlvX3dyaXRlc2Jfc2dfZW5oKTsNCj4gPiArDQo+
-ID4gIC8qKg0KPiA+ICAgKiAgICAgc2Rpb19yZWFkdyAtIHJlYWQgYSAxNiBiaXQgaW50ZWdlciBm
-cm9tIGEgU0RJTyBmdW5jdGlvbg0KPiA+ICAgKiAgICAgQGZ1bmM6IFNESU8gZnVuY3Rpb24gdG8g
-YWNjZXNzDQo+ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2NvcmUvc2Rpb19vcHMuYyBiL2Ry
-aXZlcnMvbW1jL2NvcmUvc2Rpb19vcHMuYw0KPiA+IGluZGV4IGFiYWFiYTMuLjIzMTBhMmEgMTAw
-NjQ0DQo+ID4gLS0tIGEvZHJpdmVycy9tbWMvY29yZS9zZGlvX29wcy5jDQo+ID4gKysrIGIvZHJp
-dmVycy9tbWMvY29yZS9zZGlvX29wcy5jDQo+ID4gQEAgLTExNSwxNiArMTE1LDM5IEBAIGludCBt
-bWNfaW9fcndfZGlyZWN0KHN0cnVjdCBtbWNfY2FyZCAqY2FyZCwgaW50DQo+IHdyaXRlLCB1bnNp
-Z25lZCBmbiwNCj4gPiAgICAgICAgIHJldHVybiBtbWNfaW9fcndfZGlyZWN0X2hvc3QoY2FyZC0+
-aG9zdCwgd3JpdGUsIGZuLCBhZGRyLCBpbiwNCj4gPiBvdXQpOyAgfQ0KPiA+DQo+ID4gKy8qKg0K
-PiA+ICsgKiAgICAgbW1jX2lvX3J3X2V4dGVuZGVkIC0gd3JhcHBlciBmb3Igc2RpbyBjb21tYW5k
-IDUzIHJlYWQvd3JpdGUNCj4gb3BlcmF0aW9uDQo+ID4gKyAqICAgICBAY2FyZDogZGVzdGluYXRp
-b24gZGV2aWNlIGZvciByZWFkL3dyaXRlDQo+ID4gKyAqICAgICBAd3JpdGU6IHplcm8gaW5kY2F0
-ZSByZWFkLCBub24temVybyBpbmRpY2F0ZSB3cml0ZS4NCj4gPiArICogICAgIEBmbjogU0RJTyBm
-dW5jdGlvbiB0byBhY2Nlc3MNCj4gPiArICogICAgIEBhZGRyOiBhZGRyZXNzIG9mIChzaW5nbGUg
-Ynl0ZSkgRklGTw0KPiA+ICsgKiAgICAgQGluY3JfYWRkcjogc2V0IHRvIDEgaW5kaWNhdGUgcmVh
-ZCBvciB3cml0ZSBtdWx0aXBsZSBieXRlcw0KPiA+ICsgICAgICAgICAgICAgICBvZiBkYXRhIHRv
-L2Zyb20gYW4gSU8gcmVnaXN0ZXIgYWRkcmVzcyB0aGF0DQo+ID4gKyAgICAgICAgICAgICAgIGlu
-Y3JlbWVudCBieSAxIGFmdGVyIGVhY2ggb3BlcmF0aW9uLg0KPiA+ICsgKiAgICAgQHNnX2VuaGFu
-Y2U6IGlmIHNldCB0cnVlLCB0aGUgY2FsbGVyIG9mIHRoaXMgZnVuY3Rpb24gd2lsbA0KPiA+ICsg
-ICAgICAgICAgICAgICBwcmVwYXJlIHNjYXR0ZXIgZ2F0aGVyIGRtYSBidWZmZXIgbGlzdC4NCj4g
-PiArICogICAgIEBidWY6IGJ1ZmZlciB0aGF0IGNvbnRhaW5zIHRoZSBkYXRhIHRvIHdyaXRlLiBp
-ZiBzZ19lbmhhbmNlDQo+ID4gKyAgICAgICAgICAgICAgIGlzIHNldCwgaXQgcG9pbnQgdG8gU0cg
-ZG1hIGJ1ZmZlciBsaXN0Lg0KPiA+ICsgKiAgICAgQGJsb2NrczogbnVtYmVyIG9mIGJsb2NrcyBv
-ZiBkYXRhIHRyYW5zZmVyLg0KPiA+ICsgICAgICAgICAgICAgICBpZiBzZXQgemVybywgaW5kaWNh
-dGUgYnl0ZSBtb2RlDQo+ID4gKyAgICAgICAgICAgICAgIGlmIHNldCBub24temVybywgaW5kaWNh
-dGUgYmxvY2sgbW9kZQ0KPiA+ICsgICAgICAgICAgICAgICBpZiBzZ19lbmhhbmNlIGlzIHNldCwg
-dGhpcyBwYXJhbWV0ZXIgd2lsbCBub3QgYmUgdXNlZC4NCj4gPiArICogICAgIEBibGtzejogYmxv
-Y2sgc2l6ZSBmb3IgYmxvY2sgbW9kZSBkYXRhIHRyYW5zZmVyLg0KPiA+ICsgKg0KPiA+ICsgKi8N
-Cj4gDQo+IFRoZSBkZXNjcmlwdGl2ZSBmdW5jdGlvbiBoZWFkZXIgaXNuJ3QgcmVxdWlyZWQgaGVy
-ZSwgYmVjYXVzZSB0aGlzIGlzIGFuIGludGVybmFsDQo+IGZ1bmN0aW9uIGZvciB0aGUgbW1jIGNv
-cmUuDQo+IA0KPiBIb3dldmVyLCBpZiB5b3UgcmVhbGx5IHdhbnQgdGhpcywgSSBzdWdnZXN0IHlv
-dSBtYWtlIGl0IGEgc2VwYXJhdGUgcGF0Y2guDQo+IA0KT2suDQoNCj4gPiAgaW50IG1tY19pb19y
-d19leHRlbmRlZChzdHJ1Y3QgbW1jX2NhcmQgKmNhcmQsIGludCB3cml0ZSwgdW5zaWduZWQgZm4s
-DQo+ID4gLSAgICAgICB1bnNpZ25lZCBhZGRyLCBpbnQgaW5jcl9hZGRyLCB1OCAqYnVmLCB1bnNp
-Z25lZCBibG9ja3MsIHVuc2lnbmVkDQo+IGJsa3N6KQ0KPiA+ICsgICAgICAgICAgICAgICAgICAg
-ICAgdW5zaWduZWQgaW50IGFkZHIsIGludCBpbmNyX2FkZHIsIGJvb2wNCj4gPiArIHNnX2VuaGFu
-Y2UsDQo+IA0KPiBJbnN0ZWFkIG9mIGxldHRpbmcgdGhpcyB0YWtlIGEgbmV3IGJvb2wgdmFyaWFi
-bGUsIGxldCdzIGluc3RlYWQgcHJvdmlkZSBpdCB3aXRoIGENCj4gInN0cnVjdCBzY2F0dGVybGlz
-dCAqc2ciLiBJbiBjYXNlcyB3aGVuIGl0IGlzbid0IHVzZWQsIGp1c3QgcHJvdmlkZSBOVUxMLg0K
-PiANCk9rYXksIHN0aWxsIG5lZWQgY2hvb3NlIGJldHdlZW4gc2dfdGFibGUgYW5kIHNjYXR0ZXJf
-bGlzdA0KDQoNCj4gRGVwZW5kaW5nIG9uIHRoZSBlbmQgcmVzdWx0LCB3ZSBtYXkgZXZlbiBjb25z
-aWRlciB0byBtYWtlIGEgc2VwYXJhdGUNCj4gZnVuY3Rpb24gZGVhbGluZyB3aXRoIHRoZSBzY2F0
-dGVybGlzdCBjYXNlLCBwZXJoYXBzIHZpYSBzaGFyaW5nIHNvbWUgY29tbW9uDQo+IGZ1bmN0aW9u
-YWxpdHkgZnJvbSBtbWNfaW9fcndfZXh0ZW5kZWQoKSBpbnN0ZWFkLg0KPiANCg0KT2gsIEkgaGF2
-ZSB0aG91Z2h0IG9mIHRoZSBuZXcgQVBJLCBhbmQgZmluYWxseSByZXN1ZSB0aGUgb2xkIG9uZSwg
-c2luY2UgbGVzcyBjaGFuZ2VzIGNvbXBhcmVkIHdpdGggdGhlIGNvbW1vbiBwYXJ0Lg0KSSB3aWxs
-IGJlIGZpbmUgaWYgeW91IHJlYWxseSB3YW50IGEgbmV3IEFQSS4NCg0KPiA+ICsgICAgICAgICAg
-ICAgICAgICAgICAgdm9pZCAqYnVmLCB1bnNpZ25lZCBpbnQgYmxvY2tzLCB1bnNpZ25lZCBpbnQN
-Cj4gPiArIGJsa3N6KQ0KPiA+ICB7DQo+ID4gICAgICAgICBzdHJ1Y3QgbW1jX3JlcXVlc3QgbXJx
-ID0ge307DQo+ID4gICAgICAgICBzdHJ1Y3QgbW1jX2NvbW1hbmQgY21kID0ge307DQo+ID4gICAg
-ICAgICBzdHJ1Y3QgbW1jX2RhdGEgZGF0YSA9IHt9Ow0KPiA+ICAgICAgICAgc3RydWN0IHNjYXR0
-ZXJsaXN0IHNnLCAqc2dfcHRyOw0KPiA+ICAgICAgICAgc3RydWN0IHNnX3RhYmxlIHNndGFibGU7
-DQo+ID4gKyAgICAgICBzdHJ1Y3Qgc2dfdGFibGUgKnNndGFibGVfZXh0ZXJuYWw7DQo+ID4gICAg
-ICAgICB1bnNpZ25lZCBpbnQgbmVudHMsIGxlZnRfc2l6ZSwgaTsNCj4gPiAgICAgICAgIHVuc2ln
-bmVkIGludCBzZWdfc2l6ZSA9IGNhcmQtPmhvc3QtPm1heF9zZWdfc2l6ZTsNCj4gPiArICAgICAg
-IHVuc2lnbmVkIGludCBzZ19ibG9ja3MgPSAwOw0KPiA+DQo+ID4gICAgICAgICBXQVJOX09OKGJs
-a3N6ID09IDApOw0KPiA+DQo+ID4gQEAgLTE0MCwxNiArMTYzLDM1IEBAIGludCBtbWNfaW9fcndf
-ZXh0ZW5kZWQoc3RydWN0IG1tY19jYXJkICpjYXJkLA0KPiBpbnQgd3JpdGUsIHVuc2lnbmVkIGZu
-LA0KPiA+ICAgICAgICAgY21kLmFyZyB8PSBmbiA8PCAyODsNCj4gPiAgICAgICAgIGNtZC5hcmcg
-fD0gaW5jcl9hZGRyID8gMHgwNDAwMDAwMCA6IDB4MDAwMDAwMDA7DQo+ID4gICAgICAgICBjbWQu
-YXJnIHw9IGFkZHIgPDwgOTsNCj4gPiArICAgICAgIGNtZC5mbGFncyA9IE1NQ19SU1BfU1BJX1I1
-IHwgTU1DX1JTUF9SNSB8DQo+IE1NQ19DTURfQURUQzsNCj4gPiArDQo+ID4gKyAgICAgICBkYXRh
-LmZsYWdzID0gd3JpdGUgPyBNTUNfREFUQV9XUklURSA6IE1NQ19EQVRBX1JFQUQ7DQo+ID4gKyAg
-ICAgICBkYXRhLmJsa3N6ID0gYmxrc3o7DQo+ID4gKw0KPiA+ICsgICAgICAgaWYgKHNnX2VuaGFu
-Y2UpIHsNCj4gPiArICAgICAgICAgICAgICAgc2d0YWJsZV9leHRlcm5hbCA9IGJ1ZjsNCj4gPiAr
-DQo+ID4gKyAgICAgICAgICAgICAgIGZvcl9lYWNoX3NnKHNndGFibGVfZXh0ZXJuYWwtPnNnbCwg
-c2dfcHRyLA0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgICAgICBzZ3RhYmxlX2V4dGVybmFs
-LT5uZW50cywgaSkgew0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIGlmIChzZ19wdHItPmxl
-bmd0aCA+IGNhcmQtPmhvc3QtPm1heF9zZWdfc2l6ZSkNCj4gPiArICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgIHJldHVybiAtRUlOVkFMOw0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAg
-IHNnX2Jsb2NrcyArPSBESVZfUk9VTkRfVVAoc2dfcHRyLT5sZW5ndGgsDQo+ID4gKyBibGtzeik7
-DQo+IA0KPiBUaGlzIGxvb2tzIHdyb25nLiBGb3IgZWFjaCBpdGVyYXRpb24gdGhlIG51bWJlciBv
-ZiBzZ19ibG9ja3Mgd2lsbCBiZSBpbmNyZWFzZWQsDQo+IHdpdGggdGhlIHJvdW5kIHVwIG1ldGhv
-ZC4NCj4gDQo+IFRoaXMgbWF5IGxlYWQgdG8gdGhhdCB0aGUgZGF0YS5ibG9ja3MgY291bGQgZ2V0
-IGEgaW4tY29ycmVjdCB2YWx1ZQ0KPiAoYmlnZ2VyKSB3aGVuIGFzc2lnbmVkIGJlbG93LCByaWdo
-dD8NCj4gDQoNClBlciBteSB1bmRlcnN0YW5kLCBjYWxsZXIgZHJpdmVyIHNob3VsZCBrZWVwIGVh
-Y2ggc2dfcHRyLT5sZW5ndGggbXVsdGlwbGUgb2YgYmxvY2sgc2l6ZS4NClNvIGRpdmlkZSBzaG91
-bGQgYmUgZmluZSBmb3IgbW9zdCBwbGFjZS4NCkhvd2V2ZXIgaWYgdXNlZCB3cm9uZywgc2dfcHRy
-LT5sZW5ndGggaXMgbm90IG11bHRpcGxlIG9mIGJsb2NrIHNpemUsIHJlbWFpbmRlciBtZW1vcnkg
-cGFydCB3aWxsIGJlDQpMb3N0IGlmIHVzaW5nIGRpdmlkZS4NCg0KUGxlYXNlIGNvcnJlY3QgbWUg
-aWYgSSBoYXZlIGFueSBtaXN1bmRlcnN0YW5kaW5nIGhlcmUuDQoNCg0KPiA+ICsgICAgICAgICAg
-ICAgICB9DQo+ID4gKw0KPiA+ICsgICAgICAgICAgICAgICBjbWQuYXJnIHw9IDB4MDgwMDAwMDAg
-fCBzZ19ibG9ja3M7DQo+IA0KPiBUaGlzIGlzbid0IGdvaW5nIHRvIHdvcmsgZm9yIGJ5dGUgbW9k
-ZSB0cmFuc2ZlcnMuIFNlZW1zIGxpa2UgdGhhdCBzaG91bGQgYmUNCj4gcG9zc2libGUgdG9vIHdo
-ZW4gdXNpbmcgYSBwcmUtYWxsb2NhdGVkIHNjYXR0ZXJsaXN0LCByaWdodCE/DQo+IA0KDQpBaGEs
-IGdvb2Qgc3VnZ2VzdGlvbnMuDQpZZXMsIEkgdGhpbmsgaXQgaXMgcG9zc2libGUsIGFzIHRoZXJl
-IGlzIGFjdHVhbGx5IGEgc2NhdHRlcmxpc3QgZ2VuZXJhdGVkIGZvciBieXRlIG1vZGUgdHJhbnNm
-ZXIgaW4gY3VycmVudCBBUEkuDQpCdXQgaXQgc2VlbXMgbm90IHRoZSBwcm9wZXIgdXNlIGNhc2Uu
-DQpEbyB3ZSByZWFsbHkgZXhwZWN0IGRyaXZlciBjYWxsZXIgdXNlIHNnIGluIGJ5dGUgbW9kZSwg
-aXQgbG9va3Mgc3RyYW5nZSB0byBtZS4NCg0KVG91Z2ggaW4gdGhpcyB3YXksIHRoZSBBUEkgbG9v
-a3MgbW9yZSBnZW5lcmljKHdpdGggdXNlbGVzcyBieXRlIG1vZGUgc2cpLg0KDQoNCj4gPiArICAg
-ICAgICAgICAgICAgZGF0YS5ibG9ja3MgPSBzZ19ibG9ja3M7DQo+ID4gKyAgICAgICAgICAgICAg
-IGRhdGEuc2cgPSBzZ3RhYmxlX2V4dGVybmFsLT5zZ2w7DQo+ID4gKyAgICAgICAgICAgICAgIGRh
-dGEuc2dfbGVuID0gc2d0YWJsZV9leHRlcm5hbC0+bmVudHM7DQo+ID4gKyAgICAgICAgICAgICAg
-IGdvdG8gbW1jX2RhdGFfcmVxOw0KPiA+ICsgICAgICAgfQ0KPiA+ICsNCj4gPiAgICAgICAgIGlm
-IChibG9ja3MgPT0gMCkNCj4gPiAgICAgICAgICAgICAgICAgY21kLmFyZyB8PSAoYmxrc3ogPT0g
-NTEyKSA/IDAgOiBibGtzejsgIC8qIGJ5dGUgbW9kZSAqLw0KPiA+ICAgICAgICAgZWxzZQ0KPiA+
-ICAgICAgICAgICAgICAgICBjbWQuYXJnIHw9IDB4MDgwMDAwMDAgfCBibG9ja3M7ICAgICAgICAg
-LyogYmxvY2sNCj4gbW9kZSAqLw0KPiA+IC0gICAgICAgY21kLmZsYWdzID0gTU1DX1JTUF9TUElf
-UjUgfCBNTUNfUlNQX1I1IHwNCj4gTU1DX0NNRF9BRFRDOw0KPiA+DQo+ID4gLSAgICAgICBkYXRh
-LmJsa3N6ID0gYmxrc3o7DQo+ID4gICAgICAgICAvKiBDb2RlIGluIGhvc3QgZHJpdmVycy9md2sg
-YXNzdW1lcyB0aGF0ICJibG9ja3MiIGFsd2F5cyBpcyA+PTEgKi8NCj4gPiAgICAgICAgIGRhdGEu
-YmxvY2tzID0gYmxvY2tzID8gYmxvY2tzIDogMTsNCj4gPiAtICAgICAgIGRhdGEuZmxhZ3MgPSB3
-cml0ZSA/IE1NQ19EQVRBX1dSSVRFIDogTU1DX0RBVEFfUkVBRDsNCj4gPg0KPiA+ICAgICAgICAg
-bGVmdF9zaXplID0gZGF0YS5ibGtzeiAqIGRhdGEuYmxvY2tzOw0KPiA+ICAgICAgICAgbmVudHMg
-PSBESVZfUk9VTkRfVVAobGVmdF9zaXplLCBzZWdfc2l6ZSk7IEBAIC0xNzIsMTENCj4gKzIxNCwx
-Mg0KPiA+IEBAIGludCBtbWNfaW9fcndfZXh0ZW5kZWQoc3RydWN0IG1tY19jYXJkICpjYXJkLCBp
-bnQgd3JpdGUsIHVuc2lnbmVkDQo+IGZuLA0KPiA+ICAgICAgICAgICAgICAgICBzZ19pbml0X29u
-ZSgmc2csIGJ1ZiwgbGVmdF9zaXplKTsNCj4gPiAgICAgICAgIH0NCj4gPg0KPiA+ICttbWNfZGF0
-YV9yZXE6DQo+ID4gICAgICAgICBtbWNfc2V0X2RhdGFfdGltZW91dCgmZGF0YSwgY2FyZCk7DQo+
-ID4NCj4gPiAgICAgICAgIG1tY193YWl0X2Zvcl9yZXEoY2FyZC0+aG9zdCwgJm1ycSk7DQo+ID4N
-Cj4gPiAtICAgICAgIGlmIChuZW50cyA+IDEpDQo+ID4gKyAgICAgICBpZiAoIXNnX2VuaGFuY2Ug
-JiYgbmVudHMgPiAxKQ0KPiA+ICAgICAgICAgICAgICAgICBzZ19mcmVlX3RhYmxlKCZzZ3RhYmxl
-KTsNCj4gPg0KPiA+ICAgICAgICAgaWYgKGNtZC5lcnJvcikNCj4gPiBkaWZmIC0tZ2l0IGEvZHJp
-dmVycy9tbWMvY29yZS9zZGlvX29wcy5oIGIvZHJpdmVycy9tbWMvY29yZS9zZGlvX29wcy5oDQo+
-ID4gaW5kZXggOTY5NDVjYS4uMmQ3NTEwMCAxMDA2NDQNCj4gPiAtLS0gYS9kcml2ZXJzL21tYy9j
-b3JlL3NkaW9fb3BzLmgNCj4gPiArKysgYi9kcml2ZXJzL21tYy9jb3JlL3NkaW9fb3BzLmgNCj4g
-PiBAQCAtMjMsNyArMjMsOCBAQA0KPiA+ICBpbnQgbW1jX2lvX3J3X2RpcmVjdChzdHJ1Y3QgbW1j
-X2NhcmQgKmNhcmQsIGludCB3cml0ZSwgdW5zaWduZWQgZm4sDQo+ID4gICAgICAgICB1bnNpZ25l
-ZCBhZGRyLCB1OCBpbiwgdTgqIG91dCk7ICBpbnQgbW1jX2lvX3J3X2V4dGVuZGVkKHN0cnVjdA0K
-PiA+IG1tY19jYXJkICpjYXJkLCBpbnQgd3JpdGUsIHVuc2lnbmVkIGZuLA0KPiA+IC0gICAgICAg
-dW5zaWduZWQgYWRkciwgaW50IGluY3JfYWRkciwgdTggKmJ1ZiwgdW5zaWduZWQgYmxvY2tzLCB1
-bnNpZ25lZA0KPiBibGtzeik7DQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICB1bnNpZ25lZCBp
-bnQgYWRkciwgaW50IGluY3JfYWRkciwgYm9vbA0KPiBzZ19lbmhhbmNlLA0KPiA+ICsgICAgICAg
-ICAgICAgICAgICAgICAgdm9pZCAqYnVmLCB1bnNpZ25lZCBpbnQgYmxvY2tzLCB1bnNpZ25lZCBp
-bnQNCj4gPiArIGJsa3N6KTsNCj4gPiAgaW50IHNkaW9fcmVzZXQoc3RydWN0IG1tY19ob3N0ICpo
-b3N0KTsgIHVuc2lnbmVkIGludA0KPiA+IG1tY19hbGlnbl9kYXRhX3NpemUoc3RydWN0IG1tY19j
-YXJkICpjYXJkLCB1bnNpZ25lZCBpbnQgc3opOyAgdm9pZA0KPiA+IHNkaW9faXJxX3dvcmsoc3Ry
-dWN0IHdvcmtfc3RydWN0ICp3b3JrKTsgZGlmZiAtLWdpdA0KPiA+IGEvaW5jbHVkZS9saW51eC9t
-bWMvc2Rpb19mdW5jLmggYi9pbmNsdWRlL2xpbnV4L21tYy9zZGlvX2Z1bmMuaCBpbmRleA0KPiA+
-IDcyZDRkZTQuLmQzNmJhNDcgMTAwNjQ0DQo+ID4gLS0tIGEvaW5jbHVkZS9saW51eC9tbWMvc2Rp
-b19mdW5jLmgNCj4gPiArKysgYi9pbmNsdWRlL2xpbnV4L21tYy9zZGlvX2Z1bmMuaA0KPiA+IEBA
-IC0xNCw2ICsxNCw3IEBADQo+ID4NCj4gPiAgI2luY2x1ZGUgPGxpbnV4L2RldmljZS5oPg0KPiA+
-ICAjaW5jbHVkZSA8bGludXgvbW9kX2RldmljZXRhYmxlLmg+DQo+ID4gKyNpbmNsdWRlIDxsaW51
-eC9zY2F0dGVybGlzdC5oPg0KPiA+DQo+ID4gICNpbmNsdWRlIDxsaW51eC9tbWMvcG0uaD4NCj4g
-Pg0KPiA+IEBAIC0xMzYsNiArMTM3LDExIEBAIGV4dGVybiBpbnQgc2Rpb19tZW1jcHlfZnJvbWlv
-KHN0cnVjdCBzZGlvX2Z1bmMNCj4gPiAqZnVuYywgdm9pZCAqZHN0LCAgZXh0ZXJuIGludCBzZGlv
-X3JlYWRzYihzdHJ1Y3Qgc2Rpb19mdW5jICpmdW5jLCB2b2lkICpkc3QsDQo+ID4gICAgICAgICB1
-bnNpZ25lZCBpbnQgYWRkciwgaW50IGNvdW50KTsNCj4gPg0KPiA+ICtpbnQgc2Rpb19yZWFkc2Jf
-c2dfZW5oKHN0cnVjdCBzZGlvX2Z1bmMgKmZ1bmMsIHVuc2lnbmVkIGludCBhZGRyLA0KPiA+ICsg
-ICAgICAgICAgICAgICAgICAgICAgc3RydWN0IHNnX3RhYmxlICpkc3QpOyBpbnQNCj4gPiArc2Rp
-b193cml0ZXNiX3NnX2VuaChzdHJ1Y3Qgc2Rpb19mdW5jICpmdW5jLCB1bnNpZ25lZCBpbnQgYWRk
-ciwNCj4gPiArICAgICAgICAgICAgICAgICAgICAgICBzdHJ1Y3Qgc2dfdGFibGUgKnNyYyk7DQo+
-ID4gKw0KPiA+ICBleHRlcm4gdm9pZCBzZGlvX3dyaXRlYihzdHJ1Y3Qgc2Rpb19mdW5jICpmdW5j
-LCB1OCBiLA0KPiA+ICAgICAgICAgdW5zaWduZWQgaW50IGFkZHIsIGludCAqZXJyX3JldCk7ICBl
-eHRlcm4gdm9pZA0KPiA+IHNkaW9fd3JpdGV3KHN0cnVjdCBzZGlvX2Z1bmMgKmZ1bmMsIHUxNiBi
-LA0KPiA+IC0tDQo+ID4gMS45LjENCj4gPg0KPiANCj4gS2luZCByZWdhcmRzDQo+IFVmZmUNCg==
+On 14/12/17 15:09, Kishon Vijay Abraham I wrote:
+> Errata i834 in AM572x Sitara Processors Silicon Revision 2.0, 1.1
+> (SPRZ429K July 2014–Revised March 2017 [1]) mentions
+> Under high speed HS200 and SDR104 modes, the functional clock for MMC
+> modules will reach up to 192 MHz. At this frequency, the maximum obtainable
+> timeout (DTO = 0xE) through MMC host controller is (1/192MHz)*2^27 = 700ms.
+> Commands taking longer than 700ms may be affected by this small window
+> frame. Workaround for this errata is use a software timer instead of
+> hardware timer to provide the delay requested by the upper layer.
+> 
+> While this errata is specific to AM572x, it is applicable to all sdhci
+> based controllers when a particular request require timeout greater
+> than hardware capability.
+
+It doesn't work for our controllers.  Even if the data timeout interrupt is
+disabled, it seems like the timeout still "happens" in some fashion - after
+which the host controller starts misbehaving.
+
+So you will need to add a quirk.
+
+> 
+> Re-use the software timer already implemented in sdhci to program the
+> correct timeout value and also disable the hardware timeout when
+> the required timeout is greater than hardware capabiltiy in order to
+> avoid spurious timeout interrupts.
+> 
+> This patch is based on the earlier patch implemented for omap_hsmmc [2]
+> 
+> [1] -> http://www.ti.com/lit/er/sprz429k/sprz429k.pdf
+> [2] -> https://patchwork.kernel.org/patch/9791449/
+> 
+> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+> ---
+>  drivers/mmc/host/sdhci.c | 41 +++++++++++++++++++++++++++++++++++++++--
+>  drivers/mmc/host/sdhci.h | 11 +++++++++++
+>  2 files changed, 50 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index e9290a3439d5..d0655e1d2cc7 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -673,6 +673,27 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
+>  	}
+>  }
+>  
+> +static void sdhci_calc_sw_timeout(struct sdhci_host *host,
+> +				  struct mmc_command *cmd,
+> +				  unsigned int target_timeout)
+> +{
+> +	struct mmc_host *mmc = host->mmc;
+> +	struct mmc_ios *ios = &mmc->ios;
+> +	struct mmc_data *data = cmd->data;
+> +	unsigned long long transfer_time;
+> +
+> +	if (data) {
+> +		transfer_time = MMC_BLOCK_TRANSFER_TIME_MS(data->blksz,
+> +							   ios->bus_width,
+> +							   ios->clock);
+
+If it has a value, actual_clock is better than ios->clock.
+
+> +		/* calculate timeout for the entire data */
+> +		host->data_timeout = (data->blocks * (target_timeout +
+> +						      transfer_time));
+> +	} else if (cmd->flags & MMC_RSP_BUSY) {
+> +		host->data_timeout = cmd->busy_timeout * MSEC_PER_SEC;
+
+Doesn't need MSEC_PER_SEC multiplier.
+
+> +	}
+> +}
+> +
+>  static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+>  {
+>  	u8 count;
+> @@ -732,8 +753,12 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+>  	}
+>  
+>  	if (count >= 0xF) {
+> -		DBG("Too large timeout 0x%x requested for CMD%d!\n",
+> -		    count, cmd->opcode);
+> +		DBG("Too large timeout.. using SW timeout for CMD%d!\n",
+> +		    cmd->opcode);
+> +		sdhci_calc_sw_timeout(host, cmd, target_timeout);
+> +		host->ier &= ~SDHCI_INT_DATA_TIMEOUT;
+> +		sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
+> +		sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
+>  		count = 0xE;
+>  	}
+>  
+> @@ -1198,6 +1223,14 @@ static void sdhci_finish_command(struct sdhci_host *host)
+>  {
+>  	struct mmc_command *cmd = host->cmd;
+>  
+> +	if (host->data_timeout) {
+> +		unsigned long timeout;
+> +
+> +		timeout = jiffies +
+> +			  msecs_to_jiffies(host->data_timeout);
+> +		sdhci_mod_timer(host, host->cmd->mrq, timeout);
+
+cmd could be the sbc or a stop cmd or a command during transfer, so this
+needs more logic.
+
+> +	}
+> +
+>  	host->cmd = NULL;
+>  
+>  	if (cmd->flags & MMC_RSP_PRESENT) {
+> @@ -2341,6 +2374,10 @@ static bool sdhci_request_done(struct sdhci_host *host)
+>  		return true;
+>  	}
+>  
+> +	host->data_timeout = 0;
+> +	host->ier |= SDHCI_INT_DATA_TIMEOUT;
+> +	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
+> +	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
+
+sdhci can have 2 requests in progress to allow for commands to be sent while
+a data transfer is in progress, so this is not necessarily the data transfer
+request that is done.  Also we want to avoid unnecessary register writes.
+
+>  	sdhci_del_timer(host, mrq);
+>  
+>  	/*
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 54bc444c317f..e6e0278bea1a 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -332,6 +332,15 @@ struct sdhci_adma2_64_desc {
+>  /* Allow for a a command request and a data request at the same time */
+>  #define SDHCI_MAX_MRQS		2
+>  
+> +/*
+> + * Time taken for transferring one block. It is multiplied by a constant
+> + * factor '2' to account for any errors
+> + */
+> +#define MMC_BLOCK_TRANSFER_TIME_MS(blksz, bus_width, freq)		\
+> +				   ((unsigned long long)		\
+> +				   (2 * (((blksz) * MSEC_PER_SEC *	\
+> +				   (8 / (bus_width))) / (freq))))
+
+I don't think the macro helps make the code more readable.  Might just as
+well write a nice function to calculate the entire data request timeout.
+
+> +
+>  enum sdhci_cookie {
+>  	COOKIE_UNMAPPED,
+>  	COOKIE_PRE_MAPPED,	/* mapped by sdhci_pre_req() */
+> @@ -546,6 +555,8 @@ struct sdhci_host {
+>  	/* Host SDMA buffer boundary. */
+>  	u32			sdma_boundary;
+>  
+> +	unsigned long long	data_timeout;
+
+msecs_to_jiffies() will truncate to 'unsigned int' anyway, so this might as
+well be 'unsigned int'.
+
+> +
+>  	unsigned long private[0] ____cacheline_aligned;
+>  };
+>  
+> 
+
