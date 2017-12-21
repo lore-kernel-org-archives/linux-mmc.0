@@ -1,86 +1,89 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: tmio: use io* accessors consistently
-Date: Thu, 21 Dec 2017 15:22:12 +0100
-Message-ID: <CAPDyKFrXZVXjroVr-1DO9y_37n09c3n0PBUQok+bwy_hxv95oA@mail.gmail.com>
-References: <20171219133403.788-1-wsa+renesas@sang-engineering.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 1/9] mmc: sdhci-pci: Stop calling
+ sdhci_enable_irq_wakeups()
+Date: Thu, 21 Dec 2017 16:25:57 +0200
+Message-ID: <b9801ecc-eaf4-7efc-fff0-3cbd40f29c9a@intel.com>
+References: <1513757933-11232-1-git-send-email-adrian.hunter@intel.com>
+ <1513757933-11232-2-git-send-email-adrian.hunter@intel.com>
+ <CAPDyKFoHPdYaorR38LaS5Hzs8CC99Smki8uZW8aDanboLRV3QA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <20171219133403.788-1-wsa+renesas@sang-engineering.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Simon Horman <horms@verge.net.au>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga14.intel.com ([192.55.52.115]:64489 "EHLO mga14.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750881AbdLUO0Y (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 21 Dec 2017 09:26:24 -0500
+In-Reply-To: <CAPDyKFoHPdYaorR38LaS5Hzs8CC99Smki8uZW8aDanboLRV3QA@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Haridhar Kalvala <haridhar.kalvala@intel.com>
 
-On 19 December 2017 at 14:34, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
-> Because we started using io*_rep accessors previously because they are
-> more widely defined across architectures, let's be consistent and use
-> this family for all accessor wrappers.
->
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+On 21/12/17 16:15, Ulf Hansson wrote:
+> On 20 December 2017 at 09:18, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> sdhci_enable_irq_wakeups() is already called by sdhci_suspend_host() so
+>> sdhci-pci should not need to call it. However sdhci_suspend_host() only
+>> calls it if wakeups are enabled, and sdhci-pci does not enable them until
+>> after calling sdhci_suspend_host(). So move the calls to
+>> sdhci_pci_init_wakeup() before calling sdhci_suspend_host(), and
+>> stop calling sdhci_enable_irq_wakeups(). That results in some
+>> simplification because sdhci_pci_suspend_host() and
+>> __sdhci_pci_suspend_host() no longer need to be separate functions.
+>>
+>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+>> ---
+>>  drivers/mmc/host/sdhci-pci-core.c | 58 ++++++++++++++-------------------------
+>>  1 file changed, 21 insertions(+), 37 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+>> index 110c634cfb43..2ffc09f088ee 100644
+>> --- a/drivers/mmc/host/sdhci-pci-core.c
+>> +++ b/drivers/mmc/host/sdhci-pci-core.c
+>> @@ -39,10 +39,29 @@
+>>  static void sdhci_pci_hw_reset(struct sdhci_host *host);
+>>
+>>  #ifdef CONFIG_PM_SLEEP
+>> -static int __sdhci_pci_suspend_host(struct sdhci_pci_chip *chip)
+>> +static int sdhci_pci_init_wakeup(struct sdhci_pci_chip *chip)
+>> +{
+>> +       mmc_pm_flag_t pm_flags = 0;
+>> +       int i;
+>> +
+>> +       for (i = 0; i < chip->num_slots; i++) {
+>> +               struct sdhci_pci_slot *slot = chip->slots[i];
+>> +
+>> +               if (slot)
+>> +                       pm_flags |= slot->host->mmc->pm_flags;
+>> +       }
+>> +
+>> +       return device_init_wakeup(&chip->pdev->dev,
+>> +                                 (pm_flags & MMC_PM_KEEP_POWER) &&
+>> +                                 (pm_flags & MMC_PM_WAKE_SDIO_IRQ));
+> 
+> A couple of comments here.
+> 
+> Wakeup settings shouldn't be changed during system suspend. That means
+> we shouldn't call device_init_wakeup() (or device_set_wakeup_enable()
+> for that matter) here.
+> 
+> Instead, device_init_wakeup() should be called during ->probe(), while
+> device_set_wakeup_enable() should normally *not* have to be called at
+> all by drivers. There are a exceptions for device_set_wakeup_enable(),
+> however it should not have to be called during system suspend, at
+> least.
+> 
+> Of course, I realize that you are not changing the behavior in this
+> regards in this patch, so I am fine this anyway.
+> 
+> My point is, that the end result while doing this improvements in this
+> series, should strive to that device_init_wakeup() and
+> device_set_wakeup_enable() becomes used correctly. I don't think that
+> is the case, or is it?
 
-Thanks, applied for next!
+Unfortunately we don't find out what the SDIO driver wants to do (i.e
+pm_flags & MMC_PM_WAKE_SDIO_IRQ) until suspend.
 
-Kind regards
-Uffe
-
-> ---
->
-> And here is the follow-up patch. Tested on a R-Car M3-W; still could checksum a
-> huge file from SD without performance regressions.
->
->  drivers/mmc/host/tmio_mmc.h | 12 ++++++------
->  1 file changed, 6 insertions(+), 6 deletions(-)
->
-> diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-> index 03519c4ca0aa1a..e7d651352dc90f 100644
-> --- a/drivers/mmc/host/tmio_mmc.h
-> +++ b/drivers/mmc/host/tmio_mmc.h
-> @@ -227,7 +227,7 @@ int tmio_mmc_host_runtime_resume(struct device *dev);
->
->  static inline u16 sd_ctrl_read16(struct tmio_mmc_host *host, int addr)
->  {
-> -       return readw(host->ctl + (addr << host->bus_shift));
-> +       return ioread16(host->ctl + (addr << host->bus_shift));
->  }
->
->  static inline void sd_ctrl_read16_rep(struct tmio_mmc_host *host, int addr,
-> @@ -239,8 +239,8 @@ static inline void sd_ctrl_read16_rep(struct tmio_mmc_host *host, int addr,
->  static inline u32 sd_ctrl_read16_and_16_as_32(struct tmio_mmc_host *host,
->                                               int addr)
->  {
-> -       return readw(host->ctl + (addr << host->bus_shift)) |
-> -              readw(host->ctl + ((addr + 2) << host->bus_shift)) << 16;
-> +       return ioread16(host->ctl + (addr << host->bus_shift)) |
-> +              ioread16(host->ctl + ((addr + 2) << host->bus_shift)) << 16;
->  }
->
->  static inline void sd_ctrl_read32_rep(struct tmio_mmc_host *host, int addr,
-> @@ -257,7 +257,7 @@ static inline void sd_ctrl_write16(struct tmio_mmc_host *host, int addr,
->          */
->         if (host->write16_hook && host->write16_hook(host, addr))
->                 return;
-> -       writew(val, host->ctl + (addr << host->bus_shift));
-> +       iowrite16(val, host->ctl + (addr << host->bus_shift));
->  }
->
->  static inline void sd_ctrl_write16_rep(struct tmio_mmc_host *host, int addr,
-> @@ -269,8 +269,8 @@ static inline void sd_ctrl_write16_rep(struct tmio_mmc_host *host, int addr,
->  static inline void sd_ctrl_write32_as_16_and_16(struct tmio_mmc_host *host,
->                                                 int addr, u32 val)
->  {
-> -       writew(val & 0xffff, host->ctl + (addr << host->bus_shift));
-> -       writew(val >> 16, host->ctl + ((addr + 2) << host->bus_shift));
-> +       iowrite16(val & 0xffff, host->ctl + (addr << host->bus_shift));
-> +       iowrite16(val >> 16, host->ctl + ((addr + 2) << host->bus_shift));
->  }
->
->  static inline void sd_ctrl_write32_rep(struct tmio_mmc_host *host, int addr,
-> --
-> 2.11.0
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I considered enabling wakeups by default but wasn't sure that would not
+increase power consumption in devices not expecting it.
