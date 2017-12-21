@@ -1,18 +1,19 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 02/12] mmc: sdhci-omap: Add card_busy host ops
-Date: Thu, 21 Dec 2017 10:59:56 +0200
-Message-ID: <c5c61373-aa0e-f4d1-4463-88e31474b80a@intel.com>
+Subject: Re: [PATCH 03/12] mmc: sdhci-omap: Add custom set_uhs_signaling
+ sdhci_host ops
+Date: Thu, 21 Dec 2017 11:01:06 +0200
+Message-ID: <7120e913-56c5-f04f-b61e-0e35b474ce84@intel.com>
 References: <20171214130941.26666-1-kishon@ti.com>
- <20171214130941.26666-3-kishon@ti.com>
+ <20171214130941.26666-4-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga04.intel.com ([192.55.52.120]:15081 "EHLO mga04.intel.com"
+Received: from mga01.intel.com ([192.55.52.88]:50118 "EHLO mga01.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751705AbdLUJAY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 21 Dec 2017 04:00:24 -0500
-In-Reply-To: <20171214130941.26666-3-kishon@ti.com>
+        id S1751163AbdLUJBf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 21 Dec 2017 04:01:35 -0500
+In-Reply-To: <20171214130941.26666-4-kishon@ti.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -20,132 +21,82 @@ To: Kishon Vijay Abraham I <kishon@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, nsekhar@ti.com
 
 On 14/12/17 15:09, Kishon Vijay Abraham I wrote:
-> card_busy ops is used by mmc core in
->   1) mmc_set_uhs_voltage to verify voltage switch
->   2) __mmc_start_request/mmc_poll_for_busy to check the card busy status
-> 
-> While only DAT0 can be used to check the card busy status (in '2' above),
-> CMD and DAT[0..3] is used to verify voltage switch (in '1' above).
-> 
-> The voltage switching sequence for AM572x platform is mentioned
-> in Figure 25-48. eMMC/SD/SDIO Power Switching Procedure of
-> AM572x Sitara Processors Silicon Revision 2.0, 1.1 TRM
-> (SPRUHZ6I - October 2014–Revised April 2017 [1]).
-> 
-> Add card_busy host ops in sdhci_omap that checks for both CMD and
-> DAT[0..3]. card_busy here returns true if one of CMD and DAT[0..3] is
-> low though during voltage switch sequence all of CMD and DAT[0..3] has
-> to be low (however haven't observed a case where some DAT lines are low
-> and some are high).
-
-Isn't it better to check DAT0 only since that is all that is defined for 'busy'.
-
-> 
-> In the voltage switching sequence, CLKEXTFREE bit in MMCHS_CON
-> should also be set after switching to 1.8v which is also taken
-> care in the card_busy ops.
-> 
-> [1] -> http://www.ti.com/lit/ug/spruhz6i/spruhz6i.pdf
+> UHS-1 DDR50 and MMC DDR52 mode require DDR bit to be
+> set in the configuration register (MMCHS_CON). Add
+> sdhci-omap specific set_uhs_signaling ops to set
+> this bit. Also while setting the UHSMS bit, clock should be
+> disabled.
 > 
 > Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+
+Apart from 1 minor comment below:
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
 > ---
->  drivers/mmc/host/sdhci-omap.c | 62 +++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 62 insertions(+)
+>  drivers/mmc/host/sdhci-omap.c | 26 +++++++++++++++++++++++++-
+>  1 file changed, 25 insertions(+), 1 deletion(-)
 > 
 > diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-> index 96985786cadf..defe4eac020d 100644
+> index defe4eac020d..8f7239e2edc2 100644
 > --- a/drivers/mmc/host/sdhci-omap.c
 > +++ b/drivers/mmc/host/sdhci-omap.c
-> @@ -31,11 +31,20 @@
+> @@ -31,6 +31,7 @@
 >  #define SDHCI_OMAP_CON		0x12c
 >  #define CON_DW8			BIT(5)
 >  #define CON_DMA_MASTER		BIT(20)
-> +#define CON_CLKEXTFREE		BIT(16)
-> +#define CON_PADEN		BIT(15)
+> +#define CON_DDR			BIT(19)
+>  #define CON_CLKEXTFREE		BIT(16)
+>  #define CON_PADEN		BIT(15)
 >  #define CON_INIT		BIT(1)
->  #define CON_OD			BIT(0)
+> @@ -93,6 +94,9 @@ struct sdhci_omap_host {
+>  	u8			power_mode;
+>  };
 >  
->  #define SDHCI_OMAP_CMD		0x20c
->  
-> +#define SDHCI_OMAP_PSTATE	0x0224
-> +#define PSTATE_CLEV             BIT(24)
-> +#define PSTATE_DLEV_SHIFT	20
-> +#define PSTATE_DLEV_DAT(x)	(1 << (PSTATE_DLEV_SHIFT + (x)))
-> +#define PSTATE_DLEV		(PSTATE_DLEV_DAT(0) | PSTATE_DLEV_DAT(1) | \
-> +					PSTATE_DLEV_DAT(2) | PSTATE_DLEV_DAT(3))
+> +static void sdhci_omap_start_clock(struct sdhci_omap_host *omap_host);
+> +static void sdhci_omap_stop_clock(struct sdhci_omap_host *omap_host);
+
+These forward declarations aren't needed are they.
+
 > +
->  #define SDHCI_OMAP_HCTL		0x228
->  #define HCTL_SDBP		BIT(8)
->  #define HCTL_SDVS_SHIFT		9
-> @@ -191,6 +200,58 @@ static void sdhci_omap_conf_bus_power(struct sdhci_omap_host *omap_host,
->  	}
+>  static inline u32 sdhci_omap_readl(struct sdhci_omap_host *host,
+>  				   unsigned int offset)
+>  {
+> @@ -471,6 +475,26 @@ static void sdhci_omap_init_74_clocks(struct sdhci_host *host, u8 power_mode)
+>  	enable_irq(host->irq);
 >  }
 >  
-> +static int sdhci_omap_card_busy(struct mmc_host *mmc)
+> +static void sdhci_omap_set_uhs_signaling(struct sdhci_host *host,
+> +					 unsigned int timing)
 > +{
-> +	int i;
-> +	u32 reg, ac12;
-> +	int ret = true;
-> +	struct sdhci_host *host = mmc_priv(mmc);
-> +	struct sdhci_pltfm_host *pltfm_host;
-> +	struct sdhci_omap_host *omap_host;
-> +	u32 ier = host->ier;
+> +	u32 reg;
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
 > +
-> +	pltfm_host = sdhci_priv(host);
-> +	omap_host = sdhci_pltfm_priv(pltfm_host);
+> +	sdhci_omap_stop_clock(omap_host);
 > +
 > +	reg = sdhci_omap_readl(omap_host, SDHCI_OMAP_CON);
-> +	ac12 = sdhci_omap_readl(omap_host, SDHCI_OMAP_AC12);
-> +	reg &= ~CON_CLKEXTFREE;
-> +	if (ac12 & AC12_V1V8_SIGEN)
-> +		reg |= CON_CLKEXTFREE;
-> +	reg |= CON_PADEN;
+> +	if (timing == MMC_TIMING_UHS_DDR50 || timing == MMC_TIMING_MMC_DDR52)
+> +		reg |= CON_DDR;
+> +	else
+> +		reg &= ~CON_DDR;
 > +	sdhci_omap_writel(omap_host, SDHCI_OMAP_CON, reg);
 > +
-> +	disable_irq(host->irq);
-> +	ier |= SDHCI_INT_CARD_INT;
-> +	sdhci_writel(host, ier, SDHCI_INT_ENABLE);
-> +	sdhci_writel(host, ier, SDHCI_SIGNAL_ENABLE);
-> +
-> +	for (i = 0; i < 5; i++) {
-> +		/*
-> +		 * Delay is required for PSTATE to correctly reflect
-> +		 * DLEV/CLEV values after PADEM is set.
-> +		 */
-> +		usleep_range(100, 200);
-> +		reg = sdhci_omap_readl(omap_host, SDHCI_OMAP_PSTATE);
-> +		if ((reg & PSTATE_CLEV) &&
-> +		    ((reg & PSTATE_DLEV) == PSTATE_DLEV)) {
-> +			ret = false;
-> +			goto ret;
-
-'break' is better than 'goto'
-
-> +		}
-> +	}
-> +
-> +ret:
-> +	reg = sdhci_omap_readl(omap_host, SDHCI_OMAP_CON);
-> +	reg &= ~(CON_CLKEXTFREE | CON_PADEN);
-> +	sdhci_omap_writel(omap_host, SDHCI_OMAP_CON, reg);
-> +
-> +	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
-> +	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
-> +	enable_irq(host->irq);
-> +
-> +	return ret;
+> +	sdhci_set_uhs_signaling(host, timing);
+> +	sdhci_omap_start_clock(omap_host);
 > +}
 > +
->  static int sdhci_omap_start_signal_voltage_switch(struct mmc_host *mmc,
->  						  struct mmc_ios *ios)
->  {
-> @@ -562,6 +623,7 @@ static int sdhci_omap_probe(struct platform_device *pdev)
->  	host->mmc_host_ops.start_signal_voltage_switch =
->  					sdhci_omap_start_signal_voltage_switch;
->  	host->mmc_host_ops.set_ios = sdhci_omap_set_ios;
-> +	host->mmc_host_ops.card_busy = sdhci_omap_card_busy;
+>  static struct sdhci_ops sdhci_omap_ops = {
+>  	.set_clock = sdhci_omap_set_clock,
+>  	.set_power = sdhci_omap_set_power,
+> @@ -480,7 +504,7 @@ static struct sdhci_ops sdhci_omap_ops = {
+>  	.set_bus_width = sdhci_omap_set_bus_width,
+>  	.platform_send_init_74_clocks = sdhci_omap_init_74_clocks,
+>  	.reset = sdhci_reset,
+> -	.set_uhs_signaling = sdhci_set_uhs_signaling,
+> +	.set_uhs_signaling = sdhci_omap_set_uhs_signaling,
+>  };
 >  
->  	sdhci_read_caps(host);
->  	host->caps |= SDHCI_CAN_DO_ADMA2;
+>  static int sdhci_omap_set_capabilities(struct sdhci_omap_host *omap_host)
 > 
 
