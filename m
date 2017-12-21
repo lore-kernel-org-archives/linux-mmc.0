@@ -1,145 +1,485 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/9] mmc: sdhci-pci: Stop calling sdhci_enable_irq_wakeups()
-Date: Thu, 21 Dec 2017 16:33:59 +0100
-Message-ID: <CAPDyKFrZjTvYdT8BGKadTdTBsaAeoC3YOQBBPOvqpv1JpaOUoQ@mail.gmail.com>
-References: <1513757933-11232-1-git-send-email-adrian.hunter@intel.com>
- <1513757933-11232-2-git-send-email-adrian.hunter@intel.com>
- <CAPDyKFoHPdYaorR38LaS5Hzs8CC99Smki8uZW8aDanboLRV3QA@mail.gmail.com> <b9801ecc-eaf4-7efc-fff0-3cbd40f29c9a@intel.com>
+From: Craig Bergstrom <craigb@google.com>
+Subject: Re: [PATCH 1/3] mmc: sdhci-pci-o2micro: Add hardware tuning for eMMC
+Date: Thu, 21 Dec 2017 10:18:26 -0700
+Message-ID: <CAOJUGycsUF199s-6_=NGR+pU=m0HTY8ZHUZ2aU4G8CB5V8JqbQ@mail.gmail.com>
+References: <CY4PR04MB047375B124358A33FB077C6EED3C0@CY4PR04MB0473.namprd04.prod.outlook.com>
+ <64a8b6a8-ba1b-a298-5115-d8379f121cab@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f195.google.com ([209.85.223.195]:46614 "EHLO
-        mail-io0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753543AbdLUPeA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Dec 2017 10:34:00 -0500
-Received: by mail-io0-f195.google.com with SMTP id x129so21460930iod.13
-        for <linux-mmc@vger.kernel.org>; Thu, 21 Dec 2017 07:34:00 -0800 (PST)
-In-Reply-To: <b9801ecc-eaf4-7efc-fff0-3cbd40f29c9a@intel.com>
+Received: from mail-qk0-f193.google.com ([209.85.220.193]:40570 "EHLO
+        mail-qk0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752522AbdLURS2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Dec 2017 12:18:28 -0500
+Received: by mail-qk0-f193.google.com with SMTP id q14so18996501qke.7
+        for <linux-mmc@vger.kernel.org>; Thu, 21 Dec 2017 09:18:28 -0800 (PST)
+In-Reply-To: <64a8b6a8-ba1b-a298-5115-d8379f121cab@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Haridhar Kalvala <haridhar.kalvala@intel.com>, Linux PM <linux-pm@vger.kernel.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: LinuxPatchCommit <LinuxPatchCommit@bayhubtech.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Shirley Her (SC)" <shirley.her@bayhubtech.com>
 
-+ linux-pm, Rafael, Geert
+Thanks for sending these patches out, I would be very excited to see
+these devices supported by Linux.
 
-On 21 December 2017 at 15:25, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 21/12/17 16:15, Ulf Hansson wrote:
->> On 20 December 2017 at 09:18, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>> sdhci_enable_irq_wakeups() is already called by sdhci_suspend_host() so
->>> sdhci-pci should not need to call it. However sdhci_suspend_host() only
->>> calls it if wakeups are enabled, and sdhci-pci does not enable them until
->>> after calling sdhci_suspend_host(). So move the calls to
->>> sdhci_pci_init_wakeup() before calling sdhci_suspend_host(), and
->>> stop calling sdhci_enable_irq_wakeups(). That results in some
->>> simplification because sdhci_pci_suspend_host() and
->>> __sdhci_pci_suspend_host() no longer need to be separate functions.
->>>
->>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
->>> ---
->>>  drivers/mmc/host/sdhci-pci-core.c | 58 ++++++++++++++-------------------------
->>>  1 file changed, 21 insertions(+), 37 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
->>> index 110c634cfb43..2ffc09f088ee 100644
->>> --- a/drivers/mmc/host/sdhci-pci-core.c
->>> +++ b/drivers/mmc/host/sdhci-pci-core.c
->>> @@ -39,10 +39,29 @@
->>>  static void sdhci_pci_hw_reset(struct sdhci_host *host);
->>>
->>>  #ifdef CONFIG_PM_SLEEP
->>> -static int __sdhci_pci_suspend_host(struct sdhci_pci_chip *chip)
->>> +static int sdhci_pci_init_wakeup(struct sdhci_pci_chip *chip)
->>> +{
->>> +       mmc_pm_flag_t pm_flags = 0;
->>> +       int i;
->>> +
->>> +       for (i = 0; i < chip->num_slots; i++) {
->>> +               struct sdhci_pci_slot *slot = chip->slots[i];
->>> +
->>> +               if (slot)
->>> +                       pm_flags |= slot->host->mmc->pm_flags;
->>> +       }
->>> +
->>> +       return device_init_wakeup(&chip->pdev->dev,
->>> +                                 (pm_flags & MMC_PM_KEEP_POWER) &&
->>> +                                 (pm_flags & MMC_PM_WAKE_SDIO_IRQ));
+I'm trying them out with a SEABIRD device (pci device 1217:8620).
+When I boot up and load the driver, it don't see any indication of the
+existence of block device and I see these messages repeatedly spammed
+to the kernel logs:
+
+[    0.855163] mmc1: Unknown controller version (3). You may
+experience problems.
+[    0.862519] mmc1: SDHCI controller on PCI [0000:01:00.0] using ADMA
+[   93.152163] mmc1: Timeout waiting for hardware cmd interrupt.
+[   93.157911] mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
+[   93.164347] mmc1: sdhci: Sys addr:  0x00000000 | Version:  0x00000603
+[   93.170782] mmc1: sdhci: Blk size:  0x00000000 | Blk cnt:  0x00000000
+[   93.177218] mmc1: sdhci: Argument:  0x00000000 | Trn mode: 0x00000000
+[   93.183652] mmc1: sdhci: Present:   0x01ff0000 | Host ctl: 0x00000001
+[   93.190088] mmc1: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+[   93.196523] mmc1: sdhci: Wake-up:   0x00000000 | Clock:    0x0000fa07
+[   93.202956] mmc1: sdhci: Timeout:   0x00000000 | Int stat: 0x00018000
+[   93.209392] mmc1: sdhci: Int enab:  0x00ff0083 | Sig enab: 0x00ff0083
+[   93.215826] mmc1: sdhci: AC12 err:  0x00000000 | Slot int: 0x00000001
+[   93.222260] mmc1: sdhci: Caps:      0x25fcc8bf | Caps_1:   0x00002077
+[   93.228694] mmc1: sdhci: Cmd:       0x0000371a | Max curr: 0x005800c8
+[   93.235127] mmc1: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
+[   93.241562] mmc1: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+[   93.247994] mmc1: sdhci: Host ctl2: 0x00000000
+[   93.252435] mmc1: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0x00000000
+[   93.258863] mmc1: sdhci: ============================================
+[  103.392164] mmc1: Timeout waiting for hardware cmd interrupt.
+[  103.397913] mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
+[  103.404350] mmc1: sdhci: Sys addr:  0x00000000 | Version:  0x00000603
+[  103.410786] mmc1: sdhci: Blk size:  0x00000000 | Blk cnt:  0x00000000
+[  103.417221] mmc1: sdhci: Argument:  0x00000000 | Trn mode: 0x00000000
+[  103.423654] mmc1: sdhci: Present:   0x01ff0000 | Host ctl: 0x00000001
+[  103.430089] mmc1: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+[  103.436523] mmc1: sdhci: Wake-up:   0x00000000 | Clock:    0x0000fa07
+[  103.442955] mmc1: sdhci: Timeout:   0x00000000 | Int stat: 0x00018000
+[  103.449390] mmc1: sdhci: Int enab:  0x00ff0083 | Sig enab: 0x00ff0083
+[  103.455823] mmc1: sdhci: AC12 err:  0x00000000 | Slot int: 0x00000001
+[  103.462255] mmc1: sdhci: Caps:      0x25fcc8bf | Caps_1:   0x00002077
+[  103.468689] mmc1: sdhci: Cmd:       0x0000371a | Max curr: 0x005800c8
+[  103.475126] mmc1: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
+[  103.481560] mmc1: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+[  103.487994] mmc1: sdhci: Host ctl2: 0x00000000
+[  103.492435] mmc1: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0x00000000
+[  103.498867] mmc1: sdhci: ============================================
+
+Is it expected that this should "just work", or am I doing something
+wrong?  My patched kernel is based on 4.14.2.
+
+On Tue, Dec 19, 2017 at 2:05 AM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 04/12/17 11:39, LinuxPatchCommit wrote:
+>> Dear All,
 >>
->> A couple of comments here.
+>> For O2micro/Bayhubtech SD Host DeviceID 8620, eMMC HS200 mode is working at 1.8v and it uses hardware tuning. The hardware tuning only needs to send one tuning command instead of multiple tuning commands with software tuning.
 >>
->> Wakeup settings shouldn't be changed during system suspend. That means
->> we shouldn't call device_init_wakeup() (or device_set_wakeup_enable()
->> for that matter) here.
+>> Signed-off-by: ernest.zhang <ernest.zhang@bayhubtech.com>
+>> ---
+>>  drivers/mmc/host/sdhci-pci-o2micro.c | 276 ++++++++++++++++++++++++++++++-----
+>>  1 file changed, 239 insertions(+), 37 deletions(-)
 >>
->> Instead, device_init_wakeup() should be called during ->probe(), while
->> device_set_wakeup_enable() should normally *not* have to be called at
->> all by drivers. There are a exceptions for device_set_wakeup_enable(),
->> however it should not have to be called during system suspend, at
->> least.
+>> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+>> index 14273ca00641..2a7ffd240497 100644
+>> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
+>> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+>> @@ -16,22 +16,223 @@
+>>   */
 >>
->> Of course, I realize that you are not changing the behavior in this
->> regards in this patch, so I am fine this anyway.
+>>  #include <linux/pci.h>
+>> -
+>> +#include <linux/platform_device.h>
+>> +#include <linux/regulator/fixed.h>
+>> +#include <linux/regulator/machine.h>
+>> +#include <linux/mmc/host.h>
+>> +#include <linux/mmc/mmc.h>
+>> +#include <linux/delay.h>
+>>  #include "sdhci.h"
+>>  #include "sdhci-pci.h"
+>>  #include "sdhci-pci-o2micro.h"
 >>
->> My point is, that the end result while doing this improvements in this
->> series, should strive to that device_init_wakeup() and
->> device_set_wakeup_enable() becomes used correctly. I don't think that
->> is the case, or is it?
+>> +static void sdhci_o2_start_tuning(struct sdhci_host *host) {
+>> +     u16 ctrl;
+>> +
+>> +     ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+>> +     ctrl |= SDHCI_CTRL_EXEC_TUNING;
+>> +     if (host->quirks2 & SDHCI_QUIRK2_TUNING_WORK_AROUND)
+>> +             ctrl |= SDHCI_CTRL_TUNED_CLK;
+>> +     sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+>> +
+>> +     /*
+>> +      * As per the Host Controller spec v3.00, tuning command
+>> +      * generates Buffer Read Ready interrupt, so enable that.
+>> +      *
+>> +      * Note: The spec clearly says that when tuning sequence
+>> +      * is being performed, the controller does not generate
+>> +      * interrupts other than Buffer Read Ready interrupt. But
+>> +      * to make sure we don't hit a controller bug, we _only_
+>> +      * enable Buffer Read Ready interrupt here.
+>> +      */
+>> +     sdhci_writel(host, SDHCI_INT_DATA_AVAIL, SDHCI_INT_ENABLE);
+>> +     sdhci_writel(host, SDHCI_INT_DATA_AVAIL, SDHCI_SIGNAL_ENABLE); }
+>> +
+>> +static void sdhci_o2_end_tuning(struct sdhci_host *host) {
+>> +     sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
+>> +     sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE); }
+>> +
+>> +static inline bool sdhci_data_line_cmd(struct mmc_command *cmd) {
+>> +     return cmd->data || cmd->flags & MMC_RSP_BUSY; }
+>> +
+>> +static void sdhci_del_timer(struct sdhci_host *host, struct mmc_request
+>> +*mrq) {
+>> +     if (sdhci_data_line_cmd(mrq->cmd))
+>> +             del_timer(&host->data_timer);
+>> +     else
+>> +             del_timer(&host->timer);
+>> +}
+>> +
+>> +static void sdhci_o2_set_tuning_mode(struct sdhci_host *host, bool hw)
+>> +{
+>> +     u16 reg;
+>> +
+>> +     if (hw) {
+>> +             // enable hardware tuning
+>> +             reg = sdhci_readw(host, O2_SD_VENDOR_SETTING);
+>> +             reg &= (~O2_SD_HW_TUNING_ENABLE);
+>> +             sdhci_writew(host, reg, O2_SD_VENDOR_SETTING);
+>> +     } else {
+>> +             reg = sdhci_readw(host, O2_SD_VENDOR_SETTING);
+>> +             reg |= O2_SD_HW_TUNING_ENABLE;
+>> +             sdhci_writew(host, reg, O2_SD_VENDOR_SETTING);
+>> +     }
+>> +}
+>> +
+>> +static u8 data_buf[64];
+>> +
+>> +static void sdhci_o2_send_tuning(struct sdhci_host *host, u32 opcode) {
+>> +     struct mmc_command cmd = { };
+>> +     struct mmc_data data = { };
+>> +     struct scatterlist sg;
+>> +     struct mmc_request mrq = { };
+>> +     unsigned long flags;
+>> +     u32 b = host->sdma_boundary;
+>> +     int size = sizeof(data_buf);
+>> +
+>> +     cmd.opcode = opcode;
+>> +     cmd.flags = MMC_RSP_PRESENT | MMC_RSP_OPCODE | MMC_RSP_CRC;
+>> +     cmd.mrq = &mrq;
+>> +     mrq.cmd = &cmd;
+>> +     mrq.data = &data;
+>> +     data.blksz = size;
+>> +     data.blocks = 1;
+>> +     data.flags = MMC_DATA_READ;
+>> +
+>> +     data.timeout_ns = 150 * NSEC_PER_MSEC;
+>> +
+>> +     data.sg = &sg;
+>> +     data.sg_len = 1;
+>> +     sg_init_one(&sg, data_buf, size);
+>> +
+>> +     spin_lock_irqsave(&host->lock, flags);
+>> +
+>> +     sdhci_writew(host, SDHCI_MAKE_BLKSZ(b, 64), SDHCI_BLOCK_SIZE);
+>> +
+>> +     /*
+>> +      * The tuning block is sent by the card to the host controller.
+>> +      * So we set the TRNS_READ bit in the Transfer Mode register.
+>> +      * This also takes care of setting DMA Enable and Multi Block
+>> +      * Select in the same register to 0.
+>> +      */
+>> +     sdhci_writew(host, SDHCI_TRNS_READ, SDHCI_TRANSFER_MODE);
+>> +
+>> +     sdhci_send_command(host, &cmd);
+>> +
+>> +     host->cmd = NULL;
+>> +
+>> +     sdhci_del_timer(host, &mrq);
+>> +
+>> +     host->tuning_done = 0;
+>> +
+>> +     mmiowb();
+>> +     spin_unlock_irqrestore(&host->lock, flags);
+>> +
+>> +     /* Wait for Buffer Read Ready interrupt */
+>> +     wait_event_timeout(host->buf_ready_int, (host->tuning_done == 1),
+>> +                        msecs_to_jiffies(50));
+>> +
+>> +}
+>> +
+>> +static void sdhci_o2_reset_tuning(struct sdhci_host *host) {
+>> +     u16 ctrl;
+>> +
+>> +     ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+>> +     ctrl &= ~SDHCI_CTRL_TUNED_CLK;
+>> +     ctrl &= ~SDHCI_CTRL_EXEC_TUNING;
+>> +     sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2); }
+>> +
+>> +static void __sdhci_o2_execute_tuning(struct sdhci_host *host, u32
+>> +opcode) {
+>> +
+>> +     int i;
+>> +
+>> +     sdhci_o2_send_tuning(host, MMC_SEND_TUNING_BLOCK_HS200);
 >
-> Unfortunately we don't find out what the SDIO driver wants to do (i.e
-> pm_flags & MMC_PM_WAKE_SDIO_IRQ) until suspend.
-
-That's true! Of course, we need to be able to act on this, somehow.
-
+> So it looks like you send the tuning command only once.  Is that right?
+> Maybe you could briefly outline what the tuning procedure is, and how it
+> differs from sdhci_execute_tuning().
 >
-> I considered enabling wakeups by default but wasn't sure that would not
-> increase power consumption in devices not expecting it.
-
-I understand the problem, believe me. However, I would rather like to
-try to find a generic solution to these problems, else we will keep
-abusing existing wakeups APIs.
-
-For your information, I have been working on several issues on how to
-handle the "wakeup path" correctly, which is linked to this problem.
-See a few quite small series for this below [1], [2].
-
-I think the general problems can be described liked this:
-
-1) The dev->power.wakeup_path flag doesn't get set for the device by
-the PM core, in case device_set_wakeup_enable() is called from a
-->suspend() callback. That also means, that the parent device don't
-get its >power.wakeup_path flag set in __device_suspend() by the PM
-core, while this may be expected by upper layers (PM domains, middle
-layers).
-
-2) device_may_wakeup() doesn't tell us the hole story about the
-wakeup. Only that is *may* be configured. :-)
-So in cases when device_may_wakeup() returns true, we still have these
-three conditions to consider, which we currently can't distinguish
-between:
-
-*) The wakeup is configured and enabled, so the device should be
-enabled in the wakeup path.
-
-**) The wakeup is configured and enabled, but as an out-band-wakeup
-signal (like a GPIO IRQ). This means the device shouldn't be enabled
-in the wakeup path.
-
-***) The wakeup isn't configured, thus disabled, because there are no
-consumers of the wakeup IRQ registered (as may be the case for SDIO
-IRQ). This also means the device shouldn't be enabled in the wakeup
-path.
-
-Potentially, one could consider **) and ***) being treated in the same
-way, via using an opt-out method, avoiding the wakeup path to be
-enabled. Currently I have been thinking of adding an "OUT_BAND_WAKEUP"
-driver PM flag, to deal with this, however there may be other
-preferred options.
-
-Kind regards
-Uffe
-
-[1]
-https://www.spinics.net/lists/linux-renesas-soc/msg21421.html
-[2]
-https://www.spinics.net/lists/linux-renesas-soc/msg20122.html
-(Actually the discussions there concluded that we may need an
-"OUT_BAND_WAKEUP" flag instead)
+>> +
+>> +     for (i = 0; i < 150; i++) {
+>> +             u16 ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+>> +
+>> +             if (!(ctrl & SDHCI_CTRL_EXEC_TUNING)) {
+>> +                     if (ctrl & SDHCI_CTRL_TUNED_CLK) {
+>> +                             pr_info("%s: HW tuning ok !\n",
+>> +                                     mmc_hostname(host->mmc));
+>> +                             host->tuning_done = true;
+>> +                             return;
+>> +                     }
+>> +                     pr_warn("%s: HW tuning failed !\n",
+>> +                             mmc_hostname(host->mmc));
+>> +
+>> +                     break;
+>> +             }
+>> +
+>> +             mdelay(1);
+>> +     }
+>> +
+>> +     pr_info("%s: Tuning failed, falling back to fixed sampling clock\n",
+>> +             mmc_hostname(host->mmc));
+>> +     sdhci_o2_reset_tuning(host);
+>> +
+>> +}
+>> +
+>> +static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode) {
+>> +     struct sdhci_host *host = mmc_priv(mmc);
+>> +     int current_bus_width = 0;
+>> +
+>> +     /*
+>> +      * This handler only implements the eMMC tuning that is specific to
+>> +      * this controller.  Fall back to the standard method for other TINMING.
+>> +      */
+>> +     if (host->timing != MMC_TIMING_MMC_HS200)
+>> +             return sdhci_execute_tuning(mmc, opcode);
+>> +
+>> +     if (WARN_ON(opcode != MMC_SEND_TUNING_BLOCK_HS200))
+>> +             return -EINVAL;
+>> +
+>> +     /*
+>> +      * o2 sdhci host didn't support 8bit emmc tuning
+>> +      */
+>> +     if (mmc->ios.bus_width == MMC_BUS_WIDTH_8) {
+>> +             current_bus_width = mmc->ios.bus_width;
+>> +             mmc->ios.bus_width = MMC_BUS_WIDTH_4;
+>> +             mmc->ops->set_ios(mmc, &mmc->ios);
+>> +     }
+>> +
+>> +     sdhci_o2_set_tuning_mode(host, true);
+>> +
+>> +     sdhci_o2_start_tuning(host);
+>> +
+>> +     __sdhci_o2_execute_tuning(host, opcode);
+>> +
+>> +     sdhci_o2_end_tuning(host);
+>> +
+>> +     if (current_bus_width == MMC_BUS_WIDTH_8) {
+>> +             mmc->ios.bus_width = current_bus_width;
+>> +             mmc->ops->set_ios(mmc, &mmc->ios);
+>> +     }
+>> +
+>> +     host->flags &= ~SDHCI_HS400_TUNING;
+>> +     return 0;
+>> +}
+>> +
+>>  static void o2_pci_set_baseclk(struct sdhci_pci_chip *chip, u32 value)  {
+>>       u32 scratch_32;
+>> -     pci_read_config_dword(chip->pdev,
+>> -                           O2_SD_PLL_SETTING, &scratch_32);
+>> +     pci_read_config_dword(chip->pdev, O2_SD_PLL_SETTING, &scratch_32);
+>>
+>>       scratch_32 &= 0x0000FFFF;
+>>       scratch_32 |= value;
+>>
+>> -     pci_write_config_dword(chip->pdev,
+>> -                            O2_SD_PLL_SETTING, scratch_32);
+>> +     pci_write_config_dword(chip->pdev, O2_SD_PLL_SETTING, scratch_32);
+>>  }
+>>
+>>  static void o2_pci_led_enable(struct sdhci_pci_chip *chip) @@ -40,23 +241,19 @@ static void o2_pci_led_enable(struct sdhci_pci_chip *chip)
+>>       u32 scratch_32;
+>>
+>>       /* Set led of SD host function enable */
+>> -     ret = pci_read_config_dword(chip->pdev,
+>> -                                 O2_SD_FUNC_REG0, &scratch_32);
+>> +     ret = pci_read_config_dword(chip->pdev, O2_SD_FUNC_REG0, &scratch_32);
+>>       if (ret)
+>>               return;
+>>
+>>       scratch_32 &= ~O2_SD_FREG0_LEDOFF;
+>> -     pci_write_config_dword(chip->pdev,
+>> -                            O2_SD_FUNC_REG0, scratch_32);
+>> +     pci_write_config_dword(chip->pdev, O2_SD_FUNC_REG0, scratch_32);
+>>
+>> -     ret = pci_read_config_dword(chip->pdev,
+>> -                                 O2_SD_TEST_REG, &scratch_32);
+>> +     ret = pci_read_config_dword(chip->pdev, O2_SD_TEST_REG, &scratch_32);
+>>       if (ret)
+>>               return;
+>>
+>>       scratch_32 |= O2_SD_LED_ENABLE;
+>> -     pci_write_config_dword(chip->pdev,
+>> -                            O2_SD_TEST_REG, scratch_32);
+>> +     pci_write_config_dword(chip->pdev, O2_SD_TEST_REG, scratch_32);
+>>
+>>  }
+>>
+>> @@ -104,8 +301,7 @@ static void sdhci_pci_o2_fujin2_pci_init(struct sdhci_pci_chip *chip)
+>>       scratch_32 |= 0x00CC;
+>>       pci_write_config_dword(chip->pdev, O2_SD_CAP_REG0, scratch_32);
+>>       /* Set DLL Tuning Window */
+>> -     ret = pci_read_config_dword(chip->pdev,
+>> -                                 O2_SD_TUNING_CTRL, &scratch_32);
+>> +     ret = pci_read_config_dword(chip->pdev, O2_SD_TUNING_CTRL,
+>> +&scratch_32);
+>>       if (ret)
+>>               return;
+>>       scratch_32 &= ~(0x000000FF);
+>> @@ -137,8 +333,7 @@ static void sdhci_pci_o2_fujin2_pci_init(struct sdhci_pci_chip *chip)
+>>       scratch_32 |= 0x30000000;
+>>       pci_write_config_dword(chip->pdev, O2_SD_CAPS, scratch_32);
+>>
+>> -     ret = pci_read_config_dword(chip->pdev,
+>> -                                 O2_SD_MISC_CTRL4, &scratch_32);
+>> +     ret = pci_read_config_dword(chip->pdev, O2_SD_MISC_CTRL4,
+>> +&scratch_32);
+>>       if (ret)
+>>               return;
+>>       scratch_32 &= ~(0x000f0000);
+>> @@ -151,6 +346,7 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+>>       struct sdhci_pci_chip *chip;
+>>       struct sdhci_host *host;
+>>       u32 reg;
+>> +     int ret;
+>>
+>>       chip = slot->chip;
+>>       host = slot->host;
+>> @@ -164,6 +360,22 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+>>               if (reg & 0x1)
+>>                       host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
+>>
+>> +             if (chip->pdev->device == PCI_DEVICE_ID_O2_SEABIRD0) {
+>> +                     ret = pci_read_config_dword(chip->pdev,
+>> +                                                 O2_SD_MISC_SETTING, &reg);
+>> +                     if (ret)
+>> +                             return -EIO;
+>> +                     if (reg & (1 << 4)) {
+>> +                             pr_info("%s: emmc 1.8v flag is set,
+>> +                                     force 1.8v signaling voltage\n",
+>> +                                     mmc_hostname(host->mmc));
+>> +                             host->flags &= ~(SDHCI_SIGNALING_330);
+>> +                             host->flags |= SDHCI_SIGNALING_180;
+>> +                     }
+>> +             }
+>> +
+>> +             host->mmc_host_ops.execute_tuning = sdhci_o2_execute_tuning;
+>> +
+>>               if (chip->pdev->device != PCI_DEVICE_ID_O2_FUJIN2)
+>>                       break;
+>>               /* set dll watch dog timer */
+>> @@ -191,8 +403,7 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
+>>       case PCI_DEVICE_ID_O2_8320:
+>>       case PCI_DEVICE_ID_O2_8321:
+>>               /* This extra setup is required due to broken ADMA. */
+>> -             ret = pci_read_config_byte(chip->pdev,
+>> -                             O2_SD_LOCK_WP, &scratch);
+>> +             ret = pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch);
+>>               if (ret)
+>>                       return ret;
+>>               scratch &= 0x7f;
+>> @@ -202,8 +413,7 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
+>>               pci_write_config_byte(chip->pdev, O2_SD_MULTI_VCC3V, 0x08);
+>>
+>>               /* Disable CLK_REQ# support after media DET */
+>> -             ret = pci_read_config_byte(chip->pdev,
+>> -                             O2_SD_CLKREQ, &scratch);
+>> +             ret = pci_read_config_byte(chip->pdev, O2_SD_CLKREQ, &scratch);
+>>               if (ret)
+>>                       return ret;
+>>               scratch |= 0x20;
+>> @@ -224,16 +434,14 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
+>>               pci_write_config_byte(chip->pdev, O2_SD_ADMA2, 0x08);
+>>
+>>               /* Disable the infinite transfer mode */
+>> -             ret = pci_read_config_byte(chip->pdev,
+>> -                             O2_SD_INF_MOD, &scratch);
+>> +             ret = pci_read_config_byte(chip->pdev, O2_SD_INF_MOD, &scratch);
+>>               if (ret)
+>>                       return ret;
+>>               scratch |= 0x08;
+>>               pci_write_config_byte(chip->pdev, O2_SD_INF_MOD, scratch);
+>>
+>>               /* Lock WP */
+>> -             ret = pci_read_config_byte(chip->pdev,
+>> -                             O2_SD_LOCK_WP, &scratch);
+>> +             ret = pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch);
+>>               if (ret)
+>>                       return ret;
+>>               scratch |= 0x80;
+>> @@ -243,8 +451,7 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
+>>       case PCI_DEVICE_ID_O2_SDS1:
+>>       case PCI_DEVICE_ID_O2_FUJIN2:
+>>               /* UnLock WP */
+>> -             ret = pci_read_config_byte(chip->pdev,
+>> -                             O2_SD_LOCK_WP, &scratch);
+>> +             ret = pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch);
+>>               if (ret)
+>>                       return ret;
+>>
+>> @@ -319,15 +526,13 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
+>>               if (ret)
+>>                       return ret;
+>>               scratch_32 &= ~(0xE0);
+>> -             pci_write_config_dword(chip->pdev,
+>> -                                    O2_SD_CAP_REG2, scratch_32);
+>> +             pci_write_config_dword(chip->pdev, O2_SD_CAP_REG2, scratch_32);
+>>
+>>               if (chip->pdev->device == PCI_DEVICE_ID_O2_FUJIN2)
+>>                       sdhci_pci_o2_fujin2_pci_init(chip);
+>>
+>>               /* Lock WP */
+>> -             ret = pci_read_config_byte(chip->pdev,
+>> -                                        O2_SD_LOCK_WP, &scratch);
+>> +             ret = pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch);
+>>               if (ret)
+>>                       return ret;
+>>               scratch |= 0x80;
+>> @@ -336,8 +541,7 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
+>>       case PCI_DEVICE_ID_O2_SEABIRD0:
+>>       case PCI_DEVICE_ID_O2_SEABIRD1:
+>>               /* UnLock WP */
+>> -             ret = pci_read_config_byte(chip->pdev,
+>> -                             O2_SD_LOCK_WP, &scratch);
+>> +             ret = pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch);
+>>               if (ret)
+>>                       return ret;
+>>
+>> @@ -369,11 +573,9 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
+>>               }
+>>
+>>               /* Set Tuning Windows to 5 */
+>> -             pci_write_config_byte(chip->pdev,
+>> -                             O2_SD_TUNING_CTRL, 0x55);
+>> +             pci_write_config_byte(chip->pdev, O2_SD_TUNING_CTRL, 0x55);
+>>               /* Lock WP */
+>> -             ret = pci_read_config_byte(chip->pdev,
+>> -                                        O2_SD_LOCK_WP, &scratch);
+>> +             ret = pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch);
+>>               if (ret)
+>>                       return ret;
+>>               scratch |= 0x80;
+>> --
+>> 2.14.1
+>>
+>
