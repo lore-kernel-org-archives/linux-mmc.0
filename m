@@ -1,87 +1,145 @@
-From: Michael Nazzareno Trimarchi <michael@amarulasolutions.com>
-Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: Enable/Disable mmc clock during
- runtime suspend
-Date: Thu, 21 Dec 2017 15:43:53 +0100
-Message-ID: <CAOf5uwm1Sx8sS8sN1UdMY-cDMEG9hCtetaSWvaL3UAZXD6vTcg@mail.gmail.com>
-References: <1513862546-20221-1-git-send-email-michael@amarulasolutions.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/9] mmc: sdhci-pci: Stop calling sdhci_enable_irq_wakeups()
+Date: Thu, 21 Dec 2017 16:33:59 +0100
+Message-ID: <CAPDyKFrZjTvYdT8BGKadTdTBsaAeoC3YOQBBPOvqpv1JpaOUoQ@mail.gmail.com>
+References: <1513757933-11232-1-git-send-email-adrian.hunter@intel.com>
+ <1513757933-11232-2-git-send-email-adrian.hunter@intel.com>
+ <CAPDyKFoHPdYaorR38LaS5Hzs8CC99Smki8uZW8aDanboLRV3QA@mail.gmail.com> <b9801ecc-eaf4-7efc-fff0-3cbd40f29c9a@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f193.google.com ([209.85.223.193]:38266 "EHLO
-        mail-io0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750757AbdLUOny (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Dec 2017 09:43:54 -0500
-Received: by mail-io0-f193.google.com with SMTP id 87so17116274ior.5
-        for <linux-mmc@vger.kernel.org>; Thu, 21 Dec 2017 06:43:54 -0800 (PST)
-In-Reply-To: <1513862546-20221-1-git-send-email-michael@amarulasolutions.com>
+Received: from mail-io0-f195.google.com ([209.85.223.195]:46614 "EHLO
+        mail-io0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753543AbdLUPeA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Dec 2017 10:34:00 -0500
+Received: by mail-io0-f195.google.com with SMTP id x129so21460930iod.13
+        for <linux-mmc@vger.kernel.org>; Thu, 21 Dec 2017 07:34:00 -0800 (PST)
+In-Reply-To: <b9801ecc-eaf4-7efc-fff0-3cbd40f29c9a@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Haridhar Kalvala <haridhar.kalvala@intel.com>, Linux PM <linux-pm@vger.kernel.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Geert Uytterhoeven <geert@linux-m68k.org>
 
-Hi
++ linux-pm, Rafael, Geert
 
-I have some questions:
-
-On Thu, Dec 21, 2017 at 2:22 PM, Michael Trimarchi
-<michael@amarulasolutions.com> wrote:
-> mmc clock can be stopped during runtime suspend and restart during runtime
-> resume. This let us know to not have any clock running and this reduce
-> the EMI of the device when the bus is not in use
+On 21 December 2017 at 15:25, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 21/12/17 16:15, Ulf Hansson wrote:
+>> On 20 December 2017 at 09:18, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>> sdhci_enable_irq_wakeups() is already called by sdhci_suspend_host() so
+>>> sdhci-pci should not need to call it. However sdhci_suspend_host() only
+>>> calls it if wakeups are enabled, and sdhci-pci does not enable them until
+>>> after calling sdhci_suspend_host(). So move the calls to
+>>> sdhci_pci_init_wakeup() before calling sdhci_suspend_host(), and
+>>> stop calling sdhci_enable_irq_wakeups(). That results in some
+>>> simplification because sdhci_pci_suspend_host() and
+>>> __sdhci_pci_suspend_host() no longer need to be separate functions.
+>>>
+>>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+>>> ---
+>>>  drivers/mmc/host/sdhci-pci-core.c | 58 ++++++++++++++-------------------------
+>>>  1 file changed, 21 insertions(+), 37 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+>>> index 110c634cfb43..2ffc09f088ee 100644
+>>> --- a/drivers/mmc/host/sdhci-pci-core.c
+>>> +++ b/drivers/mmc/host/sdhci-pci-core.c
+>>> @@ -39,10 +39,29 @@
+>>>  static void sdhci_pci_hw_reset(struct sdhci_host *host);
+>>>
+>>>  #ifdef CONFIG_PM_SLEEP
+>>> -static int __sdhci_pci_suspend_host(struct sdhci_pci_chip *chip)
+>>> +static int sdhci_pci_init_wakeup(struct sdhci_pci_chip *chip)
+>>> +{
+>>> +       mmc_pm_flag_t pm_flags = 0;
+>>> +       int i;
+>>> +
+>>> +       for (i = 0; i < chip->num_slots; i++) {
+>>> +               struct sdhci_pci_slot *slot = chip->slots[i];
+>>> +
+>>> +               if (slot)
+>>> +                       pm_flags |= slot->host->mmc->pm_flags;
+>>> +       }
+>>> +
+>>> +       return device_init_wakeup(&chip->pdev->dev,
+>>> +                                 (pm_flags & MMC_PM_KEEP_POWER) &&
+>>> +                                 (pm_flags & MMC_PM_WAKE_SDIO_IRQ));
+>>
+>> A couple of comments here.
+>>
+>> Wakeup settings shouldn't be changed during system suspend. That means
+>> we shouldn't call device_init_wakeup() (or device_set_wakeup_enable()
+>> for that matter) here.
+>>
+>> Instead, device_init_wakeup() should be called during ->probe(), while
+>> device_set_wakeup_enable() should normally *not* have to be called at
+>> all by drivers. There are a exceptions for device_set_wakeup_enable(),
+>> however it should not have to be called during system suspend, at
+>> least.
+>>
+>> Of course, I realize that you are not changing the behavior in this
+>> regards in this patch, so I am fine this anyway.
+>>
+>> My point is, that the end result while doing this improvements in this
+>> series, should strive to that device_init_wakeup() and
+>> device_set_wakeup_enable() becomes used correctly. I don't think that
+>> is the case, or is it?
 >
-> Signed-off-by: Michael Trimarchi <michael@amarulasolutions.com>
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 5 +++++
->  1 file changed, 5 insertions(+)
+> Unfortunately we don't find out what the SDIO driver wants to do (i.e
+> pm_flags & MMC_PM_WAKE_SDIO_IRQ) until suspend.
+
+That's true! Of course, we need to be able to act on this, somehow.
+
 >
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index 7123ef9..9a5e96f 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -196,6 +196,7 @@ struct pltfm_imx_data {
->         struct clk *clk_ipg;
->         struct clk *clk_ahb;
->         struct clk *clk_per;
-> +       unsigned int actual_clock;
->         enum {
->                 NO_CMD_PENDING,      /* no multiblock command pending*/
->                 MULTIBLK_IN_PROCESS, /* exact multiblock cmd in process */
-> @@ -1346,6 +1347,9 @@ static int sdhci_esdhc_runtime_suspend(struct device *dev)
->
->         ret = sdhci_runtime_suspend_host(host);
->
-> +       imx_data->actual_clock = host->mmc->actual_clock;
-> +       esdhc_pltfm_set_clock(host, 0);
-> +
->         if (!sdhci_sdio_irq_enabled(host)) {
->                 clk_disable_unprepare(imx_data->clk_per);
->                 clk_disable_unprepare(imx_data->clk_ipg);
+> I considered enabling wakeups by default but wasn't sure that would not
+> increase power consumption in devices not expecting it.
 
-What if the runtime suspend fail in the sdhci_runtime_suspend_host? Is
-the runtime resume called?
+I understand the problem, believe me. However, I would rather like to
+try to find a generic solution to these problems, else we will keep
+abusing existing wakeups APIs.
 
-Because in the old code the ret is not taken in account to unprepare
-and disable the clock so I did not
-take in account too. Is this correct?
+For your information, I have been working on several issues on how to
+handle the "wakeup path" correctly, which is linked to this problem.
+See a few quite small series for this below [1], [2].
 
-Michael
+I think the general problems can be described liked this:
 
-> @@ -1366,6 +1370,7 @@ static int sdhci_esdhc_runtime_resume(struct device *dev)
->                 clk_prepare_enable(imx_data->clk_ipg);
->         }
->         clk_prepare_enable(imx_data->clk_ahb);
-> +       esdhc_pltfm_set_clock(host, imx_data->actual_clock);
->
->         return sdhci_runtime_resume_host(host);
->  }
-> --
-> 2.7.4
->
+1) The dev->power.wakeup_path flag doesn't get set for the device by
+the PM core, in case device_set_wakeup_enable() is called from a
+->suspend() callback. That also means, that the parent device don't
+get its >power.wakeup_path flag set in __device_suspend() by the PM
+core, while this may be expected by upper layers (PM domains, middle
+layers).
 
+2) device_may_wakeup() doesn't tell us the hole story about the
+wakeup. Only that is *may* be configured. :-)
+So in cases when device_may_wakeup() returns true, we still have these
+three conditions to consider, which we currently can't distinguish
+between:
 
+*) The wakeup is configured and enabled, so the device should be
+enabled in the wakeup path.
 
--- 
-| Michael Nazzareno Trimarchi                     Amarula Solutions BV |
-| COO  -  Founder                                      Cruquiuskade 47 |
-| +31(0)851119172                                 Amsterdam 1018 AM NL |
-|                  [`as] http://www.amarulasolutions.com               |
+**) The wakeup is configured and enabled, but as an out-band-wakeup
+signal (like a GPIO IRQ). This means the device shouldn't be enabled
+in the wakeup path.
+
+***) The wakeup isn't configured, thus disabled, because there are no
+consumers of the wakeup IRQ registered (as may be the case for SDIO
+IRQ). This also means the device shouldn't be enabled in the wakeup
+path.
+
+Potentially, one could consider **) and ***) being treated in the same
+way, via using an opt-out method, avoiding the wakeup path to be
+enabled. Currently I have been thinking of adding an "OUT_BAND_WAKEUP"
+driver PM flag, to deal with this, however there may be other
+preferred options.
+
+Kind regards
+Uffe
+
+[1]
+https://www.spinics.net/lists/linux-renesas-soc/msg21421.html
+[2]
+https://www.spinics.net/lists/linux-renesas-soc/msg20122.html
+(Actually the discussions there concluded that we may need an
+"OUT_BAND_WAKEUP" flag instead)
