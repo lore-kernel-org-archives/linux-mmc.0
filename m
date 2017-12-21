@@ -1,58 +1,52 @@
-From: Michael Trimarchi <michael@amarulasolutions.com>
-Subject: [PATCH] mmc: sdhci-esdhc-imx: Enable/Disable mmc clock during runtime suspend
-Date: Thu, 21 Dec 2017 14:22:26 +0100
-Message-ID: <1513862546-20221-1-git-send-email-michael@amarulasolutions.com>
+From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?=
+        <u.kleine-koenig@pengutronix.de>
+Subject: [PATCH mmc-utils 6/6] mmc-utils: remove unused #includes
+Date: Thu, 21 Dec 2017 14:33:16 +0100
+Message-ID: <20171221133316.19466-7-u.kleine-koenig@pengutronix.de>
+References: <20171221133316.19466-1-u.kleine-koenig@pengutronix.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wr0-f195.google.com ([209.85.128.195]:42833 "EHLO
-        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752407AbdLUNWb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Dec 2017 08:22:31 -0500
-Received: by mail-wr0-f195.google.com with SMTP id s66so25149823wrc.9
-        for <linux-mmc@vger.kernel.org>; Thu, 21 Dec 2017 05:22:30 -0800 (PST)
+Received: from metis.ext.4.pengutronix.de ([92.198.50.35]:40169 "EHLO
+        metis.ext.4.pengutronix.de" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751808AbdLUNwK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Dec 2017 08:52:10 -0500
+In-Reply-To: <20171221133316.19466-1-u.kleine-koenig@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+To: Chris Ball <chris@printf.net>
+Cc: linux-mmc@vger.kernel.org, kernel@pengutronix.de
 
-mmc clock can be stopped during runtime suspend and restart during runtime
-resume. This let us know to not have any clock running and this reduce
-the EMI of the device when the bus is not in use
+I didn't find any functions used for which the documentation specifies to
+use (at least) one of the dropped headers.
 
-Signed-off-by: Michael Trimarchi <michael@amarulasolutions.com>
+The only Linux specific header <linux/fs.h> is needed for BLKGETSIZE,
+document that.
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 5 +++++
- 1 file changed, 5 insertions(+)
+ mmc_cmds.c | 6 +-----
+ 1 file changed, 1 insertion(+), 5 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 7123ef9..9a5e96f 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -196,6 +196,7 @@ struct pltfm_imx_data {
- 	struct clk *clk_ipg;
- 	struct clk *clk_ahb;
- 	struct clk *clk_per;
-+	unsigned int actual_clock;
- 	enum {
- 		NO_CMD_PENDING,      /* no multiblock command pending*/
- 		MULTIBLK_IN_PROCESS, /* exact multiblock cmd in process */
-@@ -1346,6 +1347,9 @@ static int sdhci_esdhc_runtime_suspend(struct device *dev)
+diff --git a/mmc_cmds.c b/mmc_cmds.c
+index cec947da1d4a..038dbd42e6bf 100644
+--- a/mmc_cmds.c
++++ b/mmc_cmds.c
+@@ -22,17 +22,13 @@
+ #include <string.h>
+ #include <sys/ioctl.h>
+ #include <sys/types.h>
+-#include <dirent.h>
+ #include <sys/stat.h>
+ #include <unistd.h>
+ #include <fcntl.h>
+-#include <libgen.h>
+-#include <limits.h>
+-#include <ctype.h>
+ #include <errno.h>
+ #include <stdint.h>
+ #include <assert.h>
+-#include <linux/fs.h>
++#include <linux/fs.h> /* for BLKGETSIZE */
  
- 	ret = sdhci_runtime_suspend_host(host);
- 
-+	imx_data->actual_clock = host->mmc->actual_clock;
-+	esdhc_pltfm_set_clock(host, 0);
-+
- 	if (!sdhci_sdio_irq_enabled(host)) {
- 		clk_disable_unprepare(imx_data->clk_per);
- 		clk_disable_unprepare(imx_data->clk_ipg);
-@@ -1366,6 +1370,7 @@ static int sdhci_esdhc_runtime_resume(struct device *dev)
- 		clk_prepare_enable(imx_data->clk_ipg);
- 	}
- 	clk_prepare_enable(imx_data->clk_ahb);
-+	esdhc_pltfm_set_clock(host, imx_data->actual_clock);
- 
- 	return sdhci_runtime_resume_host(host);
- }
+ #include "mmc.h"
+ #include "mmc_cmds.h"
 -- 
-2.7.4
+2.15.1
 
