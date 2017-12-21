@@ -1,14 +1,14 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 04/12] mmc: sdhci-omap: Add tuning support
-Date: Thu, 21 Dec 2017 11:09:00 +0200
-Message-ID: <1adeeff9-0d45-cbae-7186-f97d4097c65a@intel.com>
+Subject: Re: [PATCH 05/12] mmc: sdhci-omap: Workaround for Errata i802
+Date: Thu, 21 Dec 2017 11:09:35 +0200
+Message-ID: <8ada81f8-7e67-8d77-471a-502f6ec10b2b@intel.com>
 References: <20171214130941.26666-1-kishon@ti.com>
- <20171214130941.26666-5-kishon@ti.com>
+ <20171214130941.26666-6-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20171214130941.26666-5-kishon@ti.com>
+In-Reply-To: <20171214130941.26666-6-kishon@ti.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
 To: Kishon Vijay Abraham I <kishon@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Tony Lindgren <tony@atomide.com>
@@ -16,227 +16,58 @@ Cc: Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, l
 List-Id: linux-mmc@vger.kernel.org
 
 On 14/12/17 15:09, Kishon Vijay Abraham I wrote:
-> MMC tuning procedure is required to support SD card
-> UHS1-SDR104 mode and EMMC HS200 mode.
+> Errata i802 in AM572x Sitara Processors Silicon Revision 2.0, 1.1
+> (SPRZ429K July 2014–Revised March 2017 [1]) mentions
+> DCRC error interrupts (MMCHS_STAT[21] DCRC=0x1) can occur
+> during the tuning procedure and it has to be disabled during the
+> tuning procedure Implement workaround for Errata i802 here..
 > 
-> SDR104/HS200 DLL Tuning Procedure for AM572x platform is mentioned
-> in Figure 25-51. SDR104/HS200 DLL Tuning Procedure of
-> AM572x Sitara Processors Silicon Revision 2.0, 1.1 TRM
-> (SPRUHZ6I - October 2014–Revised April 2017 [1]).
-> 
-> The tuning function sdhci_omap_execute_tuning() will only be
-> called by the MMC/SD core if the corresponding speed modes
-> are supported by the OMAP silicon which is set in the mmc
-> host "caps" field.
-> 
-> [1] -> http://www.ti.com/lit/ug/spruhz6i/spruhz6i.pdf
+> [1] -> http://www.ti.com/lit/er/sprz429k/sprz429k.pdf
 > 
 > Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
-
-Apart from 1 minor comment below:
 
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
->  drivers/mmc/host/sdhci-omap.c | 130 ++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 130 insertions(+)
+>  drivers/mmc/host/sdhci-omap.c | 13 +++++++++++++
+>  1 file changed, 13 insertions(+)
 > 
 > diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-> index 8f7239e2edc2..df8a0a472996 100644
+> index df8a0a472996..b20f4c79ccc6 100644
 > --- a/drivers/mmc/host/sdhci-omap.c
 > +++ b/drivers/mmc/host/sdhci-omap.c
-> @@ -37,6 +37,13 @@
->  #define CON_INIT		BIT(1)
->  #define CON_OD			BIT(0)
+> @@ -266,6 +266,7 @@ static int sdhci_omap_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>  	struct sdhci_pltfm_host *pltfm_host;
+>  	struct sdhci_omap_host *omap_host;
+>  	struct device *dev;
+> +	u32 ier = host->ier;
 >  
-> +#define SDHCI_OMAP_DLL		0x0134
-> +#define DLL_SWT			BIT(20)
-> +#define DLL_FORCE_SR_C_SHIFT	13
-> +#define DLL_FORCE_SR_C_MASK	(0x7f << DLL_FORCE_SR_C_SHIFT)
-> +#define DLL_FORCE_VALUE		BIT(12)
-> +#define DLL_CALIB		BIT(1)
+>  	pltfm_host = sdhci_priv(host);
+>  	omap_host = sdhci_pltfm_priv(pltfm_host);
+> @@ -283,6 +284,16 @@ static int sdhci_omap_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>  	reg |= DLL_SWT;
+>  	sdhci_omap_writel(omap_host, SDHCI_OMAP_DLL, reg);
+>  
+> +	/*
+> +	 * OMAP5/DRA74X/DRA72x Errata i802:
+> +	 * DCRC error interrupts (MMCHS_STAT[21] DCRC=0x1) can occur
+> +	 * during the tuning procedure. So disable it during the
+> +	 * tuning procedure.
+> +	 */
+> +	ier &= ~SDHCI_INT_DATA_CRC;
+> +	sdhci_writel(host, ier, SDHCI_INT_ENABLE);
+> +	sdhci_writel(host, ier, SDHCI_SIGNAL_ENABLE);
 > +
->  #define SDHCI_OMAP_CMD		0x20c
+>  	while (phase_delay <= MAX_PHASE_DELAY) {
+>  		sdhci_omap_set_dll(omap_host, phase_delay);
 >  
->  #define SDHCI_OMAP_PSTATE	0x0224
-> @@ -66,12 +73,16 @@
+> @@ -328,6 +339,8 @@ static int sdhci_omap_execute_tuning(struct mmc_host *mmc, u32 opcode)
 >  
->  #define SDHCI_OMAP_AC12		0x23c
->  #define AC12_V1V8_SIGEN		BIT(19)
-> +#define AC12_SCLK_SEL		BIT(23)
->  
->  #define SDHCI_OMAP_CAPA		0x240
->  #define CAPA_VS33		BIT(24)
->  #define CAPA_VS30		BIT(25)
->  #define CAPA_VS18		BIT(26)
->  
-> +#define SDHCI_OMAP_CAPA2	0x0244
-> +#define CAPA2_TSDR50		BIT(13)
-> +
->  #define SDHCI_OMAP_TIMEOUT	1		/* 1 msec */
->  
->  #define SYSCTL_CLKD_MAX		0x3FF
-> @@ -80,6 +91,8 @@
->  #define IOV_3V0			3000000		/* 300000 uV */
->  #define IOV_3V3			3300000		/* 330000 uV */
->  
-> +#define MAX_PHASE_DELAY		0x7C
-> +
->  struct sdhci_omap_data {
->  	u32 offset;
->  };
-> @@ -204,6 +217,120 @@ static void sdhci_omap_conf_bus_power(struct sdhci_omap_host *omap_host,
->  	}
+>  ret:
+>  	sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
+> +	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
+> +	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
+>  	return ret;
 >  }
 >  
-> +static inline void sdhci_omap_set_dll(struct sdhci_omap_host *omap_host,
-> +				      int count)
-> +{
-> +	int i;
-> +	u32 reg;
-> +
-> +	reg = sdhci_omap_readl(omap_host, SDHCI_OMAP_DLL);
-> +	reg |= DLL_FORCE_VALUE;
-> +	reg &= ~DLL_FORCE_SR_C_MASK;
-> +	reg |= (count << DLL_FORCE_SR_C_SHIFT);
-> +	sdhci_omap_writel(omap_host, SDHCI_OMAP_DLL, reg);
-> +
-> +	reg |= DLL_CALIB;
-> +	sdhci_omap_writel(omap_host, SDHCI_OMAP_DLL, reg);
-> +	for (i = 0; i < 1000; i++) {
-> +		reg = sdhci_omap_readl(omap_host, SDHCI_OMAP_DLL);
-> +		if (reg & DLL_CALIB)
-> +			break;
-> +	}
-> +	reg &= ~DLL_CALIB;
-> +	sdhci_omap_writel(omap_host, SDHCI_OMAP_DLL, reg);
-> +}
-> +
-> +static void sdhci_omap_disable_tuning(struct sdhci_omap_host *omap_host)
-> +{
-> +	u32 reg;
-> +
-> +	reg = sdhci_omap_readl(omap_host, SDHCI_OMAP_AC12);
-> +	reg &= ~AC12_SCLK_SEL;
-> +	sdhci_omap_writel(omap_host, SDHCI_OMAP_AC12, reg);
-> +
-> +	reg = sdhci_omap_readl(omap_host, SDHCI_OMAP_DLL);
-> +	reg &= ~(DLL_FORCE_VALUE | DLL_SWT);
-> +	sdhci_omap_writel(omap_host, SDHCI_OMAP_DLL, reg);
-> +}
-> +
-> +static int sdhci_omap_execute_tuning(struct mmc_host *mmc, u32 opcode)
-> +{
-> +	u32 reg;
-> +	int ret = 0;
-> +	u8 cur_match, prev_match = 0;
-> +	u32 phase_delay = 0;
-> +	u32 start_window = 0, max_window = 0;
-> +	u32 length = 0, max_len = 0;
-> +	struct mmc_ios *ios = &mmc->ios;
-> +	struct sdhci_host *host = mmc_priv(mmc);
-> +	struct sdhci_pltfm_host *pltfm_host;
-> +	struct sdhci_omap_host *omap_host;
-> +	struct device *dev;
-> +
-> +	pltfm_host = sdhci_priv(host);
-> +	omap_host = sdhci_pltfm_priv(pltfm_host);
-> +	dev = omap_host->dev;
-
-These initializations can be combined with the declarations.  Also try to
-arrange local variable declaration lines in descending order of length e.g.
-
-	struct sdhci_host *host = mmc_priv(mmc);
-	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-	struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
-	struct device *dev = omap_host->dev;
-	struct mmc_ios *ios = &mmc->ios;
-	u32 start_window = 0, max_window = 0;
-	u8 cur_match, prev_match = 0;
-	u32 length = 0, max_len = 0;
-	u32 phase_delay = 0;
-	int ret = 0;
-	u32 reg;
-
-> +
-> +	/* clock tuning is not needed for upto 52MHz */
-> +	if (ios->clock <= 52000000)
-> +		return 0;
-> +
-> +	reg = sdhci_omap_readl(omap_host, SDHCI_OMAP_CAPA2);
-> +	if (ios->timing == MMC_TIMING_UHS_SDR50 && !(reg & CAPA2_TSDR50))
-> +		return 0;
-> +
-> +	reg = sdhci_omap_readl(omap_host, SDHCI_OMAP_DLL);
-> +	reg |= DLL_SWT;
-> +	sdhci_omap_writel(omap_host, SDHCI_OMAP_DLL, reg);
-> +
-> +	while (phase_delay <= MAX_PHASE_DELAY) {
-> +		sdhci_omap_set_dll(omap_host, phase_delay);
-> +
-> +		cur_match = !mmc_send_tuning(mmc, opcode, NULL);
-> +		if (cur_match) {
-> +			if (prev_match) {
-> +				length++;
-> +			} else {
-> +				start_window = phase_delay;
-> +				length = 1;
-> +			}
-> +		}
-> +
-> +		if (length > max_len) {
-> +			max_window = start_window;
-> +			max_len = length;
-> +		}
-> +
-> +		prev_match = cur_match;
-> +		phase_delay += 4;
-> +	}
-> +
-> +	if (!max_len) {
-> +		dev_err(dev, "Unable to find match\n");
-> +		ret = -EIO;
-> +		goto tuning_error;
-> +	}
-> +
-> +	reg = sdhci_omap_readl(omap_host, SDHCI_OMAP_AC12);
-> +	if (!(reg & AC12_SCLK_SEL)) {
-> +		ret = -EIO;
-> +		goto tuning_error;
-> +	}
-> +
-> +	phase_delay = max_window + 4 * (max_len >> 1);
-> +	sdhci_omap_set_dll(omap_host, phase_delay);
-> +
-> +	goto ret;
-> +
-> +tuning_error:
-> +	dev_err(dev, "Tuning failed\n");
-> +	sdhci_omap_disable_tuning(omap_host);
-> +
-> +ret:
-> +	sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
-> +	return ret;
-> +}
-> +
->  static int sdhci_omap_card_busy(struct mmc_host *mmc)
->  {
->  	int i;
-> @@ -312,6 +439,8 @@ static int sdhci_omap_start_signal_voltage_switch(struct mmc_host *mmc,
->  static void sdhci_omap_set_power_mode(struct sdhci_omap_host *omap_host,
->  				      u8 power_mode)
->  {
-> +	if (omap_host->bus_mode == MMC_POWER_OFF)
-> +		sdhci_omap_disable_tuning(omap_host);
->  	omap_host->power_mode = power_mode;
->  }
->  
-> @@ -648,6 +777,7 @@ static int sdhci_omap_probe(struct platform_device *pdev)
->  					sdhci_omap_start_signal_voltage_switch;
->  	host->mmc_host_ops.set_ios = sdhci_omap_set_ios;
->  	host->mmc_host_ops.card_busy = sdhci_omap_card_busy;
-> +	host->mmc_host_ops.execute_tuning = sdhci_omap_execute_tuning;
->  
->  	sdhci_read_caps(host);
->  	host->caps |= SDHCI_CAN_DO_ADMA2;
 > 
