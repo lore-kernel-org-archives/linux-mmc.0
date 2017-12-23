@@ -1,97 +1,59 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v1] mmc: sdhci-of-esdhc: Workaround for reducing the
- maximum speed on ls1021atwr
-Date: Sat, 23 Dec 2017 16:23:31 +0100
-Message-ID: <CAPDyKFre8meCFORRQs3yT-u0er2Ht2w1x=2r=kJgsDSGZajv2w@mail.gmail.com>
-References: <20171115090103.25366-1-yinbo.zhu@nxp.com> <CAPDyKFotZ9eZkSCj603BGuHOTCXitd7GmaKk0XFsj_7=CnoDgg@mail.gmail.com>
- <DB6PR0401MB253667427D21DFCAE486DD9BF8020@DB6PR0401MB2536.eurprd04.prod.outlook.com>
+From: Guenter Roeck <linux@roeck-us.net>
+Subject: Re: [PATCH v3 00/27] kill devm_ioremap_nocache
+Date: Sat, 23 Dec 2017 07:57:40 -0800
+Message-ID: <f7632cf5-2bcc-4d74-b912-3999937a1269@roeck-us.net>
+References: <1514026525-32538-1-git-send-email-xieyisheng1@huawei.com>
+ <20171223134831.GB10103@kroah.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f66.google.com ([209.85.214.66]:43407 "EHLO
-        mail-it0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751295AbdLWPXd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 23 Dec 2017 10:23:33 -0500
-Received: by mail-it0-f66.google.com with SMTP id u62so17167276ita.2
-        for <linux-mmc@vger.kernel.org>; Sat, 23 Dec 2017 07:23:32 -0800 (PST)
-In-Reply-To: <DB6PR0401MB253667427D21DFCAE486DD9BF8020@DB6PR0401MB2536.eurprd04.prod.outlook.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <20171223134831.GB10103@kroah.com>
+Content-Language: en-US
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: Greg KH <gregkh@linuxfoundation.org>, Yisheng Xie <xieyisheng1@huawei.com>
+Cc: linux-mips@linux-mips.org, ulf.hansson@linaro.org, jakub.kicinski@netronome.com, platform-driver-x86@vger.kernel.org, airlied@linux.ie, linux-wireless@vger.kernel.org, linus.walleij@linaro.org, alsa-devel@alsa-project.org, dri-devel@lists.freedesktop.org, linux-kernel@vger.kernel.org, linux-ide@vger.kernel.org, linux-mtd@lists.infradead.org, daniel.vetter@intel.com, dan.j.williams@intel.com, jason@lakedaemon.net, linux-rtc@vger.kernel.org, boris.brezillon@free-electrons.com, mchehab@kernel.org, dmaengine@vger.kernel.org, vinod.koul@intel.com, richard@nod.at, marek.vasut@gmail.com, industrypack-devel@lists.sourceforge.net, linux-pci@vger.kernel.org, dvhart@infradead.org, wg@grandegger.com, linux-media@vger.kernel.org, seanpaul@chromium.org, devel@driverdev.osuosl.org, linux-watchdog@vger.kernel.org, arnd@arndb.de, b.zolnierkie@samsung.com, marc.zyngier@arm.com, jslaby@sus
 List-Id: linux-mmc@vger.kernel.org
-To: "Y.b. Lu" <yangbo.lu@nxp.com>
-Cc: Yinbo Zhu <yinbo.zhu@nxp.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 22 December 2017 at 09:13, Y.b. Lu <yangbo.lu@nxp.com> wrote:
-> Hi Uffe,
->
->
->> -----Original Message-----
->> From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
->> Sent: 2017=E5=B9=B411=E6=9C=8816=E6=97=A5 15:34
->> To: Yinbo Zhu <yinbo.zhu@nxp.com>
->> Cc: Adrian Hunter <adrian.hunter@intel.com>; Y.b. Lu <yangbo.lu@nxp.com>=
-;
->> linux-mmc@vger.kernel.org
->> Subject: Re: [PATCH v1] mmc: sdhci-of-esdhc: Workaround for reducing the
->> maximum speed on ls1021atwr
+On 12/23/2017 05:48 AM, Greg KH wrote:
+> On Sat, Dec 23, 2017 at 06:55:25PM +0800, Yisheng Xie wrote:
+>> Hi all,
 >>
->> On 15 November 2017 at 10:01,  <yinbo.zhu@nxp.com> wrote:
->> > From: "yinbo.zhu" <yinbo.zhu@nxp.com>
->> >
->> > In SDHC high speed AC timing, the tshivkh parameter is defined as
->> > input setup times:SDHC_CMD, SDHC_DATx, to SDHC_CLK. The value of the
->> > tshivkh should be 2.5 ns considering the round trip delay, board/data
->> > skew.
->> > However, because of this erratum, it needs at least 4.1 ns.
->> >
->> > eSDHC cannot run at the maximum clock speed for the high speed mode,
->> > or there is a limit on the length of the trace on the board for data,
->> > command, and clock lines of the SDHC.
->> >
->> > Signed-off-by: yinbo.zhu <yinbo.zhu@nxp.com>
->> > ---
->> >  drivers/mmc/host/sdhci-of-esdhc.c | 6 ++++++
->> >  1 file changed, 6 insertions(+)
->> >
->> > diff --git a/drivers/mmc/host/sdhci-of-esdhc.c
->> > b/drivers/mmc/host/sdhci-of-esdhc.c
->> > index 023c24bd0d94..2744dd58a573 100644
->> > --- a/drivers/mmc/host/sdhci-of-esdhc.c
->> > +++ b/drivers/mmc/host/sdhci-of-esdhc.c
->> > @@ -498,6 +498,12 @@ static void esdhc_of_set_clock(struct sdhci_host
->> *host, unsigned int clock)
->> >                         clock -=3D 5000000;
->> >         }
->> >
->> > +       /* Workaround to reduce the clock frequency for ls1021a esdhc =
-*/
->> > +       if (of_find_compatible_node(NULL, NULL, "fsl,ls1021a-esdhc"))
->> > + {
->>
->> It's better to use the ->data pointer in the struct of_device_id for thi=
-s kind of
->> variant data.
->>
->> In ->probe() you then call of_match_device() and pick up the ->data poin=
-ter
->> and assign it to your driver private data.
->>
->> Many drivers already do like this. Have a look at dw_mmc-exynos.c for
->> example.
->>
->
-> [Y.b. Lu] How about using soc_device_match()? There is also .data member =
-could be used in soc_device_attribute structure.
-> Use soc_device_match() in esdhc_init and get .data information into sdhci=
-_esdhc structure which is private data.
-> Current incorrect host version register value fix-up for some platforms i=
-s using this method.
+>> When I tried to use devm_ioremap function and review related code, I found
+>> devm_ioremap and devm_ioremap_nocache is almost the same with each other,
+>> except one use ioremap while the other use ioremap_nocache.
+> 
+> For all arches?  Really?  Look at MIPS, and x86, they have different
+> functions.
+> 
 
-I think you need to answer the question: is the problem SoC specific
-or device-variant specific. Depending on the answer, you should pick
-the correct solution.
+Both mips and x86 end up mapping the same function, but other arches don't.
+mn10300 is one where ioremap and ioremap_nocache are definitely different.
 
-[...]
+Guenter
 
-Kind regards
-Uffe
+>> While ioremap's
+>> default function is ioremap_nocache, so devm_ioremap_nocache also have the
+>> same function with devm_ioremap, which can just be killed to reduce the size
+>> of devres.o(from 20304 bytes to 18992 bytes in my compile environment).
+>>
+>> I have posted two versions, which use macro instead of function for
+>> devm_ioremap_nocache[1] or devm_ioremap[2]. And Greg suggest me to kill
+>> devm_ioremap_nocache for no need to keep a macro around for the duplicate
+>> thing. So here comes v3 and please help to review.
+> 
+> I don't think this can be done, what am I missing?  These functions are
+> not identical, sorry for missing that before.
+> 
+> thanks,
+> 
+> greg k-h
+> 
