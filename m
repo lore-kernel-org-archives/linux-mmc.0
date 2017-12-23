@@ -1,106 +1,46 @@
-From: Yisheng Xie <xieyisheng1@huawei.com>
-Subject: [PATCH v3 27/27] devres: kill devm_ioremap_nocache
-Date: Sat, 23 Dec 2017 19:02:59 +0800
-Message-ID: <1514026979-33838-1-git-send-email-xieyisheng1@huawei.com>
+From: Greg KH <gregkh@linuxfoundation.org>
+Subject: Re: [PATCH v3 27/27] devres: kill devm_ioremap_nocache
+Date: Sat, 23 Dec 2017 14:45:32 +0100
+Message-ID: <20171223134532.GA10103@kroah.com>
+References: <1514026979-33838-1-git-send-email-xieyisheng1@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-ide-owner@vger.kernel.org>
-Sender: linux-ide-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, gregkh@linuxfoundation.org
-Cc: ysxie@foxmail.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, boris.brezillon@free-electrons.com, richard@nod.at, marek.vasut@gmail.com, cyrille.pitchen@wedev4u.fr, linux-mtd@lists.infradead.org, alsa-devel@alsa-project.org, wim@iguana.be, linux@roeck-us.net, linux-watchdog@vger.kernel.org, b.zolnierkie@samsung.com, linux-fbdev@vger.kernel.org, linus.walleij@linaro.org, linux-gpio@vger.kernel.org, ralf@linux-mips.org, linux-mips@linux-mips.org, lgirdwood@gmail.com, broonie@kernel.org, tglx@linutronix.de, jason@lakedaemon.net, marc.zyngier@arm.com, arnd@arndb.de, andriy.shevchenko@linux.intel.com, industrypack-devel@lists.sourceforge.net, wg@grandegger.com, mkl@pengutronix.de, linux-can@vger.kernel.org, mcheh
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <dri-devel-bounces@lists.freedesktop.org>
+Content-Disposition: inline
+In-Reply-To: <1514026979-33838-1-git-send-email-xieyisheng1@huawei.com>
+List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/dri-devel>,
+ <mailto:dri-devel-request@lists.freedesktop.org?subject=unsubscribe>
+List-Archive: <https://lists.freedesktop.org/archives/dri-devel>
+List-Post: <mailto:dri-devel@lists.freedesktop.org>
+List-Help: <mailto:dri-devel-request@lists.freedesktop.org?subject=help>
+List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/dri-devel>,
+ <mailto:dri-devel-request@lists.freedesktop.org?subject=subscribe>
+Errors-To: dri-devel-bounces@lists.freedesktop.org
+Sender: "dri-devel" <dri-devel-bounces@lists.freedesktop.org>
+To: Yisheng Xie <xieyisheng1@huawei.com>
+Cc: linux-mips@linux-mips.org, ulf.hansson@linaro.org, jakub.kicinski@netronome.com, lgirdwood@gmail.com, airlied@linux.ie, linux-pci@vger.kernel.org, alsa-devel@alsa-project.org, dri-devel@lists.freedesktop.org, platform-driver-x86@vger.kernel.org, linux-ide@vger.kernel.org, linux-mtd@lists.infradead.org, daniel.vetter@intel.com, tglx@linutronix.de, linux-watchdog@vger.kernel.org, linux-rtc@vger.kernel.org, boris.brezillon@free-electrons.com, andriy.shevchenko@linux.intel.com, vinod.koul@intel.com, richard@nod.at, alexandre.belloni@free-electrons.com, marek.vasut@gmail.com, industrypack-devel@lists.sourceforge.net, jslaby@suse.com, dvhart@infradead.org, linux@roeck-us.net, linux-media@vger.kernel.org, devel@driverdev.osuosl.org, jason@lakedaemon.net, arnd@arndb.de, b.zolnierkie@samsung.com, marc.zyngier@arm.com, linux-mmc@vger.kernel.org, linux-can@vger.kernel.org, linux-gp
 List-Id: linux-mmc@vger.kernel.org
 
-Now, nobody use devm_ioremap_nocache anymore, can it can just be
-removed. After this patch the size of devres.o will be reduced from
-20304 bytes to 18992 bytes.
-
-Suggested-by: Greg KH <gregkh@linuxfoundation.org>
-Signed-off-by: Yisheng Xie <xieyisheng1@huawei.com>
----
- Documentation/driver-model/devres.txt   |  1 -
- include/linux/io.h                      |  2 --
- lib/devres.c                            | 29 -----------------------------
- scripts/coccinelle/free/devm_free.cocci |  2 --
- 4 files changed, 34 deletions(-)
-
-diff --git a/Documentation/driver-model/devres.txt b/Documentation/driver-model/devres.txt
-index c180045..c3fddb5 100644
---- a/Documentation/driver-model/devres.txt
-+++ b/Documentation/driver-model/devres.txt
-@@ -292,7 +292,6 @@ IOMAP
-   devm_ioport_map()
-   devm_ioport_unmap()
-   devm_ioremap()
--  devm_ioremap_nocache()
-   devm_ioremap_wc()
-   devm_ioremap_resource() : checks resource, requests memory region, ioremaps
-   devm_iounmap()
-diff --git a/include/linux/io.h b/include/linux/io.h
-index 32e30e8..a9c7270 100644
---- a/include/linux/io.h
-+++ b/include/linux/io.h
-@@ -75,8 +75,6 @@ static inline void devm_ioport_unmap(struct device *dev, void __iomem *addr)
- 
- void __iomem *devm_ioremap(struct device *dev, resource_size_t offset,
- 			   resource_size_t size);
--void __iomem *devm_ioremap_nocache(struct device *dev, resource_size_t offset,
--				   resource_size_t size);
- void __iomem *devm_ioremap_wc(struct device *dev, resource_size_t offset,
- 				   resource_size_t size);
- void devm_iounmap(struct device *dev, void __iomem *addr);
-diff --git a/lib/devres.c b/lib/devres.c
-index 5f2aedd..f818fcf 100644
---- a/lib/devres.c
-+++ b/lib/devres.c
-@@ -44,35 +44,6 @@ void __iomem *devm_ioremap(struct device *dev, resource_size_t offset,
- EXPORT_SYMBOL(devm_ioremap);
- 
- /**
-- * devm_ioremap_nocache - Managed ioremap_nocache()
-- * @dev: Generic device to remap IO address for
-- * @offset: Resource address to map
-- * @size: Size of map
-- *
-- * Managed ioremap_nocache().  Map is automatically unmapped on driver
-- * detach.
-- */
--void __iomem *devm_ioremap_nocache(struct device *dev, resource_size_t offset,
--				   resource_size_t size)
--{
--	void __iomem **ptr, *addr;
--
--	ptr = devres_alloc(devm_ioremap_release, sizeof(*ptr), GFP_KERNEL);
--	if (!ptr)
--		return NULL;
--
--	addr = ioremap_nocache(offset, size);
--	if (addr) {
--		*ptr = addr;
--		devres_add(dev, ptr);
--	} else
--		devres_free(ptr);
--
--	return addr;
--}
--EXPORT_SYMBOL(devm_ioremap_nocache);
--
--/**
-  * devm_ioremap_wc - Managed ioremap_wc()
-  * @dev: Generic device to remap IO address for
-  * @offset: Resource address to map
-diff --git a/scripts/coccinelle/free/devm_free.cocci b/scripts/coccinelle/free/devm_free.cocci
-index c990d2c..36b8752 100644
---- a/scripts/coccinelle/free/devm_free.cocci
-+++ b/scripts/coccinelle/free/devm_free.cocci
-@@ -51,8 +51,6 @@ expression x;
- |
-  x = devm_ioremap(...)
- |
-- x = devm_ioremap_nocache(...)
--|
-  x = devm_ioport_map(...)
- )
- 
--- 
-1.8.3.1
-
+T24gU2F0LCBEZWMgMjMsIDIwMTcgYXQgMDc6MDI6NTlQTSArMDgwMCwgWWlzaGVuZyBYaWUgd3Jv
+dGU6Cj4gLS0tIGEvbGliL2RldnJlcy5jCj4gKysrIGIvbGliL2RldnJlcy5jCj4gQEAgLTQ0LDM1
+ICs0NCw2IEBAIHZvaWQgX19pb21lbSAqZGV2bV9pb3JlbWFwKHN0cnVjdCBkZXZpY2UgKmRldiwg
+cmVzb3VyY2Vfc2l6ZV90IG9mZnNldCwKPiAgRVhQT1JUX1NZTUJPTChkZXZtX2lvcmVtYXApOwo+
+ICAKPiAgLyoqCj4gLSAqIGRldm1faW9yZW1hcF9ub2NhY2hlIC0gTWFuYWdlZCBpb3JlbWFwX25v
+Y2FjaGUoKQo+IC0gKiBAZGV2OiBHZW5lcmljIGRldmljZSB0byByZW1hcCBJTyBhZGRyZXNzIGZv
+cgo+IC0gKiBAb2Zmc2V0OiBSZXNvdXJjZSBhZGRyZXNzIHRvIG1hcAo+IC0gKiBAc2l6ZTogU2l6
+ZSBvZiBtYXAKPiAtICoKPiAtICogTWFuYWdlZCBpb3JlbWFwX25vY2FjaGUoKS4gIE1hcCBpcyBh
+dXRvbWF0aWNhbGx5IHVubWFwcGVkIG9uIGRyaXZlcgo+IC0gKiBkZXRhY2guCj4gLSAqLwo+IC12
+b2lkIF9faW9tZW0gKmRldm1faW9yZW1hcF9ub2NhY2hlKHN0cnVjdCBkZXZpY2UgKmRldiwgcmVz
+b3VyY2Vfc2l6ZV90IG9mZnNldCwKPiAtCQkJCSAgIHJlc291cmNlX3NpemVfdCBzaXplKQo+IC17
+Cj4gLQl2b2lkIF9faW9tZW0gKipwdHIsICphZGRyOwo+IC0KPiAtCXB0ciA9IGRldnJlc19hbGxv
+YyhkZXZtX2lvcmVtYXBfcmVsZWFzZSwgc2l6ZW9mKCpwdHIpLCBHRlBfS0VSTkVMKTsKPiAtCWlm
+ICghcHRyKQo+IC0JCXJldHVybiBOVUxMOwo+IC0KPiAtCWFkZHIgPSBpb3JlbWFwX25vY2FjaGUo
+b2Zmc2V0LCBzaXplKTsKCldhaXQsIGRldm1faW9yZW1hcCgpIGNhbGxzIGlvcmVtYXAoKSwgbm90
+IGlvcmVtYXBfbm9jYWNoZSgpLCBhcmUgeW91Cl9TVVJFXyB0aGF0IHRoZXNlIGFyZSBhbGwgaWRl
+bnRpY2FsPyAgRm9yIGFsbCBhcmNoZXM/ICBJZiBzbywgdGhlbgppb3JlbWFwX25vY2FjaGUoKSBj
+YW4gYWxzbyBiZSByZW1vdmVkLCByaWdodD8KCkluIG15IHF1aWNrIGdsYW5jZSwgSSBkb24ndCB0
+aGluayB5b3UgY2FuIGRvIHRoaXMgc2VyaWVzIGF0IGFsbCA6KAoKZ3JlZyBrLWgKX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KZHJpLWRldmVsIG1haWxpbmcg
+bGlzdApkcmktZGV2ZWxAbGlzdHMuZnJlZWRlc2t0b3Aub3JnCmh0dHBzOi8vbGlzdHMuZnJlZWRl
+c2t0b3Aub3JnL21haWxtYW4vbGlzdGluZm8vZHJpLWRldmVsCg==
