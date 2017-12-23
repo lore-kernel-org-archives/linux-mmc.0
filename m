@@ -1,72 +1,45 @@
-From: "Y.b. Lu" <yangbo.lu@nxp.com>
-Subject: RE: [PATCH v1] mmc: sdhci-of-esdhc: Workaround for reducing the
- maximum speed on ls1021atwr
-Date: Fri, 22 Dec 2017 08:13:16 +0000
-Message-ID: <DB6PR0401MB253667427D21DFCAE486DD9BF8020@DB6PR0401MB2536.eurprd04.prod.outlook.com>
-References: <20171115090103.25366-1-yinbo.zhu@nxp.com>
- <CAPDyKFotZ9eZkSCj603BGuHOTCXitd7GmaKk0XFsj_7=CnoDgg@mail.gmail.com>
+From: Tuomas Tynkkynen <tuomas-yrGDUoBaLx3QT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH] mmc: Don't reference Linux-specific OF_GPIO_ACTIVE_LOW flag in DT binding
+Date: Sat, 23 Dec 2017 02:34:12 +0200
+Message-ID: <20171223003412.13688-1-tuomas@tuxera.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-he1eur01on0075.outbound.protection.outlook.com ([104.47.0.75]:27360
-        "EHLO EUR01-HE1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751390AbdLVINY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 22 Dec 2017 03:13:24 -0500
-In-Reply-To: <CAPDyKFotZ9eZkSCj603BGuHOTCXitd7GmaKk0XFsj_7=CnoDgg@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Tuomas Tynkkynen <tuomas-yrGDUoBaLx3QT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Yinbo Zhu <yinbo.zhu@nxp.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-SGkgVWZmZSwNCg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IFVsZiBI
-YW5zc29uIFttYWlsdG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4gU2VudDogMjAxN+W5tDEx
-5pyIMTbml6UgMTU6MzQNCj4gVG86IFlpbmJvIFpodSA8eWluYm8uemh1QG54cC5jb20+DQo+IENj
-OiBBZHJpYW4gSHVudGVyIDxhZHJpYW4uaHVudGVyQGludGVsLmNvbT47IFkuYi4gTHUgPHlhbmdi
-by5sdUBueHAuY29tPjsNCj4gbGludXgtbW1jQHZnZXIua2VybmVsLm9yZw0KPiBTdWJqZWN0OiBS
-ZTogW1BBVENIIHYxXSBtbWM6IHNkaGNpLW9mLWVzZGhjOiBXb3JrYXJvdW5kIGZvciByZWR1Y2lu
-ZyB0aGUNCj4gbWF4aW11bSBzcGVlZCBvbiBsczEwMjFhdHdyDQo+IA0KPiBPbiAxNSBOb3ZlbWJl
-ciAyMDE3IGF0IDEwOjAxLCAgPHlpbmJvLnpodUBueHAuY29tPiB3cm90ZToNCj4gPiBGcm9tOiAi
-eWluYm8uemh1IiA8eWluYm8uemh1QG54cC5jb20+DQo+ID4NCj4gPiBJbiBTREhDIGhpZ2ggc3Bl
-ZWQgQUMgdGltaW5nLCB0aGUgdHNoaXZraCBwYXJhbWV0ZXIgaXMgZGVmaW5lZCBhcw0KPiA+IGlu
-cHV0IHNldHVwIHRpbWVzOlNESENfQ01ELCBTREhDX0RBVHgsIHRvIFNESENfQ0xLLiBUaGUgdmFs
-dWUgb2YgdGhlDQo+ID4gdHNoaXZraCBzaG91bGQgYmUgMi41IG5zIGNvbnNpZGVyaW5nIHRoZSBy
-b3VuZCB0cmlwIGRlbGF5LCBib2FyZC9kYXRhDQo+ID4gc2tldy4NCj4gPiBIb3dldmVyLCBiZWNh
-dXNlIG9mIHRoaXMgZXJyYXR1bSwgaXQgbmVlZHMgYXQgbGVhc3QgNC4xIG5zLg0KPiA+DQo+ID4g
-ZVNESEMgY2Fubm90IHJ1biBhdCB0aGUgbWF4aW11bSBjbG9jayBzcGVlZCBmb3IgdGhlIGhpZ2gg
-c3BlZWQgbW9kZSwNCj4gPiBvciB0aGVyZSBpcyBhIGxpbWl0IG9uIHRoZSBsZW5ndGggb2YgdGhl
-IHRyYWNlIG9uIHRoZSBib2FyZCBmb3IgZGF0YSwNCj4gPiBjb21tYW5kLCBhbmQgY2xvY2sgbGlu
-ZXMgb2YgdGhlIFNESEMuDQo+ID4NCj4gPiBTaWduZWQtb2ZmLWJ5OiB5aW5iby56aHUgPHlpbmJv
-LnpodUBueHAuY29tPg0KPiA+IC0tLQ0KPiA+ICBkcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWVz
-ZGhjLmMgfCA2ICsrKysrKw0KPiA+ICAxIGZpbGUgY2hhbmdlZCwgNiBpbnNlcnRpb25zKCspDQo+
-ID4NCj4gPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1lc2RoYy5jDQo+
-ID4gYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWVzZGhjLmMNCj4gPiBpbmRleCAwMjNjMjRi
-ZDBkOTQuLjI3NDRkZDU4YTU3MyAxMDA2NDQNCj4gPiAtLS0gYS9kcml2ZXJzL21tYy9ob3N0L3Nk
-aGNpLW9mLWVzZGhjLmMNCj4gPiArKysgYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWVzZGhj
-LmMNCj4gPiBAQCAtNDk4LDYgKzQ5OCwxMiBAQCBzdGF0aWMgdm9pZCBlc2RoY19vZl9zZXRfY2xv
-Y2soc3RydWN0IHNkaGNpX2hvc3QNCj4gKmhvc3QsIHVuc2lnbmVkIGludCBjbG9jaykNCj4gPiAg
-ICAgICAgICAgICAgICAgICAgICAgICBjbG9jayAtPSA1MDAwMDAwOw0KPiA+ICAgICAgICAgfQ0K
-PiA+DQo+ID4gKyAgICAgICAvKiBXb3JrYXJvdW5kIHRvIHJlZHVjZSB0aGUgY2xvY2sgZnJlcXVl
-bmN5IGZvciBsczEwMjFhIGVzZGhjICovDQo+ID4gKyAgICAgICBpZiAob2ZfZmluZF9jb21wYXRp
-YmxlX25vZGUoTlVMTCwgTlVMTCwgImZzbCxsczEwMjFhLWVzZGhjIikpDQo+ID4gKyB7DQo+IA0K
-PiBJdCdzIGJldHRlciB0byB1c2UgdGhlIC0+ZGF0YSBwb2ludGVyIGluIHRoZSBzdHJ1Y3Qgb2Zf
-ZGV2aWNlX2lkIGZvciB0aGlzIGtpbmQgb2YNCj4gdmFyaWFudCBkYXRhLg0KPiANCj4gSW4gLT5w
-cm9iZSgpIHlvdSB0aGVuIGNhbGwgb2ZfbWF0Y2hfZGV2aWNlKCkgYW5kIHBpY2sgdXAgdGhlIC0+
-ZGF0YSBwb2ludGVyDQo+IGFuZCBhc3NpZ24gaXQgdG8geW91ciBkcml2ZXIgcHJpdmF0ZSBkYXRh
-Lg0KPiANCj4gTWFueSBkcml2ZXJzIGFscmVhZHkgZG8gbGlrZSB0aGlzLiBIYXZlIGEgbG9vayBh
-dCBkd19tbWMtZXh5bm9zLmMgZm9yDQo+IGV4YW1wbGUuDQo+IA0KDQpbWS5iLiBMdV0gSG93IGFi
-b3V0IHVzaW5nIHNvY19kZXZpY2VfbWF0Y2goKT8gVGhlcmUgaXMgYWxzbyAuZGF0YSBtZW1iZXIg
-Y291bGQgYmUgdXNlZCBpbiBzb2NfZGV2aWNlX2F0dHJpYnV0ZSBzdHJ1Y3R1cmUuDQpVc2Ugc29j
-X2RldmljZV9tYXRjaCgpIGluIGVzZGhjX2luaXQgYW5kIGdldCAuZGF0YSBpbmZvcm1hdGlvbiBp
-bnRvIHNkaGNpX2VzZGhjIHN0cnVjdHVyZSB3aGljaCBpcyBwcml2YXRlIGRhdGEuDQpDdXJyZW50
-IGluY29ycmVjdCBob3N0IHZlcnNpb24gcmVnaXN0ZXIgdmFsdWUgZml4LXVwIGZvciBzb21lIHBs
-YXRmb3JtcyBpcyB1c2luZyB0aGlzIG1ldGhvZC4NCg0KVGhhbmtzIGEgbG90OikNCg0KPiA+ICsg
-ICAgICAgICAgICAgICBpZiAoY2xvY2sgPT0gNTAwMDAwMDApDQo+ID4gKyAgICAgICAgICAgICAg
-ICAgICAgICAgY2xvY2sgPSA0NjUwMDAwMDsNCj4gPiArICAgICAgIH0NCj4gPiArDQo+ID4gICAg
-ICAgICB0ZW1wID0gc2RoY2lfcmVhZGwoaG9zdCwgRVNESENfU1lTVEVNX0NPTlRST0wpOw0KPiA+
-ICAgICAgICAgdGVtcCAmPSB+KEVTREhDX0NMT0NLX1NEQ0xLRU4gfCBFU0RIQ19DTE9DS19JUEdF
-TiB8DQo+IEVTREhDX0NMT0NLX0hDS0VOIHwNCj4gPiAgICAgICAgICAgICAgICAgICBFU0RIQ19D
-TE9DS19QRVJFTiB8IEVTREhDX0NMT0NLX01BU0spOw0KPiANCj4gS2luZCByZWdhcmRzDQo+IFVm
-ZmUNCg==
+OF_GPIO_ACTIVE_LOW is a Linux implementation detail. The binding
+document should be referring to GPIO_ACTIVE_LOW found in
+include/dt-bindings/gpio/gpio.h.
+
+Signed-off-by: Tuomas Tynkkynen <tuomas-yrGDUoBaLx3QT0dZR+AlfA@public.gmane.org>
+---
+ Documentation/devicetree/bindings/mmc/mmc.txt | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+index fb11ae8b3b72..467cd7b147ce 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+@@ -67,10 +67,10 @@ logic applies to the "wp-inverted" property.
+ CD and WP lines can be implemented on the hardware in one of two ways: as GPIOs,
+ specified in cd-gpios and wp-gpios properties, or as dedicated pins. Polarity of
+ dedicated pins can be specified, using *-inverted properties. GPIO polarity can
+-also be specified using the OF_GPIO_ACTIVE_LOW flag. This creates an ambiguity
++also be specified using the GPIO_ACTIVE_LOW flag. This creates an ambiguity
+ in the latter case. We choose to use the XOR logic for GPIO CD and WP lines.
+ This means, the two properties are "superimposed," for example leaving the
+-OF_GPIO_ACTIVE_LOW flag clear and specifying the respective *-inverted
++GPIO_ACTIVE_LOW flag clear and specifying the respective *-inverted property
+ property results in a double-inversion and actually means the "normal" line
+ polarity is in effect.
+ 
+-- 
+2.15.0
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
