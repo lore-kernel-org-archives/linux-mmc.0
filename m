@@ -1,108 +1,67 @@
 From: christophe leroy <christophe.leroy@c-s.fr>
 Subject: Re: [PATCH v3 00/27] kill devm_ioremap_nocache
-Date: Sun, 24 Dec 2017 09:55:18 +0100
-Message-ID: <c28ac0bc-8bd2-3dce-3167-8c0f80ec601e@c-s.fr>
+Date: Sun, 24 Dec 2017 10:05:08 +0100
+Message-ID: <b8ff7f17-7f2c-f220-9833-7ae5bd7343d5@c-s.fr>
 References: <1514026525-32538-1-git-send-email-xieyisheng1@huawei.com>
  <20171223134831.GB10103@kroah.com>
- <f7632cf5-2bcc-4d74-b912-3999937a1269@roeck-us.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-can-owner@vger.kernel.org>
-In-Reply-To: <f7632cf5-2bcc-4d74-b912-3999937a1269@roeck-us.net>
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <20171223134831.GB10103@kroah.com>
 Content-Language: fr
-Sender: linux-can-owner@vger.kernel.org
-To: Guenter Roeck <linux@roeck-us.net>, Greg KH <gregkh@linuxfoundation.org>, Yisheng Xie <xieyisheng1@huawei.com>
-Cc: linux-kernel@vger.kernel.org, ysxie@foxmail.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, boris.brezillon@free-electrons.com, richard@nod.at, marek.vasut@gmail.com, cyrille.pitchen@wedev4u.fr, linux-mtd@lists.infradead.org, alsa-devel@alsa-project.org, wim@iguana.be, linux-watchdog@vger.kernel.org, b.zolnierkie@samsung.com, linux-fbdev@vger.kernel.org, linus.walleij@linaro.org, linux-gpio@vger.kernel.org, ralf@linux-mips.org, linux-mips@linux-mips.org, lgirdwood@gmail.com, broonie@kernel.org, tglx@linutronix.de, jason@lakedaemon.net, marc.zyngier@arm.com, arnd@arndb.de, andriy.shevchenko@linux.intel.com, industrypack-devel@lists.sourceforge.net, wg@grandegger.com, mkl@pengutronix.de, linux-can@vger.kernel.org, mchehab@kernel.org, linux-media@vger.kernel.org, a.zum
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: Greg KH <gregkh@linuxfoundation.org>, Yisheng Xie <xieyisheng1@huawei.com>
+Cc: linux-mips@linux-mips.org, ulf.hansson@linaro.org, jakub.kicinski@netronome.com, platform-driver-x86@vger.kernel.org, airlied@linux.ie, linux-wireless@vger.kernel.org, linus.walleij@linaro.org, alsa-devel@alsa-project.org, dri-devel@lists.freedesktop.org, linux-kernel@vger.kernel.org, linux-ide@vger.kernel.org, linux-mtd@lists.infradead.org, daniel.vetter@intel.com, dan.j.williams@intel.com, jason@lakedaemon.net, linux-rtc@vger.kernel.org, boris.brezillon@free-electrons.com, mchehab@kernel.org, dmaengine@vger.kernel.org, vinod.koul@intel.com, richard@nod.at, marek.vasut@gmail.com, industrypack-devel@lists.sourceforge.net, linux-pci@vger.kernel.org, dvhart@infradead.org, linux@roeck-us.net, linux-media@vger.kernel.org, seanpaul@chromium.org, devel@driverdev.osuosl.org, linux-watchdog@vger.kernel.org, arnd@arndb.de, b.zolnierkie@samsung.com, marc.zyngier@arm.com, jslaby@su
 List-Id: linux-mmc@vger.kernel.org
 
-
-
-Le 23/12/2017 à 16:57, Guenter Roeck a écrit :
-> On 12/23/2017 05:48 AM, Greg KH wrote:
->> On Sat, Dec 23, 2017 at 06:55:25PM +0800, Yisheng Xie wrote:
->>> Hi all,
->>>
->>> When I tried to use devm_ioremap function and review related code, I 
->>> found
->>> devm_ioremap and devm_ioremap_nocache is almost the same with each 
->>> other,
->>> except one use ioremap while the other use ioremap_nocache.
->>
->> For all arches?  Really?  Look at MIPS, and x86, they have different
->> functions.
->>
-> 
-> Both mips and x86 end up mapping the same function, but other arches don't.
-> mn10300 is one where ioremap and ioremap_nocache are definitely different.
-
-alpha: identical
-arc: identical
-arm: identical
-arm64: identical
-cris: different        <==
-frv: identical
-hexagone: identical
-ia64: different        <==
-m32r: identical
-m68k: identical
-metag: identical
-microblaze: identical
-mips: identical
-mn10300: different     <==
-nios: identical
-openrisc: different    <==
-parisc: identical
-riscv: identical
-s390: identical
-sh: identical
-sparc: identical
-tile: identical
-um: rely on asm/generic
-unicore32: identical
-x86: identical
-asm/generic (no mmu): identical
-
-So 4 among all arches seems to have ioremap() and ioremap_nocache() 
-being different.
-
-Could we have a define set by the 4 arches on which ioremap() and 
-ioremap_nocache() are different, something like 
-HAVE_DIFFERENT_IOREMAP_NOCACHE ?
-
-Christophe
-
-> 
-> Guenter
-> 
->>> While ioremap's
->>> default function is ioremap_nocache, so devm_ioremap_nocache also 
->>> have the
->>> same function with devm_ioremap, which can just be killed to reduce 
->>> the size
->>> of devres.o(from 20304 bytes to 18992 bytes in my compile environment).
->>>
->>> I have posted two versions, which use macro instead of function for
->>> devm_ioremap_nocache[1] or devm_ioremap[2]. And Greg suggest me to kill
->>> devm_ioremap_nocache for no need to keep a macro around for the 
->>> duplicate
->>> thing. So here comes v3 and please help to review.
->>
->> I don't think this can be done, what am I missing?  These functions are
->> not identical, sorry for missing that before.
->>
->> thanks,
->>
->> greg k-h
->>
-> 
-> -- 
-> To unsubscribe from this list: send the line "unsubscribe 
-> linux-watchdog" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
----
-L'absence de virus dans ce courrier électronique a été vérifiée par le logiciel antivirus Avast.
-https://www.avast.com/antivirus
-
+CgpMZSAyMy8xMi8yMDE3IMOgIDE0OjQ4LCBHcmVnIEtIIGEgw6ljcml0wqA6Cj4gT24gU2F0LCBE
+ZWMgMjMsIDIwMTcgYXQgMDY6NTU6MjVQTSArMDgwMCwgWWlzaGVuZyBYaWUgd3JvdGU6Cj4+IEhp
+IGFsbCwKPj4KPj4gV2hlbiBJIHRyaWVkIHRvIHVzZSBkZXZtX2lvcmVtYXAgZnVuY3Rpb24gYW5k
+IHJldmlldyByZWxhdGVkIGNvZGUsIEkgZm91bmQKPj4gZGV2bV9pb3JlbWFwIGFuZCBkZXZtX2lv
+cmVtYXBfbm9jYWNoZSBpcyBhbG1vc3QgdGhlIHNhbWUgd2l0aCBlYWNoIG90aGVyLAo+PiBleGNl
+cHQgb25lIHVzZSBpb3JlbWFwIHdoaWxlIHRoZSBvdGhlciB1c2UgaW9yZW1hcF9ub2NhY2hlLgo+
+IAo+IEZvciBhbGwgYXJjaGVzPyAgUmVhbGx5PyAgTG9vayBhdCBNSVBTLCBhbmQgeDg2LCB0aGV5
+IGhhdmUgZGlmZmVyZW50Cj4gZnVuY3Rpb25zLgo+IAo+PiBXaGlsZSBpb3JlbWFwJ3MKPj4gZGVm
+YXVsdCBmdW5jdGlvbiBpcyBpb3JlbWFwX25vY2FjaGUsIHNvIGRldm1faW9yZW1hcF9ub2NhY2hl
+IGFsc28gaGF2ZSB0aGUKPj4gc2FtZSBmdW5jdGlvbiB3aXRoIGRldm1faW9yZW1hcCwgd2hpY2gg
+Y2FuIGp1c3QgYmUga2lsbGVkIHRvIHJlZHVjZSB0aGUgc2l6ZQo+PiBvZiBkZXZyZXMubyhmcm9t
+IDIwMzA0IGJ5dGVzIHRvIDE4OTkyIGJ5dGVzIGluIG15IGNvbXBpbGUgZW52aXJvbm1lbnQpLgo+
+Pgo+PiBJIGhhdmUgcG9zdGVkIHR3byB2ZXJzaW9ucywgd2hpY2ggdXNlIG1hY3JvIGluc3RlYWQg
+b2YgZnVuY3Rpb24gZm9yCj4+IGRldm1faW9yZW1hcF9ub2NhY2hlWzFdIG9yIGRldm1faW9yZW1h
+cFsyXS4gQW5kIEdyZWcgc3VnZ2VzdCBtZSB0byBraWxsCj4+IGRldm1faW9yZW1hcF9ub2NhY2hl
+IGZvciBubyBuZWVkIHRvIGtlZXAgYSBtYWNybyBhcm91bmQgZm9yIHRoZSBkdXBsaWNhdGUKPj4g
+dGhpbmcuIFNvIGhlcmUgY29tZXMgdjMgYW5kIHBsZWFzZSBoZWxwIHRvIHJldmlldy4KPiAKPiBJ
+IGRvbid0IHRoaW5rIHRoaXMgY2FuIGJlIGRvbmUsIHdoYXQgYW0gSSBtaXNzaW5nPyAgVGhlc2Ug
+ZnVuY3Rpb25zIGFyZQo+IG5vdCBpZGVudGljYWwsIHNvcnJ5IGZvciBtaXNzaW5nIHRoYXQgYmVm
+b3JlLgoKZGV2bV9pb3JlbWFwKCkgYW5kIGRldm1faW9yZW1hcF9ub2NhY2hlKCkgYXJlIHF1aXRl
+IHNpbWlsYXIsIGJvdGggdXNlIApkZXZtX2lvcmVtYXBfcmVsZWFzZSgpIGZvciB0aGUgcmVsZWFz
+ZSwgd2h5IG5vdCBqdXN0IGRlZmluaW5nOgoKc3RhdGljIHZvaWQgX19pb21lbSAqX19kZXZtX2lv
+cmVtYXAoc3RydWN0IGRldmljZSAqZGV2LCByZXNvdXJjZV9zaXplX3QgCm9mZnNldCwKCQkJICAg
+cmVzb3VyY2Vfc2l6ZV90IHNpemUsIGJvb2wgbm9jYWNoZSkKewpbLi4uXQoJaWYgKG5vY2FjaGUp
+CgkJYWRkciA9IGlvcmVtYXBfbm9jYWNoZShvZmZzZXQsIHNpemUpOwoJZWxzZQoJCWFkZHIgPSBp
+b3JlbWFwKG9mZnNldCwgc2l6ZSk7ClsuLi5dCn0KCnRoZW4gaW4gaW5jbHVkZS9saW51eC9pby5o
+CgpzdGF0aWMgaW5saW5lIHZvaWQgX19pb21lbSAqZGV2bV9pb3JlbWFwKHN0cnVjdCBkZXZpY2Ug
+KmRldiwgCnJlc291cmNlX3NpemVfdCBvZmZzZXQsCgkJCSAgIHJlc291cmNlX3NpemVfdCBzaXpl
+KQp7cmV0dXJuIF9fZGV2bV9pb3JlbWFwKGRldiwgb2Zmc2V0LCBzaXplLCBmYWxzZSk7fQoKc3Rh
+dGljIGlubGluZSB2b2lkIF9faW9tZW0gKmRldm1faW9yZW1hcF9ub2NhY2hlKHN0cnVjdCBkZXZp
+Y2UgKmRldiwgCnJlc291cmNlX3NpemVfdCBvZmZzZXQsCgkJCQkgICByZXNvdXJjZV9zaXplX3Qg
+c2l6ZSk7CntyZXR1cm4gX19kZXZtX2lvcmVtYXAoZGV2LCBvZmZzZXQsIHNpemUsIHRydWUpO30K
+CkNocmlzdG9waGUKCj4gCj4gdGhhbmtzLAo+IAo+IGdyZWcgay1oCj4gLS0KPiBUbyB1bnN1YnNj
+cmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgbGludXgtd2F0
+Y2hkb2ciIGluCj4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5l
+bC5vcmcKPiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21h
+am9yZG9tby1pbmZvLmh0bWwKPiAKCi0tLQpMJ2Fic2VuY2UgZGUgdmlydXMgZGFucyBjZSBjb3Vy
+cmllciDDqWxlY3Ryb25pcXVlIGEgw6l0w6kgdsOpcmlmacOpZSBwYXIgbGUgbG9naWNpZWwgYW50
+aXZpcnVzIEF2YXN0LgpodHRwczovL3d3dy5hdmFzdC5jb20vYW50aXZpcnVzCgpfX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpkZXZlbCBtYWlsaW5nIGxpc3QK
+ZGV2ZWxAbGludXhkcml2ZXJwcm9qZWN0Lm9yZwpodHRwOi8vZHJpdmVyZGV2LmxpbnV4ZHJpdmVy
+cHJvamVjdC5vcmcvbWFpbG1hbi9saXN0aW5mby9kcml2ZXJkZXYtZGV2ZWwK
