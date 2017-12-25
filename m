@@ -1,15 +1,14 @@
 From: Yisheng Xie <xieyisheng1@huawei.com>
-Subject: Re: [PATCH v3 00/27] kill devm_ioremap_nocache
-Date: Mon, 25 Dec 2017 09:34:25 +0800
-Message-ID: <8dd19411-5b06-0aa4-fd0e-e5b112c25dcb@huawei.com>
-References: <1514026525-32538-1-git-send-email-xieyisheng1@huawei.com>
- <20171223134831.GB10103@kroah.com>
- <b8ff7f17-7f2c-f220-9833-7ae5bd7343d5@c-s.fr>
+Subject: Re: [PATCH v3 27/27] devres: kill devm_ioremap_nocache
+Date: Mon, 25 Dec 2017 09:43:40 +0800
+Message-ID: <4d0991ec-9cd4-0c33-5560-ae9c2c762765@huawei.com>
+References: <1514026979-33838-1-git-send-email-xieyisheng1@huawei.com>
+ <20171223134532.GA10103@kroah.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <b8ff7f17-7f2c-f220-9833-7ae5bd7343d5@c-s.fr>
+In-Reply-To: <20171223134532.GA10103@kroah.com>
 List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
  <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
 List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
@@ -19,76 +18,56 @@ List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driver
  <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
 Errors-To: driverdev-devel-bounces@linuxdriverproject.org
 Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
-To: christophe leroy <christophe.leroy@c-s.fr>, Greg KH <gregkh@linuxfoundation.org>
-Cc: linux-mips@linux-mips.org, ulf.hansson@linaro.org, jakub.kicinski@netronome.com, platform-driver-x86@vger.kernel.org, airlied@linux.ie, linux-wireless@vger.kernel.org, linus.walleij@linaro.org, alsa-devel@alsa-project.org, dri-devel@lists.freedesktop.org, linux-kernel@vger.kernel.org, linux-ide@vger.kernel.org, linux-mtd@lists.infradead.org, daniel.vetter@intel.com, dan.j.williams@intel.com, jason@lakedaemon.net, linux-rtc@vger.kernel.org, boris.brezillon@free-electrons.com, mchehab@kernel.org, dmaengine@vger.kernel.org, vinod.koul@intel.com, richard@nod.at, marek.vasut@gmail.com, industrypack-devel@lists.sourceforge.net, linux-pci@vger.kernel.org, dvhart@infradead.org, linux@roeck-us.net, linux-media@vger.kernel.org, seanpaul@chromium.org, devel@driverdev.osuosl.org, linux-watchdog@vger.kernel.org, arnd@arndb.de, b.zolnierkie@samsung.com, marc.zyngier@arm.com, jslaby@su
+To: Greg KH <gregkh@linuxfoundation.org>
+Cc: linux-mips@linux-mips.org, ulf.hansson@linaro.org, jakub.kicinski@netronome.com, lgirdwood@gmail.com, airlied@linux.ie, linux-pci@vger.kernel.org, linus.walleij@linaro.org, alsa-devel@alsa-project.org, dri-devel@lists.freedesktop.org, platform-driver-x86@vger.kernel.org, linux-ide@vger.kernel.org, linux-mtd@lists.infradead.org, daniel.vetter@intel.com, tglx@linutronix.de, linux-watchdog@vger.kernel.org, linux-rtc@vger.kernel.org, boris.brezillon@free-electrons.com, andriy.shevchenko@linux.intel.com, vinod.koul@intel.com, richard@nod.at, alexandre.belloni@free-electrons.com, marek.vasut@gmail.com, industrypack-devel@lists.sourceforge.net, jslaby@suse.com, dvhart@infradead.org, linux@roeck-us.net, linux-media@vger.kernel.org, devel@driverdev.osuosl.org, jason@lakedaemon.net, arnd@arndb.de, b.zolnierkie@samsung.com, marc.zyngier@arm.com, linux-mmc@vger.kernel.org, jani.niku
 List-Id: linux-mmc@vger.kernel.org
 
-CgpPbiAyMDE3LzEyLzI0IDE3OjA1LCBjaHJpc3RvcGhlIGxlcm95IHdyb3RlOgo+IAo+IAo+IExl
-IDIzLzEyLzIwMTcgw6AgMTQ6NDgsIEdyZWcgS0ggYSDDqWNyaXQgOgo+PiBPbiBTYXQsIERlYyAy
-MywgMjAxNyBhdCAwNjo1NToyNVBNICswODAwLCBZaXNoZW5nIFhpZSB3cm90ZToKPj4+IEhpIGFs
-bCwKPj4+Cj4+PiBXaGVuIEkgdHJpZWQgdG8gdXNlIGRldm1faW9yZW1hcCBmdW5jdGlvbiBhbmQg
-cmV2aWV3IHJlbGF0ZWQgY29kZSwgSSBmb3VuZAo+Pj4gZGV2bV9pb3JlbWFwIGFuZCBkZXZtX2lv
-cmVtYXBfbm9jYWNoZSBpcyBhbG1vc3QgdGhlIHNhbWUgd2l0aCBlYWNoIG90aGVyLAo+Pj4gZXhj
-ZXB0IG9uZSB1c2UgaW9yZW1hcCB3aGlsZSB0aGUgb3RoZXIgdXNlIGlvcmVtYXBfbm9jYWNoZS4K
-Pj4KPj4gRm9yIGFsbCBhcmNoZXM/ICBSZWFsbHk/ICBMb29rIGF0IE1JUFMsIGFuZCB4ODYsIHRo
-ZXkgaGF2ZSBkaWZmZXJlbnQKPj4gZnVuY3Rpb25zLgo+Pgo+Pj4gV2hpbGUgaW9yZW1hcCdzCj4+
-PiBkZWZhdWx0IGZ1bmN0aW9uIGlzIGlvcmVtYXBfbm9jYWNoZSwgc28gZGV2bV9pb3JlbWFwX25v
-Y2FjaGUgYWxzbyBoYXZlIHRoZQo+Pj4gc2FtZSBmdW5jdGlvbiB3aXRoIGRldm1faW9yZW1hcCwg
-d2hpY2ggY2FuIGp1c3QgYmUga2lsbGVkIHRvIHJlZHVjZSB0aGUgc2l6ZQo+Pj4gb2YgZGV2cmVz
-Lm8oZnJvbSAyMDMwNCBieXRlcyB0byAxODk5MiBieXRlcyBpbiBteSBjb21waWxlIGVudmlyb25t
-ZW50KS4KPj4+Cj4+PiBJIGhhdmUgcG9zdGVkIHR3byB2ZXJzaW9ucywgd2hpY2ggdXNlIG1hY3Jv
-IGluc3RlYWQgb2YgZnVuY3Rpb24gZm9yCj4+PiBkZXZtX2lvcmVtYXBfbm9jYWNoZVsxXSBvciBk
-ZXZtX2lvcmVtYXBbMl0uIEFuZCBHcmVnIHN1Z2dlc3QgbWUgdG8ga2lsbAo+Pj4gZGV2bV9pb3Jl
-bWFwX25vY2FjaGUgZm9yIG5vIG5lZWQgdG8ga2VlcCBhIG1hY3JvIGFyb3VuZCBmb3IgdGhlIGR1
-cGxpY2F0ZQo+Pj4gdGhpbmcuIFNvIGhlcmUgY29tZXMgdjMgYW5kIHBsZWFzZSBoZWxwIHRvIHJl
-dmlldy4KPj4KPj4gSSBkb24ndCB0aGluayB0aGlzIGNhbiBiZSBkb25lLCB3aGF0IGFtIEkgbWlz
-c2luZz8gIFRoZXNlIGZ1bmN0aW9ucyBhcmUKPj4gbm90IGlkZW50aWNhbCwgc29ycnkgZm9yIG1p
-c3NpbmcgdGhhdCBiZWZvcmUuCj4gCj4gZGV2bV9pb3JlbWFwKCkgYW5kIGRldm1faW9yZW1hcF9u
-b2NhY2hlKCkgYXJlIHF1aXRlIHNpbWlsYXIsIGJvdGggdXNlIGRldm1faW9yZW1hcF9yZWxlYXNl
-KCkgZm9yIHRoZSByZWxlYXNlLCB3aHkgbm90IGp1c3QgZGVmaW5pbmc6Cj4gCj4gc3RhdGljIHZv
-aWQgX19pb21lbSAqX19kZXZtX2lvcmVtYXAoc3RydWN0IGRldmljZSAqZGV2LCByZXNvdXJjZV9z
-aXplX3Qgb2Zmc2V0LAo+ICAgICAgICAgICAgICAgIHJlc291cmNlX3NpemVfdCBzaXplLCBib29s
-IG5vY2FjaGUpCj4gewo+IFsuLi5dCj4gICAgIGlmIChub2NhY2hlKQo+ICAgICAgICAgYWRkciA9
-IGlvcmVtYXBfbm9jYWNoZShvZmZzZXQsIHNpemUpOwo+ICAgICBlbHNlCj4gICAgICAgICBhZGRy
-ID0gaW9yZW1hcChvZmZzZXQsIHNpemUpOwo+IFsuLi5dCj4gfQo+IAo+IHRoZW4gaW4gaW5jbHVk
-ZS9saW51eC9pby5oCj4gCj4gc3RhdGljIGlubGluZSB2b2lkIF9faW9tZW0gKmRldm1faW9yZW1h
-cChzdHJ1Y3QgZGV2aWNlICpkZXYsIHJlc291cmNlX3NpemVfdCBvZmZzZXQsCj4gICAgICAgICAg
-ICAgICAgcmVzb3VyY2Vfc2l6ZV90IHNpemUpCj4ge3JldHVybiBfX2Rldm1faW9yZW1hcChkZXYs
-IG9mZnNldCwgc2l6ZSwgZmFsc2UpO30KPiAKPiBzdGF0aWMgaW5saW5lIHZvaWQgX19pb21lbSAq
-ZGV2bV9pb3JlbWFwX25vY2FjaGUoc3RydWN0IGRldmljZSAqZGV2LCByZXNvdXJjZV9zaXplX3Qg
-b2Zmc2V0LAo+ICAgICAgICAgICAgICAgICAgICByZXNvdXJjZV9zaXplX3Qgc2l6ZSk7Cj4ge3Jl
-dHVybiBfX2Rldm1faW9yZW1hcChkZXYsIG9mZnNldCwgc2l6ZSwgdHJ1ZSk7fQoKWWVhaCwgdGhp
-cyBzZWVtcyBnb29kIHRvIG1lLCByaWdodCBub3cgd2UgaGF2ZSBkZXZtX2lvcmVtYXAsIGRldm1f
-aW9yZW1hcF93YywgZGV2bV9pb3JlbWFwX25vY2FjaGUKTWF5IGJlIHdlIGNhbiB1c2UgYW4gZW51
-bSBsaWtlOgp0eXBlZGVmIGVudW0gewoJREVWTV9JT1JFTUFQID0gMCwKCURFVk1fSU9SRU1BUF9O
-T0NBQ0hFLAoJREVWTV9JT1JFTUFQX1dDLAp9IGRldm1faW9yZW1hcF90eXBlOwoKc3RhdGljIGlu
-bGluZSB2b2lkIF9faW9tZW0gKmRldm1faW9yZW1hcChzdHJ1Y3QgZGV2aWNlICpkZXYsIHJlc291
-cmNlX3NpemVfdCBvZmZzZXQsCiAgICAgICAgICAgICAgICByZXNvdXJjZV9zaXplX3Qgc2l6ZSkK
-IHtyZXR1cm4gX19kZXZtX2lvcmVtYXAoZGV2LCBvZmZzZXQsIHNpemUsIERFVk1fSU9SRU1BUCk7
-fQoKIHN0YXRpYyBpbmxpbmUgdm9pZCBfX2lvbWVtICpkZXZtX2lvcmVtYXBfbm9jYWNoZShzdHJ1
-Y3QgZGV2aWNlICpkZXYsIHJlc291cmNlX3NpemVfdCBvZmZzZXQsCiAgICAgICAgICAgICAgICAg
-ICAgcmVzb3VyY2Vfc2l6ZV90IHNpemUpOwoge3JldHVybiBfX2Rldm1faW9yZW1hcChkZXYsIG9m
-ZnNldCwgc2l6ZSwgREVWTV9JT1JFTUFQX05PQ0FDSEUpO30KCiBzdGF0aWMgaW5saW5lIHZvaWQg
-X19pb21lbSAqZGV2bV9pb3JlbWFwX3djKHN0cnVjdCBkZXZpY2UgKmRldiwgcmVzb3VyY2Vfc2l6
-ZV90IG9mZnNldCwKICAgICAgICAgICAgICAgICAgICByZXNvdXJjZV9zaXplX3Qgc2l6ZSk7CiB7
-cmV0dXJuIF9fZGV2bV9pb3JlbWFwKGRldiwgb2Zmc2V0LCBzaXplLCBERVZNX0lPUkVNQVBfV0Mp
-O30KCiBzdGF0aWMgdm9pZCBfX2lvbWVtICpfX2Rldm1faW9yZW1hcChzdHJ1Y3QgZGV2aWNlICpk
-ZXYsIHJlc291cmNlX3NpemVfdCBvZmZzZXQsCiAgICAgICAgICAgICAgICByZXNvdXJjZV9zaXpl
-X3Qgc2l6ZSwgZGV2bV9pb3JlbWFwX3R5cGUgdHlwZSkKIHsKICAgICB2b2lkIF9faW9tZW0gKipw
-dHIsICphZGRyID0gTlVMTDsKIFsuLi5dCiAgICAgc3dpdGNoICh0eXBlKXsKICAgICBjYXNlIERF
-Vk1fSU9SRU1BUDoKICAgICAgICAgYWRkciA9IGlvcmVtYXAob2Zmc2V0LCBzaXplKTsKICAgICAg
-ICAgYnJlYWs7CiAgICAgY2FzZSBERVZNX0lPUkVNQVBfTk9DQUNIRToKICAgICAgICAgYWRkciA9
-IGlvcmVtYXBfbm9jYWNoZShvZmZzZXQsIHNpemUpOwogICAgICAgICBicmVhazsKICAgICBjYXNl
-IERFVk1fSU9SRU1BUF9XQzoKICAgICAgICAgYWRkciA9IGlvcmVtYXBfd2Mob2Zmc2V0LCBzaXpl
-KTsKICAgICAgICAgYnJlYWs7CiAgICAgfQogWy4uLl0KIH0KClRoYW5rcwpZaXNoZW5nCgo+IAo+
-IENocmlzdG9waGUKPiAKPj4KPj4gdGhhbmtzLAo+Pgo+PiBncmVnIGstaAo+PiAtLSAKPj4gVG8g
-dW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGxp
-bnV4LXdhdGNoZG9nIiBpbgo+PiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZn
-ZXIua2VybmVsLm9yZwo+PiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJu
-ZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwKPj4KPiAKPiAtLS0KPiBMJ2Fic2VuY2UgZGUgdmly
-dXMgZGFucyBjZSBjb3VycmllciDDqWxlY3Ryb25pcXVlIGEgw6l0w6kgdsOpcmlmacOpZSBwYXIg
-bGUgbG9naWNpZWwgYW50aXZpcnVzIEF2YXN0Lgo+IGh0dHBzOi8vd3d3LmF2YXN0LmNvbS9hbnRp
-dmlydXMKPiAKPiAKPiAuCj4gCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fXwpkZXZlbCBtYWlsaW5nIGxpc3QKZGV2ZWxAbGludXhkcml2ZXJwcm9qZWN0Lm9y
-ZwpodHRwOi8vZHJpdmVyZGV2LmxpbnV4ZHJpdmVycHJvamVjdC5vcmcvbWFpbG1hbi9saXN0aW5m
-by9kcml2ZXJkZXYtZGV2ZWwK
+
+
+On 2017/12/23 21:45, Greg KH wrote:
+> On Sat, Dec 23, 2017 at 07:02:59PM +0800, Yisheng Xie wrote:
+>> --- a/lib/devres.c
+>> +++ b/lib/devres.c
+>> @@ -44,35 +44,6 @@ void __iomem *devm_ioremap(struct device *dev, resource_size_t offset,
+>>  EXPORT_SYMBOL(devm_ioremap);
+>>  
+>>  /**
+>> - * devm_ioremap_nocache - Managed ioremap_nocache()
+>> - * @dev: Generic device to remap IO address for
+>> - * @offset: Resource address to map
+>> - * @size: Size of map
+>> - *
+>> - * Managed ioremap_nocache().  Map is automatically unmapped on driver
+>> - * detach.
+>> - */
+>> -void __iomem *devm_ioremap_nocache(struct device *dev, resource_size_t offset,
+>> -				   resource_size_t size)
+>> -{
+>> -	void __iomem **ptr, *addr;
+>> -
+>> -	ptr = devres_alloc(devm_ioremap_release, sizeof(*ptr), GFP_KERNEL);
+>> -	if (!ptr)
+>> -		return NULL;
+>> -
+>> -	addr = ioremap_nocache(offset, size);
+> 
+> Wait, devm_ioremap() calls ioremap(), not ioremap_nocache(), are you
+> _SURE_ that these are all identical?  For all arches?  If so, then
+> ioremap_nocache() can also be removed, right?
+
+Yeah, As Christophe pointed out, that 4 archs do not have the same function.
+But I do not why they do not want do the same thing. Driver may no know about
+this? right?
+
+> 
+> In my quick glance, I don't think you can do this series at all :(
+
+Yes, maybe should take Christophe suggestion and use a bool or enum to distinguish them?
+
+Thanks
+Yisheng
+> 
+> greg k-h
+> 
+> .
+> 
