@@ -1,73 +1,85 @@
-From: Yisheng Xie <xieyisheng1@huawei.com>
-Subject: Re: [PATCH v3 27/27] devres: kill devm_ioremap_nocache
-Date: Mon, 25 Dec 2017 09:43:40 +0800
-Message-ID: <4d0991ec-9cd4-0c33-5560-ae9c2c762765@huawei.com>
-References: <1514026979-33838-1-git-send-email-xieyisheng1@huawei.com>
- <20171223134532.GA10103@kroah.com>
+From: "Y.b. Lu" <yangbo.lu@nxp.com>
+Subject: RE: [PATCH v1] mmc: sdhci-of-esdhc: Workaround for reducing the
+ maximum speed on ls1021atwr
+Date: Mon, 25 Dec 2017 05:24:55 +0000
+Message-ID: <DB6PR0401MB2536A33408F524B4D3A66F1DF8010@DB6PR0401MB2536.eurprd04.prod.outlook.com>
+References: <20171115090103.25366-1-yinbo.zhu@nxp.com>
+ <CAPDyKFotZ9eZkSCj603BGuHOTCXitd7GmaKk0XFsj_7=CnoDgg@mail.gmail.com>
+ <DB6PR0401MB253667427D21DFCAE486DD9BF8020@DB6PR0401MB2536.eurprd04.prod.outlook.com>
+ <CAPDyKFre8meCFORRQs3yT-u0er2Ht2w1x=2r=kJgsDSGZajv2w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <20171223134532.GA10103@kroah.com>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
-To: Greg KH <gregkh@linuxfoundation.org>
-Cc: linux-mips@linux-mips.org, ulf.hansson@linaro.org, jakub.kicinski@netronome.com, lgirdwood@gmail.com, airlied@linux.ie, linux-pci@vger.kernel.org, linus.walleij@linaro.org, alsa-devel@alsa-project.org, dri-devel@lists.freedesktop.org, platform-driver-x86@vger.kernel.org, linux-ide@vger.kernel.org, linux-mtd@lists.infradead.org, daniel.vetter@intel.com, tglx@linutronix.de, linux-watchdog@vger.kernel.org, linux-rtc@vger.kernel.org, boris.brezillon@free-electrons.com, andriy.shevchenko@linux.intel.com, vinod.koul@intel.com, richard@nod.at, alexandre.belloni@free-electrons.com, marek.vasut@gmail.com, industrypack-devel@lists.sourceforge.net, jslaby@suse.com, dvhart@infradead.org, linux@roeck-us.net, linux-media@vger.kernel.org, devel@driverdev.osuosl.org, jason@lakedaemon.net, arnd@arndb.de, b.zolnierkie@samsung.com, marc.zyngier@arm.com, linux-mmc@vger.kernel.org, jani.niku
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-he1eur01on0078.outbound.protection.outlook.com ([104.47.0.78]:44694
+        "EHLO EUR01-HE1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1750703AbdLYFZA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 25 Dec 2017 00:25:00 -0500
+In-Reply-To: <CAPDyKFre8meCFORRQs3yT-u0er2Ht2w1x=2r=kJgsDSGZajv2w@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Yinbo Zhu <yinbo.zhu@nxp.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-
-
-On 2017/12/23 21:45, Greg KH wrote:
-> On Sat, Dec 23, 2017 at 07:02:59PM +0800, Yisheng Xie wrote:
->> --- a/lib/devres.c
->> +++ b/lib/devres.c
->> @@ -44,35 +44,6 @@ void __iomem *devm_ioremap(struct device *dev, resource_size_t offset,
->>  EXPORT_SYMBOL(devm_ioremap);
->>  
->>  /**
->> - * devm_ioremap_nocache - Managed ioremap_nocache()
->> - * @dev: Generic device to remap IO address for
->> - * @offset: Resource address to map
->> - * @size: Size of map
->> - *
->> - * Managed ioremap_nocache().  Map is automatically unmapped on driver
->> - * detach.
->> - */
->> -void __iomem *devm_ioremap_nocache(struct device *dev, resource_size_t offset,
->> -				   resource_size_t size)
->> -{
->> -	void __iomem **ptr, *addr;
->> -
->> -	ptr = devres_alloc(devm_ioremap_release, sizeof(*ptr), GFP_KERNEL);
->> -	if (!ptr)
->> -		return NULL;
->> -
->> -	addr = ioremap_nocache(offset, size);
-> 
-> Wait, devm_ioremap() calls ioremap(), not ioremap_nocache(), are you
-> _SURE_ that these are all identical?  For all arches?  If so, then
-> ioremap_nocache() can also be removed, right?
-
-Yeah, As Christophe pointed out, that 4 archs do not have the same function.
-But I do not why they do not want do the same thing. Driver may no know about
-this? right?
-
-> 
-> In my quick glance, I don't think you can do this series at all :(
-
-Yes, maybe should take Christophe suggestion and use a bool or enum to distinguish them?
-
-Thanks
-Yisheng
-> 
-> greg k-h
-> 
-> .
-> 
+SGkgVWZmZSwNCg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IFVsZiBI
+YW5zc29uIFttYWlsdG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4gU2VudDogMjAxN+W5tDEy
+5pyIMjPml6UgMjM6MjQNCj4gVG86IFkuYi4gTHUgPHlhbmdiby5sdUBueHAuY29tPg0KPiBDYzog
+WWluYm8gWmh1IDx5aW5iby56aHVAbnhwLmNvbT47IEFkcmlhbiBIdW50ZXINCj4gPGFkcmlhbi5o
+dW50ZXJAaW50ZWwuY29tPjsgbGludXgtbW1jQHZnZXIua2VybmVsLm9yZw0KPiBTdWJqZWN0OiBS
+ZTogW1BBVENIIHYxXSBtbWM6IHNkaGNpLW9mLWVzZGhjOiBXb3JrYXJvdW5kIGZvciByZWR1Y2lu
+ZyB0aGUNCj4gbWF4aW11bSBzcGVlZCBvbiBsczEwMjFhdHdyDQo+IA0KPiBPbiAyMiBEZWNlbWJl
+ciAyMDE3IGF0IDA5OjEzLCBZLmIuIEx1IDx5YW5nYm8ubHVAbnhwLmNvbT4gd3JvdGU6DQo+ID4g
+SGkgVWZmZSwNCj4gPg0KPiA+DQo+ID4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+ID4+
+IEZyb206IFVsZiBIYW5zc29uIFttYWlsdG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4gPj4g
+U2VudDogMjAxN+W5tDEx5pyIMTbml6UgMTU6MzQNCj4gPj4gVG86IFlpbmJvIFpodSA8eWluYm8u
+emh1QG54cC5jb20+DQo+ID4+IENjOiBBZHJpYW4gSHVudGVyIDxhZHJpYW4uaHVudGVyQGludGVs
+LmNvbT47IFkuYi4gTHUNCj4gPj4gPHlhbmdiby5sdUBueHAuY29tPjsgbGludXgtbW1jQHZnZXIu
+a2VybmVsLm9yZw0KPiA+PiBTdWJqZWN0OiBSZTogW1BBVENIIHYxXSBtbWM6IHNkaGNpLW9mLWVz
+ZGhjOiBXb3JrYXJvdW5kIGZvciByZWR1Y2luZw0KPiA+PiB0aGUgbWF4aW11bSBzcGVlZCBvbiBs
+czEwMjFhdHdyDQo+ID4+DQo+ID4+IE9uIDE1IE5vdmVtYmVyIDIwMTcgYXQgMTA6MDEsICA8eWlu
+Ym8uemh1QG54cC5jb20+IHdyb3RlOg0KPiA+PiA+IEZyb206ICJ5aW5iby56aHUiIDx5aW5iby56
+aHVAbnhwLmNvbT4NCj4gPj4gPg0KPiA+PiA+IEluIFNESEMgaGlnaCBzcGVlZCBBQyB0aW1pbmcs
+IHRoZSB0c2hpdmtoIHBhcmFtZXRlciBpcyBkZWZpbmVkIGFzDQo+ID4+ID4gaW5wdXQgc2V0dXAg
+dGltZXM6U0RIQ19DTUQsIFNESENfREFUeCwgdG8gU0RIQ19DTEsuIFRoZSB2YWx1ZSBvZg0KPiA+
+PiA+IHRoZSB0c2hpdmtoIHNob3VsZCBiZSAyLjUgbnMgY29uc2lkZXJpbmcgdGhlIHJvdW5kIHRy
+aXAgZGVsYXksDQo+ID4+ID4gYm9hcmQvZGF0YSBza2V3Lg0KPiA+PiA+IEhvd2V2ZXIsIGJlY2F1
+c2Ugb2YgdGhpcyBlcnJhdHVtLCBpdCBuZWVkcyBhdCBsZWFzdCA0LjEgbnMuDQo+ID4+ID4NCj4g
+Pj4gPiBlU0RIQyBjYW5ub3QgcnVuIGF0IHRoZSBtYXhpbXVtIGNsb2NrIHNwZWVkIGZvciB0aGUg
+aGlnaCBzcGVlZA0KPiA+PiA+IG1vZGUsIG9yIHRoZXJlIGlzIGEgbGltaXQgb24gdGhlIGxlbmd0
+aCBvZiB0aGUgdHJhY2Ugb24gdGhlIGJvYXJkDQo+ID4+ID4gZm9yIGRhdGEsIGNvbW1hbmQsIGFu
+ZCBjbG9jayBsaW5lcyBvZiB0aGUgU0RIQy4NCj4gPj4gPg0KPiA+PiA+IFNpZ25lZC1vZmYtYnk6
+IHlpbmJvLnpodSA8eWluYm8uemh1QG54cC5jb20+DQo+ID4+ID4gLS0tDQo+ID4+ID4gIGRyaXZl
+cnMvbW1jL2hvc3Qvc2RoY2ktb2YtZXNkaGMuYyB8IDYgKysrKysrDQo+ID4+ID4gIDEgZmlsZSBj
+aGFuZ2VkLCA2IGluc2VydGlvbnMoKykNCj4gPj4gPg0KPiA+PiA+IGRpZmYgLS1naXQgYS9kcml2
+ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWVzZGhjLmMNCj4gPj4gPiBiL2RyaXZlcnMvbW1jL2hvc3Qv
+c2RoY2ktb2YtZXNkaGMuYw0KPiA+PiA+IGluZGV4IDAyM2MyNGJkMGQ5NC4uMjc0NGRkNThhNTcz
+IDEwMDY0NA0KPiA+PiA+IC0tLSBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtZXNkaGMuYw0K
+PiA+PiA+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtZXNkaGMuYw0KPiA+PiA+IEBA
+IC00OTgsNiArNDk4LDEyIEBAIHN0YXRpYyB2b2lkIGVzZGhjX29mX3NldF9jbG9jayhzdHJ1Y3QN
+Cj4gPj4gPiBzZGhjaV9ob3N0DQo+ID4+ICpob3N0LCB1bnNpZ25lZCBpbnQgY2xvY2spDQo+ID4+
+ID4gICAgICAgICAgICAgICAgICAgICAgICAgY2xvY2sgLT0gNTAwMDAwMDsNCj4gPj4gPiAgICAg
+ICAgIH0NCj4gPj4gPg0KPiA+PiA+ICsgICAgICAgLyogV29ya2Fyb3VuZCB0byByZWR1Y2UgdGhl
+IGNsb2NrIGZyZXF1ZW5jeSBmb3IgbHMxMDIxYSBlc2RoYw0KPiAqLw0KPiA+PiA+ICsgICAgICAg
+aWYgKG9mX2ZpbmRfY29tcGF0aWJsZV9ub2RlKE5VTEwsIE5VTEwsDQo+ID4+ID4gKyAiZnNsLGxz
+MTAyMWEtZXNkaGMiKSkgew0KPiA+Pg0KPiA+PiBJdCdzIGJldHRlciB0byB1c2UgdGhlIC0+ZGF0
+YSBwb2ludGVyIGluIHRoZSBzdHJ1Y3Qgb2ZfZGV2aWNlX2lkIGZvcg0KPiA+PiB0aGlzIGtpbmQg
+b2YgdmFyaWFudCBkYXRhLg0KPiA+Pg0KPiA+PiBJbiAtPnByb2JlKCkgeW91IHRoZW4gY2FsbCBv
+Zl9tYXRjaF9kZXZpY2UoKSBhbmQgcGljayB1cCB0aGUgLT5kYXRhDQo+ID4+IHBvaW50ZXIgYW5k
+IGFzc2lnbiBpdCB0byB5b3VyIGRyaXZlciBwcml2YXRlIGRhdGEuDQo+ID4+DQo+ID4+IE1hbnkg
+ZHJpdmVycyBhbHJlYWR5IGRvIGxpa2UgdGhpcy4gSGF2ZSBhIGxvb2sgYXQgZHdfbW1jLWV4eW5v
+cy5jIGZvcg0KPiA+PiBleGFtcGxlLg0KPiA+Pg0KPiA+DQo+ID4gW1kuYi4gTHVdIEhvdyBhYm91
+dCB1c2luZyBzb2NfZGV2aWNlX21hdGNoKCk/IFRoZXJlIGlzIGFsc28gLmRhdGEgbWVtYmVyDQo+
+IGNvdWxkIGJlIHVzZWQgaW4gc29jX2RldmljZV9hdHRyaWJ1dGUgc3RydWN0dXJlLg0KPiA+IFVz
+ZSBzb2NfZGV2aWNlX21hdGNoKCkgaW4gZXNkaGNfaW5pdCBhbmQgZ2V0IC5kYXRhIGluZm9ybWF0
+aW9uIGludG8NCj4gc2RoY2lfZXNkaGMgc3RydWN0dXJlIHdoaWNoIGlzIHByaXZhdGUgZGF0YS4N
+Cj4gPiBDdXJyZW50IGluY29ycmVjdCBob3N0IHZlcnNpb24gcmVnaXN0ZXIgdmFsdWUgZml4LXVw
+IGZvciBzb21lIHBsYXRmb3JtcyBpcw0KPiB1c2luZyB0aGlzIG1ldGhvZC4NCj4gDQo+IEkgdGhp
+bmsgeW91IG5lZWQgdG8gYW5zd2VyIHRoZSBxdWVzdGlvbjogaXMgdGhlIHByb2JsZW0gU29DIHNw
+ZWNpZmljIG9yDQo+IGRldmljZS12YXJpYW50IHNwZWNpZmljLiBEZXBlbmRpbmcgb24gdGhlIGFu
+c3dlciwgeW91IHNob3VsZCBwaWNrIHRoZSBjb3JyZWN0DQo+IHNvbHV0aW9uLg0KPiANCg0KW1ku
+Yi4gTHVdIFRoaXMgc2hvdWxkIGJlIFNvQyBzcGVjaWZpYy4gSXQncyBzaWxpY29uIGVycmF0YS4g
+SXQgaGFzIHBvc3NpYmlsaXR5IHRvIGJlIGZpeGVkIGluIGZ1dHVyZSBzaWxpY29uIHJldmlzaW9u
+Lg0KU28gc29jX2RldmljZV9tYXRjaCgpIGNvdWxkIGJlIHVzZWQgSSB0aGluayA6KQ0KDQo+IFsu
+Li5dDQo+IA0KPiBLaW5kIHJlZ2FyZHMNCj4gVWZmZQ0K
