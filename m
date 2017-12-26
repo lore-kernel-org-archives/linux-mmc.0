@@ -1,85 +1,33 @@
-From: "Y.b. Lu" <yangbo.lu@nxp.com>
-Subject: RE: [PATCH v1] mmc: sdhci-of-esdhc: Workaround for reducing the
- maximum speed on ls1021atwr
-Date: Mon, 25 Dec 2017 05:24:55 +0000
-Message-ID: <DB6PR0401MB2536A33408F524B4D3A66F1DF8010@DB6PR0401MB2536.eurprd04.prod.outlook.com>
-References: <20171115090103.25366-1-yinbo.zhu@nxp.com>
- <CAPDyKFotZ9eZkSCj603BGuHOTCXitd7GmaKk0XFsj_7=CnoDgg@mail.gmail.com>
- <DB6PR0401MB253667427D21DFCAE486DD9BF8020@DB6PR0401MB2536.eurprd04.prod.outlook.com>
- <CAPDyKFre8meCFORRQs3yT-u0er2Ht2w1x=2r=kJgsDSGZajv2w@mail.gmail.com>
+From: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] mmc: Don't reference Linux-specific OF_GPIO_ACTIVE_LOW
+ flag in DT binding
+Date: Tue, 26 Dec 2017 16:53:05 -0600
+Message-ID: <20171226225305.qyd5yfmxomxgvf7x@rob-hp-laptop>
+References: <20171223003412.13688-1-tuomas@tuxera.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-he1eur01on0078.outbound.protection.outlook.com ([104.47.0.78]:44694
-        "EHLO EUR01-HE1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750703AbdLYFZA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 25 Dec 2017 00:25:00 -0500
-In-Reply-To: <CAPDyKFre8meCFORRQs3yT-u0er2Ht2w1x=2r=kJgsDSGZajv2w@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20171223003412.13688-1-tuomas-yrGDUoBaLx3QT0dZR+AlfA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Tuomas Tynkkynen <tuomas-yrGDUoBaLx3QT0dZR+AlfA@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Yinbo Zhu <yinbo.zhu@nxp.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-SGkgVWZmZSwNCg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IFVsZiBI
-YW5zc29uIFttYWlsdG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4gU2VudDogMjAxN+W5tDEy
-5pyIMjPml6UgMjM6MjQNCj4gVG86IFkuYi4gTHUgPHlhbmdiby5sdUBueHAuY29tPg0KPiBDYzog
-WWluYm8gWmh1IDx5aW5iby56aHVAbnhwLmNvbT47IEFkcmlhbiBIdW50ZXINCj4gPGFkcmlhbi5o
-dW50ZXJAaW50ZWwuY29tPjsgbGludXgtbW1jQHZnZXIua2VybmVsLm9yZw0KPiBTdWJqZWN0OiBS
-ZTogW1BBVENIIHYxXSBtbWM6IHNkaGNpLW9mLWVzZGhjOiBXb3JrYXJvdW5kIGZvciByZWR1Y2lu
-ZyB0aGUNCj4gbWF4aW11bSBzcGVlZCBvbiBsczEwMjFhdHdyDQo+IA0KPiBPbiAyMiBEZWNlbWJl
-ciAyMDE3IGF0IDA5OjEzLCBZLmIuIEx1IDx5YW5nYm8ubHVAbnhwLmNvbT4gd3JvdGU6DQo+ID4g
-SGkgVWZmZSwNCj4gPg0KPiA+DQo+ID4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+ID4+
-IEZyb206IFVsZiBIYW5zc29uIFttYWlsdG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4gPj4g
-U2VudDogMjAxN+W5tDEx5pyIMTbml6UgMTU6MzQNCj4gPj4gVG86IFlpbmJvIFpodSA8eWluYm8u
-emh1QG54cC5jb20+DQo+ID4+IENjOiBBZHJpYW4gSHVudGVyIDxhZHJpYW4uaHVudGVyQGludGVs
-LmNvbT47IFkuYi4gTHUNCj4gPj4gPHlhbmdiby5sdUBueHAuY29tPjsgbGludXgtbW1jQHZnZXIu
-a2VybmVsLm9yZw0KPiA+PiBTdWJqZWN0OiBSZTogW1BBVENIIHYxXSBtbWM6IHNkaGNpLW9mLWVz
-ZGhjOiBXb3JrYXJvdW5kIGZvciByZWR1Y2luZw0KPiA+PiB0aGUgbWF4aW11bSBzcGVlZCBvbiBs
-czEwMjFhdHdyDQo+ID4+DQo+ID4+IE9uIDE1IE5vdmVtYmVyIDIwMTcgYXQgMTA6MDEsICA8eWlu
-Ym8uemh1QG54cC5jb20+IHdyb3RlOg0KPiA+PiA+IEZyb206ICJ5aW5iby56aHUiIDx5aW5iby56
-aHVAbnhwLmNvbT4NCj4gPj4gPg0KPiA+PiA+IEluIFNESEMgaGlnaCBzcGVlZCBBQyB0aW1pbmcs
-IHRoZSB0c2hpdmtoIHBhcmFtZXRlciBpcyBkZWZpbmVkIGFzDQo+ID4+ID4gaW5wdXQgc2V0dXAg
-dGltZXM6U0RIQ19DTUQsIFNESENfREFUeCwgdG8gU0RIQ19DTEsuIFRoZSB2YWx1ZSBvZg0KPiA+
-PiA+IHRoZSB0c2hpdmtoIHNob3VsZCBiZSAyLjUgbnMgY29uc2lkZXJpbmcgdGhlIHJvdW5kIHRy
-aXAgZGVsYXksDQo+ID4+ID4gYm9hcmQvZGF0YSBza2V3Lg0KPiA+PiA+IEhvd2V2ZXIsIGJlY2F1
-c2Ugb2YgdGhpcyBlcnJhdHVtLCBpdCBuZWVkcyBhdCBsZWFzdCA0LjEgbnMuDQo+ID4+ID4NCj4g
-Pj4gPiBlU0RIQyBjYW5ub3QgcnVuIGF0IHRoZSBtYXhpbXVtIGNsb2NrIHNwZWVkIGZvciB0aGUg
-aGlnaCBzcGVlZA0KPiA+PiA+IG1vZGUsIG9yIHRoZXJlIGlzIGEgbGltaXQgb24gdGhlIGxlbmd0
-aCBvZiB0aGUgdHJhY2Ugb24gdGhlIGJvYXJkDQo+ID4+ID4gZm9yIGRhdGEsIGNvbW1hbmQsIGFu
-ZCBjbG9jayBsaW5lcyBvZiB0aGUgU0RIQy4NCj4gPj4gPg0KPiA+PiA+IFNpZ25lZC1vZmYtYnk6
-IHlpbmJvLnpodSA8eWluYm8uemh1QG54cC5jb20+DQo+ID4+ID4gLS0tDQo+ID4+ID4gIGRyaXZl
-cnMvbW1jL2hvc3Qvc2RoY2ktb2YtZXNkaGMuYyB8IDYgKysrKysrDQo+ID4+ID4gIDEgZmlsZSBj
-aGFuZ2VkLCA2IGluc2VydGlvbnMoKykNCj4gPj4gPg0KPiA+PiA+IGRpZmYgLS1naXQgYS9kcml2
-ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWVzZGhjLmMNCj4gPj4gPiBiL2RyaXZlcnMvbW1jL2hvc3Qv
-c2RoY2ktb2YtZXNkaGMuYw0KPiA+PiA+IGluZGV4IDAyM2MyNGJkMGQ5NC4uMjc0NGRkNThhNTcz
-IDEwMDY0NA0KPiA+PiA+IC0tLSBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtZXNkaGMuYw0K
-PiA+PiA+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtZXNkaGMuYw0KPiA+PiA+IEBA
-IC00OTgsNiArNDk4LDEyIEBAIHN0YXRpYyB2b2lkIGVzZGhjX29mX3NldF9jbG9jayhzdHJ1Y3QN
-Cj4gPj4gPiBzZGhjaV9ob3N0DQo+ID4+ICpob3N0LCB1bnNpZ25lZCBpbnQgY2xvY2spDQo+ID4+
-ID4gICAgICAgICAgICAgICAgICAgICAgICAgY2xvY2sgLT0gNTAwMDAwMDsNCj4gPj4gPiAgICAg
-ICAgIH0NCj4gPj4gPg0KPiA+PiA+ICsgICAgICAgLyogV29ya2Fyb3VuZCB0byByZWR1Y2UgdGhl
-IGNsb2NrIGZyZXF1ZW5jeSBmb3IgbHMxMDIxYSBlc2RoYw0KPiAqLw0KPiA+PiA+ICsgICAgICAg
-aWYgKG9mX2ZpbmRfY29tcGF0aWJsZV9ub2RlKE5VTEwsIE5VTEwsDQo+ID4+ID4gKyAiZnNsLGxz
-MTAyMWEtZXNkaGMiKSkgew0KPiA+Pg0KPiA+PiBJdCdzIGJldHRlciB0byB1c2UgdGhlIC0+ZGF0
-YSBwb2ludGVyIGluIHRoZSBzdHJ1Y3Qgb2ZfZGV2aWNlX2lkIGZvcg0KPiA+PiB0aGlzIGtpbmQg
-b2YgdmFyaWFudCBkYXRhLg0KPiA+Pg0KPiA+PiBJbiAtPnByb2JlKCkgeW91IHRoZW4gY2FsbCBv
-Zl9tYXRjaF9kZXZpY2UoKSBhbmQgcGljayB1cCB0aGUgLT5kYXRhDQo+ID4+IHBvaW50ZXIgYW5k
-IGFzc2lnbiBpdCB0byB5b3VyIGRyaXZlciBwcml2YXRlIGRhdGEuDQo+ID4+DQo+ID4+IE1hbnkg
-ZHJpdmVycyBhbHJlYWR5IGRvIGxpa2UgdGhpcy4gSGF2ZSBhIGxvb2sgYXQgZHdfbW1jLWV4eW5v
-cy5jIGZvcg0KPiA+PiBleGFtcGxlLg0KPiA+Pg0KPiA+DQo+ID4gW1kuYi4gTHVdIEhvdyBhYm91
-dCB1c2luZyBzb2NfZGV2aWNlX21hdGNoKCk/IFRoZXJlIGlzIGFsc28gLmRhdGEgbWVtYmVyDQo+
-IGNvdWxkIGJlIHVzZWQgaW4gc29jX2RldmljZV9hdHRyaWJ1dGUgc3RydWN0dXJlLg0KPiA+IFVz
-ZSBzb2NfZGV2aWNlX21hdGNoKCkgaW4gZXNkaGNfaW5pdCBhbmQgZ2V0IC5kYXRhIGluZm9ybWF0
-aW9uIGludG8NCj4gc2RoY2lfZXNkaGMgc3RydWN0dXJlIHdoaWNoIGlzIHByaXZhdGUgZGF0YS4N
-Cj4gPiBDdXJyZW50IGluY29ycmVjdCBob3N0IHZlcnNpb24gcmVnaXN0ZXIgdmFsdWUgZml4LXVw
-IGZvciBzb21lIHBsYXRmb3JtcyBpcw0KPiB1c2luZyB0aGlzIG1ldGhvZC4NCj4gDQo+IEkgdGhp
-bmsgeW91IG5lZWQgdG8gYW5zd2VyIHRoZSBxdWVzdGlvbjogaXMgdGhlIHByb2JsZW0gU29DIHNw
-ZWNpZmljIG9yDQo+IGRldmljZS12YXJpYW50IHNwZWNpZmljLiBEZXBlbmRpbmcgb24gdGhlIGFu
-c3dlciwgeW91IHNob3VsZCBwaWNrIHRoZSBjb3JyZWN0DQo+IHNvbHV0aW9uLg0KPiANCg0KW1ku
-Yi4gTHVdIFRoaXMgc2hvdWxkIGJlIFNvQyBzcGVjaWZpYy4gSXQncyBzaWxpY29uIGVycmF0YS4g
-SXQgaGFzIHBvc3NpYmlsaXR5IHRvIGJlIGZpeGVkIGluIGZ1dHVyZSBzaWxpY29uIHJldmlzaW9u
-Lg0KU28gc29jX2RldmljZV9tYXRjaCgpIGNvdWxkIGJlIHVzZWQgSSB0aGluayA6KQ0KDQo+IFsu
-Li5dDQo+IA0KPiBLaW5kIHJlZ2FyZHMNCj4gVWZmZQ0K
+On Sat, Dec 23, 2017 at 02:34:12AM +0200, Tuomas Tynkkynen wrote:
+> OF_GPIO_ACTIVE_LOW is a Linux implementation detail. The binding
+> document should be referring to GPIO_ACTIVE_LOW found in
+> include/dt-bindings/gpio/gpio.h.
+> 
+> Signed-off-by: Tuomas Tynkkynen <tuomas-yrGDUoBaLx3QT0dZR+AlfA@public.gmane.org>
+> ---
+>  Documentation/devicetree/bindings/mmc/mmc.txt | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+
+Applied, thanks.
+
+Rob
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
