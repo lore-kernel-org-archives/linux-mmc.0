@@ -1,40 +1,49 @@
 From: "ernest.zhang" <ernest.zhang@bayhubtech.com>
-Subject: [PATCH 1/3] mmc: sdhci: fix SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD handling
-Date: Thu, 28 Dec 2017 17:59:13 +0800
-Message-ID: <20171228095913.3944-1-ernest.zhang@bayhubtech.com>
+Subject: [PATCH 2/3] mmc: sdhci: Add support for o2 eMMC HS200 mode and hardware tuning
+Date: Thu, 28 Dec 2017 17:59:42 +0800
+Message-ID: <20171228095942.3994-1-ernest.zhang@bayhubtech.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-by2nam03on0100.outbound.protection.outlook.com ([104.47.42.100]:60716
+        "EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752910AbdL1KAD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 28 Dec 2017 05:00:03 -0500
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: adrian.hunter@intel.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 Cc: yuxiang.wan@bayhubtech.com, xiaoguang.yu@bayhubtech.com, shirley.her@bayhubtech.com
-List-Id: linux-mmc@vger.kernel.org
 
-SD controller with SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD quirk
-will clear SD host transfer mode register for non-data commands. But in
-eMMC HS200 hardware tuning case, the hardware tuning process need to
-transfer mode register has properly value. So don't clear transfer
-mode register when opcode equals to MMC_SEND_TUNING_BLOCK_HS200.
+Add register definition for eMMC HS200 mode. Add bitmask definition
+for hardware tuning function.
 
 Signed-off-by: ernest.zhang <ernest.zhang@bayhubtech.com>
 ---
- drivers/mmc/host/sdhci.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-pci-o2micro.h | 3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 0d5fcca18c9e..d5b19fc9ea56 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -918,7 +918,9 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
- 	if (data == NULL) {
- 		if (host->quirks2 &
- 			SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD) {
--			sdhci_writew(host, 0x0, SDHCI_TRANSFER_MODE);
-+			/* cannot clear transfer mode register when tuning */
-+			if (cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200)
-+				sdhci_writew(host, 0x0, SDHCI_TRANSFER_MODE);
- 		} else {
- 		/* clear Auto CMD settings for no data CMDs */
- 			mode = sdhci_readw(host, SDHCI_TRANSFER_MODE);
+diff --git a/drivers/mmc/host/sdhci-pci-o2micro.h b/drivers/mmc/host/sdhci-pci-o2micro.h
+index 770f53857211..5a4671d5a511 100644
+--- a/drivers/mmc/host/sdhci-pci-o2micro.h
++++ b/drivers/mmc/host/sdhci-pci-o2micro.h
+@@ -49,6 +49,7 @@
+ #define O2_SD_MISC_CTRL4	0xFC
+ #define O2_SD_TUNING_CTRL	0x300
+ #define O2_SD_PLL_SETTING	0x304
++#define O2_SD_MISC_SETTING	0x308
+ #define O2_SD_CLK_SETTING	0x328
+ #define O2_SD_CAP_REG2		0x330
+ #define O2_SD_CAP_REG0		0x334
+@@ -62,6 +63,8 @@
+ #define O2_SD_FREG4_ENABLE_CLK_SET	BIT(22)
+ 
+ #define O2_SD_VENDOR_SETTING	0x110
++#define O2_SD_HW_TUNING_ENABLE	BIT(4)
++
+ #define O2_SD_VENDOR_SETTING2	0x1C8
+ 
+ extern int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot);
 -- 
 2.14.1
+
