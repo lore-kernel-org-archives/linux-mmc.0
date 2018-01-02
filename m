@@ -1,62 +1,67 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH v2 16/22] mmc: tmio: fix never-detected card insertion bug
-Date: Tue, 2 Jan 2018 14:15:55 +0100
-Message-ID: <20180102131555.z6amjfqtadkh2w77@ninjato>
-References: <1511540697-27387-1-git-send-email-yamada.masahiro@socionext.com>
- <1511540697-27387-17-git-send-email-yamada.masahiro@socionext.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: MMC flash is very slow since 4.14 - "mmc: Delete bounce buffer
+ handling" was the problem
+Date: Tue, 2 Jan 2018 17:34:58 +0100
+Message-ID: <CAPDyKFrGgLiy9cvhtTGt5Q+MSMCuA5yw_Q7Nd77_0WnawP_BAw@mail.gmail.com>
+References: <OF8C6780FA.78E4ECBE-ONC1258209.003268EF-C1258209.003268F0@rittal.de>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="jcy3zqaq2z6nqblr"
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([88.99.104.3]:42237 "EHLO pokefinder.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751866AbeABNP5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 2 Jan 2018 08:15:57 -0500
-Content-Disposition: inline
-In-Reply-To: <1511540697-27387-17-git-send-email-yamada.masahiro@socionext.com>
+Received: from mail-it0-f53.google.com ([209.85.214.53]:33237 "EHLO
+        mail-it0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750960AbeABQe7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Jan 2018 11:34:59 -0500
+Received: by mail-it0-f53.google.com with SMTP id o130so11606933itg.0
+        for <linux-mmc@vger.kernel.org>; Tue, 02 Jan 2018 08:34:59 -0800 (PST)
+In-Reply-To: <OF8C6780FA.78E4ECBE-ONC1258209.003268EF-C1258209.003268F0@rittal.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: linux-mmc@vger.kernel.org, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+To: Benjamin Beckmeyer <beckmeyer.b@rittal.de>, Linus Walleij <linus.walleij@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
 
++ to: Linus
++ cc: Adrian
 
---jcy3zqaq2z6nqblr
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+On 2 January 2018 at 10:10, Benjamin Beckmeyer <beckmeyer.b@rittal.de> wrot=
+e:
+> Hey all,
+>
+> I have a problem with mmc flash on an i.mx 25 architecture. Im running it=
+ with Linux 4.14.x and the flash is really slow.
+> I digged a little bit deeper into this problem and it has nothing to do w=
+ith the driver (sdhci-esdhci-imx.c), because all registers for the SDHCI ha=
+ve the same values in a kernel before 4.14 and in the current 4.14 kernel.
+>
+> I figured out that following commit "mmc: Delete bounce buffer handling" =
+ is the problem. I compiled my kernel without that patch and everything is =
+running fine. There is a patch "mmc: sdhci: Avoid swiotlb buffer being full=
+" and  I hoped this will fix the problem but it doesn't.. But maybe it does=
+n't fixed it for the imx driver.
 
-Yamada-san,
+When we applied the commit "mmc: Delete bounce buffer handling", is
+was simply because we more or less thought it was dead code. It turned
+out, that wasn't case and we got some error reported due to it. Those
+errors *should* be fixed, but perhaps not from a performance
+regression point view.
 
-> The TMIO mmc cannot detect the card insertion in native_hotplug mode
-> if the driver is probed without a card inserted.
+I have looped in Linus (and Adrian), hopefully we can figure out a
+good of how to move forward on this topic.
 
-Hmm, it works for me without your patch just fine. Iam currently
-researching it...
+>
+> Hopefully anybody can help me with this problem. But I thought somebody w=
+ith a better understanding of the mmc core components knows how to handle t=
+his problem (maybe somebody from linaro, because the two patches come from =
+them).
+>
+> Kind regards,
+> Benjamin
 
-Happy new year, by the way! :)
+Thanks for reporting!
 
-Regards,
+Could you perhaps post some performance measurements done "before" and
+"after". A guess a simple "dd" test is sufficient, just to get an idea
+in what range the regression is about?
 
-   Wolfram
-
-
---jcy3zqaq2z6nqblr
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlpLhgsACgkQFA3kzBSg
-KbaDcBAAouqc6tOdEeWmKxoVOKP/PS1xRl79B+0Btgx20v8taNxoLXhIaGj5kq6F
-Nzygzx3a5OzksOyZhHlVPm4JZZNsnUaGirnEMf+ly1gh3ZwOUTjmWRMZoMawPFfk
-sLPV3xI5Kj2O/EI0OWOUxM6sXM6cdDadCnNchaDrnwRgSGClz5igabb203uZxnhy
-uJJ5b97sqwEvaLZeAYHdz0YB9CBKU3vvjvbCfKB5TrYWKy/6DTiQaX4t11F5NfeC
-EuCwNIly0hSeeVPXbZrY4WE9ZJy1enEXtTvmp01z2H/xqYaDOkOuvil9ITwq/e6e
-h6nnOKdFCQzcsPm/WU76NpT9fiPb+nBKCr5o57VMHbEj5bz2fTnvHAZUWUoO8YBS
-KZvm+OhGSFPs7qY94hgvbV7KR3hpOPn72bdHDl/BtySSFDQvJpIQ0z82CiMEJIMD
-dHmj0+/kfmkdzv2QH6hozziAeuHn8zNf/0xrVyy5Tpj3DzDlU6HH3P5yqSyiRNlq
-xAWVtnKLa0IKYJOoWjJRfEg0MzWbkRGgslwK6atXmNyx8XOvLsIjfm0GaS4FMSCi
-Bp41xKckq4V+DWHqJTKdA1ehOL82PhVxqKNB+1ZNQmkF47/znvlUExHIOqexAZP+
-+LI/XocxhED6K2f4dqqPSsLdcC8js1C+d4/fHPGkkyZ8z0f1GK0=
-=gP2v
------END PGP SIGNATURE-----
-
---jcy3zqaq2z6nqblr--
+Kind regards
+Uffe
