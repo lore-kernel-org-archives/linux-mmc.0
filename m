@@ -1,62 +1,85 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] s3mci: mark debug_regs[] as static
-Date: Wed, 3 Jan 2018 17:47:08 +0100
-Message-ID: <CAPDyKFoxizZ5vJ4h_hSo=WaqzjMc7Zq59njuESTdeMaXCV1YQA@mail.gmail.com>
-References: <20180103092705.1949763-1-arnd@arndb.de>
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: Enable/Disable mmc clock during
+ runtime suspend
+Date: Wed, 3 Jan 2018 17:56:00 +0100
+Message-ID: <CAPDyKFqjszhT1C-5KkMVJ9HvEWcow6+QPdJW2dt0i1EFv+Nvcw@mail.gmail.com>
+References: <1513862546-20221-1-git-send-email-michael@amarulasolutions.com>
+ <CAPDyKFpHG2YsdWWYG_XsVqE05fcVyRp4P7-FgbR9LPDF9OjtYA@mail.gmail.com> <CAOf5uwmd0qJhE8YEJeGdySqsXf1u+28WoeRCvUQ0MQcVSGopkg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f195.google.com ([209.85.223.195]:37291 "EHLO
-        mail-io0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750820AbeACQrJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Jan 2018 11:47:09 -0500
-Received: by mail-io0-f195.google.com with SMTP id n14so2685709iob.4
-        for <linux-mmc@vger.kernel.org>; Wed, 03 Jan 2018 08:47:09 -0800 (PST)
-In-Reply-To: <20180103092705.1949763-1-arnd@arndb.de>
+Received: from mail-it0-f65.google.com ([209.85.214.65]:42843 "EHLO
+        mail-it0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750864AbeACQ4B (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Jan 2018 11:56:01 -0500
+Received: by mail-it0-f65.google.com with SMTP id p139so2376082itb.1
+        for <linux-mmc@vger.kernel.org>; Wed, 03 Jan 2018 08:56:01 -0800 (PST)
+In-Reply-To: <CAOf5uwmd0qJhE8YEJeGdySqsXf1u+28WoeRCvUQ0MQcVSGopkg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Ben Dooks <ben-linux@fluff.org>, Heiner Kallweit <hkallweit1@gmail.com>, Julia Lawall <Julia.Lawall@lip6.fr>, Arvind Yadav <arvind.yadav.cs@gmail.com>, Sergio Prado <sergio.prado@e-labworks.com>, linux-arm-kernel@lists.infradead.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Michael Nazzareno Trimarchi <michael@amarulasolutions.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 3 January 2018 at 10:26, Arnd Bergmann <arnd@arndb.de> wrote:
-> The global array clashes with a newly added symbol of the same name:
+On 3 January 2018 at 17:38, Michael Nazzareno Trimarchi
+<michael@amarulasolutions.com> wrote:
+> Hi
 >
-> drivers/staging/ccree/cc_debugfs.o:(.data+0x0): multiple definition of `debug_regs'
-> drivers/mmc/host/s3cmci.o:(.data+0x70): first defined here
+> On Wed, Jan 3, 2018 at 5:26 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> On 21 December 2017 at 14:22, Michael Trimarchi
+>> <michael@amarulasolutions.com> wrote:
+>>> mmc clock can be stopped during runtime suspend and restart during runtime
+>>> resume. This let us know to not have any clock running and this reduce
+>>> the EMI of the device when the bus is not in use
+>>>
+>>> Signed-off-by: Michael Trimarchi <michael@amarulasolutions.com>
+>>> ---
+>>>  drivers/mmc/host/sdhci-esdhc-imx.c | 5 +++++
+>>>  1 file changed, 5 insertions(+)
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+>>> index 7123ef9..9a5e96f 100644
+>>> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+>>> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+>>> @@ -196,6 +196,7 @@ struct pltfm_imx_data {
+>>>         struct clk *clk_ipg;
+>>>         struct clk *clk_ahb;
+>>>         struct clk *clk_per;
+>>> +       unsigned int actual_clock;
+>>>         enum {
+>>>                 NO_CMD_PENDING,      /* no multiblock command pending*/
+>>>                 MULTIBLK_IN_PROCESS, /* exact multiblock cmd in process */
+>>> @@ -1346,6 +1347,9 @@ static int sdhci_esdhc_runtime_suspend(struct device *dev)
+>>>
+>>>         ret = sdhci_runtime_suspend_host(host);
+>>>
+>>> +       imx_data->actual_clock = host->mmc->actual_clock;
+>>> +       esdhc_pltfm_set_clock(host, 0);
+>>
+>> I guess want the clock to stay on "if sdhci_sdio_irq_enabled(host)".
+>> So you should probably move the above inside the below if statement.
+>>
 >
-> We should fix both, this one addresses the s3cmci driver by removing
-> the symbol from the global namespace.
->
-> Fixes: 9bdd203b4dc8 ("s3cmci: add debugfs support for examining driver and hardware state")
+> Well I'm not quite sure about it. Some wifi chipset has the wakeup
+> interrupt on external gpio
+> and someone wakeup from DAT1. Why clock should be required?
 
-Seems like we need a stable tag as well, would you mind adding it in
-the next re-spin?
+The clock should not be needed when using external GPIO (also
+described as an out-band IRQ/wakeup), but from DAT1.
 
-> Fixes: b3ec9a6736f2 ("staging: ccree: staging: ccree: replace sysfs by debugfs interface")
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
-> ---
->  drivers/mmc/host/s3cmci.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
-> index 36daee1e6588..24b27e0957e7 100644
-> --- a/drivers/mmc/host/s3cmci.c
-> +++ b/drivers/mmc/host/s3cmci.c
-> @@ -1421,7 +1421,7 @@ static const struct file_operations s3cmci_fops_state = {
->
->  #define DBG_REG(_r) { .addr = S3C2410_SDI##_r, .name = #_r }
->
-> -struct s3cmci_reg {
-> +static struct s3cmci_reg {
->         unsigned short  addr;
->         unsigned char   *name;
->  } debug_regs[] = {
+When sdhci_sdio_irq_enabled() returns true, that *should* indicate
+that DAT1 is used. Although, there may be reasons to re-visit this
+later, because the hole SDIO irq thing around wakeups for sdhci, is
+being reworked by Adrian [1].
 
-I am not very fond of these kind of declarations/definitions. How
-about if we instead move the declaration of debug_regs[] to a separate
-line? Moreover, should it be const?
+>
+> Anyway I should even rebalance resume.
 
-static struct s3cmci_reg debug_regs[] = {
+Yes.
+
+[...]
 
 Kind regards
 Uffe
+
+[1]
+https://www.spinics.net/lists/linux-mmc/msg47512.html
