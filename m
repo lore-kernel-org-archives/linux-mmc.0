@@ -1,137 +1,489 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: MMC flash is very slow since 4.14 - "mmc: Delete bounce buffer
- handling" was the problem
-Date: Tue, 2 Jan 2018 23:59:07 +0100
-Message-ID: <CACRpkdbsF2pAKZu-PsFG8m96-4JYxvtK1bzutZ6R5OjBF3xkzw@mail.gmail.com>
-References: <OF8C6780FA.78E4ECBE-ONC1258209.003268EF-C1258209.003268F0@rittal.de>
+From: Atul Garg <agarg@arasan.com>
+Subject: [PATCH V6] mmc:host:sdhci-pci:Addition of Arasan PCI Controller with integrated phy.
+Date: Tue,  2 Jan 2018 16:11:22 -0800
+Message-ID: <1514938282-3794-1-git-send-email-agarg@arasan.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="US-ASCII"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f180.google.com ([209.85.223.180]:33777 "EHLO
-        mail-io0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751021AbeABW7I (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Jan 2018 17:59:08 -0500
-Received: by mail-io0-f180.google.com with SMTP id t63so330024iod.0
-        for <linux-mmc@vger.kernel.org>; Tue, 02 Jan 2018 14:59:08 -0800 (PST)
-In-Reply-To: <OF8C6780FA.78E4ECBE-ONC1258209.003268EF-C1258209.003268F0@rittal.de>
+Received: from mail-pf0-f195.google.com ([209.85.192.195]:35855 "EHLO
+        mail-pf0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750922AbeACALk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Jan 2018 19:11:40 -0500
+Received: by mail-pf0-f195.google.com with SMTP id p84so50911pfd.3
+        for <linux-mmc@vger.kernel.org>; Tue, 02 Jan 2018 16:11:39 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Benjamin Beckmeyer <beckmeyer.b@rittal.de>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Pierre Ossman <pierre@ossman.eu>
+To: agarg@arasan.com, linux-mmc@vger.kernel.org, kishon@ti.com, rk@ti.com, nm@ti.com, nsekhar@ti.com, ulf.hansson@linaro.org, adrian.hunter@intel.com
+Cc: linux-kernel@vger.kernel.org
 
-On Tue, Jan 2, 2018 at 10:10 AM, Benjamin Beckmeyer
-<beckmeyer.b@rittal.de> wrote:
+The Arasan Controller is based on a FPGA platform and has integrated phy
+with specific registers used during initialization and
+management of different modes. The phy and the controller are integrated
+and registers are very specific to Arasan.
 
-> I have a problem with mmc flash on an i.mx 25 architecture.
-> Im running it with Linux 4.14.x and the flash is really slow.
-> I digged a little bit deeper into this problem and it has nothing to do
-> with the driver (sdhci-esdhci-imx.c), because all registers for the SDHCI
-> have the same values in a kernel before 4.14 and in the current 4.14 kernel.
->
-> I figured out that following commit "mmc: Delete bounce buffer handling"  is
-> the problem.
+Arasan being an IP provider, licenses these IPs to various companies for
+integration of IP in custom SOCs. The custom SOCs define own register
+map depending on how bits are tied inside the SOC for phy registers,
+depending on SOC memory plan and hence will require own platform drivers.
 
-OK my fault then. Let's see if we can figure this out.
+If more details on phy registers are required, an interface document is
+hosted at https: //arasandotcom/NF/eMMC5.1 PHY Programming in Linux.pdf.
 
-It seems I missed that some SDHCI derivatives are lacking
-hardware scatter-gather handling, i.e.
- commit 2134a922c6e7 ("sdhci: scatter-gather (ADMA) support")
-does not apply to this host.
+Signed-off-by: Atul Garg <agarg@arasan.com>
+---
+V6 - Parameters are enclosed in parantheses in macros. Adjusted tab space.
+Removed ret variable in arasan_phy_addr_poll.
+V5 - Separated arasan_phy_poll function into arasan_phy_addr_poll and
+arasan_phy_sts_poll  Tabspace corrected. Checked return values of poll functions.
+Removed static declaration of sdhci_pci_enable_dma and defined in
+sdhci-pci.h as suggested by Adrian Hunter <adrian.hunter@intel.com>.
+V4 - Created arasan_phy_poll function to have common timeout call.
+.Restructured arasan_set_phy to arasan_select_phy_clock and
+.arasan_phy_set to have single set of registers to be programmed for different modes.
+.Applied code style suggestions from Adrian Hunter <adrian.hunter@intel.com>.
+V3 - Removed sdhci-pci-arasan.h. Code and interface document mentioned
+above are made relevant..Applied code style suggestions from
+Sekhar Nori <nsekhar@ti.com> and .Adrian Hunter <adrian.hunter@intel.com>.
+V2 - Removed code from sdhci-pci-core.c and created sdhci-pci-arasan.c and
+.sdhci-pci-arasan.h.
+V1 - Initial Patch coded in sdhci-pci-core.c.
 
-But this commit by Pierre is from 2008 and then "some old SDHCI
-controllers" had broken ADMA. And i.MX25 is from 2009! But then I
-found this in the driver:
+ drivers/mmc/host/Makefile           |   2 +-
+ drivers/mmc/host/sdhci-pci-arasan.c | 338 ++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci-pci-core.c   |   4 +-
+ drivers/mmc/host/sdhci-pci.h        |   7 +-
+ 4 files changed, 347 insertions(+), 4 deletions(-)
+ create mode 100644 drivers/mmc/host/sdhci-pci-arasan.c
 
-/*
- * The IP has erratum ERR004536
- * uSDHC: ADMA Length Mismatch Error occurs if the AHB read access is slow,
- * when reading data from the card
- * This flag is also set for i.MX25 and i.MX35 in order to get
- * SDHCI_QUIRK_BROKEN_ADMA, but for different reasons (ADMA capability bits).
- */
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index 191a040..84cd138 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -11,7 +11,7 @@ obj-$(CONFIG_MMC_MXC)		+= mxcmmc.o
+ obj-$(CONFIG_MMC_MXS)		+= mxs-mmc.o
+ obj-$(CONFIG_MMC_SDHCI)		+= sdhci.o
+ obj-$(CONFIG_MMC_SDHCI_PCI)	+= sdhci-pci.o
+-sdhci-pci-y			+= sdhci-pci-core.o sdhci-pci-o2micro.o
++sdhci-pci-y			+= sdhci-pci-core.o sdhci-pci-o2micro.o sdhci-pci-arasan.o
+ obj-$(subst m,y,$(CONFIG_MMC_SDHCI_PCI))	+= sdhci-pci-data.o
+ obj-$(CONFIG_MMC_SDHCI_ACPI)	+= sdhci-acpi.o
+ obj-$(CONFIG_MMC_SDHCI_PXAV3)	+= sdhci-pxav3.o
+diff --git a/drivers/mmc/host/sdhci-pci-arasan.c b/drivers/mmc/host/sdhci-pci-arasan.c
+new file mode 100644
+index 0000000..79d1f74
+--- /dev/null
++++ b/drivers/mmc/host/sdhci-pci-arasan.c
+@@ -0,0 +1,338 @@
++/*
++ * Copyright (C) 2017 Arasan Chip Systems Inc.
++ *
++ * Author: Atul Garg <agarg@arasan.com>
++ *
++ * This software is licensed under the terms of the GNU General Public
++ * License version 2, as published by the Free Software Foundation, and
++ * may be copied, distributed, and modified under those terms.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ */
++
++#include <linux/pci.h>
++#include <linux/delay.h>
++
++#include "sdhci.h"
++#include "sdhci-pci.h"
++
++/* Extra registers for Arasan SD Host Controller for eMMC5.1 PHY */
++#define PHY_ADDR_REG	0x300
++#define PHY_DAT_REG	0x304
++
++#define PHY_WRITE	BIT(8)
++#define PHY_BUSY	BIT(9)
++#define DATA_MASK	0xFF
++
++/* eMMC5.1 PHY Specific Registers */
++#define DLL_STATUS	0x00
++#define IPAD_CTRL1	0x01
++#define IPAD_CTRL2	0x02
++#define IPAD_STS	0x03
++#define IOREN_CTRL1	0x06
++#define IOREN_CTRL2	0x07
++#define IOPU_CTRL1	0x08
++#define IOPU_CTRL2	0x09
++#define ITAP_DELAY	0x0C
++#define OTAP_DELAY	0x0D
++#define STRB_SEL	0x0E
++#define CLKBUF_SEL	0x0F
++#define MODE_CTRL	0x11
++#define DLL_TRIM	0x12
++#define CMD_CTRL	0x20
++#define DATA_CTRL	0x21
++#define STRB_CTRL	0x22
++#define CLK_CTRL	0x23
++#define PHY_CTRL	0x24
++
++#define DLL_ENBL	BIT(3)
++#define RTRIM_EN	BIT(1)
++#define PDB_ENBL	BIT(1)
++#define RETB_ENBL	BIT(6)
++#define ODEN_CMD	BIT(1)
++#define ODEN_DAT	0xFF
++#define REN_STRB	BIT(0)
++#define REN_CMND	BIT(1)
++#define REN_DATA	0xFF
++#define PU_CMD		BIT(1)
++#define PU_DAT		0xFF
++#define ITAPDLY_EN	BIT(0)
++#define OTAPDLY_EN	BIT(0)
++#define OD_REL_CMD	BIT(1)
++#define OD_REL_DAT	0xFF
++#define DLLTRM_ICP	0x8
++#define PDB_CMND	BIT(0)
++#define PDB_DATA	0xFF
++#define PDB_STRB	BIT(0)
++#define PDB_CLOCK	BIT(0)
++#define CALDONE_MASK	0x10
++#define DLL_RDY_MASK	0x10
++#define MAX_CLK_BUF	0x7
++
++/* Mode Controls */
++#define ENHSTRB_MODE	BIT(0)
++#define HS400_MODE	BIT(1)
++#define LEGACY_MODE	BIT(2)
++#define DDR50_MODE	BIT(3)
++
++/*
++ * Controller has no specific bits for HS200/HS.
++ * Used BIT(4), BIT(5) for software programming.
++ */
++#define HS200_MODE	BIT(4)
++#define HISPD_MODE	BIT(5)
++
++#define OTAPDLY(x)	(((x) << 1) | OTAPDLY_EN)
++#define ITAPDLY(x)	(((x) << 1) | ITAPDLY_EN)
++#define FREQSEL(x)	(((x) << 5) | DLL_ENBL)
++#define IOPAD(x, y)	((x) | (y << 2))
++
++/* Arasan private data */
++struct arasan_host {
++	u32 chg_clk;
++};
++
++static int arasan_phy_addr_poll(struct sdhci_host *host, u32 offset, u32 mask)
++{
++	ktime_t timeout = ktime_add_us(ktime_get(), 100);
++	bool failed;
++	u8 val = 0;
++
++	while (1) {
++		failed = ktime_after(ktime_get(), timeout);
++		val = sdhci_readw(host, PHY_ADDR_REG);
++		if (!(val & mask))
++			return 0;
++		if (failed)
++			return -EBUSY;
++	}
++}
++
++static int arasan_phy_write(struct sdhci_host *host, u8 data, u8 offset)
++{
++	sdhci_writew(host, data, PHY_DAT_REG);
++	sdhci_writew(host, (PHY_WRITE | offset), PHY_ADDR_REG);
++	return arasan_phy_addr_poll(host, PHY_ADDR_REG, PHY_BUSY);
++}
++
++static int arasan_phy_read(struct sdhci_host *host, u8 offset, u8 *data)
++{
++	int ret;
++
++	sdhci_writew(host, 0, PHY_DAT_REG);
++	sdhci_writew(host, offset, PHY_ADDR_REG);
++	ret = arasan_phy_addr_poll(host, PHY_ADDR_REG, PHY_BUSY);
++
++	/* Masking valid data bits */
++	*data = sdhci_readw(host, PHY_DAT_REG) & DATA_MASK;
++	return ret;
++}
++
++static int arasan_phy_sts_poll(struct sdhci_host *host, u32 offset, u32 mask)
++{
++	int ret;
++	ktime_t timeout = ktime_add_us(ktime_get(), 100);
++	bool failed;
++	u8 val = 0;
++
++	while (1) {
++		failed = ktime_after(ktime_get(), timeout);
++		ret = arasan_phy_read(host, offset, &val);
++		if (ret)
++			return -EBUSY;
++		else if (val & mask)
++			return 0;
++		if (failed)
++			return -EBUSY;
++	}
++}
++
++/* Initialize the Arasan PHY */
++static int arasan_phy_init(struct sdhci_host *host)
++{
++	int ret;
++	u8 val;
++
++	/* Program IOPADs and wait for calibration to be done */
++	if (arasan_phy_read(host, IPAD_CTRL1, &val) ||
++	    arasan_phy_write(host, val | RETB_ENBL | PDB_ENBL, IPAD_CTRL1) ||
++	    arasan_phy_read(host, IPAD_CTRL2, &val) ||
++	    arasan_phy_write(host, val | RTRIM_EN, IPAD_CTRL2))
++		return -EBUSY;
++	ret = arasan_phy_sts_poll(host, IPAD_STS, CALDONE_MASK);
++	if (ret)
++		return -EBUSY;
++
++	/* Program CMD/Data lines */
++	if (arasan_phy_read(host, IOREN_CTRL1, &val) ||
++	    arasan_phy_write(host, val | REN_CMND | REN_STRB, IOREN_CTRL1) ||
++	    arasan_phy_read(host, IOPU_CTRL1, &val) ||
++	    arasan_phy_write(host, val | PU_CMD, IOPU_CTRL1) ||
++	    arasan_phy_read(host, CMD_CTRL, &val) ||
++	    arasan_phy_write(host, val | PDB_CMND, CMD_CTRL) ||
++	    arasan_phy_read(host, IOREN_CTRL2, &val) ||
++	    arasan_phy_write(host, val | REN_DATA, IOREN_CTRL2) ||
++	    arasan_phy_read(host, IOPU_CTRL2, &val) ||
++	    arasan_phy_write(host, val | PU_DAT, IOPU_CTRL2) ||
++	    arasan_phy_read(host, DATA_CTRL, &val) ||
++	    arasan_phy_write(host, val | PDB_DATA, DATA_CTRL) ||
++	    arasan_phy_read(host, STRB_CTRL, &val) ||
++	    arasan_phy_write(host, val | PDB_STRB, STRB_CTRL) ||
++	    arasan_phy_read(host, CLK_CTRL, &val) ||
++	    arasan_phy_write(host, val | PDB_CLOCK, CLK_CTRL) ||
++	    arasan_phy_read(host, CLKBUF_SEL, &val) ||
++	    arasan_phy_write(host, val | MAX_CLK_BUF, CLKBUF_SEL) ||
++	    arasan_phy_write(host, LEGACY_MODE, MODE_CTRL))
++		return -EBUSY;
++	return 0;
++}
++
++/* Set Arasan PHY for different modes */
++static int arasan_phy_set(struct sdhci_host *host, u8 mode, u8 otap,
++			  u8 drv_type, u8 itap, u8 trim, u8 clk)
++{
++	u8 val;
++	int ret;
++
++	if (mode == HISPD_MODE || mode == HS200_MODE)
++		ret = arasan_phy_write(host, 0x0, MODE_CTRL);
++	else
++		ret = arasan_phy_write(host, mode, MODE_CTRL);
++	if (ret)
++		return ret;
++	if (mode == HS400_MODE || mode == HS200_MODE) {
++		ret = arasan_phy_read(host, IPAD_CTRL1, &val);
++		if (ret)
++			return ret;
++		ret = arasan_phy_write(host, IOPAD(val, drv_type), IPAD_CTRL1);
++		if (ret)
++			return ret;
++	}
++	if (mode == LEGACY_MODE) {
++		ret = arasan_phy_write(host, 0x0, OTAP_DELAY);
++		if (ret)
++			return ret;
++		ret = arasan_phy_write(host, 0x0, ITAP_DELAY);
++	} else {
++		ret = arasan_phy_write(host, OTAPDLY(otap), OTAP_DELAY);
++		if (ret)
++			return ret;
++		if (mode != HS200_MODE)
++			ret = arasan_phy_write(host, ITAPDLY(itap), ITAP_DELAY);
++		else
++			ret = arasan_phy_write(host, 0x0, ITAP_DELAY);
++	}
++	if (ret)
++		return ret;
++	if (mode != LEGACY_MODE) {
++		ret = arasan_phy_write(host, trim, DLL_TRIM);
++		if (ret)
++			return ret;
++	}
++	ret = arasan_phy_write(host, 0, DLL_STATUS);
++	if (ret)
++		return ret;
++	if (mode != LEGACY_MODE) {
++		ret = arasan_phy_write(host, FREQSEL(clk), DLL_STATUS);
++		if (ret)
++			return ret;
++		ret = arasan_phy_sts_poll(host, DLL_STATUS, DLL_RDY_MASK);
++		if (ret)
++			return -EBUSY;
++	}
++	return 0;
++}
++
++static int arasan_select_phy_clock(struct sdhci_host *host)
++{
++	struct sdhci_pci_slot *slot = sdhci_priv(host);
++	struct arasan_host *arasan_host = sdhci_pci_priv(slot);
++	u8 clk;
++
++	if (arasan_host->chg_clk == host->mmc->ios.clock)
++		return 0;
++
++	arasan_host->chg_clk = host->mmc->ios.clock;
++	if (host->mmc->ios.clock == 200000000)
++		clk = 0x0;
++	else if (host->mmc->ios.clock == 100000000)
++		clk = 0x2;
++	else if (host->mmc->ios.clock == 50000000)
++		clk = 0x1;
++	else
++		clk = 0x0;
++
++	if (host->mmc_host_ops.hs400_enhanced_strobe) {
++		arasan_phy_set(host, ENHSTRB_MODE, 1, 0x0, 0x0,
++			       DLLTRM_ICP, clk);
++	} else {
++		switch (host->mmc->ios.timing) {
++		case MMC_TIMING_LEGACY:
++			arasan_phy_set(host, LEGACY_MODE, 0x0, 0x0, 0x0,
++				       0x0, 0x0);
++			break;
++		case MMC_TIMING_MMC_HS:
++		case MMC_TIMING_SD_HS:
++			arasan_phy_set(host, HISPD_MODE, 0x3, 0x0, 0x2,
++				       DLLTRM_ICP, clk);
++			break;
++		case MMC_TIMING_MMC_HS200:
++		case MMC_TIMING_UHS_SDR104:
++			arasan_phy_set(host, HS200_MODE, 0x2,
++				       host->mmc->ios.drv_type, 0x0,
++				       DLLTRM_ICP, clk);
++			break;
++		case MMC_TIMING_MMC_DDR52:
++		case MMC_TIMING_UHS_DDR50:
++			arasan_phy_set(host, DDR50_MODE, 0x1, 0x0,
++				       0x0, DLLTRM_ICP, clk);
++			break;
++		case MMC_TIMING_MMC_HS400:
++			arasan_phy_set(host, HS400_MODE, 0x1,
++				       host->mmc->ios.drv_type, 0xa,
++				       DLLTRM_ICP, clk);
++			break;
++		default:
++			break;
++		}
++	}
++	return 0;
++}
++
++static int arasan_pci_probe_slot(struct sdhci_pci_slot *slot)
++{
++	int err;
++
++	slot->host->mmc->caps |= MMC_CAP_NONREMOVABLE | MMC_CAP_8_BIT_DATA;
++	err = arasan_phy_init(slot->host);
++	if (err)
++		return -ENODEV;
++	return 0;
++}
++
++static void arasan_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
++{
++	sdhci_set_clock(host, clock);
++
++	/* Change phy settings for the new clock */
++	arasan_select_phy_clock(host);
++}
++
++static const struct sdhci_ops arasan_sdhci_pci_ops = {
++	.set_clock	= arasan_sdhci_set_clock,
++	.enable_dma	= sdhci_pci_enable_dma,
++	.set_bus_width	= sdhci_set_bus_width,
++	.reset		= sdhci_reset,
++	.set_uhs_signaling	= sdhci_set_uhs_signaling,
++};
++
++const struct sdhci_pci_fixes sdhci_arasan = {
++	.probe_slot = arasan_pci_probe_slot,
++	.ops        = &arasan_sdhci_pci_ops,
++	.priv_size  = sizeof(struct arasan_host),
++};
++
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 110c634..c5b229b 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -35,7 +35,6 @@
+ #include "sdhci.h"
+ #include "sdhci-pci.h"
+ 
+-static int sdhci_pci_enable_dma(struct sdhci_host *host);
+ static void sdhci_pci_hw_reset(struct sdhci_host *host);
+ 
+ #ifdef CONFIG_PM_SLEEP
+@@ -1459,6 +1458,7 @@ static const struct pci_device_id pci_ids[] = {
+ 	SDHCI_PCI_DEVICE(O2, SDS1,     o2),
+ 	SDHCI_PCI_DEVICE(O2, SEABIRD0, o2),
+ 	SDHCI_PCI_DEVICE(O2, SEABIRD1, o2),
++	SDHCI_PCI_DEVICE(ARASAN, PHY_EMMC, arasan),
+ 	SDHCI_PCI_DEVICE_CLASS(AMD, SYSTEM_SDHCI, PCI_CLASS_MASK, amd),
+ 	/* Generic SD host controller */
+ 	{PCI_DEVICE_CLASS(SYSTEM_SDHCI, PCI_CLASS_MASK)},
+@@ -1473,7 +1473,7 @@ MODULE_DEVICE_TABLE(pci, pci_ids);
+  *                                                                           *
+ \*****************************************************************************/
+ 
+-static int sdhci_pci_enable_dma(struct sdhci_host *host)
++int sdhci_pci_enable_dma(struct sdhci_host *host)
+ {
+ 	struct sdhci_pci_slot *slot;
+ 	struct pci_dev *pdev;
+diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+index 0056f08..5cbcdc4 100644
+--- a/drivers/mmc/host/sdhci-pci.h
++++ b/drivers/mmc/host/sdhci-pci.h
+@@ -55,6 +55,9 @@
+ 
+ #define PCI_SUBDEVICE_ID_NI_7884	0x7884
+ 
++#define PCI_VENDOR_ID_ARASAN		0x16e6
++#define PCI_DEVICE_ID_ARASAN_PHY_EMMC	0x0670
++
+ /*
+  * PCI device class and mask
+  */
+@@ -170,11 +173,13 @@ static inline void *sdhci_pci_priv(struct sdhci_pci_slot *slot)
+ #ifdef CONFIG_PM_SLEEP
+ int sdhci_pci_resume_host(struct sdhci_pci_chip *chip);
+ #endif
+-
++int sdhci_pci_enable_dma(struct sdhci_host *host);
+ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot);
+ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip);
+ #ifdef CONFIG_PM_SLEEP
+ int sdhci_pci_o2_resume(struct sdhci_pci_chip *chip);
+ #endif
+ 
++extern const struct sdhci_pci_fixes sdhci_arasan;
++
+ #endif /* __SDHCI_PCI_H */
+-- 
+2.7.4
 
-(...)
-static struct esdhc_soc_data esdhc_imx25_data = {
-    .flags = ESDHC_FLAG_ERR004536,
-};
 
-static struct esdhc_soc_data esdhc_imx35_data = {
-    .flags = ESDHC_FLAG_ERR004536,
-};
+-- 
+ATTENTION: 
 
-(...)
-    if (imx_data->socdata->flags & ESDHC_FLAG_ERR004536)
-        host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
+The information contained in this message may be legally privileged and 
+confidential.  It is intended to be read only by the individual or entity 
+to whom it is addressed or by their designee. If the reader of this message 
+is not the intended recipient, you are on notice that any distribution of 
+this message, in any form, is strictly prohibited by law.
 
-So the i.MX25 is especially broken, right... :(
-I guess it doesn't help to try to get it working somehow, people must
-have already hacked at this? Also SDMA is not applicable I guess?
 
-When SDHCI_QUIRK_BROKEN_ADMA is set, we reach this:
-
-        pr_info("%s: SDHCI controller on %s [%s] using %s\n",
-                mmc_hostname(mmc), host->hw_name, dev_name(mmc_dev(mmc)),
-                (host->flags & SDHCI_USE_ADMA) ?
-                (host->flags & SDHCI_USE_64_BIT_DMA) ? "ADMA 64-bit" : "ADMA" :
-                (host->flags & SDHCI_USE_SDMA) ? "DMA" : "PIO");
-
-Can you confirm that you see "using PIO" in your dmesg kernel log?
-Or are you just using "DMA"? (i.e. SDMA, see below)
-
-Next, remedies.
-
-My suggestion was that what OMAP HSMMC was doing in
-commit 0ccd76d4c236 ("omap_hsmmc: Implement scatter-gather emulation")
-would be applicable to any such hosts.
-
-I don't understand why an ARM system like this would benefit from bounce
-buffers. They don't have especially slow memory access in certain memory
-areas or anything like that, for what I know. It should technically be
-a slowdown
-as it just copies buffers back and forth.
-
-It seems OMAPs also use sg_miter so I guess the speed gains comes from
-upping the segment and request sizes? These are currently 512 kB
-requests max and max 128 segments.
-
-Can we try the easy solutions first, what about testing something like this?
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index e9290a3439d5..2b3da32fa27b 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -25,6 +25,7 @@
- #include <linux/regulator/consumer.h>
- #include <linux/pm_runtime.h>
- #include <linux/of.h>
-+#include <linux/sizes.h>
-
- #include <linux/leds.h>
-
-@@ -3672,8 +3673,13 @@ int sdhci_setup_host(struct sdhci_host *host)
-                        mmc->max_req_size = min(mmc->max_req_size,
-                                                max_req_size);
-                }
--       } else { /* PIO */
--               mmc->max_segs = SDHCI_MAX_SEGS;
-+       } else {
-+               /*
-+                * This is the PIO case: we can use huge requests and lots of
-+                * segments because there are no hardware limitations.
-+                */
-+               mmc->max_req_size = SZ_4M;
-+               mmc->max_segs = 1024;
-        }
-
-        /*
-
-Still I'm a bit puzzled. Max segs of 128 and request size 512 K should be
-pretty OK. Could it be that you're using SDMA, and since SDMA is just using
-1 segment it benefits from the bounce buffer?
-
-If you're using SDMA, maybe, just maybe, PIO is actually faster, because
-it avoids the buffer copying that happens just in order to put things nicely
-in order for SDMA.
-
-Yours,
-Linus Walleij
+If you have received this message in error, please immediately notify the 
+sender and/or Arasan Chip Systems, Inc. by telephone at (408) 282-1600 and 
+delete or destroy any copy of this message.
