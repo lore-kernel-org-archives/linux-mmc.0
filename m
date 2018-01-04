@@ -1,291 +1,238 @@
-From: Maxime Ripard <maxime.ripard@free-electrons.com>
-Subject: Re: [PATCH 2/2] mmc: sunxi: Add runtime_pm support
-Date: Thu, 4 Jan 2018 20:54:14 +0100
-Message-ID: <20180104195414.tk6ycw7w2zukfo5l@flea.lan>
-References: <cover.ac66a754953bedbb7529436b40a7996f4ba3cb95.1513766964.git-series.maxime.ripard@free-electrons.com>
- <412579f183c42f6fe2ea04f294dfb788be5e4875.1513766964.git-series.maxime.ripard@free-electrons.com>
- <CAPDyKFomRYaL=gCwY2Kq0PXRJ9WtsQVCi-3KfkfSNU3+mnJpow@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="eh5knmeals5x6ivi"
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: [PATCH] RFT: mmc: sdhci: Implement an SDHCI-specific bounce buffer
+Date: Thu,  4 Jan 2018 21:10:45 +0100
+Message-ID: <20180104201045.31139-1-linus.walleij@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.free-electrons.com ([62.4.15.54]:57036 "EHLO
-        mail.free-electrons.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752486AbeADTy1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Jan 2018 14:54:27 -0500
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFomRYaL=gCwY2Kq0PXRJ9WtsQVCi-3KfkfSNU3+mnJpow@mail.gmail.com>
+Received: from mail-lf0-f67.google.com ([209.85.215.67]:40616 "EHLO
+        mail-lf0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751946AbeADUM6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Jan 2018 15:12:58 -0500
+Received: by mail-lf0-f67.google.com with SMTP id u84so2990817lff.7
+        for <linux-mmc@vger.kernel.org>; Thu, 04 Jan 2018 12:12:58 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chen-Yu Tsai <wens@csie.org>, linux-arm-kernel@lists.infradead.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Benjamin Beckmeyer <beckmeyer.b@rittal.de>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>
 
+The bounce buffer is gone from the MMC core, and now we found out
+that there are some (crippled) i.MX boards out there that have broken
+ADMA (cannot do scatter-gather), and broken PIO so they must use
+SDMA.
 
---eh5knmeals5x6ivi
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+SDMA sets down the number of segments to one, so that each segment
+gets turned into a singular request that ping-pongs to the block
+layer before the next request/segment is issued.
 
-Hi Ulf,
+These devices can see major benefits from a bounce buffer, as
+a fragmented read or write buffer may come in even though the sectors
+we will be reading or writing to the MMC/SD-card are consecutive.
 
-On Thu, Dec 21, 2017 at 01:21:51PM +0100, Ulf Hansson wrote:
-> On 20 December 2017 at 11:50, Maxime Ripard
-> <maxime.ripard@free-electrons.com> wrote:
-> > So far, even if our card was not in use, we didn't shut down our main
-> > clock, which meant that it was still output on the MMC bus.
-> >
-> > While this obviously means that we could save some power there, it also
-> > created issues when it comes with EMC control since we'll have a perfect
-> > peak at the card clock rate.
-> >
-> > Let's implement runtime_pm with autosuspend so that we will shut down t=
-he
-> > clock when it's not been in use for quite some time.
-> >
-> > Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
-> > ---
-> >  drivers/mmc/host/sunxi-mmc.c | 90 ++++++++++++++++++++++++-------------
-> >  1 file changed, 60 insertions(+), 30 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> > index 3ce46ebd3488..c6a0bd0e0476 100644
-> > --- a/drivers/mmc/host/sunxi-mmc.c
-> > +++ b/drivers/mmc/host/sunxi-mmc.c
-> > @@ -35,6 +35,7 @@
-> >  #include <linux/of_gpio.h>
-> >  #include <linux/of_platform.h>
-> >  #include <linux/platform_device.h>
-> > +#include <linux/pm_runtime.h>
-> >  #include <linux/regulator/consumer.h>
-> >  #include <linux/reset.h>
-> >  #include <linux/scatterlist.h>
-> > @@ -1217,29 +1218,11 @@ static int sunxi_mmc_resource_request(struct su=
-nxi_mmc_host *host,
-> >                 return ret;
-> >         }
-> >
-> > -       ret =3D clk_prepare_enable(host->clk_mmc);
-> > -       if (ret) {
-> > -               dev_err(&pdev->dev, "Enable mmc clk err %d\n", ret);
-> > -               goto error_disable_clk_ahb;
-> > -       }
-> > -
-> > -       ret =3D clk_prepare_enable(host->clk_output);
-> > -       if (ret) {
-> > -               dev_err(&pdev->dev, "Enable output clk err %d\n", ret);
-> > -               goto error_disable_clk_mmc;
-> > -       }
-> > -
-> > -       ret =3D clk_prepare_enable(host->clk_sample);
-> > -       if (ret) {
-> > -               dev_err(&pdev->dev, "Enable sample clk err %d\n", ret);
-> > -               goto error_disable_clk_output;
-> > -       }
-> > -
->=20
-> Actually, I think you should keep all the above. Perhaps you may want
-> to move it to a separate helper function though, which the
-> ->runtime_resume() callbacks can invoke as well.
->=20
-> More reasons to why, see the comment in the ->probe() function.
->=20
-> >         if (!IS_ERR(host->reset)) {
-> >                 ret =3D reset_control_reset(host->reset);
-> >                 if (ret) {
-> >                         dev_err(&pdev->dev, "reset err %d\n", ret);
-> > -                       goto error_disable_clk_sample;
-> > +                       goto error_disable_clk_ahb;
-> >                 }
-> >         }
-> >
-> > @@ -1258,12 +1241,6 @@ static int sunxi_mmc_resource_request(struct sun=
-xi_mmc_host *host,
-> >  error_assert_reset:
-> >         if (!IS_ERR(host->reset))
-> >                 reset_control_assert(host->reset);
-> > -error_disable_clk_sample:
-> > -       clk_disable_unprepare(host->clk_sample);
-> > -error_disable_clk_output:
-> > -       clk_disable_unprepare(host->clk_output);
-> > -error_disable_clk_mmc:
-> > -       clk_disable_unprepare(host->clk_mmc);
-> >  error_disable_clk_ahb:
-> >         clk_disable_unprepare(host->clk_ahb);
-> >         return ret;
-> > @@ -1280,6 +1257,7 @@ static int sunxi_mmc_probe(struct platform_device=
- *pdev)
-> >                 dev_err(&pdev->dev, "mmc alloc host failed\n");
-> >                 return -ENOMEM;
-> >         }
-> > +       platform_set_drvdata(pdev, mmc);
-> >
-> >         host =3D mmc_priv(mmc);
-> >         host->mmc =3D mmc;
-> > @@ -1340,12 +1318,16 @@ static int sunxi_mmc_probe(struct platform_devi=
-ce *pdev)
-> >         if (ret)
-> >                 goto error_free_dma;
-> >
-> > +       pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
-> > +       pm_runtime_use_autosuspend(&pdev->dev);
-> > +       pm_runtime_enable(&pdev->dev);
-> > +
->=20
-> This means in case you don't have CONFIG_PM set when compiling this
-> driver, the clocks will never be enabled using runtime PM.
->=20
-> I think it's good practice to deal with this, therefore I think you
-> should enable the clocks as before, and instead indicate that the
-> device is already runtime resumed.
->=20
-> In other words, before you call pm_runtime_enable(), invoke
-> pm_runtime_set_active().
+This patch accumulates those fragmented scatterlists in a physically
+contigous bounce buffer so that we can issue bigger DMA data chunks
+to/from the card.
 
-That's a very good point, I'll do that in the next iteration.
+It is possible to achieve even better speed-ups by adding a second
+bounce buffer so that the ->pre_req() hook in the driver can do
+the buffer copying and DMA mapping/flushing while the request is
+in flight. We save this optimization for later.
 
-> >         ret =3D mmc_add_host(mmc);
-> >         if (ret)
-> >                 goto error_free_dma;
-> >
-> >         dev_info(&pdev->dev, "base:0x%p irq:%u\n", host->reg_base, host=
-->irq);
-> > -       platform_set_drvdata(pdev, mmc);
-> > +
-> >         return 0;
-> >
-> >  error_free_dma:
-> > @@ -1361,27 +1343,75 @@ static int sunxi_mmc_remove(struct platform_dev=
-ice *pdev)
-> >         struct sunxi_mmc_host *host =3D mmc_priv(mmc);
-> >
-> >         mmc_remove_host(mmc);
-> > +       pm_runtime_force_suspend(&pdev->dev);
->=20
-> Do you need the clocks to be enabled, while calling disable_irq() and
-> sunxi_mmc_reset_host()?
->
-> In such case you need to call pm_runtime_get_sync() here. Then move
-> pm_runtime_force_suspend() a few lines below, and later call
-> pm_runtime_put_noidle().
+Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+---
+I would be surprised if this works, which is why i sprinkled a
+few extra prints all over the place so we can see what goes
+wrong. If it would happen to work, try to comment out the noisy
+prints ("bouncing read/write data") so they don't disturb test
+results.
+---
+ drivers/mmc/host/sdhci.c | 118 +++++++++++++++++++++++++++++++++++++++++++----
+ drivers/mmc/host/sdhci.h |   3 ++
+ 2 files changed, 113 insertions(+), 8 deletions(-)
 
-We don't for disable_irq, but we need it for
-sunxi_mmc_reset_host. I'll do what you suggest.
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index e9290a3439d5..d35e25effe7d 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -502,8 +502,28 @@ static int sdhci_pre_dma_transfer(struct sdhci_host *host,
+ 	if (data->host_cookie == COOKIE_PRE_MAPPED)
+ 		return data->sg_count;
+ 
+-	sg_count = dma_map_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
+-			      mmc_get_dma_dir(data));
++	/* Bounce write requests to the bounce buffer */
++	if (host->bounce_buffer) {
++		if (mmc_get_dma_dir(data) == DMA_TO_DEVICE) {
++			pr_info("bouncing write data\n");
++
++			/* Copy the data to the bounce buffer */
++			sg_copy_to_buffer(data->sg, data->sg_len,
++					  host->bounce_buffer, host->bounce_buffer_size);
++		}
++
++		/* Map the bounce buffer to the device for both reads and writes */
++		sg_count = dma_map_sg(mmc_dev(host->mmc), host->bounce_sg,
++				      1, DMA_TO_DEVICE);
++
++		/* Overzealous check */
++		if (sg_count != 1)
++			pr_err("mapped bounce buffer more than one SG entry\n");
++	} else {
++		/* Just access the data directly from memory */
++		sg_count = dma_map_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
++				      mmc_get_dma_dir(data));
++	}
+ 
+ 	if (sg_count == 0)
+ 		return -ENOSPC;
+@@ -858,8 +878,13 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+ 					     SDHCI_ADMA_ADDRESS_HI);
+ 		} else {
+ 			WARN_ON(sg_cnt != 1);
+-			sdhci_writel(host, sg_dma_address(data->sg),
+-				SDHCI_DMA_ADDRESS);
++			/* Bounce buffer goes to work */
++			if (host->bounce_buffer)
++				sdhci_writel(host, sg_dma_address(host->bounce_sg),
++					     SDHCI_DMA_ADDRESS);
++			else
++				sdhci_writel(host, sg_dma_address(data->sg),
++					     SDHCI_DMA_ADDRESS);
+ 		}
+ 	}
+ 
+@@ -2248,7 +2273,12 @@ static void sdhci_pre_req(struct mmc_host *mmc, struct mmc_request *mrq)
+ 
+ 	mrq->data->host_cookie = COOKIE_UNMAPPED;
+ 
+-	if (host->flags & SDHCI_REQ_USE_DMA)
++	/*
++	 * No pre-mapping in the pre hook if we're using the bounce buffer,
++	 * for that we would need two bounce buffers since one buffer is
++	 * in flight when this is getting called.
++	 */
++	if (host->flags & SDHCI_REQ_USE_DMA && !host->bounce_buffer)
+ 		sdhci_pre_dma_transfer(host, mrq->data, COOKIE_PRE_MAPPED);
+ }
+ 
+@@ -2352,8 +2382,25 @@ static bool sdhci_request_done(struct sdhci_host *host)
+ 		struct mmc_data *data = mrq->data;
+ 
+ 		if (data && data->host_cookie == COOKIE_MAPPED) {
+-			dma_unmap_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
+-				     mmc_get_dma_dir(data));
++			if (host->bounce_buffer) {
++				/* Unmap the bounce buffer */
++				dma_unmap_sg(mmc_dev(host->mmc), host->bounce_sg,
++					     1, mmc_get_dma_dir(data));
++
++				/* On reads, copy the data back to the sglist */
++				if (mmc_get_dma_dir(data) == DMA_FROM_DEVICE) {
++					pr_info("bouncing read data\n");
++
++					sg_copy_from_buffer(data->sg, data->sg_len,
++							    host->bounce_buffer,
++							    host->bounce_buffer_size);
++				}
++			} else {
++				/* Unmap the raw data */
++				dma_unmap_sg(mmc_dev(host->mmc), data->sg,
++					     data->sg_len,
++					     mmc_get_dma_dir(data));
++			}
+ 			data->host_cookie = COOKIE_UNMAPPED;
+ 		}
+ 	}
+@@ -2636,7 +2683,12 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
+ 		 */
+ 		if (intmask & SDHCI_INT_DMA_END) {
+ 			u32 dmastart, dmanow;
+-			dmastart = sg_dma_address(host->data->sg);
++
++			if (host->bounce_buffer)
++				dmastart = sg_dma_address(host->bounce_sg);
++			else
++				dmastart = sg_dma_address(host->data->sg);
++
+ 			dmanow = dmastart + host->data->bytes_xfered;
+ 			/*
+ 			 * Force update to the next DMA block boundary.
+@@ -3713,6 +3765,50 @@ int sdhci_setup_host(struct sdhci_host *host)
+ 	 */
+ 	mmc->max_blk_count = (host->quirks & SDHCI_QUIRK_NO_MULTIBLOCK) ? 1 : 65535;
+ 
++	if (mmc->max_segs == 1) {
++		unsigned int max_blocks;
++		unsigned int max_seg_size;
++
++		max_seg_size = mmc->max_req_size;
++		max_blocks = max_seg_size / 512;
++
++		/*
++		 * When we just support one segment, we can get significant speedups
++		 * by the help of a bounce buffer to group scattered reads/writes
++		 * together.
++		 *
++		 * TODO: is this too big? Stealing too much memory? The old bounce
++		 * buffer is max 64K. This should be the 512K that SDMA can handle
++		 * if I read the code above right. Anyways let's try this.
++		 * FIXME: use devm_*
++		 */
++		host->bounce_buffer = kmalloc(max_seg_size, GFP_KERNEL);
++		if (!host->bounce_buffer) {
++			pr_err("failed to allocate %u bytes for bounce buffer\n",
++			       max_seg_size);
++			return -ENOMEM;
++		}
++		host->bounce_buffer_size = max_seg_size;
++
++		/*
++		 * Initialize single-entry sglist to point at the bounce buffer
++		 * FIXME: use devm_*
++		 */
++		host->bounce_sg = kmalloc(sizeof(*host->bounce_sg), GFP_KERNEL);
++		if (!host->bounce_sg) {
++			pr_err("failed to allocate bounce buffer sglist\n");
++			return -ENOMEM;
++		}
++		sg_init_one(host->bounce_sg, host->bounce_buffer, max_seg_size);
++
++		/* Lie about this since we're bouncing */
++		mmc->max_segs = max_blocks;
++		mmc->max_seg_size = max_seg_size;
++
++		pr_info("SDMA with bounce buffer: bounce up to %u segments into one, max segment size %u bytes\n",
++			max_blocks, max_seg_size);
++	}
++
+ 	return 0;
+ 
+ unreg:
+@@ -3743,6 +3839,12 @@ void sdhci_cleanup_host(struct sdhci_host *host)
+ 				  host->align_addr);
+ 	host->adma_table = NULL;
+ 	host->align_buffer = NULL;
++	/* kfree() on NULL is fine */
++	kfree(host->bounce_sg);
++	kfree(host->bounce_buffer);
++	/* Overzealous but following the style above */
++	host->bounce_sg = NULL;
++	host->bounce_buffer = NULL;
+ }
+ EXPORT_SYMBOL_GPL(sdhci_cleanup_host);
+ 
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 54bc444c317f..31fc2302454a 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -440,6 +440,9 @@ struct sdhci_host {
+ 
+ 	int irq;		/* Device IRQ */
+ 	void __iomem *ioaddr;	/* Mapped address */
++	char *bounce_buffer;	/* For packing SDMA reads/writes */
++	size_t bounce_buffer_size;
++	struct scatterlist *bounce_sg;
+ 
+ 	const struct sdhci_ops *ops;	/* Low level hw interface */
+ 
+-- 
+2.14.3
 
-> >         disable_irq(host->irq);
-> >         sunxi_mmc_reset_host(host);
-> >
-> >         if (!IS_ERR(host->reset))
-> >                 reset_control_assert(host->reset);
-> >
-> > -       clk_disable_unprepare(host->clk_sample);
-> > +       dma_free_coherent(&pdev->dev, PAGE_SIZE, host->sg_cpu, host->sg=
-_dma);
-> > +       mmc_free_host(mmc);
-> > +
-> > +       return 0;
-> > +}
-> > +
-> > +static int sunxi_mmc_runtime_resume(struct device *dev)
-> > +{
-> > +       struct mmc_host *mmc =3D dev_get_drvdata(dev);
-> > +       struct sunxi_mmc_host *host =3D mmc_priv(mmc);
-> > +       int ret;
-> > +
-> > +       ret =3D clk_prepare_enable(host->clk_mmc);
-> > +       if (ret) {
-> > +               dev_err(dev, "Enable mmc clk err %d\n", ret);
-> > +               return ret;
-> > +       }
-> > +
-> > +       ret =3D clk_prepare_enable(host->clk_output);
-> > +       if (ret) {
-> > +               dev_err(dev, "Enable output clk err %d\n", ret);
-> > +               goto error_disable_clk_mmc;
-> > +       }
-> > +
-> > +       ret =3D clk_prepare_enable(host->clk_sample);
-> > +       if (ret) {
-> > +               dev_err(dev, "Enable sample clk err %d\n", ret);
-> > +               goto error_disable_clk_output;
-> > +       }
-> > +
-> > +       return 0;
-> > +
-> > +error_disable_clk_output:
-> >         clk_disable_unprepare(host->clk_output);
-> > +error_disable_clk_mmc:
-> >         clk_disable_unprepare(host->clk_mmc);
-> > -       clk_disable_unprepare(host->clk_ahb);
-> > +       return ret;
-> > +}
-> >
-> > -       dma_free_coherent(&pdev->dev, PAGE_SIZE, host->sg_cpu, host->sg=
-_dma);
-> > -       mmc_free_host(mmc);
-> > +static int sunxi_mmc_runtime_suspend(struct device *dev)
-> > +{
-> > +       struct mmc_host *mmc =3D dev_get_drvdata(dev);
-> > +       struct sunxi_mmc_host *host =3D mmc_priv(mmc);
-> > +
-> > +       clk_disable_unprepare(host->clk_sample);
-> > +       clk_disable_unprepare(host->clk_output);
-> > +       clk_disable_unprepare(host->clk_mmc);
-> >
-> >         return 0;
-> >  }
-> >
-> > +static const struct dev_pm_ops sunxi_mmc_pm_ops =3D {
-> > +       SET_RUNTIME_PM_OPS(sunxi_mmc_runtime_suspend,
-> > +                          sunxi_mmc_runtime_resume,
-> > +                          NULL)
-> > +};
-> > +
-> >  static struct platform_driver sunxi_mmc_driver =3D {
-> >         .driver =3D {
-> >                 .name   =3D "sunxi-mmc",
-> >                 .of_match_table =3D of_match_ptr(sunxi_mmc_of_match),
-> > +               .pm =3D &sunxi_mmc_pm_ops,
-> >         },
-> >         .probe          =3D sunxi_mmc_probe,
-> >         .remove         =3D sunxi_mmc_remove,
-> > --
-> > git-series 0.9.1
->=20
-> Otherwise this looks good to me!
->=20
-> BTW, isn't system wide suspend/resume() also important to save power
-> for? That's rather simple to implement, after you have enabled runtime
-> PM support.
-
-We don't have (unfortunately) any kind of suspend support at the
-moment, so I guess that'll come as a single step when we'll have it :)
-
-Thanks!
-Maxime
-
---=20
-Maxime Ripard, Free Electrons
-Embedded Linux and Kernel engineering
-http://free-electrons.com
-
---eh5knmeals5x6ivi
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEE0VqZU19dR2zEVaqr0rTAlCFNr3QFAlpOhmUACgkQ0rTAlCFN
-r3Rh4Q//cOZ4H2FrbKdDI8N9KzgkuZmb4yhThKxg3fvqfA3YSG8b5tDBkjIaNg98
-3j93DvsiTbD/ZtZdAU5EIdOhJQa4o16AiM7zMeVnJQWpc3LutmmKi9JYalMJiZV7
-s6nRqEWsFj40T1feqjf/cA0qzFd9FZ6K+6iuYBG1Zr+zPk50ENoC6AHuz7wkQ2si
-S4XqvFGEKxFOZvc8nCS+L/tiZWLRVG6tA1gdwZjRe/oaQybYtKPgMomzOiM43hN3
-mKwnIe422+6wy2vLtjKeFSp2iopgee0DlTi08NuClMQH/TDQlvSUTsYi2LMe0rDq
-oZntxOQG0nBHjVL6tsWxAZUCyzR5DIKtVR9NacF15QpBs+B0PptB5bIcQJROsFJa
-EDTwT8PZcmO2oUetfGHJoS0SebuPtABS0+28bw4ki6bJy7uhGA1oPubMdrSaaRBb
-v63+FrzEL3aw07Ap5pMHA8olgvTf53BBQBS3CUTs8g1o9PEtB/NKlqhp3KPNRvO1
-3Oc9wetDfE2DkPKjQKXW2krjBMJ7UcyYo6/cGNTpcO8hjHJGVrdwtHiv274fw+yY
-LEx5pZUgmk62/OFaGpQAplNk5t4FVTARdOqSXxlivUDJQ9mMLT/fncO1fbTW/Mmy
-VmX8ieT8IMnUcQodRrszjQ4dChwFzmCyoczgrwZqxbisw8XoXwY=
-=LgNK
------END PGP SIGNATURE-----
-
---eh5knmeals5x6ivi--
