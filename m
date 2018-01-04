@@ -1,120 +1,56 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V2 2/2] mmc: sdhci-esdhc-imx: Enable/Disable mmc clock
- during runtime suspend
-Date: Thu, 4 Jan 2018 15:08:03 +0100
-Message-ID: <CAPDyKFo0Joc1dRaw3zy_yV0+YMpSYZ2S7FkNrOkBpaA=Dng+_Q@mail.gmail.com>
-References: <1515074324-12933-1-git-send-email-michael@amarulasolutions.com> <1515074324-12933-2-git-send-email-michael@amarulasolutions.com>
+From: David Howells <dhowells@redhat.com>
+Subject: Re: [PATCH v3 00/27] kill devm_ioremap_nocache
+Date: Thu, 04 Jan 2018 14:52:54 +0000
+Message-ID: <20289.1515077574@warthog.procyon.org.uk>
+References: <CAK8P3a3i0bKvG56ha9_hzO=z80sVxCQhaeFn6QW3AwbwZs3HPg@mail.gmail.com>
+ <1514026525-32538-1-git-send-email-xieyisheng1@huawei.com>
+ <20171223134831.GB10103@kroah.com>
+ <f7632cf5-2bcc-4d74-b912-3999937a1269@roeck-us.net>
+ <c28ac0bc-8bd2-3dce-3167-8c0f80ec601e@c-s.fr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f195.google.com ([209.85.223.195]:33825 "EHLO
-        mail-io0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753086AbeADOIE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Jan 2018 09:08:04 -0500
-Received: by mail-io0-f195.google.com with SMTP id q188so2333559iod.1
-        for <linux-mmc@vger.kernel.org>; Thu, 04 Jan 2018 06:08:04 -0800 (PST)
-In-Reply-To: <1515074324-12933-2-git-send-email-michael@amarulasolutions.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <dri-devel-bounces@lists.freedesktop.org>
+In-Reply-To: <CAK8P3a3i0bKvG56ha9_hzO=z80sVxCQhaeFn6QW3AwbwZs3HPg@mail.gmail.com>
+Content-ID: <20288.1515077574.1@warthog.procyon.org.uk>
+List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/dri-devel>,
+ <mailto:dri-devel-request@lists.freedesktop.org?subject=unsubscribe>
+List-Archive: <https://lists.freedesktop.org/archives/dri-devel>
+List-Post: <mailto:dri-devel@lists.freedesktop.org>
+List-Help: <mailto:dri-devel-request@lists.freedesktop.org?subject=help>
+List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/dri-devel>,
+ <mailto:dri-devel-request@lists.freedesktop.org?subject=subscribe>
+Errors-To: dri-devel-bounces@lists.freedesktop.org
+Sender: "dri-devel" <dri-devel-bounces@lists.freedesktop.org>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Yisheng Xie <xieyisheng1@huawei.com>, linux-mips@linux-mips.org, Ulf Hansson <ulf.hansson@linaro.org>, Jakub Kicinski <jakub.kicinski@netronome.com>, Platform Driver <platform-driver-x86@vger.kernel.org>, David Airlie <airlied@linux.ie>, linux-wireless <linux-wireless@vger.kernel.org>, alsa-devel@alsa-project.org, dri-devel <dri-devel@lists.freedesktop.org>, Liam Girdwood <lgirdwood@gmail.com>, dhowells@redhat.com, IDE-ML <linux-ide@vger.kernel.org>, Wim Van Sebroeck <wim@iguana.be>, Networking <netdev@vger.kernel.org>, linux-mtd <linux-mtd@lists.infradead.org>, Daniel Vetter <daniel.vetter@intel.com>, Dan Williams <dan.j.williams@intel.com>, Jason Cooper <jason@lakedaemon.net>, linux-rtc@vger.kernel.org, Boris Brezillon <boris.brezillon@free-electrons.com>, Mauro Carvalho Chehab <mchehab@kernel.org>, dmaengine@vger.kernel.org, Vinod Koul <vinod.koul@intel.com>, Richar
 List-Id: linux-mmc@vger.kernel.org
-To: Michael Trimarchi <michael@amarulasolutions.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
 
-On 4 January 2018 at 14:58, Michael Trimarchi
-<michael@amarulasolutions.com> wrote:
-> mmc clock can be stopped during runtime suspend and restart during runtime
-> resume if the sdio irq is not enabled. Stop sdio clock reduce EMI of
-> the device when the bus is not in use.
->
-> Signed-off-by: Michael Trimarchi <michael@amarulasolutions.com>
-> ---
-> Changes V1->V2:
->         - rebase to latest linux
->         - address sdio irq wakeup
->         - move the clock enable clk_ahb up to be balance
->           with the runtime suspend function and to make
->           function more clean by the end without two if
->           condition
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 20 +++++++++++++-------
->  1 file changed, 13 insertions(+), 7 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index d08c21e..53cc1b6 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -193,6 +193,7 @@ struct pltfm_imx_data {
->         struct clk *clk_ipg;
->         struct clk *clk_ahb;
->         struct clk *clk_per;
-> +       unsigned int actual_clock;
->         enum {
->                 NO_CMD_PENDING,      /* no multiblock command pending */
->                 MULTIBLK_IN_PROCESS, /* exact multiblock cmd in process */
-> @@ -1396,6 +1397,8 @@ static int sdhci_esdhc_runtime_suspend(struct device *dev)
->                 mmc_retune_needed(host->mmc);
->
->         if (!sdhci_sdio_irq_enabled(host)) {
-> +               imx_data->actual_clock = host->mmc->actual_clock;
-> +               esdhc_pltfm_set_clock(host, 0);
->                 clk_disable_unprepare(imx_data->clk_per);
->                 clk_disable_unprepare(imx_data->clk_ipg);
->         }
-> @@ -1411,31 +1414,34 @@ static int sdhci_esdhc_runtime_resume(struct device *dev)
->         struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
->         int err;
->
-> +       err = clk_prepare_enable(imx_data->clk_ahb);
-> +       if (err)
-> +               return err;
-> +
-
-So this changes the order of how clocks are being re-enabled. I think
-the change makes sense, as normally we do things in the reverse order
-as compared what is being done during ->runtime_suspend().
-
-However, I think you should have this being a separate patch,
-preceding the one that actually calls esdhc_pltfm_set_clock() in in
-the runtime PM callbacks.
-
->         if (!sdhci_sdio_irq_enabled(host)) {
->                 err = clk_prepare_enable(imx_data->clk_per);
->                 if (err)
-> -                       return err;
-> +                       goto disable_ahb_clk;
->                 err = clk_prepare_enable(imx_data->clk_ipg);
->                 if (err)
->                         goto disable_per_clk;
-> +               esdhc_pltfm_set_clock(host, imx_data->actual_clock);
->         }
-> -       err = clk_prepare_enable(imx_data->clk_ahb);
-> -       if (err)
-> -               goto disable_ipg_clk;
-> +
->         err = sdhci_runtime_resume_host(host);
->         if (err)
-> -               goto disable_ahb_clk;
-> +               goto disable_ipg_clk;
->
->         return 0;
->
-> -disable_ahb_clk:
-> -       clk_disable_unprepare(imx_data->clk_ahb);
->  disable_ipg_clk:
->         if (!sdhci_sdio_irq_enabled(host))
->                 clk_disable_unprepare(imx_data->clk_ipg);
->  disable_per_clk:
->         if (!sdhci_sdio_irq_enabled(host))
->                 clk_disable_unprepare(imx_data->clk_per);
-> +disable_ahb_clk:
-> +       clk_disable_unprepare(imx_data->clk_ahb);
->         return err;
->  }
->  #endif
-> --
-> 2.7.4
->
-
-Otherwise this looks good to me.
-
-Kind regards
-Uffe
+QXJuZCBCZXJnbWFubiA8YXJuZEBhcm5kYi5kZT4gd3JvdGU6Cgo+IC0gbW4xMDMwMCBhcHBlYXJz
+IHRvIGJlIHdyb25nLCBicm9rZW4gYnkgRGF2aWQgSG93ZWxscyBpbgo+ICAgY29tbWl0IDgzYzJk
+YzE1Y2U4MiAoIk1OMTAzMDA6IEhhbmRsZSBjYWNoZWFibGUgUENJIHJlZ2lvbnMKPiAgIGluIHBj
+aV9pb21hcCgpIikgZm9yIGFueSBkcml2ZXIgY2FsbGluZyBpb3JlbWFwKCkgYnkgdG8gZ2V0IHVu
+Y2FjaGVkCj4gICBtZW1vcnksCgpJdCdzIG5vdCBjbGVhciB3aGF0IHRoZSByaWdodCB0aGluZyB0
+byBkbyB3YXMsIGdpdmVuIHRoYXQgdGhlcmUncyBhbiBpb3JlbWFwKCkKYW5kIGFuIGlvcmVtYXBf
+dW5jYWNoZWQoKS4KCkJ1dCB0aGUgYXNiMjMwNSdzIHBjaV9pb21hcCgpIHdpbGwgdXNlIGlvcmVt
+YXAoKSAodGhlIGNhY2hlYWJsZSB3aW5kb3cpIGlmCklPUkVTT1VSQ0VfQ0FDSEVBQkxFIGlzIHNl
+dCwgYnV0IElPUkVTT1VSQ0VfSU8gaXMgbm90IGFuZCBpb3JlbWFwX3VuY2FjaGVkKCkKb3RoZXJ3
+aXNlLgoKVGhlIG90aGVyIHN1cHBvcnRlZCB1bml0cyBkb24ndCBoYXZlIFBDSSBidXNlcy4KCj4g
+aWYgSSB1bmRlcnN0YW5kIHRoZSBjb21tZW50IGZvciBjb21taXQgMzRmMWJkZWUxOTEwICgibW4x
+MDMwMDogc3dpdGNoIHRvCj4gR0VORVJJQ19QQ0lfSU9NQVAiKSBjb3JyZWN0bHk6IGl0IHNlZW1z
+IHRoYXQgUENJIGFkZHJlc3NlcyBpbmNsdWRlIHRoZQo+ICd1bmNhY2hlZCcgYml0IGJ5IGRlZmF1
+bHQgdG8gZ2V0IHRoZSByaWdodCBiZWhhdmlvciwgYnV0IGRyb3BwaW5nIHRoYXQgYml0Cj4gYnJl
+YWtzIGl0LgoKTm90IGV4YWN0bHkuICBUaGUgQ1BVIGhhcyBhIHdpbmRvdyBpbiB0aGUgcmFuZ2Ug
+MHhhMDAwMDAwMC0weGJmZmZmZmZmIHdoaWNoIGlzCmFuIHVuY2FjaGVkIHZpZXcgb2YgaXRzIGhh
+cmR3YXJlIGJ1c2VzLiAgSXQgaGFzIGFub3RoZXIgd2luZG93IGluIHRoZSByYW5nZQoweDgwMDAw
+MDAwLTB4OWZmZmZmZmYgd2hpY2ggaXMgYSBjYWNoZWQgdmlldyBvZiB0aGF0IHJlZ2lvbi4gIFRo
+ZXNlIHdpbmRvd3MKY2Fubm90IGJlIGNoYW5nZWQgYW5kIGFkZHJlc3NlcyBhYm92ZSAweDgwMDAw
+MDAwIGFyZSBzdGF0aWNhbGx5IG1hcHBlZCBhbmQgYXJlCm9ubHkgYWNjZXNzaWJsZSBieSB0aGUg
+a2VybmVsICh0aGlzIGlzIGhhcmR3aXJlZCBpbiB0aGUgTU1VKS4KClNvIHRoZSBhcmNoIGhhcyB0
+d28gc3Vid2luZG93cyB0byB0aGUgUENJIGJ1cywgb25lIGNhY2hlZCBhbmQgb25lIHVuY2FjaGVk
+LgpUaGVzZSBzdWJ3aW5kb3dzIGFyZSBmdXJ0aGVyIHN1YmRpdmlkZWQgaW50byBpb3BvcnQgYW5k
+IGlvbWVtIHNwYWNlcywgYW4gU1JBTQphbmQgc29tZSBjb250cm9sIHJlZ2lzdGVycyBmb3IgdGhl
+IENQVS1QQ0kgYnJpZGdlLgoKRGF2aWQKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX18KZHJpLWRldmVsIG1haWxpbmcgbGlzdApkcmktZGV2ZWxAbGlzdHMuZnJl
+ZWRlc2t0b3Aub3JnCmh0dHBzOi8vbGlzdHMuZnJlZWRlc2t0b3Aub3JnL21haWxtYW4vbGlzdGlu
+Zm8vZHJpLWRldmVsCg==
