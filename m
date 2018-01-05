@@ -1,114 +1,46 @@
-From: Mathieu Malaterre <malat@debian.org>
-Subject: mmc0: Unexpected interrupt 0x04000000.
-Date: Fri, 5 Jan 2018 13:44:10 +0100
-Message-ID: <CA+7wUsyhKhGCHE5QEZ=dt2-v1sTQZpW38Gf2_wOmwJFHoJWNGA@mail.gmail.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH] RFT: mmc: sdhci: Implement an SDHCI-specific bounce buffer
+Date: Fri, 5 Jan 2018 14:25:45 +0100
+Message-ID: <CACRpkdZie+uHWX6FgqXEKitUR37S+UWvn__s1KuxyYvcdY7zGA@mail.gmail.com>
+References: <20180104201045.31139-1-linus.walleij@linaro.org>
+ <OF2F4F13DD.1FAE7453-ONC125820C.00262A12-C125820C.002B3610@rittal.de>
+ <CACRpkdYcESu=ZO1GfE+YoAsJxjVrtQQVk88wewkRPu_q2Lz6dQ@mail.gmail.com>
+ <OF76C564BA.6811E770-ONC125820C.00365A44-C125820C.00373E96@rittal.de>
+ <CACRpkdY6whY4Xrt5ijhyNCDVR8LgXyi7krkeUoSMhtsBjUJZYg@mail.gmail.com>
+ <CACRpkdaLoOaT_j7XdKBd39DMJ-qoKWpLFfmWcf9R84_QY4bBdA@mail.gmail.com> <OF94AFB2FA.5B7D9F59-ONC125820C.003C0FB9-C125820C.003D39CB@rittal.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vk0-f47.google.com ([209.85.213.47]:43981 "EHLO
-        mail-vk0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751067AbeAEMoc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Jan 2018 07:44:32 -0500
+Received: from mail-it0-f68.google.com ([209.85.214.68]:33989 "EHLO
+        mail-it0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750915AbeAENZq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Jan 2018 08:25:46 -0500
+Received: by mail-it0-f68.google.com with SMTP id m11so4559825iti.1
+        for <linux-mmc@vger.kernel.org>; Fri, 05 Jan 2018 05:25:46 -0800 (PST)
+In-Reply-To: <OF94AFB2FA.5B7D9F59-ONC125820C.003C0FB9-C125820C.003D39CB@rittal.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Benjamin Beckmeyer <beckmeyer.b@rittal.de>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
 
-Hi there,
+On Fri, Jan 5, 2018 at 12:08 PM, Benjamin Beckmeyer
+<beckmeyer.b@rittal.de> wrote:
+>> When you say you flashed "another kernel and it works" did you mean
+>> some random kernel, or exactly the same you applied my patch on,
+>> but without my patch?
+>
+>> Please confirm that you have a booting merge base so I'm not chasing
+>> ghosts here :)
+>
+> Sorry for not be exactly enough.
+> I'm using Yocto to build a kernel with some other patches(which have nothing
+> to do with emmc). This is my base and on this base I test your patches.
+> With your patches it is not booting and without it is booting.
 
-I am trying to get sdhci-pci driver to work with the following hardware:
+OK we're back to guesswork, I guess maybe I need to use
+dma_alloc_coherent() since the buffer gets bigger than 64K.
 
-$ sudo lspci -s 03:00.1 -v -nn
-03:00.1 SD Host controller [0805]: Broadcom Limited BCM57765/57785
-SDXC/MMC Card Reader [14e4:16bc] (rev 10) (prog-if 01)
-Subsystem: Broadcom Limited BCM57765/57785 SDXC/MMC Card Reader [14e4:96bc]
-Flags: bus master, fast devsel, latency 0, IRQ 17
-Memory at c1820000 (64-bit, prefetchable) [size=64K]
-Capabilities: [48] Power Management version 3
-Capabilities: [58] MSI: Enable- Count=1/1 Maskable- 64bit+
-Capabilities: [ac] Express Endpoint, MSI 00
-Capabilities: [100] Advanced Error Reporting
-Capabilities: [150] Power Budgeting <?>
-Capabilities: [160] Virtual Channel
-Kernel driver in use: sdhci-pci
-Kernel modules: sdhci_pci
+I'll test that and respin.
 
-I am using a MacBookPro10,1. I cannot get the driver to work when
-using a SDHC Samsung Evo 16GB (placed inside a card reader), it always
-report the following (1).
-
-If I now place the card onto a USB reader (USB-HUB reader) then
-everything is fine (tested using f3: f3probe). Are there any options I
-can switch to make the driver more tolerant with my hardware ?
-
-Thanks
-
-Current system is Debian stable with kernel 4.14 (backport), modinfo returns:
-
-$ /sbin/modinfo sdhci-pci
-filename:
-/lib/modules/4.14.0-0.bpo.2-amd64/kernel/drivers/mmc/host/sdhci-pci.ko
-license:        GPL
-description:    Secure Digital Host Controller Interface PCI driver
-author:         Pierre Ossman <pierre@ossman.eu>
-alias:          pci:v*d*sv*sd*bc08sc05i*
-alias:          pci:v00001022d*sv*sd*bc08sc05i*
-alias:          pci:v00001217d00008621sv*sd*bc*sc*i*
-alias:          pci:v00001217d00008620sv*sd*bc*sc*i*
-alias:          pci:v00001217d00008421sv*sd*bc*sc*i*
-alias:          pci:v00001217d00008420sv*sd*bc*sc*i*
-(...)
-alias:          pci:v00001524d00000551sv*sd*bc*sc*i*
-alias:          pci:v00001524d00000550sv*sd*bc*sc*i*
-alias:          pci:v00001180d0000E823sv*sd*bc*sc*i*
-alias:          pci:v00001180d0000E822sv*sd*bc*sc*i*
-alias:          pci:v00001180d00000843sv*sd*bc*sc*i*
-alias:          pci:v00001180d00000822sv*sd*bc*sc*i*
-depends:        sdhci,mmc_core
-intree:         Y
-name:           sdhci_pci
-vermagic:       4.14.0-0.bpo.2-amd64 SMP mod_unload modversions
-
-
-(1)
-[  220.210842] mmc0: Tuning timeout, falling back to fixed sampling clock
-[  220.210934] mmc0: new ultra high speed DDR50 SDHC card at address 59b4
-[  220.219075] mmcblk0: mmc0:59b4 00000 14.9 GiB
-[  230.362858] mmc0: Timeout waiting for hardware interrupt.
-[  230.362868] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
-[  230.362918] mmc0: sdhci: Sys addr:  0x000000c8 | Version:  0x00001502
-[  230.362927] mmc0: sdhci: Blk size:  0x00007200 | Blk cnt:  0x00000008
-[  230.362937] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x0000003b
-[  230.362946] mmc0: sdhci: Present:   0x1fff0000 | Host ctl: 0x0000001f
-[  230.362955] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
-[  230.362964] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00000007
-[  230.362974] mmc0: sdhci: Timeout:   0x0000000a | Int stat: 0x00000000
-[  230.362982] mmc0: sdhci: Int enab:  0x02ff008b | Sig enab: 0x02ff008b
-[  230.362992] mmc0: sdhci: AC12 err:  0x00000010 | Slot int: 0x00000000
-[  230.363001] mmc0: sdhci: Caps:      0x176ec8b0 | Caps_1:   0x03002177
-[  230.363011] mmc0: sdhci: Cmd:       0x0000123a | Max curr: 0x00000000
-[  230.363020] mmc0: sdhci: Resp[0]:   0x00001201 | Resp[1]:  0x00000000
-[  230.363029] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
-[  230.363035] mmc0: sdhci: Host ctl2: 0x0000804c
-[  230.363047] mmc0: sdhci: ADMA Err:  0x00000001 | ADMA Ptr: 0x0000000457940204
-[  230.363049] mmc0: sdhci: ============================================
-[  230.363119] mmc0: Unexpected interrupt 0x04000000.
-[  230.363128] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
-[  230.363157] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00001502
-[  230.363166] mmc0: sdhci: Blk size:  0x00007200 | Blk cnt:  0x00000008
-[  230.363174] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x00000033
-[  230.363184] mmc0: sdhci: Present:   0x1fff0001 | Host ctl: 0x0000001f
-[  230.363193] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
-[  230.363203] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00000007
-[  230.363214] mmc0: sdhci: Timeout:   0x0000000a | Int stat: 0x00000000
-[  230.363225] mmc0: sdhci: Int enab:  0x02ff008b | Sig enab: 0x02ff008b
-[  230.363234] mmc0: sdhci: AC12 err:  0x00000000 | Slot int: 0x00000000
-[  230.363244] mmc0: sdhci: Caps:      0x176ec8b0 | Caps_1:   0x03002177
-[  230.363253] mmc0: sdhci: Cmd:       0x00000c1a | Max curr: 0x00000000
-[  230.363263] mmc0: sdhci: Resp[0]:   0x00001201 | Resp[1]:  0x00000000
-[  230.363272] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
-[  230.363278] mmc0: sdhci: Host ctl2: 0x0000800c
-[  230.363292] mmc0: sdhci: ADMA Err:  0x00000001 | ADMA Ptr: 0x0000000457940204
-[  230.363294] mmc0: sdhci: ============================================
-[  230.363509] mmcblk0: error -110 sending stop command, original cmd
-response 0x0, card status 0x400900
+Yours,
+Linus Walleij
