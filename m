@@ -1,62 +1,37 @@
-From: Linus Walleij <linus.walleij@linaro.org>
+From: Benjamin Beckmeyer <beckmeyer.b@rittal.de>
 Subject: Re: [PATCH] RFT: mmc: sdhci: Implement an SDHCI-specific bounce buffer
-Date: Fri, 5 Jan 2018 11:46:49 +0100
-Message-ID: <CACRpkdaLoOaT_j7XdKBd39DMJ-qoKWpLFfmWcf9R84_QY4bBdA@mail.gmail.com>
-References: <20180104201045.31139-1-linus.walleij@linaro.org>
- <OF2F4F13DD.1FAE7453-ONC125820C.00262A12-C125820C.002B3610@rittal.de>
- <CACRpkdYcESu=ZO1GfE+YoAsJxjVrtQQVk88wewkRPu_q2Lz6dQ@mail.gmail.com>
- <OF76C564BA.6811E770-ONC125820C.00365A44-C125820C.00373E96@rittal.de> <CACRpkdY6whY4Xrt5ijhyNCDVR8LgXyi7krkeUoSMhtsBjUJZYg@mail.gmail.com>
+Date: Fri,  5 Jan 2018 12:08:46 +0100 (CET)
+Message-ID: <OF94AFB2FA.5B7D9F59-ONC125820C.003C0FB9-C125820C.003D39CB@rittal.de>
+References: <CACRpkdaLoOaT_j7XdKBd39DMJ-qoKWpLFfmWcf9R84_QY4bBdA@mail.gmail.com>,
+        <20180104201045.31139-1-linus.walleij@linaro.org> <OF2F4F13DD.1FAE7453-ONC125820C.00262A12-C125820C.002B3610@rittal.de> <CACRpkdYcESu=ZO1GfE+YoAsJxjVrtQQVk88wewkRPu_q2Lz6dQ@mail.gmail.com> <OF76C564BA.6811E770-ONC125820C.00365A44-C125820C.00373E96@rittal.de> <CACRpkdY6whY4Xrt5ijhyNCDVR8LgXyi7krkeUoSMhtsBjUJZYg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain;
+        charset=ISO-8859-1
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f54.google.com ([209.85.214.54]:42439 "EHLO
-        mail-it0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750756AbeAEKqu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Jan 2018 05:46:50 -0500
-Received: by mail-it0-f54.google.com with SMTP id p139so1171809itb.1
-        for <linux-mmc@vger.kernel.org>; Fri, 05 Jan 2018 02:46:50 -0800 (PST)
-In-Reply-To: <CACRpkdY6whY4Xrt5ijhyNCDVR8LgXyi7krkeUoSMhtsBjUJZYg@mail.gmail.com>
+Received: from mailgw03.loh-group.com ([195.226.74.51]:39227 "EHLO
+        mailgw03.loh-group.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751008AbeAELIr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Jan 2018 06:08:47 -0500
+In-Reply-To: <CACRpkdaLoOaT_j7XdKBd39DMJ-qoKWpLFfmWcf9R84_QY4bBdA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Benjamin Beckmeyer <beckmeyer.b@rittal.de>
+To: Linus Walleij <linus.walleij@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
 
-On Fri, Jan 5, 2018 at 11:45 AM, Linus Walleij <linus.walleij@linaro.org> wrote:
-> On Fri, Jan 5, 2018 at 11:03 AM, Benjamin Beckmeyer
-> <beckmeyer.b@rittal.de> wrote:
->>> Hey it doesn't segfault! :D
->>
->> Okay, so I guess it was a successfully test :D.
->>
->>> OK I clearly need to find a system with sdhci on it, so I dug up a laptop
->>> with SDHCI to experiment on. Now trying to figure out a bit about
->>> x86_64 development...
->>
->> Oh, sounds like fun. I'm looking forward to read from you.
->>
->>> > Suprisingly there is a mmcblk0rpmb partition now. I don't know what that is
->>> > and if this was there before, but normally it has nothing to do
->>> > with our system. On our other systems it is not present.
->>
->>> It is a feature of the eMMC card, and the feature list is retrieved with
->>> special commands from the card. Usually eMMCs that have boot partitions
->>> also have an RPMB partition.
->>
->> Thanks for that information, I assume it comes with a newer kernel because with
->> our old 3.7.2 kernel there was nothing like that.
->
-> Actually the patch works (!) with my laptop!
->
-> It also has only SDMA as it turns out.
->
-> I'm working on trying to figure out the problem....
+> When you say you flashed "another kernel and it works" did you mean
+> some random kernel, or exactly the same you applied my patch on,
+> but without my patch?
 
-When you say you flashed "another kernel and it works" did you mean
-some random kernel, or exactly the same you applied my patch on,
-but without my patch?
+> Please confirm that you have a booting merge base so I'm not chasing
+> ghosts here :)
 
-Please confirm that you have a booting merge base so I'm not chasing
-ghosts here :)
+Sorry for not be exactly enough. 
+I'm using Yocto to build a kernel with some other patches(which have nothing 
+to do with emmc). This is my base and on this base I test your patches. 
+With your patches it is not booting and without it is booting. 
 
-Yours,
-Linus Walleij
+So, no ghosts at all.
+
+Kind regards,
+Benjamin Beckmeyer
