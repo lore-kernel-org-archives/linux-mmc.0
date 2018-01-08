@@ -1,151 +1,173 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH v2] mmc: sdhci_f_sdh30: add ACPI support
-Date: Mon,  8 Jan 2018 15:44:19 +0000
-Message-ID: <20180108154419.2821-1-ard.biesheuvel@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:34362 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932282AbeAHPo2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Jan 2018 10:44:28 -0500
-Received: by mail-wm0-f65.google.com with SMTP id y82so16342400wmg.1
-        for <linux-mmc@vger.kernel.org>; Mon, 08 Jan 2018 07:44:27 -0800 (PST)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Dmitry Osipenko <digetx@gmail.com>
+Subject: Re: [PATCH V4 13/45] block: blk-merge: try to make front segments in
+ full size
+Date: Tue, 9 Jan 2018 00:09:27 +0300
+Message-ID: <c3227c8f-c782-7685-c3eb-af558a082399@gmail.com>
+References: <20171218122247.3488-1-ming.lei@redhat.com>
+ <20171218122247.3488-14-ming.lei@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20171218122247.3488-14-ming.lei@redhat.com>
+Content-Language: en-US
+Sender: owner-linux-mm@kvack.org
+To: Ming Lei <ming.lei@redhat.com>, Jens Axboe <axboe@fb.com>, Christoph Hellwig <hch@infradead.org>, Alexander Viro <viro@zeniv.linux.org.uk>, Kent Overstreet <kent.overstreet@gmail.com>
+Cc: Huang Ying <ying.huang@intel.com>, linux-kernel@vger.kernel.org, linux-block@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, Theodore Ts'o <tytso@mit.edu>, "Darrick J . Wong" <darrick.wong@oracle.com>, Coly Li <colyli@suse.de>, Filipe Manana <fdmanana@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-The Fujitsu SDH30 SDHCI controller may be described as a SCX0002 ACPI
-device on ACPI platforms incorporating the Socionext SynQuacer SoC.
+On 18.12.2017 15:22, Ming Lei wrote:
+> When merging one bvec into segment, if the bvec is too big
+> to merge, current policy is to move the whole bvec into another
+> new segment.
+> 
+> This patchset changes the policy into trying to maximize size of
+> front segments, that means in above situation, part of bvec
+> is merged into current segment, and the remainder is put
+> into next segment.
+> 
+> This patch prepares for support multipage bvec because
+> it can be quite common to see this case and we should try
+> to make front segments in full size.
+> 
+> Signed-off-by: Ming Lei <ming.lei@redhat.com>
+> ---
+>  block/blk-merge.c | 54 +++++++++++++++++++++++++++++++++++++++++++++++++-----
+>  1 file changed, 49 insertions(+), 5 deletions(-)
+> 
+> diff --git a/block/blk-merge.c b/block/blk-merge.c
+> index a476337a8ff4..42ceb89bc566 100644
+> --- a/block/blk-merge.c
+> +++ b/block/blk-merge.c
+> @@ -109,6 +109,7 @@ static struct bio *blk_bio_segment_split(struct request_queue *q,
+>  	bool do_split = true;
+>  	struct bio *new = NULL;
+>  	const unsigned max_sectors = get_max_io_size(q, bio);
+> +	unsigned advance = 0;
+>  
+>  	bio_for_each_segment(bv, bio, iter) {
+>  		/*
+> @@ -134,12 +135,32 @@ static struct bio *blk_bio_segment_split(struct request_queue *q,
+>  		}
+>  
+>  		if (bvprvp && blk_queue_cluster(q)) {
+> -			if (seg_size + bv.bv_len > queue_max_segment_size(q))
+> -				goto new_segment;
+>  			if (!BIOVEC_PHYS_MERGEABLE(bvprvp, &bv))
+>  				goto new_segment;
+>  			if (!BIOVEC_SEG_BOUNDARY(q, bvprvp, &bv))
+>  				goto new_segment;
+> +			if (seg_size + bv.bv_len > queue_max_segment_size(q)) {
+> +				/*
+> +				 * On assumption is that initial value of
+> +				 * @seg_size(equals to bv.bv_len) won't be
+> +				 * bigger than max segment size, but will
+> +				 * becomes false after multipage bvec comes.
+> +				 */
+> +				advance = queue_max_segment_size(q) - seg_size;
+> +
+> +				if (advance > 0) {
+> +					seg_size += advance;
+> +					sectors += advance >> 9;
+> +					bv.bv_len -= advance;
+> +					bv.bv_offset += advance;
+> +				}
+> +
+> +				/*
+> +				 * Still need to put remainder of current
+> +				 * bvec into a new segment.
+> +				 */
+> +				goto new_segment;
+> +			}
+>  
+>  			seg_size += bv.bv_len;
+>  			bvprv = bv;
+> @@ -161,6 +182,12 @@ static struct bio *blk_bio_segment_split(struct request_queue *q,
+>  		seg_size = bv.bv_len;
+>  		sectors += bv.bv_len >> 9;
+>  
+> +		/* restore the bvec for iterator */
+> +		if (advance) {
+> +			bv.bv_len += advance;
+> +			bv.bv_offset -= advance;
+> +			advance = 0;
+> +		}
+>  	}
+>  
+>  	do_split = false;
+> @@ -361,16 +388,29 @@ __blk_segment_map_sg(struct request_queue *q, struct bio_vec *bvec,
+>  {
+>  
+>  	int nbytes = bvec->bv_len;
+> +	unsigned advance = 0;
+>  
+>  	if (*sg && *cluster) {
+> -		if ((*sg)->length + nbytes > queue_max_segment_size(q))
+> -			goto new_segment;
+> -
+>  		if (!BIOVEC_PHYS_MERGEABLE(bvprv, bvec))
+>  			goto new_segment;
+>  		if (!BIOVEC_SEG_BOUNDARY(q, bvprv, bvec))
+>  			goto new_segment;
+>  
+> +		/*
+> +		 * try best to merge part of the bvec into previous
+> +		 * segment and follow same policy with
+> +		 * blk_bio_segment_split()
+> +		 */
+> +		if ((*sg)->length + nbytes > queue_max_segment_size(q)) {
+> +			advance = queue_max_segment_size(q) - (*sg)->length;
+> +			if (advance) {
+> +				(*sg)->length += advance;
+> +				bvec->bv_offset += advance;
+> +				bvec->bv_len -= advance;
+> +			}
+> +			goto new_segment;
+> +		}
+> +
+>  		(*sg)->length += nbytes;
+>  	} else {
+>  new_segment:
+> @@ -393,6 +433,10 @@ __blk_segment_map_sg(struct request_queue *q, struct bio_vec *bvec,
+>  
+>  		sg_set_page(*sg, bvec->bv_page, nbytes, bvec->bv_offset);
+>  		(*nsegs)++;
+> +
+> +		/* for making iterator happy */
+> +		bvec->bv_offset -= advance;
+> +		bvec->bv_len += advance;
+>  	}
+>  	*bvprv = *bvec;
+>  }
+> 
 
-Given that mmc_of_parse() has already been made ACPI/DT agnostic,
-making the SDH30 driver ACPI capable is actually rather simple:
-all we need to do is make the call to sdhci_get_of_property() [which
-does not set any properties we care about] and the clock handling
-dependent on whether we are dealing with a DT device, and exposing
-the ACPI id via the platform_driver struct and the module metadata.
+Hello,
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
----
-v2: make OF optional now that ACPI is supported
-    drop dev_of_node() check when disabling the clocks - those routines
-    tolerate NULL pointers so there's no need
+This patch breaks MMC on next-20180108, in particular MMC doesn't work anymore
+with this patch on NVIDIA Tegra20:
 
- drivers/mmc/host/Kconfig         |  2 +-
- drivers/mmc/host/sdhci_f_sdh30.c | 52 +++++++++++++-------
- 2 files changed, 35 insertions(+), 19 deletions(-)
+<3>[   36.622253] print_req_error: I/O error, dev mmcblk1, sector 512
+<3>[   36.671233] print_req_error: I/O error, dev mmcblk2, sector 128
+<3>[   36.711308] print_req_error: I/O error, dev mmcblk1, sector 31325304
+<3>[   36.749232] print_req_error: I/O error, dev mmcblk2, sector 512
+<3>[   36.761235] print_req_error: I/O error, dev mmcblk1, sector 31325816
+<3>[   36.832039] print_req_error: I/O error, dev mmcblk2, sector 31259768
+<3>[   99.793248] print_req_error: I/O error, dev mmcblk1, sector 31323136
+<3>[   99.982043] print_req_error: I/O error, dev mmcblk1, sector 929792
+<3>[   99.986301] print_req_error: I/O error, dev mmcblk1, sector 930816
+<3>[  100.293624] print_req_error: I/O error, dev mmcblk1, sector 932864
+<3>[  100.466839] print_req_error: I/O error, dev mmcblk1, sector 947200
+<3>[  100.642955] print_req_error: I/O error, dev mmcblk1, sector 949248
+<3>[  100.818838] print_req_error: I/O error, dev mmcblk1, sector 230400
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 567028c9219a..07ed947ed10b 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -320,7 +320,7 @@ config MMC_SDHCI_BCM_KONA
- config MMC_SDHCI_F_SDH30
- 	tristate "SDHCI support for Fujitsu Semiconductor F_SDH30"
- 	depends on MMC_SDHCI_PLTFM
--	depends on OF
-+	depends on OF || ACPI
- 	help
- 	  This selects the Secure Digital Host Controller Interface (SDHCI)
- 	  Needed by some Fujitsu SoC for MMC / SD / SDIO support.
-diff --git a/drivers/mmc/host/sdhci_f_sdh30.c b/drivers/mmc/host/sdhci_f_sdh30.c
-index 04ca0d33a521..485f7591fae4 100644
---- a/drivers/mmc/host/sdhci_f_sdh30.c
-+++ b/drivers/mmc/host/sdhci_f_sdh30.c
-@@ -10,9 +10,11 @@
-  * the Free Software Foundation, version 2 of the License.
-  */
- 
-+#include <linux/acpi.h>
- #include <linux/err.h>
- #include <linux/delay.h>
- #include <linux/module.h>
-+#include <linux/of.h>
- #include <linux/property.h>
- #include <linux/clk.h>
- 
-@@ -146,7 +148,6 @@ static int sdhci_f_sdh30_probe(struct platform_device *pdev)
- 
- 	platform_set_drvdata(pdev, host);
- 
--	sdhci_get_of_property(pdev);
- 	host->hw_name = "f_sdh30";
- 	host->ops = &sdhci_f_sdh30_ops;
- 	host->irq = irq;
-@@ -158,25 +159,29 @@ static int sdhci_f_sdh30_probe(struct platform_device *pdev)
- 		goto err;
- 	}
- 
--	priv->clk_iface = devm_clk_get(&pdev->dev, "iface");
--	if (IS_ERR(priv->clk_iface)) {
--		ret = PTR_ERR(priv->clk_iface);
--		goto err;
--	}
-+	if (dev_of_node(dev)) {
-+		sdhci_get_of_property(pdev);
- 
--	ret = clk_prepare_enable(priv->clk_iface);
--	if (ret)
--		goto err;
-+		priv->clk_iface = devm_clk_get(&pdev->dev, "iface");
-+		if (IS_ERR(priv->clk_iface)) {
-+			ret = PTR_ERR(priv->clk_iface);
-+			goto err;
-+		}
- 
--	priv->clk = devm_clk_get(&pdev->dev, "core");
--	if (IS_ERR(priv->clk)) {
--		ret = PTR_ERR(priv->clk);
--		goto err_clk;
--	}
-+		ret = clk_prepare_enable(priv->clk_iface);
-+		if (ret)
-+			goto err;
- 
--	ret = clk_prepare_enable(priv->clk);
--	if (ret)
--		goto err_clk;
-+		priv->clk = devm_clk_get(&pdev->dev, "core");
-+		if (IS_ERR(priv->clk)) {
-+			ret = PTR_ERR(priv->clk);
-+			goto err_clk;
-+		}
-+
-+		ret = clk_prepare_enable(priv->clk);
-+		if (ret)
-+			goto err_clk;
-+	}
- 
- 	/* init vendor specific regs */
- 	ctrl = sdhci_readw(host, F_SDH30_AHB_CONFIG);
-@@ -226,16 +231,27 @@ static int sdhci_f_sdh30_remove(struct platform_device *pdev)
- 	return 0;
- }
- 
-+#ifdef CONFIG_OF
- static const struct of_device_id f_sdh30_dt_ids[] = {
- 	{ .compatible = "fujitsu,mb86s70-sdhci-3.0" },
- 	{ /* sentinel */ }
- };
- MODULE_DEVICE_TABLE(of, f_sdh30_dt_ids);
-+#endif
-+
-+#ifdef CONFIG_ACPI
-+static const struct acpi_device_id f_sdh30_acpi_ids[] = {
-+	{ "SCX0002" },
-+	{ /* sentinel */ }
-+};
-+MODULE_DEVICE_TABLE(acpi, f_sdh30_acpi_ids);
-+#endif
- 
- static struct platform_driver sdhci_f_sdh30_driver = {
- 	.driver = {
- 		.name = "f_sdh30",
--		.of_match_table = f_sdh30_dt_ids,
-+		.of_match_table = of_match_ptr(f_sdh30_dt_ids),
-+		.acpi_match_table = ACPI_PTR(f_sdh30_acpi_ids),
- 		.pm	= &sdhci_pltfm_pmops,
- 	},
- 	.probe	= sdhci_f_sdh30_probe,
+Any attempt of mounting MMC block dev ends with a kernel crash. Reverting this
+patch fixes the issue.
+
 -- 
-2.11.0
+Dmitry
 
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
