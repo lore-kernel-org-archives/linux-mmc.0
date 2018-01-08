@@ -1,321 +1,151 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 1/9] mmc: sdhci-pci: Stop calling
- sdhci_enable_irq_wakeups()
-Date: Mon, 8 Jan 2018 16:49:26 +0200
-Message-ID: <c2d38388-93a0-61c0-e323-74851c08c1fd@intel.com>
-References: <1513757933-11232-1-git-send-email-adrian.hunter@intel.com>
- <1513757933-11232-2-git-send-email-adrian.hunter@intel.com>
- <CAPDyKFoHPdYaorR38LaS5Hzs8CC99Smki8uZW8aDanboLRV3QA@mail.gmail.com>
- <b9801ecc-eaf4-7efc-fff0-3cbd40f29c9a@intel.com>
- <CAPDyKFrZjTvYdT8BGKadTdTBsaAeoC3YOQBBPOvqpv1JpaOUoQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [PATCH v2] mmc: sdhci_f_sdh30: add ACPI support
+Date: Mon,  8 Jan 2018 15:44:19 +0000
+Message-ID: <20180108154419.2821-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:46240 "EHLO mga03.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932200AbeAHOuA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 8 Jan 2018 09:50:00 -0500
-In-Reply-To: <CAPDyKFrZjTvYdT8BGKadTdTBsaAeoC3YOQBBPOvqpv1JpaOUoQ@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:34362 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932282AbeAHPo2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Jan 2018 10:44:28 -0500
+Received: by mail-wm0-f65.google.com with SMTP id y82so16342400wmg.1
+        for <linux-mmc@vger.kernel.org>; Mon, 08 Jan 2018 07:44:27 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Haridhar Kalvala <haridhar.kalvala@intel.com>, Linux PM <linux-pm@vger.kernel.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Geert Uytterhoeven <geert@linux-m68k.org>
+To: linux-mmc@vger.kernel.org
+Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-On 21/12/17 17:33, Ulf Hansson wrote:
-> + linux-pm, Rafael, Geert
-> 
-> On 21 December 2017 at 15:25, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> On 21/12/17 16:15, Ulf Hansson wrote:
->>> On 20 December 2017 at 09:18, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>>> sdhci_enable_irq_wakeups() is already called by sdhci_suspend_host() so
->>>> sdhci-pci should not need to call it. However sdhci_suspend_host() only
->>>> calls it if wakeups are enabled, and sdhci-pci does not enable them until
->>>> after calling sdhci_suspend_host(). So move the calls to
->>>> sdhci_pci_init_wakeup() before calling sdhci_suspend_host(), and
->>>> stop calling sdhci_enable_irq_wakeups(). That results in some
->>>> simplification because sdhci_pci_suspend_host() and
->>>> __sdhci_pci_suspend_host() no longer need to be separate functions.
->>>>
->>>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
->>>> ---
->>>>  drivers/mmc/host/sdhci-pci-core.c | 58 ++++++++++++++-------------------------
->>>>  1 file changed, 21 insertions(+), 37 deletions(-)
->>>>
->>>> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
->>>> index 110c634cfb43..2ffc09f088ee 100644
->>>> --- a/drivers/mmc/host/sdhci-pci-core.c
->>>> +++ b/drivers/mmc/host/sdhci-pci-core.c
->>>> @@ -39,10 +39,29 @@
->>>>  static void sdhci_pci_hw_reset(struct sdhci_host *host);
->>>>
->>>>  #ifdef CONFIG_PM_SLEEP
->>>> -static int __sdhci_pci_suspend_host(struct sdhci_pci_chip *chip)
->>>> +static int sdhci_pci_init_wakeup(struct sdhci_pci_chip *chip)
->>>> +{
->>>> +       mmc_pm_flag_t pm_flags = 0;
->>>> +       int i;
->>>> +
->>>> +       for (i = 0; i < chip->num_slots; i++) {
->>>> +               struct sdhci_pci_slot *slot = chip->slots[i];
->>>> +
->>>> +               if (slot)
->>>> +                       pm_flags |= slot->host->mmc->pm_flags;
->>>> +       }
->>>> +
->>>> +       return device_init_wakeup(&chip->pdev->dev,
->>>> +                                 (pm_flags & MMC_PM_KEEP_POWER) &&
->>>> +                                 (pm_flags & MMC_PM_WAKE_SDIO_IRQ));
->>>
->>> A couple of comments here.
->>>
->>> Wakeup settings shouldn't be changed during system suspend. That means
->>> we shouldn't call device_init_wakeup() (or device_set_wakeup_enable()
->>> for that matter) here.
->>>
->>> Instead, device_init_wakeup() should be called during ->probe(), while
->>> device_set_wakeup_enable() should normally *not* have to be called at
->>> all by drivers. There are a exceptions for device_set_wakeup_enable(),
->>> however it should not have to be called during system suspend, at
->>> least.
->>>
->>> Of course, I realize that you are not changing the behavior in this
->>> regards in this patch, so I am fine this anyway.
->>>
->>> My point is, that the end result while doing this improvements in this
->>> series, should strive to that device_init_wakeup() and
->>> device_set_wakeup_enable() becomes used correctly. I don't think that
->>> is the case, or is it?
->>
->> Unfortunately we don't find out what the SDIO driver wants to do (i.e
->> pm_flags & MMC_PM_WAKE_SDIO_IRQ) until suspend.
-> 
-> That's true! Of course, we need to be able to act on this, somehow.
-> 
->>
->> I considered enabling wakeups by default but wasn't sure that would not
->> increase power consumption in devices not expecting it.
-> 
-> I understand the problem, believe me. However, I would rather like to
-> try to find a generic solution to these problems, else we will keep
-> abusing existing wakeups APIs.
-> 
-> For your information, I have been working on several issues on how to
-> handle the "wakeup path" correctly, which is linked to this problem.
-> See a few quite small series for this below [1], [2].
-> 
-> I think the general problems can be described liked this:
-> 
-> 1) The dev->power.wakeup_path flag doesn't get set for the device by
-> the PM core, in case device_set_wakeup_enable() is called from a
-> ->suspend() callback. That also means, that the parent device don't
-> get its >power.wakeup_path flag set in __device_suspend() by the PM
-> core, while this may be expected by upper layers (PM domains, middle
-> layers).
-> 
-> 2) device_may_wakeup() doesn't tell us the hole story about the
-> wakeup. Only that is *may* be configured. :-)
-> So in cases when device_may_wakeup() returns true, we still have these
-> three conditions to consider, which we currently can't distinguish
-> between:
-> 
-> *) The wakeup is configured and enabled, so the device should be
-> enabled in the wakeup path.
-> 
-> **) The wakeup is configured and enabled, but as an out-band-wakeup
-> signal (like a GPIO IRQ). This means the device shouldn't be enabled
-> in the wakeup path.
+The Fujitsu SDH30 SDHCI controller may be described as a SCX0002 ACPI
+device on ACPI platforms incorporating the Socionext SynQuacer SoC.
 
-So what about just adding can_oob_wakeup and oob_wakeup i.e.
+Given that mmc_of_parse() has already been made ACPI/DT agnostic,
+making the SDH30 driver ACPI capable is actually rather simple:
+all we need to do is make the call to sdhci_get_of_property() [which
+does not set any properties we care about] and the clock handling
+dependent on whether we are dealing with a DT device, and exposing
+the ACPI id via the platform_driver struct and the module metadata.
 
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
+v2: make OF optional now that ACPI is supported
+    drop dev_of_node() check when disabling the clocks - those routines
+    tolerate NULL pointers so there's no need
 
-diff --git a/drivers/base/power/sysfs.c b/drivers/base/power/sysfs.c
-index 0f651efc58a1..162a511286b7 100644
---- a/drivers/base/power/sysfs.c
-+++ b/drivers/base/power/sysfs.c
-@@ -323,23 +323,32 @@ static ssize_t pm_qos_no_power_off_store(struct device *dev,
- static ssize_t wakeup_show(struct device *dev, struct device_attribute *attr,
- 			   char *buf)
- {
--	return sprintf(buf, "%s\n", device_can_wakeup(dev)
--		? (device_may_wakeup(dev) ? _enabled : _disabled)
--		: "");
-+	return sprintf(buf, "%s\n", device_may_wakeup(dev) ||
-+				    device_may_oob_wakeup(dev) ? _enabled :
-+				    device_can_wakeup(dev) ||
-+				    device_can_oob_wakeup(dev) ? _disabled :
-+				    "");
- }
+ drivers/mmc/host/Kconfig         |  2 +-
+ drivers/mmc/host/sdhci_f_sdh30.c | 52 +++++++++++++-------
+ 2 files changed, 35 insertions(+), 19 deletions(-)
+
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 567028c9219a..07ed947ed10b 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -320,7 +320,7 @@ config MMC_SDHCI_BCM_KONA
+ config MMC_SDHCI_F_SDH30
+ 	tristate "SDHCI support for Fujitsu Semiconductor F_SDH30"
+ 	depends on MMC_SDHCI_PLTFM
+-	depends on OF
++	depends on OF || ACPI
+ 	help
+ 	  This selects the Secure Digital Host Controller Interface (SDHCI)
+ 	  Needed by some Fujitsu SoC for MMC / SD / SDIO support.
+diff --git a/drivers/mmc/host/sdhci_f_sdh30.c b/drivers/mmc/host/sdhci_f_sdh30.c
+index 04ca0d33a521..485f7591fae4 100644
+--- a/drivers/mmc/host/sdhci_f_sdh30.c
++++ b/drivers/mmc/host/sdhci_f_sdh30.c
+@@ -10,9 +10,11 @@
+  * the Free Software Foundation, version 2 of the License.
+  */
  
- static ssize_t wakeup_store(struct device *dev, struct device_attribute *attr,
- 			    const char *buf, size_t n)
- {
--	if (!device_can_wakeup(dev))
-+	bool enable = false;
-+
-+	if (!device_can_wakeup(dev) && !device_can_oob_wakeup(dev))
- 		return -EINVAL;
++#include <linux/acpi.h>
+ #include <linux/err.h>
+ #include <linux/delay.h>
+ #include <linux/module.h>
++#include <linux/of.h>
+ #include <linux/property.h>
+ #include <linux/clk.h>
  
- 	if (sysfs_streq(buf, _enabled))
--		device_set_wakeup_enable(dev, 1);
--	else if (sysfs_streq(buf, _disabled))
--		device_set_wakeup_enable(dev, 0);
--	else
-+		enable = true;
-+	else if (!sysfs_streq(buf, _disabled))
- 		return -EINVAL;
-+
-+	if (device_can_wakeup(dev))
-+		device_set_wakeup_enable(dev, enable);
-+
-+	if (device_can_oob_wakeup(dev))
-+		device_set_oob_wakeup_enable(dev, enable);
-+
- 	return n;
- }
+@@ -146,7 +148,6 @@ static int sdhci_f_sdh30_probe(struct platform_device *pdev)
  
-diff --git a/drivers/base/power/wakeup.c b/drivers/base/power/wakeup.c
-index e73a081c6397..13e176edc3d7 100644
---- a/drivers/base/power/wakeup.c
-+++ b/drivers/base/power/wakeup.c
-@@ -392,6 +392,20 @@ int device_wakeup_disable(struct device *dev)
- }
- EXPORT_SYMBOL_GPL(device_wakeup_disable);
+ 	platform_set_drvdata(pdev, host);
  
-+static void wakeup_sysfs_add_remove(struct device *dev, bool capable)
-+{
-+	if (device_is_registered(dev) && !list_empty(&dev->power.entry)) {
-+		if (capable) {
-+			int ret = wakeup_sysfs_add(dev);
-+
-+			if (ret)
-+				dev_info(dev, "Wakeup sysfs attributes not added\n");
-+		} else {
-+			wakeup_sysfs_remove(dev);
-+		}
-+	}
-+}
-+
- /**
-  * device_set_wakeup_capable - Set/reset device wakeup capability flag.
-  * @dev: Device to handle.
-@@ -410,20 +424,35 @@ void device_set_wakeup_capable(struct device *dev, bool capable)
- 		return;
+-	sdhci_get_of_property(pdev);
+ 	host->hw_name = "f_sdh30";
+ 	host->ops = &sdhci_f_sdh30_ops;
+ 	host->irq = irq;
+@@ -158,25 +159,29 @@ static int sdhci_f_sdh30_probe(struct platform_device *pdev)
+ 		goto err;
+ 	}
  
- 	dev->power.can_wakeup = capable;
--	if (device_is_registered(dev) && !list_empty(&dev->power.entry)) {
--		if (capable) {
--			int ret = wakeup_sysfs_add(dev);
--
--			if (ret)
--				dev_info(dev, "Wakeup sysfs attributes not added\n");
--		} else {
--			wakeup_sysfs_remove(dev);
--		}
+-	priv->clk_iface = devm_clk_get(&pdev->dev, "iface");
+-	if (IS_ERR(priv->clk_iface)) {
+-		ret = PTR_ERR(priv->clk_iface);
+-		goto err;
 -	}
-+	wakeup_sysfs_add_remove(dev, capable);
- }
- EXPORT_SYMBOL_GPL(device_set_wakeup_capable);
++	if (dev_of_node(dev)) {
++		sdhci_get_of_property(pdev);
  
- /**
-+ * device_set_oob_wakeup_capable - Set/reset device oob wakeup capability flag.
-+ * @dev: Device to handle.
-+ * @capable: Whether or not @dev is capable of out-of-band wake up of the system
-+ * from sleep.
-+ *
-+ * If @capable is set, set the @dev's power.can_oob_wakeup flag and add its
-+ * wakeup-related attributes to sysfs.  Otherwise, unset the @dev's
-+ * power.can_oob_wakeup flag and remove its wakeup-related attributes from
-+ * sysfs.
-+ *
-+ * This function may sleep and it can't be called from any context where
-+ * sleeping is not allowed.
-+ */
-+void device_set_oob_wakeup_capable(struct device *dev, bool capable)
-+{
-+	if (!!dev->power.can_oob_wakeup == !!capable)
-+		return;
+-	ret = clk_prepare_enable(priv->clk_iface);
+-	if (ret)
+-		goto err;
++		priv->clk_iface = devm_clk_get(&pdev->dev, "iface");
++		if (IS_ERR(priv->clk_iface)) {
++			ret = PTR_ERR(priv->clk_iface);
++			goto err;
++		}
+ 
+-	priv->clk = devm_clk_get(&pdev->dev, "core");
+-	if (IS_ERR(priv->clk)) {
+-		ret = PTR_ERR(priv->clk);
+-		goto err_clk;
+-	}
++		ret = clk_prepare_enable(priv->clk_iface);
++		if (ret)
++			goto err;
+ 
+-	ret = clk_prepare_enable(priv->clk);
+-	if (ret)
+-		goto err_clk;
++		priv->clk = devm_clk_get(&pdev->dev, "core");
++		if (IS_ERR(priv->clk)) {
++			ret = PTR_ERR(priv->clk);
++			goto err_clk;
++		}
 +
-+	dev->power.can_oob_wakeup = capable;
-+	wakeup_sysfs_add_remove(dev, capable);
-+}
-+EXPORT_SYMBOL_GPL(device_set_oob_wakeup_capable);
-+
-+/**
-  * device_init_wakeup - Device wakeup initialization.
-  * @dev: Device to handle.
-  * @enable: Whether or not to enable @dev as a wakeup device.
-diff --git a/include/linux/pm.h b/include/linux/pm.h
-index e723b78d8357..22cfcacc0095 100644
---- a/include/linux/pm.h
-+++ b/include/linux/pm.h
-@@ -585,6 +585,8 @@ struct pm_subsys_data {
- struct dev_pm_info {
- 	pm_message_t		power_state;
- 	unsigned int		can_wakeup:1;
-+	unsigned int		can_oob_wakeup:1;
-+	unsigned int		oob_wakeup:1;
- 	unsigned int		async_suspend:1;
- 	bool			in_dpm_list:1;	/* Owned by the PM core */
- 	bool			is_prepared:1;	/* Owned by the PM core */
-diff --git a/include/linux/pm_wakeup.h b/include/linux/pm_wakeup.h
-index 4238dde0aaf0..64252cb0f97a 100644
---- a/include/linux/pm_wakeup.h
-+++ b/include/linux/pm_wakeup.h
-@@ -83,11 +83,30 @@ static inline bool device_can_wakeup(struct device *dev)
- 	return dev->power.can_wakeup;
++		ret = clk_prepare_enable(priv->clk);
++		if (ret)
++			goto err_clk;
++	}
+ 
+ 	/* init vendor specific regs */
+ 	ctrl = sdhci_readw(host, F_SDH30_AHB_CONFIG);
+@@ -226,16 +231,27 @@ static int sdhci_f_sdh30_remove(struct platform_device *pdev)
+ 	return 0;
  }
  
-+static inline bool device_can_oob_wakeup(struct device *dev)
-+{
-+	return dev->power.can_oob_wakeup;
-+}
++#ifdef CONFIG_OF
+ static const struct of_device_id f_sdh30_dt_ids[] = {
+ 	{ .compatible = "fujitsu,mb86s70-sdhci-3.0" },
+ 	{ /* sentinel */ }
+ };
+ MODULE_DEVICE_TABLE(of, f_sdh30_dt_ids);
++#endif
 +
- static inline bool device_may_wakeup(struct device *dev)
- {
- 	return dev->power.can_wakeup && !!dev->power.wakeup;
- }
++#ifdef CONFIG_ACPI
++static const struct acpi_device_id f_sdh30_acpi_ids[] = {
++	{ "SCX0002" },
++	{ /* sentinel */ }
++};
++MODULE_DEVICE_TABLE(acpi, f_sdh30_acpi_ids);
++#endif
  
-+static inline bool device_may_oob_wakeup(struct device *dev)
-+{
-+	return dev->power.can_oob_wakeup && dev->power.oob_wakeup;
-+}
-+
-+static inline int device_set_oob_wakeup_enable(struct device *dev, bool enable)
-+{
-+	if (!dev->power.can_oob_wakeup)
-+		return -EINVAL;
-+
-+	dev->power.oob_wakeup = enable;
-+	return 0;
-+}
-+
- static inline void device_set_wakeup_path(struct device *dev)
- {
- 	dev->power.wakeup_path = true;
-
-
-> 
-> ***) The wakeup isn't configured, thus disabled, because there are no
-> consumers of the wakeup IRQ registered (as may be the case for SDIO
-> IRQ). This also means the device shouldn't be enabled in the wakeup
-> path.
-> 
-> Potentially, one could consider **) and ***) being treated in the same
-> way, via using an opt-out method, avoiding the wakeup path to be
-> enabled. Currently I have been thinking of adding an "OUT_BAND_WAKEUP"
-> driver PM flag, to deal with this, however there may be other
-> preferred options.
-> 
-> Kind regards
-> Uffe
-> 
-> [1]
-> https://www.spinics.net/lists/linux-renesas-soc/msg21421.html
-> [2]
-> https://www.spinics.net/lists/linux-renesas-soc/msg20122.html
-> (Actually the discussions there concluded that we may need an
-> "OUT_BAND_WAKEUP" flag instead)
-> 
+ static struct platform_driver sdhci_f_sdh30_driver = {
+ 	.driver = {
+ 		.name = "f_sdh30",
+-		.of_match_table = f_sdh30_dt_ids,
++		.of_match_table = of_match_ptr(f_sdh30_dt_ids),
++		.acpi_match_table = ACPI_PTR(f_sdh30_acpi_ids),
+ 		.pm	= &sdhci_pltfm_pmops,
+ 	},
+ 	.probe	= sdhci_f_sdh30_probe,
+-- 
+2.11.0
 
