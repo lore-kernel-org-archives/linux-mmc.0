@@ -1,59 +1,117 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH RESEND 2/9] mmc: sdhci-pci: Use device wakeup capability to determine MMC_PM_WAKE_SDIO_IRQ capability
-Date: Tue,  9 Jan 2018 09:52:19 +0200
-Message-ID: <1515484346-800-3-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH RESEND 4/9] mmc: sdhci: Handle failure of enable_irq_wake()
+Date: Tue,  9 Jan 2018 09:52:21 +0200
+Message-ID: <1515484346-800-5-git-send-email-adrian.hunter@intel.com>
 References: <1515484346-800-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga03.intel.com ([134.134.136.65]:46300 "EHLO mga03.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754742AbeAIHxE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 9 Jan 2018 02:53:04 -0500
+        id S1755071AbeAIHxI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 9 Jan 2018 02:53:08 -0500
 In-Reply-To: <1515484346-800-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>
 Cc: Linux PM <linux-pm@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Haridhar Kalvala <haridhar.kalvala@intel.com>
 
-PCI and ACPI determine if a device is wakeup capable, so use that to
-determine the MMC_PM_WAKE_SDIO_IRQ capability correctly.
+Now that sdhci_enable_irq_wakeups() is a local function, change it to
+return whether the IRQ wakeup was successfully enabled. This is in
+preparation for adding more conditions for whether IRQ wakeup is enabled.
+
+Note it is assumed, for SDHCI devices, that suspend is more important than
+wakeup, so we continue to suspend regardless.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci-pci-core.c | 11 +++++++----
- 1 file changed, 7 insertions(+), 4 deletions(-)
+ drivers/mmc/host/sdhci.c | 24 +++++++++++++++---------
+ drivers/mmc/host/sdhci.h |  1 +
+ 2 files changed, 16 insertions(+), 9 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 1711b1815630..baedb2624e36 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -50,9 +50,9 @@ static int sdhci_pci_init_wakeup(struct sdhci_pci_chip *chip)
- 			pm_flags |= slot->host->mmc->pm_flags;
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 8b2ccf7795ec..a8129d091207 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2821,7 +2821,7 @@ static irqreturn_t sdhci_thread_irq(int irq, void *dev_id)
+  * sdhci_disable_irq_wakeups() since it will be set by
+  * sdhci_enable_card_detection() or sdhci_init().
+  */
+-static void sdhci_enable_irq_wakeups(struct sdhci_host *host)
++static bool sdhci_enable_irq_wakeups(struct sdhci_host *host)
+ {
+ 	u8 val;
+ 	u8 mask = SDHCI_WAKE_ON_INSERT | SDHCI_WAKE_ON_REMOVE
+@@ -2838,6 +2838,10 @@ static void sdhci_enable_irq_wakeups(struct sdhci_host *host)
  	}
- 
--	return device_init_wakeup(&chip->pdev->dev,
--				  (pm_flags & MMC_PM_KEEP_POWER) &&
--				  (pm_flags & MMC_PM_WAKE_SDIO_IRQ));
-+	return device_set_wakeup_enable(&chip->pdev->dev,
-+					(pm_flags & MMC_PM_KEEP_POWER) &&
-+					(pm_flags & MMC_PM_WAKE_SDIO_IRQ));
+ 	sdhci_writeb(host, val, SDHCI_WAKE_UP_CONTROL);
+ 	sdhci_writel(host, irq_val, SDHCI_INT_ENABLE);
++
++	host->irq_wake_enabled = !enable_irq_wake(host->irq);
++
++	return host->irq_wake_enabled;
  }
  
- static int sdhci_pci_suspend_host(struct sdhci_pci_chip *chip)
-@@ -1680,10 +1680,13 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
- 		}
+ static void sdhci_disable_irq_wakeups(struct sdhci_host *host)
+@@ -2849,6 +2853,10 @@ static void sdhci_disable_irq_wakeups(struct sdhci_host *host)
+ 	val = sdhci_readb(host, SDHCI_WAKE_UP_CONTROL);
+ 	val &= ~mask;
+ 	sdhci_writeb(host, val, SDHCI_WAKE_UP_CONTROL);
++
++	disable_irq_wake(host->irq);
++
++	host->irq_wake_enabled = false;
+ }
+ 
+ int sdhci_suspend_host(struct sdhci_host *host)
+@@ -2857,15 +2865,14 @@ int sdhci_suspend_host(struct sdhci_host *host)
+ 
+ 	mmc_retune_timer_stop(host->mmc);
+ 
+-	if (!device_may_wakeup(mmc_dev(host->mmc))) {
++	if (!device_may_wakeup(mmc_dev(host->mmc)) ||
++	    !sdhci_enable_irq_wakeups(host)) {
+ 		host->ier = 0;
+ 		sdhci_writel(host, 0, SDHCI_INT_ENABLE);
+ 		sdhci_writel(host, 0, SDHCI_SIGNAL_ENABLE);
+ 		free_irq(host->irq, host);
+-	} else {
+-		sdhci_enable_irq_wakeups(host);
+-		enable_irq_wake(host->irq);
+ 	}
++
+ 	return 0;
+ }
+ 
+@@ -2893,15 +2900,14 @@ int sdhci_resume_host(struct sdhci_host *host)
+ 		mmiowb();
  	}
  
--	host->mmc->pm_caps = MMC_PM_KEEP_POWER | MMC_PM_WAKE_SDIO_IRQ;
-+	host->mmc->pm_caps = MMC_PM_KEEP_POWER;
- 	host->mmc->slotno = slotno;
- 	host->mmc->caps2 |= MMC_CAP2_NO_PRESCAN_POWERUP;
+-	if (!device_may_wakeup(mmc_dev(host->mmc))) {
++	if (host->irq_wake_enabled) {
++		sdhci_disable_irq_wakeups(host);
++	} else {
+ 		ret = request_threaded_irq(host->irq, sdhci_irq,
+ 					   sdhci_thread_irq, IRQF_SHARED,
+ 					   mmc_hostname(host->mmc), host);
+ 		if (ret)
+ 			return ret;
+-	} else {
+-		sdhci_disable_irq_wakeups(host);
+-		disable_irq_wake(host->irq);
+ 	}
  
-+	if (device_can_wakeup(&pdev->dev))
-+		host->mmc->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
-+
- 	if (slot->cd_idx >= 0) {
- 		ret = mmc_gpiod_request_cd(host->mmc, NULL, slot->cd_idx,
- 					   slot->cd_override_level, 0, NULL);
+ 	sdhci_enable_card_detection(host);
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 7393b3a54772..afab26fd70e6 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -484,6 +484,7 @@ struct sdhci_host {
+ 	bool bus_on;		/* Bus power prevents runtime suspend */
+ 	bool preset_enabled;	/* Preset is enabled */
+ 	bool pending_reset;	/* Cmd/data reset is pending */
++	bool irq_wake_enabled;	/* IRQ wakeup is enabled */
+ 
+ 	struct mmc_request *mrqs_done[SDHCI_MAX_MRQS];	/* Requests done */
+ 	struct mmc_command *cmd;	/* Current command */
 -- 
 1.9.1
 
