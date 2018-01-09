@@ -1,84 +1,158 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 3/3] mmc: sdhci-esdhc-imx: Enable/Disable mmc clock during
- runtime suspend
-Date: Tue, 9 Jan 2018 09:23:50 +0100
-Message-ID: <CAPDyKFrtaPpVogT74PYkxWnFqiWEUECy_UWzTp2Mq5mL_NYh_g@mail.gmail.com>
-References: <1515079859-18401-1-git-send-email-michael@amarulasolutions.com> <1515079859-18401-3-git-send-email-michael@amarulasolutions.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v2] mmc: sdhci_f_sdh30: add ACPI support
+Date: Tue, 9 Jan 2018 11:33:08 +0200
+Message-ID: <a6539780-cc5b-731f-6ea0-f227906486fc@intel.com>
+References: <20180108154419.2821-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f67.google.com ([209.85.214.67]:38923 "EHLO
-        mail-it0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755213AbeAIIXv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Jan 2018 03:23:51 -0500
-Received: by mail-it0-f67.google.com with SMTP id 68so10932951ite.4
-        for <linux-mmc@vger.kernel.org>; Tue, 09 Jan 2018 00:23:51 -0800 (PST)
-In-Reply-To: <1515079859-18401-3-git-send-email-michael@amarulasolutions.com>
+Received: from mga11.intel.com ([192.55.52.93]:3572 "EHLO mga11.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752191AbeAIJdl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 9 Jan 2018 04:33:41 -0500
+In-Reply-To: <20180108154419.2821-1-ard.biesheuvel@linaro.org>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Michael Trimarchi <michael@amarulasolutions.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org
 
-On 4 January 2018 at 16:30, Michael Trimarchi
-<michael@amarulasolutions.com> wrote:
-> mmc clock can be stopped during runtime suspend and restart during runtime
-> resume if the sdio irq is not enabled. Stop sdio clock reduce EMI of
-> the device when the bus is not in use.
->
-> Signed-off-by: Michael Trimarchi <michael@amarulasolutions.com>
+On 08/01/18 17:44, Ard Biesheuvel wrote:
+> The Fujitsu SDH30 SDHCI controller may be described as a SCX0002 ACPI
+> device on ACPI platforms incorporating the Socionext SynQuacer SoC.
+> 
+> Given that mmc_of_parse() has already been made ACPI/DT agnostic,
+> making the SDH30 driver ACPI capable is actually rather simple:
+> all we need to do is make the call to sdhci_get_of_property() [which
+> does not set any properties we care about] and the clock handling
+> dependent on whether we are dealing with a DT device, and exposing
+> the ACPI id via the platform_driver struct and the module metadata.
+> 
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-Thanks, applied for next!
-
-Adrian, please tell me if you are not happy with this.
-
-Kind regards
-Uffe
-
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
-> Changes V2->V3:
->         - move clock re-order on a separated patch
->
-> Changes V1->V2:
->         - rebase to latest linux
->         - address sdio irq wakeup
->         - move the clock enable clk_ahb up to be balance
->           with the runtime suspend function and to make
->           function more clean by the end without two if
->           condition
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 4 ++++
->  1 file changed, 4 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index 6d4e323..53cc1b6 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -193,6 +193,7 @@ struct pltfm_imx_data {
->         struct clk *clk_ipg;
->         struct clk *clk_ahb;
->         struct clk *clk_per;
-> +       unsigned int actual_clock;
->         enum {
->                 NO_CMD_PENDING,      /* no multiblock command pending */
->                 MULTIBLK_IN_PROCESS, /* exact multiblock cmd in process */
-> @@ -1396,6 +1397,8 @@ static int sdhci_esdhc_runtime_suspend(struct device *dev)
->                 mmc_retune_needed(host->mmc);
->
->         if (!sdhci_sdio_irq_enabled(host)) {
-> +               imx_data->actual_clock = host->mmc->actual_clock;
-> +               esdhc_pltfm_set_clock(host, 0);
->                 clk_disable_unprepare(imx_data->clk_per);
->                 clk_disable_unprepare(imx_data->clk_ipg);
->         }
-> @@ -1422,6 +1425,7 @@ static int sdhci_esdhc_runtime_resume(struct device *dev)
->                 err = clk_prepare_enable(imx_data->clk_ipg);
->                 if (err)
->                         goto disable_per_clk;
-> +               esdhc_pltfm_set_clock(host, imx_data->actual_clock);
->         }
->
->         err = sdhci_runtime_resume_host(host);
-> --
-> 2.7.4
->
+> v2: make OF optional now that ACPI is supported
+>     drop dev_of_node() check when disabling the clocks - those routines
+>     tolerate NULL pointers so there's no need
+> 
+>  drivers/mmc/host/Kconfig         |  2 +-
+>  drivers/mmc/host/sdhci_f_sdh30.c | 52 +++++++++++++-------
+>  2 files changed, 35 insertions(+), 19 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 567028c9219a..07ed947ed10b 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -320,7 +320,7 @@ config MMC_SDHCI_BCM_KONA
+>  config MMC_SDHCI_F_SDH30
+>  	tristate "SDHCI support for Fujitsu Semiconductor F_SDH30"
+>  	depends on MMC_SDHCI_PLTFM
+> -	depends on OF
+> +	depends on OF || ACPI
+>  	help
+>  	  This selects the Secure Digital Host Controller Interface (SDHCI)
+>  	  Needed by some Fujitsu SoC for MMC / SD / SDIO support.
+> diff --git a/drivers/mmc/host/sdhci_f_sdh30.c b/drivers/mmc/host/sdhci_f_sdh30.c
+> index 04ca0d33a521..485f7591fae4 100644
+> --- a/drivers/mmc/host/sdhci_f_sdh30.c
+> +++ b/drivers/mmc/host/sdhci_f_sdh30.c
+> @@ -10,9 +10,11 @@
+>   * the Free Software Foundation, version 2 of the License.
+>   */
+>  
+> +#include <linux/acpi.h>
+>  #include <linux/err.h>
+>  #include <linux/delay.h>
+>  #include <linux/module.h>
+> +#include <linux/of.h>
+>  #include <linux/property.h>
+>  #include <linux/clk.h>
+>  
+> @@ -146,7 +148,6 @@ static int sdhci_f_sdh30_probe(struct platform_device *pdev)
+>  
+>  	platform_set_drvdata(pdev, host);
+>  
+> -	sdhci_get_of_property(pdev);
+>  	host->hw_name = "f_sdh30";
+>  	host->ops = &sdhci_f_sdh30_ops;
+>  	host->irq = irq;
+> @@ -158,25 +159,29 @@ static int sdhci_f_sdh30_probe(struct platform_device *pdev)
+>  		goto err;
+>  	}
+>  
+> -	priv->clk_iface = devm_clk_get(&pdev->dev, "iface");
+> -	if (IS_ERR(priv->clk_iface)) {
+> -		ret = PTR_ERR(priv->clk_iface);
+> -		goto err;
+> -	}
+> +	if (dev_of_node(dev)) {
+> +		sdhci_get_of_property(pdev);
+>  
+> -	ret = clk_prepare_enable(priv->clk_iface);
+> -	if (ret)
+> -		goto err;
+> +		priv->clk_iface = devm_clk_get(&pdev->dev, "iface");
+> +		if (IS_ERR(priv->clk_iface)) {
+> +			ret = PTR_ERR(priv->clk_iface);
+> +			goto err;
+> +		}
+>  
+> -	priv->clk = devm_clk_get(&pdev->dev, "core");
+> -	if (IS_ERR(priv->clk)) {
+> -		ret = PTR_ERR(priv->clk);
+> -		goto err_clk;
+> -	}
+> +		ret = clk_prepare_enable(priv->clk_iface);
+> +		if (ret)
+> +			goto err;
+>  
+> -	ret = clk_prepare_enable(priv->clk);
+> -	if (ret)
+> -		goto err_clk;
+> +		priv->clk = devm_clk_get(&pdev->dev, "core");
+> +		if (IS_ERR(priv->clk)) {
+> +			ret = PTR_ERR(priv->clk);
+> +			goto err_clk;
+> +		}
+> +
+> +		ret = clk_prepare_enable(priv->clk);
+> +		if (ret)
+> +			goto err_clk;
+> +	}
+>  
+>  	/* init vendor specific regs */
+>  	ctrl = sdhci_readw(host, F_SDH30_AHB_CONFIG);
+> @@ -226,16 +231,27 @@ static int sdhci_f_sdh30_remove(struct platform_device *pdev)
+>  	return 0;
+>  }
+>  
+> +#ifdef CONFIG_OF
+>  static const struct of_device_id f_sdh30_dt_ids[] = {
+>  	{ .compatible = "fujitsu,mb86s70-sdhci-3.0" },
+>  	{ /* sentinel */ }
+>  };
+>  MODULE_DEVICE_TABLE(of, f_sdh30_dt_ids);
+> +#endif
+> +
+> +#ifdef CONFIG_ACPI
+> +static const struct acpi_device_id f_sdh30_acpi_ids[] = {
+> +	{ "SCX0002" },
+> +	{ /* sentinel */ }
+> +};
+> +MODULE_DEVICE_TABLE(acpi, f_sdh30_acpi_ids);
+> +#endif
+>  
+>  static struct platform_driver sdhci_f_sdh30_driver = {
+>  	.driver = {
+>  		.name = "f_sdh30",
+> -		.of_match_table = f_sdh30_dt_ids,
+> +		.of_match_table = of_match_ptr(f_sdh30_dt_ids),
+> +		.acpi_match_table = ACPI_PTR(f_sdh30_acpi_ids),
+>  		.pm	= &sdhci_pltfm_pmops,
+>  	},
+>  	.probe	= sdhci_f_sdh30_probe,
+> 
+
