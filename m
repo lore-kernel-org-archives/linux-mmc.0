@@ -1,108 +1,82 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH RESEND 9/9] mmc: sdhci-pci: Respect PM flags when enabling card detect GPIO IRQ wakeup
-Date: Tue,  9 Jan 2018 09:52:26 +0200
-Message-ID: <1515484346-800-10-git-send-email-adrian.hunter@intel.com>
-References: <1515484346-800-1-git-send-email-adrian.hunter@intel.com>
-Return-path: <linux-pm-owner@vger.kernel.org>
-In-Reply-To: <1515484346-800-1-git-send-email-adrian.hunter@intel.com>
-Sender: linux-pm-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>
-Cc: Linux PM <linux-pm@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Haridhar Kalvala <haridhar.kalvala@intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v3] mmc: sdhci: Implement an SDHCI-specific bounce buffer
+Date: Tue, 9 Jan 2018 09:07:28 +0100
+Message-ID: <CAPDyKFo+r39NAW1qGaXxq3_9kr9dVU8DBEuhQBtg-n4r4JFzAA@mail.gmail.com>
+References: <20180105162936.18612-1-linus.walleij@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-io0-f180.google.com ([209.85.223.180]:43187 "EHLO
+        mail-io0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1757637AbeAIIH3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Jan 2018 03:07:29 -0500
+Received: by mail-io0-f180.google.com with SMTP id w188so17592969iod.10
+        for <linux-mmc@vger.kernel.org>; Tue, 09 Jan 2018 00:07:29 -0800 (PST)
+In-Reply-To: <20180105162936.18612-1-linus.walleij@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Benjamin Beckmeyer <beckmeyer.b@rittal.de>, Adrian Hunter <adrian.hunter@intel.com>, Pierre Ossman <pierre@ossman.eu>, =?UTF-8?Q?Beno=C3=AEt_Th=C3=A9baudeau?= <benoit@wsystem.com>, Fabio Estevam <fabio.estevam@nxp.com>, "# 4.0+" <stable@vger.kernel.org>
 
-Commit 03dbaa04a2e5 ("mmc: slot-gpio: Add support to enable irq wake on
-cd_irq") enabled wakeup irrespective of the host controller's PM flags.
-However, users also want to control it from sysfs power/wakeup attribute.
-That means the driver needs to check the PM flags before enabling it in the
-suspend callback. Add support for that in sdhci-pci, which is the only
-driver presently using the MMC_CAP_CD_WAKE flag, and remove the enabling in
-mmc_gpiod_request_cd_irq().
+[...]
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/core/slot-gpio.c      |  2 --
- drivers/mmc/host/sdhci-pci-core.c | 18 ++++++++++++++----
- drivers/mmc/host/sdhci.c          |  4 ++++
- 3 files changed, 18 insertions(+), 6 deletions(-)
+> @@ -3713,6 +3751,43 @@ int sdhci_setup_host(struct sdhci_host *host)
+>          */
+>         mmc->max_blk_count = (host->quirks & SDHCI_QUIRK_NO_MULTIBLOCK) ? 1 : 65535;
+>
+> +       if (mmc->max_segs == 1) {
+> +               unsigned int max_blocks;
+> +               unsigned int max_seg_size;
+> +
+> +               max_seg_size = mmc->max_req_size;
+> +               max_blocks = max_seg_size / 512;
+> +               dev_info(mmc->parent, "host only supports SDMA, activate bounce buffer\n");
+> +
+> +               /*
+> +                * When we just support one segment, we can get significant speedups
+> +                * by the help of a bounce buffer to group scattered reads/writes
+> +                * together.
+> +                *
+> +                * TODO: is this too big? Stealing too much memory? The old bounce
+> +                * buffer is max 64K. This should be the 512K that SDMA can handle
+> +                * if I read the code above right. Anyways let's try this.
+> +                * FIXME: use devm_*
+> +                */
+> +               host->bounce_buffer = dma_alloc_coherent(mmc->parent, max_seg_size,
+> +                                                        &host->bounce_addr, GFP_KERNEL);
 
-diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
-index 3a30535c2f31..74dd534905f7 100644
---- a/drivers/mmc/core/slot-gpio.c
-+++ b/drivers/mmc/core/slot-gpio.c
-@@ -149,8 +149,6 @@ void mmc_gpiod_request_cd_irq(struct mmc_host *host)
- 
- 	if (irq < 0)
- 		host->caps |= MMC_CAP_NEEDS_POLL;
--	else if ((host->caps & MMC_CAP_CD_WAKE) && !enable_irq_wake(irq))
--		host->slot.cd_wake_enabled = true;
- }
- EXPORT_SYMBOL(mmc_gpiod_request_cd_irq);
- 
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index baedb2624e36..fa233fc6c854 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -41,18 +41,25 @@
- static int sdhci_pci_init_wakeup(struct sdhci_pci_chip *chip)
- {
- 	mmc_pm_flag_t pm_flags = 0;
-+	bool cap_cd_wake = false;
- 	int i;
- 
- 	for (i = 0; i < chip->num_slots; i++) {
- 		struct sdhci_pci_slot *slot = chip->slots[i];
- 
--		if (slot)
-+		if (slot) {
- 			pm_flags |= slot->host->mmc->pm_flags;
-+			if (slot->host->mmc->caps & MMC_CAP_CD_WAKE)
-+				cap_cd_wake = true;
-+		}
- 	}
- 
--	return device_set_wakeup_enable(&chip->pdev->dev,
--					(pm_flags & MMC_PM_KEEP_POWER) &&
--					(pm_flags & MMC_PM_WAKE_SDIO_IRQ));
-+	if ((pm_flags & MMC_PM_KEEP_POWER) && (pm_flags & MMC_PM_WAKE_SDIO_IRQ))
-+		return device_wakeup_enable(&chip->pdev->dev);
-+	else if (!cap_cd_wake)
-+		return device_wakeup_disable(&chip->pdev->dev);
-+
-+	return 0;
- }
- 
- static int sdhci_pci_suspend_host(struct sdhci_pci_chip *chip)
-@@ -1687,6 +1694,9 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
- 	if (device_can_wakeup(&pdev->dev))
- 		host->mmc->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
- 
-+	if (host->mmc->caps & MMC_CAP_CD_WAKE)
-+		device_init_wakeup(&pdev->dev, true);
-+
- 	if (slot->cd_idx >= 0) {
- 		ret = mmc_gpiod_request_cd(host->mmc, NULL, slot->cd_idx,
- 					   slot->cd_override_level, 0, NULL);
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index c82fd16dd14e..883b55077231 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2891,6 +2891,8 @@ int sdhci_suspend_host(struct sdhci_host *host)
- 		free_irq(host->irq, host);
- 	}
- 
-+	mmc_gpio_set_cd_wake(host->mmc, true);
-+
- 	return 0;
- }
- 
-@@ -2918,6 +2920,8 @@ int sdhci_resume_host(struct sdhci_host *host)
- 		mmiowb();
- 	}
- 
-+	mmc_gpio_set_cd_wake(host->mmc, false);
-+
- 	if (host->irq_wake_enabled) {
- 		sdhci_disable_irq_wakeups(host);
- 	} else {
--- 
-1.9.1
+Why do you need dma_alloc_coherent() - allocated bounce buffer? Isn't
+a regular kmalloc-ed buffer fine as a bounce buffer?
+
+I am worried, also according to your above comment, that it's not
+always going to work to request a large buffer like this, especially
+with dma_alloc_coherent().
+
+> +               if (!host->bounce_buffer) {
+> +                       dev_err(mmc->parent,
+> +                               "failed to allocate %u bytes for bounce buffer\n",
+> +                               max_seg_size);
+> +                       return -ENOMEM;
+
+Why not fall back to use the max_segs = 1 here. It may be slow, as
+reported, but it works.
+
+> +               }
+> +               host->bounce_buffer_size = max_seg_size;
+> +
+> +               /* Lie about this since we're bouncing */
+> +               mmc->max_segs = max_blocks;
+> +               mmc->max_seg_size = max_seg_size;
+> +
+> +               dev_info(mmc->parent,
+> +                        "bounce buffer: bounce up to %u segments into one, max segment size %u bytes\n",
+> +                        max_blocks, max_seg_size);
+> +       }
+> +
+>         return 0;
+>
+
+[...]
+
+Kind regards
+Uffe
