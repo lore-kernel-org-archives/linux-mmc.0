@@ -1,92 +1,117 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH v3] mmc: sdhci: Implement an SDHCI-specific bounce buffer
-Date: Tue, 9 Jan 2018 11:26:45 +0100
-Message-ID: <CACRpkdYW36Kdi1DuF+TbNsQNwT1RWOmVMfs0jJ-Ssf+LCembTg@mail.gmail.com>
-References: <20180105162936.18612-1-linus.walleij@linaro.org> <CAPDyKFo+r39NAW1qGaXxq3_9kr9dVU8DBEuhQBtg-n4r4JFzAA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFo+r39NAW1qGaXxq3_9kr9dVU8DBEuhQBtg-n4r4JFzAA@mail.gmail.com>
-Sender: stable-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Benjamin Beckmeyer <beckmeyer.b@rittal.de>, Adrian Hunter <adrian.hunter@intel.com>, Pierre Ossman <pierre@ossman.eu>, =?UTF-8?Q?Beno=C3=AEt_Th=C3=A9baudeau?= <benoit@wsystem.com>, Fabio Estevam <fabio.estevam@nxp.com>, "# 4.0+" <stable@vger.kernel.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH] PM / wakeup: Enable option to specify wakeup as a non in-band wakeup
+Date: Tue,  9 Jan 2018 11:54:11 +0100
+Message-ID: <1515495251-22906-1-git-send-email-ulf.hansson@linaro.org>
+Return-path: <linux-pm-owner@vger.kernel.org>
+Sender: linux-pm-owner@vger.kernel.org
+To: "Rafael J . Wysocki" <rjw@rjwysocki.net>, linux-pm@vger.kernel.org
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Kevin Hilman <khilman@kernel.org>, Viresh Kumar <viresh.kumar@linaro.org>, Geert Uytterhoeven <geert+renesas@glider.be>, Simon Horman <horms@verge.net.au>, Niklas Soderlund <niklas.soderlund+renesas@ragnatech.se>, Vincent Guittot <vincent.guittot@linaro.org>, linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Jan 9, 2018 at 9:07 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> [...]
->
->> @@ -3713,6 +3751,43 @@ int sdhci_setup_host(struct sdhci_host *host)
->>          */
->>         mmc->max_blk_count = (host->quirks & SDHCI_QUIRK_NO_MULTIBLOCK) ? 1 : 65535;
->>
->> +       if (mmc->max_segs == 1) {
->> +               unsigned int max_blocks;
->> +               unsigned int max_seg_size;
->> +
->> +               max_seg_size = mmc->max_req_size;
->> +               max_blocks = max_seg_size / 512;
->> +               dev_info(mmc->parent, "host only supports SDMA, activate bounce buffer\n");
->> +
->> +               /*
->> +                * When we just support one segment, we can get significant speedups
->> +                * by the help of a bounce buffer to group scattered reads/writes
->> +                * together.
->> +                *
->> +                * TODO: is this too big? Stealing too much memory? The old bounce
->> +                * buffer is max 64K. This should be the 512K that SDMA can handle
->> +                * if I read the code above right. Anyways let's try this.
->> +                * FIXME: use devm_*
->> +                */
->> +               host->bounce_buffer = dma_alloc_coherent(mmc->parent, max_seg_size,
->> +                                                        &host->bounce_addr, GFP_KERNEL);
->
-> Why do you need dma_alloc_coherent() - allocated bounce buffer? Isn't
-> a regular kmalloc-ed buffer fine as a bounce buffer?
+In some cases, a driver may not require its device to be powered on to be
+able to deliver wakeup signals during system suspend.
 
-No, because kmalloc() only guarantee physically coherent memory
-up to 64KB.
+Likely the most common scenario when this is the case, is a driver routing
+the wakeup signal through a GPIO IRQ, instead of using the regular in-band
+IRQ logic, via the device itself.
 
-The old bounce buffer code capped the size of the bounce buffer to
-64KB, I think for this reason (another piece of magic that noone dared
-to touch).
+Obviously the driver may put its device into a low power state during
+system suspend in cases like this. For example it may gate clocks, put
+pinctrls into sleep state, etc.
 
-If we kmalloc() something > 64KB we might get fragmented memory
-and things explode, which I think is what happened on v1/v2 of this
-patch.
+However, for middle-layers and PM domains (like genpd), which checks the
+return value from device_may_wakeup() and/or the ->dev.power.wakeup_path
+status flag, there is information missing about scenarios like these.
 
-Since the sole purpose of this bounce buffer is to keep things
-physically coherent we need to use dma_alloc_coherent() which
-will be backed by the CMA allocator if available.
+In the case of genpd, when it finds the ->dev.power.wakeup_path status flag
+being set for a device during system suspend, it leaves the device in
+powered on state including its PM domain. In other words, wasting power.
 
-> I am worried, also according to your above comment, that it's not
-> always going to work to request a large buffer like this, especially
-> with dma_alloc_coherent().
+To address this issue, add a new ->dev.power.no_inband_wakeup flag for the
+device, which drivers may set/clear to inform the PM core, in case
+device_may_wakeup() returns true, whether that shall make the
+->dev.power.wakeup_path status flag to be set or not for the device.
 
-The driver uses dma_alloc_coherent() in other places, and the size
-we ask for is 512K. (Only on affected devices with just SDMA.)
+The PM core checks the ->dev.power.no_inband_wakeup flag in the
+__device_suspend() phase, after invoking the ->suspend() callback for the
+device. At that point, the driver is responsible that it has set a correct
+value to the flag.
 
-If I cap it down to 64KB it will be as likely to succeed as a regular
-kmalloc(), it can just take any 64KB slab. I would still use
-dma_alloc_coherent() to make the code simple (tests show no
-difference to explicit ownership swap between CPU and device).
+Let's also introduce a helper function, device_set_no_inband_wakeup(),
+which drivers shall use to set/clear the ->dev.power.no_inband_wakeup flag.
 
-But the larger the buffer, the larger the speed improvement, I think
-this is why the driver performs even better than before in some
-cases.
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
 
-Is using 512 insead of 64KB a problem on any target system?
-Hardly on x86 laptops, but what about i.MX25 and i.MX35?
+To get some additional background, one may look at earlier discussions from
+various threads. The most recent is in and RFD [1] from Rafael and from an mmc
+series by Adrian [2].
 
->> +               if (!host->bounce_buffer) {
->> +                       dev_err(mmc->parent,
->> +                               "failed to allocate %u bytes for bounce buffer\n",
->> +                               max_seg_size);
->> +                       return -ENOMEM;
->
-> Why not fall back to use the max_segs = 1 here. It may be slow, as
-> reported, but it works.
+Kind regards
+Uffe
 
-OK good point. I'll fix this in v4.
+[1]
+https://marc.info/?l=linux-pm&m=151541229425689&w=2
 
-Yours,
-Linus Walleij
+[2]
+https://www.spinics.net/lists/linux-mmc/msg47549.html
+
+---
+ drivers/base/power/main.c | 2 +-
+ include/linux/pm.h        | 1 +
+ include/linux/pm_wakeup.h | 8 ++++++++
+ 3 files changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/base/power/main.c b/drivers/base/power/main.c
+index 02a497e..376c275 100644
+--- a/drivers/base/power/main.c
++++ b/drivers/base/power/main.c
+@@ -1794,7 +1794,7 @@ static int __device_suspend(struct device *dev, pm_message_t state, bool async)
+  End:
+ 	if (!error) {
+ 		dev->power.is_suspended = true;
+-		if (device_may_wakeup(dev))
++		if (device_may_wakeup(dev) && !dev->power.no_inband_wakeup)
+ 			dev->power.wakeup_path = true;
+ 
+ 		dpm_propagate_wakeup_to_parent(dev);
+diff --git a/include/linux/pm.h b/include/linux/pm.h
+index e723b78..d131834 100644
+--- a/include/linux/pm.h
++++ b/include/linux/pm.h
+@@ -600,6 +600,7 @@ struct dev_pm_info {
+ 	struct completion	completion;
+ 	struct wakeup_source	*wakeup;
+ 	bool			wakeup_path:1;
++	bool			no_inband_wakeup:1;
+ 	bool			syscore:1;
+ 	bool			no_pm_callbacks:1;	/* Owned by the PM core */
+ 	unsigned int		must_resume:1;	/* Owned by the PM core */
+diff --git a/include/linux/pm_wakeup.h b/include/linux/pm_wakeup.h
+index 4238dde..5d40887 100644
+--- a/include/linux/pm_wakeup.h
++++ b/include/linux/pm_wakeup.h
+@@ -93,6 +93,11 @@ static inline void device_set_wakeup_path(struct device *dev)
+ 	dev->power.wakeup_path = true;
+ }
+ 
++static inline void device_set_no_inband_wakeup(struct device *dev, bool wakeup)
++{
++	dev->power.no_inband_wakeup = wakeup;
++}
++
+ /* drivers/base/power/wakeup.c */
+ extern void wakeup_source_prepare(struct wakeup_source *ws, const char *name);
+ extern struct wakeup_source *wakeup_source_create(const char *name);
+@@ -181,6 +186,9 @@ static inline bool device_may_wakeup(struct device *dev)
+ 
+ static inline void device_set_wakeup_path(struct device *dev) {}
+ 
++static inline void device_set_no_inband_wakeup(struct device *dev,
++					       bool wakeup) {}
++
+ static inline void __pm_stay_awake(struct wakeup_source *ws) {}
+ 
+ static inline void pm_stay_awake(struct device *dev) {}
+-- 
+2.7.4
