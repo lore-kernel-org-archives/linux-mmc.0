@@ -1,55 +1,55 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH RESEND 0/9] mmc: sdhci-pci: Respect PM flags when enabling card detect GPIO IRQ wakeup
-Date: Tue,  9 Jan 2018 09:52:17 +0200
-Message-ID: <1515484346-800-1-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH RESEND 3/9] mmc: sdhci: Stop exporting sdhci_enable_irq_wakeups()
+Date: Tue,  9 Jan 2018 09:52:20 +0200
+Message-ID: <1515484346-800-4-git-send-email-adrian.hunter@intel.com>
+References: <1515484346-800-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-pm-owner@vger.kernel.org>
+In-Reply-To: <1515484346-800-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-pm-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>
 Cc: Linux PM <linux-pm@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Haridhar Kalvala <haridhar.kalvala@intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi
+Now that it is not being used by any drivers, stop exporting it.
 
-Commit 03dbaa04a2e5 ("mmc: slot-gpio: Add support to enable irq wake on
-cd_irq") enabled wakeup irrespective of the host controller's PM flags.
-However, users also want to control it from sysfs power/wakeup attribute.
-That means the driver needs to check the PM flags before enabling it in the
-suspend callback.  Patch 9 adds support for that in sdhci-pci, which is the
-only driver presently using the MMC_CAP_CD_WAKE flag.  Patches 1 - 7 tidy
-up aspects of sdhci and sdhci-pci wakeup handling, and patch 8 adds a
-helper function to make it easy for drivers.
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/sdhci.c | 3 +--
+ drivers/mmc/host/sdhci.h | 1 -
+ 2 files changed, 1 insertion(+), 3 deletions(-)
 
-There are 2 contentious aspects to this patch set:
-
-1) An existing problem with the SDIO API which does not let the host
-controller driver know that the SDIO function driver has requested SDIO
-card interrupt wakeup until the suspend callback - which results in the
-host controller driver having to enable or disable wakeup in the suspend
-callback.  Fixing the SDIO API is a separate issue IMHO.
-
-2) In order to use the sysfs power/wakeup attribute, the driver must set the
-device as wake capable even when it is really a GPIO that wakes the system.
-
-
-Adrian Hunter (9):
-      mmc: sdhci-pci: Stop calling sdhci_enable_irq_wakeups()
-      mmc: sdhci-pci: Use device wakeup capability to determine MMC_PM_WAKE_SDIO_IRQ capability
-      mmc: sdhci: Stop exporting sdhci_enable_irq_wakeups()
-      mmc: sdhci: Handle failure of enable_irq_wake()
-      mmc: sdhci: Rework sdhci_enable_irq_wakeups()
-      mmc: sdhci: Do not unnecessarily enable wakeup for card detect interrupt
-      mmc: sdhci: Do not unnecessarily enable wakeup for SDIO card interrupt
-      mmc: slot-gpio: Add a function to enable/disable card detect IRQ wakeup
-      mmc: sdhci-pci: Respect PM flags when enabling card detect GPIO IRQ wakeup
-
- drivers/mmc/core/core.c           |  3 +-
- drivers/mmc/core/slot-gpio.c      | 25 ++++++++++++--
- drivers/mmc/host/sdhci-pci-core.c | 73 +++++++++++++++++++--------------------
- drivers/mmc/host/sdhci.c          | 67 ++++++++++++++++++++++++-----------
- drivers/mmc/host/sdhci.h          |  2 +-
- include/linux/mmc/slot-gpio.h     |  1 +
- 6 files changed, 108 insertions(+), 63 deletions(-)
-
-
-Regards
-Adrian
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index e9290a3439d5..8b2ccf7795ec 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2821,7 +2821,7 @@ static irqreturn_t sdhci_thread_irq(int irq, void *dev_id)
+  * sdhci_disable_irq_wakeups() since it will be set by
+  * sdhci_enable_card_detection() or sdhci_init().
+  */
+-void sdhci_enable_irq_wakeups(struct sdhci_host *host)
++static void sdhci_enable_irq_wakeups(struct sdhci_host *host)
+ {
+ 	u8 val;
+ 	u8 mask = SDHCI_WAKE_ON_INSERT | SDHCI_WAKE_ON_REMOVE
+@@ -2839,7 +2839,6 @@ void sdhci_enable_irq_wakeups(struct sdhci_host *host)
+ 	sdhci_writeb(host, val, SDHCI_WAKE_UP_CONTROL);
+ 	sdhci_writel(host, irq_val, SDHCI_INT_ENABLE);
+ }
+-EXPORT_SYMBOL_GPL(sdhci_enable_irq_wakeups);
+ 
+ static void sdhci_disable_irq_wakeups(struct sdhci_host *host)
+ {
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 54bc444c317f..7393b3a54772 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -718,7 +718,6 @@ int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+ #ifdef CONFIG_PM
+ int sdhci_suspend_host(struct sdhci_host *host);
+ int sdhci_resume_host(struct sdhci_host *host);
+-void sdhci_enable_irq_wakeups(struct sdhci_host *host);
+ int sdhci_runtime_suspend_host(struct sdhci_host *host);
+ int sdhci_runtime_resume_host(struct sdhci_host *host);
+ #endif
+-- 
+1.9.1
