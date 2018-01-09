@@ -1,54 +1,30 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 2/3] mmc: sdhci: Add support for o2 eMMC HS200 mode and
- hardware tuning
-Date: Tue, 9 Jan 2018 14:36:33 +0200
-Message-ID: <feb4d1f9-1180-ffc7-6d2e-1e062acd129e@intel.com>
-References: <20171228095942.3994-1-ernest.zhang@bayhubtech.com>
+From: Benjamin Beckmeyer <beckmeyer.b@rittal.de>
+Subject: Re: [PATCH v3] mmc: sdhci: Implement an SDHCI-specific bounce buffer
+Date: Tue,  9 Jan 2018 13:43:47 +0100 (CET)
+Message-ID: <OFF01FF0C5.FD711E89-ONC1258210.0044F6F1-C1258210.0045ED0A@rittal.de>
+References: <CACRpkdYW36Kdi1DuF+TbNsQNwT1RWOmVMfs0jJ-Ssf+LCembTg@mail.gmail.com>,
+        <20180105162936.18612-1-linus.walleij@linaro.org> <CAPDyKFo+r39NAW1qGaXxq3_9kr9dVU8DBEuhQBtg-n4r4JFzAA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20171228095942.3994-1-ernest.zhang@bayhubtech.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: "ernest.zhang" <ernest.zhang@bayhubtech.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: yuxiang.wan@bayhubtech.com, xiaoguang.yu@bayhubtech.com, shirley.her@bayhubtech.com
+Content-Type: text/plain;
+        charset=ISO-8859-1
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailgw03.loh-group.com ([195.226.74.51]:43016 "EHLO
+        mailgw03.loh-group.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751255AbeAIMnt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Jan 2018 07:43:49 -0500
+In-Reply-To: <CACRpkdYW36Kdi1DuF+TbNsQNwT1RWOmVMfs0jJ-Ssf+LCembTg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Pierre Ossman <pierre@ossman.eu>, =?ISO-8859-1?Q?Beno=EEt_Th=E9baudeau?= <benoit@wsystem.com>, Fabio Estevam <fabio.estevam@nxp.com>, "# 4.0+" <stable@vger.kernel.org>
 
-On 28/12/17 11:59, ernest.zhang wrote:
-> Add register definition for eMMC HS200 mode. Add bitmask definition
-> for hardware tuning function.
-> 
-> Signed-off-by: ernest.zhang <ernest.zhang@bayhubtech.com>
-> ---
->  drivers/mmc/host/sdhci-pci-o2micro.h | 3 +++
+> Is using 512 insead of 64KB a problem on any target system? 
+> Hardly on x86 laptops, but what about i.MX25 and i.MX35?
 
-drivers/mmc/host/sdhci-pci-o2micro.h doesn't exist anymore.  Please re-base
-on mmc tree next branch.  Also these changes do not need to be a separate
-patch anyway.
+I can tell you that we won't have a problem with this size,
+but this is only my opinion and we have just one device
+with the i.MX25 architecture.
 
-
->  1 file changed, 3 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.h b/drivers/mmc/host/sdhci-pci-o2micro.h
-> index 770f53857211..5a4671d5a511 100644
-> --- a/drivers/mmc/host/sdhci-pci-o2micro.h
-> +++ b/drivers/mmc/host/sdhci-pci-o2micro.h
-> @@ -49,6 +49,7 @@
->  #define O2_SD_MISC_CTRL4	0xFC
->  #define O2_SD_TUNING_CTRL	0x300
->  #define O2_SD_PLL_SETTING	0x304
-> +#define O2_SD_MISC_SETTING	0x308
->  #define O2_SD_CLK_SETTING	0x328
->  #define O2_SD_CAP_REG2		0x330
->  #define O2_SD_CAP_REG0		0x334
-> @@ -62,6 +63,8 @@
->  #define O2_SD_FREG4_ENABLE_CLK_SET	BIT(22)
->  
->  #define O2_SD_VENDOR_SETTING	0x110
-> +#define O2_SD_HW_TUNING_ENABLE	BIT(4)
-> +
->  #define O2_SD_VENDOR_SETTING2	0x1C8
->  
->  extern int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot);
-> 
+Kind regards,
+Benjamin Beckmeyer
