@@ -1,335 +1,95 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 3/3] mmc: sdhci: fix o2 eMMC init bug and add support for
- hardware tuning
-Date: Wed, 10 Jan 2018 09:31:05 +0200
-Message-ID: <f5031fdf-c5ac-c228-1d75-055913ed33ec@intel.com>
-References: <20171228100008.4056-1-ernest.zhang@bayhubtech.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH v3] mmc: sdhci: Implement an SDHCI-specific bounce buffer
+Date: Wed, 10 Jan 2018 11:21:54 +0100
+Message-ID: <CAK8P3a2Bt7YN4dDC8_h2-7cVO895Grd4Q+domjFc3V19rW_3Ew@mail.gmail.com>
+References: <20180105162936.18612-1-linus.walleij@linaro.org>
+ <CAPDyKFo+r39NAW1qGaXxq3_9kr9dVU8DBEuhQBtg-n4r4JFzAA@mail.gmail.com> <CACRpkdYW36Kdi1DuF+TbNsQNwT1RWOmVMfs0jJ-Ssf+LCembTg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20171228100008.4056-1-ernest.zhang@bayhubtech.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: "ernest.zhang" <ernest.zhang@bayhubtech.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: yuxiang.wan@bayhubtech.com, xiaoguang.yu@bayhubtech.com, shirley.her@bayhubtech.com, Craig Bergstrom <craigb@google.com>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <CACRpkdYW36Kdi1DuF+TbNsQNwT1RWOmVMfs0jJ-Ssf+LCembTg@mail.gmail.com>
+Sender: stable-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Benjamin Beckmeyer <beckmeyer.b@rittal.de>, Adrian Hunter <adrian.hunter@intel.com>, Pierre Ossman <pierre@ossman.eu>, =?UTF-8?Q?Beno=C3=AEt_Th=C3=A9baudeau?= <benoit@wsystem.com>, Fabio Estevam <fabio.estevam@nxp.com>, "# 4.0+" <stable@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 28/12/17 12:00, ernest.zhang wrote:
-> In some case of eMMC used as boot device, the eMMC signaling voltage is
-> fixed to 1.8v, bios can set o2 sd host controller register 0x308 bit4 to
-> let host controller skip try 3.3.v signaling voltage in eMMC initialize
-> process.
-> O2 sd host controller has a function named hardware tuning. In software
-> tuning mode CPU should send multiple command to host controller but in
-> hardware tuning mode, CPU need send only one tuning command to sd host
-> controller. It can improve the speed linux boot from eMMC.
+On Tue, Jan 9, 2018 at 11:26 AM, Linus Walleij <linus.walleij@linaro.org> wrote:
+> On Tue, Jan 9, 2018 at 9:07 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> [...]
+>>
+>>> @@ -3713,6 +3751,43 @@ int sdhci_setup_host(struct sdhci_host *host)
+>>>          */
+>>>         mmc->max_blk_count = (host->quirks & SDHCI_QUIRK_NO_MULTIBLOCK) ? 1 : 65535;
+>>>
+>>> +       if (mmc->max_segs == 1) {
+>>> +               unsigned int max_blocks;
+>>> +               unsigned int max_seg_size;
+>>> +
+>>> +               max_seg_size = mmc->max_req_size;
+>>> +               max_blocks = max_seg_size / 512;
+>>> +               dev_info(mmc->parent, "host only supports SDMA, activate bounce buffer\n");
+>>> +
+>>> +               /*
+>>> +                * When we just support one segment, we can get significant speedups
+>>> +                * by the help of a bounce buffer to group scattered reads/writes
+>>> +                * together.
+>>> +                *
+>>> +                * TODO: is this too big? Stealing too much memory? The old bounce
+>>> +                * buffer is max 64K. This should be the 512K that SDMA can handle
+>>> +                * if I read the code above right. Anyways let's try this.
+>>> +                * FIXME: use devm_*
+>>> +                */
+>>> +               host->bounce_buffer = dma_alloc_coherent(mmc->parent, max_seg_size,
+>>> +                                                        &host->bounce_addr, GFP_KERNEL);
+>>
+>> Why do you need dma_alloc_coherent() - allocated bounce buffer? Isn't
+>> a regular kmalloc-ed buffer fine as a bounce buffer?
+>
+> No, because kmalloc() only guarantee physically coherent memory
+> up to 64KB.
+>
+> The old bounce buffer code capped the size of the bounce buffer to
+> 64KB, I think for this reason (another piece of magic that noone dared
+> to touch).
+>
+> If we kmalloc() something > 64KB we might get fragmented memory
+> and things explode, which I think is what happened on v1/v2 of this
+> patch.
+>
+> Since the sole purpose of this bounce buffer is to keep things
+> physically coherent we need to use dma_alloc_coherent() which
+> will be backed by the CMA allocator if available.
+>
+>> I am worried, also according to your above comment, that it's not
+>> always going to work to request a large buffer like this, especially
+>> with dma_alloc_coherent().
+>
+> The driver uses dma_alloc_coherent() in other places, and the size
+> we ask for is 512K. (Only on affected devices with just SDMA.)
 
-Please put the changes from patch 2 into this patch, re-base, and put V3 on
-the next submission.  Note the mmc tree is:
+After thinking about it some more, I wonder if 512K is a bit big
+for a coherent allocation. I think some systems are fairly limited
+in the amount of DMA-coherent memory they have, so if we
+have e.g. 2MB of coherent memory (no CMA support) and multiple
+MMC controllers, we run out of space for other drivers very quickly.
 
-	git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git
+> If I cap it down to 64KB it will be as likely to succeed as a regular
+> kmalloc(), it can just take any 64KB slab. I would still use
+> dma_alloc_coherent() to make the code simple (tests show no
+> difference to explicit ownership swap between CPU and device).
 
-Re-base on the 'next' branch.
+Did you measure the CPU utilization or just the block device
+throughput? It should not make much difference to the throughput
+as the limitation comes from the SD card or eMMC itself, but the
+CPU usage could be quite different on some systems, in particular
+on SMP machines without cache-coherent DMA.
 
-Also Craig Bergstrom reported problems getting it to work, so please respond
-to that, otherwise I am left wondering if this rather strange tuning
-procedure actually works:
+> But the larger the buffer, the larger the speed improvement, I think
+> this is why the driver performs even better than before in some
+> cases.
 
-	https://marc.info/?l=linux-mmc&m=151387671202146&w=2
+My guess is that the benefit of going beyond 64K is fairly small
+though, this seems to be a typical size that the devices optimize
+for.
 
-> 
-> Signed-off-by: ernest.zhang <ernest.zhang@bayhubtech.com>
-> ---
->  drivers/mmc/host/sdhci-pci-o2micro.c | 218 ++++++++++++++++++++++++++++++++++-
->  1 file changed, 217 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
-> index 14273ca00641..fd244d88b07e 100644
-> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
-> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
-> @@ -16,11 +16,211 @@
->   */
->  
->  #include <linux/pci.h>
-> -
-> +#include <linux/platform_device.h>
-> +#include <linux/regulator/fixed.h>
-> +#include <linux/regulator/machine.h>
-> +#include <linux/mmc/host.h>
-> +#include <linux/mmc/mmc.h>
-> +#include <linux/delay.h>
->  #include "sdhci.h"
->  #include "sdhci-pci.h"
->  #include "sdhci-pci-o2micro.h"
->  
-> +static void sdhci_o2_start_tuning(struct sdhci_host *host)
-> +{
-> +	u16 ctrl;
-> +
-> +	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> +	ctrl |= SDHCI_CTRL_EXEC_TUNING;
-> +	if (host->quirks2 & SDHCI_QUIRK2_TUNING_WORK_AROUND)
-> +		ctrl |= SDHCI_CTRL_TUNED_CLK;
-
-Why program for a quirk that you don't use?
-
-> +	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
-> +
-> +	/*
-> +	 * As per the Host Controller spec v3.00, tuning command
-> +	 * generates Buffer Read Ready interrupt, so enable that.
-> +	 *
-> +	 * Note: The spec clearly says that when tuning sequence
-> +	 * is being performed, the controller does not generate
-> +	 * interrupts other than Buffer Read Ready interrupt. But
-> +	 * to make sure we don't hit a controller bug, we _only_
-> +	 * enable Buffer Read Ready interrupt here.
-> +	 */
-> +	sdhci_writel(host, SDHCI_INT_DATA_AVAIL, SDHCI_INT_ENABLE);
-> +	sdhci_writel(host, SDHCI_INT_DATA_AVAIL, SDHCI_SIGNAL_ENABLE);
-> +}
-> +
-> +static void sdhci_o2_end_tuning(struct sdhci_host *host)
-> +{
-> +	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
-> +	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
-> +}
-> +
-> +static inline bool sdhci_data_line_cmd(struct mmc_command *cmd)
-> +{
-> +	return cmd->data || cmd->flags & MMC_RSP_BUSY;
-> +}
-> +
-> +static void sdhci_del_timer(struct sdhci_host *host, struct mmc_request *mrq)
-> +{
-> +	if (sdhci_data_line_cmd(mrq->cmd))
-> +		del_timer(&host->data_timer);
-> +	else
-> +		del_timer(&host->timer);
-> +}
-> +
-> +static void sdhci_o2_set_tuning_mode(struct sdhci_host *host, bool hw)
-
-Since you only ever call this with hw = true, maybe drop the 'hw' parameter
-altogether.
-
-> +{
-> +	u16 reg;
-> +
-> +	if (hw) {
-> +		// enable hardware tuning
-
-For consistency, please use old C-style comments /* */ instead of //
-
-> +		reg = sdhci_readw(host, O2_SD_VENDOR_SETTING);
-> +		reg &= (~O2_SD_HW_TUNING_ENABLE);
-> +		sdhci_writew(host, reg, O2_SD_VENDOR_SETTING);
-> +	} else {
-> +		reg = sdhci_readw(host, O2_SD_VENDOR_SETTING);
-> +		reg |= O2_SD_HW_TUNING_ENABLE;
-> +		sdhci_writew(host, reg, O2_SD_VENDOR_SETTING);
-> +	}
-> +}
-> +
-> +static u8 data_buf[64];
-
-It would be better to allocate data_buf.
-
-> +
-> +static void sdhci_o2_send_tuning(struct sdhci_host *host, u32 opcode)
-> +{
-> +	struct mmc_command cmd = { };
-> +	struct mmc_data data = { };
-> +	struct scatterlist sg;
-> +	struct mmc_request mrq = { };
-> +	unsigned long flags;
-> +	u32 b = host->sdma_boundary;
-> +	int size = sizeof(data_buf);
-> +
-> +	cmd.opcode = opcode;
-> +	cmd.flags = MMC_RSP_PRESENT | MMC_RSP_OPCODE | MMC_RSP_CRC;
-> +	cmd.mrq = &mrq;
-> +	mrq.cmd = &cmd;
-> +	mrq.data = &data;
-> +	data.blksz = size;
-> +	data.blocks = 1;
-> +	data.flags = MMC_DATA_READ;
-> +
-> +	data.timeout_ns = 150 * NSEC_PER_MSEC;
-
-It seems inconsistent to set 150ms timeout here but 50ms for waiting for
-Buffer Read Ready.
-
-> +
-> +	data.sg = &sg;
-> +	data.sg_len = 1;
-> +	sg_init_one(&sg, data_buf, size);
-> +
-> +	spin_lock_irqsave(&host->lock, flags);
-> +
-> +	sdhci_writew(host, SDHCI_MAKE_BLKSZ(b, 64), SDHCI_BLOCK_SIZE);
-> +
-> +	/*
-> +	 * The tuning block is sent by the card to the host controller.
-> +	 * So we set the TRNS_READ bit in the Transfer Mode register.
-> +	 * This also takes care of setting DMA Enable and Multi Block
-> +	 * Select in the same register to 0.
-> +	 */
-> +	sdhci_writew(host, SDHCI_TRNS_READ, SDHCI_TRANSFER_MODE);
-
-That won't work because the transfer mode gets overwritten by
-sdhci_send_command().
-
-> +
-> +	sdhci_send_command(host, &cmd);
-> +
-> +	host->cmd = NULL;
-> +
-> +	sdhci_del_timer(host, &mrq);
-
-Simpler would be:
-
-	del_timer(&host->data_timer);
-
-> +
-> +	host->tuning_done = 0;
-> +
-> +	mmiowb();
-> +	spin_unlock_irqrestore(&host->lock, flags);
-> +
-> +	/* Wait for Buffer Read Ready interrupt */
-> +	wait_event_timeout(host->buf_ready_int, (host->tuning_done == 1),
-> +			   msecs_to_jiffies(50));
-> +
-> +}
-> +
-> +static void sdhci_o2_reset_tuning(struct sdhci_host *host)
-> +{
-> +	u16 ctrl;
-> +
-> +	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> +	ctrl &= ~SDHCI_CTRL_TUNED_CLK;
-> +	ctrl &= ~SDHCI_CTRL_EXEC_TUNING;
-> +	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
-> +}
-> +
-> +static void __sdhci_o2_execute_tuning(struct sdhci_host *host, u32 opcode)
-> +{
-> +	int i;
-> +
-> +	sdhci_o2_send_tuning(host, MMC_SEND_TUNING_BLOCK_HS200);
-> +
-> +	for (i = 0; i < 150; i++) {
-> +		u16 ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> +
-> +		if (!(ctrl & SDHCI_CTRL_EXEC_TUNING)) {
-> +			if (ctrl & SDHCI_CTRL_TUNED_CLK) {
-> +				pr_info("%s: HW tuning ok !\n",
-> +					mmc_hostname(host->mmc));
-
-This message does not look necessary.
-
-> +				host->tuning_done = true;
-> +				return;
-> +			}
-> +			pr_warn("%s: HW tuning failed !\n",
-> +				   mmc_hostname(host->mmc));
-> +			break;
-> +		}
-> +
-> +		mdelay(1);
-
-This could be msleep() or usleep_range()
-
-> +	}
-> +
-> +	pr_info("%s: Tuning failed, falling back to fixed sampling clock\n",
-> +		mmc_hostname(host->mmc));
-> +	sdhci_o2_reset_tuning(host);
-> +}
-> +
-> +static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
-> +{
-> +	struct sdhci_host *host = mmc_priv(mmc);
-> +	int current_bus_width = 0;
-> +
-> +	/*
-> +	 * This handler only implements the eMMC tuning that is specific to
-> +	 * this controller.  Fall back to the standard method for other TINMING.
-
-TINMING -> TIMING
-
-> +	 */
-> +	if (host->timing != MMC_TIMING_MMC_HS200)
-> +		return sdhci_execute_tuning(mmc, opcode);
-> +
-> +	if (WARN_ON(opcode != MMC_SEND_TUNING_BLOCK_HS200))
-> +		return -EINVAL;
-> +
-> +	/*
-> +	 * o2 sdhci host didn't support 8bit emmc tuning
-> +	 */
-> +	if (mmc->ios.bus_width == MMC_BUS_WIDTH_8) {
-> +		current_bus_width = mmc->ios.bus_width;
-> +		mmc->ios.bus_width = MMC_BUS_WIDTH_4;
-> +		mmc->ops->set_ios(mmc, &mmc->ios);
-
-Using sdhci_set_bus_width() would be simpler.
-
-> +	}
-> +
-> +	sdhci_o2_set_tuning_mode(host, true);
-> +
-> +	sdhci_o2_start_tuning(host);
-> +
-> +	__sdhci_o2_execute_tuning(host, opcode);
-> +
-> +	sdhci_o2_end_tuning(host);
-> +
-> +	if (current_bus_width == MMC_BUS_WIDTH_8) {
-> +		mmc->ios.bus_width = current_bus_width;
-> +		mmc->ops->set_ios(mmc, &mmc->ios);
-> +	}
-> +
-> +	host->flags &= ~SDHCI_HS400_TUNING;
-> +	return 0;
-> +}
-> +
->  static void o2_pci_set_baseclk(struct sdhci_pci_chip *chip, u32 value)
->  {
->  	u32 scratch_32;
-> @@ -151,6 +351,7 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
->  	struct sdhci_pci_chip *chip;
->  	struct sdhci_host *host;
->  	u32 reg;
-> +	int ret;
->  
->  	chip = slot->chip;
->  	host = slot->host;
-> @@ -164,6 +365,21 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
->  		if (reg & 0x1)
->  			host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
->  
-> +		if (chip->pdev->device == PCI_DEVICE_ID_O2_SEABIRD0) {
-> +			ret = pci_read_config_dword(chip->pdev,
-> +						    O2_SD_MISC_SETTING, &reg);
-> +			if (ret)
-> +				return -EIO;
-> +			if (reg & (1 << 4)) {
-> +				pr_info("%s: emmc 1.8v flag is set, force 1.8v signaling voltage\n",
-> +				     mmc_hostname(host->mmc));
-> +				host->flags &= ~(SDHCI_SIGNALING_330);
-
-Parenthesis not needed.
-
-> +				host->flags |= SDHCI_SIGNALING_180;
-> +			}
-> +		}
-> +
-> +		host->mmc_host_ops.execute_tuning = sdhci_o2_execute_tuning;
-> +
->  		if (chip->pdev->device != PCI_DEVICE_ID_O2_FUJIN2)
->  			break;
->  		/* set dll watch dog timer */
-> 
+      Arnd
