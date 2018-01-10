@@ -1,304 +1,335 @@
-From: Ming Lei <ming.lei@redhat.com>
-Subject: Re: [PATCH V4 13/45] block: blk-merge: try to make front segments in
- full size
-Date: Wed, 10 Jan 2018 10:40:53 +0800
-Message-ID: <20180110024046.GA18922@ming.t460p>
-References: <20171218122247.3488-1-ming.lei@redhat.com>
- <20171218122247.3488-14-ming.lei@redhat.com>
- <c3227c8f-c782-7685-c3eb-af558a082399@gmail.com>
- <20180109023432.GB31067@ming.t460p>
- <e816e626-b8b0-c14e-ba08-cafe76dcf233@gmail.com>
- <20180109143339.GC4356@ming.t460p>
- <be7f7e1b-88c8-54f5-37c3-672f8426c6ca@gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 3/3] mmc: sdhci: fix o2 eMMC init bug and add support for
+ hardware tuning
+Date: Wed, 10 Jan 2018 09:31:05 +0200
+Message-ID: <f5031fdf-c5ac-c228-1d75-055913ed33ec@intel.com>
+References: <20171228100008.4056-1-ernest.zhang@bayhubtech.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-block-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <be7f7e1b-88c8-54f5-37c3-672f8426c6ca@gmail.com>
-Sender: linux-block-owner@vger.kernel.org
-To: Dmitry Osipenko <digetx@gmail.com>
-Cc: Jens Axboe <axboe@fb.com>, Christoph Hellwig <hch@infradead.org>, Alexander Viro <viro@zeniv.linux.org.uk>, Kent Overstreet <kent.overstreet@gmail.com>, Huang Ying <ying.huang@intel.com>, linux-kernel@vger.kernel.org, linux-block@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, Theodore Ts'o <tytso@mit.edu>, "Darrick J . Wong" <darrick.wong@oracle.com>, Coly Li <colyli@suse.de>, Filipe Manana <fdmanana@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20171228100008.4056-1-ernest.zhang@bayhubtech.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: "ernest.zhang" <ernest.zhang@bayhubtech.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: yuxiang.wan@bayhubtech.com, xiaoguang.yu@bayhubtech.com, shirley.her@bayhubtech.com, Craig Bergstrom <craigb@google.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Jan 09, 2018 at 08:02:53PM +0300, Dmitry Osipenko wrote:
-> On 09.01.2018 17:33, Ming Lei wrote:
-> > On Tue, Jan 09, 2018 at 04:18:39PM +0300, Dmitry Osipenko wrote:
-> >> On 09.01.2018 05:34, Ming Lei wrote:
-> >>> On Tue, Jan 09, 2018 at 12:09:27AM +0300, Dmitry Osipenko wrote:
-> >>>> On 18.12.2017 15:22, Ming Lei wrote:
-> >>>>> When merging one bvec into segment, if the bvec is too big
-> >>>>> to merge, current policy is to move the whole bvec into another
-> >>>>> new segment.
-> >>>>>
-> >>>>> This patchset changes the policy into trying to maximize size of
-> >>>>> front segments, that means in above situation, part of bvec
-> >>>>> is merged into current segment, and the remainder is put
-> >>>>> into next segment.
-> >>>>>
-> >>>>> This patch prepares for support multipage bvec because
-> >>>>> it can be quite common to see this case and we should try
-> >>>>> to make front segments in full size.
-> >>>>>
-> >>>>> Signed-off-by: Ming Lei <ming.lei@redhat.com>
-> >>>>> ---
-> >>>>>  block/blk-merge.c | 54 +++++++++++++++++++++++++++++++++++++++++++++++++-----
-> >>>>>  1 file changed, 49 insertions(+), 5 deletions(-)
-> >>>>>
-> >>>>> diff --git a/block/blk-merge.c b/block/blk-merge.c
-> >>>>> index a476337a8ff4..42ceb89bc566 100644
-> >>>>> --- a/block/blk-merge.c
-> >>>>> +++ b/block/blk-merge.c
-> >>>>> @@ -109,6 +109,7 @@ static struct bio *blk_bio_segment_split(struct request_queue *q,
-> >>>>>  	bool do_split = true;
-> >>>>>  	struct bio *new = NULL;
-> >>>>>  	const unsigned max_sectors = get_max_io_size(q, bio);
-> >>>>> +	unsigned advance = 0;
-> >>>>>  
-> >>>>>  	bio_for_each_segment(bv, bio, iter) {
-> >>>>>  		/*
-> >>>>> @@ -134,12 +135,32 @@ static struct bio *blk_bio_segment_split(struct request_queue *q,
-> >>>>>  		}
-> >>>>>  
-> >>>>>  		if (bvprvp && blk_queue_cluster(q)) {
-> >>>>> -			if (seg_size + bv.bv_len > queue_max_segment_size(q))
-> >>>>> -				goto new_segment;
-> >>>>>  			if (!BIOVEC_PHYS_MERGEABLE(bvprvp, &bv))
-> >>>>>  				goto new_segment;
-> >>>>>  			if (!BIOVEC_SEG_BOUNDARY(q, bvprvp, &bv))
-> >>>>>  				goto new_segment;
-> >>>>> +			if (seg_size + bv.bv_len > queue_max_segment_size(q)) {
-> >>>>> +				/*
-> >>>>> +				 * On assumption is that initial value of
-> >>>>> +				 * @seg_size(equals to bv.bv_len) won't be
-> >>>>> +				 * bigger than max segment size, but will
-> >>>>> +				 * becomes false after multipage bvec comes.
-> >>>>> +				 */
-> >>>>> +				advance = queue_max_segment_size(q) - seg_size;
-> >>>>> +
-> >>>>> +				if (advance > 0) {
-> >>>>> +					seg_size += advance;
-> >>>>> +					sectors += advance >> 9;
-> >>>>> +					bv.bv_len -= advance;
-> >>>>> +					bv.bv_offset += advance;
-> >>>>> +				}
-> >>>>> +
-> >>>>> +				/*
-> >>>>> +				 * Still need to put remainder of current
-> >>>>> +				 * bvec into a new segment.
-> >>>>> +				 */
-> >>>>> +				goto new_segment;
-> >>>>> +			}
-> >>>>>  
-> >>>>>  			seg_size += bv.bv_len;
-> >>>>>  			bvprv = bv;
-> >>>>> @@ -161,6 +182,12 @@ static struct bio *blk_bio_segment_split(struct request_queue *q,
-> >>>>>  		seg_size = bv.bv_len;
-> >>>>>  		sectors += bv.bv_len >> 9;
-> >>>>>  
-> >>>>> +		/* restore the bvec for iterator */
-> >>>>> +		if (advance) {
-> >>>>> +			bv.bv_len += advance;
-> >>>>> +			bv.bv_offset -= advance;
-> >>>>> +			advance = 0;
-> >>>>> +		}
-> >>>>>  	}
-> >>>>>  
-> >>>>>  	do_split = false;
-> >>>>> @@ -361,16 +388,29 @@ __blk_segment_map_sg(struct request_queue *q, struct bio_vec *bvec,
-> >>>>>  {
-> >>>>>  
-> >>>>>  	int nbytes = bvec->bv_len;
-> >>>>> +	unsigned advance = 0;
-> >>>>>  
-> >>>>>  	if (*sg && *cluster) {
-> >>>>> -		if ((*sg)->length + nbytes > queue_max_segment_size(q))
-> >>>>> -			goto new_segment;
-> >>>>> -
-> >>>>>  		if (!BIOVEC_PHYS_MERGEABLE(bvprv, bvec))
-> >>>>>  			goto new_segment;
-> >>>>>  		if (!BIOVEC_SEG_BOUNDARY(q, bvprv, bvec))
-> >>>>>  			goto new_segment;
-> >>>>>  
-> >>>>> +		/*
-> >>>>> +		 * try best to merge part of the bvec into previous
-> >>>>> +		 * segment and follow same policy with
-> >>>>> +		 * blk_bio_segment_split()
-> >>>>> +		 */
-> >>>>> +		if ((*sg)->length + nbytes > queue_max_segment_size(q)) {
-> >>>>> +			advance = queue_max_segment_size(q) - (*sg)->length;
-> >>>>> +			if (advance) {
-> >>>>> +				(*sg)->length += advance;
-> >>>>> +				bvec->bv_offset += advance;
-> >>>>> +				bvec->bv_len -= advance;
-> >>>>> +			}
-> >>>>> +			goto new_segment;
-> >>>>> +		}
-> >>>>> +
-> >>>>>  		(*sg)->length += nbytes;
-> >>>>>  	} else {
-> >>>>>  new_segment:
-> >>>>> @@ -393,6 +433,10 @@ __blk_segment_map_sg(struct request_queue *q, struct bio_vec *bvec,
-> >>>>>  
-> >>>>>  		sg_set_page(*sg, bvec->bv_page, nbytes, bvec->bv_offset);
-> >>>>>  		(*nsegs)++;
-> >>>>> +
-> >>>>> +		/* for making iterator happy */
-> >>>>> +		bvec->bv_offset -= advance;
-> >>>>> +		bvec->bv_len += advance;
-> >>>>>  	}
-> >>>>>  	*bvprv = *bvec;
-> >>>>>  }
-> >>>>>
-> >>>>
-> >>>> Hello,
-> >>>>
-> >>>> This patch breaks MMC on next-20180108, in particular MMC doesn't work anymore
-> >>>> with this patch on NVIDIA Tegra20:
-> >>>>
-> >>>> <3>[   36.622253] print_req_error: I/O error, dev mmcblk1, sector 512
-> >>>> <3>[   36.671233] print_req_error: I/O error, dev mmcblk2, sector 128
-> >>>> <3>[   36.711308] print_req_error: I/O error, dev mmcblk1, sector 31325304
-> >>>> <3>[   36.749232] print_req_error: I/O error, dev mmcblk2, sector 512
-> >>>> <3>[   36.761235] print_req_error: I/O error, dev mmcblk1, sector 31325816
-> >>>> <3>[   36.832039] print_req_error: I/O error, dev mmcblk2, sector 31259768
-> >>>> <3>[   99.793248] print_req_error: I/O error, dev mmcblk1, sector 31323136
-> >>>> <3>[   99.982043] print_req_error: I/O error, dev mmcblk1, sector 929792
-> >>>> <3>[   99.986301] print_req_error: I/O error, dev mmcblk1, sector 930816
-> >>>> <3>[  100.293624] print_req_error: I/O error, dev mmcblk1, sector 932864
-> >>>> <3>[  100.466839] print_req_error: I/O error, dev mmcblk1, sector 947200
-> >>>> <3>[  100.642955] print_req_error: I/O error, dev mmcblk1, sector 949248
-> >>>> <3>[  100.818838] print_req_error: I/O error, dev mmcblk1, sector 230400
-> >>>>
-> >>>> Any attempt of mounting MMC block dev ends with a kernel crash. Reverting this
-> >>>> patch fixes the issue.
-> >>>
-> >>> Hi Dmitry,
-> >>>
-> >>> Thanks for your report!
-> >>>
-> >>> Could you share us what the segment limits are on your MMC?
-> >>>
-> >>> 	cat /sys/block/mmcN/queue/max_segment_size
-> >>> 	cat /sys/block/mmcN/queue/max_segments
-> >>>
-> >>> Please test the following patch to see if your issue can be fixed?
-> >>>
-> >>> ---
-> >>> diff --git a/block/blk-merge.c b/block/blk-merge.c
-> >>> index 446f63e076aa..cfab36c26608 100644
-> >>> --- a/block/blk-merge.c
-> >>> +++ b/block/blk-merge.c
-> >>> @@ -431,12 +431,14 @@ __blk_segment_map_sg(struct request_queue *q, struct bio_vec *bvec,
-> >>>  
-> >>>  		sg_set_page(*sg, bvec->bv_page, nbytes, bvec->bv_offset);
-> >>>  		(*nsegs)++;
-> >>> +	}
-> >>>  
-> >>> +	*bvprv = *bvec;
-> >>> +	if (advance) {
-> >>>  		/* for making iterator happy */
-> >>>  		bvec->bv_offset -= advance;
-> >>>  		bvec->bv_len += advance;
-> >>>  	}
-> >>> -	*bvprv = *bvec;
-> >>>  }
-> >>>  
-> >>>  static inline int __blk_bvec_map_sg(struct request_queue *q, struct bio_vec bv,
-> >>
-> >> Hi Ming,
-> >>
-> >> I've tried your patch and unfortunately it doesn't help with the issue.
-> >>
-> >> Here are the segment limits:
-> >>
-> >> # cat /sys/block/mmc*/queue/max_segment_size
-> >> 65535
-> > 
-> > Hi Dmitry,
-> > 
-> > The 'max_segment_size' of 65535 should be the reason, could you test the
-> > following patch?
-> > 
-> > ---
-> > diff --git a/block/blk-merge.c b/block/blk-merge.c
-> > index 446f63e076aa..38a66e3e678e 100644
-> > --- a/block/blk-merge.c
-> > +++ b/block/blk-merge.c
-> > @@ -12,6 +12,8 @@
-> >  
-> >  #include "blk.h"
-> >  
-> > +#define sector_align(x)   ALIGN_DOWN(x, 512)
-> > +
-> >  static struct bio *blk_bio_discard_split(struct request_queue *q,
-> >  					 struct bio *bio,
-> >  					 struct bio_set *bs,
-> > @@ -109,7 +111,7 @@ static struct bio *blk_bio_segment_split(struct request_queue *q,
-> >  	bool do_split = true;
-> >  	struct bio *new = NULL;
-> >  	const unsigned max_sectors = get_max_io_size(q, bio);
-> > -	unsigned advance = 0;
-> > +	int advance = 0;
-> >  
-> >  	bio_for_each_segment(bv, bio, iter) {
-> >  		/*
-> > @@ -144,8 +146,9 @@ static struct bio *blk_bio_segment_split(struct request_queue *q,
-> >  				 * bigger than max segment size, but this
-> >  				 * becomes false after multipage bvecs.
-> >  				 */
-> > -				advance = queue_max_segment_size(q) - seg_size;
-> > -
-> > +				advance = sector_align(
-> > +						queue_max_segment_size(q) -
-> > +						seg_size);
-> >  				if (advance > 0) {
-> >  					seg_size += advance;
-> >  					sectors += advance >> 9;
-> > @@ -386,7 +389,7 @@ __blk_segment_map_sg(struct request_queue *q, struct bio_vec *bvec,
-> >  {
-> >  
-> >  	int nbytes = bvec->bv_len;
-> > -	unsigned advance = 0;
-> > +	int advance = 0;
-> >  
-> >  	if (*sg && *cluster) {
-> >  		if (!BIOVEC_PHYS_MERGEABLE(bvprv, bvec))
-> > @@ -400,8 +403,9 @@ __blk_segment_map_sg(struct request_queue *q, struct bio_vec *bvec,
-> >  		 * blk_bio_segment_split()
-> >  		 */
-> >  		if ((*sg)->length + nbytes > queue_max_segment_size(q)) {
-> > -			advance = queue_max_segment_size(q) - (*sg)->length;
-> > -			if (advance) {
-> > +			advance = sector_align(queue_max_segment_size(q) -
-> > +					(*sg)->length);
-> > +			if (advance > 0) {
-> >  				(*sg)->length += advance;
-> >  				bvec->bv_offset += advance;
-> >  				bvec->bv_len -= advance;
-> > @@ -431,12 +435,14 @@ __blk_segment_map_sg(struct request_queue *q, struct bio_vec *bvec,
-> >  
-> >  		sg_set_page(*sg, bvec->bv_page, nbytes, bvec->bv_offset);
-> >  		(*nsegs)++;
-> > +	}
-> >  
-> > +	*bvprv = *bvec;
-> > +	if (advance > 0) {
-> >  		/* for making iterator happy */
-> >  		bvec->bv_offset -= advance;
-> >  		bvec->bv_len += advance;
-> >  	}
-> > -	*bvprv = *bvec;
-> >  }
-> >  
-> >  static inline int __blk_bvec_map_sg(struct request_queue *q, struct bio_vec bv,
+On 28/12/17 12:00, ernest.zhang wrote:
+> In some case of eMMC used as boot device, the eMMC signaling voltage is
+> fixed to 1.8v, bios can set o2 sd host controller register 0x308 bit4 to
+> let host controller skip try 3.3.v signaling voltage in eMMC initialize
+> process.
+> O2 sd host controller has a function named hardware tuning. In software
+> tuning mode CPU should send multiple command to host controller but in
+> hardware tuning mode, CPU need send only one tuning command to sd host
+> controller. It can improve the speed linux boot from eMMC.
+
+Please put the changes from patch 2 into this patch, re-base, and put V3 on
+the next submission.  Note the mmc tree is:
+
+	git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git
+
+Re-base on the 'next' branch.
+
+Also Craig Bergstrom reported problems getting it to work, so please respond
+to that, otherwise I am left wondering if this rather strange tuning
+procedure actually works:
+
+	https://marc.info/?l=linux-mmc&m=151387671202146&w=2
+
 > 
-> This patch doesn't help either.
+> Signed-off-by: ernest.zhang <ernest.zhang@bayhubtech.com>
+> ---
+>  drivers/mmc/host/sdhci-pci-o2micro.c | 218 ++++++++++++++++++++++++++++++++++-
+>  1 file changed, 217 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+> index 14273ca00641..fd244d88b07e 100644
+> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
+> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+> @@ -16,11 +16,211 @@
+>   */
+>  
+>  #include <linux/pci.h>
+> -
+> +#include <linux/platform_device.h>
+> +#include <linux/regulator/fixed.h>
+> +#include <linux/regulator/machine.h>
+> +#include <linux/mmc/host.h>
+> +#include <linux/mmc/mmc.h>
+> +#include <linux/delay.h>
+>  #include "sdhci.h"
+>  #include "sdhci-pci.h"
+>  #include "sdhci-pci-o2micro.h"
+>  
+> +static void sdhci_o2_start_tuning(struct sdhci_host *host)
+> +{
+> +	u16 ctrl;
+> +
+> +	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+> +	ctrl |= SDHCI_CTRL_EXEC_TUNING;
+> +	if (host->quirks2 & SDHCI_QUIRK2_TUNING_WORK_AROUND)
+> +		ctrl |= SDHCI_CTRL_TUNED_CLK;
 
-OK, I will send a revert later.
+Why program for a quirk that you don't use?
 
-Thinking of the patch further, we don't need this kind of logic for
-multipage bvec at all since almost all bvecs won't be contiguous if
-bio_add_page() is used after multipage bvec is enabled.
+> +	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+> +
+> +	/*
+> +	 * As per the Host Controller spec v3.00, tuning command
+> +	 * generates Buffer Read Ready interrupt, so enable that.
+> +	 *
+> +	 * Note: The spec clearly says that when tuning sequence
+> +	 * is being performed, the controller does not generate
+> +	 * interrupts other than Buffer Read Ready interrupt. But
+> +	 * to make sure we don't hit a controller bug, we _only_
+> +	 * enable Buffer Read Ready interrupt here.
+> +	 */
+> +	sdhci_writel(host, SDHCI_INT_DATA_AVAIL, SDHCI_INT_ENABLE);
+> +	sdhci_writel(host, SDHCI_INT_DATA_AVAIL, SDHCI_SIGNAL_ENABLE);
+> +}
+> +
+> +static void sdhci_o2_end_tuning(struct sdhci_host *host)
+> +{
+> +	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
+> +	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
+> +}
+> +
+> +static inline bool sdhci_data_line_cmd(struct mmc_command *cmd)
+> +{
+> +	return cmd->data || cmd->flags & MMC_RSP_BUSY;
+> +}
+> +
+> +static void sdhci_del_timer(struct sdhci_host *host, struct mmc_request *mrq)
+> +{
+> +	if (sdhci_data_line_cmd(mrq->cmd))
+> +		del_timer(&host->data_timer);
+> +	else
+> +		del_timer(&host->timer);
+> +}
+> +
+> +static void sdhci_o2_set_tuning_mode(struct sdhci_host *host, bool hw)
 
-Thanks,
-Ming
+Since you only ever call this with hw = true, maybe drop the 'hw' parameter
+altogether.
+
+> +{
+> +	u16 reg;
+> +
+> +	if (hw) {
+> +		// enable hardware tuning
+
+For consistency, please use old C-style comments /* */ instead of //
+
+> +		reg = sdhci_readw(host, O2_SD_VENDOR_SETTING);
+> +		reg &= (~O2_SD_HW_TUNING_ENABLE);
+> +		sdhci_writew(host, reg, O2_SD_VENDOR_SETTING);
+> +	} else {
+> +		reg = sdhci_readw(host, O2_SD_VENDOR_SETTING);
+> +		reg |= O2_SD_HW_TUNING_ENABLE;
+> +		sdhci_writew(host, reg, O2_SD_VENDOR_SETTING);
+> +	}
+> +}
+> +
+> +static u8 data_buf[64];
+
+It would be better to allocate data_buf.
+
+> +
+> +static void sdhci_o2_send_tuning(struct sdhci_host *host, u32 opcode)
+> +{
+> +	struct mmc_command cmd = { };
+> +	struct mmc_data data = { };
+> +	struct scatterlist sg;
+> +	struct mmc_request mrq = { };
+> +	unsigned long flags;
+> +	u32 b = host->sdma_boundary;
+> +	int size = sizeof(data_buf);
+> +
+> +	cmd.opcode = opcode;
+> +	cmd.flags = MMC_RSP_PRESENT | MMC_RSP_OPCODE | MMC_RSP_CRC;
+> +	cmd.mrq = &mrq;
+> +	mrq.cmd = &cmd;
+> +	mrq.data = &data;
+> +	data.blksz = size;
+> +	data.blocks = 1;
+> +	data.flags = MMC_DATA_READ;
+> +
+> +	data.timeout_ns = 150 * NSEC_PER_MSEC;
+
+It seems inconsistent to set 150ms timeout here but 50ms for waiting for
+Buffer Read Ready.
+
+> +
+> +	data.sg = &sg;
+> +	data.sg_len = 1;
+> +	sg_init_one(&sg, data_buf, size);
+> +
+> +	spin_lock_irqsave(&host->lock, flags);
+> +
+> +	sdhci_writew(host, SDHCI_MAKE_BLKSZ(b, 64), SDHCI_BLOCK_SIZE);
+> +
+> +	/*
+> +	 * The tuning block is sent by the card to the host controller.
+> +	 * So we set the TRNS_READ bit in the Transfer Mode register.
+> +	 * This also takes care of setting DMA Enable and Multi Block
+> +	 * Select in the same register to 0.
+> +	 */
+> +	sdhci_writew(host, SDHCI_TRNS_READ, SDHCI_TRANSFER_MODE);
+
+That won't work because the transfer mode gets overwritten by
+sdhci_send_command().
+
+> +
+> +	sdhci_send_command(host, &cmd);
+> +
+> +	host->cmd = NULL;
+> +
+> +	sdhci_del_timer(host, &mrq);
+
+Simpler would be:
+
+	del_timer(&host->data_timer);
+
+> +
+> +	host->tuning_done = 0;
+> +
+> +	mmiowb();
+> +	spin_unlock_irqrestore(&host->lock, flags);
+> +
+> +	/* Wait for Buffer Read Ready interrupt */
+> +	wait_event_timeout(host->buf_ready_int, (host->tuning_done == 1),
+> +			   msecs_to_jiffies(50));
+> +
+> +}
+> +
+> +static void sdhci_o2_reset_tuning(struct sdhci_host *host)
+> +{
+> +	u16 ctrl;
+> +
+> +	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+> +	ctrl &= ~SDHCI_CTRL_TUNED_CLK;
+> +	ctrl &= ~SDHCI_CTRL_EXEC_TUNING;
+> +	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+> +}
+> +
+> +static void __sdhci_o2_execute_tuning(struct sdhci_host *host, u32 opcode)
+> +{
+> +	int i;
+> +
+> +	sdhci_o2_send_tuning(host, MMC_SEND_TUNING_BLOCK_HS200);
+> +
+> +	for (i = 0; i < 150; i++) {
+> +		u16 ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+> +
+> +		if (!(ctrl & SDHCI_CTRL_EXEC_TUNING)) {
+> +			if (ctrl & SDHCI_CTRL_TUNED_CLK) {
+> +				pr_info("%s: HW tuning ok !\n",
+> +					mmc_hostname(host->mmc));
+
+This message does not look necessary.
+
+> +				host->tuning_done = true;
+> +				return;
+> +			}
+> +			pr_warn("%s: HW tuning failed !\n",
+> +				   mmc_hostname(host->mmc));
+> +			break;
+> +		}
+> +
+> +		mdelay(1);
+
+This could be msleep() or usleep_range()
+
+> +	}
+> +
+> +	pr_info("%s: Tuning failed, falling back to fixed sampling clock\n",
+> +		mmc_hostname(host->mmc));
+> +	sdhci_o2_reset_tuning(host);
+> +}
+> +
+> +static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
+> +{
+> +	struct sdhci_host *host = mmc_priv(mmc);
+> +	int current_bus_width = 0;
+> +
+> +	/*
+> +	 * This handler only implements the eMMC tuning that is specific to
+> +	 * this controller.  Fall back to the standard method for other TINMING.
+
+TINMING -> TIMING
+
+> +	 */
+> +	if (host->timing != MMC_TIMING_MMC_HS200)
+> +		return sdhci_execute_tuning(mmc, opcode);
+> +
+> +	if (WARN_ON(opcode != MMC_SEND_TUNING_BLOCK_HS200))
+> +		return -EINVAL;
+> +
+> +	/*
+> +	 * o2 sdhci host didn't support 8bit emmc tuning
+> +	 */
+> +	if (mmc->ios.bus_width == MMC_BUS_WIDTH_8) {
+> +		current_bus_width = mmc->ios.bus_width;
+> +		mmc->ios.bus_width = MMC_BUS_WIDTH_4;
+> +		mmc->ops->set_ios(mmc, &mmc->ios);
+
+Using sdhci_set_bus_width() would be simpler.
+
+> +	}
+> +
+> +	sdhci_o2_set_tuning_mode(host, true);
+> +
+> +	sdhci_o2_start_tuning(host);
+> +
+> +	__sdhci_o2_execute_tuning(host, opcode);
+> +
+> +	sdhci_o2_end_tuning(host);
+> +
+> +	if (current_bus_width == MMC_BUS_WIDTH_8) {
+> +		mmc->ios.bus_width = current_bus_width;
+> +		mmc->ops->set_ios(mmc, &mmc->ios);
+> +	}
+> +
+> +	host->flags &= ~SDHCI_HS400_TUNING;
+> +	return 0;
+> +}
+> +
+>  static void o2_pci_set_baseclk(struct sdhci_pci_chip *chip, u32 value)
+>  {
+>  	u32 scratch_32;
+> @@ -151,6 +351,7 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+>  	struct sdhci_pci_chip *chip;
+>  	struct sdhci_host *host;
+>  	u32 reg;
+> +	int ret;
+>  
+>  	chip = slot->chip;
+>  	host = slot->host;
+> @@ -164,6 +365,21 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+>  		if (reg & 0x1)
+>  			host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
+>  
+> +		if (chip->pdev->device == PCI_DEVICE_ID_O2_SEABIRD0) {
+> +			ret = pci_read_config_dword(chip->pdev,
+> +						    O2_SD_MISC_SETTING, &reg);
+> +			if (ret)
+> +				return -EIO;
+> +			if (reg & (1 << 4)) {
+> +				pr_info("%s: emmc 1.8v flag is set, force 1.8v signaling voltage\n",
+> +				     mmc_hostname(host->mmc));
+> +				host->flags &= ~(SDHCI_SIGNALING_330);
+
+Parenthesis not needed.
+
+> +				host->flags |= SDHCI_SIGNALING_180;
+> +			}
+> +		}
+> +
+> +		host->mmc_host_ops.execute_tuning = sdhci_o2_execute_tuning;
+> +
+>  		if (chip->pdev->device != PCI_DEVICE_ID_O2_FUJIN2)
+>  			break;
+>  		/* set dll watch dog timer */
+> 
