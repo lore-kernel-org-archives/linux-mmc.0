@@ -1,560 +1,428 @@
-From: Craig Bergstrom <craigb@google.com>
-Subject: Re: [PATCH 1/3] mmc: sdhci-pci-o2micro: Add hardware tuning for eMMC
-Date: Wed, 10 Jan 2018 14:32:38 -0800
-Message-ID: <CAOJUGyfhcqPGvnG3WXBTgWfBBG3rrSCcpOGJc6_f9TywXVt0uQ@mail.gmail.com>
+From: "Shirley Her (SC)" <shirley.her@bayhubtech.com>
+Subject: RE: [PATCH 1/3] mmc: sdhci-pci-o2micro: Add hardware tuning for eMMC
+Date: Wed, 10 Jan 2018 23:05:54 +0000
+Message-ID: <BN6PR04MB0900F1F2F19C4A642731ACEF8B110@BN6PR04MB0900.namprd04.prod.outlook.com>
 References: <CY4PR04MB047375B124358A33FB077C6EED3C0@CY4PR04MB0473.namprd04.prod.outlook.com>
- <64a8b6a8-ba1b-a298-5115-d8379f121cab@intel.com> <CAOJUGycsUF199s-6_=NGR+pU=m0HTY8ZHUZ2aU4G8CB5V8JqbQ@mail.gmail.com>
+ <64a8b6a8-ba1b-a298-5115-d8379f121cab@intel.com>
+ <CAOJUGycsUF199s-6_=NGR+pU=m0HTY8ZHUZ2aU4G8CB5V8JqbQ@mail.gmail.com>
  <BN6PR04MB0900DDCACB5FEF8B0E3B6D998B110@BN6PR04MB0900.namprd04.prod.outlook.com>
+ <CAOJUGyfhcqPGvnG3WXBTgWfBBG3rrSCcpOGJc6_f9TywXVt0uQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <BN6PR04MB0900DDCACB5FEF8B0E3B6D998B110@BN6PR04MB0900.namprd04.prod.outlook.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Shirley Her (SC)" <shirley.her@bayhubtech.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, LinuxPatchCommit <LinuxPatchCommit@bayhubtech.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-by2nam03on0139.outbound.protection.outlook.com ([104.47.42.139]:38095
+        "EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752447AbeAJXGB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 10 Jan 2018 18:06:01 -0500
+In-Reply-To: <CAOJUGyfhcqPGvnG3WXBTgWfBBG3rrSCcpOGJc6_f9TywXVt0uQ@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Craig Bergstrom <craigb@google.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, LinuxPatchCommit <LinuxPatchCommit@bayhubtech.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Hey Shirley,
-
-If all upstream users of this device need to set bit 4 of 0x308 to 1,
-should the upstream driver do that?
-
-Craig
-
-
-On Wed, Jan 10, 2018 at 12:05 PM, Shirley Her (SC)
-<shirley.her@bayhubtech.com> wrote:
-> Hi, Craig:
->
-> As the message said during sign off as below. BIOS needs to set x0308 bit=
- 4 to 1 so the driver will skip 3.3V in eMMC initialization process. It mea=
-ns depthcharge needs to set 0x308 bit 4 to 1 first in order for driver to u=
-se eMMC 1.8V.
->
-> In some case of eMMC used as boot device, the eMMC signaling voltage
->> is fixed to 1.8v, bios can set o2 sd host controller register 0x308
->> bit4 to let host controller skip try 3.3.v signaling voltage in eMMC
->> initialize process.
->
-> Thanks,
-> Shirley
->
-> -----Original Message-----
-> From: Craig Bergstrom [mailto:craigb@google.com]
-> Sent: Thursday, December 21, 2017 9:18 AM
-> To: Adrian Hunter
-> Cc: LinuxPatchCommit; ulf.hansson@linaro.org; linux-mmc@vger.kernel.org; =
-linux-kernel@vger.kernel.org; Shirley Her (SC)
-> Subject: Re: [PATCH 1/3] mmc: sdhci-pci-o2micro: Add hardware tuning for =
-eMMC
->
-> Thanks for sending these patches out, I would be very excited to see thes=
-e devices supported by Linux.
->
-> I'm trying them out with a SEABIRD device (pci device 1217:8620).
-> When I boot up and load the driver, it don't see any indication of the ex=
-istence of block device and I see these messages repeatedly spammed to the =
-kernel logs:
->
-> [    0.855163] mmc1: Unknown controller version (3). You may
-> experience problems.
-> [    0.862519] mmc1: SDHCI controller on PCI [0000:01:00.0] using ADMA
-> [   93.152163] mmc1: Timeout waiting for hardware cmd interrupt.
-> [   93.157911] mmc1: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D SDHCI RE=
-GISTER DUMP =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> [   93.164347] mmc1: sdhci: Sys addr:  0x00000000 | Version:  0x00000603
-> [   93.170782] mmc1: sdhci: Blk size:  0x00000000 | Blk cnt:  0x00000000
-> [   93.177218] mmc1: sdhci: Argument:  0x00000000 | Trn mode: 0x00000000
-> [   93.183652] mmc1: sdhci: Present:   0x01ff0000 | Host ctl: 0x00000001
-> [   93.190088] mmc1: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
-> [   93.196523] mmc1: sdhci: Wake-up:   0x00000000 | Clock:    0x0000fa07
-> [   93.202956] mmc1: sdhci: Timeout:   0x00000000 | Int stat: 0x00018000
-> [   93.209392] mmc1: sdhci: Int enab:  0x00ff0083 | Sig enab: 0x00ff0083
-> [   93.215826] mmc1: sdhci: AC12 err:  0x00000000 | Slot int: 0x00000001
-> [   93.222260] mmc1: sdhci: Caps:      0x25fcc8bf | Caps_1:   0x00002077
-> [   93.228694] mmc1: sdhci: Cmd:       0x0000371a | Max curr: 0x005800c8
-> [   93.235127] mmc1: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
-> [   93.241562] mmc1: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
-> [   93.247994] mmc1: sdhci: Host ctl2: 0x00000000
-> [   93.252435] mmc1: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0x00000000
-> [   93.258863] mmc1: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D
-> [  103.392164] mmc1: Timeout waiting for hardware cmd interrupt.
-> [  103.397913] mmc1: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D SDHCI RE=
-GISTER DUMP =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D [  103.404350] mmc1: sdhci: S=
-ys addr:  0x00000000 | Version:  0x00000603 [  103.410786] mmc1: sdhci: Blk=
- size:  0x00000000 | Blk cnt:  0x00000000 [  103.417221] mmc1: sdhci: Argum=
-ent:  0x00000000 | Trn mode: 0x00000000
-> [  103.423654] mmc1: sdhci: Present:   0x01ff0000 | Host ctl: 0x00000001
-> [  103.430089] mmc1: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
-> [  103.436523] mmc1: sdhci: Wake-up:   0x00000000 | Clock:    0x0000fa07
-> [  103.442955] mmc1: sdhci: Timeout:   0x00000000 | Int stat: 0x00018000
-> [  103.449390] mmc1: sdhci: Int enab:  0x00ff0083 | Sig enab: 0x00ff0083 =
-[  103.455823] mmc1: sdhci: AC12 err:  0x00000000 | Slot int: 0x00000001
-> [  103.462255] mmc1: sdhci: Caps:      0x25fcc8bf | Caps_1:   0x00002077
-> [  103.468689] mmc1: sdhci: Cmd:       0x0000371a | Max curr: 0x005800c8
-> [  103.475126] mmc1: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
-> [  103.481560] mmc1: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
-> [  103.487994] mmc1: sdhci: Host ctl2: 0x00000000 [  103.492435] mmc1: sd=
-hci: ADMA Err:  0x00000000 | ADMA Ptr: 0x00000000 [  103.498867] mmc1: sdhc=
-i: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->
-> Is it expected that this should "just work", or am I doing something wron=
-g?  My patched kernel is based on 4.14.2.
->
-> On Tue, Dec 19, 2017 at 2:05 AM, Adrian Hunter <adrian.hunter@intel.com> =
-wrote:
->> On 04/12/17 11:39, LinuxPatchCommit wrote:
->>> Dear All,
->>>
->>> For O2micro/Bayhubtech SD Host DeviceID 8620, eMMC HS200 mode is workin=
-g at 1.8v and it uses hardware tuning. The hardware tuning only needs to se=
-nd one tuning command instead of multiple tuning commands with software tun=
-ing.
->>>
->>> Signed-off-by: ernest.zhang <ernest.zhang@bayhubtech.com>
->>> ---
->>>  drivers/mmc/host/sdhci-pci-o2micro.c | 276
->>> ++++++++++++++++++++++++++++++-----
->>>  1 file changed, 239 insertions(+), 37 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c
->>> b/drivers/mmc/host/sdhci-pci-o2micro.c
->>> index 14273ca00641..2a7ffd240497 100644
->>> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
->>> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
->>> @@ -16,22 +16,223 @@
->>>   */
->>>
->>>  #include <linux/pci.h>
->>> -
->>> +#include <linux/platform_device.h>
->>> +#include <linux/regulator/fixed.h>
->>> +#include <linux/regulator/machine.h> #include <linux/mmc/host.h>
->>> +#include <linux/mmc/mmc.h> #include <linux/delay.h>
->>>  #include "sdhci.h"
->>>  #include "sdhci-pci.h"
->>>  #include "sdhci-pci-o2micro.h"
->>>
->>> +static void sdhci_o2_start_tuning(struct sdhci_host *host) {
->>> +     u16 ctrl;
->>> +
->>> +     ctrl =3D sdhci_readw(host, SDHCI_HOST_CONTROL2);
->>> +     ctrl |=3D SDHCI_CTRL_EXEC_TUNING;
->>> +     if (host->quirks2 & SDHCI_QUIRK2_TUNING_WORK_AROUND)
->>> +             ctrl |=3D SDHCI_CTRL_TUNED_CLK;
->>> +     sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
->>> +
->>> +     /*
->>> +      * As per the Host Controller spec v3.00, tuning command
->>> +      * generates Buffer Read Ready interrupt, so enable that.
->>> +      *
->>> +      * Note: The spec clearly says that when tuning sequence
->>> +      * is being performed, the controller does not generate
->>> +      * interrupts other than Buffer Read Ready interrupt. But
->>> +      * to make sure we don't hit a controller bug, we _only_
->>> +      * enable Buffer Read Ready interrupt here.
->>> +      */
->>> +     sdhci_writel(host, SDHCI_INT_DATA_AVAIL, SDHCI_INT_ENABLE);
->>> +     sdhci_writel(host, SDHCI_INT_DATA_AVAIL, SDHCI_SIGNAL_ENABLE);
->>> + }
->>> +
->>> +static void sdhci_o2_end_tuning(struct sdhci_host *host) {
->>> +     sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
->>> +     sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE); }
->>> +
->>> +static inline bool sdhci_data_line_cmd(struct mmc_command *cmd) {
->>> +     return cmd->data || cmd->flags & MMC_RSP_BUSY; }
->>> +
->>> +static void sdhci_del_timer(struct sdhci_host *host, struct
->>> +mmc_request
->>> +*mrq) {
->>> +     if (sdhci_data_line_cmd(mrq->cmd))
->>> +             del_timer(&host->data_timer);
->>> +     else
->>> +             del_timer(&host->timer); }
->>> +
->>> +static void sdhci_o2_set_tuning_mode(struct sdhci_host *host, bool
->>> +hw) {
->>> +     u16 reg;
->>> +
->>> +     if (hw) {
->>> +             // enable hardware tuning
->>> +             reg =3D sdhci_readw(host, O2_SD_VENDOR_SETTING);
->>> +             reg &=3D (~O2_SD_HW_TUNING_ENABLE);
->>> +             sdhci_writew(host, reg, O2_SD_VENDOR_SETTING);
->>> +     } else {
->>> +             reg =3D sdhci_readw(host, O2_SD_VENDOR_SETTING);
->>> +             reg |=3D O2_SD_HW_TUNING_ENABLE;
->>> +             sdhci_writew(host, reg, O2_SD_VENDOR_SETTING);
->>> +     }
->>> +}
->>> +
->>> +static u8 data_buf[64];
->>> +
->>> +static void sdhci_o2_send_tuning(struct sdhci_host *host, u32 opcode) =
-{
->>> +     struct mmc_command cmd =3D { };
->>> +     struct mmc_data data =3D { };
->>> +     struct scatterlist sg;
->>> +     struct mmc_request mrq =3D { };
->>> +     unsigned long flags;
->>> +     u32 b =3D host->sdma_boundary;
->>> +     int size =3D sizeof(data_buf);
->>> +
->>> +     cmd.opcode =3D opcode;
->>> +     cmd.flags =3D MMC_RSP_PRESENT | MMC_RSP_OPCODE | MMC_RSP_CRC;
->>> +     cmd.mrq =3D &mrq;
->>> +     mrq.cmd =3D &cmd;
->>> +     mrq.data =3D &data;
->>> +     data.blksz =3D size;
->>> +     data.blocks =3D 1;
->>> +     data.flags =3D MMC_DATA_READ;
->>> +
->>> +     data.timeout_ns =3D 150 * NSEC_PER_MSEC;
->>> +
->>> +     data.sg =3D &sg;
->>> +     data.sg_len =3D 1;
->>> +     sg_init_one(&sg, data_buf, size);
->>> +
->>> +     spin_lock_irqsave(&host->lock, flags);
->>> +
->>> +     sdhci_writew(host, SDHCI_MAKE_BLKSZ(b, 64), SDHCI_BLOCK_SIZE);
->>> +
->>> +     /*
->>> +      * The tuning block is sent by the card to the host controller.
->>> +      * So we set the TRNS_READ bit in the Transfer Mode register.
->>> +      * This also takes care of setting DMA Enable and Multi Block
->>> +      * Select in the same register to 0.
->>> +      */
->>> +     sdhci_writew(host, SDHCI_TRNS_READ, SDHCI_TRANSFER_MODE);
->>> +
->>> +     sdhci_send_command(host, &cmd);
->>> +
->>> +     host->cmd =3D NULL;
->>> +
->>> +     sdhci_del_timer(host, &mrq);
->>> +
->>> +     host->tuning_done =3D 0;
->>> +
->>> +     mmiowb();
->>> +     spin_unlock_irqrestore(&host->lock, flags);
->>> +
->>> +     /* Wait for Buffer Read Ready interrupt */
->>> +     wait_event_timeout(host->buf_ready_int, (host->tuning_done =3D=3D=
- 1),
->>> +                        msecs_to_jiffies(50));
->>> +
->>> +}
->>> +
->>> +static void sdhci_o2_reset_tuning(struct sdhci_host *host) {
->>> +     u16 ctrl;
->>> +
->>> +     ctrl =3D sdhci_readw(host, SDHCI_HOST_CONTROL2);
->>> +     ctrl &=3D ~SDHCI_CTRL_TUNED_CLK;
->>> +     ctrl &=3D ~SDHCI_CTRL_EXEC_TUNING;
->>> +     sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2); }
->>> +
->>> +static void __sdhci_o2_execute_tuning(struct sdhci_host *host, u32
->>> +opcode) {
->>> +
->>> +     int i;
->>> +
->>> +     sdhci_o2_send_tuning(host, MMC_SEND_TUNING_BLOCK_HS200);
->>
->> So it looks like you send the tuning command only once.  Is that right?
->> Maybe you could briefly outline what the tuning procedure is, and how
->> it differs from sdhci_execute_tuning().
->>
->>> +
->>> +     for (i =3D 0; i < 150; i++) {
->>> +             u16 ctrl =3D sdhci_readw(host, SDHCI_HOST_CONTROL2);
->>> +
->>> +             if (!(ctrl & SDHCI_CTRL_EXEC_TUNING)) {
->>> +                     if (ctrl & SDHCI_CTRL_TUNED_CLK) {
->>> +                             pr_info("%s: HW tuning ok !\n",
->>> +                                     mmc_hostname(host->mmc));
->>> +                             host->tuning_done =3D true;
->>> +                             return;
->>> +                     }
->>> +                     pr_warn("%s: HW tuning failed !\n",
->>> +                             mmc_hostname(host->mmc));
->>> +
->>> +                     break;
->>> +             }
->>> +
->>> +             mdelay(1);
->>> +     }
->>> +
->>> +     pr_info("%s: Tuning failed, falling back to fixed sampling clock\=
-n",
->>> +             mmc_hostname(host->mmc));
->>> +     sdhci_o2_reset_tuning(host);
->>> +
->>> +}
->>> +
->>> +static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode) {
->>> +     struct sdhci_host *host =3D mmc_priv(mmc);
->>> +     int current_bus_width =3D 0;
->>> +
->>> +     /*
->>> +      * This handler only implements the eMMC tuning that is specific =
-to
->>> +      * this controller.  Fall back to the standard method for other T=
-INMING.
->>> +      */
->>> +     if (host->timing !=3D MMC_TIMING_MMC_HS200)
->>> +             return sdhci_execute_tuning(mmc, opcode);
->>> +
->>> +     if (WARN_ON(opcode !=3D MMC_SEND_TUNING_BLOCK_HS200))
->>> +             return -EINVAL;
->>> +
->>> +     /*
->>> +      * o2 sdhci host didn't support 8bit emmc tuning
->>> +      */
->>> +     if (mmc->ios.bus_width =3D=3D MMC_BUS_WIDTH_8) {
->>> +             current_bus_width =3D mmc->ios.bus_width;
->>> +             mmc->ios.bus_width =3D MMC_BUS_WIDTH_4;
->>> +             mmc->ops->set_ios(mmc, &mmc->ios);
->>> +     }
->>> +
->>> +     sdhci_o2_set_tuning_mode(host, true);
->>> +
->>> +     sdhci_o2_start_tuning(host);
->>> +
->>> +     __sdhci_o2_execute_tuning(host, opcode);
->>> +
->>> +     sdhci_o2_end_tuning(host);
->>> +
->>> +     if (current_bus_width =3D=3D MMC_BUS_WIDTH_8) {
->>> +             mmc->ios.bus_width =3D current_bus_width;
->>> +             mmc->ops->set_ios(mmc, &mmc->ios);
->>> +     }
->>> +
->>> +     host->flags &=3D ~SDHCI_HS400_TUNING;
->>> +     return 0;
->>> +}
->>> +
->>>  static void o2_pci_set_baseclk(struct sdhci_pci_chip *chip, u32 value)=
-  {
->>>       u32 scratch_32;
->>> -     pci_read_config_dword(chip->pdev,
->>> -                           O2_SD_PLL_SETTING, &scratch_32);
->>> +     pci_read_config_dword(chip->pdev, O2_SD_PLL_SETTING,
->>> + &scratch_32);
->>>
->>>       scratch_32 &=3D 0x0000FFFF;
->>>       scratch_32 |=3D value;
->>>
->>> -     pci_write_config_dword(chip->pdev,
->>> -                            O2_SD_PLL_SETTING, scratch_32);
->>> +     pci_write_config_dword(chip->pdev, O2_SD_PLL_SETTING,
->>> + scratch_32);
->>>  }
->>>
->>>  static void o2_pci_led_enable(struct sdhci_pci_chip *chip) @@ -40,23 +=
-241,19 @@ static void o2_pci_led_enable(struct sdhci_pci_chip *chip)
->>>       u32 scratch_32;
->>>
->>>       /* Set led of SD host function enable */
->>> -     ret =3D pci_read_config_dword(chip->pdev,
->>> -                                 O2_SD_FUNC_REG0, &scratch_32);
->>> +     ret =3D pci_read_config_dword(chip->pdev, O2_SD_FUNC_REG0,
->>> + &scratch_32);
->>>       if (ret)
->>>               return;
->>>
->>>       scratch_32 &=3D ~O2_SD_FREG0_LEDOFF;
->>> -     pci_write_config_dword(chip->pdev,
->>> -                            O2_SD_FUNC_REG0, scratch_32);
->>> +     pci_write_config_dword(chip->pdev, O2_SD_FUNC_REG0,
->>> + scratch_32);
->>>
->>> -     ret =3D pci_read_config_dword(chip->pdev,
->>> -                                 O2_SD_TEST_REG, &scratch_32);
->>> +     ret =3D pci_read_config_dword(chip->pdev, O2_SD_TEST_REG,
->>> + &scratch_32);
->>>       if (ret)
->>>               return;
->>>
->>>       scratch_32 |=3D O2_SD_LED_ENABLE;
->>> -     pci_write_config_dword(chip->pdev,
->>> -                            O2_SD_TEST_REG, scratch_32);
->>> +     pci_write_config_dword(chip->pdev, O2_SD_TEST_REG, scratch_32);
->>>
->>>  }
->>>
->>> @@ -104,8 +301,7 @@ static void sdhci_pci_o2_fujin2_pci_init(struct sdh=
-ci_pci_chip *chip)
->>>       scratch_32 |=3D 0x00CC;
->>>       pci_write_config_dword(chip->pdev, O2_SD_CAP_REG0, scratch_32);
->>>       /* Set DLL Tuning Window */
->>> -     ret =3D pci_read_config_dword(chip->pdev,
->>> -                                 O2_SD_TUNING_CTRL, &scratch_32);
->>> +     ret =3D pci_read_config_dword(chip->pdev, O2_SD_TUNING_CTRL,
->>> +&scratch_32);
->>>       if (ret)
->>>               return;
->>>       scratch_32 &=3D ~(0x000000FF);
->>> @@ -137,8 +333,7 @@ static void sdhci_pci_o2_fujin2_pci_init(struct sdh=
-ci_pci_chip *chip)
->>>       scratch_32 |=3D 0x30000000;
->>>       pci_write_config_dword(chip->pdev, O2_SD_CAPS, scratch_32);
->>>
->>> -     ret =3D pci_read_config_dword(chip->pdev,
->>> -                                 O2_SD_MISC_CTRL4, &scratch_32);
->>> +     ret =3D pci_read_config_dword(chip->pdev, O2_SD_MISC_CTRL4,
->>> +&scratch_32);
->>>       if (ret)
->>>               return;
->>>       scratch_32 &=3D ~(0x000f0000);
->>> @@ -151,6 +346,7 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *=
-slot)
->>>       struct sdhci_pci_chip *chip;
->>>       struct sdhci_host *host;
->>>       u32 reg;
->>> +     int ret;
->>>
->>>       chip =3D slot->chip;
->>>       host =3D slot->host;
->>> @@ -164,6 +360,22 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot =
-*slot)
->>>               if (reg & 0x1)
->>>                       host->quirks |=3D
->>> SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
->>>
->>> +             if (chip->pdev->device =3D=3D PCI_DEVICE_ID_O2_SEABIRD0) =
-{
->>> +                     ret =3D pci_read_config_dword(chip->pdev,
->>> +                                                 O2_SD_MISC_SETTING, &=
-reg);
->>> +                     if (ret)
->>> +                             return -EIO;
->>> +                     if (reg & (1 << 4)) {
->>> +                             pr_info("%s: emmc 1.8v flag is set,
->>> +                                     force 1.8v signaling voltage\n",
->>> +                                     mmc_hostname(host->mmc));
->>> +                             host->flags &=3D ~(SDHCI_SIGNALING_330);
->>> +                             host->flags |=3D SDHCI_SIGNALING_180;
->>> +                     }
->>> +             }
->>> +
->>> +             host->mmc_host_ops.execute_tuning =3D
->>> + sdhci_o2_execute_tuning;
->>> +
->>>               if (chip->pdev->device !=3D PCI_DEVICE_ID_O2_FUJIN2)
->>>                       break;
->>>               /* set dll watch dog timer */ @@ -191,8 +403,7 @@ int
->>> sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
->>>       case PCI_DEVICE_ID_O2_8320:
->>>       case PCI_DEVICE_ID_O2_8321:
->>>               /* This extra setup is required due to broken ADMA. */
->>> -             ret =3D pci_read_config_byte(chip->pdev,
->>> -                             O2_SD_LOCK_WP, &scratch);
->>> +             ret =3D pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP,
->>> + &scratch);
->>>               if (ret)
->>>                       return ret;
->>>               scratch &=3D 0x7f;
->>> @@ -202,8 +413,7 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
->>>               pci_write_config_byte(chip->pdev, O2_SD_MULTI_VCC3V,
->>> 0x08);
->>>
->>>               /* Disable CLK_REQ# support after media DET */
->>> -             ret =3D pci_read_config_byte(chip->pdev,
->>> -                             O2_SD_CLKREQ, &scratch);
->>> +             ret =3D pci_read_config_byte(chip->pdev, O2_SD_CLKREQ,
->>> + &scratch);
->>>               if (ret)
->>>                       return ret;
->>>               scratch |=3D 0x20;
->>> @@ -224,16 +434,14 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chi=
-p)
->>>               pci_write_config_byte(chip->pdev, O2_SD_ADMA2, 0x08);
->>>
->>>               /* Disable the infinite transfer mode */
->>> -             ret =3D pci_read_config_byte(chip->pdev,
->>> -                             O2_SD_INF_MOD, &scratch);
->>> +             ret =3D pci_read_config_byte(chip->pdev, O2_SD_INF_MOD,
->>> + &scratch);
->>>               if (ret)
->>>                       return ret;
->>>               scratch |=3D 0x08;
->>>               pci_write_config_byte(chip->pdev, O2_SD_INF_MOD,
->>> scratch);
->>>
->>>               /* Lock WP */
->>> -             ret =3D pci_read_config_byte(chip->pdev,
->>> -                             O2_SD_LOCK_WP, &scratch);
->>> +             ret =3D pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP,
->>> + &scratch);
->>>               if (ret)
->>>                       return ret;
->>>               scratch |=3D 0x80;
->>> @@ -243,8 +451,7 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
->>>       case PCI_DEVICE_ID_O2_SDS1:
->>>       case PCI_DEVICE_ID_O2_FUJIN2:
->>>               /* UnLock WP */
->>> -             ret =3D pci_read_config_byte(chip->pdev,
->>> -                             O2_SD_LOCK_WP, &scratch);
->>> +             ret =3D pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP,
->>> + &scratch);
->>>               if (ret)
->>>                       return ret;
->>>
->>> @@ -319,15 +526,13 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chi=
-p)
->>>               if (ret)
->>>                       return ret;
->>>               scratch_32 &=3D ~(0xE0);
->>> -             pci_write_config_dword(chip->pdev,
->>> -                                    O2_SD_CAP_REG2, scratch_32);
->>> +             pci_write_config_dword(chip->pdev, O2_SD_CAP_REG2,
->>> + scratch_32);
->>>
->>>               if (chip->pdev->device =3D=3D PCI_DEVICE_ID_O2_FUJIN2)
->>>                       sdhci_pci_o2_fujin2_pci_init(chip);
->>>
->>>               /* Lock WP */
->>> -             ret =3D pci_read_config_byte(chip->pdev,
->>> -                                        O2_SD_LOCK_WP, &scratch);
->>> +             ret =3D pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP,
->>> + &scratch);
->>>               if (ret)
->>>                       return ret;
->>>               scratch |=3D 0x80;
->>> @@ -336,8 +541,7 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
->>>       case PCI_DEVICE_ID_O2_SEABIRD0:
->>>       case PCI_DEVICE_ID_O2_SEABIRD1:
->>>               /* UnLock WP */
->>> -             ret =3D pci_read_config_byte(chip->pdev,
->>> -                             O2_SD_LOCK_WP, &scratch);
->>> +             ret =3D pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP,
->>> + &scratch);
->>>               if (ret)
->>>                       return ret;
->>>
->>> @@ -369,11 +573,9 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip=
-)
->>>               }
->>>
->>>               /* Set Tuning Windows to 5 */
->>> -             pci_write_config_byte(chip->pdev,
->>> -                             O2_SD_TUNING_CTRL, 0x55);
->>> +             pci_write_config_byte(chip->pdev, O2_SD_TUNING_CTRL,
->>> + 0x55);
->>>               /* Lock WP */
->>> -             ret =3D pci_read_config_byte(chip->pdev,
->>> -                                        O2_SD_LOCK_WP, &scratch);
->>> +             ret =3D pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP,
->>> + &scratch);
->>>               if (ret)
->>>                       return ret;
->>>               scratch |=3D 0x80;
->>> --
->>> 2.14.1
->>>
->>
+SGksIENyYWlnOg0KDQpUaGUgdXBzdHJlYW0gdXNlciBpcyB1c2luZyBTRCBjYXJkIG5vdCBlTU1D
+IGZvciB0aGlzIGRldmljZSBpbiB0aGUgY3VycmVudCBtYXJrZXQuIEJJT1MgZG9lcyBub3QgbmVl
+ZCB0byBzZXQgYml0IDQgb2YgMHgzMDggdG8gMSBmb3IgZGV2aWNlIHRoYXQgb25seSB1c2UgU0Qg
+Y2FyZC4gU2luY2UgQmF5aHViIGFscmVhZHkgc2hpcHBlZCB0aGlzIGRldmljZSBpbiB0aGUgbWFy
+a2V0IHRvIHN1cHBvcnQgU0QgY2FyZCBhbmQgd2UgY2FuIG5vdCBqdXN0IHVwc3RyZWFtIGRyaXZl
+ciB0byBvbmx5IHN1cHBvcnQgZU1NQyBmb3IgdGhpcyBkZXZpY2UuIA0KDQpXZSBjYW4gaW1wbGVt
+ZW50IGEgZHJpdmVyIHRoYXQgY2FuIGRldGVjdCBTRCBvciBlTU1DIGlzIHVzZWQgaW4gdGhlIGRl
+dmljZSBidXQgaXQgd2lsbCByZXF1aXJlIGEgbG90IG9mIGNvZGUgY2hhbmdlcyBhbmQgcmV0cnkg
+d2hpY2ggd2lsbCBkZWxheSB0aGUgY2FyZCBpbml0IHRpbWUgcGx1cyB0aGVyZSBpcyBubyBkZXZp
+Y2UrZU1NQyBjb25maWd1cmF0aW9uIGluIHRoZSBtYXJrZXQgbm93Lg0KDQpTaW5jZSB0aGlzIGlz
+IHRoZSAxc3QgdGltZSB0aGlzIGRldmljZSBpcyB1c2VkIHRvIHN1cHBvcnQgZU1NQywgc28gd2Ug
+dXNlIDB4MzA4IGJpdCA0IHRvIGlkZW50aWZ5IHRoZSBkZXZpY2UgaXMgY29ubmVjdGVkIHRvIGVN
+TUMgYW5kIEJJT1MgY2FuIGhlbHAgdG8gZG8gdGhlIGpvYiB3aGljaCBtYWtlcyBkcml2ZXIgaW1w
+bGVtZW50YXRpb24gc2ltcGxlci4NCg0KDQpUaGFua3MsDQpTaGlybGV5DQoNCg0KLS0tLS1Pcmln
+aW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IENyYWlnIEJlcmdzdHJvbSBbbWFpbHRvOmNyYWlnYkBn
+b29nbGUuY29tXSANClNlbnQ6IFdlZG5lc2RheSwgSmFudWFyeSAxMCwgMjAxOCAyOjMzIFBNDQpU
+bzogU2hpcmxleSBIZXIgKFNDKQ0KQ2M6IEFkcmlhbiBIdW50ZXI7IExpbnV4UGF0Y2hDb21taXQ7
+IHVsZi5oYW5zc29uQGxpbmFyby5vcmc7IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc7IGxpbnV4
+LWtlcm5lbEB2Z2VyLmtlcm5lbC5vcmcNClN1YmplY3Q6IFJlOiBbUEFUQ0ggMS8zXSBtbWM6IHNk
+aGNpLXBjaS1vMm1pY3JvOiBBZGQgaGFyZHdhcmUgdHVuaW5nIGZvciBlTU1DDQoNCkhleSBTaGly
+bGV5LA0KDQpJZiBhbGwgdXBzdHJlYW0gdXNlcnMgb2YgdGhpcyBkZXZpY2UgbmVlZCB0byBzZXQg
+Yml0IDQgb2YgMHgzMDggdG8gMSwgc2hvdWxkIHRoZSB1cHN0cmVhbSBkcml2ZXIgZG8gdGhhdD8N
+Cg0KQ3JhaWcNCg0KDQpPbiBXZWQsIEphbiAxMCwgMjAxOCBhdCAxMjowNSBQTSwgU2hpcmxleSBI
+ZXIgKFNDKSA8c2hpcmxleS5oZXJAYmF5aHVidGVjaC5jb20+IHdyb3RlOg0KPiBIaSwgQ3JhaWc6
+DQo+DQo+IEFzIHRoZSBtZXNzYWdlIHNhaWQgZHVyaW5nIHNpZ24gb2ZmIGFzIGJlbG93LiBCSU9T
+IG5lZWRzIHRvIHNldCB4MDMwOCBiaXQgNCB0byAxIHNvIHRoZSBkcml2ZXIgd2lsbCBza2lwIDMu
+M1YgaW4gZU1NQyBpbml0aWFsaXphdGlvbiBwcm9jZXNzLiBJdCBtZWFucyBkZXB0aGNoYXJnZSBu
+ZWVkcyB0byBzZXQgMHgzMDggYml0IDQgdG8gMSBmaXJzdCBpbiBvcmRlciBmb3IgZHJpdmVyIHRv
+IHVzZSBlTU1DIDEuOFYuDQo+DQo+IEluIHNvbWUgY2FzZSBvZiBlTU1DIHVzZWQgYXMgYm9vdCBk
+ZXZpY2UsIHRoZSBlTU1DIHNpZ25hbGluZyB2b2x0YWdlDQo+PiBpcyBmaXhlZCB0byAxLjh2LCBi
+aW9zIGNhbiBzZXQgbzIgc2QgaG9zdCBjb250cm9sbGVyIHJlZ2lzdGVyIDB4MzA4DQo+PiBiaXQ0
+IHRvIGxldCBob3N0IGNvbnRyb2xsZXIgc2tpcCB0cnkgMy4zLnYgc2lnbmFsaW5nIHZvbHRhZ2Ug
+aW4gZU1NQyANCj4+IGluaXRpYWxpemUgcHJvY2Vzcy4NCj4NCj4gVGhhbmtzLA0KPiBTaGlybGV5
+DQo+DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IENyYWlnIEJlcmdzdHJv
+bSBbbWFpbHRvOmNyYWlnYkBnb29nbGUuY29tXQ0KPiBTZW50OiBUaHVyc2RheSwgRGVjZW1iZXIg
+MjEsIDIwMTcgOToxOCBBTQ0KPiBUbzogQWRyaWFuIEh1bnRlcg0KPiBDYzogTGludXhQYXRjaENv
+bW1pdDsgdWxmLmhhbnNzb25AbGluYXJvLm9yZzsgDQo+IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5v
+cmc7IGxpbnV4LWtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc7IFNoaXJsZXkgSGVyIA0KPiAoU0MpDQo+
+IFN1YmplY3Q6IFJlOiBbUEFUQ0ggMS8zXSBtbWM6IHNkaGNpLXBjaS1vMm1pY3JvOiBBZGQgaGFy
+ZHdhcmUgdHVuaW5nIA0KPiBmb3IgZU1NQw0KPg0KPiBUaGFua3MgZm9yIHNlbmRpbmcgdGhlc2Ug
+cGF0Y2hlcyBvdXQsIEkgd291bGQgYmUgdmVyeSBleGNpdGVkIHRvIHNlZSB0aGVzZSBkZXZpY2Vz
+IHN1cHBvcnRlZCBieSBMaW51eC4NCj4NCj4gSSdtIHRyeWluZyB0aGVtIG91dCB3aXRoIGEgU0VB
+QklSRCBkZXZpY2UgKHBjaSBkZXZpY2UgMTIxNzo4NjIwKS4NCj4gV2hlbiBJIGJvb3QgdXAgYW5k
+IGxvYWQgdGhlIGRyaXZlciwgaXQgZG9uJ3Qgc2VlIGFueSBpbmRpY2F0aW9uIG9mIHRoZSBleGlz
+dGVuY2Ugb2YgYmxvY2sgZGV2aWNlIGFuZCBJIHNlZSB0aGVzZSBtZXNzYWdlcyByZXBlYXRlZGx5
+IHNwYW1tZWQgdG8gdGhlIGtlcm5lbCBsb2dzOg0KPg0KPiBbICAgIDAuODU1MTYzXSBtbWMxOiBV
+bmtub3duIGNvbnRyb2xsZXIgdmVyc2lvbiAoMykuIFlvdSBtYXkNCj4gZXhwZXJpZW5jZSBwcm9i
+bGVtcy4NCj4gWyAgICAwLjg2MjUxOV0gbW1jMTogU0RIQ0kgY29udHJvbGxlciBvbiBQQ0kgWzAw
+MDA6MDE6MDAuMF0gdXNpbmcgQURNQQ0KPiBbICAgOTMuMTUyMTYzXSBtbWMxOiBUaW1lb3V0IHdh
+aXRpbmcgZm9yIGhhcmR3YXJlIGNtZCBpbnRlcnJ1cHQuDQo+IFsgICA5My4xNTc5MTFdIG1tYzE6
+IHNkaGNpOiA9PT09PT09PT09PT0gU0RIQ0kgUkVHSVNURVIgRFVNUCA9PT09PT09PT09PQ0KPiBb
+ICAgOTMuMTY0MzQ3XSBtbWMxOiBzZGhjaTogU3lzIGFkZHI6ICAweDAwMDAwMDAwIHwgVmVyc2lv
+bjogIDB4MDAwMDA2MDMNCj4gWyAgIDkzLjE3MDc4Ml0gbW1jMTogc2RoY2k6IEJsayBzaXplOiAg
+MHgwMDAwMDAwMCB8IEJsayBjbnQ6ICAweDAwMDAwMDAwDQo+IFsgICA5My4xNzcyMThdIG1tYzE6
+IHNkaGNpOiBBcmd1bWVudDogIDB4MDAwMDAwMDAgfCBUcm4gbW9kZTogMHgwMDAwMDAwMA0KPiBb
+ICAgOTMuMTgzNjUyXSBtbWMxOiBzZGhjaTogUHJlc2VudDogICAweDAxZmYwMDAwIHwgSG9zdCBj
+dGw6IDB4MDAwMDAwMDENCj4gWyAgIDkzLjE5MDA4OF0gbW1jMTogc2RoY2k6IFBvd2VyOiAgICAg
+MHgwMDAwMDAwZiB8IEJsayBnYXA6ICAweDAwMDAwMDAwDQo+IFsgICA5My4xOTY1MjNdIG1tYzE6
+IHNkaGNpOiBXYWtlLXVwOiAgIDB4MDAwMDAwMDAgfCBDbG9jazogICAgMHgwMDAwZmEwNw0KPiBb
+ICAgOTMuMjAyOTU2XSBtbWMxOiBzZGhjaTogVGltZW91dDogICAweDAwMDAwMDAwIHwgSW50IHN0
+YXQ6IDB4MDAwMTgwMDANCj4gWyAgIDkzLjIwOTM5Ml0gbW1jMTogc2RoY2k6IEludCBlbmFiOiAg
+MHgwMGZmMDA4MyB8IFNpZyBlbmFiOiAweDAwZmYwMDgzDQo+IFsgICA5My4yMTU4MjZdIG1tYzE6
+IHNkaGNpOiBBQzEyIGVycjogIDB4MDAwMDAwMDAgfCBTbG90IGludDogMHgwMDAwMDAwMQ0KPiBb
+ICAgOTMuMjIyMjYwXSBtbWMxOiBzZGhjaTogQ2FwczogICAgICAweDI1ZmNjOGJmIHwgQ2Fwc18x
+OiAgIDB4MDAwMDIwNzcNCj4gWyAgIDkzLjIyODY5NF0gbW1jMTogc2RoY2k6IENtZDogICAgICAg
+MHgwMDAwMzcxYSB8IE1heCBjdXJyOiAweDAwNTgwMGM4DQo+IFsgICA5My4yMzUxMjddIG1tYzE6
+IHNkaGNpOiBSZXNwWzBdOiAgIDB4MDAwMDAwMDAgfCBSZXNwWzFdOiAgMHgwMDAwMDAwMA0KPiBb
+ICAgOTMuMjQxNTYyXSBtbWMxOiBzZGhjaTogUmVzcFsyXTogICAweDAwMDAwMDAwIHwgUmVzcFsz
+XTogIDB4MDAwMDAwMDANCj4gWyAgIDkzLjI0Nzk5NF0gbW1jMTogc2RoY2k6IEhvc3QgY3RsMjog
+MHgwMDAwMDAwMA0KPiBbICAgOTMuMjUyNDM1XSBtbWMxOiBzZGhjaTogQURNQSBFcnI6ICAweDAw
+MDAwMDAwIHwgQURNQSBQdHI6IDB4MDAwMDAwMDANCj4gWyAgIDkzLjI1ODg2M10gbW1jMTogc2Ro
+Y2k6ID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09DQo+IFsgIDEw
+My4zOTIxNjRdIG1tYzE6IFRpbWVvdXQgd2FpdGluZyBmb3IgaGFyZHdhcmUgY21kIGludGVycnVw
+dC4NCj4gWyAgMTAzLjM5NzkxM10gbW1jMTogc2RoY2k6ID09PT09PT09PT09PSBTREhDSSBSRUdJ
+U1RFUiBEVU1QID09PT09PT09PT09IFsgIDEwMy40MDQzNTBdIG1tYzE6IHNkaGNpOiBTeXMgYWRk
+cjogIDB4MDAwMDAwMDAgfCBWZXJzaW9uOiAgMHgwMDAwMDYwMyBbICAxMDMuNDEwNzg2XSBtbWMx
+OiBzZGhjaTogQmxrIHNpemU6ICAweDAwMDAwMDAwIHwgQmxrIGNudDogIDB4MDAwMDAwMDAgWyAg
+MTAzLjQxNzIyMV0gbW1jMTogc2RoY2k6IEFyZ3VtZW50OiAgMHgwMDAwMDAwMCB8IFRybiBtb2Rl
+OiAweDAwMDAwMDAwDQo+IFsgIDEwMy40MjM2NTRdIG1tYzE6IHNkaGNpOiBQcmVzZW50OiAgIDB4
+MDFmZjAwMDAgfCBIb3N0IGN0bDogMHgwMDAwMDAwMQ0KPiBbICAxMDMuNDMwMDg5XSBtbWMxOiBz
+ZGhjaTogUG93ZXI6ICAgICAweDAwMDAwMDBmIHwgQmxrIGdhcDogIDB4MDAwMDAwMDANCj4gWyAg
+MTAzLjQzNjUyM10gbW1jMTogc2RoY2k6IFdha2UtdXA6ICAgMHgwMDAwMDAwMCB8IENsb2NrOiAg
+ICAweDAwMDBmYTA3DQo+IFsgIDEwMy40NDI5NTVdIG1tYzE6IHNkaGNpOiBUaW1lb3V0OiAgIDB4
+MDAwMDAwMDAgfCBJbnQgc3RhdDogMHgwMDAxODAwMA0KPiBbICAxMDMuNDQ5MzkwXSBtbWMxOiBz
+ZGhjaTogSW50IGVuYWI6ICAweDAwZmYwMDgzIHwgU2lnIGVuYWI6IDB4MDBmZjAwODMgWyAgMTAz
+LjQ1NTgyM10gbW1jMTogc2RoY2k6IEFDMTIgZXJyOiAgMHgwMDAwMDAwMCB8IFNsb3QgaW50OiAw
+eDAwMDAwMDAxDQo+IFsgIDEwMy40NjIyNTVdIG1tYzE6IHNkaGNpOiBDYXBzOiAgICAgIDB4MjVm
+Y2M4YmYgfCBDYXBzXzE6ICAgMHgwMDAwMjA3Nw0KPiBbICAxMDMuNDY4Njg5XSBtbWMxOiBzZGhj
+aTogQ21kOiAgICAgICAweDAwMDAzNzFhIHwgTWF4IGN1cnI6IDB4MDA1ODAwYzgNCj4gWyAgMTAz
+LjQ3NTEyNl0gbW1jMTogc2RoY2k6IFJlc3BbMF06ICAgMHgwMDAwMDAwMCB8IFJlc3BbMV06ICAw
+eDAwMDAwMDAwDQo+IFsgIDEwMy40ODE1NjBdIG1tYzE6IHNkaGNpOiBSZXNwWzJdOiAgIDB4MDAw
+MDAwMDAgfCBSZXNwWzNdOiAgMHgwMDAwMDAwMA0KPiBbICAxMDMuNDg3OTk0XSBtbWMxOiBzZGhj
+aTogSG9zdCBjdGwyOiAweDAwMDAwMDAwIFsgIDEwMy40OTI0MzVdIG1tYzE6IA0KPiBzZGhjaTog
+QURNQSBFcnI6ICAweDAwMDAwMDAwIHwgQURNQSBQdHI6IDB4MDAwMDAwMDAgWyAgMTAzLjQ5ODg2
+N10gDQo+IG1tYzE6IHNkaGNpOiA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
+PT09PT09PQ0KPg0KPiBJcyBpdCBleHBlY3RlZCB0aGF0IHRoaXMgc2hvdWxkICJqdXN0IHdvcmsi
+LCBvciBhbSBJIGRvaW5nIHNvbWV0aGluZyB3cm9uZz8gIE15IHBhdGNoZWQga2VybmVsIGlzIGJh
+c2VkIG9uIDQuMTQuMi4NCj4NCj4gT24gVHVlLCBEZWMgMTksIDIwMTcgYXQgMjowNSBBTSwgQWRy
+aWFuIEh1bnRlciA8YWRyaWFuLmh1bnRlckBpbnRlbC5jb20+IHdyb3RlOg0KPj4gT24gMDQvMTIv
+MTcgMTE6MzksIExpbnV4UGF0Y2hDb21taXQgd3JvdGU6DQo+Pj4gRGVhciBBbGwsDQo+Pj4NCj4+
+PiBGb3IgTzJtaWNyby9CYXlodWJ0ZWNoIFNEIEhvc3QgRGV2aWNlSUQgODYyMCwgZU1NQyBIUzIw
+MCBtb2RlIGlzIHdvcmtpbmcgYXQgMS44diBhbmQgaXQgdXNlcyBoYXJkd2FyZSB0dW5pbmcuIFRo
+ZSBoYXJkd2FyZSB0dW5pbmcgb25seSBuZWVkcyB0byBzZW5kIG9uZSB0dW5pbmcgY29tbWFuZCBp
+bnN0ZWFkIG9mIG11bHRpcGxlIHR1bmluZyBjb21tYW5kcyB3aXRoIHNvZnR3YXJlIHR1bmluZy4N
+Cj4+Pg0KPj4+IFNpZ25lZC1vZmYtYnk6IGVybmVzdC56aGFuZyA8ZXJuZXN0LnpoYW5nQGJheWh1
+YnRlY2guY29tPg0KPj4+IC0tLQ0KPj4+ICBkcml2ZXJzL21tYy9ob3N0L3NkaGNpLXBjaS1vMm1p
+Y3JvLmMgfCAyNzYNCj4+PiArKysrKysrKysrKysrKysrKysrKysrKysrKysrKystLS0tLQ0KPj4+
+ICAxIGZpbGUgY2hhbmdlZCwgMjM5IGluc2VydGlvbnMoKyksIDM3IGRlbGV0aW9ucygtKQ0KPj4+
+DQo+Pj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktcGNpLW8ybWljcm8uYw0K
+Pj4+IGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1wY2ktbzJtaWNyby5jDQo+Pj4gaW5kZXggMTQy
+NzNjYTAwNjQxLi4yYTdmZmQyNDA0OTcgMTAwNjQ0DQo+Pj4gLS0tIGEvZHJpdmVycy9tbWMvaG9z
+dC9zZGhjaS1wY2ktbzJtaWNyby5jDQo+Pj4gKysrIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1w
+Y2ktbzJtaWNyby5jDQo+Pj4gQEAgLTE2LDIyICsxNiwyMjMgQEANCj4+PiAgICovDQo+Pj4NCj4+
+PiAgI2luY2x1ZGUgPGxpbnV4L3BjaS5oPg0KPj4+IC0NCj4+PiArI2luY2x1ZGUgPGxpbnV4L3Bs
+YXRmb3JtX2RldmljZS5oPg0KPj4+ICsjaW5jbHVkZSA8bGludXgvcmVndWxhdG9yL2ZpeGVkLmg+
+DQo+Pj4gKyNpbmNsdWRlIDxsaW51eC9yZWd1bGF0b3IvbWFjaGluZS5oPiAjaW5jbHVkZSA8bGlu
+dXgvbW1jL2hvc3QuaD4gDQo+Pj4gKyNpbmNsdWRlIDxsaW51eC9tbWMvbW1jLmg+ICNpbmNsdWRl
+IDxsaW51eC9kZWxheS5oPg0KPj4+ICAjaW5jbHVkZSAic2RoY2kuaCINCj4+PiAgI2luY2x1ZGUg
+InNkaGNpLXBjaS5oIg0KPj4+ICAjaW5jbHVkZSAic2RoY2ktcGNpLW8ybWljcm8uaCINCj4+Pg0K
+Pj4+ICtzdGF0aWMgdm9pZCBzZGhjaV9vMl9zdGFydF90dW5pbmcoc3RydWN0IHNkaGNpX2hvc3Qg
+Kmhvc3QpIHsNCj4+PiArICAgICB1MTYgY3RybDsNCj4+PiArDQo+Pj4gKyAgICAgY3RybCA9IHNk
+aGNpX3JlYWR3KGhvc3QsIFNESENJX0hPU1RfQ09OVFJPTDIpOw0KPj4+ICsgICAgIGN0cmwgfD0g
+U0RIQ0lfQ1RSTF9FWEVDX1RVTklORzsNCj4+PiArICAgICBpZiAoaG9zdC0+cXVpcmtzMiAmIFNE
+SENJX1FVSVJLMl9UVU5JTkdfV09SS19BUk9VTkQpDQo+Pj4gKyAgICAgICAgICAgICBjdHJsIHw9
+IFNESENJX0NUUkxfVFVORURfQ0xLOw0KPj4+ICsgICAgIHNkaGNpX3dyaXRldyhob3N0LCBjdHJs
+LCBTREhDSV9IT1NUX0NPTlRST0wyKTsNCj4+PiArDQo+Pj4gKyAgICAgLyoNCj4+PiArICAgICAg
+KiBBcyBwZXIgdGhlIEhvc3QgQ29udHJvbGxlciBzcGVjIHYzLjAwLCB0dW5pbmcgY29tbWFuZA0K
+Pj4+ICsgICAgICAqIGdlbmVyYXRlcyBCdWZmZXIgUmVhZCBSZWFkeSBpbnRlcnJ1cHQsIHNvIGVu
+YWJsZSB0aGF0Lg0KPj4+ICsgICAgICAqDQo+Pj4gKyAgICAgICogTm90ZTogVGhlIHNwZWMgY2xl
+YXJseSBzYXlzIHRoYXQgd2hlbiB0dW5pbmcgc2VxdWVuY2UNCj4+PiArICAgICAgKiBpcyBiZWlu
+ZyBwZXJmb3JtZWQsIHRoZSBjb250cm9sbGVyIGRvZXMgbm90IGdlbmVyYXRlDQo+Pj4gKyAgICAg
+ICogaW50ZXJydXB0cyBvdGhlciB0aGFuIEJ1ZmZlciBSZWFkIFJlYWR5IGludGVycnVwdC4gQnV0
+DQo+Pj4gKyAgICAgICogdG8gbWFrZSBzdXJlIHdlIGRvbid0IGhpdCBhIGNvbnRyb2xsZXIgYnVn
+LCB3ZSBfb25seV8NCj4+PiArICAgICAgKiBlbmFibGUgQnVmZmVyIFJlYWQgUmVhZHkgaW50ZXJy
+dXB0IGhlcmUuDQo+Pj4gKyAgICAgICovDQo+Pj4gKyAgICAgc2RoY2lfd3JpdGVsKGhvc3QsIFNE
+SENJX0lOVF9EQVRBX0FWQUlMLCBTREhDSV9JTlRfRU5BQkxFKTsNCj4+PiArICAgICBzZGhjaV93
+cml0ZWwoaG9zdCwgU0RIQ0lfSU5UX0RBVEFfQVZBSUwsIFNESENJX1NJR05BTF9FTkFCTEUpOyAN
+Cj4+PiArIH0NCj4+PiArDQo+Pj4gK3N0YXRpYyB2b2lkIHNkaGNpX28yX2VuZF90dW5pbmcoc3Ry
+dWN0IHNkaGNpX2hvc3QgKmhvc3QpIHsNCj4+PiArICAgICBzZGhjaV93cml0ZWwoaG9zdCwgaG9z
+dC0+aWVyLCBTREhDSV9JTlRfRU5BQkxFKTsNCj4+PiArICAgICBzZGhjaV93cml0ZWwoaG9zdCwg
+aG9zdC0+aWVyLCBTREhDSV9TSUdOQUxfRU5BQkxFKTsgfQ0KPj4+ICsNCj4+PiArc3RhdGljIGlu
+bGluZSBib29sIHNkaGNpX2RhdGFfbGluZV9jbWQoc3RydWN0IG1tY19jb21tYW5kICpjbWQpIHsN
+Cj4+PiArICAgICByZXR1cm4gY21kLT5kYXRhIHx8IGNtZC0+ZmxhZ3MgJiBNTUNfUlNQX0JVU1k7
+IH0NCj4+PiArDQo+Pj4gK3N0YXRpYyB2b2lkIHNkaGNpX2RlbF90aW1lcihzdHJ1Y3Qgc2RoY2lf
+aG9zdCAqaG9zdCwgc3RydWN0IA0KPj4+ICttbWNfcmVxdWVzdA0KPj4+ICsqbXJxKSB7DQo+Pj4g
+KyAgICAgaWYgKHNkaGNpX2RhdGFfbGluZV9jbWQobXJxLT5jbWQpKQ0KPj4+ICsgICAgICAgICAg
+ICAgZGVsX3RpbWVyKCZob3N0LT5kYXRhX3RpbWVyKTsNCj4+PiArICAgICBlbHNlDQo+Pj4gKyAg
+ICAgICAgICAgICBkZWxfdGltZXIoJmhvc3QtPnRpbWVyKTsgfQ0KPj4+ICsNCj4+PiArc3RhdGlj
+IHZvaWQgc2RoY2lfbzJfc2V0X3R1bmluZ19tb2RlKHN0cnVjdCBzZGhjaV9ob3N0ICpob3N0LCBi
+b29sDQo+Pj4gK2h3KSB7DQo+Pj4gKyAgICAgdTE2IHJlZzsNCj4+PiArDQo+Pj4gKyAgICAgaWYg
+KGh3KSB7DQo+Pj4gKyAgICAgICAgICAgICAvLyBlbmFibGUgaGFyZHdhcmUgdHVuaW5nDQo+Pj4g
+KyAgICAgICAgICAgICByZWcgPSBzZGhjaV9yZWFkdyhob3N0LCBPMl9TRF9WRU5ET1JfU0VUVElO
+Ryk7DQo+Pj4gKyAgICAgICAgICAgICByZWcgJj0gKH5PMl9TRF9IV19UVU5JTkdfRU5BQkxFKTsN
+Cj4+PiArICAgICAgICAgICAgIHNkaGNpX3dyaXRldyhob3N0LCByZWcsIE8yX1NEX1ZFTkRPUl9T
+RVRUSU5HKTsNCj4+PiArICAgICB9IGVsc2Ugew0KPj4+ICsgICAgICAgICAgICAgcmVnID0gc2Ro
+Y2lfcmVhZHcoaG9zdCwgTzJfU0RfVkVORE9SX1NFVFRJTkcpOw0KPj4+ICsgICAgICAgICAgICAg
+cmVnIHw9IE8yX1NEX0hXX1RVTklOR19FTkFCTEU7DQo+Pj4gKyAgICAgICAgICAgICBzZGhjaV93
+cml0ZXcoaG9zdCwgcmVnLCBPMl9TRF9WRU5ET1JfU0VUVElORyk7DQo+Pj4gKyAgICAgfQ0KPj4+
+ICt9DQo+Pj4gKw0KPj4+ICtzdGF0aWMgdTggZGF0YV9idWZbNjRdOw0KPj4+ICsNCj4+PiArc3Rh
+dGljIHZvaWQgc2RoY2lfbzJfc2VuZF90dW5pbmcoc3RydWN0IHNkaGNpX2hvc3QgKmhvc3QsIHUz
+MiBvcGNvZGUpIHsNCj4+PiArICAgICBzdHJ1Y3QgbW1jX2NvbW1hbmQgY21kID0geyB9Ow0KPj4+
+ICsgICAgIHN0cnVjdCBtbWNfZGF0YSBkYXRhID0geyB9Ow0KPj4+ICsgICAgIHN0cnVjdCBzY2F0
+dGVybGlzdCBzZzsNCj4+PiArICAgICBzdHJ1Y3QgbW1jX3JlcXVlc3QgbXJxID0geyB9Ow0KPj4+
+ICsgICAgIHVuc2lnbmVkIGxvbmcgZmxhZ3M7DQo+Pj4gKyAgICAgdTMyIGIgPSBob3N0LT5zZG1h
+X2JvdW5kYXJ5Ow0KPj4+ICsgICAgIGludCBzaXplID0gc2l6ZW9mKGRhdGFfYnVmKTsNCj4+PiAr
+DQo+Pj4gKyAgICAgY21kLm9wY29kZSA9IG9wY29kZTsNCj4+PiArICAgICBjbWQuZmxhZ3MgPSBN
+TUNfUlNQX1BSRVNFTlQgfCBNTUNfUlNQX09QQ09ERSB8IE1NQ19SU1BfQ1JDOw0KPj4+ICsgICAg
+IGNtZC5tcnEgPSAmbXJxOw0KPj4+ICsgICAgIG1ycS5jbWQgPSAmY21kOw0KPj4+ICsgICAgIG1y
+cS5kYXRhID0gJmRhdGE7DQo+Pj4gKyAgICAgZGF0YS5ibGtzeiA9IHNpemU7DQo+Pj4gKyAgICAg
+ZGF0YS5ibG9ja3MgPSAxOw0KPj4+ICsgICAgIGRhdGEuZmxhZ3MgPSBNTUNfREFUQV9SRUFEOw0K
+Pj4+ICsNCj4+PiArICAgICBkYXRhLnRpbWVvdXRfbnMgPSAxNTAgKiBOU0VDX1BFUl9NU0VDOw0K
+Pj4+ICsNCj4+PiArICAgICBkYXRhLnNnID0gJnNnOw0KPj4+ICsgICAgIGRhdGEuc2dfbGVuID0g
+MTsNCj4+PiArICAgICBzZ19pbml0X29uZSgmc2csIGRhdGFfYnVmLCBzaXplKTsNCj4+PiArDQo+
+Pj4gKyAgICAgc3Bpbl9sb2NrX2lycXNhdmUoJmhvc3QtPmxvY2ssIGZsYWdzKTsNCj4+PiArDQo+
+Pj4gKyAgICAgc2RoY2lfd3JpdGV3KGhvc3QsIFNESENJX01BS0VfQkxLU1ooYiwgNjQpLCBTREhD
+SV9CTE9DS19TSVpFKTsNCj4+PiArDQo+Pj4gKyAgICAgLyoNCj4+PiArICAgICAgKiBUaGUgdHVu
+aW5nIGJsb2NrIGlzIHNlbnQgYnkgdGhlIGNhcmQgdG8gdGhlIGhvc3QgY29udHJvbGxlci4NCj4+
+PiArICAgICAgKiBTbyB3ZSBzZXQgdGhlIFRSTlNfUkVBRCBiaXQgaW4gdGhlIFRyYW5zZmVyIE1v
+ZGUgcmVnaXN0ZXIuDQo+Pj4gKyAgICAgICogVGhpcyBhbHNvIHRha2VzIGNhcmUgb2Ygc2V0dGlu
+ZyBETUEgRW5hYmxlIGFuZCBNdWx0aSBCbG9jaw0KPj4+ICsgICAgICAqIFNlbGVjdCBpbiB0aGUg
+c2FtZSByZWdpc3RlciB0byAwLg0KPj4+ICsgICAgICAqLw0KPj4+ICsgICAgIHNkaGNpX3dyaXRl
+dyhob3N0LCBTREhDSV9UUk5TX1JFQUQsIFNESENJX1RSQU5TRkVSX01PREUpOw0KPj4+ICsNCj4+
+PiArICAgICBzZGhjaV9zZW5kX2NvbW1hbmQoaG9zdCwgJmNtZCk7DQo+Pj4gKw0KPj4+ICsgICAg
+IGhvc3QtPmNtZCA9IE5VTEw7DQo+Pj4gKw0KPj4+ICsgICAgIHNkaGNpX2RlbF90aW1lcihob3N0
+LCAmbXJxKTsNCj4+PiArDQo+Pj4gKyAgICAgaG9zdC0+dHVuaW5nX2RvbmUgPSAwOw0KPj4+ICsN
+Cj4+PiArICAgICBtbWlvd2IoKTsNCj4+PiArICAgICBzcGluX3VubG9ja19pcnFyZXN0b3JlKCZo
+b3N0LT5sb2NrLCBmbGFncyk7DQo+Pj4gKw0KPj4+ICsgICAgIC8qIFdhaXQgZm9yIEJ1ZmZlciBS
+ZWFkIFJlYWR5IGludGVycnVwdCAqLw0KPj4+ICsgICAgIHdhaXRfZXZlbnRfdGltZW91dChob3N0
+LT5idWZfcmVhZHlfaW50LCAoaG9zdC0+dHVuaW5nX2RvbmUgPT0gMSksDQo+Pj4gKyAgICAgICAg
+ICAgICAgICAgICAgICAgIG1zZWNzX3RvX2ppZmZpZXMoNTApKTsNCj4+PiArDQo+Pj4gK30NCj4+
+PiArDQo+Pj4gK3N0YXRpYyB2b2lkIHNkaGNpX28yX3Jlc2V0X3R1bmluZyhzdHJ1Y3Qgc2RoY2lf
+aG9zdCAqaG9zdCkgew0KPj4+ICsgICAgIHUxNiBjdHJsOw0KPj4+ICsNCj4+PiArICAgICBjdHJs
+ID0gc2RoY2lfcmVhZHcoaG9zdCwgU0RIQ0lfSE9TVF9DT05UUk9MMik7DQo+Pj4gKyAgICAgY3Ry
+bCAmPSB+U0RIQ0lfQ1RSTF9UVU5FRF9DTEs7DQo+Pj4gKyAgICAgY3RybCAmPSB+U0RIQ0lfQ1RS
+TF9FWEVDX1RVTklORzsNCj4+PiArICAgICBzZGhjaV93cml0ZXcoaG9zdCwgY3RybCwgU0RIQ0lf
+SE9TVF9DT05UUk9MMik7IH0NCj4+PiArDQo+Pj4gK3N0YXRpYyB2b2lkIF9fc2RoY2lfbzJfZXhl
+Y3V0ZV90dW5pbmcoc3RydWN0IHNkaGNpX2hvc3QgKmhvc3QsIHUzMg0KPj4+ICtvcGNvZGUpIHsN
+Cj4+PiArDQo+Pj4gKyAgICAgaW50IGk7DQo+Pj4gKw0KPj4+ICsgICAgIHNkaGNpX28yX3NlbmRf
+dHVuaW5nKGhvc3QsIE1NQ19TRU5EX1RVTklOR19CTE9DS19IUzIwMCk7DQo+Pg0KPj4gU28gaXQg
+bG9va3MgbGlrZSB5b3Ugc2VuZCB0aGUgdHVuaW5nIGNvbW1hbmQgb25seSBvbmNlLiAgSXMgdGhh
+dCByaWdodD8NCj4+IE1heWJlIHlvdSBjb3VsZCBicmllZmx5IG91dGxpbmUgd2hhdCB0aGUgdHVu
+aW5nIHByb2NlZHVyZSBpcywgYW5kIGhvdyANCj4+IGl0IGRpZmZlcnMgZnJvbSBzZGhjaV9leGVj
+dXRlX3R1bmluZygpLg0KPj4NCj4+PiArDQo+Pj4gKyAgICAgZm9yIChpID0gMDsgaSA8IDE1MDsg
+aSsrKSB7DQo+Pj4gKyAgICAgICAgICAgICB1MTYgY3RybCA9IHNkaGNpX3JlYWR3KGhvc3QsIFNE
+SENJX0hPU1RfQ09OVFJPTDIpOw0KPj4+ICsNCj4+PiArICAgICAgICAgICAgIGlmICghKGN0cmwg
+JiBTREhDSV9DVFJMX0VYRUNfVFVOSU5HKSkgew0KPj4+ICsgICAgICAgICAgICAgICAgICAgICBp
+ZiAoY3RybCAmIFNESENJX0NUUkxfVFVORURfQ0xLKSB7DQo+Pj4gKyAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgcHJfaW5mbygiJXM6IEhXIHR1bmluZyBvayAhXG4iLA0KPj4+ICsgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgbW1jX2hvc3RuYW1lKGhvc3QtPm1tYykpOw0K
+Pj4+ICsgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGhvc3QtPnR1bmluZ19kb25lID0gdHJ1
+ZTsNCj4+PiArICAgICAgICAgICAgICAgICAgICAgICAgICAgICByZXR1cm47DQo+Pj4gKyAgICAg
+ICAgICAgICAgICAgICAgIH0NCj4+PiArICAgICAgICAgICAgICAgICAgICAgcHJfd2FybigiJXM6
+IEhXIHR1bmluZyBmYWlsZWQgIVxuIiwNCj4+PiArICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICBtbWNfaG9zdG5hbWUoaG9zdC0+bW1jKSk7DQo+Pj4gKw0KPj4+ICsgICAgICAgICAgICAgICAg
+ICAgICBicmVhazsNCj4+PiArICAgICAgICAgICAgIH0NCj4+PiArDQo+Pj4gKyAgICAgICAgICAg
+ICBtZGVsYXkoMSk7DQo+Pj4gKyAgICAgfQ0KPj4+ICsNCj4+PiArICAgICBwcl9pbmZvKCIlczog
+VHVuaW5nIGZhaWxlZCwgZmFsbGluZyBiYWNrIHRvIGZpeGVkIHNhbXBsaW5nIGNsb2NrXG4iLA0K
+Pj4+ICsgICAgICAgICAgICAgbW1jX2hvc3RuYW1lKGhvc3QtPm1tYykpOw0KPj4+ICsgICAgIHNk
+aGNpX28yX3Jlc2V0X3R1bmluZyhob3N0KTsNCj4+PiArDQo+Pj4gK30NCj4+PiArDQo+Pj4gK3N0
+YXRpYyBpbnQgc2RoY2lfbzJfZXhlY3V0ZV90dW5pbmcoc3RydWN0IG1tY19ob3N0ICptbWMsIHUz
+MiBvcGNvZGUpIHsNCj4+PiArICAgICBzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdCA9IG1tY19wcml2
+KG1tYyk7DQo+Pj4gKyAgICAgaW50IGN1cnJlbnRfYnVzX3dpZHRoID0gMDsNCj4+PiArDQo+Pj4g
+KyAgICAgLyoNCj4+PiArICAgICAgKiBUaGlzIGhhbmRsZXIgb25seSBpbXBsZW1lbnRzIHRoZSBl
+TU1DIHR1bmluZyB0aGF0IGlzIHNwZWNpZmljIHRvDQo+Pj4gKyAgICAgICogdGhpcyBjb250cm9s
+bGVyLiAgRmFsbCBiYWNrIHRvIHRoZSBzdGFuZGFyZCBtZXRob2QgZm9yIG90aGVyIFRJTk1JTkcu
+DQo+Pj4gKyAgICAgICovDQo+Pj4gKyAgICAgaWYgKGhvc3QtPnRpbWluZyAhPSBNTUNfVElNSU5H
+X01NQ19IUzIwMCkNCj4+PiArICAgICAgICAgICAgIHJldHVybiBzZGhjaV9leGVjdXRlX3R1bmlu
+ZyhtbWMsIG9wY29kZSk7DQo+Pj4gKw0KPj4+ICsgICAgIGlmIChXQVJOX09OKG9wY29kZSAhPSBN
+TUNfU0VORF9UVU5JTkdfQkxPQ0tfSFMyMDApKQ0KPj4+ICsgICAgICAgICAgICAgcmV0dXJuIC1F
+SU5WQUw7DQo+Pj4gKw0KPj4+ICsgICAgIC8qDQo+Pj4gKyAgICAgICogbzIgc2RoY2kgaG9zdCBk
+aWRuJ3Qgc3VwcG9ydCA4Yml0IGVtbWMgdHVuaW5nDQo+Pj4gKyAgICAgICovDQo+Pj4gKyAgICAg
+aWYgKG1tYy0+aW9zLmJ1c193aWR0aCA9PSBNTUNfQlVTX1dJRFRIXzgpIHsNCj4+PiArICAgICAg
+ICAgICAgIGN1cnJlbnRfYnVzX3dpZHRoID0gbW1jLT5pb3MuYnVzX3dpZHRoOw0KPj4+ICsgICAg
+ICAgICAgICAgbW1jLT5pb3MuYnVzX3dpZHRoID0gTU1DX0JVU19XSURUSF80Ow0KPj4+ICsgICAg
+ICAgICAgICAgbW1jLT5vcHMtPnNldF9pb3MobW1jLCAmbW1jLT5pb3MpOw0KPj4+ICsgICAgIH0N
+Cj4+PiArDQo+Pj4gKyAgICAgc2RoY2lfbzJfc2V0X3R1bmluZ19tb2RlKGhvc3QsIHRydWUpOw0K
+Pj4+ICsNCj4+PiArICAgICBzZGhjaV9vMl9zdGFydF90dW5pbmcoaG9zdCk7DQo+Pj4gKw0KPj4+
+ICsgICAgIF9fc2RoY2lfbzJfZXhlY3V0ZV90dW5pbmcoaG9zdCwgb3Bjb2RlKTsNCj4+PiArDQo+
+Pj4gKyAgICAgc2RoY2lfbzJfZW5kX3R1bmluZyhob3N0KTsNCj4+PiArDQo+Pj4gKyAgICAgaWYg
+KGN1cnJlbnRfYnVzX3dpZHRoID09IE1NQ19CVVNfV0lEVEhfOCkgew0KPj4+ICsgICAgICAgICAg
+ICAgbW1jLT5pb3MuYnVzX3dpZHRoID0gY3VycmVudF9idXNfd2lkdGg7DQo+Pj4gKyAgICAgICAg
+ICAgICBtbWMtPm9wcy0+c2V0X2lvcyhtbWMsICZtbWMtPmlvcyk7DQo+Pj4gKyAgICAgfQ0KPj4+
+ICsNCj4+PiArICAgICBob3N0LT5mbGFncyAmPSB+U0RIQ0lfSFM0MDBfVFVOSU5HOw0KPj4+ICsg
+ICAgIHJldHVybiAwOw0KPj4+ICt9DQo+Pj4gKw0KPj4+ICBzdGF0aWMgdm9pZCBvMl9wY2lfc2V0
+X2Jhc2VjbGsoc3RydWN0IHNkaGNpX3BjaV9jaGlwICpjaGlwLCB1MzIgdmFsdWUpICB7DQo+Pj4g
+ICAgICAgdTMyIHNjcmF0Y2hfMzI7DQo+Pj4gLSAgICAgcGNpX3JlYWRfY29uZmlnX2R3b3JkKGNo
+aXAtPnBkZXYsDQo+Pj4gLSAgICAgICAgICAgICAgICAgICAgICAgICAgIE8yX1NEX1BMTF9TRVRU
+SU5HLCAmc2NyYXRjaF8zMik7DQo+Pj4gKyAgICAgcGNpX3JlYWRfY29uZmlnX2R3b3JkKGNoaXAt
+PnBkZXYsIE8yX1NEX1BMTF9TRVRUSU5HLCANCj4+PiArICZzY3JhdGNoXzMyKTsNCj4+Pg0KPj4+
+ICAgICAgIHNjcmF0Y2hfMzIgJj0gMHgwMDAwRkZGRjsNCj4+PiAgICAgICBzY3JhdGNoXzMyIHw9
+IHZhbHVlOw0KPj4+DQo+Pj4gLSAgICAgcGNpX3dyaXRlX2NvbmZpZ19kd29yZChjaGlwLT5wZGV2
+LA0KPj4+IC0gICAgICAgICAgICAgICAgICAgICAgICAgICAgTzJfU0RfUExMX1NFVFRJTkcsIHNj
+cmF0Y2hfMzIpOw0KPj4+ICsgICAgIHBjaV93cml0ZV9jb25maWdfZHdvcmQoY2hpcC0+cGRldiwg
+TzJfU0RfUExMX1NFVFRJTkcsIA0KPj4+ICsgc2NyYXRjaF8zMik7DQo+Pj4gIH0NCj4+Pg0KPj4+
+ICBzdGF0aWMgdm9pZCBvMl9wY2lfbGVkX2VuYWJsZShzdHJ1Y3Qgc2RoY2lfcGNpX2NoaXAgKmNo
+aXApIEBAIC00MCwyMyArMjQxLDE5IEBAIHN0YXRpYyB2b2lkIG8yX3BjaV9sZWRfZW5hYmxlKHN0
+cnVjdCBzZGhjaV9wY2lfY2hpcCAqY2hpcCkNCj4+PiAgICAgICB1MzIgc2NyYXRjaF8zMjsNCj4+
+Pg0KPj4+ICAgICAgIC8qIFNldCBsZWQgb2YgU0QgaG9zdCBmdW5jdGlvbiBlbmFibGUgKi8NCj4+
+PiAtICAgICByZXQgPSBwY2lfcmVhZF9jb25maWdfZHdvcmQoY2hpcC0+cGRldiwNCj4+PiAtICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgTzJfU0RfRlVOQ19SRUcwLCAmc2NyYXRjaF8z
+Mik7DQo+Pj4gKyAgICAgcmV0ID0gcGNpX3JlYWRfY29uZmlnX2R3b3JkKGNoaXAtPnBkZXYsIE8y
+X1NEX0ZVTkNfUkVHMCwgDQo+Pj4gKyAmc2NyYXRjaF8zMik7DQo+Pj4gICAgICAgaWYgKHJldCkN
+Cj4+PiAgICAgICAgICAgICAgIHJldHVybjsNCj4+Pg0KPj4+ICAgICAgIHNjcmF0Y2hfMzIgJj0g
+fk8yX1NEX0ZSRUcwX0xFRE9GRjsNCj4+PiAtICAgICBwY2lfd3JpdGVfY29uZmlnX2R3b3JkKGNo
+aXAtPnBkZXYsDQo+Pj4gLSAgICAgICAgICAgICAgICAgICAgICAgICAgICBPMl9TRF9GVU5DX1JF
+RzAsIHNjcmF0Y2hfMzIpOw0KPj4+ICsgICAgIHBjaV93cml0ZV9jb25maWdfZHdvcmQoY2hpcC0+
+cGRldiwgTzJfU0RfRlVOQ19SRUcwLCANCj4+PiArIHNjcmF0Y2hfMzIpOw0KPj4+DQo+Pj4gLSAg
+ICAgcmV0ID0gcGNpX3JlYWRfY29uZmlnX2R3b3JkKGNoaXAtPnBkZXYsDQo+Pj4gLSAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgIE8yX1NEX1RFU1RfUkVHLCAmc2NyYXRjaF8zMik7DQo+
+Pj4gKyAgICAgcmV0ID0gcGNpX3JlYWRfY29uZmlnX2R3b3JkKGNoaXAtPnBkZXYsIE8yX1NEX1RF
+U1RfUkVHLCANCj4+PiArICZzY3JhdGNoXzMyKTsNCj4+PiAgICAgICBpZiAocmV0KQ0KPj4+ICAg
+ICAgICAgICAgICAgcmV0dXJuOw0KPj4+DQo+Pj4gICAgICAgc2NyYXRjaF8zMiB8PSBPMl9TRF9M
+RURfRU5BQkxFOw0KPj4+IC0gICAgIHBjaV93cml0ZV9jb25maWdfZHdvcmQoY2hpcC0+cGRldiwN
+Cj4+PiAtICAgICAgICAgICAgICAgICAgICAgICAgICAgIE8yX1NEX1RFU1RfUkVHLCBzY3JhdGNo
+XzMyKTsNCj4+PiArICAgICBwY2lfd3JpdGVfY29uZmlnX2R3b3JkKGNoaXAtPnBkZXYsIE8yX1NE
+X1RFU1RfUkVHLCANCj4+PiArIHNjcmF0Y2hfMzIpOw0KPj4+DQo+Pj4gIH0NCj4+Pg0KPj4+IEBA
+IC0xMDQsOCArMzAxLDcgQEAgc3RhdGljIHZvaWQgc2RoY2lfcGNpX28yX2Z1amluMl9wY2lfaW5p
+dChzdHJ1Y3Qgc2RoY2lfcGNpX2NoaXAgKmNoaXApDQo+Pj4gICAgICAgc2NyYXRjaF8zMiB8PSAw
+eDAwQ0M7DQo+Pj4gICAgICAgcGNpX3dyaXRlX2NvbmZpZ19kd29yZChjaGlwLT5wZGV2LCBPMl9T
+RF9DQVBfUkVHMCwgc2NyYXRjaF8zMik7DQo+Pj4gICAgICAgLyogU2V0IERMTCBUdW5pbmcgV2lu
+ZG93ICovDQo+Pj4gLSAgICAgcmV0ID0gcGNpX3JlYWRfY29uZmlnX2R3b3JkKGNoaXAtPnBkZXYs
+DQo+Pj4gLSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIE8yX1NEX1RVTklOR19DVFJM
+LCAmc2NyYXRjaF8zMik7DQo+Pj4gKyAgICAgcmV0ID0gcGNpX3JlYWRfY29uZmlnX2R3b3JkKGNo
+aXAtPnBkZXYsIE8yX1NEX1RVTklOR19DVFJMLCANCj4+PiArJnNjcmF0Y2hfMzIpOw0KPj4+ICAg
+ICAgIGlmIChyZXQpDQo+Pj4gICAgICAgICAgICAgICByZXR1cm47DQo+Pj4gICAgICAgc2NyYXRj
+aF8zMiAmPSB+KDB4MDAwMDAwRkYpOw0KPj4+IEBAIC0xMzcsOCArMzMzLDcgQEAgc3RhdGljIHZv
+aWQgc2RoY2lfcGNpX28yX2Z1amluMl9wY2lfaW5pdChzdHJ1Y3Qgc2RoY2lfcGNpX2NoaXAgKmNo
+aXApDQo+Pj4gICAgICAgc2NyYXRjaF8zMiB8PSAweDMwMDAwMDAwOw0KPj4+ICAgICAgIHBjaV93
+cml0ZV9jb25maWdfZHdvcmQoY2hpcC0+cGRldiwgTzJfU0RfQ0FQUywgc2NyYXRjaF8zMik7DQo+
+Pj4NCj4+PiAtICAgICByZXQgPSBwY2lfcmVhZF9jb25maWdfZHdvcmQoY2hpcC0+cGRldiwNCj4+
+PiAtICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgTzJfU0RfTUlTQ19DVFJMNCwgJnNj
+cmF0Y2hfMzIpOw0KPj4+ICsgICAgIHJldCA9IHBjaV9yZWFkX2NvbmZpZ19kd29yZChjaGlwLT5w
+ZGV2LCBPMl9TRF9NSVNDX0NUUkw0LCANCj4+PiArJnNjcmF0Y2hfMzIpOw0KPj4+ICAgICAgIGlm
+IChyZXQpDQo+Pj4gICAgICAgICAgICAgICByZXR1cm47DQo+Pj4gICAgICAgc2NyYXRjaF8zMiAm
+PSB+KDB4MDAwZjAwMDApOw0KPj4+IEBAIC0xNTEsNiArMzQ2LDcgQEAgaW50IHNkaGNpX3BjaV9v
+Ml9wcm9iZV9zbG90KHN0cnVjdCBzZGhjaV9wY2lfc2xvdCAqc2xvdCkNCj4+PiAgICAgICBzdHJ1
+Y3Qgc2RoY2lfcGNpX2NoaXAgKmNoaXA7DQo+Pj4gICAgICAgc3RydWN0IHNkaGNpX2hvc3QgKmhv
+c3Q7DQo+Pj4gICAgICAgdTMyIHJlZzsNCj4+PiArICAgICBpbnQgcmV0Ow0KPj4+DQo+Pj4gICAg
+ICAgY2hpcCA9IHNsb3QtPmNoaXA7DQo+Pj4gICAgICAgaG9zdCA9IHNsb3QtPmhvc3Q7DQo+Pj4g
+QEAgLTE2NCw2ICszNjAsMjIgQEAgaW50IHNkaGNpX3BjaV9vMl9wcm9iZV9zbG90KHN0cnVjdCBz
+ZGhjaV9wY2lfc2xvdCAqc2xvdCkNCj4+PiAgICAgICAgICAgICAgIGlmIChyZWcgJiAweDEpDQo+
+Pj4gICAgICAgICAgICAgICAgICAgICAgIGhvc3QtPnF1aXJrcyB8PSANCj4+PiBTREhDSV9RVUlS
+S19NVUxUSUJMT0NLX1JFQURfQUNNRDEyOw0KPj4+DQo+Pj4gKyAgICAgICAgICAgICBpZiAoY2hp
+cC0+cGRldi0+ZGV2aWNlID09IFBDSV9ERVZJQ0VfSURfTzJfU0VBQklSRDApIHsNCj4+PiArICAg
+ICAgICAgICAgICAgICAgICAgcmV0ID0gcGNpX3JlYWRfY29uZmlnX2R3b3JkKGNoaXAtPnBkZXYs
+DQo+Pj4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBP
+Ml9TRF9NSVNDX1NFVFRJTkcsICZyZWcpOw0KPj4+ICsgICAgICAgICAgICAgICAgICAgICBpZiAo
+cmV0KQ0KPj4+ICsgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHJldHVybiAtRUlPOw0KPj4+
+ICsgICAgICAgICAgICAgICAgICAgICBpZiAocmVnICYgKDEgPDwgNCkpIHsNCj4+PiArICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICBwcl9pbmZvKCIlczogZW1tYyAxLjh2IGZsYWcgaXMgc2V0
+LA0KPj4+ICsgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZm9yY2UgMS44diBz
+aWduYWxpbmcgdm9sdGFnZVxuIiwNCj4+PiArICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgIG1tY19ob3N0bmFtZShob3N0LT5tbWMpKTsNCj4+PiArICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICBob3N0LT5mbGFncyAmPSB+KFNESENJX1NJR05BTElOR18zMzApOw0KPj4+ICsg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgIGhvc3QtPmZsYWdzIHw9IFNESENJX1NJR05BTElO
+R18xODA7DQo+Pj4gKyAgICAgICAgICAgICAgICAgICAgIH0NCj4+PiArICAgICAgICAgICAgIH0N
+Cj4+PiArDQo+Pj4gKyAgICAgICAgICAgICBob3N0LT5tbWNfaG9zdF9vcHMuZXhlY3V0ZV90dW5p
+bmcgPSANCj4+PiArIHNkaGNpX28yX2V4ZWN1dGVfdHVuaW5nOw0KPj4+ICsNCj4+PiAgICAgICAg
+ICAgICAgIGlmIChjaGlwLT5wZGV2LT5kZXZpY2UgIT0gUENJX0RFVklDRV9JRF9PMl9GVUpJTjIp
+DQo+Pj4gICAgICAgICAgICAgICAgICAgICAgIGJyZWFrOw0KPj4+ICAgICAgICAgICAgICAgLyog
+c2V0IGRsbCB3YXRjaCBkb2cgdGltZXIgKi8gQEAgLTE5MSw4ICs0MDMsNyBAQCBpbnQgDQo+Pj4g
+c2RoY2lfcGNpX28yX3Byb2JlKHN0cnVjdCBzZGhjaV9wY2lfY2hpcCAqY2hpcCkNCj4+PiAgICAg
+ICBjYXNlIFBDSV9ERVZJQ0VfSURfTzJfODMyMDoNCj4+PiAgICAgICBjYXNlIFBDSV9ERVZJQ0Vf
+SURfTzJfODMyMToNCj4+PiAgICAgICAgICAgICAgIC8qIFRoaXMgZXh0cmEgc2V0dXAgaXMgcmVx
+dWlyZWQgZHVlIHRvIGJyb2tlbiBBRE1BLiAqLw0KPj4+IC0gICAgICAgICAgICAgcmV0ID0gcGNp
+X3JlYWRfY29uZmlnX2J5dGUoY2hpcC0+cGRldiwNCj4+PiAtICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICBPMl9TRF9MT0NLX1dQLCAmc2NyYXRjaCk7DQo+Pj4gKyAgICAgICAgICAgICByZXQg
+PSBwY2lfcmVhZF9jb25maWdfYnl0ZShjaGlwLT5wZGV2LCBPMl9TRF9MT0NLX1dQLCANCj4+PiAr
+ICZzY3JhdGNoKTsNCj4+PiAgICAgICAgICAgICAgIGlmIChyZXQpDQo+Pj4gICAgICAgICAgICAg
+ICAgICAgICAgIHJldHVybiByZXQ7DQo+Pj4gICAgICAgICAgICAgICBzY3JhdGNoICY9IDB4N2Y7
+DQo+Pj4gQEAgLTIwMiw4ICs0MTMsNyBAQCBpbnQgc2RoY2lfcGNpX28yX3Byb2JlKHN0cnVjdCBz
+ZGhjaV9wY2lfY2hpcCAqY2hpcCkNCj4+PiAgICAgICAgICAgICAgIHBjaV93cml0ZV9jb25maWdf
+Ynl0ZShjaGlwLT5wZGV2LCBPMl9TRF9NVUxUSV9WQ0MzViwgDQo+Pj4gMHgwOCk7DQo+Pj4NCj4+
+PiAgICAgICAgICAgICAgIC8qIERpc2FibGUgQ0xLX1JFUSMgc3VwcG9ydCBhZnRlciBtZWRpYSBE
+RVQgKi8NCj4+PiAtICAgICAgICAgICAgIHJldCA9IHBjaV9yZWFkX2NvbmZpZ19ieXRlKGNoaXAt
+PnBkZXYsDQo+Pj4gLSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgTzJfU0RfQ0xLUkVRLCAm
+c2NyYXRjaCk7DQo+Pj4gKyAgICAgICAgICAgICByZXQgPSBwY2lfcmVhZF9jb25maWdfYnl0ZShj
+aGlwLT5wZGV2LCBPMl9TRF9DTEtSRVEsIA0KPj4+ICsgJnNjcmF0Y2gpOw0KPj4+ICAgICAgICAg
+ICAgICAgaWYgKHJldCkNCj4+PiAgICAgICAgICAgICAgICAgICAgICAgcmV0dXJuIHJldDsNCj4+
+PiAgICAgICAgICAgICAgIHNjcmF0Y2ggfD0gMHgyMDsNCj4+PiBAQCAtMjI0LDE2ICs0MzQsMTQg
+QEAgaW50IHNkaGNpX3BjaV9vMl9wcm9iZShzdHJ1Y3Qgc2RoY2lfcGNpX2NoaXAgKmNoaXApDQo+
+Pj4gICAgICAgICAgICAgICBwY2lfd3JpdGVfY29uZmlnX2J5dGUoY2hpcC0+cGRldiwgTzJfU0Rf
+QURNQTIsIDB4MDgpOw0KPj4+DQo+Pj4gICAgICAgICAgICAgICAvKiBEaXNhYmxlIHRoZSBpbmZp
+bml0ZSB0cmFuc2ZlciBtb2RlICovDQo+Pj4gLSAgICAgICAgICAgICByZXQgPSBwY2lfcmVhZF9j
+b25maWdfYnl0ZShjaGlwLT5wZGV2LA0KPj4+IC0gICAgICAgICAgICAgICAgICAgICAgICAgICAg
+IE8yX1NEX0lORl9NT0QsICZzY3JhdGNoKTsNCj4+PiArICAgICAgICAgICAgIHJldCA9IHBjaV9y
+ZWFkX2NvbmZpZ19ieXRlKGNoaXAtPnBkZXYsIE8yX1NEX0lORl9NT0QsIA0KPj4+ICsgJnNjcmF0
+Y2gpOw0KPj4+ICAgICAgICAgICAgICAgaWYgKHJldCkNCj4+PiAgICAgICAgICAgICAgICAgICAg
+ICAgcmV0dXJuIHJldDsNCj4+PiAgICAgICAgICAgICAgIHNjcmF0Y2ggfD0gMHgwODsNCj4+PiAg
+ICAgICAgICAgICAgIHBjaV93cml0ZV9jb25maWdfYnl0ZShjaGlwLT5wZGV2LCBPMl9TRF9JTkZf
+TU9ELCANCj4+PiBzY3JhdGNoKTsNCj4+Pg0KPj4+ICAgICAgICAgICAgICAgLyogTG9jayBXUCAq
+Lw0KPj4+IC0gICAgICAgICAgICAgcmV0ID0gcGNpX3JlYWRfY29uZmlnX2J5dGUoY2hpcC0+cGRl
+diwNCj4+PiAtICAgICAgICAgICAgICAgICAgICAgICAgICAgICBPMl9TRF9MT0NLX1dQLCAmc2Ny
+YXRjaCk7DQo+Pj4gKyAgICAgICAgICAgICByZXQgPSBwY2lfcmVhZF9jb25maWdfYnl0ZShjaGlw
+LT5wZGV2LCBPMl9TRF9MT0NLX1dQLCANCj4+PiArICZzY3JhdGNoKTsNCj4+PiAgICAgICAgICAg
+ICAgIGlmIChyZXQpDQo+Pj4gICAgICAgICAgICAgICAgICAgICAgIHJldHVybiByZXQ7DQo+Pj4g
+ICAgICAgICAgICAgICBzY3JhdGNoIHw9IDB4ODA7DQo+Pj4gQEAgLTI0Myw4ICs0NTEsNyBAQCBp
+bnQgc2RoY2lfcGNpX28yX3Byb2JlKHN0cnVjdCBzZGhjaV9wY2lfY2hpcCAqY2hpcCkNCj4+PiAg
+ICAgICBjYXNlIFBDSV9ERVZJQ0VfSURfTzJfU0RTMToNCj4+PiAgICAgICBjYXNlIFBDSV9ERVZJ
+Q0VfSURfTzJfRlVKSU4yOg0KPj4+ICAgICAgICAgICAgICAgLyogVW5Mb2NrIFdQICovDQo+Pj4g
+LSAgICAgICAgICAgICByZXQgPSBwY2lfcmVhZF9jb25maWdfYnl0ZShjaGlwLT5wZGV2LA0KPj4+
+IC0gICAgICAgICAgICAgICAgICAgICAgICAgICAgIE8yX1NEX0xPQ0tfV1AsICZzY3JhdGNoKTsN
+Cj4+PiArICAgICAgICAgICAgIHJldCA9IHBjaV9yZWFkX2NvbmZpZ19ieXRlKGNoaXAtPnBkZXYs
+IE8yX1NEX0xPQ0tfV1AsIA0KPj4+ICsgJnNjcmF0Y2gpOw0KPj4+ICAgICAgICAgICAgICAgaWYg
+KHJldCkNCj4+PiAgICAgICAgICAgICAgICAgICAgICAgcmV0dXJuIHJldDsNCj4+Pg0KPj4+IEBA
+IC0zMTksMTUgKzUyNiwxMyBAQCBpbnQgc2RoY2lfcGNpX28yX3Byb2JlKHN0cnVjdCBzZGhjaV9w
+Y2lfY2hpcCAqY2hpcCkNCj4+PiAgICAgICAgICAgICAgIGlmIChyZXQpDQo+Pj4gICAgICAgICAg
+ICAgICAgICAgICAgIHJldHVybiByZXQ7DQo+Pj4gICAgICAgICAgICAgICBzY3JhdGNoXzMyICY9
+IH4oMHhFMCk7DQo+Pj4gLSAgICAgICAgICAgICBwY2lfd3JpdGVfY29uZmlnX2R3b3JkKGNoaXAt
+PnBkZXYsDQo+Pj4gLSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIE8yX1NEX0NB
+UF9SRUcyLCBzY3JhdGNoXzMyKTsNCj4+PiArICAgICAgICAgICAgIHBjaV93cml0ZV9jb25maWdf
+ZHdvcmQoY2hpcC0+cGRldiwgTzJfU0RfQ0FQX1JFRzIsIA0KPj4+ICsgc2NyYXRjaF8zMik7DQo+
+Pj4NCj4+PiAgICAgICAgICAgICAgIGlmIChjaGlwLT5wZGV2LT5kZXZpY2UgPT0gUENJX0RFVklD
+RV9JRF9PMl9GVUpJTjIpDQo+Pj4gICAgICAgICAgICAgICAgICAgICAgIHNkaGNpX3BjaV9vMl9m
+dWppbjJfcGNpX2luaXQoY2hpcCk7DQo+Pj4NCj4+PiAgICAgICAgICAgICAgIC8qIExvY2sgV1Ag
+Ki8NCj4+PiAtICAgICAgICAgICAgIHJldCA9IHBjaV9yZWFkX2NvbmZpZ19ieXRlKGNoaXAtPnBk
+ZXYsDQo+Pj4gLSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBPMl9TRF9M
+T0NLX1dQLCAmc2NyYXRjaCk7DQo+Pj4gKyAgICAgICAgICAgICByZXQgPSBwY2lfcmVhZF9jb25m
+aWdfYnl0ZShjaGlwLT5wZGV2LCBPMl9TRF9MT0NLX1dQLCANCj4+PiArICZzY3JhdGNoKTsNCj4+
+PiAgICAgICAgICAgICAgIGlmIChyZXQpDQo+Pj4gICAgICAgICAgICAgICAgICAgICAgIHJldHVy
+biByZXQ7DQo+Pj4gICAgICAgICAgICAgICBzY3JhdGNoIHw9IDB4ODA7DQo+Pj4gQEAgLTMzNiw4
+ICs1NDEsNyBAQCBpbnQgc2RoY2lfcGNpX28yX3Byb2JlKHN0cnVjdCBzZGhjaV9wY2lfY2hpcCAq
+Y2hpcCkNCj4+PiAgICAgICBjYXNlIFBDSV9ERVZJQ0VfSURfTzJfU0VBQklSRDA6DQo+Pj4gICAg
+ICAgY2FzZSBQQ0lfREVWSUNFX0lEX08yX1NFQUJJUkQxOg0KPj4+ICAgICAgICAgICAgICAgLyog
+VW5Mb2NrIFdQICovDQo+Pj4gLSAgICAgICAgICAgICByZXQgPSBwY2lfcmVhZF9jb25maWdfYnl0
+ZShjaGlwLT5wZGV2LA0KPj4+IC0gICAgICAgICAgICAgICAgICAgICAgICAgICAgIE8yX1NEX0xP
+Q0tfV1AsICZzY3JhdGNoKTsNCj4+PiArICAgICAgICAgICAgIHJldCA9IHBjaV9yZWFkX2NvbmZp
+Z19ieXRlKGNoaXAtPnBkZXYsIE8yX1NEX0xPQ0tfV1AsIA0KPj4+ICsgJnNjcmF0Y2gpOw0KPj4+
+ICAgICAgICAgICAgICAgaWYgKHJldCkNCj4+PiAgICAgICAgICAgICAgICAgICAgICAgcmV0dXJu
+IHJldDsNCj4+Pg0KPj4+IEBAIC0zNjksMTEgKzU3Myw5IEBAIGludCBzZGhjaV9wY2lfbzJfcHJv
+YmUoc3RydWN0IHNkaGNpX3BjaV9jaGlwICpjaGlwKQ0KPj4+ICAgICAgICAgICAgICAgfQ0KPj4+
+DQo+Pj4gICAgICAgICAgICAgICAvKiBTZXQgVHVuaW5nIFdpbmRvd3MgdG8gNSAqLw0KPj4+IC0g
+ICAgICAgICAgICAgcGNpX3dyaXRlX2NvbmZpZ19ieXRlKGNoaXAtPnBkZXYsDQo+Pj4gLSAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgTzJfU0RfVFVOSU5HX0NUUkwsIDB4NTUpOw0KPj4+ICsg
+ICAgICAgICAgICAgcGNpX3dyaXRlX2NvbmZpZ19ieXRlKGNoaXAtPnBkZXYsIE8yX1NEX1RVTklO
+R19DVFJMLCANCj4+PiArIDB4NTUpOw0KPj4+ICAgICAgICAgICAgICAgLyogTG9jayBXUCAqLw0K
+Pj4+IC0gICAgICAgICAgICAgcmV0ID0gcGNpX3JlYWRfY29uZmlnX2J5dGUoY2hpcC0+cGRldiwN
+Cj4+PiAtICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIE8yX1NEX0xPQ0tf
+V1AsICZzY3JhdGNoKTsNCj4+PiArICAgICAgICAgICAgIHJldCA9IHBjaV9yZWFkX2NvbmZpZ19i
+eXRlKGNoaXAtPnBkZXYsIE8yX1NEX0xPQ0tfV1AsIA0KPj4+ICsgJnNjcmF0Y2gpOw0KPj4+ICAg
+ICAgICAgICAgICAgaWYgKHJldCkNCj4+PiAgICAgICAgICAgICAgICAgICAgICAgcmV0dXJuIHJl
+dDsNCj4+PiAgICAgICAgICAgICAgIHNjcmF0Y2ggfD0gMHg4MDsNCj4+PiAtLQ0KPj4+IDIuMTQu
+MQ0KPj4+DQo+Pg0K
