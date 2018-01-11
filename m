@@ -1,214 +1,129 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [RFC PATCH 09/12] mmc: sdhci: Use software timer when timeout
- greater than hardware capablility
-Date: Thu, 11 Jan 2018 10:46:06 +0200
-Message-ID: <2a41ba31-07e5-027a-de30-495f69d71a88@intel.com>
-References: <20171214130941.26666-1-kishon@ti.com>
- <20171214130941.26666-10-kishon@ti.com>
- <74170f0a-329a-2c66-7ad4-a1fedb9747df@intel.com>
- <2da01441-84d0-0d96-610d-2f9a3055ccc7@ti.com>
+Subject: Re: mmc0: Unexpected interrupt 0x04000000.
+Date: Thu, 11 Jan 2018 11:12:16 +0200
+Message-ID: <855b95e1-9baf-bcdd-784d-ad9770818040@intel.com>
+References: <CA+7wUsyhKhGCHE5QEZ=dt2-v1sTQZpW38Gf2_wOmwJFHoJWNGA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <2da01441-84d0-0d96-610d-2f9a3055ccc7@ti.com>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga04.intel.com ([192.55.52.120]:14530 "EHLO mga04.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932566AbeAKJMt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 11 Jan 2018 04:12:49 -0500
+In-Reply-To: <CA+7wUsyhKhGCHE5QEZ=dt2-v1sTQZpW38Gf2_wOmwJFHoJWNGA@mail.gmail.com>
 Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Tony Lindgren <tony@atomide.com>
-Cc: Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, nsekhar@ti.com
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Mathieu Malaterre <malat@debian.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On 04/01/18 14:59, Kishon Vijay Abraham I wrote:
-> Hi Adrian,
+On 05/01/18 14:44, Mathieu Malaterre wrote:
+> Hi there,
 > 
-> On Wednesday 20 December 2017 07:41 PM, Adrian Hunter wrote:
->> On 14/12/17 15:09, Kishon Vijay Abraham I wrote:
->>> Errata i834 in AM572x Sitara Processors Silicon Revision 2.0, 1.1
->>> (SPRZ429K July 2014–Revised March 2017 [1]) mentions
->>> Under high speed HS200 and SDR104 modes, the functional clock for MMC
->>> modules will reach up to 192 MHz. At this frequency, the maximum obtainable
->>> timeout (DTO = 0xE) through MMC host controller is (1/192MHz)*2^27 = 700ms.
->>> Commands taking longer than 700ms may be affected by this small window
->>> frame. Workaround for this errata is use a software timer instead of
->>> hardware timer to provide the delay requested by the upper layer.
->>>
->>> While this errata is specific to AM572x, it is applicable to all sdhci
->>> based controllers when a particular request require timeout greater
->>> than hardware capability.
->>
->> It doesn't work for our controllers.  Even if the data timeout interrupt is
->> disabled, it seems like the timeout still "happens" in some fashion - after
->> which the host controller starts misbehaving.
+> I am trying to get sdhci-pci driver to work with the following hardware:
 > 
-> even if the data timeout doesn't get disabled, count = 0xE is still present. So
-> ideally this shouldn't break any existing platforms no?
-
-I don't want to hide this kind of variation in the hardware behaviour.
-
->>
->> So you will need to add a quirk.
->>
->>>
->>> Re-use the software timer already implemented in sdhci to program the
->>> correct timeout value and also disable the hardware timeout when
->>> the required timeout is greater than hardware capabiltiy in order to
->>> avoid spurious timeout interrupts.
->>>
->>> This patch is based on the earlier patch implemented for omap_hsmmc [2]
->>>
->>> [1] -> http://www.ti.com/lit/er/sprz429k/sprz429k.pdf
->>> [2] -> https://patchwork.kernel.org/patch/9791449/
->>>
->>> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
->>> ---
->>>  drivers/mmc/host/sdhci.c | 41 +++++++++++++++++++++++++++++++++++++++--
->>>  drivers/mmc/host/sdhci.h | 11 +++++++++++
->>>  2 files changed, 50 insertions(+), 2 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>> index e9290a3439d5..d0655e1d2cc7 100644
->>> --- a/drivers/mmc/host/sdhci.c
->>> +++ b/drivers/mmc/host/sdhci.c
->>> @@ -673,6 +673,27 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
->>>  	}
->>>  }
->>>  
->>> +static void sdhci_calc_sw_timeout(struct sdhci_host *host,
->>> +				  struct mmc_command *cmd,
->>> +				  unsigned int target_timeout)
->>> +{
->>> +	struct mmc_host *mmc = host->mmc;
->>> +	struct mmc_ios *ios = &mmc->ios;
->>> +	struct mmc_data *data = cmd->data;
->>> +	unsigned long long transfer_time;
->>> +
->>> +	if (data) {
->>> +		transfer_time = MMC_BLOCK_TRANSFER_TIME_MS(data->blksz,
->>> +							   ios->bus_width,
->>> +							   ios->clock);
->>
->> If it has a value, actual_clock is better than ios->clock.
+> $ sudo lspci -s 03:00.1 -v -nn
+> 03:00.1 SD Host controller [0805]: Broadcom Limited BCM57765/57785
+> SDXC/MMC Card Reader [14e4:16bc] (rev 10) (prog-if 01)
+> Subsystem: Broadcom Limited BCM57765/57785 SDXC/MMC Card Reader [14e4:96bc]
+> Flags: bus master, fast devsel, latency 0, IRQ 17
+> Memory at c1820000 (64-bit, prefetchable) [size=64K]
+> Capabilities: [48] Power Management version 3
+> Capabilities: [58] MSI: Enable- Count=1/1 Maskable- 64bit+
+> Capabilities: [ac] Express Endpoint, MSI 00
+> Capabilities: [100] Advanced Error Reporting
+> Capabilities: [150] Power Budgeting <?>
+> Capabilities: [160] Virtual Channel
+> Kernel driver in use: sdhci-pci
+> Kernel modules: sdhci_pci
 > 
-> okay.
->>
->>> +		/* calculate timeout for the entire data */
->>> +		host->data_timeout = (data->blocks * (target_timeout +
->>> +						      transfer_time));
->>> +	} else if (cmd->flags & MMC_RSP_BUSY) {
->>> +		host->data_timeout = cmd->busy_timeout * MSEC_PER_SEC;
->>
->> Doesn't need MSEC_PER_SEC multiplier.
+> I am using a MacBookPro10,1. I cannot get the driver to work when
+> using a SDHC Samsung Evo 16GB (placed inside a card reader), it always
+> report the following (1).
 > 
-> right.
->>
->>> +	}
->>> +}
->>> +
->>>  static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
->>>  {
->>>  	u8 count;
->>> @@ -732,8 +753,12 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
->>>  	}
->>>  
->>>  	if (count >= 0xF) {
->>> -		DBG("Too large timeout 0x%x requested for CMD%d!\n",
->>> -		    count, cmd->opcode);
->>> +		DBG("Too large timeout.. using SW timeout for CMD%d!\n",
->>> +		    cmd->opcode);
->>> +		sdhci_calc_sw_timeout(host, cmd, target_timeout);
->>> +		host->ier &= ~SDHCI_INT_DATA_TIMEOUT;
->>> +		sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
->>> +		sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
->>>  		count = 0xE;
->>>  	}
->>>  
->>> @@ -1198,6 +1223,14 @@ static void sdhci_finish_command(struct sdhci_host *host)
->>>  {
->>>  	struct mmc_command *cmd = host->cmd;
->>>  
->>> +	if (host->data_timeout) {
->>> +		unsigned long timeout;
->>> +
->>> +		timeout = jiffies +
->>> +			  msecs_to_jiffies(host->data_timeout);
->>> +		sdhci_mod_timer(host, host->cmd->mrq, timeout);
->>
->> cmd could be the sbc or a stop cmd or a command during transfer, so this
->> needs more logic.
-> 
-> host->data_timeout gets set only for data commands or commands with busy
-> timeout. But I guess for commands during data transfer, host->data_timeout
-> might still be set?
-> 
-> Checking sdhci_data_line_cmd(mrq->cmd) in addition to host->data_timeout should
-> take care of all cases right?
-
-I suggest you make the timeout calculation allow for the commands as well
-and then reorder sdhci_mod_timer() to be called after sdhci_prepare_data()
-and make sdhci_mod_timer() do the right thing.
-
->>
->>> +	}
->>> +
->>>  	host->cmd = NULL;
->>>  
->>>  	if (cmd->flags & MMC_RSP_PRESENT) {
->>> @@ -2341,6 +2374,10 @@ static bool sdhci_request_done(struct sdhci_host *host)
->>>  		return true;
->>>  	}
->>>  
->>> +	host->data_timeout = 0;
->>> +	host->ier |= SDHCI_INT_DATA_TIMEOUT;
->>> +	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
->>> +	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
->>
->> sdhci can have 2 requests in progress to allow for commands to be sent while
->> a data transfer is in progress, so this is not necessarily the data transfer
->> request that is done.  Also we want to avoid unnecessary register writes.
->>
-> 
-> okay.. got it.
->>>  	sdhci_del_timer(host, mrq);
->>>  
->>>  	/*
->>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
->>> index 54bc444c317f..e6e0278bea1a 100644
->>> --- a/drivers/mmc/host/sdhci.h
->>> +++ b/drivers/mmc/host/sdhci.h
->>> @@ -332,6 +332,15 @@ struct sdhci_adma2_64_desc {
->>>  /* Allow for a a command request and a data request at the same time */
->>>  #define SDHCI_MAX_MRQS		2
->>>  
->>> +/*
->>> + * Time taken for transferring one block. It is multiplied by a constant
->>> + * factor '2' to account for any errors
->>> + */
->>> +#define MMC_BLOCK_TRANSFER_TIME_MS(blksz, bus_width, freq)		\
->>> +				   ((unsigned long long)		\
->>> +				   (2 * (((blksz) * MSEC_PER_SEC *	\
->>> +				   (8 / (bus_width))) / (freq))))
->>
->> I don't think the macro helps make the code more readable.  Might just as
->> well write a nice function to calculate the entire data request timeout.
-> 
-> okay.
->>
->>> +
->>>  enum sdhci_cookie {
->>>  	COOKIE_UNMAPPED,
->>>  	COOKIE_PRE_MAPPED,	/* mapped by sdhci_pre_req() */
->>> @@ -546,6 +555,8 @@ struct sdhci_host {
->>>  	/* Host SDMA buffer boundary. */
->>>  	u32			sdma_boundary;
->>>  
->>> +	unsigned long long	data_timeout;
->>
->> msecs_to_jiffies() will truncate to 'unsigned int' anyway, so this might as
->> well be 'unsigned int'.
->>
-> 
-> okay.
+> If I now place the card onto a USB reader (USB-HUB reader) then
+> everything is fine (tested using f3: f3probe). Are there any options I
+> can switch to make the driver more tolerant with my hardware ?
 > 
 > Thanks
-> Kishon
 > 
+> Current system is Debian stable with kernel 4.14 (backport), modinfo returns:
+> 
+> $ /sbin/modinfo sdhci-pci
+> filename:
+> /lib/modules/4.14.0-0.bpo.2-amd64/kernel/drivers/mmc/host/sdhci-pci.ko
+> license:        GPL
+> description:    Secure Digital Host Controller Interface PCI driver
+> author:         Pierre Ossman <pierre@ossman.eu>
+> alias:          pci:v*d*sv*sd*bc08sc05i*
+> alias:          pci:v00001022d*sv*sd*bc08sc05i*
+> alias:          pci:v00001217d00008621sv*sd*bc*sc*i*
+> alias:          pci:v00001217d00008620sv*sd*bc*sc*i*
+> alias:          pci:v00001217d00008421sv*sd*bc*sc*i*
+> alias:          pci:v00001217d00008420sv*sd*bc*sc*i*
+> (...)
+> alias:          pci:v00001524d00000551sv*sd*bc*sc*i*
+> alias:          pci:v00001524d00000550sv*sd*bc*sc*i*
+> alias:          pci:v00001180d0000E823sv*sd*bc*sc*i*
+> alias:          pci:v00001180d0000E822sv*sd*bc*sc*i*
+> alias:          pci:v00001180d00000843sv*sd*bc*sc*i*
+> alias:          pci:v00001180d00000822sv*sd*bc*sc*i*
+> depends:        sdhci,mmc_core
+> intree:         Y
+> name:           sdhci_pci
+> vermagic:       4.14.0-0.bpo.2-amd64 SMP mod_unload modversions
+> 
+> 
+> (1)
+> [  220.210842] mmc0: Tuning timeout, falling back to fixed sampling clock
+> [  220.210934] mmc0: new ultra high speed DDR50 SDHC card at address 59b4
+> [  220.219075] mmcblk0: mmc0:59b4 00000 14.9 GiB
+> [  230.362858] mmc0: Timeout waiting for hardware interrupt.
+> [  230.362868] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+> [  230.362918] mmc0: sdhci: Sys addr:  0x000000c8 | Version:  0x00001502
+> [  230.362927] mmc0: sdhci: Blk size:  0x00007200 | Blk cnt:  0x00000008
+> [  230.362937] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x0000003b
+> [  230.362946] mmc0: sdhci: Present:   0x1fff0000 | Host ctl: 0x0000001f
+> [  230.362955] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+> [  230.362964] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00000007
+> [  230.362974] mmc0: sdhci: Timeout:   0x0000000a | Int stat: 0x00000000
+> [  230.362982] mmc0: sdhci: Int enab:  0x02ff008b | Sig enab: 0x02ff008b
+> [  230.362992] mmc0: sdhci: AC12 err:  0x00000010 | Slot int: 0x00000000
+> [  230.363001] mmc0: sdhci: Caps:      0x176ec8b0 | Caps_1:   0x03002177
+> [  230.363011] mmc0: sdhci: Cmd:       0x0000123a | Max curr: 0x00000000
+> [  230.363020] mmc0: sdhci: Resp[0]:   0x00001201 | Resp[1]:  0x00000000
+> [  230.363029] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+> [  230.363035] mmc0: sdhci: Host ctl2: 0x0000804c
+> [  230.363047] mmc0: sdhci: ADMA Err:  0x00000001 | ADMA Ptr: 0x0000000457940204
+> [  230.363049] mmc0: sdhci: ============================================
+> [  230.363119] mmc0: Unexpected interrupt 0x04000000.
+
+Tuning error presumably because it used fixed sampling because tuning
+failed.  Strange considering that interrupt is not enabled.
+
+If you can't get tuning to work, you may need to disable the transfer modes
+that require tuning.
+
+
+> [  230.363128] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+> [  230.363157] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00001502
+> [  230.363166] mmc0: sdhci: Blk size:  0x00007200 | Blk cnt:  0x00000008
+> [  230.363174] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x00000033
+> [  230.363184] mmc0: sdhci: Present:   0x1fff0001 | Host ctl: 0x0000001f
+> [  230.363193] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+> [  230.363203] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00000007
+> [  230.363214] mmc0: sdhci: Timeout:   0x0000000a | Int stat: 0x00000000
+> [  230.363225] mmc0: sdhci: Int enab:  0x02ff008b | Sig enab: 0x02ff008b
+> [  230.363234] mmc0: sdhci: AC12 err:  0x00000000 | Slot int: 0x00000000
+> [  230.363244] mmc0: sdhci: Caps:      0x176ec8b0 | Caps_1:   0x03002177
+> [  230.363253] mmc0: sdhci: Cmd:       0x00000c1a | Max curr: 0x00000000
+> [  230.363263] mmc0: sdhci: Resp[0]:   0x00001201 | Resp[1]:  0x00000000
+> [  230.363272] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+> [  230.363278] mmc0: sdhci: Host ctl2: 0x0000800c
+> [  230.363292] mmc0: sdhci: ADMA Err:  0x00000001 | ADMA Ptr: 0x0000000457940204
+> [  230.363294] mmc0: sdhci: ============================================
+> [  230.363509] mmcblk0: error -110 sending stop command, original cmd
+> response 0x0, card status 0x400900
+> 
+
