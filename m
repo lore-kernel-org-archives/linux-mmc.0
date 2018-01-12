@@ -1,7 +1,7 @@
 From: <patrice.chotard@st.com>
-Subject: [PATCH 07/14] ARM: dts: stm32: Add pin map for SDIO controller on stm32f4
-Date: Fri, 12 Jan 2018 13:16:01 +0100
-Message-ID: <1515759368-16946-8-git-send-email-patrice.chotard@st.com>
+Subject: [PATCH 08/14] ARM: dts: stm32: Enable SDIO controller on stm32f469 disco board
+Date: Fri, 12 Jan 2018 13:16:02 +0100
+Message-ID: <1515759368-16946-9-git-send-email-patrice.chotard@st.com>
 References: <1515759368-16946-1-git-send-email-patrice.chotard@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,56 +14,56 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Andrea Merello <andrea.merello@gmail.com>
 
-This patch adds the pin configuration for SDIO controller on
-stm32f4.
+This patch adds SDIO-related DT nodes required by stm32f469 board
+
+There is a hardware issue on these boards, it misses a pullup on
+the GPIO line used as card detect to allow correct SD card
+detection. To allow correct card detection "broken-cd" property
+is used.
 
 Signed-off-by: Andrea Merello <andrea.merello@gmail.com>
+Signed-off-by: Alexandre TORGUE <alexandre.torgue@st.com>
 Signed-off-by: Patrice Chotard <patrice.chotard@st.com>
 ---
- arch/arm/boot/dts/stm32f4-pinctrl.dtsi | 31 +++++++++++++++++++++++++++++++
- 1 file changed, 31 insertions(+)
+ arch/arm/boot/dts/stm32f469-disco.dts | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
 
-diff --git a/arch/arm/boot/dts/stm32f4-pinctrl.dtsi b/arch/arm/boot/dts/stm32f4-pinctrl.dtsi
-index ae94d86..3520289 100644
---- a/arch/arm/boot/dts/stm32f4-pinctrl.dtsi
-+++ b/arch/arm/boot/dts/stm32f4-pinctrl.dtsi
-@@ -338,6 +338,37 @@
- 					slew-rate = <3>;
- 				};
- 			};
+diff --git a/arch/arm/boot/dts/stm32f469-disco.dts b/arch/arm/boot/dts/stm32f469-disco.dts
+index 318fb12..ebb97c3 100644
+--- a/arch/arm/boot/dts/stm32f469-disco.dts
++++ b/arch/arm/boot/dts/stm32f469-disco.dts
+@@ -66,6 +66,13 @@
+ 		serial0 = &usart3;
+ 	};
+ 
++	mmc_vcard: mmc_vcard {
++		compatible = "regulator-fixed";
++		regulator-name = "mmc_vcard";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++	};
 +
-+			sdio_pins: sdio_pins@0 {
-+				pins {
-+					pinmux = <STM32_PINMUX('C', 8, AF12)>, /* SDIO_D0 */
-+						 <STM32_PINMUX('C', 9, AF12)>, /* SDIO_D1 */
-+						 <STM32_PINMUX('C', 10, AF12)>, /* SDIO_D2 */
-+						 <STM32_PINMUX('C', 11, AF12)>, /* SDIO_D3 */
-+						 <STM32_PINMUX('C', 12, AF12)>, /* SDIO_CK */
-+						 <STM32_PINMUX('D', 2, AF12)>; /* SDIO_CMD */
-+					drive-push-pull;
-+					slew-rate = <2>;
-+				};
-+			};
-+
-+			sdio_pins_od: sdio_pins_od@0 {
-+				pins1 {
-+					pinmux = <STM32_PINMUX('C', 8, AF12)>, /* SDIO_D0 */
-+						 <STM32_PINMUX('C', 9, AF12)>, /* SDIO_D1 */
-+						 <STM32_PINMUX('C', 10, AF12)>, /* SDIO_D2 */
-+						 <STM32_PINMUX('C', 11, AF12)>, /* SDIO_D3 */
-+						 <STM32_PINMUX('C', 12, AF12)>; /* SDIO_CK */
-+					drive-push-pull;
-+					slew-rate = <2>;
-+				};
-+
-+				pins2 {
-+					pinmux = <STM32_PINMUX('D', 2, AF12)>; /* SDIO_CMD */
-+					drive-open-drain;
-+					slew-rate = <2>;
-+				};
-+			};
- 		};
+ 	soc {
+ 		dma-ranges = <0xc0000000 0x0 0x10000000>;
+ 	};
+@@ -120,6 +127,18 @@
  	};
  };
+ 
++&sdio {
++	status = "okay";
++	vmmc-supply = <&mmc_vcard>;
++	cd-gpios = <&gpiog 2 0>;
++	cd-inverted;
++	broken-cd;
++	pinctrl-names = "default", "opendrain";
++	pinctrl-0 = <&sdio_pins>;
++	pinctrl-1 = <&sdio_pins_od>;
++	bus-width = <4>;
++};
++
+ &usart3 {
+ 	pinctrl-0 = <&usart3_pins_a>;
+ 	pinctrl-names = "default";
 -- 
 1.9.1
