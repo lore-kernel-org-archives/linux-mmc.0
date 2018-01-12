@@ -1,52 +1,56 @@
-From: Uwe =?iso-8859-1?Q?Kleine-K=F6nig?=
-        <u.kleine-koenig@pengutronix.de>
-Subject: Re: [PATCH mmc-utils 0/6] mmc-utils: various cleanups
-Date: Thu, 11 Jan 2018 21:57:43 +0100
-Message-ID: <20180111205743.uinigacopk5eklgu@pengutronix.de>
-References: <20171221133316.19466-1-u.kleine-koenig@pengutronix.de>
- <CAPDyKFova9BpB7jMLav8Y3BP2426WLy=LOoj_ato7eUCeTcrxA@mail.gmail.com>
+From: "Wladimir J. van der Laan" <laanwj@gmail.com>
+Subject: Re: 4.15.0-rc5 fails boot on MX53 LOCO board due to MMC (clock?)
+ issue
+Date: Fri, 12 Jan 2018 11:42:55 +0100
+Message-ID: <20180112104255.GA28577@amethyst.visucore.com>
+References: <20180111171538.GA32086@amethyst.visucore.com>
+ <CA+sos79yU=eQAoJnmwjiwc-h7ZEB14NhMtO8i8EMX5wO1y57xw@mail.gmail.com>
+ <CA+sos7_y76fz5kLEhudeS7cp2AvzcGfgpEMJjTO+PyVif3=AvA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([85.220.165.71]:52197 "EHLO
-        metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754713AbeALK1Z (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Jan 2018 05:27:25 -0500
+Received: from mail-wm0-f50.google.com ([74.125.82.50]:44000 "EHLO
+        mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754835AbeALKm7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Jan 2018 05:42:59 -0500
+Received: by mail-wm0-f50.google.com with SMTP id g1so11107926wmg.2
+        for <linux-mmc@vger.kernel.org>; Fri, 12 Jan 2018 02:42:58 -0800 (PST)
 Content-Disposition: inline
-In-Reply-To: <CAPDyKFova9BpB7jMLav8Y3BP2426WLy=LOoj_ato7eUCeTcrxA@mail.gmail.com>
+In-Reply-To: <CA+sos7_y76fz5kLEhudeS7cp2AvzcGfgpEMJjTO+PyVif3=AvA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Sascha Hauer <kernel@pengutronix.de>
+To: =?utf-8?Q?Beno=C3=AEt_Th=C3=A9baudeau?= <benoit.thebaudeau.dev@gmail.com>
+Cc: linux-mmc@vger.kernel.org, =?utf-8?Q?Beno=C3=AEt_Th=C3=A9baudeau?= <benoit@wsystem.com>, Fabio Estevam <fabio.estevam@nxp.com>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Healy <cphealy@gmail.com>
 
-On Thu, Dec 21, 2017 at 03:21:33PM +0100, Ulf Hansson wrote:
-> On 21 December 2017 at 14:33, Uwe Kleine-König
-> <u.kleine-koenig@pengutronix.de> wrote:
-> > while trying to teach barebox to do what can be achived in Linux with
-> >
-> >         mmc enh_area set ...
-> >
-> > (not only by reading but also by stealing code from mmc-utils) I noticed
-> > a few things that when fixed make it easier for me to copy code. These
-> > (and a few more) are fixed in this series.
-> >
-> > I hope I sent this series to the right people and list. If not, please
-> > excuse me not knowing it better. I'm thankful for hints where to send
-> > patches like this instead in the future.
+> Can you please try the change below? If it works and everyone is fine
+> with it, I will send a proper patch.
+
+Thank you! That fixed the problem.
+
+Tested-by: Wladimir J. van der Laan <laanwj@gmail.com>
+
+> ---
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -687,6 +687,20 @@ static inline void esdhc_pltfm_set_clock(struct
+> sdhci_host *host,
+>          return;
+>      }
 > 
-> This is the right place!
-> 
-> Chris maintains mmc-utils, however, I haven't heard from him for quite
-> a while, let's hope that he sees this!
-
-I heard nothing yet from Chris. So to ease not loosing my work I cloned
-Chris' repository to https://github.com/ukleinek/mmc-utils and pushed my
-patches there.
-
-Best regards
-Uwe
-
--- 
-Pengutronix e.K.                           | Uwe Kleine-König            |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+> +    /* For i.MX53 eSDHCv3, SYSCTL.SDCLKFS may not be set to 0. */
+> +    if (is_imx53_esdhc(imx_data)) {
+> +        /*
+> +         * According to the i.MX53 reference manual, if DLLCTRL[10] can
+> +         * be set, then the controller is eSDHCv3, else it is eSDHCv2.
+> +         */
+> +        val = readl(host->ioaddr + ESDHC_DLL_CTRL);
+> +        writel(val | BIT(10), host->ioaddr + ESDHC_DLL_CTRL);
+> +        temp = readl(host->ioaddr + ESDHC_DLL_CTRL);
+> +        writel(val, host->ioaddr + ESDHC_DLL_CTRL);
+> +        if (temp & BIT(10))
+> +            pre_div = 2;
+> +    }
+> +
+>      temp = sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
+>      temp &= ~(ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN | ESDHC_CLOCK_PEREN
+>          | ESDHC_CLOCK_MASK);
