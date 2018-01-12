@@ -1,7 +1,7 @@
 From: <patrice.chotard@st.com>
-Subject: [PATCH 10/14] ARM: stm32: Add AMBA support for STM32F4 and STM32F7 SoCs
-Date: Fri, 12 Jan 2018 13:16:04 +0100
-Message-ID: <1515759368-16946-11-git-send-email-patrice.chotard@st.com>
+Subject: [PATCH 13/14] clk: stm32: Add clk entry for SDMMC2 on stm32F769
+Date: Fri, 12 Jan 2018 13:16:07 +0100
+Message-ID: <1515759368-16946-14-git-send-email-patrice.chotard@st.com>
 References: <1515759368-16946-1-git-send-email-patrice.chotard@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,37 +14,34 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Patrice Chotard <patrice.chotard@st.com>
 
-As both STM32F4 and STM32F7 SoCs embeds an AMBA PL180 mmci IP,
-we need to enable AMBA support in mach-stm32.
+STM32F769 has 2 SDMMC port, add clock entry for the second one.
 
+Signed-off-by: Alexandre TORGUE <alexandre.torgue@st.com>
 Signed-off-by: Patrice Chotard <patrice.chotard@st.com>
 ---
- arch/arm/mach-stm32/Kconfig | 3 +++
- 1 file changed, 3 insertions(+)
+ drivers/clk/clk-stm32f4.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/arch/arm/mach-stm32/Kconfig b/arch/arm/mach-stm32/Kconfig
-index 0d1889b..f53a8db 100644
---- a/arch/arm/mach-stm32/Kconfig
-+++ b/arch/arm/mach-stm32/Kconfig
-@@ -13,16 +13,19 @@ config ARCH_STM32
- config MACH_STM32F429
- 	bool "STMicrolectronics STM32F429"
- 	depends on ARCH_STM32
-+	select ARM_AMBA
- 	default y
+diff --git a/drivers/clk/clk-stm32f4.c b/drivers/clk/clk-stm32f4.c
+index 96c6b6b..8f8a178 100644
+--- a/drivers/clk/clk-stm32f4.c
++++ b/drivers/clk/clk-stm32f4.c
+@@ -282,6 +282,7 @@ struct stm32f4_gate_data {
  
- config MACH_STM32F469
- 	bool "STMicrolectronics STM32F469"
- 	depends on ARCH_STM32
-+	select ARM_AMBA
- 	default y
+ 	{ STM32F4_RCC_APB2ENR,  0,	"tim1",		"apb2_mul" },
+ 	{ STM32F4_RCC_APB2ENR,  1,	"tim8",		"apb2_mul" },
++	{ STM32F4_RCC_APB2ENR,  7,	"sdmmc2",	"sdmux"    },
+ 	{ STM32F4_RCC_APB2ENR,  8,	"adc1",		"apb2_div" },
+ 	{ STM32F4_RCC_APB2ENR,  9,	"adc2",		"apb2_div" },
+ 	{ STM32F4_RCC_APB2ENR, 10,	"adc3",		"apb2_div" },
+@@ -315,7 +316,7 @@ struct stm32f4_gate_data {
  
- config MACH_STM32F746
- 	bool "STMicrolectronics STM32F746"
- 	depends on ARCH_STM32
-+	select ARM_AMBA
- 	default y
+ static const u64 stm32f746_gate_map[MAX_GATE_MAP] = { 0x000000f17ef417ffull,
+ 						      0x0000000000000003ull,
+-						      0x04f77f033e01c9ffull };
++						      0x04f77f833e01c9ffull };
  
- config MACH_STM32H743
+ static const u64 *stm32f4_gate_map;
+ 
 -- 
 1.9.1
