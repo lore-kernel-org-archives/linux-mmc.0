@@ -1,92 +1,125 @@
-From: Benjamin Beckmeyer <beckmeyer.b@rittal.de>
-Subject: Re: [PATCH v4] RFT: mmc: sdhci: Implement an SDHCI-specific bounce buffer
-Date: Fri, 12 Jan 2018 12:11:52 +0100 (CET)
-Message-ID: <OF8FC8E998.7A21E1C5-ONC1258213.003D371A-C1258213.003D82BC@rittal.de>
-References: <20180112100022.3191-1-linus.walleij@linaro.org>
+From: <patrice.chotard@st.com>
+Subject: [PATCH 02/14] mmc: mmci: Don't pretend all variants to have MCI_STARBITERR flag
+Date: Fri, 12 Jan 2018 13:15:56 +0100
+Message-ID: <1515759368-16946-3-git-send-email-patrice.chotard@st.com>
+References: <1515759368-16946-1-git-send-email-patrice.chotard@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-        charset=ISO-8859-1
-Content-Transfer-Encoding: 8BIT
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20180112100022.3191-1-linus.walleij@linaro.org>
-Sender: stable-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Pierre Ossman <pierre@ossman.eu>, =?ISO-8859-1?Q?Beno=EEt_Th=E9baudeau?= <benoit@wsystem.com>, Fabio Estevam <fabio.estevam@nxp.com>, stable@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-gpio-owner@vger.kernel.org>
+In-Reply-To: <1515759368-16946-1-git-send-email-patrice.chotard@st.com>
+Sender: linux-gpio-owner@vger.kernel.org
+To: Russell King <linux@armlinux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, Linus Walleij <linus.walleij@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Alexandre Torgue <alexandre.torgue@st.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-gpio@vger.kernel.org, devicetree@vger.kernel.org, Patrice Chotard <patrice.chotard@st.com>, Andrea Merello <andrea.merello@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-> - Tested on the PCI SDHCI on my laptop: requesting a new test
->   on i.MX from Benjamin. (Please!)
+From: Patrice Chotard <patrice.chotard@st.com>
 
-Hey Linus,
+This patch prepares for supporting the STM32 variant that
+has no such bit in the status register.
 
-sorry to say that but in my case the kernel doesn't boot anymore.
-Again, after I "patched out" the bounce buffer it's running fine.
-Here is the kernel output..
+Signed-off-by: Andrea Merello <andrea.merello@gmail.com>
+Signed-off-by: Patrice Chotard <patrice.chotard@st.com>
+---
+ drivers/mmc/host/mmci.c | 16 ++++++++++++++--
+ 1 file changed, 14 insertions(+), 2 deletions(-)
 
-sdhci: Secure Digital Host Controller Interface driver
-sdhci: Copyright(c) Pierre Ossman
-sdhci-pltfm: SDHCI platform and OF driver helper
-sdhci-esdhc-imx 53fb4000.esdhc: host only supports SDMA, activate bounce buffer
-sdhci-esdhc-imx 53fb4000.esdhc: bounce buffer: bounce up to 128 segments into one, max segment size 65536 bytes
-mmc0: SDHCI controller on 53fb4000.esdhc [53fb4000.esdhc] using DMA
-sdhci-esdhc-imx 53fb8000.esdhc: Got CD GPIO
-sdhci-esdhc-imx 53fb8000.esdhc: Got WP GPIO
-sdhci-esdhc-imx 53fb8000.esdhc: host only supports SDMA, activate bounce buffer
-sdhci-esdhc-imx 53fb8000.esdhc: bounce buffer: bounce up to 128 segments into one, max segment size 65536 bytes
-mmc1: SDHCI controller on 53fb8000.esdhc [53fb8000.esdhc] using DMA
-mmc0: new high speed MMC card at address 0001
-oprofile: no performance counters
-oprofile: using timer interrupt.
-mmcblk0: mmc0:0001 002G00 1.83 GiB 
-NET: Registered protocol family 10
-mmcblk0boot0: mmc0:0001 002G00 partition 1 512 KiB
-mmcblk0boot1: mmc0:0001 002G00 partition 2 512 KiB
-Segment Routing with IPv6
-sit: IPv6, IPv4 and MPLS over IPv4 tunneling driver
-NET: Registered protocol family 17
-can: controller area network core (rev 20170425 abi 9)
-NET: Registered protocol family 29
-can: raw protocol (rev 20170425)
-can: broadcast manager protocol (rev 20170425 t)
-can: netlink gateway (rev 20170425) max_hops=1
-input: gpio-keys as /devices/platform/gpio-keys/input/input1
-mmcblk0rpmb: mmc0:0001 002G00 partition 3 128 KiB
-imxdi_rtc 53ffc000.dryice: setting system clock to 1970-01-03 01:46:38 UTC (179198)
- mmcblk0: p1 p2 p3 p4 < p5 p6 p7 p8 p9 p10 >
-EXT4-fs (mmcblk0p8): couldn't mount as ext3 due to feature incompatibilities
-EXT4-fs (mmcblk0p8): couldn't mount as ext2 due to feature incompatibilities
-EXT4-fs (mmcblk0p8): ext4_check_descriptors: Checksum for group 3 failed (1874!=0)
-EXT4-fs (mmcblk0p8): ext4_check_descriptors: Block bitmap for group 4 not in group (block 0)!
-EXT4-fs (mmcblk0p8): group descriptors corrupted!
-VFS: Cannot open root device "mmcblk0p8" or unknown-block(259,0): error -117
-Please append a correct "root=" boot option; here are the available partitions:
-b300         1916928 mmcblk0 
- driver: mmcblk
-  b301             767 mmcblk0p1 00000000-01
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 3125dc0..7e56f85 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -83,6 +83,8 @@
+  * @qcom_dml: enables qcom specific dma glue for dma transfers.
+  * @reversed_irq_handling: handle data irq before cmd irq.
+  * @mmcimask1: true if variant have a MMCIMASK1 register.
++ * @start_err: true is the variant has STARTBITERR bit inside MMCISTATUS
++ *	       register.
+  */
+ struct variant_data {
+ 	unsigned int		clkreg;
+@@ -113,6 +115,7 @@ struct variant_data {
+ 	bool			qcom_dml;
+ 	bool			reversed_irq_handling;
+ 	bool			mmcimask1;
++	bool			start_err;
+ };
+ 
+ static struct variant_data variant_arm = {
+@@ -123,6 +126,7 @@ struct variant_data {
+ 	.f_max			= 100000000,
+ 	.reversed_irq_handling	= true,
+ 	.mmcimask1		= true,
++	.start_err		= true,
+ };
+ 
+ static struct variant_data variant_arm_extended_fifo = {
+@@ -132,6 +136,7 @@ struct variant_data {
+ 	.pwrreg_powerup		= MCI_PWR_UP,
+ 	.f_max			= 100000000,
+ 	.mmcimask1		= true,
++	.start_err		= true,
+ };
+ 
+ static struct variant_data variant_arm_extended_fifo_hwfc = {
+@@ -142,6 +147,7 @@ struct variant_data {
+ 	.pwrreg_powerup		= MCI_PWR_UP,
+ 	.f_max			= 100000000,
+ 	.mmcimask1		= true,
++	.start_err		= true,
+ };
+ 
+ static struct variant_data variant_u300 = {
+@@ -158,6 +164,7 @@ struct variant_data {
+ 	.pwrreg_clkgate		= true,
+ 	.pwrreg_nopower		= true,
+ 	.mmcimask1		= true,
++	.start_err		= true,
+ };
+ 
+ static struct variant_data variant_nomadik = {
+@@ -175,6 +182,7 @@ struct variant_data {
+ 	.pwrreg_clkgate		= true,
+ 	.pwrreg_nopower		= true,
+ 	.mmcimask1		= true,
++	.start_err		= true,
+ };
+ 
+ static struct variant_data variant_ux500 = {
+@@ -198,6 +206,7 @@ struct variant_data {
+ 	.busy_detect_mask	= MCI_ST_BUSYENDMASK,
+ 	.pwrreg_nopower		= true,
+ 	.mmcimask1		= true,
++	.start_err		= true,
+ };
+ 
+ static struct variant_data variant_ux500v2 = {
+@@ -223,6 +232,7 @@ struct variant_data {
+ 	.busy_detect_mask	= MCI_ST_BUSYENDMASK,
+ 	.pwrreg_nopower		= true,
+ 	.mmcimask1		= true,
++	.start_err		= true,
+ };
+ 
+ static struct variant_data variant_qcom = {
+@@ -242,6 +252,7 @@ struct variant_data {
+ 	.qcom_fifo		= true,
+ 	.qcom_dml		= true,
+ 	.mmcimask1		= true,
++	.start_err		= true,
+ };
+ 
+ /* Busy detection for the ST Micro variant */
+@@ -935,8 +946,9 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
+ 		return;
+ 
+ 	/* First check for errors */
+-	if (status & (MCI_DATACRCFAIL|MCI_DATATIMEOUT|MCI_STARTBITERR|
+-		      MCI_TXUNDERRUN|MCI_RXOVERRUN)) {
++	if (status & (MCI_DATACRCFAIL | MCI_DATATIMEOUT |
++		      (host->variant->start_err ? MCI_STARTBITERR : 0) |
++		      MCI_TXUNDERRUN | MCI_RXOVERRUN)) {
+ 		u32 remain, success;
+ 
+ 		/* Terminate the DMA transfer */
+-- 
+1.9.1
 
-  b302             128 mmcblk0p2 00000000-02
-
-  b303             128 mmcblk0p3 00000000-03
-
-  b304               1 mmcblk0p4 
-
-  b305             767 mmcblk0p5 00000000-05
-
-  b306          409599 mmcblk0p6 00000000-06
-
-  b307           16383 mmcblk0p7 00000000-07
-
-  103:00000     409599 mmcblk0p8 00000000-08
-
-  103:00001     102399 mmcblk0p9 00000000-09
-
-  103:00002     961535 mmcblk0p10 00000000-0a
-
-b318             128 mmcblk0rpmb 
- (driver?)
-b310             512 mmcblk0boot1 
- (driver?)
-b308             512 mmcblk0boot0 
- (driver?)
-Kernel panic - not syncing: VFS: Unable to mount root fs on unknown-block(259,0)
----[ end Kernel panic - not syncing: VFS: Unable to mount root fs on unknown-block(259,0)
