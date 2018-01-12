@@ -1,49 +1,35 @@
-From: <patrice.chotard@st.com>
-Subject: [PATCH 06/14] ARM: dts: stm32: Add SDIO controller for stm32f429
-Date: Fri, 12 Jan 2018 13:16:00 +0100
-Message-ID: <1515759368-16946-7-git-send-email-patrice.chotard@st.com>
-References: <1515759368-16946-1-git-send-email-patrice.chotard@st.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH v4] RFT: mmc: sdhci: Implement an SDHCI-specific bounce buffer
+Date: Fri, 12 Jan 2018 14:56:50 +0100
+Message-ID: <CACRpkdYckpvRKLqJSi1Ri0X7R+Z3OOKB5FF535G2LmKnQqAmTA@mail.gmail.com>
+References: <20180112100022.3191-1-linus.walleij@linaro.org> <OF8FC8E998.7A21E1C5-ONC1258213.003D371A-C1258213.003D82BC@rittal.de>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1515759368-16946-1-git-send-email-patrice.chotard@st.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Russell King <linux@armlinux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, Linus Walleij <linus.walleij@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Alexandre Torgue <alexandre.torgue@st.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-gpio@vger.kernel.org, devicetree@vger.kernel.org, Patrice Chotard <patrice.chotard@st.com>, Andrea Merello <andrea.merello@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-it0-f51.google.com ([209.85.214.51]:34338 "EHLO
+        mail-it0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933760AbeALN4w (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Jan 2018 08:56:52 -0500
+Received: by mail-it0-f51.google.com with SMTP id m11so1802885iti.1
+        for <linux-mmc@vger.kernel.org>; Fri, 12 Jan 2018 05:56:52 -0800 (PST)
+In-Reply-To: <OF8FC8E998.7A21E1C5-ONC1258213.003D371A-C1258213.003D82BC@rittal.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Benjamin Beckmeyer <beckmeyer.b@rittal.de>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Pierre Ossman <pierre@ossman.eu>, =?UTF-8?Q?Beno=C3=AEt_Th=C3=A9baudeau?= <benoit@wsystem.com>, Fabio Estevam <fabio.estevam@nxp.com>, stable <stable@vger.kernel.org>
 
-From: Patrice Chotard <patrice.chotard@st.com>
+On Fri, Jan 12, 2018 at 12:11 PM, Benjamin Beckmeyer
+<beckmeyer.b@rittal.de> wrote:
 
-stm32f429 embeds ARM_PL180 sdi IP, adds SDIO controller
-node to allow MMC support.
+> sorry to say that but in my case the kernel doesn't boot anymore.
+> Again, after I "patched out" the bounce buffer it's running fine.
+> Here is the kernel output..
 
-Signed-off-by: Andrea Merello <andrea.merello@gmail.com>
-Signed-off-by: Patrice Chotard <patrice.chotard@st.com>
----
- arch/arm/boot/dts/stm32f429.dtsi | 11 +++++++++++
- 1 file changed, 11 insertions(+)
+Something is corrupting the data apparently :/
 
-diff --git a/arch/arm/boot/dts/stm32f429.dtsi b/arch/arm/boot/dts/stm32f429.dtsi
-index 10099df..ede77e0 100644
---- a/arch/arm/boot/dts/stm32f429.dtsi
-+++ b/arch/arm/boot/dts/stm32f429.dtsi
-@@ -511,6 +511,17 @@
- 			};
- 		};
- 
-+		sdio: sdio@40012c00 {
-+			compatible = "arm,pl180", "arm,primecell";
-+			arm,primecell-periphid = <0x00880180>;
-+			reg = <0x40012c00 0x400>;
-+			clocks = <&rcc 0 STM32F4_APB2_CLOCK(SDIO)>;
-+			clock-names = "apb_pclk";
-+			interrupts = <49>;
-+			max-frequency = <48000000>;
-+			status = "disabled";
-+		};
-+
- 		syscfg: system-config@40013800 {
- 			compatible = "syscon";
- 			reg = <0x40013800 0x400>;
--- 
-1.9.1
+Well since dma_alloc_coherent() is know to work, I will make a
+v5 that uses that and still caps the buffer to 64K, and bail out to
+single segments if we can't allocate a bounce buffer.
+
+Yours,
+Linus Walleij
