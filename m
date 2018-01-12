@@ -1,7 +1,7 @@
 From: <patrice.chotard@st.com>
-Subject: [PATCH 13/14] clk: stm32: Add clk entry for SDMMC2 on stm32F769
-Date: Fri, 12 Jan 2018 13:16:07 +0100
-Message-ID: <1515759368-16946-14-git-send-email-patrice.chotard@st.com>
+Subject: [PATCH 05/14] ARM: dts: stm32: Add SDIO controller for stm32f746
+Date: Fri, 12 Jan 2018 13:15:59 +0100
+Message-ID: <1515759368-16946-6-git-send-email-patrice.chotard@st.com>
 References: <1515759368-16946-1-git-send-email-patrice.chotard@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,34 +14,46 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Patrice Chotard <patrice.chotard@st.com>
 
-STM32F769 has 2 SDMMC port, add clock entry for the second one.
+stm32f746 embeds ARM_PL180 sdio IP, adds SDIO controller
+nodes to allow MMC support.
 
-Signed-off-by: Alexandre TORGUE <alexandre.torgue@st.com>
 Signed-off-by: Patrice Chotard <patrice.chotard@st.com>
 ---
- drivers/clk/clk-stm32f4.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ arch/arm/boot/dts/stm32f746.dtsi | 22 ++++++++++++++++++++++
+ 1 file changed, 22 insertions(+)
 
-diff --git a/drivers/clk/clk-stm32f4.c b/drivers/clk/clk-stm32f4.c
-index 96c6b6b..8f8a178 100644
---- a/drivers/clk/clk-stm32f4.c
-+++ b/drivers/clk/clk-stm32f4.c
-@@ -282,6 +282,7 @@ struct stm32f4_gate_data {
+diff --git a/arch/arm/boot/dts/stm32f746.dtsi b/arch/arm/boot/dts/stm32f746.dtsi
+index 5f66d15..cffe1b1 100644
+--- a/arch/arm/boot/dts/stm32f746.dtsi
++++ b/arch/arm/boot/dts/stm32f746.dtsi
+@@ -429,6 +429,28 @@
+ 			status = "disabled";
+ 		};
  
- 	{ STM32F4_RCC_APB2ENR,  0,	"tim1",		"apb2_mul" },
- 	{ STM32F4_RCC_APB2ENR,  1,	"tim8",		"apb2_mul" },
-+	{ STM32F4_RCC_APB2ENR,  7,	"sdmmc2",	"sdmux"    },
- 	{ STM32F4_RCC_APB2ENR,  8,	"adc1",		"apb2_div" },
- 	{ STM32F4_RCC_APB2ENR,  9,	"adc2",		"apb2_div" },
- 	{ STM32F4_RCC_APB2ENR, 10,	"adc3",		"apb2_div" },
-@@ -315,7 +316,7 @@ struct stm32f4_gate_data {
- 
- static const u64 stm32f746_gate_map[MAX_GATE_MAP] = { 0x000000f17ef417ffull,
- 						      0x0000000000000003ull,
--						      0x04f77f033e01c9ffull };
-+						      0x04f77f833e01c9ffull };
- 
- static const u64 *stm32f4_gate_map;
- 
++		sdio2: sdio2@40011c00 {
++			compatible = "arm,pl180", "arm,primecell";
++			arm,primecell-periphid = <0x00880180>;
++			reg = <0x40011c00 0x400>;
++			clocks = <&rcc 0 167>;
++			clock-names = "apb_pclk";
++			interrupts = <103>;
++			max-frequency = <48000000>;
++			status = "disabled";
++		};
++
++		sdio: sdio@40012c00 {
++			compatible = "arm,pl180", "arm,primecell";
++			arm,primecell-periphid = <0x00880180>;
++			reg = <0x40012c00 0x400>;
++			clocks = <&rcc 0 171>;
++			clock-names = "apb_pclk";
++			interrupts = <49>;
++			max-frequency = <48000000>;
++			status = "disabled";
++		};
++
+ 		syscfg: system-config@40013800 {
+ 			compatible = "syscon";
+ 			reg = <0x40013800 0x400>;
 -- 
 1.9.1
