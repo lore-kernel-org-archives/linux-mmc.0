@@ -1,48 +1,60 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v.4.15-rc8
-Date: Fri, 12 Jan 2018 15:28:22 +0100
-Message-ID: <1515767302-8567-1-git-send-email-ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2 09/22] mmc: tmio: use mmc_can_gpio_cd() instead of
+ checking TMIO_MMC_USE_GPIO_CD
+Date: Fri, 12 Jan 2018 15:29:33 +0100
+Message-ID: <CAPDyKFqbE7H9bB-iT8d4ZrnVbY3SF+zPWKb=Cp_LwdRwUL-YBg@mail.gmail.com>
+References: <1511540697-27387-1-git-send-email-yamada.masahiro@socionext.com> <1511540697-27387-10-git-send-email-yamada.masahiro@socionext.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1511540697-27387-10-git-send-email-yamada.masahiro@socionext.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+To: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Linus,
+On 24 November 2017 at 17:24, Masahiro Yamada
+<yamada.masahiro@socionext.com> wrote:
+> To use a GPIO line for card detection, TMIO_MMC_USE_GPIO_CD is set
+> by a legacy board (arch/sh/boards/mach-ecovec24).
+>
+> For DT platforms, the "cd-gpios" property is a legitimate way for that
+> in case the IP-builtin card detection can not be used for some reason.
+> mmc_of_parse() calls mmc_gpiod_request_cd() to set up ctx->cd_gpio if
+> the "cd-gpios" property is specified.
+>
+> To cater to both cases, mmc_can_gpio_cd() is a correct way to check
+> which card detection logic is used.
+>
+> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 
-Here's a PR with a few trivial MMC fixes intended for v4.15-rc8. Details about
-the highlights are as usual found in the signed tag.
+Thanks, applied for next!
 
-Please pull this in!
+For the rest of the series, please re-post those changes.
 
 Kind regards
-Ulf Hansson
+Uffe
 
-
-The following changes since commit 91516a2a4734614d62ee3ed921f8f88acc67c000:
-
-  mmc: core: apply NO_CMD23 quirk to some specific cards (2017-12-11 13:43:27 +0100)
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v4.15-rc2-2
-
-for you to fetch changes up to 2bd7b4aacdb6efa5ccd4749c365c171b884791d2:
-
-  mmc: s3mci: mark debug_regs[] as static (2018-01-04 12:42:31 +0100)
-
-----------------------------------------------------------------
-MMC host:
- - s3mci: mark debug_regs[] as static
- - renesas_sdhi: Add MODULE_LICENSE
-
-----------------------------------------------------------------
-Arnd Bergmann (1):
-      mmc: s3mci: mark debug_regs[] as static
-
-Masaharu Hayakawa (1):
-      mmc: renesas_sdhi: Add MODULE_LICENSE
-
- drivers/mmc/host/renesas_sdhi_core.c | 3 +++
- drivers/mmc/host/s3cmci.c            | 6 ++++--
- 2 files changed, 7 insertions(+), 2 deletions(-)
+> ---
+>
+> Changes in v2: None
+>
+>  drivers/mmc/host/tmio_mmc_core.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+> index efffb04..610f26f 100644
+> --- a/drivers/mmc/host/tmio_mmc_core.c
+> +++ b/drivers/mmc/host/tmio_mmc_core.c
+> @@ -1232,7 +1232,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
+>         }
+>         mmc->max_seg_size = mmc->max_req_size;
+>
+> -       _host->native_hotplug = !(pdata->flags & TMIO_MMC_USE_GPIO_CD ||
+> +       _host->native_hotplug = !(mmc_can_gpio_cd(mmc) ||
+>                                   mmc->caps & MMC_CAP_NEEDS_POLL ||
+>                                   !mmc_card_is_removable(mmc));
+>
+> --
+> 2.7.4
+>
