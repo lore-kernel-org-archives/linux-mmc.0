@@ -1,66 +1,94 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH v2 16/22] mmc: tmio: fix never-detected card insertion bug
-Date: Sat, 13 Jan 2018 21:59:38 +0100
-Message-ID: <20180113205938.dlfwxvmfnukvfl3f@ninjato>
-References: <1511540697-27387-1-git-send-email-yamada.masahiro@socionext.com>
- <1511540697-27387-17-git-send-email-yamada.masahiro@socionext.com>
- <20180102131555.z6amjfqtadkh2w77@ninjato>
- <20180102171321.mxhcenirdx6ohbyo@ninjato>
- <CAK7LNAThnAY43OMPDMaw4DSdtJCVTUTm4-NrTgWD-6SE-yCp=g@mail.gmail.com>
+From: =?UTF-8?q?Beno=C3=AEt=20Th=C3=A9baudeau?=
+        <benoit.thebaudeau.dev@gmail.com>
+Subject: [PATCH] mmc: sdhci-esdhc-imx: Fix i.MX53 eSDHCv3 clock
+Date: Sun, 14 Jan 2018 19:43:05 +0100
+Message-ID: <20180114184305.4018-1-benoit.thebaudeau.dev@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="lvfysjqgqkmt3h4b"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAK7LNAThnAY43OMPDMaw4DSdtJCVTUTm4-NrTgWD-6SE-yCp=g@mail.gmail.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:46482 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751493AbeANSnU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 14 Jan 2018 13:43:20 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, "Wladimir J . van der Laan" <laanwj@gmail.com>, Fabio Estevam <fabio.estevam@nxp.com>, =?UTF-8?q?Beno=C3=AEt=20Th=C3=A9baudeau?= <benoit.thebaudeau.dev@gmail.com>
 
+Commit 5143c953a786 ("mmc: sdhci-esdhc-imx: Allow all supported
+prescaler values") made it possible to set SYSCTL.SDCLKFS to 0 in SDR
+mode, thus bypassing the SD clock frequency prescaler, in order to be
+able to get higher SD clock frequencies in some contexts. However, that
+commit missed the fact that this value is illegal on the eSDHCv3
+instance of the i.MX53. This seems to be the only exception on i.MX,
+this value being legal even for the eSDHCv2 instances of the i.MX53.
 
---lvfysjqgqkmt3h4b
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Fix this issue by changing the minimum prescaler value if the i.MX53
+eSDHCv3 is detected. According to the i.MX53 reference manual, if
+DLLCTRL[10] can be set, then the controller is eSDHCv3, else it is
+eSDHCv2.
 
+This commit fixes the following issue, which was preventing the i.MX53
+Loco (IMX53QSB) board from booting Linux 4.15.0-rc5:
+[    1.882668] mmcblk1: error -84 transferring data, sector 2048, nr 8, cmd response 0x900, card status 0xc00
+[    2.002255] mmcblk1: error -84 transferring data, sector 2050, nr 6, cmd response 0x900, card status 0xc00
+[   12.645056] mmc1: Timeout waiting for hardware interrupt.
+[   12.650473] mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
+[   12.656921] mmc1: sdhci: Sys addr:  0x00000000 | Version:  0x00001201
+[   12.663366] mmc1: sdhci: Blk size:  0x00000004 | Blk cnt:  0x00000000
+[   12.669813] mmc1: sdhci: Argument:  0x00000000 | Trn mode: 0x00000013
+[   12.676258] mmc1: sdhci: Present:   0x01f8028f | Host ctl: 0x00000013
+[   12.682703] mmc1: sdhci: Power:     0x00000002 | Blk gap:  0x00000000
+[   12.689148] mmc1: sdhci: Wake-up:   0x00000000 | Clock:    0x0000003f
+[   12.695594] mmc1: sdhci: Timeout:   0x0000008e | Int stat: 0x00000000
+[   12.702039] mmc1: sdhci: Int enab:  0x107f004b | Sig enab: 0x107f004b
+[   12.708485] mmc1: sdhci: AC12 err:  0x00000000 | Slot int: 0x00001201
+[   12.714930] mmc1: sdhci: Caps:      0x07eb0000 | Caps_1:   0x08100810
+[   12.721375] mmc1: sdhci: Cmd:       0x0000163a | Max curr: 0x00000000
+[   12.727821] mmc1: sdhci: Resp[0]:   0x00000920 | Resp[1]:  0x00000000
+[   12.734265] mmc1: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+[   12.740709] mmc1: sdhci: Host ctl2: 0x00000000
+[   12.745157] mmc1: sdhci: ADMA Err:  0x00000001 | ADMA Ptr: 0xc8049200
+[   12.751601] mmc1: sdhci: ============================================
+[   12.758110] print_req_error: I/O error, dev mmcblk1, sector 2050
+[   12.764135] Buffer I/O error on dev mmcblk1p1, logical block 0, lost sync page write
+[   12.775163] EXT4-fs (mmcblk1p1): mounted filesystem without journal. Opts: (null)
+[   12.782746] VFS: Mounted root (ext4 filesystem) on device 179:9.
+[   12.789151] mmcblk1: response CRC error sending SET_BLOCK_COUNT command, card status 0x900
 
-> I am talking about the card detection
-> by the IP-builtin circuit.
+Signed-off-by: Benoît Thébaudeau <benoit.thebaudeau.dev@gmail.com>
+Reported-by: Wladimir J. van der Laan <laanwj@gmail.com>
+Tested-by: Wladimir J. van der Laan <laanwj@gmail.com>
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
 
-Yes, I know. As I wrote in one of the previous patches when reviewing
-it, I disabled GPIO CD and used the internal mechanism (for tests where
-it is relevant). Like here, too.
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 85140c9af581..8b941f814472 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -687,6 +687,20 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
+ 		return;
+ 	}
+ 
++	/* For i.MX53 eSDHCv3, SYSCTL.SDCLKFS may not be set to 0. */
++	if (is_imx53_esdhc(imx_data)) {
++		/*
++		 * According to the i.MX53 reference manual, if DLLCTRL[10] can
++		 * be set, then the controller is eSDHCv3, else it is eSDHCv2.
++		 */
++		val = readl(host->ioaddr + ESDHC_DLL_CTRL);
++		writel(val | BIT(10), host->ioaddr + ESDHC_DLL_CTRL);
++		temp = readl(host->ioaddr + ESDHC_DLL_CTRL);
++		writel(val, host->ioaddr + ESDHC_DLL_CTRL);
++		if (temp & BIT(10))
++			pre_div = 2;
++	}
++
+ 	temp = sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
+ 	temp &= ~(ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN | ESDHC_CLOCK_PEREN
+ 		| ESDHC_CLOCK_MASK);
+-- 
+2.14.1
 
->  - GPIO is not set up                     -> mmc_gpio_get_cd() returns -ENOSYS
-
-Thanks! That pointed me to the right direction. I missed that patch
-10/22 was still under discussion and not applied to mmc/next, so I had
-to pick it manually.
-
-I can confirm now that there is an issue and your patch fixes it for the
-non-GPIO case. For the GPIO case, however, the TMIO_STAT_CARD_REMOVE |
-TMIO_STAT_CARD_INSERT interrupts are enabled now, too. It didn't harm
-when doing my tests, but we shouldn't do it, to be safe IMO.
-
-
---lvfysjqgqkmt3h4b
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlpaczYACgkQFA3kzBSg
-KbY+ZxAAo52LmovtrbFQroGjH1IETD+DWGcpxItNF9jSbV9pMy7aOKEsTHhCZg9p
-6ad67g+UwUUkT1Lq0/eM+Qu0JlbJ15AU9ePQk4M7VPbkKSWz5Sj1a8/qzd6K8th6
-E6KE/o8M3ye/6jWwdIEDMwTEjOTM3TTKpoHNXOF+cG+7yUwpCNtAy8SnVI9oyOCH
-wVunOZpKWua2fMbfSLVbG3uTQOMwaBJmTEjRbkd7ix0yD4aFmvrtl7HE3oRQfWdS
-GsD/zYIeYi3BUKJtX8pJBzF+rAsM7gJfA1DmKF6XUslOwG1KHAAJp5mkBsukfrgE
-NVptyWr7XWYjnzJx9SmpNWqeG3cHhuNGJk1F9c1gLVfRRGYHOwpgjca6dHyXkECl
-c+H4LuHaWkT6pjGRtTDe5beTzG5AK16sbLqdz+2rwABMkN5GTV3ZlOP05wI2i8yV
-fV/XBb+1iCQpBHEMTg0mbPFVBAfn7tf0kZtIS4BqQiYLhEzZPxOpKIJwmnYetIJ9
-f3RXO1e+cEReDQxFs9wljRwCo/FWCOrfKmnDhO2hYkHQVpfoZZ+gpxha0Mh0mjeV
-TGuO/a85veLyyuqwq1IDeYyoCK4L6J/EmRGXAluCHjKmSMQGY5xHT3vfcrHu6mi1
-gJPk0Kj0mdpQNkKQX6E9oRMCneNDYK7Z3YV307QvxAoJtkExInU=
-=ZU88
------END PGP SIGNATURE-----
-
---lvfysjqgqkmt3h4b--
