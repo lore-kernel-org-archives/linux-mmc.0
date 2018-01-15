@@ -1,54 +1,80 @@
 From: Patrice CHOTARD <patrice.chotard@st.com>
-Subject: Re: [PATCH 04/14] mmc: mmci: Add STM32 variant
-Date: Mon, 15 Jan 2018 17:17:54 +0000
-Message-ID: <ce14077b-2b8b-f8a7-2107-78b1d9dcab27@st.com>
+Subject: Re: [PATCH 02/14] mmc: mmci: Don't pretend all variants to have
+ MCI_STARBITERR flag
+Date: Mon, 15 Jan 2018 17:27:13 +0000
+Message-ID: <5ffa4035-0cde-119e-b53e-1af6daab83cc@st.com>
 References: <1515759368-16946-1-git-send-email-patrice.chotard@st.com>
- <1515759368-16946-5-git-send-email-patrice.chotard@st.com>
- <CACRpkdYVDpmEmrF=Zk1zX8RCRnPDieTgPuCen6KQ4ttFpAm+Yg@mail.gmail.com>
+ <1515759368-16946-3-git-send-email-patrice.chotard@st.com>
+ <CAPDyKFpqENchQs7c1BSJnorTgidbwHFAHByHJU3t9TV6uHurxA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CACRpkdYVDpmEmrF=Zk1zX8RCRnPDieTgPuCen6KQ4ttFpAm+Yg@mail.gmail.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <CAPDyKFpqENchQs7c1BSJnorTgidbwHFAHByHJU3t9TV6uHurxA@mail.gmail.com>
 Content-Language: en-US
-Content-ID: <0BC9CC904D336B4FA1E3C89687C1D689@st.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Russell King <linux@armlinux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Alexandre TORGUE <alexandre.torgue@st.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-clk <linux-clk@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree@vger.kernel.org>, Andrea Merello <andrea.merello@gmail.com>
+Content-ID: <553B1ECD78F2A74EBFA23238CD394A0C@st.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-clk <linux-clk@vger.kernel.org>, Alexandre TORGUE <alexandre.torgue@st.com>, Andrea Merello <andrea.merello@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, Russell King <linux@armlinux.org.uk>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Linus Walleij <linus.walleij@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-SGkgTGludXMNCg0KT24gMDEvMTUvMjAxOCAwMjoxMyBBTSwgTGludXMgV2FsbGVpaiB3cm90ZToN
-Cj4gT24gRnJpLCBKYW4gMTIsIDIwMTggYXQgMToxNSBQTSwgIDxwYXRyaWNlLmNob3RhcmRAc3Qu
-Y29tPiB3cm90ZToNCj4gDQo+PiBGcm9tOiBQYXRyaWNlIENob3RhcmQgPHBhdHJpY2UuY2hvdGFy
-ZEBzdC5jb20+DQo+Pg0KPj4gU1RNMzJGNCBhbmQgU1RNMzJGNyBNQ1VzIGhhcyBhIFNESU8gY29u
-dHJvbGxlciB0aGF0IGxvb2tzIGxpa2UNCj4+IGFuIEFSTSBwbDgxMC4NCj4gDQo+IFBMMTgwIHlv
-dSBtZWFuLiBVbGYgY2FuIGZpeCB3aGlsZSBhcHBseWluZy4NCg0KSSBuZWVkIHRvIHNlbmQgYSB2
-MiwgaSB3aWxsIGZpeCBpdC4NCg0KPiANCj4+IFRoaXMgcGF0Y2ggYWRkcyB0aGUgU1RNMzIgdmFy
-aWFudCBzbyB0aGF0IG1tY2kgZHJpdmVyIHN1cHBvcnRzIGl0Lg0KPj4NCj4+IFNpZ25lZC1vZmYt
-Ynk6IEFuZHJlYSBNZXJlbGxvIDxhbmRyZWEubWVyZWxsb0BnbWFpbC5jb20+DQo+PiBTaWduZWQt
-b2ZmLWJ5OiBQYXRyaWNlIENob3RhcmQgPHBhdHJpY2UuY2hvdGFyZEBzdC5jb20+DQo+IA0KPiAo
-Li4uKQ0KPj4gK3N0YXRpYyBzdHJ1Y3QgdmFyaWFudF9kYXRhIHZhcmlhbnRfc3RtMzIgPSB7DQo+
-PiArICAgICAgIC5maWZvc2l6ZSAgICAgICAgICAgICAgID0gMzIgKiA0LA0KPj4gKyAgICAgICAu
-Zmlmb2hhbGZzaXplICAgICAgICAgICA9IDggKiA0LA0KPj4gKyAgICAgICAuY2xrcmVnICAgICAg
-ICAgICAgICAgICA9IE1DSV9DTEtfRU5BQkxFLA0KPj4gKyAgICAgICAuY2xrcmVnX2VuYWJsZSAg
-ICAgICAgICA9IE1DSV9TVF9VWDUwMF9IV0ZDRU4sDQo+IA0KPiBJZiB0aGUgYXNpYyBkZXNpZ25l
-ZCBkZXJpdmVkIHRoaXMgZnJvbSB1eDUwMCBJIGd1ZXNzIGl0IGlzIHByb3Blci4NCj4gDQo+PiAr
-ICAgICAgIC5jbGtyZWdfOGJpdF9idXNfZW5hYmxlID0gTUNJX1NUXzhCSVRfQlVTLA0KPj4gKyAg
-ICAgICAuY2xrcmVnX25lZ19lZGdlX2VuYWJsZSA9IE1DSV9TVF9VWDUwMF9ORUdfRURHRSwNCj4+
-ICsgICAgICAgLmRhdGFsZW5ndGhfYml0cyAgICAgICAgPSAyNCwNCj4+ICsgICAgICAgLmRhdGFj
-dHJsX21hc2tfc2RpbyAgICAgPSBNQ0lfRFBTTV9TVF9TRElPRU4sDQo+PiArICAgICAgIC5zdF9z
-ZGlvICAgICAgICAgICAgICAgID0gdHJ1ZSwNCj4gDQo+IERpZCB5b3UgdGVzdCBTRElPPyBJIHRo
-aW5rIHdlIGxhY2sgZmVhdHVyZXMgZm9yIHRoYXQuDQoNCm5vLCB0aGUgYm9hcmQgYWNjZXB0IG9u
-bHkgbWljcm8gU0QgY2FyZCwgc28gb25seSBNTUMgbW9kZSBjYW4gYmUgdGVzdGVkLg0KDQo+IA0K
-Pj4gKyAgICAgICB7DQo+PiArICAgICAgICAgICAgICAgLmlkICAgICA9IDB4MDA4ODAxODAsDQo+
-PiArICAgICAgICAgICAgICAgLm1hc2sgICA9IDB4MDBmZmZmZmYsDQo+PiArICAgICAgICAgICAg
-ICAgLmRhdGEgICA9ICZ2YXJpYW50X3N0bTMyLA0KPj4gKyAgICAgICB9LA0KPiANCj4gU2luY2Ug
-dXg1MDAgd2FzIDQ4MDE4MCBJIHdvbmRlciB3aGF0IHZhcmlhbnRzIDUsNiw3IGFyZS4uLg0KDQpX
-aGF0IGlzIHRoZSBydWxlIHRvIGRlZmluZSB0aGUgaWQgPyBmb3IgU1QgTWljcm8gdmFyaWFudHMg
-d2UgZ290IHRoZSANCmxpc3QgYmVsb3cgOg0KCS5pZCAgICAgPSAweDAwMTgwMTgwLCAgdTMwMA0K
-CS5pZCAgICAgPSAweDEwMTgwMTgwLCAgbm9tYWRpaw0KCS5pZCAgICAgPSAweDAwMjgwMTgwLCAg
-bm9tYWRpaw0KCS5pZCAgICAgPSAweDAwNDgwMTgwLCAgdXg1MDANCgkuaWQgICAgID0gMHgxMDQ4
-MDE4MCwgIHV4NTAwdjINCgkuaWQgICAgID0gMHgwMDg4MDE4MCwgIHZhcmlhbnRfc3RtMzINCg0K
-SSBzaW1wbHkgdXBkYXRlIHRoZSBzaXh0aCBkaWdpdCBmb3Igc3RtMzIgdmFyaWFudC4NCg0KDQpQ
-YXRyaWNlDQoNCj4gDQo+IFJldmlld2VkLWJ5OiBMaW51cyBXYWxsZWlqIDxsaW51cy53YWxsZWlq
-QGxpbmFyby5vcmc+DQo+IA0KPiBZb3VycywNCj4gTGludXMgV2FsbGVpag0KPiA=
+Hi Ulf
+
+On 01/15/2018 01:32 PM, Ulf Hansson wrote:
+> On 12 January 2018 at 13:15,  <patrice.chotard@st.com> wrote:
+>> From: Patrice Chotard <patrice.chotard@st.com>
+>>
+>> This patch prepares for supporting the STM32 variant that
+>> has no such bit in the status register.
+>>
+>> Signed-off-by: Andrea Merello <andrea.merello@gmail.com>
+>> Signed-off-by: Patrice Chotard <patrice.chotard@st.com>
+>> ---
+>>   drivers/mmc/host/mmci.c | 16 ++++++++++++++--
+>>   1 file changed, 14 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+>> index 3125dc0..7e56f85 100644
+>> --- a/drivers/mmc/host/mmci.c
+>> +++ b/drivers/mmc/host/mmci.c
+>> @@ -83,6 +83,8 @@
+>>    * @qcom_dml: enables qcom specific dma glue for dma transfers.
+>>    * @reversed_irq_handling: handle data irq before cmd irq.
+>>    * @mmcimask1: true if variant have a MMCIMASK1 register.
+>> + * @start_err: true is the variant has STARTBITERR bit inside MMCISTATUS
+>> + *            register.
+>>    */
+>>   struct variant_data {
+>>          unsigned int            clkreg;
+>> @@ -113,6 +115,7 @@ struct variant_data {
+>>          bool                    qcom_dml;
+>>          bool                    reversed_irq_handling;
+>>          bool                    mmcimask1;
+>> +       bool                    start_err;
+> 
+> To be consistent with how we implement support for similar variant
+> variations, I would prefer to have this being a u32. Something along
+> the lines of how the "busy_detect_flag" is being used.
+
+OK i will update this in v2
+
+Thanks
+
+Patrice
+
+> 
+> Otherwise this looks good to me.
+> 
+> [...]
+> 
+> Kind regards
+> Uffe
+> 
