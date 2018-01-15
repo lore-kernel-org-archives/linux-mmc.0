@@ -1,280 +1,54 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: sdhci-of-arasan: Add CQHCI support for
- arasan,sdhci-5.1
-Date: Mon, 15 Jan 2018 15:38:31 +0200
-Message-ID: <0eb8b184-f8e1-0d8b-6845-1bc961282321@intel.com>
-References: <1515739370-102434-1-git-send-email-shawn.lin@rock-chips.com>
+From: Patrice CHOTARD <patrice.chotard@st.com>
+Subject: Re: [PATCH 04/14] mmc: mmci: Add STM32 variant
+Date: Mon, 15 Jan 2018 17:17:54 +0000
+Message-ID: <ce14077b-2b8b-f8a7-2107-78b1d9dcab27@st.com>
+References: <1515759368-16946-1-git-send-email-patrice.chotard@st.com>
+ <1515759368-16946-5-git-send-email-patrice.chotard@st.com>
+ <CACRpkdYVDpmEmrF=Zk1zX8RCRnPDieTgPuCen6KQ4ttFpAm+Yg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:49543 "EHLO mga01.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S933580AbeAONjG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 15 Jan 2018 08:39:06 -0500
-In-Reply-To: <1515739370-102434-1-git-send-email-shawn.lin@rock-chips.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CACRpkdYVDpmEmrF=Zk1zX8RCRnPDieTgPuCen6KQ4ttFpAm+Yg@mail.gmail.com>
 Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-ID: <0BC9CC904D336B4FA1E3C89687C1D689@st.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Russell King <linux@armlinux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Alexandre TORGUE <alexandre.torgue@st.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-clk <linux-clk@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree@vger.kernel.org>, Andrea Merello <andrea.merello@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Heiko Stuebner <heiko@sntech.de>, Douglas Anderson <dianders@chromium.org>, Brian Norris <briannorris@chromium.org>
 
-On 12/01/18 08:42, Shawn Lin wrote:
-> Add CQHCI initialization and implement CQHCI operations for Arasan
-> SDHCI variant host, namely arasan,sdhci-5.1, which is used by Rockchip
-> RK3399 platform.
-> 
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-
-Some minor comments below but otherwise:
-
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-
-> ---
-> 
->  drivers/mmc/host/Kconfig           |   1 +
->  drivers/mmc/host/sdhci-of-arasan.c | 137 +++++++++++++++++++++++++++++++++++--
->  2 files changed, 131 insertions(+), 7 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 2fda095..45aed90 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -133,6 +133,7 @@ config MMC_SDHCI_OF_ARASAN
->  	depends on MMC_SDHCI_PLTFM
->  	depends on OF
->  	depends on COMMON_CLK
-> +	select MMC_CQHCI
->  	help
->  	  This selects the Arasan Secure Digital Host Controller Interface
->  	  (SDHCI). This hardware is found e.g. in Xilinx' Zynq SoC.
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index fb57206..e30c84f 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -25,11 +25,13 @@
->  #include <linux/of_device.h>
->  #include <linux/phy/phy.h>
->  #include <linux/regmap.h>
-> -#include "sdhci-pltfm.h"
->  #include <linux/of.h>
->  
-> -#define SDHCI_ARASAN_VENDOR_REGISTER	0x78
-> +#include "cqhci.h"
-> +#include "sdhci-pltfm.h"
->  
-> +#define SDHCI_ARASAN_VENDOR_REGISTER	0x78
-> +#define SDHCI_ARASAN_CQE_BASE_ADDR	0x200
->  #define VENDOR_ENHANCED_STROBE		BIT(0)
->  
->  #define PHY_CLK_TOO_SLOW_HZ		400000
-> @@ -90,6 +92,7 @@ struct sdhci_arasan_data {
->  	struct phy	*phy;
->  	bool		is_phy_on;
->  
-> +	bool		has_cqe;
->  	struct clk_hw	sdcardclk_hw;
->  	struct clk      *sdcardclk;
->  
-> @@ -290,6 +293,61 @@ static void sdhci_arasan_set_power(struct sdhci_host *host, unsigned char mode,
->  			SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
->  };
->  
-> +static u32 sdhci_arasan_cqhci_irq(struct sdhci_host *host, u32 intmask)
-> +{
-> +	int cmd_error = 0;
-> +	int data_error = 0;
-> +
-> +	if (!sdhci_cqe_irq(host, intmask, &cmd_error, &data_error))
-> +		return intmask;
-> +
-> +	cqhci_irq(host->mmc, intmask, cmd_error, data_error);
-> +
-> +	return 0;
-> +}
-> +
-> +static void sdhci_arasan_dumpregs(struct mmc_host *mmc)
-> +{
-> +	sdhci_dumpregs(mmc_priv(mmc));
-> +}
-> +
-> +static void sdhci_arasan_cqe_enable(struct mmc_host *mmc)
-> +{
-> +	struct sdhci_host *host = mmc_priv(mmc);
-> +	u32 reg;
-> +
-> +	reg = sdhci_readl(host, SDHCI_PRESENT_STATE);
-> +	while (reg & SDHCI_DATA_AVAILABLE) {
-> +		sdhci_readl(host, SDHCI_BUFFER);
-> +		reg = sdhci_readl(host, SDHCI_PRESENT_STATE);
-> +	}
-> +
-> +	sdhci_cqe_enable(mmc);
-> +}
-> +
-> +static const struct cqhci_host_ops sdhci_arasan_cqhci_ops = {
-> +	.enable         = sdhci_arasan_cqe_enable,
-> +	.disable        = sdhci_cqe_disable,
-> +	.dumpregs       = sdhci_arasan_dumpregs,
-> +};
-> +
-> +static struct sdhci_ops sdhci_arasan_cqe_ops = {
-> +	.set_clock = sdhci_arasan_set_clock,
-> +	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
-> +	.get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
-> +	.set_bus_width = sdhci_set_bus_width,
-> +	.reset = sdhci_arasan_reset,
-> +	.set_uhs_signaling = sdhci_set_uhs_signaling,
-
-Did you intend to leave out 	.set_power = sdhci_arasan_set_power,
-
-> +	.irq = sdhci_arasan_cqhci_irq,
-> +};
-> +
-> +static struct sdhci_pltfm_data sdhci_arasan_cqe_pdata = {
-> +	.ops = &sdhci_arasan_cqe_ops,
-> +	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-> +	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-> +			SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
-> +};
-> +
->  #ifdef CONFIG_PM_SLEEP
->  /**
->   * sdhci_arasan_suspend - Suspend method for the driver
-> @@ -309,6 +367,12 @@ static int sdhci_arasan_suspend(struct device *dev)
->  	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
->  		mmc_retune_needed(host->mmc);
->  
-> +	if (sdhci_arasan->has_cqe) {
-> +		ret = cqhci_suspend(host->mmc);
-> +		if (ret)
-> +			return ret;
-> +	}
-> +
->  	ret = sdhci_suspend_host(host);
->  	if (ret)
->  		return ret;
-> @@ -365,10 +429,18 @@ static int sdhci_arasan_resume(struct device *dev)
->  		sdhci_arasan->is_phy_on = true;
->  	}
->  
-> -	return sdhci_resume_host(host);
-> +	ret = sdhci_resume_host(host);
-> +	if (ret) {
-> +		dev_err(dev, "Cannot resume host.\n");
-> +		return ret;
-> +	}
-> +
-> +	if (sdhci_arasan->has_cqe)
-> +		return cqhci_resume(host->mmc);
-> +
-> +	return 0;
->  }
->  #endif /* ! CONFIG_PM_SLEEP */
-> -
-
-Better with that blank line left there
-
->  static SIMPLE_DEV_PM_OPS(sdhci_arasan_dev_pm_ops, sdhci_arasan_suspend,
->  			 sdhci_arasan_resume);
->  
-> @@ -568,6 +640,49 @@ static void sdhci_arasan_unregister_sdclk(struct device *dev)
->  	of_clk_del_provider(dev->of_node);
->  }
->  
-> +static int sdhci_arasan_add_host(struct sdhci_arasan_data *sdhci_arasan)
-> +{
-> +	struct sdhci_host *host = sdhci_arasan->host;
-> +	struct cqhci_host *cq_host;
-> +	bool dma64;
-> +	int ret;
-> +
-> +	if (!sdhci_arasan->has_cqe)
-> +		return sdhci_add_host(host);
-> +
-> +	ret = sdhci_setup_host(host);
-> +	if (ret)
-> +		return ret;
-> +
-> +	cq_host = devm_kzalloc(host->mmc->parent,
-> +			       sizeof(*cq_host), GFP_KERNEL);
-> +	if (!cq_host) {
-> +		ret = -ENOMEM;
-> +		goto cleanup;
-> +	}
-> +
-> +	cq_host->mmio = host->ioaddr + SDHCI_ARASAN_CQE_BASE_ADDR;
-> +	cq_host->ops = &sdhci_arasan_cqhci_ops;
-> +
-> +	dma64 = host->flags & SDHCI_USE_64_BIT_DMA;
-> +	if (dma64)
-> +		cq_host->caps |= CQHCI_TASK_DESC_SZ_128;
-> +
-> +	ret = cqhci_init(cq_host, host->mmc, dma64);
-> +	if (ret)
-> +		goto cleanup;
-> +
-> +	ret = __sdhci_add_host(host);
-> +	if (ret)
-> +		goto cleanup;
-> +
-> +	return 0;
-> +
-> +cleanup:
-> +	sdhci_cleanup_host(host);
-> +	return ret;
-> +}
-> +
->  static int sdhci_arasan_probe(struct platform_device *pdev)
->  {
->  	int ret;
-> @@ -579,8 +694,14 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->  	struct sdhci_arasan_data *sdhci_arasan;
->  	struct device_node *np = pdev->dev.of_node;
->  
-> -	host = sdhci_pltfm_init(pdev, &sdhci_arasan_pdata,
-> -				sizeof(*sdhci_arasan));
-> +	if (of_device_is_compatible(pdev->dev.of_node,
-> +				    "arasan,sdhci-5.1"))
-
-Unneeded line wrap
-
-> +		host = sdhci_pltfm_init(pdev, &sdhci_arasan_cqe_pdata,
-> +					sizeof(*sdhci_arasan));
-> +	else
-> +		host = sdhci_pltfm_init(pdev, &sdhci_arasan_pdata,
-> +					sizeof(*sdhci_arasan));
-
-Perhaps slightly prettier to assign pdata e.g.
-
-	const struct sdhci_pltfm_data *pdata;
-
-	if (of_device_is_compatible(pdev->dev.of_node, "arasan,sdhci-5.1"))
-		pdata = &sdhci_arasan_cqe_pdata;
-	else
-		pdata = &&sdhci_arasan_pdata;
-
-	host = sdhci_pltfm_init(pdev, pdata, sizeof(*sdhci_arasan));
-
-> +
->  	if (IS_ERR(host))
->  		return PTR_ERR(host);
->  
-> @@ -675,9 +796,11 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->  					sdhci_arasan_hs400_enhanced_strobe;
->  		host->mmc_host_ops.start_signal_voltage_switch =
->  					sdhci_arasan_voltage_switch;
-> +		sdhci_arasan->has_cqe = true;
-> +		host->mmc->caps2 |= (MMC_CAP2_CQE | MMC_CAP2_CQE_DCMD);
-
-The parentheses are not needed
-
->  	}
->  
-> -	ret = sdhci_add_host(host);
-> +	ret = sdhci_arasan_add_host(sdhci_arasan);
->  	if (ret)
->  		goto err_add_host;
->  
-> 
-
+SGkgTGludXMNCg0KT24gMDEvMTUvMjAxOCAwMjoxMyBBTSwgTGludXMgV2FsbGVpaiB3cm90ZToN
+Cj4gT24gRnJpLCBKYW4gMTIsIDIwMTggYXQgMToxNSBQTSwgIDxwYXRyaWNlLmNob3RhcmRAc3Qu
+Y29tPiB3cm90ZToNCj4gDQo+PiBGcm9tOiBQYXRyaWNlIENob3RhcmQgPHBhdHJpY2UuY2hvdGFy
+ZEBzdC5jb20+DQo+Pg0KPj4gU1RNMzJGNCBhbmQgU1RNMzJGNyBNQ1VzIGhhcyBhIFNESU8gY29u
+dHJvbGxlciB0aGF0IGxvb2tzIGxpa2UNCj4+IGFuIEFSTSBwbDgxMC4NCj4gDQo+IFBMMTgwIHlv
+dSBtZWFuLiBVbGYgY2FuIGZpeCB3aGlsZSBhcHBseWluZy4NCg0KSSBuZWVkIHRvIHNlbmQgYSB2
+MiwgaSB3aWxsIGZpeCBpdC4NCg0KPiANCj4+IFRoaXMgcGF0Y2ggYWRkcyB0aGUgU1RNMzIgdmFy
+aWFudCBzbyB0aGF0IG1tY2kgZHJpdmVyIHN1cHBvcnRzIGl0Lg0KPj4NCj4+IFNpZ25lZC1vZmYt
+Ynk6IEFuZHJlYSBNZXJlbGxvIDxhbmRyZWEubWVyZWxsb0BnbWFpbC5jb20+DQo+PiBTaWduZWQt
+b2ZmLWJ5OiBQYXRyaWNlIENob3RhcmQgPHBhdHJpY2UuY2hvdGFyZEBzdC5jb20+DQo+IA0KPiAo
+Li4uKQ0KPj4gK3N0YXRpYyBzdHJ1Y3QgdmFyaWFudF9kYXRhIHZhcmlhbnRfc3RtMzIgPSB7DQo+
+PiArICAgICAgIC5maWZvc2l6ZSAgICAgICAgICAgICAgID0gMzIgKiA0LA0KPj4gKyAgICAgICAu
+Zmlmb2hhbGZzaXplICAgICAgICAgICA9IDggKiA0LA0KPj4gKyAgICAgICAuY2xrcmVnICAgICAg
+ICAgICAgICAgICA9IE1DSV9DTEtfRU5BQkxFLA0KPj4gKyAgICAgICAuY2xrcmVnX2VuYWJsZSAg
+ICAgICAgICA9IE1DSV9TVF9VWDUwMF9IV0ZDRU4sDQo+IA0KPiBJZiB0aGUgYXNpYyBkZXNpZ25l
+ZCBkZXJpdmVkIHRoaXMgZnJvbSB1eDUwMCBJIGd1ZXNzIGl0IGlzIHByb3Blci4NCj4gDQo+PiAr
+ICAgICAgIC5jbGtyZWdfOGJpdF9idXNfZW5hYmxlID0gTUNJX1NUXzhCSVRfQlVTLA0KPj4gKyAg
+ICAgICAuY2xrcmVnX25lZ19lZGdlX2VuYWJsZSA9IE1DSV9TVF9VWDUwMF9ORUdfRURHRSwNCj4+
+ICsgICAgICAgLmRhdGFsZW5ndGhfYml0cyAgICAgICAgPSAyNCwNCj4+ICsgICAgICAgLmRhdGFj
+dHJsX21hc2tfc2RpbyAgICAgPSBNQ0lfRFBTTV9TVF9TRElPRU4sDQo+PiArICAgICAgIC5zdF9z
+ZGlvICAgICAgICAgICAgICAgID0gdHJ1ZSwNCj4gDQo+IERpZCB5b3UgdGVzdCBTRElPPyBJIHRo
+aW5rIHdlIGxhY2sgZmVhdHVyZXMgZm9yIHRoYXQuDQoNCm5vLCB0aGUgYm9hcmQgYWNjZXB0IG9u
+bHkgbWljcm8gU0QgY2FyZCwgc28gb25seSBNTUMgbW9kZSBjYW4gYmUgdGVzdGVkLg0KDQo+IA0K
+Pj4gKyAgICAgICB7DQo+PiArICAgICAgICAgICAgICAgLmlkICAgICA9IDB4MDA4ODAxODAsDQo+
+PiArICAgICAgICAgICAgICAgLm1hc2sgICA9IDB4MDBmZmZmZmYsDQo+PiArICAgICAgICAgICAg
+ICAgLmRhdGEgICA9ICZ2YXJpYW50X3N0bTMyLA0KPj4gKyAgICAgICB9LA0KPiANCj4gU2luY2Ug
+dXg1MDAgd2FzIDQ4MDE4MCBJIHdvbmRlciB3aGF0IHZhcmlhbnRzIDUsNiw3IGFyZS4uLg0KDQpX
+aGF0IGlzIHRoZSBydWxlIHRvIGRlZmluZSB0aGUgaWQgPyBmb3IgU1QgTWljcm8gdmFyaWFudHMg
+d2UgZ290IHRoZSANCmxpc3QgYmVsb3cgOg0KCS5pZCAgICAgPSAweDAwMTgwMTgwLCAgdTMwMA0K
+CS5pZCAgICAgPSAweDEwMTgwMTgwLCAgbm9tYWRpaw0KCS5pZCAgICAgPSAweDAwMjgwMTgwLCAg
+bm9tYWRpaw0KCS5pZCAgICAgPSAweDAwNDgwMTgwLCAgdXg1MDANCgkuaWQgICAgID0gMHgxMDQ4
+MDE4MCwgIHV4NTAwdjINCgkuaWQgICAgID0gMHgwMDg4MDE4MCwgIHZhcmlhbnRfc3RtMzINCg0K
+SSBzaW1wbHkgdXBkYXRlIHRoZSBzaXh0aCBkaWdpdCBmb3Igc3RtMzIgdmFyaWFudC4NCg0KDQpQ
+YXRyaWNlDQoNCj4gDQo+IFJldmlld2VkLWJ5OiBMaW51cyBXYWxsZWlqIDxsaW51cy53YWxsZWlq
+QGxpbmFyby5vcmc+DQo+IA0KPiBZb3VycywNCj4gTGludXMgV2FsbGVpag0KPiA=
