@@ -1,94 +1,48 @@
-From: =?UTF-8?q?Beno=C3=AEt=20Th=C3=A9baudeau?=
-        <benoit.thebaudeau.dev@gmail.com>
-Subject: [PATCH] mmc: sdhci-esdhc-imx: Fix i.MX53 eSDHCv3 clock
-Date: Sun, 14 Jan 2018 19:43:05 +0100
-Message-ID: <20180114184305.4018-1-benoit.thebaudeau.dev@gmail.com>
+From: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 01/14] mmc: mmci: Don't pretend all variants to have
+ MMCIMASK1 register
+Date: Mon, 15 Jan 2018 02:01:36 +0100
+Message-ID: <CACRpkdb3iS7FuGbC3n9xpazvtEW7AjbLKNZ5vKpJAv2D8c4sbA@mail.gmail.com>
+References: <1515759368-16946-1-git-send-email-patrice.chotard@st.com> <1515759368-16946-2-git-send-email-patrice.chotard@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:46482 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751493AbeANSnU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 14 Jan 2018 13:43:20 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1515759368-16946-2-git-send-email-patrice.chotard-qxv4g6HH51o@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Patrice CHOTARD <patrice.chotard-qxv4g6HH51o@public.gmane.org>
+Cc: Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Michael Turquette <mturquette-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Alexandre Torgue <alexandre.torgue-qxv4g6HH51o@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-clk <linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andrea Merello <andrea.merello-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, "Wladimir J . van der Laan" <laanwj@gmail.com>, Fabio Estevam <fabio.estevam@nxp.com>, =?UTF-8?q?Beno=C3=AEt=20Th=C3=A9baudeau?= <benoit.thebaudeau.dev@gmail.com>
 
-Commit 5143c953a786 ("mmc: sdhci-esdhc-imx: Allow all supported
-prescaler values") made it possible to set SYSCTL.SDCLKFS to 0 in SDR
-mode, thus bypassing the SD clock frequency prescaler, in order to be
-able to get higher SD clock frequencies in some contexts. However, that
-commit missed the fact that this value is illegal on the eSDHCv3
-instance of the i.MX53. This seems to be the only exception on i.MX,
-this value being legal even for the eSDHCv2 instances of the i.MX53.
+On Fri, Jan 12, 2018 at 1:15 PM,  <patrice.chotard-qxv4g6HH51o@public.gmane.org> wrote:
 
-Fix this issue by changing the minimum prescaler value if the i.MX53
-eSDHCv3 is detected. According to the i.MX53 reference manual, if
-DLLCTRL[10] can be set, then the controller is eSDHCv3, else it is
-eSDHCv2.
+> From: Patrice Chotard <patrice.chotard-qxv4g6HH51o@public.gmane.org>
+>
+> Two mask registers are used in order to select which events have to
+> actually generate an interrupt on each IRQ line.
+>
+> It seems that in the single-IRQ case it's assumed that the IRQs lines
+> are simply OR-ed, while the two mask registers are still present. The
+> driver still programs the two mask registers separately.
+>
+> However the STM32 variant has only one IRQ, and also has only one mask
+> register.
+>
+> This patch prepares for STM32 variant support by making the driver using
+> only one mask register.
+>
+> This patch also optimize the MMCIMASK1 mask usage by caching it into
+> host->mask1_reg which avoid to read it into mmci_irq().
+>
+> Tested only on STM32 variant. RFT for variants other than STM32
+>
+> Signed-off-by: Andrea Merello <andrea.merello-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+> Signed-off-by: Patrice Chotard <patrice.chotard-qxv4g6HH51o@public.gmane.org>
 
-This commit fixes the following issue, which was preventing the i.MX53
-Loco (IMX53QSB) board from booting Linux 4.15.0-rc5:
-[    1.882668] mmcblk1: error -84 transferring data, sector 2048, nr 8, cmd response 0x900, card status 0xc00
-[    2.002255] mmcblk1: error -84 transferring data, sector 2050, nr 6, cmd response 0x900, card status 0xc00
-[   12.645056] mmc1: Timeout waiting for hardware interrupt.
-[   12.650473] mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
-[   12.656921] mmc1: sdhci: Sys addr:  0x00000000 | Version:  0x00001201
-[   12.663366] mmc1: sdhci: Blk size:  0x00000004 | Blk cnt:  0x00000000
-[   12.669813] mmc1: sdhci: Argument:  0x00000000 | Trn mode: 0x00000013
-[   12.676258] mmc1: sdhci: Present:   0x01f8028f | Host ctl: 0x00000013
-[   12.682703] mmc1: sdhci: Power:     0x00000002 | Blk gap:  0x00000000
-[   12.689148] mmc1: sdhci: Wake-up:   0x00000000 | Clock:    0x0000003f
-[   12.695594] mmc1: sdhci: Timeout:   0x0000008e | Int stat: 0x00000000
-[   12.702039] mmc1: sdhci: Int enab:  0x107f004b | Sig enab: 0x107f004b
-[   12.708485] mmc1: sdhci: AC12 err:  0x00000000 | Slot int: 0x00001201
-[   12.714930] mmc1: sdhci: Caps:      0x07eb0000 | Caps_1:   0x08100810
-[   12.721375] mmc1: sdhci: Cmd:       0x0000163a | Max curr: 0x00000000
-[   12.727821] mmc1: sdhci: Resp[0]:   0x00000920 | Resp[1]:  0x00000000
-[   12.734265] mmc1: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
-[   12.740709] mmc1: sdhci: Host ctl2: 0x00000000
-[   12.745157] mmc1: sdhci: ADMA Err:  0x00000001 | ADMA Ptr: 0xc8049200
-[   12.751601] mmc1: sdhci: ============================================
-[   12.758110] print_req_error: I/O error, dev mmcblk1, sector 2050
-[   12.764135] Buffer I/O error on dev mmcblk1p1, logical block 0, lost sync page write
-[   12.775163] EXT4-fs (mmcblk1p1): mounted filesystem without journal. Opts: (null)
-[   12.782746] VFS: Mounted root (ext4 filesystem) on device 179:9.
-[   12.789151] mmcblk1: response CRC error sending SET_BLOCK_COUNT command, card status 0x900
+Reviewed-by: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
-Signed-off-by: Benoît Thébaudeau <benoit.thebaudeau.dev@gmail.com>
-Reported-by: Wladimir J. van der Laan <laanwj@gmail.com>
-Tested-by: Wladimir J. van der Laan <laanwj@gmail.com>
----
- drivers/mmc/host/sdhci-esdhc-imx.c | 14 ++++++++++++++
- 1 file changed, 14 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 85140c9af581..8b941f814472 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -687,6 +687,20 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
- 		return;
- 	}
- 
-+	/* For i.MX53 eSDHCv3, SYSCTL.SDCLKFS may not be set to 0. */
-+	if (is_imx53_esdhc(imx_data)) {
-+		/*
-+		 * According to the i.MX53 reference manual, if DLLCTRL[10] can
-+		 * be set, then the controller is eSDHCv3, else it is eSDHCv2.
-+		 */
-+		val = readl(host->ioaddr + ESDHC_DLL_CTRL);
-+		writel(val | BIT(10), host->ioaddr + ESDHC_DLL_CTRL);
-+		temp = readl(host->ioaddr + ESDHC_DLL_CTRL);
-+		writel(val, host->ioaddr + ESDHC_DLL_CTRL);
-+		if (temp & BIT(10))
-+			pre_div = 2;
-+	}
-+
- 	temp = sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
- 	temp &= ~(ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN | ESDHC_CLOCK_PEREN
- 		| ESDHC_CLOCK_MASK);
--- 
-2.14.1
-
+Yours,
+Linus Walleij
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
