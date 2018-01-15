@@ -1,38 +1,57 @@
-From: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 03/14] mmc: mmci: Add support for setting pad type via pinctrl
-Date: Mon, 15 Jan 2018 02:07:24 +0100
-Message-ID: <CACRpkdYRXhfwZW6t3zoGg8dhizGw2ktQ1-pFh7mFZ++sab8ddQ@mail.gmail.com>
-References: <1515759368-16946-1-git-send-email-patrice.chotard@st.com> <1515759368-16946-4-git-send-email-patrice.chotard@st.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH 04/14] mmc: mmci: Add STM32 variant
+Date: Mon, 15 Jan 2018 02:13:20 +0100
+Message-ID: <CACRpkdYVDpmEmrF=Zk1zX8RCRnPDieTgPuCen6KQ4ttFpAm+Yg@mail.gmail.com>
+References: <1515759368-16946-1-git-send-email-patrice.chotard@st.com> <1515759368-16946-5-git-send-email-patrice.chotard@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1515759368-16946-4-git-send-email-patrice.chotard-qxv4g6HH51o@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Patrice CHOTARD <patrice.chotard-qxv4g6HH51o@public.gmane.org>
-Cc: Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Michael Turquette <mturquette-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Alexandre Torgue <alexandre.torgue-qxv4g6HH51o@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-clk <linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andrea Merello <andrea.merello-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Return-path: <linux-gpio-owner@vger.kernel.org>
+In-Reply-To: <1515759368-16946-5-git-send-email-patrice.chotard@st.com>
+Sender: linux-gpio-owner@vger.kernel.org
+To: Patrice CHOTARD <patrice.chotard@st.com>
+Cc: Russell King <linux@armlinux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Alexandre Torgue <alexandre.torgue@st.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-clk <linux-clk@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, linux-gpio@vger.kernel.org, "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree@vger.kernel.org>, Andrea Merello <andrea.merello@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Jan 12, 2018 at 1:15 PM,  <patrice.chotard-qxv4g6HH51o@public.gmane.org> wrote:
+On Fri, Jan 12, 2018 at 1:15 PM,  <patrice.chotard@st.com> wrote:
 
-> From: Patrice Chotard <patrice.chotard-qxv4g6HH51o@public.gmane.org>
+> From: Patrice Chotard <patrice.chotard@st.com>
 >
-> The STM32 variant hasn't the control bit to switch pads in opendrain mode.
-> In this case we can achieve the same result by asking to the pinmux driver
-> to configure pins for us.
->
-> This patch make the mmci driver able to do this whenever needed.
->
-> Signed-off-by: Andrea Merello <andrea.merello-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> Signed-off-by: Patrice Chotard <patrice.chotard-qxv4g6HH51o@public.gmane.org>
+> STM32F4 and STM32F7 MCUs has a SDIO controller that looks like
+> an ARM pl810.
 
-Nice and clean way to use pin control for this.
-Hats off!
+PL180 you mean. Ulf can fix while applying.
 
-Reviewed-by: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> This patch adds the STM32 variant so that mmci driver supports it.
+>
+> Signed-off-by: Andrea Merello <andrea.merello@gmail.com>
+> Signed-off-by: Patrice Chotard <patrice.chotard@st.com>
+
+(...)
+> +static struct variant_data variant_stm32 = {
+> +       .fifosize               = 32 * 4,
+> +       .fifohalfsize           = 8 * 4,
+> +       .clkreg                 = MCI_CLK_ENABLE,
+> +       .clkreg_enable          = MCI_ST_UX500_HWFCEN,
+
+If the asic designed derived this from ux500 I guess it is proper.
+
+> +       .clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
+> +       .clkreg_neg_edge_enable = MCI_ST_UX500_NEG_EDGE,
+> +       .datalength_bits        = 24,
+> +       .datactrl_mask_sdio     = MCI_DPSM_ST_SDIOEN,
+> +       .st_sdio                = true,
+
+Did you test SDIO? I think we lack features for that.
+
+> +       {
+> +               .id     = 0x00880180,
+> +               .mask   = 0x00ffffff,
+> +               .data   = &variant_stm32,
+> +       },
+
+Since ux500 was 480180 I wonder what variants 5,6,7 are...
+
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 
 Yours,
 Linus Walleij
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
