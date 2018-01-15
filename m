@@ -1,172 +1,113 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 03/14] mmc: mmci: Add support for setting pad type via pinctrl
-Date: Mon, 15 Jan 2018 13:43:41 +0100
-Message-ID: <CAPDyKFoBTKpwSJzg5_cMei0Vzze=eQTKFBuD6mgHdYZUhqxFPw@mail.gmail.com>
-References: <1515759368-16946-1-git-send-email-patrice.chotard@st.com> <1515759368-16946-4-git-send-email-patrice.chotard@st.com>
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: Fix i.MX53 eSDHCv3 clock
+Date: Mon, 15 Jan 2018 13:54:39 +0100
+Message-ID: <CAPDyKFoBoVNvYfTpw3gA2Uzwza6hsSAKP7tV+YxKaci2GHF1og@mail.gmail.com>
+References: <20180114184305.4018-1-benoit.thebaudeau.dev@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1515759368-16946-4-git-send-email-patrice.chotard@st.com>
+In-Reply-To: <20180114184305.4018-1-benoit.thebaudeau.dev@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Patrice CHOTARD <patrice.chotard@st.com>
-Cc: Russell King <linux@armlinux.org.uk>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, Linus Walleij <linus.walleij@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Alexandre Torgue <alexandre.torgue@st.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-clk <linux-clk@vger.kernel.org>, linux-arm-kernel@lists.infradead.org, linux-gpio@vger.kernel.org, devicetree@vger.kernel.org, Andrea Merello <andrea.merello@gmail.com>
+To: =?UTF-8?Q?Beno=C3=AEt_Th=C3=A9baudeau?= <benoit.thebaudeau.dev@gmail.com>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, "Wladimir J . van der Laan" <laanwj@gmail.com>, Fabio Estevam <fabio.estevam@nxp.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 12 January 2018 at 13:15,  <patrice.chotard@st.com> wrote:
-> From: Patrice Chotard <patrice.chotard@st.com>
+On 14 January 2018 at 19:43, Beno=C3=AEt Th=C3=A9baudeau
+<benoit.thebaudeau.dev@gmail.com> wrote:
+> Commit 5143c953a786 ("mmc: sdhci-esdhc-imx: Allow all supported
+> prescaler values") made it possible to set SYSCTL.SDCLKFS to 0 in SDR
+> mode, thus bypassing the SD clock frequency prescaler, in order to be
+> able to get higher SD clock frequencies in some contexts. However, that
+> commit missed the fact that this value is illegal on the eSDHCv3
+> instance of the i.MX53. This seems to be the only exception on i.MX,
+> this value being legal even for the eSDHCv2 instances of the i.MX53.
 >
-> The STM32 variant hasn't the control bit to switch pads in opendrain mode.
-> In this case we can achieve the same result by asking to the pinmux driver
-> to configure pins for us.
+> Fix this issue by changing the minimum prescaler value if the i.MX53
+> eSDHCv3 is detected. According to the i.MX53 reference manual, if
+> DLLCTRL[10] can be set, then the controller is eSDHCv3, else it is
+> eSDHCv2.
 >
-> This patch make the mmci driver able to do this whenever needed.
+> This commit fixes the following issue, which was preventing the i.MX53
+> Loco (IMX53QSB) board from booting Linux 4.15.0-rc5:
+> [    1.882668] mmcblk1: error -84 transferring data, sector 2048, nr 8, c=
+md response 0x900, card status 0xc00
+> [    2.002255] mmcblk1: error -84 transferring data, sector 2050, nr 6, c=
+md response 0x900, card status 0xc00
+> [   12.645056] mmc1: Timeout waiting for hardware interrupt.
+> [   12.650473] mmc1: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D SDHCI RE=
+GISTER DUMP =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> [   12.656921] mmc1: sdhci: Sys addr:  0x00000000 | Version:  0x00001201
+> [   12.663366] mmc1: sdhci: Blk size:  0x00000004 | Blk cnt:  0x00000000
+> [   12.669813] mmc1: sdhci: Argument:  0x00000000 | Trn mode: 0x00000013
+> [   12.676258] mmc1: sdhci: Present:   0x01f8028f | Host ctl: 0x00000013
+> [   12.682703] mmc1: sdhci: Power:     0x00000002 | Blk gap:  0x00000000
+> [   12.689148] mmc1: sdhci: Wake-up:   0x00000000 | Clock:    0x0000003f
+> [   12.695594] mmc1: sdhci: Timeout:   0x0000008e | Int stat: 0x00000000
+> [   12.702039] mmc1: sdhci: Int enab:  0x107f004b | Sig enab: 0x107f004b
+> [   12.708485] mmc1: sdhci: AC12 err:  0x00000000 | Slot int: 0x00001201
+> [   12.714930] mmc1: sdhci: Caps:      0x07eb0000 | Caps_1:   0x08100810
+> [   12.721375] mmc1: sdhci: Cmd:       0x0000163a | Max curr: 0x00000000
+> [   12.727821] mmc1: sdhci: Resp[0]:   0x00000920 | Resp[1]:  0x00000000
+> [   12.734265] mmc1: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+> [   12.740709] mmc1: sdhci: Host ctl2: 0x00000000
+> [   12.745157] mmc1: sdhci: ADMA Err:  0x00000001 | ADMA Ptr: 0xc8049200
+> [   12.751601] mmc1: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D
+> [   12.758110] print_req_error: I/O error, dev mmcblk1, sector 2050
+> [   12.764135] Buffer I/O error on dev mmcblk1p1, logical block 0, lost s=
+ync page write
+> [   12.775163] EXT4-fs (mmcblk1p1): mounted filesystem without journal. O=
+pts: (null)
+> [   12.782746] VFS: Mounted root (ext4 filesystem) on device 179:9.
+> [   12.789151] mmcblk1: response CRC error sending SET_BLOCK_COUNT comman=
+d, card status 0x900
 >
-> Signed-off-by: Andrea Merello <andrea.merello@gmail.com>
-> Signed-off-by: Patrice Chotard <patrice.chotard@st.com>
-> ---
->  drivers/mmc/host/mmci.c | 54 ++++++++++++++++++++++++++++++++++++++++---------
->  drivers/mmc/host/mmci.h |  5 +++++
->  2 files changed, 50 insertions(+), 9 deletions(-)
->
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index 7e56f85..38e8c20 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -85,6 +85,8 @@
->   * @mmcimask1: true if variant have a MMCIMASK1 register.
->   * @start_err: true is the variant has STARTBITERR bit inside MMCISTATUS
->   *            register.
-> + * @opendrain: true if variant have dedicated bit for opendrain pins
-> + *            configuration.
->   */
->  struct variant_data {
->         unsigned int            clkreg;
-> @@ -116,6 +118,7 @@ struct variant_data {
->         bool                    reversed_irq_handling;
->         bool                    mmcimask1;
->         bool                    start_err;
-> +       bool                    opendrain;
+> Signed-off-by: Beno=C3=AEt Th=C3=A9baudeau <benoit.thebaudeau.dev@gmail.c=
+om>
+> Reported-by: Wladimir J. van der Laan <laanwj@gmail.com>
+> Tested-by: Wladimir J. van der Laan <laanwj@gmail.com>
 
-Similar comment as for patch2.
-
-To be consistent with how we implement support for similar variant
-variations, I would prefer to have this being a u32. Something along
-the lines of how the "busy_detect_flag" is being used.
-
-[...]
-
-> @@ -1394,9 +1405,11 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->  {
->         struct mmci_host *host = mmc_priv(mmc);
->         struct variant_data *variant = host->variant;
-> +       struct pinctrl_state *pins;
->         u32 pwr = 0;
->         unsigned long flags;
->         int ret;
-> +       bool is_opendrain;
->
->         if (host->plat->ios_handler &&
->                 host->plat->ios_handler(mmc_dev(mmc), ios))
-> @@ -1455,16 +1468,31 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->                                 ~MCI_ST_DATA2DIREN);
->         }
->
-> -       if (ios->bus_mode == MMC_BUSMODE_OPENDRAIN) {
-> -               if (host->hw_designer != AMBA_VENDOR_ST)
-> -                       pwr |= MCI_ROD;
-> -               else {
-> -                       /*
-> -                        * The ST Micro variant use the ROD bit for something
-> -                        * else and only has OD (Open Drain).
-> -                        */
-> -                       pwr |= MCI_OD;
-
-Seems like you should actually split this change into two parts.
-
-One that adds the variant flag for the open drain bit, when then can
-clean up this code. Then a patch on top that starts using pinctrl in
-case there is no open drain bit set.
-
-Does that sounds reasonable?
-
-> +       if (host->variant->opendrain) {
-> +               if (ios->bus_mode == MMC_BUSMODE_OPENDRAIN) {
-> +                       if (host->hw_designer != AMBA_VENDOR_ST) {
-> +                               pwr |= MCI_ROD;
-> +                       } else {
-> +                               /*
-> +                                * The ST Micro variant use the ROD bit for
-> +                                * something else and only has OD (Open Drain).
-> +                                */
-> +                               pwr |= MCI_OD;
-> +                       }
->                 }
-> +       } else {
-> +               /*
-> +                * If the variant cannot configure the pads by its own, then we
-> +                * expect the pinctrl to be able to do that for us
-> +                */
-> +               is_opendrain = (ios->bus_mode == MMC_BUSMODE_OPENDRAIN);
-> +               pins = pinctrl_lookup_state(host->pinctrl, is_opendrain ?
-
-How about doing the lookup in ->probe() instead? Then just select the
-state here, if supported?
-
-> +                                       MMCI_PINCTRL_STATE_OPENDRAIN :
-> +                                       MMCI_PINCTRL_STATE_PUSHPULL);
-> +               if (IS_ERR(pins))
-> +                       dev_warn(mmc_dev(mmc), "Cannot select pin drive type via pinctrl\n");
-> +               else
-> +                       pinctrl_select_state(host->pinctrl, pins);
->         }
->
->         /*
-> @@ -1609,6 +1637,14 @@ static int mmci_probe(struct amba_device *dev,
->         host = mmc_priv(mmc);
->         host->mmc = mmc;
->
-> +       if (!variant->opendrain) {
-> +               host->pinctrl = devm_pinctrl_get(&dev->dev);
-> +               if (IS_ERR(host->pinctrl)) {
-> +                       dev_err(&dev->dev, "failed to get pinctrl");
-> +                       goto host_free;
-> +               }
-> +       }
-> +
->         host->hw_designer = amba_manf(dev);
->         host->hw_revision = amba_rev(dev);
->         dev_dbg(mmc_dev(mmc), "designer ID = 0x%02x\n", host->hw_designer);
-> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-> index 83160a9..de3d0b3 100644
-> --- a/drivers/mmc/host/mmci.h
-> +++ b/drivers/mmc/host/mmci.h
-> @@ -192,6 +192,10 @@
->
->  #define NR_SG          128
->
-> +/* pinctrl configs */
-> +#define MMCI_PINCTRL_STATE_PUSHPULL "default"
-
-Seems like we should be able to cope fine without having to add a
-separate define for the PUSHPULL, but rather just select the default
-state instead.
-
-> +#define MMCI_PINCTRL_STATE_OPENDRAIN "opendrain"
-> +
->  struct clk;
->  struct variant_data;
->  struct dma_chan;
-> @@ -227,6 +231,7 @@ struct mmci_host {
->         bool                    vqmmc_enabled;
->         struct mmci_platform_data *plat;
->         struct variant_data     *variant;
-> +       struct pinctrl          *pinctrl;
->
->         u8                      hw_designer;
->         u8                      hw_revision:4;
-> --
-> 1.9.1
->
+Thanks, applied for fixes - adding a fixes tag as well as a stable tag!
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 14 ++++++++++++++
+>  1 file changed, 14 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-=
+esdhc-imx.c
+> index 85140c9af581..8b941f814472 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -687,6 +687,20 @@ static inline void esdhc_pltfm_set_clock(struct sdhc=
+i_host *host,
+>                 return;
+>         }
+>
+> +       /* For i.MX53 eSDHCv3, SYSCTL.SDCLKFS may not be set to 0. */
+> +       if (is_imx53_esdhc(imx_data)) {
+> +               /*
+> +                * According to the i.MX53 reference manual, if DLLCTRL[1=
+0] can
+> +                * be set, then the controller is eSDHCv3, else it is eSD=
+HCv2.
+> +                */
+> +               val =3D readl(host->ioaddr + ESDHC_DLL_CTRL);
+> +               writel(val | BIT(10), host->ioaddr + ESDHC_DLL_CTRL);
+> +               temp =3D readl(host->ioaddr + ESDHC_DLL_CTRL);
+> +               writel(val, host->ioaddr + ESDHC_DLL_CTRL);
+> +               if (temp & BIT(10))
+> +                       pre_div =3D 2;
+> +       }
+> +
+>         temp =3D sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
+>         temp &=3D ~(ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN | ESDHC_CLOCK_P=
+EREN
+>                 | ESDHC_CLOCK_MASK);
+> --
+> 2.14.1
+>
