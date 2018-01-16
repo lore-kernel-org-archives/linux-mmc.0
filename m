@@ -1,109 +1,141 @@
 From: <patrice.chotard@st.com>
-Subject: [PATCH v2 15/15] gpio: stmpe: i2c transfer are forbiden in atomic context
-Date: Tue, 16 Jan 2018 13:30:59 +0100
-Message-ID: <1516105859-3525-16-git-send-email-patrice.chotard@st.com>
+Subject: [PATCH v2 03/15] mmc: mmci: Don't pretend all variants to have OPENDRAIN bit
+Date: Tue, 16 Jan 2018 13:30:47 +0100
+Message-ID: <1516105859-3525-4-git-send-email-patrice.chotard@st.com>
 References: <1516105859-3525-1-git-send-email-patrice.chotard@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-gpio-owner@vger.kernel.org>
+Return-path: <linux-clk-owner@vger.kernel.org>
 In-Reply-To: <1516105859-3525-1-git-send-email-patrice.chotard@st.com>
-Sender: linux-gpio-owner@vger.kernel.org
+Sender: linux-clk-owner@vger.kernel.org
 To: Russell King <linux@armlinux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, Linus Walleij <linus.walleij@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Alexandre Torgue <alexandre.torgue@st.com>
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-gpio@vger.kernel.org, devicetree@vger.kernel.org, Patrice Chotard <patrice.chotard@st.com>
 List-Id: linux-mmc@vger.kernel.org
 
 From: Patrice Chotard <patrice.chotard@st.com>
 
-Move the workaround from stmpe_gpio_irq_unmask() which is executed
-in atomic context to stmpe_gpio_irq_sync_unlock() which is not.
+This patch prepares for supporting STM32 variant which doesn't
+have opendrain bit in MMCIPOWER register.
+ST others variant (u300, nomadik and ux500) uses MCI_OD bit whereas
+others variants uses MCI_ROD bit.
 
-It fixes the following issue:
-
-[    1.500000] BUG: scheduling while atomic: swapper/1/0x00000002
-[    1.500000] CPU: 0 PID: 1 Comm: swapper Not tainted 4.15.0-rc2-00020-gbd4301f-dirty #28
-[    1.520000] Hardware name: STM32 (Device Tree Support)
-[    1.520000] [<0000bfc9>] (unwind_backtrace) from [<0000b347>] (show_stack+0xb/0xc)
-[    1.530000] [<0000b347>] (show_stack) from [<0001fc49>] (__schedule_bug+0x39/0x58)
-[    1.530000] [<0001fc49>] (__schedule_bug) from [<00168211>] (__schedule+0x23/0x2b2)
-[    1.550000] [<00168211>] (__schedule) from [<001684f7>] (schedule+0x57/0x64)
-[    1.550000] [<001684f7>] (schedule) from [<0016a513>] (schedule_timeout+0x137/0x164)
-[    1.550000] [<0016a513>] (schedule_timeout) from [<00168b91>] (wait_for_common+0x8d/0xfc)
-[    1.570000] [<00168b91>] (wait_for_common) from [<00139753>] (stm32f4_i2c_xfer+0xe9/0xfe)
-[    1.580000] [<00139753>] (stm32f4_i2c_xfer) from [<00138545>] (__i2c_transfer+0x111/0x148)
-[    1.590000] [<00138545>] (__i2c_transfer) from [<001385cf>] (i2c_transfer+0x53/0x70)
-[    1.590000] [<001385cf>] (i2c_transfer) from [<001388a5>] (i2c_smbus_xfer+0x12f/0x36e)
-[    1.600000] [<001388a5>] (i2c_smbus_xfer) from [<00138b49>] (i2c_smbus_read_byte_data+0x1f/0x2a)
-[    1.610000] [<00138b49>] (i2c_smbus_read_byte_data) from [<00124fdd>] (__stmpe_reg_read+0xd/0x24)
-[    1.620000] [<00124fdd>] (__stmpe_reg_read) from [<001252b3>] (stmpe_reg_read+0x19/0x24)
-[    1.630000] [<001252b3>] (stmpe_reg_read) from [<0002c4d1>] (unmask_irq+0x17/0x22)
-[    1.640000] [<0002c4d1>] (unmask_irq) from [<0002c57f>] (irq_startup+0x6f/0x78)
-[    1.650000] [<0002c57f>] (irq_startup) from [<0002b7a1>] (__setup_irq+0x319/0x47c)
-[    1.650000] [<0002b7a1>] (__setup_irq) from [<0002bad3>] (request_threaded_irq+0x6b/0xe8)
-[    1.660000] [<0002bad3>] (request_threaded_irq) from [<0002d0b9>] (devm_request_threaded_irq+0x3b/0x6a)
-[    1.670000] [<0002d0b9>] (devm_request_threaded_irq) from [<001446e7>] (mmc_gpiod_request_cd_irq+0x49/0x8a)
-[    1.680000] [<001446e7>] (mmc_gpiod_request_cd_irq) from [<0013d45d>] (mmc_start_host+0x49/0x60)
-[    1.690000] [<0013d45d>] (mmc_start_host) from [<0013e40b>] (mmc_add_host+0x3b/0x54)
-[    1.700000] [<0013e40b>] (mmc_add_host) from [<00148119>] (mmci_probe+0x4d1/0x60c)
-[    1.710000] [<00148119>] (mmci_probe) from [<000f903b>] (amba_probe+0x7b/0xbe)
-[    1.720000] [<000f903b>] (amba_probe) from [<001170e5>] (driver_probe_device+0x169/0x1f8)
-[    1.730000] [<001170e5>] (driver_probe_device) from [<001171b7>] (__driver_attach+0x43/0x5c)
-[    1.740000] [<001171b7>] (__driver_attach) from [<0011618d>] (bus_for_each_dev+0x3d/0x46)
-[    1.740000] [<0011618d>] (bus_for_each_dev) from [<001165cd>] (bus_add_driver+0xcd/0x124)
-[    1.740000] [<001165cd>] (bus_add_driver) from [<00117713>] (driver_register+0x4d/0x7a)
-[    1.760000] [<00117713>] (driver_register) from [<001fc765>] (do_one_initcall+0xbd/0xe8)
-[    1.770000] [<001fc765>] (do_one_initcall) from [<001fc88b>] (kernel_init_freeable+0xfb/0x134)
-[    1.780000] [<001fc88b>] (kernel_init_freeable) from [<00167ee3>] (kernel_init+0x7/0x9c)
-[    1.790000] [<00167ee3>] (kernel_init) from [<00009b65>] (ret_from_fork+0x11/0x2c)
-
-Signed-off-by: Alexandre TORGUE <alexandre.torgue@st.com>
 Signed-off-by: Patrice Chotard <patrice.chotard@st.com>
 ---
- drivers/gpio/gpio-stmpe.c | 20 ++++++++++----------
- 1 file changed, 10 insertions(+), 10 deletions(-)
 
-diff --git a/drivers/gpio/gpio-stmpe.c b/drivers/gpio/gpio-stmpe.c
-index e6e5cca..91c8ae2 100644
---- a/drivers/gpio/gpio-stmpe.c
-+++ b/drivers/gpio/gpio-stmpe.c
-@@ -190,6 +190,16 @@ static void stmpe_gpio_irq_sync_unlock(struct irq_data *d)
- 	};
- 	int i, j;
+v2: _ Replace opendrain bool type by u32
+    _ Clean opendrain bit management code
+
+ drivers/mmc/host/mmci.c | 27 +++++++++++++++++----------
+ 1 file changed, 17 insertions(+), 10 deletions(-)
+
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 8a4fbc2..eb5fcfe 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -85,6 +85,7 @@
+  * @mmcimask1: true if variant have a MMCIMASK1 register.
+  * @start_err: bitmask identifying the STARTBITERR bit inside MMCISTATUS
+  *	       register.
++ * @opendrain: bitmask identifying the OPENDRAIN bit inside MMCIPOWER register
+  */
+ struct variant_data {
+ 	unsigned int		clkreg;
+@@ -116,6 +117,7 @@ struct variant_data {
+ 	bool			reversed_irq_handling;
+ 	bool			mmcimask1;
+ 	u32			start_err;
++	u32			opendrain;
+ };
  
-+	/*
-+	 * STMPE1600: to be able to get IRQ from pins,
-+	 * a read must be done on GPMR register, or a write in
-+	 * GPSR or GPCR registers
-+	 */
-+	if (stmpe->partnum == STMPE1600) {
-+		stmpe_reg_read(stmpe, stmpe->regs[STMPE_IDX_GPMR_LSB]);
-+		stmpe_reg_read(stmpe, stmpe->regs[STMPE_IDX_GPMR_CSB]);
-+	};
-+
- 	for (i = 0; i < CACHE_NR_REGS; i++) {
- 		/* STMPE801 and STMPE1600 don't have RE and FE registers */
- 		if ((stmpe->partnum == STMPE801 ||
-@@ -227,21 +237,11 @@ static void stmpe_gpio_irq_unmask(struct irq_data *d)
- {
- 	struct gpio_chip *gc = irq_data_get_irq_chip_data(d);
- 	struct stmpe_gpio *stmpe_gpio = gpiochip_get_data(gc);
--	struct stmpe *stmpe = stmpe_gpio->stmpe;
- 	int offset = d->hwirq;
- 	int regoffset = offset / 8;
- 	int mask = BIT(offset % 8);
+ static struct variant_data variant_arm = {
+@@ -127,6 +129,7 @@ struct variant_data {
+ 	.reversed_irq_handling	= true,
+ 	.mmcimask1		= true,
+ 	.start_err		= MCI_STARTBITERR,
++	.opendrain		= MCI_ROD,
+ };
  
- 	stmpe_gpio->regs[REG_IE][regoffset] |= mask;
--
--	/*
--	 * STMPE1600 workaround: to be able to get IRQ from pins,
--	 * a read must be done on GPMR register, or a write in
--	 * GPSR or GPCR registers
--	 */
--	if (stmpe->partnum == STMPE1600)
--		stmpe_reg_read(stmpe,
--			       stmpe->regs[STMPE_IDX_GPMR_LSB + regoffset]);
- }
+ static struct variant_data variant_arm_extended_fifo = {
+@@ -137,6 +140,7 @@ struct variant_data {
+ 	.f_max			= 100000000,
+ 	.mmcimask1		= true,
+ 	.start_err		= MCI_STARTBITERR,
++	.opendrain		= MCI_ROD,
+ };
  
- static void stmpe_dbg_show_one(struct seq_file *s,
+ static struct variant_data variant_arm_extended_fifo_hwfc = {
+@@ -148,6 +152,7 @@ struct variant_data {
+ 	.f_max			= 100000000,
+ 	.mmcimask1		= true,
+ 	.start_err		= MCI_STARTBITERR,
++	.opendrain		= MCI_ROD,
+ };
+ 
+ static struct variant_data variant_u300 = {
+@@ -165,6 +170,7 @@ struct variant_data {
+ 	.pwrreg_nopower		= true,
+ 	.mmcimask1		= true,
+ 	.start_err		= MCI_STARTBITERR,
++	.opendrain		= MCI_OD,
+ };
+ 
+ static struct variant_data variant_nomadik = {
+@@ -183,6 +189,7 @@ struct variant_data {
+ 	.pwrreg_nopower		= true,
+ 	.mmcimask1		= true,
+ 	.start_err		= MCI_STARTBITERR,
++	.opendrain		= MCI_OD,
+ };
+ 
+ static struct variant_data variant_ux500 = {
+@@ -207,6 +214,7 @@ struct variant_data {
+ 	.pwrreg_nopower		= true,
+ 	.mmcimask1		= true,
+ 	.start_err		= MCI_STARTBITERR,
++	.opendrain		= MCI_OD,
+ };
+ 
+ static struct variant_data variant_ux500v2 = {
+@@ -233,6 +241,7 @@ struct variant_data {
+ 	.pwrreg_nopower		= true,
+ 	.mmcimask1		= true,
+ 	.start_err		= MCI_STARTBITERR,
++	.opendrain		= MCI_OD,
+ };
+ 
+ static struct variant_data variant_qcom = {
+@@ -253,6 +262,7 @@ struct variant_data {
+ 	.qcom_dml		= true,
+ 	.mmcimask1		= true,
+ 	.start_err		= MCI_STARTBITERR,
++	.opendrain		= MCI_ROD,
+ };
+ 
+ /* Busy detection for the ST Micro variant */
+@@ -1455,16 +1465,13 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 				~MCI_ST_DATA2DIREN);
+ 	}
+ 
+-	if (ios->bus_mode == MMC_BUSMODE_OPENDRAIN) {
+-		if (host->hw_designer != AMBA_VENDOR_ST)
+-			pwr |= MCI_ROD;
+-		else {
+-			/*
+-			 * The ST Micro variant use the ROD bit for something
+-			 * else and only has OD (Open Drain).
+-			 */
+-			pwr |= MCI_OD;
+-		}
++	if (ios->bus_mode == MMC_BUSMODE_OPENDRAIN &&
++	    host->variant->opendrain) {
++		/*
++		 * The ST Micro variant use the ROD bit for
++		 * something else and only has OD (Open Drain).
++		 */
++		pwr |= host->variant->opendrain;
+ 	}
+ 
+ 	/*
 -- 
 1.9.1
 
