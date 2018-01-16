@@ -1,69 +1,66 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH v2 18/22] mmc: tmio: remove useless TMIO_MASK_CMD
- handling in tmio_mmc_host_probe()
-Date: Tue, 16 Jan 2018 10:44:09 +0100
-Message-ID: <20180116094409.3zb3igxqf36vqype@tetsubishi>
+Subject: Re: [PATCH v2 19/22] mmc: tmio: ioremap memory resource in
+ tmio_mmc_host_alloc()
+Date: Tue, 16 Jan 2018 10:44:22 +0100
+Message-ID: <20180116094422.2m2iotvgwzx6jfiz@tetsubishi>
 References: <1511540697-27387-1-git-send-email-yamada.masahiro@socionext.com>
- <1511540697-27387-19-git-send-email-yamada.masahiro@socionext.com>
+ <1511540697-27387-20-git-send-email-yamada.masahiro@socionext.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="w66ffc7p5kmmzqyx"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([88.99.104.3]:44701 "EHLO pokefinder.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750812AbeAPJoN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 16 Jan 2018 04:44:13 -0500
+        protocol="application/pgp-signature"; boundary="dc6rnypxybjuatak"
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1511540697-27387-19-git-send-email-yamada.masahiro@socionext.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+In-Reply-To: <1511540697-27387-20-git-send-email-yamada.masahiro@socionext.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Masahiro Yamada <yamada.masahiro@socionext.com>
 Cc: linux-mmc@vger.kernel.org, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+List-Id: linux-mmc@vger.kernel.org
 
 
---w66ffc7p5kmmzqyx
+--dc6rnypxybjuatak
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Sat, Nov 25, 2017 at 01:24:53AM +0900, Masahiro Yamada wrote:
-> TMIO_MASK_CMD is properly enabled in tmio_mmc_start_command().
+On Sat, Nov 25, 2017 at 01:24:54AM +0900, Masahiro Yamada wrote:
+> The register region is ioremap'ed in the tmio_mmc_host_probe(), i.e.
+> drivers cannot get access to the hardware before mmc_add_host().
 >=20
-> We have no reason to set it up in tmio_mmc_host_probe().  (If we
-> really wanted to set it in the probe, we would have to do likewise
-> when resuming.)
+> Actually, renesas_sdhi_core.c reads out the CTL_VERSION register to
+> complete the platform-specific settings.  However, at this point,
+> the MMC host is already running.
 >=20
-> Even worse, the following code is extremely confusing:
+> Move the register ioremap to tmio_mmc_host_alloc() so that drivers
+> can perform platform-specific settings between tmio_mmc_host_alloc()
+> and tmio_mmc_host_probe().
 >=20
->   _host->sdcard_irq_mask &=3D ~irq_mask;
->=20
-> The logic is opposite between "->sdcard_irq_mask" and "irq_mask".
-> The intention is not clear at a glance.
+> I changed tmio_mmc_host_alloc() to return an error pointer to
+> propagate the return code from devm_ioremap_resource().
 >=20
 > Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+> ---
 
-In general, I like it a lot. It just depends on the previous patches
-which are still subject to discussion.
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
 
---w66ffc7p5kmmzqyx
+--dc6rnypxybjuatak
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlpdyWkACgkQFA3kzBSg
-KbbPZg//THuCQ5KQm8pgYtSAt7zDChzdUAN1f9ozK1oBQQy5/jnmdpbmMw3aVitM
-QUOwGX9vN/8V+IP5n37wFhec/sMw8FDHQb/lprCdgQtZPYA936/wPhsc8046Kqbj
-siWeVKJKOxqxx45nOWdrYyVicwC0g7b8tN29kMbS+Qv+Dd9XmTATrISUpKNk8OAj
-6pfa1afT/XVsrekw2wpG8e08whVCBYbnixgHD2p9NDNVtM03GtxLhbuUGDAklakI
-cJS1xmGmER34q4sYJ9rRn+s7hnbF+0f/CwWzEpI9HDoOjRtetpfu3EbTk63p9wju
-6gcfUtDfkrFrbAZtrRGmNuc9mM9DUxxKkob04mHqPbdTZA4yVtmxpjP49hm30IKP
-xGqtbH4h1CNdnhRFw/RrTqU2u+J4TS4tqhNnJM1wdta67isWR8K/UYkCpog50Tf3
-GhSD1OeSeDe2HmL0UZodmj1yM6dkLmAe9aLsviX+qJhS3QRYHEuX+cqOZ+IPTVxH
-3xrj9tEGoyJI/YvaoKhj1QPYola3smckMqWdnKXpUjlVwj6nBKi9A82Xd7UB1lzB
-SYtLcpSlJjrANY5um8/BgQRAmZMPQb6g0Wyv1xtFXcaNSrC4+tzagiL1U6OVA7sX
-WgCIggMWA5ZJ8xpH0+rQ7ePX2R3xqeOnlxULdPtsNLYGEsdqdZU=
-=3h90
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlpdyXYACgkQFA3kzBSg
+KbYUpg//aPP/JzY4FCSZ1+y0wQanBo1l84/ptPXWPY/2W3JF1Na9F3JFMob4U8QV
+86+kh4+zm7xX8IHIPf/R7V3Dt2vj9e0mWshQwxRk/GC4Y2dXMN3eYm5WV79Ho2xq
+oVsHr2VknGMZ1XMJSwFBkKjudPfZCcaALaYI9Gdk2Vp3DFTACoSFUFyi0knvCcqv
+5fd/PvOvWXcaLwyZX9EkNtVlehP6yugfkScq3GkPbsJdv5VhX5gZmEShwEyPhWHs
+aaNw0x+ZDmi6+Mz3rDg4c3/L+9V6IYrsHPr+VScW7u9n942rHHISCJttgMgIZ0B/
+ZcJGRRB89g/iKyVlfTihHo0+pRaz/xOCAWzYn7LTSyP6ghM7JNIFbDVVBR55RBmO
+h1Q5KpTyUrUSXbq+qoQ2SZewCpXWs/mhD3HEXXy9F8LSG31a44BSwnEjHB096v3U
+XgqSCjF2d8pV5SyO3A8CZJhkgEcagYRYgGzF1ralMShEPrJcBJReRdCfrwMoW96V
++SJBYvJc16Y3UUNdBahDGpCyn2xSh17QyusRYGIyQDaYbEia6uRkVTDFL1Rexo1O
+oK2X7ni4rl/r6/x0D6P4cVMJ/MZaovobInPoOpnSKAuCDRTNv5QRkGwq5mACX/tD
+AvJ1R3yfJkpwxw0YmGCvTmwNzWsj0TqUnoHkRrk4s8O3UeZHyKo=
+=HU2N
 -----END PGP SIGNATURE-----
 
---w66ffc7p5kmmzqyx--
+--dc6rnypxybjuatak--
