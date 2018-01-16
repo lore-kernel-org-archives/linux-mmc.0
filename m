@@ -1,133 +1,196 @@
-From: Patrice CHOTARD <patrice.chotard@st.com>
-Subject: Re: [PATCH 03/14] mmc: mmci: Add support for setting pad type via
- pinctrl
-Date: Mon, 15 Jan 2018 17:42:18 +0000
-Message-ID: <c09970a6-0e6d-c26d-f41e-ab82b4cb8127@st.com>
-References: <1515759368-16946-1-git-send-email-patrice.chotard@st.com>
- <1515759368-16946-4-git-send-email-patrice.chotard@st.com>
- <CAPDyKFoBTKpwSJzg5_cMei0Vzze=eQTKFBuD6mgHdYZUhqxFPw@mail.gmail.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH] mmc: sdhci-of-arasan: Add CQHCI support for
+ arasan,sdhci-5.1
+Date: Tue, 16 Jan 2018 11:46:41 +0800
+Message-ID: <740e75a7-fb0b-b1e6-1473-2a06dfae5bb7@rock-chips.com>
+References: <1515739370-102434-1-git-send-email-shawn.lin@rock-chips.com>
+ <0eb8b184-f8e1-0d8b-6845-1bc961282321@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-gpio-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFoBTKpwSJzg5_cMei0Vzze=eQTKFBuD6mgHdYZUhqxFPw@mail.gmail.com>
-Content-Language: en-US
-Content-ID: <04E951F92C44284F8128F159FE24CAAB@st.com>
-Sender: linux-gpio-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Russell King <linux@armlinux.org.uk>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, Linus Walleij <linus.walleij@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Alexandre TORGUE <alexandre.torgue@st.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-clk <linux-clk@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Andrea Merello <andrea.merello@gmail.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.135]:56743 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751015AbeAPDqw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Jan 2018 22:46:52 -0500
+In-Reply-To: <0eb8b184-f8e1-0d8b-6845-1bc961282321@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org, Heiko Stuebner <heiko@sntech.de>, Douglas Anderson <dianders@chromium.org>, Brian Norris <briannorris@chromium.org>
 
-SGkgVWxmDQoNCk9uIDAxLzE1LzIwMTggMDE6NDMgUE0sIFVsZiBIYW5zc29uIHdyb3RlOg0KPiBP
-biAxMiBKYW51YXJ5IDIwMTggYXQgMTM6MTUsICA8cGF0cmljZS5jaG90YXJkQHN0LmNvbT4gd3Jv
-dGU6DQo+PiBGcm9tOiBQYXRyaWNlIENob3RhcmQgPHBhdHJpY2UuY2hvdGFyZEBzdC5jb20+DQo+
-Pg0KPj4gVGhlIFNUTTMyIHZhcmlhbnQgaGFzbid0IHRoZSBjb250cm9sIGJpdCB0byBzd2l0Y2gg
-cGFkcyBpbiBvcGVuZHJhaW4gbW9kZS4NCj4+IEluIHRoaXMgY2FzZSB3ZSBjYW4gYWNoaWV2ZSB0
-aGUgc2FtZSByZXN1bHQgYnkgYXNraW5nIHRvIHRoZSBwaW5tdXggZHJpdmVyDQo+PiB0byBjb25m
-aWd1cmUgcGlucyBmb3IgdXMuDQo+Pg0KPj4gVGhpcyBwYXRjaCBtYWtlIHRoZSBtbWNpIGRyaXZl
-ciBhYmxlIHRvIGRvIHRoaXMgd2hlbmV2ZXIgbmVlZGVkLg0KPj4NCj4+IFNpZ25lZC1vZmYtYnk6
-IEFuZHJlYSBNZXJlbGxvIDxhbmRyZWEubWVyZWxsb0BnbWFpbC5jb20+DQo+PiBTaWduZWQtb2Zm
-LWJ5OiBQYXRyaWNlIENob3RhcmQgPHBhdHJpY2UuY2hvdGFyZEBzdC5jb20+DQo+PiAtLS0NCj4+
-ICAgZHJpdmVycy9tbWMvaG9zdC9tbWNpLmMgfCA1NCArKysrKysrKysrKysrKysrKysrKysrKysr
-KysrKysrKysrKysrKysrLS0tLS0tLS0tDQo+PiAgIGRyaXZlcnMvbW1jL2hvc3QvbW1jaS5oIHwg
-IDUgKysrKysNCj4+ICAgMiBmaWxlcyBjaGFuZ2VkLCA1MCBpbnNlcnRpb25zKCspLCA5IGRlbGV0
-aW9ucygtKQ0KPj4NCj4+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L21tY2kuYyBiL2Ry
-aXZlcnMvbW1jL2hvc3QvbW1jaS5jDQo+PiBpbmRleCA3ZTU2Zjg1Li4zOGU4YzIwIDEwMDY0NA0K
-Pj4gLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9tbWNpLmMNCj4+ICsrKyBiL2RyaXZlcnMvbW1jL2hv
-c3QvbW1jaS5jDQo+PiBAQCAtODUsNiArODUsOCBAQA0KPj4gICAgKiBAbW1jaW1hc2sxOiB0cnVl
-IGlmIHZhcmlhbnQgaGF2ZSBhIE1NQ0lNQVNLMSByZWdpc3Rlci4NCj4+ICAgICogQHN0YXJ0X2Vy
-cjogdHJ1ZSBpcyB0aGUgdmFyaWFudCBoYXMgU1RBUlRCSVRFUlIgYml0IGluc2lkZSBNTUNJU1RB
-VFVTDQo+PiAgICAqICAgICAgICAgICAgcmVnaXN0ZXIuDQo+PiArICogQG9wZW5kcmFpbjogdHJ1
-ZSBpZiB2YXJpYW50IGhhdmUgZGVkaWNhdGVkIGJpdCBmb3Igb3BlbmRyYWluIHBpbnMNCj4+ICsg
-KiAgICAgICAgICAgIGNvbmZpZ3VyYXRpb24uDQo+PiAgICAqLw0KPj4gICBzdHJ1Y3QgdmFyaWFu
-dF9kYXRhIHsNCj4+ICAgICAgICAgIHVuc2lnbmVkIGludCAgICAgICAgICAgIGNsa3JlZzsNCj4+
-IEBAIC0xMTYsNiArMTE4LDcgQEAgc3RydWN0IHZhcmlhbnRfZGF0YSB7DQo+PiAgICAgICAgICBi
-b29sICAgICAgICAgICAgICAgICAgICByZXZlcnNlZF9pcnFfaGFuZGxpbmc7DQo+PiAgICAgICAg
-ICBib29sICAgICAgICAgICAgICAgICAgICBtbWNpbWFzazE7DQo+PiAgICAgICAgICBib29sICAg
-ICAgICAgICAgICAgICAgICBzdGFydF9lcnI7DQo+PiArICAgICAgIGJvb2wgICAgICAgICAgICAg
-ICAgICAgIG9wZW5kcmFpbjsNCj4gDQo+IFNpbWlsYXIgY29tbWVudCBhcyBmb3IgcGF0Y2gyLg0K
-PiANCj4gVG8gYmUgY29uc2lzdGVudCB3aXRoIGhvdyB3ZSBpbXBsZW1lbnQgc3VwcG9ydCBmb3Ig
-c2ltaWxhciB2YXJpYW50DQo+IHZhcmlhdGlvbnMsIEkgd291bGQgcHJlZmVyIHRvIGhhdmUgdGhp
-cyBiZWluZyBhIHUzMi4gU29tZXRoaW5nIGFsb25nDQo+IHRoZSBsaW5lcyBvZiBob3cgdGhlICJi
-dXN5X2RldGVjdF9mbGFnIiBpcyBiZWluZyB1c2VkLg0KDQpvaw0KDQo+IA0KPiBbLi4uXQ0KPiAN
-Cj4+IEBAIC0xMzk0LDkgKzE0MDUsMTEgQEAgc3RhdGljIHZvaWQgbW1jaV9zZXRfaW9zKHN0cnVj
-dCBtbWNfaG9zdCAqbW1jLCBzdHJ1Y3QgbW1jX2lvcyAqaW9zKQ0KPj4gICB7DQo+PiAgICAgICAg
-ICBzdHJ1Y3QgbW1jaV9ob3N0ICpob3N0ID0gbW1jX3ByaXYobW1jKTsNCj4+ICAgICAgICAgIHN0
-cnVjdCB2YXJpYW50X2RhdGEgKnZhcmlhbnQgPSBob3N0LT52YXJpYW50Ow0KPj4gKyAgICAgICBz
-dHJ1Y3QgcGluY3RybF9zdGF0ZSAqcGluczsNCj4+ICAgICAgICAgIHUzMiBwd3IgPSAwOw0KPj4g
-ICAgICAgICAgdW5zaWduZWQgbG9uZyBmbGFnczsNCj4+ICAgICAgICAgIGludCByZXQ7DQo+PiAr
-ICAgICAgIGJvb2wgaXNfb3BlbmRyYWluOw0KPj4NCj4+ICAgICAgICAgIGlmIChob3N0LT5wbGF0
-LT5pb3NfaGFuZGxlciAmJg0KPj4gICAgICAgICAgICAgICAgICBob3N0LT5wbGF0LT5pb3NfaGFu
-ZGxlcihtbWNfZGV2KG1tYyksIGlvcykpDQo+PiBAQCAtMTQ1NSwxNiArMTQ2OCwzMSBAQCBzdGF0
-aWMgdm9pZCBtbWNpX3NldF9pb3Moc3RydWN0IG1tY19ob3N0ICptbWMsIHN0cnVjdCBtbWNfaW9z
-ICppb3MpDQo+PiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB+TUNJX1NUX0RBVEEy
-RElSRU4pOw0KPj4gICAgICAgICAgfQ0KPj4NCj4+IC0gICAgICAgaWYgKGlvcy0+YnVzX21vZGUg
-PT0gTU1DX0JVU01PREVfT1BFTkRSQUlOKSB7DQo+PiAtICAgICAgICAgICAgICAgaWYgKGhvc3Qt
-Pmh3X2Rlc2lnbmVyICE9IEFNQkFfVkVORE9SX1NUKQ0KPj4gLSAgICAgICAgICAgICAgICAgICAg
-ICAgcHdyIHw9IE1DSV9ST0Q7DQo+PiAtICAgICAgICAgICAgICAgZWxzZSB7DQo+PiAtICAgICAg
-ICAgICAgICAgICAgICAgICAvKg0KPj4gLSAgICAgICAgICAgICAgICAgICAgICAgICogVGhlIFNU
-IE1pY3JvIHZhcmlhbnQgdXNlIHRoZSBST0QgYml0IGZvciBzb21ldGhpbmcNCj4+IC0gICAgICAg
-ICAgICAgICAgICAgICAgICAqIGVsc2UgYW5kIG9ubHkgaGFzIE9EIChPcGVuIERyYWluKS4NCj4+
-IC0gICAgICAgICAgICAgICAgICAgICAgICAqLw0KPj4gLSAgICAgICAgICAgICAgICAgICAgICAg
-cHdyIHw9IE1DSV9PRDsNCj4gDQo+IFNlZW1zIGxpa2UgeW91IHNob3VsZCBhY3R1YWxseSBzcGxp
-dCB0aGlzIGNoYW5nZSBpbnRvIHR3byBwYXJ0cy4NCj4gDQo+IE9uZSB0aGF0IGFkZHMgdGhlIHZh
-cmlhbnQgZmxhZyBmb3IgdGhlIG9wZW4gZHJhaW4gYml0LCB3aGVuIHRoZW4gY2FuDQo+IGNsZWFu
-IHVwIHRoaXMgY29kZS4gVGhlbiBhIHBhdGNoIG9uIHRvcCB0aGF0IHN0YXJ0cyB1c2luZyBwaW5j
-dHJsIGluDQo+IGNhc2UgdGhlcmUgaXMgbm8gb3BlbiBkcmFpbiBiaXQgc2V0Lg0KPiANCj4gRG9l
-cyB0aGF0IHNvdW5kcyByZWFzb25hYmxlPw0KDQpPZiBjb3Vyc2UNCg0KPiANCj4+ICsgICAgICAg
-aWYgKGhvc3QtPnZhcmlhbnQtPm9wZW5kcmFpbikgew0KPj4gKyAgICAgICAgICAgICAgIGlmIChp
-b3MtPmJ1c19tb2RlID09IE1NQ19CVVNNT0RFX09QRU5EUkFJTikgew0KPj4gKyAgICAgICAgICAg
-ICAgICAgICAgICAgaWYgKGhvc3QtPmh3X2Rlc2lnbmVyICE9IEFNQkFfVkVORE9SX1NUKSB7DQo+
-PiArICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHB3ciB8PSBNQ0lfUk9EOw0KPj4gKyAg
-ICAgICAgICAgICAgICAgICAgICAgfSBlbHNlIHsNCj4+ICsgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgLyoNCj4+ICsgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICogVGhlIFNU
-IE1pY3JvIHZhcmlhbnQgdXNlIHRoZSBST0QgYml0IGZvcg0KPj4gKyAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgKiBzb21ldGhpbmcgZWxzZSBhbmQgb25seSBoYXMgT0QgKE9wZW4gRHJh
-aW4pLg0KPj4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKi8NCj4+ICsgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgcHdyIHw9IE1DSV9PRDsNCj4+ICsgICAgICAgICAgICAg
-ICAgICAgICAgIH0NCj4+ICAgICAgICAgICAgICAgICAgfQ0KPj4gKyAgICAgICB9IGVsc2Ugew0K
-Pj4gKyAgICAgICAgICAgICAgIC8qDQo+PiArICAgICAgICAgICAgICAgICogSWYgdGhlIHZhcmlh
-bnQgY2Fubm90IGNvbmZpZ3VyZSB0aGUgcGFkcyBieSBpdHMgb3duLCB0aGVuIHdlDQo+PiArICAg
-ICAgICAgICAgICAgICogZXhwZWN0IHRoZSBwaW5jdHJsIHRvIGJlIGFibGUgdG8gZG8gdGhhdCBm
-b3IgdXMNCj4+ICsgICAgICAgICAgICAgICAgKi8NCj4+ICsgICAgICAgICAgICAgICBpc19vcGVu
-ZHJhaW4gPSAoaW9zLT5idXNfbW9kZSA9PSBNTUNfQlVTTU9ERV9PUEVORFJBSU4pOw0KPj4gKyAg
-ICAgICAgICAgICAgIHBpbnMgPSBwaW5jdHJsX2xvb2t1cF9zdGF0ZShob3N0LT5waW5jdHJsLCBp
-c19vcGVuZHJhaW4gPw0KPiANCj4gSG93IGFib3V0IGRvaW5nIHRoZSBsb29rdXAgaW4gLT5wcm9i
-ZSgpIGluc3RlYWQ/IFRoZW4ganVzdCBzZWxlY3QgdGhlDQo+IHN0YXRlIGhlcmUsIGlmIHN1cHBv
-cnRlZD8NCg0Kb2sNCg0KPiANCj4+ICsgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICBNTUNJX1BJTkNUUkxfU1RBVEVfT1BFTkRSQUlOIDoNCj4+ICsgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICBNTUNJX1BJTkNUUkxfU1RBVEVfUFVTSFBVTEwpOw0KPj4g
-KyAgICAgICAgICAgICAgIGlmIChJU19FUlIocGlucykpDQo+PiArICAgICAgICAgICAgICAgICAg
-ICAgICBkZXZfd2FybihtbWNfZGV2KG1tYyksICJDYW5ub3Qgc2VsZWN0IHBpbiBkcml2ZSB0eXBl
-IHZpYSBwaW5jdHJsXG4iKTsNCj4+ICsgICAgICAgICAgICAgICBlbHNlDQo+PiArICAgICAgICAg
-ICAgICAgICAgICAgICBwaW5jdHJsX3NlbGVjdF9zdGF0ZShob3N0LT5waW5jdHJsLCBwaW5zKTsN
-Cj4+ICAgICAgICAgIH0NCj4+DQo+PiAgICAgICAgICAvKg0KPj4gQEAgLTE2MDksNiArMTYzNywx
-NCBAQCBzdGF0aWMgaW50IG1tY2lfcHJvYmUoc3RydWN0IGFtYmFfZGV2aWNlICpkZXYsDQo+PiAg
-ICAgICAgICBob3N0ID0gbW1jX3ByaXYobW1jKTsNCj4+ICAgICAgICAgIGhvc3QtPm1tYyA9IG1t
-YzsNCj4+DQo+PiArICAgICAgIGlmICghdmFyaWFudC0+b3BlbmRyYWluKSB7DQo+PiArICAgICAg
-ICAgICAgICAgaG9zdC0+cGluY3RybCA9IGRldm1fcGluY3RybF9nZXQoJmRldi0+ZGV2KTsNCj4+
-ICsgICAgICAgICAgICAgICBpZiAoSVNfRVJSKGhvc3QtPnBpbmN0cmwpKSB7DQo+PiArICAgICAg
-ICAgICAgICAgICAgICAgICBkZXZfZXJyKCZkZXYtPmRldiwgImZhaWxlZCB0byBnZXQgcGluY3Ry
-bCIpOw0KPj4gKyAgICAgICAgICAgICAgICAgICAgICAgZ290byBob3N0X2ZyZWU7DQo+PiArICAg
-ICAgICAgICAgICAgfQ0KPj4gKyAgICAgICB9DQo+PiArDQo+PiAgICAgICAgICBob3N0LT5od19k
-ZXNpZ25lciA9IGFtYmFfbWFuZihkZXYpOw0KPj4gICAgICAgICAgaG9zdC0+aHdfcmV2aXNpb24g
-PSBhbWJhX3JldihkZXYpOw0KPj4gICAgICAgICAgZGV2X2RiZyhtbWNfZGV2KG1tYyksICJkZXNp
-Z25lciBJRCA9IDB4JTAyeFxuIiwgaG9zdC0+aHdfZGVzaWduZXIpOw0KPj4gZGlmZiAtLWdpdCBh
-L2RyaXZlcnMvbW1jL2hvc3QvbW1jaS5oIGIvZHJpdmVycy9tbWMvaG9zdC9tbWNpLmgNCj4+IGlu
-ZGV4IDgzMTYwYTkuLmRlM2QwYjMgMTAwNjQ0DQo+PiAtLS0gYS9kcml2ZXJzL21tYy9ob3N0L21t
-Y2kuaA0KPj4gKysrIGIvZHJpdmVycy9tbWMvaG9zdC9tbWNpLmgNCj4+IEBAIC0xOTIsNiArMTky
-LDEwIEBADQo+Pg0KPj4gICAjZGVmaW5lIE5SX1NHICAgICAgICAgIDEyOA0KPj4NCj4+ICsvKiBw
-aW5jdHJsIGNvbmZpZ3MgKi8NCj4+ICsjZGVmaW5lIE1NQ0lfUElOQ1RSTF9TVEFURV9QVVNIUFVM
-TCAiZGVmYXVsdCINCj4gDQo+IFNlZW1zIGxpa2Ugd2Ugc2hvdWxkIGJlIGFibGUgdG8gY29wZSBm
-aW5lIHdpdGhvdXQgaGF2aW5nIHRvIGFkZCBhDQo+IHNlcGFyYXRlIGRlZmluZSBmb3IgdGhlIFBV
-U0hQVUxMLCBidXQgcmF0aGVyIGp1c3Qgc2VsZWN0IHRoZSBkZWZhdWx0DQo+IHN0YXRlIGluc3Rl
-YWQuDQoNCnllcyBhZ3JlZQ0KDQpUaGFua3MNCg0KUGF0cmljZQ0KDQo+IA0KPj4gKyNkZWZpbmUg
-TU1DSV9QSU5DVFJMX1NUQVRFX09QRU5EUkFJTiAib3BlbmRyYWluIg0KPj4gKw0KPj4gICBzdHJ1
-Y3QgY2xrOw0KPj4gICBzdHJ1Y3QgdmFyaWFudF9kYXRhOw0KPj4gICBzdHJ1Y3QgZG1hX2NoYW47
-DQo+PiBAQCAtMjI3LDYgKzIzMSw3IEBAIHN0cnVjdCBtbWNpX2hvc3Qgew0KPj4gICAgICAgICAg
-Ym9vbCAgICAgICAgICAgICAgICAgICAgdnFtbWNfZW5hYmxlZDsNCj4+ICAgICAgICAgIHN0cnVj
-dCBtbWNpX3BsYXRmb3JtX2RhdGEgKnBsYXQ7DQo+PiAgICAgICAgICBzdHJ1Y3QgdmFyaWFudF9k
-YXRhICAgICAqdmFyaWFudDsNCj4+ICsgICAgICAgc3RydWN0IHBpbmN0cmwgICAgICAgICAgKnBp
-bmN0cmw7DQo+Pg0KPj4gICAgICAgICAgdTggICAgICAgICAgICAgICAgICAgICAgaHdfZGVzaWdu
-ZXI7DQo+PiAgICAgICAgICB1OCAgICAgICAgICAgICAgICAgICAgICBod19yZXZpc2lvbjo0Ow0K
-Pj4gLS0NCj4+IDEuOS4xDQo+Pg0KPiANCj4gS2luZCByZWdhcmRzDQo+IFVmZmUNCj4g
+Hi Adrian,
+
+On 2018/1/15 21:38, Adrian Hunter wrote:
+> On 12/01/18 08:42, Shawn Lin wrote:
+>> Add CQHCI initialization and implement CQHCI operations for Arasan
+
+[...]
+
+>> +	.set_uhs_signaling = sdhci_set_uhs_signaling,
+> 
+> Did you intend to leave out 	.set_power = sdhci_arasan_set_power,
+
+My bad. will add it in v2.
+
+> 
+>> +	.irq = sdhci_arasan_cqhci_irq,
+>> +};
+>> +
+>> +static struct sdhci_pltfm_data sdhci_arasan_cqe_pdata = {
+>> +	.ops = &sdhci_arasan_cqe_ops,
+>> +	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+>> +	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
+>> +			SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
+>> +};
+>> +
+>>   #ifdef CONFIG_PM_SLEEP
+>>   /**
+>>    * sdhci_arasan_suspend - Suspend method for the driver
+>> @@ -309,6 +367,12 @@ static int sdhci_arasan_suspend(struct device *dev)
+>>   	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
+>>   		mmc_retune_needed(host->mmc);
+>>   
+>> +	if (sdhci_arasan->has_cqe) {
+>> +		ret = cqhci_suspend(host->mmc);
+>> +		if (ret)
+>> +			return ret;
+>> +	}
+>> +
+>>   	ret = sdhci_suspend_host(host);
+>>   	if (ret)
+>>   		return ret;
+>> @@ -365,10 +429,18 @@ static int sdhci_arasan_resume(struct device *dev)
+>>   		sdhci_arasan->is_phy_on = true;
+>>   	}
+>>   
+>> -	return sdhci_resume_host(host);
+>> +	ret = sdhci_resume_host(host);
+>> +	if (ret) {
+>> +		dev_err(dev, "Cannot resume host.\n");
+>> +		return ret;
+>> +	}
+>> +
+>> +	if (sdhci_arasan->has_cqe)
+>> +		return cqhci_resume(host->mmc);
+>> +
+>> +	return 0;
+>>   }
+>>   #endif /* ! CONFIG_PM_SLEEP */
+>> -
+> 
+> Better with that blank line left there
+> 
+>>   static SIMPLE_DEV_PM_OPS(sdhci_arasan_dev_pm_ops, sdhci_arasan_suspend,
+>>   			 sdhci_arasan_resume);
+>>   
+>> @@ -568,6 +640,49 @@ static void sdhci_arasan_unregister_sdclk(struct device *dev)
+>>   	of_clk_del_provider(dev->of_node);
+>>   }
+>>   
+>> +static int sdhci_arasan_add_host(struct sdhci_arasan_data *sdhci_arasan)
+>> +{
+>> +	struct sdhci_host *host = sdhci_arasan->host;
+>> +	struct cqhci_host *cq_host;
+>> +	bool dma64;
+>> +	int ret;
+>> +
+>> +	if (!sdhci_arasan->has_cqe)
+>> +		return sdhci_add_host(host);
+>> +
+>> +	ret = sdhci_setup_host(host);
+>> +	if (ret)
+>> +		return ret;
+>> +
+>> +	cq_host = devm_kzalloc(host->mmc->parent,
+>> +			       sizeof(*cq_host), GFP_KERNEL);
+>> +	if (!cq_host) {
+>> +		ret = -ENOMEM;
+>> +		goto cleanup;
+>> +	}
+>> +
+>> +	cq_host->mmio = host->ioaddr + SDHCI_ARASAN_CQE_BASE_ADDR;
+>> +	cq_host->ops = &sdhci_arasan_cqhci_ops;
+>> +
+>> +	dma64 = host->flags & SDHCI_USE_64_BIT_DMA;
+>> +	if (dma64)
+>> +		cq_host->caps |= CQHCI_TASK_DESC_SZ_128;
+>> +
+>> +	ret = cqhci_init(cq_host, host->mmc, dma64);
+>> +	if (ret)
+>> +		goto cleanup;
+>> +
+>> +	ret = __sdhci_add_host(host);
+>> +	if (ret)
+>> +		goto cleanup;
+>> +
+>> +	return 0;
+>> +
+>> +cleanup:
+>> +	sdhci_cleanup_host(host);
+>> +	return ret;
+>> +}
+>> +
+>>   static int sdhci_arasan_probe(struct platform_device *pdev)
+>>   {
+>>   	int ret;
+>> @@ -579,8 +694,14 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+>>   	struct sdhci_arasan_data *sdhci_arasan;
+>>   	struct device_node *np = pdev->dev.of_node;
+>>   
+>> -	host = sdhci_pltfm_init(pdev, &sdhci_arasan_pdata,
+>> -				sizeof(*sdhci_arasan));
+>> +	if (of_device_is_compatible(pdev->dev.of_node,
+>> +				    "arasan,sdhci-5.1"))
+> 
+> Unneeded line wrap
+> 
+>> +		host = sdhci_pltfm_init(pdev, &sdhci_arasan_cqe_pdata,
+>> +					sizeof(*sdhci_arasan));
+>> +	else
+>> +		host = sdhci_pltfm_init(pdev, &sdhci_arasan_pdata,
+>> +					sizeof(*sdhci_arasan));
+> 
+> Perhaps slightly prettier to assign pdata e.g.
+> 
+> 	const struct sdhci_pltfm_data *pdata;
+> 
+> 	if (of_device_is_compatible(pdev->dev.of_node, "arasan,sdhci-5.1"))
+> 		pdata = &sdhci_arasan_cqe_pdata;
+> 	else
+> 		pdata = &&sdhci_arasan_pdata;
+> 
+> 	host = sdhci_pltfm_init(pdev, pdata, sizeof(*sdhci_arasan));
+> 
+
+Looks good.
+
+>> +
+>>   	if (IS_ERR(host))
+>>   		return PTR_ERR(host);
+>>   
+>> @@ -675,9 +796,11 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+>>   					sdhci_arasan_hs400_enhanced_strobe;
+>>   		host->mmc_host_ops.start_signal_voltage_switch =
+>>   					sdhci_arasan_voltage_switch;
+>> +		sdhci_arasan->has_cqe = true;
+>> +		host->mmc->caps2 |= (MMC_CAP2_CQE | MMC_CAP2_CQE_DCMD);
+> 
+> The parentheses are not needed
+
+okay.
+
+> 
+>>   	}
+>>   
+>> -	ret = sdhci_add_host(host);
+>> +	ret = sdhci_arasan_add_host(sdhci_arasan);
+>>   	if (ret)
+>>   		goto err_add_host;
+>>   
+>>
+> 
+> 
+> 
+> 
+
