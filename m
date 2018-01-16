@@ -1,11 +1,14 @@
 From: <patrice.chotard@st.com>
-Subject: [PATCH v2 00/15] Add MMCI support for STM32F SoCs family
-Date: Tue, 16 Jan 2018 13:30:44 +0100
-Message-ID: <1516105859-3525-1-git-send-email-patrice.chotard@st.com>
+Subject: [PATCH v2 01/15] mmc: mmci: Don't pretend all variants to have
+ MMCIMASK1 register
+Date: Tue, 16 Jan 2018 13:30:45 +0100
+Message-ID: <1516105859-3525-2-git-send-email-patrice.chotard@st.com>
+References: <1516105859-3525-1-git-send-email-patrice.chotard@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1516105859-3525-1-git-send-email-patrice.chotard@st.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -16,71 +19,194 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Russell King <linux@armlinux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, Linus Walleij <linus.walleij@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Alexandre Torgue <alexandre.torgue@st.com>
-Cc: devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Patrice Chotard <patrice.chotard@st.com>, linux-gpio@vger.kernel.org, linux-clk@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: devicetree@vger.kernel.org, Andrea Merello <andrea.merello@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Patrice Chotard <patrice.chotard@st.com>, linux-gpio@vger.kernel.org, linux-clk@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
 From: Patrice Chotard <patrice.chotard@st.com>
 
-This series reworks patches submitted one year ago by Andrea Merello [1] 
-but without succeed to merged it.
+Two mask registers are used in order to select which events have to
+actually generate an interrupt on each IRQ line.
 
-STM32F4 and STM32F7 SoCs families embeds a variant of the ARM PrimeCell 
-PL18x SD host controller, for which the mmci driver exists. 
-This series adds support for these SoCs to the mmci driver.
+It seems that in the single-IRQ case it's assumed that the IRQs lines
+are simply OR-ed, while the two mask registers are still present. The
+driver still programs the two mask registers separately.
 
-As other variants, this one need some specific quirks, that this 
-series address. 
+However the STM32 variant has only one IRQ, and also has only one mask
+register.
 
-This series has been tested on following boards :
-	_ stm32f429-eval
-	_ stm32f469-disco
-	_ stm32f746-eval
-	_ stm32f769-disco
+This patch prepares for STM32 variant support by making the driver using
+only one mask register.
 
-DT update for stm32f7 pinctrl, stm32f746-eval and stm32f769-disco boards
-will be sent later to avoid conflict with pending stm32f7 series [1] which
-is not yet merged on kernel mainline.
+This patch also optimize the MMCIMASK1 mask usage by caching it into
+host->mask1_reg which avoid to read it into mmci_irq().
 
-[1] https://www.spinics.net/lists/linux-mmc/msg41616.html
-[2] https://patchwork.kernel.org/patch/10104447/
+Tested only on STM32 variant. RFT for variants other than STM32
 
-v2: _ add Revievied-by, Acked-by in some patches
-    _ replace bool by u32 for start_err and opendrain fields of struct variant_data
-    _ split previous patch 3 in two parts, first patch clean the open drain bit code
-      and second part add pinctrl pins management when no open drain bit is available.
-    _ replace "pl180" by "PL180" in patch "mmc: mmci: Add STM32 variant"
+Signed-off-by: Andrea Merello <andrea.merello@gmail.com>
+Signed-off-by: Patrice Chotard <patrice.chotard@st.com>
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+---
+v2: _ Add Reviewed-by
 
-Andrea Merello (2):
-  ARM: dts: stm32: Add pin map for SDIO controller on stm32f4
-  ARM: dts: stm32: Enable SDIO controller on stm32f469 disco board
+ drivers/mmc/host/mmci.c | 28 ++++++++++++++++++++++++----
+ drivers/mmc/host/mmci.h |  1 +
+ 2 files changed, 25 insertions(+), 4 deletions(-)
 
-Patrice Chotard (13):
-  mmc: mmci: Don't pretend all variants to have MMCIMASK1 register
-  mmc: mmci: Don't pretend all variants to have MCI_STARBITERR flag
-  mmc: mmci: Don't pretend all variants to have OPENDRAIN bit
-  mmc: mmci: Add support for setting pad type via pinctrl
-  mmc: mmci: Add STM32 variant
-  ARM: dts: stm32: Add SDIO controller for stm32f746
-  ARM: dts: stm32: Add SDIO controller for stm32f429
-  ARM: dts: stm32: Enable SDIO controller on stm32429i-eval board
-  ARM: stm32: Add AMBA support for STM32F4 and STM32F7 SoCs
-  ARM: configs: stm32: Enable MMC_ARMMMCI support
-  ARM: configs: stm32: Enable EXT3_FS support
-  clk: stm32: Add clk entry for SDMMC2 on stm32F769
-  gpio: stmpe: i2c transfer are forbiden in atomic context
-
- arch/arm/boot/dts/stm32429i-eval.dts   |  19 +++++
- arch/arm/boot/dts/stm32f4-pinctrl.dtsi |  31 +++++++++
- arch/arm/boot/dts/stm32f429.dtsi       |  11 +++
- arch/arm/boot/dts/stm32f469-disco.dts  |  19 +++++
- arch/arm/boot/dts/stm32f746.dtsi       |  22 ++++++
- arch/arm/configs/stm32_defconfig       |   3 +
- arch/arm/mach-stm32/Kconfig            |   3 +
- drivers/clk/clk-stm32f4.c              |   3 +-
- drivers/gpio/gpio-stmpe.c              |  20 +++---
- drivers/mmc/host/mmci.c                | 124 +++++++++++++++++++++++++++++----
- drivers/mmc/host/mmci.h                |   6 ++
- 11 files changed, 236 insertions(+), 25 deletions(-)
-
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 97da0fc..3125dc0 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -82,6 +82,7 @@
+  * @qcom_fifo: enables qcom specific fifo pio read logic.
+  * @qcom_dml: enables qcom specific dma glue for dma transfers.
+  * @reversed_irq_handling: handle data irq before cmd irq.
++ * @mmcimask1: true if variant have a MMCIMASK1 register.
+  */
+ struct variant_data {
+ 	unsigned int		clkreg;
+@@ -111,6 +112,7 @@ struct variant_data {
+ 	bool			qcom_fifo;
+ 	bool			qcom_dml;
+ 	bool			reversed_irq_handling;
++	bool			mmcimask1;
+ };
+ 
+ static struct variant_data variant_arm = {
+@@ -120,6 +122,7 @@ struct variant_data {
+ 	.pwrreg_powerup		= MCI_PWR_UP,
+ 	.f_max			= 100000000,
+ 	.reversed_irq_handling	= true,
++	.mmcimask1		= true,
+ };
+ 
+ static struct variant_data variant_arm_extended_fifo = {
+@@ -128,6 +131,7 @@ struct variant_data {
+ 	.datalength_bits	= 16,
+ 	.pwrreg_powerup		= MCI_PWR_UP,
+ 	.f_max			= 100000000,
++	.mmcimask1		= true,
+ };
+ 
+ static struct variant_data variant_arm_extended_fifo_hwfc = {
+@@ -137,6 +141,7 @@ struct variant_data {
+ 	.datalength_bits	= 16,
+ 	.pwrreg_powerup		= MCI_PWR_UP,
+ 	.f_max			= 100000000,
++	.mmcimask1		= true,
+ };
+ 
+ static struct variant_data variant_u300 = {
+@@ -152,6 +157,7 @@ struct variant_data {
+ 	.signal_direction	= true,
+ 	.pwrreg_clkgate		= true,
+ 	.pwrreg_nopower		= true,
++	.mmcimask1		= true,
+ };
+ 
+ static struct variant_data variant_nomadik = {
+@@ -168,6 +174,7 @@ struct variant_data {
+ 	.signal_direction	= true,
+ 	.pwrreg_clkgate		= true,
+ 	.pwrreg_nopower		= true,
++	.mmcimask1		= true,
+ };
+ 
+ static struct variant_data variant_ux500 = {
+@@ -190,6 +197,7 @@ struct variant_data {
+ 	.busy_detect_flag	= MCI_ST_CARDBUSY,
+ 	.busy_detect_mask	= MCI_ST_BUSYENDMASK,
+ 	.pwrreg_nopower		= true,
++	.mmcimask1		= true,
+ };
+ 
+ static struct variant_data variant_ux500v2 = {
+@@ -214,6 +222,7 @@ struct variant_data {
+ 	.busy_detect_flag	= MCI_ST_CARDBUSY,
+ 	.busy_detect_mask	= MCI_ST_BUSYENDMASK,
+ 	.pwrreg_nopower		= true,
++	.mmcimask1		= true,
+ };
+ 
+ static struct variant_data variant_qcom = {
+@@ -232,6 +241,7 @@ struct variant_data {
+ 	.explicit_mclk_control	= true,
+ 	.qcom_fifo		= true,
+ 	.qcom_dml		= true,
++	.mmcimask1		= true,
+ };
+ 
+ /* Busy detection for the ST Micro variant */
+@@ -396,6 +406,7 @@ static void mmci_set_clkreg(struct mmci_host *host, unsigned int desired)
+ static void mmci_set_mask1(struct mmci_host *host, unsigned int mask)
+ {
+ 	void __iomem *base = host->base;
++	struct variant_data *variant = host->variant;
+ 
+ 	if (host->singleirq) {
+ 		unsigned int mask0 = readl(base + MMCIMASK0);
+@@ -406,7 +417,10 @@ static void mmci_set_mask1(struct mmci_host *host, unsigned int mask)
+ 		writel(mask0, base + MMCIMASK0);
+ 	}
+ 
+-	writel(mask, base + MMCIMASK1);
++	if (variant->mmcimask1)
++		writel(mask, base + MMCIMASK1);
++
++	host->mask1_reg = mask;
+ }
+ 
+ static void mmci_stop_data(struct mmci_host *host)
+@@ -1286,7 +1300,7 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
+ 		status = readl(host->base + MMCISTATUS);
+ 
+ 		if (host->singleirq) {
+-			if (status & readl(host->base + MMCIMASK1))
++			if (status & host->mask1_reg)
+ 				mmci_pio_irq(irq, dev_id);
+ 
+ 			status &= ~MCI_IRQ1MASK;
+@@ -1729,7 +1743,10 @@ static int mmci_probe(struct amba_device *dev,
+ 	spin_lock_init(&host->lock);
+ 
+ 	writel(0, host->base + MMCIMASK0);
+-	writel(0, host->base + MMCIMASK1);
++
++	if (variant->mmcimask1)
++		writel(0, host->base + MMCIMASK1);
++
+ 	writel(0xfff, host->base + MMCICLEAR);
+ 
+ 	/*
+@@ -1809,6 +1826,7 @@ static int mmci_remove(struct amba_device *dev)
+ 
+ 	if (mmc) {
+ 		struct mmci_host *host = mmc_priv(mmc);
++		struct variant_data *variant = host->variant;
+ 
+ 		/*
+ 		 * Undo pm_runtime_put() in probe.  We use the _sync
+@@ -1819,7 +1837,9 @@ static int mmci_remove(struct amba_device *dev)
+ 		mmc_remove_host(mmc);
+ 
+ 		writel(0, host->base + MMCIMASK0);
+-		writel(0, host->base + MMCIMASK1);
++
++		if (variant->mmcimask1)
++			writel(0, host->base + MMCIMASK1);
+ 
+ 		writel(0, host->base + MMCICOMMAND);
+ 		writel(0, host->base + MMCIDATACTRL);
+diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+index 4a8bef1..83160a9 100644
+--- a/drivers/mmc/host/mmci.h
++++ b/drivers/mmc/host/mmci.h
+@@ -223,6 +223,7 @@ struct mmci_host {
+ 	u32			clk_reg;
+ 	u32			datactrl_reg;
+ 	u32			busy_status;
++	u32			mask1_reg;
+ 	bool			vqmmc_enabled;
+ 	struct mmci_platform_data *plat;
+ 	struct variant_data	*variant;
 -- 
 1.9.1
