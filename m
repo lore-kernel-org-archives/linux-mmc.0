@@ -1,73 +1,128 @@
 From: <patrice.chotard@st.com>
-Subject: [PATCH v2 09/15] ARM: dts: stm32: Enable SDIO controller on stm32f469 disco board
-Date: Tue, 16 Jan 2018 13:30:53 +0100
-Message-ID: <1516105859-3525-10-git-send-email-patrice.chotard@st.com>
+Subject: [PATCH v2 02/15] mmc: mmci: Don't pretend all variants to have MCI_STARBITERR flag
+Date: Tue, 16 Jan 2018 13:30:46 +0100
+Message-ID: <1516105859-3525-3-git-send-email-patrice.chotard@st.com>
 References: <1516105859-3525-1-git-send-email-patrice.chotard@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-clk-owner@vger.kernel.org>
+Return-path: <linux-gpio-owner@vger.kernel.org>
 In-Reply-To: <1516105859-3525-1-git-send-email-patrice.chotard@st.com>
-Sender: linux-clk-owner@vger.kernel.org
+Sender: linux-gpio-owner@vger.kernel.org
 To: Russell King <linux@armlinux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, Linus Walleij <linus.walleij@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Alexandre Torgue <alexandre.torgue@st.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-gpio@vger.kernel.org, devicetree@vger.kernel.org, Andrea Merello <andrea.merello@gmail.com>, Patrice Chotard <patrice.chotard@st.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-gpio@vger.kernel.org, devicetree@vger.kernel.org, Patrice Chotard <patrice.chotard@st.com>, Andrea Merello <andrea.merello@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Andrea Merello <andrea.merello@gmail.com>
+From: Patrice Chotard <patrice.chotard@st.com>
 
-This patch adds SDIO-related DT nodes required by stm32f469 board
-
-There is a hardware issue on these boards, it misses a pullup on
-the GPIO line used as card detect to allow correct SD card
-detection. To allow correct card detection "broken-cd" property
-is used.
+This patch prepares for supporting the STM32 variant that
+has no such bit in the status register.
 
 Signed-off-by: Andrea Merello <andrea.merello@gmail.com>
-Signed-off-by: Alexandre TORGUE <alexandre.torgue@st.com>
 Signed-off-by: Patrice Chotard <patrice.chotard@st.com>
 ---
 
-v2 _ none
+v2: _ replace start_err bool type by u32
 
- arch/arm/boot/dts/stm32f469-disco.dts | 19 +++++++++++++++++++
- 1 file changed, 19 insertions(+)
+ drivers/mmc/host/mmci.c | 16 ++++++++++++++--
+ 1 file changed, 14 insertions(+), 2 deletions(-)
 
-diff --git a/arch/arm/boot/dts/stm32f469-disco.dts b/arch/arm/boot/dts/stm32f469-disco.dts
-index 318fb12..ebb97c3 100644
---- a/arch/arm/boot/dts/stm32f469-disco.dts
-+++ b/arch/arm/boot/dts/stm32f469-disco.dts
-@@ -66,6 +66,13 @@
- 		serial0 = &usart3;
- 	};
- 
-+	mmc_vcard: mmc_vcard {
-+		compatible = "regulator-fixed";
-+		regulator-name = "mmc_vcard";
-+		regulator-min-microvolt = <3300000>;
-+		regulator-max-microvolt = <3300000>;
-+	};
-+
- 	soc {
- 		dma-ranges = <0xc0000000 0x0 0x10000000>;
- 	};
-@@ -120,6 +127,18 @@
- 	};
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 3125dc0..8a4fbc2 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -83,6 +83,8 @@
+  * @qcom_dml: enables qcom specific dma glue for dma transfers.
+  * @reversed_irq_handling: handle data irq before cmd irq.
+  * @mmcimask1: true if variant have a MMCIMASK1 register.
++ * @start_err: bitmask identifying the STARTBITERR bit inside MMCISTATUS
++ *	       register.
+  */
+ struct variant_data {
+ 	unsigned int		clkreg;
+@@ -113,6 +115,7 @@ struct variant_data {
+ 	bool			qcom_dml;
+ 	bool			reversed_irq_handling;
+ 	bool			mmcimask1;
++	u32			start_err;
  };
  
-+&sdio {
-+	status = "okay";
-+	vmmc-supply = <&mmc_vcard>;
-+	cd-gpios = <&gpiog 2 0>;
-+	cd-inverted;
-+	broken-cd;
-+	pinctrl-names = "default", "opendrain";
-+	pinctrl-0 = <&sdio_pins>;
-+	pinctrl-1 = <&sdio_pins_od>;
-+	bus-width = <4>;
-+};
-+
- &usart3 {
- 	pinctrl-0 = <&usart3_pins_a>;
- 	pinctrl-names = "default";
+ static struct variant_data variant_arm = {
+@@ -123,6 +126,7 @@ struct variant_data {
+ 	.f_max			= 100000000,
+ 	.reversed_irq_handling	= true,
+ 	.mmcimask1		= true,
++	.start_err		= MCI_STARTBITERR,
+ };
+ 
+ static struct variant_data variant_arm_extended_fifo = {
+@@ -132,6 +136,7 @@ struct variant_data {
+ 	.pwrreg_powerup		= MCI_PWR_UP,
+ 	.f_max			= 100000000,
+ 	.mmcimask1		= true,
++	.start_err		= MCI_STARTBITERR,
+ };
+ 
+ static struct variant_data variant_arm_extended_fifo_hwfc = {
+@@ -142,6 +147,7 @@ struct variant_data {
+ 	.pwrreg_powerup		= MCI_PWR_UP,
+ 	.f_max			= 100000000,
+ 	.mmcimask1		= true,
++	.start_err		= MCI_STARTBITERR,
+ };
+ 
+ static struct variant_data variant_u300 = {
+@@ -158,6 +164,7 @@ struct variant_data {
+ 	.pwrreg_clkgate		= true,
+ 	.pwrreg_nopower		= true,
+ 	.mmcimask1		= true,
++	.start_err		= MCI_STARTBITERR,
+ };
+ 
+ static struct variant_data variant_nomadik = {
+@@ -175,6 +182,7 @@ struct variant_data {
+ 	.pwrreg_clkgate		= true,
+ 	.pwrreg_nopower		= true,
+ 	.mmcimask1		= true,
++	.start_err		= MCI_STARTBITERR,
+ };
+ 
+ static struct variant_data variant_ux500 = {
+@@ -198,6 +206,7 @@ struct variant_data {
+ 	.busy_detect_mask	= MCI_ST_BUSYENDMASK,
+ 	.pwrreg_nopower		= true,
+ 	.mmcimask1		= true,
++	.start_err		= MCI_STARTBITERR,
+ };
+ 
+ static struct variant_data variant_ux500v2 = {
+@@ -223,6 +232,7 @@ struct variant_data {
+ 	.busy_detect_mask	= MCI_ST_BUSYENDMASK,
+ 	.pwrreg_nopower		= true,
+ 	.mmcimask1		= true,
++	.start_err		= MCI_STARTBITERR,
+ };
+ 
+ static struct variant_data variant_qcom = {
+@@ -242,6 +252,7 @@ struct variant_data {
+ 	.qcom_fifo		= true,
+ 	.qcom_dml		= true,
+ 	.mmcimask1		= true,
++	.start_err		= MCI_STARTBITERR,
+ };
+ 
+ /* Busy detection for the ST Micro variant */
+@@ -935,8 +946,9 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
+ 		return;
+ 
+ 	/* First check for errors */
+-	if (status & (MCI_DATACRCFAIL|MCI_DATATIMEOUT|MCI_STARTBITERR|
+-		      MCI_TXUNDERRUN|MCI_RXOVERRUN)) {
++	if (status & (MCI_DATACRCFAIL | MCI_DATATIMEOUT |
++		      host->variant->start_err |
++		      MCI_TXUNDERRUN | MCI_RXOVERRUN)) {
+ 		u32 remain, success;
+ 
+ 		/* Terminate the DMA transfer */
 -- 
 1.9.1
 
