@@ -1,7 +1,7 @@
 From: <patrice.chotard@st.com>
-Subject: [PATCH v2 10/15] ARM: dts: stm32: Enable SDIO controller on stm32429i-eval board
-Date: Tue, 16 Jan 2018 13:30:54 +0100
-Message-ID: <1516105859-3525-11-git-send-email-patrice.chotard@st.com>
+Subject: [PATCH v2 13/15] ARM: configs: stm32: Enable EXT3_FS support
+Date: Tue, 16 Jan 2018 13:30:57 +0100
+Message-ID: <1516105859-3525-14-git-send-email-patrice.chotard@st.com>
 References: <1516105859-3525-1-git-send-email-patrice.chotard@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,52 +14,28 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Patrice Chotard <patrice.chotard@st.com>
 
-This patch adds SDIO related DT nodes for stm32429i-eval board.
+Enable EXT3_FS support to be able to read rootfs from MMC partition
+formatted in EXT2/3/4 .
 
 Signed-off-by: Patrice Chotard <patrice.chotard@st.com>
 ---
 
 v2 _ none
 
- arch/arm/boot/dts/stm32429i-eval.dts | 19 +++++++++++++++++++
- 1 file changed, 19 insertions(+)
+ arch/arm/configs/stm32_defconfig | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/arch/arm/boot/dts/stm32429i-eval.dts b/arch/arm/boot/dts/stm32429i-eval.dts
-index 1e3d4c6..6a5c701 100644
---- a/arch/arm/boot/dts/stm32429i-eval.dts
-+++ b/arch/arm/boot/dts/stm32429i-eval.dts
-@@ -144,6 +144,13 @@
- 			};
- 		};
- 	};
-+
-+	mmc_vcard: mmc_vcard {
-+		compatible = "regulator-fixed";
-+		regulator-name = "mmc_vcard";
-+		regulator-min-microvolt = <3300000>;
-+		regulator-max-microvolt = <3300000>;
-+	};
- };
- 
- &adc {
-@@ -254,6 +261,18 @@
- 	status = "okay";
- };
- 
-+&sdio {
-+	status = "okay";
-+	vmmc-supply = <&mmc_vcard>;
-+	cd-gpios = <&stmpegpio 15 GPIO_ACTIVE_HIGH>;
-+	cd-inverted;
-+	pinctrl-names = "default", "opendrain";
-+	pinctrl-0 = <&sdio_pins>;
-+	pinctrl-1 = <&sdio_pins_od>;
-+	bus-width = <4>;
-+	max-frequency = <12500000>;
-+};
-+
- &timers1 {
- 	status = "okay";
- 
+diff --git a/arch/arm/configs/stm32_defconfig b/arch/arm/configs/stm32_defconfig
+index 8b64a9e..b736823 100644
+--- a/arch/arm/configs/stm32_defconfig
++++ b/arch/arm/configs/stm32_defconfig
+@@ -72,6 +72,7 @@ CONFIG_STM32_MDMA=y
+ CONFIG_IIO=y
+ CONFIG_STM32_ADC_CORE=y
+ CONFIG_STM32_ADC=y
++CONFIG_EXT3_FS=y
+ # CONFIG_FILE_LOCKING is not set
+ # CONFIG_DNOTIFY is not set
+ # CONFIG_INOTIFY_USER is not set
 -- 
 1.9.1
