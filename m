@@ -1,51 +1,59 @@
-From: <patrice.chotard@st.com>
-Subject: [PATCH v2 14/15] clk: stm32: Add clk entry for SDMMC2 on stm32F769
-Date: Tue, 16 Jan 2018 13:30:58 +0100
-Message-ID: <1516105859-3525-15-git-send-email-patrice.chotard@st.com>
-References: <1516105859-3525-1-git-send-email-patrice.chotard@st.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH v2 20/22] mmc: tmio: move clk_enable/disable out of
+ tmio_mmc_host_probe()
+Date: Tue, 16 Jan 2018 23:42:48 +0100
+Message-ID: <20180116224248.6ywmgcxpe5luykws@tetsubishi>
+References: <1511540697-27387-1-git-send-email-yamada.masahiro@socionext.com>
+ <1511540697-27387-21-git-send-email-yamada.masahiro@socionext.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1516105859-3525-1-git-send-email-patrice.chotard@st.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Russell King <linux@armlinux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, Linus Walleij <linus.walleij@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Alexandre Torgue <alexandre.torgue@st.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-gpio@vger.kernel.org, devicetree@vger.kernel.org, Patrice Chotard <patrice.chotard@st.com>
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="d5o6ckdt6porjxbf"
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1511540697-27387-21-git-send-email-yamada.masahiro@socionext.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: linux-mmc@vger.kernel.org, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Patrice Chotard <patrice.chotard@st.com>
 
-STM32F769 has 2 SDMMC port, add clock entry for the second one.
+--d5o6ckdt6porjxbf
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Signed-off-by: Alexandre TORGUE <alexandre.torgue@st.com>
-Signed-off-by: Patrice Chotard <patrice.chotard@st.com>
-Acked-by: Stephen Boyd <sboyd@codeaurora.org>
----
+On Sat, Nov 25, 2017 at 01:24:55AM +0900, Masahiro Yamada wrote:
+> The clock is enabled in the tmio_mmc_host_probe().  It also prevents
+> drivers from performing platform-specific settings before mmc_add_host()
+> because the register access generally requires a clock.
+>=20
+> Enable/disable the clock in drivers' probe/remove.  Also, I passed
+> tmio_mmc_data to tmio_mmc_host_alloc() because renesas_sdhi_clk_enable()
+> needs it to get the private data from tmio_mmc_host.
+>=20
+> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 
-v2 _ Add Acked-by
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
- drivers/clk/clk-stm32f4.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/clk/clk-stm32f4.c b/drivers/clk/clk-stm32f4.c
-index 96c6b6b..8f8a178 100644
---- a/drivers/clk/clk-stm32f4.c
-+++ b/drivers/clk/clk-stm32f4.c
-@@ -282,6 +282,7 @@ struct stm32f4_gate_data {
- 
- 	{ STM32F4_RCC_APB2ENR,  0,	"tim1",		"apb2_mul" },
- 	{ STM32F4_RCC_APB2ENR,  1,	"tim8",		"apb2_mul" },
-+	{ STM32F4_RCC_APB2ENR,  7,	"sdmmc2",	"sdmux"    },
- 	{ STM32F4_RCC_APB2ENR,  8,	"adc1",		"apb2_div" },
- 	{ STM32F4_RCC_APB2ENR,  9,	"adc2",		"apb2_div" },
- 	{ STM32F4_RCC_APB2ENR, 10,	"adc3",		"apb2_div" },
-@@ -315,7 +316,7 @@ struct stm32f4_gate_data {
- 
- static const u64 stm32f746_gate_map[MAX_GATE_MAP] = { 0x000000f17ef417ffull,
- 						      0x0000000000000003ull,
--						      0x04f77f033e01c9ffull };
-+						      0x04f77f833e01c9ffull };
- 
- static const u64 *stm32f4_gate_map;
- 
--- 
-1.9.1
+--d5o6ckdt6porjxbf
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlpef98ACgkQFA3kzBSg
+KbZlQA//UOGijpKwM3o7ffnF2WlXgvOvMXvJpASzzsZS/T1D2heveBDhff45/0Od
+NILrTozdr69E15F94nFoF8N4UPVnAX2jGqvMpCcay2S/Jb0SZhwT/GUT3f0I1Z7f
+PgxO8wJwQwwRzMk9AYMRzWGb0GCS2aU4o/ucxLatYxIN+4byAn4MwDyTdfdoCdgJ
+TX+Mr6X4k+CpIMxQeXp8PzXJC2/MLXEBLRsN5DYYQ+fLIEQ8HXCuxy+mz7xGjiOt
+E9+4x/Bzapkb3K2WHFdgwS6pzuQBpYDl+hZO3imkpTIzMsDZa9b4IUaNHBJZ4qSa
+LnfaIujvSY+3YWaPSq942io3+qO0+ddiUzv8GKlgvMRVcDm1cyl3neF03ekR+H8J
+6LY54lwDmCqT/2TVIvh8MdZUUV+ZobiVSSDisA4z2yGj+ME+Q0mY73Sah0sQrSbf
+tShC8Kg/E50YOE0+Daqm1TDlpfskroct0nrEI/EhwouCDpNnUDc5OlkuaJV22LfX
+zFaWWLu2lSweU7MqWlHFBoUOsPgom1U/5Owpd4yIz0pBeOO5ih4zObx3oABJk1MN
+wWxsp8pNnLZmktA2wyw0YwUUg33o1c+QVckUYvsKzTNl+PwOGE9qWBhYDSRzy/H9
+19yPsaUJUny9Xo/D0yhg/rP6afdJHqEzKf4zr70OVMXuUhRX8uM=
+=oJJq
+-----END PGP SIGNATURE-----
+
+--d5o6ckdt6porjxbf--
