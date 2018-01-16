@@ -1,49 +1,44 @@
-From: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 04/14] mmc: mmci: Add STM32 variant
-Date: Tue, 16 Jan 2018 08:38:33 +0100
-Message-ID: <CACRpkdY88umqVBcFNy7Z6vgHztRr7MbAjh-AWz0nYgFXoOwCLQ@mail.gmail.com>
-References: <1515759368-16946-1-git-send-email-patrice.chotard@st.com>
- <1515759368-16946-5-git-send-email-patrice.chotard@st.com>
- <CACRpkdYVDpmEmrF=Zk1zX8RCRnPDieTgPuCen6KQ4ttFpAm+Yg@mail.gmail.com> <ce14077b-2b8b-f8a7-2107-78b1d9dcab27@st.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH RESEND 0/9] mmc: sdhci-pci: Respect PM flags when enabling
+ card detect GPIO IRQ wakeup
+Date: Tue, 16 Jan 2018 09:43:04 +0200
+Message-ID: <08283b49-fdaf-d289-e375-20bce7dbbf8f@intel.com>
+References: <1515484346-800-1-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <ce14077b-2b8b-f8a7-2107-78b1d9dcab27-qxv4g6HH51o@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Patrice CHOTARD <patrice.chotard-qxv4g6HH51o@public.gmane.org>
-Cc: Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Michael Turquette <mturquette-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Alexandre TORGUE <alexandre.torgue-qxv4g6HH51o@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-clk <linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andrea Merello <andrea.merello-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-pm-owner@vger.kernel.org>
+In-Reply-To: <1515484346-800-1-git-send-email-adrian.hunter@intel.com>
+Content-Language: en-US
+Sender: linux-pm-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>
+Cc: Linux PM <linux-pm@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Haridhar Kalvala <haridhar.kalvala@intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Jan 15, 2018 at 6:17 PM, Patrice CHOTARD <patrice.chotard-qxv4g6HH51o@public.gmane.org> wrote:
+On 09/01/18 09:52, Adrian Hunter wrote:
+> Hi
+> 
+> Commit 03dbaa04a2e5 ("mmc: slot-gpio: Add support to enable irq wake on
+> cd_irq") enabled wakeup irrespective of the host controller's PM flags.
+> However, users also want to control it from sysfs power/wakeup attribute.
+> That means the driver needs to check the PM flags before enabling it in the
+> suspend callback.  Patch 9 adds support for that in sdhci-pci, which is the
+> only driver presently using the MMC_CAP_CD_WAKE flag.  Patches 1 - 7 tidy
+> up aspects of sdhci and sdhci-pci wakeup handling, and patch 8 adds a
+> helper function to make it easy for drivers.
+> 
+> There are 2 contentious aspects to this patch set:
+> 
+> 1) An existing problem with the SDIO API which does not let the host
+> controller driver know that the SDIO function driver has requested SDIO
+> card interrupt wakeup until the suspend callback - which results in the
+> host controller driver having to enable or disable wakeup in the suspend
+> callback.  Fixing the SDIO API is a separate issue IMHO.
+> 
+> 2) In order to use the sysfs power/wakeup attribute, the driver must set the
+> device as wake capable even when it is really a GPIO that wakes the system.
+> 
 
->>> +       {
->>> +               .id     = 0x00880180,
->>> +               .mask   = 0x00ffffff,
->>> +               .data   = &variant_stm32,
->>> +       },
->>
->> Since ux500 was 480180 I wonder what variants 5,6,7 are...
->
-> What is the rule to define the id ?
-
-These four bits mean "revision".
-
-The number comes from hardware, so the ST ASIC department
-has some person who is responsible for revising the VHDL or
-Verilog code that this hardware is compiled from, and that person
-is bumping the version.
-
-Theoretically it is a "company function" or something bureaucratic
-like that updating the hardware so I guess it could be several
-people following procedure who have updated this number in the
-hardware over the years.
-
-But I bet it is a single person in Grenoble who has been doing
-the MMC/SD block since it appeared.
-
-Yours,
-Linus Walleij
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Given that we have more-or-less agreed to use sysfs power/wakeup attribute,
+I don't see a problem with going ahead with these patches, and adjusting the
+API later.  Thoughts?
