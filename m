@@ -1,7 +1,7 @@
 From: <patrice.chotard@st.com>
-Subject: [PATCH v2 11/15] ARM: stm32: Add AMBA support for STM32F4 and STM32F7 SoCs
-Date: Tue, 16 Jan 2018 13:30:55 +0100
-Message-ID: <1516105859-3525-12-git-send-email-patrice.chotard@st.com>
+Subject: [PATCH v2 06/15] ARM: dts: stm32: Add SDIO controller for stm32f746
+Date: Tue, 16 Jan 2018 13:30:50 +0100
+Message-ID: <1516105859-3525-7-git-send-email-patrice.chotard@st.com>
 References: <1516105859-3525-1-git-send-email-patrice.chotard@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,40 +14,49 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Patrice Chotard <patrice.chotard@st.com>
 
-As both STM32F4 and STM32F7 SoCs embeds an AMBA PL180 mmci IP,
-we need to enable AMBA support in mach-stm32.
+stm32f746 embeds ARM_PL180 sdio IP, adds SDIO controller
+nodes to allow MMC support.
 
 Signed-off-by: Patrice Chotard <patrice.chotard@st.com>
 ---
 
 v2 _ none
 
- arch/arm/mach-stm32/Kconfig | 3 +++
- 1 file changed, 3 insertions(+)
+ arch/arm/boot/dts/stm32f746.dtsi | 22 ++++++++++++++++++++++
+ 1 file changed, 22 insertions(+)
 
-diff --git a/arch/arm/mach-stm32/Kconfig b/arch/arm/mach-stm32/Kconfig
-index 0d1889b..f53a8db 100644
---- a/arch/arm/mach-stm32/Kconfig
-+++ b/arch/arm/mach-stm32/Kconfig
-@@ -13,16 +13,19 @@ config ARCH_STM32
- config MACH_STM32F429
- 	bool "STMicrolectronics STM32F429"
- 	depends on ARCH_STM32
-+	select ARM_AMBA
- 	default y
+diff --git a/arch/arm/boot/dts/stm32f746.dtsi b/arch/arm/boot/dts/stm32f746.dtsi
+index 5f66d15..7f55d00 100644
+--- a/arch/arm/boot/dts/stm32f746.dtsi
++++ b/arch/arm/boot/dts/stm32f746.dtsi
+@@ -429,6 +429,28 @@
+ 			status = "disabled";
+ 		};
  
- config MACH_STM32F469
- 	bool "STMicrolectronics STM32F469"
- 	depends on ARCH_STM32
-+	select ARM_AMBA
- 	default y
- 
- config MACH_STM32F746
- 	bool "STMicrolectronics STM32F746"
- 	depends on ARCH_STM32
-+	select ARM_AMBA
- 	default y
- 
- config MACH_STM32H743
++		sdio2: sdio2@40011c00 {
++			compatible = "arm,pl180", "arm,primecell";
++			arm,primecell-periphid = <0x00880180>;
++			reg = <0x40011c00 0x400>;
++			clocks = <&rcc 0 167>;
++			clock-names = "apb_pclk";
++			interrupts = <103>;
++			max-frequency = <48000000>;
++			status = "disabled";
++		};
++
++		sdio1: sdio1@40012c00 {
++			compatible = "arm,pl180", "arm,primecell";
++			arm,primecell-periphid = <0x00880180>;
++			reg = <0x40012c00 0x400>;
++			clocks = <&rcc 0 171>;
++			clock-names = "apb_pclk";
++			interrupts = <49>;
++			max-frequency = <48000000>;
++			status = "disabled";
++		};
++
+ 		syscfg: system-config@40013800 {
+ 			compatible = "syscon";
+ 			reg = <0x40013800 0x400>;
 -- 
 1.9.1
