@@ -1,28 +1,22 @@
 From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: [PATCH v3 08/16] sh: kfr2r09: use MMC_CAP2_NO_WRITE_PROTECT instead of TMIO own flag
-Date: Thu, 18 Jan 2018 01:28:08 +0900
-Message-ID: <1516206496-16612-9-git-send-email-yamada.masahiro@socionext.com>
+Subject: [PATCH v3 06/16] mmc: tmio: refactor .get_ro hook
+Date: Thu, 18 Jan 2018 01:28:06 +0900
+Message-ID: <1516206496-16612-7-git-send-email-yamada.masahiro@socionext.com>
 References: <1516206496-16612-1-git-send-email-yamada.masahiro@socionext.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1516206496-16612-1-git-send-email-yamada.masahiro@socionext.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: Ulf Magnusson <ulfalizer@gmail.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-renesas-soc@vger.kernel.org, Masahiro Yamada <yamada.masahiro@socionext.com>, Yoshinori Sato <ysato@users.sourceforge.jp>, Rich Felker <dalias@libc.org>, linux-kernel@vger.kernel.org, linux-sh@vger.kernel.org
+Cc: Ulf Magnusson <ulfalizer@gmail.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-renesas-soc@vger.kernel.org, Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-TMIO_MMC_WRPROTECT_DISABLE is equivalent to MMC_CAP2_NO_WRITE_PROTECT.
+This IP provides the write protect signal level in the status
+register, but it is also possible to use GPIO for WP.  They are
+exclusive, so it is not efficient to call mmc_gpio_get_ro() every
+time from tmio_mmc_get_ro() if we know gpio_ro is not used.
 
-The flag is propagated as follows:
-    tmio_mmc_data::capabilities2 -> mmc_host::caps2
-
-Only the difference is the TMIO_... makes tmio_mmc_get_ro() return 0
-(i.e. it does not affect mmc_gpio_get_ro() at all), while MMC_CAP2_...
-returns 0 before calling ->get_ro() hook (i.e. it affects both IP own
-logic and GPIO detection).
-
-The TMIO MMC drivers do not set-up gpio_ro by themselves, so gpio_ro
-is obviously unused by legacy boards like this.  So, this conversion
-should be safe.
+Check the capability of gpio_ro just once in the probe function,
+then set mmc_gpio_get_ro to .get_ro if it is the case.
 
 Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 ---
@@ -32,22 +26,40 @@ Changes in v3:
 
 Changes in v2: None
 
- arch/sh/boards/mach-kfr2r09/setup.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/mmc/host/tmio_mmc_core.c | 13 +++++--------
+ 1 file changed, 5 insertions(+), 8 deletions(-)
 
-diff --git a/arch/sh/boards/mach-kfr2r09/setup.c b/arch/sh/boards/mach-kfr2r09/setup.c
-index 5deb2d8..6af7777 100644
---- a/arch/sh/boards/mach-kfr2r09/setup.c
-+++ b/arch/sh/boards/mach-kfr2r09/setup.c
-@@ -375,8 +375,8 @@ static struct resource kfr2r09_sh_sdhi0_resources[] = {
- static struct tmio_mmc_data sh7724_sdhi0_data = {
- 	.chan_priv_tx	= (void *)SHDMA_SLAVE_SDHI0_TX,
- 	.chan_priv_rx	= (void *)SHDMA_SLAVE_SDHI0_RX,
--	.flags		= TMIO_MMC_WRPROTECT_DISABLE,
- 	.capabilities	= MMC_CAP_SDIO_IRQ,
-+	.capabilities2	= MMC_CAP2_NO_WRITE_PROTECT,
- };
+diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+index d092b0f..0032707 100644
+--- a/drivers/mmc/host/tmio_mmc_core.c
++++ b/drivers/mmc/host/tmio_mmc_core.c
+@@ -1076,15 +1076,9 @@ static int tmio_mmc_get_ro(struct mmc_host *mmc)
+ {
+ 	struct tmio_mmc_host *host = mmc_priv(mmc);
+ 	struct tmio_mmc_data *pdata = host->pdata;
+-	int ret = mmc_gpio_get_ro(mmc);
  
- static struct platform_device kfr2r09_sh_sdhi0_device = {
+-	if (ret >= 0)
+-		return ret;
+-
+-	ret = !((pdata->flags & TMIO_MMC_WRPROTECT_DISABLE) ||
+-		(sd_ctrl_read16_and_16_as_32(host, CTL_STATUS) & TMIO_STAT_WRPROTECT));
+-
+-	return ret;
++	return !((pdata->flags & TMIO_MMC_WRPROTECT_DISABLE) ||
++		 (sd_ctrl_read16_and_16_as_32(host, CTL_STATUS) & TMIO_STAT_WRPROTECT));
+ }
+ 
+ static int tmio_multi_io_quirk(struct mmc_card *card,
+@@ -1247,6 +1241,9 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host)
+ 	}
+ 	mmc->max_seg_size = mmc->max_req_size;
+ 
++	if (mmc_can_gpio_ro(mmc))
++		_host->ops.get_ro = mmc_gpio_get_ro;
++
+ 	_host->native_hotplug = !(mmc_can_gpio_cd(mmc) ||
+ 				  mmc->caps & MMC_CAP_NEEDS_POLL ||
+ 				  !mmc_card_is_removable(mmc));
 -- 
 2.7.4
