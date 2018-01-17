@@ -1,59 +1,84 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH v2 22/22] mmc: tmio: remove dma_ops from
- tmio_mmc_host_probe() argument
-Date: Tue, 16 Jan 2018 23:43:03 +0100
-Message-ID: <20180116224303.sspgktqoqlieig53@tetsubishi>
-References: <1511540697-27387-1-git-send-email-yamada.masahiro@socionext.com>
- <1511540697-27387-23-git-send-email-yamada.masahiro@socionext.com>
+From: "ernest.zhang" <ernest.zhang@bayhubtech.com>
+Subject: [PATCH 1/2] mmc: sdhci: Add support for O2 eMMC HS200 mode
+Date: Wed, 17 Jan 2018 09:37:34 +0800
+Message-ID: <20180117013734.4120-1-ernest.zhang@bayhubtech.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="o2p2voy2lr5yoqnr"
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1511540697-27387-23-git-send-email-yamada.masahiro@socionext.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: linux-mmc@vger.kernel.org, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: shirley.her@bayhubtech.com, yuxiang.wan@bayhubtech.com, xiaoguang.yu@bayhubtech.com
 List-Id: linux-mmc@vger.kernel.org
 
+when eMMC used as boot device, the eMMC signaling voltage is tied to 1.8v
+fixed output voltage, bios can set o2 sd host controller PCI configuration
+register 0x308 bit4 to 1 to let host controller skip try 3.3.v signaling
+voltage and direct use 1.8v singling voltage in eMMC initialize process.
 
---o2p2voy2lr5yoqnr
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Signed-off-by: ernest.zhang <ernest.zhang@bayhubtech.com>
+---
+ drivers/mmc/host/sdhci-pci-o2micro.c | 20 +++++++++++++++++++-
+ 1 file changed, 19 insertions(+), 1 deletion(-)
 
-On Sat, Nov 25, 2017 at 01:24:57AM +0900, Masahiro Yamada wrote:
-> Drivers need to set up various struct members for tmio_mmc_host before
-> calling tmio_mmc_host_probe().  Do likewise for host->dma_ops instead
-> of passing it as a function argument.
->=20
-> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
-
-Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-
-I think I have done all the review by now. I'll do some more regression
-testing tomorrow and then give Tested-by as well if everything works
-fine (but it looks like it so far).
-
-
---o2p2voy2lr5yoqnr
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlpef/YACgkQFA3kzBSg
-KbawBw//UPg5tgUAInFyysISHeVpVQEc0Rb2ax2zKMRjhGxBOa/S63iswWDouKCK
-4+vv14I10RE7C07XOO/WySZuuguRtTsLsd5dxVtcUtvvQu7DX6M787mE1sEkojpw
-kS+2Fe9wn/YO3B5K5eutzSsZVrfTMEMD9BFhzwg4vtyxVj9DJZbIEsk++GGyr5uJ
-xtG17K3KEIemt4Ju7wv4+CmXgfcTB64Wye6WcndpyIGALLPf6uW1peOE9jBmy6RO
-DeQV1CsSi2oSQmnLODgcHNi10+k9rxRbZHX5PPwNxb379hB9gT4X9Le/vU41oHPb
-AEWfcrPjQmAI8EItqfEvcp2z+nNhq63nQZPmaEQGz4yWnKDLYskLvVKon55u01wp
-P00ML6QYRsOOiOsgjcjxcrV/x17T58l/kapdqTl80H6zUoLTdtJ/GXjxrYnFNjP+
-51ZNDzVHH8o3zrLFMEaYG5QgBAWbVQnwqtOiwxAiuQ47B/DlAPIA2Sy4p5VJbmOr
-zEoFxsHxIMm87L63d/cano+k0mBq2shwv8tXqzc/yOtEinmX7fxj9vYZbIgnVgM1
-pbmU2O44qObOmzYrvif88tUZSW0iLnm2vqOgD7tjUPd1Ob0SZWyoR1X1FTdEeV5h
-Zqk6Shc3KIg1Fna3z05ghUuTBPgj/WUALWvhMmxPVibXVG/D9+g=
-=gce6
------END PGP SIGNATURE-----
-
---o2p2voy2lr5yoqnr--
+diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+index 555970a29c94..8855a416ffd4 100644
+--- a/drivers/mmc/host/sdhci-pci-o2micro.c
++++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+@@ -1,8 +1,9 @@
+ /*
+- * Copyright (C) 2013 BayHub Technology Ltd.
++ * Copyright (C) 2018 BayHub Technology Ltd.
+  *
+  * Authors: Peter Guo <peter.guo@bayhubtech.com>
+  *          Adam Lee <adam.lee@canonical.com>
++ *          Ernest Zhang <ernest.zhang@canonical.com>
+  *
+  * This software is licensed under the terms of the GNU General Public
+  * License version 2, as published by the Free Software Foundation, and
+@@ -39,6 +40,7 @@
+ #define O2_SD_MISC_CTRL4	0xFC
+ #define O2_SD_TUNING_CTRL	0x300
+ #define O2_SD_PLL_SETTING	0x304
++#define O2_SD_MISC_SETTING	0x308
+ #define O2_SD_CLK_SETTING	0x328
+ #define O2_SD_CAP_REG2		0x330
+ #define O2_SD_CAP_REG0		0x334
+@@ -53,6 +55,7 @@
+ 
+ #define O2_SD_VENDOR_SETTING	0x110
+ #define O2_SD_VENDOR_SETTING2	0x1C8
++#define O2_SD_HW_TUNING_ENABLE	BIT(4)
+ 
+ static void o2_pci_set_baseclk(struct sdhci_pci_chip *chip, u32 value)
+ {
+@@ -184,6 +187,7 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+ 	struct sdhci_pci_chip *chip;
+ 	struct sdhci_host *host;
+ 	u32 reg;
++	int ret;
+ 
+ 	chip = slot->chip;
+ 	host = slot->host;
+@@ -197,6 +201,20 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+ 		if (reg & 0x1)
+ 			host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
+ 
++		if (chip->pdev->device == PCI_DEVICE_ID_O2_SEABIRD0) {
++			ret = pci_read_config_dword(chip->pdev,
++						    O2_SD_MISC_SETTING, &reg);
++			if (ret)
++				return -EIO;
++			if (reg & (1 << 4)) {
++				pr_info("%s: emmc 1.8v flag is set, force 1.8v signaling voltage\n",
++				     mmc_hostname(host->mmc));
++				host->flags &= ~SDHCI_SIGNALING_330;
++				host->flags |= SDHCI_SIGNALING_180;
++			}
++		}
++
++
+ 		if (chip->pdev->device != PCI_DEVICE_ID_O2_FUJIN2)
+ 			break;
+ 		/* set dll watch dog timer */
+-- 
+2.14.1
