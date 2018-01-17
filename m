@@ -1,62 +1,53 @@
 From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: Re: [PATCH v2 16/22] mmc: tmio: fix never-detected card insertion bug
-Date: Thu, 18 Jan 2018 01:32:28 +0900
-Message-ID: <CAK7LNAQ-7U-5=Z26tuiZAcBYwRZaggY0POzYwsFUBZHPkC4z6Q@mail.gmail.com>
-References: <1511540697-27387-1-git-send-email-yamada.masahiro@socionext.com>
- <1511540697-27387-17-git-send-email-yamada.masahiro@socionext.com>
- <20180102131555.z6amjfqtadkh2w77@ninjato> <20180102171321.mxhcenirdx6ohbyo@ninjato>
- <CAK7LNAThnAY43OMPDMaw4DSdtJCVTUTm4-NrTgWD-6SE-yCp=g@mail.gmail.com> <20180113205938.dlfwxvmfnukvfl3f@ninjato>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Subject: [PATCH v3 08/16] sh: kfr2r09: use MMC_CAP2_NO_WRITE_PROTECT instead of TMIO own flag
+Date: Thu, 18 Jan 2018 01:28:08 +0900
+Message-ID: <1516206496-16612-9-git-send-email-yamada.masahiro@socionext.com>
+References: <1516206496-16612-1-git-send-email-yamada.masahiro@socionext.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180113205938.dlfwxvmfnukvfl3f@ninjato>
+In-Reply-To: <1516206496-16612-1-git-send-email-yamada.masahiro@socionext.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
+To: linux-mmc@vger.kernel.org, Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: Ulf Magnusson <ulfalizer@gmail.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-renesas-soc@vger.kernel.org, Masahiro Yamada <yamada.masahiro@socionext.com>, Yoshinori Sato <ysato@users.sourceforge.jp>, Rich Felker <dalias@libc.org>, linux-kernel@vger.kernel.org, linux-sh@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-2018-01-14 5:59 GMT+09:00 Wolfram Sang <wsa@the-dreams.de>:
->
->> I am talking about the card detection
->> by the IP-builtin circuit.
->
-> Yes, I know. As I wrote in one of the previous patches when reviewing
-> it, I disabled GPIO CD and used the internal mechanism (for tests where
-> it is relevant). Like here, too.
->
->>  - GPIO is not set up                     -> mmc_gpio_get_cd() returns -ENOSYS
->
-> Thanks! That pointed me to the right direction. I missed that patch
-> 10/22 was still under discussion and not applied to mmc/next, so I had
-> to pick it manually.
->
-> I can confirm now that there is an issue and your patch fixes it for the
-> non-GPIO case. For the GPIO case, however, the TMIO_STAT_CARD_REMOVE |
-> TMIO_STAT_CARD_INSERT interrupts are enabled now, too. It didn't harm
-> when doing my tests, but we shouldn't do it, to be safe IMO.
->
+TMIO_MMC_WRPROTECT_DISABLE is equivalent to MMC_CAP2_NO_WRITE_PROTECT.
 
+The flag is propagated as follows:
+    tmio_mmc_data::capabilities2 -> mmc_host::caps2
 
-Could you explain why?
+Only the difference is the TMIO_... makes tmio_mmc_get_ro() return 0
+(i.e. it does not affect mmc_gpio_get_ro() at all), while MMC_CAP2_...
+returns 0 before calling ->get_ro() hook (i.e. it affects both IP own
+logic and GPIO detection).
 
+The TMIO MMC drivers do not set-up gpio_ro by themselves, so gpio_ro
+is obviously unused by legacy boards like this.  So, this conversion
+should be safe.
 
-    _host->native_hotplug = !(mmc_can_gpio_cd(mmc) ||
-                              mmc->caps & MMC_CAP_NEEDS_POLL ||
-                             !mmc_card_is_removable(mmc));
+Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+---
 
-For the GPIO case, mmc_can_gpio_cd(mmc) is 1,
-so _host_>native_hogplug is 0.
+Changes in v3:
+  - newly added
 
+Changes in v2: None
 
-Then, my code does nothing, doesn't it?
+ arch/sh/boards/mach-kfr2r09/setup.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-+       if (_host->native_hotplug)
-+               tmio_mmc_enable_mmc_irqs(_host,
-+                               TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT);
-
-
-
-
+diff --git a/arch/sh/boards/mach-kfr2r09/setup.c b/arch/sh/boards/mach-kfr2r09/setup.c
+index 5deb2d8..6af7777 100644
+--- a/arch/sh/boards/mach-kfr2r09/setup.c
++++ b/arch/sh/boards/mach-kfr2r09/setup.c
+@@ -375,8 +375,8 @@ static struct resource kfr2r09_sh_sdhi0_resources[] = {
+ static struct tmio_mmc_data sh7724_sdhi0_data = {
+ 	.chan_priv_tx	= (void *)SHDMA_SLAVE_SDHI0_TX,
+ 	.chan_priv_rx	= (void *)SHDMA_SLAVE_SDHI0_RX,
+-	.flags		= TMIO_MMC_WRPROTECT_DISABLE,
+ 	.capabilities	= MMC_CAP_SDIO_IRQ,
++	.capabilities2	= MMC_CAP2_NO_WRITE_PROTECT,
+ };
+ 
+ static struct platform_device kfr2r09_sh_sdhi0_device = {
 -- 
-Best Regards
-Masahiro Yamada
+2.7.4
