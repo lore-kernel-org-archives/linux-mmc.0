@@ -1,58 +1,43 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH RESEND 0/9] mmc: sdhci-pci: Respect PM flags when enabling
- card detect GPIO IRQ wakeup
-Date: Wed, 17 Jan 2018 12:54:17 +0100
-Message-ID: <CAPDyKFrnqEPxXzrOfF4b9R6S2QtML4gErfZiW4M9mE4QcsCG+w@mail.gmail.com>
-References: <1515484346-800-1-git-send-email-adrian.hunter@intel.com>
- <08283b49-fdaf-d289-e375-20bce7dbbf8f@intel.com> <CAPDyKFoUqTtXMKT+_JyJSE2FWUggbX=Fiv4YVBb6qLpJh27j5g@mail.gmail.com>
+From: Colin King <colin.king@canonical.com>
+Subject: [PATCH] mmc: sh_mmcif: remove redundant initialization of 'opc'
+Date: Wed, 17 Jan 2018 13:41:57 +0000
+Message-ID: <20180117134157.23943-1-colin.king@canonical.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-pm-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFoUqTtXMKT+_JyJSE2FWUggbX=Fiv4YVBb6qLpJh27j5g@mail.gmail.com>
-Sender: linux-pm-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Linux PM <linux-pm@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Haridhar Kalvala <haridhar.kalvala@intel.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org
+Cc: kernel-janitors@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 16 January 2018 at 09:24, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 16 January 2018 at 08:43, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> On 09/01/18 09:52, Adrian Hunter wrote:
->>> Hi
->>>
->>> Commit 03dbaa04a2e5 ("mmc: slot-gpio: Add support to enable irq wake on
->>> cd_irq") enabled wakeup irrespective of the host controller's PM flags.
->>> However, users also want to control it from sysfs power/wakeup attribute.
->>> That means the driver needs to check the PM flags before enabling it in the
->>> suspend callback.  Patch 9 adds support for that in sdhci-pci, which is the
->>> only driver presently using the MMC_CAP_CD_WAKE flag.  Patches 1 - 7 tidy
->>> up aspects of sdhci and sdhci-pci wakeup handling, and patch 8 adds a
->>> helper function to make it easy for drivers.
->>>
->>> There are 2 contentious aspects to this patch set:
->>>
->>> 1) An existing problem with the SDIO API which does not let the host
->>> controller driver know that the SDIO function driver has requested SDIO
->>> card interrupt wakeup until the suspend callback - which results in the
->>> host controller driver having to enable or disable wakeup in the suspend
->>> callback.  Fixing the SDIO API is a separate issue IMHO.
->>>
->>> 2) In order to use the sysfs power/wakeup attribute, the driver must set the
->>> device as wake capable even when it is really a GPIO that wakes the system.
->>>
->>
->> Given that we have more-or-less agreed to use sysfs power/wakeup attribute,
->> I don't see a problem with going ahead with these patches, and adjusting the
->> API later.  Thoughts?
->
-> Let me have look again, I might be able to pick up at least some of
-> the changes in $subject series. No matter what, please re-post once
-> 4.16 rc1 is out.
+From: Colin Ian King <colin.king@canonical.com>
 
-I have picked up patch 1 -> patch 5, the rest seems like something we
-need to defer until we know how to deal with in/out-band wakeups.
-However, please re-post them once 4.16rc1 is out.
+Variable opc is initialized with a value that is never read, opc
+is later re-assigned a newer value, hence the initialization can
+be removed.
 
-[...]
+Cleans up clang warning:
+drivers/mmc/host/sh_mmcif.c:919:6: warning: Value stored to 'opc'
+during its initialization is never read
 
-Kind regards
-Uffe
+Signed-off-by: Colin Ian King <colin.king@canonical.com>
+---
+ drivers/mmc/host/sh_mmcif.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index 53fb18bb7bee..7bb00c68a756 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -916,7 +916,7 @@ static void sh_mmcif_start_cmd(struct sh_mmcif_host *host,
+ 			       struct mmc_request *mrq)
+ {
+ 	struct mmc_command *cmd = mrq->cmd;
+-	u32 opc = cmd->opcode;
++	u32 opc;
+ 	u32 mask = 0;
+ 	unsigned long flags;
+ 
+-- 
+2.15.1
