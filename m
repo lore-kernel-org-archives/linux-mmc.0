@@ -1,43 +1,89 @@
-From: Colin King <colin.king@canonical.com>
-Subject: [PATCH] mmc: sh_mmcif: remove redundant initialization of 'opc'
-Date: Wed, 17 Jan 2018 13:41:57 +0000
-Message-ID: <20180117134157.23943-1-colin.king@canonical.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org
-Cc: kernel-janitors@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Subject: [PATCH v3 13/16] mmc: tmio: fix never-detected card insertion bug
+Date: Thu, 18 Jan 2018 01:28:13 +0900
+Message-ID: <1516206496-16612-14-git-send-email-yamada.masahiro@socionext.com>
+References: <1516206496-16612-1-git-send-email-yamada.masahiro@socionext.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from conuserg-08.nifty.com ([210.131.2.75]:36664 "EHLO
+        conuserg-08.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753762AbeAQQ3b (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Jan 2018 11:29:31 -0500
+In-Reply-To: <1516206496-16612-1-git-send-email-yamada.masahiro@socionext.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: Ulf Magnusson <ulfalizer@gmail.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-renesas-soc@vger.kernel.org, Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 
-From: Colin Ian King <colin.king@canonical.com>
+The TMIO mmc cannot detect the card insertion in native_hotplug mode
+if the driver is probed without a card inserted.
 
-Variable opc is initialized with a value that is never read, opc
-is later re-assigned a newer value, hence the initialization can
-be removed.
+The reason is obvious; all IRQs are disabled by tmio_mmc_host_probe(),
+as follows:
 
-Cleans up clang warning:
-drivers/mmc/host/sh_mmcif.c:919:6: warning: Value stored to 'opc'
-during its initialization is never read
+  tmio_mmc_disable_mmc_irqs(_host, TMIO_MASK_ALL);
 
-Signed-off-by: Colin Ian King <colin.king@canonical.com>
+The card event IRQs are first enabled by tmio_mmc_start_command() as
+follows:
+
+  if (!host->native_hotplug)
+          irq_mask &= ~(TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT);
+  tmio_mmc_enable_mmc_irqs(host, irq_mask);
+
+If the driver is probed without a card, tmio_mmc_start_command() is
+never called in the first place.  So, the card is never detected.
+
+The card event IRQs must be enabled in probe/resume functions.
+
+Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 ---
- drivers/mmc/host/sh_mmcif.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index 53fb18bb7bee..7bb00c68a756 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -916,7 +916,7 @@ static void sh_mmcif_start_cmd(struct sh_mmcif_host *host,
- 			       struct mmc_request *mrq)
- {
- 	struct mmc_command *cmd = mrq->cmd;
--	u32 opc = cmd->opcode;
-+	u32 opc;
- 	u32 mask = 0;
- 	unsigned long flags;
+Changes in v3: None
+Changes in v2:
+  - Newly added
+
+ drivers/mmc/host/tmio_mmc_core.c | 12 ++++++++----
+ 1 file changed, 8 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+index b20d5c5..0e3dc8c 100644
+--- a/drivers/mmc/host/tmio_mmc_core.c
++++ b/drivers/mmc/host/tmio_mmc_core.c
+@@ -350,8 +350,6 @@ static int tmio_mmc_start_command(struct tmio_mmc_host *host,
+ 			c |= TRANSFER_READ;
+ 	}
  
+-	if (!host->native_hotplug)
+-		irq_mask &= ~(TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT);
+ 	tmio_mmc_enable_mmc_irqs(host, irq_mask);
+ 
+ 	/* Fire off the command */
+@@ -1294,11 +1292,13 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host)
+ 		irq_mask |= TMIO_MASK_READOP;
+ 	if (!_host->chan_tx)
+ 		irq_mask |= TMIO_MASK_WRITEOP;
+-	if (!_host->native_hotplug)
+-		irq_mask &= ~(TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT);
+ 
+ 	_host->sdcard_irq_mask &= ~irq_mask;
+ 
++	if (_host->native_hotplug)
++		tmio_mmc_enable_mmc_irqs(_host,
++				TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT);
++
+ 	spin_lock_init(&_host->lock);
+ 	mutex_init(&_host->ios_lock);
+ 
+@@ -1382,6 +1382,10 @@ int tmio_mmc_host_runtime_resume(struct device *dev)
+ 	if (host->clk_cache)
+ 		tmio_mmc_set_clock(host, host->clk_cache);
+ 
++	if (host->native_hotplug)
++		tmio_mmc_enable_mmc_irqs(host,
++				TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT);
++
+ 	tmio_mmc_enable_dma(host, true);
+ 
+ 	if (tmio_mmc_can_retune(host) && host->select_tuning(host))
 -- 
-2.15.1
+2.7.4
+
