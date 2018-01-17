@@ -1,69 +1,62 @@
 From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: [PATCH v3 00/16] mmc: tmio: another batch of TMIO MMC fixes and cleanups
-Date: Thu, 18 Jan 2018 01:28:00 +0900
-Message-ID: <1516206496-16612-1-git-send-email-yamada.masahiro@socionext.com>
+Subject: Re: [PATCH v2 16/22] mmc: tmio: fix never-detected card insertion bug
+Date: Thu, 18 Jan 2018 01:32:28 +0900
+Message-ID: <CAK7LNAQ-7U-5=Z26tuiZAcBYwRZaggY0POzYwsFUBZHPkC4z6Q@mail.gmail.com>
+References: <1511540697-27387-1-git-send-email-yamada.masahiro@socionext.com>
+ <1511540697-27387-17-git-send-email-yamada.masahiro@socionext.com>
+ <20180102131555.z6amjfqtadkh2w77@ninjato> <20180102171321.mxhcenirdx6ohbyo@ninjato>
+ <CAK7LNAThnAY43OMPDMaw4DSdtJCVTUTm4-NrTgWD-6SE-yCp=g@mail.gmail.com> <20180113205938.dlfwxvmfnukvfl3f@ninjato>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180113205938.dlfwxvmfnukvfl3f@ninjato>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: Ulf Magnusson <ulfalizer@gmail.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-renesas-soc@vger.kernel.org, Masahiro Yamada <yamada.masahiro@socionext.com>, devicetree@vger.kernel.org, linux-sh@vger.kernel.org, Yoshinori Sato <ysato@users.sourceforge.jp>, Rob Herring <robh@kernel.org>, linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, Lee Jones <lee.jones@linaro.org>, Rich Felker <dalias@libc.org>, Mark Rutland <mark.rutland@arm.com>, Ulf Hansson <ulf.hansson@linaro.org>
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <simon.horman@netronome.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-
-In the previous batch (https://lkml.org/lkml/2017/11/24/428)
-I sent 22 patches for TMIO MMC.
-
-14 patches were applied, the rest is under discussion.
-
-This series consists of 16 patches.
-
-Patch 1-4:  repost from v2.
-            (Wolfram gave Reviewed by, so I moved them to the head)
-
-Patch 5-11: new patches  (cleanups of WP flag)
-
-Patch 12: updated per Wolfram
-
-Patch 13: repost  (almost reviewed)
-
-Patch 14: updated
-
-Patch 15: new
-
-Patch 16: repost (almost reviewed)
+2018-01-14 5:59 GMT+09:00 Wolfram Sang <wsa@the-dreams.de>:
+>
+>> I am talking about the card detection
+>> by the IP-builtin circuit.
+>
+> Yes, I know. As I wrote in one of the previous patches when reviewing
+> it, I disabled GPIO CD and used the internal mechanism (for tests where
+> it is relevant). Like here, too.
+>
+>>  - GPIO is not set up                     -> mmc_gpio_get_cd() returns -ENOSYS
+>
+> Thanks! That pointed me to the right direction. I missed that patch
+> 10/22 was still under discussion and not applied to mmc/next, so I had
+> to pick it manually.
+>
+> I can confirm now that there is an issue and your patch fixes it for the
+> non-GPIO case. For the GPIO case, however, the TMIO_STAT_CARD_REMOVE |
+> TMIO_STAT_CARD_INSERT interrupts are enabled now, too. It didn't harm
+> when doing my tests, but we shouldn't do it, to be safe IMO.
+>
 
 
-Masahiro Yamada (16):
-  mmc: tmio: ioremap memory resource in tmio_mmc_host_alloc()
-  mmc: tmio: move clk_enable/disable out of tmio_mmc_host_probe()
-  mmc: tmio: move {tmio_}mmc_of_parse() to tmio_mmc_host_alloc()
-  mmc: tmio: remove dma_ops from tmio_mmc_host_probe() argument
-  mmc: slot-gpio: add a helper to check capability of GPIO WP detection
-  mmc: tmio: refactor .get_ro hook
-  mmc: renesas_sdhi: use MMC_CAP2_NO_WRITE_PROTECT instead of TMIO own
-    flag
-  sh: kfr2r09: use MMC_CAP2_NO_WRITE_PROTECT instead of TMIO own flag
-  mmc: tmio: use MMC_CAP2_NO_WRITE_PROTECT instead of TMIO own flag
-  mmc: tmio: remove TMIO_MMC_WRPROTECT_DISABLE
-  mmc: tmio: deprecate "toshiba,mmc-wrprotect-disable" DT property
-  mmc: tmio: support IP-builtin card detection logic
-  mmc: tmio: fix never-detected card insertion bug
-  mmc: tmio: move TMIO_MASK_{READOP,WRITEOP} handling to correct place
-  mmc: tmio: clear force_pio flag before starting data transfer
-  mmc: tmio: remove useless TMIO_MASK_CMD handling in
-    tmio_mmc_host_probe()
+Could you explain why?
 
- Documentation/devicetree/bindings/mmc/tmio_mmc.txt |   1 -
- arch/sh/boards/mach-kfr2r09/setup.c                |   2 +-
- drivers/mmc/core/slot-gpio.c                       |   8 ++
- drivers/mmc/host/renesas_sdhi_core.c               |  18 ++-
- drivers/mmc/host/renesas_sdhi_internal_dmac.c      |  12 +-
- drivers/mmc/host/renesas_sdhi_sys_dmac.c           |  20 ++-
- drivers/mmc/host/tmio_mmc.c                        |  11 +-
- drivers/mmc/host/tmio_mmc.h                        |   7 +-
- drivers/mmc/host/tmio_mmc_core.c                   | 139 +++++++++++----------
- include/linux/mfd/tmio.h                           |   1 -
- include/linux/mmc/slot-gpio.h                      |   1 +
- 11 files changed, 120 insertions(+), 100 deletions(-)
+
+    _host->native_hotplug = !(mmc_can_gpio_cd(mmc) ||
+                              mmc->caps & MMC_CAP_NEEDS_POLL ||
+                             !mmc_card_is_removable(mmc));
+
+For the GPIO case, mmc_can_gpio_cd(mmc) is 1,
+so _host_>native_hogplug is 0.
+
+
+Then, my code does nothing, doesn't it?
+
++       if (_host->native_hotplug)
++               tmio_mmc_enable_mmc_irqs(_host,
++                               TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT);
+
+
+
 
 -- 
-2.7.4
+Best Regards
+Masahiro Yamada
