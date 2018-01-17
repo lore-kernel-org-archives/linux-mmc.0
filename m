@@ -1,58 +1,58 @@
 From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: [PATCH v3 16/16] mmc: tmio: remove useless TMIO_MASK_CMD handling in tmio_mmc_host_probe()
-Date: Thu, 18 Jan 2018 01:28:16 +0900
-Message-ID: <1516206496-16612-17-git-send-email-yamada.masahiro@socionext.com>
+Subject: [PATCH v3 10/16] mmc: tmio: remove TMIO_MMC_WRPROTECT_DISABLE
+Date: Thu, 18 Jan 2018 01:28:10 +0900
+Message-ID: <1516206496-16612-11-git-send-email-yamada.masahiro@socionext.com>
 References: <1516206496-16612-1-git-send-email-yamada.masahiro@socionext.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1516206496-16612-1-git-send-email-yamada.masahiro@socionext.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: Ulf Magnusson <ulfalizer@gmail.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-renesas-soc@vger.kernel.org, Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Ulf Magnusson <ulfalizer@gmail.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-renesas-soc@vger.kernel.org, Masahiro Yamada <yamada.masahiro@socionext.com>, Lee Jones <lee.jones@linaro.org>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-TMIO_MASK_CMD is properly enabled in tmio_mmc_start_command().
-
-We have no reason to set it up in tmio_mmc_host_probe().  (If we
-really wanted to set it in the probe, we would have to do likewise
-when resuming.)
-
-Even worse, the following code is extremely confusing:
-
-  _host->sdcard_irq_mask &= ~irq_mask;
-
-The logic is opposite between "->sdcard_irq_mask" and "irq_mask".
-The intention is not clear at a glance.
+The use of this flag has been replaced with MMC_CAP2_NO_WRITE_PROTECT.
+No platform defines this flag any more.  Remove.
 
 Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 ---
 
-Changes in v3: None
-Changes in v2:
-  - Newly added
+Changes in v3:
+  - newly added
 
- drivers/mmc/host/tmio_mmc_core.c | 3 ---
- 1 file changed, 3 deletions(-)
+Changes in v2: None
+
+ drivers/mmc/host/tmio_mmc_core.c | 5 ++---
+ include/linux/mfd/tmio.h         | 1 -
+ 2 files changed, 2 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-index 494f0b3..b75a51b 100644
+index bdbff2d..7ad3433c 100644
 --- a/drivers/mmc/host/tmio_mmc_core.c
 +++ b/drivers/mmc/host/tmio_mmc_core.c
-@@ -1209,7 +1209,6 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host)
- 	struct tmio_mmc_data *pdata = _host->pdata;
- 	struct mmc_host *mmc = _host->mmc;
- 	int ret;
--	u32 irq_mask = TMIO_MASK_CMD;
+@@ -1075,10 +1075,9 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ static int tmio_mmc_get_ro(struct mmc_host *mmc)
+ {
+ 	struct tmio_mmc_host *host = mmc_priv(mmc);
+-	struct tmio_mmc_data *pdata = host->pdata;
  
- 	/*
- 	 * Check the sanity of mmc->f_min to prevent tmio_mmc_set_clock() from
-@@ -1291,8 +1290,6 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host)
- 	_host->sdcard_irq_mask = sd_ctrl_read16_and_16_as_32(_host, CTL_IRQ_MASK);
- 	tmio_mmc_disable_mmc_irqs(_host, TMIO_MASK_ALL);
+-	return !((pdata->flags & TMIO_MMC_WRPROTECT_DISABLE) ||
+-		 (sd_ctrl_read16_and_16_as_32(host, CTL_STATUS) & TMIO_STAT_WRPROTECT));
++	return !(sd_ctrl_read16_and_16_as_32(host, CTL_STATUS) &
++		 TMIO_STAT_WRPROTECT);
+ }
  
--	_host->sdcard_irq_mask &= ~irq_mask;
--
- 	if (_host->native_hotplug)
- 		tmio_mmc_enable_mmc_irqs(_host,
- 				TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT);
+ static int tmio_multi_io_quirk(struct mmc_card *card,
+diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
+index 396a103c..91f9221 100644
+--- a/include/linux/mfd/tmio.h
++++ b/include/linux/mfd/tmio.h
+@@ -36,7 +36,6 @@
+ 	} while (0)
+ 
+ /* tmio MMC platform flags */
+-#define TMIO_MMC_WRPROTECT_DISABLE	BIT(0)
+ /*
+  * Some controllers can support a 2-byte block size when the bus width
+  * is configured in 4-bit mode.
 -- 
 2.7.4
