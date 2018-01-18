@@ -1,75 +1,64 @@
 From: <patrice.chotard@st.com>
-Subject: [PATCH v3 05/14] mmc: mmci: Add STM32 variant
-Date: Thu, 18 Jan 2018 15:34:21 +0100
-Message-ID: <1516286070-24927-6-git-send-email-patrice.chotard@st.com>
+Subject: [PATCH v3 07/14] ARM: dts: stm32: Add SDIO controller for stm32f429
+Date: Thu, 18 Jan 2018 15:34:23 +0100
+Message-ID: <1516286070-24927-8-git-send-email-patrice.chotard@st.com>
 References: <1516286070-24927-1-git-send-email-patrice.chotard@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-clk-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <1516286070-24927-1-git-send-email-patrice.chotard@st.com>
-Sender: linux-clk-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Russell King <linux@armlinux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, Linus Walleij <linus.walleij@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Alexandre Torgue <alexandre.torgue@st.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-gpio@vger.kernel.org, devicetree@vger.kernel.org, Patrice Chotard <patrice.chotard@st.com>, Andrea Merello <andrea.merello@gmail.com>
+Cc: devicetree@vger.kernel.org, Andrea Merello <andrea.merello@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Patrice Chotard <patrice.chotard@st.com>, linux-gpio@vger.kernel.org, linux-clk@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
 From: Patrice Chotard <patrice.chotard@st.com>
 
-STM32F4 and STM32F7 MCUs has a SDIO controller that looks like
-an ARM PL810.
-This patch adds the STM32 variant so that mmci driver supports it.
+stm32f429 embeds ARM_PL180 sdi IP, adds SDIO controller
+node to allow MMC support.
 
 Signed-off-by: Andrea Merello <andrea.merello@gmail.com>
 Signed-off-by: Patrice Chotard <patrice.chotard@st.com>
-Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 ---
 
 v3: _ none
 
-v2: _ Replace "pl180" by "PL180" in commit message
+v2: _ none
 
- drivers/mmc/host/mmci.c | 22 ++++++++++++++++++++++
- 1 file changed, 22 insertions(+)
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 9918a5f..30c93c9 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -244,6 +244,23 @@ struct variant_data {
- 	.opendrain		= MCI_OD,
- };
+ arch/arm/boot/dts/stm32f429.dtsi | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/arch/arm/boot/dts/stm32f429.dtsi b/arch/arm/boot/dts/stm32f429.dtsi
+index 10099df..ede77e0 100644
+--- a/arch/arm/boot/dts/stm32f429.dtsi
++++ b/arch/arm/boot/dts/stm32f429.dtsi
+@@ -511,6 +511,17 @@
+ 			};
+ 		};
  
-+static struct variant_data variant_stm32 = {
-+	.fifosize		= 32 * 4,
-+	.fifohalfsize		= 8 * 4,
-+	.clkreg			= MCI_CLK_ENABLE,
-+	.clkreg_enable		= MCI_ST_UX500_HWFCEN,
-+	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
-+	.clkreg_neg_edge_enable	= MCI_ST_UX500_NEG_EDGE,
-+	.datalength_bits	= 24,
-+	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
-+	.st_sdio		= true,
-+	.st_clkdiv		= true,
-+	.pwrreg_powerup		= MCI_PWR_ON,
-+	.f_max			= 48000000,
-+	.pwrreg_clkgate		= true,
-+	.pwrreg_nopower		= true,
-+};
++		sdio: sdio@40012c00 {
++			compatible = "arm,pl180", "arm,primecell";
++			arm,primecell-periphid = <0x00880180>;
++			reg = <0x40012c00 0x400>;
++			clocks = <&rcc 0 STM32F4_APB2_CLOCK(SDIO)>;
++			clock-names = "apb_pclk";
++			interrupts = <49>;
++			max-frequency = <48000000>;
++			status = "disabled";
++		};
 +
- static struct variant_data variant_qcom = {
- 	.fifosize		= 16 * 4,
- 	.fifohalfsize		= 8 * 4,
-@@ -2021,6 +2038,11 @@ static int mmci_runtime_resume(struct device *dev)
- 		.mask   = 0xf0ffffff,
- 		.data	= &variant_ux500v2,
- 	},
-+	{
-+		.id     = 0x00880180,
-+		.mask   = 0x00ffffff,
-+		.data	= &variant_stm32,
-+	},
- 	/* Qualcomm variants */
- 	{
- 		.id     = 0x00051180,
+ 		syscfg: system-config@40013800 {
+ 			compatible = "syscon";
+ 			reg = <0x40013800 0x400>;
 -- 
 1.9.1
-
