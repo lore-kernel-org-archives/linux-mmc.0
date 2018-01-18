@@ -1,87 +1,56 @@
 From: Patrice CHOTARD <patrice.chotard@st.com>
-Subject: Re: [PATCH v2 03/15] mmc: mmci: Don't pretend all variants to have
- OPENDRAIN bit
-Date: Thu, 18 Jan 2018 13:24:52 +0000
-Message-ID: <1fc0817f-2495-6996-4777-abc8c30c20d2@st.com>
+Subject: Re: [PATCH v2 04/15] mmc: mmci: Add support for setting pad type via
+ pinctrl
+Date: Thu, 18 Jan 2018 13:35:05 +0000
+Message-ID: <0c73774b-f06e-2db8-ef50-3bf590b57cff@st.com>
 References: <1516105859-3525-1-git-send-email-patrice.chotard@st.com>
- <1516105859-3525-4-git-send-email-patrice.chotard@st.com>
- <CAPDyKFrhBfGq0RBBdFLex+88XqrLB-Bm3rc2Q_UZCw8XB520ug@mail.gmail.com>
+ <1516105859-3525-5-git-send-email-patrice.chotard@st.com>
+ <CAPDyKFoVT7rqLVzYVrO8JTD_MVLxr_R8PO=fWqLVG4DB1MpnTQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAPDyKFrhBfGq0RBBdFLex+88XqrLB-Bm3rc2Q_UZCw8XB520ug@mail.gmail.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFoVT7rqLVzYVrO8JTD_MVLxr_R8PO=fWqLVG4DB1MpnTQ@mail.gmail.com>
 Content-Language: en-US
-Content-ID: <95FE21E4F6BC6E4898E1488CCF17389B@st.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+Content-ID: <3FFEB509F6551545A33B36799B1C7DBB@st.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-clk <linux-clk@vger.kernel.org>, Alexandre TORGUE <alexandre.torgue@st.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, Russell King <linux@armlinux.org.uk>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Linus Walleij <linus.walleij@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Cc: Russell King <linux@armlinux.org.uk>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, Linus Walleij <linus.walleij@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Alexandre TORGUE <alexandre.torgue@st.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-clk <linux-clk@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Andrea Merello <andrea.merello@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Ulf
-
-On 01/17/2018 10:33 AM, Ulf Hansson wrote:
-> [...]
-> 
->>   /* Busy detection for the ST Micro variant */
->> @@ -1455,16 +1465,13 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->>                                  ~MCI_ST_DATA2DIREN);
->>          }
->>
->> -       if (ios->bus_mode == MMC_BUSMODE_OPENDRAIN) {
->> -               if (host->hw_designer != AMBA_VENDOR_ST)
->> -                       pwr |= MCI_ROD;
->> -               else {
->> -                       /*
->> -                        * The ST Micro variant use the ROD bit for something
->> -                        * else and only has OD (Open Drain).
->> -                        */
->> -                       pwr |= MCI_OD;
->> -               }
->> +       if (ios->bus_mode == MMC_BUSMODE_OPENDRAIN &&
->> +           host->variant->opendrain) {
-> 
-> A few nitpicks (because I anyway had some comment on patch4):
-> 
-> The above can be written on one line and the brackets isn't needed.
-> 
-> Replace host->variant->opendrain with variant->opendrain. The same
-> applies to the below change.
-
-Ah yes, i will fix it
-
-> 
->> +               /*
->> +                * The ST Micro variant use the ROD bit for
->> +                * something else and only has OD (Open Drain).
->> +                */
-> 
-> I think we can remove this comment, as this information becomes
-> implicit when we start using the variant data.
-
-Ok
-
-Thanks
-
-Patrice
-
-> 
->> +               pwr |= host->variant->opendrain;
->>          }
->>
->>          /*
->> --
->> 1.9.1
->>
-> 
-> Kind regards
-> Uffe
-> 
+SGkgVWxmDQoNCk9uIDAxLzE3LzIwMTggMTA6MzQgQU0sIFVsZiBIYW5zc29uIHdyb3RlOg0KPiBb
+Li4uXQ0KPiANCj4+ICAgICAgICAgIC8qDQo+PiBAQCAtMTYxNiw2ICsxNjI1LDMyIEBAIHN0YXRp
+YyBpbnQgbW1jaV9wcm9iZShzdHJ1Y3QgYW1iYV9kZXZpY2UgKmRldiwNCj4+ICAgICAgICAgIGhv
+c3QgPSBtbWNfcHJpdihtbWMpOw0KPj4gICAgICAgICAgaG9zdC0+bW1jID0gbW1jOw0KPj4NCj4+
+ICsgICAgICAgLyoNCj4+ICsgICAgICAgICogU29tZSB2YXJpYW50IChTVE0zMikgZG9lc24ndCBo
+YXZlIG9wZW5kcmFpbiBiaXQsIG5ldmVydGhlbGVzcw0KPj4gKyAgICAgICAgKiBwaW5zIGNhbiBi
+ZSBzZXQgYWNjb3JkaW5nbHkgdXNpbmcgcGluY3RybA0KPj4gKyAgICAgICAgKi8NCj4+ICsgICAg
+ICAgaWYgKCF2YXJpYW50LT5vcGVuZHJhaW4pIHsNCj4+ICsgICAgICAgICAgICAgICBob3N0LT5w
+aW5jdHJsID0gZGV2bV9waW5jdHJsX2dldCgmZGV2LT5kZXYpOw0KPj4gKyAgICAgICAgICAgICAg
+IGlmIChJU19FUlIoaG9zdC0+cGluY3RybCkpIHsNCj4+ICsgICAgICAgICAgICAgICAgICAgICAg
+IGRldl9lcnIoJmRldi0+ZGV2LCAiZmFpbGVkIHRvIGdldCBwaW5jdHJsIik7DQo+PiArICAgICAg
+ICAgICAgICAgICAgICAgICBnb3RvIGhvc3RfZnJlZTsNCj4+ICsgICAgICAgICAgICAgICB9DQo+
+PiArDQo+PiArICAgICAgICAgICAgICAgaG9zdC0+cGluc19kZWZhdWx0ID0gcGluY3RybF9sb29r
+dXBfc3RhdGUoaG9zdC0+cGluY3RybCwNCj4+ICsgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICBQSU5DVFJMX1NUQVRFX0RFRkFVTFQpOw0KPj4g
+KyAgICAgICAgICAgICAgIGlmIChJU19FUlIoaG9zdC0+cGluc19kZWZhdWx0KSkgew0KPj4gKyAg
+ICAgICAgICAgICAgICAgICAgICAgZGV2X3dhcm4obW1jX2RldihtbWMpLCAiQ2FuJ3Qgc2VsZWN0
+IGRlZmF1bHQgcGluc1xuIik7DQo+PiArICAgICAgICAgICAgICAgICAgICAgICBob3N0LT5waW5z
+X2RlZmF1bHQgPSBOVUxMOw0KPiANCj4gVGhpcyBpcyB3cm9uZywgSSB0aGluayB5b3Ugc2hvdWxk
+IGJhaWwgb3V0IGFuZCByZXR1cm4gdGhlIGVycm9yIGNvZGUgaW5zdGVhZC4NCg0KT2sNCg0KPiAN
+Cj4gTW9yZW92ZXIsIGNhbGxpbmcgcGluY3RybF9zZWxlY3Rfc3RhdGUoKSBmcm9tIC0+c2V0X2lv
+cyBieSB1c2luZyBhDQo+IE5VTEwgc3RhdGUsIHdpbGwgbGlrZWx5IHRyaWdnZXIgYSBOVUxMIHBv
+aW50ZXIgZGVmZXJlbmNlIGJ1ZyBpbiB0aGUNCj4gcGluY3RybCBsYXllci4NCg0KUmVnYXJkaW5n
+IHBpbmN0cmxfc2VsZWN0X3N0YXRlKCkgY2FsbCB3aXRoIGEgTlVMTCBzdGF0ZSwgdGhpcyBjYXNl
+IGlzIA0KbWFuYWdlZCBpbnNpZGUgcGluY3RybF9zdGF0ZSgpLCBidXQgb2ssIGl0IHdpbGwgYmUg
+bW9yZSBlbGVnYW50IHRvIGV4aXQgDQpkaXJlY3RseSBpbiBjYXNlIG9mIG5vIERUIHBpbnMgZGVm
+aW5pdGlvbiBmb3VuZC4NCg0KPiANCj4+ICsgICAgICAgICAgICAgICB9DQo+PiArDQo+PiArICAg
+ICAgICAgICAgICAgaG9zdC0+cGluc19vcGVuZHJhaW4gPSBwaW5jdHJsX2xvb2t1cF9zdGF0ZSho
+b3N0LT5waW5jdHJsLA0KPj4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgTU1DSV9QSU5DVFJMX1NUQVRFX09QRU5EUkFJTik7DQo+PiAr
+ICAgICAgICAgICAgICAgaWYgKElTX0VSUihob3N0LT5waW5zX29wZW5kcmFpbikpIHsNCj4+ICsg
+ICAgICAgICAgICAgICAgICAgICAgIGRldl93YXJuKG1tY19kZXYobW1jKSwgIkNhbid0IHNlbGVj
+dCBvcGVuZHJhaW4gcGluc1xuIik7DQo+PiArICAgICAgICAgICAgICAgICAgICAgICBob3N0LT5w
+aW5zX29wZW5kcmFpbiA9IE5VTEw7DQo+IA0KPiBEaXR0by4NCg0Kb2sNCg0KVGhhbmtzDQoNClBh
+dHJpY2UNCj4gDQo+PiArICAgICAgICAgICAgICAgfQ0KPj4gKyAgICAgICB9DQo+PiArDQo+IA0K
+PiBbLi4uXQ0KPiANCj4gS2luZCByZWdhcmRzDQo+IFVmZmUNCj4g
