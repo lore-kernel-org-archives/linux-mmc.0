@@ -1,56 +1,69 @@
-From: Patrice CHOTARD <patrice.chotard@st.com>
-Subject: Re: [PATCH v2 04/15] mmc: mmci: Add support for setting pad type via
- pinctrl
-Date: Thu, 18 Jan 2018 13:35:05 +0000
-Message-ID: <0c73774b-f06e-2db8-ef50-3bf590b57cff@st.com>
-References: <1516105859-3525-1-git-send-email-patrice.chotard@st.com>
- <1516105859-3525-5-git-send-email-patrice.chotard@st.com>
- <CAPDyKFoVT7rqLVzYVrO8JTD_MVLxr_R8PO=fWqLVG4DB1MpnTQ@mail.gmail.com>
+From: <patrice.chotard@st.com>
+Subject: [PATCH v3 10/14] ARM: dts: stm32: Enable SDIO controller on stm32429i-eval board
+Date: Thu, 18 Jan 2018 15:34:26 +0100
+Message-ID: <1516286070-24927-11-git-send-email-patrice.chotard@st.com>
+References: <1516286070-24927-1-git-send-email-patrice.chotard@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFoVT7rqLVzYVrO8JTD_MVLxr_R8PO=fWqLVG4DB1MpnTQ@mail.gmail.com>
-Content-Language: en-US
-Content-ID: <3FFEB509F6551545A33B36799B1C7DBB@st.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Russell King <linux@armlinux.org.uk>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, Linus Walleij <linus.walleij@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Alexandre TORGUE <alexandre.torgue@st.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-clk <linux-clk@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Andrea Merello <andrea.merello@gmail.com>
+Content-Type: text/plain
+Return-path: <linux-clk-owner@vger.kernel.org>
+In-Reply-To: <1516286070-24927-1-git-send-email-patrice.chotard@st.com>
+Sender: linux-clk-owner@vger.kernel.org
+To: Russell King <linux@armlinux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, Linus Walleij <linus.walleij@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Alexandre Torgue <alexandre.torgue@st.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-gpio@vger.kernel.org, devicetree@vger.kernel.org, Patrice Chotard <patrice.chotard@st.com>
 List-Id: linux-mmc@vger.kernel.org
 
-SGkgVWxmDQoNCk9uIDAxLzE3LzIwMTggMTA6MzQgQU0sIFVsZiBIYW5zc29uIHdyb3RlOg0KPiBb
-Li4uXQ0KPiANCj4+ICAgICAgICAgIC8qDQo+PiBAQCAtMTYxNiw2ICsxNjI1LDMyIEBAIHN0YXRp
-YyBpbnQgbW1jaV9wcm9iZShzdHJ1Y3QgYW1iYV9kZXZpY2UgKmRldiwNCj4+ICAgICAgICAgIGhv
-c3QgPSBtbWNfcHJpdihtbWMpOw0KPj4gICAgICAgICAgaG9zdC0+bW1jID0gbW1jOw0KPj4NCj4+
-ICsgICAgICAgLyoNCj4+ICsgICAgICAgICogU29tZSB2YXJpYW50IChTVE0zMikgZG9lc24ndCBo
-YXZlIG9wZW5kcmFpbiBiaXQsIG5ldmVydGhlbGVzcw0KPj4gKyAgICAgICAgKiBwaW5zIGNhbiBi
-ZSBzZXQgYWNjb3JkaW5nbHkgdXNpbmcgcGluY3RybA0KPj4gKyAgICAgICAgKi8NCj4+ICsgICAg
-ICAgaWYgKCF2YXJpYW50LT5vcGVuZHJhaW4pIHsNCj4+ICsgICAgICAgICAgICAgICBob3N0LT5w
-aW5jdHJsID0gZGV2bV9waW5jdHJsX2dldCgmZGV2LT5kZXYpOw0KPj4gKyAgICAgICAgICAgICAg
-IGlmIChJU19FUlIoaG9zdC0+cGluY3RybCkpIHsNCj4+ICsgICAgICAgICAgICAgICAgICAgICAg
-IGRldl9lcnIoJmRldi0+ZGV2LCAiZmFpbGVkIHRvIGdldCBwaW5jdHJsIik7DQo+PiArICAgICAg
-ICAgICAgICAgICAgICAgICBnb3RvIGhvc3RfZnJlZTsNCj4+ICsgICAgICAgICAgICAgICB9DQo+
-PiArDQo+PiArICAgICAgICAgICAgICAgaG9zdC0+cGluc19kZWZhdWx0ID0gcGluY3RybF9sb29r
-dXBfc3RhdGUoaG9zdC0+cGluY3RybCwNCj4+ICsgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICBQSU5DVFJMX1NUQVRFX0RFRkFVTFQpOw0KPj4g
-KyAgICAgICAgICAgICAgIGlmIChJU19FUlIoaG9zdC0+cGluc19kZWZhdWx0KSkgew0KPj4gKyAg
-ICAgICAgICAgICAgICAgICAgICAgZGV2X3dhcm4obW1jX2RldihtbWMpLCAiQ2FuJ3Qgc2VsZWN0
-IGRlZmF1bHQgcGluc1xuIik7DQo+PiArICAgICAgICAgICAgICAgICAgICAgICBob3N0LT5waW5z
-X2RlZmF1bHQgPSBOVUxMOw0KPiANCj4gVGhpcyBpcyB3cm9uZywgSSB0aGluayB5b3Ugc2hvdWxk
-IGJhaWwgb3V0IGFuZCByZXR1cm4gdGhlIGVycm9yIGNvZGUgaW5zdGVhZC4NCg0KT2sNCg0KPiAN
-Cj4gTW9yZW92ZXIsIGNhbGxpbmcgcGluY3RybF9zZWxlY3Rfc3RhdGUoKSBmcm9tIC0+c2V0X2lv
-cyBieSB1c2luZyBhDQo+IE5VTEwgc3RhdGUsIHdpbGwgbGlrZWx5IHRyaWdnZXIgYSBOVUxMIHBv
-aW50ZXIgZGVmZXJlbmNlIGJ1ZyBpbiB0aGUNCj4gcGluY3RybCBsYXllci4NCg0KUmVnYXJkaW5n
-IHBpbmN0cmxfc2VsZWN0X3N0YXRlKCkgY2FsbCB3aXRoIGEgTlVMTCBzdGF0ZSwgdGhpcyBjYXNl
-IGlzIA0KbWFuYWdlZCBpbnNpZGUgcGluY3RybF9zdGF0ZSgpLCBidXQgb2ssIGl0IHdpbGwgYmUg
-bW9yZSBlbGVnYW50IHRvIGV4aXQgDQpkaXJlY3RseSBpbiBjYXNlIG9mIG5vIERUIHBpbnMgZGVm
-aW5pdGlvbiBmb3VuZC4NCg0KPiANCj4+ICsgICAgICAgICAgICAgICB9DQo+PiArDQo+PiArICAg
-ICAgICAgICAgICAgaG9zdC0+cGluc19vcGVuZHJhaW4gPSBwaW5jdHJsX2xvb2t1cF9zdGF0ZSho
-b3N0LT5waW5jdHJsLA0KPj4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgTU1DSV9QSU5DVFJMX1NUQVRFX09QRU5EUkFJTik7DQo+PiAr
-ICAgICAgICAgICAgICAgaWYgKElTX0VSUihob3N0LT5waW5zX29wZW5kcmFpbikpIHsNCj4+ICsg
-ICAgICAgICAgICAgICAgICAgICAgIGRldl93YXJuKG1tY19kZXYobW1jKSwgIkNhbid0IHNlbGVj
-dCBvcGVuZHJhaW4gcGluc1xuIik7DQo+PiArICAgICAgICAgICAgICAgICAgICAgICBob3N0LT5w
-aW5zX29wZW5kcmFpbiA9IE5VTEw7DQo+IA0KPiBEaXR0by4NCg0Kb2sNCg0KVGhhbmtzDQoNClBh
-dHJpY2UNCj4gDQo+PiArICAgICAgICAgICAgICAgfQ0KPj4gKyAgICAgICB9DQo+PiArDQo+IA0K
-PiBbLi4uXQ0KPiANCj4gS2luZCByZWdhcmRzDQo+IFVmZmUNCj4g
+From: Patrice Chotard <patrice.chotard@st.com>
+
+This patch adds SDIO related DT nodes for stm32429i-eval board.
+
+Signed-off-by: Patrice Chotard <patrice.chotard@st.com>
+---
+
+v3: _ none
+
+v2: _ none
+
+
+ arch/arm/boot/dts/stm32429i-eval.dts | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
+
+diff --git a/arch/arm/boot/dts/stm32429i-eval.dts b/arch/arm/boot/dts/stm32429i-eval.dts
+index 1e3d4c6..6a5c701 100644
+--- a/arch/arm/boot/dts/stm32429i-eval.dts
++++ b/arch/arm/boot/dts/stm32429i-eval.dts
+@@ -144,6 +144,13 @@
+ 			};
+ 		};
+ 	};
++
++	mmc_vcard: mmc_vcard {
++		compatible = "regulator-fixed";
++		regulator-name = "mmc_vcard";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++	};
+ };
+ 
+ &adc {
+@@ -254,6 +261,18 @@
+ 	status = "okay";
+ };
+ 
++&sdio {
++	status = "okay";
++	vmmc-supply = <&mmc_vcard>;
++	cd-gpios = <&stmpegpio 15 GPIO_ACTIVE_HIGH>;
++	cd-inverted;
++	pinctrl-names = "default", "opendrain";
++	pinctrl-0 = <&sdio_pins>;
++	pinctrl-1 = <&sdio_pins_od>;
++	bus-width = <4>;
++	max-frequency = <12500000>;
++};
++
+ &timers1 {
+ 	status = "okay";
+ 
+-- 
+1.9.1
+
