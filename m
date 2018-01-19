@@ -1,47 +1,48 @@
 From: Simon Horman <horms+renesas@verge.net.au>
-Subject: [PATCH v2 0/3] mmc: renesas_sdhi: add eMMC HS400 mode support
-Date: Fri, 19 Jan 2018 14:39:03 +0100
-Message-ID: <20180119133906.11280-1-horms+renesas@verge.net.au>
+Subject: [PATCH v2 1/3] mmc: tmio: correct treatment of errors during tuning
+Date: Fri, 19 Jan 2018 14:39:04 +0100
+Message-ID: <20180119133906.11280-2-horms+renesas@verge.net.au>
+References: <20180119133906.11280-1-horms+renesas@verge.net.au>
 Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20180119133906.11280-1-horms+renesas@verge.net.au>
 Sender: linux-renesas-soc-owner@vger.kernel.org
 To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+From: Masaharu Hayakawa <masaharu.hayakawa.ry@renesas.com>
 
-this patch-set provides SDHI driver support for eMMC HS400.
+If the return value of mmc_send_tuning() is error other than -EILSEQ, the
+tuning fails and process goes out of for_loop.  But the correct processing
+is to judge their TAP as bad.
 
-Based on mmc/next
+Signed-off-by: Masaharu Hayakawa <masaharu.hayakawa.ry@renesas.com>
+Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+---
+v2 [Simon Horman]
+* Added to patchset targeted at upstream
+* Minor revision of changelog
 
-Dependencies for applying these patches: none
+v0 [Masaharu Hayakawa]
+---
+ drivers/mmc/host/tmio_mmc_core.c | 5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
 
-Dependencies to test eMMC HS400:
-* [PATCH] clk: renesas: rcar-gen3: Fix SD divider setting
-* [PATCH v2] arm64: dts: salvator-common: Enable HS400 of SDHI2
-
-To assist testing and review this patch and the above mentioned
-dependencies, which are necessary and sufficient to enable HS400 on H3 /
-Salvator-X, M3-W 1.0 / Salvator-X and H3 ES2.0 Salvator-XS are available
-at:
-
-https://git.kernel.org/pub/scm/linux/kernel/git/horms/renesas.git topic/hs400-v2
-
-Changes since v2:
-* Use updated code from BSP v3.6.0
-* Ironed out dependencies, eMMC HS400 is now working on
-  H3 / Salvator-X, M3-W 1.0 / Salvator-X and H3 ES2.0 Salvator-XS.
-
-
-Masaharu Hayakawa (3):
-  mmc: tmio: correct treatment of errors during tuning
-  mmc: tmio: add eMMC HS400 mode support
-  mmc: renesas_sdhi: add eMMC HS400 mode support
-
- drivers/mmc/host/renesas_sdhi_core.c | 125 ++++++++++++++++++++++++++++++-----
- drivers/mmc/host/tmio_mmc.h          |   6 ++
- drivers/mmc/host/tmio_mmc_core.c     |  33 +++++++--
- 3 files changed, 143 insertions(+), 21 deletions(-)
-
+diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+index 6d8719be75a8..41767d33ef97 100644
+--- a/drivers/mmc/host/tmio_mmc_core.c
++++ b/drivers/mmc/host/tmio_mmc_core.c
+@@ -800,10 +800,7 @@ static int tmio_mmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 		if (host->prepare_tuning)
+ 			host->prepare_tuning(host, i % host->tap_num);
+ 
+-		ret = mmc_send_tuning(mmc, opcode, NULL);
+-		if (ret && ret != -EILSEQ)
+-			goto out;
+-		if (ret == 0)
++		if (!mmc_send_tuning(mmc, opcode, NULL))
+ 			set_bit(i, host->taps);
+ 
+ 		usleep_range(1000, 1200);
 -- 
 2.11.0
