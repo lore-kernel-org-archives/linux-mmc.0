@@ -1,37 +1,33 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH v6] RFT: mmc: sdhci: Implement an SDHCI-specific bounce buffer
-Date: Mon, 22 Jan 2018 11:36:08 +0100
-Message-ID: <CACRpkdZhQ+Vmo7c_Yq2vDBn_SJ7qLLDCiOAx_M2ScTSC1ZOoNA@mail.gmail.com>
-References: <20180119145303.4097-1-linus.walleij@linaro.org>
- <OFE718A5EC.F4E3005B-ONC125821D.00225D5B-C125821D.00229F17@rittal.de>
- <CACRpkdYZMa7-F8pR8rKHKfXgqRMFknniLDr-vtQ-BW2fZLk+qw@mail.gmail.com>
- <OF64BA4616.A552893D-ONC125821D.002E9E83-C125821D.002EFBB2@rittal.de>
- <CACRpkdatPkr0Y-FvegwXMJB41nmN-KArXhwpZj0nR9f7SyyvmQ@mail.gmail.com> <OF8563613A.5338B5FD-ONC125821D.0036DEFF-C125821D.0036DF00@rittal.de>
+From: Mr Sawadogo Ahmed <yousefbakary03@gmail.com>
+Subject: Dear Good Friend
+Date: Mon, 22 Jan 2018 16:22:02 +0000
+Message-ID: <CALNOyY3swkqT8XQQmNtUjoz4iDqcJw6RufOPM8PmcemNiGasaw@mail.gmail.com>
+Reply-To: sawadogoahmed11@gmail.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <OF8563613A.5338B5FD-ONC125821D.0036DEFF-C125821D.0036DF00@rittal.de>
-Sender: stable-owner@vger.kernel.org
-To: Benjamin Beckmeyer <beckmeyer.b@rittal.de>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Pierre Ossman <pierre@ossman.eu>, =?UTF-8?Q?Beno=C3=AEt_Th=C3=A9baudeau?= <benoit@wsystem.com>, Fabio Estevam <fabio.estevam@nxp.com>, stable <stable@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wr0-f196.google.com ([209.85.128.196]:36414 "EHLO
+        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750848AbeAVQWE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Jan 2018 11:22:04 -0500
+Received: by mail-wr0-f196.google.com with SMTP id d9so9308334wre.3
+        for <linux-mmc@vger.kernel.org>; Mon, 22 Jan 2018 08:22:03 -0800 (PST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Jan 22, 2018 at 10:59 AM, Benjamin Beckmeyer
-<beckmeyer.b@rittal.de> wrote:
->> OK that doesn't work. Scratch that patch. What about this instead?
->
-> That is working.
+Dear Good Friend
 
-OK so it was just my random abuse of the DMA API.
-Sorry for my shitty code that of course works fine on
-the DMA-coherent x86...
+I am Mr.Sawadogo Ahmed ,I work for BOA Bank Ouagadougou Burkina Faso,
+I have a business proposal which concerns the transfer of  ($13.5
+Million US Dollars) into a foreign account. Everything about this
+transaction shall be legally done without any problem.  If you are
+interested to help me, I will give you more details as soon as I
+receive your positive response. You will be entitled to 40%, and 60%
+will be for me,. If you are willing to Work with me, send me your
+reply Immediately with your Age and  your Nationality and your Name
+and your Occupation and your Private Telephone Numbers?
 
-> I did some quick testing with time and dd again.
+Thanks
+sawadogoahmed11@gmail.com
 
-OK :)
-
-I'll fold this patch into the original, tag with your Tested-by
-and send out as non-RFC.
-
-Yours,
-Linus Walleij
+BOA  (D.R.T) Bank Of Africa,Dear Good Friend
