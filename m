@@ -1,70 +1,50 @@
-From: Linus Walleij <linus.walleij@linaro.org>
+From: Benjamin Beckmeyer <beckmeyer.b@rittal.de>
 Subject: Re: [PATCH v6] RFT: mmc: sdhci: Implement an SDHCI-specific bounce buffer
-Date: Mon, 22 Jan 2018 09:53:14 +0100
-Message-ID: <CACRpkdatPkr0Y-FvegwXMJB41nmN-KArXhwpZj0nR9f7SyyvmQ@mail.gmail.com>
-References: <20180119145303.4097-1-linus.walleij@linaro.org>
- <OFE718A5EC.F4E3005B-ONC125821D.00225D5B-C125821D.00229F17@rittal.de>
- <CACRpkdYZMa7-F8pR8rKHKfXgqRMFknniLDr-vtQ-BW2fZLk+qw@mail.gmail.com> <OF64BA4616.A552893D-ONC125821D.002E9E83-C125821D.002EFBB2@rittal.de>
+Date: Mon, 22 Jan 2018 10:59:21 +0100 (CET)
+Message-ID: <OF8563613A.5338B5FD-ONC125821D.0036DEFF-C125821D.0036DF00@rittal.de>
+References: <CACRpkdatPkr0Y-FvegwXMJB41nmN-KArXhwpZj0nR9f7SyyvmQ@mail.gmail.com>,
+        <20180119145303.4097-1-linus.walleij@linaro.org> <OFE718A5EC.F4E3005B-ONC125821D.00225D5B-C125821D.00229F17@rittal.de> <CACRpkdYZMa7-F8pR8rKHKfXgqRMFknniLDr-vtQ-BW2fZLk+qw@mail.gmail.com> <OF64BA4616.A552893D-ONC125821D.002E9E83-C125821D.002EFBB2@rittal.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain;
+        charset=ISO-8859-1
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f50.google.com ([209.85.214.50]:39204 "EHLO
-        mail-it0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753506AbeAVIxR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Jan 2018 03:53:17 -0500
-Received: by mail-it0-f50.google.com with SMTP id 68so8926742ite.4
-        for <linux-mmc@vger.kernel.org>; Mon, 22 Jan 2018 00:53:16 -0800 (PST)
-In-Reply-To: <OF64BA4616.A552893D-ONC125821D.002E9E83-C125821D.002EFBB2@rittal.de>
+Received: from mailgw03.loh-group.com ([195.226.74.51]:60072 "EHLO
+        mailgw03.loh-group.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750890AbeAVJ7X (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Jan 2018 04:59:23 -0500
+In-Reply-To: <CACRpkdatPkr0Y-FvegwXMJB41nmN-KArXhwpZj0nR9f7SyyvmQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Benjamin Beckmeyer <beckmeyer.b@rittal.de>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Pierre Ossman <pierre@ossman.eu>, =?UTF-8?Q?Beno=C3=AEt_Th=C3=A9baudeau?= <benoit@wsystem.com>, Fabio Estevam <fabio.estevam@nxp.com>, stable <stable@vger.kernel.org>
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Pierre Ossman <pierre@ossman.eu>, =?ISO-8859-1?Q?Beno=EEt_Th=E9baudeau?= <benoit@wsystem.com>, Fabio Estevam <fabio.estevam@nxp.com>, stable <stable@vger.kernel.org>
 
-On Mon, Jan 22, 2018 at 9:33 AM, Benjamin Beckmeyer
-<beckmeyer.b@rittal.de> wrote:
-> Hey Linus,
->
->> Annoying ... since the i.MX and x86 PCI version so clearly differs
->> here I'm left to trial and error over the mailing list.
->
-> I know, can I do something that it makes it easier for you?
+> OK that doesn't work. Scratch that patch. What about this instead?
 
-It's just how it is. Let's use mails and brains for debugging :D
+That is working.
+I did some quick testing with time and dd again.
 
->> Could you try this on top of the patch?
->
-> Built in and here is the output. I think, it's what you want,
-> but it doesn't work either.
+#time dd if=/dev/zero of=test bs=1M count=4
+real	0m1.898s
+user	0m0.002s
+sys	0m0.392s
 
-OK that doesn't work. Scratch that patch. What about this instead?
+#time dd if=/dev/zero of=test bs=1M count=8
+real	0m5.292s
+user	0m0.004s
+sys	0m0.772s
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 25b5e598ee6d..416e94dead4f 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -523,7 +523,7 @@ static int sdhci_pre_dma_transfer(struct sdhci_host *host,
-         dma_sync_single_for_device(host->mmc->parent,
-                        host->bounce_addr,
-                        host->bounce_buffer_size,
--                       DMA_TO_DEVICE);
-+                       mmc_get_dma_dir(data));
-         /* Just a dummy value */
-         sg_count = 1;
-     } else {
-@@ -2422,6 +2422,12 @@ static bool sdhci_request_done(struct sdhci_host *host)
-                         data->sg_len,
-                         host->bounce_buffer,
-                         length);
-+                } else {
-+                    dma_sync_single_for_cpu(
-+                        host->mmc->parent,
-+                        host->bounce_addr,
-+                        host->bounce_buffer_size,
-+                        mmc_get_dma_dir(data));
-                 }
-             } else {
-                 /* Unmap the raw data */
+#time dd if=/dev/zero of=test bs=1M count=16
+real	0m10.130s
+user	0m0.009s
+sys	0m1.479s
 
+#time dd if=/dev/zero of=test bs=1M count=32
+real	0m18.752s
+user	0m0.001s
+sys	0m2.934s
 
-Yours,
-Linus Walleij
+Looks good to me. So far.
+
+Kind regards,
+Benjamin Beckmeyer
