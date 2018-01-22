@@ -1,59 +1,70 @@
-From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?=
-        <u.kleine-koenig@pengutronix.de>
-Subject: [PATCH mmc-utils] mmc-utils: manpage: fix arguments for TH macro
-Date: Mon, 22 Jan 2018 09:48:58 +0100
-Message-ID: <20180122084858.6467-1-u.kleine-koenig@pengutronix.de>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH v6] RFT: mmc: sdhci: Implement an SDHCI-specific bounce buffer
+Date: Mon, 22 Jan 2018 09:53:14 +0100
+Message-ID: <CACRpkdatPkr0Y-FvegwXMJB41nmN-KArXhwpZj0nR9f7SyyvmQ@mail.gmail.com>
+References: <20180119145303.4097-1-linus.walleij@linaro.org>
+ <OFE718A5EC.F4E3005B-ONC125821D.00225D5B-C125821D.00229F17@rittal.de>
+ <CACRpkdYZMa7-F8pR8rKHKfXgqRMFknniLDr-vtQ-BW2fZLk+qw@mail.gmail.com> <OF64BA4616.A552893D-ONC125821D.002E9E83-C125821D.002EFBB2@rittal.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from antares.kleine-koenig.org ([94.130.110.236]:55664 "EHLO
-        antares.kleine-koenig.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753350AbeAVI4t (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Jan 2018 03:56:49 -0500
+Received: from mail-it0-f50.google.com ([209.85.214.50]:39204 "EHLO
+        mail-it0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753506AbeAVIxR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Jan 2018 03:53:17 -0500
+Received: by mail-it0-f50.google.com with SMTP id 68so8926742ite.4
+        for <linux-mmc@vger.kernel.org>; Mon, 22 Jan 2018 00:53:16 -0800 (PST)
+In-Reply-To: <OF64BA4616.A552893D-ONC125821D.002E9E83-C125821D.002EFBB2@rittal.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>
-Cc: linux-mmc@vger.kernel.org, kernel@pengutronix.de, Nobuhiro Iwamatsu <iwamatsu@debian.org>
+To: Benjamin Beckmeyer <beckmeyer.b@rittal.de>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Pierre Ossman <pierre@ossman.eu>, =?UTF-8?Q?Beno=C3=AEt_Th=C3=A9baudeau?= <benoit@wsystem.com>, Fabio Estevam <fabio.estevam@nxp.com>, stable <stable@vger.kernel.org>
 
-According to man-pages(7) the TH macro takes the following parameters:
+On Mon, Jan 22, 2018 at 9:33 AM, Benjamin Beckmeyer
+<beckmeyer.b@rittal.de> wrote:
+> Hey Linus,
+>
+>> Annoying ... since the i.MX and x86 PCI version so clearly differs
+>> here I'm left to trial and error over the mailing list.
+>
+> I know, can I do something that it makes it easier for you?
 
-	.TH title section date source manual
+It's just how it is. Let's use mails and brains for debugging :D
 
-with some recommendations for the individual parameters. Adapt the usage
-of TH accordingly. The motivating change is to drop "man" in the title
-in favor of "MMC".
----
-Hello,
+>> Could you try this on top of the patch?
+>
+> Built in and here is the output. I think, it's what you want,
+> but it doesn't work either.
 
-assuming that I cannot lure Chris into action with this patch given that
-my previous patch series[1] already failed, I pushed this patch to my
-repository on github[2] immediately.
+OK that doesn't work. Scratch that patch. What about this instead?
 
-Adding the Debian maintainer of mmc-utils to Cc:. @iwamatsu: Maybe you
-know about Chris and his motivation to continue caring for mmc-utils
-upstream? Do you feel like picking up patches while Chis is unavailable?
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 25b5e598ee6d..416e94dead4f 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -523,7 +523,7 @@ static int sdhci_pre_dma_transfer(struct sdhci_host *host,
+         dma_sync_single_for_device(host->mmc->parent,
+                        host->bounce_addr,
+                        host->bounce_buffer_size,
+-                       DMA_TO_DEVICE);
++                       mmc_get_dma_dir(data));
+         /* Just a dummy value */
+         sg_count = 1;
+     } else {
+@@ -2422,6 +2422,12 @@ static bool sdhci_request_done(struct sdhci_host *host)
+                         data->sg_len,
+                         host->bounce_buffer,
+                         length);
++                } else {
++                    dma_sync_single_for_cpu(
++                        host->mmc->parent,
++                        host->bounce_addr,
++                        host->bounce_buffer_size,
++                        mmc_get_dma_dir(data));
+                 }
+             } else {
+                 /* Unmap the raw data */
 
-FTR: Debian also ships a patch[2] that might be worth to merge into
-mmc-utils.
 
-Best regards
-Uwe
-
-[1] https://www.spinics.net/lists/linux-mmc/msg47541.html
-[2] https://github.com/ukleinek/mmc-utils
-[3] https://sources.debian.org/src/mmc-utils/0+git20170901.37c86e60-1/debian/patches/fix_build_ppc64el.patch/
-
- man/mmc.1 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/man/mmc.1 b/man/mmc.1
-index 971feae8d7f1..bdb6f09575ea 100644
---- a/man/mmc.1
-+++ b/man/mmc.1
-@@ -1,4 +1,4 @@
--.TH man 1 "16 November 2015" "0.1" "mmc-utils man page"
-+.TH MMC 1 "2015-11-16" "0.1" "mmc-utils"
- .SH
- NAME
- mmc-utils \- Configure MMC storage devices from userspace.
--- 
-2.15.1
-
+Yours,
+Linus Walleij
