@@ -1,49 +1,50 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: davinci: suppress error message on EPROBE_DEFER
-Date: Mon, 22 Jan 2018 08:27:31 +0100
-Message-ID: <CAPDyKFqu42ophwEi7WTy6iW6nFF94qksAahW1y4qZv2Q=xEe-A@mail.gmail.com>
-References: <1516566493-31348-1-git-send-email-david@lechnology.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH v6] RFT: mmc: sdhci: Implement an SDHCI-specific bounce buffer
+Date: Mon, 22 Jan 2018 09:16:10 +0100
+Message-ID: <CACRpkdYZMa7-F8pR8rKHKfXgqRMFknniLDr-vtQ-BW2fZLk+qw@mail.gmail.com>
+References: <20180119145303.4097-1-linus.walleij@linaro.org> <OFE718A5EC.F4E3005B-ONC125821D.00225D5B-C125821D.00229F17@rittal.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1516566493-31348-1-git-send-email-david@lechnology.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: David Lechner <david@lechnology.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-arm-kernel@lists.infradead.org
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <OFE718A5EC.F4E3005B-ONC125821D.00225D5B-C125821D.00229F17@rittal.de>
+Sender: stable-owner@vger.kernel.org
+To: Benjamin Beckmeyer <beckmeyer.b@rittal.de>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Pierre Ossman <pierre@ossman.eu>, =?UTF-8?Q?Beno=C3=AEt_Th=C3=A9baudeau?= <benoit@wsystem.com>, Fabio Estevam <fabio.estevam@nxp.com>, stable <stable@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 21 January 2018 at 21:28, David Lechner <david@lechnology.com> wrote:
-> This suppresses printing an error message during probe of the TI DaVinci
-> MMC driver when the error is EPROBE_DEFER.
->
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Signed-off-by: David Lechner <david@lechnology.com>
+On Mon, Jan 22, 2018 at 7:18 AM, Benjamin Beckmeyer
+<beckmeyer.b@rittal.de> wrote:
 
-Thanks, applied for next!
+> I tested it a few moments ago and to make it short: it doesn't work.
 
-Kind regards
-Uffe
+Annoying ... since the i.MX and x86 PCI version so clearly differs
+here I'm left to trial and error over the mailing list.
 
-> ---
->  drivers/mmc/host/davinci_mmc.c | 5 +++--
->  1 file changed, 3 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
-> index c5309cc..8e36317 100644
-> --- a/drivers/mmc/host/davinci_mmc.c
-> +++ b/drivers/mmc/host/davinci_mmc.c
-> @@ -1253,8 +1253,9 @@ static int davinci_mmcsd_probe(struct platform_device *pdev)
->                 pdev->id_entry = match->data;
->                 ret = mmc_of_parse(mmc);
->                 if (ret) {
-> -                       dev_err(&pdev->dev,
-> -                               "could not parse of data: %d\n", ret);
-> +                       if (ret != -EPROBE_DEFER)
-> +                               dev_err(&pdev->dev,
-> +                                       "could not parse of data: %d\n", ret);
->                         goto parse_fail;
->                 }
->         } else {
-> --
-> 2.7.4
->
+> mmc1 bounce up to 128 segments into one, max segment size 65536 bytes
+> mmc1: SDHCI controller on 53fb8000.esdhc [53fb8000.esdhc] using DMA
+
+Could it be that this SDMA has this problem of not being
+able to send things aligned on even 64K pages? (Off-by-one
+error in the hardware.)
+
+Could you try this on top of the patch?
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 25b5e598ee6d..6b436f0e0925 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -3323,7 +3323,7 @@ static int sdhci_allocate_bounce_buffer(struct
+sdhci_host *host)
+      * has diminishing returns, this is probably because SD/MMC
+      * cards are usually optimized to handle this size of requests.
+      */
+-    bounce_size = SZ_64K;
++    bounce_size = SZ_64K-1;
+     /*
+      * Adjust downwards to maximum request size if this is less
+      * than our segment size, else hammer down the maximum
+
+The code should report that it bounces 127 segments into 1 instead.
+
+Yours,
+Linus Walleij
