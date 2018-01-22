@@ -1,91 +1,98 @@
-From: Benjamin Beckmeyer <beckmeyer.b@rittal.de>
-Subject: Re: [PATCH v6] RFT: mmc: sdhci: Implement an SDHCI-specific bounce buffer
-Date: Mon, 22 Jan 2018 07:18:10 +0100 (CET)
-Message-ID: <OFE718A5EC.F4E3005B-ONC125821D.00225D5B-C125821D.00229F17@rittal.de>
-References: <20180119145303.4097-1-linus.walleij@linaro.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: tmio: hide unused tmio_mmc_clk_disable/tmio_mmc_clk_enable
+ functions
+Date: Mon, 22 Jan 2018 08:27:01 +0100
+Message-ID: <CAPDyKFqfRJh0NUy-7ZjyZ6vN_vv_G5bwmxxUXeEbxHeVZhmYnA@mail.gmail.com>
+References: <20180119145502.1114288-1-arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain;
-        charset=ISO-8859-1
-Content-Transfer-Encoding: 8BIT
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20180119145303.4097-1-linus.walleij@linaro.org>
-Sender: stable-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Pierre Ossman <pierre@ossman.eu>, =?ISO-8859-1?Q?Beno=EEt_Th=E9baudeau?= <benoit@wsystem.com>, Fabio Estevam <fabio.estevam@nxp.com>, stable@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-it0-f67.google.com ([209.85.214.67]:33276 "EHLO
+        mail-it0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751073AbeAVH1C (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Jan 2018 02:27:02 -0500
+Received: by mail-it0-f67.google.com with SMTP id c102so10987442itd.0
+        for <linux-mmc@vger.kernel.org>; Sun, 21 Jan 2018 23:27:02 -0800 (PST)
+In-Reply-To: <20180119145502.1114288-1-arnd@arndb.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms+renesas@verge.net.au>, Masahiro Yamada <yamada.masahiro@socionext.com>, Geert Uytterhoeven <geert+renesas@glider.be>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-Good morning,
+On 19 January 2018 at 15:54, Arnd Bergmann <arnd@arndb.de> wrote:
+> When CONFIG_PM is disabled, we get a warning about the clock handling
+> being unused:
+>
+> drivers/mmc/host/tmio_mmc_core.c:937:13: error: 'tmio_mmc_clk_disable' defined but not used [-Werror=unused-function]
+>  static void tmio_mmc_clk_disable(struct tmio_mmc_host *host)
+>              ^~~~~~~~~~~~~~~~~~~~
+> drivers/mmc/host/tmio_mmc_core.c:929:12: error: 'tmio_mmc_clk_enable' defined but not used [-Werror=unused-function]
+>  static int tmio_mmc_clk_enable(struct tmio_mmc_host *host)
+>             ^~~~~~~~~~~~~~~~~~~
+>
+> As the clock handling is now done elsewhere, this is only used when
+> power management is enabled. We could make the functions as __maybe_unused,
+> but since there is already an #ifdef section, it seems easier to move
+> the helpers closer to their callers.
+>
+> Fixes: b21fc294387e ("mmc: tmio: move clk_enable/disable out of tmio_mmc_host_probe()")
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 
-I tested it a few moments ago and to make it short: it doesn't work.
+Thanks, applied for next!
 
-Here is the long story:
+Kind regards
+Uffe
 
-sdhci: Secure Digital Host Controller Interface driver
-sdhci: Copyright(c) Pierre Ossman
-sdhci-pltfm: SDHCI platform and OF driver helper
-mmc0 bounce up to 128 segments into one, max segment size 65536 bytes
-mmc0: SDHCI controller on 53fb4000.esdhc [53fb4000.esdhc] using DMA
-sdhci-esdhc-imx 53fb8000.esdhc: Got CD GPIO
-sdhci-esdhc-imx 53fb8000.esdhc: Got WP GPIO
-mmc1 bounce up to 128 segments into one, max segment size 65536 bytes
-mmc1: SDHCI controller on 53fb8000.esdhc [53fb8000.esdhc] using DMA
-oprofile: no performance counters
-oprofile: using timer interrupt.
-mmc0: new high speed MMC card at address 0001
-NET: Registered protocol family 10
-mmcblk0: mmc0:0001 002G00 1.83 GiB 
-mmcblk0boot0: mmc0:0001 002G00 partition 1 512 KiB
-Segment Routing with IPv6
-sit: IPv6, IPv4 and MPLS over IPv4 tunneling driver
-mmcblk0boot1: mmc0:0001 002G00 partition 2 512 KiB
-mmcblk0rpmb: mmc0:0001 002G00 partition 3 128 KiB
- mmcblk0: p1 p2 p3 p4 < p5 p6 p7 p8 p9 p10 >
-NET: Registered protocol family 17
-can: controller area network core (rev 20170425 abi 9)
-NET: Registered protocol family 29
-can: raw protocol (rev 20170425)
-can: broadcast manager protocol (rev 20170425 t)
-can: netlink gateway (rev 20170425) max_hops=1
-input: gpio-keys as /devices/platform/gpio-keys/input/input1
-imxdi_rtc 53ffc000.dryice: setting system clock to 1970-01-12 21:01:47 UTC (1026107)
-EXT4-fs (mmcblk0p8): couldn't mount as ext3 due to feature incompatibilities
-EXT4-fs (mmcblk0p8): couldn't mount as ext2 due to feature incompatibilities
-EXT4-fs (mmcblk0p8): ext4_check_descriptors: Checksum for group 4 failed (25648!=0)
-EXT4-fs (mmcblk0p8): ext4_check_descriptors: Block bitmap for group 5 not in group (block 0)!
-EXT4-fs (mmcblk0p8): group descriptors corrupted!
-VFS: Cannot open root device "mmcblk0p8" or unknown-block(259,0): error -117
-Please append a correct "root=" boot option; here are the available partitions:
-b300         1916928 mmcblk0 
- driver: mmcblk
-  b301             767 mmcblk0p1 00000000-01
-
-  b302             128 mmcblk0p2 00000000-02
-
-  b303             128 mmcblk0p3 00000000-03
-
-  b304               1 mmcblk0p4 
-
-  b305           16384 mmcblk0p5 00000000-05
-
-  b306          409599 mmcblk0p6 00000000-06
-
-  b307           16383 mmcblk0p7 00000000-07
-
-  103:00000     409599 mmcblk0p8 00000000-08
-
-  103:00001     102399 mmcblk0p9 00000000-09
-
-  103:00002     961535 mmcblk0p10 00000000-0a
-
-b318             128 mmcblk0rpmb 
- (driver?)
-b310             512 mmcblk0boot1 
- (driver?)
-b308             512 mmcblk0boot0 
- (driver?)
-Kernel panic - not syncing: VFS: Unable to mount root fs on unknown-block(259,0)
----[ end Kernel panic - not syncing: VFS: Unable to mount root fs on unknown-block(259,0)
-
-
-Kind regards,
-Benjamin Beckmeyer
+> ---
+>  drivers/mmc/host/tmio_mmc_core.c | 28 ++++++++++++++--------------
+>  1 file changed, 14 insertions(+), 14 deletions(-)
+>
+> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+> index 6d8719be75a8..33494241245a 100644
+> --- a/drivers/mmc/host/tmio_mmc_core.c
+> +++ b/drivers/mmc/host/tmio_mmc_core.c
+> @@ -926,20 +926,6 @@ static void tmio_mmc_done_work(struct work_struct *work)
+>         tmio_mmc_finish_request(host);
+>  }
+>
+> -static int tmio_mmc_clk_enable(struct tmio_mmc_host *host)
+> -{
+> -       if (!host->clk_enable)
+> -               return -ENOTSUPP;
+> -
+> -       return host->clk_enable(host);
+> -}
+> -
+> -static void tmio_mmc_clk_disable(struct tmio_mmc_host *host)
+> -{
+> -       if (host->clk_disable)
+> -               host->clk_disable(host);
+> -}
+> -
+>  static void tmio_mmc_power_on(struct tmio_mmc_host *host, unsigned short vdd)
+>  {
+>         struct mmc_host *mmc = host->mmc;
+> @@ -1337,6 +1323,20 @@ void tmio_mmc_host_remove(struct tmio_mmc_host *host)
+>  EXPORT_SYMBOL_GPL(tmio_mmc_host_remove);
+>
+>  #ifdef CONFIG_PM
+> +static int tmio_mmc_clk_enable(struct tmio_mmc_host *host)
+> +{
+> +       if (!host->clk_enable)
+> +               return -ENOTSUPP;
+> +
+> +       return host->clk_enable(host);
+> +}
+> +
+> +static void tmio_mmc_clk_disable(struct tmio_mmc_host *host)
+> +{
+> +       if (host->clk_disable)
+> +               host->clk_disable(host);
+> +}
+> +
+>  int tmio_mmc_host_runtime_suspend(struct device *dev)
+>  {
+>         struct tmio_mmc_host *host = dev_get_drvdata(dev);
+> --
+> 2.9.0
+>
