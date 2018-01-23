@@ -1,55 +1,48 @@
-From: Wei Yongjun <weiyongjun1@huawei.com>
-Subject: [PATCH -next] mmc: mmci: fix error return code in mmci_probe()
-Date: Tue, 23 Jan 2018 02:09:13 +0000
-Message-ID: <1516673353-170330-1-git-send-email-weiyongjun1@huawei.com>
+From: Patrice CHOTARD <patrice.chotard@st.com>
+Subject: Re: [PATCH -next] mmc: mmci: fix error return code in mmci_probe()
+Date: Tue, 23 Jan 2018 08:28:04 +0000
+Message-ID: <e3730a8e-2bc2-6173-c4d3-374a93ef6114@st.com>
+References: <1516673353-170330-1-git-send-email-weiyongjun1@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from szxga05-in.huawei.com ([45.249.212.191]:4267 "EHLO huawei.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751071AbeAWCCw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 22 Jan 2018 21:02:52 -0500
+Received: from mx08-00178001.pphosted.com ([91.207.212.93]:36519 "EHLO
+        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1750760AbeAWI2Y (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Jan 2018 03:28:24 -0500
+In-Reply-To: <1516673353-170330-1-git-send-email-weiyongjun1@huawei.com>
+Content-Language: en-US
+Content-ID: <F7A1D02A8E1CF44F8AE7E045F20B2EDF@st.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King <linux@armlinux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Patrice Chotard <patrice.chotard@st.com>
-Cc: Wei Yongjun <weiyongjun1@huawei.com>, linux-mmc@vger.kernel.org, kernel-janitors@vger.kernel.org
+To: Wei Yongjun <weiyongjun1@huawei.com>, Russell King <linux@armlinux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "kernel-janitors@vger.kernel.org" <kernel-janitors@vger.kernel.org>
 
-Fix to return a negative error code from the error handling
-case instead of 0, as done elsewhere in this function.
-
-Fixes: f9bb304ce855 ("mmc: mmci: Add support for setting pad type via pinctrl")
-Signed-off-by: Wei Yongjun <weiyongjun1@huawei.com>
----
- drivers/mmc/host/mmci.c | 3 +++
- 1 file changed, 3 insertions(+)
-
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 6246eaa..70b0df8 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -1646,6 +1646,7 @@ static int mmci_probe(struct amba_device *dev,
- 		host->pinctrl = devm_pinctrl_get(&dev->dev);
- 		if (IS_ERR(host->pinctrl)) {
- 			dev_err(&dev->dev, "failed to get pinctrl");
-+			ret = PTR_ERR(host->pinctrl);
- 			goto host_free;
- 		}
- 
-@@ -1653,6 +1654,7 @@ static int mmci_probe(struct amba_device *dev,
- 							  PINCTRL_STATE_DEFAULT);
- 		if (IS_ERR(host->pins_default)) {
- 			dev_err(mmc_dev(mmc), "Can't select default pins\n");
-+			ret = PTR_ERR(host->pins_default);
- 			goto host_free;
- 		}
- 
-@@ -1660,6 +1662,7 @@ static int mmci_probe(struct amba_device *dev,
- 							    MMCI_PINCTRL_STATE_OPENDRAIN);
- 		if (IS_ERR(host->pins_opendrain)) {
- 			dev_err(mmc_dev(mmc), "Can't select opendrain pins\n");
-+			ret = PTR_ERR(host->pins_opendrain);
- 			goto host_free;
- 		}
- 	}
-
+SGkgV2VpDQoNCk9uIDAxLzIzLzIwMTggMDM6MDkgQU0sIFdlaSBZb25nanVuIHdyb3RlOg0KPiBG
+aXggdG8gcmV0dXJuIGEgbmVnYXRpdmUgZXJyb3IgY29kZSBmcm9tIHRoZSBlcnJvciBoYW5kbGlu
+Zw0KPiBjYXNlIGluc3RlYWQgb2YgMCwgYXMgZG9uZSBlbHNld2hlcmUgaW4gdGhpcyBmdW5jdGlv
+bi4NCj4gDQo+IEZpeGVzOiBmOWJiMzA0Y2U4NTUgKCJtbWM6IG1tY2k6IEFkZCBzdXBwb3J0IGZv
+ciBzZXR0aW5nIHBhZCB0eXBlIHZpYSBwaW5jdHJsIikNCj4gU2lnbmVkLW9mZi1ieTogV2VpIFlv
+bmdqdW4gPHdlaXlvbmdqdW4xQGh1YXdlaS5jb20+DQo+IC0tLQ0KPiAgIGRyaXZlcnMvbW1jL2hv
+c3QvbW1jaS5jIHwgMyArKysNCj4gICAxIGZpbGUgY2hhbmdlZCwgMyBpbnNlcnRpb25zKCspDQo+
+IA0KPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9tbWNpLmMgYi9kcml2ZXJzL21tYy9o
+b3N0L21tY2kuYw0KPiBpbmRleCA2MjQ2ZWFhLi43MGIwZGY4IDEwMDY0NA0KPiAtLS0gYS9kcml2
+ZXJzL21tYy9ob3N0L21tY2kuYw0KPiArKysgYi9kcml2ZXJzL21tYy9ob3N0L21tY2kuYw0KPiBA
+QCAtMTY0Niw2ICsxNjQ2LDcgQEAgc3RhdGljIGludCBtbWNpX3Byb2JlKHN0cnVjdCBhbWJhX2Rl
+dmljZSAqZGV2LA0KPiAgIAkJaG9zdC0+cGluY3RybCA9IGRldm1fcGluY3RybF9nZXQoJmRldi0+
+ZGV2KTsNCj4gICAJCWlmIChJU19FUlIoaG9zdC0+cGluY3RybCkpIHsNCj4gICAJCQlkZXZfZXJy
+KCZkZXYtPmRldiwgImZhaWxlZCB0byBnZXQgcGluY3RybCIpOw0KPiArCQkJcmV0ID0gUFRSX0VS
+Uihob3N0LT5waW5jdHJsKTsNCj4gICAJCQlnb3RvIGhvc3RfZnJlZTsNCj4gICAJCX0NCj4gICAN
+Cj4gQEAgLTE2NTMsNiArMTY1NCw3IEBAIHN0YXRpYyBpbnQgbW1jaV9wcm9iZShzdHJ1Y3QgYW1i
+YV9kZXZpY2UgKmRldiwNCj4gICAJCQkJCQkJICBQSU5DVFJMX1NUQVRFX0RFRkFVTFQpOw0KPiAg
+IAkJaWYgKElTX0VSUihob3N0LT5waW5zX2RlZmF1bHQpKSB7DQo+ICAgCQkJZGV2X2VycihtbWNf
+ZGV2KG1tYyksICJDYW4ndCBzZWxlY3QgZGVmYXVsdCBwaW5zXG4iKTsNCj4gKwkJCXJldCA9IFBU
+Ul9FUlIoaG9zdC0+cGluc19kZWZhdWx0KTsNCj4gICAJCQlnb3RvIGhvc3RfZnJlZTsNCj4gICAJ
+CX0NCj4gICANCj4gQEAgLTE2NjAsNiArMTY2Miw3IEBAIHN0YXRpYyBpbnQgbW1jaV9wcm9iZShz
+dHJ1Y3QgYW1iYV9kZXZpY2UgKmRldiwNCj4gICAJCQkJCQkJICAgIE1NQ0lfUElOQ1RSTF9TVEFU
+RV9PUEVORFJBSU4pOw0KPiAgIAkJaWYgKElTX0VSUihob3N0LT5waW5zX29wZW5kcmFpbikpIHsN
+Cj4gICAJCQlkZXZfZXJyKG1tY19kZXYobW1jKSwgIkNhbid0IHNlbGVjdCBvcGVuZHJhaW4gcGlu
+c1xuIik7DQo+ICsJCQlyZXQgPSBQVFJfRVJSKGhvc3QtPnBpbnNfb3BlbmRyYWluKTsNCj4gICAJ
+CQlnb3RvIGhvc3RfZnJlZTsNCj4gICAJCX0NCj4gICAJfQ0KPiANCg0KUmV2aWV3ZWQtYnk6IFBh
+dHJpY2UgQ2hvdGFyZCA8cGF0cmljZS5jaG90YXJkQHN0LmNvbT4NCg0KVGhhbmtz
