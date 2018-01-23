@@ -1,48 +1,160 @@
-From: Patrice CHOTARD <patrice.chotard@st.com>
-Subject: Re: [PATCH -next] mmc: mmci: fix error return code in mmci_probe()
-Date: Tue, 23 Jan 2018 08:28:04 +0000
-Message-ID: <e3730a8e-2bc2-6173-c4d3-374a93ef6114@st.com>
-References: <1516673353-170330-1-git-send-email-weiyongjun1@huawei.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Jiri Slaby <jslaby@suse.cz>
+Subject: [PATCH 4.4-stable 1/2] x86/cpu/intel: Introduce macros for Intel family numbers
+Date: Tue, 23 Jan 2018 21:38:55 +0100
+Message-ID: <20180123203856.27727-1-jslaby@suse.cz>
+References: <15163532439137@kroah.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx08-00178001.pphosted.com ([91.207.212.93]:36519 "EHLO
-        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1750760AbeAWI2Y (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Jan 2018 03:28:24 -0500
-In-Reply-To: <1516673353-170330-1-git-send-email-weiyongjun1@huawei.com>
-Content-Language: en-US
-Content-ID: <F7A1D02A8E1CF44F8AE7E045F20B2EDF@st.com>
+Received: from mx2.suse.de ([195.135.220.15]:51160 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932088AbeAWUjC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 23 Jan 2018 15:39:02 -0500
+In-Reply-To: <15163532439137@kroah.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wei Yongjun <weiyongjun1@huawei.com>, Russell King <linux@armlinux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "kernel-janitors@vger.kernel.org" <kernel-janitors@vger.kernel.org>
+To: gregkh@linuxfoundation.org
+Cc: stable@vger.kernel.org, Dave Hansen <dave@sr71.net>, Dave Hansen <dave.hansen@linux.intel.com>, Adrian Hunter <adrian.hunter@intel.com>, Andy Lutomirski <luto@amacapital.net>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@alien8.de>, Brian Gerst <brgerst@gmail.com>, Darren Hart <dvhart@infradead.org>, Denys Vlasenko <dvlasenk@redhat.com>, Doug Thompson <dougthompson@xmission.com>, Eduardo Valentin <edubezval@gmail.com>, "H . Peter Anvin" <hpa@zytor.com>, Jacob Pan <jacob.jun.pan@linux.intel.com>, Kan Liang <kan.liang@intel.com>, Len Brown <lenb@kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>, Mauro Carvalho Chehab <mchehab@osg.samsung.com>, Peter Zijlstra <peterz@infradead.org>, "Rafael J . Wysocki" <rafael.j.wysocki@intel.com>
 
-SGkgV2VpDQoNCk9uIDAxLzIzLzIwMTggMDM6MDkgQU0sIFdlaSBZb25nanVuIHdyb3RlOg0KPiBG
-aXggdG8gcmV0dXJuIGEgbmVnYXRpdmUgZXJyb3IgY29kZSBmcm9tIHRoZSBlcnJvciBoYW5kbGlu
-Zw0KPiBjYXNlIGluc3RlYWQgb2YgMCwgYXMgZG9uZSBlbHNld2hlcmUgaW4gdGhpcyBmdW5jdGlv
-bi4NCj4gDQo+IEZpeGVzOiBmOWJiMzA0Y2U4NTUgKCJtbWM6IG1tY2k6IEFkZCBzdXBwb3J0IGZv
-ciBzZXR0aW5nIHBhZCB0eXBlIHZpYSBwaW5jdHJsIikNCj4gU2lnbmVkLW9mZi1ieTogV2VpIFlv
-bmdqdW4gPHdlaXlvbmdqdW4xQGh1YXdlaS5jb20+DQo+IC0tLQ0KPiAgIGRyaXZlcnMvbW1jL2hv
-c3QvbW1jaS5jIHwgMyArKysNCj4gICAxIGZpbGUgY2hhbmdlZCwgMyBpbnNlcnRpb25zKCspDQo+
-IA0KPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9tbWNpLmMgYi9kcml2ZXJzL21tYy9o
-b3N0L21tY2kuYw0KPiBpbmRleCA2MjQ2ZWFhLi43MGIwZGY4IDEwMDY0NA0KPiAtLS0gYS9kcml2
-ZXJzL21tYy9ob3N0L21tY2kuYw0KPiArKysgYi9kcml2ZXJzL21tYy9ob3N0L21tY2kuYw0KPiBA
-QCAtMTY0Niw2ICsxNjQ2LDcgQEAgc3RhdGljIGludCBtbWNpX3Byb2JlKHN0cnVjdCBhbWJhX2Rl
-dmljZSAqZGV2LA0KPiAgIAkJaG9zdC0+cGluY3RybCA9IGRldm1fcGluY3RybF9nZXQoJmRldi0+
-ZGV2KTsNCj4gICAJCWlmIChJU19FUlIoaG9zdC0+cGluY3RybCkpIHsNCj4gICAJCQlkZXZfZXJy
-KCZkZXYtPmRldiwgImZhaWxlZCB0byBnZXQgcGluY3RybCIpOw0KPiArCQkJcmV0ID0gUFRSX0VS
-Uihob3N0LT5waW5jdHJsKTsNCj4gICAJCQlnb3RvIGhvc3RfZnJlZTsNCj4gICAJCX0NCj4gICAN
-Cj4gQEAgLTE2NTMsNiArMTY1NCw3IEBAIHN0YXRpYyBpbnQgbW1jaV9wcm9iZShzdHJ1Y3QgYW1i
-YV9kZXZpY2UgKmRldiwNCj4gICAJCQkJCQkJICBQSU5DVFJMX1NUQVRFX0RFRkFVTFQpOw0KPiAg
-IAkJaWYgKElTX0VSUihob3N0LT5waW5zX2RlZmF1bHQpKSB7DQo+ICAgCQkJZGV2X2VycihtbWNf
-ZGV2KG1tYyksICJDYW4ndCBzZWxlY3QgZGVmYXVsdCBwaW5zXG4iKTsNCj4gKwkJCXJldCA9IFBU
-Ul9FUlIoaG9zdC0+cGluc19kZWZhdWx0KTsNCj4gICAJCQlnb3RvIGhvc3RfZnJlZTsNCj4gICAJ
-CX0NCj4gICANCj4gQEAgLTE2NjAsNiArMTY2Miw3IEBAIHN0YXRpYyBpbnQgbW1jaV9wcm9iZShz
-dHJ1Y3QgYW1iYV9kZXZpY2UgKmRldiwNCj4gICAJCQkJCQkJICAgIE1NQ0lfUElOQ1RSTF9TVEFU
-RV9PUEVORFJBSU4pOw0KPiAgIAkJaWYgKElTX0VSUihob3N0LT5waW5zX29wZW5kcmFpbikpIHsN
-Cj4gICAJCQlkZXZfZXJyKG1tY19kZXYobW1jKSwgIkNhbid0IHNlbGVjdCBvcGVuZHJhaW4gcGlu
-c1xuIik7DQo+ICsJCQlyZXQgPSBQVFJfRVJSKGhvc3QtPnBpbnNfb3BlbmRyYWluKTsNCj4gICAJ
-CQlnb3RvIGhvc3RfZnJlZTsNCj4gICAJCX0NCj4gICAJfQ0KPiANCg0KUmV2aWV3ZWQtYnk6IFBh
-dHJpY2UgQ2hvdGFyZCA8cGF0cmljZS5jaG90YXJkQHN0LmNvbT4NCg0KVGhhbmtz
+From: Dave Hansen <dave@sr71.net>
+
+commit 970442c599b22ccd644ebfe94d1d303bf6f87c05 upstream.
+
+Problem:
+
+We have a boatload of open-coded family-6 model numbers.  Half of
+them have these model numbers in hex and the other half in
+decimal.  This makes grepping for them tons of fun, if you were
+to try.
+
+Solution:
+
+Consolidate all the magic numbers.  Put all the definitions in
+one header.
+
+The names here are closely derived from the comments describing
+the models from arch/x86/events/intel/core.c.  We could easily
+make them shorter by doing things like s/SANDYBRIDGE/SNB/, but
+they seemed fine even with the longer versions to me.
+
+Do not take any of these names too literally, like "DESKTOP"
+or "MOBILE".  These are all colloquial names and not precise
+descriptions of everywhere a given model will show up.
+
+Signed-off-by: Dave Hansen <dave.hansen@linux.intel.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Andy Lutomirski <luto@amacapital.net>
+Cc: Andy Lutomirski <luto@kernel.org>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Brian Gerst <brgerst@gmail.com>
+Cc: Darren Hart <dvhart@infradead.org>
+Cc: Dave Hansen <dave@sr71.net>
+Cc: Denys Vlasenko <dvlasenk@redhat.com>
+Cc: Doug Thompson <dougthompson@xmission.com>
+Cc: Eduardo Valentin <edubezval@gmail.com>
+Cc: H. Peter Anvin <hpa@zytor.com>
+Cc: Jacob Pan <jacob.jun.pan@linux.intel.com>
+Cc: Kan Liang <kan.liang@intel.com>
+Cc: Len Brown <lenb@kernel.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Mauro Carvalho Chehab <mchehab@osg.samsung.com>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+Cc: Rajneesh Bhardwaj <rajneesh.bhardwaj@intel.com>
+Cc: Souvik Kumar Chakravarty <souvik.k.chakravarty@intel.com>
+Cc: Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>
+Cc: Stephane Eranian <eranian@google.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Tony Luck <tony.luck@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Viresh Kumar <viresh.kumar@linaro.org>
+Cc: Vishwanath Somayaji <vishwanath.somayaji@intel.com>
+Cc: Zhang Rui <rui.zhang@intel.com>
+Cc: jacob.jun.pan@intel.com
+Cc: linux-acpi@vger.kernel.org
+Cc: linux-edac@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org
+Cc: linux-pm@vger.kernel.org
+Cc: platform-driver-x86@vger.kernel.org
+Link: http://lkml.kernel.org/r/20160603001927.F2A7D828@viggo.jf.intel.com
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+---
+ arch/x86/include/asm/intel-family.h | 68 +++++++++++++++++++++++++++++++++++++
+ 1 file changed, 68 insertions(+)
+ create mode 100644 arch/x86/include/asm/intel-family.h
+
+diff --git a/arch/x86/include/asm/intel-family.h b/arch/x86/include/asm/intel-family.h
+new file mode 100644
+index 000000000000..6999f7d01a0d
+--- /dev/null
++++ b/arch/x86/include/asm/intel-family.h
+@@ -0,0 +1,68 @@
++#ifndef _ASM_X86_INTEL_FAMILY_H
++#define _ASM_X86_INTEL_FAMILY_H
++
++/*
++ * "Big Core" Processors (Branded as Core, Xeon, etc...)
++ *
++ * The "_X" parts are generally the EP and EX Xeons, or the
++ * "Extreme" ones, like Broadwell-E.
++ *
++ * Things ending in "2" are usually because we have no better
++ * name for them.  There's no processor called "WESTMERE2".
++ */
++
++#define INTEL_FAM6_CORE_YONAH		0x0E
++#define INTEL_FAM6_CORE2_MEROM		0x0F
++#define INTEL_FAM6_CORE2_MEROM_L	0x16
++#define INTEL_FAM6_CORE2_PENRYN		0x17
++#define INTEL_FAM6_CORE2_DUNNINGTON	0x1D
++
++#define INTEL_FAM6_NEHALEM		0x1E
++#define INTEL_FAM6_NEHALEM_EP		0x1A
++#define INTEL_FAM6_NEHALEM_EX		0x2E
++#define INTEL_FAM6_WESTMERE		0x25
++#define INTEL_FAM6_WESTMERE2		0x1F
++#define INTEL_FAM6_WESTMERE_EP		0x2C
++#define INTEL_FAM6_WESTMERE_EX		0x2F
++
++#define INTEL_FAM6_SANDYBRIDGE		0x2A
++#define INTEL_FAM6_SANDYBRIDGE_X	0x2D
++#define INTEL_FAM6_IVYBRIDGE		0x3A
++#define INTEL_FAM6_IVYBRIDGE_X		0x3E
++
++#define INTEL_FAM6_HASWELL_CORE		0x3C
++#define INTEL_FAM6_HASWELL_X		0x3F
++#define INTEL_FAM6_HASWELL_ULT		0x45
++#define INTEL_FAM6_HASWELL_GT3E		0x46
++
++#define INTEL_FAM6_BROADWELL_CORE	0x3D
++#define INTEL_FAM6_BROADWELL_XEON_D	0x56
++#define INTEL_FAM6_BROADWELL_GT3E	0x47
++#define INTEL_FAM6_BROADWELL_X		0x4F
++
++#define INTEL_FAM6_SKYLAKE_MOBILE	0x4E
++#define INTEL_FAM6_SKYLAKE_DESKTOP	0x5E
++#define INTEL_FAM6_SKYLAKE_X		0x55
++#define INTEL_FAM6_KABYLAKE_MOBILE	0x8E
++#define INTEL_FAM6_KABYLAKE_DESKTOP	0x9E
++
++/* "Small Core" Processors (Atom) */
++
++#define INTEL_FAM6_ATOM_PINEVIEW	0x1C
++#define INTEL_FAM6_ATOM_LINCROFT	0x26
++#define INTEL_FAM6_ATOM_PENWELL		0x27
++#define INTEL_FAM6_ATOM_CLOVERVIEW	0x35
++#define INTEL_FAM6_ATOM_CEDARVIEW	0x36
++#define INTEL_FAM6_ATOM_SILVERMONT1	0x37 /* BayTrail/BYT / Valleyview */
++#define INTEL_FAM6_ATOM_SILVERMONT2	0x4D /* Avaton/Rangely */
++#define INTEL_FAM6_ATOM_AIRMONT		0x4C /* CherryTrail / Braswell */
++#define INTEL_FAM6_ATOM_MERRIFIELD1	0x4A /* Tangier */
++#define INTEL_FAM6_ATOM_MERRIFIELD2	0x5A /* Annidale */
++#define INTEL_FAM6_ATOM_GOLDMONT	0x5C
++#define INTEL_FAM6_ATOM_DENVERTON	0x5F /* Goldmont Microserver */
++
++/* Xeon Phi */
++
++#define INTEL_FAM6_XEON_PHI_KNL		0x57 /* Knights Landing */
++
++#endif /* _ASM_X86_INTEL_FAMILY_H */
+-- 
+2.16.0
+
