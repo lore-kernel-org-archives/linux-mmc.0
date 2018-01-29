@@ -1,373 +1,312 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: [PATCH v8] mmc: sdhci: Implement an SDHCI-specific bounce buffer
-Date: Mon, 29 Jan 2018 00:44:53 +0100
-Message-ID: <20180128234453.2880-1-linus.walleij@linaro.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC for v.4.16
+Date: Mon, 29 Jan 2018 11:14:48 +0100
+Message-ID: <1517220888-4431-1-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-Return-path: <stable-owner@vger.kernel.org>
-Sender: stable-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Benjamin Beckmeyer <beckmeyer.b@rittal.de>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Pierre Ossman <pierre@ossman.eu>, =?UTF-8?q?Beno=C3=AEt=20Th=C3=A9baudeau?= <benoit@wsystem.com>, Fabio Estevam <fabio.estevam@nxp.com>, stable@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f51.google.com ([74.125.82.51]:34008 "EHLO
+        mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751204AbeA2KOy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Jan 2018 05:14:54 -0500
+Received: by mail-wm0-f51.google.com with SMTP id j21so35669571wmh.1
+        for <linux-mmc@vger.kernel.org>; Mon, 29 Jan 2018 02:14:53 -0800 (PST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>
 
-The bounce buffer is gone from the MMC core, and now we found out
-that there are some (crippled) i.MX boards out there that have broken
-ADMA (cannot do scatter-gather), and also broken PIO so they must
-use SDMA. Closer examination shows a less significant slowdown
-also on SDMA-only capable Laptop hosts.
+Hi Linus,
 
-SDMA sets down the number of segments to one, so that each segment
-gets turned into a singular request that ping-pongs to the block
-layer before the next request/segment is issued.
+Here's the PR for MMC for v4.16. Details about the highlights are as usual found
+in the signed tag.
 
-Apparently it happens a lot that the block layer send requests
-that include a lot of physically discontiguous segments. My guess
-is that this phenomenon is coming from the file system.
+Please pull this in!
 
-These devices that cannot handle scatterlists in hardware can see
-major benefits from a DMA-contiguous bounce buffer.
+Kind regards
+Ulf Hansson
 
-This patch accumulates those fragmented scatterlists in a physically
-contiguous bounce buffer so that we can issue bigger DMA data chunks
-to/from the card.
 
-When tested with a PCI-integrated host (1217:8221) that
-only supports SDMA:
-0b:00.0 SD Host controller: O2 Micro, Inc. OZ600FJ0/OZ900FJ0/OZ600FJS
-        SD/MMC Card Reader Controller (rev 05)
-This patch gave ~1Mbyte/s improved throughput on large reads and
-writes when testing using iozone than without the patch.
+The following changes since commit 50c4c4e268a2d7a3e58ebb698ac74da0de40ae36:
 
-dmesg:
-sdhci-pci 0000:0b:00.0: SDHCI controller found [1217:8221] (rev 5)
-mmc0 bounce up to 128 segments into one, max segment size 65536 bytes
-mmc0: SDHCI controller on PCI [0000:0b:00.0] using DMA
+  Linux 4.15-rc3 (2017-12-10 17:56:26 -0800)
 
-On the i.MX SDHCI controllers on the crippled i.MX 25 and i.MX 35
-the patch restores the performance to what it was before we removed
-the bounce buffers.
+are available in the git repository at:
 
-Cc: Pierre Ossman <pierre@ossman.eu>
-Cc: Benoît Thébaudeau <benoit@wsystem.com>
-Cc: Fabio Estevam <fabio.estevam@nxp.com>
-Cc: Benjamin Beckmeyer <beckmeyer.b@rittal.de>
-Cc: stable@vger.kernel.org # v4.14+
-Fixes: de3ee99b097d ("mmc: Delete bounce buffer handling")
-Tested-by: Benjamin Beckmeyer <beckmeyer.b@rittal.de>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
----
-ChangeLog v7->v8:
-- Fixed bad information and spelling mistakes in the commit
-  message.
-- Use sdhci_sdma_address() in one more spot identified by Adrian.
-- Collected Adrian's ACK.
-ChangeLog v6->v7:
-- Fix the directions on dma_sync_for[device|cpu]() so the
-  ownership of the buffer gets swapped properly and in the right
-  direction for every transfer. Didn't see this because x86 PCI is
-  DMA coherent...
-- Tested and greelighted on i.MX 25.
-- Also tested on the PCI version.
-ChangeLog v5->v6:
-- Again switch back to explicit sync of buffers. I want to get this
-  solution to work because it gives more control and it's more
-  elegant.
-- Update host->max_req_size as noted by Adrian, hopefully this
-  fixes the i.MX. I was just lucky on my Intel laptop I guess:
-  the block stack never requested anything bigger than 64KB and
-  that was why it worked even if max_req_size was bigger than
-  what would fit in the bounce buffer.
-- Copy the number of bytes in the mmc_data instead of the number
-  of bytes in the bounce buffer. For RX this is blksize * blocks
-  and for TX this is bytes_xfered.
-- Break out a sdhci_sdma_address() for getting the DMA address
-  for either the raw sglist or the bounce buffer depending on
-  configuration.
-- Add some explicit bounds check for the data so that we do not
-  attempt to copy more than the bounce buffer size even if the
-  block layer is erroneously configured.
-- Move allocation of bounce buffer out to its own function.
-- Use pr_[info|err] throughout so all debug prints from the
-  driver come out in the same manner and style.
-- Use unsigned int for the bounce buffer size.
-- Re-tested with iozone: we still get the same nice performance
-  improvements.
-- Request a text on i.MX (hi Benjamin)
-ChangeLog v4->v5:
-- Go back to dma_alloc_coherent() as this apparently works better.
-- Keep the other changes, cap for 64KB, fall back to single segments.
-- Requesting a test of this on i.MX. (Sorry Benjamin.)
-ChangeLog v3->v4:
-- Cap the bounce buffer to 64KB instead of the biggest segment
-  as we experience diminishing returns with buffers > 64KB.
-- Instead of using dma_alloc_coherent(), use good old devm_kmalloc()
-  and issue dma_sync_single_for*() to explicitly switch
-  ownership between CPU and the device. This way we exercise the
-  cache better and may consume less CPU.
-- Bail out with single segments if we cannot allocate a bounce
-  buffer.
-- Tested on the PCI SDHCI on my laptop: requesting a new test
-  on i.MX from Benjamin. (Please!)
-ChangeLog v2->v3:
-- Rewrite the commit message a bit
-- Add Benjamin's Tested-by
-- Add Fixes and stable tags
-ChangeLog v1->v2:
-- Skip the remapping and fiddling with the buffer, instead use
-  dma_alloc_coherent() and use a simple, coherent bounce buffer.
-- Couple kernel messages to ->parent of the mmc_host as it relates
-  to the hardware characteristics.
----
- drivers/mmc/host/sdhci.c | 164 ++++++++++++++++++++++++++++++++++++++++++++---
- drivers/mmc/host/sdhci.h |   3 +
- 2 files changed, 159 insertions(+), 8 deletions(-)
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v4.16
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index e9290a3439d5..d24306b2b839 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -21,6 +21,7 @@
- #include <linux/dma-mapping.h>
- #include <linux/slab.h>
- #include <linux/scatterlist.h>
-+#include <linux/sizes.h>
- #include <linux/swiotlb.h>
- #include <linux/regulator/consumer.h>
- #include <linux/pm_runtime.h>
-@@ -502,8 +503,35 @@ static int sdhci_pre_dma_transfer(struct sdhci_host *host,
- 	if (data->host_cookie == COOKIE_PRE_MAPPED)
- 		return data->sg_count;
- 
--	sg_count = dma_map_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
--			      mmc_get_dma_dir(data));
-+	/* Bounce write requests to the bounce buffer */
-+	if (host->bounce_buffer) {
-+		unsigned int length = data->blksz * data->blocks;
-+
-+		if (length > host->bounce_buffer_size) {
-+			pr_err("%s: asked for transfer of %u bytes exceeds bounce buffer %u bytes\n",
-+			       mmc_hostname(host->mmc), length,
-+			       host->bounce_buffer_size);
-+			return -EIO;
-+		}
-+		if (mmc_get_dma_dir(data) == DMA_TO_DEVICE) {
-+			/* Copy the data to the bounce buffer */
-+			sg_copy_to_buffer(data->sg, data->sg_len,
-+					  host->bounce_buffer,
-+					  length);
-+		}
-+		/* Switch ownership to the DMA */
-+		dma_sync_single_for_device(host->mmc->parent,
-+					   host->bounce_addr,
-+					   host->bounce_buffer_size,
-+					   mmc_get_dma_dir(data));
-+		/* Just a dummy value */
-+		sg_count = 1;
-+	} else {
-+		/* Just access the data directly from memory */
-+		sg_count = dma_map_sg(mmc_dev(host->mmc),
-+				      data->sg, data->sg_len,
-+				      mmc_get_dma_dir(data));
-+	}
- 
- 	if (sg_count == 0)
- 		return -ENOSPC;
-@@ -673,6 +701,14 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
- 	}
- }
- 
-+static u32 sdhci_sdma_address(struct sdhci_host *host)
-+{
-+	if (host->bounce_buffer)
-+		return host->bounce_addr;
-+	else
-+		return sg_dma_address(host->data->sg);
-+}
-+
- static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
- {
- 	u8 count;
-@@ -858,8 +894,8 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
- 					     SDHCI_ADMA_ADDRESS_HI);
- 		} else {
- 			WARN_ON(sg_cnt != 1);
--			sdhci_writel(host, sg_dma_address(data->sg),
--				SDHCI_DMA_ADDRESS);
-+			sdhci_writel(host, sdhci_sdma_address(host),
-+				     SDHCI_DMA_ADDRESS);
- 		}
- 	}
- 
-@@ -2248,7 +2284,12 @@ static void sdhci_pre_req(struct mmc_host *mmc, struct mmc_request *mrq)
- 
- 	mrq->data->host_cookie = COOKIE_UNMAPPED;
- 
--	if (host->flags & SDHCI_REQ_USE_DMA)
-+	/*
-+	 * No pre-mapping in the pre hook if we're using the bounce buffer,
-+	 * for that we would need two bounce buffers since one buffer is
-+	 * in flight when this is getting called.
-+	 */
-+	if (host->flags & SDHCI_REQ_USE_DMA && !host->bounce_buffer)
- 		sdhci_pre_dma_transfer(host, mrq->data, COOKIE_PRE_MAPPED);
- }
- 
-@@ -2352,8 +2393,45 @@ static bool sdhci_request_done(struct sdhci_host *host)
- 		struct mmc_data *data = mrq->data;
- 
- 		if (data && data->host_cookie == COOKIE_MAPPED) {
--			dma_unmap_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
--				     mmc_get_dma_dir(data));
-+			if (host->bounce_buffer) {
-+				/*
-+				 * On reads, copy the bounced data into the
-+				 * sglist
-+				 */
-+				if (mmc_get_dma_dir(data) == DMA_FROM_DEVICE) {
-+					unsigned int length = data->bytes_xfered;
-+
-+					if (length > host->bounce_buffer_size) {
-+						pr_err("%s: bounce buffer is %u bytes but DMA claims to have transferred %u bytes\n",
-+						       mmc_hostname(host->mmc),
-+						       host->bounce_buffer_size,
-+						       data->bytes_xfered);
-+						/* Cap it down and continue */
-+						length = host->bounce_buffer_size;
-+					}
-+					dma_sync_single_for_cpu(
-+						host->mmc->parent,
-+						host->bounce_addr,
-+						host->bounce_buffer_size,
-+						DMA_FROM_DEVICE);
-+					sg_copy_from_buffer(data->sg,
-+						data->sg_len,
-+						host->bounce_buffer,
-+						length);
-+				} else {
-+					/* No copying, just switch ownership */
-+					dma_sync_single_for_cpu(
-+						host->mmc->parent,
-+						host->bounce_addr,
-+						host->bounce_buffer_size,
-+						mmc_get_dma_dir(data));
-+				}
-+			} else {
-+				/* Unmap the raw data */
-+				dma_unmap_sg(mmc_dev(host->mmc), data->sg,
-+					     data->sg_len,
-+					     mmc_get_dma_dir(data));
-+			}
- 			data->host_cookie = COOKIE_UNMAPPED;
- 		}
- 	}
-@@ -2636,7 +2714,8 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
- 		 */
- 		if (intmask & SDHCI_INT_DMA_END) {
- 			u32 dmastart, dmanow;
--			dmastart = sg_dma_address(host->data->sg);
-+
-+			dmastart = sdhci_sdma_address(host);
- 			dmanow = dmastart + host->data->bytes_xfered;
- 			/*
- 			 * Force update to the next DMA block boundary.
-@@ -3217,6 +3296,68 @@ void __sdhci_read_caps(struct sdhci_host *host, u16 *ver, u32 *caps, u32 *caps1)
- }
- EXPORT_SYMBOL_GPL(__sdhci_read_caps);
- 
-+static int sdhci_allocate_bounce_buffer(struct sdhci_host *host)
-+{
-+	struct mmc_host *mmc = host->mmc;
-+	unsigned int max_blocks;
-+	unsigned int bounce_size;
-+	int ret;
-+
-+	/*
-+	 * Cap the bounce buffer at 64KB. Using a bigger bounce buffer
-+	 * has diminishing returns, this is probably because SD/MMC
-+	 * cards are usually optimized to handle this size of requests.
-+	 */
-+	bounce_size = SZ_64K;
-+	/*
-+	 * Adjust downwards to maximum request size if this is less
-+	 * than our segment size, else hammer down the maximum
-+	 * request size to the maximum buffer size.
-+	 */
-+	if (mmc->max_req_size < bounce_size)
-+		bounce_size = mmc->max_req_size;
-+	max_blocks = bounce_size / 512;
-+
-+	/*
-+	 * When we just support one segment, we can get significant
-+	 * speedups by the help of a bounce buffer to group scattered
-+	 * reads/writes together.
-+	 */
-+	host->bounce_buffer = devm_kmalloc(mmc->parent,
-+					   bounce_size,
-+					   GFP_KERNEL);
-+	if (!host->bounce_buffer) {
-+		pr_err("%s: failed to allocate %u bytes for bounce buffer, falling back to single segments\n",
-+		       mmc_hostname(mmc),
-+		       bounce_size);
-+		/*
-+		 * Exiting with zero here makes sure we proceed with
-+		 * mmc->max_segs == 1.
-+		 */
-+		return 0;
-+	}
-+
-+	host->bounce_addr = dma_map_single(mmc->parent,
-+					   host->bounce_buffer,
-+					   bounce_size,
-+					   DMA_BIDIRECTIONAL);
-+	ret = dma_mapping_error(mmc->parent, host->bounce_addr);
-+	if (ret)
-+		/* Again fall back to max_segs == 1 */
-+		return 0;
-+	host->bounce_buffer_size = bounce_size;
-+
-+	/* Lie about this since we're bouncing */
-+	mmc->max_segs = max_blocks;
-+	mmc->max_seg_size = bounce_size;
-+	mmc->max_req_size = bounce_size;
-+
-+	pr_info("%s bounce up to %u segments into one, max segment size %u bytes\n",
-+		mmc_hostname(mmc), max_blocks, bounce_size);
-+
-+	return 0;
-+}
-+
- int sdhci_setup_host(struct sdhci_host *host)
- {
- 	struct mmc_host *mmc;
-@@ -3713,6 +3854,13 @@ int sdhci_setup_host(struct sdhci_host *host)
- 	 */
- 	mmc->max_blk_count = (host->quirks & SDHCI_QUIRK_NO_MULTIBLOCK) ? 1 : 65535;
- 
-+	if (mmc->max_segs == 1) {
-+		/* This may alter mmc->*_blk_* parameters */
-+		ret = sdhci_allocate_bounce_buffer(host);
-+		if (ret)
-+			return ret;
-+	}
-+
- 	return 0;
- 
- unreg:
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 54bc444c317f..1d7d61e25dbf 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -440,6 +440,9 @@ struct sdhci_host {
- 
- 	int irq;		/* Device IRQ */
- 	void __iomem *ioaddr;	/* Mapped address */
-+	char *bounce_buffer;	/* For packing SDMA reads/writes */
-+	dma_addr_t bounce_addr;
-+	unsigned int bounce_buffer_size;
- 
- 	const struct sdhci_ops *ops;	/* Low level hw interface */
- 
--- 
-2.14.3
+for you to fetch changes up to 310eb252a78307fc2ac4c4c755290a578c0304d0:
+
+  mmc: mmci: fix error return code in mmci_probe() (2018-01-24 13:51:07 +0100)
+
+----------------------------------------------------------------
+There are two major achievements for MMC in this release, which deserves to be
+specially highlighted.
+
+First, we have converted the MMC block device from using the legacy blk
+interface into using the modern blkmq interface. Not only do we get all the
+nice effects from using blkmq, but it also means that new fresh nice code
+replaces old rusty code. Great news to everybody that cares about MMC/SD!
+
+It should also be noted that converting to blkmq has not been trivial, mostly
+because of that we have been carrying too much of MMC specific optimizations
+for the I/O request path, rather than striving to move these to the generic blk
+layer. Hopefully we won't be doing that mistake, ever again.
+
+Special thanks to Adrian Hunter (Intel) and to Linus Walleij (Linaro), who both
+have been working on this for quite some time!
+
+Second, on top of the blkmq deployment, we have enabled full support the eMMC
+command queuing feature, introduced in the eMMC v.5.1 spec. This also includes
+an implementation of a host driver library, supporting the corresponding CQHCI
+HW. Ideally, those controllers that supports CQHCI should only need some minor
+adaptations to make this play.
+
+So far the sdhci-pci driver for the Intel GLKs and the sdhci-of-arasan driver
+used on Rockchip RK3399, have enabled support for eMMC command queueing.
+
+Worth to highlight is also that, implementing the eMMC command queuing support
+has been a collaborative effort, as several people from Codeaurora, Rockchip,
+Intel and Linaro have been involved. However, the work has been driven by
+Adrian Hunter (Intel).
+
+In some shadow of the above, here are the rest of the highlights:
+
+MMC core:
+ - Don't remove non-removable cards during system suspend
+ - Add a slot-gpio helper to check capability of GPIO WP detection
+
+MMC host:
+ - sdhci: Cleanups and improvements of some wakeup related code
+ - sdhci-pci-arasan: New variant to support Arasan PCI HW with integrated phy
+ - sdhci-acpi: Avoid broken UHS transfer modes on Intel CHT
+ - sdhci-acpi: Add support for ACPI HID of AMD Controller with HS400
+ - sdhci_f_sdh30: Add ACPI support
+ - sdhci-esdhc-imx: Enable/disable clock at runtime suspend/resume
+ - sdhci-of-esdhc: A few minor fixes
+ - mmci: Add support for new STM32 variant
+ - renesas_sdhi: enable R-Car D3 (r8a77995) support
+ - tmio/renesas_sdhi: Re-structuring, cleanups and modernizations
+
+----------------------------------------------------------------
+Adam Borowski (1):
+      mmc: sunxi: fix mojibake in module metadata
+
+Adrian Hunter (31):
+      mmc: block: No need to export mmc_cleanup_queue()
+      mmc: block: Simplify cleaning up the queue
+      mmc: core: Make mmc_pre_req() and mmc_post_req() available
+      mmc: block: Add error-handling comments
+      mmc: core: Add parameter use_blk_mq
+      mmc: block: Add blk-mq support
+      mmc: block: Add CQE support
+      mmc: sdhci-pci: Add CQHCI support for Intel GLK
+      mmc: block: blk-mq: Add support for direct completion
+      mmc: block: blk-mq: Separate card polling from recovery
+      mmc: block: Make card_busy_detect() accumulate all response error bits
+      mmc: block: blk-mq: Check error bits and save the exception bit when polling card busy
+      mmc: block: Check the timeout correctly in card_busy_detect()
+      mmc: block: Check for transfer state in card_busy_detect()
+      mmc: block: Add timeout_clks when calculating timeout
+      mmc: block: Reduce polling timeout from 10 minutes to 10 seconds
+      mmc: block: blk-mq: Stop using legacy recovery
+      mmc: mmc_test: Do not use mmc_start_areq() anymore
+      mmc: core: Ensure cmd_completion is initialized
+      mmc: mmc_test: Ensure command queue is disabled for testing
+      mmc: core: Remove option not to use blk-mq
+      mmc: block: Remove code no longer needed after the switch to blk-mq
+      mmc: core: Remove code no longer needed after the switch to blk-mq
+      mmc: cqhci: Ensure macro parameters are wrapped in parentheses
+      mmc: sdhci-acpi: Add setup_host() callback
+      mmc: sdhci-acpi: Avoid broken UHS transfer modes on Intel CHT
+      mmc: sdhci-pci: Stop calling sdhci_enable_irq_wakeups()
+      mmc: sdhci-pci: Use device wakeup capability to determine MMC_PM_WAKE_SDIO_IRQ capability
+      mmc: sdhci: Stop exporting sdhci_enable_irq_wakeups()
+      mmc: sdhci: Handle failure of enable_irq_wake()
+      mmc: sdhci: Rework sdhci_enable_irq_wakeups()
+
+Andy Shevchenko (1):
+      sdhci: Advertise 2.0v supply on SDIO host controller
+
+Ard Biesheuvel (1):
+      mmc: sdhci_f_sdh30: add ACPI support
+
+Arnd Bergmann (3):
+      mmc_test: use ktime_get_ts64 for timestamps
+      mmc: s3mci: mark debug_regs[] as static
+      mmc: tmio: hide unused tmio_mmc_clk_disable/tmio_mmc_clk_enable functions
+
+Arvind Yadav (5):
+      mmc: meson-gx-mmc: Fix platform_get_irq's error checking
+      mmc: s3cmci: Fix platform_get_irq's error checking
+      mmc: sdhci-acpi: Handle return value of platform_get_irq
+      mmc: sdhci-spear: Handle return value of platform_get_irq
+      mmc: sunxi-mmc: Handle return value of platform_get_irq
+
+Atul Garg (1):
+      mmc:host:sdhci-pci:Addition of Arasan PCI Controller with integrated phy.
+
+Benoît Thébaudeau (1):
+      mmc: sdhci-esdhc-imx: Fix i.MX53 eSDHCv3 clock
+
+Christoph Fritz (1):
+      mmc: core: apply NO_CMD23 quirk to some specific cards
+
+Colin Ian King (2):
+      mmc: block: make function mmc_cqe_issue_type static
+      mmc: sh_mmcif: remove redundant initialization of 'opc'
+
+Dan Carpenter (2):
+      mmc: block: blk-mq: Potential NULL deref on mmc_blk_alloc_req() failure
+      mmc: tmio, renesas_sdhi: Remove unneeded NULL check
+
+Daniel Drake (1):
+      mmc: avoid removing non-removable hosts during suspend
+
+David Lechner (2):
+      mmc: davinci: dont' use module_platform_driver_probe()
+      mmc: davinci: suppress error message on EPROBE_DEFER
+
+Liu, Changcheng (1):
+      mmc: block: fix logical error to avoid memory leak
+
+Masaharu Hayakawa (1):
+      mmc: renesas_sdhi: Add MODULE_LICENSE
+
+Masahiro Yamada (21):
+      mmc: slot-gpio: call gpiod_to_irq() only when MMC_CAP_NEEDS_POLL is unset
+      mmc: renesas_sdhi: consolidate DMAC CONFIG options
+      mmc: renesas_sdhi: remove wrong depends on to enable compile test
+      mmc: renesas_sdhi: remove eprobe jump label
+      mmc: tmio: set tmio_mmc_host to driver data
+      mmc: tmio: use devm_ioremap_resource() instead of devm_ioremap()
+      mmc: tmio: move mmc_host_ops to struct tmio_mmc_host from static data
+      mmc: tmio, renesas_sdhi: set mmc_host_ops hooks directly
+      mmc: tmio: move mmc_gpio_request_cd() before mmc_add_host()
+      mmc: renesas_sdhi: remove always false condition
+      mmc: tmio, renesas_sdhi: move struct tmio_mmc_dma to renesas_sdhi.h
+      mmc: tmio, renesas_sdhi: move Renesas-specific DMA data to renesas_sdhi.h
+      mmc: tmio,renesas_sdhi: move ssc_tappos to renesas_sdhi.h
+      mmc: tmio: change bus_shift to unsigned int
+      mmc: tmio: use mmc_can_gpio_cd() instead of checking TMIO_MMC_USE_GPIO_CD
+      mmc: tmio: ioremap memory resource in tmio_mmc_host_alloc()
+      mmc: tmio: move clk_enable/disable out of tmio_mmc_host_probe()
+      mmc: tmio: move {tmio_}mmc_of_parse() to tmio_mmc_host_alloc()
+      mmc: tmio: remove dma_ops from tmio_mmc_host_probe() argument
+      mmc: slot-gpio: add a helper to check capability of GPIO WP detection
+      mmc: tmio: refactor .get_ro hook
+
+Michael Trimarchi (3):
+      mmc: sdhci-esdhc-imx: Manage sdhci_runtime_suspend_host error code
+      mmc: sdhci-esdhc-imx: Changes the order of how clocks are being re-enabled
+      mmc: sdhci-esdhc-imx: Enable/Disable mmc clock during runtime suspend
+
+Milan Stevanovic (1):
+      mmc: sdhci-of-arasan: Add sdhci_arasan_set_power
+
+Patrice Chotard (5):
+      mmc: mmci: Don't pretend all variants to have MMCIMASK1 register
+      mmc: mmci: Don't pretend all variants to have MCI_STARBITERR flag
+      mmc: mmci: Don't pretend all variants to have OPENDRAIN bit
+      mmc: mmci: Add support for setting pad type via pinctrl
+      mmc: mmci: Add STM32 variant
+
+Pravin Shedge (1):
+      mmc: android-goldfish: remove duplicate includes
+
+Sean Wang (1):
+      mmc: dt-bindings: add mmc support to MT7623 SoC
+
+Shah Nehal-Bakulchandra (1):
+      mmc: sdhci-acpi: Add support for ACPI HID of AMD Controller with HS400
+
+Shawn Lin (1):
+      mmc: sdhci-of-arasan: Add CQHCI support for arasan,sdhci-5.1
+
+Ulf Hansson (5):
+      Merge branch 'fixes' into next
+      Merge branch 'fixes' into next
+      Merge branch 'fixes' into next
+      Merge branch 'fixes' into next
+      Merge branch 'fixes' into next
+
+Ulrich Hecht (2):
+      dt-bindings: mmc: renesas_sdhi: Add r8a77995 support
+      mmc: renesas_sdhi: enable R-Car D3 (r8a77995) support
+
+Venkat Gopalakrishnan (1):
+      mmc: cqhci: support for command queue enabled host
+
+Wei Yongjun (1):
+      mmc: mmci: fix error return code in mmci_probe()
+
+Wolfram Sang (5):
+      mmc: core: properly init drv_type
+      mmc: core: use usleep_range rather than HZ magic in mmc_delay()
+      mmc: tmio: use usleep_range consistently
+      mmc: tmio: use ioread* for repeated access to a register
+      mmc: tmio: use io* accessors consistently
+
+Wu Fengguang (1):
+      mmc: block: blk-mq: fix boolreturn.cocci warnings
+
+Zhoujie Wu (1):
+      mmc: sdhci-xenon: wait 5ms after set 1.8V signal enable
+
+yinbo.zhu (2):
+      mmc: sdhci-of-esdhc: fix eMMC couldn't work after kexec
+      mmc: sdhci-of-esdhc: fix the mmc error after sleep on ls1046ardb
+
+ Documentation/devicetree/bindings/mmc/mtk-sd.txt   |    2 +
+ Documentation/devicetree/bindings/mmc/tmio_mmc.txt |    1 +
+ drivers/mmc/core/block.c                           | 1385 +++++++++++---------
+ drivers/mmc/core/block.h                           |   12 +-
+ drivers/mmc/core/bus.c                             |    2 -
+ drivers/mmc/core/card.h                            |    2 +
+ drivers/mmc/core/core.c                            |  228 +---
+ drivers/mmc/core/core.h                            |   47 +-
+ drivers/mmc/core/host.h                            |    6 +-
+ drivers/mmc/core/mmc.c                             |    2 +-
+ drivers/mmc/core/mmc_test.c                        |  221 ++--
+ drivers/mmc/core/queue.c                           |  504 ++++---
+ drivers/mmc/core/queue.h                           |   64 +-
+ drivers/mmc/core/quirks.h                          |    8 +
+ drivers/mmc/core/slot-gpio.c                       |   22 +-
+ drivers/mmc/host/Kconfig                           |   22 +-
+ drivers/mmc/host/Makefile                          |   11 +-
+ drivers/mmc/host/android-goldfish.c                |    2 -
+ drivers/mmc/host/cqhci.c                           | 1150 ++++++++++++++++
+ drivers/mmc/host/cqhci.h                           |  240 ++++
+ drivers/mmc/host/davinci_mmc.c                     |   17 +-
+ drivers/mmc/host/meson-gx-mmc.c                    |    2 +-
+ drivers/mmc/host/mmci.c                            |  127 +-
+ drivers/mmc/host/mmci.h                            |    6 +
+ drivers/mmc/host/renesas_sdhi.h                    |   22 +
+ drivers/mmc/host/renesas_sdhi_core.c               |   52 +-
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c      |   15 +-
+ drivers/mmc/host/renesas_sdhi_sys_dmac.c           |   37 +-
+ drivers/mmc/host/s3cmci.c                          |    8 +-
+ drivers/mmc/host/sdhci-acpi.c                      |  132 +-
+ drivers/mmc/host/sdhci-esdhc-imx.c                 |   36 +-
+ drivers/mmc/host/sdhci-of-arasan.c                 |  149 ++-
+ drivers/mmc/host/sdhci-of-esdhc.c                  |    8 +
+ drivers/mmc/host/sdhci-pci-arasan.c                |  331 +++++
+ drivers/mmc/host/sdhci-pci-core.c                  |  218 ++-
+ drivers/mmc/host/sdhci-pci.h                       |    7 +-
+ drivers/mmc/host/sdhci-spear.c                     |    4 +
+ drivers/mmc/host/sdhci-xenon.c                     |    7 +
+ drivers/mmc/host/sdhci.c                           |   57 +-
+ drivers/mmc/host/sdhci.h                           |    2 +-
+ drivers/mmc/host/sdhci_f_sdh30.c                   |   52 +-
+ drivers/mmc/host/sh_mmcif.c                        |    2 +-
+ drivers/mmc/host/sunxi-mmc.c                       |    9 +-
+ drivers/mmc/host/tmio_mmc.c                        |   23 +-
+ drivers/mmc/host/tmio_mmc.h                        |   43 +-
+ drivers/mmc/host/tmio_mmc_core.c                   |  152 +--
+ include/linux/mmc/host.h                           |    5 +-
+ include/linux/mmc/slot-gpio.h                      |    1 +
+ 48 files changed, 4009 insertions(+), 1446 deletions(-)
+ create mode 100644 drivers/mmc/host/cqhci.c
+ create mode 100644 drivers/mmc/host/cqhci.h
+ create mode 100644 drivers/mmc/host/sdhci-pci-arasan.c
