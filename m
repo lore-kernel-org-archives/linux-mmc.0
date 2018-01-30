@@ -1,13 +1,13 @@
 From: Ulf Magnusson <ulfalizer@gmail.com>
-Subject: [PATCH 03/10] mmc: kconfig: Remove empty help text
-Date: Tue, 30 Jan 2018 20:05:25 +0100
-Message-ID: <20180130190555.6577-4-ulfalizer@gmail.com>
-References: <20180130190555.6577-1-ulfalizer@gmail.com>
+Subject: [PATCH v2 03/10] mmc: kconfig: Remove empty help text
+Date: Tue, 30 Jan 2018 20:22:58 +0100
+Message-ID: <20180130192349.8420-4-ulfalizer@gmail.com>
+References: <20180130192349.8420-1-ulfalizer@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180130190555.6577-1-ulfalizer@gmail.com>
+In-Reply-To: <20180130192349.8420-1-ulfalizer@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kbuild@vger.kernel.org
-Cc: yamada.masahiro@socionext.com, mcgrof@kernel.org, Ulf Magnusson <ulfalizer@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, David Daney <david.daney@cavium.com>, Linus Walleij <linus.walleij@linaro.org>, Jan Glauber <jglauber@cavium.com>, Shawn Lin <shawn.lin@rock-chips.com>, Simon Horman <horms+renesas@verge.net.au>, Eric Anholt <eric@anholt.net>, Venkat Gopalakrishnan <venkatg@codeaurora.org>, Carlo Caione <carlo@endlessm.com>, Kishon Vijay Abraham I <kishon@ti.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Rui Feng <rui_feng@realsil.com.cn>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, yamada.masahiro@socionext.com, mcgrof@kernel.org, Ulf Magnusson <ulfalizer@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Arnd Bergmann <arnd@arndb.de>, Jan Glauber <jglauber@cavium.com>, Simon Horman <horms+renesas@verge.net.au>, Shawn Lin <shawn.lin@rock-chips.com>, Eric Anholt <eric@anholt.net>, Carlo Caione <carlo@endlessm.com>, Venkat Gopalakrishnan <venkatg@codeaurora.org>, Kishon Vijay Abraham I <kishon@ti.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Rui Feng <rui_feng@realsil.com.cn>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
 In preparation for adding a warning ("kconfig: Warn if help text is
