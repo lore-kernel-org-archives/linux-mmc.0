@@ -1,17 +1,21 @@
 From: Ulf Magnusson <ulfalizer@gmail.com>
-Subject: [PATCH v2 03/10] mmc: kconfig: Remove empty help text
-Date: Tue, 30 Jan 2018 20:22:58 +0100
-Message-ID: <20180130192349.8420-4-ulfalizer@gmail.com>
-References: <20180130192349.8420-1-ulfalizer@gmail.com>
+Subject: [PATCH 03/11] mmc: kconfig: Remove blank help text
+Date: Wed, 31 Jan 2018 10:34:22 +0100
+Message-ID: <20180131093434.20050-4-ulfalizer@gmail.com>
+References: <20180131093434.20050-1-ulfalizer@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180130192349.8420-1-ulfalizer@gmail.com>
+In-Reply-To: <20180131093434.20050-1-ulfalizer@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kbuild@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, yamada.masahiro@socionext.com, mcgrof@kernel.org, Ulf Magnusson <ulfalizer@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Arnd Bergmann <arnd@arndb.de>, Jan Glauber <jglauber@cavium.com>, Simon Horman <horms+renesas@verge.net.au>, Shawn Lin <shawn.lin@rock-chips.com>, Eric Anholt <eric@anholt.net>, Carlo Caione <carlo@endlessm.com>, Venkat Gopalakrishnan <venkatg@codeaurora.org>, Kishon Vijay Abraham I <kishon@ti.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Rui Feng <rui_feng@realsil.com.cn>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, yamada.masahiro@socionext.com, mcgrof@kernel.org, rdunlap@infradead.org, dan.carpenter@oracle.com, pebolle@tiscali.nl, Ulf Magnusson <ulfalizer@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Shawn Lin <shawn.lin@rock-chips.com>, Simon Horman <horms+renesas@verge.net.au>, Jan Glauber <jglauber@cavium.com>, Eric Anholt <eric@anholt.net>, Carlo Caione <carlo@endlessm.com>, Venkat Gopalakrishnan <venkatg@codeaurora.org>, Kishon Vijay Abraham I <kishon@ti.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Rui Feng <rui_feng@realsil.com.cn>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-In preparation for adding a warning ("kconfig: Warn if help text is
-blank"): https://lkml.org/lkml/2018/1/30/516
+Blank help texts are probably either a typo, a Kconfig misunderstanding,
+or some kind of half-committing to adding a help text (in which case a
+TODO comment would be clearer, if the help text really can't be added
+right away).
+
+Best to remove them, IMO.
 
 Signed-off-by: Ulf Magnusson <ulfalizer@gmail.com>
 ---
