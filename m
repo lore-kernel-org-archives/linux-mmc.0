@@ -1,65 +1,37 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: MMC_SDHI_{SYS,INTERNAL}_DMAC should depend on HAS_DMA
-Date: Wed, 31 Jan 2018 11:31:40 +0100
-Message-ID: <CAPDyKFqRwGgZ17eteN8nytS2ub-tqoY2kHec7N05GK6ipAUUcg@mail.gmail.com>
-References: <1517318680-14918-1-git-send-email-geert@linux-m68k.org>
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Subject: Re: [PATCH 03/11] mmc: kconfig: Remove blank help text
+Date: Fri, 2 Feb 2018 02:09:15 +0900
+Message-ID: <CAK7LNARZaB6c7BYOaP9aKU38npfOiHG7=6R0QGLAsTA8egd18g@mail.gmail.com>
+References: <20180131093434.20050-1-ulfalizer@gmail.com> <20180131093434.20050-4-ulfalizer@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f195.google.com ([209.85.223.195]:39977 "EHLO
-        mail-io0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752492AbeAaKbl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Jan 2018 05:31:41 -0500
-Received: by mail-io0-f195.google.com with SMTP id t22so14674989ioa.7
-        for <linux-mmc@vger.kernel.org>; Wed, 31 Jan 2018 02:31:41 -0800 (PST)
-In-Reply-To: <1517318680-14918-1-git-send-email-geert@linux-m68k.org>
+Received: from conssluserg-03.nifty.com ([210.131.2.82]:34828 "EHLO
+        conssluserg-03.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752544AbeBARKO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Feb 2018 12:10:14 -0500
+In-Reply-To: <20180131093434.20050-4-ulfalizer@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Masahiro Yamada <yamada.masahiro@socionext.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Ulf Magnusson <ulfalizer@gmail.com>
+Cc: Linux Kbuild mailing list <linux-kbuild@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "Luis R. Rodriguez" <mcgrof@kernel.org>, Randy Dunlap <rdunlap@infradead.org>, Dan Carpenter <dan.carpenter@oracle.com>, Paul Bolle <pebolle@tiscali.nl>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Shawn Lin <shawn.lin@rock-chips.com>, Simon Horman <horms+renesas@verge.net.au>, Jan Glauber <jglauber@cavium.com>, Eric Anholt <eric@anholt.net>, Carlo Caione <carlo@endlessm.com>, Venkat Gopalakrishnan <venkatg@codeaurora.org>, Kishon Vijay Abraham I <kishon@ti.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Rui Feng <rui_feng@realsil.com.cn>
 
-On 30 January 2018 at 14:24, Geert Uytterhoeven <geert@linux-m68k.org> wrote:
-> If NO_DMA=y:
+2018-01-31 18:34 GMT+09:00 Ulf Magnusson <ulfalizer@gmail.com>:
+> Blank help texts are probably either a typo, a Kconfig misunderstanding,
+> or some kind of half-committing to adding a help text (in which case a
+> TODO comment would be clearer, if the help text really can't be added
+> right away).
 >
->     ERROR: "bad_dma_ops" [drivers/mmc/host/renesas_sdhi_sys_dmac.ko] undefined!
->     ERROR: "bad_dma_ops" [drivers/mmc/host/renesas_sdhi_internal_dmac.ko] undefined!
+> Best to remove them, IMO.
 >
-> Add dependencies on HAS_DMA to fix this.
->
-> Fixes: e578afab6e5f57e7 ("mmc: renesas_sdhi: remove wrong depends on to enable compile test")
-> Signed-off-by: Geert Uytterhoeven <geert@linux-m68k.org>
-
-Thanks, applied for fixes!
-
-Kind regards
-Uffe
-
+> Signed-off-by: Ulf Magnusson <ulfalizer@gmail.com>
 > ---
->  drivers/mmc/host/Kconfig | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 67bd3344dd03a1ae..0eae619419d9ddeb 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -605,7 +605,7 @@ config MMC_SDHI
->
->  config MMC_SDHI_SYS_DMAC
->         tristate "DMA for SDHI SD/SDIO controllers using SYS-DMAC"
-> -       depends on MMC_SDHI
-> +       depends on MMC_SDHI && HAS_DMA
->         default MMC_SDHI if (SUPERH || ARM)
->         help
->           This provides DMA support for SDHI SD/SDIO controllers
-> @@ -615,7 +615,7 @@ config MMC_SDHI_SYS_DMAC
->  config MMC_SDHI_INTERNAL_DMAC
->         tristate "DMA for SDHI SD/SDIO controllers using on-chip bus mastering"
->         depends on ARM64 || COMPILE_TEST
-> -       depends on MMC_SDHI
-> +       depends on MMC_SDHI && HAS_DMA
->         default MMC_SDHI if ARM64
->         help
->           This provides DMA support for SDHI SD/SDIO controllers
-> --
-> 2.7.4
->
+
+
+FYI.
+
+I picked up this patch to kbuild
+because I need this to suppress warning messages
+introduced by 11/11.
+
+I am planning to send a PR for this series next week.
