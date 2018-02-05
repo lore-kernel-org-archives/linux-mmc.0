@@ -1,55 +1,36 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v.4.16-rc1
-Date: Mon,  5 Feb 2018 14:49:26 +0100
-Message-ID: <1517838566-2345-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f67.google.com ([209.85.215.67]:43073 "EHLO
-        mail-lf0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752920AbeBENta (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Feb 2018 08:49:30 -0500
-Received: by mail-lf0-f67.google.com with SMTP id o89so41816983lfg.10
-        for <linux-mmc@vger.kernel.org>; Mon, 05 Feb 2018 05:49:29 -0800 (PST)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Joe Perches <joe-6d6DIl74uiNBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [PATCH v2 15/16] mmc: sdhci-omap: Add SPDX identifier
+Date: Mon, 05 Feb 2018 13:50:53 -0800
+Message-ID: <1517867453.7489.261.camel@perches.com>
+References: <20180205125029.21570-1-kishon@ti.com>
+         <20180205125029.21570-16-kishon@ti.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20180205125029.21570-16-kishon-l0cyMroinI0@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Kate Stewart <kstewart-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>
 
-Hi Linus,
+(Adding Kate Stewart)
 
-Here's a PR with a few MMC fixes intended for v4.16-rc1. Details about the
-highlights are as usual found in the signed tag.
+On Mon, 2018-02-05 at 18:20 +0530, Kishon Vijay Abraham I wrote:
+> The SPDX identifier is a legally binding shorthand,
 
-Please pull this in!
+As far as I know that "legally binding" bit is unproven.
+So maybe, maybe not.
 
-Kind regards
-Ulf Hansson
+I don't doubt that it should be added, but I would be
+hesitant to state in a commit message that it is
+legally binding.
 
+> which can be used
+> instead of the full boiler plate text.
 
-The following changes since commit 3da90b159b146672f830bcd2489dd3a1f4e9e089:
-
-  Merge tag 'f2fs-for-4.16-rc1' of git://git.kernel.org/pub/scm/linux/kernel/git/jaegeuk/f2fs (2018-01-30 19:07:32 -0800)
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v4.16-2
-
-for you to fetch changes up to 56174d9a21496fce64fcc6ba2f475734c20c12e4:
-
-  mmc: MMC_SDHI_{SYS,INTERNAL}_DMAC should depend on HAS_DMA (2018-01-31 11:27:23 +0100)
-
-----------------------------------------------------------------
-MMC host:
- - renesas_sdhi: Fix build error in case NO_DMA=y
- - sdhci: Implement a bounce buffer to address throughput regressions
-
-----------------------------------------------------------------
-Geert Uytterhoeven (1):
-      mmc: MMC_SDHI_{SYS,INTERNAL}_DMAC should depend on HAS_DMA
-
-Linus Walleij (1):
-      mmc: sdhci: Implement an SDHCI-specific bounce buffer
-
- drivers/mmc/host/Kconfig |   4 +-
- drivers/mmc/host/sdhci.c | 164 ++++++++++++++++++++++++++++++++++++++++++++---
- drivers/mmc/host/sdhci.h |   3 +
- 3 files changed, 161 insertions(+), 10 deletions(-)
+I would also be hesitant to remove existing license text.
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
