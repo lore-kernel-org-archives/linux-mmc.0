@@ -1,131 +1,125 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v2 08/16] mmc: sdhci-omap: Add support to override f_max and iodelay from pdata
-Date: Mon, 5 Feb 2018 18:20:21 +0530
-Message-ID: <20180205125029.21570-9-kishon@ti.com>
+Subject: [PATCH v2 04/16] mmc: sdhci-omap: Add tuning support
+Date: Mon, 5 Feb 2018 18:20:17 +0530
+Message-ID: <20180205125029.21570-5-kishon@ti.com>
 References: <20180205125029.21570-1-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <20180205125029.21570-1-kishon@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, Kishon Vijay Abraham I <kishon@ti.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, Kishon Vijay Abraham I <kishon@ti.com>, Rob Herring <robh+dt@kernel.org>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-DRA74x EVM Rev H EVM comes with revision 2.0 silicon. However, earlier
-versions of EVM can come with either revision 1.1 or revision 1.0 of
-silicon.
-
-The device-tree file is written to support rev 2.0 of silicon.
-pdata-quirks are used to then override the settings needed for
-PG 1.1 silicon.
-
-PG 1.1 silicon has limitations w.r.t frequencies at which MMC1/2/3
-can operate as well as different IOdelay numbers.
-
-Add support in sdhci-omap driver to get platform data if available
-(added using pdata quirks) and override the data (max-frequency and
-iodelay data) obtained from device tree.
-
-Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
----
- drivers/mmc/host/sdhci-omap.c            | 21 ++++++++++++++++++++-
- include/linux/platform_data/sdhci-omap.h | 22 ++++++++++++++++++++++
- 2 files changed, 42 insertions(+), 1 deletion(-)
- create mode 100644 include/linux/platform_data/sdhci-omap.h
-
-diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-index d5a9e688dc1b..c2570db3f7a2 100644
---- a/drivers/mmc/host/sdhci-omap.c
-+++ b/drivers/mmc/host/sdhci-omap.c
-@@ -22,6 +22,7 @@
- #include <linux/module.h>
- #include <linux/of.h>
- #include <linux/of_device.h>
-+#include <linux/platform_data/sdhci-omap.h>
- #include <linux/platform_device.h>
- #include <linux/pm_runtime.h>
- #include <linux/regulator/consumer.h>
-@@ -99,6 +100,7 @@ struct sdhci_omap_data {
- };
- 
- struct sdhci_omap_host {
-+	char			*version;
- 	void __iomem		*base;
- 	struct device		*dev;
- 	struct	regulator	*pbias;
-@@ -732,12 +734,21 @@ static struct pinctrl_state
- 				  u32 *caps, u32 capmask)
- {
- 	struct device *dev = omap_host->dev;
-+	char *version = omap_host->version;
- 	struct pinctrl_state *pinctrl_state = ERR_PTR(-ENODEV);
-+	char str[20];
- 
- 	if (!(*caps & capmask))
- 		goto ret;
- 
--	pinctrl_state = pinctrl_lookup_state(omap_host->pinctrl, mode);
-+	if (version) {
-+		snprintf(str, 20, "%s-%s", mode, version);
-+		pinctrl_state = pinctrl_lookup_state(omap_host->pinctrl, str);
-+	}
-+
-+	if (IS_ERR(pinctrl_state))
-+		pinctrl_state = pinctrl_lookup_state(omap_host->pinctrl, mode);
-+
- 	if (IS_ERR(pinctrl_state)) {
- 		dev_err(dev, "no pinctrl state for %s mode", mode);
- 		*caps &= ~capmask;
-@@ -840,6 +851,7 @@ static int sdhci_omap_probe(struct platform_device *pdev)
- 	struct mmc_host *mmc;
- 	const struct of_device_id *match;
- 	struct sdhci_omap_data *data;
-+	struct sdhci_omap_platform_data *platform_data;
- 
- 	match = of_match_device(omap_sdhci_match, dev);
- 	if (!match)
-@@ -874,6 +886,13 @@ static int sdhci_omap_probe(struct platform_device *pdev)
- 	if (ret)
- 		goto err_pltfm_free;
- 
-+	platform_data = dev_get_platdata(dev);
-+	if (platform_data) {
-+		omap_host->version = platform_data->version;
-+		if (platform_data->max_freq)
-+			mmc->f_max = platform_data->max_freq;
-+	}
-+
- 	pltfm_host->clk = devm_clk_get(dev, "fck");
- 	if (IS_ERR(pltfm_host->clk)) {
- 		ret = PTR_ERR(pltfm_host->clk);
-diff --git a/include/linux/platform_data/sdhci-omap.h b/include/linux/platform_data/sdhci-omap.h
-new file mode 100644
-index 000000000000..92abd53dcd00
---- /dev/null
-+++ b/include/linux/platform_data/sdhci-omap.h
-@@ -0,0 +1,22 @@
-+// SPDX-License-Identifier: GPL-2.0
-+// Copyright (c) 2018 Texas Instruments
-+// SDHCI Controller Platform Data for TI's OMAP SoCs
-+// Author: Kishon Vijay Abraham I <kishon@ti.com>
-+
-+#ifndef __SDHCI_OMAP_PDATA_H__
-+#define __SDHCI_OMAP_PDATA_H__
-+
-+struct sdhci_omap_platform_data {
-+	const char *name;
-+
-+	/*
-+	 * set if your board has components or wiring that limits the
-+	 * maximum frequency on the MMC bus
-+	 */
-+	unsigned int max_freq;
-+
-+	/* string specifying a particular variant of hardware */
-+	char *version;
-+};
-+
-+#endif
--- 
-2.11.0
+TU1DIHR1bmluZyBwcm9jZWR1cmUgaXMgcmVxdWlyZWQgdG8gc3VwcG9ydCBTRCBjYXJkClVIUzEt
+U0RSMTA0IG1vZGUgYW5kIEVNTUMgSFMyMDAgbW9kZS4KClNEUjEwNC9IUzIwMCBETEwgVHVuaW5n
+IFByb2NlZHVyZSBmb3IgQU01NzJ4IHBsYXRmb3JtIGlzIG1lbnRpb25lZAppbiBGaWd1cmUgMjUt
+NTEuIFNEUjEwNC9IUzIwMCBETEwgVHVuaW5nIFByb2NlZHVyZSBvZgpBTTU3MnggU2l0YXJhIFBy
+b2Nlc3NvcnMgU2lsaWNvbiBSZXZpc2lvbiAyLjAsIDEuMSBUUk0KKFNQUlVIWjZJIC0gT2N0b2Jl
+ciAyMDE04oCTUmV2aXNlZCBBcHJpbCAyMDE3IFsxXSkuCgpUaGUgdHVuaW5nIGZ1bmN0aW9uIHNk
+aGNpX29tYXBfZXhlY3V0ZV90dW5pbmcoKSB3aWxsIG9ubHkgYmUKY2FsbGVkIGJ5IHRoZSBNTUMv
+U0QgY29yZSBpZiB0aGUgY29ycmVzcG9uZGluZyBzcGVlZCBtb2RlcwphcmUgc3VwcG9ydGVkIGJ5
+IHRoZSBPTUFQIHNpbGljb24gd2hpY2ggaXMgc2V0IGluIHRoZSBtbWMKaG9zdCAiY2FwcyIgZmll
+bGQuCgpbMV0gLT4gaHR0cDovL3d3dy50aS5jb20vbGl0L3VnL3NwcnVoejZpL3NwcnVoejZpLnBk
+ZgoKU2lnbmVkLW9mZi1ieTogS2lzaG9uIFZpamF5IEFicmFoYW0gSSA8a2lzaG9uQHRpLmNvbT4K
+QWNrZWQtYnk6IEFkcmlhbiBIdW50ZXIgPGFkcmlhbi5odW50ZXJAaW50ZWwuY29tPgotLS0KIGRy
+aXZlcnMvbW1jL2hvc3Qvc2RoY2ktb21hcC5jIHwgMTMwICsrKysrKysrKysrKysrKysrKysrKysr
+KysrKysrKysrKysrKysrKysrKwogMSBmaWxlIGNoYW5nZWQsIDEzMCBpbnNlcnRpb25zKCspCgpk
+aWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vbWFwLmMgYi9kcml2ZXJzL21tYy9o
+b3N0L3NkaGNpLW9tYXAuYwppbmRleCA4NmI2Y2MwYTUzODAuLjM2ZTA2MjZkM2RlMiAxMDA2NDQK
+LS0tIGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vbWFwLmMKKysrIGIvZHJpdmVycy9tbWMvaG9z
+dC9zZGhjaS1vbWFwLmMKQEAgLTM3LDYgKzM3LDEzIEBACiAjZGVmaW5lIENPTl9JTklUCQlCSVQo
+MSkKICNkZWZpbmUgQ09OX09ECQkJQklUKDApCiAKKyNkZWZpbmUgU0RIQ0lfT01BUF9ETEwJCTB4
+MDEzNAorI2RlZmluZSBETExfU1dUCQkJQklUKDIwKQorI2RlZmluZSBETExfRk9SQ0VfU1JfQ19T
+SElGVAkxMworI2RlZmluZSBETExfRk9SQ0VfU1JfQ19NQVNLCSgweDdmIDw8IERMTF9GT1JDRV9T
+Ul9DX1NISUZUKQorI2RlZmluZSBETExfRk9SQ0VfVkFMVUUJCUJJVCgxMikKKyNkZWZpbmUgRExM
+X0NBTElCCQlCSVQoMSkKKwogI2RlZmluZSBTREhDSV9PTUFQX0NNRAkJMHgyMGMKIAogI2RlZmlu
+ZSBTREhDSV9PTUFQX1BTVEFURQkweDAyMjQKQEAgLTYzLDEyICs3MCwxNiBAQAogCiAjZGVmaW5l
+IFNESENJX09NQVBfQUMxMgkJMHgyM2MKICNkZWZpbmUgQUMxMl9WMVY4X1NJR0VOCQlCSVQoMTkp
+CisjZGVmaW5lIEFDMTJfU0NMS19TRUwJCUJJVCgyMykKIAogI2RlZmluZSBTREhDSV9PTUFQX0NB
+UEEJCTB4MjQwCiAjZGVmaW5lIENBUEFfVlMzMwkJQklUKDI0KQogI2RlZmluZSBDQVBBX1ZTMzAJ
+CUJJVCgyNSkKICNkZWZpbmUgQ0FQQV9WUzE4CQlCSVQoMjYpCiAKKyNkZWZpbmUgU0RIQ0lfT01B
+UF9DQVBBMgkweDAyNDQKKyNkZWZpbmUgQ0FQQTJfVFNEUjUwCQlCSVQoMTMpCisKICNkZWZpbmUg
+U0RIQ0lfT01BUF9USU1FT1VUCTEJCS8qIDEgbXNlYyAqLwogCiAjZGVmaW5lIFNZU0NUTF9DTEtE
+X01BWAkJMHgzRkYKQEAgLTc3LDYgKzg4LDggQEAKICNkZWZpbmUgSU9WXzNWMAkJCTMwMDAwMDAJ
+CS8qIDMwMDAwMCB1ViAqLwogI2RlZmluZSBJT1ZfM1YzCQkJMzMwMDAwMAkJLyogMzMwMDAwIHVW
+ICovCiAKKyNkZWZpbmUgTUFYX1BIQVNFX0RFTEFZCQkweDdDCisKIHN0cnVjdCBzZGhjaV9vbWFw
+X2RhdGEgewogCXUzMiBvZmZzZXQ7CiB9OwpAQCAtMTk4LDYgKzIxMSwxMjAgQEAgc3RhdGljIHZv
+aWQgc2RoY2lfb21hcF9jb25mX2J1c19wb3dlcihzdHJ1Y3Qgc2RoY2lfb21hcF9ob3N0ICpvbWFw
+X2hvc3QsCiAJfQogfQogCitzdGF0aWMgaW5saW5lIHZvaWQgc2RoY2lfb21hcF9zZXRfZGxsKHN0
+cnVjdCBzZGhjaV9vbWFwX2hvc3QgKm9tYXBfaG9zdCwKKwkJCQkgICAgICBpbnQgY291bnQpCit7
+CisJaW50IGk7CisJdTMyIHJlZzsKKworCXJlZyA9IHNkaGNpX29tYXBfcmVhZGwob21hcF9ob3N0
+LCBTREhDSV9PTUFQX0RMTCk7CisJcmVnIHw9IERMTF9GT1JDRV9WQUxVRTsKKwlyZWcgJj0gfkRM
+TF9GT1JDRV9TUl9DX01BU0s7CisJcmVnIHw9IChjb3VudCA8PCBETExfRk9SQ0VfU1JfQ19TSElG
+VCk7CisJc2RoY2lfb21hcF93cml0ZWwob21hcF9ob3N0LCBTREhDSV9PTUFQX0RMTCwgcmVnKTsK
+KworCXJlZyB8PSBETExfQ0FMSUI7CisJc2RoY2lfb21hcF93cml0ZWwob21hcF9ob3N0LCBTREhD
+SV9PTUFQX0RMTCwgcmVnKTsKKwlmb3IgKGkgPSAwOyBpIDwgMTAwMDsgaSsrKSB7CisJCXJlZyA9
+IHNkaGNpX29tYXBfcmVhZGwob21hcF9ob3N0LCBTREhDSV9PTUFQX0RMTCk7CisJCWlmIChyZWcg
+JiBETExfQ0FMSUIpCisJCQlicmVhazsKKwl9CisJcmVnICY9IH5ETExfQ0FMSUI7CisJc2RoY2lf
+b21hcF93cml0ZWwob21hcF9ob3N0LCBTREhDSV9PTUFQX0RMTCwgcmVnKTsKK30KKworc3RhdGlj
+IHZvaWQgc2RoY2lfb21hcF9kaXNhYmxlX3R1bmluZyhzdHJ1Y3Qgc2RoY2lfb21hcF9ob3N0ICpv
+bWFwX2hvc3QpCit7CisJdTMyIHJlZzsKKworCXJlZyA9IHNkaGNpX29tYXBfcmVhZGwob21hcF9o
+b3N0LCBTREhDSV9PTUFQX0FDMTIpOworCXJlZyAmPSB+QUMxMl9TQ0xLX1NFTDsKKwlzZGhjaV9v
+bWFwX3dyaXRlbChvbWFwX2hvc3QsIFNESENJX09NQVBfQUMxMiwgcmVnKTsKKworCXJlZyA9IHNk
+aGNpX29tYXBfcmVhZGwob21hcF9ob3N0LCBTREhDSV9PTUFQX0RMTCk7CisJcmVnICY9IH4oRExM
+X0ZPUkNFX1ZBTFVFIHwgRExMX1NXVCk7CisJc2RoY2lfb21hcF93cml0ZWwob21hcF9ob3N0LCBT
+REhDSV9PTUFQX0RMTCwgcmVnKTsKK30KKworc3RhdGljIGludCBzZGhjaV9vbWFwX2V4ZWN1dGVf
+dHVuaW5nKHN0cnVjdCBtbWNfaG9zdCAqbW1jLCB1MzIgb3Bjb2RlKQoreworCXN0cnVjdCBzZGhj
+aV9ob3N0ICpob3N0ID0gbW1jX3ByaXYobW1jKTsKKwlzdHJ1Y3Qgc2RoY2lfcGx0Zm1faG9zdCAq
+cGx0Zm1faG9zdCA9IHNkaGNpX3ByaXYoaG9zdCk7CisJc3RydWN0IHNkaGNpX29tYXBfaG9zdCAq
+b21hcF9ob3N0ID0gc2RoY2lfcGx0Zm1fcHJpdihwbHRmbV9ob3N0KTsKKwlzdHJ1Y3QgZGV2aWNl
+ICpkZXYgPSBvbWFwX2hvc3QtPmRldjsKKwlzdHJ1Y3QgbW1jX2lvcyAqaW9zID0gJm1tYy0+aW9z
+OworCXUzMiBzdGFydF93aW5kb3cgPSAwLCBtYXhfd2luZG93ID0gMDsKKwl1OCBjdXJfbWF0Y2gs
+IHByZXZfbWF0Y2ggPSAwOworCXUzMiBsZW5ndGggPSAwLCBtYXhfbGVuID0gMDsKKwl1MzIgcGhh
+c2VfZGVsYXkgPSAwOworCWludCByZXQgPSAwOworCXUzMiByZWc7CisKKwlwbHRmbV9ob3N0ID0g
+c2RoY2lfcHJpdihob3N0KTsKKwlvbWFwX2hvc3QgPSBzZGhjaV9wbHRmbV9wcml2KHBsdGZtX2hv
+c3QpOworCWRldiA9IG9tYXBfaG9zdC0+ZGV2OworCisJLyogY2xvY2sgdHVuaW5nIGlzIG5vdCBu
+ZWVkZWQgZm9yIHVwdG8gNTJNSHogKi8KKwlpZiAoaW9zLT5jbG9jayA8PSA1MjAwMDAwMCkKKwkJ
+cmV0dXJuIDA7CisKKwlyZWcgPSBzZGhjaV9vbWFwX3JlYWRsKG9tYXBfaG9zdCwgU0RIQ0lfT01B
+UF9DQVBBMik7CisJaWYgKGlvcy0+dGltaW5nID09IE1NQ19USU1JTkdfVUhTX1NEUjUwICYmICEo
+cmVnICYgQ0FQQTJfVFNEUjUwKSkKKwkJcmV0dXJuIDA7CisKKwlyZWcgPSBzZGhjaV9vbWFwX3Jl
+YWRsKG9tYXBfaG9zdCwgU0RIQ0lfT01BUF9ETEwpOworCXJlZyB8PSBETExfU1dUOworCXNkaGNp
+X29tYXBfd3JpdGVsKG9tYXBfaG9zdCwgU0RIQ0lfT01BUF9ETEwsIHJlZyk7CisKKwl3aGlsZSAo
+cGhhc2VfZGVsYXkgPD0gTUFYX1BIQVNFX0RFTEFZKSB7CisJCXNkaGNpX29tYXBfc2V0X2RsbChv
+bWFwX2hvc3QsIHBoYXNlX2RlbGF5KTsKKworCQljdXJfbWF0Y2ggPSAhbW1jX3NlbmRfdHVuaW5n
+KG1tYywgb3Bjb2RlLCBOVUxMKTsKKwkJaWYgKGN1cl9tYXRjaCkgeworCQkJaWYgKHByZXZfbWF0
+Y2gpIHsKKwkJCQlsZW5ndGgrKzsKKwkJCX0gZWxzZSB7CisJCQkJc3RhcnRfd2luZG93ID0gcGhh
+c2VfZGVsYXk7CisJCQkJbGVuZ3RoID0gMTsKKwkJCX0KKwkJfQorCisJCWlmIChsZW5ndGggPiBt
+YXhfbGVuKSB7CisJCQltYXhfd2luZG93ID0gc3RhcnRfd2luZG93OworCQkJbWF4X2xlbiA9IGxl
+bmd0aDsKKwkJfQorCisJCXByZXZfbWF0Y2ggPSBjdXJfbWF0Y2g7CisJCXBoYXNlX2RlbGF5ICs9
+IDQ7CisJfQorCisJaWYgKCFtYXhfbGVuKSB7CisJCWRldl9lcnIoZGV2LCAiVW5hYmxlIHRvIGZp
+bmQgbWF0Y2hcbiIpOworCQlyZXQgPSAtRUlPOworCQlnb3RvIHR1bmluZ19lcnJvcjsKKwl9CisK
+KwlyZWcgPSBzZGhjaV9vbWFwX3JlYWRsKG9tYXBfaG9zdCwgU0RIQ0lfT01BUF9BQzEyKTsKKwlp
+ZiAoIShyZWcgJiBBQzEyX1NDTEtfU0VMKSkgeworCQlyZXQgPSAtRUlPOworCQlnb3RvIHR1bmlu
+Z19lcnJvcjsKKwl9CisKKwlwaGFzZV9kZWxheSA9IG1heF93aW5kb3cgKyA0ICogKG1heF9sZW4g
+Pj4gMSk7CisJc2RoY2lfb21hcF9zZXRfZGxsKG9tYXBfaG9zdCwgcGhhc2VfZGVsYXkpOworCisJ
+Z290byByZXQ7CisKK3R1bmluZ19lcnJvcjoKKwlkZXZfZXJyKGRldiwgIlR1bmluZyBmYWlsZWRc
+biIpOworCXNkaGNpX29tYXBfZGlzYWJsZV90dW5pbmcob21hcF9ob3N0KTsKKworcmV0OgorCXNk
+aGNpX3Jlc2V0KGhvc3QsIFNESENJX1JFU0VUX0NNRCB8IFNESENJX1JFU0VUX0RBVEEpOworCXJl
+dHVybiByZXQ7Cit9CisKIHN0YXRpYyBpbnQgc2RoY2lfb21hcF9jYXJkX2J1c3koc3RydWN0IG1t
+Y19ob3N0ICptbWMpCiB7CiAJdTMyIHJlZywgYWMxMjsKQEAgLTI5OSw2ICs0MjYsOCBAQCBzdGF0
+aWMgaW50IHNkaGNpX29tYXBfc3RhcnRfc2lnbmFsX3ZvbHRhZ2Vfc3dpdGNoKHN0cnVjdCBtbWNf
+aG9zdCAqbW1jLAogc3RhdGljIHZvaWQgc2RoY2lfb21hcF9zZXRfcG93ZXJfbW9kZShzdHJ1Y3Qg
+c2RoY2lfb21hcF9ob3N0ICpvbWFwX2hvc3QsCiAJCQkJICAgICAgdTggcG93ZXJfbW9kZSkKIHsK
+KwlpZiAob21hcF9ob3N0LT5idXNfbW9kZSA9PSBNTUNfUE9XRVJfT0ZGKQorCQlzZGhjaV9vbWFw
+X2Rpc2FibGVfdHVuaW5nKG9tYXBfaG9zdCk7CiAJb21hcF9ob3N0LT5wb3dlcl9tb2RlID0gcG93
+ZXJfbW9kZTsKIH0KIApAQCAtNjM1LDYgKzc2NCw3IEBAIHN0YXRpYyBpbnQgc2RoY2lfb21hcF9w
+cm9iZShzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlICpwZGV2KQogCQkJCQlzZGhjaV9vbWFwX3N0YXJ0
+X3NpZ25hbF92b2x0YWdlX3N3aXRjaDsKIAlob3N0LT5tbWNfaG9zdF9vcHMuc2V0X2lvcyA9IHNk
+aGNpX29tYXBfc2V0X2lvczsKIAlob3N0LT5tbWNfaG9zdF9vcHMuY2FyZF9idXN5ID0gc2RoY2lf
+b21hcF9jYXJkX2J1c3k7CisJaG9zdC0+bW1jX2hvc3Rfb3BzLmV4ZWN1dGVfdHVuaW5nID0gc2Ro
+Y2lfb21hcF9leGVjdXRlX3R1bmluZzsKIAogCXNkaGNpX3JlYWRfY2Fwcyhob3N0KTsKIAlob3N0
+LT5jYXBzIHw9IFNESENJX0NBTl9ET19BRE1BMjsKLS0gCjIuMTEuMAoKCl9fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmxpbnV4LWFybS1rZXJuZWwgbWFpbGlu
+ZyBsaXN0CmxpbnV4LWFybS1rZXJuZWxAbGlzdHMuaW5mcmFkZWFkLm9yZwpodHRwOi8vbGlzdHMu
+aW5mcmFkZWFkLm9yZy9tYWlsbWFuL2xpc3RpbmZvL2xpbnV4LWFybS1rZXJuZWwK
