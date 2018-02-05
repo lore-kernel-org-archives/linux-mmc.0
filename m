@@ -1,48 +1,76 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [RFC PATCH] mmc: sdhci-of-arasan: Add auto tuning support for
- ZynqMP Platform
-Date: Mon, 5 Feb 2018 00:07:40 -0600
-Message-ID: <20180205024420.iagez2mue2skrngq@rob-hp-laptop>
-References: <1517336073-18142-1-git-send-email-mnarani@xilinx.com>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: [PATCH v2 03/16] mmc: sdhci-omap: Add custom set_uhs_signaling sdhci_host ops
+Date: Mon, 5 Feb 2018 18:20:16 +0530
+Message-ID: <20180205125029.21570-4-kishon@ti.com>
+References: <20180205125029.21570-1-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pg0-f67.google.com ([74.125.83.67]:36309 "EHLO
-        mail-pg0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752621AbeBEGHm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Feb 2018 01:07:42 -0500
-Content-Disposition: inline
-In-Reply-To: <1517336073-18142-1-git-send-email-mnarani@xilinx.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180205125029.21570-1-kishon@ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, Kishon Vijay Abraham I <kishon@ti.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Manish Narani <manish.narani@xilinx.com>
-Cc: michal.simek@xilinx.com, adrian.hunter@intel.com, ulf.hansson@linaro.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, mark.rutland@arm.com, anirudh@xilinx.com, sgoud@xilinx.com, Manish Narani <mnarani@xilinx.com>
 
-On Tue, Jan 30, 2018 at 11:44:33PM +0530, Manish Narani wrote:
-> This patch adds support of SD auto tuning for ZynqMP platform. Auto
-> tuning sequence sends tuning block to card when operating in UHS-1
-> modes. This resets the DLL and sends CMD19/CMD21 as a part of the auto
-> tuning process. Once the auto tuning process gets completed, reset the
-> DLL to load the newly obtained SDHC tuned tap value.
-> 
-> Signed-off-by: Manish Narani <mnarani@xilinx.com>
-> ---
->  .../devicetree/bindings/mmc/arasan,sdhci.txt       |   1 +
->  drivers/mmc/host/sdhci-of-arasan.c                 | 219 ++++++++++++++++++++-
->  2 files changed, 219 insertions(+), 1 deletion(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> index 60481bf..7d29751 100644
-> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> @@ -14,6 +14,7 @@ Required Properties:
->      - "arasan,sdhci-4.9a": generic Arasan SDHCI 4.9a PHY
->      - "arasan,sdhci-5.1": generic Arasan SDHCI 5.1 PHY
->      - "rockchip,rk3399-sdhci-5.1", "arasan,sdhci-5.1": rk3399 eMMC PHY
-> +    - "xlnx,zynqmp-8.9a": Xilinx ZynqMP 8.9a PHY
+UHS-1 DDR50 and MMC DDR52 mode require DDR bit to be
+set in the configuration register (MMCHS_CON). Add
+sdhci-omap specific set_uhs_signaling ops to set
+this bit. Also while setting the UHSMS bit, clock should be
+disabled.
 
-This should be a separate patch.
+Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/sdhci-omap.c | 23 ++++++++++++++++++++++-
+ 1 file changed, 22 insertions(+), 1 deletion(-)
 
->        For this device it is strongly suggested to include arasan,soc-ctl-syscon.
->    - reg: From mmc bindings: Register location and length.
->    - clocks: From clock bindings: Handles to clock inputs.
+diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+index df927f3faaf6..86b6cc0a5380 100644
+--- a/drivers/mmc/host/sdhci-omap.c
++++ b/drivers/mmc/host/sdhci-omap.c
+@@ -31,6 +31,7 @@
+ #define SDHCI_OMAP_CON		0x12c
+ #define CON_DW8			BIT(5)
+ #define CON_DMA_MASTER		BIT(20)
++#define CON_DDR			BIT(19)
+ #define CON_CLKEXTFREE		BIT(16)
+ #define CON_PADEN		BIT(15)
+ #define CON_INIT		BIT(1)
+@@ -461,6 +462,26 @@ static void sdhci_omap_init_74_clocks(struct sdhci_host *host, u8 power_mode)
+ 	enable_irq(host->irq);
+ }
+ 
++static void sdhci_omap_set_uhs_signaling(struct sdhci_host *host,
++					 unsigned int timing)
++{
++	u32 reg;
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
++
++	sdhci_omap_stop_clock(omap_host);
++
++	reg = sdhci_omap_readl(omap_host, SDHCI_OMAP_CON);
++	if (timing == MMC_TIMING_UHS_DDR50 || timing == MMC_TIMING_MMC_DDR52)
++		reg |= CON_DDR;
++	else
++		reg &= ~CON_DDR;
++	sdhci_omap_writel(omap_host, SDHCI_OMAP_CON, reg);
++
++	sdhci_set_uhs_signaling(host, timing);
++	sdhci_omap_start_clock(omap_host);
++}
++
+ static struct sdhci_ops sdhci_omap_ops = {
+ 	.set_clock = sdhci_omap_set_clock,
+ 	.set_power = sdhci_omap_set_power,
+@@ -470,7 +491,7 @@ static struct sdhci_ops sdhci_omap_ops = {
+ 	.set_bus_width = sdhci_omap_set_bus_width,
+ 	.platform_send_init_74_clocks = sdhci_omap_init_74_clocks,
+ 	.reset = sdhci_reset,
+-	.set_uhs_signaling = sdhci_set_uhs_signaling,
++	.set_uhs_signaling = sdhci_omap_set_uhs_signaling,
+ };
+ 
+ static int sdhci_omap_set_capabilities(struct sdhci_omap_host *omap_host)
+-- 
+2.11.0
