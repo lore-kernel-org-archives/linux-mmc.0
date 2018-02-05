@@ -1,60 +1,63 @@
-From: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
-Subject: [PATCH v2 15/16] mmc: sdhci-omap: Add SPDX identifier
-Date: Mon, 5 Feb 2018 18:20:28 +0530
-Message-ID: <20180205125029.21570-16-kishon@ti.com>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: [PATCH v2 10/16] mmc: sdhci: Fix to use data_timer only for data line commands
+Date: Mon, 5 Feb 2018 18:20:23 +0530
+Message-ID: <20180205125029.21570-11-kishon@ti.com>
 References: <20180205125029.21570-1-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20180205125029.21570-1-kishon-l0cyMroinI0@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lelnx194.ext.ti.com ([198.47.27.80]:11515 "EHLO
+        lelnx194.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753085AbeBEMvp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Feb 2018 07:51:45 -0500
+In-Reply-To: <20180205125029.21570-1-kishon@ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, Kishon Vijay Abraham I <kishon@ti.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-The SPDX identifier is a legally binding shorthand, which can be used
-instead of the full boiler plate text. Update sdhci-omap driver with the
-correct SPDX license identifier.
+commit d7422fb489eee5587d3eec ("mmc: sdhci: Separate timer timeout for
+command and data requests") while separating timer timeout for
+command and data requests, passed cmd->mrq to sdhci_mod_timer (cmd is an
+argument to sdhci_send_command) and in sdhci_mod_timer used mrq->cmd
+to check if it is a data line command. This results in using
+data timer for commands like MMC_SET_BLOCK_COUNT (CMD23) though it is
+not a data line command. Fix it here.
 
-Signed-off-by: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
+Fixes: commit d7422fb489eee5587d3eec ("mmc: sdhci: Separate timer timeout for
+command and data requests")
+
+Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- drivers/mmc/host/sdhci-omap.c | 22 ++++------------------
- 1 file changed, 4 insertions(+), 18 deletions(-)
+ drivers/mmc/host/sdhci.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-index 863f6736c2fe..d44918172197 100644
---- a/drivers/mmc/host/sdhci-omap.c
-+++ b/drivers/mmc/host/sdhci-omap.c
-@@ -1,21 +1,7 @@
--/**
-- * SDHCI Controller driver for TI's OMAP SoCs
-- *
-- * Copyright (C) 2017 Texas Instruments
-- * Author: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
-- *
-- * This program is free software: you can redistribute it and/or modify
-- * it under the terms of the GNU General Public License version 2 of
-- * the License as published by the Free Software Foundation.
-- *
-- * This program is distributed in the hope that it will be useful,
-- * but WITHOUT ANY WARRANTY; without even the implied warranty of
-- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-- * GNU General Public License for more details.
-- *
-- * You should have received a copy of the GNU General Public License
-- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
-- */
-+// SPDX-License-Identifier: GPL-2.0
-+// Copyright (c) 2018 Texas Instruments
-+// SDHCI Controller driver for TI's OMAP SoCs
-+// Author: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 1aa74b4682f3..0489572d1892 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1073,10 +1073,10 @@ static void sdhci_finish_data(struct sdhci_host *host)
+ 	}
+ }
  
- #include <linux/delay.h>
- #include <linux/mmc/slot-gpio.h>
+-static void sdhci_mod_timer(struct sdhci_host *host, struct mmc_request *mrq,
++static void sdhci_mod_timer(struct sdhci_host *host, struct mmc_command *cmd,
+ 			    unsigned long timeout)
+ {
+-	if (sdhci_data_line_cmd(mrq->cmd))
++	if (sdhci_data_line_cmd(cmd))
+ 		mod_timer(&host->data_timer, timeout);
+ 	else
+ 		mod_timer(&host->timer, timeout);
+@@ -1135,7 +1135,7 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 		timeout += DIV_ROUND_UP(cmd->busy_timeout, 1000) * HZ + HZ;
+ 	else
+ 		timeout += 10 * HZ;
+-	sdhci_mod_timer(host, cmd->mrq, timeout);
++	sdhci_mod_timer(host, cmd, timeout);
+ 
+ 	host->cmd = cmd;
+ 	if (sdhci_data_line_cmd(cmd)) {
 -- 
 2.11.0
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
