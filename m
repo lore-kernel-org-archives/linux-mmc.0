@@ -1,122 +1,74 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v2 02/16] mmc: sdhci-omap: Add card_busy host ops
-Date: Mon, 5 Feb 2018 18:20:15 +0530
-Message-ID: <20180205125029.21570-3-kishon@ti.com>
+Subject: [PATCH v2 05/16] mmc: sdhci-omap: Workaround for Errata i802
+Date: Mon, 5 Feb 2018 18:20:18 +0530
+Message-ID: <20180205125029.21570-6-kishon@ti.com>
 References: <20180205125029.21570-1-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lelnx193.ext.ti.com ([198.47.27.77]:63857 "EHLO
-        lelnx193.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752986AbeBEMv3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Feb 2018 07:51:29 -0500
+Received: from lelnx194.ext.ti.com ([198.47.27.80]:11512 "EHLO
+        lelnx194.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753067AbeBEMvm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Feb 2018 07:51:42 -0500
 In-Reply-To: <20180205125029.21570-1-kishon@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>, Adrian Hunter <adrian.hunter@intel.com>
 Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, Kishon Vijay Abraham I <kishon@ti.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-Add card_busy host ops in sdhci_omap to check card busy status.
+Errata i802 in AM572x Sitara Processors Silicon Revision 2.0, 1.1
+(SPRZ429K July 2014–Revised March 2017 [1]) mentions
+DCRC error interrupts (MMCHS_STAT[21] DCRC=0x1) can occur
+during the tuning procedure and it has to be disabled during the
+tuning procedure Implement workaround for Errata i802 here..
 
-The voltage switching sequence for AM572x platform is mentioned
-in Figure 25-48. eMMC/SD/SDIO Power Switching Procedure of
-AM572x Sitara Processors Silicon Revision 2.0, 1.1 TRM
-(SPRUHZ6I - October 2014–Revised April 2017 [1]).
-
-In the voltage switching sequence, CLKEXTFREE bit in MMCHS_CON
-should also be set after switching to 1.8v which is also taken
-care in the card_busy ops.
-
-[1] -> http://www.ti.com/lit/ug/spruhz6i/spruhz6i.pdf
+[1] -> http://www.ti.com/lit/er/sprz429k/sprz429k.pdf
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci-omap.c | 52 +++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 52 insertions(+)
+ drivers/mmc/host/sdhci-omap.c | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-index 96985786cadf..df927f3faaf6 100644
+index 36e0626d3de2..e24ae903f7ba 100644
 --- a/drivers/mmc/host/sdhci-omap.c
 +++ b/drivers/mmc/host/sdhci-omap.c
-@@ -31,11 +31,17 @@
- #define SDHCI_OMAP_CON		0x12c
- #define CON_DW8			BIT(5)
- #define CON_DMA_MASTER		BIT(20)
-+#define CON_CLKEXTFREE		BIT(16)
-+#define CON_PADEN		BIT(15)
- #define CON_INIT		BIT(1)
- #define CON_OD			BIT(0)
- 
- #define SDHCI_OMAP_CMD		0x20c
- 
-+#define SDHCI_OMAP_PSTATE	0x0224
-+#define PSTATE_DLEV_DAT0	BIT(20)
-+#define PSTATE_DATI		BIT(1)
-+
- #define SDHCI_OMAP_HCTL		0x228
- #define HCTL_SDBP		BIT(8)
- #define HCTL_SDVS_SHIFT		9
-@@ -191,6 +197,51 @@ static void sdhci_omap_conf_bus_power(struct sdhci_omap_host *omap_host,
- 	}
- }
- 
-+static int sdhci_omap_card_busy(struct mmc_host *mmc)
-+{
-+	u32 reg, ac12;
-+	int ret = false;
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	struct sdhci_pltfm_host *pltfm_host;
-+	struct sdhci_omap_host *omap_host;
+@@ -257,6 +257,7 @@ static int sdhci_omap_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	u32 start_window = 0, max_window = 0;
+ 	u8 cur_match, prev_match = 0;
+ 	u32 length = 0, max_len = 0;
 +	u32 ier = host->ier;
-+
-+	pltfm_host = sdhci_priv(host);
-+	omap_host = sdhci_pltfm_priv(pltfm_host);
-+
-+	reg = sdhci_omap_readl(omap_host, SDHCI_OMAP_CON);
-+	ac12 = sdhci_omap_readl(omap_host, SDHCI_OMAP_AC12);
-+	reg &= ~CON_CLKEXTFREE;
-+	if (ac12 & AC12_V1V8_SIGEN)
-+		reg |= CON_CLKEXTFREE;
-+	reg |= CON_PADEN;
-+	sdhci_omap_writel(omap_host, SDHCI_OMAP_CON, reg);
-+
-+	disable_irq(host->irq);
-+	ier |= SDHCI_INT_CARD_INT;
+ 	u32 phase_delay = 0;
+ 	int ret = 0;
+ 	u32 reg;
+@@ -277,6 +278,16 @@ static int sdhci_omap_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	reg |= DLL_SWT;
+ 	sdhci_omap_writel(omap_host, SDHCI_OMAP_DLL, reg);
+ 
++	/*
++	 * OMAP5/DRA74X/DRA72x Errata i802:
++	 * DCRC error interrupts (MMCHS_STAT[21] DCRC=0x1) can occur
++	 * during the tuning procedure. So disable it during the
++	 * tuning procedure.
++	 */
++	ier &= ~SDHCI_INT_DATA_CRC;
 +	sdhci_writel(host, ier, SDHCI_INT_ENABLE);
 +	sdhci_writel(host, ier, SDHCI_SIGNAL_ENABLE);
 +
-+	/*
-+	 * Delay is required for PSTATE to correctly reflect
-+	 * DLEV/CLEV values after PADEN is set.
-+	 */
-+	usleep_range(50, 100);
-+	reg = sdhci_omap_readl(omap_host, SDHCI_OMAP_PSTATE);
-+	if ((reg & PSTATE_DATI) || !(reg & PSTATE_DLEV_DAT0))
-+		ret = true;
-+
-+	reg = sdhci_omap_readl(omap_host, SDHCI_OMAP_CON);
-+	reg &= ~(CON_CLKEXTFREE | CON_PADEN);
-+	sdhci_omap_writel(omap_host, SDHCI_OMAP_CON, reg);
-+
+ 	while (phase_delay <= MAX_PHASE_DELAY) {
+ 		sdhci_omap_set_dll(omap_host, phase_delay);
+ 
+@@ -322,6 +333,8 @@ static int sdhci_omap_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 
+ ret:
+ 	sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
 +	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
 +	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
-+	enable_irq(host->irq);
-+
-+	return ret;
-+}
-+
- static int sdhci_omap_start_signal_voltage_switch(struct mmc_host *mmc,
- 						  struct mmc_ios *ios)
- {
-@@ -562,6 +613,7 @@ static int sdhci_omap_probe(struct platform_device *pdev)
- 	host->mmc_host_ops.start_signal_voltage_switch =
- 					sdhci_omap_start_signal_voltage_switch;
- 	host->mmc_host_ops.set_ios = sdhci_omap_set_ios;
-+	host->mmc_host_ops.card_busy = sdhci_omap_card_busy;
+ 	return ret;
+ }
  
- 	sdhci_read_caps(host);
- 	host->caps |= SDHCI_CAN_DO_ADMA2;
 -- 
 2.11.0
 
