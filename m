@@ -1,54 +1,62 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH v3 05/16] mmc: slot-gpio: add a helper to check
- capability of GPIO WP detection
-Date: Wed, 7 Feb 2018 20:06:25 +0100
-Message-ID: <20180207190625.vaosboluf2jcfop6@ninjato>
+Subject: Re: [PATCH v3 06/16] mmc: tmio: refactor .get_ro hook
+Date: Wed, 7 Feb 2018 20:09:51 +0100
+Message-ID: <20180207190951.viniisquogyk2av6@ninjato>
 References: <1516206496-16612-1-git-send-email-yamada.masahiro@socionext.com>
- <1516206496-16612-6-git-send-email-yamada.masahiro@socionext.com>
+ <1516206496-16612-7-git-send-email-yamada.masahiro@socionext.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="7thxwjmuytw3bn4e"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+        protocol="application/pgp-signature"; boundary="4hyxqrgwjik2wcxf"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from sauhun.de ([88.99.104.3]:44213 "EHLO pokefinder.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754038AbeBGTJx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 7 Feb 2018 14:09:53 -0500
 Content-Disposition: inline
-In-Reply-To: <1516206496-16612-6-git-send-email-yamada.masahiro@socionext.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
+In-Reply-To: <1516206496-16612-7-git-send-email-yamada.masahiro@socionext.com>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Masahiro Yamada <yamada.masahiro@socionext.com>
 Cc: linux-mmc@vger.kernel.org, Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Magnusson <ulfalizer@gmail.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-List-Id: linux-mmc@vger.kernel.org
 
 
---7thxwjmuytw3bn4e
+--4hyxqrgwjik2wcxf
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Thu, Jan 18, 2018 at 01:28:05AM +0900, Masahiro Yamada wrote:
-> Like mmc_can_gpio_cd(), mmc_can_gpio_ro() will also be useful for host
-> drivers to know whether GPIO write-protect detection is supported.
+On Thu, Jan 18, 2018 at 01:28:06AM +0900, Masahiro Yamada wrote:
+> This IP provides the write protect signal level in the status
+> register, but it is also possible to use GPIO for WP.  They are
+> exclusive, so it is not efficient to call mmc_gpio_get_ro() every
+> time from tmio_mmc_get_ro() if we know gpio_ro is not used.
+>=20
+> Check the capability of gpio_ro just once in the probe function,
+> then set mmc_gpio_get_ro to .get_ro if it is the case.
 >=20
 > Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 
 Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
 
---7thxwjmuytw3bn4e
+--4hyxqrgwjik2wcxf
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlp7Ti0ACgkQFA3kzBSg
-KbaKTw/9HmgEMusxqOgs1VlPUaSP1ydOlIDZXQc7Ff8M2JAQlu42xqmmu+UY6GLj
-6eiXKSgSpnYONORI3B1VhCrNPwOPPzeV579B8mSL8dGs4iP9AEYAdbhayVzukMnG
-qYiCRRGZMAQkSOhG4euhrrEeqDKiqMuBshWBI90df/fNseQqoLDkTzYKs4k0qpA/
-eoewx0Q3U3P5kN6paT4FX1REMmJZj2yTHNoosWicChrr7pxpQkCsTaR+i5ezzVKN
-Hvl4Gp16PuK1gZYjALNAKBWQRxMxWjMN1DxZ8tqSrNSsvN5bn8R2NlUr/5REYp4c
-IdBxdnZbU5cxXGCrjz3s++ZmW8sMf9BwEk+tZwCutiIgjPu2402dgUy1R/MHN6ZE
-YvcVrhuhxRKgyLrbwW/q2ftsICUVmhB3El2yqkVmDANJWIr+yUdWs1dg1+/X6Cbb
-QPRZIPukKfxHbzMElRQe0eFKHxTv4q7Exn2U+NU721q64NTV+ExJUHItMNyN97n8
-i+T9wfdcvxWGsRkaI+G/UCgOb/7bQEQPSF1wBrgnjUEPYjVHUZj4GT+pPPHLeCbw
-yPH0q4SYgtApXXqGAMTK2vMjzouriVesyrYLOvHlsPdzJEI7y1NM93MhNuQu1KiV
-WJXLy0wfRjI6TDmnbmranN0DY3crWLj3EiI1kYTtd3eHiEWpIho=
-=wfCH
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlp7Tv4ACgkQFA3kzBSg
+KbZwZQ//TWe1qgH1C2ufhOJ0BrEo4/hqT7Q/Qiq1m2vwNxFoQL51ZH1mV9iURMeg
+WNR3SQlRs49vUYhylEIoTu78KWaCnSPYt1PnXPLWNc5/P5LJWp0AwHPUkbmgptXL
+VnbKWtchCK0XUrYVL6gc5wBshZXMdBETy3L7l/MZCdeBDcL69/8fxWW9bhjhqekT
+Bbz/DXk0ge8SPQ4K8rpXFn3GHy8wf3mbSg561JMYRyWOF0zx6MmTQkNtlLPcyXxq
+U4zQ+UUgN4yT3pn1HOfxtI8atVqiP/DcIs3eauOgvmneH19N3uGcVF3LjUhb7+Xt
+4xfG0gURmfNffVicNJ+Xzw20ofzPCiQ5fCc50H0csjyx05+FVjLaHXBJh6XPiOJg
+cdUOz+rQBi1lhrYDO8ryZnIcyiIBphsUrLsRfV+28E7hqcPEHZ6SYbWcM3c5o9G7
++6mUNU6UzSN337R1eGsQ4T1H9lywrA5KSidd3Il3X+qJd8nawKiNN9ekMpzei8M0
+ZxJ5Sb4vpS45REvRJV6FniXNzDcpDdsC2vrrA3t/thlQ0YIuHyWh8IwVXbY5KewQ
+lrN58vLg5LKW/fJedxZExdr5tdTkpupgluZNcZpsN6ACHJ1cYu7VQ9GsxfUcP/6g
+jErcmxGJIgFC/eLO4iCxJfozKa7NTf3R8KTpSs9hjAwr3lLo8zY=
+=I/jZ
 -----END PGP SIGNATURE-----
 
---7thxwjmuytw3bn4e--
+--4hyxqrgwjik2wcxf--
