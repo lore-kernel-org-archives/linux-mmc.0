@@ -1,74 +1,80 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH v3 13/16] mmc: tmio: fix never-detected card insertion bug
-Date: Wed, 7 Feb 2018 20:38:35 +0100
-Message-ID: <20180207193835.ildbw2wt2zeha6eo@ninjato>
+Subject: Re: [PATCH v3 14/16] mmc: tmio: move TMIO_MASK_{READOP,WRITEOP}
+ handling to correct place
+Date: Wed, 7 Feb 2018 22:47:07 +0100
+Message-ID: <20180207214707.6d32d27towuofyyu@ninjato>
 References: <1516206496-16612-1-git-send-email-yamada.masahiro@socionext.com>
- <1516206496-16612-14-git-send-email-yamada.masahiro@socionext.com>
+ <1516206496-16612-15-git-send-email-yamada.masahiro@socionext.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="zw4qzvuln4pkl6sg"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([88.99.104.3]:44402 "EHLO pokefinder.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754108AbeBGTih (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 7 Feb 2018 14:38:37 -0500
+        protocol="application/pgp-signature"; boundary="uhgi7sjo6kbhlkoa"
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1516206496-16612-14-git-send-email-yamada.masahiro@socionext.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+In-Reply-To: <1516206496-16612-15-git-send-email-yamada.masahiro@socionext.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Masahiro Yamada <yamada.masahiro@socionext.com>
 Cc: linux-mmc@vger.kernel.org, Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Magnusson <ulfalizer@gmail.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+List-Id: linux-mmc@vger.kernel.org
 
 
---zw4qzvuln4pkl6sg
+--uhgi7sjo6kbhlkoa
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Thu, Jan 18, 2018 at 01:28:13AM +0900, Masahiro Yamada wrote:
-> The TMIO mmc cannot detect the card insertion in native_hotplug mode
-> if the driver is probed without a card inserted.
+On Thu, Jan 18, 2018 at 01:28:14AM +0900, Masahiro Yamada wrote:
+> As far as I tested the IP on UniPhier SoCs, TMIO_STAT_{RXRDY,TXRQ}
+> are asserted for DMA mode as well as for PIO.  I need to disable the
+> those IRQs in dma_ops->start hook, otherwise the DMA transfer fails
+> with the following error message:
+>   PIO IRQ in DMA mode!
 >=20
-> The reason is obvious; all IRQs are disabled by tmio_mmc_host_probe(),
-> as follows:
+> Renesas chips are the same cases since I see their dma_ops->start
+> hooks explicitly clear TMIO_STAT_{RXRDY,TXRQ} (with nice comment!).
 >=20
->   tmio_mmc_disable_mmc_irqs(_host, TMIO_MASK_ALL);
+> If we do this sanity check in TMIO MMC core, RXRDY/TXRQ handling
+> should be entirely moved to the core.  tmio_mmc_cmd_irq() will
+> be a suitable place to disable them.
 >=20
-> The card event IRQs are first enabled by tmio_mmc_start_command() as
-> follows:
+> The probe function sets TMIO_MASK_{READOP,WRITEOP} but this is odd.
 >=20
->   if (!host->native_hotplug)
->           irq_mask &=3D ~(TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT);
->   tmio_mmc_enable_mmc_irqs(host, irq_mask);
+>     /* Unmask the IRQs we want to know about */
+>     if (!_host->chan_rx)
+>             irq_mask |=3D TMIO_MASK_READOP;
+>     if (!_host->chan_tx)
+>             irq_mask |=3D TMIO_MASK_WRITEOP;
 >=20
-> If the driver is probed without a card, tmio_mmc_start_command() is
-> never called in the first place.  So, the card is never detected.
->=20
-> The card event IRQs must be enabled in probe/resume functions.
+> At this point, _host->{chan_rx,chan_tx} are _always_ NULL because
+> tmio_mmc_request_dma() is called after this code.  Consequently,
+> TMIO_MASK_{READOP,WRITEOP} are set here whether DMA is used or not.
+> Remove this pointless code.
 >=20
 > Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 
-Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+I need to stop reviewing here because I'd need the applied version for
+checking. I hope Ulf can give me a base tomorrow.
+
+Or Yamada-san, do you meanwhile have a git repo somewhere?
 
 
---zw4qzvuln4pkl6sg
+--uhgi7sjo6kbhlkoa
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlp7VbcACgkQFA3kzBSg
-KbZafRAAp6E7dIQ958qKwfAz1I19l5Xq8APvj/XH6l0YDqVWKOn30/OxM1zOmsZ1
-qZz8pg28z6VFKOsIFyoBoAHvpOi3XofdHI5F9vLpWkGiw6PhpziL3LKKbTBEYatl
-Va/pbvfLc2d2LOLbrYcyOvrsrBdKibSyMhHhhvitvuYwux2haEsnEEKAlerYYil3
-gg2FsEtldw/zUN1lolwxy3mBRQruGACnY3JMwHmQxM76ud62ERbBRPP7Ec8jdf4n
-e1G/MletvlfauvvJh4TVcJTDZhHmnfzprGss1PNbDp+AieNKbJm6yZFw/MDq0cNA
-l50YsHtyH7PS+NyVqefi9hMmJjI3oznTGItfabX3C9Sqpv5iAEpkmpUI0OiO6T5D
-LwTzOtZxprDUFINKm1BfS7/jlB9bms9qHpM9QJyMC0vP+jwpy83jp8VMD8izcV9U
-o38HqCcBmVP4UdSoROjFqiEsi9N7ahZnJS99dIvVWXUKbW/HdyWSuau1KfuwDGAL
-MLjL5a5GDZVoT7ubahZF5VHpIQpllf3VweVhvbyZTy/CKotGWEcl/TUBGmoQnZAT
-0J4VaRVp4yU79rD+oAPnAQLxiMrsEhaxx1J5H7ETgfOCTtf1f9w27GC+YvNfP+Hc
-6K6vPvRVg7Okjo3/WmYcBGKAPwICayVK24ZJ52TSybjzuCg/7hk=
-=HLDO
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlp7c9cACgkQFA3kzBSg
+KbYlKhAAsan0zSFN0R/z5buBHVHh9XipwQcaH19s1VWL61PaPkSz+OgxqKHZEGmu
+hFcq5ZdhHEtkKBWJDcwEYLTXI9zJSaeJwlImq8svOw19Ql5cKokiepqT5S+UBfbE
+c61hwL8vaD2gEt5V1prSoSbuGdRqM56CyWD5V2EYgpUQUjx8ok8GG6f5LYsj9yCS
+vXf2cZuuFCclAYYu1wsyyW6U0xkxYu1Ll8cBPxuX7+PVXCCsWp5rjNV6jXbm7NJv
+YkSJn/MChBfZ569txrhAZKjKzTa6zCfsocFQ1dvOvUkW5JOM/KNMSLmnKmzdLJIN
+DcgXJbI1cNy5YUujk+lEtaZUjwlj3v8GXcX7vcse7BKtkex4I2NvPsAwZmHJr6Ol
+l/MLKBd0gfQqwou/oLH1/xu/4OzA/WiNXnXqxrsxD2WBDZ70DOb+6BzPaQ8I/D1E
+uN7QsIXQG/Qc3uAXl7PvbhlUSl5ZZ3zJck5dbP7Hmja/n7MIOGjqo4+A11viLFG3
+is7006uJB8Nx01mAjmHwCIUc+k0+Pjm52sww0iOcqc9+7ZEkQf+9uxHNE/gNOVxz
+ys7pQfbNl6qxpBsVMayaewdqAdJaic3qTx/WJ4QMfjsc17I5K6pN09GtFWr6c5Y2
+AFRX8q0fsud0AoJjcQAbVUafLwEX1KcwklUPbeD/PAy6/0VW8Bs=
+=ucR1
 -----END PGP SIGNATURE-----
 
---zw4qzvuln4pkl6sg--
+--uhgi7sjo6kbhlkoa--
