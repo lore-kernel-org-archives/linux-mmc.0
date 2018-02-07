@@ -1,53 +1,66 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH v3 10/16] mmc: tmio: remove TMIO_MMC_WRPROTECT_DISABLE
-Date: Wed, 7 Feb 2018 20:31:55 +0100
-Message-ID: <20180207193155.42phpprycb3nx3nv@ninjato>
+From: Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>
+Subject: Re: [PATCH v3 11/16] mmc: tmio: deprecate
+ "toshiba,mmc-wrprotect-disable" DT property
+Date: Wed, 7 Feb 2018 20:32:27 +0100
+Message-ID: <20180207193227.hu6cyh2e27dmrqwt@ninjato>
 References: <1516206496-16612-1-git-send-email-yamada.masahiro@socionext.com>
- <1516206496-16612-11-git-send-email-yamada.masahiro@socionext.com>
+ <1516206496-16612-12-git-send-email-yamada.masahiro@socionext.com>
+ <CAK7LNAQUJw-fjuJO68Kvskn8BRYW3rZj4YMtbo-Oxfv7c=6Ggg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="ifrazsdmgitbusor"
-Return-path: <linux-kernel-owner@vger.kernel.org>
+        protocol="application/pgp-signature"; boundary="n64esxgg2ls3up2p"
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1516206496-16612-11-git-send-email-yamada.masahiro@socionext.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: linux-mmc@vger.kernel.org, Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Magnusson <ulfalizer@gmail.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-renesas-soc@vger.kernel.org, Lee Jones <lee.jones@linaro.org>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+In-Reply-To: <CAK7LNAQUJw-fjuJO68Kvskn8BRYW3rZj4YMtbo-Oxfv7c=6Ggg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Masahiro Yamada <yamada.masahiro-uWyLwvC0a2jby3iVrkZq2A@public.gmane.org>
+Cc: linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, Ulf Magnusson <ulfalizer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>, Simon Horman <horms+renesas-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>, Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>, Linux-Renesas <linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
 
---ifrazsdmgitbusor
+--n64esxgg2ls3up2p
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Thu, Jan 18, 2018 at 01:28:10AM +0900, Masahiro Yamada wrote:
-> The use of this flag has been replaced with MMC_CAP2_NO_WRITE_PROTECT.
-> No platform defines this flag any more.  Remove.
+On Thu, Jan 18, 2018 at 10:58:36AM +0900, Masahiro Yamada wrote:
+> 2018-01-18 1:28 GMT+09:00 Masahiro Yamada <yamada.masahiro-uWyLwvC0a2jby3iVrkZq2A@public.gmane.org>:
+> > This property is equivalent to "disable-wp" defined in
+> > Documentation/devicetree/bindings/mmc/tmio_mmc.txt
 >=20
-> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+> This is mistake.
+>=20
+> "disable-wp" is defined in
+>=20
+> Documentation/devicetree/bindings/mmc/mmc.txt
 
-Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+With that fixed:
+
+Reviewed-by: Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>
 
 
---ifrazsdmgitbusor
+--n64esxgg2ls3up2p
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlp7VCsACgkQFA3kzBSg
-KbYp6hAAlxqCwtGDsyOvTHHCdI7ovmAjVOm/kBzKXAF8jHUAAe+Z7W9VSssrbIYx
-wssHlpeW1lUHIvhiFINTyZGLKpD4qFOULxUBuQF5yJr369M/KUT8aGaUuaLHUCOs
-wmV47rdtusho6Bt+skW9InE3q+0dACD58YHYe6ZRuTeZ65T48DyC+Lm6JPlfqC13
-/VwWykk5xBcaLnjCiEkFvYXsQwXJSX/EDdt6ZIst0JehBhuX4X58gkBDBgNeWY/d
-BbvH5mRDFWxzQgdj0BojKhDorMXFpraQdreJuX7V6xvtuML3ogfQsUV9ALNaDe2i
-40uElQKlE9aDGGnp6FtxppbDmVE74pvuQI4OTUKf4GF+i778IngAZQl6QsQ3f3FW
-DZd2DodhnzrAHLHEWjn6sTeJLXuKWIHeC9G6WAJrJULGvo+RSyjGhsO59oSTiC2h
-lvtuuy0//noRrlh8Jp8/f9Bz4bC5OF1hmKm1TnWRk/ZRMFT1f0p+t2lo6jz6GFkP
-LhLzc3d7syx8mdydAJV1IkEiTycYGi7HY6KHb8vAu9LTJcvWVamuOHhLp4w5LAdJ
-D06hfC1PkXy4YT4yc13+WpXqCV6zEq8nH/nLwNjxnPn7974uIHU3+6h9AQHZN0sB
-npiVbIz/iMQU+Fd6Qt12mg6A/YMK0qEKAhvnBm61UHPJGUUwdzw=
-=7HNv
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlp7VEoACgkQFA3kzBSg
+KbZ2MQ//cTK2L1RNvVTODkTz7P/XIz7dtmszlYSZXMagmYtqh1rW19FRPo40yo89
+XL0DNLiXTgN0yEWv6178HBPe4QGASdxxpjIJBH5CT5/uQT2nX8C2VG0d+w82WESO
+zwTshuqKfRDYWWFIII6FPu4YZZQT+Nk9pSBvAUR0l9MPrI7uSkrVdOCK/DpK60Jf
+bkuXqvo3QmCI76Cz6cBAiF9lAM9d0mIFst247fH3Cvf0IE/elXkWej3elZiOgZVt
+orqcdGZDBbCmGFx0OCUItl5o+Zb2wIefAG/lfk3ULPoajNAiHHgvjTKfoxWD7s3d
+b1P/WT3Yx3VttVTOvIaUWOV6NXoOehFIVxiuufrzyUIuiM11s2VTHTa1PeyJf/L/
+QTrnG67yvOhyKLtrQ4egaxF+NMKySbd3Wl7apAB3yMvz72t2gnrFm86W+WUHy5kY
+2VuBxP4iDToRaQ+dqVLq+csnbOG83jf7O2jk3h6M0eIuULhRp+XcyqBfsMkhmaP1
+OddjI5LBdU2oIMkVzXxo36JaNKgyWjJgHq1ztJ/nZGfL4KNckHTj0VRJgvftmiwa
+vbr4FJ2/jy9H3pva0qLEcTuynk11jA0onZ+4uK2YBIvs3zJbai2YQyBUvVBDfCOJ
+gKA5cI3mmZ/Is3zx8pL1L4egtK39eGmGo57oJ/KJpsK3FrgKavI=
+=mKCt
 -----END PGP SIGNATURE-----
 
---ifrazsdmgitbusor--
+--n64esxgg2ls3up2p--
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
