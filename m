@@ -1,80 +1,95 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH v3 14/16] mmc: tmio: move TMIO_MASK_{READOP,WRITEOP}
- handling to correct place
-Date: Wed, 7 Feb 2018 22:47:07 +0100
-Message-ID: <20180207214707.6d32d27towuofyyu@ninjato>
-References: <1516206496-16612-1-git-send-email-yamada.masahiro@socionext.com>
- <1516206496-16612-15-git-send-email-yamada.masahiro@socionext.com>
+Subject: Re: [PATCH v2 1/3] mmc: tmio: correct treatment of errors during
+ tuning
+Date: Wed, 7 Feb 2018 22:52:52 +0100
+Message-ID: <20180207215252.dirj5x7ky5bdznmk@ninjato>
+References: <20180119133906.11280-1-horms+renesas@verge.net.au>
+ <20180119133906.11280-2-horms+renesas@verge.net.au>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="uhgi7sjo6kbhlkoa"
-Return-path: <linux-kernel-owner@vger.kernel.org>
+        protocol="application/pgp-signature"; boundary="gj7xmhrloyxynxeq"
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1516206496-16612-15-git-send-email-yamada.masahiro@socionext.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: linux-mmc@vger.kernel.org, Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Magnusson <ulfalizer@gmail.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+In-Reply-To: <20180119133906.11280-2-horms+renesas@verge.net.au>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Simon Horman <horms+renesas@verge.net.au>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
 
---uhgi7sjo6kbhlkoa
+--gj7xmhrloyxynxeq
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Thu, Jan 18, 2018 at 01:28:14AM +0900, Masahiro Yamada wrote:
-> As far as I tested the IP on UniPhier SoCs, TMIO_STAT_{RXRDY,TXRQ}
-> are asserted for DMA mode as well as for PIO.  I need to disable the
-> those IRQs in dma_ops->start hook, otherwise the DMA transfer fails
-> with the following error message:
->   PIO IRQ in DMA mode!
+On Fri, Jan 19, 2018 at 02:39:04PM +0100, Simon Horman wrote:
+> From: Masaharu Hayakawa <masaharu.hayakawa.ry@renesas.com>
 >=20
-> Renesas chips are the same cases since I see their dma_ops->start
-> hooks explicitly clear TMIO_STAT_{RXRDY,TXRQ} (with nice comment!).
->=20
-> If we do this sanity check in TMIO MMC core, RXRDY/TXRQ handling
-> should be entirely moved to the core.  tmio_mmc_cmd_irq() will
-> be a suitable place to disable them.
->=20
-> The probe function sets TMIO_MASK_{READOP,WRITEOP} but this is odd.
->=20
->     /* Unmask the IRQs we want to know about */
->     if (!_host->chan_rx)
->             irq_mask |=3D TMIO_MASK_READOP;
->     if (!_host->chan_tx)
->             irq_mask |=3D TMIO_MASK_WRITEOP;
->=20
-> At this point, _host->{chan_rx,chan_tx} are _always_ NULL because
-> tmio_mmc_request_dma() is called after this code.  Consequently,
-> TMIO_MASK_{READOP,WRITEOP} are set here whether DMA is used or not.
-> Remove this pointless code.
->=20
-> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+> If the return value of mmc_send_tuning() is error other than -EILSEQ, the
+> tuning fails and process goes out of for_loop.  But the correct processing
+> is to judge their TAP as bad.
 
-I need to stop reviewing here because I'd need the applied version for
-checking. I hope Ulf can give me a base tomorrow.
+Ideally, we would have more specific reasons why this is correct processing.
 
-Or Yamada-san, do you meanwhile have a git repo somewhere?
+What other codes could happen here?
 
+> Signed-off-by: Masaharu Hayakawa <masaharu.hayakawa.ry@renesas.com>
+> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+> ---
+> v2 [Simon Horman]
+> * Added to patchset targeted at upstream
+> * Minor revision of changelog
+>=20
+> v0 [Masaharu Hayakawa]
+> ---
+>  drivers/mmc/host/tmio_mmc_core.c | 5 +----
+>  1 file changed, 1 insertion(+), 4 deletions(-)
+>=20
+> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc=
+_core.c
+> index 6d8719be75a8..41767d33ef97 100644
+> --- a/drivers/mmc/host/tmio_mmc_core.c
+> +++ b/drivers/mmc/host/tmio_mmc_core.c
+> @@ -800,10 +800,7 @@ static int tmio_mmc_execute_tuning(struct mmc_host *=
+mmc, u32 opcode)
+>  		if (host->prepare_tuning)
+>  			host->prepare_tuning(host, i % host->tap_num);
+> =20
+> -		ret =3D mmc_send_tuning(mmc, opcode, NULL);
+> -		if (ret && ret !=3D -EILSEQ)
+> -			goto out;
+> -		if (ret =3D=3D 0)
+> +		if (!mmc_send_tuning(mmc, opcode, NULL))
 
---uhgi7sjo6kbhlkoa
+I'd prefer (mmc_send_tuning() =3D=3D 0) here instead of '!mmc_send_tuning()=
+'.
+This reads as 'is ok' while the other reads more 'if not ok'.
+
+>  			set_bit(i, host->taps);
+> =20
+>  		usleep_range(1000, 1200);
+> --=20
+> 2.11.0
+>=20
+
+--gj7xmhrloyxynxeq
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlp7c9cACgkQFA3kzBSg
-KbYlKhAAsan0zSFN0R/z5buBHVHh9XipwQcaH19s1VWL61PaPkSz+OgxqKHZEGmu
-hFcq5ZdhHEtkKBWJDcwEYLTXI9zJSaeJwlImq8svOw19Ql5cKokiepqT5S+UBfbE
-c61hwL8vaD2gEt5V1prSoSbuGdRqM56CyWD5V2EYgpUQUjx8ok8GG6f5LYsj9yCS
-vXf2cZuuFCclAYYu1wsyyW6U0xkxYu1Ll8cBPxuX7+PVXCCsWp5rjNV6jXbm7NJv
-YkSJn/MChBfZ569txrhAZKjKzTa6zCfsocFQ1dvOvUkW5JOM/KNMSLmnKmzdLJIN
-DcgXJbI1cNy5YUujk+lEtaZUjwlj3v8GXcX7vcse7BKtkex4I2NvPsAwZmHJr6Ol
-l/MLKBd0gfQqwou/oLH1/xu/4OzA/WiNXnXqxrsxD2WBDZ70DOb+6BzPaQ8I/D1E
-uN7QsIXQG/Qc3uAXl7PvbhlUSl5ZZ3zJck5dbP7Hmja/n7MIOGjqo4+A11viLFG3
-is7006uJB8Nx01mAjmHwCIUc+k0+Pjm52sww0iOcqc9+7ZEkQf+9uxHNE/gNOVxz
-ys7pQfbNl6qxpBsVMayaewdqAdJaic3qTx/WJ4QMfjsc17I5K6pN09GtFWr6c5Y2
-AFRX8q0fsud0AoJjcQAbVUafLwEX1KcwklUPbeD/PAy6/0VW8Bs=
-=ucR1
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlp7dTQACgkQFA3kzBSg
+KbYIjg//a1DsxTmVYaw2HMDCncbkHYlkUL9KSeRFiRizv4XU0qoygtlFkM0/n0T9
+Psm/GAm3zcqn8UhuCkQmhmYqHj9X10cBfHWtxMFaAZyE9AmBKksxSqPVyBkAaXx0
+BrTDH1KayIwifyavVk48xR31ZKl5KMZOTYsyWvWK/nNxXAi6MXrTvk+4PmfnEx3Y
+CTFyF10gAg0WTXqXOEy9h2VDxWKCSHOCPYQyoHsN/FX7PRPKGdcvfFD63QFNXQzE
+7sNNLjKiuWr5n3jv2ZdgQ153CgBfn2N4ziigQdigHKa2gFF8cnoXWj4W1dDJRXyx
+WkKE5RCiS2lvmsBQPUKBCuXXpAanpV+YBNLjPtrZiBlbwjPve6qsqpUwKCWX+/Hp
+pdG8eh/l25rPjDlahvvpO3NPAoIcm3gy4fUkHxSO/Qvfxz9d317Xg1UAMwxmFJeU
+AtG009oLCZOiD4Mvh7mGsSflFx8jgHFFoI9goX3PxlG0UJL57cx66m+Fe2XwhcTy
+v6Z8dp8SybiMgksUPAodwfZvZ2hp0XZP2KNzNoMax+JCyMaXSW98l+FlHazW4pqE
+1GnhSRMBXgCD5xrSfk5xwh4JXwfM6WauuyXXb01pH/3Z/A08CIdOCx5EmRB4HwqE
+YdHVUbB9WdBi7eDGJKh0aTCWvagQXf/KTNj5NHROWiovqee5dfY=
+=xZwc
 -----END PGP SIGNATURE-----
 
---uhgi7sjo6kbhlkoa--
+--gj7xmhrloyxynxeq--
