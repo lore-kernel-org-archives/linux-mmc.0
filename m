@@ -1,65 +1,59 @@
 From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: Re: [PATCH v3 12/16] mmc: tmio: support IP-builtin card detection logic
-Date: Thu, 8 Feb 2018 10:02:39 +0900
-Message-ID: <CAK7LNARbRW+KyX9_h1mSrse5MSC3Zp40qOFVDWhEXG0ig8zkxQ@mail.gmail.com>
+Subject: Re: [PATCH v3 14/16] mmc: tmio: move TMIO_MASK_{READOP,WRITEOP}
+ handling to correct place
+Date: Thu, 8 Feb 2018 10:11:09 +0900
+Message-ID: <CAK7LNAQwXADUhscdp=C7c-2VfZmrj9kThc0o6JN4JDvcBSdCEw@mail.gmail.com>
 References: <1516206496-16612-1-git-send-email-yamada.masahiro@socionext.com>
- <1516206496-16612-13-git-send-email-yamada.masahiro@socionext.com> <20180207193459.tsmci752idkayjxd@ninjato>
+ <1516206496-16612-15-git-send-email-yamada.masahiro@socionext.com> <20180207214707.6d32d27towuofyyu@ninjato>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180207193459.tsmci752idkayjxd@ninjato>
+In-Reply-To: <20180207214707.6d32d27towuofyyu@ninjato>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Wolfram Sang <wsa@the-dreams.de>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Magnusson <ulfalizer@gmail.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-2018-02-08 4:34 GMT+09:00 Wolfram Sang <wsa@the-dreams.de>:
-> On Thu, Jan 18, 2018 at 01:28:12AM +0900, Masahiro Yamada wrote:
->> A card detect GPIO is set up only for platforms with "cd-gpios"
->> DT property or TMIO_MMC_USE_GPIO_CD flag.  However, the driver
->> core always uses mmc_gpio_get_cd, which just fails with -ENOSYS
->> if ctx->cd_gpio is unset.
+2018-02-08 6:47 GMT+09:00 Wolfram Sang <wsa@the-dreams.de>:
+> On Thu, Jan 18, 2018 at 01:28:14AM +0900, Masahiro Yamada wrote:
+>> As far as I tested the IP on UniPhier SoCs, TMIO_STAT_{RXRDY,TXRQ}
+>> are asserted for DMA mode as well as for PIO.  I need to disable the
+>> those IRQs in dma_ops->start hook, otherwise the DMA transfer fails
+>> with the following error message:
+>>   PIO IRQ in DMA mode!
 >>
->> The bit 5 of the status register provides the current signal level
->> of the CD line.  Allow to use it if the GPIO is unused.
+>> Renesas chips are the same cases since I see their dma_ops->start
+>> hooks explicitly clear TMIO_STAT_{RXRDY,TXRQ} (with nice comment!).
+>>
+>> If we do this sanity check in TMIO MMC core, RXRDY/TXRQ handling
+>> should be entirely moved to the core.  tmio_mmc_cmd_irq() will
+>> be a suitable place to disable them.
+>>
+>> The probe function sets TMIO_MASK_{READOP,WRITEOP} but this is odd.
+>>
+>>     /* Unmask the IRQs we want to know about */
+>>     if (!_host->chan_rx)
+>>             irq_mask |= TMIO_MASK_READOP;
+>>     if (!_host->chan_tx)
+>>             irq_mask |= TMIO_MASK_WRITEOP;
+>>
+>> At this point, _host->{chan_rx,chan_tx} are _always_ NULL because
+>> tmio_mmc_request_dma() is called after this code.  Consequently,
+>> TMIO_MASK_{READOP,WRITEOP} are set here whether DMA is used or not.
+>> Remove this pointless code.
 >>
 >> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 >
-> Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> I need to stop reviewing here because I'd need the applied version for
+> checking. I hope Ulf can give me a base tomorrow.
 >
->> @@ -1095,7 +1103,7 @@ static const struct mmc_host_ops tmio_mmc_ops = {
->
-> I just wonder why the diff-tool puts 'const' in the definition. There is
-> no const in my version here. And there shouldn't be because we modify
-> the struct in this patch.
+> Or Yamada-san, do you meanwhile have a git repo somewhere?
 >
 
-Which kernel version are you seeing?
+Patch 1-6 were pulled merged in this MW.
 
-The following patch was applied and it is in Linus'tree.
-
-
-
-commit c055fc75c1757b220108489038cfe60496b13865
-Author: Masahiro Yamada <yamada.masahiro@socionext.com>
-Date:   Sat Nov 25 01:24:41 2017 +0900
-
-    mmc: tmio: move mmc_host_ops to struct tmio_mmc_host from static data
-
-    Currently, tmio_mmc_ops is static data and tmio_mmc_host_probe()
-    updates some hooks in the static data.  This is a problem when
-    two or more instances call tmio_mmc_host_probe() and each of them
-    requests to use its own card_busy/start_signal_voltage_switch.
-
-    We can borrow a solution from sdhci_alloc_host().  Copy the whole
-    ops structure to host->mmc_host_ops, then override the hooks in
-    malloc'ed data.  Constify tmio_mmc_ops since it is now a template
-    ops used by default.
-
-    Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
-    Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-    Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-    Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Patch 7-16 are cleanly applicable onto Linus' tree.
+(commit 581e400ff935d34 as of writing)
 
 
 
