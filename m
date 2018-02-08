@@ -1,62 +1,149 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: Re: [PATCH v3 14/16] mmc: tmio: move TMIO_MASK_{READOP,WRITEOP}
- handling to correct place
-Date: Thu, 8 Feb 2018 10:11:09 +0900
-Message-ID: <CAK7LNAQwXADUhscdp=C7c-2VfZmrj9kThc0o6JN4JDvcBSdCEw@mail.gmail.com>
-References: <1516206496-16612-1-git-send-email-yamada.masahiro@socionext.com>
- <1516206496-16612-15-git-send-email-yamada.masahiro@socionext.com> <20180207214707.6d32d27towuofyyu@ninjato>
+From: Vijay Viswanath <vviswana@codeaurora.org>
+Subject: Re: [PATCH RFC 2/2] mmc: sdhci-msm: support voltage pad switching
+Date: Thu, 8 Feb 2018 10:49:10 +0530
+Message-ID: <288d817a-0c9d-5c9f-c0bc-c5b523793670@codeaurora.org>
+References: <1516262742-44326-1-git-send-email-vviswana@codeaurora.org>
+ <1516262742-44326-3-git-send-email-vviswana@codeaurora.org>
+ <20180202215154.GI12728@builder>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180207214707.6d32d27towuofyyu@ninjato>
+In-Reply-To: <20180202215154.GI12728@builder>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Magnusson <ulfalizer@gmail.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
+To: Bjorn Andersson <bjorn.andersson@linaro.org>
+Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, Krishna Konda <kkonda@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-2018-02-08 6:47 GMT+09:00 Wolfram Sang <wsa@the-dreams.de>:
-> On Thu, Jan 18, 2018 at 01:28:14AM +0900, Masahiro Yamada wrote:
->> As far as I tested the IP on UniPhier SoCs, TMIO_STAT_{RXRDY,TXRQ}
->> are asserted for DMA mode as well as for PIO.  I need to disable the
->> those IRQs in dma_ops->start hook, otherwise the DMA transfer fails
->> with the following error message:
->>   PIO IRQ in DMA mode!
+
+
+On 2/3/2018 3:21 AM, Bjorn Andersson wrote:
+> On Thu 18 Jan 00:05 PST 2018, Vijay Viswanath wrote:
+> 
+>> From: Krishna Konda <kkonda@codeaurora.org>
 >>
->> Renesas chips are the same cases since I see their dma_ops->start
->> hooks explicitly clear TMIO_STAT_{RXRDY,TXRQ} (with nice comment!).
+>> The PADs for sdhc controller are dual-voltage that support 3v/1.8v.
+>> Those PADs have a control signal (io_pad_pwr_switch/mode18 ) that
+>> indicates whether the PAD works in 3v or 1.8v.
 >>
->> If we do this sanity check in TMIO MMC core, RXRDY/TXRQ handling
->> should be entirely moved to the core.  tmio_mmc_cmd_irq() will
->> be a suitable place to disable them.
+>> SDHC core on msm platforms should have IO_PAD_PWR_SWITCH bit set/unset
+>> based on actual voltage used for IO lines. So when power irq is
+>> triggered for io high or io low, the driver should check the voltages
+>> supported and set the pad accordingly.
 >>
->> The probe function sets TMIO_MASK_{READOP,WRITEOP} but this is odd.
->>
->>     /* Unmask the IRQs we want to know about */
->>     if (!_host->chan_rx)
->>             irq_mask |= TMIO_MASK_READOP;
->>     if (!_host->chan_tx)
->>             irq_mask |= TMIO_MASK_WRITEOP;
->>
->> At this point, _host->{chan_rx,chan_tx} are _always_ NULL because
->> tmio_mmc_request_dma() is called after this code.  Consequently,
->> TMIO_MASK_{READOP,WRITEOP} are set here whether DMA is used or not.
->> Remove this pointless code.
->>
->> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
->
-> I need to stop reviewing here because I'd need the applied version for
-> checking. I hope Ulf can give me a base tomorrow.
->
-> Or Yamada-san, do you meanwhile have a git repo somewhere?
+> 
+> I'll try to find some time to check that this doesn't break 8916 and
+> 8974...again...
 >
 
-Patch 1-6 were pulled merged in this MW.
+Thanks! Btwn, I had tested the code in db410c.
 
-Patch 7-16 are cleanly applicable onto Linus' tree.
-(commit 581e400ff935d34 as of writing)
+>> Signed-off-by: Krishna Konda <kkonda@codeaurora.org>
+>> Signed-off-by: Venkat Gopalakrishnan <venkatg@codeaurora.org>
+>> Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
+>> ---
+>>   drivers/mmc/host/sdhci-msm.c | 38 ++++++++++++++++++++++++++++++++++++++
+>>   1 file changed, 38 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+>> index 5c23e92..f5728a8 100644
+>> --- a/drivers/mmc/host/sdhci-msm.c
+>> +++ b/drivers/mmc/host/sdhci-msm.c
+>> @@ -78,6 +78,8 @@
+>>   #define CORE_HC_MCLK_SEL_DFLT	(2 << 8)
+>>   #define CORE_HC_MCLK_SEL_HS400	(3 << 8)
+>>   #define CORE_HC_MCLK_SEL_MASK	(3 << 8)
+>> +#define CORE_IO_PAD_PWR_SWITCH_EN	(1 << 15)
+>> +#define CORE_IO_PAD_PWR_SWITCH  (1 << 16)
+>>   #define CORE_HC_SELECT_IN_EN	BIT(18)
+>>   #define CORE_HC_SELECT_IN_HS400	(6 << 19)
+>>   #define CORE_HC_SELECT_IN_MASK	(7 << 19)
+>> @@ -1166,6 +1168,35 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
+>>   	 */
+>>   	writel_relaxed(irq_ack, msm_host->core_mem + CORE_PWRCTL_CTL);
+>>   
+>> +	/*
+>> +	 * SDHC has core_mem and hc_mem device memory and these memory
+>> +	 * addresses do not fall within 1KB region. Hence, any update to
+>> +	 * core_mem address space would require an mb() to ensure this gets
+>> +	 * completed before its next update to registers within hc_mem.
+>> +	 */
+>> +	mb();
+> 
+> If you just use writel() instead of writel_relaxed() you don't need to
+> sprinkle the driver with comments like this. And you really should be
+> able to just say "Ensure ordering between core_mem and hc_mem writes" if
+> you really feel like making it explicit.
+> 
+>> +	/*
+>> +	 * We should unset IO PAD PWR switch only if the register write can
+>> +	 * set IO lines high and the regulator also switches to 3 V.
+>> +	 * Else, we should keep the IO PAD PWR switch set.
+>> +	 * This is applicable to certain targets where eMMC vccq supply is only
+>> +	 * 1.8V. In such targets, even during REQ_IO_HIGH, the IO PAD PWR
+>> +	 * switch must be kept set to reflect actual regulator voltage. This
+>> +	 * way, during initialization of controllers with only 1.8V, we will
+>> +	 * set the IO PAD bit without waiting for a REQ_IO_LOW.
+>> +	 */
+>> +	if ((io_level & REQ_IO_HIGH) && (msm_host->caps_0 & CORE_3_0V_SUPPORT))
+>> +		writel_relaxed((readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC) &
+>> +					~CORE_IO_PAD_PWR_SWITCH), host->ioaddr +
+>> +				CORE_VENDOR_SPEC);
+> 
+> Please split this up in read, modify and write operations.
+> 
 
+Will do
 
+>> +	else if ((io_level & REQ_IO_LOW) ||
+>> +			(msm_host->caps_0 & CORE_1_8V_SUPPORT))
+>> +		writel_relaxed((readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC) |
+>> +					CORE_IO_PAD_PWR_SWITCH), host->ioaddr +
+>> +				CORE_VENDOR_SPEC);
+>> +	/* Ensure that the IO PAD switches are updated before proceeding */
+> 
+> That's not what "mb()" does, it ensures that any writes that was done
+> before this line will hit the hardware before any writes that is done
+> after this line.
+> 
 
--- 
-Best Regards
-Masahiro Yamada
+Will update the comments.
+
+> But again, using writel() would save us from doing this explicitly
+> throughout the code.
+> 
+>> +	mb();
+>> +
+>>   	if (pwr_state)
+>>   		msm_host->curr_pwr_state = pwr_state;
+>>   	if (io_level)
+>> @@ -1518,6 +1549,13 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>>   	}
+>>   
+>>   	/*
+>> +	 * Set the PAD_PWR_SWITCH_EN bit so that the PAD_PWR_SWITCH bit can
+>> +	 * be used as required later on.
+>> +	 */
+>> +	writel_relaxed((readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC) |
+>> +				CORE_IO_PAD_PWR_SWITCH_EN), host->ioaddr +
+>> +			CORE_VENDOR_SPEC);
+> 
+> Please rewrite as 3 operations.
+> 
+> Do we need to set the pwr switch value as well? Or we're fine relying on
+> the existing value here?
+
+After the IO_PAD_PWR_SWTCH is enabled, we will call 
+sdhci_msm_handle_pwr_irq. If there is any pending power irq interrupt, 
+that will set the appropriate pwr switch value. Otherwise, an 
+appropriate value will get set during REQ_BUS_ON event.
+
+> 
+> Regards,
+> Bjorn
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
