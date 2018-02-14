@@ -1,66 +1,82 @@
-From: Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>
-Subject: Re: [PATCH v3 00/16] mmc: tmio: another batch of TMIO MMC fixes and
- cleanups
-Date: Wed, 14 Feb 2018 11:23:11 +0100
-Message-ID: <20180214102311.w7hfbnpfkecnjlkb@katana>
-References: <1516206496-16612-1-git-send-email-yamada.masahiro@socionext.com>
- <CAPDyKFp3dPjsEeyrKAbW_duErCS+xYD0K8zhcRPCY65eRNtMqg@mail.gmail.com>
- <20180207191152.kvqrugblst2cko3c@ninjato>
- <CAPDyKFoxp7p0atQTV=PoQ7Bwt0fOs2aEq1KJHPtrq+zA3eFYgw@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v2 00/16] mmc: sdhci-omap: Add UHS/HS200 mode support
+Date: Wed, 14 Feb 2018 11:38:13 +0100
+Message-ID: <CAPDyKFrh5-p4hDtG5eSbU4rX4+q4ZMsW1APOKSZh=wAASmoQKg@mail.gmail.com>
+References: <20180205125029.21570-1-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="chnywmmjtoeycwvc"
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFoxp7p0atQTV=PoQ7Bwt0fOs2aEq1KJHPtrq+zA3eFYgw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <20180205125029.21570-1-kishon-l0cyMroinI0@public.gmane.org>
 Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Masahiro Yamada <yamada.masahiro-uWyLwvC0a2jby3iVrkZq2A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, Ulf Magnusson <ulfalizer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>, Simon Horman <horms+renesas-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>, Yoshihiro Shimoda <yoshihiro.shimoda.uh-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>, Linux-Renesas <linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux-sh list <linux-sh-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Yoshinori Sato <ysato-Rn4VEauK+AKRv+LV9MX5uooqe+aC9MnS@public.gmane.org>, Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Lee Jones <lee.jones-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rich Felker <dalias-8zAoT0mYgF4@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+To: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
+Cc: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-omap <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
+On 5 February 2018 at 13:50, Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org> wrote:
+> Add UHS/HS200 mode support in sdhci-omap. The programming sequence
+> for voltage switching, tuning is followed from AM572x TRM
+> http://www.ti.com/lit/ug/spruhz6i/spruhz6i.pdf
+> (Similar to all AM57x/DRA7x SoCs). The patch series also implements
+> workaround for errata published in
+> http://www.ti.com/lit/er/sprz429k/sprz429k.pdf.
+>
+> It also includes a pdata-quirk patch since both pdata-quirks and
+> sdhci-omap uses struct sdhci_omap_platform_data.
+>
+> The dt patches enabling UHS/HS200 will follow this series.
+>
+> Changes from v1:
+> *) Only poll on DAT0 and DATI for card_busy status
+> *) Cleanup iodelay patch as suggested by Tony.
+> *) Added quirk to disable HW timeout
+> *) Use the existing data timer but program a relatively accurate
+>    SW timeout value (Impacts all platforms)
+> *) Fix a bug in sdhci which was using data_timer for non data line
+>    commands
+>
+> I've tested on dra72-evm, dra7xx-evm, dra71-evm, am572x-idk, am571x-idk
+> dra76-evm, am57xx-evm and k2g-evm.
+>
+> I've also pushed the series (along with dt) to
+> https://github.com/kishon/linux-wip.git sdhci_uhs_v2
+>
+> Kishon Vijay Abraham I (16):
+>   mmc: sdhci-omap: Update 'power_mode' outside sdhci_omap_init_74_clocks
+>   mmc: sdhci-omap: Add card_busy host ops
+>   mmc: sdhci-omap: Add custom set_uhs_signaling sdhci_host ops
+>   mmc: sdhci-omap: Add tuning support
+>   mmc: sdhci-omap: Workaround for Errata i802
+>   mmc: sdhci_omap: Add support to set IODELAY values
+>   mmc: sdhci_omap: Fix sdhci-omap quirks
+>   mmc: sdhci-omap: Add support to override f_max and iodelay from pdata
+>   mmc: sdhci: Add quirk to disable HW timeout
+>   mmc: sdhci: Fix to use data_timer only for data line commands
+>   mmc: sdhci: Program a relatively accurate SW timeout value
+>   mmc: sdhci-omap: Workaround for Errata i834
+>   dt-bindings: sdhci-omap: Add K2G specific binding
+>   mmc: sdhci-omap: Add support for MMC/SD controller in k2g SoC
+>   mmc: sdhci-omap: Add SPDX identifier
+>   ARM: OMAP2+: Use sdhci-omap specific pdata-quirks for MMC/SD on DRA74x
+>     EVM
+>
+>  .../devicetree/bindings/mmc/sdhci-omap.txt         |   2 +
+>  arch/arm/mach-omap2/pdata-quirks.c                 |  34 +-
+>  drivers/mmc/host/sdhci-omap.c                      | 430 +++++++++++++++++++--
+>  drivers/mmc/host/sdhci.c                           |  62 ++-
+>  drivers/mmc/host/sdhci.h                           |  17 +
+>  include/linux/platform_data/sdhci-omap.h           |  22 ++
+>  6 files changed, 518 insertions(+), 49 deletions(-)
+>  create mode 100644 include/linux/platform_data/sdhci-omap.h
+>
+> --
+> 2.11.0
+>
 
---chnywmmjtoeycwvc
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+To move forward and while waiting for Adrian to come back, I have
+applied patch 1 -> 7 for next.
 
-
-> You need to check again. :-)
-
-Seems like it. Sorry for the noise.
-
-> I am eager to apply those patches you already have reviewed (to
-> patch14), as those mostly seemed rather trivial and should be nice
-> cleanups.
->=20
-> Do you mind me going ahead, then you can continue and review/test the res=
-t?
-
-Yes, we can work incremently from there. I'll send patches if I discover
-something unexpected.
-
-
---chnywmmjtoeycwvc
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlqEDgsACgkQFA3kzBSg
-KbaVOxAAnEIyy0lswAOLrIpsQ+2pdHoH9MoOE+lfqFoXg28YvNHF6YfWKA47gWoD
-lmklgXxahFD/Dz07hngX21PF0kujg01iUC78nBNdXeN+pm1NIdipUahohuDQgRGj
-Pac163PpS4CPjPLA7yRLz44pXg4LQsIratlR1O1Nnw8mRRFY7aRr42+r/1kBKdYY
-LRehZe+7FoFgYAws224BNPOzvOX5n8Hg194c5rLRPif3EV21XQlc9tygG8A4bW6g
-m86jriqDUEYeE1RCgqiRlyxDZqyLFqLzsAHXWrDLoDpFMgmnLAX7Uihi37N38mw7
-SGjmZOHQnD5vtblop+rINnt5eZn3oevvgmQogwB0HasjjtwjOxUlARyNPicxrir8
-SVt5A/fA+ix52owdXN+SH+D0T5biGJEO3vd6zWOxOiKLmmRp0vrBsGNHUyh/Mxeo
-q+1kQ2OnsSxkZmyg4cYXYh2cHe3fYQb5DCj4oomraVLSzb+txk0dXc/RGwRArGQB
-0W8sMIVWj1f46mQs/XYJkbyqQEe1CJQU+O6TNsS4We3vXyMQdBUSH6ow35ShcUlF
-84I5u/K/q4ALhaRbVsKfs0jg4M7HOvUnflLJJlzhZAiOD59yXlUWI2Ttmxls/VsS
-BIEIhEZ4bai8g9q4s1lr6AP4xcigtQJXytLhJIG+rrrUckuXrM8=
-=AECR
------END PGP SIGNATURE-----
-
---chnywmmjtoeycwvc--
+Thanks and kind regards
+Uffe
 --
 To unsubscribe from this list: send the line "unsubscribe devicetree" in
 the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
