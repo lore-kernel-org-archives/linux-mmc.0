@@ -1,50 +1,43 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-iproc: Disable preset values for BCM2835
-Date: Wed, 14 Feb 2018 11:38:39 +0100
-Message-ID: <CAPDyKFov+8-t1awEQqB+vJxkbVvDKNae=JVUoyZsO3uRj=YeOA@mail.gmail.com>
-References: <1518465764-30051-1-git-send-email-stefan.wahren@i2se.com>
+Subject: Re: [PATCH v3 00/16] mmc: tmio: another batch of TMIO MMC fixes and cleanups
+Date: Wed, 14 Feb 2018 11:39:26 +0100
+Message-ID: <CAPDyKFox8m4maTHQZi4gzyi=UVh0KO_xnfhjbjeMxsd=a9PB5A@mail.gmail.com>
+References: <1516206496-16612-1-git-send-email-yamada.masahiro@socionext.com>
+ <CAPDyKFp3dPjsEeyrKAbW_duErCS+xYD0K8zhcRPCY65eRNtMqg@mail.gmail.com>
+ <20180207191152.kvqrugblst2cko3c@ninjato> <CAPDyKFoxp7p0atQTV=PoQ7Bwt0fOs2aEq1KJHPtrq+zA3eFYgw@mail.gmail.com>
+ <20180214102311.w7hfbnpfkecnjlkb@katana>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f65.google.com ([209.85.214.65]:54818 "EHLO
-        mail-it0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S967089AbeBNKik (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Feb 2018 05:38:40 -0500
-Received: by mail-it0-f65.google.com with SMTP id p204so2224594itc.4
-        for <linux-mmc@vger.kernel.org>; Wed, 14 Feb 2018 02:38:40 -0800 (PST)
-In-Reply-To: <1518465764-30051-1-git-send-email-stefan.wahren@i2se.com>
+Received: from mail-it0-f41.google.com ([209.85.214.41]:37832 "EHLO
+        mail-it0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S967286AbeBNKj1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Feb 2018 05:39:27 -0500
+Received: by mail-it0-f41.google.com with SMTP id d10so8565641itj.2
+        for <linux-mmc@vger.kernel.org>; Wed, 14 Feb 2018 02:39:27 -0800 (PST)
+In-Reply-To: <20180214102311.w7hfbnpfkecnjlkb@katana>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stefan Wahren <stefan.wahren@i2se.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Eric Anholt <eric@anholt.net>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Jon Mason <jonmason@broadcom.com>, linux-arm-kernel@lists.infradead.org, BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Wolfram Sang <wsa@the-dreams.de>, Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Magnusson <ulfalizer@gmail.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, devicetree@vger.kernel.org, Linux-sh list <linux-sh@vger.kernel.org>, Yoshinori Sato <ysato@users.sourceforge.jp>, Rob Herring <robh@kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Lee Jones <lee.jones@linaro.org>, Rich Felker <dalias@libc.org>, Mark Rutland <mark.rutland@arm.com>
 
-On 12 February 2018 at 21:02, Stefan Wahren <stefan.wahren@i2se.com> wrote:
-> According to the BCM2835 datasheet there are no preset value registers.
-> This wasn't an issue before, because we didn't propagate 1.8V support.
+On 14 February 2018 at 11:23, Wolfram Sang <wsa@the-dreams.de> wrote:
 >
-> Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
+>> You need to check again. :-)
+>
+> Seems like it. Sorry for the noise.
+>
+>> I am eager to apply those patches you already have reviewed (to
+>> patch14), as those mostly seemed rather trivial and should be nice
+>> cleanups.
+>>
+>> Do you mind me going ahead, then you can continue and review/test the rest?
+>
+> Yes, we can work incremently from there. I'll send patches if I discover
+> something unexpected.
+>
 
-Thanks, applied for next!
+Great! So, applied patches 7->14.
 
-Kind regards
+Thanks and kind regards
 Uffe
-
-> ---
->  drivers/mmc/host/sdhci-iproc.c | 1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
-> index 61666d2..0ef741b 100644
-> --- a/drivers/mmc/host/sdhci-iproc.c
-> +++ b/drivers/mmc/host/sdhci-iproc.c
-> @@ -214,6 +214,7 @@ static const struct sdhci_pltfm_data sdhci_bcm2835_pltfm_data = {
->                   SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
->                   SDHCI_QUIRK_MISSING_CAPS |
->                   SDHCI_QUIRK_NO_HISPD_BIT,
-> +       .quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
->         .ops = &sdhci_iproc_32only_ops,
->  };
->
-> --
-> 2.7.4
->
