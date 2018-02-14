@@ -1,96 +1,60 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 1/2] mmc: sdhci-pci: Fix S0i3 for Intel BYT-based controllers
-Date: Wed, 14 Feb 2018 15:57:43 +0200
-Message-ID: <1518616664-14342-2-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH 2/2] mmc: sdhci-pci: Get rid of glk_cqe_enable()
+Date: Wed, 14 Feb 2018 15:57:44 +0200
+Message-ID: <1518616664-14342-3-git-send-email-adrian.hunter@intel.com>
 References: <1518616664-14342-1-git-send-email-adrian.hunter@intel.com>
-Return-path: <linux-pm-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga05.intel.com ([192.55.52.43]:40497 "EHLO mga05.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1030221AbeBNN6b (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 14 Feb 2018 08:58:31 -0500
 In-Reply-To: <1518616664-14342-1-git-send-email-adrian.hunter@intel.com>
-Sender: linux-pm-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>
 Cc: Linux PM <linux-pm@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Haridhar Kalvala <haridhar.kalvala@intel.com>
-List-Id: linux-mmc@vger.kernel.org
 
-Tuning can leave the IP in an active state (Buffer Read Enable bit set)
-which prevents the entry to low power states (i.e. S0i3). Data reset will
-clear it.
-
-Generally tuning is followed by a data transfer which will anyway sort out
-the state, so it is rare that S0i3 is actually prevented.
+Now that tuning no longer leaves the Buffer Read Enable bit set (refer
+intel_execute_tuning()), glk_cqe_enable() is no longer needed. Get rid of
+it.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-Cc: stable@vger.kernel.org
 ---
- drivers/mmc/host/sdhci-pci-core.c | 35 +++++++++++++++++++++++++++++++----
- 1 file changed, 31 insertions(+), 4 deletions(-)
+ drivers/mmc/host/sdhci-pci-core.c | 20 +-------------------
+ 1 file changed, 1 insertion(+), 19 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 5296b749d661..ba725580e944 100644
+index ba725580e944..bd6ee968bcd9 100644
 --- a/drivers/mmc/host/sdhci-pci-core.c
 +++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -661,9 +661,36 @@ static void byt_read_dsm(struct sdhci_pci_slot *slot)
- 	slot->chip->rpm_retune = intel_host->d3_retune;
+@@ -719,26 +719,8 @@ static int glk_emmc_probe_slot(struct sdhci_pci_slot *slot)
+ 	return ret;
  }
  
--static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
-+static int intel_execute_tuning(struct mmc_host *mmc, u32 opcode)
-+{
-+	int err = sdhci_execute_tuning(mmc, opcode);
-+	struct sdhci_host *host = mmc_priv(mmc);
-+
-+	if (err)
-+		return err;
-+
-+	/*
-+	 * Tuning can leave the IP in an active state (Buffer Read Enable bit
-+	 * set) which prevents the entry to low power states (i.e. S0i3). Data
-+	 * reset will clear it.
-+	 */
-+	sdhci_reset(host, SDHCI_RESET_DATA);
-+
-+	return 0;
-+}
-+
-+static void byt_probe_slot(struct sdhci_pci_slot *slot)
- {
-+	struct mmc_host_ops *ops = &slot->host->mmc_host_ops;
-+
- 	byt_read_dsm(slot);
-+
-+	ops->execute_tuning = intel_execute_tuning;
-+}
-+
-+static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
-+{
-+	byt_probe_slot(slot);
- 	slot->host->mmc->caps |= MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE |
- 				 MMC_CAP_HW_RESET | MMC_CAP_1_8V_DDR |
- 				 MMC_CAP_CMD_DURING_TFR |
-@@ -786,7 +813,7 @@ static int ni_byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
- {
- 	int err;
- 
--	byt_read_dsm(slot);
-+	byt_probe_slot(slot);
- 
- 	err = ni_set_max_freq(slot);
- 	if (err)
-@@ -799,7 +826,7 @@ static int ni_byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
- 
- static int byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
- {
--	byt_read_dsm(slot);
-+	byt_probe_slot(slot);
- 	slot->host->mmc->caps |= MMC_CAP_POWER_OFF_CARD | MMC_CAP_NONREMOVABLE |
- 				 MMC_CAP_WAIT_WHILE_BUSY;
- 	return 0;
-@@ -807,7 +834,7 @@ static int byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
- 
- static int byt_sd_probe_slot(struct sdhci_pci_slot *slot)
- {
--	byt_read_dsm(slot);
-+	byt_probe_slot(slot);
- 	slot->host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY |
- 				 MMC_CAP_AGGRESSIVE_PM | MMC_CAP_CD_WAKE;
- 	slot->cd_idx = 0;
+-static void glk_cqe_enable(struct mmc_host *mmc)
+-{
+-	struct sdhci_host *host = mmc_priv(mmc);
+-	u32 reg;
+-
+-	/*
+-	 * CQE gets stuck if it sees Buffer Read Enable bit set, which can be
+-	 * the case after tuning, so ensure the buffer is drained.
+-	 */
+-	reg = sdhci_readl(host, SDHCI_PRESENT_STATE);
+-	while (reg & SDHCI_DATA_AVAILABLE) {
+-		sdhci_readl(host, SDHCI_BUFFER);
+-		reg = sdhci_readl(host, SDHCI_PRESENT_STATE);
+-	}
+-
+-	sdhci_cqe_enable(mmc);
+-}
+-
+ static const struct cqhci_host_ops glk_cqhci_ops = {
+-	.enable		= glk_cqe_enable,
++	.enable		= sdhci_cqe_enable,
+ 	.disable	= sdhci_cqe_disable,
+ 	.dumpregs	= sdhci_pci_dumpregs,
+ };
 -- 
 1.9.1
+
