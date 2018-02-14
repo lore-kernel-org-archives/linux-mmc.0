@@ -1,53 +1,60 @@
-From: Michal =?UTF-8?B?U3VjaMOhbmVr?= <msuchanek@suse.de>
-Subject: Re: [PATCH 1/2] mmc: bcm2835: reset host on timeout
-Date: Wed, 14 Feb 2018 16:36:49 +0100
-Message-ID: <20180214163649.3a0c9476@kitsune.suse.cz>
-References: <97593d6e1a41af1baff61f7d9e6e68a450fc9da6.1518619058.git.msuchanek@suse.de>
-        <1fbf0d77-cb53-f0fa-b810-e9954138d907@i2se.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+From: KOBAYASHI Yoshitake <yoshitake.kobayashi@toshiba.co.jp>
+Subject: [PATCH -next v4] mtd: nand: toshiba: Retrieve ECC requirements from extended ID
+Date: Thu, 15 Feb 2018 00:35:06 +0900
+Message-ID: <1518622506-16606-1-git-send-email-yoshitake.kobayashi@toshiba.co.jp>
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1fbf0d77-cb53-f0fa-b810-e9954138d907@i2se.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Stefan Wahren <stefan.wahren@i2se.com>
-Cc: Michal Suchanek <msuchanek@suse.de>, Ulf Hansson <ulf.hansson@linaro.org>, Florian Fainelli <f.fainelli@gmail.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, bcm-kernel-feedback-list@broadcom.com, Eric Anholt <eric@anholt.net>, Gerd Hoffmann <kraxel@redhat.com>, "Gustavo A. R. Silva" <garsilva@embeddedor.com>, Julia Lawall <Julia.Lawall@lip6.fr>, linux-mmc@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+To: boris.brezillon@free-electrons.com, richard@nod.at, dwmw2@infradead.org, computersforpeace@gmail.com, marek.vasut@gmail.com, cyrille.pitchen@wedev4u.fr, linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, KOBAYASHI Yoshitake <yoshitake.kobayashi@toshiba.co.jp>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 14 Feb 2018 15:58:31 +0100
-Stefan Wahren <stefan.wahren@i2se.com> wrote:
+This patch enables support to read the ECC strength and size from the
+NAND flash using Toshiba Memory SLC NAND extended-ID. This patch is
+based on the information of the 6th ID byte of the Toshiba Memory SLC
+NAND.
 
-> Hi Michal,
-> 
-> Am 14.02.2018 um 15:38 schrieb Michal Suchanek:
-> > The bcm2835 mmc host tends to lock up for unknown reason so reset
-> > it on timeout. The upper mmc block layer tries retransimitting with
-> > single blocks which tends to work out after a long wait.
-> >
-> > This is better than giving up and leaving the machine broken for no
-> > obvious reason.  
-> 
-> could you please provide more information about this issue (affected
-> hardware, kernel config, version, dmesg, reproducible scenario)?
-> 
+Signed-off-by: KOBAYASHI Yoshitake <yoshitake.kobayashi@toshiba.co.jp>
+---
+ drivers/mtd/nand/nand_toshiba.c | 26 ++++++++++++++++++++++++++
+ 1 file changed, 26 insertions(+)
 
-The RPi3 is known to not work with some SD cards. You can find some
-wiki pages with large tables of known-working and known-broken cards. I
-have a couple of RPi3 boards and a card that works and card that does
-not. I tried debugging the issue but did not find anything I can do
-about it - AFAICT the issue happens somewhere inside the MMC controller
-IP. 
-
-I have no inside knowledge of the controller in question but during
-testing I tried to reset the controller whenever the issue happens so I
-can continue running the test system for a longer time until it gets
-unusable. While I did not find any solution to the problem the
-workaround with resetting the controller works quite reliably for me.
-
-So I am posting it in the hope that people with the wrong combination
-of RPi3 and SD card will not get a blank screen but rather a system
-that boots but tends to lock up for half a minute occasionally.
-
-Thanks
-
-Michal
+diff --git a/drivers/mtd/nand/nand_toshiba.c b/drivers/mtd/nand/nand_toshiba.c
+index 57df857..ab43f02 100644
+--- a/drivers/mtd/nand/nand_toshiba.c
++++ b/drivers/mtd/nand/nand_toshiba.c
+@@ -35,6 +35,32 @@ static void toshiba_nand_decode_id(struct nand_chip *chip)
+ 	    (chip->id.data[5] & 0x7) == 0x6 /* 24nm */ &&
+ 	    !(chip->id.data[4] & 0x80) /* !BENAND */)
+ 		mtd->oobsize = 32 * mtd->writesize >> 9;
++
++	/*
++	 * Extract ECC requirements from 6th id byte.
++	 * For Toshiba SLC, ecc requrements are as follows:
++	 *  - 43nm: 1 bit ECC for each 512Byte is required.
++	 *  - 32nm: 4 bit ECC for each 512Byte is required.
++	 *  - 24nm: 8 bit ECC for each 512Byte is required.
++	 */
++	if (chip->id.len >= 6 && nand_is_slc(chip)) {
++		chip->ecc_step_ds = 512;
++		switch (chip->id.data[5] & 0x7) {
++		case 0x4:
++			chip->ecc_strength_ds = 1;
++			break;
++		case 0x5:
++			chip->ecc_strength_ds = 4;
++			break;
++		case 0x6:
++			chip->ecc_strength_ds = 8;
++			break;
++		default:
++			WARN(1, "Could not get ECC info");
++			chip->ecc_step_ds = 0;
++			break;
++		}
++	}
+ }
+ 
+ static int toshiba_nand_init(struct nand_chip *chip)
+-- 
+2.7.4
