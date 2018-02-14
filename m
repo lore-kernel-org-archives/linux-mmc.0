@@ -1,92 +1,35 @@
-From: "Cunningham, Joel" <Joel.Cunningham@garmin.com>
-Subject: RE: [PATCH] mmc: update sdio_claim_irq documentation
-Date: Wed, 14 Feb 2018 14:53:01 +0000
-Message-ID: <7464B52C8785D749B3908E8649D517950151D615DD@OLAWPA-EXMB02.ad.garmin.com>
+From: Stefan Wahren <stefan.wahren@i2se.com>
+Subject: Re: [PATCH 1/2] mmc: bcm2835: reset host on timeout
+Date: Wed, 14 Feb 2018 15:58:31 +0100
+Message-ID: <1fbf0d77-cb53-f0fa-b810-e9954138d907@i2se.com>
+References: <97593d6e1a41af1baff61f7d9e6e68a450fc9da6.1518619058.git.msuchanek@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-sn1nam02on0105.outbound.protection.outlook.com ([104.47.36.105]:6176
-        "EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1031006AbeBNOxF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 14 Feb 2018 09:53:05 -0500
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <97593d6e1a41af1baff61f7d9e6e68a450fc9da6.1518619058.git.msuchanek@suse.de>
+Content-Language: de-DE
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Michal Suchanek <msuchanek@suse.de>, Ulf Hansson <ulf.hansson@linaro.org>, Florian Fainelli <f.fainelli@gmail.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, bcm-kernel-feedback-list@broadcom.com, Eric Anholt <eric@anholt.net>, Gerd Hoffmann <kraxel@redhat.com>, "Gustavo A. R. Silva" <garsilva@embeddedor.com>, Julia Lawall <Julia.Lawall@lip6.fr>, linux-mmc@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBsaW51eC1tbWMtb3duZXJAdmdl
-ci5rZXJuZWwub3JnIFttYWlsdG86bGludXgtbW1jLQ0KPiBvd25lckB2Z2VyLmtlcm5lbC5vcmdd
-IE9uIEJlaGFsZiBPZiBVbGYgSGFuc3Nvbg0KPiBTZW50OiBXZWRuZXNkYXksIEZlYnJ1YXJ5IDE0
-LCAyMDE4IDQ6MDYgQU0NCj4gVG86IEN1bm5pbmdoYW0sIEpvZWwgPEpvZWwuQ3VubmluZ2hhbUBn
-YXJtaW4uY29tPg0KPiBDYzogbGludXgtbW1jQHZnZXIua2VybmVsLm9yZw0KPiBTdWJqZWN0OiBS
-ZTogW1BBVENIXSBtbWM6IHVwZGF0ZSBzZGlvX2NsYWltX2lycSBkb2N1bWVudGF0aW9uDQo+DQo+
-IE9uIDI0IEphbnVhcnkgMjAxOCBhdCAyMzo1NywgQ3VubmluZ2hhbSwgSm9lbA0KPiA8Sm9lbC5D
-dW5uaW5naGFtQGdhcm1pbi5jb20+IHdyb3RlOg0KPiA+IEkgaGF2ZSBhIDNyZCBwYXJ0eSBkcml2
-ZXIgd2hpY2ggY2FsbHMgc2Rpb19jbGFpbV9ob3N0IChhbmQNCj4gc2Rpb19yZWxlYXNlX2hvc3Qp
-IGluIGl0cyBJUlEgaGFuZGxlciwgdGhlIGNvbW1lbnQgZG9jdW1lbnRhdGlvbiBmb3INCj4gc2Rp
-b19jbGFpbV9pcnEoKSBjYXVzZWQgY29uZnVzaW9uIGFib3V0IHdoZXRoZXIgdGhpcyB3YXMgYWxs
-b3dlZCwgZXZlbg0KPiB0aG91Z2ggdGhlIGltcGxlbWVudGF0aW9uIHN1cHBvcnRzIHJlY3Vyc2l2
-ZSBjbGFpbXMgYW5kIHRoZSBkcml2ZXIgaXMNCj4gZnVuY3Rpb25pbmcgd2l0aG91dCBpc3N1ZS4N
-Cj4gPg0KPiA+IElmIHRoZSBpbnRlbnRpb24gaXMgdGhhdCByZWN1cnNpdmUgY2xhaW1zIGFyZSBz
-dXBwb3J0ZWQsIHRoZSBiZWxvdyBwYXRjaA0KPiAoYmFzZWQgb24gbW1jLW5leHQpIHVwZGF0ZXMg
-dGhlIGRvY3VtZW50YXRpb24gdG8gZGVtb3RlIHRoZSAibXVzdCBub3QiDQo+IHRvIGEgImRvZXMg
-bm90IG5lZWQgdG8iDQo+DQo+IFJlY3Vyc2l2ZSBjbGFpbXMgYXJlIHN1cHBvcnRlZCwgaG93ZXZl
-ciBpbnRlcm5hbGx5IGluIHRoZSBtbWMgY29yZSB3ZSBoYXZlDQo+IG1vdmVkIHRvd2FyZHMgb2Yg
-cmVtb3ZpbmcgYWxsIG9jY3VycmVuY2VzIG9mIHRoZW0gKHRvIG1ha2UgdGhlIGxvY2tpbmcNCj4g
-bW9yZSBzbGltKS4NCj4NCj4gVGhlcmVmb3JlLCBJIHdvdWxkbid0IG1pbmQga2VlcGluZyB0aGUg
-ZG9jIGFzIGlzLCBldmVuIGlmIGlzbid0IGEgcHJvYmxlbSBpbg0KPiBwcmFjdGljZSB0byBoYXZl
-IG5lc3RlZCBjbGFpbS9yZWxlYXNlIG9mIHRoZSBzZGlvIGhvc3QuDQoNClRoYW5rcyBmb3IgdGhl
-IGV4cGxhbmF0aW9uIGFuZCB0aGF0J3MgZ29vZCB0byBnZXQgc29tZSBjbGFyaXR5IHRoYXQgcmVj
-dXJzaXZlIGNsYWltcyBhcmUgc3VwcG9ydGVkLg0KDQpUaGlua2luZyBhYm91dCB0aGUgd29yZGlu
-ZyBvZiB0aGUgZG9jdW1lbnRhdGlvbiBtb3JlLCAnbXVzdCBub3QnIHJlYWxseSBtZWFucyB0byBt
-ZSB0aGF0IG9uZSBpcyBuZXZlciBhbGxvd2VkIHRvIHBlcmZvcm0gdGhlIHJlY3Vyc2l2ZSBjbGFp
-bS4gIE15IHVuZGVyc3RhbmRpbmcgY29tZXMgZnJvbSB0eXBpY2FsIHVzYWdlIG9mICdNVVNUIE5P
-VCcgaW4gUkZDcyAoc2VlIFJGQyAyMTE5KS4gIFdvdWxkIHlvdSBiZSBvcGVuIHRvIHVzaW5nICdz
-aG91bGQgbm90JyB0byBpbmRpY2F0ZSBkb2luZyBhIHJlY3Vyc2l2ZSBjbGFpbSBpcyBub3QgcmVj
-b21tZW5kZWQgYXMgYSBiZXN0IHByYWN0aWNlLCBidXQgaXMgc3VwcG9ydGVkIGluIHNvbWUgY2ly
-Y3Vtc3RhbmNlcz8NCg0KSSdtIG5vdCBpbnRlbmRpbmcgdG8gYmUgcGVkYW50aWMsIHRoaXMgd29y
-ZGluZyByZWFsbHkgZGlkIGNhdXNlIGEgYmFjay1hbmQtZm9ydGggZGlzY3Vzc2lvbiBiZXR3ZWVu
-IGRldmVsb3BlcnMgYXMgdG8gMSkgSWYgd2UgY29ycmVjdGx5IHVuZGVyc3Rvb2QgdGhlIFNESU8g
-QVBJIGltcGxlbWVudGF0aW9uIGFuZCAyKSBXaGV0aGVyIHRoZSBkcml2ZXIgaXMgd3JvbmcvYnJv
-a2VuLg0KDQpKb2VsDQoNCj4NCj4gS2luZCByZWdhcmRzDQo+IFVmZmUNCj4NCj4gPg0KPiA+IEpv
-ZWwNCj4gPg0KPiA+IEZyb206IEpvZWwgQ3VubmluZ2hhbSA8am9lbC5jdW5uaW5naGFtQGdhcm1p
-bi5jb20+DQo+ID4NCj4gPiBVcGRhdGUgZG9jdW1lbnRhdGlvbiBmb3Igc2Rpb19jbGFpbV9pcnEg
-dG8gcmVsYXggdGhlIHdvcmRpbmcgd2hpY2gNCj4gPiBkZXNjcmliZXMgd2hldGhlciBvciBub3Qg
-aXRzIHNhZmUgdG8gY2FsbCBzZGlvX2NsYWltL3JlbGVhc2VfaG9zdCBpbg0KPiA+IGFuIElSUSBo
-YW5kbGVyIHJlZ2lzdGVyZWQgdmlhIHNkaW9fY2xhaW1faXJxLiBUaGUgc2Rpb19jbGFpbV9ob3N0
-DQo+ID4gaW1wbGVtZW50YXRpb24gaGFzIHN1cHBvcnQgKHZpYSBfX21tY19jbGFpbV9ob3N0KSB0
-byBiZSByZWN1cnNpdmVseQ0KPiA+IGNsYWltZWQNCj4gPg0KPiA+IFNpZ25lZC1vZmYtYnk6IEpv
-ZWwgQ3VubmluZ2hhbSA8am9lbC5jdW5uaW5naGFtQGdhcm1pbi5jb20+DQo+ID4gLS0tDQo+ID4g
-IGRyaXZlcnMvbW1jL2NvcmUvc2Rpb19pcnEuYyB8IDQgKystLQ0KPiA+ICAxIGZpbGUgY2hhbmdl
-ZCwgMiBpbnNlcnRpb25zKCspLCAyIGRlbGV0aW9ucygtKQ0KPiA+DQo+ID4gZGlmZiAtLWdpdCBh
-L2RyaXZlcnMvbW1jL2NvcmUvc2Rpb19pcnEuYyBiL2RyaXZlcnMvbW1jL2NvcmUvc2Rpb19pcnEu
-Yw0KPiA+IGluZGV4IDdhMmVhZjg0MTBhMy4uMzdhMWE0YmNiNzc4IDEwMDY0NA0KPiA+IC0tLSBh
-L2RyaXZlcnMvbW1jL2NvcmUvc2Rpb19pcnEuYw0KPiA+ICsrKyBiL2RyaXZlcnMvbW1jL2NvcmUv
-c2Rpb19pcnEuYw0KPiA+IEBAIC0yNzcsOCArMjc3LDggQEAgc3RhdGljIHZvaWQgc2Rpb19zaW5n
-bGVfaXJxX3NldChzdHJ1Y3QgbW1jX2NhcmQNCj4gKmNhcmQpDQo+ID4gICAqDQo+ID4gICAqICAg
-ICBDbGFpbSBhbmQgYWN0aXZhdGUgdGhlIElSUSBmb3IgdGhlIGdpdmVuIFNESU8gZnVuY3Rpb24u
-IFRoZSBwcm92aWRlZA0KPiA+ICAgKiAgICAgaGFuZGxlciB3aWxsIGJlIGNhbGxlZCB3aGVuIHRo
-YXQgSVJRIGlzIGFzc2VydGVkLiAgVGhlIGhvc3QgaXMgYWx3YXlzDQo+ID4gLSAqICAgICBjbGFp
-bWVkIGFscmVhZHkgd2hlbiB0aGUgaGFuZGxlciBpcyBjYWxsZWQgc28gdGhlIGhhbmRsZXIgbXVz
-dCBub3QNCj4gPiAtICogICAgIGNhbGwgc2Rpb19jbGFpbV9ob3N0KCkgbm9yIHNkaW9fcmVsZWFz
-ZV9ob3N0KCkuDQo+ID4gKyAqICAgICBjbGFpbWVkIGFscmVhZHkgd2hlbiB0aGUgaGFuZGxlciBp
-cyBjYWxsZWQgc28gdGhlIGhhbmRsZXIgZG9lcyBub3QNCj4gPiArICogICAgIG5lZWQgdG8gY2Fs
-bCBzZGlvX2NsYWltX2hvc3QoKSBvciBzZGlvX3JlbGVhc2VfaG9zdCgpLg0KPiA+ICAgKi8NCj4g
-PiAgaW50IHNkaW9fY2xhaW1faXJxKHN0cnVjdCBzZGlvX2Z1bmMgKmZ1bmMsIHNkaW9faXJxX2hh
-bmRsZXJfdA0KPiA+ICpoYW5kbGVyKSAgew0KPiA+IC0tDQo+ID4gMi4xNC4xDQo+ID4NCj4gLS0N
-Cj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2Ny
-aWJlIGxpbnV4LW1tYyIgaW4gdGhlDQo+IGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2
-Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdA0KPiBodHRwOi8vdmdlci5rZXJu
-ZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg0KX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX18NCg0KQ09ORklERU5USUFMSVRZIE5PVElDRTogVGhpcyBlbWFpbCBhbmQgYW55IGF0dGFj
-aG1lbnRzIGFyZSBmb3IgdGhlIHNvbGUgdXNlIG9mIHRoZSBpbnRlbmRlZCByZWNpcGllbnQocykg
-YW5kIGNvbnRhaW4gaW5mb3JtYXRpb24gdGhhdCBtYXkgYmUgR2FybWluIGNvbmZpZGVudGlhbCBh
-bmQvb3IgR2FybWluIGxlZ2FsbHkgcHJpdmlsZWdlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhp
-cyBlbWFpbCBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHJlcGx5IGVtYWls
-IGFuZCBkZWxldGUgdGhlIG1lc3NhZ2UuIEFueSBkaXNjbG9zdXJlLCBjb3B5aW5nLCBkaXN0cmli
-dXRpb24gb3IgdXNlIG9mIHRoaXMgY29tbXVuaWNhdGlvbiAoaW5jbHVkaW5nIGF0dGFjaG1lbnRz
-KSBieSBzb21lb25lIG90aGVyIHRoYW4gdGhlIGludGVuZGVkIHJlY2lwaWVudCBpcyBwcm9oaWJp
-dGVkLiBUaGFuayB5b3UuDQo=
+Hi Michal,
+
+Am 14.02.2018 um 15:38 schrieb Michal Suchanek:
+> The bcm2835 mmc host tends to lock up for unknown reason so reset it on
+> timeout. The upper mmc block layer tries retransimitting with single
+> blocks which tends to work out after a long wait.
+>
+> This is better than giving up and leaving the machine broken for no
+> obvious reason.
+
+could you please provide more information about this issue (affected
+hardware, kernel config, version, dmesg, reproducible scenario)?
