@@ -1,39 +1,81 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 08/16] mmc: sdhci-omap: Add support to override f_max
- and iodelay from pdata
-Date: Wed, 14 Feb 2018 10:53:14 +0100
-Message-ID: <CAPDyKFrhpry40TCjmQ_-WO-EWa2BCL0eNXLZB_UobGaYbsBiHA@mail.gmail.com>
-References: <20180205125029.21570-1-kishon@ti.com> <20180205125029.21570-9-kishon@ti.com>
+Subject: Re: [PATCH] mmc: update sdio_claim_irq documentation
+Date: Wed, 14 Feb 2018 11:06:20 +0100
+Message-ID: <CAPDyKFr+h_YGWD_+6OdsENq-rHJdB+0y1vGZ=uFP2LSQJm5-oQ@mail.gmail.com>
+References: <7464B52C8785D749B3908E8649D517950151D5340A@OLAWPA-EXMB02.ad.garmin.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180205125029.21570-9-kishon@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>
-Cc: Tony Lindgren <tony@atomide.com>, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, devicetree@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, linux-arm-kernel@lists.infradead.org
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-it0-f67.google.com ([209.85.214.67]:51069 "EHLO
+        mail-it0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S967116AbeBNKGV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Feb 2018 05:06:21 -0500
+Received: by mail-it0-f67.google.com with SMTP id y16so3540349itc.0
+        for <linux-mmc@vger.kernel.org>; Wed, 14 Feb 2018 02:06:21 -0800 (PST)
+In-Reply-To: <7464B52C8785D749B3908E8649D517950151D5340A@OLAWPA-EXMB02.ad.garmin.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "Cunningham, Joel" <Joel.Cunningham@garmin.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 5 February 2018 at 13:50, Kishon Vijay Abraham I <kishon@ti.com> wrote:
-> DRA74x EVM Rev H EVM comes with revision 2.0 silicon. However, earlier
-> versions of EVM can come with either revision 1.1 or revision 1.0 of
-> silicon.
+On 24 January 2018 at 23:57, Cunningham, Joel
+<Joel.Cunningham@garmin.com> wrote:
+> I have a 3rd party driver which calls sdio_claim_host (and sdio_release_h=
+ost) in its IRQ handler, the comment documentation for sdio_claim_irq() cau=
+sed confusion about whether this was allowed, even though the implementatio=
+n supports recursive claims and the driver is functioning without issue.
 >
-> The device-tree file is written to support rev 2.0 of silicon.
-> pdata-quirks are used to then override the settings needed for
-> PG 1.1 silicon.
->
-> PG 1.1 silicon has limitations w.r.t frequencies at which MMC1/2/3
-> can operate as well as different IOdelay numbers.
+> If the intention is that recursive claims are supported, the below patch =
+(based on mmc-next) updates the documentation to demote the "must not" to a=
+ "does not need to"
 
-I fail to understand the need for platform data. Why can't DT be used
-for the older revisions as well?
+Recursive claims are supported, however internally in the mmc core we
+have moved towards of removing all occurrences of them (to make the
+locking more slim).
 
->
-> Add support in sdhci-omap driver to get platform data if available
-> (added using pdata quirks) and override the data (max-frequency and
-> iodelay data) obtained from device tree.
-
-[...]
+Therefore, I wouldn't mind keeping the doc as is, even if isn't a
+problem in practice to have nested claim/release of the sdio host.
 
 Kind regards
 Uffe
+
+>
+> Joel
+>
+> From: Joel Cunningham <joel.cunningham@garmin.com>
+>
+> Update documentation for sdio_claim_irq to relax the wording which
+> describes whether or not its safe to call sdio_claim/release_host in
+> an IRQ handler registered via sdio_claim_irq. The sdio_claim_host
+> implementation has support (via __mmc_claim_host) to be recursively
+> claimed
+>
+> Signed-off-by: Joel Cunningham <joel.cunningham@garmin.com>
+> ---
+>  drivers/mmc/core/sdio_irq.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
+> index 7a2eaf8410a3..37a1a4bcb778 100644
+> --- a/drivers/mmc/core/sdio_irq.c
+> +++ b/drivers/mmc/core/sdio_irq.c
+> @@ -277,8 +277,8 @@ static void sdio_single_irq_set(struct mmc_card *card=
+)
+>   *
+>   *     Claim and activate the IRQ for the given SDIO function. The provi=
+ded
+>   *     handler will be called when that IRQ is asserted.  The host is al=
+ways
+> - *     claimed already when the handler is called so the handler must no=
+t
+> - *     call sdio_claim_host() nor sdio_release_host().
+> + *     claimed already when the handler is called so the handler does no=
+t
+> + *     need to call sdio_claim_host() or sdio_release_host().
+>   */
+>  int sdio_claim_irq(struct sdio_func *func, sdio_irq_handler_t *handler)
+>  {
+> --
+> 2.14.1
+>
