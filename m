@@ -1,88 +1,47 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2 3/4] mmc: slot-gpio: Add a function to enable/disable card detect IRQ wakeup
-Date: Wed, 14 Feb 2018 14:56:31 +0200
-Message-ID: <1518612992-4951-4-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V2 2/4] mmc: sdhci: Do not unnecessarily enable wakeup for SDIO card interrupt
+Date: Wed, 14 Feb 2018 14:56:30 +0200
+Message-ID: <1518612992-4951-3-git-send-email-adrian.hunter@intel.com>
 References: <1518612992-4951-1-git-send-email-adrian.hunter@intel.com>
-Return-path: <linux-pm-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga02.intel.com ([134.134.136.20]:11167 "EHLO mga02.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S967724AbeBNM5T (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 14 Feb 2018 07:57:19 -0500
 In-Reply-To: <1518612992-4951-1-git-send-email-adrian.hunter@intel.com>
-Sender: linux-pm-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>
 Cc: Linux PM <linux-pm@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Haridhar Kalvala <haridhar.kalvala@intel.com>
-List-Id: linux-mmc@vger.kernel.org
 
-Commit 03dbaa04a2e5 ("mmc: slot-gpio: Add support to enable irq wake on
-cd_irq") enabled wakeup irrespective of the host controller's PM flags.
-However, users also want to control it from sysfs power/wakeup attribute.
-That means the driver needs to check the PM flags before enabling it in the
-suspend callback. Add helper function mmc_gpio_set_cd_wake() to make it
-easy for drivers to do that.
+Do not enable wakeup for SDIO card interrupt unless the SDIO function
+driver has requested it which is indicated by mmc_card_wake_sdio_irq().
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/core.c       |  3 +--
- drivers/mmc/core/slot-gpio.c  | 23 +++++++++++++++++++++++
- include/linux/mmc/slot-gpio.h |  1 +
- 3 files changed, 25 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sdhci.c | 9 +++++++--
+ 1 file changed, 7 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index c0ba6d8823b7..7bed23c877de 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2655,8 +2655,7 @@ void mmc_start_host(struct mmc_host *host)
- void mmc_stop_host(struct mmc_host *host)
- {
- 	if (host->slot.cd_irq >= 0) {
--		if (host->slot.cd_wake_enabled)
--			disable_irq_wake(host->slot.cd_irq);
-+		mmc_gpio_set_cd_wake(host, false);
- 		disable_irq(host->slot.cd_irq);
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index c2653347bb5e..565d24ccb2f2 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2928,8 +2928,13 @@ static bool sdhci_enable_irq_wakeups(struct sdhci_host *host)
+ 		irq_val |= SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE;
  	}
  
-diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
-index 3698b0576009..817d668aae34 100644
---- a/drivers/mmc/core/slot-gpio.c
-+++ b/drivers/mmc/core/slot-gpio.c
-@@ -154,6 +154,29 @@ void mmc_gpiod_request_cd_irq(struct mmc_host *host)
- }
- EXPORT_SYMBOL(mmc_gpiod_request_cd_irq);
- 
-+int mmc_gpio_set_cd_wake(struct mmc_host *host, bool on)
-+{
-+	int ret = 0;
-+
-+	if (!(host->caps & MMC_CAP_CD_WAKE) ||
-+	    host->slot.cd_irq < 0 ||
-+	    on == host->slot.cd_wake_enabled)
-+		return 0;
-+
-+	if (on) {
-+		if (device_may_wakeup(mmc_dev(host))) {
-+			ret = enable_irq_wake(host->slot.cd_irq);
-+			host->slot.cd_wake_enabled = !ret;
-+		}
-+	} else {
-+		disable_irq_wake(host->slot.cd_irq);
-+		host->slot.cd_wake_enabled = false;
+-	wake_val |= SDHCI_WAKE_ON_INT;
+-	irq_val |= SDHCI_INT_CARD_INT;
++	if (mmc_card_wake_sdio_irq(host->mmc)) {
++		wake_val |= SDHCI_WAKE_ON_INT;
++		irq_val |= SDHCI_INT_CARD_INT;
 +	}
 +
-+	return ret;
-+}
-+EXPORT_SYMBOL(mmc_gpio_set_cd_wake);
-+
- /* Register an alternate interrupt service routine for
-  * the card-detect GPIO.
-  */
-diff --git a/include/linux/mmc/slot-gpio.h b/include/linux/mmc/slot-gpio.h
-index 91f1ba0663c8..06607c59c4d0 100644
---- a/include/linux/mmc/slot-gpio.h
-+++ b/include/linux/mmc/slot-gpio.h
-@@ -31,6 +31,7 @@ int mmc_gpiod_request_ro(struct mmc_host *host, const char *con_id,
- 			 unsigned int debounce, bool *gpio_invert);
- void mmc_gpio_set_cd_isr(struct mmc_host *host,
- 			 irqreturn_t (*isr)(int irq, void *dev_id));
-+int mmc_gpio_set_cd_wake(struct mmc_host *host, bool on);
- void mmc_gpiod_request_cd_irq(struct mmc_host *host);
- bool mmc_can_gpio_cd(struct mmc_host *host);
- bool mmc_can_gpio_ro(struct mmc_host *host);
++	if (!irq_val)
++		return false;
+ 
+ 	val = sdhci_readb(host, SDHCI_WAKE_UP_CONTROL);
+ 	val &= ~mask;
 -- 
 1.9.1
+
