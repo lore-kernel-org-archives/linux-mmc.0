@@ -1,81 +1,47 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: update sdio_claim_irq documentation
-Date: Wed, 14 Feb 2018 11:06:20 +0100
-Message-ID: <CAPDyKFr+h_YGWD_+6OdsENq-rHJdB+0y1vGZ=uFP2LSQJm5-oQ@mail.gmail.com>
-References: <7464B52C8785D749B3908E8649D517950151D5340A@OLAWPA-EXMB02.ad.garmin.com>
+Subject: Re: [PATCH 03/11] mmc: kconfig: Remove blank help text
+Date: Wed, 14 Feb 2018 11:11:56 +0100
+Message-ID: <CAPDyKFr0sC9+3aEjyQECAKj_KLtUoubM8DTwz1ZFqLLXjJf2ag@mail.gmail.com>
+References: <20180131093434.20050-1-ulfalizer@gmail.com> <20180131093434.20050-4-ulfalizer@gmail.com>
+ <CAK7LNARZaB6c7BYOaP9aKU38npfOiHG7=6R0QGLAsTA8egd18g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f67.google.com ([209.85.214.67]:51069 "EHLO
-        mail-it0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S967116AbeBNKGV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Feb 2018 05:06:21 -0500
-Received: by mail-it0-f67.google.com with SMTP id y16so3540349itc.0
-        for <linux-mmc@vger.kernel.org>; Wed, 14 Feb 2018 02:06:21 -0800 (PST)
-In-Reply-To: <7464B52C8785D749B3908E8649D517950151D5340A@OLAWPA-EXMB02.ad.garmin.com>
+Received: from mail-io0-f193.google.com ([209.85.223.193]:45216 "EHLO
+        mail-io0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S967050AbeBNKL5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Feb 2018 05:11:57 -0500
+Received: by mail-io0-f193.google.com with SMTP id p188so24600842ioe.12
+        for <linux-mmc@vger.kernel.org>; Wed, 14 Feb 2018 02:11:57 -0800 (PST)
+In-Reply-To: <CAK7LNARZaB6c7BYOaP9aKU38npfOiHG7=6R0QGLAsTA8egd18g@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Cunningham, Joel" <Joel.Cunningham@garmin.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: Ulf Magnusson <ulfalizer@gmail.com>, Linux Kbuild mailing list <linux-kbuild@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "Luis R. Rodriguez" <mcgrof@kernel.org>, Randy Dunlap <rdunlap@infradead.org>, Dan Carpenter <dan.carpenter@oracle.com>, Paul Bolle <pebolle@tiscali.nl>, Adrian Hunter <adrian.hunter@intel.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Shawn Lin <shawn.lin@rock-chips.com>, Simon Horman <horms+renesas@verge.net.au>, Jan Glauber <jglauber@cavium.com>, Eric Anholt <eric@anholt.net>, Carlo Caione <carlo@endlessm.com>, Venkat Gopalakrishnan <venkatg@codeaurora.org>, Kishon Vijay Abraham I <kishon@ti.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Rui Feng <rui_feng@realsil.com.cn>
 
-On 24 January 2018 at 23:57, Cunningham, Joel
-<Joel.Cunningham@garmin.com> wrote:
-> I have a 3rd party driver which calls sdio_claim_host (and sdio_release_h=
-ost) in its IRQ handler, the comment documentation for sdio_claim_irq() cau=
-sed confusion about whether this was allowed, even though the implementatio=
-n supports recursive claims and the driver is functioning without issue.
+On 1 February 2018 at 18:09, Masahiro Yamada
+<yamada.masahiro@socionext.com> wrote:
+> 2018-01-31 18:34 GMT+09:00 Ulf Magnusson <ulfalizer@gmail.com>:
+>> Blank help texts are probably either a typo, a Kconfig misunderstanding,
+>> or some kind of half-committing to adding a help text (in which case a
+>> TODO comment would be clearer, if the help text really can't be added
+>> right away).
+>>
+>> Best to remove them, IMO.
+>>
+>> Signed-off-by: Ulf Magnusson <ulfalizer@gmail.com>
+>> ---
 >
-> If the intention is that recursive claims are supported, the below patch =
-(based on mmc-next) updates the documentation to demote the "must not" to a=
- "does not need to"
+>
+> FYI.
+>
+> I picked up this patch to kbuild
+> because I need this to suppress warning messages
+> introduced by 11/11.
 
-Recursive claims are supported, however internally in the mmc core we
-have moved towards of removing all occurrences of them (to make the
-locking more slim).
+Okay. Feel free to add my ack.
 
-Therefore, I wouldn't mind keeping the doc as is, even if isn't a
-problem in practice to have nested claim/release of the sdio host.
+[...]
 
 Kind regards
 Uffe
-
->
-> Joel
->
-> From: Joel Cunningham <joel.cunningham@garmin.com>
->
-> Update documentation for sdio_claim_irq to relax the wording which
-> describes whether or not its safe to call sdio_claim/release_host in
-> an IRQ handler registered via sdio_claim_irq. The sdio_claim_host
-> implementation has support (via __mmc_claim_host) to be recursively
-> claimed
->
-> Signed-off-by: Joel Cunningham <joel.cunningham@garmin.com>
-> ---
->  drivers/mmc/core/sdio_irq.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
-> index 7a2eaf8410a3..37a1a4bcb778 100644
-> --- a/drivers/mmc/core/sdio_irq.c
-> +++ b/drivers/mmc/core/sdio_irq.c
-> @@ -277,8 +277,8 @@ static void sdio_single_irq_set(struct mmc_card *card=
-)
->   *
->   *     Claim and activate the IRQ for the given SDIO function. The provi=
-ded
->   *     handler will be called when that IRQ is asserted.  The host is al=
-ways
-> - *     claimed already when the handler is called so the handler must no=
-t
-> - *     call sdio_claim_host() nor sdio_release_host().
-> + *     claimed already when the handler is called so the handler does no=
-t
-> + *     need to call sdio_claim_host() or sdio_release_host().
->   */
->  int sdio_claim_irq(struct sdio_func *func, sdio_irq_handler_t *handler)
->  {
-> --
-> 2.14.1
->
