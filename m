@@ -1,55 +1,96 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2 1/4] mmc: sdhci: Do not unnecessarily enable wakeup for card detect interrupt
-Date: Wed, 14 Feb 2018 14:56:29 +0200
-Message-ID: <1518612992-4951-2-git-send-email-adrian.hunter@intel.com>
-References: <1518612992-4951-1-git-send-email-adrian.hunter@intel.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:11167 "EHLO mga02.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S967589AbeBNM5R (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 14 Feb 2018 07:57:17 -0500
-In-Reply-To: <1518612992-4951-1-git-send-email-adrian.hunter@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [PATCH 1/2] mmc: sdhci-pci: Fix S0i3 for Intel BYT-based controllers
+Date: Wed, 14 Feb 2018 15:57:43 +0200
+Message-ID: <1518616664-14342-2-git-send-email-adrian.hunter@intel.com>
+References: <1518616664-14342-1-git-send-email-adrian.hunter@intel.com>
+Return-path: <linux-pm-owner@vger.kernel.org>
+In-Reply-To: <1518616664-14342-1-git-send-email-adrian.hunter@intel.com>
+Sender: linux-pm-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>
 Cc: Linux PM <linux-pm@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Haridhar Kalvala <haridhar.kalvala@intel.com>
+List-Id: linux-mmc@vger.kernel.org
 
-Do not unnecessarily enable card detect wakeup in the cases that the card
-is not removable or a GPIO is used for card detect.
+Tuning can leave the IP in an active state (Buffer Read Enable bit set)
+which prevents the entry to low power states (i.e. S0i3). Data reset will
+clear it.
+
+Generally tuning is followed by a data transfer which will anyway sort out
+the state, so it is rare that S0i3 is actually prevented.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+Cc: stable@vger.kernel.org
 ---
- drivers/mmc/host/sdhci.c | 10 +++++++++-
- 1 file changed, 9 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-pci-core.c | 35 +++++++++++++++++++++++++++++++----
+ 1 file changed, 31 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 2020e57ffa7e..c2653347bb5e 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2899,6 +2899,14 @@ static irqreturn_t sdhci_thread_irq(int irq, void *dev_id)
- \*****************************************************************************/
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 5296b749d661..ba725580e944 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -661,9 +661,36 @@ static void byt_read_dsm(struct sdhci_pci_slot *slot)
+ 	slot->chip->rpm_retune = intel_host->d3_retune;
+ }
  
- #ifdef CONFIG_PM
-+
-+static bool sdhci_cd_irq_can_wakeup(struct sdhci_host *host)
+-static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
++static int intel_execute_tuning(struct mmc_host *mmc, u32 opcode)
 +{
-+	return mmc_card_is_removable(host->mmc) &&
-+	       !(host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) &&
-+	       host->mmc->slot.cd_irq < 0;
++	int err = sdhci_execute_tuning(mmc, opcode);
++	struct sdhci_host *host = mmc_priv(mmc);
++
++	if (err)
++		return err;
++
++	/*
++	 * Tuning can leave the IP in an active state (Buffer Read Enable bit
++	 * set) which prevents the entry to low power states (i.e. S0i3). Data
++	 * reset will clear it.
++	 */
++	sdhci_reset(host, SDHCI_RESET_DATA);
++
++	return 0;
 +}
 +
- /*
-  * To enable wakeup events, the corresponding events have to be enabled in
-  * the Interrupt Status Enable register too. See 'Table 1-6: Wakeup Signal
-@@ -2915,7 +2923,7 @@ static bool sdhci_enable_irq_wakeups(struct sdhci_host *host)
- 	u8 wake_val = 0;
- 	u8 val;
++static void byt_probe_slot(struct sdhci_pci_slot *slot)
+ {
++	struct mmc_host_ops *ops = &slot->host->mmc_host_ops;
++
+ 	byt_read_dsm(slot);
++
++	ops->execute_tuning = intel_execute_tuning;
++}
++
++static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
++{
++	byt_probe_slot(slot);
+ 	slot->host->mmc->caps |= MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE |
+ 				 MMC_CAP_HW_RESET | MMC_CAP_1_8V_DDR |
+ 				 MMC_CAP_CMD_DURING_TFR |
+@@ -786,7 +813,7 @@ static int ni_byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
+ {
+ 	int err;
  
--	if (!(host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)) {
-+	if (sdhci_cd_irq_can_wakeup(host)) {
- 		wake_val |= SDHCI_WAKE_ON_INSERT | SDHCI_WAKE_ON_REMOVE;
- 		irq_val |= SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE;
- 	}
+-	byt_read_dsm(slot);
++	byt_probe_slot(slot);
+ 
+ 	err = ni_set_max_freq(slot);
+ 	if (err)
+@@ -799,7 +826,7 @@ static int ni_byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
+ 
+ static int byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
+ {
+-	byt_read_dsm(slot);
++	byt_probe_slot(slot);
+ 	slot->host->mmc->caps |= MMC_CAP_POWER_OFF_CARD | MMC_CAP_NONREMOVABLE |
+ 				 MMC_CAP_WAIT_WHILE_BUSY;
+ 	return 0;
+@@ -807,7 +834,7 @@ static int byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
+ 
+ static int byt_sd_probe_slot(struct sdhci_pci_slot *slot)
+ {
+-	byt_read_dsm(slot);
++	byt_probe_slot(slot);
+ 	slot->host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY |
+ 				 MMC_CAP_AGGRESSIVE_PM | MMC_CAP_CD_WAKE;
+ 	slot->cd_idx = 0;
 -- 
 1.9.1
-
