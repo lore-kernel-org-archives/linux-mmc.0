@@ -1,29 +1,39 @@
-From: Florian Fainelli <f.fainelli@gmail.com>
-Subject: Re: [PATCH 2/2] mmc: bcm2835: print some informational messages during reset
-Date: Wed, 14 Feb 2018 08:50:16 -0800
-Message-ID: <FAD84DC4-510C-4AED-A310-A8F6D6FB4B5D@gmail.com>
-References: <97593d6e1a41af1baff61f7d9e6e68a450fc9da6.1518619058.git.msuchanek@suse.de><97593d6e1a41af1baff61f7d9e6e68a450fc9da6.1518619058.git.msuchanek@suse.de> <57ff1e429a7fc12300a3cca0c5e9a637beed0d3a.1518619058.git.msuchanek@suse.de>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH v2 08/16] mmc: sdhci-omap: Add support to override f_max
+ and iodelay from pdata
+Date: Wed, 14 Feb 2018 09:24:56 -0800
+Message-ID: <20180214172455.GO6364@atomide.com>
+References: <20180205125029.21570-1-kishon@ti.com>
+ <20180205125029.21570-9-kishon@ti.com>
+ <CAPDyKFrhpry40TCjmQ_-WO-EWa2BCL0eNXLZB_UobGaYbsBiHA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <57ff1e429a7fc12300a3cca0c5e9a637beed0d3a.1518619058.git.msuchanek@suse.de>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFrhpry40TCjmQ_-WO-EWa2BCL0eNXLZB_UobGaYbsBiHA@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Michal Suchanek <msuchanek@suse.de>, Ulf Hansson <ulf.hansson@linaro.org>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, bcm-kernel-feedback-list@broadcom.com, Eric Anholt <eric@anholt.net>, Stefan Wahren <stefan.wahren@i2se.com>, Gerd Hoffmann <kraxel@redhat.com>, "Gustavo A. R. Silva" <garsilva@embeddedor.com>, Julia Lawall <Julia.Lawall@lip6.fr>, linux-mmc@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Kishon Vijay Abraham I <kishon@ti.com>, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, devicetree@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On February 14, 2018 6:38:58 AM PST, Michal Suchanek <msuchanek@suse=2Ede> =
-wrote:
->The previous patch does reset during hardware error so make the reset
->progress more visible=2E
+* Ulf Hansson <ulf.hansson@linaro.org> [180214 09:53]:
+> On 5 February 2018 at 13:50, Kishon Vijay Abraham I <kishon@ti.com> wrote:
+> > DRA74x EVM Rev H EVM comes with revision 2.0 silicon. However, earlier
+> > versions of EVM can come with either revision 1.1 or revision 1.0 of
+> > silicon.
+> >
+> > The device-tree file is written to support rev 2.0 of silicon.
+> > pdata-quirks are used to then override the settings needed for
+> > PG 1.1 silicon.
+> >
+> > PG 1.1 silicon has limitations w.r.t frequencies at which MMC1/2/3
+> > can operate as well as different IOdelay numbers.
+> 
+> I fail to understand the need for platform data. Why can't DT be used
+> for the older revisions as well?
 
-Based on your previous email it looks like this can happen quite frequentl=
-y so we might be spamming the kernel log with such reset messages=2E Turnin=
-g this into a debug print would not be great either, how about a custom sys=
-fs attribute counting the number of times a reset was done?
+Maybe the silicon revision is not available via soc_device_match()?
 
-We should ideally root cause this but I am sure we can=2E
+Regards,
 
---=20
-Florian
+Tony
