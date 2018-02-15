@@ -1,90 +1,62 @@
-From: Ludovic Barre <ludovic.Barre-qxv4g6HH51o@public.gmane.org>
-Subject: [PATCH 4/5] ARM: dts: stm32: add sdmmc1 support for stm32h743i-eval
-Date: Thu, 15 Feb 2018 14:34:56 +0100
-Message-ID: <1518701697-14242-5-git-send-email-ludovic.Barre@st.com>
+From: Ludovic Barre <ludovic.Barre@st.com>
+Subject: [PATCH 5/5] ARM: configs: stm32: add mmc and ext2/3/4 support
+Date: Thu, 15 Feb 2018 14:34:57 +0100
+Message-ID: <1518701697-14242-6-git-send-email-ludovic.Barre@st.com>
 References: <1518701697-14242-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1518701697-14242-1-git-send-email-ludovic.Barre-qxv4g6HH51o@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Maxime Coquelin <mcoquelin.stm32-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Alexandre Torgue <alexandre.torgue-qxv4g6HH51o@public.gmane.org>, Gerald Baeza <gerald.baeza-qxv4g6HH51o@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ludovic Barre <ludovic.barre-qxv4g6HH51o@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx08-00178001.pphosted.com ([91.207.212.93]:53907 "EHLO
+        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1031445AbeBONgZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Feb 2018 08:36:25 -0500
+In-Reply-To: <1518701697-14242-1-git-send-email-ludovic.Barre@st.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
+Cc: Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Gerald Baeza <gerald.baeza@st.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, Ludovic Barre <ludovic.barre@st.com>
 
-From: Ludovic Barre <ludovic.barre-qxv4g6HH51o@public.gmane.org>
+From: Ludovic Barre <ludovic.barre@st.com>
 
-This patch adds support of micro sd card connected to sdmmc1.
+This patch adds support of
+-mmc framework and stm32 sdmmc controller
+-ext2/3/4 filesystem
+-LBDAF to support huge file (needed for ext4)
 
-Signed-off-by: Ludovic Barre <ludovic.barre-qxv4g6HH51o@public.gmane.org>
+Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- arch/arm/boot/dts/stm32h743-pinctrl.dtsi | 26 ++++++++++++++++++++++++++
- arch/arm/boot/dts/stm32h743i-eval.dts    | 11 +++++++++++
- 2 files changed, 37 insertions(+)
+ arch/arm/configs/stm32_defconfig | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-diff --git a/arch/arm/boot/dts/stm32h743-pinctrl.dtsi b/arch/arm/boot/dts/stm32h743-pinctrl.dtsi
-index 65c1cd0..ef17192 100644
---- a/arch/arm/boot/dts/stm32h743-pinctrl.dtsi
-+++ b/arch/arm/boot/dts/stm32h743-pinctrl.dtsi
-@@ -164,6 +164,32 @@
- 					bias-disable;
- 				};
- 			};
-+
-+			sdmmc1_b4_pins_a: sdmmc1-b4@0 {
-+				pins {
-+					pinmux = <STM32_PINMUX('C', 8, AF12)>, /* SDMMC1_D0 */
-+						 <STM32_PINMUX('C', 9, AF12)>, /* SDMMC1_D1 */
-+						 <STM32_PINMUX('C', 10, AF12)>, /* SDMMC1_D2 */
-+						 <STM32_PINMUX('C', 11, AF12)>, /* SDMMC1_D3 */
-+						 <STM32_PINMUX('C', 12, AF12)>, /* SDMMC1_CK */
-+						 <STM32_PINMUX('D', 2, AF12)>; /* SDMMC1_CMD */
-+					slew-rate = <3>;
-+					drive-push-pull;
-+					bias-disable;
-+				};
-+			};
-+
-+			sdmmc1_dir_pins_a: sdmmc1-dir@0 {
-+				pins {
-+					pinmux = <STM32_PINMUX('C', 6, AF8)>, /* SDMMC1_D0DIR */
-+						 <STM32_PINMUX('C', 7, AF8)>, /* SDMMC1_D123DIR */
-+						 <STM32_PINMUX('B', 9, AF7)>, /* SDMMC1_CDIR */
-+						 <STM32_PINMUX('B', 8, AF7)>; /* SDMMC1_CKIN */
-+					slew-rate = <3>;
-+					drive-push-pull;
-+					bias-pull-up;
-+				};
-+			};
- 		};
- 	};
- };
-diff --git a/arch/arm/boot/dts/stm32h743i-eval.dts b/arch/arm/boot/dts/stm32h743i-eval.dts
-index c6ceda8..d564f8f 100644
---- a/arch/arm/boot/dts/stm32h743i-eval.dts
-+++ b/arch/arm/boot/dts/stm32h743i-eval.dts
-@@ -98,6 +98,17 @@
- 	clock-frequency = <25000000>;
- };
- 
-+&sdmmc1 {
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&sdmmc1_b4_pins_a &sdmmc1_dir_pins_a>;
-+	broken-cd;
-+	st,dirpol;
-+	st,negedge;
-+	st,pin-ckin;
-+	bus-width = <4>;
-+	status = "okay";
-+};
-+
- &usart1 {
- 	pinctrl-0 = <&usart1_pins>;
- 	pinctrl-names = "default";
+diff --git a/arch/arm/configs/stm32_defconfig b/arch/arm/configs/stm32_defconfig
+index 91014ea..2573355 100644
+--- a/arch/arm/configs/stm32_defconfig
++++ b/arch/arm/configs/stm32_defconfig
+@@ -15,7 +15,6 @@ CONFIG_EMBEDDED=y
+ # CONFIG_VM_EVENT_COUNTERS is not set
+ # CONFIG_SLUB_DEBUG is not set
+ CONFIG_MODULES=y
+-# CONFIG_LBDAF is not set
+ # CONFIG_BLK_DEV_BSG is not set
+ # CONFIG_IOSCHED_DEADLINE is not set
+ # CONFIG_IOSCHED_CFQ is not set
+@@ -57,6 +56,8 @@ CONFIG_MFD_STMPE=y
+ CONFIG_REGULATOR=y
+ CONFIG_REGULATOR_FIXED_VOLTAGE=y
+ # CONFIG_USB_SUPPORT is not set
++CONFIG_MMC=y
++CONFIG_MMC_STM32_SDMMC=y
+ CONFIG_NEW_LEDS=y
+ CONFIG_LEDS_CLASS=y
+ CONFIG_LEDS_GPIO=y
+@@ -71,6 +72,7 @@ CONFIG_STM32_MDMA=y
+ CONFIG_IIO=y
+ CONFIG_STM32_ADC_CORE=y
+ CONFIG_STM32_ADC=y
++CONFIG_EXT3_FS=y
+ # CONFIG_FILE_LOCKING is not set
+ # CONFIG_DNOTIFY is not set
+ # CONFIG_INOTIFY_USER is not set
 -- 
 2.7.4
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
