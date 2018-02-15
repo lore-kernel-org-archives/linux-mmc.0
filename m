@@ -1,97 +1,96 @@
-From: Stefan Wahren <stefan.wahren@i2se.com>
-Subject: Re: [PATCH 1/2] mmc: bcm2835: reset host on timeout
-Date: Wed, 14 Feb 2018 21:30:16 +0100 (CET)
-Message-ID: <431948292.48734.1518640216077@email.1und1.de>
-References: <97593d6e1a41af1baff61f7d9e6e68a450fc9da6.1518619058.git.msuchanek@suse.de>
- <1fbf0d77-cb53-f0fa-b810-e9954138d907@i2se.com>
- <20180214163649.3a0c9476@kitsune.suse.cz>
- <20180214165827.386b9bb1@kitsune.suse.cz>
- <ecf8dd61-ab16-b298-d197-ea93ecf5982b@i2se.com>
- <20180214202454.6e7ebeaf@naga.suse.cz>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [ulf.hansson-mmc:next 6/19] drivers/mmc/host/sdhci-omap.c:466:8:
+ error: implicit declaration of function 'pinctrl_select_state'; did you mean 'node_set_state'?
+Date: Thu, 15 Feb 2018 07:46:22 +0100
+Message-ID: <CAPDyKFooJneuOG-0B3S1XmcpLoxdiRYNT57HJYUuiiYXm_7zdw@mail.gmail.com>
+References: <201802142054.sFImvGeA%fengguang.wu@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180214202454.6e7ebeaf@naga.suse.cz>
-Sender: linux-kernel-owner@vger.kernel.org
-To: =?UTF-8?Q?Michal_Such=C3=A1nek?= <msuchanek@suse.de>
-Cc: Eric Anholt <eric@anholt.net>, bcm-kernel-feedback-list@broadcom.com, linux-kernel@vger.kernel.org, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Florian Fainelli <f.fainelli@gmail.com>, linux-rpi-kernel@lists.infradead.org, Phil Elwell <phil@raspberrypi.org>, Gerd Hoffmann <kraxel@redhat.com>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Julia Lawall <Julia.Lawall@lip6.fr>, "Gustavo A. R. Silva" <garsilva@embeddedor.com>, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-it0-f66.google.com ([209.85.214.66]:52652 "EHLO
+        mail-it0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752144AbeBOGqX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Feb 2018 01:46:23 -0500
+Received: by mail-it0-f66.google.com with SMTP id o13so18106306ito.2
+        for <linux-mmc@vger.kernel.org>; Wed, 14 Feb 2018 22:46:23 -0800 (PST)
+In-Reply-To: <201802142054.sFImvGeA%fengguang.wu@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Kishon Vijay Abraham I <kishon@ti.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi Michal,
+On 14 February 2018 at 13:22, kbuild test robot <fengguang.wu@intel.com> wrote:
+> tree:   git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git next
+> head:   779e209cefc2ef7da86f79894bc1988bc38b048a
+> commit: 713190bb14aaa6113fd54416fa909028e550fb08 [6/19] mmc: sdhci_omap: Add support to set IODELAY values
+> config: sh-allmodconfig (attached as .config)
+> compiler: sh4-linux-gnu-gcc (Debian 7.2.0-11) 7.2.0
+> reproduce:
+>         wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
+>         chmod +x ~/bin/make.cross
+>         git checkout 713190bb14aaa6113fd54416fa909028e550fb08
+>         # save the attached .config to linux build tree
+>         make.cross ARCH=sh
+>
+> All error/warnings (new ones prefixed by >>):
+>
+>    drivers/mmc/host/sdhci-omap.c: In function 'sdhci_omap_set_timing':
+>>> drivers/mmc/host/sdhci-omap.c:466:8: error: implicit declaration of function 'pinctrl_select_state'; did you mean 'node_set_state'? [-Werror=implicit-function-declaration]
+>      ret = pinctrl_select_state(omap_host->pinctrl, pinctrl_state);
+>            ^~~~~~~~~~~~~~~~~~~~
+>            node_set_state
+>    drivers/mmc/host/sdhci-omap.c: In function 'sdhci_omap_iodelay_pinctrl_state':
+>>> drivers/mmc/host/sdhci-omap.c:740:18: error: implicit declaration of function 'pinctrl_lookup_state'; did you mean 'inc_zone_state'? [-Werror=implicit-function-declaration]
+>      pinctrl_state = pinctrl_lookup_state(omap_host->pinctrl, mode);
+>                      ^~~~~~~~~~~~~~~~~~~~
+>                      inc_zone_state
+>>> drivers/mmc/host/sdhci-omap.c:740:16: warning: assignment makes pointer from integer without a cast [-Wint-conversion]
+>      pinctrl_state = pinctrl_lookup_state(omap_host->pinctrl, mode);
+>                    ^
+>    drivers/mmc/host/sdhci-omap.c: In function 'sdhci_omap_config_iodelay_pinctrl_state':
+>>> drivers/mmc/host/sdhci-omap.c:769:23: error: implicit declaration of function 'devm_pinctrl_get'; did you mean 'devm_clk_get'? [-Werror=implicit-function-declaration]
+>      omap_host->pinctrl = devm_pinctrl_get(omap_host->dev);
+>                           ^~~~~~~~~~~~~~~~
+>                           devm_clk_get
+>    drivers/mmc/host/sdhci-omap.c:769:21: warning: assignment makes pointer from integer without a cast [-Wint-conversion]
+>      omap_host->pinctrl = devm_pinctrl_get(omap_host->dev);
+>                         ^
+>    drivers/mmc/host/sdhci-omap.c:775:8: warning: assignment makes pointer from integer without a cast [-Wint-conversion]
+>      state = pinctrl_lookup_state(omap_host->pinctrl, "default");
+>            ^
+>    cc1: some warnings being treated as errors
+>
+> vim +466 drivers/mmc/host/sdhci-omap.c
+>
+>    450
+>    451  static void sdhci_omap_set_timing(struct sdhci_omap_host *omap_host, u8 timing)
+>    452  {
+>    453          int ret;
+>    454          struct pinctrl_state *pinctrl_state;
+>    455          struct device *dev = omap_host->dev;
+>    456
+>    457          if (!(omap_host->flags & SDHCI_OMAP_REQUIRE_IODELAY))
+>    458                  return;
+>    459
+>    460          if (omap_host->timing == timing)
+>    461                  return;
+>    462
+>    463          sdhci_omap_stop_clock(omap_host);
+>    464
+>    465          pinctrl_state = omap_host->pinctrl_state[timing];
+>  > 466          ret = pinctrl_select_state(omap_host->pinctrl, pinctrl_state);
+>    467          if (ret) {
+>    468                  dev_err(dev, "failed to select pinctrl state\n");
+>    469                  return;
+>    470          }
+>    471
+>    472          sdhci_omap_start_clock(omap_host);
+>    473          omap_host->timing = timing;
+>    474  }
+>    475
 
-> Michal Suchánek <msuchanek@suse.de> hat am 14. Februar 2018 um 20:24 geschrieben:
-> 
-> 
-> On Wed, 14 Feb 2018 17:49:31 +0100
-> Stefan Wahren <stefan.wahren@i2se.com> wrote:
-> 
-> > Hi Michal,
-> > 
-> > [add Phil]
-> > 
-> > Am 14.02.2018 um 17:13 schrieb Michal Suchánek:
-> > > On Wed, 14 Feb 2018 16:36:49 +0100
-> > > Michal Suchánek <msuchanek@suse.de> wrote:
-> > >  
-> > >> On Wed, 14 Feb 2018 15:58:31 +0100
-> > >> Stefan Wahren <stefan.wahren@i2se.com> wrote:
-> > >>  
-> > >>> Hi Michal,
-> > >>>
-> > >>> Am 14.02.2018 um 15:38 schrieb Michal Suchanek:    
-> > >>>> The bcm2835 mmc host tends to lock up for unknown reason so reset
-> > >>>> it on timeout. The upper mmc block layer tries retransimitting
-> > >>>> with single blocks which tends to work out after a long wait.
-> > >>>>
-> > >>>> This is better than giving up and leaving the machine broken for
-> > >>>> no obvious reason.      
-> > >>> could you please provide more information about this issue
-> > >>> (affected hardware, kernel config, version, dmesg, reproducible
-> > >>> scenario)? 
-> > > It tends to reproduce when upgrading a few packages with zypper and
-> > > otherwise at random during system operation. It seems that for my
-> > > card it worsens with age to some degree so perhaps it depends on the
-> > > fragmentation of the internal card flash.
-> > >
-> > > Attaching dmesg and kernel config.  
-> > 
-> > do you noticed this issue before 4.15-rc4?
-> 
-> I initially noticed it with 4.4 kernel with some backports to make it
-> bootable on RPi.
+Kishon, no actions needed. I amended to offending commit by adding the
+missing include file.
 
-this confuses me. Gerd and i ported this driver from downstream and finally it's got merged in 4.12. 
-
-So do you mean that you backported the mainline version to 4.4 or the downstream version of 4.4?
-
-On a quick look they seems identical, but they aren't.
-
-> > 
-> > Could you please test with 4.15 final again?
-> 
-> Right, I can apply the patches on something more recent.
-> 
-> > 
-> > What kind of SD card (name) triggers the issue?
-> 
-> Samsung EVO MB-MP16D
-
-Thanks
-
-> 
-> Also see https://elinux.org/RPi_SD_cards#Which_SD_card.3F
-
-I'm very sceptical about this list. The card above is listed as OK and NOK. The experienced issues doesn't need to be direct related to the card (unproperly umounted, bad driver, ...).
-
-Stefan
-
-> 
-> Thanks
-> 
-> Michal
-> 
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+Kind regards
+Uffe
