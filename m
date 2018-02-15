@@ -1,11 +1,10 @@
 From: Ludovic Barre <ludovic.Barre-qxv4g6HH51o@public.gmane.org>
-Subject: [PATCH 3/5] ARM: dts: stm32: add sdmmc support for stm32h743
-Date: Thu, 15 Feb 2018 14:34:55 +0100
-Message-ID: <1518701697-14242-4-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH 4/5] ARM: dts: stm32: add sdmmc1 support for stm32h743i-eval
+Date: Thu, 15 Feb 2018 14:34:56 +0100
+Message-ID: <1518701697-14242-5-git-send-email-ludovic.Barre@st.com>
 References: <1518701697-14242-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1518701697-14242-1-git-send-email-ludovic.Barre-qxv4g6HH51o@public.gmane.org>
 Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
@@ -15,58 +14,73 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre-qxv4g6HH51o@public.gmane.org>
 
-This patch adds sdmmc support for stm32h743.
-2×SD/SDIO/MMC interfaces (up to 125 MHz)
+This patch adds support of micro sd card connected to sdmmc1.
 
 Signed-off-by: Ludovic Barre <ludovic.barre-qxv4g6HH51o@public.gmane.org>
 ---
- arch/arm/boot/dts/stm32h743.dtsi | 26 ++++++++++++++++++++++++++
- 1 file changed, 26 insertions(+)
+ arch/arm/boot/dts/stm32h743-pinctrl.dtsi | 26 ++++++++++++++++++++++++++
+ arch/arm/boot/dts/stm32h743i-eval.dts    | 11 +++++++++++
+ 2 files changed, 37 insertions(+)
 
-diff --git a/arch/arm/boot/dts/stm32h743.dtsi b/arch/arm/boot/dts/stm32h743.dtsi
-index bbfcbac..5e85538 100644
---- a/arch/arm/boot/dts/stm32h743.dtsi
-+++ b/arch/arm/boot/dts/stm32h743.dtsi
-@@ -217,6 +217,19 @@
+diff --git a/arch/arm/boot/dts/stm32h743-pinctrl.dtsi b/arch/arm/boot/dts/stm32h743-pinctrl.dtsi
+index 65c1cd0..ef17192 100644
+--- a/arch/arm/boot/dts/stm32h743-pinctrl.dtsi
++++ b/arch/arm/boot/dts/stm32h743-pinctrl.dtsi
+@@ -164,6 +164,32 @@
+ 					bias-disable;
+ 				};
  			};
- 		};
- 
-+		sdmmc2: sdmmc@48022400 {
-+			compatible = "st,stm32h7-sdmmc";
-+			reg = <0x48022400 0x400>;
-+			reg-names = "sdmmc";
-+			interrupts = <124>;
-+			clocks = <&rcc SDMMC2_CK>;
-+			resets = <&rcc STM32H7_AHB2_RESET(SDMMC2)>;
-+			cap-sd-highspeed;
-+			cap-mmc-highspeed;
-+			max-frequency = <125000000>;
-+			status = "disabled";
-+		};
 +
- 		mdma1: dma@52000000 {
- 			compatible = "st,stm32h7-mdma";
- 			reg = <0x52000000 0x1000>;
-@@ -227,6 +240,19 @@
- 			dma-requests = <32>;
- 		};
- 
-+		sdmmc1: sdmmc@52007000 {
-+			compatible = "st,stm32h7-sdmmc";
-+			reg = <0x52007000 0x1000>;
-+			reg-names = "sdmmc";
-+			interrupts = <49>;
-+			clocks = <&rcc SDMMC1_CK>;
-+			resets = <&rcc STM32H7_AHB3_RESET(SDMMC1)>;
-+			cap-sd-highspeed;
-+			cap-mmc-highspeed;
-+			max-frequency = <125000000>;
-+			status = "disabled";
-+		};
++			sdmmc1_b4_pins_a: sdmmc1-b4@0 {
++				pins {
++					pinmux = <STM32_PINMUX('C', 8, AF12)>, /* SDMMC1_D0 */
++						 <STM32_PINMUX('C', 9, AF12)>, /* SDMMC1_D1 */
++						 <STM32_PINMUX('C', 10, AF12)>, /* SDMMC1_D2 */
++						 <STM32_PINMUX('C', 11, AF12)>, /* SDMMC1_D3 */
++						 <STM32_PINMUX('C', 12, AF12)>, /* SDMMC1_CK */
++						 <STM32_PINMUX('D', 2, AF12)>; /* SDMMC1_CMD */
++					slew-rate = <3>;
++					drive-push-pull;
++					bias-disable;
++				};
++			};
 +
- 		lptimer2: timer@58002400 {
- 			#address-cells = <1>;
- 			#size-cells = <0>;
++			sdmmc1_dir_pins_a: sdmmc1-dir@0 {
++				pins {
++					pinmux = <STM32_PINMUX('C', 6, AF8)>, /* SDMMC1_D0DIR */
++						 <STM32_PINMUX('C', 7, AF8)>, /* SDMMC1_D123DIR */
++						 <STM32_PINMUX('B', 9, AF7)>, /* SDMMC1_CDIR */
++						 <STM32_PINMUX('B', 8, AF7)>; /* SDMMC1_CKIN */
++					slew-rate = <3>;
++					drive-push-pull;
++					bias-pull-up;
++				};
++			};
+ 		};
+ 	};
+ };
+diff --git a/arch/arm/boot/dts/stm32h743i-eval.dts b/arch/arm/boot/dts/stm32h743i-eval.dts
+index c6ceda8..d564f8f 100644
+--- a/arch/arm/boot/dts/stm32h743i-eval.dts
++++ b/arch/arm/boot/dts/stm32h743i-eval.dts
+@@ -98,6 +98,17 @@
+ 	clock-frequency = <25000000>;
+ };
+ 
++&sdmmc1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&sdmmc1_b4_pins_a &sdmmc1_dir_pins_a>;
++	broken-cd;
++	st,dirpol;
++	st,negedge;
++	st,pin-ckin;
++	bus-width = <4>;
++	status = "okay";
++};
++
+ &usart1 {
+ 	pinctrl-0 = <&usart1_pins>;
+ 	pinctrl-names = "default";
 -- 
 2.7.4
 
