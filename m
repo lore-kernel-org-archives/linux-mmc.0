@@ -1,102 +1,50 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: Re: [ulf.hansson-mmc:next 6/19] drivers/mmc/host/sdhci-omap.c:466:8:
- error: implicit declaration of function 'pinctrl_select_state'; did you mean
- 'node_set_state'?
-Date: Thu, 15 Feb 2018 13:11:53 +0530
-Message-ID: <d20ae2de-fa65-580b-b5c7-59dab4edd7a1@ti.com>
-References: <201802142054.sFImvGeA%fengguang.wu@intel.com>
- <CAPDyKFooJneuOG-0B3S1XmcpLoxdiRYNT57HJYUuiiYXm_7zdw@mail.gmail.com>
+From: Ludovic Barre <ludovic.Barre@st.com>
+Subject: [PATCH 0/5] mmc: add stm32 sdmmc controller
+Date: Thu, 15 Feb 2018 14:34:52 +0100
+Message-ID: <1518701697-14242-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lelnx193.ext.ti.com ([198.47.27.77]:41427 "EHLO
-        lelnx193.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754824AbeBOHl4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Feb 2018 02:41:56 -0500
-In-Reply-To: <CAPDyKFooJneuOG-0B3S1XmcpLoxdiRYNT57HJYUuiiYXm_7zdw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
+Cc: Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Gerald Baeza <gerald.baeza@st.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, Ludovic Barre <ludovic.barre@st.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
+From: Ludovic Barre <ludovic.barre@st.com>
 
+This patch serie adds support of stm32 SDMMC controller.
+stm32h7 is the first SoC to use stm32 SDMMC controller
+(previous SoC had pl180 controller).
 
-On Thursday 15 February 2018 12:16 PM, Ulf Hansson wrote:
-> On 14 February 2018 at 13:22, kbuild test robot <fengguang.wu@intel.com> wrote:
->> tree:   git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git next
->> head:   779e209cefc2ef7da86f79894bc1988bc38b048a
->> commit: 713190bb14aaa6113fd54416fa909028e550fb08 [6/19] mmc: sdhci_omap: Add support to set IODELAY values
->> config: sh-allmodconfig (attached as .config)
->> compiler: sh4-linux-gnu-gcc (Debian 7.2.0-11) 7.2.0
->> reproduce:
->>         wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
->>         chmod +x ~/bin/make.cross
->>         git checkout 713190bb14aaa6113fd54416fa909028e550fb08
->>         # save the attached .config to linux build tree
->>         make.cross ARCH=sh
->>
->> All error/warnings (new ones prefixed by >>):
->>
->>    drivers/mmc/host/sdhci-omap.c: In function 'sdhci_omap_set_timing':
->>>> drivers/mmc/host/sdhci-omap.c:466:8: error: implicit declaration of function 'pinctrl_select_state'; did you mean 'node_set_state'? [-Werror=implicit-function-declaration]
->>      ret = pinctrl_select_state(omap_host->pinctrl, pinctrl_state);
->>            ^~~~~~~~~~~~~~~~~~~~
->>            node_set_state
->>    drivers/mmc/host/sdhci-omap.c: In function 'sdhci_omap_iodelay_pinctrl_state':
->>>> drivers/mmc/host/sdhci-omap.c:740:18: error: implicit declaration of function 'pinctrl_lookup_state'; did you mean 'inc_zone_state'? [-Werror=implicit-function-declaration]
->>      pinctrl_state = pinctrl_lookup_state(omap_host->pinctrl, mode);
->>                      ^~~~~~~~~~~~~~~~~~~~
->>                      inc_zone_state
->>>> drivers/mmc/host/sdhci-omap.c:740:16: warning: assignment makes pointer from integer without a cast [-Wint-conversion]
->>      pinctrl_state = pinctrl_lookup_state(omap_host->pinctrl, mode);
->>                    ^
->>    drivers/mmc/host/sdhci-omap.c: In function 'sdhci_omap_config_iodelay_pinctrl_state':
->>>> drivers/mmc/host/sdhci-omap.c:769:23: error: implicit declaration of function 'devm_pinctrl_get'; did you mean 'devm_clk_get'? [-Werror=implicit-function-declaration]
->>      omap_host->pinctrl = devm_pinctrl_get(omap_host->dev);
->>                           ^~~~~~~~~~~~~~~~
->>                           devm_clk_get
->>    drivers/mmc/host/sdhci-omap.c:769:21: warning: assignment makes pointer from integer without a cast [-Wint-conversion]
->>      omap_host->pinctrl = devm_pinctrl_get(omap_host->dev);
->>                         ^
->>    drivers/mmc/host/sdhci-omap.c:775:8: warning: assignment makes pointer from integer without a cast [-Wint-conversion]
->>      state = pinctrl_lookup_state(omap_host->pinctrl, "default");
->>            ^
->>    cc1: some warnings being treated as errors
->>
->> vim +466 drivers/mmc/host/sdhci-omap.c
->>
->>    450
->>    451  static void sdhci_omap_set_timing(struct sdhci_omap_host *omap_host, u8 timing)
->>    452  {
->>    453          int ret;
->>    454          struct pinctrl_state *pinctrl_state;
->>    455          struct device *dev = omap_host->dev;
->>    456
->>    457          if (!(omap_host->flags & SDHCI_OMAP_REQUIRE_IODELAY))
->>    458                  return;
->>    459
->>    460          if (omap_host->timing == timing)
->>    461                  return;
->>    462
->>    463          sdhci_omap_stop_clock(omap_host);
->>    464
->>    465          pinctrl_state = omap_host->pinctrl_state[timing];
->>  > 466          ret = pinctrl_select_state(omap_host->pinctrl, pinctrl_state);
->>    467          if (ret) {
->>    468                  dev_err(dev, "failed to select pinctrl state\n");
->>    469                  return;
->>    470          }
->>    471
->>    472          sdhci_omap_start_clock(omap_host);
->>    473          omap_host->timing = timing;
->>    474  }
->>    475
-> 
-> Kishon, no actions needed. I amended to offending commit by adding the
-> missing include file.
+The SDMMC features include the following:
+-Full compliance with MultiMediaCard System Specification Version 4.51.
+ Card support for three different databus modes:
+ 1-bit (default), 4-bit and 8-bit.
+-Full compliance with SD memory card specifications version 4.1.
+ SDR104 speed limited to maximum allowed I/O speed, SPI mode and
+ UHS-II mode not supported.
+-Full compliance with SDIO card specification version 4.0.
 
-All right. Thanks!
+Ludovic Barre (5):
+  dt-bindings: mmc: document the stm32 sdmmc bindings
+  mmc: add stm32 sdmmc controller driver
+  ARM: dts: stm32: add sdmmc support for stm32h743
+  ARM: dts: stm32: add sdmmc1 support for stm32h743i-eval
+  ARM: configs: stm32: add mmc and ext2/3/4 support
 
-Regards
-Kishon
+ .../devicetree/bindings/mmc/st,stm32-sdmmc.txt     |  35 +
+ arch/arm/boot/dts/stm32h743-pinctrl.dtsi           |  26 +
+ arch/arm/boot/dts/stm32h743.dtsi                   |  26 +
+ arch/arm/boot/dts/stm32h743i-eval.dts              |  11 +
+ arch/arm/configs/stm32_defconfig                   |   4 +-
+ drivers/mmc/host/Kconfig                           |   8 +
+ drivers/mmc/host/Makefile                          |   1 +
+ drivers/mmc/host/stm32-sdmmc.c                     | 710 +++++++++++++++++++++
+ drivers/mmc/host/stm32-sdmmc.h                     | 220 +++++++
+ 9 files changed, 1040 insertions(+), 1 deletion(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/st,stm32-sdmmc.txt
+ create mode 100644 drivers/mmc/host/stm32-sdmmc.c
+ create mode 100644 drivers/mmc/host/stm32-sdmmc.h
+
+-- 
+2.7.4
