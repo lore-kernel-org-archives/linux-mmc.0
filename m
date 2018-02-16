@@ -1,62 +1,56 @@
-From: Stefan Wahren <stefan.wahren@i2se.com>
-Subject: Re: [PATCH 2/2] mmc: bcm2835: print some informational messages
- during reset
-Date: Thu, 15 Feb 2018 19:22:00 +0100 (CET)
-Message-ID: <1950058855.86123.1518718920111@email.1und1.de>
-References: <97593d6e1a41af1baff61f7d9e6e68a450fc9da6.1518619058.git.msuchanek@suse.de>
- <97593d6e1a41af1baff61f7d9e6e68a450fc9da6.1518619058.git.msuchanek@suse.de>
- <57ff1e429a7fc12300a3cca0c5e9a637beed0d3a.1518619058.git.msuchanek@suse.de>
- <F404E9C8-AE64-4B36-AD1B-911BD3C33946@gmail.com>
- <20180214204733.7987d16c@naga.suse.cz>
+From: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
+Subject: Re: [PATCH v2 11/16] mmc: sdhci: Program a relatively accurate SW
+ timeout value
+Date: Fri, 16 Feb 2018 12:47:41 +0530
+Message-ID: <aa30bb13-7271-a426-f606-59f21961806f@ti.com>
+References: <20180205125029.21570-1-kishon@ti.com>
+ <20180205125029.21570-12-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180214204733.7987d16c@naga.suse.cz>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Florian Fainelli <f.fainelli@gmail.com>, =?UTF-8?Q?Michal_Such=C3=A1nek?= <msuchanek@suse.de>
-Cc: Scott Branden <sbranden@broadcom.com>, linux-rpi-kernel@lists.infradead.org, Eric Anholt <eric@anholt.net>, bcm-kernel-feedback-list@broadcom.com, Gerd Hoffmann <kraxel@redhat.com>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-kernel@vger.kernel.org, Ray Jui <rjui@broadcom.com>, "Gustavo A. R. Silva" <garsilva@embeddedor.com>, Julia Lawall <Julia.Lawall@lip6.fr>, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20180205125029.21570-12-kishon-l0cyMroinI0@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Michal,
 
-> Michal Suchánek <msuchanek@suse.de> hat am 14. Februar 2018 um 20:47 geschrieben:
-> 
-> 
-> On Wed, 14 Feb 2018 08:50:16 -0800
-> Florian Fainelli <f.fainelli@gmail.com> wrote:
-> 
-> > On February 14, 2018 6:38:58 AM PST, Michal Suchanek
-> > <msuchanek@suse.de> wrote:
-> > >The previous patch does reset during hardware error so make the reset
-> > >progress more visible.  
-> > 
-> > Based on your previous email it looks like this can happen quite
-> > frequently so we might be spamming the kernel log with such reset
-> > messages. Turning this into a debug print would not be great either,
-> > how about a custom sysfs attribute counting the number of times a
-> > reset was done?
-> 
-> Since every such message happens when the system stalls for like half a
-> minute I don't think there will be that many until somebody notices
-> something is amiss. It might be also helpful in diagnosing if other
-> cards lock up in different way - for me the DMA shutdown is short so I
-> guess it's the mmc host that is locked up and the DMA engine is fine.
-> It might look differently on different systems, though.
 
-FWIW according to your dmesg your RPi doesn't use the DMA engine:
-
-[ 5.004609] sdhost-bcm2835 3f202000.sdhost: unable to initialise DMA channel. Falling back to PIO
-[ 5.154518] sdhost-bcm2835 3f202000.sdhost: loaded - DMA disabled
-
-For me it's a chicken and egg problem if the DMA driver is build as a kernel module.
-
-Stefan
-
+On Monday 05 February 2018 06:20 PM, Kishon Vijay Abraham I wrote:
+> sdhci has a 10 second timeout to catch devices that stop responding.
+> Instead of programming 10 second arbitrary value, calculate the total time
+> it would take for the entire transfer to happen and program the timeout
+> value accordingly.
 > 
-> I understand that adding messages it somewhat controversial so I added
-> them in separate patch.
+> Signed-off-by: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
+> ---
+>  drivers/mmc/host/sdhci.c | 46 +++++++++++++++++++++++++++++++++++++++-------
+>  drivers/mmc/host/sdhci.h | 10 ++++++++++
+>  2 files changed, 49 insertions(+), 7 deletions(-)
 > 
-> Thanks
-> 
-> Michal
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 0489572d1892..d52f9e7eabe2 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -673,6 +673,37 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
+>  	}
+>  }
+>  
+> +static void sdhci_calc_sw_timeout(struct sdhci_host *host,
+> +				  struct mmc_command *cmd,
+> +				  unsigned int target_timeout)
+> +{
+> +	struct mmc_data *data = cmd->data;
+> +	struct mmc_host *mmc = host->mmc;
+> +	unsigned long long transfer_time;
+> +	struct mmc_ios *ios = &mmc->ios;
+> +	unsigned char bus_width = ios->bus_width;
+
+This should have been 1 << ios->bus_width.
+
+-Kishon
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
