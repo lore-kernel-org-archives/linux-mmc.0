@@ -1,56 +1,52 @@
-From: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH v2 11/16] mmc: sdhci: Program a relatively accurate SW
- timeout value
-Date: Fri, 16 Feb 2018 12:47:41 +0530
-Message-ID: <aa30bb13-7271-a426-f606-59f21961806f@ti.com>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: Re: [PATCH v2 08/16] mmc: sdhci-omap: Add support to override f_max
+ and iodelay from pdata
+Date: Fri, 16 Feb 2018 13:38:51 +0530
+Message-ID: <d381abaf-8968-ae0f-7dd3-8c10e7220648@ti.com>
 References: <20180205125029.21570-1-kishon@ti.com>
- <20180205125029.21570-12-kishon@ti.com>
+ <20180205125029.21570-9-kishon@ti.com>
+ <CAPDyKFrhpry40TCjmQ_-WO-EWa2BCL0eNXLZB_UobGaYbsBiHA@mail.gmail.com>
+ <20180214172455.GO6364@atomide.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="windows-1252"
 Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20180205125029.21570-12-kishon-l0cyMroinI0@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from fllnx210.ext.ti.com ([198.47.19.17]:55287 "EHLO
+        fllnx210.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753922AbeBPIJ3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Feb 2018 03:09:29 -0500
+In-Reply-To: <20180214172455.GO6364@atomide.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, devicetree@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, linux-arm-kernel@lists.infradead.org
 
+Hi,
 
+On Wednesday 14 February 2018 10:54 PM, Tony Lindgren wrote:
+> * Ulf Hansson <ulf.hansson@linaro.org> [180214 09:53]:
+>> On 5 February 2018 at 13:50, Kishon Vijay Abraham I <kishon@ti.com> wrote:
+>>> DRA74x EVM Rev H EVM comes with revision 2.0 silicon. However, earlier
+>>> versions of EVM can come with either revision 1.1 or revision 1.0 of
+>>> silicon.
+>>>
+>>> The device-tree file is written to support rev 2.0 of silicon.
+>>> pdata-quirks are used to then override the settings needed for
+>>> PG 1.1 silicon.
+>>>
+>>> PG 1.1 silicon has limitations w.r.t frequencies at which MMC1/2/3
+>>> can operate as well as different IOdelay numbers.
+>>
+>> I fail to understand the need for platform data. Why can't DT be used
+>> for the older revisions as well?
 
-On Monday 05 February 2018 06:20 PM, Kishon Vijay Abraham I wrote:
-> sdhci has a 10 second timeout to catch devices that stop responding.
-> Instead of programming 10 second arbitrary value, calculate the total time
-> it would take for the entire transfer to happen and program the timeout
-> value accordingly.
+It was decided to have dt file for a single soc revision. So the default dts
+corresponds to rev 2.0.
 > 
-> Signed-off-by: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
-> ---
->  drivers/mmc/host/sdhci.c | 46 +++++++++++++++++++++++++++++++++++++++-------
->  drivers/mmc/host/sdhci.h | 10 ++++++++++
->  2 files changed, 49 insertions(+), 7 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 0489572d1892..d52f9e7eabe2 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -673,6 +673,37 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
->  	}
->  }
->  
-> +static void sdhci_calc_sw_timeout(struct sdhci_host *host,
-> +				  struct mmc_command *cmd,
-> +				  unsigned int target_timeout)
-> +{
-> +	struct mmc_data *data = cmd->data;
-> +	struct mmc_host *mmc = host->mmc;
-> +	unsigned long long transfer_time;
-> +	struct mmc_ios *ios = &mmc->ios;
-> +	unsigned char bus_width = ios->bus_width;
+> Maybe the silicon revision is not available via soc_device_match()?
 
-This should have been 1 << ios->bus_width.
+hmm.. looks like we can get rid of pdata if we use soc_device_match. Thanks for
+the hint.
 
--Kishon
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Regards
+Kishon
