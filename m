@@ -1,17 +1,15 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v2 11/16] mmc: sdhci: Program a relatively accurate SW
- timeout value
-Date: Mon, 19 Feb 2018 15:13:23 +0200
-Message-ID: <89a159dc-1601-5c19-1468-c0efeb1bb2a2@intel.com>
-References: <20180205125029.21570-1-kishon@ti.com>
- <20180205125029.21570-12-kishon@ti.com>
- <a65e45a0-8032-b2b8-c590-c28a5e12a5c6@intel.com>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH 1/5] dt-bindings: mmc: document the stm32 sdmmc bindings
+Date: Mon, 19 Feb 2018 08:47:35 -0600
+Message-ID: <20180219144735.sbxa76z6aik3w453@rob-hp-laptop>
+References: <1518701697-14242-1-git-send-email-ludovic.Barre@st.com>
+ <1518701697-14242-2-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <a65e45a0-8032-b2b8-c590-c28a5e12a5c6@intel.com>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <1518701697-14242-2-git-send-email-ludovic.Barre@st.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -21,164 +19,74 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Kishon Vijay Abraham I <kishon@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>
-Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Ludovic Barre <ludovic.Barre@st.com>
+Cc: devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Alexandre Torgue <alexandre.torgue@st.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Gerald Baeza <gerald.baeza@st.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 19/02/18 11:24, Adrian Hunter wrote:
-> On 05/02/18 14:50, Kishon Vijay Abraham I wrote:
->> sdhci has a 10 second timeout to catch devices that stop responding.
->> Instead of programming 10 second arbitrary value, calculate the total time
->> it would take for the entire transfer to happen and program the timeout
->> value accordingly.
->>
->> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
->> ---
->>  drivers/mmc/host/sdhci.c | 46 +++++++++++++++++++++++++++++++++++++++-------
->>  drivers/mmc/host/sdhci.h | 10 ++++++++++
->>  2 files changed, 49 insertions(+), 7 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index 0489572d1892..d52f9e7eabe2 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -673,6 +673,37 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
->>  	}
->>  }
->>  
->> +static void sdhci_calc_sw_timeout(struct sdhci_host *host,
->> +				  struct mmc_command *cmd,
->> +				  unsigned int target_timeout)
->> +{
->> +	struct mmc_data *data = cmd->data;
->> +	struct mmc_host *mmc = host->mmc;
->> +	unsigned long long transfer_time;
->> +	struct mmc_ios *ios = &mmc->ios;
->> +	unsigned char bus_width = ios->bus_width;
->> +	unsigned int blksz;
->> +	unsigned int freq;
->> +
->> +	if (data) {
->> +		blksz = data->blksz;
->> +		freq = host->mmc->actual_clock ? host->mmc->actual_clock :
->> +						host->clock;
+On Thu, Feb 15, 2018 at 02:34:53PM +0100, Ludovic Barre wrote:
+> From: Ludovic Barre <ludovic.barre@st.com>
 > 
-> I think this can be:
+> Document the binding for stm32 sdmmc controller.
 > 
-> 		freq = host->mmc->actual_clock ? : host->clock;
+> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
+> ---
+>  .../devicetree/bindings/mmc/st,stm32-sdmmc.txt     | 35 ++++++++++++++++++++++
+>  1 file changed, 35 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/st,stm32-sdmmc.txt
 > 
->> +		transfer_time = (unsigned long long)(blksz * NSEC_PER_SEC *
->> +						     (8 / bus_width)) / freq;
-> 
-> You have got a 32-bit overflow here and a 64-bit division that can't always
-> be done with '/'
-> 
->> +		/* multiply by '2' to account for any unknowns */
->> +		transfer_time = transfer_time * 2;
-> 
-> 		transfer_time *= 2;
-> 
->> +		/* calculate timeout for the entire data */
->> +		host->data_timeout = (data->blocks * ((target_timeout *
->> +						       NSEC_PER_USEC) +
->> +						       transfer_time));
->> +	} else {
->> +		host->data_timeout = target_timeout * NSEC_PER_USEC;
-> 
-> And another 32-bit overflow here
-> 
->> +	}
->> +
->> +	host->data_timeout += MMC_CMD_TRANSFER_TIME;
->> +}
->> +
->>  static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
->>  {
->>  	u8 count;
->> @@ -742,6 +773,7 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
->>  			host->hw_timeout_disabled = true;
->>  		}
->>  	}
->> +	sdhci_calc_sw_timeout(host, cmd, target_timeout);
->>  
->>  	return count;
->>  }
->> @@ -1130,13 +1162,6 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
->>  		mdelay(1);
->>  	}
->>  
->> -	timeout = jiffies;
->> -	if (!cmd->data && cmd->busy_timeout > 9000)
->> -		timeout += DIV_ROUND_UP(cmd->busy_timeout, 1000) * HZ + HZ;
->> -	else
->> -		timeout += 10 * HZ;
->> -	sdhci_mod_timer(host, cmd, timeout);
->> -
->>  	host->cmd = cmd;
->>  	if (sdhci_data_line_cmd(cmd)) {
->>  		WARN_ON(host->data_cmd);
->> @@ -1176,6 +1201,13 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
->>  	    cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200)
->>  		flags |= SDHCI_CMD_DATA;
->>  
->> +	timeout = jiffies;
->> +	if (sdhci_data_line_cmd(cmd))
->> +		timeout += nsecs_to_jiffies(host->data_timeout);
->> +	else
->> +		timeout += 10 * HZ;
->> +	sdhci_mod_timer(host, cmd, timeout);
-> 
-> Here you probably want to avoid updating the timer if the mrq has already
-> started using host->data_timeout.
-> 
->> +
->>  	sdhci_writew(host, SDHCI_MAKE_CMD(cmd->opcode, flags), SDHCI_COMMAND);
->>  }
->>  EXPORT_SYMBOL_GPL(sdhci_send_command);
->> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
->> index 3a967a56fcc3..b73577d77856 100644
->> --- a/drivers/mmc/host/sdhci.h
->> +++ b/drivers/mmc/host/sdhci.h
->> @@ -332,6 +332,14 @@ struct sdhci_adma2_64_desc {
->>  /* Allow for a a command request and a data request at the same time */
->>  #define SDHCI_MAX_MRQS		2
->>  
->> +/*
->> + * 48bit command and 136 bit response in 400KHz clock should take 0.46ms.
-> 
-> I am not sure the math is correct here.  I would add the 64 clocks before
-> the response also, and allow for 100 kHz clock.
-> 
-> 	(48 + 64 + 136) * 100 us = 24.8 ms
+> diff --git a/Documentation/devicetree/bindings/mmc/st,stm32-sdmmc.txt b/Documentation/devicetree/bindings/mmc/st,stm32-sdmmc.txt
+> new file mode 100644
+> index 0000000..52eb1f8
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/st,stm32-sdmmc.txt
+> @@ -0,0 +1,35 @@
+> +* STMicroelectronics STM32 SDMMC controller
+> +
+> +The highspeed MMC host controller on STM32 soc family
+> +provides an interface for MMC, SD and SDIO types of memory cards.
+> +
+> +This file documents differences between the core properties described
+> +by mmc.txt and the properties used by the sdmmc driver.
+> +
+> +Required properties:
+> + - compatible: Should be "st,stm32h7-sdmmc"
+> + - reg: mmc controller base registers
+> + - interrupts: Should contain the interrupt number
+> + - clocks: Should contain phandle for the clock feeding the controller
+> + - resets: Should contain phandle for the reset feeding the controller
+> +
+> +Optional property:
+> +- st,dirpol: Allow to select direction polarity of external voltage
 
-No I am off by x10, sorry!  I would still go for 10 ms.
+This doesn't need to be so terse. Perhaps "st,dir-output-high".
 
-> 
-> Given that you are looking at data block timeouts in excess of 700 ms, and
-> anything up to 10% of that is relatively negligible, anything less that 70
-> ms seems fine, so I would set 30 ms here as a round number.
-> 
->> + * However since the start time of the command, the time between
->> + * command and response, and the time between response and start of data is
->> + * not known, set the command transfer time to 2ms.
->> + */
->> +#define MMC_CMD_TRANSFER_TIME	(2 * NSEC_PER_MSEC) /* max 2 ms */
->> +
->>  enum sdhci_cookie {
->>  	COOKIE_UNMAPPED,
->>  	COOKIE_PRE_MAPPED,	/* mapped by sdhci_pre_req() */
->> @@ -554,6 +562,8 @@ struct sdhci_host {
->>  	/* Host SDMA buffer boundary. */
->>  	u32			sdma_boundary;
->>  
->> +	unsigned long long	data_timeout;
-> 
-> nsecs_to_jiffies() uses u64 which is nicer I think
-> 
->> +
->>  	unsigned long private[0] ____cacheline_aligned;
->>  };
->>  
->>
-> 
+> +  transceiver (which manage data and command direction).
+> +  if set: Voltage transceiver IOs are driven as output when direction signals are high,
+> +  else: Voltage transceiver IOs are driven as output when direction signals are low.
+> +- st,negedge: generate data & command on sdmmc clock falling edge
+
+st,neg-edge
+
+> +- st,pin-ckin: use sdmmc_ckin pin from an external driver to sample
+> +  the receive data (example: with voltage switch transceiver).
+
+st,use-ckin
+
+> +
+> +Example:
+> +	sdmmc1: sdmmc@52007000 {
+
+mmc@...
+
+> +		compatible = "st,stm32h7-sdmmc";
+> +		reg = <0x52007000 0x1000>;
+> +		interrupts = <49>;
+> +		clocks = <&rcc SDMMC1_CK>;
+> +		resets = <&rcc SDMMC1_R>;
+> +		bus-width = <4>;
+> +		cap-sd-highspeed;
+> +		cap-mmc-highspeed;
+> +	};
+> -- 
+> 2.7.4
 > 
