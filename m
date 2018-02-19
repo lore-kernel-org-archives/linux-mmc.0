@@ -1,15 +1,16 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v2 15/16] mmc: sdhci-omap: Add SPDX identifier
-Date: Mon, 19 Feb 2018 11:33:48 +0200
-Message-ID: <2011736b-9c4c-41e2-2dd7-a3ec86d3b180@intel.com>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: Re: [PATCH v2 10/16] mmc: sdhci: Fix to use data_timer only for data
+ line commands
+Date: Mon, 19 Feb 2018 18:25:16 +0530
+Message-ID: <7452a187-bdb6-e985-10c6-7829a2d04caf@ti.com>
 References: <20180205125029.21570-1-kishon@ti.com>
- <20180205125029.21570-16-kishon@ti.com>
+ <20180205125029.21570-11-kishon@ti.com>
+ <192a7c1e-9180-e473-8000-4a4aa806df91@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20180205125029.21570-16-kishon@ti.com>
-Content-Language: en-US
+In-Reply-To: <192a7c1e-9180-e473-8000-4a4aa806df91@intel.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -19,51 +20,80 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Kishon Vijay Abraham I <kishon@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>
 Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 05/02/18 14:50, Kishon Vijay Abraham I wrote:
-> The SPDX identifier is a legally binding shorthand, which can be used
-> instead of the full boiler plate text. Update sdhci-omap driver with the
-> correct SPDX license identifier.
-> 
-> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+Hi Adrian,
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-
-> ---
->  drivers/mmc/host/sdhci-omap.c | 22 ++++------------------
->  1 file changed, 4 insertions(+), 18 deletions(-)
+On Monday 19 February 2018 01:33 PM, Adrian Hunter wrote:
+> On 05/02/18 14:50, Kishon Vijay Abraham I wrote:
+>> commit d7422fb489eee5587d3eec ("mmc: sdhci: Separate timer timeout for
+>> command and data requests") while separating timer timeout for
+>> command and data requests, passed cmd->mrq to sdhci_mod_timer (cmd is an
+>> argument to sdhci_send_command) and in sdhci_mod_timer used mrq->cmd
+>> to check if it is a data line command. This results in using
+>> data timer for commands like MMC_SET_BLOCK_COUNT (CMD23) though it is
+>> not a data line command. Fix it here.
 > 
-> diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-> index 863f6736c2fe..d44918172197 100644
-> --- a/drivers/mmc/host/sdhci-omap.c
-> +++ b/drivers/mmc/host/sdhci-omap.c
-> @@ -1,21 +1,7 @@
-> -/**
-> - * SDHCI Controller driver for TI's OMAP SoCs
-> - *
-> - * Copyright (C) 2017 Texas Instruments
-> - * Author: Kishon Vijay Abraham I <kishon@ti.com>
-> - *
-> - * This program is free software: you can redistribute it and/or modify
-> - * it under the terms of the GNU General Public License version 2 of
-> - * the License as published by the Free Software Foundation.
-> - *
-> - * This program is distributed in the hope that it will be useful,
-> - * but WITHOUT ANY WARRANTY; without even the implied warranty of
-> - * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> - * GNU General Public License for more details.
-> - *
-> - * You should have received a copy of the GNU General Public License
-> - * along with this program.  If not, see <http://www.gnu.org/licenses/>.
-> - */
-> +// SPDX-License-Identifier: GPL-2.0
-> +// Copyright (c) 2018 Texas Instruments
-> +// SDHCI Controller driver for TI's OMAP SoCs
-> +// Author: Kishon Vijay Abraham I <kishon@ti.com>
->  
->  #include <linux/delay.h>
->  #include <linux/mmc/slot-gpio.h>
+> I am not sure why you need this change, but it is not right actually.  There
+
+After adding below (similar to next patch)
++	timeout = jiffies;
++	if (sdhci_data_line_cmd(mrq->cmd))
++		timeout += nsecs_to_jiffies(host->data_timeout);
++	else
++		timeout += 10 * HZ;
++	sdhci_mod_timer(host, mrq->cmd, timeout);
++
+
+I saw that host->data_timeout was having a value of '0'. And that's because for
+set block count command, sdhci_data_line_cmd(mrq->cmd) evaluates to 'true'
+though sdhci_prepare_data() doesn't set timeout.
+
+> are 2 timers because there can be 2 mrqs and we need to delete the correct
+> timer in sdhci_request_done() so it is better to make the selection based on
+> the mrq not the last command.
+
+okay, I have to change the mod_timer logic in sdhci_send_command().
+
+Thanks
+Kishon
+> 
+>>
+>> Fixes: commit d7422fb489eee5587d3eec ("mmc: sdhci: Separate timer timeout for
+>> command and data requests")
+>>
+>> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+>> ---
+>>  drivers/mmc/host/sdhci.c | 6 +++---
+>>  1 file changed, 3 insertions(+), 3 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index 1aa74b4682f3..0489572d1892 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -1073,10 +1073,10 @@ static void sdhci_finish_data(struct sdhci_host *host)
+>>  	}
+>>  }
+>>  
+>> -static void sdhci_mod_timer(struct sdhci_host *host, struct mmc_request *mrq,
+>> +static void sdhci_mod_timer(struct sdhci_host *host, struct mmc_command *cmd,
+>>  			    unsigned long timeout)
+>>  {
+>> -	if (sdhci_data_line_cmd(mrq->cmd))
+>> +	if (sdhci_data_line_cmd(cmd))
+>>  		mod_timer(&host->data_timer, timeout);
+>>  	else
+>>  		mod_timer(&host->timer, timeout);
+>> @@ -1135,7 +1135,7 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+>>  		timeout += DIV_ROUND_UP(cmd->busy_timeout, 1000) * HZ + HZ;
+>>  	else
+>>  		timeout += 10 * HZ;
+>> -	sdhci_mod_timer(host, cmd->mrq, timeout);
+>> +	sdhci_mod_timer(host, cmd, timeout);
+>>  
+>>  	host->cmd = cmd;
+>>  	if (sdhci_data_line_cmd(cmd)) {
+>>
 > 
