@@ -1,104 +1,95 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [RFC PATCH] mmc: sdhci-of-arasan: Add auto tuning support for
- ZynqMP Platform
-Date: Thu, 22 Feb 2018 10:20:07 +0200
-Message-ID: <ce9efad6-b007-4cd9-18e7-a7932835846c@intel.com>
-References: <1517336073-18142-1-git-send-email-mnarani@xilinx.com>
- <608309c3-fc4d-25a2-f0a9-21c0f3e2db46@intel.com>
- <SN1PR0201MB1791863A71475E3F0D896DD0C1CE0@SN1PR0201MB1791.namprd02.prod.outlook.com>
+From: Evgeniy Didin <Evgeniy.Didin@synopsys.com>
+Subject: [PATCH v2] mmc: dw_mmc: Fix the DTO timeout overflow calculation for
+ 32-bit systems
+Date: Thu, 22 Feb 2018 16:34:18 +0300
+Message-ID: <20180222133418.29336-1-Evgeniy.Didin@synopsys.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <SN1PR0201MB1791863A71475E3F0D896DD0C1CE0@SN1PR0201MB1791.namprd02.prod.outlook.com>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Manish Narani <MNARANI@xilinx.com>, "michal.simek@xilinx.com" <michal.simek@xilinx.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "mark.rutland@arm.com" <mark.rutland@arm.com>, "robh+dt@kernel.org" <robh+dt@kernel.org>
-Cc: Srinivas Goud <sgoud@xilinx.com>, Anirudha Sarangi <anirudh@xilinx.com>
+Return-path: <linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-snps-arc>,
+ <mailto:linux-snps-arc-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-snps-arc/>
+List-Post: <mailto:linux-snps-arc@lists.infradead.org>
+List-Help: <mailto:linux-snps-arc-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-snps-arc>,
+ <mailto:linux-snps-arc-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-snps-arc" <linux-snps-arc-bounces@lists.infradead.org>
+Errors-To: linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org
+To: linux-mmc@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Vineet Gupta <Vineet.Gupta1@synopsys.com>, Alexey Brodkin <Alexey.Brodkin@synopsys.com>, Douglas Anderson <dianders@chromium.org>, stable@vger.kernel.org, linux-kernel@vger.kernel.org, linux-snps-arc@lists.infradead.org, Eugeniy Paltsev <Eugeniy.Paltsev@synopsys.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 21/02/18 17:00, Manish Narani wrote:
-> Hi Adrian,
-> 
->> -----Original Message-----
->> From: Manish Narani
->> Sent: Wednesday, February 21, 2018 11:39 AM
->> To: Adrian Hunter <adrian.hunter@intel.com>; michal.simek@xilinx.com;
->> ulf.hansson@linaro.org; linux-arm-kernel@lists.infradead.org; linux-
->> mmc@vger.kernel.org; linux-kernel@vger.kernel.org;
->> devicetree@vger.kernel.org; mark.rutland@arm.com; robh+dt@kernel.org
->> Cc: Anirudha Sarangi <anirudh@xilinx.com>; Srinivas Goud
->> <sgoud@xilinx.com>
->> Subject: RE: [RFC PATCH] mmc: sdhci-of-arasan: Add auto tuning support for
->> ZynqMP Platform
->>
->> Hi Adrian,
->>
->>
->>> -----Original Message-----
->>> From: Adrian Hunter [mailto:adrian.hunter@intel.com]
->>> Sent: Friday, February 16, 2018 7:37 PM
->>> To: Manish Narani <MNARANI@xilinx.com>; michal.simek@xilinx.com;
->>> ulf.hansson@linaro.org; linux-arm-kernel@lists.infradead.org; linux-
->>> mmc@vger.kernel.org; linux-kernel@vger.kernel.org;
->>> devicetree@vger.kernel.org; mark.rutland@arm.com; robh+dt@kernel.org
->>> Cc: Anirudha Sarangi <anirudh@xilinx.com>; Srinivas Goud
->>> <sgoud@xilinx.com>; Manish Narani <MNARANI@xilinx.com>
->>> Subject: Re: [RFC PATCH] mmc: sdhci-of-arasan: Add auto tuning support
->>> for ZynqMP Platform
->>>
->>> On 30/01/18 20:14, Manish Narani wrote:
->>>> This patch adds support of SD auto tuning for ZynqMP platform. Auto
->>>> tuning sequence sends tuning block to card when operating in UHS-1
->>>> modes. This resets the DLL and sends CMD19/CMD21 as a part of the
->>>> auto tuning process. Once the auto tuning process gets completed,
->>>> reset the DLL to load the newly obtained SDHC tuned tap value.
->>>
->>> How is this different from:
->>> 	1. reset the dll
->>> 	2. call sdhci_execute_tuning
->>> 	3. reset the dll
->>>
-> Below is my take on your above comments:
-> - 'Reset the dll' is a platform specific call inside 'arasan_zynqmp_execute_tuning' which is implemented in sdhci-of-arasan.c 
-> - 'arasan_zynqmp_execute_tuning' is called from 'sdhci_execute_tuning' as a platform_execute_tuning routine
-> - So to keep 'DLL reset' routine called from sdhci-of-arasan.c, I have implemented the execute_tuning in sdhci-of-arasan.c
+In commit 9d9491a7da2a ("mmc: dw_mmc: Fix the DTO timeout calculation") have been made
+changes which cause multiply overflow for 32-bit systems.
+The broken timeout calculations caused false interrupt latency warnings
+and stacktrace splat (such as below) when accessing the SD Card.
 
-I meant something like:
+| Running :  4M-check-reassembly-tcp-cmykw2-rotatew2.out -v0 -w1
+| -  Info: Finished target initialization.
+| mmcblk0: error -110 transferring data, sector 320544, nr 2048, cmd response
+|  0x900, card status 0x0
+| mmc_host mmc0: Bus speed (slot 0) = 50000000Hz (slot req 400000Hz, actual
+| 396825HZ div = 63)
+| mmc_host mmc0: Bus speed (slot 0) = 50000000Hz (slot req 25000000Hz, actual
+|  25000000HZ div = 1)
+| ------------[ cut here ]------------
+| softirq: huh, entered softirq 6 TASKLET 6f6a9412 with preempt_count 00000101,
+| exited with 00000100?
+| WARNING: CPU: 2 PID: 0 at ../lib/scatterlist.c:652 sg_miter_next+0x28/0x20c
+| Modules linked in:
+| CPU: 2 PID: 0 Comm: swapper/2 Not tainted 4.15.0 #57
+|
+| Stack Trace:
+|  arc_unwind_core.constprop.1+0xd0/0xf4
+|  dump_stack+0x68/0x80
+|  warn_slowpath_null+0x4e/0xec
+|  sg_miter_next+0x28/0x20c
+|  dw_mci_read_data_pio+0x44/0x190
+|  dw_mmc f000a000.mmc: Unexpected interrupt latency
+|   dw_mci_interrupt+0x3ee/0x530
+|  __handle_irq_event_percpu+0x56/0x150
+|  handle_irq_event+0x34/0x78
+|  handle_level_irq+0x8e/0x120
+|  generic_handle_irq+0x1c/0x2c
+|  idu_cascade_isr+0x30/0x6c
+|  __handle_domain_irq+0x72/0xc8
+|  ret_from_exception+0x0/0x8
+|---[ end trace 2a58c9af6c25fe51 ]---
 
-	if (of_device_is_compatible(pdev->dev.of_node, "xlnx,zynqmp-8.9a"))
-		host->mmc_host_ops.execute_tuning = arasan_zynqmp_execute_tuning;
+Lets cast this multiply to u64 type which prevents overflow.
 
+Tested-by: Vineet Gupta <Vineet.Gupta1@synopsys.com>
+Fixes: ARC STAR 9001306872 HSDK, sdio: board crashes when copying big files
 
-static int arasan_zynqmp_execute_tuning(struct mmc_host *mmc, u32 opcode)
-{
-	struct sdhci_host *host = mmc_priv(mmc);
-	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
-	int err;
+Signed-off-by: Evgeniy Didin <Evgeniy.Didin@synopsys.com>
 
-	arasan_zynqmp_dll_reset(host, sdhci_arasan->device_id);
+CC: Alexey Brodkin <abrodkin@synopsys.com>
+CC: Eugeniy Paltsev <paltsev@synopsys.com>
+CC: Douglas Anderson <dianders@chromium.org>
+CC: Ulf Hansson <ulf.hansson@linaro.org>
+CC: linux-kernel@vger.kernel.org
+CC: linux-snps-arc@lists.infradead.org
+Cc: <stable@vger.kernel.org> #  9d9491a7da2a mmc: dw_mmc: Fix the DTO timeout calculation
+---
+Changes since v1:
+-uint64_t switched to u64
+-changed commit message
+ drivers/mmc/host/dw_mmc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-	err = sdhci_execute_tuning(mmc, opcode);
-	if (err)
-		return err;
-
-	arasan_zynqmp_dll_reset(host, sdhci_arasan->device_id);
-
-	return 0;
-}
-
-> 
-> Alternative way (Please review):
-> - Define a host->quirk2 bit (SDHCI_QUIRK2_DLL_RESET_NEEDED) in sdhci-of-arasan.c indicating DLL reset needed while tuning operation
-> - Call 'dll reset' routine before and after __sdhci_execute_tuning() in sdhci.c when a host->quirk2 bit (SDHCI_QUIRK2_DLL_RESET_NEEDED) is set
-
-We should try to avoid quirks.
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 0aa39975f33b..1a0b9751c67c 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1944,7 +1944,7 @@ static void dw_mci_set_drto(struct dw_mci *host)
+ 	drto_div = (mci_readl(host, CLKDIV) & 0xff) * 2;
+ 	if (drto_div == 0)
+ 		drto_div = 1;
+-	drto_ms = DIV_ROUND_UP(MSEC_PER_SEC * drto_clks * drto_div,
++	drto_ms = DIV_ROUND_UP((u64)MSEC_PER_SEC * drto_clks * drto_div,
+ 			       host->bus_hz);
+ 
+ 	/* add a bit spare time */
+-- 
+2.11.0
