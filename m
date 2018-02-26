@@ -1,48 +1,42 @@
-From: Evgeniy Didin <Evgeniy.Didin@synopsys.com>
-Subject: Re: [PATCH 2/2 v3] mmc: dw_mmc: Fix the CTO overflow calculation
- for 32-bit systems
-Date: Mon, 26 Feb 2018 15:14:21 +0000
-Message-ID: <1519658060.31245.4.camel@synopsys.com>
+From: Andy Shevchenko <andy.shevchenko@gmail.com>
+Subject: Re: [PATCH 2/2 v3] mmc: dw_mmc: Fix the CTO overflow calculation for
+ 32-bit systems
+Date: Mon, 26 Feb 2018 18:53:48 +0200
+Message-ID: <CAHp75VeJhHWhxc4DBiqiu4n6raXbNQ0+W5YX_jthQd2OFF9F=w@mail.gmail.com>
 References: <20180226143413.44134-1-Evgeniy.Didin@synopsys.com>
- <20180226143413.44134-3-Evgeniy.Didin@synopsys.com>
- <CAHp75Vct=jMohCFnn3aoZCAw-Q8=8OOF-nPXh9dfwrWHVPXSfA@mail.gmail.com>
+ <20180226143413.44134-3-Evgeniy.Didin@synopsys.com> <CAHp75Vct=jMohCFnn3aoZCAw-Q8=8OOF-nPXh9dfwrWHVPXSfA@mail.gmail.com>
+ <1519658060.31245.4.camel@synopsys.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAHp75Vct=jMohCFnn3aoZCAw-Q8=8OOF-nPXh9dfwrWHVPXSfA@mail.gmail.com>
-Content-Language: en-US
-Content-ID: <FEEEA117F9F34B4FA13761F6BF868230@internal.synopsys.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-snps-arc>,
- <mailto:linux-snps-arc-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-snps-arc/>
-List-Post: <mailto:linux-snps-arc@lists.infradead.org>
-List-Help: <mailto:linux-snps-arc-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-snps-arc>,
- <mailto:linux-snps-arc-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-snps-arc" <linux-snps-arc-bounces@lists.infradead.org>
-Errors-To: linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org
-To: "andy.shevchenko@gmail.com" <andy.shevchenko@gmail.com>, "Evgeniy.Didin@synopsys.com" <Evgeniy.Didin@synopsys.com>
-Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "Vineet.Gupta1@synopsys.com" <Vineet.Gupta1@synopsys.com>, "Alexey.Brodkin@synopsys.com" <Alexey.Brodkin@synopsys.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "stable@vger.kernel.org" <stable@vger.kernel.org>, "dianders@chromium.org" <dianders@chromium.org>, "linux-snps-arc@lists.infradead.org" <linux-snps-arc@lists.infradead.org>, "Eugeniy.Paltsev@synopsys.com" <Eugeniy.Paltsev@synopsys.com>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1519658060.31245.4.camel@synopsys.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Evgeniy Didin <Evgeniy.Didin@synopsys.com>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Alexey.Brodkin@synopsys.com" <Alexey.Brodkin@synopsys.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "dianders@chromium.org" <dianders@chromium.org>, "Vineet.Gupta1@synopsys.com" <Vineet.Gupta1@synopsys.com>, "Eugeniy.Paltsev@synopsys.com" <Eugeniy.Paltsev@synopsys.com>, "linux-snps-arc@lists.infradead.org" <linux-snps-arc@lists.infradead.org>, "stable@vger.kernel.org" <stable@vger.kernel.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-T24gTW9uLCAyMDE4LTAyLTI2IGF0IDE2OjM5ICswMjAwLCBBbmR5IFNoZXZjaGVua28gd3JvdGU6
-DQo+IE9uIE1vbiwgRmViIDI2LCAyMDE4IGF0IDQ6MzQgUE0sIEV2Z2VuaXkgRGlkaW4NCj4gPEV2
-Z2VuaXkuRGlkaW5Ac3lub3BzeXMuY29tPiB3cm90ZToNCj4gPiBJbiBjb21taXQgNGMyMzU3ZjU3
-ZGQ1ICgibW1jOiBkd19tbWM6IEZpeCB0aGUgQ1RPIHRpbWVvdXQgY2FsY3VsYXRpb24iKQ0KPiA+
-IGhhdmUgYmVlbiBtYWRlIGNoYW5nZXMgd2hpY2ggY2FuIGNhdXNlIG11bHRpcGx5IG92ZXJmbG93
-IGZvciAzMi1iaXQgc3lzdGVtcy4NCj4gPiBUaGUgdmFsdWUgb2YgY3RvX21zIGlzIGxvd2VyIHRo
-ZSBkcnRvX21zLCBidXQgbmV2ZXJ0aGVsZXNzIG92ZXJmbG93IGNhbiBvY2N1ci4NCj4gPiBMZXRz
-IGNhc3QgdGhpcyBtdWx0aXBseSB0byB1NjQgdHlwZSB3aGljaCBwcmV2ZW50cyBvdmVyZmxvdy4N
-Cj4gPiAtwqDCoMKgwqDCoMKgwqBjdG9fbXMgPSBESVZfUk9VTkRfVVAoTVNFQ19QRVJfU0VDICog
-Y3RvX2Nsa3MgKiBjdG9fZGl2LCBob3N0LT5idXNfaHopOw0KPiA+ICsNCj4gPiArwqDCoMKgwqDC
-oMKgwqBjdG9fbXMgPSBESVZfUk9VTkRfVVAoKHU2NClNU0VDX1BFUl9TRUMgKiBjdG9fY2xrcyAq
-IGN0b19kaXYsIGhvc3QtPmJ1c19oeik7DQo+IA0KPiBJSVJDLCBzb21lb25lIGNvbW1lbnRlZCBv
-biB0aGlzIG9yIHNpbWlsYXIsIGkuZS4NCj4gDQo+IERJVl9ST1VORF9VUF9VTEwoKSA/DQpTd2l0
-Y2ggRElWX1JPVU5EX1VQIG1hY3JvIHRvIERJVl9ST1VORF9VUF9VTEwgaXMgbm90IHJlYXNvbmFi
-bGUNCmJlY2F1c2Ugb3ZlcmZsb3cgaGFwcGVucyBvbiBtdWx0aXBseSBhbmQgRElWX1JPVU5EX1VQ
-X1VMTCBoZWxwcw0Kd2l0aCBzdW0gb3ZlcmZsb3cuDQoNCi0tDQpCZXN0IHJlZ2FyZHMsDQpFdmdl
-bml5IERpZGluCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-CmxpbnV4LXNucHMtYXJjIG1haWxpbmcgbGlzdApsaW51eC1zbnBzLWFyY0BsaXN0cy5pbmZyYWRl
-YWQub3JnCmh0dHA6Ly9saXN0cy5pbmZyYWRlYWQub3JnL21haWxtYW4vbGlzdGluZm8vbGludXgt
-c25wcy1hcmM=
+On Mon, Feb 26, 2018 at 5:14 PM, Evgeniy Didin
+<Evgeniy.Didin@synopsys.com> wrote:
+> On Mon, 2018-02-26 at 16:39 +0200, Andy Shevchenko wrote:
+>> On Mon, Feb 26, 2018 at 4:34 PM, Evgeniy Didin
+>> <Evgeniy.Didin@synopsys.com> wrote:
+>> > In commit 4c2357f57dd5 ("mmc: dw_mmc: Fix the CTO timeout calculation")
+>> > have been made changes which can cause multiply overflow for 32-bit systems.
+>> > The value of cto_ms is lower the drto_ms, but nevertheless overflow can occur.
+>> > Lets cast this multiply to u64 type which prevents overflow.
+>> > -       cto_ms = DIV_ROUND_UP(MSEC_PER_SEC * cto_clks * cto_div, host->bus_hz);
+>> > +
+>> > +       cto_ms = DIV_ROUND_UP((u64)MSEC_PER_SEC * cto_clks * cto_div, host->bus_hz);
+>>
+>> IIRC, someone commented on this or similar, i.e.
+>>
+>> DIV_ROUND_UP_ULL() ?
+> Switch DIV_ROUND_UP macro to DIV_ROUND_UP_ULL is not reasonable
+> because overflow happens on multiply and DIV_ROUND_UP_ULL helps
+> with sum overflow.
+
+Did you try to compile your code for 32-bit target?
+
+-- 
+With Best Regards,
+Andy Shevchenko
