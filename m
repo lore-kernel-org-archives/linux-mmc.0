@@ -1,85 +1,49 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH] mmc: sdhci-of-arasan: Add quirk to avoid erroneous msg
-Date: Tue, 27 Feb 2018 22:42:03 +0800
-Message-ID: <b725dcf5-2f53-dab7-1e0c-85ea138f54a9@rock-chips.com>
-References: <1519739731-27920-1-git-send-email-phil.edworthy@renesas.com>
- <b35a8ac6-af47-5851-95ae-371288bb5f25@rock-chips.com>
- <HK2PR0601MB1393B39958A128DCB8CA0E44F5C00@HK2PR0601MB1393.apcprd06.prod.outlook.com>
+From: Alex Lemberg <Alex.Lemberg@wdc.com>
+Subject: Re: [PATCH] mmc: card: Don't show eMMC RPMB and BOOT areas in
+ /proc/partitions
+Date: Tue, 27 Feb 2018 14:56:26 +0000
+Message-ID: <CB89C150-B842-475C-A53A-C6FE7E8A710A@wdc.com>
+References: <1519731229-19141-1-git-send-email-harish_kandiga@mentor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-2022-jp; format=flowed; delsp=yes
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <HK2PR0601MB1393B39958A128DCB8CA0E44F5C00@HK2PR0601MB1393.apcprd06.prod.outlook.com>
+In-Reply-To: <1519731229-19141-1-git-send-email-harish_kandiga@mentor.com>
+Content-Language: en-US
+Content-ID: <EABF50BC22CD074793560B5B7445C1DD@namprd04.prod.outlook.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Phil Edworthy <phil.edworthy@renesas.com>
-Cc: shawn.lin@rock-chips.com, Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michal.simek@xilinx.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
+To: Harish Jenny K N <harish_kandiga@mentor.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linus.walleij@linaro.org" <linus.walleij@linaro.org>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 2018/2/27 22:31, Phil Edworthy wrote:
-> Hi Shawn,
-> 
-> On 27 February 2018 14:28, Shawn Lin wrote:
->> 在 2018/2/27 21:55, Phil Edworthy 写道:
->>> Since the controller does not support the end-of-busy IRQ, don't use it.
->>> Otherwise, on older SD cards you will get lots of these messages:
->>> "mmc0: Got data interrupt 0x00000002 even though no data operation was
->> in progress"
->>>
->>
->> I'm afraid you have to explain which version of arasan's IP suffer from this
->> and what does the "older SD cards" mean?
-> Ok, I'll try to find out the IP version...
-> For "older SD cards", I can provide a list of a few cards that exhibit this problem
-> and others that don't, is that enough info?
-
-What I meant is could you elaborate more about what kind of cards, e.g,
-are them the  legacy SDSC cards or SDHC cards, or maybe they are only
-running with defaut speed? or whatever, but not just with a vague
-"older" cards. :)
-
-> 
-> Thanks
-> Phil
-> 
->>> This has been reported on Xilinx devices that also use the Arasan IP.
->>> See https://patchwork.kernel.org/patch/8062871/
->>>
->>> This has been tested on the Renesas RZ/ND-DB board with the RZ/N1 SoC.
->>>
->>> Signed-off-by: Phil Edworthy <phil.edworthy@renesas.com>
->>> ---
->>>    drivers/mmc/host/sdhci-of-arasan.c | 3 ++-
->>>    1 file changed, 2 insertions(+), 1 deletion(-)
->>>
->>> diff --git a/drivers/mmc/host/sdhci-of-arasan.c
->>> b/drivers/mmc/host/sdhci-of-arasan.c
->>> index c33a5f7..ab66e32 100644
->>> --- a/drivers/mmc/host/sdhci-of-arasan.c
->>> +++ b/drivers/mmc/host/sdhci-of-arasan.c
->>> @@ -290,7 +290,8 @@ static const struct sdhci_pltfm_data
->> sdhci_arasan_pdata = {
->>>    	.ops = &sdhci_arasan_ops,
->>>    	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
->>>    	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
->>> -			SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
->>> +			SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN |
->>> +			SDHCI_QUIRK2_STOP_WITH_TC,
->>>    };
->>>
->>>    static u32 sdhci_arasan_cqhci_irq(struct sdhci_host *host, u32
->>> intmask)
->>>
->>
->>
->> --
->> Best Regards
->> Shawn Lin
-> 
-> 
-> 
-> 
-
-
--- 
-Best Regards
-Shawn Lin
+V2hpbGUgUlBNQiBwYXJ0aXRpb24gcmVxdWlyZXMgc3BlY2lhbCBJT0NUTA0KDQpUaGFua3MsDQpB
+bGV4IA0K77u/T24gMi8yNy8xOCwgMTozNCBQTSwgImxpbnV4LW1tYy1vd25lckB2Z2VyLmtlcm5l
+bC5vcmcgb24gYmVoYWxmIG9mIEhhcmlzaCBKZW5ueSBLIE4iIDxsaW51eC1tbWMtb3duZXJAdmdl
+ci5rZXJuZWwub3JnIG9uIGJlaGFsZiBvZiBoYXJpc2hfa2FuZGlnYUBtZW50b3IuY29tPiB3cm90
+ZToNCg0KICAgIEZyb206IEFuZHJldyBHYWJiYXNvdiA8YW5kcmV3X2dhYmJhc292QG1lbnRvci5j
+b20+DQogICAgDQogICAgU2luY2UgUlBNQiBhcmVhIGlzIGFjY2Vzc2libGUgdmlhIHNwZWNpYWwg
+aW9jdGwgb25seSBhbmQgYm9vdCBhcmVhcw0KICAgIGFyZSB1bmxpa2VseSB0byBjb250YWluIGFu
+eSBwYXJ0aXRpb25zLCBleGNsdWRlIHRoZW0gYWxsIGZyb20gbGlzdGluZw0KICAgIGluIC9wcm9j
+L3BhcnRpdGlvbnMuIFRoaXMgd2lsbCBoaWRlIHRoZW0gZnJvbSB2YXJpb3VzIHVzZXItbGV2ZWwN
+CiAgICBzb2Z0d2FyZSAoZS5nLiBmZGlzayksIHRodXMgYXZvaWRpbmcgdW5uZWNlc3NhcnkgYWNj
+ZXNzIGF0dGVtcHRzLg0KICAgIA0KICAgIFNpZ25lZC1vZmYtYnk6IEFuZHJldyBHYWJiYXNvdiA8
+YW5kcmV3X2dhYmJhc292QG1lbnRvci5jb20+DQogICAgU2lnbmVkLW9mZi1ieTogSGFyaXNoIEpl
+bm55IEsgTiA8aGFyaXNoX2thbmRpZ2FAbWVudG9yLmNvbT4NCiAgICAtLS0NCiAgICAgZHJpdmVy
+cy9tbWMvY29yZS9ibG9jay5jIHwgMyArKy0NCiAgICAgMSBmaWxlIGNoYW5nZWQsIDIgaW5zZXJ0
+aW9ucygrKSwgMSBkZWxldGlvbigtKQ0KICAgIA0KICAgIGRpZmYgLS1naXQgYS9kcml2ZXJzL21t
+Yy9jb3JlL2Jsb2NrLmMgYi9kcml2ZXJzL21tYy9jb3JlL2Jsb2NrLmMNCiAgICBpbmRleCAyMDEz
+NWE1Li4zNzZlNDdlIDEwMDY0NA0KICAgIC0tLSBhL2RyaXZlcnMvbW1jL2NvcmUvYmxvY2suYw0K
+ICAgICsrKyBiL2RyaXZlcnMvbW1jL2NvcmUvYmxvY2suYw0KICAgIEBAIC0yMzQxLDcgKzIzNDEs
+OCBAQCBzdGF0aWMgc3RydWN0IG1tY19ibGtfZGF0YSAqbW1jX2Jsa19hbGxvY19yZXEoc3RydWN0
+IG1tY19jYXJkICpjYXJkLA0KICAgICAJc2V0X2Rpc2tfcm8obWQtPmRpc2ssIG1kLT5yZWFkX29u
+bHkgfHwgZGVmYXVsdF9ybyk7DQogICAgIAltZC0+ZGlzay0+ZmxhZ3MgPSBHRU5IRF9GTF9FWFRf
+REVWVDsNCiAgICAgCWlmIChhcmVhX3R5cGUgJiAoTU1DX0JMS19EQVRBX0FSRUFfUlBNQiB8IE1N
+Q19CTEtfREFUQV9BUkVBX0JPT1QpKQ0KICAgIC0JCW1kLT5kaXNrLT5mbGFncyB8PSBHRU5IRF9G
+TF9OT19QQVJUX1NDQU47DQogICAgKwkJbWQtPmRpc2stPmZsYWdzIHw9IEdFTkhEX0ZMX05PX1BB
+UlRfU0NBTg0KICAgICsJCQkJICAgfCBHRU5IRF9GTF9TVVBQUkVTU19QQVJUSVRJT05fSU5GTzsN
+CiAgICAgDQogICAgIAkvKg0KICAgICAJICogQXMgZGlzY3Vzc2VkIG9uIGxrbWwsIEdFTkhEX0ZM
+X1JFTU9WQUJMRSBzaG91bGQ6DQogICAgLS0gDQogICAgMS45LjENCiAgICANCiAgICAtLQ0KICAg
+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmli
+ZSBsaW51eC1tbWMiIGluDQogICAgdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2
+Z2VyLmtlcm5lbC5vcmcNCiAgICBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5r
+ZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCiAgICANCg0K
