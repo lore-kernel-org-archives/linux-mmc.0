@@ -1,52 +1,106 @@
-From: Alex Lemberg <Alex.Lemberg@wdc.com>
-Subject: Re: [PATCH] mmc: card: Don't show eMMC RPMB and BOOT areas in
- /proc/partitions
-Date: Tue, 27 Feb 2018 14:58:33 +0000
-Message-ID: <14AC9066-4BA9-478D-9F67-2A29D69E6011@wdc.com>
-References: <1519731229-19141-1-git-send-email-harish_kandiga@mentor.com>
+From: Phil Edworthy <phil.edworthy@renesas.com>
+Subject: RE: [PATCH] mmc: sdhci-of-arasan: Add quirk to avoid erroneous msg
+Date: Tue, 27 Feb 2018 15:05:46 +0000
+Message-ID: <HK2PR0601MB139380F295EF5CE849288F91F5C00@HK2PR0601MB1393.apcprd06.prod.outlook.com>
+References: <1519739731-27920-1-git-send-email-phil.edworthy@renesas.com>
+ <b35a8ac6-af47-5851-95ae-371288bb5f25@rock-chips.com>
+ <HK2PR0601MB1393B39958A128DCB8CA0E44F5C00@HK2PR0601MB1393.apcprd06.prod.outlook.com>
+ <b725dcf5-2f53-dab7-1e0c-85ea138f54a9@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="iso-2022-jp"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1519731229-19141-1-git-send-email-harish_kandiga@mentor.com>
+In-Reply-To: <b725dcf5-2f53-dab7-1e0c-85ea138f54a9@rock-chips.com>
 Content-Language: en-US
-Content-ID: <6CB7AAEC713896469897D11F2DB1481E@namprd04.prod.outlook.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Harish Jenny K N <harish_kandiga@mentor.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linus.walleij@linaro.org" <linus.walleij@linaro.org>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michal.simek@xilinx.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-SGkgQW5kcmV3LA0KDQpXaGlsZSBSUE1CIHBhcnRpdGlvbiByZXF1aXJlcyBzcGVjaWFsIElPQ1RM
-LCB0aGUgYm9vdCBwYXJ0aXRpb24gaXMgb25seSByZXF1aXJlcyAic3dpdGNoIHBhcnRpdGlvbiIs
-IHdoaWNoIGlzIG5vdCB1bnVzdWFsIG9wZXJhdGlvbiBpbiBlTU1DLg0KV2h5IHRvIHByZXZlbnQg
-dXNlcnMgYWNjZXNzIGJvb3QgcGFydGl0aW9uPw0KDQpUaGFua3MsDQpBbGV4IA0KDQrvu79PbiAy
-LzI3LzE4LCAxOjM0IFBNLCAibGludXgtbW1jLW93bmVyQHZnZXIua2VybmVsLm9yZyBvbiBiZWhh
-bGYgb2YgSGFyaXNoIEplbm55IEsgTiIgPGxpbnV4LW1tYy1vd25lckB2Z2VyLmtlcm5lbC5vcmcg
-b24gYmVoYWxmIG9mIGhhcmlzaF9rYW5kaWdhQG1lbnRvci5jb20+IHdyb3RlOg0KDQogICAgRnJv
-bTogQW5kcmV3IEdhYmJhc292IDxhbmRyZXdfZ2FiYmFzb3ZAbWVudG9yLmNvbT4NCiAgICANCiAg
-ICBTaW5jZSBSUE1CIGFyZWEgaXMgYWNjZXNzaWJsZSB2aWEgc3BlY2lhbCBpb2N0bCBvbmx5IGFu
-ZCBib290IGFyZWFzDQogICAgYXJlIHVubGlrZWx5IHRvIGNvbnRhaW4gYW55IHBhcnRpdGlvbnMs
-IGV4Y2x1ZGUgdGhlbSBhbGwgZnJvbSBsaXN0aW5nDQogICAgaW4gL3Byb2MvcGFydGl0aW9ucy4g
-VGhpcyB3aWxsIGhpZGUgdGhlbSBmcm9tIHZhcmlvdXMgdXNlci1sZXZlbA0KICAgIHNvZnR3YXJl
-IChlLmcuIGZkaXNrKSwgdGh1cyBhdm9pZGluZyB1bm5lY2Vzc2FyeSBhY2Nlc3MgYXR0ZW1wdHMu
-DQogICAgDQogICAgU2lnbmVkLW9mZi1ieTogQW5kcmV3IEdhYmJhc292IDxhbmRyZXdfZ2FiYmFz
-b3ZAbWVudG9yLmNvbT4NCiAgICBTaWduZWQtb2ZmLWJ5OiBIYXJpc2ggSmVubnkgSyBOIDxoYXJp
-c2hfa2FuZGlnYUBtZW50b3IuY29tPg0KICAgIC0tLQ0KICAgICBkcml2ZXJzL21tYy9jb3JlL2Js
-b2NrLmMgfCAzICsrLQ0KICAgICAxIGZpbGUgY2hhbmdlZCwgMiBpbnNlcnRpb25zKCspLCAxIGRl
-bGV0aW9uKC0pDQogICAgDQogICAgZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2NvcmUvYmxvY2su
-YyBiL2RyaXZlcnMvbW1jL2NvcmUvYmxvY2suYw0KICAgIGluZGV4IDIwMTM1YTUuLjM3NmU0N2Ug
-MTAwNjQ0DQogICAgLS0tIGEvZHJpdmVycy9tbWMvY29yZS9ibG9jay5jDQogICAgKysrIGIvZHJp
-dmVycy9tbWMvY29yZS9ibG9jay5jDQogICAgQEAgLTIzNDEsNyArMjM0MSw4IEBAIHN0YXRpYyBz
-dHJ1Y3QgbW1jX2Jsa19kYXRhICptbWNfYmxrX2FsbG9jX3JlcShzdHJ1Y3QgbW1jX2NhcmQgKmNh
-cmQsDQogICAgIAlzZXRfZGlza19ybyhtZC0+ZGlzaywgbWQtPnJlYWRfb25seSB8fCBkZWZhdWx0
-X3JvKTsNCiAgICAgCW1kLT5kaXNrLT5mbGFncyA9IEdFTkhEX0ZMX0VYVF9ERVZUOw0KICAgICAJ
-aWYgKGFyZWFfdHlwZSAmIChNTUNfQkxLX0RBVEFfQVJFQV9SUE1CIHwgTU1DX0JMS19EQVRBX0FS
-RUFfQk9PVCkpDQogICAgLQkJbWQtPmRpc2stPmZsYWdzIHw9IEdFTkhEX0ZMX05PX1BBUlRfU0NB
-TjsNCiAgICArCQltZC0+ZGlzay0+ZmxhZ3MgfD0gR0VOSERfRkxfTk9fUEFSVF9TQ0FODQogICAg
-KwkJCQkgICB8IEdFTkhEX0ZMX1NVUFBSRVNTX1BBUlRJVElPTl9JTkZPOw0KICAgICANCiAgICAg
-CS8qDQogICAgIAkgKiBBcyBkaXNjdXNzZWQgb24gbGttbCwgR0VOSERfRkxfUkVNT1ZBQkxFIHNo
-b3VsZDoNCiAgICAtLSANCiAgICAxLjkuMQ0KICAgIA0KICAgIC0tDQogICAgVG8gdW5zdWJzY3Jp
-YmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGxpbnV4LW1tYyIg
-aW4NCiAgICB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9y
-Zw0KICAgIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFq
-b3Jkb21vLWluZm8uaHRtbA0KICAgIA0KDQo=
+Hi Shawn,
+
+On 27 February 2018 14:42, Shawn Lin wrote:
+> On 2018/2/27 22:31, Phil Edworthy wrote:
+> > Hi Shawn,
+> >
+> > On 27 February 2018 14:28, Shawn Lin wrote:
+> >> =1B$B:_=1B(B 2018/2/27 21:55, Phil Edworthy =1B$B<LF;=1B(B:
+> >>> Since the controller does not support the end-of-busy IRQ, don't use =
+it.
+> >>> Otherwise, on older SD cards you will get lots of these messages:
+> >>> "mmc0: Got data interrupt 0x00000002 even though no data operation
+> >>> was
+> >> in progress"
+> >>>
+> >>
+> >> I'm afraid you have to explain which version of arasan's IP suffer
+> >> from this and what does the "older SD cards" mean?
+> > Ok, I'll try to find out the IP version...
+> > For "older SD cards", I can provide a list of a few cards that exhibit
+> > this problem and others that don't, is that enough info?
+>=20
+> What I meant is could you elaborate more about what kind of cards, e.g, a=
+re
+> them the  legacy SDSC cards or SDHC cards, or maybe they are only running
+> with defaut speed? or whatever, but not just with a vague "older" cards. =
+:)
+Unfortunately, I have one SDHC card that works, one that doesn't. Both card=
+s
+are running with a 50MHz SD clock. All I know is this:
+
+SD cards that report unexpected interrupts:
+2GB Sandisk Extreme III                     (e624 SD02G 1.89 GiB)
+8GB Sandisk (SDHC class 4)              (aaaa SU08G 7.40 GiB)
+8GB Sandisk Extreme III (SDHC class 6)    (bb4e SD08G 7.61 GiB)
+
+SD cards that work ok:
+16GB Samsung (microSDHC U1 class 10)          (0001 00000 14.6 GiB)
+16GB Sandisk Ultra (microSDHC U1 class 10)    (aaaa SL16G 14.8 GiB)
+32GB Sandisk Ultra (microSDHC U1 class 10)    (aaaa SL32G 29.7 GiB)
+
+Thanks
+Phil
+
+> >>> This has been reported on Xilinx devices that also use the Arasan IP.
+> >>> See https://patchwork.kernel.org/patch/8062871/
+> >>>
+> >>> This has been tested on the Renesas RZ/ND-DB board with the RZ/N1
+> SoC.
+> >>>
+> >>> Signed-off-by: Phil Edworthy <phil.edworthy@renesas.com>
+> >>> ---
+> >>>    drivers/mmc/host/sdhci-of-arasan.c | 3 ++-
+> >>>    1 file changed, 2 insertions(+), 1 deletion(-)
+> >>>
+> >>> diff --git a/drivers/mmc/host/sdhci-of-arasan.c
+> >>> b/drivers/mmc/host/sdhci-of-arasan.c
+> >>> index c33a5f7..ab66e32 100644
+> >>> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> >>> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> >>> @@ -290,7 +290,8 @@ static const struct sdhci_pltfm_data
+> >> sdhci_arasan_pdata =3D {
+> >>>    	.ops =3D &sdhci_arasan_ops,
+> >>>    	.quirks =3D SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+> >>>    	.quirks2 =3D SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
+> >>> -			SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
+> >>> +			SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN |
+> >>> +			SDHCI_QUIRK2_STOP_WITH_TC,
+> >>>    };
+> >>>
+> >>>    static u32 sdhci_arasan_cqhci_irq(struct sdhci_host *host, u32
+> >>> intmask)
+> >>>
+> >>
+> >>
+> >> --
+> >> Best Regards
+> >> Shawn Lin
+> >
+> >
+> >
+> >
+>=20
+>=20
+> --
+> Best Regards
+> Shawn Lin
