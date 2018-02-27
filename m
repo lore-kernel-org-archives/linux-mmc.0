@@ -1,44 +1,41 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: dw_mmc: update kernel-doc comments for dw_mci
-Date: Tue, 27 Feb 2018 12:28:06 +0100
-Message-ID: <CAPDyKFp7Aik0U49cFZGMamw8xe+=yakGjfuMgbvgFrQA-t=VXQ@mail.gmail.com>
-References: <20180222194525.28947-1-alexey.roslyakov@gmail.com>
- <CGME20180223014048epcas5p293b090a79d10de2653428d6fec57a203@epcas5p2.samsung.com>
- <f87c7d91-8b26-bf63-5323-5c60b00c81e4@rock-chips.com> <a3f948c2-f443-63d1-ff3e-51751bc83982@samsung.com>
+From: Harish Jenny K N <harish_kandiga@mentor.com>
+Subject: [PATCH] mmc: card: Don't show eMMC RPMB and BOOT areas in /proc/partitions
+Date: Tue, 27 Feb 2018 17:03:49 +0530
+Message-ID: <1519731229-19141-1-git-send-email-harish_kandiga@mentor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <a3f948c2-f443-63d1-ff3e-51751bc83982@samsung.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, Alexey Roslyakov <alexey.roslyakov@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: ulf.hansson@linaro.org, linus.walleij@linaro.org, adrian.hunter@intel.com, shawn.lin@rock-chips.com
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, harish_kandiga@mentor.com
 List-Id: linux-mmc@vger.kernel.org
 
-On 23 February 2018 at 07:30, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> On 02/23/2018 10:40 AM, Shawn Lin wrote:
->> Hi Alexey,
->>
->> On 2018/2/23 3:45, Alexey Roslyakov wrote:
->>> cur_slot and num_slots has been removed from struct dw_mci in 42f989c002f2.
->>> Unfortunately, inline documentation was not updated so far.
->>>
->>> Fix @lock field documentation in Locking section.
->>> Move @mrq field of struct dw_mci_slot mention closer to it
->>> description, so no one could miss this slightest detail.
->>>
->>> Couple of code style fixes as a bonus.
->>>
->>
->> Thanks for updating these.
->>
->> Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
->
-> Thanks! Will apply this with Shawn's Reveiwed-by tag.
+From: Andrew Gabbasov <andrew_gabbasov@mentor.com>
 
-Dear Jaehoon, I picked this up for next and by adding your ack. Tell
-me if you have objections!
+Since RPMB area is accessible via special ioctl only and boot areas
+are unlikely to contain any partitions, exclude them all from listing
+in /proc/partitions. This will hide them from various user-level
+software (e.g. fdisk), thus avoiding unnecessary access attempts.
 
-[...]
+Signed-off-by: Andrew Gabbasov <andrew_gabbasov@mentor.com>
+Signed-off-by: Harish Jenny K N <harish_kandiga@mentor.com>
+---
+ drivers/mmc/core/block.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-Thanks and kind regards
-Uffe
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 20135a5..376e47e 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -2341,7 +2341,8 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 	set_disk_ro(md->disk, md->read_only || default_ro);
+ 	md->disk->flags = GENHD_FL_EXT_DEVT;
+ 	if (area_type & (MMC_BLK_DATA_AREA_RPMB | MMC_BLK_DATA_AREA_BOOT))
+-		md->disk->flags |= GENHD_FL_NO_PART_SCAN;
++		md->disk->flags |= GENHD_FL_NO_PART_SCAN
++				   | GENHD_FL_SUPPRESS_PARTITION_INFO;
+ 
+ 	/*
+ 	 * As discussed on lkml, GENHD_FL_REMOVABLE should:
+-- 
+1.9.1
