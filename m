@@ -1,45 +1,66 @@
-From: Andy Shevchenko <andy.shevchenko@gmail.com>
-Subject: Re: [PATCH 2/2 v3] mmc: dw_mmc: Fix the CTO overflow calculation for
- 32-bit systems
-Date: Tue, 27 Feb 2018 12:49:06 +0200
-Message-ID: <CAHp75Vfb6HQvx531bDi_j1wG=-vae73o+hcOyCGfOeQKEUpYeg@mail.gmail.com>
-References: <20180226143413.44134-1-Evgeniy.Didin@synopsys.com>
- <20180226143413.44134-3-Evgeniy.Didin@synopsys.com> <CAHp75Vct=jMohCFnn3aoZCAw-Q8=8OOF-nPXh9dfwrWHVPXSfA@mail.gmail.com>
- <1519658060.31245.4.camel@synopsys.com> <CAHp75VeJhHWhxc4DBiqiu4n6raXbNQ0+W5YX_jthQd2OFF9F=w@mail.gmail.com>
- <1519665265.31245.6.camel@synopsys.com> <CAHp75VcABGN+awEUzNiTAc985EM0XVS6eiNLGYYD1_vCrRC00Q@mail.gmail.com>
- <1519676841.2997.7.camel@synopsys.com> <20180227115243.7ca84b3b@xhacker.debian>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2] mmc: dw_mmc-k3: Fix out-of-bounds access through DT alias
+Date: Tue, 27 Feb 2018 12:27:26 +0100
+Message-ID: <CAPDyKFrFKp7Bn+86jWN1t4Q7bLup0z3cnPM8zMMTdMTQLJSfQA@mail.gmail.com>
+References: <1519389859-14947-1-git-send-email-geert+renesas@glider.be>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20180227115243.7ca84b3b@xhacker.debian>
-Sender: stable-owner@vger.kernel.org
-To: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
-Cc: Alexey Brodkin <Alexey.Brodkin@synopsys.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "dianders@chromium.org" <dianders@chromium.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Vineet.Gupta1@synopsys.com" <Vineet.Gupta1@synopsys.com>, "Eugeniy.Paltsev@synopsys.com" <Eugeniy.Paltsev@synopsys.com>, "linux-snps-arc@lists.infradead.org" <linux-snps-arc@lists.infradead.org>, "stable@vger.kernel.org" <stable@vger.kernel.org>, "Evgeniy.Didin@synopsys.com" <Evgeniy.Didin@synopsys.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1519389859-14947-1-git-send-email-geert+renesas@glider.be>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Geert Uytterhoeven <geert+renesas@glider.be>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, devicetree-compiler@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Feb 27, 2018 at 5:52 AM, Jisheng Zhang
-<Jisheng.Zhang@synaptics.com> wrote:
-> On Mon, 26 Feb 2018 20:27:22 +0000 Alexey Brodkin wrote:
->> On Mon, 2018-02-26 at 20:30 +0200, Andy Shevchenko wrote:
->> > On Mon, Feb 26, 2018 at 7:14 PM, Evgeniy Didin
->> > <Evgeniy.Didin@synopsys.com> wrote:
->> > > On Mon, 2018-02-26 at 18:53 +0200, Andy Shevchenko wrote:
->> > > > On Mon, Feb 26, 2018 at 5:14 PM, Evgeniy Didin
+On 23 February 2018 at 13:44, Geert Uytterhoeven
+<geert+renesas@glider.be> wrote:
+> The hs_timing_cfg[] array is indexed using a value derived from the
+> "mshcN" alias in DT, which may lead to an out-of-bounds access.
+>
+> Fix this by adding a range check.
+>
+> Fixes: 361c7fe9b02eee7e ("mmc: dw_mmc-k3: add sd support for hi3660")
+> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
->> > > > > > IIRC, someone commented on this or similar, i.e.
->> > > > > > DIV_ROUND_UP_ULL() ?
+Thanks, applied for fixes!
 
-^^^^^^^^^^^^
+Should we add a stable tag as well?
 
->> So maybe we need to add export of __udivdi3() for other arches, what do you think?
+Kind regards
+Uffe
 
-> Per my understanding, Linux kernel prefer to make use of do_div or implementations
-> in <linux/math64.h> for 64bit divide
-
-To everyone in this thread. See just above. That's solution which will work.
-Other than that, drop COMPILE_TEST from the Kconfig and put a comment
-that driver will not compile on architectures w/o division library.
-
--- 
-With Best Regards,
-Andy Shevchenko
+> ---
+> v2:
+>   - Fix Fixes reference.
+>
+> There is another possible out-of-bounds access in
+> drivers/mmc/host/dw_mmc.c:dw_mci_init_slot():
+>
+>     if (drv_data && drv_data->caps)
+>             mmc->caps |= drv_data->caps[ctrl_id];
+>
+> With ctrl_id derived from "mshcN".
+>
+> Unfortunately the upper bound is not known at run-time, without adding
+> such a field to struct dw_mci_drv_data first.
+> ---
+>  drivers/mmc/host/dw_mmc-k3.c | 3 +++
+>  1 file changed, 3 insertions(+)
+>
+> diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
+> index 73fd75c3c824904d..75ae5803b0db24dd 100644
+> --- a/drivers/mmc/host/dw_mmc-k3.c
+> +++ b/drivers/mmc/host/dw_mmc-k3.c
+> @@ -135,6 +135,9 @@ static int dw_mci_hi6220_parse_dt(struct dw_mci *host)
+>         if (priv->ctrl_id < 0)
+>                 priv->ctrl_id = 0;
+>
+> +       if (priv->ctrl_id >= TIMING_MODE)
+> +               return -EINVAL;
+> +
+>         host->priv = priv;
+>         return 0;
+>  }
+> --
+> 2.7.4
+>
