@@ -1,61 +1,44 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/2] mmc: dw_mmc: Avoid accessing registers in runtime
- suspended state
-Date: Tue, 27 Feb 2018 12:27:47 +0100
-Message-ID: <CAPDyKFpEjCwfcX6HwiBJceCzyRtJw4fGb_BvuKRQSOD_=TKtVg@mail.gmail.com>
-References: <1519375646-146695-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: Re: [PATCH] mmc: dw_mmc: update kernel-doc comments for dw_mci
+Date: Tue, 27 Feb 2018 12:28:06 +0100
+Message-ID: <CAPDyKFp7Aik0U49cFZGMamw8xe+=yakGjfuMgbvgFrQA-t=VXQ@mail.gmail.com>
+References: <20180222194525.28947-1-alexey.roslyakov@gmail.com>
+ <CGME20180223014048epcas5p293b090a79d10de2653428d6fec57a203@epcas5p2.samsung.com>
+ <f87c7d91-8b26-bf63-5323-5c60b00c81e4@rock-chips.com> <a3f948c2-f443-63d1-ff3e-51751bc83982@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <1519375646-146695-1-git-send-email-shawn.lin@rock-chips.com>
-Sender: stable-owner@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "# 4.0+" <stable@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <a3f948c2-f443-63d1-ff3e-51751bc83982@samsung.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Shawn Lin <shawn.lin@rock-chips.com>, Alexey Roslyakov <alexey.roslyakov@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 23 February 2018 at 09:47, Shawn Lin <shawn.lin@rock-chips.com> wrote:
-> cat /sys/kernel/debug/mmc0/regs will hang up the system since
-> it's in runtime suspended state, so the genpd and biu_clk is
-> off. This patch fixes this problem by calling pm_runtime_get_sync
-> to wake it up before reading the registers.
+On 23 February 2018 at 07:30, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> On 02/23/2018 10:40 AM, Shawn Lin wrote:
+>> Hi Alexey,
+>>
+>> On 2018/2/23 3:45, Alexey Roslyakov wrote:
+>>> cur_slot and num_slots has been removed from struct dw_mci in 42f989c002f2.
+>>> Unfortunately, inline documentation was not updated so far.
+>>>
+>>> Fix @lock field documentation in Locking section.
+>>> Move @mrq field of struct dw_mci_slot mention closer to it
+>>> description, so no one could miss this slightest detail.
+>>>
+>>> Couple of code style fixes as a bonus.
+>>>
+>>
+>> Thanks for updating these.
+>>
+>> Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
 >
-> Fixes: e9ed8835e990 ("mmc: dw_mmc: add runtime PM callback")
-> Cc: <stable@vger.kernel.org>
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> Thanks! Will apply this with Shawn's Reveiwed-by tag.
 
-Thanks, applied fixes!
+Dear Jaehoon, I picked this up for next and by adding your ack. Tell
+me if you have objections!
 
-Kind regards
+[...]
+
+Thanks and kind regards
 Uffe
-
-> ---
->
->  drivers/mmc/host/dw_mmc.c | 4 ++++
->  1 file changed, 4 insertions(+)
->
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 0aa3997..e38dcf4 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -165,6 +165,8 @@ static int dw_mci_regs_show(struct seq_file *s, void *v)
->  {
->         struct dw_mci *host = s->private;
->
-> +       pm_runtime_get_sync(host->dev);
-> +
->         seq_printf(s, "STATUS:\t0x%08x\n", mci_readl(host, STATUS));
->         seq_printf(s, "RINTSTS:\t0x%08x\n", mci_readl(host, RINTSTS));
->         seq_printf(s, "CMD:\t0x%08x\n", mci_readl(host, CMD));
-> @@ -172,6 +174,8 @@ static int dw_mci_regs_show(struct seq_file *s, void *v)
->         seq_printf(s, "INTMASK:\t0x%08x\n", mci_readl(host, INTMASK));
->         seq_printf(s, "CLKENA:\t0x%08x\n", mci_readl(host, CLKENA));
->
-> +       pm_runtime_put_autosuspend(host->dev);
-> +
->         return 0;
->  }
->
-> --
-> 1.9.1
->
->
