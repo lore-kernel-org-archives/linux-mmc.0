@@ -1,47 +1,50 @@
-From: Dmitry Osipenko <digetx@gmail.com>
-Subject: Re: [PATCH V15 06/22] mmc: block: Add blk-mq support
-Date: Tue, 27 Feb 2018 15:04:35 +0300
-Message-ID: <a15e8905-6ca8-d078-d891-58dc2f30f463@gmail.com>
-References: <1511962879-24262-1-git-send-email-adrian.hunter@intel.com>
- <1511962879-24262-7-git-send-email-adrian.hunter@intel.com>
- <bc65b542-9703-aa04-f1c7-b10584e44391@gmail.com>
- <829308a3-3bf6-c173-65fa-e2a0f45f7f61@intel.com>
- <68886f99-97f5-897a-f754-6f414741bd5a@gmail.com>
- <22580b82-0257-b156-9f0c-79afa34067e5@gmail.com>
- <CACRpkdaWyV2VPFBsFAjt-a8t6f3F6XwonHxfR3HfUJ=C13uuWw@mail.gmail.com>
+From: Alexandre Torgue <alexandre.torgue@st.com>
+Subject: Re: [PATCH v3 00/14] Add MMCI support for STM32F SoCs family
+Date: Tue, 27 Feb 2018 14:25:34 +0100
+Message-ID: <c4f78733-2544-6cef-97e5-fedcc23de404@st.com>
+References: <1516286070-24927-1-git-send-email-patrice.chotard@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="utf-8"; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CACRpkdaWyV2VPFBsFAjt-a8t6f3F6XwonHxfR3HfUJ=C13uuWw@mail.gmail.com>
+In-Reply-To: <1516286070-24927-1-git-send-email-patrice.chotard@st.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Christoph
+To: patrice.chotard@st.com, Russell King <linux@armlinux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, Linus Walleij <linus.walleij@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-gpio@vger.kernel.org, devicetree@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 27.02.2018 11:57, Linus Walleij wrote:
-> On Mon, Feb 26, 2018 at 10:48 PM, Dmitry Osipenko <digetx@gmail.com> wrote:
->> On 22.02.2018 20:54, Dmitry Osipenko wrote:
->>> On 22.02.2018 10:42, Adrian Hunter wrote:
-> 
->>>> SDIO (unless it is a combo card) should be unaffected by changes to the
->>>> block driver.
->>
->> I don't know whether it's a combo card or not. Where I can find info about that?
->> Is it mentioned in sysfs somewhere?
-> 
-> Combo cards were used with very old (2000s) PDAs which had only
-> one SD card slot which they wanted to use for WiFi and storage
-> at the same time.
-> 
-> They are very uncommon and I haven't been able to locate any
-> even for testing.
-> 
-> It is very unlikely that you have one.
-> 
-> However you would notice it from seeing a partition attachment
-> message (like with an ordinary SD card) when you plug in your
-> card.
+Hi Patrice,
 
-Thank you very much for the explanation. It's not a combo card.
+On 01/18/2018 03:34 PM, patrice.chotard@st.com wrote:
+> From: Patrice Chotard <patrice.chotard@st.com>
+> 
+> This series reworks patches submitted one year ago by Andrea Merello [1]
+> but without succeed to merged it.
+> 
+> STM32F4 and STM32F7 SoCs families embeds a variant of the ARM PrimeCell
+> PL18x SD host controller, for which the mmci driver exists.
+> This series adds support for these SoCs to the mmci driver.
+> 
+> As other variants, this one need some specific quirks, that this
+> series address.
+> 
+> This series has been tested on following boards :
+> 	_ stm32f429-eval
+> 	_ stm32f469-disco
+> 	_ stm32f746-eval
+> 	_ stm32f769-disco
+> 
+> DT update for stm32f7 pinctrl, stm32f746-eval and stm32f769-disco boards
+> will be sent later to avoid conflict with pending stm32f7 series [1] which
+> is not yet merged on kernel mainline.
+> 
+> [1] https://www.spinics.net/lists/linux-mmc/msg41616.html
+> [2] https://patchwork.kernel.org/patch/10104447/
+>
+...
+
+Patches 6 to 13 (DT/SoC/configs) applied on stm32-next.
+
+Thanks
+Alex
