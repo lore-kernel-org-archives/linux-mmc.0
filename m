@@ -1,50 +1,54 @@
-From: Alexandre Torgue <alexandre.torgue@st.com>
-Subject: Re: [PATCH v3 00/14] Add MMCI support for STM32F SoCs family
-Date: Tue, 27 Feb 2018 14:25:34 +0100
-Message-ID: <c4f78733-2544-6cef-97e5-fedcc23de404@st.com>
-References: <1516286070-24927-1-git-send-email-patrice.chotard@st.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH] mmc: card: Don't show eMMC RPMB and BOOT areas in
+ /proc/partitions
+Date: Tue, 27 Feb 2018 21:51:05 +0800
+Message-ID: <2994915e-18ff-1589-53b2-e726aa3fd872@rock-chips.com>
+References: <1519731229-19141-1-git-send-email-harish_kandiga@mentor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=gbk; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1516286070-24927-1-git-send-email-patrice.chotard@st.com>
-Content-Language: en-US
+In-Reply-To: <1519731229-19141-1-git-send-email-harish_kandiga@mentor.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: patrice.chotard@st.com, Russell King <linux@armlinux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, Linus Walleij <linus.walleij@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-gpio@vger.kernel.org, devicetree@vger.kernel.org
+To: Harish Jenny K N <harish_kandiga@mentor.com>, adrian.hunter@intel.com
+Cc: ulf.hansson@linaro.org, linus.walleij@linaro.org, shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Patrice,
+ÔÚ 2018/2/27 19:33, Harish Jenny K N Ð´µÀ:
+> From: Andrew Gabbasov <andrew_gabbasov@mentor.com>
+> 
+> Since RPMB area is accessible via special ioctl only and boot areas
+> are unlikely to contain any partitions, exclude them all from listing
+> in /proc/partitions. This will hide them from various user-level
+> software (e.g. fdisk), thus avoiding unnecessary access attempts.
+> 
+> Signed-off-by: Andrew Gabbasov <andrew_gabbasov@mentor.com>
+> Signed-off-by: Harish Jenny K N <harish_kandiga@mentor.com>
+> ---
+>   drivers/mmc/core/block.c | 3 ++-
+>   1 file changed, 2 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index 20135a5..376e47e 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -2341,7 +2341,8 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+>   	set_disk_ro(md->disk, md->read_only || default_ro);
+>   	md->disk->flags = GENHD_FL_EXT_DEVT;
+>   	if (area_type & (MMC_BLK_DATA_AREA_RPMB | MMC_BLK_DATA_AREA_BOOT))
+> -		md->disk->flags |= GENHD_FL_NO_PART_SCAN;
+> +		md->disk->flags |= GENHD_FL_NO_PART_SCAN
+> +				   | GENHD_FL_SUPPRESS_PARTITION_INFO;
 
-On 01/18/2018 03:34 PM, patrice.chotard@st.com wrote:
-> From: Patrice Chotard <patrice.chotard@st.com>
-> 
-> This series reworks patches submitted one year ago by Andrea Merello [1]
-> but without succeed to merged it.
-> 
-> STM32F4 and STM32F7 SoCs families embeds a variant of the ARM PrimeCell
-> PL18x SD host controller, for which the mmci driver exists.
-> This series adds support for these SoCs to the mmci driver.
-> 
-> As other variants, this one need some specific quirks, that this
-> series address.
-> 
-> This series has been tested on following boards :
-> 	_ stm32f429-eval
-> 	_ stm32f469-disco
-> 	_ stm32f746-eval
-> 	_ stm32f769-disco
-> 
-> DT update for stm32f7 pinctrl, stm32f746-eval and stm32f769-disco boards
-> will be sent later to avoid conflict with pending stm32f7 series [1] which
-> is not yet merged on kernel mainline.
-> 
-> [1] https://www.spinics.net/lists/linux-mmc/msg41616.html
-> [2] https://patchwork.kernel.org/patch/10104447/
->
-...
+I would prefer using GENHD_FL_HIDDEN instead of adding all these two
+flags.
 
-Patches 6 to 13 (DT/SoC/configs) applied on stm32-next.
+>   
+>   	/*
+>   	 * As discussed on lkml, GENHD_FL_REMOVABLE should:
+> 
 
-Thanks
-Alex
+
+-- 
+Best Regards
+Shawn Lin
