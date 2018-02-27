@@ -1,66 +1,61 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: dw_mmc-k3: Fix out-of-bounds access through DT alias
-Date: Tue, 27 Feb 2018 12:27:26 +0100
-Message-ID: <CAPDyKFrFKp7Bn+86jWN1t4Q7bLup0z3cnPM8zMMTdMTQLJSfQA@mail.gmail.com>
-References: <1519389859-14947-1-git-send-email-geert+renesas@glider.be>
+Subject: Re: [PATCH 1/2] mmc: dw_mmc: Avoid accessing registers in runtime
+ suspended state
+Date: Tue, 27 Feb 2018 12:27:47 +0100
+Message-ID: <CAPDyKFpEjCwfcX6HwiBJceCzyRtJw4fGb_BvuKRQSOD_=TKtVg@mail.gmail.com>
+References: <1519375646-146695-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1519389859-14947-1-git-send-email-geert+renesas@glider.be>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Geert Uytterhoeven <geert+renesas@glider.be>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, devicetree-compiler@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <1519375646-146695-1-git-send-email-shawn.lin@rock-chips.com>
+Sender: stable-owner@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "# 4.0+" <stable@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 23 February 2018 at 13:44, Geert Uytterhoeven
-<geert+renesas@glider.be> wrote:
-> The hs_timing_cfg[] array is indexed using a value derived from the
-> "mshcN" alias in DT, which may lead to an out-of-bounds access.
+On 23 February 2018 at 09:47, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> cat /sys/kernel/debug/mmc0/regs will hang up the system since
+> it's in runtime suspended state, so the genpd and biu_clk is
+> off. This patch fixes this problem by calling pm_runtime_get_sync
+> to wake it up before reading the registers.
 >
-> Fix this by adding a range check.
->
-> Fixes: 361c7fe9b02eee7e ("mmc: dw_mmc-k3: add sd support for hi3660")
-> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
+> Fixes: e9ed8835e990 ("mmc: dw_mmc: add runtime PM callback")
+> Cc: <stable@vger.kernel.org>
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-Thanks, applied for fixes!
-
-Should we add a stable tag as well?
+Thanks, applied fixes!
 
 Kind regards
 Uffe
 
 > ---
-> v2:
->   - Fix Fixes reference.
 >
-> There is another possible out-of-bounds access in
-> drivers/mmc/host/dw_mmc.c:dw_mci_init_slot():
+>  drivers/mmc/host/dw_mmc.c | 4 ++++
+>  1 file changed, 4 insertions(+)
 >
->     if (drv_data && drv_data->caps)
->             mmc->caps |= drv_data->caps[ctrl_id];
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 0aa3997..e38dcf4 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -165,6 +165,8 @@ static int dw_mci_regs_show(struct seq_file *s, void *v)
+>  {
+>         struct dw_mci *host = s->private;
 >
-> With ctrl_id derived from "mshcN".
->
-> Unfortunately the upper bound is not known at run-time, without adding
-> such a field to struct dw_mci_drv_data first.
-> ---
->  drivers/mmc/host/dw_mmc-k3.c | 3 +++
->  1 file changed, 3 insertions(+)
->
-> diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
-> index 73fd75c3c824904d..75ae5803b0db24dd 100644
-> --- a/drivers/mmc/host/dw_mmc-k3.c
-> +++ b/drivers/mmc/host/dw_mmc-k3.c
-> @@ -135,6 +135,9 @@ static int dw_mci_hi6220_parse_dt(struct dw_mci *host)
->         if (priv->ctrl_id < 0)
->                 priv->ctrl_id = 0;
->
-> +       if (priv->ctrl_id >= TIMING_MODE)
-> +               return -EINVAL;
+> +       pm_runtime_get_sync(host->dev);
 > +
->         host->priv = priv;
+>         seq_printf(s, "STATUS:\t0x%08x\n", mci_readl(host, STATUS));
+>         seq_printf(s, "RINTSTS:\t0x%08x\n", mci_readl(host, RINTSTS));
+>         seq_printf(s, "CMD:\t0x%08x\n", mci_readl(host, CMD));
+> @@ -172,6 +174,8 @@ static int dw_mci_regs_show(struct seq_file *s, void *v)
+>         seq_printf(s, "INTMASK:\t0x%08x\n", mci_readl(host, INTMASK));
+>         seq_printf(s, "CLKENA:\t0x%08x\n", mci_readl(host, CLKENA));
+>
+> +       pm_runtime_put_autosuspend(host->dev);
+> +
 >         return 0;
 >  }
+>
 > --
-> 2.7.4
+> 1.9.1
+>
 >
