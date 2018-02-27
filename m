@@ -1,52 +1,49 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: sdhci-of-arasan: Add quirk to avoid erroneous msg
-Date: Tue, 27 Feb 2018 16:08:24 +0200
-Message-ID: <6abab0b5-72c5-0578-91aa-5d0c3867e53b@intel.com>
+From: Phil Edworthy <phil.edworthy@renesas.com>
+Subject: RE: [PATCH] mmc: sdhci-of-arasan: Add quirk to avoid erroneous msg
+Date: Tue, 27 Feb 2018 14:14:15 +0000
+Message-ID: <HK2PR0601MB13939B7510C1A4726197797CF5C00@HK2PR0601MB1393.apcprd06.prod.outlook.com>
 References: <1519739731-27920-1-git-send-email-phil.edworthy@renesas.com>
+ <6abab0b5-72c5-0578-91aa-5d0c3867e53b@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1519739731-27920-1-git-send-email-phil.edworthy@renesas.com>
+In-Reply-To: <6abab0b5-72c5-0578-91aa-5d0c3867e53b@intel.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Phil Edworthy <phil.edworthy@renesas.com>
-Cc: Michal Simek <michal.simek@xilinx.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-renesas-soc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Michal Simek <michal.simek@xilinx.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 27/02/18 15:55, Phil Edworthy wrote:
-> Since the controller does not support the end-of-busy IRQ, don't use it.
-> Otherwise, on older SD cards you will get lots of these messages:
-> "mmc0: Got data interrupt 0x00000002 even though no data operation was in progress"
-
-SDHCI_QUIRK2_STOP_WITH_TC may be the quirk you want but it doesn't match
-your description.  SDHCI_QUIRK2_STOP_WITH_TC is when we always get a TC
-(end-of-busy) IRQ with the STOP command even when we didn't ask for one.
-Hence the TC interrupt (0x00000002) comes when we think we are already finished.
-
-> 
-> This has been reported on Xilinx devices that also use the Arasan IP.
-> See https://patchwork.kernel.org/patch/8062871/
-> 
-> This has been tested on the Renesas RZ/ND-DB board with the RZ/N1 SoC.
-> 
-> Signed-off-by: Phil Edworthy <phil.edworthy@renesas.com>
-> ---
->  drivers/mmc/host/sdhci-of-arasan.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index c33a5f7..ab66e32 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -290,7 +290,8 @@ static const struct sdhci_pltfm_data sdhci_arasan_pdata = {
->  	.ops = &sdhci_arasan_ops,
->  	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
->  	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-> -			SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
-> +			SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN |
-> +			SDHCI_QUIRK2_STOP_WITH_TC,
->  };
->  
->  static u32 sdhci_arasan_cqhci_irq(struct sdhci_host *host, u32 intmask)
-> 
+SGkgQWRyaWFuLA0KDQpPbiAyNyBGZWJydWFyeSAyMDE4IDE0OjA4LCBBZHJpYW4gSHVudGVyIHdy
+b3RlOg0KPiBPbiAyNy8wMi8xOCAxNTo1NSwgUGhpbCBFZHdvcnRoeSB3cm90ZToNCj4gPiBTaW5j
+ZSB0aGUgY29udHJvbGxlciBkb2VzIG5vdCBzdXBwb3J0IHRoZSBlbmQtb2YtYnVzeSBJUlEsIGRv
+bid0IHVzZSBpdC4NCj4gPiBPdGhlcndpc2UsIG9uIG9sZGVyIFNEIGNhcmRzIHlvdSB3aWxsIGdl
+dCBsb3RzIG9mIHRoZXNlIG1lc3NhZ2VzOg0KPiA+ICJtbWMwOiBHb3QgZGF0YSBpbnRlcnJ1cHQg
+MHgwMDAwMDAwMiBldmVuIHRob3VnaCBubyBkYXRhIG9wZXJhdGlvbiB3YXMNCj4gaW4gcHJvZ3Jl
+c3MiDQo+IA0KPiBTREhDSV9RVUlSSzJfU1RPUF9XSVRIX1RDIG1heSBiZSB0aGUgcXVpcmsgeW91
+IHdhbnQgYnV0IGl0IGRvZXNuJ3QNCj4gbWF0Y2ggeW91ciBkZXNjcmlwdGlvbi4gIFNESENJX1FV
+SVJLMl9TVE9QX1dJVEhfVEMgaXMgd2hlbiB3ZSBhbHdheXMNCj4gZ2V0IGEgVEMNCj4gKGVuZC1v
+Zi1idXN5KSBJUlEgd2l0aCB0aGUgU1RPUCBjb21tYW5kIGV2ZW4gd2hlbiB3ZSBkaWRuJ3QgYXNr
+IGZvcg0KPiBvbmUuDQo+IEhlbmNlIHRoZSBUQyBpbnRlcnJ1cHQgKDB4MDAwMDAwMDIpIGNvbWVz
+IHdoZW4gd2UgdGhpbmsgd2UgYXJlIGFscmVhZHkNCj4gZmluaXNoZWQuDQpSaWdodCwgdGhhbmtz
+IGZvciBjbGFyaWZ5aW5nLCBJJ2xsIGZpeHVwIHRoZSBtZXNzYWdlLg0KDQo+ID4NCj4gPiBUaGlz
+IGhhcyBiZWVuIHJlcG9ydGVkIG9uIFhpbGlueCBkZXZpY2VzIHRoYXQgYWxzbyB1c2UgdGhlIEFy
+YXNhbiBJUC4NCj4gPiBTZWUgaHR0cHM6Ly9wYXRjaHdvcmsua2VybmVsLm9yZy9wYXRjaC84MDYy
+ODcxLw0KPiA+DQo+ID4gVGhpcyBoYXMgYmVlbiB0ZXN0ZWQgb24gdGhlIFJlbmVzYXMgUlovTkQt
+REIgYm9hcmQgd2l0aCB0aGUgUlovTjEgU29DLg0KPiA+DQo+ID4gU2lnbmVkLW9mZi1ieTogUGhp
+bCBFZHdvcnRoeSA8cGhpbC5lZHdvcnRoeUByZW5lc2FzLmNvbT4NCj4gPiAtLS0NCj4gPiAgZHJp
+dmVycy9tbWMvaG9zdC9zZGhjaS1vZi1hcmFzYW4uYyB8IDMgKystDQo+ID4gIDEgZmlsZSBjaGFu
+Z2VkLCAyIGluc2VydGlvbnMoKyksIDEgZGVsZXRpb24oLSkNCj4gPg0KPiA+IGRpZmYgLS1naXQg
+YS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWFyYXNhbi5jDQo+ID4gYi9kcml2ZXJzL21tYy9o
+b3N0L3NkaGNpLW9mLWFyYXNhbi5jDQo+ID4gaW5kZXggYzMzYTVmNy4uYWI2NmUzMiAxMDA2NDQN
+Cj4gPiAtLS0gYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWFyYXNhbi5jDQo+ID4gKysrIGIv
+ZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1hcmFzYW4uYw0KPiA+IEBAIC0yOTAsNyArMjkwLDgg
+QEAgc3RhdGljIGNvbnN0IHN0cnVjdCBzZGhjaV9wbHRmbV9kYXRhDQo+IHNkaGNpX2FyYXNhbl9w
+ZGF0YSA9IHsNCj4gPiAgCS5vcHMgPSAmc2RoY2lfYXJhc2FuX29wcywNCj4gPiAgCS5xdWlya3Mg
+PSBTREhDSV9RVUlSS19DQVBfQ0xPQ0tfQkFTRV9CUk9LRU4sDQo+ID4gIAkucXVpcmtzMiA9IFNE
+SENJX1FVSVJLMl9QUkVTRVRfVkFMVUVfQlJPS0VOIHwNCj4gPiAtCQkJU0RIQ0lfUVVJUksyX0NM
+T0NLX0RJVl9aRVJPX0JST0tFTiwNCj4gPiArCQkJU0RIQ0lfUVVJUksyX0NMT0NLX0RJVl9aRVJP
+X0JST0tFTiB8DQo+ID4gKwkJCVNESENJX1FVSVJLMl9TVE9QX1dJVEhfVEMsDQo+ID4gIH07DQo+
+ID4NCj4gPiAgc3RhdGljIHUzMiBzZGhjaV9hcmFzYW5fY3FoY2lfaXJxKHN0cnVjdCBzZGhjaV9o
+b3N0ICpob3N0LCB1MzINCj4gPiBpbnRtYXNrKQ0KPiA+DQoNCg==
