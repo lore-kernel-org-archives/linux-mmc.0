@@ -1,110 +1,99 @@
-From: Evgeniy Didin <Evgeniy.Didin@synopsys.com>
-Subject: mmc: dw_mmc: DRTO interrupt cause driver switch to PIO mode
-Date: Wed, 28 Feb 2018 16:11:02 +0000
-Message-ID: <1519834261.8992.8.camel@synopsys.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH v4] mmc: dw_mmc: Fix the DTO/CTO timeout overflow
+ calculation for 32-bit systems
+Date: Wed, 28 Feb 2018 08:16:20 -0800
+Message-ID: <CAD=FV=XSSpevXKO7h0s826qt7Fdo7Zzp6SrNa4VCzEgCJ-zWCA@mail.gmail.com>
+References: <20180228115318.20154-1-Evgeniy.Didin@synopsys.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org>
-Content-Language: en-US
-Content-ID: <97DF8CAC3B22D94293A7D2F248613706@internal.synopsys.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-snps-arc>,
- <mailto:linux-snps-arc-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-snps-arc/>
-List-Post: <mailto:linux-snps-arc@lists.infradead.org>
-List-Help: <mailto:linux-snps-arc-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-snps-arc>,
- <mailto:linux-snps-arc-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-snps-arc" <linux-snps-arc-bounces@lists.infradead.org>
-Errors-To: linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>, Alexey Brodkin <Alexey.Brodkin@synopsys.com>, "andy.shevchenko@gmail.com" <andy.shevchenko@gmail.com>, "dianders@chromium.org" <dianders@chromium.org>, "Jisheng.Zhang@synaptics.com" <Jisheng.Zhang@synaptics.com>, "linux-snps-arc@lists.infradead.org" <linux-snps-arc@lists.infradead.org>, Eugeniy Paltsev <Eugeniy.Paltsev@synopsys.com>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180228115318.20154-1-Evgeniy.Didin@synopsys.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Evgeniy Didin <Evgeniy.Didin@synopsys.com>, Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc@vger.kernel.org, Alexey Brodkin <Alexey.Brodkin@synopsys.com>, Eugeniy Paltsev <Eugeniy.Paltsev@synopsys.com>, Ulf Hansson <ulf.hansson@linaro.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, Jisheng Zhang <Jisheng.Zhang@synaptics.com>, Shawn Lin <shawn.lin@rock-chips.com>, Vineet Gupta <Vineet.Gupta1@synopsys.com>, LKML <linux-kernel@vger.kernel.org>, linux-snps-arc@lists.infradead.org, stable@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-SGVsbG8gZXZlcnlvbmUsDQoNCldlIGhhdmUgbWFkZSBzb21lIHJlc2VhcmNoIG9mIGhvdyBkcml2
-ZXIgYmVoYXZlcyBpbiBjYXNlIHdoZW4gY2hhbmdlcyBbMV0gYXJlIG5vdCBhcHBsaWVkLg0KSGVy
-ZSBpbiBbMl0gd2FzIG1ldGlvbmVkIHRoYXQgd2hpbGUgdHJhbnNmZXJpbmcgZGF0YQ0KYWZ0ZXIg
-aW50ZXJydXB0IGhhcyBoYXBwZW5kIGRyaXZlciB3ZW50IHRvIFBJTyBtb2RlLCB0aGF0IGlzIG5v
-dCBleHBlY3RlZC4NCkhlcmUgaXMgbG9nOg0KDQp8IFJ1bm5pbmcgOsKgwqA0TS1jaGVjay1yZWFz
-c2VtYmx5LXRjcC1jbXlrdzItcm90YXRldzIub3V0IC12MCAtdzENCnwgLcKgwqBJbmZvOiBGaW5p
-c2hlZCB0YXJnZXQgaW5pdGlhbGl6YXRpb24uDQp8IG1tY2JsazA6IGVycm9yIC0xMTAgdHJhbnNm
-ZXJyaW5nIGRhdGEsIHNlY3RvciAzMjA1NDQsIG5yIDIwNDgsIGNtZCByZXNwb25zZQ0KfMKgwqAw
-eDkwMCwgY2FyZCBzdGF0dXMgMHgwDQp8IG1tY19ob3N0IG1tYzA6IEJ1cyBzcGVlZCAoc2xvdCAw
-KSA9IDUwMDAwMDAwSHogKHNsb3QgcmVxIDQwMDAwMEh6LCBhY3R1YWwNCnwgMzk2ODI1SFogZGl2
-ID0gNjMpDQp8IG1tY19ob3N0IG1tYzA6IEJ1cyBzcGVlZCAoc2xvdCAwKSA9IDUwMDAwMDAwSHog
-KHNsb3QgcmVxIDI1MDAwMDAwSHosIGFjdHVhbA0KfMKgwqAyNTAwMDAwMEhaIGRpdiA9IDEpDQp8
-IC0tLS0tLS0tLS0tLVsgY3V0IGhlcmUgXS0tLS0tLS0tLS0tLQ0KfCBzb2Z0aXJxOiBodWgsIGVu
-dGVyZWQgc29mdGlycSA2IFRBU0tMRVQgNmY2YTk0MTIgd2l0aCBwcmVlbXB0X2NvdW50IDAwMDAw
-MTAxLA0KfCBleGl0ZWQgd2l0aCAwMDAwMDEwMD8NCnwgV0FSTklORzogQ1BVOiAyIFBJRDogMCBh
-dCAuLi9saWIvc2NhdHRlcmxpc3QuYzo2NTIgc2dfbWl0ZXJfbmV4dCsweDI4LzB4MjBjDQp8IE1v
-ZHVsZXMgbGlua2VkIGluOg0KfCBDUFU6IDIgUElEOiAwIENvbW06IHN3YXBwZXIvMiBOb3QgdGFp
-bnRlZCA0LjE1LjAgIzU3DQp8DQp8IFN0YWNrIFRyYWNlOg0KfMKgwqBhcmNfdW53aW5kX2NvcmUu
-Y29uc3Rwcm9wLjErMHhkMC8weGY0DQp8wqDCoGR1bXBfc3RhY2srMHg2OC8weDgwDQp8wqDCoHdh
-cm5fc2xvd3BhdGhfbnVsbCsweDRlLzB4ZWMNCnzCoMKgc2dfbWl0ZXJfbmV4dCsweDI4LzB4MjBj
-DQoNCj7CoMKgZHdfbWNpX3JlYWRfZGF0YV9waW8rMHg0NC8weDE5MMKgDQoNCnzCoMKgZHdfbW1j
-IGYwMDBhMDAwLm1tYzogVW5leHBlY3RlZCBpbnRlcnJ1cHQgbGF0ZW5jeQ0KfMKgwqDCoGR3X21j
-aV9pbnRlcnJ1cHQrMHgzZWUvMHg1MzANCnzCoMKgX19oYW5kbGVfaXJxX2V2ZW50X3BlcmNwdSsw
-eDU2LzB4MTUwDQp8wqDCoGhhbmRsZV9pcnFfZXZlbnQrMHgzNC8weDc4DQp8wqDCoGhhbmRsZV9s
-ZXZlbF9pcnErMHg4ZS8weDEyMA0KfMKgwqBnZW5lcmljX2hhbmRsZV9pcnErMHgxYy8weDJjDQp8
-wqDCoGlkdV9jYXNjYWRlX2lzcisweDMwLzB4NmMNCnzCoMKgX19oYW5kbGVfZG9tYWluX2lycSsw
-eDcyLzB4YzgNCnzCoMKgcmV0X2Zyb21fZXhjZXB0aW9uKzB4MC8weDgNCnwtLS1bIGVuZCB0cmFj
-ZSAyYTU4YzlhZjZjMjVmZTUxIF0tLS0NCg0KDQpJZiBJIGNvcnJlY3RseSB1bmRlcnN0YW5kIGJl
-aGF2aW91ciwgYWZ0ZXIgaW50ZXJydXB0IGhhcyBvY2N1cnJlZCwgZHJpdmVyIHdhcyBpbiBzdGF0
-ZSAiQlVTWSIsDQp0aGFuIGl0IGNoZWNrcyBzdGF0dXMgaW4gZHdfbWNpX2RhdGFfY29tcGxldGUo
-KSB3aGVyZSBTRE1NQ19JTlRfRFJUTyBpcyBzZXQgKGRydG9fbXMgaXMgbm90IGNvcnJlY3QpLg0K
-QWZ0ZXIgdGhhdCBmdW5jdGlvbiBkd19tY2lfcmVzZXQoKSBpcyBjYWxsZWQuwqANCkFzIEkgc2Vl
-IGFmdGVyIHJlc2V0IGRyaXZlciB0cmllcyB0byByZXN0YXJ0LMKgwqBkd19tY2lfaWRtYWNfc3Rh
-cnRfZG1hKCkgY2FsbGVkIGluIHdoaWNoIGR3X21jaV9wcmVwYXJlX2Rlc2MzMigpIGlzIGNhbGxl
-ZC4NCkluIHRoYXQgZnVuY3Rpb24gZGVzY3JpcHRvcnMgc3RhdGVzIGFyZSBjaGVja2VkLCB3aGVy
-ZSBvbmUgb2YgZGVzY3JpcHRvciBpcyBPV04tZWQgYmVjYXVzZSB3ZSBnb3QgaW50ZXJydXB0IHdo
-aWxlIHRyYW5zZmVycmluZyBkYXRhLsKgDQpBZnRlciB0aGF0IGRyaXZlciBqdW1wcyB0byAiZXJy
-X293bl9iaXQ6Iiwgd2hlcmUgaXQgcmVpbml0cyBJRE1BQywgYnV0IHJldHVybiB2YWx1ZSBpcyAt
-RUlOVkFMLCBhbmQgYWZ0ZXJhbGwgZHJpdmVyIHdlbnQgaW50byBQSU8gbW9kZToNCmBkd19tY2lf
-c3VibWl0X2RhdGFfZG1hOiBmYWxsIGJhY2sgdG8gUElPIG1vZGUgZm9yIGN1cnJlbnQgdHJhbnNm
-ZXIiYA0KDQpUaGUgcHJvYmxlbSBpcyBpbiBjaGVja2luZyBkZXNjcmlwdG9ycyBzdGF0dXNlcyBp
-biBJRE1BQyBpbml0aWFsaXphdGlvbiwgd2hpY2ggYXJlIGRpcnR5Lg0KV2hhdCBkbyB5b3UgdGhp
-bmsgYWJvdXQgY2xlYXJpbmcgdGhlbSBpbiBkd19tY2lfcmVzZXQoKT8NCg0KQWxzbyBJIGhhdmUg
-Y2hlY2tlZCBob3cgU0RjYXJkIHdvcmtzIGluIFBJTyBtb2RlLCBmb3IgdGhhdCBJIG1hZGU6DQoN
-CmdpdCBkaWZmIGRyaXZlcnMvbW1jL2hvc3QvZHdfbW1jLmMNCkBAIC0yOTI0LDcgKzI5MjQsNyBA
-QCBzdGF0aWMgdm9pZCBkd19tY2lfaW5pdF9kbWEoc3RydWN0IGR3X21jaSAqaG9zdCkNCsKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgZ290byBub19kbWE7DQrCoMKgwqDCoMKgwqDCoMKg
-fQ0KLQ0KK8KgwqDCoMKgwqDCoMKgwqBnb3RvIG5vX2RtYTsNCsKgwqDCoMKgwqDCoMKgwqAvKiBE
-ZXRlcm1pbmUgd2hpY2ggRE1BIGludGVyZmFjZSB0byB1c2UgKi8NCg0KSXQgZG9lc24ndCB3b3Jr
-IHdlbGw6DQoNCg0KfCBTeW5vcHN5cyBEZXNpZ253YXJlIE11bHRpbWVkaWEgQ2FyZCBJbnRlcmZh
-Y2UgRHJpdmVyDQp8IGR3X21tYyBmMDAwYTAwMC5tbWM6ICdudW0tc2xvdHMnIHdhcyBkZXByZWNh
-dGVkLg0KfCBkd19tbWMgZjAwMGEwMDAubW1jOiBVc2luZyBQSU8gbW9kZS4NCnwgZHdfbW1jIGYw
-MDBhMDAwLm1tYzogVmVyc2lvbiBJRCBpcyAyOTBhDQp8IGR3X21tYyBmMDAwYTAwMC5tbWM6IERX
-IE1NQyBjb250cm9sbGVyIGF0IGlycSAxMiwzMiBiaXQgaG9zdCBkYXRhIHdpZHRoLDE2IGRlZXAg
-Zmlmbw0KLi4uDQoNCnwgIyBtb3VudCAvZGV2L21tY2JsazBwMiAyDQp8IEVYVDQtZnMgKG1tY2Js
-azBwMik6IGNvdWxkbid0IG1vdW50IGFzIGV4dDMgZHVlIHRvIGZlYXR1cmUgaW5jb21wYXRpYmls
-aXRpZXMNCnwgRVhUNC1mcyAobW1jYmxrMHAyKTogY291bGRuJ3QgbW91bnQgYXMgZXh0MiBkdWUg
-dG8gZmVhdHVyZSBpbmNvbXBhdGliaWxpdGllcw0KfCBFWFQ0LWZzIChtbWNibGswcDIpOiBtb3Vu
-dGVkIGZpbGVzeXN0ZW0gd2l0aCBvcmRlcmVkIGRhdGEgbW9kZS4gT3B0czogKG51bGwpDQp8ICMg
-Y3AgMi9iaWdfYnVja19idW5ueV8xMDgwcF9oMjY0Lm1vdiAvdG1wDQp8IElORk86IHRhc2sga3dv
-cmtlci8zOjFIOjEzMSBibG9ja2VkIGZvciBtb3JlIHRoYW4gMTAgc2Vjb25kcy4NCnzCoMKgwqDC
-oMKgwqBOb3QgdGFpbnRlZCA0LjE2LjAtcmMyLTAwMDY0LWdhZjNlNzlkMjk1NTUtZGlydHkgIzIN
-CnwgImVjaG8gMCA+IC9wcm9jL3N5cy9rZXJuZWwvaHVuZ190YXNrX3RpbWVvdXRfc2VjcyIgZGlz
-YWJsZXMgdGhpcyBtZXNzYWdlLg0KfCBrd29ya2VyLzM6MUjCoMKgwqDCoETCoMKgwqDCoDDCoMKg
-wqAxMzHCoMKgwqDCoMKgwqAyIDB4MDAwMDAwMDANCnwgV29ya3F1ZXVlOiBrYmxvY2tkIGJsa19t
-cV9ydW5fd29ya19mbg0KfA0KfCBTdGFjayBUcmFjZToNCnzCoMKgX19zd2l0Y2hfdG8rMHgwLzB4
-YWMNCnzCoMKgX19zY2hlZHVsZSsweDFjNC8weDU5OA0KfMKgwqBzY2hlZHVsZSsweDI4LzB4NzgN
-CnzCoMKgbW1jX2Jsa19yd193YWl0KzB4OTYvMHhmOA0KfMKgwqBtbWNfYmxrX21xX2lzc3VlX3Jx
-KzB4NTFhLzB4ODgwDQp8wqDCoG1tY19tcV9xdWV1ZV9ycSsweDEzNi8weDFmOA0KfMKgwqBibGtf
-bXFfZGlzcGF0Y2hfcnFfbGlzdCsweGIwLzB4NWU4DQp8wqDCoGJsa19tcV9kb19kaXNwYXRjaF9z
-Y2hlZCsweDRjLzB4OWMNCnzCoMKgYmxrX21xX3NjaGVkX2Rpc3BhdGNoX3JlcXVlc3RzKzB4ZjAv
-MHgxNWMNCnzCoMKgYmxrX21xX3J1bl93b3JrX2ZuKzB4NzgvMHgxMzANCnzCoMKgcHJvY2Vzc19v
-bmVfd29yaysweDE5NC8weDMzOA0KfMKgwqB3b3JrZXJfdGhyZWFkKzB4ZjAvMHg0NjQNCnzCoMKg
-a3RocmVhZCsweDExNi8weDEzYw0KfMKgwqByZXRfZnJvbV9mb3JrKzB4MTgvMHgxYw0KfElORk86
-IHRhc2sga3dvcmtlci8zOjFIOjEzMSBibG9ja2VkIGZvciBtb3JlIHRoYW4gMTAgc2Vjb25kcy4N
-CnzCoMKgwqDCoMKgwqBOb3QgdGFpbnRlZCA0LjE2LjAtcmMyLTAwMDY0LWdhZjNlNzlkMjk1NTUt
-ZGlydHkgIzINCnwiZWNobyAwID4gL3Byb2Mvc3lzL2tlcm5lbC9odW5nX3Rhc2tfdGltZW91dF9z
-ZWNzIiBkaXNhYmxlcyB0aGlzIG1lc3NhZ2UuDQp8a3dvcmtlci8zOjFIwqDCoMKgwqBEwqDCoMKg
-wqAwwqDCoMKgMTMxwqDCoMKgwqDCoMKgMiAweDAwMDAwMDAwDQp8V29ya3F1ZXVlOiBrYmxvY2tk
-IGJsa19tcV9ydW5fd29ya19mbg0KDQpJIGd1ZXNzIHRoYXQgaXMgbm90IGV4cGVjdGVkLiBJIGFt
-IHdvbmRlcmluZyB3YXMgdGhhdCBtb2RlIGhhdmUgYmVlbiB0ZXN0ZWQ/DQoNCkJlc3QgcmVnYXJk
-cywNCkV2Z2VuaXkgRGlkaW4NCg0KWzFdIDogaHR0cHM6Ly93d3cuc3Bpbmljcy5uZXQvbGlzdHMv
-a2VybmVsL21zZzI3MzQzMTAuaHRtbMKgDQpbMl0gOiBodHRwczovL3d3dy5zcGluaWNzLm5ldC9s
-aXN0cy9saW51eC1tbWMvbXNnNDgwMTAuaHRtbApfX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fXwpsaW51eC1zbnBzLWFyYyBtYWlsaW5nIGxpc3QKbGludXgtc25w
-cy1hcmNAbGlzdHMuaW5mcmFkZWFkLm9yZwpodHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9tYWls
-bWFuL2xpc3RpbmZvL2xpbnV4LXNucHMtYXJj
+Hi,
+
+On Wed, Feb 28, 2018 at 3:53 AM, Evgeniy Didin
+<Evgeniy.Didin@synopsys.com> wrote:
+> In commit 9d9491a7da2a ("mmc: dw_mmc: Fix the DTO timeout calculation") and
+> commit 4c2357f57dd5 ("mmc: dw_mmc: Fix the CTO timeout calculation")
+> have been made changes which cause multiply overflow for 32-bit systems.
+> The broken timeout calculations leads to unexpected ETIMEDOUT errors and
+> causes stacktrace splat (such as below) during normal data exchange
+> with SD-card.
+>
+> | Running :  4M-check-reassembly-tcp-cmykw2-rotatew2.out -v0 -w1
+> | -  Info: Finished target initialization.
+> | mmcblk0: error -110 transferring data, sector 320544, nr 2048, cmd response
+> |  0x900, card status 0x0
+>
+> DIV_ROUND_UP_ULL helps to escape usage of __udivdi3() from libgcc and so
+> code gets compiled on all 32-bit platforms as opposed to usage
+> of DIV_ROUND_UP when we may only compile stuff on a very few arches.
+>
+> Lets cast this multiply to u64 type which prevents overflow.
+>
+> Tested-by: Vineet Gupta <Vineet.Gupta1@synopsys.com>
+> Reported-by: Vineet Gupta <Vineet.Gupta1@synopsys.com> # ARC STAR 9001306872 HSDK, sdio: board crashes when copying big files
+> Fixes: 9d9491a7da2a ("mmc: dw_mmc: Fix the DTO timeout calculation")
+> Fixes: 4c2357f57dd5 ("mmc: dw_mmc: Fix the CTO timeout calculation")
+>
+> Signed-off-by: Evgeniy Didin <Evgeniy.Didin@synopsys.com>
+>
+> CC: Alexey Brodkin <abrodkin@synopsys.com>
+> CC: Eugeniy Paltsev <paltsev@synopsys.com>
+> CC: Douglas Anderson <dianders@chromium.org>
+> CC: Ulf Hansson <ulf.hansson@linaro.org>
+> CC: Andy Shevchenko <andy.shevchenko@gmail.com>
+> CC: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+> CC: Shawn Lin <shawn.lin@rock-chips.com>
+> CC: Vineet Gupta <Vineet.Gupta1@synopsys.com>
+> CC: linux-kernel@vger.kernel.org
+> CC: linux-snps-arc@lists.infradead.org
+> Cc: <stable@vger.kernel.org>
+> ---
+> Changes since v3:
+> -Switch DIV_ROUND_UP macro to DIV_ROUND_UP_ULL
+> -Make one patch from two patches
+> -Modify commit message
+>
+> Changes sinve v2:
+> -add fix for cto_ms
+>
+> Changes since v1:
+> -uint64_t switched to u64
+>
+>  drivers/mmc/host/dw_mmc.c | 9 ++++++---
+>  1 file changed, 6 insertions(+), 3 deletions(-)
+
+FYI that your messages keep ending up in my spam folder and I just see
+other people's replies.  Not exactly sure why...  Note also that your
+patch really doesn't have all the tags in the right places.  All the
+Tags including the Signed-off-by and Cc are supposed to be squashed in
+one paragraph  ...and I believe "CC" is canonically supposed to be
+"Cc".  Presumably the maintainer can fix this up when applying, but
+please try to do better in the future.  Speaking of which, you didn't
+include the dw_mmc maintainer (Jaehoon Chung) in your post?  That
+seems not so great unless you know something that get_maintainers
+doesn't know about who will apply this patch.
+
+$ ./scripts/get_maintainer.pl -f drivers/mmc/host/dw_mmc.c
+Jaehoon Chung <jh80.chung@samsung.com> (maintainer:SYNOPSYS DESIGNWARE
+MMC/SD/SDIO DRIVER)
+
+
+As far as the actual patch, at first I thought maybe we could avoid
+the 64-bit math and just pre-divide bus_hz by MSEC_PER_SEC (just like
+used to happen before my change), but I think there's still a chance
+of overflow, right?  Because, for instance:
+
+drto_clks can be a full 24 bits
+drto_div can be effectively 9 bits
+
+...we could do further tricks (further rounding up the result), but it
+seems like just doing the 64-bit math is fine too unless someone has
+any strong objections...
+
+Reviewed-by: Douglas Anderson <dianders@chromium.org>
