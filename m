@@ -1,90 +1,66 @@
-From: Evgeniy Didin <Evgeniy.Didin@synopsys.com>
-Subject: [PATCH v4] mmc: dw_mmc: Fix the DTO/CTO timeout overflow calculation for 32-bit systems
-Date: Wed, 28 Feb 2018 14:53:18 +0300
-Message-ID: <20180228115318.20154-1-Evgeniy.Didin@synopsys.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Evgeniy Didin <Evgeniy.Didin@synopsys.com>, Alexey Brodkin <Alexey.Brodkin@synopsys.com>, Eugeniy Paltsev <Eugeniy.Paltsev@synopsys.com>, Douglas Anderson <dianders@chromium.org>, Ulf Hansson <ulf.hansson@linaro.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, Jisheng Zhang <Jisheng.Zhang@synaptics.com>, Shawn Lin <shawn.lin@rock-chips.com>, Vineet Gupta <Vineet.Gupta1@synopsys.com>, linux-kernel@vger.kernel.org, linux-snps-arc@lists.infradead.org, stable@vger.kernel.org
+From: Ludovic Barre <ludovic.Barre@st.com>
+Subject: [PATCH V2 5/5] ARM: configs: stm32: add mmc and ext2/3/4 support
+Date: Wed, 28 Feb 2018 16:47:24 +0100
+Message-ID: <1519832844-28068-6-git-send-email-ludovic.Barre@st.com>
+References: <1519832844-28068-1-git-send-email-ludovic.Barre@st.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1519832844-28068-1-git-send-email-ludovic.Barre@st.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
+Cc: devicetree@vger.kernel.org, Alexandre Torgue <alexandre.torgue@st.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ludovic Barre <ludovic.barre@st.com>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Gerald Baeza <gerald.baeza@st.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-In commit 9d9491a7da2a ("mmc: dw_mmc: Fix the DTO timeout calculation") and
-commit 4c2357f57dd5 ("mmc: dw_mmc: Fix the CTO timeout calculation") 
-have been made changes which cause multiply overflow for 32-bit systems.
-The broken timeout calculations leads to unexpected ETIMEDOUT errors and 
-causes stacktrace splat (such as below) during normal data exchange 
-with SD-card.
+From: Ludovic Barre <ludovic.barre@st.com>
 
-| Running :  4M-check-reassembly-tcp-cmykw2-rotatew2.out -v0 -w1
-| -  Info: Finished target initialization.
-| mmcblk0: error -110 transferring data, sector 320544, nr 2048, cmd response
-|  0x900, card status 0x0
+This patch adds support of
+-mmc framework and stm32 sdmmc controller
+-ext2/3/4 filesystem
+-LBDAF to support huge file (needed for ext4)
 
-DIV_ROUND_UP_ULL helps to escape usage of __udivdi3() from libgcc and so
-code gets compiled on all 32-bit platforms as opposed to usage
-of DIV_ROUND_UP when we may only compile stuff on a very few arches.
-
-Lets cast this multiply to u64 type which prevents overflow.
-
-Tested-by: Vineet Gupta <Vineet.Gupta1@synopsys.com>
-Reported-by: Vineet Gupta <Vineet.Gupta1@synopsys.com> # ARC STAR 9001306872 HSDK, sdio: board crashes when copying big files
-Fixes: 9d9491a7da2a ("mmc: dw_mmc: Fix the DTO timeout calculation")
-Fixes: 4c2357f57dd5 ("mmc: dw_mmc: Fix the CTO timeout calculation")
-
-Signed-off-by: Evgeniy Didin <Evgeniy.Didin@synopsys.com>
-
-CC: Alexey Brodkin <abrodkin@synopsys.com>
-CC: Eugeniy Paltsev <paltsev@synopsys.com>
-CC: Douglas Anderson <dianders@chromium.org>
-CC: Ulf Hansson <ulf.hansson@linaro.org>
-CC: Andy Shevchenko <andy.shevchenko@gmail.com>
-CC: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
-CC: Shawn Lin <shawn.lin@rock-chips.com>
-CC: Vineet Gupta <Vineet.Gupta1@synopsys.com>
-CC: linux-kernel@vger.kernel.org
-CC: linux-snps-arc@lists.infradead.org
-Cc: <stable@vger.kernel.org> 
+Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
-Changes since v3:
--Switch DIV_ROUND_UP macro to DIV_ROUND_UP_ULL
--Make one patch from two patches
--Modify commit message
+ arch/arm/configs/stm32_defconfig | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-Changes sinve v2:
--add fix for cto_ms
-
-Changes since v1:
--uint64_t switched to u64
-
- drivers/mmc/host/dw_mmc.c | 9 ++++++---
- 1 file changed, 6 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 0aa39975f33b..cba534d4c81b 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -409,7 +409,9 @@ static inline void dw_mci_set_cto(struct dw_mci *host)
- 	cto_div = (mci_readl(host, CLKDIV) & 0xff) * 2;
- 	if (cto_div == 0)
- 		cto_div = 1;
--	cto_ms = DIV_ROUND_UP(MSEC_PER_SEC * cto_clks * cto_div, host->bus_hz);
-+
-+	cto_ms = DIV_ROUND_UP_ULL((u64)MSEC_PER_SEC * cto_clks * cto_div,
-+				  host->bus_hz);
- 
- 	/* add a bit spare time */
- 	cto_ms += 10;
-@@ -1944,8 +1946,9 @@ static void dw_mci_set_drto(struct dw_mci *host)
- 	drto_div = (mci_readl(host, CLKDIV) & 0xff) * 2;
- 	if (drto_div == 0)
- 		drto_div = 1;
--	drto_ms = DIV_ROUND_UP(MSEC_PER_SEC * drto_clks * drto_div,
--			       host->bus_hz);
-+
-+	drto_ms = DIV_ROUND_UP_ULL((u64)MSEC_PER_SEC * drto_clks * drto_div,
-+				   host->bus_hz);
- 
- 	/* add a bit spare time */
- 	drto_ms += 10;
+diff --git a/arch/arm/configs/stm32_defconfig b/arch/arm/configs/stm32_defconfig
+index 91014ea..2573355 100644
+--- a/arch/arm/configs/stm32_defconfig
++++ b/arch/arm/configs/stm32_defconfig
+@@ -15,7 +15,6 @@ CONFIG_EMBEDDED=y
+ # CONFIG_VM_EVENT_COUNTERS is not set
+ # CONFIG_SLUB_DEBUG is not set
+ CONFIG_MODULES=y
+-# CONFIG_LBDAF is not set
+ # CONFIG_BLK_DEV_BSG is not set
+ # CONFIG_IOSCHED_DEADLINE is not set
+ # CONFIG_IOSCHED_CFQ is not set
+@@ -57,6 +56,8 @@ CONFIG_MFD_STMPE=y
+ CONFIG_REGULATOR=y
+ CONFIG_REGULATOR_FIXED_VOLTAGE=y
+ # CONFIG_USB_SUPPORT is not set
++CONFIG_MMC=y
++CONFIG_MMC_STM32_SDMMC=y
+ CONFIG_NEW_LEDS=y
+ CONFIG_LEDS_CLASS=y
+ CONFIG_LEDS_GPIO=y
+@@ -71,6 +72,7 @@ CONFIG_STM32_MDMA=y
+ CONFIG_IIO=y
+ CONFIG_STM32_ADC_CORE=y
+ CONFIG_STM32_ADC=y
++CONFIG_EXT3_FS=y
+ # CONFIG_FILE_LOCKING is not set
+ # CONFIG_DNOTIFY is not set
+ # CONFIG_INOTIFY_USER is not set
 -- 
-2.11.0
+2.7.4
