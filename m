@@ -1,13 +1,11 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V2 3/5] ARM: dts: stm32: add sdmmc support for stm32h743
-Date: Wed, 28 Feb 2018 16:47:22 +0100
-Message-ID: <1519832844-28068-4-git-send-email-ludovic.Barre@st.com>
-References: <1519832844-28068-1-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V2 0/5] mmc: add stm32 sdmmc controller
+Date: Wed, 28 Feb 2018 16:47:19 +0100
+Message-ID: <1519832844-28068-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1519832844-28068-1-git-send-email-ludovic.Barre@st.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -21,31 +19,51 @@ To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
 Cc: devicetree@vger.kernel.org, Alexandre Torgue <alexandre.torgue@st.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ludovic Barre <ludovic.barre@st.com>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Gerald Baeza <gerald.baeza@st.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-RnJvbTogTHVkb3ZpYyBCYXJyZSA8bHVkb3ZpYy5iYXJyZUBzdC5jb20+CgpUaGlzIHBhdGNoIGFk
-ZHMgc2RtbWMgc3VwcG9ydCBmb3Igc3RtMzJoNzQzLgoyw5dTRC9TRElPL01NQyBpbnRlcmZhY2Vz
-ICh1cCB0byAxMjUgTUh6KQoKU2lnbmVkLW9mZi1ieTogTHVkb3ZpYyBCYXJyZSA8bHVkb3ZpYy5i
-YXJyZUBzdC5jb20+Ci0tLQogYXJjaC9hcm0vYm9vdC9kdHMvc3RtMzJoNzQzLmR0c2kgfCAyNiAr
-KysrKysrKysrKysrKysrKysrKysrKysrKwogMSBmaWxlIGNoYW5nZWQsIDI2IGluc2VydGlvbnMo
-KykKCmRpZmYgLS1naXQgYS9hcmNoL2FybS9ib290L2R0cy9zdG0zMmg3NDMuZHRzaSBiL2FyY2gv
-YXJtL2Jvb3QvZHRzL3N0bTMyaDc0My5kdHNpCmluZGV4IGJiZmNiYWMuLjVlODU1MzggMTAwNjQ0
-Ci0tLSBhL2FyY2gvYXJtL2Jvb3QvZHRzL3N0bTMyaDc0My5kdHNpCisrKyBiL2FyY2gvYXJtL2Jv
-b3QvZHRzL3N0bTMyaDc0My5kdHNpCkBAIC0yMTcsNiArMjE3LDE5IEBACiAJCQl9OwogCQl9Owog
-CisJCXNkbW1jMjogc2RtbWNANDgwMjI0MDAgeworCQkJY29tcGF0aWJsZSA9ICJzdCxzdG0zMmg3
-LXNkbW1jIjsKKwkJCXJlZyA9IDwweDQ4MDIyNDAwIDB4NDAwPjsKKwkJCXJlZy1uYW1lcyA9ICJz
-ZG1tYyI7CisJCQlpbnRlcnJ1cHRzID0gPDEyND47CisJCQljbG9ja3MgPSA8JnJjYyBTRE1NQzJf
-Q0s+OworCQkJcmVzZXRzID0gPCZyY2MgU1RNMzJIN19BSEIyX1JFU0VUKFNETU1DMik+OworCQkJ
-Y2FwLXNkLWhpZ2hzcGVlZDsKKwkJCWNhcC1tbWMtaGlnaHNwZWVkOworCQkJbWF4LWZyZXF1ZW5j
-eSA9IDwxMjUwMDAwMDA+OworCQkJc3RhdHVzID0gImRpc2FibGVkIjsKKwkJfTsKKwogCQltZG1h
-MTogZG1hQDUyMDAwMDAwIHsKIAkJCWNvbXBhdGlibGUgPSAic3Qsc3RtMzJoNy1tZG1hIjsKIAkJ
-CXJlZyA9IDwweDUyMDAwMDAwIDB4MTAwMD47CkBAIC0yMjcsNiArMjQwLDE5IEBACiAJCQlkbWEt
-cmVxdWVzdHMgPSA8MzI+OwogCQl9OwogCisJCXNkbW1jMTogc2RtbWNANTIwMDcwMDAgeworCQkJ
-Y29tcGF0aWJsZSA9ICJzdCxzdG0zMmg3LXNkbW1jIjsKKwkJCXJlZyA9IDwweDUyMDA3MDAwIDB4
-MTAwMD47CisJCQlyZWctbmFtZXMgPSAic2RtbWMiOworCQkJaW50ZXJydXB0cyA9IDw0OT47CisJ
-CQljbG9ja3MgPSA8JnJjYyBTRE1NQzFfQ0s+OworCQkJcmVzZXRzID0gPCZyY2MgU1RNMzJIN19B
-SEIzX1JFU0VUKFNETU1DMSk+OworCQkJY2FwLXNkLWhpZ2hzcGVlZDsKKwkJCWNhcC1tbWMtaGln
-aHNwZWVkOworCQkJbWF4LWZyZXF1ZW5jeSA9IDwxMjUwMDAwMDA+OworCQkJc3RhdHVzID0gImRp
-c2FibGVkIjsKKwkJfTsKKwogCQlscHRpbWVyMjogdGltZXJANTgwMDI0MDAgewogCQkJI2FkZHJl
-c3MtY2VsbHMgPSA8MT47CiAJCQkjc2l6ZS1jZWxscyA9IDwwPjsKLS0gCjIuNy40CgoKX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KbGludXgtYXJtLWtlcm5l
-bCBtYWlsaW5nIGxpc3QKbGludXgtYXJtLWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnCmh0dHA6
-Ly9saXN0cy5pbmZyYWRlYWQub3JnL21haWxtYW4vbGlzdGluZm8vbGludXgtYXJtLWtlcm5lbAo=
+From: Ludovic Barre <ludovic.barre@st.com>
+
+This patch serie adds support of stm32 SDMMC controller.
+stm32h7 is the first SoC to use stm32 SDMMC controller
+(previous SoC had pl180 controller).
+
+The SDMMC features include the following:
+-Full compliance with MultiMediaCard System Specification Version 4.51.
+ Card support for three different databus modes:
+ 1-bit (default), 4-bit and 8-bit.
+-Full compliance with SD memory card specifications version 4.1.
+ SDR104 speed limited to maximum allowed I/O speed, SPI mode and
+ UHS-II mode not supported.
+-Full compliance with SDIO card specification version 4.0.
+
+change V2:
+-dt-bindings: properties name
+st,dir-output-high; st,neg-edge; st,use-ckin
+-dt-bindings: node example s/sdmmc@/mmc@/g
+-removes return of enable/disable_imask functions
+-adds dev_warn if clk divisor is too short.
+-replaces overprotection of n_elem by fail of dma_map_sg
+-removes shortcut host->base
+-Use device_property_present
+
+Ludovic Barre (5):
+  dt-bindings: mmc: document the stm32 sdmmc bindings
+  mmc: add stm32 sdmmc controller driver
+  ARM: dts: stm32: add sdmmc support for stm32h743
+  ARM: dts: stm32: add sdmmc1 support for stm32h743i-eval
+  ARM: configs: stm32: add mmc and ext2/3/4 support
+
+ .../devicetree/bindings/mmc/st,stm32-sdmmc.txt     |  35 +
+ arch/arm/boot/dts/stm32h743-pinctrl.dtsi           |  26 +
+ arch/arm/boot/dts/stm32h743.dtsi                   |  26 +
+ arch/arm/boot/dts/stm32h743i-eval.dts              |  11 +
+ arch/arm/configs/stm32_defconfig                   |   4 +-
+ drivers/mmc/host/Kconfig                           |   8 +
+ drivers/mmc/host/Makefile                          |   1 +
+ drivers/mmc/host/stm32-sdmmc.c                     | 708 +++++++++++++++++++++
+ drivers/mmc/host/stm32-sdmmc.h                     | 220 +++++++
+ 9 files changed, 1038 insertions(+), 1 deletion(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/st,stm32-sdmmc.txt
+ create mode 100644 drivers/mmc/host/stm32-sdmmc.c
+ create mode 100644 drivers/mmc/host/stm32-sdmmc.h
+
+-- 
+2.7.4
