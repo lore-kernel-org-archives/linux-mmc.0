@@ -1,32 +1,36 @@
-From: Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko@sntech.de>
-Subject: Re: [PATCH] dt-bindings: rockchip-dw-mshc: use consistent clock names
-Date: Thu, 01 Mar 2018 11:57:53 +0100
-Message-ID: <3149874.hkvgG7d5Rc@diego>
-References: <20180301103447.7059-1-john@metanate.com>
+From: Harish Jenny K N <harish_kandiga@mentor.com>
+Subject: [PATCH] mmc: Export host capabilities to debugfs.
+Date: Thu, 1 Mar 2018 18:47:35 +0530
+Message-ID: <1519910255-6296-1-git-send-email-harish_kandiga@mentor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20180301103447.7059-1-john@metanate.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: John Keeping <john@metanate.com>
-Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-rockchip@lists.infradead.org, Rob Herring <robh+dt@kernel.org>, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: ulf.hansson@linaro.org, linus.walleij@linaro.org, adrian.hunter@intel.com, shawn.lin@rock-chips.com, avri.altman@wdc.com, andriy.shevchenko@linux.intel.com
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, harish_kandiga@mentor.com
 List-Id: linux-mmc@vger.kernel.org
 
-Am Donnerstag, 1. M=E4rz 2018, 11:34:47 CET schrieb John Keeping:
-> The names of these clocks are "ciu-drive" and "ciu-sample" as described
-> for the clock-names property.  Avoid confusion by spelling these
-> correctly everywhere they are referenced.
-> =
+This patch exports the host capabilities to debugfs
 
-> Signed-off-by: John Keeping <john@metanate.com>
+Signed-off-by: Andrew Gabbasov <andrew_gabbasov@mentor.com>
+Signed-off-by: Harish Jenny K N <harish_kandiga@mentor.com>
+---
+ drivers/mmc/core/debugfs.c | 3 +++
+ 1 file changed, 3 insertions(+)
 
-Reviewed-by: Heiko Stuebner <heiko@sntech.de>
+diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+index c51e0c0..fa2df7f 100644
+--- a/drivers/mmc/core/debugfs.c
++++ b/drivers/mmc/core/debugfs.c
+@@ -289,6 +289,9 @@ void mmc_add_card_debugfs(struct mmc_card *card)
+ 
+ 	card->debugfs_root = root;
+ 
++	if (!debugfs_create_x32("host_caps", S_IRUSR, root, (u32 *)&host->caps))
++		goto err;
++
+ 	if (!debugfs_create_x32("state", S_IRUSR, root, &card->state))
+ 		goto err;
+ 
+-- 
+1.9.1
