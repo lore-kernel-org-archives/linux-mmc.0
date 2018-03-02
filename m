@@ -1,35 +1,82 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH 2/6] mmc: dw_mmc: remove the deprecated "num-slots"
-Date: Fri, 2 Mar 2018 09:25:23 -0600
-Message-ID: <20180302152523.577q4ru466nt2gvo@rob-hp-laptop>
-References: <20180223064138.18401-1-jh80.chung@samsung.com>
- <CGME20180223064140epcas2p41a734737c3fe7373329a94f485c21fd4@epcas2p4.samsung.com>
- <20180223064138.18401-2-jh80.chung@samsung.com>
+From: Dmitry Osipenko <digetx@gmail.com>
+Subject: Re: EXT4 Oops (Re: [PATCH V15 06/22] mmc: block: Add blk-mq support)
+Date: Fri, 2 Mar 2018 19:39:25 +0300
+Message-ID: <24166154-8b08-bab6-ac8e-618eeba30674@gmail.com>
+References: <1511962879-24262-1-git-send-email-adrian.hunter@intel.com>
+ <1511962879-24262-7-git-send-email-adrian.hunter@intel.com>
+ <bc65b542-9703-aa04-f1c7-b10584e44391@gmail.com>
+ <829308a3-3bf6-c173-65fa-e2a0f45f7f61@intel.com>
+ <68886f99-97f5-897a-f754-6f414741bd5a@gmail.com>
+ <22580b82-0257-b156-9f0c-79afa34067e5@gmail.com>
+ <8876217f-ede6-fc81-2e05-b4fc976b3235@intel.com>
+ <6a1267b0-6242-fc9f-60ed-02bf34677b62@intel.com>
+ <20180301160418.GA2490@thunk.org>
+ <AF3403B9-9791-4A77-A6FB-3281B8EA7A31@dilger.ca>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20180223064138.18401-2-jh80.chung@samsung.com>
+In-Reply-To: <AF3403B9-9791-4A77-A6FB-3281B8EA7A31@dilger.ca>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, ulf.hansson@linaro.org, mark.rutland@arm.com, manabian@gmail.com, dinguyen@kernel.org, will.deacon@arm.com, xuwei5@hisilicon.com
+To: Andreas Dilger <adilger@dilger.ca>, Theodore Ts'o <tytso@mit.edu>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Feb 23, 2018 at 03:41:34PM +0900, Jaehoon Chung wrote:
-> 'num-slots' property had already deprecated.
-> Remove the 'nom-slots' property that is kept to maintain the compatibility.
+On 01.03.2018 23:20, Andreas Dilger wrote:
 > 
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> ---
->  Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt | 5 -----
->  drivers/mmc/host/dw_mmc-pci.c                              | 1 -
->  drivers/mmc/host/dw_mmc.c                                  | 4 ----
->  drivers/mmc/host/dw_mmc.h                                  | 3 ---
->  4 files changed, 13 deletions(-)
+> On Mar 1, 2018, at 9:04 AM, Theodore Ts'o <tytso@mit.edu> wrote:
+>> This doesn't seem to make sense; the PC is where we are currently
+>> executing, and LR is the "Link Register" where the flow of control
+>> will be returning after the current function returns, right?  Well,
+>> dx_probe should *not* be returning to __wait_on_bit().  So this just
+>> seems.... weird.
+>>
+>> Ignoring the LR register, this stack trace looks sane...  I can't see
+>> which pointer could be NULL and getting dereferenced, though.  How
+>> easily can you reproduce the problem?  Can you either (a) translate
+>> the PC into a line number, or better yet, if you can reproduce, add a
+>> series of BUG_ON's so we can see what's going on?
 
-Normally I'd say you need to wait some time after updating the dts 
-files, but given that all the users are 1 slot I think this is fine.
+Ted, thank you for the suggestion. I don't have a bug-reproducer, it happens
+only under some IO load and quite randomly. I've applied the BUG_ON()'s, but it
+may take some time to catch the bug again.
 
-For this and the rest of the series:
+>> +	BUG_ON(frame);
+> 
+> I think you mean:
+> 	BUG_ON(frame == NULL);
+> or
+> 	BUG_ON(!frame);
+> 
+> 
+>> 	memset(frame_in, 0, EXT4_HTREE_LEVEL * sizeof(frame_in[0]));
+>> 	frame->bh = ext4_read_dirblock(dir, 0, INDEX);
+>> 	if (IS_ERR(frame->bh))
+>> 		return (struct dx_frame *) frame->bh;
+>>
+>> +	BUG_ON(frame->bh);
+>> +	BUG_ON(frame->bh->b_data);
+> 
+> Same here.
+> 
+> 	BUG_ON(frame->bh == NULL);
+> 	BUG_ON(frame->bh->b_data == NULL);
+> 
+> This is why I don't like implicit "is NULL" or "is non-zero" usage.  Lustre
+> used to require "== NULL" or "!= NULL" to avoid bugs like this, but had to
+> abandon that because of upstream code style.
 
-Reviewed-by: Rob Herring <robh@kernel.org>
+Well spotted, thanks Andreas.
+
+>> 	root = (struct dx_root *) frame->bh->b_data;
+>> 	if (root->info.hash_version != DX_HASH_TEA &&
+>> 	    root->info.hash_version != DX_HASH_HALF_MD4 &&
+>> 	    root->info.hash_version != DX_HASH_LEGACY) {
+>>
+>> These are "could never" happen scenarios from looking at the code, but
+>> that will help explain what is going on.
+>>
+>> If this is reliably only happening with mq, the only way I could see
+>> that if is something is returning an error when it previously wasn't.
+>> This isn't a problem we're seeing with any of our testing, though.
