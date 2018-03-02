@@ -1,121 +1,113 @@
-From: Andreas Dilger <adilger@dilger.ca>
-Subject: Re: EXT4 Oops (Re: [PATCH V15 06/22] mmc: block: Add blk-mq support)
-Date: Thu, 1 Mar 2018 13:20:16 -0700
-Message-ID: <AF3403B9-9791-4A77-A6FB-3281B8EA7A31@dilger.ca>
-References: <1511962879-24262-1-git-send-email-adrian.hunter@intel.com>
- <1511962879-24262-7-git-send-email-adrian.hunter@intel.com>
- <bc65b542-9703-aa04-f1c7-b10584e44391@gmail.com>
- <829308a3-3bf6-c173-65fa-e2a0f45f7f61@intel.com>
- <68886f99-97f5-897a-f754-6f414741bd5a@gmail.com>
- <22580b82-0257-b156-9f0c-79afa34067e5@gmail.com>
- <8876217f-ede6-fc81-2e05-b4fc976b3235@intel.com>
- <6a1267b0-6242-fc9f-60ed-02bf34677b62@intel.com>
- <20180301160418.GA2490@thunk.org>
-Mime-Version: 1.0 (Mac OS X Mail 10.3 \(3273\))
-Content-Type: multipart/signed;
- boundary="Apple-Mail=_83C1D3F3-F6FF-4590-B7E4-E000F852A5BA";
- protocol="application/pgp-signature"; micalg=pgp-sha256
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180301160418.GA2490@thunk.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Dmitry Osipenko <digetx@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chi>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v4] mmc: dw_mmc: Fix the DTO/CTO timeout overflow
+ calculation for 32-bit systems
+Date: Fri, 02 Mar 2018 17:05:42 +0900
+Message-ID: <1112b6b6-4bb9-6cbf-24e5-e082f7ce04df@samsung.com>
+References: <20180228115318.20154-1-Evgeniy.Didin@synopsys.com>
+        <CGME20180301055819epcas1p4de351fc93e2226e0b0ae5c9647610fc4@epcas1p4.samsung.com>
+        <20180301135755.7e26f12e@xhacker.debian>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <stable-owner@vger.kernel.org>
+In-reply-to: <20180301135755.7e26f12e@xhacker.debian>
+Content-language: en-US
+Sender: stable-owner@vger.kernel.org
+To: Jisheng Zhang <Jisheng.Zhang@synaptics.com>, Evgeniy Didin <Evgeniy.Didin@synopsys.com>
+Cc: linux-mmc@vger.kernel.org, Alexey Brodkin <Alexey.Brodkin@synopsys.com>, Eugeniy Paltsev <Eugeniy.Paltsev@synopsys.com>, Douglas Anderson <dianders@chromium.org>, Ulf Hansson <ulf.hansson@linaro.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, Shawn Lin <shawn.lin@rock-chips.com>, Vineet Gupta <Vineet.Gupta1@synopsys.com>, linux-kernel@vger.kernel.org, linux-snps-arc@lists.infradead.org, stable@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-
---Apple-Mail=_83C1D3F3-F6FF-4590-B7E4-E000F852A5BA
-Content-Transfer-Encoding: 7bit
-Content-Type: text/plain;
-	charset=us-ascii
-
-
-On Mar 1, 2018, at 9:04 AM, Theodore Ts'o <tytso@mit.edu> wrote:
-> This doesn't seem to make sense; the PC is where we are currently
-> executing, and LR is the "Link Register" where the flow of control
-> will be returning after the current function returns, right?  Well,
-> dx_probe should *not* be returning to __wait_on_bit().  So this just
-> seems.... weird.
+On 03/01/2018 02:57 PM, Jisheng Zhang wrote:
+> On Wed, 28 Feb 2018 14:53:18 +0300 Evgeniy Didin wrote:
 > 
-> Ignoring the LR register, this stack trace looks sane...  I can't see
-> which pointer could be NULL and getting dereferenced, though.  How
-> easily can you reproduce the problem?  Can you either (a) translate
-> the PC into a line number, or better yet, if you can reproduce, add a
-> series of BUG_ON's so we can see what's going on?
+>> In commit 9d9491a7da2a ("mmc: dw_mmc: Fix the DTO timeout calculation") and
+>> commit 4c2357f57dd5 ("mmc: dw_mmc: Fix the CTO timeout calculation") 
+>> have been made changes which cause multiply overflow for 32-bit systems.
+>> The broken timeout calculations leads to unexpected ETIMEDOUT errors and 
+>> causes stacktrace splat (such as below) during normal data exchange 
+>> with SD-card.
+>>
+>> | Running :  4M-check-reassembly-tcp-cmykw2-rotatew2.out -v0 -w1
+>> | -  Info: Finished target initialization.
+>> | mmcblk0: error -110 transferring data, sector 320544, nr 2048, cmd response
+>> |  0x900, card status 0x0
+>>
+>> DIV_ROUND_UP_ULL helps to escape usage of __udivdi3() from libgcc and so
+>> code gets compiled on all 32-bit platforms as opposed to usage
+>> of DIV_ROUND_UP when we may only compile stuff on a very few arches.
+>>
+>> Lets cast this multiply to u64 type which prevents overflow.
 > 
-> +	BUG_ON(frame);
+> Reviewed-by: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
 
-I think you mean:
-	BUG_ON(frame == NULL);
-or
-	BUG_ON(!frame);
+Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
 
+Best Regards,
+Jaehoon Chung
 
-> 	memset(frame_in, 0, EXT4_HTREE_LEVEL * sizeof(frame_in[0]));
-> 	frame->bh = ext4_read_dirblock(dir, 0, INDEX);
-> 	if (IS_ERR(frame->bh))
-> 		return (struct dx_frame *) frame->bh;
 > 
-> +	BUG_ON(frame->bh);
-> +	BUG_ON(frame->bh->b_data);
-
-Same here.
-
-	BUG_ON(frame->bh == NULL);
-	BUG_ON(frame->bh->b_data == NULL);
-
-This is why I don't like implicit "is NULL" or "is non-zero" usage.  Lustre
-used to require "== NULL" or "!= NULL" to avoid bugs like this, but had to
-abandon that because of upstream code style.
-
-> 	root = (struct dx_root *) frame->bh->b_data;
-> 	if (root->info.hash_version != DX_HASH_TEA &&
-> 	    root->info.hash_version != DX_HASH_HALF_MD4 &&
-> 	    root->info.hash_version != DX_HASH_LEGACY) {
+>>
+>> Tested-by: Vineet Gupta <Vineet.Gupta1@synopsys.com>
+>> Reported-by: Vineet Gupta <Vineet.Gupta1@synopsys.com> # ARC STAR 9001306872 HSDK, sdio: board crashes when copying big files
+>> Fixes: 9d9491a7da2a ("mmc: dw_mmc: Fix the DTO timeout calculation")
+>> Fixes: 4c2357f57dd5 ("mmc: dw_mmc: Fix the CTO timeout calculation")
+>>
+>> Signed-off-by: Evgeniy Didin <Evgeniy.Didin@synopsys.com>
+>>
+>> CC: Alexey Brodkin <abrodkin@synopsys.com>
+>> CC: Eugeniy Paltsev <paltsev@synopsys.com>
+>> CC: Douglas Anderson <dianders@chromium.org>
+>> CC: Ulf Hansson <ulf.hansson@linaro.org>
+>> CC: Andy Shevchenko <andy.shevchenko@gmail.com>
+>> CC: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+>> CC: Shawn Lin <shawn.lin@rock-chips.com>
+>> CC: Vineet Gupta <Vineet.Gupta1@synopsys.com>
+>> CC: linux-kernel@vger.kernel.org
+>> CC: linux-snps-arc@lists.infradead.org
+>> Cc: <stable@vger.kernel.org> 
+>> ---
+>> Changes since v3:
+>> -Switch DIV_ROUND_UP macro to DIV_ROUND_UP_ULL
+>> -Make one patch from two patches
+>> -Modify commit message
+>>
+>> Changes sinve v2:
+>> -add fix for cto_ms
+>>
+>> Changes since v1:
+>> -uint64_t switched to u64
+>>
+>>  drivers/mmc/host/dw_mmc.c | 9 ++++++---
+>>  1 file changed, 6 insertions(+), 3 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index 0aa39975f33b..cba534d4c81b 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -409,7 +409,9 @@ static inline void dw_mci_set_cto(struct dw_mci *host)
+>>  	cto_div = (mci_readl(host, CLKDIV) & 0xff) * 2;
+>>  	if (cto_div == 0)
+>>  		cto_div = 1;
+>> -	cto_ms = DIV_ROUND_UP(MSEC_PER_SEC * cto_clks * cto_div, host->bus_hz);
+>> +
+>> +	cto_ms = DIV_ROUND_UP_ULL((u64)MSEC_PER_SEC * cto_clks * cto_div,
+>> +				  host->bus_hz);
+>>  
+>>  	/* add a bit spare time */
+>>  	cto_ms += 10;
+>> @@ -1944,8 +1946,9 @@ static void dw_mci_set_drto(struct dw_mci *host)
+>>  	drto_div = (mci_readl(host, CLKDIV) & 0xff) * 2;
+>>  	if (drto_div == 0)
+>>  		drto_div = 1;
+>> -	drto_ms = DIV_ROUND_UP(MSEC_PER_SEC * drto_clks * drto_div,
+>> -			       host->bus_hz);
+>> +
+>> +	drto_ms = DIV_ROUND_UP_ULL((u64)MSEC_PER_SEC * drto_clks * drto_div,
+>> +				   host->bus_hz);
+>>  
+>>  	/* add a bit spare time */
+>>  	drto_ms += 10;
 > 
-> These are "could never" happen scenarios from looking at the code, but
-> that will help explain what is going on.
 > 
-> If this is reliably only happening with mq, the only way I could see
-> that if is something is returning an error when it previously wasn't.
-> This isn't a problem we're seeing with any of our testing, though.
 > 
-> Cheers,
 > 
-> 						- Ted
-> 
-
-
-Cheers, Andreas
-
-
-
-
-
-
---Apple-Mail=_83C1D3F3-F6FF-4590-B7E4-E000F852A5BA
-Content-Transfer-Encoding: 7bit
-Content-Disposition: attachment;
-	filename=signature.asc
-Content-Type: application/pgp-signature;
-	name=signature.asc
-Content-Description: Message signed with OpenPGP
-
------BEGIN PGP SIGNATURE-----
-Comment: GPGTools - http://gpgtools.org
-
-iQIzBAEBCAAdFiEEDb73u6ZejP5ZMprvcqXauRfMH+AFAlqYYIAACgkQcqXauRfM
-H+D1MQ/9HoJWn769M05/z1EIBrSufibX73AF41nPOwDkOkmUvcmf+48coM0H1y2y
-HJl6JonNCNZ/wPvpo8yFrXjrZ8/1R0Cekk0nptM9Zokg3ufJygmU8+BB3smeHB7L
-nw1O4ftW1jAXFGGDdj/HiB4Fuy5vij6FgpFaRLz5VtoenkL509d8WBZoRHBnBHsz
-RWD05dB/Hx6s9jVnVs6BkH9Q9r7qxLIjIq24hp6qKy1Zvu1GwjTxMEfqNADEj0Sf
-TjJ/AfG1kCtxnvhYsk2JRhnEj1b7xNbb+eFd9+T4ca/oB4o5hn3BltNBbDMReQBZ
-UHAzhf8N5w+k8psDLXpOl9HjQue9H+bPlYbF4g3JUHWhbRklWiObTU5XULegTNRc
-vVmsmw4iYIve6FEp3neb/DfLrKOnLHWBakESxVZel6N42OxFGJYk0XQc2XmoNCyj
-uC/HgZWV2Iah5F3o0HLpnWHnr2xWE/AVrIhCK2p5ecLq16niFCMh1CCksGqrrqwx
-eIirkF1z9atKTe4XTf7412gPSood0PjbT/2qe5FDLpRtdTiwDA8SMc+pDw7UpbYj
-ymhDIbQf019VSXV9AzN3rktNPaaya+HNSuxqkG26R2jLRsbf3qml1snoUjKga1fS
-DDu5H/nwTLVsjypDHpDapoXul04KRphOKdfUi5z+xJSXLUTwySI=
-=Vg/6
------END PGP SIGNATURE-----
-
---Apple-Mail=_83C1D3F3-F6FF-4590-B7E4-E000F852A5BA--
