@@ -1,67 +1,78 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v.4.16-rc4
-Date: Fri,  2 Mar 2018 12:47:55 +0100
-Message-ID: <1519991275-31436-1-git-send-email-ulf.hansson@linaro.org>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH] mmc: card: Don't show eMMC RPMB and BOOT areas in /proc/partitions
+Date: Fri, 2 Mar 2018 13:53:14 +0100
+Message-ID: <CACRpkdYuxoZaF9xyoA9tsyBuXOkrcdZVGWYfcyEMe0psk6UydQ@mail.gmail.com>
+References: <1519731229-19141-1-git-send-email-harish_kandiga@mentor.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1519731229-19141-1-git-send-email-harish_kandiga@mentor.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+To: Harish Jenny K N <harish_kandiga@mentor.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Linus,
+On Tue, Feb 27, 2018 at 12:33 PM, Harish Jenny K N
+<harish_kandiga@mentor.com> wrote:
 
-Here's a PR with some MMC fixes intended for v4.16-rc4. Details about the
-highlights are as usual found in the signed tag.
+> From: Andrew Gabbasov <andrew_gabbasov@mentor.com>
+>
+> Since RPMB area is accessible via special ioctl only and boot areas
+> are unlikely to contain any partitions, exclude them all from listing
+> in /proc/partitions. This will hide them from various user-level
+> software (e.g. fdisk), thus avoiding unnecessary access attempts.
+>
+> Signed-off-by: Andrew Gabbasov <andrew_gabbasov@mentor.com>
+> Signed-off-by: Harish Jenny K N <harish_kandiga@mentor.com>
 
-Please pull this in!
+Makes sense to me, at least it makes the problem smaller not bigger.
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 
-Kind regards
-Ulf Hansson
+> The main intention of the patch was to not have RPMB device in /proc/partitions.
+> Boot partitions are also unlikely to have any partitioning, so it made sense to
+> treat them the same way as RPMB and not list in /proc/partitions.
+> Now I see that RPMB is converted to a character device and this change
+> may not be required for RPMB.
 
+It certainly does not hurt, even if this code path is not called
+for the RPMB partition anymore (luckily).
 
-The following changes since commit 4a3928c6f8a53fa1aed28ccba227742486e8ddcb:
+On a general note, I do not feel the work with boot partitions or
+the general purpose partitions is finished.
 
-  Linux 4.16-rc3 (2018-02-25 18:50:41 -0800)
+In a lecture I pointed out that:
 
-are available in the git repository at:
+dd if=/dev/sda of=sda.img
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v4.16-rc3
+Gives an image of the whole device, and you can restore the
+device by doing the inverse of that command.
 
-for you to fetch changes up to 3a574919f0cc15a46ec14c3e5e08300908991915:
+For MMC devices,
 
-  mmc: core: Avoid hanging to claim host for mmc via some nested calls (2018-02-27 15:12:37 +0100)
+dd if=/dev/mmcblk0 of=mmcblk0.img
 
-----------------------------------------------------------------
-MMC core:
- - mmc: core: Avoid hang when claiming host
+does NOT have the same nice property. Instead, since the
+special partitions are their own devices and not part of the main
+device, they have to be backed up separately.
 
-MMC host:
- - dw_mmc: Avoid hang when accessing registers
- - dw_mmc: Fix out-of-bounds access for slot's caps
- - dw_mmc-k3: Fix out-of-bounds access through DT alias
- - sdhci-pci: Fix S0i3 for Intel BYT-based controllers
+IMO this breaks the user contract of how a device vs a partition
+works.
 
-----------------------------------------------------------------
-Adrian Hunter (1):
-      mmc: sdhci-pci: Fix S0i3 for Intel BYT-based controllers
+What we need to do is make the "special partitions" part of the
+main block device and stop spawning these special block
+devices for each boot partions or general partitions. In addition,
+each of these boot partitions or general partitions will get their
+own block queue and state container which is not cheap in
+runtime memory footprint terms.
 
-Geert Uytterhoeven (1):
-      mmc: dw_mmc-k3: Fix out-of-bounds access through DT alias
+So what I want to do (unless someone beats me to it) it to come
+up with some way making boot and general partitions part
+of the main block device. Possibly the core kernel partitioning
+code needs to be augmented. The tentative idea is to just
+put the sectors representing these partitions after the main
+block device and access them from there, with an offset.
 
-Shawn Lin (3):
-      mmc: dw_mmc: Factor out dw_mci_init_slot_caps
-      mmc: dw_mmc: Fix out-of-bounds access for slot's caps
-      mmc: dw_mmc: Avoid accessing registers in runtime suspended state
+That job isn't entirely trivial though.
 
-Ulf Hansson (1):
-      mmc: core: Avoid hanging to claim host for mmc via some nested calls
-
- drivers/mmc/core/mmc_ops.c         |  4 --
- drivers/mmc/host/dw_mmc-exynos.c   |  1 +
- drivers/mmc/host/dw_mmc-k3.c       |  4 ++
- drivers/mmc/host/dw_mmc-rockchip.c |  1 +
- drivers/mmc/host/dw_mmc-zx.c       |  1 +
- drivers/mmc/host/dw_mmc.c          | 84 ++++++++++++++++++++++++--------------
- drivers/mmc/host/dw_mmc.h          |  2 +
- drivers/mmc/host/sdhci-pci-core.c  | 35 ++++++++++++++--
- 8 files changed, 94 insertions(+), 38 deletions(-)
+Yours,
+Linus Walleij
