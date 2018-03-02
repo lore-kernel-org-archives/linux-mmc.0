@@ -1,16 +1,13 @@
 From: Ludovic BARRE <ludovic.barre@st.com>
 Subject: Re: [PATCH V2 0/5] mmc: add stm32 sdmmc controller
-Date: Fri, 2 Mar 2018 09:51:26 +0100
-Message-ID: <cbdd31d8-dbea-4ea3-01ba-443daeb51775@st.com>
-References: <1519832844-28068-1-git-send-email-ludovic.Barre@st.com>
- <CAPDyKFpfPAaLRZLqpyi6RwC1-=7Ao=u+OmEfHaYBABzd_-BKAw@mail.gmail.com>
- <8f328063-610f-a2e8-5f29-d3f0019384f2@st.com>
- <CAPDyKFqFWcZnWoUdnfRtj9WA1+ooNCXKfZ94Ddq4j849CH2QOQ@mail.gmail.com>
+Date: Fri, 2 Mar 2018 09:56:13 +0100
+Message-ID: <af8422d5-a257-a8af-3191-27e486c2a88d@st.com>
+References: <cbdd31d8-dbea-4ea3-01ba-443daeb51775@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"; Format="flowed"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAPDyKFqFWcZnWoUdnfRtj9WA1+ooNCXKfZ94Ddq4j849CH2QOQ@mail.gmail.com>
+In-Reply-To: <cbdd31d8-dbea-4ea3-01ba-443daeb51775@st.com>
 Content-Language: en-US
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
@@ -21,10 +18,8 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: devicetree@vger.kernel.org, Alexandre Torgue <alexandre.torgue@st.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Gerald Baeza <gerald.baeza@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre TORGUE <alexandre.torgue@st.com>, Gerald BAEZA <gerald.baeza@st.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Benjamin Gaignard <benjamin.gaignard@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-
 
 
 On 03/01/2018 11:44 AM, Ulf Hansson wrote:
