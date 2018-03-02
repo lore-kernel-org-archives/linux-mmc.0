@@ -1,193 +1,162 @@
-From: Doug Anderson <dianders@google.com>
-Subject: Re: [PATCH V2 2/2] mmc: sdhci-msm: support voltage pad switching
-Date: Fri, 2 Mar 2018 10:25:38 -0800
-Message-ID: <CAD=FV=VXWbFDtDPboSpj=Pp3iCujN6RaE2dzXRpUEX-F-B_uZA@mail.gmail.com>
-References: <1518415278-59062-1-git-send-email-vviswana@codeaurora.org> <1518415278-59062-3-git-send-email-vviswana@codeaurora.org>
+From: Jeremy McNicoll <jmcnicol@redhat.com>
+Subject: Re: [PATCH V2 1/2] mmc: sdhci-msm: Add support to store supported
+ vdd-io voltages
+Date: Fri, 2 Mar 2018 15:08:21 -0800
+Message-ID: <19cc8cdf-3c75-5bde-08b2-34c4f4a2d5fa@redhat.com>
+References: <1518415278-59062-1-git-send-email-vviswana@codeaurora.org>
+ <1518415278-59062-2-git-send-email-vviswana@codeaurora.org>
+ <CAD=FV=VZVcN+47=KVkjDsoMtEaznDrNQSOj_iOdVpXDN8NURig@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1518415278-59062-3-git-send-email-vviswana@codeaurora.org>
+In-Reply-To: <CAD=FV=VZVcN+47=KVkjDsoMtEaznDrNQSOj_iOdVpXDN8NURig@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Vijay Viswanath <vviswana@codeaurora.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, Krishna Konda <kkonda@codeaurora.org>, evgreen@chromium.org
+To: Doug Anderson <dianders@chromium.org>, Vijay Viswanath <vviswana@codeaurora.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, evgreen@chromium.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+On 2018-03-02 10:23 AM, Doug Anderson wrote:
+> Hi,
+> 
+> On Sun, Feb 11, 2018 at 10:01 PM, Vijay Viswanath
+> <vviswana@codeaurora.org> wrote:
+>> During probe check whether the vdd-io regulator of sdhc platform device
+>> can support 1.8V and 3V and store this information as a capability of
+>> platform device.
+>>
+>> Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
+>> ---
+>>   drivers/mmc/host/sdhci-msm.c | 38 ++++++++++++++++++++++++++++++++++++++
+>>   1 file changed, 38 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+>> index c283291..5c23e92 100644
+>> --- a/drivers/mmc/host/sdhci-msm.c
+>> +++ b/drivers/mmc/host/sdhci-msm.c
+>> @@ -23,6 +23,7 @@
+>>   #include <linux/iopoll.h>
+>>
+>>   #include "sdhci-pltfm.h"
+>> +#include <linux/regulator/consumer.h>
+> 
+> This is a strange sort order for this include file.  Why is it after
+> the local include?
+> 
+> 
+>>   #define CORE_MCI_VERSION               0x50
+>>   #define CORE_VERSION_MAJOR_SHIFT       28
+>> @@ -81,6 +82,9 @@
+>>   #define CORE_HC_SELECT_IN_HS400        (6 << 19)
+>>   #define CORE_HC_SELECT_IN_MASK (7 << 19)
+>>
+>> +#define CORE_3_0V_SUPPORT      (1 << 25)
+>> +#define CORE_1_8V_SUPPORT      (1 << 26)
+>> +
+> 
+> Is there something magical about 25 and 26?  This is a new caps field,
+> so I'd have expected 0 and 1.
+> 
+> 
+>>   #define CORE_CSR_CDC_CTLR_CFG0         0x130
+>>   #define CORE_SW_TRIG_FULL_CALIB                BIT(16)
+>>   #define CORE_HW_AUTOCAL_ENA            BIT(17)
+>> @@ -148,6 +152,7 @@ struct sdhci_msm_host {
+>>          u32 curr_io_level;
+>>          wait_queue_head_t pwr_irq_wait;
+>>          bool pwr_irq_flag;
+>> +       u32 caps_0;
+>>   };
+>>
+>>   static unsigned int msm_get_clock_rate_for_bus_mode(struct sdhci_host *host,
+>> @@ -1313,6 +1318,35 @@ static void sdhci_msm_writeb(struct sdhci_host *host, u8 val, int reg)
+>>                  sdhci_msm_check_power_status(host, req_type);
+>>   }
+>>
+>> +static int sdhci_msm_set_regulator_caps(struct sdhci_msm_host *msm_host)
+>> +{
+>> +       struct mmc_host *mmc = msm_host->mmc;
+>> +       struct regulator *supply = mmc->supply.vqmmc;
+>> +       int i, count;
+>> +       u32 caps = 0, vdd_uV;
+>> +
+>> +       if (!IS_ERR(mmc->supply.vqmmc)) {
+>> +               count = regulator_count_voltages(supply);
+>> +               if (count < 0)
+>> +                       return count;
+>> +               for (i = 0; i < count; i++) {
+>> +                       vdd_uV = regulator_list_voltage(supply, i);
+>> +                       if (vdd_uV <= 0)
+>> +                               continue;
+>> +                       if (vdd_uV > 2700000)
+>> +                               caps |= CORE_3_0V_SUPPORT;
+>> +                       if (vdd_uV < 1950000)
+>> +                               caps |= CORE_1_8V_SUPPORT;
+>> +               }
+> 
+> Shouldn't you be using regulator_is_supported_voltage() rather than
+> open coding?  Also: I've never personally worked on a device where it
+> was used, but there is definitely a concept floating about of a
+> voltage level of 1.2V.  Maybe should copy the ranges from
+> mmc_regulator_set_vqmmc()?
+> 
+> 
+> Also: seems like you should have some way to deal with "caps" ending
+> up w/ no bits set.  IIRC you can have a regulator that can be enabled
+> / disabled but doesn't list a voltage, so if someone messed up their
+> device tree you could end up in this case.  Should you print a
+> warning?  ...or treat it as if we support "3.0V"?  ...or ?  I guess it
+> depends on how do you want patch #2 to behave in that case.
 
-On Sun, Feb 11, 2018 at 10:01 PM, Vijay Viswanath
-<vviswana@codeaurora.org> wrote:
-> From: Krishna Konda <kkonda@codeaurora.org>
->
-> The PADs for SD card are dual-voltage that support 3v/1.8v. Those PADs
-> have a control signal  (io_pad_pwr_switch/mode18 ) that indicates
-> whether the PAD works in 3v or 1.8v.
->
-> SDHC core on msm platforms should have IO_PAD_PWR_SWITCH bit set/unset
-> based on actual voltage used for IO lines. So when power irq is
-> triggered for io high or io low, the driver should check the voltages
-> supported and set the pad accordingly.
->
-> Signed-off-by: Krishna Konda <kkonda@codeaurora.org>
-> Signed-off-by: Venkat Gopalakrishnan <venkatg@codeaurora.org>
-> Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
-> ---
->  drivers/mmc/host/sdhci-msm.c | 34 ++++++++++++++++++++++++++++++++++
->  1 file changed, 34 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 5c23e92..96c81df 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -78,6 +78,8 @@
->  #define CORE_HC_MCLK_SEL_DFLT  (2 << 8)
->  #define CORE_HC_MCLK_SEL_HS400 (3 << 8)
->  #define CORE_HC_MCLK_SEL_MASK  (3 << 8)
-> +#define CORE_IO_PAD_PWR_SWITCH_EN      (1 << 15)
-> +#define CORE_IO_PAD_PWR_SWITCH  (1 << 16)
->  #define CORE_HC_SELECT_IN_EN   BIT(18)
->  #define CORE_HC_SELECT_IN_HS400        (6 << 19)
->  #define CORE_HC_SELECT_IN_MASK (7 << 19)
-> @@ -1109,6 +1111,7 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
->         u32 irq_status, irq_ack = 0;
->         int retry = 10;
->         int pwr_state = 0, io_level = 0;
-> +       u32 config = 0;
+Both, initialize it to sane value and print something.  This way at
+least you have a good chance of booting and not hard hanging and you
+are given a reasonable message indicating what needs to be fixed.
 
-Don't init things to 0 unless you're relying on it (you're not).
-Doing so tends to bypass compiler warnings about "use before init" and
-leads to uncaught bugs.
+-jeremy
 
-
->         irq_status = readl_relaxed(msm_host->core_mem + CORE_PWRCTL_STATUS);
-> @@ -1166,6 +1169,30 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
->          */
->         writel_relaxed(irq_ack, msm_host->core_mem + CORE_PWRCTL_CTL);
->
-> +       /* Ensure order between core_mem and hc_mem */
-> +       mb();
-
-I spent a bit of time brushing up on my memory barriers and (as far as
-I understand) I agree that in general mb() between accesses of
-core_mem and hc_mem is technically needed since, as you say, there are
-two separate io-mapped devices here and you're using relaxed
-accessors.
-
-Oh, but hold on.  In this particular case they're truly not needed,
-right?  The value stored in CORE_VENDOR_SPEC should be exactly the
-value you wrote last to it, right?  ...and you're just reading it
-back.  There should be no need for any sort of barrier here...
-...and, if you wanted to be _truly_ efficient (maybe you do since
-you're going through all this trouble of using readl_relaxed) you
-could just cache this value in "struct sdhci_msm_host" and you don't
-even have to read it back at all.
-
-
-> +       /*
-> +        * We should unset IO PAD PWR switch only if the register write can
-> +        * set IO lines high and the regulator also switches to 3 V.
-> +        * Else, we should keep the IO PAD PWR switch set.
-> +        * This is applicable to certain targets where eMMC vccq supply is only
-> +        * 1.8V. In such targets, even during REQ_IO_HIGH, the IO PAD PWR
-> +        * switch must be kept set to reflect actual regulator voltage. This
-> +        * way, during initialization of controllers with only 1.8V, we will
-> +        * set the IO PAD bit without waiting for a REQ_IO_LOW.
-> +        */
-> +       config = readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC);
-> +
-> +       if ((io_level & REQ_IO_HIGH) && (msm_host->caps_0 & CORE_3_0V_SUPPORT))
-> +               config &= ~CORE_IO_PAD_PWR_SWITCH;
-> +       else if ((io_level & REQ_IO_LOW) ||
-> +                       (msm_host->caps_0 & CORE_1_8V_SUPPORT))
-> +               config |= CORE_IO_PAD_PWR_SWITCH;
-
-Part of me thinks that this would all be much cleaner using the same
-solution as "drivers/power/avs/rockchip-io-domain.c".  AKA: register
-to be notified about changes to vqmmc and set the bit whenever it
-flips.  ...but I won't insist on that.  I don't know a whole lot about
-the whole "REQ_IO_HIGH" bug I guess it's a sane place to do this...
-
-...but I will say that the fact that sometimes "config" isn't set to
-anything at all here confuses me (IOW if you don't hit either the "if"
-or "else if" then config is unchanged).  I think the comment block
-above tries to explain it, but I still don't really get it.  Maybe
-more examples?  If I was describing the current algorithm, I'd give
-these examples:
-
-* If vqmmc can only be 1.8V then at init time we'll have set
-PAD_PWR_SWITCH_EN and leave the PAD_PWR_SWITCH set to 3.3V, but then
-upon the first "REQ_IO_LOW" we'll transition down to 1.8V and stay
-there forever.
-
-* If vqmmc can only be 3.3V then at init time we'll have set
-PAD_PWR_SWITCH_EN and leave the PAD_PWR_SWITCH set to 3.3V always.
-
-* If vqmmc can be either 3.3V or 1.8V then at init time we'll have set
-PAD_PWR_SWITCH_EN and leave the PAD_PWR_SWITCH set to 3.3V, but then
-we'll honor REQ_IO_LOW / REQ_IO_HIGH.
-
-* If vqmmc has an unknown range (or ins't provided) then we'll behave
-like the 3.3V case (because earlier code initted PAD_PWR_SWITCH_EN to
-0 when it wrote CORE_VENDOR_SPEC_POR_VAL and then we never change it).
-
-
-> +
-> +       writel_relaxed(config, host->ioaddr + CORE_VENDOR_SPEC);
-> +       /* Ensure IO pad update before any further register read/writes */
-> +       mb();
-
-I agree that (to the best of my understanding) this mb() ought to be
-there, but maybe mention that the reason is that you have two separate
-IO ranges for registers and that's why you need it.
-
-Also: if you truly care about avoiding mb() calls (and since you're
-using _relaxed variants I assume you do), you should avoid writing the
-config and doing the "mb" if you didn't actually make a change.
-
-
-> +
->         if (pwr_state)
->                 msm_host->curr_pwr_state = pwr_state;
->         if (io_level)
-> @@ -1518,6 +1545,13 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->         }
->
->         /*
-> +        * Set the PAD_PWR_SWITCH_EN bit so that the PAD_PWR_SWITCH bit can
-> +        * be used as required later on.
-> +        */
-> +       config = readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC);
-> +       config |= CORE_IO_PAD_PWR_SWITCH_EN;
-> +       writel_relaxed(config, host->ioaddr + CORE_VENDOR_SPEC);
-
-If this is going to be unconditional (as you've written it) should
-this be combined with the statement earlier in the same function where
-we write "CORE_VENDOR_SPEC_POR_VAL" to this same register?
-
-Seems like you could write:
-
-#define CORE_VENDOR_SPEC_INIT_VAL (CORE_VENDOR_SPEC_POR_VAL | \
-                           CORE_IO_PAD_PWR_SWITCH_EN)
-
-...then just change the init line to use "CORE_VENDOR_SPEC_INIT_VAL"
-instead of "CORE_VENDOR_SPEC_POR_VAL".
-
----
-
-...but it seems like it might be even better just leave the "en" bit
-off for now and just turn it on when you actually need it.
-
-BTW: All I have is a very terse register spec in front of me, but do
-you happen to know why "HC_IO_PAD_PWR_SWITCH_EN" even exists at all?
-Is there some difference between "enabled but choose 3.3 V" and "not
-enabled?"  Also: do all versions of the controller supported by this
-driver support this bit?
-
-One last thing: on SDM845 one of the two SD controllers doesn't
-support 1.8V, though the register description still describes these
-bits.  Presumably for that controller it's better to just not set
-"enabled" at all?
-
-
-
-
--Doug
+> 
+> 
+>> +       }
+> 
+> How should things behave if vqmmc is an error?  In that case is it
+> important to not set "CORE_IO_PAD_PWR_SWITCH_EN" in patch set #2?
+> ...or should you set "CORE_IO_PAD_PWR_SWITCH_EN" but then make sure
+> you don't set "CORE_IO_PAD_PWR_SWITCH"?
+> 
+> 
+>> +       msm_host->caps_0 |= caps;
+>> +       pr_debug("%s: %s: supported caps: 0x%08x\n", mmc_hostname(mmc),
+>> +                       __func__, caps);
+>> +
+>> +       return 0;
+>> +}
+>> +
+>> +
+>>   static const struct of_device_id sdhci_msm_dt_match[] = {
+>>          { .compatible = "qcom,sdhci-msm-v4" },
+>>          {},
+>> @@ -1530,6 +1564,10 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>>          ret = sdhci_add_host(host);
+>>          if (ret)
+>>                  goto pm_runtime_disable;
+>> +       ret = sdhci_msm_set_regulator_caps(msm_host);
+>> +       if (ret)
+>> +               dev_err(&pdev->dev, "%s: Failed to set regulator caps: %d\n",
+>> +                               __func__, ret);
+> 
+> Why do you need __func__ here?  You're already using dev_err(), that
+> gives an idea of where we are.
+> 
+> 
+>>
+>>          pm_runtime_mark_last_busy(&pdev->dev);
+>>          pm_runtime_put_autosuspend(&pdev->dev);
+>> --
+>>   Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc.
+>> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a Linux Foundation Collaborative Project.
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
