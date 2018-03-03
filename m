@@ -1,162 +1,106 @@
-From: Jeremy McNicoll <jmcnicol@redhat.com>
-Subject: Re: [PATCH V2 1/2] mmc: sdhci-msm: Add support to store supported
- vdd-io voltages
-Date: Fri, 2 Mar 2018 15:08:21 -0800
-Message-ID: <19cc8cdf-3c75-5bde-08b2-34c4f4a2d5fa@redhat.com>
-References: <1518415278-59062-1-git-send-email-vviswana@codeaurora.org>
- <1518415278-59062-2-git-send-email-vviswana@codeaurora.org>
- <CAD=FV=VZVcN+47=KVkjDsoMtEaznDrNQSOj_iOdVpXDN8NURig@mail.gmail.com>
+From: Stefan Wahren <stefan.wahren@i2se.com>
+Subject: Re: [PATCH 1/2] mmc: bcm2835: reset host on timeout
+Date: Sat, 3 Mar 2018 14:58:45 +0100 (CET)
+Message-ID: <166274019.307112.1520085525833@email.1und1.de>
+References: <97593d6e1a41af1baff61f7d9e6e68a450fc9da6.1518619058.git.msuchanek@suse.de>
+ <1fbf0d77-cb53-f0fa-b810-e9954138d907@i2se.com>
+ <20180214163649.3a0c9476@kitsune.suse.cz>
+ <20180214165827.386b9bb1@kitsune.suse.cz>
+ <ecf8dd61-ab16-b298-d197-ea93ecf5982b@i2se.com>
+ <20180214202454.6e7ebeaf@naga.suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAD=FV=VZVcN+47=KVkjDsoMtEaznDrNQSOj_iOdVpXDN8NURig@mail.gmail.com>
-Content-Language: en-US
+In-Reply-To: <20180214202454.6e7ebeaf@naga.suse.cz>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>, Vijay Viswanath <vviswana@codeaurora.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, evgreen@chromium.org
+To: =?UTF-8?Q?Michal_Such=C3=A1nek?= <msuchanek@suse.de>
+Cc: Eric Anholt <eric@anholt.net>, bcm-kernel-feedback-list@broadcom.com, linux-kernel@vger.kernel.org, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Florian Fainelli <f.fainelli@gmail.com>, linux-rpi-kernel@lists.infradead.org, Phil Elwell <phil@raspberrypi.org>, Gerd Hoffmann <kraxel@redhat.com>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Julia Lawall <Julia.Lawall@lip6.fr>, "Gustavo A. R. Silva" <garsilva@embeddedor.com>, linux-arm-kernel@lists.infradead.org, Stefan Schake <stschake@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 2018-03-02 10:23 AM, Doug Anderson wrote:
-> Hi,
-> 
-> On Sun, Feb 11, 2018 at 10:01 PM, Vijay Viswanath
-> <vviswana@codeaurora.org> wrote:
->> During probe check whether the vdd-io regulator of sdhc platform device
->> can support 1.8V and 3V and store this information as a capability of
->> platform device.
->>
->> Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
->> ---
->>   drivers/mmc/host/sdhci-msm.c | 38 ++++++++++++++++++++++++++++++++++++++
->>   1 file changed, 38 insertions(+)
->>
->> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
->> index c283291..5c23e92 100644
->> --- a/drivers/mmc/host/sdhci-msm.c
->> +++ b/drivers/mmc/host/sdhci-msm.c
->> @@ -23,6 +23,7 @@
->>   #include <linux/iopoll.h>
->>
->>   #include "sdhci-pltfm.h"
->> +#include <linux/regulator/consumer.h>
-> 
-> This is a strange sort order for this include file.  Why is it after
-> the local include?
-> 
-> 
->>   #define CORE_MCI_VERSION               0x50
->>   #define CORE_VERSION_MAJOR_SHIFT       28
->> @@ -81,6 +82,9 @@
->>   #define CORE_HC_SELECT_IN_HS400        (6 << 19)
->>   #define CORE_HC_SELECT_IN_MASK (7 << 19)
->>
->> +#define CORE_3_0V_SUPPORT      (1 << 25)
->> +#define CORE_1_8V_SUPPORT      (1 << 26)
->> +
-> 
-> Is there something magical about 25 and 26?  This is a new caps field,
-> so I'd have expected 0 and 1.
-> 
-> 
->>   #define CORE_CSR_CDC_CTLR_CFG0         0x130
->>   #define CORE_SW_TRIG_FULL_CALIB                BIT(16)
->>   #define CORE_HW_AUTOCAL_ENA            BIT(17)
->> @@ -148,6 +152,7 @@ struct sdhci_msm_host {
->>          u32 curr_io_level;
->>          wait_queue_head_t pwr_irq_wait;
->>          bool pwr_irq_flag;
->> +       u32 caps_0;
->>   };
->>
->>   static unsigned int msm_get_clock_rate_for_bus_mode(struct sdhci_host *host,
->> @@ -1313,6 +1318,35 @@ static void sdhci_msm_writeb(struct sdhci_host *host, u8 val, int reg)
->>                  sdhci_msm_check_power_status(host, req_type);
->>   }
->>
->> +static int sdhci_msm_set_regulator_caps(struct sdhci_msm_host *msm_host)
->> +{
->> +       struct mmc_host *mmc = msm_host->mmc;
->> +       struct regulator *supply = mmc->supply.vqmmc;
->> +       int i, count;
->> +       u32 caps = 0, vdd_uV;
->> +
->> +       if (!IS_ERR(mmc->supply.vqmmc)) {
->> +               count = regulator_count_voltages(supply);
->> +               if (count < 0)
->> +                       return count;
->> +               for (i = 0; i < count; i++) {
->> +                       vdd_uV = regulator_list_voltage(supply, i);
->> +                       if (vdd_uV <= 0)
->> +                               continue;
->> +                       if (vdd_uV > 2700000)
->> +                               caps |= CORE_3_0V_SUPPORT;
->> +                       if (vdd_uV < 1950000)
->> +                               caps |= CORE_1_8V_SUPPORT;
->> +               }
-> 
-> Shouldn't you be using regulator_is_supported_voltage() rather than
-> open coding?  Also: I've never personally worked on a device where it
-> was used, but there is definitely a concept floating about of a
-> voltage level of 1.2V.  Maybe should copy the ranges from
-> mmc_regulator_set_vqmmc()?
-> 
-> 
-> Also: seems like you should have some way to deal with "caps" ending
-> up w/ no bits set.  IIRC you can have a regulator that can be enabled
-> / disabled but doesn't list a voltage, so if someone messed up their
-> device tree you could end up in this case.  Should you print a
-> warning?  ...or treat it as if we support "3.0V"?  ...or ?  I guess it
-> depends on how do you want patch #2 to behave in that case.
+Hi Michal,
 
-Both, initialize it to sane value and print something.  This way at
-least you have a good chance of booting and not hard hanging and you
-are given a reasonable message indicating what needs to be fixed.
+[add Stefan to CC]
 
--jeremy
+> Michal Suchánek <msuchanek@suse.de> hat am 14. Februar 2018 um 20:24 geschrieben:
+> 
+> 
+> On Wed, 14 Feb 2018 17:49:31 +0100
+> Stefan Wahren <stefan.wahren@i2se.com> wrote:
+> 
+> > Hi Michal,
+> > 
+> > [add Phil]
+> > 
+> > Am 14.02.2018 um 17:13 schrieb Michal Suchánek:
+> > > On Wed, 14 Feb 2018 16:36:49 +0100
+> > > Michal Suchánek <msuchanek@suse.de> wrote:
+> > >  
+> > >> On Wed, 14 Feb 2018 15:58:31 +0100
+> > >> Stefan Wahren <stefan.wahren@i2se.com> wrote:
+> > >>  
+> > >>> Hi Michal,
+> > >>>
+> > >>> Am 14.02.2018 um 15:38 schrieb Michal Suchanek:    
+> > >>>> The bcm2835 mmc host tends to lock up for unknown reason so reset
+> > >>>> it on timeout. The upper mmc block layer tries retransimitting
+> > >>>> with single blocks which tends to work out after a long wait.
+> > >>>>
+> > >>>> This is better than giving up and leaving the machine broken for
+> > >>>> no obvious reason.      
+> > >>> could you please provide more information about this issue
+> > >>> (affected hardware, kernel config, version, dmesg, reproducible
+> > >>> scenario)? 
+> > > It tends to reproduce when upgrading a few packages with zypper and
+> > > otherwise at random during system operation. It seems that for my
+> > > card it worsens with age to some degree so perhaps it depends on the
+> > > fragmentation of the internal card flash.
+> > >
+> > > Attaching dmesg and kernel config.  
+> > 
+> > do you noticed this issue before 4.15-rc4?
+> 
+> I initially noticed it with 4.4 kernel with some backports to make it
+> bootable on RPi.
+> > 
+> > Could you please test with 4.15 final again?
+> 
+> Right, I can apply the patches on something more recent.
+> 
+> > 
+> > What kind of SD card (name) triggers the issue?
+> 
+> Samsung EVO MB-MP16D
+> 
+> Also see https://elinux.org/RPi_SD_cards#Which_SD_card.3F
+> 
+> Thanks
+> 
+> Michal
+> 
 
-> 
-> 
->> +       }
-> 
-> How should things behave if vqmmc is an error?  In that case is it
-> important to not set "CORE_IO_PAD_PWR_SWITCH_EN" in patch set #2?
-> ...or should you set "CORE_IO_PAD_PWR_SWITCH_EN" but then make sure
-> you don't set "CORE_IO_PAD_PWR_SWITCH"?
-> 
-> 
->> +       msm_host->caps_0 |= caps;
->> +       pr_debug("%s: %s: supported caps: 0x%08x\n", mmc_hostname(mmc),
->> +                       __func__, caps);
->> +
->> +       return 0;
->> +}
->> +
->> +
->>   static const struct of_device_id sdhci_msm_dt_match[] = {
->>          { .compatible = "qcom,sdhci-msm-v4" },
->>          {},
->> @@ -1530,6 +1564,10 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->>          ret = sdhci_add_host(host);
->>          if (ret)
->>                  goto pm_runtime_disable;
->> +       ret = sdhci_msm_set_regulator_caps(msm_host);
->> +       if (ret)
->> +               dev_err(&pdev->dev, "%s: Failed to set regulator caps: %d\n",
->> +                               __func__, ret);
-> 
-> Why do you need __func__ here?  You're already using dev_err(), that
-> gives an idea of where we are.
-> 
-> 
->>
->>          pm_runtime_mark_last_busy(&pdev->dev);
->>          pm_runtime_put_autosuspend(&pdev->dev);
->> --
->>   Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc.
->> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a Linux Foundation Collaborative Project.
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+yesterday i finished my stress tests with Raspberry Pi 3.
+
+Scenario:
+- copy Tumbleweed on SD card (openSUSE-Tumbleweed-ARM-JeOS-raspberrypi3.aarch64-2018.02.02-Build1.2.raw, Linux 4.14.15)
+- setup locales with yast
+- run zypper update
+- reboot
+- install and remove java 1.8 in a loop for at least 1 hour
+
+Results of the different SD cards:
+Toshiba uSDHC Class 10 UHS-1 32 GB: PASS
+BASETech uSDHC Class 10 16 GB: PASS
+Samsung uSDHC EVO+ UHS-1 16 GB: PASS
+Samsung uSDHC Class 6 32 GB: PASS
+SanDisk Edge Class 4 16 GB: PASS
+Kingston uSDHC Class 10 UHS-1 32 GB: PASS
+QUMOX uSDHC Class 10 UHS-1 16 GB: FAIL (zypper segfaulted permantently)
+Transcend uSDHC Class 10 UHS-1 32 GB: PASS
+
+I was never able to reproduce this timeout. So i still need the feedback about the 4.15 and i a reliable test scenario.
+
+In a github issue, i've read that badblocks could reproduce the issue more likely.
+
+Regards
+Stefan
