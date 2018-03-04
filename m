@@ -1,31 +1,67 @@
-From: Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>
-Subject: Re: [PATCH] mmc: Export host capabilities to debugfs.
-Date: Sat, 3 Mar 2018 18:32:53 +0200
-Message-ID: <ba1aa77a-88ea-faba-8dec-33373b65664c@mentor.com>
-References: <1519910255-6296-1-git-send-email-harish_kandiga@mentor.com>
+From: Michal =?UTF-8?B?U3VjaMOhbmVr?= <msuchanek@suse.de>
+Subject: Re: [PATCH 2/2] mmc: bcm2835: print some informational messages
+ during reset
+Date: Sun, 4 Mar 2018 16:46:16 +0100
+Message-ID: <20180304164616.75e8e55e@naga.suse.cz>
+References: <97593d6e1a41af1baff61f7d9e6e68a450fc9da6.1518619058.git.msuchanek@suse.de>
+        <97593d6e1a41af1baff61f7d9e6e68a450fc9da6.1518619058.git.msuchanek@suse.de>
+        <57ff1e429a7fc12300a3cca0c5e9a637beed0d3a.1518619058.git.msuchanek@suse.de>
+        <F404E9C8-AE64-4B36-AD1B-911BD3C33946@gmail.com>
+        <20180214204733.7987d16c@naga.suse.cz>
+        <1950058855.86123.1518718920111@email.1und1.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1519910255-6296-1-git-send-email-harish_kandiga@mentor.com>
+In-Reply-To: <1950058855.86123.1518718920111@email.1und1.de>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Harish Jenny K N <harish_kandiga@mentor.com>, ulf.hansson@linaro.org, linus.walleij@linaro.org, adrian.hunter@intel.com, shawn.lin@rock-chips.com, avri.altman@wdc.com, andriy.shevchenko@linux.intel.com
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Stefan Wahren <stefan.wahren@i2se.com>
+Cc: Florian Fainelli <f.fainelli@gmail.com>, Scott Branden <sbranden@broadcom.com>, linux-rpi-kernel@lists.infradead.org, Eric Anholt <eric@anholt.net>, bcm-kernel-feedback-list@broadcom.com, Gerd Hoffmann <kraxel@redhat.com>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-kernel@vger.kernel.org, Ray Jui <rjui@broadcom.com>, "Gustavo A. R. Silva" <garsilva@embeddedor.com>, Julia Lawall <Julia.Lawall@lip6.fr>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Harish,
+On Thu, 15 Feb 2018 19:22:00 +0100 (CET)
+Stefan Wahren <stefan.wahren@i2se.com> wrote:
 
-On 03/01/2018 03:17 PM, Harish Jenny K N wrote:
-> This patch exports the host capabilities to debugfs
+> Hi Michal,
 > 
-> Signed-off-by: Andrew Gabbasov <andrew_gabbasov@mentor.com>
-> Signed-off-by: Harish Jenny K N <harish_kandiga@mentor.com>
-> ---
+> > Michal Suchánek <msuchanek@suse.de> hat am 14. Februar 2018 um
+> > 20:47 geschrieben:
+> > 
+> > 
+> > On Wed, 14 Feb 2018 08:50:16 -0800
+> > Florian Fainelli <f.fainelli@gmail.com> wrote:
+> >   
+> > > On February 14, 2018 6:38:58 AM PST, Michal Suchanek
+> > > <msuchanek@suse.de> wrote:  
+> > > >The previous patch does reset during hardware error so make the
+> > > >reset progress more visible.    
+> > > 
+> > > Based on your previous email it looks like this can happen quite
+> > > frequently so we might be spamming the kernel log with such reset
+> > > messages. Turning this into a debug print would not be great
+> > > either, how about a custom sysfs attribute counting the number of
+> > > times a reset was done?  
+> > 
+> > Since every such message happens when the system stalls for like
+> > half a minute I don't think there will be that many until somebody
+> > notices something is amiss. It might be also helpful in diagnosing
+> > if other cards lock up in different way - for me the DMA shutdown
+> > is short so I guess it's the mmc host that is locked up and the DMA
+> > engine is fine. It might look differently on different systems,
+> > though.  
+> 
+> FWIW according to your dmesg your RPi doesn't use the DMA engine:
+> 
+> [ 5.004609] sdhost-bcm2835 3f202000.sdhost: unable to initialise DMA
+> channel. Falling back to PIO [ 5.154518] sdhost-bcm2835
+> 3f202000.sdhost: loaded - DMA disabled
+> 
+> For me it's a chicken and egg problem if the DMA driver is build as a
+> kernel module.
 
-would you mind to restore the authorship to Abbas Raza and send v2?
+It can be included in the ramdisk but somebody would have to add it to
+the list of required modules because the dependency is non-obvious.
 
-Thank you in advance.
+Thanks
 
---
-With best wishes,
-Vladimir
+Michal
