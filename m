@@ -1,33 +1,85 @@
-From: Michal =?UTF-8?B?U3VjaMOhbmVr?= <msuchanek@suse.de>
+From: Stefan Wahren <stefan.wahren@i2se.com>
 Subject: Re: [PATCH 1/2] mmc: bcm2835: reset host on timeout
-Date: Sun, 4 Mar 2018 17:36:53 +0100
-Message-ID: <20180304173653.78adac53@naga.suse.cz>
+Date: Sun, 4 Mar 2018 19:11:49 +0100 (CET)
+Message-ID: <46261671.179357.1520187109844@email.1und1.de>
 References: <97593d6e1a41af1baff61f7d9e6e68a450fc9da6.1518619058.git.msuchanek@suse.de>
-        <1fbf0d77-cb53-f0fa-b810-e9954138d907@i2se.com>
-        <20180214163649.3a0c9476@kitsune.suse.cz>
-        <20180214165827.386b9bb1@kitsune.suse.cz>
-        <ecf8dd61-ab16-b298-d197-ea93ecf5982b@i2se.com>
-        <20180214202454.6e7ebeaf@naga.suse.cz>
-        <166274019.307112.1520085525833@email.1und1.de>
+ <1fbf0d77-cb53-f0fa-b810-e9954138d907@i2se.com>
+ <20180214163649.3a0c9476@kitsune.suse.cz>
+ <20180214165827.386b9bb1@kitsune.suse.cz>
+ <ecf8dd61-ab16-b298-d197-ea93ecf5982b@i2se.com>
+ <20180214202454.6e7ebeaf@naga.suse.cz>
+ <431948292.48734.1518640216077@email.1und1.de>
+ <20180304165717.6d4d8e68@naga.suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <166274019.307112.1520085525833@email.1und1.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Stefan Wahren <stefan.wahren@i2se.com>
-Cc: Eric Anholt <eric@anholt.net>, bcm-kernel-feedback-list@broadcom.com, linux-kernel@vger.kernel.org, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Florian Fainelli <f.fainelli@gmail.com>, linux-rpi-kernel@lists.infradead.org, Phil Elwell <phil@raspberrypi.org>, Gerd Hoffmann <kraxel@redhat.com>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Julia Lawall <Julia.Lawall@lip6.fr>, "Gustavo A. R. Silva" <garsilva@embeddedor.com>, linux-arm-kernel@lists.infradead.org, Stefan Schake <stschake@gmail.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20180304165717.6d4d8e68@naga.suse.cz>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: =?UTF-8?Q?Michal_Such=C3=A1nek?= <msuchanek@suse.de>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Florian Fainelli <f.fainelli@gmail.com>, Scott Branden <sbranden@broadcom.com>, Julia Lawall <Julia.Lawall@lip6.fr>, Ray Jui <rjui@broadcom.com>, Phil Elwell <phil@raspberrypi.org>, linux-kernel@vger.kernel.org, Eric Anholt <eric@anholt.net>, bcm-kernel-feedback-list@broadcom.com, linux-rpi-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, "Gustavo A. R. Silva" <garsilva@embeddedor.com>, linux-arm-kernel@lists.infradead.org, Gerd Hoffmann <kraxel@redhat.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Sat, 3 Mar 2018 14:58:45 +0100 (CET)
-Stefan Wahren <stefan.wahren@i2se.com> wrote:
-
-> In a github issue, i've read that badblocks could reproduce the issue
-> more likely.
-
-How many iterations of badblocks? It doe snot reproduce the issue for
-me.
-
-Thanks
-
-Michal
+SGkgTWljaGFsLAoKPiBNaWNoYWwgU3VjaMOhbmVrIDxtc3VjaGFuZWtAc3VzZS5kZT4gaGF0IGFt
+IDQuIE3DpHJ6IDIwMTggdW0gMTY6NTcgZ2VzY2hyaWViZW46Cj4gCj4gCj4gT24gV2VkLCAxNCBG
+ZWIgMjAxOCAyMTozMDoxNiArMDEwMCAoQ0VUKQo+IFN0ZWZhbiBXYWhyZW4gPHN0ZWZhbi53YWhy
+ZW5AaTJzZS5jb20+IHdyb3RlOgo+IAo+ID4gSGkgTWljaGFsLAo+ID4gCj4gPiA+IE1pY2hhbCBT
+dWNow6FuZWsgPG1zdWNoYW5la0BzdXNlLmRlPiBoYXQgYW0gMTQuIEZlYnJ1YXIgMjAxOCB1bQo+
+ID4gPiAyMDoyNCBnZXNjaHJpZWJlbjoKPiA+ID4gCj4gPiA+IAo+ID4gPiBPbiBXZWQsIDE0IEZl
+YiAyMDE4IDE3OjQ5OjMxICswMTAwCj4gPiA+IFN0ZWZhbiBXYWhyZW4gPHN0ZWZhbi53YWhyZW5A
+aTJzZS5jb20+IHdyb3RlOgo+ID4gPiAgIAo+ID4gPiA+IEhpIE1pY2hhbCwKPiA+ID4gPiAKPiA+
+ID4gPiBbYWRkIFBoaWxdCj4gPiA+ID4gCj4gPiA+ID4gQW0gMTQuMDIuMjAxOCB1bSAxNzoxMyBz
+Y2hyaWViIE1pY2hhbCBTdWNow6FuZWs6ICAKPiA+ID4gPiA+IE9uIFdlZCwgMTQgRmViIDIwMTgg
+MTY6MzY6NDkgKzAxMDAKPiA+ID4gPiA+IE1pY2hhbCBTdWNow6FuZWsgPG1zdWNoYW5la0BzdXNl
+LmRlPiB3cm90ZToKPiA+ID4gPiA+ICAgIAo+ID4gPiA+ID4+IE9uIFdlZCwgMTQgRmViIDIwMTgg
+MTU6NTg6MzEgKzAxMDAKPiA+ID4gPiA+PiBTdGVmYW4gV2FocmVuIDxzdGVmYW4ud2FocmVuQGky
+c2UuY29tPiB3cm90ZToKPiA+ID4gPiA+PiAgICAKPiA+ID4gPiA+Pj4gSGkgTWljaGFsLAo+ID4g
+PiA+ID4+Pgo+ID4gPiA+ID4+PiBBbSAxNC4wMi4yMDE4IHVtIDE1OjM4IHNjaHJpZWIgTWljaGFs
+IFN1Y2hhbmVrOiAgICAgIAo+ID4gPiA+ID4+Pj4gVGhlIGJjbTI4MzUgbW1jIGhvc3QgdGVuZHMg
+dG8gbG9jayB1cCBmb3IgdW5rbm93biByZWFzb24gc28KPiA+ID4gPiA+Pj4+IHJlc2V0IGl0IG9u
+IHRpbWVvdXQuIFRoZSB1cHBlciBtbWMgYmxvY2sgbGF5ZXIgdHJpZXMKPiA+ID4gPiA+Pj4+IHJl
+dHJhbnNpbWl0dGluZyB3aXRoIHNpbmdsZSBibG9ja3Mgd2hpY2ggdGVuZHMgdG8gd29yayBvdXQK
+PiA+ID4gPiA+Pj4+IGFmdGVyIGEgbG9uZyB3YWl0Lgo+ID4gPiA+ID4+Pj4KPiA+ID4gPiA+Pj4+
+IFRoaXMgaXMgYmV0dGVyIHRoYW4gZ2l2aW5nIHVwIGFuZCBsZWF2aW5nIHRoZSBtYWNoaW5lIGJy
+b2tlbgo+ID4gPiA+ID4+Pj4gZm9yIG5vIG9idmlvdXMgcmVhc29uLiAgICAgICAgCj4gPiA+ID4g
+Pj4+IGNvdWxkIHlvdSBwbGVhc2UgcHJvdmlkZSBtb3JlIGluZm9ybWF0aW9uIGFib3V0IHRoaXMg
+aXNzdWUKPiA+ID4gPiA+Pj4gKGFmZmVjdGVkIGhhcmR3YXJlLCBrZXJuZWwgY29uZmlnLCB2ZXJz
+aW9uLCBkbWVzZywKPiA+ID4gPiA+Pj4gcmVwcm9kdWNpYmxlIHNjZW5hcmlvKT8gICAKPiA+ID4g
+PiA+IEl0IHRlbmRzIHRvIHJlcHJvZHVjZSB3aGVuIHVwZ3JhZGluZyBhIGZldyBwYWNrYWdlcyB3
+aXRoIHp5cHBlcgo+ID4gPiA+ID4gYW5kIG90aGVyd2lzZSBhdCByYW5kb20gZHVyaW5nIHN5c3Rl
+bSBvcGVyYXRpb24uIEl0IHNlZW1zIHRoYXQKPiA+ID4gPiA+IGZvciBteSBjYXJkIGl0IHdvcnNl
+bnMgd2l0aCBhZ2UgdG8gc29tZSBkZWdyZWUgc28gcGVyaGFwcyBpdAo+ID4gPiA+ID4gZGVwZW5k
+cyBvbiB0aGUgZnJhZ21lbnRhdGlvbiBvZiB0aGUgaW50ZXJuYWwgY2FyZCBmbGFzaC4KPiA+ID4g
+PiA+Cj4gPiA+ID4gPiBBdHRhY2hpbmcgZG1lc2cgYW5kIGtlcm5lbCBjb25maWcuICAgIAo+ID4g
+PiA+IAo+ID4gPiA+IGRvIHlvdSBub3RpY2VkIHRoaXMgaXNzdWUgYmVmb3JlIDQuMTUtcmM0PyAg
+Cj4gPiA+IAo+ID4gPiBJIGluaXRpYWxseSBub3RpY2VkIGl0IHdpdGggNC40IGtlcm5lbCB3aXRo
+IHNvbWUgYmFja3BvcnRzIHRvIG1ha2UKPiA+ID4gaXQgYm9vdGFibGUgb24gUlBpLiAgCj4gPiAK
+PiA+IHRoaXMgY29uZnVzZXMgbWUuIEdlcmQgYW5kIGkgcG9ydGVkIHRoaXMgZHJpdmVyIGZyb20g
+ZG93bnN0cmVhbSBhbmQKPiA+IGZpbmFsbHkgaXQncyBnb3QgbWVyZ2VkIGluIDQuMTIuIAo+ID4g
+Cj4gPiBTbyBkbyB5b3UgbWVhbiB0aGF0IHlvdSBiYWNrcG9ydGVkIHRoZSBtYWlubGluZSB2ZXJz
+aW9uIHRvIDQuNCBvciB0aGUKPiA+IGRvd25zdHJlYW0gdmVyc2lvbiBvZiA0LjQ/Cj4gCj4gSSBk
+aWQgbm90IGJhY2twb3J0IGl0IGJ1dCBsb29raW5nIGF0IHRoZSBjaGFuZ2Vsb2cgaXQgaXMgYmFj
+a3BvcnQgb2YKPiB0aGUgNC4xMiBkcml2ZXIuIEl0IGRvZXMgbm90IGxvb2sgYXMgdGhlIDQuMTUg
+ZHJpdmVyIHRob3VnaC4gTG9va3MgbGlrZQo+IHRoZXJlIHdhcyBzb21lIHJlb3JnYW5pemF0aW9u
+IG9mIHRoZSBiY20gbW1jIHNpbmNlIHRoZW4uCj4gCj4gPiAKPiA+IE9uIGEgcXVpY2sgbG9vayB0
+aGV5IHNlZW1zIGlkZW50aWNhbCwgYnV0IHRoZXkgYXJlbid0Lgo+ID4gCj4gPiA+ID4gCj4gPiA+
+ID4gQ291bGQgeW91IHBsZWFzZSB0ZXN0IHdpdGggNC4xNSBmaW5hbCBhZ2Fpbj8gIAo+ID4gPgo+
+IAo+IEkgdHJpZWQgdXBncmFkaW5nIHRvIHRoZSBjdXJyZW50IG1hc3RlciAoNC4xNi1yYzMrKSBh
+bmQgdGhlIGlzc3VlIGlzCj4gc3RpbGwgcmVwcm9kdWNpYmxlIGFsdGhvdWdoIGxlc3MgZnJlcXVl
+bnQuIEkgZGlkIGZ1bGwgdXBncmFkZSBmcm9tIHRoZQo+IGluc3RhbGwgaW1hZ2Ugd2hpY2ggaW5z
+dGFsbHMgb3ZlciAzMDAgcGFja2FnZXMgYW5kIHRoZSBpc3N1ZSB0cmlnZ2VyZWQKPiBzb21ld2hl
+cmUgYXJvdW5kIDIwMHRoIHdoaWxlIGJlZm9yZSBpbnN0YWxsaW5nIGEgaGFsZiBkb3plbiBwYWNr
+YWdlcwo+IHdvdWxkIHVzdWFsbHkgdHJpZ2dlciBpdC4KPiAKCnRoaXMgaXMgdGhlIHNhbWUgd2hh
+dCBpIGRpZCBkdXJpbmcgbXkgc3RyZXNzIHRlc3RzLiBUaGUgc3RlcCBpbnN0YWxsZWQgNDc1IHBh
+Y2thZ2VzLiBUaGUgdGltZW91dCBuZXZlciBvY2N1cmVkLgoKU3RlZmFuCgpfX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpsaW51eC1hcm0ta2VybmVsIG1haWxp
+bmcgbGlzdApsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3Rz
+LmluZnJhZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1hcm0ta2VybmVsCg==
