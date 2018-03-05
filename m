@@ -1,61 +1,61 @@
-From: SF Markus Elfring <elfring@users.sourceforge.net>
-Subject: [PATCH] mmc/core/block: Use memdup_user() rather than duplicating its
- implementation
-Date: Mon, 5 Mar 2018 13:08:03 +0100
-Message-ID: <4eca7388-cb2d-31e0-b64d-afb30818f53e@users.sourceforge.net>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v3] mmc: Export host capabilities to debugfs.
+Date: Mon, 5 Mar 2018 13:13:41 +0100
+Message-ID: <CAPDyKFqL0tE3fdODbpo5Ci1_e=RbOfxZkTXKQ4XWo4FKHzwMiw@mail.gmail.com>
+References: <1520242120-2924-1-git-send-email-harish_kandiga@mentor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Language: en-GB
+In-Reply-To: <1520242120-2924-1-git-send-email-harish_kandiga@mentor.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org
+To: Harish Jenny K N <harish_kandiga@mentor.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, avri.altman@wdc.com, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Vladimir Zapolskiy <Vladimir_Zapolskiy@mentor.com>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Markus Elfring <elfring@users.sourceforge.net>
-Date: Mon, 5 Mar 2018 11:33:21 +0100
+On 5 March 2018 at 10:28, Harish Jenny K N <harish_kandiga@mentor.com> wrote:
+> From: Abbas Raza <Abbas_Raza@mentor.com>
+>
+> This patch exports the host capabilities to debugfs
+>
+> Signed-off-by: Abbas Raza <Abbas_Raza@mentor.com>
+> Signed-off-by: Andrew Gabbasov <andrew_gabbasov@mentor.com>
+> Signed-off-by: Harish Jenny K N <harish_kandiga@mentor.com>
+> ---
+>
+> Changes in v3:
+> - Removed typecasting of &host->caps to (u32 *)
+>
+> Changes in v2:
+> - Changed Author
+>
+>  drivers/mmc/core/debugfs.c | 3 +++
+>  1 file changed, 3 insertions(+)
+>
+> diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+> index c51e0c0..570c9e4 100644
+> --- a/drivers/mmc/core/debugfs.c
+> +++ b/drivers/mmc/core/debugfs.c
+> @@ -289,6 +289,9 @@ void mmc_add_card_debugfs(struct mmc_card *card)
+>
+>         card->debugfs_root = root;
+>
+> +       if (!debugfs_create_x32("host_caps", S_IRUSR, root, &host->caps))
+> +               goto err;
+> +
 
-Reuse existing functionality from memdup_user() instead of keeping
-duplicate source code.
+This isn't the correct place to created the node(s). Please move this
+to mmc_add_host_debugfs().
 
-This issue was detected by using the Coccinelle software.
+Moreover, I suggest you export both caps and caps2 in the same change,
+there is no need to have two changes for that - and finally name the
+nodes to "caps" and "caps2".
 
-Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
----
- drivers/mmc/core/block.c | 15 ++++-----------
- 1 file changed, 4 insertions(+), 11 deletions(-)
+>         if (!debugfs_create_x32("state", S_IRUSR, root, &card->state))
+>                 goto err;
+>
+> --
+> 1.9.1
+>
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 20135a5de748..4b09c7380e70 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -375,22 +375,15 @@ static struct mmc_blk_ioc_data *mmc_blk_ioctl_copy_from_user(
- 		return idata;
- 	}
- 
--	idata->buf = kmalloc(idata->buf_bytes, GFP_KERNEL);
--	if (!idata->buf) {
--		err = -ENOMEM;
-+	idata->buf = memdup_user((void __user *)(unsigned long)
-+				 idata->ic.data_ptr, idata->buf_bytes);
-+	if (IS_ERR(idata->buf)) {
-+		err = PTR_ERR(idata->buf);
- 		goto idata_err;
- 	}
- 
--	if (copy_from_user(idata->buf, (void __user *)(unsigned long)
--					idata->ic.data_ptr, idata->buf_bytes)) {
--		err = -EFAULT;
--		goto copy_err;
--	}
--
- 	return idata;
- 
--copy_err:
--	kfree(idata->buf);
- idata_err:
- 	kfree(idata);
- out:
--- 
-2.16.2
+Kind regards
+Uffe
