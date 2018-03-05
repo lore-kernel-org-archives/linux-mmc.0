@@ -1,43 +1,35 @@
-From: Harish Jenny K N <harish_kandiga@mentor.com>
-Subject: [PATCH v2] mmc: Export host capabilities to debugfs.
-Date: Mon, 5 Mar 2018 09:54:30 +0530
-Message-ID: <1520223870-3471-1-git-send-email-harish_kandiga@mentor.com>
+From: <sean.wang@mediatek.com>
+Subject: [PATCH 1/2] mmc: dt-bindings: add support for MT7622 SoC
+Date: Mon, 5 Mar 2018 15:03:19 +0800
+Message-ID: <6cb1d6d4ee40a61f7b33aed1711753342590d0dd.1520232933.git.sean.wang@mediatek.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, linus.walleij@linaro.org, adrian.hunter@intel.com, shawn.lin@rock-chips.com, avri.altman@wdc.com, andriy.shevchenko@linux.intel.com
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, harish_kandiga@mentor.com, Vladimir_Zapolskiy@mentor.com
+To: robh+dt@kernel.org, mark.rutland@arm.com, ulf.hansson@linaro.org
+Cc: devicetree@vger.kernel.org, linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Sean Wang <sean.wang@mediatek.com>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Abbas Raza <Abbas_Raza@mentor.com>
+From: Sean Wang <sean.wang@mediatek.com>
 
-This patch exports the host capabilities to debugfs
+Add the devicetree binding for MT7622 SoC
 
-Signed-off-by: Abbas Raza <Abbas_Raza@mentor.com>
-Signed-off-by: Andrew Gabbasov <andrew_gabbasov@mentor.com>
-Signed-off-by: Harish Jenny K N <harish_kandiga@mentor.com>
+Signed-off-by: Sean Wang <sean.wang@mediatek.com>
 ---
+ Documentation/devicetree/bindings/mmc/mtk-sd.txt | 1 +
+ 1 file changed, 1 insertion(+)
 
-Changes in v2:
-- Changed Author
-
- drivers/mmc/core/debugfs.c | 3 +++
- 1 file changed, 3 insertions(+)
-
-diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
-index c51e0c0..fa2df7f 100644
---- a/drivers/mmc/core/debugfs.c
-+++ b/drivers/mmc/core/debugfs.c
-@@ -289,6 +289,9 @@ void mmc_add_card_debugfs(struct mmc_card *card)
+diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.txt b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+index 9b80176..f33467a 100644
+--- a/Documentation/devicetree/bindings/mmc/mtk-sd.txt
++++ b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+@@ -12,6 +12,7 @@ Required properties:
+ 	"mediatek,mt8173-mmc": for mmc host ip compatible with mt8173
+ 	"mediatek,mt2701-mmc": for mmc host ip compatible with mt2701
+ 	"mediatek,mt2712-mmc": for mmc host ip compatible with mt2712
++	"mediatek,mt7622-mmc": for MT7622 SoC
+ 	"mediatek,mt7623-mmc", "mediatek,mt2701-mmc": for MT7623 SoC
  
- 	card->debugfs_root = root;
- 
-+	if (!debugfs_create_x32("host_caps", S_IRUSR, root, (u32 *)&host->caps))
-+		goto err;
-+
- 	if (!debugfs_create_x32("state", S_IRUSR, root, &card->state))
- 		goto err;
- 
+ - reg: physical base address of the controller and length
 -- 
-1.9.1
+2.7.4
