@@ -1,66 +1,113 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/2] mmc: mediatek: add support for MT7622 SoC
-Date: Mon, 5 Mar 2018 09:45:59 +0100
-Message-ID: <CAPDyKFq6kPXsxHMCkCfvmm1t1ccs-ZgFY=z6YhuKdza5+WuLLw@mail.gmail.com>
-References: <6cb1d6d4ee40a61f7b33aed1711753342590d0dd.1520232933.git.sean.wang@mediatek.com>
- <83a3ee9471cc7312b9cc43bcf692939e90af34ba.1520232933.git.sean.wang@mediatek.com>
+Subject: Re: [PATCH v4] mmc: dw_mmc: Fix the DTO/CTO timeout overflow
+ calculation for 32-bit systems
+Date: Mon, 5 Mar 2018 09:46:09 +0100
+Message-ID: <CAPDyKFrfo1S5xFRp7T+ayO2rEk7mxu1LgykUZuAMGevq+u6RLg@mail.gmail.com>
+References: <20180228115318.20154-1-Evgeniy.Didin@synopsys.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <83a3ee9471cc7312b9cc43bcf692939e90af34ba.1520232933.git.sean.wang@mediatek.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: sean.wang@mediatek.com
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, linux-mediatek@lists.infradead.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Chaotian Jing <chaotian.jing@mediatek.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20180228115318.20154-1-Evgeniy.Didin@synopsys.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-snps-arc>,
+ <mailto:linux-snps-arc-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-snps-arc/>
+List-Post: <mailto:linux-snps-arc@lists.infradead.org>
+List-Help: <mailto:linux-snps-arc-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-snps-arc>,
+ <mailto:linux-snps-arc-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-snps-arc" <linux-snps-arc-bounces@lists.infradead.org>
+Errors-To: linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org
+To: Evgeniy Didin <Evgeniy.Didin@synopsys.com>
+Cc: Jisheng Zhang <Jisheng.Zhang@synaptics.com>, Shawn Lin <shawn.lin@rock-chips.com>, Alexey Brodkin <Alexey.Brodkin@synopsys.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Douglas Anderson <dianders@chromium.org>, "# 4.0+" <stable@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, linux-snps-arc@lists.infradead.org, Eugeniy Paltsev <Eugeniy.Paltsev@synopsys.com>, Vineet Gupta <Vineet.Gupta1@synopsys.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 5 March 2018 at 08:03,  <sean.wang@mediatek.com> wrote:
-> From: Sean Wang <sean.wang@mediatek.com>
+On 28 February 2018 at 12:53, Evgeniy Didin <Evgeniy.Didin@synopsys.com> wrote:
+> In commit 9d9491a7da2a ("mmc: dw_mmc: Fix the DTO timeout calculation") and
+> commit 4c2357f57dd5 ("mmc: dw_mmc: Fix the CTO timeout calculation")
+> have been made changes which cause multiply overflow for 32-bit systems.
+> The broken timeout calculations leads to unexpected ETIMEDOUT errors and
+> causes stacktrace splat (such as below) during normal data exchange
+> with SD-card.
 >
-> Just applying the existing logic and adding its own characteristics into
-> the space pointed by an extra entry of struct of_device_id to have support
-> of MT7622 SoC.
+> | Running :  4M-check-reassembly-tcp-cmykw2-rotatew2.out -v0 -w1
+> | -  Info: Finished target initialization.
+> | mmcblk0: error -110 transferring data, sector 320544, nr 2048, cmd response
+> |  0x900, card status 0x0
 >
-> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
-> Signed-off-by: Sean Wang <sean.wang@mediatek.com>
-> Tested-by: Jumin Li <jumin.li@mediatek.com>
+> DIV_ROUND_UP_ULL helps to escape usage of __udivdi3() from libgcc and so
+> code gets compiled on all 32-bit platforms as opposed to usage
+> of DIV_ROUND_UP when we may only compile stuff on a very few arches.
+>
+> Lets cast this multiply to u64 type which prevents overflow.
+>
+> Tested-by: Vineet Gupta <Vineet.Gupta1@synopsys.com>
+> Reported-by: Vineet Gupta <Vineet.Gupta1@synopsys.com> # ARC STAR 9001306872 HSDK, sdio: board crashes when copying big files
+> Fixes: 9d9491a7da2a ("mmc: dw_mmc: Fix the DTO timeout calculation")
+> Fixes: 4c2357f57dd5 ("mmc: dw_mmc: Fix the CTO timeout calculation")
+>
+> Signed-off-by: Evgeniy Didin <Evgeniy.Didin@synopsys.com>
+>
+> CC: Alexey Brodkin <abrodkin@synopsys.com>
+> CC: Eugeniy Paltsev <paltsev@synopsys.com>
+> CC: Douglas Anderson <dianders@chromium.org>
+> CC: Ulf Hansson <ulf.hansson@linaro.org>
+> CC: Andy Shevchenko <andy.shevchenko@gmail.com>
+> CC: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+> CC: Shawn Lin <shawn.lin@rock-chips.com>
+> CC: Vineet Gupta <Vineet.Gupta1@synopsys.com>
+> CC: linux-kernel@vger.kernel.org
+> CC: linux-snps-arc@lists.infradead.org
+> Cc: <stable@vger.kernel.org>
 
-Thanks, applied for next!
+Thanks, applied for fixes! I took the liberty to remove this cc-list
+and did some additional minor cleanups of the change log.
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/mtk-sd.c | 12 ++++++++++++
->  1 file changed, 12 insertions(+)
+> Changes since v3:
+> -Switch DIV_ROUND_UP macro to DIV_ROUND_UP_ULL
+> -Make one patch from two patches
+> -Modify commit message
 >
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 6457a7d..cb274e8 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -438,11 +438,23 @@ static const struct mtk_mmc_compatible mt2712_compat = {
->         .enhance_rx = true,
->  };
+> Changes sinve v2:
+> -add fix for cto_ms
 >
-> +static const struct mtk_mmc_compatible mt7622_compat = {
-> +       .clk_div_bits = 12,
-> +       .hs400_tune = false,
-> +       .pad_tune_reg = MSDC_PAD_TUNE0,
-> +       .async_fifo = true,
-> +       .data_tune = true,
-> +       .busy_check = true,
-> +       .stop_clk_fix = true,
-> +       .enhance_rx = true,
-> +};
+> Changes since v1:
+> -uint64_t switched to u64
+>
+>  drivers/mmc/host/dw_mmc.c | 9 ++++++---
+>  1 file changed, 6 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 0aa39975f33b..cba534d4c81b 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -409,7 +409,9 @@ static inline void dw_mci_set_cto(struct dw_mci *host)
+>         cto_div = (mci_readl(host, CLKDIV) & 0xff) * 2;
+>         if (cto_div == 0)
+>                 cto_div = 1;
+> -       cto_ms = DIV_ROUND_UP(MSEC_PER_SEC * cto_clks * cto_div, host->bus_hz);
 > +
->  static const struct of_device_id msdc_of_ids[] = {
->         { .compatible = "mediatek,mt8135-mmc", .data = &mt8135_compat},
->         { .compatible = "mediatek,mt8173-mmc", .data = &mt8173_compat},
->         { .compatible = "mediatek,mt2701-mmc", .data = &mt2701_compat},
->         { .compatible = "mediatek,mt2712-mmc", .data = &mt2712_compat},
-> +       { .compatible = "mediatek,mt7622-mmc", .data = &mt7622_compat},
->         {}
->  };
->  MODULE_DEVICE_TABLE(of, msdc_of_ids);
+> +       cto_ms = DIV_ROUND_UP_ULL((u64)MSEC_PER_SEC * cto_clks * cto_div,
+> +                                 host->bus_hz);
+>
+>         /* add a bit spare time */
+>         cto_ms += 10;
+> @@ -1944,8 +1946,9 @@ static void dw_mci_set_drto(struct dw_mci *host)
+>         drto_div = (mci_readl(host, CLKDIV) & 0xff) * 2;
+>         if (drto_div == 0)
+>                 drto_div = 1;
+> -       drto_ms = DIV_ROUND_UP(MSEC_PER_SEC * drto_clks * drto_div,
+> -                              host->bus_hz);
+> +
+> +       drto_ms = DIV_ROUND_UP_ULL((u64)MSEC_PER_SEC * drto_clks * drto_div,
+> +                                  host->bus_hz);
+>
+>         /* add a bit spare time */
+>         drto_ms += 10;
 > --
-> 2.7.4
+> 2.11.0
 >
