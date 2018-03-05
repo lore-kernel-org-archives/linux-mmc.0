@@ -1,24 +1,50 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH] dt-bindings: rockchip-dw-mshc: use consistent clock names
-Date: Mon, 5 Mar 2018 15:45:38 +0800
-Message-ID: <d4a6c91e-9304-8b4f-5089-b7d7541ac98f@rock-chips.com>
-References: <20180301103447.7059-1-john@metanate.com>
+Subject: Re: [PATCH v2] mmc: Export host capabilities to debugfs.
+Date: Mon, 5 Mar 2018 15:51:54 +0800
+Message-ID: <40000048-4f64-792d-ba38-25a15be8569a@rock-chips.com>
+References: <1520223870-3471-1-git-send-email-harish_kandiga@mentor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset=gbk; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20180301103447.7059-1-john@metanate.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: John Keeping <john@metanate.com>
-Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Heiko Stuebner <heiko@sntech.de>, shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org, linux-rockchip@lists.infradead.org, Rob Herring <robh+dt@kernel.org>, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1520223870-3471-1-git-send-email-harish_kandiga@mentor.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Harish Jenny K N <harish_kandiga@mentor.com>, ulf.hansson@linaro.org, linus.walleij@linaro.org, adrian.hunter@intel.com, avri.altman@wdc.com, andriy.shevchenko@linux.intel.com
+Cc: shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Vladimir_Zapolskiy@mentor.com
 List-Id: linux-mmc@vger.kernel.org
 
-Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+On 2018/3/5 12:24, Harish Jenny K N wrote:
+> From: Abbas Raza <Abbas_Raza@mentor.com>
+> 
+> This patch exports the host capabilities to debugfs
+> 
+> Signed-off-by: Abbas Raza <Abbas_Raza@mentor.com>
+> Signed-off-by: Andrew Gabbasov <andrew_gabbasov@mentor.com>
+> Signed-off-by: Harish Jenny K N <harish_kandiga@mentor.com>
+> ---
+> 
+> Changes in v2:
+> - Changed Author
+> 
+>   drivers/mmc/core/debugfs.c | 3 +++
+>   1 file changed, 3 insertions(+)
+> 
+> diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+> index c51e0c0..fa2df7f 100644
+> --- a/drivers/mmc/core/debugfs.c
+> +++ b/drivers/mmc/core/debugfs.c
+> @@ -289,6 +289,9 @@ void mmc_add_card_debugfs(struct mmc_card *card)
+>   
+>   	card->debugfs_root = root;
+>   
+> +	if (!debugfs_create_x32("host_caps", S_IRUSR, root, (u32 *)&host->caps))
+
+Perhaps you don't need cast, and '&host->caps' should be fine?
+And you don't need to export host->caps2?
+
+> +		goto err;
+> +
+>   	if (!debugfs_create_x32("state", S_IRUSR, root, &card->state))
+>   		goto err;
+>   
+> 
