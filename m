@@ -1,7 +1,7 @@
 From: Harish Jenny K N <harish_kandiga@mentor.com>
-Subject: [PATCH] mmc: Export host capabilities to debugfs.
-Date: Mon, 5 Mar 2018 19:08:44 +0530
-Message-ID: <1520257124-27647-1-git-send-email-harish_kandiga@mentor.com>
+Subject: [PATCH v4] mmc: Export host capabilities to debugfs.
+Date: Mon, 5 Mar 2018 19:09:19 +0530
+Message-ID: <1520257159-27699-1-git-send-email-harish_kandiga@mentor.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
