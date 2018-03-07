@@ -1,204 +1,182 @@
-From: Vijay Viswanath <vviswana@codeaurora.org>
-Subject: Re: [PATCH V2 1/2] mmc: sdhci-msm: Add support to store supported
- vdd-io voltages
-Date: Wed, 7 Mar 2018 12:43:02 +0530
-Message-ID: <ab80d114-9060-1fd0-dc42-6319a4e50d61@codeaurora.org>
-References: <1518415278-59062-1-git-send-email-vviswana@codeaurora.org>
- <1518415278-59062-2-git-send-email-vviswana@codeaurora.org>
- <CAD=FV=VZVcN+47=KVkjDsoMtEaznDrNQSOj_iOdVpXDN8NURig@mail.gmail.com>
- <19cc8cdf-3c75-5bde-08b2-34c4f4a2d5fa@redhat.com>
+From: Harish Jenny K N <harish_kandiga@mentor.com>
+Subject: [PATCH v7] mmc: Export host capabilities to debugfs.
+Date: Wed, 7 Mar 2018 18:11:02 +0530
+Message-ID: <1520426462-3039-1-git-send-email-harish_kandiga@mentor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <19cc8cdf-3c75-5bde-08b2-34c4f4a2d5fa@redhat.com>
-Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jeremy McNicoll <jmcnicol@redhat.com>, Doug Anderson <dianders@chromium.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, evgreen@chromium.org
+To: ulf.hansson@linaro.org, linus.walleij@linaro.org, adrian.hunter@intel.com, shawn.lin@rock-chips.com, avri.altman@wdc.com, andriy.shevchenko@linux.intel.com
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, harish_kandiga@mentor.com, Vladimir_Zapolskiy@mentor.com
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Dough, Jeremy,
+This patch exports the host capabilities to debugfs
 
-On 3/3/2018 4:38 AM, Jeremy McNicoll wrote:
-> On 2018-03-02 10:23 AM, Doug Anderson wrote:
->> Hi,
->>
->> On Sun, Feb 11, 2018 at 10:01 PM, Vijay Viswanath
->> <vviswana@codeaurora.org> wrote:
->>> During probe check whether the vdd-io regulator of sdhc platform device
->>> can support 1.8V and 3V and store this information as a capability of
->>> platform device.
->>>
->>> Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
->>> ---
->>>   drivers/mmc/host/sdhci-msm.c | 38 
->>> ++++++++++++++++++++++++++++++++++++++
->>>   1 file changed, 38 insertions(+)
->>>
->>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
->>> index c283291..5c23e92 100644
->>> --- a/drivers/mmc/host/sdhci-msm.c
->>> +++ b/drivers/mmc/host/sdhci-msm.c
->>> @@ -23,6 +23,7 @@
->>>   #include <linux/iopoll.h>
->>>
->>>   #include "sdhci-pltfm.h"
->>> +#include <linux/regulator/consumer.h>
->>
->> This is a strange sort order for this include file.  Why is it after
->> the local include?
->>
->>
->>>   #define CORE_MCI_VERSION               0x50
->>>   #define CORE_VERSION_MAJOR_SHIFT       28
->>> @@ -81,6 +82,9 @@
->>>   #define CORE_HC_SELECT_IN_HS400        (6 << 19)
->>>   #define CORE_HC_SELECT_IN_MASK (7 << 19)
->>>
->>> +#define CORE_3_0V_SUPPORT      (1 << 25)
->>> +#define CORE_1_8V_SUPPORT      (1 << 26)
->>> +
->>
->> Is there something magical about 25 and 26?  This is a new caps field,
->> so I'd have expected 0 and 1.
->>
->>
+This idea of sharing host capabilities over debugfs
+came up from Abbas Raza <Abbas_Raza@mentor.com>
+Earlier discussions:
+https://lkml.org/lkml/2018/3/5/357
+https://www.spinics.net/lists/linux-mmc/msg48219.html
 
-Yes, these bits are the same corresponding to the capabilities in the 
-Capabilities Register (offset 0x40). The bit positions become important 
-when capabilities register doesn't show support to some voltages, but we 
-can support those voltages. At that time, we will have to fake 
-capabilities. The changes for those are currently not yet pushed up.
+Signed-off-by: Harish Jenny K N <harish_kandiga@mentor.com>
+---
 
->>>   #define CORE_CSR_CDC_CTLR_CFG0         0x130
->>>   #define CORE_SW_TRIG_FULL_CALIB                BIT(16)
->>>   #define CORE_HW_AUTOCAL_ENA            BIT(17)
->>> @@ -148,6 +152,7 @@ struct sdhci_msm_host {
->>>          u32 curr_io_level;
->>>          wait_queue_head_t pwr_irq_wait;
->>>          bool pwr_irq_flag;
->>> +       u32 caps_0;
->>>   };
->>>
->>>   static unsigned int msm_get_clock_rate_for_bus_mode(struct 
->>> sdhci_host *host,
->>> @@ -1313,6 +1318,35 @@ static void sdhci_msm_writeb(struct sdhci_host 
->>> *host, u8 val, int reg)
->>>                  sdhci_msm_check_power_status(host, req_type);
->>>   }
->>>
->>> +static int sdhci_msm_set_regulator_caps(struct sdhci_msm_host 
->>> *msm_host)
->>> +{
->>> +       struct mmc_host *mmc = msm_host->mmc;
->>> +       struct regulator *supply = mmc->supply.vqmmc;
->>> +       int i, count;
->>> +       u32 caps = 0, vdd_uV;
->>> +
->>> +       if (!IS_ERR(mmc->supply.vqmmc)) {
->>> +               count = regulator_count_voltages(supply);
->>> +               if (count < 0)
->>> +                       return count;
->>> +               for (i = 0; i < count; i++) {
->>> +                       vdd_uV = regulator_list_voltage(supply, i);
->>> +                       if (vdd_uV <= 0)
->>> +                               continue;
->>> +                       if (vdd_uV > 2700000)
->>> +                               caps |= CORE_3_0V_SUPPORT;
->>> +                       if (vdd_uV < 1950000)
->>> +                               caps |= CORE_1_8V_SUPPORT;
->>> +               }
->>
->> Shouldn't you be using regulator_is_supported_voltage() rather than
->> open coding?  Also: I've never personally worked on a device where it
->> was used, but there is definitely a concept floating about of a
->> voltage level of 1.2V.  Maybe should copy the ranges from
->> mmc_regulator_set_vqmmc()?
->>
->>
+Changes in v7
+- Moved additional capabilities also to caps file as mentioned by Ulf Hansson
+- compacting the code with macros
 
-regulator_is_supported_voltage() checks for a range and it also uses 
-regulator_list_voltage() internally. regulator_list_voltage() is also an 
-exported API for use by drivers AFAIK. Please correct if it is not.
+Changes in v6:
+- Used DEFINE_SHOW_ATTRIBUTE
 
->> Also: seems like you should have some way to deal with "caps" ending
->> up w/ no bits set.  IIRC you can have a regulator that can be enabled
->> / disabled but doesn't list a voltage, so if someone messed up their
->> device tree you could end up in this case.  Should you print a
->> warning?  ...or treat it as if we support "3.0V"?  ...or ?  I guess it
->> depends on how do you want patch #2 to behave in that case.
-> 
-> Both, initialize it to sane value and print something.  This way at
-> least you have a good chance of booting and not hard hanging and you
-> are given a reasonable message indicating what needs to be fixed.
-> 
-> -jeremy
-> 
->>
->>
->>> +       }
->>
->> How should things behave if vqmmc is an error?  In that case is it
->> important to not set "CORE_IO_PAD_PWR_SWITCH_EN" in patch set #2?
->> ...or should you set "CORE_IO_PAD_PWR_SWITCH_EN" but then make sure
->> you don't set "CORE_IO_PAD_PWR_SWITCH"?
->>
->>
+Changes in v5:
+- Added parser logic in kernel by using debugfs_create_file  for caps and caps2 instead of debugfs_create_x32
+- Changed Author
 
-Thanks for the suggestion. If the regulators exit and doesn't list the 
-voltages, then I believe initialization itself will not happen. We will 
-not have any available ocr and in sdhci_setup_host it should fail.
-But these enhancements can be incorporated. Since this patch is already 
-acknowledged, I will incorporate these changes in a subsequent patch.
+Changes in v4:
+- Moved the creation of nodes to mmc_add_host_debugfs
+- Exported caps2
+- Renamed host_caps to caps
 
->>> +       msm_host->caps_0 |= caps;
->>> +       pr_debug("%s: %s: supported caps: 0x%08x\n", mmc_hostname(mmc),
->>> +                       __func__, caps);
->>> +
->>> +       return 0;
->>> +}
->>> +
->>> +
->>>   static const struct of_device_id sdhci_msm_dt_match[] = {
->>>          { .compatible = "qcom,sdhci-msm-v4" },
->>>          {},
->>> @@ -1530,6 +1564,10 @@ static int sdhci_msm_probe(struct 
->>> platform_device *pdev)
->>>          ret = sdhci_add_host(host);
->>>          if (ret)
->>>                  goto pm_runtime_disable;
->>> +       ret = sdhci_msm_set_regulator_caps(msm_host);
->>> +       if (ret)
->>> +               dev_err(&pdev->dev, "%s: Failed to set regulator 
->>> caps: %d\n",
->>> +                               __func__, ret);
->>
->> Why do you need __func__ here?  You're already using dev_err(), that
->> gives an idea of where we are.
->>
+Changes in v3:
+- Removed typecasting of &host->caps to (u32 *)
 
-dev_err() doesn't give information of where it is getting called.
+Changes in v2:
+- Changed Author
 
->>
->>>
->>>          pm_runtime_mark_last_busy(&pdev->dev);
->>>          pm_runtime_put_autosuspend(&pdev->dev);
->>> -- 
->>>   Qualcomm India Private Limited, on behalf of Qualcomm Innovation 
->>> Center, Inc.
->>> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a 
->>> Linux Foundation Collaborative Project.
->>>
->>> -- 
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> -- 
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+ drivers/mmc/core/debugfs.c | 114 +++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 114 insertions(+)
 
-Thanks,
-Vijay
+diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+index c51e0c0..f2fbeae 100644
+--- a/drivers/mmc/core/debugfs.c
++++ b/drivers/mmc/core/debugfs.c
+@@ -225,6 +225,117 @@ static int mmc_clock_opt_set(void *data, u64 val)
+ DEFINE_SIMPLE_ATTRIBUTE(mmc_clock_fops, mmc_clock_opt_get, mmc_clock_opt_set,
+ 	"%llu\n");
+
++static int mmc_caps_show(struct seq_file *s, void *unused)
++{
++#define YN(bit) ((caps & bit) ? "Yes" : "No")
++#define YN2(bit) ((caps2 & bit) ? "Yes" : "No")
++	struct mmc_host *host = s->private;
++	u32 caps = host->caps;
++	u32 caps2 = host->caps2;
++
++	seq_puts(s, "\nMMC Host capabilities are:\n");
++	seq_puts(s, "=============================================\n");
++	seq_printf(s, "Can the host do 4 bit transfers :\t%s\n",
++		   YN(MMC_CAP_4_BIT_DATA));
++	seq_printf(s, "Can do MMC high-speed timing :\t%s\n",
++		   YN(MMC_CAP_MMC_HIGHSPEED));
++	seq_printf(s, "Can do SD high-speed timing :\t%s\n",
++		   YN(MMC_CAP_SD_HIGHSPEED));
++	seq_printf(s, "Can signal pending SDIO IRQs :\t%s\n",
++		   YN(MMC_CAP_SDIO_IRQ));
++	seq_printf(s, "Talks only SPI protocols :\t%s\n",
++		   YN(MMC_CAP_SPI));
++	seq_printf(s, "Needs polling for card-detection :\t%s\n",
++		   YN(MMC_CAP_NEEDS_POLL));
++	seq_printf(s, "Can the host do 8 bit transfers :\t%s\n",
++		   YN(MMC_CAP_8_BIT_DATA));
++	seq_printf(s, "Suspend (e)MMC/SD at idle :\t%s\n",
++		   YN(MMC_CAP_AGGRESSIVE_PM));
++	seq_printf(s, "Nonremovable e.g. eMMC :\t%s\n",
++		   YN(MMC_CAP_NONREMOVABLE));
++	seq_printf(s, "Waits while card is busy :\t%s\n",
++		   YN(MMC_CAP_WAIT_WHILE_BUSY));
++	seq_printf(s, "Allow erase/trim commands :\t%s\n",
++		   YN(MMC_CAP_ERASE));
++	seq_printf(s, "Can support DDR mode at 3.3V :\t%s\n",
++		   YN(MMC_CAP_3_3V_DDR));
++	seq_printf(s, "Can support DDR mode at 1.8V :\t%s\n",
++		   YN(MMC_CAP_1_8V_DDR));
++	seq_printf(s, "Can support DDR mode at 1.2V :\t%s\n",
++		   YN(MMC_CAP_1_2V_DDR));
++	seq_printf(s, "Can power off after boot :\t%s\n",
++		   YN(MMC_CAP_POWER_OFF_CARD));
++	seq_printf(s, "CMD14/CMD19 bus width ok :\t%s\n",
++		   YN(MMC_CAP_BUS_WIDTH_TEST));
++	seq_printf(s, "Host supports UHS SDR12 mode :\t%s\n",
++		   YN(MMC_CAP_UHS_SDR12));
++	seq_printf(s, "Host supports UHS SDR25 mode :\t%s\n",
++		   YN(MMC_CAP_UHS_SDR25));
++	seq_printf(s, "Host supports UHS SDR50 mode :\t%s\n",
++		   YN(MMC_CAP_UHS_SDR50));
++	seq_printf(s, "Host supports UHS SDR104 mode :\t%s\n",
++		   YN(MMC_CAP_UHS_SDR104));
++	seq_printf(s, "Host supports UHS DDR50 mode :\t%s\n",
++		   YN(MMC_CAP_UHS_DDR50));
++	seq_printf(s, "Host supports Driver Type A :\t%s\n",
++		   YN(MMC_CAP_DRIVER_TYPE_A));
++	seq_printf(s, "Host supports Driver Type C :\t%s\n",
++		   YN(MMC_CAP_DRIVER_TYPE_C));
++	seq_printf(s, "Host supports Driver Type D :\t%s\n",
++		   YN(MMC_CAP_DRIVER_TYPE_D));
++	seq_printf(s, "RW reqs can be completed within mmc_request_done() :\t%s\n",
++		   YN(MMC_CAP_DONE_COMPLETE));
++	seq_printf(s, "Enable card detect wake :\t%s\n",
++		   YN(MMC_CAP_CD_WAKE));
++	seq_printf(s, "Commands during data transfer :\t%s\n",
++		   YN(MMC_CAP_CMD_DURING_TFR));
++	seq_printf(s, "CMD23 supported. :\t%s\n",
++		   YN(MMC_CAP_CMD23));
++	seq_printf(s, "Hardware reset :\t%s\n",
++		   YN(MMC_CAP_HW_RESET));
++	seq_puts(s, "=============================================\n");
++	seq_puts(s, "MMC Host additional capabilities are:\n");
++	seq_puts(s, "=============================================\n");
++	seq_printf(s, "Boot partition no access :\t%s\n",
++		   YN2(MMC_CAP2_BOOTPART_NOACC));
++	seq_printf(s, "Can do full power cycle :\t%s\n",
++		   YN2(MMC_CAP2_FULL_PWR_CYCLE));
++	seq_printf(s, "Can support HS200 1.8V SDR :\t%s\n",
++		   YN2(MMC_CAP2_HS200_1_8V_SDR));
++	seq_printf(s, "Can support HS200 1.2V SDR :\t%s\n",
++		   YN2(MMC_CAP2_HS200_1_2V_SDR));
++	seq_printf(s, "Card-detect signal active high :\t%s\n",
++		   YN2(MMC_CAP2_CD_ACTIVE_HIGH));
++	seq_printf(s, "Write-protect signal active high :\t%s\n",
++		   YN2(MMC_CAP2_RO_ACTIVE_HIGH));
++	seq_printf(s, "Don't power up before scan :\t%s\n",
++		   YN2(MMC_CAP2_NO_PRESCAN_POWERUP));
++	seq_printf(s, "Can support HS400 1.8V :\t%s\n",
++		   YN2(MMC_CAP2_HS400_1_8V));
++	seq_printf(s, "Can support HS400 1.2V :\t%s\n",
++		   YN2(MMC_CAP2_HS400_1_2V));
++	seq_printf(s, "SDIO IRQ Nothread :\t%s\n",
++		   YN2(MMC_CAP2_SDIO_IRQ_NOTHREAD));
++	seq_printf(s, "No physical write protect pin, assume always read-write :\t%s\n",
++		   YN2(MMC_CAP2_NO_WRITE_PROTECT));
++	seq_printf(s, "Do not send SDIO commands during initialization :\t%s\n",
++		   YN2(MMC_CAP2_NO_SDIO));
++	seq_printf(s, "Host supports enhanced strobe :\t%s\n",
++		   YN2(MMC_CAP2_HS400_ES));
++	seq_printf(s, "Do not send SD commands during initialization :\t%s\n",
++		   YN2(MMC_CAP2_NO_SD));
++	seq_printf(s, "Do not send (e)MMC commands during initialization :\t%s\n",
++		   YN2(MMC_CAP2_NO_MMC));
++	seq_printf(s, "Has eMMC command queue engine :\t%s\n",
++		   YN2(MMC_CAP2_CQE));
++	seq_printf(s, "CQE can issue a direct command :\t%s\n",
++		   YN2(MMC_CAP2_CQE_DCMD));
++	return 0;
++#undef YN
++#undef YN2
++}
++DEFINE_SHOW_ATTRIBUTE(mmc_caps);
++
+ void mmc_add_host_debugfs(struct mmc_host *host)
+ {
+ 	struct dentry *root;
+@@ -243,6 +354,9 @@ void mmc_add_host_debugfs(struct mmc_host *host)
+ 	if (!debugfs_create_file("ios", S_IRUSR, root, host, &mmc_ios_fops))
+ 		goto err_node;
+
++	if (!debugfs_create_file("caps", S_IRUSR, root, host, &mmc_caps_fops))
++		goto err_node;
++
+ 	if (!debugfs_create_file("clock", S_IRUSR | S_IWUSR, root, host,
+ 			&mmc_clock_fops))
+ 		goto err_node;
+--
+1.9.1
