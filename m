@@ -1,123 +1,50 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v3 03/11] mmc: sdhci-omap: Workaround for Errata i843
-Date: Wed, 7 Mar 2018 18:50:12 +0530
-Message-ID: <20180307132020.30951-4-kishon@ti.com>
+Subject: [PATCH v3 02/11] mmc: sdhci-omap: Remove setting ADMA capability in
+ driver
+Date: Wed, 7 Mar 2018 18:50:11 +0530
+Message-ID: <20180307132020.30951-3-kishon@ti.com>
 References: <20180307132020.30951-1-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <20180307132020.30951-1-kishon@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, kishon@ti.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, kishon@ti.com, Rob Herring <robh+dt@kernel.org>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Errata i843 in AM572x Sitara Processors Silicon Revision 2.0, 1.1
-(SPRZ429K July 2014–Revised March 2017 [1]) mentions
-PG 1.0/1.1 silicon has limitations w.r.t frequencies at which MMC1/2/3
-can operate.
-
-Use soc_device_match() to identify rev 1.0/1.1 silicon and
-override mmc->f_max according to the errata workaround.
-"max-frequency" dt property cannot be used since the device
-tree is added for rev 2.0 silicon.
-
-soc_device_match() is also used in order to get the IODelay values
-for rev 1.0/1.1 silicon.
-
-[1] -> http://www.ti.com/lit/er/sprz429k/sprz429k.pdf
+sdhci can directly get ADMA capability from MMCHS_CAPA register.
+Remove explicitly setting ADMA here as some instances might not have
+ADMA enabled. (sdhci_read_caps() is also removed from here since
+sdhci_setup_host() invokes it).
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- drivers/mmc/host/sdhci-omap.c | 35 ++++++++++++++++++++++++++++++++++-
- 1 file changed, 34 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-omap.c | 3 ---
+ 1 file changed, 3 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-index 0c40b13fb67d..fbc20a4fbb23 100644
+index 3cce30584d2f..0c40b13fb67d 100644
 --- a/drivers/mmc/host/sdhci-omap.c
 +++ b/drivers/mmc/host/sdhci-omap.c
-@@ -26,6 +26,7 @@
- #include <linux/pm_runtime.h>
- #include <linux/regulator/consumer.h>
- #include <linux/pinctrl/consumer.h>
-+#include <linux/sys_soc.h>
+@@ -923,9 +923,6 @@ static int sdhci_omap_probe(struct platform_device *pdev)
+ 	host->mmc_host_ops.card_busy = sdhci_omap_card_busy;
+ 	host->mmc_host_ops.execute_tuning = sdhci_omap_execute_tuning;
  
- #include "sdhci-pltfm.h"
- 
-@@ -100,6 +101,7 @@ struct sdhci_omap_data {
- };
- 
- struct sdhci_omap_host {
-+	char			*version;
- 	void __iomem		*base;
- 	struct device		*dev;
- 	struct	regulator	*pbias;
-@@ -733,12 +735,21 @@ static struct pinctrl_state
- 				  u32 *caps, u32 capmask)
- {
- 	struct device *dev = omap_host->dev;
-+	char *version = omap_host->version;
- 	struct pinctrl_state *pinctrl_state = ERR_PTR(-ENODEV);
-+	char str[20];
- 
- 	if (!(*caps & capmask))
- 		goto ret;
- 
--	pinctrl_state = pinctrl_lookup_state(omap_host->pinctrl, mode);
-+	if (version) {
-+		snprintf(str, 20, "%s-%s", mode, version);
-+		pinctrl_state = pinctrl_lookup_state(omap_host->pinctrl, str);
-+	}
-+
-+	if (IS_ERR(pinctrl_state))
-+		pinctrl_state = pinctrl_lookup_state(omap_host->pinctrl, mode);
-+
- 	if (IS_ERR(pinctrl_state)) {
- 		dev_err(dev, "no pinctrl state for %s mode", mode);
- 		*caps &= ~capmask;
-@@ -830,6 +841,16 @@ static int sdhci_omap_config_iodelay_pinctrl_state(struct sdhci_omap_host
- 	return 0;
- }
- 
-+static const struct soc_device_attribute sdhci_omap_soc_devices[] = {
-+	{
-+		.machine = "DRA7[45]*",
-+		.revision = "ES1.[01]",
-+	},
-+	{
-+		/* sentinel */
-+	}
-+};
-+
- static int sdhci_omap_probe(struct platform_device *pdev)
- {
- 	int ret;
-@@ -841,6 +862,7 @@ static int sdhci_omap_probe(struct platform_device *pdev)
- 	struct mmc_host *mmc;
- 	const struct of_device_id *match;
- 	struct sdhci_omap_data *data;
-+	const struct soc_device_attribute *soc;
- 
- 	match = of_match_device(omap_sdhci_match, dev);
- 	if (!match)
-@@ -875,6 +897,17 @@ static int sdhci_omap_probe(struct platform_device *pdev)
+-	sdhci_read_caps(host);
+-	host->caps |= SDHCI_CAN_DO_ADMA2;
+-
+ 	ret = sdhci_setup_host(host);
  	if (ret)
- 		goto err_pltfm_free;
- 
-+	soc = soc_device_match(sdhci_omap_soc_devices);
-+	if (soc) {
-+		omap_host->version = "rev11";
-+		if (!strcmp(dev_name(dev), "4809c000.mmc"))
-+			mmc->f_max = 96000000;
-+		if (!strcmp(dev_name(dev), "480b4000.mmc"))
-+			mmc->f_max = 48000000;
-+		if (!strcmp(dev_name(dev), "480ad000.mmc"))
-+			mmc->f_max = 48000000;
-+	}
-+
- 	pltfm_host->clk = devm_clk_get(dev, "fck");
- 	if (IS_ERR(pltfm_host->clk)) {
- 		ret = PTR_ERR(pltfm_host->clk);
+ 		goto err_put_sync;
 -- 
 2.11.0
