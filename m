@@ -1,7 +1,7 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v3 01/11] mmc: sdhci-omap: Fix when capabilities are obtained from SDHCI_CAPABILITIES reg
-Date: Wed, 7 Mar 2018 18:50:10 +0530
-Message-ID: <20180307132020.30951-2-kishon@ti.com>
+Subject: [PATCH v3 05/11] mmc: sdhci: Disable HS200 mode if controller can't support 1.8v
+Date: Wed, 7 Mar 2018 18:50:14 +0530
+Message-ID: <20180307132020.30951-6-kishon@ti.com>
 References: <20180307132020.30951-1-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,51 +12,28 @@ To: Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>, Adri
 Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, kishon@ti.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-sdhci_omap_config_iodelay_pinctrl_state() requires caps and caps2 to be
-initialized (speed mode capabilities like UHS/HS200) before it is
-invoked. While mmc_of_parse() initializes caps/caps2 if capabilities is
-populated in device tree, it will remain uninitialized for capabilities
-obtained from SDHCI_CAPABILITIES register.
-Fix sdhci_omap_config_iodelay_pinctrl_state() to be used even while
-getting the capabilities from SDHCI_CAPABILITIES register by invoking
-sdhci_setup_host() before sdhci_omap_config_iodelay_pinctrl_state().
+Though MMC controller can indicate HS200 mode capability (by
+using "mmc-hs200-1_8v" dt property), if the IO lines in the board
+is connected to 3.3v supply, HS200 mode cannot be supported.
+Such boards have "no-1-8-v" property in their dts file. Disable HS200
+mode for boards which have "no-1-8-v" set.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- drivers/mmc/host/sdhci-omap.c | 14 +++++++++-----
- 1 file changed, 9 insertions(+), 5 deletions(-)
+ drivers/mmc/host/sdhci.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-index 1456abd5eeb9..3cce30584d2f 100644
---- a/drivers/mmc/host/sdhci-omap.c
-+++ b/drivers/mmc/host/sdhci-omap.c
-@@ -916,10 +916,6 @@ static int sdhci_omap_probe(struct platform_device *pdev)
- 		goto err_put_sync;
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 2ededa7f43df..aa8b5ca0d1b0 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -3672,6 +3672,7 @@ int sdhci_setup_host(struct sdhci_host *host)
+ 	if (host->quirks2 & SDHCI_QUIRK2_NO_1_8_V) {
+ 		host->caps1 &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
+ 				 SDHCI_SUPPORT_DDR50);
++		mmc->caps2 &= ~MMC_CAP2_HS200;
  	}
  
--	ret = sdhci_omap_config_iodelay_pinctrl_state(omap_host);
--	if (ret)
--		goto err_put_sync;
--
- 	host->mmc_host_ops.get_ro = mmc_gpio_get_ro;
- 	host->mmc_host_ops.start_signal_voltage_switch =
- 					sdhci_omap_start_signal_voltage_switch;
-@@ -930,7 +926,15 @@ static int sdhci_omap_probe(struct platform_device *pdev)
- 	sdhci_read_caps(host);
- 	host->caps |= SDHCI_CAN_DO_ADMA2;
- 
--	ret = sdhci_add_host(host);
-+	ret = sdhci_setup_host(host);
-+	if (ret)
-+		goto err_put_sync;
-+
-+	ret = sdhci_omap_config_iodelay_pinctrl_state(omap_host);
-+	if (ret)
-+		goto err_put_sync;
-+
-+	ret = __sdhci_add_host(host);
- 	if (ret)
- 		goto err_put_sync;
- 
+ 	/* Any UHS-I mode in caps implies SDR12 and SDR25 support. */
 -- 
 2.11.0
