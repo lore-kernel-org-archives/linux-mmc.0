@@ -1,45 +1,23 @@
-From: Dinh Nguyen <dinguyen@kernel.org>
-Subject: Re: [PATCH 4/6] arm64: dts: stratix10: remove 'num-slots' property
- for dwmmc
-Date: Wed, 7 Mar 2018 08:37:46 -0600
-Message-ID: <94cf9226-27f2-1550-e1c1-2f7dbb873bd1@kernel.org>
-References: <20180223064138.18401-1-jh80.chung@samsung.com>
- <CGME20180223064140epcas2p3804fe3b7d63e4b7975d94a178e94dffb@epcas2p3.samsung.com>
- <20180223064138.18401-4-jh80.chung@samsung.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH v3 00/11] mmc: sdhci-omap: Add UHS/HS200 mode support
+Date: Wed, 7 Mar 2018 07:12:26 -0800
+Message-ID: <20180307151226.GF5799@atomide.com>
+References: <20180307132020.30951-1-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180223064138.18401-4-jh80.chung@samsung.com>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <20180307132020.30951-1-kishon@ti.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, manabian@gmail.com, will.deacon@arm.com, xuwei5@hisilicon.com
+To: Kishon Vijay Abraham I <kishon@ti.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
+* Kishon Vijay Abraham I <kishon@ti.com> [180307 13:21]:
+> Changes from v2:
+> *) Used soc_device_match() instead of pdata-quirks as per Tony's
+>    suggestions.
 
+Looks good to me now thanks. For the whole series:
 
-On 02/23/2018 12:41 AM, Jaehoon Chung wrote:
-> Since 'num-slots' had already deprecated, remove the property in
-> device-tree file.
-> 
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> ---
->  arch/arm64/boot/dts/altera/socfpga_stratix10_socdk.dts | 1 -
->  1 file changed, 1 deletion(-)
-> 
-> diff --git a/arch/arm64/boot/dts/altera/socfpga_stratix10_socdk.dts b/arch/arm64/boot/dts/altera/socfpga_stratix10_socdk.dts
-> index a37c46112876..4e146b4e6487 100644
-> --- a/arch/arm64/boot/dts/altera/socfpga_stratix10_socdk.dts
-> +++ b/arch/arm64/boot/dts/altera/socfpga_stratix10_socdk.dts
-> @@ -88,7 +88,6 @@
->  
->  &mmc {
->  	status = "okay";
-> -	num-slots = <1>;
->  	cap-sd-highspeed;
->  	broken-cd;
->  	bus-width = <4>;
-> 
-
-Acked-by: Dinh Nguyen <dinguyen@kernel.org>
+Acked-by: Tony Lindgren <tony@atomide.com>
