@@ -1,67 +1,125 @@
-From: Bastian Stender <bst@pengutronix.de>
-Subject: [PATCH] mmc: block: fix updating ext_csd caches on ioctl call
-Date: Thu,  8 Mar 2018 15:08:11 +0100
-Message-ID: <20180308140811.6966-1-bst@pengutronix.de>
-Return-path: <stable-owner@vger.kernel.org>
-Sender: stable-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Gregory CLEMENT <gregory.clement@free-electrons.com>, Shawn Guo <shawnguo@kernel.org>, Marcin Wojtas <mw@semihalf.com>, Seshagiri Holi <sholi@nvidia.com>, Jon Hunter <jonathanh@nvidia.com>, Johan Rudholm <johan.rudholm@stericsson.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, kernel@pengutronix.de, Bastian Stender <bst@pengutronix.de>, Jan Luebbe <jlu@pengutronix.de>, stable@vger.kernel.org
+From: Maxime Ripard <maxime.ripard@bootlin.com>
+Subject: [PATCH v2 3/8] mmc: sunxi: Move the power on action in a separate
+ function
+Date: Thu,  8 Mar 2018 15:52:49 +0100
+Message-ID: <cff8ee6d63b8e48881fc2c9d81a1a2d383fbbc5f.1520520655.git-series.maxime.ripard@bootlin.com>
+References: <cover.e1acb3dc84e043c8342166e7fb45f79be36ab154.1520520655.git-series.maxime.ripard@bootlin.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <cover.e1acb3dc84e043c8342166e7fb45f79be36ab154.1520520655.git-series.maxime.ripard@bootlin.com>
+In-Reply-To: <cover.e1acb3dc84e043c8342166e7fb45f79be36ab154.1520520655.git-series.maxime.ripard@bootlin.com>
+References: <cover.e1acb3dc84e043c8342166e7fb45f79be36ab154.1520520655.git-series.maxime.ripard@bootlin.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Chen-Yu Tsai <wens@csie.org>, Maxime Ripard <maxime.ripard@bootlin.com>, ulf.hansson@linaro.org
+Cc: Thomas Petazzoni <thomas.petazzoni@bootlin.com>, linux-mmc@vger.kernel.org, Quentin Schulz <quentin.schulz@bootlin.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-PARTITION_CONFIG is cached in mmc_card->ext_csd.part_config and the
-currently active partition in mmc_blk_data->part_curr. These caches do
-not always reflect changes if the ioctl call modifies the
-PARTITION_CONFIG registers, e.g. by changing BOOT_PARTITION_ENABLE.
+We'll need to have the power on behaviour in order to implement runtime_pm.
+Move it outside of the .set_ios callback for an easier access.
 
-Write the PARTITION_CONFIG value extracted from the ioctl call to the
-cache and update the currently active partition accordingly. This
-ensures that the user space cannot change the values behind the
-kernel's back. The next call to mmc_blk_part_switch() will operate on
-the data set by the ioctl and reflect the changes appropriately.
+And it improves readibility as a bonus.
 
-Signed-off-by: Bastian Stender <bst@pengutronix.de>
-Signed-off-by: Jan Luebbe <jlu@pengutronix.de>
-Cc: stable@vger.kernel.org
+Signed-off-by: Maxime Ripard <maxime.ripard@bootlin.com>
 ---
- drivers/mmc/core/block.c | 19 +++++++++++++++++++
- 1 file changed, 19 insertions(+)
+ drivers/mmc/host/sunxi-mmc.c | 62 ++++++++++++++++++++-----------------
+ 1 file changed, 34 insertions(+), 28 deletions(-)
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 20135a5de748..2cfb963d9f37 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -72,6 +72,7 @@ MODULE_ALIAS("mmc:block");
- #define MMC_BLK_TIMEOUT_MS  (10 * 1000)
- #define MMC_SANITIZE_REQ_TIMEOUT 240000
- #define MMC_EXTRACT_INDEX_FROM_ARG(x) ((x & 0x00FF0000) >> 16)
-+#define MMC_EXTRACT_VALUE_FROM_ARG(x) ((x & 0x0000FF00) >> 8)
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index a53e39d8b07e..4e81fe171532 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -855,6 +855,39 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
+ 	return 0;
+ }
  
- #define mmc_req_rel_wr(req)	((req->cmd_flags & REQ_FUA) && \
- 				  (rq_data_dir(req) == WRITE))
-@@ -586,6 +587,24 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
- 		return data.error;
- 	}
- 
-+	/*
-+	 * Make sure the cache of the PARTITION_CONFIG register and
-+	 * PARTITION_ACCESS bits is updated in case the ioctl ext_csd write
-+	 * changed it successfully.
-+	 */
-+	if ((MMC_EXTRACT_INDEX_FROM_ARG(cmd.arg) == EXT_CSD_PART_CONFIG) &&
-+	    (cmd.opcode == MMC_SWITCH)) {
-+		struct mmc_blk_data *main_md = dev_get_drvdata(&card->dev);
-+		u8 value = MMC_EXTRACT_VALUE_FROM_ARG(cmd.arg);
++static void sunxi_mmc_power_on(struct mmc_host *mmc, struct mmc_ios *ios)
++{
++	struct sunxi_mmc_host *host = mmc_priv(mmc);
++	u32 rval;
 +
-+		/*
-+		 * Update cache so the next mmc_blk_part_switch call operates
-+		 * on up-to-date data.
-+		 */
-+		card->ext_csd.part_config = value;
-+		main_md->part_curr = value & EXT_CSD_PART_CONFIG_ACC_MASK;
++	dev_dbg(mmc_dev(mmc), "Powering on\n");
++
++	/* set bus width */
++	switch (ios->bus_width) {
++	case MMC_BUS_WIDTH_1:
++		mmc_writel(host, REG_WIDTH, SDXC_WIDTH1);
++		break;
++	case MMC_BUS_WIDTH_4:
++		mmc_writel(host, REG_WIDTH, SDXC_WIDTH4);
++		break;
++	case MMC_BUS_WIDTH_8:
++		mmc_writel(host, REG_WIDTH, SDXC_WIDTH8);
++		break;
 +	}
 +
- 	/*
- 	 * According to the SD specs, some commands require a delay after
- 	 * issuing the command.
++	/* set ddr mode */
++	rval = mmc_readl(host, REG_GCTRL);
++	if (ios->timing == MMC_TIMING_UHS_DDR50 ||
++	    ios->timing == MMC_TIMING_MMC_DDR52)
++		rval |= SDXC_DDR_MODE;
++	else
++		rval &= ~SDXC_DDR_MODE;
++	mmc_writel(host, REG_GCTRL, rval);
++
++	host->ferror = sunxi_mmc_clk_set_rate(host, ios);
++	/* Android code had a usleep_range(50000, 55000); here */
++}
++
+ static void sunxi_mmc_power_off(struct mmc_host *mmc, struct mmc_ios *ios)
+ {
+ 	struct sunxi_mmc_host *host = mmc_priv(mmc);
+@@ -874,7 +907,6 @@ static void sunxi_mmc_power_off(struct mmc_host *mmc, struct mmc_ios *ios)
+ static void sunxi_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ {
+ 	struct sunxi_mmc_host *host = mmc_priv(mmc);
+-	u32 rval;
+ 
+ 	/* Set the power state */
+ 	switch (ios->power_mode) {
+@@ -912,33 +944,7 @@ static void sunxi_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		break;
+ 	}
+ 
+-	/* set bus width */
+-	switch (ios->bus_width) {
+-	case MMC_BUS_WIDTH_1:
+-		mmc_writel(host, REG_WIDTH, SDXC_WIDTH1);
+-		break;
+-	case MMC_BUS_WIDTH_4:
+-		mmc_writel(host, REG_WIDTH, SDXC_WIDTH4);
+-		break;
+-	case MMC_BUS_WIDTH_8:
+-		mmc_writel(host, REG_WIDTH, SDXC_WIDTH8);
+-		break;
+-	}
+-
+-	/* set ddr mode */
+-	rval = mmc_readl(host, REG_GCTRL);
+-	if (ios->timing == MMC_TIMING_UHS_DDR50 ||
+-	    ios->timing == MMC_TIMING_MMC_DDR52)
+-		rval |= SDXC_DDR_MODE;
+-	else
+-		rval &= ~SDXC_DDR_MODE;
+-	mmc_writel(host, REG_GCTRL, rval);
+-
+-	/* set up clock */
+-	if (ios->power_mode) {
+-		host->ferror = sunxi_mmc_clk_set_rate(host, ios);
+-		/* Android code had a usleep_range(50000, 55000); here */
+-	}
++	sunxi_mmc_power_on(mmc, ios);
+ }
+ 
+ static int sunxi_mmc_volt_switch(struct mmc_host *mmc, struct mmc_ios *ios)
 -- 
-2.16.1
+git-series 0.9.1
