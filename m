@@ -1,231 +1,83 @@
-From: Maxime Ripard <maxime.ripard@bootlin.com>
-Subject: [PATCH v2 5/8] mmc: sunxi: Move resources management to separate
- functions
-Date: Thu,  8 Mar 2018 15:52:51 +0100
-Message-ID: <ae107f83803778d4e34e43161c4670930c260f62.1520520655.git-series.maxime.ripard@bootlin.com>
-References: <cover.e1acb3dc84e043c8342166e7fb45f79be36ab154.1520520655.git-series.maxime.ripard@bootlin.com>
+From: Alex Lemberg <Alex.Lemberg@wdc.com>
+Subject: Re: [PATCH] mmc: card: Don't show eMMC RPMB and BOOT areas in
+ /proc/partitions
+Date: Thu, 8 Mar 2018 20:36:01 +0000
+Message-ID: <67491d8c-7eb3-e8c5-7eb0-3006ff668a60@wdc.com>
+References: <1519731229-19141-1-git-send-email-harish_kandiga@mentor.com>
+ <CACRpkdYuxoZaF9xyoA9tsyBuXOkrcdZVGWYfcyEMe0psk6UydQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <cover.e1acb3dc84e043c8342166e7fb45f79be36ab154.1520520655.git-series.maxime.ripard@bootlin.com>
-In-Reply-To: <cover.e1acb3dc84e043c8342166e7fb45f79be36ab154.1520520655.git-series.maxime.ripard@bootlin.com>
-References: <cover.e1acb3dc84e043c8342166e7fb45f79be36ab154.1520520655.git-series.maxime.ripard@bootlin.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Chen-Yu Tsai <wens@csie.org>, Maxime Ripard <maxime.ripard@bootlin.com>, ulf.hansson@linaro.org
-Cc: Thomas Petazzoni <thomas.petazzoni@bootlin.com>, linux-mmc@vger.kernel.org, Quentin Schulz <quentin.schulz@bootlin.com>, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CACRpkdYuxoZaF9xyoA9tsyBuXOkrcdZVGWYfcyEMe0psk6UydQ@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <1650BAD238F43F45AC17F877891882A2@namprd04.prod.outlook.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>, Harish Jenny K N <harish_kandiga@mentor.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-We've had all our resources management, and especially the clocks and reset
-sequence, done directly as part of the probe.
-
-As we want to implement runtime_pm, we'll obviously want to have that
-moved outside of the probe so that we can call do it in our runtime suspend
-and resume hooks without too much duplication.
-
-Signed-off-by: Maxime Ripard <maxime.ripard@bootlin.com>
----
- drivers/mmc/host/sunxi-mmc.c | 142 ++++++++++++++++++++----------------
- 1 file changed, 82 insertions(+), 60 deletions(-)
-
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index e4b44c4adb8f..34bc90bc04b2 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -265,6 +265,7 @@ struct sunxi_mmc_cfg {
- };
- 
- struct sunxi_mmc_host {
-+	struct device *dev;
- 	struct mmc_host	*mmc;
- 	struct reset_control *reset;
- 	const struct sunxi_mmc_cfg *cfg;
-@@ -1183,6 +1184,80 @@ static const struct of_device_id sunxi_mmc_of_match[] = {
- };
- MODULE_DEVICE_TABLE(of, sunxi_mmc_of_match);
- 
-+static int sunxi_mmc_enable(struct sunxi_mmc_host *host)
-+{
-+	int ret;
-+
-+	ret = clk_prepare_enable(host->clk_ahb);
-+	if (ret) {
-+		dev_err(dev, "Couldn't enable the bus clocks (%d)\n", ret);
-+		return ret;
-+	}
-+
-+	ret = clk_prepare_enable(host->clk_mmc);
-+	if (ret) {
-+		dev_err(host->dev, "Enable mmc clk err %d\n", ret);
-+		goto error_disable_clk_ahb;
-+	}
-+
-+	ret = clk_prepare_enable(host->clk_output);
-+	if (ret) {
-+		dev_err(host->dev, "Enable output clk err %d\n", ret);
-+		goto error_disable_clk_mmc;
-+	}
-+
-+	ret = clk_prepare_enable(host->clk_sample);
-+	if (ret) {
-+		dev_err(host->dev, "Enable sample clk err %d\n", ret);
-+		goto error_disable_clk_output;
-+	}
-+
-+	if (!IS_ERR(host->reset)) {
-+		ret = reset_control_reset(host->reset);
-+		if (ret) {
-+			dev_err(dev, "Couldn't reset the MMC controller (%d)\n",
-+				ret);
-+			goto error_disable_clk_sample;
-+		}
-+	}
-+
-+	/*
-+	 * Sometimes the controller asserts the irq on boot for some reason,
-+	 * make sure the controller is in a sane state before enabling irqs.
-+	 */
-+	ret = sunxi_mmc_reset_host(host);
-+	if (ret)
-+		goto error_assert_reset;
-+
-+	return 0;
-+
-+error_assert_reset:
-+	if (!IS_ERR(host->reset))
-+		reset_control_assert(host->reset);
-+error_disable_clk_sample:
-+	clk_disable_unprepare(host->clk_sample);
-+error_disable_clk_output:
-+	clk_disable_unprepare(host->clk_output);
-+error_disable_clk_mmc:
-+	clk_disable_unprepare(host->clk_mmc);
-+error_disable_clk_ahb:
-+	clk_disable_unprepare(host->clk_ahb);
-+	return ret;
-+}
-+
-+static void sunxi_mmc_disable(struct sunxi_mmc_host *host)
-+{
-+	sunxi_mmc_reset_host(host);
-+
-+	if (!IS_ERR(host->reset))
-+		reset_control_assert(host->reset);
-+
-+	clk_disable_unprepare(host->clk_sample);
-+	clk_disable_unprepare(host->clk_output);
-+	clk_disable_unprepare(host->clk_mmc);
-+	clk_disable_unprepare(host->clk_ahb);
-+}
-+
- static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
- 				      struct platform_device *pdev)
- {
-@@ -1232,66 +1307,21 @@ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
- 	if (PTR_ERR(host->reset) == -EPROBE_DEFER)
- 		return PTR_ERR(host->reset);
- 
--	ret = clk_prepare_enable(host->clk_ahb);
--	if (ret) {
--		dev_err(&pdev->dev, "Enable ahb clk err %d\n", ret);
--		return ret;
--	}
--
--	ret = clk_prepare_enable(host->clk_mmc);
--	if (ret) {
--		dev_err(&pdev->dev, "Enable mmc clk err %d\n", ret);
--		goto error_disable_clk_ahb;
--	}
--
--	ret = clk_prepare_enable(host->clk_output);
--	if (ret) {
--		dev_err(&pdev->dev, "Enable output clk err %d\n", ret);
--		goto error_disable_clk_mmc;
--	}
--
--	ret = clk_prepare_enable(host->clk_sample);
--	if (ret) {
--		dev_err(&pdev->dev, "Enable sample clk err %d\n", ret);
--		goto error_disable_clk_output;
--	}
--
--	if (!IS_ERR(host->reset)) {
--		ret = reset_control_reset(host->reset);
--		if (ret) {
--			dev_err(&pdev->dev, "reset err %d\n", ret);
--			goto error_disable_clk_sample;
--		}
--	}
--
--	/*
--	 * Sometimes the controller asserts the irq on boot for some reason,
--	 * make sure the controller is in a sane state before enabling irqs.
--	 */
--	ret = sunxi_mmc_reset_host(host);
-+	ret = sunxi_mmc_enable(host);
- 	if (ret)
--		goto error_assert_reset;
-+		return ret;
- 
- 	host->irq = platform_get_irq(pdev, 0);
- 	if (host->irq <= 0) {
- 		ret = -EINVAL;
--		goto error_assert_reset;
-+		goto error_disable_mmc;
- 	}
- 
- 	return devm_request_threaded_irq(&pdev->dev, host->irq, sunxi_mmc_irq,
- 			sunxi_mmc_handle_manual_stop, 0, "sunxi-mmc", host);
- 
--error_assert_reset:
--	if (!IS_ERR(host->reset))
--		reset_control_assert(host->reset);
--error_disable_clk_sample:
--	clk_disable_unprepare(host->clk_sample);
--error_disable_clk_output:
--	clk_disable_unprepare(host->clk_output);
--error_disable_clk_mmc:
--	clk_disable_unprepare(host->clk_mmc);
--error_disable_clk_ahb:
--	clk_disable_unprepare(host->clk_ahb);
-+error_disable_mmc:
-+	sunxi_mmc_disable(host);
- 	return ret;
- }
- 
-@@ -1308,6 +1338,7 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
- 	}
- 
- 	host = mmc_priv(mmc);
-+	host->dev = &pdev->dev;
- 	host->mmc = mmc;
- 	spin_lock_init(&host->lock);
- 
-@@ -1388,16 +1419,7 @@ static int sunxi_mmc_remove(struct platform_device *pdev)
- 
- 	mmc_remove_host(mmc);
- 	disable_irq(host->irq);
--	sunxi_mmc_reset_host(host);
--
--	if (!IS_ERR(host->reset))
--		reset_control_assert(host->reset);
--
--	clk_disable_unprepare(host->clk_sample);
--	clk_disable_unprepare(host->clk_output);
--	clk_disable_unprepare(host->clk_mmc);
--	clk_disable_unprepare(host->clk_ahb);
--
-+	sunxi_mmc_disable(host);
- 	dma_free_coherent(&pdev->dev, PAGE_SIZE, host->sg_cpu, host->sg_dma);
- 	mmc_free_host(mmc);
- 
--- 
-git-series 0.9.1
+SGkgTGludXMsDQoNCk9uIDMvMi8xOCA0OjUzIEFNLCBMaW51cyBXYWxsZWlqIHdyb3RlOg0KPiBP
+biBUdWUsIEZlYiAyNywgMjAxOCBhdCAxMjozMyBQTSwgSGFyaXNoIEplbm55IEsgTg0KPiA8aGFy
+aXNoX2thbmRpZ2FAbWVudG9yLmNvbT4gd3JvdGU6DQo+DQo+PiBGcm9tOiBBbmRyZXcgR2FiYmFz
+b3YgPGFuZHJld19nYWJiYXNvdkBtZW50b3IuY29tPg0KPj4NCj4+IFNpbmNlIFJQTUIgYXJlYSBp
+cyBhY2Nlc3NpYmxlIHZpYSBzcGVjaWFsIGlvY3RsIG9ubHkgYW5kIGJvb3QgYXJlYXMNCj4+IGFy
+ZSB1bmxpa2VseSB0byBjb250YWluIGFueSBwYXJ0aXRpb25zLCBleGNsdWRlIHRoZW0gYWxsIGZy
+b20gbGlzdGluZw0KPj4gaW4gL3Byb2MvcGFydGl0aW9ucy4gVGhpcyB3aWxsIGhpZGUgdGhlbSBm
+cm9tIHZhcmlvdXMgdXNlci1sZXZlbA0KPj4gc29mdHdhcmUgKGUuZy4gZmRpc2spLCB0aHVzIGF2
+b2lkaW5nIHVubmVjZXNzYXJ5IGFjY2VzcyBhdHRlbXB0cy4NCj4+DQo+PiBTaWduZWQtb2ZmLWJ5
+OiBBbmRyZXcgR2FiYmFzb3YgPGFuZHJld19nYWJiYXNvdkBtZW50b3IuY29tPg0KPj4gU2lnbmVk
+LW9mZi1ieTogSGFyaXNoIEplbm55IEsgTiA8aGFyaXNoX2thbmRpZ2FAbWVudG9yLmNvbT4NCj4g
+TWFrZXMgc2Vuc2UgdG8gbWUsIGF0IGxlYXN0IGl0IG1ha2VzIHRoZSBwcm9ibGVtIHNtYWxsZXIg
+bm90IGJpZ2dlci4NCj4gUmV2aWV3ZWQtYnk6IExpbnVzIFdhbGxlaWogPGxpbnVzLndhbGxlaWpA
+bGluYXJvLm9yZz4NCj4NCj4+IFRoZSBtYWluIGludGVudGlvbiBvZiB0aGUgcGF0Y2ggd2FzIHRv
+IG5vdCBoYXZlIFJQTUIgZGV2aWNlIGluIC9wcm9jL3BhcnRpdGlvbnMuDQo+PiBCb290IHBhcnRp
+dGlvbnMgYXJlIGFsc28gdW5saWtlbHkgdG8gaGF2ZSBhbnkgcGFydGl0aW9uaW5nLCBzbyBpdCBt
+YWRlIHNlbnNlIHRvDQo+PiB0cmVhdCB0aGVtIHRoZSBzYW1lIHdheSBhcyBSUE1CIGFuZCBub3Qg
+bGlzdCBpbiAvcHJvYy9wYXJ0aXRpb25zLg0KPj4gTm93IEkgc2VlIHRoYXQgUlBNQiBpcyBjb252
+ZXJ0ZWQgdG8gYSBjaGFyYWN0ZXIgZGV2aWNlIGFuZCB0aGlzIGNoYW5nZQ0KPj4gbWF5IG5vdCBi
+ZSByZXF1aXJlZCBmb3IgUlBNQi4NCj4gSXQgY2VydGFpbmx5IGRvZXMgbm90IGh1cnQsIGV2ZW4g
+aWYgdGhpcyBjb2RlIHBhdGggaXMgbm90IGNhbGxlZA0KPiBmb3IgdGhlIFJQTUIgcGFydGl0aW9u
+IGFueW1vcmUgKGx1Y2tpbHkpLg0KPg0KPiBPbiBhIGdlbmVyYWwgbm90ZSwgSSBkbyBub3QgZmVl
+bCB0aGUgd29yayB3aXRoIGJvb3QgcGFydGl0aW9ucyBvcg0KPiB0aGUgZ2VuZXJhbCBwdXJwb3Nl
+IHBhcnRpdGlvbnMgaXMgZmluaXNoZWQuDQo+DQo+IEluIGEgbGVjdHVyZSBJIHBvaW50ZWQgb3V0
+IHRoYXQ6DQo+DQo+IGRkIGlmPS9kZXYvc2RhIG9mPXNkYS5pbWcNCj4NCj4gR2l2ZXMgYW4gaW1h
+Z2Ugb2YgdGhlIHdob2xlIGRldmljZSwgYW5kIHlvdSBjYW4gcmVzdG9yZSB0aGUNCj4gZGV2aWNl
+IGJ5IGRvaW5nIHRoZSBpbnZlcnNlIG9mIHRoYXQgY29tbWFuZC4NCj4NCj4gRm9yIE1NQyBkZXZp
+Y2VzLA0KPg0KPiBkZCBpZj0vZGV2L21tY2JsazAgb2Y9bW1jYmxrMC5pbWcNCj4NCj4gZG9lcyBO
+T1QgaGF2ZSB0aGUgc2FtZSBuaWNlIHByb3BlcnR5LiBJbnN0ZWFkLCBzaW5jZSB0aGUNCj4gc3Bl
+Y2lhbCBwYXJ0aXRpb25zIGFyZSB0aGVpciBvd24gZGV2aWNlcyBhbmQgbm90IHBhcnQgb2YgdGhl
+IG1haW4NCj4gZGV2aWNlLCB0aGV5IGhhdmUgdG8gYmUgYmFja2VkIHVwIHNlcGFyYXRlbHkuDQo+
+DQo+IElNTyB0aGlzIGJyZWFrcyB0aGUgdXNlciBjb250cmFjdCBvZiBob3cgYSBkZXZpY2UgdnMg
+YSBwYXJ0aXRpb24NCj4gd29ya3MuDQo+DQo+IFdoYXQgd2UgbmVlZCB0byBkbyBpcyBtYWtlIHRo
+ZSAic3BlY2lhbCBwYXJ0aXRpb25zIiBwYXJ0IG9mIHRoZQ0KPiBtYWluIGJsb2NrIGRldmljZSBh
+bmQgc3RvcCBzcGF3bmluZyB0aGVzZSBzcGVjaWFsIGJsb2NrDQo+IGRldmljZXMgZm9yIGVhY2gg
+Ym9vdCBwYXJ0aW9ucyBvciBnZW5lcmFsIHBhcnRpdGlvbnMuIEluIGFkZGl0aW9uLA0KPiBlYWNo
+IG9mIHRoZXNlIGJvb3QgcGFydGl0aW9ucyBvciBnZW5lcmFsIHBhcnRpdGlvbnMgd2lsbCBnZXQg
+dGhlaXINCj4gb3duIGJsb2NrIHF1ZXVlIGFuZCBzdGF0ZSBjb250YWluZXIgd2hpY2ggaXMgbm90
+IGNoZWFwIGluDQo+IHJ1bnRpbWUgbWVtb3J5IGZvb3RwcmludCB0ZXJtcy4NCj4NCj4gU28gd2hh
+dCBJIHdhbnQgdG8gZG8gKHVubGVzcyBzb21lb25lIGJlYXRzIG1lIHRvIGl0KSBpdCB0byBjb21l
+DQo+IHVwIHdpdGggc29tZSB3YXkgbWFraW5nIGJvb3QgYW5kIGdlbmVyYWwgcGFydGl0aW9ucyBw
+YXJ0DQo+IG9mIHRoZSBtYWluIGJsb2NrIGRldmljZS4gUG9zc2libHkgdGhlIGNvcmUga2VybmVs
+IHBhcnRpdGlvbmluZw0KPiBjb2RlIG5lZWRzIHRvIGJlIGF1Z21lbnRlZC4gVGhlIHRlbnRhdGl2
+ZSBpZGVhIGlzIHRvIGp1c3QNCj4gcHV0IHRoZSBzZWN0b3JzIHJlcHJlc2VudGluZyB0aGVzZSBw
+YXJ0aXRpb25zIGFmdGVyIHRoZSBtYWluDQo+IGJsb2NrIGRldmljZSBhbmQgYWNjZXNzIHRoZW0g
+ZnJvbSB0aGVyZSwgd2l0aCBhbiBvZmZzZXQuDQpJIGRvbid0IHRoaW5rIHRoYXQgaGlkaW5nIHRo
+ZSBCb290IGFuZCBSUE1CIHdpbGwgcmVzb2x2ZSB0aGUgcHJvYmxlbQ0KZGVzY3JpYmVkIGFib3Zl
+Lg0KQm9vdCBwYXJ0aXRpb24gKHNhbWUgYXMgUlBNQikgaW4gZU1NQyBkZXZpY2UgaXMgYSBzZXBh
+cmF0ZQ0KInBoeXNpY2FsIiBwYXJ0aXRpb24uDQpJdCBoYXMgaXRzIG93biBsb2dpY2FsIGFkZHJl
+c3MgcmFuZ2UgYW5kIGRpZmZlcmVudCBmcm9tIGdlbmVyYWwNCnBhcnRpdGlvbiBjaGFyYWN0ZXJp
+c3RpY3MuDQpGcm9tIHRoZSBwcm90b2NvbCAtIHRoZSBhY2Nlc3MgdG8gdGhpcyBwYXJ0aXRpb24g
+aXQgcmVxdWlyZXMgc3dpdGNoDQpwYXJ0aXRpb24gY29tbWFuZC4gSXQgY2FuIGJlIGFjY2Vzc2Vz
+IGR1cmluZyB0aGUgYm9vdCBzZXF1ZW5jZQ0KYmVmb3JlIHRoZSBnZW5lcmFsL3VzZXJkYXRhIHBh
+cnRpdGlvbiBpcyBtb3VudGVkLg0KRnJvbSB0aGUgZGV2aWNlIHNpZGUgLSBpdCBjYW4gYmUgbWFu
+YWdlZCBpbiB0b3RhbGx5IGRpZmZlcmVudCBtYW5uZXINCihTTEMgdnMuIE1MQyBibG9ja3MsIGV0
+Yy4pDQpJIHRoaW5rIGl0IGNvbXBsZXRlbHkgbWFrZXMgc2Vuc2UgdG8gYWxsb3cgYWNjZXNzIHRv
+IEJvb3QgcGFydGl0aW9uIGZyb20gdGhlDQp1c2VyIHNwYWNlLiBGb3IgZXhhbXBsZSAtIHRvIGFs
+bG93IFIvVyB0aGUgYm9vdCBpbWFnZS4NCg0KQUZBSUssIGluIGNhc2Ugb2YgU0NTSS9VRlMgZGV2
+aWNlcyAtIEJvb3QgTFVOJ3MgYXJlIHJlcHJlc2VudGVkIGFzDQpzZXBhcmF0ZSBibG9jaw0KZGV2
+aWNlIHBhcnRpdGlvbnMgKC9kZXYvc2RiLCBkZXYvc2RjLi4uKS4NClNob3VsZG4ndCB3ZSBoYXZl
+IHRoZSBzYW1lIGZvciBlTU1DPw0KDQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBz
+ZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBsaW51eC1tbWMiIGluDQo+IHRoZSBib2R5IG9mIGEg
+bWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnDQo+IE1vcmUgbWFqb3Jkb21vIGlu
+Zm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
