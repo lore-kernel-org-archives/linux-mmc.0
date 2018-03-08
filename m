@@ -1,8 +1,7 @@
 From: Maxime Ripard <maxime.ripard@bootlin.com>
-Subject: [PATCH v2 3/8] mmc: sunxi: Move the power on action in a separate
- function
-Date: Thu,  8 Mar 2018 15:52:49 +0100
-Message-ID: <cff8ee6d63b8e48881fc2c9d81a1a2d383fbbc5f.1520520655.git-series.maxime.ripard@bootlin.com>
+Subject: [PATCH v2 1/8] mmc: sunxi: Reorder the headers
+Date: Thu,  8 Mar 2018 15:52:47 +0100
+Message-ID: <9530334c1fa45100e27c3d541d2a3b1e1d8113d2.1520520655.git-series.maxime.ripard@bootlin.com>
 References: <cover.e1acb3dc84e043c8342166e7fb45f79be36ab154.1520520655.git-series.maxime.ripard@bootlin.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -24,102 +23,73 @@ To: Chen-Yu Tsai <wens@csie.org>, Maxime Ripard <maxime.ripard@bootlin.com>, ulf
 Cc: Thomas Petazzoni <thomas.petazzoni@bootlin.com>, linux-mmc@vger.kernel.org, Quentin Schulz <quentin.schulz@bootlin.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-We'll need to have the power on behaviour in order to implement runtime_pm.
-Move it outside of the .set_ios callback for an easier access.
-
-And it improves readibility as a bonus.
+Our headers sort algorithm has had pretty chaotic results. Let's fix that.
 
 Signed-off-by: Maxime Ripard <maxime.ripard@bootlin.com>
 ---
- drivers/mmc/host/sunxi-mmc.c | 62 ++++++++++++++++++++-----------------
- 1 file changed, 34 insertions(+), 28 deletions(-)
+ drivers/mmc/host/sunxi-mmc.c | 43 +++++++++++++++++--------------------
+ 1 file changed, 20 insertions(+), 23 deletions(-)
 
 diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index a53e39d8b07e..4e81fe171532 100644
+index bad612d6f879..f9723797a9f8 100644
 --- a/drivers/mmc/host/sunxi-mmc.c
 +++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -855,6 +855,39 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
- 	return 0;
- }
+@@ -13,36 +13,33 @@
+  * the License, or (at your option) any later version.
+  */
  
-+static void sunxi_mmc_power_on(struct mmc_host *mmc, struct mmc_ios *ios)
-+{
-+	struct sunxi_mmc_host *host = mmc_priv(mmc);
-+	u32 rval;
-+
-+	dev_dbg(mmc_dev(mmc), "Powering on\n");
-+
-+	/* set bus width */
-+	switch (ios->bus_width) {
-+	case MMC_BUS_WIDTH_1:
-+		mmc_writel(host, REG_WIDTH, SDXC_WIDTH1);
-+		break;
-+	case MMC_BUS_WIDTH_4:
-+		mmc_writel(host, REG_WIDTH, SDXC_WIDTH4);
-+		break;
-+	case MMC_BUS_WIDTH_8:
-+		mmc_writel(host, REG_WIDTH, SDXC_WIDTH8);
-+		break;
-+	}
-+
-+	/* set ddr mode */
-+	rval = mmc_readl(host, REG_GCTRL);
-+	if (ios->timing == MMC_TIMING_UHS_DDR50 ||
-+	    ios->timing == MMC_TIMING_MMC_DDR52)
-+		rval |= SDXC_DDR_MODE;
-+	else
-+		rval &= ~SDXC_DDR_MODE;
-+	mmc_writel(host, REG_GCTRL, rval);
-+
-+	host->ferror = sunxi_mmc_clk_set_rate(host, ios);
-+	/* Android code had a usleep_range(50000, 55000); here */
-+}
-+
- static void sunxi_mmc_power_off(struct mmc_host *mmc, struct mmc_ios *ios)
- {
- 	struct sunxi_mmc_host *host = mmc_priv(mmc);
-@@ -874,7 +907,6 @@ static void sunxi_mmc_power_off(struct mmc_host *mmc, struct mmc_ios *ios)
- static void sunxi_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- {
- 	struct sunxi_mmc_host *host = mmc_priv(mmc);
--	u32 rval;
- 
- 	/* Set the power state */
- 	switch (ios->power_mode) {
-@@ -912,33 +944,7 @@ static void sunxi_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		break;
- 	}
- 
--	/* set bus width */
--	switch (ios->bus_width) {
--	case MMC_BUS_WIDTH_1:
--		mmc_writel(host, REG_WIDTH, SDXC_WIDTH1);
--		break;
--	case MMC_BUS_WIDTH_4:
--		mmc_writel(host, REG_WIDTH, SDXC_WIDTH4);
--		break;
--	case MMC_BUS_WIDTH_8:
--		mmc_writel(host, REG_WIDTH, SDXC_WIDTH8);
--		break;
--	}
+-#include <linux/kernel.h>
+-#include <linux/module.h>
+-#include <linux/io.h>
+-#include <linux/device.h>
+-#include <linux/interrupt.h>
+-#include <linux/delay.h>
+-#include <linux/err.h>
 -
--	/* set ddr mode */
--	rval = mmc_readl(host, REG_GCTRL);
--	if (ios->timing == MMC_TIMING_UHS_DDR50 ||
--	    ios->timing == MMC_TIMING_MMC_DDR52)
--		rval |= SDXC_DDR_MODE;
--	else
--		rval &= ~SDXC_DDR_MODE;
--	mmc_writel(host, REG_GCTRL, rval);
+ #include <linux/clk.h>
+ #include <linux/clk/sunxi-ng.h>
+-#include <linux/gpio.h>
+-#include <linux/platform_device.h>
+-#include <linux/spinlock.h>
+-#include <linux/scatterlist.h>
++#include <linux/delay.h>
++#include <linux/device.h>
+ #include <linux/dma-mapping.h>
+-#include <linux/slab.h>
+-#include <linux/reset.h>
+-#include <linux/regulator/consumer.h>
 -
--	/* set up clock */
--	if (ios->power_mode) {
--		host->ferror = sunxi_mmc_clk_set_rate(host, ios);
--		/* Android code had a usleep_range(50000, 55000); here */
--	}
-+	sunxi_mmc_power_on(mmc, ios);
- }
+-#include <linux/of_address.h>
+-#include <linux/of_gpio.h>
+-#include <linux/of_platform.h>
+-
++#include <linux/err.h>
++#include <linux/gpio.h>
++#include <linux/interrupt.h>
++#include <linux/io.h>
++#include <linux/kernel.h>
++#include <linux/mmc/card.h>
++#include <linux/mmc/core.h>
++#include <linux/mmc/mmc.h>
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/sd.h>
+ #include <linux/mmc/sdio.h>
+-#include <linux/mmc/mmc.h>
+-#include <linux/mmc/core.h>
+-#include <linux/mmc/card.h>
+ #include <linux/mmc/slot-gpio.h>
++#include <linux/module.h>
++#include <linux/of_address.h>
++#include <linux/of_gpio.h>
++#include <linux/of_platform.h>
++#include <linux/platform_device.h>
++#include <linux/regulator/consumer.h>
++#include <linux/reset.h>
++#include <linux/scatterlist.h>
++#include <linux/slab.h>
++#include <linux/spinlock.h>
  
- static int sunxi_mmc_volt_switch(struct mmc_host *mmc, struct mmc_ios *ios)
+ /* register offset definitions */
+ #define SDXC_REG_GCTRL	(0x00) /* SMC Global Control Register */
 -- 
 git-series 0.9.1
