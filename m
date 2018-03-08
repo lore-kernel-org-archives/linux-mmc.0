@@ -1,8 +1,7 @@
 From: Maxime Ripard <maxime.ripard@bootlin.com>
-Subject: [PATCH v2 2/8] mmc: sunxi: Move the power off action in a separate
- function
-Date: Thu,  8 Mar 2018 15:52:48 +0100
-Message-ID: <bd3c692c488e0e3ee8f4cc169980a74384717ec2.1520520655.git-series.maxime.ripard@bootlin.com>
+Subject: [PATCH v2 7/8] mmc: sunxi: Set our device drvdata earlier
+Date: Thu,  8 Mar 2018 15:52:53 +0100
+Message-ID: <d4f41babadf6dcab3520d25c658b93c49d10f64d.1520520655.git-series.maxime.ripard@bootlin.com>
 References: <cover.e1acb3dc84e043c8342166e7fb45f79be36ab154.1520520655.git-series.maxime.ripard@bootlin.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -24,58 +23,35 @@ To: Chen-Yu Tsai <wens@csie.org>, Maxime Ripard <maxime.ripard@bootlin.com>, ulf
 Cc: Thomas Petazzoni <thomas.petazzoni@bootlin.com>, linux-mmc@vger.kernel.org, Quentin Schulz <quentin.schulz@bootlin.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-We'll need to have the power off behaviour in order to implement
-runtime_pm. Move it outside of the .set_ios callback for an easier access.
-
-And it improves readibility as a bonus.
+As soon as the pm_runtime_enable hook is called, our runtime_suspend and
+runtime_resume hooks can be called as well. However, we only set the device
+drvdata that we will use after we have registered into the MMC core. Move
+that earlier so that we don't have a race that could lead to a crash.
 
 Signed-off-by: Maxime Ripard <maxime.ripard@bootlin.com>
 ---
- drivers/mmc/host/sunxi-mmc.c | 25 +++++++++++++++++--------
- 1 file changed, 17 insertions(+), 8 deletions(-)
+ drivers/mmc/host/sunxi-mmc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index f9723797a9f8..a53e39d8b07e 100644
+index c6431f6e816f..f6374066081b 100644
 --- a/drivers/mmc/host/sunxi-mmc.c
 +++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -855,6 +855,22 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
- 	return 0;
- }
- 
-+static void sunxi_mmc_power_off(struct mmc_host *mmc, struct mmc_ios *ios)
-+{
-+	struct sunxi_mmc_host *host = mmc_priv(mmc);
-+
-+	dev_dbg(mmc_dev(mmc), "Powering off\n");
-+
-+	sunxi_mmc_reset_host(host);
-+	if (!IS_ERR(mmc->supply.vmmc))
-+		mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
-+
-+	if (!IS_ERR(mmc->supply.vqmmc) && host->vqmmc_enabled)
-+		regulator_disable(mmc->supply.vqmmc);
-+
-+	host->vqmmc_enabled = false;
-+}
-+
- static void sunxi_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- {
- 	struct sunxi_mmc_host *host = mmc_priv(mmc);
-@@ -892,14 +908,7 @@ static void sunxi_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		break;
- 
- 	case MMC_POWER_OFF:
--		dev_dbg(mmc_dev(mmc), "power off!\n");
--		sunxi_mmc_reset_host(host);
--		if (!IS_ERR(mmc->supply.vmmc))
--			mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
--
--		if (!IS_ERR(mmc->supply.vqmmc) && host->vqmmc_enabled)
--			regulator_disable(mmc->supply.vqmmc);
--		host->vqmmc_enabled = false;
-+		sunxi_mmc_power_off(mmc, ios);
- 		break;
+@@ -1336,6 +1336,7 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
+ 		dev_err(&pdev->dev, "mmc alloc host failed\n");
+ 		return -ENOMEM;
  	}
++	platform_set_drvdata(pdev, mmc);
  
+ 	host = mmc_priv(mmc);
+ 	host->dev = &pdev->dev;
+@@ -1402,7 +1403,6 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
+ 		goto error_free_dma;
+ 
+ 	dev_info(&pdev->dev, "base:0x%p irq:%u\n", host->reg_base, host->irq);
+-	platform_set_drvdata(pdev, mmc);
+ 	return 0;
+ 
+ error_free_dma:
 -- 
 git-series 0.9.1
