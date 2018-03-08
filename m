@@ -1,16 +1,11 @@
 From: Maxime Ripard <maxime.ripard@bootlin.com>
-Subject: [PATCH v2 6/8] mmc: sunxi: Move the reset deassertion before enabling
- the clocks
-Date: Thu,  8 Mar 2018 15:52:52 +0100
-Message-ID: <4b3035d91ee18d544b5893470258396b5b7880a1.1520520655.git-series.maxime.ripard@bootlin.com>
-References: <cover.e1acb3dc84e043c8342166e7fb45f79be36ab154.1520520655.git-series.maxime.ripard@bootlin.com>
+Subject: [PATCH v2 0/8] mmc: sunxi: Add runtime PM support
+Date: Thu,  8 Mar 2018 15:52:46 +0100
+Message-ID: <cover.e1acb3dc84e043c8342166e7fb45f79be36ab154.1520520655.git-series.maxime.ripard@bootlin.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <cover.e1acb3dc84e043c8342166e7fb45f79be36ab154.1520520655.git-series.maxime.ripard@bootlin.com>
-In-Reply-To: <cover.e1acb3dc84e043c8342166e7fb45f79be36ab154.1520520655.git-series.maxime.ripard@bootlin.com>
-References: <cover.e1acb3dc84e043c8342166e7fb45f79be36ab154.1520520655.git-series.maxime.ripard@bootlin.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -24,98 +19,42 @@ To: Chen-Yu Tsai <wens@csie.org>, Maxime Ripard <maxime.ripard@bootlin.com>, ulf
 Cc: Thomas Petazzoni <thomas.petazzoni@bootlin.com>, linux-mmc@vger.kernel.org, Quentin Schulz <quentin.schulz@bootlin.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-As per Allwinner guidelines, the reset line should be deasserted before
-turning the clocks on.
+Hi,
 
-Implement it in our driver as well.
+Since it's introduction, our MMC controller has had its external clocks
+running all the time.
 
-Signed-off-by: Maxime Ripard <maxime.ripard@bootlin.com>
----
- drivers/mmc/host/sunxi-mmc.c | 36 ++++++++++++++++++------------------
- 1 file changed, 18 insertions(+), 18 deletions(-)
+While that was working great, the power usage and most importantly the EMI
+that it generated was pretty bad.
 
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index 34bc90bc04b2..c6431f6e816f 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -1188,10 +1188,19 @@ static int sunxi_mmc_enable(struct sunxi_mmc_host *host)
- {
- 	int ret;
- 
-+	if (!IS_ERR(host->reset)) {
-+		ret = reset_control_reset(host->reset);
-+		if (ret) {
-+			dev_err(host->dev, "Couldn't reset the MMC controller (%d)\n",
-+				ret);
-+			return ret;
-+		}
-+	}
-+
- 	ret = clk_prepare_enable(host->clk_ahb);
- 	if (ret) {
--		dev_err(dev, "Couldn't enable the bus clocks (%d)\n", ret);
--		return ret;
-+		dev_err(host->dev, "Couldn't enable the bus clocks (%d)\n", ret);
-+		goto error_assert_reset;
- 	}
- 
- 	ret = clk_prepare_enable(host->clk_mmc);
-@@ -1212,28 +1221,16 @@ static int sunxi_mmc_enable(struct sunxi_mmc_host *host)
- 		goto error_disable_clk_output;
- 	}
- 
--	if (!IS_ERR(host->reset)) {
--		ret = reset_control_reset(host->reset);
--		if (ret) {
--			dev_err(dev, "Couldn't reset the MMC controller (%d)\n",
--				ret);
--			goto error_disable_clk_sample;
--		}
--	}
--
- 	/*
- 	 * Sometimes the controller asserts the irq on boot for some reason,
- 	 * make sure the controller is in a sane state before enabling irqs.
- 	 */
- 	ret = sunxi_mmc_reset_host(host);
- 	if (ret)
--		goto error_assert_reset;
-+		goto error_disable_clk_sample;
- 
- 	return 0;
- 
--error_assert_reset:
--	if (!IS_ERR(host->reset))
--		reset_control_assert(host->reset);
- error_disable_clk_sample:
- 	clk_disable_unprepare(host->clk_sample);
- error_disable_clk_output:
-@@ -1242,6 +1239,9 @@ static int sunxi_mmc_enable(struct sunxi_mmc_host *host)
- 	clk_disable_unprepare(host->clk_mmc);
- error_disable_clk_ahb:
- 	clk_disable_unprepare(host->clk_ahb);
-+error_assert_reset:
-+	if (!IS_ERR(host->reset))
-+		reset_control_assert(host->reset);
- 	return ret;
- }
- 
-@@ -1249,13 +1249,13 @@ static void sunxi_mmc_disable(struct sunxi_mmc_host *host)
- {
- 	sunxi_mmc_reset_host(host);
- 
--	if (!IS_ERR(host->reset))
--		reset_control_assert(host->reset);
--
- 	clk_disable_unprepare(host->clk_sample);
- 	clk_disable_unprepare(host->clk_output);
- 	clk_disable_unprepare(host->clk_mmc);
- 	clk_disable_unprepare(host->clk_ahb);
-+
-+	if (!IS_ERR(host->reset))
-+		reset_control_assert(host->reset);
- }
- 
- static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
+Let's implement some runtime_pm hooks with an autosuspend to shut down the
+whole block when the MMC is not active.
+
+However, some SDIO devices will not probe properly if we keep shutting down
+the controller, so the autosuspend is disabled for the SDIO devices.
+
+Let me know what you think,
+Maxime
+
+Changes from v1:
+  - Disable entirely the controller
+  - Made sure the driver would work with CONFIG_PM off
+  - Fixed an issue with the SDIO devices
+  - Rebased on top of 4.16
+
+Maxime Ripard (8):
+  mmc: sunxi: Reorder the headers
+  mmc: sunxi: Move the power off action in a separate function
+  mmc: sunxi: Move the power on action in a separate function
+  mmc: sunxi: Move the power up action in a separate function
+  mmc: sunxi: Move resources management to separate functions
+  mmc: sunxi: Move the reset deassertion before enabling the clocks
+  mmc: sunxi: Set our device drvdata earlier
+  mmc: sunxi: Add runtime_pm support
+
+ drivers/mmc/host/sunxi-mmc.c | 346 ++++++++++++++++++++++--------------
+ 1 file changed, 216 insertions(+), 130 deletions(-)
+
+base-commit: 661e50bc853209e41a5c14a290ca4decc43cbfd1
 -- 
 git-series 0.9.1
