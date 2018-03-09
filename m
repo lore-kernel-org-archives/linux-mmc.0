@@ -1,182 +1,200 @@
-From: Harish Jenny K N <harish_kandiga@mentor.com>
-Subject: [PATCH v8] mmc: Export host capabilities to debugfs.
-Date: Fri, 9 Mar 2018 10:30:41 +0530
-Message-ID: <1520571641-5741-1-git-send-email-harish_kandiga@mentor.com>
+From: Jeremy McNicoll <jmcnicol@redhat.com>
+Subject: Re: [PATCH V2 2/2] mmc: sdhci-msm: support voltage pad switching
+Date: Fri, 9 Mar 2018 01:12:58 -0800
+Message-ID: <f1739273-e9d5-718a-4a89-673dd1052a6b@redhat.com>
+References: <1518415278-59062-1-git-send-email-vviswana@codeaurora.org>
+ <1518415278-59062-3-git-send-email-vviswana@codeaurora.org>
+ <CAD=FV=VXWbFDtDPboSpj=Pp3iCujN6RaE2dzXRpUEX-F-B_uZA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAD=FV=VXWbFDtDPboSpj=Pp3iCujN6RaE2dzXRpUEX-F-B_uZA@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, linus.walleij@linaro.org, adrian.hunter@intel.com, shawn.lin@rock-chips.com, avri.altman@wdc.com, andriy.shevchenko@linux.intel.com
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, harish_kandiga@mentor.com, Vladimir_Zapolskiy@mentor.com
+To: Doug Anderson <dianders@google.com>, Vijay Viswanath <vviswana@codeaurora.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, Krishna Konda <kkonda@codeaurora.org>, evgreen@chromium.org
 List-Id: linux-mmc@vger.kernel.org
 
-This patch exports the host capabilities to debugfs
+On 2018-03-02 10:25 AM, Doug Anderson wrote:
+> Hi,
+> 
+> On Sun, Feb 11, 2018 at 10:01 PM, Vijay Viswanath
+> <vviswana@codeaurora.org> wrote:
+>> From: Krishna Konda <kkonda@codeaurora.org>
+>>
+>> The PADs for SD card are dual-voltage that support 3v/1.8v. Those PADs
+>> have a control signal  (io_pad_pwr_switch/mode18 ) that indicates
+>> whether the PAD works in 3v or 1.8v.
+>>
+>> SDHC core on msm platforms should have IO_PAD_PWR_SWITCH bit set/unset
+>> based on actual voltage used for IO lines. So when power irq is
+>> triggered for io high or io low, the driver should check the voltages
+>> supported and set the pad accordingly.
+>>
+>> Signed-off-by: Krishna Konda <kkonda@codeaurora.org>
+>> Signed-off-by: Venkat Gopalakrishnan <venkatg@codeaurora.org>
+>> Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
+>> ---
+>>   drivers/mmc/host/sdhci-msm.c | 34 ++++++++++++++++++++++++++++++++++
+>>   1 file changed, 34 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+>> index 5c23e92..96c81df 100644
+>> --- a/drivers/mmc/host/sdhci-msm.c
+>> +++ b/drivers/mmc/host/sdhci-msm.c
+>> @@ -78,6 +78,8 @@
+>>   #define CORE_HC_MCLK_SEL_DFLT  (2 << 8)
+>>   #define CORE_HC_MCLK_SEL_HS400 (3 << 8)
+>>   #define CORE_HC_MCLK_SEL_MASK  (3 << 8)
+>> +#define CORE_IO_PAD_PWR_SWITCH_EN      (1 << 15)
+>> +#define CORE_IO_PAD_PWR_SWITCH  (1 << 16)
+>>   #define CORE_HC_SELECT_IN_EN   BIT(18)
+>>   #define CORE_HC_SELECT_IN_HS400        (6 << 19)
+>>   #define CORE_HC_SELECT_IN_MASK (7 << 19)
+>> @@ -1109,6 +1111,7 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
+>>          u32 irq_status, irq_ack = 0;
+>>          int retry = 10;
+>>          int pwr_state = 0, io_level = 0;
+>> +       u32 config = 0;
+> 
+> Don't init things to 0 unless you're relying on it (you're not).
+> Doing so tends to bypass compiler warnings about "use before init" and
+> leads to uncaught bugs.
+> 
+> 
+>>          irq_status = readl_relaxed(msm_host->core_mem + CORE_PWRCTL_STATUS);
+>> @@ -1166,6 +1169,30 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
+>>           */
+>>          writel_relaxed(irq_ack, msm_host->core_mem + CORE_PWRCTL_CTL);
+>>
+>> +       /* Ensure order between core_mem and hc_mem */
+>> +       mb();
+> 
+> I spent a bit of time brushing up on my memory barriers and (as far as
+> I understand) I agree that in general mb() between accesses of
+> core_mem and hc_mem is technically needed since, as you say, there are
+> two separate io-mapped devices here and you're using relaxed
+> accessors.
+> 
+> Oh, but hold on.  In this particular case they're truly not needed,
+> right?  The value stored in CORE_VENDOR_SPEC should be exactly the
+> value you wrote last to it, right?  ...and you're just reading it
+> back.  There should be no need for any sort of barrier here...
+> ...and, if you wanted to be _truly_ efficient (maybe you do since
+> you're going through all this trouble of using readl_relaxed) you
+> could just cache this value in "struct sdhci_msm_host" and you don't
+> even have to read it back at all.
+> 
+> 
+>> +       /*
+>> +        * We should unset IO PAD PWR switch only if the register write can
+>> +        * set IO lines high and the regulator also switches to 3 V.
+>> +        * Else, we should keep the IO PAD PWR switch set.
+>> +        * This is applicable to certain targets where eMMC vccq supply is only
+>> +        * 1.8V. In such targets, even during REQ_IO_HIGH, the IO PAD PWR
+>> +        * switch must be kept set to reflect actual regulator voltage. This
+>> +        * way, during initialization of controllers with only 1.8V, we will
+>> +        * set the IO PAD bit without waiting for a REQ_IO_LOW.
+>> +        */
+>> +       config = readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC);
+>> +
+>> +       if ((io_level & REQ_IO_HIGH) && (msm_host->caps_0 & CORE_3_0V_SUPPORT))
+>> +               config &= ~CORE_IO_PAD_PWR_SWITCH;
+>> +       else if ((io_level & REQ_IO_LOW) ||
+>> +                       (msm_host->caps_0 & CORE_1_8V_SUPPORT))
+>> +               config |= CORE_IO_PAD_PWR_SWITCH;
+> 
+> Part of me thinks that this would all be much cleaner using the same
+> solution as "drivers/power/avs/rockchip-io-domain.c".  AKA: register
+> to be notified about changes to vqmmc and set the bit whenever it
+> flips.  ...but I won't insist on that.  I don't know a whole lot about
+> the whole "REQ_IO_HIGH" bug I guess it's a sane place to do this...
+> 
+> ...but I will say that the fact that sometimes "config" isn't set to
+> anything at all here confuses me (IOW if you don't hit either the "if"
+> or "else if" then config is unchanged).  I think the comment block
+> above tries to explain it, but I still don't really get it.  Maybe
+> more examples?  If I was describing the current algorithm, I'd give
+> these examples:
+> 
+> * If vqmmc can only be 1.8V then at init time we'll have set
+> PAD_PWR_SWITCH_EN and leave the PAD_PWR_SWITCH set to 3.3V, but then
+> upon the first "REQ_IO_LOW" we'll transition down to 1.8V and stay
+> there forever.
+> 
+> * If vqmmc can only be 3.3V then at init time we'll have set
+> PAD_PWR_SWITCH_EN and leave the PAD_PWR_SWITCH set to 3.3V always.
+> 
+> * If vqmmc can be either 3.3V or 1.8V then at init time we'll have set
+> PAD_PWR_SWITCH_EN and leave the PAD_PWR_SWITCH set to 3.3V, but then
+> we'll honor REQ_IO_LOW / REQ_IO_HIGH.
+> 
+> * If vqmmc has an unknown range (or ins't provided) then we'll behave
+> like the 3.3V case (because earlier code initted PAD_PWR_SWITCH_EN to
+> 0 when it wrote CORE_VENDOR_SPEC_POR_VAL and then we never change it).
+> 
+> 
+>> +
+>> +       writel_relaxed(config, host->ioaddr + CORE_VENDOR_SPEC);
+>> +       /* Ensure IO pad update before any further register read/writes */
+>> +       mb();
+> 
+> I agree that (to the best of my understanding) this mb() ought to be
+> there, but maybe mention that the reason is that you have two separate
+> IO ranges for registers and that's why you need it.
+> 
+> Also: if you truly care about avoiding mb() calls (and since you're
+> using _relaxed variants I assume you do), you should avoid writing the
+> config and doing the "mb" if you didn't actually make a change.
+> 
+> 
+>> +
+>>          if (pwr_state)
+>>                  msm_host->curr_pwr_state = pwr_state;
+>>          if (io_level)
+>> @@ -1518,6 +1545,13 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>>          }
+>>
+>>          /*
+>> +        * Set the PAD_PWR_SWITCH_EN bit so that the PAD_PWR_SWITCH bit can
+>> +        * be used as required later on.
+>> +        */
+>> +       config = readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC);
+>> +       config |= CORE_IO_PAD_PWR_SWITCH_EN;
+>> +       writel_relaxed(config, host->ioaddr + CORE_VENDOR_SPEC);
+> 
+> If this is going to be unconditional (as you've written it) should
+> this be combined with the statement earlier in the same function where
+> we write "CORE_VENDOR_SPEC_POR_VAL" to this same register?
+> 
+> Seems like you could write:
+> 
+> #define CORE_VENDOR_SPEC_INIT_VAL (CORE_VENDOR_SPEC_POR_VAL | \
+>                             CORE_IO_PAD_PWR_SWITCH_EN)
+> 
+> ...then just change the init line to use "CORE_VENDOR_SPEC_INIT_VAL"
+> instead of "CORE_VENDOR_SPEC_POR_VAL".
+> 
+> ---
+> 
+> ...but it seems like it might be even better just leave the "en" bit
+> off for now and just turn it on when you actually need it.
+> 
+> BTW: All I have is a very terse register spec in front of me, but do
+> you happen to know why "HC_IO_PAD_PWR_SWITCH_EN" even exists at all?
+> Is there some difference between "enabled but choose 3.3 V" and "not
+> enabled?"  Also: do all versions of the controller supported by this
+> driver support this bit?
+> 
+> One last thing: on SDM845 one of the two SD controllers doesn't
+> support 1.8V, though the register description still describes these
+> bits.  Presumably for that controller it's better to just not set
+> "enabled" at all?
+> 
+> 
+> 
 
-This idea of sharing host capabilities over debugfs
-came up from Abbas Raza <Abbas_Raza@mentor.com>
-Earlier discussions:
-https://lkml.org/lkml/2018/3/5/357
-https://www.spinics.net/lists/linux-mmc/msg48219.html
+Looking forward to reviewing and testing V3.
 
-Signed-off-by: Harish Jenny K N <harish_kandiga@mentor.com>
----
-
-Changes in v8
-- Changes to use for_each_set_bit as suggested by Andy Shevchenko.
-
-Changes in v7
-- Moved additional capabilities also to caps file as mentioned by Ulf Hansson
-- compacting the code with macros
-
-Changes in v6:
-- Used DEFINE_SHOW_ATTRIBUTE
-
-Changes in v5:
-- Added parser logic in kernel by using debugfs_create_file  for caps and caps2 instead of debugfs_create_x32
-- Changed Author
-
-Changes in v4:
-- Moved the creation of nodes to mmc_add_host_debugfs
-- Exported caps2
-- Renamed host_caps to caps
-
-Changes in v3:
-- Removed typecasting of &host->caps to (u32 *)
-
-Changes in v2:
-- Changed Author
-
- drivers/mmc/core/debugfs.c | 111 +++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 111 insertions(+)
-
-diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
-index c51e0c0..a16846b 100644
---- a/drivers/mmc/core/debugfs.c
-+++ b/drivers/mmc/core/debugfs.c
-@@ -225,6 +225,114 @@ static int mmc_clock_opt_set(void *data, u64 val)
- DEFINE_SIMPLE_ATTRIBUTE(mmc_clock_fops, mmc_clock_opt_get, mmc_clock_opt_set,
- 	"%llu\n");
-
-+static int mmc_caps_show(struct seq_file *s, void *unused)
-+{
-+	static const char * const mmc_host_capabilities[] = {
-+		"4-bit transfers allowed",/* MMC_CAP_4_BIT_DATA (1 << 0) */
-+		/* MMC_CAP_MMC_HIGHSPEED (1 << 1)*/
-+		"Supports MMC high-speed timing",
-+		/* MMC_CAP_SD_HIGHSPEED (1 << 2)*/
-+		"Supports SD high-speed timing",
-+		"Can signal pending SDIO IRQs",/* MMC_CAP_SDIO_IRQ (1 << 3) */
-+		"Talks only SPI protocols",/* MMC_CAP_SPI (1 << 4) */
-+		/* MMC_CAP_NEEDS_POLL (1 << 5)*/
-+		"Needs polling for card-detection",
-+		"8 bit transfers allowed",/* MMC_CAP_8_BIT_DATA (1 << 6) */
-+		"Suspends (e)MMC/SD at idle",/*MMC_CAP_AGGRESSIVE_PM (1 << 7)*/
-+		"Nonremovable",/* MMC_CAP_NONREMOVABLE (1 << 8) */
-+		"Waits while card is busy",/*MMC_CAP_WAIT_WHILE_BUSY (1 << 9)*/
-+		"Allows erase/trim commands",/* MMC_CAP_ERASE (1 << 10) */
-+		"Supports DDR mode at 3.3V",/* MMC_CAP_3_3V_DDR	(1 << 11) */
-+		"Supports DDR mode at 1.8V",/* MMC_CAP_1_8V_DDR (1 << 12) */
-+		"Supports DDR mode at 1.2V",/* MMC_CAP_1_2V_DDR (1 << 13) */
-+		"Can power off after boot",/*MMC_CAP_POWER_OFF_CARD (1 << 14)*/
-+		"CMD14/CMD19 bus width ok",/*MMC_CAP_BUS_WIDTH_TEST (1 << 15)*/
-+		"Supports UHS SDR12 mode",/* MMC_CAP_UHS_SDR12 (1 << 16) */
-+		"Supports UHS SDR25 mode",/* MMC_CAP_UHS_SDR25 (1 << 17) */
-+		"Supports UHS SDR50 mode",/* MMC_CAP_UHS_SDR50 (1 << 18) */
-+		"Supports UHS SDR104 mode",/* MMC_CAP_UHS_SDR104 (1 << 19) */
-+		"Supports UHS DDR50 mode",/* MMC_CAP_UHS_DDR50 (1 << 20) */
-+		"",/* (1 << 21) is free for reuse*/
-+		"",/* (1 << 22) */
-+		"Supports Driver Type A",/* MMC_CAP_DRIVER_TYPE_A (1 << 23) */
-+		"Supports Driver Type C",/* MMC_CAP_DRIVER_TYPE_C (1 << 24) */
-+		"Supports Driver Type D",/* MMC_CAP_DRIVER_TYPE_D (1 << 25) */
-+		"",/* (1 << 26) */
-+		/* MMC_CAP_DONE_COMPLETE (1 << 27) */
-+		"RW reqs can be completed within mmc_request_done()",
-+		"Supports Enable card detect wake",/*MMC_CAP_CD_WAKE (1 << 28)*/
-+		/* MMC_CAP_CMD_DURING_TFR (1 << 29) */
-+		"Can send commands during data transfer",
-+		"CMD23 supported",/* MMC_CAP_CMD23 (1 << 30) */
-+		"Supports Hardware reset"/* MMC_CAP_HW_RESET	(1 << 31) */
-+	};
-+
-+	static const char * const mmc_host_capabilities2[] = {
-+		/* MMC_CAP2_BOOTPART_NOACC (1 << 0) */
-+		"No access to Boot partition",
-+		"",/* (1 << 1) */
-+		"Can do full power cycle",/* MMC_CAP2_FULL_PWR_CYCLE (1 << 2) */
-+		"",/* (1 << 3) */
-+		"",/* (1 << 4) */
-+		"Supports HS200 1.8V SDR",/* MMC_CAP2_HS200_1_8V_SDR (1 << 5) */
-+		"Supports HS200 1.2V SDR",/* MMC_CAP2_HS200_1_2V_SDR (1 << 6) */
-+		"",/* (1 << 7) */
-+		"",/* (1 << 8) */
-+		"",/* (1 << 9) */
-+		/* MMC_CAP2_CD_ACTIVE_HIGH (1 << 10) */
-+		"Card-detect signal active high",
-+		/* MMC_CAP2_RO_ACTIVE_HIGH (1 << 11) */
-+		"Write-protect signal active high",
-+		"",/* (1 << 12) */
-+		"",/* (1 << 13) */
-+		/* MMC_CAP2_NO_PRESCAN_POWERUP (1 << 14) */
-+		"Can do complete power cycle of the card",
-+		"Supports HS400 1.8V",/* MMC_CAP2_HS400_1_8V	(1 << 15) */
-+		"Support HS400 1.2V",/* MMC_CAP2_HS400_1_2V	(1 << 16) */
-+		"SDIO IRQ - Nothread",/* MMC_CAP2_SDIO_IRQ_NOTHREAD (1 << 17) */
-+		/* MMC_CAP2_NO_WRITE_PROTECT (1 << 18) */
-+		"No physical write protect pin, assume always read-write",
-+		/* MMC_CAP2_NO_SDIO (1 << 19) */
-+		"Do not send SDIO commands during initialization",
-+		"Supports enhanced strobe",/* MMC_CAP2_HS400_ES (1 << 20) */
-+		/* MMC_CAP2_NO_SD (1 << 21) */
-+		"Do not send SD commands during initialization",
-+		/* MMC_CAP2_NO_MMC (1 << 22) */
-+		"Do not send (e)MMC commands during initialization",
-+		"Has eMMC command queue engine",/* MMC_CAP2_CQE	 (1 << 23) */
-+		"CQE can issue a direct command",/*MMC_CAP2_CQE_DCMD (1 << 24)*/
-+		"",/* (1 << 25) */
-+		"",/* (1 << 26) */
-+		"",/* (1 << 27) */
-+		"",/* (1 << 28) */
-+		"",/* (1 << 29) */
-+		"",/* (1 << 30) */
-+		""/* (1 << 31) */
-+	};
-+
-+	struct mmc_host *host = s->private;
-+	u32 caps = host->caps;
-+	u32 caps2 = host->caps2;
-+	int bit;
-+	int size = sizeof(u32) * BITS_PER_BYTE;
-+
-+	seq_puts(s, "MMC Host capabilities are:\n");
-+	seq_puts(s, "=============================================\n");
-+
-+	for_each_set_bit(bit, (const unsigned long *)&caps, size)
-+		seq_printf(s, "%s\n", mmc_host_capabilities[bit]);
-+
-+	seq_puts(s, "=============================================\n");
-+	seq_puts(s, "MMC Host additional capabilities are:\n");
-+	seq_puts(s, "=============================================\n");
-+
-+	for_each_set_bit(bit, (const unsigned long *)&caps2, size)
-+		seq_printf(s, "%s\n", mmc_host_capabilities2[bit]);
-+
-+	return 0;
-+}
-+DEFINE_SHOW_ATTRIBUTE(mmc_caps);
-+
- void mmc_add_host_debugfs(struct mmc_host *host)
- {
- 	struct dentry *root;
-@@ -243,6 +351,9 @@ void mmc_add_host_debugfs(struct mmc_host *host)
- 	if (!debugfs_create_file("ios", S_IRUSR, root, host, &mmc_ios_fops))
- 		goto err_node;
-
-+	if (!debugfs_create_file("caps", S_IRUSR, root, host, &mmc_caps_fops))
-+		goto err_node;
-+
- 	if (!debugfs_create_file("clock", S_IRUSR | S_IWUSR, root, host,
- 			&mmc_clock_fops))
- 		goto err_node;
---
-1.9.1
+-jeremy
