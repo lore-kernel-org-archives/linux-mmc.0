@@ -1,81 +1,160 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH] mmc: card: Don't show eMMC RPMB and BOOT areas in /proc/partitions
-Date: Sat, 10 Mar 2018 12:59:08 +0100
-Message-ID: <CACRpkdaPk6=DNH_Wk6q-8_Sa8BCCHA28Jr5FO64Q0eeUCFCBXQ@mail.gmail.com>
-References: <1519731229-19141-1-git-send-email-harish_kandiga@mentor.com>
- <CACRpkdYuxoZaF9xyoA9tsyBuXOkrcdZVGWYfcyEMe0psk6UydQ@mail.gmail.com> <67491d8c-7eb3-e8c5-7eb0-3006ff668a60@wdc.com>
+From: Ben Hutchings <ben@decadent.org.uk>
+Subject: [PATCH 3.16 40/76] x86/cpu/intel: Introduce macros for Intel
+ family numbers
+Date: Mon, 12 Mar 2018 03:06:12 +0000
+Message-ID: <lsq.1520823972.478544665@decadent.org.uk>
+References: <lsq.1520823971.5976735@decadent.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <67491d8c-7eb3-e8c5-7eb0-3006ff668a60@wdc.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Alex Lemberg <Alex.Lemberg@wdc.com>
-Cc: Harish Jenny K N <harish_kandiga@mentor.com>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Transfer-Encoding: 8bit
+Return-path: <stable-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <lsq.1520823971.5976735@decadent.org.uk>
+Sender: stable-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc: akpm@linux-foundation.org, Vishwanath Somayaji <vishwanath.somayaji@intel.com>, Mauro Carvalho Chehab <mchehab@osg.samsung.com>, Ingo Molnar <mingo@kernel.org>, Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@linux.intel.com>, linux-edac@vger.kernel.org, Tony Luck <tony.luck@intel.com>, Andy Lutomirski <luto@amacapital.net>, Andy Lutomirski <luto@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-acpi@vger.kernel.org, Viresh Kumar <viresh.kumar@linaro.org>, Darren Hart <dvhart@infradead.org>, "H. Peter Anvin" <hpa@zytor.com>, platform-driver-x86@vger.kernel.org, jacob.jun.pan@intel.com, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Linus Torvalds <torvalds@linux-foundation.org>, Dave Hansen <dave@sr71.net>, Ka
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Mar 8, 2018 at 9:36 PM, Alex Lemberg <Alex.Lemberg@wdc.com> wrote:
-> On 3/2/18 4:53 AM, Linus Walleij wrote:
+3.16.56-rc1 review patch.  If anyone has any objections, please let me know.
 
->> What we need to do is make the "special partitions" part of the
->> main block device and stop spawning these special block
->> devices for each boot partions or general partitions. In addition,
->> each of these boot partitions or general partitions will get their
->> own block queue and state container which is not cheap in
->> runtime memory footprint terms.
->>
->> So what I want to do (unless someone beats me to it) it to come
->> up with some way making boot and general partitions part
->> of the main block device. Possibly the core kernel partitioning
->> code needs to be augmented. The tentative idea is to just
->> put the sectors representing these partitions after the main
->> block device and access them from there, with an offset.
->
-> I don't think that hiding the Boot and RPMB will resolve the problem
-> described above.
+------------------
 
-Me neither. I'm just trying to discuss the problem lurking behind
-these partitions.
+From: Dave Hansen <dave@sr71.net>
 
-> Boot partition (same as RPMB) in eMMC device is a separate
-> "physical" partition.
-> It has its own logical address range and different from general
-> partition characteristics.
+commit 970442c599b22ccd644ebfe94d1d303bf6f87c05 upstream.
 
-Yep.
+Problem:
 
-> From the protocol - the access to this partition it requires switch
-> partition command.
+We have a boatload of open-coded family-6 model numbers.  Half of
+them have these model numbers in hex and the other half in
+decimal.  This makes grepping for them tons of fun, if you were
+to try.
 
-Yeah I saw that as well... it's a bit funny.
+Solution:
 
-> From the device side - it can be managed in totally different manner
-> (SLC vs. MLC blocks, etc.)
-> I think it completely makes sense to allow access to Boot partition from the
-> user space. For example - to allow R/W the boot image.
+Consolidate all the magic numbers.  Put all the definitions in
+one header.
 
-But this patch doesn't hide the partition from userspace does it?
+The names here are closely derived from the comments describing
+the models from arch/x86/events/intel/core.c.  We could easily
+make them shorter by doing things like s/SANDYBRIDGE/SNB/, but
+they seemed fine even with the longer versions to me.
 
-They will still appear in /dev/mmcblk0boot1 etc.
+Do not take any of these names too literally, like "DESKTOP"
+or "MOBILE".  These are all colloquial names and not precise
+descriptions of everywhere a given model will show up.
 
-Just not reported as "real" partitions in /proc/partitions.
+Signed-off-by: Dave Hansen <dave.hansen@linux.intel.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Andy Lutomirski <luto@amacapital.net>
+Cc: Andy Lutomirski <luto@kernel.org>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Brian Gerst <brgerst@gmail.com>
+Cc: Darren Hart <dvhart@infradead.org>
+Cc: Dave Hansen <dave@sr71.net>
+Cc: Denys Vlasenko <dvlasenk@redhat.com>
+Cc: Doug Thompson <dougthompson@xmission.com>
+Cc: Eduardo Valentin <edubezval@gmail.com>
+Cc: H. Peter Anvin <hpa@zytor.com>
+Cc: Jacob Pan <jacob.jun.pan@linux.intel.com>
+Cc: Kan Liang <kan.liang@intel.com>
+Cc: Len Brown <lenb@kernel.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Mauro Carvalho Chehab <mchehab@osg.samsung.com>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+Cc: Rajneesh Bhardwaj <rajneesh.bhardwaj@intel.com>
+Cc: Souvik Kumar Chakravarty <souvik.k.chakravarty@intel.com>
+Cc: Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>
+Cc: Stephane Eranian <eranian@google.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Tony Luck <tony.luck@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Viresh Kumar <viresh.kumar@linaro.org>
+Cc: Vishwanath Somayaji <vishwanath.somayaji@intel.com>
+Cc: Zhang Rui <rui.zhang@intel.com>
+Cc: jacob.jun.pan@intel.com
+Cc: linux-acpi@vger.kernel.org
+Cc: linux-edac@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org
+Cc: linux-pm@vger.kernel.org
+Cc: platform-driver-x86@vger.kernel.org
+Link: http://lkml.kernel.org/r/20160603001927.F2A7D828@viggo.jf.intel.com
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Ben Hutchings <ben@decadent.org.uk>
+---
+ arch/x86/include/asm/intel-family.h | 68 +++++++++++++++++++++++++++++++++++++
+ 1 file changed, 68 insertions(+)
+ create mode 100644 arch/x86/include/asm/intel-family.h
 
-Or do I misunderstand it?
-
-> AFAIK, in case of SCSI/UFS devices - Boot LUN's are represented as
-> separate block
-> device partitions (/dev/sdb, dev/sdc...).
-> Shouldn't we have the same for eMMC?
-
-I think we should, but we have the problem with the boot partitions
-and general partitions that they do not work anything like SCSCI
-LUNs.
-
-On a SCSI device dd from the whole device will copy all data on
-the device, the partition table and contents of all partitions.
-
-For say /dev/mmcblk0 this is not true of the device contains
-boot or general partitions, those other partitions will not be
-copied.
-
-Yours,
-Linus Walleij
+--- /dev/null
++++ b/arch/x86/include/asm/intel-family.h
+@@ -0,0 +1,68 @@
++#ifndef _ASM_X86_INTEL_FAMILY_H
++#define _ASM_X86_INTEL_FAMILY_H
++
++/*
++ * "Big Core" Processors (Branded as Core, Xeon, etc...)
++ *
++ * The "_X" parts are generally the EP and EX Xeons, or the
++ * "Extreme" ones, like Broadwell-E.
++ *
++ * Things ending in "2" are usually because we have no better
++ * name for them.  There's no processor called "WESTMERE2".
++ */
++
++#define INTEL_FAM6_CORE_YONAH		0x0E
++#define INTEL_FAM6_CORE2_MEROM		0x0F
++#define INTEL_FAM6_CORE2_MEROM_L	0x16
++#define INTEL_FAM6_CORE2_PENRYN		0x17
++#define INTEL_FAM6_CORE2_DUNNINGTON	0x1D
++
++#define INTEL_FAM6_NEHALEM		0x1E
++#define INTEL_FAM6_NEHALEM_EP		0x1A
++#define INTEL_FAM6_NEHALEM_EX		0x2E
++#define INTEL_FAM6_WESTMERE		0x25
++#define INTEL_FAM6_WESTMERE2		0x1F
++#define INTEL_FAM6_WESTMERE_EP		0x2C
++#define INTEL_FAM6_WESTMERE_EX		0x2F
++
++#define INTEL_FAM6_SANDYBRIDGE		0x2A
++#define INTEL_FAM6_SANDYBRIDGE_X	0x2D
++#define INTEL_FAM6_IVYBRIDGE		0x3A
++#define INTEL_FAM6_IVYBRIDGE_X		0x3E
++
++#define INTEL_FAM6_HASWELL_CORE		0x3C
++#define INTEL_FAM6_HASWELL_X		0x3F
++#define INTEL_FAM6_HASWELL_ULT		0x45
++#define INTEL_FAM6_HASWELL_GT3E		0x46
++
++#define INTEL_FAM6_BROADWELL_CORE	0x3D
++#define INTEL_FAM6_BROADWELL_XEON_D	0x56
++#define INTEL_FAM6_BROADWELL_GT3E	0x47
++#define INTEL_FAM6_BROADWELL_X		0x4F
++
++#define INTEL_FAM6_SKYLAKE_MOBILE	0x4E
++#define INTEL_FAM6_SKYLAKE_DESKTOP	0x5E
++#define INTEL_FAM6_SKYLAKE_X		0x55
++#define INTEL_FAM6_KABYLAKE_MOBILE	0x8E
++#define INTEL_FAM6_KABYLAKE_DESKTOP	0x9E
++
++/* "Small Core" Processors (Atom) */
++
++#define INTEL_FAM6_ATOM_PINEVIEW	0x1C
++#define INTEL_FAM6_ATOM_LINCROFT	0x26
++#define INTEL_FAM6_ATOM_PENWELL		0x27
++#define INTEL_FAM6_ATOM_CLOVERVIEW	0x35
++#define INTEL_FAM6_ATOM_CEDARVIEW	0x36
++#define INTEL_FAM6_ATOM_SILVERMONT1	0x37 /* BayTrail/BYT / Valleyview */
++#define INTEL_FAM6_ATOM_SILVERMONT2	0x4D /* Avaton/Rangely */
++#define INTEL_FAM6_ATOM_AIRMONT		0x4C /* CherryTrail / Braswell */
++#define INTEL_FAM6_ATOM_MERRIFIELD1	0x4A /* Tangier */
++#define INTEL_FAM6_ATOM_MERRIFIELD2	0x5A /* Annidale */
++#define INTEL_FAM6_ATOM_GOLDMONT	0x5C
++#define INTEL_FAM6_ATOM_DENVERTON	0x5F /* Goldmont Microserver */
++
++/* Xeon Phi */
++
++#define INTEL_FAM6_XEON_PHI_KNL		0x57 /* Knights Landing */
++
++#endif /* _ASM_X86_INTEL_FAMILY_H */
