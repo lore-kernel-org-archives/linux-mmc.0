@@ -1,57 +1,60 @@
-From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Subject: Re: [PATCH v9] mmc: Export host capabilities to debugfs.
-Date: Mon, 12 Mar 2018 16:27:17 +0200
-Message-ID: <1520864837.10722.596.camel@linux.intel.com>
-References: <1520829090-3567-1-git-send-email-harish_kandiga@mentor.com>
-         <1520849262.10722.582.camel@linux.intel.com>
-         <DM5PR04MB10854C79897A80023EF37F76FCD30@DM5PR04MB1085.namprd04.prod.outlook.com>
-         <540fef96-aa2f-e6c3-467d-bc1d021dd55b@mentor.com>
-         <DM5PR04MB10859F389CA2D1F2370C02CFFCD30@DM5PR04MB1085.namprd04.prod.outlook.com>
-         <329d521d-1776-43ee-2f0e-e9690c29a693@mentor.com>
-         <1520859807.10722.591.camel@linux.intel.com>
-         <5e038945-a09c-5c64-2152-5d2783a249ec@mentor.com>
-         <1520864550.10722.594.camel@linux.intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1520864550.10722.594.camel@linux.intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Harish Jenny K N <harish_kandiga@mentor.com>, Avri Altman <Avri.Altman@wdc.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linus.walleij@linaro.org" <linus.walleij@linaro.org>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Vladimir_Zapolskiy@mentor.com" <Vladimir_Zapolskiy@mentor.com>
+From: Ezequiel Garcia <ezequiel@vanguardiasur.com.ar>
+Subject: [PATCH v2 01/14] mmc: jz4740: Fix race condition in IRQ mask update
+Date: Mon, 12 Mar 2018 18:55:41 -0300
+Message-ID: <20180312215554.20770-2-ezequiel@vanguardiasur.com.ar>
+References: <20180312215554.20770-1-ezequiel@vanguardiasur.com.ar>
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20180312215554.20770-1-ezequiel@vanguardiasur.com.ar>
+Sender: stable-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Paul Cercueil <paul@crapouillou.net>
+Cc: linux-mmc@vger.kernel.org, linux-mips@linux-mips.org, James Hogan <jhogan@kernel.org>, Alex Smith <alex.smith@imgtec.com>, stable@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, 2018-03-12 at 16:22 +0200, Andy Shevchenko wrote:
-> On Mon, 2018-03-12 at 19:04 +0530, Harish Jenny K N wrote:
-> > 
-> > On Monday 12 March 2018 06:33 PM, Andy Shevchenko wrote:
-> > > On Mon, 2018-03-12 at 18:00 +0530, Harish Jenny K N wrote:
-> > > > > > > > > +	for_each_set_bit(bit, (const unsigned long
-> > > > > > > > > *)&caps,
-> > > > > > > > > BITS_PER_LONG)
-> > > > > > > > > +	for_each_set_bit(bit, (const unsigned long
-> > > > > > > > > *)&caps2,
-> > > > > > > > > BITS_PER_LONG)
-> > > > > > > > 
-> > > > > > > > Explicit casting is not needed anymore in both cases.
-> > Sorry for I was not clear that the compilation error is for the
-> > following case
+From: Alex Smith <alex.smith@imgtec.com>
 
-> > > u32 caps = host->caps;
+A spinlock is held while updating the internal copy of the IRQ mask,
+but not while writing it to the actual IMASK register. After the lock
+is released, an IRQ can occur before the IMASK register is written.
+If handling this IRQ causes the mask to be changed, when the handler
+returns back to the middle of the first mask update, a stale value
+will be written to the mask register.
 
-This is wrong! I told you that and you seems changed at least in v9.
-What are you doing locally?
+If this causes an IRQ to become unmasked that cannot have its status
+cleared by writing a 1 to it in the IREG register, e.g. the SDIO IRQ,
+then we can end up stuck with the same IRQ repeatedly being fired but
+not handled. Normally the MMC IRQ handler attempts to clear any
+unexpected IRQs by writing IREG, but for those that cannot be cleared
+in this way then the IRQ will just repeatedly fire.
 
-> > > for_each_set_bit(bit, &caps, ARRAY_SIZE(mmc_host_capabilities))
-> > 
+This was resulting in lockups after a while of using Wi-Fi on the
+CI20 (GitHub issue #19).
 
-> Are you sure you have caps defined as unsigned long?
-> 
-> Check your code, the explicit casting should gone. Otherwise you are
-> doing something wrong.
+Resolve by holding the spinlock until after the IMASK register has
+been updated.
 
-See above.
+Cc: stable@vger.kernel.org
+Link: https://github.com/MIPS/CI20_linux/issues/19
+Fixes: 61bfbdb85687 ("MMC: Add support for the controller on JZ4740 SoCs.")
+Tested-by: Mathieu Malaterre <malat@debian.org>
+Signed-off-by: Alex Smith <alex.smith@imgtec.com>
+---
+ drivers/mmc/host/jz4740_mmc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
+diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
+index 712e08d9a45e..a0168e9e4fce 100644
+--- a/drivers/mmc/host/jz4740_mmc.c
++++ b/drivers/mmc/host/jz4740_mmc.c
+@@ -362,9 +362,9 @@ static void jz4740_mmc_set_irq_enabled(struct jz4740_mmc_host *host,
+ 		host->irq_mask &= ~irq;
+ 	else
+ 		host->irq_mask |= irq;
+-	spin_unlock_irqrestore(&host->lock, flags);
+ 
+ 	writew(host->irq_mask, host->base + JZ_REG_MMC_IMASK);
++	spin_unlock_irqrestore(&host->lock, flags);
+ }
+ 
+ static void jz4740_mmc_clock_enable(struct jz4740_mmc_host *host,
 -- 
-Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Intel Finland Oy
+2.16.2
