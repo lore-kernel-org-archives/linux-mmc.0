@@ -1,160 +1,181 @@
-From: Ben Hutchings <ben@decadent.org.uk>
-Subject: [PATCH 3.2 074/104] x86/cpu/intel: Introduce macros for Intel
- family numbers
-Date: Mon, 12 Mar 2018 03:03:34 +0000
-Message-ID: <lsq.1520823814.187680530@decadent.org.uk>
-References: <lsq.1520823814.606620518@decadent.org.uk>
+From: Harish Jenny K N <harish_kandiga@mentor.com>
+Subject: [PATCH v9] mmc: Export host capabilities to debugfs.
+Date: Mon, 12 Mar 2018 10:01:30 +0530
+Message-ID: <1520829090-3567-1-git-send-email-harish_kandiga@mentor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <lsq.1520823814.606620518@decadent.org.uk>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: akpm@linux-foundation.org, Souvik Kumar Chakravarty <souvik.k.chakravarty@intel.com>, "H. Peter Anvin" <hpa@zytor.com>, Andy Lutomirski <luto@amacapital.net>, linux-acpi@vger.kernel.org, Borislav Petkov <bp@alien8.de>, Rajneesh Bhardwaj <rajneesh.bhardwaj@intel.com>, Vishwanath Somayaji <vishwanath.somayaji@intel.com>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Zhang Rui <rui.zhang@intel.com>, Len Brown <lenb@kernel.org>, linux-mmc@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>, Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>, Doug Thompson <dougthompson@xmission.com>, Ulf Hansson <ulf.hansson@linaro.org>, platform-driver-x86@vger.kernel.org, Peter Zijlstra <peterz@infradead.org>, Brian Gerst <brger>
+To: ulf.hansson@linaro.org, linus.walleij@linaro.org, adrian.hunter@intel.com, shawn.lin@rock-chips.com, avri.altman@wdc.com, andriy.shevchenko@linux.intel.com
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, harish_kandiga@mentor.com, Vladimir_Zapolskiy@mentor.com
 List-Id: linux-mmc@vger.kernel.org
 
-3.2.101-rc1 review patch.  If anyone has any objections, please let me know.
+This patch exports the host capabilities to debugfs
 
-------------------
+This idea of sharing host capabilities over debugfs
+came up from Abbas Raza <Abbas_Raza@mentor.com>
+Earlier discussions:
+https://lkml.org/lkml/2018/3/5/357
+https://www.spinics.net/lists/linux-mmc/msg48219.html
 
-From: Dave Hansen <dave@sr71.net>
-
-commit 970442c599b22ccd644ebfe94d1d303bf6f87c05 upstream.
-
-Problem:
-
-We have a boatload of open-coded family-6 model numbers.  Half of
-them have these model numbers in hex and the other half in
-decimal.  This makes grepping for them tons of fun, if you were
-to try.
-
-Solution:
-
-Consolidate all the magic numbers.  Put all the definitions in
-one header.
-
-The names here are closely derived from the comments describing
-the models from arch/x86/events/intel/core.c.  We could easily
-make them shorter by doing things like s/SANDYBRIDGE/SNB/, but
-they seemed fine even with the longer versions to me.
-
-Do not take any of these names too literally, like "DESKTOP"
-or "MOBILE".  These are all colloquial names and not precise
-descriptions of everywhere a given model will show up.
-
-Signed-off-by: Dave Hansen <dave.hansen@linux.intel.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Andy Lutomirski <luto@amacapital.net>
-Cc: Andy Lutomirski <luto@kernel.org>
-Cc: Borislav Petkov <bp@alien8.de>
-Cc: Brian Gerst <brgerst@gmail.com>
-Cc: Darren Hart <dvhart@infradead.org>
-Cc: Dave Hansen <dave@sr71.net>
-Cc: Denys Vlasenko <dvlasenk@redhat.com>
-Cc: Doug Thompson <dougthompson@xmission.com>
-Cc: Eduardo Valentin <edubezval@gmail.com>
-Cc: H. Peter Anvin <hpa@zytor.com>
-Cc: Jacob Pan <jacob.jun.pan@linux.intel.com>
-Cc: Kan Liang <kan.liang@intel.com>
-Cc: Len Brown <lenb@kernel.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Mauro Carvalho Chehab <mchehab@osg.samsung.com>
-Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
-Cc: Rajneesh Bhardwaj <rajneesh.bhardwaj@intel.com>
-Cc: Souvik Kumar Chakravarty <souvik.k.chakravarty@intel.com>
-Cc: Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>
-Cc: Stephane Eranian <eranian@google.com>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Tony Luck <tony.luck@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Viresh Kumar <viresh.kumar@linaro.org>
-Cc: Vishwanath Somayaji <vishwanath.somayaji@intel.com>
-Cc: Zhang Rui <rui.zhang@intel.com>
-Cc: jacob.jun.pan@intel.com
-Cc: linux-acpi@vger.kernel.org
-Cc: linux-edac@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org
-Cc: linux-pm@vger.kernel.org
-Cc: platform-driver-x86@vger.kernel.org
-Link: http://lkml.kernel.org/r/20160603001927.F2A7D828@viggo.jf.intel.com
-Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Signed-off-by: Ben Hutchings <ben@decadent.org.uk>
+Signed-off-by: Harish Jenny K N <harish_kandiga@mentor.com>
 ---
- arch/x86/include/asm/intel-family.h | 68 +++++++++++++++++++++++++++++++++++++
- 1 file changed, 68 insertions(+)
- create mode 100644 arch/x86/include/asm/intel-family.h
 
---- /dev/null
-+++ b/arch/x86/include/asm/intel-family.h
-@@ -0,0 +1,68 @@
-+#ifndef _ASM_X86_INTEL_FAMILY_H
-+#define _ASM_X86_INTEL_FAMILY_H
+Changes in v9
+- More code cleanup as suggested by Andy Shevchenko.
+
+Changes in v8
+- Changes to use for_each_set_bit as suggested by Andy Shevchenko.
+
+Changes in v7
+- Moved additional capabilities also to caps file as mentioned by Ulf Hansson
+- compacting the code with macros
+
+Changes in v6:
+- Used DEFINE_SHOW_ATTRIBUTE
+
+Changes in v5:
+- Added parser logic in kernel by using debugfs_create_file  for caps and caps2 instead of debugfs_create_x32
+- Changed Author
+
+Changes in v4:
+- Moved the creation of nodes to mmc_add_host_debugfs
+- Exported caps2
+- Renamed host_caps to caps
+
+Changes in v3:
+- Removed typecasting of &host->caps to (u32 *)
+
+Changes in v2:
+- Changed Author
+
+ drivers/mmc/core/debugfs.c | 107 +++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 107 insertions(+)
+
+diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+index c51e0c0..e19305a 100644
+--- a/drivers/mmc/core/debugfs.c
++++ b/drivers/mmc/core/debugfs.c
+@@ -225,6 +225,110 @@ static int mmc_clock_opt_set(void *data, u64 val)
+ DEFINE_SIMPLE_ATTRIBUTE(mmc_clock_fops, mmc_clock_opt_get, mmc_clock_opt_set,
+ 	"%llu\n");
+
++/*
++ * mmc_host_capabilities - MMC host capabilities
++ *
++ * This must be in sync with caps definitions in the mmc/host.h
++ */
++static const char * const mmc_host_capabilities[] = {
++	"4-bit transfers allowed",
++	"Supports MMC high-speed timing",
++	"Supports SD high-speed timing",
++	"Can signal pending SDIO IRQs",
++	"Talks only SPI protocols",
++	"Needs polling for card-detection",
++	"8 bit transfers allowed",
++	"Suspends (e)MMC/SD at idle",
++	"Nonremovable",
++	"Waits while card is busy",
++	"Allows erase/trim commands",
++	"Supports DDR mode at 3.3V",
++	"Supports DDR mode at 1.8V",
++	"Supports DDR mode at 1.2V",
++	"Can power off after boot",
++	"CMD14/CMD19 bus width ok",
++	"Supports UHS SDR12 mode",
++	"Supports UHS SDR25 mode",
++	"Supports UHS SDR50 mode",
++	"Supports UHS SDR104 mode",
++	"Supports UHS DDR50 mode",
++	"Unknown (bit 21)",
++	"Unknown (bit 22)",
++	"Supports Driver Type A",
++	"Supports Driver Type C",
++	"Supports Driver Type D",
++	"Unknown (bit 26)",
++	"RW reqs can be completed within mmc_request_done()",
++	"Supports Enable card detect wake",
++	"Can send commands during data transfer",
++	"CMD23 supported",
++	"Supports Hardware reset"
++};
 +
 +/*
-+ * "Big Core" Processors (Branded as Core, Xeon, etc...)
++ * mmc_host_capabilities2 - MMC host additional capabilities
 + *
-+ * The "_X" parts are generally the EP and EX Xeons, or the
-+ * "Extreme" ones, like Broadwell-E.
-+ *
-+ * Things ending in "2" are usually because we have no better
-+ * name for them.  There's no processor called "WESTMERE2".
++ * This must be in sync with caps2 definitions in the mmc/host.h
 + */
++static const char * const mmc_host_capabilities2[] = {
++	"No access to Boot partition",
++	"Unknown (bit 1)",
++	"Can do full power cycle",
++	"Unknown (bit 3)",
++	"Unknown (bit 4)",
++	"Supports HS200 1.8V SDR",
++	"Supports HS200 1.2V SDR",
++	"Unknown (bit 7)",
++	"Unknown (bit 8)",
++	"Unknown (bit 9)",
++	"Card-detect signal active high",
++	"Write-protect signal active high",
++	"Unknown (bit 12)",
++	"Unknown (bit 13)",
++	"Can do complete power cycle of the card",
++	"Supports HS400 1.8V",
++	"Support HS400 1.2V",
++	"SDIO IRQ - Nothread",
++	"No physical write protect pin, assume always read-write",
++	"Do not send SDIO commands during initialization",
++	"Supports enhanced strobe",
++	"Do not send SD commands during initialization",
++	"Do not send (e)MMC commands during initialization",
++	"Has eMMC command queue engine",
++	"CQE can issue a direct command",
++	"Unknown (bit 25)",
++	"Unknown (bit 26)",
++	"Unknown (bit 27)",
++	"Unknown (bit 28)",
++	"Unknown (bit 29)",
++	"Unknown (bit 30)",
++	"Unknown (bit 31)"
++};
 +
-+#define INTEL_FAM6_CORE_YONAH		0x0E
-+#define INTEL_FAM6_CORE2_MEROM		0x0F
-+#define INTEL_FAM6_CORE2_MEROM_L	0x16
-+#define INTEL_FAM6_CORE2_PENRYN		0x17
-+#define INTEL_FAM6_CORE2_DUNNINGTON	0x1D
++static int mmc_caps_show(struct seq_file *s, void *unused)
++{
++	struct mmc_host *host = s->private;
++	unsigned long caps = host->caps;
++	unsigned long caps2 = host->caps2;
++	int bit;
 +
-+#define INTEL_FAM6_NEHALEM		0x1E
-+#define INTEL_FAM6_NEHALEM_EP		0x1A
-+#define INTEL_FAM6_NEHALEM_EX		0x2E
-+#define INTEL_FAM6_WESTMERE		0x25
-+#define INTEL_FAM6_WESTMERE2		0x1F
-+#define INTEL_FAM6_WESTMERE_EP		0x2C
-+#define INTEL_FAM6_WESTMERE_EX		0x2F
++	seq_puts(s, "MMC Host capabilities are:\n");
++	seq_puts(s, "=============================================\n");
 +
-+#define INTEL_FAM6_SANDYBRIDGE		0x2A
-+#define INTEL_FAM6_SANDYBRIDGE_X	0x2D
-+#define INTEL_FAM6_IVYBRIDGE		0x3A
-+#define INTEL_FAM6_IVYBRIDGE_X		0x3E
++	for_each_set_bit(bit, (const unsigned long *)&caps, BITS_PER_LONG)
++		seq_printf(s, "%s\n", mmc_host_capabilities[bit]);
 +
-+#define INTEL_FAM6_HASWELL_CORE		0x3C
-+#define INTEL_FAM6_HASWELL_X		0x3F
-+#define INTEL_FAM6_HASWELL_ULT		0x45
-+#define INTEL_FAM6_HASWELL_GT3E		0x46
++	seq_puts(s, "=============================================\n");
++	seq_puts(s, "MMC Host additional capabilities are:\n");
++	seq_puts(s, "=============================================\n");
 +
-+#define INTEL_FAM6_BROADWELL_CORE	0x3D
-+#define INTEL_FAM6_BROADWELL_XEON_D	0x56
-+#define INTEL_FAM6_BROADWELL_GT3E	0x47
-+#define INTEL_FAM6_BROADWELL_X		0x4F
++	for_each_set_bit(bit, (const unsigned long *)&caps2, BITS_PER_LONG)
++		seq_printf(s, "%s\n", mmc_host_capabilities2[bit]);
 +
-+#define INTEL_FAM6_SKYLAKE_MOBILE	0x4E
-+#define INTEL_FAM6_SKYLAKE_DESKTOP	0x5E
-+#define INTEL_FAM6_SKYLAKE_X		0x55
-+#define INTEL_FAM6_KABYLAKE_MOBILE	0x8E
-+#define INTEL_FAM6_KABYLAKE_DESKTOP	0x9E
++	return 0;
++}
++DEFINE_SHOW_ATTRIBUTE(mmc_caps);
 +
-+/* "Small Core" Processors (Atom) */
+ void mmc_add_host_debugfs(struct mmc_host *host)
+ {
+ 	struct dentry *root;
+@@ -243,6 +347,9 @@ void mmc_add_host_debugfs(struct mmc_host *host)
+ 	if (!debugfs_create_file("ios", S_IRUSR, root, host, &mmc_ios_fops))
+ 		goto err_node;
+
++	if (!debugfs_create_file("caps", S_IRUSR, root, host, &mmc_caps_fops))
++		goto err_node;
 +
-+#define INTEL_FAM6_ATOM_PINEVIEW	0x1C
-+#define INTEL_FAM6_ATOM_LINCROFT	0x26
-+#define INTEL_FAM6_ATOM_PENWELL		0x27
-+#define INTEL_FAM6_ATOM_CLOVERVIEW	0x35
-+#define INTEL_FAM6_ATOM_CEDARVIEW	0x36
-+#define INTEL_FAM6_ATOM_SILVERMONT1	0x37 /* BayTrail/BYT / Valleyview */
-+#define INTEL_FAM6_ATOM_SILVERMONT2	0x4D /* Avaton/Rangely */
-+#define INTEL_FAM6_ATOM_AIRMONT		0x4C /* CherryTrail / Braswell */
-+#define INTEL_FAM6_ATOM_MERRIFIELD1	0x4A /* Tangier */
-+#define INTEL_FAM6_ATOM_MERRIFIELD2	0x5A /* Annidale */
-+#define INTEL_FAM6_ATOM_GOLDMONT	0x5C
-+#define INTEL_FAM6_ATOM_DENVERTON	0x5F /* Goldmont Microserver */
-+
-+/* Xeon Phi */
-+
-+#define INTEL_FAM6_XEON_PHI_KNL		0x57 /* Knights Landing */
-+
-+#endif /* _ASM_X86_INTEL_FAMILY_H */
+ 	if (!debugfs_create_file("clock", S_IRUSR | S_IWUSR, root, host,
+ 			&mmc_clock_fops))
+ 		goto err_node;
+--
+1.9.1
