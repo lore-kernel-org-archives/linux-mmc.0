@@ -1,52 +1,42 @@
-From: Harish Jenny K N <harish_kandiga@mentor.com>
-Subject: Re: [PATCH v9] mmc: Export host capabilities to debugfs.
-Date: Mon, 12 Mar 2018 15:57:12 +0530
-Message-ID: <39d886ff-7bfe-5ef9-5d51-4ff1eaa55278@mentor.com>
+From: Avri Altman <Avri.Altman@wdc.com>
+Subject: RE: [PATCH v9] mmc: Export host capabilities to debugfs.
+Date: Mon, 12 Mar 2018 10:45:53 +0000
+Message-ID: <DM5PR04MB10854C79897A80023EF37F76FCD30@DM5PR04MB1085.namprd04.prod.outlook.com>
 References: <1520829090-3567-1-git-send-email-harish_kandiga@mentor.com>
  <1520849262.10722.582.camel@linux.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1520849262.10722.582.camel@linux.intel.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>, ulf.hansson@linaro.org, linus.walleij@linaro.org, adrian.hunter@intel.com, shawn.lin@rock-chips.com, avri.altman@wdc.com
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Vladimir_Zapolskiy@mentor.com
+To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Harish Jenny K N <harish_kandiga@mentor.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linus.walleij@linaro.org" <linus.walleij@linaro.org>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Vladimir_Zapolskiy@mentor.com" <Vladimir_Zapolskiy@mentor.com>
 List-Id: linux-mmc@vger.kernel.org
 
-
-
-On Monday 12 March 2018 03:37 PM, Andy Shevchenko wrote:
-> On Mon, 2018-03-12 at 10:01 +0530, Harish Jenny K N wrote:
->> This patch exports the host capabilities to debugfs
->>
->> This idea of sharing host capabilities over debugfs
->> came up from Abbas Raza <Abbas_Raza@mentor.com>
->> Earlier discussions:
->> https://lkml.org/lkml/2018/3/5/357
->> https://www.spinics.net/lists/linux-mmc/msg48219.html
->>
-> Address below minors and, FWIW, take mine
->
-> Reviewed-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-
-Thanks.
-
->
->> +	for_each_set_bit(bit, (const unsigned long *)&caps,
->> BITS_PER_LONG)
->> +	for_each_set_bit(bit, (const unsigned long *)&caps2,
->> BITS_PER_LONG)
-> Explicit casting is not needed anymore in both cases.
->
-
-I will address these.
-Before sending new patch , I would like to inform that I have been sending this patch with the following checkpatch warning, just to keep it same as other usages of debugfs_create_file in the drivers/mmc/core/debugfs.c file.
-
-WARNING:SYMBOLIC_PERMS: Symbolic permissions 'S_IRUSR' are not preferred. Consider using octal permissions '0400'.
-
-Do I need to address this or keep it same as S_IRUSR ?
-
-Thanks,
-Harish Jenny K N
+DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogQW5keSBTaGV2Y2hlbmtv
+IFttYWlsdG86YW5kcml5LnNoZXZjaGVua29AbGludXguaW50ZWwuY29tXQ0KPiBTZW50OiBNb25k
+YXksIE1hcmNoIDEyLCAyMDE4IDEyOjA4IFBNDQo+IFRvOiBIYXJpc2ggSmVubnkgSyBOIDxoYXJp
+c2hfa2FuZGlnYUBtZW50b3IuY29tPjsgdWxmLmhhbnNzb25AbGluYXJvLm9yZzsNCj4gbGludXMu
+d2FsbGVpakBsaW5hcm8ub3JnOyBhZHJpYW4uaHVudGVyQGludGVsLmNvbTsgc2hhd24ubGluQHJv
+Y2stDQo+IGNoaXBzLmNvbTsgQXZyaSBBbHRtYW4gPEF2cmkuQWx0bWFuQHdkYy5jb20+DQo+IENj
+OiBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOyBsaW51eC1rZXJuZWxAdmdlci5rZXJuZWwub3Jn
+Ow0KPiBWbGFkaW1pcl9aYXBvbHNraXlAbWVudG9yLmNvbQ0KPiBTdWJqZWN0OiBSZTogW1BBVENI
+IHY5XSBtbWM6IEV4cG9ydCBob3N0IGNhcGFiaWxpdGllcyB0byBkZWJ1Z2ZzLg0KPiANCj4gT24g
+TW9uLCAyMDE4LTAzLTEyIGF0IDEwOjAxICswNTMwLCBIYXJpc2ggSmVubnkgSyBOIHdyb3RlOg0K
+PiA+IFRoaXMgcGF0Y2ggZXhwb3J0cyB0aGUgaG9zdCBjYXBhYmlsaXRpZXMgdG8gZGVidWdmcw0K
+PiA+DQo+ID4gVGhpcyBpZGVhIG9mIHNoYXJpbmcgaG9zdCBjYXBhYmlsaXRpZXMgb3ZlciBkZWJ1
+Z2ZzIGNhbWUgdXAgZnJvbSBBYmJhcw0KPiA+IFJhemEgPEFiYmFzX1JhemFAbWVudG9yLmNvbT4g
+RWFybGllciBkaXNjdXNzaW9uczoNCj4gPiBodHRwczovL2xrbWwub3JnL2xrbWwvMjAxOC8zLzUv
+MzU3DQo+ID4gaHR0cHM6Ly93d3cuc3Bpbmljcy5uZXQvbGlzdHMvbGludXgtbW1jL21zZzQ4MjE5
+Lmh0bWwNCj4gPg0KPiANCj4gQWRkcmVzcyBiZWxvdyBtaW5vcnMgYW5kLCBGV0lXLCB0YWtlIG1p
+bmUNCj4gDQo+IFJldmlld2VkLWJ5OiBBbmR5IFNoZXZjaGVua28gPGFuZHJpeS5zaGV2Y2hlbmtv
+QGxpbnV4LmludGVsLmNvbT4NCj4gDQo+ID4gKwlmb3JfZWFjaF9zZXRfYml0KGJpdCwgKGNvbnN0
+IHVuc2lnbmVkIGxvbmcgKikmY2FwcywNCj4gPiBCSVRTX1BFUl9MT05HKQ0KPiANCj4gPiArCWZv
+cl9lYWNoX3NldF9iaXQoYml0LCAoY29uc3QgdW5zaWduZWQgbG9uZyAqKSZjYXBzMiwNCj4gPiBC
+SVRTX1BFUl9MT05HKQ0KPiANCj4gRXhwbGljaXQgY2FzdGluZyBpcyBub3QgbmVlZGVkIGFueW1v
+cmUgaW4gYm90aCBjYXNlcy4NCkFsc28gbWF5YmUgdXNlIHNpemVvZihtbWNfaG9zdF9jYXBhYmls
+aXRpZXMpIGluc3RlYWQgb2YgQklUU19QRVJfTE9ORz8NCg0KDQo+IA0KPiAtLQ0KPiBBbmR5IFNo
+ZXZjaGVua28gPGFuZHJpeS5zaGV2Y2hlbmtvQGxpbnV4LmludGVsLmNvbT4NCj4gSW50ZWwgRmlu
+bGFuZCBPeQ0K
