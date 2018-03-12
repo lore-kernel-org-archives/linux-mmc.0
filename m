@@ -1,39 +1,40 @@
-From: Harish Jenny K N <harish_kandiga@mentor.com>
-Subject: Re: [PATCH] mmc: card: Don't show eMMC RPMB and BOOT areas in
- /proc/partitions
-Date: Mon, 12 Mar 2018 10:14:09 +0530
-Message-ID: <1714e1a4-c591-34e6-125e-3eb2e074e698@mentor.com>
-References: <1519731229-19141-1-git-send-email-harish_kandiga@mentor.com>
- <CACRpkdYuxoZaF9xyoA9tsyBuXOkrcdZVGWYfcyEMe0psk6UydQ@mail.gmail.com>
- <67491d8c-7eb3-e8c5-7eb0-3006ff668a60@wdc.com>
- <CACRpkdaPk6=DNH_Wk6q-8_Sa8BCCHA28Jr5FO64Q0eeUCFCBXQ@mail.gmail.com>
+From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Subject: Re: [PATCH v9] mmc: Export host capabilities to debugfs.
+Date: Mon, 12 Mar 2018 12:07:42 +0200
+Message-ID: <1520849262.10722.582.camel@linux.intel.com>
+References: <1520829090-3567-1-git-send-email-harish_kandiga@mentor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CACRpkdaPk6=DNH_Wk6q-8_Sa8BCCHA28Jr5FO64Q0eeUCFCBXQ@mail.gmail.com>
-Content-Language: en-US
+In-Reply-To: <1520829090-3567-1-git-send-email-harish_kandiga@mentor.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>, Alex Lemberg <Alex.Lemberg@wdc.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Harish Jenny K N <harish_kandiga@mentor.com>, ulf.hansson@linaro.org, linus.walleij@linaro.org, adrian.hunter@intel.com, shawn.lin@rock-chips.com, avri.altman@wdc.com
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Vladimir_Zapolskiy@mentor.com
 List-Id: linux-mmc@vger.kernel.org
 
+On Mon, 2018-03-12 at 10:01 +0530, Harish Jenny K N wrote:
+> This patch exports the host capabilities to debugfs
+> 
+> This idea of sharing host capabilities over debugfs
+> came up from Abbas Raza <Abbas_Raza@mentor.com>
+> Earlier discussions:
+> https://lkml.org/lkml/2018/3/5/357
+> https://www.spinics.net/lists/linux-mmc/msg48219.html
+> 
 
+Address below minors and, FWIW, take mine
 
-On Saturday 10 March 2018 05:29 PM, Linus Walleij wrote:
->
-> But this patch doesn't hide the partition from userspace does it?
->
-> They will still appear in /dev/mmcblk0boot1 etc.
->
-> Just not reported as "real" partitions in /proc/partitions.
->
-> Or do I misunderstand it?
->
->
+Reviewed-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
-You are correct. This patch does not hide partition from userspace.
-They will still appear in /dev/. But not reported as "real" partitions in /proc/partiotions.
+> +	for_each_set_bit(bit, (const unsigned long *)&caps,
+> BITS_PER_LONG)
 
-Thanks,
-Harish Jenny K N
+> +	for_each_set_bit(bit, (const unsigned long *)&caps2,
+> BITS_PER_LONG)
+
+Explicit casting is not needed anymore in both cases.
+
+-- 
+Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Intel Finland Oy
