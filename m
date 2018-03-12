@@ -1,56 +1,91 @@
-From: Avri Altman <Avri.Altman@wdc.com>
-Subject: RE: [PATCH v9] mmc: Export host capabilities to debugfs.
-Date: Mon, 12 Mar 2018 11:32:08 +0000
-Message-ID: <DM5PR04MB10859F389CA2D1F2370C02CFFCD30@DM5PR04MB1085.namprd04.prod.outlook.com>
+From: Harish Jenny K N <harish_kandiga@mentor.com>
+Subject: Re: [PATCH v9] mmc: Export host capabilities to debugfs.
+Date: Mon, 12 Mar 2018 18:00:35 +0530
+Message-ID: <329d521d-1776-43ee-2f0e-e9690c29a693@mentor.com>
 References: <1520829090-3567-1-git-send-email-harish_kandiga@mentor.com>
  <1520849262.10722.582.camel@linux.intel.com>
  <DM5PR04MB10854C79897A80023EF37F76FCD30@DM5PR04MB1085.namprd04.prod.outlook.com>
  <540fef96-aa2f-e6c3-467d-bc1d021dd55b@mentor.com>
+ <DM5PR04MB10859F389CA2D1F2370C02CFFCD30@DM5PR04MB1085.namprd04.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <540fef96-aa2f-e6c3-467d-bc1d021dd55b@mentor.com>
+In-Reply-To: <DM5PR04MB10859F389CA2D1F2370C02CFFCD30@DM5PR04MB1085.namprd04.prod.outlook.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Harish Jenny K N <harish_kandiga@mentor.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linus.walleij@linaro.org" <linus.walleij@linaro.org>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>
+To: Avri Altman <Avri.Altman@wdc.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linus.walleij@linaro.org" <linus.walleij@linaro.org>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>
 Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Vladimir_Zapolskiy@mentor.com" <Vladimir_Zapolskiy@mentor.com>
 List-Id: linux-mmc@vger.kernel.org
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogSGFyaXNoIEplbm55IEsg
-TiBbbWFpbHRvOmhhcmlzaF9rYW5kaWdhQG1lbnRvci5jb21dDQo+IFNlbnQ6IE1vbmRheSwgTWFy
-Y2ggMTIsIDIwMTggMToxNyBQTQ0KPiBUbzogQXZyaSBBbHRtYW4gPEF2cmkuQWx0bWFuQHdkYy5j
-b20+OyBBbmR5IFNoZXZjaGVua28NCj4gPGFuZHJpeS5zaGV2Y2hlbmtvQGxpbnV4LmludGVsLmNv
-bT47IHVsZi5oYW5zc29uQGxpbmFyby5vcmc7DQo+IGxpbnVzLndhbGxlaWpAbGluYXJvLm9yZzsg
-YWRyaWFuLmh1bnRlckBpbnRlbC5jb207IHNoYXduLmxpbkByb2NrLWNoaXBzLmNvbQ0KPiBDYzog
-bGludXgtbW1jQHZnZXIua2VybmVsLm9yZzsgbGludXgta2VybmVsQHZnZXIua2VybmVsLm9yZzsN
-Cj4gVmxhZGltaXJfWmFwb2xza2l5QG1lbnRvci5jb20NCj4gU3ViamVjdDogUmU6IFtQQVRDSCB2
-OV0gbW1jOiBFeHBvcnQgaG9zdCBjYXBhYmlsaXRpZXMgdG8gZGVidWdmcy4NCj4gDQo+IA0KPiAN
-Cj4gT24gTW9uZGF5IDEyIE1hcmNoIDIwMTggMDQ6MTUgUE0sIEF2cmkgQWx0bWFuIHdyb3RlOg0K
-PiA+DQo+ID4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+ID4+IEZyb206IEFuZHkgU2hl
-dmNoZW5rbyBbbWFpbHRvOmFuZHJpeS5zaGV2Y2hlbmtvQGxpbnV4LmludGVsLmNvbV0NCj4gPj4g
-U2VudDogTW9uZGF5LCBNYXJjaCAxMiwgMjAxOCAxMjowOCBQTQ0KPiA+PiBUbzogSGFyaXNoIEpl
-bm55IEsgTiA8aGFyaXNoX2thbmRpZ2FAbWVudG9yLmNvbT47DQo+ID4+IHVsZi5oYW5zc29uQGxp
-bmFyby5vcmc7IGxpbnVzLndhbGxlaWpAbGluYXJvLm9yZzsNCj4gPj4gYWRyaWFuLmh1bnRlckBp
-bnRlbC5jb207IHNoYXduLmxpbkByb2NrLSBjaGlwcy5jb207IEF2cmkgQWx0bWFuDQo+ID4+IDxB
-dnJpLkFsdG1hbkB3ZGMuY29tPg0KPiA+PiBDYzogbGludXgtbW1jQHZnZXIua2VybmVsLm9yZzsg
-bGludXgta2VybmVsQHZnZXIua2VybmVsLm9yZzsNCj4gPj4gVmxhZGltaXJfWmFwb2xza2l5QG1l
-bnRvci5jb20NCj4gPj4gU3ViamVjdDogUmU6IFtQQVRDSCB2OV0gbW1jOiBFeHBvcnQgaG9zdCBj
-YXBhYmlsaXRpZXMgdG8gZGVidWdmcy4NCj4gPj4NCj4gPj4gT24gTW9uLCAyMDE4LTAzLTEyIGF0
-IDEwOjAxICswNTMwLCBIYXJpc2ggSmVubnkgSyBOIHdyb3RlOg0KPiA+Pj4gVGhpcyBwYXRjaCBl
-eHBvcnRzIHRoZSBob3N0IGNhcGFiaWxpdGllcyB0byBkZWJ1Z2ZzDQo+ID4+Pg0KPiA+Pj4gVGhp
-cyBpZGVhIG9mIHNoYXJpbmcgaG9zdCBjYXBhYmlsaXRpZXMgb3ZlciBkZWJ1Z2ZzIGNhbWUgdXAg
-ZnJvbQ0KPiA+Pj4gQWJiYXMgUmF6YSA8QWJiYXNfUmF6YUBtZW50b3IuY29tPiBFYXJsaWVyIGRp
-c2N1c3Npb25zOg0KPiA+Pj4gaHR0cHM6Ly9sa21sLm9yZy9sa21sLzIwMTgvMy81LzM1Nw0KPiA+
-Pj4gaHR0cHM6Ly93d3cuc3Bpbmljcy5uZXQvbGlzdHMvbGludXgtbW1jL21zZzQ4MjE5Lmh0bWwN
-Cj4gPj4+DQo+ID4+IEFkZHJlc3MgYmVsb3cgbWlub3JzIGFuZCwgRldJVywgdGFrZSBtaW5lDQo+
-ID4+DQo+ID4+IFJldmlld2VkLWJ5OiBBbmR5IFNoZXZjaGVua28gPGFuZHJpeS5zaGV2Y2hlbmtv
-QGxpbnV4LmludGVsLmNvbT4NCj4gPj4NCj4gPj4+ICsJZm9yX2VhY2hfc2V0X2JpdChiaXQsIChj
-b25zdCB1bnNpZ25lZCBsb25nICopJmNhcHMsDQo+ID4+PiBCSVRTX1BFUl9MT05HKQ0KPiA+Pj4g
-Kwlmb3JfZWFjaF9zZXRfYml0KGJpdCwgKGNvbnN0IHVuc2lnbmVkIGxvbmcgKikmY2FwczIsDQo+
-ID4+PiBCSVRTX1BFUl9MT05HKQ0KPiA+PiBFeHBsaWNpdCBjYXN0aW5nIGlzIG5vdCBuZWVkZWQg
-YW55bW9yZSBpbiBib3RoIGNhc2VzLg0KPiA+IEFsc28gbWF5YmUgdXNlIHNpemVvZihtbWNfaG9z
-dF9jYXBhYmlsaXRpZXMpIGluc3RlYWQgb2YgQklUU19QRVJfTE9ORz8NCj4gDQo+IFlvdSBtZWFu
-IHNpemVvZihjYXBzKSBhbmQgbm90IHNpemVvZihtbWNfaG9zdF9jYXBhYmlsaXRpZXMpIC4gUmln
-aHQgPw0KbWVhbnQgQVJSQVlfU0laRShtbWNfaG9zdF9jYXBhYmlsaXRpZXMpDQoNClRoYW5rcywN
-CkF2cmkNCg0KPiANCj4gDQo+IFRoYW5rcywNCj4gSGFyaXNoIEplbm55IEsgTg0K
+
+
+On Monday 12 March 2018 05:02 PM, Avri Altman wrote:
+>
+>> -----Original Message-----
+>> From: Harish Jenny K N [mailto:harish_kandiga@mentor.com]
+>> Sent: Monday, March 12, 2018 1:17 PM
+>> To: Avri Altman <Avri.Altman@wdc.com>; Andy Shevchenko
+>> <andriy.shevchenko@linux.intel.com>; ulf.hansson@linaro.org;
+>> linus.walleij@linaro.org; adrian.hunter@intel.com; shawn.lin@rock-chips.com
+>> Cc: linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org;
+>> Vladimir_Zapolskiy@mentor.com
+>> Subject: Re: [PATCH v9] mmc: Export host capabilities to debugfs.
+>>
+>>
+>>
+>> On Monday 12 March 2018 04:15 PM, Avri Altman wrote:
+>>>> -----Original Message-----
+>>>> From: Andy Shevchenko [mailto:andriy.shevchenko@linux.intel.com]
+>>>> Sent: Monday, March 12, 2018 12:08 PM
+>>>> To: Harish Jenny K N <harish_kandiga@mentor.com>;
+>>>> ulf.hansson@linaro.org; linus.walleij@linaro.org;
+>>>> adrian.hunter@intel.com; shawn.lin@rock- chips.com; Avri Altman
+>>>> <Avri.Altman@wdc.com>
+>>>> Cc: linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org;
+>>>> Vladimir_Zapolskiy@mentor.com
+>>>> Subject: Re: [PATCH v9] mmc: Export host capabilities to debugfs.
+>>>>
+>>>> On Mon, 2018-03-12 at 10:01 +0530, Harish Jenny K N wrote:
+>>>>> This patch exports the host capabilities to debugfs
+>>>>>
+>>>>> This idea of sharing host capabilities over debugfs came up from
+>>>>> Abbas Raza <Abbas_Raza@mentor.com> Earlier discussions:
+>>>>> https://lkml.org/lkml/2018/3/5/357
+>>>>> https://www.spinics.net/lists/linux-mmc/msg48219.html
+>>>>>
+>>>> Address below minors and, FWIW, take mine
+>>>>
+>>>> Reviewed-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+>>>>
+>>>>> +	for_each_set_bit(bit, (const unsigned long *)&caps,
+>>>>> BITS_PER_LONG)
+>>>>> +	for_each_set_bit(bit, (const unsigned long *)&caps2,
+>>>>> BITS_PER_LONG)
+>>>> Explicit casting is not needed anymore in both cases.
+>>> Also maybe use sizeof(mmc_host_capabilities) instead of BITS_PER_LONG?
+>> You mean sizeof(caps) and not sizeof(mmc_host_capabilities) . Right ?
+> meant ARRAY_SIZE(mmc_host_capabilities)
+>
+> Thanks,
+> Avri
+>
+
+ARRAY_SIZE(mmc_host_capabilities) will be 32 and this will be my old change for which I got a comment from Andy Shevchenko asking me to replace u32 with unsigned long.
+
+This is the old comment:
+
+>> +    int size = sizeof(u32) * BITS_PER_BYTE;
+> This is redundant. Use BITS_PER_LONG (why's that, see below) in the
+for_each_set_bit().
+
+>> +    for_each_set_bit(bit, (const unsigned long *)&caps, size)
+>> +    for_each_set_bit(bit, (const unsigned long *)&caps2, size)
+> These are UB cases.
+> Fix is simple, replace u32 by unsigned long in (1) above.
+
+Note: Without typecasting &caps to(const unsigned long *) will give compilation error in this case.
+
+
+Thanks,
+Harish Jenny K N
