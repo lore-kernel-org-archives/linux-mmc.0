@@ -1,21 +1,21 @@
 From: Ben Hutchings <ben@decadent.org.uk>
-Subject: [PATCH 3.16 40/76] x86/cpu/intel: Introduce macros for Intel
+Subject: [PATCH 3.2 074/104] x86/cpu/intel: Introduce macros for Intel
  family numbers
-Date: Mon, 12 Mar 2018 03:06:12 +0000
-Message-ID: <lsq.1520823972.478544665@decadent.org.uk>
-References: <lsq.1520823971.5976735@decadent.org.uk>
+Date: Mon, 12 Mar 2018 03:03:34 +0000
+Message-ID: <lsq.1520823814.187680530@decadent.org.uk>
+References: <lsq.1520823814.606620518@decadent.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 8bit
-Return-path: <stable-owner@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <lsq.1520823971.5976735@decadent.org.uk>
-Sender: stable-owner@vger.kernel.org
+In-Reply-To: <lsq.1520823814.606620518@decadent.org.uk>
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: akpm@linux-foundation.org, Vishwanath Somayaji <vishwanath.somayaji@intel.com>, Mauro Carvalho Chehab <mchehab@osg.samsung.com>, Ingo Molnar <mingo@kernel.org>, Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@linux.intel.com>, linux-edac@vger.kernel.org, Tony Luck <tony.luck@intel.com>, Andy Lutomirski <luto@amacapital.net>, Andy Lutomirski <luto@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-acpi@vger.kernel.org, Viresh Kumar <viresh.kumar@linaro.org>, Darren Hart <dvhart@infradead.org>, "H. Peter Anvin" <hpa@zytor.com>, platform-driver-x86@vger.kernel.org, jacob.jun.pan@intel.com, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Linus Torvalds <torvalds@linux-foundation.org>, Dave Hansen <dave@sr71.net>, Ka
+Cc: akpm@linux-foundation.org, Souvik Kumar Chakravarty <souvik.k.chakravarty@intel.com>, "H. Peter Anvin" <hpa@zytor.com>, Andy Lutomirski <luto@amacapital.net>, linux-acpi@vger.kernel.org, Borislav Petkov <bp@alien8.de>, Rajneesh Bhardwaj <rajneesh.bhardwaj@intel.com>, Vishwanath Somayaji <vishwanath.somayaji@intel.com>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Zhang Rui <rui.zhang@intel.com>, Len Brown <lenb@kernel.org>, linux-mmc@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>, Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>, Doug Thompson <dougthompson@xmission.com>, Ulf Hansson <ulf.hansson@linaro.org>, platform-driver-x86@vger.kernel.org, Peter Zijlstra <peterz@infradead.org>, Brian Gerst <brger>
 List-Id: linux-mmc@vger.kernel.org
 
-3.16.56-rc1 review patch.  If anyone has any objections, please let me know.
+3.2.101-rc1 review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
