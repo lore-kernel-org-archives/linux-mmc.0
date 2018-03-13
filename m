@@ -1,186 +1,65 @@
-From: Harish Jenny K N <harish_kandiga@mentor.com>
-Subject: [PATCH v10] mmc: Export host capabilities to debugfs.
-Date: Tue, 13 Mar 2018 10:40:12 +0530
-Message-ID: <1520917812-20047-1-git-send-email-harish_kandiga@mentor.com>
+From: Evgeniy Didin <Evgeniy.Didin@synopsys.com>
+Subject: mmc: block: bonnie++ runs with errors on arc/hsdk board
+Date: Tue, 13 Mar 2018 12:04:35 +0000
+Message-ID: <1520942674.10285.8.camel@synopsys.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, linus.walleij@linaro.org, adrian.hunter@intel.com, shawn.lin@rock-chips.com, avri.altman@wdc.com, andriy.shevchenko@linux.intel.com
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, harish_kandiga@mentor.com, Vladimir_Zapolskiy@mentor.com
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org>
+Content-Language: en-US
+Content-ID: <A283F28BCC8DBD4BAB467DBDA5C25007@internal.synopsys.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-snps-arc>,
+ <mailto:linux-snps-arc-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-snps-arc/>
+List-Post: <mailto:linux-snps-arc@lists.infradead.org>
+List-Help: <mailto:linux-snps-arc-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-snps-arc>,
+ <mailto:linux-snps-arc-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-snps-arc" <linux-snps-arc-bounces@lists.infradead.org>
+Errors-To: linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org
+To: "adrian.hunter@intel.com" <adrian.hunter@intel.com>
+Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linus.walleij@linaro.org" <linus.walleij@linaro.org>, Alexey Brodkin <Alexey.Brodkin@synopsys.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "jh80.chung@samsung.com" <jh80.chung@samsung.com>, "linux-snps-arc@lists.infradead.org" <linux-snps-arc@lists.infradead.org>, Eugeniy Paltsev <Eugeniy.Paltsev@synopsys.com>
 List-Id: linux-mmc@vger.kernel.org
 
-This patch exports the host capabilities to debugfs
-
-This idea of sharing host capabilities over debugfs
-came up from Abbas Raza <Abbas_Raza@mentor.com>
-Earlier discussions:
-https://lkml.org/lkml/2018/3/5/357
-https://www.spinics.net/lists/linux-mmc/msg48219.html
-
-Reviewed-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Signed-off-by: Harish Jenny K N <harish_kandiga@mentor.com>
----
-
-Changes in v10:
-- minor review comment addressed. 
-- Added "Reviewed-by" line
-
-Changes in v9
-- More code cleanup as suggested by Andy Shevchenko.
-
-Changes in v8
-- Changes to use for_each_set_bit as suggested by Andy Shevchenko.
-
-Changes in v7
-- Moved additional capabilities also to caps file as mentioned by Ulf Hansson
-- compacting the code with macros
-
-Changes in v6:
-- Used DEFINE_SHOW_ATTRIBUTE
-
-Changes in v5:
-- Added parser logic in kernel by using debugfs_create_file  for caps and caps2 instead of debugfs_create_x32
-- Changed Author
-
-Changes in v4:
-- Moved the creation of nodes to mmc_add_host_debugfs
-- Exported caps2
-- Renamed host_caps to caps
-
-Changes in v3:
-- Removed typecasting of &host->caps to (u32 *)
-
-Changes in v2:
-- Changed Author
-
- drivers/mmc/core/debugfs.c | 107 +++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 107 insertions(+)
-
-diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
-index c51e0c0..826d361 100644
---- a/drivers/mmc/core/debugfs.c
-+++ b/drivers/mmc/core/debugfs.c
-@@ -225,6 +225,110 @@ static int mmc_clock_opt_set(void *data, u64 val)
- DEFINE_SIMPLE_ATTRIBUTE(mmc_clock_fops, mmc_clock_opt_get, mmc_clock_opt_set,
- 	"%llu\n");
- 
-+/*
-+ * mmc_host_capabilities - MMC host capabilities
-+ *
-+ * This must be in sync with caps definitions in the mmc/host.h
-+ */
-+static const char * const mmc_host_capabilities[] = {
-+	"4-bit transfers allowed",
-+	"Supports MMC high-speed timing",
-+	"Supports SD high-speed timing",
-+	"Can signal pending SDIO IRQs",
-+	"Talks only SPI protocols",
-+	"Needs polling for card-detection",
-+	"8 bit transfers allowed",
-+	"Suspends (e)MMC/SD at idle",
-+	"Nonremovable",
-+	"Waits while card is busy",
-+	"Allows erase/trim commands",
-+	"Supports DDR mode at 3.3V",
-+	"Supports DDR mode at 1.8V",
-+	"Supports DDR mode at 1.2V",
-+	"Can power off after boot",
-+	"CMD14/CMD19 bus width ok",
-+	"Supports UHS SDR12 mode",
-+	"Supports UHS SDR25 mode",
-+	"Supports UHS SDR50 mode",
-+	"Supports UHS SDR104 mode",
-+	"Supports UHS DDR50 mode",
-+	"Unknown (bit 21)",
-+	"Unknown (bit 22)",
-+	"Supports Driver Type A",
-+	"Supports Driver Type C",
-+	"Supports Driver Type D",
-+	"Unknown (bit 26)",
-+	"RW reqs can be completed within mmc_request_done()",
-+	"Supports Enable card detect wake",
-+	"Can send commands during data transfer",
-+	"CMD23 supported",
-+	"Supports Hardware reset"
-+};
-+
-+/*
-+ * mmc_host_capabilities2 - MMC host additional capabilities
-+ *
-+ * This must be in sync with caps2 definitions in the mmc/host.h
-+ */
-+static const char * const mmc_host_capabilities2[] = {
-+	"No access to Boot partition",
-+	"Unknown (bit 1)",
-+	"Can do full power cycle",
-+	"Unknown (bit 3)",
-+	"Unknown (bit 4)",
-+	"Supports HS200 1.8V SDR",
-+	"Supports HS200 1.2V SDR",
-+	"Unknown (bit 7)",
-+	"Unknown (bit 8)",
-+	"Unknown (bit 9)",
-+	"Card-detect signal active high",
-+	"Write-protect signal active high",
-+	"Unknown (bit 12)",
-+	"Unknown (bit 13)",
-+	"Can do complete power cycle of the card",
-+	"Supports HS400 1.8V",
-+	"Support HS400 1.2V",
-+	"SDIO IRQ - Nothread",
-+	"No physical write protect pin, assume always read-write",
-+	"Do not send SDIO commands during initialization",
-+	"Supports enhanced strobe",
-+	"Do not send SD commands during initialization",
-+	"Do not send (e)MMC commands during initialization",
-+	"Has eMMC command queue engine",
-+	"CQE can issue a direct command",
-+	"Unknown (bit 25)",
-+	"Unknown (bit 26)",
-+	"Unknown (bit 27)",
-+	"Unknown (bit 28)",
-+	"Unknown (bit 29)",
-+	"Unknown (bit 30)",
-+	"Unknown (bit 31)"
-+};
-+
-+static int mmc_caps_show(struct seq_file *s, void *unused)
-+{
-+	struct mmc_host *host = s->private;
-+	unsigned long caps = host->caps;
-+	unsigned long caps2 = host->caps2;
-+	int bit;
-+
-+	seq_puts(s, "MMC Host capabilities are:\n");
-+	seq_puts(s, "=============================================\n");
-+
-+	for_each_set_bit(bit, &caps, ARRAY_SIZE(mmc_host_capabilities))
-+		seq_printf(s, "%s\n", mmc_host_capabilities[bit]);
-+
-+	seq_puts(s, "=============================================\n");
-+	seq_puts(s, "MMC Host additional capabilities are:\n");
-+	seq_puts(s, "=============================================\n");
-+
-+	for_each_set_bit(bit, &caps2, ARRAY_SIZE(mmc_host_capabilities2))
-+		seq_printf(s, "%s\n", mmc_host_capabilities2[bit]);
-+
-+	return 0;
-+}
-+DEFINE_SHOW_ATTRIBUTE(mmc_caps);
-+
- void mmc_add_host_debugfs(struct mmc_host *host)
- {
- 	struct dentry *root;
-@@ -243,6 +347,9 @@ void mmc_add_host_debugfs(struct mmc_host *host)
- 	if (!debugfs_create_file("ios", S_IRUSR, root, host, &mmc_ios_fops))
- 		goto err_node;
- 
-+	if (!debugfs_create_file("caps", 0400, root, host, &mmc_caps_fops))
-+		goto err_node;
-+
- 	if (!debugfs_create_file("clock", S_IRUSR | S_IWUSR, root, host,
- 			&mmc_clock_fops))
- 		goto err_node;
--- 
-1.9.1
+SGVsbG8gQWRyaWFuLA0KDQpJIGhhdmUgZGlzY292ZXJlZCwgdGhhdCBiZWdnaW5pbmcgd2l0aCA0
+LjE2LXJjMSBib25uaWUrKyBiZW5jaG1hcmsNCnJ1bnMgd2l0aCBlcnJvcnMgb24gYXJjL2hzZGsg
+Ym9hcmQuIEFmdGVyIGJpc2VjdGluZyBiZXR3ZWVuIDQuMTUgYW5kIDQuMTYtcmMxLA0KSSBoYXZl
+IGZvdW5kIHRoYXQgZXJyb3JzIHN0YXJ0ZWQgYWZ0ZXLCoA0KY29tbWl0IDgxMTk2OTc2ZWQ5NCAo
+bW1jOiBibG9jazogQWRkIGJsay1tcSBzdXBwb3J0KS4NCg0KRXJyb3IgbWVzc2FnZSBpcyBsaWtl
+Og0KDQp8ICMgYm9ubmllKysgLXUgcm9vdCAtciAyNTYgLXMgNTEyIC14IDEgLWTCoMKgL21udMKg
+DQp8IFVzaW5nIHVpZDowLCBnaWQ6MC4NCnwgV3JpdGluZyB3aXRoIHB1dGMoKS4uLnJhbmRvbTog
+Y3JuZyBpbml0IGRvbmUNCnwgZG9uZQ0KfCBXcml0aW5nIGludGVsbGlnZW50bHkuLi5JTkZPOiB0
+YXNrIGt3b3JrZXIvdTg6MDo1IGJsb2NrZWQgZm9yIG1vcmUgdGhhbiAxMCBzZWNvbmRzLg0KfMKg
+wqDCoMKgwqDCoE5vdCB0YWludGVkIDQuMTUuMC1yYzMtMDAwMTItZzgxMTk2OTc2ZWQ5NC1kaXJ0
+eSAjMQ0KfCAiZWNobyAwID4gL3Byb2Mvc3lzL2tlcm5lbC9odW5nX3Rhc2tfdGltZW91dF9zZWNz
+IiBkaXNhYmxlcyB0aGlzIG1lc3NhZ2UuDQp8IGt3b3JrZXIvdTg6MMKgwqDCoMKgRMKgwqDCoMKg
+MMKgwqDCoMKgwqA1wqDCoMKgwqDCoMKgMiAweDAwMDAwMDAwDQp8IFdvcmtxdWV1ZTogd3JpdGVi
+YWNrIHdiX3dvcmtmbiAoZmx1c2gtMTc5OjApDQp8DQp8IFN0YWNrIFRyYWNlOg0KfMKgwqBfX3N3
+aXRjaF90bysweDAvMHhhYw0KfMKgwqBfX3NjaGVkdWxlKzB4MWI4LzB4NzM4DQp8wqDCoGlvX3Nj
+aGVkdWxlKzB4NWMvMHhjMA0KfMKgwqBiaXRfd2FpdF9pbysweGMvMHg0OA0KfMKgwqBvdXRfb2Zf
+bGluZV93YWl0X29uX2JpdCsweDc4LzB4YzANCnzCoMKgZG9fZ2V0X3dyaXRlX2FjY2VzcysweDFh
+YS8weDRjYw0KfMKgwqBqYmQyX2pvdXJuYWxfZ2V0X3dyaXRlX2FjY2VzcysweDMyLzB4NzQNCnzC
+oMKgX19leHQ0X2pvdXJuYWxfZ2V0X3dyaXRlX2FjY2VzcysweDNhLzB4YWMNCnzCoMKgZXh0NF9t
+Yl9tYXJrX2Rpc2tzcGFjZV91c2VkKzB4NjYvMHg1YjANCnzCoMKgZXh0NF9tYl9uZXdfYmxvY2tz
+KzB4MWVlLzB4ODMwDQp8wqDCoGV4dDRfZXh0X21hcF9ibG9ja3MrMHg1MDQvMHhjYWMNCnzCoMKg
+ZXh0NF9tYXBfYmxvY2tzKzB4MjYyLzB4NWU4DQp8wqDCoG1wYWdlX21hcF9hbmRfc3VibWl0X2V4
+dGVudCsweGI4LzB4NjQ4DQp8wqDCoGV4dDRfd3JpdGVwYWdlcysweDVjZS8weDZiNA0KfMKgwqBk
+b193cml0ZXBhZ2VzKzB4MjAvMHg4NA0KfMKgwqBfX3dyaXRlYmFja19zaW5nbGVfaW5vZGUrMHgy
+YS8weDE1NA0KfMKgwqB3Yl93cml0ZWJhY2srMHg1MzgvMHhhZTANCnzCoMKgd2Jfd29ya2ZuKzB4
+MTdjLzB4MzM0DQp8wqDCoHByb2Nlc3Nfb25lX3dvcmsrMHgxYTYvMHgzNTANCnzCoMKgd29ya2Vy
+X3RocmVhZCsweGYyLzB4NDc4DQp8wqDCoGt0aHJlYWQrMHgxMjAvMHgxM2MNCnzCoMKgcmV0X2Zy
+b21fZm9yaysweDE4LzB4MWMNCg0KVGhlcmUgYXJlIHNvbWUgZGV0YWlscyBvZiBoc2RrX2RlZmNv
+bmZpZyBwcmVzZW50ZWQgYmVsbG93Og0KDQpTT0ZUTE9DS1VQX0RFVEVDVE9SPXkNCkRFVEVDVF9I
+VU5HX1RBU0s9eQ0KREVGQVVMVF9IVU5HX1RBU0tfVElNRU9VVD0xMA0KTU1DX0RXPXkNCk1NQ19E
+V19QTFRGTT15DQoNCkkgaGF2ZSBhbHNvIHRlc3RlZCBib25uaWUrKyBvbiBXYW5kYm9hcmQgb24g
+djQuMTYtcmM1IHdpdGggdGhlIHNhbWUNCkRFRkFVTFRfSFVOR19UQVNLX1RJTUVPVVQ9MTAsIGJ1
+dCB0aGVyZSB3ZXJlIG5vIGVycm9ycy4NCg0KRXZlbiB0aG91Z2ggaXQgaXMgbm90IGNyaXRpY2Fs
+IGVycm9yIGFuZCB3ZSBzZWUgYm9ubmllKysgdGVzdCBwcm9jZWVkcyB0byB0aGUgZW5kLA0Kc3Rp
+bGwgaXQgaXMgc3RyYW5nZSwgdGhhdCBzb21lIHByb2Nlc3MgaXMgcnVubmluZyBpbiBrZXJuZWwg
+c3BhY2UgZm9yIGEgbG9uZyB0aW1lIChhdCBsZWFzdCAxMHNlYykuDQpXaGF0IGlzIHN0cmFuZ2Us
+IGJlZm9yZSBtZXRpb25lZCBjb21taXQgSSBjYW4ndCByZXByb2R1Y2UgdGhpcyBiZWhhdmlvdXIu
+DQoNCkkgYW0gd29uZGVyaW5nIGlzIHRoaXMgZXhwZWN0ZWQgYmVoYXZpb3VyP8KgDQoNCkJlc3Qg
+cmVnYXJkcywNCkV2Z2VuaXkgRGlkaW4KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX18KbGludXgtc25wcy1hcmMgbWFpbGluZyBsaXN0CmxpbnV4LXNucHMtYXJj
+QGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9s
+aXN0aW5mby9saW51eC1zbnBzLWFyYw==
