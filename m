@@ -1,50 +1,100 @@
-From: Phil Edworthy <phil.edworthy@renesas.com>
-Subject: [PATCH v2] mmc: sdhci-of-arasan: Add quirk to avoid unexpected interrupt msgs
-Date: Tue, 13 Mar 2018 14:26:40 +0000
-Message-ID: <1520951200-24703-1-git-send-email-phil.edworthy@renesas.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Michal Simek <michal.simek@xilinx.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Michel Pollet <michel.pollet@bp.renesas.com>, Phil Edworthy <phil.edworthy@renesas.com>
+From: Evgeniy Didin <Evgeniy.Didin@synopsys.com>
+Subject: Re: mmc: block: bonnie++ runs with errors on arc/hsdk board
+Date: Tue, 13 Mar 2018 15:56:42 +0000
+Message-ID: <1520956602.10285.10.camel@synopsys.com>
+References: <1520942674.10285.8.camel@synopsys.com>
+ <486fe92e-9b53-53a4-f98d-129a97032470@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org>
+In-Reply-To: <486fe92e-9b53-53a4-f98d-129a97032470@intel.com>
+Content-Language: en-US
+Content-ID: <C8B4B2221781384CB1CF6CC014B82FBA@internal.synopsys.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-snps-arc>,
+ <mailto:linux-snps-arc-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-snps-arc/>
+List-Post: <mailto:linux-snps-arc@lists.infradead.org>
+List-Help: <mailto:linux-snps-arc-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-snps-arc>,
+ <mailto:linux-snps-arc-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-snps-arc" <linux-snps-arc-bounces@lists.infradead.org>
+Errors-To: linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org
+To: "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "Evgeniy.Didin@synopsys.com" <Evgeniy.Didin@synopsys.com>
+Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-ext4@vger.kernel.org" <linux-ext4@vger.kernel.org>, "tytso@mit.edu" <tytso@mit.edu>, "linus.walleij@linaro.org" <linus.walleij@linaro.org>, "Alexey.Brodkin@synopsys.com" <Alexey.Brodkin@synopsys.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "jh80.chung@samsung.com" <jh80.chung@samsung.com>, "adilger.kernel@dilger.ca" <adilger.kernel@dilger.ca>, "linux-snps-arc@lists.infradead.org" <linux-snps-arc@lists.infradead.org>, "Eugeniy.Paltsev@synopsys.com" <Eugeniy.Paltsev@synopsys.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On SD 2.00 cards we get lots of these messages:
-"mmc0: Got data interrupt 0x00000002 even though no data operation was in progress"
-By applying the SDHCI_QUIRK2_STOP_WITH_TC quirk, the messages no longer happen.
-
-A single card claiming to be SD 3.00 compliant also generates the interrupts,
-but since the card's manfacturing date is 2002 mar, it's unlikely to really be
-SD 3.00. This card is a 8GB SanDisk 'SU08G' 8.0 (SDHC class 4).
-
-This has been reported on Xilinx devices that also use the Arasan IP.
-See https://patchwork.kernel.org/patch/8062871/
-
-This has been tested on the Renesas RZ/ND-DB board with the RZ/N1 SoC. The
-Arasan IP in this device is version 1.39a and uses a max SD clock of 50MHz and
-does not support DDR modes.
-
-Signed-off-by: Phil Edworthy <phil.edworthy@renesas.com>
----
-v2:
- - Changed commit msg to detail the cards that fail.
- - Provided the IP version and further background info.
----
- drivers/mmc/host/sdhci-of-arasan.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index c33a5f7..ab66e32 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -290,7 +290,8 @@ static const struct sdhci_pltfm_data sdhci_arasan_pdata = {
- 	.ops = &sdhci_arasan_ops,
- 	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
- 	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
--			SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
-+			SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN |
-+			SDHCI_QUIRK2_STOP_WITH_TC,
- };
- 
- static u32 sdhci_arasan_cqhci_irq(struct sdhci_host *host, u32 intmask)
--- 
-2.7.4
+T24gVHVlLCAyMDE4LTAzLTEzIGF0IDE2OjA1ICswMjAwLCBBZHJpYW4gSHVudGVyIHdyb3RlOg0K
+PiBPbiAxMy8wMy8xOCAxNDowNCwgRXZnZW5peSBEaWRpbiB3cm90ZToNCj4gPiBIZWxsbyBBZHJp
+YW4sDQo+ID4gDQo+ID4gSSBoYXZlIGRpc2NvdmVyZWQsIHRoYXQgYmVnZ2luaW5nIHdpdGggNC4x
+Ni1yYzEgYm9ubmllKysgYmVuY2htYXJrDQo+ID4gcnVucyB3aXRoIGVycm9ycyBvbiBhcmMvaHNk
+ayBib2FyZC4gQWZ0ZXIgYmlzZWN0aW5nIGJldHdlZW4gNC4xNSBhbmQgNC4xNi1yYzEsDQo+ID4g
+SSBoYXZlIGZvdW5kIHRoYXQgZXJyb3JzIHN0YXJ0ZWQgYWZ0ZXLCoA0KPiA+IGNvbW1pdCA4MTE5
+Njk3NmVkOTQgKG1tYzogYmxvY2s6IEFkZCBibGstbXEgc3VwcG9ydCkuDQo+ID4gDQo+ID4gRXJy
+b3IgbWVzc2FnZSBpcyBsaWtlOg0KPiA+IA0KPiA+ID4gIyBib25uaWUrKyAtdSByb290IC1yIDI1
+NiAtcyA1MTIgLXggMSAtZMKgwqAvbW50wqANCj4gPiA+IFVzaW5nIHVpZDowLCBnaWQ6MC4NCj4g
+PiA+IFdyaXRpbmcgd2l0aCBwdXRjKCkuLi5yYW5kb206IGNybmcgaW5pdCBkb25lDQo+ID4gPiBk
+b25lDQo+ID4gPiBXcml0aW5nIGludGVsbGlnZW50bHkuLi5JTkZPOiB0YXNrIGt3b3JrZXIvdTg6
+MDo1IGJsb2NrZWQgZm9yIG1vcmUgdGhhbiAxMCBzZWNvbmRzLg0KPiA+ID4gwqDCoMKgwqDCoMKg
+Tm90IHRhaW50ZWQgNC4xNS4wLXJjMy0wMDAxMi1nODExOTY5NzZlZDk0LWRpcnR5ICMxDQo+ID4g
+PiAiZWNobyAwID4gL3Byb2Mvc3lzL2tlcm5lbC9odW5nX3Rhc2tfdGltZW91dF9zZWNzIiBkaXNh
+YmxlcyB0aGlzIG1lc3NhZ2UuDQo+ID4gPiBrd29ya2VyL3U4OjDCoMKgwqDCoETCoMKgwqDCoDDC
+oMKgwqDCoMKgNcKgwqDCoMKgwqDCoDIgMHgwMDAwMDAwMA0KPiA+ID4gV29ya3F1ZXVlOiB3cml0
+ZWJhY2sgd2Jfd29ya2ZuIChmbHVzaC0xNzk6MCkNCj4gPiA+IA0KPiA+ID4gU3RhY2sgVHJhY2U6
+DQo+ID4gPiDCoMKgX19zd2l0Y2hfdG8rMHgwLzB4YWMNCj4gPiA+IMKgwqBfX3NjaGVkdWxlKzB4
+MWI4LzB4NzM4DQo+ID4gPiDCoMKgaW9fc2NoZWR1bGUrMHg1Yy8weGMwDQo+ID4gPiDCoMKgYml0
+X3dhaXRfaW8rMHhjLzB4NDgNCj4gPiA+IMKgwqBvdXRfb2ZfbGluZV93YWl0X29uX2JpdCsweDc4
+LzB4YzANCj4gPiA+IMKgwqBkb19nZXRfd3JpdGVfYWNjZXNzKzB4MWFhLzB4NGNjDQo+ID4gPiDC
+oMKgamJkMl9qb3VybmFsX2dldF93cml0ZV9hY2Nlc3MrMHgzMi8weDc0DQo+ID4gPiDCoMKgX19l
+eHQ0X2pvdXJuYWxfZ2V0X3dyaXRlX2FjY2VzcysweDNhLzB4YWMNCj4gPiA+IMKgwqBleHQ0X21i
+X21hcmtfZGlza3NwYWNlX3VzZWQrMHg2Ni8weDViMA0KPiA+ID4gwqDCoGV4dDRfbWJfbmV3X2Js
+b2NrcysweDFlZS8weDgzMA0KPiA+ID4gwqDCoGV4dDRfZXh0X21hcF9ibG9ja3MrMHg1MDQvMHhj
+YWMNCj4gPiA+IMKgwqBleHQ0X21hcF9ibG9ja3MrMHgyNjIvMHg1ZTgNCj4gPiA+IMKgwqBtcGFn
+ZV9tYXBfYW5kX3N1Ym1pdF9leHRlbnQrMHhiOC8weDY0OA0KPiA+ID4gwqDCoGV4dDRfd3JpdGVw
+YWdlcysweDVjZS8weDZiNA0KPiA+ID4gwqDCoGRvX3dyaXRlcGFnZXMrMHgyMC8weDg0DQo+ID4g
+PiDCoMKgX193cml0ZWJhY2tfc2luZ2xlX2lub2RlKzB4MmEvMHgxNTQNCj4gPiA+IMKgwqB3Yl93
+cml0ZWJhY2srMHg1MzgvMHhhZTANCj4gPiA+IMKgwqB3Yl93b3JrZm4rMHgxN2MvMHgzMzQNCj4g
+PiA+IMKgwqBwcm9jZXNzX29uZV93b3JrKzB4MWE2LzB4MzUwDQo+ID4gPiDCoMKgd29ya2VyX3Ro
+cmVhZCsweGYyLzB4NDc4DQo+ID4gPiDCoMKga3RocmVhZCsweDEyMC8weDEzYw0KPiA+ID4gwqDC
+oHJldF9mcm9tX2ZvcmsrMHgxOC8weDFjDQo+ID4gDQo+ID4gVGhlcmUgYXJlIHNvbWUgZGV0YWls
+cyBvZiBoc2RrX2RlZmNvbmZpZyBwcmVzZW50ZWQgYmVsbG93Og0KPiA+IA0KPiA+IFNPRlRMT0NL
+VVBfREVURUNUT1I9eQ0KPiA+IERFVEVDVF9IVU5HX1RBU0s9eQ0KPiA+IERFRkFVTFRfSFVOR19U
+QVNLX1RJTUVPVVQ9MTANCj4gPiBNTUNfRFc9eQ0KPiA+IE1NQ19EV19QTFRGTT15DQo+ID4gDQo+
+ID4gSSBoYXZlIGFsc28gdGVzdGVkIGJvbm5pZSsrIG9uIFdhbmRib2FyZCBvbiB2NC4xNi1yYzUg
+d2l0aCB0aGUgc2FtZQ0KPiA+IERFRkFVTFRfSFVOR19UQVNLX1RJTUVPVVQ9MTAsIGJ1dCB0aGVy
+ZSB3ZXJlIG5vIGVycm9ycy4NCj4gPiANCj4gPiBFdmVuIHRob3VnaCBpdCBpcyBub3QgY3JpdGlj
+YWwgZXJyb3IgYW5kIHdlIHNlZSBib25uaWUrKyB0ZXN0IHByb2NlZWRzIHRvIHRoZSBlbmQsDQo+
+ID4gc3RpbGwgaXQgaXMgc3RyYW5nZSwgdGhhdCBzb21lIHByb2Nlc3MgaXMgcnVubmluZyBpbiBr
+ZXJuZWwgc3BhY2UgZm9yIGEgbG9uZyB0aW1lIChhdCBsZWFzdCAxMHNlYykuDQo+ID4gV2hhdCBp
+cyBzdHJhbmdlLCBiZWZvcmUgbWV0aW9uZWQgY29tbWl0IEkgY2FuJ3QgcmVwcm9kdWNlIHRoaXMg
+YmVoYXZpb3VyLg0KPiA+IA0KPiA+IEkgYW0gd29uZGVyaW5nIGlzIHRoaXMgZXhwZWN0ZWQgYmVo
+YXZpb3VyP8KgDQo+IA0KPiBXYXMgdGhlIHBlcmZvcm1hbmNlIGFmZmVjdGVkPyBpLmUuIHRoZSBy
+ZXN1bHRzIGZyb20gYm9ubmllKysNCkkgaGF2ZSBydW4gYm9ubmllKysgc2V2ZXJhbCB0aW1lcyBi
+ZWZvcmUgYW5kIGFmdGVyIG1lbnRpb25lZCBjb21taXQuIEhlcmUgaXMgb3V0cHV0Og0KLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS08OC0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0NCkJlZm9yZSBjb21taXQ6DQpBUkNMaW51eCw1MTJNLDY0NDIsNTAsNzIxMSwwLDUzMzMs
+MCwxMjk1NCw5OSwzNDU2MzgsMTAwLCsrKysrLCsrKywxNiwyMjMyMiwxMDAsKysrKyssKysrLDMy
+NzM1LDk5LDIyOTIxLDEwMCwrKysrKywrKyssMzIyMTEsMTAwDQpBUkNMaW51eCw1MTJNLDY2MTEs
+NTEsNzI0OCwwLDUxNjIsMCwxMjk1MSw5OSwzNDQ3NjMsOTksKysrKyssKysrLDE2LDIyNjQ5LDk5
+LCsrKysrLCsrKywzMjcyMyw5OSwyMjU3MiwxMDAsKysrKyssKysrLDMxNjk3LDEwMA0KQVJDTGlu
+dXgsNTEyTSw2NTk3LDUyLDczMDcsMCw1MzY4LDAsMTI5MzQsOTksMzQzOTg3LDk5LCsrKysrLCsr
+KywxNiwyMjc3NSwxMDAsKysrKyssKysrLDMyNzEzLDk5LDIyODMyLDEwMCwrKysrKywrKyssMzE4
+OTksOTkNCkFmdGVyIGNvbW1pdDoNCkFSQ0xpbnV4LDUxMk0sNDQ1MywzNiw2NDc0LDEsNTg1Miww
+LDEyOTQwLDk5LDM0NDMyOSwxMDAsKysrKyssKysrLDE2LDIyMTY4LDk4LCsrKysrLCsrKywzMjc2
+MCw5OSwyMjc1NSwxMDAsKysrKyssKysrLDMyMjA1LDEwMA0KQVJDTGludXgsNTEyTSw1MTU5LDQy
+LDY5NDQsMSw1NjU4LDAsMTI5NDUsOTksMzQ0MjkwLDEwMCwrKysrKywrKyssMTYsMjIyOTUsMTAw
+LCsrKysrLCsrKywzMjcxNSw5OSwyMjg4OCw5OSwrKysrKywrKyssMzIwMDcsOTkNCkFSQ0xpbnV4
+LDUxMk0sNTE3MCw0Miw2ODQwLDIsNTMxNSwwLDEyOTQ2LDk5LDM0Mzg4OSwxMDAsKysrKyssKysr
+LDE2LDIyNDQ1LDEwMCwrKysrKywrKyssMzI2ODEsOTksMjI5NjcsMTAwLCsrKysrLCsrKywzMjEx
+Nyw5OQ0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS08
+OC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLQ0KICAgICAgICAgICAgICBeXl5ewqANCklmIGkgdW5kZXJzdGFuZCBj
+b3JyZWN0bHksIGluIHRoaXJkIGNvbHVtbiBpcyBzaG93biAic2VxdWVudGlhbCBvdXRwdXQiIHBl
+ciBjaGFyYWN0ZXIgc3BlZWQgKEsvc2VjKSwgd2hpY2ggZGVjcmVhc2VkLg0KDQo+IFdoYXQgbW91
+bnQgb3B0aW9ucyBkaWQgeW91IHVzZT8NCkkgZGlkbid0IHVzZSBhbnkgb3B0aW9ucy4gU2ltcGx5
+Og0KIyBtb3VudCAvZGV2L21tY2JsazBwMSAvbW50DQoNCkJlc3QgcmVnYXJkcywNCkV2Z2VuaXkg
+RGlkaW4KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KbGlu
+dXgtc25wcy1hcmMgbWFpbGluZyBsaXN0CmxpbnV4LXNucHMtYXJjQGxpc3RzLmluZnJhZGVhZC5v
+cmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1zbnBz
+LWFyYw==
