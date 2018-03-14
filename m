@@ -1,87 +1,50 @@
-From: Evgeniy Didin <Evgeniy.Didin@synopsys.com>
-Subject: [PATCH] mmc: dw_mmc: fix falling from idmac to PIO mode when
- dw_mci_reset occurs
-Date: Wed, 14 Mar 2018 22:30:51 +0300
-Message-ID: <20180314193051.16791-1-Evgeniy.Didin@synopsys.com>
+From: "Rafael J. Wysocki" <rafael@kernel.org>
+Subject: Re: [PATCH 00/47] arch-removal: device drivers
+Date: Wed, 14 Mar 2018 23:45:54 +0100
+Message-ID: <CAJZ5v0jsoxWRiwPOCJH6AAz-MiccOuicD8peCevLRMbTfc7LEg@mail.gmail.com>
+References: <20180314153603.3127932-1-arnd@arndb.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-snps-arc>,
- <mailto:linux-snps-arc-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-snps-arc/>
-List-Post: <mailto:linux-snps-arc@lists.infradead.org>
-List-Help: <mailto:linux-snps-arc-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-snps-arc>,
- <mailto:linux-snps-arc-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-snps-arc" <linux-snps-arc-bounces@lists.infradead.org>
-Errors-To: linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org
-To: linux-mmc@vger.kernel.org
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Alexey Brodkin <Alexey.Brodkin@synopsys.com>, Andy Shevchenko <andy.shevchenko@gmail.com>, Evgeniy Didin <Evgeniy.Didin@synopsys.com>, Jisheng Zhang <Jisheng.Zhang@synaptics.com>, linux-snps-arc@lists.infradead.org, Eugeniy Paltsev <Eugeniy.Paltsev@synopsys.com>
+Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
+In-Reply-To: <20180314153603.3127932-1-arnd@arndb.de>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
+List-Post: <mailto:linux-mtd@lists.infradead.org>
+List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-mtd" <linux-mtd-bounces@lists.infradead.org>
+Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, "open list:ULTRA-WIDEBAND (UWB) SUBSYSTEM:" <linux-usb@vger.kernel.org>, Wolfram Sang <wsa@the-dreams.de>, linux-iio@vger.kernel.org, Viresh Kumar <viresh.kumar@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, alexandre.belloni@bootlin.com, linux-ide@vger.kernel.org, netdev <netdev@vger.kernel.org>, linux-mtd@lists.infradead.org, linux-i2c <linux-i2c@vger.kernel.org>, linux-rtc@vger.kernel.org, Lars-Peter Clausen <lars@metafoo.de>, Herbert Xu <herbert@gondor.apana.org.au>, Jonathan Corbet <corbet@lwn.net>, "open list:DOCUMENTATION" <linux-doc@vger.kernel.org>, Alan Stern <stern@rowland.harvard.edu>, linux-serial@vger.kernel.org, Jiri Slaby <jslaby@suse.com>, linux-mmc <linux-mmc@vger.kernel.org>, shli@kernel.org, wg@grandegger.com, linux-crypto@vger.kernel.org, Linux PWM List <linux-pwm@vger.kernel.org>, linux-watchdog@vger.k
 List-Id: linux-mmc@vger.kernel.org
 
-It was found that in IDMAC mode after soft-reset driver switches 
-to PIO mode.
+On Wed, Mar 14, 2018 at 4:35 PM, Arnd Bergmann <arnd@arndb.de> wrote:
+> Hi driver maintainers,
+>
+> I just posted one series with the removal of eight architectures,
+> see https://lkml.org/lkml/2018/3/14/505 for details, or
+> https://lwn.net/Articles/748074/ for more background.
+>
+> These are the device drivers that go along with them. I have already
+> picked up the drivers for arch/metag/ into my tree, they were reviewed
+> earlier.
+>
+> Please let me know if you have any concerns with the patch, or if you
+> prefer to pick up the patches in your respective trees.  I created
+> the patches with 'git format-patch -D', so they will not apply without
+> manually removing those files.
+>
+> For anything else, I'd keep the removal patches in my asm-generic tree
+> and will send a pull request for 4.17 along with the actual arch removal.
 
-That's what happens in case of DTO timeout overflow calculation failure:
-1. soft-reset is called
-2. driver restarts dma
-3. descriptors states are checked, one of descriptor is owned by the IDMAC.
-4. driver can't use DMA and then switches to PIO mode.
+Please include the cpufreq patches into that and you can add ACKs from
+me on them if that helps.
 
-Failure was already fixed in: 
-https://www.spinics.net/lists/linux-mmc/msg48125.html.
+Thanks!
 
-Behaviour while soft-reset is not something we except or 
-even want to happen. So we switch from dw_mci_idmac_reset
-to dw_mci_idmac_init, so descriptors are cleaned before starting dma. 
-
-And while at it explicitly zero des0 which otherwise might
-contain garbage as being allocated by dmam_alloc_coherent().
-
-Signed-off-by: Evgeniy Didin <Evgeniy.Didin@synopsys.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Andy Shevchenko <andy.shevchenko@gmail.com>
-Cc: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Alexey Brodkin <abrodkin@synopsys.com>
-Cc: Eugeniy Paltsev <Eugeniy.Paltsev@synopsys.com>
-Cc: linux-snps-arc@lists.infradead.org
----
- drivers/mmc/host/dw_mmc.c | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 0aa39975f33b..26f2ac107702 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -558,6 +558,7 @@ static int dw_mci_idmac_init(struct dw_mci *host)
- 					(sizeof(struct idmac_desc_64addr) *
- 							(i + 1))) >> 32;
- 			/* Initialize reserved and buffer size fields to "0" */
-+			p->des0 = 0;
- 			p->des1 = 0;
- 			p->des2 = 0;
- 			p->des3 = 0;
-@@ -580,6 +581,7 @@ static int dw_mci_idmac_init(struct dw_mci *host)
- 		     i++, p++) {
- 			p->des3 = cpu_to_le32(host->sg_dma +
- 					(sizeof(struct idmac_desc) * (i + 1)));
-+			p->des0 = 0;
- 			p->des1 = 0;
- 		}
- 
-@@ -1795,8 +1797,8 @@ static bool dw_mci_reset(struct dw_mci *host)
- 	}
- 
- 	if (host->use_dma == TRANS_MODE_IDMAC)
--		/* It is also recommended that we reset and reprogram idmac */
--		dw_mci_idmac_reset(host);
-+		/* It is also required that we reinit idmac */
-+		dw_mci_idmac_init(host);
- 
- 	ret = true;
- 
--- 
-2.11.0
+______________________________________________________
+Linux MTD discussion mailing list
+http://lists.infradead.org/mailman/listinfo/linux-mtd/
