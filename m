@@ -1,80 +1,87 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 29/47] mmc: remove bfin_sdh driver
-Date: Wed, 14 Mar 2018 18:07:21 +0100
-Message-ID: <CAPDyKFr81J1pW_Jie7afshcRdHCSDsE-0MdHqsi3EZCLNzznQw@mail.gmail.com>
-References: <20180314153603.3127932-1-arnd@arndb.de> <20180314153603.3127932-30-arnd@arndb.de>
+From: Evgeniy Didin <Evgeniy.Didin@synopsys.com>
+Subject: [PATCH] mmc: dw_mmc: fix falling from idmac to PIO mode when
+ dw_mci_reset occurs
+Date: Wed, 14 Mar 2018 22:30:51 +0300
+Message-ID: <20180314193051.16791-1-Evgeniy.Didin@synopsys.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180314153603.3127932-30-arnd@arndb.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-snps-arc>,
+ <mailto:linux-snps-arc-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-snps-arc/>
+List-Post: <mailto:linux-snps-arc@lists.infradead.org>
+List-Help: <mailto:linux-snps-arc-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-snps-arc>,
+ <mailto:linux-snps-arc-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-snps-arc" <linux-snps-arc-bounces@lists.infradead.org>
+Errors-To: linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org
+To: linux-mmc@vger.kernel.org
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Alexey Brodkin <Alexey.Brodkin@synopsys.com>, Andy Shevchenko <andy.shevchenko@gmail.com>, Evgeniy Didin <Evgeniy.Didin@synopsys.com>, Jisheng Zhang <Jisheng.Zhang@synaptics.com>, linux-snps-arc@lists.infradead.org, Eugeniy Paltsev <Eugeniy.Paltsev@synopsys.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 14 March 2018 at 16:35, Arnd Bergmann <arnd@arndb.de> wrote:
-> The blackfin architecture is getting removed, so this one
-> is obsolete now as well.
->
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+It was found that in IDMAC mode after soft-reset driver switches 
+to PIO mode.
 
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+That's what happens in case of DTO timeout overflow calculation failure:
+1. soft-reset is called
+2. driver restarts dma
+3. descriptors states are checked, one of descriptor is owned by the IDMAC.
+4. driver can't use DMA and then switches to PIO mode.
 
-Kind regards
-Uffe
+Failure was already fixed in: 
+https://www.spinics.net/lists/linux-mmc/msg48125.html.
 
-> ---
->  drivers/mmc/host/Kconfig    |  19 --
->  drivers/mmc/host/Makefile   |   1 -
->  drivers/mmc/host/bfin_sdh.c | 679 --------------------------------------------
->  3 files changed, 699 deletions(-)
->  delete mode 100644 drivers/mmc/host/bfin_sdh.c
->
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 620c2d90a646..b4fd5d48dd35 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -646,25 +646,6 @@ config MMC_VIA_SDMMC
->
->           If unsure, say N.
->
-> -config SDH_BFIN
-> -       tristate "Blackfin Secure Digital Host support"
-> -       depends on (BF54x && !BF544) || (BF51x && !BF512)
-> -       help
-> -         If you say yes here you will get support for the Blackfin on-chip
-> -         Secure Digital Host interface.  This includes support for MMC and
-> -         SD cards.
-> -
-> -         To compile this driver as a module, choose M here: the
-> -         module will be called bfin_sdh.
-> -
-> -         If unsure, say N.
-> -
-> -config SDH_BFIN_MISSING_CMD_PULLUP_WORKAROUND
-> -       bool "Blackfin EZkit Missing SDH_CMD Pull Up Resistor Workaround"
-> -       depends on SDH_BFIN
-> -       help
-> -         If you say yes here SD-Cards may work on the EZkit.
-> -
->  config MMC_CAVIUM_OCTEON
->         tristate "Cavium OCTEON SD/MMC Card Interface support"
->         depends on CAVIUM_OCTEON_SOC
-> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-> index 84cd1388abc3..f563cc0b7f93 100644
-> --- a/drivers/mmc/host/Makefile
-> +++ b/drivers/mmc/host/Makefile
-> @@ -43,7 +43,6 @@ obj-$(CONFIG_MMC_SDHI_SYS_DMAC)               += renesas_sdhi_sys_dmac.o
->  obj-$(CONFIG_MMC_SDHI_INTERNAL_DMAC)   += renesas_sdhi_internal_dmac.o
->  obj-$(CONFIG_MMC_CB710)                += cb710-mmc.o
->  obj-$(CONFIG_MMC_VIA_SDMMC)    += via-sdmmc.o
-> -obj-$(CONFIG_SDH_BFIN)         += bfin_sdh.o
->  octeon-mmc-objs := cavium.o cavium-octeon.o
->  obj-$(CONFIG_MMC_CAVIUM_OCTEON) += octeon-mmc.o
->  thunderx-mmc-objs := cavium.o cavium-thunderx.o
-> diff --git a/drivers/mmc/host/bfin_sdh.c b/drivers/mmc/host/bfin_sdh.c
-> deleted file mode 100644
-> index 526231e38583..000000000000
-> --
-> 2.9.0
->
+Behaviour while soft-reset is not something we except or 
+even want to happen. So we switch from dw_mci_idmac_reset
+to dw_mci_idmac_init, so descriptors are cleaned before starting dma. 
+
+And while at it explicitly zero des0 which otherwise might
+contain garbage as being allocated by dmam_alloc_coherent().
+
+Signed-off-by: Evgeniy Didin <Evgeniy.Didin@synopsys.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Andy Shevchenko <andy.shevchenko@gmail.com>
+Cc: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+Cc: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Alexey Brodkin <abrodkin@synopsys.com>
+Cc: Eugeniy Paltsev <Eugeniy.Paltsev@synopsys.com>
+Cc: linux-snps-arc@lists.infradead.org
+---
+ drivers/mmc/host/dw_mmc.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 0aa39975f33b..26f2ac107702 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -558,6 +558,7 @@ static int dw_mci_idmac_init(struct dw_mci *host)
+ 					(sizeof(struct idmac_desc_64addr) *
+ 							(i + 1))) >> 32;
+ 			/* Initialize reserved and buffer size fields to "0" */
++			p->des0 = 0;
+ 			p->des1 = 0;
+ 			p->des2 = 0;
+ 			p->des3 = 0;
+@@ -580,6 +581,7 @@ static int dw_mci_idmac_init(struct dw_mci *host)
+ 		     i++, p++) {
+ 			p->des3 = cpu_to_le32(host->sg_dma +
+ 					(sizeof(struct idmac_desc) * (i + 1)));
++			p->des0 = 0;
+ 			p->des1 = 0;
+ 		}
+ 
+@@ -1795,8 +1797,8 @@ static bool dw_mci_reset(struct dw_mci *host)
+ 	}
+ 
+ 	if (host->use_dma == TRANS_MODE_IDMAC)
+-		/* It is also recommended that we reset and reprogram idmac */
+-		dw_mci_idmac_reset(host);
++		/* It is also required that we reinit idmac */
++		dw_mci_idmac_init(host);
+ 
+ 	ret = true;
+ 
+-- 
+2.11.0
