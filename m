@@ -1,59 +1,130 @@
-From: Evgeniy Didin <Evgeniy.Didin@synopsys.com>
-Subject: Re: mmc: block: bonnie++ runs with errors on arc/hsdk board
-Date: Wed, 14 Mar 2018 12:32:50 +0000
-Message-ID: <1521030769.10285.16.camel@synopsys.com>
-References: <1520942674.10285.8.camel@synopsys.com>
- <486fe92e-9b53-53a4-f98d-129a97032470@intel.com>
- <1520956602.10285.10.camel@synopsys.com>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: Re: [PATCH v2 09/16] mmc: sdhci: Add quirk to disable HW timeout
+Date: Wed, 14 Mar 2018 18:55:06 +0530
+Message-ID: <ccca4747-198d-b43f-57d3-b9dcebeaf460@ti.com>
+References: <20180205125029.21570-1-kishon@ti.com>
+ <20180205125029.21570-10-kishon@ti.com>
+ <cda22332-ed17-9309-4989-19765744879b@intel.com>
+ <a7ba98cd-7a3c-00f9-bfaa-a982126c9185@ti.com>
+ <18a7cff5-5cc5-4eb1-17c8-033bd5ddf6c1@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1520956602.10285.10.camel@synopsys.com>
-Content-Language: en-US
-Content-ID: <FE7645740806C74AA8847536493B0757@internal.synopsys.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-snps-arc>,
- <mailto:linux-snps-arc-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-snps-arc/>
-List-Post: <mailto:linux-snps-arc@lists.infradead.org>
-List-Help: <mailto:linux-snps-arc-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-snps-arc>,
- <mailto:linux-snps-arc-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-snps-arc" <linux-snps-arc-bounces@lists.infradead.org>
-Errors-To: linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org
-To: "adrian.hunter@intel.com" <adrian.hunter@intel.com>
-Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-ext4@vger.kernel.org" <linux-ext4@vger.kernel.org>, "tytso@mit.edu" <tytso@mit.edu>, "linus.walleij@linaro.org" <linus.walleij@linaro.org>, "Alexey.Brodkin@synopsys.com" <Alexey.Brodkin@synopsys.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "jh80.chung@samsung.com" <jh80.chung@samsung.com>, "adilger.kernel@dilger.ca" <adilger.kernel@dilger.ca>, "linux-snps-arc@lists.infradead.org" <linux-snps-arc@lists.infradead.org>, "Eugeniy.Paltsev@synopsys.com" <Eugeniy.Paltsev@synopsys.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <18a7cff5-5cc5-4eb1-17c8-033bd5ddf6c1@intel.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>
+Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-SGkgQWRyaWFuLA0KPiA+IA0KPiA+IFdhcyB0aGUgcGVyZm9ybWFuY2UgYWZmZWN0ZWQ/IGkuZS4g
-dGhlIHJlc3VsdHMgZnJvbSBib25uaWUrKw0KPiANCj4gSSBoYXZlIHJ1biBib25uaWUrKyBzZXZl
-cmFsIHRpbWVzIGJlZm9yZSBhbmQgYWZ0ZXIgbWVudGlvbmVkIGNvbW1pdC4gSGVyZSBpcyBvdXRw
-dXQ6DQo+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-PDgtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tDQo+IEJlZm9yZSBjb21taXQ6DQo+IEFSQ0xpbnV4LDUxMk0sNjQ0
-Miw1MCw3MjExLDAsNTMzMywwLDEyOTU0LDk5LDM0NTYzOCwxMDAsKysrKyssKysrLDE2LDIyMzIy
-LDEwMCwrKysrKywrKyssMzI3MzUsOTksMjI5MjEsMTAwLCsrKysrLCsrKywzMjIxMSwxMDANCj4g
-QVJDTGludXgsNTEyTSw2NjExLDUxLDcyNDgsMCw1MTYyLDAsMTI5NTEsOTksMzQ0NzYzLDk5LCsr
-KysrLCsrKywxNiwyMjY0OSw5OSwrKysrKywrKyssMzI3MjMsOTksMjI1NzIsMTAwLCsrKysrLCsr
-KywzMTY5NywxMDANCj4gQVJDTGludXgsNTEyTSw2NTk3LDUyLDczMDcsMCw1MzY4LDAsMTI5MzQs
-OTksMzQzOTg3LDk5LCsrKysrLCsrKywxNiwyMjc3NSwxMDAsKysrKyssKysrLDMyNzEzLDk5LDIy
-ODMyLDEwMCwrKysrKywrKyssMzE4OTksOTkNCj4gQWZ0ZXIgY29tbWl0Og0KPiBBUkNMaW51eCw1
-MTJNLDQ0NTMsMzYsNjQ3NCwxLDU4NTIsMCwxMjk0MCw5OSwzNDQzMjksMTAwLCsrKysrLCsrKywx
-NiwyMjE2OCw5OCwrKysrKywrKyssMzI3NjAsOTksMjI3NTUsMTAwLCsrKysrLCsrKywzMjIwNSwx
-MDANCj4gQVJDTGludXgsNTEyTSw1MTU5LDQyLDY5NDQsMSw1NjU4LDAsMTI5NDUsOTksMzQ0Mjkw
-LDEwMCwrKysrKywrKyssMTYsMjIyOTUsMTAwLCsrKysrLCsrKywzMjcxNSw5OSwyMjg4OCw5OSwr
-KysrKywrKyssMzIwMDcsOTkNCj4gQVJDTGludXgsNTEyTSw1MTcwLDQyLDY4NDAsMiw1MzE1LDAs
-MTI5NDYsOTksMzQzODg5LDEwMCwrKysrKywrKyssMTYsMjI0NDUsMTAwLCsrKysrLCsrKywzMjY4
-MSw5OSwyMjk2NywxMDAsKysrKyssKysrLDMyMTE3LDk5DQo+IC0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tPDgtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCj4gwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoF5eXl7CoA0KPiBJZiBpIHVuZGVyc3RhbmQgY29ycmVjdGx5
-LCBpbiB0aGlyZCBjb2x1bW4gaXMgc2hvd24gInNlcXVlbnRpYWwgb3V0cHV0IiBwZXIgY2hhcmFj
-dGVyIHNwZWVkIChLL3NlYyksIHdoaWNoIGRlY3JlYXNlZC4NCj4gDQo+ID4gV2hhdCBtb3VudCBv
-cHRpb25zIGRpZCB5b3UgdXNlPw0KPiANCj4gSSBkaWRuJ3QgdXNlIGFueSBvcHRpb25zLiBTaW1w
-bHk6DQo+ICMgbW91bnQgL2Rldi9tbWNibGswcDEgL21udA0KDQpOb3RlIHRoYXQgdGhlIGZpbGUg
-c3lzdGVtIG9uIFNEY2FyZCB3YXMgZXh0NC7CoA0KDQpCZXN0IHJlZ2FyZHMsDQpFdmdlbml5IERp
-ZGluCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmxpbnV4
-LXNucHMtYXJjIG1haWxpbmcgbGlzdApsaW51eC1zbnBzLWFyY0BsaXN0cy5pbmZyYWRlYWQub3Jn
-Cmh0dHA6Ly9saXN0cy5pbmZyYWRlYWQub3JnL21haWxtYW4vbGlzdGluZm8vbGludXgtc25wcy1h
-cmM=
+
+
+On Monday 05 March 2018 03:08 PM, Adrian Hunter wrote:
+> On 05/03/18 11:30, Kishon Vijay Abraham I wrote:
+>> Hi Adrian,
+>>
+>> On Monday 19 February 2018 02:21 PM, Adrian Hunter wrote:
+>>> On 05/02/18 14:50, Kishon Vijay Abraham I wrote:
+>>>> Add quirk to disable HW timeout if the requested timeout is more than
+>>>> the maximum obtainable timeout.
+>>>>
+>>>> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+>>>> ---
+>>>>  drivers/mmc/host/sdhci.c | 12 ++++++++++++
+>>>>  drivers/mmc/host/sdhci.h |  7 +++++++
+>>>>  2 files changed, 19 insertions(+)
+>>>>
+>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>>> index 070aff9c108f..1aa74b4682f3 100644
+>>>> --- a/drivers/mmc/host/sdhci.c
+>>>> +++ b/drivers/mmc/host/sdhci.c
+>>>> @@ -735,6 +735,12 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+>>>>  		DBG("Too large timeout 0x%x requested for CMD%d!\n",
+>>>>  		    count, cmd->opcode);
+>>>>  		count = 0xE;
+>>>> +		if (host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT) {
+>>>> +			host->ier &= ~SDHCI_INT_DATA_TIMEOUT;
+>>>> +			sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
+>>>> +			sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
+>>>> +			host->hw_timeout_disabled = true;
+>>>> +		}
+>>>
+>>> sdhci_calc_timeout() is really for calculations so please do this in
+>>> sdhci_set_timeout() instead (i.e. change sdhci_calc_timeout() to return
+>>> whether the timeout is too big).  Note that you need to cater for the "/*
+>>> Unspecified timeout, assume max */" case and the
+>>> SDHCI_QUIRK_BROKEN_TIMEOUT_VAL case.
+>>>
+>>> Also if SDHCI_INT_DATA_TIMEOUT is not being disabled, check here to
+>>> re-enable it and leave sdhci_request_done() alone. i.e.
+>>>
+>>> 	else if (!(host->ier & SDHCI_INT_DATA_TIMEOUT)) {
+>>> 		host->ier |= SDHCI_INT_DATA_TIMEOUT;
+>>> 		sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
+>>> 		sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
+>>> 	}
+>>>
+>>> Maybe make a separate subroutine for the update:
+>>>
+>>> void sdhci_set_data_timeout_irq(struct sdhci_host *host, bool enable)
+>>> {
+>>> 	if (enable)
+>>> 		host->ier |= SDHCI_INT_DATA_TIMEOUT;
+>>> 	else
+>>> 		host->ier &= ~SDHCI_INT_DATA_TIMEOUT;
+>>> 	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
+>>> 	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
+>>> }
+>>>
+>>>
+>>>>  	}
+>>>>  
+>>>>  	return count;
+>>>> @@ -2349,6 +2355,12 @@ static bool sdhci_request_done(struct sdhci_host *host)
+>>>>  	}
+>>>>  
+>>>>  	sdhci_del_timer(host, mrq);
+>>>> +	if (sdhci_data_line_cmd(mrq->cmd) && host->hw_timeout_disabled) {
+>>>> +		host->ier |= SDHCI_INT_DATA_TIMEOUT;
+>>>> +		sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
+>>>> +		sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
+>>>> +		host->hw_timeout_disabled = false;
+>>>> +	}
+>>>>  
+>>>>  	/*
+>>>>  	 * Always unmap the data buffers if they were mapped by
+>>>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+>>>> index afab26fd70e6..3a967a56fcc3 100644
+>>>> --- a/drivers/mmc/host/sdhci.h
+>>>> +++ b/drivers/mmc/host/sdhci.h
+>>>> @@ -437,6 +437,11 @@ struct sdhci_host {
+>>>>  #define SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN		(1<<15)
+>>>>  /* Controller has CRC in 136 bit Command Response */
+>>>>  #define SDHCI_QUIRK2_RSP_136_HAS_CRC			(1<<16)
+>>>> +/*
+>>>> + * Disable HW timeout if the requested timeout is more than the maximum
+>>>> + * obtainable timeout
+>>>> + */
+>>>> +#define SDHCI_QUIRK2_DISABLE_HW_TIMEOUT			(1<<17)
+>>
+>> Are you okay with the definition of this quirk? i.e this quirk is applied only
+>> when the requested timeout is "more" than the maximum obtainable timeout.
+>>
+>> By this way platforms can continue to use hardware timeout for smaller timeout
+>> value.
+> 
+> It is fine to me.
+> 
+Okay thanks. I've posted v3 sometime last week. I'm trying to get this in for
+4.17? Can you review the new revision please?
+
+Thanks
+Kishon
