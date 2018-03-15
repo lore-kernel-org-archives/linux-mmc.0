@@ -1,54 +1,31 @@
-From: Alexey Brodkin <Alexey.Brodkin@synopsys.com>
-Subject: Re: mmc: block: bonnie++ runs with errors on arc/hsdk board
-Date: Thu, 15 Mar 2018 17:21:49 +0000
-Message-ID: <1521134509.6358.1.camel@synopsys.com>
-References: <1520942674.10285.8.camel@synopsys.com>
- <486fe92e-9b53-53a4-f98d-129a97032470@intel.com>
- <1520956602.10285.10.camel@synopsys.com>
- <1521030769.10285.16.camel@synopsys.com>
- <83de0f90-0919-f449-b432-494b9bf524a1@intel.com>
- <345e9053-9251-ad27-d05b-ec80b69ee235@synopsys.com>
+From: Stephen Boyd <sboyd@kernel.org>
+Subject: Re: [PATCH v2 14/15] clk: stm32: Add clk entry for SDMMC2 on stm32F769
+Date: Thu, 15 Mar 2018 14:24:03 -0700
+Message-ID: <152114904300.111154.16697790469167766472@swboyd.mtv.corp.google.com>
+References: <1516105859-3525-1-git-send-email-patrice.chotard@st.com>
+ <1516105859-3525-15-git-send-email-patrice.chotard@st.com>
+ <fb3b26e8-0102-122b-1386-68a661139706@st.com>
+ <CACRpkdbd-Zz-JRC-_OfKtx28OvDcf0af93pqraP=XPpAN-geVg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org>
-In-Reply-To: <345e9053-9251-ad27-d05b-ec80b69ee235@synopsys.com>
-Content-Language: en-US
-Content-ID: <575290F5A47817428606B129E3E738F1@internal.synopsys.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-snps-arc>,
- <mailto:linux-snps-arc-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-snps-arc/>
-List-Post: <mailto:linux-snps-arc@lists.infradead.org>
-List-Help: <mailto:linux-snps-arc-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-snps-arc>,
- <mailto:linux-snps-arc-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-snps-arc" <linux-snps-arc-bounces@lists.infradead.org>
-Errors-To: linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org
-To: Vineet Gupta <Vineet.Gupta1@synopsys.com>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>
-Cc: "Evgeniy.Didin@synopsys.com" <Evgeniy.Didin@synopsys.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-ext4@vger.kernel.org" <linux-ext4@vger.kernel.org>, "tytso@mit.edu" <tytso@mit.edu>, "vincent.weaver@maine.edu" <vincent.weaver@maine.edu>, "peterz@infradead.org" <peterz@infradead.org>, "linus.walleij@linaro.org" <linus.walleij@linaro.org>, "Alexey.Brodkin@synopsys.com" <Alexey.Brodkin@synopsys.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "jh80.chung@samsung.com" <jh80.chung@samsung.com>, "adilger.kernel@dilger.ca" <adilger.kernel@dilger.ca>, "linux-snps-arc@lists.infradead.org" <linux-snps-arc@lists.infradead.org>, "Eugeniy.Paltsev@synopsys.com" <Eugeniy.Paltsev@synopsys.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CACRpkdbd-Zz-JRC-_OfKtx28OvDcf0af93pqraP=XPpAN-geVg@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>, Patrice CHOTARD <patrice.chotard@st.com>
+Cc: Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Alexandre TORGUE <alexandre.torgue@st.com>, Michael Turquette <mturquette@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Russell King <linux@armlinux.org.uk>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, "linux-clk@vger.kernel.org" <linux-clk@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Vineet,
-
-On Thu, 2018-03-15 at 09:38 -0700, Vineet Gupta wrote:
-> On 03/15/2018 02:27 AM, Adrian Hunter wrote:
-> > Please try:
-> > 
-> > 	perf record -a -e mmc:* -- bonnie++ -u root -r 256 -s 512 -x 1 -d /mnt
-> > 
-> > and share the resulting perf.data file when you are able
-> > to reproduce the hung task message.
-> > 
-> > You may want to add this patch first:
-> > 
-> > 	https://marc.info/?l=linux-mmc&m=152110580324200
+Quoting Linus Walleij (2018-03-01 01:12:30)
+> On Mon, Feb 26, 2018 at 9:41 AM, Patrice CHOTARD <patrice.chotard@st.com> wrote:
 > 
-> While this SoC has perf counters, Unfortunately the overflow interrupts are not 
-> wired up. We can do perf stats but not sampling.
+> > Hi Stephen, Michael
+> >
+> > It's a gentle reminder as this patch is present on mailing list and
+> > acked-by since 01/12/2018
+> 
+> You need Stephen's new kernel.org mail address to reach him.
+> (Added on TO:)
+> 
 
-I guess here Adrian was asking for pure software MMC-related events which are
-orthogonal to CPU's perf interrupts.
-
-Adrian?
-
--Alexey
+Thanks. Both work now after I've setup filters to catch everything.
