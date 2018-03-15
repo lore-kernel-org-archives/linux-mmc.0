@@ -1,29 +1,33 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc/core/block: Use memdup_user() rather than duplicating
- its implementation
-Date: Thu, 15 Mar 2018 11:23:30 +0100
-Message-ID: <CAPDyKFpBjRF4ggd73mA8QnybVVGuzA16SNCdYnZaBRNTbOuPAw@mail.gmail.com>
-References: <4eca7388-cb2d-31e0-b64d-afb30818f53e@users.sourceforge.net>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] mmc: dw_mmc-rockchip: correct property names in debug
+Date: Thu, 15 Mar 2018 11:23:26 +0100
+Message-ID: <CAPDyKFro5hvuEKuiPHCg9WEf7Ysmj_9GJ_bykquq9+okA2Sk_w@mail.gmail.com>
+References: <20180301103625.7285-1-john@metanate.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <4eca7388-cb2d-31e0-b64d-afb30818f53e@users.sourceforge.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: SF Markus Elfring <elfring@users.sourceforge.net>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <20180301103625.7285-1-john-HooS5bfzL4hWk0Htik3J/w@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: John Keeping <john-HooS5bfzL4hWk0Htik3J/w@public.gmane.org>
+Cc: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Linux ARM <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 5 March 2018 at 13:08, SF Markus Elfring
-<elfring@users.sourceforge.net> wrote:
-> From: Markus Elfring <elfring@users.sourceforge.net>
-> Date: Mon, 5 Mar 2018 11:33:21 +0100
+On 1 March 2018 at 11:36, John Keeping <john-HooS5bfzL4hWk0Htik3J/w@public.gmane.org> wrote:
+> Following up the device tree fixed in commits e78c637127ee ("ARM: dts:
+> rockchip: Fix DWMMC clocks") and ca9eee95a2de ("arm64: dts: rockchip:
+> Fix DWMMC clocks", 2018-02-15), avoid confusion by using the correct
+> property name in the debug output if clocks are not found.
 >
-> Reuse existing functionality from memdup_user() instead of keeping
-> duplicate source code.
->
-> This issue was detected by using the Coccinelle software.
->
-> Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
+> Signed-off-by: John Keeping <john-HooS5bfzL4hWk0Htik3J/w@public.gmane.org>
 
 Thanks, applied for next!
 
@@ -31,44 +35,27 @@ Kind regards
 Uffe
 
 > ---
->  drivers/mmc/core/block.c | 15 ++++-----------
->  1 file changed, 4 insertions(+), 11 deletions(-)
+>  drivers/mmc/host/dw_mmc-rockchip.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 >
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 20135a5de748..4b09c7380e70 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -375,22 +375,15 @@ static struct mmc_blk_ioc_data *mmc_blk_ioctl_copy_from_user(
->                 return idata;
->         }
+> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+> index 339295212935..40d7de2eea12 100644
+> --- a/drivers/mmc/host/dw_mmc-rockchip.c
+> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
+> @@ -282,11 +282,11 @@ static int dw_mci_rk3288_parse_dt(struct dw_mci *host)
 >
-> -       idata->buf = kmalloc(idata->buf_bytes, GFP_KERNEL);
-> -       if (!idata->buf) {
-> -               err = -ENOMEM;
-> +       idata->buf = memdup_user((void __user *)(unsigned long)
-> +                                idata->ic.data_ptr, idata->buf_bytes);
-> +       if (IS_ERR(idata->buf)) {
-> +               err = PTR_ERR(idata->buf);
->                 goto idata_err;
->         }
+>         priv->drv_clk = devm_clk_get(host->dev, "ciu-drive");
+>         if (IS_ERR(priv->drv_clk))
+> -               dev_dbg(host->dev, "ciu_drv not available\n");
+> +               dev_dbg(host->dev, "ciu-drive not available\n");
 >
-> -       if (copy_from_user(idata->buf, (void __user *)(unsigned long)
-> -                                       idata->ic.data_ptr, idata->buf_bytes)) {
-> -               err = -EFAULT;
-> -               goto copy_err;
-> -       }
-> -
->         return idata;
+>         priv->sample_clk = devm_clk_get(host->dev, "ciu-sample");
+>         if (IS_ERR(priv->sample_clk))
+> -               dev_dbg(host->dev, "ciu_sample not available\n");
+> +               dev_dbg(host->dev, "ciu-sample not available\n");
 >
-> -copy_err:
-> -       kfree(idata->buf);
->  idata_err:
->         kfree(idata);
->  out:
+>         host->priv = priv;
+>
 > --
 > 2.16.2
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
