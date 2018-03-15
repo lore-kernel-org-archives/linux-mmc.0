@@ -1,18 +1,19 @@
-From: Vineet Gupta <Vineet.Gupta1@synopsys.com>
-Subject: Re: mmc: block: bonnie++ runs with errors on arc/hsdk board
-Date: Thu, 15 Mar 2018 09:38:15 -0700
-Message-ID: <345e9053-9251-ad27-d05b-ec80b69ee235@synopsys.com>
-References: <1520942674.10285.8.camel@synopsys.com>
- <486fe92e-9b53-53a4-f98d-129a97032470@intel.com>
- <1520956602.10285.10.camel@synopsys.com>
- <1521030769.10285.16.camel@synopsys.com>
- <83de0f90-0919-f449-b432-494b9bf524a1@intel.com>
+From: Evgeniy Didin <Evgeniy.Didin@synopsys.com>
+Subject: Re: [PATCH] mmc: dw_mmc: fix falling from idmac to PIO mode when
+ dw_mci_reset occurs
+Date: Thu, 15 Mar 2018 17:24:09 +0000
+Message-ID: <1521134649.10304.7.camel@synopsys.com>
+References: <20180314193051.16791-1-Evgeniy.Didin@synopsys.com>
+ <CAPDyKFrgBm8-G1CsnqS9G62xFA2qA0XkuGBfA5v6grZnjRLteA@mail.gmail.com>
+ <1521119909.10304.1.camel@synopsys.com>
+ <CAPDyKFp--bHg8PH7om7TTY15m0CRw3i4eO1=StRnVofxnf50OQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org>
-In-Reply-To: <83de0f90-0919-f449-b432-494b9bf524a1@intel.com>
+In-Reply-To: <CAPDyKFp--bHg8PH7om7TTY15m0CRw3i4eO1=StRnVofxnf50OQ@mail.gmail.com>
 Content-Language: en-US
+Content-ID: <054C4DB5CC0BE34EB46B16934AF59F33@internal.synopsys.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-snps-arc>,
  <mailto:linux-snps-arc-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-snps-arc/>
@@ -22,29 +23,46 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-snps-arc>,
  <mailto:linux-snps-arc-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-snps-arc" <linux-snps-arc-bounces@lists.infradead.org>
 Errors-To: linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Evgeniy Didin <Evgeniy.Didin@synopsys.com>
-Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-snps-arc@lists.infradead.org" <linux-snps-arc@lists.infradead.org>, "tytso@mit.edu" <tytso@mit.edu>, Vince Weaver <vincent.weaver@maine.edu>, Peter Zijlstra <peterz@infradead.org>, "linus.walleij@linaro.org" <linus.walleij@linaro.org>, "Alexey.Brodkin@synopsys.com" <Alexey.Brodkin@synopsys.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "jh80.chung@samsung.com" <jh80.chung@samsung.com>, "adilger.kernel@dilger.ca" <adilger.kernel@dilger.ca>, "linux-ext4@vger.kernel.org" <linux-ext4@vger.kernel.org>, "Eugeniy.Paltsev@synopsys.com" <Eugeniy.Paltsev@synopsys.com>
+To: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "Evgeniy.Didin@synopsys.com" <Evgeniy.Didin@synopsys.com>
+Cc: "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>, "Alexey.Brodkin@synopsys.com" <Alexey.Brodkin@synopsys.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Jisheng.Zhang@synaptics.com" <Jisheng.Zhang@synaptics.com>, "jh80.chung@samsung.com" <jh80.chung@samsung.com>, "andy.shevchenko@gmail.com" <andy.shevchenko@gmail.com>, "linux-snps-arc@lists.infradead.org" <linux-snps-arc@lists.infradead.org>, "Eugeniy.Paltsev@synopsys.com" <Eugeniy.Paltsev@synopsys.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 03/15/2018 02:27 AM, Adrian Hunter wrote:
-> Please try:
+On Thu, 2018-03-15 at 14:39 +0100, Ulf Hansson wrote:
+> On 15 March 2018 at 14:18, Evgeniy Didin <Evgeniy.Didin@synopsys.com> wrote:
+> > Hello Ulf,
+> > 
+> > On Thu, 2018-03-15 at 10:57 +0100, Ulf Hansson wrote:
+> > > On 14 March 2018 at 20:30, Evgeniy Didin <Evgeniy.Didin@synopsys.com> wrote:
+> > > > It was found that in IDMAC mode after soft-reset driver switches
+> > > > to PIO mode.
+> > > > 
+> > > > That's what happens in case of DTO timeout overflow calculation failure:
+> > > > 1. soft-reset is called
+> > > > 2. driver restarts dma
+> > > > 3. descriptors states are checked, one of descriptor is owned by the IDMAC.
+> > > > 4. driver can't use DMA and then switches to PIO mode.
+> > > > 
+> > > > Failure was already fixed in:
+> > > > https://urldefense.proofpoint.com/v2/url?u=https-3A__www.spinics.net_lists_linux-2Dmmc_msg48125.html&d=DwIBaQ&c=DPL6_X_6JkXFx7AXWqB0tg&r=vQk-RIbjwN0zvlwiMSpq3LYUTNf7Gqc4ujh
+> > > > osYI
+> > > > TtAw&m=6rPWpKUYQD3kY-2OEikJUWyEJvwKJljWHFC8rd2TCak&s=JjX0Dx8-eSyW2cATMsnG1eAzrKgoDkS1bcS5XYrVtlE&e=.
+> > > 
+> > > Evgeniy,
+> > > 
+> > > It seems like I should squash this fix into the above commit? Makes sense?
+> > 
+> > IMHO it is not a good idea, because this fix is orthogonal to the above commit.
+> > Debugging drto overflow issue we found this strange behavior.
 > 
-> 	perf record -a -e mmc:* -- bonnie++ -u root -r 256 -s 512 -x 1 -d /mnt
+> Okay! Thanks for clarifying.
 > 
-> and share the resulting perf.data file when you are able
-> to reproduce the hung task message.
+> > This might be general issue of soft-reset. So I think this should be separate patch.
+> > Also if these patches are independent, it will be easier to backport them.
 > 
-> You may want to add this patch first:
-> 
-> 	https://marc.info/?l=linux-mmc&m=152110580324200
+> Should I add a stable tag then?
 
-While this SoC has perf counters, Unfortunately the overflow interrupts are not 
-wired up. We can do perf stats but not sampling.
+Sure. The issue can happen since v3.17, because starting with this version function dw_mci_reset was implemented.
+Commit 3a33a94ce270 ("mmc: dw_mmc: change to use recommended reset procedure").
 
-Peter was it you or Vince trying to use timer interrupts to emulate perf sampling 
-on some ARM SoC ?
-
-Thing is we have a spare hardware timer per core (TIMER1) which is not usabel for 
-otherwise gtod function in SMP and could well be repurposed for perf needs.
-
--Vineet
+Best regards,
+Evgeniy Didin
