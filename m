@@ -1,15 +1,14 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v3 02/11] mmc: sdhci-omap: Remove setting ADMA capability
- in driver
-Date: Thu, 15 Mar 2018 16:18:49 +0200
-Message-ID: <a867eebf-2c32-4a0f-713a-766d81d52c4c@intel.com>
+Subject: Re: [PATCH v3 03/11] mmc: sdhci-omap: Workaround for Errata i843
+Date: Thu, 15 Mar 2018 16:24:53 +0200
+Message-ID: <5410610d-4874-9e66-0d5a-966a73422457@intel.com>
 References: <20180307132020.30951-1-kishon@ti.com>
- <20180307132020.30951-3-kishon@ti.com>
+ <20180307132020.30951-4-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180307132020.30951-3-kishon@ti.com>
+In-Reply-To: <20180307132020.30951-4-kishon@ti.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
 To: Kishon Vijay Abraham I <kishon@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>
@@ -17,31 +16,113 @@ Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russe
 List-Id: linux-mmc@vger.kernel.org
 
 On 07/03/18 15:20, Kishon Vijay Abraham I wrote:
-> sdhci can directly get ADMA capability from MMCHS_CAPA register.
-> Remove explicitly setting ADMA here as some instances might not have
-> ADMA enabled. (sdhci_read_caps() is also removed from here since
-> sdhci_setup_host() invokes it).
+> Errata i843 in AM572x Sitara Processors Silicon Revision 2.0, 1.1
+> (SPRZ429K July 2014–Revised March 2017 [1]) mentions
+> PG 1.0/1.1 silicon has limitations w.r.t frequencies at which MMC1/2/3
+> can operate.
+> 
+> Use soc_device_match() to identify rev 1.0/1.1 silicon and
+> override mmc->f_max according to the errata workaround.
+> "max-frequency" dt property cannot be used since the device
+> tree is added for rev 2.0 silicon.
+> 
+> soc_device_match() is also used in order to get the IODelay values
+> for rev 1.0/1.1 silicon.
+> 
+> [1] -> http://www.ti.com/lit/er/sprz429k/sprz429k.pdf
 > 
 > Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
->  drivers/mmc/host/sdhci-omap.c | 3 ---
->  1 file changed, 3 deletions(-)
+>  drivers/mmc/host/sdhci-omap.c | 35 ++++++++++++++++++++++++++++++++++-
+>  1 file changed, 34 insertions(+), 1 deletion(-)
 > 
 > diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-> index 3cce30584d2f..0c40b13fb67d 100644
+> index 0c40b13fb67d..fbc20a4fbb23 100644
 > --- a/drivers/mmc/host/sdhci-omap.c
 > +++ b/drivers/mmc/host/sdhci-omap.c
-> @@ -923,9 +923,6 @@ static int sdhci_omap_probe(struct platform_device *pdev)
->  	host->mmc_host_ops.card_busy = sdhci_omap_card_busy;
->  	host->mmc_host_ops.execute_tuning = sdhci_omap_execute_tuning;
+> @@ -26,6 +26,7 @@
+>  #include <linux/pm_runtime.h>
+>  #include <linux/regulator/consumer.h>
+>  #include <linux/pinctrl/consumer.h>
+> +#include <linux/sys_soc.h>
 >  
-> -	sdhci_read_caps(host);
-> -	host->caps |= SDHCI_CAN_DO_ADMA2;
-> -
->  	ret = sdhci_setup_host(host);
+>  #include "sdhci-pltfm.h"
+>  
+> @@ -100,6 +101,7 @@ struct sdhci_omap_data {
+>  };
+>  
+>  struct sdhci_omap_host {
+> +	char			*version;
+>  	void __iomem		*base;
+>  	struct device		*dev;
+>  	struct	regulator	*pbias;
+> @@ -733,12 +735,21 @@ static struct pinctrl_state
+>  				  u32 *caps, u32 capmask)
+>  {
+>  	struct device *dev = omap_host->dev;
+> +	char *version = omap_host->version;
+>  	struct pinctrl_state *pinctrl_state = ERR_PTR(-ENODEV);
+> +	char str[20];
+>  
+>  	if (!(*caps & capmask))
+>  		goto ret;
+>  
+> -	pinctrl_state = pinctrl_lookup_state(omap_host->pinctrl, mode);
+> +	if (version) {
+> +		snprintf(str, 20, "%s-%s", mode, version);
+> +		pinctrl_state = pinctrl_lookup_state(omap_host->pinctrl, str);
+> +	}
+> +
+> +	if (IS_ERR(pinctrl_state))
+> +		pinctrl_state = pinctrl_lookup_state(omap_host->pinctrl, mode);
+> +
+>  	if (IS_ERR(pinctrl_state)) {
+>  		dev_err(dev, "no pinctrl state for %s mode", mode);
+>  		*caps &= ~capmask;
+> @@ -830,6 +841,16 @@ static int sdhci_omap_config_iodelay_pinctrl_state(struct sdhci_omap_host
+>  	return 0;
+>  }
+>  
+> +static const struct soc_device_attribute sdhci_omap_soc_devices[] = {
+> +	{
+> +		.machine = "DRA7[45]*",
+> +		.revision = "ES1.[01]",
+> +	},
+> +	{
+> +		/* sentinel */
+> +	}
+> +};
+> +
+>  static int sdhci_omap_probe(struct platform_device *pdev)
+>  {
+>  	int ret;
+> @@ -841,6 +862,7 @@ static int sdhci_omap_probe(struct platform_device *pdev)
+>  	struct mmc_host *mmc;
+>  	const struct of_device_id *match;
+>  	struct sdhci_omap_data *data;
+> +	const struct soc_device_attribute *soc;
+>  
+>  	match = of_match_device(omap_sdhci_match, dev);
+>  	if (!match)
+> @@ -875,6 +897,17 @@ static int sdhci_omap_probe(struct platform_device *pdev)
 >  	if (ret)
->  		goto err_put_sync;
+>  		goto err_pltfm_free;
+>  
+> +	soc = soc_device_match(sdhci_omap_soc_devices);
+> +	if (soc) {
+> +		omap_host->version = "rev11";
+> +		if (!strcmp(dev_name(dev), "4809c000.mmc"))
+> +			mmc->f_max = 96000000;
+> +		if (!strcmp(dev_name(dev), "480b4000.mmc"))
+> +			mmc->f_max = 48000000;
+> +		if (!strcmp(dev_name(dev), "480ad000.mmc"))
+> +			mmc->f_max = 48000000;
+> +	}
+> +
+>  	pltfm_host->clk = devm_clk_get(dev, "fck");
+>  	if (IS_ERR(pltfm_host->clk)) {
+>  		ret = PTR_ERR(pltfm_host->clk);
 > 
