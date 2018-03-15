@@ -1,78 +1,79 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: Export card RCA register to sysfs.
-Date: Thu, 15 Mar 2018 11:23:41 +0100
-Message-ID: <CAPDyKFp_OAnoyTw1Lx+L0Yqt+z+vkwAGqkDz2Qiip-gdCg4e7A@mail.gmail.com>
-References: <1520398902-23012-1-git-send-email-harish_kandiga@mentor.com>
+Subject: Re: [PATCH] mmc: block: fix updating ext_csd caches on ioctl call
+Date: Thu, 15 Mar 2018 11:24:00 +0100
+Message-ID: <CAPDyKFp4tQg6kLy9KwqSJ5tBXEaDwLpGz7C-ewj4jYdjPZhXZw@mail.gmail.com>
+References: <20180308140811.6966-1-bst@pengutronix.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1520398902-23012-1-git-send-email-harish_kandiga@mentor.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Harish Jenny K N <harish_kandiga@mentor.com>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20180308140811.6966-1-bst@pengutronix.de>
+Sender: stable-owner@vger.kernel.org
+To: Bastian Stender <bst@pengutronix.de>
+Cc: Gregory CLEMENT <gregory.clement@free-electrons.com>, Shawn Guo <shawnguo@kernel.org>, Marcin Wojtas <mw@semihalf.com>, Seshagiri Holi <sholi@nvidia.com>, Jon Hunter <jonathanh@nvidia.com>, Johan Rudholm <johan.rudholm@stericsson.com>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Sascha Hauer <kernel@pengutronix.de>, Jan Luebbe <jlu@pengutronix.de>, "# 4.0+" <stable@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 7 March 2018 at 06:01, Harish Jenny K N <harish_kandiga@mentor.com> wrote:
-> This patch exports RCA register to sysfs which will help in
-> reading the disk identification information.
+On 8 March 2018 at 15:08, Bastian Stender <bst@pengutronix.de> wrote:
+> PARTITION_CONFIG is cached in mmc_card->ext_csd.part_config and the
+> currently active partition in mmc_blk_data->part_curr. These caches do
+> not always reflect changes if the ioctl call modifies the
+> PARTITION_CONFIG registers, e.g. by changing BOOT_PARTITION_ENABLE.
 >
-> Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
-> Signed-off-by: Harish Jenny K N <harish_kandiga@mentor.com>
+> Write the PARTITION_CONFIG value extracted from the ioctl call to the
+> cache and update the currently active partition accordingly. This
+> ensures that the user space cannot change the values behind the
+> kernel's back. The next call to mmc_blk_part_switch() will operate on
+> the data set by the ioctl and reflect the changes appropriately.
+>
+> Signed-off-by: Bastian Stender <bst@pengutronix.de>
+> Signed-off-by: Jan Luebbe <jlu@pengutronix.de>
+> Cc: stable@vger.kernel.org
 
-Thanks, applied for next!
+Thanks, applied for fixes!
 
 Kind regards
 Uffe
 
 > ---
+>  drivers/mmc/core/block.c | 19 +++++++++++++++++++
+>  1 file changed, 19 insertions(+)
 >
-> Changes in v2:
-> - Used 0x%04x to display 16 bit register
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index 20135a5de748..2cfb963d9f37 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -72,6 +72,7 @@ MODULE_ALIAS("mmc:block");
+>  #define MMC_BLK_TIMEOUT_MS  (10 * 1000)
+>  #define MMC_SANITIZE_REQ_TIMEOUT 240000
+>  #define MMC_EXTRACT_INDEX_FROM_ARG(x) ((x & 0x00FF0000) >> 16)
+> +#define MMC_EXTRACT_VALUE_FROM_ARG(x) ((x & 0x0000FF00) >> 8)
 >
->  drivers/mmc/core/mmc.c | 2 ++
->  drivers/mmc/core/sd.c  | 2 ++
->  2 files changed, 4 insertions(+)
+>  #define mmc_req_rel_wr(req)    ((req->cmd_flags & REQ_FUA) && \
+>                                   (rq_data_dir(req) == WRITE))
+> @@ -586,6 +587,24 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+>                 return data.error;
+>         }
 >
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 208a762..6f8ebd6 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -792,6 +792,7 @@ static int mmc_compare_ext_csds(struct mmc_card *card, unsigned bus_width)
->  MMC_DEV_ATTR(raw_rpmb_size_mult, "%#x\n", card->ext_csd.raw_rpmb_size_mult);
->  MMC_DEV_ATTR(rel_sectors, "%#x\n", card->ext_csd.rel_sectors);
->  MMC_DEV_ATTR(ocr, "0x%08x\n", card->ocr);
-> +MMC_DEV_ATTR(rca, "0x%04x\n", card->rca);
->  MMC_DEV_ATTR(cmdq_en, "%d\n", card->ext_csd.cmdq_en);
->
->  static ssize_t mmc_fwrev_show(struct device *dev,
-> @@ -848,6 +849,7 @@ static ssize_t mmc_dsr_show(struct device *dev,
->         &dev_attr_raw_rpmb_size_mult.attr,
->         &dev_attr_rel_sectors.attr,
->         &dev_attr_ocr.attr,
-> +       &dev_attr_rca.attr,
->         &dev_attr_dsr.attr,
->         &dev_attr_cmdq_en.attr,
->         NULL,
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index 62b84dd..2ecd098 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -676,6 +676,7 @@ static int mmc_sd_init_uhs_card(struct mmc_card *card)
->  MMC_DEV_ATTR(oemid, "0x%04x\n", card->cid.oemid);
->  MMC_DEV_ATTR(serial, "0x%08x\n", card->cid.serial);
->  MMC_DEV_ATTR(ocr, "0x%08x\n", card->ocr);
-> +MMC_DEV_ATTR(rca, "0x%04x\n", card->rca);
->
->
->  static ssize_t mmc_dsr_show(struct device *dev,
-> @@ -709,6 +710,7 @@ static ssize_t mmc_dsr_show(struct device *dev,
->         &dev_attr_oemid.attr,
->         &dev_attr_serial.attr,
->         &dev_attr_ocr.attr,
-> +       &dev_attr_rca.attr,
->         &dev_attr_dsr.attr,
->         NULL,
->  };
+> +       /*
+> +        * Make sure the cache of the PARTITION_CONFIG register and
+> +        * PARTITION_ACCESS bits is updated in case the ioctl ext_csd write
+> +        * changed it successfully.
+> +        */
+> +       if ((MMC_EXTRACT_INDEX_FROM_ARG(cmd.arg) == EXT_CSD_PART_CONFIG) &&
+> +           (cmd.opcode == MMC_SWITCH)) {
+> +               struct mmc_blk_data *main_md = dev_get_drvdata(&card->dev);
+> +               u8 value = MMC_EXTRACT_VALUE_FROM_ARG(cmd.arg);
+> +
+> +               /*
+> +                * Update cache so the next mmc_blk_part_switch call operates
+> +                * on up-to-date data.
+> +                */
+> +               card->ext_csd.part_config = value;
+> +               main_md->part_curr = value & EXT_CSD_PART_CONFIG_ACC_MASK;
+> +       }
+> +
+>         /*
+>          * According to the SD specs, some commands require a delay after
+>          * issuing the command.
 > --
-> 1.9.1
+> 2.16.1
 >
