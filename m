@@ -1,151 +1,99 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 8/8] mmc: sunxi: Add runtime_pm support
-Date: Thu, 15 Mar 2018 10:30:54 +0100
-Message-ID: <CAPDyKFoJ0KftG1VxzdM97ubFJ25M+X0EjgOPc6HxewgyZMPipg@mail.gmail.com>
-References: <cover.e1acb3dc84e043c8342166e7fb45f79be36ab154.1520520655.git-series.maxime.ripard@bootlin.com>
- <052c21c000f64c28fd6b64c4db11e4b706bebf79.1520520655.git-series.maxime.ripard@bootlin.com>
+Subject: Re: [PATCH] mmc: dw_mmc: fix falling from idmac to PIO mode when
+ dw_mci_reset occurs
+Date: Thu, 15 Mar 2018 10:57:32 +0100
+Message-ID: <CAPDyKFrgBm8-G1CsnqS9G62xFA2qA0XkuGBfA5v6grZnjRLteA@mail.gmail.com>
+References: <20180314193051.16791-1-Evgeniy.Didin@synopsys.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <052c21c000f64c28fd6b64c4db11e4b706bebf79.1520520655.git-series.maxime.ripard@bootlin.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Maxime Ripard <maxime.ripard@bootlin.com>
-Cc: Thomas Petazzoni <thomas.petazzoni@bootlin.com>, Chen-Yu Tsai <wens@csie.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Quentin Schulz <quentin.schulz@bootlin.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+Return-path: <linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20180314193051.16791-1-Evgeniy.Didin@synopsys.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-snps-arc>,
+ <mailto:linux-snps-arc-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-snps-arc/>
+List-Post: <mailto:linux-snps-arc@lists.infradead.org>
+List-Help: <mailto:linux-snps-arc-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-snps-arc>,
+ <mailto:linux-snps-arc-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-snps-arc" <linux-snps-arc-bounces@lists.infradead.org>
+Errors-To: linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org
+To: Evgeniy Didin <Evgeniy.Didin@synopsys.com>
+Cc: Shawn Lin <shawn.lin@rock-chips.com>, Alexey Brodkin <Alexey.Brodkin@synopsys.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jisheng Zhang <Jisheng.Zhang@synaptics.com>, Jaehoon Chung <jh80.chung@samsung.com>, Andy Shevchenko <andy.shevchenko@gmail.com>, linux-snps-arc@lists.infradead.org, Eugeniy Paltsev <Eugeniy.Paltsev@synopsys.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 8 March 2018 at 15:52, Maxime Ripard <maxime.ripard@bootlin.com> wrote:
-> So far, even if our card was not in use, we didn't shut down our main
-> clock, which meant that it was still output on the MMC bus.
+On 14 March 2018 at 20:30, Evgeniy Didin <Evgeniy.Didin@synopsys.com> wrote:
+> It was found that in IDMAC mode after soft-reset driver switches
+> to PIO mode.
 >
-> While this obviously means that we could save some power there, it also
-> created issues when it comes with EMC control since we'll have a perfect
-> peak at the card clock rate.
+> That's what happens in case of DTO timeout overflow calculation failure:
+> 1. soft-reset is called
+> 2. driver restarts dma
+> 3. descriptors states are checked, one of descriptor is owned by the IDMAC.
+> 4. driver can't use DMA and then switches to PIO mode.
 >
-> Let's implement runtime_pm with autosuspend so that we will shut down the
-> clock when it's not been in use for quite some time.
->
-> Signed-off-by: Maxime Ripard <maxime.ripard@bootlin.com>
-> ---
->  drivers/mmc/host/sunxi-mmc.c | 46 +++++++++++++++++++++++++++++++++++++-
->  1 file changed, 46 insertions(+)
->
-> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index f6374066081b..0f98a5fcaade 100644
-> --- a/drivers/mmc/host/sunxi-mmc.c
-> +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -35,6 +35,7 @@
->  #include <linux/of_gpio.h>
->  #include <linux/of_platform.h>
->  #include <linux/platform_device.h>
-> +#include <linux/pm_runtime.h>
->  #include <linux/regulator/consumer.h>
->  #include <linux/reset.h>
->  #include <linux/scatterlist.h>
-> @@ -973,6 +974,9 @@ static void sunxi_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
->         unsigned long flags;
->         u32 imask;
->
-> +       if (enable)
-> +               pm_runtime_get_noresume(host->dev);
-> +
->         spin_lock_irqsave(&host->lock, flags);
->
->         imask = mmc_readl(host, REG_IMASK);
-> @@ -985,6 +989,9 @@ static void sunxi_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
->         }
->         mmc_writel(host, REG_IMASK, imask);
->         spin_unlock_irqrestore(&host->lock, flags);
-> +
-> +       if (!enable)
-> +               pm_runtime_put_noidle(host->mmc->parent);
->  }
->
->  static void sunxi_mmc_hw_reset(struct mmc_host *mmc)
-> @@ -1398,6 +1405,11 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
->         if (ret)
->                 goto error_free_dma;
->
-> +       pm_runtime_set_active(&pdev->dev);
-> +       pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
-> +       pm_runtime_use_autosuspend(&pdev->dev);
-> +       pm_runtime_enable(&pdev->dev);
-> +
->         ret = mmc_add_host(mmc);
->         if (ret)
->                 goto error_free_dma;
-> @@ -1418,6 +1430,7 @@ static int sunxi_mmc_remove(struct platform_device *pdev)
->         struct sunxi_mmc_host *host = mmc_priv(mmc);
->
->         mmc_remove_host(mmc);
-> +       pm_runtime_force_suspend(&pdev->dev);
->         disable_irq(host->irq);
->         sunxi_mmc_disable(host);
->         dma_free_coherent(&pdev->dev, PAGE_SIZE, host->sg_cpu, host->sg_dma);
-> @@ -1426,10 +1439,43 @@ static int sunxi_mmc_remove(struct platform_device *pdev)
->         return 0;
->  }
->
-> +static int sunxi_mmc_runtime_resume(struct device *dev)
-> +{
-> +       struct mmc_host *mmc = dev_get_drvdata(dev);
-> +       struct sunxi_mmc_host *host = mmc_priv(mmc);
-> +       int ret;
-> +
-> +       ret = sunxi_mmc_enable(host);
-> +       if (ret)
-> +               return ret;
-> +
-> +       sunxi_mmc_power_up(mmc, &mmc->ios);
+> Failure was already fixed in:
+> https://www.spinics.net/lists/linux-mmc/msg48125.html.
 
-Instead of doing power up, you may need restore some ios settings,
-such as the clock rate for example.
+Evgeniy,
 
-You may also need to restore some registers in sunxi device, in case
-it's possible that the controller loses context at runtime suspend.
-
-> +
-> +       return 0;
-> +}
-> +
-> +static int sunxi_mmc_runtime_suspend(struct device *dev)
-> +{
-> +       struct mmc_host *mmc = dev_get_drvdata(dev);
-> +       struct sunxi_mmc_host *host = mmc_priv(mmc);
-> +
-> +       sunxi_mmc_power_off(mmc, &mmc->ios);
-> +       sunxi_mmc_disable(host);
-> +
-> +       return 0;
-> +}
-> +
-> +static const struct dev_pm_ops sunxi_mmc_pm_ops = {
-> +       SET_RUNTIME_PM_OPS(sunxi_mmc_runtime_suspend,
-> +                          sunxi_mmc_runtime_resume,
-> +                          NULL)
-> +};
-> +
->  static struct platform_driver sunxi_mmc_driver = {
->         .driver = {
->                 .name   = "sunxi-mmc",
->                 .of_match_table = of_match_ptr(sunxi_mmc_of_match),
-> +               .pm = &sunxi_mmc_pm_ops,
->         },
->         .probe          = sunxi_mmc_probe,
->         .remove         = sunxi_mmc_remove,
-> --
-> git-series 0.9.1
-
-
-Otherwise, overall, this looks rather okay to me.
+It seems like I should squash this fix into the above commit? Makes sense?
 
 Kind regards
 Uffe
+
+>
+> Behaviour while soft-reset is not something we except or
+> even want to happen. So we switch from dw_mci_idmac_reset
+> to dw_mci_idmac_init, so descriptors are cleaned before starting dma.
+>
+> And while at it explicitly zero des0 which otherwise might
+> contain garbage as being allocated by dmam_alloc_coherent().
+>
+> Signed-off-by: Evgeniy Didin <Evgeniy.Didin@synopsys.com>
+> Cc: Jaehoon Chung <jh80.chung@samsung.com>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: Andy Shevchenko <andy.shevchenko@gmail.com>
+> Cc: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+> Cc: Shawn Lin <shawn.lin@rock-chips.com>
+> Cc: Alexey Brodkin <abrodkin@synopsys.com>
+> Cc: Eugeniy Paltsev <Eugeniy.Paltsev@synopsys.com>
+> Cc: linux-snps-arc@lists.infradead.org
+> ---
+>  drivers/mmc/host/dw_mmc.c | 6 ++++--
+>  1 file changed, 4 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 0aa39975f33b..26f2ac107702 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -558,6 +558,7 @@ static int dw_mci_idmac_init(struct dw_mci *host)
+>                                         (sizeof(struct idmac_desc_64addr) *
+>                                                         (i + 1))) >> 32;
+>                         /* Initialize reserved and buffer size fields to "0" */
+> +                       p->des0 = 0;
+>                         p->des1 = 0;
+>                         p->des2 = 0;
+>                         p->des3 = 0;
+> @@ -580,6 +581,7 @@ static int dw_mci_idmac_init(struct dw_mci *host)
+>                      i++, p++) {
+>                         p->des3 = cpu_to_le32(host->sg_dma +
+>                                         (sizeof(struct idmac_desc) * (i + 1)));
+> +                       p->des0 = 0;
+>                         p->des1 = 0;
+>                 }
+>
+> @@ -1795,8 +1797,8 @@ static bool dw_mci_reset(struct dw_mci *host)
+>         }
+>
+>         if (host->use_dma == TRANS_MODE_IDMAC)
+> -               /* It is also recommended that we reset and reprogram idmac */
+> -               dw_mci_idmac_reset(host);
+> +               /* It is also required that we reinit idmac */
+> +               dw_mci_idmac_init(host);
+>
+>         ret = true;
+>
+> --
+> 2.11.0
+>
