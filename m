@@ -1,78 +1,67 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v3 00/11] mmc: sdhci-omap: Add UHS/HS200 mode support
-Date: Thu, 15 Mar 2018 10:52:26 +0200
-Message-ID: <1b7e25b2-4949-5427-1c36-0b253c79ff8d@intel.com>
-References: <20180307132020.30951-1-kishon@ti.com>
- <CAPDyKFrnPQs3B2QN7tf3UH0JYjqkpS1YDhq0s3scads3exPCCg@mail.gmail.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 00/47] arch-removal: device drivers
+Date: Thu, 15 Mar 2018 10:09:43 +0100
+Message-ID: <CAK8P3a151M35ywHyABt2KFypPaiZROYuL10ztChwjSwqS9haHg@mail.gmail.com>
+References: <20180314153603.3127932-1-arnd@arndb.de>
+ <20180315063238.3303b8d1@bbrezillon>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFrnPQs3B2QN7tf3UH0JYjqkpS1YDhq0s3scads3exPCCg@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Kishon Vijay Abraham I <kishon@ti.com>
-Cc: Tony Lindgren <tony@atomide.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, devicetree@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
+In-Reply-To: <20180315063238.3303b8d1@bbrezillon>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
+List-Post: <mailto:linux-mtd@lists.infradead.org>
+List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-mtd" <linux-mtd-bounces@lists.infradead.org>
+Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
+To: Boris Brezillon <boris.brezillon@bootlin.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-usb@vger.kernel.org, Wolfram Sang <wsa@the-dreams.de>, linux-iio@vger.kernel.org, Viresh Kumar <viresh.kumar@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, Alexandre Belloni <alexandre.belloni@bootlin.com>, IDE-ML <linux-ide@vger.kernel.org>, Networking <netdev@vger.kernel.org>, linux-mtd <linux-mtd@lists.infradead.org>, linux-i2c@vger.kernel.org, linux-rtc@vger.kernel.org, Lars-Peter Clausen <lars@metafoo.de>, Herbert Xu <herbert@gondor.apana.org.au>, Jonathan Corbet <corbet@lwn.net>, "open list:DOCUMENTATION" <linux-doc@vger.kernel.org>, Alan Stern <stern@rowland.harvard.edu>, linux-serial@vger.kernel.org, Jiri Slaby <jslaby@suse.com>, linux-mmc <linux-mmc@vger.kernel.org>, Shaohua Li <shli@kernel.org>, wg@grandegger.com, "open list:HARDWARE RANDOM NUMBER GENERATOR CORE" <linux-crypto@vger.kernel.org>, linux-pwm@vger
 List-Id: linux-mmc@vger.kernel.org
 
-On 15/03/18 10:47, Ulf Hansson wrote:
-> On 7 March 2018 at 14:20, Kishon Vijay Abraham I <kishon@ti.com> wrote:
->> Add UHS/HS200 mode support in sdhci-omap. The programming sequence
->> for voltage switching, tuning is followed from AM572x TRM
->> http://www.ti.com/lit/ug/spruhz6i/spruhz6i.pdf
->> (Similar to all AM57x/DRA7x SoCs). The patch series also implements
->> workaround for errata published in
->> http://www.ti.com/lit/er/sprz429k/sprz429k.pdf
+On Thu, Mar 15, 2018 at 6:32 AM, Boris Brezillon
+<boris.brezillon@bootlin.com> wrote:
+> Hi Arnd,
+>
+> On Wed, 14 Mar 2018 16:35:13 +0100
+> Arnd Bergmann <arnd@arndb.de> wrote:
+>
+>> Hi driver maintainers,
 >>
->> patches are created on top of
->> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git next
+>> I just posted one series with the removal of eight architectures,
+>> see https://lkml.org/lkml/2018/3/14/505 for details, or
+>> https://lwn.net/Articles/748074/ for more background.
 >>
->> Patches in v2 already applied to mmc -next are dropped from the
->> series.
+>> These are the device drivers that go along with them. I have already
+>> picked up the drivers for arch/metag/ into my tree, they were reviewed
+>> earlier.
 >>
->> Changes from v2:
->> *) Changed SW timeout logic as per Adrians's suggestion
->> *) Validated SDIO with the current patches (added a couple of fixes
->>    found while adding SDIO support).
->> *) Used soc_device_match() instead of pdata-quirks as per Tony's
->>    suggestions.
+>> Please let me know if you have any concerns with the patch, or if you
+>> prefer to pick up the patches in your respective trees.  I created
+>> the patches with 'git format-patch -D', so they will not apply without
+>> manually removing those files.
 >>
->> Changes from v1:
->> *) Only poll on DAT0 and DATI for card_busy status
->> *) Cleanup iodelay patch as suggested by Tony.
->> *) Added quirk to disable HW timeout
->> *) Use the existing data timer but program a relatively accurate
->>    SW timeout value (Impacts all platforms)
->> *) Fix a bug in sdhci which was using data_timer for non data line
->>    commands
+>> For anything else, I'd keep the removal patches in my asm-generic tree
+>> and will send a pull request for 4.17 along with the actual arch removal.
 >>
->> Kishon Vijay Abraham I (11):
->>   mmc: sdhci-omap: Fix when capabilities are obtained from
->>     SDHCI_CAPABILITIES reg
->>   mmc: sdhci-omap: Remove setting ADMA capability in driver
->>   mmc: sdhci-omap: Workaround for Errata i843
->>   mmc: sdhci-omap: Invoke sdhci_get_of_property to read sdhci dt
->>     properties
->>   mmc: sdhci: Disable HS200 mode if controller can't support 1.8v
->>   mmc: sdhci: Add quirk to disable HW timeout
->>   mmc: sdhci: Program a relatively accurate SW timeout value
->>   mmc: sdhci-omap: Workaround for Errata i834
->>   dt-bindings: sdhci-omap: Add K2G specific binding
->>   mmc: sdhci-omap: Add support for MMC/SD controller in k2g SoC
->>   mmc: sdhci-omap: Add sdhci_omap specific ops for enable_sdio_irq
->>
->>  .../devicetree/bindings/mmc/sdhci-omap.txt         |  2 +
->>  drivers/mmc/host/sdhci-omap.c                      | 78 +++++++++++++++++++---
->>  drivers/mmc/host/sdhci.c                           | 75 +++++++++++++++++----
->>  drivers/mmc/host/sdhci.h                           | 15 +++++
->>  4 files changed, 148 insertions(+), 22 deletions(-)
->>
->> --
->> 2.11.0
->>
-> 
-> Overall this looks good to me, however it seems like we need to give
-> Adrian a little more time to comment.
-> 
 
-I will try to look at it today.
+>
+> If you don't mind, I'd like to take the mtd patches through the MTD
+> tree. As you've probably noticed, nand code has been moved around and
+> it's easier for me to carry those 2 simple changes in my tree than
+> creating an immutable branch.
+>
+> Let me know if this is a problem.
+
+Sounds good, I've removed the two patches from my tree now.
+I've already sent a version of those that is based on your latest tree to
+you for inclusion.
+
+      Arnd
+
+______________________________________________________
+Linux MTD discussion mailing list
+http://lists.infradead.org/mailman/listinfo/linux-mtd/
