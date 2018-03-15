@@ -1,15 +1,15 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v3 01/11] mmc: sdhci-omap: Fix when capabilities are
- obtained from SDHCI_CAPABILITIES reg
-Date: Thu, 15 Mar 2018 16:17:25 +0200
-Message-ID: <e9ac3f68-2d75-6648-7774-786c20f6746c@intel.com>
+Subject: Re: [PATCH v3 02/11] mmc: sdhci-omap: Remove setting ADMA capability
+ in driver
+Date: Thu, 15 Mar 2018 16:18:49 +0200
+Message-ID: <a867eebf-2c32-4a0f-713a-766d81d52c4c@intel.com>
 References: <20180307132020.30951-1-kishon@ti.com>
- <20180307132020.30951-2-kishon@ti.com>
+ <20180307132020.30951-3-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180307132020.30951-2-kishon@ti.com>
+In-Reply-To: <20180307132020.30951-3-kishon@ti.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
 To: Kishon Vijay Abraham I <kishon@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>
@@ -17,51 +17,31 @@ Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russe
 List-Id: linux-mmc@vger.kernel.org
 
 On 07/03/18 15:20, Kishon Vijay Abraham I wrote:
-> sdhci_omap_config_iodelay_pinctrl_state() requires caps and caps2 to be
-> initialized (speed mode capabilities like UHS/HS200) before it is
-> invoked. While mmc_of_parse() initializes caps/caps2 if capabilities is
-> populated in device tree, it will remain uninitialized for capabilities
-> obtained from SDHCI_CAPABILITIES register.
-> Fix sdhci_omap_config_iodelay_pinctrl_state() to be used even while
-> getting the capabilities from SDHCI_CAPABILITIES register by invoking
-> sdhci_setup_host() before sdhci_omap_config_iodelay_pinctrl_state().
+> sdhci can directly get ADMA capability from MMCHS_CAPA register.
+> Remove explicitly setting ADMA here as some instances might not have
+> ADMA enabled. (sdhci_read_caps() is also removed from here since
+> sdhci_setup_host() invokes it).
 > 
 > Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
 > ---
->  drivers/mmc/host/sdhci-omap.c | 14 +++++++++-----
->  1 file changed, 9 insertions(+), 5 deletions(-)
+>  drivers/mmc/host/sdhci-omap.c | 3 ---
+>  1 file changed, 3 deletions(-)
 > 
 > diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-> index 1456abd5eeb9..3cce30584d2f 100644
+> index 3cce30584d2f..0c40b13fb67d 100644
 > --- a/drivers/mmc/host/sdhci-omap.c
 > +++ b/drivers/mmc/host/sdhci-omap.c
-> @@ -916,10 +916,6 @@ static int sdhci_omap_probe(struct platform_device *pdev)
->  		goto err_put_sync;
->  	}
+> @@ -923,9 +923,6 @@ static int sdhci_omap_probe(struct platform_device *pdev)
+>  	host->mmc_host_ops.card_busy = sdhci_omap_card_busy;
+>  	host->mmc_host_ops.execute_tuning = sdhci_omap_execute_tuning;
 >  
-> -	ret = sdhci_omap_config_iodelay_pinctrl_state(omap_host);
-> -	if (ret)
-> -		goto err_put_sync;
+> -	sdhci_read_caps(host);
+> -	host->caps |= SDHCI_CAN_DO_ADMA2;
 > -
->  	host->mmc_host_ops.get_ro = mmc_gpio_get_ro;
->  	host->mmc_host_ops.start_signal_voltage_switch =
->  					sdhci_omap_start_signal_voltage_switch;
-> @@ -930,7 +926,15 @@ static int sdhci_omap_probe(struct platform_device *pdev)
->  	sdhci_read_caps(host);
->  	host->caps |= SDHCI_CAN_DO_ADMA2;
->  
-> -	ret = sdhci_add_host(host);
-> +	ret = sdhci_setup_host(host);
-> +	if (ret)
-> +		goto err_put_sync;
-> +
-> +	ret = sdhci_omap_config_iodelay_pinctrl_state(omap_host);
-> +	if (ret)
-> +		goto err_put_sync;
-> +
-> +	ret = __sdhci_add_host(host);
+>  	ret = sdhci_setup_host(host);
 >  	if (ret)
 >  		goto err_put_sync;
-
-if __sdhci_add_host() fails, then sdhci_cleanup_host() needs to be called to
-free resources allocated by sdhci_setup_host().
+> 
