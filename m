@@ -1,55 +1,200 @@
-From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Subject: Re: [PATCH v10] mmc: Export host capabilities to debugfs.
-Date: Thu, 15 Mar 2018 15:02:08 +0200
-Message-ID: <1521118928.10722.658.camel@linux.intel.com>
-References: <1520917812-20047-1-git-send-email-harish_kandiga@mentor.com>
-         <CAPDyKFo8jFwDO1E=tNSd4yTn3qtefzvHK0V70fcEqzB=SibrJA@mail.gmail.com>
-         <1521109575.10722.654.camel@linux.intel.com>
-         <CAPDyKFrZaDx2NdvaFdgOxWBuwtjMnJE41p=x5b2x2moFEO3kXQ@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v3 07/11] mmc: sdhci: Program a relatively accurate SW
+ timeout value
+Date: Thu, 15 Mar 2018 15:13:27 +0200
+Message-ID: <1e87e5f9-13e1-765b-f077-26a55359b2c3@intel.com>
+References: <20180307132020.30951-1-kishon@ti.com>
+ <20180307132020.30951-8-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFrZaDx2NdvaFdgOxWBuwtjMnJE41p=x5b2x2moFEO3kXQ@mail.gmail.com>
+In-Reply-To: <20180307132020.30951-8-kishon@ti.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Harish Jenny K N <harish_kandiga@mentor.com>, Linus Walleij <linus.walleij@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, avri.altman@wdc.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Vladimir Zapolskiy <Vladimir_Zapolskiy@mentor.com>
+To: Kishon Vijay Abraham I <kishon@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 2018-03-15 at 13:29 +0100, Ulf Hansson wrote:
-> On 15 March 2018 at 11:26, Andy Shevchenko
-> <andriy.shevchenko@linux.intel.com> wrote:
-> > On Thu, 2018-03-15 at 11:12 +0100, Ulf Hansson wrote:
-> > > On 13 March 2018 at 06:10, Harish Jenny K N <harish_kandiga@mentor
-> > > .com
-> > > > wrote:
-> > > > 
-> > > Honestly, I don't like this, but maybe other people do, then I am
-> > > fine
-> > > with this approach.
-> > > 
-> > > If were to decide, I would just rather print the caps field in a
-> > > hexadecimal bit form and leave the translation to the user.
-> > 
-> > A compromise would be to print both:
-> > 
-> > 0xHHHHHHHH\n
-> > Description of each enabled field, one per line
-> > 
-> > 
-> > Another format would be:
-> > 
-> > Bit XX: Description of a field
+On 07/03/18 15:20, Kishon Vijay Abraham I wrote:
+> sdhci has a 10 second timeout to catch devices that stop responding.
+> Instead of programming 10 second arbitrary value, calculate the total time
+> it would take for the entire transfer to happen and program the timeout
+> value accordingly.
 > 
-> If we were to print the description, there is no point in printing the
-> bits in hex. Or is it?
+> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+> ---
+>  drivers/mmc/host/sdhci.c | 47 ++++++++++++++++++++++++++++++++++++++++-------
+>  drivers/mmc/host/sdhci.h | 10 ++++++++++
+>  2 files changed, 50 insertions(+), 7 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 1dd117cbeb6e..baab67bfa39b 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -709,6 +709,36 @@ static u32 sdhci_sdma_address(struct sdhci_host *host)
+>  		return sg_dma_address(host->data->sg);
+>  }
+>  
+> +static void sdhci_calc_sw_timeout(struct sdhci_host *host,
+> +				  struct mmc_command *cmd,
+> +				  unsigned int target_timeout)
+> +{
+> +	struct mmc_data *data = cmd->data;
+> +	struct mmc_host *mmc = host->mmc;
+> +	u64 transfer_time;
+> +	struct mmc_ios *ios = &mmc->ios;
+> +	unsigned char bus_width = 1 << ios->bus_width;
+> +	unsigned int blksz;
+> +	unsigned int freq;
+> +
+> +	if (data) {
+> +		blksz = data->blksz;
+> +		freq = host->mmc->actual_clock ? : host->clock;
+> +		transfer_time = (u64)blksz * NSEC_PER_SEC * (8 / bus_width);
+> +		do_div(transfer_time, freq);
+> +		/* multiply by '2' to account for any unknowns */
+> +		transfer_time = transfer_time * 2;
+> +		/* calculate timeout for the entire data */
+> +		host->data_timeout = (data->blocks * ((target_timeout *
+> +						       NSEC_PER_USEC) +
+> +						       transfer_time));
 
-It is helpful for scripting (since it's debugfs, under scripting I mean
-something rather for test suites than for actual use).
+(target_timeout * NSEC_PER_USEC) might be 32-bit and therefore overflow
+for timeouts greater than about 4 seconds.
 
-> As I said, if you and other folkz thinks this is valuable, then I am
-> fine as well. Just saying, it's not my preferred option.
+> +	} else {
+> +		host->data_timeout = (u64)target_timeout * NSEC_PER_USEC;
+> +	}
+> +
+> +	host->data_timeout += MMC_CMD_TRANSFER_TIME;
 
--- 
-Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Intel Finland Oy
+Need to allow for target_timeout == 0 so:
+
+	if (host->data_timeout)
+		host->data_timeout += MMC_CMD_TRANSFER_TIME;
+
+> +}
+> +
+>  static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+>  {
+>  	u8 count;
+> @@ -766,6 +796,7 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+>  		if (count >= 0xF)
+>  			break;
+>  	}
+> +	sdhci_calc_sw_timeout(host, cmd, target_timeout);
+
+If you make the changes I suggest for patch 6, then this would
+move sdhci_calc_sw_timeout() into sdhci_set_timeout().
+
+I suggest you factor out the target_timeout calculation e.g.
+
+static unsigned int sdhci_target_timeout(struct sdhci_host *host,
+					 struct mmc_command *cmd,
+					 struct mmc_data *data)
+{
+	unsigned int target_timeout;
+
+	/* timeout in us */
+	if (!data)
+		target_timeout = cmd->busy_timeout * 1000;
+	else {
+		target_timeout = DIV_ROUND_UP(data->timeout_ns, 1000);
+		if (host->clock && data->timeout_clks) {
+			unsigned long long val;
+
+			/*
+			 * data->timeout_clks is in units of clock cycles.
+			 * host->clock is in Hz.  target_timeout is in us.
+			 * Hence, us = 1000000 * cycles / Hz.  Round up.
+			 */
+			val = 1000000ULL * data->timeout_clks;
+			if (do_div(val, host->clock))
+				target_timeout++;
+			target_timeout += val;
+		}
+	}
+
+	return target_timeout;
+}
+
+And call it from sdhci_calc_sw_timeout()
+
+>  
+>  	return count;
+>  }
+> @@ -1175,13 +1206,6 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+>  		mdelay(1);
+>  	}
+>  
+> -	timeout = jiffies;
+> -	if (!cmd->data && cmd->busy_timeout > 9000)
+> -		timeout += DIV_ROUND_UP(cmd->busy_timeout, 1000) * HZ + HZ;
+> -	else
+> -		timeout += 10 * HZ;
+> -	sdhci_mod_timer(host, cmd->mrq, timeout);
+> -
+>  	host->cmd = cmd;
+>  	if (sdhci_data_line_cmd(cmd)) {
+>  		WARN_ON(host->data_cmd);
+> @@ -1221,6 +1245,15 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+>  	    cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200)
+>  		flags |= SDHCI_CMD_DATA;
+>  
+> +	timeout = jiffies;
+> +	if (host->data_timeout > 0) {
+
+This can be just:
+
+	if (host->data_timeout) {
+
+> +		timeout += nsecs_to_jiffies(host->data_timeout);
+> +		host->data_timeout = 0;
+
+It would be better to initialize host->data_timeout = 0 at the top of
+sdhci_prepare_data().
+
+Also still need:
+
+	else if (!cmd->data && cmd->busy_timeout > 9000) {
+		timeout += DIV_ROUND_UP(cmd->busy_timeout, 1000) * HZ + HZ;
+
+
+> +	} else {
+> +		timeout += 10 * HZ;
+> +	}
+> +	sdhci_mod_timer(host, cmd->mrq, timeout);
+> +
+>  	sdhci_writew(host, SDHCI_MAKE_CMD(cmd->opcode, flags), SDHCI_COMMAND);
+>  }
+>  EXPORT_SYMBOL_GPL(sdhci_send_command);
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index ff283ee08854..29b242fd17de 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -332,6 +332,14 @@ struct sdhci_adma2_64_desc {
+>  /* Allow for a a command request and a data request at the same time */
+>  #define SDHCI_MAX_MRQS		2
+>  
+> +/*
+> + * 48bit command and 136 bit response in 100KHz clock could take upto 2.48ms.
+> + * However since the start time of the command, the time between
+> + * command and response, and the time between response and start of data is
+> + * not known, set the command transfer time to 10ms.
+> + */
+> +#define MMC_CMD_TRANSFER_TIME	(10 * NSEC_PER_MSEC) /* max 10 ms */
+> +
+>  enum sdhci_cookie {
+>  	COOKIE_UNMAPPED,
+>  	COOKIE_PRE_MAPPED,	/* mapped by sdhci_pre_req() */
+> @@ -555,6 +563,8 @@ struct sdhci_host {
+>  	/* Host SDMA buffer boundary. */
+>  	u32			sdma_boundary;
+>  
+> +	u64			data_timeout;
+> +
+>  	unsigned long private[0] ____cacheline_aligned;
+>  };
+>  
+> 
