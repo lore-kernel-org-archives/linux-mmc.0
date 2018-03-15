@@ -1,93 +1,63 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 2/8] mmc: sunxi: Move the power off action in a
- separate function
-Date: Thu, 15 Mar 2018 10:23:15 +0100
-Message-ID: <CAPDyKFpdX5Xg_S0daFeFWE-4CQFRa=MC-qdmzqNyCaipyxAj3Q@mail.gmail.com>
-References: <cover.e1acb3dc84e043c8342166e7fb45f79be36ab154.1520520655.git-series.maxime.ripard@bootlin.com>
- <bd3c692c488e0e3ee8f4cc169980a74384717ec2.1520520655.git-series.maxime.ripard@bootlin.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: mmc: block: bonnie++ runs with errors on arc/hsdk board
+Date: Thu, 15 Mar 2018 11:27:49 +0200
+Message-ID: <83de0f90-0919-f449-b432-494b9bf524a1@intel.com>
+References: <1520942674.10285.8.camel@synopsys.com>
+ <486fe92e-9b53-53a4-f98d-129a97032470@intel.com>
+ <1520956602.10285.10.camel@synopsys.com>
+ <1521030769.10285.16.camel@synopsys.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <bd3c692c488e0e3ee8f4cc169980a74384717ec2.1520520655.git-series.maxime.ripard@bootlin.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Maxime Ripard <maxime.ripard@bootlin.com>
-Cc: Thomas Petazzoni <thomas.petazzoni@bootlin.com>, Chen-Yu Tsai <wens@csie.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Quentin Schulz <quentin.schulz@bootlin.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1521030769.10285.16.camel@synopsys.com>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-snps-arc>,
+ <mailto:linux-snps-arc-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-snps-arc/>
+List-Post: <mailto:linux-snps-arc@lists.infradead.org>
+List-Help: <mailto:linux-snps-arc-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-snps-arc>,
+ <mailto:linux-snps-arc-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-snps-arc" <linux-snps-arc-bounces@lists.infradead.org>
+Errors-To: linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org
+To: Evgeniy Didin <Evgeniy.Didin@synopsys.com>
+Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-ext4@vger.kernel.org" <linux-ext4@vger.kernel.org>, "tytso@mit.edu" <tytso@mit.edu>, "linus.walleij@linaro.org" <linus.walleij@linaro.org>, "Alexey.Brodkin@synopsys.com" <Alexey.Brodkin@synopsys.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "jh80.chung@samsung.com" <jh80.chung@samsung.com>, "adilger.kernel@dilger.ca" <adilger.kernel@dilger.ca>, "linux-snps-arc@lists.infradead.org" <linux-snps-arc@lists.infradead.org>, "Eugeniy.Paltsev@synopsys.com" <Eugeniy.Paltsev@synopsys.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 8 March 2018 at 15:52, Maxime Ripard <maxime.ripard@bootlin.com> wrote:
-> We'll need to have the power off behaviour in order to implement
-> runtime_pm. Move it outside of the .set_ios callback for an easier access.
-
-This isn't correct. To implement runtime PM for the sunxi device,
-which I think is what your goal is, you should not disable/enable
-regulators to the (e)MMC/SD/SDIO card.
-
-If you also want runtime PM deployment for the card, that is managed
-by the mmc core already. All you have to do is to set
-MMC_CAP_AGGRESSIVE_PM for your mmc host, if you want that.
-
->
-> And it improves readibility as a bonus.
->
-> Signed-off-by: Maxime Ripard <maxime.ripard@bootlin.com>
-> ---
->  drivers/mmc/host/sunxi-mmc.c | 25 +++++++++++++++++--------
->  1 file changed, 17 insertions(+), 8 deletions(-)
->
-> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index f9723797a9f8..a53e39d8b07e 100644
-> --- a/drivers/mmc/host/sunxi-mmc.c
-> +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -855,6 +855,22 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
->         return 0;
->  }
->
-> +static void sunxi_mmc_power_off(struct mmc_host *mmc, struct mmc_ios *ios)
-> +{
-> +       struct sunxi_mmc_host *host = mmc_priv(mmc);
-> +
-> +       dev_dbg(mmc_dev(mmc), "Powering off\n");
-> +
-> +       sunxi_mmc_reset_host(host);
-> +       if (!IS_ERR(mmc->supply.vmmc))
-> +               mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
-> +
-> +       if (!IS_ERR(mmc->supply.vqmmc) && host->vqmmc_enabled)
-> +               regulator_disable(mmc->supply.vqmmc);
-> +
-> +       host->vqmmc_enabled = false;
-> +}
-> +
->  static void sunxi_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->  {
->         struct sunxi_mmc_host *host = mmc_priv(mmc);
-> @@ -892,14 +908,7 @@ static void sunxi_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->                 break;
->
->         case MMC_POWER_OFF:
-> -               dev_dbg(mmc_dev(mmc), "power off!\n");
-> -               sunxi_mmc_reset_host(host);
-> -               if (!IS_ERR(mmc->supply.vmmc))
-> -                       mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
-> -
-> -               if (!IS_ERR(mmc->supply.vqmmc) && host->vqmmc_enabled)
-> -                       regulator_disable(mmc->supply.vqmmc);
-> -               host->vqmmc_enabled = false;
-> +               sunxi_mmc_power_off(mmc, ios);
->                 break;
->         }
->
-> --
-> git-series 0.9.1
-
-Kind regards
-Uffe
+T24gMTQvMDMvMTggMTQ6MzIsIEV2Z2VuaXkgRGlkaW4gd3JvdGU6Cj4gSGkgQWRyaWFuLAo+Pj4K
+Pj4+IFdhcyB0aGUgcGVyZm9ybWFuY2UgYWZmZWN0ZWQ/IGkuZS4gdGhlIHJlc3VsdHMgZnJvbSBi
+b25uaWUrKwo+Pgo+PiBJIGhhdmUgcnVuIGJvbm5pZSsrIHNldmVyYWwgdGltZXMgYmVmb3JlIGFu
+ZCBhZnRlciBtZW50aW9uZWQgY29tbWl0LiBIZXJlIGlzIG91dHB1dDoKPj4gLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS08OC0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0K
+Pj4gQmVmb3JlIGNvbW1pdDoKPj4gQVJDTGludXgsNTEyTSw2NDQyLDUwLDcyMTEsMCw1MzMzLDAs
+MTI5NTQsOTksMzQ1NjM4LDEwMCwrKysrKywrKyssMTYsMjIzMjIsMTAwLCsrKysrLCsrKywzMjcz
+NSw5OSwyMjkyMSwxMDAsKysrKyssKysrLDMyMjExLDEwMAo+PiBBUkNMaW51eCw1MTJNLDY2MTEs
+NTEsNzI0OCwwLDUxNjIsMCwxMjk1MSw5OSwzNDQ3NjMsOTksKysrKyssKysrLDE2LDIyNjQ5LDk5
+LCsrKysrLCsrKywzMjcyMyw5OSwyMjU3MiwxMDAsKysrKyssKysrLDMxNjk3LDEwMAo+PiBBUkNM
+aW51eCw1MTJNLDY1OTcsNTIsNzMwNywwLDUzNjgsMCwxMjkzNCw5OSwzNDM5ODcsOTksKysrKyss
+KysrLDE2LDIyNzc1LDEwMCwrKysrKywrKyssMzI3MTMsOTksMjI4MzIsMTAwLCsrKysrLCsrKywz
+MTg5OSw5OQo+PiBBZnRlciBjb21taXQ6Cj4+IEFSQ0xpbnV4LDUxMk0sNDQ1MywzNiw2NDc0LDEs
+NTg1MiwwLDEyOTQwLDk5LDM0NDMyOSwxMDAsKysrKyssKysrLDE2LDIyMTY4LDk4LCsrKysrLCsr
+KywzMjc2MCw5OSwyMjc1NSwxMDAsKysrKyssKysrLDMyMjA1LDEwMAo+PiBBUkNMaW51eCw1MTJN
+LDUxNTksNDIsNjk0NCwxLDU2NTgsMCwxMjk0NSw5OSwzNDQyOTAsMTAwLCsrKysrLCsrKywxNiwy
+MjI5NSwxMDAsKysrKyssKysrLDMyNzE1LDk5LDIyODg4LDk5LCsrKysrLCsrKywzMjAwNyw5OQo+
+PiBBUkNMaW51eCw1MTJNLDUxNzAsNDIsNjg0MCwyLDUzMTUsMCwxMjk0Niw5OSwzNDM4ODksMTAw
+LCsrKysrLCsrKywxNiwyMjQ0NSwxMDAsKysrKyssKysrLDMyNjgxLDk5LDIyOTY3LDEwMCwrKysr
+KywrKyssMzIxMTcsOTkKPj4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS08OC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQo+PiDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
+oMKgXl5eXsKgCj4+IElmIGkgdW5kZXJzdGFuZCBjb3JyZWN0bHksIGluIHRoaXJkIGNvbHVtbiBp
+cyBzaG93biAic2VxdWVudGlhbCBvdXRwdXQiIHBlciBjaGFyYWN0ZXIgc3BlZWQgKEsvc2VjKSwg
+d2hpY2ggZGVjcmVhc2VkLgo+Pgo+Pj4gV2hhdCBtb3VudCBvcHRpb25zIGRpZCB5b3UgdXNlPwo+
+Pgo+PiBJIGRpZG4ndCB1c2UgYW55IG9wdGlvbnMuIFNpbXBseToKPj4gIyBtb3VudCAvZGV2L21t
+Y2JsazBwMSAvbW50Cj4gCj4gTm90ZSB0aGF0IHRoZSBmaWxlIHN5c3RlbSBvbiBTRGNhcmQgd2Fz
+IGV4dDQuwqAKClBsZWFzZSB0cnk6CgoJcGVyZiByZWNvcmQgLWEgLWUgbW1jOiogLS0gYm9ubmll
+KysgLXUgcm9vdCAtciAyNTYgLXMgNTEyIC14IDEgLWQgL21udAoKYW5kIHNoYXJlIHRoZSByZXN1
+bHRpbmcgcGVyZi5kYXRhIGZpbGUgd2hlbiB5b3UgYXJlIGFibGUKdG8gcmVwcm9kdWNlIHRoZSBo
+dW5nIHRhc2sgbWVzc2FnZS4KCllvdSBtYXkgd2FudCB0byBhZGQgdGhpcyBwYXRjaCBmaXJzdDoK
+CglodHRwczovL21hcmMuaW5mby8/bD1saW51eC1tbWMmbT0xNTIxMTA1ODAzMjQyMDAKCl9fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmxpbnV4LXNucHMtYXJj
+IG1haWxpbmcgbGlzdApsaW51eC1zbnBzLWFyY0BsaXN0cy5pbmZyYWRlYWQub3JnCmh0dHA6Ly9s
+aXN0cy5pbmZyYWRlYWQub3JnL21haWxtYW4vbGlzdGluZm8vbGludXgtc25wcy1hcmM=
