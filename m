@@ -1,194 +1,200 @@
-From: Maxime Ripard <maxime.ripard@bootlin.com>
-Subject: Re: [PATCH v2 8/8] mmc: sunxi: Add runtime_pm support
-Date: Thu, 15 Mar 2018 11:04:11 +0100
-Message-ID: <20180315100411.iqcnwqws623ws6yn@flea>
-References: <cover.e1acb3dc84e043c8342166e7fb45f79be36ab154.1520520655.git-series.maxime.ripard@bootlin.com>
- <052c21c000f64c28fd6b64c4db11e4b706bebf79.1520520655.git-series.maxime.ripard@bootlin.com>
- <CAPDyKFoJ0KftG1VxzdM97ubFJ25M+X0EjgOPc6HxewgyZMPipg@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v10] mmc: Export host capabilities to debugfs.
+Date: Thu, 15 Mar 2018 11:12:54 +0100
+Message-ID: <CAPDyKFo8jFwDO1E=tNSd4yTn3qtefzvHK0V70fcEqzB=SibrJA@mail.gmail.com>
+References: <1520917812-20047-1-git-send-email-harish_kandiga@mentor.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1856178775963326762=="
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAPDyKFoJ0KftG1VxzdM97ubFJ25M+X0EjgOPc6HxewgyZMPipg@mail.gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Thomas Petazzoni <thomas.petazzoni@bootlin.com>, Chen-Yu Tsai <wens@csie.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Quentin Schulz <quentin.schulz@bootlin.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1520917812-20047-1-git-send-email-harish_kandiga@mentor.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Harish Jenny K N <harish_kandiga@mentor.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, avri.altman@wdc.com, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Vladimir Zapolskiy <Vladimir_Zapolskiy@mentor.com>
 List-Id: linux-mmc@vger.kernel.org
 
+On 13 March 2018 at 06:10, Harish Jenny K N <harish_kandiga@mentor.com> wrote:
+> This patch exports the host capabilities to debugfs
+>
+> This idea of sharing host capabilities over debugfs
+> came up from Abbas Raza <Abbas_Raza@mentor.com>
+> Earlier discussions:
+> https://lkml.org/lkml/2018/3/5/357
+> https://www.spinics.net/lists/linux-mmc/msg48219.html
+>
+> Reviewed-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+> Signed-off-by: Harish Jenny K N <harish_kandiga@mentor.com>
+> ---
+>
+> Changes in v10:
+> - minor review comment addressed.
+> - Added "Reviewed-by" line
+>
+> Changes in v9
+> - More code cleanup as suggested by Andy Shevchenko.
+>
+> Changes in v8
+> - Changes to use for_each_set_bit as suggested by Andy Shevchenko.
+>
+> Changes in v7
+> - Moved additional capabilities also to caps file as mentioned by Ulf Hansson
+> - compacting the code with macros
+>
+> Changes in v6:
+> - Used DEFINE_SHOW_ATTRIBUTE
+>
+> Changes in v5:
+> - Added parser logic in kernel by using debugfs_create_file  for caps and caps2 instead of debugfs_create_x32
+> - Changed Author
+>
+> Changes in v4:
+> - Moved the creation of nodes to mmc_add_host_debugfs
+> - Exported caps2
+> - Renamed host_caps to caps
+>
+> Changes in v3:
+> - Removed typecasting of &host->caps to (u32 *)
+>
+> Changes in v2:
+> - Changed Author
+>
+>  drivers/mmc/core/debugfs.c | 107 +++++++++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 107 insertions(+)
+>
+> diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+> index c51e0c0..826d361 100644
+> --- a/drivers/mmc/core/debugfs.c
+> +++ b/drivers/mmc/core/debugfs.c
+> @@ -225,6 +225,110 @@ static int mmc_clock_opt_set(void *data, u64 val)
+>  DEFINE_SIMPLE_ATTRIBUTE(mmc_clock_fops, mmc_clock_opt_get, mmc_clock_opt_set,
+>         "%llu\n");
+>
+> +/*
+> + * mmc_host_capabilities - MMC host capabilities
+> + *
+> + * This must be in sync with caps definitions in the mmc/host.h
+> + */
+> +static const char * const mmc_host_capabilities[] = {
+> +       "4-bit transfers allowed",
+> +       "Supports MMC high-speed timing",
+> +       "Supports SD high-speed timing",
+> +       "Can signal pending SDIO IRQs",
+> +       "Talks only SPI protocols",
+> +       "Needs polling for card-detection",
+> +       "8 bit transfers allowed",
+> +       "Suspends (e)MMC/SD at idle",
+> +       "Nonremovable",
+> +       "Waits while card is busy",
+> +       "Allows erase/trim commands",
+> +       "Supports DDR mode at 3.3V",
+> +       "Supports DDR mode at 1.8V",
+> +       "Supports DDR mode at 1.2V",
+> +       "Can power off after boot",
+> +       "CMD14/CMD19 bus width ok",
+> +       "Supports UHS SDR12 mode",
+> +       "Supports UHS SDR25 mode",
+> +       "Supports UHS SDR50 mode",
+> +       "Supports UHS SDR104 mode",
+> +       "Supports UHS DDR50 mode",
+> +       "Unknown (bit 21)",
+> +       "Unknown (bit 22)",
+> +       "Supports Driver Type A",
+> +       "Supports Driver Type C",
+> +       "Supports Driver Type D",
+> +       "Unknown (bit 26)",
+> +       "RW reqs can be completed within mmc_request_done()",
+> +       "Supports Enable card detect wake",
+> +       "Can send commands during data transfer",
+> +       "CMD23 supported",
+> +       "Supports Hardware reset"
+> +};
+> +
+> +/*
+> + * mmc_host_capabilities2 - MMC host additional capabilities
+> + *
+> + * This must be in sync with caps2 definitions in the mmc/host.h
+> + */
+> +static const char * const mmc_host_capabilities2[] = {
+> +       "No access to Boot partition",
+> +       "Unknown (bit 1)",
+> +       "Can do full power cycle",
+> +       "Unknown (bit 3)",
+> +       "Unknown (bit 4)",
+> +       "Supports HS200 1.8V SDR",
+> +       "Supports HS200 1.2V SDR",
+> +       "Unknown (bit 7)",
+> +       "Unknown (bit 8)",
+> +       "Unknown (bit 9)",
+> +       "Card-detect signal active high",
+> +       "Write-protect signal active high",
+> +       "Unknown (bit 12)",
+> +       "Unknown (bit 13)",
+> +       "Can do complete power cycle of the card",
+> +       "Supports HS400 1.8V",
+> +       "Support HS400 1.2V",
+> +       "SDIO IRQ - Nothread",
+> +       "No physical write protect pin, assume always read-write",
+> +       "Do not send SDIO commands during initialization",
+> +       "Supports enhanced strobe",
+> +       "Do not send SD commands during initialization",
+> +       "Do not send (e)MMC commands during initialization",
+> +       "Has eMMC command queue engine",
+> +       "CQE can issue a direct command",
+> +       "Unknown (bit 25)",
+> +       "Unknown (bit 26)",
+> +       "Unknown (bit 27)",
+> +       "Unknown (bit 28)",
+> +       "Unknown (bit 29)",
+> +       "Unknown (bit 30)",
+> +       "Unknown (bit 31)"
+> +};
 
---===============1856178775963326762==
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="onj42xyt7ehynl2m"
-Content-Disposition: inline
+Honestly, I don't like this, but maybe other people do, then I am fine
+with this approach.
 
+If were to decide, I would just rather print the caps field in a
+hexadecimal bit form and leave the translation to the user.
 
---onj42xyt7ehynl2m
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+> +
+> +static int mmc_caps_show(struct seq_file *s, void *unused)
+> +{
+> +       struct mmc_host *host = s->private;
+> +       unsigned long caps = host->caps;
+> +       unsigned long caps2 = host->caps2;
+> +       int bit;
+> +
+> +       seq_puts(s, "MMC Host capabilities are:\n");
+> +       seq_puts(s, "=============================================\n");
+> +
+> +       for_each_set_bit(bit, &caps, ARRAY_SIZE(mmc_host_capabilities))
+> +               seq_printf(s, "%s\n", mmc_host_capabilities[bit]);
+> +
+> +       seq_puts(s, "=============================================\n");
+> +       seq_puts(s, "MMC Host additional capabilities are:\n");
+> +       seq_puts(s, "=============================================\n");
+> +
+> +       for_each_set_bit(bit, &caps2, ARRAY_SIZE(mmc_host_capabilities2))
+> +               seq_printf(s, "%s\n", mmc_host_capabilities2[bit]);
+> +
+> +       return 0;
+> +}
+> +DEFINE_SHOW_ATTRIBUTE(mmc_caps);
+> +
+>  void mmc_add_host_debugfs(struct mmc_host *host)
+>  {
+>         struct dentry *root;
+> @@ -243,6 +347,9 @@ void mmc_add_host_debugfs(struct mmc_host *host)
+>         if (!debugfs_create_file("ios", S_IRUSR, root, host, &mmc_ios_fops))
+>                 goto err_node;
+>
+> +       if (!debugfs_create_file("caps", 0400, root, host, &mmc_caps_fops))
+> +               goto err_node;
+> +
+>         if (!debugfs_create_file("clock", S_IRUSR | S_IWUSR, root, host,
+>                         &mmc_clock_fops))
+>                 goto err_node;
+> --
+> 1.9.1
+>
 
-Hi Ulf,
-
-On Thu, Mar 15, 2018 at 10:30:54AM +0100, Ulf Hansson wrote:
-> On 8 March 2018 at 15:52, Maxime Ripard <maxime.ripard@bootlin.com> wrote:
-> > So far, even if our card was not in use, we didn't shut down our main
-> > clock, which meant that it was still output on the MMC bus.
-> >
-> > While this obviously means that we could save some power there, it also
-> > created issues when it comes with EMC control since we'll have a perfect
-> > peak at the card clock rate.
-> >
-> > Let's implement runtime_pm with autosuspend so that we will shut down t=
-he
-> > clock when it's not been in use for quite some time.
-> >
-> > Signed-off-by: Maxime Ripard <maxime.ripard@bootlin.com>
-> > ---
-> >  drivers/mmc/host/sunxi-mmc.c | 46 ++++++++++++++++++++++++++++++++++++=
-+-
-> >  1 file changed, 46 insertions(+)
-> >
-> > diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> > index f6374066081b..0f98a5fcaade 100644
-> > --- a/drivers/mmc/host/sunxi-mmc.c
-> > +++ b/drivers/mmc/host/sunxi-mmc.c
-> > @@ -35,6 +35,7 @@
-> >  #include <linux/of_gpio.h>
-> >  #include <linux/of_platform.h>
-> >  #include <linux/platform_device.h>
-> > +#include <linux/pm_runtime.h>
-> >  #include <linux/regulator/consumer.h>
-> >  #include <linux/reset.h>
-> >  #include <linux/scatterlist.h>
-> > @@ -973,6 +974,9 @@ static void sunxi_mmc_enable_sdio_irq(struct mmc_ho=
-st *mmc, int enable)
-> >         unsigned long flags;
-> >         u32 imask;
-> >
-> > +       if (enable)
-> > +               pm_runtime_get_noresume(host->dev);
-> > +
-> >         spin_lock_irqsave(&host->lock, flags);
-> >
-> >         imask =3D mmc_readl(host, REG_IMASK);
-> > @@ -985,6 +989,9 @@ static void sunxi_mmc_enable_sdio_irq(struct mmc_ho=
-st *mmc, int enable)
-> >         }
-> >         mmc_writel(host, REG_IMASK, imask);
-> >         spin_unlock_irqrestore(&host->lock, flags);
-> > +
-> > +       if (!enable)
-> > +               pm_runtime_put_noidle(host->mmc->parent);
-> >  }
-> >
-> >  static void sunxi_mmc_hw_reset(struct mmc_host *mmc)
-> > @@ -1398,6 +1405,11 @@ static int sunxi_mmc_probe(struct platform_devic=
-e *pdev)
-> >         if (ret)
-> >                 goto error_free_dma;
-> >
-> > +       pm_runtime_set_active(&pdev->dev);
-> > +       pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
-> > +       pm_runtime_use_autosuspend(&pdev->dev);
-> > +       pm_runtime_enable(&pdev->dev);
-> > +
-> >         ret =3D mmc_add_host(mmc);
-> >         if (ret)
-> >                 goto error_free_dma;
-> > @@ -1418,6 +1430,7 @@ static int sunxi_mmc_remove(struct platform_devic=
-e *pdev)
-> >         struct sunxi_mmc_host *host =3D mmc_priv(mmc);
-> >
-> >         mmc_remove_host(mmc);
-> > +       pm_runtime_force_suspend(&pdev->dev);
-> >         disable_irq(host->irq);
-> >         sunxi_mmc_disable(host);
-> >         dma_free_coherent(&pdev->dev, PAGE_SIZE, host->sg_cpu, host->sg=
-_dma);
-> > @@ -1426,10 +1439,43 @@ static int sunxi_mmc_remove(struct platform_dev=
-ice *pdev)
-> >         return 0;
-> >  }
-> >
-> > +static int sunxi_mmc_runtime_resume(struct device *dev)
-> > +{
-> > +       struct mmc_host *mmc =3D dev_get_drvdata(dev);
-> > +       struct sunxi_mmc_host *host =3D mmc_priv(mmc);
-> > +       int ret;
-> > +
-> > +       ret =3D sunxi_mmc_enable(host);
-> > +       if (ret)
-> > +               return ret;
-> > +
-> > +       sunxi_mmc_power_up(mmc, &mmc->ios);
->=20
-> Instead of doing power up, you may need restore some ios settings,
-> such as the clock rate for example.
->=20
-> You may also need to restore some registers in sunxi device, in case
-> it's possible that the controller loses context at runtime suspend.
-
-The thing I was precisely trying to avoid was this :)
-
-I could save and restore registers when the MMC controller is put into
-suspend, but that's pretty much exactly the same sequence than what is
-done in the MMC_POWER_UP sequence in .set_ios.
-
-So it just felt cleaner to just do the power_up sequence at resume
-time. It avoids having to maintain the list of registers to save and
-restore, and it involves less code overall.
-
-It suprised me a bit that the core will not call .set_ios with
-MMC_POWER_UP at resume by itself, but I guess there's a good reason
-for that :)
-
-Thanks!
-Maxime
-
---=20
-Maxime Ripard, Bootlin (formerly Free Electrons)
-Embedded Linux and Kernel engineering
-https://bootlin.com
-
---onj42xyt7ehynl2m
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEE0VqZU19dR2zEVaqr0rTAlCFNr3QFAlqqRRoACgkQ0rTAlCFN
-r3RXmw/9GI2gL9sdHrLi5c52vvZ8MxiR6VQXllazIWO4jjSgT1iSlXqCfEY1RdkW
-rfIP8zEz9KzO1xIWahbDcYVaFO+XNLeNnl2g2AufgLw2D34vPEOOoZ0SJbDzkpBL
-4p+loHYIKAML4V8CRnUjSqIdR2cvROtjD30D5XLIfhhHRKMN4/li0vLBQoa816Xd
-G2W6XJukueMOZl49/9qY/cfEHc3TVLew53V8VxX36jA/twcaq60pBvSc80fDx7pt
-IUYJ+i6k0gdaBiV5cKZC/71VYFPMG/TSr8te1sl/6b/r7WlJjseu4tHMTaH38822
-CvhKVsA/Y02rdDSy2sNT4nPWDYpT33YVFhCk5YQwTcEmEl3fO6tlEe9buc1Z/twS
-PukU7cQLW2p++0GmLn5YgwPVV/aM6drYAcOWt1JywRf+L0HWHiFEF85CAhm88yT8
-beWpU1114x7CsvQjADYhkwgX0uoWAaO4SUBu0irfMy7nJRYBdUD+w1jc/jod6Kfj
-kbSvq97O8Bo1FlaIM/o5Zmv9Ngluh0x8XayJ/PhOhjCUrSgkT7svc0UsDQe+PNYw
-6r/jKhyXdJAl73ezJG8J0mGYm9VyuU0deP4AzIFJD6yjPbND2CRMu8479owHqn49
-SmtU8106OfACL4uPHHX6uEgnR8sHwjzKI6aCE37OVqEVQBEioSY=
-=Rp30
------END PGP SIGNATURE-----
-
---onj42xyt7ehynl2m--
-
-
---===============1856178775963326762==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-linux-arm-kernel mailing list
-linux-arm-kernel@lists.infradead.org
-http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
-
---===============1856178775963326762==--
+Kind regards
+Uffe
