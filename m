@@ -1,200 +1,104 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v3 07/11] mmc: sdhci: Program a relatively accurate SW
- timeout value
-Date: Thu, 15 Mar 2018 15:13:27 +0200
-Message-ID: <1e87e5f9-13e1-765b-f077-26a55359b2c3@intel.com>
-References: <20180307132020.30951-1-kishon@ti.com>
- <20180307132020.30951-8-kishon@ti.com>
+From: Evgeniy Didin <Evgeniy.Didin@synopsys.com>
+Subject: Re: [PATCH] mmc: dw_mmc: fix falling from idmac to PIO mode when
+ dw_mci_reset occurs
+Date: Thu, 15 Mar 2018 13:18:31 +0000
+Message-ID: <1521119909.10304.1.camel@synopsys.com>
+References: <20180314193051.16791-1-Evgeniy.Didin@synopsys.com>
+ <CAPDyKFrgBm8-G1CsnqS9G62xFA2qA0XkuGBfA5v6grZnjRLteA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180307132020.30951-8-kishon@ti.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org>
+In-Reply-To: <CAPDyKFrgBm8-G1CsnqS9G62xFA2qA0XkuGBfA5v6grZnjRLteA@mail.gmail.com>
 Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-ID: <9A7637A06421E34C9824923DA5658585@internal.synopsys.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-snps-arc>,
+ <mailto:linux-snps-arc-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-snps-arc/>
+List-Post: <mailto:linux-snps-arc@lists.infradead.org>
+List-Help: <mailto:linux-snps-arc-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-snps-arc>,
+ <mailto:linux-snps-arc-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-snps-arc" <linux-snps-arc-bounces@lists.infradead.org>
+Errors-To: linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org
+To: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "Evgeniy.Didin@synopsys.com" <Evgeniy.Didin@synopsys.com>
+Cc: "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>, "Alexey.Brodkin@synopsys.com" <Alexey.Brodkin@synopsys.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Jisheng.Zhang@synaptics.com" <Jisheng.Zhang@synaptics.com>, "jh80.chung@samsung.com" <jh80.chung@samsung.com>, "andy.shevchenko@gmail.com" <andy.shevchenko@gmail.com>, "linux-snps-arc@lists.infradead.org" <linux-snps-arc@lists.infradead.org>, "Eugeniy.Paltsev@synopsys.com" <Eugeniy.Paltsev@synopsys.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 07/03/18 15:20, Kishon Vijay Abraham I wrote:
-> sdhci has a 10 second timeout to catch devices that stop responding.
-> Instead of programming 10 second arbitrary value, calculate the total time
-> it would take for the entire transfer to happen and program the timeout
-> value accordingly.
-> 
-> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
-> ---
->  drivers/mmc/host/sdhci.c | 47 ++++++++++++++++++++++++++++++++++++++++-------
->  drivers/mmc/host/sdhci.h | 10 ++++++++++
->  2 files changed, 50 insertions(+), 7 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 1dd117cbeb6e..baab67bfa39b 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -709,6 +709,36 @@ static u32 sdhci_sdma_address(struct sdhci_host *host)
->  		return sg_dma_address(host->data->sg);
->  }
->  
-> +static void sdhci_calc_sw_timeout(struct sdhci_host *host,
-> +				  struct mmc_command *cmd,
-> +				  unsigned int target_timeout)
-> +{
-> +	struct mmc_data *data = cmd->data;
-> +	struct mmc_host *mmc = host->mmc;
-> +	u64 transfer_time;
-> +	struct mmc_ios *ios = &mmc->ios;
-> +	unsigned char bus_width = 1 << ios->bus_width;
-> +	unsigned int blksz;
-> +	unsigned int freq;
-> +
-> +	if (data) {
-> +		blksz = data->blksz;
-> +		freq = host->mmc->actual_clock ? : host->clock;
-> +		transfer_time = (u64)blksz * NSEC_PER_SEC * (8 / bus_width);
-> +		do_div(transfer_time, freq);
-> +		/* multiply by '2' to account for any unknowns */
-> +		transfer_time = transfer_time * 2;
-> +		/* calculate timeout for the entire data */
-> +		host->data_timeout = (data->blocks * ((target_timeout *
-> +						       NSEC_PER_USEC) +
-> +						       transfer_time));
-
-(target_timeout * NSEC_PER_USEC) might be 32-bit and therefore overflow
-for timeouts greater than about 4 seconds.
-
-> +	} else {
-> +		host->data_timeout = (u64)target_timeout * NSEC_PER_USEC;
-> +	}
-> +
-> +	host->data_timeout += MMC_CMD_TRANSFER_TIME;
-
-Need to allow for target_timeout == 0 so:
-
-	if (host->data_timeout)
-		host->data_timeout += MMC_CMD_TRANSFER_TIME;
-
-> +}
-> +
->  static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
->  {
->  	u8 count;
-> @@ -766,6 +796,7 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
->  		if (count >= 0xF)
->  			break;
->  	}
-> +	sdhci_calc_sw_timeout(host, cmd, target_timeout);
-
-If you make the changes I suggest for patch 6, then this would
-move sdhci_calc_sw_timeout() into sdhci_set_timeout().
-
-I suggest you factor out the target_timeout calculation e.g.
-
-static unsigned int sdhci_target_timeout(struct sdhci_host *host,
-					 struct mmc_command *cmd,
-					 struct mmc_data *data)
-{
-	unsigned int target_timeout;
-
-	/* timeout in us */
-	if (!data)
-		target_timeout = cmd->busy_timeout * 1000;
-	else {
-		target_timeout = DIV_ROUND_UP(data->timeout_ns, 1000);
-		if (host->clock && data->timeout_clks) {
-			unsigned long long val;
-
-			/*
-			 * data->timeout_clks is in units of clock cycles.
-			 * host->clock is in Hz.  target_timeout is in us.
-			 * Hence, us = 1000000 * cycles / Hz.  Round up.
-			 */
-			val = 1000000ULL * data->timeout_clks;
-			if (do_div(val, host->clock))
-				target_timeout++;
-			target_timeout += val;
-		}
-	}
-
-	return target_timeout;
-}
-
-And call it from sdhci_calc_sw_timeout()
-
->  
->  	return count;
->  }
-> @@ -1175,13 +1206,6 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
->  		mdelay(1);
->  	}
->  
-> -	timeout = jiffies;
-> -	if (!cmd->data && cmd->busy_timeout > 9000)
-> -		timeout += DIV_ROUND_UP(cmd->busy_timeout, 1000) * HZ + HZ;
-> -	else
-> -		timeout += 10 * HZ;
-> -	sdhci_mod_timer(host, cmd->mrq, timeout);
-> -
->  	host->cmd = cmd;
->  	if (sdhci_data_line_cmd(cmd)) {
->  		WARN_ON(host->data_cmd);
-> @@ -1221,6 +1245,15 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
->  	    cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200)
->  		flags |= SDHCI_CMD_DATA;
->  
-> +	timeout = jiffies;
-> +	if (host->data_timeout > 0) {
-
-This can be just:
-
-	if (host->data_timeout) {
-
-> +		timeout += nsecs_to_jiffies(host->data_timeout);
-> +		host->data_timeout = 0;
-
-It would be better to initialize host->data_timeout = 0 at the top of
-sdhci_prepare_data().
-
-Also still need:
-
-	else if (!cmd->data && cmd->busy_timeout > 9000) {
-		timeout += DIV_ROUND_UP(cmd->busy_timeout, 1000) * HZ + HZ;
-
-
-> +	} else {
-> +		timeout += 10 * HZ;
-> +	}
-> +	sdhci_mod_timer(host, cmd->mrq, timeout);
-> +
->  	sdhci_writew(host, SDHCI_MAKE_CMD(cmd->opcode, flags), SDHCI_COMMAND);
->  }
->  EXPORT_SYMBOL_GPL(sdhci_send_command);
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index ff283ee08854..29b242fd17de 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -332,6 +332,14 @@ struct sdhci_adma2_64_desc {
->  /* Allow for a a command request and a data request at the same time */
->  #define SDHCI_MAX_MRQS		2
->  
-> +/*
-> + * 48bit command and 136 bit response in 100KHz clock could take upto 2.48ms.
-> + * However since the start time of the command, the time between
-> + * command and response, and the time between response and start of data is
-> + * not known, set the command transfer time to 10ms.
-> + */
-> +#define MMC_CMD_TRANSFER_TIME	(10 * NSEC_PER_MSEC) /* max 10 ms */
-> +
->  enum sdhci_cookie {
->  	COOKIE_UNMAPPED,
->  	COOKIE_PRE_MAPPED,	/* mapped by sdhci_pre_req() */
-> @@ -555,6 +563,8 @@ struct sdhci_host {
->  	/* Host SDMA buffer boundary. */
->  	u32			sdma_boundary;
->  
-> +	u64			data_timeout;
-> +
->  	unsigned long private[0] ____cacheline_aligned;
->  };
->  
-> 
+SGVsbG8gVWxmLA0KDQpPbiBUaHUsIDIwMTgtMDMtMTUgYXQgMTA6NTcgKzAxMDAsIFVsZiBIYW5z
+c29uIHdyb3RlOg0KPiBPbiAxNCBNYXJjaCAyMDE4IGF0IDIwOjMwLCBFdmdlbml5IERpZGluIDxF
+dmdlbml5LkRpZGluQHN5bm9wc3lzLmNvbT4gd3JvdGU6DQo+ID4gSXQgd2FzIGZvdW5kIHRoYXQg
+aW4gSURNQUMgbW9kZSBhZnRlciBzb2Z0LXJlc2V0IGRyaXZlciBzd2l0Y2hlcw0KPiA+IHRvIFBJ
+TyBtb2RlLg0KPiA+IA0KPiA+IFRoYXQncyB3aGF0IGhhcHBlbnMgaW4gY2FzZSBvZiBEVE8gdGlt
+ZW91dCBvdmVyZmxvdyBjYWxjdWxhdGlvbiBmYWlsdXJlOg0KPiA+IDEuIHNvZnQtcmVzZXQgaXMg
+Y2FsbGVkDQo+ID4gMi4gZHJpdmVyIHJlc3RhcnRzIGRtYQ0KPiA+IDMuIGRlc2NyaXB0b3JzIHN0
+YXRlcyBhcmUgY2hlY2tlZCwgb25lIG9mIGRlc2NyaXB0b3IgaXMgb3duZWQgYnkgdGhlIElETUFD
+Lg0KPiA+IDQuIGRyaXZlciBjYW4ndCB1c2UgRE1BIGFuZCB0aGVuIHN3aXRjaGVzIHRvIFBJTyBt
+b2RlLg0KPiA+IA0KPiA+IEZhaWx1cmUgd2FzIGFscmVhZHkgZml4ZWQgaW46DQo+ID4gaHR0cHM6
+Ly91cmxkZWZlbnNlLnByb29mcG9pbnQuY29tL3YyL3VybD91PWh0dHBzLTNBX193d3cuc3Bpbmlj
+cy5uZXRfbGlzdHNfbGludXgtMkRtbWNfbXNnNDgxMjUuaHRtbCZkPUR3SUJhUSZjPURQTDZfWF82
+SmtYRng3QVhXcUIwdGcmcj12UWstUkliandOMHp2bHdpTVNwcTNMWVVUTmY3R3FjNHVqaG9zWUkN
+Cj4gPiBUdEF3Jm09NnJQV3BLVVlRRDNrWS0yT0Vpa0pVV3lFSnZ3S0psaldIRkM4cmQyVENhayZz
+PUpqWDBEeDgtZVN5VzJjQVRNc25HMWVBenJLZ29Ea1MxYmNTNVhZclZ0bEUmZT0uDQo+IA0KPiBF
+dmdlbml5LA0KPiANCj4gSXQgc2VlbXMgbGlrZSBJIHNob3VsZCBzcXVhc2ggdGhpcyBmaXggaW50
+byB0aGUgYWJvdmUgY29tbWl0PyBNYWtlcyBzZW5zZT8NCklNSE8gaXQgaXMgbm90IGEgZ29vZCBp
+ZGVhLCBiZWNhdXNlIHRoaXMgZml4IGlzIG9ydGhvZ29uYWwgdG8gdGhlIGFib3ZlIGNvbW1pdC4N
+CkRlYnVnZ2luZyBkcnRvIG92ZXJmbG93IGlzc3VlIHdlIGZvdW5kIHRoaXMgc3RyYW5nZSBiZWhh
+dmlvci4NClRoaXMgbWlnaHQgYmUgZ2VuZXJhbCBpc3N1ZSBvZiBzb2Z0LXJlc2V0LiBTbyBJIHRo
+aW5rIHRoaXMgc2hvdWxkIGJlIHNlcGFyYXRlIHBhdGNoLg0KQWxzbyBpZiB0aGVzZSBwYXRjaGVz
+IGFyZSBpbmRlcGVuZGVudCwgaXQgd2lsbCBiZSBlYXNpZXIgdG8gYmFja3BvcnQgdGhlbS4NCg0K
+QmVzdCByZWdhcmRzLA0KRXZnZW5peSBEaWRpbg0KDQo+IEtpbmQgcmVnYXJkcw0KPiBVZmZlDQo+
+IA0KPiA+IA0KPiA+IEJlaGF2aW91ciB3aGlsZSBzb2Z0LXJlc2V0IGlzIG5vdCBzb21ldGhpbmcg
+d2UgZXhjZXB0IG9yDQo+ID4gZXZlbiB3YW50IHRvIGhhcHBlbi4gU28gd2Ugc3dpdGNoIGZyb20g
+ZHdfbWNpX2lkbWFjX3Jlc2V0DQo+ID4gdG8gZHdfbWNpX2lkbWFjX2luaXQsIHNvIGRlc2NyaXB0
+b3JzIGFyZSBjbGVhbmVkIGJlZm9yZSBzdGFydGluZyBkbWEuDQo+ID4gDQo+ID4gQW5kIHdoaWxl
+IGF0IGl0IGV4cGxpY2l0bHkgemVybyBkZXMwIHdoaWNoIG90aGVyd2lzZSBtaWdodA0KPiA+IGNv
+bnRhaW4gZ2FyYmFnZSBhcyBiZWluZyBhbGxvY2F0ZWQgYnkgZG1hbV9hbGxvY19jb2hlcmVudCgp
+Lg0KPiA+IA0KPiA+IFNpZ25lZC1vZmYtYnk6IEV2Z2VuaXkgRGlkaW4gPEV2Z2VuaXkuRGlkaW5A
+c3lub3BzeXMuY29tPg0KPiA+IENjOiBKYWVob29uIENodW5nIDxqaDgwLmNodW5nQHNhbXN1bmcu
+Y29tPg0KPiA+IENjOiBVbGYgSGFuc3NvbiA8dWxmLmhhbnNzb25AbGluYXJvLm9yZz4NCj4gPiBD
+YzogQW5keSBTaGV2Y2hlbmtvIDxhbmR5LnNoZXZjaGVua29AZ21haWwuY29tPg0KPiA+IENjOiBK
+aXNoZW5nIFpoYW5nIDxKaXNoZW5nLlpoYW5nQHN5bmFwdGljcy5jb20+DQo+ID4gQ2M6IFNoYXdu
+IExpbiA8c2hhd24ubGluQHJvY2stY2hpcHMuY29tPg0KPiA+IENjOiBBbGV4ZXkgQnJvZGtpbiA8
+YWJyb2RraW5Ac3lub3BzeXMuY29tPg0KPiA+IENjOiBFdWdlbml5IFBhbHRzZXYgPEV1Z2VuaXku
+UGFsdHNldkBzeW5vcHN5cy5jb20+DQo+ID4gQ2M6IGxpbnV4LXNucHMtYXJjQGxpc3RzLmluZnJh
+ZGVhZC5vcmcNCj4gPiAtLS0NCj4gPiDCoGRyaXZlcnMvbW1jL2hvc3QvZHdfbW1jLmMgfCA2ICsr
+KystLQ0KPiA+IMKgMSBmaWxlIGNoYW5nZWQsIDQgaW5zZXJ0aW9ucygrKSwgMiBkZWxldGlvbnMo
+LSkNCj4gPiANCj4gPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9kd19tbWMuYyBiL2Ry
+aXZlcnMvbW1jL2hvc3QvZHdfbW1jLmMNCj4gPiBpbmRleCAwYWEzOTk3NWYzM2IuLjI2ZjJhYzEw
+NzcwMiAxMDA2NDQNCj4gPiAtLS0gYS9kcml2ZXJzL21tYy9ob3N0L2R3X21tYy5jDQo+ID4gKysr
+IGIvZHJpdmVycy9tbWMvaG9zdC9kd19tbWMuYw0KPiA+IEBAIC01NTgsNiArNTU4LDcgQEAgc3Rh
+dGljIGludCBkd19tY2lfaWRtYWNfaW5pdChzdHJ1Y3QgZHdfbWNpICpob3N0KQ0KPiA+IMKgwqDC
+oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqDCoMKgKHNpemVvZihzdHJ1Y3QgaWRtYWNfZGVzY182NGFkZHIpICoNCj4g
+PiDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
+oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+KGkgKyAxKSkpID4+IDMyOw0KPiA+IMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
+oMKgwqDCoMKgwqDCoC8qIEluaXRpYWxpemUgcmVzZXJ2ZWQgYW5kIGJ1ZmZlciBzaXplIGZpZWxk
+cyB0byAiMCIgKi8NCj4gPiArwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
+oMKgwqDCoHAtPmRlczAgPSAwOw0KPiA+IMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqDCoHAtPmRlczEgPSAwOw0KPiA+IMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
+oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoHAtPmRlczIgPSAwOw0KPiA+IMKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoHAtPmRlczMgPSAwOw0KPiA+IEBAIC01
+ODAsNiArNTgxLDcgQEAgc3RhdGljIGludCBkd19tY2lfaWRtYWNfaW5pdChzdHJ1Y3QgZHdfbWNp
+ICpob3N0KQ0KPiA+IMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoGkr
+KywgcCsrKSB7DQo+ID4gwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgcC0+ZGVzMyA9IGNwdV90b19sZTMyKGhvc3QtPnNnX2RtYSArDQo+ID4gwqDCoMKgwqDC
+oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqAoc2l6ZW9mKHN0cnVjdCBpZG1hY19kZXNjKSAqIChpICsgMSkpKTsNCj4g
+PiArwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoHAtPmRlczAg
+PSAwOw0KPiA+IMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
+oHAtPmRlczEgPSAwOw0KPiA+IMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgfQ0KPiA+
+IA0KPiA+IEBAIC0xNzk1LDggKzE3OTcsOCBAQCBzdGF0aWMgYm9vbCBkd19tY2lfcmVzZXQoc3Ry
+dWN0IGR3X21jaSAqaG9zdCkNCj4gPiDCoMKgwqDCoMKgwqDCoMKgfQ0KPiA+IA0KPiA+IMKgwqDC
+oMKgwqDCoMKgwqBpZiAoaG9zdC0+dXNlX2RtYSA9PSBUUkFOU19NT0RFX0lETUFDKQ0KPiA+IC3C
+oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAvKiBJdCBpcyBhbHNvIHJlY29tbWVuZGVkIHRo
+YXQgd2UgcmVzZXQgYW5kIHJlcHJvZ3JhbSBpZG1hYyAqLw0KPiA+IC3CoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqBkd19tY2lfaWRtYWNfcmVzZXQoaG9zdCk7DQo+ID4gK8KgwqDCoMKgwqDC
+oMKgwqDCoMKgwqDCoMKgwqDCoC8qIEl0IGlzIGFsc28gcmVxdWlyZWQgdGhhdCB3ZSByZWluaXQg
+aWRtYWMgKi8NCj4gPiArwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgZHdfbWNpX2lkbWFj
+X2luaXQoaG9zdCk7DQo+ID4gDQo+ID4gwqDCoMKgwqDCoMKgwqDCoHJldCA9IHRydWU7DQo+ID4g
+DQo+ID4gLS0NCj4gPiAyLjExLjANCj4gPiAKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX18KbGludXgtc25wcy1hcmMgbWFpbGluZyBsaXN0CmxpbnV4LXNucHMt
+YXJjQGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1h
+bi9saXN0aW5mby9saW51eC1zbnBzLWFyYw==
