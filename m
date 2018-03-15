@@ -1,200 +1,91 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v10] mmc: Export host capabilities to debugfs.
-Date: Thu, 15 Mar 2018 11:12:54 +0100
-Message-ID: <CAPDyKFo8jFwDO1E=tNSd4yTn3qtefzvHK0V70fcEqzB=SibrJA@mail.gmail.com>
-References: <1520917812-20047-1-git-send-email-harish_kandiga@mentor.com>
+Subject: Re: [PATCH 1/6] mmc: dw_mmc: remove the deprecated
+ "clock-freq-min-max" property
+Date: Thu, 15 Mar 2018 11:22:36 +0100
+Message-ID: <CAPDyKFp2TCBfBvA53+UTJYYRrn2x_Szwb92x_2ahHhOKWdvntw@mail.gmail.com>
+References: <CGME20180223064140epcas2p104fe6cca431ec24f2b09a6f5a45ed342@epcas2p1.samsung.com>
+ <20180223064138.18401-1-jh80.chung@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1520917812-20047-1-git-send-email-harish_kandiga@mentor.com>
+In-Reply-To: <20180223064138.18401-1-jh80.chung@samsung.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Harish Jenny K N <harish_kandiga@mentor.com>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, avri.altman@wdc.com, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Vladimir Zapolskiy <Vladimir_Zapolskiy@mentor.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, devicetree@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Joachim Eastwood <manabian@gmail.com>, dinguyen@kernel.org, Will Deacon <will.deacon@arm.com>, Wei Xu <xuwei5@hisilicon.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 13 March 2018 at 06:10, Harish Jenny K N <harish_kandiga@mentor.com> wrote:
-> This patch exports the host capabilities to debugfs
+On 23 February 2018 at 07:41, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> 'clock-freq-min-max' property had already deprecated.
+> Remove the 'clock-freq-min-max' property that is kept to maintain
+> the compatibility.
 >
-> This idea of sharing host capabilities over debugfs
-> came up from Abbas Raza <Abbas_Raza@mentor.com>
-> Earlier discussions:
-> https://lkml.org/lkml/2018/3/5/357
-> https://www.spinics.net/lists/linux-mmc/msg48219.html
->
-> Reviewed-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-> Signed-off-by: Harish Jenny K N <harish_kandiga@mentor.com>
-> ---
->
-> Changes in v10:
-> - minor review comment addressed.
-> - Added "Reviewed-by" line
->
-> Changes in v9
-> - More code cleanup as suggested by Andy Shevchenko.
->
-> Changes in v8
-> - Changes to use for_each_set_bit as suggested by Andy Shevchenko.
->
-> Changes in v7
-> - Moved additional capabilities also to caps file as mentioned by Ulf Hansson
-> - compacting the code with macros
->
-> Changes in v6:
-> - Used DEFINE_SHOW_ATTRIBUTE
->
-> Changes in v5:
-> - Added parser logic in kernel by using debugfs_create_file  for caps and caps2 instead of debugfs_create_x32
-> - Changed Author
->
-> Changes in v4:
-> - Moved the creation of nodes to mmc_add_host_debugfs
-> - Exported caps2
-> - Renamed host_caps to caps
->
-> Changes in v3:
-> - Removed typecasting of &host->caps to (u32 *)
->
-> Changes in v2:
-> - Changed Author
->
->  drivers/mmc/core/debugfs.c | 107 +++++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 107 insertions(+)
->
-> diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
-> index c51e0c0..826d361 100644
-> --- a/drivers/mmc/core/debugfs.c
-> +++ b/drivers/mmc/core/debugfs.c
-> @@ -225,6 +225,110 @@ static int mmc_clock_opt_set(void *data, u64 val)
->  DEFINE_SIMPLE_ATTRIBUTE(mmc_clock_fops, mmc_clock_opt_get, mmc_clock_opt_set,
->         "%llu\n");
->
-> +/*
-> + * mmc_host_capabilities - MMC host capabilities
-> + *
-> + * This must be in sync with caps definitions in the mmc/host.h
-> + */
-> +static const char * const mmc_host_capabilities[] = {
-> +       "4-bit transfers allowed",
-> +       "Supports MMC high-speed timing",
-> +       "Supports SD high-speed timing",
-> +       "Can signal pending SDIO IRQs",
-> +       "Talks only SPI protocols",
-> +       "Needs polling for card-detection",
-> +       "8 bit transfers allowed",
-> +       "Suspends (e)MMC/SD at idle",
-> +       "Nonremovable",
-> +       "Waits while card is busy",
-> +       "Allows erase/trim commands",
-> +       "Supports DDR mode at 3.3V",
-> +       "Supports DDR mode at 1.8V",
-> +       "Supports DDR mode at 1.2V",
-> +       "Can power off after boot",
-> +       "CMD14/CMD19 bus width ok",
-> +       "Supports UHS SDR12 mode",
-> +       "Supports UHS SDR25 mode",
-> +       "Supports UHS SDR50 mode",
-> +       "Supports UHS SDR104 mode",
-> +       "Supports UHS DDR50 mode",
-> +       "Unknown (bit 21)",
-> +       "Unknown (bit 22)",
-> +       "Supports Driver Type A",
-> +       "Supports Driver Type C",
-> +       "Supports Driver Type D",
-> +       "Unknown (bit 26)",
-> +       "RW reqs can be completed within mmc_request_done()",
-> +       "Supports Enable card detect wake",
-> +       "Can send commands during data transfer",
-> +       "CMD23 supported",
-> +       "Supports Hardware reset"
-> +};
-> +
-> +/*
-> + * mmc_host_capabilities2 - MMC host additional capabilities
-> + *
-> + * This must be in sync with caps2 definitions in the mmc/host.h
-> + */
-> +static const char * const mmc_host_capabilities2[] = {
-> +       "No access to Boot partition",
-> +       "Unknown (bit 1)",
-> +       "Can do full power cycle",
-> +       "Unknown (bit 3)",
-> +       "Unknown (bit 4)",
-> +       "Supports HS200 1.8V SDR",
-> +       "Supports HS200 1.2V SDR",
-> +       "Unknown (bit 7)",
-> +       "Unknown (bit 8)",
-> +       "Unknown (bit 9)",
-> +       "Card-detect signal active high",
-> +       "Write-protect signal active high",
-> +       "Unknown (bit 12)",
-> +       "Unknown (bit 13)",
-> +       "Can do complete power cycle of the card",
-> +       "Supports HS400 1.8V",
-> +       "Support HS400 1.2V",
-> +       "SDIO IRQ - Nothread",
-> +       "No physical write protect pin, assume always read-write",
-> +       "Do not send SDIO commands during initialization",
-> +       "Supports enhanced strobe",
-> +       "Do not send SD commands during initialization",
-> +       "Do not send (e)MMC commands during initialization",
-> +       "Has eMMC command queue engine",
-> +       "CQE can issue a direct command",
-> +       "Unknown (bit 25)",
-> +       "Unknown (bit 26)",
-> +       "Unknown (bit 27)",
-> +       "Unknown (bit 28)",
-> +       "Unknown (bit 29)",
-> +       "Unknown (bit 30)",
-> +       "Unknown (bit 31)"
-> +};
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 
-Honestly, I don't like this, but maybe other people do, then I am fine
-with this approach.
-
-If were to decide, I would just rather print the caps field in a
-hexadecimal bit form and leave the translation to the user.
-
-> +
-> +static int mmc_caps_show(struct seq_file *s, void *unused)
-> +{
-> +       struct mmc_host *host = s->private;
-> +       unsigned long caps = host->caps;
-> +       unsigned long caps2 = host->caps2;
-> +       int bit;
-> +
-> +       seq_puts(s, "MMC Host capabilities are:\n");
-> +       seq_puts(s, "=============================================\n");
-> +
-> +       for_each_set_bit(bit, &caps, ARRAY_SIZE(mmc_host_capabilities))
-> +               seq_printf(s, "%s\n", mmc_host_capabilities[bit]);
-> +
-> +       seq_puts(s, "=============================================\n");
-> +       seq_puts(s, "MMC Host additional capabilities are:\n");
-> +       seq_puts(s, "=============================================\n");
-> +
-> +       for_each_set_bit(bit, &caps2, ARRAY_SIZE(mmc_host_capabilities2))
-> +               seq_printf(s, "%s\n", mmc_host_capabilities2[bit]);
-> +
-> +       return 0;
-> +}
-> +DEFINE_SHOW_ATTRIBUTE(mmc_caps);
-> +
->  void mmc_add_host_debugfs(struct mmc_host *host)
->  {
->         struct dentry *root;
-> @@ -243,6 +347,9 @@ void mmc_add_host_debugfs(struct mmc_host *host)
->         if (!debugfs_create_file("ios", S_IRUSR, root, host, &mmc_ios_fops))
->                 goto err_node;
->
-> +       if (!debugfs_create_file("caps", 0400, root, host, &mmc_caps_fops))
-> +               goto err_node;
-> +
->         if (!debugfs_create_file("clock", S_IRUSR | S_IWUSR, root, host,
->                         &mmc_clock_fops))
->                 goto err_node;
-> --
-> 1.9.1
->
+Thanks, applied for next!
 
 Kind regards
 Uffe
+
+> ---
+>  .../devicetree/bindings/mmc/synopsys-dw-mshc.txt          |  4 ----
+>  drivers/mmc/host/dw_mmc.c                                 | 15 ++++-----------
+>  2 files changed, 4 insertions(+), 15 deletions(-)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+> index ef3e5f14067a..75c9fdca4aaf 100644
+> --- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+> @@ -59,10 +59,6 @@ Optional properties:
+>    is specified and the ciu clock is specified then we'll try to set the ciu
+>    clock to this at probe time.
+>
+> -* clock-freq-min-max (DEPRECATED): Minimum and Maximum clock frequency for card output
+> -  clock(cclk_out). If it's not specified, max is 200MHZ and min is 400KHz by default.
+> -         (Use the "max-frequency" instead of "clock-freq-min-max".)
+> -
+>  * num-slots (DEPRECATED): specifies the number of slots supported by the controller.
+>    The number of physical slots actually used could be equal or less than the
+>    value specified by num-slots. If this property is not specified, the value
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 0aa39975f33b..38e0e7c4ffd9 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -2784,7 +2784,6 @@ static int dw_mci_init_slot(struct dw_mci *host)
+>         struct dw_mci_slot *slot;
+>         const struct dw_mci_drv_data *drv_data = host->drv_data;
+>         int ctrl_id, ret;
+> -       u32 freq[2];
+>
+>         mmc = mmc_alloc_host(sizeof(struct dw_mci_slot), host->dev);
+>         if (!mmc)
+> @@ -2798,16 +2797,6 @@ static int dw_mci_init_slot(struct dw_mci *host)
+>         host->slot = slot;
+>
+>         mmc->ops = &dw_mci_ops;
+> -       if (device_property_read_u32_array(host->dev, "clock-freq-min-max",
+> -                                          freq, 2)) {
+> -               mmc->f_min = DW_MCI_FREQ_MIN;
+> -               mmc->f_max = DW_MCI_FREQ_MAX;
+> -       } else {
+> -               dev_info(host->dev,
+> -                       "'clock-freq-min-max' property was deprecated.\n");
+> -               mmc->f_min = freq[0];
+> -               mmc->f_max = freq[1];
+> -       }
+>
+>         /*if there are external regulators, get them*/
+>         ret = mmc_regulator_get_supply(mmc);
+> @@ -2846,6 +2835,10 @@ static int dw_mci_init_slot(struct dw_mci *host)
+>         if (ret)
+>                 goto err_host_allocated;
+>
+> +       mmc->f_min = DW_MCI_FREQ_MIN;
+> +       if (!mmc->f_max)
+> +               mmc->f_max = DW_MCI_FREQ_MAX;
+> +
+>         /* Process SDIO IRQs through the sdio_irq_work. */
+>         if (mmc->caps & MMC_CAP_SDIO_IRQ)
+>                 mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;
+> --
+> 2.15.1
+>
