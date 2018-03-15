@@ -1,17 +1,16 @@
-From: Evgeniy Didin <Evgeniy.Didin@synopsys.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
 Subject: Re: [PATCH] mmc: dw_mmc: fix falling from idmac to PIO mode when
  dw_mci_reset occurs
-Date: Thu, 15 Mar 2018 13:18:31 +0000
-Message-ID: <1521119909.10304.1.camel@synopsys.com>
+Date: Thu, 15 Mar 2018 14:39:35 +0100
+Message-ID: <CAPDyKFp--bHg8PH7om7TTY15m0CRw3i4eO1=StRnVofxnf50OQ@mail.gmail.com>
 References: <20180314193051.16791-1-Evgeniy.Didin@synopsys.com>
  <CAPDyKFrgBm8-G1CsnqS9G62xFA2qA0XkuGBfA5v6grZnjRLteA@mail.gmail.com>
+ <1521119909.10304.1.camel@synopsys.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAPDyKFrgBm8-G1CsnqS9G62xFA2qA0XkuGBfA5v6grZnjRLteA@mail.gmail.com>
-Content-Language: en-US
-Content-ID: <9A7637A06421E34C9824923DA5658585@internal.synopsys.com>
+In-Reply-To: <1521119909.10304.1.camel@synopsys.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-snps-arc>,
  <mailto:linux-snps-arc-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-snps-arc/>
@@ -21,84 +20,42 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-snps-arc>,
  <mailto:linux-snps-arc-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-snps-arc" <linux-snps-arc-bounces@lists.infradead.org>
 Errors-To: linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org
-To: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "Evgeniy.Didin@synopsys.com" <Evgeniy.Didin@synopsys.com>
+To: Evgeniy Didin <Evgeniy.Didin@synopsys.com>
 Cc: "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>, "Alexey.Brodkin@synopsys.com" <Alexey.Brodkin@synopsys.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Jisheng.Zhang@synaptics.com" <Jisheng.Zhang@synaptics.com>, "jh80.chung@samsung.com" <jh80.chung@samsung.com>, "andy.shevchenko@gmail.com" <andy.shevchenko@gmail.com>, "linux-snps-arc@lists.infradead.org" <linux-snps-arc@lists.infradead.org>, "Eugeniy.Paltsev@synopsys.com" <Eugeniy.Paltsev@synopsys.com>
 List-Id: linux-mmc@vger.kernel.org
 
-SGVsbG8gVWxmLA0KDQpPbiBUaHUsIDIwMTgtMDMtMTUgYXQgMTA6NTcgKzAxMDAsIFVsZiBIYW5z
-c29uIHdyb3RlOg0KPiBPbiAxNCBNYXJjaCAyMDE4IGF0IDIwOjMwLCBFdmdlbml5IERpZGluIDxF
-dmdlbml5LkRpZGluQHN5bm9wc3lzLmNvbT4gd3JvdGU6DQo+ID4gSXQgd2FzIGZvdW5kIHRoYXQg
-aW4gSURNQUMgbW9kZSBhZnRlciBzb2Z0LXJlc2V0IGRyaXZlciBzd2l0Y2hlcw0KPiA+IHRvIFBJ
-TyBtb2RlLg0KPiA+IA0KPiA+IFRoYXQncyB3aGF0IGhhcHBlbnMgaW4gY2FzZSBvZiBEVE8gdGlt
-ZW91dCBvdmVyZmxvdyBjYWxjdWxhdGlvbiBmYWlsdXJlOg0KPiA+IDEuIHNvZnQtcmVzZXQgaXMg
-Y2FsbGVkDQo+ID4gMi4gZHJpdmVyIHJlc3RhcnRzIGRtYQ0KPiA+IDMuIGRlc2NyaXB0b3JzIHN0
-YXRlcyBhcmUgY2hlY2tlZCwgb25lIG9mIGRlc2NyaXB0b3IgaXMgb3duZWQgYnkgdGhlIElETUFD
-Lg0KPiA+IDQuIGRyaXZlciBjYW4ndCB1c2UgRE1BIGFuZCB0aGVuIHN3aXRjaGVzIHRvIFBJTyBt
-b2RlLg0KPiA+IA0KPiA+IEZhaWx1cmUgd2FzIGFscmVhZHkgZml4ZWQgaW46DQo+ID4gaHR0cHM6
-Ly91cmxkZWZlbnNlLnByb29mcG9pbnQuY29tL3YyL3VybD91PWh0dHBzLTNBX193d3cuc3Bpbmlj
-cy5uZXRfbGlzdHNfbGludXgtMkRtbWNfbXNnNDgxMjUuaHRtbCZkPUR3SUJhUSZjPURQTDZfWF82
-SmtYRng3QVhXcUIwdGcmcj12UWstUkliandOMHp2bHdpTVNwcTNMWVVUTmY3R3FjNHVqaG9zWUkN
-Cj4gPiBUdEF3Jm09NnJQV3BLVVlRRDNrWS0yT0Vpa0pVV3lFSnZ3S0psaldIRkM4cmQyVENhayZz
-PUpqWDBEeDgtZVN5VzJjQVRNc25HMWVBenJLZ29Ea1MxYmNTNVhZclZ0bEUmZT0uDQo+IA0KPiBF
-dmdlbml5LA0KPiANCj4gSXQgc2VlbXMgbGlrZSBJIHNob3VsZCBzcXVhc2ggdGhpcyBmaXggaW50
-byB0aGUgYWJvdmUgY29tbWl0PyBNYWtlcyBzZW5zZT8NCklNSE8gaXQgaXMgbm90IGEgZ29vZCBp
-ZGVhLCBiZWNhdXNlIHRoaXMgZml4IGlzIG9ydGhvZ29uYWwgdG8gdGhlIGFib3ZlIGNvbW1pdC4N
-CkRlYnVnZ2luZyBkcnRvIG92ZXJmbG93IGlzc3VlIHdlIGZvdW5kIHRoaXMgc3RyYW5nZSBiZWhh
-dmlvci4NClRoaXMgbWlnaHQgYmUgZ2VuZXJhbCBpc3N1ZSBvZiBzb2Z0LXJlc2V0LiBTbyBJIHRo
-aW5rIHRoaXMgc2hvdWxkIGJlIHNlcGFyYXRlIHBhdGNoLg0KQWxzbyBpZiB0aGVzZSBwYXRjaGVz
-IGFyZSBpbmRlcGVuZGVudCwgaXQgd2lsbCBiZSBlYXNpZXIgdG8gYmFja3BvcnQgdGhlbS4NCg0K
-QmVzdCByZWdhcmRzLA0KRXZnZW5peSBEaWRpbg0KDQo+IEtpbmQgcmVnYXJkcw0KPiBVZmZlDQo+
-IA0KPiA+IA0KPiA+IEJlaGF2aW91ciB3aGlsZSBzb2Z0LXJlc2V0IGlzIG5vdCBzb21ldGhpbmcg
-d2UgZXhjZXB0IG9yDQo+ID4gZXZlbiB3YW50IHRvIGhhcHBlbi4gU28gd2Ugc3dpdGNoIGZyb20g
-ZHdfbWNpX2lkbWFjX3Jlc2V0DQo+ID4gdG8gZHdfbWNpX2lkbWFjX2luaXQsIHNvIGRlc2NyaXB0
-b3JzIGFyZSBjbGVhbmVkIGJlZm9yZSBzdGFydGluZyBkbWEuDQo+ID4gDQo+ID4gQW5kIHdoaWxl
-IGF0IGl0IGV4cGxpY2l0bHkgemVybyBkZXMwIHdoaWNoIG90aGVyd2lzZSBtaWdodA0KPiA+IGNv
-bnRhaW4gZ2FyYmFnZSBhcyBiZWluZyBhbGxvY2F0ZWQgYnkgZG1hbV9hbGxvY19jb2hlcmVudCgp
-Lg0KPiA+IA0KPiA+IFNpZ25lZC1vZmYtYnk6IEV2Z2VuaXkgRGlkaW4gPEV2Z2VuaXkuRGlkaW5A
-c3lub3BzeXMuY29tPg0KPiA+IENjOiBKYWVob29uIENodW5nIDxqaDgwLmNodW5nQHNhbXN1bmcu
-Y29tPg0KPiA+IENjOiBVbGYgSGFuc3NvbiA8dWxmLmhhbnNzb25AbGluYXJvLm9yZz4NCj4gPiBD
-YzogQW5keSBTaGV2Y2hlbmtvIDxhbmR5LnNoZXZjaGVua29AZ21haWwuY29tPg0KPiA+IENjOiBK
-aXNoZW5nIFpoYW5nIDxKaXNoZW5nLlpoYW5nQHN5bmFwdGljcy5jb20+DQo+ID4gQ2M6IFNoYXdu
-IExpbiA8c2hhd24ubGluQHJvY2stY2hpcHMuY29tPg0KPiA+IENjOiBBbGV4ZXkgQnJvZGtpbiA8
-YWJyb2RraW5Ac3lub3BzeXMuY29tPg0KPiA+IENjOiBFdWdlbml5IFBhbHRzZXYgPEV1Z2VuaXku
-UGFsdHNldkBzeW5vcHN5cy5jb20+DQo+ID4gQ2M6IGxpbnV4LXNucHMtYXJjQGxpc3RzLmluZnJh
-ZGVhZC5vcmcNCj4gPiAtLS0NCj4gPiDCoGRyaXZlcnMvbW1jL2hvc3QvZHdfbW1jLmMgfCA2ICsr
-KystLQ0KPiA+IMKgMSBmaWxlIGNoYW5nZWQsIDQgaW5zZXJ0aW9ucygrKSwgMiBkZWxldGlvbnMo
-LSkNCj4gPiANCj4gPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9kd19tbWMuYyBiL2Ry
-aXZlcnMvbW1jL2hvc3QvZHdfbW1jLmMNCj4gPiBpbmRleCAwYWEzOTk3NWYzM2IuLjI2ZjJhYzEw
-NzcwMiAxMDA2NDQNCj4gPiAtLS0gYS9kcml2ZXJzL21tYy9ob3N0L2R3X21tYy5jDQo+ID4gKysr
-IGIvZHJpdmVycy9tbWMvaG9zdC9kd19tbWMuYw0KPiA+IEBAIC01NTgsNiArNTU4LDcgQEAgc3Rh
-dGljIGludCBkd19tY2lfaWRtYWNfaW5pdChzdHJ1Y3QgZHdfbWNpICpob3N0KQ0KPiA+IMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgKHNpemVvZihzdHJ1Y3QgaWRtYWNfZGVzY182NGFkZHIpICoNCj4g
-PiDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-KGkgKyAxKSkpID4+IDMyOw0KPiA+IMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoC8qIEluaXRpYWxpemUgcmVzZXJ2ZWQgYW5kIGJ1ZmZlciBzaXplIGZpZWxk
-cyB0byAiMCIgKi8NCj4gPiArwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoHAtPmRlczAgPSAwOw0KPiA+IMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoHAtPmRlczEgPSAwOw0KPiA+IMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoHAtPmRlczIgPSAwOw0KPiA+IMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoHAtPmRlczMgPSAwOw0KPiA+IEBAIC01
-ODAsNiArNTgxLDcgQEAgc3RhdGljIGludCBkd19tY2lfaWRtYWNfaW5pdChzdHJ1Y3QgZHdfbWNp
-ICpob3N0KQ0KPiA+IMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoGkr
-KywgcCsrKSB7DQo+ID4gwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgcC0+ZGVzMyA9IGNwdV90b19sZTMyKGhvc3QtPnNnX2RtYSArDQo+ID4gwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqAoc2l6ZW9mKHN0cnVjdCBpZG1hY19kZXNjKSAqIChpICsgMSkpKTsNCj4g
-PiArwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoHAtPmRlczAg
-PSAwOw0KPiA+IMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oHAtPmRlczEgPSAwOw0KPiA+IMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgfQ0KPiA+
-IA0KPiA+IEBAIC0xNzk1LDggKzE3OTcsOCBAQCBzdGF0aWMgYm9vbCBkd19tY2lfcmVzZXQoc3Ry
-dWN0IGR3X21jaSAqaG9zdCkNCj4gPiDCoMKgwqDCoMKgwqDCoMKgfQ0KPiA+IA0KPiA+IMKgwqDC
-oMKgwqDCoMKgwqBpZiAoaG9zdC0+dXNlX2RtYSA9PSBUUkFOU19NT0RFX0lETUFDKQ0KPiA+IC3C
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAvKiBJdCBpcyBhbHNvIHJlY29tbWVuZGVkIHRo
-YXQgd2UgcmVzZXQgYW5kIHJlcHJvZ3JhbSBpZG1hYyAqLw0KPiA+IC3CoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqBkd19tY2lfaWRtYWNfcmVzZXQoaG9zdCk7DQo+ID4gK8KgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoC8qIEl0IGlzIGFsc28gcmVxdWlyZWQgdGhhdCB3ZSByZWluaXQg
-aWRtYWMgKi8NCj4gPiArwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgZHdfbWNpX2lkbWFj
-X2luaXQoaG9zdCk7DQo+ID4gDQo+ID4gwqDCoMKgwqDCoMKgwqDCoHJldCA9IHRydWU7DQo+ID4g
-DQo+ID4gLS0NCj4gPiAyLjExLjANCj4gPiAKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX18KbGludXgtc25wcy1hcmMgbWFpbGluZyBsaXN0CmxpbnV4LXNucHMt
-YXJjQGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1h
-bi9saXN0aW5mby9saW51eC1zbnBzLWFyYw==
+On 15 March 2018 at 14:18, Evgeniy Didin <Evgeniy.Didin@synopsys.com> wrote:
+> Hello Ulf,
+>
+> On Thu, 2018-03-15 at 10:57 +0100, Ulf Hansson wrote:
+>> On 14 March 2018 at 20:30, Evgeniy Didin <Evgeniy.Didin@synopsys.com> wrote:
+>> > It was found that in IDMAC mode after soft-reset driver switches
+>> > to PIO mode.
+>> >
+>> > That's what happens in case of DTO timeout overflow calculation failure:
+>> > 1. soft-reset is called
+>> > 2. driver restarts dma
+>> > 3. descriptors states are checked, one of descriptor is owned by the IDMAC.
+>> > 4. driver can't use DMA and then switches to PIO mode.
+>> >
+>> > Failure was already fixed in:
+>> > https://urldefense.proofpoint.com/v2/url?u=https-3A__www.spinics.net_lists_linux-2Dmmc_msg48125.html&d=DwIBaQ&c=DPL6_X_6JkXFx7AXWqB0tg&r=vQk-RIbjwN0zvlwiMSpq3LYUTNf7Gqc4ujhosYI
+>> > TtAw&m=6rPWpKUYQD3kY-2OEikJUWyEJvwKJljWHFC8rd2TCak&s=JjX0Dx8-eSyW2cATMsnG1eAzrKgoDkS1bcS5XYrVtlE&e=.
+>>
+>> Evgeniy,
+>>
+>> It seems like I should squash this fix into the above commit? Makes sense?
+> IMHO it is not a good idea, because this fix is orthogonal to the above commit.
+> Debugging drto overflow issue we found this strange behavior.
+
+Okay! Thanks for clarifying.
+
+> This might be general issue of soft-reset. So I think this should be separate patch.
+> Also if these patches are independent, it will be easier to backport them.
+
+Should I add a stable tag then?
+
+[...]
+
+Kind regards
+Uffe
