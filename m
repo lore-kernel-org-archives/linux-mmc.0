@@ -1,99 +1,85 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: dw_mmc: fix falling from idmac to PIO mode when
- dw_mci_reset occurs
-Date: Thu, 15 Mar 2018 10:57:32 +0100
-Message-ID: <CAPDyKFrgBm8-G1CsnqS9G62xFA2qA0XkuGBfA5v6grZnjRLteA@mail.gmail.com>
-References: <20180314193051.16791-1-Evgeniy.Didin@synopsys.com>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: Re: [PATCH v3 00/11] mmc: sdhci-omap: Add UHS/HS200 mode support
+Date: Thu, 15 Mar 2018 15:32:30 +0530
+Message-ID: <d6009c30-112f-eff9-4afe-5dd4c3a61baa@ti.com>
+References: <20180307132020.30951-1-kishon@ti.com>
+ <CAPDyKFrnPQs3B2QN7tf3UH0JYjqkpS1YDhq0s3scads3exPCCg@mail.gmail.com>
+ <1b7e25b2-4949-5427-1c36-0b253c79ff8d@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20180314193051.16791-1-Evgeniy.Didin@synopsys.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-snps-arc>,
- <mailto:linux-snps-arc-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-snps-arc/>
-List-Post: <mailto:linux-snps-arc@lists.infradead.org>
-List-Help: <mailto:linux-snps-arc-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-snps-arc>,
- <mailto:linux-snps-arc-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-snps-arc" <linux-snps-arc-bounces@lists.infradead.org>
-Errors-To: linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org
-To: Evgeniy Didin <Evgeniy.Didin@synopsys.com>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, Alexey Brodkin <Alexey.Brodkin@synopsys.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jisheng Zhang <Jisheng.Zhang@synaptics.com>, Jaehoon Chung <jh80.chung@samsung.com>, Andy Shevchenko <andy.shevchenko@gmail.com>, linux-snps-arc@lists.infradead.org, Eugeniy Paltsev <Eugeniy.Paltsev@synopsys.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1b7e25b2-4949-5427-1c36-0b253c79ff8d@intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Tony Lindgren <tony@atomide.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, devicetree@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 14 March 2018 at 20:30, Evgeniy Didin <Evgeniy.Didin@synopsys.com> wrote:
-> It was found that in IDMAC mode after soft-reset driver switches
-> to PIO mode.
->
-> That's what happens in case of DTO timeout overflow calculation failure:
-> 1. soft-reset is called
-> 2. driver restarts dma
-> 3. descriptors states are checked, one of descriptor is owned by the IDMAC.
-> 4. driver can't use DMA and then switches to PIO mode.
->
-> Failure was already fixed in:
-> https://www.spinics.net/lists/linux-mmc/msg48125.html.
 
-Evgeniy,
 
-It seems like I should squash this fix into the above commit? Makes sense?
+On Thursday 15 March 2018 02:22 PM, Adrian Hunter wrote:
+> On 15/03/18 10:47, Ulf Hansson wrote:
+>> On 7 March 2018 at 14:20, Kishon Vijay Abraham I <kishon@ti.com> wrote:
+>>> Add UHS/HS200 mode support in sdhci-omap. The programming sequence
+>>> for voltage switching, tuning is followed from AM572x TRM
+>>> http://www.ti.com/lit/ug/spruhz6i/spruhz6i.pdf
+>>> (Similar to all AM57x/DRA7x SoCs). The patch series also implements
+>>> workaround for errata published in
+>>> http://www.ti.com/lit/er/sprz429k/sprz429k.pdf
+>>>
+>>> patches are created on top of
+>>> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git next
+>>>
+>>> Patches in v2 already applied to mmc -next are dropped from the
+>>> series.
+>>>
+>>> Changes from v2:
+>>> *) Changed SW timeout logic as per Adrians's suggestion
+>>> *) Validated SDIO with the current patches (added a couple of fixes
+>>>    found while adding SDIO support).
+>>> *) Used soc_device_match() instead of pdata-quirks as per Tony's
+>>>    suggestions.
+>>>
+>>> Changes from v1:
+>>> *) Only poll on DAT0 and DATI for card_busy status
+>>> *) Cleanup iodelay patch as suggested by Tony.
+>>> *) Added quirk to disable HW timeout
+>>> *) Use the existing data timer but program a relatively accurate
+>>>    SW timeout value (Impacts all platforms)
+>>> *) Fix a bug in sdhci which was using data_timer for non data line
+>>>    commands
+>>>
+>>> Kishon Vijay Abraham I (11):
+>>>   mmc: sdhci-omap: Fix when capabilities are obtained from
+>>>     SDHCI_CAPABILITIES reg
+>>>   mmc: sdhci-omap: Remove setting ADMA capability in driver
+>>>   mmc: sdhci-omap: Workaround for Errata i843
+>>>   mmc: sdhci-omap: Invoke sdhci_get_of_property to read sdhci dt
+>>>     properties
+>>>   mmc: sdhci: Disable HS200 mode if controller can't support 1.8v
+>>>   mmc: sdhci: Add quirk to disable HW timeout
+>>>   mmc: sdhci: Program a relatively accurate SW timeout value
+>>>   mmc: sdhci-omap: Workaround for Errata i834
+>>>   dt-bindings: sdhci-omap: Add K2G specific binding
+>>>   mmc: sdhci-omap: Add support for MMC/SD controller in k2g SoC
+>>>   mmc: sdhci-omap: Add sdhci_omap specific ops for enable_sdio_irq
+>>>
+>>>  .../devicetree/bindings/mmc/sdhci-omap.txt         |  2 +
+>>>  drivers/mmc/host/sdhci-omap.c                      | 78 +++++++++++++++++++---
+>>>  drivers/mmc/host/sdhci.c                           | 75 +++++++++++++++++----
+>>>  drivers/mmc/host/sdhci.h                           | 15 +++++
+>>>  4 files changed, 148 insertions(+), 22 deletions(-)
+>>>
+>>> --
+>>> 2.11.0
+>>>
+>>
+>> Overall this looks good to me, however it seems like we need to give
+>> Adrian a little more time to comment.
+>>
+> 
+> I will try to look at it today.
 
-Kind regards
-Uffe
+sure, thanks!
 
->
-> Behaviour while soft-reset is not something we except or
-> even want to happen. So we switch from dw_mci_idmac_reset
-> to dw_mci_idmac_init, so descriptors are cleaned before starting dma.
->
-> And while at it explicitly zero des0 which otherwise might
-> contain garbage as being allocated by dmam_alloc_coherent().
->
-> Signed-off-by: Evgeniy Didin <Evgeniy.Didin@synopsys.com>
-> Cc: Jaehoon Chung <jh80.chung@samsung.com>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: Andy Shevchenko <andy.shevchenko@gmail.com>
-> Cc: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
-> Cc: Shawn Lin <shawn.lin@rock-chips.com>
-> Cc: Alexey Brodkin <abrodkin@synopsys.com>
-> Cc: Eugeniy Paltsev <Eugeniy.Paltsev@synopsys.com>
-> Cc: linux-snps-arc@lists.infradead.org
-> ---
->  drivers/mmc/host/dw_mmc.c | 6 ++++--
->  1 file changed, 4 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 0aa39975f33b..26f2ac107702 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -558,6 +558,7 @@ static int dw_mci_idmac_init(struct dw_mci *host)
->                                         (sizeof(struct idmac_desc_64addr) *
->                                                         (i + 1))) >> 32;
->                         /* Initialize reserved and buffer size fields to "0" */
-> +                       p->des0 = 0;
->                         p->des1 = 0;
->                         p->des2 = 0;
->                         p->des3 = 0;
-> @@ -580,6 +581,7 @@ static int dw_mci_idmac_init(struct dw_mci *host)
->                      i++, p++) {
->                         p->des3 = cpu_to_le32(host->sg_dma +
->                                         (sizeof(struct idmac_desc) * (i + 1)));
-> +                       p->des0 = 0;
->                         p->des1 = 0;
->                 }
->
-> @@ -1795,8 +1797,8 @@ static bool dw_mci_reset(struct dw_mci *host)
->         }
->
->         if (host->use_dma == TRANS_MODE_IDMAC)
-> -               /* It is also recommended that we reset and reprogram idmac */
-> -               dw_mci_idmac_reset(host);
-> +               /* It is also required that we reinit idmac */
-> +               dw_mci_idmac_init(host);
->
->         ret = true;
->
-> --
-> 2.11.0
->
+-Kishon
