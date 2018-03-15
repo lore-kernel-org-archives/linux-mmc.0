@@ -1,67 +1,93 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 00/47] arch-removal: device drivers
-Date: Thu, 15 Mar 2018 10:09:43 +0100
-Message-ID: <CAK8P3a151M35ywHyABt2KFypPaiZROYuL10ztChwjSwqS9haHg@mail.gmail.com>
-References: <20180314153603.3127932-1-arnd@arndb.de>
- <20180315063238.3303b8d1@bbrezillon>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2 2/8] mmc: sunxi: Move the power off action in a
+ separate function
+Date: Thu, 15 Mar 2018 10:23:15 +0100
+Message-ID: <CAPDyKFpdX5Xg_S0daFeFWE-4CQFRa=MC-qdmzqNyCaipyxAj3Q@mail.gmail.com>
+References: <cover.e1acb3dc84e043c8342166e7fb45f79be36ab154.1520520655.git-series.maxime.ripard@bootlin.com>
+ <bd3c692c488e0e3ee8f4cc169980a74384717ec2.1520520655.git-series.maxime.ripard@bootlin.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
-In-Reply-To: <20180315063238.3303b8d1@bbrezillon>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
- <mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
-List-Post: <mailto:linux-mtd@lists.infradead.org>
-List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
- <mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-mtd" <linux-mtd-bounces@lists.infradead.org>
-Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
-To: Boris Brezillon <boris.brezillon@bootlin.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-usb@vger.kernel.org, Wolfram Sang <wsa@the-dreams.de>, linux-iio@vger.kernel.org, Viresh Kumar <viresh.kumar@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, Alexandre Belloni <alexandre.belloni@bootlin.com>, IDE-ML <linux-ide@vger.kernel.org>, Networking <netdev@vger.kernel.org>, linux-mtd <linux-mtd@lists.infradead.org>, linux-i2c@vger.kernel.org, linux-rtc@vger.kernel.org, Lars-Peter Clausen <lars@metafoo.de>, Herbert Xu <herbert@gondor.apana.org.au>, Jonathan Corbet <corbet@lwn.net>, "open list:DOCUMENTATION" <linux-doc@vger.kernel.org>, Alan Stern <stern@rowland.harvard.edu>, linux-serial@vger.kernel.org, Jiri Slaby <jslaby@suse.com>, linux-mmc <linux-mmc@vger.kernel.org>, Shaohua Li <shli@kernel.org>, wg@grandegger.com, "open list:HARDWARE RANDOM NUMBER GENERATOR CORE" <linux-crypto@vger.kernel.org>, linux-pwm@vger
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <bd3c692c488e0e3ee8f4cc169980a74384717ec2.1520520655.git-series.maxime.ripard@bootlin.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Maxime Ripard <maxime.ripard@bootlin.com>
+Cc: Thomas Petazzoni <thomas.petazzoni@bootlin.com>, Chen-Yu Tsai <wens@csie.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Quentin Schulz <quentin.schulz@bootlin.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Mar 15, 2018 at 6:32 AM, Boris Brezillon
-<boris.brezillon@bootlin.com> wrote:
-> Hi Arnd,
->
-> On Wed, 14 Mar 2018 16:35:13 +0100
-> Arnd Bergmann <arnd@arndb.de> wrote:
->
->> Hi driver maintainers,
->>
->> I just posted one series with the removal of eight architectures,
->> see https://lkml.org/lkml/2018/3/14/505 for details, or
->> https://lwn.net/Articles/748074/ for more background.
->>
->> These are the device drivers that go along with them. I have already
->> picked up the drivers for arch/metag/ into my tree, they were reviewed
->> earlier.
->>
->> Please let me know if you have any concerns with the patch, or if you
->> prefer to pick up the patches in your respective trees.  I created
->> the patches with 'git format-patch -D', so they will not apply without
->> manually removing those files.
->>
->> For anything else, I'd keep the removal patches in my asm-generic tree
->> and will send a pull request for 4.17 along with the actual arch removal.
->>
+On 8 March 2018 at 15:52, Maxime Ripard <maxime.ripard@bootlin.com> wrote:
+> We'll need to have the power off behaviour in order to implement
+> runtime_pm. Move it outside of the .set_ios callback for an easier access.
+
+This isn't correct. To implement runtime PM for the sunxi device,
+which I think is what your goal is, you should not disable/enable
+regulators to the (e)MMC/SD/SDIO card.
+
+If you also want runtime PM deployment for the card, that is managed
+by the mmc core already. All you have to do is to set
+MMC_CAP_AGGRESSIVE_PM for your mmc host, if you want that.
 
 >
-> If you don't mind, I'd like to take the mtd patches through the MTD
-> tree. As you've probably noticed, nand code has been moved around and
-> it's easier for me to carry those 2 simple changes in my tree than
-> creating an immutable branch.
+> And it improves readibility as a bonus.
 >
-> Let me know if this is a problem.
+> Signed-off-by: Maxime Ripard <maxime.ripard@bootlin.com>
+> ---
+>  drivers/mmc/host/sunxi-mmc.c | 25 +++++++++++++++++--------
+>  1 file changed, 17 insertions(+), 8 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+> index f9723797a9f8..a53e39d8b07e 100644
+> --- a/drivers/mmc/host/sunxi-mmc.c
+> +++ b/drivers/mmc/host/sunxi-mmc.c
+> @@ -855,6 +855,22 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
+>         return 0;
+>  }
+>
+> +static void sunxi_mmc_power_off(struct mmc_host *mmc, struct mmc_ios *ios)
+> +{
+> +       struct sunxi_mmc_host *host = mmc_priv(mmc);
+> +
+> +       dev_dbg(mmc_dev(mmc), "Powering off\n");
+> +
+> +       sunxi_mmc_reset_host(host);
+> +       if (!IS_ERR(mmc->supply.vmmc))
+> +               mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
+> +
+> +       if (!IS_ERR(mmc->supply.vqmmc) && host->vqmmc_enabled)
+> +               regulator_disable(mmc->supply.vqmmc);
+> +
+> +       host->vqmmc_enabled = false;
+> +}
+> +
+>  static void sunxi_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>  {
+>         struct sunxi_mmc_host *host = mmc_priv(mmc);
+> @@ -892,14 +908,7 @@ static void sunxi_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>                 break;
+>
+>         case MMC_POWER_OFF:
+> -               dev_dbg(mmc_dev(mmc), "power off!\n");
+> -               sunxi_mmc_reset_host(host);
+> -               if (!IS_ERR(mmc->supply.vmmc))
+> -                       mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
+> -
+> -               if (!IS_ERR(mmc->supply.vqmmc) && host->vqmmc_enabled)
+> -                       regulator_disable(mmc->supply.vqmmc);
+> -               host->vqmmc_enabled = false;
+> +               sunxi_mmc_power_off(mmc, ios);
+>                 break;
+>         }
+>
+> --
+> git-series 0.9.1
 
-Sounds good, I've removed the two patches from my tree now.
-I've already sent a version of those that is based on your latest tree to
-you for inclusion.
-
-      Arnd
-
-______________________________________________________
-Linux MTD discussion mailing list
-http://lists.infradead.org/mailman/listinfo/linux-mtd/
+Kind regards
+Uffe
