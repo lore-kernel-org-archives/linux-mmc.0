@@ -1,147 +1,56 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 8/8] mmc: sunxi: Add runtime_pm support
-Date: Thu, 15 Mar 2018 11:24:36 +0100
-Message-ID: <CAPDyKFpzi2fbSHPUaJRnBmb7YLCzwD0fTFStXgY1eB136m2gEw@mail.gmail.com>
-References: <cover.e1acb3dc84e043c8342166e7fb45f79be36ab154.1520520655.git-series.maxime.ripard@bootlin.com>
- <052c21c000f64c28fd6b64c4db11e4b706bebf79.1520520655.git-series.maxime.ripard@bootlin.com>
- <CAPDyKFoJ0KftG1VxzdM97ubFJ25M+X0EjgOPc6HxewgyZMPipg@mail.gmail.com>
- <20180315100411.iqcnwqws623ws6yn@flea>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v3 05/11] mmc: sdhci: Disable HS200 mode if controller
+ can't support 1.8v
+Date: Thu, 15 Mar 2018 12:58:37 +0200
+Message-ID: <fc379441-ed8e-47b4-f34b-d4137d158ec6@intel.com>
+References: <20180307132020.30951-1-kishon@ti.com>
+ <20180307132020.30951-6-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20180315100411.iqcnwqws623ws6yn@flea>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Maxime Ripard <maxime.ripard@bootlin.com>
-Cc: Thomas Petazzoni <thomas.petazzoni@bootlin.com>, Chen-Yu Tsai <wens@csie.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Quentin Schulz <quentin.schulz@bootlin.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180307132020.30951-6-kishon@ti.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Kishon Vijay Abraham I <kishon@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 15 March 2018 at 11:04, Maxime Ripard <maxime.ripard@bootlin.com> wrote:
-> Hi Ulf,
->
-> On Thu, Mar 15, 2018 at 10:30:54AM +0100, Ulf Hansson wrote:
->> On 8 March 2018 at 15:52, Maxime Ripard <maxime.ripard@bootlin.com> wrote:
->> > So far, even if our card was not in use, we didn't shut down our main
->> > clock, which meant that it was still output on the MMC bus.
->> >
->> > While this obviously means that we could save some power there, it also
->> > created issues when it comes with EMC control since we'll have a perfect
->> > peak at the card clock rate.
->> >
->> > Let's implement runtime_pm with autosuspend so that we will shut down the
->> > clock when it's not been in use for quite some time.
->> >
->> > Signed-off-by: Maxime Ripard <maxime.ripard@bootlin.com>
->> > ---
->> >  drivers/mmc/host/sunxi-mmc.c | 46 +++++++++++++++++++++++++++++++++++++-
->> >  1 file changed, 46 insertions(+)
->> >
->> > diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
->> > index f6374066081b..0f98a5fcaade 100644
->> > --- a/drivers/mmc/host/sunxi-mmc.c
->> > +++ b/drivers/mmc/host/sunxi-mmc.c
->> > @@ -35,6 +35,7 @@
->> >  #include <linux/of_gpio.h>
->> >  #include <linux/of_platform.h>
->> >  #include <linux/platform_device.h>
->> > +#include <linux/pm_runtime.h>
->> >  #include <linux/regulator/consumer.h>
->> >  #include <linux/reset.h>
->> >  #include <linux/scatterlist.h>
->> > @@ -973,6 +974,9 @@ static void sunxi_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
->> >         unsigned long flags;
->> >         u32 imask;
->> >
->> > +       if (enable)
->> > +               pm_runtime_get_noresume(host->dev);
->> > +
->> >         spin_lock_irqsave(&host->lock, flags);
->> >
->> >         imask = mmc_readl(host, REG_IMASK);
->> > @@ -985,6 +989,9 @@ static void sunxi_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
->> >         }
->> >         mmc_writel(host, REG_IMASK, imask);
->> >         spin_unlock_irqrestore(&host->lock, flags);
->> > +
->> > +       if (!enable)
->> > +               pm_runtime_put_noidle(host->mmc->parent);
->> >  }
->> >
->> >  static void sunxi_mmc_hw_reset(struct mmc_host *mmc)
->> > @@ -1398,6 +1405,11 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
->> >         if (ret)
->> >                 goto error_free_dma;
->> >
->> > +       pm_runtime_set_active(&pdev->dev);
->> > +       pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
->> > +       pm_runtime_use_autosuspend(&pdev->dev);
->> > +       pm_runtime_enable(&pdev->dev);
->> > +
->> >         ret = mmc_add_host(mmc);
->> >         if (ret)
->> >                 goto error_free_dma;
->> > @@ -1418,6 +1430,7 @@ static int sunxi_mmc_remove(struct platform_device *pdev)
->> >         struct sunxi_mmc_host *host = mmc_priv(mmc);
->> >
->> >         mmc_remove_host(mmc);
->> > +       pm_runtime_force_suspend(&pdev->dev);
->> >         disable_irq(host->irq);
->> >         sunxi_mmc_disable(host);
->> >         dma_free_coherent(&pdev->dev, PAGE_SIZE, host->sg_cpu, host->sg_dma);
->> > @@ -1426,10 +1439,43 @@ static int sunxi_mmc_remove(struct platform_device *pdev)
->> >         return 0;
->> >  }
->> >
->> > +static int sunxi_mmc_runtime_resume(struct device *dev)
->> > +{
->> > +       struct mmc_host *mmc = dev_get_drvdata(dev);
->> > +       struct sunxi_mmc_host *host = mmc_priv(mmc);
->> > +       int ret;
->> > +
->> > +       ret = sunxi_mmc_enable(host);
->> > +       if (ret)
->> > +               return ret;
->> > +
->> > +       sunxi_mmc_power_up(mmc, &mmc->ios);
->>
->> Instead of doing power up, you may need restore some ios settings,
->> such as the clock rate for example.
->>
->> You may also need to restore some registers in sunxi device, in case
->> it's possible that the controller loses context at runtime suspend.
->
-> The thing I was precisely trying to avoid was this :)
->
-> I could save and restore registers when the MMC controller is put into
-> suspend, but that's pretty much exactly the same sequence than what is
-> done in the MMC_POWER_UP sequence in .set_ios.
+On 07/03/18 15:20, Kishon Vijay Abraham I wrote:
+> Though MMC controller can indicate HS200 mode capability (by
+> using "mmc-hs200-1_8v" dt property), if the IO lines in the board
+> is connected to 3.3v supply, HS200 mode cannot be supported.
+> Such boards have "no-1-8-v" property in their dts file. Disable HS200
+> mode for boards which have "no-1-8-v" set.
+> 
+> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+> ---
+>  drivers/mmc/host/sdhci.c | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 2ededa7f43df..aa8b5ca0d1b0 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -3672,6 +3672,7 @@ int sdhci_setup_host(struct sdhci_host *host)
+>  	if (host->quirks2 & SDHCI_QUIRK2_NO_1_8_V) {
+>  		host->caps1 &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
+>  				 SDHCI_SUPPORT_DDR50);
+> +		mmc->caps2 &= ~MMC_CAP2_HS200;
 
-Well, there may be some overlap.
+Pedantically, shouldn't that be:
 
->
-> So it just felt cleaner to just do the power_up sequence at resume
-> time. It avoids having to maintain the list of registers to save and
-> restore, and it involves less code overall.
+	~(MMC_CAP2_HS200_1_8V_SDR | MMC_CAP2_HS400_1_8V)
 
-I understand.
+We have MMC_CAP2_HSX00_1_2V so maybe we should add:
 
->
-> It suprised me a bit that the core will not call .set_ios with
-> MMC_POWER_UP at resume by itself, but I guess there's a good reason
-> for that :)
+	#define MMC_CAP2_HSX00_1_8V	(MMC_CAP2_HS200_1_8V_SDR | MMC_CAP2_HS400_1_8V)
 
-It does that when it runtime PM manages the mmc/sd/sdio card, don't
-confuse that with the mmc host. That's because it needs to follow the
-(e)MMC/SD/SDIO spec, which don't allows you to just cut the power to
-card without first informing (sending commands) the card about it.
+And then
 
-Kind regards
-Uffe
+		mmc->caps2 &= ~MMC_CAP2_HSX00_1_8V;
+
+>  	}
+>  
+>  	/* Any UHS-I mode in caps implies SDR12 and SDR25 support. */
+> 
