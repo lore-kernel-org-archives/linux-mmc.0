@@ -1,102 +1,74 @@
-From: Boris Brezillon <boris.brezillon@bootlin.com>
-Subject: Re: [PATCH 00/47] arch-removal: device drivers
-Date: Thu, 15 Mar 2018 06:32:38 +0100
-Message-ID: <20180315063238.3303b8d1@bbrezillon>
-References: <20180314153603.3127932-1-arnd@arndb.de>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v3 00/11] mmc: sdhci-omap: Add UHS/HS200 mode support
+Date: Thu, 15 Mar 2018 09:47:10 +0100
+Message-ID: <CAPDyKFrnPQs3B2QN7tf3UH0JYjqkpS1YDhq0s3scads3exPCCg@mail.gmail.com>
+References: <20180307132020.30951-1-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
-In-Reply-To: <20180314153603.3127932-1-arnd@arndb.de>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
- <mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
-List-Post: <mailto:linux-mtd@lists.infradead.org>
-List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
- <mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-mtd" <linux-mtd-bounces@lists.infradead.org>
-Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: ulf.hansson@linaro.org, linux-usb@vger.kernel.org, wsa@the-dreams.de, linux-iio@vger.kernel.org, viresh.kumar@linaro.org, linus.walleij@linaro.org, alexandre.belloni@bootlin.com, linux-ide@vger.kernel.org, netdev@vger.kernel.org, linux-mtd@lists.infradead.org, linux-i2c@vger.kernel.org, linux-rtc@vger.kernel.org, lars@metafoo.de, herbert@gondor.apana.org.au, corbet@lwn.net, linux-doc@vger.kernel.org, stern@rowland.harvard.edu, linux-serial@vger.kernel.org, jslaby@suse.com, linux-mmc@vger.kernel.org, shli@kernel.org, wg@grandegger.com, linux-crypto@vger.kernel.org, linux-pwm@vger.kernel.org, linux-watchdog@vger.kernel.org, alsa-devel@alsa-project.org, b.zolnierkie@samsung.com, linux-input@vger.kernel.org, linux-can@vger.kernel.org, linux-raid@vger.kernel.org, linux-gpio@vger.kernel.org, broonie@kernel.org, bp@alien8.de, linux-fbdev@vger.kernel.org, mchehab@kernel.orglin
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180307132020.30951-1-kishon@ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Kishon Vijay Abraham I <kishon@ti.com>
+Cc: Tony Lindgren <tony@atomide.com>, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, devicetree@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Arnd,
+On 7 March 2018 at 14:20, Kishon Vijay Abraham I <kishon@ti.com> wrote:
+> Add UHS/HS200 mode support in sdhci-omap. The programming sequence
+> for voltage switching, tuning is followed from AM572x TRM
+> http://www.ti.com/lit/ug/spruhz6i/spruhz6i.pdf
+> (Similar to all AM57x/DRA7x SoCs). The patch series also implements
+> workaround for errata published in
+> http://www.ti.com/lit/er/sprz429k/sprz429k.pdf
+>
+> patches are created on top of
+> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git next
+>
+> Patches in v2 already applied to mmc -next are dropped from the
+> series.
+>
+> Changes from v2:
+> *) Changed SW timeout logic as per Adrians's suggestion
+> *) Validated SDIO with the current patches (added a couple of fixes
+>    found while adding SDIO support).
+> *) Used soc_device_match() instead of pdata-quirks as per Tony's
+>    suggestions.
+>
+> Changes from v1:
+> *) Only poll on DAT0 and DATI for card_busy status
+> *) Cleanup iodelay patch as suggested by Tony.
+> *) Added quirk to disable HW timeout
+> *) Use the existing data timer but program a relatively accurate
+>    SW timeout value (Impacts all platforms)
+> *) Fix a bug in sdhci which was using data_timer for non data line
+>    commands
+>
+> Kishon Vijay Abraham I (11):
+>   mmc: sdhci-omap: Fix when capabilities are obtained from
+>     SDHCI_CAPABILITIES reg
+>   mmc: sdhci-omap: Remove setting ADMA capability in driver
+>   mmc: sdhci-omap: Workaround for Errata i843
+>   mmc: sdhci-omap: Invoke sdhci_get_of_property to read sdhci dt
+>     properties
+>   mmc: sdhci: Disable HS200 mode if controller can't support 1.8v
+>   mmc: sdhci: Add quirk to disable HW timeout
+>   mmc: sdhci: Program a relatively accurate SW timeout value
+>   mmc: sdhci-omap: Workaround for Errata i834
+>   dt-bindings: sdhci-omap: Add K2G specific binding
+>   mmc: sdhci-omap: Add support for MMC/SD controller in k2g SoC
+>   mmc: sdhci-omap: Add sdhci_omap specific ops for enable_sdio_irq
+>
+>  .../devicetree/bindings/mmc/sdhci-omap.txt         |  2 +
+>  drivers/mmc/host/sdhci-omap.c                      | 78 +++++++++++++++++++---
+>  drivers/mmc/host/sdhci.c                           | 75 +++++++++++++++++----
+>  drivers/mmc/host/sdhci.h                           | 15 +++++
+>  4 files changed, 148 insertions(+), 22 deletions(-)
+>
+> --
+> 2.11.0
+>
 
-On Wed, 14 Mar 2018 16:35:13 +0100
-Arnd Bergmann <arnd@arndb.de> wrote:
+Overall this looks good to me, however it seems like we need to give
+Adrian a little more time to comment.
 
-> Hi driver maintainers,
-> 
-> I just posted one series with the removal of eight architectures,
-> see https://lkml.org/lkml/2018/3/14/505 for details, or
-> https://lwn.net/Articles/748074/ for more background.
-> 
-> These are the device drivers that go along with them. I have already
-> picked up the drivers for arch/metag/ into my tree, they were reviewed
-> earlier.
-> 
-> Please let me know if you have any concerns with the patch, or if you
-> prefer to pick up the patches in your respective trees.  I created
-> the patches with 'git format-patch -D', so they will not apply without
-> manually removing those files.
-> 
-> For anything else, I'd keep the removal patches in my asm-generic tree
-> and will send a pull request for 4.17 along with the actual arch removal.
-> 
->        Arnd
-> 
-> Arnd Bergmann
->   edac: remove tile driver
->   net: tile: remove ethernet drivers
->   net: adi: remove blackfin ethernet drivers
->   net: 8390: remove m32r specific bits
->   net: remove cris etrax ethernet driver
->   net: smsc: remove m32r specific smc91x configuration
->   raid: remove tile specific raid6 implementation
->   rtc: remove tile driver
->   rtc: remove bfin driver
->   char: remove obsolete ds1302 rtc driver
->   char: remove tile-srom.c
->   char: remove blackfin OTP driver
->   pcmcia: remove m32r drivers
->   pcmcia: remove blackfin driver
->   ASoC: remove blackfin drivers
->   video/logo: remove obsolete logo files
->   fbdev: remove blackfin drivers
->   fbdev: s1d13xxxfb: remove m32r specific hacks
->   crypto: remove blackfin CRC driver
->   media: platform: remove blackfin capture driver
->   media: platform: remove m32r specific arv driver
->   cpufreq: remove blackfin driver
->   cpufreq: remove cris specific drivers
->   gpio: remove etraxfs driver
->   pinctrl: remove adi2/blackfin drivers
->   ata: remove bf54x driver
->   input: keyboard: remove bf54x driver
->   input: misc: remove blackfin rotary driver
->   mmc: remove bfin_sdh driver
->   can: remove bfin_can driver
->   watchdog: remove bfin_wdt driver
->   mtd: maps: remove bfin-async-flash driver
->   mtd: nand: remove bf5xx_nand driver
-
-If you don't mind, I'd like to take the mtd patches through the MTD
-tree. As you've probably noticed, nand code has been moved around and
-it's easier for me to carry those 2 simple changes in my tree than
-creating an immutable branch.
-
-Let me know if this is a problem.
-
-Regards,
-
-Boris
-
--- 
-Boris Brezillon, Bootlin (formerly Free Electrons)
-Embedded Linux and Kernel engineering
-https://bootlin.com
-
-______________________________________________________
-Linux MTD discussion mailing list
-http://lists.infradead.org/mailman/listinfo/linux-mtd/
+Kind regards
+Uffe
