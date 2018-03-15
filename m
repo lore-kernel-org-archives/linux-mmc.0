@@ -1,61 +1,67 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: dw_mmc: fix falling from idmac to PIO mode when
- dw_mci_reset occurs
-Date: Thu, 15 Mar 2018 14:39:35 +0100
-Message-ID: <CAPDyKFp--bHg8PH7om7TTY15m0CRw3i4eO1=StRnVofxnf50OQ@mail.gmail.com>
-References: <20180314193051.16791-1-Evgeniy.Didin@synopsys.com>
- <CAPDyKFrgBm8-G1CsnqS9G62xFA2qA0XkuGBfA5v6grZnjRLteA@mail.gmail.com>
- <1521119909.10304.1.camel@synopsys.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v3 01/11] mmc: sdhci-omap: Fix when capabilities are
+ obtained from SDHCI_CAPABILITIES reg
+Date: Thu, 15 Mar 2018 16:17:25 +0200
+Message-ID: <e9ac3f68-2d75-6648-7774-786c20f6746c@intel.com>
+References: <20180307132020.30951-1-kishon@ti.com>
+ <20180307132020.30951-2-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1521119909.10304.1.camel@synopsys.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-snps-arc>,
- <mailto:linux-snps-arc-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-snps-arc/>
-List-Post: <mailto:linux-snps-arc@lists.infradead.org>
-List-Help: <mailto:linux-snps-arc-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-snps-arc>,
- <mailto:linux-snps-arc-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-snps-arc" <linux-snps-arc-bounces@lists.infradead.org>
-Errors-To: linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org
-To: Evgeniy Didin <Evgeniy.Didin@synopsys.com>
-Cc: "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>, "Alexey.Brodkin@synopsys.com" <Alexey.Brodkin@synopsys.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Jisheng.Zhang@synaptics.com" <Jisheng.Zhang@synaptics.com>, "jh80.chung@samsung.com" <jh80.chung@samsung.com>, "andy.shevchenko@gmail.com" <andy.shevchenko@gmail.com>, "linux-snps-arc@lists.infradead.org" <linux-snps-arc@lists.infradead.org>, "Eugeniy.Paltsev@synopsys.com" <Eugeniy.Paltsev@synopsys.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180307132020.30951-2-kishon@ti.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Kishon Vijay Abraham I <kishon@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 15 March 2018 at 14:18, Evgeniy Didin <Evgeniy.Didin@synopsys.com> wrote:
-> Hello Ulf,
->
-> On Thu, 2018-03-15 at 10:57 +0100, Ulf Hansson wrote:
->> On 14 March 2018 at 20:30, Evgeniy Didin <Evgeniy.Didin@synopsys.com> wrote:
->> > It was found that in IDMAC mode after soft-reset driver switches
->> > to PIO mode.
->> >
->> > That's what happens in case of DTO timeout overflow calculation failure:
->> > 1. soft-reset is called
->> > 2. driver restarts dma
->> > 3. descriptors states are checked, one of descriptor is owned by the IDMAC.
->> > 4. driver can't use DMA and then switches to PIO mode.
->> >
->> > Failure was already fixed in:
->> > https://urldefense.proofpoint.com/v2/url?u=https-3A__www.spinics.net_lists_linux-2Dmmc_msg48125.html&d=DwIBaQ&c=DPL6_X_6JkXFx7AXWqB0tg&r=vQk-RIbjwN0zvlwiMSpq3LYUTNf7Gqc4ujhosYI
->> > TtAw&m=6rPWpKUYQD3kY-2OEikJUWyEJvwKJljWHFC8rd2TCak&s=JjX0Dx8-eSyW2cATMsnG1eAzrKgoDkS1bcS5XYrVtlE&e=.
->>
->> Evgeniy,
->>
->> It seems like I should squash this fix into the above commit? Makes sense?
-> IMHO it is not a good idea, because this fix is orthogonal to the above commit.
-> Debugging drto overflow issue we found this strange behavior.
+On 07/03/18 15:20, Kishon Vijay Abraham I wrote:
+> sdhci_omap_config_iodelay_pinctrl_state() requires caps and caps2 to be
+> initialized (speed mode capabilities like UHS/HS200) before it is
+> invoked. While mmc_of_parse() initializes caps/caps2 if capabilities is
+> populated in device tree, it will remain uninitialized for capabilities
+> obtained from SDHCI_CAPABILITIES register.
+> Fix sdhci_omap_config_iodelay_pinctrl_state() to be used even while
+> getting the capabilities from SDHCI_CAPABILITIES register by invoking
+> sdhci_setup_host() before sdhci_omap_config_iodelay_pinctrl_state().
+> 
+> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+> ---
+>  drivers/mmc/host/sdhci-omap.c | 14 +++++++++-----
+>  1 file changed, 9 insertions(+), 5 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+> index 1456abd5eeb9..3cce30584d2f 100644
+> --- a/drivers/mmc/host/sdhci-omap.c
+> +++ b/drivers/mmc/host/sdhci-omap.c
+> @@ -916,10 +916,6 @@ static int sdhci_omap_probe(struct platform_device *pdev)
+>  		goto err_put_sync;
+>  	}
+>  
+> -	ret = sdhci_omap_config_iodelay_pinctrl_state(omap_host);
+> -	if (ret)
+> -		goto err_put_sync;
+> -
+>  	host->mmc_host_ops.get_ro = mmc_gpio_get_ro;
+>  	host->mmc_host_ops.start_signal_voltage_switch =
+>  					sdhci_omap_start_signal_voltage_switch;
+> @@ -930,7 +926,15 @@ static int sdhci_omap_probe(struct platform_device *pdev)
+>  	sdhci_read_caps(host);
+>  	host->caps |= SDHCI_CAN_DO_ADMA2;
+>  
+> -	ret = sdhci_add_host(host);
+> +	ret = sdhci_setup_host(host);
+> +	if (ret)
+> +		goto err_put_sync;
+> +
+> +	ret = sdhci_omap_config_iodelay_pinctrl_state(omap_host);
+> +	if (ret)
+> +		goto err_put_sync;
+> +
+> +	ret = __sdhci_add_host(host);
+>  	if (ret)
+>  		goto err_put_sync;
 
-Okay! Thanks for clarifying.
-
-> This might be general issue of soft-reset. So I think this should be separate patch.
-> Also if these patches are independent, it will be easier to backport them.
-
-Should I add a stable tag then?
-
-[...]
-
-Kind regards
-Uffe
+if __sdhci_add_host() fails, then sdhci_cleanup_host() needs to be called to
+free resources allocated by sdhci_setup_host().
