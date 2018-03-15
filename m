@@ -1,79 +1,100 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: block: fix updating ext_csd caches on ioctl call
-Date: Thu, 15 Mar 2018 11:24:00 +0100
-Message-ID: <CAPDyKFp4tQg6kLy9KwqSJ5tBXEaDwLpGz7C-ewj4jYdjPZhXZw@mail.gmail.com>
-References: <20180308140811.6966-1-bst@pengutronix.de>
+Subject: Re: [PATCH 2/6] mmc: dw_mmc: remove the deprecated "num-slots"
+Date: Thu, 15 Mar 2018 11:22:41 +0100
+Message-ID: <CAPDyKFrkDPfff1KD53HVTevGwCvdJGBRo6_z4NRmLcGC7qHhfw@mail.gmail.com>
+References: <CGME20180223064140epcas2p41a734737c3fe7373329a94f485c21fd4@epcas2p4.samsung.com>
+ <20180223064138.18401-1-jh80.chung@samsung.com> <20180223064138.18401-2-jh80.chung@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20180308140811.6966-1-bst@pengutronix.de>
-Sender: stable-owner@vger.kernel.org
-To: Bastian Stender <bst@pengutronix.de>
-Cc: Gregory CLEMENT <gregory.clement@free-electrons.com>, Shawn Guo <shawnguo@kernel.org>, Marcin Wojtas <mw@semihalf.com>, Seshagiri Holi <sholi@nvidia.com>, Jon Hunter <jonathanh@nvidia.com>, Johan Rudholm <johan.rudholm@stericsson.com>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Sascha Hauer <kernel@pengutronix.de>, Jan Luebbe <jlu@pengutronix.de>, "# 4.0+" <stable@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180223064138.18401-2-jh80.chung@samsung.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, devicetree@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Joachim Eastwood <manabian@gmail.com>, dinguyen@kernel.org, Will Deacon <will.deacon@arm.com>, Wei Xu <xuwei5@hisilicon.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 8 March 2018 at 15:08, Bastian Stender <bst@pengutronix.de> wrote:
-> PARTITION_CONFIG is cached in mmc_card->ext_csd.part_config and the
-> currently active partition in mmc_blk_data->part_curr. These caches do
-> not always reflect changes if the ioctl call modifies the
-> PARTITION_CONFIG registers, e.g. by changing BOOT_PARTITION_ENABLE.
+On 23 February 2018 at 07:41, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> 'num-slots' property had already deprecated.
+> Remove the 'nom-slots' property that is kept to maintain the compatibility.
 >
-> Write the PARTITION_CONFIG value extracted from the ioctl call to the
-> cache and update the currently active partition accordingly. This
-> ensures that the user space cannot change the values behind the
-> kernel's back. The next call to mmc_blk_part_switch() will operate on
-> the data set by the ioctl and reflect the changes appropriately.
->
-> Signed-off-by: Bastian Stender <bst@pengutronix.de>
-> Signed-off-by: Jan Luebbe <jlu@pengutronix.de>
-> Cc: stable@vger.kernel.org
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 
-Thanks, applied for fixes!
+Thanks, applied for next!
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/core/block.c | 19 +++++++++++++++++++
->  1 file changed, 19 insertions(+)
+>  Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt | 5 -----
+>  drivers/mmc/host/dw_mmc-pci.c                              | 1 -
+>  drivers/mmc/host/dw_mmc.c                                  | 4 ----
+>  drivers/mmc/host/dw_mmc.h                                  | 3 ---
+>  4 files changed, 13 deletions(-)
 >
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 20135a5de748..2cfb963d9f37 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -72,6 +72,7 @@ MODULE_ALIAS("mmc:block");
->  #define MMC_BLK_TIMEOUT_MS  (10 * 1000)
->  #define MMC_SANITIZE_REQ_TIMEOUT 240000
->  #define MMC_EXTRACT_INDEX_FROM_ARG(x) ((x & 0x00FF0000) >> 16)
-> +#define MMC_EXTRACT_VALUE_FROM_ARG(x) ((x & 0x0000FF00) >> 8)
+> diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+> index 75c9fdca4aaf..7e5e427a22ce 100644
+> --- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+> @@ -59,11 +59,6 @@ Optional properties:
+>    is specified and the ciu clock is specified then we'll try to set the ciu
+>    clock to this at probe time.
 >
->  #define mmc_req_rel_wr(req)    ((req->cmd_flags & REQ_FUA) && \
->                                   (rq_data_dir(req) == WRITE))
-> @@ -586,6 +587,24 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
->                 return data.error;
+> -* num-slots (DEPRECATED): specifies the number of slots supported by the controller.
+> -  The number of physical slots actually used could be equal or less than the
+> -  value specified by num-slots. If this property is not specified, the value
+> -  of num-slot property is assumed to be 1.
+> -
+>  * fifo-depth: The maximum size of the tx/rx fifo's. If this property is not
+>    specified, the default value of the fifo size is determined from the
+>    controller registers.
+> diff --git a/drivers/mmc/host/dw_mmc-pci.c b/drivers/mmc/host/dw_mmc-pci.c
+> index ab8713297edb..3ad07d7b2c97 100644
+> --- a/drivers/mmc/host/dw_mmc-pci.c
+> +++ b/drivers/mmc/host/dw_mmc-pci.c
+> @@ -29,7 +29,6 @@
+>                                 MMC_CAP_SDIO_IRQ)
+>
+>  static struct dw_mci_board pci_board_data = {
+> -       .num_slots                      = 1,
+>         .caps                           = DW_MCI_CAPABILITIES,
+>         .bus_hz                         = 33 * 1000 * 1000,
+>         .detect_delay_ms                = 200,
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 38e0e7c4ffd9..a63ca7bc1099 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -3124,10 +3124,6 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>                         return ERR_PTR(-EPROBE_DEFER);
 >         }
 >
-> +       /*
-> +        * Make sure the cache of the PARTITION_CONFIG register and
-> +        * PARTITION_ACCESS bits is updated in case the ioctl ext_csd write
-> +        * changed it successfully.
-> +        */
-> +       if ((MMC_EXTRACT_INDEX_FROM_ARG(cmd.arg) == EXT_CSD_PART_CONFIG) &&
-> +           (cmd.opcode == MMC_SWITCH)) {
-> +               struct mmc_blk_data *main_md = dev_get_drvdata(&card->dev);
-> +               u8 value = MMC_EXTRACT_VALUE_FROM_ARG(cmd.arg);
-> +
-> +               /*
-> +                * Update cache so the next mmc_blk_part_switch call operates
-> +                * on up-to-date data.
-> +                */
-> +               card->ext_csd.part_config = value;
-> +               main_md->part_curr = value & EXT_CSD_PART_CONFIG_ACC_MASK;
-> +       }
-> +
->         /*
->          * According to the SD specs, some commands require a delay after
->          * issuing the command.
+> -       /* find out number of slots supported */
+> -       if (!device_property_read_u32(dev, "num-slots", &pdata->num_slots))
+> -               dev_info(dev, "'num-slots' was deprecated.\n");
+> -
+>         if (device_property_read_u32(dev, "fifo-depth", &pdata->fifo_depth))
+>                 dev_info(dev,
+>                          "fifo-depth property not found, using value of FIFOTH register as default\n");
+> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+> index e3124f06a47e..80ff9a6c6fdd 100644
+> --- a/drivers/mmc/host/dw_mmc.h
+> +++ b/drivers/mmc/host/dw_mmc.h
+> @@ -102,7 +102,6 @@ struct dw_mci_dma_slave {
+>   * @bus_hz: The rate of @mck in Hz. This forms the basis for MMC bus
+>   *     rate and timeout calculations.
+>   * @current_speed: Configured rate of the controller.
+> - * @num_slots: Number of slots available.
+>   * @fifoth_val: The value of FIFOTH register.
+>   * @verid: Denote Version ID.
+>   * @dev: Device associated with the MMC controller.
+> @@ -253,8 +252,6 @@ struct dma_pdata;
+>
+>  /* Board platform data */
+>  struct dw_mci_board {
+> -       u32 num_slots;
+> -
+>         unsigned int bus_hz; /* Clock speed at the cclk_in pad */
+>
+>         u32 caps;       /* Capabilities */
 > --
-> 2.16.1
+> 2.15.1
 >
