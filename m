@@ -1,171 +1,43 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v3 07/11] mmc: sdhci: Program a relatively accurate SW
- timeout value
-Date: Fri, 16 Mar 2018 16:21:08 +0200
-Message-ID: <49210daa-b593-4b34-abf5-be81580723bc@intel.com>
-References: <20180307132020.30951-1-kishon@ti.com>
- <20180307132020.30951-8-kishon@ti.com>
- <1e87e5f9-13e1-765b-f077-26a55359b2c3@intel.com>
- <47752066-aeda-87bc-6928-1a9b80f1c45c@ti.com>
+From: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Subject: Re: [PATCH v2 18/21] serial: Remove depends on HAS_DMA in case of
+	platform dependency
+Date: Fri, 16 Mar 2018 15:34:32 +0100
+Message-ID: <20180316143432.GA29333@kroah.com>
+References: <1521208314-4783-1-git-send-email-geert@linux-m68k.org>
+	<1521208314-4783-19-git-send-email-geert@linux-m68k.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <47752066-aeda-87bc-6928-1a9b80f1c45c@ti.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1521208314-4783-19-git-send-email-geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, linux-iio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-fpga-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-remoteproc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, alsa-devel-K7yf7f+aM1XWsZ/bQMPhNw@public.gmane.org, Bjorn Andersson <bjorn.andersson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Eric Anholt <eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org>, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux1394-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>, Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>, Boris Brezillon <boris.brezillon-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, "James E . J . Bottomley" <jejb-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>, Herbert Xu <herbert-lOAM2aK0SrRLBo1qDEOMRrpzq4S04n8Q@public.gmane.org>, linux-scsi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Richard Weinberger <richard-/L3Ra7n9ekc@public.gmane.org>, Jassi Brar <jassisinghbrar-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Marek Vasut <marek.vasut-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-serial-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matias Bjorling <mb-VR7NuqX4VJ8tq7phqP6ubQ@public.gmane.org>, linux-media-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>deve
 List-Id: linux-mmc@vger.kernel.org
 
-On 16/03/18 08:29, Kishon Vijay Abraham I wrote:
-> Hi,
+On Fri, Mar 16, 2018 at 02:51:51PM +0100, Geert Uytterhoeven wrote:
+> Remove dependencies on HAS_DMA where a Kconfig symbol depends on another
+> symbol that implies HAS_DMA, and, optionally, on "|| COMPILE_TEST".
+> In most cases this other symbol is an architecture or platform specific
+> symbol, or PCI.
 > 
-> On Thursday 15 March 2018 06:43 PM, Adrian Hunter wrote:
->> On 07/03/18 15:20, Kishon Vijay Abraham I wrote:
->>> sdhci has a 10 second timeout to catch devices that stop responding.
->>> Instead of programming 10 second arbitrary value, calculate the total time
->>> it would take for the entire transfer to happen and program the timeout
->>> value accordingly.
->>>
->>> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
->>> ---
->>>  drivers/mmc/host/sdhci.c | 47 ++++++++++++++++++++++++++++++++++++++++-------
->>>  drivers/mmc/host/sdhci.h | 10 ++++++++++
->>>  2 files changed, 50 insertions(+), 7 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>> index 1dd117cbeb6e..baab67bfa39b 100644
->>> --- a/drivers/mmc/host/sdhci.c
->>> +++ b/drivers/mmc/host/sdhci.c
->>> @@ -709,6 +709,36 @@ static u32 sdhci_sdma_address(struct sdhci_host *host)
->>>  		return sg_dma_address(host->data->sg);
->>>  }
->>>  
->>> +static void sdhci_calc_sw_timeout(struct sdhci_host *host,
->>> +				  struct mmc_command *cmd,
->>> +				  unsigned int target_timeout)
->>> +{
->>> +	struct mmc_data *data = cmd->data;
->>> +	struct mmc_host *mmc = host->mmc;
->>> +	u64 transfer_time;
->>> +	struct mmc_ios *ios = &mmc->ios;
->>> +	unsigned char bus_width = 1 << ios->bus_width;
->>> +	unsigned int blksz;
->>> +	unsigned int freq;
->>> +
->>> +	if (data) {
->>> +		blksz = data->blksz;
->>> +		freq = host->mmc->actual_clock ? : host->clock;
->>> +		transfer_time = (u64)blksz * NSEC_PER_SEC * (8 / bus_width);
->>> +		do_div(transfer_time, freq);
->>> +		/* multiply by '2' to account for any unknowns */
->>> +		transfer_time = transfer_time * 2;
->>> +		/* calculate timeout for the entire data */
->>> +		host->data_timeout = (data->blocks * ((target_timeout *
->>> +						       NSEC_PER_USEC) +
->>> +						       transfer_time));
->>
->> (target_timeout * NSEC_PER_USEC) might be 32-bit and therefore overflow
->> for timeouts greater than about 4 seconds.
->>
->>> +	} else {
->>> +		host->data_timeout = (u64)target_timeout * NSEC_PER_USEC;
->>> +	}
->>> +
->>> +	host->data_timeout += MMC_CMD_TRANSFER_TIME;
->>
->> Need to allow for target_timeout == 0 so:
->>
->> 	if (host->data_timeout)
->> 		host->data_timeout += MMC_CMD_TRANSFER_TIME;
->>
->>> +}
->>> +
->>>  static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
->>>  {
->>>  	u8 count;
->>> @@ -766,6 +796,7 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
->>>  		if (count >= 0xF)
->>>  			break;
->>>  	}
->>> +	sdhci_calc_sw_timeout(host, cmd, target_timeout);
->>
->> If you make the changes I suggest for patch 6, then this would
->> move sdhci_calc_sw_timeout() into sdhci_set_timeout().
->>
->> I suggest you factor out the target_timeout calculation e.g.
->>
->> static unsigned int sdhci_target_timeout(struct sdhci_host *host,
->> 					 struct mmc_command *cmd,
->> 					 struct mmc_data *data)
->> {
->> 	unsigned int target_timeout;
->>
->> 	/* timeout in us */
->> 	if (!data)
->> 		target_timeout = cmd->busy_timeout * 1000;
->> 	else {
->> 		target_timeout = DIV_ROUND_UP(data->timeout_ns, 1000);
->> 		if (host->clock && data->timeout_clks) {
->> 			unsigned long long val;
->>
->> 			/*
->> 			 * data->timeout_clks is in units of clock cycles.
->> 			 * host->clock is in Hz.  target_timeout is in us.
->> 			 * Hence, us = 1000000 * cycles / Hz.  Round up.
->> 			 */
->> 			val = 1000000ULL * data->timeout_clks;
->> 			if (do_div(val, host->clock))
->> 				target_timeout++;
->> 			target_timeout += val;
->> 		}
->> 	}
->>
->> 	return target_timeout;
->> }
->>
->> And call it from sdhci_calc_sw_timeout()
->>
->>>  
->>>  	return count;
->>>  }
->>> @@ -1175,13 +1206,6 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
->>>  		mdelay(1);
->>>  	}
->>>  
->>> -	timeout = jiffies;
->>> -	if (!cmd->data && cmd->busy_timeout > 9000)
->>> -		timeout += DIV_ROUND_UP(cmd->busy_timeout, 1000) * HZ + HZ;
->>> -	else
->>> -		timeout += 10 * HZ;
->>> -	sdhci_mod_timer(host, cmd->mrq, timeout);
->>> -
->>>  	host->cmd = cmd;
->>>  	if (sdhci_data_line_cmd(cmd)) {
->>>  		WARN_ON(host->data_cmd);
->>> @@ -1221,6 +1245,15 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
->>>  	    cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200)
->>>  		flags |= SDHCI_CMD_DATA;
->>>  
->>> +	timeout = jiffies;
->>> +	if (host->data_timeout > 0) {
->>
->> This can be just:
->>
->> 	if (host->data_timeout) {
->>
->>> +		timeout += nsecs_to_jiffies(host->data_timeout);
->>> +		host->data_timeout = 0;
->>
->> It would be better to initialize host->data_timeout = 0 at the top of
->> sdhci_prepare_data().
->>
->> Also still need:
->>
->> 	else if (!cmd->data && cmd->busy_timeout > 9000) {
->> 		timeout += DIV_ROUND_UP(cmd->busy_timeout, 1000) * HZ + HZ;
+> Generic symbols and drivers without platform dependencies keep their
+> dependencies on HAS_DMA, to prevent compiling subsystems or drivers that
+> cannot work anyway.
 > 
-> sdhci_calc_sw_timeout should have calculated the timeout for this case too no?
+> This simplifies the dependencies, and allows to improve compile-testing.
+> 
+> Signed-off-by: Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>
+> Reviewed-by: Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+> Acked-by: Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>
 
-Yes, but I was thinking you would only calculate when it was needed.
+Acked-by: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
