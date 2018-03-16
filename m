@@ -1,49 +1,78 @@
-From: Bartlomiej Zolnierkiewicz <b.zolnierkie-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [PATCH v2 04/21] fbdev: Remove depends on HAS_DMA in case of
-	platform dependency
-Date: Fri, 16 Mar 2018 17:01:13 +0100
-Message-ID: <1863306.fWLBGQtWhd@amdc3058>
-References: <1521208314-4783-1-git-send-email-geert@linux-m68k.org>
-	<CGME20180316152138epcas1p3e0e107cd14fd6fb4aeb595e0e7661ab7@epcas1p3.samsung.com>
-	<1521208314-4783-5-git-send-email-geert@linux-m68k.org>
+From: Evgeniy Didin <Evgeniy.Didin@synopsys.com>
+Subject: Re: mmc: block: bonnie++ runs with errors on arc/hsdk board
+Date: Fri, 16 Mar 2018 17:10:37 +0000
+Message-ID: <1521220236.10304.10.camel@synopsys.com>
+References: <1520942674.10285.8.camel@synopsys.com>
+ <486fe92e-9b53-53a4-f98d-129a97032470@intel.com>
+ <1520956602.10285.10.camel@synopsys.com>
+ <1521030769.10285.16.camel@synopsys.com>
+ <83de0f90-0919-f449-b432-494b9bf524a1@intel.com>
+ <1521126524.10304.5.camel@synopsys.com>
+ <c5e50711-77d9-d1d2-35f4-3b656c8e895c@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-reply-to: <1521208314-4783-5-git-send-email-geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, linux-iio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-fpga-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-remoteproc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, alsa-devel-K7yf7f+aM1XWsZ/bQMPhNw@public.gmane.org, Bjorn Andersson <bjorn.andersson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Eric Anholt <eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org>, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux1394-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>, Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>, Boris Brezillon <boris.brezillon-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, "James E . J . Bottomley" <jejb-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>, Herbert Xu <herbert-lOAM2aK0SrRLBo1qDEOMRrpzq4S04n8Q@public.gmane.org>, linux-scsi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Richard Weinberger <richard-/L3Ra7n9ekc@public.gmane.org>, Jassi Brar <jassisinghbrar-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Marek Vasut <marek.vasut-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-serial-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matias Bjorling <mb-VR7NuqX4VJ8tq7phqP6ubQ@public.gmane.org>, David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, linux-media-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org>
+In-Reply-To: <c5e50711-77d9-d1d2-35f4-3b656c8e895c@intel.com>
+Content-Language: en-US
+Content-ID: <C8711AD844C36E41A7E89E8D530462C6@internal.synopsys.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-snps-arc>,
+ <mailto:linux-snps-arc-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-snps-arc/>
+List-Post: <mailto:linux-snps-arc@lists.infradead.org>
+List-Help: <mailto:linux-snps-arc-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-snps-arc>,
+ <mailto:linux-snps-arc-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-snps-arc" <linux-snps-arc-bounces@lists.infradead.org>
+Errors-To: linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org
+To: "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "Evgeniy.Didin@synopsys.com" <Evgeniy.Didin@synopsys.com>
+Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-ext4@vger.kernel.org" <linux-ext4@vger.kernel.org>, "tytso@mit.edu" <tytso@mit.edu>, "linus.walleij@linaro.org" <linus.walleij@linaro.org>, "Alexey.Brodkin@synopsys.com" <Alexey.Brodkin@synopsys.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "jh80.chung@samsung.com" <jh80.chung@samsung.com>, "adilger.kernel@dilger.ca" <adilger.kernel@dilger.ca>, "linux-snps-arc@lists.infradead.org" <linux-snps-arc@lists.infradead.org>, "Eugeniy.Paltsev@synopsys.com" <Eugeniy.Paltsev@synopsys.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Friday, March 16, 2018 02:51:37 PM Geert Uytterhoeven wrote:
-> Remove dependencies on HAS_DMA where a Kconfig symbol depends on another
-> symbol that implies HAS_DMA, and, optionally, on "|| COMPILE_TEST".
-> In most cases this other symbol is an architecture or platform specific
-> symbol, or PCI.
-> 
-> Generic symbols and drivers without platform dependencies keep their
-> dependencies on HAS_DMA, to prevent compiling subsystems or drivers that
-> cannot work anyway.
-> 
-> This simplifies the dependencies, and allows to improve compile-testing.
-> 
-> Signed-off-by: Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>
-> Reviewed-by: Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-> Acked-by: Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>
-
-Acked-by: Bartlomiej Zolnierkiewicz <b.zolnierkie-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-
-Best regards,
---
-Bartlomiej Zolnierkiewicz
-Samsung R&D Institute Poland
-Samsung Electronics
+SGVsbG8gQWRyaWFuLA0KDQo+IFllcy7CoMKgVW5mb3J0dW5hdGVseSB0aGUgY2xvY2sgdXNlZCBp
+cyBub3QgYWNjdXJhdGUgZW5vdWdoIHRvIGNvcnJlY3RseSBvcmRlcg0KPiB0aGUgZXZlbnRzIGFj
+cm9zcyBkaWZmZXJlbnQgQ1BVcywgd2hpY2ggbWFrZXMgaXQgdmVyeSBoYXJkIHRvIHNlZSBkZWxh
+eXMNCj4gYmV0d2VlbiByZXF1ZXN0cy7CoMKgWW91IGNvdWxkIHRyeSBhIGRpZmZlcmVudCBjbG9j
+ayAtIHJlZmVyIHRoZSAtLWNsb2NraWQNCj4gb3B0aW9uIHRvIHBlcmYgcmVjb3JkLg0KPiANCj4g
+TmV2ZXJ0aGVsZXNzIGl0IHNob3dzIHRoZXJlIGFyZSBubyBJL08gZXJyb3JzIHdoaWNoIG1lYW5z
+IHRoZSBlcnJvciByZWNvdmVyeQ0KPiBjYW4gYmUgcnVsZWQgb3V0IGFzIGEgcHJvYmxlbS4NCj4g
+DQo+IFRoZSBpc3N1ZSBjb3VsZCBiZSBjYXVzZWQgYnkgdGhlIEkvTyBzY2hlZHVsZXIuwqDCoFVu
+ZGVyIGJsay1tcSB0aGUgZGVmYXVsdA0KPiBzY2hlZHVsZXIgaXMgdGhlIG1xLWRlYWRsaW5lIHNj
+aGVkdWxlciB3aGVyZWFzIHdpdGhvdXQgYmxrLW1xIHlvdSB3b3VsZA0KPiBwcm9iYWJseSBoYXZl
+IGJlZW4gdXNpbmcgY2ZxIGJ5IGRlZmF1bHQuwqDCoFlvdSBjb3VsZCB0cnkgdGhlIGJmcSBzY2hl
+ZHVsZXI6DQo+IA0KPiAJZWNobyBiZnEgPiAvc3lzL2Jsb2NrL21tY2JsazAvcXVldWUvc2NoZWR1
+bGVyDQo+IA0KPiBCdXQgeW91IG1pZ2h0IG5lZWQgdG8gYWRkIGl0IHRvIHRoZSBrZXJuZWwgY29u
+ZmlnIGkuZS4NCj4gDQo+IAlDT05GSUdfSU9TQ0hFRF9CRlE9eQ0KPiANClN3aXRjaGluZyBmcm9t
+IG1xLWRlYWRsaW5lIHNjaGVkdWxlciB0byBiZnEgZml4ZWQgdGhlIGlzc3VlLg0KQWxzbyBib25u
+aWUrKyByZXN1bHRzIGhhdmUgY2hhbmdlZDoNCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tPDgtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQpiZnEgc2NoZWR1bGVyOg0K
+QVJDTGludXgsNTEyTSw2NDYzLDg3LDcyOTcsMCw1NDUwLDAsOTgyNyw5OSwzNDI5NTIsOTksKysr
+KyssKysrLDE2LDE3NTI1LDEwMCwrKysrKywrKyssMjQzMjksOTksMTc2MjEsMTAwLCsrKysrLCsr
+KywyNDAwMSwxMDENCg0KbXEtZGVhZGxpbmUgc2NoZWR1bGVyOg0KQVJDTGludXgsNTEyTSw0NDUz
+LDM2LDY0NzQsMSw1ODUyLDAsMTI5NDAsOTksMzQ0MzI5LDEwMCwrKysrKywrKyssMTYsMjIxNjgs
+OTgsKysrKyssKysrLDMyNzYwLDk5LDIyNzU1LDEwMCwrKysrKywrKyssMzIyMDUsMTAwDQotLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLTw4LS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLQ0KQXMgSSBzZWUsIHRoZSBwZXJmb3JtYW5jZSBvZiBzZXF1ZW50aWFsIGlucHV0IHBl
+ciBjaGFyIGFuZCBvZiBmaWxlIG9wZXJhdGlvbnMgaGF2ZSBkZWNyZWFzZWQgZm9yIH4yNSUuDQoN
+CkRvIHlvdSBoYXZlIGFueSBpZGVhIHdoYXQgY291bGQgYmUgYSByZWFzb24gZm9yIHN1Y2ggYSBs
+b25nIHN0YWxsaW5nIGluIGNhc2Ugb2YgbXEtZGVhZGxpbmUgSU9zY2hlZHVsZXI/IEkgd291bGQg
+ZXhwZWN0IGlmIHRoZXJlIGlzIA0Kc29tZSBsb25nIGFzeW5jIG9wZXJhdGlvbiwga2VybmVsIHNo
+b3VsZCBub3QgYmUgYmxvY2tlZC4gQnV0IHdoYXQgd2Ugc2VlIHVzaW5nIG1xLWRlYWRsaW5lIGlz
+IGtlcm5lbCBibG9ja2VkIGluIGJpdF93YWl0X2lvKCkuDQpEbyB5b3UgdGhpbmsgdGhpcyBpcyBh
+IHZhbGlkIGJlaGF2aW9yIGF0IGxlYXN0IGluIGNhc2Ugb2YgbXEtZGVhZGxpbmUgSU9zY2hlZHVs
+ZXI/DQoNCj4gQWx0ZXJuYXRpdmVseSB5b3UgY291bGQgZmlkZGxlIHdpdGggdGhlIHNjaGVkdWxl
+ciBwYXJhbWV0ZXJzOg0KPiANCj4gV2l0aCBtcS1kZWFkbGluZSB0aGV5IGFyZToNCj4gDQo+ICMg
+Z3JlcCAtSCAuIC9zeXMvYmxvY2svbW1jYmxrMC9xdWV1ZS9pb3NjaGVkLyoNCj4gL3N5cy9ibG9j
+ay9tbWNibGswL3F1ZXVlL2lvc2NoZWQvZmlmb19iYXRjaDoxNg0KPiAvc3lzL2Jsb2NrL21tY2Js
+azAvcXVldWUvaW9zY2hlZC9mcm9udF9tZXJnZXM6MQ0KPiAvc3lzL2Jsb2NrL21tY2JsazAvcXVl
+dWUvaW9zY2hlZC9yZWFkX2V4cGlyZTo1MDANCj4gL3N5cy9ibG9jay9tbWNibGswL3F1ZXVlL2lv
+c2NoZWQvd3JpdGVfZXhwaXJlOjUwMDANCj4gL3N5cy9ibG9jay9tbWNibGswL3F1ZXVlL2lvc2No
+ZWQvd3JpdGVzX3N0YXJ2ZWQ6Mg0KPiANCj4gWW91IGNvdWxkIHRyeSBkZWNyZWFzaW5nIHRoZSB3
+cml0ZV9leHBpcmUgYW5kL29yIGZpZm9fYmF0Y2guDQpJdCBzZWVtcyB0aGF0IGRlY3JlYXNpbmcg
+ZG9lc24ndCBhZmZlY3Qgb24gdGhpcyBpc3N1ZS4NCg0KQmVzdCByZWdhcmRzLA0KRXZnZW5peSBE
+aWRpbgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpsaW51
+eC1zbnBzLWFyYyBtYWlsaW5nIGxpc3QKbGludXgtc25wcy1hcmNAbGlzdHMuaW5mcmFkZWFkLm9y
+ZwpodHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9tYWlsbWFuL2xpc3RpbmZvL2xpbnV4LXNucHMt
+YXJj
