@@ -1,73 +1,84 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: dw_mmc: fix falling from idmac to PIO mode when
- dw_mci_reset occurs
-Date: Fri, 16 Mar 2018 08:41:16 +0100
-Message-ID: <CAPDyKFpO9bhxuegZaGQPwhtNJ4c-CpfurU3a-6yF07mL-B24sQ@mail.gmail.com>
-References: <20180314193051.16791-1-Evgeniy.Didin@synopsys.com>
- <CAPDyKFrgBm8-G1CsnqS9G62xFA2qA0XkuGBfA5v6grZnjRLteA@mail.gmail.com>
- <1521119909.10304.1.camel@synopsys.com>
- <CAPDyKFp--bHg8PH7om7TTY15m0CRw3i4eO1=StRnVofxnf50OQ@mail.gmail.com>
- <1521134649.10304.7.camel@synopsys.com>
+Subject: Re: [PATCH v10] mmc: Export host capabilities to debugfs.
+Date: Fri, 16 Mar 2018 08:57:40 +0100
+Message-ID: <CAPDyKFoP02ZGkUxmtWbF6kEWTzdM2dyKmyWcsGZ1_Mt3WUyg-Q@mail.gmail.com>
+References: <1520917812-20047-1-git-send-email-harish_kandiga@mentor.com>
+ <CAPDyKFo8jFwDO1E=tNSd4yTn3qtefzvHK0V70fcEqzB=SibrJA@mail.gmail.com>
+ <1521109575.10722.654.camel@linux.intel.com> <CAPDyKFrZaDx2NdvaFdgOxWBuwtjMnJE41p=x5b2x2moFEO3kXQ@mail.gmail.com>
+ <b93613a1-f35d-d246-5e1d-dc7821eb5976@mentor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1521134649.10304.7.camel@synopsys.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-snps-arc>,
- <mailto:linux-snps-arc-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-snps-arc/>
-List-Post: <mailto:linux-snps-arc@lists.infradead.org>
-List-Help: <mailto:linux-snps-arc-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-snps-arc>,
- <mailto:linux-snps-arc-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-snps-arc" <linux-snps-arc-bounces@lists.infradead.org>
-Errors-To: linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org
-To: Evgeniy Didin <Evgeniy.Didin@synopsys.com>
-Cc: "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>, "Alexey.Brodkin@synopsys.com" <Alexey.Brodkin@synopsys.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Jisheng.Zhang@synaptics.com" <Jisheng.Zhang@synaptics.com>, "jh80.chung@samsung.com" <jh80.chung@samsung.com>, "andy.shevchenko@gmail.com" <andy.shevchenko@gmail.com>, "linux-snps-arc@lists.infradead.org" <linux-snps-arc@lists.infradead.org>, "Eugeniy.Paltsev@synopsys.com" <Eugeniy.Paltsev@synopsys.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <b93613a1-f35d-d246-5e1d-dc7821eb5976@mentor.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Harish Jenny K N <harish_kandiga@mentor.com>
+Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Linus Walleij <linus.walleij@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, avri.altman@wdc.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Vladimir Zapolskiy <Vladimir_Zapolskiy@mentor.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 15 March 2018 at 18:24, Evgeniy Didin <Evgeniy.Didin@synopsys.com> wrote:
-> On Thu, 2018-03-15 at 14:39 +0100, Ulf Hansson wrote:
->> On 15 March 2018 at 14:18, Evgeniy Didin <Evgeniy.Didin@synopsys.com> wrote:
->> > Hello Ulf,
->> >
->> > On Thu, 2018-03-15 at 10:57 +0100, Ulf Hansson wrote:
->> > > On 14 March 2018 at 20:30, Evgeniy Didin <Evgeniy.Didin@synopsys.com> wrote:
->> > > > It was found that in IDMAC mode after soft-reset driver switches
->> > > > to PIO mode.
->> > > >
->> > > > That's what happens in case of DTO timeout overflow calculation failure:
->> > > > 1. soft-reset is called
->> > > > 2. driver restarts dma
->> > > > 3. descriptors states are checked, one of descriptor is owned by the IDMAC.
->> > > > 4. driver can't use DMA and then switches to PIO mode.
->> > > >
->> > > > Failure was already fixed in:
->> > > > https://urldefense.proofpoint.com/v2/url?u=https-3A__www.spinics.net_lists_linux-2Dmmc_msg48125.html&d=DwIBaQ&c=DPL6_X_6JkXFx7AXWqB0tg&r=vQk-RIbjwN0zvlwiMSpq3LYUTNf7Gqc4ujh
->> > > > osYI
->> > > > TtAw&m=6rPWpKUYQD3kY-2OEikJUWyEJvwKJljWHFC8rd2TCak&s=JjX0Dx8-eSyW2cATMsnG1eAzrKgoDkS1bcS5XYrVtlE&e=.
->> > >
->> > > Evgeniy,
->> > >
->> > > It seems like I should squash this fix into the above commit? Makes sense?
->> >
->> > IMHO it is not a good idea, because this fix is orthogonal to the above commit.
->> > Debugging drto overflow issue we found this strange behavior.
->>
->> Okay! Thanks for clarifying.
->>
->> > This might be general issue of soft-reset. So I think this should be separate patch.
->> > Also if these patches are independent, it will be easier to backport them.
->>
->> Should I add a stable tag then?
+On 16 March 2018 at 05:20, Harish Jenny K N <harish_kandiga@mentor.com> wro=
+te:
 >
-> Sure. The issue can happen since v3.17, because starting with this version function dw_mci_reset was implemented.
-> Commit 3a33a94ce270 ("mmc: dw_mmc: change to use recommended reset procedure").
+>
+> On Thursday 15 March 2018 05:59 PM, Ulf Hansson wrote:
+>> On 15 March 2018 at 11:26, Andy Shevchenko
+>> <andriy.shevchenko@linux.intel.com> wrote:
+>>> On Thu, 2018-03-15 at 11:12 +0100, Ulf Hansson wrote:
+>>>> On 13 March 2018 at 06:10, Harish Jenny K N <harish_kandiga@mentor.com
+>>>>> wrote:
+>>>>>
+>>>> Honestly, I don't like this, but maybe other people do, then I am fine
+>>>> with this approach.
+>>>>
+>>>> If were to decide, I would just rather print the caps field in a
+>>>> hexadecimal bit form and leave the translation to the user.
+>>> A compromise would be to print both:
+>>>
+>>> 0xHHHHHHHH\n
+>>> Description of each enabled field, one per line
+>>>
+>>>
+>>> Another format would be:
+>>>
+>>> Bit XX: Description of a field
+>> If we were to print the description, there is no point in printing the
+>> bits in hex. Or is it?
+> Yes. I also do not see the use of printing hex value if we are printing t=
+he description.
+>
+>>
+>> As I said, if you and other folkz thinks this is valuable, then I am
+>> fine as well. Just saying, it's not my preferred option.
+>>
+>>
+>
+>
+> I just want to inform that the idea of printing the description came afte=
+r discussion in https://www.spinics.net/lists/linux-mmc/msg48246.html, wher=
+e it was decided adding utility in mmc-utils was not going to work ( reason=
+:  We may very well be changing the bit offsets for the caps and caps2 in t=
+he mmc kernel header, keeping a copy of them is not a good idea. It's just =
+a matter of *when* it will break).
 
-Alright. I tried applying it, and the first kernel version that seems
-to work is 4.4. Thus I am adding that tag, if you or other people want
-it for an earlier version, please to send a backported version to
-@stable.
+I recall. However, I didn't realize all these strings were going to be
+needed. :-)
+
+>
+> On Thu, 2018-03-15 at 11:12 +0100, Ulf Hansson wrote:
+>> If were to decide, I would just rather print the caps field in a hexadec=
+imal bit form and leave the translation to the user.
+>
+> I think translation becomes difficult for the above reason and hence I wo=
+uld prefer printing the description.
+
+Okay.
+
+>
+> Note: Printing values in Hex was the original idea and it is also availab=
+le in https://www.spinics.net/lists/linux-mmc/msg48213.html just in case if=
+ it is required.
+
+Yeah, so maybe I should apply that one, then we can take it from there!?
 
 Kind regards
 Uffe
