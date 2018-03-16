@@ -1,84 +1,96 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v10] mmc: Export host capabilities to debugfs.
-Date: Fri, 16 Mar 2018 08:57:40 +0100
-Message-ID: <CAPDyKFoP02ZGkUxmtWbF6kEWTzdM2dyKmyWcsGZ1_Mt3WUyg-Q@mail.gmail.com>
-References: <1520917812-20047-1-git-send-email-harish_kandiga@mentor.com>
- <CAPDyKFo8jFwDO1E=tNSd4yTn3qtefzvHK0V70fcEqzB=SibrJA@mail.gmail.com>
- <1521109575.10722.654.camel@linux.intel.com> <CAPDyKFrZaDx2NdvaFdgOxWBuwtjMnJE41p=x5b2x2moFEO3kXQ@mail.gmail.com>
- <b93613a1-f35d-d246-5e1d-dc7821eb5976@mentor.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: mmc: block: bonnie++ runs with errors on arc/hsdk board
+Date: Fri, 16 Mar 2018 14:12:20 +0200
+Message-ID: <c5e50711-77d9-d1d2-35f4-3b656c8e895c@intel.com>
+References: <1520942674.10285.8.camel@synopsys.com>
+ <486fe92e-9b53-53a4-f98d-129a97032470@intel.com>
+ <1520956602.10285.10.camel@synopsys.com>
+ <1521030769.10285.16.camel@synopsys.com>
+ <83de0f90-0919-f449-b432-494b9bf524a1@intel.com>
+ <1521126524.10304.5.camel@synopsys.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <b93613a1-f35d-d246-5e1d-dc7821eb5976@mentor.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Harish Jenny K N <harish_kandiga@mentor.com>
-Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Linus Walleij <linus.walleij@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, avri.altman@wdc.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Vladimir Zapolskiy <Vladimir_Zapolskiy@mentor.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1521126524.10304.5.camel@synopsys.com>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-snps-arc>,
+ <mailto:linux-snps-arc-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-snps-arc/>
+List-Post: <mailto:linux-snps-arc@lists.infradead.org>
+List-Help: <mailto:linux-snps-arc-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-snps-arc>,
+ <mailto:linux-snps-arc-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-snps-arc" <linux-snps-arc-bounces@lists.infradead.org>
+Errors-To: linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org
+To: Evgeniy Didin <Evgeniy.Didin@synopsys.com>
+Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-ext4@vger.kernel.org" <linux-ext4@vger.kernel.org>, "tytso@mit.edu" <tytso@mit.edu>, "linus.walleij@linaro.org" <linus.walleij@linaro.org>, "Alexey.Brodkin@synopsys.com" <Alexey.Brodkin@synopsys.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "jh80.chung@samsung.com" <jh80.chung@samsung.com>, "adilger.kernel@dilger.ca" <adilger.kernel@dilger.ca>, "linux-snps-arc@lists.infradead.org" <linux-snps-arc@lists.infradead.org>, "Eugeniy.Paltsev@synopsys.com" <Eugeniy.Paltsev@synopsys.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 16 March 2018 at 05:20, Harish Jenny K N <harish_kandiga@mentor.com> wro=
-te:
->
->
-> On Thursday 15 March 2018 05:59 PM, Ulf Hansson wrote:
->> On 15 March 2018 at 11:26, Andy Shevchenko
->> <andriy.shevchenko@linux.intel.com> wrote:
->>> On Thu, 2018-03-15 at 11:12 +0100, Ulf Hansson wrote:
->>>> On 13 March 2018 at 06:10, Harish Jenny K N <harish_kandiga@mentor.com
->>>>> wrote:
->>>>>
->>>> Honestly, I don't like this, but maybe other people do, then I am fine
->>>> with this approach.
->>>>
->>>> If were to decide, I would just rather print the caps field in a
->>>> hexadecimal bit form and leave the translation to the user.
->>> A compromise would be to print both:
->>>
->>> 0xHHHHHHHH\n
->>> Description of each enabled field, one per line
->>>
->>>
->>> Another format would be:
->>>
->>> Bit XX: Description of a field
->> If we were to print the description, there is no point in printing the
->> bits in hex. Or is it?
-> Yes. I also do not see the use of printing hex value if we are printing t=
-he description.
->
->>
->> As I said, if you and other folkz thinks this is valuable, then I am
->> fine as well. Just saying, it's not my preferred option.
->>
->>
->
->
-> I just want to inform that the idea of printing the description came afte=
-r discussion in https://www.spinics.net/lists/linux-mmc/msg48246.html, wher=
-e it was decided adding utility in mmc-utils was not going to work ( reason=
-:  We may very well be changing the bit offsets for the caps and caps2 in t=
-he mmc kernel header, keeping a copy of them is not a good idea. It's just =
-a matter of *when* it will break).
-
-I recall. However, I didn't realize all these strings were going to be
-needed. :-)
-
->
-> On Thu, 2018-03-15 at 11:12 +0100, Ulf Hansson wrote:
->> If were to decide, I would just rather print the caps field in a hexadec=
-imal bit form and leave the translation to the user.
->
-> I think translation becomes difficult for the above reason and hence I wo=
-uld prefer printing the description.
-
-Okay.
-
->
-> Note: Printing values in Hex was the original idea and it is also availab=
-le in https://www.spinics.net/lists/linux-mmc/msg48213.html just in case if=
- it is required.
-
-Yeah, so maybe I should apply that one, then we can take it from there!?
-
-Kind regards
-Uffe
+T24gMTUvMDMvMTggMTc6MDgsIEV2Z2VuaXkgRGlkaW4gd3JvdGU6Cj4gSGkgQWRyaWFuLAo+IAo+
+PiBPbiAxNC8wMy8xOCAxNDozMiwgRXZnZW5peSBEaWRpbiB3cm90ZToKPj4+IEhpIEFkcmlhbiwK
+Pj4+Pj4KPj4+Pj4gV2FzIHRoZSBwZXJmb3JtYW5jZSBhZmZlY3RlZD8gaS5lLiB0aGUgcmVzdWx0
+cyBmcm9tIGJvbm5pZSsrCj4+Pj4KPj4+PiBJIGhhdmUgcnVuIGJvbm5pZSsrIHNldmVyYWwgdGlt
+ZXMgYmVmb3JlIGFuZCBhZnRlciBtZW50aW9uZWQgY29tbWl0LiBIZXJlIGlzIG91dHB1dDoKPj4+
+PiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLTw4LS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLQo+Pj4+IEJlZm9yZSBjb21taXQ6Cj4+Pj4gQVJDTGludXgsNTEyTSw2NDQy
+LDUwLDcyMTEsMCw1MzMzLDAsMTI5NTQsOTksMzQ1NjM4LDEwMCwrKysrKywrKyssMTYsMjIzMjIs
+MTAwLCsrKysrLCsrKywzMjczNSw5OSwyMjkyMSwxMDAsKysrKyssKysrLDMyMjExLDEwMAo+Pj4+
+IEFSQ0xpbnV4LDUxMk0sNjYxMSw1MSw3MjQ4LDAsNTE2MiwwLDEyOTUxLDk5LDM0NDc2Myw5OSwr
+KysrKywrKyssMTYsMjI2NDksOTksKysrKyssKysrLDMyNzIzLDk5LDIyNTcyLDEwMCwrKysrKywr
+KyssMzE2OTcsMTAwCj4+Pj4gQVJDTGludXgsNTEyTSw2NTk3LDUyLDczMDcsMCw1MzY4LDAsMTI5
+MzQsOTksMzQzOTg3LDk5LCsrKysrLCsrKywxNiwyMjc3NSwxMDAsKysrKyssKysrLDMyNzEzLDk5
+LDIyODMyLDEwMCwrKysrKywrKyssMzE4OTksOTkKPj4+PiBBZnRlciBjb21taXQ6Cj4+Pj4gQVJD
+TGludXgsNTEyTSw0NDUzLDM2LDY0NzQsMSw1ODUyLDAsMTI5NDAsOTksMzQ0MzI5LDEwMCwrKysr
+KywrKyssMTYsMjIxNjgsOTgsKysrKyssKysrLDMyNzYwLDk5LDIyNzU1LDEwMCwrKysrKywrKyss
+MzIyMDUsMTAwCj4+Pj4gQVJDTGludXgsNTEyTSw1MTU5LDQyLDY5NDQsMSw1NjU4LDAsMTI5NDUs
+OTksMzQ0MjkwLDEwMCwrKysrKywrKyssMTYsMjIyOTUsMTAwLCsrKysrLCsrKywzMjcxNSw5OSwy
+Mjg4OCw5OSwrKysrKywrKyssMzIwMDcsOTkKPj4+PiBBUkNMaW51eCw1MTJNLDUxNzAsNDIsNjg0
+MCwyLDUzMTUsMCwxMjk0Niw5OSwzNDM4ODksMTAwLCsrKysrLCsrKywxNiwyMjQ0NSwxMDAsKysr
+KyssKysrLDMyNjgxLDk5LDIyOTY3LDEwMCwrKysrKywrKyssMzIxMTcsOTkKPj4+PiAtLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLTw4LS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tCj4+Pj4gwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoF5eXl7CoAo+Pj4+IElmIGkgdW5k
+ZXJzdGFuZCBjb3JyZWN0bHksIGluIHRoaXJkIGNvbHVtbiBpcyBzaG93biAic2VxdWVudGlhbCBv
+dXRwdXQiIHBlciBjaGFyYWN0ZXIgc3BlZWQgKEsvc2VjKSwgd2hpY2ggZGVjcmVhc2VkLgo+Pj4+
+Cj4+Pj4+IFdoYXQgbW91bnQgb3B0aW9ucyBkaWQgeW91IHVzZT8KPj4+Pgo+Pj4+IEkgZGlkbid0
+IHVzZSBhbnkgb3B0aW9ucy4gU2ltcGx5Ogo+Pj4+ICMgbW91bnQgL2Rldi9tbWNibGswcDEgL21u
+dAo+Pj4KPj4+IE5vdGUgdGhhdCB0aGUgZmlsZSBzeXN0ZW0gb24gU0RjYXJkIHdhcyBleHQ0LsKg
+Cj4+Cj4+IFBsZWFzZSB0cnk6Cj4+Cj4+IAlwZXJmIHJlY29yZCAtYSAtZSBtbWM6KiAtLSBib25u
+aWUrKyAtdSByb290IC1yIDI1NiAtcyA1MTIgLXggMSAtZCAvbW50Cj4+IGFuZCBzaGFyZSB0aGUg
+cmVzdWx0aW5nIHBlcmYuZGF0YSBmaWxlIHdoZW4geW91IGFyZSBhYmxlCj4+IHRvIHJlcHJvZHVj
+ZSB0aGUgaHVuZyB0YXNrIG1lc3NhZ2UuCj4+Cj4gCj4gSSBoYXZlIGFwcGxpZWQgdGhlIHBhdGNo
+IGJlbG93IGFuZCBjb2xsZWN0ZWQgcGVyZi5kYXRhIHVzaW5nIGNvbW1hbmQgYWJvdmUsIGh1bmcg
+bWVzc2FnZSBhbHNvIGFwcGVhcmVkLiBJcyB0aGlzIHRoZSBpbmZvcm1hdGlvbiB5b3UgbmVlZGVk
+Pwo+IChwZXJmLmRhdGEgaXMgaW4gYXR0YWNobWVudHMgdG8gdGhpcwo+IG1lc3NhZ2UpLgoKWWVz
+LiAgVW5mb3J0dW5hdGVseSB0aGUgY2xvY2sgdXNlZCBpcyBub3QgYWNjdXJhdGUgZW5vdWdoIHRv
+IGNvcnJlY3RseSBvcmRlcgp0aGUgZXZlbnRzIGFjcm9zcyBkaWZmZXJlbnQgQ1BVcywgd2hpY2gg
+bWFrZXMgaXQgdmVyeSBoYXJkIHRvIHNlZSBkZWxheXMKYmV0d2VlbiByZXF1ZXN0cy4gIFlvdSBj
+b3VsZCB0cnkgYSBkaWZmZXJlbnQgY2xvY2sgLSByZWZlciB0aGUgLS1jbG9ja2lkCm9wdGlvbiB0
+byBwZXJmIHJlY29yZC4KCk5ldmVydGhlbGVzcyBpdCBzaG93cyB0aGVyZSBhcmUgbm8gSS9PIGVy
+cm9ycyB3aGljaCBtZWFucyB0aGUgZXJyb3IgcmVjb3ZlcnkKY2FuIGJlIHJ1bGVkIG91dCBhcyBh
+IHByb2JsZW0uCgpUaGUgaXNzdWUgY291bGQgYmUgY2F1c2VkIGJ5IHRoZSBJL08gc2NoZWR1bGVy
+LiAgVW5kZXIgYmxrLW1xIHRoZSBkZWZhdWx0CnNjaGVkdWxlciBpcyB0aGUgbXEtZGVhZGxpbmUg
+c2NoZWR1bGVyIHdoZXJlYXMgd2l0aG91dCBibGstbXEgeW91IHdvdWxkCnByb2JhYmx5IGhhdmUg
+YmVlbiB1c2luZyBjZnEgYnkgZGVmYXVsdC4gIFlvdSBjb3VsZCB0cnkgdGhlIGJmcSBzY2hlZHVs
+ZXI6CgoJZWNobyBiZnEgPiAvc3lzL2Jsb2NrL21tY2JsazAvcXVldWUvc2NoZWR1bGVyCgpCdXQg
+eW91IG1pZ2h0IG5lZWQgdG8gYWRkIGl0IHRvIHRoZSBrZXJuZWwgY29uZmlnIGkuZS4KCglDT05G
+SUdfSU9TQ0hFRF9CRlE9eQoKQWx0ZXJuYXRpdmVseSB5b3UgY291bGQgZmlkZGxlIHdpdGggdGhl
+IHNjaGVkdWxlciBwYXJhbWV0ZXJzOgoKV2l0aCBtcS1kZWFkbGluZSB0aGV5IGFyZToKCiMgZ3Jl
+cCAtSCAuIC9zeXMvYmxvY2svbW1jYmxrMC9xdWV1ZS9pb3NjaGVkLyoKL3N5cy9ibG9jay9tbWNi
+bGswL3F1ZXVlL2lvc2NoZWQvZmlmb19iYXRjaDoxNgovc3lzL2Jsb2NrL21tY2JsazAvcXVldWUv
+aW9zY2hlZC9mcm9udF9tZXJnZXM6MQovc3lzL2Jsb2NrL21tY2JsazAvcXVldWUvaW9zY2hlZC9y
+ZWFkX2V4cGlyZTo1MDAKL3N5cy9ibG9jay9tbWNibGswL3F1ZXVlL2lvc2NoZWQvd3JpdGVfZXhw
+aXJlOjUwMDAKL3N5cy9ibG9jay9tbWNibGswL3F1ZXVlL2lvc2NoZWQvd3JpdGVzX3N0YXJ2ZWQ6
+MgoKWW91IGNvdWxkIHRyeSBkZWNyZWFzaW5nIHRoZSB3cml0ZV9leHBpcmUgYW5kL29yIGZpZm9f
+YmF0Y2guCgo+ICAKPj4gWW91IG1heSB3YW50IHRvIGFkZCB0aGlzIHBhdGNoIGZpcnN0Ogo+Pgo+
+PiAJaHR0cHM6Ly91cmxkZWZlbnNlLnByb29mcG9pbnQuY29tL3YyL3VybD91PWh0dHBzLTNBX19t
+YXJjLmluZm9fLTNGbC0zRGxpbnV4LTJEbW1jLTI2bS0zRDE1MjExMDU4MDMyNDIwMCZkPUR3SURh
+USZjPURQTDZfWF82SmtYRng3QVhXcUIwdGcmcj12UWstUkliandOMHp2bHdpTVNwcTNMWVVUTmY3
+R3FjNAo+PiB1amhvc1lJVHRBdyZtPUxlVkZtZ3pVMHlkdy1xSGFBVmgta1pJLXY0bWxkbkN5Y1l4
+SUd4cURleFUmcz1TeUd2c1ZKQk96ZWdPMk16M2hRNWo2Q1k4S3JqTFdKRVJWSGZvc1NtS1NzJmU9
+Cj4gCj4gQmVzdCByZWdhcmRzLAo+IEV2Z2VuaXkgRGlkaW4KPiAKCgpfX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpsaW51eC1zbnBzLWFyYyBtYWlsaW5nIGxp
+c3QKbGludXgtc25wcy1hcmNAbGlzdHMuaW5mcmFkZWFkLm9yZwpodHRwOi8vbGlzdHMuaW5mcmFk
+ZWFkLm9yZy9tYWlsbWFuL2xpc3RpbmZvL2xpbnV4LXNucHMtYXJj
