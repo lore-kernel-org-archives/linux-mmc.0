@@ -1,59 +1,68 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: Re: [PATCH v3 11/16] mmc: tmio: deprecate "toshiba,mmc-wrprotect-disable"
- DT property
-Date: Sun, 18 Mar 2018 11:46:48 +0900
-Message-ID: <CAK7LNATy=VzKXS-uZBgYm5A1k6E-87qDGNBTi=zFi9JGa2xrng@mail.gmail.com>
-References: <1516206496-16612-1-git-send-email-yamada.masahiro@socionext.com>
- <1516206496-16612-12-git-send-email-yamada.masahiro@socionext.com>
- <CAK7LNAQUJw-fjuJO68Kvskn8BRYW3rZj4YMtbo-Oxfv7c=6Ggg@mail.gmail.com> <20180207193227.hu6cyh2e27dmrqwt@ninjato>
+From: =?UTF-8?Q?Matias_Bj=c3=b8rling?= <mb@lightnvm.io>
+Subject: Re: [PATCH v2 10/21] lightnvm: Remove depends on HAS_DMA in case of
+ platform dependency
+Date: Sun, 18 Mar 2018 19:46:11 +0100
+Message-ID: <319a2b17-f08e-7219-cf5d-08e2df81d55c@lightnvm.io>
+References: <1521208314-4783-1-git-send-email-geert@linux-m68k.org>
+ <1521208314-4783-11-git-send-email-geert@linux-m68k.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180207193227.hu6cyh2e27dmrqwt@ninjato>
+In-Reply-To: <1521208314-4783-11-git-send-email-geert@linux-m68k.org>
+Content-Language: en-GB
 Sender: linux-kernel-owner@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>, linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Magnusson <ulfalizer@gmail.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, devicetree@vger.kernel.org, Rob Herring <robh@kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>
+To: Geert Uytterhoeven <geert@linux-m68k.org>, Christoph Hellwig <hch@lst.de>, Marek Szyprowski <m.szyprowski@samsung.com>, Robin Murphy <robin.murphy@arm.com>, Felipe Balbi <balbi@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "James E . J . Bottomley" <jejb@linux.vnet.ibm.com>, "Martin K . Petersen" <martin.petersen@oracle.com>, Andrew Morton <akpm@linux-foundation.org>, Mark Brown <broonie@kernel.org>, Liam Girdwood <lgirdwood@gmail.com>, Tejun Heo <tj@kernel.org>, Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Stefan Richter <stefanr@s5r6.in-berlin.de>, Alan Tull <atull@kernel.org>, Moritz Fischer <mdf@kernel.org>, Wolfram Sang <wsa@the-dreams.de>
+Cc: iommu@lists.linux-foundation.org, linux-usb@vger.kernel.org, linux-scsi@vger.kernel.org, alsa-devel@alsa-project.org, linux-ide@vger.kernel.org, linux-crypto@vger.kernel.org, linux-fbdev@vger.kernel.org, linux1394-devel@lists.sourceforge.net, linux-fpga@vger.kernel.org, linux-i2c@vger.kernel.org, linux-iio@vger.kernel.org, linux-block@vger.kernel.org, linux-media@vger.kernel.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, netdev@vger.kernel.org, linux-remoteproc@vger.kernel.org, linux-serial@vger.kernel.org, linux-spi@vger.kernel.org, devel@driverdev.osuosl.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-2018-02-08 4:32 GMT+09:00 Wolfram Sang <wsa@the-dreams.de>:
-> On Thu, Jan 18, 2018 at 10:58:36AM +0900, Masahiro Yamada wrote:
->> 2018-01-18 1:28 GMT+09:00 Masahiro Yamada <yamada.masahiro@socionext.com>:
->> > This property is equivalent to "disable-wp" defined in
->> > Documentation/devicetree/bindings/mmc/tmio_mmc.txt
->>
->> This is mistake.
->>
->> "disable-wp" is defined in
->>
->> Documentation/devicetree/bindings/mmc/mmc.txt
->
-> With that fixed:
->
-> Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
->
+On 03/16/2018 02:51 PM, Geert Uytterhoeven wrote:
+> Remove dependencies on HAS_DMA where a Kconfig symbol depends on another
+> symbol that implies HAS_DMA, and, optionally, on "|| COMPILE_TEST".
+> In most cases this other symbol is an architecture or platform specific
+> symbol, or PCI.
+> 
+> Generic symbols and drivers without platform dependencies keep their
+> dependencies on HAS_DMA, to prevent compiling subsystems or drivers that
+> cannot work anyway.
+> 
+> This simplifies the dependencies, and allows to improve compile-testing.
+> 
+> Notes:
+>    - FSL_FMAN keeps its dependency on HAS_DMA, as it calls set_dma_ops(),
+>      which does not exist if HAS_DMA=n (Do we need a dummy? The use of
+>      set_dma_ops() in this driver is questionable),
+>    - SND_SOC_LPASS_IPQ806X and SND_SOC_LPASS_PLATFORM loose their
+>      dependency on HAS_DMA, as they are selected from
+>      SND_SOC_APQ8016_SBC.
+> 
+> Signed-off-by: Geert Uytterhoeven <geert@linux-m68k.org>
+> Reviewed-by: Mark Brown <broonie@kernel.org>
+> Acked-by: Robin Murphy <robin.murphy@arm.com>
+> ---
+> v2:
+>    - Add Reviewed-by, Acked-by,
+>    - Drop RFC state,
+>    - Split per subsystem.
+> ---
+>   drivers/lightnvm/Kconfig | 2 +-
+>   1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/lightnvm/Kconfig b/drivers/lightnvm/Kconfig
+> index 10c08982185a572f..9c03f35d9df113c6 100644
+> --- a/drivers/lightnvm/Kconfig
+> +++ b/drivers/lightnvm/Kconfig
+> @@ -4,7 +4,7 @@
+>   
+>   menuconfig NVM
+>   	bool "Open-Channel SSD target support"
+> -	depends on BLOCK && HAS_DMA && PCI
+> +	depends on BLOCK && PCI
+>   	select BLK_DEV_NVME
+>   	help
+>   	  Say Y here to get to enable Open-channel SSDs.
+> 
 
-BTW, the subject of the applied version is wrong.
+Looks good.
 
-In my original post:
-https://patchwork.kernel.org/patch/10170007/
-"toshiba,mmc-wrprotect-disable"
-No space after the vendor prefix.
-
-
-But, applied commit (788778b0d21a6d5cd5)
-I see a space, like
-"toshiba, mmc-wrprotect-disable"
-
-
-I think this is a bug of patchwork.
-
-
-I have seen various bugs that break
-the patch format.
-
-I filed some bug reports for patchwork,
-but not sure what happened.
-
--- 
-Best Regards
-Masahiro Yamada
+Reviewed-by: Matias Bjørling <mb@lightnvm.io>
