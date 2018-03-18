@@ -1,76 +1,59 @@
-From: Jonathan Cameron <jic23@kernel.org>
-Subject: Re: [PATCH v2 08/21] iio: adc: Remove depends on HAS_DMA in case of
- platform dependency
-Date: Sat, 17 Mar 2018 16:42:41 +0000
-Message-ID: <20180317164241.6fbad835@archlinux>
-References: <1521208314-4783-1-git-send-email-geert@linux-m68k.org>
- <1521208314-4783-9-git-send-email-geert@linux-m68k.org>
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Subject: Re: [PATCH v3 11/16] mmc: tmio: deprecate "toshiba,mmc-wrprotect-disable"
+ DT property
+Date: Sun, 18 Mar 2018 11:46:48 +0900
+Message-ID: <CAK7LNATy=VzKXS-uZBgYm5A1k6E-87qDGNBTi=zFi9JGa2xrng@mail.gmail.com>
+References: <1516206496-16612-1-git-send-email-yamada.masahiro@socionext.com>
+ <1516206496-16612-12-git-send-email-yamada.masahiro@socionext.com>
+ <CAK7LNAQUJw-fjuJO68Kvskn8BRYW3rZj4YMtbo-Oxfv7c=6Ggg@mail.gmail.com> <20180207193227.hu6cyh2e27dmrqwt@ninjato>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <1521208314-4783-9-git-send-email-geert@linux-m68k.org>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa@the-dreams.de>, linux-iio@vger.kernel.org, linux-fpga@vger.kernel.org, linux-remoteproc@vger.kernel.org, alsa-devel@alsa-project.org, Bjorn Andersson <bjorn.andersson@linaro.org>, Eric Anholt <eric@anholt.net>, netdev@vger.kernel.org, linux-mtd@lists.infradead.org, linux-i2c@vger.kernel.org, linux1394-devel@lists.sourceforge.net, Christoph Hellwig <hch@lst.de>, Marek Szyprowski <m.szyprowski@samsung.com>, Stefan Wahren <stefan.wahren@i2se.com>, Boris Brezillon <boris.brezillon@free-electrons.com>, "James E . J . Bottomley" <jejb@linux.vnet.ibm.com>, Herbert Xu <herbert@gondor.apana.org.au>, linux-scsi@vger.kernel.org, Richard Weinberger <richard@nod.at>, Joerg Roedel <joro@8bytes.org>, Jassi Brar <jassisinghbrar@gmail.com>, Marek Vasut <marek.vasut@gmail.com>, linux-serial@vger.kernel.org, Matias Bjorling <mb@lightn>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180207193227.hu6cyh2e27dmrqwt@ninjato>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>, linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Magnusson <ulfalizer@gmail.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, devicetree@vger.kernel.org, Rob Herring <robh@kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, 16 Mar 2018 14:51:41 +0100
-Geert Uytterhoeven <geert@linux-m68k.org> wrote:
+2018-02-08 4:32 GMT+09:00 Wolfram Sang <wsa@the-dreams.de>:
+> On Thu, Jan 18, 2018 at 10:58:36AM +0900, Masahiro Yamada wrote:
+>> 2018-01-18 1:28 GMT+09:00 Masahiro Yamada <yamada.masahiro@socionext.com>:
+>> > This property is equivalent to "disable-wp" defined in
+>> > Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+>>
+>> This is mistake.
+>>
+>> "disable-wp" is defined in
+>>
+>> Documentation/devicetree/bindings/mmc/mmc.txt
+>
+> With that fixed:
+>
+> Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+>
 
-> Remove dependencies on HAS_DMA where a Kconfig symbol depends on another
-> symbol that implies HAS_DMA, and, optionally, on "|| COMPILE_TEST".
-> In most cases this other symbol is an architecture or platform specific
-> symbol, or PCI.
-> 
-> Generic symbols and drivers without platform dependencies keep their
-> dependencies on HAS_DMA, to prevent compiling subsystems or drivers that
-> cannot work anyway.
-> 
-> This simplifies the dependencies, and allows to improve compile-testing.
-> 
-> Signed-off-by: Geert Uytterhoeven <geert@linux-m68k.org>
-> Reviewed-by: Mark Brown <broonie@kernel.org>
-> Acked-by: Robin Murphy <robin.murphy@arm.com>
-Great.
-Acked-by: Jonathan Cameron <Jonathan.Cameron@huawei.com>
+BTW, the subject of the applied version is wrong.
 
-Thanks for doing this - this has been annoying for a long time :)
+In my original post:
+https://patchwork.kernel.org/patch/10170007/
+"toshiba,mmc-wrprotect-disable"
+No space after the vendor prefix.
 
-> ---
-> v2:
->   - Add Reviewed-by, Acked-by,
->   - Drop RFC state,
->   - Split per subsystem.
-> ---
->  drivers/iio/adc/Kconfig | 2 --
->  1 file changed, 2 deletions(-)
-> 
-> diff --git a/drivers/iio/adc/Kconfig b/drivers/iio/adc/Kconfig
-> index 72bc2b71765ae2ff..57f46e88f5c2536e 100644
-> --- a/drivers/iio/adc/Kconfig
-> +++ b/drivers/iio/adc/Kconfig
-> @@ -158,7 +158,6 @@ config AT91_SAMA5D2_ADC
->  	tristate "Atmel AT91 SAMA5D2 ADC"
->  	depends on ARCH_AT91 || COMPILE_TEST
->  	depends on HAS_IOMEM
-> -	depends on HAS_DMA
->  	select IIO_TRIGGERED_BUFFER
->  	help
->  	  Say yes here to build support for Atmel SAMA5D2 ADC which is
-> @@ -647,7 +646,6 @@ config SD_ADC_MODULATOR
->  config STM32_ADC_CORE
->  	tristate "STMicroelectronics STM32 adc core"
->  	depends on ARCH_STM32 || COMPILE_TEST
-> -	depends on HAS_DMA
->  	depends on OF
->  	depends on REGULATOR
->  	select IIO_BUFFER
+
+But, applied commit (788778b0d21a6d5cd5)
+I see a space, like
+"toshiba, mmc-wrprotect-disable"
+
+
+I think this is a bug of patchwork.
+
+
+I have seen various bugs that break
+the patch format.
+
+I filed some bug reports for patchwork,
+but not sure what happened.
+
+-- 
+Best Regards
+Masahiro Yamada
