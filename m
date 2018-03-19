@@ -1,119 +1,188 @@
-From: Madalin-cristian Bucur <madalin.bucur-3arQi8VN3Tc@public.gmane.org>
-Subject: RE: [PATCH v2 10/21] lightnvm: Remove depends on HAS_DMA in case of
-	platform dependency
-Date: Mon, 19 Mar 2018 05:27:16 +0000
-Message-ID: <AM5PR04MB3267989AB6A81639F61AB165ECD40@AM5PR04MB3267.eurprd04.prod.outlook.com>
-References: <1521208314-4783-1-git-send-email-geert@linux-m68k.org>
-	<1521208314-4783-11-git-send-email-geert@linux-m68k.org>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: Re: [PATCH v3 07/11] mmc: sdhci: Program a relatively accurate SW
+ timeout value
+Date: Mon, 19 Mar 2018 14:50:57 +0530
+Message-ID: <29f640ac-b155-41c6-cf3f-8c66e1b300f1@ti.com>
+References: <20180307132020.30951-1-kishon@ti.com>
+ <20180307132020.30951-8-kishon@ti.com>
+ <1e87e5f9-13e1-765b-f077-26a55359b2c3@intel.com>
+ <47752066-aeda-87bc-6928-1a9b80f1c45c@ti.com>
+ <49210daa-b593-4b34-abf5-be81580723bc@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <1521208314-4783-11-git-send-email-geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>, Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>, Marek Szyprowski <m.szyprowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>, Felipe Balbi <balbi-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "James E . J . Bottomley" <jejb-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>, "Martin K . Petersen" <martin.petersen-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Liam Girdwood <lgirdwood-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Tejun Heo <tj-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Herbert Xu <herbert-lOAM2aK0SrRLBo1qDEOMRrpzq4S04n8Q@public.gmane.org>, "David S . Miller" <davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Stefan Richter <stefanr-MtYdepGKPcBMYopoZt5u/LNAH6kLmebB@public.gmane.org>, Alan Tull <atull-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Moritz Fischer <mdf-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Jonathan Cameron <jic23-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Joerg Roedel <joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org>, Matias Bjorling <mb-VR7NuqX4VJ8tq7phqP6ubQ@public.gmane.org>, Jassi Brar <jas>
-Cc: "devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org" <devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org>, "alsa-devel-K7yf7f+aM1XWsZ/bQMPhNw@public.gmane.org" <alsa-devel-K7yf7f+aM1XWsZ/bQMPhNw@public.gmane.org>, "linux-media-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-media-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-scsi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-scsi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-iio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-iio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-fpga-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-fpga-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-fbdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-fbdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-ide-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-ide-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org" <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>, "linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-mtd-IAPFreCvJWMMKQXVYFwzLw@public.gmane.org>
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <49210daa-b593-4b34-abf5-be81580723bc@intel.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>
+Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-> -----Original Message-----
-> From: netdev-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org [mailto:netdev-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org]
-> On Behalf Of Geert Uytterhoeven
-> Sent: Friday, March 16, 2018 3:52 PM
-> To: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>; Marek Szyprowski
-> <m.szyprowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>; Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>;
-> Felipe Balbi <balbi-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>; Greg Kroah-Hartman
-> <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>; James E . J . Bottomley
-> <jejb-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>; Martin K . Petersen
-> <martin.petersen-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>; Andrew Morton <akpm@linux-
-> foundation.org>; Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>; Liam Girdwood
-> <lgirdwood-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>; Tejun Heo <tj-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>; Herbert Xu
-> <herbert-lOAM2aK0SrRLBo1qDEOMRrpzq4S04n8Q@public.gmane.org>; David S . Miller <davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org>;
-> Bartlomiej Zolnierkiewicz <b.zolnierkie-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>; Stefan Richter
-> <stefanr-MtYdepGKPcBMYopoZt5u/LNAH6kLmebB@public.gmane.org>; Alan Tull <atull-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>; Moritz Fischer
-> <mdf-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>; Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>; Jonathan Cameron
-> <jic23-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>; Joerg Roedel <joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org>; Matias Bjorling
-> <mb-VR7NuqX4VJ8tq7phqP6ubQ@public.gmane.org>; Jassi Brar <jassisinghbrar-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>; Mauro Carvalho
-> Chehab <mchehab-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>; Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>; David
-> Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>; Brian Norris
-> <computersforpeace-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>; Marek Vasut <marek.vasut-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>;
-> Cyrille Pitchen <cyrille.pitchen-yU5RGvR974pGWvitb5QawA@public.gmane.org>; Boris Brezillon
-> <boris.brezillon-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>; Richard Weinberger <richard-/L3Ra7n9ekc@public.gmane.org>;
-> Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>; Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>;
-> Bjorn Andersson <bjorn.andersson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>; Eric Anholt <eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org>;
-> Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>
-> Cc: iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org; linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-
-> scsi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; alsa-devel-K7yf7f+aM1XWsZ/bQMPhNw@public.gmane.org; linux-ide-u79uwXL29TY76Z2rM5mHXA@public.gmane.org;
-> linux-crypto-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-fbdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux1394-
-> devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org; linux-fpga-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-
-> i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-iio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org;
-> linux-media-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-
-> mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org; netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-
-> remoteproc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-serial-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-
-> spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org; linux-
-> kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>
-> Subject: [PATCH v2 10/21] lightnvm: Remove depends on HAS_DMA in case of
-> platform dependency
-> 
-> Remove dependencies on HAS_DMA where a Kconfig symbol depends on
-> another
-> symbol that implies HAS_DMA, and, optionally, on "|| COMPILE_TEST".
-> In most cases this other symbol is an architecture or platform specific
-> symbol, or PCI.
-> 
-> Generic symbols and drivers without platform dependencies keep their
-> dependencies on HAS_DMA, to prevent compiling subsystems or drivers that
-> cannot work anyway.
-> 
-> This simplifies the dependencies, and allows to improve compile-testing.
-> 
-> Notes:
->   - FSL_FMAN keeps its dependency on HAS_DMA, as it calls set_dma_ops(),
->     which does not exist if HAS_DMA=n (Do we need a dummy? The use of
->     set_dma_ops() in this driver is questionable),
+Hi Adrian,
 
-Hi,
+On Friday 16 March 2018 07:51 PM, Adrian Hunter wrote:
+> On 16/03/18 08:29, Kishon Vijay Abraham I wrote:
+>> Hi,
+>>
+>> On Thursday 15 March 2018 06:43 PM, Adrian Hunter wrote:
+>>> On 07/03/18 15:20, Kishon Vijay Abraham I wrote:
+>>>> sdhci has a 10 second timeout to catch devices that stop responding.
+>>>> Instead of programming 10 second arbitrary value, calculate the total time
+>>>> it would take for the entire transfer to happen and program the timeout
+>>>> value accordingly.
+>>>>
+>>>> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+>>>> ---
+>>>>  drivers/mmc/host/sdhci.c | 47 ++++++++++++++++++++++++++++++++++++++++-------
+>>>>  drivers/mmc/host/sdhci.h | 10 ++++++++++
+>>>>  2 files changed, 50 insertions(+), 7 deletions(-)
+>>>>
+>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>>> index 1dd117cbeb6e..baab67bfa39b 100644
+>>>> --- a/drivers/mmc/host/sdhci.c
+>>>> +++ b/drivers/mmc/host/sdhci.c
+>>>> @@ -709,6 +709,36 @@ static u32 sdhci_sdma_address(struct sdhci_host *host)
+>>>>  		return sg_dma_address(host->data->sg);
+>>>>  }
+>>>>  
+>>>> +static void sdhci_calc_sw_timeout(struct sdhci_host *host,
+>>>> +				  struct mmc_command *cmd,
+>>>> +				  unsigned int target_timeout)
+>>>> +{
+>>>> +	struct mmc_data *data = cmd->data;
+>>>> +	struct mmc_host *mmc = host->mmc;
+>>>> +	u64 transfer_time;
+>>>> +	struct mmc_ios *ios = &mmc->ios;
+>>>> +	unsigned char bus_width = 1 << ios->bus_width;
+>>>> +	unsigned int blksz;
+>>>> +	unsigned int freq;
+>>>> +
+>>>> +	if (data) {
+>>>> +		blksz = data->blksz;
+>>>> +		freq = host->mmc->actual_clock ? : host->clock;
+>>>> +		transfer_time = (u64)blksz * NSEC_PER_SEC * (8 / bus_width);
+>>>> +		do_div(transfer_time, freq);
+>>>> +		/* multiply by '2' to account for any unknowns */
+>>>> +		transfer_time = transfer_time * 2;
+>>>> +		/* calculate timeout for the entire data */
+>>>> +		host->data_timeout = (data->blocks * ((target_timeout *
+>>>> +						       NSEC_PER_USEC) +
+>>>> +						       transfer_time));
+>>>
+>>> (target_timeout * NSEC_PER_USEC) might be 32-bit and therefore overflow
+>>> for timeouts greater than about 4 seconds.
+>>>
+>>>> +	} else {
+>>>> +		host->data_timeout = (u64)target_timeout * NSEC_PER_USEC;
+>>>> +	}
+>>>> +
+>>>> +	host->data_timeout += MMC_CMD_TRANSFER_TIME;
+>>>
+>>> Need to allow for target_timeout == 0 so:
+>>>
+>>> 	if (host->data_timeout)
+>>> 		host->data_timeout += MMC_CMD_TRANSFER_TIME;
+>>>
+>>>> +}
+>>>> +
+>>>>  static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+>>>>  {
+>>>>  	u8 count;
+>>>> @@ -766,6 +796,7 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+>>>>  		if (count >= 0xF)
+>>>>  			break;
+>>>>  	}
+>>>> +	sdhci_calc_sw_timeout(host, cmd, target_timeout);
+>>>
+>>> If you make the changes I suggest for patch 6, then this would
+>>> move sdhci_calc_sw_timeout() into sdhci_set_timeout().
+>>>
+>>> I suggest you factor out the target_timeout calculation e.g.
+>>>
+>>> static unsigned int sdhci_target_timeout(struct sdhci_host *host,
+>>> 					 struct mmc_command *cmd,
+>>> 					 struct mmc_data *data)
+>>> {
+>>> 	unsigned int target_timeout;
+>>>
+>>> 	/* timeout in us */
+>>> 	if (!data)
+>>> 		target_timeout = cmd->busy_timeout * 1000;
+>>> 	else {
+>>> 		target_timeout = DIV_ROUND_UP(data->timeout_ns, 1000);
+>>> 		if (host->clock && data->timeout_clks) {
+>>> 			unsigned long long val;
+>>>
+>>> 			/*
+>>> 			 * data->timeout_clks is in units of clock cycles.
+>>> 			 * host->clock is in Hz.  target_timeout is in us.
+>>> 			 * Hence, us = 1000000 * cycles / Hz.  Round up.
+>>> 			 */
+>>> 			val = 1000000ULL * data->timeout_clks;
+>>> 			if (do_div(val, host->clock))
+>>> 				target_timeout++;
+>>> 			target_timeout += val;
+>>> 		}
+>>> 	}
+>>>
+>>> 	return target_timeout;
+>>> }
+>>>
+>>> And call it from sdhci_calc_sw_timeout()
+>>>
+>>>>  
+>>>>  	return count;
+>>>>  }
+>>>> @@ -1175,13 +1206,6 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+>>>>  		mdelay(1);
+>>>>  	}
+>>>>  
+>>>> -	timeout = jiffies;
+>>>> -	if (!cmd->data && cmd->busy_timeout > 9000)
+>>>> -		timeout += DIV_ROUND_UP(cmd->busy_timeout, 1000) * HZ + HZ;
+>>>> -	else
+>>>> -		timeout += 10 * HZ;
+>>>> -	sdhci_mod_timer(host, cmd->mrq, timeout);
+>>>> -
+>>>>  	host->cmd = cmd;
+>>>>  	if (sdhci_data_line_cmd(cmd)) {
+>>>>  		WARN_ON(host->data_cmd);
+>>>> @@ -1221,6 +1245,15 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+>>>>  	    cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200)
+>>>>  		flags |= SDHCI_CMD_DATA;
+>>>>  
+>>>> +	timeout = jiffies;
+>>>> +	if (host->data_timeout > 0) {
+>>>
+>>> This can be just:
+>>>
+>>> 	if (host->data_timeout) {
+>>>
+>>>> +		timeout += nsecs_to_jiffies(host->data_timeout);
+>>>> +		host->data_timeout = 0;
+>>>
+>>> It would be better to initialize host->data_timeout = 0 at the top of
+>>> sdhci_prepare_data().
+>>>
+>>> Also still need:
+>>>
+>>> 	else if (!cmd->data && cmd->busy_timeout > 9000) {
+>>> 		timeout += DIV_ROUND_UP(cmd->busy_timeout, 1000) * HZ + HZ;
+>>
+>> sdhci_calc_sw_timeout should have calculated the timeout for this case too no?
+> 
+> Yes, but I was thinking you would only calculate when it was needed.
 
-The set_dma_ops() is no longer required in the fsl/fman, I'll send a patch to remove it.
+I feel since we would have anyways calculated data_timeout, we should use that
+instead unless you see a problem with that.
 
 Thanks
-
->   - SND_SOC_LPASS_IPQ806X and SND_SOC_LPASS_PLATFORM loose their
->     dependency on HAS_DMA, as they are selected from
->     SND_SOC_APQ8016_SBC.
-> 
-> Signed-off-by: Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>
-> Reviewed-by: Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-> Acked-by: Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>
-> ---
-> v2:
->   - Add Reviewed-by, Acked-by,
->   - Drop RFC state,
->   - Split per subsystem.
-> ---
->  drivers/lightnvm/Kconfig | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/lightnvm/Kconfig b/drivers/lightnvm/Kconfig
-> index 10c08982185a572f..9c03f35d9df113c6 100644
-> --- a/drivers/lightnvm/Kconfig
-> +++ b/drivers/lightnvm/Kconfig
-> @@ -4,7 +4,7 @@
-> 
->  menuconfig NVM
->  	bool "Open-Channel SSD target support"
-> -	depends on BLOCK && HAS_DMA && PCI
-> +	depends on BLOCK && PCI
->  	select BLK_DEV_NVME
->  	help
->  	  Say Y here to get to enable Open-channel SSDs.
-> --
-> 2.7.4
+Kishon
