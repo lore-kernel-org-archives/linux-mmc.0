@@ -1,195 +1,289 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: Re: [PATCH v3 07/11] mmc: sdhci: Program a relatively accurate SW
- timeout value
-Date: Mon, 19 Mar 2018 15:49:08 +0530
-Message-ID: <dacb62d3-086d-27a7-85cf-94916ce464b5@ti.com>
-References: <20180307132020.30951-1-kishon@ti.com>
- <20180307132020.30951-8-kishon@ti.com>
- <1e87e5f9-13e1-765b-f077-26a55359b2c3@intel.com>
- <47752066-aeda-87bc-6928-1a9b80f1c45c@ti.com>
- <49210daa-b593-4b34-abf5-be81580723bc@intel.com>
- <29f640ac-b155-41c6-cf3f-8c66e1b300f1@ti.com>
- <1905d25f-d16d-50b1-54b0-35807d801a12@intel.com>
+From: Vijay Viswanath <vviswana@codeaurora.org>
+Subject: Re: [PATCH V2 1/2] mmc: sdhci-msm: Add support to store supported
+ vdd-io voltages
+Date: Mon, 19 Mar 2018 18:02:01 +0530
+Message-ID: <3446c68e-17fd-8454-92c7-71d37598a914@codeaurora.org>
+References: <1518415278-59062-1-git-send-email-vviswana@codeaurora.org>
+ <1518415278-59062-2-git-send-email-vviswana@codeaurora.org>
+ <CAD=FV=VZVcN+47=KVkjDsoMtEaznDrNQSOj_iOdVpXDN8NURig@mail.gmail.com>
+ <19cc8cdf-3c75-5bde-08b2-34c4f4a2d5fa@redhat.com>
+ <ab80d114-9060-1fd0-dc42-6319a4e50d61@codeaurora.org>
+ <CAD=FV=WyEa1sVcU1N2ZkxUfE5VHcA-RpS=9031miGieanrxm8A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1905d25f-d16d-50b1-54b0-35807d801a12@intel.com>
+In-Reply-To: <CAD=FV=WyEa1sVcU1N2ZkxUfE5VHcA-RpS=9031miGieanrxm8A@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Doug Anderson <dianders@chromium.org>
+Cc: Jeremy McNicoll <jmcnicol@redhat.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, evgreen@chromium.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Adrian,
 
-On Monday 19 March 2018 03:30 PM, Adrian Hunter wrote:
-> On 19/03/18 11:20, Kishon Vijay Abraham I wrote:
->> Hi Adrian,
+
+On 3/7/2018 9:42 PM, Doug Anderson wrote:
+> Hi,
+> 
+> On Tue, Mar 6, 2018 at 11:13 PM, Vijay Viswanath
+> <vviswana@codeaurora.org> wrote:
+>> Hi Dough, Jeremy,
 >>
->> On Friday 16 March 2018 07:51 PM, Adrian Hunter wrote:
->>> On 16/03/18 08:29, Kishon Vijay Abraham I wrote:
+>>
+>> On 3/3/2018 4:38 AM, Jeremy McNicoll wrote:
+>>>
+>>> On 2018-03-02 10:23 AM, Doug Anderson wrote:
+>>>>
 >>>> Hi,
 >>>>
->>>> On Thursday 15 March 2018 06:43 PM, Adrian Hunter wrote:
->>>>> On 07/03/18 15:20, Kishon Vijay Abraham I wrote:
->>>>>> sdhci has a 10 second timeout to catch devices that stop responding.
->>>>>> Instead of programming 10 second arbitrary value, calculate the total time
->>>>>> it would take for the entire transfer to happen and program the timeout
->>>>>> value accordingly.
->>>>>>
->>>>>> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
->>>>>> ---
->>>>>>  drivers/mmc/host/sdhci.c | 47 ++++++++++++++++++++++++++++++++++++++++-------
->>>>>>  drivers/mmc/host/sdhci.h | 10 ++++++++++
->>>>>>  2 files changed, 50 insertions(+), 7 deletions(-)
->>>>>>
->>>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>>>>> index 1dd117cbeb6e..baab67bfa39b 100644
->>>>>> --- a/drivers/mmc/host/sdhci.c
->>>>>> +++ b/drivers/mmc/host/sdhci.c
->>>>>> @@ -709,6 +709,36 @@ static u32 sdhci_sdma_address(struct sdhci_host *host)
->>>>>>  		return sg_dma_address(host->data->sg);
->>>>>>  }
->>>>>>  
->>>>>> +static void sdhci_calc_sw_timeout(struct sdhci_host *host,
->>>>>> +				  struct mmc_command *cmd,
->>>>>> +				  unsigned int target_timeout)
->>>>>> +{
->>>>>> +	struct mmc_data *data = cmd->data;
->>>>>> +	struct mmc_host *mmc = host->mmc;
->>>>>> +	u64 transfer_time;
->>>>>> +	struct mmc_ios *ios = &mmc->ios;
->>>>>> +	unsigned char bus_width = 1 << ios->bus_width;
->>>>>> +	unsigned int blksz;
->>>>>> +	unsigned int freq;
->>>>>> +
->>>>>> +	if (data) {
->>>>>> +		blksz = data->blksz;
->>>>>> +		freq = host->mmc->actual_clock ? : host->clock;
->>>>>> +		transfer_time = (u64)blksz * NSEC_PER_SEC * (8 / bus_width);
->>>>>> +		do_div(transfer_time, freq);
->>>>>> +		/* multiply by '2' to account for any unknowns */
->>>>>> +		transfer_time = transfer_time * 2;
->>>>>> +		/* calculate timeout for the entire data */
->>>>>> +		host->data_timeout = (data->blocks * ((target_timeout *
->>>>>> +						       NSEC_PER_USEC) +
->>>>>> +						       transfer_time));
+>>>> On Sun, Feb 11, 2018 at 10:01 PM, Vijay Viswanath
+>>>> <vviswana@codeaurora.org> wrote:
 >>>>>
->>>>> (target_timeout * NSEC_PER_USEC) might be 32-bit and therefore overflow
->>>>> for timeouts greater than about 4 seconds.
+>>>>> During probe check whether the vdd-io regulator of sdhc platform device
+>>>>> can support 1.8V and 3V and store this information as a capability of
+>>>>> platform device.
 >>>>>
->>>>>> +	} else {
->>>>>> +		host->data_timeout = (u64)target_timeout * NSEC_PER_USEC;
->>>>>> +	}
->>>>>> +
->>>>>> +	host->data_timeout += MMC_CMD_TRANSFER_TIME;
+>>>>> Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
+>>>>> ---
+>>>>>    drivers/mmc/host/sdhci-msm.c | 38
+>>>>> ++++++++++++++++++++++++++++++++++++++
+>>>>>    1 file changed, 38 insertions(+)
 >>>>>
->>>>> Need to allow for target_timeout == 0 so:
+>>>>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+>>>>> index c283291..5c23e92 100644
+>>>>> --- a/drivers/mmc/host/sdhci-msm.c
+>>>>> +++ b/drivers/mmc/host/sdhci-msm.c
+>>>>> @@ -23,6 +23,7 @@
+>>>>>    #include <linux/iopoll.h>
 >>>>>
->>>>> 	if (host->data_timeout)
->>>>> 		host->data_timeout += MMC_CMD_TRANSFER_TIME;
->>>>>
->>>>>> +}
->>>>>> +
->>>>>>  static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
->>>>>>  {
->>>>>>  	u8 count;
->>>>>> @@ -766,6 +796,7 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
->>>>>>  		if (count >= 0xF)
->>>>>>  			break;
->>>>>>  	}
->>>>>> +	sdhci_calc_sw_timeout(host, cmd, target_timeout);
->>>>>
->>>>> If you make the changes I suggest for patch 6, then this would
->>>>> move sdhci_calc_sw_timeout() into sdhci_set_timeout().
->>>>>
->>>>> I suggest you factor out the target_timeout calculation e.g.
->>>>>
->>>>> static unsigned int sdhci_target_timeout(struct sdhci_host *host,
->>>>> 					 struct mmc_command *cmd,
->>>>> 					 struct mmc_data *data)
->>>>> {
->>>>> 	unsigned int target_timeout;
->>>>>
->>>>> 	/* timeout in us */
->>>>> 	if (!data)
->>>>> 		target_timeout = cmd->busy_timeout * 1000;
->>>>> 	else {
->>>>> 		target_timeout = DIV_ROUND_UP(data->timeout_ns, 1000);
->>>>> 		if (host->clock && data->timeout_clks) {
->>>>> 			unsigned long long val;
->>>>>
->>>>> 			/*
->>>>> 			 * data->timeout_clks is in units of clock cycles.
->>>>> 			 * host->clock is in Hz.  target_timeout is in us.
->>>>> 			 * Hence, us = 1000000 * cycles / Hz.  Round up.
->>>>> 			 */
->>>>> 			val = 1000000ULL * data->timeout_clks;
->>>>> 			if (do_div(val, host->clock))
->>>>> 				target_timeout++;
->>>>> 			target_timeout += val;
->>>>> 		}
->>>>> 	}
->>>>>
->>>>> 	return target_timeout;
->>>>> }
->>>>>
->>>>> And call it from sdhci_calc_sw_timeout()
->>>>>
->>>>>>  
->>>>>>  	return count;
->>>>>>  }
->>>>>> @@ -1175,13 +1206,6 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
->>>>>>  		mdelay(1);
->>>>>>  	}
->>>>>>  
->>>>>> -	timeout = jiffies;
->>>>>> -	if (!cmd->data && cmd->busy_timeout > 9000)
->>>>>> -		timeout += DIV_ROUND_UP(cmd->busy_timeout, 1000) * HZ + HZ;
->>>>>> -	else
->>>>>> -		timeout += 10 * HZ;
->>>>>> -	sdhci_mod_timer(host, cmd->mrq, timeout);
->>>>>> -
->>>>>>  	host->cmd = cmd;
->>>>>>  	if (sdhci_data_line_cmd(cmd)) {
->>>>>>  		WARN_ON(host->data_cmd);
->>>>>> @@ -1221,6 +1245,15 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
->>>>>>  	    cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200)
->>>>>>  		flags |= SDHCI_CMD_DATA;
->>>>>>  
->>>>>> +	timeout = jiffies;
->>>>>> +	if (host->data_timeout > 0) {
->>>>>
->>>>> This can be just:
->>>>>
->>>>> 	if (host->data_timeout) {
->>>>>
->>>>>> +		timeout += nsecs_to_jiffies(host->data_timeout);
->>>>>> +		host->data_timeout = 0;
->>>>>
->>>>> It would be better to initialize host->data_timeout = 0 at the top of
->>>>> sdhci_prepare_data().
->>>>>
->>>>> Also still need:
->>>>>
->>>>> 	else if (!cmd->data && cmd->busy_timeout > 9000) {
->>>>> 		timeout += DIV_ROUND_UP(cmd->busy_timeout, 1000) * HZ + HZ;
+>>>>>    #include "sdhci-pltfm.h"
+>>>>> +#include <linux/regulator/consumer.h>
 >>>>
->>>> sdhci_calc_sw_timeout should have calculated the timeout for this case too no?
->>>
->>> Yes, but I was thinking you would only calculate when it was needed.
+>>>>
+>>>> This is a strange sort order for this include file.  Why is it after
+>>>> the local include?
+>>>>
+>>>>
+>>>>>    #define CORE_MCI_VERSION               0x50
+>>>>>    #define CORE_VERSION_MAJOR_SHIFT       28
+>>>>> @@ -81,6 +82,9 @@
+>>>>>    #define CORE_HC_SELECT_IN_HS400        (6 << 19)
+>>>>>    #define CORE_HC_SELECT_IN_MASK (7 << 19)
+>>>>>
+>>>>> +#define CORE_3_0V_SUPPORT      (1 << 25)
+>>>>> +#define CORE_1_8V_SUPPORT      (1 << 26)
+>>>>> +
+>>>>
+>>>>
+>>>> Is there something magical about 25 and 26?  This is a new caps field,
+>>>> so I'd have expected 0 and 1.
+>>>>
+>>>>
 >>
->> I feel since we would have anyways calculated data_timeout, we should use that
->> instead unless you see a problem with that.
+>> Yes, these bits are the same corresponding to the capabilities in the
+>> Capabilities Register (offset 0x40). The bit positions become important when
+>> capabilities register doesn't show support to some voltages, but we can
+>> support those voltages. At that time, we will have to fake capabilities. The
+>> changes for those are currently not yet pushed up.
+>>
+>>
+>>>>>    #define CORE_CSR_CDC_CTLR_CFG0         0x130
+>>>>>    #define CORE_SW_TRIG_FULL_CALIB                BIT(16)
+>>>>>    #define CORE_HW_AUTOCAL_ENA            BIT(17)
+>>>>> @@ -148,6 +152,7 @@ struct sdhci_msm_host {
+>>>>>           u32 curr_io_level;
+>>>>>           wait_queue_head_t pwr_irq_wait;
+>>>>>           bool pwr_irq_flag;
+>>>>> +       u32 caps_0;
+>>>>>    };
+>>>>>
+>>>>>    static unsigned int msm_get_clock_rate_for_bus_mode(struct sdhci_host
+>>>>> *host,
+>>>>> @@ -1313,6 +1318,35 @@ static void sdhci_msm_writeb(struct sdhci_host
+>>>>> *host, u8 val, int reg)
+>>>>>                   sdhci_msm_check_power_status(host, req_type);
+>>>>>    }
+>>>>>
+>>>>> +static int sdhci_msm_set_regulator_caps(struct sdhci_msm_host
+>>>>> *msm_host)
+>>>>> +{
+>>>>> +       struct mmc_host *mmc = msm_host->mmc;
+>>>>> +       struct regulator *supply = mmc->supply.vqmmc;
+>>>>> +       int i, count;
+>>>>> +       u32 caps = 0, vdd_uV;
+>>>>> +
+>>>>> +       if (!IS_ERR(mmc->supply.vqmmc)) {
+>>>>> +               count = regulator_count_voltages(supply);
+>>>>> +               if (count < 0)
+>>>>> +                       return count;
+>>>>> +               for (i = 0; i < count; i++) {
+>>>>> +                       vdd_uV = regulator_list_voltage(supply, i);
+>>>>> +                       if (vdd_uV <= 0)
+>>>>> +                               continue;
+>>>>> +                       if (vdd_uV > 2700000)
+>>>>> +                               caps |= CORE_3_0V_SUPPORT;
+>>>>> +                       if (vdd_uV < 1950000)
+>>>>> +                               caps |= CORE_1_8V_SUPPORT;
+>>>>> +               }
+>>>>
+>>>>
+>>>> Shouldn't you be using regulator_is_supported_voltage() rather than
+>>>> open coding?  Also: I've never personally worked on a device where it
+>>>> was used, but there is definitely a concept floating about of a
+>>>> voltage level of 1.2V.  Maybe should copy the ranges from
+>>>> mmc_regulator_set_vqmmc()?
+>>>>
+>>>>
+>>
+>> regulator_is_supported_voltage() checks for a range and it also uses
+>> regulator_list_voltage() internally. regulator_list_voltage() is also an
+>> exported API for use by drivers AFAIK. Please correct if it is not.
 > 
-> I would prefer not to calculate data_timeout when a hardware timeout is
-> being used.
+> Sure, regulator_list_voltage() is valid to call.  I'm not saying that
+> your code is wrong or violates abstractions, just that it's
+> essentially re-implementing regulator_is_supported_voltage() for very
+> little gain.  Calling regulator_is_supported_voltage() is better
+> because:
+> 
+> 1. In theory, it should generate less code.  Sure, it might loop twice
+> with the current implementation of regulator_is_supported_voltage(),
+> but for a non-time-critical section like this smaller code is likely
+> better than faster code (decreases kernel size / uses up less cache
+> space, etc).
+> 
+> 2. If regulator_is_supported_voltage() is ever improved to be more
+> efficient you'll get that improvement automatically.  If someone
+> happened to source vqmmc from a PWM regulator, for instance, trying to
+> enumerate all voltages like this would be a disaster.
+> 
+> 3. Code will be simpler to understand.
+> 
+> You can replace your whole loop with:
+> 
+> if (regulator_is_supported_voltage(mmc->supply.vqmmc, 1700000, 1950000))
+>    caps |= CORE_1_8V_SUPPORT
+> if (regulator_is_supported_voltage(mmc->supply.vqmmc, 2700000, 3600000))
+>    caps |= CORE_3_0V_SUPPORT
+> 
+> 
+>>>> Also: seems like you should have some way to deal with "caps" ending
+>>>> up w/ no bits set.  IIRC you can have a regulator that can be enabled
+>>>> / disabled but doesn't list a voltage, so if someone messed up their
+>>>> device tree you could end up in this case.  Should you print a
+>>>> warning?  ...or treat it as if we support "3.0V"?  ...or ?  I guess it
+>>>> depends on how do you want patch #2 to behave in that case.
+>>>
+>>>
+>>> Both, initialize it to sane value and print something.  This way at
+>>> least you have a good chance of booting and not hard hanging and you
+>>> are given a reasonable message indicating what needs to be fixed.
+>>>
+>>> -jeremy
+>>>
+
+Its good to add a warning, but initializing it to some value might not 
+be appropriate. It will be better to leave it blank and if caps doesn't 
+have any of 1.8V/3V, better to not enable IO_PAD_PWR_SWITCH_EN.
+
+>>>>
+>>>>
+>>>>> +       }
+>>>>
+>>>>
+>>>> How should things behave if vqmmc is an error?  In that case is it
+>>>> important to not set "CORE_IO_PAD_PWR_SWITCH_EN" in patch set #2?
+>>>> ...or should you set "CORE_IO_PAD_PWR_SWITCH_EN" but then make sure
+>>>> you don't set "CORE_IO_PAD_PWR_SWITCH"?
+>>>>
+>>>>
+>>
+>> Thanks for the suggestion. If the regulators exit and doesn't list the
+>> voltages, then I believe initialization itself will not happen. We will not
+>> have any available ocr and in sdhci_setup_host it should fail.
+>> But these enhancements can be incorporated. Since this patch is already
+>> acknowledged, I will incorporate these changes in a subsequent patch.
+> 
+> It's already acknowledged?  I saw that your RFC was acknowledged by
+> Adrian Hunter but then you didn't include that tag in the posting of
+> v2, so I assumed for some reason it no longer applied.  If you're
+> thinking that Ulf would be the one to apply this patch, he probably
+> doesn't know that it's Acked either.
+> 
+> Perhaps Adrian or Ulf can give direction for how they see this patch proceeding.
+> 
 > 
 
-That differs from what I had thought. This patch tries to program a relatively
-accurate SW timeout value (for data_timer) irrespective of whether hardware
-timeout is used or not. This only tries to change the 10 Sec SW timeout value
-programmed for all data transfer commands.
+Since I put up V2 anyway, I will include your suggestions and put V3. My 
+mistake, I didn't notice the ACK was for RFC.
 
-Thanks
-Kishon
+>>>>> +       msm_host->caps_0 |= caps;
+>>>>> +       pr_debug("%s: %s: supported caps: 0x%08x\n", mmc_hostname(mmc),
+>>>>> +                       __func__, caps);
+>>>>> +
+>>>>> +       return 0;
+>>>>> +}
+>>>>> +
+>>>>> +
+>>>>>    static const struct of_device_id sdhci_msm_dt_match[] = {
+>>>>>           { .compatible = "qcom,sdhci-msm-v4" },
+>>>>>           {},
+>>>>> @@ -1530,6 +1564,10 @@ static int sdhci_msm_probe(struct platform_device
+>>>>> *pdev)
+>>>>>           ret = sdhci_add_host(host);
+>>>>>           if (ret)
+>>>>>                   goto pm_runtime_disable;
+>>>>> +       ret = sdhci_msm_set_regulator_caps(msm_host);
+>>>>> +       if (ret)
+>>>>> +               dev_err(&pdev->dev, "%s: Failed to set regulator caps:
+>>>>> %d\n",
+>>>>> +                               __func__, ret);
+>>>>
+>>>>
+>>>> Why do you need __func__ here?  You're already using dev_err(), that
+>>>> gives an idea of where we are.
+>>>>
+>>
+>> dev_err() doesn't give information of where it is getting called.
+> 
+> It gives you the driver and the error message should be unique to the
+> driver and easy to find.  Including "__func__ in messages like this is
+> discouraged unless you are in a context where you somehow can't get
+> access to the device pointer.  I suppose ultimately it's up the the
+> maintainer for individual cases but overall I've seen this to be a
+> consistently applied rule in the kernel.
+> 
+> In any case, why would this particular print be special that it should
+> include __func__ but all others (in this file, or in dev_err in
+> general) shouldn't?
+> 
+> 
+>>>>>           pm_runtime_mark_last_busy(&pdev->dev);
+>>>>>           pm_runtime_put_autosuspend(&pdev->dev);
+>>>>> --
+>>>>>    Qualcomm India Private Limited, on behalf of Qualcomm Innovation
+>>>>> Center, Inc.
+>>>>> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a
+>>>>> Linux Foundation Collaborative Project.
+>>>>>
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+>> Thanks,
+>> Vijay
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
+Thanks,
+Vijay
