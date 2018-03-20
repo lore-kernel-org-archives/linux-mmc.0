@@ -1,67 +1,38 @@
-From: Chunyan Zhang <zhang.chunyan@linaro.org>
-Subject: [PATCH 2/3] mmc: sdhci: made changes for SDMA System Address register
-Date: Tue, 20 Mar 2018 16:36:25 +0800
-Message-ID: <1521534986-21907-3-git-send-email-zhang.chunyan@linaro.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 0/3] mmc: add support for sdhci 4.0
+Date: Tue, 20 Mar 2018 11:18:28 +0200
+Message-ID: <2291348c-7338-f335-88b8-10dc308e7f22@intel.com>
 References: <1521534986-21907-1-git-send-email-zhang.chunyan@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1521534986-21907-1-git-send-email-zhang.chunyan@linaro.org>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
+To: Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Mark Brown <broonie@kernel.org>, Billows Wu <billows.wu@spreadtrum.com>, Chunyan Zhang <zhang.lyra@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-According to the SD host controller specification version 4.10, when
-Host Version 4 is enabled, SDMA uses ADMA System Address register
-(05Fh-058h) instead of using SDMA System Address register to
-support both 32-bit and 64-bit addressing.
+On 20/03/18 10:36, Chunyan Zhang wrote:
+>>From the SD host controller version 4.0 on, SDHCI implementation either
+> is version 3 compatible or version 4 mode. This patch-set covers those
+> changes which are common for SDHCI 4.0 version, regardless of whether
+> they are used with SD or eMMC storage devices.
 
-Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
----
- drivers/mmc/host/sdhci.c | 10 ++++++++--
- 1 file changed, 8 insertions(+), 2 deletions(-)
+Why use v4 mode?
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index da4d91e..748a3a3 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -805,6 +805,7 @@ static void sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
- static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
- {
- 	u8 ctrl;
-+	u32 reg;
- 	struct mmc_data *data = cmd->data;
- 
- 	if (sdhci_data_line_cmd(cmd))
-@@ -894,8 +895,10 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
- 					     SDHCI_ADMA_ADDRESS_HI);
- 		} else {
- 			WARN_ON(sg_cnt != 1);
-+			reg = host->v4_mode ? SDHCI_ADMA_ADDRESS :
-+				SDHCI_DMA_ADDRESS;
- 			sdhci_writel(host, sdhci_sdma_address(host),
--				     SDHCI_DMA_ADDRESS);
-+				     reg);
- 		}
- 	}
- 
-@@ -2721,6 +2724,7 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
- 		 */
- 		if (intmask & SDHCI_INT_DMA_END) {
- 			u32 dmastart, dmanow;
-+			u32 reg;
- 
- 			dmastart = sdhci_sdma_address(host);
- 			dmanow = dmastart + host->data->bytes_xfered;
-@@ -2733,7 +2737,9 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
- 			host->data->bytes_xfered = dmanow - dmastart;
- 			DBG("DMA base 0x%08x, transferred 0x%06x bytes, next 0x%08x\n",
- 			    dmastart, host->data->bytes_xfered, dmanow);
--			sdhci_writel(host, dmanow, SDHCI_DMA_ADDRESS);
-+			reg = host->v4_mode ? SDHCI_ADMA_ADDRESS :
-+				SDHCI_DMA_ADDRESS;
-+			sdhci_writel(host, dmanow, reg);
- 		}
- 
- 		if (intmask & SDHCI_INT_DATA_END) {
--- 
-2.7.4
+What driver is using v4 mode?  Can you also post those changes?
+
+Are you planning on adding UHS-II support also?
+
+> 
+> Chunyan Zhang (3):
+>   mmc: sdhci: add sd host v4 mode
+>   mmc: sdhci: made changes for System Address register of SDMA
+>   mmc: sdhci: add ADMA2 64-bit addressing support for V4 mode
+> 
+>  drivers/mmc/host/sdhci.c | 66 +++++++++++++++++++++++++++++++++++++-----------
+>  drivers/mmc/host/sdhci.h | 29 +++++++++++++++++----
+>  2 files changed, 75 insertions(+), 20 deletions(-)
+> 
