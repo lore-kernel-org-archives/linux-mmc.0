@@ -1,88 +1,26 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: mmc: block: bonnie++ runs with errors on arc/hsdk board
-Date: Tue, 20 Mar 2018 10:29:16 +0200
-Message-ID: <e00cf7f1-6ed8-124d-54b7-81e3d5722b10@intel.com>
-References: <1520942674.10285.8.camel@synopsys.com>
- <486fe92e-9b53-53a4-f98d-129a97032470@intel.com>
- <1520956602.10285.10.camel@synopsys.com>
- <1521030769.10285.16.camel@synopsys.com>
- <83de0f90-0919-f449-b432-494b9bf524a1@intel.com>
- <1521126524.10304.5.camel@synopsys.com>
- <c5e50711-77d9-d1d2-35f4-3b656c8e895c@intel.com>
- <1521220236.10304.10.camel@synopsys.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1521220236.10304.10.camel@synopsys.com>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-snps-arc>,
- <mailto:linux-snps-arc-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-snps-arc/>
-List-Post: <mailto:linux-snps-arc@lists.infradead.org>
-List-Help: <mailto:linux-snps-arc-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-snps-arc>,
- <mailto:linux-snps-arc-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-snps-arc" <linux-snps-arc-bounces@lists.infradead.org>
-Errors-To: linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org
-To: Evgeniy Didin <Evgeniy.Didin@synopsys.com>
-Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-ext4@vger.kernel.org" <linux-ext4@vger.kernel.org>, "tytso@mit.edu" <tytso@mit.edu>, "linus.walleij@linaro.org" <linus.walleij@linaro.org>, "Alexey.Brodkin@synopsys.com" <Alexey.Brodkin@synopsys.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "jh80.chung@samsung.com" <jh80.chung@samsung.com>, "adilger.kernel@dilger.ca" <adilger.kernel@dilger.ca>, "linux-snps-arc@lists.infradead.org" <linux-snps-arc@lists.infradead.org>, "Eugeniy.Paltsev@synopsys.com" <Eugeniy.Paltsev@synopsys.com>
+From: Chunyan Zhang <zhang.chunyan@linaro.org>
+Subject: [PATCH 0/3] mmc: add support for sdhci 4.0
+Date: Tue, 20 Mar 2018 16:36:23 +0800
+Message-ID: <1521534986-21907-1-git-send-email-zhang.chunyan@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Mark Brown <broonie@kernel.org>, Billows Wu <billows.wu@spreadtrum.com>, Chunyan Zhang <zhang.lyra@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-T24gMTYvMDMvMTggMTk6MTAsIEV2Z2VuaXkgRGlkaW4gd3JvdGU6Cj4gSGVsbG8gQWRyaWFuLAo+
-IAo+PiBZZXMuwqDCoFVuZm9ydHVuYXRlbHkgdGhlIGNsb2NrIHVzZWQgaXMgbm90IGFjY3VyYXRl
-IGVub3VnaCB0byBjb3JyZWN0bHkgb3JkZXIKPj4gdGhlIGV2ZW50cyBhY3Jvc3MgZGlmZmVyZW50
-IENQVXMsIHdoaWNoIG1ha2VzIGl0IHZlcnkgaGFyZCB0byBzZWUgZGVsYXlzCj4+IGJldHdlZW4g
-cmVxdWVzdHMuwqDCoFlvdSBjb3VsZCB0cnkgYSBkaWZmZXJlbnQgY2xvY2sgLSByZWZlciB0aGUg
-LS1jbG9ja2lkCj4+IG9wdGlvbiB0byBwZXJmIHJlY29yZC4KPj4KPj4gTmV2ZXJ0aGVsZXNzIGl0
-IHNob3dzIHRoZXJlIGFyZSBubyBJL08gZXJyb3JzIHdoaWNoIG1lYW5zIHRoZSBlcnJvciByZWNv
-dmVyeQo+PiBjYW4gYmUgcnVsZWQgb3V0IGFzIGEgcHJvYmxlbS4KPj4KPj4gVGhlIGlzc3VlIGNv
-dWxkIGJlIGNhdXNlZCBieSB0aGUgSS9PIHNjaGVkdWxlci7CoMKgVW5kZXIgYmxrLW1xIHRoZSBk
-ZWZhdWx0Cj4+IHNjaGVkdWxlciBpcyB0aGUgbXEtZGVhZGxpbmUgc2NoZWR1bGVyIHdoZXJlYXMg
-d2l0aG91dCBibGstbXEgeW91IHdvdWxkCj4+IHByb2JhYmx5IGhhdmUgYmVlbiB1c2luZyBjZnEg
-YnkgZGVmYXVsdC7CoMKgWW91IGNvdWxkIHRyeSB0aGUgYmZxIHNjaGVkdWxlcjoKPj4KPj4gCWVj
-aG8gYmZxID4gL3N5cy9ibG9jay9tbWNibGswL3F1ZXVlL3NjaGVkdWxlcgo+Pgo+PiBCdXQgeW91
-IG1pZ2h0IG5lZWQgdG8gYWRkIGl0IHRvIHRoZSBrZXJuZWwgY29uZmlnIGkuZS4KPj4KPj4gCUNP
-TkZJR19JT1NDSEVEX0JGUT15Cj4+Cj4gU3dpdGNoaW5nIGZyb20gbXEtZGVhZGxpbmUgc2NoZWR1
-bGVyIHRvIGJmcSBmaXhlZCB0aGUgaXNzdWUuCj4gQWxzbyBib25uaWUrKyByZXN1bHRzIGhhdmUg
-Y2hhbmdlZDoKPiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LTw4LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLQo+IGJmcSBzY2hlZHVsZXI6Cj4gQVJDTGludXgsNTEyTSw2
-NDYzLDg3LDcyOTcsMCw1NDUwLDAsOTgyNyw5OSwzNDI5NTIsOTksKysrKyssKysrLDE2LDE3NTI1
-LDEwMCwrKysrKywrKyssMjQzMjksOTksMTc2MjEsMTAwLCsrKysrLCsrKywyNDAwMSwxMDEKPiAK
-PiBtcS1kZWFkbGluZSBzY2hlZHVsZXI6Cj4gQVJDTGludXgsNTEyTSw0NDUzLDM2LDY0NzQsMSw1
-ODUyLDAsMTI5NDAsOTksMzQ0MzI5LDEwMCwrKysrKywrKyssMTYsMjIxNjgsOTgsKysrKyssKysr
-LDMyNzYwLDk5LDIyNzU1LDEwMCwrKysrKywrKyssMzIyMDUsMTAwCj4gLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS08OC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KPiBB
-cyBJIHNlZSwgdGhlIHBlcmZvcm1hbmNlIG9mIHNlcXVlbnRpYWwgaW5wdXQgcGVyIGNoYXIgYW5k
-IG9mIGZpbGUKPiBvcGVyYXRpb25zIGhhdmUgZGVjcmVhc2VkIGZvciB+MjUlLgoKWW91IG1heSBu
-ZWVkIHRvIGFnZ3JlZ2F0ZSBtb3JlIHJ1bnMsIGFuZCBhbHNvIGNvbXBhcmUgdG8gQkZRIHdpdGgg
-YmxrLW1xCmFnYWluc3QgQ0ZRIHdpdGhvdXQgYmxrLW1xLiAgSWYgeW91IHRoaW5rIEJGUSBpcyB1
-bmRlci1wZXJmb3JtaW5nLCB0aGVuCmNvbnRhY3QgdGhlIEJGUSBtYWludGFpbmVycy4KCj4gCj4g
-RG8geW91IGhhdmUgYW55IGlkZWEgd2hhdCBjb3VsZCBiZSBhIHJlYXNvbiBmb3Igc3VjaCBhIGxv
-bmcgc3RhbGxpbmcgaW4KPiBjYXNlIG9mIG1xLWRlYWRsaW5lIElPc2NoZWR1bGVyPwoKV3JpdGUg
-c3RhcnZhdGlvbi4KCj4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBJIHdvdWxkIGV4
-cGVjdCBpZiB0aGVyZSBpcyBzb21lIGxvbmcKPiBhc3luYyBvcGVyYXRpb24sIGtlcm5lbCBzaG91
-bGQgbm90IGJlIGJsb2NrZWQuCgpUaGUga2VybmVsIGlzIG5vdCBibG9ja2VkLiAgQUZBSUNUIGl0
-IGlzIHRoZSBFWFQ0IGpvdXJuYWwgdGhhdCBpcwpibG9ja2VkIHdhaXRpbmcgb24gYSB3cml0ZS4K
-Cj4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBCdXQgd2hh
-dCB3ZSBzZWUgdXNpbmcKPiBtcS1kZWFkbGluZSBpcyBrZXJuZWwgYmxvY2tlZCBpbiBiaXRfd2Fp
-dF9pbygpLiBEbyB5b3UgdGhpbmsgdGhpcyBpcyBhCj4gdmFsaWQgYmVoYXZpb3IgYXQgbGVhc3Qg
-aW4gY2FzZSBvZiBtcS1kZWFkbGluZSBJT3NjaGVkdWxlcj8KCm1xLWRlYWRsaW5lIGlzIGRlc2ln
-bmVkIHRvIGZhdm91ciByZWFkcyBvdmVyIHdyaXRlcywgc28gaW4gdGhhdCBzZW5zZSBzb21lCmFt
-b3VudCBvZiB3cml0ZS1zdGFydmF0aW9uIGlzIG5vcm1hbC4KCj4gCj4+IEFsdGVybmF0aXZlbHkg
-eW91IGNvdWxkIGZpZGRsZSB3aXRoIHRoZSBzY2hlZHVsZXIgcGFyYW1ldGVyczoKPj4KPj4gV2l0
-aCBtcS1kZWFkbGluZSB0aGV5IGFyZToKPj4KPj4gIyBncmVwIC1IIC4gL3N5cy9ibG9jay9tbWNi
-bGswL3F1ZXVlL2lvc2NoZWQvKgo+PiAvc3lzL2Jsb2NrL21tY2JsazAvcXVldWUvaW9zY2hlZC9m
-aWZvX2JhdGNoOjE2Cj4+IC9zeXMvYmxvY2svbW1jYmxrMC9xdWV1ZS9pb3NjaGVkL2Zyb250X21l
-cmdlczoxCj4+IC9zeXMvYmxvY2svbW1jYmxrMC9xdWV1ZS9pb3NjaGVkL3JlYWRfZXhwaXJlOjUw
-MAo+PiAvc3lzL2Jsb2NrL21tY2JsazAvcXVldWUvaW9zY2hlZC93cml0ZV9leHBpcmU6NTAwMAo+
-PiAvc3lzL2Jsb2NrL21tY2JsazAvcXVldWUvaW9zY2hlZC93cml0ZXNfc3RhcnZlZDoyCj4+Cj4+
-IFlvdSBjb3VsZCB0cnkgZGVjcmVhc2luZyB0aGUgd3JpdGVfZXhwaXJlIGFuZC9vciBmaWZvX2Jh
-dGNoLgo+IEl0IHNlZW1zIHRoYXQgZGVjcmVhc2luZyBkb2Vzbid0IGFmZmVjdCBvbiB0aGlzIGlz
-c3VlLgoKVGhhdCBpcyBzdXJwcmlzaW5nLiAgWW91IGNvdWxkIGFsc28gdHJ5IHdyaXRlc19zdGFy
-dmVkPTEgb3IKd3JpdGVzX3N0YXJ2ZWQ9MC4KCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fCmxpbnV4LXNucHMtYXJjIG1haWxpbmcgbGlzdApsaW51eC1zbnBz
-LWFyY0BsaXN0cy5pbmZyYWRlYWQub3JnCmh0dHA6Ly9saXN0cy5pbmZyYWRlYWQub3JnL21haWxt
-YW4vbGlzdGluZm8vbGludXgtc25wcy1hcmM=
+>From the SD host controller version 4.0 on, SDHCI implementation either
+is version 3 compatible or version 4 mode. This patch-set covers those
+changes which are common for SDHCI 4.0 version, regardless of whether
+they are used with SD or eMMC storage devices.
+
+Chunyan Zhang (3):
+  mmc: sdhci: add sd host v4 mode
+  mmc: sdhci: made changes for System Address register of SDMA
+  mmc: sdhci: add ADMA2 64-bit addressing support for V4 mode
+
+ drivers/mmc/host/sdhci.c | 66 +++++++++++++++++++++++++++++++++++++-----------
+ drivers/mmc/host/sdhci.h | 29 +++++++++++++++++----
+ 2 files changed, 75 insertions(+), 20 deletions(-)
+
+-- 
+2.7.4
