@@ -1,60 +1,75 @@
-From: Ezequiel Garcia <ezequiel@vanguardiasur.com.ar>
-Subject: [PATCH 01/14] mmc: jz4740: Fix race condition in IRQ mask update
-Date: Wed, 21 Mar 2018 16:27:28 -0300
-Message-ID: <20180321192741.25872-2-ezequiel@vanguardiasur.com.ar>
-References: <20180321192741.25872-1-ezequiel@vanguardiasur.com.ar>
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20180321192741.25872-1-ezequiel@vanguardiasur.com.ar>
-Sender: stable-owner@vger.kernel.org
-To: Mathieu Malaterre <malat@debian.org>, Ulf Hansson <ulf.hansson@linaro.org>, Paul Cercueil <paul@crapouillou.net>
-Cc: linux-mmc@vger.kernel.org, linux-mips@linux-mips.org, James Hogan <jhogan@kernel.org>, kernel@collabora.com, Alex Smith <alex.smith@imgtec.com>, stable@vger.kernel.org
+From: Harish Jenny K N <harish_kandiga@mentor.com>
+Subject: Re: [PATCH v10] mmc: Export host capabilities to debugfs.
+Date: Thu, 22 Mar 2018 10:49:37 +0530
+Message-ID: <3fcd7a2a-19a3-859c-0b24-8ac07bfaa1e2@mentor.com>
+References: <1520917812-20047-1-git-send-email-harish_kandiga@mentor.com>
+ <CAPDyKFo8jFwDO1E=tNSd4yTn3qtefzvHK0V70fcEqzB=SibrJA@mail.gmail.com>
+ <1521109575.10722.654.camel@linux.intel.com>
+ <CAPDyKFrZaDx2NdvaFdgOxWBuwtjMnJE41p=x5b2x2moFEO3kXQ@mail.gmail.com>
+ <b93613a1-f35d-d246-5e1d-dc7821eb5976@mentor.com>
+ <CAPDyKFoP02ZGkUxmtWbF6kEWTzdM2dyKmyWcsGZ1_Mt3WUyg-Q@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFoP02ZGkUxmtWbF6kEWTzdM2dyKmyWcsGZ1_Mt3WUyg-Q@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Linus Walleij <linus.walleij@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, avri.altman@wdc.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Vladimir Zapolskiy <Vladimir_Zapolskiy@mentor.com>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Alex Smith <alex.smith@imgtec.com>
 
-A spinlock is held while updating the internal copy of the IRQ mask,
-but not while writing it to the actual IMASK register. After the lock
-is released, an IRQ can occur before the IMASK register is written.
-If handling this IRQ causes the mask to be changed, when the handler
-returns back to the middle of the first mask update, a stale value
-will be written to the mask register.
 
-If this causes an IRQ to become unmasked that cannot have its status
-cleared by writing a 1 to it in the IREG register, e.g. the SDIO IRQ,
-then we can end up stuck with the same IRQ repeatedly being fired but
-not handled. Normally the MMC IRQ handler attempts to clear any
-unexpected IRQs by writing IREG, but for those that cannot be cleared
-in this way then the IRQ will just repeatedly fire.
+On Friday 16 March 2018 01:27 PM, Ulf Hansson wrote:
+> On 16 March 2018 at 05:20, Harish Jenny K N <harish_kandiga@mentor.com> wrote:
+>>
+>> On Thursday 15 March 2018 05:59 PM, Ulf Hansson wrote:
+>>> On 15 March 2018 at 11:26, Andy Shevchenko
+>>> <andriy.shevchenko@linux.intel.com> wrote:
+>>>> On Thu, 2018-03-15 at 11:12 +0100, Ulf Hansson wrote:
+>>>>> On 13 March 2018 at 06:10, Harish Jenny K N <harish_kandiga@mentor.com
+>>>>>> wrote:
+>>>>>>
+>>>>> Honestly, I don't like this, but maybe other people do, then I am fine
+>>>>> with this approach.
+>>>>>
+>>>>> If were to decide, I would just rather print the caps field in a
+>>>>> hexadecimal bit form and leave the translation to the user.
+>>>> A compromise would be to print both:
+>>>>
+>>>> 0xHHHHHHHH\n
+>>>> Description of each enabled field, one per line
+>>>>
+>>>>
+>>>> Another format would be:
+>>>>
+>>>> Bit XX: Description of a field
+>>> If we were to print the description, there is no point in printing the
+>>> bits in hex. Or is it?
+>> Yes. I also do not see the use of printing hex value if we are printing the description.
+>>
+>>> As I said, if you and other folkz thinks this is valuable, then I am
+>>> fine as well. Just saying, it's not my preferred option.
+>>>
+>>>
+>>
+>> I just want to inform that the idea of printing the description came after discussion in https://www.spinics.net/lists/linux-mmc/msg48246.html, where it was decided adding utility in mmc-utils was not going to work ( reason:  We may very well be changing the bit offsets for the caps and caps2 in the mmc kernel header, keeping a copy of them is not a good idea. It's just a matter of *when* it will break).
+> I recall. However, I didn't realize all these strings were going to be
+> needed. :-)
+>
+>> On Thu, 2018-03-15 at 11:12 +0100, Ulf Hansson wrote:
+>>> If were to decide, I would just rather print the caps field in a hexadecimal bit form and leave the translation to the user.
+>> I think translation becomes difficult for the above reason and hence I would prefer printing the description.
+> Okay.
+>
+>> Note: Printing values in Hex was the original idea and it is also available in https://www.spinics.net/lists/linux-mmc/msg48213.html just in case if it is required.
+> Yeah, so maybe I should apply that one, then we can take it from there!?
 
-This was resulting in lockups after a while of using Wi-Fi on the
-CI20 (GitHub issue #19).
 
-Resolve by holding the spinlock until after the IMASK register has
-been updated.
 
-Cc: stable@vger.kernel.org
-Link: https://github.com/MIPS/CI20_linux/issues/19
-Fixes: 61bfbdb85687 ("MMC: Add support for the controller on JZ4740 SoCs.")
-Tested-by: Mathieu Malaterre <malat@debian.org>
-Signed-off-by: Alex Smith <alex.smith@imgtec.com>
----
- drivers/mmc/host/jz4740_mmc.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Fine with both the approach. Please consider this.
 
-diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
-index 712e08d9a45e..a0168e9e4fce 100644
---- a/drivers/mmc/host/jz4740_mmc.c
-+++ b/drivers/mmc/host/jz4740_mmc.c
-@@ -362,9 +362,9 @@ static void jz4740_mmc_set_irq_enabled(struct jz4740_mmc_host *host,
- 		host->irq_mask &= ~irq;
- 	else
- 		host->irq_mask |= irq;
--	spin_unlock_irqrestore(&host->lock, flags);
- 
- 	writew(host->irq_mask, host->base + JZ_REG_MMC_IMASK);
-+	spin_unlock_irqrestore(&host->lock, flags);
- }
- 
- static void jz4740_mmc_clock_enable(struct jz4740_mmc_host *host,
--- 
-2.16.2
+
+Thanks,
+Harish Jenny K N
