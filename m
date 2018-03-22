@@ -1,75 +1,102 @@
-From: Harish Jenny K N <harish_kandiga@mentor.com>
-Subject: Re: [PATCH v10] mmc: Export host capabilities to debugfs.
-Date: Thu, 22 Mar 2018 10:49:37 +0530
-Message-ID: <3fcd7a2a-19a3-859c-0b24-8ac07bfaa1e2@mentor.com>
-References: <1520917812-20047-1-git-send-email-harish_kandiga@mentor.com>
- <CAPDyKFo8jFwDO1E=tNSd4yTn3qtefzvHK0V70fcEqzB=SibrJA@mail.gmail.com>
- <1521109575.10722.654.camel@linux.intel.com>
- <CAPDyKFrZaDx2NdvaFdgOxWBuwtjMnJE41p=x5b2x2moFEO3kXQ@mail.gmail.com>
- <b93613a1-f35d-d246-5e1d-dc7821eb5976@mentor.com>
- <CAPDyKFoP02ZGkUxmtWbF6kEWTzdM2dyKmyWcsGZ1_Mt3WUyg-Q@mail.gmail.com>
+From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Subject: [PATCH] mmc: block: Delete gendisk before cleaning up the request
+ queue
+Date: Thu, 22 Mar 2018 15:49:00 +0800
+Message-ID: <1521704940-45406-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFoP02ZGkUxmtWbF6kEWTzdM2dyKmyWcsGZ1_Mt3WUyg-Q@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Linus Walleij <linus.walleij@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, avri.altman@wdc.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Vladimir Zapolskiy <Vladimir_Zapolskiy@mentor.com>
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
+dd if=/dev/urandom of=/dev/mmcblk1 bs=4k count=10000
+with a SD card hotplug during transfer reports a warning below:
 
+Remove the disk, partition and bdi sysfs attributes before cleaning
+up the request queue associated with the disk.
 
-On Friday 16 March 2018 01:27 PM, Ulf Hansson wrote:
-> On 16 March 2018 at 05:20, Harish Jenny K N <harish_kandiga@mentor.com> wrote:
->>
->> On Thursday 15 March 2018 05:59 PM, Ulf Hansson wrote:
->>> On 15 March 2018 at 11:26, Andy Shevchenko
->>> <andriy.shevchenko@linux.intel.com> wrote:
->>>> On Thu, 2018-03-15 at 11:12 +0100, Ulf Hansson wrote:
->>>>> On 13 March 2018 at 06:10, Harish Jenny K N <harish_kandiga@mentor.com
->>>>>> wrote:
->>>>>>
->>>>> Honestly, I don't like this, but maybe other people do, then I am fine
->>>>> with this approach.
->>>>>
->>>>> If were to decide, I would just rather print the caps field in a
->>>>> hexadecimal bit form and leave the translation to the user.
->>>> A compromise would be to print both:
->>>>
->>>> 0xHHHHHHHH\n
->>>> Description of each enabled field, one per line
->>>>
->>>>
->>>> Another format would be:
->>>>
->>>> Bit XX: Description of a field
->>> If we were to print the description, there is no point in printing the
->>> bits in hex. Or is it?
->> Yes. I also do not see the use of printing hex value if we are printing the description.
->>
->>> As I said, if you and other folkz thinks this is valuable, then I am
->>> fine as well. Just saying, it's not my preferred option.
->>>
->>>
->>
->> I just want to inform that the idea of printing the description came after discussion in https://www.spinics.net/lists/linux-mmc/msg48246.html, where it was decided adding utility in mmc-utils was not going to work ( reason:  We may very well be changing the bit offsets for the caps and caps2 in the mmc kernel header, keeping a copy of them is not a good idea. It's just a matter of *when* it will break).
-> I recall. However, I didn't realize all these strings were going to be
-> needed. :-)
->
->> On Thu, 2018-03-15 at 11:12 +0100, Ulf Hansson wrote:
->>> If were to decide, I would just rather print the caps field in a hexadecimal bit form and leave the translation to the user.
->> I think translation becomes difficult for the above reason and hence I would prefer printing the description.
-> Okay.
->
->> Note: Printing values in Hex was the original idea and it is also available in https://www.spinics.net/lists/linux-mmc/msg48213.html just in case if it is required.
-> Yeah, so maybe I should apply that one, then we can take it from there!?
+[  410.331226] mmc1: card 59b4 removed
+[  410.348583] WARNING: CPU: 0 PID: 5 at block/blk-core.c:785
+blk_cleanup_queue+0x138/0x140
+[  410.349294] Modules linked in:
+[  410.349570] CPU: 0 PID: 5 Comm: kworker/0:0 Not tainted
+4.16.0-rc6-next-20180321-00004-gc2ad6a7 #263
+[  410.350363] Hardware name: Excavator-RK3399 Board (DT)
+[  410.350819] Workqueue: events_freezable mmc_rescan
+[  410.351242] pstate: 60000005 (nZCv daif -PAN -UAO)
+[  410.351663] pc : blk_cleanup_queue+0x138/0x140
+[  410.352054] lr : blk_cleanup_queue+0xac/0x140
+[  410.352436] sp : ffff0000092cbb90
+[  410.352727] x29: ffff0000092cbb90 x28: 0000000000000000
+[  410.353195] x27: ffff8000f6f23030 x26: ffff00000904e610
+[  410.353662] x25: ffff8000f17cc808 x24: ffff8000f1038200
+[  410.354128] x23: 0000000000000060 x22: 0000000000000000
+[  410.354595] x21: ffff8000f11748d8 x20: ffff8000f1038200
+[  410.355061] x19: ffff8000f1174200 x18: 0000ffff936347d8
+[  410.355528] x17: 0000ffff935b93c0 x16: ffff0000081263f8
+[  410.355994] x15: 0000000000000000 x14: 0000000000000400
+[  410.356461] x13: 0000000000000001 x12: 0000000000000001
+[  410.356927] x11: 0000000000000040 x10: ffff8000f2400028
+[  410.357393] x9 : ffff8000f2400040 x8 : 0000000000000000
+[  410.357860] x7 : ffff8000f6f3a340 x6 : ffff8000f6f3a340
+[  410.358326] x5 : ffff8000f2400000 x4 : ffff8000f6f3a340
+[  410.358792] x3 : 0000000000000000 x2 : 39c1333e45670800
+[  410.359259] x1 : 0000000000000000 x0 : 0000000000000003
+[  410.359726] Call trace:
+[  410.359943]  blk_cleanup_queue+0x138/0x140
+[  410.360305]  mmc_cleanup_queue+0x2c/0x48
+[  410.360652]  mmc_blk_remove_req+0x1c/0x98
+[  410.361005]  mmc_blk_remove+0x180/0x1c0
+[  410.361343]  mmc_bus_remove+0x1c/0x28
+[  410.361670]  device_release_driver_internal+0x154/0x1f0
+[  410.362128]  device_release_driver+0x14/0x20
+[  410.362504]  bus_remove_device+0xc8/0x108
+[  410.362858]  device_del+0x120/0x350
+[  410.363167]  mmc_remove_card+0x5c/0xb8
+[  410.363498]  mmc_sd_detect+0x40/0x78
+[  410.363813]  mmc_rescan+0x19c/0x368
+[  410.364123]  process_one_work+0x1ac/0x318
+[  410.364477]  worker_thread+0x50/0x450
+[  410.364801]  kthread+0xf8/0x128
+[  410.365081]  ret_from_fork+0x10/0x18
+[  410.365395] ---[ end trace 268e87a46c28968c ]---
 
+Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+---
 
+ drivers/mmc/core/block.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Fine with both the approach. Please consider this.
-
-
-Thanks,
-Harish Jenny K N
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index a2b9c25..02485e3 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -2659,7 +2659,6 @@ static void mmc_blk_remove_req(struct mmc_blk_data *md)
+ 		 * from being accepted.
+ 		 */
+ 		card = md->queue.card;
+-		mmc_cleanup_queue(&md->queue);
+ 		if (md->disk->flags & GENHD_FL_UP) {
+ 			device_remove_file(disk_to_dev(md->disk), &md->force_ro);
+ 			if ((md->area_type & MMC_BLK_DATA_AREA_BOOT) &&
+@@ -2669,6 +2668,7 @@ static void mmc_blk_remove_req(struct mmc_blk_data *md)
+ 
+ 			del_gendisk(md->disk);
+ 		}
++		mmc_cleanup_queue(&md->queue);
+ 		mmc_blk_put(md);
+ 	}
+ }
+-- 
+1.9.1
