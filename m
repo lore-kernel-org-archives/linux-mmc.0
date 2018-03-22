@@ -1,17 +1,17 @@
-From: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Subject: Re: [PATCH] mmc: block: Delete gendisk before cleaning up the request
  queue
-Date: Thu, 22 Mar 2018 11:31:43 +0200
-Message-ID: <1e104a4a-0508-97ee-4235-12de3e38b417@intel.com>
+Date: Thu, 22 Mar 2018 10:47:27 +0100
+Message-ID: <CAPDyKFrHsg1+3w7iOjKZGCuho-K37PN8Skta_H-uy4dnVMbd9A@mail.gmail.com>
 References: <1521704940-45406-1-git-send-email-shawn.lin@rock-chips.com>
  <f1c54ab8-aa38-69bc-b55a-fd8decc67d2d@intel.com>
  <ba973085-9321-c782-2eb1-68a1ff67366c@rock-chips.com>
+ <1e104a4a-0508-97ee-4235-12de3e38b417@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <ba973085-9321-c782-2eb1-68a1ff67366c-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Content-Language: en-US
+In-Reply-To: <1e104a4a-0508-97ee-4235-12de3e38b417-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
  <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
@@ -21,106 +21,151 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
  <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
 Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Cc: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-T24gMjIvMDMvMTggMTA6NDMsIFNoYXduIExpbiB3cm90ZToKPiBPbiAyMDE4LzMvMjIgMTY6MjYs
-IEFkcmlhbiBIdW50ZXIgd3JvdGU6Cj4+IE9uIDIyLzAzLzE4IDA5OjQ5LCBTaGF3biBMaW4gd3Jv
-dGU6Cj4+PiBkZCBpZj0vZGV2L3VyYW5kb20gb2Y9L2Rldi9tbWNibGsxIGJzPTRrIGNvdW50PTEw
-MDAwCj4+PiB3aXRoIGEgU0QgY2FyZCBob3RwbHVnIGR1cmluZyB0cmFuc2ZlciByZXBvcnRzIGEg
-d2FybmluZyBiZWxvdzoKPj4KPj4gV2hhdCBrZXJuZWwgdmVyc2lvbiAvIGNvbW1pdCB3YXMgaXQ/
-Cj4gCj4gQWN0dWFsbHkgdGhlIGxvZyBiZWxvdyBoYXMgaXQsIGl0IGlzIGNsZWFuIDogNC4xNi4w
-LXJjNi1uZXh0LTIwMTgwMzIxCgpPayBzbyBpdCBzZWVtcyB0byBiZSBjb21pbmcgZnJvbSB0aGlz
-IHBhdGNoIGluIG5leHQ6Cgpjb21taXQgYTA2MzA1N2Q3YzczMWNmZmE3ZDEwNzQwZThlYmMyOTcw
-ZGY4ZGJiMwpBdXRob3I6IEJhcnQgVmFuIEFzc2NoZSA8YmFydC52YW5hc3NjaGVAd2RjLmNvbT4K
-RGF0ZTogICBXZWQgRmViIDI4IDEwOjE1OjMzIDIwMTggLTA4MDAKCiAgICBibG9jazogRml4IGEg
-cmFjZSBiZXR3ZWVuIHJlcXVlc3QgcXVldWUgcmVtb3ZhbCBhbmQgdGhlIGJsb2NrIGNncm91cCBj
-b250cm9sbGVyCgogICAgQXZvaWQgdGhhdCB0aGUgZm9sbG93aW5nIHJhY2UgY2FuIG9jY3VyOgoK
-ICAgIGJsa19jbGVhbnVwX3F1ZXVlKCkgICAgICAgICAgICAgICBibGtjZ19wcmludF9ibGtncygp
-CiAgICAgIHNwaW5fbG9ja19pcnEobG9jaykgKDEpICAgICAgICAgICBzcGluX2xvY2tfaXJxKGJs
-a2ctPnEtPnF1ZXVlX2xvY2spICgyLDUpCiAgICAgICAgcS0+cXVldWVfbG9jayA9ICZxLT5fX3F1
-ZXVlX2xvY2sgKDMpCiAgICAgIHNwaW5fdW5sb2NrX2lycShsb2NrKSAoNCkKICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgIHNwaW5fdW5sb2NrX2lycShibGtnLT5xLT5xdWV1
-ZV9sb2NrKSAoNikKCiAgICAoMSkgdGFrZSBkcml2ZXIgbG9jazsKICAgICgyKSBidXN5IGxvb3Ag
-Zm9yIGRyaXZlciBsb2NrOwogICAgKDMpIG92ZXJyaWRlIGRyaXZlciBsb2NrIHdpdGggaW50ZXJu
-YWwgbG9jazsKICAgICg0KSB1bmxvY2sgZHJpdmVyIGxvY2s7CiAgICAoNSkgY2FuIHRha2UgZHJp
-dmVyIGxvY2sgbm93OwogICAgKDYpIGJ1dCB1bmxvY2sgaW50ZXJuYWwgbG9jay4KCiAgICBUaGlz
-IGNoYW5nZSBpcyBzYWZlIGJlY2F1c2Ugb25seSB0aGUgU0NTSSBjb3JlIGFuZCB0aGUgTlZNRSBj
-b3JlIGtlZXAKICAgIGEgcmVmZXJlbmNlIG9uIGEgcmVxdWVzdCBxdWV1ZSBhZnRlciBoYXZpbmcg
-Y2FsbGVkIGJsa19jbGVhbnVwX3F1ZXVlKCkuCiAgICBOZWl0aGVyIGRyaXZlciBhY2Nlc3NlcyBh
-bnkgb2YgdGhlIHJlbW92ZWQgZGF0YSBzdHJ1Y3R1cmVzIGJldHdlZW4gaXRzCiAgICBibGtfY2xl
-YW51cF9xdWV1ZSgpIGFuZCBibGtfcHV0X3F1ZXVlKCkgY2FsbHMuCgogICAgUmVwb3J0ZWQtYnk6
-IEpvc2VwaCBRaSA8am9zZXBoLnFpQGxpbnV4LmFsaWJhYmEuY29tPgogICAgU2lnbmVkLW9mZi1i
-eTogQmFydCBWYW4gQXNzY2hlIDxiYXJ0LnZhbmFzc2NoZUB3ZGMuY29tPgogICAgUmV2aWV3ZWQt
-Ynk6IEpvc2VwaCBRaSA8am9zZXBoLnFpQGxpbnV4LmFsaWJhYmEuY29tPgogICAgQ2M6IEphbiBL
-YXJhIDxqYWNrQHN1c2UuY29tPgogICAgU2lnbmVkLW9mZi1ieTogSmVucyBBeGJvZSA8YXhib2VA
-a2VybmVsLmRrPgoKCj4gCj4+Cj4+Pgo+Pj4gUmVtb3ZlIHRoZSBkaXNrLCBwYXJ0aXRpb24gYW5k
-IGJkaSBzeXNmcyBhdHRyaWJ1dGVzIGJlZm9yZSBjbGVhbmluZwo+Pj4gdXAgdGhlIHJlcXVlc3Qg
-cXVldWUgYXNzb2NpYXRlZCB3aXRoIHRoZSBkaXNrLgo+Pj4KPj4+IFvCoCA0MTAuMzMxMjI2XSBt
-bWMxOiBjYXJkIDU5YjQgcmVtb3ZlZAo+Pj4gW8KgIDQxMC4zNDg1ODNdIFdBUk5JTkc6IENQVTog
-MCBQSUQ6IDUgYXQgYmxvY2svYmxrLWNvcmUuYzo3ODUKPj4+IGJsa19jbGVhbnVwX3F1ZXVlKzB4
-MTM4LzB4MTQwCj4+PiBbwqAgNDEwLjM0OTI5NF0gTW9kdWxlcyBsaW5rZWQgaW46Cj4+PiBbwqAg
-NDEwLjM0OTU3MF0gQ1BVOiAwIFBJRDogNSBDb21tOiBrd29ya2VyLzA6MCBOb3QgdGFpbnRlZAo+
-Pj4gNC4xNi4wLXJjNi1uZXh0LTIwMTgwMzIxLTAwMDA0LWdjMmFkNmE3ICMyNjMKPj4+IFvCoCA0
-MTAuMzUwMzYzXSBIYXJkd2FyZSBuYW1lOiBFeGNhdmF0b3ItUkszMzk5IEJvYXJkIChEVCkKPj4+
-IFvCoCA0MTAuMzUwODE5XSBXb3JrcXVldWU6IGV2ZW50c19mcmVlemFibGUgbW1jX3Jlc2Nhbgo+
-Pj4gW8KgIDQxMC4zNTEyNDJdIHBzdGF0ZTogNjAwMDAwMDUgKG5aQ3YgZGFpZiAtUEFOIC1VQU8p
-Cj4+PiBbwqAgNDEwLjM1MTY2M10gcGMgOiBibGtfY2xlYW51cF9xdWV1ZSsweDEzOC8weDE0MAo+
-Pj4gW8KgIDQxMC4zNTIwNTRdIGxyIDogYmxrX2NsZWFudXBfcXVldWUrMHhhYy8weDE0MAo+Pj4g
-W8KgIDQxMC4zNTI0MzZdIHNwIDogZmZmZjAwMDAwOTJjYmI5MAo+Pj4gW8KgIDQxMC4zNTI3Mjdd
-IHgyOTogZmZmZjAwMDAwOTJjYmI5MCB4Mjg6IDAwMDAwMDAwMDAwMDAwMDAKPj4+IFvCoCA0MTAu
-MzUzMTk1XSB4Mjc6IGZmZmY4MDAwZjZmMjMwMzAgeDI2OiBmZmZmMDAwMDA5MDRlNjEwCj4+PiBb
-wqAgNDEwLjM1MzY2Ml0geDI1OiBmZmZmODAwMGYxN2NjODA4IHgyNDogZmZmZjgwMDBmMTAzODIw
-MAo+Pj4gW8KgIDQxMC4zNTQxMjhdIHgyMzogMDAwMDAwMDAwMDAwMDA2MCB4MjI6IDAwMDAwMDAw
-MDAwMDAwMDAKPj4+IFvCoCA0MTAuMzU0NTk1XSB4MjE6IGZmZmY4MDAwZjExNzQ4ZDggeDIwOiBm
-ZmZmODAwMGYxMDM4MjAwCj4+PiBbwqAgNDEwLjM1NTA2MV0geDE5OiBmZmZmODAwMGYxMTc0MjAw
-IHgxODogMDAwMGZmZmY5MzYzNDdkOAo+Pj4gW8KgIDQxMC4zNTU1MjhdIHgxNzogMDAwMGZmZmY5
-MzViOTNjMCB4MTY6IGZmZmYwMDAwMDgxMjYzZjgKPj4+IFvCoCA0MTAuMzU1OTk0XSB4MTU6IDAw
-MDAwMDAwMDAwMDAwMDAgeDE0OiAwMDAwMDAwMDAwMDAwNDAwCj4+PiBbwqAgNDEwLjM1NjQ2MV0g
-eDEzOiAwMDAwMDAwMDAwMDAwMDAxIHgxMjogMDAwMDAwMDAwMDAwMDAwMQo+Pj4gW8KgIDQxMC4z
-NTY5MjddIHgxMTogMDAwMDAwMDAwMDAwMDA0MCB4MTA6IGZmZmY4MDAwZjI0MDAwMjgKPj4+IFvC
-oCA0MTAuMzU3MzkzXSB4OSA6IGZmZmY4MDAwZjI0MDAwNDAgeDggOiAwMDAwMDAwMDAwMDAwMDAw
-Cj4+PiBbwqAgNDEwLjM1Nzg2MF0geDcgOiBmZmZmODAwMGY2ZjNhMzQwIHg2IDogZmZmZjgwMDBm
-NmYzYTM0MAo+Pj4gW8KgIDQxMC4zNTgzMjZdIHg1IDogZmZmZjgwMDBmMjQwMDAwMCB4NCA6IGZm
-ZmY4MDAwZjZmM2EzNDAKPj4+IFvCoCA0MTAuMzU4NzkyXSB4MyA6IDAwMDAwMDAwMDAwMDAwMDAg
-eDIgOiAzOWMxMzMzZTQ1NjcwODAwCj4+PiBbwqAgNDEwLjM1OTI1OV0geDEgOiAwMDAwMDAwMDAw
-MDAwMDAwIHgwIDogMDAwMDAwMDAwMDAwMDAwMwo+Pj4gW8KgIDQxMC4zNTk3MjZdIENhbGwgdHJh
-Y2U6Cj4+PiBbwqAgNDEwLjM1OTk0M13CoCBibGtfY2xlYW51cF9xdWV1ZSsweDEzOC8weDE0MAo+
-Pj4gW8KgIDQxMC4zNjAzMDVdwqAgbW1jX2NsZWFudXBfcXVldWUrMHgyYy8weDQ4Cj4+PiBbwqAg
-NDEwLjM2MDY1Ml3CoCBtbWNfYmxrX3JlbW92ZV9yZXErMHgxYy8weDk4Cj4+PiBbwqAgNDEwLjM2
-MTAwNV3CoCBtbWNfYmxrX3JlbW92ZSsweDE4MC8weDFjMAo+Pj4gW8KgIDQxMC4zNjEzNDNdwqAg
-bW1jX2J1c19yZW1vdmUrMHgxYy8weDI4Cj4+PiBbwqAgNDEwLjM2MTY3MF3CoCBkZXZpY2VfcmVs
-ZWFzZV9kcml2ZXJfaW50ZXJuYWwrMHgxNTQvMHgxZjAKPj4+IFvCoCA0MTAuMzYyMTI4XcKgIGRl
-dmljZV9yZWxlYXNlX2RyaXZlcisweDE0LzB4MjAKPj4+IFvCoCA0MTAuMzYyNTA0XcKgIGJ1c19y
-ZW1vdmVfZGV2aWNlKzB4YzgvMHgxMDgKPj4+IFvCoCA0MTAuMzYyODU4XcKgIGRldmljZV9kZWwr
-MHgxMjAvMHgzNTAKPj4+IFvCoCA0MTAuMzYzMTY3XcKgIG1tY19yZW1vdmVfY2FyZCsweDVjLzB4
-YjgKPj4+IFvCoCA0MTAuMzYzNDk4XcKgIG1tY19zZF9kZXRlY3QrMHg0MC8weDc4Cj4+PiBbwqAg
-NDEwLjM2MzgxM13CoCBtbWNfcmVzY2FuKzB4MTljLzB4MzY4Cj4+PiBbwqAgNDEwLjM2NDEyM13C
-oCBwcm9jZXNzX29uZV93b3JrKzB4MWFjLzB4MzE4Cj4+PiBbwqAgNDEwLjM2NDQ3N13CoCB3b3Jr
-ZXJfdGhyZWFkKzB4NTAvMHg0NTAKPj4+IFvCoCA0MTAuMzY0ODAxXcKgIGt0aHJlYWQrMHhmOC8w
-eDEyOAo+Pj4gW8KgIDQxMC4zNjUwODFdwqAgcmV0X2Zyb21fZm9yaysweDEwLzB4MTgKPj4+IFvC
-oCA0MTAuMzY1Mzk1XSAtLS1bIGVuZCB0cmFjZSAyNjhlODdhNDZjMjg5NjhjIF0tLS0KPj4+Cj4+
-PiBTaWduZWQtb2ZmLWJ5OiBTaGF3biBMaW4gPHNoYXduLmxpbkByb2NrLWNoaXBzLmNvbT4KPj4+
-IC0tLQo+Pj4KPj4+IMKgIGRyaXZlcnMvbW1jL2NvcmUvYmxvY2suYyB8IDIgKy0KPj4+IMKgIDEg
-ZmlsZSBjaGFuZ2VkLCAxIGluc2VydGlvbigrKSwgMSBkZWxldGlvbigtKQo+Pj4KPj4+IGRpZmYg
-LS1naXQgYS9kcml2ZXJzL21tYy9jb3JlL2Jsb2NrLmMgYi9kcml2ZXJzL21tYy9jb3JlL2Jsb2Nr
-LmMKPj4+IGluZGV4IGEyYjljMjUuLjAyNDg1ZTMgMTAwNjQ0Cj4+PiAtLS0gYS9kcml2ZXJzL21t
-Yy9jb3JlL2Jsb2NrLmMKPj4+ICsrKyBiL2RyaXZlcnMvbW1jL2NvcmUvYmxvY2suYwo+Pj4gQEAg
-LTI2NTksNyArMjY1OSw2IEBAIHN0YXRpYyB2b2lkIG1tY19ibGtfcmVtb3ZlX3JlcShzdHJ1Y3Qg
-bW1jX2Jsa19kYXRhCj4+PiAqbWQpCj4+PiDCoMKgwqDCoMKgwqDCoMKgwqDCoCAqIGZyb20gYmVp
-bmcgYWNjZXB0ZWQuCj4+PiDCoMKgwqDCoMKgwqDCoMKgwqDCoCAqLwo+Pj4gwqDCoMKgwqDCoMKg
-wqDCoMKgIGNhcmQgPSBtZC0+cXVldWUuY2FyZDsKPj4+IC3CoMKgwqDCoMKgwqDCoCBtbWNfY2xl
-YW51cF9xdWV1ZSgmbWQtPnF1ZXVlKTsKPj4+IMKgwqDCoMKgwqDCoMKgwqDCoCBpZiAobWQtPmRp
-c2stPmZsYWdzICYgR0VOSERfRkxfVVApIHsKPj4+IMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-IGRldmljZV9yZW1vdmVfZmlsZShkaXNrX3RvX2RldihtZC0+ZGlzayksICZtZC0+Zm9yY2Vfcm8p
-Owo+Pj4gwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAgaWYgKChtZC0+YXJlYV90eXBlICYgTU1D
-X0JMS19EQVRBX0FSRUFfQk9PVCkgJiYKPj4+IEBAIC0yNjY5LDYgKzI2NjgsNyBAQCBzdGF0aWMg
-dm9pZCBtbWNfYmxrX3JlbW92ZV9yZXEoc3RydWN0IG1tY19ibGtfZGF0YQo+Pj4gKm1kKQo+Pj4g
-wqAgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAgZGVsX2dlbmRpc2sobWQtPmRpc2spOwo+Pj4g
-wqDCoMKgwqDCoMKgwqDCoMKgIH0KPj4+ICvCoMKgwqDCoMKgwqDCoCBtbWNfY2xlYW51cF9xdWV1
-ZSgmbWQtPnF1ZXVlKTsKPj4+IMKgwqDCoMKgwqDCoMKgwqDCoCBtbWNfYmxrX3B1dChtZCk7Cj4+
-PiDCoMKgwqDCoMKgIH0KPj4+IMKgIH0KPj4+Cj4+Cj4+Cj4+Cj4+Cj4gCj4gCgoKX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KTGludXgtcm9ja2NoaXAgbWFp
-bGluZyBsaXN0CkxpbnV4LXJvY2tjaGlwQGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3Rz
-LmluZnJhZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1yb2NrY2hpcAo=
+On 22 March 2018 at 10:31, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
+> On 22/03/18 10:43, Shawn Lin wrote:
+>> On 2018/3/22 16:26, Adrian Hunter wrote:
+>>> On 22/03/18 09:49, Shawn Lin wrote:
+>>>> dd if=/dev/urandom of=/dev/mmcblk1 bs=4k count=10000
+>>>> with a SD card hotplug during transfer reports a warning below:
+>>>
+>>> What kernel version / commit was it?
+>>
+>> Actually the log below has it, it is clean : 4.16.0-rc6-next-20180321
+>
+> Ok so it seems to be coming from this patch in next:
+>
+> commit a063057d7c731cffa7d10740e8ebc2970df8dbb3
+> Author: Bart Van Assche <bart.vanassche-Sjgp3cTcYWE@public.gmane.org>
+> Date:   Wed Feb 28 10:15:33 2018 -0800
+>
+>     block: Fix a race between request queue removal and the block cgroup controller
+>
+>     Avoid that the following race can occur:
+>
+>     blk_cleanup_queue()               blkcg_print_blkgs()
+>       spin_lock_irq(lock) (1)           spin_lock_irq(blkg->q->queue_lock) (2,5)
+>         q->queue_lock = &q->__queue_lock (3)
+>       spin_unlock_irq(lock) (4)
+>                                         spin_unlock_irq(blkg->q->queue_lock) (6)
+>
+>     (1) take driver lock;
+>     (2) busy loop for driver lock;
+>     (3) override driver lock with internal lock;
+>     (4) unlock driver lock;
+>     (5) can take driver lock now;
+>     (6) but unlock internal lock.
+>
+>     This change is safe because only the SCSI core and the NVME core keep
+>     a reference on a request queue after having called blk_cleanup_queue().
+>     Neither driver accesses any of the removed data structures between its
+>     blk_cleanup_queue() and blk_put_queue() calls.
+>
+>     Reported-by: Joseph Qi <joseph.qi-KPsoFbNs7GizrGE5bRqYAgC/G2K4zDHf@public.gmane.org>
+>     Signed-off-by: Bart Van Assche <bart.vanassche-Sjgp3cTcYWE@public.gmane.org>
+>     Reviewed-by: Joseph Qi <joseph.qi-KPsoFbNs7GizrGE5bRqYAgC/G2K4zDHf@public.gmane.org>
+>     Cc: Jan Kara <jack-IBi9RG/b67k@public.gmane.org>
+>     Signed-off-by: Jens Axboe <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>
+
+Looks like a reasonable analyze!
+
+Shawn, could you please re-post your patch to linux-block, Jens,
+cc:mmc-list, me and Adrian.
+
+I think the patch should be picked up by Jens and go via his tree.
+
+Kind regards
+Uffe
+
+>
+>
+>>
+>>>
+>>>>
+>>>> Remove the disk, partition and bdi sysfs attributes before cleaning
+>>>> up the request queue associated with the disk.
+>>>>
+>>>> [  410.331226] mmc1: card 59b4 removed
+>>>> [  410.348583] WARNING: CPU: 0 PID: 5 at block/blk-core.c:785
+>>>> blk_cleanup_queue+0x138/0x140
+>>>> [  410.349294] Modules linked in:
+>>>> [  410.349570] CPU: 0 PID: 5 Comm: kworker/0:0 Not tainted
+>>>> 4.16.0-rc6-next-20180321-00004-gc2ad6a7 #263
+>>>> [  410.350363] Hardware name: Excavator-RK3399 Board (DT)
+>>>> [  410.350819] Workqueue: events_freezable mmc_rescan
+>>>> [  410.351242] pstate: 60000005 (nZCv daif -PAN -UAO)
+>>>> [  410.351663] pc : blk_cleanup_queue+0x138/0x140
+>>>> [  410.352054] lr : blk_cleanup_queue+0xac/0x140
+>>>> [  410.352436] sp : ffff0000092cbb90
+>>>> [  410.352727] x29: ffff0000092cbb90 x28: 0000000000000000
+>>>> [  410.353195] x27: ffff8000f6f23030 x26: ffff00000904e610
+>>>> [  410.353662] x25: ffff8000f17cc808 x24: ffff8000f1038200
+>>>> [  410.354128] x23: 0000000000000060 x22: 0000000000000000
+>>>> [  410.354595] x21: ffff8000f11748d8 x20: ffff8000f1038200
+>>>> [  410.355061] x19: ffff8000f1174200 x18: 0000ffff936347d8
+>>>> [  410.355528] x17: 0000ffff935b93c0 x16: ffff0000081263f8
+>>>> [  410.355994] x15: 0000000000000000 x14: 0000000000000400
+>>>> [  410.356461] x13: 0000000000000001 x12: 0000000000000001
+>>>> [  410.356927] x11: 0000000000000040 x10: ffff8000f2400028
+>>>> [  410.357393] x9 : ffff8000f2400040 x8 : 0000000000000000
+>>>> [  410.357860] x7 : ffff8000f6f3a340 x6 : ffff8000f6f3a340
+>>>> [  410.358326] x5 : ffff8000f2400000 x4 : ffff8000f6f3a340
+>>>> [  410.358792] x3 : 0000000000000000 x2 : 39c1333e45670800
+>>>> [  410.359259] x1 : 0000000000000000 x0 : 0000000000000003
+>>>> [  410.359726] Call trace:
+>>>> [  410.359943]  blk_cleanup_queue+0x138/0x140
+>>>> [  410.360305]  mmc_cleanup_queue+0x2c/0x48
+>>>> [  410.360652]  mmc_blk_remove_req+0x1c/0x98
+>>>> [  410.361005]  mmc_blk_remove+0x180/0x1c0
+>>>> [  410.361343]  mmc_bus_remove+0x1c/0x28
+>>>> [  410.361670]  device_release_driver_internal+0x154/0x1f0
+>>>> [  410.362128]  device_release_driver+0x14/0x20
+>>>> [  410.362504]  bus_remove_device+0xc8/0x108
+>>>> [  410.362858]  device_del+0x120/0x350
+>>>> [  410.363167]  mmc_remove_card+0x5c/0xb8
+>>>> [  410.363498]  mmc_sd_detect+0x40/0x78
+>>>> [  410.363813]  mmc_rescan+0x19c/0x368
+>>>> [  410.364123]  process_one_work+0x1ac/0x318
+>>>> [  410.364477]  worker_thread+0x50/0x450
+>>>> [  410.364801]  kthread+0xf8/0x128
+>>>> [  410.365081]  ret_from_fork+0x10/0x18
+>>>> [  410.365395] ---[ end trace 268e87a46c28968c ]---
+>>>>
+>>>> Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+>>>> ---
+>>>>
+>>>>   drivers/mmc/core/block.c | 2 +-
+>>>>   1 file changed, 1 insertion(+), 1 deletion(-)
+>>>>
+>>>> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+>>>> index a2b9c25..02485e3 100644
+>>>> --- a/drivers/mmc/core/block.c
+>>>> +++ b/drivers/mmc/core/block.c
+>>>> @@ -2659,7 +2659,6 @@ static void mmc_blk_remove_req(struct mmc_blk_data
+>>>> *md)
+>>>>            * from being accepted.
+>>>>            */
+>>>>           card = md->queue.card;
+>>>> -        mmc_cleanup_queue(&md->queue);
+>>>>           if (md->disk->flags & GENHD_FL_UP) {
+>>>>               device_remove_file(disk_to_dev(md->disk), &md->force_ro);
+>>>>               if ((md->area_type & MMC_BLK_DATA_AREA_BOOT) &&
+>>>> @@ -2669,6 +2668,7 @@ static void mmc_blk_remove_req(struct mmc_blk_data
+>>>> *md)
+>>>>                 del_gendisk(md->disk);
+>>>>           }
+>>>> +        mmc_cleanup_queue(&md->queue);
+>>>>           mmc_blk_put(md);
+>>>>       }
+>>>>   }
+>>>>
+>>>
+>>>
+>>>
+>>>
+>>
+>>
+>
