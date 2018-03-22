@@ -1,71 +1,65 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v.4.16-rc7
-Date: Thu, 22 Mar 2018 11:05:52 +0100
-Message-ID: <1521713152-4201-1-git-send-email-ulf.hansson@linaro.org>
+Subject: Re: [PATCH v4] mmc: Export host capabilities to debugfs.
+Date: Thu, 22 Mar 2018 11:19:45 +0100
+Message-ID: <CAPDyKFotmS3ZxTCaYxuu7c-_KiLfNfz2GQMzmZn8JSOeSbgrbg@mail.gmail.com>
+References: <1520257159-27699-1-git-send-email-harish_kandiga@mentor.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1520257159-27699-1-git-send-email-harish_kandiga@mentor.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+To: Harish Jenny K N <harish_kandiga@mentor.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, avri.altman@wdc.com, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Vladimir Zapolskiy <Vladimir_Zapolskiy@mentor.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Linus,
+On 5 March 2018 at 14:39, Harish Jenny K N <harish_kandiga@mentor.com> wrote:
+> From: Abbas Raza <Abbas_Raza@mentor.com>
+>
+> This patch exports the host capabilities to debugfs
+>
+> Signed-off-by: Abbas Raza <Abbas_Raza@mentor.com>
+> Signed-off-by: Andrew Gabbasov <andrew_gabbasov@mentor.com>
+> [Harish: Added caps2, moved creation to mmc_add_host_debugfs]
+> Signed-off-by: Harish Jenny K N <harish_kandiga@mentor.com>
 
-Here's a PR with a couple of MMC fixes intended for v4.16-rc7. Details about the
-highlights are as usual found in the signed tag.
-
-Please pull this in!
+Thanks, applied for next!
 
 Kind regards
-Ulf Hansson
+Uffe
 
-
-The following changes since commit 661e50bc853209e41a5c14a290ca4decc43cbfd1:
-
-  Linux 4.16-rc4 (2018-03-04 14:54:11 -0800)
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v4.16-rc4
-
-for you to fetch changes up to d58ac803cfbb92ede501409dd6afe9abb111d4f1:
-
-  mmc: sdhci-acpi: Fix IRQ 0 (2018-03-21 11:10:20 +0100)
-
-----------------------------------------------------------------
-MMC host:
- - dw_mmc: Fix the suspend/resume issue for Exynos5433
- - dw_mmc: Fix the DTO/CTO timeout overflow calculation for 32-bit systems
- - dw_mmc: Make PIO mode work when failing with idmac when dw_mci_reset occurs
- - sdhci-acpi: Re-allow IRQ 0 to fix broken probe
-
-MMC core:
- - Update EXT_CSD caches to correctly switch partition for ioctl calls
- - Fix tracepoint print of blk_addr and blksz
- - Disable HPI on broken Micron (Numonyx) eMMC cards
-
-----------------------------------------------------------------
-Adrian Hunter (2):
-      mmc: core: Fix tracepoint print of blk_addr and blksz
-      mmc: sdhci-acpi: Fix IRQ 0
-
-Bastian Stender (1):
-      mmc: block: fix updating ext_csd caches on ioctl call
-
-Dirk Behme (1):
-      mmc: core: Disable HPI for certain Micron (Numonyx) eMMC cards
-
-Evgeniy Didin (2):
-      mmc: dw_mmc: Fix the DTO/CTO timeout overflow calculation for 32-bit systems
-      mmc: dw_mmc: fix falling from idmac to PIO mode when dw_mci_reset occurs
-
-Jaehoon Chung (1):
-      mmc: dw_mmc: exynos: fix the suspend/resume issue for exynos5433
-
- drivers/mmc/core/block.c         | 19 +++++++++++++++++++
- drivers/mmc/core/card.h          |  1 +
- drivers/mmc/core/quirks.h        |  6 ++++++
- drivers/mmc/host/dw_mmc-exynos.c |  8 +++++++-
- drivers/mmc/host/dw_mmc.c        | 15 ++++++++++-----
- drivers/mmc/host/sdhci-acpi.c    |  2 +-
- include/trace/events/mmc.h       |  4 ++--
- 7 files changed, 46 insertions(+), 9 deletions(-)
+> ---
+>
+> Changes in v4:
+> - Moved the creation of nodes to mmc_add_host_debugfs
+> - Exported caps2
+> - Renamed host_caps to caps
+>
+> Changes in v3:
+> - Removed typecasting of &host->caps to (u32 *)
+>
+> Changes in v2:
+> - Changed Author
+>
+>  drivers/mmc/core/debugfs.c | 6 ++++++
+>  1 file changed, 6 insertions(+)
+>
+> diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+> index c51e0c0..d2275c5 100644
+> --- a/drivers/mmc/core/debugfs.c
+> +++ b/drivers/mmc/core/debugfs.c
+> @@ -243,6 +243,12 @@ void mmc_add_host_debugfs(struct mmc_host *host)
+>         if (!debugfs_create_file("ios", S_IRUSR, root, host, &mmc_ios_fops))
+>                 goto err_node;
+>
+> +       if (!debugfs_create_x32("caps", S_IRUSR, root, &host->caps))
+> +               goto err_node;
+> +
+> +       if (!debugfs_create_x32("caps2", S_IRUSR, root, &host->caps2))
+> +               goto err_node;
+> +
+>         if (!debugfs_create_file("clock", S_IRUSR | S_IWUSR, root, host,
+>                         &mmc_clock_fops))
+>                 goto err_node;
+> --
+> 1.9.1
+>
