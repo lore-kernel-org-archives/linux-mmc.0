@@ -1,106 +1,81 @@
-From: Quentin Schulz <quentin.schulz@bootlin.com>
-Subject: Re: [PATCH 2/2] mmc: Add mmc_force_detect_change_begin / _end
- functions
-Date: Fri, 23 Mar 2018 08:25:26 +0100
-Message-ID: <20180323072526.xvqamolxbmxk2de7@qschulz>
-References: <20170721143502.1991-1-quentin.schulz@free-electrons.com>
- <20170721143502.1991-3-quentin.schulz@free-electrons.com>
- <4015f7df-36ca-c762-5b9a-94a270f65475@redhat.com>
- <CAPDyKFpePxfAc20NCO7xvbGca8m=Bymc=5KBYFF570rnACViQA@mail.gmail.com>
- <20180208145952.qlq4sxohqd3s7m7o@qschulz>
- <CAPDyKFrbRVgOFRKpO5TdwHO-XQ035exrUt_bgM=BaxnEPmCvrw@mail.gmail.com>
- <20180209080541.edgjbhjo542vq3h6@qschulz>
- <CAPDyKFqDrdD+N+foLCwsVABtboz1Vn=OtJs14gp07zJfXHVKSA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============6411500505058700568=="
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <CAPDyKFqDrdD+N+foLCwsVABtboz1Vn=OtJs14gp07zJfXHVKSA@mail.gmail.com>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+From: "Tobin C. Harding" <me@tobin.cc>
+Subject: [PATCH] mmc: pwrseq: Use kmalloc_array instead of stack VLA
+Date: Mon, 26 Mar 2018 17:33:14 +1100
+Message-ID: <1522045994-21913-1-git-send-email-me@tobin.cc>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: driverdevel <devel@driverdev.osuosl.org>, Quentin Schulz <quentin.schulz@free-electrons.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linus Walleij <linus.walleij@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Hans de Goede <hdegoede@redhat.com>, Chen-Yu Tsai <wens@csie.org>, Icenowy Zheng <icenowy@aosc.xyz>, Maxime Ripard <maxime.ripard@free-electrons.com>, Shawn Lin <shawn.lin@rock-chips.com>
+Cc: "Tobin C. Harding" <me@tobin.cc>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, kernel-hardening@lists.openwall.com, Tycho Andersen <tycho@tycho.ws>
 List-Id: linux-mmc@vger.kernel.org
 
+The use of stack Variable Length Arrays needs to be avoided, as they
+can be a vector for stack exhaustion, which can be both a runtime bug
+(kernel Oops) or a security flaw (overwriting memory beyond the
+stack). Also, in general, as code evolves it is easy to lose track of
+how big a VLA can get. Thus, we can end up having runtime failures
+that are hard to debug. As part of the directive[1] to remove all VLAs
+from the kernel, and build with -Wvla.
 
---===============6411500505058700568==
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="ycqgfhmspyyj7oby"
-Content-Disposition: inline
+Currently driver is using a VLA declared using the number of descriptors.  This
+array is used to store integer values and is later used as an argument to
+`gpiod_set_array_value_cansleep()` This can be avoided by using
+`kmalloc_array()` to allocate memory for the array of integer values.  Memory is
+free'd before return from function.
 
+>From the code it appears that it is safe to sleep so we can use GFP_KERNEL
+(based _cansleep() suffix of function `gpiod_set_array_value_cansleep()`.
 
---ycqgfhmspyyj7oby
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+It can be expected that this patch will result in a small increase in overhead
+due to the use of `kmalloc_array()`
 
-Hi Uffe,
+[1] https://lkml.org/lkml/2018/3/7/621
 
-On Fri, Feb 09, 2018 at 03:01:00PM +0100, Ulf Hansson wrote:
-> [...]
->=20
-> >> > I'd like to know if any progress has been made on that problem (I may
-> >> > have missed patches).
-> >> > Had you had the time to look at the issue?
-> >>
-> >> I have looked at the issue, but not manage to cook some patches for it.
-> >>
-> >> However, it's on my top of my TODO list for mmc. No promises, but
-> >> perhaps and hopefully I manage to get something posted during the
-> >> coming release cycle.
-> >>
-> >
-> > Cool! If you ever need some testing, I'd be glad to test your patches
-> > (even if they are in a draft/RFC state).
-> >
-> > Also, when you send patches, I'd appreciate being Cc'ed so that I can
-> > put my Tested-by :) Thanks!
->=20
-> Absolutely! I appreciate it.
->=20
+Signed-off-by: Tobin C. Harding <me@tobin.cc>
+---
 
-Any news? Can I help in any way?
+Patch is untested.  I was not able to fully grok the call chain involved
+with this change so was unable to quantify the total degradation
+of performance.
 
-Best regards,
-Quentin
+Line calling to gpiod_set_array_value_cansleep() is 83 characters long,
+patch attempts to leave the code as clean as possible.  Open to
+suggestions for improvement.  I tried various forms of while loop and
+pointer arithmetic for the setting of `values` but in the end settled
+for array indexing, again open to suggestions.
 
---ycqgfhmspyyj7oby
-Content-Type: application/pgp-signature; name="signature.asc"
+thanks,
+Tobin.
 
------BEGIN PGP SIGNATURE-----
+ drivers/mmc/core/pwrseq_simple.c | 14 +++++++++-----
+ 1 file changed, 9 insertions(+), 5 deletions(-)
 
-iQIcBAABCAAGBQJatKvkAAoJEIS4mnU+4PGj5DwQAKuqH2p7Gp5Fd2MlQ3KJQ3x+
-JaA6zJp8dDiiK4Y6AvHzNwz3LsRyyXHKhZBStYUTgGAnkxMa0rdI3pV/gKkvcH2+
-89p6BmUO9IL/LgVb7beHHffS490A41hBege0ok5zkBHDEJJU1mUsisKJMM7dQ6JI
-aZxEomoOYiAECoIRPByGjo5kW02VJnE95SGsQRH9kvHsN5v5r0gxv6LUbOyIMeVT
-7FmOTdv+mIId1+RyJv5PxdidMWCDjRHFeQMBmKBKDN0ejW0udU2EnyuI1YVRMmmm
-MoJeoif1D5whNOV3pO2/+2L3VXdJDL4tbKbNG+F86DDirPCBizCftXJonwu0eweb
-TshgflQuukPrYnfh3/D4za6mnjxJmc7raxRvQfjlGgcDSqIuwNZp1dS47GtwjZZS
-ZLZb1l9PzO1fhmTYP4vzNb8u+OJ236o6JR3Wu0TDN4ZMRFT+s5g8OHM3rjIHbxzs
-66jJRgdYItLfd/w1C/XN2LAKX2FxLPnplshh7U4rTsqtuqSj57sXiwCYWMBlJcUo
-jQseQsb6yKvH8taJlJh5GLsgcEflq8S3lsV16wrSKVETq58aYOKpchCR3Rw3sw71
-5HZg6n8H7dFN1hVGluXShmWzsYlMMnXcSh3qY5+aipsIAKZpR1oBpW0xSymCYr1p
-S/uuwylI9lkcvb7ihKJa
-=gxA1
------END PGP SIGNATURE-----
-
---ycqgfhmspyyj7oby--
-
---===============6411500505058700568==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-devel mailing list
-devel@linuxdriverproject.org
-http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel
-
---===============6411500505058700568==--
+diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
+index 13ef162cf066..a8b9fee4d62a 100644
+--- a/drivers/mmc/core/pwrseq_simple.c
++++ b/drivers/mmc/core/pwrseq_simple.c
+@@ -40,14 +40,18 @@ static void mmc_pwrseq_simple_set_gpios_value(struct mmc_pwrseq_simple *pwrseq,
+ 	struct gpio_descs *reset_gpios = pwrseq->reset_gpios;
+ 
+ 	if (!IS_ERR(reset_gpios)) {
+-		int i;
+-		int values[reset_gpios->ndescs];
++		int i, *values;
++		int nvalues = reset_gpios->ndescs;
+ 
+-		for (i = 0; i < reset_gpios->ndescs; i++)
++		values = kmalloc_array(nvalues, sizeof(int), GFP_KERNEL);
++		if (!values)
++			return;
++
++		for (i = 0; i < nvalues; i++)
+ 			values[i] = value;
+ 
+-		gpiod_set_array_value_cansleep(
+-			reset_gpios->ndescs, reset_gpios->desc, values);
++		gpiod_set_array_value_cansleep(nvalues, reset_gpios->desc, values);
++		kfree(values);
+ 	}
+ }
+ 
+-- 
+2.7.4
