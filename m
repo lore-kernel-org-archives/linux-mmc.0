@@ -1,81 +1,84 @@
-From: "Tobin C. Harding" <me@tobin.cc>
-Subject: [PATCH] mmc: pwrseq: Use kmalloc_array instead of stack VLA
-Date: Mon, 26 Mar 2018 17:33:14 +1100
-Message-ID: <1522045994-21913-1-git-send-email-me@tobin.cc>
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Subject: [PATCH] mmc: sdhci-cadence: send tune request twice to work around errata
+Date: Tue, 27 Mar 2018 18:29:53 +0900
+Message-ID: <1522142993-25654-1-git-send-email-yamada.masahiro@socionext.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "Tobin C. Harding" <me@tobin.cc>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, kernel-hardening@lists.openwall.com, Tycho Andersen <tycho@tycho.ws>
+To: linux-mmc@vger.kernel.org
+Cc: Piotr Sroka <piotrs@cadence.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-The use of stack Variable Length Arrays needs to be avoided, as they
-can be a vector for stack exhaustion, which can be both a runtime bug
-(kernel Oops) or a security flaw (overwriting memory beyond the
-stack). Also, in general, as code evolves it is easy to lose track of
-how big a VLA can get. Thus, we can end up having runtime failures
-that are hard to debug. As part of the directive[1] to remove all VLAs
-from the kernel, and build with -Wvla.
+Cadence sent out an errata report to their customers of this IP.
+This errata is not so severe, but the tune request should be sent
+twice to avoid the potential issue.
 
-Currently driver is using a VLA declared using the number of descriptors.  This
-array is used to store integer values and is later used as an argument to
-`gpiod_set_array_value_cansleep()` This can be avoided by using
-`kmalloc_array()` to allocate memory for the array of integer values.  Memory is
-free'd before return from function.
+Quote from the report:
 
->From the code it appears that it is safe to sleep so we can use GFP_KERNEL
-(based _cansleep() suffix of function `gpiod_set_array_value_cansleep()`.
+Problem Summary
+---------------
+The IP6116 SD/eMMC PHY design has a timing issue on receive data path.
+This issue may lead to an incorrect values of read/write pointers of
+the synchronization FIFO. Such a situation can happen at the SDR104
+and HS200 tuning procedure when the PHY is requested to change a phase
+of sampling clock when moving to the next tuning iteration.
 
-It can be expected that this patch will result in a small increase in overhead
-due to the use of `kmalloc_array()`
+Workarounds
+-----------
+The following are valid workarounds to resolve the issue:
 
-[1] https://lkml.org/lkml/2018/3/7/621
+1. In eMMC mode, software sends tune request twice instead of once at
+   each iteration. This means that the clock phase is not changed on
+   the second request so there is no potential for clock instability.
+2. In SD mode, software must not use the hardware tuning and instead
+   perform an almost identical procedure to eMMC, using the HRS34 Tune
+   Force register.
 
-Signed-off-by: Tobin C. Harding <me@tobin.cc>
+Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 ---
 
-Patch is untested.  I was not able to fully grok the call chain involved
-with this change so was unable to quantify the total degradation
-of performance.
+ drivers/mmc/host/sdhci-cadence.c | 22 ++++++++++++++++++----
+ 1 file changed, 18 insertions(+), 4 deletions(-)
 
-Line calling to gpiod_set_array_value_cansleep() is 83 characters long,
-patch attempts to leave the code as clean as possible.  Open to
-suggestions for improvement.  I tried various forms of while loop and
-pointer arithmetic for the setting of `values` but in the end settled
-for array indexing, again open to suggestions.
-
-thanks,
-Tobin.
-
- drivers/mmc/core/pwrseq_simple.c | 14 +++++++++-----
- 1 file changed, 9 insertions(+), 5 deletions(-)
-
-diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
-index 13ef162cf066..a8b9fee4d62a 100644
---- a/drivers/mmc/core/pwrseq_simple.c
-+++ b/drivers/mmc/core/pwrseq_simple.c
-@@ -40,14 +40,18 @@ static void mmc_pwrseq_simple_set_gpios_value(struct mmc_pwrseq_simple *pwrseq,
- 	struct gpio_descs *reset_gpios = pwrseq->reset_gpios;
+diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
+index 0f589e2..bc30d16 100644
+--- a/drivers/mmc/host/sdhci-cadence.c
++++ b/drivers/mmc/host/sdhci-cadence.c
+@@ -253,6 +253,7 @@ static int sdhci_cdns_set_tune_val(struct sdhci_host *host, unsigned int val)
+ 	struct sdhci_cdns_priv *priv = sdhci_cdns_priv(host);
+ 	void __iomem *reg = priv->hrs_addr + SDHCI_CDNS_HRS06;
+ 	u32 tmp;
++	int i, ret;
  
- 	if (!IS_ERR(reset_gpios)) {
--		int i;
--		int values[reset_gpios->ndescs];
-+		int i, *values;
-+		int nvalues = reset_gpios->ndescs;
+ 	if (WARN_ON(!FIELD_FIT(SDHCI_CDNS_HRS06_TUNE, val)))
+ 		return -EINVAL;
+@@ -260,11 +261,24 @@ static int sdhci_cdns_set_tune_val(struct sdhci_host *host, unsigned int val)
+ 	tmp = readl(reg);
+ 	tmp &= ~SDHCI_CDNS_HRS06_TUNE;
+ 	tmp |= FIELD_PREP(SDHCI_CDNS_HRS06_TUNE, val);
+-	tmp |= SDHCI_CDNS_HRS06_TUNE_UP;
+-	writel(tmp, reg);
  
--		for (i = 0; i < reset_gpios->ndescs; i++)
-+		values = kmalloc_array(nvalues, sizeof(int), GFP_KERNEL);
-+		if (!values)
-+			return;
+-	return readl_poll_timeout(reg, tmp, !(tmp & SDHCI_CDNS_HRS06_TUNE_UP),
+-				  0, 1);
++	/*
++	 * Workaround for IP errata:
++	 * The IP6116 SD/eMMC PHY design has a timing issue on receive data
++	 * path. Send tune request twice.
++	 */
++	for (i = 0; i < 2; i++) {
++		tmp |= SDHCI_CDNS_HRS06_TUNE_UP;
++		writel(tmp, reg);
 +
-+		for (i = 0; i < nvalues; i++)
- 			values[i] = value;
- 
--		gpiod_set_array_value_cansleep(
--			reset_gpios->ndescs, reset_gpios->desc, values);
-+		gpiod_set_array_value_cansleep(nvalues, reset_gpios->desc, values);
-+		kfree(values);
- 	}
++		ret = readl_poll_timeout(reg, tmp,
++					 !(tmp & SDHCI_CDNS_HRS06_TUNE_UP),
++					 0, 1);
++
++		return ret;
++	}
++
++	return 0;
  }
  
+ static int sdhci_cdns_execute_tuning(struct mmc_host *mmc, u32 opcode)
 -- 
 2.7.4
