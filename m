@@ -1,112 +1,132 @@
-From: Alexander Kappner <agk@godking.net>
-Subject: [PATCH] [mmc_block] Prevent bus reference leak in mmc_blk_init
-Date: Wed, 28 Mar 2018 15:18:31 -0700
-Message-ID: <1522275511-7693-1-git-send-email-agk@godking.net>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH V4 1/2] mmc: sdhci-msm: Add support to store supported
+ vdd-io voltages
+Date: Wed, 28 Mar 2018 15:52:52 -0700
+Message-ID: <CAD=FV=VuSVPYVRKoc0hhSHpqNuUuuFRMfD_aCDYw5RA703pt=w@mail.gmail.com>
+References: <1522242500-10556-1-git-send-email-vviswana@codeaurora.org> <1522242500-10556-2-git-send-email-vviswana@codeaurora.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1522242500-10556-2-git-send-email-vviswana@codeaurora.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, linus.walleij@linaro.org, adrian.hunter@intel.com, shawn.lin@rock-chips.com, agk@godking.net
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Vijay Viswanath <vviswana@codeaurora.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, Bjorn Andersson <bjorn.andersson@linaro.org>, riteshh@codeaurora.org
 List-Id: linux-mmc@vger.kernel.org
 
-Upon module load, mmc_block allocates a bus with bus_register in
-mmc_blk_init. This reference never gets freed during module unload.
-Subsequent re-insertions of the module fail and BUG() is triggered:
+Hi,
 
-[   84.583342] sysfs: cannot create duplicate filename '/bus/mmc_rpmb'
-[   84.583373] CPU: 6 PID: 1825 Comm: modprobe Tainted: P           O     4.16.0-rc6-00384-gf36b753 #30
-[   84.583381] Hardware name: LENOVO 20ENCTO1WW/20ENCTO1WW, BIOS N1EET62W (1.35 ) 11/10/2016
-[   84.583385] Call Trace:
-[   84.583401]  dump_stack+0x5a/0x75
-[   84.583411]  sysfs_warn_dup+0x58/0x70
-[   84.583419]  sysfs_create_dir_ns+0x70/0x80
-[   84.583437]  kobject_add_internal+0xa5/0x2c0
-[   84.583453]  kset_register+0x44/0x60
-[   84.583470]  bus_register+0xc6/0x270
-[   84.583479]  ? 0xffffffffa000d000
-[   84.583492]  mmc_blk_init+0x12/0x1000 [mmc_block]
-[   84.583501]  do_one_initcall+0x4e/0x194
-[   84.583510]  ? ___cache_free+0x21/0x2b0
-[   84.583524]  do_init_module+0x5a/0x20f
-[   84.583533]  load_module+0x235c/0x2510
-[   84.583550]  ? SYSC_finit_module+0x80/0xb0
-[   84.583558]  SYSC_finit_module+0x80/0xb0
-[   84.583570]  do_syscall_64+0x77/0x290
-[   84.583580]  entry_SYSCALL_64_after_hwframe+0x3d/0xa2
-[   84.583587] RIP: 0033:0x7f452a3ad5b9
-[   84.583593] RSP: 002b:00007fff4562ba18 EFLAGS: 00000206 ORIG_RAX: 0000000000000139
-[   84.583602] RAX: ffffffffffffffda RBX: 000056092895c520 RCX: 00007f452a3ad5b9
-[   84.583607] RDX: 0000000000000000 RSI: 000056092697b3d9 RDI: 0000000000000003
-[   84.583612] RBP: 000056092697b3d9 R08: 0000000000000000 R09: 000056092895d310
-[   84.583617] R10: 0000000000000003 R11: 0000000000000206 R12: 0000000000000000
-[   84.583623] R13: 000056092895c430 R14: 0000000000040000 R15: 0000000000040000
-[   84.583647] ------------[ cut here ]------------
-[   84.583656] kobject_add_internal failed for mmc_rpmb with -EEXIST, don't try to register things with the same name in the same directory.
-[   84.583694] WARNING: CPU: 6 PID: 1825 at lib/kobject.c:238 kobject_add_internal+0x296/0x2c0
-[   84.583705] Modules linked in: mmc_block(+) rtsx_pci_sdmmc rtsx_pci iwlmvm mac80211 nvidia_drm(PO) nvidia_modeset(PO) iwlwifi nvidia(PO) cfg80211 qmi_wwan thinkpad_acpi rfkill sdhci_pci cqhci sdhci mfd_core [last unloaded: mmc_block]
-[   84.583770] CPU: 6 PID: 1825 Comm: modprobe Tainted: P           O     4.16.0-rc6-00384-gf36b753 #30
-[   84.583774] Hardware name: LENOVO 20ENCTO1WW/20ENCTO1WW, BIOS N1EET62W (1.35 ) 11/10/2016
-[   84.583782] RIP: 0010:kobject_add_internal+0x296/0x2c0
-[   84.583786] RSP: 0018:ffffc9000769bc58 EFLAGS: 00010296
-[   84.583791] RAX: 000000000000007d RBX: ffff880fcf588618 RCX: 0000000000000000
-[   84.583796] RDX: 0000000000040400 RSI: 00000000000000f6 RDI: 00000000ffffffff
-[   84.583801] RBP: 00000000ffffffef R08: 0000000000000000 R09: 0000000000000354
-[   84.583806] R10: ffffffff8251fc74 R11: 0000000000000353 R12: ffff88100d3cf698
-[   84.583811] R13: ffff880fcf588618 R14: ffffffffa0028590 R15: ffffffffa0028540
-[   84.583818] FS:  00007f452a853700(0000) GS:ffff881053d80000(0000) knlGS:0000000000000000
-[   84.583823] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-[   84.583837] CR2: 00007f452a3faea0 CR3: 0000000fc89e4004 CR4: 00000000003606e0
-[   84.583850] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
-[   84.583863] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
-[   84.583875] Call Trace:
-[   84.583893]  kset_register+0x44/0x60
-[   84.583902]  bus_register+0xc6/0x270
-[   84.583910]  ? 0xffffffffa000d000
-[   84.583926]  mmc_blk_init+0x12/0x1000 [mmc_block]
-[   84.583940]  do_one_initcall+0x4e/0x194
-[   84.583948]  ? ___cache_free+0x21/0x2b0
-[   84.583966]  do_init_module+0x5a/0x20f
-[   84.583979]  load_module+0x235c/0x2510
-[   84.583995]  ? SYSC_finit_module+0x80/0xb0
-[   84.584001]  SYSC_finit_module+0x80/0xb0
-[   84.584010]  do_syscall_64+0x77/0x290
-[   84.584016]  entry_SYSCALL_64_after_hwframe+0x3d/0xa2
-[   84.584021] RIP: 0033:0x7f452a3ad5b9
-[   84.584025] RSP: 002b:00007fff4562ba18 EFLAGS: 00000206 ORIG_RAX: 0000000000000139
-[   84.584030] RAX: ffffffffffffffda RBX: 000056092895c520 RCX: 00007f452a3ad5b9
-[   84.584034] RDX: 0000000000000000 RSI: 000056092697b3d9 RDI: 0000000000000003
-[   84.584038] RBP: 000056092697b3d9 R08: 0000000000000000 R09: 000056092895d310
-[   84.584043] R10: 0000000000000003 R11: 0000000000000206 R12: 0000000000000000
-[   84.584047] R13: 000056092895c430 R14: 0000000000040000 R15: 0000000000040000
-[   84.584053] Code: 7b 20 49 89 c4 48 85 ff 0f 84 10 fe ff ff e9 cd fd ff ff 48 8b 13 48 c7 c6 00 80 f4 81 48 c7 c7 e0 ad 0f 82 31 c0 e8 ca 9a 7b ff <0f> 0b e9 5f fe ff ff 0f 0b 0f 0b 0f 0b 0f 0b e9 71 ff ff ff 0f
-[   84.584147] ---[ end trace d27b36e0e2c0e7e5 ]---
-[   84.584162] mmcblk: could not register RPMB bus type
+On Wed, Mar 28, 2018 at 6:08 AM, Vijay Viswanath
+<vviswana@codeaurora.org> wrote:
+> During probe check whether the vdd-io regulator of sdhc platform device
+> can support 1.8V and 3V and store this information as a capability of
+> platform device.
+>
+> Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
+> ---
+>  drivers/mmc/host/sdhci-msm.c | 35 ++++++++++++++++++++++++++++++++++-
+>  1 file changed, 34 insertions(+), 1 deletion(-)
 
-Steps to reproduce:
+Since I commented on v2, please copy me for this series going forward.  Thanks.
 
-Build with CONFIG_MMC_BLOCK=m
 
-modprobe mmc_block
-rmmod mmc_block
-modprobe mmc_block
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index c283291..2fcd9010 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -21,6 +21,7 @@
+>  #include <linux/pm_runtime.h>
+>  #include <linux/slab.h>
+>  #include <linux/iopoll.h>
+> +#include <linux/regulator/consumer.h>
+>
+>  #include "sdhci-pltfm.h"
+>
+> @@ -81,6 +82,9 @@
+>  #define CORE_HC_SELECT_IN_HS400        (6 << 19)
+>  #define CORE_HC_SELECT_IN_MASK (7 << 19)
+>
+> +#define CORE_3_0V_SUPPORT      (1 << 25)
+> +#define CORE_1_8V_SUPPORT      (1 << 26)
+> +
+>  #define CORE_CSR_CDC_CTLR_CFG0         0x130
+>  #define CORE_SW_TRIG_FULL_CALIB                BIT(16)
+>  #define CORE_HW_AUTOCAL_ENA            BIT(17)
+> @@ -148,6 +152,7 @@ struct sdhci_msm_host {
+>         u32 curr_io_level;
+>         wait_queue_head_t pwr_irq_wait;
+>         bool pwr_irq_flag;
+> +       u32 caps_0;
+>  };
+>
+>  static unsigned int msm_get_clock_rate_for_bus_mode(struct sdhci_host *host,
+> @@ -1103,7 +1108,7 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
+>         struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+>         u32 irq_status, irq_ack = 0;
+>         int retry = 10;
+> -       int pwr_state = 0, io_level = 0;
+> +       u32 pwr_state = 0, io_level = 0;
+>
+>
+>         irq_status = readl_relaxed(msm_host->core_mem + CORE_PWRCTL_STATUS);
+> @@ -1313,6 +1318,30 @@ static void sdhci_msm_writeb(struct sdhci_host *host, u8 val, int reg)
+>                 sdhci_msm_check_power_status(host, req_type);
+>  }
+>
+> +static int sdhci_msm_set_regulator_caps(struct sdhci_msm_host *msm_host)
 
-The proposed patch deallocates the reference in mmc_blk_exit.
+This function always returns 0.  Make it void.
 
-Signed-off-by: Alexander Kappner <agk@godking.net>
----
- drivers/mmc/core/block.c | 1 +
- 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 2cfb963..9c6f639 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -3087,6 +3087,7 @@ static void __exit mmc_blk_exit(void)
- 	mmc_unregister_driver(&mmc_driver);
- 	unregister_blkdev(MMC_BLOCK_MAJOR, "mmc");
- 	unregister_chrdev_region(mmc_rpmb_devt, MAX_DEVICES);
-+	bus_unregister(&mmc_rpmb_bus_type);
- }
- 
- module_init(mmc_blk_init);
--- 
-2.1.4
+> +{
+> +       struct mmc_host *mmc = msm_host->mmc;
+> +       struct regulator *supply = mmc->supply.vqmmc;
+> +       u32 caps = 0;
+> +
+> +       if (!IS_ERR(mmc->supply.vqmmc)) {
+> +               if (regulator_is_supported_voltage(supply, 1700000, 1950000))
+> +                       caps |= CORE_1_8V_SUPPORT;
+> +               if (regulator_is_supported_voltage(supply, 2700000, 3600000))
+> +                       caps |= CORE_3_0V_SUPPORT;
+> +
+> +               if (!caps)
+> +                       pr_warn("%s: %s: 1.8/3V not supported for vqmmc\n",
+> +                                       mmc_hostname(mmc), __func__);
+
+Please remove __func__.  You already have the unique thing to find the
+right driver (AKA mmc_hostname(mmc)) and the string itself should be
+enough from there.
+
+
+> +       }
+> +
+> +       msm_host->caps_0 |= caps;
+> +       pr_debug("%s: %s: supported caps: 0x%08x\n", mmc_hostname(mmc),
+> +                       __func__, caps);
+
+Same, no need for __func__.
+
+
+> +
+> +       return 0;
+> +}
+> +
+>  static const struct of_device_id sdhci_msm_dt_match[] = {
+>         { .compatible = "qcom,sdhci-msm-v4" },
+>         {},
+> @@ -1530,6 +1559,10 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>         ret = sdhci_add_host(host);
+>         if (ret)
+>                 goto pm_runtime_disable;
+> +       ret = sdhci_msm_set_regulator_caps(msm_host);
+> +       if (ret)
+> +               dev_err(&pdev->dev, "Failed to set regulator caps: %d\n",
+> +                               ret);
+
+If you find some reason _not_ to make sdhci_msm_set_regulator_caps()
+return "void" as per above, you should actually do something about
+this error.  You've used "dev_err" which makes me feel like you
+consider this a serious error.  Presumably it should cause the probe
+to fail?
+
+
+-Doug
