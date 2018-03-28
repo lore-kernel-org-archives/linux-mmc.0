@@ -1,84 +1,52 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: [PATCH] mmc: sdhci-cadence: send tune request twice to work around errata
-Date: Tue, 27 Mar 2018 18:29:53 +0900
-Message-ID: <1522142993-25654-1-git-send-email-yamada.masahiro@socionext.com>
+From: Vijay Viswanath <vviswana@codeaurora.org>
+Subject: [PATCH V3 0/2] mmc: sdhci-msm: Configuring IO_PAD support for sdhci-msm
+Date: Wed, 28 Mar 2018 18:25:37 +0530
+Message-ID: <1522241739-56274-1-git-send-email-vviswana@codeaurora.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=y
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Piotr Sroka <piotrs@cadence.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, vviswana@codeaurora.org, bjorn.andersson@linaro.org, riteshh@codeaurora.org
 List-Id: linux-mmc@vger.kernel.org
 
-Cadence sent out an errata report to their customers of this IP.
-This errata is not so severe, but the tune request should be sent
-twice to avoid the potential issue.
+>From the HPG:
+In some platform, SDCC controller can be connected to either an eMMC device or
+an SD card. The PADs for SD card are dual-voltage that support 3v/1.8v. Those
+PADs have a control signal  (io_pad_pwr_switch/mode18 ) that indicates whether
+the PAD works in 3v or 1.8v.
 
-Quote from the report:
+For SD usage the default value of this signal is ‘0’, and SD driver changes it
+to ‘1’ as a part of voltage switching sequence.
+For eMMC usage, SW should configure this signal to ‘1’ and supply 1.8v to PADs
+before starting any activity on the eMMC BUS.
 
-Problem Summary
----------------
-The IP6116 SD/eMMC PHY design has a timing issue on receive data path.
-This issue may lead to an incorrect values of read/write pointers of
-the synchronization FIFO. Such a situation can happen at the SDR104
-and HS200 tuning procedure when the PHY is requested to change a phase
-of sampling clock when moving to the next tuning iteration.
+To set this signal, write the following in the
+SDC1_SDCC_HC_VENDOR_SPECIFIC_FUNC register:
+	HC_IO_PAD_PWR_SWITCH: bit 16
+		HC_IO_PAD_PWR_SWITCH_EN: bit 15
 
-Workarounds
------------
-The following are valid workarounds to resolve the issue:
+Changes since v1:
+	Modified comments on io_pad related changes.
+	Split some read+modify+write commands to multiple lines
 
-1. In eMMC mode, software sends tune request twice instead of once at
-   each iteration. This means that the clock phase is not changed on
-   the second request so there is no potential for clock instability.
-2. In SD mode, software must not use the hardware tuning and instead
-   perform an almost identical procedure to eMMC, using the HRS34 Tune
-   Force register.
+Changes since v2:
+	IO_PAD_PWR_SWITCH_EN will be set only if we have info regarding what
+	voltage is suported by the regulators.
+	Replaced regulator_list_voltage() API with
+	regulator_is_supported_voltage().
 
-Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
----
 
- drivers/mmc/host/sdhci-cadence.c | 22 ++++++++++++++++++----
- 1 file changed, 18 insertions(+), 4 deletions(-)
+Krishna Konda (1):
+  mmc: sdhci-msm: support voltage pad switching
 
-diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
-index 0f589e2..bc30d16 100644
---- a/drivers/mmc/host/sdhci-cadence.c
-+++ b/drivers/mmc/host/sdhci-cadence.c
-@@ -253,6 +253,7 @@ static int sdhci_cdns_set_tune_val(struct sdhci_host *host, unsigned int val)
- 	struct sdhci_cdns_priv *priv = sdhci_cdns_priv(host);
- 	void __iomem *reg = priv->hrs_addr + SDHCI_CDNS_HRS06;
- 	u32 tmp;
-+	int i, ret;
- 
- 	if (WARN_ON(!FIELD_FIT(SDHCI_CDNS_HRS06_TUNE, val)))
- 		return -EINVAL;
-@@ -260,11 +261,24 @@ static int sdhci_cdns_set_tune_val(struct sdhci_host *host, unsigned int val)
- 	tmp = readl(reg);
- 	tmp &= ~SDHCI_CDNS_HRS06_TUNE;
- 	tmp |= FIELD_PREP(SDHCI_CDNS_HRS06_TUNE, val);
--	tmp |= SDHCI_CDNS_HRS06_TUNE_UP;
--	writel(tmp, reg);
- 
--	return readl_poll_timeout(reg, tmp, !(tmp & SDHCI_CDNS_HRS06_TUNE_UP),
--				  0, 1);
-+	/*
-+	 * Workaround for IP errata:
-+	 * The IP6116 SD/eMMC PHY design has a timing issue on receive data
-+	 * path. Send tune request twice.
-+	 */
-+	for (i = 0; i < 2; i++) {
-+		tmp |= SDHCI_CDNS_HRS06_TUNE_UP;
-+		writel(tmp, reg);
-+
-+		ret = readl_poll_timeout(reg, tmp,
-+					 !(tmp & SDHCI_CDNS_HRS06_TUNE_UP),
-+					 0, 1);
-+
-+		return ret;
-+	}
-+
-+	return 0;
- }
- 
- static int sdhci_cdns_execute_tuning(struct mmc_host *mmc, u32 opcode)
+Vijay Viswanath (1):
+  mmc: sdhci-msm: Add support to store supported vdd-io voltages
+
+ drivers/mmc/host/sdhci-msm.c | 99 +++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 97 insertions(+), 2 deletions(-)
+
 -- 
-2.7.4
+ Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc. 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a Linux Foundation Collaborative Project.
