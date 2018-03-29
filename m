@@ -1,14 +1,13 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V4 2/3] mmc: sdhci: Add support for O2 hardware tuning
-Date: Thu, 29 Mar 2018 15:21:32 +0300
-Message-ID: <16cf1d6e-65d6-4fac-aa44-18edefcd3d14@intel.com>
+Subject: Re: [PATCH V4 1/3] mmc: sdhci: Add support for O2 eMMC HS200 mode
+Date: Thu, 29 Mar 2018 15:25:50 +0300
+Message-ID: <fbdc3592-cb50-9c0e-d5fd-0ab087f09a69@intel.com>
 References: <1520604265-4430-1-git-send-email-ernest.zhang@bayhubtech.com>
- <1520604265-4430-2-git-send-email-ernest.zhang@bayhubtech.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1520604265-4430-2-git-send-email-ernest.zhang@bayhubtech.com>
+In-Reply-To: <1520604265-4430-1-git-send-email-ernest.zhang@bayhubtech.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
 To: "ernest.zhang" <ernest.zhang@bayhubtech.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
@@ -16,267 +15,81 @@ Cc: xiaoguang.yu@bayhubtech.com, shirley.her@bayhubtech.com, yuxiang.wan@bayhubt
 List-Id: linux-mmc@vger.kernel.org
 
 On 09/03/18 16:04, ernest.zhang wrote:
-> Add hardware tuning function instead of software tuning because O2/Bayhub
-> SD host controller support hardware tuning.
+> When use eMMC as boot device, the eMMC signaling voltage is tied to 1.8v
+> fixed output voltage, bios can set o2 sd host controller PCI configuration
+> register 0x308 bit4 to 1 to let driver skip 3.3v signaling voltage and 
+> direct use 1.8v singling voltage in eMMC initialize process.
 > 
-> Changes: Add many functions to execute hardware tuning for eMMC 1.8V HS200
-> mode, the hardware tuning command and procedure is based on O2/Bayhub 
-> hardware tuning spec.
+> Changes: Check PCIe register 0x308 bit 4 and skip eMMC 3.3v initialization
+> process if it is set to 1.
 > 
 > Signed-off-by: ernest.zhang <ernest.zhang@bayhubtech.com>
+
+Notwithstanding minor formatting comment below:
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
 > ---
-
-This is where the change log should be:
-
-e.g.
-
-Changes in V4:
-	<what you changed between the 3rd version and the 4th version>
-
-Changes in V3:
-	<what you changed between the 2nd version and the 3rd version>
-
-etc.
-
->  drivers/mmc/host/sdhci-pci-o2micro.c | 193 +++++++++++++++++++++++++++++++++++
->  drivers/mmc/host/sdhci.c             |   5 +-
->  2 files changed, 197 insertions(+), 1 deletion(-)
+>  drivers/mmc/host/sdhci-pci-o2micro.c | 18 ++++++++++++++++++
+>  1 file changed, 18 insertions(+)
 > 
 > diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
-> index d465751..a918984 100644
+> index 555970a..d465751 100644
 > --- a/drivers/mmc/host/sdhci-pci-o2micro.c
 > +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
-> @@ -17,6 +17,9 @@
->   */
+> @@ -3,6 +3,7 @@
+>   *
+>   * Authors: Peter Guo <peter.guo@bayhubtech.com>
+>   *          Adam Lee <adam.lee@canonical.com>
+> + *          Ernest Zhang <ernest.zhang@bayhubtech.com>
+>   *
+>   * This software is licensed under the terms of the GNU General Public
+>   * License version 2, as published by the Free Software Foundation, and
+> @@ -39,6 +40,7 @@
+>  #define O2_SD_MISC_CTRL4	0xFC
+>  #define O2_SD_TUNING_CTRL	0x300
+>  #define O2_SD_PLL_SETTING	0x304
+> +#define O2_SD_MISC_SETTING	0x308
+>  #define O2_SD_CLK_SETTING	0x328
+>  #define O2_SD_CAP_REG2		0x330
+>  #define O2_SD_CAP_REG0		0x334
+> @@ -184,6 +186,7 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+>  	struct sdhci_pci_chip *chip;
+>  	struct sdhci_host *host;
+>  	u32 reg;
+> +	int ret;
 >  
->  #include <linux/pci.h>
-> +#include <linux/mmc/host.h>
-> +#include <linux/mmc/mmc.h>
-> +#include <linux/delay.h>
+>  	chip = slot->chip;
+>  	host = slot->host;
+> @@ -197,6 +200,21 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+>  		if (reg & 0x1)
+>  			host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
 >  
->  #include "sdhci.h"
->  #include "sdhci-pci.h"
-> @@ -55,6 +58,194 @@
->  
->  #define O2_SD_VENDOR_SETTING	0x110
->  #define O2_SD_VENDOR_SETTING2	0x1C8
-> +#define O2_SD_HW_TUNING_DISABLE	BIT(4)
-> +
-> +static void sdhci_o2_start_tuning(struct sdhci_host *host)
-> +{
-> +	u16 ctrl;
-> +
-> +	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> +	ctrl |= SDHCI_CTRL_EXEC_TUNING;
-> +	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
-> +
-> +	/*
-> +	 * As per the Host Controller spec v3.00, tuning command
-> +	 * generates Buffer Read Ready interrupt, so enable that.
-> +	 *
-> +	 * Note: The spec clearly says that when tuning sequence
-> +	 * is being performed, the controller does not generate
-> +	 * interrupts other than Buffer Read Ready interrupt. But
-> +	 * to make sure we don't hit a controller bug, we _only_
-> +	 * enable Buffer Read Ready interrupt here.
-> +	 */
-> +	sdhci_writel(host, SDHCI_INT_DATA_AVAIL, SDHCI_INT_ENABLE);
-> +	sdhci_writel(host, SDHCI_INT_DATA_AVAIL, SDHCI_SIGNAL_ENABLE);
-> +}
-> +
-> +static void sdhci_o2_end_tuning(struct sdhci_host *host)
-> +{
-> +	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
-> +	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
-> +}
-> +
-> +static inline bool sdhci_data_line_cmd(struct mmc_command *cmd)
-> +{
-> +	return cmd->data || cmd->flags & MMC_RSP_BUSY;
-> +}
-> +
-> +static void sdhci_del_timer(struct sdhci_host *host, struct mmc_request *mrq)
-> +{
-> +	if (sdhci_data_line_cmd(mrq->cmd))
-> +		del_timer(&host->data_timer);
-> +	else
-> +		del_timer(&host->timer);
-> +}
-> +
-> +static void sdhci_o2_set_tuning_mode(struct sdhci_host *host)
-> +{
-> +	u16 reg;
-> +
-> +	/* enable hardware tuning */
-> +	reg = sdhci_readw(host, O2_SD_VENDOR_SETTING);
-> +	reg &= ~O2_SD_HW_TUNING_DISABLE;
-> +	sdhci_writew(host, reg, O2_SD_VENDOR_SETTING);
-> +}
-> +
-> +
-> +static int sdhci_o2_send_tuning(struct sdhci_host *host, u32 opcode)
-> +{
-> +	struct mmc_command cmd = { };
-> +	struct mmc_data data = { };
-> +	struct scatterlist sg;
-> +	struct mmc_request mrq = { };
-> +	unsigned long flags;
-> +	u32 b = host->sdma_boundary;
-> +	int size = 64;
-> +	u8 *data_buf = kzalloc(size, GFP_KERNEL);
-> +
-> +	if (!data_buf)
-> +		return -ENOMEM;
-> +
-> +	cmd.opcode = opcode;
-> +	cmd.flags = MMC_RSP_PRESENT | MMC_RSP_OPCODE | MMC_RSP_CRC;
-> +	cmd.mrq = &mrq;
-> +	cmd.data = NULL;
+> +		if (chip->pdev->device == PCI_DEVICE_ID_O2_SEABIRD0) {
+> +			ret = pci_read_config_dword(chip->pdev,
+> +						    O2_SD_MISC_SETTING, &reg);
+> +			if (ret)
+> +				return -EIO;
+> +			if (reg & (1 << 4)) {
+> +				pr_info("%s: emmc 1.8v flag is set, force 1.8v signaling voltage\n",
+> +				     mmc_hostname(host->mmc));
 
-As previously, please explain why you have cmd.data = NULL but mrq.data = &data
+Indenting is a little odd i.e. checkpatch says
 
-> +	mrq.cmd = &cmd;
-> +	mrq.data = &data;
-> +	data.blksz = size;
-> +	data.blocks = 1;
-> +	data.flags = MMC_DATA_READ;
-> +
-> +	data.timeout_ns = 50 * NSEC_PER_MSEC;
-> +
-> +	data.sg = &sg;
-> +	data.sg_len = 1;
-> +	sg_init_one(&sg, data_buf, size);
-> +
-> +	spin_lock_irqsave(&host->lock, flags);
-> +
-> +	sdhci_writew(host, SDHCI_MAKE_BLKSZ(b, 64), SDHCI_BLOCK_SIZE);
-> +
-> +	/*
-> +	 * The tuning block is sent by the card to the host controller.
-> +	 * So we set the TRNS_READ bit in the Transfer Mode register.
-> +	 * This also takes care of setting DMA Enable and Multi Block
-> +	 * Select in the same register to 0.
-> +	 */
-> +	sdhci_writew(host, SDHCI_TRNS_READ, SDHCI_TRANSFER_MODE);
-> +
-> +	sdhci_send_command(host, &cmd);
-> +
-> +	host->cmd = NULL;
-> +
-> +	sdhci_del_timer(host, &mrq);
-> +
-> +	host->tuning_done = 0;
-> +
-> +	mmiowb();
-> +	spin_unlock_irqrestore(&host->lock, flags);
-> +
-> +	/* Wait for Buffer Read Ready interrupt */
-> +	wait_event_timeout(host->buf_ready_int, (host->tuning_done == 1),
-> +			   msecs_to_jiffies(50));
-> +	kfree(data_buf);
-> +	return 0;
-> +}
-> +
-> +static void sdhci_o2_reset_tuning(struct sdhci_host *host)
-> +{
-> +	u16 ctrl;
-> +
-> +	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> +	ctrl &= ~SDHCI_CTRL_TUNED_CLK;
-> +	ctrl &= ~SDHCI_CTRL_EXEC_TUNING;
-> +	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
-> +}
-> +
-> +static void __sdhci_o2_execute_tuning(struct sdhci_host *host, u32 opcode)
-> +{
-> +	int i;
-> +
-> +	sdhci_o2_send_tuning(host, MMC_SEND_TUNING_BLOCK_HS200);
-> +
-> +	for (i = 0; i < 150; i++) {
-> +		u16 ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> +
-> +		if (!(ctrl & SDHCI_CTRL_EXEC_TUNING)) {
-> +			if (ctrl & SDHCI_CTRL_TUNED_CLK) {
-> +				host->tuning_done = true;
-> +				return;
+CHECK: Alignment should match open parenthesis
+#58: FILE: drivers/mmc/host/sdhci-pci-o2micro.c:210:
++                               pr_info("%s: emmc 1.8v flag is set, force
+1.8v signaling voltage\n",
++                                    mmc_hostname(host->mmc))
+
+> +				host->flags &= ~SDHCI_SIGNALING_330;
+> +				host->flags |= SDHCI_SIGNALING_180;
+> +				host->mmc->caps2 |= MMC_CAP2_NO_SD;
+> +				host->mmc->caps2 |= MMC_CAP2_NO_SDIO;
 > +			}
-> +			pr_warn("%s: HW tuning failed !\n",
-> +				   mmc_hostname(host->mmc));
-> +			break;
 > +		}
-> +
-> +		mdelay(1);
-> +	}
-> +
-> +	pr_info("%s: Tuning failed, falling back to fixed sampling clock\n",
-> +		mmc_hostname(host->mmc));
-> +	sdhci_o2_reset_tuning(host);
-> +}
-> +
-> +static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
-> +{
-> +	struct sdhci_host *host = mmc_priv(mmc);
-> +	int current_bus_width = 0;
-> +
-> +	/*
-> +	 * This handler only implements the eMMC tuning that is specific to
-> +	 * this controller.  Fall back to the standard method for other TIMING.
-> +	 */
-> +	if (host->timing != MMC_TIMING_MMC_HS200)
-> +		return sdhci_execute_tuning(mmc, opcode);
-> +
-> +	if (WARN_ON(opcode != MMC_SEND_TUNING_BLOCK_HS200))
-> +		return -EINVAL;
-> +
-> +	/*
-> +	 * o2 sdhci host didn't support 8bit emmc tuning
-> +	 */
-> +	if (mmc->ios.bus_width == MMC_BUS_WIDTH_8) {
-> +		current_bus_width = mmc->ios.bus_width;
-> +		sdhci_set_bus_width(host, MMC_BUS_WIDTH_4);
-> +	}
-> +
-> +	sdhci_o2_set_tuning_mode(host);
-> +
-> +	sdhci_o2_start_tuning(host);
-> +
-> +	__sdhci_o2_execute_tuning(host, opcode);
-> +
-> +	sdhci_o2_end_tuning(host);
-> +
-> +	if (current_bus_width == MMC_BUS_WIDTH_8)
-> +		sdhci_set_bus_width(host, current_bus_width);
-> +
-> +	host->flags &= ~SDHCI_HS400_TUNING;
-> +	return 0;
-> +}
->  
->  static void o2_pci_set_baseclk(struct sdhci_pci_chip *chip, u32 value)
->  {
-> @@ -215,6 +406,8 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
->  			}
->  		}
->  
-> +		host->mmc_host_ops.execute_tuning = sdhci_o2_execute_tuning;
 > +
 >  		if (chip->pdev->device != PCI_DEVICE_ID_O2_FUJIN2)
 >  			break;
 >  		/* set dll watch dog timer */
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 2ededa7..3bf6117 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -955,7 +955,10 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
->  	if (data == NULL) {
->  		if (host->quirks2 &
->  			SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD) {
-> -			sdhci_writew(host, 0x0, SDHCI_TRANSFER_MODE);
-> +			/* must not clear SDHCI_TRANSFER_MODE when tuning */
-> +			if (cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200) {
-> +				sdhci_writew(host, 0x0, SDHCI_TRANSFER_MODE);
-> +			}
->  		} else {
->  		/* clear Auto CMD settings for no data CMDs */
->  			mode = sdhci_readw(host, SDHCI_TRANSFER_MODE);
 > 
