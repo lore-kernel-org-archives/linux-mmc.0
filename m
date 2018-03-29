@@ -1,127 +1,282 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH] [mmc_block] Prevent bus reference leak in mmc_blk_init
-Date: Thu, 29 Mar 2018 17:52:25 +0800
-Message-ID: <a8548725-f245-b9ea-a309-56c030f81a16@rock-chips.com>
-References: <1522275511-7693-1-git-send-email-agk@godking.net>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V4 2/3] mmc: sdhci: Add support for O2 hardware tuning
+Date: Thu, 29 Mar 2018 15:21:32 +0300
+Message-ID: <16cf1d6e-65d6-4fac-aa44-18edefcd3d14@intel.com>
+References: <1520604265-4430-1-git-send-email-ernest.zhang@bayhubtech.com>
+ <1520604265-4430-2-git-send-email-ernest.zhang@bayhubtech.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1522275511-7693-1-git-send-email-agk@godking.net>
+In-Reply-To: <1520604265-4430-2-git-send-email-ernest.zhang@bayhubtech.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Alexander Kappner <agk@godking.net>
-Cc: ulf.hansson@linaro.org, linus.walleij@linaro.org, adrian.hunter@intel.com, shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: "ernest.zhang" <ernest.zhang@bayhubtech.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: xiaoguang.yu@bayhubtech.com, shirley.her@bayhubtech.com, yuxiang.wan@bayhubtech.com
 List-Id: linux-mmc@vger.kernel.org
 
-On 2018/3/29 6:18, Alexander Kappner wrote:
-> Upon module load, mmc_block allocates a bus with bus_register in
-> mmc_blk_init. This reference never gets freed during module unload.
-> Subsequent re-insertions of the module fail and BUG() is triggered:
-
-WARN() is triggered.
-
+On 09/03/18 16:04, ernest.zhang wrote:
+> Add hardware tuning function instead of software tuning because O2/Bayhub
+> SD host controller support hardware tuning.
 > 
-> [   84.583342] sysfs: cannot create duplicate filename '/bus/mmc_rpmb'
-> [   84.583373] CPU: 6 PID: 1825 Comm: modprobe Tainted: P           O     4.16.0-rc6-00384-gf36b753 #30
-> [   84.583381] Hardware name: LENOVO 20ENCTO1WW/20ENCTO1WW, BIOS N1EET62W (1.35 ) 11/10/2016
-> [   84.583385] Call Trace:
-> [   84.583401]  dump_stack+0x5a/0x75
-> [   84.583411]  sysfs_warn_dup+0x58/0x70
-> [   84.583419]  sysfs_create_dir_ns+0x70/0x80
-> [   84.583437]  kobject_add_internal+0xa5/0x2c0
-> [   84.583453]  kset_register+0x44/0x60
-> [   84.583470]  bus_register+0xc6/0x270
-> [   84.583479]  ? 0xffffffffa000d000
-> [   84.583492]  mmc_blk_init+0x12/0x1000 [mmc_block]
-> [   84.583501]  do_one_initcall+0x4e/0x194
-> [   84.583510]  ? ___cache_free+0x21/0x2b0
-> [   84.583524]  do_init_module+0x5a/0x20f
-> [   84.583533]  load_module+0x235c/0x2510
-> [   84.583550]  ? SYSC_finit_module+0x80/0xb0
-> [   84.583558]  SYSC_finit_module+0x80/0xb0
-> [   84.583570]  do_syscall_64+0x77/0x290
-> [   84.583580]  entry_SYSCALL_64_after_hwframe+0x3d/0xa2
-> [   84.583587] RIP: 0033:0x7f452a3ad5b9
-> [   84.583593] RSP: 002b:00007fff4562ba18 EFLAGS: 00000206 ORIG_RAX: 0000000000000139
-> [   84.583602] RAX: ffffffffffffffda RBX: 000056092895c520 RCX: 00007f452a3ad5b9
-> [   84.583607] RDX: 0000000000000000 RSI: 000056092697b3d9 RDI: 0000000000000003
-> [   84.583612] RBP: 000056092697b3d9 R08: 0000000000000000 R09: 000056092895d310
-> [   84.583617] R10: 0000000000000003 R11: 0000000000000206 R12: 0000000000000000
-> [   84.583623] R13: 000056092895c430 R14: 0000000000040000 R15: 0000000000040000
-> [   84.583647] ------------[ cut here ]------------
-> [   84.583656] kobject_add_internal failed for mmc_rpmb with -EEXIST, don't try to register things with the same name in the same directory.
-> [   84.583694] WARNING: CPU: 6 PID: 1825 at lib/kobject.c:238 kobject_add_internal+0x296/0x2c0
-> [   84.583705] Modules linked in: mmc_block(+) rtsx_pci_sdmmc rtsx_pci iwlmvm mac80211 nvidia_drm(PO) nvidia_modeset(PO) iwlwifi nvidia(PO) cfg80211 qmi_wwan thinkpad_acpi rfkill sdhci_pci cqhci sdhci mfd_core [last unloaded: mmc_block]
-> [   84.583770] CPU: 6 PID: 1825 Comm: modprobe Tainted: P           O     4.16.0-rc6-00384-gf36b753 #30
-> [   84.583774] Hardware name: LENOVO 20ENCTO1WW/20ENCTO1WW, BIOS N1EET62W (1.35 ) 11/10/2016
-> [   84.583782] RIP: 0010:kobject_add_internal+0x296/0x2c0
-> [   84.583786] RSP: 0018:ffffc9000769bc58 EFLAGS: 00010296
-> [   84.583791] RAX: 000000000000007d RBX: ffff880fcf588618 RCX: 0000000000000000
-> [   84.583796] RDX: 0000000000040400 RSI: 00000000000000f6 RDI: 00000000ffffffff
-> [   84.583801] RBP: 00000000ffffffef R08: 0000000000000000 R09: 0000000000000354
-> [   84.583806] R10: ffffffff8251fc74 R11: 0000000000000353 R12: ffff88100d3cf698
-> [   84.583811] R13: ffff880fcf588618 R14: ffffffffa0028590 R15: ffffffffa0028540
-> [   84.583818] FS:  00007f452a853700(0000) GS:ffff881053d80000(0000) knlGS:0000000000000000
-> [   84.583823] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-> [   84.583837] CR2: 00007f452a3faea0 CR3: 0000000fc89e4004 CR4: 00000000003606e0
-> [   84.583850] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
-> [   84.583863] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
-> [   84.583875] Call Trace:
-> [   84.583893]  kset_register+0x44/0x60
-> [   84.583902]  bus_register+0xc6/0x270
-> [   84.583910]  ? 0xffffffffa000d000
-> [   84.583926]  mmc_blk_init+0x12/0x1000 [mmc_block]
-> [   84.583940]  do_one_initcall+0x4e/0x194
-> [   84.583948]  ? ___cache_free+0x21/0x2b0
-> [   84.583966]  do_init_module+0x5a/0x20f
-> [   84.583979]  load_module+0x235c/0x2510
-> [   84.583995]  ? SYSC_finit_module+0x80/0xb0
-> [   84.584001]  SYSC_finit_module+0x80/0xb0
-> [   84.584010]  do_syscall_64+0x77/0x290
-> [   84.584016]  entry_SYSCALL_64_after_hwframe+0x3d/0xa2
-> [   84.584021] RIP: 0033:0x7f452a3ad5b9
-> [   84.584025] RSP: 002b:00007fff4562ba18 EFLAGS: 00000206 ORIG_RAX: 0000000000000139
-> [   84.584030] RAX: ffffffffffffffda RBX: 000056092895c520 RCX: 00007f452a3ad5b9
-> [   84.584034] RDX: 0000000000000000 RSI: 000056092697b3d9 RDI: 0000000000000003
-> [   84.584038] RBP: 000056092697b3d9 R08: 0000000000000000 R09: 000056092895d310
-> [   84.584043] R10: 0000000000000003 R11: 0000000000000206 R12: 0000000000000000
-> [   84.584047] R13: 000056092895c430 R14: 0000000000040000 R15: 0000000000040000
-> [   84.584053] Code: 7b 20 49 89 c4 48 85 ff 0f 84 10 fe ff ff e9 cd fd ff ff 48 8b 13 48 c7 c6 00 80 f4 81 48 c7 c7 e0 ad 0f 82 31 c0 e8 ca 9a 7b ff <0f> 0b e9 5f fe ff ff 0f 0b 0f 0b 0f 0b 0f 0b e9 71 ff ff ff 0f
-> [   84.584147] ---[ end trace d27b36e0e2c0e7e5 ]---
-> [   84.584162] mmcblk: could not register RPMB bus type
+> Changes: Add many functions to execute hardware tuning for eMMC 1.8V HS200
+> mode, the hardware tuning command and procedure is based on O2/Bayhub 
+> hardware tuning spec.
 > 
-> Steps to reproduce:
-> 
-> Build with CONFIG_MMC_BLOCK=m
-> 
-> modprobe mmc_block
-> rmmod mmc_block
-> modprobe mmc_block
-> 
-> The proposed patch deallocates the reference in mmc_blk_exit.
-> 
-
-Fixes: 97548575bef3 ("mmc: block: Convert RPMB to a character device")
-Cc: Stable <stable@vger.kernel.org>
-
-> Signed-off-by: Alexander Kappner <agk@godking.net>
+> Signed-off-by: ernest.zhang <ernest.zhang@bayhubtech.com>
 > ---
->   drivers/mmc/core/block.c | 1 +
->   1 file changed, 1 insertion(+)
+
+This is where the change log should be:
+
+e.g.
+
+Changes in V4:
+	<what you changed between the 3rd version and the 4th version>
+
+Changes in V3:
+	<what you changed between the 2nd version and the 3rd version>
+
+etc.
+
+>  drivers/mmc/host/sdhci-pci-o2micro.c | 193 +++++++++++++++++++++++++++++++++++
+>  drivers/mmc/host/sdhci.c             |   5 +-
+>  2 files changed, 197 insertions(+), 1 deletion(-)
 > 
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 2cfb963..9c6f639 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -3087,6 +3087,7 @@ static void __exit mmc_blk_exit(void)
->   	mmc_unregister_driver(&mmc_driver);
->   	unregister_blkdev(MMC_BLOCK_MAJOR, "mmc");
->   	unregister_chrdev_region(mmc_rpmb_devt, MAX_DEVICES);
-> +	bus_unregister(&mmc_rpmb_bus_type);
+> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+> index d465751..a918984 100644
+> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
+> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+> @@ -17,6 +17,9 @@
+>   */
+>  
+>  #include <linux/pci.h>
+> +#include <linux/mmc/host.h>
+> +#include <linux/mmc/mmc.h>
+> +#include <linux/delay.h>
+>  
+>  #include "sdhci.h"
+>  #include "sdhci-pci.h"
+> @@ -55,6 +58,194 @@
+>  
+>  #define O2_SD_VENDOR_SETTING	0x110
+>  #define O2_SD_VENDOR_SETTING2	0x1C8
+> +#define O2_SD_HW_TUNING_DISABLE	BIT(4)
+> +
+> +static void sdhci_o2_start_tuning(struct sdhci_host *host)
+> +{
+> +	u16 ctrl;
+> +
+> +	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+> +	ctrl |= SDHCI_CTRL_EXEC_TUNING;
+> +	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+> +
+> +	/*
+> +	 * As per the Host Controller spec v3.00, tuning command
+> +	 * generates Buffer Read Ready interrupt, so enable that.
+> +	 *
+> +	 * Note: The spec clearly says that when tuning sequence
+> +	 * is being performed, the controller does not generate
+> +	 * interrupts other than Buffer Read Ready interrupt. But
+> +	 * to make sure we don't hit a controller bug, we _only_
+> +	 * enable Buffer Read Ready interrupt here.
+> +	 */
+> +	sdhci_writel(host, SDHCI_INT_DATA_AVAIL, SDHCI_INT_ENABLE);
+> +	sdhci_writel(host, SDHCI_INT_DATA_AVAIL, SDHCI_SIGNAL_ENABLE);
+> +}
+> +
+> +static void sdhci_o2_end_tuning(struct sdhci_host *host)
+> +{
+> +	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
+> +	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
+> +}
+> +
+> +static inline bool sdhci_data_line_cmd(struct mmc_command *cmd)
+> +{
+> +	return cmd->data || cmd->flags & MMC_RSP_BUSY;
+> +}
+> +
+> +static void sdhci_del_timer(struct sdhci_host *host, struct mmc_request *mrq)
+> +{
+> +	if (sdhci_data_line_cmd(mrq->cmd))
+> +		del_timer(&host->data_timer);
+> +	else
+> +		del_timer(&host->timer);
+> +}
+> +
+> +static void sdhci_o2_set_tuning_mode(struct sdhci_host *host)
+> +{
+> +	u16 reg;
+> +
+> +	/* enable hardware tuning */
+> +	reg = sdhci_readw(host, O2_SD_VENDOR_SETTING);
+> +	reg &= ~O2_SD_HW_TUNING_DISABLE;
+> +	sdhci_writew(host, reg, O2_SD_VENDOR_SETTING);
+> +}
+> +
+> +
+> +static int sdhci_o2_send_tuning(struct sdhci_host *host, u32 opcode)
+> +{
+> +	struct mmc_command cmd = { };
+> +	struct mmc_data data = { };
+> +	struct scatterlist sg;
+> +	struct mmc_request mrq = { };
+> +	unsigned long flags;
+> +	u32 b = host->sdma_boundary;
+> +	int size = 64;
+> +	u8 *data_buf = kzalloc(size, GFP_KERNEL);
+> +
+> +	if (!data_buf)
+> +		return -ENOMEM;
+> +
+> +	cmd.opcode = opcode;
+> +	cmd.flags = MMC_RSP_PRESENT | MMC_RSP_OPCODE | MMC_RSP_CRC;
+> +	cmd.mrq = &mrq;
+> +	cmd.data = NULL;
 
-Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+As previously, please explain why you have cmd.data = NULL but mrq.data = &data
 
->   }
->   
->   module_init(mmc_blk_init);
+> +	mrq.cmd = &cmd;
+> +	mrq.data = &data;
+> +	data.blksz = size;
+> +	data.blocks = 1;
+> +	data.flags = MMC_DATA_READ;
+> +
+> +	data.timeout_ns = 50 * NSEC_PER_MSEC;
+> +
+> +	data.sg = &sg;
+> +	data.sg_len = 1;
+> +	sg_init_one(&sg, data_buf, size);
+> +
+> +	spin_lock_irqsave(&host->lock, flags);
+> +
+> +	sdhci_writew(host, SDHCI_MAKE_BLKSZ(b, 64), SDHCI_BLOCK_SIZE);
+> +
+> +	/*
+> +	 * The tuning block is sent by the card to the host controller.
+> +	 * So we set the TRNS_READ bit in the Transfer Mode register.
+> +	 * This also takes care of setting DMA Enable and Multi Block
+> +	 * Select in the same register to 0.
+> +	 */
+> +	sdhci_writew(host, SDHCI_TRNS_READ, SDHCI_TRANSFER_MODE);
+> +
+> +	sdhci_send_command(host, &cmd);
+> +
+> +	host->cmd = NULL;
+> +
+> +	sdhci_del_timer(host, &mrq);
+> +
+> +	host->tuning_done = 0;
+> +
+> +	mmiowb();
+> +	spin_unlock_irqrestore(&host->lock, flags);
+> +
+> +	/* Wait for Buffer Read Ready interrupt */
+> +	wait_event_timeout(host->buf_ready_int, (host->tuning_done == 1),
+> +			   msecs_to_jiffies(50));
+> +	kfree(data_buf);
+> +	return 0;
+> +}
+> +
+> +static void sdhci_o2_reset_tuning(struct sdhci_host *host)
+> +{
+> +	u16 ctrl;
+> +
+> +	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+> +	ctrl &= ~SDHCI_CTRL_TUNED_CLK;
+> +	ctrl &= ~SDHCI_CTRL_EXEC_TUNING;
+> +	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+> +}
+> +
+> +static void __sdhci_o2_execute_tuning(struct sdhci_host *host, u32 opcode)
+> +{
+> +	int i;
+> +
+> +	sdhci_o2_send_tuning(host, MMC_SEND_TUNING_BLOCK_HS200);
+> +
+> +	for (i = 0; i < 150; i++) {
+> +		u16 ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+> +
+> +		if (!(ctrl & SDHCI_CTRL_EXEC_TUNING)) {
+> +			if (ctrl & SDHCI_CTRL_TUNED_CLK) {
+> +				host->tuning_done = true;
+> +				return;
+> +			}
+> +			pr_warn("%s: HW tuning failed !\n",
+> +				   mmc_hostname(host->mmc));
+> +			break;
+> +		}
+> +
+> +		mdelay(1);
+> +	}
+> +
+> +	pr_info("%s: Tuning failed, falling back to fixed sampling clock\n",
+> +		mmc_hostname(host->mmc));
+> +	sdhci_o2_reset_tuning(host);
+> +}
+> +
+> +static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
+> +{
+> +	struct sdhci_host *host = mmc_priv(mmc);
+> +	int current_bus_width = 0;
+> +
+> +	/*
+> +	 * This handler only implements the eMMC tuning that is specific to
+> +	 * this controller.  Fall back to the standard method for other TIMING.
+> +	 */
+> +	if (host->timing != MMC_TIMING_MMC_HS200)
+> +		return sdhci_execute_tuning(mmc, opcode);
+> +
+> +	if (WARN_ON(opcode != MMC_SEND_TUNING_BLOCK_HS200))
+> +		return -EINVAL;
+> +
+> +	/*
+> +	 * o2 sdhci host didn't support 8bit emmc tuning
+> +	 */
+> +	if (mmc->ios.bus_width == MMC_BUS_WIDTH_8) {
+> +		current_bus_width = mmc->ios.bus_width;
+> +		sdhci_set_bus_width(host, MMC_BUS_WIDTH_4);
+> +	}
+> +
+> +	sdhci_o2_set_tuning_mode(host);
+> +
+> +	sdhci_o2_start_tuning(host);
+> +
+> +	__sdhci_o2_execute_tuning(host, opcode);
+> +
+> +	sdhci_o2_end_tuning(host);
+> +
+> +	if (current_bus_width == MMC_BUS_WIDTH_8)
+> +		sdhci_set_bus_width(host, current_bus_width);
+> +
+> +	host->flags &= ~SDHCI_HS400_TUNING;
+> +	return 0;
+> +}
+>  
+>  static void o2_pci_set_baseclk(struct sdhci_pci_chip *chip, u32 value)
+>  {
+> @@ -215,6 +406,8 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+>  			}
+>  		}
+>  
+> +		host->mmc_host_ops.execute_tuning = sdhci_o2_execute_tuning;
+> +
+>  		if (chip->pdev->device != PCI_DEVICE_ID_O2_FUJIN2)
+>  			break;
+>  		/* set dll watch dog timer */
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 2ededa7..3bf6117 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -955,7 +955,10 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
+>  	if (data == NULL) {
+>  		if (host->quirks2 &
+>  			SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD) {
+> -			sdhci_writew(host, 0x0, SDHCI_TRANSFER_MODE);
+> +			/* must not clear SDHCI_TRANSFER_MODE when tuning */
+> +			if (cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200) {
+> +				sdhci_writew(host, 0x0, SDHCI_TRANSFER_MODE);
+> +			}
+>  		} else {
+>  		/* clear Auto CMD settings for no data CMDs */
+>  			mode = sdhci_readw(host, SDHCI_TRANSFER_MODE);
 > 
