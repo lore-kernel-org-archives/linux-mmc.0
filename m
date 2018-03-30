@@ -1,37 +1,43 @@
-From: oscardagrach <ryan@edited.us>
-Subject: [PATCH] mmc: dw_mmc-k3: Fix DDR52 mode by setting required clock divisor
-Date: Thu, 29 Mar 2018 13:24:22 -0500
-Message-ID: <20180329182423.21201-1-ryan@edited.us>
+From: Eugeniy Paltsev <Eugeniy.Paltsev@synopsys.com>
+Subject: DW MMC multislot support
+Date: Fri, 30 Mar 2018 15:37:39 +0000
+Message-ID: <1522424259.32101.7.camel@synopsys.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Language: en-US
+Content-ID: <1CC2C62C4259CA4791F613D157505327@internal.synopsys.com>
 Sender: linux-kernel-owner@vger.kernel.org
-Cc: oscardagrach <ryan@edited.us>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "jh80.chung@samsung.com" <jh80.chung@samsung.com>, "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>, "Vineet.Gupta1@synopsys.com" <Vineet.Gupta1@synopsys.com>, "Alexey.Brodkin@synopsys.com" <Alexey.Brodkin@synopsys.com>, "linux-snps-arc@lists.infradead.org" <linux-snps-arc@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Signed-off-by: oscardagrach <ryan@edited.us>
----
- drivers/mmc/host/dw_mmc-k3.c | 10 ++++++++--
- 1 file changed, 8 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
-index 89cdb3d533bb..efc546cb4db8 100644
---- a/drivers/mmc/host/dw_mmc-k3.c
-+++ b/drivers/mmc/host/dw_mmc-k3.c
-@@ -194,8 +194,14 @@ static void dw_mci_hi6220_set_ios(struct dw_mci *host, struct mmc_ios *ios)
- 	int ret;
- 	unsigned int clock;
- 
--	clock = (ios->clock <= 25000000) ? 25000000 : ios->clock;
--
-+	/* CLKDIV must be 1 for DDR52/8-bit mode */
-+	if (ios->bus_width == MMC_BUS_WIDTH_8 &&
-+		ios->timing == MMC_TIMING_MMC_DDR52) {
-+		mci_writel(host, CLKDIV, 0x1);
-+		clock = ios->clock;
-+	} else {
-+		clock = (ios->clock <= 25000000) ? 25000000 : ios->clock;
-+	}
- 	ret = clk_set_rate(host->biu_clk, clock);
- 	if (ret)
- 		dev_warn(host->dev, "failed to set rate %uHz\n", clock);
--- 
-2.11.0
+SGksDQoNCkkgaGF2ZSBwbGFucyB0byBhZGQgbXVsdGlzbG90IHN1cHBvcnQgdG8gRGVzaWduV2Fy
+ZSBNTUMgZHJpdmVyLg0KDQpBcyBvZiB0b2RheSBJIGhhdmUgcHJvb2Ygb2YgY29uY2VwdCBmb3Ig
+bXVsdGlzbG90IERXIE1NQyBkcml2ZXIgd2l0aCB0d28gc2xvdHMgd29ya2luZw0Kc2ltdWx0YW5l
+b3VzbHk6DQpJIHJldmVydGVkIGFsbCBjb21taXRzIHdoaWNoIHJlbW92ZSBwcmV2aW91cyBpbXBs
+ZW1lbnRhdGlvbiBvZiAicHNldWRvLW11bHRpc2xvdCINCmFuZCBhZGQgYWxsIHJlcXVpcmVkIHN0
+ZXBzIGZvciBjaGFuZ2luZyBzbG90IG51bWJlciB0byBfX2R3X21jaV9zdGFydF9yZXF1ZXN0IGZ1
+bmN0aW9uLg0KDQpCdXQgSSBoYXZlIHNldmVyYWwgaXNzdWVzIHdpdGggc2V0X2lvcyBmdW5jdGlv
+biBpbiBtdWx0aXNsb3QgbW9kZSAoYXMgZWFjaCBzbG90DQppcyByZWdpc3RlcmVkIGFzIHNlcGFy
+YXRlIG1tYyBob3N0KToNCjEpIFdlIGNhbiBjaGFuZ2UgY2xvY2sgZm9yIHNsb3QgMSB3aGlsZSBz
+bG90IDAgaXMgYWN0aXZlLg0KMikgV2UgY2FuIGRpc2FibGUgb25lIHNsb3QgKGJ5IGNhbGxpbmcg
+c2V0X2lvcyB3aXRoICdwb3dlcl9tb2RlJyA9PSBNTUNfUE9XRVJfT0ZGKQ0KIHdoaWNoIGNhdXNl
+IGNsb2NrIGRpc2FibGUgZm9yIGFsbCBzbG90cy4NCjMpIFdlIGNhbiBlbmFibGUgb25lIHNsb3Qg
+KGJ5IGNhbGxpbmcgc2V0X2lvcyB3aXRoICdwb3dlcl9tb2RlJyA9PSBNTUNfUE9XRVJfT04pDQog
+d2hpY2ggY2F1c2UgRE1BIGFuZCBGSUZPIHJlc2V0IHdoaWxlIGFub3RoZXIgc2xvdCBpcyBhY3Rp
+dmUuDQpBbmQgc28gb24uLi4NCg0KDQpIZXJlIGlzIG15IGlkZWFzIGhvdyB0byBmaXggdGhpczoN
+CjEpIEluIHNldF9pb3MgZnVuY3Rpb24gd2UgY2FuIHNpbXBseSBzdG9yZSBwYXJhbWV0ZXJzDQog
+KGxpa2UgY2xvY2sgc3BlZWQvdGltaW5ncy9idXMgd2lkdGgpIHRvIGNvcnJlc3BvbmRpbmcgc2xv
+dCBzdHJ1Y3R1cmUgYW5kIGFwcGx5DQogdGhlbSBvbmx5IGluIHRoZSBiZWdpbm5pbmcgb2YgX19k
+d19tY2lfc3RhcnRfcmVxdWVzdCBmdW5jdGlvbiBpZiBjdXJyZW50IHNsb3QgaXMNCiBjaGFuZ2Vk
+Lg0KIEFub3RoZXIgb3B0aW9uIGlzIHRvIGNob29zZSBtYXhpbXVtIGNsb2NrIHdoaWNoIGlzIHN1
+aXRhYmxlIGZvciBib3RoIHNsb3RzDQogaW5zdGVhZCBvZiBjbG9jayBzd2l0Y2ggb24gZXZlcnkg
+c2xvdCBjaGFuZ2UuDQoyKSBEbyBhbGwgYWN0aW9ucyBmb3Igc2xvdCBkaXNhYmxpbmcgKCdwb3dl
+cl9tb2RlJyA9PSBNTUNfUE9XRVJfT0ZGKSBvbmx5IGlmDQogb3RoZXJzIHNsb3RzIGFyZSBkaXNh
+YmxlZCB0b28uDQozKSBEbyBhbGwgYWN0aW9ucyBmb3Igc2xvdCBlbmFibGluZyAoJ3Bvd2VyX21v
+ZGUnID09IE1NQ19QT1dFUl9PTikgb25seSBpZg0KIG5vIHNsb3RzIGFyZSBlbmFibGVkLg0KDQoN
+Ck1heWJlIHlvdSBoYXZlIGFueSBjb21tZW50cyBvciByZW1hcmtzIGFib3V0IHRoaXM/DQpBbGwg
+Y29tbWVudHMgYW5kIHN1Z2dlc3Rpb25zIGFyZSBtb3JlIHRoYW4gd2VsY29tZS4NCi0tIA0KIEV1
+Z2VuaXkgUGFsdHNldg==
