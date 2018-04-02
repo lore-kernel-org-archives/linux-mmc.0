@@ -1,7 +1,7 @@
 From: Robert Jarzmik <robert.jarzmik@free.fr>
-Subject: [PATCH 01/15] dmaengine: pxa: use a dma slave map
-Date: Mon,  2 Apr 2018 16:26:42 +0200
-Message-ID: <20180402142656.26815-2-robert.jarzmik@free.fr>
+Subject: [PATCH 03/15] mmc: pxamci: remove the dmaengine compat need
+Date: Mon,  2 Apr 2018 16:26:44 +0200
+Message-ID: <20180402142656.26815-4-robert.jarzmik@free.fr>
 References: <20180402142656.26815-1-robert.jarzmik@free.fr>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20180402142656.26815-1-robert.jarzmik@free.fr>
@@ -10,83 +10,78 @@ To: Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, 
 Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-ide@vger.kernel.org, dmaengine@vger.kernel.org, linux-media@vger.kernel.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, netdev@vger.kernel.org, devel@driverdev.osuosl.org, alsa-devel@alsa-project.org
 List-Id: linux-mmc@vger.kernel.org
 
-In order to remove the specific knowledge of the dma mapping from PXA
-drivers, add a default slave map for pxa architectures.
+As the pxa architecture switched towards the dmaengine slave map, the
+old compatibility mechanism to acquire the dma requestor line number and
+priority are not needed anymore.
 
-This won't impact MMP architecture, but is aimed only at all PXA boards.
-
-This is the first step, and once all drivers are converted,
-pxad_filter_fn() will be made static, and the DMA resources removed from
-device.c.
+This patch simplifies the dma resource acquisition, using the more
+generic function dma_request_slave_channel().
 
 Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>
-Reported-by: Arnd Bergmann <arnd@arndb.de>
 ---
- drivers/dma/pxa_dma.c                 | 10 +++++++++-
- include/linux/platform_data/mmp_dma.h |  4 ++++
- 2 files changed, 13 insertions(+), 1 deletion(-)
+ drivers/mmc/host/pxamci.c | 29 +++--------------------------
+ 1 file changed, 3 insertions(+), 26 deletions(-)
 
-diff --git a/drivers/dma/pxa_dma.c b/drivers/dma/pxa_dma.c
-index b53fb618bbf6..9505334f9c6e 100644
---- a/drivers/dma/pxa_dma.c
-+++ b/drivers/dma/pxa_dma.c
-@@ -179,6 +179,8 @@ static unsigned int pxad_drcmr(unsigned int line)
- 	return 0x1000 + line * 4;
- }
- 
-+bool pxad_filter_fn(struct dma_chan *chan, void *param);
-+
- /*
-  * Debug fs
-  */
-@@ -1396,9 +1398,10 @@ static int pxad_probe(struct platform_device *op)
+diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
+index c763b404510f..6c94474e36f4 100644
+--- a/drivers/mmc/host/pxamci.c
++++ b/drivers/mmc/host/pxamci.c
+@@ -24,7 +24,6 @@
+ #include <linux/interrupt.h>
+ #include <linux/dmaengine.h>
+ #include <linux/dma-mapping.h>
+-#include <linux/dma/pxa-dma.h>
+ #include <linux/clk.h>
+ #include <linux/err.h>
+ #include <linux/mmc/host.h>
+@@ -637,10 +636,8 @@ static int pxamci_probe(struct platform_device *pdev)
  {
- 	struct pxad_device *pdev;
- 	const struct of_device_id *of_id;
-+	const struct dma_slave_map *slave_map = NULL;
- 	struct mmp_dma_platdata *pdata = dev_get_platdata(&op->dev);
- 	struct resource *iores;
--	int ret, dma_channels = 0, nb_requestors = 0;
-+	int ret, dma_channels = 0, nb_requestors = 0, slave_map_cnt = 0;
- 	const enum dma_slave_buswidth widths =
- 		DMA_SLAVE_BUSWIDTH_1_BYTE   | DMA_SLAVE_BUSWIDTH_2_BYTES |
- 		DMA_SLAVE_BUSWIDTH_4_BYTES;
-@@ -1429,6 +1432,8 @@ static int pxad_probe(struct platform_device *op)
- 	} else if (pdata && pdata->dma_channels) {
- 		dma_channels = pdata->dma_channels;
- 		nb_requestors = pdata->nb_requestors;
-+		slave_map = pdata->slave_map;
-+		slave_map_cnt = pdata->slave_map_cnt;
- 	} else {
- 		dma_channels = 32;	/* default 32 channel */
+ 	struct mmc_host *mmc;
+ 	struct pxamci_host *host = NULL;
+-	struct resource *r, *dmarx, *dmatx;
+-	struct pxad_param param_rx, param_tx;
++	struct resource *r;
+ 	int ret, irq, gpio_cd = -1, gpio_ro = -1, gpio_power = -1;
+-	dma_cap_mask_t mask;
+ 
+ 	ret = pxamci_of_init(pdev);
+ 	if (ret)
+@@ -739,34 +736,14 @@ static int pxamci_probe(struct platform_device *pdev)
+ 
+ 	platform_set_drvdata(pdev, mmc);
+ 
+-	if (!pdev->dev.of_node) {
+-		dmarx = platform_get_resource(pdev, IORESOURCE_DMA, 0);
+-		dmatx = platform_get_resource(pdev, IORESOURCE_DMA, 1);
+-		if (!dmarx || !dmatx) {
+-			ret = -ENXIO;
+-			goto out;
+-		}
+-		param_rx.prio = PXAD_PRIO_LOWEST;
+-		param_rx.drcmr = dmarx->start;
+-		param_tx.prio = PXAD_PRIO_LOWEST;
+-		param_tx.drcmr = dmatx->start;
+-	}
+-
+-	dma_cap_zero(mask);
+-	dma_cap_set(DMA_SLAVE, mask);
+-
+-	host->dma_chan_rx =
+-		dma_request_slave_channel_compat(mask, pxad_filter_fn,
+-						 &param_rx, &pdev->dev, "rx");
++	host->dma_chan_rx = dma_request_slave_channel(&pdev->dev, "rx");
+ 	if (host->dma_chan_rx == NULL) {
+ 		dev_err(&pdev->dev, "unable to request rx dma channel\n");
+ 		ret = -ENODEV;
+ 		goto out;
  	}
-@@ -1440,6 +1445,9 @@ static int pxad_probe(struct platform_device *op)
- 	pdev->slave.device_prep_dma_memcpy = pxad_prep_memcpy;
- 	pdev->slave.device_prep_slave_sg = pxad_prep_slave_sg;
- 	pdev->slave.device_prep_dma_cyclic = pxad_prep_dma_cyclic;
-+	pdev->slave.filter.map = slave_map;
-+	pdev->slave.filter.mapcnt = slave_map_cnt;
-+	pdev->slave.filter.fn = pxad_filter_fn;
  
- 	pdev->slave.copy_align = PDMA_ALIGNMENT;
- 	pdev->slave.src_addr_widths = widths;
-diff --git a/include/linux/platform_data/mmp_dma.h b/include/linux/platform_data/mmp_dma.h
-index d1397c8ed94e..6397b9c8149a 100644
---- a/include/linux/platform_data/mmp_dma.h
-+++ b/include/linux/platform_data/mmp_dma.h
-@@ -12,9 +12,13 @@
- #ifndef MMP_DMA_H
- #define MMP_DMA_H
- 
-+struct dma_slave_map;
-+
- struct mmp_dma_platdata {
- 	int dma_channels;
- 	int nb_requestors;
-+	int slave_map_cnt;
-+	const struct dma_slave_map *slave_map;
- };
- 
- #endif /* MMP_DMA_H */
+-	host->dma_chan_tx =
+-		dma_request_slave_channel_compat(mask, pxad_filter_fn,
+-						 &param_tx,  &pdev->dev, "tx");
++	host->dma_chan_tx = dma_request_slave_channel(&pdev->dev, "tx");
+ 	if (host->dma_chan_tx == NULL) {
+ 		dev_err(&pdev->dev, "unable to request tx dma channel\n");
+ 		ret = -ENODEV;
 -- 
 2.11.0
