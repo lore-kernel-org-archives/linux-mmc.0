@@ -1,13 +1,13 @@
 From: Robert Jarzmik <robert.jarzmik@free.fr>
-Subject: [PATCH 05/15] mtd: nand: pxa3xx: remove the dmaengine compat need
-Date: Mon,  2 Apr 2018 16:26:46 +0200
-Message-ID: <20180402142656.26815-6-robert.jarzmik@free.fr>
+Subject: [PATCH 06/15] net: smc911x: remove the dmaengine compat need
+Date: Mon,  2 Apr 2018 16:26:47 +0200
+Message-ID: <20180402142656.26815-7-robert.jarzmik@free.fr>
 References: <20180402142656.26815-1-robert.jarzmik@free.fr>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20180402142656.26815-1-robert.jarzmik@free.fr>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Tejun Heo <tj@kernel.org>, Vinod Koul <vinod.koul@intel.com>, Mauro Carvalho Chehab <mchehab@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, Boris Brezillon <boris.brezillon@free-electrons.com>, David Woodhouse <dwmw2@infradead.org>, Brian Norris <computersforpeace@gmail.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Cyrille Pitchen <cyrille.pitchen@wedev4u.fr>, Nicolas Pitre <nico@fluxnic.net>, Samuel Ortiz <samuel@sortiz.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-ide@vger.kernel.org, dmaengine@vger.kernel.org, linux-media@vger.kernel.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, netdev@vger.kernel.org, devel@driverdev.osuosl.org, alsa-devel@alsa-project.org, Robert Jarzmik <robert.jarzmik@renault.com>
+Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-ide@vger.kernel.org, dmaengine@vger.kernel.org, linux-media@vger.kernel.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, netdev@vger.kernel.org, devel@driverdev.osuosl.org, alsa-devel@alsa-project.org
 List-Id: linux-mmc@vger.kernel.org
 
 From: Robert Jarzmik <robert.jarzmik@renault.com>
@@ -21,36 +21,49 @@ generic function dma_request_slave_channel().
 
 Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>
 ---
- drivers/mtd/nand/pxa3xx_nand.c | 10 +---------
- 1 file changed, 1 insertion(+), 9 deletions(-)
+ drivers/net/ethernet/smsc/smc911x.c | 16 ++--------------
+ 1 file changed, 2 insertions(+), 14 deletions(-)
 
-diff --git a/drivers/mtd/nand/pxa3xx_nand.c b/drivers/mtd/nand/pxa3xx_nand.c
-index d1979c7dbe7e..4a56a0aef5b1 100644
---- a/drivers/mtd/nand/pxa3xx_nand.c
-+++ b/drivers/mtd/nand/pxa3xx_nand.c
-@@ -1518,8 +1518,6 @@ static int pxa3xx_nand_init_buff(struct pxa3xx_nand_info *info)
- {
- 	struct platform_device *pdev = info->pdev;
+diff --git a/drivers/net/ethernet/smsc/smc911x.c b/drivers/net/ethernet/smsc/smc911x.c
+index 05157442a980..4c3713bd5caa 100644
+--- a/drivers/net/ethernet/smsc/smc911x.c
++++ b/drivers/net/ethernet/smsc/smc911x.c
+@@ -74,7 +74,6 @@ static const char version[] =
+ #include <linux/skbuff.h>
+ 
+ #include <linux/dmaengine.h>
+-#include <linux/dma/pxa-dma.h>
+ 
+ #include <asm/io.h>
+ 
+@@ -1794,8 +1793,6 @@ static int smc911x_probe(struct net_device *dev)
+ 	unsigned long irq_flags;
+ #ifdef SMC_USE_DMA
  	struct dma_slave_config	config;
 -	dma_cap_mask_t mask;
 -	struct pxad_param param;
- 	int ret;
+ #endif
  
- 	info->data_buff = kmalloc(info->buf_size, GFP_KERNEL);
-@@ -1533,13 +1531,7 @@ static int pxa3xx_nand_init_buff(struct pxa3xx_nand_info *info)
- 		return ret;
+ 	DBG(SMC_DEBUG_FUNC, dev, "--> %s\n", __func__);
+@@ -1969,17 +1966,8 @@ static int smc911x_probe(struct net_device *dev)
  
- 	sg_init_one(&info->sg, info->data_buff, info->buf_size);
+ #ifdef SMC_USE_DMA
+ 
 -	dma_cap_zero(mask);
 -	dma_cap_set(DMA_SLAVE, mask);
 -	param.prio = PXAD_PRIO_LOWEST;
--	param.drcmr = info->drcmr_dat;
--	info->dma_chan = dma_request_slave_channel_compat(mask, pxad_filter_fn,
--							  &param, &pdev->dev,
--							  "data");
-+	info->dma_chan = dma_request_slave_channel(&pdev->dev, "data");
- 	if (!info->dma_chan) {
- 		dev_err(&pdev->dev, "unable to request data dma channel\n");
- 		return -ENODEV;
+-	param.drcmr = -1UL;
+-
+-	lp->rxdma =
+-		dma_request_slave_channel_compat(mask, pxad_filter_fn,
+-						 &param, &dev->dev, "rx");
+-	lp->txdma =
+-		dma_request_slave_channel_compat(mask, pxad_filter_fn,
+-						 &param, &dev->dev, "tx");
++	lp->rxdma = dma_request_slave_channel(&dev->dev, "rx");
++	lp->txdma = dma_request_slave_channel(&dev->dev, "tx");
+ 	lp->rxdma_active = 0;
+ 	lp->txdma_active = 0;
+ 
 -- 
 2.11.0
