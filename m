@@ -1,7 +1,7 @@
 From: Robert Jarzmik <robert.jarzmik@free.fr>
-Subject: [PATCH 06/15] net: smc911x: remove the dmaengine compat need
-Date: Mon,  2 Apr 2018 16:26:47 +0200
-Message-ID: <20180402142656.26815-7-robert.jarzmik@free.fr>
+Subject: [PATCH 07/15] net: smc91x: remove the dmaengine compat need
+Date: Mon,  2 Apr 2018 16:26:48 +0200
+Message-ID: <20180402142656.26815-8-robert.jarzmik@free.fr>
 References: <20180402142656.26815-1-robert.jarzmik@free.fr>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20180402142656.26815-1-robert.jarzmik@free.fr>
@@ -21,49 +21,45 @@ generic function dma_request_slave_channel().
 
 Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>
 ---
- drivers/net/ethernet/smsc/smc911x.c | 16 ++--------------
- 1 file changed, 2 insertions(+), 14 deletions(-)
+ drivers/net/ethernet/smsc/smc91x.c | 12 +-----------
+ drivers/net/ethernet/smsc/smc91x.h |  1 -
+ 2 files changed, 1 insertion(+), 12 deletions(-)
 
-diff --git a/drivers/net/ethernet/smsc/smc911x.c b/drivers/net/ethernet/smsc/smc911x.c
-index 05157442a980..4c3713bd5caa 100644
---- a/drivers/net/ethernet/smsc/smc911x.c
-+++ b/drivers/net/ethernet/smsc/smc911x.c
-@@ -74,7 +74,6 @@ static const char version[] =
- #include <linux/skbuff.h>
- 
- #include <linux/dmaengine.h>
--#include <linux/dma/pxa-dma.h>
- 
- #include <asm/io.h>
- 
-@@ -1794,8 +1793,6 @@ static int smc911x_probe(struct net_device *dev)
- 	unsigned long irq_flags;
- #ifdef SMC_USE_DMA
- 	struct dma_slave_config	config;
--	dma_cap_mask_t mask;
--	struct pxad_param param;
+diff --git a/drivers/net/ethernet/smsc/smc91x.c b/drivers/net/ethernet/smsc/smc91x.c
+index 080428762858..4c600f430f6d 100644
+--- a/drivers/net/ethernet/smsc/smc91x.c
++++ b/drivers/net/ethernet/smsc/smc91x.c
+@@ -2018,18 +2018,8 @@ static int smc_probe(struct net_device *dev, void __iomem *ioaddr,
+ 	lp->cfg.flags |= SMC91X_USE_DMA;
+ #  endif
+ 	if (lp->cfg.flags & SMC91X_USE_DMA) {
+-		dma_cap_mask_t mask;
+-		struct pxad_param param;
+-
+-		dma_cap_zero(mask);
+-		dma_cap_set(DMA_SLAVE, mask);
+-		param.prio = PXAD_PRIO_LOWEST;
+-		param.drcmr = -1UL;
+-
+ 		lp->dma_chan =
+-			dma_request_slave_channel_compat(mask, pxad_filter_fn,
+-							 &param, &dev->dev,
+-							 "data");
++			dma_request_slave_channel(lp->device, "data");
+ 	}
  #endif
  
- 	DBG(SMC_DEBUG_FUNC, dev, "--> %s\n", __func__);
-@@ -1969,17 +1966,8 @@ static int smc911x_probe(struct net_device *dev)
+diff --git a/drivers/net/ethernet/smsc/smc91x.h b/drivers/net/ethernet/smsc/smc91x.h
+index 08b17adf0a65..e849b6c2fa60 100644
+--- a/drivers/net/ethernet/smsc/smc91x.h
++++ b/drivers/net/ethernet/smsc/smc91x.h
+@@ -327,7 +327,6 @@ struct smc_local {
+  * as RX which can overrun memory and lose packets.
+  */
+ #include <linux/dma-mapping.h>
+-#include <linux/dma/pxa-dma.h>
  
- #ifdef SMC_USE_DMA
- 
--	dma_cap_zero(mask);
--	dma_cap_set(DMA_SLAVE, mask);
--	param.prio = PXAD_PRIO_LOWEST;
--	param.drcmr = -1UL;
--
--	lp->rxdma =
--		dma_request_slave_channel_compat(mask, pxad_filter_fn,
--						 &param, &dev->dev, "rx");
--	lp->txdma =
--		dma_request_slave_channel_compat(mask, pxad_filter_fn,
--						 &param, &dev->dev, "tx");
-+	lp->rxdma = dma_request_slave_channel(&dev->dev, "rx");
-+	lp->txdma = dma_request_slave_channel(&dev->dev, "tx");
- 	lp->rxdma_active = 0;
- 	lp->txdma_active = 0;
- 
+ #ifdef SMC_insl
+ #undef SMC_insl
 -- 
 2.11.0
