@@ -1,7 +1,7 @@
 From: Robert Jarzmik <robert.jarzmik@free.fr>
-Subject: [PATCH 13/15] ARM: pxa: remove the DMA IO resources
-Date: Mon,  2 Apr 2018 16:26:54 +0200
-Message-ID: <20180402142656.26815-14-robert.jarzmik@free.fr>
+Subject: [PATCH 14/15] ARM: pxa: change SSP devices allocation
+Date: Mon,  2 Apr 2018 16:26:55 +0200
+Message-ID: <20180402142656.26815-15-robert.jarzmik@free.fr>
 References: <20180402142656.26815-1-robert.jarzmik@free.fr>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20180402142656.26815-1-robert.jarzmik@free.fr>
@@ -10,238 +10,317 @@ To: Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, 
 Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-ide@vger.kernel.org, dmaengine@vger.kernel.org, linux-media@vger.kernel.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, netdev@vger.kernel.org, devel@driverdev.osuosl.org, alsa-devel@alsa-project.org
 List-Id: linux-mmc@vger.kernel.org
 
-As the last driver using the former mechanism to acquire the DMA
-requestor line has be converted to the dma_slave_map, remove all these
-resources from the PXA devices.
+In order to prepare for the dma_slave_map change for SSP DMA channels
+allocation, the SSP platform devices will now include a platform data
+structure which in turn selects which dma channel has to be used for
+data transfers, especially the PCM ones.
 
 Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>
 ---
- arch/arm/mach-pxa/devices.c | 136 --------------------------------------------
- 1 file changed, 136 deletions(-)
+ arch/arm/mach-pxa/devices.c            | 78 +++++++++++++++++++++++++++++-----
+ arch/arm/mach-pxa/devices.h            | 14 ++----
+ arch/arm/mach-pxa/include/mach/audio.h | 12 ++++++
+ arch/arm/mach-pxa/pxa25x.c             |  4 +-
+ arch/arm/mach-pxa/pxa27x.c             |  4 +-
+ arch/arm/mach-pxa/pxa3xx.c             |  5 +--
+ 6 files changed, 86 insertions(+), 31 deletions(-)
 
 diff --git a/arch/arm/mach-pxa/devices.c b/arch/arm/mach-pxa/devices.c
-index da67ebe9a7d5..c0b3c90fd67f 100644
+index c0b3c90fd67f..955d255dc4f4 100644
 --- a/arch/arm/mach-pxa/devices.c
 +++ b/arch/arm/mach-pxa/devices.c
-@@ -61,16 +61,6 @@ static struct resource pxamci_resources[] = {
- 		.end	= IRQ_MMC,
- 		.flags	= IORESOURCE_IRQ,
+@@ -481,6 +481,17 @@ void __init pxa_set_ac97_info(pxa2xx_audio_ops_t *ops)
+ 	pxa_register_device(&pxa_device_ac97, ops);
+ }
+ 
++static struct pxa_ssp_info pxa_ssp_infos[] = {
++	{ .dma_chan_rx_name = "ssp1_rx", .dma_chan_tx_name = "ssp1_tx", },
++	{ .dma_chan_rx_name = "ssp1_rx", .dma_chan_tx_name = "ssp1_tx", },
++	{ .dma_chan_rx_name = "ssp2_rx", .dma_chan_tx_name = "ssp2_tx", },
++	{ .dma_chan_rx_name = "ssp2_rx", .dma_chan_tx_name = "ssp2_tx", },
++	{ .dma_chan_rx_name = "ssp3_rx", .dma_chan_tx_name = "ssp3_tx", },
++	{ .dma_chan_rx_name = "ssp3_rx", .dma_chan_tx_name = "ssp3_tx", },
++	{ .dma_chan_rx_name = "ssp4_rx", .dma_chan_tx_name = "ssp4_tx", },
++	{ .dma_chan_rx_name = "ssp4_rx", .dma_chan_tx_name = "ssp4_tx", },
++};
++
+ #ifdef CONFIG_PXA25x
+ 
+ static struct resource pxa25x_resource_pwm0[] = {
+@@ -528,7 +539,7 @@ static struct resource pxa25x_resource_ssp[] = {
  	},
--	[2] = {
--		.start	= 21,
--		.end	= 21,
--		.flags	= IORESOURCE_DMA,
--	},
--	[3] = {
--		.start	= 22,
--		.end	= 22,
--		.flags	= IORESOURCE_DMA,
--	},
  };
  
- static u64 pxamci_dmamask = 0xffffffffUL;
-@@ -408,16 +398,6 @@ static struct resource pxa_ir_resources[] = {
- 		.end	= 0x40700023,
- 		.flags  = IORESOURCE_MEM,
+-struct platform_device pxa25x_device_ssp = {
++static struct platform_device pxa25x_device_ssp = {
+ 	.name		= "pxa25x-ssp",
+ 	.id		= 0,
+ 	.dev		= {
+@@ -554,7 +565,7 @@ static struct resource pxa25x_resource_nssp[] = {
  	},
--	[5] = {
--		.start  = 17,
--		.end	= 17,
--		.flags  = IORESOURCE_DMA,
--	},
--	[6] = {
--		.start  = 18,
--		.end	= 18,
--		.flags  = IORESOURCE_DMA,
--	},
  };
  
- struct platform_device pxa_device_ficp = {
-@@ -546,18 +526,6 @@ static struct resource pxa25x_resource_ssp[] = {
- 		.end	= IRQ_SSP,
- 		.flags	= IORESOURCE_IRQ,
+-struct platform_device pxa25x_device_nssp = {
++static struct platform_device pxa25x_device_nssp = {
+ 	.name		= "pxa25x-nssp",
+ 	.id		= 1,
+ 	.dev		= {
+@@ -580,7 +591,7 @@ static struct resource pxa25x_resource_assp[] = {
  	},
--	[2] = {
--		/* DRCMR for RX */
--		.start	= 13,
--		.end	= 13,
--		.flags	= IORESOURCE_DMA,
--	},
--	[3] = {
--		/* DRCMR for TX */
--		.start	= 14,
--		.end	= 14,
--		.flags	= IORESOURCE_DMA,
--	},
  };
  
- struct platform_device pxa25x_device_ssp = {
-@@ -584,18 +552,6 @@ static struct resource pxa25x_resource_nssp[] = {
- 		.end	= IRQ_NSSP,
- 		.flags	= IORESOURCE_IRQ,
+-struct platform_device pxa25x_device_assp = {
++static struct platform_device pxa25x_device_assp = {
+ 	/* ASSP is basically equivalent to NSSP */
+ 	.name		= "pxa25x-nssp",
+ 	.id		= 2,
+@@ -591,6 +602,22 @@ struct platform_device pxa25x_device_assp = {
+ 	.resource	= pxa25x_resource_assp,
+ 	.num_resources	= ARRAY_SIZE(pxa25x_resource_assp),
+ };
++
++static struct platform_device *pxa25x_device_ssps[] = {
++	&pxa25x_device_ssp,
++	&pxa25x_device_nssp,
++	&pxa25x_device_assp,
++};
++
++void __init pxa25x_set_ssp_info(void)
++{
++	int ssp;
++
++	for (ssp = 0; ssp < ARRAY_SIZE(pxa25x_device_ssps); ssp++)
++		pxa_register_device(pxa25x_device_ssps[ssp],
++				    &pxa_ssp_infos[ssp]);
++}
++
+ #endif /* CONFIG_PXA25x */
+ 
+ #if defined(CONFIG_PXA27x) || defined(CONFIG_PXA3xx)
+@@ -698,7 +725,7 @@ static struct resource pxa27x_resource_ssp1[] = {
  	},
--	[2] = {
--		/* DRCMR for RX */
--		.start	= 15,
--		.end	= 15,
--		.flags	= IORESOURCE_DMA,
--	},
--	[3] = {
--		/* DRCMR for TX */
--		.start	= 16,
--		.end	= 16,
--		.flags	= IORESOURCE_DMA,
--	},
  };
  
- struct platform_device pxa25x_device_nssp = {
-@@ -622,18 +578,6 @@ static struct resource pxa25x_resource_assp[] = {
- 		.end	= IRQ_ASSP,
- 		.flags	= IORESOURCE_IRQ,
+-struct platform_device pxa27x_device_ssp1 = {
++static struct platform_device pxa27x_device_ssp1 = {
+ 	.name		= "pxa27x-ssp",
+ 	.id		= 0,
+ 	.dev		= {
+@@ -724,7 +751,7 @@ static struct resource pxa27x_resource_ssp2[] = {
  	},
--	[2] = {
--		/* DRCMR for RX */
--		.start	= 23,
--		.end	= 23,
--		.flags	= IORESOURCE_DMA,
--	},
--	[3] = {
--		/* DRCMR for TX */
--		.start	= 24,
--		.end	= 24,
--		.flags	= IORESOURCE_DMA,
--	},
  };
  
- struct platform_device pxa25x_device_assp = {
-@@ -752,18 +696,6 @@ static struct resource pxa27x_resource_ssp1[] = {
- 		.end	= IRQ_SSP,
- 		.flags	= IORESOURCE_IRQ,
+-struct platform_device pxa27x_device_ssp2 = {
++static struct platform_device pxa27x_device_ssp2 = {
+ 	.name		= "pxa27x-ssp",
+ 	.id		= 1,
+ 	.dev		= {
+@@ -750,7 +777,7 @@ static struct resource pxa27x_resource_ssp3[] = {
  	},
--	[2] = {
--		/* DRCMR for RX */
--		.start	= 13,
--		.end	= 13,
--		.flags	= IORESOURCE_DMA,
--	},
--	[3] = {
--		/* DRCMR for TX */
--		.start	= 14,
--		.end	= 14,
--		.flags	= IORESOURCE_DMA,
--	},
  };
  
- struct platform_device pxa27x_device_ssp1 = {
-@@ -790,18 +722,6 @@ static struct resource pxa27x_resource_ssp2[] = {
- 		.end	= IRQ_SSP2,
- 		.flags	= IORESOURCE_IRQ,
- 	},
--	[2] = {
--		/* DRCMR for RX */
--		.start	= 15,
--		.end	= 15,
--		.flags	= IORESOURCE_DMA,
--	},
--	[3] = {
--		/* DRCMR for TX */
--		.start	= 16,
--		.end	= 16,
--		.flags	= IORESOURCE_DMA,
--	},
+-struct platform_device pxa27x_device_ssp3 = {
++static struct platform_device pxa27x_device_ssp3 = {
+ 	.name		= "pxa27x-ssp",
+ 	.id		= 2,
+ 	.dev		= {
+@@ -761,6 +788,21 @@ struct platform_device pxa27x_device_ssp3 = {
+ 	.num_resources	= ARRAY_SIZE(pxa27x_resource_ssp3),
  };
  
- struct platform_device pxa27x_device_ssp2 = {
-@@ -828,18 +748,6 @@ static struct resource pxa27x_resource_ssp3[] = {
- 		.end	= IRQ_SSP3,
- 		.flags	= IORESOURCE_IRQ,
- 	},
--	[2] = {
--		/* DRCMR for RX */
--		.start	= 66,
--		.end	= 66,
--		.flags	= IORESOURCE_DMA,
--	},
--	[3] = {
--		/* DRCMR for TX */
--		.start	= 67,
--		.end	= 67,
--		.flags	= IORESOURCE_DMA,
--	},
++static struct platform_device *pxa27x_device_ssps[] = {
++	&pxa27x_device_ssp1,
++	&pxa27x_device_ssp2,
++	&pxa27x_device_ssp3,
++};
++
++void __init pxa27x_set_ssp_info(void)
++{
++	int ssp;
++
++	for (ssp = 0; ssp < ARRAY_SIZE(pxa27x_device_ssps); ssp++)
++		pxa_register_device(pxa27x_device_ssps[ssp],
++				    &pxa_ssp_infos[ssp]);
++}
++
+ static struct resource pxa27x_resource_pwm0[] = {
+ 	[0] = {
+ 		.start	= 0x40b00000,
+@@ -951,7 +993,7 @@ static struct resource pxa3xx_resource_ssp4[] = {
+  * make the driver set the correct internal type, hence we provide specific
+  * platform_devices for each of them.
+  */
+-struct platform_device pxa3xx_device_ssp1 = {
++static struct platform_device pxa3xx_device_ssp1 = {
+ 	.name		= "pxa3xx-ssp",
+ 	.id		= 0,
+ 	.dev		= {
+@@ -962,7 +1004,7 @@ struct platform_device pxa3xx_device_ssp1 = {
+ 	.num_resources	= ARRAY_SIZE(pxa27x_resource_ssp1),
  };
  
- struct platform_device pxa27x_device_ssp3 = {
-@@ -896,16 +804,6 @@ static struct resource pxa3xx_resources_mci2[] = {
- 		.end	= IRQ_MMC2,
- 		.flags	= IORESOURCE_IRQ,
- 	},
--	[2] = {
--		.start	= 93,
--		.end	= 93,
--		.flags	= IORESOURCE_DMA,
--	},
--	[3] = {
--		.start	= 94,
--		.end	= 94,
--		.flags	= IORESOURCE_DMA,
--	},
+-struct platform_device pxa3xx_device_ssp2 = {
++static struct platform_device pxa3xx_device_ssp2 = {
+ 	.name		= "pxa3xx-ssp",
+ 	.id		= 1,
+ 	.dev		= {
+@@ -973,7 +1015,7 @@ struct platform_device pxa3xx_device_ssp2 = {
+ 	.num_resources	= ARRAY_SIZE(pxa27x_resource_ssp2),
  };
  
- struct platform_device pxa3xx_device_mci2 = {
-@@ -935,16 +833,6 @@ static struct resource pxa3xx_resources_mci3[] = {
- 		.end	= IRQ_MMC3,
- 		.flags	= IORESOURCE_IRQ,
- 	},
--	[2] = {
--		.start	= 100,
--		.end	= 100,
--		.flags	= IORESOURCE_DMA,
--	},
--	[3] = {
--		.start	= 101,
--		.end	= 101,
--		.flags	= IORESOURCE_DMA,
--	},
+-struct platform_device pxa3xx_device_ssp3 = {
++static struct platform_device pxa3xx_device_ssp3 = {
+ 	.name		= "pxa3xx-ssp",
+ 	.id		= 2,
+ 	.dev		= {
+@@ -984,7 +1026,7 @@ struct platform_device pxa3xx_device_ssp3 = {
+ 	.num_resources	= ARRAY_SIZE(pxa27x_resource_ssp3),
  };
  
- struct platform_device pxa3xx_device_mci3 = {
-@@ -1022,18 +910,6 @@ static struct resource pxa3xx_resources_nand[] = {
- 		.end	= IRQ_NAND,
- 		.flags	= IORESOURCE_IRQ,
- 	},
--	[2] = {
--		/* DRCMR for Data DMA */
--		.start	= 97,
--		.end	= 97,
--		.flags	= IORESOURCE_DMA,
--	},
--	[3] = {
--		/* DRCMR for Command DMA */
--		.start	= 99,
--		.end	= 99,
--		.flags	= IORESOURCE_DMA,
--	},
+-struct platform_device pxa3xx_device_ssp4 = {
++static struct platform_device pxa3xx_device_ssp4 = {
+ 	.name		= "pxa3xx-ssp",
+ 	.id		= 3,
+ 	.dev		= {
+@@ -994,6 +1036,22 @@ struct platform_device pxa3xx_device_ssp4 = {
+ 	.resource	= pxa3xx_resource_ssp4,
+ 	.num_resources	= ARRAY_SIZE(pxa3xx_resource_ssp4),
  };
++
++static struct platform_device *pxa3xx_device_ssps[] = {
++	&pxa3xx_device_ssp1,
++	&pxa3xx_device_ssp2,
++	&pxa3xx_device_ssp3,
++	&pxa3xx_device_ssp4,
++};
++
++void __init pxa3xx_set_ssp_info(void)
++{
++	int ssp;
++
++	for (ssp = 0; ssp < ARRAY_SIZE(pxa3xx_device_ssps); ssp++)
++		pxa_register_device(pxa3xx_device_ssps[ssp],
++				    &pxa_ssp_infos[ssp]);
++}
+ #endif /* CONFIG_PXA3xx */
  
- static u64 pxa3xx_nand_dma_mask = DMA_BIT_MASK(32);
-@@ -1067,18 +943,6 @@ static struct resource pxa3xx_resource_ssp4[] = {
- 		.end	= IRQ_SSP4,
- 		.flags	= IORESOURCE_IRQ,
- 	},
--	[2] = {
--		/* DRCMR for RX */
--		.start	= 2,
--		.end	= 2,
--		.flags	= IORESOURCE_DMA,
--	},
--	[3] = {
--		/* DRCMR for TX */
--		.start	= 3,
--		.end	= 3,
--		.flags	= IORESOURCE_DMA,
--	},
+ struct resource pxa_resource_gpio[] = {
+diff --git a/arch/arm/mach-pxa/devices.h b/arch/arm/mach-pxa/devices.h
+index 11263f7c455b..5909805e7d84 100644
+--- a/arch/arm/mach-pxa/devices.h
++++ b/arch/arm/mach-pxa/devices.h
+@@ -22,17 +22,6 @@ extern struct platform_device pxa27x_device_i2c_power;
+ extern struct platform_device pxa27x_device_ohci;
+ extern struct platform_device pxa27x_device_keypad;
+ 
+-extern struct platform_device pxa25x_device_ssp;
+-extern struct platform_device pxa25x_device_nssp;
+-extern struct platform_device pxa25x_device_assp;
+-extern struct platform_device pxa27x_device_ssp1;
+-extern struct platform_device pxa27x_device_ssp2;
+-extern struct platform_device pxa27x_device_ssp3;
+-extern struct platform_device pxa3xx_device_ssp1;
+-extern struct platform_device pxa3xx_device_ssp2;
+-extern struct platform_device pxa3xx_device_ssp3;
+-extern struct platform_device pxa3xx_device_ssp4;
+-
+ extern struct platform_device pxa25x_device_pwm0;
+ extern struct platform_device pxa25x_device_pwm1;
+ extern struct platform_device pxa27x_device_pwm0;
+@@ -65,3 +54,6 @@ extern void pxa27x_set_i2c_power_info(struct i2c_pxa_platform_data *info);
+ #ifdef CONFIG_PXA3xx
+ extern void pxa3xx_set_i2c_power_info(struct i2c_pxa_platform_data *info);
+ #endif
++void pxa25x_set_ssp_info(void);
++void pxa27x_set_ssp_info(void);
++void pxa3xx_set_ssp_info(void);
+diff --git a/arch/arm/mach-pxa/include/mach/audio.h b/arch/arm/mach-pxa/include/mach/audio.h
+index 7beebf7297b5..f1f6bc7673a1 100644
+--- a/arch/arm/mach-pxa/include/mach/audio.h
++++ b/arch/arm/mach-pxa/include/mach/audio.h
+@@ -28,4 +28,16 @@ typedef struct {
+ 
+ extern void pxa_set_ac97_info(pxa2xx_audio_ops_t *ops);
+ 
++/*
++ * struct pxa_ssp_info - platform data for SSP devices
++ * @dma_chan_rx_name: name of the receive dma channel to query, see
++ *		      pxa_slave_map
++ * @dma_chan_tx_name: name of the transmit dma channel to query, see
++ *		      pxa_slave_map
++ */
++struct pxa_ssp_info {
++	const char *dma_chan_rx_name;
++	const char *dma_chan_tx_name;
++};
++
+ #endif
+diff --git a/arch/arm/mach-pxa/pxa25x.c b/arch/arm/mach-pxa/pxa25x.c
+index ba431fad5c47..74779afbf200 100644
+--- a/arch/arm/mach-pxa/pxa25x.c
++++ b/arch/arm/mach-pxa/pxa25x.c
+@@ -193,9 +193,6 @@ static struct platform_device *pxa25x_devices[] __initdata = {
+ 	&pxa_device_pmu,
+ 	&pxa_device_i2s,
+ 	&sa1100_device_rtc,
+-	&pxa25x_device_ssp,
+-	&pxa25x_device_nssp,
+-	&pxa25x_device_assp,
+ 	&pxa25x_device_pwm0,
+ 	&pxa25x_device_pwm1,
+ 	&pxa_device_asoc_platform,
+@@ -219,6 +216,7 @@ static int __init pxa25x_init(void)
+ 			pxa_register_device(&pxa25x_device_gpio, &pxa25x_gpio_info);
+ 			ret = platform_add_devices(pxa25x_devices,
+ 						   ARRAY_SIZE(pxa25x_devices));
++			pxa25x_set_ssp_info();
+ 		}
+ 	}
+ 
+diff --git a/arch/arm/mach-pxa/pxa27x.c b/arch/arm/mach-pxa/pxa27x.c
+index 0c06f383ad52..f3896d164fd3 100644
+--- a/arch/arm/mach-pxa/pxa27x.c
++++ b/arch/arm/mach-pxa/pxa27x.c
+@@ -290,9 +290,6 @@ static struct platform_device *devices[] __initdata = {
+ 	&pxa_device_asoc_ssp3,
+ 	&pxa_device_asoc_platform,
+ 	&pxa_device_rtc,
+-	&pxa27x_device_ssp1,
+-	&pxa27x_device_ssp2,
+-	&pxa27x_device_ssp3,
+ 	&pxa27x_device_pwm0,
+ 	&pxa27x_device_pwm1,
  };
- 
- /*
+@@ -313,6 +310,7 @@ static int __init pxa27x_init(void)
+ 		if (!of_have_populated_dt()) {
+ 			pxa_register_device(&pxa27x_device_gpio,
+ 					    &pxa27x_gpio_info);
++			pxa27x_set_ssp_info();
+ 			pxa2xx_set_dmac_info(32, 75);
+ 			ret = platform_add_devices(devices,
+ 						   ARRAY_SIZE(devices));
+diff --git a/arch/arm/mach-pxa/pxa3xx.c b/arch/arm/mach-pxa/pxa3xx.c
+index 4b8a0df8ea57..2a5044dd463e 100644
+--- a/arch/arm/mach-pxa/pxa3xx.c
++++ b/arch/arm/mach-pxa/pxa3xx.c
+@@ -413,10 +413,6 @@ static struct platform_device *devices[] __initdata = {
+ 	&pxa_device_asoc_ssp4,
+ 	&pxa_device_asoc_platform,
+ 	&pxa_device_rtc,
+-	&pxa3xx_device_ssp1,
+-	&pxa3xx_device_ssp2,
+-	&pxa3xx_device_ssp3,
+-	&pxa3xx_device_ssp4,
+ 	&pxa27x_device_pwm0,
+ 	&pxa27x_device_pwm1,
+ };
+@@ -456,6 +452,7 @@ static int __init pxa3xx_init(void)
+ 		ret = platform_add_devices(devices, ARRAY_SIZE(devices));
+ 		if (ret)
+ 			return ret;
++		pxa3xx_set_ssp_info();
+ 		if (cpu_is_pxa300() || cpu_is_pxa310() || cpu_is_pxa320()) {
+ 			platform_device_add_data(&pxa3xx_device_gpio,
+ 						 &pxa3xx_gpio_pdata,
 -- 
 2.11.0
