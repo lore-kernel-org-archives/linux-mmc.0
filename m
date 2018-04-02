@@ -1,14 +1,27 @@
 From: Robert Jarzmik <robert.jarzmik@free.fr>
-Subject: [PATCH 08/15] ASoC: pxa: remove the dmaengine compat need
-Date: Mon,  2 Apr 2018 16:26:49 +0200
-Message-ID: <20180402142656.26815-9-robert.jarzmik@free.fr>
+Subject: [PATCH 04/15] media: pxa_camera: remove the dmaengine compat need
+Date: Mon,  2 Apr 2018 16:26:45 +0200
+Message-ID: <20180402142656.26815-5-robert.jarzmik@free.fr>
 References: <20180402142656.26815-1-robert.jarzmik@free.fr>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <20180402142656.26815-1-robert.jarzmik@free.fr>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Tejun Heo <tj@kernel.org>, Vinod Koul <vinod.koul@intel.com>, Mauro Carvalho Chehab <mchehab@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, Boris Brezillon <boris.brezillon@free-electrons.com>, David Woodhouse <dwmw2@infradead.org>, Brian Norris <computersforpeace@gmail.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Cyrille Pitchen <cyrille.pitchen@wedev4u.fr>, Nicolas Pitre <nico@fluxnic.net>, Samuel Ortiz <samuel@sortiz.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-ide@vger.kernel.org, dmaengine@vger.kernel.org, linux-media@vger.kernel.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, netdev@vger.kernel.org, devel@driverdev.osuosl.org, alsa-devel@alsa-project.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Tejun Heo <tj@kernel.org>, Vinod Koul <vinod.koul@intel.com>, Mauro Carvalho Chehab <mchehab@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, Boris Brezillon <boris.brezillon@free-electrons.com>, David Woodhouse <dwmw2@infradead.org>, Brian Norris <computersforpeace@gmail.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Cyrille Pitchen <cyrille.pitchen@wedev4u.fr>, Nicolas Pitre <nico@fluxnic.net>, Samuel Ortiz <samuel@sortiz.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>, Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, Ar
+Cc: devel@driverdev.osuosl.org, alsa-devel@alsa-project.org, netdev@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-ide@vger.kernel.org, linux-mtd@lists.infradead.org, dmaengine@vger.kernel.org, =?UTF-8?q?Niklas=20S=C3=B6derlund?= <niklas.soderlund+renesas@ragnatech.se>, linux-arm-kernel@lists.infradead.org, linux-media@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+
+From: Robert Jarzmik <robert.jarzmik@renault.com>
 
 As the pxa architecture switched towards the dmaengine slave map, the
 old compatibility mechanism to acquire the dma requestor line number and
@@ -19,133 +32,59 @@ generic function dma_request_slave_channel().
 
 Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>
 ---
- sound/arm/pxa2xx-ac97.c     | 14 ++------------
- sound/arm/pxa2xx-pcm-lib.c  |  6 +++---
- sound/soc/pxa/pxa2xx-ac97.c | 32 +++++---------------------------
- 3 files changed, 10 insertions(+), 42 deletions(-)
+ drivers/media/platform/pxa_camera.c | 22 +++-------------------
+ 1 file changed, 3 insertions(+), 19 deletions(-)
 
-diff --git a/sound/arm/pxa2xx-ac97.c b/sound/arm/pxa2xx-ac97.c
-index 4bc244c40f80..236a63cdaf9f 100644
---- a/sound/arm/pxa2xx-ac97.c
-+++ b/sound/arm/pxa2xx-ac97.c
-@@ -63,28 +63,18 @@ static struct snd_ac97_bus_ops pxa2xx_ac97_ops = {
- 	.reset	= pxa2xx_ac97_legacy_reset,
- };
+diff --git a/drivers/media/platform/pxa_camera.c b/drivers/media/platform/pxa_camera.c
+index c71a00736541..4c82d1880753 100644
+--- a/drivers/media/platform/pxa_camera.c
++++ b/drivers/media/platform/pxa_camera.c
+@@ -2357,8 +2357,6 @@ static int pxa_camera_probe(struct platform_device *pdev)
+ 		.src_maxburst = 8,
+ 		.direction = DMA_DEV_TO_MEM,
+ 	};
+-	dma_cap_mask_t mask;
+-	struct pxad_param params;
+ 	char clk_name[V4L2_CLK_NAME_SIZE];
+ 	int irq;
+ 	int err = 0, i;
+@@ -2432,34 +2430,20 @@ static int pxa_camera_probe(struct platform_device *pdev)
+ 	pcdev->base = base;
  
--static struct pxad_param pxa2xx_ac97_pcm_out_req = {
--	.prio = PXAD_PRIO_LOWEST,
--	.drcmr = 12,
--};
+ 	/* request dma */
+-	dma_cap_zero(mask);
+-	dma_cap_set(DMA_SLAVE, mask);
+-	dma_cap_set(DMA_PRIVATE, mask);
 -
- static struct snd_dmaengine_dai_dma_data pxa2xx_ac97_pcm_out = {
- 	.addr		= __PREG(PCDR),
- 	.addr_width	= DMA_SLAVE_BUSWIDTH_4_BYTES,
-+	.chan_name	= "pcm_pcm_stereo_out",
- 	.maxburst	= 32,
--	.filter_data	= &pxa2xx_ac97_pcm_out_req,
--};
--
--static struct pxad_param pxa2xx_ac97_pcm_in_req = {
--	.prio = PXAD_PRIO_LOWEST,
--	.drcmr = 11,
- };
+-	params.prio = 0;
+-	params.drcmr = 68;
+-	pcdev->dma_chans[0] =
+-		dma_request_slave_channel_compat(mask, pxad_filter_fn,
+-						 &params, &pdev->dev, "CI_Y");
++	pcdev->dma_chans[0] = dma_request_slave_channel(&pdev->dev, "CI_Y");
+ 	if (!pcdev->dma_chans[0]) {
+ 		dev_err(&pdev->dev, "Can't request DMA for Y\n");
+ 		return -ENODEV;
+ 	}
  
- static struct snd_dmaengine_dai_dma_data pxa2xx_ac97_pcm_in = {
- 	.addr		= __PREG(PCDR),
- 	.addr_width	= DMA_SLAVE_BUSWIDTH_4_BYTES,
-+	.chan_name	= "pcm_pcm_stereo_in",
- 	.maxburst	= 32,
--	.filter_data	= &pxa2xx_ac97_pcm_in_req,
- };
+-	params.drcmr = 69;
+-	pcdev->dma_chans[1] =
+-		dma_request_slave_channel_compat(mask, pxad_filter_fn,
+-						 &params, &pdev->dev, "CI_U");
++	pcdev->dma_chans[1] = dma_request_slave_channel(&pdev->dev, "CI_U");
+ 	if (!pcdev->dma_chans[1]) {
+ 		dev_err(&pdev->dev, "Can't request DMA for Y\n");
+ 		err = -ENODEV;
+ 		goto exit_free_dma_y;
+ 	}
  
- static struct snd_pcm *pxa2xx_ac97_pcm;
-diff --git a/sound/arm/pxa2xx-pcm-lib.c b/sound/arm/pxa2xx-pcm-lib.c
-index e8da3b8ee721..cbfaba60b79a 100644
---- a/sound/arm/pxa2xx-pcm-lib.c
-+++ b/sound/arm/pxa2xx-pcm-lib.c
-@@ -125,9 +125,9 @@ int __pxa2xx_pcm_open(struct snd_pcm_substream *substream)
- 	if (ret < 0)
- 		return ret;
- 
--	return snd_dmaengine_pcm_open_request_chan(substream,
--					pxad_filter_fn,
--					dma_params->filter_data);
-+	return snd_dmaengine_pcm_open(
-+		substream, dma_request_slave_channel(rtd->platform->dev,
-+						     dma_params->chan_name));
- }
- EXPORT_SYMBOL(__pxa2xx_pcm_open);
- 
-diff --git a/sound/soc/pxa/pxa2xx-ac97.c b/sound/soc/pxa/pxa2xx-ac97.c
-index 803818aabee9..1b41c0f2a8fb 100644
---- a/sound/soc/pxa/pxa2xx-ac97.c
-+++ b/sound/soc/pxa/pxa2xx-ac97.c
-@@ -68,61 +68,39 @@ static struct snd_ac97_bus_ops pxa2xx_ac97_ops = {
- 	.reset	= pxa2xx_ac97_cold_reset,
- };
- 
--static struct pxad_param pxa2xx_ac97_pcm_stereo_in_req = {
--	.prio = PXAD_PRIO_LOWEST,
--	.drcmr = 11,
--};
--
- static struct snd_dmaengine_dai_dma_data pxa2xx_ac97_pcm_stereo_in = {
- 	.addr		= __PREG(PCDR),
- 	.addr_width	= DMA_SLAVE_BUSWIDTH_4_BYTES,
-+	.chan_name	= "pcm_pcm_stereo_in",
- 	.maxburst	= 32,
--	.filter_data	= &pxa2xx_ac97_pcm_stereo_in_req,
--};
--
--static struct pxad_param pxa2xx_ac97_pcm_stereo_out_req = {
--	.prio = PXAD_PRIO_LOWEST,
--	.drcmr = 12,
- };
- 
- static struct snd_dmaengine_dai_dma_data pxa2xx_ac97_pcm_stereo_out = {
- 	.addr		= __PREG(PCDR),
- 	.addr_width	= DMA_SLAVE_BUSWIDTH_4_BYTES,
-+	.chan_name	= "pcm_pcm_stereo_out",
- 	.maxburst	= 32,
--	.filter_data	= &pxa2xx_ac97_pcm_stereo_out_req,
- };
- 
--static struct pxad_param pxa2xx_ac97_pcm_aux_mono_out_req = {
--	.prio = PXAD_PRIO_LOWEST,
--	.drcmr = 10,
--};
- static struct snd_dmaengine_dai_dma_data pxa2xx_ac97_pcm_aux_mono_out = {
- 	.addr		= __PREG(MODR),
- 	.addr_width	= DMA_SLAVE_BUSWIDTH_2_BYTES,
-+	.chan_name	= "pcm_aux_mono_out",
- 	.maxburst	= 16,
--	.filter_data	= &pxa2xx_ac97_pcm_aux_mono_out_req,
- };
- 
--static struct pxad_param pxa2xx_ac97_pcm_aux_mono_in_req = {
--	.prio = PXAD_PRIO_LOWEST,
--	.drcmr = 9,
--};
- static struct snd_dmaengine_dai_dma_data pxa2xx_ac97_pcm_aux_mono_in = {
- 	.addr		= __PREG(MODR),
- 	.addr_width	= DMA_SLAVE_BUSWIDTH_2_BYTES,
-+	.chan_name	= "pcm_aux_mono_in",
- 	.maxburst	= 16,
--	.filter_data	= &pxa2xx_ac97_pcm_aux_mono_in_req,
- };
- 
--static struct pxad_param pxa2xx_ac97_pcm_aux_mic_mono_req = {
--	.prio = PXAD_PRIO_LOWEST,
--	.drcmr = 8,
--};
- static struct snd_dmaengine_dai_dma_data pxa2xx_ac97_pcm_mic_mono_in = {
- 	.addr		= __PREG(MCDR),
- 	.addr_width	= DMA_SLAVE_BUSWIDTH_2_BYTES,
-+	.chan_name	= "pcm_aux_mic_mono",
- 	.maxburst	= 16,
--	.filter_data	= &pxa2xx_ac97_pcm_aux_mic_mono_req,
- };
- 
- static int pxa2xx_ac97_hifi_startup(struct snd_pcm_substream *substream,
+-	params.drcmr = 70;
+-	pcdev->dma_chans[2] =
+-		dma_request_slave_channel_compat(mask, pxad_filter_fn,
+-						 &params, &pdev->dev, "CI_V");
++	pcdev->dma_chans[2] = dma_request_slave_channel(&pdev->dev, "CI_V");
+ 	if (!pcdev->dma_chans[2]) {
+ 		dev_err(&pdev->dev, "Can't request DMA for V\n");
+ 		err = -ENODEV;
 -- 
 2.11.0
