@@ -1,148 +1,84 @@
-From: Vijay Viswanath <vviswana@codeaurora.org>
-Subject: Re: [PATCH V4 1/2] mmc: sdhci-msm: Add support to store supported
- vdd-io voltages
-Date: Mon, 2 Apr 2018 09:53:13 +0530
-Message-ID: <d9b715fe-ebb6-2a7d-76e4-408a04472c04@codeaurora.org>
-References: <1522242500-10556-1-git-send-email-vviswana@codeaurora.org>
- <1522242500-10556-2-git-send-email-vviswana@codeaurora.org>
- <CAD=FV=VuSVPYVRKoc0hhSHpqNuUuuFRMfD_aCDYw5RA703pt=w@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Robert Jarzmik <robert.jarzmik@free.fr>
+Subject: [PATCH 00/15] ARM: pxa: switch to DMA slave maps
+Date: Mon,  2 Apr 2018 16:26:41 +0200
+Message-ID: <20180402142656.26815-1-robert.jarzmik@free.fr>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAD=FV=VuSVPYVRKoc0hhSHpqNuUuuFRMfD_aCDYw5RA703pt=w@mail.gmail.com>
-Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, Bjorn Andersson <bjorn.andersson@linaro.org>, riteshh@codeaurora.org
+To: Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Tejun Heo <tj@kernel.org>, Vinod Koul <vinod.koul@intel.com>, Mauro Carvalho Chehab <mchehab@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, Boris Brezillon <boris.brezillon@free-electrons.com>, David Woodhouse <dwmw2@infradead.org>, Brian Norris <computersforpeace@gmail.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Cyrille Pitchen <cyrille.pitchen@wedev4u.fr>, Nicolas Pitre <nico@fluxnic.net>, Samuel Ortiz <samuel@sortiz.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-ide@vger.kernel.org, dmaengine@vger.kernel.org, linux-media@vger.kernel.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, netdev@vger.kernel.org, devel@driverdev.osuosl.org, alsa-devel@alsa-project.org
 List-Id: linux-mmc@vger.kernel.org
 
+Hi,
 
+This serie is aimed at removing the dmaengine slave compat use, and transfer
+knowledge of the DMA requestors into architecture code.
 
-On 3/29/2018 4:22 AM, Doug Anderson wrote:
-> Hi,
-> 
-> On Wed, Mar 28, 2018 at 6:08 AM, Vijay Viswanath
-> <vviswana@codeaurora.org> wrote:
->> During probe check whether the vdd-io regulator of sdhc platform device
->> can support 1.8V and 3V and store this information as a capability of
->> platform device.
->>
->> Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
->> ---
->>   drivers/mmc/host/sdhci-msm.c | 35 ++++++++++++++++++++++++++++++++++-
->>   1 file changed, 34 insertions(+), 1 deletion(-)
-> 
-> Since I commented on v2, please copy me for this series going forward.  Thanks.
-> 
-> 
+This was discussed/advised by Arnd a couple of years back, it's almost time.
 
-Will do. Sorry I missed.
+The serie is divided in 3 phasees :
+ - phase 1 : patch 1/15 and patch 2/15
+   => this is the preparation work
+ - phase 2 : patches 3/15 .. 10/15
+   => this is the switch of all the drivers
+   => this one will require either an Ack of the maintainers or be taken by them
+      once phase 1 is merged
+ - phase 3 : patches 11/15
+   => this is the last part, cleanup and removal of export of the DMA filter
+      function
 
->> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
->> index c283291..2fcd9010 100644
->> --- a/drivers/mmc/host/sdhci-msm.c
->> +++ b/drivers/mmc/host/sdhci-msm.c
->> @@ -21,6 +21,7 @@
->>   #include <linux/pm_runtime.h>
->>   #include <linux/slab.h>
->>   #include <linux/iopoll.h>
->> +#include <linux/regulator/consumer.h>
->>
->>   #include "sdhci-pltfm.h"
->>
->> @@ -81,6 +82,9 @@
->>   #define CORE_HC_SELECT_IN_HS400        (6 << 19)
->>   #define CORE_HC_SELECT_IN_MASK (7 << 19)
->>
->> +#define CORE_3_0V_SUPPORT      (1 << 25)
->> +#define CORE_1_8V_SUPPORT      (1 << 26)
->> +
->>   #define CORE_CSR_CDC_CTLR_CFG0         0x130
->>   #define CORE_SW_TRIG_FULL_CALIB                BIT(16)
->>   #define CORE_HW_AUTOCAL_ENA            BIT(17)
->> @@ -148,6 +152,7 @@ struct sdhci_msm_host {
->>          u32 curr_io_level;
->>          wait_queue_head_t pwr_irq_wait;
->>          bool pwr_irq_flag;
->> +       u32 caps_0;
->>   };
->>
->>   static unsigned int msm_get_clock_rate_for_bus_mode(struct sdhci_host *host,
->> @@ -1103,7 +1108,7 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
->>          struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
->>          u32 irq_status, irq_ack = 0;
->>          int retry = 10;
->> -       int pwr_state = 0, io_level = 0;
->> +       u32 pwr_state = 0, io_level = 0;
->>
->>
->>          irq_status = readl_relaxed(msm_host->core_mem + CORE_PWRCTL_STATUS);
->> @@ -1313,6 +1318,30 @@ static void sdhci_msm_writeb(struct sdhci_host *host, u8 val, int reg)
->>                  sdhci_msm_check_power_status(host, req_type);
->>   }
->>
->> +static int sdhci_msm_set_regulator_caps(struct sdhci_msm_host *msm_host)
-> 
-> This function always returns 0.  Make it void.
-> 
-> 
->> +{
->> +       struct mmc_host *mmc = msm_host->mmc;
->> +       struct regulator *supply = mmc->supply.vqmmc;
->> +       u32 caps = 0;
->> +
->> +       if (!IS_ERR(mmc->supply.vqmmc)) {
->> +               if (regulator_is_supported_voltage(supply, 1700000, 1950000))
->> +                       caps |= CORE_1_8V_SUPPORT;
->> +               if (regulator_is_supported_voltage(supply, 2700000, 3600000))
->> +                       caps |= CORE_3_0V_SUPPORT;
->> +
->> +               if (!caps)
->> +                       pr_warn("%s: %s: 1.8/3V not supported for vqmmc\n",
->> +                                       mmc_hostname(mmc), __func__);
-> 
-> Please remove __func__.  You already have the unique thing to find the
-> right driver (AKA mmc_hostname(mmc)) and the string itself should be
-> enough from there.
-> 
-> 
->> +       }
->> +
->> +       msm_host->caps_0 |= caps;
->> +       pr_debug("%s: %s: supported caps: 0x%08x\n", mmc_hostname(mmc),
->> +                       __func__, caps);
-> 
-> Same, no need for __func__.
-> 
-> 
+As this looks like a patch bomb, each maintainer expressing for his tree either
+an Ack or "I want to take through my tree" will be spared in the next iterations
+of this serie.
 
-will remove all unnecessary __func__ references.
+Several of these changes have been tested on actual hardware, including :
+ - pxamci
+ - pxa_camera
+ - smc*
+ - ASoC and SSP
 
->> +
->> +       return 0;
->> +}
->> +
->>   static const struct of_device_id sdhci_msm_dt_match[] = {
->>          { .compatible = "qcom,sdhci-msm-v4" },
->>          {},
->> @@ -1530,6 +1559,10 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->>          ret = sdhci_add_host(host);
->>          if (ret)
->>                  goto pm_runtime_disable;
->> +       ret = sdhci_msm_set_regulator_caps(msm_host);
->> +       if (ret)
->> +               dev_err(&pdev->dev, "Failed to set regulator caps: %d\n",
->> +                               ret);
-> 
-> If you find some reason _not_ to make sdhci_msm_set_regulator_caps()
-> return "void" as per above, you should actually do something about
-> this error.  You've used "dev_err" which makes me feel like you
-> consider this a serious error.  Presumably it should cause the probe
-> to fail?
-> >
-> -Doug
-> 
+Happy review.
 
-yeah, we don't need to print anything here as a warning is printed in 
-sdhci_msm_set_regulator_caps() anyway.
+Robert Jarzmik (15):
+  dmaengine: pxa: use a dma slave map
+  ARM: pxa: add dma slave map
+  mmc: pxamci: remove the dmaengine compat need
+  media: pxa_camera: remove the dmaengine compat need
+  mtd: nand: pxa3xx: remove the dmaengine compat need
+  net: smc911x: remove the dmaengine compat need
+  net: smc91x: remove the dmaengine compat need
+  ASoC: pxa: remove the dmaengine compat need
+  net: irda: pxaficp_ir: remove the dmaengine compat need
+  ata: pata_pxa: remove the dmaengine compat need
+  dmaengine: pxa: document pxad_param
+  dmaengine: pxa: make the filter function internal
+  ARM: pxa: remove the DMA IO resources
+  ARM: pxa: change SSP devices allocation
+  ARM: pxa: change SSP DMA channels allocation
+
+ arch/arm/mach-pxa/devices.c               | 269 ++++++++++++++----------------
+ arch/arm/mach-pxa/devices.h               |  14 +-
+ arch/arm/mach-pxa/include/mach/audio.h    |  12 ++
+ arch/arm/mach-pxa/pxa25x.c                |   4 +-
+ arch/arm/mach-pxa/pxa27x.c                |   4 +-
+ arch/arm/mach-pxa/pxa3xx.c                |   5 +-
+ arch/arm/plat-pxa/ssp.c                   |  50 +-----
+ drivers/ata/pata_pxa.c                    |  10 +-
+ drivers/dma/pxa_dma.c                     |  13 +-
+ drivers/media/platform/pxa_camera.c       |  22 +--
+ drivers/mmc/host/pxamci.c                 |  29 +---
+ drivers/mtd/nand/pxa3xx_nand.c            |  10 +-
+ drivers/net/ethernet/smsc/smc911x.c       |  16 +-
+ drivers/net/ethernet/smsc/smc91x.c        |  12 +-
+ drivers/net/ethernet/smsc/smc91x.h        |   1 -
+ drivers/staging/irda/drivers/pxaficp_ir.c |  14 +-
+ include/linux/dma/pxa-dma.h               |  20 +--
+ include/linux/platform_data/mmp_dma.h     |   4 +
+ include/linux/pxa2xx_ssp.h                |   4 +-
+ sound/arm/pxa2xx-ac97.c                   |  14 +-
+ sound/arm/pxa2xx-pcm-lib.c                |   6 +-
+ sound/soc/pxa/pxa-ssp.c                   |   5 +-
+ sound/soc/pxa/pxa2xx-ac97.c               |  32 +---
+ 23 files changed, 196 insertions(+), 374 deletions(-)
+
+-- 
+2.11.0
