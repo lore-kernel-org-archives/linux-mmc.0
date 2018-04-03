@@ -1,47 +1,37 @@
 From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 14/15] ARM: pxa: change SSP devices allocation
-Date: Tue, 3 Apr 2018 09:06:46 +0200
-Message-ID: <CAK8P3a2hYWO2eweg3zpR7iJoqtH4uxJLAxJAno7L96G7nA2HxQ@mail.gmail.com>
-References: <20180402142656.26815-1-robert.jarzmik@free.fr>
- <20180402142656.26815-15-robert.jarzmik@free.fr>
+Subject: Re: [PATCH 12/15] dmaengine: pxa: make the filter function internal
+Date: Tue, 3 Apr 2018 09:13:34 +0200
+Message-ID: <CAK8P3a0T3HV9ee4Kk7+Y16S-51SLzbn5fRBsr4bSV0ZQnthPVg@mail.gmail.com>
+References: <20180402142656.26815-13-robert.jarzmik@free.fr> <201804030025.FmWPyArN%fengguang.wu@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <20180402142656.26815-15-robert.jarzmik@free.fr>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
-To: Robert Jarzmik <robert.jarzmik@free.fr>
-Cc: Kate Stewart <kstewart@linuxfoundation.org>, Ulf Hansson <ulf.hansson@linaro.org>, alsa-devel@alsa-project.org, Jaroslav Kysela <perex@perex.cz>, IDE-ML <linux-ide@vger.kernel.org>, Networking <netdev@vger.kernel.org>, linux-mtd <linux-mtd@lists.infradead.org>, devel@driverdev.osuosl.org, Boris Brezillon <boris.brezillon@free-electrons.com>, Vinod Koul <vinod.koul@intel.com>, Richard Weinberger <richard@nod.at>, Takashi Iwai <tiwai@suse.com>, Russell King <linux@armlinux.org.uk>, Marek Vasut <marek.vasut@gmail.com>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, Linux Media Mailing List <linux-media@vger.kernel.org>, Samuel Ortiz <samuel@sortiz.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Philippe Ombredanne <pombredanne@nexb.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, dmaengine@vger.kernel.org, Mark Brown <broonie@kernel.org>, Thomas
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <201804030025.FmWPyArN%fengguang.wu@intel.com>
+Sender: netdev-owner@vger.kernel.org
+To: kbuild test robot <lkp@intel.com>
+Cc: Robert Jarzmik <robert.jarzmik@free.fr>, kbuild-all@01.org, Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Tejun Heo <tj@kernel.org>, Vinod Koul <vinod.koul@intel.com>, Mauro Carvalho Chehab <mchehab@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, Boris Brezillon <boris.brezillon@free-electrons.com>, David Woodhouse <dwmw2@infradead.org>, Brian Norris <computersforpeace@gmail.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Cyrille Pitchen <cyrille.pitchen@wedev4u.fr>, Nicolas Pitre <nico@fluxnic.net>, Samuel Ortiz <samuel@sortiz.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Apr 2, 2018 at 4:26 PM, Robert Jarzmik <robert.jarzmik@free.fr> wrote:
+On Mon, Apr 2, 2018 at 6:35 PM, kbuild test robot <lkp@intel.com> wrote:
 
 >
-> +static struct pxa_ssp_info pxa_ssp_infos[] = {
-> +       { .dma_chan_rx_name = "ssp1_rx", .dma_chan_tx_name = "ssp1_tx", },
-> +       { .dma_chan_rx_name = "ssp1_rx", .dma_chan_tx_name = "ssp1_tx", },
-> +       { .dma_chan_rx_name = "ssp2_rx", .dma_chan_tx_name = "ssp2_tx", },
-> +       { .dma_chan_rx_name = "ssp2_rx", .dma_chan_tx_name = "ssp2_tx", },
-> +       { .dma_chan_rx_name = "ssp3_rx", .dma_chan_tx_name = "ssp3_tx", },
-> +       { .dma_chan_rx_name = "ssp3_rx", .dma_chan_tx_name = "ssp3_tx", },
-> +       { .dma_chan_rx_name = "ssp4_rx", .dma_chan_tx_name = "ssp4_tx", },
-> +       { .dma_chan_rx_name = "ssp4_rx", .dma_chan_tx_name = "ssp4_tx", },
-> +};
+>    drivers/mtd/nand/marvell_nand.c:2621:17: sparse: undefined identifier 'pxad_filter_fn'
+>>> drivers/mtd/nand/marvell_nand.c:2621:17: sparse: call with no type!
+>    In file included from drivers/mtd/nand/marvell_nand.c:21:0:
+>    drivers/mtd/nand/marvell_nand.c: In function 'marvell_nfc_init_dma':
+>    drivers/mtd/nand/marvell_nand.c:2621:42: error: 'pxad_filter_fn' undeclared (first use in this function); did you mean 'dma_filter_fn'?
+>       dma_request_slave_channel_compat(mask, pxad_filter_fn,
+>                                              ^
+>    include/linux/dmaengine.h:1408:46: note: in definition of macro 'dma_request_slave_channel_compat'
+>      __dma_request_slave_channel_compat(&(mask), x, y, dev, name)
+>                                                  ^
+>    drivers/mtd/nand/marvell_nand.c:2621:42: note: each undeclared identifier is reported only once for each function it appears in
+>       dma_request_slave_channel_compat(mask, pxad_filter_fn,
+>                                              ^
+>    include/linux/dmaengine.h:1408:46: note: in definition of macro 'dma_request_slave_channel_compat'
+>      __dma_request_slave_channel_compat(&(mask), x, y, dev, name)
 
-This part looks odd to me, you're adding an extra level of indirection to
-do two stages of lookups in some form of platform data.
-
-Why can't you just always use "rx" and "tx" as the names here?
-
-(also, I don't see why each line is duplicated, but I'm sure there's
-an easy answer for that).
+The driver is a replacement for the pxa3xx nand driver, so it now has
+to get changed as well.
 
        Arnd
