@@ -1,109 +1,551 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH] [mmc_block] Prevent bus reference leak in mmc_blk_init
-Date: Wed, 4 Apr 2018 14:48:54 +0200
-Message-ID: <CACRpkdYz146oz1Vm_dnepr6HTVmEhtBBLzXoF4_=vgKj=9Sq3A@mail.gmail.com>
-References: <1522275511-7693-1-git-send-email-agk@godking.net>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v3 07/11] mmc: sdhci: Program a relatively accurate SW
+ timeout value
+Date: Wed, 4 Apr 2018 15:48:15 +0300
+Message-ID: <5453e71c-7dde-b305-5e0c-900bf4efe818@intel.com>
+References: <20180307132020.30951-1-kishon@ti.com>
+ <20180307132020.30951-8-kishon@ti.com>
+ <1e87e5f9-13e1-765b-f077-26a55359b2c3@intel.com>
+ <47752066-aeda-87bc-6928-1a9b80f1c45c@ti.com>
+ <49210daa-b593-4b34-abf5-be81580723bc@intel.com>
+ <29f640ac-b155-41c6-cf3f-8c66e1b300f1@ti.com>
+ <1905d25f-d16d-50b1-54b0-35807d801a12@intel.com>
+ <dacb62d3-086d-27a7-85cf-94916ce464b5@ti.com>
+ <27e92e28-08b4-42b1-e4ef-32fa8ac785dc@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/mixed;
+ boundary="------------5B1226B4B55F50EA6005BA6E"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1522275511-7693-1-git-send-email-agk@godking.net>
+In-Reply-To: <27e92e28-08b4-42b1-e4ef-32fa8ac785dc@ti.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Alexander Kappner <agk@godking.net>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Kishon Vijay Abraham I <kishon@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Mar 29, 2018 at 12:18 AM, Alexander Kappner <agk@godking.net> wrote:
+This is a multi-part message in MIME format.
+--------------5B1226B4B55F50EA6005BA6E
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 
-> Upon module load, mmc_block allocates a bus with bus_register in
-> mmc_blk_init. This reference never gets freed during module unload.
-> Subsequent re-insertions of the module fail and BUG() is triggered:
->
-> [   84.583342] sysfs: cannot create duplicate filename '/bus/mmc_rpmb'
-> [   84.583373] CPU: 6 PID: 1825 Comm: modprobe Tainted: P           O     4.16.0-rc6-00384-gf36b753 #30
-> [   84.583381] Hardware name: LENOVO 20ENCTO1WW/20ENCTO1WW, BIOS N1EET62W (1.35 ) 11/10/2016
-> [   84.583385] Call Trace:
-> [   84.583401]  dump_stack+0x5a/0x75
-> [   84.583411]  sysfs_warn_dup+0x58/0x70
-> [   84.583419]  sysfs_create_dir_ns+0x70/0x80
-> [   84.583437]  kobject_add_internal+0xa5/0x2c0
-> [   84.583453]  kset_register+0x44/0x60
-> [   84.583470]  bus_register+0xc6/0x270
-> [   84.583479]  ? 0xffffffffa000d000
-> [   84.583492]  mmc_blk_init+0x12/0x1000 [mmc_block]
-> [   84.583501]  do_one_initcall+0x4e/0x194
-> [   84.583510]  ? ___cache_free+0x21/0x2b0
-> [   84.583524]  do_init_module+0x5a/0x20f
-> [   84.583533]  load_module+0x235c/0x2510
-> [   84.583550]  ? SYSC_finit_module+0x80/0xb0
-> [   84.583558]  SYSC_finit_module+0x80/0xb0
-> [   84.583570]  do_syscall_64+0x77/0x290
-> [   84.583580]  entry_SYSCALL_64_after_hwframe+0x3d/0xa2
-> [   84.583587] RIP: 0033:0x7f452a3ad5b9
-> [   84.583593] RSP: 002b:00007fff4562ba18 EFLAGS: 00000206 ORIG_RAX: 0000000000000139
-> [   84.583602] RAX: ffffffffffffffda RBX: 000056092895c520 RCX: 00007f452a3ad5b9
-> [   84.583607] RDX: 0000000000000000 RSI: 000056092697b3d9 RDI: 0000000000000003
-> [   84.583612] RBP: 000056092697b3d9 R08: 0000000000000000 R09: 000056092895d310
-> [   84.583617] R10: 0000000000000003 R11: 0000000000000206 R12: 0000000000000000
-> [   84.583623] R13: 000056092895c430 R14: 0000000000040000 R15: 0000000000040000
-> [   84.583647] ------------[ cut here ]------------
-> [   84.583656] kobject_add_internal failed for mmc_rpmb with -EEXIST, don't try to register things with the same name in the same directory.
-> [   84.583694] WARNING: CPU: 6 PID: 1825 at lib/kobject.c:238 kobject_add_internal+0x296/0x2c0
-> [   84.583705] Modules linked in: mmc_block(+) rtsx_pci_sdmmc rtsx_pci iwlmvm mac80211 nvidia_drm(PO) nvidia_modeset(PO) iwlwifi nvidia(PO) cfg80211 qmi_wwan thinkpad_acpi rfkill sdhci_pci cqhci sdhci mfd_core [last unloaded: mmc_block]
-> [   84.583770] CPU: 6 PID: 1825 Comm: modprobe Tainted: P           O     4.16.0-rc6-00384-gf36b753 #30
-> [   84.583774] Hardware name: LENOVO 20ENCTO1WW/20ENCTO1WW, BIOS N1EET62W (1.35 ) 11/10/2016
-> [   84.583782] RIP: 0010:kobject_add_internal+0x296/0x2c0
-> [   84.583786] RSP: 0018:ffffc9000769bc58 EFLAGS: 00010296
-> [   84.583791] RAX: 000000000000007d RBX: ffff880fcf588618 RCX: 0000000000000000
-> [   84.583796] RDX: 0000000000040400 RSI: 00000000000000f6 RDI: 00000000ffffffff
-> [   84.583801] RBP: 00000000ffffffef R08: 0000000000000000 R09: 0000000000000354
-> [   84.583806] R10: ffffffff8251fc74 R11: 0000000000000353 R12: ffff88100d3cf698
-> [   84.583811] R13: ffff880fcf588618 R14: ffffffffa0028590 R15: ffffffffa0028540
-> [   84.583818] FS:  00007f452a853700(0000) GS:ffff881053d80000(0000) knlGS:0000000000000000
-> [   84.583823] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-> [   84.583837] CR2: 00007f452a3faea0 CR3: 0000000fc89e4004 CR4: 00000000003606e0
-> [   84.583850] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
-> [   84.583863] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
-> [   84.583875] Call Trace:
-> [   84.583893]  kset_register+0x44/0x60
-> [   84.583902]  bus_register+0xc6/0x270
-> [   84.583910]  ? 0xffffffffa000d000
-> [   84.583926]  mmc_blk_init+0x12/0x1000 [mmc_block]
-> [   84.583940]  do_one_initcall+0x4e/0x194
-> [   84.583948]  ? ___cache_free+0x21/0x2b0
-> [   84.583966]  do_init_module+0x5a/0x20f
-> [   84.583979]  load_module+0x235c/0x2510
-> [   84.583995]  ? SYSC_finit_module+0x80/0xb0
-> [   84.584001]  SYSC_finit_module+0x80/0xb0
-> [   84.584010]  do_syscall_64+0x77/0x290
-> [   84.584016]  entry_SYSCALL_64_after_hwframe+0x3d/0xa2
-> [   84.584021] RIP: 0033:0x7f452a3ad5b9
-> [   84.584025] RSP: 002b:00007fff4562ba18 EFLAGS: 00000206 ORIG_RAX: 0000000000000139
-> [   84.584030] RAX: ffffffffffffffda RBX: 000056092895c520 RCX: 00007f452a3ad5b9
-> [   84.584034] RDX: 0000000000000000 RSI: 000056092697b3d9 RDI: 0000000000000003
-> [   84.584038] RBP: 000056092697b3d9 R08: 0000000000000000 R09: 000056092895d310
-> [   84.584043] R10: 0000000000000003 R11: 0000000000000206 R12: 0000000000000000
-> [   84.584047] R13: 000056092895c430 R14: 0000000000040000 R15: 0000000000040000
-> [   84.584053] Code: 7b 20 49 89 c4 48 85 ff 0f 84 10 fe ff ff e9 cd fd ff ff 48 8b 13 48 c7 c6 00 80 f4 81 48 c7 c7 e0 ad 0f 82 31 c0 e8 ca 9a 7b ff <0f> 0b e9 5f fe ff ff 0f 0b 0f 0b 0f 0b 0f 0b e9 71 ff ff ff 0f
-> [   84.584147] ---[ end trace d27b36e0e2c0e7e5 ]---
-> [   84.584162] mmcblk: could not register RPMB bus type
->
-> Steps to reproduce:
->
-> Build with CONFIG_MMC_BLOCK=m
->
-> modprobe mmc_block
-> rmmod mmc_block
-> modprobe mmc_block
->
-> The proposed patch deallocates the reference in mmc_blk_exit.
->
-> Signed-off-by: Alexander Kappner <agk@godking.net>
+On 20/03/18 11:48, Kishon Vijay Abraham I wrote:
+> Hi Adrian,
+> 
+> On Monday 19 March 2018 03:49 PM, Kishon Vijay Abraham I wrote:
+>> Hi Adrian,
+>>
+>> On Monday 19 March 2018 03:30 PM, Adrian Hunter wrote:
+>>> On 19/03/18 11:20, Kishon Vijay Abraham I wrote:
+>>>> Hi Adrian,
+>>>>
+>>>> On Friday 16 March 2018 07:51 PM, Adrian Hunter wrote:
+>>>>> On 16/03/18 08:29, Kishon Vijay Abraham I wrote:
+>>>>>> Hi,
+>>>>>>
+>>>>>> On Thursday 15 March 2018 06:43 PM, Adrian Hunter wrote:
+>>>>>>> On 07/03/18 15:20, Kishon Vijay Abraham I wrote:
+>>>>>>>> sdhci has a 10 second timeout to catch devices that stop responding.
+>>>>>>>> Instead of programming 10 second arbitrary value, calculate the total time
+>>>>>>>> it would take for the entire transfer to happen and program the timeout
+>>>>>>>> value accordingly.
+>>>>>>>>
+>>>>>>>> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+>>>>>>>> ---
+>>>>>>>>  drivers/mmc/host/sdhci.c | 47 ++++++++++++++++++++++++++++++++++++++++-------
+>>>>>>>>  drivers/mmc/host/sdhci.h | 10 ++++++++++
+>>>>>>>>  2 files changed, 50 insertions(+), 7 deletions(-)
+>>>>>>>>
+>>>>>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>>>>>>> index 1dd117cbeb6e..baab67bfa39b 100644
+>>>>>>>> --- a/drivers/mmc/host/sdhci.c
+>>>>>>>> +++ b/drivers/mmc/host/sdhci.c
+>>>>>>>> @@ -709,6 +709,36 @@ static u32 sdhci_sdma_address(struct sdhci_host *host)
+>>>>>>>>  		return sg_dma_address(host->data->sg);
+>>>>>>>>  }
+>>>>>>>>  
+>>>>>>>> +static void sdhci_calc_sw_timeout(struct sdhci_host *host,
+>>>>>>>> +				  struct mmc_command *cmd,
+>>>>>>>> +				  unsigned int target_timeout)
+>>>>>>>> +{
+>>>>>>>> +	struct mmc_data *data = cmd->data;
+>>>>>>>> +	struct mmc_host *mmc = host->mmc;
+>>>>>>>> +	u64 transfer_time;
+>>>>>>>> +	struct mmc_ios *ios = &mmc->ios;
+>>>>>>>> +	unsigned char bus_width = 1 << ios->bus_width;
+>>>>>>>> +	unsigned int blksz;
+>>>>>>>> +	unsigned int freq;
+>>>>>>>> +
+>>>>>>>> +	if (data) {
+>>>>>>>> +		blksz = data->blksz;
+>>>>>>>> +		freq = host->mmc->actual_clock ? : host->clock;
+>>>>>>>> +		transfer_time = (u64)blksz * NSEC_PER_SEC * (8 / bus_width);
+>>>>>>>> +		do_div(transfer_time, freq);
+>>>>>>>> +		/* multiply by '2' to account for any unknowns */
+>>>>>>>> +		transfer_time = transfer_time * 2;
+>>>>>>>> +		/* calculate timeout for the entire data */
+>>>>>>>> +		host->data_timeout = (data->blocks * ((target_timeout *
+>>>>>>>> +						       NSEC_PER_USEC) +
+>>>>>>>> +						       transfer_time));
+>>>>>>>
+>>>>>>> (target_timeout * NSEC_PER_USEC) might be 32-bit and therefore overflow
+>>>>>>> for timeouts greater than about 4 seconds.
+>>>>>>>
+>>>>>>>> +	} else {
+>>>>>>>> +		host->data_timeout = (u64)target_timeout * NSEC_PER_USEC;
+>>>>>>>> +	}
+>>>>>>>> +
+>>>>>>>> +	host->data_timeout += MMC_CMD_TRANSFER_TIME;
+>>>>>>>
+>>>>>>> Need to allow for target_timeout == 0 so:
+>>>>>>>
+>>>>>>> 	if (host->data_timeout)
+>>>>>>> 		host->data_timeout += MMC_CMD_TRANSFER_TIME;
+>>>>>>>
+>>>>>>>> +}
+>>>>>>>> +
+>>>>>>>>  static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+>>>>>>>>  {
+>>>>>>>>  	u8 count;
+>>>>>>>> @@ -766,6 +796,7 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+>>>>>>>>  		if (count >= 0xF)
+>>>>>>>>  			break;
+>>>>>>>>  	}
+>>>>>>>> +	sdhci_calc_sw_timeout(host, cmd, target_timeout);
+>>>>>>>
+>>>>>>> If you make the changes I suggest for patch 6, then this would
+>>>>>>> move sdhci_calc_sw_timeout() into sdhci_set_timeout().
+>>>>>>>
+>>>>>>> I suggest you factor out the target_timeout calculation e.g.
+>>>>>>>
+>>>>>>> static unsigned int sdhci_target_timeout(struct sdhci_host *host,
+>>>>>>> 					 struct mmc_command *cmd,
+>>>>>>> 					 struct mmc_data *data)
+>>>>>>> {
+>>>>>>> 	unsigned int target_timeout;
+>>>>>>>
+>>>>>>> 	/* timeout in us */
+>>>>>>> 	if (!data)
+>>>>>>> 		target_timeout = cmd->busy_timeout * 1000;
+>>>>>>> 	else {
+>>>>>>> 		target_timeout = DIV_ROUND_UP(data->timeout_ns, 1000);
+>>>>>>> 		if (host->clock && data->timeout_clks) {
+>>>>>>> 			unsigned long long val;
+>>>>>>>
+>>>>>>> 			/*
+>>>>>>> 			 * data->timeout_clks is in units of clock cycles.
+>>>>>>> 			 * host->clock is in Hz.  target_timeout is in us.
+>>>>>>> 			 * Hence, us = 1000000 * cycles / Hz.  Round up.
+>>>>>>> 			 */
+>>>>>>> 			val = 1000000ULL * data->timeout_clks;
+>>>>>>> 			if (do_div(val, host->clock))
+>>>>>>> 				target_timeout++;
+>>>>>>> 			target_timeout += val;
+>>>>>>> 		}
+>>>>>>> 	}
+>>>>>>>
+>>>>>>> 	return target_timeout;
+>>>>>>> }
+>>>>>>>
+>>>>>>> And call it from sdhci_calc_sw_timeout()
+>>>>>>>
+>>>>>>>>  
+>>>>>>>>  	return count;
+>>>>>>>>  }
+>>>>>>>> @@ -1175,13 +1206,6 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+>>>>>>>>  		mdelay(1);
+>>>>>>>>  	}
+>>>>>>>>  
+>>>>>>>> -	timeout = jiffies;
+>>>>>>>> -	if (!cmd->data && cmd->busy_timeout > 9000)
+>>>>>>>> -		timeout += DIV_ROUND_UP(cmd->busy_timeout, 1000) * HZ + HZ;
+>>>>>>>> -	else
+>>>>>>>> -		timeout += 10 * HZ;
+>>>>>>>> -	sdhci_mod_timer(host, cmd->mrq, timeout);
+>>>>>>>> -
+>>>>>>>>  	host->cmd = cmd;
+>>>>>>>>  	if (sdhci_data_line_cmd(cmd)) {
+>>>>>>>>  		WARN_ON(host->data_cmd);
+>>>>>>>> @@ -1221,6 +1245,15 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+>>>>>>>>  	    cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200)
+>>>>>>>>  		flags |= SDHCI_CMD_DATA;
+>>>>>>>>  
+>>>>>>>> +	timeout = jiffies;
+>>>>>>>> +	if (host->data_timeout > 0) {
+>>>>>>>
+>>>>>>> This can be just:
+>>>>>>>
+>>>>>>> 	if (host->data_timeout) {
+>>>>>>>
+>>>>>>>> +		timeout += nsecs_to_jiffies(host->data_timeout);
+>>>>>>>> +		host->data_timeout = 0;
+>>>>>>>
+>>>>>>> It would be better to initialize host->data_timeout = 0 at the top of
+>>>>>>> sdhci_prepare_data().
+>>>>>>>
+>>>>>>> Also still need:
+>>>>>>>
+>>>>>>> 	else if (!cmd->data && cmd->busy_timeout > 9000) {
+>>>>>>> 		timeout += DIV_ROUND_UP(cmd->busy_timeout, 1000) * HZ + HZ;
+>>>>>>
+>>>>>> sdhci_calc_sw_timeout should have calculated the timeout for this case too no?
+>>>>>
+>>>>> Yes, but I was thinking you would only calculate when it was needed.
+>>>>
+>>>> I feel since we would have anyways calculated data_timeout, we should use that
+>>>> instead unless you see a problem with that.
+>>>
+>>> I would prefer not to calculate data_timeout when a hardware timeout is
+>>> being used.
+>>>
+>>
+>> That differs from what I had thought. This patch tries to program a relatively
+>> accurate SW timeout value (for data_timer) irrespective of whether hardware
+>> timeout is used or not. This only tries to change the 10 Sec SW timeout value
+>> programmed for all data transfer commands.
+> 
+> IMHO since we calculate the worst case timeout value we should be using that
+> for all cases where we are able to calculate the timeout value so that we don't
+> give a too high or too low timeout value. Let me know If this sounds okay to you.
 
-Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+I don't want to do the calculation for drivers that don't need it.
 
-Sorry I bet it is my mistake.
+How about the 3 patches attached
 
-Ulf: I think this should be tagged for stable.
+--------------5B1226B4B55F50EA6005BA6E
+Content-Type: text/x-patch;
+ name="0001-mmc-sdhci-Add-quirk-to-disable-HW-timeout.patch"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment;
+ filename="0001-mmc-sdhci-Add-quirk-to-disable-HW-timeout.patch"
 
-Yours,
-Linus Walleij
+>From 52d36e3bf42d189378603ecdad06ffda601cc545 Mon Sep 17 00:00:00 2001
+From: Adrian Hunter <adrian.hunter@intel.com>
+Date: Thu, 29 Mar 2018 16:04:14 +0300
+Subject: [PATCH 1/3] mmc: sdhci: Add quirk to disable HW timeout
+
+Add quirk to disable HW timeout if the requested timeout is more than the
+maximum obtainable timeout.
+
+Also, if the quirk is set and ->get_max_timeout_count() is not implemented,
+max_busy_timeout is set to zero.
+
+Based-on-patch-by: Kishon Vijay Abraham I <kishon@ti.com>
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/sdhci.c | 38 ++++++++++++++++++++++++++++++++++----
+ drivers/mmc/host/sdhci.h |  5 +++++
+ 2 files changed, 39 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 3bf6117ee879..5299ea6b5c9c 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -709,12 +709,15 @@ static u32 sdhci_sdma_address(struct sdhci_host *host)
+ 		return sg_dma_address(host->data->sg);
+ }
+ 
+-static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
++static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd,
++			     bool *too_big)
+ {
+ 	u8 count;
+ 	struct mmc_data *data = cmd->data;
+ 	unsigned target_timeout, current_timeout;
+ 
++	*too_big = true;
++
+ 	/*
+ 	 * If the host controller provides us with an incorrect timeout
+ 	 * value, just skip the check and use 0xE.  The hardware may take
+@@ -768,9 +771,12 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+ 	}
+ 
+ 	if (count >= 0xF) {
+-		DBG("Too large timeout 0x%x requested for CMD%d!\n",
+-		    count, cmd->opcode);
++		if (!(host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT))
++			DBG("Too large timeout 0x%x requested for CMD%d!\n",
++			    count, cmd->opcode);
+ 		count = 0xE;
++	} else {
++		*too_big = false;
+ 	}
+ 
+ 	return count;
+@@ -790,6 +796,16 @@ static void sdhci_set_transfer_irqs(struct sdhci_host *host)
+ 	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
+ }
+ 
++static void sdhci_set_data_timeout_irq(struct sdhci_host *host, bool enable)
++{
++	if (enable)
++		host->ier |= SDHCI_INT_DATA_TIMEOUT;
++	else
++		host->ier &= ~SDHCI_INT_DATA_TIMEOUT;
++	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
++	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
++}
++
+ static void sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+ {
+ 	u8 count;
+@@ -797,7 +813,17 @@ static void sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+ 	if (host->ops->set_timeout) {
+ 		host->ops->set_timeout(host, cmd);
+ 	} else {
+-		count = sdhci_calc_timeout(host, cmd);
++		bool too_big = false;
++
++		count = sdhci_calc_timeout(host, cmd, &too_big);
++
++		if (too_big &&
++		    host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT) {
++			sdhci_set_data_timeout_irq(host, false);
++		} else if (!(host->ier & SDHCI_INT_DATA_TIMEOUT)) {
++			sdhci_set_data_timeout_irq(host, true);
++		}
++
+ 		sdhci_writeb(host, count, SDHCI_TIMEOUT_CONTROL);
+ 	}
+ }
+@@ -3619,6 +3645,10 @@ int sdhci_setup_host(struct sdhci_host *host)
+ 		mmc->max_busy_timeout /= host->timeout_clk;
+ 	}
+ 
++	if (host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT &&
++	    !host->ops->get_max_timeout_count)
++		mmc->max_busy_timeout = 0;
++
+ 	mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE | MMC_CAP_CMD23;
+ 	mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;
+ 
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index c95b0a4a7594..f6555c0f4ad3 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -437,6 +437,11 @@ struct sdhci_host {
+ #define SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN		(1<<15)
+ /* Controller has CRC in 136 bit Command Response */
+ #define SDHCI_QUIRK2_RSP_136_HAS_CRC			(1<<16)
++/*
++ * Disable HW timeout if the requested timeout is more than the maximum
++ * obtainable timeout.
++ */
++#define SDHCI_QUIRK2_DISABLE_HW_TIMEOUT			(1<<17)
+ 
+ 	int irq;		/* Device IRQ */
+ 	void __iomem *ioaddr;	/* Mapped address */
+-- 
+1.9.1
+
+
+--------------5B1226B4B55F50EA6005BA6E
+Content-Type: text/x-patch;
+ name="0002-mmc-sdhci-Factor-out-target_timeout-calculation.patch"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment;
+ filename*0="0002-mmc-sdhci-Factor-out-target_timeout-calculation.patch"
+
+>From c73df33aa4549301e0b93424990dc16de2b14923 Mon Sep 17 00:00:00 2001
+From: Adrian Hunter <adrian.hunter@intel.com>
+Date: Wed, 4 Apr 2018 15:14:38 +0300
+Subject: [PATCH 2/3] mmc: sdhci: Factor out target_timeout calculation
+
+Factor out the target_timeout calculation so it can be re-used.
+
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/sdhci.c | 48 ++++++++++++++++++++++++++++++------------------
+ 1 file changed, 30 insertions(+), 18 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 5299ea6b5c9c..7c0683b8baba 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -709,6 +709,35 @@ static u32 sdhci_sdma_address(struct sdhci_host *host)
+ 		return sg_dma_address(host->data->sg);
+ }
+ 
++static unsigned int sdhci_target_timeout(struct sdhci_host *host,
++					 struct mmc_command *cmd,
++					 struct mmc_data *data)
++{
++	unsigned int target_timeout;
++
++	/* timeout in us */
++	if (!data) {
++		target_timeout = cmd->busy_timeout * 1000;
++	} else {
++		target_timeout = DIV_ROUND_UP(data->timeout_ns, 1000);
++		if (host->clock && data->timeout_clks) {
++			unsigned long long val;
++
++			/*
++			 * data->timeout_clks is in units of clock cycles.
++			 * host->clock is in Hz.  target_timeout is in us.
++			 * Hence, us = 1000000 * cycles / Hz.  Round up.
++			 */
++			val = 1000000ULL * data->timeout_clks;
++			if (do_div(val, host->clock))
++				target_timeout++;
++			target_timeout += val;
++		}
++	}
++
++	return target_timeout;
++}
++
+ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd,
+ 			     bool *too_big)
+ {
+@@ -732,24 +761,7 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd,
+ 		return 0xE;
+ 
+ 	/* timeout in us */
+-	if (!data)
+-		target_timeout = cmd->busy_timeout * 1000;
+-	else {
+-		target_timeout = DIV_ROUND_UP(data->timeout_ns, 1000);
+-		if (host->clock && data->timeout_clks) {
+-			unsigned long long val;
+-
+-			/*
+-			 * data->timeout_clks is in units of clock cycles.
+-			 * host->clock is in Hz.  target_timeout is in us.
+-			 * Hence, us = 1000000 * cycles / Hz.  Round up.
+-			 */
+-			val = 1000000ULL * data->timeout_clks;
+-			if (do_div(val, host->clock))
+-				target_timeout++;
+-			target_timeout += val;
+-		}
+-	}
++	target_timeout = sdhci_target_timeout(host, cmd, data);
+ 
+ 	/*
+ 	 * Figure out needed cycles.
+-- 
+1.9.1
+
+
+--------------5B1226B4B55F50EA6005BA6E
+Content-Type: text/x-patch;
+ name="0003-mmc-sdhci-Program-a-relatively-accurate-SW-timeout-v.patch"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment;
+ filename*0="0003-mmc-sdhci-Program-a-relatively-accurate-SW-timeout-v.pa";
+ filename*1="tch"
+
+>From 0976d161bfb9c9a35c5176c8059c4ed9a985a0b2 Mon Sep 17 00:00:00 2001
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Date: Wed, 7 Mar 2018 18:50:16 +0530
+Subject: [PATCH 3/3] mmc: sdhci: Program a relatively accurate SW timeout
+ value
+
+sdhci has a 10 second timeout to catch devices that stop responding.
+In the case of quirk SDHCI_QUIRK2_DISABLE_HW_TIMEOUT, instead of
+programming 10 second arbitrary value, calculate the total time it would
+take for the entire transfer to happen and program the timeout value
+accordingly.
+
+Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/sdhci.c | 36 ++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci.h | 10 ++++++++++
+ 2 files changed, 46 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 7c0683b8baba..d67ac1bf7caa 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -738,6 +738,39 @@ static unsigned int sdhci_target_timeout(struct sdhci_host *host,
+ 	return target_timeout;
+ }
+ 
++static void sdhci_calc_sw_timeout(struct sdhci_host *host,
++				  struct mmc_command *cmd)
++{
++	struct mmc_data *data = cmd->data;
++	struct mmc_host *mmc = host->mmc;
++	struct mmc_ios *ios = &mmc->ios;
++	unsigned char bus_width = 1 << ios->bus_width;
++	unsigned int blksz;
++	unsigned int freq;
++	u64 target_timeout;
++	u64 transfer_time;
++
++	target_timeout = sdhci_target_timeout(host, cmd, data);
++	target_timeout *= NSEC_PER_USEC;
++
++	if (data) {
++		blksz = data->blksz;
++		freq = host->mmc->actual_clock ? : host->clock;
++		transfer_time = (u64)blksz * NSEC_PER_SEC * (8 / bus_width);
++		do_div(transfer_time, freq);
++		/* multiply by '2' to account for any unknowns */
++		transfer_time = transfer_time * 2;
++		/* calculate timeout for the entire data */
++		host->data_timeout = data->blocks * target_timeout +
++				     transfer_time;
++	} else {
++		host->data_timeout = target_timeout;
++	}
++
++	if (host->data_timeout)
++		host->data_timeout += MMC_CMD_TRANSFER_TIME;
++}
++
+ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd,
+ 			     bool *too_big)
+ {
+@@ -831,6 +864,7 @@ static void sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+ 
+ 		if (too_big &&
+ 		    host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT) {
++			sdhci_calc_sw_timeout(host, cmd);
+ 			sdhci_set_data_timeout_irq(host, false);
+ 		} else if (!(host->ier & SDHCI_INT_DATA_TIMEOUT)) {
+ 			sdhci_set_data_timeout_irq(host, true);
+@@ -845,6 +879,8 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+ 	u8 ctrl;
+ 	struct mmc_data *data = cmd->data;
+ 
++	host->data_timeout = 0;
++
+ 	if (sdhci_data_line_cmd(cmd))
+ 		sdhci_set_timeout(host, cmd);
+ 
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index f6555c0f4ad3..23966f887da6 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -332,6 +332,14 @@ struct sdhci_adma2_64_desc {
+ /* Allow for a a command request and a data request at the same time */
+ #define SDHCI_MAX_MRQS		2
+ 
++/*
++ * 48bit command and 136 bit response in 100KHz clock could take upto 2.48ms.
++ * However since the start time of the command, the time between
++ * command and response, and the time between response and start of data is
++ * not known, set the command transfer time to 10ms.
++ */
++#define MMC_CMD_TRANSFER_TIME	(10 * NSEC_PER_MSEC) /* max 10 ms */
++
+ enum sdhci_cookie {
+ 	COOKIE_UNMAPPED,
+ 	COOKIE_PRE_MAPPED,	/* mapped by sdhci_pre_req() */
+@@ -555,6 +563,8 @@ struct sdhci_host {
+ 	/* Host SDMA buffer boundary. */
+ 	u32			sdma_boundary;
+ 
++	u64			data_timeout;
++
+ 	unsigned long private[0] ____cacheline_aligned;
+ };
+ 
+-- 
+1.9.1
+
+
+--------------5B1226B4B55F50EA6005BA6E--
