@@ -1,93 +1,63 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: pwrseq: Use kmalloc_array instead of stack VLA
-Date: Wed, 4 Apr 2018 14:45:31 +0200
-Message-ID: <CAPDyKFobX6U4_st0nE7-yHt1SPFu4diLhzTaswY6Xt3BrruvAA@mail.gmail.com>
-References: <1522045994-21913-1-git-send-email-me@tobin.cc>
+Subject: Re: [PATCH v2] mmc: sdhci-of-arasan: Add quirk to avoid unexpected
+ interrupt msgs
+Date: Wed, 4 Apr 2018 14:45:23 +0200
+Message-ID: <CAPDyKFqFnPosPTb2x5=aeXjGqAJBDgKBCV9pJRfkREecChyJ9w@mail.gmail.com>
+References: <1520951200-24703-1-git-send-email-phil.edworthy@renesas.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1522045994-21913-1-git-send-email-me@tobin.cc>
+In-Reply-To: <1520951200-24703-1-git-send-email-phil.edworthy@renesas.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Tobin C. Harding" <me@tobin.cc>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, kernel-hardening@lists.openwall.com, Tycho Andersen <tycho@tycho.ws>
+To: Phil Edworthy <phil.edworthy@renesas.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Michal Simek <michal.simek@xilinx.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Michel Pollet <michel.pollet@bp.renesas.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 26 March 2018 at 08:33, Tobin C. Harding <me@tobin.cc> wrote:
-> The use of stack Variable Length Arrays needs to be avoided, as they
-> can be a vector for stack exhaustion, which can be both a runtime bug
-> (kernel Oops) or a security flaw (overwriting memory beyond the
-> stack). Also, in general, as code evolves it is easy to lose track of
-> how big a VLA can get. Thus, we can end up having runtime failures
-> that are hard to debug. As part of the directive[1] to remove all VLAs
-> from the kernel, and build with -Wvla.
+On 13 March 2018 at 15:26, Phil Edworthy <phil.edworthy@renesas.com> wrote:
+> On SD 2.00 cards we get lots of these messages:
+> "mmc0: Got data interrupt 0x00000002 even though no data operation was in progress"
+> By applying the SDHCI_QUIRK2_STOP_WITH_TC quirk, the messages no longer happen.
 >
-> Currently driver is using a VLA declared using the number of descriptors.  This
-> array is used to store integer values and is later used as an argument to
-> `gpiod_set_array_value_cansleep()` This can be avoided by using
-> `kmalloc_array()` to allocate memory for the array of integer values.  Memory is
-> free'd before return from function.
+> A single card claiming to be SD 3.00 compliant also generates the interrupts,
+> but since the card's manfacturing date is 2002 mar, it's unlikely to really be
+> SD 3.00. This card is a 8GB SanDisk 'SU08G' 8.0 (SDHC class 4).
 >
-> From the code it appears that it is safe to sleep so we can use GFP_KERNEL
-> (based _cansleep() suffix of function `gpiod_set_array_value_cansleep()`.
+> This has been reported on Xilinx devices that also use the Arasan IP.
+> See https://patchwork.kernel.org/patch/8062871/
 >
-> It can be expected that this patch will result in a small increase in overhead
-> due to the use of `kmalloc_array()`
+> This has been tested on the Renesas RZ/ND-DB board with the RZ/N1 SoC. The
+> Arasan IP in this device is version 1.39a and uses a max SD clock of 50MHz and
+> does not support DDR modes.
 >
-> [1] https://lkml.org/lkml/2018/3/7/621
->
-> Signed-off-by: Tobin C. Harding <me@tobin.cc>
+> Signed-off-by: Phil Edworthy <phil.edworthy@renesas.com>
 
-Thanks, queued for 3.18!
+Queued for 3.18, thanks!
 
 Kind regards
 Uffe
 
 > ---
+> v2:
+>  - Changed commit msg to detail the cards that fail.
+>  - Provided the IP version and further background info.
+> ---
+>  drivers/mmc/host/sdhci-of-arasan.c | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
 >
-> Patch is untested.  I was not able to fully grok the call chain involved
-> with this change so was unable to quantify the total degradation
-> of performance.
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index c33a5f7..ab66e32 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -290,7 +290,8 @@ static const struct sdhci_pltfm_data sdhci_arasan_pdata = {
+>         .ops = &sdhci_arasan_ops,
+>         .quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+>         .quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
+> -                       SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
+> +                       SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN |
+> +                       SDHCI_QUIRK2_STOP_WITH_TC,
+>  };
 >
-> Line calling to gpiod_set_array_value_cansleep() is 83 characters long,
-> patch attempts to leave the code as clean as possible.  Open to
-> suggestions for improvement.  I tried various forms of while loop and
-> pointer arithmetic for the setting of `values` but in the end settled
-> for array indexing, again open to suggestions.
->
-> thanks,
-> Tobin.
->
->  drivers/mmc/core/pwrseq_simple.c | 14 +++++++++-----
->  1 file changed, 9 insertions(+), 5 deletions(-)
->
-> diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
-> index 13ef162cf066..a8b9fee4d62a 100644
-> --- a/drivers/mmc/core/pwrseq_simple.c
-> +++ b/drivers/mmc/core/pwrseq_simple.c
-> @@ -40,14 +40,18 @@ static void mmc_pwrseq_simple_set_gpios_value(struct mmc_pwrseq_simple *pwrseq,
->         struct gpio_descs *reset_gpios = pwrseq->reset_gpios;
->
->         if (!IS_ERR(reset_gpios)) {
-> -               int i;
-> -               int values[reset_gpios->ndescs];
-> +               int i, *values;
-> +               int nvalues = reset_gpios->ndescs;
->
-> -               for (i = 0; i < reset_gpios->ndescs; i++)
-> +               values = kmalloc_array(nvalues, sizeof(int), GFP_KERNEL);
-> +               if (!values)
-> +                       return;
-> +
-> +               for (i = 0; i < nvalues; i++)
->                         values[i] = value;
->
-> -               gpiod_set_array_value_cansleep(
-> -                       reset_gpios->ndescs, reset_gpios->desc, values);
-> +               gpiod_set_array_value_cansleep(nvalues, reset_gpios->desc, values);
-> +               kfree(values);
->         }
->  }
->
+>  static u32 sdhci_arasan_cqhci_irq(struct sdhci_host *host, u32 intmask)
 > --
 > 2.7.4
 >
