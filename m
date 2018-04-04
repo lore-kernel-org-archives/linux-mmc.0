@@ -1,49 +1,47 @@
-From: Kees Cook <keescook@chromium.org>
-Subject: Re: [PATCH] mmc: pwrseq: Use kmalloc_array instead of stack VLA
-Date: Wed, 4 Apr 2018 09:23:05 -0700
-Message-ID: <CAGXu5jJgt+sUtTPpqiFVx19mNXs-asjTUQJABrLBf_g8q=FQAA@mail.gmail.com>
-References: <1522045994-21913-1-git-send-email-me@tobin.cc> <CAPDyKFobX6U4_st0nE7-yHt1SPFu4diLhzTaswY6Xt3BrruvAA@mail.gmail.com>
+From: Robert Jarzmik <robert.jarzmik@free.fr>
+Subject: Re: [PATCH 00/15] ARM: pxa: switch to DMA slave maps
+Date: Wed, 04 Apr 2018 21:49:26 +0200
+Message-ID: <874lkq4urd.fsf@belgarion.home>
+References: <20180402142656.26815-1-robert.jarzmik@free.fr>
+ <CAPDyKFot9dAST2jQL5s8E4U=bCHxkio=uwpqPd6S0N4FWJRB-w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFobX6U4_st0nE7-yHt1SPFu4diLhzTaswY6Xt3BrruvAA@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <CAPDyKFot9dAST2jQL5s8E4U=bCHxkio=uwpqPd6S0N4FWJRB-w@mail.gmail.com>
+ (Ulf Hansson's message of "Tue, 3 Apr 2018 17:08:42 +0200")
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "Tobin C. Harding" <me@tobin.cc>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Kernel Hardening <kernel-hardening@lists.openwall.com>, Tycho Andersen <tycho@tycho.ws>
+Cc: alsa-devel@alsa-project.org, Jaroslav Kysela <perex@perex.cz>, linux-ide@vger.kernel.org, netdev@vger.kernel.org, linux-mtd@lists.infradead.org, driverdevel <devel@driverdev.osuosl.org>, Boris Brezillon <boris.brezillon@free-electrons.com>, Vinod Koul <vinod.koul@intel.com>, Richard Weinberger <richard@nod.at>, Takashi Iwai <tiwai@suse.com>, Marek Vasut <marek.vasut@gmail.com>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, linux-media@vger.kernel.org, Samuel Ortiz <samuel@sortiz.org>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, dmaengine@vger.kernel.org, Mark Brown <broonie@kernel.org>, Mauro Carvalho Chehab <mchehab@kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Nicolas Pitre <nico@fluxnic.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-mmc@vger.ke
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Apr 4, 2018 at 5:45 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 26 March 2018 at 08:33, Tobin C. Harding <me@tobin.cc> wrote:
->> The use of stack Variable Length Arrays needs to be avoided, as they
->> can be a vector for stack exhaustion, which can be both a runtime bug
->> (kernel Oops) or a security flaw (overwriting memory beyond the
->> stack). Also, in general, as code evolves it is easy to lose track of
->> how big a VLA can get. Thus, we can end up having runtime failures
->> that are hard to debug. As part of the directive[1] to remove all VLAs
->> from the kernel, and build with -Wvla.
+Ulf Hansson <ulf.hansson@linaro.org> writes:
+
+> On 2 April 2018 at 16:26, Robert Jarzmik <robert.jarzmik@free.fr> wrote:
+>> Hi,
 >>
->> Currently driver is using a VLA declared using the number of descriptors.  This
->> array is used to store integer values and is later used as an argument to
->> `gpiod_set_array_value_cansleep()` This can be avoided by using
->> `kmalloc_array()` to allocate memory for the array of integer values.  Memory is
->> free'd before return from function.
->>
->> From the code it appears that it is safe to sleep so we can use GFP_KERNEL
->> (based _cansleep() suffix of function `gpiod_set_array_value_cansleep()`.
->>
->> It can be expected that this patch will result in a small increase in overhead
->> due to the use of `kmalloc_array()`
->>
->> [1] https://lkml.org/lkml/2018/3/7/621
->>
->> Signed-off-by: Tobin C. Harding <me@tobin.cc>
+>> This serie is aimed at removing the dmaengine slave compat use, and transfer
+>> knowledge of the DMA requestors into architecture code.
+>> As this looks like a patch bomb, each maintainer expressing for his tree either
+>> an Ack or "I want to take through my tree" will be spared in the next iterations
+>> of this serie.
 >
-> Thanks, queued for 3.18!
+> Perhaps an option is to send this hole series as PR for 3.17 rc1, that
+> would removed some churns and make this faster/easier? Well, if you
+> receive the needed acks of course.
+For 3.17-rc1 it looks a bit optimistic with the review time ... If I have all
+acks, I'll queue it into my pxa tree. If at least one maintainer withholds his
+ack, the end of the serie (phase 3) won't be applied until it is sorted out.
 
-Time travel! ;)
+Cheers.
 
--Kees
-
--- 
-Kees Cook
-Pixel Security
+--
+Robert
