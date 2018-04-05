@@ -1,148 +1,53 @@
-From: zhangfei <zhangfei.gao@linaro.org>
-Subject: Re: [PATCH] mmc: dw_mmc-k3: Fix DDR52 mode by setting required clock
- divisor
-Date: Thu, 5 Apr 2018 10:08:57 +0800
-Message-ID: <00fe2c61-1cb8-d548-2057-9e70ec18df67@linaro.org>
-References: <20180329182423.21201-1-ryan@edited.us>
- <e3ec3a77-f2f3-2164-4dbb-80e1ba3ebc63@rock-chips.com>
- <CAGoBSJq+tSpvFZsJLPffTaFBg5o2Nn2eeXXvHqt4Us_dd7==1w@mail.gmail.com>
- <bed16723-6bf0-4bcf-f44c-ebcf7a1e7cc5@rock-chips.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 00/15] ARM: pxa: switch to DMA slave maps
+Date: Thu, 5 Apr 2018 08:29:53 +0200
+Message-ID: <CAPDyKFoFz_HgYPOMGuOTpehrTR3DtWE3uZbcnVwUwVhDy02Mow@mail.gmail.com>
+References: <20180402142656.26815-1-robert.jarzmik@free.fr>
+ <CAPDyKFot9dAST2jQL5s8E4U=bCHxkio=uwpqPd6S0N4FWJRB-w@mail.gmail.com>
+ <874lkq4urd.fsf@belgarion.home> <20180404215623.2bf07406@bbrezillon>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <bed16723-6bf0-4bcf-f44c-ebcf7a1e7cc5@rock-chips.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, Ryan Grachek <ryan@edited.us>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, liwei213@huawei.com, Suzhuangluan <suzhuangluan@hisilicon.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <20180404215623.2bf07406@bbrezillon>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: Boris Brezillon <boris.brezillon@bootlin.com>
+Cc: alsa-devel@alsa-project.org, Takashi Iwai <tiwai@suse.com>, linux-ide@vger.kernel.org, netdev@vger.kernel.org, linux-mtd@lists.infradead.org, Robert Jarzmik <robert.jarzmik@free.fr>, driverdevel <devel@driverdev.osuosl.org>, Boris Brezillon <boris.brezillon@free-electrons.com>, Vinod Koul <vinod.koul@intel.com>, Richard Weinberger <richard@nod.at>, Marek Vasut <marek.vasut@gmail.com>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, linux-media@vger.kernel.org, Samuel Ortiz <samuel@sortiz.org>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, dmaengine@vger.kernel.org, Mark Brown <broonie@kernel.org>, Jaroslav Kysela <perex@perex.cz>, Mauro Carvalho Chehab <mchehab@kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Nicolas Pitre <nico@fluxnic.net>, Greg Kroah-Hartman <gregk>
 List-Id: linux-mmc@vger.kernel.org
 
-+ Hisilicon colleague
+On 4 April 2018 at 21:56, Boris Brezillon <boris.brezillon@bootlin.com> wrote:
+> On Wed, 04 Apr 2018 21:49:26 +0200
+> Robert Jarzmik <robert.jarzmik@free.fr> wrote:
+>
+>> Ulf Hansson <ulf.hansson@linaro.org> writes:
+>>
+>> > On 2 April 2018 at 16:26, Robert Jarzmik <robert.jarzmik@free.fr> wrote:
+>> >> Hi,
+>> >>
+>> >> This serie is aimed at removing the dmaengine slave compat use, and transfer
+>> >> knowledge of the DMA requestors into architecture code.
+>> >> As this looks like a patch bomb, each maintainer expressing for his tree either
+>> >> an Ack or "I want to take through my tree" will be spared in the next iterations
+>> >> of this serie.
+>> >
+>> > Perhaps an option is to send this hole series as PR for 3.17 rc1, that
+>> > would removed some churns and make this faster/easier? Well, if you
+>> > receive the needed acks of course.
+>> For 3.17-rc1 it looks a bit optimistic with the review time ... If I have all
+>
+> Especially since 3.17-rc1 has been released more than 3 years ago :-),
+> but I guess you meant 4.17-rc1.
 
+Yeah, I realize that I was a bit lost in time yesterday. Even more
+people have been having fun about it (me too). :-)
 
-On 2018年04月05日 08:51, Shawn Lin wrote:
-> [+ Zhangfei Gao who added support for hi6220]
->
-> On 2018/4/4 23:31, Ryan Grachek wrote:
->> On Tue, Apr 3, 2018 at 6:31 AM, Shawn Lin <shawn.lin@rock-chips.com 
->> <mailto:shawn.lin@rock-chips.com>> wrote:
->>
->>     On 2018/3/30 2:24, oscardagrach wrote:
->>
->>     Need at least one line commit body.
->>
->>         Signed-off-by: oscardagrach <ryan@edited.us 
->> <mailto:ryan@edited.us>>
->>         ---
->>            drivers/mmc/host/dw_mmc-k3.c | 10 ++++++++--
->>            1 file changed, 8 insertions(+), 2 deletions(-)
->>
->>         diff --git a/drivers/mmc/host/dw_mmc-k3.c
->>         b/drivers/mmc/host/dw_mmc-k3.c
->>         index 89cdb3d533bb..efc546cb4db8 100644
->>         --- a/drivers/mmc/host/dw_mmc-k3.c
->>         +++ b/drivers/mmc/host/dw_mmc-k3.c
->>         @@ -194,8 +194,14 @@ static void dw_mci_hi6220_set_ios(struct
->>         dw_mci *host, struct mmc_ios *ios)
->>                  int ret;
->>                  unsigned int clock;
->>            -     clock = (ios->clock <= 25000000) ? 25000000 : 
->> ios->clock;
->>         -
->>         +       /* CLKDIV must be 1 for DDR52/8-bit mode */
->>         +       if (ios->bus_width == MMC_BUS_WIDTH_8 &&
->>         +               ios->timing == MMC_TIMING_MMC_DDR52) {
->>         +               mci_writel(host, CLKDIV, 0x1);
->>         +               clock = ios->clock;
->>         +       } else {
->>         +               clock = (ios->clock <= 25000000) ? 25000000 :
->>         ios->clock;
->>         +       }
->>
->>
->>     I undertand DDR52/8-bit need CLKDIV fixed 1, but shouldn't the 
->> following
->>     change is more sensible?
->>
->>     if (ios->bus_width == MMC_BUS_WIDTH_8 && ios->timing ==
->>     MMC_TIMING_MMC_DDR52)
->>              clock = ios->clock * 2;
->>     else
->>              clock = (ios->clock <= 25000000) ? 25000000 : ios->clock;
->>
->>
->>     The reason is ios->clock is 52MHz and you could claim 104MHz from 
->> the
->>     clock provider and let dw_mmc core take care of the divder to be 1.
->>     Otherwise, you just force it to be DDR52/8-bit with a clk rate of 
->> 26MHz.
->>
->>
->>                  ret = clk_set_rate(host->biu_clk, clock);
->>                  if (ret)
->>                          dev_warn(host->dev, "failed to set rate
->>         %uHz\n", clock);
->>
->>
->>
->
-> For future wise, please use plain mode mail, but not HTML format.
->
->> Your feedback is correct. I see the Rockchip dwmmc driver has a similar
->> implementation. After applying your suggested changes, however, my board
->> reports "dwmmc_k3 f723d000.dwmmc0: failed to set rate 104000000Hz"
->> during intialization of eMMC. In addition, I do not see CLKDIV being
->> set to 1. clk_set_rate fails and I wonder if this is out-of-scope of
->> the driver.
->>
->> If I set CLKDIV where I did prior, with your changes, the device fails
->> to set the clock and falls back to 52 MHz (26 MHz) and works fine, but
->> again, CLKDIV is reported as 0 (even though it is 1.) One thing of
->> interest to note is when I manually set the clock by doing:
->> (echo 104000000 > /sys/kernel/debug/mmc0/clock) the device reports back
->> 'mmc_host mmc0: Bus speed (slot 0) = 198400000Hz (slot req 104000000Hz,
->>   actual 99200000HZ div = 1)' which works reliably and clk_set_rate does
->> not report any error.
->>
->
-> When looking closely into the code, at least dw_mci_hi6220_set_ios
-> goes wrong with the bus_hz, since it should be ciu_clk but not biu_clk.
-> "b" stands for bus, and "c" stands for card IMHO, however bus_hz
-> describs the clock to the card, provided by controller. Does the
-> following patch help?
->
->
-> diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
-> index 89cdb3d..9e78cf2 100644
-> --- a/drivers/mmc/host/dw_mmc-k3.c
-> +++ b/drivers/mmc/host/dw_mmc-k3.c
-> @@ -194,13 +194,21 @@ static void dw_mci_hi6220_set_ios(struct dw_mci 
-> *host, struct mmc_ios *ios)
->         int ret;
->         unsigned int clock;
->
-> -       clock = (ios->clock <= 25000000) ? 25000000 : ios->clock;
-> +       if (ios->bus_width == MMC_BUS_WIDTH_8 &&
-> +           ios->timing == MMC_TIMING_MMC_DDR52)
-> +               clock = ios->clock * 2;
-> +       else
-> +               clock = (ios->clock <= 25000000) ? 25000000 : ios->clock;
->
-> -       ret = clk_set_rate(host->biu_clk, clock);
-> +       ret = clk_set_rate(host->ciu_clk, clock);
->         if (ret)
->                 dev_warn(host->dev, "failed to set rate %uHz\n", clock);
->
-> -       host->bus_hz = clk_get_rate(host->biu_clk);
-> +       clock = clk_get_rate(host->ciu_clk);
-> +       if (clock != host->bus_hz) {
-> +               host->bus_hz = clock;
-> +               host->current_speed = 0;
-> +       }
->  }
->
->
->> I am not sure where to begin debugging these clock issues and welcome
->> any feedback.
->
+Kind regards
+Uffe
