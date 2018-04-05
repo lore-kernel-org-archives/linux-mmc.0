@@ -1,47 +1,136 @@
-From: Rob Herring <robherring2-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH v2 00/21] Allow compile-testing NO_DMA (drivers)
-Date: Wed, 4 Apr 2018 19:32:53 -0500
-Message-ID: <CAL_JsqJMppYaz31Gg8BH2OaAxs56dnjZ4y+nzBBp-Tt2odaqCw@mail.gmail.com>
-References: <1521208314-4783-1-git-send-email-geert@linux-m68k.org>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH] mmc: dw_mmc-k3: Fix DDR52 mode by setting required clock
+ divisor
+Date: Thu, 5 Apr 2018 08:51:14 +0800
+Message-ID: <bed16723-6bf0-4bcf-f44c-ebcf7a1e7cc5@rock-chips.com>
+References: <20180329182423.21201-1-ryan@edited.us>
+ <e3ec3a77-f2f3-2164-4dbb-80e1ba3ebc63@rock-chips.com>
+ <CAGoBSJq+tSpvFZsJLPffTaFBg5o2Nn2eeXXvHqt4Us_dd7==1w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <1521208314-4783-1-git-send-email-geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, linux-iio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-fpga-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "open list:REMOTE PROCESSOR (REMOTEPROC) SUBSYSTEM" <linux-remoteproc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux-ALSA <alsa-devel-K7yf7f+aM1XWsZ/bQMPhNw@public.gmane.org>, Bjorn Andersson <bjorn.andersson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Eric Anholt <eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org>, netdev <netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Linux I2C <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux1394-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>, Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>, Boris Brezillon <boris.brezillon-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, "James E . J . Bottomley" <jejb-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>, Herbert Xu <herbert-lOAM2aK0SrRLBo1qDEOMRrpzq4S04n8Q@public.gmane.org>, linux-scsi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Richard Weinberger <richard-/L3Ra7n9ekc@public.gmane.org>, Jassi Brar <jassisinghbrar-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Marek Vasut <marek.vasut-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "open list:SERIAL DRIVERS" <linux-serial@>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAGoBSJq+tSpvFZsJLPffTaFBg5o2Nn2eeXXvHqt4Us_dd7==1w@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ryan Grachek <ryan@edited.us>
+Cc: shawn.lin@rock-chips.com, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Zhangfei Gao <zhangfei.gao@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Mar 16, 2018 at 8:51 AM, Geert Uytterhoeven
-<geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org> wrote:
->         Hi all,
->
-> If NO_DMA=y, get_dma_ops() returns a reference to the non-existing
-> symbol bad_dma_ops, thus causing a link failure if it is ever used.
->
-> The intention of this is twofold:
->   1. To catch users of the DMA API on systems that do no support the DMA
->      mapping API,
->   2. To avoid building drivers that cannot work on such systems anyway.
->
-> However, the disadvantage is that we have to keep on adding dependencies
-> on HAS_DMA all over the place.
->
-> Thanks to the COMPILE_TEST symbol, lots of drivers now depend on one or
-> more platform dependencies (that imply HAS_DMA) || COMPILE_TEST, thus
-> already covering intention #2.  Having to add an explicit dependency on
-> HAS_DMA here is cumbersome, and hinders compile-testing.
+[+ Zhangfei Gao who added support for hi6220]
 
-The same can be said for CONFIG_IOMEM and CONFIG_OF. Any plans to
-remove those too? CONFIG_IOMEM is mostly just a !CONFIG_UM option.
+On 2018/4/4 23:31, Ryan Grachek wrote:
+> On Tue, Apr 3, 2018 at 6:31 AM, Shawn Lin <shawn.lin@rock-chips.com 
+> <mailto:shawn.lin@rock-chips.com>> wrote:
+> 
+>     On 2018/3/30 2:24, oscardagrach wrote:
+> 
+>     Need at least one line commit body.
+> 
+>         Signed-off-by: oscardagrach <ryan@edited.us <mailto:ryan@edited.us>>
+>         ---
+>            drivers/mmc/host/dw_mmc-k3.c | 10 ++++++++--
+>            1 file changed, 8 insertions(+), 2 deletions(-)
+> 
+>         diff --git a/drivers/mmc/host/dw_mmc-k3.c
+>         b/drivers/mmc/host/dw_mmc-k3.c
+>         index 89cdb3d533bb..efc546cb4db8 100644
+>         --- a/drivers/mmc/host/dw_mmc-k3.c
+>         +++ b/drivers/mmc/host/dw_mmc-k3.c
+>         @@ -194,8 +194,14 @@ static void dw_mci_hi6220_set_ios(struct
+>         dw_mci *host, struct mmc_ios *ios)
+>                  int ret;
+>                  unsigned int clock;
+>            -     clock = (ios->clock <= 25000000) ? 25000000 : ios->clock;
+>         -
+>         +       /* CLKDIV must be 1 for DDR52/8-bit mode */
+>         +       if (ios->bus_width == MMC_BUS_WIDTH_8 &&
+>         +               ios->timing == MMC_TIMING_MMC_DDR52) {
+>         +               mci_writel(host, CLKDIV, 0x1);
+>         +               clock = ios->clock;
+>         +       } else {
+>         +               clock = (ios->clock <= 25000000) ? 25000000 :
+>         ios->clock;
+>         +       }
+> 
+> 
+>     I undertand DDR52/8-bit need CLKDIV fixed 1, but shouldn't the following
+>     change is more sensible?
+> 
+>     if (ios->bus_width == MMC_BUS_WIDTH_8 && ios->timing ==
+>     MMC_TIMING_MMC_DDR52)
+>              clock = ios->clock * 2;
+>     else
+>              clock = (ios->clock <= 25000000) ? 25000000 : ios->clock;
+> 
+> 
+>     The reason is ios->clock is 52MHz and you could claim 104MHz from the
+>     clock provider and let dw_mmc core take care of the divder to be 1.
+>     Otherwise, you just force it to be DDR52/8-bit with a clk rate of 26MHz.
+> 
+> 
+>                  ret = clk_set_rate(host->biu_clk, clock);
+>                  if (ret)
+>                          dev_warn(host->dev, "failed to set rate
+>         %uHz\n", clock);
+> 
+> 
+> 
 
-Rob
+For future wise, please use plain mode mail, but not HTML format.
+
+> Your feedback is correct. I see the Rockchip dwmmc driver has a similar
+> implementation. After applying your suggested changes, however, my board
+> reports "dwmmc_k3 f723d000.dwmmc0: failed to set rate 104000000Hz"
+> during intialization of eMMC. In addition, I do not see CLKDIV being
+> set to 1. clk_set_rate fails and I wonder if this is out-of-scope of
+> the driver.
+> 
+> If I set CLKDIV where I did prior, with your changes, the device fails
+> to set the clock and falls back to 52 MHz (26 MHz) and works fine, but
+> again, CLKDIV is reported as 0 (even though it is 1.) One thing of
+> interest to note is when I manually set the clock by doing:
+> (echo 104000000 > /sys/kernel/debug/mmc0/clock) the device reports back
+> 'mmc_host mmc0: Bus speed (slot 0) = 198400000Hz (slot req 104000000Hz,
+>   actual 99200000HZ div = 1)' which works reliably and clk_set_rate does
+> not report any error.
+> 
+
+When looking closely into the code, at least dw_mci_hi6220_set_ios
+goes wrong with the bus_hz, since it should be ciu_clk but not biu_clk.
+"b" stands for bus, and "c" stands for card IMHO, however bus_hz
+describs the clock to the card, provided by controller. Does the
+following patch help?
+
+
+diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
+index 89cdb3d..9e78cf2 100644
+--- a/drivers/mmc/host/dw_mmc-k3.c
++++ b/drivers/mmc/host/dw_mmc-k3.c
+@@ -194,13 +194,21 @@ static void dw_mci_hi6220_set_ios(struct dw_mci 
+*host, struct mmc_ios *ios)
+         int ret;
+         unsigned int clock;
+
+-       clock = (ios->clock <= 25000000) ? 25000000 : ios->clock;
++       if (ios->bus_width == MMC_BUS_WIDTH_8 &&
++           ios->timing == MMC_TIMING_MMC_DDR52)
++               clock = ios->clock * 2;
++       else
++               clock = (ios->clock <= 25000000) ? 25000000 : ios->clock;
+
+-       ret = clk_set_rate(host->biu_clk, clock);
++       ret = clk_set_rate(host->ciu_clk, clock);
+         if (ret)
+                 dev_warn(host->dev, "failed to set rate %uHz\n", clock);
+
+-       host->bus_hz = clk_get_rate(host->biu_clk);
++       clock = clk_get_rate(host->ciu_clk);
++       if (clock != host->bus_hz) {
++               host->bus_hz = clock;
++               host->current_speed = 0;
++       }
+  }
+
+
+> I am not sure where to begin debugging these clock issues and welcome
+> any feedback.
