@@ -1,46 +1,280 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 00/15] ARM: pxa: switch to DMA slave maps
-Date: Thu, 5 Apr 2018 08:50:03 +0200
-Message-ID: <CAK8P3a1Y0X-2QQm+adXO8xNr7Z6SU6rDjZs8JhRskX-UrseyRw@mail.gmail.com>
-References: <20180402142656.26815-1-robert.jarzmik@free.fr>
- <CAPDyKFot9dAST2jQL5s8E4U=bCHxkio=uwpqPd6S0N4FWJRB-w@mail.gmail.com>
- <874lkq4urd.fsf@belgarion.home> <20180404215623.2bf07406@bbrezillon> <CAPDyKFoFz_HgYPOMGuOTpehrTR3DtWE3uZbcnVwUwVhDy02Mow@mail.gmail.com>
+From: Vijay Viswanath <vviswana@codeaurora.org>
+Subject: Re: [PATCH V4 2/2] mmc: sdhci-msm: support voltage pad switching
+Date: Fri, 6 Apr 2018 15:18:43 +0530
+Message-ID: <637147e3-5006-3593-3b01-9516375f8995@codeaurora.org>
+References: <1522242500-10556-1-git-send-email-vviswana@codeaurora.org>
+ <1522242500-10556-3-git-send-email-vviswana@codeaurora.org>
+ <CAD=FV=XepJMGFmYyj85yC7xbaB5XQKWd1vRX-rott4CMgU9EdA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <netdev-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFoFz_HgYPOMGuOTpehrTR3DtWE3uZbcnVwUwVhDy02Mow@mail.gmail.com>
-Sender: netdev-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Boris Brezillon <boris.brezillon@bootlin.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Tejun Heo <tj@kernel.org>, Vinod Koul <vinod.koul@intel.com>, Mauro Carvalho Chehab <mchehab@kernel.org>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, Boris Brezillon <boris.brezillon@free-electrons.com>, David Woodhouse <dwmw2@infradead.org>, Brian Norris <computersforpeace@gmail.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Cyrille Pitchen <cyrille.pitchen@wedev4u.fr>, Nicolas Pitre <nico@fluxnic.net>, Samuel Ortiz <samuel@sortiz.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jaroslav
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAD=FV=XepJMGFmYyj85yC7xbaB5XQKWd1vRX-rott4CMgU9EdA@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Doug Anderson <dianders@google.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, Bjorn Andersson <bjorn.andersson@linaro.org>, riteshh@codeaurora.org, Krishna Konda <kkonda@codeaurora.org>Asutosh Das <asutoshd@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Apr 5, 2018 at 8:29 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 4 April 2018 at 21:56, Boris Brezillon <boris.brezillon@bootlin.com> wrote:
->> On Wed, 04 Apr 2018 21:49:26 +0200
->> Robert Jarzmik <robert.jarzmik@free.fr> wrote:
+
+
+On 3/29/2018 4:23 AM, Doug Anderson wrote:
+> Hi,
+> 
+> On Wed, Mar 28, 2018 at 6:08 AM, Vijay Viswanath
+> <vviswana@codeaurora.org> wrote:
+>> From: Krishna Konda <kkonda@codeaurora.org>
 >>
->>> Ulf Hansson <ulf.hansson@linaro.org> writes:
->>>
->>> > On 2 April 2018 at 16:26, Robert Jarzmik <robert.jarzmik@free.fr> wrote:
->>> >> Hi,
->>> >>
->>> >> This serie is aimed at removing the dmaengine slave compat use, and transfer
->>> >> knowledge of the DMA requestors into architecture code.
->>> >> As this looks like a patch bomb, each maintainer expressing for his tree either
->>> >> an Ack or "I want to take through my tree" will be spared in the next iterations
->>> >> of this serie.
->>> >
->>> > Perhaps an option is to send this hole series as PR for 3.17 rc1, that
->>> > would removed some churns and make this faster/easier? Well, if you
->>> > receive the needed acks of course.
->>> For 3.17-rc1 it looks a bit optimistic with the review time ... If I have all
+>> The PADs for SD card are dual-voltage that support 3v/1.8v. Those PADs
+>> have a control signal  (io_pad_pwr_switch/mode18 ) that indicates
+>> whether the PAD works in 3v or 1.8v.
 >>
->> Especially since 3.17-rc1 has been released more than 3 years ago :-),
->> but I guess you meant 4.17-rc1.
+>> SDHC core on msm platforms should have IO_PAD_PWR_SWITCH bit set/unset
+>> based on actual voltage used for IO lines. So when power irq is
+>> triggered for io high or io low, the driver should check the voltages
+>> supported and set the pad accordingly.
+>>
+>> Signed-off-by: Krishna Konda <kkonda@codeaurora.org>
+>> Signed-off-by: Venkat Gopalakrishnan <venkatg@codeaurora.org>
+>> Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
+>> ---
+>>   drivers/mmc/host/sdhci-msm.c | 64 ++++++++++++++++++++++++++++++++++++++++++--
+>>   1 file changed, 62 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+>> index 2fcd9010..bbf9626 100644
+>> --- a/drivers/mmc/host/sdhci-msm.c
+>> +++ b/drivers/mmc/host/sdhci-msm.c
+>> @@ -78,12 +78,15 @@
+>>   #define CORE_HC_MCLK_SEL_DFLT  (2 << 8)
+>>   #define CORE_HC_MCLK_SEL_HS400 (3 << 8)
+>>   #define CORE_HC_MCLK_SEL_MASK  (3 << 8)
+>> +#define CORE_IO_PAD_PWR_SWITCH_EN      (1 << 15)
+>> +#define CORE_IO_PAD_PWR_SWITCH  (1 << 16)
+>>   #define CORE_HC_SELECT_IN_EN   BIT(18)
+>>   #define CORE_HC_SELECT_IN_HS400        (6 << 19)
+>>   #define CORE_HC_SELECT_IN_MASK (7 << 19)
+>>
+>>   #define CORE_3_0V_SUPPORT      (1 << 25)
+>>   #define CORE_1_8V_SUPPORT      (1 << 26)
+>> +#define CORE_VOLT_SUPPORT      (CORE_3_0V_SUPPORT | CORE_1_8V_SUPPORT)
+>>
+>>   #define CORE_CSR_CDC_CTLR_CFG0         0x130
+>>   #define CORE_SW_TRIG_FULL_CALIB                BIT(16)
+>> @@ -1109,7 +1112,7 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
+>>          u32 irq_status, irq_ack = 0;
+>>          int retry = 10;
+>>          u32 pwr_state = 0, io_level = 0;
+>> -
+>> +       u32 config;
+>>
+>>          irq_status = readl_relaxed(msm_host->core_mem + CORE_PWRCTL_STATUS);
+>>          irq_status &= INT_MASK;
+>> @@ -1166,6 +1169,45 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
+>>           */
+>>          writel_relaxed(irq_ack, msm_host->core_mem + CORE_PWRCTL_CTL);
+>>
+>> +       /*
+>> +        * If we don't have info regarding the voltage levels supported by
+>> +        * regulators, don't change the IO PAD PWR SWITCH.
+>> +        */
+>> +       if (msm_host->caps_0 & CORE_VOLT_SUPPORT) {
+>> +               /* Ensure order between core_mem and hc_mem */
+>> +               mb();
+> 
+> Like in v2, I don't understand why you need a mb() before the read
+> from CORE_VENDOR_SPEC.  No reads or writes to the core_mem will affect
+> the value you're reading here, so you need no barrier.
+> 
+> If you need a barrier before the _write_ to CORE_VENDOR_SPEC then add
+> it below.  Then in the case where the config doesn't change you have
+> no barriers.
+> 
 >
-> Yeah, I realize that I was a bit lost in time yesterday. Even more
-> people have been having fun about it (me too). :-)
+>> +               /*
+>> +                * We should unset IO PAD PWR switch only if the register write
+>> +                * can set IO lines high and the regulator also switches to 3 V.
+>> +                * Else, we should keep the IO PAD PWR switch set.
+>> +                * This is applicable to certain targets where eMMC vccq supply
+>> +                * is only 1.8V. In such targets, even during REQ_IO_HIGH, the
+>> +                * IO PAD PWR switch must be kept set to reflect actual
+>> +                * regulator voltage. This way, during initialization of
+>> +                * controllers with only 1.8V, we will set the IO PAD bit
+>> +                * without waiting for a REQ_IO_LOW.
+>> +                */
+> 
+> For the above comment, what about just:
+> 
+> new_config = config
+> if (msm_host->caps_0 == CORE_1_8V_SUPPORT) {
+>    new_config |= CORE_IO_PAD_PWR_SWITCH;
+> } else if (msm_host->caps_0 == CORE_3_3V_SUPPORT) {
+>    new_config &= ~CORE_IO_PAD_PWR_SWITCH;
+> } else if (msm_host->caps_0 & CORE_VOLT_SUPPORT) {
+>    if (io_level & REQ_IO_HIGH)
+>      new_config &= ~CORE_IO_PAD_PWR_SWITCH;
+>    else if (io_level & REQ_IO_LOW)
+>      new_config |= CORE_IO_PAD_PWR_SWITCH;
+> }
 
-I occasionally still type 2.6.17 when I mean 4.17.
+This looks a big mess of if/else. Does the above implementation have 
+better performance compared to having two if/else with bit operations 
+inside ? The latter looks much cleaner and faster.
 
-       Arnd
+If regulator only supports 3V and we get a io_low from BUS_OFF ( 
+REQ_IO_LOW should never come if we don't support 1.8V), it is ok to set 
+io pad.
+
+> if (config != new_config) {
+>   ...
+> }
+> 
+> AKA: first check if it only supports one voltage and pick that one.
+> Else if it supports both you can use the request.  This might be more
+> important if you get rid of the initial setting in
+> sdhci_msm_set_regulator_caps() as I'm suggesting.
+> 
+>
+>> +               config = readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC);
+>> +
+>> +               if (((io_level & REQ_IO_HIGH) && (msm_host->caps_0 &
+>> +                               CORE_3_0V_SUPPORT)) &&
+>> +                               (config & CORE_IO_PAD_PWR_SWITCH)) {
+>> +                       config &= ~CORE_IO_PAD_PWR_SWITCH;
+>> +                       writel_relaxed(config,
+>> +                                       host->ioaddr + CORE_VENDOR_SPEC);
+>> +                       /* IO PAD register is in different memory space */
+>> +                       mb();
+> 
+> Wow, for a driver that tries so hard to use "relaxed" versions of
+> writes to avoid barriers you sure end up needing to sprinkle a lot of
+> these around "just in case".  :(  ...this one seems extra fishy
+> because:
+> 
+> * There are no more accesses after this one in this function.
+> 
+> * If you're worried about something that happens outside of the
+> context of the IRQ needing this wb() then that's a silly concern.
+> Presumably if they were doing anything that could race with you they'd
+> have a lock and locking routines are implicit barriers.
+> 
+> * In the context of the IRQ itself the next call is
+> sdhci_msm_complete_pwr_irq_wait(), which eventually calls wake_up.
+> This has a locking primitive and thus an implicit barrier.
+> 
+
+Sorry, I didn't get implicit barrier in locking primitive.
+In mmc_set_signal_voltage switch:
+	1. Send cmd 11.
+	2. Switch 1.8V in SDHCI_HOST_CONTROL2
+	3. Wait for pwr_irq wake_up().
+	4. pwr_irq context comes up & does register read/writes in core mem. 
+Updates IO PAD in HC mem.
+	5. pwr_irq calls wake_up.
+	6. mmc_set_signal_voltage_switch context does further register 
+read/writes which expects IO_PAD change within pwr_irq context is 
+complete before step 6.
+
+Can wake_up() ensure that any update to CORE_VENDOR_SPEC happens before 
+any register writes in HC after the wake_up() ?
+
+> * There's a direct call of sdhci_msm_handle_pwr_irq() from probe, and
+> it has a big fat mb().  I have a hard time believing that matters too
+> because I'd bet "platform_get_irq_byname" has at least one lock in it.
+> 
+> 
+> IMHO these "_relaxed" calls are just not worth it except in _very_
+> targeted usage.
+> 
+> 
+>> +               } else if (((io_level & REQ_IO_LOW) ||
+>> +                               (msm_host->caps_0 & CORE_1_8V_SUPPORT)) &&
+>> +                               !(config & CORE_IO_PAD_PWR_SWITCH)) {
+>> +                       config |= CORE_IO_PAD_PWR_SWITCH;
+>> +                       writel_relaxed(config,
+>> +                                       host->ioaddr + CORE_VENDOR_SPEC);
+>> +                       /* IO PAD bit is in different memory space */
+>> +                       mb();
+>> +               }
+>> +       }
+>> +
+>>          if (pwr_state)
+>>                  msm_host->curr_pwr_state = pwr_state;
+>>          if (io_level)
+>> @@ -1322,7 +1364,8 @@ static int sdhci_msm_set_regulator_caps(struct sdhci_msm_host *msm_host)
+>>   {
+>>          struct mmc_host *mmc = msm_host->mmc;
+>>          struct regulator *supply = mmc->supply.vqmmc;
+>> -       u32 caps = 0;
+>> +       u32 caps = 0, config;
+>> +       struct sdhci_host *host = mmc_priv(mmc);
+>>
+>>          if (!IS_ERR(mmc->supply.vqmmc)) {
+>>                  if (regulator_is_supported_voltage(supply, 1700000, 1950000))
+>> @@ -1335,6 +1378,23 @@ static int sdhci_msm_set_regulator_caps(struct sdhci_msm_host *msm_host)
+>>                                          mmc_hostname(mmc), __func__);
+>>          }
+>>
+>> +       if (caps) {
+>> +               /*
+>> +                * Set the PAD_PWR_SWITCH_EN bit so that the PAD_PWR_SWITCH
+>> +                * bit can be used as required later on.
+>> +                */
+>> +               u32 io_level = msm_host->curr_io_level;
+>> +
+>> +               config = readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC);
+>> +               config |= CORE_IO_PAD_PWR_SWITCH_EN;
+>> +
+>> +               if ((io_level & REQ_IO_HIGH) && (caps & CORE_3_0V_SUPPORT))
+> 
+> Slight nit that there's a tab character after "caps &".  Please
+> replace it with a space.
+> 
+> 
+
+Will do
+
+>> +                       config &= ~CORE_IO_PAD_PWR_SWITCH;
+>> +               else if ((io_level & REQ_IO_LOW) || (caps & CORE_1_8V_SUPPORT))
+>> +                       config |= CORE_IO_PAD_PWR_SWITCH;
+> 
+> Are you sure that's right?  In English:
+> 
+> * If we requested high and we support high then set to high.
+> * else if we requested low __or__ we support low then set low.
+> 
+> Things that are weird above that:
+> 
+> * If we request low but don't support low, switch to low anyway.
+
+> * If we request high but only support low, switch to low anyway.
+> 
+> If nothing else seems like this would deserve a comment, but I'd be
+> curious of the justification for that logic.
+> 
+> 
+> Also: seems like this is duplicated code between here and
+> sdhci_msm_handle_pwr_irq().  Does it even need to be here?  Can't you
+> just move the call to sdhci_msm_set_regulator_caps() before the call
+> to sdhci_msm_handle_pwr_irq() in probe?  Then just let that first call
+> to to sdhci_msm_handle_pwr_irq() do this work?  In
+> sdhci_msm_handle_pwr_irq() you can always just "OR" in
+> CORE_IO_PAD_PWR_SWITCH_EN
+> 
+> 
+> -Doug
+> --
+
+
+If we don't support 1.8V, then the only time io_low will happen is 
+during BUS_OFF. For BUS_OFF, enabling IO_PAD_PWR_SWITCH is ok.
+
+This logic is same as what is there in pwr_irq. Added the same stuff 
+here because by the time we get regulator info from mmc layer, some 
+power irqs would have already come and gone.
+
+
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
