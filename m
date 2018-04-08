@@ -1,221 +1,152 @@
-From: Yixun Lan <yixun.lan@amlogic.com>
-Subject: [PATCH v2] ARM64: dts: meson-axg: enable the eMMC controller
-Date: Sun, 8 Apr 2018 11:36:47 +0000
-Message-ID: <20180408113647.13543-1-yixun.lan@amlogic.com>
+From: "liwei (CM)" <liwei213@huawei.com>
+Subject: =?utf-8?B?562U5aSNOiBbUEFUQ0hdIG1tYzogZHdfbW1jLWszOiBGaXggRERSNTIgbW9k?=
+ =?utf-8?Q?e_by_setting_required_clock_divisor?=
+Date: Sun, 8 Apr 2018 08:23:53 +0000
+Message-ID: <1699CE87DE933F49876AD744B5DC140FA596C5@DGGEMM506-MBS.china.huawei.com>
+References: <20180329182423.21201-1-ryan@edited.us>
+ <e3ec3a77-f2f3-2164-4dbb-80e1ba3ebc63@rock-chips.com>
+ <CAGoBSJq+tSpvFZsJLPffTaFBg5o2Nn2eeXXvHqt4Us_dd7==1w@mail.gmail.com>
+ <bed16723-6bf0-4bcf-f44c-ebcf7a1e7cc5@rock-chips.com>
+ <CAGoBSJogjG9efE9EKdinTCN9Px0zsW1_=5msXjHrLZXVjLBgow@mail.gmail.com>
+ <9d4bec45-42e3-da8d-ff29-1f24db27faf5@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <9d4bec45-42e3-da8d-ff29-1f24db27faf5@rock-chips.com>
+Content-Language: zh-CN
 Sender: linux-kernel-owner@vger.kernel.org
-To: Kevin Hilman <khilman@baylibre.com>
-Cc: Nan Li <nan.li@amlogic.com>, Yixun Lan <yixun.lan@amlogic.com>, Carlo Caione <carlo@caione.org>, Jerome Brunet <jbrunet@baylibre.com>, Heiner Kallweit <hkallweit1@gmail.com>, Rob Herring <robh@kernel.org>, linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>, Ryan Grachek <ryan@edited.us>, "Jinguojun (A)" <kid.jin@hisilicon.com>, "jingbing (C)" <jingbing2@hisilicon.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Zhangfei Gao <zhangfei.gao@linaro.org>, Suzhuangluan <suzhuangluan@hisilicon.com>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Nan Li <nan.li@amlogic.com>
-
-The IP of eMMC controller in AXG is similiar to Meson-GX series.
-Here we add the initial support of the HS200 mode with
-clock running at 166MHz (to be safe), since we found some eMMC chip
-fail to run at 200MHz due to tunning phase error.
-
-Signed-off-by: Nan Li <nan.li@amlogic.com>
-Signed-off-by: Yixun Lan <yixun.lan@amlogic.com>
-
----
-Hi Kevin
-  Please note this patch actually depend on the eMMC driver here [0].
-  Still a few problem to solve, to improve the tuning phase driver to make
-the clock running at 200MHz, and to further support the HS400 mode.
-Anyway, this patch itself is quite independent.
-
-changes since v1 at [1]:
- - fix missing gpio dt-bindings header
-
-[0] http://lkml.kernel.org/r/20180403100652.41056-1-yixun.lan@amlogic.com
-[1] http://lkml.kernel.org/r/20180403102651.60340-1-yixun.lan@amlogic.com
----
- arch/arm64/boot/dts/amlogic/meson-axg-s400.dts | 58 ++++++++++++++++++
- arch/arm64/boot/dts/amlogic/meson-axg.dtsi     | 82 ++++++++++++++++++++++++++
- 2 files changed, 140 insertions(+)
-
-diff --git a/arch/arm64/boot/dts/amlogic/meson-axg-s400.dts b/arch/arm64/boot/dts/amlogic/meson-axg-s400.dts
-index 57eedced5a51..f67d4e47e641 100644
---- a/arch/arm64/boot/dts/amlogic/meson-axg-s400.dts
-+++ b/arch/arm64/boot/dts/amlogic/meson-axg-s400.dts
-@@ -15,6 +15,44 @@
- 		serial0 = &uart_AO;
- 		serial1 = &uart_A;
- 	};
-+
-+	vddio_boot: regulator-vddio_boot {
-+		compatible = "regulator-fixed";
-+		regulator-name = "VDDIO_BOOT";
-+		regulator-min-microvolt = <1800000>;
-+		regulator-max-microvolt = <1800000>;
-+	};
-+
-+	vddao_3v3: regulator-vddao_3v3 {
-+		compatible = "regulator-fixed";
-+		regulator-name = "VDDAO_3V3";
-+		regulator-min-microvolt = <3300000>;
-+		regulator-max-microvolt = <3300000>;
-+	};
-+
-+	vddio_ao18: regulator-vddio_ao18 {
-+		compatible = "regulator-fixed";
-+		regulator-name = "VDDIO_AO18";
-+		regulator-min-microvolt = <1800000>;
-+		regulator-max-microvolt = <1800000>;
-+	};
-+
-+	vcc_3v3: regulator-vcc_3v3 {
-+		compatible = "regulator-fixed";
-+		regulator-name = "VCC_3V3";
-+		regulator-min-microvolt = <3300000>;
-+		regulator-max-microvolt = <3300000>;
-+	};
-+
-+	emmc_pwrseq: emmc-pwrseq {
-+		compatible = "mmc-pwrseq-emmc";
-+		reset-gpios = <&gpio BOOT_9 GPIO_ACTIVE_LOW>;
-+	};
-+
-+	sdio_pwrseq: sdio-pwrseq {
-+		compatible = "mmc-pwrseq-simple";
-+		reset-gpios = <&gpio GPIOX_6 GPIO_ACTIVE_LOW>;
-+	};
- };
- 
- &ethmac {
-@@ -47,3 +85,23 @@
- 	pinctrl-0 = <&i2c1_z_pins>;
- 	pinctrl-names = "default";
- };
-+
-+/* emmc storage */
-+&sd_emmc_c {
-+	status = "okay";
-+	pinctrl-0 = <&emmc_pins>;
-+	pinctrl-1 = <&emmc_clk_gate_pins>;
-+	pinctrl-names = "default", "clk-gate";
-+
-+	bus-width = <8>;
-+	cap-sd-highspeed;
-+	cap-mmc-highspeed;
-+	max-frequency = <180000000>;
-+	non-removable;
-+	disable-wp;
-+	mmc-ddr-1_8v;
-+	mmc-hs200-1_8v;
-+
-+	vmmc-supply = <&vcc_3v3>;
-+	vqmmc-supply = <&vddio_boot>;
-+};
-diff --git a/arch/arm64/boot/dts/amlogic/meson-axg.dtsi b/arch/arm64/boot/dts/amlogic/meson-axg.dtsi
-index b58808eb3cc8..cb70778c323c 100644
---- a/arch/arm64/boot/dts/amlogic/meson-axg.dtsi
-+++ b/arch/arm64/boot/dts/amlogic/meson-axg.dtsi
-@@ -7,6 +7,7 @@
- #include <dt-bindings/interrupt-controller/irq.h>
- #include <dt-bindings/interrupt-controller/arm-gic.h>
- #include <dt-bindings/clock/axg-clkc.h>
-+#include <dt-bindings/gpio/meson-axg-gpio.h>
- 
- / {
- 	compatible = "amlogic,meson-axg";
-@@ -113,6 +114,36 @@
- 		#size-cells = <2>;
- 		ranges;
- 
-+		apb: apb@ffe00000 {
-+			compatible = "simple-bus";
-+			reg = <0x0 0xffe00000 0x0 0x200000>;
-+			#address-cells = <2>;
-+			#size-cells = <2>;
-+			ranges = <0x0 0x0 0x0 0xffe00000 0x0 0x200000>;
-+
-+			sd_emmc_b: sd@5000 {
-+				compatible = "amlogic,meson-axg-mmc";
-+				reg = <0x0 0x5000 0x0 0x2000>;
-+				interrupts = <GIC_SPI 217 IRQ_TYPE_EDGE_RISING>;
-+				status = "disabled";
-+				clocks = <&clkc CLKID_SD_EMMC_B>,
-+					<&clkc CLKID_SD_EMMC_B_CLK0>,
-+					<&clkc CLKID_FCLK_DIV2>;
-+				clock-names = "core", "clkin0", "clkin1";
-+			};
-+
-+			sd_emmc_c: mmc@7000 {
-+				compatible = "amlogic,meson-axg-mmc";
-+				reg = <0x0 0x7000 0x0 0x2000>;
-+				interrupts = <GIC_SPI 218 IRQ_TYPE_EDGE_RISING>;
-+				status = "disabled";
-+				clocks = <&clkc CLKID_SD_EMMC_C>,
-+					<&clkc CLKID_SD_EMMC_C_CLK0>,
-+					<&clkc CLKID_FCLK_DIV2>;
-+				clock-names = "core", "clkin0", "clkin1";
-+			};
-+		};
-+
- 		cbus: bus@ffd00000 {
- 			compatible = "simple-bus";
- 			reg = <0x0 0xffd00000 0x0 0x25000>;
-@@ -309,6 +340,57 @@
- 					gpio-ranges = <&pinctrl_periphs 0 0 86>;
- 				};
- 
-+				emmc_pins: emmc {
-+					mux {
-+						groups = "emmc_nand_d0",
-+							"emmc_nand_d1",
-+							"emmc_nand_d2",
-+							"emmc_nand_d3",
-+							"emmc_nand_d4",
-+							"emmc_nand_d5",
-+							"emmc_nand_d6",
-+							"emmc_nand_d7",
-+							"emmc_clk",
-+							"emmc_cmd",
-+							"emmc_ds";
-+						function = "emmc";
-+					};
-+				};
-+
-+				emmc_clk_gate_pins: emmc_clk_gate {
-+					mux {
-+						groups = "BOOT_8";
-+						function = "gpio_periphs";
-+					};
-+					cfg-pull-down {
-+						pins = "BOOT_8";
-+						bias-pull-down;
-+					};
-+				};
-+
-+				sdio_pins: sdio {
-+					mux {
-+						groups = "sdio_d0",
-+							"sdio_d1",
-+							"sdio_d2",
-+							"sdio_d3",
-+							"sdio_cmd",
-+							"sdio_clk";
-+						function = "sdio";
-+					};
-+				};
-+
-+				sdio_clk_gate_pins: sdio_clk_gate {
-+					mux {
-+						groups = "GPIOX_4";
-+						function = "gpio_periphs";
-+					};
-+					cfg-pull-down {
-+						pins = "GPIOX_4";
-+						bias-pull-down;
-+					};
-+				};
-+
- 				eth_rmii_x_pins: eth-x-rmii {
- 					mux {
- 						groups = "eth_mdio_x",
--- 
-2.16.2
+K2ppbmd1b2p1biBqaW5nYmluZw0KDQotLS0tLemCruS7tuWOn+S7ti0tLS0tDQrlj5Hku7bkuro6
+IFNoYXduIExpbiBbbWFpbHRvOnNoYXduLmxpbkByb2NrLWNoaXBzLmNvbV0gDQrlj5HpgIHml7bp
+l7Q6IDIwMTjlubQ05pyIOOaXpSA5OjUyDQrmlLbku7bkuro6IFJ5YW4gR3JhY2hlaw0K5oqE6YCB
+OiBzaGF3bi5saW5Acm9jay1jaGlwcy5jb207IEphZWhvb24gQ2h1bmc7IFVsZiBIYW5zc29uOyBs
+aW51eC1tbWNAdmdlci5rZXJuZWwub3JnOyBsaW51eC1rZXJuZWxAdmdlci5rZXJuZWwub3JnOyBa
+aGFuZ2ZlaSBHYW87IGxpd2VpIChDTSk7IFN1emh1YW5nbHVhbg0K5Li76aKYOiBSZTogW1BBVENI
+XSBtbWM6IGR3X21tYy1rMzogRml4IEREUjUyIG1vZGUgYnkgc2V0dGluZyByZXF1aXJlZCBjbG9j
+ayBkaXZpc29yDQoNCk9uIDIwMTgvNC82IDIxOjQxLCBSeWFuIEdyYWNoZWsgd3JvdGU6DQo+IE9u
+IFdlZCwgQXByIDQsIDIwMTggYXQgNzo1MSBQTSwgU2hhd24gTGluIDxzaGF3bi5saW5Acm9jay1j
+aGlwcy5jb20+IHdyb3RlOg0KPj4gWysgWmhhbmdmZWkgR2FvIHdobyBhZGRlZCBzdXBwb3J0IGZv
+ciBoaTYyMjBdDQo+Pg0KPj4gT24gMjAxOC80LzQgMjM6MzEsIFJ5YW4gR3JhY2hlayB3cm90ZToN
+Cj4+Pg0KPj4+IE9uIFR1ZSwgQXByIDMsIDIwMTggYXQgNjozMSBBTSwgU2hhd24gTGluIDxzaGF3
+bi5saW5Acm9jay1jaGlwcy5jb20gDQo+Pj4gPG1haWx0bzpzaGF3bi5saW5Acm9jay1jaGlwcy5j
+b20+PiB3cm90ZToNCj4+Pg0KPj4+ICAgICAgT24gMjAxOC8zLzMwIDI6MjQsIG9zY2FyZGFncmFj
+aCB3cm90ZToNCj4+Pg0KPj4+ICAgICAgTmVlZCBhdCBsZWFzdCBvbmUgbGluZSBjb21taXQgYm9k
+eS4NCj4+Pg0KPj4+ICAgICAgICAgIFNpZ25lZC1vZmYtYnk6IG9zY2FyZGFncmFjaCA8cnlhbkBl
+ZGl0ZWQudXMgDQo+Pj4gPG1haWx0bzpyeWFuQGVkaXRlZC51cz4+DQo+Pj4NCj4+PiAgICAgICAg
+ICAtLS0NCj4+PiAgICAgICAgICAgICBkcml2ZXJzL21tYy9ob3N0L2R3X21tYy1rMy5jIHwgMTAg
+KysrKysrKystLQ0KPj4+ICAgICAgICAgICAgIDEgZmlsZSBjaGFuZ2VkLCA4IGluc2VydGlvbnMo
+KyksIDIgZGVsZXRpb25zKC0pDQo+Pj4NCj4+PiAgICAgICAgICBkaWZmIC0tZ2l0IGEvZHJpdmVy
+cy9tbWMvaG9zdC9kd19tbWMtazMuYw0KPj4+ICAgICAgICAgIGIvZHJpdmVycy9tbWMvaG9zdC9k
+d19tbWMtazMuYw0KPj4+ICAgICAgICAgIGluZGV4IDg5Y2RiM2Q1MzNiYi4uZWZjNTQ2Y2I0ZGI4
+IDEwMDY0NA0KPj4+ICAgICAgICAgIC0tLSBhL2RyaXZlcnMvbW1jL2hvc3QvZHdfbW1jLWszLmMN
+Cj4+PiAgICAgICAgICArKysgYi9kcml2ZXJzL21tYy9ob3N0L2R3X21tYy1rMy5jDQo+Pj4gICAg
+ICAgICAgQEAgLTE5NCw4ICsxOTQsMTQgQEAgc3RhdGljIHZvaWQgZHdfbWNpX2hpNjIyMF9zZXRf
+aW9zKHN0cnVjdA0KPj4+ICAgICAgICAgIGR3X21jaSAqaG9zdCwgc3RydWN0IG1tY19pb3MgKmlv
+cykNCj4+PiAgICAgICAgICAgICAgICAgICBpbnQgcmV0Ow0KPj4+ICAgICAgICAgICAgICAgICAg
+IHVuc2lnbmVkIGludCBjbG9jazsNCj4+PiAgICAgICAgICAgICAtICAgICBjbG9jayA9IChpb3Mt
+PmNsb2NrIDw9IDI1MDAwMDAwKSA/IDI1MDAwMDAwIDogaW9zLT5jbG9jazsNCj4+PiAgICAgICAg
+ICAtDQo+Pj4gICAgICAgICAgKyAgICAgICAvKiBDTEtESVYgbXVzdCBiZSAxIGZvciBERFI1Mi84
+LWJpdCBtb2RlICovDQo+Pj4gICAgICAgICAgKyAgICAgICBpZiAoaW9zLT5idXNfd2lkdGggPT0g
+TU1DX0JVU19XSURUSF84ICYmDQo+Pj4gICAgICAgICAgKyAgICAgICAgICAgICAgIGlvcy0+dGlt
+aW5nID09IE1NQ19USU1JTkdfTU1DX0REUjUyKSB7DQo+Pj4gICAgICAgICAgKyAgICAgICAgICAg
+ICAgIG1jaV93cml0ZWwoaG9zdCwgQ0xLRElWLCAweDEpOw0KPj4+ICAgICAgICAgICsgICAgICAg
+ICAgICAgICBjbG9jayA9IGlvcy0+Y2xvY2s7DQo+Pj4gICAgICAgICAgKyAgICAgICB9IGVsc2Ug
+ew0KPj4+ICAgICAgICAgICsgICAgICAgICAgICAgICBjbG9jayA9IChpb3MtPmNsb2NrIDw9IDI1
+MDAwMDAwKSA/IDI1MDAwMDAwIDoNCj4+PiAgICAgICAgICBpb3MtPmNsb2NrOw0KPj4+ICAgICAg
+ICAgICsgICAgICAgfQ0KPj4+DQo+Pj4NCj4+PiAgICAgIEkgdW5kZXJ0YW5kIEREUjUyLzgtYml0
+IG5lZWQgQ0xLRElWIGZpeGVkIDEsIGJ1dCBzaG91bGRuJ3QgdGhlIA0KPj4+IGZvbGxvd2luZw0K
+Pj4+ICAgICAgY2hhbmdlIGlzIG1vcmUgc2Vuc2libGU/DQo+Pj4NCj4+PiAgICAgIGlmIChpb3Mt
+PmJ1c193aWR0aCA9PSBNTUNfQlVTX1dJRFRIXzggJiYgaW9zLT50aW1pbmcgPT0NCj4+PiAgICAg
+IE1NQ19USU1JTkdfTU1DX0REUjUyKQ0KPj4+ICAgICAgICAgICAgICAgY2xvY2sgPSBpb3MtPmNs
+b2NrICogMjsNCj4+PiAgICAgIGVsc2UNCj4+PiAgICAgICAgICAgICAgIGNsb2NrID0gKGlvcy0+
+Y2xvY2sgPD0gMjUwMDAwMDApID8gMjUwMDAwMDAgOiANCj4+PiBpb3MtPmNsb2NrOw0KPj4+DQo+
+Pj4NCj4+PiAgICAgIFRoZSByZWFzb24gaXMgaW9zLT5jbG9jayBpcyA1Mk1IeiBhbmQgeW91IGNv
+dWxkIGNsYWltIDEwNE1IeiBmcm9tIHRoZQ0KPj4+ICAgICAgY2xvY2sgcHJvdmlkZXIgYW5kIGxl
+dCBkd19tbWMgY29yZSB0YWtlIGNhcmUgb2YgdGhlIGRpdmRlciB0byBiZSAxLg0KPj4+ICAgICAg
+T3RoZXJ3aXNlLCB5b3UganVzdCBmb3JjZSBpdCB0byBiZSBERFI1Mi84LWJpdCB3aXRoIGEgY2xr
+IHJhdGUgDQo+Pj4gb2YgMjZNSHouDQo+Pj4NCj4+Pg0KPj4+ICAgICAgICAgICAgICAgICAgIHJl
+dCA9IGNsa19zZXRfcmF0ZShob3N0LT5iaXVfY2xrLCBjbG9jayk7DQo+Pj4gICAgICAgICAgICAg
+ICAgICAgaWYgKHJldCkNCj4+PiAgICAgICAgICAgICAgICAgICAgICAgICAgIGRldl93YXJuKGhv
+c3QtPmRldiwgImZhaWxlZCB0byBzZXQgcmF0ZQ0KPj4+ICAgICAgICAgICV1SHpcbiIsIGNsb2Nr
+KTsNCj4+Pg0KPj4+DQo+Pj4NCj4+DQo+PiBGb3IgZnV0dXJlIHdpc2UsIHBsZWFzZSB1c2UgcGxh
+aW4gbW9kZSBtYWlsLCBidXQgbm90IEhUTUwgZm9ybWF0Lg0KPj4NCj4+PiBZb3VyIGZlZWRiYWNr
+IGlzIGNvcnJlY3QuIEkgc2VlIHRoZSBSb2NrY2hpcCBkd21tYyBkcml2ZXIgaGFzIGEgDQo+Pj4g
+c2ltaWxhciBpbXBsZW1lbnRhdGlvbi4gQWZ0ZXIgYXBwbHlpbmcgeW91ciBzdWdnZXN0ZWQgY2hh
+bmdlcywgDQo+Pj4gaG93ZXZlciwgbXkgYm9hcmQgcmVwb3J0cyAiZHdtbWNfazMgZjcyM2QwMDAu
+ZHdtbWMwOiBmYWlsZWQgdG8gc2V0IHJhdGUgMTA0MDAwMDAwSHoiDQo+Pj4gZHVyaW5nIGludGlh
+bGl6YXRpb24gb2YgZU1NQy4gSW4gYWRkaXRpb24sIEkgZG8gbm90IHNlZSBDTEtESVYgYmVpbmcg
+DQo+Pj4gc2V0IHRvIDEuIGNsa19zZXRfcmF0ZSBmYWlscyBhbmQgSSB3b25kZXIgaWYgdGhpcyBp
+cyBvdXQtb2Ytc2NvcGUgb2YgDQo+Pj4gdGhlIGRyaXZlci4NCj4+Pg0KPj4+IElmIEkgc2V0IENM
+S0RJViB3aGVyZSBJIGRpZCBwcmlvciwgd2l0aCB5b3VyIGNoYW5nZXMsIHRoZSBkZXZpY2UgDQo+
+Pj4gZmFpbHMgdG8gc2V0IHRoZSBjbG9jayBhbmQgZmFsbHMgYmFjayB0byA1MiBNSHogKDI2IE1I
+eikgYW5kIHdvcmtzIA0KPj4+IGZpbmUsIGJ1dCBhZ2FpbiwgQ0xLRElWIGlzIHJlcG9ydGVkIGFz
+IDAgKGV2ZW4gdGhvdWdoIGl0IGlzIDEuKSBPbmUgDQo+Pj4gdGhpbmcgb2YgaW50ZXJlc3QgdG8g
+bm90ZSBpcyB3aGVuIEkgbWFudWFsbHkgc2V0IHRoZSBjbG9jayBieSBkb2luZzoNCj4+PiAoZWNo
+byAxMDQwMDAwMDAgPiAvc3lzL2tlcm5lbC9kZWJ1Zy9tbWMwL2Nsb2NrKSB0aGUgZGV2aWNlIHJl
+cG9ydHMgDQo+Pj4gYmFjayAnbW1jX2hvc3QgbW1jMDogQnVzIHNwZWVkIChzbG90IDApID0gMTk4
+NDAwMDAwSHogKHNsb3QgcmVxIDEwNDAwMDAwMEh6LA0KPj4+ICAgIGFjdHVhbCA5OTIwMDAwMEha
+IGRpdiA9IDEpJyB3aGljaCB3b3JrcyByZWxpYWJseSBhbmQgY2xrX3NldF9yYXRlIA0KPj4+IGRv
+ZXMgbm90IHJlcG9ydCBhbnkgZXJyb3IuDQo+Pj4NCj4+DQo+PiBXaGVuIGxvb2tpbmcgY2xvc2Vs
+eSBpbnRvIHRoZSBjb2RlLCBhdCBsZWFzdCBkd19tY2lfaGk2MjIwX3NldF9pb3MgDQo+PiBnb2Vz
+IHdyb25nIHdpdGggdGhlIGJ1c19oeiwgc2luY2UgaXQgc2hvdWxkIGJlIGNpdV9jbGsgYnV0IG5v
+dCBiaXVfY2xrLg0KPj4gImIiIHN0YW5kcyBmb3IgYnVzLCBhbmQgImMiIHN0YW5kcyBmb3IgY2Fy
+ZCBJTUhPLCBob3dldmVyIGJ1c19oeiANCj4+IGRlc2NyaWJzIHRoZSBjbG9jayB0byB0aGUgY2Fy
+ZCwgcHJvdmlkZWQgYnkgY29udHJvbGxlci4gRG9lcyB0aGUgDQo+PiBmb2xsb3dpbmcgcGF0Y2gg
+aGVscD8NCj4+DQo+Pg0KPj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3QvZHdfbW1jLWsz
+LmMgDQo+PiBiL2RyaXZlcnMvbW1jL2hvc3QvZHdfbW1jLWszLmMgaW5kZXggODljZGIzZC4uOWU3
+OGNmMiAxMDA2NDQNCj4+IC0tLSBhL2RyaXZlcnMvbW1jL2hvc3QvZHdfbW1jLWszLmMNCj4+ICsr
+KyBiL2RyaXZlcnMvbW1jL2hvc3QvZHdfbW1jLWszLmMNCj4+IEBAIC0xOTQsMTMgKzE5NCwyMSBA
+QCBzdGF0aWMgdm9pZCBkd19tY2lfaGk2MjIwX3NldF9pb3Moc3RydWN0IGR3X21jaSANCj4+ICpo
+b3N0LCBzdHJ1Y3QgbW1jX2lvcyAqaW9zKQ0KPj4gICAgICAgICAgaW50IHJldDsNCj4+ICAgICAg
+ICAgIHVuc2lnbmVkIGludCBjbG9jazsNCj4+DQo+PiAtICAgICAgIGNsb2NrID0gKGlvcy0+Y2xv
+Y2sgPD0gMjUwMDAwMDApID8gMjUwMDAwMDAgOiBpb3MtPmNsb2NrOw0KPj4gKyAgICAgICBpZiAo
+aW9zLT5idXNfd2lkdGggPT0gTU1DX0JVU19XSURUSF84ICYmDQo+PiArICAgICAgICAgICBpb3Mt
+PnRpbWluZyA9PSBNTUNfVElNSU5HX01NQ19ERFI1MikNCj4+ICsgICAgICAgICAgICAgICBjbG9j
+ayA9IGlvcy0+Y2xvY2sgKiAyOw0KPj4gKyAgICAgICBlbHNlDQo+PiArICAgICAgICAgICAgICAg
+Y2xvY2sgPSAoaW9zLT5jbG9jayA8PSAyNTAwMDAwMCkgPyAyNTAwMDAwMCA6IA0KPj4gKyBpb3Mt
+PmNsb2NrOw0KPj4NCj4+IC0gICAgICAgcmV0ID0gY2xrX3NldF9yYXRlKGhvc3QtPmJpdV9jbGss
+IGNsb2NrKTsNCj4+ICsgICAgICAgcmV0ID0gY2xrX3NldF9yYXRlKGhvc3QtPmNpdV9jbGssIGNs
+b2NrKTsNCj4+ICAgICAgICAgIGlmIChyZXQpDQo+PiAgICAgICAgICAgICAgICAgIGRldl93YXJu
+KGhvc3QtPmRldiwgImZhaWxlZCB0byBzZXQgcmF0ZSAldUh6XG4iLCANCj4+IGNsb2NrKTsNCj4+
+DQo+PiAtICAgICAgIGhvc3QtPmJ1c19oeiA9IGNsa19nZXRfcmF0ZShob3N0LT5iaXVfY2xrKTsN
+Cj4+ICsgICAgICAgY2xvY2sgPSBjbGtfZ2V0X3JhdGUoaG9zdC0+Y2l1X2Nsayk7DQo+PiArICAg
+ICAgIGlmIChjbG9jayAhPSBob3N0LT5idXNfaHopIHsNCj4+ICsgICAgICAgICAgICAgICBob3N0
+LT5idXNfaHogPSBjbG9jazsNCj4+ICsgICAgICAgICAgICAgICBob3N0LT5jdXJyZW50X3NwZWVk
+ID0gMDsNCj4+ICsgICAgICAgfQ0KPj4NCj4+ICAgfQ0KPj4NCj4+DQo+Pj4gSSBhbSBub3Qgc3Vy
+ZSB3aGVyZSB0byBiZWdpbiBkZWJ1Z2dpbmcgdGhlc2UgY2xvY2sgaXNzdWVzIGFuZCANCj4+PiB3
+ZWxjb21lIGFueSBmZWVkYmFjay4NCj4+DQo+Pg0KPiANCj4gVGhlIGNoYW5nZSByZXN1bHRzIGlu
+IHRoZSBmb2xsb3dpbmc6DQo+ICdkd21tY19rMyBmNzIzZTAwMC5kd21tYzE6IGZhaWxlZCB0byBz
+ZXQgcmF0ZSAyNTAwMDAwMEh6Jw0KPiAnZHdtbWNfazMgZjcyM2QwMDAuZHdtbWMwOiBmYWlsZWQg
+dG8gc2V0IHJhdGUgMjUwMDAwMDBIeicNCj4gJ2R3bW1jX2szIGY3MjNmMDAwLmR3bW1jMjogZmFp
+bGVkIHRvIHNldCByYXRlIDI1MDAwMDAwSHonDQo+IA0KPiBhbmQgbGF0ZXIgb246DQo+ICdkd21t
+Y19rMyBmNzIzZDAwMC5kd21tYzA6IGZhaWxlZCB0byBzZXQgcmF0ZSA1MjAwMDAwMEh6Jw0KPiAn
+ZHdtbWNfazMgZjcyM2QwMDAuZHdtbWMwOiBmYWlsZWQgdG8gc2V0IHJhdGUgMTA0MDAwMDAwSHon
+DQo+IA0KPiBFdmVudHVhbGx5IG1tYzEgKFVIUy0xIE1pY3JvU0QpIHdpbGwgc2V0dGxlIGRvd24g
+YWZ0ZXIgcmVwZWF0ZWQgDQo+IGF0dGVtcHRzIGF0IHNldHRpbmcgMjUgTUh6Og0KPiAnbW1jX2hv
+c3QgbW1jMTogQnVzIHNwZWVkIChzbG90IDApID0gMTAwMDAwMDAwSHogKHNsb3QgcmVxIA0KPiAx
+MDAwMDAwMDBIeiwgYWN0dWFsIDEwMDAwMDAwMEhaIGRpdiA9IDApJw0KPiAnbW1jMTogbmV3IHVs
+dHJhIGhpZ2ggc3BlZWQgU0RSNTAgU0RIQyBjYXJkIGF0IGFkZHJlc3MgMDAwMScNCj4gJ21tY2Js
+azE6IG1tYzE6MDAwMSBHQjFRVCAyOS44IEdpQicNCj4gDQo+IFNhbWUgZm9yIG1tYzIgKFNESU8g
+V0wxODM1TU9EIFdpRmkpOg0KPiAnbW1jX2hvc3QgbW1jMjogQnVzIHNwZWVkIChzbG90IDApID0g
+MTAwMDAwMDAwSHogKHNsb3QgcmVxIDUwMDAwMDAwSHosIA0KPiBhY3R1YWwgNTAwMDAwMDBIWiBk
+aXYgPSAxKScNCj4gJ21tYzI6IG5ldyBoaWdoIHNwZWVkIFNESU8gY2FyZCBhdCBhZGRyZXNzIDAw
+MDEnDQo+IA0KPiBTbyBtbWMxIGFuZCBtbWMyIHdpbGwgaW5pdGlhbGl6ZSBldmVudHVhbGx5LiBJ
+IGhhZCBub3Qgb2JzZXJ2ZWQgdGhpcyANCj4gYmVoYXZpb3IgcHJpb3IuIEl0IGFwcGVhcnMgdG8g
+ZmFpbCBzZXR0aW5nIGFsbCBkZXZpY2VzIHRvIGFuIGluaXRpYWwgDQo+IHJhdGUgb2YgMjUgTUh6
+LiBIb3dldmVyLCB0aGUgc2FtZSBjYW5ub3QgYmUgc2FpZCBmb3IgbW1jMCAoZU1NQykuDQo+IEFn
+YWluLCBJIG9ic2VydmVkIGJlaW5nIGFibGUgdG8gc2V0IHRoZSBjbG9jayBtYW51YWxseSB0aHJv
+dWdoIGRlYnVnZnMgDQo+IHRvIDEwNE1IeigvMikgd2hpY2ggaXMgc3VjY2Vzc2Z1bCBhbmQgdGhl
+IGNhcmQgYmVjb21lcyBzdGFibGUgYW5kIHdpbGwgDQo+IGluaXRpYWxpemUgcHJvcGVybHkuDQo+
+IA0KPiAnZWNobyAxMDQwMDAwMDAgPiAvc3lzL2tlcm5lbC9kZWJ1Zy9tbWMwL2Nsb2NrJw0KPiAn
+bW1jX2hvc3QgbW1jMDogQnVzIHNwZWVkIChzbG90IDApID0gMjAwMDAwMDAwSHogKHNsb3QgcmVx
+IA0KPiAxMDQwMDAwMDBIeiwgYWN0dWFsIDEwMDAwMDAwMEhaIGRpdiA9IDEpJw0KPiANCj4gU28g
+aXQgc2VlbXMgdG8gc2V0dGxlIGRvd24gYXQgNTAgTUh6LCBidXQgb25seSBpZiBzZXQgbWFudWFs
+bHkuIEl0IA0KPiBkb2VzIGFwcGVhciBDTEtESVYgaXMgYmVpbmcgc2V0IGFjY29yZGluZ2x5IG5v
+dy4NCg0KSG1tLi4uLiBJIGNhbid0IHNlZSBhbnkgZGlmZmVyZW5jZXMuLiBBbmQgZmFpbGVkIHRv
+IHNldCBjbG9jayByYXRlIGluIHRoZSBmaXJzdCBwbGFjZSBhbmQgZmluYWxseSBnb3QgaXQsIHdo
+aWNoIGJleW9uZCB0aGUgbW1jIGRyaXZlciBzY29wZS4gTWF5YmUgaGlzaWxpY29uIGd1eXMgaGF2
+ZSBtb3JlIGlkZWEgaGVyZS4NCg0KPiANCj4gDQo+IA0KDQo=
