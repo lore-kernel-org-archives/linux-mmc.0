@@ -1,41 +1,55 @@
-From: Jia-Ju Bai <baijiaju1990@gmail.com>
-Subject: [PATCH 3/3] mmc: wbsd: Replace mdelay with usleep_range in wbsd_pnp_resume
-Date: Wed, 11 Apr 2018 10:47:13 +0800
-Message-ID: <1523414833-2714-1-git-send-email-baijiaju1990@gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v.4.17-rc1
+Date: Wed, 11 Apr 2018 14:22:15 +0200
+Message-ID: <1523449335-15724-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: pierre@ossman.eu, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Jia-Ju Bai <baijiaju1990@gmail.com>
+To: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-wbsd_pnp_resume() is never called in atomic context.
-This function is only set as ".resume" in struct pnp_driver.
+Hi Linus,
 
-Despite never getting called from atomic context, wbsd_pnp_resume()
-calls mdelay() to busily wait.
-This is not necessary and can be replaced with usleep_range() to
-avoid busy waiting.
+Here's a PR with a couple of MMC fixes intended for v4.17-rc1. Details about
+the highlights are as usual found in the signed tag.
 
-This is found by a static analysis tool named DCNS written by myself.
-And I also manually check it.
+Please pull this in!
 
-Signed-off-by: Jia-Ju Bai <baijiaju1990@gmail.com>
----
- drivers/mmc/host/wbsd.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Kind regards
+Ulf Hansson
 
-diff --git a/drivers/mmc/host/wbsd.c b/drivers/mmc/host/wbsd.c
-index 546aaf8..83e13cf 100644
---- a/drivers/mmc/host/wbsd.c
-+++ b/drivers/mmc/host/wbsd.c
-@@ -1890,7 +1890,7 @@ static int wbsd_pnp_resume(struct pnp_dev *pnp_dev)
- 	/*
- 	 * Allow device to initialise itself properly.
- 	 */
--	mdelay(5);
-+	usleep_range(5000, 6000);
- 
- 	wbsd_init_device(host);
- 	return 0;
--- 
-1.9.1
+
+The following changes since commit 17dec0a949153d9ac00760ba2f5b78cb583e995f:
+
+  Merge branch 'userns-linus' of git://git.kernel.org/pub/scm/linux/kernel/git/ebiederm/user-namespace (2018-04-03 19:15:32 -0700)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v4.17-2
+
+for you to fetch changes up to fc167daff581c01ebce8695e9618231cae3561a1:
+
+  mmc: tmio: Fix error handling when issuing CMD23 (2018-04-04 12:21:27 +0200)
+
+----------------------------------------------------------------
+MMC core:
+ - Prevent bus reference leak in mmc_blk_init()
+
+MMC host:
+ - tmio: Fix error handling when issuing CMD23
+ - jz4740: Fix race condition in IRQ mask update
+
+----------------------------------------------------------------
+Alex Smith (1):
+      mmc: jz4740: Fix race condition in IRQ mask update
+
+Alexander Kappner (1):
+      mmc: core: Prevent bus reference leak in mmc_blk_init()
+
+Masaharu Hayakawa (1):
+      mmc: tmio: Fix error handling when issuing CMD23
+
+ drivers/mmc/core/block.c         | 1 +
+ drivers/mmc/host/jz4740_mmc.c    | 2 +-
+ drivers/mmc/host/tmio_mmc_core.c | 2 +-
+ 3 files changed, 3 insertions(+), 2 deletions(-)
