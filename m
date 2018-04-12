@@ -1,51 +1,47 @@
-From: Jia-Ju Bai <baijiaju1990@gmail.com>
-Subject: Re: [PATCH 1/3] mmc: wbsd: Replace mdelay with usleep_range in
- wbsd_init
-Date: Thu, 12 Apr 2018 09:34:15 +0800
-Message-ID: <13f0f859-0331-c770-80ba-bc332b32582f@gmail.com>
-References: <1523414803-2626-1-git-send-email-baijiaju1990@gmail.com>
- <CAPDyKFq4hL6TRaovv9O1NLXBmd7QJQcuVGmc5kSO3Na-2gcT1g@mail.gmail.com>
+From: Mark Brown <broonie@kernel.org>
+Subject: Re: [PATCH 08/15] ASoC: pxa: remove the dmaengine compat need
+Date: Thu, 12 Apr 2018 16:26:32 +0100
+Message-ID: <20180412152632.GG9929@sirena.org.uk>
+References: <20180402142656.26815-1-robert.jarzmik@free.fr>
+ <20180402142656.26815-9-robert.jarzmik@free.fr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFq4hL6TRaovv9O1NLXBmd7QJQcuVGmc5kSO3Na-2gcT1g@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Pierre Ossman <pierre@ossman.eu>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="fCcDWlUEdh43YKr8"
+Return-path: <netdev-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20180402142656.26815-9-robert.jarzmik@free.fr>
+Sender: netdev-owner@vger.kernel.org
+To: Robert Jarzmik <robert.jarzmik@free.fr>
+Cc: Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Tejun Heo <tj@kernel.org>, Vinod Koul <vinod.koul@intel.com>, Mauro Carvalho Chehab <mchehab@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, Boris Brezillon <boris.brezillon@free-electrons.com>, David Woodhouse <dwmw2@infradead.org>, Brian Norris <computersforpeace@gmail.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Cyrille Pitchen <cyrille.pitchen@wedev4u.fr>, Nicolas Pitre <nico@fluxnic.net>, Samuel Ortiz <samuel@sortiz.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse>
 List-Id: linux-mmc@vger.kernel.org
 
 
+--fCcDWlUEdh43YKr8
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-On 2018/4/11 23:04, Ulf Hansson wrote:
-> On 11 April 2018 at 04:46, Jia-Ju Bai <baijiaju1990@gmail.com> wrote:
->> wbsd_init() is never called in atomic context.
->>
->> The call chains ending up at wbsd_init() are:
->> [1] wbsd_init() <- wbsd_probe()
->> [2] wbsd_init() <- wbsd_pnp_probe()
->>
->> wbsd_probe() is set as ".probe" in struct platform_driver.
->> wbsd_pnp_probe() is set as ".probe" in struct pnp_driver.
->> These functions are not called in atomic context.
->>
->> Despite never getting called from atomic context, wbsd_init()
->> calls mdelay() to busily wait.
->> This is not necessary and can be replaced with usleep_range() to
->> avoid busy waiting.
->>
->> This is found by a static analysis tool named DCNS written by myself.
->> And I also manually check it.
->>
->> Signed-off-by: Jia-Ju Bai <baijiaju1990@gmail.com>
-> The patch is good, however I think you should squash all three in this
-> series into one. For obvious reasons.
+On Mon, Apr 02, 2018 at 04:26:49PM +0200, Robert Jarzmik wrote:
+> As the pxa architecture switched towards the dmaengine slave map, the
+> old compatibility mechanism to acquire the dma requestor line number and
+> priority are not needed anymore.
 
-Hello, Ulf.
-Thanks for your reply and advice :)
-I will follow it in my future patches.
+Acked-by: Mark Brown <broonie@kernel.org>
 
+If there's no dependency I'm happy to take this for 4.18.
 
-Best wishes,
-Jia-Ju Bai
+--fCcDWlUEdh43YKr8
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAlrPeqcACgkQJNaLcl1U
+h9BSZAf/TjOZQziPXrBJ727QgQKnwF8+6GXuQPc3HlwShDoJ9qAWnzcOSwzJ8fkE
+dcG2858Zo0M7NCqcoOokOhM4wKUOn3aCE78wDsjEPX/PohKdI3uHZXBLbSrFaSF8
+y1TYjHDRCKqYTTfaG4bNfONcAb+ymbxjGD4ZOsrkV82pl8tCA+zCT5g6C8PrqshL
+GwwmmJQHGK0CU477p0+QN/EsW/B9VNLNsqpeFS9WAlZcTuA004mW/3YYf8hwpk0i
+pFqD2AXnmrDVsynBm78eKaAtqMRUkd0I/iWRWqFf7DtVVx6Foo8877fCdcVLYgYI
+mArYZJIh+YC/f25ftES/xWmAqIokOQ==
+=INfO
+-----END PGP SIGNATURE-----
+
+--fCcDWlUEdh43YKr8--
