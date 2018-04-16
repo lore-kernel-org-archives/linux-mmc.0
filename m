@@ -1,65 +1,60 @@
-From: Ryder Lee <ryder.lee@mediatek.com>
-Subject: [PATCH] mmc: mediatek: use of_device_get_match_data()
-Date: Mon, 16 Apr 2018 10:33:47 +0800
-Message-ID: <e391bcb1abbe5f7ff46973a5713fd7e067b7e9ff.1523347340.git.ryder.lee@mediatek.com>
-References: <31f944ab8dfcc1d7b6f03b35657a2a34825b5246.1523347340.git.ryder.lee@mediatek.com>
+From: Maxime Ripard <maxime.ripard@bootlin.com>
+Subject: [PATCH v3 2/7] mmc: sunxi: Change sunxi_mmc_init_host argument type
+Date: Mon, 16 Apr 2018 16:23:00 +0200
+Message-ID: <0f3761e74651c81206d1ea7ed51d7da4ad846163.1523888566.git-series.maxime.ripard@bootlin.com>
+References: <cover.e9b9c0ab5bc9ffcc52a15e1c2f41462729da5b61.1523888566.git-series.maxime.ripard@bootlin.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <31f944ab8dfcc1d7b6f03b35657a2a34825b5246.1523347340.git.ryder.lee@mediatek.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chaotian Jing <chaotian.jing@mediatek.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, Ryder Lee <ryder.lee@mediatek.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <cover.e9b9c0ab5bc9ffcc52a15e1c2f41462729da5b61.1523888566.git-series.maxime.ripard@bootlin.com>
+In-Reply-To: <cover.e9b9c0ab5bc9ffcc52a15e1c2f41462729da5b61.1523888566.git-series.maxime.ripard@bootlin.com>
+References: <cover.e9b9c0ab5bc9ffcc52a15e1c2f41462729da5b61.1523888566.git-series.maxime.ripard@bootlin.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Chen-Yu Tsai <wens@csie.org>, Maxime Ripard <maxime.ripard@bootlin.com>, ulf.hansson@linaro.org
+Cc: Thomas Petazzoni <thomas.petazzoni@bootlin.com>, linux-mmc@vger.kernel.org, Quentin Schulz <quentin.schulz@bootlin.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-The usage of of_device_get_match_data() reduce the code size a bit.
+All the other functions in the driver take a struct sunxi_mmc_host pointer.
+Let's make it consistent.
 
-Also, the only way to call msdc_drv_probe() is to match an entry in
-msdc_of_ids[], so of_id cannot be NULL.
-
-Signed-off-by: Ryder Lee <ryder.lee@mediatek.com>
+Signed-off-by: Maxime Ripard <maxime.ripard@bootlin.com>
 ---
- drivers/mmc/host/mtk-sd.c | 7 ++-----
- 1 file changed, 2 insertions(+), 5 deletions(-)
+ drivers/mmc/host/sunxi-mmc.c | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 6457a7d..67e9b57 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -19,6 +19,7 @@
- #include <linux/ioport.h>
- #include <linux/irq.h>
- #include <linux/of_address.h>
-+#include <linux/of_device.h>
- #include <linux/of_irq.h>
- #include <linux/of_gpio.h>
- #include <linux/pinctrl/consumer.h>
-@@ -1808,7 +1809,6 @@ static int msdc_drv_probe(struct platform_device *pdev)
- 	struct mmc_host *mmc;
- 	struct msdc_host *host;
- 	struct resource *res;
--	const struct of_device_id *of_id;
- 	int ret;
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index 91feed8045fd..9fdaea37aa74 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -319,10 +319,9 @@ static int sunxi_mmc_reset_host(struct sunxi_mmc_host *host)
+ 	return 0;
+ }
  
- 	if (!pdev->dev.of_node) {
-@@ -1816,9 +1816,6 @@ static int msdc_drv_probe(struct platform_device *pdev)
- 		return -EINVAL;
- 	}
+-static int sunxi_mmc_init_host(struct mmc_host *mmc)
++static int sunxi_mmc_init_host(struct sunxi_mmc_host *host)
+ {
+ 	u32 rval;
+-	struct sunxi_mmc_host *host = mmc_priv(mmc);
  
--	of_id = of_match_node(msdc_of_ids, pdev->dev.of_node);
--	if (!of_id)
--		return -EINVAL;
- 	/* Allocate MMC host for this device */
- 	mmc = mmc_alloc_host(sizeof(struct msdc_host), &pdev->dev);
- 	if (!mmc)
-@@ -1887,7 +1884,7 @@ static int msdc_drv_probe(struct platform_device *pdev)
- 	msdc_of_property_parse(pdev, host);
+ 	if (sunxi_mmc_reset_host(host))
+ 		return -EIO;
+@@ -885,7 +884,7 @@ static void sunxi_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 			host->vqmmc_enabled = true;
+ 		}
  
- 	host->dev = &pdev->dev;
--	host->dev_comp = of_id->data;
-+	host->dev_comp = of_device_get_match_data(&pdev->dev);
- 	host->mmc = mmc;
- 	host->src_clk_freq = clk_get_rate(host->src_clk);
- 	/* Set host parameters to mmc */
+-		host->ferror = sunxi_mmc_init_host(mmc);
++		host->ferror = sunxi_mmc_init_host(host);
+ 		if (host->ferror)
+ 			return;
+ 
 -- 
-1.9.1
+git-series 0.9.1
