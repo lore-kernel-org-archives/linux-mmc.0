@@ -1,11 +1,15 @@
 From: Maxime Ripard <maxime.ripard@bootlin.com>
-Subject: [PATCH v3 0/7] mmc: sunxi: Add runtime PM support
-Date: Mon, 16 Apr 2018 16:22:58 +0200
-Message-ID: <cover.e9b9c0ab5bc9ffcc52a15e1c2f41462729da5b61.1523888566.git-series.maxime.ripard@bootlin.com>
+Subject: [PATCH v3 4/7] mmc: sunxi: Move clock configuration to a function
+Date: Mon, 16 Apr 2018 16:23:02 +0200
+Message-ID: <ed072568a5b39d1dbcb6c35469aa3ab04f450eda.1523888566.git-series.maxime.ripard@bootlin.com>
+References: <cover.e9b9c0ab5bc9ffcc52a15e1c2f41462729da5b61.1523888566.git-series.maxime.ripard@bootlin.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <cover.e9b9c0ab5bc9ffcc52a15e1c2f41462729da5b61.1523888566.git-series.maxime.ripard@bootlin.com>
+In-Reply-To: <cover.e9b9c0ab5bc9ffcc52a15e1c2f41462729da5b61.1523888566.git-series.maxime.ripard@bootlin.com>
+References: <cover.e9b9c0ab5bc9ffcc52a15e1c2f41462729da5b61.1523888566.git-series.maxime.ripard@bootlin.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -19,48 +23,64 @@ To: Chen-Yu Tsai <wens@csie.org>, Maxime Ripard <maxime.ripard@bootlin.com>, ulf
 Cc: Thomas Petazzoni <thomas.petazzoni@bootlin.com>, linux-mmc@vger.kernel.org, Quentin Schulz <quentin.schulz@bootlin.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+In order to improve readibility and reusability, let's move the clock setup
+to a small function called by our .set_ios hook.
 
-Since it's introduction, our MMC controller has had its external clocks
-running all the time.
+Signed-off-by: Maxime Ripard <maxime.ripard@bootlin.com>
+---
+ drivers/mmc/host/sunxi-mmc.c | 33 ++++++++++++++++++---------------
+ 1 file changed, 18 insertions(+), 15 deletions(-)
 
-While that was working great, the power usage and most importantly the EMI
-that it generated was pretty bad.
-
-Let's implement some runtime_pm hooks with an autosuspend to shut down the
-whole block when the MMC is not active.
-
-However, some SDIO devices will not probe properly if we keep shutting down
-the controller, so the autosuspend is disabled for the SDIO devices.
-
-Let me know what you think,
-Maxime
-
-Changes from v2:
-  - Dropped the patches already applied
-  - Do not power up or down the card during a runtime_resume or
-    runtime_suspend, but only take care of the controller
-  - In order to do the above, split the set_ios function into smaller
-    chunks that can be called from set_ios and our runtime_resume hook
-
-Changes from v1:
-  - Disable entirely the controller
-  - Made sure the driver would work with CONFIG_PM off
-  - Fixed an issue with the SDIO devices
-  - Rebased on top of 4.16
-
-Maxime Ripard (7):
-  mmc: sunxi: Reorder the headers
-  mmc: sunxi: Change sunxi_mmc_init_host argument type
-  mmc: sunxi: Move bus width configuration to a function
-  mmc: sunxi: Move clock configuration to a function
-  mmc: sunxi: Move the card power configuration to a function
-  mmc: sunxi: Add runtime_pm support
-  mmc: sunxi: Drop the init / reset of the controller from set_ios
-
- drivers/mmc/host/sunxi-mmc.c | 185 +++++++++++++++++++++++-------------
- 1 file changed, 122 insertions(+), 63 deletions(-)
-
-base-commit: 60cc43fc888428bb2f18f08997432d426a243338
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index c0bb75e17a44..3c1ab46cc60a 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -871,6 +871,23 @@ static void sunxi_mmc_set_bus_width(struct sunxi_mmc_host *host,
+ 	}
+ }
+ 
++static void sunxi_mmc_set_clk(struct sunxi_mmc_host *host, struct mmc_ios *ios)
++{
++	u32 rval;
++
++	/* set ddr mode */
++	rval = mmc_readl(host, REG_GCTRL);
++	if (ios->timing == MMC_TIMING_UHS_DDR50 ||
++	    ios->timing == MMC_TIMING_MMC_DDR52)
++		rval |= SDXC_DDR_MODE;
++	else
++		rval &= ~SDXC_DDR_MODE;
++	mmc_writel(host, REG_GCTRL, rval);
++
++	host->ferror = sunxi_mmc_clk_set_rate(host, ios);
++	/* Android code had a usleep_range(50000, 55000); here */
++}
++
+ static void sunxi_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ {
+ 	struct sunxi_mmc_host *host = mmc_priv(mmc);
+@@ -920,21 +937,7 @@ static void sunxi_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	}
+ 
+ 	sunxi_mmc_set_bus_width(host, ios->bus_width);
+-
+-	/* set ddr mode */
+-	rval = mmc_readl(host, REG_GCTRL);
+-	if (ios->timing == MMC_TIMING_UHS_DDR50 ||
+-	    ios->timing == MMC_TIMING_MMC_DDR52)
+-		rval |= SDXC_DDR_MODE;
+-	else
+-		rval &= ~SDXC_DDR_MODE;
+-	mmc_writel(host, REG_GCTRL, rval);
+-
+-	/* set up clock */
+-	if (ios->power_mode) {
+-		host->ferror = sunxi_mmc_clk_set_rate(host, ios);
+-		/* Android code had a usleep_range(50000, 55000); here */
+-	}
++	sunxi_mmc_set_clk(host, ios);
+ }
+ 
+ static int sunxi_mmc_volt_switch(struct mmc_host *mmc, struct mmc_ios *ios)
 -- 
 git-series 0.9.1
