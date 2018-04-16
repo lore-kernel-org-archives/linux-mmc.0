@@ -1,7 +1,8 @@
 From: Maxime Ripard <maxime.ripard@bootlin.com>
-Subject: [PATCH v3 4/7] mmc: sunxi: Move clock configuration to a function
-Date: Mon, 16 Apr 2018 16:23:02 +0200
-Message-ID: <ed072568a5b39d1dbcb6c35469aa3ab04f450eda.1523888566.git-series.maxime.ripard@bootlin.com>
+Subject: [PATCH v3 7/7] mmc: sunxi: Drop the init / reset of the controller
+ from set_ios
+Date: Mon, 16 Apr 2018 16:23:05 +0200
+Message-ID: <68af0c20ec99bda4af61d413e5feee75f0577292.1523888566.git-series.maxime.ripard@bootlin.com>
 References: <cover.e9b9c0ab5bc9ffcc52a15e1c2f41462729da5b61.1523888566.git-series.maxime.ripard@bootlin.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -23,64 +24,47 @@ To: Chen-Yu Tsai <wens@csie.org>, Maxime Ripard <maxime.ripard@bootlin.com>, ulf
 Cc: Thomas Petazzoni <thomas.petazzoni@bootlin.com>, linux-mmc@vger.kernel.org, Quentin Schulz <quentin.schulz@bootlin.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-In order to improve readibility and reusability, let's move the clock setup
-to a small function called by our .set_ios hook.
+Our set_ios hook is, when the card is power up or down, either doing a full
+init or put our controller back into a reset mode.
+
+Since we're also doing that in our runtime_pm hooks, and at possibly much
+more often, we can drop it from the set_ios, and either rely on our
+runtime_pm hooks or our probe to do it.
 
 Signed-off-by: Maxime Ripard <maxime.ripard@bootlin.com>
 ---
- drivers/mmc/host/sunxi-mmc.c | 33 ++++++++++++++++++---------------
- 1 file changed, 18 insertions(+), 15 deletions(-)
+ drivers/mmc/host/sunxi-mmc.c | 11 ++++-------
+ 1 file changed, 4 insertions(+), 7 deletions(-)
 
 diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index c0bb75e17a44..3c1ab46cc60a 100644
+index 0253deb153a4..97c6b79b7d6f 100644
 --- a/drivers/mmc/host/sunxi-mmc.c
 +++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -871,6 +871,23 @@ static void sunxi_mmc_set_bus_width(struct sunxi_mmc_host *host,
- 	}
- }
- 
-+static void sunxi_mmc_set_clk(struct sunxi_mmc_host *host, struct mmc_ios *ios)
-+{
-+	u32 rval;
-+
-+	/* set ddr mode */
-+	rval = mmc_readl(host, REG_GCTRL);
-+	if (ios->timing == MMC_TIMING_UHS_DDR50 ||
-+	    ios->timing == MMC_TIMING_MMC_DDR52)
-+		rval |= SDXC_DDR_MODE;
-+	else
-+		rval &= ~SDXC_DDR_MODE;
-+	mmc_writel(host, REG_GCTRL, rval);
-+
-+	host->ferror = sunxi_mmc_clk_set_rate(host, ios);
-+	/* Android code had a usleep_range(50000, 55000); here */
-+}
-+
- static void sunxi_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+@@ -939,14 +939,7 @@ static void sunxi_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
  {
  	struct sunxi_mmc_host *host = mmc_priv(mmc);
-@@ -920,21 +937,7 @@ static void sunxi_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	}
  
+-	if (ios->power_mode == MMC_POWER_OFF)
+-		sunxi_mmc_reset_host(host);
+-
+ 	sunxi_mmc_card_power(host, ios);
+-
+-	if (ios->power_mode == MMC_POWER_UP)
+-		sunxi_mmc_init_host(host);
+-
  	sunxi_mmc_set_bus_width(host, ios->bus_width);
--
--	/* set ddr mode */
--	rval = mmc_readl(host, REG_GCTRL);
--	if (ios->timing == MMC_TIMING_UHS_DDR50 ||
--	    ios->timing == MMC_TIMING_MMC_DDR52)
--		rval |= SDXC_DDR_MODE;
--	else
--		rval &= ~SDXC_DDR_MODE;
--	mmc_writel(host, REG_GCTRL, rval);
--
--	/* set up clock */
--	if (ios->power_mode) {
--		host->ferror = sunxi_mmc_clk_set_rate(host, ios);
--		/* Android code had a usleep_range(50000, 55000); here */
--	}
-+	sunxi_mmc_set_clk(host, ios);
+ 	sunxi_mmc_set_clk(host, ios);
  }
+@@ -1401,6 +1394,10 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		goto error_free_dma;
  
- static int sunxi_mmc_volt_switch(struct mmc_host *mmc, struct mmc_ios *ios)
++	ret = sunxi_mmc_init_host(host);
++	if (ret)
++		goto error_free_dma;
++
+ 	pm_runtime_set_active(&pdev->dev);
+ 	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
+ 	pm_runtime_use_autosuspend(&pdev->dev);
 -- 
 git-series 0.9.1
