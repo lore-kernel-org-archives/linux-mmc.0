@@ -1,12 +1,12 @@
 From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: [PATCH v3 10/20] lightnvm: Remove depends on HAS_DMA in case of
+Subject: [PATCH v3 11/20] mailbox: Remove depends on HAS_DMA in case of
  platform dependency
-Date: Tue, 17 Apr 2018 19:49:10 +0200
-Message-ID: <1523987360-18760-11-git-send-email-geert@linux-m68k.org>
+Date: Tue, 17 Apr 2018 19:49:11 +0200
+Message-ID: <1523987360-18760-12-git-send-email-geert@linux-m68k.org>
 References: <1523987360-18760-1-git-send-email-geert@linux-m68k.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
 In-Reply-To: <1523987360-18760-1-git-send-email-geert@linux-m68k.org>
 List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
@@ -22,29 +22,52 @@ To: Christoph Hellwig <hch@lst.de>, Marek Szyprowski <m.szyprowski@samsung.com>,
 Cc: devel@driverdev.osuosl.org, alsa-devel@alsa-project.org, linux-media@vger.kernel.org, linux-iio@vger.kernel.org, netdev@vger.kernel.org, linux-fpga@vger.kernel.org, linux-usb@vger.kernel.org, linux-mmc@vger.kernel.org, linux-fbdev@vger.kernel.org, linux-spi@vger.kernel.org, linux-block@vger.kernel.org, linux-ide@vger.kernel.org, iommu@lists.linux-foundation.org, linux-mtd@lists.infradead.org, linux-crypto@vger.kernel.org, linux-serial@vger.kernel.org, Geert Uytterhoeven <geert@linux-m68k.org>, linux-remoteproc@vger.kernel.org, linux1394-devel@lists.sourceforge.net, linux-kernel@vger.kernel.org, linux-i2c@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-UmVtb3ZlIGRlcGVuZGVuY2llcyBvbiBIQVNfRE1BIHdoZXJlIGEgS2NvbmZpZyBzeW1ib2wgZGVw
-ZW5kcyBvbiBhbm90aGVyCnN5bWJvbCB0aGF0IGltcGxpZXMgSEFTX0RNQSwgYW5kLCBvcHRpb25h
-bGx5LCBvbiAifHwgQ09NUElMRV9URVNUIi4KSW4gbW9zdCBjYXNlcyB0aGlzIG90aGVyIHN5bWJv
-bCBpcyBhbiBhcmNoaXRlY3R1cmUgb3IgcGxhdGZvcm0gc3BlY2lmaWMKc3ltYm9sLCBvciBQQ0ku
-CgpHZW5lcmljIHN5bWJvbHMgYW5kIGRyaXZlcnMgd2l0aG91dCBwbGF0Zm9ybSBkZXBlbmRlbmNp
-ZXMga2VlcCB0aGVpcgpkZXBlbmRlbmNpZXMgb24gSEFTX0RNQSwgdG8gcHJldmVudCBjb21waWxp
-bmcgc3Vic3lzdGVtcyBvciBkcml2ZXJzIHRoYXQKY2Fubm90IHdvcmsgYW55d2F5LgoKVGhpcyBz
-aW1wbGlmaWVzIHRoZSBkZXBlbmRlbmNpZXMsIGFuZCBhbGxvd3MgdG8gaW1wcm92ZSBjb21waWxl
-LXRlc3RpbmcuCgpTaWduZWQtb2ZmLWJ5OiBHZWVydCBVeXR0ZXJob2V2ZW4gPGdlZXJ0QGxpbnV4
-LW02OGsub3JnPgpSZXZpZXdlZC1ieTogTWFyayBCcm93biA8YnJvb25pZUBrZXJuZWwub3JnPgpB
-Y2tlZC1ieTogUm9iaW4gTXVycGh5IDxyb2Jpbi5tdXJwaHlAYXJtLmNvbT4KUmV2aWV3ZWQtYnk6
-IE1hdGlhcyBCasO4cmxpbmcgPG1iQGxpZ2h0bnZtLmlvPgotLS0KdjM6CiAgLSBBZGQgUmV2aWV3
-ZWQtYnksCiAgLSBSZWJhc2UgdG8gdjQuMTctcmMxLAogIC0gUmVtb3ZlZCBib2d1cyBub3RlcywK
-CnYyOgogIC0gQWRkIFJldmlld2VkLWJ5LCBBY2tlZC1ieSwKICAtIERyb3AgUkZDIHN0YXRlLAog
-IC0gU3BsaXQgcGVyIHN1YnN5c3RlbS4KLS0tCiBkcml2ZXJzL2xpZ2h0bnZtL0tjb25maWcgfCAy
-ICstCiAxIGZpbGUgY2hhbmdlZCwgMSBpbnNlcnRpb24oKyksIDEgZGVsZXRpb24oLSkKCmRpZmYg
-LS1naXQgYS9kcml2ZXJzL2xpZ2h0bnZtL0tjb25maWcgYi9kcml2ZXJzL2xpZ2h0bnZtL0tjb25m
-aWcKaW5kZXggMTBjMDg5ODIxODVhNTcyZi4uOWMwM2YzNWQ5ZGYxMTNjNiAxMDA2NDQKLS0tIGEv
-ZHJpdmVycy9saWdodG52bS9LY29uZmlnCisrKyBiL2RyaXZlcnMvbGlnaHRudm0vS2NvbmZpZwpA
-QCAtNCw3ICs0LDcgQEAKIAogbWVudWNvbmZpZyBOVk0KIAlib29sICJPcGVuLUNoYW5uZWwgU1NE
-IHRhcmdldCBzdXBwb3J0IgotCWRlcGVuZHMgb24gQkxPQ0sgJiYgSEFTX0RNQSAmJiBQQ0kKKwlk
-ZXBlbmRzIG9uIEJMT0NLICYmIFBDSQogCXNlbGVjdCBCTEtfREVWX05WTUUKIAloZWxwCiAJICBT
-YXkgWSBoZXJlIHRvIGdldCB0byBlbmFibGUgT3Blbi1jaGFubmVsIFNTRHMuCi0tIAoyLjcuNAoK
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KZGV2ZWwgbWFp
-bGluZyBsaXN0CmRldmVsQGxpbnV4ZHJpdmVycHJvamVjdC5vcmcKaHR0cDovL2RyaXZlcmRldi5s
-aW51eGRyaXZlcnByb2plY3Qub3JnL21haWxtYW4vbGlzdGluZm8vZHJpdmVyZGV2LWRldmVsCg==
+Remove dependencies on HAS_DMA where a Kconfig symbol depends on another
+symbol that implies HAS_DMA, and, optionally, on "|| COMPILE_TEST".
+In most cases this other symbol is an architecture or platform specific
+symbol, or PCI.
+
+Generic symbols and drivers without platform dependencies keep their
+dependencies on HAS_DMA, to prevent compiling subsystems or drivers that
+cannot work anyway.
+
+This simplifies the dependencies, and allows to improve compile-testing.
+
+Signed-off-by: Geert Uytterhoeven <geert@linux-m68k.org>
+Reviewed-by: Mark Brown <broonie@kernel.org>
+Acked-by: Robin Murphy <robin.murphy@arm.com>
+---
+v3:
+  - Rebase to v4.17-rc1,
+  - Removed bogus notes,
+
+v2:
+  - Add Reviewed-by, Acked-by,
+  - Drop RFC state,
+  - Split per subsystem.
+---
+ drivers/mailbox/Kconfig | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/drivers/mailbox/Kconfig b/drivers/mailbox/Kconfig
+index a2bb27446dce4e2b..725dce5ba62d5baf 100644
+--- a/drivers/mailbox/Kconfig
++++ b/drivers/mailbox/Kconfig
+@@ -162,7 +162,6 @@ config XGENE_SLIMPRO_MBOX
+ config BCM_PDC_MBOX
+ 	tristate "Broadcom FlexSparx DMA Mailbox"
+ 	depends on ARCH_BCM_IPROC || COMPILE_TEST
+-	depends on HAS_DMA
+ 	help
+ 	  Mailbox implementation for the Broadcom FlexSparx DMA ring manager,
+ 	  which provides access to various offload engines on Broadcom
+@@ -172,7 +171,6 @@ config BCM_FLEXRM_MBOX
+ 	tristate "Broadcom FlexRM Mailbox"
+ 	depends on ARM64
+ 	depends on ARCH_BCM_IPROC || COMPILE_TEST
+-	depends on HAS_DMA
+ 	select GENERIC_MSI_IRQ_DOMAIN
+ 	default m if ARCH_BCM_IPROC
+ 	help
+-- 
+2.7.4
