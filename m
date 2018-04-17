@@ -1,140 +1,60 @@
-From: Maxime Ripard <maxime.ripard@bootlin.com>
-Subject: [PATCH v3 6/7] mmc: sunxi: Add runtime_pm support
-Date: Mon, 16 Apr 2018 16:23:04 +0200
-Message-ID: <4514368de4ef7b4224be455f2d9e6090b464e819.1523888566.git-series.maxime.ripard@bootlin.com>
-References: <cover.e9b9c0ab5bc9ffcc52a15e1c2f41462729da5b61.1523888566.git-series.maxime.ripard@bootlin.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <cover.e9b9c0ab5bc9ffcc52a15e1c2f41462729da5b61.1523888566.git-series.maxime.ripard@bootlin.com>
-In-Reply-To: <cover.e9b9c0ab5bc9ffcc52a15e1c2f41462729da5b61.1523888566.git-series.maxime.ripard@bootlin.com>
-References: <cover.e9b9c0ab5bc9ffcc52a15e1c2f41462729da5b61.1523888566.git-series.maxime.ripard@bootlin.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Chen-Yu Tsai <wens@csie.org>, Maxime Ripard <maxime.ripard@bootlin.com>, ulf.hansson@linaro.org
-Cc: Thomas Petazzoni <thomas.petazzoni@bootlin.com>, linux-mmc@vger.kernel.org, Quentin Schulz <quentin.schulz@bootlin.com>, linux-arm-kernel@lists.infradead.org
+From: Eugeniy Paltsev <Eugeniy.Paltsev@synopsys.com>
+Subject: [RFC 0/2] dw_mmc: add multislot support
+Date: Tue, 17 Apr 2018 15:11:28 +0300
+Message-ID: <20180417121130.25281-1-Eugeniy.Paltsev@synopsys.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, linux-snps-arc@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, shawn.lin@rock-chips.com, Kukjin Kim <kgene@kernel.org>, Krzysztof Kozlowski <krzk@kernel.org>, Alexey Brodkin <Alexey.Brodkin@synopsys.com>, Eugeniy Paltsev <Eugeniy.Paltsev@synopsys.com>Eugeniy Paltsev <Eugeniy.Paltsev@synopsys.com>
 List-Id: linux-mmc@vger.kernel.org
 
-So far, even if our card was not in use, we didn't shut down our MMC
-controller, which meant that it was still active and clocking the bus.
+This series consists of two patches:
+1. revert removal of previously existed "pseudo-multislot" support.
+ * Revert "mmc: dw_mmc: remove the deprecated "num-slots""
+ * Revert "mmc: dw_mmc: fix the wrong condition check of getting num-slots from DT"
+ * Revert "mmc: dw_mmc: remove the unnecessary slot variable"
+ * Revert "mmc: dw_mmc: update kernel-doc comments for dw_mci"
+ * Revert "mmc: dw_mmc: use the 'slot' instead of 'cur_slot'"
+ * Revert "mmc: dw_mmc: remove the 'id' arguments about functions relevant to slot"
+ * Revert "mmc: dw_mmc: change the array of slots"
+ * Revert "mmc: dw_mmc: remove the loop about finding slots"
+ * Revert "mmc: dw_mmc: deprecated the "num-slots" property"
 
-While this obviously means that we could save some power there, it also
-creates issues when it comes to EMC control since we'll have a perfect peak
-at the card clock rate.
+2. Add missing stuff to support multislot mode in DesignWare MMC driver.
+ * Add missing slot switch to __dw_mci_start_request() function.
+ * Refactor set_ios function:
+   a) Calculate common clock which is
+      suitable for all slots instead of directly use clock value
+      provided by mmc core. We calculate common clock as the minimum
+      among each used slot clocks. This clock is calculated in
+      dw_mci_calc_common_clock() function which is called
+      from set_ios()
+   b) Disable clock only if no other slots are ON.
+   c) Setup clock directly in set_ios() only if no other slots
+      are ON. Otherwise adjust clock in __dw_mci_start_request()
+      function before slot switch.
+   d) Move timings and bus_width setup to separate funcions.
+ * Use timing field in each slot structure instead of common field in
+   host structure.
+ * Add locks to serialize access to registers.
 
-Let's implement runtime_pm with autosuspend so that we will shut down the
-controller when it's not been in use for quite some time.
+NOTE: this patch is based off of v4.17-rc1
 
-Signed-off-by: Maxime Ripard <maxime.ripard@bootlin.com>
----
- drivers/mmc/host/sunxi-mmc.c | 48 +++++++++++++++++++++++++++++++++++++-
- 1 file changed, 48 insertions(+)
+NOTE: as of today I tested this changes (in singleslot and multislot
+   modes) only on Synopsys HSDK board. But I will get ODROID-XU4 board
+   (with Exynos5422 which has DW MMC controller) the next week
+   so I will test it on this board too to catch any regressions.
 
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index 0165da0d022a..0253deb153a4 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -35,6 +35,7 @@
- #include <linux/of_gpio.h>
- #include <linux/of_platform.h>
- #include <linux/platform_device.h>
-+#include <linux/pm_runtime.h>
- #include <linux/regulator/consumer.h>
- #include <linux/reset.h>
- #include <linux/scatterlist.h>
-@@ -969,6 +970,9 @@ static void sunxi_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
- 	unsigned long flags;
- 	u32 imask;
- 
-+	if (enable)
-+		pm_runtime_get_noresume(host->dev);
-+
- 	spin_lock_irqsave(&host->lock, flags);
- 
- 	imask = mmc_readl(host, REG_IMASK);
-@@ -981,6 +985,9 @@ static void sunxi_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
- 	}
- 	mmc_writel(host, REG_IMASK, imask);
- 	spin_unlock_irqrestore(&host->lock, flags);
-+
-+	if (!enable)
-+		pm_runtime_put_noidle(host->mmc->parent);
- }
- 
- static void sunxi_mmc_hw_reset(struct mmc_host *mmc)
-@@ -1394,6 +1401,11 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
- 	if (ret)
- 		goto error_free_dma;
- 
-+	pm_runtime_set_active(&pdev->dev);
-+	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
-+	pm_runtime_use_autosuspend(&pdev->dev);
-+	pm_runtime_enable(&pdev->dev);
-+
- 	ret = mmc_add_host(mmc);
- 	if (ret)
- 		goto error_free_dma;
-@@ -1414,6 +1426,7 @@ static int sunxi_mmc_remove(struct platform_device *pdev)
- 	struct sunxi_mmc_host *host = mmc_priv(mmc);
- 
- 	mmc_remove_host(mmc);
-+	pm_runtime_force_suspend(&pdev->dev);
- 	disable_irq(host->irq);
- 	sunxi_mmc_disable(host);
- 	dma_free_coherent(&pdev->dev, PAGE_SIZE, host->sg_cpu, host->sg_dma);
-@@ -1422,10 +1435,45 @@ static int sunxi_mmc_remove(struct platform_device *pdev)
- 	return 0;
- }
- 
-+static int sunxi_mmc_runtime_resume(struct device *dev)
-+{
-+	struct mmc_host	*mmc = dev_get_drvdata(dev);
-+	struct sunxi_mmc_host *host = mmc_priv(mmc);
-+	int ret;
-+
-+	ret = sunxi_mmc_enable(host);
-+	if (ret)
-+		return ret;
-+
-+	sunxi_mmc_init_host(host);
-+	sunxi_mmc_set_bus_width(host, mmc->ios.bus_width);
-+	sunxi_mmc_set_clk(host, &mmc->ios);
-+
-+	return 0;
-+}
-+
-+static int sunxi_mmc_runtime_suspend(struct device *dev)
-+{
-+	struct mmc_host	*mmc = dev_get_drvdata(dev);
-+	struct sunxi_mmc_host *host = mmc_priv(mmc);
-+
-+	sunxi_mmc_reset_host(host);
-+	sunxi_mmc_disable(host);
-+
-+	return 0;
-+}
-+
-+static const struct dev_pm_ops sunxi_mmc_pm_ops = {
-+	SET_RUNTIME_PM_OPS(sunxi_mmc_runtime_suspend,
-+			   sunxi_mmc_runtime_resume,
-+			   NULL)
-+};
-+
- static struct platform_driver sunxi_mmc_driver = {
- 	.driver = {
- 		.name	= "sunxi-mmc",
- 		.of_match_table = of_match_ptr(sunxi_mmc_of_match),
-+		.pm = &sunxi_mmc_pm_ops,
- 	},
- 	.probe		= sunxi_mmc_probe,
- 	.remove		= sunxi_mmc_remove,
+Eugeniy Paltsev (2):
+  dw_mmc: revert removal multislot support
+  dw_mmc: add multislot support
+
+ .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |   5 +
+ drivers/mmc/host/dw_mmc-exynos.c                   |   4 +-
+ drivers/mmc/host/dw_mmc-pci.c                      |   1 +
+ drivers/mmc/host/dw_mmc.c                          | 486 +++++++++++++++------
+ drivers/mmc/host/dw_mmc.h                          |  35 +-
+ 5 files changed, 387 insertions(+), 144 deletions(-)
+
 -- 
-git-series 0.9.1
+2.14.3
