@@ -1,75 +1,74 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 0/7] mmc: sunxi: Add runtime PM support
-Date: Thu, 19 Apr 2018 15:17:43 +0200
-Message-ID: <CAPDyKFpNE3YG6N4zowd8qFYbiw5-KmiZ-TfkzsQEbRNupORqrA@mail.gmail.com>
-References: <cover.e9b9c0ab5bc9ffcc52a15e1c2f41462729da5b61.1523888566.git-series.maxime.ripard@bootlin.com>
+Subject: Re: [PATCH] mmc: mediatek: use of_device_get_match_data()
+Date: Thu, 19 Apr 2018 15:18:57 +0200
+Message-ID: <CAPDyKFr9O2YiN8KrwqzOA3rzsx6kA8gRO35_G5bpYRMpg8Z73Q@mail.gmail.com>
+References: <31f944ab8dfcc1d7b6f03b35657a2a34825b5246.1523347340.git.ryder.lee@mediatek.com>
+ <e391bcb1abbe5f7ff46973a5713fd7e067b7e9ff.1523347340.git.ryder.lee@mediatek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <cover.e9b9c0ab5bc9ffcc52a15e1c2f41462729da5b61.1523888566.git-series.maxime.ripard@bootlin.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Maxime Ripard <maxime.ripard@bootlin.com>
-Cc: Thomas Petazzoni <thomas.petazzoni@bootlin.com>, Chen-Yu Tsai <wens@csie.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Quentin Schulz <quentin.schulz@bootlin.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <e391bcb1abbe5f7ff46973a5713fd7e067b7e9ff.1523347340.git.ryder.lee@mediatek.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ryder Lee <ryder.lee@mediatek.com>
+Cc: Chaotian Jing <chaotian.jing@mediatek.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, linux-mediatek@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 16 April 2018 at 16:22, Maxime Ripard <maxime.ripard@bootlin.com> wrote:
-> Hi,
+On 16 April 2018 at 04:33, Ryder Lee <ryder.lee@mediatek.com> wrote:
+> The usage of of_device_get_match_data() reduce the code size a bit.
 >
-> Since it's introduction, our MMC controller has had its external clocks
-> running all the time.
+> Also, the only way to call msdc_drv_probe() is to match an entry in
+> msdc_of_ids[], so of_id cannot be NULL.
 >
-> While that was working great, the power usage and most importantly the EMI
-> that it generated was pretty bad.
->
-> Let's implement some runtime_pm hooks with an autosuspend to shut down the
-> whole block when the MMC is not active.
->
-> However, some SDIO devices will not probe properly if we keep shutting down
-> the controller, so the autosuspend is disabled for the SDIO devices.
->
-> Let me know what you think,
-> Maxime
->
+> Signed-off-by: Ryder Lee <ryder.lee@mediatek.com>
 
-Nice work! Applied for next!
+Thanks, applied for next!
 
 Kind regards
 Uffe
 
-> Changes from v2:
->   - Dropped the patches already applied
->   - Do not power up or down the card during a runtime_resume or
->     runtime_suspend, but only take care of the controller
->   - In order to do the above, split the set_ios function into smaller
->     chunks that can be called from set_ios and our runtime_resume hook
+> ---
+>  drivers/mmc/host/mtk-sd.c | 7 ++-----
+>  1 file changed, 2 insertions(+), 5 deletions(-)
 >
-> Changes from v1:
->   - Disable entirely the controller
->   - Made sure the driver would work with CONFIG_PM off
->   - Fixed an issue with the SDIO devices
->   - Rebased on top of 4.16
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index 6457a7d..67e9b57 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -19,6 +19,7 @@
+>  #include <linux/ioport.h>
+>  #include <linux/irq.h>
+>  #include <linux/of_address.h>
+> +#include <linux/of_device.h>
+>  #include <linux/of_irq.h>
+>  #include <linux/of_gpio.h>
+>  #include <linux/pinctrl/consumer.h>
+> @@ -1808,7 +1809,6 @@ static int msdc_drv_probe(struct platform_device *pdev)
+>         struct mmc_host *mmc;
+>         struct msdc_host *host;
+>         struct resource *res;
+> -       const struct of_device_id *of_id;
+>         int ret;
 >
-> Maxime Ripard (7):
->   mmc: sunxi: Reorder the headers
->   mmc: sunxi: Change sunxi_mmc_init_host argument type
->   mmc: sunxi: Move bus width configuration to a function
->   mmc: sunxi: Move clock configuration to a function
->   mmc: sunxi: Move the card power configuration to a function
->   mmc: sunxi: Add runtime_pm support
->   mmc: sunxi: Drop the init / reset of the controller from set_ios
+>         if (!pdev->dev.of_node) {
+> @@ -1816,9 +1816,6 @@ static int msdc_drv_probe(struct platform_device *pdev)
+>                 return -EINVAL;
+>         }
 >
->  drivers/mmc/host/sunxi-mmc.c | 185 +++++++++++++++++++++++-------------
->  1 file changed, 122 insertions(+), 63 deletions(-)
+> -       of_id = of_match_node(msdc_of_ids, pdev->dev.of_node);
+> -       if (!of_id)
+> -               return -EINVAL;
+>         /* Allocate MMC host for this device */
+>         mmc = mmc_alloc_host(sizeof(struct msdc_host), &pdev->dev);
+>         if (!mmc)
+> @@ -1887,7 +1884,7 @@ static int msdc_drv_probe(struct platform_device *pdev)
+>         msdc_of_property_parse(pdev, host);
 >
-> base-commit: 60cc43fc888428bb2f18f08997432d426a243338
+>         host->dev = &pdev->dev;
+> -       host->dev_comp = of_id->data;
+> +       host->dev_comp = of_device_get_match_data(&pdev->dev);
+>         host->mmc = mmc;
+>         host->src_clk_freq = clk_get_rate(host->src_clk);
+>         /* Set host parameters to mmc */
 > --
-> git-series 0.9.1
+> 1.9.1
+>
