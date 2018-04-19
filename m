@@ -1,133 +1,75 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3 13/20] mmc: Remove depends on HAS_DMA in case of
-	platform dependency
-Date: Thu, 19 Apr 2018 15:17:53 +0200
-Message-ID: <CAPDyKFrDsqJ-URAi=b0JmRkqoAqgT01HDPpQtNkH5to_Enm+LA@mail.gmail.com>
-References: <1523987360-18760-1-git-send-email-geert@linux-m68k.org>
-	<1523987360-18760-14-git-send-email-geert@linux-m68k.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v3 0/7] mmc: sunxi: Add runtime PM support
+Date: Thu, 19 Apr 2018 15:17:43 +0200
+Message-ID: <CAPDyKFpNE3YG6N4zowd8qFYbiw5-KmiZ-TfkzsQEbRNupORqrA@mail.gmail.com>
+References: <cover.e9b9c0ab5bc9ffcc52a15e1c2f41462729da5b61.1523888566.git-series.maxime.ripard@bootlin.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <1523987360-18760-14-git-send-email-geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>
-Cc: alsa-devel-K7yf7f+aM1XWsZ/bQMPhNw@public.gmane.org, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, linux-iio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-fpga-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-remoteproc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Fbdev development list <linux-fbdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Bjorn Andersson <bjorn.andersson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Eric Anholt <eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org>, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux1394-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>, Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>, Boris Brezillon <boris.brezillon-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Herbert Xu <herbert-lOAM2aK0SrRLBo1qDEOMRrpzq4S04n8Q@public.gmane.org>, Richard Weinberger <richard-/L3Ra7n9ekc@public.gmane.org>, Jassi Brar <jassisinghbrar-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Marek Vasut <marek.vasut-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-serial-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matias Bjorling <mb-VR7NuqX4VJ8tq7phqP6ubQ@public.gmane.org>, linux-media-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, driverdevel <devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org>, Alan Tull <atull@kern>
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <cover.e9b9c0ab5bc9ffcc52a15e1c2f41462729da5b61.1523888566.git-series.maxime.ripard@bootlin.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Maxime Ripard <maxime.ripard@bootlin.com>
+Cc: Thomas Petazzoni <thomas.petazzoni@bootlin.com>, Chen-Yu Tsai <wens@csie.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Quentin Schulz <quentin.schulz@bootlin.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 17 April 2018 at 19:49, Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org> wrote:
-> Remove dependencies on HAS_DMA where a Kconfig symbol depends on another
-> symbol that implies HAS_DMA, and, optionally, on "|| COMPILE_TEST".
-> In most cases this other symbol is an architecture or platform specific
-> symbol, or PCI.
+On 16 April 2018 at 16:22, Maxime Ripard <maxime.ripard@bootlin.com> wrote:
+> Hi,
 >
-> Generic symbols and drivers without platform dependencies keep their
-> dependencies on HAS_DMA, to prevent compiling subsystems or drivers that
-> cannot work anyway.
+> Since it's introduction, our MMC controller has had its external clocks
+> running all the time.
 >
-> This simplifies the dependencies, and allows to improve compile-testing.
+> While that was working great, the power usage and most importantly the EMI
+> that it generated was pretty bad.
 >
-> Signed-off-by: Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>
-> Reviewed-by: Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-> Acked-by: Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>
-> Acked-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Let's implement some runtime_pm hooks with an autosuspend to shut down the
+> whole block when the MMC is not active.
+>
+> However, some SDIO devices will not probe properly if we keep shutting down
+> the controller, so the autosuspend is disabled for the SDIO devices.
+>
+> Let me know what you think,
+> Maxime
+>
 
-Thanks, applied for next!
+Nice work! Applied for next!
 
-Kind regrds
+Kind regards
 Uffe
 
-> ---
-> v3:
->   - Add Acked-by,
->   - Rebase to v4.17-rc1,
+> Changes from v2:
+>   - Dropped the patches already applied
+>   - Do not power up or down the card during a runtime_resume or
+>     runtime_suspend, but only take care of the controller
+>   - In order to do the above, split the set_ios function into smaller
+>     chunks that can be called from set_ios and our runtime_resume hook
 >
-> v2:
->   - Add Reviewed-by, Acked-by,
->   - Drop RFC state,
->   - Split per subsystem.
-> ---
->  drivers/mmc/host/Kconfig | 10 ++--------
->  1 file changed, 2 insertions(+), 8 deletions(-)
+> Changes from v1:
+>   - Disable entirely the controller
+>   - Made sure the driver would work with CONFIG_PM off
+>   - Fixed an issue with the SDIO devices
+>   - Rebased on top of 4.16
 >
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 9589f9c9046f14b1..3978d0418958bf6b 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -358,7 +358,6 @@ config MMC_MESON_MX_SDIO
->         tristate "Amlogic Meson6/Meson8/Meson8b SD/MMC Host Controller support"
->         depends on ARCH_MESON || COMPILE_TEST
->         depends on COMMON_CLK
-> -       depends on HAS_DMA
->         depends on OF
->         help
->           This selects support for the SD/MMC Host Controller on
-> @@ -401,7 +400,6 @@ config MMC_OMAP
+> Maxime Ripard (7):
+>   mmc: sunxi: Reorder the headers
+>   mmc: sunxi: Change sunxi_mmc_init_host argument type
+>   mmc: sunxi: Move bus width configuration to a function
+>   mmc: sunxi: Move clock configuration to a function
+>   mmc: sunxi: Move the card power configuration to a function
+>   mmc: sunxi: Add runtime_pm support
+>   mmc: sunxi: Drop the init / reset of the controller from set_ios
 >
->  config MMC_OMAP_HS
->         tristate "TI OMAP High Speed Multimedia Card Interface support"
-> -       depends on HAS_DMA
->         depends on ARCH_OMAP2PLUS || ARCH_KEYSTONE || COMPILE_TEST
->         help
->           This selects the TI OMAP High Speed Multimedia card Interface.
-> @@ -511,7 +509,6 @@ config MMC_DAVINCI
+>  drivers/mmc/host/sunxi-mmc.c | 185 +++++++++++++++++++++++-------------
+>  1 file changed, 122 insertions(+), 63 deletions(-)
 >
->  config MMC_GOLDFISH
->         tristate "goldfish qemu Multimedia Card Interface support"
-> -       depends on HAS_DMA
->         depends on GOLDFISH || COMPILE_TEST
->         help
->           This selects the Goldfish Multimedia card Interface emulation
-> @@ -605,7 +602,7 @@ config MMC_SDHI
->
->  config MMC_SDHI_SYS_DMAC
->         tristate "DMA for SDHI SD/SDIO controllers using SYS-DMAC"
-> -       depends on MMC_SDHI && HAS_DMA
-> +       depends on MMC_SDHI
->         default MMC_SDHI if (SUPERH || ARM)
->         help
->           This provides DMA support for SDHI SD/SDIO controllers
-> @@ -615,7 +612,7 @@ config MMC_SDHI_SYS_DMAC
->  config MMC_SDHI_INTERNAL_DMAC
->         tristate "DMA for SDHI SD/SDIO controllers using on-chip bus mastering"
->         depends on ARM64 || COMPILE_TEST
-> -       depends on MMC_SDHI && HAS_DMA
-> +       depends on MMC_SDHI
->         default MMC_SDHI if ARM64
->         help
->           This provides DMA support for SDHI SD/SDIO controllers
-> @@ -669,7 +666,6 @@ config MMC_CAVIUM_THUNDERX
->
->  config MMC_DW
->         tristate "Synopsys DesignWare Memory Card Interface"
-> -       depends on HAS_DMA
->         depends on ARC || ARM || ARM64 || MIPS || COMPILE_TEST
->         help
->           This selects support for the Synopsys DesignWare Mobile Storage IP
-> @@ -748,7 +744,6 @@ config MMC_DW_ZX
->
->  config MMC_SH_MMCIF
->         tristate "SuperH Internal MMCIF support"
-> -       depends on HAS_DMA
->         depends on SUPERH || ARCH_RENESAS || COMPILE_TEST
->         help
->           This selects the MMC Host Interface controller (MMCIF) found in various
-> @@ -868,7 +863,6 @@ config MMC_TOSHIBA_PCI
->  config MMC_BCM2835
->         tristate "Broadcom BCM2835 SDHOST MMC Controller support"
->         depends on ARCH_BCM2835 || COMPILE_TEST
-> -       depends on HAS_DMA
->         help
->           This selects the BCM2835 SDHOST MMC controller. If you have
->           a BCM2835 platform with SD or MMC devices, say Y or M here.
+> base-commit: 60cc43fc888428bb2f18f08997432d426a243338
 > --
-> 2.7.4
->
+> git-series 0.9.1
