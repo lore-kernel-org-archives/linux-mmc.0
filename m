@@ -1,54 +1,55 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
+From: Alexey Brodkin <Alexey.Brodkin@synopsys.com>
 Subject: Re: [RFC 0/2] dw_mmc: add multislot support
-Date: Fri, 20 Apr 2018 09:35:28 +0200
-Message-ID: <CAPDyKFqxZLtx_=0UU9NgBnW0Vmw=456q2FFbMBK4LKEaF-ua7A@mail.gmail.com>
+Date: Fri, 20 Apr 2018 07:42:13 +0000
+Message-ID: <1524210132.4614.4.camel@synopsys.com>
 References: <20180417121130.25281-1-Eugeniy.Paltsev@synopsys.com>
+         <CAPDyKFqxZLtx_=0UU9NgBnW0Vmw=456q2FFbMBK4LKEaF-ua7A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180417121130.25281-1-Eugeniy.Paltsev@synopsys.com>
+In-Reply-To: <CAPDyKFqxZLtx_=0UU9NgBnW0Vmw=456q2FFbMBK4LKEaF-ua7A@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <D9DC3DB3425B1B44A290CEED23313210@internal.synopsys.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Eugeniy Paltsev <Eugeniy.Paltsev@synopsys.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-snps-arc@lists.infradead.org, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Lin <shawn.lin@rock-chips.com>, Kukjin Kim <kgene@kernel.org>, Krzysztof Kozlowski <krzk@kernel.org>, Alexey Brodkin <Alexey.Brodkin@synopsys.com>
+To: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+Cc: "jh80.chung@samsung.com" <jh80.chung@samsung.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "krzk@kernel.org" <krzk@kernel.org>, "Eugeniy.Paltsev@synopsys.com" <Eugeniy.Paltsev@synopsys.com>, "linux-snps-arc@lists.infradead.org" <linux-snps-arc@lists.infradead.org>, "kgene@kernel.org" <kgene@kernel.org>, "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-[...]
-
->
-> 2. Add missing stuff to support multislot mode in DesignWare MMC driver.
->  * Add missing slot switch to __dw_mci_start_request() function.
->  * Refactor set_ios function:
->    a) Calculate common clock which is
->       suitable for all slots instead of directly use clock value
->       provided by mmc core. We calculate common clock as the minimum
->       among each used slot clocks. This clock is calculated in
->       dw_mci_calc_common_clock() function which is called
->       from set_ios()
->    b) Disable clock only if no other slots are ON.
->    c) Setup clock directly in set_ios() only if no other slots
->       are ON. Otherwise adjust clock in __dw_mci_start_request()
->       function before slot switch.
->    d) Move timings and bus_width setup to separate funcions.
->  * Use timing field in each slot structure instead of common field in
->    host structure.
->  * Add locks to serialize access to registers.
-
-Sorry, but this is a hack to *try* to make multi-slot work and this
-isn't sufficient. There were good reasons to why the earlier
-non-working multi slot support was removed from dw_mmc.
-
-Let me elaborate a bit for your understanding. The core uses a host
-lock (mmc_claim|release_host()) to serialize operations and commands,
-as to confirm to the SD/SDIO/(e)MMC specs. The above changes gives no
-guarantees for this. To make that work, we would need a "mmc bus lock"
-to be managed by the core.
-
-However, inventing a "mmc bus lock" would lead to other problems
-related to I/O scheduling for upper layers - it simply breaks. For
-example, I/O requests for one card/slot can then starve I/O requests
-reaching another card/slot.
-
-[...]
-
-Kind regards
-Uffe
+SGkgVWxmLA0KDQpPbiBGcmksIDIwMTgtMDQtMjAgYXQgMDk6MzUgKzAyMDAsIFVsZiBIYW5zc29u
+IHdyb3RlOg0KPiBbLi4uXQ0KPiANCj4gPiANCj4gPiAyLiBBZGQgbWlzc2luZyBzdHVmZiB0byBz
+dXBwb3J0IG11bHRpc2xvdCBtb2RlIGluIERlc2lnbldhcmUgTU1DIGRyaXZlci4NCj4gPiAgKiBB
+ZGQgbWlzc2luZyBzbG90IHN3aXRjaCB0byBfX2R3X21jaV9zdGFydF9yZXF1ZXN0KCkgZnVuY3Rp
+b24uDQo+ID4gICogUmVmYWN0b3Igc2V0X2lvcyBmdW5jdGlvbjoNCj4gPiAgICBhKSBDYWxjdWxh
+dGUgY29tbW9uIGNsb2NrIHdoaWNoIGlzDQo+ID4gICAgICAgc3VpdGFibGUgZm9yIGFsbCBzbG90
+cyBpbnN0ZWFkIG9mIGRpcmVjdGx5IHVzZSBjbG9jayB2YWx1ZQ0KPiA+ICAgICAgIHByb3ZpZGVk
+IGJ5IG1tYyBjb3JlLiBXZSBjYWxjdWxhdGUgY29tbW9uIGNsb2NrIGFzIHRoZSBtaW5pbXVtDQo+
+ID4gICAgICAgYW1vbmcgZWFjaCB1c2VkIHNsb3QgY2xvY2tzLiBUaGlzIGNsb2NrIGlzIGNhbGN1
+bGF0ZWQgaW4NCj4gPiAgICAgICBkd19tY2lfY2FsY19jb21tb25fY2xvY2soKSBmdW5jdGlvbiB3
+aGljaCBpcyBjYWxsZWQNCj4gPiAgICAgICBmcm9tIHNldF9pb3MoKQ0KPiA+ICAgIGIpIERpc2Fi
+bGUgY2xvY2sgb25seSBpZiBubyBvdGhlciBzbG90cyBhcmUgT04uDQo+ID4gICAgYykgU2V0dXAg
+Y2xvY2sgZGlyZWN0bHkgaW4gc2V0X2lvcygpIG9ubHkgaWYgbm8gb3RoZXIgc2xvdHMNCj4gPiAg
+ICAgICBhcmUgT04uIE90aGVyd2lzZSBhZGp1c3QgY2xvY2sgaW4gX19kd19tY2lfc3RhcnRfcmVx
+dWVzdCgpDQo+ID4gICAgICAgZnVuY3Rpb24gYmVmb3JlIHNsb3Qgc3dpdGNoLg0KPiA+ICAgIGQp
+IE1vdmUgdGltaW5ncyBhbmQgYnVzX3dpZHRoIHNldHVwIHRvIHNlcGFyYXRlIGZ1bmNpb25zLg0K
+PiA+ICAqIFVzZSB0aW1pbmcgZmllbGQgaW4gZWFjaCBzbG90IHN0cnVjdHVyZSBpbnN0ZWFkIG9m
+IGNvbW1vbiBmaWVsZCBpbg0KPiA+ICAgIGhvc3Qgc3RydWN0dXJlLg0KPiA+ICAqIEFkZCBsb2Nr
+cyB0byBzZXJpYWxpemUgYWNjZXNzIHRvIHJlZ2lzdGVycy4NCj4gDQo+IFNvcnJ5LCBidXQgdGhp
+cyBpcyBhIGhhY2sgdG8gKnRyeSogdG8gbWFrZSBtdWx0aS1zbG90IHdvcmsgYW5kIHRoaXMNCj4g
+aXNuJ3Qgc3VmZmljaWVudC4gVGhlcmUgd2VyZSBnb29kIHJlYXNvbnMgdG8gd2h5IHRoZSBlYXJs
+aWVyDQo+IG5vbi13b3JraW5nIG11bHRpIHNsb3Qgc3VwcG9ydCB3YXMgcmVtb3ZlZCBmcm9tIGR3
+X21tYy4NCj4gDQo+IExldCBtZSBlbGFib3JhdGUgYSBiaXQgZm9yIHlvdXIgdW5kZXJzdGFuZGlu
+Zy4gVGhlIGNvcmUgdXNlcyBhIGhvc3QNCj4gbG9jayAobW1jX2NsYWltfHJlbGVhc2VfaG9zdCgp
+KSB0byBzZXJpYWxpemUgb3BlcmF0aW9ucyBhbmQgY29tbWFuZHMsDQo+IGFzIHRvIGNvbmZpcm0g
+dG8gdGhlIFNEL1NESU8vKGUpTU1DIHNwZWNzLiBUaGUgYWJvdmUgY2hhbmdlcyBnaXZlcyBubw0K
+PiBndWFyYW50ZWVzIGZvciB0aGlzLiBUbyBtYWtlIHRoYXQgd29yaywgd2Ugd291bGQgbmVlZCBh
+ICJtbWMgYnVzIGxvY2siDQo+IHRvIGJlIG1hbmFnZWQgYnkgdGhlIGNvcmUuDQo+IA0KPiBIb3dl
+dmVyLCBpbnZlbnRpbmcgYSAibW1jIGJ1cyBsb2NrIiB3b3VsZCBsZWFkIHRvIG90aGVyIHByb2Js
+ZW1zDQo+IHJlbGF0ZWQgdG8gSS9PIHNjaGVkdWxpbmcgZm9yIHVwcGVyIGxheWVycyAtIGl0IHNp
+bXBseSBicmVha3MuIEZvcg0KPiBleGFtcGxlLCBJL08gcmVxdWVzdHMgZm9yIG9uZSBjYXJkL3Ns
+b3QgY2FuIHRoZW4gc3RhcnZlIEkvTyByZXF1ZXN0cw0KPiByZWFjaGluZyBhbm90aGVyIGNhcmQv
+c2xvdC4NCg0KU28gYXJlIHlvdSBzYXlpbmcgdGhhdCBtdWx0aS1zbG90IHN1cHBvcnQgaXMgYSBu
+byBnbyBpbiBnZW5lcmFsIG9yIGl0IGlzIG9ubHkNCmFwcGxpY2FibGUgdG8gRFcgTU1DIChJIHJl
+YWxseSBkb3VidCB0aGF0J3MgYSBjYXNlKT8NCg0KQlRXIHRoZXJlJ3JlIG90aGVyIGNvbnRyb2xs
+ZXJzIHRoYXQgc2VlbSB0byBzdXBwb3J0IG11bHRpLXNsb3QgbGlrZSBBdG1lbCBldGMuDQoNCi1B
+bGV4ZXk=
