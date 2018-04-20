@@ -1,134 +1,75 @@
-From: Vijay Viswanath <vviswana@codeaurora.org>
-Subject: [PATCH V5 2/2] mmc: sdhci-msm: support voltage pad switching
-Date: Fri, 20 Apr 2018 17:45:29 +0530
-Message-ID: <1524226529-30100-3-git-send-email-vviswana@codeaurora.org>
-References: <1524226529-30100-1-git-send-email-vviswana@codeaurora.org>
+From: Eugeniy Paltsev <Eugeniy.Paltsev@synopsys.com>
+Subject: Re: [RFC 0/2] dw_mmc: add multislot support
+Date: Fri, 20 Apr 2018 15:53:30 +0000
+Message-ID: <1524239609.10138.47.camel@synopsys.com>
+References: <20180417121130.25281-1-Eugeniy.Paltsev@synopsys.com>
+         <CAPDyKFqxZLtx_=0UU9NgBnW0Vmw=456q2FFbMBK4LKEaF-ua7A@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1524226529-30100-1-git-send-email-vviswana@codeaurora.org>
+In-Reply-To: <CAPDyKFqxZLtx_=0UU9NgBnW0Vmw=456q2FFbMBK4LKEaF-ua7A@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <0E79426BD2A16D41A85A936916640BBD@internal.synopsys.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, vviswana@codeaurora.org, bjorn.andersson@linaro.org, riteshh@codeaurora.org, vbadigan@codeaurora.org, Krishna Konda <kkonda@codeaurora.org>
+To: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "Eugeniy.Paltsev@synopsys.com" <Eugeniy.Paltsev@synopsys.com>
+Cc: "jh80.chung@samsung.com" <jh80.chung@samsung.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Alexey.Brodkin@synopsys.com" <Alexey.Brodkin@synopsys.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "krzk@kernel.org" <krzk@kernel.org>, "linux-snps-arc@lists.infradead.org" <linux-snps-arc@lists.infradead.org>, "kgene@kernel.org" <kgene@kernel.org>, "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-The PADs for SD card are dual-voltage that support 3v/1.8v. Those PADs
-have a control signal  (io_pad_pwr_switch/mode18 ) that indicates
-whether the PAD works in 3v or 1.8v.
-
-SDHC core on msm platforms should have IO_PAD_PWR_SWITCH bit set/unset
-based on actual voltage used for IO lines. So when power irq is
-triggered for io high or io low, the driver should check the voltages
-supported and set the pad accordingly.
-
-Signed-off-by: Krishna Konda <kkonda@codeaurora.org>
-Signed-off-by: Venkat Gopalakrishnan <venkatg@codeaurora.org>
-Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
-Reviewed-by: Douglas Anderson <dianders@chromium.org>
----
- drivers/mmc/host/sdhci-msm.c | 57 ++++++++++++++++++++++++++++++++++++++++++--
- 1 file changed, 55 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index edd30a2..bb11916 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -78,12 +78,15 @@
- #define CORE_HC_MCLK_SEL_DFLT	(2 << 8)
- #define CORE_HC_MCLK_SEL_HS400	(3 << 8)
- #define CORE_HC_MCLK_SEL_MASK	(3 << 8)
-+#define CORE_IO_PAD_PWR_SWITCH_EN	(1 << 15)
-+#define CORE_IO_PAD_PWR_SWITCH  (1 << 16)
- #define CORE_HC_SELECT_IN_EN	BIT(18)
- #define CORE_HC_SELECT_IN_HS400	(6 << 19)
- #define CORE_HC_SELECT_IN_MASK	(7 << 19)
- 
- #define CORE_3_0V_SUPPORT	(1 << 25)
- #define CORE_1_8V_SUPPORT	(1 << 26)
-+#define CORE_VOLT_SUPPORT	(CORE_3_0V_SUPPORT | CORE_1_8V_SUPPORT)
- 
- #define CORE_CSR_CDC_CTLR_CFG0		0x130
- #define CORE_SW_TRIG_FULL_CALIB		BIT(16)
-@@ -1109,7 +1112,7 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
- 	u32 irq_status, irq_ack = 0;
- 	int retry = 10;
- 	u32 pwr_state = 0, io_level = 0;
--
-+	u32 config;
- 
- 	irq_status = readl_relaxed(msm_host->core_mem + CORE_PWRCTL_STATUS);
- 	irq_status &= INT_MASK;
-@@ -1166,6 +1169,38 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
- 	 */
- 	writel_relaxed(irq_ack, msm_host->core_mem + CORE_PWRCTL_CTL);
- 
-+	/*
-+	 * If we don't have info regarding the voltage levels supported by
-+	 * regulators, don't change the IO PAD PWR SWITCH.
-+	 */
-+	if (msm_host->caps_0 & CORE_VOLT_SUPPORT) {
-+		u32 new_config;
-+		/*
-+		 * We should unset IO PAD PWR switch only if the register write
-+		 * can set IO lines high and the regulator also switches to 3 V.
-+		 * Else, we should keep the IO PAD PWR switch set.
-+		 * This is applicable to certain targets where eMMC vccq supply
-+		 * is only 1.8V. In such targets, even during REQ_IO_HIGH, the
-+		 * IO PAD PWR switch must be kept set to reflect actual
-+		 * regulator voltage. This way, during initialization of
-+		 * controllers with only 1.8V, we will set the IO PAD bit
-+		 * without waiting for a REQ_IO_LOW.
-+		 */
-+		config = readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC);
-+		new_config = config;
-+
-+		if ((io_level & REQ_IO_HIGH) &&
-+				(msm_host->caps_0 & CORE_3_0V_SUPPORT))
-+			new_config &= ~CORE_IO_PAD_PWR_SWITCH;
-+		else if ((io_level & REQ_IO_LOW) ||
-+				(msm_host->caps_0 & CORE_1_8V_SUPPORT))
-+			new_config |= CORE_IO_PAD_PWR_SWITCH;
-+
-+		if (config ^ new_config)
-+			writel_relaxed(new_config,
-+					host->ioaddr + CORE_VENDOR_SPEC);
-+	}
-+
- 	if (pwr_state)
- 		msm_host->curr_pwr_state = pwr_state;
- 	if (io_level)
-@@ -1322,7 +1357,8 @@ static void sdhci_msm_set_regulator_caps(struct sdhci_msm_host *msm_host)
- {
- 	struct mmc_host *mmc = msm_host->mmc;
- 	struct regulator *supply = mmc->supply.vqmmc;
--	u32 caps = 0;
-+	u32 caps = 0, config;
-+	struct sdhci_host *host = mmc_priv(mmc);
- 
- 	if (!IS_ERR(mmc->supply.vqmmc)) {
- 		if (regulator_is_supported_voltage(supply, 1700000, 1950000))
-@@ -1335,6 +1371,23 @@ static void sdhci_msm_set_regulator_caps(struct sdhci_msm_host *msm_host)
- 					mmc_hostname(mmc));
- 	}
- 
-+	if (caps) {
-+		/*
-+		 * Set the PAD_PWR_SWITCH_EN bit so that the PAD_PWR_SWITCH
-+		 * bit can be used as required later on.
-+		 */
-+		u32 io_level = msm_host->curr_io_level;
-+
-+		config = readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC);
-+		config |= CORE_IO_PAD_PWR_SWITCH_EN;
-+
-+		if ((io_level & REQ_IO_HIGH) && (caps &	CORE_3_0V_SUPPORT))
-+			config &= ~CORE_IO_PAD_PWR_SWITCH;
-+		else if ((io_level & REQ_IO_LOW) || (caps & CORE_1_8V_SUPPORT))
-+			config |= CORE_IO_PAD_PWR_SWITCH;
-+
-+		writel_relaxed(config, host->ioaddr + CORE_VENDOR_SPEC);
-+	}
- 	msm_host->caps_0 |= caps;
- 	pr_debug("%s: supported caps: 0x%08x\n", mmc_hostname(mmc), caps);
- }
--- 
- Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc. 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a Linux Foundation Collaborative Project.
+SGkgVWxmLA0KDQpPbiBGcmksIDIwMTgtMDQtMjAgYXQgMDk6MzUgKzAyMDAsIFVsZiBIYW5zc29u
+IHdyb3RlOg0KPiBbLi4uXQ0KPiANCj4gPiANCj4gPiAyLiBBZGQgbWlzc2luZyBzdHVmZiB0byBz
+dXBwb3J0IG11bHRpc2xvdCBtb2RlIGluIERlc2lnbldhcmUgTU1DIGRyaXZlci4NCj4gPiAgKiBB
+ZGQgbWlzc2luZyBzbG90IHN3aXRjaCB0byBfX2R3X21jaV9zdGFydF9yZXF1ZXN0KCkgZnVuY3Rp
+b24uDQo+ID4gICogUmVmYWN0b3Igc2V0X2lvcyBmdW5jdGlvbjoNCj4gPiAgICBhKSBDYWxjdWxh
+dGUgY29tbW9uIGNsb2NrIHdoaWNoIGlzDQo+ID4gICAgICAgc3VpdGFibGUgZm9yIGFsbCBzbG90
+cyBpbnN0ZWFkIG9mIGRpcmVjdGx5IHVzZSBjbG9jayB2YWx1ZQ0KPiA+ICAgICAgIHByb3ZpZGVk
+IGJ5IG1tYyBjb3JlLiBXZSBjYWxjdWxhdGUgY29tbW9uIGNsb2NrIGFzIHRoZSBtaW5pbXVtDQo+
+ID4gICAgICAgYW1vbmcgZWFjaCB1c2VkIHNsb3QgY2xvY2tzLiBUaGlzIGNsb2NrIGlzIGNhbGN1
+bGF0ZWQgaW4NCj4gPiAgICAgICBkd19tY2lfY2FsY19jb21tb25fY2xvY2soKSBmdW5jdGlvbiB3
+aGljaCBpcyBjYWxsZWQNCj4gPiAgICAgICBmcm9tIHNldF9pb3MoKQ0KPiA+ICAgIGIpIERpc2Fi
+bGUgY2xvY2sgb25seSBpZiBubyBvdGhlciBzbG90cyBhcmUgT04uDQo+ID4gICAgYykgU2V0dXAg
+Y2xvY2sgZGlyZWN0bHkgaW4gc2V0X2lvcygpIG9ubHkgaWYgbm8gb3RoZXIgc2xvdHMNCj4gPiAg
+ICAgICBhcmUgT04uIE90aGVyd2lzZSBhZGp1c3QgY2xvY2sgaW4gX19kd19tY2lfc3RhcnRfcmVx
+dWVzdCgpDQo+ID4gICAgICAgZnVuY3Rpb24gYmVmb3JlIHNsb3Qgc3dpdGNoLg0KPiA+ICAgIGQp
+IE1vdmUgdGltaW5ncyBhbmQgYnVzX3dpZHRoIHNldHVwIHRvIHNlcGFyYXRlIGZ1bmNpb25zLg0K
+PiA+ICAqIFVzZSB0aW1pbmcgZmllbGQgaW4gZWFjaCBzbG90IHN0cnVjdHVyZSBpbnN0ZWFkIG9m
+IGNvbW1vbiBmaWVsZCBpbg0KPiA+ICAgIGhvc3Qgc3RydWN0dXJlLg0KPiA+ICAqIEFkZCBsb2Nr
+cyB0byBzZXJpYWxpemUgYWNjZXNzIHRvIHJlZ2lzdGVycy4NCj4gDQo+IFNvcnJ5LCBidXQgdGhp
+cyBpcyBhIGhhY2sgdG8gKnRyeSogdG8gbWFrZSBtdWx0aS1zbG90IHdvcmsgYW5kIHRoaXMNCj4g
+aXNuJ3Qgc3VmZmljaWVudC4gVGhlcmUgd2VyZSBnb29kIHJlYXNvbnMgdG8gd2h5IHRoZSBlYXJs
+aWVyDQo+IG5vbi13b3JraW5nIG11bHRpIHNsb3Qgc3VwcG9ydCB3YXMgcmVtb3ZlZCBmcm9tIGR3
+X21tYy4NCg0KUHJldmlvdXMgbXVsdGkgc2xvdCBpbXBsZW1lbnRhdGlvbiB3YXMgcmVtb3ZlZCBh
+cyBub2JvZHkgdXNlZCBpdCBhbmQNCm5vYm9keSB0ZXN0ZWQgaXQuIFRoZXJlIGFyZSBsb3RzIG9m
+IG1pc3Rha2VzIGluIHByZXZpb3VzIGltcGxlbWVudGF0aW9uDQp3aGljaCBhcmUgbm90IHJlbGF0
+ZWQgdG8gcmVxdWVzdCBzZXJpYWxpemF0aW9uDQpsaWtlIGxhY2sgb2Ygc2xvdCBzd2l0Y2ggLyBs
+YWNrIG9mIGFkZGluZyBzbG90IGlkIHRvIENJVSBjb21tYW5kcyAvIGV0cy4uLg0KU28gb2J2aW91
+c2x5IGl0IHdhcyBuZXZlciB0ZXN0ZWQgYW5kIG5ldmVyIHVzZWQgYXQgcmVhbCBtdWx0aSBzbG90
+IGhhcmR3YXJlLg0KDQo+IExldCBtZSBlbGFib3JhdGUgYSBiaXQgZm9yIHlvdXIgdW5kZXJzdGFu
+ZGluZy4gVGhlIGNvcmUgdXNlcyBhIGhvc3QNCj4gbG9jayAobW1jX2NsYWltfHJlbGVhc2VfaG9z
+dCgpKSB0byBzZXJpYWxpemUgb3BlcmF0aW9ucyBhbmQgY29tbWFuZHMsDQo+IGFzIHRvIGNvbmZp
+cm0gdG8gdGhlIFNEL1NESU8vKGUpTU1DIHNwZWNzLiBUaGUgYWJvdmUgY2hhbmdlcyBnaXZlcyBu
+bw0KPiBndWFyYW50ZWVzIGZvciB0aGlzLiBUbyBtYWtlIHRoYXQgd29yaywgd2Ugd291bGQgbmVl
+ZCBhICJtbWMgYnVzIGxvY2siDQo+IHRvIGJlIG1hbmFnZWQgYnkgdGhlIGNvcmUuDQoNCkluIGN1
+cnJlbnQgaW1wbGVtZW50YXRpb24gZGF0YSB0cmFuc2ZlcnMgYW5kIGNvbW1hbmRzIHRvIGRpZmZl
+cmVudA0KaG9zdHMgKHNsb3RzKSBhcmUgc2VyaWFsaXplZCBpbnRlcm5hbGx5IGluIHRoZSBkd19t
+bWMgZHJpdmVyLiBXZSBoYXZlDQpyZXF1ZXN0IHF1ZXVlIGFuZCB3aGVuIC5yZXF1ZXN0KCkgaXMg
+Y2FsbGVkIHdlIGFkZCBuZXcgcmVxdWVzdCB0byB0aGUNCnF1ZXVlLiBXZSB0YWtlIG5ldyByZXF1
+ZXN0IGZyb20gdGhlIHF1ZXVlIG9ubHkgaWYgdGhlIHByZXZpb3VzIG9uZQ0KaGFzIGFscmVhZHkg
+ZmluaXNoZWQuDQoNClNvIGFsdGhvdWdoIGhvc3RzIChzbG90cykgaGF2ZSBzZXBhcmF0ZSBsb2Nr
+cyAobW1jX2NsYWltfHJlbGVhc2VfaG9zdCgpKQ0KdGhlIHJlcXVlc3RzIHRvIGRpZmZlcmVudCBz
+bG90cyBhcmUgc2VyaWFsaXplZCBieSBkcml2ZXIuDQoNCklzbid0IHRoYXQgZW5vdWdoPw0KSSdt
+IG5vdCB2ZXJ5IGZhbWlsaWFyIHdpdGggU0QvU0RJTy8oZSlNTUMgc3BlY3Mgc28gbXkgYXNzdW1w
+dGlvbnMgbWlnaHQgYmUgd3JvbmcNCmluIHRoYXQgY2FzZSBwbGVhc2UgY29ycmVjdCBtZS4NCg0K
+PiBIb3dldmVyLCBpbnZlbnRpbmcgYSAibW1jIGJ1cyBsb2NrIiB3b3VsZCBsZWFkIHRvIG90aGVy
+IHByb2JsZW1zDQo+IHJlbGF0ZWQgdG8gSS9PIHNjaGVkdWxpbmcgZm9yIHVwcGVyIGxheWVycyAt
+IGl0IHNpbXBseSBicmVha3MuIEZvcg0KPiBleGFtcGxlLCBJL08gcmVxdWVzdHMgZm9yIG9uZSBj
+YXJkL3Nsb3QgY2FuIHRoZW4gc3RhcnZlIEkvTyByZXF1ZXN0cw0KPiByZWFjaGluZyBhbm90aGVy
+IGNhcmQvc2xvdC4NCj4gDQoNCk5ldmVydGhlbGVzcyB3ZSBoYWQgdG8gZGVhbCBzb21laG93IHdp
+dGggZXhpc3RpbmcgaGFyZHdhcmUgd2hpY2gNCmhhcyBtdWx0aXNsb3QgZHcgbW1jIGNvbnRyb2xs
+ZXIgYW5kIGJvdGggc2xvdHMgYXJlIHVzZWQuLi4NCg0KVGhpcyBwYXRjaCBhdCBsZWFzdCBzaG91
+bGRuJ3QgYnJlYWsgYW55dGhpbmcgZm9yIGN1cnJlbnQgdXNlcnMgKHdoaWNoIHVzZQ0KaXQgaW4g
+c2luZ2xlIHNsb3QgbW9kZSkNCg0KTW9yZW92ZXIgd2UgdGVzdGVkIHRoaXMgZHVhbC1zbG90IGlt
+cGxlbWVudGF0aW9uIGFuZCBkb24ndCBjYXRjaCBhbnkgcHJvYmxlbXMNCihwcm9iYWJseSB5ZXQp
+IGV4Y2VwdCBidXMgcGVyZm9ybWFuY2UgZGVjcmVhc2UgaW4gZHVhbC1zbG90IG1vZGUgKHdoaWNo
+IGlzDQpxdWl0ZSBleHBlY3RlZCkuDQoNCj4gDQo+IEtpbmQgcmVnYXJkcw0KPiBVZmZlDQotLSAN
+CiBFdWdlbml5IFBhbHRzZXY=
