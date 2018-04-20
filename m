@@ -1,59 +1,48 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v2] mmc: sdhci-cadence: fix logically and structurally
- dead code
-Date: Fri, 20 Apr 2018 09:08:49 +0300
-Message-ID: <d04fd2b0-c1c2-dbe8-2c5f-db36665ffbc2@intel.com>
-References: <20180419155958.GA18593@embeddedor.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v.4.17-rc2
+Date: Fri, 20 Apr 2018 08:51:47 +0200
+Message-ID: <1524207107-3397-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180419155958.GA18593@embeddedor.com>
-Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Gustavo A. R. Silva" <gustavo@embeddedor.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 19/04/18 18:59, Gustavo A. R. Silva wrote:
-> Currently, the code block inside the for loop will never execute
-> more than once, because the function returns inmediately after
-> the first iteration, hence the execution of the code at the second
-> iteration is structurally dead and, code at line 281: return 0; is
-> never reached.
-> 
-> Fix this by checking _ret_ before return.
-> 
-> Addresses-Coverity-ID: 1468009 ("Logically dead code")
-> Addresses-Coverity-ID: 1468002 ("Structurally dead code")
-> Suggested-by: Masahiro Yamada <yamada.masahiro@socionext.com>
-> Signed-off-by: Gustavo A. R. Silva <gustavo@embeddedor.com>
+Hi Linus,
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Here's a PR with a couple of MMC fixes intended for v4.17-rc2. Details about
+the highlights are as usual found in the signed tag.
 
-> ---
-> Changes in v2:
->  - Update changelog.
->  - Drop the 'Fixes' tag.
->  - Add check on ret instead of removing the "return ret;" line.
->  - Thanks to Masahiro Yamada for the feedback provided.
-> 
->  drivers/mmc/host/sdhci-cadence.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
-> index bc30d16..7a343b8 100644
-> --- a/drivers/mmc/host/sdhci-cadence.c
-> +++ b/drivers/mmc/host/sdhci-cadence.c
-> @@ -274,8 +274,8 @@ static int sdhci_cdns_set_tune_val(struct sdhci_host *host, unsigned int val)
->  		ret = readl_poll_timeout(reg, tmp,
->  					 !(tmp & SDHCI_CDNS_HRS06_TUNE_UP),
->  					 0, 1);
-> -
-> -		return ret;
-> +		if (ret)
-> +			return ret;
->  	}
->  
->  	return 0;
-> 
+Please pull this in!
+
+Kind regards
+Ulf Hansson
+
+
+The following changes since commit fc167daff581c01ebce8695e9618231cae3561a1:
+
+  mmc: tmio: Fix error handling when issuing CMD23 (2018-04-04 12:21:27 +0200)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v4.17-3
+
+for you to fetch changes up to 0cbc94daa55441c21999e96a07061952d873dcb7:
+
+  mmc: renesas_sdhi_internal_dmac: limit DMA RX for old SoCs (2018-04-19 14:57:17 +0200)
+
+----------------------------------------------------------------
+MMC host:
+ - sdhci-pci: Fixup tuning for AMD for eMMC HS200 mode
+ - renesas_sdhi_internal_dmac: Avoid data corruption by limiting DMA RX
+
+----------------------------------------------------------------
+Daniel Kurtz (1):
+      mmc: sdhci-pci: Only do AMD tuning for HS200
+
+Wolfram Sang (1):
+      mmc: renesas_sdhi_internal_dmac: limit DMA RX for old SoCs
+
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c | 39 ++++++++++++++++++++++-----
+ drivers/mmc/host/sdhci-pci-core.c             | 25 +++++++++++++++--
+ 2 files changed, 56 insertions(+), 8 deletions(-)
