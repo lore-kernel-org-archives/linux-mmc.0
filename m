@@ -1,75 +1,92 @@
-From: Eugeniy Paltsev <Eugeniy.Paltsev@synopsys.com>
-Subject: Re: [RFC 0/2] dw_mmc: add multislot support
-Date: Fri, 20 Apr 2018 15:53:30 +0000
-Message-ID: <1524239609.10138.47.camel@synopsys.com>
-References: <20180417121130.25281-1-Eugeniy.Paltsev@synopsys.com>
-         <CAPDyKFqxZLtx_=0UU9NgBnW0Vmw=456q2FFbMBK4LKEaF-ua7A@mail.gmail.com>
+From: "ernest.zhang" <ernest.zhang@bayhubtech.com>
+Subject: [PATCH V5 1/3] mmc: sdhci: Add support for O2 eMMC HS200 mode
+Date: Sat, 21 Apr 2018 00:37:26 +0800
+Message-ID: <20180420163726.17036-1-ernest.zhang@bayhubtech.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFqxZLtx_=0UU9NgBnW0Vmw=456q2FFbMBK4LKEaF-ua7A@mail.gmail.com>
-Content-Language: en-US
-Content-ID: <0E79426BD2A16D41A85A936916640BBD@internal.synopsys.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "Eugeniy.Paltsev@synopsys.com" <Eugeniy.Paltsev@synopsys.com>
-Cc: "jh80.chung@samsung.com" <jh80.chung@samsung.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Alexey.Brodkin@synopsys.com" <Alexey.Brodkin@synopsys.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "krzk@kernel.org" <krzk@kernel.org>, "linux-snps-arc@lists.infradead.org" <linux-snps-arc@lists.infradead.org>, "kgene@kernel.org" <kgene@kernel.org>, "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>
+To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Xiaoguang Yu <xiaoguang.yu@bayhubtech.com>, Shirley Her <shirley.her@bayhubtech.com>, Yuxiang Wan <yuxiang.wan@bayhubtech.com>
 List-Id: linux-mmc@vger.kernel.org
 
-SGkgVWxmLA0KDQpPbiBGcmksIDIwMTgtMDQtMjAgYXQgMDk6MzUgKzAyMDAsIFVsZiBIYW5zc29u
-IHdyb3RlOg0KPiBbLi4uXQ0KPiANCj4gPiANCj4gPiAyLiBBZGQgbWlzc2luZyBzdHVmZiB0byBz
-dXBwb3J0IG11bHRpc2xvdCBtb2RlIGluIERlc2lnbldhcmUgTU1DIGRyaXZlci4NCj4gPiAgKiBB
-ZGQgbWlzc2luZyBzbG90IHN3aXRjaCB0byBfX2R3X21jaV9zdGFydF9yZXF1ZXN0KCkgZnVuY3Rp
-b24uDQo+ID4gICogUmVmYWN0b3Igc2V0X2lvcyBmdW5jdGlvbjoNCj4gPiAgICBhKSBDYWxjdWxh
-dGUgY29tbW9uIGNsb2NrIHdoaWNoIGlzDQo+ID4gICAgICAgc3VpdGFibGUgZm9yIGFsbCBzbG90
-cyBpbnN0ZWFkIG9mIGRpcmVjdGx5IHVzZSBjbG9jayB2YWx1ZQ0KPiA+ICAgICAgIHByb3ZpZGVk
-IGJ5IG1tYyBjb3JlLiBXZSBjYWxjdWxhdGUgY29tbW9uIGNsb2NrIGFzIHRoZSBtaW5pbXVtDQo+
-ID4gICAgICAgYW1vbmcgZWFjaCB1c2VkIHNsb3QgY2xvY2tzLiBUaGlzIGNsb2NrIGlzIGNhbGN1
-bGF0ZWQgaW4NCj4gPiAgICAgICBkd19tY2lfY2FsY19jb21tb25fY2xvY2soKSBmdW5jdGlvbiB3
-aGljaCBpcyBjYWxsZWQNCj4gPiAgICAgICBmcm9tIHNldF9pb3MoKQ0KPiA+ICAgIGIpIERpc2Fi
-bGUgY2xvY2sgb25seSBpZiBubyBvdGhlciBzbG90cyBhcmUgT04uDQo+ID4gICAgYykgU2V0dXAg
-Y2xvY2sgZGlyZWN0bHkgaW4gc2V0X2lvcygpIG9ubHkgaWYgbm8gb3RoZXIgc2xvdHMNCj4gPiAg
-ICAgICBhcmUgT04uIE90aGVyd2lzZSBhZGp1c3QgY2xvY2sgaW4gX19kd19tY2lfc3RhcnRfcmVx
-dWVzdCgpDQo+ID4gICAgICAgZnVuY3Rpb24gYmVmb3JlIHNsb3Qgc3dpdGNoLg0KPiA+ICAgIGQp
-IE1vdmUgdGltaW5ncyBhbmQgYnVzX3dpZHRoIHNldHVwIHRvIHNlcGFyYXRlIGZ1bmNpb25zLg0K
-PiA+ICAqIFVzZSB0aW1pbmcgZmllbGQgaW4gZWFjaCBzbG90IHN0cnVjdHVyZSBpbnN0ZWFkIG9m
-IGNvbW1vbiBmaWVsZCBpbg0KPiA+ICAgIGhvc3Qgc3RydWN0dXJlLg0KPiA+ICAqIEFkZCBsb2Nr
-cyB0byBzZXJpYWxpemUgYWNjZXNzIHRvIHJlZ2lzdGVycy4NCj4gDQo+IFNvcnJ5LCBidXQgdGhp
-cyBpcyBhIGhhY2sgdG8gKnRyeSogdG8gbWFrZSBtdWx0aS1zbG90IHdvcmsgYW5kIHRoaXMNCj4g
-aXNuJ3Qgc3VmZmljaWVudC4gVGhlcmUgd2VyZSBnb29kIHJlYXNvbnMgdG8gd2h5IHRoZSBlYXJs
-aWVyDQo+IG5vbi13b3JraW5nIG11bHRpIHNsb3Qgc3VwcG9ydCB3YXMgcmVtb3ZlZCBmcm9tIGR3
-X21tYy4NCg0KUHJldmlvdXMgbXVsdGkgc2xvdCBpbXBsZW1lbnRhdGlvbiB3YXMgcmVtb3ZlZCBh
-cyBub2JvZHkgdXNlZCBpdCBhbmQNCm5vYm9keSB0ZXN0ZWQgaXQuIFRoZXJlIGFyZSBsb3RzIG9m
-IG1pc3Rha2VzIGluIHByZXZpb3VzIGltcGxlbWVudGF0aW9uDQp3aGljaCBhcmUgbm90IHJlbGF0
-ZWQgdG8gcmVxdWVzdCBzZXJpYWxpemF0aW9uDQpsaWtlIGxhY2sgb2Ygc2xvdCBzd2l0Y2ggLyBs
-YWNrIG9mIGFkZGluZyBzbG90IGlkIHRvIENJVSBjb21tYW5kcyAvIGV0cy4uLg0KU28gb2J2aW91
-c2x5IGl0IHdhcyBuZXZlciB0ZXN0ZWQgYW5kIG5ldmVyIHVzZWQgYXQgcmVhbCBtdWx0aSBzbG90
-IGhhcmR3YXJlLg0KDQo+IExldCBtZSBlbGFib3JhdGUgYSBiaXQgZm9yIHlvdXIgdW5kZXJzdGFu
-ZGluZy4gVGhlIGNvcmUgdXNlcyBhIGhvc3QNCj4gbG9jayAobW1jX2NsYWltfHJlbGVhc2VfaG9z
-dCgpKSB0byBzZXJpYWxpemUgb3BlcmF0aW9ucyBhbmQgY29tbWFuZHMsDQo+IGFzIHRvIGNvbmZp
-cm0gdG8gdGhlIFNEL1NESU8vKGUpTU1DIHNwZWNzLiBUaGUgYWJvdmUgY2hhbmdlcyBnaXZlcyBu
-bw0KPiBndWFyYW50ZWVzIGZvciB0aGlzLiBUbyBtYWtlIHRoYXQgd29yaywgd2Ugd291bGQgbmVl
-ZCBhICJtbWMgYnVzIGxvY2siDQo+IHRvIGJlIG1hbmFnZWQgYnkgdGhlIGNvcmUuDQoNCkluIGN1
-cnJlbnQgaW1wbGVtZW50YXRpb24gZGF0YSB0cmFuc2ZlcnMgYW5kIGNvbW1hbmRzIHRvIGRpZmZl
-cmVudA0KaG9zdHMgKHNsb3RzKSBhcmUgc2VyaWFsaXplZCBpbnRlcm5hbGx5IGluIHRoZSBkd19t
-bWMgZHJpdmVyLiBXZSBoYXZlDQpyZXF1ZXN0IHF1ZXVlIGFuZCB3aGVuIC5yZXF1ZXN0KCkgaXMg
-Y2FsbGVkIHdlIGFkZCBuZXcgcmVxdWVzdCB0byB0aGUNCnF1ZXVlLiBXZSB0YWtlIG5ldyByZXF1
-ZXN0IGZyb20gdGhlIHF1ZXVlIG9ubHkgaWYgdGhlIHByZXZpb3VzIG9uZQ0KaGFzIGFscmVhZHkg
-ZmluaXNoZWQuDQoNClNvIGFsdGhvdWdoIGhvc3RzIChzbG90cykgaGF2ZSBzZXBhcmF0ZSBsb2Nr
-cyAobW1jX2NsYWltfHJlbGVhc2VfaG9zdCgpKQ0KdGhlIHJlcXVlc3RzIHRvIGRpZmZlcmVudCBz
-bG90cyBhcmUgc2VyaWFsaXplZCBieSBkcml2ZXIuDQoNCklzbid0IHRoYXQgZW5vdWdoPw0KSSdt
-IG5vdCB2ZXJ5IGZhbWlsaWFyIHdpdGggU0QvU0RJTy8oZSlNTUMgc3BlY3Mgc28gbXkgYXNzdW1w
-dGlvbnMgbWlnaHQgYmUgd3JvbmcNCmluIHRoYXQgY2FzZSBwbGVhc2UgY29ycmVjdCBtZS4NCg0K
-PiBIb3dldmVyLCBpbnZlbnRpbmcgYSAibW1jIGJ1cyBsb2NrIiB3b3VsZCBsZWFkIHRvIG90aGVy
-IHByb2JsZW1zDQo+IHJlbGF0ZWQgdG8gSS9PIHNjaGVkdWxpbmcgZm9yIHVwcGVyIGxheWVycyAt
-IGl0IHNpbXBseSBicmVha3MuIEZvcg0KPiBleGFtcGxlLCBJL08gcmVxdWVzdHMgZm9yIG9uZSBj
-YXJkL3Nsb3QgY2FuIHRoZW4gc3RhcnZlIEkvTyByZXF1ZXN0cw0KPiByZWFjaGluZyBhbm90aGVy
-IGNhcmQvc2xvdC4NCj4gDQoNCk5ldmVydGhlbGVzcyB3ZSBoYWQgdG8gZGVhbCBzb21laG93IHdp
-dGggZXhpc3RpbmcgaGFyZHdhcmUgd2hpY2gNCmhhcyBtdWx0aXNsb3QgZHcgbW1jIGNvbnRyb2xs
-ZXIgYW5kIGJvdGggc2xvdHMgYXJlIHVzZWQuLi4NCg0KVGhpcyBwYXRjaCBhdCBsZWFzdCBzaG91
-bGRuJ3QgYnJlYWsgYW55dGhpbmcgZm9yIGN1cnJlbnQgdXNlcnMgKHdoaWNoIHVzZQ0KaXQgaW4g
-c2luZ2xlIHNsb3QgbW9kZSkNCg0KTW9yZW92ZXIgd2UgdGVzdGVkIHRoaXMgZHVhbC1zbG90IGlt
-cGxlbWVudGF0aW9uIGFuZCBkb24ndCBjYXRjaCBhbnkgcHJvYmxlbXMNCihwcm9iYWJseSB5ZXQp
-IGV4Y2VwdCBidXMgcGVyZm9ybWFuY2UgZGVjcmVhc2UgaW4gZHVhbC1zbG90IG1vZGUgKHdoaWNo
-IGlzDQpxdWl0ZSBleHBlY3RlZCkuDQoNCj4gDQo+IEtpbmQgcmVnYXJkcw0KPiBVZmZlDQotLSAN
-CiBFdWdlbml5IFBhbHRzZXY=
+When use eMMC as boot device, the eMMC signaling voltage is tied to 1.8v
+fixed output voltage, bios can set o2 sd host controller PCI configuration
+register 0x308 bit4 to 1 to let driver skip 3.3v signaling voltage and
+direct use 1.8v singling voltage in eMMC initialize process.
+
+Changes in V5:
+	Modify code format to pass checkpatch.pl check and add a summary
+	of what has changed in each version.
+
+Changes in V4:
+	Skip SDIO and SD initalization when register 0x308 bit 4 is set,
+	and modify some typo.
+
+Changes in V3:
+	Rebase the patch on the mmc tree 'next' branch.
+
+Changes in V2:
+	Modify code format, and delete unused code path.
+
+Changes in V1:
+	Check PCIe register 0x308 bit 4 and skip eMMC 3.3v initialization
+	process if it is set to 1.
+
+Signed-off-by: ernest.zhang <ernest.zhang@bayhubtech.com>
+---
+ drivers/mmc/host/sdhci-pci-o2micro.c | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+index 555970a..ba59db6a 100644
+--- a/drivers/mmc/host/sdhci-pci-o2micro.c
++++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+@@ -3,6 +3,7 @@
+  *
+  * Authors: Peter Guo <peter.guo@bayhubtech.com>
+  *          Adam Lee <adam.lee@canonical.com>
++ *          Ernest Zhang <ernest.zhang@bayhubtech.com>
+  *
+  * This software is licensed under the terms of the GNU General Public
+  * License version 2, as published by the Free Software Foundation, and
+@@ -39,6 +40,7 @@
+ #define O2_SD_MISC_CTRL4	0xFC
+ #define O2_SD_TUNING_CTRL	0x300
+ #define O2_SD_PLL_SETTING	0x304
++#define O2_SD_MISC_SETTING	0x308
+ #define O2_SD_CLK_SETTING	0x328
+ #define O2_SD_CAP_REG2		0x330
+ #define O2_SD_CAP_REG0		0x334
+@@ -184,6 +186,7 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+ 	struct sdhci_pci_chip *chip;
+ 	struct sdhci_host *host;
+ 	u32 reg;
++	int ret;
+ 
+ 	chip = slot->chip;
+ 	host = slot->host;
+@@ -197,6 +200,21 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+ 		if (reg & 0x1)
+ 			host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
+ 
++		if (chip->pdev->device == PCI_DEVICE_ID_O2_SEABIRD0) {
++			ret = pci_read_config_dword(chip->pdev,
++						    O2_SD_MISC_SETTING, &reg);
++			if (ret)
++				return -EIO;
++			if (reg & (1 << 4)) {
++				pr_info("%s: emmc 1.8v flag is set, force 1.8v signaling voltage\n",
++					mmc_hostname(host->mmc));
++				host->flags &= ~SDHCI_SIGNALING_330;
++				host->flags |= SDHCI_SIGNALING_180;
++				host->mmc->caps2 |= MMC_CAP2_NO_SD;
++				host->mmc->caps2 |= MMC_CAP2_NO_SDIO;
++			}
++		}
++
+ 		if (chip->pdev->device != PCI_DEVICE_ID_O2_FUJIN2)
+ 			break;
+ 		/* set dll watch dog timer */
+-- 
+2.7.4
