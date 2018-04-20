@@ -1,68 +1,58 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC 0/2] dw_mmc: add multislot support
-Date: Fri, 20 Apr 2018 10:56:46 +0200
-Message-ID: <CAPDyKFqGNR_YV=adUKqzEuYk-ZV48MHW68Uyr=8nXBEvafGsWQ@mail.gmail.com>
-References: <20180417121130.25281-1-Eugeniy.Paltsev@synopsys.com>
- <CAPDyKFqxZLtx_=0UU9NgBnW0Vmw=456q2FFbMBK4LKEaF-ua7A@mail.gmail.com> <1524210132.4614.4.camel@synopsys.com>
+From: Vijay Viswanath <vviswana@codeaurora.org>
+Subject: [PATCH V5 0/2] mmc: sdhci-msm: Configuring IO_PAD support for sdhci-msm
+Date: Fri, 20 Apr 2018 17:45:27 +0530
+Message-ID: <1524226529-30100-1-git-send-email-vviswana@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=y
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1524210132.4614.4.camel@synopsys.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Alexey Brodkin <Alexey.Brodkin@synopsys.com>
-Cc: "jh80.chung@samsung.com" <jh80.chung@samsung.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "krzk@kernel.org" <krzk@kernel.org>, "Eugeniy.Paltsev@synopsys.com" <Eugeniy.Paltsev@synopsys.com>, "linux-snps-arc@lists.infradead.org" <linux-snps-arc@lists.infradead.org>, "kgene@kernel.org" <kgene@kernel.org>, "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, vviswana@codeaurora.org, bjorn.andersson@linaro.org, riteshh@codeaurora.org, vbadigan@codeaurora.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 20 April 2018 at 09:42, Alexey Brodkin <Alexey.Brodkin@synopsys.com> wrote:
-> Hi Ulf,
->
-> On Fri, 2018-04-20 at 09:35 +0200, Ulf Hansson wrote:
->> [...]
->>
->> >
->> > 2. Add missing stuff to support multislot mode in DesignWare MMC driver.
->> >  * Add missing slot switch to __dw_mci_start_request() function.
->> >  * Refactor set_ios function:
->> >    a) Calculate common clock which is
->> >       suitable for all slots instead of directly use clock value
->> >       provided by mmc core. We calculate common clock as the minimum
->> >       among each used slot clocks. This clock is calculated in
->> >       dw_mci_calc_common_clock() function which is called
->> >       from set_ios()
->> >    b) Disable clock only if no other slots are ON.
->> >    c) Setup clock directly in set_ios() only if no other slots
->> >       are ON. Otherwise adjust clock in __dw_mci_start_request()
->> >       function before slot switch.
->> >    d) Move timings and bus_width setup to separate funcions.
->> >  * Use timing field in each slot structure instead of common field in
->> >    host structure.
->> >  * Add locks to serialize access to registers.
->>
->> Sorry, but this is a hack to *try* to make multi-slot work and this
->> isn't sufficient. There were good reasons to why the earlier
->> non-working multi slot support was removed from dw_mmc.
->>
->> Let me elaborate a bit for your understanding. The core uses a host
->> lock (mmc_claim|release_host()) to serialize operations and commands,
->> as to confirm to the SD/SDIO/(e)MMC specs. The above changes gives no
->> guarantees for this. To make that work, we would need a "mmc bus lock"
->> to be managed by the core.
->>
->> However, inventing a "mmc bus lock" would lead to other problems
->> related to I/O scheduling for upper layers - it simply breaks. For
->> example, I/O requests for one card/slot can then starve I/O requests
->> reaching another card/slot.
->
-> So are you saying that multi-slot support is a no go in general or it is only
-> applicable to DW MMC (I really doubt that's a case)?
+>From the HPG:
+In some platform, SDCC controller can be connected to either an eMMC device or
+an SD card. The PADs for SD card are dual-voltage that support 3v/1.8v. Those
+PADs have a control signal  (io_pad_pwr_switch/mode18 ) that indicates whether
+the PAD works in 3v or 1.8v.
 
-In general.
+For SD usage the default value of this signal is ‘0’, and SD driver changes it
+to ‘1’ as a part of voltage switching sequence.
+For eMMC usage, SW should configure this signal to ‘1’ and supply 1.8v to PADs
+before starting any activity on the eMMC BUS.
 
->
-> BTW there're other controllers that seem to support multi-slot like Atmel etc.
+To set this signal, write the following in the
+SDC1_SDCC_HC_VENDOR_SPECIFIC_FUNC register:
+	HC_IO_PAD_PWR_SWITCH: bit 16
+		HC_IO_PAD_PWR_SWITCH_EN: bit 15
 
-Yeah, none of those are working - it just bad attempts to try to make
-*something* work.
+Changes since v1:
+	Modified comments on io_pad related changes.
+	Split some read+modify+write commands to multiple lines
 
-Kind regards
-Uffe
+Changes since v2:
+	IO_PAD_PWR_SWITCH_EN will be set only if we have info regarding what
+	voltage is supported by the regulators.
+	Replaced regulator_list_voltage() API with
+	regulator_is_supported_voltage().
+
+Changes since v3:
+	Removed unnecessary prints and extra lines.
+
+Changes since v4:
+	Removed unnecessary mb() within sdhci_msm_handle_pwr_irq() since
+	wakeup calls have implicit write barriers.
+
+Krishna Konda (1):
+  mmc: sdhci-msm: support voltage pad switching
+
+Vijay Viswanath (1):
+  mmc: sdhci-msm: Add support to store supported vdd-io voltages
+
+ drivers/mmc/host/sdhci-msm.c | 99 +++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 97 insertions(+), 2 deletions(-)
+
+-- 
+ Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc. 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a Linux Foundation Collaborative Project.
