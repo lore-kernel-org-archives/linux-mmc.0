@@ -1,101 +1,171 @@
-From: "ernest.zhang" <ernest.zhang@bayhubtech.com>
-Subject: [PATCH V5 3/3] mmc: sdhci: Add MSI interrupt support for O2 SD host
-Date: Sat, 21 Apr 2018 00:39:50 +0800
-Message-ID: <20180420163950.11756-1-ernest.zhang@bayhubtech.com>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: Liming Sun <lsun@mellanox.com>
+Subject: [PATCH 1/2] mmc: dw_mmc-bluefield: Add driver extension
+Date: Fri, 20 Apr 2018 13:32:17 -0400
+Message-ID: <1524245538-34137-1-git-send-email-lsun@mellanox.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: Xiaoguang Yu <xiaoguang.yu@bayhubtech.com>, Shirley Her <shirley.her@bayhubtech.com>, Yuxiang Wan <yuxiang.wan@bayhubtech.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Jaehoon Chung <jh80.chung@samsung.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>
+Cc: Liming Sun <lsun@mellanox.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Add MSI interrupt support if the SD host device can support MSI interrupt.
+This commit adds extension to the dw_mmc driver for Mellanox BlueField
+SoC. It updates the UHS_REG_EXT register to bring up the eMMC card on
+this SoC.
 
-Changes in V5:
-	1. Because pci_enable_msi is marked as deprecated and should not be
-	used in new code, use pci_alloc_irq_vectors instead.
-	2. Remove unneeded CONFIG_PCI_MSI macro check
-
-Changes in V4:
-	Enable MSI interrupt if the MSI capability bit is set in
-	capability register.
-
-Changes in V3:
-	None. This patch is add in V4.
-
-Changes in V2:
-	None. This patch is add in V4.
-
-Changes in V1:
-	None. This patch is add in V4.
-
-Signed-off-by: ernest.zhang <ernest.zhang@bayhubtech.com>
+Signed-off-by: Liming Sun <lsun@mellanox.com>
 ---
- drivers/mmc/host/sdhci-pci-o2micro.c | 30 +++++++++++++++++++++++++++---
- 1 file changed, 27 insertions(+), 3 deletions(-)
+ .../devicetree/bindings/mmc/bluefield-dw-mshc.txt  | 29 +++++++++
+ drivers/mmc/host/Kconfig                           |  9 +++
+ drivers/mmc/host/Makefile                          |  1 +
+ drivers/mmc/host/dw_mmc-bluefield.c                | 72 ++++++++++++++++++++++
+ 4 files changed, 111 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/bluefield-dw-mshc.txt
+ create mode 100644 drivers/mmc/host/dw_mmc-bluefield.c
 
-diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
-index 96adaae..374c783 100644
---- a/drivers/mmc/host/sdhci-pci-o2micro.c
-+++ b/drivers/mmc/host/sdhci-pci-o2micro.c
-@@ -358,11 +358,13 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
- {
- 	struct sdhci_pci_chip *chip;
- 	struct sdhci_host *host;
-+	struct mmc_host *mmc;
- 	u32 reg;
- 	int ret;
- 
- 	chip = slot->chip;
- 	host = slot->host;
-+	mmc = host->mmc;
- 	switch (chip->pdev->device) {
- 	case PCI_DEVICE_ID_O2_SDS0:
- 	case PCI_DEVICE_ID_O2_SEABIRD0:
-@@ -373,6 +375,28 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
- 		if (reg & 0x1)
- 			host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
- 
-+		if (pci_find_capability(chip->pdev, PCI_CAP_ID_MSI)) {
-+			ret = pci_alloc_irq_vectors(chip->pdev, 1, 1,
-+						    PCI_IRQ_MSI | PCI_IRQ_MSIX);
-+			if (ret == 1) {
-+				ret = pci_irq_vector(chip->pdev, 0);
-+				if (ret >= 0) {
-+					host->irq = ret;
-+					pr_info("%s: use MSI irq, irq=%d\n",
-+						mmc_hostname(mmc), host->irq);
-+				} else {
-+					pr_err("%s: failed to get device irq, err=%d\n",
-+					       mmc_hostname(mmc), ret);
-+				}
-+			} else {
-+				pr_err("%s: enable PCI MSI failed, err=%d\n",
-+				       mmc_hostname(mmc), ret);
-+			}
-+		} else {
-+			pr_info("%s: unsupport msi, use INTx irq\n",
-+				mmc_hostname(mmc));
-+		}
+diff --git a/Documentation/devicetree/bindings/mmc/bluefield-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/bluefield-dw-mshc.txt
+new file mode 100644
+index 0000000..ee0dd61
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/bluefield-dw-mshc.txt
+@@ -0,0 +1,29 @@
++* Mellanox Bluefield SoC specific extensions to the Synopsys Designware
++  Mobile Storage Host Controller
 +
- 		if (chip->pdev->device == PCI_DEVICE_ID_O2_SEABIRD0) {
- 			ret = pci_read_config_dword(chip->pdev,
- 						    O2_SD_MISC_SETTING, &reg);
-@@ -380,11 +404,11 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
- 				return -EIO;
- 			if (reg & (1 << 4)) {
- 				pr_info("%s: emmc 1.8v flag is set, force 1.8v signaling voltage\n",
--					mmc_hostname(host->mmc));
-+					mmc_hostname(mmc));
- 				host->flags &= ~SDHCI_SIGNALING_330;
- 				host->flags |= SDHCI_SIGNALING_180;
--				host->mmc->caps2 |= MMC_CAP2_NO_SD;
--				host->mmc->caps2 |= MMC_CAP2_NO_SDIO;
-+				mmc->caps2 |= MMC_CAP2_NO_SD;
-+				mmc->caps2 |= MMC_CAP2_NO_SDIO;
- 			}
- 		}
++Read synopsys-dw-mshc.txt for more details
++
++The Synopsys designware mobile storage host controller is used to interface
++a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
++differences between the core Synopsys dw mshc controller properties described
++by synopsys-dw-mshc.txt and the properties used by the Mellanox Bluefield SoC
++specific extensions to the Synopsys Designware Mobile Storage Host Controller.
++
++Required Properties:
++
++* compatible: should be one of the following.
++  - "mellanox,bluefield-dw-mshc": for controllers with Mellanox Bluefield SoC
++    specific extensions.
++
++Example:
++
++	/* Mellanox Bluefield SoC MMC */
++	dwmmc0@4,0 {
++		compatible = "mellanox,bluefield-dw-mshc";
++		reg = <4 0x8000 0x400>;
++		interrupts = <32>;
++		fifo-depth = <0x100>;
++		clock-frequency = <24000000>;
++		bus-width = <8>;
++		cap-mmc-highspeed;
++	};
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 9589f9c..26ac6b5 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -717,6 +717,15 @@ config MMC_DW_K3
+ 	  Synopsys DesignWare Memory Card Interface driver. Select this option
+ 	  for platforms based on Hisilicon K3 SoC's.
  
++config MMC_DW_BLUEFIELD
++	tristate "BlueField specific extensions for Synopsys DW Memory Card Interface"
++	depends on MMC_DW
++	select MMC_DW_PLTFM
++	help
++	  This selects support for Mellanox BlueField SoC specific extensions to
++	  the Synopsys DesignWare Memory Card Interface driver. Select this
++	  option for platforms based on Mellanox BlueField SoC's.
++
+ config MMC_DW_PCI
+ 	tristate "Synopsys Designware MCI support on PCI bus"
+ 	depends on MMC_DW && PCI
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index 6aead24..267b3f1 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -55,6 +55,7 @@ obj-$(CONFIG_MMC_DW_K3)		+= dw_mmc-k3.o
+ obj-$(CONFIG_MMC_DW_PCI)	+= dw_mmc-pci.o
+ obj-$(CONFIG_MMC_DW_ROCKCHIP)	+= dw_mmc-rockchip.o
+ obj-$(CONFIG_MMC_DW_ZX)		+= dw_mmc-zx.o
++obj-$(CONFIG_MMC_DW_BLUEFIELD)	+= dw_mmc-bluefield.o
+ obj-$(CONFIG_MMC_SH_MMCIF)	+= sh_mmcif.o
+ obj-$(CONFIG_MMC_JZ4740)	+= jz4740_mmc.o
+ obj-$(CONFIG_MMC_VUB300)	+= vub300.o
+diff --git a/drivers/mmc/host/dw_mmc-bluefield.c b/drivers/mmc/host/dw_mmc-bluefield.c
+new file mode 100644
+index 0000000..12067b1
+--- /dev/null
++++ b/drivers/mmc/host/dw_mmc-bluefield.c
+@@ -0,0 +1,72 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Copyright (C) 2018 Mellanox Technologies.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ */
++
++#include <linux/module.h>
++#include <linux/io.h>
++#include <linux/irq.h>
++#include <linux/platform_device.h>
++#include <linux/pm_runtime.h>
++#include <linux/mmc/host.h>
++#include <linux/mmc/mmc.h>
++#include <linux/of.h>
++
++#include "dw_mmc.h"
++#include "dw_mmc-pltfm.h"
++
++static void dw_mci_bluefield_set_ios(struct dw_mci *host, struct mmc_ios *ios)
++{
++	u32 regs;
++
++	/* Set drive=4 (bit 29:23) and sample=2 (bit 22:16) in UHS_REG_EXT. */
++	regs = mci_readl(host, UHS_REG_EXT);
++	regs = (regs & ~0x3F100000 & ~0x7F0000) | (4 << 23) | (2 << 16);
++	mci_writel(host, UHS_REG_EXT, regs);
++}
++
++static const struct dw_mci_drv_data bluefield_drv_data = {
++	.set_ios		= dw_mci_bluefield_set_ios
++};
++
++static const struct of_device_id dw_mci_bluefield_match[] = {
++	{ .compatible = "mellanox,bluefield-dw-mshc",
++		.data = &bluefield_drv_data },
++	{},
++};
++MODULE_DEVICE_TABLE(of, dw_mci_bluefield_match);
++
++static int dw_mci_bluefield_probe(struct platform_device *pdev)
++{
++	const struct dw_mci_drv_data *drv_data = NULL;
++	const struct of_device_id *match;
++
++	if (pdev->dev.of_node) {
++		match = of_match_node(dw_mci_bluefield_match,
++				      pdev->dev.of_node);
++		drv_data = match->data;
++	}
++
++	return dw_mci_pltfm_register(pdev, drv_data);
++}
++
++static struct platform_driver dw_mci_bluefield_pltfm_driver = {
++	.probe		= dw_mci_bluefield_probe,
++	.remove		= dw_mci_pltfm_remove,
++	.driver		= {
++		.name		= "dwmmc_bluefield",
++		.of_match_table	= dw_mci_bluefield_match,
++		.pm		= &dw_mci_pltfm_pmops,
++	},
++};
++
++module_platform_driver(dw_mci_bluefield_pltfm_driver);
++
++MODULE_DESCRIPTION("BlueField DW Multimedia Card driver");
++MODULE_AUTHOR("Mellanox Technologies");
++MODULE_LICENSE("GPL v2");
 -- 
-2.7.4
+1.8.3.1
