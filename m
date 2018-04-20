@@ -1,63 +1,110 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: sdhci-cadence: fix logically and structurally
- dead code
-Date: Fri, 20 Apr 2018 09:10:13 +0200
-Message-ID: <CAPDyKFq-BzzMjYrnDwrmKiKm_L=8dq-G_Mtx+pbpG0qqgHgerg@mail.gmail.com>
-References: <20180419155958.GA18593@embeddedor.com>
+Subject: Re: [PATCH 28/61] mmc: host: simplify getting .drvdata
+Date: Fri, 20 Apr 2018 09:10:20 +0200
+Message-ID: <CAPDyKFrsnXeuHkAGM-w7hH_HuTr+n62Z1UziP0umNQB-oKn+8g@mail.gmail.com>
+References: <20180419140641.27926-1-wsa+renesas@sang-engineering.com> <20180419140641.27926-29-wsa+renesas@sang-engineering.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180419155958.GA18593@embeddedor.com>
+In-Reply-To: <20180419140641.27926-29-wsa+renesas@sang-engineering.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
-Cc: Masahiro Yamada <yamada.masahiro@socionext.com>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, kernel-janitors@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michal.simek@xilinx.com>, Tony Prisk <linux@prisktech.co.nz>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 19 April 2018 at 17:59, Gustavo A. R. Silva <gustavo@embeddedor.com> wrote:
-> Currently, the code block inside the for loop will never execute
-> more than once, because the function returns inmediately after
-> the first iteration, hence the execution of the code at the second
-> iteration is structurally dead and, code at line 281: return 0; is
-> never reached.
+On 19 April 2018 at 16:05, Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
+> We should get drvdata from struct device directly. Going via
+> platform_device is an unneeded step back and forth.
 >
-> Fix this by checking _ret_ before return.
->
-> Addresses-Coverity-ID: 1468009 ("Logically dead code")
-> Addresses-Coverity-ID: 1468002 ("Structurally dead code")
-> Suggested-by: Masahiro Yamada <yamada.masahiro@socionext.com>
-> Signed-off-by: Gustavo A. R. Silva <gustavo@embeddedor.com>
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-Thanks, applied for next and by fixing the minor spelling mistake in
-the changelog.
+Thanks, applied for next!
 
 Kind regards
 Uffe
 
 > ---
-> Changes in v2:
->  - Update changelog.
->  - Drop the 'Fixes' tag.
->  - Add check on ret instead of removing the "return ret;" line.
->  - Thanks to Masahiro Yamada for the feedback provided.
 >
->  drivers/mmc/host/sdhci-cadence.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
+> Build tested only. buildbot is happy. Please apply individually.
 >
-> diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
-> index bc30d16..7a343b8 100644
-> --- a/drivers/mmc/host/sdhci-cadence.c
-> +++ b/drivers/mmc/host/sdhci-cadence.c
-> @@ -274,8 +274,8 @@ static int sdhci_cdns_set_tune_val(struct sdhci_host *host, unsigned int val)
->                 ret = readl_poll_timeout(reg, tmp,
->                                          !(tmp & SDHCI_CDNS_HRS06_TUNE_UP),
->                                          0, 1);
-> -
-> -               return ret;
-> +               if (ret)
-> +                       return ret;
->         }
+>  drivers/mmc/host/davinci_mmc.c     | 6 ++----
+>  drivers/mmc/host/sdhci-of-arasan.c | 6 ++----
+>  drivers/mmc/host/wmt-sdmmc.c       | 6 ++----
+>  3 files changed, 6 insertions(+), 12 deletions(-)
 >
->         return 0;
+> diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
+> index 8e363174f9d6..9e68c3645e22 100644
+> --- a/drivers/mmc/host/davinci_mmc.c
+> +++ b/drivers/mmc/host/davinci_mmc.c
+> @@ -1377,8 +1377,7 @@ static int __exit davinci_mmcsd_remove(struct platform_device *pdev)
+>  #ifdef CONFIG_PM
+>  static int davinci_mmcsd_suspend(struct device *dev)
+>  {
+> -       struct platform_device *pdev = to_platform_device(dev);
+> -       struct mmc_davinci_host *host = platform_get_drvdata(pdev);
+> +       struct mmc_davinci_host *host = dev_get_drvdata(dev);
+>
+>         writel(0, host->base + DAVINCI_MMCIM);
+>         mmc_davinci_reset_ctrl(host, 1);
+> @@ -1389,8 +1388,7 @@ static int davinci_mmcsd_suspend(struct device *dev)
+>
+>  static int davinci_mmcsd_resume(struct device *dev)
+>  {
+> -       struct platform_device *pdev = to_platform_device(dev);
+> -       struct mmc_davinci_host *host = platform_get_drvdata(pdev);
+> +       struct mmc_davinci_host *host = dev_get_drvdata(dev);
+>
+>         clk_enable(host->clk);
+>         mmc_davinci_reset_ctrl(host, 0);
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index c33a5f7393bd..bed3612247b0 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -359,8 +359,7 @@ static const struct sdhci_pltfm_data sdhci_arasan_cqe_pdata = {
+>   */
+>  static int sdhci_arasan_suspend(struct device *dev)
+>  {
+> -       struct platform_device *pdev = to_platform_device(dev);
+> -       struct sdhci_host *host = platform_get_drvdata(pdev);
+> +       struct sdhci_host *host = dev_get_drvdata(dev);
+>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>         struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
+>         int ret;
+> @@ -403,8 +402,7 @@ static int sdhci_arasan_suspend(struct device *dev)
+>   */
+>  static int sdhci_arasan_resume(struct device *dev)
+>  {
+> -       struct platform_device *pdev = to_platform_device(dev);
+> -       struct sdhci_host *host = platform_get_drvdata(pdev);
+> +       struct sdhci_host *host = dev_get_drvdata(dev);
+>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>         struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
+>         int ret;
+> diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
+> index fd30ac7da5e5..3ba42f508014 100644
+> --- a/drivers/mmc/host/wmt-sdmmc.c
+> +++ b/drivers/mmc/host/wmt-sdmmc.c
+> @@ -928,8 +928,7 @@ static int wmt_mci_remove(struct platform_device *pdev)
+>  static int wmt_mci_suspend(struct device *dev)
+>  {
+>         u32 reg_tmp;
+> -       struct platform_device *pdev = to_platform_device(dev);
+> -       struct mmc_host *mmc = platform_get_drvdata(pdev);
+> +       struct mmc_host *mmc = dev_get_drvdata(dev);
+>         struct wmt_mci_priv *priv;
+>
+>         if (!mmc)
+> @@ -953,8 +952,7 @@ static int wmt_mci_suspend(struct device *dev)
+>  static int wmt_mci_resume(struct device *dev)
+>  {
+>         u32 reg_tmp;
+> -       struct platform_device *pdev = to_platform_device(dev);
+> -       struct mmc_host *mmc = platform_get_drvdata(pdev);
+> +       struct mmc_host *mmc = dev_get_drvdata(dev);
+>         struct wmt_mci_priv *priv;
+>
+>         if (mmc) {
 > --
-> 2.7.4
+> 2.11.0
 >
