@@ -1,35 +1,99 @@
-From: Liming Sun <lsun@mellanox.com>
-Subject: [PATCH 2/2] arm64: defconfig: Enable dw_mmc-bluefield driver
-Date: Fri, 20 Apr 2018 13:32:18 -0400
-Message-ID: <1524245538-34137-2-git-send-email-lsun@mellanox.com>
-References: <1524245538-34137-1-git-send-email-lsun@mellanox.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1524245538-34137-1-git-send-email-lsun@mellanox.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Jaehoon Chung <jh80.chung@samsung.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>
-Cc: Liming Sun <lsun@mellanox.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Hans Verkuil <hverkuil@xs4all.nl>
+Subject: Re: [PATCH 04/15] media: pxa_camera: remove the dmaengine compat need
+Date: Sun, 22 Apr 2018 13:06:12 +0200
+Message-ID: <89f3e97c-08a4-33b6-8fd3-0c1b4dea2065@xs4all.nl>
+References: <20180402142656.26815-1-robert.jarzmik@free.fr>
+ <20180402142656.26815-5-robert.jarzmik@free.fr>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <20180402142656.26815-5-robert.jarzmik@free.fr>
+Content-Language: en-US
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: Robert Jarzmik <robert.jarzmik@free.fr>, Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Tejun Heo <tj@kernel.org>, Vinod Koul <vinod.koul@intel.com>, Mauro Carvalho Chehab <mchehab@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, Boris Brezillon <boris.brezillon@free-electrons.com>, David Woodhouse <dwmw2@infradead.org>, Brian Norris <computersforpeace@gmail.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Cyrille Pitchen <cyrille.pitchen@wedev4u.fr>, Nicolas Pitre <nico@fluxnic.net>, Samuel Ortiz <samuel@sortiz.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>, Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, A
+Cc: devel@driverdev.osuosl.org, alsa-devel@alsa-project.org, netdev@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-ide@vger.kernel.org, linux-mtd@lists.infradead.org, dmaengine@vger.kernel.org, =?UTF-8?Q?Niklas_S=c3=b6derlund?= <niklas.soderlund+renesas@ragnatech.se>, linux-arm-kernel@lists.infradead.org, linux-media@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-This patch updates arm64 defconfig to enable dw_mmc-bluefield,
-which is a driver extension of Synopsys Designware MMC for the
-Mellanox BlueField Soc.
+On 04/02/2018 04:26 PM, Robert Jarzmik wrote:
+> From: Robert Jarzmik <robert.jarzmik@renault.com>
+> 
+> As the pxa architecture switched towards the dmaengine slave map, the
+> old compatibility mechanism to acquire the dma requestor line number and
+> priority are not needed anymore.
+> 
+> This patch simplifies the dma resource acquisition, using the more
+> generic function dma_request_slave_channel().
+> 
+> Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>
 
-Signed-off-by: Liming Sun <lsun@mellanox.com>
----
- arch/arm64/configs/defconfig | 1 +
- 1 file changed, 1 insertion(+)
+Acked-by: Hans Verkuil <hans.verkuil@cisco.com>
 
-diff --git a/arch/arm64/configs/defconfig b/arch/arm64/configs/defconfig
-index ecf6137..43464ab 100644
---- a/arch/arm64/configs/defconfig
-+++ b/arch/arm64/configs/defconfig
-@@ -487,6 +487,7 @@ CONFIG_MMC_DW=y
- CONFIG_MMC_DW_EXYNOS=y
- CONFIG_MMC_DW_K3=y
- CONFIG_MMC_DW_ROCKCHIP=y
-+CONFIG_MMC_DW_BLUEFIELD=y
- CONFIG_MMC_SUNXI=y
- CONFIG_MMC_BCM2835=y
- CONFIG_MMC_SDHCI_XENON=y
--- 
-1.8.3.1
+Regards,
+
+	Hans
+
+> ---
+>  drivers/media/platform/pxa_camera.c | 22 +++-------------------
+>  1 file changed, 3 insertions(+), 19 deletions(-)
+> 
+> diff --git a/drivers/media/platform/pxa_camera.c b/drivers/media/platform/pxa_camera.c
+> index c71a00736541..4c82d1880753 100644
+> --- a/drivers/media/platform/pxa_camera.c
+> +++ b/drivers/media/platform/pxa_camera.c
+> @@ -2357,8 +2357,6 @@ static int pxa_camera_probe(struct platform_device *pdev)
+>  		.src_maxburst = 8,
+>  		.direction = DMA_DEV_TO_MEM,
+>  	};
+> -	dma_cap_mask_t mask;
+> -	struct pxad_param params;
+>  	char clk_name[V4L2_CLK_NAME_SIZE];
+>  	int irq;
+>  	int err = 0, i;
+> @@ -2432,34 +2430,20 @@ static int pxa_camera_probe(struct platform_device *pdev)
+>  	pcdev->base = base;
+>  
+>  	/* request dma */
+> -	dma_cap_zero(mask);
+> -	dma_cap_set(DMA_SLAVE, mask);
+> -	dma_cap_set(DMA_PRIVATE, mask);
+> -
+> -	params.prio = 0;
+> -	params.drcmr = 68;
+> -	pcdev->dma_chans[0] =
+> -		dma_request_slave_channel_compat(mask, pxad_filter_fn,
+> -						 &params, &pdev->dev, "CI_Y");
+> +	pcdev->dma_chans[0] = dma_request_slave_channel(&pdev->dev, "CI_Y");
+>  	if (!pcdev->dma_chans[0]) {
+>  		dev_err(&pdev->dev, "Can't request DMA for Y\n");
+>  		return -ENODEV;
+>  	}
+>  
+> -	params.drcmr = 69;
+> -	pcdev->dma_chans[1] =
+> -		dma_request_slave_channel_compat(mask, pxad_filter_fn,
+> -						 &params, &pdev->dev, "CI_U");
+> +	pcdev->dma_chans[1] = dma_request_slave_channel(&pdev->dev, "CI_U");
+>  	if (!pcdev->dma_chans[1]) {
+>  		dev_err(&pdev->dev, "Can't request DMA for Y\n");
+>  		err = -ENODEV;
+>  		goto exit_free_dma_y;
+>  	}
+>  
+> -	params.drcmr = 70;
+> -	pcdev->dma_chans[2] =
+> -		dma_request_slave_channel_compat(mask, pxad_filter_fn,
+> -						 &params, &pdev->dev, "CI_V");
+> +	pcdev->dma_chans[2] = dma_request_slave_channel(&pdev->dev, "CI_V");
+>  	if (!pcdev->dma_chans[2]) {
+>  		dev_err(&pdev->dev, "Can't request DMA for V\n");
+>  		err = -ENODEV;
+> 
