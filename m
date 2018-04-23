@@ -1,172 +1,185 @@
-From: Chaotian Jing <chaotian.jing@mediatek.com>
-Subject: [PATCH] mmc: mediatek: add 64G DRAM DMA support
-Date: Mon, 23 Apr 2018 17:26:50 +0800
-Message-ID: <1524475610-22079-2-git-send-email-chaotian.jing@mediatek.com>
-References: <1524475610-22079-1-git-send-email-chaotian.jing@mediatek.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/2] mmc: dw_mmc-bluefield: Add driver extension
+Date: Mon, 23 Apr 2018 11:31:51 +0200
+Message-ID: <CAPDyKFoPgMeCmAC9JeC4hzW4OBDqCq5cdjPoRd0AfYpq=FErwg@mail.gmail.com>
+References: <1524245538-34137-1-git-send-email-lsun@mellanox.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1524475610-22079-1-git-send-email-chaotian.jing@mediatek.com>
+In-Reply-To: <1524245538-34137-1-git-send-email-lsun@mellanox.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Matthias Brugger <matthias.bgg@gmail.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Phong LE <ple@baylibre.com>, Julia Lawall <Julia.Lawall@lip6.fr>, Heiner Kallweit <hkallweit1@gmail.com>, Ryder Lee <ryder.lee@mediatek.com>, yong mao <yong.mao@mediatek.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, srv_heupstream@mediatek.com
+To: Liming Sun <lsun@mellanox.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Jaehoon Chung <jh80.chung@samsung.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, devicetree@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-MT2712 MSDC supports 64G DRAM DMA access, it needs update
-gpd/bd structure.
+On 20 April 2018 at 19:32, Liming Sun <lsun@mellanox.com> wrote:
+> This commit adds extension to the dw_mmc driver for Mellanox BlueField
+> SoC. It updates the UHS_REG_EXT register to bring up the eMMC card on
+> this SoC.
+>
+> Signed-off-by: Liming Sun <lsun@mellanox.com>
+> ---
+>  .../devicetree/bindings/mmc/bluefield-dw-mshc.txt  | 29 +++++++++
 
-Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
----
- drivers/mmc/host/mtk-sd.c | 44 +++++++++++++++++++++++++++++++++++++++-----
- 1 file changed, 39 insertions(+), 5 deletions(-)
+Please move changes to DT docs into a separate patch.
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index d642e11..93269ac 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -228,6 +228,7 @@
- 
- #define MSDC_PATCH_BIT2_CFGRESP   (0x1 << 15)   /* RW */
- #define MSDC_PATCH_BIT2_CFGCRCSTS (0x1 << 28)   /* RW */
-+#define MSDC_PB2_SUPPORT_64G      (0x1 << 1)    /* RW */
- #define MSDC_PB2_RESPWAIT         (0x3 << 2)    /* RW */
- #define MSDC_PB2_RESPSTSENSEL     (0x7 << 16)   /* RW */
- #define MSDC_PB2_CRCSTSENSEL      (0x7 << 29)   /* RW */
-@@ -281,6 +282,8 @@ struct mt_gpdma_desc {
- #define GPDMA_DESC_BDP		(0x1 << 1)
- #define GPDMA_DESC_CHECKSUM	(0xff << 8) /* bit8 ~ bit15 */
- #define GPDMA_DESC_INT		(0x1 << 16)
-+#define GPDMA_DESC_NEXT_H4	(0xf << 24)
-+#define GPDMA_DESC_PTR_H4	(0xf << 28)
- 	u32 next;
- 	u32 ptr;
- 	u32 gpd_data_len;
-@@ -297,6 +300,8 @@ struct mt_bdma_desc {
- #define BDMA_DESC_CHECKSUM	(0xff << 8) /* bit8 ~ bit15 */
- #define BDMA_DESC_BLKPAD	(0x1 << 17)
- #define BDMA_DESC_DWPAD		(0x1 << 18)
-+#define BDMA_DESC_NEXT_H4	(0xf << 24)
-+#define BDMA_DESC_PTR_H4	(0xf << 28)
- 	u32 next;
- 	u32 ptr;
- 	u32 bd_data_len;
-@@ -335,6 +340,7 @@ struct mtk_mmc_compatible {
- 	bool busy_check;
- 	bool stop_clk_fix;
- 	bool enhance_rx;
-+	bool support_64g;
- };
- 
- struct msdc_tune_para {
-@@ -404,6 +410,7 @@ struct msdc_host {
- 	.busy_check = false,
- 	.stop_clk_fix = false,
- 	.enhance_rx = false,
-+	.support_64g = false,
- };
- 
- static const struct mtk_mmc_compatible mt8173_compat = {
-@@ -415,6 +422,7 @@ struct msdc_host {
- 	.busy_check = false,
- 	.stop_clk_fix = false,
- 	.enhance_rx = false,
-+	.support_64g = false,
- };
- 
- static const struct mtk_mmc_compatible mt2701_compat = {
-@@ -426,6 +434,7 @@ struct msdc_host {
- 	.busy_check = false,
- 	.stop_clk_fix = false,
- 	.enhance_rx = false,
-+	.support_64g = false,
- };
- 
- static const struct mtk_mmc_compatible mt2712_compat = {
-@@ -437,6 +446,7 @@ struct msdc_host {
- 	.busy_check = true,
- 	.stop_clk_fix = true,
- 	.enhance_rx = true,
-+	.support_64g = true,
- };
- 
- static const struct mtk_mmc_compatible mt7622_compat = {
-@@ -448,6 +458,7 @@ struct msdc_host {
- 	.busy_check = true,
- 	.stop_clk_fix = true,
- 	.enhance_rx = true,
-+	.support_64g = false,
- };
- 
- static const struct of_device_id msdc_of_ids[] = {
-@@ -558,6 +569,10 @@ static inline void msdc_dma_setup(struct msdc_host *host, struct msdc_dma *dma,
- 		bd[j].bd_info &= ~BDMA_DESC_BLKPAD;
- 		bd[j].bd_info &= ~BDMA_DESC_DWPAD;
- 		bd[j].ptr = (u32)dma_address;
-+		if (host->dev_comp->support_64g) {
-+			bd[j].bd_info &= ~BDMA_DESC_PTR_H4;
-+			bd[j].bd_info |= ((dma_address >> 32) & 0xf) << 28;
-+		}
- 		bd[j].bd_data_len &= ~BDMA_DESC_BUFLEN;
- 		bd[j].bd_data_len |= (dma_len & BDMA_DESC_BUFLEN);
- 
-@@ -1367,6 +1382,9 @@ static void msdc_init_hw(struct msdc_host *host)
- 			     MSDC_PATCH_BIT2_CFGCRCSTS);
- 	}
- 
-+	if (host->dev_comp->support_64g)
-+		sdr_set_bits(host->base + MSDC_PATCH_BIT2,
-+			     MSDC_PB2_SUPPORT_64G);
- 	if (host->dev_comp->data_tune) {
- 		sdr_set_bits(host->base + tune_reg,
- 			     MSDC_PAD_TUNE_RD_SEL | MSDC_PAD_TUNE_CMD_SEL);
-@@ -1408,19 +1426,32 @@ static void msdc_init_gpd_bd(struct msdc_host *host, struct msdc_dma *dma)
- {
- 	struct mt_gpdma_desc *gpd = dma->gpd;
- 	struct mt_bdma_desc *bd = dma->bd;
-+	dma_addr_t dma_addr;
- 	int i;
- 
- 	memset(gpd, 0, sizeof(struct mt_gpdma_desc) * 2);
- 
-+	dma_addr = dma->gpd_addr + sizeof(struct mt_gpdma_desc);
- 	gpd->gpd_info = GPDMA_DESC_BDP; /* hwo, cs, bd pointer */
--	gpd->ptr = (u32)dma->bd_addr; /* physical address */
- 	/* gpd->next is must set for desc DMA
- 	 * That's why must alloc 2 gpd structure.
- 	 */
--	gpd->next = (u32)dma->gpd_addr + sizeof(struct mt_gpdma_desc);
-+	gpd->next = (u32)dma_addr;
-+	if (host->dev_comp->support_64g)
-+		gpd->gpd_info |= ((dma_addr >> 32) & 0xf) << 24;
-+
-+	dma_addr = dma->bd_addr;
-+	gpd->ptr = (u32)dma->bd_addr; /* physical address */
-+	if (host->dev_comp->support_64g)
-+		gpd->gpd_info |= ((dma_addr >> 32) & 0xf) << 28;
-+
- 	memset(bd, 0, sizeof(struct mt_bdma_desc) * MAX_BD_NUM);
--	for (i = 0; i < (MAX_BD_NUM - 1); i++)
--		bd[i].next = (u32)dma->bd_addr + sizeof(*bd) * (i + 1);
-+	for (i = 0; i < (MAX_BD_NUM - 1); i++) {
-+		dma_addr = dma->bd_addr + sizeof(*bd) * (i + 1);
-+		bd[i].next = (u32)dma_addr;
-+		if (host->dev_comp->support_64g)
-+			bd[i].bd_info |= ((dma_addr >> 32) & 0xf) << 24;
-+	}
- }
- 
- static void msdc_ops_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-@@ -1913,7 +1944,10 @@ static int msdc_drv_probe(struct platform_device *pdev)
- 	mmc->max_blk_size = 2048;
- 	mmc->max_req_size = 512 * 1024;
- 	mmc->max_blk_count = mmc->max_req_size / 512;
--	host->dma_mask = DMA_BIT_MASK(32);
-+	if (host->dev_comp->support_64g)
-+		host->dma_mask = DMA_BIT_MASK(36);
-+	else
-+		host->dma_mask = DMA_BIT_MASK(32);
- 	mmc_dev(mmc)->dma_mask = &host->dma_mask;
- 
- 	host->timeout_clks = 3 * 1048576;
--- 
-1.8.1.1.dirty
+Otherwise this looks good to me.
+
+Kind regards
+Uffe
+
+>  drivers/mmc/host/Kconfig                           |  9 +++
+>  drivers/mmc/host/Makefile                          |  1 +
+>  drivers/mmc/host/dw_mmc-bluefield.c                | 72 ++++++++++++++++++++++
+>  4 files changed, 111 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/bluefield-dw-mshc.txt
+>  create mode 100644 drivers/mmc/host/dw_mmc-bluefield.c
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/bluefield-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/bluefield-dw-mshc.txt
+> new file mode 100644
+> index 0000000..ee0dd61
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/bluefield-dw-mshc.txt
+> @@ -0,0 +1,29 @@
+> +* Mellanox Bluefield SoC specific extensions to the Synopsys Designware
+> +  Mobile Storage Host Controller
+> +
+> +Read synopsys-dw-mshc.txt for more details
+> +
+> +The Synopsys designware mobile storage host controller is used to interface
+> +a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
+> +differences between the core Synopsys dw mshc controller properties described
+> +by synopsys-dw-mshc.txt and the properties used by the Mellanox Bluefield SoC
+> +specific extensions to the Synopsys Designware Mobile Storage Host Controller.
+> +
+> +Required Properties:
+> +
+> +* compatible: should be one of the following.
+> +  - "mellanox,bluefield-dw-mshc": for controllers with Mellanox Bluefield SoC
+> +    specific extensions.
+> +
+> +Example:
+> +
+> +       /* Mellanox Bluefield SoC MMC */
+> +       dwmmc0@4,0 {
+> +               compatible = "mellanox,bluefield-dw-mshc";
+> +               reg = <4 0x8000 0x400>;
+> +               interrupts = <32>;
+> +               fifo-depth = <0x100>;
+> +               clock-frequency = <24000000>;
+> +               bus-width = <8>;
+> +               cap-mmc-highspeed;
+> +       };
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 9589f9c..26ac6b5 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -717,6 +717,15 @@ config MMC_DW_K3
+>           Synopsys DesignWare Memory Card Interface driver. Select this option
+>           for platforms based on Hisilicon K3 SoC's.
+>
+> +config MMC_DW_BLUEFIELD
+> +       tristate "BlueField specific extensions for Synopsys DW Memory Card Interface"
+> +       depends on MMC_DW
+> +       select MMC_DW_PLTFM
+> +       help
+> +         This selects support for Mellanox BlueField SoC specific extensions to
+> +         the Synopsys DesignWare Memory Card Interface driver. Select this
+> +         option for platforms based on Mellanox BlueField SoC's.
+> +
+>  config MMC_DW_PCI
+>         tristate "Synopsys Designware MCI support on PCI bus"
+>         depends on MMC_DW && PCI
+> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+> index 6aead24..267b3f1 100644
+> --- a/drivers/mmc/host/Makefile
+> +++ b/drivers/mmc/host/Makefile
+> @@ -55,6 +55,7 @@ obj-$(CONFIG_MMC_DW_K3)               += dw_mmc-k3.o
+>  obj-$(CONFIG_MMC_DW_PCI)       += dw_mmc-pci.o
+>  obj-$(CONFIG_MMC_DW_ROCKCHIP)  += dw_mmc-rockchip.o
+>  obj-$(CONFIG_MMC_DW_ZX)                += dw_mmc-zx.o
+> +obj-$(CONFIG_MMC_DW_BLUEFIELD) += dw_mmc-bluefield.o
+>  obj-$(CONFIG_MMC_SH_MMCIF)     += sh_mmcif.o
+>  obj-$(CONFIG_MMC_JZ4740)       += jz4740_mmc.o
+>  obj-$(CONFIG_MMC_VUB300)       += vub300.o
+> diff --git a/drivers/mmc/host/dw_mmc-bluefield.c b/drivers/mmc/host/dw_mmc-bluefield.c
+> new file mode 100644
+> index 0000000..12067b1
+> --- /dev/null
+> +++ b/drivers/mmc/host/dw_mmc-bluefield.c
+> @@ -0,0 +1,72 @@
+> +// SPDX-License-Identifier: GPL-2.0
+> +/*
+> + * Copyright (C) 2018 Mellanox Technologies.
+> + *
+> + * This program is free software; you can redistribute it and/or modify
+> + * it under the terms of the GNU General Public License as published by
+> + * the Free Software Foundation; either version 2 of the License, or
+> + * (at your option) any later version.
+> + */
+> +
+> +#include <linux/module.h>
+> +#include <linux/io.h>
+> +#include <linux/irq.h>
+> +#include <linux/platform_device.h>
+> +#include <linux/pm_runtime.h>
+> +#include <linux/mmc/host.h>
+> +#include <linux/mmc/mmc.h>
+> +#include <linux/of.h>
+> +
+> +#include "dw_mmc.h"
+> +#include "dw_mmc-pltfm.h"
+> +
+> +static void dw_mci_bluefield_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+> +{
+> +       u32 regs;
+> +
+> +       /* Set drive=4 (bit 29:23) and sample=2 (bit 22:16) in UHS_REG_EXT. */
+> +       regs = mci_readl(host, UHS_REG_EXT);
+> +       regs = (regs & ~0x3F100000 & ~0x7F0000) | (4 << 23) | (2 << 16);
+> +       mci_writel(host, UHS_REG_EXT, regs);
+> +}
+> +
+> +static const struct dw_mci_drv_data bluefield_drv_data = {
+> +       .set_ios                = dw_mci_bluefield_set_ios
+> +};
+> +
+> +static const struct of_device_id dw_mci_bluefield_match[] = {
+> +       { .compatible = "mellanox,bluefield-dw-mshc",
+> +               .data = &bluefield_drv_data },
+> +       {},
+> +};
+> +MODULE_DEVICE_TABLE(of, dw_mci_bluefield_match);
+> +
+> +static int dw_mci_bluefield_probe(struct platform_device *pdev)
+> +{
+> +       const struct dw_mci_drv_data *drv_data = NULL;
+> +       const struct of_device_id *match;
+> +
+> +       if (pdev->dev.of_node) {
+> +               match = of_match_node(dw_mci_bluefield_match,
+> +                                     pdev->dev.of_node);
+> +               drv_data = match->data;
+> +       }
+> +
+> +       return dw_mci_pltfm_register(pdev, drv_data);
+> +}
+> +
+> +static struct platform_driver dw_mci_bluefield_pltfm_driver = {
+> +       .probe          = dw_mci_bluefield_probe,
+> +       .remove         = dw_mci_pltfm_remove,
+> +       .driver         = {
+> +               .name           = "dwmmc_bluefield",
+> +               .of_match_table = dw_mci_bluefield_match,
+> +               .pm             = &dw_mci_pltfm_pmops,
+> +       },
+> +};
+> +
+> +module_platform_driver(dw_mci_bluefield_pltfm_driver);
+> +
+> +MODULE_DESCRIPTION("BlueField DW Multimedia Card driver");
+> +MODULE_AUTHOR("Mellanox Technologies");
+> +MODULE_LICENSE("GPL v2");
+> --
+> 1.8.3.1
+>
