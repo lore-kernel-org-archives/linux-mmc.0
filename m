@@ -1,152 +1,134 @@
 From: Liming Sun <lsun@mellanox.com>
-Subject: RE: [PATCH 1/2] mmc: dw_mmc-bluefield: Add driver extension
-Date: Mon, 23 Apr 2018 15:17:49 +0000
-Message-ID: <AM2PR05MB0753660AB3586955631CA28CA1890@AM2PR05MB0753.eurprd05.prod.outlook.com>
-References: <1524245538-34137-1-git-send-email-lsun@mellanox.com>
- <CAPDyKFoPgMeCmAC9JeC4hzW4OBDqCq5cdjPoRd0AfYpq=FErwg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Subject: [PATCH v2 1/3] mmc: dw_mmc-bluefield: Add driver extension
+Date: Mon, 23 Apr 2018 11:32:20 -0400
+Message-ID: <026fa942828c54fda5bad225981e56abc808b949.1524497286.git.lsun@mellanox.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFoPgMeCmAC9JeC4hzW4OBDqCq5cdjPoRd0AfYpq=FErwg@mail.gmail.com>
-Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Jaehoon Chung <jh80.chung@samsung.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Jaehoon Chung <jh80.chung@samsung.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>
+Cc: Liming Sun <lsun@mellanox.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-VGhhbmtzIFVmZmUuIEknbGwgc3VibWl0IHBhdGNoIDIgYXMgc3VnZ2VzdGVkLg0KDQpCZXN0IHJl
-Z2FyZHMsDQpMaW1pbmcNCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBV
-bGYgSGFuc3NvbiBbbWFpbHRvOnVsZi5oYW5zc29uQGxpbmFyby5vcmddDQo+IFNlbnQ6IE1vbmRh
-eSwgQXByaWwgMjMsIDIwMTggNTozMiBBTQ0KPiBUbzogTGltaW5nIFN1biA8bHN1bkBtZWxsYW5v
-eC5jb20+DQo+IENjOiBSb2IgSGVycmluZyA8cm9iaCtkdEBrZXJuZWwub3JnPjsgTWFyayBSdXRs
-YW5kDQo+IDxtYXJrLnJ1dGxhbmRAYXJtLmNvbT47IEphZWhvb24gQ2h1bmcgPGpoODAuY2h1bmdA
-c2Ftc3VuZy5jb20+Ow0KPiBDYXRhbGluIE1hcmluYXMgPGNhdGFsaW4ubWFyaW5hc0Bhcm0uY29t
-PjsgV2lsbCBEZWFjb24NCj4gPHdpbGwuZGVhY29uQGFybS5jb20+OyBsaW51eC1tbWNAdmdlci5r
-ZXJuZWwub3JnOw0KPiBkZXZpY2V0cmVlQHZnZXIua2VybmVsLm9yZzsgTGludXggS2VybmVsIE1h
-aWxpbmcgTGlzdCA8bGludXgtDQo+IGtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc+DQo+IFN1YmplY3Q6
-IFJlOiBbUEFUQ0ggMS8yXSBtbWM6IGR3X21tYy1ibHVlZmllbGQ6IEFkZCBkcml2ZXIgZXh0ZW5z
-aW9uDQo+IA0KPiBPbiAyMCBBcHJpbCAyMDE4IGF0IDE5OjMyLCBMaW1pbmcgU3VuIDxsc3VuQG1l
-bGxhbm94LmNvbT4gd3JvdGU6DQo+ID4gVGhpcyBjb21taXQgYWRkcyBleHRlbnNpb24gdG8gdGhl
-IGR3X21tYyBkcml2ZXIgZm9yIE1lbGxhbm94IEJsdWVGaWVsZA0KPiA+IFNvQy4gSXQgdXBkYXRl
-cyB0aGUgVUhTX1JFR19FWFQgcmVnaXN0ZXIgdG8gYnJpbmcgdXAgdGhlIGVNTUMgY2FyZCBvbg0K
-PiA+IHRoaXMgU29DLg0KPiA+DQo+ID4gU2lnbmVkLW9mZi1ieTogTGltaW5nIFN1biA8bHN1bkBt
-ZWxsYW5veC5jb20+DQo+ID4gLS0tDQo+ID4gIC4uLi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9i
-bHVlZmllbGQtZHctbXNoYy50eHQgIHwgMjkgKysrKysrKysrDQo+IA0KPiBQbGVhc2UgbW92ZSBj
-aGFuZ2VzIHRvIERUIGRvY3MgaW50byBhIHNlcGFyYXRlIHBhdGNoLg0KPiANCj4gT3RoZXJ3aXNl
-IHRoaXMgbG9va3MgZ29vZCB0byBtZS4NCj4gDQo+IEtpbmQgcmVnYXJkcw0KPiBVZmZlDQo+IA0K
-PiA+ICBkcml2ZXJzL21tYy9ob3N0L0tjb25maWcgICAgICAgICAgICAgICAgICAgICAgICAgICB8
-ICA5ICsrKw0KPiA+ICBkcml2ZXJzL21tYy9ob3N0L01ha2VmaWxlICAgICAgICAgICAgICAgICAg
-ICAgICAgICB8ICAxICsNCj4gPiAgZHJpdmVycy9tbWMvaG9zdC9kd19tbWMtYmx1ZWZpZWxkLmMg
-ICAgICAgICAgICAgICAgfCA3Mg0KPiArKysrKysrKysrKysrKysrKysrKysrDQo+ID4gIDQgZmls
-ZXMgY2hhbmdlZCwgMTExIGluc2VydGlvbnMoKykNCj4gPiAgY3JlYXRlIG1vZGUgMTAwNjQ0IERv
-Y3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9tbWMvYmx1ZWZpZWxkLQ0KPiBkdy1tc2hj
-LnR4dA0KPiA+ICBjcmVhdGUgbW9kZSAxMDA2NDQgZHJpdmVycy9tbWMvaG9zdC9kd19tbWMtYmx1
-ZWZpZWxkLmMNCj4gPg0KPiA+IGRpZmYgLS1naXQgYS9Eb2N1bWVudGF0aW9uL2RldmljZXRyZWUv
-YmluZGluZ3MvbW1jL2JsdWVmaWVsZC1kdy0NCj4gbXNoYy50eHQgYi9Eb2N1bWVudGF0aW9uL2Rl
-dmljZXRyZWUvYmluZGluZ3MvbW1jL2JsdWVmaWVsZC1kdy0NCj4gbXNoYy50eHQNCj4gPiBuZXcg
-ZmlsZSBtb2RlIDEwMDY0NA0KPiA+IGluZGV4IDAwMDAwMDAuLmVlMGRkNjENCj4gPiAtLS0gL2Rl
-di9udWxsDQo+ID4gKysrIGIvRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9i
-bHVlZmllbGQtZHctbXNoYy50eHQNCj4gPiBAQCAtMCwwICsxLDI5IEBADQo+ID4gKyogTWVsbGFu
-b3ggQmx1ZWZpZWxkIFNvQyBzcGVjaWZpYyBleHRlbnNpb25zIHRvIHRoZSBTeW5vcHN5cyBEZXNp
-Z253YXJlDQo+ID4gKyAgTW9iaWxlIFN0b3JhZ2UgSG9zdCBDb250cm9sbGVyDQo+ID4gKw0KPiA+
-ICtSZWFkIHN5bm9wc3lzLWR3LW1zaGMudHh0IGZvciBtb3JlIGRldGFpbHMNCj4gPiArDQo+ID4g
-K1RoZSBTeW5vcHN5cyBkZXNpZ253YXJlIG1vYmlsZSBzdG9yYWdlIGhvc3QgY29udHJvbGxlciBp
-cyB1c2VkIHRvDQo+IGludGVyZmFjZQ0KPiA+ICthIFNvQyB3aXRoIHN0b3JhZ2UgbWVkaXVtIHN1
-Y2ggYXMgZU1NQyBvciBTRC9NTUMgY2FyZHMuIFRoaXMgZmlsZQ0KPiBkb2N1bWVudHMNCj4gPiAr
-ZGlmZmVyZW5jZXMgYmV0d2VlbiB0aGUgY29yZSBTeW5vcHN5cyBkdyBtc2hjIGNvbnRyb2xsZXIg
-cHJvcGVydGllcw0KPiBkZXNjcmliZWQNCj4gPiArYnkgc3lub3BzeXMtZHctbXNoYy50eHQgYW5k
-IHRoZSBwcm9wZXJ0aWVzIHVzZWQgYnkgdGhlIE1lbGxhbm94DQo+IEJsdWVmaWVsZCBTb0MNCj4g
-PiArc3BlY2lmaWMgZXh0ZW5zaW9ucyB0byB0aGUgU3lub3BzeXMgRGVzaWdud2FyZSBNb2JpbGUg
-U3RvcmFnZSBIb3N0DQo+IENvbnRyb2xsZXIuDQo+ID4gKw0KPiA+ICtSZXF1aXJlZCBQcm9wZXJ0
-aWVzOg0KPiA+ICsNCj4gPiArKiBjb21wYXRpYmxlOiBzaG91bGQgYmUgb25lIG9mIHRoZSBmb2xs
-b3dpbmcuDQo+ID4gKyAgLSAibWVsbGFub3gsYmx1ZWZpZWxkLWR3LW1zaGMiOiBmb3IgY29udHJv
-bGxlcnMgd2l0aCBNZWxsYW5veCBCbHVlZmllbGQNCj4gU29DDQo+ID4gKyAgICBzcGVjaWZpYyBl
-eHRlbnNpb25zLg0KPiA+ICsNCj4gPiArRXhhbXBsZToNCj4gPiArDQo+ID4gKyAgICAgICAvKiBN
-ZWxsYW5veCBCbHVlZmllbGQgU29DIE1NQyAqLw0KPiA+ICsgICAgICAgZHdtbWMwQDQsMCB7DQo+
-ID4gKyAgICAgICAgICAgICAgIGNvbXBhdGlibGUgPSAibWVsbGFub3gsYmx1ZWZpZWxkLWR3LW1z
-aGMiOw0KPiA+ICsgICAgICAgICAgICAgICByZWcgPSA8NCAweDgwMDAgMHg0MDA+Ow0KPiA+ICsg
-ICAgICAgICAgICAgICBpbnRlcnJ1cHRzID0gPDMyPjsNCj4gPiArICAgICAgICAgICAgICAgZmlm
-by1kZXB0aCA9IDwweDEwMD47DQo+ID4gKyAgICAgICAgICAgICAgIGNsb2NrLWZyZXF1ZW5jeSA9
-IDwyNDAwMDAwMD47DQo+ID4gKyAgICAgICAgICAgICAgIGJ1cy13aWR0aCA9IDw4PjsNCj4gPiAr
-ICAgICAgICAgICAgICAgY2FwLW1tYy1oaWdoc3BlZWQ7DQo+ID4gKyAgICAgICB9Ow0KPiA+IGRp
-ZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L0tjb25maWcgYi9kcml2ZXJzL21tYy9ob3N0L0tj
-b25maWcNCj4gPiBpbmRleCA5NTg5ZjljLi4yNmFjNmI1IDEwMDY0NA0KPiA+IC0tLSBhL2RyaXZl
-cnMvbW1jL2hvc3QvS2NvbmZpZw0KPiA+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3QvS2NvbmZpZw0K
-PiA+IEBAIC03MTcsNiArNzE3LDE1IEBAIGNvbmZpZyBNTUNfRFdfSzMNCj4gPiAgICAgICAgICAg
-U3lub3BzeXMgRGVzaWduV2FyZSBNZW1vcnkgQ2FyZCBJbnRlcmZhY2UgZHJpdmVyLiBTZWxlY3Qg
-dGhpcw0KPiBvcHRpb24NCj4gPiAgICAgICAgICAgZm9yIHBsYXRmb3JtcyBiYXNlZCBvbiBIaXNp
-bGljb24gSzMgU29DJ3MuDQo+ID4NCj4gPiArY29uZmlnIE1NQ19EV19CTFVFRklFTEQNCj4gPiAr
-ICAgICAgIHRyaXN0YXRlICJCbHVlRmllbGQgc3BlY2lmaWMgZXh0ZW5zaW9ucyBmb3IgU3lub3Bz
-eXMgRFcgTWVtb3J5IENhcmQNCj4gSW50ZXJmYWNlIg0KPiA+ICsgICAgICAgZGVwZW5kcyBvbiBN
-TUNfRFcNCj4gPiArICAgICAgIHNlbGVjdCBNTUNfRFdfUExURk0NCj4gPiArICAgICAgIGhlbHAN
-Cj4gPiArICAgICAgICAgVGhpcyBzZWxlY3RzIHN1cHBvcnQgZm9yIE1lbGxhbm94IEJsdWVGaWVs
-ZCBTb0Mgc3BlY2lmaWMgZXh0ZW5zaW9ucyB0bw0KPiA+ICsgICAgICAgICB0aGUgU3lub3BzeXMg
-RGVzaWduV2FyZSBNZW1vcnkgQ2FyZCBJbnRlcmZhY2UgZHJpdmVyLiBTZWxlY3QgdGhpcw0KPiA+
-ICsgICAgICAgICBvcHRpb24gZm9yIHBsYXRmb3JtcyBiYXNlZCBvbiBNZWxsYW5veCBCbHVlRmll
-bGQgU29DJ3MuDQo+ID4gKw0KPiA+ICBjb25maWcgTU1DX0RXX1BDSQ0KPiA+ICAgICAgICAgdHJp
-c3RhdGUgIlN5bm9wc3lzIERlc2lnbndhcmUgTUNJIHN1cHBvcnQgb24gUENJIGJ1cyINCj4gPiAg
-ICAgICAgIGRlcGVuZHMgb24gTU1DX0RXICYmIFBDSQ0KPiA+IGRpZmYgLS1naXQgYS9kcml2ZXJz
-L21tYy9ob3N0L01ha2VmaWxlIGIvZHJpdmVycy9tbWMvaG9zdC9NYWtlZmlsZQ0KPiA+IGluZGV4
-IDZhZWFkMjQuLjI2N2IzZjEgMTAwNjQ0DQo+ID4gLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9NYWtl
-ZmlsZQ0KPiA+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3QvTWFrZWZpbGUNCj4gPiBAQCAtNTUsNiAr
-NTUsNyBAQCBvYmotJChDT05GSUdfTU1DX0RXX0szKSAgICAgICAgICAgICAgICs9IGR3X21tYy0N
-Cj4gazMubw0KPiA+ICBvYmotJChDT05GSUdfTU1DX0RXX1BDSSkgICAgICAgKz0gZHdfbW1jLXBj
-aS5vDQo+ID4gIG9iai0kKENPTkZJR19NTUNfRFdfUk9DS0NISVApICArPSBkd19tbWMtcm9ja2No
-aXAubw0KPiA+ICBvYmotJChDT05GSUdfTU1DX0RXX1pYKSAgICAgICAgICAgICAgICArPSBkd19t
-bWMtengubw0KPiA+ICtvYmotJChDT05GSUdfTU1DX0RXX0JMVUVGSUVMRCkgKz0gZHdfbW1jLWJs
-dWVmaWVsZC5vDQo+ID4gIG9iai0kKENPTkZJR19NTUNfU0hfTU1DSUYpICAgICArPSBzaF9tbWNp
-Zi5vDQo+ID4gIG9iai0kKENPTkZJR19NTUNfSlo0NzQwKSAgICAgICArPSBqejQ3NDBfbW1jLm8N
-Cj4gPiAgb2JqLSQoQ09ORklHX01NQ19WVUIzMDApICAgICAgICs9IHZ1YjMwMC5vDQo+ID4gZGlm
-ZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3QvZHdfbW1jLWJsdWVmaWVsZC5jDQo+IGIvZHJpdmVy
-cy9tbWMvaG9zdC9kd19tbWMtYmx1ZWZpZWxkLmMNCj4gPiBuZXcgZmlsZSBtb2RlIDEwMDY0NA0K
-PiA+IGluZGV4IDAwMDAwMDAuLjEyMDY3YjENCj4gPiAtLS0gL2Rldi9udWxsDQo+ID4gKysrIGIv
-ZHJpdmVycy9tbWMvaG9zdC9kd19tbWMtYmx1ZWZpZWxkLmMNCj4gPiBAQCAtMCwwICsxLDcyIEBA
-DQo+ID4gKy8vIFNQRFgtTGljZW5zZS1JZGVudGlmaWVyOiBHUEwtMi4wDQo+ID4gKy8qDQo+ID4g
-KyAqIENvcHlyaWdodCAoQykgMjAxOCBNZWxsYW5veCBUZWNobm9sb2dpZXMuDQo+ID4gKyAqDQo+
-ID4gKyAqIFRoaXMgcHJvZ3JhbSBpcyBmcmVlIHNvZnR3YXJlOyB5b3UgY2FuIHJlZGlzdHJpYnV0
-ZSBpdCBhbmQvb3IgbW9kaWZ5DQo+ID4gKyAqIGl0IHVuZGVyIHRoZSB0ZXJtcyBvZiB0aGUgR05V
-IEdlbmVyYWwgUHVibGljIExpY2Vuc2UgYXMgcHVibGlzaGVkIGJ5DQo+ID4gKyAqIHRoZSBGcmVl
-IFNvZnR3YXJlIEZvdW5kYXRpb247IGVpdGhlciB2ZXJzaW9uIDIgb2YgdGhlIExpY2Vuc2UsIG9y
-DQo+ID4gKyAqIChhdCB5b3VyIG9wdGlvbikgYW55IGxhdGVyIHZlcnNpb24uDQo+ID4gKyAqLw0K
-PiA+ICsNCj4gPiArI2luY2x1ZGUgPGxpbnV4L21vZHVsZS5oPg0KPiA+ICsjaW5jbHVkZSA8bGlu
-dXgvaW8uaD4NCj4gPiArI2luY2x1ZGUgPGxpbnV4L2lycS5oPg0KPiA+ICsjaW5jbHVkZSA8bGlu
-dXgvcGxhdGZvcm1fZGV2aWNlLmg+DQo+ID4gKyNpbmNsdWRlIDxsaW51eC9wbV9ydW50aW1lLmg+
-DQo+ID4gKyNpbmNsdWRlIDxsaW51eC9tbWMvaG9zdC5oPg0KPiA+ICsjaW5jbHVkZSA8bGludXgv
-bW1jL21tYy5oPg0KPiA+ICsjaW5jbHVkZSA8bGludXgvb2YuaD4NCj4gPiArDQo+ID4gKyNpbmNs
-dWRlICJkd19tbWMuaCINCj4gPiArI2luY2x1ZGUgImR3X21tYy1wbHRmbS5oIg0KPiA+ICsNCj4g
-PiArc3RhdGljIHZvaWQgZHdfbWNpX2JsdWVmaWVsZF9zZXRfaW9zKHN0cnVjdCBkd19tY2kgKmhv
-c3QsIHN0cnVjdA0KPiBtbWNfaW9zICppb3MpDQo+ID4gK3sNCj4gPiArICAgICAgIHUzMiByZWdz
-Ow0KPiA+ICsNCj4gPiArICAgICAgIC8qIFNldCBkcml2ZT00IChiaXQgMjk6MjMpIGFuZCBzYW1w
-bGU9MiAoYml0IDIyOjE2KSBpbiBVSFNfUkVHX0VYVC4gKi8NCj4gPiArICAgICAgIHJlZ3MgPSBt
-Y2lfcmVhZGwoaG9zdCwgVUhTX1JFR19FWFQpOw0KPiA+ICsgICAgICAgcmVncyA9IChyZWdzICYg
-fjB4M0YxMDAwMDAgJiB+MHg3RjAwMDApIHwgKDQgPDwgMjMpIHwgKDIgPDwgMTYpOw0KPiA+ICsg
-ICAgICAgbWNpX3dyaXRlbChob3N0LCBVSFNfUkVHX0VYVCwgcmVncyk7DQo+ID4gK30NCj4gPiAr
-DQo+ID4gK3N0YXRpYyBjb25zdCBzdHJ1Y3QgZHdfbWNpX2Rydl9kYXRhIGJsdWVmaWVsZF9kcnZf
-ZGF0YSA9IHsNCj4gPiArICAgICAgIC5zZXRfaW9zICAgICAgICAgICAgICAgID0gZHdfbWNpX2Js
-dWVmaWVsZF9zZXRfaW9zDQo+ID4gK307DQo+ID4gKw0KPiA+ICtzdGF0aWMgY29uc3Qgc3RydWN0
-IG9mX2RldmljZV9pZCBkd19tY2lfYmx1ZWZpZWxkX21hdGNoW10gPSB7DQo+ID4gKyAgICAgICB7
-IC5jb21wYXRpYmxlID0gIm1lbGxhbm94LGJsdWVmaWVsZC1kdy1tc2hjIiwNCj4gPiArICAgICAg
-ICAgICAgICAgLmRhdGEgPSAmYmx1ZWZpZWxkX2Rydl9kYXRhIH0sDQo+ID4gKyAgICAgICB7fSwN
-Cj4gPiArfTsNCj4gPiArTU9EVUxFX0RFVklDRV9UQUJMRShvZiwgZHdfbWNpX2JsdWVmaWVsZF9t
-YXRjaCk7DQo+ID4gKw0KPiA+ICtzdGF0aWMgaW50IGR3X21jaV9ibHVlZmllbGRfcHJvYmUoc3Ry
-dWN0IHBsYXRmb3JtX2RldmljZSAqcGRldikNCj4gPiArew0KPiA+ICsgICAgICAgY29uc3Qgc3Ry
-dWN0IGR3X21jaV9kcnZfZGF0YSAqZHJ2X2RhdGEgPSBOVUxMOw0KPiA+ICsgICAgICAgY29uc3Qg
-c3RydWN0IG9mX2RldmljZV9pZCAqbWF0Y2g7DQo+ID4gKw0KPiA+ICsgICAgICAgaWYgKHBkZXYt
-PmRldi5vZl9ub2RlKSB7DQo+ID4gKyAgICAgICAgICAgICAgIG1hdGNoID0gb2ZfbWF0Y2hfbm9k
-ZShkd19tY2lfYmx1ZWZpZWxkX21hdGNoLA0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgcGRldi0+ZGV2Lm9mX25vZGUpOw0KPiA+ICsgICAgICAgICAgICAgICBkcnZf
-ZGF0YSA9IG1hdGNoLT5kYXRhOw0KPiA+ICsgICAgICAgfQ0KPiA+ICsNCj4gPiArICAgICAgIHJl
-dHVybiBkd19tY2lfcGx0Zm1fcmVnaXN0ZXIocGRldiwgZHJ2X2RhdGEpOw0KPiA+ICt9DQo+ID4g
-Kw0KPiA+ICtzdGF0aWMgc3RydWN0IHBsYXRmb3JtX2RyaXZlciBkd19tY2lfYmx1ZWZpZWxkX3Bs
-dGZtX2RyaXZlciA9IHsNCj4gPiArICAgICAgIC5wcm9iZSAgICAgICAgICA9IGR3X21jaV9ibHVl
-ZmllbGRfcHJvYmUsDQo+ID4gKyAgICAgICAucmVtb3ZlICAgICAgICAgPSBkd19tY2lfcGx0Zm1f
-cmVtb3ZlLA0KPiA+ICsgICAgICAgLmRyaXZlciAgICAgICAgID0gew0KPiA+ICsgICAgICAgICAg
-ICAgICAubmFtZSAgICAgICAgICAgPSAiZHdtbWNfYmx1ZWZpZWxkIiwNCj4gPiArICAgICAgICAg
-ICAgICAgLm9mX21hdGNoX3RhYmxlID0gZHdfbWNpX2JsdWVmaWVsZF9tYXRjaCwNCj4gPiArICAg
-ICAgICAgICAgICAgLnBtICAgICAgICAgICAgID0gJmR3X21jaV9wbHRmbV9wbW9wcywNCj4gPiAr
-ICAgICAgIH0sDQo+ID4gK307DQo+ID4gKw0KPiA+ICttb2R1bGVfcGxhdGZvcm1fZHJpdmVyKGR3
-X21jaV9ibHVlZmllbGRfcGx0Zm1fZHJpdmVyKTsNCj4gPiArDQo+ID4gK01PRFVMRV9ERVNDUklQ
-VElPTigiQmx1ZUZpZWxkIERXIE11bHRpbWVkaWEgQ2FyZCBkcml2ZXIiKTsNCj4gPiArTU9EVUxF
-X0FVVEhPUigiTWVsbGFub3ggVGVjaG5vbG9naWVzIik7DQo+ID4gK01PRFVMRV9MSUNFTlNFKCJH
-UEwgdjIiKTsNCj4gPiAtLQ0KPiA+IDEuOC4zLjENCj4gPg0K
+This commit adds extension to the dw_mmc driver for Mellanox BlueField
+SoC. It updates the UHS_REG_EXT register to bring up the eMMC card on
+this SoC.
+
+Signed-off-by: Liming Sun <lsun@mellanox.com>
+---
+ drivers/mmc/host/Kconfig            |  9 +++++
+ drivers/mmc/host/Makefile           |  1 +
+ drivers/mmc/host/dw_mmc-bluefield.c | 72 +++++++++++++++++++++++++++++++++++++
+ 3 files changed, 82 insertions(+)
+ create mode 100644 drivers/mmc/host/dw_mmc-bluefield.c
+
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 9589f9c..26ac6b5 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -717,6 +717,15 @@ config MMC_DW_K3
+ 	  Synopsys DesignWare Memory Card Interface driver. Select this option
+ 	  for platforms based on Hisilicon K3 SoC's.
+ 
++config MMC_DW_BLUEFIELD
++	tristate "BlueField specific extensions for Synopsys DW Memory Card Interface"
++	depends on MMC_DW
++	select MMC_DW_PLTFM
++	help
++	  This selects support for Mellanox BlueField SoC specific extensions to
++	  the Synopsys DesignWare Memory Card Interface driver. Select this
++	  option for platforms based on Mellanox BlueField SoC's.
++
+ config MMC_DW_PCI
+ 	tristate "Synopsys Designware MCI support on PCI bus"
+ 	depends on MMC_DW && PCI
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index 6aead24..267b3f1 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -55,6 +55,7 @@ obj-$(CONFIG_MMC_DW_K3)		+= dw_mmc-k3.o
+ obj-$(CONFIG_MMC_DW_PCI)	+= dw_mmc-pci.o
+ obj-$(CONFIG_MMC_DW_ROCKCHIP)	+= dw_mmc-rockchip.o
+ obj-$(CONFIG_MMC_DW_ZX)		+= dw_mmc-zx.o
++obj-$(CONFIG_MMC_DW_BLUEFIELD)	+= dw_mmc-bluefield.o
+ obj-$(CONFIG_MMC_SH_MMCIF)	+= sh_mmcif.o
+ obj-$(CONFIG_MMC_JZ4740)	+= jz4740_mmc.o
+ obj-$(CONFIG_MMC_VUB300)	+= vub300.o
+diff --git a/drivers/mmc/host/dw_mmc-bluefield.c b/drivers/mmc/host/dw_mmc-bluefield.c
+new file mode 100644
+index 0000000..12067b1
+--- /dev/null
++++ b/drivers/mmc/host/dw_mmc-bluefield.c
+@@ -0,0 +1,72 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Copyright (C) 2018 Mellanox Technologies.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ */
++
++#include <linux/module.h>
++#include <linux/io.h>
++#include <linux/irq.h>
++#include <linux/platform_device.h>
++#include <linux/pm_runtime.h>
++#include <linux/mmc/host.h>
++#include <linux/mmc/mmc.h>
++#include <linux/of.h>
++
++#include "dw_mmc.h"
++#include "dw_mmc-pltfm.h"
++
++static void dw_mci_bluefield_set_ios(struct dw_mci *host, struct mmc_ios *ios)
++{
++	u32 regs;
++
++	/* Set drive=4 (bit 29:23) and sample=2 (bit 22:16) in UHS_REG_EXT. */
++	regs = mci_readl(host, UHS_REG_EXT);
++	regs = (regs & ~0x3F100000 & ~0x7F0000) | (4 << 23) | (2 << 16);
++	mci_writel(host, UHS_REG_EXT, regs);
++}
++
++static const struct dw_mci_drv_data bluefield_drv_data = {
++	.set_ios		= dw_mci_bluefield_set_ios
++};
++
++static const struct of_device_id dw_mci_bluefield_match[] = {
++	{ .compatible = "mellanox,bluefield-dw-mshc",
++		.data = &bluefield_drv_data },
++	{},
++};
++MODULE_DEVICE_TABLE(of, dw_mci_bluefield_match);
++
++static int dw_mci_bluefield_probe(struct platform_device *pdev)
++{
++	const struct dw_mci_drv_data *drv_data = NULL;
++	const struct of_device_id *match;
++
++	if (pdev->dev.of_node) {
++		match = of_match_node(dw_mci_bluefield_match,
++				      pdev->dev.of_node);
++		drv_data = match->data;
++	}
++
++	return dw_mci_pltfm_register(pdev, drv_data);
++}
++
++static struct platform_driver dw_mci_bluefield_pltfm_driver = {
++	.probe		= dw_mci_bluefield_probe,
++	.remove		= dw_mci_pltfm_remove,
++	.driver		= {
++		.name		= "dwmmc_bluefield",
++		.of_match_table	= dw_mci_bluefield_match,
++		.pm		= &dw_mci_pltfm_pmops,
++	},
++};
++
++module_platform_driver(dw_mci_bluefield_pltfm_driver);
++
++MODULE_DESCRIPTION("BlueField DW Multimedia Card driver");
++MODULE_AUTHOR("Mellanox Technologies");
++MODULE_LICENSE("GPL v2");
+-- 
+1.8.3.1
