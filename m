@@ -1,37 +1,48 @@
-From: Liming Sun <lsun@mellanox.com>
-Subject: [PATCH v2 3/3] arm64: defconfig: Enable dw_mmc-bluefield driver
-Date: Mon, 23 Apr 2018 11:32:22 -0400
-Message-ID: <fd0bce71b881a4e9c58e8b39fdb2fc8d00ccbacd.1524497286.git.lsun@mellanox.com>
-References: <026fa942828c54fda5bad225981e56abc808b949.1524497286.git.lsun@mellanox.com>
+From: Kevin Hilman <khilman@baylibre.com>
+Subject: Re: [PATCH v2] ARM64: dts: meson-axg: enable the eMMC controller
+Date: Mon, 23 Apr 2018 09:41:05 -0700
+Message-ID: <CAOi56cUwzrpA1AdRQE3gdW55my-_dqSNnwyEd4poUPjUkpaBag@mail.gmail.com>
+References: <20180408113647.13543-1-yixun.lan@amlogic.com> <7ho9if3wo3.fsf@baylibre.com>
+ <CAPDyKFpcmO7LYuyuNPcYmzeDyq_AXDH5W4Y9dByTL-B+DGZSqg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <026fa942828c54fda5bad225981e56abc808b949.1524497286.git.lsun@mellanox.com>
-In-Reply-To: <026fa942828c54fda5bad225981e56abc808b949.1524497286.git.lsun@mellanox.com>
-References: <026fa942828c54fda5bad225981e56abc808b949.1524497286.git.lsun@mellanox.com>
+In-Reply-To: <CAPDyKFpcmO7LYuyuNPcYmzeDyq_AXDH5W4Y9dByTL-B+DGZSqg@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Jaehoon Chung <jh80.chung@samsung.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>
-Cc: Liming Sun <lsun@mellanox.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Yixun Lan <yixun.lan@amlogic.com>, Rob Herring <robh@kernel.org>, devicetree <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Nan Li <nan.li@amlogic.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Carlo Caione <carlo@caione.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, Jerome Brunet <jbrunet@baylibre.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Heiner Kallweit <hkallweit1@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-This patch updates arm64 defconfig to enable dw_mmc-bluefield,
-which is a driver extension of Synopsys Designware MMC for the
-Mellanox BlueField Soc.
+On Thu, Apr 19, 2018 at 11:55 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 19 April 2018 at 19:58, Kevin Hilman <khilman@baylibre.com> wrote:
+>> Yixun Lan <yixun.lan@amlogic.com> writes:
+>>
+>>> From: Nan Li <nan.li@amlogic.com>
+>>>
+>>> The IP of eMMC controller in AXG is similiar to Meson-GX series.
+>>> Here we add the initial support of the HS200 mode with
+>>> clock running at 166MHz (to be safe), since we found some eMMC chip
+>>> fail to run at 200MHz due to tunning phase error.
+>>>
+>>> Signed-off-by: Nan Li <nan.li@amlogic.com>
+>>> Signed-off-by: Yixun Lan <yixun.lan@amlogic.com>
+>>
+>> Applied to v4.18/dt64
+>>
+>>> ---
+>>> Hi Kevin
+>>>   Please note this patch actually depend on the eMMC driver here [0].
+>>>   Still a few problem to solve, to improve the tuning phase driver to make
+>>> the clock running at 200MHz, and to further support the HS400 mode.
+>>> Anyway, this patch itself is quite independent.
+>>
+>> The driver changes are queued for v4.18 also.  Good!
+>
+> Right, may I consider that as an ack? :-)
 
-Signed-off-by: Liming Sun <lsun@mellanox.com>
----
- arch/arm64/configs/defconfig | 1 +
- 1 file changed, 1 insertion(+)
+I thought it was already merged while I was OoO, so I didn't bother to
+reply with an ack, but if it's not too late, then yes:
 
-diff --git a/arch/arm64/configs/defconfig b/arch/arm64/configs/defconfig
-index ecf6137..43464ab 100644
---- a/arch/arm64/configs/defconfig
-+++ b/arch/arm64/configs/defconfig
-@@ -487,6 +487,7 @@ CONFIG_MMC_DW=y
- CONFIG_MMC_DW_EXYNOS=y
- CONFIG_MMC_DW_K3=y
- CONFIG_MMC_DW_ROCKCHIP=y
-+CONFIG_MMC_DW_BLUEFIELD=y
- CONFIG_MMC_SUNXI=y
- CONFIG_MMC_BCM2835=y
- CONFIG_MMC_SDHCI_XENON=y
--- 
-1.8.3.1
+Acked-by: Kevin Hilman <khilman@baylibre.com>
+
+Kevin
