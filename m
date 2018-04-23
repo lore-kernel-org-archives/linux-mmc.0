@@ -1,44 +1,77 @@
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: Re: [PATCH 09/15] net: irda: pxaficp_ir: remove the dmaengine compat
- need
-Date: Mon, 23 Apr 2018 10:37:20 +0200
-Message-ID: <20180423083720.GA25048@kroah.com>
-References: <20180402142656.26815-1-robert.jarzmik@free.fr>
- <20180402142656.26815-10-robert.jarzmik@free.fr>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V5 0/2] mmc: sdhci-msm: Configuring IO_PAD support for sdhci-msm
+Date: Mon, 23 Apr 2018 11:18:00 +0200
+Message-ID: <CAPDyKFp_YErJVM4PR5KSAwuBE2hakQ7Vqzzd8p=eybv02EvFhA@mail.gmail.com>
+References: <1524226529-30100-1-git-send-email-vviswana@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-Content-Disposition: inline
-In-Reply-To: <20180402142656.26815-10-robert.jarzmik@free.fr>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
-To: Robert Jarzmik <robert.jarzmik@free.fr>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, alsa-devel@alsa-project.org, Takashi Iwai <tiwai@suse.com>, linux-ide@vger.kernel.org, Pravin Shedge <pravin.shedge4linux@gmail.com>, linux-mtd@lists.infradead.org, devel@driverdev.osuosl.org, Boris Brezillon <boris.brezillon@free-electrons.com>, Mauro Carvalho Chehab <mchehab@kernel.org>, Vinod Koul <vinod.koul@intel.com>, Richard Weinberger <richard@nod.at>, Marek Vasut <marek.vasut@gmail.com>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, linux-media@vger.kernel.org, Samuel Ortiz <samuel@sortiz.org>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, dmaengine@vger.kernel.org, Mark Brown <broonie@kernel.org>, Jaroslav Kysela <perex@perex.cz>, linux-arm-kernel@lists.infradead.org, Nicolas Pitre <nico@fluxnic.net>, netdev@vger.kernel.org, linux-mmc
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1524226529-30100-1-git-send-email-vviswana@codeaurora.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Vijay Viswanath <vviswana@codeaurora.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, linux-arm-msm <linux-arm-msm@vger.kernel.org>, Georgi Djakov <georgi.djakov@linaro.org>, Asutosh Das <asutoshd@codeaurora.org>, Sahitya Tummala <stummala@codeaurora.org>, Venkat Gopalakrishnan <venkatg@codeaurora.org>, Pramod Gurav <pramod.gurav@linaro.org>, Jeremy McNicoll <jeremymc@redhat.com>, Bjorn Andersson <bjorn.andersson@linaro.org>, Harjani Ritesh <riteshh@codeaurora.org>, vbadigan@codeaurora.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Apr 02, 2018 at 04:26:50PM +0200, Robert Jarzmik wrote:
-> As the pxa architecture switched towards the dmaengine slave map, the
-> old compatibility mechanism to acquire the dma requestor line number and
-> priority are not needed anymore.
-> 
-> This patch simplifies the dma resource acquisition, using the more
-> generic function dma_request_slave_channel().
-> 
-> Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>
-> ---
->  drivers/staging/irda/drivers/pxaficp_ir.c | 14 ++------------
->  1 file changed, 2 insertions(+), 12 deletions(-)
+On 20 April 2018 at 14:15, Vijay Viswanath <vviswana@codeaurora.org> wrote:
+> From the HPG:
+> In some platform, SDCC controller can be connected to either an eMMC devi=
+ce or
+> an SD card. The PADs for SD card are dual-voltage that support 3v/1.8v. T=
+hose
+> PADs have a control signal  (io_pad_pwr_switch/mode18 ) that indicates wh=
+ether
+> the PAD works in 3v or 1.8v.
+>
+> For SD usage the default value of this signal is =E2=80=980=E2=80=99, and=
+ SD driver changes it
+> to =E2=80=981=E2=80=99 as a part of voltage switching sequence.
+> For eMMC usage, SW should configure this signal to =E2=80=981=E2=80=99 an=
+d supply 1.8v to PADs
+> before starting any activity on the eMMC BUS.
+>
+> To set this signal, write the following in the
+> SDC1_SDCC_HC_VENDOR_SPECIFIC_FUNC register:
+>         HC_IO_PAD_PWR_SWITCH: bit 16
+>                 HC_IO_PAD_PWR_SWITCH_EN: bit 15
+>
 
-This file is no longer in Linus's tree :)
+Thanks, applied for next!
 
-thanks,
+Kind regards
+Uffe
 
-greg k-h
+> Changes since v1:
+>         Modified comments on io_pad related changes.
+>         Split some read+modify+write commands to multiple lines
+>
+> Changes since v2:
+>         IO_PAD_PWR_SWITCH_EN will be set only if we have info regarding w=
+hat
+>         voltage is supported by the regulators.
+>         Replaced regulator_list_voltage() API with
+>         regulator_is_supported_voltage().
+>
+> Changes since v3:
+>         Removed unnecessary prints and extra lines.
+>
+> Changes since v4:
+>         Removed unnecessary mb() within sdhci_msm_handle_pwr_irq() since
+>         wakeup calls have implicit write barriers.
+>
+> Krishna Konda (1):
+>   mmc: sdhci-msm: support voltage pad switching
+>
+> Vijay Viswanath (1):
+>   mmc: sdhci-msm: Add support to store supported vdd-io voltages
+>
+>  drivers/mmc/host/sdhci-msm.c | 99 ++++++++++++++++++++++++++++++++++++++=
++++++-
+>  1 file changed, 97 insertions(+), 2 deletions(-)
+>
+> --
+>  Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center,=
+ Inc.
+> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a Linu=
+x Foundation Collaborative Project.
+>
