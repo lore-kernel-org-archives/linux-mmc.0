@@ -1,185 +1,201 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/2] mmc: dw_mmc-bluefield: Add driver extension
-Date: Mon, 23 Apr 2018 11:31:51 +0200
-Message-ID: <CAPDyKFoPgMeCmAC9JeC4hzW4OBDqCq5cdjPoRd0AfYpq=FErwg@mail.gmail.com>
-References: <1524245538-34137-1-git-send-email-lsun@mellanox.com>
+From: Lukasz Majewski <lukma@denx.de>
+Subject: Re: [PATCH] mmc: disable card sleep via device-tree
+Date: Mon, 23 Apr 2018 11:36:19 +0200
+Message-ID: <20180423113619.6f557d8e@jawa>
+References: <20180422213126.32756-1-lukma@denx.de>
+        <CAPDyKFqaV0ehiHCNdt0i4sWE9cskBa9AQHdRZmzCphPzCdm9ow@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha256;
+ boundary="Sig_/IF+H5faWthBKBtwH87VFZRl"; protocol="application/pgp-signature"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1524245538-34137-1-git-send-email-lsun@mellanox.com>
+In-Reply-To: <CAPDyKFqaV0ehiHCNdt0i4sWE9cskBa9AQHdRZmzCphPzCdm9ow@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Liming Sun <lsun@mellanox.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Jaehoon Chung <jh80.chung@samsung.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, devicetree@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Linus Walleij <linus.walleij@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Fabio Estevam <fabio.estevam@nxp.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Chanho Min <chanho.min@lge.com>, devicetree@vger.kernel.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Stanislav Meduna <stanislav.meduna@nxtcontrol.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 20 April 2018 at 19:32, Liming Sun <lsun@mellanox.com> wrote:
-> This commit adds extension to the dw_mmc driver for Mellanox BlueField
-> SoC. It updates the UHS_REG_EXT register to bring up the eMMC card on
-> this SoC.
->
-> Signed-off-by: Liming Sun <lsun@mellanox.com>
-> ---
->  .../devicetree/bindings/mmc/bluefield-dw-mshc.txt  | 29 +++++++++
+--Sig_/IF+H5faWthBKBtwH87VFZRl
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: quoted-printable
 
-Please move changes to DT docs into a separate patch.
+Hi Ulf,
 
-Otherwise this looks good to me.
+> On 22 April 2018 at 23:31, Lukasz Majewski <lukma@denx.de> wrote:
+> > From: Stanislav Meduna <stanislav.meduna@nxtcontrol.com>
+> >
+> > On a TQMa53 module the mmc_sleep leaves the eMMC card in a state
+> > that the imx53 rom boot code is unable to probe, resulting in
+> > reboot hanging. Add a device tree property to disable sleeping
+> > on suspend.
+> >
+> > For TQMa53 modules the exact commit to cause hang after reboot
+> > (v3.10 -> v3.11):
+> > commit 486fdbbc1483 ("mmc: core: Add shutdown callback for (e)MMC
+> > bus_ops")
+> >
+> > [The exact discussion can be found here:
+> > https://patchwork.kernel.org/patch/8881401/
+> > "i.MX53 restart via watchdog does not work"
+> >
+> > Signed-off-by: Stanislav Meduna <stanislav.meduna@nxtcontrol.com>
+> > Signed-off-by: Lukasz Majewski <lukma@denx.de>
+> > ---
+> >  Documentation/devicetree/bindings/mmc/mmc-card.txt | 4 ++++
+> >  drivers/mmc/core/mmc.c                             | 7 +++++--
+> >  include/linux/mmc/card.h                           | 2 +-
+> >  3 files changed, 10 insertions(+), 3 deletions(-)
+> >
+> > diff --git a/Documentation/devicetree/bindings/mmc/mmc-card.txt
+> > b/Documentation/devicetree/bindings/mmc/mmc-card.txt index
+> > 8d2d71758907..c3ee151edd7c 100644 ---
+> > a/Documentation/devicetree/bindings/mmc/mmc-card.txt +++
+> > b/Documentation/devicetree/bindings/mmc/mmc-card.txt @@ -12,6 +12,9
+> > @@ Required properties: Optional properties:
+> >  -broken-hpi : Use this to indicate that the mmc-card has a broken
+> > hpi implementation, and that hpi should not be used
+> > +-no-sleep-on-suspend : Do not put the card to sleep when
+> > suspending.
+> > +              There are boards with bootloaders that are unable
+> > +              to probe such card when rebooting.
+> >
+> >  Example:
+> >
+> > @@ -26,5 +29,6 @@ Example:
+> >                 reg =3D <0>;
+> >                 compatible =3D "mmc-card";
+> >                 broken-hpi;
+> > +               no-sleep-on-suspend;
+> >         };
+> >  };
+> > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> > index 208a762b87ef..a3b74b5c8893 100644
+> > --- a/drivers/mmc/core/mmc.c
+> > +++ b/drivers/mmc/core/mmc.c
+> > @@ -381,8 +381,11 @@ static int mmc_decode_ext_csd(struct mmc_card
+> > *card, u8 *ext_csd) }
+> >
+> >         np =3D mmc_of_find_child_device(card->host, 0);
+> > -       if (np && of_device_is_compatible(np, "mmc-card"))
+> > +       if (np && of_device_is_compatible(np, "mmc-card")) {
+> >                 broken_hpi =3D of_property_read_bool(np,
+> > "broken-hpi");
+> > +               card->no_sleep_on_suspend =3D
+> > +                       of_property_read_bool(np,
+> > "no-sleep-on-suspend");
+> > +       }
+> >         of_node_put(np);
+> >
+> >         /*
+> > @@ -1990,7 +1993,7 @@ static int _mmc_suspend(struct mmc_host
+> > *host, bool is_suspend) if (mmc_can_poweroff_notify(host->card) &&
+> >                 ((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE)
+> > || !is_suspend)) err =3D mmc_poweroff_notify(host->card, notify_type);
+> > -       else if (mmc_can_sleep(host->card))
+> > +       else if (mmc_can_sleep(host->card)
+> > && !host->card->no_sleep_on_suspend) =20
+>=20
+> No, this is wrong.
+>=20
+> This means that the mmc_power_off() a few lines below would start to
+> violate the eMMC spec.=20
+> That via powering off the card, without first
+> sending the sleep or power-off-notify command.
+> You are probably just lucky, as your particular eMMC card still copes
+> with this in-correct sequence (I know there are these kind of cards).
+>=20
+> Well, what is also interesting in this regards, is what is happening
+> during mmc_power_off().
 
-Kind regards
-Uffe
+The mmc_power_off() -> mmc_pwrseq_power_off() -> here the *pwrseq is
+null, so we do nothing with the power.
 
->  drivers/mmc/host/Kconfig                           |  9 +++
->  drivers/mmc/host/Makefile                          |  1 +
->  drivers/mmc/host/dw_mmc-bluefield.c                | 72 ++++++++++++++++++++++
->  4 files changed, 111 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/bluefield-dw-mshc.txt
->  create mode 100644 drivers/mmc/host/dw_mmc-bluefield.c
->
-> diff --git a/Documentation/devicetree/bindings/mmc/bluefield-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/bluefield-dw-mshc.txt
-> new file mode 100644
-> index 0000000..ee0dd61
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/bluefield-dw-mshc.txt
-> @@ -0,0 +1,29 @@
-> +* Mellanox Bluefield SoC specific extensions to the Synopsys Designware
-> +  Mobile Storage Host Controller
-> +
-> +Read synopsys-dw-mshc.txt for more details
-> +
-> +The Synopsys designware mobile storage host controller is used to interface
-> +a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
-> +differences between the core Synopsys dw mshc controller properties described
-> +by synopsys-dw-mshc.txt and the properties used by the Mellanox Bluefield SoC
-> +specific extensions to the Synopsys Designware Mobile Storage Host Controller.
-> +
-> +Required Properties:
-> +
-> +* compatible: should be one of the following.
-> +  - "mellanox,bluefield-dw-mshc": for controllers with Mellanox Bluefield SoC
-> +    specific extensions.
-> +
-> +Example:
-> +
-> +       /* Mellanox Bluefield SoC MMC */
-> +       dwmmc0@4,0 {
-> +               compatible = "mellanox,bluefield-dw-mshc";
-> +               reg = <4 0x8000 0x400>;
-> +               interrupts = <32>;
-> +               fifo-depth = <0x100>;
-> +               clock-frequency = <24000000>;
-> +               bus-width = <8>;
-> +               cap-mmc-highspeed;
-> +       };
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 9589f9c..26ac6b5 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -717,6 +717,15 @@ config MMC_DW_K3
->           Synopsys DesignWare Memory Card Interface driver. Select this option
->           for platforms based on Hisilicon K3 SoC's.
->
-> +config MMC_DW_BLUEFIELD
-> +       tristate "BlueField specific extensions for Synopsys DW Memory Card Interface"
-> +       depends on MMC_DW
-> +       select MMC_DW_PLTFM
-> +       help
-> +         This selects support for Mellanox BlueField SoC specific extensions to
-> +         the Synopsys DesignWare Memory Card Interface driver. Select this
-> +         option for platforms based on Mellanox BlueField SoC's.
-> +
->  config MMC_DW_PCI
->         tristate "Synopsys Designware MCI support on PCI bus"
->         depends on MMC_DW && PCI
-> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-> index 6aead24..267b3f1 100644
-> --- a/drivers/mmc/host/Makefile
-> +++ b/drivers/mmc/host/Makefile
-> @@ -55,6 +55,7 @@ obj-$(CONFIG_MMC_DW_K3)               += dw_mmc-k3.o
->  obj-$(CONFIG_MMC_DW_PCI)       += dw_mmc-pci.o
->  obj-$(CONFIG_MMC_DW_ROCKCHIP)  += dw_mmc-rockchip.o
->  obj-$(CONFIG_MMC_DW_ZX)                += dw_mmc-zx.o
-> +obj-$(CONFIG_MMC_DW_BLUEFIELD) += dw_mmc-bluefield.o
->  obj-$(CONFIG_MMC_SH_MMCIF)     += sh_mmcif.o
->  obj-$(CONFIG_MMC_JZ4740)       += jz4740_mmc.o
->  obj-$(CONFIG_MMC_VUB300)       += vub300.o
-> diff --git a/drivers/mmc/host/dw_mmc-bluefield.c b/drivers/mmc/host/dw_mmc-bluefield.c
-> new file mode 100644
-> index 0000000..12067b1
-> --- /dev/null
-> +++ b/drivers/mmc/host/dw_mmc-bluefield.c
-> @@ -0,0 +1,72 @@
-> +// SPDX-License-Identifier: GPL-2.0
-> +/*
-> + * Copyright (C) 2018 Mellanox Technologies.
-> + *
-> + * This program is free software; you can redistribute it and/or modify
-> + * it under the terms of the GNU General Public License as published by
-> + * the Free Software Foundation; either version 2 of the License, or
-> + * (at your option) any later version.
-> + */
-> +
-> +#include <linux/module.h>
-> +#include <linux/io.h>
-> +#include <linux/irq.h>
-> +#include <linux/platform_device.h>
-> +#include <linux/pm_runtime.h>
-> +#include <linux/mmc/host.h>
-> +#include <linux/mmc/mmc.h>
-> +#include <linux/of.h>
-> +
-> +#include "dw_mmc.h"
-> +#include "dw_mmc-pltfm.h"
-> +
-> +static void dw_mci_bluefield_set_ios(struct dw_mci *host, struct mmc_ios *ios)
-> +{
-> +       u32 regs;
-> +
-> +       /* Set drive=4 (bit 29:23) and sample=2 (bit 22:16) in UHS_REG_EXT. */
-> +       regs = mci_readl(host, UHS_REG_EXT);
-> +       regs = (regs & ~0x3F100000 & ~0x7F0000) | (4 << 23) | (2 << 16);
-> +       mci_writel(host, UHS_REG_EXT, regs);
-> +}
-> +
-> +static const struct dw_mci_drv_data bluefield_drv_data = {
-> +       .set_ios                = dw_mci_bluefield_set_ios
-> +};
-> +
-> +static const struct of_device_id dw_mci_bluefield_match[] = {
-> +       { .compatible = "mellanox,bluefield-dw-mshc",
-> +               .data = &bluefield_drv_data },
-> +       {},
-> +};
-> +MODULE_DEVICE_TABLE(of, dw_mci_bluefield_match);
-> +
-> +static int dw_mci_bluefield_probe(struct platform_device *pdev)
-> +{
-> +       const struct dw_mci_drv_data *drv_data = NULL;
-> +       const struct of_device_id *match;
-> +
-> +       if (pdev->dev.of_node) {
-> +               match = of_match_node(dw_mci_bluefield_match,
-> +                                     pdev->dev.of_node);
-> +               drv_data = match->data;
-> +       }
-> +
-> +       return dw_mci_pltfm_register(pdev, drv_data);
-> +}
-> +
-> +static struct platform_driver dw_mci_bluefield_pltfm_driver = {
-> +       .probe          = dw_mci_bluefield_probe,
-> +       .remove         = dw_mci_pltfm_remove,
-> +       .driver         = {
-> +               .name           = "dwmmc_bluefield",
-> +               .of_match_table = dw_mci_bluefield_match,
-> +               .pm             = &dw_mci_pltfm_pmops,
-> +       },
-> +};
-> +
-> +module_platform_driver(dw_mci_bluefield_pltfm_driver);
-> +
-> +MODULE_DESCRIPTION("BlueField DW Multimedia Card driver");
-> +MODULE_AUTHOR("Mellanox Technologies");
-> +MODULE_LICENSE("GPL v2");
-> --
-> 1.8.3.1
->
+In mmc_power_off() function we call mmc_set_initial_state(host);
+
+> Does your host driver cut power to VMMC and/or
+> VQMMC?
+
+The esdhci3 controller uses 'vmm-supply' which is a 'regulator-fixed'
+with 'regulator-always-on' attribute.
+
+It seems like the eMMC is always powered with 3.3V.
+
+Considering the above it seems like the card is still powered - the HW
+design also supports some backup powering (so the voltage from the
+board is not took immediately).
+
+
+To be even more strange the suspend to mem works without any issues
+(without this patch).
+With "reboot -f" it seems like we hang in imx53 BootROM (as I can read
+it from my JTAG debugger).
+
+As written in the commit message - problems started after sending
+suspend sequence of eMMC commands to the eMMC device.
+
+
+[The eMMC memory itself is Micron 4GiB - 4.4.1]
+
+>=20
+> >                 err =3D mmc_sleep(host);
+> >         else if (!mmc_host_is_spi(host))
+> >                 err =3D mmc_deselect_cards(host);
+> > diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> > index 279b39008a33..c64d88e6de3b 100644
+> > --- a/include/linux/mmc/card.h
+> > +++ b/include/linux/mmc/card.h
+> > @@ -304,8 +304,8 @@ struct mmc_card {
+> >         struct dentry           *debugfs_root;
+> >         struct mmc_part part[MMC_NUM_PHY_PARTITION]; /* physical
+> > partitions */ unsigned int    nr_parts;
+> > -
+> >         unsigned int            bouncesz;       /* Bounce buffer
+> > size */
+> > +       bool    no_sleep_on_suspend;
+> >  };
+> >
+> >  static inline bool mmc_large_sector(struct mmc_card *card)
+> > --
+> > 2.11.0
+> > =20
+>=20
+> My impression is that it seems like there are still some uncertainties
+> around what actually happens when the failure occurs during re-boot. I
+> am guessing this boils done to how VMMC and VQMMC are being managed.
+>=20
+> BTW, in the the pwrseq_emmc, we register a restart handler to pull the
+> reset GPIO for the eMMC. Perhaps that can help to fix this problem as
+> well!?
+>=20
+> Kind regards
+> Uffe
+
+
+
+
+Best regards,
+
+Lukasz Majewski
+
+--
+
+DENX Software Engineering GmbH,      Managing Director: Wolfgang Denk
+HRB 165235 Munich, Office: Kirchenstr.5, D-82194 Groebenzell, Germany
+Phone: (+49)-8142-66989-10 Fax: (+49)-8142-66989-80 Email: wd@denx.de
+
+--Sig_/IF+H5faWthBKBtwH87VFZRl
+Content-Type: application/pgp-signature
+Content-Description: OpenPGP digital signature
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAEBCAAdFiEEgAyFJ+N6uu6+XupJAR8vZIA0zr0FAlrdqRMACgkQAR8vZIA0
+zr016gf/U3BMmug4/3JHoJvLnmWsn9Q/uhjNGsQb+5QKjnS5K3SWIGGYKraSStG/
+A9sv3YR7x/WFE+GAB//u9g0zhkAPd6b+fTDxmbWnn2PmaY4JpRp1M/aTXg+oHIQm
+qZcBUKYpgkTxaxybEmdzjZryupVv/X8Nojoxftmx3OrZ2dMQVk1FveR8avVlG3/5
+RnCHesIqhBZNxv90j0bn5B5kVae+PyLyDg3w4pNmiaHZEaVbVvlMz8lI4+bcJNoM
+pHSuW01yPos6FTXIQgO8BWIr1obUR8YYi8fqnQF9gBWqPpvXp0Sxy9rhJk91N5Ec
+TvyTBn0TCZezMQR5rFEjHxlZDEmEag==
+=rntX
+-----END PGP SIGNATURE-----
+
+--Sig_/IF+H5faWthBKBtwH87VFZRl--
