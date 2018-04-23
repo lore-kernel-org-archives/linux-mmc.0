@@ -1,204 +1,152 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: disable card sleep via device-tree
-Date: Mon, 23 Apr 2018 17:01:14 +0200
-Message-ID: <CAPDyKFoe7+M=ftQmMrP5O68TkuwkMSsoLuGrMa6N9ygew4eHPw@mail.gmail.com>
-References: <20180422213126.32756-1-lukma@denx.de> <CAPDyKFqaV0ehiHCNdt0i4sWE9cskBa9AQHdRZmzCphPzCdm9ow@mail.gmail.com>
- <20180423113619.6f557d8e@jawa> <CAPDyKFrhzVcST2SYjJaLb1vLTG3Rv+X7tmh7E-78A8xTYQyXOg@mail.gmail.com>
- <20180423161113.463d4f0e@jawa>
+From: Liming Sun <lsun@mellanox.com>
+Subject: RE: [PATCH 1/2] mmc: dw_mmc-bluefield: Add driver extension
+Date: Mon, 23 Apr 2018 15:17:49 +0000
+Message-ID: <AM2PR05MB0753660AB3586955631CA28CA1890@AM2PR05MB0753.eurprd05.prod.outlook.com>
+References: <1524245538-34137-1-git-send-email-lsun@mellanox.com>
+ <CAPDyKFoPgMeCmAC9JeC4hzW4OBDqCq5cdjPoRd0AfYpq=FErwg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180423161113.463d4f0e@jawa>
+In-Reply-To: <CAPDyKFoPgMeCmAC9JeC4hzW4OBDqCq5cdjPoRd0AfYpq=FErwg@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Lukasz Majewski <lukma@denx.de>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Fabio Estevam <fabio.estevam@nxp.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Chanho Min <chanho.min@lge.com>, devicetree@vger.kernel.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Stanislav Meduna <stanislav.meduna@nxtcontrol.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Jaehoon Chung <jh80.chung@samsung.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 23 April 2018 at 16:11, Lukasz Majewski <lukma@denx.de> wrote:
-> Hi Ulf,
->
->> On 23 April 2018 at 11:36, Lukasz Majewski <lukma@denx.de> wrote:
->> > Hi Ulf,
->> >
->> >> On 22 April 2018 at 23:31, Lukasz Majewski <lukma@denx.de> wrote:
->> >> > From: Stanislav Meduna <stanislav.meduna@nxtcontrol.com>
->> >> >
->> >> > On a TQMa53 module the mmc_sleep leaves the eMMC card in a state
->> >> > that the imx53 rom boot code is unable to probe, resulting in
->> >> > reboot hanging. Add a device tree property to disable sleeping
->> >> > on suspend.
->> >> >
->> >> > For TQMa53 modules the exact commit to cause hang after reboot
->> >> > (v3.10 -> v3.11):
->> >> > commit 486fdbbc1483 ("mmc: core: Add shutdown callback for (e)MMC
->> >> > bus_ops")
->> >> >
->> >> > [The exact discussion can be found here:
->> >> > https://patchwork.kernel.org/patch/8881401/
->> >> > "i.MX53 restart via watchdog does not work"
->> >> >
->> >> > Signed-off-by: Stanislav Meduna <stanislav.meduna@nxtcontrol.com>
->> >> > Signed-off-by: Lukasz Majewski <lukma@denx.de>
->> >> > ---
->> >> >  Documentation/devicetree/bindings/mmc/mmc-card.txt | 4 ++++
->> >> >  drivers/mmc/core/mmc.c                             | 7 +++++--
->> >> >  include/linux/mmc/card.h                           | 2 +-
->> >> >  3 files changed, 10 insertions(+), 3 deletions(-)
->> >> >
->> >> > diff --git a/Documentation/devicetree/bindings/mmc/mmc-card.txt
->> >> > b/Documentation/devicetree/bindings/mmc/mmc-card.txt index
->> >> > 8d2d71758907..c3ee151edd7c 100644 ---
->> >> > a/Documentation/devicetree/bindings/mmc/mmc-card.txt +++
->> >> > b/Documentation/devicetree/bindings/mmc/mmc-card.txt @@ -12,6
->> >> > +12,9 @@ Required properties: Optional properties:
->> >> >  -broken-hpi : Use this to indicate that the mmc-card has a
->> >> > broken hpi implementation, and that hpi should not be used
->> >> > +-no-sleep-on-suspend : Do not put the card to sleep when
->> >> > suspending.
->> >> > +              There are boards with bootloaders that are unable
->> >> > +              to probe such card when rebooting.
->> >> >
->> >> >  Example:
->> >> >
->> >> > @@ -26,5 +29,6 @@ Example:
->> >> >                 reg = <0>;
->> >> >                 compatible = "mmc-card";
->> >> >                 broken-hpi;
->> >> > +               no-sleep-on-suspend;
->> >> >         };
->> >> >  };
->> >> > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->> >> > index 208a762b87ef..a3b74b5c8893 100644
->> >> > --- a/drivers/mmc/core/mmc.c
->> >> > +++ b/drivers/mmc/core/mmc.c
->> >> > @@ -381,8 +381,11 @@ static int mmc_decode_ext_csd(struct
->> >> > mmc_card *card, u8 *ext_csd) }
->> >> >
->> >> >         np = mmc_of_find_child_device(card->host, 0);
->> >> > -       if (np && of_device_is_compatible(np, "mmc-card"))
->> >> > +       if (np && of_device_is_compatible(np, "mmc-card")) {
->> >> >                 broken_hpi = of_property_read_bool(np,
->> >> > "broken-hpi");
->> >> > +               card->no_sleep_on_suspend =
->> >> > +                       of_property_read_bool(np,
->> >> > "no-sleep-on-suspend");
->> >> > +       }
->> >> >         of_node_put(np);
->> >> >
->> >> >         /*
->> >> > @@ -1990,7 +1993,7 @@ static int _mmc_suspend(struct mmc_host
->> >> > *host, bool is_suspend) if (mmc_can_poweroff_notify(host->card)
->> >> > && ((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE)
->> >> > || !is_suspend)) err = mmc_poweroff_notify(host->card,
->> >> > notify_type);
->> >> > -       else if (mmc_can_sleep(host->card))
->> >> > +       else if (mmc_can_sleep(host->card)
->> >> > && !host->card->no_sleep_on_suspend)
->> >>
->> >> No, this is wrong.
->> >>
->> >> This means that the mmc_power_off() a few lines below would start
->> >> to violate the eMMC spec.
->> >> That via powering off the card, without first
->> >> sending the sleep or power-off-notify command.
->> >> You are probably just lucky, as your particular eMMC card still
->> >> copes with this in-correct sequence (I know there are these kind
->> >> of cards).
->> >>
->> >> Well, what is also interesting in this regards, is what is
->> >> happening during mmc_power_off().
->> >
->> > The mmc_power_off() -> mmc_pwrseq_power_off() -> here the *pwrseq is
->> > null, so we do nothing with the power.
->> >
->> > In mmc_power_off() function we call mmc_set_initial_state(host);
->> >
->> >> Does your host driver cut power to VMMC and/or
->> >> VQMMC?
->> >
->> > The esdhci3 controller uses 'vmm-supply' which is a
->> > 'regulator-fixed' with 'regulator-always-on' attribute.
->>
->> Assume you mean vmmc-supply.
->>
->> Anyway, it seems a bit weird to have this regulator as fixed and
->> always on. Of course it's possible, but it's more common to have vqmmc
->> fixed and always on. Maybe double check the schematics.
->>
->> >
->> > It seems like the eMMC is always powered with 3.3V.
->>
->> What about vqmmc then?
->
-> It seems like the vqmmc is not added/used in dts (imx53.dtsi). Only the
-> vmmc-supply is used.
-
-My point is, that perhaps DTS is wrong or too simplified.
-
-Perhaps vmmc can be powered off/on?
-
->
->>
->> >
->> > Considering the above it seems like the card is still powered - the
->> > HW design also supports some backup powering (so the voltage from
->> > the board is not took immediately).
->>
->> I think you need to verify that the CMD5 (sleep) is actually sent and
->> successfully completed.
->>
->> In regards to that, do your host support MMC_CAP_WAIT_WHILE_BUSY?
->
-> No. This flag is not supported (set) on this host.
-
-Okay. One thing to remove from possible root causes.
-
->
->> If
->> not, there is a delay (specific to the card) after the CMD5.
->
-> Yes, the delay is used (mmc.c Line 1890).
-> The delay is 7ms (as read from card->ext_csd.sa_timeout).
->
-> Increasing it by 10 (or 100) ms doesn't solve the problem.
-
-Okay. To really be sure, I would also try 1000ms.
-
->
->>
->> So the support in your host driver for MMC_CAP_WAIT_WHILE_BUSY could
->> be broken, or the delay may be too short. Perhaps forcing to use the
->> delay and use a delay that for sure should work is worth to test.
->>
->> >
->> >
->> > To be even more strange the suspend to mem works without any issues
->> > (without this patch).
->> > With "reboot -f" it seems like we hang in imx53 BootROM (as I can
->> > read it from my JTAG debugger).
->>
->> So clearly there is a difference during reboot.
->>
->> A wild guess... Probably vmmc supply is turned on/off in this path,
->> while perhaps the CMD5 support has failed when the kernel issued
->> it...
->
-> This needs to be checked.
->
-> It may be also possible that the BootROM expects that the eMMC would
-> not be in SLEEP state (after CMD5 issuing).
-
-Well, in principle that shouldn't matter.
-
-CMD0 is fine to use to wakeup the card from sleep state and that can
-be followed by a regular initialization sequence. This is the way the
-mmc core, during system resume does it.
-
-Another possible option is that the power to vqmmc becomes power
-cycled during reboot, while power to vmmc isn't.
-
-Hope my ideas to narrow down the problem are helping and not adding
-confusion. :-)
-
-Kind regards
-Uffe
+VGhhbmtzIFVmZmUuIEknbGwgc3VibWl0IHBhdGNoIDIgYXMgc3VnZ2VzdGVkLg0KDQpCZXN0IHJl
+Z2FyZHMsDQpMaW1pbmcNCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBV
+bGYgSGFuc3NvbiBbbWFpbHRvOnVsZi5oYW5zc29uQGxpbmFyby5vcmddDQo+IFNlbnQ6IE1vbmRh
+eSwgQXByaWwgMjMsIDIwMTggNTozMiBBTQ0KPiBUbzogTGltaW5nIFN1biA8bHN1bkBtZWxsYW5v
+eC5jb20+DQo+IENjOiBSb2IgSGVycmluZyA8cm9iaCtkdEBrZXJuZWwub3JnPjsgTWFyayBSdXRs
+YW5kDQo+IDxtYXJrLnJ1dGxhbmRAYXJtLmNvbT47IEphZWhvb24gQ2h1bmcgPGpoODAuY2h1bmdA
+c2Ftc3VuZy5jb20+Ow0KPiBDYXRhbGluIE1hcmluYXMgPGNhdGFsaW4ubWFyaW5hc0Bhcm0uY29t
+PjsgV2lsbCBEZWFjb24NCj4gPHdpbGwuZGVhY29uQGFybS5jb20+OyBsaW51eC1tbWNAdmdlci5r
+ZXJuZWwub3JnOw0KPiBkZXZpY2V0cmVlQHZnZXIua2VybmVsLm9yZzsgTGludXggS2VybmVsIE1h
+aWxpbmcgTGlzdCA8bGludXgtDQo+IGtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc+DQo+IFN1YmplY3Q6
+IFJlOiBbUEFUQ0ggMS8yXSBtbWM6IGR3X21tYy1ibHVlZmllbGQ6IEFkZCBkcml2ZXIgZXh0ZW5z
+aW9uDQo+IA0KPiBPbiAyMCBBcHJpbCAyMDE4IGF0IDE5OjMyLCBMaW1pbmcgU3VuIDxsc3VuQG1l
+bGxhbm94LmNvbT4gd3JvdGU6DQo+ID4gVGhpcyBjb21taXQgYWRkcyBleHRlbnNpb24gdG8gdGhl
+IGR3X21tYyBkcml2ZXIgZm9yIE1lbGxhbm94IEJsdWVGaWVsZA0KPiA+IFNvQy4gSXQgdXBkYXRl
+cyB0aGUgVUhTX1JFR19FWFQgcmVnaXN0ZXIgdG8gYnJpbmcgdXAgdGhlIGVNTUMgY2FyZCBvbg0K
+PiA+IHRoaXMgU29DLg0KPiA+DQo+ID4gU2lnbmVkLW9mZi1ieTogTGltaW5nIFN1biA8bHN1bkBt
+ZWxsYW5veC5jb20+DQo+ID4gLS0tDQo+ID4gIC4uLi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9i
+bHVlZmllbGQtZHctbXNoYy50eHQgIHwgMjkgKysrKysrKysrDQo+IA0KPiBQbGVhc2UgbW92ZSBj
+aGFuZ2VzIHRvIERUIGRvY3MgaW50byBhIHNlcGFyYXRlIHBhdGNoLg0KPiANCj4gT3RoZXJ3aXNl
+IHRoaXMgbG9va3MgZ29vZCB0byBtZS4NCj4gDQo+IEtpbmQgcmVnYXJkcw0KPiBVZmZlDQo+IA0K
+PiA+ICBkcml2ZXJzL21tYy9ob3N0L0tjb25maWcgICAgICAgICAgICAgICAgICAgICAgICAgICB8
+ICA5ICsrKw0KPiA+ICBkcml2ZXJzL21tYy9ob3N0L01ha2VmaWxlICAgICAgICAgICAgICAgICAg
+ICAgICAgICB8ICAxICsNCj4gPiAgZHJpdmVycy9tbWMvaG9zdC9kd19tbWMtYmx1ZWZpZWxkLmMg
+ICAgICAgICAgICAgICAgfCA3Mg0KPiArKysrKysrKysrKysrKysrKysrKysrDQo+ID4gIDQgZmls
+ZXMgY2hhbmdlZCwgMTExIGluc2VydGlvbnMoKykNCj4gPiAgY3JlYXRlIG1vZGUgMTAwNjQ0IERv
+Y3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9tbWMvYmx1ZWZpZWxkLQ0KPiBkdy1tc2hj
+LnR4dA0KPiA+ICBjcmVhdGUgbW9kZSAxMDA2NDQgZHJpdmVycy9tbWMvaG9zdC9kd19tbWMtYmx1
+ZWZpZWxkLmMNCj4gPg0KPiA+IGRpZmYgLS1naXQgYS9Eb2N1bWVudGF0aW9uL2RldmljZXRyZWUv
+YmluZGluZ3MvbW1jL2JsdWVmaWVsZC1kdy0NCj4gbXNoYy50eHQgYi9Eb2N1bWVudGF0aW9uL2Rl
+dmljZXRyZWUvYmluZGluZ3MvbW1jL2JsdWVmaWVsZC1kdy0NCj4gbXNoYy50eHQNCj4gPiBuZXcg
+ZmlsZSBtb2RlIDEwMDY0NA0KPiA+IGluZGV4IDAwMDAwMDAuLmVlMGRkNjENCj4gPiAtLS0gL2Rl
+di9udWxsDQo+ID4gKysrIGIvRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9i
+bHVlZmllbGQtZHctbXNoYy50eHQNCj4gPiBAQCAtMCwwICsxLDI5IEBADQo+ID4gKyogTWVsbGFu
+b3ggQmx1ZWZpZWxkIFNvQyBzcGVjaWZpYyBleHRlbnNpb25zIHRvIHRoZSBTeW5vcHN5cyBEZXNp
+Z253YXJlDQo+ID4gKyAgTW9iaWxlIFN0b3JhZ2UgSG9zdCBDb250cm9sbGVyDQo+ID4gKw0KPiA+
+ICtSZWFkIHN5bm9wc3lzLWR3LW1zaGMudHh0IGZvciBtb3JlIGRldGFpbHMNCj4gPiArDQo+ID4g
+K1RoZSBTeW5vcHN5cyBkZXNpZ253YXJlIG1vYmlsZSBzdG9yYWdlIGhvc3QgY29udHJvbGxlciBp
+cyB1c2VkIHRvDQo+IGludGVyZmFjZQ0KPiA+ICthIFNvQyB3aXRoIHN0b3JhZ2UgbWVkaXVtIHN1
+Y2ggYXMgZU1NQyBvciBTRC9NTUMgY2FyZHMuIFRoaXMgZmlsZQ0KPiBkb2N1bWVudHMNCj4gPiAr
+ZGlmZmVyZW5jZXMgYmV0d2VlbiB0aGUgY29yZSBTeW5vcHN5cyBkdyBtc2hjIGNvbnRyb2xsZXIg
+cHJvcGVydGllcw0KPiBkZXNjcmliZWQNCj4gPiArYnkgc3lub3BzeXMtZHctbXNoYy50eHQgYW5k
+IHRoZSBwcm9wZXJ0aWVzIHVzZWQgYnkgdGhlIE1lbGxhbm94DQo+IEJsdWVmaWVsZCBTb0MNCj4g
+PiArc3BlY2lmaWMgZXh0ZW5zaW9ucyB0byB0aGUgU3lub3BzeXMgRGVzaWdud2FyZSBNb2JpbGUg
+U3RvcmFnZSBIb3N0DQo+IENvbnRyb2xsZXIuDQo+ID4gKw0KPiA+ICtSZXF1aXJlZCBQcm9wZXJ0
+aWVzOg0KPiA+ICsNCj4gPiArKiBjb21wYXRpYmxlOiBzaG91bGQgYmUgb25lIG9mIHRoZSBmb2xs
+b3dpbmcuDQo+ID4gKyAgLSAibWVsbGFub3gsYmx1ZWZpZWxkLWR3LW1zaGMiOiBmb3IgY29udHJv
+bGxlcnMgd2l0aCBNZWxsYW5veCBCbHVlZmllbGQNCj4gU29DDQo+ID4gKyAgICBzcGVjaWZpYyBl
+eHRlbnNpb25zLg0KPiA+ICsNCj4gPiArRXhhbXBsZToNCj4gPiArDQo+ID4gKyAgICAgICAvKiBN
+ZWxsYW5veCBCbHVlZmllbGQgU29DIE1NQyAqLw0KPiA+ICsgICAgICAgZHdtbWMwQDQsMCB7DQo+
+ID4gKyAgICAgICAgICAgICAgIGNvbXBhdGlibGUgPSAibWVsbGFub3gsYmx1ZWZpZWxkLWR3LW1z
+aGMiOw0KPiA+ICsgICAgICAgICAgICAgICByZWcgPSA8NCAweDgwMDAgMHg0MDA+Ow0KPiA+ICsg
+ICAgICAgICAgICAgICBpbnRlcnJ1cHRzID0gPDMyPjsNCj4gPiArICAgICAgICAgICAgICAgZmlm
+by1kZXB0aCA9IDwweDEwMD47DQo+ID4gKyAgICAgICAgICAgICAgIGNsb2NrLWZyZXF1ZW5jeSA9
+IDwyNDAwMDAwMD47DQo+ID4gKyAgICAgICAgICAgICAgIGJ1cy13aWR0aCA9IDw4PjsNCj4gPiAr
+ICAgICAgICAgICAgICAgY2FwLW1tYy1oaWdoc3BlZWQ7DQo+ID4gKyAgICAgICB9Ow0KPiA+IGRp
+ZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L0tjb25maWcgYi9kcml2ZXJzL21tYy9ob3N0L0tj
+b25maWcNCj4gPiBpbmRleCA5NTg5ZjljLi4yNmFjNmI1IDEwMDY0NA0KPiA+IC0tLSBhL2RyaXZl
+cnMvbW1jL2hvc3QvS2NvbmZpZw0KPiA+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3QvS2NvbmZpZw0K
+PiA+IEBAIC03MTcsNiArNzE3LDE1IEBAIGNvbmZpZyBNTUNfRFdfSzMNCj4gPiAgICAgICAgICAg
+U3lub3BzeXMgRGVzaWduV2FyZSBNZW1vcnkgQ2FyZCBJbnRlcmZhY2UgZHJpdmVyLiBTZWxlY3Qg
+dGhpcw0KPiBvcHRpb24NCj4gPiAgICAgICAgICAgZm9yIHBsYXRmb3JtcyBiYXNlZCBvbiBIaXNp
+bGljb24gSzMgU29DJ3MuDQo+ID4NCj4gPiArY29uZmlnIE1NQ19EV19CTFVFRklFTEQNCj4gPiAr
+ICAgICAgIHRyaXN0YXRlICJCbHVlRmllbGQgc3BlY2lmaWMgZXh0ZW5zaW9ucyBmb3IgU3lub3Bz
+eXMgRFcgTWVtb3J5IENhcmQNCj4gSW50ZXJmYWNlIg0KPiA+ICsgICAgICAgZGVwZW5kcyBvbiBN
+TUNfRFcNCj4gPiArICAgICAgIHNlbGVjdCBNTUNfRFdfUExURk0NCj4gPiArICAgICAgIGhlbHAN
+Cj4gPiArICAgICAgICAgVGhpcyBzZWxlY3RzIHN1cHBvcnQgZm9yIE1lbGxhbm94IEJsdWVGaWVs
+ZCBTb0Mgc3BlY2lmaWMgZXh0ZW5zaW9ucyB0bw0KPiA+ICsgICAgICAgICB0aGUgU3lub3BzeXMg
+RGVzaWduV2FyZSBNZW1vcnkgQ2FyZCBJbnRlcmZhY2UgZHJpdmVyLiBTZWxlY3QgdGhpcw0KPiA+
+ICsgICAgICAgICBvcHRpb24gZm9yIHBsYXRmb3JtcyBiYXNlZCBvbiBNZWxsYW5veCBCbHVlRmll
+bGQgU29DJ3MuDQo+ID4gKw0KPiA+ICBjb25maWcgTU1DX0RXX1BDSQ0KPiA+ICAgICAgICAgdHJp
+c3RhdGUgIlN5bm9wc3lzIERlc2lnbndhcmUgTUNJIHN1cHBvcnQgb24gUENJIGJ1cyINCj4gPiAg
+ICAgICAgIGRlcGVuZHMgb24gTU1DX0RXICYmIFBDSQ0KPiA+IGRpZmYgLS1naXQgYS9kcml2ZXJz
+L21tYy9ob3N0L01ha2VmaWxlIGIvZHJpdmVycy9tbWMvaG9zdC9NYWtlZmlsZQ0KPiA+IGluZGV4
+IDZhZWFkMjQuLjI2N2IzZjEgMTAwNjQ0DQo+ID4gLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9NYWtl
+ZmlsZQ0KPiA+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3QvTWFrZWZpbGUNCj4gPiBAQCAtNTUsNiAr
+NTUsNyBAQCBvYmotJChDT05GSUdfTU1DX0RXX0szKSAgICAgICAgICAgICAgICs9IGR3X21tYy0N
+Cj4gazMubw0KPiA+ICBvYmotJChDT05GSUdfTU1DX0RXX1BDSSkgICAgICAgKz0gZHdfbW1jLXBj
+aS5vDQo+ID4gIG9iai0kKENPTkZJR19NTUNfRFdfUk9DS0NISVApICArPSBkd19tbWMtcm9ja2No
+aXAubw0KPiA+ICBvYmotJChDT05GSUdfTU1DX0RXX1pYKSAgICAgICAgICAgICAgICArPSBkd19t
+bWMtengubw0KPiA+ICtvYmotJChDT05GSUdfTU1DX0RXX0JMVUVGSUVMRCkgKz0gZHdfbW1jLWJs
+dWVmaWVsZC5vDQo+ID4gIG9iai0kKENPTkZJR19NTUNfU0hfTU1DSUYpICAgICArPSBzaF9tbWNp
+Zi5vDQo+ID4gIG9iai0kKENPTkZJR19NTUNfSlo0NzQwKSAgICAgICArPSBqejQ3NDBfbW1jLm8N
+Cj4gPiAgb2JqLSQoQ09ORklHX01NQ19WVUIzMDApICAgICAgICs9IHZ1YjMwMC5vDQo+ID4gZGlm
+ZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3QvZHdfbW1jLWJsdWVmaWVsZC5jDQo+IGIvZHJpdmVy
+cy9tbWMvaG9zdC9kd19tbWMtYmx1ZWZpZWxkLmMNCj4gPiBuZXcgZmlsZSBtb2RlIDEwMDY0NA0K
+PiA+IGluZGV4IDAwMDAwMDAuLjEyMDY3YjENCj4gPiAtLS0gL2Rldi9udWxsDQo+ID4gKysrIGIv
+ZHJpdmVycy9tbWMvaG9zdC9kd19tbWMtYmx1ZWZpZWxkLmMNCj4gPiBAQCAtMCwwICsxLDcyIEBA
+DQo+ID4gKy8vIFNQRFgtTGljZW5zZS1JZGVudGlmaWVyOiBHUEwtMi4wDQo+ID4gKy8qDQo+ID4g
+KyAqIENvcHlyaWdodCAoQykgMjAxOCBNZWxsYW5veCBUZWNobm9sb2dpZXMuDQo+ID4gKyAqDQo+
+ID4gKyAqIFRoaXMgcHJvZ3JhbSBpcyBmcmVlIHNvZnR3YXJlOyB5b3UgY2FuIHJlZGlzdHJpYnV0
+ZSBpdCBhbmQvb3IgbW9kaWZ5DQo+ID4gKyAqIGl0IHVuZGVyIHRoZSB0ZXJtcyBvZiB0aGUgR05V
+IEdlbmVyYWwgUHVibGljIExpY2Vuc2UgYXMgcHVibGlzaGVkIGJ5DQo+ID4gKyAqIHRoZSBGcmVl
+IFNvZnR3YXJlIEZvdW5kYXRpb247IGVpdGhlciB2ZXJzaW9uIDIgb2YgdGhlIExpY2Vuc2UsIG9y
+DQo+ID4gKyAqIChhdCB5b3VyIG9wdGlvbikgYW55IGxhdGVyIHZlcnNpb24uDQo+ID4gKyAqLw0K
+PiA+ICsNCj4gPiArI2luY2x1ZGUgPGxpbnV4L21vZHVsZS5oPg0KPiA+ICsjaW5jbHVkZSA8bGlu
+dXgvaW8uaD4NCj4gPiArI2luY2x1ZGUgPGxpbnV4L2lycS5oPg0KPiA+ICsjaW5jbHVkZSA8bGlu
+dXgvcGxhdGZvcm1fZGV2aWNlLmg+DQo+ID4gKyNpbmNsdWRlIDxsaW51eC9wbV9ydW50aW1lLmg+
+DQo+ID4gKyNpbmNsdWRlIDxsaW51eC9tbWMvaG9zdC5oPg0KPiA+ICsjaW5jbHVkZSA8bGludXgv
+bW1jL21tYy5oPg0KPiA+ICsjaW5jbHVkZSA8bGludXgvb2YuaD4NCj4gPiArDQo+ID4gKyNpbmNs
+dWRlICJkd19tbWMuaCINCj4gPiArI2luY2x1ZGUgImR3X21tYy1wbHRmbS5oIg0KPiA+ICsNCj4g
+PiArc3RhdGljIHZvaWQgZHdfbWNpX2JsdWVmaWVsZF9zZXRfaW9zKHN0cnVjdCBkd19tY2kgKmhv
+c3QsIHN0cnVjdA0KPiBtbWNfaW9zICppb3MpDQo+ID4gK3sNCj4gPiArICAgICAgIHUzMiByZWdz
+Ow0KPiA+ICsNCj4gPiArICAgICAgIC8qIFNldCBkcml2ZT00IChiaXQgMjk6MjMpIGFuZCBzYW1w
+bGU9MiAoYml0IDIyOjE2KSBpbiBVSFNfUkVHX0VYVC4gKi8NCj4gPiArICAgICAgIHJlZ3MgPSBt
+Y2lfcmVhZGwoaG9zdCwgVUhTX1JFR19FWFQpOw0KPiA+ICsgICAgICAgcmVncyA9IChyZWdzICYg
+fjB4M0YxMDAwMDAgJiB+MHg3RjAwMDApIHwgKDQgPDwgMjMpIHwgKDIgPDwgMTYpOw0KPiA+ICsg
+ICAgICAgbWNpX3dyaXRlbChob3N0LCBVSFNfUkVHX0VYVCwgcmVncyk7DQo+ID4gK30NCj4gPiAr
+DQo+ID4gK3N0YXRpYyBjb25zdCBzdHJ1Y3QgZHdfbWNpX2Rydl9kYXRhIGJsdWVmaWVsZF9kcnZf
+ZGF0YSA9IHsNCj4gPiArICAgICAgIC5zZXRfaW9zICAgICAgICAgICAgICAgID0gZHdfbWNpX2Js
+dWVmaWVsZF9zZXRfaW9zDQo+ID4gK307DQo+ID4gKw0KPiA+ICtzdGF0aWMgY29uc3Qgc3RydWN0
+IG9mX2RldmljZV9pZCBkd19tY2lfYmx1ZWZpZWxkX21hdGNoW10gPSB7DQo+ID4gKyAgICAgICB7
+IC5jb21wYXRpYmxlID0gIm1lbGxhbm94LGJsdWVmaWVsZC1kdy1tc2hjIiwNCj4gPiArICAgICAg
+ICAgICAgICAgLmRhdGEgPSAmYmx1ZWZpZWxkX2Rydl9kYXRhIH0sDQo+ID4gKyAgICAgICB7fSwN
+Cj4gPiArfTsNCj4gPiArTU9EVUxFX0RFVklDRV9UQUJMRShvZiwgZHdfbWNpX2JsdWVmaWVsZF9t
+YXRjaCk7DQo+ID4gKw0KPiA+ICtzdGF0aWMgaW50IGR3X21jaV9ibHVlZmllbGRfcHJvYmUoc3Ry
+dWN0IHBsYXRmb3JtX2RldmljZSAqcGRldikNCj4gPiArew0KPiA+ICsgICAgICAgY29uc3Qgc3Ry
+dWN0IGR3X21jaV9kcnZfZGF0YSAqZHJ2X2RhdGEgPSBOVUxMOw0KPiA+ICsgICAgICAgY29uc3Qg
+c3RydWN0IG9mX2RldmljZV9pZCAqbWF0Y2g7DQo+ID4gKw0KPiA+ICsgICAgICAgaWYgKHBkZXYt
+PmRldi5vZl9ub2RlKSB7DQo+ID4gKyAgICAgICAgICAgICAgIG1hdGNoID0gb2ZfbWF0Y2hfbm9k
+ZShkd19tY2lfYmx1ZWZpZWxkX21hdGNoLA0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgcGRldi0+ZGV2Lm9mX25vZGUpOw0KPiA+ICsgICAgICAgICAgICAgICBkcnZf
+ZGF0YSA9IG1hdGNoLT5kYXRhOw0KPiA+ICsgICAgICAgfQ0KPiA+ICsNCj4gPiArICAgICAgIHJl
+dHVybiBkd19tY2lfcGx0Zm1fcmVnaXN0ZXIocGRldiwgZHJ2X2RhdGEpOw0KPiA+ICt9DQo+ID4g
+Kw0KPiA+ICtzdGF0aWMgc3RydWN0IHBsYXRmb3JtX2RyaXZlciBkd19tY2lfYmx1ZWZpZWxkX3Bs
+dGZtX2RyaXZlciA9IHsNCj4gPiArICAgICAgIC5wcm9iZSAgICAgICAgICA9IGR3X21jaV9ibHVl
+ZmllbGRfcHJvYmUsDQo+ID4gKyAgICAgICAucmVtb3ZlICAgICAgICAgPSBkd19tY2lfcGx0Zm1f
+cmVtb3ZlLA0KPiA+ICsgICAgICAgLmRyaXZlciAgICAgICAgID0gew0KPiA+ICsgICAgICAgICAg
+ICAgICAubmFtZSAgICAgICAgICAgPSAiZHdtbWNfYmx1ZWZpZWxkIiwNCj4gPiArICAgICAgICAg
+ICAgICAgLm9mX21hdGNoX3RhYmxlID0gZHdfbWNpX2JsdWVmaWVsZF9tYXRjaCwNCj4gPiArICAg
+ICAgICAgICAgICAgLnBtICAgICAgICAgICAgID0gJmR3X21jaV9wbHRmbV9wbW9wcywNCj4gPiAr
+ICAgICAgIH0sDQo+ID4gK307DQo+ID4gKw0KPiA+ICttb2R1bGVfcGxhdGZvcm1fZHJpdmVyKGR3
+X21jaV9ibHVlZmllbGRfcGx0Zm1fZHJpdmVyKTsNCj4gPiArDQo+ID4gK01PRFVMRV9ERVNDUklQ
+VElPTigiQmx1ZUZpZWxkIERXIE11bHRpbWVkaWEgQ2FyZCBkcml2ZXIiKTsNCj4gPiArTU9EVUxF
+X0FVVEhPUigiTWVsbGFub3ggVGVjaG5vbG9naWVzIik7DQo+ID4gK01PRFVMRV9MSUNFTlNFKCJH
+UEwgdjIiKTsNCj4gPiAtLQ0KPiA+IDEuOC4zLjENCj4gPg0K
