@@ -1,60 +1,41 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH 1/3] ARM: dts: keystone-k2g-evm: Add "vqmmc-supply" property for mmc0/mmc1
-Date: Wed, 25 Apr 2018 18:57:44 +0530
-Message-ID: <20180425132746.13911-2-kishon@ti.com>
-References: <20180425132746.13911-1-kishon@ti.com>
+Subject: [PATCH v4 15/15] Documentation: ARM: Add new MMC requirements for DRA7/K2G
+Date: Wed, 25 Apr 2018 19:02:03 +0530
+Message-ID: <20180425133203.14133-1-kishon@ti.com>
+References: <20180425125449.19755-16-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180425132746.13911-1-kishon@ti.com>
+In-Reply-To: <20180425125449.19755-16-kishon@ti.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Santosh Shilimkar <ssantosh@kernel.org>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, kishon@ti.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, Tony Lindgren <tony@atomide.com>
+To: =?UTF-8?q?Beno=C3=AEt=20Cousson=20?= <bcousson@baylibre.com>, Tony Lindgren <tony@atomide.com>
+Cc: Jonathan Corbet <corbet@lwn.net>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, linux-doc@vger.kernel.org, kishon@ti.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Add "vqmmc-supply" property for mmc0/mmc1 to indicate the supply connected
-to the IO lines. Also add dt node for ldo1 regulator required for mmc1
-vqmmc-supply.
+>From 4.18 kernel, all the MMC controller instances in DRA7
+are programmed using sdhci based driver (sdhci-omap.c). Document
+this new requirement here. Both omap2plus_defconfig and
+multi_v7_defconfig has CONFIG_MMC_SDHCI_OMAP enabled.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- arch/arm/boot/dts/keystone-k2g-evm.dts | 10 ++++++++++
- 1 file changed, 10 insertions(+)
+Changes from v3:
+Add K2G also in the dependencies description
 
-diff --git a/arch/arm/boot/dts/keystone-k2g-evm.dts b/arch/arm/boot/dts/keystone-k2g-evm.dts
-index 6a4657799b99..60b4f59899d2 100644
---- a/arch/arm/boot/dts/keystone-k2g-evm.dts
-+++ b/arch/arm/boot/dts/keystone-k2g-evm.dts
-@@ -37,6 +37,14 @@
- 		regulator-max-microvolt = <3300000>;
- 		regulator-always-on;
- 	};
+ Documentation/arm/OMAP/README | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/Documentation/arm/OMAP/README b/Documentation/arm/OMAP/README
+index 75645c45d14a..5bf5ac3b3ed4 100644
+--- a/Documentation/arm/OMAP/README
++++ b/Documentation/arm/OMAP/README
+@@ -5,3 +5,7 @@ KERNEL		NEW DEPENDENCIES
+ v4.3+		Update is needed for custom .config files to make sure
+ 		CONFIG_REGULATOR_PBIAS is enabled for MMC1 to work
+ 		properly.
 +
-+	vcc1v8_ldo1_reg: fixedregulator-vcc1v8-ldo1 {
-+		compatible = "regulator-fixed";
-+		regulator-name = "ldo1";
-+		regulator-min-microvolt = <1800000>;
-+		regulator-max-microvolt = <1800000>;
-+		regulator-always-on;
-+	};
- };
- 
- &k2g_pinctrl {
-@@ -130,6 +138,7 @@
- 	pinctrl-names = "default";
- 	pinctrl-0 = <&mmc0_pins>;
- 	vmmc-supply = <&vcc3v3_dcin_reg>;
-+	vqmmc-supply = <&vcc3v3_dcin_reg>;
- 	cd-gpios = <&gpio1 12 GPIO_ACTIVE_LOW>;
- 	status = "okay";
- };
-@@ -138,6 +147,7 @@
- 	pinctrl-names = "default";
- 	pinctrl-0 = <&mmc1_pins>;
- 	vmmc-supply = <&vcc3v3_dcin_reg>; /* VCC3V3_EMMC is connected to VCC3V3_DCIN */
-+	vqmmc-supply = <&vcc1v8_ldo1_reg>;
- 	ti,non-removable;
- 	status = "okay";
- };
++v4.18+		Update is needed for custom .config files to make sure
++		CONFIG_MMC_SDHCI_OMAP is enabled for all MMC instances
++		to work in DRA7 and K2G based boards.
 -- 
 2.17.0
