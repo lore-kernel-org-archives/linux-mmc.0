@@ -1,94 +1,94 @@
-From: Rob Herring <robh+dt@kernel.org>
-Subject: Re: [PATCH v3 09/15] ARM: dts: dra72-evm-common: Add wilink8 wlan support
-Date: Wed, 25 Apr 2018 09:49:53 -0500
-Message-ID: <CAL_Jsq+d6VdbYT3djvYQARjEP3qXiG16f9e8XESfNBj3zzf2NQ@mail.gmail.com>
-References: <20180425125449.19755-1-kishon@ti.com> <20180425125449.19755-10-kishon@ti.com>
+From: Eugeniy Paltsev <Eugeniy.Paltsev@synopsys.com>
+Subject: Re: [RFC 0/2] dw_mmc: add multislot support
+Date: Wed, 25 Apr 2018 13:53:38 +0000
+Message-ID: <1524664417.18209.16.camel@synopsys.com>
+References: <20180417121130.25281-1-Eugeniy.Paltsev@synopsys.com>
+         <CAPDyKFqxZLtx_=0UU9NgBnW0Vmw=456q2FFbMBK4LKEaF-ua7A@mail.gmail.com>
+         <1524239609.10138.47.camel@synopsys.com>
+         <CAPDyKFpY7JsQukY=E2PRg=iVfmis4i1kvST+b2wtshNc5Jn+jw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180425125449.19755-10-kishon@ti.com>
+In-Reply-To: <CAPDyKFpY7JsQukY=E2PRg=iVfmis4i1kvST+b2wtshNc5Jn+jw@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <DD76B6655B65824D93BE5774FD60A5FB@internal.synopsys.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>
-Cc: =?UTF-8?Q?Beno=C3=AEt_Cousson?= <bcousson@baylibre.com>, Tony Lindgren <tony@atomide.com>, Jonathan Corbet <corbet@lwn.net>, Mark Rutland <mark.rutland@arm.com>, linux-doc@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, devicetree@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, Hari Nagalla <hnagalla@ti.com>, Eyal Reizer <eyalr@ti.com>, Sekhar Nori <nsekhar@ti.com>
+To: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+Cc: "jh80.chung@samsung.com" <jh80.chung@samsung.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Alexey.Brodkin@synopsys.com" <Alexey.Brodkin@synopsys.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "krzk@kernel.org" <krzk@kernel.org>, "linux-snps-arc@lists.infradead.org" <linux-snps-arc@lists.infradead.org>, "kgene@kernel.org" <kgene@kernel.org>, "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Apr 25, 2018 at 7:54 AM, Kishon Vijay Abraham I <kishon@ti.com> wrote:
-> From: Hari Nagalla <hnagalla@ti.com>
->
-> Wilink8 module is a combo wireless connectivity card based
-> on Texas Instrument's wl18xx solution.
->
-> Add support for the wlan capabilities of this module by muxing
-> the relevant mmc lines, and setting the required device-tree
-> data.
->
-> Signed-off-by: Eyal Reizer <eyalr@ti.com>
-> Signed-off-by: Hari Nagalla <hnagalla@ti.com>
-> [nsekhar@ti.com: drop WLAN_EN pinmux. It should be done by bootloader.
->                  Also, some commit message adjustments]
-> Signed-off-by: Sekhar Nori <nsekhar@ti.com>
-> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
-> ---
->  arch/arm/boot/dts/dra72-evm-common.dtsi   | 42 +++++++++++++++++++++++
->  arch/arm/boot/dts/dra72x-mmc-iodelay.dtsi | 11 ++++++
->  2 files changed, 53 insertions(+)
->
-> diff --git a/arch/arm/boot/dts/dra72-evm-common.dtsi b/arch/arm/boot/dts/dra72-evm-common.dtsi
-> index 8e3b185d864b..1e4d36e33a1b 100644
-> --- a/arch/arm/boot/dts/dra72-evm-common.dtsi
-> +++ b/arch/arm/boot/dts/dra72-evm-common.dtsi
-> @@ -44,6 +44,16 @@
->                 regulator-boot-on;
->         };
->
-> +       evm_3v6: fixedregulator-evm_3v6 {
-> +               compatible = "regulator-fixed";
-> +               regulator-name = "evm_3v6";
-> +               regulator-min-microvolt = <3600000>;
-> +               regulator-max-microvolt = <3600000>;
-> +               vin-supply = <&evm_5v0>;
-> +               regulator-always-on;
-> +               regulator-boot-on;
-> +       };
-> +
->         vsys_3v3: fixedregulator-vsys3v3 {
->                 /* Output 2 of TPS43351QDAPRQ1 on dra72-evm */
->                 /* Output 2 of LM5140QRWGTQ1 on dra71-evm */
-> @@ -171,6 +181,15 @@
->                         clocks = <&atl_clkin2_ck>;
->                 };
->         };
-> +
-> +       vmmcwl_fixed: fixedregulator-mmcwl {
-> +               compatible = "regulator-fixed";
-> +               regulator-name = "vmmcwl_fixed";
-> +               regulator-min-microvolt = <1800000>;
-> +               regulator-max-microvolt = <1800000>;
-> +               gpio = <&gpio5 8 GPIO_ACTIVE_HIGH>;
-> +               enable-active-high;
-> +       };
->  };
->
->  &dra7_pmx_core {
-> @@ -398,6 +417,29 @@
->         max-frequency = <192000000>;
->  };
->
-> +&mmc4 {
-> +       status = "okay";
-> +       vmmc-supply = <&evm_3v6>;
-> +       vqmmc-supply = <&vmmcwl_fixed>;
-> +       bus-width = <4>;
-> +       cap-power-off-card;
-> +       keep-power-in-suspend;
-> +       non-removable;
-> +       pinctrl-names = "default", "hs", "sdr12", "sdr25";
-> +       pinctrl-0 = <&mmc4_pins_default>;
-> +       pinctrl-1 = <&mmc4_pins_default>;
-> +       pinctrl-2 = <&mmc4_pins_default>;
-> +       pinctrl-3 = <&mmc4_pins_default>;
-> +       #address-cells = <1>;
-> +       #size-cells = <0>;
-> +       wlcore: wlcore@2 {
-
-wifi@2
+T24gTW9uLCAyMDE4LTA0LTIzIGF0IDA4OjQ3ICswMjAwLCBVbGYgSGFuc3NvbiB3cm90ZToNCj4g
+T24gMjAgQXByaWwgMjAxOCBhdCAxNzo1MywgRXVnZW5peSBQYWx0c2V2IDxFdWdlbml5LlBhbHRz
+ZXZAc3lub3BzeXMuY29tPiB3cm90ZToNCj4gPiBIaSBVbGYsDQo+ID4gDQo+ID4gT24gRnJpLCAy
+MDE4LTA0LTIwIGF0IDA5OjM1ICswMjAwLCBVbGYgSGFuc3NvbiB3cm90ZToNCj4gPiA+IFsuLi5d
+DQo+ID4gPiANCj4gPiA+ID4gDQo+ID4gPiA+IDIuIEFkZCBtaXNzaW5nIHN0dWZmIHRvIHN1cHBv
+cnQgbXVsdGlzbG90IG1vZGUgaW4gRGVzaWduV2FyZSBNTUMgZHJpdmVyLg0KPiA+ID4gPiAgKiBB
+ZGQgbWlzc2luZyBzbG90IHN3aXRjaCB0byBfX2R3X21jaV9zdGFydF9yZXF1ZXN0KCkgZnVuY3Rp
+b24uDQo+ID4gPiA+ICAqIFJlZmFjdG9yIHNldF9pb3MgZnVuY3Rpb246DQo+ID4gPiA+ICAgIGEp
+IENhbGN1bGF0ZSBjb21tb24gY2xvY2sgd2hpY2ggaXMNCj4gPiA+ID4gICAgICAgc3VpdGFibGUg
+Zm9yIGFsbCBzbG90cyBpbnN0ZWFkIG9mIGRpcmVjdGx5IHVzZSBjbG9jayB2YWx1ZQ0KPiA+ID4g
+PiAgICAgICBwcm92aWRlZCBieSBtbWMgY29yZS4gV2UgY2FsY3VsYXRlIGNvbW1vbiBjbG9jayBh
+cyB0aGUgbWluaW11bQ0KPiA+ID4gPiAgICAgICBhbW9uZyBlYWNoIHVzZWQgc2xvdCBjbG9ja3Mu
+IFRoaXMgY2xvY2sgaXMgY2FsY3VsYXRlZCBpbg0KPiA+ID4gPiAgICAgICBkd19tY2lfY2FsY19j
+b21tb25fY2xvY2soKSBmdW5jdGlvbiB3aGljaCBpcyBjYWxsZWQNCj4gPiA+ID4gICAgICAgZnJv
+bSBzZXRfaW9zKCkNCj4gPiA+ID4gICAgYikgRGlzYWJsZSBjbG9jayBvbmx5IGlmIG5vIG90aGVy
+IHNsb3RzIGFyZSBPTi4NCj4gPiA+ID4gICAgYykgU2V0dXAgY2xvY2sgZGlyZWN0bHkgaW4gc2V0
+X2lvcygpIG9ubHkgaWYgbm8gb3RoZXIgc2xvdHMNCj4gPiA+ID4gICAgICAgYXJlIE9OLiBPdGhl
+cndpc2UgYWRqdXN0IGNsb2NrIGluIF9fZHdfbWNpX3N0YXJ0X3JlcXVlc3QoKQ0KPiA+ID4gPiAg
+ICAgICBmdW5jdGlvbiBiZWZvcmUgc2xvdCBzd2l0Y2guDQo+ID4gPiA+ICAgIGQpIE1vdmUgdGlt
+aW5ncyBhbmQgYnVzX3dpZHRoIHNldHVwIHRvIHNlcGFyYXRlIGZ1bmNpb25zLg0KPiA+ID4gPiAg
+KiBVc2UgdGltaW5nIGZpZWxkIGluIGVhY2ggc2xvdCBzdHJ1Y3R1cmUgaW5zdGVhZCBvZiBjb21t
+b24gZmllbGQgaW4NCj4gPiA+ID4gICAgaG9zdCBzdHJ1Y3R1cmUuDQo+ID4gPiA+ICAqIEFkZCBs
+b2NrcyB0byBzZXJpYWxpemUgYWNjZXNzIHRvIHJlZ2lzdGVycy4NCj4gPiA+IA0KPiA+ID4gU29y
+cnksIGJ1dCB0aGlzIGlzIGEgaGFjayB0byAqdHJ5KiB0byBtYWtlIG11bHRpLXNsb3Qgd29yayBh
+bmQgdGhpcw0KPiA+ID4gaXNuJ3Qgc3VmZmljaWVudC4gVGhlcmUgd2VyZSBnb29kIHJlYXNvbnMg
+dG8gd2h5IHRoZSBlYXJsaWVyDQo+ID4gPiBub24td29ya2luZyBtdWx0aSBzbG90IHN1cHBvcnQg
+d2FzIHJlbW92ZWQgZnJvbSBkd19tbWMuDQo+ID4gDQo+ID4gUHJldmlvdXMgbXVsdGkgc2xvdCBp
+bXBsZW1lbnRhdGlvbiB3YXMgcmVtb3ZlZCBhcyBub2JvZHkgdXNlZCBpdCBhbmQNCj4gPiBub2Jv
+ZHkgdGVzdGVkIGl0LiBUaGVyZSBhcmUgbG90cyBvZiBtaXN0YWtlcyBpbiBwcmV2aW91cyBpbXBs
+ZW1lbnRhdGlvbg0KPiA+IHdoaWNoIGFyZSBub3QgcmVsYXRlZCB0byByZXF1ZXN0IHNlcmlhbGl6
+YXRpb24NCj4gPiBsaWtlIGxhY2sgb2Ygc2xvdCBzd2l0Y2ggLyBsYWNrIG9mIGFkZGluZyBzbG90
+IGlkIHRvIENJVSBjb21tYW5kcyAvIGV0cy4uLg0KPiA+IFNvIG9idmlvdXNseSBpdCB3YXMgbmV2
+ZXIgdGVzdGVkIGFuZCBuZXZlciB1c2VkIGF0IHJlYWwgbXVsdGkgc2xvdCBoYXJkd2FyZS4NCj4g
+PiANCj4gPiA+IExldCBtZSBlbGFib3JhdGUgYSBiaXQgZm9yIHlvdXIgdW5kZXJzdGFuZGluZy4g
+VGhlIGNvcmUgdXNlcyBhIGhvc3QNCj4gPiA+IGxvY2sgKG1tY19jbGFpbXxyZWxlYXNlX2hvc3Qo
+KSkgdG8gc2VyaWFsaXplIG9wZXJhdGlvbnMgYW5kIGNvbW1hbmRzLA0KPiA+ID4gYXMgdG8gY29u
+ZmlybSB0byB0aGUgU0QvU0RJTy8oZSlNTUMgc3BlY3MuIFRoZSBhYm92ZSBjaGFuZ2VzIGdpdmVz
+IG5vDQo+ID4gPiBndWFyYW50ZWVzIGZvciB0aGlzLiBUbyBtYWtlIHRoYXQgd29yaywgd2Ugd291
+bGQgbmVlZCBhICJtbWMgYnVzIGxvY2siDQo+ID4gPiB0byBiZSBtYW5hZ2VkIGJ5IHRoZSBjb3Jl
+Lg0KPiA+IA0KPiA+IEluIGN1cnJlbnQgaW1wbGVtZW50YXRpb24gZGF0YSB0cmFuc2ZlcnMgYW5k
+IGNvbW1hbmRzIHRvIGRpZmZlcmVudA0KPiA+IGhvc3RzIChzbG90cykgYXJlIHNlcmlhbGl6ZWQg
+aW50ZXJuYWxseSBpbiB0aGUgZHdfbW1jIGRyaXZlci4gV2UgaGF2ZQ0KPiA+IHJlcXVlc3QgcXVl
+dWUgYW5kIHdoZW4gLnJlcXVlc3QoKSBpcyBjYWxsZWQgd2UgYWRkIG5ldyByZXF1ZXN0IHRvIHRo
+ZQ0KPiA+IHF1ZXVlLiBXZSB0YWtlIG5ldyByZXF1ZXN0IGZyb20gdGhlIHF1ZXVlIG9ubHkgaWYg
+dGhlIHByZXZpb3VzIG9uZQ0KPiA+IGhhcyBhbHJlYWR5IGZpbmlzaGVkLg0KPiANCj4gVGhhdCBp
+c24ndCBzdWZmaWNpZW50LiBUaGUgY29yZSBleHBlY3RzIGFsbCBjYWxscyB0byAqYW55KiBvZiB0
+aGUgaG9zdA0KPiBvcHMgdG8gYmUgc2VyaWFsaXplZCBmb3Igb25lIGhvc3QuIEl0IGRvZXMgc28g
+dG8gY29uZm9ybSB0byB0aGUgc3BlY3MuDQo+IA0KPiBGb3IgZXhhbXBsZSBpdCBtYXkgY2FsbDoN
+Cj4gIC0+c2V0X2lvcygpDQo+IC0+cmVxdWVzdCgpDQo+IC0+c2V0X2lvcygpDQo+IC0+cmVxdWVz
+dCgpDQo+IC0+cmVxdWVzdCgpDQo+IA0KDQpBIGJpdCByZW1hcmsgZm9yIGJldHRlciB1bmRlcnN0
+YW5kaW5nOg0KDQpBbGwgY2FyZCBzZXR0aW5ncyBjaGFuZ2UgYXJlIHNlcmlhbGl6ZWQgdG9vLiBU
+aGVzZSBzZXR0aW5ncyBhcmUgYXBwbGllZA0KYWZ0ZXIgc2xvdCBzd2l0Y2ggYmVmb3JlIGV4ZWN1
+dGlvbiBvZiBuZXcgcmVxdWVzdCBmb3IgdGhpcyBzbG90Lg0KDQpTbyBzaXR1YXRpb25zIGxpa2Ug
+Y2FsbGluZyBhbnkgaG9zdF8wIG9wcyB3aGlsZSBhbm90aGVyIGhvc3QgKGhvc3RfMSkgaXMgYWN0
+aXZlDQphcmUgaGFuZGxlZCBieSBjdXJyZW50IGNvZGUuDQoNClRoaXMgaXMgZXhhbXBsZSBvZiBz
+aW11bHRhbmVvdXMgb3BzIGNhbGxzIGZvciBib3RoIHNsb3RzOg0KDQpob3N0IChzbG90KSAwICAg
+IHwgaG9zdCAoc2xvdCkgMQ0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCmgw
+LT5zZXRfaW9zKCkgICAgfCAgICBoMS0+c2V0X2lvcygpDQpoMC0+cmVxdWVzdCgpICAgIHwgICAg
+aDEtPnJlcXVlc3QoKQ0KaDAtPnNldF9pb3MoKSAgICB8ICAgIGgxLT5zZXRfaW9zKCkNCmgwLT5y
+ZXF1ZXN0KCkgICAgfCAgICBoMS0+cmVxdWVzdCgpDQpoMC0+cmVxdWVzdCgpICAgIHwNCmgwLT5y
+ZXF1ZXN0KCkgICAgfA0KaDAtPnJlcXVlc3QoKSAgICB8DQoNCkhvdyBpdCB3aWxsIGJlIHNlcmlh
+bGl6ZWQgaW4gdGhlIG1tYyBkcml2ZXI6DQoNCmgwLT5zZXRfaW9zKCkgICAvLyBoMCBzZXR0aW5n
+cyBzYXZlDQpoMS0+c2V0X2lvcygpICAgLy8gaDEgc2V0dGluZ3Mgc2F2ZQ0KaDAtPnJlcXVlc3Qo
+KSAgIC8vIGFwcGx5IHNldHRpbmdzIGZvciBoMCBhbmQgZG8gcmVxdWVzdA0KLS0tLS0tIHNsb3Qg
+c3dpdGNoIHRvIGgxIC0tLS0tLQ0KaDEtPnJlcXVlc3QoKSAgIC8vIGFwcGx5IHNldHRpbmdzIGZv
+ciBoMSBhbmQgZG8gcmVxdWVzdA0KaDAtPnNldF9pb3MoKSAgIC8vIGgwIHNldHRpbmdzIHNhdmUN
+CmgxLT5zZXRfaW9zKCkgICAvLyBoMSBzZXR0aW5ncyBzYXZlDQotLS0tLS0gc2xvdCBzd2l0Y2gg
+dG8gaDAgLS0tLS0tDQpoMC0+cmVxdWVzdCgpICAgLy8gYXBwbHkgc2V0dGluZ3MgZm9yIGgwIGFu
+ZCBkbyByZXF1ZXN0DQotLS0tLS0gc2xvdCBzd2l0Y2ggdG8gaDEgLS0tLS0tDQpoMS0+cmVxdWVz
+dCgpICAgLy8gYXBwbHkgc2V0dGluZ3MgZm9yIGgxIGFuZCBkbyByZXF1ZXN0DQotLS0tLS0gc2xv
+dCBzd2l0Y2ggdG8gaDAgLS0tLS0tDQpoMC0+cmVxdWVzdCgpICAgLy8gZG8gcmVxdWVzdCAobm8g
+bmV3IHNldHRpbmdzIHRvIGFwcGx5KQ0KaDAtPnJlcXVlc3QoKSAgIC8vIGRvIHJlcXVlc3QgKG5v
+IG5ldyBzZXR0aW5ncyB0byBhcHBseSkNCmgwLT5yZXF1ZXN0KCkgICAvLyBkbyByZXF1ZXN0IChu
+byBuZXcgc2V0dGluZ3MgdG8gYXBwbHkpDQoNCi0tIA0KIEV1Z2VuaXkgUGFsdHNldg==
