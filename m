@@ -1,46 +1,58 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH v3 04/15] ARM: dts: dra74x-mmc-iodelay: Add a new pinctrl
- group for clk line without pullup
-Date: Wed, 25 Apr 2018 06:35:29 -0700
-Message-ID: <20180425133529.GU5671@atomide.com>
-References: <20180425125449.19755-1-kishon@ti.com>
- <20180425125449.19755-5-kishon@ti.com>
+From: Rob Herring <robh+dt@kernel.org>
+Subject: Re: [PATCH v3 11/15] ARM: dts: dra7-evm: Add wilink8 wlan support
+Date: Wed, 25 Apr 2018 09:47:08 -0500
+Message-ID: <CAL_JsqKBXbcQxbN7z9j_DKgiaQg4buUa+08fg9zPELv-ucpRZA@mail.gmail.com>
+References: <20180425125449.19755-1-kishon@ti.com> <20180425125449.19755-12-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20180425125449.19755-5-kishon@ti.com>
+In-Reply-To: <20180425125449.19755-12-kishon@ti.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Kishon Vijay Abraham I <kishon@ti.com>
-Cc: =?utf-8?Q?Beno=C3=AEt?= Cousson <bcousson@baylibre.com>, Jonathan Corbet <corbet@lwn.net>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org
+Cc: =?UTF-8?Q?Beno=C3=AEt_Cousson?= <bcousson@baylibre.com>, Tony Lindgren <tony@atomide.com>, Jonathan Corbet <corbet@lwn.net>, Mark Rutland <mark.rutland@arm.com>, linux-doc@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, devicetree@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, Hari Nagalla <hnagalla@ti.com>, Ido Yariv <ido@wizery.com>, Eyal Reizer <eyalr@ti.com>, Sekhar Nori <nsekhar@ti.com>
 List-Id: linux-mmc@vger.kernel.org
 
-* Kishon Vijay Abraham I <kishon@ti.com> [180425 12:57]:
-> --- a/arch/arm/boot/dts/dra74x-mmc-iodelay.dtsi
-> +++ b/arch/arm/boot/dts/dra74x-mmc-iodelay.dtsi
-> @@ -49,6 +49,17 @@
->  		>;
->  	};
->  
-> +	mmc1_pins_default_no_clk_pu: mmc1_pins_default_no_clk_pu {
-> +		pinctrl-single,pins = <
-> +			DRA7XX_CORE_IOPAD(0x3754, PIN_INPUT_PULLDOWN | MUX_MODE0) /* mmc1_clk.clk */
-> +			DRA7XX_CORE_IOPAD(0x3758, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_cmd.cmd */
-> +			DRA7XX_CORE_IOPAD(0x375c, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_dat0.dat0 */
-> +			DRA7XX_CORE_IOPAD(0x3760, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_dat1.dat1 */
-> +			DRA7XX_CORE_IOPAD(0x3764, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_dat2.dat2 */
-> +			DRA7XX_CORE_IOPAD(0x3768, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_dat3.dat3 */
-> +		>;
-> +	};
+On Wed, Apr 25, 2018 at 7:54 AM, Kishon Vijay Abraham I <kishon@ti.com> wrote:
+> From: Hari Nagalla <hnagalla@ti.com>
+>
+> The wilink module is a combo wireless connectivity sdio
+> card based on Texas Instrument's wl18xx solution. It is a
+> 4-wire, 1.8V, embedded sdio wlan device with an external
+> irq line and is power-controlled by a gpio-based fixed
+> regulator.
+>
+> Add pinmux configuration and IODelay values for MMC4.
+> On dra7-evm, MMC4 is used for connecting to wilink module.
+>
+> IODelay data credits to :  Vishal Mahaveer <vishalm@ti.com>
+> and Sekhar Nori <nsekhar@ti.com>
+>
+> Signed-off-by: Ido Yariv <ido@wizery.com>
+> Signed-off-by: Eyal Reizer <eyalr@ti.com>
+> Signed-off-by: Hari Nagalla <hnagalla@ti.com>
+> Signed-off-by: Sekhar Nori <nsekhar@ti.com>
+> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+> ---
+>  arch/arm/boot/dts/dra7-evm-common.dtsi | 15 +++++++++++++++
+>  arch/arm/boot/dts/dra7-evm.dts         | 25 +++++++++++++++++++++++++
+>  2 files changed, 40 insertions(+)
+>
+> diff --git a/arch/arm/boot/dts/dra7-evm-common.dtsi b/arch/arm/boot/dts/dra7-evm-common.dtsi
+> index 05a7b1a01bc3..3590c40fc112 100644
+> --- a/arch/arm/boot/dts/dra7-evm-common.dtsi
+> +++ b/arch/arm/boot/dts/dra7-evm-common.dtsi
+> @@ -260,3 +260,18 @@
+>  &pcie1_rc {
+>         status = "okay";
+>  };
 > +
->  	mmc1_pins_sdr12: mmc1_pins_sdr12 {
->  		pinctrl-single,pins = <
->  			DRA7XX_CORE_IOPAD(0x3754, PIN_INPUT_PULLUP | MUX_MODE0)	/* mmc1_clk.clk */
-> -- 
+> +&mmc4 {
+> +       bus-width = <4>;
+> +       cap-power-off-card;
+> +       keep-power-in-suspend;
+> +       non-removable;
+> +       #address-cells = <1>;
+> +       #size-cells = <0>;
+> +       wlcore: wlcore@2 {
 
-If this data is the same for all of them, why don't you add something
-like dra7-iodelay.dtsi that can be included as needed?
-
-Regards,
-
-Tony
+wifi@2
