@@ -1,7 +1,7 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v3 05/15] ARM: dts: dra76x-mmc-iodelay: Add a new pinctrl group for clk line without pullup
-Date: Wed, 25 Apr 2018 18:24:39 +0530
-Message-ID: <20180425125449.19755-6-kishon@ti.com>
+Subject: [PATCH v3 13/15] ARM: dts: dra7: Use sdhci-omap programming model
+Date: Wed, 25 Apr 2018 18:24:47 +0530
+Message-ID: <20180425125449.19755-14-kishon@ti.com>
 References: <20180425125449.19755-1-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,46 +12,177 @@ To: =?UTF-8?q?Beno=C3=AEt=20Cousson=20?= <bcousson@baylibre.com>, Tony Lindgren 
 Cc: Jonathan Corbet <corbet@lwn.net>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, linux-doc@vger.kernel.org, kishon@ti.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-During a short period when the bus voltage is switched from 3.3v to 1.8v,
-(to enumerate UHS mode), the mmc module is disabled and the mmc IO lines
-are kept in a state according to the programmed pad mux pull type.
-
-According to 4.2.4.2 Timing to Switch Signal Voltage in "SD Specifications
-Part 1 Physical Layer Specification Version 5.00 February 22, 2016", the
-host should hold CLK line low for at least 5ms.
-
-In order to keep the card line low during voltage switch, the pad mux of
-mmc1_clk line should be configured to pull down.
-
-Add a new pinctrl group for clock line without pullup to be used in boards
-where mmc1_clk line is not connected to an external pullup.
+Use sdhci-omap programming model based on the generic sdhci
+library for programming the eMMC/SD/SDIO controller.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- arch/arm/boot/dts/dra76x-mmc-iodelay.dtsi | 11 +++++++++++
- 1 file changed, 11 insertions(+)
+ .../boot/dts/am57xx-beagle-x15-common.dtsi    |  4 +--
+ arch/arm/boot/dts/am57xx-beagle-x15.dts       |  1 +
+ arch/arm/boot/dts/am57xx-idk-common.dtsi      |  3 ++-
+ arch/arm/boot/dts/dra7-evm.dts                |  1 +
+ arch/arm/boot/dts/dra7.dtsi                   | 27 +++++++------------
+ arch/arm/boot/dts/dra72-evm-common.dtsi       |  2 +-
+ arch/arm/boot/dts/dra76-evm.dts               |  3 ++-
+ 7 files changed, 19 insertions(+), 22 deletions(-)
 
-diff --git a/arch/arm/boot/dts/dra76x-mmc-iodelay.dtsi b/arch/arm/boot/dts/dra76x-mmc-iodelay.dtsi
-index baba7b00eca7..b6327220a88e 100644
---- a/arch/arm/boot/dts/dra76x-mmc-iodelay.dtsi
-+++ b/arch/arm/boot/dts/dra76x-mmc-iodelay.dtsi
-@@ -38,6 +38,17 @@
- 		>;
- 	};
+diff --git a/arch/arm/boot/dts/am57xx-beagle-x15-common.dtsi b/arch/arm/boot/dts/am57xx-beagle-x15-common.dtsi
+index 6204a266212a..ad953113cefb 100644
+--- a/arch/arm/boot/dts/am57xx-beagle-x15-common.dtsi
++++ b/arch/arm/boot/dts/am57xx-beagle-x15-common.dtsi
+@@ -444,8 +444,8 @@
+ 	vmmc-supply = <&vdd_3v3>;
+ 	vqmmc-supply = <&vdd_3v3>;
+ 	bus-width = <8>;
+-	ti,non-removable;
+-	cap-mmc-dual-data-rate;
++	non-removable;
++	no-1-8-v;
+ };
  
-+	mmc1_pins_default_no_clk_pu: mmc1_pins_default_no_clk_pu {
-+		pinctrl-single,pins = <
-+			DRA7XX_CORE_IOPAD(0x3754, PIN_INPUT_PULLDOWN | MUX_MODE0) /* mmc1_clk.clk */
-+			DRA7XX_CORE_IOPAD(0x3758, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_cmd.cmd */
-+			DRA7XX_CORE_IOPAD(0x375c, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_dat0.dat0 */
-+			DRA7XX_CORE_IOPAD(0x3760, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_dat1.dat1 */
-+			DRA7XX_CORE_IOPAD(0x3764, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_dat2.dat2 */
-+			DRA7XX_CORE_IOPAD(0x3768, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_dat3.dat3 */
-+		>;
-+	};
-+
- 	mmc1_pins_hs: mmc1_pins_hs {
- 		pinctrl-single,pins = <
- 			DRA7XX_CORE_IOPAD(0x3754, PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE11 | MUX_MODE0) /* mmc1_clk.clk */
+ &sata {
+diff --git a/arch/arm/boot/dts/am57xx-beagle-x15.dts b/arch/arm/boot/dts/am57xx-beagle-x15.dts
+index d6689106d2a8..c393de8a2391 100644
+--- a/arch/arm/boot/dts/am57xx-beagle-x15.dts
++++ b/arch/arm/boot/dts/am57xx-beagle-x15.dts
+@@ -25,6 +25,7 @@
+ 	pinctrl-1 = <&mmc1_pins_hs>;
+ 
+ 	vmmc-supply = <&ldo1_reg>;
++	no-1-8-v;
+ };
+ 
+ &mmc2 {
+diff --git a/arch/arm/boot/dts/am57xx-idk-common.dtsi b/arch/arm/boot/dts/am57xx-idk-common.dtsi
+index 43cdf523a8a0..605e7ec1b218 100644
+--- a/arch/arm/boot/dts/am57xx-idk-common.dtsi
++++ b/arch/arm/boot/dts/am57xx-idk-common.dtsi
+@@ -423,8 +423,9 @@
+ 	vmmc-supply = <&v3_3d>;
+ 	vqmmc-supply = <&v3_3d>;
+ 	bus-width = <8>;
+-	ti,non-removable;
++	non-removable;
+ 	max-frequency = <96000000>;
++	no-1-8-v;
+ };
+ 
+ &dcan1 {
+diff --git a/arch/arm/boot/dts/dra7-evm.dts b/arch/arm/boot/dts/dra7-evm.dts
+index 704947cbef48..0894593860d6 100644
+--- a/arch/arm/boot/dts/dra7-evm.dts
++++ b/arch/arm/boot/dts/dra7-evm.dts
+@@ -377,6 +377,7 @@
+ 	vmmc-supply = <&evm_1v8_sw>;
+ 	vqmmc-supply = <&evm_1v8_sw>;
+ 	bus-width = <8>;
++	non-removable;
+ 	pinctrl-names = "default", "hs", "ddr_1_8v-rev11", "ddr_1_8v", "hs200_1_8v-rev11", "hs200_1_8v";
+ 	pinctrl-0 = <&mmc2_pins_default>;
+ 	pinctrl-1 = <&mmc2_pins_hs>;
+diff --git a/arch/arm/boot/dts/dra7.dtsi b/arch/arm/boot/dts/dra7.dtsi
+index f4ddd86f2c77..ae2f8dd46328 100644
+--- a/arch/arm/boot/dts/dra7.dtsi
++++ b/arch/arm/boot/dts/dra7.dtsi
+@@ -1079,14 +1079,10 @@
+ 		};
+ 
+ 		mmc1: mmc@4809c000 {
+-			compatible = "ti,omap4-hsmmc";
++			compatible = "ti,dra7-sdhci";
+ 			reg = <0x4809c000 0x400>;
+ 			interrupts = <GIC_SPI 78 IRQ_TYPE_LEVEL_HIGH>;
+ 			ti,hwmods = "mmc1";
+-			ti,dual-volt;
+-			ti,needs-special-reset;
+-			dmas = <&sdma_xbar 61>, <&sdma_xbar 62>;
+-			dma-names = "tx", "rx";
+ 			status = "disabled";
+ 			pbias-supply = <&pbias_mmc_reg>;
+ 			max-frequency = <192000000>;
+@@ -1100,40 +1096,37 @@
+ 		};
+ 
+ 		mmc2: mmc@480b4000 {
+-			compatible = "ti,omap4-hsmmc";
++			compatible = "ti,dra7-sdhci";
+ 			reg = <0x480b4000 0x400>;
+ 			interrupts = <GIC_SPI 81 IRQ_TYPE_LEVEL_HIGH>;
+ 			ti,hwmods = "mmc2";
+-			ti,needs-special-reset;
+-			dmas = <&sdma_xbar 47>, <&sdma_xbar 48>;
+-			dma-names = "tx", "rx";
+ 			status = "disabled";
+ 			max-frequency = <192000000>;
++			/* SDR104/DDR50/SDR50 bits in CAPA2 is not supported */
++			sdhci-caps-mask = <0x7 0x0>;
+ 		};
+ 
+ 		mmc3: mmc@480ad000 {
+-			compatible = "ti,omap4-hsmmc";
++			compatible = "ti,dra7-sdhci";
+ 			reg = <0x480ad000 0x400>;
+ 			interrupts = <GIC_SPI 89 IRQ_TYPE_LEVEL_HIGH>;
+ 			ti,hwmods = "mmc3";
+-			ti,needs-special-reset;
+-			dmas = <&sdma_xbar 77>, <&sdma_xbar 78>;
+-			dma-names = "tx", "rx";
+ 			status = "disabled";
+ 			/* Errata i887 limits max-frequency of MMC3 to 64 MHz */
+ 			max-frequency = <64000000>;
++			/* SDMA is not supported */
++			sdhci-caps-mask = <0x0 0x400000>;
+ 		};
+ 
+ 		mmc4: mmc@480d1000 {
+-			compatible = "ti,omap4-hsmmc";
++			compatible = "ti,dra7-sdhci";
+ 			reg = <0x480d1000 0x400>;
+ 			interrupts = <GIC_SPI 91 IRQ_TYPE_LEVEL_HIGH>;
+ 			ti,hwmods = "mmc4";
+-			ti,needs-special-reset;
+-			dmas = <&sdma_xbar 57>, <&sdma_xbar 58>;
+-			dma-names = "tx", "rx";
+ 			status = "disabled";
+ 			max-frequency = <192000000>;
++			/* SDMA is not supported */
++			sdhci-caps-mask = <0x0 0x400000>;
+ 		};
+ 
+ 		mmu0_dsp1: mmu@40d01000 {
+diff --git a/arch/arm/boot/dts/dra72-evm-common.dtsi b/arch/arm/boot/dts/dra72-evm-common.dtsi
+index 1e4d36e33a1b..5a763b1f5883 100644
+--- a/arch/arm/boot/dts/dra72-evm-common.dtsi
++++ b/arch/arm/boot/dts/dra72-evm-common.dtsi
+@@ -413,7 +413,7 @@
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&mmc2_pins_default>;
+ 	bus-width = <8>;
+-	ti,non-removable;
++	non-removable;
+ 	max-frequency = <192000000>;
+ };
+ 
+diff --git a/arch/arm/boot/dts/dra76-evm.dts b/arch/arm/boot/dts/dra76-evm.dts
+index ad154c7b0632..c07f0051844d 100644
+--- a/arch/arm/boot/dts/dra76-evm.dts
++++ b/arch/arm/boot/dts/dra76-evm.dts
+@@ -327,7 +327,7 @@
+ &mmc1 {
+ 	status = "okay";
+ 	vmmc-supply = <&vio_3v3_sd>;
+-	vmmc_aux-supply = <&ldo4_reg>;
++	vqmmc-supply = <&ldo4_reg>;
+ 	bus-width = <4>;
+ 	/*
+ 	 * SDCD signal is not being used here - using the fact that GPIO mode
+@@ -344,6 +344,7 @@
+ 	vmmc-supply = <&vio_1v8>;
+ 	vqmmc-supply = <&vio_1v8>;
+ 	bus-width = <8>;
++	non-removable;
+ 	pinctrl-names = "default", "hs", "ddr_1_8v", "hs200_1_8v";
+ 	pinctrl-0 = <&mmc2_pins_default>;
+ 	pinctrl-1 = <&mmc2_pins_default>;
 -- 
 2.17.0
