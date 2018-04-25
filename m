@@ -1,7 +1,7 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH 3/3] ARM: configs: keystone: Enable CONFIG_MMC_SDHCI_OMAP
-Date: Wed, 25 Apr 2018 18:57:46 +0530
-Message-ID: <20180425132746.13911-4-kishon@ti.com>
+Subject: [PATCH 1/3] ARM: dts: keystone-k2g-evm: Add "vqmmc-supply" property for mmc0/mmc1
+Date: Wed, 25 Apr 2018 18:57:44 +0530
+Message-ID: <20180425132746.13911-2-kishon@ti.com>
 References: <20180425132746.13911-1-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,28 +12,49 @@ To: Santosh Shilimkar <ssantosh@kernel.org>
 Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, kishon@ti.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, Tony Lindgren <tony@atomide.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Enable CONFIG_MMC_SDHCI_OMAP so that TI's K2G SoC
-can use sdhci-omap driver for MMC/SD controller.
+Add "vqmmc-supply" property for mmc0/mmc1 to indicate the supply connected
+to the IO lines. Also add dt node for ldo1 regulator required for mmc1
+vqmmc-supply.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- arch/arm/configs/keystone_defconfig | 3 +++
- 1 file changed, 3 insertions(+)
+ arch/arm/boot/dts/keystone-k2g-evm.dts | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
 
-diff --git a/arch/arm/configs/keystone_defconfig b/arch/arm/configs/keystone_defconfig
-index 2536c231eea1..21a6ce4ef9bc 100644
---- a/arch/arm/configs/keystone_defconfig
-+++ b/arch/arm/configs/keystone_defconfig
-@@ -170,7 +170,10 @@ CONFIG_USB_DWC3=y
- CONFIG_NOP_USB_XCEIV=y
- CONFIG_KEYSTONE_USB_PHY=y
- CONFIG_MMC=y
-+CONFIG_MMC_SDHCI=y
-+CONFIG_MMC_SDHCI_PLTFM=y
- CONFIG_MMC_OMAP_HS=y
-+CONFIG_MMC_SDHCI_OMAP=y
- CONFIG_NEW_LEDS=y
- CONFIG_LEDS_CLASS=y
- CONFIG_LEDS_GPIO=y
+diff --git a/arch/arm/boot/dts/keystone-k2g-evm.dts b/arch/arm/boot/dts/keystone-k2g-evm.dts
+index 6a4657799b99..60b4f59899d2 100644
+--- a/arch/arm/boot/dts/keystone-k2g-evm.dts
++++ b/arch/arm/boot/dts/keystone-k2g-evm.dts
+@@ -37,6 +37,14 @@
+ 		regulator-max-microvolt = <3300000>;
+ 		regulator-always-on;
+ 	};
++
++	vcc1v8_ldo1_reg: fixedregulator-vcc1v8-ldo1 {
++		compatible = "regulator-fixed";
++		regulator-name = "ldo1";
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <1800000>;
++		regulator-always-on;
++	};
+ };
+ 
+ &k2g_pinctrl {
+@@ -130,6 +138,7 @@
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&mmc0_pins>;
+ 	vmmc-supply = <&vcc3v3_dcin_reg>;
++	vqmmc-supply = <&vcc3v3_dcin_reg>;
+ 	cd-gpios = <&gpio1 12 GPIO_ACTIVE_LOW>;
+ 	status = "okay";
+ };
+@@ -138,6 +147,7 @@
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&mmc1_pins>;
+ 	vmmc-supply = <&vcc3v3_dcin_reg>; /* VCC3V3_EMMC is connected to VCC3V3_DCIN */
++	vqmmc-supply = <&vcc1v8_ldo1_reg>;
+ 	ti,non-removable;
+ 	status = "okay";
+ };
 -- 
 2.17.0
