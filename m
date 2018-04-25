@@ -1,7 +1,7 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v3 04/15] ARM: dts: dra74x-mmc-iodelay: Add a new pinctrl group for clk line without pullup
-Date: Wed, 25 Apr 2018 18:24:38 +0530
-Message-ID: <20180425125449.19755-5-kishon@ti.com>
+Subject: [PATCH v3 07/15] ARM: dts: dra71-evm: Use pinctrl group from dra72x-mmc-iodelay.dtsi to select pulldown
+Date: Wed, 25 Apr 2018 18:24:41 +0530
+Message-ID: <20180425125449.19755-8-kishon@ti.com>
 References: <20180425125449.19755-1-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,46 +12,51 @@ To: =?UTF-8?q?Beno=C3=AEt=20Cousson=20?= <bcousson@baylibre.com>, Tony Lindgren 
 Cc: Jonathan Corbet <corbet@lwn.net>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, linux-doc@vger.kernel.org, kishon@ti.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-During a short period when the bus voltage is switched from 3.3v to 1.8v,
-(to enumerate UHS mode), the mmc module is disabled and the mmc IO lines
-are kept in a state according to the programmed pad mux pull type.
-
-According to 4.2.4.2 Timing to Switch Signal Voltage in "SD Specifications
-Part 1 Physical Layer Specification Version 5.00 February 22, 2016", the
-host should hold CLK line low for at least 5ms.
-
-In order to keep the card line low during voltage switch, the pad mux of
-mmc1_clk line should be configured to pull down.
-
-Add a new pinctrl group for clock line without pullup to be used in boards
-where mmc1_clk line is not connected to an external pullup.
+commit 0e43884cca77218d2eccc331396e8 ("ARM: dts: dra71-evm: Select pull
+down for mmc1_clk line in default mode") modified mmc1_pins_default
+pinctrl group in dra71-evm.dts to change the CLK line to
+PIN_INPUT_PULLDOWN. However instead of changing the pinctrl group,
+use the new pinctrl group "mmc1_pins_default_no_clk_pu" in
+dra72x-mmc-iodelay added specifically to be used for CLK line
+without external pull up.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- arch/arm/boot/dts/dra74x-mmc-iodelay.dtsi | 11 +++++++++++
- 1 file changed, 11 insertions(+)
+ arch/arm/boot/dts/dra71-evm.dts | 15 +--------------
+ 1 file changed, 1 insertion(+), 14 deletions(-)
 
-diff --git a/arch/arm/boot/dts/dra74x-mmc-iodelay.dtsi b/arch/arm/boot/dts/dra74x-mmc-iodelay.dtsi
-index 28ebb4eb884a..30af5a03a852 100644
---- a/arch/arm/boot/dts/dra74x-mmc-iodelay.dtsi
-+++ b/arch/arm/boot/dts/dra74x-mmc-iodelay.dtsi
-@@ -49,6 +49,17 @@
- 		>;
+diff --git a/arch/arm/boot/dts/dra71-evm.dts b/arch/arm/boot/dts/dra71-evm.dts
+index 64c57d87ca2f..8065678b8016 100644
+--- a/arch/arm/boot/dts/dra71-evm.dts
++++ b/arch/arm/boot/dts/dra71-evm.dts
+@@ -50,19 +50,6 @@
  	};
+ };
  
-+	mmc1_pins_default_no_clk_pu: mmc1_pins_default_no_clk_pu {
-+		pinctrl-single,pins = <
-+			DRA7XX_CORE_IOPAD(0x3754, PIN_INPUT_PULLDOWN | MUX_MODE0) /* mmc1_clk.clk */
-+			DRA7XX_CORE_IOPAD(0x3758, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_cmd.cmd */
-+			DRA7XX_CORE_IOPAD(0x375c, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_dat0.dat0 */
-+			DRA7XX_CORE_IOPAD(0x3760, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_dat1.dat1 */
-+			DRA7XX_CORE_IOPAD(0x3764, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_dat2.dat2 */
-+			DRA7XX_CORE_IOPAD(0x3768, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_dat3.dat3 */
-+		>;
-+	};
-+
- 	mmc1_pins_sdr12: mmc1_pins_sdr12 {
- 		pinctrl-single,pins = <
- 			DRA7XX_CORE_IOPAD(0x3754, PIN_INPUT_PULLUP | MUX_MODE0)	/* mmc1_clk.clk */
+-&dra7_pmx_core {
+-	mmc1_pins_default: mmc1_pins_default {
+-		pinctrl-single,pins = <
+-			DRA7XX_CORE_IOPAD(0x3754, PIN_INPUT_PULLDOWN | MUX_MODE0) /* mmc1_clk.clk */
+-			DRA7XX_CORE_IOPAD(0x3758, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_cmd.cmd */
+-			DRA7XX_CORE_IOPAD(0x375c, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_dat0.dat0 */
+-			DRA7XX_CORE_IOPAD(0x3760, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_dat1.dat1 */
+-			DRA7XX_CORE_IOPAD(0x3764, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_dat2.dat2 */
+-			DRA7XX_CORE_IOPAD(0x3768, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_dat3.dat3 */
+-		>;
+-	};
+-};
+-
+ &i2c1 {
+ 	status = "okay";
+ 	clock-frequency = <400000>;
+@@ -187,7 +174,7 @@
+ 
+ &mmc1 {
+ 	pinctrl-names = "default", "hs", "sdr12", "sdr25", "sdr50", "ddr50", "sdr104";
+-	pinctrl-0 = <&mmc1_pins_default>;
++	pinctrl-0 = <&mmc1_pins_default_no_clk_pu>;
+ 	pinctrl-1 = <&mmc1_pins_hs>;
+ 	pinctrl-2 = <&mmc1_pins_sdr12>;
+ 	pinctrl-3 = <&mmc1_pins_sdr25>;
 -- 
 2.17.0
