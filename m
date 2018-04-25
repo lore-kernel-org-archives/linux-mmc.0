@@ -1,7 +1,7 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v4 07/12] mmc: sdhci: Factor out target_timeout calculation
-Date: Wed, 25 Apr 2018 17:39:32 +0530
-Message-ID: <20180425120937.29867-8-kishon@ti.com>
+Subject: [PATCH v4 02/12] mmc: sdhci-omap: Remove setting ADMA capability in driver
+Date: Wed, 25 Apr 2018 17:39:27 +0530
+Message-ID: <20180425120937.29867-3-kishon@ti.com>
 References: <20180425120937.29867-1-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,81 +12,31 @@ To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com
 Cc: kishon@ti.com, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, Tony Lindgren <tony@atomide.com>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Adrian Hunter <adrian.hunter@intel.com>
+sdhci can directly get ADMA capability from MMCHS_CAPA register.
+Remove explicitly setting ADMA here as some instances might not have
+ADMA enabled. (sdhci_read_caps() is also removed from here since
+sdhci_setup_host() invokes it).
 
-Factor out the target_timeout calculation so it can be re-used.
-
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Acked-by: Tony Lindgren <tony@atomide.com>
 ---
- drivers/mmc/host/sdhci.c | 48 +++++++++++++++++++++++++---------------
- 1 file changed, 30 insertions(+), 18 deletions(-)
+ drivers/mmc/host/sdhci-omap.c | 3 ---
+ 1 file changed, 3 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index b91163de4da4..c432ec3644aa 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -709,6 +709,35 @@ static u32 sdhci_sdma_address(struct sdhci_host *host)
- 		return sg_dma_address(host->data->sg);
- }
+diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+index 9bb53702e0e5..6e2cf4cfeec0 100644
+--- a/drivers/mmc/host/sdhci-omap.c
++++ b/drivers/mmc/host/sdhci-omap.c
+@@ -923,9 +923,6 @@ static int sdhci_omap_probe(struct platform_device *pdev)
+ 	host->mmc_host_ops.card_busy = sdhci_omap_card_busy;
+ 	host->mmc_host_ops.execute_tuning = sdhci_omap_execute_tuning;
  
-+static unsigned int sdhci_target_timeout(struct sdhci_host *host,
-+					 struct mmc_command *cmd,
-+					 struct mmc_data *data)
-+{
-+	unsigned int target_timeout;
-+
-+	/* timeout in us */
-+	if (!data) {
-+		target_timeout = cmd->busy_timeout * 1000;
-+	} else {
-+		target_timeout = DIV_ROUND_UP(data->timeout_ns, 1000);
-+		if (host->clock && data->timeout_clks) {
-+			unsigned long long val;
-+
-+			/*
-+			 * data->timeout_clks is in units of clock cycles.
-+			 * host->clock is in Hz.  target_timeout is in us.
-+			 * Hence, us = 1000000 * cycles / Hz.  Round up.
-+			 */
-+			val = 1000000ULL * data->timeout_clks;
-+			if (do_div(val, host->clock))
-+				target_timeout++;
-+			target_timeout += val;
-+		}
-+	}
-+
-+	return target_timeout;
-+}
-+
- static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd,
- 			     bool *too_big)
- {
-@@ -732,24 +761,7 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd,
- 		return 0xE;
- 
- 	/* timeout in us */
--	if (!data)
--		target_timeout = cmd->busy_timeout * 1000;
--	else {
--		target_timeout = DIV_ROUND_UP(data->timeout_ns, 1000);
--		if (host->clock && data->timeout_clks) {
--			unsigned long long val;
+-	sdhci_read_caps(host);
+-	host->caps |= SDHCI_CAN_DO_ADMA2;
 -
--			/*
--			 * data->timeout_clks is in units of clock cycles.
--			 * host->clock is in Hz.  target_timeout is in us.
--			 * Hence, us = 1000000 * cycles / Hz.  Round up.
--			 */
--			val = 1000000ULL * data->timeout_clks;
--			if (do_div(val, host->clock))
--				target_timeout++;
--			target_timeout += val;
--		}
--	}
-+	target_timeout = sdhci_target_timeout(host, cmd, data);
- 
- 	/*
- 	 * Figure out needed cycles.
+ 	ret = sdhci_setup_host(host);
+ 	if (ret)
+ 		goto err_put_sync;
 -- 
 2.17.0
