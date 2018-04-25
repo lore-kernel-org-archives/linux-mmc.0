@@ -1,7 +1,7 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v4 08/12] mmc: sdhci: Program a relatively accurate SW timeout value
-Date: Wed, 25 Apr 2018 17:39:33 +0530
-Message-ID: <20180425120937.29867-9-kishon@ti.com>
+Subject: [PATCH v4 07/12] mmc: sdhci: Factor out target_timeout calculation
+Date: Wed, 25 Apr 2018 17:39:32 +0530
+Message-ID: <20180425120937.29867-8-kishon@ti.com>
 References: <20180425120937.29867-1-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,107 +12,81 @@ To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com
 Cc: kishon@ti.com, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, Tony Lindgren <tony@atomide.com>
 List-Id: linux-mmc@vger.kernel.org
 
-sdhci has a 10 second timeout to catch devices that stop responding.
-In the case of quirk SDHCI_QUIRK2_DISABLE_HW_TIMEOUT, instead of
-programming 10 second arbitrary value, calculate the total time it would
-take for the entire transfer to happen and program the timeout value
-accordingly.
+From: Adrian Hunter <adrian.hunter@intel.com>
 
-Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+Factor out the target_timeout calculation so it can be re-used.
+
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- drivers/mmc/host/sdhci.c | 36 ++++++++++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci.h | 10 ++++++++++
- 2 files changed, 46 insertions(+)
+ drivers/mmc/host/sdhci.c | 48 +++++++++++++++++++++++++---------------
+ 1 file changed, 30 insertions(+), 18 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index c432ec3644aa..1ed0b8b6570a 100644
+index b91163de4da4..c432ec3644aa 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -738,6 +738,39 @@ static unsigned int sdhci_target_timeout(struct sdhci_host *host,
- 	return target_timeout;
+@@ -709,6 +709,35 @@ static u32 sdhci_sdma_address(struct sdhci_host *host)
+ 		return sg_dma_address(host->data->sg);
  }
  
-+static void sdhci_calc_sw_timeout(struct sdhci_host *host,
-+				  struct mmc_command *cmd)
++static unsigned int sdhci_target_timeout(struct sdhci_host *host,
++					 struct mmc_command *cmd,
++					 struct mmc_data *data)
 +{
-+	struct mmc_data *data = cmd->data;
-+	struct mmc_host *mmc = host->mmc;
-+	struct mmc_ios *ios = &mmc->ios;
-+	unsigned char bus_width = 1 << ios->bus_width;
-+	unsigned int blksz;
-+	unsigned int freq;
-+	u64 target_timeout;
-+	u64 transfer_time;
++	unsigned int target_timeout;
 +
-+	target_timeout = sdhci_target_timeout(host, cmd, data);
-+	target_timeout *= NSEC_PER_USEC;
-+
-+	if (data) {
-+		blksz = data->blksz;
-+		freq = host->mmc->actual_clock ? : host->clock;
-+		transfer_time = (u64)blksz * NSEC_PER_SEC * (8 / bus_width);
-+		do_div(transfer_time, freq);
-+		/* multiply by '2' to account for any unknowns */
-+		transfer_time = transfer_time * 2;
-+		/* calculate timeout for the entire data */
-+		host->data_timeout = data->blocks * target_timeout +
-+				     transfer_time;
++	/* timeout in us */
++	if (!data) {
++		target_timeout = cmd->busy_timeout * 1000;
 +	} else {
-+		host->data_timeout = target_timeout;
++		target_timeout = DIV_ROUND_UP(data->timeout_ns, 1000);
++		if (host->clock && data->timeout_clks) {
++			unsigned long long val;
++
++			/*
++			 * data->timeout_clks is in units of clock cycles.
++			 * host->clock is in Hz.  target_timeout is in us.
++			 * Hence, us = 1000000 * cycles / Hz.  Round up.
++			 */
++			val = 1000000ULL * data->timeout_clks;
++			if (do_div(val, host->clock))
++				target_timeout++;
++			target_timeout += val;
++		}
 +	}
 +
-+	if (host->data_timeout)
-+		host->data_timeout += MMC_CMD_TRANSFER_TIME;
++	return target_timeout;
 +}
 +
  static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd,
  			     bool *too_big)
  {
-@@ -831,6 +864,7 @@ static void sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+@@ -732,24 +761,7 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd,
+ 		return 0xE;
  
- 		if (too_big &&
- 		    host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT) {
-+			sdhci_calc_sw_timeout(host, cmd);
- 			sdhci_set_data_timeout_irq(host, false);
- 		} else if (!(host->ier & SDHCI_INT_DATA_TIMEOUT)) {
- 			sdhci_set_data_timeout_irq(host, true);
-@@ -845,6 +879,8 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
- 	u8 ctrl;
- 	struct mmc_data *data = cmd->data;
+ 	/* timeout in us */
+-	if (!data)
+-		target_timeout = cmd->busy_timeout * 1000;
+-	else {
+-		target_timeout = DIV_ROUND_UP(data->timeout_ns, 1000);
+-		if (host->clock && data->timeout_clks) {
+-			unsigned long long val;
+-
+-			/*
+-			 * data->timeout_clks is in units of clock cycles.
+-			 * host->clock is in Hz.  target_timeout is in us.
+-			 * Hence, us = 1000000 * cycles / Hz.  Round up.
+-			 */
+-			val = 1000000ULL * data->timeout_clks;
+-			if (do_div(val, host->clock))
+-				target_timeout++;
+-			target_timeout += val;
+-		}
+-	}
++	target_timeout = sdhci_target_timeout(host, cmd, data);
  
-+	host->data_timeout = 0;
-+
- 	if (sdhci_data_line_cmd(cmd))
- 		sdhci_set_timeout(host, cmd);
- 
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index f6555c0f4ad3..23966f887da6 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -332,6 +332,14 @@ struct sdhci_adma2_64_desc {
- /* Allow for a a command request and a data request at the same time */
- #define SDHCI_MAX_MRQS		2
- 
-+/*
-+ * 48bit command and 136 bit response in 100KHz clock could take upto 2.48ms.
-+ * However since the start time of the command, the time between
-+ * command and response, and the time between response and start of data is
-+ * not known, set the command transfer time to 10ms.
-+ */
-+#define MMC_CMD_TRANSFER_TIME	(10 * NSEC_PER_MSEC) /* max 10 ms */
-+
- enum sdhci_cookie {
- 	COOKIE_UNMAPPED,
- 	COOKIE_PRE_MAPPED,	/* mapped by sdhci_pre_req() */
-@@ -555,6 +563,8 @@ struct sdhci_host {
- 	/* Host SDMA buffer boundary. */
- 	u32			sdma_boundary;
- 
-+	u64			data_timeout;
-+
- 	unsigned long private[0] ____cacheline_aligned;
- };
- 
+ 	/*
+ 	 * Figure out needed cycles.
 -- 
 2.17.0
