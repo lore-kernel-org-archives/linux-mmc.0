@@ -1,64 +1,75 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: Re: [PATCH v4 05/12] mmc: sdhci: Disable HS200/HS400 mode if
- controller can't support 1.8v
-Date: Thu, 26 Apr 2018 15:38:35 +0530
-Message-ID: <7b877764-22f3-e13b-a8da-1e0b997b4b74@ti.com>
-References: <20180425120937.29867-1-kishon@ti.com>
- <20180425120937.29867-6-kishon@ti.com>
- <6bdf4feb-bc12-3779-3de6-e08af1d4f518@intel.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [RFC 0/2] dw_mmc: add multislot support
+Date: Thu, 26 Apr 2018 19:30:02 +0900
+Message-ID: <396f24f0-2b51-9218-8d15-fd77f49735e8@samsung.com>
+References: <CGME20180417121325epcas2p319c672feee4203d8b90131da461f4bd6@epcas2p3.samsung.com>
+        <20180417121130.25281-1-Eugeniy.Paltsev@synopsys.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <6bdf4feb-bc12-3779-3de6-e08af1d4f518@intel.com>
+In-Reply-To: <20180417121130.25281-1-Eugeniy.Paltsev@synopsys.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, Tony Lindgren <tony@atomide.com>
+To: Eugeniy Paltsev <Eugeniy.Paltsev@synopsys.com>, linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, linux-snps-arc@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Ulf Hansson <ulf.hansson@linaro.org>, shawn.lin@rock-chips.com, Kukjin Kim <kgene@kernel.org>, Krzysztof Kozlowski <krzk@kernel.org>, Alexey Brodkin <Alexey.Brodkin@synopsys.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Adrian,
+Hi,
 
-On Thursday 26 April 2018 02:25 PM, Adrian Hunter wrote:
-> On 25/04/18 15:09, Kishon Vijay Abraham I wrote:
->> Though MMC controller can indicate HS200/HS400 mode capability (by
->> using "mmc-hs200-1_8v"/"mmc-hs400-1_8v" dt property), if the IO lines
->> in the board is connected to 3.3v supply, HS200/HS400 mode cannot be
->> supported. Such boards have "no-1-8-v" property in their dts file.
->> Disable HS200/HS400 mode for boards which have "no-1-8-v" set.
->>
->> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
->> Acked-by: Tony Lindgren <tony@atomide.com>
->> ---
->>  drivers/mmc/host/sdhci.c | 1 +
->>  include/linux/mmc/host.h | 1 +
->>  2 files changed, 2 insertions(+)
->>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index 2ededa7f43df..b5f047b5f3ae 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -3672,6 +3672,7 @@ int sdhci_setup_host(struct sdhci_host *host)
->>  	if (host->quirks2 & SDHCI_QUIRK2_NO_1_8_V) {
->>  		host->caps1 &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
->>  				 SDHCI_SUPPORT_DDR50);
->> +		mmc->caps2 &= ~MMC_CAP2_HSX00_1_8V;
+On 04/17/2018 09:11 PM, Eugeniy Paltsev wrote:
+> This series consists of two patches:
+> 1. revert removal of previously existed "pseudo-multislot" support.
+>  * Revert "mmc: dw_mmc: remove the deprecated "num-slots""
+>  * Revert "mmc: dw_mmc: fix the wrong condition check of getting num-slots from DT"
+>  * Revert "mmc: dw_mmc: remove the unnecessary slot variable"
+>  * Revert "mmc: dw_mmc: update kernel-doc comments for dw_mci"
+>  * Revert "mmc: dw_mmc: use the 'slot' instead of 'cur_slot'"
+>  * Revert "mmc: dw_mmc: remove the 'id' arguments about functions relevant to slot"
+>  * Revert "mmc: dw_mmc: change the array of slots"
+>  * Revert "mmc: dw_mmc: remove the loop about finding slots"
+>  * Revert "mmc: dw_mmc: deprecated the "num-slots" property"
 > 
-> Seems weird for sdhci to clear flags it never set.  Also couldn't we
-> reasonably expect dt properties to be consistent?  Is this really about
-> setting SDHCI_QUIRK2_NO_1_8_V in your driver and expecting it to override
-> other dt properties?  Although that still begs the question why anyone would
-> set dt properties that the hardware doesn't support?  I guess you should
-> also clear MMC_CAP2_HS400_ES.
+> 2. Add missing stuff to support multislot mode in DesignWare MMC driver.
+>  * Add missing slot switch to __dw_mci_start_request() function.
+>  * Refactor set_ios function:
+>    a) Calculate common clock which is
+>       suitable for all slots instead of directly use clock value
+>       provided by mmc core. We calculate common clock as the minimum
+>       among each used slot clocks. This clock is calculated in
+>       dw_mci_calc_common_clock() function which is called
+>       from set_ios()
+>    b) Disable clock only if no other slots are ON.
+>    c) Setup clock directly in set_ios() only if no other slots
+>       are ON. Otherwise adjust clock in __dw_mci_start_request()
+>       function before slot switch.
+>    d) Move timings and bus_width setup to separate funcions.
+>  * Use timing field in each slot structure instead of common field in
+>    host structure.
+>  * Add locks to serialize access to registers.
 
-The SoC might support a specific mode like HS200. So the SoC specific dtsi file
-might have dt properties for HS200 mode set. But the board which uses the SoC
-might be modeled in a way a particular mode cannot be used (like IO lines not
-connected to 1.8v). One option is to use /delete-property/ in the board dts
-file. But since "no-1-8-v" property already indicates HS200 mode cannot be
-supported, having a /delete-property/ might be redundant.
+Sorry for late. :(
+Well, I will read the other comments..and reply soon. 
 
-I can reset caps2 in sdhci-omap after invoking mmc_of_parse if you feel that
-makes more sense.
+Best Regards,
+Jaehoon Chung
 
-Thanks
-Kishon
+> 
+> NOTE: this patch is based off of v4.17-rc1
+> 
+> NOTE: as of today I tested this changes (in singleslot and multislot
+>    modes) only on Synopsys HSDK board. But I will get ODROID-XU4 board
+>    (with Exynos5422 which has DW MMC controller) the next week
+>    so I will test it on this board too to catch any regressions.
+> 
+> Eugeniy Paltsev (2):
+>   dw_mmc: revert removal multislot support
+>   dw_mmc: add multislot support
+> 
+>  .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |   5 +
+>  drivers/mmc/host/dw_mmc-exynos.c                   |   4 +-
+>  drivers/mmc/host/dw_mmc-pci.c                      |   1 +
+>  drivers/mmc/host/dw_mmc.c                          | 486 +++++++++++++++------
+>  drivers/mmc/host/dw_mmc.h                          |  35 +-
+>  5 files changed, 387 insertions(+), 144 deletions(-)
+> 
