@@ -1,75 +1,64 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [RFC 0/2] dw_mmc: add multislot support
-Date: Thu, 26 Apr 2018 19:30:02 +0900
-Message-ID: <396f24f0-2b51-9218-8d15-fd77f49735e8@samsung.com>
-References: <CGME20180417121325epcas2p319c672feee4203d8b90131da461f4bd6@epcas2p3.samsung.com>
-        <20180417121130.25281-1-Eugeniy.Paltsev@synopsys.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+From: Jerome Brunet <jbrunet@baylibre.com>
+Subject: [PATCH] mmc: meson-gx: add device reset
+Date: Thu, 26 Apr 2018 12:38:17 +0200
+Message-ID: <20180426103817.12675-1-jbrunet@baylibre.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180417121130.25281-1-Eugeniy.Paltsev@synopsys.com>
-Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Eugeniy Paltsev <Eugeniy.Paltsev@synopsys.com>, linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, linux-snps-arc@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Ulf Hansson <ulf.hansson@linaro.org>, shawn.lin@rock-chips.com, Kukjin Kim <kgene@kernel.org>, Krzysztof Kozlowski <krzk@kernel.org>, Alexey Brodkin <Alexey.Brodkin@synopsys.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Carlo Caione <carlo@caione.org>, Kevin Hilman <khilman@baylibre.com>
+Cc: Jerome Brunet <jbrunet@baylibre.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+Trigger the reset line of the mmc controller while probing, if available
+The reset should be optional for now, at least until all related DT node
+have the reset property
 
-On 04/17/2018 09:11 PM, Eugeniy Paltsev wrote:
-> This series consists of two patches:
-> 1. revert removal of previously existed "pseudo-multislot" support.
->  * Revert "mmc: dw_mmc: remove the deprecated "num-slots""
->  * Revert "mmc: dw_mmc: fix the wrong condition check of getting num-slots from DT"
->  * Revert "mmc: dw_mmc: remove the unnecessary slot variable"
->  * Revert "mmc: dw_mmc: update kernel-doc comments for dw_mci"
->  * Revert "mmc: dw_mmc: use the 'slot' instead of 'cur_slot'"
->  * Revert "mmc: dw_mmc: remove the 'id' arguments about functions relevant to slot"
->  * Revert "mmc: dw_mmc: change the array of slots"
->  * Revert "mmc: dw_mmc: remove the loop about finding slots"
->  * Revert "mmc: dw_mmc: deprecated the "num-slots" property"
-> 
-> 2. Add missing stuff to support multislot mode in DesignWare MMC driver.
->  * Add missing slot switch to __dw_mci_start_request() function.
->  * Refactor set_ios function:
->    a) Calculate common clock which is
->       suitable for all slots instead of directly use clock value
->       provided by mmc core. We calculate common clock as the minimum
->       among each used slot clocks. This clock is calculated in
->       dw_mci_calc_common_clock() function which is called
->       from set_ios()
->    b) Disable clock only if no other slots are ON.
->    c) Setup clock directly in set_ios() only if no other slots
->       are ON. Otherwise adjust clock in __dw_mci_start_request()
->       function before slot switch.
->    d) Move timings and bus_width setup to separate funcions.
->  * Use timing field in each slot structure instead of common field in
->    host structure.
->  * Add locks to serialize access to registers.
+Signed-off-by: Jerome Brunet <jbrunet@baylibre.com>
+---
+ Documentation/devicetree/bindings/mmc/amlogic,meson-gx.txt | 2 ++
+ drivers/mmc/host/meson-gx-mmc.c                            | 6 ++++++
+ 2 files changed, 8 insertions(+)
 
-Sorry for late. :(
-Well, I will read the other comments..and reply soon. 
-
-Best Regards,
-Jaehoon Chung
-
-> 
-> NOTE: this patch is based off of v4.17-rc1
-> 
-> NOTE: as of today I tested this changes (in singleslot and multislot
->    modes) only on Synopsys HSDK board. But I will get ODROID-XU4 board
->    (with Exynos5422 which has DW MMC controller) the next week
->    so I will test it on this board too to catch any regressions.
-> 
-> Eugeniy Paltsev (2):
->   dw_mmc: revert removal multislot support
->   dw_mmc: add multislot support
-> 
->  .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |   5 +
->  drivers/mmc/host/dw_mmc-exynos.c                   |   4 +-
->  drivers/mmc/host/dw_mmc-pci.c                      |   1 +
->  drivers/mmc/host/dw_mmc.c                          | 486 +++++++++++++++------
->  drivers/mmc/host/dw_mmc.h                          |  35 +-
->  5 files changed, 387 insertions(+), 144 deletions(-)
-> 
+diff --git a/Documentation/devicetree/bindings/mmc/amlogic,meson-gx.txt b/Documentation/devicetree/bindings/mmc/amlogic,meson-gx.txt
+index 5add8d7d855f..ba434375e7f2 100644
+--- a/Documentation/devicetree/bindings/mmc/amlogic,meson-gx.txt
++++ b/Documentation/devicetree/bindings/mmc/amlogic,meson-gx.txt
+@@ -20,6 +20,7 @@ Required properties:
+ 	"clkin1" - Other parent clock of internal mux
+   The driver has an internal mux clock which switches between clkin0 and clkin1 depending on the
+   clock rate requested by the MMC core.
++- reset      : phandle of the internal reset line
+ 
+ Example:
+ 
+@@ -30,4 +31,5 @@ Example:
+ 		clocks = <&clkc CLKID_SD_EMMC_A>, <&xtal>, <&clkc CLKID_FCLK_DIV2>;
+ 		clock-names = "core", "clkin0", "clkin1";
+ 		pinctrl-0 = <&emmc_pins>;
++		resets = <&reset RESET_SD_EMMC_A>;
+ 	};
+diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+index 55bbd67177df..9d214622c8cf 100644
+--- a/drivers/mmc/host/meson-gx-mmc.c
++++ b/drivers/mmc/host/meson-gx-mmc.c
+@@ -35,6 +35,7 @@
+ #include <linux/clk.h>
+ #include <linux/clk-provider.h>
+ #include <linux/regulator/consumer.h>
++#include <linux/reset.h>
+ #include <linux/interrupt.h>
+ #include <linux/bitfield.h>
+ #include <linux/pinctrl/consumer.h>
+@@ -1212,6 +1213,11 @@ static int meson_mmc_probe(struct platform_device *pdev)
+ 		goto free_host;
+ 	}
+ 
++	ret = device_reset_optional(&pdev->dev);
++	if (ret)
++		if (ret != -EPROBE_DEFER)
++			dev_err(&pdev->dev, "device reset failed: %d\n", ret);
++
+ 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+ 	host->regs = devm_ioremap_resource(&pdev->dev, res);
+ 	if (IS_ERR(host->regs)) {
+-- 
+2.14.3
