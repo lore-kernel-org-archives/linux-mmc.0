@@ -1,79 +1,41 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: meson-gx: add device reset
-Date: Thu, 26 Apr 2018 15:54:48 +0200
-Message-ID: <CAPDyKFooqSGrgKqKxTTRBYbi6s-199GhRNhQvVD0wzWWK3UG=Q@mail.gmail.com>
-References: <20180426103817.12675-1-jbrunet@baylibre.com>
+From: Icenowy Zheng <icenowy-h8G6r0blFSE@public.gmane.org>
+Subject: [PATCH 0/3] Enable basic MMC support on Allwinner H6
+Date: Thu, 26 Apr 2018 22:07:25 +0800
+Message-ID: <20180426140728.43155-1-icenowy@aosc.io>
+Reply-To: icenowy-h8G6r0blFSE@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180426103817.12675-1-jbrunet@baylibre.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jerome Brunet <jbrunet@baylibre.com>
-Cc: Carlo Caione <carlo@caione.org>, Kevin Hilman <khilman@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, devicetree@vger.kernel.org, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Return-path: <linux-sunxi+bncBDS6XAN6ZADRBUV2Q7LQKGQE3WHCDWY-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Icenowy Zheng <icenowy-h8G6r0blFSE@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 26 April 2018 at 12:38, Jerome Brunet <jbrunet@baylibre.com> wrote:
-> Trigger the reset line of the mmc controller while probing, if available
-> The reset should be optional for now, at least until all related DT node
-> have the reset property
->
-> Signed-off-by: Jerome Brunet <jbrunet@baylibre.com>
-> ---
->  Documentation/devicetree/bindings/mmc/amlogic,meson-gx.txt | 2 ++
+Allwinner H6 features 3 SD/MMC controllers. The first and second ones
+are similar to the ones on the Allwinner A64/H5 SoCs, and the third one
+adds the function to use EMCE (EMbedded Crypto Engine) on the Allwinner
+H6 chip to do full-disk encryption.
 
-Please move DT doc changes into separate patches. And make the DT
-maintainers are in to field as well.
+Enable basic MMC support on Allwinner H6. Higher speed bins are not
+supported, similar to A64/H5. EMCE is also not supported, and keeps its
+bypassed status by default.
 
-Otherwise, this looks good to me.
+Icenowy Zheng (3):
+  mmc: sunxi: add support for the MMC controller on H6
+  arm64: allwinner: h6: add device tree nodes for MMC controllers
+  arm64: allwinner: h6: enable MMC0/2 on Pine H64
 
-Kind regards
-Uffe
+ .../devicetree/bindings/mmc/sunxi-mmc.txt          |  2 +
+ .../boot/dts/allwinner/sun50i-h6-pine-h64.dts      | 32 +++++++++++++
+ arch/arm64/boot/dts/allwinner/sun50i-h6.dtsi       | 56 ++++++++++++++++++++++
+ drivers/mmc/host/sunxi-mmc.c                       | 16 +++++++
+ 4 files changed, 106 insertions(+)
 
->  drivers/mmc/host/meson-gx-mmc.c                            | 6 ++++++
->  2 files changed, 8 insertions(+)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/amlogic,meson-gx.txt b/Documentation/devicetree/bindings/mmc/amlogic,meson-gx.txt
-> index 5add8d7d855f..ba434375e7f2 100644
-> --- a/Documentation/devicetree/bindings/mmc/amlogic,meson-gx.txt
-> +++ b/Documentation/devicetree/bindings/mmc/amlogic,meson-gx.txt
-> @@ -20,6 +20,7 @@ Required properties:
->         "clkin1" - Other parent clock of internal mux
->    The driver has an internal mux clock which switches between clkin0 and clkin1 depending on the
->    clock rate requested by the MMC core.
-> +- reset      : phandle of the internal reset line
->
->  Example:
->
-> @@ -30,4 +31,5 @@ Example:
->                 clocks = <&clkc CLKID_SD_EMMC_A>, <&xtal>, <&clkc CLKID_FCLK_DIV2>;
->                 clock-names = "core", "clkin0", "clkin1";
->                 pinctrl-0 = <&emmc_pins>;
-> +               resets = <&reset RESET_SD_EMMC_A>;
->         };
-> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-> index 55bbd67177df..9d214622c8cf 100644
-> --- a/drivers/mmc/host/meson-gx-mmc.c
-> +++ b/drivers/mmc/host/meson-gx-mmc.c
-> @@ -35,6 +35,7 @@
->  #include <linux/clk.h>
->  #include <linux/clk-provider.h>
->  #include <linux/regulator/consumer.h>
-> +#include <linux/reset.h>
->  #include <linux/interrupt.h>
->  #include <linux/bitfield.h>
->  #include <linux/pinctrl/consumer.h>
-> @@ -1212,6 +1213,11 @@ static int meson_mmc_probe(struct platform_device *pdev)
->                 goto free_host;
->         }
->
-> +       ret = device_reset_optional(&pdev->dev);
-> +       if (ret)
-> +               if (ret != -EPROBE_DEFER)
-> +                       dev_err(&pdev->dev, "device reset failed: %d\n", ret);
-> +
->         res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
->         host->regs = devm_ioremap_resource(&pdev->dev, res);
->         if (IS_ERR(host->regs)) {
-> --
-> 2.14.3
->
+-- 
+2.15.1
