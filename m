@@ -1,36 +1,68 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: Re: [PATCH 0/3] K2G: mmc: Update mmc dt node to use sdhci-omap
-Date: Thu, 26 Apr 2018 11:12:12 +0530
-Message-ID: <2d03fa36-5fa1-322c-cc82-2dc3749dcaa3@ti.com>
-References: <20180425132746.13911-1-kishon@ti.com>
- <fc5f3498-62fd-15d3-90df-206c51649cb4@oracle.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [RFC 0/2] dw_mmc: add multislot support
+Date: Thu, 26 Apr 2018 08:28:04 +0200
+Message-ID: <CAPDyKFr4WXgFEDLGztRoSrAFMrHC7ASJxaxCTKMeGN8i-Ns86w@mail.gmail.com>
+References: <20180417121130.25281-1-Eugeniy.Paltsev@synopsys.com>
+ <CAPDyKFqxZLtx_=0UU9NgBnW0Vmw=456q2FFbMBK4LKEaF-ua7A@mail.gmail.com>
+ <1524239609.10138.47.camel@synopsys.com> <CAPDyKFpY7JsQukY=E2PRg=iVfmis4i1kvST+b2wtshNc5Jn+jw@mail.gmail.com>
+ <1524664417.18209.16.camel@synopsys.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <fc5f3498-62fd-15d3-90df-206c51649cb4@oracle.com>
+In-Reply-To: <1524664417.18209.16.camel@synopsys.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Santosh Shilimkar <santosh.shilimkar@oracle.com>, Santosh Shilimkar <ssantosh@kernel.org>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, Tony Lindgren <tony@atomide.com>
+To: Eugeniy Paltsev <Eugeniy.Paltsev@synopsys.com>
+Cc: "jh80.chung@samsung.com" <jh80.chung@samsung.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Alexey.Brodkin@synopsys.com" <Alexey.Brodkin@synopsys.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "krzk@kernel.org" <krzk@kernel.org>, "linux-snps-arc@lists.infradead.org" <linux-snps-arc@lists.infradead.org>, "kgene@kernel.org" <kgene@kernel.org>, "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
+[...]
 
+> A bit remark for better understanding:
+>
+> All card settings change are serialized too. These settings are applied
+> after slot switch before execution of new request for this slot.
+>
+> So situations like calling any host_0 ops while another host (host_1) is active
+> are handled by current code.
+>
+> This is example of simultaneous ops calls for both slots:
+>
+> host (slot) 0    | host (slot) 1
+> -----------------------------------
+> h0->set_ios()    |    h1->set_ios()
+> h0->request()    |    h1->request()
+> h0->set_ios()    |    h1->set_ios()
+> h0->request()    |    h1->request()
+> h0->request()    |
+> h0->request()    |
+> h0->request()    |
+>
+> How it will be serialized in the mmc driver:
+>
+> h0->set_ios()   // h0 settings save
+> h1->set_ios()   // h1 settings save
+> h0->request()   // apply settings for h0 and do request
 
-On Wednesday 25 April 2018 11:10 PM, Santosh Shilimkar wrote:
-> On 4/25/2018 6:27 AM, Kishon Vijay Abraham I wrote:
->> Update mmc dt node to use sdhci-omap binding instead of omap_hsmmc
->> binding.
->>
->> I've also updated keystone_defconfig to enable CONFIG_MMC_SDHCI_OMAP.
->> Everyone who use a custom .config should also enable
->> CONFIG_MMC_SDHCI_OMAP for MMC to work.
->>
->> This series should be merged only after [1]
->> [1] -> https://marc.info/?l=linux-kernel&m=152465820531802&w=2
->>
-> Keep me posted once the dependency gets merged.
+This doesn't work as it would mean violation of the specs in some
+scenarios. Particular during the card initialization and card power
+off.
 
-sure.
+> ------ slot switch to h1 ------
+> h1->request()   // apply settings for h1 and do request
 
-Regards
-Kishon
+Ditto. Etc...
+
+> h0->set_ios()   // h0 settings save
+> h1->set_ios()   // h1 settings save
+> ------ slot switch to h0 ------
+> h0->request()   // apply settings for h0 and do request
+> ------ slot switch to h1 ------
+> h1->request()   // apply settings for h1 and do request
+> ------ slot switch to h0 ------
+> h0->request()   // do request (no new settings to apply)
+> h0->request()   // do request (no new settings to apply)
+> h0->request()   // do request (no new settings to apply)
+>
+
+Kind regards
+Uffe
