@@ -1,65 +1,22 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v4 05/12] mmc: sdhci: Disable HS200/HS400 mode if
- controller can't support 1.8v
-Date: Thu, 26 Apr 2018 11:55:20 +0300
-Message-ID: <6bdf4feb-bc12-3779-3de6-e08af1d4f518@intel.com>
-References: <20180425120937.29867-1-kishon@ti.com>
- <20180425120937.29867-6-kishon@ti.com>
+Subject: Re: [RESEND PATCH v4.9, 1/1] mmc: sdhci-dwc-mshc-pci: synopsys dwc
+ mshc support
+Date: Thu, 26 Apr 2018 12:56:36 +0300
+Message-ID: <2f51bbdb-6d1e-8e8e-d6d5-96270a47dd56@intel.com>
+References: <705D14B1C7978B40A723277C067CEDE2010A99DD80@IN01WEMBXB.internal.synopsys.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180425120937.29867-6-kishon@ti.com>
+In-Reply-To: <705D14B1C7978B40A723277C067CEDE2010A99DD80@IN01WEMBXB.internal.synopsys.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, Tony Lindgren <tony@atomide.com>
+To: Prabu Thangamuthu <Prabu.T@synopsys.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Manjunath M Bettegowda <Manjunath.MB@synopsys.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 25/04/18 15:09, Kishon Vijay Abraham I wrote:
-> Though MMC controller can indicate HS200/HS400 mode capability (by
-> using "mmc-hs200-1_8v"/"mmc-hs400-1_8v" dt property), if the IO lines
-> in the board is connected to 3.3v supply, HS200/HS400 mode cannot be
-> supported. Such boards have "no-1-8-v" property in their dts file.
-> Disable HS200/HS400 mode for boards which have "no-1-8-v" set.
-> 
-> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
-> Acked-by: Tony Lindgren <tony@atomide.com>
-> ---
->  drivers/mmc/host/sdhci.c | 1 +
->  include/linux/mmc/host.h | 1 +
->  2 files changed, 2 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 2ededa7f43df..b5f047b5f3ae 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -3672,6 +3672,7 @@ int sdhci_setup_host(struct sdhci_host *host)
->  	if (host->quirks2 & SDHCI_QUIRK2_NO_1_8_V) {
->  		host->caps1 &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
->  				 SDHCI_SUPPORT_DDR50);
-> +		mmc->caps2 &= ~MMC_CAP2_HSX00_1_8V;
+On 12/04/18 18:47, Prabu Thangamuthu wrote:
+> This patch is intended for linux-4.9.y branch.
 
-Seems weird for sdhci to clear flags it never set.  Also couldn't we
-reasonably expect dt properties to be consistent?  Is this really about
-setting SDHCI_QUIRK2_NO_1_8_V in your driver and expecting it to override
-other dt properties?  Although that still begs the question why anyone would
-set dt properties that the hardware doesn't support?  I guess you should
-also clear MMC_CAP2_HS400_ES.
+Do you mean linux stable?  That means you need to follow stable kernel rules:
 
->  	}
->  
->  	/* Any UHS-I mode in caps implies SDR12 and SDR25 support. */
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 7c6eaf63f5ce..58832451767b 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -345,6 +345,7 @@ struct mmc_host {
->  #define MMC_CAP2_HS400_1_2V	(1 << 16)	/* Can support HS400 1.2V */
->  #define MMC_CAP2_HS400		(MMC_CAP2_HS400_1_8V | \
->  				 MMC_CAP2_HS400_1_2V)
-> +#define MMC_CAP2_HSX00_1_8V	(MMC_CAP2_HS200_1_8V_SDR | MMC_CAP2_HS400_1_8V)
->  #define MMC_CAP2_HSX00_1_2V	(MMC_CAP2_HS200_1_2V_SDR | MMC_CAP2_HS400_1_2V)
->  #define MMC_CAP2_SDIO_IRQ_NOTHREAD (1 << 17)
->  #define MMC_CAP2_NO_WRITE_PROTECT (1 << 18)	/* No physical write protect pin, assume that card is always read-write */
-> 
+	https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/Documentation/process/stable-kernel-rules.rst
