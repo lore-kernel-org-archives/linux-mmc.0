@@ -1,13 +1,13 @@
 From: Icenowy Zheng <icenowy-h8G6r0blFSE@public.gmane.org>
-Subject: [PATCH 1/3] mmc: sunxi: add support for the MMC
- controller on H6
-Date: Thu, 26 Apr 2018 22:07:26 +0800
-Message-ID: <20180426140728.43155-2-icenowy@aosc.io>
+Subject: [PATCH 2/3] arm64: allwinner: h6: add device tree nodes
+ for MMC controllers
+Date: Thu, 26 Apr 2018 22:07:27 +0800
+Message-ID: <20180426140728.43155-3-icenowy@aosc.io>
 References: <20180426140728.43155-1-icenowy@aosc.io>
 Reply-To: icenowy-h8G6r0blFSE@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-sunxi+bncBDS6XAN6ZADRB652Q7LQKGQEGY2FOJY-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Return-path: <linux-sunxi+bncBDS6XAN6ZADRBCV3Q7LQKGQE3KMUIEI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 In-Reply-To: <20180426140728.43155-1-icenowy-h8G6r0blFSE@public.gmane.org>
 List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
@@ -20,67 +20,87 @@ To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herri
 Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Icenowy Zheng <icenowy-h8G6r0blFSE@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-The new Allwinner H6 SoC have 3 MMC controllers. The first and second
-ones are similar to the ones on A64, but the third one adds EMCE
-(Embedded Crypto Engine) support which does hardware transparent crypto
-on the eMMC.
+The Allwinner H6 SoC have 3 MMC controllers.
 
-As we still do not have support for EMCE, and the support of it is
-disabled by defualt, we just duplicate the A64 mmc configurations and
-change the compatible string.
+Add device tree nodes for them.
 
 Signed-off-by: Icenowy Zheng <icenowy-h8G6r0blFSE@public.gmane.org>
 ---
- Documentation/devicetree/bindings/mmc/sunxi-mmc.txt |  2 ++
- drivers/mmc/host/sunxi-mmc.c                        | 16 ++++++++++++++++
- 2 files changed, 18 insertions(+)
+ arch/arm64/boot/dts/allwinner/sun50i-h6.dtsi | 56 ++++++++++++++++++++++++++++
+ 1 file changed, 56 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
-index 132e0007d7d6..e6aa5c7a5e12 100644
---- a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
-@@ -16,6 +16,8 @@ Required properties:
-    * "allwinner,sun9i-a80-mmc"
-    * "allwinner,sun50i-a64-emmc"
-    * "allwinner,sun50i-a64-mmc"
-+   * "allwinner,sun50i-h6-emmc"
-+   * "allwinner,sun50i-h6-mmc"
-  - reg : mmc controller base registers
-  - clocks : a list with 4 phandle + clock specifier pairs
-  - clock-names : must contain "ahb", "mmc", "output" and "sample"
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index 97c6b79b7d6f..05e2b5fd7aa4 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -1168,6 +1168,20 @@ static const struct sunxi_mmc_cfg sun50i_a64_emmc_cfg = {
- 	.can_calibrate = true,
- };
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h6.dtsi b/arch/arm64/boot/dts/allwinner/sun50i-h6.dtsi
+index 4debc3962830..3cbfc035c979 100644
+--- a/arch/arm64/boot/dts/allwinner/sun50i-h6.dtsi
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h6.dtsi
+@@ -124,12 +124,68 @@
+ 			interrupt-controller;
+ 			#interrupt-cells = <3>;
  
-+static const struct sunxi_mmc_cfg sun50i_h6_cfg = {
-+	.idma_des_size_bits = 16,
-+	.clk_delays = NULL,
-+	.can_calibrate = true,
-+	.mask_data0 = true,
-+	.needs_new_timings = true,
-+};
++			mmc0_pins: mmc0-pins {
++				pins = "PF0", "PF1", "PF2", "PF3",
++				       "PF4", "PF5";
++				function = "mmc0";
++				drive-strength = <30>;
++				bias-pull-up;
++			};
 +
-+static const struct sunxi_mmc_cfg sun50i_h6_emmc_cfg = {
-+	.idma_des_size_bits = 13,
-+	.clk_delays = NULL,
-+	.can_calibrate = true,
-+};
++			mmc2_pins: mmc2-pins {
++				pins = "PC1", "PC4", "PC5", "PC6",
++				       "PC7", "PC8", "PC9", "PC10",
++				       "PC11", "PC12", "PC13", "PC14";
++				function = "mmc2";
++				drive-strength = <30>;
++				bias-pull-up;
++			};
 +
- static const struct of_device_id sunxi_mmc_of_match[] = {
- 	{ .compatible = "allwinner,sun4i-a10-mmc", .data = &sun4i_a10_cfg },
- 	{ .compatible = "allwinner,sun5i-a13-mmc", .data = &sun5i_a13_cfg },
-@@ -1176,6 +1190,8 @@ static const struct of_device_id sunxi_mmc_of_match[] = {
- 	{ .compatible = "allwinner,sun9i-a80-mmc", .data = &sun9i_a80_cfg },
- 	{ .compatible = "allwinner,sun50i-a64-mmc", .data = &sun50i_a64_cfg },
- 	{ .compatible = "allwinner,sun50i-a64-emmc", .data = &sun50i_a64_emmc_cfg },
-+	{ .compatible = "allwinner,sun50i-h6-mmc", .data = &sun50i_h6_cfg },
-+	{ .compatible = "allwinner,sun50i-h6-emmc", .data = &sun50i_h6_emmc_cfg },
- 	{ /* sentinel */ }
- };
- MODULE_DEVICE_TABLE(of, sunxi_mmc_of_match);
+ 			uart0_ph_pins: uart0-ph {
+ 				pins = "PH0", "PH1";
+ 				function = "uart0";
+ 			};
+ 		};
+ 
++		mmc0: mmc@4020000 {
++			compatible = "allwinner,sun50i-h6-mmc";
++			reg = <0x04020000 0x1000>;
++			clocks = <&ccu CLK_BUS_MMC0>, <&ccu CLK_MMC0>;
++			clock-names = "ahb", "mmc";
++			resets = <&ccu RST_BUS_MMC0>;
++			reset-names = "ahb";
++			interrupts = <GIC_SPI 35 IRQ_TYPE_LEVEL_HIGH>;
++			status = "disabled";
++			#address-cells = <1>;
++			#size-cells = <0>;
++		};
++
++		mmc1: mmc@4021000 {
++			compatible = "allwinner,sun50i-h6-mmc";
++			reg = <0x04021000 0x1000>;
++			clocks = <&ccu CLK_BUS_MMC1>, <&ccu CLK_MMC1>;
++			clock-names = "ahb", "mmc";
++			resets = <&ccu RST_BUS_MMC1>;
++			reset-names = "ahb";
++			interrupts = <GIC_SPI 36 IRQ_TYPE_LEVEL_HIGH>;
++			status = "disabled";
++			#address-cells = <1>;
++			#size-cells = <0>;
++		};
++
++		mmc2: mmc@4022000 {
++			compatible = "allwinner,sun50i-h6-emmc";
++			reg = <0x04022000 0x1000>;
++			clocks = <&ccu CLK_BUS_MMC2>, <&ccu CLK_MMC2>;
++			clock-names = "ahb", "mmc";
++			resets = <&ccu RST_BUS_MMC2>;
++			reset-names = "ahb";
++			interrupts = <GIC_SPI 37 IRQ_TYPE_LEVEL_HIGH>;
++			status = "disabled";
++			#address-cells = <1>;
++			#size-cells = <0>;
++		};
++
+ 		uart0: serial@5000000 {
+ 			compatible = "snps,dw-apb-uart";
+ 			reg = <0x05000000 0x400>;
 -- 
 2.15.1
