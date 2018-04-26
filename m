@@ -1,16 +1,16 @@
 From: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH 2/3] arm64: allwinner: h6: add device tree
- nodes for MMC controllers
-Date: Thu, 26 Apr 2018 17:45:38 +0100
-Message-ID: <9571735d-929f-a2ef-ed97-dc9193420b73@arm.com>
+Subject: Re: [PATCH 3/3] arm64: allwinner: h6: enable MMC0/2 on
+ Pine H64
+Date: Thu, 26 Apr 2018 17:46:26 +0100
+Message-ID: <03cc2e8c-4a35-3fb4-b408-fd8d4ba3e407@arm.com>
 References: <20180426140728.43155-1-icenowy@aosc.io>
- <20180426140728.43155-3-icenowy@aosc.io>
+ <20180426140728.43155-4-icenowy@aosc.io>
 Reply-To: andre.przywara-5wv7dgnIgG8@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-sunxi+bncBDNZNK75ZIKRBQ4ERDLQKGQE5VHRE4A-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Return-path: <linux-sunxi+bncBDNZNK75ZIKRBA4FRDLQKGQEC33U4NQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-In-Reply-To: <20180426140728.43155-3-icenowy-h8G6r0blFSE@public.gmane.org>
+In-Reply-To: <20180426140728.43155-4-icenowy-h8G6r0blFSE@public.gmane.org>
 Content-Language: en-GB
 List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
@@ -25,104 +25,82 @@ List-Id: linux-mmc@vger.kernel.org
 Hi,
 
 On 26/04/18 15:07, Icenowy Zheng wrote:
-> The Allwinner H6 SoC have 3 MMC controllers.
+> The Pine H64 board have a MicroSD slot connected to MMC0 controller of
+> the H6 SoC and a eMMC slot connected to MMC2.
 > 
-> Add device tree nodes for them.
+> Enable them in the device tree.
 > 
 > Signed-off-by: Icenowy Zheng <icenowy-h8G6r0blFSE@public.gmane.org>
 > ---
->  arch/arm64/boot/dts/allwinner/sun50i-h6.dtsi | 56 ++++++++++++++++++++++++++++
->  1 file changed, 56 insertions(+)
+>  .../boot/dts/allwinner/sun50i-h6-pine-h64.dts      | 32 ++++++++++++++++++++++
+>  1 file changed, 32 insertions(+)
 > 
-> diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h6.dtsi b/arch/arm64/boot/dts/allwinner/sun50i-h6.dtsi
-> index 4debc3962830..3cbfc035c979 100644
-> --- a/arch/arm64/boot/dts/allwinner/sun50i-h6.dtsi
-> +++ b/arch/arm64/boot/dts/allwinner/sun50i-h6.dtsi
-> @@ -124,12 +124,68 @@
->  			interrupt-controller;
->  			#interrupt-cells = <3>;
->  
-> +			mmc0_pins: mmc0-pins {
-> +				pins = "PF0", "PF1", "PF2", "PF3",
-> +				       "PF4", "PF5";
-> +				function = "mmc0";
-> +				drive-strength = <30>;
-> +				bias-pull-up;
-> +			};
+> diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h6-pine-h64.dts b/arch/arm64/boot/dts/allwinner/sun50i-h6-pine-h64.dts
+> index d36de5eb81f3..78b1cd54687c 100644
+> --- a/arch/arm64/boot/dts/allwinner/sun50i-h6-pine-h64.dts
+> +++ b/arch/arm64/boot/dts/allwinner/sun50i-h6-pine-h64.dts
+> @@ -20,6 +20,38 @@
+>  	chosen {
+>  		stdout-path = "serial0:115200n8";
+>  	};
 > +
-> +			mmc2_pins: mmc2-pins {
-> +				pins = "PC1", "PC4", "PC5", "PC6",
-> +				       "PC7", "PC8", "PC9", "PC10",
-> +				       "PC11", "PC12", "PC13", "PC14";
-> +				function = "mmc2";
-> +				drive-strength = <30>;
-> +				bias-pull-up;
-> +			};
+> +	reg_vcc3v3: vcc3v3 {
+> +		compatible = "regulator-fixed";
+> +		regulator-name = "vcc3v3";
+> +		regulator-min-microvolt = <3300000>;
+> +		regulator-max-microvolt = <3300000>;
+> +	};
 > +
->  			uart0_ph_pins: uart0-ph {
->  				pins = "PH0", "PH1";
->  				function = "uart0";
->  			};
->  		};
->  
-> +		mmc0: mmc@4020000 {
-> +			compatible = "allwinner,sun50i-h6-mmc";
-
-This should be:
-			compatible = "allwinner,sun50i-h6-mmc",
-				     "allwinner,sun50i-a64-mmc";
-
-> +			reg = <0x04020000 0x1000>;
-> +			clocks = <&ccu CLK_BUS_MMC0>, <&ccu CLK_MMC0>;
-> +			clock-names = "ahb", "mmc";
-> +			resets = <&ccu RST_BUS_MMC0>;
-> +			reset-names = "ahb";
-> +			interrupts = <GIC_SPI 35 IRQ_TYPE_LEVEL_HIGH>;
-> +			status = "disabled";
-> +			#address-cells = <1>;
-> +			#size-cells = <0>;
-> +		};
+> +	reg_vcc1v8: vcc1v8 {
+> +		compatible = "regulator-fixed";
+> +		regulator-name = "vcc1v8";
+> +		regulator-min-microvolt = <1800000>;
+> +		regulator-max-microvolt = <1800000>;
+> +	};
+> +};
 > +
-> +		mmc1: mmc@4021000 {
-> +			compatible = "allwinner,sun50i-h6-mmc";
+> +&mmc0 {
+> +	pinctrl-names = "default";
+> +	pinctrl-0 = <&mmc0_pins>;
+> +	vmmc-supply = <&reg_vcc3v3>;
 
-same here
+So this is actually CLDO1 on the AXP, correct?
 
-> +			reg = <0x04021000 0x1000>;
-> +			clocks = <&ccu CLK_BUS_MMC1>, <&ccu CLK_MMC1>;
-> +			clock-names = "ahb", "mmc";
-> +			resets = <&ccu RST_BUS_MMC1>;
-> +			reset-names = "ahb";
-> +			interrupts = <GIC_SPI 36 IRQ_TYPE_LEVEL_HIGH>;
-> +			status = "disabled";
-> +			#address-cells = <1>;
-> +			#size-cells = <0>;
-> +		};
+
+> +	cd-gpios = <&pio 5 6 GPIO_ACTIVE_LOW>;
+> +	status = "okay";
+> +};
 > +
-> +		mmc2: mmc@4022000 {
-> +			compatible = "allwinner,sun50i-h6-emmc";
+> +&mmc2 {
+> +	pinctrl-names = "default";
+> +	pinctrl-0 = <&mmc2_pins>;
+> +	vmmc-supply = <&reg_vcc3v3>;
+> +	vqmmc-supply = <&reg_vcc1v8>;
 
-and here:
-			compatible = "allwinner,sun50i-h6-emmc",
-				     "allwinner,sun50i-a64-emmc";
+And this is BLDO2?
 
-The rest looks correct to me.
+I am just asking because I want to avoid running into the same problem
+as with the A64 before: that future DTs become incompatible with older
+kernels, because we change the power supply to point to the AXP
+regulators, which this kernel does not support yet.
+
+It looks like there are more users of those power rails, so we could
+keep those supplies connected to these fixed regulators here, even with
+AXP-805 support in the kernel.
+
+Or we keep this back until we get proper AXP support in the kernel? I
+guess it's quite close to the existing PMICs, so it might be more a
+copy&paste exercise to support the AXP-805?
+
+But apart from this this looks correct to me.
 
 Cheers,
 Andre.
 
-> +			reg = <0x04022000 0x1000>;
-> +			clocks = <&ccu CLK_BUS_MMC2>, <&ccu CLK_MMC2>;
-> +			clock-names = "ahb", "mmc";
-> +			resets = <&ccu RST_BUS_MMC2>;
-> +			reset-names = "ahb";
-> +			interrupts = <GIC_SPI 37 IRQ_TYPE_LEVEL_HIGH>;
-> +			status = "disabled";
-> +			#address-cells = <1>;
-> +			#size-cells = <0>;
-> +		};
-> +
->  		uart0: serial@5000000 {
->  			compatible = "snps,dw-apb-uart";
->  			reg = <0x05000000 0x400>;
+> +	non-removable;
+> +	cap-mmc-hw-reset;
+> +	status = "okay";
+>  };
+>  
+>  &uart0 {
 > 
