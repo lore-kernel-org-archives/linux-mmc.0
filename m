@@ -1,7 +1,7 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v5 02/14] mmc: sdhci-omap: Remove setting ADMA capability in driver
-Date: Fri, 27 Apr 2018 17:17:11 +0530
-Message-ID: <20180427114723.2687-3-kishon@ti.com>
+Subject: [PATCH v5 05/14] mmc: sdhci: Disable 1.8v modes (HS200/HS400/UHS) if controller can't support 1.8v
+Date: Fri, 27 Apr 2018 17:17:14 +0530
+Message-ID: <20180427114723.2687-6-kishon@ti.com>
 References: <20180427114723.2687-1-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,31 +12,62 @@ To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com
 Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-sdhci can directly get ADMA capability from MMCHS_CAPA register.
-Remove explicitly setting ADMA here as some instances might not have
-ADMA enabled. (sdhci_read_caps() is also removed from here since
-sdhci_setup_host() invokes it).
+The SDHCI controller in a SoC might support HS200/HS400 (indicated
+using mmc-hs200-1_8v/mmc-hs400-1_8v dt property), but if the board is
+modeled such that the IO lines are not connected to 1.8v then
+HS200/HS400 cannot be supported. Disable HS200/HS400 if the board
+does not have 1.8v connected to the IO lines. Also Disable DDR/UHS in 1.8v
+if the IO lines are not connected to 1.8v.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 Acked-by: Tony Lindgren <tony@atomide.com>
 ---
- drivers/mmc/host/sdhci-omap.c | 3 ---
- 1 file changed, 3 deletions(-)
+ drivers/mmc/host/sdhci.c | 10 ++++++++++
+ include/linux/mmc/host.h |  4 ++++
+ 2 files changed, 14 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-index e7e43f2ae224..78f3ceea570e 100644
---- a/drivers/mmc/host/sdhci-omap.c
-+++ b/drivers/mmc/host/sdhci-omap.c
-@@ -923,9 +923,6 @@ static int sdhci_omap_probe(struct platform_device *pdev)
- 	host->mmc_host_ops.card_busy = sdhci_omap_card_busy;
- 	host->mmc_host_ops.execute_tuning = sdhci_omap_execute_tuning;
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 2ededa7f43df..0f3cdca3e769 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -3672,6 +3672,16 @@ int sdhci_setup_host(struct sdhci_host *host)
+ 	if (host->quirks2 & SDHCI_QUIRK2_NO_1_8_V) {
+ 		host->caps1 &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
+ 				 SDHCI_SUPPORT_DDR50);
++		/*
++		 * The SDHCI controller in a SoC might support HS200/HS400
++		 * (indicated using mmc-hs200-1_8v/mmc-hs400-1_8v dt property),
++		 * but if the board is modeled such that the IO lines are not
++		 * connected to 1.8v then HS200/HS400 cannot be supported.
++		 * Disable HS200/HS400 if the board does not have 1.8v connected
++		 * to the IO lines. (Applicable for other modes in 1.8v)
++		 */
++		mmc->caps2 &= ~(MMC_CAP2_HSX00_1_8V | MMC_CAP2_HS400_ES);
++		mmc->caps &= ~(MMC_CAP_1_8V_DDR | MMC_CAP_UHS);
+ 	}
  
--	sdhci_read_caps(host);
--	host->caps |= SDHCI_CAN_DO_ADMA2;
--
- 	ret = sdhci_setup_host(host);
- 	if (ret)
- 		goto err_put_sync;
+ 	/* Any UHS-I mode in caps implies SDR12 and SDR25 support. */
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 7c6eaf63f5ce..8f1859044db1 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -320,6 +320,9 @@ struct mmc_host {
+ #define MMC_CAP_UHS_SDR50	(1 << 18)	/* Host supports UHS SDR50 mode */
+ #define MMC_CAP_UHS_SDR104	(1 << 19)	/* Host supports UHS SDR104 mode */
+ #define MMC_CAP_UHS_DDR50	(1 << 20)	/* Host supports UHS DDR50 mode */
++#define MMC_CAP_UHS		(MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25 | \
++				 MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR104 | \
++				 MMC_CAP_UHS_DDR50)
+ /* (1 << 21) is free for reuse */
+ #define MMC_CAP_DRIVER_TYPE_A	(1 << 23)	/* Host supports Driver Type A */
+ #define MMC_CAP_DRIVER_TYPE_C	(1 << 24)	/* Host supports Driver Type C */
+@@ -345,6 +348,7 @@ struct mmc_host {
+ #define MMC_CAP2_HS400_1_2V	(1 << 16)	/* Can support HS400 1.2V */
+ #define MMC_CAP2_HS400		(MMC_CAP2_HS400_1_8V | \
+ 				 MMC_CAP2_HS400_1_2V)
++#define MMC_CAP2_HSX00_1_8V	(MMC_CAP2_HS200_1_8V_SDR | MMC_CAP2_HS400_1_8V)
+ #define MMC_CAP2_HSX00_1_2V	(MMC_CAP2_HS200_1_2V_SDR | MMC_CAP2_HS400_1_2V)
+ #define MMC_CAP2_SDIO_IRQ_NOTHREAD (1 << 17)
+ #define MMC_CAP2_NO_WRITE_PROTECT (1 << 18)	/* No physical write protect pin, assume that card is always read-write */
 -- 
 2.17.0
