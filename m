@@ -1,7 +1,7 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v5 08/14] mmc: sdhci: Program a relatively accurate SW timeout value
-Date: Fri, 27 Apr 2018 17:17:17 +0530
-Message-ID: <20180427114723.2687-9-kishon@ti.com>
+Subject: [PATCH v5 06/14] mmc: sdhci: Add quirk to disable HW timeout
+Date: Fri, 27 Apr 2018 17:17:15 +0530
+Message-ID: <20180427114723.2687-7-kishon@ti.com>
 References: <20180427114723.2687-1-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,137 +12,120 @@ To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com
 Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-sdhci has a 10 second timeout to catch devices that stop responding.
-In the case of quirk SDHCI_QUIRK2_DISABLE_HW_TIMEOUT, instead of
-programming 10 second arbitrary value, calculate the total time it would
-take for the entire transfer to happen and program the timeout value
-accordingly.
+From: Adrian Hunter <adrian.hunter@intel.com>
 
-Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+Add quirk to disable HW timeout if the requested timeout is more than the
+maximum obtainable timeout.
+
+Also, if the quirk is set and ->get_max_timeout_count() is not implemented,
+max_busy_timeout is set to zero.
+
+Based-on-patch-by: Kishon Vijay Abraham I <kishon@ti.com>
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- drivers/mmc/host/sdhci.c | 52 ++++++++++++++++++++++++++++++++++------
- drivers/mmc/host/sdhci.h | 10 ++++++++
- 2 files changed, 55 insertions(+), 7 deletions(-)
+ drivers/mmc/host/sdhci.c | 38 ++++++++++++++++++++++++++++++++++----
+ drivers/mmc/host/sdhci.h |  5 +++++
+ 2 files changed, 39 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index b229354e5b88..1c828e0e9905 100644
+index 0f3cdca3e769..8da118d0d2c4 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -738,6 +738,39 @@ static unsigned int sdhci_target_timeout(struct sdhci_host *host,
- 	return target_timeout;
+@@ -709,12 +709,15 @@ static u32 sdhci_sdma_address(struct sdhci_host *host)
+ 		return sg_dma_address(host->data->sg);
  }
  
-+static void sdhci_calc_sw_timeout(struct sdhci_host *host,
-+				  struct mmc_command *cmd)
-+{
-+	struct mmc_data *data = cmd->data;
-+	struct mmc_host *mmc = host->mmc;
-+	struct mmc_ios *ios = &mmc->ios;
-+	unsigned char bus_width = 1 << ios->bus_width;
-+	unsigned int blksz;
-+	unsigned int freq;
-+	u64 target_timeout;
-+	u64 transfer_time;
-+
-+	target_timeout = sdhci_target_timeout(host, cmd, data);
-+	target_timeout *= NSEC_PER_USEC;
-+
-+	if (data) {
-+		blksz = data->blksz;
-+		freq = host->mmc->actual_clock ? : host->clock;
-+		transfer_time = (u64)blksz * NSEC_PER_SEC * (8 / bus_width);
-+		do_div(transfer_time, freq);
-+		/* multiply by '2' to account for any unknowns */
-+		transfer_time = transfer_time * 2;
-+		/* calculate timeout for the entire data */
-+		host->data_timeout = data->blocks * target_timeout +
-+				     transfer_time;
-+	} else {
-+		host->data_timeout = target_timeout;
-+	}
-+
-+	if (host->data_timeout)
-+		host->data_timeout += MMC_CMD_TRANSFER_TIME;
-+}
-+
- static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd,
- 			     bool *too_big)
+-static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
++static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd,
++			     bool *too_big)
  {
-@@ -831,6 +864,7 @@ static void sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
- 
- 		if (too_big &&
- 		    host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT) {
-+			sdhci_calc_sw_timeout(host, cmd);
- 			sdhci_set_data_timeout_irq(host, false);
- 		} else if (!(host->ier & SDHCI_INT_DATA_TIMEOUT)) {
- 			sdhci_set_data_timeout_irq(host, true);
-@@ -845,6 +879,8 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
- 	u8 ctrl;
+ 	u8 count;
  	struct mmc_data *data = cmd->data;
+ 	unsigned target_timeout, current_timeout;
  
-+	host->data_timeout = 0;
++	*too_big = true;
 +
- 	if (sdhci_data_line_cmd(cmd))
- 		sdhci_set_timeout(host, cmd);
- 
-@@ -1198,13 +1234,6 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 		mdelay(1);
+ 	/*
+ 	 * If the host controller provides us with an incorrect timeout
+ 	 * value, just skip the check and use 0xE.  The hardware may take
+@@ -768,9 +771,12 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
  	}
  
--	timeout = jiffies;
--	if (!cmd->data && cmd->busy_timeout > 9000)
--		timeout += DIV_ROUND_UP(cmd->busy_timeout, 1000) * HZ + HZ;
--	else
--		timeout += 10 * HZ;
--	sdhci_mod_timer(host, cmd->mrq, timeout);
--
- 	host->cmd = cmd;
- 	if (sdhci_data_line_cmd(cmd)) {
- 		WARN_ON(host->data_cmd);
-@@ -1244,6 +1273,15 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 	    cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200)
- 		flags |= SDHCI_CMD_DATA;
+ 	if (count >= 0xF) {
+-		DBG("Too large timeout 0x%x requested for CMD%d!\n",
+-		    count, cmd->opcode);
++		if (!(host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT))
++			DBG("Too large timeout 0x%x requested for CMD%d!\n",
++			    count, cmd->opcode);
+ 		count = 0xE;
++	} else {
++		*too_big = false;
+ 	}
  
-+	timeout = jiffies;
-+	if (host->data_timeout)
-+		timeout += nsecs_to_jiffies(host->data_timeout);
-+	else if (!cmd->data && cmd->busy_timeout > 9000)
-+		timeout += DIV_ROUND_UP(cmd->busy_timeout, 1000) * HZ + HZ;
-+	else
-+		timeout += 10 * HZ;
-+	sdhci_mod_timer(host, cmd->mrq, timeout);
-+
- 	sdhci_writew(host, SDHCI_MAKE_CMD(cmd->opcode, flags), SDHCI_COMMAND);
+ 	return count;
+@@ -790,6 +796,16 @@ static void sdhci_set_transfer_irqs(struct sdhci_host *host)
+ 	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
  }
- EXPORT_SYMBOL_GPL(sdhci_send_command);
+ 
++static void sdhci_set_data_timeout_irq(struct sdhci_host *host, bool enable)
++{
++	if (enable)
++		host->ier |= SDHCI_INT_DATA_TIMEOUT;
++	else
++		host->ier &= ~SDHCI_INT_DATA_TIMEOUT;
++	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
++	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
++}
++
+ static void sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+ {
+ 	u8 count;
+@@ -797,7 +813,17 @@ static void sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+ 	if (host->ops->set_timeout) {
+ 		host->ops->set_timeout(host, cmd);
+ 	} else {
+-		count = sdhci_calc_timeout(host, cmd);
++		bool too_big = false;
++
++		count = sdhci_calc_timeout(host, cmd, &too_big);
++
++		if (too_big &&
++		    host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT) {
++			sdhci_set_data_timeout_irq(host, false);
++		} else if (!(host->ier & SDHCI_INT_DATA_TIMEOUT)) {
++			sdhci_set_data_timeout_irq(host, true);
++		}
++
+ 		sdhci_writeb(host, count, SDHCI_TIMEOUT_CONTROL);
+ 	}
+ }
+@@ -3616,6 +3642,10 @@ int sdhci_setup_host(struct sdhci_host *host)
+ 		mmc->max_busy_timeout /= host->timeout_clk;
+ 	}
+ 
++	if (host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT &&
++	    !host->ops->get_max_timeout_count)
++		mmc->max_busy_timeout = 0;
++
+ 	mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE | MMC_CAP_CMD23;
+ 	mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;
+ 
 diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index f6555c0f4ad3..23966f887da6 100644
+index c95b0a4a7594..f6555c0f4ad3 100644
 --- a/drivers/mmc/host/sdhci.h
 +++ b/drivers/mmc/host/sdhci.h
-@@ -332,6 +332,14 @@ struct sdhci_adma2_64_desc {
- /* Allow for a a command request and a data request at the same time */
- #define SDHCI_MAX_MRQS		2
- 
+@@ -437,6 +437,11 @@ struct sdhci_host {
+ #define SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN		(1<<15)
+ /* Controller has CRC in 136 bit Command Response */
+ #define SDHCI_QUIRK2_RSP_136_HAS_CRC			(1<<16)
 +/*
-+ * 48bit command and 136 bit response in 100KHz clock could take upto 2.48ms.
-+ * However since the start time of the command, the time between
-+ * command and response, and the time between response and start of data is
-+ * not known, set the command transfer time to 10ms.
++ * Disable HW timeout if the requested timeout is more than the maximum
++ * obtainable timeout.
 + */
-+#define MMC_CMD_TRANSFER_TIME	(10 * NSEC_PER_MSEC) /* max 10 ms */
-+
- enum sdhci_cookie {
- 	COOKIE_UNMAPPED,
- 	COOKIE_PRE_MAPPED,	/* mapped by sdhci_pre_req() */
-@@ -555,6 +563,8 @@ struct sdhci_host {
- 	/* Host SDMA buffer boundary. */
- 	u32			sdma_boundary;
++#define SDHCI_QUIRK2_DISABLE_HW_TIMEOUT			(1<<17)
  
-+	u64			data_timeout;
-+
- 	unsigned long private[0] ____cacheline_aligned;
- };
- 
+ 	int irq;		/* Device IRQ */
+ 	void __iomem *ioaddr;	/* Mapped address */
 -- 
 2.17.0
