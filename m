@@ -1,175 +1,50 @@
-From: Icenowy Zheng <icenowy-h8G6r0blFSE@public.gmane.org>
-Subject: Re: [PATCH 2/3] arm64: allwinner: h6: add device tree
- nodes for MMC controllers
-Date: Fri, 27 Apr 2018 17:23:46 +0800
-Message-ID: <6EBD7D16-E985-4345-B2C2-D0CE7B32F8C5@aosc.io>
-References: <20180426140728.43155-1-icenowy@aosc.io> <20180426140728.43155-3-icenowy@aosc.io> <9571735d-929f-a2ef-ed97-dc9193420b73@arm.com> <77DF7884-8DA8-4ED5-BB51-941CFDE4A123@aosc.io> <0ae1b6ce-c1cf-61e8-e09b-abec47b089b2@arm.com>
-Reply-To: icenowy-h8G6r0blFSE@public.gmane.org
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: Re: [PATCH v3 04/15] ARM: dts: dra74x-mmc-iodelay: Add a new pinctrl
+ group for clk line without pullup
+Date: Fri, 27 Apr 2018 16:49:48 +0530
+Message-ID: <859a6ba4-3dd7-2507-d536-e6b559372f32@ti.com>
+References: <20180425125449.19755-1-kishon@ti.com>
+ <20180425125449.19755-5-kishon@ti.com> <20180425133529.GU5671@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-sunxi+bncBDS6XAN6ZADRBQOYRPLQKGQEJ4S37XI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-In-Reply-To: <0ae1b6ce-c1cf-61e8-e09b-abec47b089b2-5wv7dgnIgG8@public.gmane.org>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: andre.przywara-5wv7dgnIgG8@public.gmane.orgAndre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180425133529.GU5671@atomide.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>
+Cc: =?UTF-8?Q?Beno=c3=aet_Cousson?= <bcousson@baylibre.com>, Jonathan Corbet <corbet@lwn.net>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
+Hi Tony,
 
+On Wednesday 25 April 2018 07:05 PM, Tony Lindgren wrote:
+> * Kishon Vijay Abraham I <kishon@ti.com> [180425 12:57]:
+>> --- a/arch/arm/boot/dts/dra74x-mmc-iodelay.dtsi
+>> +++ b/arch/arm/boot/dts/dra74x-mmc-iodelay.dtsi
+>> @@ -49,6 +49,17 @@
+>>  		>;
+>>  	};
+>>  
+>> +	mmc1_pins_default_no_clk_pu: mmc1_pins_default_no_clk_pu {
+>> +		pinctrl-single,pins = <
+>> +			DRA7XX_CORE_IOPAD(0x3754, PIN_INPUT_PULLDOWN | MUX_MODE0) /* mmc1_clk.clk */
+>> +			DRA7XX_CORE_IOPAD(0x3758, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_cmd.cmd */
+>> +			DRA7XX_CORE_IOPAD(0x375c, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_dat0.dat0 */
+>> +			DRA7XX_CORE_IOPAD(0x3760, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_dat1.dat1 */
+>> +			DRA7XX_CORE_IOPAD(0x3764, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_dat2.dat2 */
+>> +			DRA7XX_CORE_IOPAD(0x3768, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_dat3.dat3 */
+>> +		>;
+>> +	};
+>> +
+>>  	mmc1_pins_sdr12: mmc1_pins_sdr12 {
+>>  		pinctrl-single,pins = <
+>>  			DRA7XX_CORE_IOPAD(0x3754, PIN_INPUT_PULLUP | MUX_MODE0)	/* mmc1_clk.clk */
+>> -- 
+> 
+> If this data is the same for all of them, why don't you add something
+> like dra7-iodelay.dtsi that can be included as needed?
 
-=E4=BA=8E 2018=E5=B9=B44=E6=9C=8827=E6=97=A5 GMT+08:00 =E4=B8=8B=E5=8D=885:=
-18:23, Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org> =E5=86=99=E5=88=B0:
->Hi,
->
->On 27/04/18 09:36, Icenowy Zheng wrote:
->>=20
->>=20
->> =E4=BA=8E 2018=E5=B9=B44=E6=9C=8827=E6=97=A5 GMT+08:00 =E4=B8=8A=E5=8D=
-=8812:45:38, Andre Przywara
-><andre.przywara-5wv7dgnIgG8@public.gmane.org> =E5=86=99=E5=88=B0:
->>> Hi,
->>>
->>> On 26/04/18 15:07, Icenowy Zheng wrote:
->>>> The Allwinner H6 SoC have 3 MMC controllers.
->>>>
->>>> Add device tree nodes for them.
->>>>
->>>> Signed-off-by: Icenowy Zheng <icenowy-h8G6r0blFSE@public.gmane.org>
->>>> ---
->>>>  arch/arm64/boot/dts/allwinner/sun50i-h6.dtsi | 56
->>> ++++++++++++++++++++++++++++
->>>>  1 file changed, 56 insertions(+)
->>>>
->>>> diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h6.dtsi
->>> b/arch/arm64/boot/dts/allwinner/sun50i-h6.dtsi
->>>> index 4debc3962830..3cbfc035c979 100644
->>>> --- a/arch/arm64/boot/dts/allwinner/sun50i-h6.dtsi
->>>> +++ b/arch/arm64/boot/dts/allwinner/sun50i-h6.dtsi
->>>> @@ -124,12 +124,68 @@
->>>>  			interrupt-controller;
->>>>  			#interrupt-cells =3D <3>;
->>>> =20
->>>> +			mmc0_pins: mmc0-pins {
->>>> +				pins =3D "PF0", "PF1", "PF2", "PF3",
->>>> +				       "PF4", "PF5";
->>>> +				function =3D "mmc0";
->>>> +				drive-strength =3D <30>;
->>>> +				bias-pull-up;
->>>> +			};
->>>> +
->>>> +			mmc2_pins: mmc2-pins {
->>>> +				pins =3D "PC1", "PC4", "PC5", "PC6",
->>>> +				       "PC7", "PC8", "PC9", "PC10",
->>>> +				       "PC11", "PC12", "PC13", "PC14";
->>>> +				function =3D "mmc2";
->>>> +				drive-strength =3D <30>;
->>>> +				bias-pull-up;
->>>> +			};
->>>> +
->>>>  			uart0_ph_pins: uart0-ph {
->>>>  				pins =3D "PH0", "PH1";
->>>>  				function =3D "uart0";
->>>>  			};
->>>>  		};
->>>> =20
->>>> +		mmc0: mmc@4020000 {
->>>> +			compatible =3D "allwinner,sun50i-h6-mmc";
->>>
->>> This should be:
->>> 			compatible =3D "allwinner,sun50i-h6-mmc",
->>> 				     "allwinner,sun50i-a64-mmc";
->>=20
->> I'm intended to not add A64 compatible, as
->> H6 is a quite new design
->> (new process) and there might be different behavior, even on mmc0/1.
->
->But as your patch proves, it is fully backwards compatible: An A64
->driver works with this device.
+okay, I'll add dra7-mmc-iodelay.dtsi and send a new revision.
 
-No, my patch only proves "the current A64 driver works
-with this device", not "Any A64 driver works with device", as
-the current driver doesn't fully use the capability provided
-by A64 MMC cobtrollers.
-
->And this is what this compatible string list says: If your system does
->not have a specific H6 driver, you can use an A64 driver.
->You might not get all the (potentially) new features, but it covers
->everything the A64 has.
->
->And a new silicon process doesn't matter here, since the software
->interface is unchanged. *If* we find bugs, we can add quirks matching
-
-I think there's timing parameters for higher speed bins which
-are different among chips. As we have currently no support
-for speed bins higher than DDR50, they're not added yet.
-
->on
->the H6 compatible string - that's why we put it here already, despite
->having a matching string in the kernel at the moment.
-
-Device tree is not driver data but hardware description, so
-it should follow "how the device is formed" rather than
-"how the device works".
-
->
->>>> +			reg =3D <0x04020000 0x1000>;
->>>> +			clocks =3D <&ccu CLK_BUS_MMC0>, <&ccu CLK_MMC0>;
->>>> +			clock-names =3D "ahb", "mmc";
->>>> +			resets =3D <&ccu RST_BUS_MMC0>;
->>>> +			reset-names =3D "ahb";
->>>> +			interrupts =3D <GIC_SPI 35 IRQ_TYPE_LEVEL_HIGH>;
->>>> +			status =3D "disabled";
->>>> +			#address-cells =3D <1>;
->>>> +			#size-cells =3D <0>;
->>>> +		};
->>>> +
->>>> +		mmc1: mmc@4021000 {
->>>> +			compatible =3D "allwinner,sun50i-h6-mmc";
->>>
->>> same here
->>>
->>>> +			reg =3D <0x04021000 0x1000>;
->>>> +			clocks =3D <&ccu CLK_BUS_MMC1>, <&ccu CLK_MMC1>;
->>>> +			clock-names =3D "ahb", "mmc";
->>>> +			resets =3D <&ccu RST_BUS_MMC1>;
->>>> +			reset-names =3D "ahb";
->>>> +			interrupts =3D <GIC_SPI 36 IRQ_TYPE_LEVEL_HIGH>;
->>>> +			status =3D "disabled";
->>>> +			#address-cells =3D <1>;
->>>> +			#size-cells =3D <0>;
->>>> +		};
->>>> +
->>>> +		mmc2: mmc@4022000 {
->>>> +			compatible =3D "allwinner,sun50i-h6-emmc";
->>>
->>> and here:
->>> 			compatible =3D "allwinner,sun50i-h6-emmc",
->>> 				     "allwinner,sun50i-a64-emmc";
->>=20
->> MMC2 on H6 has EMCE capability, so surely there should
->> only be H6 compatible, and no A64 one.
->
->Same as above, the A64 eMMC is a subset of the H6 eMMC, so the A64 eMMC
->driver can drive the H6 as well. And again your code proves that,
->because it behaves exactly the same as for the A64.
->In case we ever get support for the EMCE, we add the new compatible
->string to the driver and tie it to the new feature. So newer kernels
->can
->use this feature, older kernel will just not, but can happily use the
->eMMC anyway.
->
->Cheers,
->Andre.
-
---=20
-You received this message because you are subscribed to the Google Groups "=
-linux-sunxi" group.
-To unsubscribe from this group and stop receiving emails from it, send an e=
-mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
-For more options, visit https://groups.google.com/d/optout.
+Thanks
+Kishon
