@@ -1,10 +1,11 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v5 07/14] mmc: sdhci: Factor out target_timeout calculation
-Date: Fri, 27 Apr 2018 17:17:16 +0530
-Message-ID: <20180427114723.2687-8-kishon@ti.com>
+Subject: [PATCH v5 09/14] mmc: sdhci-omap: Workaround for Errata i834
+Date: Fri, 27 Apr 2018 17:17:18 +0530
+Message-ID: <20180427114723.2687-10-kishon@ti.com>
 References: <20180427114723.2687-1-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20180427114723.2687-1-kishon@ti.com>
 Sender: linux-kernel-owner@vger.kernel.org
@@ -12,81 +13,37 @@ To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com
 Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-From: Adrian Hunter <adrian.hunter@intel.com>
+Errata i834 in AM572x Sitara Processors Silicon Revision 2.0, 1.1
+(SPRZ429K July 2014–Revised March 2017 [1]) mentions the maximum
+obtainable timeout through MMC host controller is 700ms. And for
+commands taking longer than 700ms, hardware timeout should be
+disabled and software timeout should be used.
 
-Factor out the target_timeout calculation so it can be re-used.
+The workaround for Errata i834 can be achieved by adding
+SDHCI_QUIRK2_DISABLE_HW_TIMEOUT quirk in sdhci-omap.
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+[1] -> http://www.ti.com/lit/er/sprz429k/sprz429k.pdf
+
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+Acked-by: Tony Lindgren <tony@atomide.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci.c | 48 +++++++++++++++++++++++++---------------
- 1 file changed, 30 insertions(+), 18 deletions(-)
+ drivers/mmc/host/sdhci-omap.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 8da118d0d2c4..b229354e5b88 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -709,6 +709,35 @@ static u32 sdhci_sdma_address(struct sdhci_host *host)
- 		return sg_dma_address(host->data->sg);
- }
+diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+index d5c1a9c71f95..2232a9974b21 100644
+--- a/drivers/mmc/host/sdhci-omap.c
++++ b/drivers/mmc/host/sdhci-omap.c
+@@ -715,7 +715,8 @@ static const struct sdhci_pltfm_data sdhci_omap_pdata = {
+ 		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC,
+ 	.quirks2 = SDHCI_QUIRK2_ACMD23_BROKEN |
+ 		   SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
+-		   SDHCI_QUIRK2_RSP_136_HAS_CRC,
++		   SDHCI_QUIRK2_RSP_136_HAS_CRC |
++		   SDHCI_QUIRK2_DISABLE_HW_TIMEOUT,
+ 	.ops = &sdhci_omap_ops,
+ };
  
-+static unsigned int sdhci_target_timeout(struct sdhci_host *host,
-+					 struct mmc_command *cmd,
-+					 struct mmc_data *data)
-+{
-+	unsigned int target_timeout;
-+
-+	/* timeout in us */
-+	if (!data) {
-+		target_timeout = cmd->busy_timeout * 1000;
-+	} else {
-+		target_timeout = DIV_ROUND_UP(data->timeout_ns, 1000);
-+		if (host->clock && data->timeout_clks) {
-+			unsigned long long val;
-+
-+			/*
-+			 * data->timeout_clks is in units of clock cycles.
-+			 * host->clock is in Hz.  target_timeout is in us.
-+			 * Hence, us = 1000000 * cycles / Hz.  Round up.
-+			 */
-+			val = 1000000ULL * data->timeout_clks;
-+			if (do_div(val, host->clock))
-+				target_timeout++;
-+			target_timeout += val;
-+		}
-+	}
-+
-+	return target_timeout;
-+}
-+
- static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd,
- 			     bool *too_big)
- {
-@@ -732,24 +761,7 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd,
- 		return 0xE;
- 
- 	/* timeout in us */
--	if (!data)
--		target_timeout = cmd->busy_timeout * 1000;
--	else {
--		target_timeout = DIV_ROUND_UP(data->timeout_ns, 1000);
--		if (host->clock && data->timeout_clks) {
--			unsigned long long val;
--
--			/*
--			 * data->timeout_clks is in units of clock cycles.
--			 * host->clock is in Hz.  target_timeout is in us.
--			 * Hence, us = 1000000 * cycles / Hz.  Round up.
--			 */
--			val = 1000000ULL * data->timeout_clks;
--			if (do_div(val, host->clock))
--				target_timeout++;
--			target_timeout += val;
--		}
--	}
-+	target_timeout = sdhci_target_timeout(host, cmd, data);
- 
- 	/*
- 	 * Figure out needed cycles.
 -- 
 2.17.0
