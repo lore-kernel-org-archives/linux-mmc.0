@@ -1,10 +1,11 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v5 06/14] mmc: sdhci: Add quirk to disable HW timeout
-Date: Fri, 27 Apr 2018 17:17:15 +0530
-Message-ID: <20180427114723.2687-7-kishon@ti.com>
+Subject: [PATCH v5 03/14] mmc: sdhci-omap: Workaround for Errata i843
+Date: Fri, 27 Apr 2018 17:17:12 +0530
+Message-ID: <20180427114723.2687-4-kishon@ti.com>
 References: <20180427114723.2687-1-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20180427114723.2687-1-kishon@ti.com>
 Sender: linux-kernel-owner@vger.kernel.org
@@ -12,120 +13,113 @@ To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com
 Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-From: Adrian Hunter <adrian.hunter@intel.com>
+Errata i843 in AM572x Sitara Processors Silicon Revision 2.0, 1.1
+(SPRZ429K July 2014–Revised March 2017 [1]) mentions
+PG 1.0/1.1 silicon has limitations w.r.t frequencies at which MMC1/2/3
+can operate.
 
-Add quirk to disable HW timeout if the requested timeout is more than the
-maximum obtainable timeout.
+Use soc_device_match() to identify rev 1.0/1.1 silicon and
+override mmc->f_max according to the errata workaround.
+"max-frequency" dt property cannot be used since the device
+tree is added for rev 2.0 silicon.
 
-Also, if the quirk is set and ->get_max_timeout_count() is not implemented,
-max_busy_timeout is set to zero.
+soc_device_match() is also used in order to get the IODelay values
+for rev 1.0/1.1 silicon.
 
-Based-on-patch-by: Kishon Vijay Abraham I <kishon@ti.com>
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+[1] -> http://www.ti.com/lit/er/sprz429k/sprz429k.pdf
+
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Acked-by: Tony Lindgren <tony@atomide.com>
 ---
- drivers/mmc/host/sdhci.c | 38 ++++++++++++++++++++++++++++++++++----
- drivers/mmc/host/sdhci.h |  5 +++++
- 2 files changed, 39 insertions(+), 4 deletions(-)
+ drivers/mmc/host/sdhci-omap.c | 35 ++++++++++++++++++++++++++++++++++-
+ 1 file changed, 34 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 0f3cdca3e769..8da118d0d2c4 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -709,12 +709,15 @@ static u32 sdhci_sdma_address(struct sdhci_host *host)
- 		return sg_dma_address(host->data->sg);
- }
+diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+index 78f3ceea570e..b3dc7f1466e5 100644
+--- a/drivers/mmc/host/sdhci-omap.c
++++ b/drivers/mmc/host/sdhci-omap.c
+@@ -26,6 +26,7 @@
+ #include <linux/pm_runtime.h>
+ #include <linux/regulator/consumer.h>
+ #include <linux/pinctrl/consumer.h>
++#include <linux/sys_soc.h>
  
--static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
-+static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd,
-+			     bool *too_big)
+ #include "sdhci-pltfm.h"
+ 
+@@ -100,6 +101,7 @@ struct sdhci_omap_data {
+ };
+ 
+ struct sdhci_omap_host {
++	char			*version;
+ 	void __iomem		*base;
+ 	struct device		*dev;
+ 	struct	regulator	*pbias;
+@@ -733,12 +735,21 @@ static struct pinctrl_state
+ 				  u32 *caps, u32 capmask)
  {
- 	u8 count;
- 	struct mmc_data *data = cmd->data;
- 	unsigned target_timeout, current_timeout;
+ 	struct device *dev = omap_host->dev;
++	char *version = omap_host->version;
+ 	struct pinctrl_state *pinctrl_state = ERR_PTR(-ENODEV);
++	char str[20];
  
-+	*too_big = true;
+ 	if (!(*caps & capmask))
+ 		goto ret;
+ 
+-	pinctrl_state = pinctrl_lookup_state(omap_host->pinctrl, mode);
++	if (version) {
++		snprintf(str, 20, "%s-%s", mode, version);
++		pinctrl_state = pinctrl_lookup_state(omap_host->pinctrl, str);
++	}
 +
- 	/*
- 	 * If the host controller provides us with an incorrect timeout
- 	 * value, just skip the check and use 0xE.  The hardware may take
-@@ -768,9 +771,12 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
- 	}
- 
- 	if (count >= 0xF) {
--		DBG("Too large timeout 0x%x requested for CMD%d!\n",
--		    count, cmd->opcode);
-+		if (!(host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT))
-+			DBG("Too large timeout 0x%x requested for CMD%d!\n",
-+			    count, cmd->opcode);
- 		count = 0xE;
-+	} else {
-+		*too_big = false;
- 	}
- 
- 	return count;
-@@ -790,6 +796,16 @@ static void sdhci_set_transfer_irqs(struct sdhci_host *host)
- 	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
++	if (IS_ERR(pinctrl_state))
++		pinctrl_state = pinctrl_lookup_state(omap_host->pinctrl, mode);
++
+ 	if (IS_ERR(pinctrl_state)) {
+ 		dev_err(dev, "no pinctrl state for %s mode", mode);
+ 		*caps &= ~capmask;
+@@ -830,6 +841,16 @@ static int sdhci_omap_config_iodelay_pinctrl_state(struct sdhci_omap_host
+ 	return 0;
  }
  
-+static void sdhci_set_data_timeout_irq(struct sdhci_host *host, bool enable)
-+{
-+	if (enable)
-+		host->ier |= SDHCI_INT_DATA_TIMEOUT;
-+	else
-+		host->ier &= ~SDHCI_INT_DATA_TIMEOUT;
-+	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
-+	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
-+}
++static const struct soc_device_attribute sdhci_omap_soc_devices[] = {
++	{
++		.machine = "DRA7[45]*",
++		.revision = "ES1.[01]",
++	},
++	{
++		/* sentinel */
++	}
++};
 +
- static void sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+ static int sdhci_omap_probe(struct platform_device *pdev)
  {
- 	u8 count;
-@@ -797,7 +813,17 @@ static void sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
- 	if (host->ops->set_timeout) {
- 		host->ops->set_timeout(host, cmd);
- 	} else {
--		count = sdhci_calc_timeout(host, cmd);
-+		bool too_big = false;
-+
-+		count = sdhci_calc_timeout(host, cmd, &too_big);
-+
-+		if (too_big &&
-+		    host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT) {
-+			sdhci_set_data_timeout_irq(host, false);
-+		} else if (!(host->ier & SDHCI_INT_DATA_TIMEOUT)) {
-+			sdhci_set_data_timeout_irq(host, true);
-+		}
-+
- 		sdhci_writeb(host, count, SDHCI_TIMEOUT_CONTROL);
- 	}
- }
-@@ -3616,6 +3642,10 @@ int sdhci_setup_host(struct sdhci_host *host)
- 		mmc->max_busy_timeout /= host->timeout_clk;
- 	}
+ 	int ret;
+@@ -841,6 +862,7 @@ static int sdhci_omap_probe(struct platform_device *pdev)
+ 	struct mmc_host *mmc;
+ 	const struct of_device_id *match;
+ 	struct sdhci_omap_data *data;
++	const struct soc_device_attribute *soc;
  
-+	if (host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT &&
-+	    !host->ops->get_max_timeout_count)
-+		mmc->max_busy_timeout = 0;
+ 	match = of_match_device(omap_sdhci_match, dev);
+ 	if (!match)
+@@ -875,6 +897,17 @@ static int sdhci_omap_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		goto err_pltfm_free;
+ 
++	soc = soc_device_match(sdhci_omap_soc_devices);
++	if (soc) {
++		omap_host->version = "rev11";
++		if (!strcmp(dev_name(dev), "4809c000.mmc"))
++			mmc->f_max = 96000000;
++		if (!strcmp(dev_name(dev), "480b4000.mmc"))
++			mmc->f_max = 48000000;
++		if (!strcmp(dev_name(dev), "480ad000.mmc"))
++			mmc->f_max = 48000000;
++	}
 +
- 	mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE | MMC_CAP_CMD23;
- 	mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;
- 
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index c95b0a4a7594..f6555c0f4ad3 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -437,6 +437,11 @@ struct sdhci_host {
- #define SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN		(1<<15)
- /* Controller has CRC in 136 bit Command Response */
- #define SDHCI_QUIRK2_RSP_136_HAS_CRC			(1<<16)
-+/*
-+ * Disable HW timeout if the requested timeout is more than the maximum
-+ * obtainable timeout.
-+ */
-+#define SDHCI_QUIRK2_DISABLE_HW_TIMEOUT			(1<<17)
- 
- 	int irq;		/* Device IRQ */
- 	void __iomem *ioaddr;	/* Mapped address */
+ 	pltfm_host->clk = devm_clk_get(dev, "fck");
+ 	if (IS_ERR(pltfm_host->clk)) {
+ 		ret = PTR_ERR(pltfm_host->clk);
 -- 
 2.17.0
