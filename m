@@ -1,7 +1,7 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v5 05/14] mmc: sdhci: Disable 1.8v modes (HS200/HS400/UHS) if controller can't support 1.8v
-Date: Fri, 27 Apr 2018 17:17:14 +0530
-Message-ID: <20180427114723.2687-6-kishon@ti.com>
+Subject: [PATCH v5 07/14] mmc: sdhci: Factor out target_timeout calculation
+Date: Fri, 27 Apr 2018 17:17:16 +0530
+Message-ID: <20180427114723.2687-8-kishon@ti.com>
 References: <20180427114723.2687-1-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,62 +12,81 @@ To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com
 Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-The SDHCI controller in a SoC might support HS200/HS400 (indicated
-using mmc-hs200-1_8v/mmc-hs400-1_8v dt property), but if the board is
-modeled such that the IO lines are not connected to 1.8v then
-HS200/HS400 cannot be supported. Disable HS200/HS400 if the board
-does not have 1.8v connected to the IO lines. Also Disable DDR/UHS in 1.8v
-if the IO lines are not connected to 1.8v.
+From: Adrian Hunter <adrian.hunter@intel.com>
 
+Factor out the target_timeout calculation so it can be re-used.
+
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
-Acked-by: Tony Lindgren <tony@atomide.com>
 ---
- drivers/mmc/host/sdhci.c | 10 ++++++++++
- include/linux/mmc/host.h |  4 ++++
- 2 files changed, 14 insertions(+)
+ drivers/mmc/host/sdhci.c | 48 +++++++++++++++++++++++++---------------
+ 1 file changed, 30 insertions(+), 18 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 2ededa7f43df..0f3cdca3e769 100644
+index 8da118d0d2c4..b229354e5b88 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -3672,6 +3672,16 @@ int sdhci_setup_host(struct sdhci_host *host)
- 	if (host->quirks2 & SDHCI_QUIRK2_NO_1_8_V) {
- 		host->caps1 &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
- 				 SDHCI_SUPPORT_DDR50);
-+		/*
-+		 * The SDHCI controller in a SoC might support HS200/HS400
-+		 * (indicated using mmc-hs200-1_8v/mmc-hs400-1_8v dt property),
-+		 * but if the board is modeled such that the IO lines are not
-+		 * connected to 1.8v then HS200/HS400 cannot be supported.
-+		 * Disable HS200/HS400 if the board does not have 1.8v connected
-+		 * to the IO lines. (Applicable for other modes in 1.8v)
-+		 */
-+		mmc->caps2 &= ~(MMC_CAP2_HSX00_1_8V | MMC_CAP2_HS400_ES);
-+		mmc->caps &= ~(MMC_CAP_1_8V_DDR | MMC_CAP_UHS);
- 	}
+@@ -709,6 +709,35 @@ static u32 sdhci_sdma_address(struct sdhci_host *host)
+ 		return sg_dma_address(host->data->sg);
+ }
  
- 	/* Any UHS-I mode in caps implies SDR12 and SDR25 support. */
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 7c6eaf63f5ce..8f1859044db1 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -320,6 +320,9 @@ struct mmc_host {
- #define MMC_CAP_UHS_SDR50	(1 << 18)	/* Host supports UHS SDR50 mode */
- #define MMC_CAP_UHS_SDR104	(1 << 19)	/* Host supports UHS SDR104 mode */
- #define MMC_CAP_UHS_DDR50	(1 << 20)	/* Host supports UHS DDR50 mode */
-+#define MMC_CAP_UHS		(MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25 | \
-+				 MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR104 | \
-+				 MMC_CAP_UHS_DDR50)
- /* (1 << 21) is free for reuse */
- #define MMC_CAP_DRIVER_TYPE_A	(1 << 23)	/* Host supports Driver Type A */
- #define MMC_CAP_DRIVER_TYPE_C	(1 << 24)	/* Host supports Driver Type C */
-@@ -345,6 +348,7 @@ struct mmc_host {
- #define MMC_CAP2_HS400_1_2V	(1 << 16)	/* Can support HS400 1.2V */
- #define MMC_CAP2_HS400		(MMC_CAP2_HS400_1_8V | \
- 				 MMC_CAP2_HS400_1_2V)
-+#define MMC_CAP2_HSX00_1_8V	(MMC_CAP2_HS200_1_8V_SDR | MMC_CAP2_HS400_1_8V)
- #define MMC_CAP2_HSX00_1_2V	(MMC_CAP2_HS200_1_2V_SDR | MMC_CAP2_HS400_1_2V)
- #define MMC_CAP2_SDIO_IRQ_NOTHREAD (1 << 17)
- #define MMC_CAP2_NO_WRITE_PROTECT (1 << 18)	/* No physical write protect pin, assume that card is always read-write */
++static unsigned int sdhci_target_timeout(struct sdhci_host *host,
++					 struct mmc_command *cmd,
++					 struct mmc_data *data)
++{
++	unsigned int target_timeout;
++
++	/* timeout in us */
++	if (!data) {
++		target_timeout = cmd->busy_timeout * 1000;
++	} else {
++		target_timeout = DIV_ROUND_UP(data->timeout_ns, 1000);
++		if (host->clock && data->timeout_clks) {
++			unsigned long long val;
++
++			/*
++			 * data->timeout_clks is in units of clock cycles.
++			 * host->clock is in Hz.  target_timeout is in us.
++			 * Hence, us = 1000000 * cycles / Hz.  Round up.
++			 */
++			val = 1000000ULL * data->timeout_clks;
++			if (do_div(val, host->clock))
++				target_timeout++;
++			target_timeout += val;
++		}
++	}
++
++	return target_timeout;
++}
++
+ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd,
+ 			     bool *too_big)
+ {
+@@ -732,24 +761,7 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd,
+ 		return 0xE;
+ 
+ 	/* timeout in us */
+-	if (!data)
+-		target_timeout = cmd->busy_timeout * 1000;
+-	else {
+-		target_timeout = DIV_ROUND_UP(data->timeout_ns, 1000);
+-		if (host->clock && data->timeout_clks) {
+-			unsigned long long val;
+-
+-			/*
+-			 * data->timeout_clks is in units of clock cycles.
+-			 * host->clock is in Hz.  target_timeout is in us.
+-			 * Hence, us = 1000000 * cycles / Hz.  Round up.
+-			 */
+-			val = 1000000ULL * data->timeout_clks;
+-			if (do_div(val, host->clock))
+-				target_timeout++;
+-			target_timeout += val;
+-		}
+-	}
++	target_timeout = sdhci_target_timeout(host, cmd, data);
+ 
+ 	/*
+ 	 * Figure out needed cycles.
 -- 
 2.17.0
