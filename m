@@ -1,87 +1,72 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v5 00/14] mmc: sdhci-omap: Add UHS/HS200 mode support
-Date: Fri, 27 Apr 2018 17:17:09 +0530
-Message-ID: <20180427114723.2687-1-kishon@ti.com>
+Subject: [PATCH v5 01/14] mmc: sdhci-omap: Fix when capabilities are obtained from SDHCI_CAPABILITIES reg
+Date: Fri, 27 Apr 2018 17:17:10 +0530
+Message-ID: <20180427114723.2687-2-kishon@ti.com>
+References: <20180427114723.2687-1-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180427114723.2687-1-kishon@ti.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
 Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-Add UHS/HS200 mode support in sdhci-omap. The programming sequence
-for voltage switching, tuning is followed from AM572x TRM
-http://www.ti.com/lit/ug/spruhz6j/spruhz6j.pdf
-(Similar to all AM57x/DRA7x SoCs). The patch series also implements
-workaround for errata published in
-http://www.ti.com/lit/er/sprz429l/sprz429l.pdf
+sdhci_omap_config_iodelay_pinctrl_state() requires caps and caps2 to be
+initialized (speed mode capabilities like UHS/HS200) before it is
+invoked. While mmc_of_parse() initializes caps/caps2 if capabilities is
+populated in device tree, it will remain uninitialized for capabilities
+obtained from SDHCI_CAPABILITIES register.
+Fix sdhci_omap_config_iodelay_pinctrl_state() to be used even while
+getting the capabilities from SDHCI_CAPABILITIES register by invoking
+sdhci_setup_host() before sdhci_omap_config_iodelay_pinctrl_state().
 
-patches are created on top of
-git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git next
+Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+Acked-by: Tony Lindgren <tony@atomide.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/sdhci-omap.c | 17 ++++++++++++-----
+ 1 file changed, 12 insertions(+), 5 deletions(-)
 
-The patches along with dt has also been pushed to
-https://github.com/kishon/linux-wip.git sdhci_uhs_v5
-
-Changes from v4:
-*) Added comment in sdhci for disabling HS200/HS400 mode
-*) Fixed a couple of chunks in "Program a relatively accurate SW timeout
-   value" which were missed in the previous revision
-*) Added a patch in sdhci-omap to get IODelay values of 3.3v DDR mode.
-*) Added pinctrl binding documentation for sdhci-omap which was missed
-   before.
-
-Changes from v3:
-*) Fixed Adrian's comment on error handling when __sdhci_add_host()
-   fails
-*) Used Adrian's patches for programming SW timeout value.
-
-Changes from v2:
-*) Patches in v2 already applied to mmc -next are dropped from the
-   series.
-*) Changed SW timeout logic as per Adrians's suggestion
-*) Validated SDIO with the current patches (added a couple of fixes
-   found while adding SDIO support).
-*) Used soc_device_match() instead of pdata-quirks as per Tony's
-   suggestions.
-
-Changes from v1:
-*) Only poll on DAT0 and DATI for card_busy status
-*) Cleanup iodelay patch as suggested by Tony.
-*) Added quirk to disable HW timeout
-*) Use the existing data timer but program a relatively accurate
-   SW timeout value (Impacts all platforms)
-*) Fix a bug in sdhci which was using data_timer for non data line
-   commands
-
-Adrian Hunter (2):
-  mmc: sdhci: Add quirk to disable HW timeout
-  mmc: sdhci: Factor out target_timeout calculation
-
-Kishon Vijay Abraham I (12):
-  mmc: sdhci-omap: Fix when capabilities are obtained from
-    SDHCI_CAPABILITIES reg
-  mmc: sdhci-omap: Remove setting ADMA capability in driver
-  mmc: sdhci-omap: Workaround for Errata i843
-  mmc: sdhci-omap: Invoke sdhci_get_of_property to read sdhci dt
-    properties
-  mmc: sdhci: Disable 1.8v modes (HS200/HS400/UHS) if controller can't
-    support 1.8v
-  mmc: sdhci: Program a relatively accurate SW timeout value
-  mmc: sdhci-omap: Workaround for Errata i834
-  dt-bindings: sdhci-omap: Add K2G specific binding
-  mmc: sdhci-omap: Add support for MMC/SD controller in k2g SoC
-  mmc: sdhci-omap: Add sdhci_omap specific ops for enable_sdio_irq
-  dt-bindings: sdhci-omap: Add pinctrl bindings
-  mmc: sdhci-omap: Get IODelay values for 3.3v DDR mode
-
- .../devicetree/bindings/mmc/sdhci-omap.txt    |   7 +
- drivers/mmc/host/sdhci-omap.c                 |  92 +++++++++--
- drivers/mmc/host/sdhci.c                      | 148 ++++++++++++++----
- drivers/mmc/host/sdhci.h                      |  15 ++
- include/linux/mmc/host.h                      |   4 +
- 5 files changed, 226 insertions(+), 40 deletions(-)
-
+diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+index 1456abd5eeb9..e7e43f2ae224 100644
+--- a/drivers/mmc/host/sdhci-omap.c
++++ b/drivers/mmc/host/sdhci-omap.c
+@@ -916,10 +916,6 @@ static int sdhci_omap_probe(struct platform_device *pdev)
+ 		goto err_put_sync;
+ 	}
+ 
+-	ret = sdhci_omap_config_iodelay_pinctrl_state(omap_host);
+-	if (ret)
+-		goto err_put_sync;
+-
+ 	host->mmc_host_ops.get_ro = mmc_gpio_get_ro;
+ 	host->mmc_host_ops.start_signal_voltage_switch =
+ 					sdhci_omap_start_signal_voltage_switch;
+@@ -930,12 +926,23 @@ static int sdhci_omap_probe(struct platform_device *pdev)
+ 	sdhci_read_caps(host);
+ 	host->caps |= SDHCI_CAN_DO_ADMA2;
+ 
+-	ret = sdhci_add_host(host);
++	ret = sdhci_setup_host(host);
+ 	if (ret)
+ 		goto err_put_sync;
+ 
++	ret = sdhci_omap_config_iodelay_pinctrl_state(omap_host);
++	if (ret)
++		goto err_cleanup_host;
++
++	ret = __sdhci_add_host(host);
++	if (ret)
++		goto err_cleanup_host;
++
+ 	return 0;
+ 
++err_cleanup_host:
++	sdhci_cleanup_host(host);
++
+ err_put_sync:
+ 	pm_runtime_put_sync(dev);
+ 
 -- 
 2.17.0
