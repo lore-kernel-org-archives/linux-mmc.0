@@ -1,229 +1,136 @@
-From: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH 3/3] arm64: allwinner: h6: enable MMC0/2 on
- Pine H64
-Date: Mon, 30 Apr 2018 11:44:25 +0100
-Message-ID: <c70beee6-3524-a322-9668-45cb27fc365c@arm.com>
-References: <20180426140728.43155-1-icenowy@aosc.io>
- <20180426140728.43155-4-icenowy@aosc.io>
- <03cc2e8c-4a35-3fb4-b408-fd8d4ba3e407@arm.com>
- <83EDF187-5EB2-4FEB-99BC-9D5B728D3A45@aosc.io>
- <45956397-a593-e51e-8637-655178c5901c@arm.com>
- <CDCEAF85-ACD3-4884-8727-3AB1BFF670FE@aosc.io>
-Reply-To: andre.przywara-5wv7dgnIgG8@public.gmane.org
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-sunxi+bncBDNZNK75ZIKRBGXHTPLQKGQESMJ4QXI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-In-Reply-To: <CDCEAF85-ACD3-4884-8727-3AB1BFF670FE-h8G6r0blFSE@public.gmane.org>
-Content-Language: en-GB
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Icenowy Zheng <icenowy-h8G6r0blFSE@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+From: Liming Sun <lsun@mellanox.com>
+Subject: [PATCH v3 1/3] mmc: dw_mmc-bluefield: Add driver extension
+Date: Mon, 30 Apr 2018 10:51:06 -0400
+Message-ID: <1525099868-45094-1-git-send-email-lsun@mellanox.com>
+References: <026fa942828c54fda5bad225981e56abc808b949.1524497286.git.lsun@mellanox.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <026fa942828c54fda5bad225981e56abc808b949.1524497286.git.lsun@mellanox.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Jaehoon Chung <jh80.chung@samsung.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>
+Cc: Liming Sun <lsun@mellanox.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+This commit adds extension to the dw_mmc driver for Mellanox BlueField
+SoC. It updates the UHS_REG_EXT register to bring up the eMMC card on
+this SoC.
 
-On 30/04/18 10:51, Icenowy Zheng wrote:
->=20
->=20
-> =E4=BA=8E 2018=E5=B9=B44=E6=9C=8830=E6=97=A5 GMT+08:00 =E4=B8=8B=E5=8D=88=
-5:47:35, Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org> =E5=86=99=E5=88=B0:
->> Hi Icenowy,
->>
->> On 27/04/18 08:12, Icenowy Zheng wrote:
->>>
->>>
->>> =E4=BA=8E 2018=E5=B9=B44=E6=9C=8827=E6=97=A5 GMT+08:00 =E4=B8=8A=E5=8D=
-=8812:46:26, Andre Przywara
->> <andre.przywara-5wv7dgnIgG8@public.gmane.org> =E5=86=99=E5=88=B0:
->>>> Hi,
->>>>
->>>> On 26/04/18 15:07, Icenowy Zheng wrote:
->>>>> The Pine H64 board have a MicroSD slot connected to MMC0 controller
->>>> of
->>>>> the H6 SoC and a eMMC slot connected to MMC2.
->>>>>
->>>>> Enable them in the device tree.
->>>>>
->>>>> Signed-off-by: Icenowy Zheng <icenowy-h8G6r0blFSE@public.gmane.org>
->>>>> ---
->>>>>  .../boot/dts/allwinner/sun50i-h6-pine-h64.dts      | 32
->>>> ++++++++++++++++++++++
->>>>>  1 file changed, 32 insertions(+)
->>>>>
->>>>> diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h6-pine-h64.dts
->>>> b/arch/arm64/boot/dts/allwinner/sun50i-h6-pine-h64.dts
->>>>> index d36de5eb81f3..78b1cd54687c 100644
->>>>> --- a/arch/arm64/boot/dts/allwinner/sun50i-h6-pine-h64.dts
->>>>> +++ b/arch/arm64/boot/dts/allwinner/sun50i-h6-pine-h64.dts
->>>>> @@ -20,6 +20,38 @@
->>>>>  	chosen {
->>>>>  		stdout-path =3D "serial0:115200n8";
->>>>>  	};
->>>>> +
->>>>> +	reg_vcc3v3: vcc3v3 {
->>>>> +		compatible =3D "regulator-fixed";
->>>>> +		regulator-name =3D "vcc3v3";
->>>>> +		regulator-min-microvolt =3D <3300000>;
->>>>> +		regulator-max-microvolt =3D <3300000>;
->>>>> +	};
->>>>> +
->>>>> +	reg_vcc1v8: vcc1v8 {
->>>>> +		compatible =3D "regulator-fixed";
->>>>> +		regulator-name =3D "vcc1v8";
->>>>> +		regulator-min-microvolt =3D <1800000>;
->>>>> +		regulator-max-microvolt =3D <1800000>;
->>>>> +	};
->>>>> +};
->>>>> +
->>>>> +&mmc0 {
->>>>> +	pinctrl-names =3D "default";
->>>>> +	pinctrl-0 =3D <&mmc0_pins>;
->>>>> +	vmmc-supply =3D <&reg_vcc3v3>;
->>>>
->>>> So this is actually CLDO1 on the AXP, correct?
->>>
->>> I remember it's coupled between two LDOs, to provide enough power.
->>>
->>>>
->>>>
->>>>> +	cd-gpios =3D <&pio 5 6 GPIO_ACTIVE_LOW>;
->>>>> +	status =3D "okay";
->>>>> +};
->>>>> +
->>>>> +&mmc2 {
->>>>> +	pinctrl-names =3D "default";
->>>>> +	pinctrl-0 =3D <&mmc2_pins>;
->>>>> +	vmmc-supply =3D <&reg_vcc3v3>;
->>>>> +	vqmmc-supply =3D <&reg_vcc1v8>;
->>>>
->>>> And this is BLDO2?
->>>
->>> Yes.
->>>
->>>>
->>>> I am just asking because I want to avoid running into the same
->> problem
->>>> as with the A64 before: that future DTs become incompatible with
->> older
->>>> kernels, because we change the power supply to point to the AXP
->>>> regulators, which this kernel does not support yet.
->>>
->>> The answer is just not to keep this compatibility, as it's not
->>> supported option to update DT without updating kernel.
->>
->> Well, I recognise that statement.. ;-) and I understand that it's far
->> easier to handle it this way. But:
->> - Which .dtb are we going to write into the SPI flash? An older one,
->> which covers all kernels, but lacks features? Or a newer one, which
->> limits the bootable kernels to recent versions?
->> - Which DT are we going to give to EFI applications?
->> - Which DT are the BSDs suspected to take? They don't ship their own
->> DTs
->> (which is good!).
->>
->> So I understand that "shipping the DT with the kernel" is the old
->> (embedded!) way of doing things, but I really believe we should stop
->> relying on this and try to come up with backwards compatible DTs, which
->> live in the firmware and get updated there. Because this is what the
->> distros seem to expect from ARM64 boards these days.
->=20
-> I think in this way we should change the way to submit
-> patches -- let DT binding patch be merged when it's ready,
-> and do not wait for driver.
+Signed-off-by: Liming Sun <lsun@mellanox.com>
+---
+ drivers/mmc/host/Kconfig            |  9 +++++
+ drivers/mmc/host/Makefile           |  1 +
+ drivers/mmc/host/dw_mmc-bluefield.c | 72 +++++++++++++++++++++++++++++++++++++
+ 3 files changed, 82 insertions(+)
+ create mode 100644 drivers/mmc/host/dw_mmc-bluefield.c
 
-Yes, I agree. Ideally we would look at the hardware description, create
-a binding just based on that and submit it.
-
-Then the actual DTs and the drivers (for Linux, U-Boot, *BSD,
-you-name-it) could be done independently from each other.
-
-I think we should really aim for that. The only question is whether this
-is really practical, since the documentation is sometimes lacking and we
-may discover missing properties during driver development.
-So when we meanwhile do hand-in-hand development, we should make sure we
-don't break anything in the future.
-
->>> P.S. I think the DT will update twice on the kernel side, the
->>> first time keep reg_vcc3v3 (as it's coupled) but use real
->>> regulator for reg_vcc1v8, the second time use the real
->>> coupled regulator for reg_vcc3v3.
->>>
->>>>
->>>> It looks like there are more users of those power rails, so we could
->>>> keep those supplies connected to these fixed regulators here, even
->> with
->>>> AXP-805 support in the kernel.
->>>
->>> It's not a good choice.
->>>
->>>>
->>>> Or we keep this back until we get proper AXP support in the kernel?
->> I
->>>> guess it's quite close to the existing PMICs, so it might be more a
->>>> copy&paste exercise to support the AXP-805?
->>>
->>> It's not a reason to keep it back.
->>
->> So I compared the manuals of the AXP806 and the AXP805, the register
->> interface looks identical to me. I only have a (somewhat) Chinese
->> version of the AXP806 manual, so couldn't really find the difference
->> between the two. Do you know more about it? Is it just maybe the
->> packaging and the electrical properties (like max current supported)?
->>
->> If the I2C register interface is really the same, we could just add the
->> DT nodes for the regulator and be done.
->=20
-> They're the same. My following patchset adds AXP805
-> compatible just to use AXP806 code. I have asked Wink
-> and the answer is that they have only preset difference.
-
-Ah, thanks for that, that's good info!
-So in this case we don't even need to add the compatible name to the
-driver, just add it to the binding doc and create (or copy) the DT
-snippets. See last week's discussion ;-)
-And we could aim to merge this together with the MMC driver, so that
-there would be no regression.
-Isn't that doable? I am happy to review patches on short notice (if you
-have them already, otherwise I am happy to make them).
-
-So in summary it looks like all changes could be purely binding doc/DT
-changes, so any 4.17 kernel would work already, when presented with the
-right DT.
-
-Cheers,
-Andre.
-
-
->=20
->>
->> Cheers,
->> Andre.
->>
->>>
->>>>
->>>> But apart from this this looks correct to me.
->>>>
->>>> Cheers,
->>>> Andre.
->>>>
->>>>> +	non-removable;
->>>>> +	cap-mmc-hw-reset;
->>>>> +	status =3D "okay";
->>>>>  };
->>>>> =20
->>>>>  &uart0 {
->>>>>
-
---=20
-You received this message because you are subscribed to the Google Groups "=
-linux-sunxi" group.
-To unsubscribe from this group and stop receiving emails from it, send an e=
-mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
-For more options, visit https://groups.google.com/d/optout.
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 9589f9c..26ac6b5 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -717,6 +717,15 @@ config MMC_DW_K3
+ 	  Synopsys DesignWare Memory Card Interface driver. Select this option
+ 	  for platforms based on Hisilicon K3 SoC's.
+ 
++config MMC_DW_BLUEFIELD
++	tristate "BlueField specific extensions for Synopsys DW Memory Card Interface"
++	depends on MMC_DW
++	select MMC_DW_PLTFM
++	help
++	  This selects support for Mellanox BlueField SoC specific extensions to
++	  the Synopsys DesignWare Memory Card Interface driver. Select this
++	  option for platforms based on Mellanox BlueField SoC's.
++
+ config MMC_DW_PCI
+ 	tristate "Synopsys Designware MCI support on PCI bus"
+ 	depends on MMC_DW && PCI
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index 6aead24..267b3f1 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -55,6 +55,7 @@ obj-$(CONFIG_MMC_DW_K3)		+= dw_mmc-k3.o
+ obj-$(CONFIG_MMC_DW_PCI)	+= dw_mmc-pci.o
+ obj-$(CONFIG_MMC_DW_ROCKCHIP)	+= dw_mmc-rockchip.o
+ obj-$(CONFIG_MMC_DW_ZX)		+= dw_mmc-zx.o
++obj-$(CONFIG_MMC_DW_BLUEFIELD)	+= dw_mmc-bluefield.o
+ obj-$(CONFIG_MMC_SH_MMCIF)	+= sh_mmcif.o
+ obj-$(CONFIG_MMC_JZ4740)	+= jz4740_mmc.o
+ obj-$(CONFIG_MMC_VUB300)	+= vub300.o
+diff --git a/drivers/mmc/host/dw_mmc-bluefield.c b/drivers/mmc/host/dw_mmc-bluefield.c
+new file mode 100644
+index 0000000..12067b1
+--- /dev/null
++++ b/drivers/mmc/host/dw_mmc-bluefield.c
+@@ -0,0 +1,72 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Copyright (C) 2018 Mellanox Technologies.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ */
++
++#include <linux/module.h>
++#include <linux/io.h>
++#include <linux/irq.h>
++#include <linux/platform_device.h>
++#include <linux/pm_runtime.h>
++#include <linux/mmc/host.h>
++#include <linux/mmc/mmc.h>
++#include <linux/of.h>
++
++#include "dw_mmc.h"
++#include "dw_mmc-pltfm.h"
++
++static void dw_mci_bluefield_set_ios(struct dw_mci *host, struct mmc_ios *ios)
++{
++	u32 regs;
++
++	/* Set drive=4 (bit 29:23) and sample=2 (bit 22:16) in UHS_REG_EXT. */
++	regs = mci_readl(host, UHS_REG_EXT);
++	regs = (regs & ~0x3F100000 & ~0x7F0000) | (4 << 23) | (2 << 16);
++	mci_writel(host, UHS_REG_EXT, regs);
++}
++
++static const struct dw_mci_drv_data bluefield_drv_data = {
++	.set_ios		= dw_mci_bluefield_set_ios
++};
++
++static const struct of_device_id dw_mci_bluefield_match[] = {
++	{ .compatible = "mellanox,bluefield-dw-mshc",
++		.data = &bluefield_drv_data },
++	{},
++};
++MODULE_DEVICE_TABLE(of, dw_mci_bluefield_match);
++
++static int dw_mci_bluefield_probe(struct platform_device *pdev)
++{
++	const struct dw_mci_drv_data *drv_data = NULL;
++	const struct of_device_id *match;
++
++	if (pdev->dev.of_node) {
++		match = of_match_node(dw_mci_bluefield_match,
++				      pdev->dev.of_node);
++		drv_data = match->data;
++	}
++
++	return dw_mci_pltfm_register(pdev, drv_data);
++}
++
++static struct platform_driver dw_mci_bluefield_pltfm_driver = {
++	.probe		= dw_mci_bluefield_probe,
++	.remove		= dw_mci_pltfm_remove,
++	.driver		= {
++		.name		= "dwmmc_bluefield",
++		.of_match_table	= dw_mci_bluefield_match,
++		.pm		= &dw_mci_pltfm_pmops,
++	},
++};
++
++module_platform_driver(dw_mci_bluefield_pltfm_driver);
++
++MODULE_DESCRIPTION("BlueField DW Multimedia Card driver");
++MODULE_AUTHOR("Mellanox Technologies");
++MODULE_LICENSE("GPL v2");
+-- 
+1.8.3.1
