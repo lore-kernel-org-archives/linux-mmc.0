@@ -1,103 +1,175 @@
-From: Lukasz Majewski <lukma@denx.de>
-Subject: Re: [PATCH] mmc: disable card sleep via device-tree
-Date: Mon, 30 Apr 2018 11:31:57 +0200
-Message-ID: <20180430113157.37a09e5c@jawa>
-References: <20180422213126.32756-1-lukma@denx.de>
-        <CACRpkdbzvnSHPQOZjs3WcL9pOMz3R0W9P9Gre5n_G40udTMUjQ@mail.gmail.com>
+From: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH 3/3] arm64: allwinner: h6: enable MMC0/2 on
+ Pine H64
+Date: Mon, 30 Apr 2018 10:47:35 +0100
+Message-ID: <45956397-a593-e51e-8637-655178c5901c@arm.com>
+References: <20180426140728.43155-1-icenowy@aosc.io>
+ <20180426140728.43155-4-icenowy@aosc.io>
+ <03cc2e8c-4a35-3fb4-b408-fd8d4ba3e407@arm.com>
+ <83EDF187-5EB2-4FEB-99BC-9D5B728D3A45@aosc.io>
+Reply-To: andre.przywara-5wv7dgnIgG8@public.gmane.org
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
- boundary="Sig_/GQcZcnqHsueOF9j.h1LrYQo"; protocol="application/pgp-signature"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CACRpkdbzvnSHPQOZjs3WcL9pOMz3R0W9P9Gre5n_G40udTMUjQ@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Fabio Estevam <fabio.estevam@nxp.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Chanho Min <chanho.min@lge.com>, "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Stanislav Meduna <stanislav.meduna@nxtcontrol.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-sunxi+bncBDNZNK75ZIKRBSGMTPLQKGQECTDMSXY-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+In-Reply-To: <83EDF187-5EB2-4FEB-99BC-9D5B728D3A45-h8G6r0blFSE@public.gmane.org>
+Content-Language: en-GB
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: Icenowy Zheng <icenowy-h8G6r0blFSE@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
---Sig_/GQcZcnqHsueOF9j.h1LrYQo
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: quoted-printable
+Hi Icenowy,
 
-On Mon, 30 Apr 2018 11:13:45 +0200
-Hi Linus,
-
-> On Sun, Apr 22, 2018 at 11:31 PM, Lukasz Majewski <lukma@denx.de>
-> wrote:
+On 27/04/18 08:12, Icenowy Zheng wrote:
 >=20
-> > From: Stanislav Meduna <stanislav.meduna@nxtcontrol.com>
-> >
-> > On a TQMa53 module the mmc_sleep leaves the eMMC card in a state
-> > that the imx53 rom boot code is unable to probe, resulting in
-> > reboot hanging. Add a device tree property to disable sleeping
-> > on suspend.
-> >
-> > For TQMa53 modules the exact commit to cause hang after reboot
-> > (v3.10 -> v3.11):
-> > commit 486fdbbc1483 ("mmc: core: Add shutdown callback for (e)MMC
-> > bus_ops")
-> >
-> > [The exact discussion can be found here:
-> > https://patchwork.kernel.org/patch/8881401/
-> > "i.MX53 restart via watchdog does not work"
-> >
-> > Signed-off-by: Stanislav Meduna <stanislav.meduna@nxtcontrol.com>
-> > Signed-off-by: Lukasz Majewski <lukma@denx.de> =20
-> (...)
 >=20
-> >  Optional properties:
-> >  -broken-hpi : Use this to indicate that the mmc-card has a broken
-> > hpi implementation, and that hpi should not be used
-> > +-no-sleep-on-suspend : Do not put the card to sleep when
-> > suspending.
-> > +              There are boards with bootloaders that are unable
-> > +              to probe such card when rebooting. =20
+> =E4=BA=8E 2018=E5=B9=B44=E6=9C=8827=E6=97=A5 GMT+08:00 =E4=B8=8A=E5=8D=88=
+12:46:26, Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org> =E5=86=99=E5=88=B0:
+>> Hi,
+>>
+>> On 26/04/18 15:07, Icenowy Zheng wrote:
+>>> The Pine H64 board have a MicroSD slot connected to MMC0 controller
+>> of
+>>> the H6 SoC and a eMMC slot connected to MMC2.
+>>>
+>>> Enable them in the device tree.
+>>>
+>>> Signed-off-by: Icenowy Zheng <icenowy-h8G6r0blFSE@public.gmane.org>
+>>> ---
+>>>  .../boot/dts/allwinner/sun50i-h6-pine-h64.dts      | 32
+>> ++++++++++++++++++++++
+>>>  1 file changed, 32 insertions(+)
+>>>
+>>> diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h6-pine-h64.dts
+>> b/arch/arm64/boot/dts/allwinner/sun50i-h6-pine-h64.dts
+>>> index d36de5eb81f3..78b1cd54687c 100644
+>>> --- a/arch/arm64/boot/dts/allwinner/sun50i-h6-pine-h64.dts
+>>> +++ b/arch/arm64/boot/dts/allwinner/sun50i-h6-pine-h64.dts
+>>> @@ -20,6 +20,38 @@
+>>>  	chosen {
+>>>  		stdout-path =3D "serial0:115200n8";
+>>>  	};
+>>> +
+>>> +	reg_vcc3v3: vcc3v3 {
+>>> +		compatible =3D "regulator-fixed";
+>>> +		regulator-name =3D "vcc3v3";
+>>> +		regulator-min-microvolt =3D <3300000>;
+>>> +		regulator-max-microvolt =3D <3300000>;
+>>> +	};
+>>> +
+>>> +	reg_vcc1v8: vcc1v8 {
+>>> +		compatible =3D "regulator-fixed";
+>>> +		regulator-name =3D "vcc1v8";
+>>> +		regulator-min-microvolt =3D <1800000>;
+>>> +		regulator-max-microvolt =3D <1800000>;
+>>> +	};
+>>> +};
+>>> +
+>>> +&mmc0 {
+>>> +	pinctrl-names =3D "default";
+>>> +	pinctrl-0 =3D <&mmc0_pins>;
+>>> +	vmmc-supply =3D <&reg_vcc3v3>;
+>>
+>> So this is actually CLDO1 on the AXP, correct?
 >=20
-> As far as I understand this problem is not coming from the host
-> controller itself,
-> so it should not be tagged on to the host controller either. Rather
-> the problem is how the specific system has integrated the host
-> controller, the problem is in the fixture of this specific machine,
-> as you say, in the i.MX53 ROM.
+> I remember it's coupled between two LDOs, to provide enough power.
 >=20
-> In that case, I would say use this:
+>>
+>>
+>>> +	cd-gpios =3D <&pio 5 6 GPIO_ACTIVE_LOW>;
+>>> +	status =3D "okay";
+>>> +};
+>>> +
+>>> +&mmc2 {
+>>> +	pinctrl-names =3D "default";
+>>> +	pinctrl-0 =3D <&mmc2_pins>;
+>>> +	vmmc-supply =3D <&reg_vcc3v3>;
+>>> +	vqmmc-supply =3D <&reg_vcc1v8>;
+>>
+>> And this is BLDO2?
 >=20
-> if (of_machine_is_compatible("fsl,imx53")) {
->    ..activate quirk...
-> }
+> Yes.
+>=20
+>>
+>> I am just asking because I want to avoid running into the same problem
+>> as with the A64 before: that future DTs become incompatible with older
+>> kernels, because we change the power supply to point to the AXP
+>> regulators, which this kernel does not support yet.
+>=20
+> The answer is just not to keep this compatibility, as it's not
+> supported option to update DT without updating kernel.
 
-I see. Thanks for pointing this.
+Well, I recognise that statement.. ;-) and I understand that it's far
+easier to handle it this way. But:
+- Which .dtb are we going to write into the SPI flash? An older one,
+which covers all kernels, but lacks features? Or a newer one, which
+limits the bootable kernels to recent versions?
+- Which DT are we going to give to EFI applications?
+- Which DT are the BSDs suspected to take? They don't ship their own DTs
+(which is good!).
+
+So I understand that "shipping the DT with the kernel" is the old
+(embedded!) way of doing things, but I really believe we should stop
+relying on this and try to come up with backwards compatible DTs, which
+live in the firmware and get updated there. Because this is what the
+distros seem to expect from ARM64 boards these days.
+
+> P.S. I think the DT will update twice on the kernel side, the
+> first time keep reg_vcc3v3 (as it's coupled) but use real
+> regulator for reg_vcc1v8, the second time use the real
+> coupled regulator for reg_vcc3v3.
+>=20
+>>
+>> It looks like there are more users of those power rails, so we could
+>> keep those supplies connected to these fixed regulators here, even with
+>> AXP-805 support in the kernel.
+>=20
+> It's not a good choice.
+>=20
+>>
+>> Or we keep this back until we get proper AXP support in the kernel? I
+>> guess it's quite close to the existing PMICs, so it might be more a
+>> copy&paste exercise to support the AXP-805?
+>=20
+> It's not a reason to keep it back.
+
+So I compared the manuals of the AXP806 and the AXP805, the register
+interface looks identical to me. I only have a (somewhat) Chinese
+version of the AXP806 manual, so couldn't really find the difference
+between the two. Do you know more about it? Is it just maybe the
+packaging and the electrical properties (like max current supported)?
+
+If the I2C register interface is really the same, we could just add the
+DT nodes for the regulator and be done.
+
+Cheers,
+Andre.
 
 >=20
-> Yours,
-> Linus Walleij
+>>
+>> But apart from this this looks correct to me.
+>>
+>> Cheers,
+>> Andre.
+>>
+>>> +	non-removable;
+>>> +	cap-mmc-hw-reset;
+>>> +	status =3D "okay";
+>>>  };
+>>> =20
+>>>  &uart0 {
+>>>
 
-
-
-
-Best regards,
-
-Lukasz Majewski
-
---
-
-DENX Software Engineering GmbH,      Managing Director: Wolfgang Denk
-HRB 165235 Munich, Office: Kirchenstr.5, D-82194 Groebenzell, Germany
-Phone: (+49)-8142-66989-10 Fax: (+49)-8142-66989-80 Email: wd@denx.de
-
---Sig_/GQcZcnqHsueOF9j.h1LrYQo
-Content-Type: application/pgp-signature
-Content-Description: OpenPGP digital signature
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAEBCAAdFiEEgAyFJ+N6uu6+XupJAR8vZIA0zr0FAlrm4o0ACgkQAR8vZIA0
-zr2sFQgAv82zj0TyT0DP6MwwHWZ27wU8H3GjV0n6w1jRM5g9btdBLTHC9aHPzG7G
-yIW0NNM8WSe29uDqd8THmfGrjbMtzdxa/1eAj3eQxtwJsKJd43w5KrZVmU8azPmk
-+kQkxLalkjDqkUsRv7CiTAPCn+OGVngaA8dcCvV1EvDBkzgCKBzfc7ahBj2TWcK6
-3ejEbPNw8i9ujLP8qtRdpEUAOtJlYWNPG7U6n9ddtQCIQH0JZ8pU0+Ff0iAI7150
-2nqPtmCyIlQUZYlIYslf2KG7PpH45lJ09uKu2tM7lpaiRBQnuG+nYf7dxsPfnage
-8aVTBQyZZg1gDZ3q/OUvAqTRDZkYnw==
-=sbpo
------END PGP SIGNATURE-----
-
---Sig_/GQcZcnqHsueOF9j.h1LrYQo--
+--=20
+You received this message because you are subscribed to the Google Groups "=
+linux-sunxi" group.
+To unsubscribe from this group and stop receiving emails from it, send an e=
+mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
+For more options, visit https://groups.google.com/d/optout.
