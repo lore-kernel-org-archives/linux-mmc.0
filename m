@@ -1,101 +1,71 @@
-From: Liming Sun <lsun@mellanox.com>
-Subject: RE: [PATCH v4 2/3] dt-bindings: mmc: Add binding for BlueField SoC
-Date: Tue, 1 May 2018 19:10:22 +0000
-Message-ID: <AM2PR05MB0753E1D0ADA97E687EDD59C6A1810@AM2PR05MB0753.eurprd05.prod.outlook.com>
-References: <026fa942828c54fda5bad225981e56abc808b949.1524497286.git.lsun@mellanox.com>
- <1525185155-24469-2-git-send-email-lsun@mellanox.com>
- <20180501162446.GA10012@rob-hp-laptop>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+From: Evan Green <evgreen@chromium.org>
+Subject: [PATCH RFC] mmc: sdhci: Don't get card-detect without preemption
+Date: Tue,  1 May 2018 16:47:21 -0700
+Message-ID: <20180501234721.187135-1-evgreen@chromium.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180501162446.GA10012@rob-hp-laptop>
-Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Rob Herring <robh@kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Jaehoon Chung <jh80.chung@samsung.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Evan Green <evgreen@chromium.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Thanks! Updated in v5 2/3.
+For a controller with SDHCI_QUIRK_NO_CARD_NO_RESET, there are several
+conditions where sdhci_do_reset is called under a spinlock with interrupts
+disabled. The card detect is often a GPIO, which might sleep. Avoid
+asking for the card detect status if interrupts are disabled to prevent
+a warning like the following:
 
-> -----Original Message-----
-> From: Rob Herring [mailto:robh@kernel.org]
-> Sent: Tuesday, May 1, 2018 12:25 PM
-> To: Liming Sun <lsun@mellanox.com>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>; Mark Rutland
-> <mark.rutland@arm.com>; Jaehoon Chung <jh80.chung@samsung.com>;
-> Catalin Marinas <catalin.marinas@arm.com>; Will Deacon
-> <will.deacon@arm.com>; linux-mmc@vger.kernel.org;
-> devicetree@vger.kernel.org; linux-kernel@vger.kernel.org
-> Subject: Re: [PATCH v4 2/3] dt-bindings: mmc: Add binding for BlueField S=
-oC
->=20
-> On Tue, May 01, 2018 at 10:32:34AM -0400, Liming Sun wrote:
-> > This commit adds "mellanox,bluefield-dw-mshc" for dwmmc driver
-> > extension on Mellanox BlueField SoC platform.
-> >
-> > Signed-off-by: Liming Sun <lsun@mellanox.com>
-> > ---
-> >  .../devicetree/bindings/mmc/bluefield-dw-mshc.txt  | 29
-> ++++++++++++++++++++++
-> >  1 file changed, 29 insertions(+)
-> >  create mode 100644 Documentation/devicetree/bindings/mmc/bluefield-
-> dw-mshc.txt
-> >
-> > diff --git a/Documentation/devicetree/bindings/mmc/bluefield-dw-
-> mshc.txt b/Documentation/devicetree/bindings/mmc/bluefield-dw-
-> mshc.txt
-> > new file mode 100644
-> > index 0000000..75bd844d
-> > --- /dev/null
-> > +++ b/Documentation/devicetree/bindings/mmc/bluefield-dw-mshc.txt
-> > @@ -0,0 +1,29 @@
-> > +* Mellanox Bluefield SoC specific extensions to the Synopsys Designwar=
-e
-> > +  Mobile Storage Host Controller
-> > +
-> > +Read synopsys-dw-mshc.txt for more details
-> > +
-> > +The Synopsys designware mobile storage host controller is used to
-> interface
-> > +a SoC with storage medium such as eMMC or SD/MMC cards. This file
-> documents
-> > +differences between the core Synopsys dw mshc controller properties
-> described
-> > +by synopsys-dw-mshc.txt and the properties used by the Mellanox
-> Bluefield SoC
-> > +specific extensions to the Synopsys Designware Mobile Storage Host
-> Controller.
-> > +
-> > +Required Properties:
-> > +
-> > +* compatible: should be one of the following.
-> > +  - "mellanox,bluefield-dw-mshc": for controllers with Mellanox Bluefi=
-eld
-> SoC
-> > +    specific extensions.
-> > +
-> > +Example:
-> > +
-> > +	/* Mellanox Bluefield SoC MMC */
-> > +	mmc@0x6008000 {
->=20
-> Drop the '0x'.
->=20
-> Building your dtb with 'W=3D1' will warn on this.
->=20
-> With that,
->=20
-> Reviewed-by: Rob Herring <robh@kernel.org>
->=20
-> > +		compatible =3D "mellanox,bluefield-dw-mshc";
-> > +		reg =3D <0x6008000 0x400>;
-> > +		interrupts =3D <32>;
-> > +		fifo-depth =3D <0x100>;
-> > +		clock-frequency =3D <24000000>;
-> > +		bus-width =3D <8>;
-> > +		cap-mmc-highspeed;
-> > +	};
-> > --
-> > 1.8.3.1
-> >
+[    2.480199] Call trace:
+[    2.480218] [<ffffff800808a698>] dump_backtrace+0x0/0x228
+[    2.480224] [<ffffff800808a8e0>] show_stack+0x20/0x28
+[    2.480235] [<ffffff80088a0214>] dump_stack+0x90/0xb0
+[    2.480245] [<ffffff80080d7aa8>] ___might_sleep+0x110/0x128
+[    2.480248] [<ffffff80080d7b38>] __might_sleep+0x78/0x88
+[    2.480260] [<ffffff80083cdd28>] gpiod_get_raw_value_cansleep+0x2c/0xc4
+[    2.480269] [<ffffff80086a93a8>] mmc_gpio_get_cd+0x3c/0x68
+[    2.480275] [<ffffff80086b008c>] sdhci_get_cd+0x20/0x98
+[    2.480280] [<ffffff80086b081c>] sdhci_do_reset+0x50/0x88
+[    2.480283] [<ffffff80086b4640>] sdhci_tasklet_finish+0x1a8/0x270
+[    2.480292] [<ffffff80080b29d4>] tasklet_action+0x90/0xf4
+[    2.480296] [<ffffff80080813b8>] __do_softirq+0x1c8/0x360
+[    2.480300] [<ffffff80080b2408>] irq_exit+0x88/0xd0
+
+---
+
+I discovered this warning while trying to bring up SD, somewhat unsuccessfully,
+on a new device, and hit this error path.
+
+This change is not ideal as it only makes a best effort to adhere to the quirk,
+but may in some cases end up resetting the controller with no card present.
+
+Another option I considered was trying to call sdhci_do_reset within only
+sleepable contexts. I actually got as far as converting the tasklet to a
+work queue, and deferring the reset to the end of the function in
+sdhci_request_done. But 1) I'm not sure if that deferral was actually safe,
+and 2) we call sdhci_do_reset from under the lock in several other places,
+such as sdhci_card_event and sdhci_cqe_disable.
+
+Finally, I also considered calling the non-_maysleep gpio functions in
+mmc_gpio_get_cd. I assume this is not workable as someone somewhere has put
+a card detect off of a PMIC or GPIO expander.
+
+Any advice?
+
+---
+ drivers/mmc/host/sdhci.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 759278dd317d..c5273acf6987 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -210,7 +210,7 @@ static void sdhci_do_reset(struct sdhci_host *host, u8 mask)
+ 	if (host->quirks & SDHCI_QUIRK_NO_CARD_NO_RESET) {
+ 		struct mmc_host *mmc = host->mmc;
+ 
+-		if (!mmc->ops->get_cd(mmc))
++		if (preemptible() && !mmc->ops->get_cd(mmc))
+ 			return;
+ 	}
+ 
+-- 
+2.13.5
