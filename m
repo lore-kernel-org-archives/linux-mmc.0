@@ -1,7 +1,7 @@
 From: Vijay Viswanath <vviswana@codeaurora.org>
-Subject: [PATCH RFC 3/4] host: sdhci: fix current caps when there is no host->vmmc
-Date: Tue,  1 May 2018 16:09:12 +0530
-Message-ID: <1525171153-24476-4-git-send-email-vviswana@codeaurora.org>
+Subject: [PATCH RFC 4/4] host: sdhci-msm: implement get_current_limit() host op
+Date: Tue,  1 May 2018 16:09:13 +0530
+Message-ID: <1525171153-24476-5-git-send-email-vviswana@codeaurora.org>
 References: <1525171153-24476-1-git-send-email-vviswana@codeaurora.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1525171153-24476-1-git-send-email-vviswana@codeaurora.org>
@@ -12,56 +12,48 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Sahitya Tummala <stummala@codeaurora.org>
 
-When the regulators are not managed by SDHCI host driver (i.e.,
-when host->vmmc and host->vmmcq are absent), get the regulator
-current capabilities through a new host op get_current_limit().
+This is needed to get the current capabilities of vdd
+regulator that is not managed by SDHCI driver.
 
+Change-Id: I927c14b9890f1d672fe8a3e89d0b334f43463b36
 Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
 Signed-off-by: Sayali Lokhande <sayalil@codeaurora.org>
-[vviswana@codeaurora.org: fixed trivial merge conflicts]
 Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
-
-Change-Id: I3370a2411beec1f03cc5f102bf95cd816c60351e
 ---
- drivers/mmc/host/sdhci.c | 11 ++++++++---
- drivers/mmc/host/sdhci.h |  1 +
- 2 files changed, 9 insertions(+), 3 deletions(-)
+ drivers/mmc/host/sdhci-msm.c | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 0d5fcca..edc2ccd 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -3570,10 +3570,15 @@ int sdhci_setup_host(struct sdhci_host *host)
- 	 * value.
- 	 */
- 	max_current_caps = sdhci_readl(host, SDHCI_MAX_CURRENT);
--	if (!max_current_caps && !IS_ERR(mmc->supply.vmmc)) {
--		int curr = regulator_get_current_limit(mmc->supply.vmmc);
--		if (curr > 0) {
-+	if (!max_current_caps) {
-+		u32 curr = 0;
-+
-+		if (!IS_ERR(mmc->supply.vmmc))
-+			curr = regulator_get_current_limit(mmc->supply.vmmc);
-+		else if (host->ops->get_current_limit)
-+			curr = host->ops->get_current_limit(host);
- 
-+		if (curr > 0) {
- 			/* convert to SDHCI_MAX_CURRENT format */
- 			curr = curr/1000;  /* convert to mA */
- 			curr = curr/SDHCI_MAX_CURRENT_MULTIPLIER;
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 54bc444..a01af78 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -584,6 +584,7 @@ struct sdhci_ops {
- 	void    (*adma_workaround)(struct sdhci_host *host, u32 intmask);
- 	void    (*card_event)(struct sdhci_host *host);
- 	void	(*voltage_switch)(struct sdhci_host *host);
-+	unsigned int	(*get_current_limit)(struct sdhci_host *host);
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 0e0f12d..083b4a5 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -2079,6 +2079,18 @@ static void sdhci_msm_set_default_hw_caps(struct device *dev,
+ 	{},
  };
  
- #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
++static unsigned int sdhci_msm_get_current_limit(struct sdhci_host *host)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
++	struct sdhci_msm_reg_data *vdd_data = msm_host->pdata.vdd_data;
++	u32 max_curr = 0;
++
++	if (vdd_data)
++		max_curr = vdd_data->hpm_uA;
++	return max_curr;
++}
++
+ MODULE_DEVICE_TABLE(of, sdhci_msm_dt_match);
+ 
+ static const struct sdhci_ops sdhci_msm_ops = {
+@@ -2090,6 +2102,7 @@ static void sdhci_msm_set_default_hw_caps(struct device *dev,
+ 	.set_uhs_signaling = sdhci_msm_set_uhs_signaling,
+ 	.write_w = sdhci_msm_writew,
+ 	.write_b = sdhci_msm_writeb,
++	.get_current_limit = sdhci_msm_get_current_limit,
+ };
+ 
+ static const struct sdhci_pltfm_data sdhci_msm_pdata = {
 -- 
  Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc. 
 Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a Linux Foundation Collaborative Project.
