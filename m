@@ -1,71 +1,149 @@
-From: Evan Green <evgreen@chromium.org>
-Subject: [PATCH RFC] mmc: sdhci: Don't get card-detect without preemption
-Date: Tue,  1 May 2018 16:47:21 -0700
-Message-ID: <20180501234721.187135-1-evgreen@chromium.org>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH v5 1/3] mmc: dw_mmc-bluefield: Add driver extension
+Date: Wed, 2 May 2018 09:02:03 +0800
+Message-ID: <c95b926f-2129-c6de-7112-728eea9c7a3a@rock-chips.com>
+References: <026fa942828c54fda5bad225981e56abc808b949.1524497286.git.lsun@mellanox.com>
+ <1525198787-46403-1-git-send-email-lsun@mellanox.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=gbk; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1525198787-46403-1-git-send-email-lsun@mellanox.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Evan Green <evgreen@chromium.org>
+To: Liming Sun <lsun@mellanox.com>, Mark Rutland <mark.rutland@arm.com>, Jaehoon Chung <jh80.chung@samsung.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, stable@kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-For a controller with SDHCI_QUIRK_NO_CARD_NO_RESET, there are several
-conditions where sdhci_do_reset is called under a spinlock with interrupts
-disabled. The card detect is often a GPIO, which might sleep. Avoid
-asking for the card detect status if interrupts are disabled to prevent
-a warning like the following:
+On 2018/5/2 2:19, Liming Sun wrote:
+> This commit adds extension to the dw_mmc driver for Mellanox BlueField
+> SoC. It updates the UHS_REG_EXT register to bring up the eMMC card on
+> this SoC.
+> 
+> Cc: stable@kernel.org
 
-[    2.480199] Call trace:
-[    2.480218] [<ffffff800808a698>] dump_backtrace+0x0/0x228
-[    2.480224] [<ffffff800808a8e0>] show_stack+0x20/0x28
-[    2.480235] [<ffffff80088a0214>] dump_stack+0x90/0xb0
-[    2.480245] [<ffffff80080d7aa8>] ___might_sleep+0x110/0x128
-[    2.480248] [<ffffff80080d7b38>] __might_sleep+0x78/0x88
-[    2.480260] [<ffffff80083cdd28>] gpiod_get_raw_value_cansleep+0x2c/0xc4
-[    2.480269] [<ffffff80086a93a8>] mmc_gpio_get_cd+0x3c/0x68
-[    2.480275] [<ffffff80086b008c>] sdhci_get_cd+0x20/0x98
-[    2.480280] [<ffffff80086b081c>] sdhci_do_reset+0x50/0x88
-[    2.480283] [<ffffff80086b4640>] sdhci_tasklet_finish+0x1a8/0x270
-[    2.480292] [<ffffff80080b29d4>] tasklet_action+0x90/0xf4
-[    2.480296] [<ffffff80080813b8>] __do_softirq+0x1c8/0x360
-[    2.480300] [<ffffff80080b2408>] irq_exit+0x88/0xd0
+Why?
 
----
+> Signed-off-by: Liming Sun <lsun@mellanox.com>
+> Reviewed-by: David Woods <dwoods@mellanox.com>
+> ---
+>   drivers/mmc/host/Kconfig            |  9 +++++
+>   drivers/mmc/host/Makefile           |  1 +
+>   drivers/mmc/host/dw_mmc-bluefield.c | 72 +++++++++++++++++++++++++++++++++++++
+>   3 files changed, 82 insertions(+)
+>   create mode 100644 drivers/mmc/host/dw_mmc-bluefield.c
+> 
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 9589f9c..26ac6b5 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -717,6 +717,15 @@ config MMC_DW_K3
+>   	  Synopsys DesignWare Memory Card Interface driver. Select this option
+>   	  for platforms based on Hisilicon K3 SoC's.
+>   
+> +config MMC_DW_BLUEFIELD
 
-I discovered this warning while trying to bring up SD, somewhat unsuccessfully,
-on a new device, and hit this error path.
+And did you have feedback of my comment in V2£¿
+http://lists-archives.com/linux-kernel/29104830-mmc-dw_mmc-bluefield-add-driver-extension.html
 
-This change is not ideal as it only makes a best effort to adhere to the quirk,
-but may in some cases end up resetting the controller with no card present.
-
-Another option I considered was trying to call sdhci_do_reset within only
-sleepable contexts. I actually got as far as converting the tasklet to a
-work queue, and deferring the reset to the end of the function in
-sdhci_request_done. But 1) I'm not sure if that deferral was actually safe,
-and 2) we call sdhci_do_reset from under the lock in several other places,
-such as sdhci_card_event and sdhci_cqe_disable.
-
-Finally, I also considered calling the non-_maysleep gpio functions in
-mmc_gpio_get_cd. I assume this is not workable as someone somewhere has put
-a card detect off of a PMIC or GPIO expander.
-
-Any advice?
-
----
- drivers/mmc/host/sdhci.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 759278dd317d..c5273acf6987 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -210,7 +210,7 @@ static void sdhci_do_reset(struct sdhci_host *host, u8 mask)
- 	if (host->quirks & SDHCI_QUIRK_NO_CARD_NO_RESET) {
- 		struct mmc_host *mmc = host->mmc;
- 
--		if (!mmc->ops->get_cd(mmc))
-+		if (preemptible() && !mmc->ops->get_cd(mmc))
- 			return;
- 	}
- 
--- 
-2.13.5
+> +	tristate "BlueField specific extensions for Synopsys DW Memory Card Interface"
+> +	depends on MMC_DW
+> +	select MMC_DW_PLTFM
+> +	help
+> +	  This selects support for Mellanox BlueField SoC specific extensions to
+> +	  the Synopsys DesignWare Memory Card Interface driver. Select this
+> +	  option for platforms based on Mellanox BlueField SoC's.
+> +
+>   config MMC_DW_PCI
+>   	tristate "Synopsys Designware MCI support on PCI bus"
+>   	depends on MMC_DW && PCI
+> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+> index 6aead24..267b3f1 100644
+> --- a/drivers/mmc/host/Makefile
+> +++ b/drivers/mmc/host/Makefile
+> @@ -55,6 +55,7 @@ obj-$(CONFIG_MMC_DW_K3)		+= dw_mmc-k3.o
+>   obj-$(CONFIG_MMC_DW_PCI)	+= dw_mmc-pci.o
+>   obj-$(CONFIG_MMC_DW_ROCKCHIP)	+= dw_mmc-rockchip.o
+>   obj-$(CONFIG_MMC_DW_ZX)		+= dw_mmc-zx.o
+> +obj-$(CONFIG_MMC_DW_BLUEFIELD)	+= dw_mmc-bluefield.o
+>   obj-$(CONFIG_MMC_SH_MMCIF)	+= sh_mmcif.o
+>   obj-$(CONFIG_MMC_JZ4740)	+= jz4740_mmc.o
+>   obj-$(CONFIG_MMC_VUB300)	+= vub300.o
+> diff --git a/drivers/mmc/host/dw_mmc-bluefield.c b/drivers/mmc/host/dw_mmc-bluefield.c
+> new file mode 100644
+> index 0000000..12067b1
+> --- /dev/null
+> +++ b/drivers/mmc/host/dw_mmc-bluefield.c
+> @@ -0,0 +1,72 @@
+> +// SPDX-License-Identifier: GPL-2.0
+> +/*
+> + * Copyright (C) 2018 Mellanox Technologies.
+> + *
+> + * This program is free software; you can redistribute it and/or modify
+> + * it under the terms of the GNU General Public License as published by
+> + * the Free Software Foundation; either version 2 of the License, or
+> + * (at your option) any later version.
+> + */
+> +
+> +#include <linux/module.h>
+> +#include <linux/io.h>
+> +#include <linux/irq.h>
+> +#include <linux/platform_device.h>
+> +#include <linux/pm_runtime.h>
+> +#include <linux/mmc/host.h>
+> +#include <linux/mmc/mmc.h>
+> +#include <linux/of.h>
+> +
+> +#include "dw_mmc.h"
+> +#include "dw_mmc-pltfm.h"
+> +
+> +static void dw_mci_bluefield_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+> +{
+> +	u32 regs;
+> +
+> +	/* Set drive=4 (bit 29:23) and sample=2 (bit 22:16) in UHS_REG_EXT. */
+> +	regs = mci_readl(host, UHS_REG_EXT);
+> +	regs = (regs & ~0x3F100000 & ~0x7F0000) | (4 << 23) | (2 << 16);
+> +	mci_writel(host, UHS_REG_EXT, regs);
+> +}
+> +
+> +static const struct dw_mci_drv_data bluefield_drv_data = {
+> +	.set_ios		= dw_mci_bluefield_set_ios
+> +};
+> +
+> +static const struct of_device_id dw_mci_bluefield_match[] = {
+> +	{ .compatible = "mellanox,bluefield-dw-mshc",
+> +		.data = &bluefield_drv_data },
+> +	{},
+> +};
+> +MODULE_DEVICE_TABLE(of, dw_mci_bluefield_match);
+> +
+> +static int dw_mci_bluefield_probe(struct platform_device *pdev)
+> +{
+> +	const struct dw_mci_drv_data *drv_data = NULL;
+> +	const struct of_device_id *match;
+> +
+> +	if (pdev->dev.of_node) {
+> +		match = of_match_node(dw_mci_bluefield_match,
+> +				      pdev->dev.of_node);
+> +		drv_data = match->data;
+> +	}
+> +
+> +	return dw_mci_pltfm_register(pdev, drv_data);
+> +}
+> +
+> +static struct platform_driver dw_mci_bluefield_pltfm_driver = {
+> +	.probe		= dw_mci_bluefield_probe,
+> +	.remove		= dw_mci_pltfm_remove,
+> +	.driver		= {
+> +		.name		= "dwmmc_bluefield",
+> +		.of_match_table	= dw_mci_bluefield_match,
+> +		.pm		= &dw_mci_pltfm_pmops,
+> +	},
+> +};
+> +
+> +module_platform_driver(dw_mci_bluefield_pltfm_driver);
+> +
+> +MODULE_DESCRIPTION("BlueField DW Multimedia Card driver");
+> +MODULE_AUTHOR("Mellanox Technologies");
+> +MODULE_LICENSE("GPL v2");
+> 
