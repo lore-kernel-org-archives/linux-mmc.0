@@ -1,44 +1,96 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 1/3] mmc: sunxi: add support for the MMC
- controller on H6
-Date: Wed, 2 May 2018 14:54:58 +0200
-Message-ID: <CAPDyKFr1CRS7W5gYntbo_KhkvoCB00xzfF4jyUOmtkG1z2g2xg@mail.gmail.com>
-References: <20180426140728.43155-1-icenowy@aosc.io> <20180426140728.43155-2-icenowy@aosc.io>
-Reply-To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v5 00/14] mmc: sdhci-omap: Add UHS/HS200 mode support
+Date: Wed, 2 May 2018 15:15:11 +0200
+Message-ID: <CAPDyKFqb=Dyi=UMZBLKcrBbmaWbGEjf-Vp5vQ0b7_F__+YnXHQ@mail.gmail.com>
+References: <20180427114723.2687-1-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-sunxi+bncBDF57NG2XIHRBI7KU3LQKGQEQLVG5VI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-In-Reply-To: <20180426140728.43155-2-icenowy-h8G6r0blFSE@public.gmane.org>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Icenowy Zheng <icenowy-h8G6r0blFSE@public.gmane.org>
-Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux ARM <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi <linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180427114723.2687-1-kishon@ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Kishon Vijay Abraham I <kishon@ti.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, devicetree@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 26 April 2018 at 16:07, Icenowy Zheng <icenowy-h8G6r0blFSE@public.gmane.org> wrote:
-> The new Allwinner H6 SoC have 3 MMC controllers. The first and second
-> ones are similar to the ones on A64, but the third one adds EMCE
-> (Embedded Crypto Engine) support which does hardware transparent crypto
-> on the eMMC.
+On 27 April 2018 at 13:47, Kishon Vijay Abraham I <kishon@ti.com> wrote:
+> Add UHS/HS200 mode support in sdhci-omap. The programming sequence
+> for voltage switching, tuning is followed from AM572x TRM
+> http://www.ti.com/lit/ug/spruhz6j/spruhz6j.pdf
+> (Similar to all AM57x/DRA7x SoCs). The patch series also implements
+> workaround for errata published in
+> http://www.ti.com/lit/er/sprz429l/sprz429l.pdf
 >
-> As we still do not have support for EMCE, and the support of it is
-> disabled by defualt, we just duplicate the A64 mmc configurations and
-> change the compatible string.
+> patches are created on top of
+> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git next
 >
-> Signed-off-by: Icenowy Zheng <icenowy-h8G6r0blFSE@public.gmane.org>
-> ---
->  Documentation/devicetree/bindings/mmc/sunxi-mmc.txt |  2 ++
+> The patches along with dt has also been pushed to
+> https://github.com/kishon/linux-wip.git sdhci_uhs_v5
 
-DT doc changes in separate patches please!
-
->  drivers/mmc/host/sunxi-mmc.c                        | 16 ++++++++++++++++
->  2 files changed, 18 insertions(+)
->
+Thanks, applied for next!
 
 Kind regards
 Uffe
+
+>
+> Changes from v4:
+> *) Added comment in sdhci for disabling HS200/HS400 mode
+> *) Fixed a couple of chunks in "Program a relatively accurate SW timeout
+>    value" which were missed in the previous revision
+> *) Added a patch in sdhci-omap to get IODelay values of 3.3v DDR mode.
+> *) Added pinctrl binding documentation for sdhci-omap which was missed
+>    before.
+>
+> Changes from v3:
+> *) Fixed Adrian's comment on error handling when __sdhci_add_host()
+>    fails
+> *) Used Adrian's patches for programming SW timeout value.
+>
+> Changes from v2:
+> *) Patches in v2 already applied to mmc -next are dropped from the
+>    series.
+> *) Changed SW timeout logic as per Adrians's suggestion
+> *) Validated SDIO with the current patches (added a couple of fixes
+>    found while adding SDIO support).
+> *) Used soc_device_match() instead of pdata-quirks as per Tony's
+>    suggestions.
+>
+> Changes from v1:
+> *) Only poll on DAT0 and DATI for card_busy status
+> *) Cleanup iodelay patch as suggested by Tony.
+> *) Added quirk to disable HW timeout
+> *) Use the existing data timer but program a relatively accurate
+>    SW timeout value (Impacts all platforms)
+> *) Fix a bug in sdhci which was using data_timer for non data line
+>    commands
+>
+> Adrian Hunter (2):
+>   mmc: sdhci: Add quirk to disable HW timeout
+>   mmc: sdhci: Factor out target_timeout calculation
+>
+> Kishon Vijay Abraham I (12):
+>   mmc: sdhci-omap: Fix when capabilities are obtained from
+>     SDHCI_CAPABILITIES reg
+>   mmc: sdhci-omap: Remove setting ADMA capability in driver
+>   mmc: sdhci-omap: Workaround for Errata i843
+>   mmc: sdhci-omap: Invoke sdhci_get_of_property to read sdhci dt
+>     properties
+>   mmc: sdhci: Disable 1.8v modes (HS200/HS400/UHS) if controller can't
+>     support 1.8v
+>   mmc: sdhci: Program a relatively accurate SW timeout value
+>   mmc: sdhci-omap: Workaround for Errata i834
+>   dt-bindings: sdhci-omap: Add K2G specific binding
+>   mmc: sdhci-omap: Add support for MMC/SD controller in k2g SoC
+>   mmc: sdhci-omap: Add sdhci_omap specific ops for enable_sdio_irq
+>   dt-bindings: sdhci-omap: Add pinctrl bindings
+>   mmc: sdhci-omap: Get IODelay values for 3.3v DDR mode
+>
+>  .../devicetree/bindings/mmc/sdhci-omap.txt    |   7 +
+>  drivers/mmc/host/sdhci-omap.c                 |  92 +++++++++--
+>  drivers/mmc/host/sdhci.c                      | 148 ++++++++++++++----
+>  drivers/mmc/host/sdhci.h                      |  15 ++
+>  include/linux/mmc/host.h                      |   4 +
+>  5 files changed, 226 insertions(+), 40 deletions(-)
+>
+> --
+> 2.17.0
+>
