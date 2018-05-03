@@ -1,44 +1,53 @@
-From: Joerg Roedel <joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3 09/20] iommu: Remove depends on HAS_DMA in case of
-	platform dependency
-Date: Thu, 3 May 2018 15:02:44 +0200
-Message-ID: <20180503130244.ifal7n4tyxvekjnj@8bytes.org>
-References: <1523987360-18760-1-git-send-email-geert@linux-m68k.org>
-	<1523987360-18760-10-git-send-email-geert@linux-m68k.org>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH v5 00/14] mmc: sdhci-omap: Add UHS/HS200 mode support
+Date: Thu, 3 May 2018 07:12:45 -0700
+Message-ID: <20180503141245.GO98604@atomide.com>
+References: <20180427114723.2687-1-kishon@ti.com>
+ <CAPDyKFqb=Dyi=UMZBLKcrBbmaWbGEjf-Vp5vQ0b7_F__+YnXHQ@mail.gmail.com>
+ <20180502145551.GL98604@atomide.com>
+ <CAPDyKFr4=p5Q1oEDVQct+8GeDm-rbQCLyE8+3RqGBkWLvDTKdA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1523987360-18760-10-git-send-email-geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, linux-iio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-fpga-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-remoteproc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, alsa-devel-K7yf7f+aM1XWsZ/bQMPhNw@public.gmane.org, Bjorn Andersson <bjorn.andersson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Eric Anholt <eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org>, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux1394-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>, Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>, Boris Brezillon <boris.brezillon-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Herbert Xu <herbert-lOAM2aK0SrRLBo1qDEOMRrpzq4S04n8Q@public.gmane.org>, Richard Weinberger <richard-/L3Ra7n9ekc@public.gmane.org>, Jassi Brar <jassisinghbrar-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Marek Vasut <marek.vasut-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-serial-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matias Bjorling <mb-VR7NuqX4VJ8tq7phqP6ubQ@public.gmane.org>, linux-media-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org, Alan Tull <atull-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+In-Reply-To: <CAPDyKFr4=p5Q1oEDVQct+8GeDm-rbQCLyE8+3RqGBkWLvDTKdA@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Kishon Vijay Abraham I <kishon@ti.com>, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, devicetree@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Apr 17, 2018 at 07:49:09PM +0200, Geert Uytterhoeven wrote:
-> Remove dependencies on HAS_DMA where a Kconfig symbol depends on another
-> symbol that implies HAS_DMA, and, optionally, on "|| COMPILE_TEST".
-> In most cases this other symbol is an architecture or platform specific
-> symbol, or PCI.
+* Ulf Hansson <ulf.hansson@linaro.org> [180503 08:53]:
+> On 2 May 2018 at 16:55, Tony Lindgren <tony@atomide.com> wrote:
+> > * Ulf Hansson <ulf.hansson@linaro.org> [180502 13:17]:
+> >> On 27 April 2018 at 13:47, Kishon Vijay Abraham I <kishon@ti.com> wrote:
+> >> > Add UHS/HS200 mode support in sdhci-omap. The programming sequence
+> >> > for voltage switching, tuning is followed from AM572x TRM
+> >> > http://www.ti.com/lit/ug/spruhz6j/spruhz6j.pdf
+> >> > (Similar to all AM57x/DRA7x SoCs). The patch series also implements
+> >> > workaround for errata published in
+> >> > http://www.ti.com/lit/er/sprz429l/sprz429l.pdf
+> >> >
+> >> > patches are created on top of
+> >> > git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git next
+> >> >
+> >> > The patches along with dt has also been pushed to
+> >> > https://github.com/kishon/linux-wip.git sdhci_uhs_v5
+> >>
+> >> Thanks, applied for next!
+> >
+> > OK. Ulf, can I use some commit id from your next as a base for
+> > the related dts changes?
+> >
 > 
-> Generic symbols and drivers without platform dependencies keep their
-> dependencies on HAS_DMA, to prevent compiling subsystems or drivers that
-> cannot work anyway.
+> No, I am re-basing my next branch from time to time so it's not a good idea.
 > 
-> This simplifies the dependencies, and allows to improve compile-testing.
+> Instead I have shared an immutable branch for your to pull/merge:
+> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git sdhci_omap
 > 
-> Signed-off-by: Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>
-> Reviewed-by: Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-> Acked-by: Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>
-> Acked-by: Joerg Roedel <jroedel-l3A5Bk7waGM@public.gmane.org>
+> I also signed the top commit on this branch: sdhci-omap-v4.17-rc3
+> 
+> The branch is based on 4.17-rc3.
 
-Applied, thanks.
+OK great, thanks a lot!
+
+Tony
