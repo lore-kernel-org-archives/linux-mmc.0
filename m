@@ -1,54 +1,82 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH v4 00/14] dra7: mmc: Update mmc dt node to use sdhci-omap
-Date: Thu, 3 May 2018 10:40:19 -0700
-Message-ID: <20180503174019.GX98604@atomide.com>
-References: <20180427120905.3665-1-kishon@ti.com>
+From: Maxime Ripard <maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [PATCH 3/3] arm64: allwinner: h6: enable MMC0/2 on
+ Pine H64
+Date: Thu, 3 May 2018 20:05:53 +0200
+Message-ID: <20180503180553.qjjgnw5jnvtdn46n@flea>
+References: <20180426140728.43155-1-icenowy@aosc.io>
+ <20180426140728.43155-4-icenowy@aosc.io>
+ <03cc2e8c-4a35-3fb4-b408-fd8d4ba3e407@arm.com>
+ <83EDF187-5EB2-4FEB-99BC-9D5B728D3A45@aosc.io>
+ <45956397-a593-e51e-8637-655178c5901c@arm.com>
+ <20180502093601.fvkacdv62aqxshbr@flea>
+ <aa2d6072-87a5-cd52-d3a5-17df889e6bc9@arm.com>
+Reply-To: maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-sunxi+bncBDSJBYGBRIMBBDE7VXLQKGQED7UE5MQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Content-Disposition: inline
-In-Reply-To: <20180427120905.3665-1-kishon@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>
-Cc: Jonathan Corbet <corbet@lwn.net>, =?utf-8?Q?Beno=C3=AEt?= Cousson <bcousson@baylibre.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org
+In-Reply-To: <aa2d6072-87a5-cd52-d3a5-17df889e6bc9-5wv7dgnIgG8@public.gmane.org>
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
+Cc: Icenowy Zheng <icenowy-h8G6r0blFSE@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-* Kishon Vijay Abraham I <kishon@ti.com> [180427 05:11]:
-> Changes from v3:
-> *) Added dra7-mmc-iodelay.dtsi to add a new pinctrl group for clk line
->    without pullup to be used for dra71-evm and am57xx-idk.
-> *) Rename wlcore node name to wifi
+On Wed, May 02, 2018 at 12:01:53PM +0100, Andre Przywara wrote:
+> >>>> It looks like there are more users of those power rails, so we could
+> >>>> keep those supplies connected to these fixed regulators here, even with
+> >>>> AXP-805 support in the kernel.
+> >>>
+> >>> It's not a good choice.
+> >>>
+> >>>>
+> >>>> Or we keep this back until we get proper AXP support in the kernel? I
+> >>>> guess it's quite close to the existing PMICs, so it might be more a
+> >>>> copy&paste exercise to support the AXP-805?
+> >>>
+> >>> It's not a reason to keep it back.
+> >>
+> >> So I compared the manuals of the AXP806 and the AXP805, the register
+> >> interface looks identical to me. I only have a (somewhat) Chinese
+> >> version of the AXP806 manual, so couldn't really find the difference
+> >> between the two. Do you know more about it? Is it just maybe the
+> >> packaging and the electrical properties (like max current supported)?
+> >>
+> >> If the I2C register interface is really the same, we could just add the
+> >> DT nodes for the regulator and be done.
+> > 
+> > And that argument is only valid if you 100% trust the fact that both
+> > datasheet are complete and accurate.
+> > 
+> > And experience show that you can't.
 > 
-> This series should be merged only after [1].
-> [1] -> https://marc.info/?l=linux-omap&m=152482966225758&w=2
-> 
-> This series:
->  *) Adds wilink wlan support (Now all MMC instances in DRA7 will use
->     sdhci-omap)
->  *) Add a new pinctrl group for clk line without pullup required for
->     UHS cards to work reliably.
->  *) Update README to make sure users update .config file from 4.18
->     kernel.
->  *) Use sdhci-omap programming model.
+> Well, but I wonder how paranoid we are going to be? And in this case we
+> have confirmation from Wink that they are the same.
 
-Applying this series into omap-for-v4.18/dt-sdhci on top of the
-immutable branch from Ulf.
+Paranoid enough so that we don't blindly trust that the reviewer had a
+coffee, no interruptions or moment of distraction, or that the
+datasheet is correct.
 
-> In the "Use sdhci-omap programming model" patch, "ti,omap4-hsmmc"
-> compatible is removed. This is because if both "ti,dra7-sdhci" and
-> "ti,omap4-hsmmc" is added and if there is probe deferral in sdhci_omap
-> driver, the device is binding to omap_hsmmc driver.
-> 
-> Once omap_hsmmc and sdhci_omap driver are feature identical,
-> sdhci_omap driver will be made to support omap_hsmmc binding
-> (including "ti,omap4-hsmmc" compatible) and omap_hsmmc driver will
-> be removed. Till then dt nodes with "ti,omap4-hsmmc" compatible
-> will use omap_hsmmc driver and "ti,dra7-sdhci" compatible will
-> use sdhci_omap driver.
+But not so paranoid that having the driver running on a kernel is
+enough.
 
-Great that sounds good to me :) This way we can test and enable
-it one SoC at a time.
+> So I think we can go with just a DT addition, given that we test it
+> and confirm that it works for our use case. Should we discover
+> something odd or undocumented later, I'd consider this a bug fix,
+> which we then (and only then!) could fix by adding the compatible
+> string to the driver. Any DT would be fine already, because we list
+> both compatible strings in there.
 
-Regards,
+In this particular case, yeah, it seems reasonable.
 
-Tony
+Maxime
+
+-- 
+Maxime Ripard, Bootlin (formerly Free Electrons)
+Embedded Linux and Kernel engineering
+https://bootlin.com
