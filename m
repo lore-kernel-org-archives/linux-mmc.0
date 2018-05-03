@@ -1,119 +1,54 @@
-From: Liming Sun <lsun@mellanox.com>
-Subject: RE: [PATCH v5 1/3] mmc: dw_mmc-bluefield: Add driver extension
-Date: Thu, 3 May 2018 15:52:01 +0000
-Message-ID: <DB4PR05MB07687C762D336E619147F359A1870@DB4PR05MB0768.eurprd05.prod.outlook.com>
-References: <026fa942828c54fda5bad225981e56abc808b949.1524497286.git.lsun@mellanox.com>
-        <CGME20180501182919epcas2p368101c944e8e4bcdb19a1863fc8d469d@epcas2p3.samsung.com>
-        <1525198787-46403-1-git-send-email-lsun@mellanox.com>
- <90076dd0-1e6a-3678-5357-98f84a03a46a@samsung.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH v4 00/14] dra7: mmc: Update mmc dt node to use sdhci-omap
+Date: Thu, 3 May 2018 10:40:19 -0700
+Message-ID: <20180503174019.GX98604@atomide.com>
+References: <20180427120905.3665-1-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <90076dd0-1e6a-3678-5357-98f84a03a46a@samsung.com>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <20180427120905.3665-1-kishon@ti.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Kishon Vijay Abraham I <kishon@ti.com>
+Cc: Jonathan Corbet <corbet@lwn.net>, =?utf-8?Q?Beno=C3=AEt?= Cousson <bcousson@baylibre.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-VGhhbmtzLiBVcGRhdGVkIGluIHY2LiBSZW1vdmVkIHRoZSAiQ2M6IHN0YWJsZUBrZXJuZWwub3Jn
-IiB3aGljaCBpcyBhIHR5cG8uIFdpbGwgZG8gaXQgbGF0ZXIgZm9yIHN0YWJsZSBicmFuY2guIEFs
-c28gYWRkcmVzc2VkIHRoZSBjb21tZW50IHRvIHVzZSBNQUNST3MgaW4gcGF0Y2ggMS8zLg0KDQo+
-IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IEphZWhvb24gQ2h1bmcgW21haWx0
-bzpqaDgwLmNodW5nQHNhbXN1bmcuY29tXQ0KPiBTZW50OiBXZWRuZXNkYXksIE1heSAyLCAyMDE4
-IDQ6MTcgQU0NCj4gVG86IExpbWluZyBTdW4gPGxzdW5AbWVsbGFub3guY29tPjsgVWxmIEhhbnNz
-b24NCj4gPHVsZi5oYW5zc29uQGxpbmFyby5vcmc+OyBSb2IgSGVycmluZyA8cm9iaCtkdEBrZXJu
-ZWwub3JnPjsgTWFyaw0KPiBSdXRsYW5kIDxtYXJrLnJ1dGxhbmRAYXJtLmNvbT47IENhdGFsaW4g
-TWFyaW5hcw0KPiA8Y2F0YWxpbi5tYXJpbmFzQGFybS5jb20+OyBXaWxsIERlYWNvbiA8d2lsbC5k
-ZWFjb25AYXJtLmNvbT4NCj4gQ2M6IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc7IGRldmljZXRy
-ZWVAdmdlci5rZXJuZWwub3JnOyBsaW51eC0NCj4ga2VybmVsQHZnZXIua2VybmVsLm9yZzsgc3Rh
-YmxlQGtlcm5lbC5vcmcNCj4gU3ViamVjdDogUmU6IFtQQVRDSCB2NSAxLzNdIG1tYzogZHdfbW1j
-LWJsdWVmaWVsZDogQWRkIGRyaXZlciBleHRlbnNpb24NCj4gDQo+IEhpLA0KPiANCj4gT24gMDUv
-MDIvMjAxOCAwMzoxOSBBTSwgTGltaW5nIFN1biB3cm90ZToNCj4gPiBUaGlzIGNvbW1pdCBhZGRz
-IGV4dGVuc2lvbiB0byB0aGUgZHdfbW1jIGRyaXZlciBmb3IgTWVsbGFub3ggQmx1ZUZpZWxkDQo+
-ID4gU29DLiBJdCB1cGRhdGVzIHRoZSBVSFNfUkVHX0VYVCByZWdpc3RlciB0byBicmluZyB1cCB0
-aGUgZU1NQyBjYXJkIG9uDQo+ID4gdGhpcyBTb0MuDQo+IA0KPiBDb3VsZCB5b3UgaGVjayBTaGF3
-bidzIGNvbW1lbnRzPyBBbmQgYWRkIHRoZSBtaW5vciBjb21tZW50Lg0KPiANCj4gPg0KPiA+IENj
-OiBzdGFibGVAa2VybmVsLm9yZw0KPiA+IFNpZ25lZC1vZmYtYnk6IExpbWluZyBTdW4gPGxzdW5A
-bWVsbGFub3guY29tPg0KPiA+IFJldmlld2VkLWJ5OiBEYXZpZCBXb29kcyA8ZHdvb2RzQG1lbGxh
-bm94LmNvbT4NCj4gPiAtLS0NCj4gPiAgZHJpdmVycy9tbWMvaG9zdC9LY29uZmlnICAgICAgICAg
-ICAgfCAgOSArKysrKw0KPiA+ICBkcml2ZXJzL21tYy9ob3N0L01ha2VmaWxlICAgICAgICAgICB8
-ICAxICsNCj4gPiAgZHJpdmVycy9tbWMvaG9zdC9kd19tbWMtYmx1ZWZpZWxkLmMgfCA3Mg0KPiAr
-KysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrDQo+ID4gIDMgZmlsZXMgY2hhbmdl
-ZCwgODIgaW5zZXJ0aW9ucygrKQ0KPiA+ICBjcmVhdGUgbW9kZSAxMDA2NDQgZHJpdmVycy9tbWMv
-aG9zdC9kd19tbWMtYmx1ZWZpZWxkLmMNCj4gPg0KPiA+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21t
-Yy9ob3N0L0tjb25maWcgYi9kcml2ZXJzL21tYy9ob3N0L0tjb25maWcNCj4gPiBpbmRleCA5NTg5
-ZjljLi4yNmFjNmI1IDEwMDY0NA0KPiA+IC0tLSBhL2RyaXZlcnMvbW1jL2hvc3QvS2NvbmZpZw0K
-PiA+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3QvS2NvbmZpZw0KPiA+IEBAIC03MTcsNiArNzE3LDE1
-IEBAIGNvbmZpZyBNTUNfRFdfSzMNCj4gPiAgCSAgU3lub3BzeXMgRGVzaWduV2FyZSBNZW1vcnkg
-Q2FyZCBJbnRlcmZhY2UgZHJpdmVyLiBTZWxlY3QgdGhpcw0KPiBvcHRpb24NCj4gPiAgCSAgZm9y
-IHBsYXRmb3JtcyBiYXNlZCBvbiBIaXNpbGljb24gSzMgU29DJ3MuDQo+ID4NCj4gPiArY29uZmln
-IE1NQ19EV19CTFVFRklFTEQNCj4gPiArCXRyaXN0YXRlICJCbHVlRmllbGQgc3BlY2lmaWMgZXh0
-ZW5zaW9ucyBmb3IgU3lub3BzeXMgRFcgTWVtb3J5IENhcmQNCj4gSW50ZXJmYWNlIg0KPiA+ICsJ
-ZGVwZW5kcyBvbiBNTUNfRFcNCj4gPiArCXNlbGVjdCBNTUNfRFdfUExURk0NCj4gPiArCWhlbHAN
-Cj4gPiArCSAgVGhpcyBzZWxlY3RzIHN1cHBvcnQgZm9yIE1lbGxhbm94IEJsdWVGaWVsZCBTb0Mg
-c3BlY2lmaWMgZXh0ZW5zaW9ucw0KPiB0bw0KPiA+ICsJICB0aGUgU3lub3BzeXMgRGVzaWduV2Fy
-ZSBNZW1vcnkgQ2FyZCBJbnRlcmZhY2UgZHJpdmVyLiBTZWxlY3QgdGhpcw0KPiA+ICsJICBvcHRp
-b24gZm9yIHBsYXRmb3JtcyBiYXNlZCBvbiBNZWxsYW5veCBCbHVlRmllbGQgU29DJ3MuDQo+ID4g
-Kw0KPiA+ICBjb25maWcgTU1DX0RXX1BDSQ0KPiA+ICAJdHJpc3RhdGUgIlN5bm9wc3lzIERlc2ln
-bndhcmUgTUNJIHN1cHBvcnQgb24gUENJIGJ1cyINCj4gPiAgCWRlcGVuZHMgb24gTU1DX0RXICYm
-IFBDSQ0KPiA+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L01ha2VmaWxlIGIvZHJpdmVy
-cy9tbWMvaG9zdC9NYWtlZmlsZQ0KPiA+IGluZGV4IDZhZWFkMjQuLjI2N2IzZjEgMTAwNjQ0DQo+
-ID4gLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9NYWtlZmlsZQ0KPiA+ICsrKyBiL2RyaXZlcnMvbW1j
-L2hvc3QvTWFrZWZpbGUNCj4gPiBAQCAtNTUsNiArNTUsNyBAQCBvYmotJChDT05GSUdfTU1DX0RX
-X0szKQkJKz0gZHdfbW1jLQ0KPiBrMy5vDQo+ID4gIG9iai0kKENPTkZJR19NTUNfRFdfUENJKQkr
-PSBkd19tbWMtcGNpLm8NCj4gPiAgb2JqLSQoQ09ORklHX01NQ19EV19ST0NLQ0hJUCkJKz0gZHdf
-bW1jLXJvY2tjaGlwLm8NCj4gPiAgb2JqLSQoQ09ORklHX01NQ19EV19aWCkJCSs9IGR3X21tYy16
-eC5vDQo+ID4gK29iai0kKENPTkZJR19NTUNfRFdfQkxVRUZJRUxEKQkrPSBkd19tbWMtYmx1ZWZp
-ZWxkLm8NCj4gPiAgb2JqLSQoQ09ORklHX01NQ19TSF9NTUNJRikJKz0gc2hfbW1jaWYubw0KPiA+
-ICBvYmotJChDT05GSUdfTU1DX0paNDc0MCkJKz0gano0NzQwX21tYy5vDQo+ID4gIG9iai0kKENP
-TkZJR19NTUNfVlVCMzAwKQkrPSB2dWIzMDAubw0KPiA+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21t
-Yy9ob3N0L2R3X21tYy1ibHVlZmllbGQuYw0KPiBiL2RyaXZlcnMvbW1jL2hvc3QvZHdfbW1jLWJs
-dWVmaWVsZC5jDQo+ID4gbmV3IGZpbGUgbW9kZSAxMDA2NDQNCj4gPiBpbmRleCAwMDAwMDAwLi4x
-MjA2N2IxDQo+ID4gLS0tIC9kZXYvbnVsbA0KPiA+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3QvZHdf
-bW1jLWJsdWVmaWVsZC5jDQo+ID4gQEAgLTAsMCArMSw3MiBAQA0KPiA+ICsvLyBTUERYLUxpY2Vu
-c2UtSWRlbnRpZmllcjogR1BMLTIuMA0KPiA+ICsvKg0KPiA+ICsgKiBDb3B5cmlnaHQgKEMpIDIw
-MTggTWVsbGFub3ggVGVjaG5vbG9naWVzLg0KPiA+ICsgKg0KPiA+ICsgKiBUaGlzIHByb2dyYW0g
-aXMgZnJlZSBzb2Z0d2FyZTsgeW91IGNhbiByZWRpc3RyaWJ1dGUgaXQgYW5kL29yIG1vZGlmeQ0K
-PiA+ICsgKiBpdCB1bmRlciB0aGUgdGVybXMgb2YgdGhlIEdOVSBHZW5lcmFsIFB1YmxpYyBMaWNl
-bnNlIGFzIHB1Ymxpc2hlZCBieQ0KPiA+ICsgKiB0aGUgRnJlZSBTb2Z0d2FyZSBGb3VuZGF0aW9u
-OyBlaXRoZXIgdmVyc2lvbiAyIG9mIHRoZSBMaWNlbnNlLCBvcg0KPiA+ICsgKiAoYXQgeW91ciBv
-cHRpb24pIGFueSBsYXRlciB2ZXJzaW9uLg0KPiA+ICsgKi8NCj4gPiArDQo+ID4gKyNpbmNsdWRl
-IDxsaW51eC9tb2R1bGUuaD4NCj4gPiArI2luY2x1ZGUgPGxpbnV4L2lvLmg+DQo+ID4gKyNpbmNs
-dWRlIDxsaW51eC9pcnEuaD4NCj4gPiArI2luY2x1ZGUgPGxpbnV4L3BsYXRmb3JtX2RldmljZS5o
-Pg0KPiA+ICsjaW5jbHVkZSA8bGludXgvcG1fcnVudGltZS5oPg0KPiA+ICsjaW5jbHVkZSA8bGlu
-dXgvbW1jL2hvc3QuaD4NCj4gPiArI2luY2x1ZGUgPGxpbnV4L21tYy9tbWMuaD4NCj4gPiArI2lu
-Y2x1ZGUgPGxpbnV4L29mLmg+DQo+ID4gKw0KPiA+ICsjaW5jbHVkZSAiZHdfbW1jLmgiDQo+ID4g
-KyNpbmNsdWRlICJkd19tbWMtcGx0Zm0uaCINCj4gPiArDQo+ID4gK3N0YXRpYyB2b2lkIGR3X21j
-aV9ibHVlZmllbGRfc2V0X2lvcyhzdHJ1Y3QgZHdfbWNpICpob3N0LCBzdHJ1Y3QNCj4gbW1jX2lv
-cyAqaW9zKQ0KPiA+ICt7DQo+ID4gKwl1MzIgcmVnczsNCj4gPiArDQo+ID4gKwkvKiBTZXQgZHJp
-dmU9NCAoYml0IDI5OjIzKSBhbmQgc2FtcGxlPTIgKGJpdCAyMjoxNikgaW4gVUhTX1JFR19FWFQu
-DQo+ICovDQo+ID4gKwlyZWdzID0gbWNpX3JlYWRsKGhvc3QsIFVIU19SRUdfRVhUKTsNCj4gPiAr
-CXJlZ3MgPSAocmVncyAmIH4weDNGMTAwMDAwICYgfjB4N0YwMDAwKSB8ICg0IDw8IDIzKSB8ICgy
-IDw8IDE2KTsNCj4gDQo+IEkgd2FudCB0byB1c2UgdGhlIG1hY3JvLiBOb3QgKDQgPDwgMjMpLi4N
-Cj4gDQo+ID4gKwltY2lfd3JpdGVsKGhvc3QsIFVIU19SRUdfRVhULCByZWdzKTsNCj4gPiArfQ0K
-PiA+ICsNCj4gPiArc3RhdGljIGNvbnN0IHN0cnVjdCBkd19tY2lfZHJ2X2RhdGEgYmx1ZWZpZWxk
-X2Rydl9kYXRhID0gew0KPiA+ICsJLnNldF9pb3MJCT0gZHdfbWNpX2JsdWVmaWVsZF9zZXRfaW9z
-DQo+ID4gK307DQo+ID4gKw0KPiA+ICtzdGF0aWMgY29uc3Qgc3RydWN0IG9mX2RldmljZV9pZCBk
-d19tY2lfYmx1ZWZpZWxkX21hdGNoW10gPSB7DQo+ID4gKwl7IC5jb21wYXRpYmxlID0gIm1lbGxh
-bm94LGJsdWVmaWVsZC1kdy1tc2hjIiwNCj4gPiArCQkuZGF0YSA9ICZibHVlZmllbGRfZHJ2X2Rh
-dGEgfSwNCj4gPiArCXt9LA0KPiA+ICt9Ow0KPiA+ICtNT0RVTEVfREVWSUNFX1RBQkxFKG9mLCBk
-d19tY2lfYmx1ZWZpZWxkX21hdGNoKTsNCj4gPiArDQo+ID4gK3N0YXRpYyBpbnQgZHdfbWNpX2Js
-dWVmaWVsZF9wcm9iZShzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlICpwZGV2KQ0KPiA+ICt7DQo+ID4g
-Kwljb25zdCBzdHJ1Y3QgZHdfbWNpX2Rydl9kYXRhICpkcnZfZGF0YSA9IE5VTEw7DQo+ID4gKwlj
-b25zdCBzdHJ1Y3Qgb2ZfZGV2aWNlX2lkICptYXRjaDsNCj4gPiArDQo+ID4gKwlpZiAocGRldi0+
-ZGV2Lm9mX25vZGUpIHsNCj4gPiArCQltYXRjaCA9IG9mX21hdGNoX25vZGUoZHdfbWNpX2JsdWVm
-aWVsZF9tYXRjaCwNCj4gPiArCQkJCSAgICAgIHBkZXYtPmRldi5vZl9ub2RlKTsNCj4gPiArCQlk
-cnZfZGF0YSA9IG1hdGNoLT5kYXRhOw0KPiA+ICsJfQ0KPiA+ICsNCj4gPiArCXJldHVybiBkd19t
-Y2lfcGx0Zm1fcmVnaXN0ZXIocGRldiwgZHJ2X2RhdGEpOw0KPiA+ICt9DQo+ID4gKw0KPiA+ICtz
-dGF0aWMgc3RydWN0IHBsYXRmb3JtX2RyaXZlciBkd19tY2lfYmx1ZWZpZWxkX3BsdGZtX2RyaXZl
-ciA9IHsNCj4gPiArCS5wcm9iZQkJPSBkd19tY2lfYmx1ZWZpZWxkX3Byb2JlLA0KPiA+ICsJLnJl
-bW92ZQkJPSBkd19tY2lfcGx0Zm1fcmVtb3ZlLA0KPiA+ICsJLmRyaXZlcgkJPSB7DQo+ID4gKwkJ
-Lm5hbWUJCT0gImR3bW1jX2JsdWVmaWVsZCIsDQo+ID4gKwkJLm9mX21hdGNoX3RhYmxlCT0gZHdf
-bWNpX2JsdWVmaWVsZF9tYXRjaCwNCj4gPiArCQkucG0JCT0gJmR3X21jaV9wbHRmbV9wbW9wcywN
-Cj4gPiArCX0sDQo+ID4gK307DQo+ID4gKw0KPiA+ICttb2R1bGVfcGxhdGZvcm1fZHJpdmVyKGR3
-X21jaV9ibHVlZmllbGRfcGx0Zm1fZHJpdmVyKTsNCj4gPiArDQo+ID4gK01PRFVMRV9ERVNDUklQ
-VElPTigiQmx1ZUZpZWxkIERXIE11bHRpbWVkaWEgQ2FyZCBkcml2ZXIiKTsNCj4gPiArTU9EVUxF
-X0FVVEhPUigiTWVsbGFub3ggVGVjaG5vbG9naWVzIik7DQo+ID4gK01PRFVMRV9MSUNFTlNFKCJH
-UEwgdjIiKTsNCj4gPg0KDQo=
+* Kishon Vijay Abraham I <kishon@ti.com> [180427 05:11]:
+> Changes from v3:
+> *) Added dra7-mmc-iodelay.dtsi to add a new pinctrl group for clk line
+>    without pullup to be used for dra71-evm and am57xx-idk.
+> *) Rename wlcore node name to wifi
+> 
+> This series should be merged only after [1].
+> [1] -> https://marc.info/?l=linux-omap&m=152482966225758&w=2
+> 
+> This series:
+>  *) Adds wilink wlan support (Now all MMC instances in DRA7 will use
+>     sdhci-omap)
+>  *) Add a new pinctrl group for clk line without pullup required for
+>     UHS cards to work reliably.
+>  *) Update README to make sure users update .config file from 4.18
+>     kernel.
+>  *) Use sdhci-omap programming model.
+
+Applying this series into omap-for-v4.18/dt-sdhci on top of the
+immutable branch from Ulf.
+
+> In the "Use sdhci-omap programming model" patch, "ti,omap4-hsmmc"
+> compatible is removed. This is because if both "ti,dra7-sdhci" and
+> "ti,omap4-hsmmc" is added and if there is probe deferral in sdhci_omap
+> driver, the device is binding to omap_hsmmc driver.
+> 
+> Once omap_hsmmc and sdhci_omap driver are feature identical,
+> sdhci_omap driver will be made to support omap_hsmmc binding
+> (including "ti,omap4-hsmmc" compatible) and omap_hsmmc driver will
+> be removed. Till then dt nodes with "ti,omap4-hsmmc" compatible
+> will use omap_hsmmc driver and "ti,dra7-sdhci" compatible will
+> use sdhci_omap driver.
+
+Great that sounds good to me :) This way we can test and enable
+it one SoC at a time.
+
+Regards,
+
+Tony
