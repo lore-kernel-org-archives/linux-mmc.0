@@ -1,56 +1,36 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: Re: [PATCH 0/3] K2G: mmc: Update mmc dt node to use sdhci-omap
-Date: Fri, 4 May 2018 13:36:06 +0530
-Message-ID: <e4b70bab-d3bd-7071-aefa-2934c20a3e30@ti.com>
-References: <20180425132746.13911-1-kishon@ti.com>
- <fc5f3498-62fd-15d3-90df-206c51649cb4@oracle.com>
- <0481f6f0-539e-4809-63cd-1134367a7b78@ti.com>
- <de0bd46a-21d4-14de-9695-9b0f3996dacb@oracle.com>
+From: Aapo Vienamo <aapo.vienamo@iki.fi>
+Subject: [PATCH] mmc: tegra: remove redundant return statement
+Date: Fri, 4 May 2018 12:20:53 +0300
+Message-ID: <20180504092053.GA20277@orion>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <de0bd46a-21d4-14de-9695-9b0f3996dacb@oracle.com>
+Content-Disposition: inline
 Sender: linux-kernel-owner@vger.kernel.org
-To: "santosh.shilimkar@oracle.com" <santosh.shilimkar@oracle.com>, Santosh Shilimkar <ssantosh@kernel.org>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, Tony Lindgren <tony@atomide.com>
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Santosh,
+A redundant return statement is removed from
+tegra_sdhci_set_uhs_signaling(). The function returns void and the
+return does not affect the control flow of the function.
 
-On Friday 04 May 2018 12:22 AM, santosh.shilimkar@oracle.com wrote:
-> On 5/3/18 4:57 AM, Kishon Vijay Abraham I wrote:
->> Hi Santosh,
->>
->> On Wednesday 25 April 2018 11:10 PM, Santosh Shilimkar wrote:
->>> On 4/25/2018 6:27 AM, Kishon Vijay Abraham I wrote:
->>>> Update mmc dt node to use sdhci-omap binding instead of omap_hsmmc
->>>> binding.
->>>>
->>>> I've also updated keystone_defconfig to enable CONFIG_MMC_SDHCI_OMAP.
->>>> Everyone who use a custom .config should also enable
->>>> CONFIG_MMC_SDHCI_OMAP for MMC to work.
->>>>
->>>> This series should be merged only after [1]
->>>> [1] -> https://marc.info/?l=linux-kernel&m=152465820531802&w=2
->>>>
->>> Keep me posted once the dependency gets merged.
->>
->> Ulf has merged the sdhci part and has shared an immutable branch
->>
->> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git sdhci_omap
->> with his signed tag sdhci-omap-v4.17-rc3.
->>
->> Can you use it as a base for merging this series?
->>
-> How about I apply only DTS patches and exlude config file update ?
-> You can send the config patch after the merge window. Are the DTS
-> changes also going to break anything without basing of this sdhci
-> branch ?
+Signed-off-by: Aapo Vienamo <aapo.vienamo@iki.fi>
+---
+ drivers/mmc/host/sdhci-tegra.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Yes, the bindings has changed for sdhci-omap.
-It should also be fine if this entire series can be merged during the 4.18 -rc
-cycle since the dependent patches would have been already merged then.
-
-Thanks
-Kishon
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index b877c13184c2..970d38f68939 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -231,7 +231,7 @@ static void tegra_sdhci_set_uhs_signaling(struct sdhci_host *host,
+ 	if (timing == MMC_TIMING_UHS_DDR50)
+ 		tegra_host->ddr_signaling = true;
+ 
+-	return sdhci_set_uhs_signaling(host, timing);
++	sdhci_set_uhs_signaling(host, timing);
+ }
+ 
+ static unsigned int tegra_sdhci_get_max_clock(struct sdhci_host *host)
+-- 
+2.16.1
