@@ -1,65 +1,116 @@
-From: "santosh.shilimkar@oracle.com" <santosh.shilimkar@oracle.com>
-Subject: Re: [PATCH 0/3] K2G: mmc: Update mmc dt node to use sdhci-omap
-Date: Fri, 4 May 2018 08:46:10 -0700
-Message-ID: <d7ec2aed-028f-4d0d-fc31-ecc798b0ef14@oracle.com>
-References: <20180425132746.13911-1-kishon@ti.com>
- <fc5f3498-62fd-15d3-90df-206c51649cb4@oracle.com>
- <0481f6f0-539e-4809-63cd-1134367a7b78@ti.com>
- <de0bd46a-21d4-14de-9695-9b0f3996dacb@oracle.com>
- <e4b70bab-d3bd-7071-aefa-2934c20a3e30@ti.com>
+From: Mauro Carvalho Chehab <mchehab+samsung@kernel.org>
+Subject: Re: [PATCH 04/15] media: pxa_camera: remove the dmaengine compat need
+Date: Fri, 4 May 2018 16:29:32 -0300
+Message-ID: <20180504162932.52a020cc@vento.lan>
+References: <20180402142656.26815-1-robert.jarzmik@free.fr>
+ <20180402142656.26815-5-robert.jarzmik@free.fr>
+ <89f3e97c-08a4-33b6-8fd3-0c1b4dea2065@xs4all.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <e4b70bab-d3bd-7071-aefa-2934c20a3e30@ti.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>, Santosh Shilimkar <ssantosh@kernel.org>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, Tony Lindgren <tony@atomide.com>
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <89f3e97c-08a4-33b6-8fd3-0c1b4dea2065@xs4all.nl>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Hans Verkuil <hverkuil@xs4all.nl>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, alsa-devel@alsa-project.org, Takashi Iwai <tiwai@suse.com>, linux-ide@vger.kernel.org, Pravin Shedge <pravin.shedge4linux@gmail.com>, netdev@vger.kernel.org, linux-mtd@lists.infradead.org, Laurent Pinchart <laurent.pinchart@ideasonboard.com>, Robert Jarzmik <robert.jarzmik@free.fr>, devel@driverdev.osuosl.org, Boris Brezillon <boris.brezillon@free-electrons.com>, dmaengine@vger.kernel.org, Vinod Koul <vinod.koul@intel.com>, Richard Weinberger <richard@nod.at>, Robert Jarzmik <robert.jarzmik@renault.com>, Marek Vasut <marek.vasut@gmail.com>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, linux-media@vger.kernel.org, Samuel Ortiz <samuel@sortiz.org>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Flavio Ceolin <flavio.ceolin@intel.com>, Mark
 List-Id: linux-mmc@vger.kernel.org
 
-On 5/4/18 1:06 AM, Kishon Vijay Abraham I wrote:
-> Hi Santosh,
-> 
-> On Friday 04 May 2018 12:22 AM, santosh.shilimkar@oracle.com wrote:
->> On 5/3/18 4:57 AM, Kishon Vijay Abraham I wrote:
->>> Hi Santosh,
->>>
->>> On Wednesday 25 April 2018 11:10 PM, Santosh Shilimkar wrote:
->>>> On 4/25/2018 6:27 AM, Kishon Vijay Abraham I wrote:
->>>>> Update mmc dt node to use sdhci-omap binding instead of omap_hsmmc
->>>>> binding.
->>>>>
->>>>> I've also updated keystone_defconfig to enable CONFIG_MMC_SDHCI_OMAP.
->>>>> Everyone who use a custom .config should also enable
->>>>> CONFIG_MMC_SDHCI_OMAP for MMC to work.
->>>>>
->>>>> This series should be merged only after [1]
->>>>> [1] -> https://marc.info/?l=linux-kernel&m=152465820531802&w=2
->>>>>
->>>> Keep me posted once the dependency gets merged.
->>>
->>> Ulf has merged the sdhci part and has shared an immutable branch
->>>
->>> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git sdhci_omap
->>> with his signed tag sdhci-omap-v4.17-rc3.
->>>
->>> Can you use it as a base for merging this series?
->>>
->> How about I apply only DTS patches and exlude config file update ?
->> You can send the config patch after the merge window. Are the DTS
->> changes also going to break anything without basing of this sdhci
->> branch ?
-> 
-> Yes, the bindings has changed for sdhci-omap.
-> It should also be fine if this entire series can be merged during the 4.18 -rc
-> cycle since the dependent patches would have been already merged then.
-> 
-I see. In that, lets wait for 4.18-rcx for all the dependencies to make
-it. This series won't qualify for fixes but at least we can get that
-into next early in the cycle so that it becomes usable.
+Em Sun, 22 Apr 2018 13:06:12 +0200
+Hans Verkuil <hverkuil@xs4all.nl> escreveu:
 
-Thanks for followup Kishon !!
+> On 04/02/2018 04:26 PM, Robert Jarzmik wrote:
+> > From: Robert Jarzmik <robert.jarzmik@renault.com>
+> > 
+> > As the pxa architecture switched towards the dmaengine slave map, the
+> > old compatibility mechanism to acquire the dma requestor line number and
+> > priority are not needed anymore.
+> > 
+> > This patch simplifies the dma resource acquisition, using the more
+> > generic function dma_request_slave_channel().
+> > 
+> > Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>  
+> 
+> Acked-by: Hans Verkuil <hans.verkuil@cisco.com>
+
+I'm assuming that you'll be applying it together with other PXA patches.
+So:
+
+Acked-by: Mauro Carvalho Chehab <mchehab+samsung@kernel.org>
 
 Regards,
-Santosh
+Mauro
+> 
+> Regards,
+> 
+> 	Hans
+> 
+> > ---
+> >  drivers/media/platform/pxa_camera.c | 22 +++-------------------
+> >  1 file changed, 3 insertions(+), 19 deletions(-)
+> > 
+> > diff --git a/drivers/media/platform/pxa_camera.c b/drivers/media/platform/pxa_camera.c
+> > index c71a00736541..4c82d1880753 100644
+> > --- a/drivers/media/platform/pxa_camera.c
+> > +++ b/drivers/media/platform/pxa_camera.c
+> > @@ -2357,8 +2357,6 @@ static int pxa_camera_probe(struct platform_device *pdev)
+> >  		.src_maxburst = 8,
+> >  		.direction = DMA_DEV_TO_MEM,
+> >  	};
+> > -	dma_cap_mask_t mask;
+> > -	struct pxad_param params;
+> >  	char clk_name[V4L2_CLK_NAME_SIZE];
+> >  	int irq;
+> >  	int err = 0, i;
+> > @@ -2432,34 +2430,20 @@ static int pxa_camera_probe(struct platform_device *pdev)
+> >  	pcdev->base = base;
+> >  
+> >  	/* request dma */
+> > -	dma_cap_zero(mask);
+> > -	dma_cap_set(DMA_SLAVE, mask);
+> > -	dma_cap_set(DMA_PRIVATE, mask);
+> > -
+> > -	params.prio = 0;
+> > -	params.drcmr = 68;
+> > -	pcdev->dma_chans[0] =
+> > -		dma_request_slave_channel_compat(mask, pxad_filter_fn,
+> > -						 &params, &pdev->dev, "CI_Y");
+> > +	pcdev->dma_chans[0] = dma_request_slave_channel(&pdev->dev, "CI_Y");
+> >  	if (!pcdev->dma_chans[0]) {
+> >  		dev_err(&pdev->dev, "Can't request DMA for Y\n");
+> >  		return -ENODEV;
+> >  	}
+> >  
+> > -	params.drcmr = 69;
+> > -	pcdev->dma_chans[1] =
+> > -		dma_request_slave_channel_compat(mask, pxad_filter_fn,
+> > -						 &params, &pdev->dev, "CI_U");
+> > +	pcdev->dma_chans[1] = dma_request_slave_channel(&pdev->dev, "CI_U");
+> >  	if (!pcdev->dma_chans[1]) {
+> >  		dev_err(&pdev->dev, "Can't request DMA for Y\n");
+> >  		err = -ENODEV;
+> >  		goto exit_free_dma_y;
+> >  	}
+> >  
+> > -	params.drcmr = 70;
+> > -	pcdev->dma_chans[2] =
+> > -		dma_request_slave_channel_compat(mask, pxad_filter_fn,
+> > -						 &params, &pdev->dev, "CI_V");
+> > +	pcdev->dma_chans[2] = dma_request_slave_channel(&pdev->dev, "CI_V");
+> >  	if (!pcdev->dma_chans[2]) {
+> >  		dev_err(&pdev->dev, "Can't request DMA for V\n");
+> >  		err = -ENODEV;
+> >   
+> 
+
+
+
+Thanks,
+Mauro
