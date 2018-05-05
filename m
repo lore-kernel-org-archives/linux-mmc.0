@@ -1,114 +1,99 @@
 From: Mauro Carvalho Chehab <mchehab+samsung@kernel.org>
-Subject: Re: [PATCH 04/15] media: pxa_camera: remove the dmaengine compat need
-Date: Fri, 4 May 2018 16:29:32 -0300
-Message-ID: <20180504162932.52a020cc@vento.lan>
-References: <20180402142656.26815-1-robert.jarzmik@free.fr>
- <20180402142656.26815-5-robert.jarzmik@free.fr>
- <89f3e97c-08a4-33b6-8fd3-0c1b4dea2065@xs4all.nl>
+Subject: Re: [PATCH v3 12/20] media: Remove depends on HAS_DMA in case of
+ platform dependency
+Date: Sat, 5 May 2018 09:47:43 -0300
+Message-ID: <20180505094743.4d201ba0@vento.lan>
+References: <1523987360-18760-1-git-send-email-geert@linux-m68k.org>
+ <1523987360-18760-13-git-send-email-geert@linux-m68k.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <89f3e97c-08a4-33b6-8fd3-0c1b4dea2065@xs4all.nl>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Hans Verkuil <hverkuil@xs4all.nl>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, alsa-devel@alsa-project.org, Takashi Iwai <tiwai@suse.com>, linux-ide@vger.kernel.org, Pravin Shedge <pravin.shedge4linux@gmail.com>, netdev@vger.kernel.org, linux-mtd@lists.infradead.org, Laurent Pinchart <laurent.pinchart@ideasonboard.com>, Robert Jarzmik <robert.jarzmik@free.fr>, devel@driverdev.osuosl.org, Boris Brezillon <boris.brezillon@free-electrons.com>, dmaengine@vger.kernel.org, Vinod Koul <vinod.koul@intel.com>, Richard Weinberger <richard@nod.at>, Robert Jarzmik <robert.jarzmik@renault.com>, Marek Vasut <marek.vasut@gmail.com>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, linux-media@vger.kernel.org, Samuel Ortiz <samuel@sortiz.org>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Flavio Ceolin <flavio.ceolin@intel.com>, Mark
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <1523987360-18760-13-git-send-email-geert@linux-m68k.org>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa@the-dreams.de>, linux-iio@vger.kernel.org, linux-fpga@vger.kernel.org, linux-remoteproc@vger.kernel.org, alsa-devel@alsa-project.org, Bjorn Andersson <bjorn.andersson@linaro.org>, Eric Anholt <eric@anholt.net>, netdev@vger.kernel.org, linux-mtd@lists.infradead.org, linux-i2c@vger.kernel.org, linux1394-devel@lists.sourceforge.net, Christoph Hellwig <hch@lst.de>, Marek Szyprowski <m.szyprowski@samsung.com>, Stefan Wahren <stefan.wahren@i2se.com>, Boris Brezillon <boris.brezillon@free-electrons.com>, Herbert Xu <herbert@gondor.apana.org.au>, Richard Weinberger <richard@nod.at>, Joerg Roedel <joro@8bytes.org>, Jassi Brar <jassisinghbrar@gmail.com>, Marek Vasut <marek.vasut@gmail.com>, linux-serial@vger.kernel.org, Matias Bjorling <mb@lightnvm.io>, David Woodhouse <dwmw2@infradead.org>, linux-media@vger.kernel.org, Ohad
 List-Id: linux-mmc@vger.kernel.org
 
-Em Sun, 22 Apr 2018 13:06:12 +0200
-Hans Verkuil <hverkuil@xs4all.nl> escreveu:
+Hi Geert,
 
-> On 04/02/2018 04:26 PM, Robert Jarzmik wrote:
-> > From: Robert Jarzmik <robert.jarzmik@renault.com>
-> > 
-> > As the pxa architecture switched towards the dmaengine slave map, the
-> > old compatibility mechanism to acquire the dma requestor line number and
-> > priority are not needed anymore.
-> > 
-> > This patch simplifies the dma resource acquisition, using the more
-> > generic function dma_request_slave_channel().
-> > 
-> > Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>  
+Em Tue, 17 Apr 2018 19:49:12 +0200
+Geert Uytterhoeven <geert@linux-m68k.org> escreveu:
+
+> Remove dependencies on HAS_DMA where a Kconfig symbol depends on another
+> symbol that implies HAS_DMA, and, optionally, on "|| COMPILE_TEST".
+
+Applying a patch like that is hard, as there are lots of churn at
+the code. That's against latest media upstream:
+
+checking file drivers/media/pci/intel/ipu3/Kconfig
+Hunk #1 FAILED at 4.
+1 out of 1 hunk FAILED
+checking file drivers/media/pci/solo6x10/Kconfig
+checking file drivers/media/pci/sta2x11/Kconfig
+Hunk #1 FAILED at 1.
+1 out of 1 hunk FAILED
+checking file drivers/media/pci/tw5864/Kconfig
+checking file drivers/media/pci/tw686x/Kconfig
+checking file drivers/media/platform/Kconfig
+Hunk #2 FAILED at 63.
+Hunk #3 succeeded at 81 (offset 1 line).
+Hunk #4 succeeded at 91 (offset 1 line).
+Hunk #5 succeeded at 101 (offset 1 line).
+Hunk #6 succeeded at 111 (offset 1 line).
+Hunk #7 succeeded at 124 (offset 1 line).
+Hunk #8 succeeded at 142 (offset 1 line).
+Hunk #9 succeeded at 169 (offset 1 line).
+Hunk #10 succeeded at 186 (offset 1 line).
+Hunk #11 succeeded at 197 (offset 1 line).
+Hunk #12 succeeded at 213 (offset 1 line).
+Hunk #13 succeeded at 227 (offset 1 line).
+Hunk #14 succeeded at 254 (offset 1 line).
+Hunk #15 succeeded at 265 (offset 1 line).
+Hunk #16 succeeded at 275 (offset 1 line).
+Hunk #17 succeeded at 284 (offset 1 line).
+Hunk #18 succeeded at 295 (offset 1 line).
+Hunk #19 succeeded at 303 (offset 1 line).
+Hunk #20 succeeded at 312 (offset 1 line).
+Hunk #21 succeeded at 338 (offset 1 line).
+Hunk #22 succeeded at 383 (offset 1 line).
+Hunk #23 succeeded at 397 (offset 1 line).
+Hunk #24 succeeded at 422 (offset 1 line).
+Hunk #25 succeeded at 435 (offset 1 line).
+Hunk #26 succeeded at 452 (offset 1 line).
+Hunk #27 succeeded at 470 (offset 1 line).
+Hunk #28 succeeded at 612 (offset 1 line).
+1 out of 28 hunks FAILED
+
+> In most cases this other symbol is an architecture or platform specific
+> symbol, or PCI.
 > 
-> Acked-by: Hans Verkuil <hans.verkuil@cisco.com>
+> Generic symbols and drivers without platform dependencies keep their
+> dependencies on HAS_DMA, to prevent compiling subsystems or drivers that
+> cannot work anyway.
 
-I'm assuming that you'll be applying it together with other PXA patches.
-So:
+Actually, depends on HAS_DMA was introduced on media because builds
+were failing otherwise. We started adding it before the addition 
+of COMPILE_TEST.
 
-Acked-by: Mauro Carvalho Chehab <mchehab+samsung@kernel.org>
+Can we just remove all HAS_DMA Kconfig dependencies as a hole from the
+entire media subsystem, with something like:
+
+	$ for i in $(find drivers/media -name Kconfig) $(find drivers/staging/media -name Kconfig); do sed '/depends on HAS_DMA/d;s/ && HAS_DMA//g' -i $i; done
+
+Or would it cause build issues?
 
 Regards,
 Mauro
-> 
-> Regards,
-> 
-> 	Hans
-> 
-> > ---
-> >  drivers/media/platform/pxa_camera.c | 22 +++-------------------
-> >  1 file changed, 3 insertions(+), 19 deletions(-)
-> > 
-> > diff --git a/drivers/media/platform/pxa_camera.c b/drivers/media/platform/pxa_camera.c
-> > index c71a00736541..4c82d1880753 100644
-> > --- a/drivers/media/platform/pxa_camera.c
-> > +++ b/drivers/media/platform/pxa_camera.c
-> > @@ -2357,8 +2357,6 @@ static int pxa_camera_probe(struct platform_device *pdev)
-> >  		.src_maxburst = 8,
-> >  		.direction = DMA_DEV_TO_MEM,
-> >  	};
-> > -	dma_cap_mask_t mask;
-> > -	struct pxad_param params;
-> >  	char clk_name[V4L2_CLK_NAME_SIZE];
-> >  	int irq;
-> >  	int err = 0, i;
-> > @@ -2432,34 +2430,20 @@ static int pxa_camera_probe(struct platform_device *pdev)
-> >  	pcdev->base = base;
-> >  
-> >  	/* request dma */
-> > -	dma_cap_zero(mask);
-> > -	dma_cap_set(DMA_SLAVE, mask);
-> > -	dma_cap_set(DMA_PRIVATE, mask);
-> > -
-> > -	params.prio = 0;
-> > -	params.drcmr = 68;
-> > -	pcdev->dma_chans[0] =
-> > -		dma_request_slave_channel_compat(mask, pxad_filter_fn,
-> > -						 &params, &pdev->dev, "CI_Y");
-> > +	pcdev->dma_chans[0] = dma_request_slave_channel(&pdev->dev, "CI_Y");
-> >  	if (!pcdev->dma_chans[0]) {
-> >  		dev_err(&pdev->dev, "Can't request DMA for Y\n");
-> >  		return -ENODEV;
-> >  	}
-> >  
-> > -	params.drcmr = 69;
-> > -	pcdev->dma_chans[1] =
-> > -		dma_request_slave_channel_compat(mask, pxad_filter_fn,
-> > -						 &params, &pdev->dev, "CI_U");
-> > +	pcdev->dma_chans[1] = dma_request_slave_channel(&pdev->dev, "CI_U");
-> >  	if (!pcdev->dma_chans[1]) {
-> >  		dev_err(&pdev->dev, "Can't request DMA for Y\n");
-> >  		err = -ENODEV;
-> >  		goto exit_free_dma_y;
-> >  	}
-> >  
-> > -	params.drcmr = 70;
-> > -	pcdev->dma_chans[2] =
-> > -		dma_request_slave_channel_compat(mask, pxad_filter_fn,
-> > -						 &params, &pdev->dev, "CI_V");
-> > +	pcdev->dma_chans[2] = dma_request_slave_channel(&pdev->dev, "CI_V");
-> >  	if (!pcdev->dma_chans[2]) {
-> >  		dev_err(&pdev->dev, "Can't request DMA for V\n");
-> >  		err = -ENODEV;
-> >   
-> 
+
 
 
 
