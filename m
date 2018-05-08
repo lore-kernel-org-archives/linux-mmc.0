@@ -1,89 +1,69 @@
-From: Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>
-Subject: Re: [PATCH v3 12/20] media: Remove depends on HAS_DMA in case of
-	platform dependency
-Date: Mon, 7 May 2018 09:21:47 +0200
-Message-ID: <CAMuHMdXp8u9O7Yt3W+WxuOOadYOM+_28DLOMfktwgy_WqML_0A@mail.gmail.com>
-References: <1523987360-18760-1-git-send-email-geert@linux-m68k.org>
-	<1523987360-18760-13-git-send-email-geert@linux-m68k.org>
-	<20180505094743.4d201ba0@vento.lan>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] brcmfmac: Add support for bcm43364 wireless chipset
+Date: Tue, 8 May 2018 09:58:34 +0200
+Message-ID: <CAPDyKFr62-+EF_GRbUSa=VOQfYa3c3HHZCR_LsN67k1yVkNNFw@mail.gmail.com>
+References: <1525416503-832-1-git-send-email-sean@lano.id.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <20180505094743.4d201ba0-ch4gOOMV7nf/PtFMR13I2A@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Mauro Carvalho Chehab <mchehab+samsung-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, linux-iio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-fpga-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "open list:REMOTE PROCESSOR (REMOTEPROC) SUBSYSTEM" <linux-remoteproc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ALSA Development Mailing List <alsa-devel-K7yf7f+aM1XWsZ/bQMPhNw@public.gmane.org>, Bjorn Andersson <bjorn.andersson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Eric Anholt <eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org>, netdev <netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, MTD Maling List <linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Linux I2C <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux1394-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>, Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>, Boris Brezillon <boris.brezillon-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Herbert Xu <herbert-lOAM2aK0SrRLBo1qDEOMRrpzq4S04n8Q@public.gmane.org>, Richard Weinberger <richard-/L3Ra7n9ekc@public.gmane.org>, Jassi Brar <jassisinghbrar-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Marek Vasut <marek.vasut-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "open list:SERIAL DRIVERS" <linux-serial-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matias Bjorling <mb@light>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1525416503-832-1-git-send-email-sean-k1Xf6wIwYfsQrrorzV6ljw@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Sean Lanigan <sean-k1Xf6wIwYfsQrrorzV6ljw@public.gmane.org>, Arend van Spriel <arend.vanspriel-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
+Cc: Franky Lin <franky.lin-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Hante Meuleman <hante.meuleman-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Chi-Hsien Lin <chi-hsien.lin-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org>, Wright Feng <wright.feng-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org>, Ian Molton <ian-zdned+2MO1+9FHfhHBbuYA@public.gmane.org>, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, brcm80211-dev-list-+wT8y+m8/X5BDgjK7y7TUQ@public.gmane.org, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Mauro,
-
-On Sat, May 5, 2018 at 2:47 PM, Mauro Carvalho Chehab
-<mchehab+samsung-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
-> Em Tue, 17 Apr 2018 19:49:12 +0200
-> Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org> escreveu:
+On 4 May 2018 at 08:48, Sean Lanigan <sean-k1Xf6wIwYfsQrrorzV6ljw@public.gmane.org> wrote:
+> Add support for the BCM43364 chipset via an SDIO interface, as used in
+> e.g. the Murata 1FX module.
 >
->> Remove dependencies on HAS_DMA where a Kconfig symbol depends on another
->> symbol that implies HAS_DMA, and, optionally, on "|| COMPILE_TEST".
+> The BCM43364 uses the same firmware as the BCM43430 (which is already
+> included), the only difference is the omission of Bluetooth.
 >
-> Applying a patch like that is hard, as there are lots of churn at
-> the code. That's against latest media upstream:
-
-[...]
-
-I can rebase. What's your preferred target? media-next?
-
->> In most cases this other symbol is an architecture or platform specific
->> symbol, or PCI.
->>
->> Generic symbols and drivers without platform dependencies keep their
->> dependencies on HAS_DMA, to prevent compiling subsystems or drivers that
->> cannot work anyway.
+> However, the SDIO_ID for the BCM43364 is 02D0:A9A4, giving it a MODALIAS
+> of sdio:c00v02D0dA9A4, which doesn't get recognised and hence doesn't
+> load the brcmfmac module. Adding the 'A9A4' ID in the appropriate place
+> triggers the brcmfmac driver to load, and then correctly use the
+> firmware file 'brcmfmac43430-sdio.bin'.
 >
-> Actually, depends on HAS_DMA was introduced on media because builds
-> were failing otherwise. We started adding it before the addition
-> of COMPILE_TEST.
-
-Indeed. Before the 5 commits below, a missing dependency on HAS_DMA
-would cause the build to fail for NO_DMA platforms.
-
-    f29ab49b5388b2f8 dma-mapping: Convert NO_DMA get_dma_ops() into a real dummy
-    ab642e952f80c66c dma-coherent: Add NO_DMA dummies for managed DMA API
-    c1ce6c2beea38171 mm: Add NO_DMA dummies for DMA pool API
-    bff739b6559e2fce scsi: Add NO_DMA dummies for SCSI DMA mapping API
-    1f674e16f9ce6eb2 usb: gadget: Add NO_DMA dummies for DMA mapping API
-
-> Can we just remove all HAS_DMA Kconfig dependencies as a hole from the
-> entire media subsystem, with something like:
 >
->         $ for i in $(find drivers/media -name Kconfig) $(find drivers/staging/media -name Kconfig); do sed '/depends on HAS_DMA/d;s/ && HAS_DMA//g' -i $i; done
+> Signed-off-by: Sean Lanigan <sean-k1Xf6wIwYfsQrrorzV6ljw@public.gmane.org>
+
+Acked-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+
+Arend, I assume you want to pick this up? If not, just tell and I can do it.
+
+Kind regards
+Uffe
+
+> ---
+>  drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c | 1 +
+>  include/linux/mmc/sdio_ids.h                              | 1 +
+>  2 files changed, 2 insertions(+)
 >
-> Or would it cause build issues?
-
-It should not cause build issues, but it would enable lots of drivers that
-need DMA platform support on platforms where they wouldn't work, making the
-life of distro configurators harder.
-
-That's why my series removes HAS_DMA only for symbols that have a platform
-dependency.
-
-Thanks!
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+> diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
+> index 0b68240..4648a3d 100644
+> --- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
+> +++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
+> @@ -963,6 +963,7 @@ static const struct sdio_device_id brcmf_sdmmc_ids[] = {
+>         BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43340),
+>         BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43341),
+>         BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43362),
+> +       BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43364),
+>         BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4335_4339),
+>         BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4339),
+>         BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43430),
+> diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
+> index cdd66a5..0a7abe8 100644
+> --- a/include/linux/mmc/sdio_ids.h
+> +++ b/include/linux/mmc/sdio_ids.h
+> @@ -35,6 +35,7 @@
+>  #define SDIO_DEVICE_ID_BROADCOM_4335_4339      0x4335
+>  #define SDIO_DEVICE_ID_BROADCOM_4339           0x4339
+>  #define SDIO_DEVICE_ID_BROADCOM_43362          0xa962
+> +#define SDIO_DEVICE_ID_BROADCOM_43364          0xa9a4
+>  #define SDIO_DEVICE_ID_BROADCOM_43430          0xa9a6
+>  #define SDIO_DEVICE_ID_BROADCOM_4345           0x4345
+>  #define SDIO_DEVICE_ID_BROADCOM_43455          0xa9bf
+> --
+> 2.7.4
+>
