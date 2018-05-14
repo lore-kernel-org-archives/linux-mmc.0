@@ -1,101 +1,80 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V5 1/3] mmc: sdhci: Add support for O2 eMMC HS200 mode
-Date: Fri, 11 May 2018 15:53:17 +0300
-Message-ID: <a0a6b18f-5d73-96ae-afee-46aae1041c1c@intel.com>
-References: <20180420163726.17036-1-ernest.zhang@bayhubtech.com>
+From: Faiz Abbas <faiz_abbas@ti.com>
+Subject: MMC performance degradation due to too many requests
+Date: Mon, 14 May 2018 17:00:56 +0530
+Message-ID: <0ea1d2bf-fa0f-4b3d-556a-5dca5afbf2a9@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180420163726.17036-1-ernest.zhang@bayhubtech.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: "ernest.zhang" <ernest.zhang@bayhubtech.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Xiaoguang Yu <xiaoguang.yu@bayhubtech.com>, Shirley Her <shirley.her@bayhubtech.com>, Yuxiang Wan <yuxiang.wan@bayhubtech.com>
+To: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, linux-mmc@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 20/04/18 19:37, ernest.zhang wrote:
-> When use eMMC as boot device, the eMMC signaling voltage is tied to 1.8v
-> fixed output voltage, bios can set o2 sd host controller PCI configuration
-> register 0x308 bit4 to 1 to let driver skip 3.3v signaling voltage and
-> direct use 1.8v singling voltage in eMMC initialize process.
-> 
-> Changes in V5:
-> 	Modify code format to pass checkpatch.pl check and add a summary
-> 	of what has changed in each version.
-> 
-> Changes in V4:
-> 	Skip SDIO and SD initalization when register 0x308 bit 4 is set,
-> 	and modify some typo.
-> 
-> Changes in V3:
-> 	Rebase the patch on the mmc tree 'next' branch.
-> 
-> Changes in V2:
-> 	Modify code format, and delete unused code path.
-> 
-> Changes in V1:
-> 	Check PCIe register 0x308 bit 4 and skip eMMC 3.3v initialization
-> 	process if it is set to 1.
-> 
-> Signed-off-by: ernest.zhang <ernest.zhang@bayhubtech.com>
-> ---
+Hi Everyone,
 
-Change log still in the wrong place.  Nevertheless:
+I am debugging a performance degradation issue in some SD cards which
+happened around 4.13 kernel on TI's AM335x-evm.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+I compare the time taken for a simple dd command (after dropping
+caches) to run between kernel versions 4.13 and 4.14. I see that there
+is a consistent 15-20% reduction in speed. The amount of decrease
+depends on the card used.
 
->  drivers/mmc/host/sdhci-pci-o2micro.c | 18 ++++++++++++++++++
->  1 file changed, 18 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
-> index 555970a..ba59db6a 100644
-> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
-> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
-> @@ -3,6 +3,7 @@
->   *
->   * Authors: Peter Guo <peter.guo@bayhubtech.com>
->   *          Adam Lee <adam.lee@canonical.com>
-> + *          Ernest Zhang <ernest.zhang@bayhubtech.com>
->   *
->   * This software is licensed under the terms of the GNU General Public
->   * License version 2, as published by the Free Software Foundation, and
-> @@ -39,6 +40,7 @@
->  #define O2_SD_MISC_CTRL4	0xFC
->  #define O2_SD_TUNING_CTRL	0x300
->  #define O2_SD_PLL_SETTING	0x304
-> +#define O2_SD_MISC_SETTING	0x308
->  #define O2_SD_CLK_SETTING	0x328
->  #define O2_SD_CAP_REG2		0x330
->  #define O2_SD_CAP_REG0		0x334
-> @@ -184,6 +186,7 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
->  	struct sdhci_pci_chip *chip;
->  	struct sdhci_host *host;
->  	u32 reg;
-> +	int ret;
->  
->  	chip = slot->chip;
->  	host = slot->host;
-> @@ -197,6 +200,21 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
->  		if (reg & 0x1)
->  			host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
->  
-> +		if (chip->pdev->device == PCI_DEVICE_ID_O2_SEABIRD0) {
-> +			ret = pci_read_config_dword(chip->pdev,
-> +						    O2_SD_MISC_SETTING, &reg);
-> +			if (ret)
-> +				return -EIO;
-> +			if (reg & (1 << 4)) {
-> +				pr_info("%s: emmc 1.8v flag is set, force 1.8v signaling voltage\n",
-> +					mmc_hostname(host->mmc));
-> +				host->flags &= ~SDHCI_SIGNALING_330;
-> +				host->flags |= SDHCI_SIGNALING_180;
-> +				host->mmc->caps2 |= MMC_CAP2_NO_SD;
-> +				host->mmc->caps2 |= MMC_CAP2_NO_SDIO;
-> +			}
-> +		}
-> +
->  		if (chip->pdev->device != PCI_DEVICE_ID_O2_FUJIN2)
->  			break;
->  		/* set dll watch dog timer */
-> 
+command:
+# echo 3 > /proc/sys/vm/drop_caches; dd if=/dev/zero of=/dev/mmcblk1p2
+bs=1M count=100;
+
+
+v4.13
+~22s for 100M transfer
+
+v4.14
+~28s for 100M transfer
+
+Also, I see many times the number of interrupts for mmc1 in 4.14.
+
+v4.14
+ 34:      2122       INTC  64 Level     mmc1
+
+v4.13
+162:       457       INTC  64 Level     mmc1
+
+This increase of interrupts also exists in the latest kernel.
+
+I also printed out the size of the DMA transfers in the omap_hsmmc
+driver during the dd command. I see that the maximum size of the dma
+transfer has decreased from 1 MB to 256kB between 4.13 and 4.14.
+
+Full log:
+
+v4.13
+https://pastebin.ubuntu.com/p/gK2k9GZcNd/
+
+v4.14
+https://pastebin.ubuntu.com/p/3YzCbQ79rk/
+
+It looks like something has started splitting the request into 4 times
+as many smaller buffers and this is what is causing the performance
+decrease.
+
+I also ran the ftrace function profile tool on mmc* and blk* functions
+and see that the function mmc_blk_issue_rq() is where the program spends
+most of its time and the calls to that and other related functions have
+increased around 4 times with the average time per call being reduced.
+
+Function profile Log:
+
+v4.13
+https://pastebin.ubuntu.com/p/R5JG6FpTvy/
+
+v4.14
+https://pastebin.ubuntu.com/p/Kc6QYYwYcN/
+
+I am not sure why calls to mmc_blk_issue_rq() have increased by so much.
+Any ideas why this could be happening?
+
+
+Thanks,
+Faiz
