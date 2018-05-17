@@ -1,92 +1,40 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH] mmc: block: propagate correct returned value in
- mmc_rpmb_ioctl
-Date: Thu, 17 May 2018 14:24:02 +0800
-Message-ID: <c6865f1b-8c0a-4a8c-d174-57665aaa5007@rock-chips.com>
-References: <20180516192022.23541-1-malat@debian.org>
- <316ca15c-86f2-f052-c307-ba12eea7b579@rock-chips.com>
- <CA+7wUszzfp8u+PwRzOUj3MNNEdCpZYCUoFgGp3GwT8c9nyurpg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+From: Vijay Viswanath <vviswana@codeaurora.org>
+Subject: [PATCH V1 0/3] Changes for SDCC5 version
+Date: Thu, 17 May 2018 15:58:55 +0530
+Message-ID: <1526552938-21292-1-git-send-email-vviswana@codeaurora.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CA+7wUszzfp8u+PwRzOUj3MNNEdCpZYCUoFgGp3GwT8c9nyurpg@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Mathieu Malaterre <malat@debian.org>
-Cc: shawn.lin@rock-chips.com, Linus Walleij <linus.walleij@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, devicetree@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, jeremymc@redhat.com, vviswana@codeaurora.org, bjorn.andersson@linaro.org, riteshh@codeaurora.org, vbadigan@codeaurora.org, dianders@google.com, sayalil@codeaurora.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 2018/5/17 14:16, Mathieu Malaterre wrote:
-> On Thu, May 17, 2018 at 4:45 AM, Shawn Lin <shawn.lin@rock-chips.com> wrote:
->>
->> On 2018/5/17 3:20, Mathieu Malaterre wrote:
->>>
->>> In commit 97548575bef3 ("mmc: block: Convert RPMB to a character device")
->>> a
->>> new function `mmc_rpmb_ioctl` was added. The final return is simply
->>> returning a value of `0` instead of propagating the correct return code.
->>>
->>> Discovered during a compilation with W=1, silence the following gcc
->>> warning
->>>
->>>     drivers/mmc/core/block.c:2470:6: warning: variable ‘ret’ set but not
->>> used [-Wunused-but-set-variable]
->>>
->>
->> Good catch! But hey, which gcc are you using now? Mine, gcc-linaro-
->> 6.3.1-2017.05-x86_64_aarch64-linux-gnu, with W=1 doesn't warn about
->> this.
-> 
-> $ powerpc-linux-gnu-gcc --version
-> powerpc-linux-gnu-gcc (Debian 6.3.0-18) 6.3.0 20170516
-> Copyright (C) 2016 Free Software Foundation, Inc.
-> This is free software; see the source for copying conditions.  There is NO
-> warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-> 
+With SDCC5, the MCI register space got removed and the offset/order of
+several registers have changed. Based on SDCC version used and the register,
+we need to pick the base address and offset.
 
-Thanks for sharing.
+Changes since RFC:
+	Dropped voltage regulator changes in sdhci-msm
+	Split the "Register changes for sdcc V5" patch
+	Instead of checking mci removal for deciding which base addr to use,
+	new function pointers are defined for the 2 variants of sdcc: 
+		1) MCI present
+		2) V5 (mci removed)
+	Instead of string comparing with the compatible string from DT file,
+	the sdhci_msm_probe will now pick the data associated with the
+	compatible entry and use it to load variant specific address offsets
+	and msm variant specific read/write ops. 
 
-> This is the default powerpc cross compiler on Debian stable (no
-> change). Config is simply a ppc32 (with some minor customization).
-> 
-> 
->> And it's worth backporting to stable.
-> 
-> I am not familiar with the process, do I need to submit a v2 to add the line:
-> 
-> Cc: <stable@vger.kernel.org> # v4.15+
-> 
+Sayali Lokhande (2):
+  mmc: sdhci-msm: Define new Register address map
+  mmc: host: Register changes for sdcc V5
 
-In general Ulf could kindly help with it when applied. :)
+Vijay Viswanath (1):
+  mmc: sdhci-msm: Add msm version specific ops and data structures
 
-> ?
-> 
->> Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
->>
->>
->>> Signed-off-by: Mathieu Malaterre <malat@debian.org>
->>> ---
->>>    drivers/mmc/core/block.c | 2 +-
->>>    1 file changed, 1 insertion(+), 1 deletion(-)
->>>
->>> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
->>> index 9e923cd1d80e..38a7586b00cc 100644
->>> --- a/drivers/mmc/core/block.c
->>> +++ b/drivers/mmc/core/block.c
->>> @@ -2485,7 +2485,7 @@ static long mmc_rpmb_ioctl(struct file *filp,
->>> unsigned int cmd,
->>>                  break;
->>>          }
->>>    -     return 0;
->>> +       return ret;
->>>    }
->>>      #ifdef CONFIG_COMPAT
->>>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
-> 
+ .../devicetree/bindings/mmc/sdhci-msm.txt          |   5 +-
+ drivers/mmc/host/sdhci-msm.c                       | 545 ++++++++++++++++-----
+ 2 files changed, 423 insertions(+), 127 deletions(-)
+
+-- 
+ Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc. 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a Linux Foundation Collaborative Project.
