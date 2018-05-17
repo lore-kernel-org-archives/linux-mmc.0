@@ -1,83 +1,89 @@
-From: Faiz Abbas <faiz_abbas@ti.com>
-Subject: Re: MMC performance degradation due to too many requests
-Date: Thu, 17 May 2018 18:24:11 +0530
-Message-ID: <44f591d4-908b-9476-6deb-0ddf77794b49@ti.com>
-References: <0ea1d2bf-fa0f-4b3d-556a-5dca5afbf2a9@ti.com>
- <CACRpkdaZ5G=gBHNwf7YMLEBOqC2UrO+YLrz09H4h8HWYN=av4w@mail.gmail.com>
- <3e2c96fa-273e-192f-1caf-788de7659592@ti.com>
- <CACRpkda+jrHgG=5qs-s7dcy4ZV4b9gQFGuf8SkwbAoGKxhBpqw@mail.gmail.com>
+From: Evan Green <evgreen@chromium.org>
+Subject: Re: [PATCH RFC] mmc: sdhci: Don't get card-detect without preemption
+Date: Thu, 17 May 2018 09:26:48 -0700
+Message-ID: <CAE=gft5=nmKndCrKposh6bQa=3Oh62ZxfmmRUOK4cPLzfy7xSQ@mail.gmail.com>
+References: <20180501234721.187135-1-evgreen@chromium.org> <07fc9a48-a84c-b754-0d00-6f61f39e5f86@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CACRpkda+jrHgG=5qs-s7dcy4ZV4b9gQFGuf8SkwbAoGKxhBpqw@mail.gmail.com>
-Content-Language: en-US
+In-Reply-To: <07fc9a48-a84c-b754-0d00-6f61f39e5f86@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>, Will Newton <will.newton@gmail.com>, ext Tony Lindgren <tony@atomide.com>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
+To: adrian.hunter@intel.com
+Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+On Wed, May 16, 2018 at 2:52 AM Adrian Hunter <adrian.hunter@intel.com>
+wrote:
 
-On Wednesday 16 May 2018 07:59 PM, Linus Walleij wrote:
-> On Tue, May 15, 2018 at 5:11 PM, Faiz Abbas <faiz_abbas@ti.com> wrote:
->> On Tuesday 15 May 2018 06:09 PM, Linus Walleij wrote:
->>> On Mon, May 14, 2018 at 1:30 PM, Faiz Abbas <faiz_abbas@ti.com> wrote:
->>>
->>>> Also, I see many times the number of interrupts for mmc1 in 4.14.
->>> (...)
->>>> I also printed out the size of the DMA transfers in the omap_hsmmc
->>>> driver during the dd command. I see that the maximum size of the dma
->>>> transfer has decreased from 1 MB to 256kB between 4.13 and 4.14.
->>>
->>> This seems like my fault for removing the bounce buffer.
->>> (The name bounce buffer is misleading, I suspect the right
->>> term for what is was doing was "merge buffer" or something,
->>> coalescing physically consecutive requests.)
->>>
->>> commit de3ee99b097dd51938276e3af388cd4ad0f2750a
->>> "mmc: Delete bounce buffer handling"
->>> should be the culprit.
->>
->> I don't think so. I checked out to the commit before that and see that
->> the interrupts are still too high.
-> 
-> OK phew then I'm safe :)
-> 
->>> The bounce buffer only makes any performance impact if the
->>> host DMA controller is unable to handle scatter-gather lists
->>> so the number of segments is set down to 1.
->>>
->>> Can you verifty that:
->>> - mmc->max_segs == 1
->>
->> No. It is 64 in v4.14. It was 1024 in v4.13.
-> 
-> This smells like:
-> commit 9442400486a1ec28915e9ab31517a5665ed35705
-> "mmc: omap_hsmmc: Reduce max_segs for reliability"
-> 
+> On 02/05/18 02:47, Evan Green wrote:
+> > For a controller with SDHCI_QUIRK_NO_CARD_NO_RESET, there are several
+> > conditions where sdhci_do_reset is called under a spinlock with
+interrupts
+> > disabled. The card detect is often a GPIO, which might sleep. Avoid
+> > asking for the card detect status if interrupts are disabled to prevent
+> > a warning like the following:
+> >
+> > [    2.480199] Call trace:
+> > [    2.480218] [<ffffff800808a698>] dump_backtrace+0x0/0x228
+> > [    2.480224] [<ffffff800808a8e0>] show_stack+0x20/0x28
+> > [    2.480235] [<ffffff80088a0214>] dump_stack+0x90/0xb0
+> > [    2.480245] [<ffffff80080d7aa8>] ___might_sleep+0x110/0x128
+> > [    2.480248] [<ffffff80080d7b38>] __might_sleep+0x78/0x88
+> > [    2.480260] [<ffffff80083cdd28>]
+gpiod_get_raw_value_cansleep+0x2c/0xc4
+> > [    2.480269] [<ffffff80086a93a8>] mmc_gpio_get_cd+0x3c/0x68
+> > [    2.480275] [<ffffff80086b008c>] sdhci_get_cd+0x20/0x98
+> > [    2.480280] [<ffffff80086b081c>] sdhci_do_reset+0x50/0x88
+> > [    2.480283] [<ffffff80086b4640>] sdhci_tasklet_finish+0x1a8/0x270
+> > [    2.480292] [<ffffff80080b29d4>] tasklet_action+0x90/0xf4
+> > [    2.480296] [<ffffff80080813b8>] __do_softirq+0x1c8/0x360
+> > [    2.480300] [<ffffff80080b2408>] irq_exit+0x88/0xd0
+> >
+> > ---
+> >
+> > I discovered this warning while trying to bring up SD, somewhat
+unsuccessfully,
+> > on a new device, and hit this error path.
+> >
+> > This change is not ideal as it only makes a best effort to adhere to
+the quirk,
+> > but may in some cases end up resetting the controller with no card
+present.
+> >
+> > Another option I considered was trying to call sdhci_do_reset within
+only
+> > sleepable contexts. I actually got as far as converting the tasklet to a
+> > work queue, and deferring the reset to the end of the function in
+> > sdhci_request_done. But 1) I'm not sure if that deferral was actually
+safe,
+> > and 2) we call sdhci_do_reset from under the lock in several other
+places,
+> > such as sdhci_card_event and sdhci_cqe_disable.
+> >
+> > Finally, I also considered calling the non-_maysleep gpio functions in
+> > mmc_gpio_get_cd. I assume this is not workable as someone somewhere has
+put
+> > a card detect off of a PMIC or GPIO expander.
+> >
+> > Any advice?
 
-Yes. I was able to bisect the number of interrupts to the same commit as
-well.
+> The SDHCI_QUIRK_NO_CARD_NO_RESET quirk was designed for host controllers
+> that use the present state register.  I have to assume that users of GPIO
+> card detect get away with using the quirk because:
+>          a) their GPIO does not sleep, and
+>          b) they don't enable the debugging that produces the "might sleep"
+>          warning
 
-On top of v4.14,
+> If you know your device's card detect GPIO does not sleep, then you can
+look
+> at making a non-sleep version of mmc_gpio_get_cd().
 
-*Without revert*:
-https://pastebin.ubuntu.com/p/VJgvzrCP9g/
+> Another possibility is to look at using mmc_gpio_set_cd_isr() to keep
+track
+> of whether the card has been removed.  Also try to use sdhci_ops->reset()
+> rather than SDHCI_QUIRK_NO_CARD_NO_RESET.
 
-avg speed for 100 MB transfer: 3.7 MBps
-Number of interrupts per 100 MB transfer: ~2000
 
-*After revert*:
-https://pastebin.ubuntu.com/p/ktgTmKVKkN/
-
-avg speed for 100 MB transfer: 4.6 MBps
-Number of interrupts per 100 MB transfer: ~500
-
-Also, I'm getting 1M buffers in the omap_hsmmc DMA now.
-
-@Will will it be OK to change the mmc_segs back to 1024?
-
-Thanks,
-Faiz
+Thanks Adrian for the guidance. I'll explore this a bit and see what shakes
+out.
+-Evan
