@@ -1,89 +1,124 @@
-From: Evan Green <evgreen@chromium.org>
-Subject: Re: [PATCH RFC] mmc: sdhci: Don't get card-detect without preemption
-Date: Thu, 17 May 2018 09:26:48 -0700
-Message-ID: <CAE=gft5=nmKndCrKposh6bQa=3Oh62ZxfmmRUOK4cPLzfy7xSQ@mail.gmail.com>
-References: <20180501234721.187135-1-evgreen@chromium.org> <07fc9a48-a84c-b754-0d00-6f61f39e5f86@intel.com>
+From: Daniel Mack <daniel@zonque.org>
+Subject: Re: [PATCH 05/15] mtd: nand: pxa3xx: remove the dmaengine compat need
+Date: Fri, 18 May 2018 23:31:02 +0200
+Message-ID: <a09d80dc-e8fd-1e9a-1878-8875ddc83134@zonque.org>
+References: <20180402142656.26815-1-robert.jarzmik@free.fr>
+ <20180402142656.26815-6-robert.jarzmik@free.fr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <07fc9a48-a84c-b754-0d00-6f61f39e5f86@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: adrian.hunter@intel.com
-Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: multipart/mixed; boundary="------------39EE53F47ACFCC5932325DF0"
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20180402142656.26815-6-robert.jarzmik@free.fr>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Robert Jarzmik <robert.jarzmik@free.fr>, Haojian Zhuang <haojian.zhuang@gmail.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Tejun Heo <tj@kernel.org>, Vinod Koul <vinod.koul@intel.com>, Mauro Carvalho Chehab <mchehab@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, Boris Brezillon <boris.brezillon@free-electrons.com>, David Woodhouse <dwmw2@infradead.org>, Brian Norris <computersforpeace@gmail.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Cyrille Pitchen <cyrille.pitchen@wedev4u.fr>, Nicolas Pitre <nico@fluxnic.net>, Samuel Ortiz <samuel@sortiz.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>, Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, Arnd Bergmann <arnd@arndb.de>
+Cc: devel@driverdev.osuosl.org, alsa-devel@alsa-project.org, netdev@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-ide@vger.kernel.org, linux-mtd@lists.infradead.org, dmaengine@vger.kernel.org, Robert Jarzmik <robert.jarzmik@renault.com>, linux-arm-kernel@lists.infradead.org, linux-media@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, May 16, 2018 at 2:52 AM Adrian Hunter <adrian.hunter@intel.com>
-wrote:
+This is a multi-part message in MIME format.
+--------------39EE53F47ACFCC5932325DF0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-> On 02/05/18 02:47, Evan Green wrote:
-> > For a controller with SDHCI_QUIRK_NO_CARD_NO_RESET, there are several
-> > conditions where sdhci_do_reset is called under a spinlock with
-interrupts
-> > disabled. The card detect is often a GPIO, which might sleep. Avoid
-> > asking for the card detect status if interrupts are disabled to prevent
-> > a warning like the following:
-> >
-> > [    2.480199] Call trace:
-> > [    2.480218] [<ffffff800808a698>] dump_backtrace+0x0/0x228
-> > [    2.480224] [<ffffff800808a8e0>] show_stack+0x20/0x28
-> > [    2.480235] [<ffffff80088a0214>] dump_stack+0x90/0xb0
-> > [    2.480245] [<ffffff80080d7aa8>] ___might_sleep+0x110/0x128
-> > [    2.480248] [<ffffff80080d7b38>] __might_sleep+0x78/0x88
-> > [    2.480260] [<ffffff80083cdd28>]
-gpiod_get_raw_value_cansleep+0x2c/0xc4
-> > [    2.480269] [<ffffff80086a93a8>] mmc_gpio_get_cd+0x3c/0x68
-> > [    2.480275] [<ffffff80086b008c>] sdhci_get_cd+0x20/0x98
-> > [    2.480280] [<ffffff80086b081c>] sdhci_do_reset+0x50/0x88
-> > [    2.480283] [<ffffff80086b4640>] sdhci_tasklet_finish+0x1a8/0x270
-> > [    2.480292] [<ffffff80080b29d4>] tasklet_action+0x90/0xf4
-> > [    2.480296] [<ffffff80080813b8>] __do_softirq+0x1c8/0x360
-> > [    2.480300] [<ffffff80080b2408>] irq_exit+0x88/0xd0
-> >
-> > ---
-> >
-> > I discovered this warning while trying to bring up SD, somewhat
-unsuccessfully,
-> > on a new device, and hit this error path.
-> >
-> > This change is not ideal as it only makes a best effort to adhere to
-the quirk,
-> > but may in some cases end up resetting the controller with no card
-present.
-> >
-> > Another option I considered was trying to call sdhci_do_reset within
-only
-> > sleepable contexts. I actually got as far as converting the tasklet to a
-> > work queue, and deferring the reset to the end of the function in
-> > sdhci_request_done. But 1) I'm not sure if that deferral was actually
-safe,
-> > and 2) we call sdhci_do_reset from under the lock in several other
-places,
-> > such as sdhci_card_event and sdhci_cqe_disable.
-> >
-> > Finally, I also considered calling the non-_maysleep gpio functions in
-> > mmc_gpio_get_cd. I assume this is not workable as someone somewhere has
-put
-> > a card detect off of a PMIC or GPIO expander.
-> >
-> > Any advice?
+Hi Robert,
 
-> The SDHCI_QUIRK_NO_CARD_NO_RESET quirk was designed for host controllers
-> that use the present state register.  I have to assume that users of GPIO
-> card detect get away with using the quirk because:
->          a) their GPIO does not sleep, and
->          b) they don't enable the debugging that produces the "might sleep"
->          warning
+Thanks for this series.
 
-> If you know your device's card detect GPIO does not sleep, then you can
-look
-> at making a non-sleep version of mmc_gpio_get_cd().
+On Monday, April 02, 2018 04:26 PM, Robert Jarzmik wrote:
+> From: Robert Jarzmik <robert.jarzmik@renault.com>
+> 
+> As the pxa architecture switched towards the dmaengine slave map, the
+> old compatibility mechanism to acquire the dma requestor line number and
+> priority are not needed anymore.
+> 
+> This patch simplifies the dma resource acquisition, using the more
+> generic function dma_request_slave_channel().
+> 
+> Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>
+> ---
+>   drivers/mtd/nand/pxa3xx_nand.c | 10 +---------
 
-> Another possibility is to look at using mmc_gpio_set_cd_isr() to keep
-track
-> of whether the card has been removed.  Also try to use sdhci_ops->reset()
-> rather than SDHCI_QUIRK_NO_CARD_NO_RESET.
+This driver was replaced by drivers/mtd/nand/raw/marvell_nand.c 
+recently, so this patch can be dropped. I attached a version for the new 
+driver which you can pick instead.
 
 
-Thanks Adrian for the guidance. I'll explore this a bit and see what shakes
-out.
--Evan
+Thanks,
+Daniel
+
+--------------39EE53F47ACFCC5932325DF0
+Content-Type: text/x-patch;
+ name="0001-mtd-rawnand-marvell-remove-dmaengine-compat-code.patch"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment;
+ filename*0="0001-mtd-rawnand-marvell-remove-dmaengine-compat-code.patch"
+
+>From c63bc40bdfe2d596e42919235840109a2f1b2776 Mon Sep 17 00:00:00 2001
+From: Daniel Mack <daniel@zonque.org>
+Date: Sat, 12 May 2018 21:50:13 +0200
+Subject: [PATCH] mtd: rawnand: marvell: remove dmaengine compat code
+
+As the pxa architecture switched towards the dmaengine slave map, the
+old compatibility mechanism to acquire the dma requestor line number and
+priority are not needed anymore.
+
+This patch simplifies the dma resource acquisition, using the more
+generic function dma_request_slave_channel().
+
+Signed-off-by: Daniel Mack <daniel@zonque.org>
+---
+ drivers/mtd/nand/raw/marvell_nand.c | 11 +----------
+ 1 file changed, 1 insertion(+), 10 deletions(-)
+
+diff --git a/drivers/mtd/nand/raw/marvell_nand.c b/drivers/mtd/nand/raw/marvell_nand.c
+index ebb1d141b900..30017cd7d91c 100644
+--- a/drivers/mtd/nand/raw/marvell_nand.c
++++ b/drivers/mtd/nand/raw/marvell_nand.c
+@@ -2612,8 +2612,6 @@ static int marvell_nfc_init_dma(struct marvell_nfc *nfc)
+ 						    dev);
+ 	struct dma_slave_config config = {};
+ 	struct resource *r;
+-	dma_cap_mask_t mask;
+-	struct pxad_param param;
+ 	int ret;
+ 
+ 	if (!IS_ENABLED(CONFIG_PXA_DMA)) {
+@@ -2632,14 +2630,7 @@ static int marvell_nfc_init_dma(struct marvell_nfc *nfc)
+ 		return -ENXIO;
+ 	}
+ 
+-	param.drcmr = r->start;
+-	param.prio = PXAD_PRIO_LOWEST;
+-	dma_cap_zero(mask);
+-	dma_cap_set(DMA_SLAVE, mask);
+-	nfc->dma_chan =
+-		dma_request_slave_channel_compat(mask, pxad_filter_fn,
+-						 &param, nfc->dev,
+-						 "data");
++	nfc->dma_chan = dma_request_slave_channel(nfc->dev, "data");
+ 	if (!nfc->dma_chan) {
+ 		dev_err(nfc->dev,
+ 			"Unable to request data DMA channel\n");
+-- 
+2.14.3
+
+
+--------------39EE53F47ACFCC5932325DF0
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+linux-arm-kernel mailing list
+linux-arm-kernel@lists.infradead.org
+http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+
+--------------39EE53F47ACFCC5932325DF0--
