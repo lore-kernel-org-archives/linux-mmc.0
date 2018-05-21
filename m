@@ -1,56 +1,71 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 3/3] mmc: sdhci-iproc: add SDHCI_QUIRK2_HOST_OFF_CARD_ON
- for cygnus
-Date: Mon, 21 May 2018 13:37:06 +0200
-Message-ID: <CAPDyKFpr6TzDDJA3gaczGzv+5xjjvhqPB1rqL86G4Dmw2xHeXg@mail.gmail.com>
-References: <1526681037-2074-1-git-send-email-scott.branden@broadcom.com> <1526681037-2074-4-git-send-email-scott.branden@broadcom.com>
+Subject: Re: [PATCH v7 2/3] dt-bindings: mmc: Add binding for BlueField SoC
+Date: Mon, 21 May 2018 13:36:15 +0200
+Message-ID: <CAPDyKFoBjyOSJLXy+LiTm3BQYgw2BMu_i5g+is+rkZJ5iGyExg@mail.gmail.com>
+References: <026fa942828c54fda5bad225981e56abc808b949.1524497286.git.lsun@mellanox.com>
+ <1525805210-15246-1-git-send-email-lsun@mellanox.com> <1525805210-15246-2-git-send-email-lsun@mellanox.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1526681037-2074-4-git-send-email-scott.branden@broadcom.com>
+In-Reply-To: <1525805210-15246-2-git-send-email-lsun@mellanox.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Scott Branden <scott.branden@broadcom.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Corneliu Doban <corneliu.doban@broadcom.com>
+To: Liming Sun <lsun@mellanox.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Jaehoon Chung <jh80.chung@samsung.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, devicetree@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 19 May 2018 at 00:03, Scott Branden <scott.branden@broadcom.com> wrote:
-> From: Corneliu Doban <corneliu.doban@broadcom.com>
+On 8 May 2018 at 20:46, Liming Sun <lsun@mellanox.com> wrote:
+> This commit adds "mellanox,bluefield-dw-mshc" for dwmmc driver
+> extension on Mellanox BlueField SoC platform.
 >
-> The SDHCI_QUIRK2_HOST_OFF_CARD_ON is needed for the driver to
-> properly reset the host controller (reset all) on initialization
-> after exiting deep sleep.
->
-> Signed-off-by: Corneliu Doban <corneliu.doban@broadcom.com>
-> Signed-off-by: Scott Branden <scott.branden@broadcom.com>
-> Reviewed-by: Ray Jui <ray.jui@broadcom.com>
-> Reviewed-by: Srinath Mannam <srinath.mannam@broadcom.com>
+> Signed-off-by: Liming Sun <lsun@mellanox.com>
+> Reviewed-by: David Woods <dwoods@mellanox.com>
+> Reviewed-by: Rob Herring <robh@kernel.org>
 
-Applied for fixes, by adding a fixes+stable tag, thanks!
-
-    Fixes: c833e92bbb60 ("mmc: sdhci-iproc: support standard byte
-register accesses")
-    Cc: stable@vger.kernel.org # v4.10+
+Thanks, applied for next!
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/sdhci-iproc.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  .../devicetree/bindings/mmc/bluefield-dw-mshc.txt  | 29 ++++++++++++++++++++++
+>  1 file changed, 29 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/bluefield-dw-mshc.txt
 >
-> diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
-> index 1f0ab08..d0e83db 100644
-> --- a/drivers/mmc/host/sdhci-iproc.c
-> +++ b/drivers/mmc/host/sdhci-iproc.c
-> @@ -186,7 +186,7 @@ static const struct sdhci_ops sdhci_iproc_32only_ops = {
->
->  static const struct sdhci_pltfm_data sdhci_iproc_cygnus_pltfm_data = {
->         .quirks = SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK,
-> -       .quirks2 = SDHCI_QUIRK2_ACMD23_BROKEN,
-> +       .quirks2 = SDHCI_QUIRK2_ACMD23_BROKEN | SDHCI_QUIRK2_HOST_OFF_CARD_ON,
->         .ops = &sdhci_iproc_32only_ops,
->  };
->
+> diff --git a/Documentation/devicetree/bindings/mmc/bluefield-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/bluefield-dw-mshc.txt
+> new file mode 100644
+> index 0000000..b0f0999
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/bluefield-dw-mshc.txt
+> @@ -0,0 +1,29 @@
+> +* Mellanox Bluefield SoC specific extensions to the Synopsys Designware
+> +  Mobile Storage Host Controller
+> +
+> +Read synopsys-dw-mshc.txt for more details
+> +
+> +The Synopsys designware mobile storage host controller is used to interface
+> +a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
+> +differences between the core Synopsys dw mshc controller properties described
+> +by synopsys-dw-mshc.txt and the properties used by the Mellanox Bluefield SoC
+> +specific extensions to the Synopsys Designware Mobile Storage Host Controller.
+> +
+> +Required Properties:
+> +
+> +* compatible: should be one of the following.
+> +  - "mellanox,bluefield-dw-mshc": for controllers with Mellanox Bluefield SoC
+> +    specific extensions.
+> +
+> +Example:
+> +
+> +       /* Mellanox Bluefield SoC MMC */
+> +       mmc@6008000 {
+> +               compatible = "mellanox,bluefield-dw-mshc";
+> +               reg = <0x6008000 0x400>;
+> +               interrupts = <32>;
+> +               fifo-depth = <0x100>;
+> +               clock-frequency = <24000000>;
+> +               bus-width = <8>;
+> +               cap-mmc-highspeed;
+> +       };
 > --
-> 2.5.0
+> 1.8.3.1
 >
