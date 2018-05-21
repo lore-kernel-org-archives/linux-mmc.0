@@ -1,51 +1,50 @@
-From: Yisheng Xie <xieyisheng1@huawei.com>
-Subject: [PATCH 16/33] mmc: sdhci-xenon: use match_string() helper
-Date: Mon, 21 May 2018 19:57:53 +0800
-Message-ID: <1526903890-35761-17-git-send-email-xieyisheng1@huawei.com>
-References: <1526903890-35761-1-git-send-email-xieyisheng1@huawei.com>
+From: Liming Sun <lsun@mellanox.com>
+Subject: RE: [PATCH v7 3/3] arm64: defconfig: Enable dw_mmc-bluefield driver
+Date: Mon, 21 May 2018 19:35:36 +0000
+Message-ID: <AM2PR05MB0753E5385AB2C7672E4541B7A1950@AM2PR05MB0753.eurprd05.prod.outlook.com>
+References: <026fa942828c54fda5bad225981e56abc808b949.1524497286.git.lsun@mellanox.com>
+ <1525805210-15246-1-git-send-email-lsun@mellanox.com>
+ <1525805210-15246-3-git-send-email-lsun@mellanox.com>
+ <CAPDyKFqBqTjjjFSkRBLKECmdn-b01hv51LOtqSSSTseWYL=Ykw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1526903890-35761-1-git-send-email-xieyisheng1@huawei.com>
+In-Reply-To: <CAPDyKFqBqTjjjFSkRBLKECmdn-b01hv51LOtqSSSTseWYL=Ykw@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Yisheng Xie <xieyisheng1@huawei.com>, Adrian Hunter <adrian.hunter@intel.com>, Hu Ziji <huziji@marvell.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Jaehoon Chung <jh80.chung@samsung.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-match_string() returns the index of an array for a matching string,
-which can be used intead of open coded variant.
-
-Cc: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Hu Ziji <huziji@marvell.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org
-Signed-off-by: Yisheng Xie <xieyisheng1@huawei.com>
----
- drivers/mmc/host/sdhci-xenon-phy.c | 11 +++--------
- 1 file changed, 3 insertions(+), 8 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-xenon-phy.c b/drivers/mmc/host/sdhci-xenon-phy.c
-index ec87943..a35804b 100644
---- a/drivers/mmc/host/sdhci-xenon-phy.c
-+++ b/drivers/mmc/host/sdhci-xenon-phy.c
-@@ -814,15 +814,10 @@ static int xenon_add_phy(struct device_node *np, struct sdhci_host *host,
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
--	int i, ret;
-+	int ret;
- 
--	for (i = 0; i < NR_PHY_TYPES; i++) {
--		if (!strcmp(phy_name, phy_types[i])) {
--			priv->phy_type = i;
--			break;
--		}
--	}
--	if (i == NR_PHY_TYPES) {
-+	priv->phy_type = match_string(phy_types, NR_PHY_TYPES, phy_name);
-+	if (priv->phy_type < 0) {
- 		dev_err(mmc_dev(host->mmc),
- 			"Unable to determine PHY name %s. Use default eMMC 5.1 PHY\n",
- 			phy_name);
--- 
-1.7.12.4
+VGhhbmtzISBJJ2xsIHRyeSB0byBzZW5kIHRoaXMgb25lIHRvIGFybSBzb2MuDQoNCkJlc3QgcmVn
+YXJkcywNCkxpbWluZw0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IFVs
+ZiBIYW5zc29uIFttYWlsdG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4gU2VudDogTW9uZGF5
+LCBNYXkgMjEsIDIwMTggNzozNiBBTQ0KPiBUbzogTGltaW5nIFN1biA8bHN1bkBtZWxsYW5veC5j
+b20+DQo+IENjOiBSb2IgSGVycmluZyA8cm9iaCtkdEBrZXJuZWwub3JnPjsgTWFyayBSdXRsYW5k
+DQo+IDxtYXJrLnJ1dGxhbmRAYXJtLmNvbT47IEphZWhvb24gQ2h1bmcgPGpoODAuY2h1bmdAc2Ft
+c3VuZy5jb20+Ow0KPiBDYXRhbGluIE1hcmluYXMgPGNhdGFsaW4ubWFyaW5hc0Bhcm0uY29tPjsg
+V2lsbCBEZWFjb24NCj4gPHdpbGwuZGVhY29uQGFybS5jb20+OyBsaW51eC1tbWNAdmdlci5rZXJu
+ZWwub3JnOw0KPiBkZXZpY2V0cmVlQHZnZXIua2VybmVsLm9yZzsgTGludXggS2VybmVsIE1haWxp
+bmcgTGlzdCA8bGludXgtDQo+IGtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc+DQo+IFN1YmplY3Q6IFJl
+OiBbUEFUQ0ggdjcgMy8zXSBhcm02NDogZGVmY29uZmlnOiBFbmFibGUgZHdfbW1jLWJsdWVmaWVs
+ZA0KPiBkcml2ZXINCj4gDQo+IE9uIDggTWF5IDIwMTggYXQgMjA6NDYsIExpbWluZyBTdW4gPGxz
+dW5AbWVsbGFub3guY29tPiB3cm90ZToNCj4gPiBUaGlzIHBhdGNoIHVwZGF0ZXMgYXJtNjQgZGVm
+Y29uZmlnIHRvIGVuYWJsZSBkd19tbWMtYmx1ZWZpZWxkLA0KPiA+IHdoaWNoIGlzIGEgZHJpdmVy
+IGV4dGVuc2lvbiBvZiBTeW5vcHN5cyBEZXNpZ253YXJlIE1NQyBmb3IgdGhlDQo+ID4gTWVsbGFu
+b3ggQmx1ZUZpZWxkIFNvYy4NCj4gPg0KPiA+IFNpZ25lZC1vZmYtYnk6IExpbWluZyBTdW4gPGxz
+dW5AbWVsbGFub3guY29tPg0KPiA+IFJldmlld2VkLWJ5OiBEYXZpZCBXb29kcyA8ZHdvb2RzQG1l
+bGxhbm94LmNvbT4NCj4gDQo+IEkgaGF2ZSBhcHBsaWVkIHRoZSBvdGhlciBwYXJ0cyBpbiB0aGUg
+c2VyaWVzLCBidXQgbm90IHRoaXMgb25lIGFzIGl0J3MNCj4gcHJvYmFibHkgYmV0dGVyIGl0IGdv
+ZXMgdmlhIGFybSBzb2MuDQo+IA0KPiBJIGNhbiB0YWtlIGl0LCBidXQgdGhlbiBJIG5lZWQgYW4g
+YWNrIGZyb20gYXJtNjQgZm9sa3ouLi4NCj4gDQo+IEtpbmQgcmVnYXJkcw0KPiBVZmZlDQo+IA0K
+PiA+IC0tLQ0KPiA+ICBhcmNoL2FybTY0L2NvbmZpZ3MvZGVmY29uZmlnIHwgMSArDQo+ID4gIDEg
+ZmlsZSBjaGFuZ2VkLCAxIGluc2VydGlvbigrKQ0KPiA+DQo+ID4gZGlmZiAtLWdpdCBhL2FyY2gv
+YXJtNjQvY29uZmlncy9kZWZjb25maWcgYi9hcmNoL2FybTY0L2NvbmZpZ3MvZGVmY29uZmlnDQo+
+ID4gaW5kZXggZWNmNjEzNy4uNDM0NjRhYiAxMDA2NDQNCj4gPiAtLS0gYS9hcmNoL2FybTY0L2Nv
+bmZpZ3MvZGVmY29uZmlnDQo+ID4gKysrIGIvYXJjaC9hcm02NC9jb25maWdzL2RlZmNvbmZpZw0K
+PiA+IEBAIC00ODcsNiArNDg3LDcgQEAgQ09ORklHX01NQ19EVz15DQo+ID4gIENPTkZJR19NTUNf
+RFdfRVhZTk9TPXkNCj4gPiAgQ09ORklHX01NQ19EV19LMz15DQo+ID4gIENPTkZJR19NTUNfRFdf
+Uk9DS0NISVA9eQ0KPiA+ICtDT05GSUdfTU1DX0RXX0JMVUVGSUVMRD15DQo+ID4gIENPTkZJR19N
+TUNfU1VOWEk9eQ0KPiA+ICBDT05GSUdfTU1DX0JDTTI4MzU9eQ0KPiA+ICBDT05GSUdfTU1DX1NE
+SENJX1hFTk9OPXkNCj4gPiAtLQ0KPiA+IDEuOC4zLjENCj4gPg0K
