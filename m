@@ -1,50 +1,118 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/3] mmc: sdhci-iproc: remove hard coded mmc cap 1.8v
-Date: Mon, 21 May 2018 13:36:53 +0200
-Message-ID: <CAPDyKFqLtGTSscPEtuBOro0iXdWNByzmrzn_NafKQkX9nt9w1g@mail.gmail.com>
-References: <1526681037-2074-1-git-send-email-scott.branden@broadcom.com> <1526681037-2074-2-git-send-email-scott.branden@broadcom.com>
+Subject: Re: [PATCH 2/3] mmc: sdhci-iproc: fix 32bit writes for TRANSFER_MODE register
+Date: Mon, 21 May 2018 13:37:00 +0200
+Message-ID: <CAPDyKFopxnd_pskfm0mS8rkW+AXJ7MNqdoXwKQYP3iGcqfzvyw@mail.gmail.com>
+References: <1526681037-2074-1-git-send-email-scott.branden@broadcom.com> <1526681037-2074-3-git-send-email-scott.branden@broadcom.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1526681037-2074-2-git-send-email-scott.branden@broadcom.com>
+In-Reply-To: <1526681037-2074-3-git-send-email-scott.branden@broadcom.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Scott Branden <scott.branden@broadcom.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Srinath Mannam <srinath.mannam@broadcom.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Corneliu Doban <corneliu.doban@broadcom.com>
 List-Id: linux-mmc@vger.kernel.org
 
 On 19 May 2018 at 00:03, Scott Branden <scott.branden@broadcom.com> wrote:
-> From: Srinath Mannam <srinath.mannam@broadcom.com>
+> From: Corneliu Doban <corneliu.doban@broadcom.com>
 >
-> Remove hard coded mmc cap 1.8v from platform data as it is board specific.
-> The 1.8v DDR mmc caps can be enabled using DTS property for those
-> boards that support it.
+> When the host controller accepts only 32bit writes, the value of the
+> 16bit TRANSFER_MODE register, that has the same 32bit address as the
+> 16bit COMMAND register, needs to be saved and it will be written
+> in a 32bit write together with the command as this will trigger the
+> host to send the command on the SD interface.
+> When sending the tuning command, TRANSFER_MODE is written and then
+> sdhci_set_transfer_mode reads it back to clear AUTO_CMD12 bit and
+> write it again resulting in wrong value to be written because the
+> initial write value was saved in a shadow and the read-back returned
+> a wrong value, from the register.
+> Fix sdhci_iproc_readw to return the saved value of TRANSFER_MODE
+> when a saved value exist.
+> Same fix for read of BLOCK_SIZE and BLOCK_COUNT registers, that are
+> saved for a different reason, although a scenario that will cause the
+> mentioned problem on this registers is not probable.
 >
-> Fixes: b17b4ab8ce38 ("mmc: sdhci-iproc: define MMC caps in platform data")
-> Signed-off-by: Srinath Mannam <srinath.mannam@broadcom.com>
+> Fixes: b580c52d58d9 ("mmc: sdhci-iproc: add IPROC SDHCI driver")
+> Signed-off-by: Corneliu Doban <corneliu.doban@broadcom.com>
 > Signed-off-by: Scott Branden <scott.branden@broadcom.com>
-> Reviewed-by: Ray Jui <ray.jui@broadcom.com>
 
-Thanks, applied for and by adding a stable tag.
+Thanks, applied for fixes and by adding a stable tag!
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/sdhci-iproc.c | 1 -
->  1 file changed, 1 deletion(-)
+>  drivers/mmc/host/sdhci-iproc.c | 30 +++++++++++++++++++++++++-----
+>  1 file changed, 25 insertions(+), 5 deletions(-)
 >
 > diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
-> index 0ef741b..6f430da 100644
+> index 6f430da..1f0ab08 100644
 > --- a/drivers/mmc/host/sdhci-iproc.c
 > +++ b/drivers/mmc/host/sdhci-iproc.c
-> @@ -206,7 +206,6 @@ static const struct sdhci_iproc_data iproc_data = {
->         .caps1 = SDHCI_DRIVER_TYPE_C |
->                  SDHCI_DRIVER_TYPE_D |
->                  SDHCI_SUPPORT_DDR50,
-> -       .mmc_caps = MMC_CAP_1_8V_DDR,
+> @@ -33,6 +33,8 @@ struct sdhci_iproc_host {
+>         const struct sdhci_iproc_data *data;
+>         u32 shadow_cmd;
+>         u32 shadow_blk;
+> +       bool is_cmd_shadowed;
+> +       bool is_blk_shadowed;
 >  };
 >
->  static const struct sdhci_pltfm_data sdhci_bcm2835_pltfm_data = {
+>  #define REG_OFFSET_IN_BITS(reg) ((reg) << 3 & 0x18)
+> @@ -48,8 +50,22 @@ static inline u32 sdhci_iproc_readl(struct sdhci_host *host, int reg)
+>
+>  static u16 sdhci_iproc_readw(struct sdhci_host *host, int reg)
+>  {
+> -       u32 val = sdhci_iproc_readl(host, (reg & ~3));
+> -       u16 word = val >> REG_OFFSET_IN_BITS(reg) & 0xffff;
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +       struct sdhci_iproc_host *iproc_host = sdhci_pltfm_priv(pltfm_host);
+> +       u32 val;
+> +       u16 word;
+> +
+> +       if ((reg == SDHCI_TRANSFER_MODE) && iproc_host->is_cmd_shadowed) {
+> +               /* Get the saved transfer mode */
+> +               val = iproc_host->shadow_cmd;
+> +       } else if ((reg == SDHCI_BLOCK_SIZE || reg == SDHCI_BLOCK_COUNT) &&
+> +                  iproc_host->is_blk_shadowed) {
+> +               /* Get the saved block info */
+> +               val = iproc_host->shadow_blk;
+> +       } else {
+> +               val = sdhci_iproc_readl(host, (reg & ~3));
+> +       }
+> +       word = val >> REG_OFFSET_IN_BITS(reg) & 0xffff;
+>         return word;
+>  }
+>
+> @@ -105,13 +121,15 @@ static void sdhci_iproc_writew(struct sdhci_host *host, u16 val, int reg)
+>
+>         if (reg == SDHCI_COMMAND) {
+>                 /* Write the block now as we are issuing a command */
+> -               if (iproc_host->shadow_blk != 0) {
+> +               if (iproc_host->is_blk_shadowed) {
+>                         sdhci_iproc_writel(host, iproc_host->shadow_blk,
+>                                 SDHCI_BLOCK_SIZE);
+> -                       iproc_host->shadow_blk = 0;
+> +                       iproc_host->is_blk_shadowed = false;
+>                 }
+>                 oldval = iproc_host->shadow_cmd;
+> -       } else if (reg == SDHCI_BLOCK_SIZE || reg == SDHCI_BLOCK_COUNT) {
+> +               iproc_host->is_cmd_shadowed = false;
+> +       } else if ((reg == SDHCI_BLOCK_SIZE || reg == SDHCI_BLOCK_COUNT) &&
+> +                  iproc_host->is_blk_shadowed) {
+>                 /* Block size and count are stored in shadow reg */
+>                 oldval = iproc_host->shadow_blk;
+>         } else {
+> @@ -123,9 +141,11 @@ static void sdhci_iproc_writew(struct sdhci_host *host, u16 val, int reg)
+>         if (reg == SDHCI_TRANSFER_MODE) {
+>                 /* Save the transfer mode until the command is issued */
+>                 iproc_host->shadow_cmd = newval;
+> +               iproc_host->is_cmd_shadowed = true;
+>         } else if (reg == SDHCI_BLOCK_SIZE || reg == SDHCI_BLOCK_COUNT) {
+>                 /* Save the block info until the command is issued */
+>                 iproc_host->shadow_blk = newval;
+> +               iproc_host->is_blk_shadowed = true;
+>         } else {
+>                 /* Command or other regular 32-bit write */
+>                 sdhci_iproc_writel(host, newval, reg & ~3);
 > --
 > 2.5.0
 >
