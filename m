@@ -1,107 +1,66 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: Allow non-sleeping GPIO cd
-Date: Tue, 22 May 2018 14:08:40 +0200
-Message-ID: <CAPDyKFq3+rfSgUMv1R3AEEw-v7e-J2wvbye8ztXsoaJSwxDLbQ@mail.gmail.com>
-References: <20180521223503.152131-1-evgreen@chromium.org>
+From: Faiz Abbas <faiz_abbas@ti.com>
+Subject: mmc filesystem performance decreased on the first write after
+ filesystem creation
+Date: Tue, 22 May 2018 20:48:31 +0530
+Message-ID: <a976e20a-3ed1-43d0-4665-f570ef496d02@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180521223503.152131-1-evgreen@chromium.org>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Evan Green <evgreen@chromium.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Doug Anderson <dianders@chromium.org>
+To: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>
+Cc: Christoph Hellwig <hch@lst.de>, Ulf Hansson <ulf.hansson@linaro.org>, Jens Axboe <axboe@kernel.dk>
 List-Id: linux-mmc@vger.kernel.org
 
-On 22 May 2018 at 00:35, Evan Green <evgreen@chromium.org> wrote:
-> This change uses the appropriate _cansleep or non-sleeping API for
-> reading GPIO card detect state. This allows users with GPIOs that
-> never sleep to avoid a warning when certain quirks are present.
->
-> The sdhci controller has an SDHCI_QUIRK_NO_CARD_NO_RESET, which
-> indicates that a controller will not reset properly if no card is
-> inserted. With this quirk enabled, mmc_get_cd_gpio is called in
-> several places with a spinlock held and interrupts disabled.
-> gpiod_get_raw_value_cansleep is not happy with this situation,
-> and throws out a warning.
->
-> For boards that a) use controllers that have this quirk, and b) wire
-> card detect up to a GPIO that doesn't sleep, this is a spurious warning.
-> This change silences that warning, at the cost of pushing this problem
-> down to users that have sleeping GPIOs and controllers with this quirk.
->
-> Signed-off-by: Evan Green <evgreen@chromium.org>
-> ---
-> This is my initial solution to the warning I was trying to face down
-> in my previous RFC [1]. Upsides of this solution is it manages to
-> avoid the warning in places where the warning doesn't apply, and is
-> low-risk. Other approaches I considered:
->
-> 1. Changing sdhci_get_cd to reach through mmc and get the GPIO value
-> directly (without sleeping) rather than calling mmc_gpio_get_cd,
-> which uses the cansleep functions. I didn't love this because a) it
-> seemed ugly to be reaching into mmc_host like that and b) I'd have to
-> duplicate the logic in mmc_gpio_get_cd, which seemed brittle.
->
-> 2. Using mmc_gpio_set_cd_isr to record when the card detect pin
-> changes, and then in sdhci_do_reset we wouldn't actually need to
-> get CD state, just look at the cached value. This seemed risky to me
-> since it would affect all sdhci controllers, and I don't know that
-> everybody using gpio-cd can do interrupts on their pins.
->
-> 3. Adding mmc_gpio_get_cd_nosleep(). That one's still doable if
-> preferred, but I'd have to give some thought to when sdhci wires
-> up to which one.
+Hi,
 
-First, I thought I preferred this option, as it becomes clear of what
-goes on. However I then realize, that it may not be worth it, because
-in the end I guess the caller (sdhci), will not be able to deal with
-error codes. For example, what would it do if it receives  a -ENOTSUPP
-from mmc_gpio_get_cd_nosleep()?
+I am debugging a performance reduction in ext2 filesystems on an mmc
+device in TI's am335x evm board.
 
->
-> I'm up for other suggestions. This one most just seemed like the
-> best first stab of minimally addressing the warning without rocking
-> the boat otherwise.
->
-> [1] https://patchwork.kernel.org/patch/10374633/
-> ---
->  drivers/mmc/core/slot-gpio.c | 14 ++++++++++----
->  1 file changed, 10 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
-> index 31f7dbb15668..0f497b69f4b8 100644
-> --- a/drivers/mmc/core/slot-gpio.c
-> +++ b/drivers/mmc/core/slot-gpio.c
-> @@ -75,16 +75,22 @@ EXPORT_SYMBOL(mmc_gpio_get_ro);
->
->  int mmc_gpio_get_cd(struct mmc_host *host)
->  {
-> +       int can_sleep;
->         struct mmc_gpio *ctx = host->slot.handler_priv;
->
->         if (!ctx || !ctx->cd_gpio)
->                 return -ENOSYS;
->
-> -       if (ctx->override_cd_active_level)
-> -               return !gpiod_get_raw_value_cansleep(ctx->cd_gpio) ^
-> -                       !!(host->caps2 & MMC_CAP2_CD_ACTIVE_HIGH);
-> +       can_sleep = gpiod_cansleep(ctx->cd_gpio);
-> +       if (ctx->override_cd_active_level) {
-> +               int value = can_sleep ?
-> +                               gpiod_get_raw_value_cansleep(ctx->cd_gpio) :
-> +                               gpiod_get_raw_value(ctx->cd_gpio);
-> +               return !value ^ !!(host->caps2 & MMC_CAP2_CD_ACTIVE_HIGH);
-> +       }
->
-> -       return gpiod_get_value_cansleep(ctx->cd_gpio);
-> +       return can_sleep ? gpiod_get_value_cansleep(ctx->cd_gpio) :
-> +                       gpiod_get_value(ctx->cd_gpio);
->  }
->  EXPORT_SYMBOL(mmc_gpio_get_cd);
->
-> --
-> 2.13.5
->
+I see that the performance is reduced on the first write after making a
+new filesystem using mkfs.ext2 on one of the mmc partitions. The
+performance comes back to normal after the first write.
 
-Kind regards
-Uffe
+commands used:
+
+=> umount /dev/mmcblk1p2
+
+=> mkfs.ext2 -F  /dev/mmcblk1p2
+
+=> mount -t ext2 -o async /dev/mmcblk1p2 /mnt/partition_mmc
+
+=> dd if=/dev/urandom of=/dev/shm/srctest_file_mmc_1184 bs=1M count=10
+
+=> ./filesystem_tests -write -src_file /dev/shm/srctest_file_mmc_1184
+-srcfile_size 10 -file /mnt/partition_mmc/test_file_1184 -buffer_size
+102400 -file_size 100 -performance
+
+The filesystem_tests write utility reads from the file generated at
+/dev/shm/srctest_file_mmc_1184, memory maps the file to a buffer, and
+then writes it into the newly created /mnt/partition_mmc in multiples of
+buffer_size while measuring write performance.
+
+See here for the implementation of filesystem_tests write utility:
+http://arago-project.org/git/projects/?p=test-automation/ltp-ddt.git;a=blob;f=testcases/ddt/filesystem_test_suite/src/testcases/st_filesystem_write_to_file.c;h=80e8e244d7eaa9f0dbd9b21ea705445156c36bef;hb=f7fc06c290333ce08a7d4fba104eee0f0f1d942b
+
+Complete log with multiple calls to filesystem_tests:
+https://pastebin.ubuntu.com/p/BckmTJpqPv/
+
+Notice that the first run of filesystem_tests has a lower throughput
+reported.
+
+I was able to bisect the issue to this commit:
+5d1429fead5b (mmc: remove the discard_zeroes_data flag)
+
+I would assume that after this flag is removed, the filesystem creation
+command would explicitly write zeroes to the device which might explain
+the performance fall. However, then the mkfs.ext2 command itself should
+take more time rather than the first file write after that.
+
+It would be nice if someone could help me understand why this is happening.
+
+Thanks for your help.
+
+Regards,
+Faiz
