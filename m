@@ -1,8 +1,8 @@
 From: Robert Jarzmik <robert.jarzmik@free.fr>
-Subject: [PATCH v2 04/13] media: pxa_camera: remove the
+Subject: [PATCH v2 05/13] mtd: rawnand: marvell: remove the
 	dmaengine compat need
-Date: Thu, 24 May 2018 09:06:54 +0200
-Message-ID: <20180524070703.11901-5-robert.jarzmik@free.fr>
+Date: Thu, 24 May 2018 09:06:55 +0200
+Message-ID: <20180524070703.11901-6-robert.jarzmik@free.fr>
 References: <20180524070703.11901-1-robert.jarzmik@free.fr>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -29,63 +29,46 @@ priority are not needed anymore.
 This patch simplifies the dma resource acquisition, using the more
 generic function dma_request_slave_channel().
 
+Signed-off-by: Signed-off-by: Daniel Mack <daniel@zonque.org>
 Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>
-Acked-by: Hans Verkuil <hans.verkuil@cisco.com>
-Acked-by: Mauro Carvalho Chehab <mchehab+samsung@kernel.org>
 ---
- drivers/media/platform/pxa_camera.c | 22 +++-------------------
- 1 file changed, 3 insertions(+), 19 deletions(-)
+ drivers/mtd/nand/raw/marvell_nand.c | 17 +----------------
+ 1 file changed, 1 insertion(+), 16 deletions(-)
 
-diff --git a/drivers/media/platform/pxa_camera.c b/drivers/media/platform/pxa_camera.c
-index c71a00736541..4c82d1880753 100644
---- a/drivers/media/platform/pxa_camera.c
-+++ b/drivers/media/platform/pxa_camera.c
-@@ -2357,8 +2357,6 @@ static int pxa_camera_probe(struct platform_device *pdev)
- 		.src_maxburst = 8,
- 		.direction = DMA_DEV_TO_MEM,
- 	};
+diff --git a/drivers/mtd/nand/raw/marvell_nand.c b/drivers/mtd/nand/raw/marvell_nand.c
+index 10e953218948..f9763be078ef 100644
+--- a/drivers/mtd/nand/raw/marvell_nand.c
++++ b/drivers/mtd/nand/raw/marvell_nand.c
+@@ -2613,8 +2613,6 @@ static int marvell_nfc_init_dma(struct marvell_nfc *nfc)
+ 						    dev);
+ 	struct dma_slave_config config = {};
+ 	struct resource *r;
 -	dma_cap_mask_t mask;
--	struct pxad_param params;
- 	char clk_name[V4L2_CLK_NAME_SIZE];
- 	int irq;
- 	int err = 0, i;
-@@ -2432,34 +2430,20 @@ static int pxa_camera_probe(struct platform_device *pdev)
- 	pcdev->base = base;
+-	struct pxad_param param;
+ 	int ret;
  
- 	/* request dma */
+ 	if (!IS_ENABLED(CONFIG_PXA_DMA)) {
+@@ -2627,20 +2625,7 @@ static int marvell_nfc_init_dma(struct marvell_nfc *nfc)
+ 	if (ret)
+ 		return ret;
+ 
+-	r = platform_get_resource(pdev, IORESOURCE_DMA, 0);
+-	if (!r) {
+-		dev_err(nfc->dev, "No resource defined for data DMA\n");
+-		return -ENXIO;
+-	}
+-
+-	param.drcmr = r->start;
+-	param.prio = PXAD_PRIO_LOWEST;
 -	dma_cap_zero(mask);
 -	dma_cap_set(DMA_SLAVE, mask);
--	dma_cap_set(DMA_PRIVATE, mask);
--
--	params.prio = 0;
--	params.drcmr = 68;
--	pcdev->dma_chans[0] =
+-	nfc->dma_chan =
 -		dma_request_slave_channel_compat(mask, pxad_filter_fn,
--						 &params, &pdev->dev, "CI_Y");
-+	pcdev->dma_chans[0] = dma_request_slave_channel(&pdev->dev, "CI_Y");
- 	if (!pcdev->dma_chans[0]) {
- 		dev_err(&pdev->dev, "Can't request DMA for Y\n");
- 		return -ENODEV;
- 	}
- 
--	params.drcmr = 69;
--	pcdev->dma_chans[1] =
--		dma_request_slave_channel_compat(mask, pxad_filter_fn,
--						 &params, &pdev->dev, "CI_U");
-+	pcdev->dma_chans[1] = dma_request_slave_channel(&pdev->dev, "CI_U");
- 	if (!pcdev->dma_chans[1]) {
- 		dev_err(&pdev->dev, "Can't request DMA for Y\n");
- 		err = -ENODEV;
- 		goto exit_free_dma_y;
- 	}
- 
--	params.drcmr = 70;
--	pcdev->dma_chans[2] =
--		dma_request_slave_channel_compat(mask, pxad_filter_fn,
--						 &params, &pdev->dev, "CI_V");
-+	pcdev->dma_chans[2] = dma_request_slave_channel(&pdev->dev, "CI_V");
- 	if (!pcdev->dma_chans[2]) {
- 		dev_err(&pdev->dev, "Can't request DMA for V\n");
- 		err = -ENODEV;
+-						 &param, nfc->dev,
+-						 "data");
++	nfc->dma_chan =	dma_request_slave_channel(&nfc->dev, "data");
+ 	if (!nfc->dma_chan) {
+ 		dev_err(nfc->dev,
+ 			"Unable to request data DMA channel\n");
 -- 
 2.11.0
