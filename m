@@ -1,8 +1,8 @@
 From: Robert Jarzmik <robert.jarzmik@free.fr>
-Subject: [PATCH v2 05/13] mtd: rawnand: marvell: remove the
-	dmaengine compat need
-Date: Thu, 24 May 2018 09:06:55 +0200
-Message-ID: <20180524070703.11901-6-robert.jarzmik@free.fr>
+Subject: [PATCH v2 06/13] net: smc911x: remove the dmaengine
+	compat need
+Date: Thu, 24 May 2018 09:06:56 +0200
+Message-ID: <20180524070703.11901-7-robert.jarzmik@free.fr>
 References: <20180524070703.11901-1-robert.jarzmik@free.fr>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -29,46 +29,51 @@ priority are not needed anymore.
 This patch simplifies the dma resource acquisition, using the more
 generic function dma_request_slave_channel().
 
-Signed-off-by: Signed-off-by: Daniel Mack <daniel@zonque.org>
 Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>
 ---
- drivers/mtd/nand/raw/marvell_nand.c | 17 +----------------
- 1 file changed, 1 insertion(+), 16 deletions(-)
+ drivers/net/ethernet/smsc/smc911x.c | 16 ++--------------
+ 1 file changed, 2 insertions(+), 14 deletions(-)
 
-diff --git a/drivers/mtd/nand/raw/marvell_nand.c b/drivers/mtd/nand/raw/marvell_nand.c
-index 10e953218948..f9763be078ef 100644
---- a/drivers/mtd/nand/raw/marvell_nand.c
-+++ b/drivers/mtd/nand/raw/marvell_nand.c
-@@ -2613,8 +2613,6 @@ static int marvell_nfc_init_dma(struct marvell_nfc *nfc)
- 						    dev);
- 	struct dma_slave_config config = {};
- 	struct resource *r;
+diff --git a/drivers/net/ethernet/smsc/smc911x.c b/drivers/net/ethernet/smsc/smc911x.c
+index 05157442a980..4c3713bd5caa 100644
+--- a/drivers/net/ethernet/smsc/smc911x.c
++++ b/drivers/net/ethernet/smsc/smc911x.c
+@@ -74,7 +74,6 @@ static const char version[] =
+ #include <linux/skbuff.h>
+ 
+ #include <linux/dmaengine.h>
+-#include <linux/dma/pxa-dma.h>
+ 
+ #include <asm/io.h>
+ 
+@@ -1794,8 +1793,6 @@ static int smc911x_probe(struct net_device *dev)
+ 	unsigned long irq_flags;
+ #ifdef SMC_USE_DMA
+ 	struct dma_slave_config	config;
 -	dma_cap_mask_t mask;
 -	struct pxad_param param;
- 	int ret;
+ #endif
  
- 	if (!IS_ENABLED(CONFIG_PXA_DMA)) {
-@@ -2627,20 +2625,7 @@ static int marvell_nfc_init_dma(struct marvell_nfc *nfc)
- 	if (ret)
- 		return ret;
+ 	DBG(SMC_DEBUG_FUNC, dev, "--> %s\n", __func__);
+@@ -1969,17 +1966,8 @@ static int smc911x_probe(struct net_device *dev)
  
--	r = platform_get_resource(pdev, IORESOURCE_DMA, 0);
--	if (!r) {
--		dev_err(nfc->dev, "No resource defined for data DMA\n");
--		return -ENXIO;
--	}
--
--	param.drcmr = r->start;
--	param.prio = PXAD_PRIO_LOWEST;
+ #ifdef SMC_USE_DMA
+ 
 -	dma_cap_zero(mask);
 -	dma_cap_set(DMA_SLAVE, mask);
--	nfc->dma_chan =
+-	param.prio = PXAD_PRIO_LOWEST;
+-	param.drcmr = -1UL;
+-
+-	lp->rxdma =
 -		dma_request_slave_channel_compat(mask, pxad_filter_fn,
--						 &param, nfc->dev,
--						 "data");
-+	nfc->dma_chan =	dma_request_slave_channel(&nfc->dev, "data");
- 	if (!nfc->dma_chan) {
- 		dev_err(nfc->dev,
- 			"Unable to request data DMA channel\n");
+-						 &param, &dev->dev, "rx");
+-	lp->txdma =
+-		dma_request_slave_channel_compat(mask, pxad_filter_fn,
+-						 &param, &dev->dev, "tx");
++	lp->rxdma = dma_request_slave_channel(&dev->dev, "rx");
++	lp->txdma = dma_request_slave_channel(&dev->dev, "tx");
+ 	lp->rxdma_active = 0;
+ 	lp->txdma_active = 0;
+ 
 -- 
 2.11.0
