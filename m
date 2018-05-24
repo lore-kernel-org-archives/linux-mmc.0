@@ -1,11 +1,13 @@
 From: Robert Jarzmik <robert.jarzmik@free.fr>
-Subject: [PATCH v2 00/13] ARM: pxa: switch to DMA slave maps
-Date: Thu, 24 May 2018 09:06:50 +0200
-Message-ID: <20180524070703.11901-1-robert.jarzmik@free.fr>
+Subject: [PATCH v2 01/13] dmaengine: pxa: use a dma slave map
+Date: Thu, 24 May 2018 09:06:51 +0200
+Message-ID: <20180524070703.11901-2-robert.jarzmik@free.fr>
+References: <20180524070703.11901-1-robert.jarzmik@free.fr>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <alsa-devel-bounces@alsa-project.org>
+In-Reply-To: <20180524070703.11901-1-robert.jarzmik@free.fr>
 List-Unsubscribe: <http://mailman.alsa-project.org/mailman/options/alsa-devel>,
  <mailto:alsa-devel-request@alsa-project.org?subject=unsubscribe>
 List-Archive: <http://mailman.alsa-project.org/pipermail/alsa-devel/>
@@ -19,96 +21,84 @@ To: Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, 
 Cc: alsa-devel@alsa-project.org, netdev@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-ide@vger.kernel.org, linux-mtd@lists.infradead.org, dmaengine@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-media@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-This v1 cover letter is quoted in [1].
+In order to remove the specific knowledge of the dma mapping from PXA
+drivers, add a default slave map for pxa architectures.
 
-For maintainers the table below should help you focus on the patches targetted at you, and ignore the other noise.
+This won't impact MMP architecture, but is aimed only at all PXA boards.
 
-The differences since v1 is by maintainers / topic / patch :
-- Arnd and Daniel / PXA topic / 0002
-  devices.c split into pxa25x.c, pxa27x.c and pxa3xx.c
-- Boris and Daniel / MTD topic / 0005
-  Review and ack of this one
-- Arnd and netdev / NET topic / 0006 and 0007
-  Arnd comment taken, review and ack of these one
-- Mark and alsa-devel / ASoC topic / 0008
-  Mark, I couldn't keep your former Ack because :
-    - I changed one line so that the cpu device provides the DMA
-    - I added pxa2xx-i2s which was forgotten
-  Therefore I need a new ack
-- Arnd and Daniel / SSP topic / 0013
-  Review and ack of this one
+This is the first step, and once all drivers are converted,
+pxad_filter_fn() will be made static, and the DMA resources removed from
+device.c.
 
-Happy review.
+Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>
+Reported-by: Arnd Bergmann <arnd@arndb.de>
+Acked-by: Vinod Koul <vkoul@kernel.org>
+---
+ drivers/dma/pxa_dma.c                 | 10 +++++++++-
+ include/linux/platform_data/mmp_dma.h |  4 ++++
+ 2 files changed, 13 insertions(+), 1 deletion(-)
 
---
-Robert
-
-Robert Jarzmik (13):
-  dmaengine: pxa: use a dma slave map
-  ARM: pxa: add dma slave map
-  mmc: pxamci: remove the dmaengine compat need
-  media: pxa_camera: remove the dmaengine compat need
-  mtd: rawnand: marvell: remove the dmaengine compat need
-  net: smc911x: remove the dmaengine compat need
-  net: smc91x: remove the dmaengine compat need
-  ASoC: pxa: remove the dmaengine compat need
-  ata: pata_pxa: remove the dmaengine compat need
-  dmaengine: pxa: document pxad_param
-  dmaengine: pxa: make the filter function internal
-  ARM: pxa: remove the DMA IO resources
-  ARM: pxa: change SSP DMA channels allocation
-
- arch/arm/mach-pxa/devices.c           | 148 +---------------------------------
- arch/arm/mach-pxa/devices.h           |   6 +-
- arch/arm/mach-pxa/pxa25x.c            |  41 +++++++++-
- arch/arm/mach-pxa/pxa27x.c            |  42 +++++++++-
- arch/arm/mach-pxa/pxa3xx.c            |  44 +++++++++-
- arch/arm/plat-pxa/ssp.c               |  47 -----------
- drivers/ata/pata_pxa.c                |  10 +--
- drivers/dma/pxa_dma.c                 |  13 ++-
- drivers/media/platform/pxa_camera.c   |  22 +----
- drivers/mmc/host/pxamci.c             |  29 +------
- drivers/mtd/nand/raw/marvell_nand.c   |  17 +---
- drivers/net/ethernet/smsc/smc911x.c   |  16 +---
- drivers/net/ethernet/smsc/smc91x.c    |  12 +--
- drivers/net/ethernet/smsc/smc91x.h    |   1 -
- include/linux/dma/pxa-dma.h           |  20 +++--
- include/linux/platform_data/mmp_dma.h |   4 +
- include/linux/pxa2xx_ssp.h            |   2 -
- sound/arm/pxa2xx-ac97.c               |  14 +---
- sound/arm/pxa2xx-pcm-lib.c            |   6 +-
- sound/soc/pxa/pxa-ssp.c               |   5 +-
- sound/soc/pxa/pxa2xx-ac97.c           |  32 ++------
- sound/soc/pxa/pxa2xx-i2s.c            |   6 +-
- 22 files changed, 180 insertions(+), 357 deletions(-)
-
+diff --git a/drivers/dma/pxa_dma.c b/drivers/dma/pxa_dma.c
+index b53fb618bbf6..9505334f9c6e 100644
+--- a/drivers/dma/pxa_dma.c
++++ b/drivers/dma/pxa_dma.c
+@@ -179,6 +179,8 @@ static unsigned int pxad_drcmr(unsigned int line)
+ 	return 0x1000 + line * 4;
+ }
+ 
++bool pxad_filter_fn(struct dma_chan *chan, void *param);
++
+ /*
+  * Debug fs
+  */
+@@ -1396,9 +1398,10 @@ static int pxad_probe(struct platform_device *op)
+ {
+ 	struct pxad_device *pdev;
+ 	const struct of_device_id *of_id;
++	const struct dma_slave_map *slave_map = NULL;
+ 	struct mmp_dma_platdata *pdata = dev_get_platdata(&op->dev);
+ 	struct resource *iores;
+-	int ret, dma_channels = 0, nb_requestors = 0;
++	int ret, dma_channels = 0, nb_requestors = 0, slave_map_cnt = 0;
+ 	const enum dma_slave_buswidth widths =
+ 		DMA_SLAVE_BUSWIDTH_1_BYTE   | DMA_SLAVE_BUSWIDTH_2_BYTES |
+ 		DMA_SLAVE_BUSWIDTH_4_BYTES;
+@@ -1429,6 +1432,8 @@ static int pxad_probe(struct platform_device *op)
+ 	} else if (pdata && pdata->dma_channels) {
+ 		dma_channels = pdata->dma_channels;
+ 		nb_requestors = pdata->nb_requestors;
++		slave_map = pdata->slave_map;
++		slave_map_cnt = pdata->slave_map_cnt;
+ 	} else {
+ 		dma_channels = 32;	/* default 32 channel */
+ 	}
+@@ -1440,6 +1445,9 @@ static int pxad_probe(struct platform_device *op)
+ 	pdev->slave.device_prep_dma_memcpy = pxad_prep_memcpy;
+ 	pdev->slave.device_prep_slave_sg = pxad_prep_slave_sg;
+ 	pdev->slave.device_prep_dma_cyclic = pxad_prep_dma_cyclic;
++	pdev->slave.filter.map = slave_map;
++	pdev->slave.filter.mapcnt = slave_map_cnt;
++	pdev->slave.filter.fn = pxad_filter_fn;
+ 
+ 	pdev->slave.copy_align = PDMA_ALIGNMENT;
+ 	pdev->slave.src_addr_widths = widths;
+diff --git a/include/linux/platform_data/mmp_dma.h b/include/linux/platform_data/mmp_dma.h
+index d1397c8ed94e..6397b9c8149a 100644
+--- a/include/linux/platform_data/mmp_dma.h
++++ b/include/linux/platform_data/mmp_dma.h
+@@ -12,9 +12,13 @@
+ #ifndef MMP_DMA_H
+ #define MMP_DMA_H
+ 
++struct dma_slave_map;
++
+ struct mmp_dma_platdata {
+ 	int dma_channels;
+ 	int nb_requestors;
++	int slave_map_cnt;
++	const struct dma_slave_map *slave_map;
+ };
+ 
+ #endif /* MMP_DMA_H */
 -- 
 2.11.0
-
----
-[1] Former v1 cover letter
-This serie is aimed at removing the dmaengine slave compat use, and transfer
-knowledge of the DMA requestors into architecture code.
-
-This was discussed/advised by Arnd a couple of years back, it's almost time.
-
-The serie is divided in 3 phasees :
- - phase 1 : patch 1/15 and patch 2/15
-   => this is the preparation work
- - phase 2 : patches 3/15 .. 10/15
-   => this is the switch of all the drivers
-   => this one will require either an Ack of the maintainers or be taken by them
-      once phase 1 is merged
- - phase 3 : patches 11/15
-   => this is the last part, cleanup and removal of export of the DMA filter
-      function
-
-As this looks like a patch bomb, each maintainer expressing for his tree either
-an Ack or "I want to take through my tree" will be spared in the next iterations
-of this serie.
-
-Several of these changes have been tested on actual hardware, including :
- - pxamci
- - pxa_camera
- - smc*
- - ASoC and SSP
