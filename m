@@ -1,291 +1,154 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 1/1] mmc: sdhci-pci-dwc-mshc: synopsys dwc mshc support
-Date: Thu, 24 May 2018 15:11:55 +0300
-Message-ID: <1f766ad9-481e-89cc-c0be-d9aea05e890b@intel.com>
-References: <705D14B1C7978B40A723277C067CEDE2010A9B43CC@IN01WEMBXB.internal.synopsys.com>
- <abe62da4-3ef9-5660-94e1-a3f919df06cd@intel.com>
- <705D14B1C7978B40A723277C067CEDE2010A9B5491@IN01WEMBXB.internal.synopsys.com>
+From: Vijay Viswanath <vviswana@codeaurora.org>
+Subject: Re: [PATCH V1 1/3] mmc: sdhci-msm: Define new Register address map
+Date: Thu, 24 May 2018 17:57:24 +0530
+Message-ID: <d84dd4ca-f921-d9e9-c1bf-d9354f308e2b@codeaurora.org>
+References: <1526552938-21292-1-git-send-email-vviswana@codeaurora.org>
+ <1526552938-21292-2-git-send-email-vviswana@codeaurora.org>
+ <CAE=gft7uoUSDmfrpzEQ_AGKPD3E25X6xwPiTkgsJwZn-zHaYuQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <705D14B1C7978B40A723277C067CEDE2010A9B5491@IN01WEMBXB.internal.synopsys.com>
+In-Reply-To: <CAE=gft7uoUSDmfrpzEQ_AGKPD3E25X6xwPiTkgsJwZn-zHaYuQ@mail.gmail.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Prabu Thangamuthu <Prabu.T@synopsys.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Manjunath M Bettegowda <Manjunath.MB@synopsys.com>
+To: Evan Green <evgreen@chromium.org>
+Cc: adrian.hunter@intel.com, Ulf Hansson <ulf.hansson@linaro.org>, robh+dt@kernel.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, devicetree@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, jeremymc@redhat.com, Bjorn Andersson <bjorn.andersson@linaro.org>, riteshh@codeaurora.org, vbadigan@codeaurora.org, Doug Anderson <dianders@google.com>, sayalil@codeaurora.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 24/05/18 14:28, Prabu Thangamuthu wrote:
-> Hi Adrian,
+
+
+On 5/22/2018 11:39 PM, Evan Green wrote:
+> Hi Vijay,
+> On Thu, May 17, 2018 at 3:30 AM Vijay Viswanath <vviswana@codeaurora.org>
+> wrote:
 > 
-> On 5/24/2018 2:06 PM, Adrian Hunter wrote:
->> Hi
->>
->> This patch is mangled.
-> We will check it.
->>
->> On 22/05/18 09:42, Prabu Thangamuthu wrote:
->>> To enable Synopsys DWC MSHC controller on HPAS-DX platform connected using
->>> PCIe interface. As Clock generation logic is implemented in MMCM module of
->>> HAPS-DX platform, we have separate functions to control the MMCM to
->>> generate required clocks with respect to speed mode. Also we have platform
->>> specific set_power function to support different VDD of eMMC devices.
->>>
->>> Signed-off-by: Prabu Thangamuthu <prabu.t@synopsys.com>
->>> ---
->>>  MAINTAINERS                           |   7 ++
->>>  drivers/mmc/host/Makefile             |   3 +-
->>>  drivers/mmc/host/sdhci-pci-core.c     |   1 +
->>>  drivers/mmc/host/sdhci-pci-dwc-mshc.c | 146
->>> ++++++++++++++++++++++++++++++++++
->>>  drivers/mmc/host/sdhci-pci-dwc-mshc.h |  37 +++++++++
->>>  drivers/mmc/host/sdhci-pci.h          |   3 +
->>>  6 files changed, 196 insertions(+), 1 deletion(-)
->>>  create mode 100644 drivers/mmc/host/sdhci-pci-dwc-mshc.c
->>>  create mode 100644 drivers/mmc/host/sdhci-pci-dwc-mshc.h
->>>
->>> diff --git a/MAINTAINERS b/MAINTAINERS
->>> index 9051a9c..f1749c4 100644
->>> --- a/MAINTAINERS
->>> +++ b/MAINTAINERS
->>> @@ -12643,6 +12643,13 @@ S:    Maintained
->>>  F:    drivers/mmc/host/sdhci*
->>>  F:    include/linux/mmc/sdhci*
->>>  
->>> +SYNOPSYS SDHCI COMPLIANT DWC MSHC DRIVER
->>> +M:    Prabu Thangamuthu <prabu.t@synopsys.com>
->>> +M:    Manjunath M B <manjumb@synopsys.com>
->>> +L:    linux-mmc@vger.kernel.org
->>> +S:    Maintained
->>> +F:    drivers/mmc/host/sdhci-pci-dwc-mshc*
->>> +
->>>  SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) SAMSUNG DRIVER
->>>  M:    Ben Dooks <ben-linux@fluff.org>
->>>  M:    Jaehoon Chung <jh80.chung@samsung.com>
->>> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
->>> index 6aead24..6c0d3fb 100644
->>> --- a/drivers/mmc/host/Makefile
->>> +++ b/drivers/mmc/host/Makefile
->>> @@ -11,7 +11,8 @@ obj-$(CONFIG_MMC_MXC)        += mxcmmc.o
->>>  obj-$(CONFIG_MMC_MXS)        += mxs-mmc.o
->>>  obj-$(CONFIG_MMC_SDHCI)        += sdhci.o
->>>  obj-$(CONFIG_MMC_SDHCI_PCI)    += sdhci-pci.o
->>> -sdhci-pci-y            += sdhci-pci-core.o sdhci-pci-o2micro.o
->>> sdhci-pci-arasan.o
->>> +sdhci-pci-y            += sdhci-pci-core.o sdhci-pci-o2micro.o
->>> sdhci-pci-arasan.o \
->>> +                   sdhci-pci-dwc-mshc.o
->>>  obj-$(subst m,y,$(CONFIG_MMC_SDHCI_PCI))    += sdhci-pci-data.o
->>>  obj-$(CONFIG_MMC_SDHCI_ACPI)    += sdhci-acpi.o
->>>  obj-$(CONFIG_MMC_SDHCI_PXAV3)    += sdhci-pxav3.o
->>> diff --git a/drivers/mmc/host/sdhci-pci-core.c
->>> b/drivers/mmc/host/sdhci-pci-core.c
->>> index 77dd352..96b6963 100644
->>> --- a/drivers/mmc/host/sdhci-pci-core.c
->>> +++ b/drivers/mmc/host/sdhci-pci-core.c
->>> @@ -1511,6 +1511,7 @@ static int amd_probe(struct sdhci_pci_chip *chip)
->>>      SDHCI_PCI_DEVICE(O2, SEABIRD0, o2),
->>>      SDHCI_PCI_DEVICE(O2, SEABIRD1, o2),
->>>      SDHCI_PCI_DEVICE(ARASAN, PHY_EMMC, arasan),
->>> +    SDHCI_PCI_DEVICE(SYNOPSYS, DWC_MSHC,  snps),
->>>      SDHCI_PCI_DEVICE_CLASS(AMD, SYSTEM_SDHCI, PCI_CLASS_MASK, amd),
->>>      /* Generic SD host controller */
->>>      {PCI_DEVICE_CLASS(SYSTEM_SDHCI, PCI_CLASS_MASK)},
->>> diff --git a/drivers/mmc/host/sdhci-pci-dwc-mshc.c
->>> b/drivers/mmc/host/sdhci-pci-dwc-mshc.c
->>> new file mode 100644
->>> index 0000000..bca3db4
->>> --- /dev/null
->>> +++ b/drivers/mmc/host/sdhci-pci-dwc-mshc.c
->>> @@ -0,0 +1,146 @@
->>> +// SPDX-License-Identifier: GPL-2.0
->>> +/*
->>> + * SDHCI driver for Synopsys DWC_MSHC controller
->>> + *
->>> + * Copyright (C) 2018 Synopsys, Inc. (www.synopsys.com)
->>> + *
->>> + * Authors:
->>> + *    Prabu Thangamuthu <prabu.t@synopsys.com>
->>> + *    Manjunath M B <manjumb@synopsys.com>
->>> + *
->>> + */
->>> +
->>> +#include <linux/pci.h>
->>> +#include <linux/delay.h>
->>> +#include <linux/module.h>
->>> +#include <linux/moduleparam.h>
->>> +
->>> +#include "sdhci.h"
->>> +#include "sdhci-pci.h"
->>> +#include "sdhci-pci-dwc-mshc.h"
->>> +
->>> +/* Default emmc vdd is set to 3.3V */
->>> +static unsigned int emmc_vdd = SDHC_EMMC_VDD_330V;
->>> +module_param(emmc_vdd, int, 0444);
->> Why a module parameter?
-> Our platform has slots for eMMC devices which can supports both 1.8 V
-> and 3.3 V
-> operating modes. We want this module parameter to control the operating
-> voltage
-> of eMMC devices.
-
-So why not use firmware device properties?
-
->>> +
->>> +static void sdhci_snps_set_clock(struct sdhci_host *host, unsigned int
->>> clock)
->>> +{
->>> +    u16 clk = 0;
->>> +    u32 reg = 0;
->>> +    u32 vendor_ptr = 0;
->>> +
->>> +    vendor_ptr = sdhci_readw(host, SDHCI_VENDOR_PTR_R);
->>> +
->>> +    /* Disable Software managed rx tuning */
->>> +    reg = sdhci_readl(host, (SDHC_AT_CTRL_R + vendor_ptr));
->>> +    reg &= ~SDHC_SW_TUNE_EN;
->>> +    sdhci_writel(host, reg, (SDHC_AT_CTRL_R + vendor_ptr));
->>> +
->>> +    if (clock <= 52000000) {
->>> +        sdhci_set_clock(host, clock);
->>> +    } else {
->>> +        /* Assert reset to MMCM */
->>> +        reg = sdhci_readl(host, (SDHC_GPIO_OUT + vendor_ptr));
->>> +        reg |= SDHC_CCLK_MMCM_RST;
->>> +        sdhci_writel(host, reg, (SDHC_GPIO_OUT + vendor_ptr));
->>> +
->>> +        /* Configure MMCM*/
->> Space between MMCM and *
-> Okay.
->>
->>> +        sdhci_writel(host, DIV_REG_100_MHZ, SDHC_MMCM_DIV_REG);
->>> +        sdhci_writel(host, CLKFBOUT_100_MHZ,
->>> +                SDHC_MMCM_CLKFBOUT);
->>> +
->>> +        /* De-assert reset to MMCM*/
->> Space between MMCM and *
-> Okay.
->>
->>
->>> +        reg = sdhci_readl(host, (SDHC_GPIO_OUT + vendor_ptr));
->>> +        reg &= ~SDHC_CCLK_MMCM_RST;
->>> +        sdhci_writel(host, reg, (SDHC_GPIO_OUT + vendor_ptr));
->>> +
->>> +        /* Enable clock */
->>> +        clk = SDHCI_PROG_CLOCK_MODE | SDHCI_CLOCK_INT_EN |
->>> +            SDHCI_CLOCK_CARD_EN;
->>> +        sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
->>> +    }
->>> +}
->>> +
->>> +static void sdhci_snps_set_power(struct sdhci_host *host, unsigned char
->>> mode,
->>> +             unsigned short vdd)
->>> +{
->>> +    u8 pwr = 0;
->>> +    u16 ctrl;
->>> +
->>> +    if (mode != MMC_POWER_OFF) {
->>> +        switch (1 << vdd) {
->>> +        case MMC_VDD_165_195:
->>> +            pwr = SDHCI_POWER_180;
->>> +            break;
->>> +        case MMC_VDD_29_30:
->>> +        case MMC_VDD_30_31:
->>> +            pwr = SDHCI_POWER_300;
->>> +            break;
->>> +        case MMC_VDD_32_33:
->>> +        case MMC_VDD_33_34:
->>> +            pwr = SDHCI_POWER_330;
->>> +            break;
->>> +        default:
->>> +            WARN(1, "%s: Invalid vdd %#x\n",
->>> +                 mmc_hostname(host->mmc), vdd);
->>> +            break;
->>> +        }
->>> +    }
->>> +
->>> +    if (host->pwr == pwr)
->>> +        return;
->>> +
->>> +    host->pwr = pwr;
->>> +
->>> +    if (pwr == 0) {
->>> +        sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
->>> +    } else {
->>> +        sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
->>> +
->>> +        /*
->>> +         * Enable it for eMMC phy cfg1 test with 1.8V mode
->>> +         */
->>> +        if (emmc_vdd == SDHC_EMMC_VDD_180V) {
->>> +            pwr = SDHCI_POWER_180;
->>> +            sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
->>> +
->>> +            ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
->>> +            /*
->>> +             * Enable 1.8V Signal Enable in the Host Control2
->>> +             * register
->>> +             */
->>> +            ctrl |= SDHCI_CTRL_VDD_180;
->>> +            sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
->>> +        }
->>> +        pwr |= SDHCI_POWER_ON;
->>> +
->>> +        sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
->>> +    }
->>> +}
->>> +
->>> +static int sdhci_snps_pci_probe_slot(struct sdhci_pci_slot *slot)
->>> +{
->>> +    struct sdhci_host *host = slot->host;
->>> +
->>> +    host->caps = sdhci_readl(host, SDHCI_CAPABILITIES);
->>> +    host->caps1 = sdhci_readl(host, SDHCI_CAPABILITIES_1);
->> Why read caps here?
-> We had it for logging purpose. we will remove it.
-
-To prevent 3.0V or 3.3V clear the corresponding capabilities bits.  There
-are DT bindings for overriding the capabilities.
-
-To use only 1.8V signaling clear SDHCI_SIGNALING_330 from host->flags.
-
-Then you shouldn't need sdhci_snps_set_power().
-
->>
->>> +
->>> +    return 0;
->>> +}
->>> +
->>> +/* Synopsys DWC MSHC Controller based on SDHCI-PCI */
->>> +static const struct sdhci_ops sdhci_snps_ops = {
->>> +    .set_clock    = sdhci_snps_set_clock,
->>> +    .set_power    = sdhci_snps_set_power,
->>> +    .enable_dma    = sdhci_pci_enable_dma,
->>> +    .set_bus_width    = sdhci_set_bus_width,
->>> +    .reset        = sdhci_reset,
->>> +    .set_uhs_signaling = sdhci_set_uhs_signaling,
->>> +};
->>> +
->>> +const struct sdhci_pci_fixes sdhci_snps = {
->>> +    .probe_slot    = sdhci_snps_pci_probe_slot,
->>> +    .ops        = &sdhci_snps_ops,
->>> +};
->>> +
->>> +MODULE_PARM_DESC(emmc_vdd, "VDD to configure eMMC device supply voltage");
->>> diff --git a/drivers/mmc/host/sdhci-pci-dwc-mshc.h
->>> b/drivers/mmc/host/sdhci-pci-dwc-mshc.h
->>> new file mode 100644
->>> index 0000000..352bbfd
->>> --- /dev/null
->>> +++ b/drivers/mmc/host/sdhci-pci-dwc-mshc.h
->> Please put the definitions into sdhci-pci-dwc-mshc.c and then this file is
->> not needed.
-> Okay.
+>> From: Sayali Lokhande <sayalil@codeaurora.org>
 > 
-> Thanks for review comments.
+>> For SDCC version 5.0.0, MCI registers are removed from SDCC
+>> interface and some registers are moved to HC.
+>> Define a new data structure where we can statically define
+>> the address offsets for the registers in different SDCC versions.
 > 
-> Regards,
-> Prabu.
+>> Signed-off-by: Sayali Lokhande <sayalil@codeaurora.org>
+>> Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
+>> ---
+>>    drivers/mmc/host/sdhci-msm.c | 89
+> ++++++++++++++++++++++++++++++++++++++++++++
+>>    1 file changed, 89 insertions(+)
+> 
+>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+>> index bb11916..2524455 100644
+>> --- a/drivers/mmc/host/sdhci-msm.c
+>> +++ b/drivers/mmc/host/sdhci-msm.c
+>> @@ -137,6 +137,95 @@
+>>    /* Timeout value to avoid infinite waiting for pwr_irq */
+>>    #define MSM_PWR_IRQ_TIMEOUT_MS 5000
+> 
+>> +struct sdhci_msm_offset {
+>> +       u32 core_hc_mode;
+>> +       u32 core_mci_data_cnt;
+>> +       u32 core_mci_status;
+>> +       u32 core_mci_fifo_cnt;
+>> +       u32 core_mci_version;
+>> +       u32 core_generics;
+>> +       u32 core_testbus_config;
+>> +       u32 core_testbus_sel2_bit;
+>> +       u32 core_testbus_ena;
+>> +       u32 core_testbus_sel2;
+>> +       u32 core_pwrctl_status;
+>> +       u32 core_pwrctl_mask;
+>> +       u32 core_pwrctl_clear;
+>> +       u32 core_pwrctl_ctl;
+>> +       u32 core_sdcc_debug_reg;
+>> +       u32 core_dll_config;
+>> +       u32 core_dll_status;
+>> +       u32 core_vendor_spec;
+>> +       u32 core_vendor_spec_adma_err_addr0;
+>> +       u32 core_vendor_spec_adma_err_addr1;
+>> +       u32 core_vendor_spec_func2;
+>> +       u32 core_vendor_spec_capabilities0;
+>> +       u32 core_ddr_200_cfg;
+>> +       u32 core_vendor_spec3;
+>> +       u32 core_dll_config_2;
+>> +       u32 core_ddr_config;
+>> +       u32 core_ddr_config_2;
+>> +};
+>> +
+>> +static const struct sdhci_msm_offset sdhci_msm_v5_offset = {
+>> +       .core_mci_data_cnt = 0x35c,
+>> +       .core_mci_status = 0x324,
+>> +       .core_mci_fifo_cnt = 0x308,
+>> +       .core_mci_version = 0x318,
+>> +       .core_generics = 0x320,
+>> +       .core_testbus_config = 0x32c,
+>> +       .core_testbus_sel2_bit = 3,
+>> +       .core_testbus_ena = (1 << 31),
+>> +       .core_testbus_sel2 = (1 << 3),
+>> +       .core_pwrctl_status = 0x240,
+>> +       .core_pwrctl_mask = 0x244,
+>> +       .core_pwrctl_clear = 0x248,
+>> +       .core_pwrctl_ctl = 0x24c,
+>> +       .core_sdcc_debug_reg = 0x358,
+>> +       .core_dll_config = 0x200,
+>> +       .core_dll_status = 0x208,
+>> +       .core_vendor_spec = 0x20c,
+>> +       .core_vendor_spec_adma_err_addr0 = 0x214,
+>> +       .core_vendor_spec_adma_err_addr1 = 0x218,
+>> +       .core_vendor_spec_func2 = 0x210,
+>> +       .core_vendor_spec_capabilities0 = 0x21c,
+>> +       .core_ddr_200_cfg = 0x224,
+>> +       .core_vendor_spec3 = 0x250,
+>> +       .core_dll_config_2 = 0x254,
+>> +       .core_ddr_config = 0x258,
+>> +       .core_ddr_config_2 = 0x25c,
+>> +};
+>> +
+>> +static const struct sdhci_msm_offset sdhci_msm_mci_offset = {
+>> +       .core_hc_mode = 0x78,
+>> +       .core_mci_data_cnt = 0x30,
+>> +       .core_mci_status = 0x34,
+>> +       .core_mci_fifo_cnt = 0x44,
+>> +       .core_mci_version = 0x050,
+>> +       .core_generics = 0x70,
+>> +       .core_testbus_config = 0x0CC,
+>> +       .core_testbus_sel2_bit = 4,
+>> +       .core_testbus_ena = (1 << 3),
+>> +       .core_testbus_sel2 = (1 << 4),
+>> +       .core_pwrctl_status = 0xDC,
+>> +       .core_pwrctl_mask = 0xE0,
+>> +       .core_pwrctl_clear = 0xE4,
+>> +       .core_pwrctl_ctl = 0xE8,
+>> +       .core_sdcc_debug_reg = 0x124,
+>> +       .core_dll_config = 0x100,
+>> +       .core_dll_status = 0x108,
+>> +       .core_vendor_spec = 0x10C,
+>> +       .core_vendor_spec_adma_err_addr0 = 0x114,
+>> +       .core_vendor_spec_adma_err_addr1 = 0x118,
+>> +       .core_vendor_spec_func2 = 0x110,
+>> +       .core_vendor_spec_capabilities0 = 0x11C,
+>> +       .core_ddr_200_cfg = 0x184,
+>> +       .core_vendor_spec3 = 0x1B0,
+>> +       .core_dll_config_2 = 0x1B4,
+>> +       .core_ddr_config = 0x1B8,
+>> +       .core_ddr_config_2 = 0x1BC,
+>> +};
+>> +
+> 
+> I notice a lot of these are never used in the subsequent patches of this
+> series. I guess more register definitions are always better than fewer,
+> it's just a shame that they take up space now. Did you just add everything
+> that was different between v4 and v5, or how did you come up with this set?
+> 
+> Also, I think lowercase hex letters are preferred.
+> 
+> I verified that the v5 register offsets look good, at least for the
+> registers I have documentation for.
+> 
+Yeah, felt it better to include all registers even they are not used 
+currently.
+
+Will change to use  lowercase hex letters
+
+> -Evan
 > 
