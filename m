@@ -1,121 +1,100 @@
 From: Robert Jarzmik <robert.jarzmik@free.fr>
-Subject: [PATCH v2 13/13] ARM: pxa: change SSP DMA channels allocation
-Date: Thu, 24 May 2018 09:07:03 +0200
-Message-ID: <20180524070703.11901-14-robert.jarzmik@free.fr>
+Subject: [PATCH v2 03/13] mmc: pxamci: remove the dmaengine
+	compat need
+Date: Thu, 24 May 2018 09:06:53 +0200
+Message-ID: <20180524070703.11901-4-robert.jarzmik@free.fr>
 References: <20180524070703.11901-1-robert.jarzmik@free.fr>
-Return-path: <netdev-owner@vger.kernel.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <alsa-devel-bounces@alsa-project.org>
 In-Reply-To: <20180524070703.11901-1-robert.jarzmik@free.fr>
-Sender: netdev-owner@vger.kernel.org
+List-Unsubscribe: <http://mailman.alsa-project.org/mailman/options/alsa-devel>,
+ <mailto:alsa-devel-request@alsa-project.org?subject=unsubscribe>
+List-Archive: <http://mailman.alsa-project.org/pipermail/alsa-devel/>
+List-Post: <mailto:alsa-devel@alsa-project.org>
+List-Help: <mailto:alsa-devel-request@alsa-project.org?subject=help>
+List-Subscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
+ <mailto:alsa-devel-request@alsa-project.org?subject=subscribe>
+Errors-To: alsa-devel-bounces@alsa-project.org
+Sender: alsa-devel-bounces@alsa-project.org
 To: Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, Boris Brezillon <boris.brezillon@free-electrons.com>, David Woodhouse <dwmw2@infradead.org>, Brian Norris <computersforpeace@gmail.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, Arnd Bergmann <arnd@arndb.de>
-Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-ide@vger.kernel.org, dmaengine@vger.kernel.org, linux-media@vger.kernel.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, netdev@vger.kernel.org, alsa-devel@alsa-project.org
+Cc: alsa-devel@alsa-project.org, netdev@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-ide@vger.kernel.org, linux-mtd@lists.infradead.org, dmaengine@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-media@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Now the dma_slave_map is available for PXA architecture, switch the SSP
-device to it.
+As the pxa architecture switched towards the dmaengine slave map, the
+old compatibility mechanism to acquire the dma requestor line number and
+priority are not needed anymore.
 
-This specifically means that :
-- for platform data based machines, the DMA requestor channels are
-  extracted from the slave map, where pxa-ssp-dai.<N> is a 1-1 match to
-  ssp.<N>, and the channels are either "rx" or "tx".
-
-- for device tree platforms, the dma node should be hooked into the
-  pxa2xx-ac97 or pxa-ssp-dai node.
+This patch simplifies the dma resource acquisition, using the more
+generic function dma_request_slave_channel().
 
 Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
-Since v1: Removed channel names from platform_data
----
- arch/arm/plat-pxa/ssp.c    | 47 ----------------------------------------------
- include/linux/pxa2xx_ssp.h |  2 --
- sound/soc/pxa/pxa-ssp.c    |  5 ++---
- 3 files changed, 2 insertions(+), 52 deletions(-)
+ drivers/mmc/host/pxamci.c | 29 +++--------------------------
+ 1 file changed, 3 insertions(+), 26 deletions(-)
 
-diff --git a/arch/arm/plat-pxa/ssp.c b/arch/arm/plat-pxa/ssp.c
-index ba13f793fbce..ed36dcab80f1 100644
---- a/arch/arm/plat-pxa/ssp.c
-+++ b/arch/arm/plat-pxa/ssp.c
-@@ -127,53 +127,6 @@ static int pxa_ssp_probe(struct platform_device *pdev)
- 	if (IS_ERR(ssp->clk))
- 		return PTR_ERR(ssp->clk);
+diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
+index c763b404510f..6c94474e36f4 100644
+--- a/drivers/mmc/host/pxamci.c
++++ b/drivers/mmc/host/pxamci.c
+@@ -24,7 +24,6 @@
+ #include <linux/interrupt.h>
+ #include <linux/dmaengine.h>
+ #include <linux/dma-mapping.h>
+-#include <linux/dma/pxa-dma.h>
+ #include <linux/clk.h>
+ #include <linux/err.h>
+ #include <linux/mmc/host.h>
+@@ -637,10 +636,8 @@ static int pxamci_probe(struct platform_device *pdev)
+ {
+ 	struct mmc_host *mmc;
+ 	struct pxamci_host *host = NULL;
+-	struct resource *r, *dmarx, *dmatx;
+-	struct pxad_param param_rx, param_tx;
++	struct resource *r;
+ 	int ret, irq, gpio_cd = -1, gpio_ro = -1, gpio_power = -1;
+-	dma_cap_mask_t mask;
  
--	if (dev->of_node) {
--		struct of_phandle_args dma_spec;
--		struct device_node *np = dev->of_node;
--		int ret;
--
--		/*
--		 * FIXME: we should allocate the DMA channel from this
--		 * context and pass the channel down to the ssp users.
--		 * For now, we lookup the rx and tx indices manually
--		 */
--
--		/* rx */
--		ret = of_parse_phandle_with_args(np, "dmas", "#dma-cells",
--						 0, &dma_spec);
--
--		if (ret) {
--			dev_err(dev, "Can't parse dmas property\n");
--			return -ENODEV;
+ 	ret = pxamci_of_init(pdev);
+ 	if (ret)
+@@ -739,34 +736,14 @@ static int pxamci_probe(struct platform_device *pdev)
+ 
+ 	platform_set_drvdata(pdev, mmc);
+ 
+-	if (!pdev->dev.of_node) {
+-		dmarx = platform_get_resource(pdev, IORESOURCE_DMA, 0);
+-		dmatx = platform_get_resource(pdev, IORESOURCE_DMA, 1);
+-		if (!dmarx || !dmatx) {
+-			ret = -ENXIO;
+-			goto out;
 -		}
--		ssp->drcmr_rx = dma_spec.args[0];
--		of_node_put(dma_spec.np);
--
--		/* tx */
--		ret = of_parse_phandle_with_args(np, "dmas", "#dma-cells",
--						 1, &dma_spec);
--		if (ret) {
--			dev_err(dev, "Can't parse dmas property\n");
--			return -ENODEV;
--		}
--		ssp->drcmr_tx = dma_spec.args[0];
--		of_node_put(dma_spec.np);
--	} else {
--		res = platform_get_resource(pdev, IORESOURCE_DMA, 0);
--		if (res == NULL) {
--			dev_err(dev, "no SSP RX DRCMR defined\n");
--			return -ENODEV;
--		}
--		ssp->drcmr_rx = res->start;
--
--		res = platform_get_resource(pdev, IORESOURCE_DMA, 1);
--		if (res == NULL) {
--			dev_err(dev, "no SSP TX DRCMR defined\n");
--			return -ENODEV;
--		}
--		ssp->drcmr_tx = res->start;
+-		param_rx.prio = PXAD_PRIO_LOWEST;
+-		param_rx.drcmr = dmarx->start;
+-		param_tx.prio = PXAD_PRIO_LOWEST;
+-		param_tx.drcmr = dmatx->start;
 -	}
 -
- 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	if (res == NULL) {
- 		dev_err(dev, "no memory resource defined\n");
-diff --git a/include/linux/pxa2xx_ssp.h b/include/linux/pxa2xx_ssp.h
-index 8461b18e4608..03a7ca46735b 100644
---- a/include/linux/pxa2xx_ssp.h
-+++ b/include/linux/pxa2xx_ssp.h
-@@ -212,8 +212,6 @@ struct ssp_device {
- 	int		type;
- 	int		use_count;
- 	int		irq;
--	int		drcmr_rx;
--	int		drcmr_tx;
- 
- 	struct device_node	*of_node;
- };
-diff --git a/sound/soc/pxa/pxa-ssp.c b/sound/soc/pxa/pxa-ssp.c
-index 0291c7cb64eb..e09368d89bbc 100644
---- a/sound/soc/pxa/pxa-ssp.c
-+++ b/sound/soc/pxa/pxa-ssp.c
-@@ -104,9 +104,8 @@ static int pxa_ssp_startup(struct snd_pcm_substream *substream,
- 	dma = kzalloc(sizeof(struct snd_dmaengine_dai_dma_data), GFP_KERNEL);
- 	if (!dma)
- 		return -ENOMEM;
+-	dma_cap_zero(mask);
+-	dma_cap_set(DMA_SLAVE, mask);
 -
--	dma->filter_data = substream->stream == SNDRV_PCM_STREAM_PLAYBACK ?
--				&ssp->drcmr_tx : &ssp->drcmr_rx;
-+	dma->chan_name = substream->stream == SNDRV_PCM_STREAM_PLAYBACK ?
-+		"tx" : "rx";
+-	host->dma_chan_rx =
+-		dma_request_slave_channel_compat(mask, pxad_filter_fn,
+-						 &param_rx, &pdev->dev, "rx");
++	host->dma_chan_rx = dma_request_slave_channel(&pdev->dev, "rx");
+ 	if (host->dma_chan_rx == NULL) {
+ 		dev_err(&pdev->dev, "unable to request rx dma channel\n");
+ 		ret = -ENODEV;
+ 		goto out;
+ 	}
  
- 	snd_soc_dai_set_dma_data(cpu_dai, substream, dma);
- 
+-	host->dma_chan_tx =
+-		dma_request_slave_channel_compat(mask, pxad_filter_fn,
+-						 &param_tx,  &pdev->dev, "tx");
++	host->dma_chan_tx = dma_request_slave_channel(&pdev->dev, "tx");
+ 	if (host->dma_chan_tx == NULL) {
+ 		dev_err(&pdev->dev, "unable to request tx dma channel\n");
+ 		ret = -ENODEV;
 -- 
 2.11.0
