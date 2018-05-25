@@ -1,161 +1,142 @@
-From: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
-Subject: [PATCH] mmc: sdhci-*: Don't emit error msg if sdhci_add_host()
- fails
-Date: Fri, 25 May 2018 15:15:09 +0800
-Message-ID: <20180525151509.0270dbe1@xhacker.debian>
+From: Daniel Mack <daniel@zonque.org>
+Subject: Re: [PATCH v2 13/13] ARM: pxa: change SSP DMA channels allocation
+Date: Fri, 25 May 2018 09:56:13 +0200
+Message-ID: <7e50d21c-c563-156f-d5d3-cd977af0e9d0@zonque.org>
+References: <20180524070703.11901-1-robert.jarzmik@free.fr>
+ <20180524070703.11901-14-robert.jarzmik@free.fr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Florian Fainelli <f.fainelli@gmail.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Ben Dooks <ben-linux@fluff.org>, Jaehoon Chung <jh80.chung@samsung.com>, Viresh Kumar <vireshk@kernel.org>, Patrice Chotard <patrice.chotard@st.com>
-Cc: bcm-kernel-feedback-list@broadcom.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <20180524070703.11901-14-robert.jarzmik@free.fr>
+Content-Language: en-US
+Sender: netdev-owner@vger.kernel.org
+To: Robert Jarzmik <robert.jarzmik@free.fr>, Haojian Zhuang <haojian.zhuang@gmail.com>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, Boris Brezillon <boris.brezillon@free-electrons.com>, David Woodhouse <dwmw2@infradead.org>, Brian Norris <computersforpeace@gmail.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, Arnd Bergmann <arnd@arndb.de>
+Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-ide@vger.kernel.org, dmaengine@vger.kernel.org, linux-media@vger.kernel.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, netdev@vger.kernel.org, alsa-devel@alsa-project.org
 List-Id: linux-mmc@vger.kernel.org
 
-I noticed below error msg with sdhci-pxav3 on some berlin platforms:
+On Thursday, May 24, 2018 09:07 AM, Robert Jarzmik wrote:
+> Now the dma_slave_map is available for PXA architecture, switch the SSP
+> device to it.
+> 
+> This specifically means that :
+> - for platform data based machines, the DMA requestor channels are
+>    extracted from the slave map, where pxa-ssp-dai.<N> is a 1-1 match to
+>    ssp.<N>, and the channels are either "rx" or "tx".
+> 
+> - for device tree platforms, the dma node should be hooked into the
+>    pxa2xx-ac97 or pxa-ssp-dai node.
+> 
+> Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>
 
-[.....] sdhci-pxav3 f7ab0000.sdhci failed to add host
+Acked-by: Daniel Mack <daniel@zonque.org>
 
-It is due to getting related vmmc or vqmmc regulator returns
--EPROBE_DEFER. It doesn't matter at all but it's confusing.
 
-=46rom another side, if driver probing fails and the error number isn't
--EPROBE_DEFER, the core will tell us something as below:
+We should, however, merge what's left of this management glue code into 
+the users of it, so the dma related properties can be put in the right 
+devicetree node.
 
-[.....] sdhci-pxav3: probe of f7ab0000.sdhci failed with error -EXX
+I'll prepare a patch for that for 4.18. This is a good preparation for 
+this round though.
 
-So it's not necessary to emit error msg if sdhci_add_host() fails. And
-some other sdhci host drivers also have this issue, let's fix them
-together.
 
-Signed-off-by: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
----
- drivers/mmc/host/sdhci-bcm-kona.c | 4 +---
- drivers/mmc/host/sdhci-pic32.c    | 4 +---
- drivers/mmc/host/sdhci-pxav2.c    | 4 +---
- drivers/mmc/host/sdhci-pxav3.c    | 4 +---
- drivers/mmc/host/sdhci-s3c.c      | 4 +---
- drivers/mmc/host/sdhci-spear.c    | 4 +---
- drivers/mmc/host/sdhci-st.c       | 4 +---
- 7 files changed, 7 insertions(+), 21 deletions(-)
+Thanks,
+Daniel
 
-diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm=
--kona.c
-index 11ca95c60bcf..bdbd4897c0f7 100644
---- a/drivers/mmc/host/sdhci-bcm-kona.c
-+++ b/drivers/mmc/host/sdhci-bcm-kona.c
-@@ -284,10 +284,8 @@ static int sdhci_bcm_kona_probe(struct platform_device=
- *pdev)
- 	sdhci_bcm_kona_sd_init(host);
-=20
- 	ret =3D sdhci_add_host(host);
--	if (ret) {
--		dev_err(dev, "Failed sdhci_add_host\n");
-+	if (ret)
- 		goto err_reset;
--	}
-=20
- 	/* if device is eMMC, emulate card insert right here */
- 	if (!mmc_card_is_removable(host->mmc)) {
-diff --git a/drivers/mmc/host/sdhci-pic32.c b/drivers/mmc/host/sdhci-pic32.c
-index a6caa49ca25a..a11e6397d4ff 100644
---- a/drivers/mmc/host/sdhci-pic32.c
-+++ b/drivers/mmc/host/sdhci-pic32.c
-@@ -200,10 +200,8 @@ static int pic32_sdhci_probe(struct platform_device *p=
-dev)
- 	}
-=20
- 	ret =3D sdhci_add_host(host);
--	if (ret) {
--		dev_err(&pdev->dev, "error adding host\n");
-+	if (ret)
- 		goto err_base_clk;
--	}
-=20
- 	dev_info(&pdev->dev, "Successfully added sdhci host\n");
- 	return 0;
-diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
-index 8986f9d9cf98..2c3827f54927 100644
---- a/drivers/mmc/host/sdhci-pxav2.c
-+++ b/drivers/mmc/host/sdhci-pxav2.c
-@@ -221,10 +221,8 @@ static int sdhci_pxav2_probe(struct platform_device *p=
-dev)
- 	host->ops =3D &pxav2_sdhci_ops;
-=20
- 	ret =3D sdhci_add_host(host);
--	if (ret) {
--		dev_err(&pdev->dev, "failed to add host\n");
-+	if (ret)
- 		goto disable_clk;
--	}
-=20
- 	return 0;
-=20
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index a34434166ca7..b8e96f392428 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -472,10 +472,8 @@ static int sdhci_pxav3_probe(struct platform_device *p=
-dev)
- 	pm_suspend_ignore_children(&pdev->dev, 1);
-=20
- 	ret =3D sdhci_add_host(host);
--	if (ret) {
--		dev_err(&pdev->dev, "failed to add host\n");
-+	if (ret)
- 		goto err_add_host;
--	}
-=20
- 	if (host->mmc->pm_caps & MMC_PM_WAKE_SDIO_IRQ)
- 		device_init_wakeup(&pdev->dev, 1);
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index cda83ccb2702..9ef89d00970e 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -655,10 +655,8 @@ static int sdhci_s3c_probe(struct platform_device *pde=
-v)
- 		goto err_req_regs;
-=20
- 	ret =3D sdhci_add_host(host);
--	if (ret) {
--		dev_err(dev, "sdhci_add_host() failed\n");
-+	if (ret)
- 		goto err_req_regs;
--	}
-=20
- #ifdef CONFIG_PM
- 	if (pdata->cd_type !=3D S3C_SDHCI_CD_INTERNAL)
-diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
-index 14511526a3a8..9247d51f2eed 100644
---- a/drivers/mmc/host/sdhci-spear.c
-+++ b/drivers/mmc/host/sdhci-spear.c
-@@ -126,10 +126,8 @@ static int sdhci_probe(struct platform_device *pdev)
- 	}
-=20
- 	ret =3D sdhci_add_host(host);
--	if (ret) {
--		dev_dbg(&pdev->dev, "error adding host\n");
-+	if (ret)
- 		goto disable_clk;
--	}
-=20
- 	platform_set_drvdata(pdev, host);
-=20
-diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
-index c32daed0d418..8f95647195d9 100644
---- a/drivers/mmc/host/sdhci-st.c
-+++ b/drivers/mmc/host/sdhci-st.c
-@@ -422,10 +422,8 @@ static int sdhci_st_probe(struct platform_device *pdev)
- 	st_mmcss_cconfig(np, host);
-=20
- 	ret =3D sdhci_add_host(host);
--	if (ret) {
--		dev_err(&pdev->dev, "Failed sdhci_add_host\n");
-+	if (ret)
- 		goto err_out;
--	}
-=20
- 	host_version =3D readw_relaxed((host->ioaddr + SDHCI_HOST_VERSION));
-=20
---=20
-2.17.0
+
+> ---
+> Since v1: Removed channel names from platform_data
+> ---
+>   arch/arm/plat-pxa/ssp.c    | 47 ----------------------------------------------
+>   include/linux/pxa2xx_ssp.h |  2 --
+>   sound/soc/pxa/pxa-ssp.c    |  5 ++---
+>   3 files changed, 2 insertions(+), 52 deletions(-)
+> 
+> diff --git a/arch/arm/plat-pxa/ssp.c b/arch/arm/plat-pxa/ssp.c
+> index ba13f793fbce..ed36dcab80f1 100644
+> --- a/arch/arm/plat-pxa/ssp.c
+> +++ b/arch/arm/plat-pxa/ssp.c
+> @@ -127,53 +127,6 @@ static int pxa_ssp_probe(struct platform_device *pdev)
+>   	if (IS_ERR(ssp->clk))
+>   		return PTR_ERR(ssp->clk);
+>   
+> -	if (dev->of_node) {
+> -		struct of_phandle_args dma_spec;
+> -		struct device_node *np = dev->of_node;
+> -		int ret;
+> -
+> -		/*
+> -		 * FIXME: we should allocate the DMA channel from this
+> -		 * context and pass the channel down to the ssp users.
+> -		 * For now, we lookup the rx and tx indices manually
+> -		 */
+> -
+> -		/* rx */
+> -		ret = of_parse_phandle_with_args(np, "dmas", "#dma-cells",
+> -						 0, &dma_spec);
+> -
+> -		if (ret) {
+> -			dev_err(dev, "Can't parse dmas property\n");
+> -			return -ENODEV;
+> -		}
+> -		ssp->drcmr_rx = dma_spec.args[0];
+> -		of_node_put(dma_spec.np);
+> -
+> -		/* tx */
+> -		ret = of_parse_phandle_with_args(np, "dmas", "#dma-cells",
+> -						 1, &dma_spec);
+> -		if (ret) {
+> -			dev_err(dev, "Can't parse dmas property\n");
+> -			return -ENODEV;
+> -		}
+> -		ssp->drcmr_tx = dma_spec.args[0];
+> -		of_node_put(dma_spec.np);
+> -	} else {
+> -		res = platform_get_resource(pdev, IORESOURCE_DMA, 0);
+> -		if (res == NULL) {
+> -			dev_err(dev, "no SSP RX DRCMR defined\n");
+> -			return -ENODEV;
+> -		}
+> -		ssp->drcmr_rx = res->start;
+> -
+> -		res = platform_get_resource(pdev, IORESOURCE_DMA, 1);
+> -		if (res == NULL) {
+> -			dev_err(dev, "no SSP TX DRCMR defined\n");
+> -			return -ENODEV;
+> -		}
+> -		ssp->drcmr_tx = res->start;
+> -	}
+> -
+>   	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+>   	if (res == NULL) {
+>   		dev_err(dev, "no memory resource defined\n");
+> diff --git a/include/linux/pxa2xx_ssp.h b/include/linux/pxa2xx_ssp.h
+> index 8461b18e4608..03a7ca46735b 100644
+> --- a/include/linux/pxa2xx_ssp.h
+> +++ b/include/linux/pxa2xx_ssp.h
+> @@ -212,8 +212,6 @@ struct ssp_device {
+>   	int		type;
+>   	int		use_count;
+>   	int		irq;
+> -	int		drcmr_rx;
+> -	int		drcmr_tx;
+>   
+>   	struct device_node	*of_node;
+>   };
+> diff --git a/sound/soc/pxa/pxa-ssp.c b/sound/soc/pxa/pxa-ssp.c
+> index 0291c7cb64eb..e09368d89bbc 100644
+> --- a/sound/soc/pxa/pxa-ssp.c
+> +++ b/sound/soc/pxa/pxa-ssp.c
+> @@ -104,9 +104,8 @@ static int pxa_ssp_startup(struct snd_pcm_substream *substream,
+>   	dma = kzalloc(sizeof(struct snd_dmaengine_dai_dma_data), GFP_KERNEL);
+>   	if (!dma)
+>   		return -ENOMEM;
+> -
+> -	dma->filter_data = substream->stream == SNDRV_PCM_STREAM_PLAYBACK ?
+> -				&ssp->drcmr_tx : &ssp->drcmr_rx;
+> +	dma->chan_name = substream->stream == SNDRV_PCM_STREAM_PLAYBACK ?
+> +		"tx" : "rx";
+>   
+>   	snd_soc_dai_set_dma_data(cpu_dai, substream, dma);
+>   
+> 
