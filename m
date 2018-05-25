@@ -1,196 +1,161 @@
-From: Daniel Mack <daniel@zonque.org>
-Subject: Re: [PATCH v2 08/13] ASoC: pxa: remove the dmaengine
-	compat need
-Date: Fri, 25 May 2018 10:35:37 +0200
-Message-ID: <5bc2aa06-7939-1ca4-6704-30f307edcda4@zonque.org>
-References: <20180524070703.11901-1-robert.jarzmik@free.fr>
- <20180524070703.11901-9-robert.jarzmik@free.fr>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: sdhci-*: Don't emit error msg if sdhci_add_host()
+ fails
+Date: Fri, 25 May 2018 12:05:58 +0300
+Message-ID: <48df3724-b9ff-ef9c-0583-961fd40f1978@intel.com>
+References: <20180525151509.0270dbe1@xhacker.debian>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <alsa-devel-bounces@alsa-project.org>
-In-Reply-To: <20180524070703.11901-9-robert.jarzmik@free.fr>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180525151509.0270dbe1@xhacker.debian>
 Content-Language: en-US
-List-Unsubscribe: <http://mailman.alsa-project.org/mailman/options/alsa-devel>,
- <mailto:alsa-devel-request@alsa-project.org?subject=unsubscribe>
-List-Archive: <http://mailman.alsa-project.org/pipermail/alsa-devel/>
-List-Post: <mailto:alsa-devel@alsa-project.org>
-List-Help: <mailto:alsa-devel-request@alsa-project.org?subject=help>
-List-Subscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
- <mailto:alsa-devel-request@alsa-project.org?subject=subscribe>
-Errors-To: alsa-devel-bounces@alsa-project.org
-Sender: alsa-devel-bounces@alsa-project.org
-To: Robert Jarzmik <robert.jarzmik@free.fr>, Haojian Zhuang <haojian.zhuang@gmail.com>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, Boris Brezillon <boris.brezillon@free-electrons.com>, David Woodhouse <dwmw2@infradead.org>, Brian Norris <computersforpeace@gmail.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, Arnd Bergmann <arnd@arndb.de>
-Cc: alsa-devel@alsa-project.org, netdev@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-ide@vger.kernel.org, linux-mtd@lists.infradead.org, dmaengine@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-media@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jisheng Zhang <Jisheng.Zhang@synaptics.com>, Ulf Hansson <ulf.hansson@linaro.org>, Florian Fainelli <f.fainelli@gmail.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Ben Dooks <ben-linux@fluff.org>, Jaehoon Chung <jh80.chung@samsung.com>, Viresh Kumar <vireshk@kernel.org>, Patrice Chotard <patrice.chotard@st.com>
+Cc: bcm-kernel-feedback-list@broadcom.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Thursday, May 24, 2018 09:06 AM, Robert Jarzmik wrote:
-> As the pxa architecture switched towards the dmaengine slave map, the
-> old compatibility mechanism to acquire the dma requestor line number and
-> priority are not needed anymore.
+On 25/05/18 10:15, Jisheng Zhang wrote:
+> I noticed below error msg with sdhci-pxav3 on some berlin platforms:
 > 
-> This patch simplifies the dma resource acquisition, using the more
-> generic function dma_request_slave_channel().
+> [.....] sdhci-pxav3 f7ab0000.sdhci failed to add host
 > 
-> Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>
+> It is due to getting related vmmc or vqmmc regulator returns
+> -EPROBE_DEFER. It doesn't matter at all but it's confusing.
+> 
+>>From another side, if driver probing fails and the error number isn't
+> -EPROBE_DEFER, the core will tell us something as below:
+> 
+> [.....] sdhci-pxav3: probe of f7ab0000.sdhci failed with error -EXX
+> 
+> So it's not necessary to emit error msg if sdhci_add_host() fails. And
+> some other sdhci host drivers also have this issue, let's fix them
+> together.
+> 
+> Signed-off-by: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
 
-Reviewed-by: Daniel Mack <daniel@zonque.org>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
->   sound/arm/pxa2xx-ac97.c     | 14 ++------------
->   sound/arm/pxa2xx-pcm-lib.c  |  6 +++---
->   sound/soc/pxa/pxa2xx-ac97.c | 32 +++++---------------------------
->   sound/soc/pxa/pxa2xx-i2s.c  |  6 ++----
->   4 files changed, 12 insertions(+), 46 deletions(-)
+>  drivers/mmc/host/sdhci-bcm-kona.c | 4 +---
+>  drivers/mmc/host/sdhci-pic32.c    | 4 +---
+>  drivers/mmc/host/sdhci-pxav2.c    | 4 +---
+>  drivers/mmc/host/sdhci-pxav3.c    | 4 +---
+>  drivers/mmc/host/sdhci-s3c.c      | 4 +---
+>  drivers/mmc/host/sdhci-spear.c    | 4 +---
+>  drivers/mmc/host/sdhci-st.c       | 4 +---
+>  7 files changed, 7 insertions(+), 21 deletions(-)
 > 
-> diff --git a/sound/arm/pxa2xx-ac97.c b/sound/arm/pxa2xx-ac97.c
-> index 4bc244c40f80..236a63cdaf9f 100644
-> --- a/sound/arm/pxa2xx-ac97.c
-> +++ b/sound/arm/pxa2xx-ac97.c
-> @@ -63,28 +63,18 @@ static struct snd_ac97_bus_ops pxa2xx_ac97_ops = {
->   	.reset	= pxa2xx_ac97_legacy_reset,
->   };
->   
-> -static struct pxad_param pxa2xx_ac97_pcm_out_req = {
-> -	.prio = PXAD_PRIO_LOWEST,
-> -	.drcmr = 12,
-> -};
-> -
->   static struct snd_dmaengine_dai_dma_data pxa2xx_ac97_pcm_out = {
->   	.addr		= __PREG(PCDR),
->   	.addr_width	= DMA_SLAVE_BUSWIDTH_4_BYTES,
-> +	.chan_name	= "pcm_pcm_stereo_out",
->   	.maxburst	= 32,
-> -	.filter_data	= &pxa2xx_ac97_pcm_out_req,
-> -};
-> -
-> -static struct pxad_param pxa2xx_ac97_pcm_in_req = {
-> -	.prio = PXAD_PRIO_LOWEST,
-> -	.drcmr = 11,
->   };
->   
->   static struct snd_dmaengine_dai_dma_data pxa2xx_ac97_pcm_in = {
->   	.addr		= __PREG(PCDR),
->   	.addr_width	= DMA_SLAVE_BUSWIDTH_4_BYTES,
-> +	.chan_name	= "pcm_pcm_stereo_in",
->   	.maxburst	= 32,
-> -	.filter_data	= &pxa2xx_ac97_pcm_in_req,
->   };
->   
->   static struct snd_pcm *pxa2xx_ac97_pcm;
-> diff --git a/sound/arm/pxa2xx-pcm-lib.c b/sound/arm/pxa2xx-pcm-lib.c
-> index e8da3b8ee721..dcbe7ecc1835 100644
-> --- a/sound/arm/pxa2xx-pcm-lib.c
-> +++ b/sound/arm/pxa2xx-pcm-lib.c
-> @@ -125,9 +125,9 @@ int __pxa2xx_pcm_open(struct snd_pcm_substream *substream)
->   	if (ret < 0)
->   		return ret;
->   
-> -	return snd_dmaengine_pcm_open_request_chan(substream,
-> -					pxad_filter_fn,
-> -					dma_params->filter_data);
-> +	return snd_dmaengine_pcm_open(
-> +		substream, dma_request_slave_channel(rtd->cpu_dai->dev,
-> +						     dma_params->chan_name));
->   }
->   EXPORT_SYMBOL(__pxa2xx_pcm_open);
->   
-> diff --git a/sound/soc/pxa/pxa2xx-ac97.c b/sound/soc/pxa/pxa2xx-ac97.c
-> index 803818aabee9..1b41c0f2a8fb 100644
-> --- a/sound/soc/pxa/pxa2xx-ac97.c
-> +++ b/sound/soc/pxa/pxa2xx-ac97.c
-> @@ -68,61 +68,39 @@ static struct snd_ac97_bus_ops pxa2xx_ac97_ops = {
->   	.reset	= pxa2xx_ac97_cold_reset,
->   };
->   
-> -static struct pxad_param pxa2xx_ac97_pcm_stereo_in_req = {
-> -	.prio = PXAD_PRIO_LOWEST,
-> -	.drcmr = 11,
-> -};
-> -
->   static struct snd_dmaengine_dai_dma_data pxa2xx_ac97_pcm_stereo_in = {
->   	.addr		= __PREG(PCDR),
->   	.addr_width	= DMA_SLAVE_BUSWIDTH_4_BYTES,
-> +	.chan_name	= "pcm_pcm_stereo_in",
->   	.maxburst	= 32,
-> -	.filter_data	= &pxa2xx_ac97_pcm_stereo_in_req,
-> -};
-> -
-> -static struct pxad_param pxa2xx_ac97_pcm_stereo_out_req = {
-> -	.prio = PXAD_PRIO_LOWEST,
-> -	.drcmr = 12,
->   };
->   
->   static struct snd_dmaengine_dai_dma_data pxa2xx_ac97_pcm_stereo_out = {
->   	.addr		= __PREG(PCDR),
->   	.addr_width	= DMA_SLAVE_BUSWIDTH_4_BYTES,
-> +	.chan_name	= "pcm_pcm_stereo_out",
->   	.maxburst	= 32,
-> -	.filter_data	= &pxa2xx_ac97_pcm_stereo_out_req,
->   };
->   
-> -static struct pxad_param pxa2xx_ac97_pcm_aux_mono_out_req = {
-> -	.prio = PXAD_PRIO_LOWEST,
-> -	.drcmr = 10,
-> -};
->   static struct snd_dmaengine_dai_dma_data pxa2xx_ac97_pcm_aux_mono_out = {
->   	.addr		= __PREG(MODR),
->   	.addr_width	= DMA_SLAVE_BUSWIDTH_2_BYTES,
-> +	.chan_name	= "pcm_aux_mono_out",
->   	.maxburst	= 16,
-> -	.filter_data	= &pxa2xx_ac97_pcm_aux_mono_out_req,
->   };
->   
-> -static struct pxad_param pxa2xx_ac97_pcm_aux_mono_in_req = {
-> -	.prio = PXAD_PRIO_LOWEST,
-> -	.drcmr = 9,
-> -};
->   static struct snd_dmaengine_dai_dma_data pxa2xx_ac97_pcm_aux_mono_in = {
->   	.addr		= __PREG(MODR),
->   	.addr_width	= DMA_SLAVE_BUSWIDTH_2_BYTES,
-> +	.chan_name	= "pcm_aux_mono_in",
->   	.maxburst	= 16,
-> -	.filter_data	= &pxa2xx_ac97_pcm_aux_mono_in_req,
->   };
->   
-> -static struct pxad_param pxa2xx_ac97_pcm_aux_mic_mono_req = {
-> -	.prio = PXAD_PRIO_LOWEST,
-> -	.drcmr = 8,
-> -};
->   static struct snd_dmaengine_dai_dma_data pxa2xx_ac97_pcm_mic_mono_in = {
->   	.addr		= __PREG(MCDR),
->   	.addr_width	= DMA_SLAVE_BUSWIDTH_2_BYTES,
-> +	.chan_name	= "pcm_aux_mic_mono",
->   	.maxburst	= 16,
-> -	.filter_data	= &pxa2xx_ac97_pcm_aux_mic_mono_req,
->   };
->   
->   static int pxa2xx_ac97_hifi_startup(struct snd_pcm_substream *substream,
-> diff --git a/sound/soc/pxa/pxa2xx-i2s.c b/sound/soc/pxa/pxa2xx-i2s.c
-> index 3fb60baf6eab..e7184de0de04 100644
-> --- a/sound/soc/pxa/pxa2xx-i2s.c
-> +++ b/sound/soc/pxa/pxa2xx-i2s.c
-> @@ -82,20 +82,18 @@ static struct pxa_i2s_port pxa_i2s;
->   static struct clk *clk_i2s;
->   static int clk_ena = 0;
->   
-> -static unsigned long pxa2xx_i2s_pcm_stereo_out_req = 3;
->   static struct snd_dmaengine_dai_dma_data pxa2xx_i2s_pcm_stereo_out = {
->   	.addr		= __PREG(SADR),
->   	.addr_width	= DMA_SLAVE_BUSWIDTH_4_BYTES,
-> +	.chan_name	= "tx",
->   	.maxburst	= 32,
-> -	.filter_data	= &pxa2xx_i2s_pcm_stereo_out_req,
->   };
->   
-> -static unsigned long pxa2xx_i2s_pcm_stereo_in_req = 2;
->   static struct snd_dmaengine_dai_dma_data pxa2xx_i2s_pcm_stereo_in = {
->   	.addr		= __PREG(SADR),
->   	.addr_width	= DMA_SLAVE_BUSWIDTH_4_BYTES,
-> +	.chan_name	= "rx",
->   	.maxburst	= 32,
-> -	.filter_data	= &pxa2xx_i2s_pcm_stereo_in_req,
->   };
->   
->   static int pxa2xx_i2s_startup(struct snd_pcm_substream *substream,
+> diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
+> index 11ca95c60bcf..bdbd4897c0f7 100644
+> --- a/drivers/mmc/host/sdhci-bcm-kona.c
+> +++ b/drivers/mmc/host/sdhci-bcm-kona.c
+> @@ -284,10 +284,8 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
+>  	sdhci_bcm_kona_sd_init(host);
+>  
+>  	ret = sdhci_add_host(host);
+> -	if (ret) {
+> -		dev_err(dev, "Failed sdhci_add_host\n");
+> +	if (ret)
+>  		goto err_reset;
+> -	}
+>  
+>  	/* if device is eMMC, emulate card insert right here */
+>  	if (!mmc_card_is_removable(host->mmc)) {
+> diff --git a/drivers/mmc/host/sdhci-pic32.c b/drivers/mmc/host/sdhci-pic32.c
+> index a6caa49ca25a..a11e6397d4ff 100644
+> --- a/drivers/mmc/host/sdhci-pic32.c
+> +++ b/drivers/mmc/host/sdhci-pic32.c
+> @@ -200,10 +200,8 @@ static int pic32_sdhci_probe(struct platform_device *pdev)
+>  	}
+>  
+>  	ret = sdhci_add_host(host);
+> -	if (ret) {
+> -		dev_err(&pdev->dev, "error adding host\n");
+> +	if (ret)
+>  		goto err_base_clk;
+> -	}
+>  
+>  	dev_info(&pdev->dev, "Successfully added sdhci host\n");
+>  	return 0;
+> diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
+> index 8986f9d9cf98..2c3827f54927 100644
+> --- a/drivers/mmc/host/sdhci-pxav2.c
+> +++ b/drivers/mmc/host/sdhci-pxav2.c
+> @@ -221,10 +221,8 @@ static int sdhci_pxav2_probe(struct platform_device *pdev)
+>  	host->ops = &pxav2_sdhci_ops;
+>  
+>  	ret = sdhci_add_host(host);
+> -	if (ret) {
+> -		dev_err(&pdev->dev, "failed to add host\n");
+> +	if (ret)
+>  		goto disable_clk;
+> -	}
+>  
+>  	return 0;
+>  
+> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+> index a34434166ca7..b8e96f392428 100644
+> --- a/drivers/mmc/host/sdhci-pxav3.c
+> +++ b/drivers/mmc/host/sdhci-pxav3.c
+> @@ -472,10 +472,8 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
+>  	pm_suspend_ignore_children(&pdev->dev, 1);
+>  
+>  	ret = sdhci_add_host(host);
+> -	if (ret) {
+> -		dev_err(&pdev->dev, "failed to add host\n");
+> +	if (ret)
+>  		goto err_add_host;
+> -	}
+>  
+>  	if (host->mmc->pm_caps & MMC_PM_WAKE_SDIO_IRQ)
+>  		device_init_wakeup(&pdev->dev, 1);
+> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+> index cda83ccb2702..9ef89d00970e 100644
+> --- a/drivers/mmc/host/sdhci-s3c.c
+> +++ b/drivers/mmc/host/sdhci-s3c.c
+> @@ -655,10 +655,8 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
+>  		goto err_req_regs;
+>  
+>  	ret = sdhci_add_host(host);
+> -	if (ret) {
+> -		dev_err(dev, "sdhci_add_host() failed\n");
+> +	if (ret)
+>  		goto err_req_regs;
+> -	}
+>  
+>  #ifdef CONFIG_PM
+>  	if (pdata->cd_type != S3C_SDHCI_CD_INTERNAL)
+> diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
+> index 14511526a3a8..9247d51f2eed 100644
+> --- a/drivers/mmc/host/sdhci-spear.c
+> +++ b/drivers/mmc/host/sdhci-spear.c
+> @@ -126,10 +126,8 @@ static int sdhci_probe(struct platform_device *pdev)
+>  	}
+>  
+>  	ret = sdhci_add_host(host);
+> -	if (ret) {
+> -		dev_dbg(&pdev->dev, "error adding host\n");
+> +	if (ret)
+>  		goto disable_clk;
+> -	}
+>  
+>  	platform_set_drvdata(pdev, host);
+>  
+> diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
+> index c32daed0d418..8f95647195d9 100644
+> --- a/drivers/mmc/host/sdhci-st.c
+> +++ b/drivers/mmc/host/sdhci-st.c
+> @@ -422,10 +422,8 @@ static int sdhci_st_probe(struct platform_device *pdev)
+>  	st_mmcss_cconfig(np, host);
+>  
+>  	ret = sdhci_add_host(host);
+> -	if (ret) {
+> -		dev_err(&pdev->dev, "Failed sdhci_add_host\n");
+> +	if (ret)
+>  		goto err_out;
+> -	}
+>  
+>  	host_version = readw_relaxed((host->ioaddr + SDHCI_HOST_VERSION));
+>  
 > 
