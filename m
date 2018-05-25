@@ -1,94 +1,72 @@
 From: Evan Green <evgreen@chromium.org>
-Subject: [PATCH v2] mmc: Allow non-sleeping GPIO cd
-Date: Fri, 25 May 2018 12:25:23 -0700
-Message-ID: <20180525192523.204873-1-evgreen@chromium.org>
+Subject: Re: [PATCH V1 2/3] mmc: sdhci-msm: Add msm version specific ops and
+ data structures
+Date: Fri, 25 May 2018 13:45:27 -0700
+Message-ID: <CAE=gft5ZeSJwDHme7xb8Uotm9-Eed01JaxDrCX_+SER+j71OTQ@mail.gmail.com>
+References: <1526552938-21292-1-git-send-email-vviswana@codeaurora.org>
+ <1526552938-21292-3-git-send-email-vviswana@codeaurora.org>
+ <CAE=gft4ZQ34QankD_S5y_KjoZG8rxQkEfPo7vZsJTUB387P6dQ@mail.gmail.com> <85d7d14c-fd1c-92af-4605-3441649c9fcd@codeaurora.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <85d7d14c-fd1c-92af-4605-3441649c9fcd@codeaurora.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Andy Shevchenko <andy.shevchenko@gmail.com>, Douglas Anderson <dianders@chromium.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Evan Green <evgreen@chromium.org>
+To: vviswana@codeaurora.org
+Cc: adrian.hunter@intel.com, Ulf Hansson <ulf.hansson@linaro.org>, robh+dt@kernel.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, devicetree@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, jeremymc@redhat.com, Bjorn Andersson <bjorn.andersson@linaro.org>, riteshh@codeaurora.org, vbadigan@codeaurora.org, Doug Anderson <dianders@google.com>, sayalil@codeaurora.org
 List-Id: linux-mmc@vger.kernel.org
 
-This change uses the appropriate _cansleep or non-sleeping API for
-reading GPIO card detect state. This allows users with GPIOs that
-never sleep to avoid a warning when certain quirks are present.
+On Thu, May 24, 2018 at 5:35 AM Vijay Viswanath <vviswana@codeaurora.org>
+wrote:
 
-The sdhci controller has an SDHCI_QUIRK_NO_CARD_NO_RESET, which
-indicates that a controller will not reset properly if no card is
-inserted. With this quirk enabled, mmc_get_cd_gpio is called in
-several places with a spinlock held and interrupts disabled.
-gpiod_get_raw_value_cansleep is not happy with this situation,
-and throws out a warning.
 
-For boards that a) use controllers that have this quirk, and b) wire
-card detect up to a GPIO that doesn't sleep, this is a spurious warning.
-This change silences that warning, at the cost of pushing this problem
-down to users that have sleeping GPIOs and controllers with this quirk.
 
-Signed-off-by: Evan Green <evgreen@chromium.org>
----
-Changes since v1:
-	- Style fixups as suggested by Andy
+> On 5/22/2018 11:40 PM, Evan Green wrote:
+> > On Thu, May 17, 2018 at 3:30 AM Vijay Viswanath <vviswana@codeaurora.org
 
-This is my initial solution to the warning I was trying to face down
-in my previous RFC [1]. Upsides of this solution is it manages to
-avoid the warning in places where the warning doesn't apply, and is
-low-risk. Other approaches I considered:
+> > wrote:
+> >
+> >> In addition to offsets of certain registers changing, the registers in
+> >> core_mem have been shifted to HC mem as well. To access these
+registers,
+> >> define msm version specific functions. These functions can be loaded
+> >> into the function pointers at the time of probe based on the msm
+version
+> >> detected.
+> >
+> >> Also defind new data structure to hold version specific Ops and
+register
+> >> addresses.
+> >
+> >> Signed-off-by: Sayali Lokhande <sayalil@codeaurora.org>
+> >> Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
+> >> ---
+> >>    drivers/mmc/host/sdhci-msm.c | 112
+> > +++++++++++++++++++++++++++++++++++++++++++
+> >>    1 file changed, 112 insertions(+)
+> >
+> >> diff --git a/drivers/mmc/host/sdhci-msm.c
+b/drivers/mmc/host/sdhci-msm.c
+> >> index 2524455..bb2bb59 100644
+> >> --- a/drivers/mmc/host/sdhci-msm.c
+> >> +++ b/drivers/mmc/host/sdhci-msm.c
+> >> @@ -226,6 +226,25 @@ struct sdhci_msm_offset {
+> >>           .core_ddr_config_2 = 0x1BC,
+> >>    };
+> >
+> >> +struct sdhci_msm_variant_ops {
+> >> +       u8 (*msm_readb_relaxed)(struct sdhci_host *host, u32 offset);
+> >
+> > I don't see any uses of msm_readb_relaxed or msm_writeb_relaxed in this
+> > patch or the next one. Are these needed?
 
-1. Changing sdhci_get_cd to reach through mmc and get the GPIO value
-directly (without sleeping) rather than calling mmc_gpio_get_cd,
-which uses the cansleep functions. I didn't love this because a) it
-seemed ugly to be reaching into mmc_host like that and b) I'd have to
-duplicate the logic in mmc_gpio_get_cd, which seemed brittle.
+> They are not used as of now. Kept them since they can have use later.
+> Felt it better to define base functions and addresses now itself.
 
-2. Using mmc_gpio_set_cd_isr to record when the card detect pin
-changes, and then in sdhci_do_reset we wouldn't actually need to
-get CD state, just look at the cached value. This seemed risky to me
-since it would affect all sdhci controllers, and I don't know that
-everybody using gpio-cd can do interrupts on their pins.
 
-3. Adding mmc_gpio_get_cd_nosleep(). That one's still doable if
-preferred, but I'd have to give some thought to when sdhci wires
-up to which one.
+I think we should remove these, unless you have an imminent patch queued up
+where you're about to use them. The register definitions in patch 1 are one
+thing, as those were nice info to have and difficult to derive later
+without certain documents. But these byte functions could be easily added
+again by anyone if they're needed. So I don't think they have value now.
 
-I'm up for other suggestions. This one most just seemed like the
-best first stab of minimally addressing the warning without rocking
-the boat otherwise.
-
-[1] https://patchwork.kernel.org/patch/10374633/
----
- drivers/mmc/core/slot-gpio.c | 15 +++++++++++----
- 1 file changed, 11 insertions(+), 4 deletions(-)
-
-diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
-index 31f7dbb15668..1ca8220690f2 100644
---- a/drivers/mmc/core/slot-gpio.c
-+++ b/drivers/mmc/core/slot-gpio.c
-@@ -76,15 +76,22 @@ EXPORT_SYMBOL(mmc_gpio_get_ro);
- int mmc_gpio_get_cd(struct mmc_host *host)
- {
- 	struct mmc_gpio *ctx = host->slot.handler_priv;
-+	int cansleep;
- 
- 	if (!ctx || !ctx->cd_gpio)
- 		return -ENOSYS;
- 
--	if (ctx->override_cd_active_level)
--		return !gpiod_get_raw_value_cansleep(ctx->cd_gpio) ^
--			!!(host->caps2 & MMC_CAP2_CD_ACTIVE_HIGH);
-+	cansleep = gpiod_cansleep(ctx->cd_gpio);
-+	if (ctx->override_cd_active_level) {
-+		int value = cansleep ?
-+				gpiod_get_raw_value_cansleep(ctx->cd_gpio) :
-+				gpiod_get_raw_value(ctx->cd_gpio);
-+		return !value ^ !!(host->caps2 & MMC_CAP2_CD_ACTIVE_HIGH);
-+	}
- 
--	return gpiod_get_value_cansleep(ctx->cd_gpio);
-+	return cansleep ?
-+		gpiod_get_value_cansleep(ctx->cd_gpio) :
-+		gpiod_get_value(ctx->cd_gpio);
- }
- EXPORT_SYMBOL(mmc_gpio_get_cd);
- 
--- 
-2.13.5
+-Evan
