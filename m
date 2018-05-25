@@ -1,67 +1,161 @@
-From: Mark Brown <broonie@kernel.org>
-Subject: Re: [PATCH v2 08/13] ASoC: pxa: remove the dmaengine
-	compat need
-Date: Thu, 24 May 2018 14:58:36 +0100
-Message-ID: <20180524135836.GR4828@sirena.org.uk>
-References: <20180524070703.11901-1-robert.jarzmik@free.fr>
- <20180524070703.11901-9-robert.jarzmik@free.fr>
+From: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+Subject: [PATCH] mmc: sdhci-*: Don't emit error msg if sdhci_add_host()
+ fails
+Date: Fri, 25 May 2018 15:15:09 +0800
+Message-ID: <20180525151509.0270dbe1@xhacker.debian>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============7081102325017339701=="
-Return-path: <alsa-devel-bounces@alsa-project.org>
-In-Reply-To: <20180524070703.11901-9-robert.jarzmik@free.fr>
-List-Unsubscribe: <http://mailman.alsa-project.org/mailman/options/alsa-devel>,
- <mailto:alsa-devel-request@alsa-project.org?subject=unsubscribe>
-List-Archive: <http://mailman.alsa-project.org/pipermail/alsa-devel/>
-List-Post: <mailto:alsa-devel@alsa-project.org>
-List-Help: <mailto:alsa-devel-request@alsa-project.org?subject=help>
-List-Subscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
- <mailto:alsa-devel-request@alsa-project.org?subject=subscribe>
-Errors-To: alsa-devel-bounces@alsa-project.org
-Sender: alsa-devel-bounces@alsa-project.org
-To: Robert Jarzmik <robert.jarzmik@free.fr>
-Cc: Boris Brezillon <boris.brezillon@free-electrons.com>, alsa-devel@alsa-project.org, Arnd Bergmann <arnd@arndb.de>, linux-ide@vger.kernel.org, Richard Weinberger <richard@nod.at>, linux-mmc@vger.kernel.org, Liam Girdwood <lgirdwood@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, linux-kernel@vger.kernel.org, Marek Vasut <marek.vasut@gmail.com>, linux-mtd@lists.infradead.org, linux-arm-kernel@lists.infradead.org, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, netdev@vger.kernel.org, dmaengine@vger.kernel.org, Brian Norris <computersforpeace@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Daniel Mack <daniel@zonque.org>, linux-media@vger.kernel.org
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Florian Fainelli <f.fainelli@gmail.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Ben Dooks <ben-linux@fluff.org>, Jaehoon Chung <jh80.chung@samsung.com>, Viresh Kumar <vireshk@kernel.org>, Patrice Chotard <patrice.chotard@st.com>
+Cc: bcm-kernel-feedback-list@broadcom.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
+I noticed below error msg with sdhci-pxav3 on some berlin platforms:
 
---===============7081102325017339701==
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="brdEIFGMNIjz5YJG"
-Content-Disposition: inline
+[.....] sdhci-pxav3 f7ab0000.sdhci failed to add host
 
+It is due to getting related vmmc or vqmmc regulator returns
+-EPROBE_DEFER. It doesn't matter at all but it's confusing.
 
---brdEIFGMNIjz5YJG
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+=46rom another side, if driver probing fails and the error number isn't
+-EPROBE_DEFER, the core will tell us something as below:
 
-On Thu, May 24, 2018 at 09:06:58AM +0200, Robert Jarzmik wrote:
-> As the pxa architecture switched towards the dmaengine slave map, the
-> old compatibility mechanism to acquire the dma requestor line number and
-> priority are not needed anymore.
+[.....] sdhci-pxav3: probe of f7ab0000.sdhci failed with error -EXX
 
-Acked-by: Mark Brown <broonie@kernel.org>
+So it's not necessary to emit error msg if sdhci_add_host() fails. And
+some other sdhci host drivers also have this issue, let's fix them
+together.
 
---brdEIFGMNIjz5YJG
-Content-Type: application/pgp-signature; name="signature.asc"
+Signed-off-by: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+---
+ drivers/mmc/host/sdhci-bcm-kona.c | 4 +---
+ drivers/mmc/host/sdhci-pic32.c    | 4 +---
+ drivers/mmc/host/sdhci-pxav2.c    | 4 +---
+ drivers/mmc/host/sdhci-pxav3.c    | 4 +---
+ drivers/mmc/host/sdhci-s3c.c      | 4 +---
+ drivers/mmc/host/sdhci-spear.c    | 4 +---
+ drivers/mmc/host/sdhci-st.c       | 4 +---
+ 7 files changed, 7 insertions(+), 21 deletions(-)
 
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAlsGxQsACgkQJNaLcl1U
-h9AOOQf+ICndtAhAUcJYotu2F1wfe6zK/SmwQs2RaAzNMRnQTNmdgQDHaITOBSE0
-juDyVbEzdIjDwHmu3lB6bZ+mj3MDpGeJ1DPvvi6aI+pkDH/J16XMXXTchXyo3NI0
-db1lLlmXYiTbnsVGU2bO6hMCG588Us7ZyHzt2pxD0f9LqNzy3f617uD3fSQZSzrd
-a5JyJZMHQfoIhO58gKX7fQ+JVum/7BFb2S4eFv/DZPZsU9Gy96h0viVcyImmE+ri
-qS4cfZJlV/PC7m4GYIP8V23Dl6rj8wsh7YvKUUtat6tIqGRkZtHFEo6BCQedA3Ka
-+7F7zfmpLYaC8VeKI0Fp8fxfDYF0Jg==
-=gxiC
------END PGP SIGNATURE-----
-
---brdEIFGMNIjz5YJG--
-
---===============7081102325017339701==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-
---===============7081102325017339701==--
+diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm=
+-kona.c
+index 11ca95c60bcf..bdbd4897c0f7 100644
+--- a/drivers/mmc/host/sdhci-bcm-kona.c
++++ b/drivers/mmc/host/sdhci-bcm-kona.c
+@@ -284,10 +284,8 @@ static int sdhci_bcm_kona_probe(struct platform_device=
+ *pdev)
+ 	sdhci_bcm_kona_sd_init(host);
+=20
+ 	ret =3D sdhci_add_host(host);
+-	if (ret) {
+-		dev_err(dev, "Failed sdhci_add_host\n");
++	if (ret)
+ 		goto err_reset;
+-	}
+=20
+ 	/* if device is eMMC, emulate card insert right here */
+ 	if (!mmc_card_is_removable(host->mmc)) {
+diff --git a/drivers/mmc/host/sdhci-pic32.c b/drivers/mmc/host/sdhci-pic32.c
+index a6caa49ca25a..a11e6397d4ff 100644
+--- a/drivers/mmc/host/sdhci-pic32.c
++++ b/drivers/mmc/host/sdhci-pic32.c
+@@ -200,10 +200,8 @@ static int pic32_sdhci_probe(struct platform_device *p=
+dev)
+ 	}
+=20
+ 	ret =3D sdhci_add_host(host);
+-	if (ret) {
+-		dev_err(&pdev->dev, "error adding host\n");
++	if (ret)
+ 		goto err_base_clk;
+-	}
+=20
+ 	dev_info(&pdev->dev, "Successfully added sdhci host\n");
+ 	return 0;
+diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
+index 8986f9d9cf98..2c3827f54927 100644
+--- a/drivers/mmc/host/sdhci-pxav2.c
++++ b/drivers/mmc/host/sdhci-pxav2.c
+@@ -221,10 +221,8 @@ static int sdhci_pxav2_probe(struct platform_device *p=
+dev)
+ 	host->ops =3D &pxav2_sdhci_ops;
+=20
+ 	ret =3D sdhci_add_host(host);
+-	if (ret) {
+-		dev_err(&pdev->dev, "failed to add host\n");
++	if (ret)
+ 		goto disable_clk;
+-	}
+=20
+ 	return 0;
+=20
+diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+index a34434166ca7..b8e96f392428 100644
+--- a/drivers/mmc/host/sdhci-pxav3.c
++++ b/drivers/mmc/host/sdhci-pxav3.c
+@@ -472,10 +472,8 @@ static int sdhci_pxav3_probe(struct platform_device *p=
+dev)
+ 	pm_suspend_ignore_children(&pdev->dev, 1);
+=20
+ 	ret =3D sdhci_add_host(host);
+-	if (ret) {
+-		dev_err(&pdev->dev, "failed to add host\n");
++	if (ret)
+ 		goto err_add_host;
+-	}
+=20
+ 	if (host->mmc->pm_caps & MMC_PM_WAKE_SDIO_IRQ)
+ 		device_init_wakeup(&pdev->dev, 1);
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index cda83ccb2702..9ef89d00970e 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -655,10 +655,8 @@ static int sdhci_s3c_probe(struct platform_device *pde=
+v)
+ 		goto err_req_regs;
+=20
+ 	ret =3D sdhci_add_host(host);
+-	if (ret) {
+-		dev_err(dev, "sdhci_add_host() failed\n");
++	if (ret)
+ 		goto err_req_regs;
+-	}
+=20
+ #ifdef CONFIG_PM
+ 	if (pdata->cd_type !=3D S3C_SDHCI_CD_INTERNAL)
+diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
+index 14511526a3a8..9247d51f2eed 100644
+--- a/drivers/mmc/host/sdhci-spear.c
++++ b/drivers/mmc/host/sdhci-spear.c
+@@ -126,10 +126,8 @@ static int sdhci_probe(struct platform_device *pdev)
+ 	}
+=20
+ 	ret =3D sdhci_add_host(host);
+-	if (ret) {
+-		dev_dbg(&pdev->dev, "error adding host\n");
++	if (ret)
+ 		goto disable_clk;
+-	}
+=20
+ 	platform_set_drvdata(pdev, host);
+=20
+diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
+index c32daed0d418..8f95647195d9 100644
+--- a/drivers/mmc/host/sdhci-st.c
++++ b/drivers/mmc/host/sdhci-st.c
+@@ -422,10 +422,8 @@ static int sdhci_st_probe(struct platform_device *pdev)
+ 	st_mmcss_cconfig(np, host);
+=20
+ 	ret =3D sdhci_add_host(host);
+-	if (ret) {
+-		dev_err(&pdev->dev, "Failed sdhci_add_host\n");
++	if (ret)
+ 		goto err_out;
+-	}
+=20
+ 	host_version =3D readw_relaxed((host->ioaddr + SDHCI_HOST_VERSION));
+=20
+--=20
+2.17.0
