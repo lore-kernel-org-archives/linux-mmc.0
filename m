@@ -1,83 +1,70 @@
-From: Christoph Hellwig <hch@lst.de>
-Subject: Re: mmc filesystem performance decreased on the first write after
-        filesystem creation
-Date: Mon, 28 May 2018 08:26:18 +0200
-Message-ID: <20180528062618.GA4196@lst.de>
-References: <a976e20a-3ed1-43d0-4665-f570ef496d02@ti.com>
+From: Maxime Ripard <maxime.ripard@bootlin.com>
+Subject: Re: [PATCH] mmc: sunxi: mark PM functions as __maybe_unused
+Date: Mon, 28 May 2018 08:50:43 +0200
+Message-ID: <20180528065043.yewyrrat2eqlm2sa@flea>
+References: <20180525210752.1794502-1-arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="jops65ydd4glphpe"
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <a976e20a-3ed1-43d0-4665-f570ef496d02@ti.com>
+In-Reply-To: <20180525210752.1794502-1-arnd@arndb.de>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Faiz Abbas <faiz_abbas@ti.com>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, Christoph Hellwig <hch@lst.de>, Ulf Hansson <ulf.hansson@linaro.org>, Jens Axboe <axboe@kernel.dk>, linux-ext4@vger.kernel.org, tytso@mit.edu
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chen-Yu Tsai <wens@csie.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Summary: mke2s uses the BLKDISCARD ioctl to wipe the device,
-and then uses BLKDISCARDZEROES to check if that zeroed the data.
 
-A while ago I made BLKDISCARDZEROES always return 0 because it is
-basically impossible to have reliably zeroing using discard as the
-standards leave the devices way to many options to not actually
-zero data at their own choice when using the discard commands.
+--jops65ydd4glphpe
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-So IFF mke2fs want to actually free space and zero it it needs
-to use fallocate to punch a hole, and mmc needs to implement
-REQ_OP_WRITE_ZEROS IFF it actually has a reliable way to zero
-blocks.
+On Fri, May 25, 2018 at 11:07:42PM +0200, Arnd Bergmann wrote:
+> The newly added runtime-pm functions cause a harmless warning
+> when CONFIG_PM is disabled:
+>=20
+> drivers/mmc/host/sunxi-mmc.c:1452:12: error: 'sunxi_mmc_runtime_suspend' =
+defined but not used [-Werror=3Dunused-function]
+>  static int sunxi_mmc_runtime_suspend(struct device *dev)
+>             ^~~~~~~~~~~~~~~~~~~~~~~~~
+> drivers/mmc/host/sunxi-mmc.c:1435:12: error: 'sunxi_mmc_runtime_resume' d=
+efined but not used [-Werror=3Dunused-function]
+>  static int sunxi_mmc_runtime_resume(struct device *dev)
+>=20
+> This marks them as __maybe_unused to shut up the warning.
+>=20
+> Fixes: 9a8e1e8cc2c0 ("mmc: sunxi: Add runtime_pm support")
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 
+Acked-by: Maxime Ripard <maxime.ripard@bootlin.com>
 
-On Tue, May 22, 2018 at 08:48:31PM +0530, Faiz Abbas wrote:
-> Hi,
-> 
-> I am debugging a performance reduction in ext2 filesystems on an mmc
-> device in TI's am335x evm board.
-> 
-> I see that the performance is reduced on the first write after making a
-> new filesystem using mkfs.ext2 on one of the mmc partitions. The
-> performance comes back to normal after the first write.
-> 
-> commands used:
-> 
-> => umount /dev/mmcblk1p2
-> 
-> => mkfs.ext2 -F  /dev/mmcblk1p2
-> 
-> => mount -t ext2 -o async /dev/mmcblk1p2 /mnt/partition_mmc
-> 
-> => dd if=/dev/urandom of=/dev/shm/srctest_file_mmc_1184 bs=1M count=10
-> 
-> => ./filesystem_tests -write -src_file /dev/shm/srctest_file_mmc_1184
-> -srcfile_size 10 -file /mnt/partition_mmc/test_file_1184 -buffer_size
-> 102400 -file_size 100 -performance
-> 
-> The filesystem_tests write utility reads from the file generated at
-> /dev/shm/srctest_file_mmc_1184, memory maps the file to a buffer, and
-> then writes it into the newly created /mnt/partition_mmc in multiples of
-> buffer_size while measuring write performance.
-> 
-> See here for the implementation of filesystem_tests write utility:
-> http://arago-project.org/git/projects/?p=test-automation/ltp-ddt.git;a=blob;f=testcases/ddt/filesystem_test_suite/src/testcases/st_filesystem_write_to_file.c;h=80e8e244d7eaa9f0dbd9b21ea705445156c36bef;hb=f7fc06c290333ce08a7d4fba104eee0f0f1d942b
-> 
-> Complete log with multiple calls to filesystem_tests:
-> https://pastebin.ubuntu.com/p/BckmTJpqPv/
-> 
-> Notice that the first run of filesystem_tests has a lower throughput
-> reported.
-> 
-> I was able to bisect the issue to this commit:
-> 5d1429fead5b (mmc: remove the discard_zeroes_data flag)
-> 
-> I would assume that after this flag is removed, the filesystem creation
-> command would explicitly write zeroes to the device which might explain
-> the performance fall. However, then the mkfs.ext2 command itself should
-> take more time rather than the first file write after that.
-> 
-> It would be nice if someone could help me understand why this is happening.
-> 
-> Thanks for your help.
-> 
-> Regards,
-> Faiz
----end quoted text---
+Thanks!
+Maxime
+
+--=20
+Maxime Ripard, Bootlin (formerly Free Electrons)
+Embedded Linux and Kernel engineering
+https://bootlin.com
+
+--jops65ydd4glphpe
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIyBAABCAAdFiEE0VqZU19dR2zEVaqr0rTAlCFNr3QFAlsLprIACgkQ0rTAlCFN
+r3Sk4g/4ztmk2MGwc/nBZIQCIaoS0xaVrifTM4UPyYUg0uG7leJ9mB9O1bgazsxd
+ROUGsyRZ1i1Syrl5QkIpWTQNZ+y6vced1s2/cGFaRuIohuiU/ouyfYV9U/qdXWJk
+lrMb1yGajD9klfmh1xhChOWZlqhd/7Z3IYt49Fc/B2A6QqcVB6aiUKYR2kd5ZUjc
+Sw+nZrUBUzZScfiTxOUr95M0MuO+EqJA1ayA080BvrboZD8k0svq+wLXx5W42QYA
+c0ayrBZRp+LwwtjuwkLkaCHVFEqh9Qda1ACXG2GohFFFo5xb6bps9yEOwaDo+EjU
+NkzjgHA0i0Gj8+gUVv9qWKmHM8D5yKOynSfP/LzVjC5ToXSCX3AcTc3ZPFVa8gpm
+PC6w/1Rm1hwrVHbYzzEM/a2bNGDAFhH7HAFgSrLfpsWPwnk8i6sj2ZfcZhIoNWrK
+8ElCCGosmGK//2cAGJvnqX6Dl9onu0aho+RBDEdEXThwYPaQAOOPlwTV0WZmxp9e
+u8/hCjV0kJtIYAtlId6GYrhpLymwtnjCzJRwInLDT+7HE1XS/XIWbwj0Hr9aJ6NF
+hbNcEkQTH8+GRkEMLMYc/HnK4gMaD6Mt6bp+e7q/M4AwBKOttOp400noHbLUVsFy
+AR0Yprwkq4zcb/WpqiMep6wUU5AkeosK5XcgTUxc5r9V6Htn2w==
+=bNNd
+-----END PGP SIGNATURE-----
+
+--jops65ydd4glphpe--
