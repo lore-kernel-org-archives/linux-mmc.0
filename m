@@ -1,163 +1,110 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-*: Don't emit error msg if sdhci_add_host() fails
-Date: Mon, 28 May 2018 13:27:46 +0200
-Message-ID: <CAPDyKFoJsMwsBLgX=80QE2k+E+zYQfbNv_TyKqEJAWML5_OnWg@mail.gmail.com>
-References: <20180525151509.0270dbe1@xhacker.debian>
+Subject: Re: [PATCH v2] mmc: Allow non-sleeping GPIO cd
+Date: Mon, 28 May 2018 13:27:53 +0200
+Message-ID: <CAPDyKFq+-CSs2oo9EarJCgMYuFstMAyggoroc8YFkikqbR7Y5w@mail.gmail.com>
+References: <20180525192523.204873-1-evgreen@chromium.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180525151509.0270dbe1@xhacker.debian>
+In-Reply-To: <20180525192523.204873-1-evgreen@chromium.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Florian Fainelli <f.fainelli@gmail.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Ben Dooks <ben-linux@fluff.org>, Jaehoon Chung <jh80.chung@samsung.com>, Viresh Kumar <vireshk@kernel.org>, Patrice Chotard <patrice.chotard@st.com>, BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+To: Evan Green <evgreen@chromium.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Andy Shevchenko <andy.shevchenko@gmail.com>, Douglas Anderson <dianders@chromium.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 25 May 2018 at 09:15, Jisheng Zhang <Jisheng.Zhang@synaptics.com> wrote:
-> I noticed below error msg with sdhci-pxav3 on some berlin platforms:
+On 25 May 2018 at 21:25, Evan Green <evgreen@chromium.org> wrote:
+> This change uses the appropriate _cansleep or non-sleeping API for
+> reading GPIO card detect state. This allows users with GPIOs that
+> never sleep to avoid a warning when certain quirks are present.
 >
-> [.....] sdhci-pxav3 f7ab0000.sdhci failed to add host
+> The sdhci controller has an SDHCI_QUIRK_NO_CARD_NO_RESET, which
+> indicates that a controller will not reset properly if no card is
+> inserted. With this quirk enabled, mmc_get_cd_gpio is called in
+> several places with a spinlock held and interrupts disabled.
+> gpiod_get_raw_value_cansleep is not happy with this situation,
+> and throws out a warning.
 >
-> It is due to getting related vmmc or vqmmc regulator returns
-> -EPROBE_DEFER. It doesn't matter at all but it's confusing.
+> For boards that a) use controllers that have this quirk, and b) wire
+> card detect up to a GPIO that doesn't sleep, this is a spurious warning.
+> This change silences that warning, at the cost of pushing this problem
+> down to users that have sleeping GPIOs and controllers with this quirk.
 >
-> From another side, if driver probing fails and the error number isn't
-> -EPROBE_DEFER, the core will tell us something as below:
->
-> [.....] sdhci-pxav3: probe of f7ab0000.sdhci failed with error -EXX
->
-> So it's not necessary to emit error msg if sdhci_add_host() fails. And
-> some other sdhci host drivers also have this issue, let's fix them
-> together.
->
-> Signed-off-by: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+> Signed-off-by: Evan Green <evgreen@chromium.org>
 
-Thanks, applied for next!
+I decided to queue this up for next. Let's see if there is anybody
+objecting to that.
 
-Kind regards
+As stated, I think that possible option 3) would be nice, but I am
+fine with this for now.
+
+Thanks and kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/sdhci-bcm-kona.c | 4 +---
->  drivers/mmc/host/sdhci-pic32.c    | 4 +---
->  drivers/mmc/host/sdhci-pxav2.c    | 4 +---
->  drivers/mmc/host/sdhci-pxav3.c    | 4 +---
->  drivers/mmc/host/sdhci-s3c.c      | 4 +---
->  drivers/mmc/host/sdhci-spear.c    | 4 +---
->  drivers/mmc/host/sdhci-st.c       | 4 +---
->  7 files changed, 7 insertions(+), 21 deletions(-)
+> Changes since v1:
+>         - Style fixups as suggested by Andy
 >
-> diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
-> index 11ca95c60bcf..bdbd4897c0f7 100644
-> --- a/drivers/mmc/host/sdhci-bcm-kona.c
-> +++ b/drivers/mmc/host/sdhci-bcm-kona.c
-> @@ -284,10 +284,8 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
->         sdhci_bcm_kona_sd_init(host);
+> This is my initial solution to the warning I was trying to face down
+> in my previous RFC [1]. Upsides of this solution is it manages to
+> avoid the warning in places where the warning doesn't apply, and is
+> low-risk. Other approaches I considered:
 >
->         ret = sdhci_add_host(host);
-> -       if (ret) {
-> -               dev_err(dev, "Failed sdhci_add_host\n");
-> +       if (ret)
->                 goto err_reset;
-> -       }
+> 1. Changing sdhci_get_cd to reach through mmc and get the GPIO value
+> directly (without sleeping) rather than calling mmc_gpio_get_cd,
+> which uses the cansleep functions. I didn't love this because a) it
+> seemed ugly to be reaching into mmc_host like that and b) I'd have to
+> duplicate the logic in mmc_gpio_get_cd, which seemed brittle.
 >
->         /* if device is eMMC, emulate card insert right here */
->         if (!mmc_card_is_removable(host->mmc)) {
-> diff --git a/drivers/mmc/host/sdhci-pic32.c b/drivers/mmc/host/sdhci-pic32.c
-> index a6caa49ca25a..a11e6397d4ff 100644
-> --- a/drivers/mmc/host/sdhci-pic32.c
-> +++ b/drivers/mmc/host/sdhci-pic32.c
-> @@ -200,10 +200,8 @@ static int pic32_sdhci_probe(struct platform_device *pdev)
->         }
+> 2. Using mmc_gpio_set_cd_isr to record when the card detect pin
+> changes, and then in sdhci_do_reset we wouldn't actually need to
+> get CD state, just look at the cached value. This seemed risky to me
+> since it would affect all sdhci controllers, and I don't know that
+> everybody using gpio-cd can do interrupts on their pins.
 >
->         ret = sdhci_add_host(host);
-> -       if (ret) {
-> -               dev_err(&pdev->dev, "error adding host\n");
-> +       if (ret)
->                 goto err_base_clk;
-> -       }
+> 3. Adding mmc_gpio_get_cd_nosleep(). That one's still doable if
+> preferred, but I'd have to give some thought to when sdhci wires
+> up to which one.
 >
->         dev_info(&pdev->dev, "Successfully added sdhci host\n");
->         return 0;
-> diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
-> index 8986f9d9cf98..2c3827f54927 100644
-> --- a/drivers/mmc/host/sdhci-pxav2.c
-> +++ b/drivers/mmc/host/sdhci-pxav2.c
-> @@ -221,10 +221,8 @@ static int sdhci_pxav2_probe(struct platform_device *pdev)
->         host->ops = &pxav2_sdhci_ops;
+> I'm up for other suggestions. This one most just seemed like the
+> best first stab of minimally addressing the warning without rocking
+> the boat otherwise.
 >
->         ret = sdhci_add_host(host);
-> -       if (ret) {
-> -               dev_err(&pdev->dev, "failed to add host\n");
-> +       if (ret)
->                 goto disable_clk;
-> -       }
+> [1] https://patchwork.kernel.org/patch/10374633/
+> ---
+>  drivers/mmc/core/slot-gpio.c | 15 +++++++++++----
+>  1 file changed, 11 insertions(+), 4 deletions(-)
 >
->         return 0;
+> diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
+> index 31f7dbb15668..1ca8220690f2 100644
+> --- a/drivers/mmc/core/slot-gpio.c
+> +++ b/drivers/mmc/core/slot-gpio.c
+> @@ -76,15 +76,22 @@ EXPORT_SYMBOL(mmc_gpio_get_ro);
+>  int mmc_gpio_get_cd(struct mmc_host *host)
+>  {
+>         struct mmc_gpio *ctx = host->slot.handler_priv;
+> +       int cansleep;
 >
-> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-> index a34434166ca7..b8e96f392428 100644
-> --- a/drivers/mmc/host/sdhci-pxav3.c
-> +++ b/drivers/mmc/host/sdhci-pxav3.c
-> @@ -472,10 +472,8 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
->         pm_suspend_ignore_children(&pdev->dev, 1);
+>         if (!ctx || !ctx->cd_gpio)
+>                 return -ENOSYS;
 >
->         ret = sdhci_add_host(host);
-> -       if (ret) {
-> -               dev_err(&pdev->dev, "failed to add host\n");
-> +       if (ret)
->                 goto err_add_host;
-> -       }
+> -       if (ctx->override_cd_active_level)
+> -               return !gpiod_get_raw_value_cansleep(ctx->cd_gpio) ^
+> -                       !!(host->caps2 & MMC_CAP2_CD_ACTIVE_HIGH);
+> +       cansleep = gpiod_cansleep(ctx->cd_gpio);
+> +       if (ctx->override_cd_active_level) {
+> +               int value = cansleep ?
+> +                               gpiod_get_raw_value_cansleep(ctx->cd_gpio) :
+> +                               gpiod_get_raw_value(ctx->cd_gpio);
+> +               return !value ^ !!(host->caps2 & MMC_CAP2_CD_ACTIVE_HIGH);
+> +       }
 >
->         if (host->mmc->pm_caps & MMC_PM_WAKE_SDIO_IRQ)
->                 device_init_wakeup(&pdev->dev, 1);
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> index cda83ccb2702..9ef89d00970e 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -655,10 +655,8 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
->                 goto err_req_regs;
->
->         ret = sdhci_add_host(host);
-> -       if (ret) {
-> -               dev_err(dev, "sdhci_add_host() failed\n");
-> +       if (ret)
->                 goto err_req_regs;
-> -       }
->
->  #ifdef CONFIG_PM
->         if (pdata->cd_type != S3C_SDHCI_CD_INTERNAL)
-> diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
-> index 14511526a3a8..9247d51f2eed 100644
-> --- a/drivers/mmc/host/sdhci-spear.c
-> +++ b/drivers/mmc/host/sdhci-spear.c
-> @@ -126,10 +126,8 @@ static int sdhci_probe(struct platform_device *pdev)
->         }
->
->         ret = sdhci_add_host(host);
-> -       if (ret) {
-> -               dev_dbg(&pdev->dev, "error adding host\n");
-> +       if (ret)
->                 goto disable_clk;
-> -       }
->
->         platform_set_drvdata(pdev, host);
->
-> diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
-> index c32daed0d418..8f95647195d9 100644
-> --- a/drivers/mmc/host/sdhci-st.c
-> +++ b/drivers/mmc/host/sdhci-st.c
-> @@ -422,10 +422,8 @@ static int sdhci_st_probe(struct platform_device *pdev)
->         st_mmcss_cconfig(np, host);
->
->         ret = sdhci_add_host(host);
-> -       if (ret) {
-> -               dev_err(&pdev->dev, "Failed sdhci_add_host\n");
-> +       if (ret)
->                 goto err_out;
-> -       }
->
->         host_version = readw_relaxed((host->ioaddr + SDHCI_HOST_VERSION));
+> -       return gpiod_get_value_cansleep(ctx->cd_gpio);
+> +       return cansleep ?
+> +               gpiod_get_value_cansleep(ctx->cd_gpio) :
+> +               gpiod_get_value(ctx->cd_gpio);
+>  }
+>  EXPORT_SYMBOL(mmc_gpio_get_cd);
 >
 > --
-> 2.17.0
+> 2.13.5
 >
