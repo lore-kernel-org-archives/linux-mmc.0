@@ -1,102 +1,74 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v2] mmc: Allow non-sleeping GPIO cd
-Date: Mon, 28 May 2018 12:06:28 +0300
-Message-ID: <3cbcda6a-4b57-0e7c-548c-ff8b38aaa635@intel.com>
-References: <20180525192523.204873-1-evgreen@chromium.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: sunxi: mark PM functions as __maybe_unused
+Date: Mon, 28 May 2018 13:04:16 +0200
+Message-ID: <CAPDyKFoyBZ=k5UQyTmgkPd+30Htymw99Xeh3C+bDPo+VGyjrNw@mail.gmail.com>
+References: <20180525210752.1794502-1-arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180525192523.204873-1-evgreen@chromium.org>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Evan Green <evgreen@chromium.org>, Ulf Hansson <ulf.hansson@linaro.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, Douglas Anderson <dianders@chromium.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20180525210752.1794502-1-arnd@arndb.de>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Maxime Ripard <maxime.ripard@bootlin.com>, Chen-Yu Tsai <wens@csie.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 25/05/18 22:25, Evan Green wrote:
-> This change uses the appropriate _cansleep or non-sleeping API for
-> reading GPIO card detect state. This allows users with GPIOs that
-> never sleep to avoid a warning when certain quirks are present.
-> 
-> The sdhci controller has an SDHCI_QUIRK_NO_CARD_NO_RESET, which
-> indicates that a controller will not reset properly if no card is
-> inserted. With this quirk enabled, mmc_get_cd_gpio is called in
-> several places with a spinlock held and interrupts disabled.
-> gpiod_get_raw_value_cansleep is not happy with this situation,
-> and throws out a warning.
-> 
-> For boards that a) use controllers that have this quirk, and b) wire
-> card detect up to a GPIO that doesn't sleep, this is a spurious warning.
-> This change silences that warning, at the cost of pushing this problem
-> down to users that have sleeping GPIOs and controllers with this quirk.
-> 
-> Signed-off-by: Evan Green <evgreen@chromium.org>
-> ---
-> Changes since v1:
-> 	- Style fixups as suggested by Andy
-> 
-> This is my initial solution to the warning I was trying to face down
-> in my previous RFC [1]. Upsides of this solution is it manages to
-> avoid the warning in places where the warning doesn't apply, and is
-> low-risk. Other approaches I considered:
-> 
-> 1. Changing sdhci_get_cd to reach through mmc and get the GPIO value
-> directly (without sleeping) rather than calling mmc_gpio_get_cd,
-> which uses the cansleep functions. I didn't love this because a) it
-> seemed ugly to be reaching into mmc_host like that and b) I'd have to
-> duplicate the logic in mmc_gpio_get_cd, which seemed brittle.
-> 
-> 2. Using mmc_gpio_set_cd_isr to record when the card detect pin
-> changes, and then in sdhci_do_reset we wouldn't actually need to
-> get CD state, just look at the cached value. This seemed risky to me
-> since it would affect all sdhci controllers, and I don't know that
-> everybody using gpio-cd can do interrupts on their pins.
-> 
-> 3. Adding mmc_gpio_get_cd_nosleep(). That one's still doable if
-> preferred, but I'd have to give some thought to when sdhci wires
-> up to which one.
+On 25 May 2018 at 23:07, Arnd Bergmann <arnd@arndb.de> wrote:
+> The newly added runtime-pm functions cause a harmless warning
+> when CONFIG_PM is disabled:
+>
+> drivers/mmc/host/sunxi-mmc.c:1452:12: error: 'sunxi_mmc_runtime_suspend' defined but not used [-Werror=unused-function]
+>  static int sunxi_mmc_runtime_suspend(struct device *dev)
+>             ^~~~~~~~~~~~~~~~~~~~~~~~~
+> drivers/mmc/host/sunxi-mmc.c:1435:12: error: 'sunxi_mmc_runtime_resume' defined but not used [-Werror=unused-function]
+>  static int sunxi_mmc_runtime_resume(struct device *dev)
+>
+> This marks them as __maybe_unused to shut up the warning.
 
-Surely just when SDHCI_QUIRK_NO_CARD_NO_RESET is used
+Most mmc drivers uses #ifdef CONFIG_PM instead of the __maybe_unused() option.
 
-> 
-> I'm up for other suggestions. This one most just seemed like the
-> best first stab of minimally addressing the warning without rocking
-> the boat otherwise.
-> 
-> [1] https://patchwork.kernel.org/patch/10374633/
+It's not a big deal, but consistency is always good. Would you mind changing?
+
+Br
+Uffe
+
+>
+> Fixes: 9a8e1e8cc2c0 ("mmc: sunxi: Add runtime_pm support")
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 > ---
->  drivers/mmc/core/slot-gpio.c | 15 +++++++++++----
->  1 file changed, 11 insertions(+), 4 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
-> index 31f7dbb15668..1ca8220690f2 100644
-> --- a/drivers/mmc/core/slot-gpio.c
-> +++ b/drivers/mmc/core/slot-gpio.c
-> @@ -76,15 +76,22 @@ EXPORT_SYMBOL(mmc_gpio_get_ro);
->  int mmc_gpio_get_cd(struct mmc_host *host)
->  {
->  	struct mmc_gpio *ctx = host->slot.handler_priv;
-> +	int cansleep;
->  
->  	if (!ctx || !ctx->cd_gpio)
->  		return -ENOSYS;
->  
-> -	if (ctx->override_cd_active_level)
-> -		return !gpiod_get_raw_value_cansleep(ctx->cd_gpio) ^
-> -			!!(host->caps2 & MMC_CAP2_CD_ACTIVE_HIGH);
-> +	cansleep = gpiod_cansleep(ctx->cd_gpio);
-> +	if (ctx->override_cd_active_level) {
-> +		int value = cansleep ?
-> +				gpiod_get_raw_value_cansleep(ctx->cd_gpio) :
-> +				gpiod_get_raw_value(ctx->cd_gpio);
-> +		return !value ^ !!(host->caps2 & MMC_CAP2_CD_ACTIVE_HIGH);
-> +	}
->  
-> -	return gpiod_get_value_cansleep(ctx->cd_gpio);
-> +	return cansleep ?
-> +		gpiod_get_value_cansleep(ctx->cd_gpio) :
-> +		gpiod_get_value(ctx->cd_gpio);
+>  drivers/mmc/host/sunxi-mmc.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+> index 97c6b79b7d6f..837888b96bd3 100644
+> --- a/drivers/mmc/host/sunxi-mmc.c
+> +++ b/drivers/mmc/host/sunxi-mmc.c
+> @@ -1432,7 +1432,7 @@ static int sunxi_mmc_remove(struct platform_device *pdev)
+>         return 0;
 >  }
->  EXPORT_SYMBOL(mmc_gpio_get_cd);
->  
-> 
+>
+> -static int sunxi_mmc_runtime_resume(struct device *dev)
+> +static int __maybe_unused sunxi_mmc_runtime_resume(struct device *dev)
+>  {
+>         struct mmc_host *mmc = dev_get_drvdata(dev);
+>         struct sunxi_mmc_host *host = mmc_priv(mmc);
+> @@ -1449,7 +1449,7 @@ static int sunxi_mmc_runtime_resume(struct device *dev)
+>         return 0;
+>  }
+>
+> -static int sunxi_mmc_runtime_suspend(struct device *dev)
+> +static int __maybe_unused sunxi_mmc_runtime_suspend(struct device *dev)
+>  {
+>         struct mmc_host *mmc = dev_get_drvdata(dev);
+>         struct sunxi_mmc_host *host = mmc_priv(mmc);
+> --
+> 2.9.0
+>
