@@ -1,87 +1,63 @@
-From: Prabu Thangamuthu <Prabu.T@synopsys.com>
-Subject: Re: [PATCH 1/1] mmc: sdhci-pci-dwc-mshc: synopsys dwc mshc support
-Date: Mon, 28 May 2018 13:03:21 +0000
-Message-ID: <705D14B1C7978B40A723277C067CEDE2010A9B65FC@IN01WEMBXB.internal.synopsys.com>
-References: <705D14B1C7978B40A723277C067CEDE2010A9B43CC@IN01WEMBXB.internal.synopsys.com>
- <CAHp75VcT+HEb67q0XbMvi9xQ4s0nyVKnoYRm5KN42z8h2FSu1g@mail.gmail.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH] mmc: sunxi: mark PM functions as __maybe_unused
+Date: Mon, 28 May 2018 17:15:13 +0200
+Message-ID: <CAK8P3a1z2AyUs536ujPm8dpYrktRoeFxcbNHQ_fgQK1idM5T+A@mail.gmail.com>
+References: <20180525210752.1794502-1-arnd@arndb.de> <CAPDyKFoyBZ=k5UQyTmgkPd+30Htymw99Xeh3C+bDPo+VGyjrNw@mail.gmail.com>
+ <CAK8P3a2AGu4Lec1pwi87gb4QYn9QTy7mG2i9kWtfAR=An+k-7g@mail.gmail.com> <CAHp75VffA5Q2VxgkQqT6M_iLwZtv46Gy5Fz4Fx7PA9CvRnX0Ag@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Language: en-US
+In-Reply-To: <CAHp75VffA5Q2VxgkQqT6M_iLwZtv46Gy5Fz4Fx7PA9CvRnX0Ag@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Andy Shevchenko <andy.shevchenko@gmail.com>
-Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Manjunath M Bettegowda <Manjunath.MB@synopsys.com>
+Cc: Jean Delvare <jdelvare@suse.com>, Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@bootlin.com>, Chen-Yu Tsai <wens@csie.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Andy,=0A=
-=0A=
-Thanks for pointing all. We will fix it.=0A=
-=0A=
-Regards,=0A=
-Prabu=0A=
-=0A=
-On 5/28/2018 5:49 PM, Andy Shevchenko wrote:=0A=
-> On Tue, May 22, 2018 at 9:42 AM, Prabu Thangamuthu <Prabu.T@synopsys.com>=
- wrote:=0A=
->> To enable Synopsys DWC MSHC controller on HPAS-DX platform connected usi=
-ng=0A=
->> PCIe interface. As Clock generation logic is implemented in MMCM module =
-of=0A=
->> HAPS-DX platform, we have separate functions to control the MMCM to=0A=
->> generate required clocks with respect to speed mode. Also we have platfo=
-rm=0A=
->> specific set_power function to support different VDD of eMMC devices.=0A=
->> + * Authors:=0A=
->> + *    Prabu Thangamuthu <prabu.t@synopsys.com>=0A=
->> + *    Manjunath M B <manjumb@synopsys.com>=0A=
->> + *=0A=
-> Redundant last line in above excerpt.=0A=
->=0A=
->> +#include <linux/pci.h>=0A=
->> +#include <linux/delay.h>=0A=
->> +#include <linux/module.h>=0A=
->> +#include <linux/moduleparam.h>=0A=
-> This one is effectively included by module.h.=0A=
->=0A=
->> +/* Default emmc vdd is set to 3.3V */=0A=
->> +static unsigned int emmc_vdd =3D SDHC_EMMC_VDD_330V;=0A=
->> +module_param(emmc_vdd, int, 0444);=0A=
-> This looks weird. Why do you need a module parameter?=0A=
->=0A=
->> +    u16 clk =3D 0;=0A=
->> +    u32 reg =3D 0;=0A=
->> +    u32 vendor_ptr =3D 0;=0A=
-> Why do above have assignments?=0A=
->=0A=
->> +MODULE_PARM_DESC(emmc_vdd, "VDD to configure eMMC device supply voltage=
-");=0A=
-> This better to be near to the parameter declaration. Though, as I said=0A=
-> above, it feels wrong to have it in the first place.=0A=
->=0A=
->=0A=
->> +/* Synopsys Vendor Specific Registers */=0A=
->> +#define SDHC_GPIO_OUT                          0x34=0A=
->> +#define SDHC_AT_CTRL_R                   0x40=0A=
->> +=0A=
->> +#define SDHC_SW_TUNE_EN                   0x00000010=0A=
->> +=0A=
->> +/* MMCM DRP */=0A=
->> +#define SDHC_MMCM_DIV_REG               0x1020=0A=
->> +#define DIV_REG_100_MHZ                   0x1145=0A=
->> +=0A=
->> +#define SDHC_MMCM_CLKFBOUT               0x1024=0A=
->> +#define CLKFBOUT_100_MHZ               0x0000=0A=
->> +=0A=
->> +#define SDHC_CCLK_MMCM_RST               0x00000001=0A=
-> Do you need these all in the header file? Why?=0A=
->=0A=
->=0A=
->> +#define PCI_DEVICE_ID_SYNOPSYS_DWC_MSHC 0xC202=0A=
-> Absent blank line.=0A=
-> Broken style of the value.=0A=
->=0A=
-> Who knows what else wrong with this patch? Please, pay attention to=0A=
-> the details and check twice before submit.=0A=
->=0A=
-=0A=
+On Mon, May 28, 2018 at 2:12 PM, Andy Shevchenko
+<andy.shevchenko@gmail.com> wrote:
+> +Cc: Jean
+>
+> On Mon, May 28, 2018 at 2:13 PM, Arnd Bergmann <arnd@arndb.de> wrote:
+>> On Mon, May 28, 2018 at 1:04 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>> On 25 May 2018 at 23:07, Arnd Bergmann <arnd@arndb.de> wrote:
+>>>> The newly added runtime-pm functions cause a harmless warning
+>>>> when CONFIG_PM is disabled:
+>>>>
+>>>> drivers/mmc/host/sunxi-mmc.c:1452:12: error: 'sunxi_mmc_runtime_suspend' defined but not used [-Werror=unused-function]
+>>>>  static int sunxi_mmc_runtime_suspend(struct device *dev)
+>>>>             ^~~~~~~~~~~~~~~~~~~~~~~~~
+>>>> drivers/mmc/host/sunxi-mmc.c:1435:12: error: 'sunxi_mmc_runtime_resume' defined but not used [-Werror=unused-function]
+>>>>  static int sunxi_mmc_runtime_resume(struct device *dev)
+>>>>
+>>>> This marks them as __maybe_unused to shut up the warning.
+>>>
+>>> Most mmc drivers uses #ifdef CONFIG_PM instead of the __maybe_unused() option.
+>>>
+>>> It's not a big deal, but consistency is always good. Would you mind changing?
+>>
+>> I'd prefer not to. Most uses of #ifdef CONFIG_PM that get introduced are wrong,
+>> and cause additional randconfig warnings that I end up having to fix,
+>> so I always
+>> do it with __maybe_unused.
+>
+> Some of the maintainers have strong objection against such changes.
+> http://lkml.iu.edu/hypermail/linux/kernel/1805.1/06100.html
+>
+> It seems we might have a split in the opinions, which is not good in
+> this case (consistency for PM callbacks overall will be broken).
+
+We actually talked about this at the kernel summit last year, and the conclusion
+was that we should replace the SET_RUNTIME_PM_OPS(),
+SIMPLE_DEV_PM_OPS(), SET_SYSTEM_SLEEP_PM_OPS()
+etc macros with new ones that don't require the ugly #ifdef and just silently
+drop the unused functions.
+
+Unfortunately we can't extend the existing macros to work that way (it
+breaks for drivers that have an #ifdef today), and nobody could come up
+with a new name that is at least as readable as the current one.
+
+Note that incorrect #ifdef usage here is the most common source of
+newly introduced build warnings and errors in the kernel, everyone gets
+those wrong since they are just very confusing.
+
+       Arnd
