@@ -1,7 +1,7 @@
 From: Prabu Thangamuthu <Prabu.T@synopsys.com>
 Subject: Re: [PATCH 1/1] mmc: sdhci-pci-dwc-mshc: synopsys dwc mshc support
-Date: Mon, 28 May 2018 12:10:05 +0000
-Message-ID: <705D14B1C7978B40A723277C067CEDE2010A9B658F@IN01WEMBXB.internal.synopsys.com>
+Date: Mon, 28 May 2018 12:10:12 +0000
+Message-ID: <705D14B1C7978B40A723277C067CEDE2010A9B659F@IN01WEMBXB.internal.synopsys.com>
 References: <705D14B1C7978B40A723277C067CEDE2010A9B43CC@IN01WEMBXB.internal.synopsys.com>
  <abe62da4-3ef9-5660-94e1-a3f919df06cd@intel.com>
  <705D14B1C7978B40A723277C067CEDE2010A9B5491@IN01WEMBXB.internal.synopsys.com>
