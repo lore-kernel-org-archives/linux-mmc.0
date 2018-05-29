@@ -1,49 +1,53 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: mxmmc: include linux/highmem.h
-Date: Tue, 29 May 2018 12:35:52 +0200
-Message-ID: <CAPDyKFo2b9biWkmJ1tM4QU1RbGvF6SOOpTxpYFuUchkhZKXnug@mail.gmail.com>
-References: <20180529103057.1378025-1-arnd@arndb.de>
+From: Qing Xia <xiaqing17@hisilicon.com>
+Subject: [PATCH] mmc: dw_mmc: fix card threshold control configuration
+Date: Tue, 29 May 2018 18:38:55 +0800
+Message-ID: <1527590335-171787-1-git-send-email-xiaqing17@hisilicon.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180529103057.1378025-1-arnd@arndb.de>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Christoph Hellwig <hch@lst.de>, Linus Walleij <linus.walleij@linaro.org>, Russell King <linux@armlinux.org.uk>, Shawn Lin <shawn.lin@rock-chips.com>, Allen <allen.lkml@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: jh80.chung@samsung.com, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, x00270170 <xiaqing17@hisilicon.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 29 May 2018 at 12:30, Arnd Bergmann <arnd@arndb.de> wrote:
-> The highmem conversion caused a build error in some configurations:
->
-> drivers/mmc/host/mxcmmc.c: In function 'mxcmci_transfer_data':
-> drivers/mmc/host/mxcmmc.c:622:10: error: implicit declaration of function 'kmap_atomic'; did you mean 'in_atomic'? [-Werror=implicit-function-declaration]
->
-> This includes the correct header file.
->
-> Fixes: b189e7589f6d ("mmc: mxcmmc: handle highmem pages")
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+From: x00270170 <xiaqing17@hisilicon.com>
 
-Thanks, applied for next!
+Card write threshold control is supposed to be set since controller
+version 2.80a for data write in HS400 mode and data read in
+HS200/HS400/SDR104 mode. However the current code returns without
+configuring it in the case of data writing in HS400 mode.
+Meanwhile the patch fixes that the current code goes to
+'disable' when doing data reading in HS400 mode.
 
-Kind regards
-Uffe
+Signed-off-by: Qing Xia <xiaqing17@hisilicon.com>
+---
+ drivers/mmc/host/dw_mmc.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
 
-> ---
->  drivers/mmc/host/mxcmmc.c | 1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-> index 150fbdba777d..d62bf7efce13 100644
-> --- a/drivers/mmc/host/mxcmmc.c
-> +++ b/drivers/mmc/host/mxcmmc.c
-> @@ -21,6 +21,7 @@
->  #include <linux/init.h>
->  #include <linux/ioport.h>
->  #include <linux/platform_device.h>
-> +#include <linux/highmem.h>
->  #include <linux/interrupt.h>
->  #include <linux/irq.h>
->  #include <linux/blkdev.h>
-> --
-> 2.9.0
->
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 29a1afa..3ee8f57 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1065,8 +1065,8 @@ static void dw_mci_ctrl_thld(struct dw_mci *host, struct mmc_data *data)
+ 	 * It's used when HS400 mode is enabled.
+ 	 */
+ 	if (data->flags & MMC_DATA_WRITE &&
+-		!(host->timing != MMC_TIMING_MMC_HS400))
+-		return;
++		host->timing != MMC_TIMING_MMC_HS400)
++		goto disable;
+ 
+ 	if (data->flags & MMC_DATA_WRITE)
+ 		enable = SDMMC_CARD_WR_THR_EN;
+@@ -1074,7 +1074,8 @@ static void dw_mci_ctrl_thld(struct dw_mci *host, struct mmc_data *data)
+ 		enable = SDMMC_CARD_RD_THR_EN;
+ 
+ 	if (host->timing != MMC_TIMING_MMC_HS200 &&
+-	    host->timing != MMC_TIMING_UHS_SDR104)
++	    host->timing != MMC_TIMING_UHS_SDR104 &&
++	    host->timing != MMC_TIMING_MMC_HS400)
+ 		goto disable;
+ 
+ 	blksz_depth = blksz / (1 << host->data_shift);
+-- 
+2.8.1
