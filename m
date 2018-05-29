@@ -1,7 +1,7 @@
 From: Vijay Viswanath <vviswana@codeaurora.org>
-Subject: [PATCH V2 2/4] mmc: sdhci-msm: Add msm version specific ops and data structures
-Date: Tue, 29 May 2018 15:22:39 +0530
-Message-ID: <1527587561-27448-3-git-send-email-vviswana@codeaurora.org>
+Subject: [PATCH V2 3/4] Documentation: sdhci-msm: Add new compatible string for SDCC v5
+Date: Tue, 29 May 2018 15:22:40 +0530
+Message-ID: <1527587561-27448-4-git-send-email-vviswana@codeaurora.org>
 References: <1527587561-27448-1-git-send-email-vviswana@codeaurora.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1527587561-27448-1-git-send-email-vviswana@codeaurora.org>
@@ -10,125 +10,35 @@ To: adrian.hunter@intel.com, ulf.hansson@linaro.org, robh+dt@kernel.org, mark.ru
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, devicetree@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, jeremymc@redhat.com, vviswana@codeaurora.org, bjorn.andersson@linaro.org, riteshh@codeaurora.org, vbadigan@codeaurora.org, dianders@google.com, sayalil@codeaurora.org
 List-Id: linux-mmc@vger.kernel.org
 
-In addition to offsets of certain registers changing, the registers in
-core_mem have been shifted to HC mem as well. To access these
-registers, define msm version specific functions. These functions can
-be loaded into the function pointers at the time of probe based on
-the msm version detected.
+From: Sayali Lokhande <sayalil@codeaurora.org>
 
-Also defind new data structure to hold version specific Ops and
-register addresses.
+For SDCC version 5.0.0 and higher, new compatible string
+"qcom,sdhci-msm-v5" is added.
 
 Signed-off-by: Sayali Lokhande <sayalil@codeaurora.org>
 Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
 ---
- drivers/mmc/host/sdhci-msm.c | 77 ++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 77 insertions(+)
+ Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 4050c99..2a66aa0 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -226,6 +226,24 @@ struct sdhci_msm_offset {
- 	.core_ddr_config_2 = 0x1bc,
- };
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+index bfdcdc4..502b3b8 100644
+--- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
++++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+@@ -4,7 +4,12 @@ This file documents differences between the core properties in mmc.txt
+ and the properties used by the sdhci-msm driver.
  
-+struct sdhci_msm_variant_ops {
-+	u8 (*msm_readb_relaxed)(struct sdhci_host *host, u32 offset);
-+	u32 (*msm_readl_relaxed)(struct sdhci_host *host, u32 offset);
-+	void (*msm_writeb_relaxed)(u8 val, struct sdhci_host *host, u32 offset);
-+	void (*msm_writel_relaxed)(u32 val, struct sdhci_host *host,
-+			u32 offset);
-+};
-+
-+/*
-+ * From V5, register spaces have changed. Wrap this info in a structure
-+ * and choose the data_structure based on version info mentioned in DT.
-+ */
-+struct sdhci_msm_variant_info {
-+	bool mci_removed;
-+	const struct sdhci_msm_variant_ops *var_ops;
-+	const struct sdhci_msm_offset *offset;
-+};
-+
- struct sdhci_msm_host {
- 	struct platform_device *pdev;
- 	void __iomem *core_mem;	/* MSM SDCC mapped address */
-@@ -245,8 +263,45 @@ struct sdhci_msm_host {
- 	wait_queue_head_t pwr_irq_wait;
- 	bool pwr_irq_flag;
- 	u32 caps_0;
-+	bool mci_removed;
-+	const struct sdhci_msm_variant_ops *var_ops;
-+	const struct sdhci_msm_offset *offset;
- };
- 
-+/*
-+ * APIs to read/write to vendor specific registers which were there in the
-+ * core_mem region before MCI was removed.
-+ */
-+static u32 sdhci_msm_mci_variant_readl_relaxed(struct sdhci_host *host,
-+		u32 offset)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+
-+	return readl_relaxed(msm_host->core_mem + offset);
-+}
-+
-+static u32 sdhci_msm_v5_variant_readl_relaxed(struct sdhci_host *host,
-+		u32 offset)
-+{
-+	return readl_relaxed(host->ioaddr + offset);
-+}
-+
-+static void sdhci_msm_mci_variant_writel_relaxed(u32 val,
-+		struct sdhci_host *host, u32 offset)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+
-+	writel_relaxed(val, msm_host->core_mem + offset);
-+}
-+
-+static void sdhci_msm_v5_variant_writel_relaxed(u32 val,
-+		struct sdhci_host *host, u32 offset)
-+{
-+	writel_relaxed(val, host->ioaddr + offset);
-+}
-+
- static unsigned int msm_get_clock_rate_for_bus_mode(struct sdhci_host *host,
- 						    unsigned int clock)
- {
-@@ -1481,6 +1536,28 @@ static void sdhci_msm_set_regulator_caps(struct sdhci_msm_host *msm_host)
- 	pr_debug("%s: supported caps: 0x%08x\n", mmc_hostname(mmc), caps);
- }
- 
-+static const struct sdhci_msm_variant_ops mci_var_ops = {
-+	.msm_readl_relaxed = sdhci_msm_mci_variant_readl_relaxed,
-+	.msm_writel_relaxed = sdhci_msm_mci_variant_writel_relaxed,
-+};
-+
-+static const struct sdhci_msm_variant_ops v5_var_ops = {
-+	.msm_readl_relaxed = sdhci_msm_v5_variant_readl_relaxed,
-+	.msm_writel_relaxed = sdhci_msm_v5_variant_writel_relaxed,
-+};
-+
-+static const struct sdhci_msm_variant_info sdhci_msm_mci_var = {
-+	.mci_removed = 0,
-+	.var_ops = &mci_var_ops,
-+	.offset = &sdhci_msm_mci_offset,
-+};
-+
-+static const struct sdhci_msm_variant_info sdhci_msm_v5_var = {
-+	.mci_removed = 1,
-+	.var_ops = &v5_var_ops,
-+	.offset = &sdhci_msm_v5_offset,
-+};
-+
- static const struct of_device_id sdhci_msm_dt_match[] = {
- 	{ .compatible = "qcom,sdhci-msm-v4" },
- 	{},
+ Required properties:
+-- compatible: Should contain "qcom,sdhci-msm-v4".
++- compatible: Should contain:
++		"qcom,sdhci-msm-v4" for sdcc versions less than 5.0
++		"qcom,sdhci-msm-v5" for sdcc versions >= 5.0
++		For SDCC version 5.0.0, MCI registers are removed from SDCC
++		interface and some registers are moved to HC. New compatible
++		string is added to support this change - "qcom,sdhci-msm-v5".
+ - reg: Base address and length of the register in the following order:
+ 	- Host controller register map (required)
+ 	- SD Core register map (required)
 -- 
  Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc. 
 Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a Linux Foundation Collaborative Project.
