@@ -1,30 +1,52 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH V2 3/4] Documentation: sdhci-msm: Add new compatible
- string for SDCC v5
-Date: Wed, 30 May 2018 22:52:16 -0500
-Message-ID: <20180531035216.GA12320@rob-hp-laptop>
-References: <1527587561-27448-1-git-send-email-vviswana@codeaurora.org>
- <1527587561-27448-4-git-send-email-vviswana@codeaurora.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: sdhci-msm: Remove NO_CARD_NO_RESET quirk
+Date: Thu, 31 May 2018 08:55:48 +0300
+Message-ID: <c61b82f1-8095-91dd-b4ea-5e38b1f257fe@intel.com>
+References: <20180530144335.7888-1-georgi.djakov@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1527587561-27448-4-git-send-email-vviswana@codeaurora.org>
+In-Reply-To: <20180530144335.7888-1-georgi.djakov@linaro.org>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Vijay Viswanath <vviswana@codeaurora.org>
-Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, devicetree@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, jeremymc@redhat.com, bjorn.andersson@linaro.org, riteshh@codeaurora.org, vbadigan@codeaurora.org, dianders@google.com, sayalil@codeaurora.org
+To: Georgi Djakov <georgi.djakov@linaro.org>, ulf.hansson@linaro.org
+Cc: vviswana@codeaurora.org, riteshh@codeaurora.org, subhashj@codeaurora.org, stummala@codeaurora.org, asutoshd@codeaurora.org, bjorn.andersson@linaro.org, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, May 29, 2018 at 03:22:40PM +0530, Vijay Viswanath wrote:
-> From: Sayali Lokhande <sayalil@codeaurora.org>
+On 30/05/18 17:43, Georgi Djakov wrote:
+> Now we have a proper implementation for the power irq handling and this
+> quirk is not needed anymore. In fact, it is causing card detection delays
+> on apq8096 platforms and the following error is displayed:
+> sdhci_msm 74a4900.sdhci: mmc0: pwr_irq for req: (4) timed out
 > 
-> For SDCC version 5.0.0 and higher, new compatible string
-> "qcom,sdhci-msm-v5" is added.
+> The quirk is forcing the controller to retain 1.8V signalling on the slot
+> even when a new card is inserted, which is not correct. The proper behavior
+> would be to reset the controller in order to start with 3.3V signaling.
 > 
-> Signed-off-by: Sayali Lokhande <sayalil@codeaurora.org>
-> Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
-> ---
->  Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 7 ++++++-
->  1 file changed, 6 insertions(+), 1 deletion(-)
+> Fixes: c0309b3803fe ("mmc: sdhci-msm: Add sdhci msm register write APIs which wait for pwr irq")
+> Suggested-by: Vijay Viswanath <vviswana@codeaurora.org>
+> Signed-off-by: Georgi Djakov <georgi.djakov@linaro.org>
 
-Acked-by: Rob Herring <robh@kernel.org>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
+> ---
+> This can go for v4.18, as it's not a critical fix.
+> Tested on db410c and db820c.
+> ---
+>  drivers/mmc/host/sdhci-msm.c | 1 -
+>  1 file changed, 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index c283291db705..791779173332 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -1333,7 +1333,6 @@ static const struct sdhci_ops sdhci_msm_ops = {
+>  
+>  static const struct sdhci_pltfm_data sdhci_msm_pdata = {
+>  	.quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
+> -		  SDHCI_QUIRK_NO_CARD_NO_RESET |
+>  		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
+>  		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+>  	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+> 
