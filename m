@@ -1,78 +1,77 @@
-From: Helmut Grohne <h.grohne@intenta.de>
-Subject: [RFC PATCH] sdhci-of-arasan: card initialization failure -84
-Date: Mon, 4 Jun 2018 08:42:13 +0200
-Message-ID: <20180604064211.q2thyftgpffuaer2@laureti-dev>
+From: Aapo Vienamo <avienamo@nvidia.com>
+Subject: [PATCH] mmc: tegra: Use sdhci_pltfm_clk_get_max_clock
+Date: Mon, 4 Jun 2018 18:35:40 +0300
+Message-ID: <1528126540-27004-1-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michal.simek@xilinx.com>, =?iso-8859-1?Q?S=F6ren?= Brinkmann <soren.brinkmann@xilinx.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, Aapo Vienamo <avienamo@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Work around repeated:
+The sdhci get_max_clock callback is set to sdhci_pltfm_clk_get_max_clock
+and tegra_sdhci_get_max_clock is removed. It appears that the
+shdci-tegra specific callback was originally introduced due to the
+requirement that the host clock has to be twice the bus clock on DDR50
+mode. As far as I can tell the only effect the removal has on DDR50 mode
+is in cases where the parent clock is unable to supply the requested
+clock rate, causing the DDR50 mode to run at a lower frequency.
+Currently the DDR50 mode isn't enabled on any of the SoCs and would also
+require configuring the SDHCI clock divider register to function
+properly.
 
-    mmc0: error -84 whilst initialising SD card
+The problem with tegra_sdhci_get_max_clock is that it divides the clock
+rate by two and thus artificially limits the maximum frequency of faster
+signaling modes which don't have the host-bus frequency ratio requirement
+of DDR50 such as SDR104 and HS200. Furthermore, the call to
+clk_round_rate() may return an error which isn't handled by
+tegra_sdhci_get_max_clock.
+
+Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
 ---
- drivers/mmc/host/sdhci.c | 1 +
- 1 file changed, 1 insertion(+)
+ drivers/mmc/host/sdhci-tegra.c | 15 ++-------------
+ 1 file changed, 2 insertions(+), 13 deletions(-)
 
-I'm seeing the above error -84 with a series of Kingston cards of 4GB capacity
-when used with an arasan host controller. Using the cards with other hosts or
-using other cards with the host is not problematic. The host controller has the
-following device tree:
-
-	ps7-sdio@e0100000 {
-		compatible = "arasan,sdhci-8.9a";
-		reg = <0xe0100000 0x1000>;
-		clock-names = "clk_xin", "clk_ahb";
-		clock-frequency = <50000000>;
-		clocks = <&clkc 21>, <&clkc 32>;
-		interrupt-parent = <&ps7_scugic_0>;
-		interrupts = <0 24 4>;
-	};
-
-When enabling sufficient debugging (and thus slowing the kernel down), the
-problem goes away. Without debug features, the insertion of this delay suffices
-for my particular instance. Inserting the same delay before the
-SDHCI_CLOCK_CARD_EN write also makes the error go away.
-
-While instrumenting the code I found that the loop waiting for the
-SDHCI_CLOCK_INT_STABLE would always terminate immediately (regardless of the
-card being used). Only when the card is removed, the loop would spin once. This
-hints that potentially the stable checking is broken for this host controller.
-
-During my testing I checked 7 Kingston cards, 2 Transcend Cards, 1 Apacer card,
-3 arasn hosts, 3 non-arasan hosts and had consistent reports for a similar
-number of devices from others.
-
-If my hypothesis is reasonable, I can turn this patch into a new quirk that
-replaces the stable polling with msleep(20), which is the poll timeout. Is
-there anything else I should investigate before doing so?
-
-Helmut
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 90cc1977b792..5d2809aeb4eb 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1430,6 +1430,7 @@ void sdhci_enable_clk(struct sdhci_host *host, u16 clk)
- 
- 	clk |= SDHCI_CLOCK_CARD_EN;
- 	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-+	udelay(80);
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index 970d38f6..c8745b5 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -234,17 +234,6 @@ static void tegra_sdhci_set_uhs_signaling(struct sdhci_host *host,
+ 	sdhci_set_uhs_signaling(host, timing);
  }
- EXPORT_SYMBOL_GPL(sdhci_enable_clk);
  
+-static unsigned int tegra_sdhci_get_max_clock(struct sdhci_host *host)
+-{
+-	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-
+-	/*
+-	 * DDR modes require the host to run at double the card frequency, so
+-	 * the maximum rate we can support is half of the module input clock.
+-	 */
+-	return clk_round_rate(pltfm_host->clk, UINT_MAX) / 2;
+-}
+-
+ static void tegra_sdhci_set_tap(struct sdhci_host *host, unsigned int tap)
+ {
+ 	u32 reg;
+@@ -309,7 +298,7 @@ static const struct sdhci_ops tegra_sdhci_ops = {
+ 	.platform_execute_tuning = tegra_sdhci_execute_tuning,
+ 	.set_uhs_signaling = tegra_sdhci_set_uhs_signaling,
+ 	.voltage_switch = tegra_sdhci_voltage_switch,
+-	.get_max_clock = tegra_sdhci_get_max_clock,
++	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+ };
+ 
+ static const struct sdhci_pltfm_data sdhci_tegra20_pdata = {
+@@ -357,7 +346,7 @@ static const struct sdhci_ops tegra114_sdhci_ops = {
+ 	.platform_execute_tuning = tegra_sdhci_execute_tuning,
+ 	.set_uhs_signaling = tegra_sdhci_set_uhs_signaling,
+ 	.voltage_switch = tegra_sdhci_voltage_switch,
+-	.get_max_clock = tegra_sdhci_get_max_clock,
++	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+ };
+ 
+ static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
 -- 
-2.11.0
+2.7.4
