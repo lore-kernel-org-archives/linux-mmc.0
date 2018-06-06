@@ -1,89 +1,138 @@
-From: Aapo Vienamo <avienamo@nvidia.com>
-Subject: Re: [PATCH] mmc: tegra: Use sdhci_pltfm_clk_get_max_clock
-Date: Tue, 5 Jun 2018 14:58:55 +0300
-Message-ID: <20180605145855.3004dae2@dhcp-10-21-25-168>
-References: <1528126540-27004-1-git-send-email-avienamo@nvidia.com>
-        <20180605092801.GC20649@ulmo>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V2 1/4] mmc: sdhci-msm: Define new Register address map
+Date: Wed, 6 Jun 2018 09:30:20 +0300
+Message-ID: <2adfe55e-1c75-046b-594c-aa80b732c68d@intel.com>
+References: <1527587561-27448-1-git-send-email-vviswana@codeaurora.org>
+ <1527587561-27448-2-git-send-email-vviswana@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180605092801.GC20649@ulmo>
+In-Reply-To: <1527587561-27448-2-git-send-email-vviswana@codeaurora.org>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Thierry Reding <thierry.reding@gmail.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Jonathan Hunter <jonathanh@nvidia.com>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Vijay Viswanath <vviswana@codeaurora.org>, ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, devicetree@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, jeremymc@redhat.com, bjorn.andersson@linaro.org, riteshh@codeaurora.org, vbadigan@codeaurora.org, dianders@google.com, sayalil@codeaurora.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 5 Jun 2018 11:28:01 +0200
-Thierry Reding <thierry.reding@gmail.com> wrote:
+On 29/05/18 12:52, Vijay Viswanath wrote:
+> From: Sayali Lokhande <sayalil@codeaurora.org>
+> 
+> For SDCC version 5.0.0, MCI registers are removed from SDCC
+> interface and some registers are moved to HC.
+> Define a new data structure where we can statically define
+> the address offsets for the registers in different SDCC versions.
+> 
+> Signed-off-by: Sayali Lokhande <sayalil@codeaurora.org>
+> Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
 
-> On Mon, Jun 04, 2018 at 06:35:40PM +0300, Aapo Vienamo wrote:
-> > The sdhci get_max_clock callback is set to sdhci_pltfm_clk_get_max_clock
-> > and tegra_sdhci_get_max_clock is removed. It appears that the
-> > shdci-tegra specific callback was originally introduced due to the
-> > requirement that the host clock has to be twice the bus clock on DDR50
-> > mode. As far as I can tell the only effect the removal has on DDR50 mode
-> > is in cases where the parent clock is unable to supply the requested
-> > clock rate, causing the DDR50 mode to run at a lower frequency.
-> > Currently the DDR50 mode isn't enabled on any of the SoCs and would also
-> > require configuring the SDHCI clock divider register to function
-> > properly.
-> > 
-> > The problem with tegra_sdhci_get_max_clock is that it divides the clock
-> > rate by two and thus artificially limits the maximum frequency of faster
-> > signaling modes which don't have the host-bus frequency ratio requirement
-> > of DDR50 such as SDR104 and HS200. Furthermore, the call to
-> > clk_round_rate() may return an error which isn't handled by
-> > tegra_sdhci_get_max_clock.
-> > 
-> > Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
-> > ---
-> >  drivers/mmc/host/sdhci-tegra.c | 15 ++-------------
-> >  1 file changed, 2 insertions(+), 13 deletions(-)
-> > 
-> > diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> > index 970d38f6..c8745b5 100644
-> > --- a/drivers/mmc/host/sdhci-tegra.c
-> > +++ b/drivers/mmc/host/sdhci-tegra.c
-> > @@ -234,17 +234,6 @@ static void tegra_sdhci_set_uhs_signaling(struct sdhci_host *host,
-> >  	sdhci_set_uhs_signaling(host, timing);
-> >  }
-> >  
-> > -static unsigned int tegra_sdhci_get_max_clock(struct sdhci_host *host)
-> > -{
-> > -	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > -
-> > -	/*
-> > -	 * DDR modes require the host to run at double the card frequency, so
-> > -	 * the maximum rate we can support is half of the module input clock.
-> > -	 */
-> > -	return clk_round_rate(pltfm_host->clk, UINT_MAX) / 2;
-> > -}  
-> 
-> sdhci_pltfm_clk_get_max_clock() returns the current frequency of the
-> clock, which may not be an accurate maximum.
-> 
-> Also, even if we don't support DDR modes now, we may want to enable them
-> in the future, at which point we'll need to move to something similar to
-> the above again, albeit maybe with some of the issues that you mentioned
-> fixed.
-> 
-> I wonder if we have access to the target mode in this function, because
-> it seems to me like we'd need to take that into account when determining
-> the maximum clock rate. Or perhaps the double-rate aspect is already
-> dealt with in other parts of the MMC subsystem, so the value we should
-> return here may not even need to take the mode into account.
+It would be prettier to line up the '=' and use BIT() not << but nevertheless:
 
-I don't think that's possible. The callback is only called during probe
-from sdhci_setup_host() via sdhci_add_host(). Handling DDR50 properly
-might require adding a new SDHCI quirk bit.
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-> All of the above said, it is true that we don't enable DDR modes as of
-> now, and this patch seems like it shouldn't break anything either, so:
+
+> ---
+>  drivers/mmc/host/sdhci-msm.c | 89 ++++++++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 89 insertions(+)
 > 
-> Acked-by: Thierry Reding <treding@nvidia.com>
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index bb11916..4050c99 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -137,6 +137,95 @@
+>  /* Timeout value to avoid infinite waiting for pwr_irq */
+>  #define MSM_PWR_IRQ_TIMEOUT_MS 5000
+>  
+> +struct sdhci_msm_offset {
+> +	u32 core_hc_mode;
+> +	u32 core_mci_data_cnt;
+> +	u32 core_mci_status;
+> +	u32 core_mci_fifo_cnt;
+> +	u32 core_mci_version;
+> +	u32 core_generics;
+> +	u32 core_testbus_config;
+> +	u32 core_testbus_sel2_bit;
+> +	u32 core_testbus_ena;
+> +	u32 core_testbus_sel2;
+> +	u32 core_pwrctl_status;
+> +	u32 core_pwrctl_mask;
+> +	u32 core_pwrctl_clear;
+> +	u32 core_pwrctl_ctl;
+> +	u32 core_sdcc_debug_reg;
+> +	u32 core_dll_config;
+> +	u32 core_dll_status;
+> +	u32 core_vendor_spec;
+> +	u32 core_vendor_spec_adma_err_addr0;
+> +	u32 core_vendor_spec_adma_err_addr1;
+> +	u32 core_vendor_spec_func2;
+> +	u32 core_vendor_spec_capabilities0;
+> +	u32 core_ddr_200_cfg;
+> +	u32 core_vendor_spec3;
+> +	u32 core_dll_config_2;
+> +	u32 core_ddr_config;
+> +	u32 core_ddr_config_2;
+> +};
+> +
+> +static const struct sdhci_msm_offset sdhci_msm_v5_offset = {
+> +	.core_mci_data_cnt = 0x35c,
+> +	.core_mci_status = 0x324,
+> +	.core_mci_fifo_cnt = 0x308,
+> +	.core_mci_version = 0x318,
+> +	.core_generics = 0x320,
+> +	.core_testbus_config = 0x32c,
+> +	.core_testbus_sel2_bit = 3,
+> +	.core_testbus_ena = (1 << 31),
+> +	.core_testbus_sel2 = (1 << 3),
+> +	.core_pwrctl_status = 0x240,
+> +	.core_pwrctl_mask = 0x244,
+> +	.core_pwrctl_clear = 0x248,
+> +	.core_pwrctl_ctl = 0x24c,
+> +	.core_sdcc_debug_reg = 0x358,
+> +	.core_dll_config = 0x200,
+> +	.core_dll_status = 0x208,
+> +	.core_vendor_spec = 0x20c,
+> +	.core_vendor_spec_adma_err_addr0 = 0x214,
+> +	.core_vendor_spec_adma_err_addr1 = 0x218,
+> +	.core_vendor_spec_func2 = 0x210,
+> +	.core_vendor_spec_capabilities0 = 0x21c,
+> +	.core_ddr_200_cfg = 0x224,
+> +	.core_vendor_spec3 = 0x250,
+> +	.core_dll_config_2 = 0x254,
+> +	.core_ddr_config = 0x258,
+> +	.core_ddr_config_2 = 0x25c,
+> +};
+> +
+> +static const struct sdhci_msm_offset sdhci_msm_mci_offset = {
+> +	.core_hc_mode = 0x78,
+> +	.core_mci_data_cnt = 0x30,
+> +	.core_mci_status = 0x34,
+> +	.core_mci_fifo_cnt = 0x44,
+> +	.core_mci_version = 0x050,
+> +	.core_generics = 0x70,
+> +	.core_testbus_config = 0x0cc,
+> +	.core_testbus_sel2_bit = 4,
+> +	.core_testbus_ena = (1 << 3),
+> +	.core_testbus_sel2 = (1 << 4),
+> +	.core_pwrctl_status = 0xdc,
+> +	.core_pwrctl_mask = 0xe0,
+> +	.core_pwrctl_clear = 0xe4,
+> +	.core_pwrctl_ctl = 0xe8,
+> +	.core_sdcc_debug_reg = 0x124,
+> +	.core_dll_config = 0x100,
+> +	.core_dll_status = 0x108,
+> +	.core_vendor_spec = 0x10c,
+> +	.core_vendor_spec_adma_err_addr0 = 0x114,
+> +	.core_vendor_spec_adma_err_addr1 = 0x118,
+> +	.core_vendor_spec_func2 = 0x110,
+> +	.core_vendor_spec_capabilities0 = 0x11c,
+> +	.core_ddr_200_cfg = 0x184,
+> +	.core_vendor_spec3 = 0x1b0,
+> +	.core_dll_config_2 = 0x1b4,
+> +	.core_ddr_config = 0x1b8,
+> +	.core_ddr_config_2 = 0x1bc,
+> +};
+> +
+>  struct sdhci_msm_host {
+>  	struct platform_device *pdev;
+>  	void __iomem *core_mem;	/* MSM SDCC mapped address */
 > 
-> I also gave this a brief run on Jetson TK1 and things seem to work fine,
-> so:
-> 
-> Tested-by: Thierry Reding <treding@nvidia.com>
