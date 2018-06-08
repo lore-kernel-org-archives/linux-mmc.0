@@ -1,72 +1,60 @@
-From: Chunyan Zhang <zhang.chunyan@linaro.org>
-Subject: [PATCH 1/6] mmc: sdhci: add sd host v4 mode
-Date: Fri,  8 Jun 2018 16:18:08 +0800
-Message-ID: <1528445893-14530-2-git-send-email-zhang.chunyan@linaro.org>
-References: <1528445893-14530-1-git-send-email-zhang.chunyan@linaro.org>
+From: Feng Tang <feng.tang@intel.com>
+Subject: [PATCH] mmc: Move the mmc driver init earlier
+Date: Fri,  8 Jun 2018 17:51:54 +0800
+Message-ID: <20180608095154.22413-1-feng.tang@intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1528445893-14530-1-git-send-email-zhang.chunyan@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@spreadtrum.com>, zhang.lyra@gmail.com
+To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Feng Tang <feng.tang@intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-For SD host controller version 4.00 or later ones, there're two
-modes of implementation - Version 3.00 compatible mode or
-Version 4 mode.  This patch introduces a flag to record this.
+When doing some boot time optimization for an eMMC rootfs NUCs,
+we found the rootfs may spend around 100 microseconds waiting
+for eMMC card to be initialized, then the rootfs could be
+mounted.
+	[    1.216561] Waiting for root device /dev/mmcblk1p1...
+	[    1.289262] mmc1: new HS400 MMC card at address 0001
+	[    1.289667] mmcblk1: mmc1:0001 R1J56L 14.7 GiB
+	[    1.289772] mmcblk1boot0: mmc1:0001 R1J56L partition 1 8.00 MiB
+	[    1.289869] mmcblk1boot1: mmc1:0001 R1J56L partition 2 8.00 MiB
+	[    1.289967] mmcblk1rpmb: mmc1:0001 R1J56L partition 3 4.00 MiB
+	[    1.292798]  mmcblk1: p1 p2 p3
+	[    1.300576] EXT4-fs (mmcblk1p1): couldn't mount as ext3 due to feature incompatibilities
+	[    1.300912] EXT4-fs (mmcblk1p1): couldn't mount as ext2 due to feature incompatibilities
 
-Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
+And this is a common problem for smartphones, tablets, embedded
+devices and automotive products. This patch will make the eMMC/SD
+card  start initializing earlier, by changing its order in drivers/Makefile.
+
+On our platform, the waiting for eMMC card is almost eliminated with the patch,
+which is critical to boot time.
+
+Signed-off-by: Feng Tang <feng.tang@intel.com>
 ---
- drivers/mmc/host/sdhci.c | 6 ++++++
- drivers/mmc/host/sdhci.h | 6 ++++++
- 2 files changed, 12 insertions(+)
+ drivers/Makefile | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 2ededa7f..cf5695f 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -3302,6 +3302,12 @@ void __sdhci_read_caps(struct sdhci_host *host, u16 *ver, u32 *caps, u32 *caps1)
- 	v = ver ? *ver : sdhci_readw(host, SDHCI_HOST_VERSION);
- 	host->version = (v & SDHCI_SPEC_VER_MASK) >> SDHCI_SPEC_VER_SHIFT;
+diff --git a/drivers/Makefile b/drivers/Makefile
+index 24cd47014657..c473afd3c688 100644
+--- a/drivers/Makefile
++++ b/drivers/Makefile
+@@ -50,6 +50,9 @@ obj-$(CONFIG_REGULATOR)		+= regulator/
+ # reset controllers early, since gpu drivers might rely on them to initialize
+ obj-$(CONFIG_RESET_CONTROLLER)	+= reset/
  
-+	if (host->version >= SDHCI_SPEC_400) {
-+		if (sdhci_readw(host, SDHCI_HOST_CONTROL2) &
-+			SDHCI_CTRL_V4_MODE)
-+			host->v4_mode = true;
-+	}
++# put mmc early as many morden devices use emm/sd card as rootfs storage
++obj-y				+= mmc/
 +
- 	if (host->quirks & SDHCI_QUIRK_MISSING_CAPS)
- 		return;
- 
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index c95b0a4..128b0ba 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -184,6 +184,7 @@
- #define   SDHCI_CTRL_DRV_TYPE_D		0x0030
- #define  SDHCI_CTRL_EXEC_TUNING		0x0040
- #define  SDHCI_CTRL_TUNED_CLK		0x0080
-+#define  SDHCI_CTRL_V4_MODE		0x1000
- #define  SDHCI_CTRL_PRESET_VAL_ENABLE	0x8000
- 
- #define SDHCI_CAPABILITIES	0x40
-@@ -270,6 +271,8 @@
- #define   SDHCI_SPEC_100	0
- #define   SDHCI_SPEC_200	1
- #define   SDHCI_SPEC_300	2
-+#define   SDHCI_SPEC_400	3
-+#define   SDHCI_SPEC_410	4
- 
- /*
-  * End of controller registers.
-@@ -551,6 +554,9 @@ struct sdhci_host {
- 	u32			sdma_boundary;
- 
- 	unsigned long private[0] ____cacheline_aligned;
-+
-+	/* Host Version 4 Enable */
-+	bool			v4_mode;
- };
- 
- struct sdhci_ops {
+ # tty/ comes before char/ so that the VT console is the boot-time
+ # default.
+ obj-y				+= tty/
+@@ -128,7 +131,6 @@ obj-$(CONFIG_EISA)		+= eisa/
+ obj-$(CONFIG_PM_OPP)		+= opp/
+ obj-$(CONFIG_CPU_FREQ)		+= cpufreq/
+ obj-$(CONFIG_CPU_IDLE)		+= cpuidle/
+-obj-y				+= mmc/
+ obj-$(CONFIG_MEMSTICK)		+= memstick/
+ obj-$(CONFIG_NEW_LEDS)		+= leds/
+ obj-$(CONFIG_INFINIBAND)	+= infiniband/
 -- 
-2.7.4
+2.14.1
