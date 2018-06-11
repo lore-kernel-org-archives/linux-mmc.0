@@ -1,239 +1,120 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 6/6] mmc: host: sdhci-sprd: added Spreadtrum's host
- controller R11
-Date: Mon, 11 Jun 2018 09:15:03 +0200
-Message-ID: <CAPDyKFq5WpLTySEPKjNxXSjz5hpiDGStNQo1pPzNmxy0Y9bpnQ@mail.gmail.com>
-References: <1528445893-14530-1-git-send-email-zhang.chunyan@linaro.org> <1528445893-14530-7-git-send-email-zhang.chunyan@linaro.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: linux 4.17, drivers/mmc/host/sdhci-pci-o2micro.c, crash with
+ sdcard >128G
+Date: Mon, 11 Jun 2018 14:10:03 +0300
+Message-ID: <e6ab8c4a-2371-c4a4-a95e-4c72cefa8696@intel.com>
+References: <CAMjKNNM=f5pKgYh+ZAB+hvxeDG5B_5PsYX8YWZMZrmF9qS2DZA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1528445893-14530-7-git-send-email-zhang.chunyan@linaro.org>
+In-Reply-To: <CAMjKNNM=f5pKgYh+ZAB+hvxeDG5B_5PsYX8YWZMZrmF9qS2DZA@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Chunyan Zhang <zhang.chunyan@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@spreadtrum.com>, Chunyan Zhang <zhang.lyra@gmail.com>
+To: jean-luc malet <jeanluc.malet@gmail.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 8 June 2018 at 10:18, Chunyan Zhang <zhang.chunyan@linaro.org> wrote:
-> From: Chunyan Zhang <chunyan.zhang@spreadtrum.com>
->
-> This patch adds the initial support of Secure Digital Host Controller
-> Interface compliant controller - R11 found in some latest Spreadtrum
-> chipsets.
->
-> R11 is a variant based on SD v4.0 specification.
->
-> With this driver, mmc can be initialized, can be mounted, read and
-> written.
->
-> Original-by: Billows Wu <billows.wu@spreadtrum.com>
-> Signed-off-by: Chunyan Zhang <chunyan.zhang@spreadtrum.com>
-> ---
->  drivers/mmc/host/Kconfig          |  13 ++
->  drivers/mmc/host/Makefile         |   1 +
->  drivers/mmc/host/sdhci-sprd-r11.c | 472 ++++++++++++++++++++++++++++++++++++++
->  3 files changed, 486 insertions(+)
->  create mode 100644 drivers/mmc/host/sdhci-sprd-r11.c
+On 09/06/18 11:38, jean-luc malet wrote:
+> Hi everybody!
+> thanks for adding support to my O2 Micro, Inc. Device 8620 in last kernel!!!
+> I was looking for it since long time!!!!
+> 
+> # lspci -kv
+> 02:00.0 SD Host controller: O2 Micro, Inc. Device 8620 (rev 01) (prog-if 01)
+> Subsystem: Lenovo Device 3800
+> Flags: bus master, fast devsel, latency 0, IRQ 17
+> Memory at a1001000 (32-bit, non-prefetchable) [size=4K]
+> Memory at a1000000 (32-bit, non-prefetchable) [size=2K]
+> Capabilities: [6c] Power Management version 3
+> Capabilities: [48] MSI: Enable- Count=1/1 Maskable+ 64bit+
+> Capabilities: [80] Express Endpoint, MSI 00
+> Capabilities: [100] Virtual Channel
+> Capabilities: [200] Advanced Error Reporting
+> Capabilities: [230] Latency Tolerance Reporting
+> Capabilities: [240] L1 PM Substates
+> Kernel driver in use: sdhci-pci
+> Kernel modules: sdhci_pci
+> 
+> it works fine with sdcard up to 128G but crash on my samsung 256G evo plus
+> card
+> (https://www.samsung.com/fr/memory-storage/evo-plus-microsd-card-with-sd-adapter/MB-MC256DAEU/)
+> 
+> insert 256G card
+> #dmesg
+> 
+>     [94815.892525] mmc0: Tuning timeout, falling back to fixed sampling clock
+>     [94815.892627] mmc0: new ultra high speed SDR104 SDXC card at address 0001
+>     [94815.893398] mmcblk0: mmc0:0001 EE8QT 239 GiB 
+>     [94815.945330] mmc0: Tuning timeout, falling back to fixed sampling clock
+> 
+> # dd if=/dev/mmcblk0 of=test bs=512 count=1
+> 
+>     dd: error reading '/dev/mmcblk0': Input/output error
+>     0+0 records in
+>     0+0 records out
+>     0 bytes copied, 42.829 s, 0.0 kB/s
+> 
+> #dmesg
+> 
+>     [94825.956285] mmc0: Timeout waiting for hardware interrupt.
+>     [94825.956289] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+>     [94825.956297] mmc0: sdhci: Sys addr:  0x00000008 | Version:  0x00000603
+>     [94825.956304] mmc0: sdhci: Blk size:  0x00007200 | Blk cnt:  0x00000008
+>     [94825.956310] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x0000003b
+>     [94825.956316] mmc0: sdhci: Present:   0x01ff0000 | Host ctl: 0x00000017
+>     [94825.956322] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+>     [94825.956327] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00000007
+>     [94825.956333] mmc0: sdhci: Timeout:   0x0000000a | Int stat: 0x00000000
+>     [94825.956339] mmc0: sdhci: Int enab:  0x02ff008b | Sig enab: 0x02ff008b
+>     [94825.956344] mmc0: sdhci: AC12 err:  0x00000004 | Slot int: 0x00000000
+>     [94825.956350] mmc0: sdhci: Caps:      0x25fcc8bf | Caps_1:   0x00002077
+>     [94825.956356] mmc0: sdhci: Cmd:       0x0000123a | Max curr: 0x005800c8
+>     [94825.956362] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0x00000000
+>     [94825.956368] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00001b00
+>     [94825.956371] mmc0: sdhci: Host ctl2: 0x0000800b
+>     [94825.956378] mmc0: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0xfffff208
+>     [94825.956380] mmc0: sdhci: ============================================
+>     [94826.007314] mmc0: Tuning timeout, falling back to fixed sampling clock
+> 
+> remove card
+> insert 128G card (http://www.toshiba-sdcard.com/microsd/microsd_m302.html)
+> #dmesg
+> 
+>     [95214.753428] mmc0: Tuning timeout, falling back to fixed sampling clock
+>     [95214.753530] mmc0: new ultra high speed SDR104 SDXC card at address 1234
+>     [95214.754399] mmcblk0: mmc0:1234 SA128 116 GiB 
+>     [95214.756474]  mmcblk0: p1
+> 
+> 
+>     # dd if=/dev/mmcblk0 of=test bs=512 count=1
+>     1+0 records in
+>     1+0 records out
+>     512 bytes copied, 0.00209609 s, 244 kB/s
+> 
+> 
+> remove card 
+> insert 128G card (samsung 128Gb evo U1 card)
+> #dmseg
+> 
+>     [95438.053427] mmc0: Tuning timeout, falling back to fixed sampling clock
+>     [95438.053552] mmc0: new ultra high speed DDR50 SDXC card at address 59b4
+>     [95438.054139] mmcblk0: mmc0:59b4 00000 120 GiB 
+>     [95438.056451]  mmcblk0: p1
+> 
+> 
+> # dd if=/dev/mmcblk0 of=test bs=512 count=1
+> 
+>     1+0 records in
+>     1+0 records out
+>     512 bytes copied, 0.0346192 s, 14.8 kB/s
+> 
+> 
+> since the toshiba a 256G samsung are both U3 this seems not related to this
+> since one of the samsung card works, this don't seems to be related to the
+> brand....
+> so this seems related to the size of the card....
+> if you need more information, I'll try to provide the best accurate ones :)
 
-This is a DT based driver. Please add a separate patch describing the
-corresponding bindings and compatibles.
-
-[...]
-
-> +static int sdhci_sprd_get_dt_resource(struct platform_device *pdev,
-> +               struct sdhci_sprd_host *sprd_host)
-> +{
-> +       int ret = 0;
-> +       struct clk *clk;
-> +
-> +       clk = devm_clk_get(&pdev->dev, "sdio");
-> +       if (IS_ERR(clk)) {
-> +               ret = PTR_ERR(clk);
-> +               dev_warn(&pdev->dev, "Failed to get sdio clock (%d)\n", ret);
-> +               goto out;
-> +       }
-> +       sprd_host->clk_sdio = clk;
-> +
-> +       clk = devm_clk_get(&pdev->dev, "source");
-> +       if (IS_ERR(clk)) {
-> +               ret = PTR_ERR(clk);
-> +               dev_warn(&pdev->dev, "Failed to get source clock (%d)\n", ret);
-> +               goto out;
-> +       }
-> +       sprd_host->clk_source = clk;
-> +
-> +       clk_set_parent(sprd_host->clk_sdio, sprd_host->clk_source);
-> +       sprd_host->base_rate = clk_get_rate(sprd_host->clk_source);
-> +       if (!sprd_host->base_rate) {
-> +               sprd_host->base_rate = 26000000;
-> +               dev_warn(&pdev->dev, "The source clock rate is 0\n");
-> +       }
-> +
-
-The above can be managed by the assigned-clock* DT bindings. Please
-have a look at:
-
-Documentation/devicetree/bindings/clock/clock-bindings.txt
-drivers/clk/clk-conf.c
-
-> +       clk = devm_clk_get(&pdev->dev, "enable");
-> +       if (IS_ERR(clk)) {
-> +               ret = PTR_ERR(clk);
-> +               dev_warn(&pdev->dev, "Failed to get gate clock (%d)\n", ret);
-
-The printed name of the clock doesn't match the name used in
-devm_clk_get() call.
-
-BTW, I think devm_clk_get() already prints some information when it
-fails to lookup a clock. Isn't that sufficient?
-
-> +               goto out;
-> +       }
-> +       sprd_host->clk_enable = clk;
-> +
-> +out:
-> +       return ret;
-> +}
-> +
-> +static void sdhci_sprd_set_mmc_struct(struct platform_device *pdev,
-> +                               struct mmc_host *mmc)
-> +{
-> +       struct device_node *np = pdev->dev.of_node;
-> +       struct sdhci_host *host = mmc_priv(mmc);
-> +
-> +       mmc->caps = MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED |
-> +               MMC_CAP_ERASE | MMC_CAP_CMD23;
-> +
-> +       mmc_of_parse(mmc);
-> +       mmc_of_parse_voltage(np, &host->ocr_mask);
-
-mmc_of_parse_voltage() is intended to be used for controllers that
-internally manages the powered to the card. Is that really the case?
-
-I assume you have external regulator(s) to manage that, no?
-
-> +
-> +       mmc->ocr_avail = 0x40000;
-> +       mmc->ocr_avail_sdio = mmc->ocr_avail;
-> +       mmc->ocr_avail_sd = mmc->ocr_avail;
-> +       mmc->ocr_avail_mmc = mmc->ocr_avail;
-
-If there is external regulators used, all the above can go away. In
-either case, at least the *_sdio, *_sd, *_mmc can go away.
-
-> +
-> +       mmc->max_current_330 = SDHCI_SPRD_MAX_CUR;
-> +       mmc->max_current_300 = SDHCI_SPRD_MAX_CUR;
-> +       mmc->max_current_180 = SDHCI_SPRD_MAX_CUR;
-
-This should probably also be fetched used an external regulator and
-sdhci already manages that.
-
-> +
-> +       host->dma_mask = DMA_BIT_MASK(64);
-> +       mmc_dev(host->mmc)->dma_mask = &host->dma_mask;
-> +}
-
-[...]
-
-> +
-> +static unsigned int sdhci_sprd_get_min_clock(struct sdhci_host *host)
-> +{
-> +       return 400000;
-> +}
-
-Isn't there a more straightforward way to assign the minimum clock
-rate? Do you really need to use a callback?
-
-> +
-> +static void sdhci_sprd_reset(struct sdhci_host *host, u8 mask)
-> +{
-> +       sdhci_reset(host, mask);
-> +}
-
-Looks like an unnecessary wrapper function.
-
-[...]
-
-> +static int sdhci_sprd_probe(struct platform_device *pdev)
-> +{
-> +       struct sdhci_host *host;
-> +       struct sdhci_sprd_host *sprd_host;
-> +       int ret = 0;
-> +
-> +       host = sdhci_pltfm_init(pdev, &sdhci_sprd_pdata, sizeof(*sprd_host));
-> +       if (IS_ERR(host))
-> +               return PTR_ERR(host);
-> +
-> +       sprd_host = TO_SPRD_HOST(host);
-> +
-> +       ret = sdhci_sprd_get_dt_resource(pdev, sprd_host);
-> +       if (ret)
-> +               goto pltfm_free;
-> +
-> +       clk_prepare_enable(sprd_host->clk_sdio);
-> +       clk_prepare_enable(sprd_host->clk_enable);
-> +
-> +       sdhci_sprd_init_config(host);
-> +
-> +       sdhci_sprd_set_mmc_struct(pdev, host->mmc);
-> +
-> +       host->version = sdhci_readw(host, SDHCI_HOST_VERSION);
-> +       sprd_host->version = ((host->version & SDHCI_VENDOR_VER_MASK) >>
-> +                              SDHCI_VENDOR_VER_SHIFT);
-> +
-> +       pm_runtime_get_noresume(&pdev->dev);
-> +       pm_runtime_set_active(&pdev->dev);
-> +       pm_runtime_enable(&pdev->dev);
-> +       pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
-> +       pm_runtime_use_autosuspend(&pdev->dev);
-> +       pm_suspend_ignore_children(&pdev->dev, 1);
-> +
-> +       ret = sdhci_add_host(host);
-> +       if (ret) {
-> +               dev_err(&pdev->dev, "failed to add mmc host: %d\n", ret);
-> +               goto pm_runtime_disable;
-> +       }
-> +
-
-Looks like there is a missing call to pm_runtime_put() here, no?
-
-Unless it's intentional to prevent runtime suspend, for whatever reasons!?
-
-> +       return 0;
-> +
-> +pm_runtime_disable:
-> +       pm_runtime_disable(&pdev->dev);
-> +       pm_runtime_set_suspended(&pdev->dev);
-> +
-> +       clk_disable_unprepare(sprd_host->clk_sdio);
-> +       clk_disable_unprepare(sprd_host->clk_enable);
-> +
-> +pltfm_free:
-> +       sdhci_pltfm_free(pdev);
-> +       return ret;
-> +}
-> +
-> +static int sdhci_sprd_remove(struct platform_device *pdev)
-> +{
-> +       struct sdhci_host *host = platform_get_drvdata(pdev);
-> +       struct sdhci_sprd_host *sprd_host = TO_SPRD_HOST(host);
-> +       struct mmc_host *mmc = host->mmc;
-> +
-> +       mmc_remove_host(mmc);
-> +       clk_disable_unprepare(sprd_host->clk_sdio);
-> +       clk_disable_unprepare(sprd_host->clk_enable);
-> +
-> +       mmc_free_host(mmc);
-> +
-> +       return 0;
-> +}
-> +
-> +static const struct of_device_id sdhci_sprd_of_match[] = {
-> +       { .compatible = "sprd,sdhc-r11", },
-
-As stated, don't forget to document this.
-
-[...]
-
-Kind regards
-Uffe
+Tuning fails for all the cards, it is just some of them still work with
+fixed sampling.  You need to find someone who knows about the O2 Micro
+controllers. but no one has touched the driver since 2015.
