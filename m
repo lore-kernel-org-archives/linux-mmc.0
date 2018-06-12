@@ -1,29 +1,78 @@
-From: Evan Green <evgreen@chromium.org>
-Subject: Re: [PATCH V2 4/4] mmc: host: Register changes for sdcc V5
-Date: Mon, 11 Jun 2018 14:25:14 -0700
-Message-ID: <CAE=gft4zgJhhug35ApU+4YkHzFQg1nX9-BwOhmoRANc8GUA0+w@mail.gmail.com>
-References: <1527587561-27448-1-git-send-email-vviswana@codeaurora.org>
- <1527587561-27448-5-git-send-email-vviswana@codeaurora.org> <12fe9a2d-af74-bc84-3b2c-c150e8768b86@intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: Move the mmc driver init earlier
+Date: Tue, 12 Jun 2018 08:25:44 +0200
+Message-ID: <CAPDyKFrs3ngkVVQaq34V9qzV3KoFdy=B+UbLnzR=fHKsOco=tg@mail.gmail.com>
+References: <20180608095154.22413-1-feng.tang@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <12fe9a2d-af74-bc84-3b2c-c150e8768b86@intel.com>
+In-Reply-To: <20180608095154.22413-1-feng.tang@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: adrian.hunter@intel.com
-Cc: vviswana@codeaurora.org, Ulf Hansson <ulf.hansson@linaro.org>, robh+dt@kernel.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, devicetree@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, jeremymc@redhat.com, Bjorn Andersson <bjorn.andersson@linaro.org>, riteshh@codeaurora.org, vbadigan@codeaurora.org, Doug Anderson <dianders@google.com>, sayalil@codeaurora.org
+To: Feng Tang <feng.tang@intel.com>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Adrian Hunter <adrian.hunter@intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Jun 5, 2018 at 11:33 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
+On 8 June 2018 at 11:51, Feng Tang <feng.tang@intel.com> wrote:
+> When doing some boot time optimization for an eMMC rootfs NUCs,
+> we found the rootfs may spend around 100 microseconds waiting
+> for eMMC card to be initialized, then the rootfs could be
+> mounted.
+>         [    1.216561] Waiting for root device /dev/mmcblk1p1...
+>         [    1.289262] mmc1: new HS400 MMC card at address 0001
+>         [    1.289667] mmcblk1: mmc1:0001 R1J56L 14.7 GiB
+>         [    1.289772] mmcblk1boot0: mmc1:0001 R1J56L partition 1 8.00 MiB
+>         [    1.289869] mmcblk1boot1: mmc1:0001 R1J56L partition 2 8.00 MiB
+>         [    1.289967] mmcblk1rpmb: mmc1:0001 R1J56L partition 3 4.00 MiB
+>         [    1.292798]  mmcblk1: p1 p2 p3
+>         [    1.300576] EXT4-fs (mmcblk1p1): couldn't mount as ext3 due to feature incompatibilities
+>         [    1.300912] EXT4-fs (mmcblk1p1): couldn't mount as ext2 due to feature incompatibilities
 >
-> On 29/05/18 12:52, Vijay Viswanath wrote:
-> > Add support to use the new compatible string "qcom,sdhci-msm-v5".
-> >
-> > Based on the msm variant, pick the relevant variant data and
-> > use it for register read/write to msm specific registers.
-> >
-> > Signed-off-by: Sayali Lokhande <sayalil@codeaurora.org>
-> > Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
+> And this is a common problem for smartphones, tablets, embedded
+> devices and automotive products. This patch will make the eMMC/SD
+> card  start initializing earlier, by changing its order in drivers/Makefile.
 >
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> On our platform, the waiting for eMMC card is almost eliminated with the patch,
+> which is critical to boot time.
 
-Reviewed-by: Evan Green <evgreen@chromium.org>
+I am wondering what kernel version you are running here. There have
+been some changes to the mmc initialization path, which perhaps can
+help.
+
+>
+> Signed-off-by: Feng Tang <feng.tang@intel.com>
+> ---
+>  drivers/Makefile | 4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/Makefile b/drivers/Makefile
+> index 24cd47014657..c473afd3c688 100644
+> --- a/drivers/Makefile
+> +++ b/drivers/Makefile
+> @@ -50,6 +50,9 @@ obj-$(CONFIG_REGULATOR)               += regulator/
+>  # reset controllers early, since gpu drivers might rely on them to initialize
+>  obj-$(CONFIG_RESET_CONTROLLER) += reset/
+>
+> +# put mmc early as many morden devices use emm/sd card as rootfs storage
+> +obj-y                          += mmc/
+> +
+
+Your suggested approach isn't really a solution, as it may work for
+your particular case but not for everybody else.
+
+>  # tty/ comes before char/ so that the VT console is the boot-time
+>  # default.
+>  obj-y                          += tty/
+> @@ -128,7 +131,6 @@ obj-$(CONFIG_EISA)          += eisa/
+>  obj-$(CONFIG_PM_OPP)           += opp/
+>  obj-$(CONFIG_CPU_FREQ)         += cpufreq/
+>  obj-$(CONFIG_CPU_IDLE)         += cpuidle/
+> -obj-y                          += mmc/
+>  obj-$(CONFIG_MEMSTICK)         += memstick/
+>  obj-$(CONFIG_NEW_LEDS)         += leds/
+>  obj-$(CONFIG_INFINIBAND)       += infiniband/
+> --
+> 2.14.1
+>
+
+Kind regards
+Uffe
