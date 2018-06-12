@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH 13/19] mmc: mmci: send stop cmd if a data command fail
-Date: Tue, 12 Jun 2018 15:14:34 +0200
-Message-ID: <1528809280-31116-14-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH 11/19] mmc: mmci: add variant property to check specific data constraint
+Date: Tue, 12 Jun 2018 15:14:32 +0200
+Message-ID: <1528809280-31116-12-git-send-email-ludovic.Barre@st.com>
 References: <1528809280-31116-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,144 +14,58 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-The mmc framework follows the requirement of SD_Specification:
-the STOP_TRANSMISSION is sent on multiple write/read commands
-and the stop command (alone), not needed on other ADTC commands.
-
-But, some variants require a stop command "STOP_TRANSMISION" to clear
-the DPSM "Data Path State Machine" if an error happens on command or data
-step. If it's not done the next data command will freeze hardware block.
-Needed to support the STM32 sdmmc variant.
+This patch adds a function pointer to check specific data constraint
+follow hardware variant. Needed to support the STM32 sdmmc variant
+which has alignment constraint.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.c | 36 +++++++++++++++++++++++++++++++-----
- drivers/mmc/host/mmci.h |  3 +++
- 2 files changed, 34 insertions(+), 5 deletions(-)
+ drivers/mmc/host/mmci.c | 5 +++++
+ drivers/mmc/host/mmci.h | 2 ++
+ 2 files changed, 7 insertions(+)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 87724e1..9af7db8 100644
+index abddad7..9c00804 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -24,6 +24,7 @@
- #include <linux/mmc/pm.h>
- #include <linux/mmc/host.h>
- #include <linux/mmc/card.h>
-+#include <linux/mmc/mmc.h>
- #include <linux/mmc/slot-gpio.h>
- #include <linux/amba/bus.h>
- #include <linux/clk.h>
-@@ -522,11 +523,28 @@ static void mmci_set_mask1(struct mmci_host *host, unsigned int mask)
- 	host->mask1_reg = mask;
- }
- 
--static void mmci_stop_data(struct mmci_host *host)
-+static int mmci_stop_data(struct mmci_host *host)
+@@ -312,6 +312,8 @@ static int mmci_card_busy(struct mmc_host *mmc)
+ static int mmci_validate_data(struct mmci_host *host,
+ 			      struct mmc_data *data)
  {
-+	struct mmc_command *stop = &host->stop_abort;
-+	struct mmc_data *data = host->data;
-+	unsigned int cmd = 0;
++	struct variant_data *variant = host->variant;
 +
- 	mmci_write_datactrlreg(host, 0);
- 	mmci_set_mask1(host, 0);
- 	host->data = NULL;
-+
-+	if (host->variant->cmdreg_stop) {
-+		cmd |= host->variant->cmdreg_stop;
-+		if (!data->stop) {
-+			memset(stop, 0, sizeof(struct mmc_command));
-+			stop->opcode = MMC_STOP_TRANSMISSION;
-+			stop->arg = 0;
-+			stop->flags = MMC_RSP_R1B | MMC_CMD_AC;
-+			data->stop = stop;
-+		}
-+	}
-+
-+	return cmd;
- }
- 
- static void mmci_init_sg(struct mmci_host *host, struct mmc_data *data)
-@@ -703,6 +721,7 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
- 	      unsigned int status)
- {
- 	unsigned int status_err;
-+	unsigned int cmd_reg = 0;
- 
- 	/* Make sure we have data to handle */
  	if (!data)
-@@ -761,7 +780,7 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
- 	if (status & MCI_DATAEND || data->error) {
- 		mmci_dma_finalize(host, data);
+ 		return 0;
  
--		mmci_stop_data(host);
-+		cmd_reg = mmci_stop_data(host);
- 
- 		if (!data->error)
- 			/* The error clause is handled above, success! */
-@@ -770,7 +789,7 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
- 		if (!data->stop || host->mrq->sbc) {
- 			mmci_request_end(host, data->mrq);
- 		} else {
--			mmci_start_command(host, data->stop, 0);
-+			mmci_start_command(host, data->stop, cmd_reg);
- 		}
- 	}
- }
-@@ -780,6 +799,8 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
- 	     unsigned int status)
- {
- 	void __iomem *base = host->base;
-+	struct mmc_data *data = host->data;
-+	unsigned int cmd_reg = 0;
- 	bool sbc;
- 
- 	if (!cmd)
-@@ -865,11 +886,16 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+@@ -321,6 +323,9 @@ static int mmci_validate_data(struct mmci_host *host,
+ 		return -EINVAL;
  	}
  
- 	if ((!sbc && !cmd->data) || cmd->error) {
--		if (host->data) {
-+		if (data) {
- 			/* Terminate the DMA transfer */
- 			mmci_dma_error(host);
- 
--			mmci_stop_data(host);
-+			cmd_reg = mmci_stop_data(host);
++	if (variant->validate_data)
++		return variant->validate_data(host, data);
 +
-+			if (data->stop) {
-+				mmci_start_command(host, data->stop, cmd_reg);
-+				return;
-+			}
- 		}
- 		mmci_request_end(host, host->mrq);
- 	} else if (sbc) {
+ 	return 0;
+ }
+ 
 diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 2d7e901..4b4cd1d 100644
+index 12ee2e6..30d3f53 100644
 --- a/drivers/mmc/host/mmci.h
 +++ b/drivers/mmc/host/mmci.h
-@@ -243,6 +243,7 @@ struct mmci_host;
-  * @cmdreg_lrsp_crc: enable value for long response with crc
-  * @cmdreg_srsp_crc: enable value for short response with crc
-  * @cmdreg_srsp: enable value for short response without crc
-+ * @cmdreg_stop: enable value for stop and abort transmission
-  * @datalength_bits: number of bits in the MMCIDATALENGTH register
-  * @fifosize: number of bytes that can be written when MMCI_TXFIFOEMPTY
-  *	      is asserted (likewise for RX)
-@@ -298,6 +299,7 @@ struct variant_data {
- 	unsigned int		cmdreg_lrsp_crc;
- 	unsigned int		cmdreg_srsp_crc;
- 	unsigned int		cmdreg_srsp;
-+	unsigned int		cmdreg_stop;
- 	unsigned int		datalength_bits;
- 	unsigned int		fifosize;
- 	unsigned int		fifohalfsize;
-@@ -343,6 +345,7 @@ struct mmci_host {
- 	struct mmc_request	*mrq;
- 	struct mmc_command	*cmd;
- 	struct mmc_data		*data;
-+	struct mmc_command	stop_abort;
- 	struct mmc_host		*mmc;
- 	struct clk		*clk;
- 	bool			singleirq;
+@@ -284,6 +284,7 @@ struct mmci_host;
+  *	       register.
+  * @opendrain: bitmask identifying the OPENDRAIN bit inside MMCIPOWER register
+  * @mmci_dma: Pointer to platform-specific DMA callbacks.
++ * @validate_data: if hardware block has specific constraint on validate data
+  * @set_clk_ios: if clock procedure of variant is specific
+  * @set_pwr_ios: if power procedure of variant is specific
+  */
+@@ -328,6 +329,7 @@ struct variant_data {
+ 	u32			start_err;
+ 	u32			opendrain;
+ 	struct mmci_dma_ops	*mmci_dma;
++	int (*validate_data)(struct mmci_host *host, struct mmc_data *data);
+ 	void (*set_clkreg)(struct mmci_host *host, unsigned int desired);
+ 	void (*set_pwrreg)(struct mmci_host *host, unsigned char power_mode,
+ 			   unsigned int pwr);
 -- 
 2.7.4
