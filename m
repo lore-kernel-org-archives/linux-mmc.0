@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH 05/19] mmc: mmci: allow to overwrite clock/power procedure to specific variant
-Date: Tue, 12 Jun 2018 15:14:26 +0200
-Message-ID: <1528809280-31116-6-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH 10/19] mmc: mmci: add variant property to allow remain data
+Date: Tue, 12 Jun 2018 15:14:31 +0200
+Message-ID: <1528809280-31116-11-git-send-email-ludovic.Barre@st.com>
 References: <1528809280-31116-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,182 +14,129 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-A specific variant could have different power or clock procedures.
-This patch allows to overwrite the default mmci_set_clkreg and
-mmci_set_pwrreg for a specific variant.
+This patch adds a boolean property to read remaining data.
+Needed to support the STM32 sdmmc variant. MMCIDATACNT
+register should be read only after the data transfer is complete.
+When reading after an error event the read data count value may be
+different from the real number of data bytes transferred.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.c | 96 +++++++++++++++++++++++++++++--------------------
- drivers/mmc/host/mmci.h |  7 ++++
- 2 files changed, 64 insertions(+), 39 deletions(-)
+ drivers/mmc/host/mmci.c | 17 +++++++++++++++--
+ drivers/mmc/host/mmci.h |  3 +++
+ 2 files changed, 18 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index ede95b7..801c86b 100644
+index 83c3572..abddad7 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -374,6 +374,52 @@ static void mmci_set_clkreg(struct mmci_host *host, unsigned int desired)
- 	mmci_write_clkreg(host, clk);
- }
- 
-+static void mmci_set_pwrreg(struct mmci_host *host, unsigned char power_mode,
-+			    unsigned int pwr)
-+{
-+	struct variant_data *variant = host->variant;
-+	struct mmc_host *mmc = host->mmc;
-+
-+	switch (power_mode) {
-+	case MMC_POWER_OFF:
-+		if (!IS_ERR(mmc->supply.vmmc))
-+			mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
-+
-+		if (!IS_ERR(mmc->supply.vqmmc) && host->vqmmc_enabled) {
-+			regulator_disable(mmc->supply.vqmmc);
-+			host->vqmmc_enabled = false;
+@@ -58,6 +58,7 @@ static struct variant_data variant_arm = {
+ 	.datalength_bits	= 16,
+ 	.datactrl_blocksz	= 11,
+ 	.datactrl_dpsm_enable	= MCI_DPSM_ENABLE,
++	.datacnt_remain		= true,
+ 	.pwrreg_powerup		= MCI_PWR_UP,
+ 	.f_max			= 100000000,
+ 	.reversed_irq_handling	= true,
+@@ -78,6 +79,7 @@ static struct variant_data variant_arm_extended_fifo = {
+ 	.datalength_bits	= 16,
+ 	.datactrl_blocksz	= 11,
+ 	.datactrl_dpsm_enable	= MCI_DPSM_ENABLE,
++	.datacnt_remain		= true,
+ 	.pwrreg_powerup		= MCI_PWR_UP,
+ 	.f_max			= 100000000,
+ 	.mmcimask1		= true,
+@@ -98,6 +100,7 @@ static struct variant_data variant_arm_extended_fifo_hwfc = {
+ 	.datalength_bits	= 16,
+ 	.datactrl_blocksz	= 11,
+ 	.datactrl_dpsm_enable	= MCI_DPSM_ENABLE,
++	.datacnt_remain		= true,
+ 	.pwrreg_powerup		= MCI_PWR_UP,
+ 	.f_max			= 100000000,
+ 	.mmcimask1		= true,
+@@ -120,6 +123,7 @@ static struct variant_data variant_u300 = {
+ 	.datactrl_blocksz	= 11,
+ 	.datactrl_dpsm_enable	= MCI_DPSM_ENABLE,
+ 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
++	.datacnt_remain		= true,
+ 	.st_sdio			= true,
+ 	.pwrreg_powerup		= MCI_PWR_ON,
+ 	.f_max			= 100000000,
+@@ -146,6 +150,7 @@ static struct variant_data variant_nomadik = {
+ 	.datactrl_blocksz	= 11,
+ 	.datactrl_dpsm_enable	= MCI_DPSM_ENABLE,
+ 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
++	.datacnt_remain		= true,
+ 	.st_sdio		= true,
+ 	.st_clkdiv		= true,
+ 	.pwrreg_powerup		= MCI_PWR_ON,
+@@ -175,6 +180,7 @@ static struct variant_data variant_ux500 = {
+ 	.datactrl_blocksz	= 11,
+ 	.datactrl_dpsm_enable	= MCI_DPSM_ENABLE,
+ 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
++	.datacnt_remain		= true,
+ 	.st_sdio		= true,
+ 	.st_clkdiv		= true,
+ 	.pwrreg_powerup		= MCI_PWR_ON,
+@@ -209,6 +215,7 @@ static struct variant_data variant_ux500v2 = {
+ 	.datactrl_blocksz	= 11,
+ 	.datactrl_dpsm_enable	= MCI_DPSM_ENABLE,
+ 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
++	.datacnt_remain		= true,
+ 	.st_sdio		= true,
+ 	.st_clkdiv		= true,
+ 	.blksz_datactrl16	= true,
+@@ -244,6 +251,7 @@ static struct variant_data variant_stm32 = {
+ 	.datactrl_blocksz	= 11,
+ 	.datactrl_dpsm_enable	= MCI_DPSM_ENABLE,
+ 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
++	.datacnt_remain		= true,
+ 	.st_sdio		= true,
+ 	.st_clkdiv		= true,
+ 	.pwrreg_powerup		= MCI_PWR_ON,
+@@ -270,6 +278,7 @@ static struct variant_data variant_qcom = {
+ 	.datalength_bits	= 24,
+ 	.datactrl_blocksz	= 11,
+ 	.datactrl_dpsm_enable	= MCI_DPSM_ENABLE,
++	.datacnt_remain		= true,
+ 	.pwrreg_powerup		= MCI_PWR_UP,
+ 	.f_max			= 208000000,
+ 	.explicit_mclk_control	= true,
+@@ -711,8 +720,12 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
+ 		 * can be as much as a FIFO-worth of data ahead.  This
+ 		 * matters for FIFO overruns only.
+ 		 */
+-		remain = readl(host->base + MMCIDATACNT);
+-		success = data->blksz * data->blocks - remain;
++		if (host->variant->datacnt_remain) {
++			remain = readl(host->base + MMCIDATACNT);
++			success = data->blksz * data->blocks - remain;
++		} else {
++			success = 0;
 +		}
-+
-+		break;
-+	case MMC_POWER_UP:
-+		if (!IS_ERR(mmc->supply.vmmc))
-+			mmc_regulator_set_ocr(mmc, mmc->supply.vmmc,
-+					      mmc->ios.vdd);
-+
-+		/*
-+		 * The ST Micro variant doesn't have the PL180s MCI_PWR_UP
-+		 * and instead uses MCI_PWR_ON so apply whatever value is
-+		 * configured in the variant data.
-+		 */
-+		pwr |= variant->pwrreg_powerup;
-+
-+		break;
-+	case MMC_POWER_ON:
-+		if (!IS_ERR(mmc->supply.vqmmc) && !host->vqmmc_enabled) {
-+			if (regulator_enable(mmc->supply.vqmmc) < 0)
-+				dev_err(mmc_dev(mmc),
-+					"failed to enable vqmmc regulator\n");
-+			else
-+				host->vqmmc_enabled = true;
-+		}
-+
-+		pwr |= MCI_PWR_ON;
-+		break;
-+	}
-+
-+	mmci_write_pwrreg(host, pwr);
-+}
-+
- static void
- mmci_request_end(struct mmci_host *host, struct mmc_request *mrq)
- {
-@@ -1031,7 +1077,7 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- {
- 	struct mmci_host *host = mmc_priv(mmc);
- 	struct variant_data *variant = host->variant;
--	u32 pwr = 0;
-+	unsigned int pwr = 0;
- 	unsigned long flags;
- 	int ret;
  
-@@ -1039,42 +1085,6 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		host->plat->ios_handler(mmc_dev(mmc), ios))
- 			dev_err(mmc_dev(mmc), "platform ios_handler failed\n");
- 
--	switch (ios->power_mode) {
--	case MMC_POWER_OFF:
--		if (!IS_ERR(mmc->supply.vmmc))
--			mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
--
--		if (!IS_ERR(mmc->supply.vqmmc) && host->vqmmc_enabled) {
--			regulator_disable(mmc->supply.vqmmc);
--			host->vqmmc_enabled = false;
--		}
--
--		break;
--	case MMC_POWER_UP:
--		if (!IS_ERR(mmc->supply.vmmc))
--			mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, ios->vdd);
--
--		/*
--		 * The ST Micro variant doesn't have the PL180s MCI_PWR_UP
--		 * and instead uses MCI_PWR_ON so apply whatever value is
--		 * configured in the variant data.
--		 */
--		pwr |= variant->pwrreg_powerup;
--
--		break;
--	case MMC_POWER_ON:
--		if (!IS_ERR(mmc->supply.vqmmc) && !host->vqmmc_enabled) {
--			ret = regulator_enable(mmc->supply.vqmmc);
--			if (ret < 0)
--				dev_err(mmc_dev(mmc),
--					"failed to enable vqmmc regulator\n");
--			else
--				host->vqmmc_enabled = true;
--		}
--
--		pwr |= MCI_PWR_ON;
--		break;
--	}
- 
- 	if (variant->signal_direction && ios->power_mode != MMC_POWER_OFF) {
- 		/*
-@@ -1126,8 +1136,16 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 
- 	spin_lock_irqsave(&host->lock, flags);
- 
--	mmci_set_clkreg(host, ios->clock);
--	mmci_write_pwrreg(host, pwr);
-+	if (variant->set_clkreg)
-+		variant->set_clkreg(host, ios->clock);
-+	else
-+		mmci_set_clkreg(host, ios->clock);
-+
-+	if (variant->set_pwrreg)
-+		variant->set_pwrreg(host, ios->power_mode, pwr);
-+	else
-+		mmci_set_pwrreg(host, ios->power_mode, pwr);
-+
- 	mmci_reg_delay(host);
- 
- 	spin_unlock_irqrestore(&host->lock, flags);
+ 		dev_dbg(mmc_dev(host->mmc), "MCI ERROR IRQ, status 0x%08x at 0x%08x\n",
+ 			status_err, success);
 diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 2ba9640..7265ca6 100644
+index 5091025..12ee2e6 100644
 --- a/drivers/mmc/host/mmci.h
 +++ b/drivers/mmc/host/mmci.h
-@@ -231,6 +231,7 @@
- 
- struct clk;
- struct dma_chan;
-+struct mmci_host;
- 
- /**
-  * struct variant_data - MMCI variant-specific quirks
-@@ -273,6 +274,8 @@ struct dma_chan;
-  *	       register.
-  * @opendrain: bitmask identifying the OPENDRAIN bit inside MMCIPOWER register
-  * @mmci_dma: Pointer to platform-specific DMA callbacks.
-+ * @set_clk_ios: if clock procedure of variant is specific
-+ * @set_pwr_ios: if power procedure of variant is specific
-  */
- struct variant_data {
- 	unsigned int		clkreg;
-@@ -307,6 +310,9 @@ struct variant_data {
- 	u32			start_err;
- 	u32			opendrain;
- 	struct mmci_dma_ops	*mmci_dma;
-+	void (*set_clkreg)(struct mmci_host *host, unsigned int desired);
-+	void (*set_pwrreg)(struct mmci_host *host, unsigned char power_mode,
-+			   unsigned int pwr);
- };
- 
- struct mmci_host {
-@@ -328,6 +334,7 @@ struct mmci_host {
- 	u32			pwr_reg;
- 	u32			pwr_reg_add;
- 	u32			clk_reg;
-+	u32			clk_reg_add;
- 	u32			datactrl_reg;
- 	u32			busy_status;
- 	u32			mask1_reg;
+@@ -260,6 +260,8 @@ struct mmci_host;
+  * @datactrl_blksz: block size in power of two
+  * @datactrl_dpsm_enable: enable value for DPSM
+  * @datactrl_first: true if data must be setup before send command
++ * @datacnt_remain: true if you could read datacnt register
++ *                  to define remain data
+  * @pwrreg_powerup: power up value for MMCIPOWER register
+  * @f_max: maximum clk frequency supported by the controller.
+  * @signal_direction: input/out direction of bus signals can be indicated
+@@ -303,6 +305,7 @@ struct variant_data {
+ 	unsigned int		datactrl_blocksz;
+ 	unsigned int		datactrl_dpsm_enable;
+ 	bool			datactrl_first;
++	bool			datacnt_remain;
+ 	bool			st_sdio;
+ 	bool			st_clkdiv;
+ 	bool			blksz_datactrl16;
 -- 
 2.7.4
