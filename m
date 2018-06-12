@@ -1,192 +1,288 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH 06/19] mmc: mmci: add variant properties to define cpsm &
- cmdresp bits
-Date: Tue, 12 Jun 2018 15:14:27 +0200
-Message-ID: <1528809280-31116-7-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH 17/19] mmc: mmci: add stm32 sdmmc idma support
+Date: Tue, 12 Jun 2018 15:14:38 +0200
+Message-ID: <1528809280-31116-18-git-send-email-ludovic.Barre@st.com>
 References: <1528809280-31116-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1528809280-31116-1-git-send-email-ludovic.Barre@st.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
-Cc: devicetree@vger.kernel.org, Alexandre Torgue <alexandre.torgue@st.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ludovic Barre <ludovic.barre@st.com>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Gerald Baeza <gerald.baeza@st.com>, linux-arm-kernel@lists.infradead.org
+Cc: Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Gerald Baeza <gerald.baeza@st.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, Ludovic Barre <ludovic.barre@st.com>
 List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-This patch adds command variant properties to define
-cpsm enable bit and responses.
-Needed to support the STM32 variant (shift of cpsm bit,
-specific definition of commands response).
+This patch adds support of Internal DMA (IDMA) for
+STM32 sdmmc variant. Direct memory access (DMA) is used to provide
+high-speed transfer between the SDMMC FIFO and the memory.
+The SDMMC internal DMA (IDMA) provides one channel to be used either
+for transmit or receive.
+
+The IDMA provides 2 modes:
+- Single buffered channel: the data at the memory side is accessed
+  in a linear matter starting from the base address IDMABASE with
+  DATALENGTH. So, max segment number must be defined to one and
+  max segment size to max datalength.
+- Linked list channel: the data at the memory side is subsequently
+  accessed from linked buffers, located at base address IDMABASE.
+  The size of the memory buffers is defined by IDMABSIZE. The first
+  linked list item is defined at IDMABAR address, and next item in
+  IDMALAR. In this mode sdmmc variant could transfer several
+  memory segments (not contiguous) in the same request.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.c | 47 +++++++++++++++++++++++++++++++++++++++++++----
- drivers/mmc/host/mmci.h |  8 ++++++++
- 2 files changed, 51 insertions(+), 4 deletions(-)
+ drivers/mmc/host/mmci.h     |   5 ++
+ drivers/mmc/host/mmci_dma.c | 197 ++++++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/mmci_dma.h |   2 +
+ 3 files changed, 204 insertions(+)
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 801c86b..52562fc 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -51,6 +51,10 @@ static unsigned int fmax = 515633;
- static struct variant_data variant_arm = {
- 	.fifosize		= 16 * 4,
- 	.fifohalfsize		= 8 * 4,
-+	.cmdreg_cpsm_enable	= MCI_CPSM_ENABLE,
-+	.cmdreg_lrsp_crc	= MCI_CPSM_RESPONSE | MCI_CPSM_LONGRSP,
-+	.cmdreg_srsp_crc	= MCI_CPSM_RESPONSE,
-+	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
- 	.datalength_bits	= 16,
- 	.datactrl_blocksz	= 11,
- 	.pwrreg_powerup		= MCI_PWR_UP,
-@@ -65,6 +69,10 @@ static struct variant_data variant_arm = {
- static struct variant_data variant_arm_extended_fifo = {
- 	.fifosize		= 128 * 4,
- 	.fifohalfsize		= 64 * 4,
-+	.cmdreg_cpsm_enable	= MCI_CPSM_ENABLE,
-+	.cmdreg_lrsp_crc	= MCI_CPSM_RESPONSE | MCI_CPSM_LONGRSP,
-+	.cmdreg_srsp_crc	= MCI_CPSM_RESPONSE,
-+	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
- 	.datalength_bits	= 16,
- 	.datactrl_blocksz	= 11,
- 	.pwrreg_powerup		= MCI_PWR_UP,
-@@ -79,6 +87,10 @@ static struct variant_data variant_arm_extended_fifo_hwfc = {
- 	.fifosize		= 128 * 4,
- 	.fifohalfsize		= 64 * 4,
- 	.clkreg_enable		= MCI_ARM_HWFCEN,
-+	.cmdreg_cpsm_enable	= MCI_CPSM_ENABLE,
-+	.cmdreg_lrsp_crc	= MCI_CPSM_RESPONSE | MCI_CPSM_LONGRSP,
-+	.cmdreg_srsp_crc	= MCI_CPSM_RESPONSE,
-+	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
- 	.datalength_bits	= 16,
- 	.datactrl_blocksz	= 11,
- 	.pwrreg_powerup		= MCI_PWR_UP,
-@@ -94,6 +106,10 @@ static struct variant_data variant_u300 = {
- 	.fifohalfsize		= 8 * 4,
- 	.clkreg_enable		= MCI_ST_U300_HWFCEN,
- 	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
-+	.cmdreg_cpsm_enable	= MCI_CPSM_ENABLE,
-+	.cmdreg_lrsp_crc	= MCI_CPSM_RESPONSE | MCI_CPSM_LONGRSP,
-+	.cmdreg_srsp_crc	= MCI_CPSM_RESPONSE,
-+	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
- 	.datalength_bits	= 16,
- 	.datactrl_blocksz	= 11,
- 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
-@@ -114,6 +130,10 @@ static struct variant_data variant_nomadik = {
- 	.fifohalfsize		= 8 * 4,
- 	.clkreg			= MCI_CLK_ENABLE,
- 	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
-+	.cmdreg_cpsm_enable	= MCI_CPSM_ENABLE,
-+	.cmdreg_lrsp_crc	= MCI_CPSM_RESPONSE | MCI_CPSM_LONGRSP,
-+	.cmdreg_srsp_crc	= MCI_CPSM_RESPONSE,
-+	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
- 	.datalength_bits	= 24,
- 	.datactrl_blocksz	= 11,
- 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
-@@ -137,6 +157,10 @@ static struct variant_data variant_ux500 = {
- 	.clkreg_enable		= MCI_ST_UX500_HWFCEN,
- 	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
- 	.clkreg_neg_edge_enable	= MCI_ST_UX500_NEG_EDGE,
-+	.cmdreg_cpsm_enable	= MCI_CPSM_ENABLE,
-+	.cmdreg_lrsp_crc	= MCI_CPSM_RESPONSE | MCI_CPSM_LONGRSP,
-+	.cmdreg_srsp_crc	= MCI_CPSM_RESPONSE,
-+	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
- 	.datalength_bits	= 24,
- 	.datactrl_blocksz	= 11,
- 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
-@@ -164,6 +188,10 @@ static struct variant_data variant_ux500v2 = {
- 	.clkreg_enable		= MCI_ST_UX500_HWFCEN,
- 	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
- 	.clkreg_neg_edge_enable	= MCI_ST_UX500_NEG_EDGE,
-+	.cmdreg_cpsm_enable	= MCI_CPSM_ENABLE,
-+	.cmdreg_lrsp_crc	= MCI_CPSM_RESPONSE | MCI_CPSM_LONGRSP,
-+	.cmdreg_srsp_crc	= MCI_CPSM_RESPONSE,
-+	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
- 	.datactrl_mask_ddrmode	= MCI_DPSM_ST_DDRMODE,
- 	.datalength_bits	= 24,
- 	.datactrl_blocksz	= 11,
-@@ -193,6 +221,10 @@ static struct variant_data variant_stm32 = {
- 	.clkreg_enable		= MCI_ST_UX500_HWFCEN,
- 	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
- 	.clkreg_neg_edge_enable	= MCI_ST_UX500_NEG_EDGE,
-+	.cmdreg_cpsm_enable	= MCI_CPSM_ENABLE,
-+	.cmdreg_lrsp_crc	= MCI_CPSM_RESPONSE | MCI_CPSM_LONGRSP,
-+	.cmdreg_srsp_crc	= MCI_CPSM_RESPONSE,
-+	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
- 	.datalength_bits	= 24,
- 	.datactrl_blocksz	= 11,
- 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
-@@ -213,6 +245,10 @@ static struct variant_data variant_qcom = {
- 				  MCI_QCOM_CLK_SELECT_IN_FBCLK,
- 	.clkreg_8bit_bus_enable = MCI_QCOM_CLK_WIDEBUS_8,
- 	.datactrl_mask_ddrmode	= MCI_QCOM_CLK_SELECT_IN_DDR_MODE,
-+	.cmdreg_cpsm_enable	= MCI_CPSM_ENABLE,
-+	.cmdreg_lrsp_crc	= MCI_CPSM_RESPONSE | MCI_CPSM_LONGRSP,
-+	.cmdreg_srsp_crc	= MCI_CPSM_RESPONSE,
-+	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
- 	.data_cmd_enable	= MCI_CPSM_QCOM_DATCMD,
- 	.blksz_datactrl4	= true,
- 	.datalength_bits	= 24,
-@@ -603,16 +639,19 @@ mmci_start_command(struct mmci_host *host, struct mmc_command *cmd, u32 c)
- 	dev_dbg(mmc_dev(host->mmc), "op %02x arg %08x flags %08x\n",
- 	    cmd->opcode, cmd->arg, cmd->flags);
- 
--	if (readl(base + MMCICOMMAND) & MCI_CPSM_ENABLE) {
-+	if (readl(base + MMCICOMMAND) & host->variant->cmdreg_cpsm_enable) {
- 		writel(0, base + MMCICOMMAND);
- 		mmci_reg_delay(host);
- 	}
- 
--	c |= cmd->opcode | MCI_CPSM_ENABLE;
-+	c |= cmd->opcode | host->variant->cmdreg_cpsm_enable;
- 	if (cmd->flags & MMC_RSP_PRESENT) {
- 		if (cmd->flags & MMC_RSP_136)
--			c |= MCI_CPSM_LONGRSP;
--		c |= MCI_CPSM_RESPONSE;
-+			c |= host->variant->cmdreg_lrsp_crc;
-+		else if (cmd->flags & MMC_RSP_CRC)
-+			c |= host->variant->cmdreg_srsp_crc;
-+		else
-+			c |= host->variant->cmdreg_srsp;
- 	}
- 	if (/*interrupt*/0)
- 		c |= MCI_CPSM_INTERRUPT;
 diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 7265ca6..e173305 100644
+index c2ad724..e36ea18 100644
 --- a/drivers/mmc/host/mmci.h
 +++ b/drivers/mmc/host/mmci.h
-@@ -239,6 +239,10 @@ struct mmci_host;
-  * @clkreg_enable: enable value for MMCICLOCK register
-  * @clkreg_8bit_bus_enable: enable value for 8 bit bus
-  * @clkreg_neg_edge_enable: enable value for inverted data/cmd output
-+ * @cmdreg_cpsm_enable: enable value for CPSM
-+ * @cmdreg_lrsp_crc: enable value for long response with crc
-+ * @cmdreg_srsp_crc: enable value for short response with crc
-+ * @cmdreg_srsp: enable value for short response without crc
-  * @datalength_bits: number of bits in the MMCIDATALENGTH register
-  * @fifosize: number of bytes that can be written when MMCI_TXFIFOEMPTY
-  *	      is asserted (likewise for RX)
-@@ -282,6 +286,10 @@ struct variant_data {
- 	unsigned int		clkreg_enable;
- 	unsigned int		clkreg_8bit_bus_enable;
- 	unsigned int		clkreg_neg_edge_enable;
-+	unsigned int		cmdreg_cpsm_enable;
-+	unsigned int		cmdreg_lrsp_crc;
-+	unsigned int		cmdreg_srsp_crc;
-+	unsigned int		cmdreg_srsp;
- 	unsigned int		datalength_bits;
- 	unsigned int		fifosize;
- 	unsigned int		fifohalfsize;
+@@ -343,6 +343,8 @@ struct mmci_host;
+  * @opendrain: bitmask identifying the OPENDRAIN bit inside MMCIPOWER register
+  * @mmci_dma: Pointer to platform-specific DMA callbacks.
+  * @reset: true if variant has need reset signal.
++ * @dma_lli: true if variant has dma link list feature.
++ * @stm32_idmabsize_mask: stm32 sdmmc idma buffer size.
+  * @validate_data: if hardware block has specific constraint on validate data
+  * @set_clk_ios: if clock procedure of variant is specific
+  * @set_pwr_ios: if power procedure of variant is specific
+@@ -391,6 +393,8 @@ struct variant_data {
+ 	u32			opendrain;
+ 	struct mmci_dma_ops	*mmci_dma;
+ 	bool			reset;
++	bool			dma_lli;
++	u32			stm32_idmabsize_mask;
+ 	int (*validate_data)(struct mmci_host *host, struct mmc_data *data);
+ 	void (*set_clkreg)(struct mmci_host *host, unsigned int desired);
+ 	void (*set_pwrreg)(struct mmci_host *host, unsigned char power_mode,
+@@ -445,5 +449,6 @@ struct mmci_host {
+ };
+ 
+ extern struct mmci_dma_ops dmaengine;
++extern struct mmci_dma_ops sdmmc_idma;
+ 
+ void mmci_write_datactrlreg(struct mmci_host *host, u32 datactrl);
+diff --git a/drivers/mmc/host/mmci_dma.c b/drivers/mmc/host/mmci_dma.c
+index dd7dae5..27b55c2 100644
+--- a/drivers/mmc/host/mmci_dma.c
++++ b/drivers/mmc/host/mmci_dma.c
+@@ -581,3 +581,200 @@ struct mmci_dma_ops dmaengine = {
+ #else
+ struct mmci_dma_ops dmaengine = {};
+ #endif
++
++#define SDMMC_LLI_BUF_LEN	PAGE_SIZE
++#define SDMMC_IDMA_BURST	BIT(MMCI_STM32_IDMABNDT_SHIFT)
++
++struct sdmmc_lli_desc {
++	u32 idmalar;
++	u32 idmabase;
++	u32 idmasize;
++};
++
++struct sdmmc_next {
++	s32 cookie;
++};
++
++struct sdmmc_priv {
++	dma_addr_t sg_dma;
++	void *sg_cpu;
++	struct sdmmc_next next_data;
++};
++
++static int __sdmmc_idma_prep_data(struct mmci_host *host, struct mmc_data *data)
++{
++	int n_elem;
++
++	n_elem = dma_map_sg(mmc_dev(host->mmc),
++			    data->sg,
++			    data->sg_len,
++			    mmc_get_dma_dir(data));
++
++	if (!n_elem) {
++		dev_err(mmc_dev(host->mmc), "dma_map_sg failed\n");
++		return -EINVAL;
++	}
++
++	return 0;
++}
++
++int sdmmc_idma_validate_data(struct mmci_host *host,
++			     struct mmc_data *data)
++{
++	struct sdmmc_priv *idma = host->dma_priv;
++	struct sdmmc_next *nd = &idma->next_data;
++	struct scatterlist *sg;
++	int ret, i;
++
++	/* Check if next job is not already prepared. */
++	if (data->host_cookie != nd->cookie) {
++		ret = __sdmmc_idma_prep_data(host, data);
++		if (ret)
++			return ret;
++	}
++
++	/*
++	 * idma has constraints on idmabase & idmasize for each element
++	 * excepted the last element which has no constraint on idmasize
++	 */
++	for_each_sg(data->sg, sg, data->sg_len - 1, i) {
++		if (!IS_ALIGNED(sg_dma_address(data->sg), sizeof(u32)) ||
++		    !IS_ALIGNED(sg_dma_len(data->sg), SDMMC_IDMA_BURST)) {
++			dev_err(mmc_dev(host->mmc),
++				"unaligned scatterlist: ofst:%x length:%d\n",
++				data->sg->offset, data->sg->length);
++			return -EINVAL;
++		}
++	}
++
++	if (!IS_ALIGNED(sg_dma_address(data->sg), sizeof(u32))) {
++		dev_err(mmc_dev(host->mmc),
++			"unaligned last scatterlist: ofst:%x length:%d\n",
++			data->sg->offset, data->sg->length);
++		return -EINVAL;
++	}
++
++	return 0;
++}
++
++static void sdmmc_idma_pre_req(struct mmci_host *host, struct mmc_data *data)
++{
++	struct sdmmc_priv *idma = host->dma_priv;
++	struct sdmmc_next *nd = &idma->next_data;
++
++	if (!__sdmmc_idma_prep_data(host, data))
++		data->host_cookie = ++nd->cookie < 0 ? 1 : nd->cookie;
++}
++
++static void sdmmc_idma_post_req(struct mmci_host *host, struct mmc_data *data,
++				int err)
++{
++	if (!data || !data->host_cookie)
++		return;
++
++	dma_unmap_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
++		     mmc_get_dma_dir(data));
++
++	data->host_cookie = 0;
++}
++
++static int sdmmc_idma_setup(struct mmci_host *host)
++{
++	struct sdmmc_priv *idma;
++
++	idma = devm_kzalloc(mmc_dev(host->mmc), sizeof(*idma), GFP_KERNEL);
++	if (!idma)
++		return -ENOMEM;
++
++	host->dma_priv = idma;
++
++	if (host->variant->dma_lli) {
++		idma->sg_cpu = dmam_alloc_coherent(mmc_dev(host->mmc),
++						   SDMMC_LLI_BUF_LEN,
++						   &idma->sg_dma, GFP_KERNEL);
++		if (!idma->sg_cpu) {
++			dev_err(mmc_dev(host->mmc),
++				"Failed to alloc IDMA descriptor\n");
++			return -ENOMEM;
++		}
++		host->mmc->max_segs = SDMMC_LLI_BUF_LEN /
++			sizeof(struct sdmmc_lli_desc);
++		host->mmc->max_seg_size = host->variant->stm32_idmabsize_mask;
++	} else {
++		host->mmc->max_segs = 1;
++		host->mmc->max_seg_size = host->mmc->max_req_size;
++	}
++
++	/* initialize pre request cookie */
++	idma->next_data.cookie = 1;
++
++	return 0;
++}
++
++static int sdmmc_idma_start(struct mmci_host *host, unsigned int datactrl)
++
++{
++	struct sdmmc_priv *idma = host->dma_priv;
++	struct sdmmc_lli_desc *desc = (struct sdmmc_lli_desc *)idma->sg_cpu;
++	struct mmc_data *data = host->data;
++	struct scatterlist *sg;
++	int i;
++
++	if (!host->variant->dma_lli || data->sg_len == 1) {
++		writel_relaxed(sg_dma_address(data->sg),
++			       host->base + MMCI_STM32_IDMABASE0R);
++		writel_relaxed(MMCI_STM32_IDMAEN,
++			       host->base + MMCI_STM32_IDMACTRLR);
++		goto out;
++	}
++
++	for_each_sg(data->sg, sg, data->sg_len, i) {
++		desc[i].idmalar = (i + 1) * sizeof(struct sdmmc_lli_desc);
++		desc[i].idmalar |= MMCI_STM32_ULA | MMCI_STM32_ULS
++			| MMCI_STM32_ABR;
++		desc[i].idmabase = sg_dma_address(sg);
++		desc[i].idmasize = sg_dma_len(sg);
++	}
++
++	/* notice the end of link list */
++	desc[data->sg_len - 1].idmalar &= ~MMCI_STM32_ULA;
++
++	dma_wmb();
++	writel_relaxed(idma->sg_dma, host->base + MMCI_STM32_IDMABAR);
++	writel_relaxed(desc[0].idmalar, host->base + MMCI_STM32_IDMALAR);
++	writel_relaxed(desc[0].idmabase, host->base + MMCI_STM32_IDMABASE0R);
++	writel_relaxed(desc[0].idmasize, host->base + MMCI_STM32_IDMABSIZER);
++	writel_relaxed(MMCI_STM32_IDMAEN | MMCI_STM32_IDMALLIEN,
++		       host->base + MMCI_STM32_IDMACTRLR);
++
++	/* mask & datactrl */
++out:
++	mmci_write_datactrlreg(host, datactrl);
++	writel(readl(host->base + MMCIMASK0) | MCI_DATAENDMASK,
++	       host->base + MMCIMASK0);
++
++	return 0;
++}
++
++static void sdmmc_idma_finalize(struct mmci_host *host, struct mmc_data *data)
++{
++	writel_relaxed(0, host->base + MMCI_STM32_IDMACTRLR);
++}
++
++static void sdmmc_idma_get_next_data(struct mmci_host *host,
++				     struct mmc_data *data)
++{
++	struct sdmmc_priv *idma = host->dma_priv;
++	struct sdmmc_next *next = &idma->next_data;
++
++	WARN_ON(data->host_cookie && data->host_cookie != next->cookie);
++}
++
++struct mmci_dma_ops sdmmc_idma = {
++	.setup = sdmmc_idma_setup,
++	.pre_req = sdmmc_idma_pre_req,
++	.start = sdmmc_idma_start,
++	.finalize = sdmmc_idma_finalize,
++	.post_req = sdmmc_idma_post_req,
++	.get_next_data = sdmmc_idma_get_next_data,
++};
+diff --git a/drivers/mmc/host/mmci_dma.h b/drivers/mmc/host/mmci_dma.h
+index 33e4e8a..cbfda89 100644
+--- a/drivers/mmc/host/mmci_dma.h
++++ b/drivers/mmc/host/mmci_dma.h
+@@ -28,4 +28,6 @@ void mmci_dma_post_req(struct mmci_host *host,
+ void mmci_dma_error(struct mmci_host *host);
+ void mmci_dma_get_next_data(struct mmci_host *host, struct mmc_data *data);
+ 
++int sdmmc_idma_validate_data(struct mmci_host *host,
++			     struct mmc_data *data);
+ #endif /* __MMC_DMA_H__ */
 -- 
 2.7.4
