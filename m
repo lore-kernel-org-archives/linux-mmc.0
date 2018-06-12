@@ -1,84 +1,152 @@
-From: Feng Tang <feng.tang@intel.com>
-Subject: Re: [PATCH] mmc: Move the mmc driver init earlier
-Date: Tue, 12 Jun 2018 21:06:40 +0800
-Message-ID: <20180612130640.yzuifhrlfs3lefuc@shbuild888>
-References: <20180608095154.22413-1-feng.tang@intel.com>
- <CAPDyKFrs3ngkVVQaq34V9qzV3KoFdy=B+UbLnzR=fHKsOco=tg@mail.gmail.com>
- <20180612084234.gjzq66xsqblryrkm@shbuild888>
- <CAPDyKFq8WZhQQ9EBjfuVvu=YHB9AdwvMHwyKOY5Wxku1V5PtmA@mail.gmail.com>
- <03aa85b4-74cf-621c-08cf-271b4c0d8e8c@rock-chips.com>
+From: Ludovic Barre <ludovic.Barre@st.com>
+Subject: [PATCH 08/19] mmc: mmci: add variant property to define irq pio mask
+Date: Tue, 12 Jun 2018 15:14:29 +0200
+Message-ID: <1528809280-31116-9-git-send-email-ludovic.Barre@st.com>
+References: <1528809280-31116-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <03aa85b4-74cf-621c-08cf-271b4c0d8e8c@rock-chips.com>
+In-Reply-To: <1528809280-31116-1-git-send-email-ludovic.Barre@st.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Adrian Hunter <adrian.hunter@intel.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
+Cc: Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Gerald Baeza <gerald.baeza@st.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, Ludovic Barre <ludovic.barre@st.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Jun 12, 2018 at 08:05:25PM +0800, Shawn Lin wrote:
-> On 2018/6/12 18:29, Ulf Hansson wrote:
-> > On 12 June 2018 at 10:42, Feng Tang <feng.tang@intel.com> wrote:
-> > > Hi Ulf,
-> > > 
-> > > Thanks for the review.
-> > > 
-> > > On Tue, Jun 12, 2018 at 08:25:44AM +0200, Ulf Hansson wrote:
-> > > > On 8 June 2018 at 11:51, Feng Tang <feng.tang@intel.com> wrote:
-> > > > > When doing some boot time optimization for an eMMC rootfs NUCs,
-> > > > > we found the rootfs may spend around 100 microseconds waiting
-> > > > > for eMMC card to be initialized, then the rootfs could be
-> > > > > mounted.
-> > > > >          [    1.216561] Waiting for root device /dev/mmcblk1p1...
-> > > > >          [    1.289262] mmc1: new HS400 MMC card at address 0001
-> > > > >          [    1.289667] mmcblk1: mmc1:0001 R1J56L 14.7 GiB
-> > > > >          [    1.289772] mmcblk1boot0: mmc1:0001 R1J56L partition 1 8.00 MiB
-> > > > >          [    1.289869] mmcblk1boot1: mmc1:0001 R1J56L partition 2 8.00 MiB
-> > > > >          [    1.289967] mmcblk1rpmb: mmc1:0001 R1J56L partition 3 4.00 MiB
-> > > > >          [    1.292798]  mmcblk1: p1 p2 p3
-> > > > >          [    1.300576] EXT4-fs (mmcblk1p1): couldn't mount as ext3 due to feature incompatibilities
-> > > > >          [    1.300912] EXT4-fs (mmcblk1p1): couldn't mount as ext2 due to feature incompatibilities
-> > > > > 
-> > > > > And this is a common problem for smartphones, tablets, embedded
-> > > > > devices and automotive products. This patch will make the eMMC/SD
-> > > > > card  start initializing earlier, by changing its order in drivers/Makefile.
-> > > > > 
-> > > > > On our platform, the waiting for eMMC card is almost eliminated with the patch,
-> > > > > which is critical to boot time.
-> > > > 
-> > > > I am wondering what kernel version you are running here. There have
-> > > > been some changes to the mmc initialization path, which perhaps can
-> > > > help.
-> > > These logs in commit msg are based on kernel 4.14, and the patch is generated
-> > > against kernel 4.17.
-> > 
-> > Right. So it's quite recent, even if lot's of changes have been made
-> > to the mmc core since then.
-> > 
-> > A few things (old/new) that is important.
-> > 1) Check if your mmc host driver support MMC_CAP_WAIT_WHILE_BUSY. That
-> > should have some effect, avoiding unnecessary polling.
-> > 
-> > 2) Since 4.18 rc1, you will be able to configure an over estimated
-> > "power on" delay (via DT as well). Look at commit
-> > 6d796c68cd15234a33a4bd2ef7231125fea2dc6c.
-> 
-> Sorry to chime in. We could also reduce the "power on" delay via hosts'
-> ->set_ios() callback.
-> 
-> > 
-> > 3) If you use a DT based platform, I think what people do is to
-> > re-organize the order of device nodes, such that as many as possible
-> > -EPROBE_DEFER is avoided to be returned by drivers. This is also not a
-> > good solution, but the best we have at this moment.
-> 
-> Also DT based platform is allowed to add no-sd and no-sdio for the eMMC
-> node, which could slighly help reduce the boot time.
-> You could refer to Documentation/devicetree/bindings/mmc/mmc.txt for
-> details.
+From: Ludovic Barre <ludovic.barre@st.com>
 
-Thanks Shawn for your tips, we did simliar thing :) for no-sd and no-sdio, 
-and even disabled SDHCI controller that has nothing connected.
+This patch allows to define specific pio mask for variants.
+Needed to support the STM32 sdmmc variant which has some bits
+with different meaning (bits: 21,20,13,12,9)
 
-- Feng
+Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
+---
+ drivers/mmc/host/mmci.c | 13 +++++++++++--
+ drivers/mmc/host/mmci.h |  5 ++++-
+ 2 files changed, 15 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 1f44c61..5fd3ffb6 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -62,6 +62,7 @@ static struct variant_data variant_arm = {
+ 	.f_max			= 100000000,
+ 	.reversed_irq_handling	= true,
+ 	.mmcimask1		= true,
++	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
+ 	.start_err		= MCI_STARTBITERR,
+ 	.opendrain		= MCI_ROD,
+ 	.mmci_dma		= &dmaengine,
+@@ -80,6 +81,7 @@ static struct variant_data variant_arm_extended_fifo = {
+ 	.pwrreg_powerup		= MCI_PWR_UP,
+ 	.f_max			= 100000000,
+ 	.mmcimask1		= true,
++	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
+ 	.start_err		= MCI_STARTBITERR,
+ 	.opendrain		= MCI_ROD,
+ 	.mmci_dma		= &dmaengine,
+@@ -99,6 +101,7 @@ static struct variant_data variant_arm_extended_fifo_hwfc = {
+ 	.pwrreg_powerup		= MCI_PWR_UP,
+ 	.f_max			= 100000000,
+ 	.mmcimask1		= true,
++	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
+ 	.start_err		= MCI_STARTBITERR,
+ 	.opendrain		= MCI_ROD,
+ 	.mmci_dma		= &dmaengine,
+@@ -124,6 +127,7 @@ static struct variant_data variant_u300 = {
+ 	.pwrreg_clkgate		= true,
+ 	.pwrreg_nopower		= true,
+ 	.mmcimask1		= true,
++	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
+ 	.start_err		= MCI_STARTBITERR,
+ 	.opendrain		= MCI_OD,
+ 	.mmci_dma		= &dmaengine,
+@@ -150,6 +154,7 @@ static struct variant_data variant_nomadik = {
+ 	.pwrreg_clkgate		= true,
+ 	.pwrreg_nopower		= true,
+ 	.mmcimask1		= true,
++	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
+ 	.start_err		= MCI_STARTBITERR,
+ 	.opendrain		= MCI_OD,
+ 	.mmci_dma		= &dmaengine,
+@@ -182,6 +187,7 @@ static struct variant_data variant_ux500 = {
+ 	.busy_detect_mask	= MCI_ST_BUSYENDMASK,
+ 	.pwrreg_nopower		= true,
+ 	.mmcimask1		= true,
++	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
+ 	.start_err		= MCI_STARTBITERR,
+ 	.opendrain		= MCI_OD,
+ 	.mmci_dma		= &dmaengine,
+@@ -216,6 +222,7 @@ static struct variant_data variant_ux500v2 = {
+ 	.busy_detect_mask	= MCI_ST_BUSYENDMASK,
+ 	.pwrreg_nopower		= true,
+ 	.mmcimask1		= true,
++	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
+ 	.start_err		= MCI_STARTBITERR,
+ 	.opendrain		= MCI_OD,
+ 	.mmci_dma		= &dmaengine,
+@@ -232,6 +239,7 @@ static struct variant_data variant_stm32 = {
+ 	.cmdreg_lrsp_crc	= MCI_CPSM_RESPONSE | MCI_CPSM_LONGRSP,
+ 	.cmdreg_srsp_crc	= MCI_CPSM_RESPONSE,
+ 	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
++	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
+ 	.datalength_bits	= 24,
+ 	.datactrl_blocksz	= 11,
+ 	.datactrl_dpsm_enable	= MCI_DPSM_ENABLE,
+@@ -268,6 +276,7 @@ static struct variant_data variant_qcom = {
+ 	.qcom_fifo		= true,
+ 	.qcom_dml		= true,
+ 	.mmcimask1		= true,
++	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
+ 	.start_err		= MCI_STARTBITERR,
+ 	.opendrain		= MCI_ROD,
+ 	.mmci_dma		= &dmaengine,
+@@ -486,7 +495,7 @@ static void mmci_set_mask1(struct mmci_host *host, unsigned int mask)
+ 	if (host->singleirq) {
+ 		unsigned int mask0 = readl(base + MMCIMASK0);
+ 
+-		mask0 &= ~MCI_IRQ1MASK;
++		mask0 &= ~variant->irq_pio_mask;
+ 		mask0 |= mask;
+ 
+ 		writel(mask0, base + MMCIMASK0);
+@@ -1046,7 +1055,7 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
+ 			if (status & host->mask1_reg)
+ 				mmci_pio_irq(irq, dev_id);
+ 
+-			status &= ~MCI_IRQ1MASK;
++			status &= ~host->variant->irq_pio_mask;
+ 		}
+ 
+ 		/*
+diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+index a2bf8bc..b91b130 100644
+--- a/drivers/mmc/host/mmci.h
++++ b/drivers/mmc/host/mmci.h
+@@ -186,7 +186,7 @@
+ 	MCI_CMDRESPENDMASK | MCI_CMDSENTMASK)
+ 
+ /* These interrupts are directed to IRQ1 when two IRQ lines are available */
+-#define MCI_IRQ1MASK \
++#define MCI_IRQ_PIO_MASK \
+ 	(MCI_RXFIFOHALFFULLMASK | MCI_RXDATAAVLBLMASK | \
+ 	 MCI_TXFIFOHALFEMPTYMASK)
+ 
+@@ -275,6 +275,8 @@ struct mmci_host;
+  * @qcom_dml: enables qcom specific dma glue for dma transfers.
+  * @reversed_irq_handling: handle data irq before cmd irq.
+  * @mmcimask1: true if variant have a MMCIMASK1 register.
++ * @irq_pio_mask: bitmask used to manage interrupt pio transfert in mmcimask
++ *		  register
+  * @start_err: bitmask identifying the STARTBITERR bit inside MMCISTATUS
+  *	       register.
+  * @opendrain: bitmask identifying the OPENDRAIN bit inside MMCIPOWER register
+@@ -317,6 +319,7 @@ struct variant_data {
+ 	bool			qcom_dml;
+ 	bool			reversed_irq_handling;
+ 	bool			mmcimask1;
++	unsigned int		irq_pio_mask;
+ 	u32			start_err;
+ 	u32			opendrain;
+ 	struct mmci_dma_ops	*mmci_dma;
+-- 
+2.7.4
