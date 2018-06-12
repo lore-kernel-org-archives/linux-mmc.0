@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH 16/19] mmc: mmci: add DT bindings for STM32 sdmmc
-Date: Tue, 12 Jun 2018 15:14:37 +0200
-Message-ID: <1528809280-31116-17-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH 09/19] mmc: mmci: add variant property to write datactrl before command
+Date: Tue, 12 Jun 2018 15:14:30 +0200
+Message-ID: <1528809280-31116-10-git-send-email-ludovic.Barre@st.com>
 References: <1528809280-31116-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,61 +14,59 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-STM32 sdmmc variant has support to:
--Indicate signal directions (only one property
-for d0dir, d123dir, cmd_dir)
--Select command and data phase relation.
--Select "clock in" from an external driver.
+This patch adds a boolean property to allow to write datactrl
+before to send command, whatever the command type (read or write).
+Needed to support the STM32 sdmmc variant.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- Documentation/devicetree/bindings/mmc/mmci.txt | 9 +++++++++
- drivers/mmc/host/mmci.c                        | 6 ++++++
- 2 files changed, 15 insertions(+)
+ drivers/mmc/host/mmci.c | 6 ++++--
+ drivers/mmc/host/mmci.h | 2 ++
+ 2 files changed, 6 insertions(+), 2 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/mmci.txt b/Documentation/devicetree/bindings/mmc/mmci.txt
-index e952707..d678933 100644
---- a/Documentation/devicetree/bindings/mmc/mmci.txt
-+++ b/Documentation/devicetree/bindings/mmc/mmci.txt
-@@ -19,6 +19,7 @@ Optional properties:
-                            the ID provided by the HW
- - vqmmc-supply           : phandle to the regulator device tree node, mentioned
-                            as the VCCQ/VDD_IO supply in the eMMC/SD specs.
-+specific for ux500 variant:
- - st,sig-dir-dat0        : bus signal direction pin used for DAT[0].
- - st,sig-dir-dat2        : bus signal direction pin used for DAT[2].
- - st,sig-dir-dat31       : bus signal direction pin used for DAT[3] and DAT[1].
-@@ -26,6 +27,14 @@ Optional properties:
- - st,sig-dir-cmd         : cmd signal direction pin used for CMD.
- - st,sig-pin-fbclk       : feedback clock signal pin used.
- 
-+specific for sdmmc variant:
-+- st,sig-dir             : signal direction polarity used for cmd, dat0 dat123.
-+- st,neg-edge            : data & command phase relation, generated on
-+                           sd clock falling edge.
-+- st,use-ckin            : use ckin pin from an external driver to sample
-+                           the receive data (example: with voltage
-+			   switch transceiver).
-+
- Deprecated properties:
- - mmc-cap-mmc-highspeed  : indicates whether MMC is high speed capable.
- - mmc-cap-sd-highspeed   : indicates whether SD is high speed capable.
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index e24fd1e..86aef4f 100644
+index 5fd3ffb6..83c3572 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -1328,6 +1328,12 @@ static int mmci_of_parse(struct device_node *np, struct mmc_host *mmc)
- 		host->pwr_reg_add |= MCI_ST_CMDDIREN;
- 	if (of_get_property(np, "st,sig-pin-fbclk", NULL))
- 		host->pwr_reg_add |= MCI_ST_FBCLKEN;
-+	if (of_get_property(np, "st,sig-dir", NULL))
-+		host->pwr_reg_add |= MCI_STM32_DIRPOL;
-+	if (of_get_property(np, "st,neg-edge", NULL))
-+		host->clk_reg_add |= MCI_STM32_CLK_NEGEDGE;
-+	if (of_get_property(np, "st,use-ckin ", NULL))
-+		host->clk_reg_add |= MCI_STM32_CLK_SELCKIN;
+@@ -855,7 +855,8 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+ 		mmci_request_end(host, host->mrq);
+ 	} else if (sbc) {
+ 		mmci_start_command(host, host->mrq->cmd, 0);
+-	} else if (!(cmd->data->flags & MMC_DATA_READ)) {
++	} else if (!host->variant->datactrl_first &&
++		   !(cmd->data->flags & MMC_DATA_READ)) {
+ 		mmci_start_data(host, cmd->data);
+ 	}
+ }
+@@ -1119,7 +1120,8 @@ static void mmci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 	if (mrq->data)
+ 		mmci_dma_get_next_data(host, mrq->data);
  
- 	if (of_get_property(np, "mmc-cap-mmc-highspeed", NULL))
- 		mmc->caps |= MMC_CAP_MMC_HIGHSPEED;
+-	if (mrq->data && mrq->data->flags & MMC_DATA_READ)
++	if (mrq->data &&
++	    (host->variant->datactrl_first || mrq->data->flags & MMC_DATA_READ))
+ 		mmci_start_data(host, mrq->data);
+ 
+ 	if (mrq->sbc)
+diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+index b91b130..5091025 100644
+--- a/drivers/mmc/host/mmci.h
++++ b/drivers/mmc/host/mmci.h
+@@ -259,6 +259,7 @@ struct mmci_host;
+  * @datactrl_mask_sdio: SDIO enable mask in datactrl register
+  * @datactrl_blksz: block size in power of two
+  * @datactrl_dpsm_enable: enable value for DPSM
++ * @datactrl_first: true if data must be setup before send command
+  * @pwrreg_powerup: power up value for MMCIPOWER register
+  * @f_max: maximum clk frequency supported by the controller.
+  * @signal_direction: input/out direction of bus signals can be indicated
+@@ -301,6 +302,7 @@ struct variant_data {
+ 	unsigned int		datactrl_mask_sdio;
+ 	unsigned int		datactrl_blocksz;
+ 	unsigned int		datactrl_dpsm_enable;
++	bool			datactrl_first;
+ 	bool			st_sdio;
+ 	bool			st_clkdiv;
+ 	bool			blksz_datactrl16;
 -- 
 2.7.4
