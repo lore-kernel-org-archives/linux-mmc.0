@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH 12/19] mmc: mmci: add variant property to request a reset
-Date: Tue, 12 Jun 2018 15:14:33 +0200
-Message-ID: <1528809280-31116-13-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH 13/19] mmc: mmci: send stop cmd if a data command fail
+Date: Tue, 12 Jun 2018 15:14:34 +0200
+Message-ID: <1528809280-31116-14-git-send-email-ludovic.Barre@st.com>
 References: <1528809280-31116-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,85 +14,144 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-Some variants could require a reset.
-STM32 sdmmc variant needs to reset hardware block
-during the power cycle procedure (for re-initialization)
+The mmc framework follows the requirement of SD_Specification:
+the STOP_TRANSMISSION is sent on multiple write/read commands
+and the stop command (alone), not needed on other ADTC commands.
+
+But, some variants require a stop command "STOP_TRANSMISION" to clear
+the DPSM "Data Path State Machine" if an error happens on command or data
+step. If it's not done the next data command will freeze hardware block.
+Needed to support the STM32 sdmmc variant.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- Documentation/devicetree/bindings/mmc/mmci.txt | 2 ++
- drivers/mmc/host/mmci.c                        | 9 +++++++++
- drivers/mmc/host/mmci.h                        | 4 ++++
- 3 files changed, 15 insertions(+)
+ drivers/mmc/host/mmci.c | 36 +++++++++++++++++++++++++++++++-----
+ drivers/mmc/host/mmci.h |  3 +++
+ 2 files changed, 34 insertions(+), 5 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/mmci.txt b/Documentation/devicetree/bindings/mmc/mmci.txt
-index 03796cf..e952707 100644
---- a/Documentation/devicetree/bindings/mmc/mmci.txt
-+++ b/Documentation/devicetree/bindings/mmc/mmci.txt
-@@ -11,6 +11,8 @@ Required properties:
- - compatible             : contains "arm,pl18x", "arm,primecell".
- - vmmc-supply            : phandle to the regulator device tree node, mentioned
-                            as the VCC/VDD supply in the eMMC/SD specs.
-+depend of variant:
-+- resets                 : phandle to internal reset line.
- 
- Optional properties:
- - arm,primecell-periphid : contains the PrimeCell Peripheral ID, it overrides
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 9c00804..87724e1 100644
+index 87724e1..9af7db8 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -37,6 +37,7 @@
- #include <linux/pm_runtime.h>
- #include <linux/types.h>
- #include <linux/pinctrl/consumer.h>
-+#include <linux/reset.h>
+@@ -24,6 +24,7 @@
+ #include <linux/mmc/pm.h>
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/card.h>
++#include <linux/mmc/mmc.h>
+ #include <linux/mmc/slot-gpio.h>
+ #include <linux/amba/bus.h>
+ #include <linux/clk.h>
+@@ -522,11 +523,28 @@ static void mmci_set_mask1(struct mmci_host *host, unsigned int mask)
+ 	host->mask1_reg = mask;
+ }
  
- #include <asm/div64.h>
- #include <asm/io.h>
-@@ -1445,6 +1446,14 @@ static int mmci_probe(struct amba_device *dev,
- 
- 	dev_dbg(mmc_dev(mmc), "clocking block at %u Hz\n", mmc->f_max);
- 
-+	if (variant->reset) {
-+		host->rst = devm_reset_control_get_exclusive(&dev->dev, NULL);
-+		if (IS_ERR(host->rst)) {
-+			ret = PTR_ERR(host->rst);
-+			goto clk_disable;
+-static void mmci_stop_data(struct mmci_host *host)
++static int mmci_stop_data(struct mmci_host *host)
+ {
++	struct mmc_command *stop = &host->stop_abort;
++	struct mmc_data *data = host->data;
++	unsigned int cmd = 0;
++
+ 	mmci_write_datactrlreg(host, 0);
+ 	mmci_set_mask1(host, 0);
+ 	host->data = NULL;
++
++	if (host->variant->cmdreg_stop) {
++		cmd |= host->variant->cmdreg_stop;
++		if (!data->stop) {
++			memset(stop, 0, sizeof(struct mmc_command));
++			stop->opcode = MMC_STOP_TRANSMISSION;
++			stop->arg = 0;
++			stop->flags = MMC_RSP_R1B | MMC_CMD_AC;
++			data->stop = stop;
 +		}
 +	}
 +
- 	/* Get regulators and the supported OCR mask */
- 	ret = mmc_regulator_get_supply(mmc);
- 	if (ret)
++	return cmd;
+ }
+ 
+ static void mmci_init_sg(struct mmci_host *host, struct mmc_data *data)
+@@ -703,6 +721,7 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
+ 	      unsigned int status)
+ {
+ 	unsigned int status_err;
++	unsigned int cmd_reg = 0;
+ 
+ 	/* Make sure we have data to handle */
+ 	if (!data)
+@@ -761,7 +780,7 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
+ 	if (status & MCI_DATAEND || data->error) {
+ 		mmci_dma_finalize(host, data);
+ 
+-		mmci_stop_data(host);
++		cmd_reg = mmci_stop_data(host);
+ 
+ 		if (!data->error)
+ 			/* The error clause is handled above, success! */
+@@ -770,7 +789,7 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
+ 		if (!data->stop || host->mrq->sbc) {
+ 			mmci_request_end(host, data->mrq);
+ 		} else {
+-			mmci_start_command(host, data->stop, 0);
++			mmci_start_command(host, data->stop, cmd_reg);
+ 		}
+ 	}
+ }
+@@ -780,6 +799,8 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+ 	     unsigned int status)
+ {
+ 	void __iomem *base = host->base;
++	struct mmc_data *data = host->data;
++	unsigned int cmd_reg = 0;
+ 	bool sbc;
+ 
+ 	if (!cmd)
+@@ -865,11 +886,16 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+ 	}
+ 
+ 	if ((!sbc && !cmd->data) || cmd->error) {
+-		if (host->data) {
++		if (data) {
+ 			/* Terminate the DMA transfer */
+ 			mmci_dma_error(host);
+ 
+-			mmci_stop_data(host);
++			cmd_reg = mmci_stop_data(host);
++
++			if (data->stop) {
++				mmci_start_command(host, data->stop, cmd_reg);
++				return;
++			}
+ 		}
+ 		mmci_request_end(host, host->mrq);
+ 	} else if (sbc) {
 diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 30d3f53..2d7e901 100644
+index 2d7e901..4b4cd1d 100644
 --- a/drivers/mmc/host/mmci.h
 +++ b/drivers/mmc/host/mmci.h
-@@ -284,6 +284,7 @@ struct mmci_host;
-  *	       register.
-  * @opendrain: bitmask identifying the OPENDRAIN bit inside MMCIPOWER register
-  * @mmci_dma: Pointer to platform-specific DMA callbacks.
-+ * @reset: true if variant has need reset signal.
-  * @validate_data: if hardware block has specific constraint on validate data
-  * @set_clk_ios: if clock procedure of variant is specific
-  * @set_pwr_ios: if power procedure of variant is specific
-@@ -329,6 +330,7 @@ struct variant_data {
- 	u32			start_err;
- 	u32			opendrain;
- 	struct mmci_dma_ops	*mmci_dma;
-+	bool			reset;
- 	int (*validate_data)(struct mmci_host *host, struct mmc_data *data);
- 	void (*set_clkreg)(struct mmci_host *host, unsigned int desired);
- 	void (*set_pwrreg)(struct mmci_host *host, unsigned char power_mode,
-@@ -345,6 +347,8 @@ struct mmci_host {
+@@ -243,6 +243,7 @@ struct mmci_host;
+  * @cmdreg_lrsp_crc: enable value for long response with crc
+  * @cmdreg_srsp_crc: enable value for short response with crc
+  * @cmdreg_srsp: enable value for short response without crc
++ * @cmdreg_stop: enable value for stop and abort transmission
+  * @datalength_bits: number of bits in the MMCIDATALENGTH register
+  * @fifosize: number of bytes that can be written when MMCI_TXFIFOEMPTY
+  *	      is asserted (likewise for RX)
+@@ -298,6 +299,7 @@ struct variant_data {
+ 	unsigned int		cmdreg_lrsp_crc;
+ 	unsigned int		cmdreg_srsp_crc;
+ 	unsigned int		cmdreg_srsp;
++	unsigned int		cmdreg_stop;
+ 	unsigned int		datalength_bits;
+ 	unsigned int		fifosize;
+ 	unsigned int		fifohalfsize;
+@@ -343,6 +345,7 @@ struct mmci_host {
+ 	struct mmc_request	*mrq;
+ 	struct mmc_command	*cmd;
+ 	struct mmc_data		*data;
++	struct mmc_command	stop_abort;
+ 	struct mmc_host		*mmc;
  	struct clk		*clk;
  	bool			singleirq;
- 
-+	struct reset_control	*rst;
-+
- 	spinlock_t		lock;
- 
- 	unsigned int		mclk;
 -- 
 2.7.4
