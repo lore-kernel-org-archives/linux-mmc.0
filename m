@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH 14/19] mmc: mmci: add clock divider for stm32 sdmmc
-Date: Tue, 12 Jun 2018 15:14:35 +0200
-Message-ID: <1528809280-31116-15-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH 19/19] mmc: mmci: add stm32 sdmmc variant
+Date: Tue, 12 Jun 2018 15:14:40 +0200
+Message-ID: <1528809280-31116-20-git-send-email-ludovic.Barre@st.com>
 References: <1528809280-31116-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,46 +14,62 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-The STM32 sdmmc variant has a different clock divider.
+This patch adds a stm32 sdmmc variant, rev 1.1.
+Introduces a new Manufacturer id "0x53, ascii 'S' to define
+new stm32 sdmmc familly with clean range of amba
+revision/configurations bits (corresponding to sdmmc_ver
+register with major/minor fields).
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.c | 2 ++
- drivers/mmc/host/mmci.h | 2 ++
- 2 files changed, 4 insertions(+)
+ drivers/mmc/host/mmci.c | 28 ++++++++++++++++++++++++++++
+ 1 file changed, 28 insertions(+)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 9af7db8..e24fd1e 100644
+index af27a0a..bed671d 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -1451,6 +1451,8 @@ static int mmci_probe(struct amba_device *dev,
- 	 */
- 	if (variant->st_clkdiv)
- 		mmc->f_min = DIV_ROUND_UP(host->mclk, 257);
-+	else if (variant->stm32_clkdiv)
-+		mmc->f_min = DIV_ROUND_UP(host->mclk, 2046);
- 	else if (variant->explicit_mclk_control)
- 		mmc->f_min = clk_round_rate(host->clk, 100000);
- 	else
-diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 4b4cd1d..227927e 100644
---- a/drivers/mmc/host/mmci.h
-+++ b/drivers/mmc/host/mmci.h
-@@ -252,6 +252,7 @@ struct mmci_host;
-  * @data_cmd_enable: enable value for data commands.
-  * @st_sdio: enable ST specific SDIO logic
-  * @st_clkdiv: true if using a ST-specific clock divider algorithm
-+ * @stm32_clkdiv: true if using a STM32-specific clock divider algorithm
-  * @datactrl_mask_ddrmode: ddr mode mask in datactrl register.
-  * @blksz_datactrl16: true if Block size is at b16..b30 position in datactrl
-  *                    register
-@@ -312,6 +313,7 @@ struct variant_data {
- 	bool			datacnt_remain;
- 	bool			st_sdio;
- 	bool			st_clkdiv;
-+	bool			stm32_clkdiv;
- 	bool			blksz_datactrl16;
- 	bool			blksz_datactrl4;
- 	u32			pwrreg_powerup;
+@@ -267,6 +267,29 @@ static struct variant_data variant_stm32 = {
+ 	.mmci_dma		= &dmaengine,
+ };
+ 
++static struct variant_data variant_stm32_sdmmc = {
++	.fifosize		= 16 * 4,
++	.fifohalfsize		= 8 * 4,
++	.f_max			= 208000000,
++	.stm32_clkdiv		= true,
++	.reset			= true,
++	.cmdreg_cpsm_enable	= MCI_CPSM_STM32_ENABLE,
++	.cmdreg_lrsp_crc	= MCI_CPSM_STM32_LRSP_CRC,
++	.cmdreg_srsp_crc	= MCI_CPSM_STM32_SRSP_CRC,
++	.cmdreg_srsp		= MCI_CPSM_STM32_SRSP,
++	.cmdreg_stop		= MCI_CPSM_STM32_CMDSTOP,
++	.data_cmd_enable	= MCI_CPSM_STM32_CMDTRANS,
++	.irq_pio_mask		= MCI_IRQ_PIO_STM32_MASK,
++	.datactrl_first		= true,
++	.datalength_bits	= 25,
++	.datactrl_blocksz	= 14,
++	.mmci_dma		= &sdmmc_idma,
++	.stm32_idmabsize_mask	= GENMASK(12, 5),
++	.validate_data		= sdmmc_idma_validate_data,
++	.set_clkreg		= mmci_sdmmc_set_clkreg,
++	.set_pwrreg		= mmci_sdmmc_set_pwrreg,
++};
++
+ static struct variant_data variant_qcom = {
+ 	.fifosize		= 16 * 4,
+ 	.fifohalfsize		= 8 * 4,
+@@ -1907,6 +1930,11 @@ static const struct amba_id mmci_ids[] = {
+ 		.mask   = 0x00ffffff,
+ 		.data	= &variant_stm32,
+ 	},
++	{
++		.id     = 0x10153180,
++		.mask	= 0xf0ffffff,
++		.data	= &variant_stm32_sdmmc,
++	},
+ 	/* Qualcomm variants */
+ 	{
+ 		.id     = 0x00051180,
 -- 
 2.7.4
