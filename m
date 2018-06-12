@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH 18/19] mmc: mmci: add specific clk/pwr procedure for stm32 sdmmc
-Date: Tue, 12 Jun 2018 15:14:39 +0200
-Message-ID: <1528809280-31116-19-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH 15/19] mmc: mmci: add stm32 sdmmc registers
+Date: Tue, 12 Jun 2018 15:14:36 +0200
+Message-ID: <1528809280-31116-16-git-send-email-ludovic.Barre@st.com>
 References: <1528809280-31116-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,157 +14,119 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-This patch adds specific clock and power ios for stm32 sdmmc variant.
-power ios: stm32 dedicated procedure must be done to perform power
-off/on procedures. To power off, the sdmmc must be reset and set
-to power cycle state before to disabling vqmmc. This drives low
-SDMMC_D[7:0], SDMMC_CMD and SDMMC_CK to prevent the Card from
-being supplied through the signal lines.
-To power on, set the SDMMC in power-off SDMMC_D[7:0], SDMMC_CMD
-and SDMMC_CK are driven high. Then we can set the SDMMC to
-Power-on state.
-
-clock ios: specific bits behavior:
--clock divider card_clk = mclk / (2 * clkdiv)
--ddr activation
--wide bus 1/4/8bits
--bus speed
--receive clock selection (in_ck/ck_in/fb_ck)
+This patch adds stm32 sdmmc specific registers.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.c | 112 ++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 112 insertions(+)
+ drivers/mmc/host/mmci.h | 56 +++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 56 insertions(+)
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 86aef4f..af27a0a 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -50,6 +50,10 @@
+diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+index 227927e..c2ad724 100644
+--- a/drivers/mmc/host/mmci.h
++++ b/drivers/mmc/host/mmci.h
+@@ -23,6 +23,14 @@
+ #define MCI_ST_DATA31DIREN	(1 << 5)
+ #define MCI_ST_FBCLKEN		(1 << 7)
+ #define MCI_ST_DATA74DIREN	(1 << 8)
++/*
++ * The STM32 sdmmc does not have PWR_UP/OD/ROD
++ * and uses the power register for
++ */
++#define MCI_STM32_PWR_CYC	0x02
++#define MCI_STM32_VSWITCH	BIT(2)
++#define MCI_STM32_VSWITCHEN	BIT(3)
++#define MCI_STM32_DIRPOL	BIT(4)
  
- static unsigned int fmax = 515633;
+ #define MMCICLOCK		0x004
+ #define MCI_CLK_ENABLE		(1 << 8)
+@@ -50,6 +58,19 @@
+ #define MCI_QCOM_CLK_SELECT_IN_FBCLK	BIT(15)
+ #define MCI_QCOM_CLK_SELECT_IN_DDR_MODE	(BIT(14) | BIT(15))
  
-+static void mmci_sdmmc_set_pwrreg(struct mmci_host *host,
-+				  unsigned char power_mode, unsigned int pwr);
-+static void mmci_sdmmc_set_clkreg(struct mmci_host *host, unsigned int desired);
++/* Modified on STM32 sdmmc */
++#define MCI_STM32_CLK_CLKDIV_MSK	GENMASK(9, 0)
++#define MCI_STM32_CLK_WIDEBUS_4		BIT(14)
++#define MCI_STM32_CLK_WIDEBUS_8		BIT(15)
++#define MCI_STM32_CLK_NEGEDGE		BIT(16)
++#define MCI_STM32_CLK_HWFCEN		BIT(17)
++#define MCI_STM32_CLK_DDR		BIT(18)
++#define MCI_STM32_CLK_BUSSPEED		BIT(19)
++#define MCI_STM32_CLK_SEL_MSK		GENMASK(21, 20)
++#define MCI_STM32_CLK_SELCK		(0 << 20)
++#define MCI_STM32_CLK_SELCKIN		(1 << 20)
++#define MCI_STM32_CLK_SELFBCK		(2 << 20)
 +
- static struct variant_data variant_arm = {
- 	.fifosize		= 16 * 4,
- 	.fifohalfsize		= 8 * 4,
-@@ -490,6 +494,114 @@ static void mmci_set_pwrreg(struct mmci_host *host, unsigned char power_mode,
- 	mmci_write_pwrreg(host, pwr);
- }
+ #define MMCIARGUMENT		0x008
  
-+static void mmci_sdmmc_set_clkreg(struct mmci_host *host, unsigned int desired)
-+{
-+	unsigned int clk = 0, ddr = 0;
+ /* The command register controls the Command Path State Machine (CPSM) */
+@@ -72,6 +93,15 @@
+ #define MCI_CPSM_QCOM_CCSDISABLE	BIT(15)
+ #define MCI_CPSM_QCOM_AUTO_CMD19	BIT(16)
+ #define MCI_CPSM_QCOM_AUTO_CMD21	BIT(21)
++/* Command register in STM32 sdmmc versions */
++#define MCI_CPSM_STM32_CMDTRANS		BIT(6)
++#define MCI_CPSM_STM32_CMDSTOP		BIT(7)
++#define MCI_CPSM_STM32_WAITRESP_MASK	GENMASK(9, 8)
++#define MCI_CPSM_STM32_NORSP		(0 << 8)
++#define MCI_CPSM_STM32_SRSP_CRC		(1 << 8)
++#define MCI_CPSM_STM32_SRSP		(2 << 8)
++#define MCI_CPSM_STM32_LRSP_CRC		(3 << 8)
++#define MCI_CPSM_STM32_ENABLE		BIT(12)
+ 
+ #define MMCIRESPCMD		0x010
+ #define MMCIRESPONSE0		0x014
+@@ -130,6 +160,8 @@
+ #define MCI_ST_SDIOIT		(1 << 22)
+ #define MCI_ST_CEATAEND		(1 << 23)
+ #define MCI_ST_CARDBUSY		(1 << 24)
++/* Extended status bits for the STM32 variants */
++#define MCI_STM32_BUSYD0	BIT(20)
+ 
+ #define MMCICLEAR		0x038
+ #define MCI_CMDCRCFAILCLR	(1 << 0)
+@@ -175,11 +207,32 @@
+ #define MCI_ST_SDIOITMASK	(1 << 22)
+ #define MCI_ST_CEATAENDMASK	(1 << 23)
+ #define MCI_ST_BUSYENDMASK	(1 << 24)
++/* Extended status bits for the STM32 variants */
++#define MCI_STM32_BUSYD0ENDMASK	BIT(21)
+ 
+ #define MMCIMASK1		0x040
+ #define MMCIFIFOCNT		0x048
+ #define MMCIFIFO		0x080 /* to 0x0bc */
+ 
++/* STM32 sdmmc registers for IDMA (Internal DMA) */
++#define MMCI_STM32_IDMACTRLR	0x050
++#define MMCI_STM32_IDMAEN	BIT(0)
++#define MMCI_STM32_IDMALLIEN	BIT(1)
 +
-+	if (host->mmc->ios.timing == MMC_TIMING_MMC_DDR52 ||
-+	    host->mmc->ios.timing == MMC_TIMING_UHS_DDR50)
-+		ddr = MCI_STM32_CLK_DDR;
++#define MMCI_STM32_IDMABSIZER		0x054
++#define MMCI_STM32_IDMABNDT_SHIFT	5
++#define MMCI_STM32_IDMABNDT_MASK	GENMASK(12, 5)
 +
-+	/*
-+	 * cclk = mclk / (2 * clkdiv)
-+	 * clkdiv 0 => bypass
-+	 * in ddr mode bypass is not possible
-+	 */
-+	if (desired) {
-+		if (desired >= host->mclk && !ddr) {
-+			host->cclk = host->mclk;
-+		} else {
-+			clk = DIV_ROUND_UP(host->mclk, 2 * desired);
-+			if (clk > MCI_STM32_CLK_CLKDIV_MSK)
-+				clk = MCI_STM32_CLK_CLKDIV_MSK;
-+			host->cclk = host->mclk / (2 * clk);
-+		}
-+	}
++#define MMCI_STM32_IDMABASE0R	0x058
 +
-+	if (host->mmc->ios.bus_width == MMC_BUS_WIDTH_4)
-+		clk |= MCI_STM32_CLK_WIDEBUS_4;
-+	if (host->mmc->ios.bus_width == MMC_BUS_WIDTH_8)
-+		clk |= MCI_STM32_CLK_WIDEBUS_8;
++#define MMCI_STM32_IDMALAR	0x64
++#define MMCI_STM32_IDMALA_MASK	GENMASK(13, 0)
++#define MMCI_STM32_ABR		BIT(29)
++#define MMCI_STM32_ULS		BIT(30)
++#define MMCI_STM32_ULA		BIT(31)
 +
-+	clk |= MCI_STM32_CLK_HWFCEN;
-+	clk |= host->clk_reg_add;
-+	clk |= ddr;
++#define MMCI_STM32_IDMABAR	0x68
 +
-+	/*
-+	 * SDMMC_FBCK is selected when an external Delay Block is needed
-+	 * with SDR104.
-+	 */
-+	if (host->mmc->ios.timing >= MMC_TIMING_UHS_SDR50) {
-+		clk |= MCI_STM32_CLK_BUSSPEED;
-+		if (host->mmc->ios.timing == MMC_TIMING_UHS_SDR104) {
-+			clk &= ~MCI_STM32_CLK_SEL_MSK;
-+			clk |= MCI_STM32_CLK_SELFBCK;
-+		}
-+	}
+ #define MCI_IRQENABLE	\
+ 	(MCI_CMDCRCFAILMASK | MCI_DATACRCFAILMASK | MCI_CMDTIMEOUTMASK | \
+ 	MCI_DATATIMEOUTMASK | MCI_TXUNDERRUNMASK | MCI_RXOVERRUNMASK |	\
+@@ -190,6 +243,9 @@
+ 	(MCI_RXFIFOHALFFULLMASK | MCI_RXDATAAVLBLMASK | \
+ 	 MCI_TXFIFOHALFEMPTYMASK)
+ 
++#define MCI_IRQ_PIO_STM32_MASK \
++	(MCI_RXFIFOHALFFULLMASK | MCI_TXFIFOHALFEMPTYMASK)
 +
-+	mmci_write_clkreg(host, clk);
-+}
-+
-+static void mmci_sdmmc_set_pwrreg(struct mmci_host *host,
-+				  unsigned char power_mode, unsigned int pwr)
-+{
-+	struct mmc_host *mmc = host->mmc;
-+
-+	pwr |= host->pwr_reg_add;
-+
-+	switch (power_mode) {
-+	case MMC_POWER_OFF:
-+		if (!IS_ERR(mmc->supply.vmmc))
-+			mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
-+
-+		/* Only a reset could disable sdmmc */
-+		reset_control_assert(host->rst);
-+		udelay(2);
-+		reset_control_deassert(host->rst);
-+
-+		/* default mask (probe) must be activated */
-+		writel(MCI_IRQENABLE | host->variant->start_err,
-+		       host->base + MMCIMASK0);
-+
-+		/*
-+		 * Set the SDMMC in Power-cycle state before to disabling vqmmc.
-+		 * This will make that the SDMMC_D[7:0], SDMMC_CMD and SDMMC_CK
-+		 * are driven low, to prevent the Card from being supplied
-+		 * through the signal lines.
-+		 */
-+		mmci_write_pwrreg(host, MCI_STM32_PWR_CYC | pwr);
-+
-+		if (!IS_ERR(host->mmc->supply.vqmmc) && host->vqmmc_enabled) {
-+			regulator_disable(host->mmc->supply.vqmmc);
-+			host->vqmmc_enabled = false;
-+		}
-+		break;
-+	case MMC_POWER_UP:
-+		if (!IS_ERR(mmc->supply.vmmc))
-+			mmc_regulator_set_ocr(mmc, mmc->supply.vmmc,
-+					      mmc->ios.vdd);
-+		break;
-+	case MMC_POWER_ON:
-+		if (!IS_ERR(host->mmc->supply.vqmmc) && !host->vqmmc_enabled) {
-+			if (regulator_enable(host->mmc->supply.vqmmc) < 0)
-+				dev_err(mmc_dev(host->mmc),
-+					"failed to enable vqmmc regulator\n");
-+			else
-+				host->vqmmc_enabled = true;
-+		}
-+
-+		/*
-+		 * After a power-cycle state, we must set the SDMMC in
-+		 * Power-off. The SDMMC_D[7:0], SDMMC_CMD and SDMMC_CK are
-+		 * driven high. Then we can set the SDMMC to Power-on state
-+		 */
-+		mmci_write_pwrreg(host, MCI_PWR_OFF | pwr);
-+		mdelay(1);
-+		mmci_write_pwrreg(host, MCI_PWR_ON | pwr);
-+		break;
-+	}
-+}
-+
- static void
- mmci_request_end(struct mmci_host *host, struct mmc_request *mrq)
- {
+ #define NR_SG		128
+ 
+ #define MMCI_PINCTRL_STATE_OPENDRAIN "opendrain"
 -- 
 2.7.4
