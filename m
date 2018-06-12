@@ -1,47 +1,53 @@
-From: Andy Shevchenko <andy.shevchenko@gmail.com>
-Subject: Re: [PATCH] mmc: dw_mmc should depend on COMMON_CLK
-Date: Tue, 12 Jun 2018 20:07:52 +0300
-Message-ID: <CAHp75VdtdkqJW2svYPuBW4nZz2dRnZ4w5c_BBv=iTgZV2Lkj1A@mail.gmail.com>
-References: <1528310612-10158-1-git-send-email-clabbe@baylibre.com>
+From: Stephen Boyd <swboyd@chromium.org>
+Subject: Re: [PATCH V2 4/4] mmc: host: Register changes for sdcc V5
+Date: Tue, 12 Jun 2018 16:25:23 -0700
+Message-ID: <152884592336.16708.2751337614926643627@swboyd.mtv.corp.google.com>
+References: <1527587561-27448-1-git-send-email-vviswana@codeaurora.org>
+ <1527587561-27448-5-git-send-email-vviswana@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1528310612-10158-1-git-send-email-clabbe@baylibre.com>
+In-Reply-To: <1527587561-27448-5-git-send-email-vviswana@codeaurora.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Corentin Labbe <clabbe@baylibre.com>, Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org
+To: adrian.hunter@intel.com, mark.rutland@arm.com, robh+dt@kernel.org, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, devicetree@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, jeremymc@redhat.com, vviswana@codeaurora.org, bjorn.andersson@linaro.org, riteshh@codeaurora.org, vbadigan@codeaurora.org, dianders@google.com, sayalil@codeaurora.org
 List-Id: linux-mmc@vger.kernel.org
 
-+Cc: Geert
+Quoting Vijay Viswanath (2018-05-29 02:52:41)
+> @@ -137,6 +125,12 @@
+>  /* Timeout value to avoid infinite waiting for pwr_irq */
+>  #define MSM_PWR_IRQ_TIMEOUT_MS 5000
+>  =
 
-On Wed, Jun 6, 2018 at 9:43 PM, Corentin Labbe <clabbe@baylibre.com> wrote:
-> This patch fix the following build failure on m68k:
-> ERROR: "clk_set_rate" [drivers/mmc/host/dw_mmc.ko] undefined!
->
-> Signed-off-by: Corentin Labbe <clabbe@baylibre.com>
-> ---
->  drivers/mmc/host/Kconfig | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 0581c199c996..77d6ba090436 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -666,7 +666,7 @@ config MMC_CAVIUM_THUNDERX
->
->  config MMC_DW
->         tristate "Synopsys DesignWare Memory Card Interface"
-> -       depends on ARC || ARM || ARM64 || MIPS || COMPILE_TEST
-> +       depends on COMMON_CLK && (ARC || ARM || ARM64 || MIPS || COMPILE_TEST)
->         help
->           This selects support for the Synopsys DesignWare Mobile Storage IP
->           block, this provides host support for SD and MMC interfaces, in both
-> --
-> 2.16.4
->
+> +#define MSM_HOST_READL(msm_host, host, offset) \
+> +       msm_host->var_ops->msm_readl_relaxed(host, offset)
+> +
+> +#define MSM_HOST_WRITEL(msm_host, val, host, offset) \
+> +       msm_host->var_ops->msm_writel_relaxed(val, host, offset)
 
+Is there a reason these macros are capitalized? We don't have READL and
+WRITEL macros in the kernel because function-like macros are typically
+lowercase.
 
+> +
+>  struct sdhci_msm_offset {
+>         u32 core_hc_mode;
+>         u32 core_mci_data_cnt;
+> @@ -268,6 +262,14 @@ struct sdhci_msm_host {
+>         const struct sdhci_msm_offset *offset;
+>  };
+>  =
 
--- 
-With Best Regards,
-Andy Shevchenko
+> +const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct sdhci_host *=
+host)
+
+static?
+
+> +{
+> +       struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
+> +       struct sdhci_msm_host *msm_host =3D sdhci_pltfm_priv(pltfm_host);
+> +
+> +       return msm_host->offset;
+> +}
+> +
