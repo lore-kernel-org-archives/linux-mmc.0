@@ -1,7 +1,7 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
 Subject: Re: [RFC PATCH] sdhci-of-arasan: card initialization failure -84
-Date: Thu, 14 Jun 2018 10:19:20 +0300
-Message-ID: <da0ebcb3-b19a-86a6-8462-87a1c0e81fff@intel.com>
+Date: Thu, 14 Jun 2018 10:14:34 +0300
+Message-ID: <658c1c31-9193-990b-e6d0-944958aa7b1f@intel.com>
 References: <20180604064211.q2thyftgpffuaer2@laureti-dev>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -19,10 +19,8 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Helmut Grohne <h.grohne@intenta.de>, Michal Simek <michal.simek@xilinx.com>, =?UTF-8?Q?S=c3=b6ren_Brinkmann?= <soren.brinkmann@xilinx.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc: Atul Garg <agarg@arasan.com>, linux-arm-kernel@lists.infradead.org
+Cc: linux-arm-kernel@lists.infradead.org, Atul Garg <agarg@arasan.co>
 List-Id: linux-mmc@vger.kernel.org
-
-And again without mangling Atul's email address.
 
 On 04/06/18 09:42, Helmut Grohne wrote:
 > Work around repeated:
