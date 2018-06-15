@@ -1,72 +1,149 @@
-From: Chunyan Zhang <zhang.chunyan@linaro.org>
-Subject: [PATCH V2 7/7] dt-bindings: sdhci-sprd: Add bindings for the sdhci-sprd controller
-Date: Fri, 15 Jun 2018 10:04:15 +0800
-Message-ID: <1529028255-6022-8-git-send-email-zhang.chunyan@linaro.org>
-References: <1529028255-6022-1-git-send-email-zhang.chunyan@linaro.org>
+From: Vijay Viswanath <vviswana@codeaurora.org>
+Subject: Re: [PATCH V2 2/4] mmc: sdhci-msm: Add msm version specific ops and
+ data structures
+Date: Fri, 15 Jun 2018 10:26:45 +0530
+Message-ID: <a6458995-a9ba-341e-425d-2092461d9626@codeaurora.org>
+References: <1527587561-27448-1-git-send-email-vviswana@codeaurora.org>
+ <1527587561-27448-3-git-send-email-vviswana@codeaurora.org>
+ <152884658650.16708.8327586252448186103@swboyd.mtv.corp.google.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1529028255-6022-1-git-send-email-zhang.chunyan@linaro.org>
+In-Reply-To: <152884658650.16708.8327586252448186103@swboyd.mtv.corp.google.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@spreadtrum.com>, zhang.lyra@gmail.com
+To: Stephen Boyd <swboyd@chromium.org>, adrian.hunter@intel.com, mark.rutland@arm.com, robh+dt@kernel.org, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, devicetree@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, jeremymc@redhat.com, bjorn.andersson@linaro.org, riteshh@codeaurora.org, vbadigan@codeaurora.org, dianders@google.com, sayalil@codeaurora.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Chunyan Zhang <chunyan.zhang@spreadtrum.com>
+Hi Stephen,
 
-This patch adds the device-tree binding documentation for Spreadtrum
-SDHCI driver.
+On 6/13/2018 5:06 AM, Stephen Boyd wrote:
+> Quoting Vijay Viswanath (2018-05-29 02:52:39)
+>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+>> index 4050c99..2a66aa0 100644
+>> --- a/drivers/mmc/host/sdhci-msm.c
+>> +++ b/drivers/mmc/host/sdhci-msm.c
+>> @@ -226,6 +226,24 @@ struct sdhci_msm_offset {
+>>          .core_ddr_config_2 = 0x1bc,
+>>   };
+>>   
+>> +struct sdhci_msm_variant_ops {
+>> +       u8 (*msm_readb_relaxed)(struct sdhci_host *host, u32 offset);
+>> +       u32 (*msm_readl_relaxed)(struct sdhci_host *host, u32 offset);
+>> +       void (*msm_writeb_relaxed)(u8 val, struct sdhci_host *host, u32 offset);
+>> +       void (*msm_writel_relaxed)(u32 val, struct sdhci_host *host,
+>> +                       u32 offset);
+>> +};
+>> +
+>> +/*
+>> + * From V5, register spaces have changed. Wrap this info in a structure
+>> + * and choose the data_structure based on version info mentioned in DT.
+>> + */
+> 
+> This is sort of odd. Usually we have a read/write function that swizzles
+> based on register variants, and that's contained with that function. Now
+> it's the other way.
+> 
+>> +struct sdhci_msm_variant_info {
+>> +       bool mci_removed;
+>> +       const struct sdhci_msm_variant_ops *var_ops;
+>> +       const struct sdhci_msm_offset *offset;
+>> +};
+>> +
+>>   struct sdhci_msm_host {
+>>          struct platform_device *pdev;
+>>          void __iomem *core_mem; /* MSM SDCC mapped address */
+>> @@ -245,8 +263,45 @@ struct sdhci_msm_host {
+>>          wait_queue_head_t pwr_irq_wait;
+>>          bool pwr_irq_flag;
+>>          u32 caps_0;
+>> +       bool mci_removed;
+>> +       const struct sdhci_msm_variant_ops *var_ops;
+>> +       const struct sdhci_msm_offset *offset;
+>>   };
+>>   
+>> +/*
+>> + * APIs to read/write to vendor specific registers which were there in the
+>> + * core_mem region before MCI was removed.
+>> + */
+>> +static u32 sdhci_msm_mci_variant_readl_relaxed(struct sdhci_host *host,
+>> +               u32 offset)
+>> +{
+>> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>> +       struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+>> +
+>> +       return readl_relaxed(msm_host->core_mem + offset);
+> 
+> Is core_mem assigned in the new hardware? Maybe that needs to be
+> 'repurposed' for vendor specific registers on v5 and renamed to
+> something like msm_host::vendor_base or something like that.
+> 
 
-Signed-off-by: Chunyan Zhang <chunyan.zhang@spreadtrum.com>
----
- .../devicetree/bindings/mmc/sdhci-sprd.txt         | 41 ++++++++++++++++++++++
- 1 file changed, 41 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-sprd.txt
+There is no core_mem in the new hardware. We can assign hc_mem address 
+to core_mem variable (if SDCC5) and do away with the need of special 
+read/write functions, but I feel thats a bad approach and misleading.
 
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-sprd.txt b/Documentation/devicetree/bindings/mmc/sdhci-sprd.txt
-new file mode 100644
-index 0000000..45c9978
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/sdhci-sprd.txt
-@@ -0,0 +1,41 @@
-+* Spreadtrum SDHCI controller (sdhci-sprd)
-+
-+The Secure Digital (SD) Host controller on Spreadtrum SoCs provides an interface
-+for MMC, SD and SDIO types of cards.
-+
-+This file documents differences between the core properties in mmc.txt
-+and the properties used by the sdhci-sprd driver.
-+
-+Required properties:
-+- compatible: Should contain "sprd,sdhci-r11".
-+- reg: physical base address of the controller and length.
-+- interrupts: Interrupts used by the SDHCI controller.
-+- clocks: Should contain phandle for the clock feeding the SDHCI controller
-+- clock-names: Should contain the following:
-+	"sdio" - SDIO source clock (required)
-+	"enable" - gate clock which used for enabling/disabling the device (required)
-+
-+Optional properties:
-+- assigned-clocks: the same with "sdio" clock
-+- assigned-clock-parents: the default parent of "sdio" clock
-+
-+Examples:
-+
-+sdio0: sdio@20600000 {
-+	compatible  = "sprd,sdhci-r11";
-+	reg = <0 0x20600000 0 0x1000>;
-+	interrupts = <GIC_SPI 60 IRQ_TYPE_LEVEL_HIGH>;
-+
-+	clock-names = "sdio", "enable";
-+	clocks = <&ap_clk CLK_EMMC_2X>,
-+		 <&apahb_gate CLK_EMMC_EB>;
-+	assigned-clocks = <&ap_clk CLK_EMMC_2X>;
-+	assigned-clock-parents = <&rpll CLK_RPLL_390M>;
-+
-+	bus-width = <8>;
-+	non-removable;
-+	no-sdio;
-+	no-sd;
-+	cap-mmc-hw-reset;
-+	status = "okay";
-+};
--- 
-2.7.4
+>> +}
+>> +
+>> +static u32 sdhci_msm_v5_variant_readl_relaxed(struct sdhci_host *host,
+>> +               u32 offset)
+>> +{
+>> +       return readl_relaxed(host->ioaddr + offset);
+>> +}
+>> +
+>> +static void sdhci_msm_mci_variant_writel_relaxed(u32 val,
+>> +               struct sdhci_host *host, u32 offset)
+>> +{
+>> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>> +       struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+>> +
+>> +       writel_relaxed(val, msm_host->core_mem + offset);
+>> +}
+>> +
+>> +static void sdhci_msm_v5_variant_writel_relaxed(u32 val,
+>> +               struct sdhci_host *host, u32 offset)
+>> +{
+>> +       writel_relaxed(val, host->ioaddr + offset);
+>> +}
+>> +
+>>   static unsigned int msm_get_clock_rate_for_bus_mode(struct sdhci_host *host,
+>>                                                      unsigned int clock)
+>>   {
+>> @@ -1481,6 +1536,28 @@ static void sdhci_msm_set_regulator_caps(struct sdhci_msm_host *msm_host)
+>>          pr_debug("%s: supported caps: 0x%08x\n", mmc_hostname(mmc), caps);
+>>   }
+>>   
+>> +static const struct sdhci_msm_variant_ops mci_var_ops = {
+>> +       .msm_readl_relaxed = sdhci_msm_mci_variant_readl_relaxed,
+>> +       .msm_writel_relaxed = sdhci_msm_mci_variant_writel_relaxed,
+>> +};
+>> +
+>> +static const struct sdhci_msm_variant_ops v5_var_ops = {
+>> +       .msm_readl_relaxed = sdhci_msm_v5_variant_readl_relaxed,
+>> +       .msm_writel_relaxed = sdhci_msm_v5_variant_writel_relaxed,
+>> +};
+>> +
+>> +static const struct sdhci_msm_variant_info sdhci_msm_mci_var = {
+>> +       .mci_removed = 0,
+> 
+> Please use true and false instead of 0 and 1 when the type is bool.
+>
+
+Will do
+
+>> +       .var_ops = &mci_var_ops,
+>> +       .offset = &sdhci_msm_mci_offset,
+>> +};
+>> +
+>> +static const struct sdhci_msm_variant_info sdhci_msm_v5_var = {
+>> +       .mci_removed = 1,
+>> +       .var_ops = &v5_var_ops,
+>> +       .offset = &sdhci_msm_v5_offset,
+>> +};
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
