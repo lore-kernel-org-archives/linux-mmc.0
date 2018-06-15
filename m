@@ -1,7 +1,7 @@
 From: Chunyan Zhang <zhang.chunyan@linaro.org>
-Subject: [PATCH V2 1/7] mmc: sdhci: add sd host v4 mode
-Date: Fri, 15 Jun 2018 10:04:09 +0800
-Message-ID: <1529028255-6022-2-git-send-email-zhang.chunyan@linaro.org>
+Subject: [PATCH V2 2/7] mmc: sdhci: made changes for System Address register of SDMA
+Date: Fri, 15 Jun 2018 10:04:10 +0800
+Message-ID: <1529028255-6022-3-git-send-email-zhang.chunyan@linaro.org>
 References: <1529028255-6022-1-git-send-email-zhang.chunyan@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1529028255-6022-1-git-send-email-zhang.chunyan@linaro.org>
@@ -10,63 +10,58 @@ To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@spreadtrum.com>, zhang.lyra@gmail.com
 List-Id: linux-mmc@vger.kernel.org
 
-For SD host controller version 4.00 or later ones, there're two
-modes of implementation - Version 3.00 compatible mode or
-Version 4 mode.  This patch introduces a flag to record this.
+According to the SD host controller specification version 4.10, when
+Host Version 4 is enabled, SDMA uses ADMA System Address register
+(05Fh-058h) instead of using SDMA System Address register to
+support both 32-bit and 64-bit addressing.
 
 Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
 ---
- drivers/mmc/host/sdhci.c | 6 ++++++
- drivers/mmc/host/sdhci.h | 6 ++++++
- 2 files changed, 12 insertions(+)
+ drivers/mmc/host/sdhci.c | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 2ededa7f..cf5695f 100644
+index cf5695f..f57201f 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -3302,6 +3302,12 @@ void __sdhci_read_caps(struct sdhci_host *host, u16 *ver, u32 *caps, u32 *caps1)
- 	v = ver ? *ver : sdhci_readw(host, SDHCI_HOST_VERSION);
- 	host->version = (v & SDHCI_SPEC_VER_MASK) >> SDHCI_SPEC_VER_SHIFT;
+@@ -805,6 +805,7 @@ static void sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+ {
+ 	u8 ctrl;
++	u32 reg;
+ 	struct mmc_data *data = cmd->data;
  
-+	if (host->version >= SDHCI_SPEC_400) {
-+		if (sdhci_readw(host, SDHCI_HOST_CONTROL2) &
-+			SDHCI_CTRL_V4_MODE)
-+			host->v4_mode = true;
-+	}
-+
- 	if (host->quirks & SDHCI_QUIRK_MISSING_CAPS)
- 		return;
+ 	if (sdhci_data_line_cmd(cmd))
+@@ -894,8 +895,10 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+ 					     SDHCI_ADMA_ADDRESS_HI);
+ 		} else {
+ 			WARN_ON(sg_cnt != 1);
++			reg = host->v4_mode ? SDHCI_ADMA_ADDRESS :
++				SDHCI_DMA_ADDRESS;
+ 			sdhci_writel(host, sdhci_sdma_address(host),
+-				     SDHCI_DMA_ADDRESS);
++				     reg);
+ 		}
+ 	}
  
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index c95b0a4..128b0ba 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -184,6 +184,7 @@
- #define   SDHCI_CTRL_DRV_TYPE_D		0x0030
- #define  SDHCI_CTRL_EXEC_TUNING		0x0040
- #define  SDHCI_CTRL_TUNED_CLK		0x0080
-+#define  SDHCI_CTRL_V4_MODE		0x1000
- #define  SDHCI_CTRL_PRESET_VAL_ENABLE	0x8000
+@@ -2721,6 +2724,7 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
+ 		 */
+ 		if (intmask & SDHCI_INT_DMA_END) {
+ 			u32 dmastart, dmanow;
++			u32 reg;
  
- #define SDHCI_CAPABILITIES	0x40
-@@ -270,6 +271,8 @@
- #define   SDHCI_SPEC_100	0
- #define   SDHCI_SPEC_200	1
- #define   SDHCI_SPEC_300	2
-+#define   SDHCI_SPEC_400	3
-+#define   SDHCI_SPEC_410	4
+ 			dmastart = sdhci_sdma_address(host);
+ 			dmanow = dmastart + host->data->bytes_xfered;
+@@ -2733,7 +2737,9 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
+ 			host->data->bytes_xfered = dmanow - dmastart;
+ 			DBG("DMA base 0x%08x, transferred 0x%06x bytes, next 0x%08x\n",
+ 			    dmastart, host->data->bytes_xfered, dmanow);
+-			sdhci_writel(host, dmanow, SDHCI_DMA_ADDRESS);
++			reg = host->v4_mode ? SDHCI_ADMA_ADDRESS :
++				SDHCI_DMA_ADDRESS;
++			sdhci_writel(host, dmanow, reg);
+ 		}
  
- /*
-  * End of controller registers.
-@@ -551,6 +554,9 @@ struct sdhci_host {
- 	u32			sdma_boundary;
- 
- 	unsigned long private[0] ____cacheline_aligned;
-+
-+	/* Host Version 4 Enable */
-+	bool			v4_mode;
- };
- 
- struct sdhci_ops {
+ 		if (intmask & SDHCI_INT_DATA_END) {
 -- 
 2.7.4
