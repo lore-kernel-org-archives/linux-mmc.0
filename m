@@ -1,66 +1,99 @@
-From: Vijay Viswanath <vviswana@codeaurora.org>
-Subject: Re: [PATCH V2 4/4] mmc: host: Register changes for sdcc V5
-Date: Fri, 15 Jun 2018 11:14:41 +0530
-Message-ID: <4a215e3a-16af-4574-efca-0ebe5960705a@codeaurora.org>
-References: <1527587561-27448-1-git-send-email-vviswana@codeaurora.org>
- <1527587561-27448-5-git-send-email-vviswana@codeaurora.org>
- <152884592336.16708.2751337614926643627@swboyd.mtv.corp.google.com>
+From: Helmut Grohne <h.grohne@intenta.de>
+Subject: [PATCH v2] mmc: sdhci-of-arasan: Add quirk for unstable clocks
+Date: Fri, 15 Jun 2018 10:18:32 +0200
+Message-ID: <20180615081830.zrgx6arwn6ga27gu@laureti-dev>
+References: <da0ebcb3-b19a-86a6-8462-87a1c0e81fff@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <152884592336.16708.2751337614926643627@swboyd.mtv.corp.google.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Stephen Boyd <swboyd@chromium.org>, adrian.hunter@intel.com, mark.rutland@arm.com, robh+dt@kernel.org, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, devicetree@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, jeremymc@redhat.com, bjorn.andersson@linaro.org, riteshh@codeaurora.org, vbadigan@codeaurora.org, dianders@google.com, sayalil@codeaurora.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <da0ebcb3-b19a-86a6-8462-87a1c0e81fff@intel.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michal.simek@xilinx.com>, =?iso-8859-1?Q?S=F6ren?= Brinkmann <soren.brinkmann@xilinx.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc: Atul Garg <agarg@arasan.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
+Some controllers immediately report SDHCI_CLOCK_INT_STABLE after
+enabling the clock even when the clock is not stable. When used in
+conjunction with older/slower cards, this can result in:
 
+    mmc0: error -84 whilst initialising SD card
 
-On 6/13/2018 4:55 AM, Stephen Boyd wrote:
-> Quoting Vijay Viswanath (2018-05-29 02:52:41)
->> @@ -137,6 +125,12 @@
->>   /* Timeout value to avoid infinite waiting for pwr_irq */
->>   #define MSM_PWR_IRQ_TIMEOUT_MS 5000
->>   
->> +#define MSM_HOST_READL(msm_host, host, offset) \
->> +       msm_host->var_ops->msm_readl_relaxed(host, offset)
->> +
->> +#define MSM_HOST_WRITEL(msm_host, val, host, offset) \
->> +       msm_host->var_ops->msm_writel_relaxed(val, host, offset)
-> 
-> Is there a reason these macros are capitalized? We don't have READL and
-> WRITEL macros in the kernel because function-like macros are typically
-> lowercase.
-> 
+When the stable reporting is broken, we simply wait for the maximum
+stabilization period.
 
-will change them to lower case. Didn't notice that...
+Signed-off-by: Helmut Grohne <h.grohne@intenta.de>
+---
+ Documentation/devicetree/bindings/mmc/arasan,sdhci.txt |  2 ++
+ drivers/mmc/host/sdhci-of-arasan.c                     | 16 ++++++++++++++++
+ 2 files changed, 18 insertions(+)
 
->> +
->>   struct sdhci_msm_offset {
->>          u32 core_hc_mode;
->>          u32 core_mci_data_cnt;
->> @@ -268,6 +262,14 @@ struct sdhci_msm_host {
->>          const struct sdhci_msm_offset *offset;
->>   };
->>   
->> +const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct sdhci_host *host)
-> 
-> static?
-> 
+Changes since v1 (RFC):
+ * Use an arasan-specific quirk in the ->set_clock() callback as requested by
+   Adrian Hunter.
 
-will do
-
->> +{
->> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> +       struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
->> +
->> +       return msm_host->offset;
->> +}
->> +
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+index 60481bfc3d31..c0e0f04a8504 100644
+--- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
++++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+@@ -39,6 +39,8 @@ Optional Properties:
+   - xlnx,fails-without-test-cd: when present, the controller doesn't work when
+     the CD line is not connected properly, and the line is not connected
+     properly. Test mode can be used to force the controller to function.
++  - xlnx,int-clock-stable-broken: when present, the controller always reports
++    that the internal clock is stable even when it is not.
+ 
+ Example:
+ 	sdhci@e0100000 {
+diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+index c33a5f7393bd..f7fe26c75150 100644
+--- a/drivers/mmc/host/sdhci-of-arasan.c
++++ b/drivers/mmc/host/sdhci-of-arasan.c
+@@ -102,6 +102,9 @@ struct sdhci_arasan_data {
+ 
+ /* Controller does not have CD wired and will not function normally without */
+ #define SDHCI_ARASAN_QUIRK_FORCE_CDTEST	BIT(0)
++/* Controller immediately reports SDHCI_CLOCK_INT_STABLE after enabling the
++ * internal clock even when the clock isn't stable */
++#define SDHCI_ARASAN_QUIRK_CLOCK_UNSTABLE BIT(1)
+ };
+ 
+ static const struct sdhci_arasan_soc_ctl_map rk3399_soc_ctl_map = {
+@@ -207,6 +210,16 @@ static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
+ 
+ 	sdhci_set_clock(host, clock);
+ 
++	if (sdhci_arasan->quirks & SDHCI_ARASAN_QUIRK_CLOCK_UNSTABLE)
++		/*
++		 * Some controllers immediately report SDHCI_CLOCK_INT_STABLE
++		 * after enabling the clock even though the clock is not
++		 * stable. Trying to use a clock without waiting here results
++		 * in EILSEQ while detecting some older/slower cards. The
++		 * chosen delay is the maximum delay from sdhci_set_clock.
++		 */
++		msleep(20);
++
+ 	if (ctrl_phy) {
+ 		phy_power_on(sdhci_arasan->phy);
+ 		sdhci_arasan->is_phy_on = true;
+@@ -759,6 +772,9 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+ 	if (of_property_read_bool(np, "xlnx,fails-without-test-cd"))
+ 		sdhci_arasan->quirks |= SDHCI_ARASAN_QUIRK_FORCE_CDTEST;
+ 
++	if (of_property_read_bool(np, "xlnx,int-clock-stable-broken"))
++		sdhci_arasan->quirks |= SDHCI_ARASAN_QUIRK_CLOCK_UNSTABLE;
++
+ 	pltfm_host->clk = clk_xin;
+ 
+ 	if (of_device_is_compatible(pdev->dev.of_node,
+-- 
+2.11.0
