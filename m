@@ -1,55 +1,72 @@
 From: Chunyan Zhang <zhang.chunyan@linaro.org>
-Subject: [PATCH V2 0/7] mmc: add support for sdhci 4.0
-Date: Fri, 15 Jun 2018 10:04:08 +0800
-Message-ID: <1529028255-6022-1-git-send-email-zhang.chunyan@linaro.org>
+Subject: [PATCH V2 1/7] mmc: sdhci: add sd host v4 mode
+Date: Fri, 15 Jun 2018 10:04:09 +0800
+Message-ID: <1529028255-6022-2-git-send-email-zhang.chunyan@linaro.org>
+References: <1529028255-6022-1-git-send-email-zhang.chunyan@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1529028255-6022-1-git-send-email-zhang.chunyan@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@spreadtrum.com>, zhang.lyra@gmail.com
 List-Id: linux-mmc@vger.kernel.org
 
-From: Chunyan Zhang <chunyan.zhang@spreadtrum.com>
+For SD host controller version 4.00 or later ones, there're two
+modes of implementation - Version 3.00 compatible mode or
+Version 4 mode.  This patch introduces a flag to record this.
 
->From the SD host controller version 4.0 on, SDHCI implementation either
-is version 3 compatible or version 4 mode. This patch-set covers those
-changes which are common for SDHCI 4.0 version, regardless of whether
-they are used with SD or eMMC storage devices.
+Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
+---
+ drivers/mmc/host/sdhci.c | 6 ++++++
+ drivers/mmc/host/sdhci.h | 6 ++++++
+ 2 files changed, 12 insertions(+)
 
-This patchset also added a new sdhci driver for Spreadtrum's controller
-which supports v4.0 mode.
-
-This patchset has been tested on Spreadtrum's mobile phone, emmc can be
-initialized, mounted, read and written, with these changes for common
-sdhci framework and sdhci-sprd driver.
-
-Changes from v1:
-* Addressed comments from Ulf:
- - Add dt-bindings for Spreadtrum sdhci;
- - Use assigned-clocks* DT bindings to set default source of sdio clock;
- - Removed unuseful print;
- - Removed two functions which are not used;
- - Add back the missing pm_runtime_put_autosuspend() after adding sdhci host.
-
-* Changed Spreadtrum sdhci driver name to sdhci-sprd.
-
-Chunyan Zhang (7):
-  mmc: sdhci: add sd host v4 mode
-  mmc: sdhci: made changes for System Address register of SDMA
-  mmc: sdhci: add ADMA2 64-bit addressing support for V4 mode
-  mmc: sdhci: add 32-bit block count support for v4 mode
-  mmc: sdhci: add CMD23 support for v4 mode
-  mmc: sdhci-sprd: added Spreadtrum's initial host controller
-  dt-bindings: sdhci-sprd: Add bindings for the sdhci-sprd controller
-
- .../devicetree/bindings/mmc/sdhci-sprd.txt         |  41 ++
- drivers/mmc/host/Kconfig                           |  13 +
- drivers/mmc/host/Makefile                          |   1 +
- drivers/mmc/host/sdhci-sprd.c                      | 426 +++++++++++++++++++++
- drivers/mmc/host/sdhci.c                           |  85 +++-
- drivers/mmc/host/sdhci.h                           |  31 +-
- 6 files changed, 575 insertions(+), 22 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-sprd.txt
- create mode 100644 drivers/mmc/host/sdhci-sprd.c
-
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 2ededa7f..cf5695f 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -3302,6 +3302,12 @@ void __sdhci_read_caps(struct sdhci_host *host, u16 *ver, u32 *caps, u32 *caps1)
+ 	v = ver ? *ver : sdhci_readw(host, SDHCI_HOST_VERSION);
+ 	host->version = (v & SDHCI_SPEC_VER_MASK) >> SDHCI_SPEC_VER_SHIFT;
+ 
++	if (host->version >= SDHCI_SPEC_400) {
++		if (sdhci_readw(host, SDHCI_HOST_CONTROL2) &
++			SDHCI_CTRL_V4_MODE)
++			host->v4_mode = true;
++	}
++
+ 	if (host->quirks & SDHCI_QUIRK_MISSING_CAPS)
+ 		return;
+ 
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index c95b0a4..128b0ba 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -184,6 +184,7 @@
+ #define   SDHCI_CTRL_DRV_TYPE_D		0x0030
+ #define  SDHCI_CTRL_EXEC_TUNING		0x0040
+ #define  SDHCI_CTRL_TUNED_CLK		0x0080
++#define  SDHCI_CTRL_V4_MODE		0x1000
+ #define  SDHCI_CTRL_PRESET_VAL_ENABLE	0x8000
+ 
+ #define SDHCI_CAPABILITIES	0x40
+@@ -270,6 +271,8 @@
+ #define   SDHCI_SPEC_100	0
+ #define   SDHCI_SPEC_200	1
+ #define   SDHCI_SPEC_300	2
++#define   SDHCI_SPEC_400	3
++#define   SDHCI_SPEC_410	4
+ 
+ /*
+  * End of controller registers.
+@@ -551,6 +554,9 @@ struct sdhci_host {
+ 	u32			sdma_boundary;
+ 
+ 	unsigned long private[0] ____cacheline_aligned;
++
++	/* Host Version 4 Enable */
++	bool			v4_mode;
+ };
+ 
+ struct sdhci_ops {
 -- 
 2.7.4
