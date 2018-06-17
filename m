@@ -1,37 +1,76 @@
-From: Stephen Boyd <sboyd@kernel.org>
-Subject: Re: [PATCH v3 16/27] docs: Fix more broken references
-Date: Fri, 15 Jun 2018 14:42:46 -0700
-Message-ID: <152909896651.16708.13481357388390831455@swboyd.mtv.corp.google.com>
-References: <cover.1528990947.git.mchehab+samsung@kernel.org>
- <e1bf52a721005b2017434acc54ec5ddc152d6fe4.1528990947.git.mchehab+samsung@kernel.org>
+From: Robert Jarzmik <robert.jarzmik@free.fr>
+Subject: [PATCH v3 00/14] ARM: pxa: switch to DMA slave maps
+Date: Sun, 17 Jun 2018 19:02:03 +0200
+Message-ID: <20180617170217.24177-1-robert.jarzmik@free.fr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <dri-devel-bounces@lists.freedesktop.org>
-In-Reply-To: <e1bf52a721005b2017434acc54ec5ddc152d6fe4.1528990947.git.mchehab+samsung@kernel.org>
-List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=unsubscribe>
-List-Archive: <https://lists.freedesktop.org/archives/dri-devel>
-List-Post: <mailto:dri-devel@lists.freedesktop.org>
-List-Help: <mailto:dri-devel-request@lists.freedesktop.org?subject=help>
-List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=subscribe>
-Errors-To: dri-devel-bounces@lists.freedesktop.org
-Sender: "dri-devel" <dri-devel-bounces@lists.freedesktop.org>
-To: Linux Doc Mailing List <linux-doc@vger.kernel.org>
-Cc: linux-hwmon@vger.kernel.org, devicetree@vger.kernel.org, alsa-devel@alsa-project.org, linux-samsung-soc@vger.kernel.org, linux-mediatek@lists.infradead.org, Jonathan Corbet <corbet@lwn.net>, netdev@vger.kernel.org, linux-pm@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, dri-devel@lists.freedesktop.org, Mauro Carvalho Chehab <mchehab@infradead.org>, linux-rockchip@lists.infradead.org, linux-usb@vger.kernel.org, intel-wired-lan@lists.osuosl.org, Mauro Carvalho Chehab <mchehab+samsung@kernel.org>, linux-fsdevel@vger.kernel.org, linux-clk@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <alsa-devel-bounces@alsa-project.org>
+List-Unsubscribe: <http://mailman.alsa-project.org/mailman/options/alsa-devel>,
+ <mailto:alsa-devel-request@alsa-project.org?subject=unsubscribe>
+List-Archive: <http://mailman.alsa-project.org/pipermail/alsa-devel/>
+List-Post: <mailto:alsa-devel@alsa-project.org>
+List-Help: <mailto:alsa-devel-request@alsa-project.org?subject=help>
+List-Subscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
+ <mailto:alsa-devel-request@alsa-project.org?subject=subscribe>
+Errors-To: alsa-devel-bounces@alsa-project.org
+Sender: alsa-devel-bounces@alsa-project.org
+To: Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Tejun Heo <tj@kernel.org>, Vinod Koul <vinod.koul@intel.com>, Mauro Carvalho Chehab <mchehab@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Miquel Raynal <miquel.raynal@bootlin.com>, Boris Brezillon <boris.brezillon@bootlin.com>, David Woodhouse <dwmw2@infradead.org>, Brian Norris <computersforpeace@gmail.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Nicolas Pitre <nico@fluxnic.net>, Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>, Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>
+Cc: alsa-devel@alsa-project.org, netdev@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-ide@vger.kernel.org, linux-mtd@lists.infradead.org, dmaengine@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-media@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-UXVvdGluZyBNYXVybyBDYXJ2YWxobyBDaGVoYWIgKDIwMTgtMDYtMTQgMDk6MDk6MDEpCj4gQXMg
-d2UgbW92ZSBzdHVmZiBhcm91bmQsIHNvbWUgZG9jIHJlZmVyZW5jZXMgYXJlIGJyb2tlbi4gRml4
-IHNvbWUgb2YKPiB0aGVtIHZpYSB0aGlzIHNjcmlwdDoKPiAgICAgICAgIC4vc2NyaXB0cy9kb2N1
-bWVudGF0aW9uLWZpbGUtcmVmLWNoZWNrIC0tZml4Cj4gCj4gTWFudWFsbHkgY2hlY2tlZCB0aGF0
-IHByb2R1Y2VkIHJlc3VsdHMgYXJlIHZhbGlkLgo+IAo+IFNpZ25lZC1vZmYtYnk6IE1hdXJvIENh
-cnZhbGhvIENoZWhhYiA8bWNoZWhhYitzYW1zdW5nQGtlcm5lbC5vcmc+Cj4gLS0tCj4gIC4uLi9k
-ZXZpY2V0cmVlL2JpbmRpbmdzL2Nsb2NrL3N0L3N0LGNsa2dlbi50eHQgfCAgOCArKysrLS0tLQo+
-ICAuLi4vZGV2aWNldHJlZS9iaW5kaW5ncy9jbG9jay90aS9nYXRlLnR4dCAgICAgIHwgIDIgKy0K
-PiAgLi4uL2RldmljZXRyZWUvYmluZGluZ3MvY2xvY2svdGkvaW50ZXJmYWNlLnR4dCB8ICAyICst
-CgpBY2tlZC1ieTogU3RlcGhlbiBCb3lkIDxzYm95ZEBrZXJuZWwub3JnPgoKX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KZHJpLWRldmVsIG1haWxpbmcgbGlz
-dApkcmktZGV2ZWxAbGlzdHMuZnJlZWRlc2t0b3Aub3JnCmh0dHBzOi8vbGlzdHMuZnJlZWRlc2t0
-b3Aub3JnL21haWxtYW4vbGlzdGluZm8vZHJpLWRldmVsCg==
+As I gathered almost all the required acks, this is an information only post
+before queuing to the PXA tree.
+
+The only missing part is for netdev, for which I'd like an ack from netdev
+people for patches 0007 and 0008, but that won't prevent me from queuing all the
+other patches (excepting the patch 0012 which can only be applied once 0007 and
+0008 are queued).
+
+Cheers.
+
+--
+Robert
+
+Robert Jarzmik (14):
+  dmaengine: pxa: use a dma slave map
+  ARM: pxa: add dma slave map
+  dmaengine: pxa: add a default requestor policy
+  mmc: pxamci: remove the dmaengine compat need
+  media: pxa_camera: remove the dmaengine compat need
+  mtd: rawnand: marvell: remove the dmaengine compat need
+  net: smc911x: remove the dmaengine compat need
+  net: smc91x: remove the dmaengine compat need
+  ASoC: pxa: remove the dmaengine compat need
+  ata: pata_pxa: remove the dmaengine compat need
+  dmaengine: pxa: document pxad_param
+  dmaengine: pxa: make the filter function internal
+  ARM: pxa: remove the DMA IO resources
+  ARM: pxa: change SSP DMA channels allocation
+
+ arch/arm/mach-pxa/devices.c           | 148 +---------------------------------
+ arch/arm/mach-pxa/devices.h           |   6 +-
+ arch/arm/mach-pxa/pxa25x.c            |  38 ++++++++-
+ arch/arm/mach-pxa/pxa27x.c            |  39 ++++++++-
+ arch/arm/mach-pxa/pxa3xx.c            |  41 +++++++++-
+ arch/arm/plat-pxa/ssp.c               |  47 -----------
+ drivers/ata/pata_pxa.c                |  10 +--
+ drivers/dma/pxa_dma.c                 |  18 ++++-
+ drivers/media/platform/pxa_camera.c   |  22 +----
+ drivers/mmc/host/pxamci.c             |  29 +------
+ drivers/mtd/nand/raw/marvell_nand.c   |  17 +---
+ drivers/net/ethernet/smsc/smc911x.c   |  13 +--
+ drivers/net/ethernet/smsc/smc91x.c    |   9 +--
+ drivers/net/ethernet/smsc/smc91x.h    |   1 -
+ include/linux/dma/pxa-dma.h           |  20 +++--
+ include/linux/platform_data/mmp_dma.h |   4 +
+ include/linux/pxa2xx_ssp.h            |   2 -
+ sound/arm/pxa2xx-ac97.c               |  14 +---
+ sound/arm/pxa2xx-pcm-lib.c            |   6 +-
+ sound/soc/pxa/pxa-ssp.c               |   5 +-
+ sound/soc/pxa/pxa2xx-ac97.c           |  32 ++------
+ sound/soc/pxa/pxa2xx-i2s.c            |   6 +-
+ 22 files changed, 176 insertions(+), 351 deletions(-)
+
+-- 
+2.11.0
