@@ -1,76 +1,52 @@
 From: Robert Jarzmik <robert.jarzmik@free.fr>
-Subject: [PATCH v3 00/14] ARM: pxa: switch to DMA slave maps
-Date: Sun, 17 Jun 2018 19:02:03 +0200
-Message-ID: <20180617170217.24177-1-robert.jarzmik@free.fr>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <alsa-devel-bounces@alsa-project.org>
-List-Unsubscribe: <http://mailman.alsa-project.org/mailman/options/alsa-devel>,
- <mailto:alsa-devel-request@alsa-project.org?subject=unsubscribe>
-List-Archive: <http://mailman.alsa-project.org/pipermail/alsa-devel/>
-List-Post: <mailto:alsa-devel@alsa-project.org>
-List-Help: <mailto:alsa-devel-request@alsa-project.org?subject=help>
-List-Subscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
- <mailto:alsa-devel-request@alsa-project.org?subject=subscribe>
-Errors-To: alsa-devel-bounces@alsa-project.org
-Sender: alsa-devel-bounces@alsa-project.org
+Subject: [PATCH v3 03/14] dmaengine: pxa: add a default requestor policy
+Date: Sun, 17 Jun 2018 19:02:06 +0200
+Message-ID: <20180617170217.24177-4-robert.jarzmik@free.fr>
+References: <20180617170217.24177-1-robert.jarzmik@free.fr>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180617170217.24177-1-robert.jarzmik@free.fr>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Tejun Heo <tj@kernel.org>, Vinod Koul <vinod.koul@intel.com>, Mauro Carvalho Chehab <mchehab@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Miquel Raynal <miquel.raynal@bootlin.com>, Boris Brezillon <boris.brezillon@bootlin.com>, David Woodhouse <dwmw2@infradead.org>, Brian Norris <computersforpeace@gmail.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Nicolas Pitre <nico@fluxnic.net>, Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>, Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>
-Cc: alsa-devel@alsa-project.org, netdev@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-ide@vger.kernel.org, linux-mtd@lists.infradead.org, dmaengine@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-media@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-ide@vger.kernel.org, dmaengine@vger.kernel.org, linux-media@vger.kernel.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, netdev@vger.kernel.org, alsa-devel@alsa-project.org, Arnd Bergmann <arnd@arndb.de>
 List-Id: linux-mmc@vger.kernel.org
 
-As I gathered almost all the required acks, this is an information only post
-before queuing to the PXA tree.
+As what former drcmr -1 value meant, add a this as a default to each
+channel, ie. that by default no requestor line is used.
 
-The only missing part is for netdev, for which I'd like an ack from netdev
-people for patches 0007 and 0008, but that won't prevent me from queuing all the
-other patches (excepting the patch 0012 which can only be applied once 0007 and
-0008 are queued).
+This is specifically used for network drivers smc91x and smc911x, and
+needed for their port to slave maps.
 
-Cheers.
+Cc: Arnd Bergmann <arnd@arndb.de>
+Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>
+Acked-by: Vinod Koul <vkoul@kernel.org>
+---
+Since v1: changed -1 to U32_MAX
+---
+ drivers/dma/pxa_dma.c | 5 +++++
+ 1 file changed, 5 insertions(+)
 
---
-Robert
-
-Robert Jarzmik (14):
-  dmaengine: pxa: use a dma slave map
-  ARM: pxa: add dma slave map
-  dmaengine: pxa: add a default requestor policy
-  mmc: pxamci: remove the dmaengine compat need
-  media: pxa_camera: remove the dmaengine compat need
-  mtd: rawnand: marvell: remove the dmaengine compat need
-  net: smc911x: remove the dmaengine compat need
-  net: smc91x: remove the dmaengine compat need
-  ASoC: pxa: remove the dmaengine compat need
-  ata: pata_pxa: remove the dmaengine compat need
-  dmaengine: pxa: document pxad_param
-  dmaengine: pxa: make the filter function internal
-  ARM: pxa: remove the DMA IO resources
-  ARM: pxa: change SSP DMA channels allocation
-
- arch/arm/mach-pxa/devices.c           | 148 +---------------------------------
- arch/arm/mach-pxa/devices.h           |   6 +-
- arch/arm/mach-pxa/pxa25x.c            |  38 ++++++++-
- arch/arm/mach-pxa/pxa27x.c            |  39 ++++++++-
- arch/arm/mach-pxa/pxa3xx.c            |  41 +++++++++-
- arch/arm/plat-pxa/ssp.c               |  47 -----------
- drivers/ata/pata_pxa.c                |  10 +--
- drivers/dma/pxa_dma.c                 |  18 ++++-
- drivers/media/platform/pxa_camera.c   |  22 +----
- drivers/mmc/host/pxamci.c             |  29 +------
- drivers/mtd/nand/raw/marvell_nand.c   |  17 +---
- drivers/net/ethernet/smsc/smc911x.c   |  13 +--
- drivers/net/ethernet/smsc/smc91x.c    |   9 +--
- drivers/net/ethernet/smsc/smc91x.h    |   1 -
- include/linux/dma/pxa-dma.h           |  20 +++--
- include/linux/platform_data/mmp_dma.h |   4 +
- include/linux/pxa2xx_ssp.h            |   2 -
- sound/arm/pxa2xx-ac97.c               |  14 +---
- sound/arm/pxa2xx-pcm-lib.c            |   6 +-
- sound/soc/pxa/pxa-ssp.c               |   5 +-
- sound/soc/pxa/pxa2xx-ac97.c           |  32 ++------
- sound/soc/pxa/pxa2xx-i2s.c            |   6 +-
- 22 files changed, 176 insertions(+), 351 deletions(-)
-
+diff --git a/drivers/dma/pxa_dma.c b/drivers/dma/pxa_dma.c
+index 9505334f9c6e..b31c28b67ad3 100644
+--- a/drivers/dma/pxa_dma.c
++++ b/drivers/dma/pxa_dma.c
+@@ -762,6 +762,8 @@ static void pxad_free_chan_resources(struct dma_chan *dchan)
+ 	dma_pool_destroy(chan->desc_pool);
+ 	chan->desc_pool = NULL;
+ 
++	chan->drcmr = U32_MAX;
++	chan->prio = PXAD_PRIO_LOWEST;
+ }
+ 
+ static void pxad_free_desc(struct virt_dma_desc *vd)
+@@ -1386,6 +1388,9 @@ static int pxad_init_dmadev(struct platform_device *op,
+ 		c = devm_kzalloc(&op->dev, sizeof(*c), GFP_KERNEL);
+ 		if (!c)
+ 			return -ENOMEM;
++
++		c->drcmr = U32_MAX;
++		c->prio = PXAD_PRIO_LOWEST;
+ 		c->vc.desc_free = pxad_free_desc;
+ 		vchan_init(&c->vc, &pdev->slave);
+ 		init_waitqueue_head(&c->wq_state);
 -- 
 2.11.0
