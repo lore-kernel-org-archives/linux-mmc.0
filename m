@@ -1,207 +1,46 @@
-From: Daniel Mack <daniel@zonque.org>
-Subject: Re: [PATCH v3 09/14] ASoC: pxa: remove the dmaengine
-	compat need
-Date: Sun, 17 Jun 2018 20:17:09 +0200
-Message-ID: <1984a4a7-e33b-6349-31f3-6f85ff1582b8@zonque.org>
-References: <20180617170217.24177-1-robert.jarzmik@free.fr>
- <20180617170217.24177-10-robert.jarzmik@free.fr>
+From: Lee Jones <lee.jones@linaro.org>
+Subject: Re: [PATCH v4 22/26] devicetree: fix name of pinctrl-bindings.txt
+Date: Mon, 18 Jun 2018 06:48:13 +0100
+Message-ID: <20180618054813.GA31141@dell>
+References: <cover.1529079119.git.mchehab+samsung@kernel.org>
+ <1832904c012f823958663464ac4fb249f77978b5.1529079120.git.mchehab+samsung@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <alsa-devel-bounces@alsa-project.org>
-In-Reply-To: <20180617170217.24177-10-robert.jarzmik@free.fr>
-Content-Language: en-US
-List-Unsubscribe: <http://mailman.alsa-project.org/mailman/options/alsa-devel>,
- <mailto:alsa-devel-request@alsa-project.org?subject=unsubscribe>
-List-Archive: <http://mailman.alsa-project.org/pipermail/alsa-devel/>
-List-Post: <mailto:alsa-devel@alsa-project.org>
-List-Help: <mailto:alsa-devel-request@alsa-project.org?subject=help>
-List-Subscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
- <mailto:alsa-devel-request@alsa-project.org?subject=subscribe>
-Errors-To: alsa-devel-bounces@alsa-project.org
-Sender: alsa-devel-bounces@alsa-project.org
-To: Robert Jarzmik <robert.jarzmik@free.fr>, Haojian Zhuang <haojian.zhuang@gmail.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Tejun Heo <tj@kernel.org>, Vinod Koul <vinod.koul@intel.com>, Mauro Carvalho Chehab <mchehab@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Miquel Raynal <miquel.raynal@bootlin.com>, Boris Brezillon <boris.brezillon@bootlin.com>, David Woodhouse <dwmw2@infradead.org>, Brian Norris <computersforpeace@gmail.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Nicolas Pitre <nico@fluxnic.net>, Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>, Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>
-Cc: alsa-devel@alsa-project.org, netdev@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-ide@vger.kernel.org, linux-mtd@lists.infradead.org, dmaengine@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-media@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1832904c012f823958663464ac4fb249f77978b5.1529079120.git.mchehab+samsung@kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Mauro Carvalho Chehab <mchehab+samsung@kernel.org>
+Cc: Linux Doc Mailing List <linux-doc@vger.kernel.org>, Jonathan Corbet <corbet@lwn.net>, Mauro Carvalho Chehab <mchehab@infradead.org>, linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Mark Brown <broonie@kernel.org>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org, linux-serial@vger.kernel.org, linux-spi@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Mark,
+On Fri, 15 Jun 2018, Mauro Carvalho Chehab wrote:
 
-I prepared a series of patches for 4.18 that conflict with this one. 
-Instead of letting other people resolve this down the road, I'd prefer 
-if this one went through the ASoC tree, if you don't mind.
-
-I've talked to Robert off-list, and he's fine with this approach.
-
-
-Thanks,
-Daniel
-
-On Sunday, June 17, 2018 07:02 PM, Robert Jarzmik wrote:
-> As the pxa architecture switched towards the dmaengine slave map, the
-> old compatibility mechanism to acquire the dma requestor line number and
-> priority are not needed anymore.
+> Rename:
+> 	pinctrl-binding.txt -> pinctrl-bindings.txt
 > 
-> This patch simplifies the dma resource acquisition, using the more
-> generic function dma_request_slave_channel().
+> In order to match the current name of this file.
 > 
-> Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>
-> Reviewed-by: Daniel Mack <daniel@zonque.org>
-> Acked-by: Mark Brown <broonie@kernel.org>
+> Signed-off-by: Mauro Carvalho Chehab <mchehab+samsung@kernel.org>
 > ---
->   sound/arm/pxa2xx-ac97.c     | 14 ++------------
->   sound/arm/pxa2xx-pcm-lib.c  |  6 +++---
->   sound/soc/pxa/pxa2xx-ac97.c | 32 +++++---------------------------
->   sound/soc/pxa/pxa2xx-i2s.c  |  6 ++----
->   4 files changed, 12 insertions(+), 46 deletions(-)
-> 
-> diff --git a/sound/arm/pxa2xx-ac97.c b/sound/arm/pxa2xx-ac97.c
-> index 4bc244c40f80..236a63cdaf9f 100644
-> --- a/sound/arm/pxa2xx-ac97.c
-> +++ b/sound/arm/pxa2xx-ac97.c
-> @@ -63,28 +63,18 @@ static struct snd_ac97_bus_ops pxa2xx_ac97_ops = {
->   	.reset	= pxa2xx_ac97_legacy_reset,
->   };
->   
-> -static struct pxad_param pxa2xx_ac97_pcm_out_req = {
-> -	.prio = PXAD_PRIO_LOWEST,
-> -	.drcmr = 12,
-> -};
-> -
->   static struct snd_dmaengine_dai_dma_data pxa2xx_ac97_pcm_out = {
->   	.addr		= __PREG(PCDR),
->   	.addr_width	= DMA_SLAVE_BUSWIDTH_4_BYTES,
-> +	.chan_name	= "pcm_pcm_stereo_out",
->   	.maxburst	= 32,
-> -	.filter_data	= &pxa2xx_ac97_pcm_out_req,
-> -};
-> -
-> -static struct pxad_param pxa2xx_ac97_pcm_in_req = {
-> -	.prio = PXAD_PRIO_LOWEST,
-> -	.drcmr = 11,
->   };
->   
->   static struct snd_dmaengine_dai_dma_data pxa2xx_ac97_pcm_in = {
->   	.addr		= __PREG(PCDR),
->   	.addr_width	= DMA_SLAVE_BUSWIDTH_4_BYTES,
-> +	.chan_name	= "pcm_pcm_stereo_in",
->   	.maxburst	= 32,
-> -	.filter_data	= &pxa2xx_ac97_pcm_in_req,
->   };
->   
->   static struct snd_pcm *pxa2xx_ac97_pcm;
-> diff --git a/sound/arm/pxa2xx-pcm-lib.c b/sound/arm/pxa2xx-pcm-lib.c
-> index e8da3b8ee721..dcbe7ecc1835 100644
-> --- a/sound/arm/pxa2xx-pcm-lib.c
-> +++ b/sound/arm/pxa2xx-pcm-lib.c
-> @@ -125,9 +125,9 @@ int __pxa2xx_pcm_open(struct snd_pcm_substream *substream)
->   	if (ret < 0)
->   		return ret;
->   
-> -	return snd_dmaengine_pcm_open_request_chan(substream,
-> -					pxad_filter_fn,
-> -					dma_params->filter_data);
-> +	return snd_dmaengine_pcm_open(
-> +		substream, dma_request_slave_channel(rtd->cpu_dai->dev,
-> +						     dma_params->chan_name));
->   }
->   EXPORT_SYMBOL(__pxa2xx_pcm_open);
->   
-> diff --git a/sound/soc/pxa/pxa2xx-ac97.c b/sound/soc/pxa/pxa2xx-ac97.c
-> index 803818aabee9..1b41c0f2a8fb 100644
-> --- a/sound/soc/pxa/pxa2xx-ac97.c
-> +++ b/sound/soc/pxa/pxa2xx-ac97.c
-> @@ -68,61 +68,39 @@ static struct snd_ac97_bus_ops pxa2xx_ac97_ops = {
->   	.reset	= pxa2xx_ac97_cold_reset,
->   };
->   
-> -static struct pxad_param pxa2xx_ac97_pcm_stereo_in_req = {
-> -	.prio = PXAD_PRIO_LOWEST,
-> -	.drcmr = 11,
-> -};
-> -
->   static struct snd_dmaengine_dai_dma_data pxa2xx_ac97_pcm_stereo_in = {
->   	.addr		= __PREG(PCDR),
->   	.addr_width	= DMA_SLAVE_BUSWIDTH_4_BYTES,
-> +	.chan_name	= "pcm_pcm_stereo_in",
->   	.maxburst	= 32,
-> -	.filter_data	= &pxa2xx_ac97_pcm_stereo_in_req,
-> -};
-> -
-> -static struct pxad_param pxa2xx_ac97_pcm_stereo_out_req = {
-> -	.prio = PXAD_PRIO_LOWEST,
-> -	.drcmr = 12,
->   };
->   
->   static struct snd_dmaengine_dai_dma_data pxa2xx_ac97_pcm_stereo_out = {
->   	.addr		= __PREG(PCDR),
->   	.addr_width	= DMA_SLAVE_BUSWIDTH_4_BYTES,
-> +	.chan_name	= "pcm_pcm_stereo_out",
->   	.maxburst	= 32,
-> -	.filter_data	= &pxa2xx_ac97_pcm_stereo_out_req,
->   };
->   
-> -static struct pxad_param pxa2xx_ac97_pcm_aux_mono_out_req = {
-> -	.prio = PXAD_PRIO_LOWEST,
-> -	.drcmr = 10,
-> -};
->   static struct snd_dmaengine_dai_dma_data pxa2xx_ac97_pcm_aux_mono_out = {
->   	.addr		= __PREG(MODR),
->   	.addr_width	= DMA_SLAVE_BUSWIDTH_2_BYTES,
-> +	.chan_name	= "pcm_aux_mono_out",
->   	.maxburst	= 16,
-> -	.filter_data	= &pxa2xx_ac97_pcm_aux_mono_out_req,
->   };
->   
-> -static struct pxad_param pxa2xx_ac97_pcm_aux_mono_in_req = {
-> -	.prio = PXAD_PRIO_LOWEST,
-> -	.drcmr = 9,
-> -};
->   static struct snd_dmaengine_dai_dma_data pxa2xx_ac97_pcm_aux_mono_in = {
->   	.addr		= __PREG(MODR),
->   	.addr_width	= DMA_SLAVE_BUSWIDTH_2_BYTES,
-> +	.chan_name	= "pcm_aux_mono_in",
->   	.maxburst	= 16,
-> -	.filter_data	= &pxa2xx_ac97_pcm_aux_mono_in_req,
->   };
->   
-> -static struct pxad_param pxa2xx_ac97_pcm_aux_mic_mono_req = {
-> -	.prio = PXAD_PRIO_LOWEST,
-> -	.drcmr = 8,
-> -};
->   static struct snd_dmaengine_dai_dma_data pxa2xx_ac97_pcm_mic_mono_in = {
->   	.addr		= __PREG(MCDR),
->   	.addr_width	= DMA_SLAVE_BUSWIDTH_2_BYTES,
-> +	.chan_name	= "pcm_aux_mic_mono",
->   	.maxburst	= 16,
-> -	.filter_data	= &pxa2xx_ac97_pcm_aux_mic_mono_req,
->   };
->   
->   static int pxa2xx_ac97_hifi_startup(struct snd_pcm_substream *substream,
-> diff --git a/sound/soc/pxa/pxa2xx-i2s.c b/sound/soc/pxa/pxa2xx-i2s.c
-> index 3fb60baf6eab..e7184de0de04 100644
-> --- a/sound/soc/pxa/pxa2xx-i2s.c
-> +++ b/sound/soc/pxa/pxa2xx-i2s.c
-> @@ -82,20 +82,18 @@ static struct pxa_i2s_port pxa_i2s;
->   static struct clk *clk_i2s;
->   static int clk_ena = 0;
->   
-> -static unsigned long pxa2xx_i2s_pcm_stereo_out_req = 3;
->   static struct snd_dmaengine_dai_dma_data pxa2xx_i2s_pcm_stereo_out = {
->   	.addr		= __PREG(SADR),
->   	.addr_width	= DMA_SLAVE_BUSWIDTH_4_BYTES,
-> +	.chan_name	= "tx",
->   	.maxburst	= 32,
-> -	.filter_data	= &pxa2xx_i2s_pcm_stereo_out_req,
->   };
->   
-> -static unsigned long pxa2xx_i2s_pcm_stereo_in_req = 2;
->   static struct snd_dmaengine_dai_dma_data pxa2xx_i2s_pcm_stereo_in = {
->   	.addr		= __PREG(SADR),
->   	.addr_width	= DMA_SLAVE_BUSWIDTH_4_BYTES,
-> +	.chan_name	= "rx",
->   	.maxburst	= 32,
-> -	.filter_data	= &pxa2xx_i2s_pcm_stereo_in_req,
->   };
->   
->   static int pxa2xx_i2s_startup(struct snd_pcm_substream *substream,
-> 
+>  Documentation/devicetree/bindings/media/stih407-c8sectpfe.txt | 2 +-
+
+>  Documentation/devicetree/bindings/mfd/as3722.txt              | 2 +-
+
+Acked-by: Lee Jones <lee.jones@linaro.org>
+
+>  .../devicetree/bindings/mmc/microchip,sdhci-pic32.txt         | 2 +-
+>  Documentation/devicetree/bindings/mmc/sdhci-st.txt            | 2 +-
+>  .../devicetree/bindings/pinctrl/pinctrl-max77620.txt          | 4 ++--
+>  .../devicetree/bindings/pinctrl/pinctrl-mcp23s08.txt          | 4 ++--
+>  Documentation/devicetree/bindings/pinctrl/pinctrl-rk805.txt   | 4 ++--
+>  .../devicetree/bindings/serial/microchip,pic32-uart.txt       | 2 +-
+>  Documentation/devicetree/bindings/spi/spi-st-ssc.txt          | 2 +-
+>  9 files changed, 12 insertions(+), 12 deletions(-)
+
+-- 
+Lee Jones [李琼斯]
+Linaro Services Technical Lead
+Linaro.org │ Open source software for ARM SoCs
+Follow Linaro: Facebook | Twitter | Blog
