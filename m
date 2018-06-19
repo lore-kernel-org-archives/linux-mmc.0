@@ -1,45 +1,56 @@
-From: Robert Jarzmik <robert.jarzmik@free.fr>
-Subject: Re: [PATCH v3 06/14] mtd: rawnand: marvell: remove the
-	dmaengine compat need
-Date: Mon, 18 Jun 2018 21:31:27 +0200
-Message-ID: <87h8lzriwg.fsf@belgarion.home>
-References: <20180617170217.24177-1-robert.jarzmik@free.fr>
- <20180617170217.24177-7-robert.jarzmik@free.fr>
- <3a2a8951-f380-af99-bf97-6ff722404410@zonque.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <alsa-devel-bounces@alsa-project.org>
-In-Reply-To: <3a2a8951-f380-af99-bf97-6ff722404410@zonque.org> (Daniel Mack's
- message of "Sun, 17 Jun 2018 20:12:49 +0200")
-List-Unsubscribe: <http://mailman.alsa-project.org/mailman/options/alsa-devel>,
- <mailto:alsa-devel-request@alsa-project.org?subject=unsubscribe>
-List-Archive: <http://mailman.alsa-project.org/pipermail/alsa-devel/>
-List-Post: <mailto:alsa-devel@alsa-project.org>
-List-Help: <mailto:alsa-devel-request@alsa-project.org?subject=help>
-List-Subscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
- <mailto:alsa-devel-request@alsa-project.org?subject=subscribe>
-Errors-To: alsa-devel-bounces@alsa-project.org
-Sender: alsa-devel-bounces@alsa-project.org
-To: Daniel Mack <daniel@zonque.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, alsa-devel@alsa-project.org, linux-kernel@vger.kernel.org, linux-ide@vger.kernel.org, linux-mtd@lists.infradead.org, Miquel Raynal <miquel.raynal@bootlin.com>, Mauro Carvalho Chehab <mchehab@kernel.org>, Vinod Koul <vinod.koul@intel.com>, Richard Weinberger <richard@nod.at>, Takashi Iwai <tiwai@suse.com>, Marek Vasut <marek.vasut@gmail.com>, linux-media@vger.kernel.org, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Boris Brezillon <boris.brezillon@bootlin.com>, Mark Brown <broonie@kernel.org>, linux-arm-kernel@lists.infradead.org, Nicolas Pitre <nico@fluxnic.net>, netdev@vger.kernel.org, linux-mmc@vger.kernel.org, Liam Girdwood <lgirdwood@gmail.com>, dmaengine@vger.kernel.org, Tejun Heo <tj@kernel.org>, Brian Norris <computersforpeace@gmail.com>, David Woodhouse <dwmw2@infradead.org>
+From: Vijay Viswanath <vviswana@codeaurora.org>
+Subject: [PATCH V3 0/4] Changes for SDCC5 version
+Date: Tue, 19 Jun 2018 11:09:17 +0530
+Message-ID: <1529386761-4923-1-git-send-email-vviswana@codeaurora.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, devicetree@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, jeremymc@redhat.com, vviswana@codeaurora.org, bjorn.andersson@linaro.org, riteshh@codeaurora.org, vbadigan@codeaurora.org, dianders@google.com, sayalil@codeaurora.org
 List-Id: linux-mmc@vger.kernel.org
 
-Daniel Mack <daniel@zonque.org> writes:
+With SDCC5, the MCI register space got removed and the offset/order of
+several registers have changed. Based on SDCC version used and the register,
+we need to pick the base address and offset.
 
-> On Sunday, June 17, 2018 07:02 PM, Robert Jarzmik wrote:
->> As the pxa architecture switched towards the dmaengine slave map, the
->> old compatibility mechanism to acquire the dma requestor line number and
->> priority are not needed anymore.
->>
->> This patch simplifies the dma resource acquisition, using the more
->> generic function dma_request_slave_channel().
->>
->> Signed-off-by: Signed-off-by: Daniel Mack <daniel@zonque.org>
->
-> Something went wrong here, but you can simply fix that when applying the series
-> :)
-Indeed, fixed before applying to the pxa/for-next tree.
+Depends on patch series: "[PATCH V5 0/2] mmc: sdhci-msm: Configuring IO_PAD support for sdhci-msm"
 
---
-Robert
+Changes since RFC:
+	Dropped voltage regulator changes in sdhci-msm
+	Split the "Register changes for sdcc V5" patch
+	Instead of checking mci removal for deciding which base addr to use,
+	new function pointers are defined for the 2 variants of sdcc: 
+		1) MCI present
+		2) V5 (mci removed)
+	Instead of string comparing with the compatible string from DT file,
+	the sdhci_msm_probe will now pick the data associated with the
+	compatible entry and use it to load variant specific address offsets
+	and msm variant specific read/write ops.
+
+Changes since V1:
+	Removed unused msm_reab & msm_writeb APIs
+	Changed certain register addresses from uppercase to lowercase hex
+	letters
+	Removed extra lines and spaces
+	Split "[PATCH V1 0/3] Changes for SDCC5 version" patch into two,
+	one for Documentation and other for the driver changes.
+
+Changes since V2:
+	Used lower case for macro function defenitions
+	Removed unused function pointers for msm_readb & msm_writeb
+
+
+Sayali Lokhande (3):
+  mmc: sdhci-msm: Define new Register address map
+  Documentation: sdhci-msm: Add new compatible string for SDCC v5
+  mmc: host: Register changes for sdcc V5
+
+Vijay Viswanath (1):
+  mmc: sdhci-msm: Add msm version specific ops and data structures
+
+ .../devicetree/bindings/mmc/sdhci-msm.txt          |   7 +-
+ drivers/mmc/host/sdhci-msm.c                       | 511 ++++++++++++++++-----
+ 2 files changed, 391 insertions(+), 127 deletions(-)
+
+-- 
+ Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc. 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a Linux Foundation Collaborative Project.
