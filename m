@@ -1,100 +1,103 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 1/1] mmc: sdhci-pci: fix eMMC controller issue on Intel
- Baytrail SoCs
-Date: Tue, 19 Jun 2018 10:03:01 +0300
-Message-ID: <293c2771-ea9b-4f0c-bd31-f8844de12dc4@intel.com>
-References: <20180619063119.3955-1-kurt@linutronix.de>
- <20180619063119.3955-2-kurt@linutronix.de>
+Subject: Re: [PATCH v2] mmc: sdhci-of-arasan: Add quirk for unstable clocks
+Date: Tue, 19 Jun 2018 12:09:17 +0300
+Message-ID: <8e6fa189-f585-c835-488f-e15f18128547@intel.com>
+References: <da0ebcb3-b19a-86a6-8462-87a1c0e81fff@intel.com>
+ <20180615081830.zrgx6arwn6ga27gu@laureti-dev>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180619063119.3955-2-kurt@linutronix.de>
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20180615081830.zrgx6arwn6ga27gu@laureti-dev>
 Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Kurt Kanzenbach <kurt@linutronix.de>
-Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, tglx@linutronix.de
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Helmut Grohne <h.grohne@intenta.de>, Michal Simek <michal.simek@xilinx.com>, =?UTF-8?Q?S=c3=b6ren_Brinkmann?= <soren.brinkmann@xilinx.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc: Atul Garg <agarg@arasan.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 19/06/18 09:31, Kurt Kanzenbach wrote:
-> Sometimes the eMMC controller doesn't respond anymore on Intel Baytrail
-> SoCs. The resulting error looks like:
+On 15/06/18 11:18, Helmut Grohne wrote:
+> Some controllers immediately report SDHCI_CLOCK_INT_STABLE after
+> enabling the clock even when the clock is not stable. When used in
+> conjunction with older/slower cards, this can result in:
 > 
-> |mmc1: Reset 0x1 never completed.
-> |sdhci: =========== REGISTER DUMP (mmc1)===========
-> |sdhci: Sys addr: 0xffffffff | Version:  0x0000ffff
-> |sdhci: Blk size: 0x0000ffff | Blk cnt:  0x0000ffff
-> |sdhci: Argument: 0xffffffff | Trn mode: 0x0000ffff
-> |sdhci: Present:  0xffffffff | Host ctl: 0x000000ff
-> |sdhci: Power:    0x000000ff | Blk gap:  0x000000ff
-> |sdhci: Wake-up:  0x000000ff | Clock:    0x0000ffff
-> |sdhci: Timeout:  0x000000ff | Int stat: 0xffffffff
-> |sdhci: Int enab: 0xffffffff | Sig enab: 0xffffffff
-> |sdhci: AC12 err: 0x0000ffff | Slot int: 0x0000ffff
-> |sdhci: Caps:     0xffffffff | Caps_1:   0xffffffff
-> |sdhci: Cmd:      0x0000ffff | Max curr: 0xffffffff
-> |sdhci: Host ctl2: 0x0000ffff
-> |sdhci: ADMA Err: 0xffffffff | ADMA Ptr: 0xffffffff
+>     mmc0: error -84 whilst initialising SD card
 > 
-> The behavior was observed on an Intel Atom E3825 performing lots of reboots. The
+> When the stable reporting is broken, we simply wait for the maximum
+> stabilization period.
+> 
+> Signed-off-by: Helmut Grohne <h.grohne@intenta.de>
 
-So you are saying this only happens at boot time?  And only when re-booting?
-Can you send all the kernel messages?  Can you send an acpidump?
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-> issue seems to occur if runtime power management is used. Found by utilizing
-> ftrace.
-> 
-> The erratum VLI10 for the Intel E3825 states, that the eMMC controller
-> incorrectly announces that it supports suspend/resume. However, that shouldn't
-> be used, as the controller may incorrectly transfer data between memory and the
-> SD device.
-
-That erratum is not related to this problem.  The suspend/resume that is
-documented is an internal SDHCI feature, not the kernel's suspend/resume.
-The SDHCI Suspend/Resume Mechanism is not supported in the driver, so it is
-not being used anyway.
-
-> 
-> Therefore, disallowing runtime pm resolves the issue. Tested on the E3825.
-> 
-> Signed-off-by: Kurt Kanzenbach <kurt@linutronix.de>
 > ---
->  drivers/mmc/host/sdhci-pci-core.c | 17 ++++++++++++++++-
->  1 file changed, 16 insertions(+), 1 deletion(-)
+>  Documentation/devicetree/bindings/mmc/arasan,sdhci.txt |  2 ++
+>  drivers/mmc/host/sdhci-of-arasan.c                     | 16 ++++++++++++++++
+>  2 files changed, 18 insertions(+)
 > 
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index 77dd3521daae..df89381944cd 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -870,6 +870,21 @@ static const struct sdhci_pci_fixes sdhci_intel_byt_emmc = {
->  	.priv_size	= sizeof(struct intel_host),
+> Changes since v1 (RFC):
+>  * Use an arasan-specific quirk in the ->set_clock() callback as requested by
+>    Adrian Hunter.
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> index 60481bfc3d31..c0e0f04a8504 100644
+> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> @@ -39,6 +39,8 @@ Optional Properties:
+>    - xlnx,fails-without-test-cd: when present, the controller doesn't work when
+>      the CD line is not connected properly, and the line is not connected
+>      properly. Test mode can be used to force the controller to function.
+> +  - xlnx,int-clock-stable-broken: when present, the controller always reports
+> +    that the internal clock is stable even when it is not.
+>  
+>  Example:
+>  	sdhci@e0100000 {
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index c33a5f7393bd..f7fe26c75150 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -102,6 +102,9 @@ struct sdhci_arasan_data {
+>  
+>  /* Controller does not have CD wired and will not function normally without */
+>  #define SDHCI_ARASAN_QUIRK_FORCE_CDTEST	BIT(0)
+> +/* Controller immediately reports SDHCI_CLOCK_INT_STABLE after enabling the
+> + * internal clock even when the clock isn't stable */
+> +#define SDHCI_ARASAN_QUIRK_CLOCK_UNSTABLE BIT(1)
 >  };
 >  
-> +/*
-> + * See Erratum VLI10 from Errata List for Intel Atom E3825, Link:
-> + * https://www.intel.ca/content/dam/www/public/us/en/documents/specification-updates/atom-e3800-family-spec-update.pdf
-> + */
-> +static const struct sdhci_pci_fixes sdhci_intel_byt_emmc_no_runtime_pm = {
-> +	.allow_runtime_pm = false,
-> +	.probe_slot	= byt_emmc_probe_slot,
-> +	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
-> +	.quirks2	= SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-> +			  SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400 |
-> +			  SDHCI_QUIRK2_STOP_WITH_TC,
-> +	.ops		= &sdhci_intel_byt_ops,
-> +	.priv_size	= sizeof(struct intel_host),
-> +};
+>  static const struct sdhci_arasan_soc_ctl_map rk3399_soc_ctl_map = {
+> @@ -207,6 +210,16 @@ static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
+>  
+>  	sdhci_set_clock(host, clock);
+>  
+> +	if (sdhci_arasan->quirks & SDHCI_ARASAN_QUIRK_CLOCK_UNSTABLE)
+> +		/*
+> +		 * Some controllers immediately report SDHCI_CLOCK_INT_STABLE
+> +		 * after enabling the clock even though the clock is not
+> +		 * stable. Trying to use a clock without waiting here results
+> +		 * in EILSEQ while detecting some older/slower cards. The
+> +		 * chosen delay is the maximum delay from sdhci_set_clock.
+> +		 */
+> +		msleep(20);
 > +
->  static const struct sdhci_pci_fixes sdhci_intel_glk_emmc = {
->  	.allow_runtime_pm	= true,
->  	.probe_slot		= glk_emmc_probe_slot,
-> @@ -1470,7 +1485,7 @@ static const struct pci_device_id pci_ids[] = {
->  	SDHCI_PCI_SUBDEVICE(INTEL, BYT_SDIO, NI, 7884, ni_byt_sdio),
->  	SDHCI_PCI_DEVICE(INTEL, BYT_SDIO,  intel_byt_sdio),
->  	SDHCI_PCI_DEVICE(INTEL, BYT_SD,    intel_byt_sd),
-> -	SDHCI_PCI_DEVICE(INTEL, BYT_EMMC2, intel_byt_emmc),
-> +	SDHCI_PCI_DEVICE(INTEL, BYT_EMMC2, intel_byt_emmc_no_runtime_pm),
->  	SDHCI_PCI_DEVICE(INTEL, BSW_EMMC,  intel_byt_emmc),
->  	SDHCI_PCI_DEVICE(INTEL, BSW_SDIO,  intel_byt_sdio),
->  	SDHCI_PCI_DEVICE(INTEL, BSW_SD,    intel_byt_sd),
+>  	if (ctrl_phy) {
+>  		phy_power_on(sdhci_arasan->phy);
+>  		sdhci_arasan->is_phy_on = true;
+> @@ -759,6 +772,9 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+>  	if (of_property_read_bool(np, "xlnx,fails-without-test-cd"))
+>  		sdhci_arasan->quirks |= SDHCI_ARASAN_QUIRK_FORCE_CDTEST;
+>  
+> +	if (of_property_read_bool(np, "xlnx,int-clock-stable-broken"))
+> +		sdhci_arasan->quirks |= SDHCI_ARASAN_QUIRK_CLOCK_UNSTABLE;
+> +
+>  	pltfm_host->clk = clk_xin;
+>  
+>  	if (of_device_is_compatible(pdev->dev.of_node,
 > 
