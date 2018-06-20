@@ -1,16 +1,14 @@
 From: Helmut Grohne <h.grohne@intenta.de>
-Subject: [PATCH v3 1/2] dt-bindings: mmc: broken clock stable indicator on
- arasan controllers
-Date: Wed, 20 Jun 2018 13:32:51 +0200
-Message-ID: <12953dbf9af1f1a71aaf3ef77782e56a2a7ad893.1529493667.git.h.grohne@intenta.de>
+Subject: [PATCH v3 0/2] mmc: sdhci-of-arasan: workaround for broken clocks
+Date: Wed, 20 Jun 2018 13:32:41 +0200
+Message-ID: <cover.1529493667.git.h.grohne@intenta.de>
 References: <20180615081830.zrgx6arwn6ga27gu@laureti-dev>
- <cover.1529493667.git.h.grohne@intenta.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 Content-Disposition: inline
-In-Reply-To: <cover.1529493667.git.h.grohne@intenta.de>
+In-Reply-To: <20180615081830.zrgx6arwn6ga27gu@laureti-dev>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -24,33 +22,24 @@ To: Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michal.simek@xilinx.c
 Cc: Atul Garg <agarg@arasan.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Some controllers immediately report that their internal clock is stable
-after activating it even when the clock is not stable. When used in
-conjunction with older/slower cards, this can result in:
+This patch series works around the internal clock indicating stability too
+quickly to operate. It manifests itself as:
 
     mmc0: error -84 whilst initialising SD card
 
-This flag allows documenting and thus working around such a hardware
-defect.
+Changes since v2:
+ * Ulf Hansson requested splitting the patch in accordance with
+   Documentation/devicetree/bindings/submitting-patches.txt. Also update
+   recipient list accordingly.
+ * Added Acked-by from Adrian Hunter.
 
-Signed-off-by: Helmut Grohne <h.grohne@intenta.de>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
----
- Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 2 ++
- 1 file changed, 2 insertions(+)
+Helmut Grohne (2):
+  dt-bindings: mmc: broken clock stable indicator on arasan controllers
+  mmc: sdhci-of-arasan: Add quirk for unstable clocks
 
-diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-index 60481bfc3d31..28332b655d2e 100644
---- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-+++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-@@ -39,6 +39,8 @@ Optional Properties:
-   - xlnx,fails-without-test-cd: when present, the controller doesn't work when
-     the CD line is not connected properly, and the line is not connected
-     properly. Test mode can be used to force the controller to function.
-+  - xlnx,int-clock-stable-broken: when present, the controller always reports
-+    that the internal clock is stable even when it is not.
- 
- Example:
- 	sdhci@e0100000 {
+ Documentation/devicetree/bindings/mmc/arasan,sdhci.txt |  2 ++
+ drivers/mmc/host/sdhci-of-arasan.c                     | 16 ++++++++++++++++
+ 2 files changed, 18 insertions(+)
+
 -- 
 2.11.0
