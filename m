@@ -1,45 +1,82 @@
-From: Robert Jarzmik <robert.jarzmik@free.fr>
-Subject: Re: [PATCH v3 09/14] ASoC: pxa: remove the dmaengine
-	compat need
-Date: Thu, 21 Jun 2018 10:50:03 +0200
-Message-ID: <87muvoo75w.fsf@belgarion.home>
-References: <20180617170217.24177-1-robert.jarzmik@free.fr>
- <20180617170217.24177-10-robert.jarzmik@free.fr>
- <1984a4a7-e33b-6349-31f3-6f85ff1582b8@zonque.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V2 1/7] mmc: sdhci: add sd host v4 mode
+Date: Thu, 21 Jun 2018 13:49:32 +0300
+Message-ID: <1f3e7e87-be4e-37ab-af46-1c4e5dd79a1d@intel.com>
+References: <1529028255-6022-1-git-send-email-zhang.chunyan@linaro.org>
+ <1529028255-6022-2-git-send-email-zhang.chunyan@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <alsa-devel-bounces@alsa-project.org>
-In-Reply-To: <1984a4a7-e33b-6349-31f3-6f85ff1582b8@zonque.org> (Daniel Mack's
- message of "Sun, 17 Jun 2018 20:17:09 +0200")
-List-Unsubscribe: <http://mailman.alsa-project.org/mailman/options/alsa-devel>,
- <mailto:alsa-devel-request@alsa-project.org?subject=unsubscribe>
-List-Archive: <http://mailman.alsa-project.org/pipermail/alsa-devel/>
-List-Post: <mailto:alsa-devel@alsa-project.org>
-List-Help: <mailto:alsa-devel-request@alsa-project.org?subject=help>
-List-Subscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
- <mailto:alsa-devel-request@alsa-project.org?subject=subscribe>
-Errors-To: alsa-devel-bounces@alsa-project.org
-Sender: alsa-devel-bounces@alsa-project.org
-To: Mark Brown <broonie@kernel.org>, Daniel Mack <daniel@zonque.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, alsa-devel@alsa-project.org, linux-kernel@vger.kernel.org, linux-ide@vger.kernel.org, linux-mtd@lists.infradead.org, Miquel Raynal <miquel.raynal@bootlin.com>, Mauro Carvalho Chehab <mchehab@kernel.org>, Vinod Koul <vinod.koul@intel.com>, Richard Weinberger <richard@nod.at>, Takashi Iwai <tiwai@suse.com>, Marek Vasut <marek.vasut@gmail.com>, linux-media@vger.kernel.org, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Boris Brezillon <boris.brezillon@bootlin.com>, linux-arm-kernel@lists.infradead.org, Nicolas Pitre <nico@fluxnic.net>, netdev@vger.kernel.org, linux-mmc@vger.kernel.org, Liam Girdwood <lgirdwood@gmail.com>, dmaengine@vger.kernel.org, Tejun Heo <tj@kernel.org>, Brian Norris <computersforpeace@gmail.com>, David Woodhouse <dwmw2@infradead.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1529028255-6022-2-git-send-email-zhang.chunyan@linaro.org>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@spreadtrum.com>, zhang.lyra@gmail.com
 List-Id: linux-mmc@vger.kernel.org
 
-Daniel Mack <daniel@zonque.org> writes:
+On 15/06/18 05:04, Chunyan Zhang wrote:
+> For SD host controller version 4.00 or later ones, there're two
+> modes of implementation - Version 3.00 compatible mode or
+> Version 4 mode.  This patch introduces a flag to record this.
+> 
+> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
+> ---
+>  drivers/mmc/host/sdhci.c | 6 ++++++
+>  drivers/mmc/host/sdhci.h | 6 ++++++
+>  2 files changed, 12 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 2ededa7f..cf5695f 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -3302,6 +3302,12 @@ void __sdhci_read_caps(struct sdhci_host *host, u16 *ver, u32 *caps, u32 *caps1)
+>  	v = ver ? *ver : sdhci_readw(host, SDHCI_HOST_VERSION);
+>  	host->version = (v & SDHCI_SPEC_VER_MASK) >> SDHCI_SPEC_VER_SHIFT;
+>  
+> +	if (host->version >= SDHCI_SPEC_400) {
+> +		if (sdhci_readw(host, SDHCI_HOST_CONTROL2) &
+> +			SDHCI_CTRL_V4_MODE)
+> +			host->v4_mode = true;
+> +	}
 
-> Hi Mark,
->
-> I prepared a series of patches for 4.18 that conflict with this one. Instead of
-> letting other people resolve this down the road, I'd prefer if this one went
-> through the ASoC tree, if you don't mind.
->
-> I've talked to Robert off-list, and he's fine with this approach.
-That's right.
+At this point the host controller has just been reset which would mean it
+must be in version 3 compatibility mode, which would mean this code doesn't
+do anything.
 
-I'll tentativaly queue this patch to my pxa/for-next tree. As soon as I hear
-that Mark queued it up in his tree, I'll drop it from mine.
-
-Cheers.
-
---
-Robert
+> +
+>  	if (host->quirks & SDHCI_QUIRK_MISSING_CAPS)
+>  		return;
+>  
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index c95b0a4..128b0ba 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -184,6 +184,7 @@
+>  #define   SDHCI_CTRL_DRV_TYPE_D		0x0030
+>  #define  SDHCI_CTRL_EXEC_TUNING		0x0040
+>  #define  SDHCI_CTRL_TUNED_CLK		0x0080
+> +#define  SDHCI_CTRL_V4_MODE		0x1000
+>  #define  SDHCI_CTRL_PRESET_VAL_ENABLE	0x8000
+>  
+>  #define SDHCI_CAPABILITIES	0x40
+> @@ -270,6 +271,8 @@
+>  #define   SDHCI_SPEC_100	0
+>  #define   SDHCI_SPEC_200	1
+>  #define   SDHCI_SPEC_300	2
+> +#define   SDHCI_SPEC_400	3
+> +#define   SDHCI_SPEC_410	4
+>  
+>  /*
+>   * End of controller registers.
+> @@ -551,6 +554,9 @@ struct sdhci_host {
+>  	u32			sdma_boundary;
+>  
+>  	unsigned long private[0] ____cacheline_aligned;
+> +
+> +	/* Host Version 4 Enable */
+> +	bool			v4_mode;
+>  };
+>  
+>  struct sdhci_ops {
+> 
