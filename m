@@ -1,44 +1,45 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH v3 1/2] dt-bindings: mmc: broken clock stable indicator
- on arasan controllers
-Date: Wed, 20 Jun 2018 13:08:28 -0600
-Message-ID: <20180620190828.GA26510@rob-hp-laptop>
-References: <20180615081830.zrgx6arwn6ga27gu@laureti-dev>
- <cover.1529493667.git.h.grohne@intenta.de>
- <12953dbf9af1f1a71aaf3ef77782e56a2a7ad893.1529493667.git.h.grohne@intenta.de>
+From: Robert Jarzmik <robert.jarzmik@free.fr>
+Subject: Re: [PATCH v3 09/14] ASoC: pxa: remove the dmaengine
+	compat need
+Date: Thu, 21 Jun 2018 10:50:03 +0200
+Message-ID: <87muvoo75w.fsf@belgarion.home>
+References: <20180617170217.24177-1-robert.jarzmik@free.fr>
+ <20180617170217.24177-10-robert.jarzmik@free.fr>
+ <1984a4a7-e33b-6349-31f3-6f85ff1582b8@zonque.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <12953dbf9af1f1a71aaf3ef77782e56a2a7ad893.1529493667.git.h.grohne@intenta.de>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Helmut Grohne <h.grohne@intenta.de>
-Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Atul Garg <agarg@arasan.com>, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michal.simek@xilinx.com>, linux-arm-kernel@lists.infradead.org, =?iso-8859-1?Q?S=F6ren?= Brinkmann <soren.brinkmann@xilinx.com>
+Return-path: <alsa-devel-bounces@alsa-project.org>
+In-Reply-To: <1984a4a7-e33b-6349-31f3-6f85ff1582b8@zonque.org> (Daniel Mack's
+ message of "Sun, 17 Jun 2018 20:17:09 +0200")
+List-Unsubscribe: <http://mailman.alsa-project.org/mailman/options/alsa-devel>,
+ <mailto:alsa-devel-request@alsa-project.org?subject=unsubscribe>
+List-Archive: <http://mailman.alsa-project.org/pipermail/alsa-devel/>
+List-Post: <mailto:alsa-devel@alsa-project.org>
+List-Help: <mailto:alsa-devel-request@alsa-project.org?subject=help>
+List-Subscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
+ <mailto:alsa-devel-request@alsa-project.org?subject=subscribe>
+Errors-To: alsa-devel-bounces@alsa-project.org
+Sender: alsa-devel-bounces@alsa-project.org
+To: Mark Brown <broonie@kernel.org>, Daniel Mack <daniel@zonque.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, alsa-devel@alsa-project.org, linux-kernel@vger.kernel.org, linux-ide@vger.kernel.org, linux-mtd@lists.infradead.org, Miquel Raynal <miquel.raynal@bootlin.com>, Mauro Carvalho Chehab <mchehab@kernel.org>, Vinod Koul <vinod.koul@intel.com>, Richard Weinberger <richard@nod.at>, Takashi Iwai <tiwai@suse.com>, Marek Vasut <marek.vasut@gmail.com>, linux-media@vger.kernel.org, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Boris Brezillon <boris.brezillon@bootlin.com>, linux-arm-kernel@lists.infradead.org, Nicolas Pitre <nico@fluxnic.net>, netdev@vger.kernel.org, linux-mmc@vger.kernel.org, Liam Girdwood <lgirdwood@gmail.com>, dmaengine@vger.kernel.org, Tejun Heo <tj@kernel.org>, Brian Norris <computersforpeace@gmail.com>, David Woodhouse <dwmw2@infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Jun 20, 2018 at 01:32:51PM +0200, Helmut Grohne wrote:
-> Some controllers immediately report that their internal clock is stable
-> after activating it even when the clock is not stable. When used in
-> conjunction with older/slower cards, this can result in:
-> 
->     mmc0: error -84 whilst initialising SD card
-> 
-> This flag allows documenting and thus working around such a hardware
-> defect.
-> 
-> Signed-off-by: Helmut Grohne <h.grohne@intenta.de>
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-> ---
->  Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 2 ++
->  1 file changed, 2 insertions(+)
+Daniel Mack <daniel@zonque.org> writes:
 
-Reviewed-by: Rob Herring <robh@kernel.org>
+> Hi Mark,
+>
+> I prepared a series of patches for 4.18 that conflict with this one. Instead of
+> letting other people resolve this down the road, I'd prefer if this one went
+> through the ASoC tree, if you don't mind.
+>
+> I've talked to Robert off-list, and he's fine with this approach.
+That's right.
+
+I'll tentativaly queue this patch to my pxa/for-next tree. As soon as I hear
+that Mark queued it up in his tree, I'll drop it from mine.
+
+Cheers.
+
+--
+Robert
