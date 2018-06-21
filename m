@@ -1,197 +1,116 @@
-From: Manish Narani <MNARANI@xilinx.com>
-Subject: RE: [RFC PATCH 3/3] sdhci: arasan: Add support to read Tap Delay
- values from DT
-Date: Thu, 21 Jun 2018 12:54:57 +0000
-Message-ID: <SN6PR02MB4959A08CC3B0AAC01B7DB9E5C1760@SN6PR02MB4959.namprd02.prod.outlook.com>
-References: <1528373500-24663-1-git-send-email-manish.narani@xilinx.com>
- <1528373500-24663-3-git-send-email-manish.narani@xilinx.com>
- <SN6PR02MB49595D9202DDF98DA16C495CC17D0@SN6PR02MB4959.namprd02.prod.outlook.com>
- <6d3b2f29-fe8d-b084-3e1f-631cf20796b9@intel.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V2 1/7] mmc: sdhci: add sd host v4 mode
+Date: Thu, 21 Jun 2018 16:15:16 +0300
+Message-ID: <38c47bf5-d320-7767-59c1-958d1bbb6dc9@intel.com>
+References: <1529028255-6022-1-git-send-email-zhang.chunyan@linaro.org>
+ <1529028255-6022-2-git-send-email-zhang.chunyan@linaro.org>
+ <1f3e7e87-be4e-37ab-af46-1c4e5dd79a1d@intel.com>
+ <CAAfSe-ug+M7DO7S1KKQ43FcrRgfGqEpikvivgjBjih8yuTU0sg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <6d3b2f29-fe8d-b084-3e1f-631cf20796b9@intel.com>
+In-Reply-To: <CAAfSe-ug+M7DO7S1KKQ43FcrRgfGqEpikvivgjBjih8yuTU0sg@mail.gmail.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, "robh+dt@kernel.org" <robh+dt@kernel.org>, "catalin.marinas@arm.com" <catalin.marinas@arm.com>, "will.deacon@arm.com" <will.deacon@arm.com>, "mdf@kernel.org" <mdf@kernel.org>, "stefan.krsmanovic@aggios.com" <stefan.krsmanovic@aggios.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Michal Simek <michals@xilinx.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
-Cc: Srinivas Goud <sgoud@xilinx.com>, Anirudha Sarangi <anirudh@xilinx.com>
+To: Chunyan Zhang <zhang.lyra@gmail.com>
+Cc: Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@spreadtrum.com>
 List-Id: linux-mmc@vger.kernel.org
 
-SGkgQWRyaWFuLA0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IEFkcmlh
-biBIdW50ZXIgW21haWx0bzphZHJpYW4uaHVudGVyQGludGVsLmNvbV0NCj4gU2VudDogVHVlc2Rh
-eSwgSnVuZSAxOSwgMjAxOCA1OjA4IFBNDQo+IFRvOiBNYW5pc2ggTmFyYW5pIDxNTkFSQU5JQHhp
-bGlueC5jb20+OyByb2JoK2R0QGtlcm5lbC5vcmc7DQo+IGNhdGFsaW4ubWFyaW5hc0Bhcm0uY29t
-OyB3aWxsLmRlYWNvbkBhcm0uY29tOyBtZGZAa2VybmVsLm9yZzsNCj4gc3RlZmFuLmtyc21hbm92
-aWNAYWdnaW9zLmNvbTsgbGludXgtYXJtLWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnOyBsaW51
-eC0NCj4ga2VybmVsQHZnZXIua2VybmVsLm9yZzsgbGludXgtbW1jQHZnZXIua2VybmVsLm9yZzsN
-Cj4gZGV2aWNldHJlZUB2Z2VyLmtlcm5lbC5vcmc7IE1pY2hhbCBTaW1layA8bWljaGFsc0B4aWxp
-bnguY29tPjsNCj4gdWxmLmhhbnNzb25AbGluYXJvLm9yZw0KPiBDYzogU3Jpbml2YXMgR291ZCA8
-c2dvdWRAeGlsaW54LmNvbT47IEFuaXJ1ZGhhIFNhcmFuZ2kNCj4gPGFuaXJ1ZGhAeGlsaW54LmNv
-bT4NCj4gU3ViamVjdDogUmU6IFtSRkMgUEFUQ0ggMy8zXSBzZGhjaTogYXJhc2FuOiBBZGQgc3Vw
-cG9ydCB0byByZWFkIFRhcCBEZWxheQ0KPiB2YWx1ZXMgZnJvbSBEVA0KPiANCj4gT24gMTQvMDYv
-MTggMDg6MzgsIE1hbmlzaCBOYXJhbmkgd3JvdGU6DQo+ID4gUGluZyBmb3IgUkZDDQo+IA0KPiBX
-aGF0IGlzIGVlbWk/ICBXaHkgYXJlbid0IHRoZXJlIHBhdGNoZXMgZm9yIHRoYXQ/DQpFZW1pKEV4
-dGVuc2libGUgRW5lcmd5IE1hbmFnZW1lbnQgSW50ZXJmYWNlKSBpcyBhIHBvd2VyIG1hbmFnZW1l
-bnQgaW50ZXJmYWNlIGZvciBaeW5xTVAgY29yZS4gVGhlIHBhdGNoZXMgZm9yIHRoZSBzYW1lIGFy
-ZSBhbHJlYWR5IGluIHByb2Nlc3Mgb2YgbWFpbmxpbmluZy4gDQpodHRwczovL2xrbWwub3JnL2xr
-bWwvMjAxOC82LzIwLzgyMw0KDQpUaGFua3MsDQpNYW5pc2gNCj4gDQo+ID4NCj4gPj4gLS0tLS1P
-cmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gPj4gRnJvbTogTWFuaXNoIE5hcmFuaSBbbWFpbHRvOm1h
-bmlzaC5uYXJhbmlAeGlsaW54LmNvbV0NCj4gPj4gU2VudDogVGh1cnNkYXksIEp1bmUgNywgMjAx
-OCA1OjQyIFBNDQo+ID4+IFRvOiByb2JoK2R0QGtlcm5lbC5vcmc7IG1hcmsucnV0bGFuZEBhcm0u
-Y29tOw0KPiA+PiBjYXRhbGluLm1hcmluYXNAYXJtLmNvbTsgd2lsbC5kZWFjb25AYXJtLmNvbTsg
-bWRmQGtlcm5lbC5vcmc7DQo+ID4+IHN0ZWZhbi5rcnNtYW5vdmljQGFnZ2lvcy5jb207IGxpbnV4
-LWFybS1rZXJuZWxAbGlzdHMuaW5mcmFkZWFkLm9yZzsNCj4gPj4gbGludXgta2VybmVsQHZnZXIu
-a2VybmVsLm9yZzsgbGludXgtIG1tY0B2Z2VyLmtlcm5lbC5vcmc7DQo+ID4+IGRldmljZXRyZWVA
-dmdlci5rZXJuZWwub3JnOyBhZHJpYW4uaHVudGVyQGludGVsLmNvbTsNCj4gPj4gbWljaGFsLnNp
-bWVrQHhpbGlueC5jb207IHVsZi5oYW5zc29uQGxpbmFyby5vcmcNCj4gPj4gQ2M6IE1hbmlzaCBO
-YXJhbmkgPE1OQVJBTklAeGlsaW54LmNvbT4NCj4gPj4gU3ViamVjdDogW1JGQyBQQVRDSCAzLzNd
-IHNkaGNpOiBhcmFzYW46IEFkZCBzdXBwb3J0IHRvIHJlYWQgVGFwIERlbGF5DQo+ID4+IHZhbHVl
-cyBmcm9tIERUDQo+ID4+DQo+ID4+IFRoaXMgcGF0Y2ggYWRkcyBzdXBwb3J0IGZvciByZWFkaW5n
-IFRhcCBEZWxheSB2YWx1ZXMgZnJvbSBEZXZpY2UgVHJlZQ0KPiA+PiBhbmQgd3JpdGUgdGhlbSB2
-aWEgZWVtaSBjYWxscy4gVGhlIG1hY3JvcyBjb250YWluaW5nIHRoZXNlIHRhcCBkZWxheQ0KPiA+
-PiB2YWx1ZXMgYXJlIHJlbW92ZWQgZnJvbSB0aGUgZHJpdmVyLg0KPiA+Pg0KPiA+PiBTaWduZWQt
-b2ZmLWJ5OiBNYW5pc2ggTmFyYW5pIDxtYW5pc2gubmFyYW5pQHhpbGlueC5jb20+DQo+ID4+IC0t
-LQ0KPiA+PiAgZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1hcmFzYW4uYyB8IDEzMQ0KPiA+PiAr
-KysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrDQo+ID4+ICAxIGZpbGUgY2hhbmdl
-ZCwgMTMxIGluc2VydGlvbnMoKykNCj4gPj4NCj4gPj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1j
-L2hvc3Qvc2RoY2ktb2YtYXJhc2FuLmMNCj4gPj4gYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLSBv
-Zi1hcmFzYW4uYyBpbmRleCBlMzMzMmE1Li5mYzBmZDAxIDEwMDY0NA0KPiA+PiAtLS0gYS9kcml2
-ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWFyYXNhbi5jDQo+ID4+ICsrKyBiL2RyaXZlcnMvbW1jL2hv
-c3Qvc2RoY2ktb2YtYXJhc2FuLmMNCj4gPj4gQEAgLTM2LDYgKzM2LDggQEANCj4gPj4NCj4gPj4g
-ICNkZWZpbmUgUEhZX0NMS19UT09fU0xPV19IWgkJNDAwMDAwDQo+ID4+DQo+ID4+ICsjZGVmaW5l
-IE1NQ19CQU5LMgkJMHgyDQo+ID4+ICsNCj4gPj4gIC8qDQo+ID4+ICAgKiBPbiBzb21lIFNvQ3Mg
-dGhlIHN5c2NvbiBhcmVhIGhhcyBhIGZlYXR1cmUgd2hlcmUgdGhlIHVwcGVyIDE2LWJpdHMgb2YN
-Cj4gPj4gICAqIGVhY2ggMzItYml0IHJlZ2lzdGVyIGFjdCBhcyBhIHdyaXRlIG1hc2sgZm9yIHRo
-ZSBsb3dlciAxNi1iaXRzLg0KPiA+PiBUaGlzIGFsbG93cyBAQCAtOTAsNiArOTIsMTAgQEAgc3Ry
-dWN0IHNkaGNpX2FyYXNhbl9kYXRhIHsNCj4gPj4gIAlzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdDsN
-Cj4gPj4gIAlzdHJ1Y3QgY2xrCSpjbGtfYWhiOw0KPiA+PiAgCXN0cnVjdCBwaHkJKnBoeTsNCj4g
-Pj4gKwl1MzIgbWlvX2Jhbms7DQo+ID4+ICsJdTMyIGRldmljZV9pZDsNCj4gPj4gKwl1MzIgaXRh
-cGRseVtNTUNfVElNSU5HX01NQ19IUzQwMCArIDFdOw0KPiA+PiArCXUzMiBvdGFwZGx5W01NQ19U
-SU1JTkdfTU1DX0hTNDAwICsgMV07DQo+ID4+ICAJYm9vbAkJaXNfcGh5X29uOw0KPiA+Pg0KPiA+
-PiAgCWJvb2wJCWhhc19jcWU7DQo+ID4+IEBAIC0xNjAsMTEgKzE2NiwzNiBAQCBzdGF0aWMgaW50
-IHNkaGNpX2FyYXNhbl9zeXNjb25fd3JpdGUoc3RydWN0DQo+ID4+IHNkaGNpX2hvc3QgKmhvc3Qs
-DQo+ID4+ICAJcmV0dXJuIHJldDsNCj4gPj4gIH0NCj4gPj4NCj4gPj4gKy8qKg0KPiA+PiArICog
-YXJhc2FuX3p5bnFtcF9zZXRfdGFwX2RlbGF5IC0gUHJvZ3JhbSB0aGUgdGFwIGRlbGF5cy4NCj4g
-Pj4gKyAqIEBkZXZpY2VpZDoJCVVuaXF1ZSBJZCBvZiBkZXZpY2UNCj4gPj4gKyAqIEBpdGFwX2Rl
-bGF5OgkJSW5wdXQgVGFwIERlbGF5DQo+ID4+ICsgKiBAb2l0YXBfZGVsYXk6CU91dHB1dCBUYXAg
-RGVsYXkNCj4gPj4gKyAqLw0KPiA+PiArc3RhdGljIHZvaWQgYXJhc2FuX3p5bnFtcF9zZXRfdGFw
-X2RlbGF5KHU4IGRldmljZWlkLCB1OCBpdGFwX2RlbGF5LA0KPiA+PiArdTgNCj4gPj4gK290YXBf
-ZGVsYXkpIHsNCj4gPj4gKwljb25zdCBzdHJ1Y3QgenlucW1wX2VlbWlfb3BzICplZW1pX29wcyA9
-DQo+ID4+IHp5bnFtcF9wbV9nZXRfZWVtaV9vcHMoKTsNCj4gPj4gKwl1MzIgbm9kZV9pZCA9IChk
-ZXZpY2VpZCA9PSAwKSA/IE5PREVfU0RfMCA6IE5PREVfU0RfMTsNCj4gPj4gKw0KPiA+PiArCWlm
-ICghZWVtaV9vcHMgfHwgIWVlbWlfb3BzLT5pb2N0bCkNCj4gPj4gKwkJcmV0dXJuOw0KPiA+PiAr
-DQo+ID4+ICsJaWYgKGl0YXBfZGVsYXkpDQo+ID4+ICsJCWVlbWlfb3BzLT5pb2N0bChub2RlX2lk
-LCBJT0NUTF9TRVRfU0RfVEFQREVMQVksDQo+ID4+ICsJCQkJUE1fVEFQREVMQVlfSU5QVVQsIGl0
-YXBfZGVsYXksIE5VTEwpOw0KPiA+PiArDQo+ID4+ICsJaWYgKG90YXBfZGVsYXkpDQo+ID4+ICsJ
-CWVlbWlfb3BzLT5pb2N0bChub2RlX2lkLCBJT0NUTF9TRVRfU0RfVEFQREVMQVksDQo+ID4+ICsJ
-CQkJUE1fVEFQREVMQVlfT1VUUFVULCBvdGFwX2RlbGF5LCBOVUxMKTsNCj4gPj4gfQ0KPiA+PiAr
-DQo+ID4+ICBzdGF0aWMgdm9pZCBzZGhjaV9hcmFzYW5fc2V0X2Nsb2NrKHN0cnVjdCBzZGhjaV9o
-b3N0ICpob3N0LCB1bnNpZ25lZA0KPiA+PiBpbnQNCj4gPj4gY2xvY2spICB7DQo+ID4+ICAJc3Ry
-dWN0IHNkaGNpX3BsdGZtX2hvc3QgKnBsdGZtX2hvc3QgPSBzZGhjaV9wcml2KGhvc3QpOw0KPiA+
-PiAgCXN0cnVjdCBzZGhjaV9hcmFzYW5fZGF0YSAqc2RoY2lfYXJhc2FuID0NCj4gPj4gc2RoY2lf
-cGx0Zm1fcHJpdihwbHRmbV9ob3N0KTsNCj4gPj4gIAlib29sIGN0cmxfcGh5ID0gZmFsc2U7DQo+
-ID4+ICsJdTggaXRhcF9kZWxheTsNCj4gPj4gKwl1OCBvdGFwX2RlbGF5Ow0KPiA+Pg0KPiA+PiAg
-CWlmICghSVNfRVJSKHNkaGNpX2FyYXNhbi0+cGh5KSkgew0KPiA+PiAgCQlpZiAoIXNkaGNpX2Fy
-YXNhbi0+aXNfcGh5X29uICYmIGNsb2NrIDw9DQo+ID4+IFBIWV9DTEtfVE9PX1NMT1dfSFopIHsg
-QEAgLTIwMCw2ICsyMzEsMTYgQEAgc3RhdGljIHZvaWQNCj4gPj4gc2RoY2lfYXJhc2FuX3NldF9j
-bG9jayhzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdCwgdW5zaWduZWQgaW50IGNsb2NrKQ0KPiA+PiAg
-CQl9DQo+ID4+ICAJfQ0KPiA+Pg0KPiA+PiArCWlmIChob3N0LT52ZXJzaW9uID49IFNESENJX1NQ
-RUNfMzAwKSB7DQo+ID4+ICsJCWlmICgoaG9zdC0+dGltaW5nICE9IE1NQ19USU1JTkdfTEVHQUNZ
-KSAmJg0KPiA+PiArCQkJKGhvc3QtPnRpbWluZyAhPSBNTUNfVElNSU5HX1VIU19TRFIxMikpIHsN
-Cj4gPj4gKwkJCWl0YXBfZGVsYXkgPSBzZGhjaV9hcmFzYW4tPml0YXBkbHlbaG9zdC0+dGltaW5n
-XTsNCj4gPj4gKwkJCW90YXBfZGVsYXkgPSBzZGhjaV9hcmFzYW4tPm90YXBkbHlbaG9zdC0+dGlt
-aW5nXTsNCj4gPj4gKwkJCWFyYXNhbl96eW5xbXBfc2V0X3RhcF9kZWxheShzZGhjaV9hcmFzYW4t
-DQo+ID4+PiBkZXZpY2VfaWQsDQo+ID4+ICsJCQkJCQkgICAgaXRhcF9kZWxheSwgb3RhcF9kZWxh
-eSk7DQo+ID4+ICsJCX0NCj4gPj4gKwl9DQo+ID4+ICsNCj4gPj4gIAlpZiAoY3RybF9waHkgJiYg
-c2RoY2lfYXJhc2FuLT5pc19waHlfb24pIHsNCj4gPj4gIAkJcGh5X3Bvd2VyX29mZihzZGhjaV9h
-cmFzYW4tPnBoeSk7DQo+ID4+ICAJCXNkaGNpX2FyYXNhbi0+aXNfcGh5X29uID0gZmFsc2U7DQo+
-ID4+IEBAIC00NTYsNiArNDk3LDcgQEAgc3RhdGljIGNvbnN0IHN0cnVjdCBvZl9kZXZpY2VfaWQN
-Cj4gPj4gc2RoY2lfYXJhc2FuX29mX21hdGNoW10gPSB7DQo+ID4+ICAJeyAuY29tcGF0aWJsZSA9
-ICJhcmFzYW4sc2RoY2ktOC45YSIgfSwNCj4gPj4gIAl7IC5jb21wYXRpYmxlID0gImFyYXNhbixz
-ZGhjaS01LjEiIH0sDQo+ID4+ICAJeyAuY29tcGF0aWJsZSA9ICJhcmFzYW4sc2RoY2ktNC45YSIg
-fSwNCj4gPj4gKwl7IC5jb21wYXRpYmxlID0gInhsbngsenlucW1wLTguOWEiIH0sDQo+ID4+DQo+
-ID4+ICAJeyAvKiBzZW50aW5lbCAqLyB9DQo+ID4+ICB9Ow0KPiA+PiBAQCAtNjQxLDYgKzY4Myw3
-NCBAQCBzdGF0aWMgdm9pZCBzZGhjaV9hcmFzYW5fdW5yZWdpc3Rlcl9zZGNsayhzdHJ1Y3QNCj4g
-Pj4gZGV2aWNlICpkZXYpDQo+ID4+ICAJb2ZfY2xrX2RlbF9wcm92aWRlcihkZXYtPm9mX25vZGUp
-Ow0KPiA+PiAgfQ0KPiA+Pg0KPiA+PiArLyoqDQo+ID4+ICsgKiBhcmFzYW5fenlucW1wX2R0X3Bh
-cnNlX3RhcF9kZWxheXMgLSBSZWFkIFRhcCBEZWxheSB2YWx1ZXMgZnJvbSBEVA0KPiA+PiArICoN
-Cj4gPj4gKyAqIENhbGxlZCBhdCBpbml0aWFsaXphdGlvbiB0byBwYXJzZSB0aGUgdmFsdWVzIG9m
-IFRhcCBEZWxheXMuDQo+ID4+ICsgKg0KPiA+PiArICogQGRldjoJCVBvaW50ZXIgdG8gb3VyIHN0
-cnVjdCBkZXZpY2UuDQo+ID4+ICsgKi8NCj4gPj4gK3N0YXRpYyB2b2lkIGFyYXNhbl96eW5xbXBf
-ZHRfcGFyc2VfdGFwX2RlbGF5cyhzdHJ1Y3QgZGV2aWNlICpkZXYpIHsNCj4gPj4gKwlzdHJ1Y3Qg
-cGxhdGZvcm1fZGV2aWNlICpwZGV2ID0gdG9fcGxhdGZvcm1fZGV2aWNlKGRldik7DQo+ID4+ICsJ
-c3RydWN0IHNkaGNpX2hvc3QgKmhvc3QgPSBwbGF0Zm9ybV9nZXRfZHJ2ZGF0YShwZGV2KTsNCj4g
-Pj4gKwlzdHJ1Y3Qgc2RoY2lfcGx0Zm1faG9zdCAqcGx0Zm1faG9zdCA9IHNkaGNpX3ByaXYoaG9z
-dCk7DQo+ID4+ICsJc3RydWN0IHNkaGNpX2FyYXNhbl9kYXRhICpzZGhjaV9hcmFzYW4gPQ0KPiA+
-PiBzZGhjaV9wbHRmbV9wcml2KHBsdGZtX2hvc3QpOw0KPiA+PiArCXN0cnVjdCBkZXZpY2Vfbm9k
-ZSAqbnAgPSBkZXYtPm9mX25vZGU7DQo+ID4+ICsNCj4gPj4gKwlvZl9wcm9wZXJ0eV9yZWFkX3Uz
-MihucCwgInhsbngsaXRhcF9kZWxheV9zZF9oc2QiLA0KPiA+PiArCQkJICAgICAmc2RoY2lfYXJh
-c2FuLT5pdGFwZGx5W01NQ19USU1JTkdfU0RfSFNdKTsNCj4gPj4gKwlvZl9wcm9wZXJ0eV9yZWFk
-X3UzMihucCwgInhsbngsb3RhcF9kZWxheV9zZF9oc2QiLA0KPiA+PiArCQkJICAgICAmc2RoY2lf
-YXJhc2FuLT5vdGFwZGx5W01NQ19USU1JTkdfU0RfSFNdKTsNCj4gPj4gKwlvZl9wcm9wZXJ0eV9y
-ZWFkX3UzMihucCwgInhsbngsaXRhcF9kZWxheV9zZHIyNSIsDQo+ID4+ICsJCQkgICAgICZzZGhj
-aV9hcmFzYW4tDQo+ID4+PiBpdGFwZGx5W01NQ19USU1JTkdfVUhTX1NEUjI1XSk7DQo+ID4+ICsJ
-b2ZfcHJvcGVydHlfcmVhZF91MzIobnAsICJ4bG54LG90YXBfZGVsYXlfc2RyMjUiLA0KPiA+PiAr
-CQkJICAgICAmc2RoY2lfYXJhc2FuLQ0KPiA+Pj4gb3RhcGRseVtNTUNfVElNSU5HX1VIU19TRFIy
-NV0pOw0KPiA+PiArCW9mX3Byb3BlcnR5X3JlYWRfdTMyKG5wLCAieGxueCxpdGFwX2RlbGF5X3Nk
-cjUwIiwNCj4gPj4gKwkJCSAgICAgJnNkaGNpX2FyYXNhbi0NCj4gPj4+IGl0YXBkbHlbTU1DX1RJ
-TUlOR19VSFNfU0RSNTBdKTsNCj4gPj4gKwlvZl9wcm9wZXJ0eV9yZWFkX3UzMihucCwgInhsbngs
-b3RhcF9kZWxheV9zZHI1MCIsDQo+ID4+ICsJCQkgICAgICZzZGhjaV9hcmFzYW4tDQo+ID4+PiBv
-dGFwZGx5W01NQ19USU1JTkdfVUhTX1NEUjUwXSk7DQo+ID4+ICsJb2ZfcHJvcGVydHlfcmVhZF91
-MzIobnAsICJ4bG54LGl0YXBfZGVsYXlfc2RfZGRyNTAiLA0KPiA+PiArCQkJICAgICAmc2RoY2lf
-YXJhc2FuLQ0KPiA+Pj4gaXRhcGRseVtNTUNfVElNSU5HX1VIU19ERFI1MF0pOw0KPiA+PiArCW9m
-X3Byb3BlcnR5X3JlYWRfdTMyKG5wLCAieGxueCxvdGFwX2RlbGF5X3NkX2RkcjUwIiwNCj4gPj4g
-KwkJCSAgICAgJnNkaGNpX2FyYXNhbi0NCj4gPj4+IG90YXBkbHlbTU1DX1RJTUlOR19VSFNfRERS
-NTBdKTsNCj4gPj4gKwlvZl9wcm9wZXJ0eV9yZWFkX3UzMihucCwgInhsbngsaXRhcF9kZWxheV9t
-bWNfaHNkIiwNCj4gPj4gKwkJCSAgICAgJnNkaGNpX2FyYXNhbi0NCj4gPj4+IGl0YXBkbHlbTU1D
-X1RJTUlOR19NTUNfSFNdKTsNCj4gPj4gKwlvZl9wcm9wZXJ0eV9yZWFkX3UzMihucCwgInhsbngs
-b3RhcF9kZWxheV9tbWNfaHNkIiwNCj4gPj4gKwkJCSAgICAgJnNkaGNpX2FyYXNhbi0NCj4gPj4+
-IG90YXBkbHlbTU1DX1RJTUlOR19NTUNfSFNdKTsNCj4gPj4gKwlvZl9wcm9wZXJ0eV9yZWFkX3Uz
-MihucCwgInhsbngsaXRhcF9kZWxheV9tbWNfZGRyNTAiLA0KPiA+PiArCQkJICAgICAmc2RoY2lf
-YXJhc2FuLQ0KPiA+Pj4gaXRhcGRseVtNTUNfVElNSU5HX01NQ19ERFI1Ml0pOw0KPiA+PiArCW9m
-X3Byb3BlcnR5X3JlYWRfdTMyKG5wLCAieGxueCxvdGFwX2RlbGF5X21tY19kZHI1MCIsDQo+ID4+
-ICsJCQkgICAgICZzZGhjaV9hcmFzYW4tDQo+ID4+PiBvdGFwZGx5W01NQ19USU1JTkdfTU1DX0RE
-UjUyXSk7DQo+ID4+ICsJaWYgKHNkaGNpX2FyYXNhbi0+bWlvX2JhbmsgPT0gTU1DX0JBTksyKSB7
-DQo+ID4+ICsJCW9mX3Byb3BlcnR5X3JlYWRfdTMyKG5wLA0KPiA+PiArCQkJCSAgICAgInhsbngs
-aXRhcF9kZWxheV9zZHIxMDRfYjIiLA0KPiA+PiArCQkJCSZzZGhjaV9hcmFzYW4tDQo+ID4+PiBp
-dGFwZGx5W01NQ19USU1JTkdfVUhTX1NEUjEwNF0pOw0KPiA+PiArCQlvZl9wcm9wZXJ0eV9yZWFk
-X3UzMihucCwNCj4gPj4gKwkJCQkgICAgICJ4bG54LG90YXBfZGVsYXlfc2RyMTA0X2IyIiwNCj4g
-Pj4gKwkJCQkmc2RoY2lfYXJhc2FuLQ0KPiA+Pj4gb3RhcGRseVtNTUNfVElNSU5HX1VIU19TRFIx
-MDRdKTsNCj4gPj4gKwkJb2ZfcHJvcGVydHlfcmVhZF91MzIobnAsDQo+ID4+ICsJCQkJICAgICAi
-eGxueCxpdGFwX2RlbGF5X21tY19oczIwMF9iMiIsDQo+ID4+ICsJCQkJJnNkaGNpX2FyYXNhbi0N
-Cj4gPj4+IGl0YXBkbHlbTU1DX1RJTUlOR19NTUNfSFMyMDBdKTsNCj4gPj4gKwkJb2ZfcHJvcGVy
-dHlfcmVhZF91MzIobnAsDQo+ID4+ICsJCQkJICAgICAieGxueCxvdGFwX2RlbGF5X21tY19oczIw
-MF9iMiIsDQo+ID4+ICsJCQkJJnNkaGNpX2FyYXNhbi0NCj4gPj4+IG90YXBkbHlbTU1DX1RJTUlO
-R19NTUNfSFMyMDBdKTsNCj4gPj4gKwl9IGVsc2Ugew0KPiA+PiArCQlvZl9wcm9wZXJ0eV9yZWFk
-X3UzMihucCwNCj4gPj4gKwkJCQkgICAgICJ4bG54LGl0YXBfZGVsYXlfc2RyMTA0X2IwIiwNCj4g
-Pj4gKwkJCQkmc2RoY2lfYXJhc2FuLQ0KPiA+Pj4gaXRhcGRseVtNTUNfVElNSU5HX1VIU19TRFIx
-MDRdKTsNCj4gPj4gKwkJb2ZfcHJvcGVydHlfcmVhZF91MzIobnAsDQo+ID4+ICsJCQkJICAgICAi
-eGxueCxvdGFwX2RlbGF5X3NkcjEwNF9iMCIsDQo+ID4+ICsJCQkJJnNkaGNpX2FyYXNhbi0NCj4g
-Pj4+IG90YXBkbHlbTU1DX1RJTUlOR19VSFNfU0RSMTA0XSk7DQo+ID4+ICsJCW9mX3Byb3BlcnR5
-X3JlYWRfdTMyKG5wLA0KPiA+PiArCQkJCSAgICAgInhsbngsaXRhcF9kZWxheV9tbWNfaHMyMDBf
-YjAiLA0KPiA+PiArCQkJCSZzZGhjaV9hcmFzYW4tDQo+ID4+PiBpdGFwZGx5W01NQ19USU1JTkdf
-TU1DX0hTMjAwXSk7DQo+ID4+ICsJCW9mX3Byb3BlcnR5X3JlYWRfdTMyKG5wLA0KPiA+PiArCQkJ
-CSAgICAgInhsbngsb3RhcF9kZWxheV9tbWNfaHMyMDBfYjAiLA0KPiA+PiArCQkJCSZzZGhjaV9h
-cmFzYW4tDQo+ID4+PiBvdGFwZGx5W01NQ19USU1JTkdfTU1DX0hTMjAwXSk7DQo+ID4+ICsJfQ0K
-PiA+PiArfQ0KPiA+PiArDQo+ID4+ICBzdGF0aWMgaW50IHNkaGNpX2FyYXNhbl9hZGRfaG9zdChz
-dHJ1Y3Qgc2RoY2lfYXJhc2FuX2RhdGEgKnNkaGNpX2FyYXNhbikgIHsNCj4gPj4gIAlzdHJ1Y3Qg
-c2RoY2lfaG9zdCAqaG9zdCA9IHNkaGNpX2FyYXNhbi0+aG9zdDsgQEAgLTc3Niw2ICs4ODYsMjcg
-QEANCj4gPj4gc3RhdGljIGludCBzZGhjaV9hcmFzYW5fcHJvYmUoc3RydWN0IHBsYXRmb3JtX2Rl
-dmljZSAqcGRldikNCj4gPj4gIAkJZ290byB1bnJlZ19jbGs7DQo+ID4+ICAJfQ0KPiA+Pg0KPiA+
-PiArCWlmIChvZl9kZXZpY2VfaXNfY29tcGF0aWJsZShwZGV2LT5kZXYub2Zfbm9kZSwNCj4gPj4g
-KwkJCQkgICAgInhsbngsenlucW1wLTguOWEiKSkgew0KPiA+PiArCQlyZXQgPSBvZl9wcm9wZXJ0
-eV9yZWFkX3UzMihwZGV2LT5kZXYub2Zfbm9kZSwNCj4gPj4gKwkJCQkJICAgInhsbngsbWlvX2Jh
-bmsiLA0KPiA+PiArCQkJCQkgICAmc2RoY2lfYXJhc2FuLT5taW9fYmFuayk7DQo+ID4+ICsJCWlm
-IChyZXQgPCAwKSB7DQo+ID4+ICsJCQlkZXZfZXJyKCZwZGV2LT5kZXYsDQo+ID4+ICsJCQkJIlwi
-eGxueCxtaW9fYmFuayBcIiBwcm9wZXJ0eSBpcyBtaXNzaW5nLlxuIik7DQo+ID4+ICsJCQlnb3Rv
-IGNsa19kaXNhYmxlX2FsbDsNCj4gPj4gKwkJfQ0KPiA+PiArCQlyZXQgPSBvZl9wcm9wZXJ0eV9y
-ZWFkX3UzMihwZGV2LT5kZXYub2Zfbm9kZSwNCj4gPj4gKwkJCQkJICAgInhsbngsZGV2aWNlX2lk
-IiwNCj4gPj4gKwkJCQkJICAgJnNkaGNpX2FyYXNhbi0+ZGV2aWNlX2lkKTsNCj4gPj4gKwkJaWYg
-KHJldCA8IDApIHsNCj4gPj4gKwkJCWRldl9lcnIoJnBkZXYtPmRldiwNCj4gPj4gKwkJCQkiXCJ4
-bG54LGRldmljZV9pZCBcIiBwcm9wZXJ0eSBpcyBtaXNzaW5nLlxuIik7DQo+ID4+ICsJCQlnb3Rv
-IGNsa19kaXNhYmxlX2FsbDsNCj4gPj4gKwkJfQ0KPiA+PiArCQlhcmFzYW5fenlucW1wX2R0X3Bh
-cnNlX3RhcF9kZWxheXMoJnBkZXYtPmRldik7DQo+ID4+ICsJfQ0KPiA+PiArDQo+ID4+ICAJc2Ro
-Y2lfYXJhc2FuLT5waHkgPSBFUlJfUFRSKC1FTk9ERVYpOw0KPiA+PiAgCWlmIChvZl9kZXZpY2Vf
-aXNfY29tcGF0aWJsZShwZGV2LT5kZXYub2Zfbm9kZSwNCj4gPj4gIAkJCQkgICAgImFyYXNhbixz
-ZGhjaS01LjEiKSkgew0KPiA+PiAtLQ0KPiA+PiAyLjcuNA0KPiA+DQo+ID4NCg0K
+On 21/06/18 14:14, Chunyan Zhang wrote:
+> On 21 June 2018 at 18:49, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> On 15/06/18 05:04, Chunyan Zhang wrote:
+>>> For SD host controller version 4.00 or later ones, there're two
+>>> modes of implementation - Version 3.00 compatible mode or
+>>> Version 4 mode.  This patch introduces a flag to record this.
+>>>
+>>> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
+>>> ---
+>>>  drivers/mmc/host/sdhci.c | 6 ++++++
+>>>  drivers/mmc/host/sdhci.h | 6 ++++++
+>>>  2 files changed, 12 insertions(+)
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>> index 2ededa7f..cf5695f 100644
+>>> --- a/drivers/mmc/host/sdhci.c
+>>> +++ b/drivers/mmc/host/sdhci.c
+>>> @@ -3302,6 +3302,12 @@ void __sdhci_read_caps(struct sdhci_host *host, u16 *ver, u32 *caps, u32 *caps1)
+>>>       v = ver ? *ver : sdhci_readw(host, SDHCI_HOST_VERSION);
+>>>       host->version = (v & SDHCI_SPEC_VER_MASK) >> SDHCI_SPEC_VER_SHIFT;
+>>>
+>>> +     if (host->version >= SDHCI_SPEC_400) {
+>>> +             if (sdhci_readw(host, SDHCI_HOST_CONTROL2) &
+>>> +                     SDHCI_CTRL_V4_MODE)
+>>> +                     host->v4_mode = true;
+>>> +     }
+>>
+>> At this point the host controller has just been reset which would mean it
+>> must be in version 3 compatibility mode, which would mean this code doesn't
+>> do anything.
+> 
+> Why is it version 3 mode at this point?
+
+According to the specification, reset clears RW fields to zero.
+
+> 
+> I've tested this code on the sd host controller which was introduced
+> in 6/7 in this patch-set, the result showed that it was v4_mode.
+> Moreover without this patch, the Spreadtrum's sdhci driver in patch
+> 6/7 couldn't work.
+> 
+> Am I missing something here?
+
+It seems the Spreadtrum controller doesn't clear the "Host Version 4 Enable"
+bit upon software reset for all.
+
+Also this seems the wrong way around.  The driver should decide whether or
+not to use V4 mode and then the "Host Version 4 Enable" bit should be set
+accordingly.
+
+V4 has been around so long that we can't just enable all supporting hardware
+without risking the possibility it will break some platform.  So I suggest
+adding a function sdhci_enable_v4_mode() which is called during probe.
+
+> 
+> Best,
+> Chunyan
+> 
+>>
+>>> +
+>>>       if (host->quirks & SDHCI_QUIRK_MISSING_CAPS)
+>>>               return;
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+>>> index c95b0a4..128b0ba 100644
+>>> --- a/drivers/mmc/host/sdhci.h
+>>> +++ b/drivers/mmc/host/sdhci.h
+>>> @@ -184,6 +184,7 @@
+>>>  #define   SDHCI_CTRL_DRV_TYPE_D              0x0030
+>>>  #define  SDHCI_CTRL_EXEC_TUNING              0x0040
+>>>  #define  SDHCI_CTRL_TUNED_CLK                0x0080
+>>> +#define  SDHCI_CTRL_V4_MODE          0x1000
+>>>  #define  SDHCI_CTRL_PRESET_VAL_ENABLE        0x8000
+>>>
+>>>  #define SDHCI_CAPABILITIES   0x40
+>>> @@ -270,6 +271,8 @@
+>>>  #define   SDHCI_SPEC_100     0
+>>>  #define   SDHCI_SPEC_200     1
+>>>  #define   SDHCI_SPEC_300     2
+>>> +#define   SDHCI_SPEC_400     3
+>>> +#define   SDHCI_SPEC_410     4
+>>>
+>>>  /*
+>>>   * End of controller registers.
+>>> @@ -551,6 +554,9 @@ struct sdhci_host {
+>>>       u32                     sdma_boundary;
+>>>
+>>>       unsigned long private[0] ____cacheline_aligned;
+>>> +
+>>> +     /* Host Version 4 Enable */
+>>> +     bool                    v4_mode;
+>>>  };
+>>>
+>>>  struct sdhci_ops {
+>>>
+>>
+> 
