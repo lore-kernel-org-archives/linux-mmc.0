@@ -1,31 +1,39 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH RESEND 0/3] K2G: mmc: Update mmc dt node to use
-Date: Fri, 22 Jun 2018 15:46:14 +0530
-Message-ID: <20180622101617.11157-1-kishon@ti.com>
+Subject: [PATCH RESEND 3/3] ARM: configs: keystone: Enable CONFIG_MMC_SDHCI_OMAP
+Date: Fri, 22 Jun 2018 15:46:17 +0530
+Message-ID: <20180622101617.11157-4-kishon@ti.com>
+References: <20180622101617.11157-1-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180622101617.11157-1-kishon@ti.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Santosh Shilimkar <ssantosh@kernel.org>, kishon@ti.com
 Cc: robh+dt@kernel.org, Mark Rutland <mark.rutland@arm.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, Tony Lindgren <tony@atomide.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Update mmc dt node to use sdhci-omap binding instead of omap_hsmmc
-binding.
+Enable CONFIG_MMC_SDHCI_OMAP so that TI's K2G SoC
+can use sdhci-omap driver for MMC/SD controller.
 
-I've also updated keystone_defconfig to enable CONFIG_MMC_SDHCI_OMAP.
-Everyone who use a custom .config should also enable
-CONFIG_MMC_SDHCI_OMAP for MMC to work.
+Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+---
+ arch/arm/configs/keystone_defconfig | 3 +++
+ 1 file changed, 3 insertions(+)
 
-Kishon Vijay Abraham I (3):
-  ARM: dts: keystone-k2g-evm: Add "vqmmc-supply" property for mmc0/mmc1
-  ARM: dts: keystone-k2g-evm: Use sdhci-omap programming model
-  ARM: configs: keystone: Enable CONFIG_MMC_SDHCI_OMAP
-
- arch/arm/boot/dts/keystone-k2g-evm.dts | 10 ++++++++++
- arch/arm/boot/dts/keystone-k2g.dtsi    | 12 ++++--------
- arch/arm/configs/keystone_defconfig    |  3 +++
- 3 files changed, 17 insertions(+), 8 deletions(-)
-
+diff --git a/arch/arm/configs/keystone_defconfig b/arch/arm/configs/keystone_defconfig
+index 2536c231eea1..21a6ce4ef9bc 100644
+--- a/arch/arm/configs/keystone_defconfig
++++ b/arch/arm/configs/keystone_defconfig
+@@ -170,7 +170,10 @@ CONFIG_USB_DWC3=y
+ CONFIG_NOP_USB_XCEIV=y
+ CONFIG_KEYSTONE_USB_PHY=y
+ CONFIG_MMC=y
++CONFIG_MMC_SDHCI=y
++CONFIG_MMC_SDHCI_PLTFM=y
+ CONFIG_MMC_OMAP_HS=y
++CONFIG_MMC_SDHCI_OMAP=y
+ CONFIG_NEW_LEDS=y
+ CONFIG_LEDS_CLASS=y
+ CONFIG_LEDS_GPIO=y
 -- 
 2.17.1
