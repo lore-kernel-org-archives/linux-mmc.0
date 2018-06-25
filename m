@@ -1,52 +1,75 @@
-From: Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org>
-Subject: Suspend of SDIO function devices
-Date: Sun, 24 Jun 2018 22:46:39 +0200
-Message-ID: <b8a41e3a-7100-ae17-1275-d1b40a026201@zonque.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Language: en-US
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>
-Cc: "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "libertas-dev-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <libertas-dev-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+From: Mark Brown <broonie@kernel.org>
+Subject: Applied "dmaengine: pxa: document pxad_param" to the asoc tree
+Date: Mon, 25 Jun 2018 14:15:20 +0100
+Message-ID: <E1fXRKy-0008Lb-A6@debutante>
+References: <20180524070703.11901-11-robert.jarzmik@free.fr>
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <20180524070703.11901-11-robert.jarzmik@free.fr>
+Sender: netdev-owner@vger.kernel.org
+To: Robert Jarzmik <robert.jarzmik@free.fr>
+Cc: Vinod Koul <vkoul@kernel.org>, Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, Boris Brezillon <boris.brezillon@free-electrons.com>, David Woodhouse <dwmw2@infradead.org>, Brian Norris <computersforpeace@gmail.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, Arnd Bergmann <arnd@arndb.de>, alsa-devel@alsa-project.org, netdev@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-ide@vger.kernel.org, linux-mtd@lists.infradead.org, dmaengine@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-media@vger.kernel.orgalsa-devel@alsa-project.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+The patch
 
-I'm currently looking into the suspend callbacks of drivers of hardware 
-that use an SDIO interface, specifically the libertas_sdio driver:
+   dmaengine: pxa: document pxad_param
 
-    drivers/net/wireless/marvell/libertas/if_sdio.c
+has been applied to the asoc tree at
 
-The comments in if_sdio_suspend() suggest that by returning -ENOSYS due 
-to runtime-dependant circumstances, the MMC core will remove the card 
-entirely at suspend time. I then searched for the bits that do that and 
-failed, until I came across this old commit, which first appeared in 3.16:
+   https://git.kernel.org/pub/scm/linux/kernel/git/broonie/sound.git 
 
-    573185cc7e6 mmc: core: Invoke sdio func driver's PM callbacks from 
-the sdio bus
+All being well this means that it will be integrated into the linux-next
+tree (usually sometime in the next 24 hours) and sent to Linus during
+the next merge window (or sooner if it is a bug fix), however if
+problems are discovered then the patch may be dropped or reverted.  
 
-Before that commit, the mmc core did in fact invoke the card's 
-.suspend() callback manually and if it returned a non-zero result, it 
-would remove the card. Now that the generic pm functions are in place, 
-this does no longer happen because the host and its clients are 
-independent entities. Consequently, systems fail to suspend when the 
-libertas_sdio module is loaded.
+You may get further e-mails resulting from automated or manual testing
+and review of the tree, please engage with people reporting problems and
+send followup patches addressing any issues that are reported if needed.
 
-The pm notifier code in drivers/mmc/core/core.c does still handle cases 
-where no pm functions are provided at all (in which case it removes the 
-card), but it doesn't handle -ENOSYS return values at runtime.
+If any updates are required or you are submitting further changes they
+should be sent as incremental updates against current git, existing
+patches will not be replaced.
 
-Now I'm wondering how this is supposed to work, and which end needs 
-fixing. The mmc/sdio core by restoring the old logic from before 
-573185cc7e6, or the libertas driver.
-
-The platform I'm working on does not retain power for the SDIO slaves, 
-so a complete re-init is necessary after resume.
-
-Please advise, I'm happy to test approaches and send patches.
-
+Please add any relevant lists and maintainers to the CCs when replying
+to this mail.
 
 Thanks,
-Daniel
+Mark
+
+>From b6d1a17f4729e4fda5740a855da91d202db2c118 Mon Sep 17 00:00:00 2001
+From: Robert Jarzmik <robert.jarzmik@free.fr>
+Date: Sun, 17 Jun 2018 19:02:14 +0200
+Subject: [PATCH] dmaengine: pxa: document pxad_param
+
+Add some documentation for the pxad_param structure, and describe the
+contract behind the minimal required priority of a DMA channel.
+
+Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>
+Acked-by: Vinod Koul <vkoul@kernel.org>
+---
+ include/linux/dma/pxa-dma.h | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/include/linux/dma/pxa-dma.h b/include/linux/dma/pxa-dma.h
+index e56ec7af4fd7..9fc594f69eff 100644
+--- a/include/linux/dma/pxa-dma.h
++++ b/include/linux/dma/pxa-dma.h
+@@ -9,6 +9,15 @@ enum pxad_chan_prio {
+ 	PXAD_PRIO_LOWEST,
+ };
+ 
++/**
++ * struct pxad_param - dma channel request parameters
++ * @drcmr: requestor line number
++ * @prio: minimal mandatory priority of the channel
++ *
++ * If a requested channel is granted, its priority will be at least @prio,
++ * ie. if PXAD_PRIO_LOW is required, the requested channel will be either
++ * PXAD_PRIO_LOW, PXAD_PRIO_NORMAL or PXAD_PRIO_HIGHEST.
++ */
+ struct pxad_param {
+ 	unsigned int drcmr;
+ 	enum pxad_chan_prio prio;
+-- 
+2.18.0.rc2
