@@ -1,18 +1,18 @@
 From: Mark Brown <broonie@kernel.org>
-Subject: Applied "dmaengine: pxa: document pxad_param" to the asoc tree
-Date: Mon, 25 Jun 2018 14:15:20 +0100
-Message-ID: <E1fXRKy-0008Lb-A6@debutante>
-References: <20180524070703.11901-11-robert.jarzmik@free.fr>
-Return-path: <netdev-owner@vger.kernel.org>
-In-Reply-To: <20180524070703.11901-11-robert.jarzmik@free.fr>
-Sender: netdev-owner@vger.kernel.org
+Subject: Applied "ARM: pxa: change SSP DMA channels allocation" to the asoc tree
+Date: Mon, 25 Jun 2018 14:15:15 +0100
+Message-ID: <E1fXRKt-0008Il-HJ@debutante>
+References: <20180524070703.11901-14-robert.jarzmik@free.fr>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180524070703.11901-14-robert.jarzmik@free.fr>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Robert Jarzmik <robert.jarzmik@free.fr>
-Cc: Vinod Koul <vkoul@kernel.org>, Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, Boris Brezillon <boris.brezillon@free-electrons.com>, David Woodhouse <dwmw2@infradead.org>, Brian Norris <computersforpeace@gmail.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, Arnd Bergmann <arnd@arndb.de>, alsa-devel@alsa-project.org, netdev@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-ide@vger.kernel.org, linux-mtd@lists.infradead.org, dmaengine@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-media@vger.kernel.orgalsa-devel@alsa-project.org
+Cc: Daniel Mack <daniel@zonque.org>Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, Boris Brezillon <boris.brezillon@free-electrons.com>, David Woodhouse <dwmw2@infradead.org>, Brian Norris <computersforpeace@gmail.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, Arnd Bergmann <arnd@arndb.de>, alsa-devel@alsa-project.org, netdev@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-ide@vger.kernel.org, linux-mtd@lists.infradead.org, dmaengine@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-media@vger.kernel.orgalsa-devel@alsa-project.org
 List-Id: linux-mmc@vger.kernel.org
 
 The patch
 
-   dmaengine: pxa: document pxad_param
+   ARM: pxa: change SSP DMA channels allocation
 
 has been applied to the asoc tree at
 
@@ -37,39 +37,116 @@ to this mail.
 Thanks,
 Mark
 
->From b6d1a17f4729e4fda5740a855da91d202db2c118 Mon Sep 17 00:00:00 2001
+>From cd31b80736852d34bc1072f3e579a6fd73a244e7 Mon Sep 17 00:00:00 2001
 From: Robert Jarzmik <robert.jarzmik@free.fr>
-Date: Sun, 17 Jun 2018 19:02:14 +0200
-Subject: [PATCH] dmaengine: pxa: document pxad_param
+Date: Sun, 17 Jun 2018 19:02:17 +0200
+Subject: [PATCH] ARM: pxa: change SSP DMA channels allocation
 
-Add some documentation for the pxad_param structure, and describe the
-contract behind the minimal required priority of a DMA channel.
+Now the dma_slave_map is available for PXA architecture, switch the SSP
+device to it.
+
+This specifically means that :
+- for platform data based machines, the DMA requestor channels are
+  extracted from the slave map, where pxa-ssp-dai.<N> is a 1-1 match to
+  ssp.<N>, and the channels are either "rx" or "tx".
+
+- for device tree platforms, the dma node should be hooked into the
+  pxa2xx-ac97 or pxa-ssp-dai node.
 
 Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>
-Acked-by: Vinod Koul <vkoul@kernel.org>
+Acked-by: Daniel Mack <daniel@zonque.org>
 ---
- include/linux/dma/pxa-dma.h | 9 +++++++++
- 1 file changed, 9 insertions(+)
+ arch/arm/plat-pxa/ssp.c    | 47 --------------------------------------
+ include/linux/pxa2xx_ssp.h |  2 --
+ sound/soc/pxa/pxa-ssp.c    |  5 ++--
+ 3 files changed, 2 insertions(+), 52 deletions(-)
 
-diff --git a/include/linux/dma/pxa-dma.h b/include/linux/dma/pxa-dma.h
-index e56ec7af4fd7..9fc594f69eff 100644
---- a/include/linux/dma/pxa-dma.h
-+++ b/include/linux/dma/pxa-dma.h
-@@ -9,6 +9,15 @@ enum pxad_chan_prio {
- 	PXAD_PRIO_LOWEST,
- };
+diff --git a/arch/arm/plat-pxa/ssp.c b/arch/arm/plat-pxa/ssp.c
+index ba13f793fbce..ed36dcab80f1 100644
+--- a/arch/arm/plat-pxa/ssp.c
++++ b/arch/arm/plat-pxa/ssp.c
+@@ -127,53 +127,6 @@ static int pxa_ssp_probe(struct platform_device *pdev)
+ 	if (IS_ERR(ssp->clk))
+ 		return PTR_ERR(ssp->clk);
  
-+/**
-+ * struct pxad_param - dma channel request parameters
-+ * @drcmr: requestor line number
-+ * @prio: minimal mandatory priority of the channel
-+ *
-+ * If a requested channel is granted, its priority will be at least @prio,
-+ * ie. if PXAD_PRIO_LOW is required, the requested channel will be either
-+ * PXAD_PRIO_LOW, PXAD_PRIO_NORMAL or PXAD_PRIO_HIGHEST.
-+ */
- struct pxad_param {
- 	unsigned int drcmr;
- 	enum pxad_chan_prio prio;
+-	if (dev->of_node) {
+-		struct of_phandle_args dma_spec;
+-		struct device_node *np = dev->of_node;
+-		int ret;
+-
+-		/*
+-		 * FIXME: we should allocate the DMA channel from this
+-		 * context and pass the channel down to the ssp users.
+-		 * For now, we lookup the rx and tx indices manually
+-		 */
+-
+-		/* rx */
+-		ret = of_parse_phandle_with_args(np, "dmas", "#dma-cells",
+-						 0, &dma_spec);
+-
+-		if (ret) {
+-			dev_err(dev, "Can't parse dmas property\n");
+-			return -ENODEV;
+-		}
+-		ssp->drcmr_rx = dma_spec.args[0];
+-		of_node_put(dma_spec.np);
+-
+-		/* tx */
+-		ret = of_parse_phandle_with_args(np, "dmas", "#dma-cells",
+-						 1, &dma_spec);
+-		if (ret) {
+-			dev_err(dev, "Can't parse dmas property\n");
+-			return -ENODEV;
+-		}
+-		ssp->drcmr_tx = dma_spec.args[0];
+-		of_node_put(dma_spec.np);
+-	} else {
+-		res = platform_get_resource(pdev, IORESOURCE_DMA, 0);
+-		if (res == NULL) {
+-			dev_err(dev, "no SSP RX DRCMR defined\n");
+-			return -ENODEV;
+-		}
+-		ssp->drcmr_rx = res->start;
+-
+-		res = platform_get_resource(pdev, IORESOURCE_DMA, 1);
+-		if (res == NULL) {
+-			dev_err(dev, "no SSP TX DRCMR defined\n");
+-			return -ENODEV;
+-		}
+-		ssp->drcmr_tx = res->start;
+-	}
+-
+ 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+ 	if (res == NULL) {
+ 		dev_err(dev, "no memory resource defined\n");
+diff --git a/include/linux/pxa2xx_ssp.h b/include/linux/pxa2xx_ssp.h
+index 8461b18e4608..03a7ca46735b 100644
+--- a/include/linux/pxa2xx_ssp.h
++++ b/include/linux/pxa2xx_ssp.h
+@@ -212,8 +212,6 @@ struct ssp_device {
+ 	int		type;
+ 	int		use_count;
+ 	int		irq;
+-	int		drcmr_rx;
+-	int		drcmr_tx;
+ 
+ 	struct device_node	*of_node;
+ };
+diff --git a/sound/soc/pxa/pxa-ssp.c b/sound/soc/pxa/pxa-ssp.c
+index 6fc986080130..0b441338bdd4 100644
+--- a/sound/soc/pxa/pxa-ssp.c
++++ b/sound/soc/pxa/pxa-ssp.c
+@@ -105,9 +105,8 @@ static int pxa_ssp_startup(struct snd_pcm_substream *substream,
+ 	dma = kzalloc(sizeof(struct snd_dmaengine_dai_dma_data), GFP_KERNEL);
+ 	if (!dma)
+ 		return -ENOMEM;
+-
+-	dma->filter_data = substream->stream == SNDRV_PCM_STREAM_PLAYBACK ?
+-				&ssp->drcmr_tx : &ssp->drcmr_rx;
++	dma->chan_name = substream->stream == SNDRV_PCM_STREAM_PLAYBACK ?
++		"tx" : "rx";
+ 
+ 	snd_soc_dai_set_dma_data(cpu_dai, substream, dma);
+ 
 -- 
 2.18.0.rc2
