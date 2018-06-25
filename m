@@ -1,30 +1,18 @@
 From: Mark Brown <broonie@kernel.org>
-Subject: Applied "ata: pata_pxa: remove the dmaengine compat
-	need" to the asoc tree
-Date: Mon, 25 Jun 2018 14:15:22 +0100
-Message-ID: <E1fXRL0-0008N1-GA@debutante>
-References: <20180524070703.11901-10-robert.jarzmik@free.fr>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <alsa-devel-bounces@alsa-project.org>
-In-Reply-To: <20180524070703.11901-10-robert.jarzmik@free.fr>
-List-Unsubscribe: <http://mailman.alsa-project.org/mailman/options/alsa-devel>,
- <mailto:alsa-devel-request@alsa-project.org?subject=unsubscribe>
-List-Archive: <http://mailman.alsa-project.org/pipermail/alsa-devel/>
-List-Post: <mailto:alsa-devel@alsa-project.org>
-List-Help: <mailto:alsa-devel-request@alsa-project.org?subject=help>
-List-Subscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
- <mailto:alsa-devel-request@alsa-project.org?subject=subscribe>
-Errors-To: alsa-devel-bounces@alsa-project.org
-Sender: alsa-devel-bounces@alsa-project.org
+Subject: Applied "media: pxa_camera: remove the dmaengine compat need" to the asoc tree
+Date: Mon, 25 Jun 2018 14:15:26 +0100
+Message-ID: <E1fXRL4-0008Q6-RV@debutante>
+References: <20180524070703.11901-5-robert.jarzmik@free.fr>
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <20180524070703.11901-5-robert.jarzmik@free.fr>
+Sender: netdev-owner@vger.kernel.org
 To: Robert Jarzmik <robert.jarzmik@free.fr>
-Cc: linux-ide@vger.kernel.org, Boris Brezillon <boris.brezillon@free-electrons.com>, alsa-devel@alsa-project.org, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Richard Weinberger <richard@nod.at>, linux-mmc@vger.kernel.org, Liam Girdwood <lgirdwood@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, linux-kernel@vger.kernel.org, Marek Vasut <marek.vasut@gmail.com>, Mark Brown <broonie@kernel.org>, linux-mtd@lists.infradead.org, linux-arm-kernel@lists.infradead.org, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, netdev@vger.kernel.org, dmaengine@vger.kernel.org, Brian Norris <computersforpeace@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Daniel Mack <daniel@zonque.org>, linux-media@vger.kernel.org
+Cc: Hans Verkuil <hans.verkuil@cisco.com>, Mauro Carvalho Chehab <mchehab+samsung@kernel.org>, Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, Boris Brezillon <boris.brezillon@free-electrons.com>, David Woodhouse <dwmw2@infradead.org>, Brian Norris <computersforpeace@gmail.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, Arnd Bergmann <arnd@arndb.de>, alsa-devel@alsa-project.org, netdev@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-ide@vger.kernel.org, linux-mtd@lists.infradead.org, dmaengine@vger.kernel.org, linux-arm-kernel@lists.infradead.orgli
 List-Id: linux-mmc@vger.kernel.org
 
 The patch
 
-   ata: pata_pxa: remove the dmaengine compat need
+   media: pxa_camera: remove the dmaengine compat need
 
 has been applied to the asoc tree at
 
@@ -49,10 +37,10 @@ to this mail.
 Thanks,
 Mark
 
->From 273340e8bf86de53eef7073993352ea11c563696 Mon Sep 17 00:00:00 2001
+>From f727b6cda449184188d8a64987f194687bf01782 Mon Sep 17 00:00:00 2001
 From: Robert Jarzmik <robert.jarzmik@free.fr>
-Date: Sun, 17 Jun 2018 19:02:13 +0200
-Subject: [PATCH] ata: pata_pxa: remove the dmaengine compat need
+Date: Sun, 17 Jun 2018 19:02:08 +0200
+Subject: [PATCH] media: pxa_camera: remove the dmaengine compat need
 
 As the pxa architecture switched towards the dmaengine slave map, the
 old compatibility mechanism to acquire the dma requestor line number and
@@ -62,52 +50,62 @@ This patch simplifies the dma resource acquisition, using the more
 generic function dma_request_slave_channel().
 
 Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>
-Acked-by: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+Acked-by: Hans Verkuil <hans.verkuil@cisco.com>
+Acked-by: Mauro Carvalho Chehab <mchehab+samsung@kernel.org>
 ---
- drivers/ata/pata_pxa.c | 10 +---------
- 1 file changed, 1 insertion(+), 9 deletions(-)
+ drivers/media/platform/pxa_camera.c | 22 +++-------------------
+ 1 file changed, 3 insertions(+), 19 deletions(-)
 
-diff --git a/drivers/ata/pata_pxa.c b/drivers/ata/pata_pxa.c
-index f6c46e9a4dc0..e8b6a2e464c9 100644
---- a/drivers/ata/pata_pxa.c
-+++ b/drivers/ata/pata_pxa.c
-@@ -25,7 +25,6 @@
- #include <linux/libata.h>
- #include <linux/platform_device.h>
- #include <linux/dmaengine.h>
--#include <linux/dma/pxa-dma.h>
- #include <linux/gpio.h>
- #include <linux/slab.h>
- #include <linux/completion.h>
-@@ -180,8 +179,6 @@ static int pxa_ata_probe(struct platform_device *pdev)
- 	struct resource *irq_res;
- 	struct pata_pxa_pdata *pdata = dev_get_platdata(&pdev->dev);
- 	struct dma_slave_config	config;
+diff --git a/drivers/media/platform/pxa_camera.c b/drivers/media/platform/pxa_camera.c
+index d85ffbfb7c1f..b6e9e93bde7a 100644
+--- a/drivers/media/platform/pxa_camera.c
++++ b/drivers/media/platform/pxa_camera.c
+@@ -2375,8 +2375,6 @@ static int pxa_camera_probe(struct platform_device *pdev)
+ 		.src_maxburst = 8,
+ 		.direction = DMA_DEV_TO_MEM,
+ 	};
 -	dma_cap_mask_t mask;
--	struct pxad_param param;
- 	int ret = 0;
+-	struct pxad_param params;
+ 	char clk_name[V4L2_CLK_NAME_SIZE];
+ 	int irq;
+ 	int err = 0, i;
+@@ -2450,34 +2448,20 @@ static int pxa_camera_probe(struct platform_device *pdev)
+ 	pcdev->base = base;
  
- 	/*
-@@ -278,10 +275,6 @@ static int pxa_ata_probe(struct platform_device *pdev)
- 
- 	ap->private_data = data;
- 
+ 	/* request dma */
 -	dma_cap_zero(mask);
 -	dma_cap_set(DMA_SLAVE, mask);
--	param.prio = PXAD_PRIO_LOWEST;
--	param.drcmr = pdata->dma_dreq;
- 	memset(&config, 0, sizeof(config));
- 	config.src_addr_width = DMA_SLAVE_BUSWIDTH_2_BYTES;
- 	config.dst_addr_width = DMA_SLAVE_BUSWIDTH_2_BYTES;
-@@ -294,8 +287,7 @@ static int pxa_ata_probe(struct platform_device *pdev)
- 	 * Request the DMA channel
- 	 */
- 	data->dma_chan =
+-	dma_cap_set(DMA_PRIVATE, mask);
+-
+-	params.prio = 0;
+-	params.drcmr = 68;
+-	pcdev->dma_chans[0] =
 -		dma_request_slave_channel_compat(mask, pxad_filter_fn,
--						 &param, &pdev->dev, "data");
-+		dma_request_slave_channel(&pdev->dev, "data");
- 	if (!data->dma_chan)
- 		return -EBUSY;
- 	ret = dmaengine_slave_config(data->dma_chan, &config);
+-						 &params, &pdev->dev, "CI_Y");
++	pcdev->dma_chans[0] = dma_request_slave_channel(&pdev->dev, "CI_Y");
+ 	if (!pcdev->dma_chans[0]) {
+ 		dev_err(&pdev->dev, "Can't request DMA for Y\n");
+ 		return -ENODEV;
+ 	}
+ 
+-	params.drcmr = 69;
+-	pcdev->dma_chans[1] =
+-		dma_request_slave_channel_compat(mask, pxad_filter_fn,
+-						 &params, &pdev->dev, "CI_U");
++	pcdev->dma_chans[1] = dma_request_slave_channel(&pdev->dev, "CI_U");
+ 	if (!pcdev->dma_chans[1]) {
+ 		dev_err(&pdev->dev, "Can't request DMA for Y\n");
+ 		err = -ENODEV;
+ 		goto exit_free_dma_y;
+ 	}
+ 
+-	params.drcmr = 70;
+-	pcdev->dma_chans[2] =
+-		dma_request_slave_channel_compat(mask, pxad_filter_fn,
+-						 &params, &pdev->dev, "CI_V");
++	pcdev->dma_chans[2] = dma_request_slave_channel(&pdev->dev, "CI_V");
+ 	if (!pcdev->dma_chans[2]) {
+ 		dev_err(&pdev->dev, "Can't request DMA for V\n");
+ 		err = -ENODEV;
 -- 
 2.18.0.rc2
