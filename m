@@ -1,94 +1,115 @@
-From: Stefan Agner <stefan@agner.ch>
-Subject: Re: Self-detected stall on CPU when using SD card
-Date: Tue, 26 Jun 2018 16:45:37 +0200
-Message-ID: <0f262b04fab61ec75b7e368a8f4968aa@agner.ch>
-References: <037cbd3560a68bad0cea92f453c1b819@agner.ch>
+From: "ernest.zhang" <ernest.zhang@bayhubtech.com>
+Subject: [PATCH V6 1/3] mmc: sdhci: Add support for O2 eMMC HS200 mode
+Date: Tue, 26 Jun 2018 23:46:45 +0800
+Message-ID: <20180626154647.11623-1-ernest.zhang@bayhubtech.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <037cbd3560a68bad0cea92f453c1b819@agner.ch>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: adrian.hunter@intel.com, aisheng.dong@nxp.com, fabio.estevam@nxp.com
-Cc: linux-mmc-owner@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: ernest.zhang@bayhubtech.com, chuanjin.pang@bayhubtech.com, mike.li@bayhubtech.com, chevron.li@bayhubtech.com, shirley.her@bayhubtech.com, xiaoguang.yu@bayhubtech.com, bobby.wu@bayhubtech.com
 List-Id: linux-mmc@vger.kernel.org
 
-On 26.06.2018 12:53, Stefan Agner wrote:
-> Hi,
-> 
-> On our Colibri iMX6 (arch/arm/boot/dts/imx6qdl-colibri.dtsi) we
-> experience the following stack trace when a SD card is plugged in:
-> 
+When use eMMC as boot device, the eMMC signaling voltage is tied to 1.8v
+fixed output voltage, bios can set o2 sd host controller PCI configuration
+register 0x308 bit4 to 1 to let driver skip 3.3v signaling voltage and
+direct use 1.8v singling voltage in eMMC initialize process.
 
-[...]
+Signed-off-by: ernest.zhang <ernest.zhang@bayhubtech.com>
+---
+Changes in V6:
+	1.Move change log to correct place.
+	2.Change HS200 mode clock frequency from 208MHz to 200MHz to meet
+	Specification.
 
-> [<c08396f4>] (esdhc_pltfm_set_clock) from [<c083622c>]
-> (sdhci_set_ios+0xd8/0x584)
->  r10:ffffe000 r9:c1105900 r8:00004097 r7:d818f2e8 r6:d818f480
-> r5:d818f2e8
->  r4:d818f000
-> [<c0836154>] (sdhci_set_ios) from [<c0836070>]
-> (sdhci_runtime_resume_host+0xa0/0x184)
->  r9:c1105900 r8:00004097 r7:d818f2e8 r6:d818f648 r5:d818f000 r4:d818f480
+Changes in V5:
+	Modify code format to pass checkpatch.pl check and add a summary
+	of what has changed in each version.
 
-[...]
+Changes in V4:
+	Skip SDIO and SD initalization when register 0x308 bit 4 is set,
+	and modify some typo.
 
-> 
-> It used to work in v4.9, so I started a git bisect. It pointed me to
-> this commit:
-> 
-> Commit d1e4f74f911d ("mmc: sdhci: Do not use spin lock in set_ios
-> paths").
-> 
-> Reverting the commit on-top of v4.18-rc1 seems to fix the issue too.
-> 
-> Any idea?
+Changes in V3:
+	Rebase the patch on the mmc tree 'next' branch.
 
-I figured out that the same platform had a GPIO Key which triggered all
-the time. This seems to exacerbate the MMC issue such that it triggers
-on very boot, about rootfs mount time.
+Changes in V2:
+	Modify code format, and delete unused code path.
 
-This change seems to fix the issue as well, not sure though whether this
-is a proper fix:
+Changes in V1:
+	Check PCIe register 0x308 bit 4 and skip eMMC 3.3v initialization
+	process if it is set to 1.
+---
+ drivers/mmc/host/sdhci-pci-o2micro.c | 22 ++++++++++++++++++++--
+ 1 file changed, 20 insertions(+), 2 deletions(-)
 
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -697,6 +697,7 @@ static inline void esdhc_pltfm_set_clock(struct
-sdhci_host *host,
-        int ddr_pre_div = imx_data->is_ddr ? 2 : 1;
-        int pre_div = 1;
-        int div = 1;
-+       unsigned long flags;
-        u32 temp, val;
+diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+index 555970a..94cf3cd 100644
+--- a/drivers/mmc/host/sdhci-pci-o2micro.c
++++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+@@ -3,6 +3,7 @@
+  *
+  * Authors: Peter Guo <peter.guo@bayhubtech.com>
+  *          Adam Lee <adam.lee@canonical.com>
++ *          Ernest Zhang <ernest.zhang@bayhubtech.com>
+  *
+  * This software is licensed under the terms of the GNU General Public
+  * License version 2, as published by the Free Software Foundation, and
+@@ -39,6 +40,7 @@
+ #define O2_SD_MISC_CTRL4	0xFC
+ #define O2_SD_TUNING_CTRL	0x300
+ #define O2_SD_PLL_SETTING	0x304
++#define O2_SD_MISC_SETTING	0x308
+ #define O2_SD_CLK_SETTING	0x328
+ #define O2_SD_CAP_REG2		0x330
+ #define O2_SD_CAP_REG0		0x334
+@@ -184,6 +186,7 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+ 	struct sdhci_pci_chip *chip;
+ 	struct sdhci_host *host;
+ 	u32 reg;
++	int ret;
  
-        if (clock == 0) {
-@@ -724,6 +725,7 @@ static inline void esdhc_pltfm_set_clock(struct
-sdhci_host *host,
-                        pre_div = 2;
-        }
+ 	chip = slot->chip;
+ 	host = slot->host;
+@@ -197,6 +200,21 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+ 		if (reg & 0x1)
+ 			host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
  
-+       spin_lock_irqsave(&host->lock, flags);
-        temp = sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
-        temp &= ~(ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN |
-ESDHC_CLOCK_PEREN
-                | ESDHC_CLOCK_MASK);
-@@ -754,6 +756,7 @@ static inline void esdhc_pltfm_set_clock(struct
-sdhci_host *host,
-                writel(val | ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
-                host->ioaddr + ESDHC_VENDOR_SPEC);
-        }
-+       spin_unlock_irqrestore(&host->lock, flags);
++		if (chip->pdev->device == PCI_DEVICE_ID_O2_SEABIRD0) {
++			ret = pci_read_config_dword(chip->pdev,
++						    O2_SD_MISC_SETTING, &reg);
++			if (ret)
++				return -EIO;
++			if (reg & (1 << 4)) {
++				pr_info("%s: emmc 1.8v flag is set, force 1.8v signaling voltage\n",
++					mmc_hostname(host->mmc));
++				host->flags &= ~SDHCI_SIGNALING_330;
++				host->flags |= SDHCI_SIGNALING_180;
++				host->mmc->caps2 |= MMC_CAP2_NO_SD;
++				host->mmc->caps2 |= MMC_CAP2_NO_SDIO;
++			}
++		}
++
+ 		if (chip->pdev->device != PCI_DEVICE_ID_O2_FUJIN2)
+ 			break;
+ 		/* set dll watch dog timer */
+@@ -293,7 +311,7 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
  
-        mdelay(1);
- }
-
---
-Stefan
+ 			/* Check Whether subId is 0x11 or 0x12 */
+ 			if ((scratch_32 == 0x11) || (scratch_32 == 0x12)) {
+-				scratch_32 = 0x2c280000;
++				scratch_32 = 0x25100000;
+ 
+ 				/* Set Base Clock to 208MZ */
+ 				o2_pci_set_baseclk(chip, scratch_32);
+@@ -388,7 +406,7 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
+ 					       O2_SD_PLL_SETTING, scratch_32);
+ 		} else {
+ 			scratch_32 &= 0x0000FFFF;
+-			scratch_32 |= 0x2c280000;
++			scratch_32 |= 0x25100000;
+ 
+ 			pci_write_config_dword(chip->pdev,
+ 					       O2_SD_PLL_SETTING, scratch_32);
+-- 
+2.7.4
