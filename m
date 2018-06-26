@@ -1,82 +1,55 @@
-From: "ernest.zhang" <ernest.zhang@bayhubtech.com>
-Subject: [PATCH V6 3/3] mmc: sdhci: Add MSI interrupt support for O2 SD host
-Date: Tue, 26 Jun 2018 23:46:47 +0800
-Message-ID: <20180626154647.11623-3-ernest.zhang@bayhubtech.com>
-References: <20180626154647.11623-1-ernest.zhang@bayhubtech.com>
+From: Daniel Mack <daniel@zonque.org>
+Subject: Re: Suspend of SDIO function devices
+Date: Tue, 26 Jun 2018 22:34:39 +0200
+Message-ID: <fcec2b1b-e2ab-3404-d958-b62d6d91583a@zonque.org>
+References: <b8a41e3a-7100-ae17-1275-d1b40a026201@zonque.org>
+ <CAPDyKFrgcFrah34+eFMsBQYWr03bTSMMUuYw61jYfpffSQrQAg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180626154647.11623-1-ernest.zhang@bayhubtech.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: ernest.zhang@bayhubtech.com, chuanjin.pang@bayhubtech.com, mike.li@bayhubtech.com, chevron.li@bayhubtech.com, shirley.her@bayhubtech.com, xiaoguang.yu@bayhubtech.com, bobby.wu@bayhubtech.com
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFrgcFrah34+eFMsBQYWr03bTSMMUuYw61jYfpffSQrQAg@mail.gmail.com>
+Content-Language: en-US
+Sender: netdev-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "libertas-dev@lists.infradead.org" <libertas-dev@lists.infradead.org>, linux-wireless@vger.kernel.org, "netdev@vger.kernel.org" <netdev@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Add MSI interrupt support if the SD host device can support MSI interrupt.
+Hi Ulf,
 
-Signed-off-by: ernest.zhang <ernest.zhang@bayhubtech.com>
----
-Changes in V6:
-	1. Move change log to correct place.
-	2. Reduce unneeded pr_info prints.
-	3. In function sdhci_pci_o2_probe_slot, remove using local
-	variable 'mmc' instead of using 'host->mmc'.
-	3. Make the msi enable code a sperate function.
+Thanks for the prompt reply!
 
-Changes in V5:
-	1. Because pci_enable_msi is marked as deprecated and should not be
-	used in new code, use pci_alloc_irq_vectors instead.
-	2. Remove unneeded CONFIG_PCI_MSI macro check.
+On Monday, June 25, 2018 05:00 PM, Ulf Hansson wrote:
+> On 24 June 2018 at 22:46, Daniel Mack <daniel@zonque.org> wrote:
+>> Please advise, I'm happy to test approaches and send patches.
+> 
+>  From a top level point of view, I think this needs to be changed:
+> 
+> 1)
+> In cases when the libertas sdio driver's ->suspend() callback, thinks
+> of returning -ENOSYS, it should instead call if_sdio_power_off().
+> Depending if if_sdio_power_save() has already been called, this shall
+> be skipped.
+> 
+> The important thing here is to disable the SDIO func device and to
+> release the SDIO irq.
+> 
+> 2)
+> During resume, depending on whether the earlier ->suspend() callback
+> invoked if_sdio_power_off(),  libertas sdio driver's ->resume()
+> callback should call if_sdio_power_on().
+> 
+> This should re-initiate the libertas sdio device and re-program the
+> firmware. To complete these actions, the firmware file also needs to
+> be fetched, which requires file system accesses also to be resumed.
+> 
+> We also need to wait for the firmware programming to be completed,
+> hence also do a "wait_event(card->pwron_waitq, priv->fw_ready);" from
+> somewhere.
 
-Changes in V4:
-	Enable MSI interrupt if the MSI capability bit is set in
-	capability register.
----
- drivers/mmc/host/sdhci-pci-o2micro.c | 25 +++++++++++++++++++++++++
- 1 file changed, 25 insertions(+)
+Great, thanks, that helped a lot! I have something that does the job ob 
+my board. Will send out a patch shortly.
 
-diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
-index 7747e8b..56bc717 100644
---- a/drivers/mmc/host/sdhci-pci-o2micro.c
-+++ b/drivers/mmc/host/sdhci-pci-o2micro.c
-@@ -260,6 +260,29 @@ static void sdhci_pci_o2_fujin2_pci_init(struct sdhci_pci_chip *chip)
- 	pci_write_config_dword(chip->pdev, O2_SD_MISC_CTRL4, scratch_32);
- }
- 
-+static void sdhci_pci_o2_enable_msi(struct sdhci_pci_chip *chip,
-+				    struct sdhci_host *host)
-+{
-+	int ret;
-+
-+	ret = pci_find_capability(chip->pdev, PCI_CAP_ID_MSI);
-+	if (!ret) {
-+		pr_info("%s: unsupport msi, use INTx irq\n",
-+			mmc_hostname(host->mmc));
-+		return;
-+	}
-+
-+	ret = pci_alloc_irq_vectors(chip->pdev, 1, 1,
-+				    PCI_IRQ_MSI | PCI_IRQ_MSIX);
-+	if (ret < 0) {
-+		pr_err("%s: enable PCI MSI failed, err=%d\n",
-+		       mmc_hostname(host->mmc), ret);
-+		return;
-+	}
-+
-+	host->irq = pci_irq_vector(chip->pdev, 0);
-+}
-+
- int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
- {
- 	struct sdhci_pci_chip *chip;
-@@ -279,6 +302,8 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
- 		if (reg & 0x1)
- 			host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
- 
-+		sdhci_pci_o2_enable_msi(chip, host);
-+
- 		if (chip->pdev->device == PCI_DEVICE_ID_O2_SEABIRD0) {
- 			ret = pci_read_config_dword(chip->pdev,
- 						    O2_SD_MISC_SETTING, &reg);
--- 
-2.7.4
+
+Best regards,
+Daniel
