@@ -1,44 +1,56 @@
 From: Stefan Agner <stefan@agner.ch>
-Subject: [PATCH 0/3] mmc: sdhci-esdhc-imx: fix no UHS modes
-Date: Thu, 28 Jun 2018 10:13:28 +0200
-Message-ID: <20180628081331.13051-1-stefan@agner.ch>
+Subject: [PATCH 2/3] mmc: sdhci: add quirk to prevent higher speed modes
+Date: Thu, 28 Jun 2018 10:13:30 +0200
+Message-ID: <20180628081331.13051-3-stefan@agner.ch>
+References: <20180628081331.13051-1-stefan@agner.ch>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180628081331.13051-1-stefan@agner.ch>
 Sender: linux-kernel-owner@vger.kernel.org
 To: adrian.hunter@intel.com, ulf.hansson@linaro.org
 Cc: fabio.estevam@nxp.com, haibo.chen@nxp.com, aisheng.dong@nxp.com, michael@amarulasolutions.com, rmk+kernel@armlinux.org.uk, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Stefan Agner <stefan@agner.ch>
 List-Id: linux-mmc@vger.kernel.org
 
-Currently sdhci-esdhc-imx.c sets SDHCI_QUIRK2_NO_1_8_V if no
-100MHz/200MHz pinctrl configurations are present in order to
-prevent the stack from choosing high speed modes.
+Some hosts are capable of running higher speed modes but do not
+have the board support for it. Introduce a quirk which prevents
+the stack from using modes running at 100MHz or faster.
 
-This does work for SD cards quite well, since 1.8V matches all
-higher speed modes, and all lower speed modes run with 3.3V.
+Signed-off-by: Stefan Agner <stefan@agner.ch>
+---
+ drivers/mmc/host/sdhci.c | 8 ++++++++
+ drivers/mmc/host/sdhci.h | 2 ++
+ 2 files changed, 10 insertions(+)
 
-However, when running a eMMC on 1.8V only, this causes issues:
-If vqmmc-supply is set to 1.8V only, and the driver at the same
-time sets SDHCI_QUIRK2_NO_1_8_V, the stack has troubls selecting
-a valid mode and continuously prints:
-  mmc1: Switching to 3.3V signalling voltage failed
-
-There are already board device trees which work around this by
-not setting vqmmc-supply, e.g.
-arch/arm/boot/dts/imx6qdl-sr-som-ti.dtsi.
-
-Introducing a new quirk was the only way which I came up with,
-but maybe there is a better way to prevent higher speed modes
-while allowing 1.8V eMMC?
-
-Stefan Agner (3):
-  mmc: sdhci-esdhc-imx: get rid of support_vsel
-  mmc: sdhci: add quirk to prevent higher speed modes
-  mmc: sdhci-esdhc-imx: prevent stack from using higher speed modes
-
- drivers/mmc/host/sdhci-esdhc-imx.c          | 12 ++++--------
- drivers/mmc/host/sdhci.c                    |  8 ++++++++
- drivers/mmc/host/sdhci.h                    |  2 ++
- include/linux/platform_data/mmc-esdhc-imx.h |  2 --
- 4 files changed, 14 insertions(+), 10 deletions(-)
-
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 1c828e0e9905..8ac257dfaab3 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -3749,6 +3749,14 @@ int sdhci_setup_host(struct sdhci_host *host)
+ 		}
+ 	}
+ 
++	if (host->quirks2 & SDHCI_QUIRK2_NO_UHS_HS200_HS400) {
++		host->caps1 &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
++				 SDHCI_SUPPORT_DDR50);
++
++		mmc->caps2 &= ~(MMC_CAP2_HSX00_1_8V | MMC_CAP2_HSX00_1_2V |
++				MMC_CAP2_HS400_ES);
++	}
++
+ 	if (host->quirks2 & SDHCI_QUIRK2_NO_1_8_V) {
+ 		host->caps1 &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
+ 				 SDHCI_SUPPORT_DDR50);
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 23966f887da6..cb2433d6d61f 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -450,6 +450,8 @@ struct sdhci_host {
+  * obtainable timeout.
+  */
+ #define SDHCI_QUIRK2_DISABLE_HW_TIMEOUT			(1<<17)
++/* Do not support any higher speeds (>50MHz) */
++#define SDHCI_QUIRK2_NO_UHS_HS200_HS400			(1<<18)
+ 
+ 	int irq;		/* Device IRQ */
+ 	void __iomem *ioaddr;	/* Mapped address */
 -- 
 2.18.0
