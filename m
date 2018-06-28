@@ -1,64 +1,45 @@
-From: Stefan Agner <stefan@agner.ch>
-Subject: [PATCH 3/3] mmc: sdhci-esdhc-imx: prevent stack from using higher speed modes
-Date: Thu, 28 Jun 2018 10:13:31 +0200
-Message-ID: <20180628081331.13051-4-stefan@agner.ch>
-References: <20180628081331.13051-1-stefan@agner.ch>
+From: Laurentiu Tudor <laurentiu.tudor@nxp.com>
+Subject: [PATCH] mmc: sdhci-of-esdhc: set proper dma mask for ls104x chips
+Date: Thu, 28 Jun 2018 11:45:09 +0300
+Message-ID: <20180628084509.19646-1-laurentiu.tudor@nxp.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180628081331.13051-1-stefan@agner.ch>
 Sender: linux-kernel-owner@vger.kernel.org
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc: fabio.estevam@nxp.com, haibo.chen@nxp.com, aisheng.dong@nxp.com, michael@amarulasolutions.com, rmk+kernel@armlinux.org.uk, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Stefan Agner <stefan@agner.ch>
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: yangbo.lu@nxp.com, Laurentiu Tudor <laurentiu.tudor@nxp.com>
 List-Id: linux-mmc@vger.kernel.org
 
-If pinctrl configurations for higher speed modes are missing, the
-stack currently uses the no 1.8V quirk. This comes close to what
-we need but not exactly: E.g. if a eMMC chip uses 1.8V signaling
-(by specifying a 1.8V only vqmmc-supply) while not providing any
-100MHz/200MHz pinctrl configurations then the SDHCI_QUIRK2_NO_1_8_V
-leads the stack to print signaling voltage switch failed errors
-continuously:
-  mmc1: Switching to 3.3V signalling voltage failed
+SDHCI controller in ls1043a and ls1046a generate 40-bit wide addresses
+when doing DMA. Make sure that the corresponding dma mask is correctly
+configured.
 
-Presumably because the stack tries to use 3.3V signaling:
-
-  # cat /sys/kernel/debug/mmc1/ios
-  ...
-  timing spec:    8 (mmc DDR52)
-  signal voltage: 0 (3.30 V)
-  ...
-
-With using SDHCI_QUIRK2_NO_UHS_HS200_HS400 we prevent the stack
-from choosing any modes require speeds higher than 52MHz while
-still allowing to select modes using 1.8V at lower speeds (e.g.
-DDR52):
-
-  # cat /sys/kernel/debug/mmc1/ios
-  ...
-  timing spec:    8 (mmc DDR52)
-  signal voltage: 1 (1.80 V)
-  ...
-
-Signed-off-by: Stefan Agner <stefan@agner.ch>
+Signed-off-by: Laurentiu Tudor <laurentiu.tudor@nxp.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sdhci-of-esdhc.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 20a420b765b3..4a1c33018072 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -1165,10 +1165,10 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
- 			 * fall back to not supporting uhs by specifying no
- 			 * 1.8v quirk
- 			 */
--			host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
-+			host->quirks2 |= SDHCI_QUIRK2_NO_UHS_HS200_HS400;
- 		}
- 	} else {
--		host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
-+		host->quirks2 |= SDHCI_QUIRK2_NO_UHS_HS200_HS400;
- 	}
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index 4ffa6b173a21..8332f56e6c0d 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -22,6 +22,7 @@
+ #include <linux/sys_soc.h>
+ #include <linux/clk.h>
+ #include <linux/ktime.h>
++#include <linux/dma-mapping.h>
+ #include <linux/mmc/host.h>
+ #include "sdhci-pltfm.h"
+ #include "sdhci-esdhc.h"
+@@ -427,6 +428,11 @@ static void esdhc_of_adma_workaround(struct sdhci_host *host, u32 intmask)
+ static int esdhc_of_enable_dma(struct sdhci_host *host)
+ {
+ 	u32 value;
++	struct device *dev = mmc_dev(host->mmc);
++
++	if (of_device_is_compatible(dev->of_node, "fsl,ls1043a-esdhc") ||
++	    of_device_is_compatible(dev->of_node, "fsl,ls1046a-esdhc"))
++		dma_set_mask_and_coherent(dev, DMA_BIT_MASK(40));
  
- 	/* call to generic mmc_of_parse to support additional capabilities */
+ 	value = sdhci_readl(host, ESDHC_DMA_SYSCTL);
+ 	value |= ESDHC_DMA_SNOOP;
 -- 
-2.18.0
+2.17.1
