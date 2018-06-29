@@ -1,92 +1,146 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 00/19] mmc: mmci: add stm32 sdmmc variant
-Date: Fri, 29 Jun 2018 17:18:14 +0200
-Message-ID: <CAPDyKFrYBLQDbtTgeuwCjpr5+2Y4+BUcYAmxT0AKj_-SvvGGQg@mail.gmail.com>
-References: <1528809280-31116-1-git-send-email-ludovic.Barre@st.com> <f475a8c7-5a48-bf40-bbd9-a7a513f8a70f@st.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v2] libertas: fix suspend and resume for SDIO connected cards
+Date: Fri, 29 Jun 2018 17:39:47 +0200
+Message-ID: <CAPDyKFr7snWsk=194u4nKs4301tUARByuEPSFop_fzxn6HVQDQ@mail.gmail.com>
+References: <20180627185845.31799-1-daniel@zonque.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <f475a8c7-5a48-bf40-bbd9-a7a513f8a70f@st.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ludovic BARRE <ludovic.barre@st.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Gerald Baeza <gerald.baeza@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, devicetree@vger.kernel.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20180627185845.31799-1-daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org>
+Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, libertas-dev-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 29 June 2018 at 15:51, Ludovic BARRE <ludovic.barre@st.com> wrote:
-> hi Ulf
+On 27 June 2018 at 20:58, Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org> wrote:
+> Prior to commit 573185cc7e64 ("mmc: core: Invoke sdio func driver's PM
+> callbacks from the sdio bus"), the MMC core used to call into the power
+> management functions of SDIO clients itself and removed the card if the
+> return code was non-zero. IOW, the mmc handled errors gracefully and didn=
+'t
+> upchain them to the pm core.
 >
-> I know that you very busy on other task,
-> but did you have time to look my serie.
-> do you have first feedback ?
+> Since this change, the mmc core relies on generic power management
+> functions which treat all errors as a reason to cancel the suspend
+> immediately. This causes suspend attempts to fail when the libertas
+> driver is loaded.
+>
+> To fix this, power down the card explicitly in if_sdio_suspend() when we
+> know we're about to lose power and return success. Also set a flag in the=
+se
+> cases, and power up the card again in if_sdio_resume().
+>
+> Signed-off-by: Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org>
+> Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>
 
-Apologize for the delay. I am going to catch up on mmc next week.
+Looks good to me! Should be a candidate for stable as well!?
 
-At first glance, this looks reasonable.
+Reviewed-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+
+I have some additional related changes in mind for the libertas SDIO
+driver, however let me post patches for us to discuss around instead.
 
 Kind regards
 Uffe
 
+> ---
+> v1 =E2=86=92 v2:
+> * Reworded patch subject
+> * Added wait_event(card->pwron_waitq, card->priv->fw_ready)
 >
-> BR
-> Ludo
+>  drivers/net/wireless/marvell/libertas/dev.h   |  1 +
+>  .../net/wireless/marvell/libertas/if_sdio.c   | 30 +++++++++++++++----
+>  2 files changed, 25 insertions(+), 6 deletions(-)
 >
+> diff --git a/drivers/net/wireless/marvell/libertas/dev.h b/drivers/net/wi=
+reless/marvell/libertas/dev.h
+> index dd1ee1f0af48..469134930026 100644
+> --- a/drivers/net/wireless/marvell/libertas/dev.h
+> +++ b/drivers/net/wireless/marvell/libertas/dev.h
+> @@ -104,6 +104,7 @@ struct lbs_private {
+>         u8 fw_ready;
+>         u8 surpriseremoved;
+>         u8 setup_fw_on_resume;
+> +       u8 power_up_on_resume;
+>         int (*hw_host_to_card) (struct lbs_private *priv, u8 type, u8 *pa=
+yload, u16 nb);
+>         void (*reset_card) (struct lbs_private *priv);
+>         int (*power_save) (struct lbs_private *priv);
+> diff --git a/drivers/net/wireless/marvell/libertas/if_sdio.c b/drivers/ne=
+t/wireless/marvell/libertas/if_sdio.c
+> index 2300e796c6ab..43743c26c071 100644
+> --- a/drivers/net/wireless/marvell/libertas/if_sdio.c
+> +++ b/drivers/net/wireless/marvell/libertas/if_sdio.c
+> @@ -1290,15 +1290,23 @@ static void if_sdio_remove(struct sdio_func *func=
+)
+>  static int if_sdio_suspend(struct device *dev)
+>  {
+>         struct sdio_func *func =3D dev_to_sdio_func(dev);
+> -       int ret;
+>         struct if_sdio_card *card =3D sdio_get_drvdata(func);
+> +       struct lbs_private *priv =3D card->priv;
+> +       int ret;
 >
-> On 06/12/2018 03:14 PM, Ludovic Barre wrote:
->>
->> From: Ludovic Barre <ludovic.barre@st.com>
->>
->> This patch series adapts mmci driver to add support for stm32
->> sdmmc variant. stm32h7 SoC integrates the first revision of
->> stm32 sdmmc.
->>
->> This series is composed of 3 parts:
->> -Prepare mmci driver to manage dma interfaces by adding property.
->>   New mmci dma API is defined according to the legacy needs.
->> -Adapt mmci driver to dedicated constraints of stm32 sdmmc variant,
->>   defined under some specific properties.
->> -Add stm32 sdmmc variant. As Internal DMA way satisfies data
->> transfer, the mmci driver hasn't been modified for pio_read/write.
->> Specific adds-ons to stm32 sdmmc:
->>   + registers
->>   + clk/power functions
->>   + idma interface
->>
->> Ludovic Barre (19):
->>    mmc: mmci: regroup and define dma operations
->>    mmc: mmci: merge qcom dml feature into mmci dma
->>    mmc: mmci: add datactrl block size variant property
->>    mmc: mmci: expand startbiterr to irqmask and error check
->>    mmc: mmci: allow to overwrite clock/power procedure to specific
->>      variant
->>    mmc: mmci: add variant properties to define cpsm & cmdresp bits
->>    mmc: mmci: add variant property to define dpsm bit
->>    mmc: mmci: add variant property to define irq pio mask
->>    mmc: mmci: add variant property to write datactrl before command
->>    mmc: mmci: add variant property to allow remain data
->>    mmc: mmci: add variant property to check specific data constraint
->>    mmc: mmci: add variant property to request a reset
->>    mmc: mmci: send stop cmd if a data command fail
->>    mmc: mmci: add clock divider for stm32 sdmmc
->>    mmc: mmci: add stm32 sdmmc registers
->>    mmc: mmci: add DT bindings for STM32 sdmmc
->>    mmc: mmci: add stm32 sdmmc idma support
->>    mmc: mmci: add specific clk/pwr procedure for stm32 sdmmc
->>    mmc: mmci: add stm32 sdmmc variant
->>
->>   Documentation/devicetree/bindings/mmc/mmci.txt |  11 +
->>   drivers/mmc/host/Makefile                      |   3 +-
->>   drivers/mmc/host/mmci.c                        | 846
->> +++++++++++--------------
->>   drivers/mmc/host/mmci.h                        | 237 ++++++-
->>   drivers/mmc/host/mmci_dma.c                    | 780
->> +++++++++++++++++++++++
->>   drivers/mmc/host/mmci_dma.h                    |  33 +
->>   drivers/mmc/host/mmci_qcom_dml.c               | 177 ------
->>   drivers/mmc/host/mmci_qcom_dml.h               |  31 -
->>   8 files changed, 1410 insertions(+), 708 deletions(-)
->>   create mode 100644 drivers/mmc/host/mmci_dma.c
->>   create mode 100644 drivers/mmc/host/mmci_dma.h
->>   delete mode 100644 drivers/mmc/host/mmci_qcom_dml.c
->>   delete mode 100644 drivers/mmc/host/mmci_qcom_dml.h
->>
+>         mmc_pm_flag_t flags =3D sdio_get_host_pm_caps(func);
+> +       priv->power_up_on_resume =3D false;
+>
+>         /* If we're powered off anyway, just let the mmc layer remove the
+>          * card. */
+> -       if (!lbs_iface_active(card->priv))
+> -               return -ENOSYS;
+> +       if (!lbs_iface_active(priv)) {
+> +               if (priv->fw_ready) {
+> +                       priv->power_up_on_resume =3D true;
+> +                       if_sdio_power_off(card);
+> +               }
+> +
+> +               return 0;
+> +       }
+>
+>         dev_info(dev, "%s: suspend: PM flags =3D 0x%x\n",
+>                  sdio_func_id(func), flags);
+> @@ -1306,9 +1314,14 @@ static int if_sdio_suspend(struct device *dev)
+>         /* If we aren't being asked to wake on anything, we should bail o=
+ut
+>          * and let the SD stack power down the card.
+>          */
+> -       if (card->priv->wol_criteria =3D=3D EHS_REMOVE_WAKEUP) {
+> +       if (priv->wol_criteria =3D=3D EHS_REMOVE_WAKEUP) {
+>                 dev_info(dev, "Suspend without wake params -- powering do=
+wn card\n");
+> -               return -ENOSYS;
+> +               if (priv->fw_ready) {
+> +                       priv->power_up_on_resume =3D true;
+> +                       if_sdio_power_off(card);
+> +               }
+> +
+> +               return 0;
+>         }
+>
+>         if (!(flags & MMC_PM_KEEP_POWER)) {
+> @@ -1321,7 +1334,7 @@ static int if_sdio_suspend(struct device *dev)
+>         if (ret)
+>                 return ret;
+>
+> -       ret =3D lbs_suspend(card->priv);
+> +       ret =3D lbs_suspend(priv);
+>         if (ret)
+>                 return ret;
+>
+> @@ -1336,6 +1349,11 @@ static int if_sdio_resume(struct device *dev)
+>
+>         dev_info(dev, "%s: resume: we're back\n", sdio_func_id(func));
+>
+> +       if (card->priv->power_up_on_resume) {
+> +               if_sdio_power_on(card);
+> +               wait_event(card->pwron_waitq, card->priv->fw_ready);
+> +       }
+> +
+>         ret =3D lbs_resume(card->priv);
+>
+>         return ret;
+> --
+> 2.17.1
 >
