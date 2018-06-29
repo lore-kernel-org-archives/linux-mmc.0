@@ -1,50 +1,48 @@
-From: Anson Huang <Anson.Huang@nxp.com>
-Subject: [PATCH] mmc: core: cd_label must be last entry of mmc_gpio struct
-Date: Fri, 29 Jun 2018 09:35:32 +0800
-Message-ID: <1530236132-7968-1-git-send-email-Anson.Huang@nxp.com>
+From: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Subject: RE: [PATCH 1/2] mmc: renesas_sdhi_internal_dmac: Fix missing unmap in
+ error patch
+Date: Fri, 29 Jun 2018 09:39:06 +0000
+Message-ID: <OSBPR01MB22939056914D61BF8202B1FED84E0@OSBPR01MB2293.jpnprd01.prod.outlook.com>
+References: <1530181745-10519-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+ <1530181745-10519-2-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+ <CAMuHMdWRKPoP6rxgeWC5tWyxdvZ0kJH9UmxPY3H4hxWMKmq=iw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, adrian.hunter@intel.com, yamada.masahiro@socionext.com, evgreen@chromium.org, shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Linux-imx@nxp.com
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <CAMuHMdWRKPoP6rxgeWC5tWyxdvZ0kJH9UmxPY3H4hxWMKmq=iw@mail.gmail.com>
+Content-Language: ja-JP
+Sender: stable-owner@vger.kernel.org
+To: Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, stable <stable@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-commit bfd694d5e21c ("mmc: core: Add tunable delay
-before detecting card after card is inserted") adds
-"u32 cd_debounce_delay_ms" to the last of mmc_gpio
-struct and cause "char cd_label[0]" NOT work as string
-pointer of card detect label, when "cat /proc/interrupts",
-the devname for card detect gpio is incorrect as below:
-
-144:          0  gpio-mxc  22 Edge      ▒
-161:          0  gpio-mxc   7 Edge      ▒
-
-Making "char cd_label[0]" the last entry of mmc_gpio struct,
-the result is correct as below:
-
-144:          0  gpio-mxc  22 Edge      2198000.mmc cd
-161:          0  gpio-mxc   7 Edge      2190000.mmc cd
-
-Signed-off-by: Anson Huang <Anson.Huang@nxp.com>
----
- drivers/mmc/core/slot-gpio.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
-index ef05e00..1ccf9dc 100644
---- a/drivers/mmc/core/slot-gpio.c
-+++ b/drivers/mmc/core/slot-gpio.c
-@@ -27,8 +27,8 @@ struct mmc_gpio {
- 	bool override_cd_active_level;
- 	irqreturn_t (*cd_gpio_isr)(int irq, void *dev_id);
- 	char *ro_label;
--	char cd_label[0];
- 	u32 cd_debounce_delay_ms;
-+	char cd_label[0];
- };
- 
- static irqreturn_t mmc_gpio_cd_irqt(int irq, void *dev_id)
--- 
-2.7.4
+SGkgR2VlcnQtc2FuLA0KDQo+IEZyb206IEdlZXJ0IFV5dHRlcmhvZXZlbiwgU2VudDogVGh1cnNk
+YXksIEp1bmUgMjgsIDIwMTggOTo1MCBQTQ0KPiANCj4gSGkgU2hpbW9kYS1zYW4sDQo+IA0KPiBP
+biBUaHUsIEp1biAyOCwgMjAxOCBhdCAxOjUzIFBNIFlvc2hpaGlybyBTaGltb2RhDQo+IDx5b3No
+aWhpcm8uc2hpbW9kYS51aEByZW5lc2FzLmNvbT4gd3JvdGU6DQo+ID4gVGhpcyBwYXRjaCBmaXhl
+cyBhbiBpc3N1ZSB0aGF0IGxhY2tzIHRoZSBkbWFfdW5tYXBfc2coKSBjYWxsaW5nIGluDQo+ID4g
+dGhlIGVycm9yIHBhdGNoIG9mIHJlbmVzYXNfc2RoaV9pbnRlcm5hbF9kbWFjX3N0YXJ0X2RtYSgp
+Lg0KPiANCj4gTmljZSBjYXRjaCENCj4gVGhhbmtzIGZvciB5b3VyIHBhdGNoIQ0KPiANCj4gPiBG
+aXhlczogMGNiYzk0ZGFhNTU0ICgibW1jOiByZW5lc2FzX3NkaGlfaW50ZXJuYWxfZG1hYzogbGlt
+aXQgRE1BIFJYIGZvciBvbGQgU29DcyIpDQo+ID4gQ2M6IDxzdGFibGVAdmdlci5rZXJuZWwub3Jn
+PiAjIHY0LjE3Kw0KPiA+IFNpZ25lZC1vZmYtYnk6IFlvc2hpaGlybyBTaGltb2RhIDx5b3NoaWhp
+cm8uc2hpbW9kYS51aEByZW5lc2FzLmNvbT4NCj4gDQo+IFJldmlld2VkLWJ5OiBHZWVydCBVeXR0
+ZXJob2V2ZW4gPGdlZXJ0K3JlbmVzYXNAZ2xpZGVyLmJlPg0KDQpUaGFuayB5b3UgZm9yIHlvdXIg
+cmV2aWV3IQ0KDQo+ID4gLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9yZW5lc2FzX3NkaGlfaW50ZXJu
+YWxfZG1hYy5jDQo+ID4gKysrIGIvZHJpdmVycy9tbWMvaG9zdC9yZW5lc2FzX3NkaGlfaW50ZXJu
+YWxfZG1hYy5jDQo+ID4gQEAgLTE3Myw4ICsxNzMsMTEgQEANCj4gPiAgICAgICAgIGlmIChkYXRh
+LT5mbGFncyAmIE1NQ19EQVRBX1JFQUQpIHsNCj4gPiAgICAgICAgICAgICAgICAgZHRyYW5fbW9k
+ZSB8PSBEVFJBTl9NT0RFX0NIX05VTV9DSDE7DQo+ID4gICAgICAgICAgICAgICAgIGlmICh0ZXN0
+X2JpdChTREhJX0lOVEVSTkFMX0RNQUNfT05FX1JYX09OTFksICZnbG9iYWxfZmxhZ3MpICYmDQo+
+ID4gLSAgICAgICAgICAgICAgICAgICB0ZXN0X2FuZF9zZXRfYml0KFNESElfSU5URVJOQUxfRE1B
+Q19SWF9JTl9VU0UsICZnbG9iYWxfZmxhZ3MpKQ0KPiA+ICsgICAgICAgICAgICAgICAgICAgdGVz
+dF9hbmRfc2V0X2JpdChTREhJX0lOVEVSTkFMX0RNQUNfUlhfSU5fVVNFLCAmZ2xvYmFsX2ZsYWdz
+KSkgew0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIGRtYV91bm1hcF9zZygmaG9zdC0+cGRl
+di0+ZGV2LCBzZywgaG9zdC0+c2dfbGVuLA0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICBtbWNfZ2V0X2RtYV9kaXIoZGF0YSkpOw0KPiANCj4gR2l2ZW4gdGhlcmUgaXMg
+YWxyZWFkeSBhIGNhbGwgdG8gZG1hX3VubWFwX3NnKCkgYSBmZXcgbGluZXMgZWFybGllciAsIHlv
+dQ0KPiBtYXkgd2FudCB0byBpbnRyb2R1Y2UgYSBuZXcgbGFiZWwgYmVmb3JlIGZvcmNlX3Bpbywg
+YW5kIG1vdmUgdGhlIGNhbGwgdG8NCj4gZG1hX3VubWFwX3NnKCkgdGhlcmUuDQoNClRoYW5rIHlv
+dSBmb3IgdGhlIGNvbW1lbnQuIFNvLCBJJ2xsIHN1Ym1pdCB2MiBwYXRjaC4NCg0KQmVzdCByZWdh
+cmRzLA0KWW9zaGloaXJvIFNoaW1vZGENCg0K
