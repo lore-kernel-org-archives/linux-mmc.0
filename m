@@ -1,58 +1,78 @@
-From: Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2] libertas: fix suspend and resume for SDIO connected
- cards
-Date: Fri, 29 Jun 2018 19:57:45 +0200
-Message-ID: <dac693d9-b6f4-fac6-3cfa-ccfc4a6172c6@zonque.org>
-References: <20180627185845.31799-1-daniel@zonque.org>
- <CAPDyKFr7snWsk=194u4nKs4301tUARByuEPSFop_fzxn6HVQDQ@mail.gmail.com>
+From: Fabio Estevam <festevam@gmail.com>
+Subject: Re: [PATCH] mmc: core: cd_label must be last entry of mmc_gpio struct
+Date: Fri, 29 Jun 2018 17:00:27 -0300
+Message-ID: <CAOMZO5BnvwB5rUr2H0=tp9wWnePoMWyfX86CT15jxsi_PaFG0Q@mail.gmail.com>
+References: <1530236132-7968-1-git-send-email-Anson.Huang@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAPDyKFr7snWsk=194u4nKs4301tUARByuEPSFop_fzxn6HVQDQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, libertas-dev-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1530236132-7968-1-git-send-email-Anson.Huang@nxp.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Anson Huang <Anson.Huang@nxp.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, evgreen@chromium.org, Shawn Lin <shawn.lin@rock-chips.com>, linux-mmc@vger.kernel.org, linux-kernel <linux-kernel@vger.kernel.org>, NXP Linux Team <Linux-imx@nxp.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Friday, June 29, 2018 05:39 PM, Ulf Hansson wrote:
-> On 27 June 2018 at 20:58, Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org> wrote:
->> Prior to commit 573185cc7e64 ("mmc: core: Invoke sdio func driver's PM
->> callbacks from the sdio bus"), the MMC core used to call into the power
->> management functions of SDIO clients itself and removed the card if the
->> return code was non-zero. IOW, the mmc handled errors gracefully and didn't
->> upchain them to the pm core.
->>
->> Since this change, the mmc core relies on generic power management
->> functions which treat all errors as a reason to cancel the suspend
->> immediately. This causes suspend attempts to fail when the libertas
->> driver is loaded.
->>
->> To fix this, power down the card explicitly in if_sdio_suspend() when we
->> know we're about to lose power and return success. Also set a flag in these
->> cases, and power up the card again in if_sdio_resume().
->>
->> Signed-off-by: Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org>
->> Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>
-> 
-> Looks good to me! Should be a candidate for stable as well!?
+Hi Anson,
 
-Thanks!
+On Thu, Jun 28, 2018 at 10:35 PM, Anson Huang <Anson.Huang@nxp.com> wrote:
+> commit bfd694d5e21c ("mmc: core: Add tunable delay
+> before detecting card after card is inserted") adds
+> "u32 cd_debounce_delay_ms" to the last of mmc_gpio
+> struct and cause "char cd_label[0]" NOT work as string
+> pointer of card detect label, when "cat /proc/interrupts",
+> the devname for card detect gpio is incorrect as below:
+>
+> 144:          0  gpio-mxc  22 Edge      =E2=96=92
+> 161:          0  gpio-mxc   7 Edge      =E2=96=92
+>
+> Making "char cd_label[0]" the last entry of mmc_gpio struct,
+> the result is correct as below:
+>
+> 144:          0  gpio-mxc  22 Edge      2198000.mmc cd
+> 161:          0  gpio-mxc   7 Edge      2190000.mmc cd
 
-Yeah, it should probably get a
+Please add a Fixes: tag.
 
-Fixes: 573185cc7e64 ("mmc: core: Invoke sdio func driver's PM
-callbacks from the sdio bus")
+> Signed-off-by: Anson Huang <Anson.Huang@nxp.com>
+> ---
+>  drivers/mmc/core/slot-gpio.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
+> index ef05e00..1ccf9dc 100644
+> --- a/drivers/mmc/core/slot-gpio.c
+> +++ b/drivers/mmc/core/slot-gpio.c
+> @@ -27,8 +27,8 @@ struct mmc_gpio {
+>         bool override_cd_active_level;
+>         irqreturn_t (*cd_gpio_isr)(int irq, void *dev_id);
+>         char *ro_label;
+> -       char cd_label[0];
+>         u32 cd_debounce_delay_ms;
+> +       char cd_label[0];
 
-as well.
+Thanks for the fix.
 
-> I have some additional related changes in mind for the libertas SDIO
-> driver, however let me post patches for us to discuss around instead.
+A more robust solution would be:
 
-I currently have access to such hardware, so I can test patches :)
+--- a/drivers/mmc/core/slot-gpio.c
++++ b/drivers/mmc/core/slot-gpio.c
+@@ -27,8 +27,8 @@ struct mmc_gpio {
+        bool override_cd_active_level;
+        irqreturn_t (*cd_gpio_isr)(int irq, void *dev_id);
+        char *ro_label;
+-       char cd_label[0];
+        u32 cd_debounce_delay_ms;
++       char cd_label[];
+ };
 
+This way if someone tries to rearrange the struct members in the
+future, then GCC will complain with the following error:
+error: flexible array member not at end of struct
 
-Thanks,
-Daniel
+Please see a158531f3c92 ("gpio: 74x164: Fix crash during .remove()")
+which provides a nice explanation for this same kind of problem.
+
+Then you can add:
+
+Tested-by: Fabio Estevam <fabio.estevam@nxp.com>
