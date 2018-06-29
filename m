@@ -1,48 +1,27 @@
 From: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Subject: RE: [PATCH 1/2] mmc: renesas_sdhi_internal_dmac: Fix missing unmap in
- error patch
-Date: Fri, 29 Jun 2018 09:39:06 +0000
-Message-ID: <OSBPR01MB22939056914D61BF8202B1FED84E0@OSBPR01MB2293.jpnprd01.prod.outlook.com>
-References: <1530181745-10519-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
- <1530181745-10519-2-git-send-email-yoshihiro.shimoda.uh@renesas.com>
- <CAMuHMdWRKPoP6rxgeWC5tWyxdvZ0kJH9UmxPY3H4hxWMKmq=iw@mail.gmail.com>
+Subject: [PATCH v2 0/2] mmc: renesas_sdhi_internal_dmac: fix two issues for error path
+Date: Fri, 29 Jun 2018 19:01:43 +0900
+Message-ID: <1530266505-19953-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain
 Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <CAMuHMdWRKPoP6rxgeWC5tWyxdvZ0kJH9UmxPY3H4hxWMKmq=iw@mail.gmail.com>
-Content-Language: ja-JP
 Sender: stable-owner@vger.kernel.org
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, stable <stable@vger.kernel.org>
+To: wsa+renesas@sang-engineering.com, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, stable@vger.kernel.org, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 List-Id: linux-mmc@vger.kernel.org
 
-SGkgR2VlcnQtc2FuLA0KDQo+IEZyb206IEdlZXJ0IFV5dHRlcmhvZXZlbiwgU2VudDogVGh1cnNk
-YXksIEp1bmUgMjgsIDIwMTggOTo1MCBQTQ0KPiANCj4gSGkgU2hpbW9kYS1zYW4sDQo+IA0KPiBP
-biBUaHUsIEp1biAyOCwgMjAxOCBhdCAxOjUzIFBNIFlvc2hpaGlybyBTaGltb2RhDQo+IDx5b3No
-aWhpcm8uc2hpbW9kYS51aEByZW5lc2FzLmNvbT4gd3JvdGU6DQo+ID4gVGhpcyBwYXRjaCBmaXhl
-cyBhbiBpc3N1ZSB0aGF0IGxhY2tzIHRoZSBkbWFfdW5tYXBfc2coKSBjYWxsaW5nIGluDQo+ID4g
-dGhlIGVycm9yIHBhdGNoIG9mIHJlbmVzYXNfc2RoaV9pbnRlcm5hbF9kbWFjX3N0YXJ0X2RtYSgp
-Lg0KPiANCj4gTmljZSBjYXRjaCENCj4gVGhhbmtzIGZvciB5b3VyIHBhdGNoIQ0KPiANCj4gPiBG
-aXhlczogMGNiYzk0ZGFhNTU0ICgibW1jOiByZW5lc2FzX3NkaGlfaW50ZXJuYWxfZG1hYzogbGlt
-aXQgRE1BIFJYIGZvciBvbGQgU29DcyIpDQo+ID4gQ2M6IDxzdGFibGVAdmdlci5rZXJuZWwub3Jn
-PiAjIHY0LjE3Kw0KPiA+IFNpZ25lZC1vZmYtYnk6IFlvc2hpaGlybyBTaGltb2RhIDx5b3NoaWhp
-cm8uc2hpbW9kYS51aEByZW5lc2FzLmNvbT4NCj4gDQo+IFJldmlld2VkLWJ5OiBHZWVydCBVeXR0
-ZXJob2V2ZW4gPGdlZXJ0K3JlbmVzYXNAZ2xpZGVyLmJlPg0KDQpUaGFuayB5b3UgZm9yIHlvdXIg
-cmV2aWV3IQ0KDQo+ID4gLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9yZW5lc2FzX3NkaGlfaW50ZXJu
-YWxfZG1hYy5jDQo+ID4gKysrIGIvZHJpdmVycy9tbWMvaG9zdC9yZW5lc2FzX3NkaGlfaW50ZXJu
-YWxfZG1hYy5jDQo+ID4gQEAgLTE3Myw4ICsxNzMsMTEgQEANCj4gPiAgICAgICAgIGlmIChkYXRh
-LT5mbGFncyAmIE1NQ19EQVRBX1JFQUQpIHsNCj4gPiAgICAgICAgICAgICAgICAgZHRyYW5fbW9k
-ZSB8PSBEVFJBTl9NT0RFX0NIX05VTV9DSDE7DQo+ID4gICAgICAgICAgICAgICAgIGlmICh0ZXN0
-X2JpdChTREhJX0lOVEVSTkFMX0RNQUNfT05FX1JYX09OTFksICZnbG9iYWxfZmxhZ3MpICYmDQo+
-ID4gLSAgICAgICAgICAgICAgICAgICB0ZXN0X2FuZF9zZXRfYml0KFNESElfSU5URVJOQUxfRE1B
-Q19SWF9JTl9VU0UsICZnbG9iYWxfZmxhZ3MpKQ0KPiA+ICsgICAgICAgICAgICAgICAgICAgdGVz
-dF9hbmRfc2V0X2JpdChTREhJX0lOVEVSTkFMX0RNQUNfUlhfSU5fVVNFLCAmZ2xvYmFsX2ZsYWdz
-KSkgew0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIGRtYV91bm1hcF9zZygmaG9zdC0+cGRl
-di0+ZGV2LCBzZywgaG9zdC0+c2dfbGVuLA0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICBtbWNfZ2V0X2RtYV9kaXIoZGF0YSkpOw0KPiANCj4gR2l2ZW4gdGhlcmUgaXMg
-YWxyZWFkeSBhIGNhbGwgdG8gZG1hX3VubWFwX3NnKCkgYSBmZXcgbGluZXMgZWFybGllciAsIHlv
-dQ0KPiBtYXkgd2FudCB0byBpbnRyb2R1Y2UgYSBuZXcgbGFiZWwgYmVmb3JlIGZvcmNlX3Bpbywg
-YW5kIG1vdmUgdGhlIGNhbGwgdG8NCj4gZG1hX3VubWFwX3NnKCkgdGhlcmUuDQoNClRoYW5rIHlv
-dSBmb3IgdGhlIGNvbW1lbnQuIFNvLCBJJ2xsIHN1Ym1pdCB2MiBwYXRjaC4NCg0KQmVzdCByZWdh
-cmRzLA0KWW9zaGloaXJvIFNoaW1vZGENCg0K
+This patch set is based on the mmc.git / fixes branch.
+
+Changes from v1:
+ - Add Reviewed-by Geert-san.
+ - Add a new goto label for error path.
+
+Yoshihiro Shimoda (2):
+  mmc: renesas_sdhi_internal_dmac: Fix missing unmap in error patch
+  mmc: renesas_sdhi_internal_dmac: Cannot clear the RX_IN_USE in abort
+
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c | 15 +++++++--------
+ 1 file changed, 7 insertions(+), 8 deletions(-)
+
+-- 
+1.9.1
