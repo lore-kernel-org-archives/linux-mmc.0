@@ -1,38 +1,67 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 0/2] mmc: renesas_sdhi_internal_dmac: fix two issues
- for error path
-Date: Mon, 2 Jul 2018 16:37:11 +0200
-Message-ID: <CAPDyKFoEM4+7waCsWt1QnkkbT-VNPVvqCsT3j+R1LXpAi5Jr7Q@mail.gmail.com>
-References: <1530266505-19953-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+Subject: Re: [PATCH] mmc: dw_mmc: fix errors to use card read/write threshold
+ for HS400 mode
+Date: Mon, 2 Jul 2018 16:37:42 +0200
+Message-ID: <CAPDyKFpi5tN__ue+j+QREp-KFEE_X6ib2MQY5oVm8q6m+sDwkA@mail.gmail.com>
+References: <1530280769-14114-1-git-send-email-kehuanlin@pinecone.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <1530266505-19953-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-Sender: stable-owner@vger.kernel.org
-To: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, "# 4.0+" <stable@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1530280769-14114-1-git-send-email-kehuanlin@pinecone.net>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Huanlin.Ke" <chgokhl@gmail.com>
+Cc: kehuanlin@pinecone.net, zhangbo_a <zhangbo_a@xiaomi.com>, Jaehoon Chung <jh80.chung@samsung.com>, "open list:SYNOPSYS DESIGNWARE MMC/SD/SDIO DRIVER" <linux-mmc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>, Qing Xia <xiaqing17@hisilicon.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 29 June 2018 at 12:01, Yoshihiro Shimoda
-<yoshihiro.shimoda.uh@renesas.com> wrote:
-> This patch set is based on the mmc.git / fixes branch.
+On 29 June 2018 at 15:59, Huanlin.Ke <chgokhl@gmail.com> wrote:
+> The card write threshold is applicable for HS400 mode only, so it should
+> return back except HS400 timing mode.
 >
-> Changes from v1:
->  - Add Reviewed-by Geert-san.
->  - Add a new goto label for error path.
+> The card read threshold is also required for HS400 mode as the host
+> controller incorrectly samples the data if the card clock stops within
+> a block transfer.
 >
-> Yoshihiro Shimoda (2):
->   mmc: renesas_sdhi_internal_dmac: Fix missing unmap in error patch
->   mmc: renesas_sdhi_internal_dmac: Cannot clear the RX_IN_USE in abort
->
->  drivers/mmc/host/renesas_sdhi_internal_dmac.c | 15 +++++++--------
->  1 file changed, 7 insertions(+), 8 deletions(-)
->
-> --
-> 1.9.1
->
+> Signed-off-by: Huanlin.Ke <kehuanlin@pinecone.net>
+> Signed-off-by: zhangbo_a <zhangbo_a@xiaomi.com>
 
-Thanks, applied for fixes!
+Thanks for your patch!
+
+I have just applied an earlier version of the patch, posted by Qing
+Xia from Hisilicon.
+https://patchwork.kernel.org/patch/10434913/
+
+If it works for you as well, I can add your tested by tags for it.
+
+Also, can you perhaps point me to a commit which introduced the problem?
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/dw_mmc.c | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 623f4d2..d4e6983 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1065,7 +1065,7 @@ static void dw_mci_ctrl_thld(struct dw_mci *host, struct mmc_data *data)
+>          * It's used when HS400 mode is enabled.
+>          */
+>         if (data->flags & MMC_DATA_WRITE &&
+> -               !(host->timing != MMC_TIMING_MMC_HS400))
+> +               (host->timing != MMC_TIMING_MMC_HS400))
+>                 return;
+>
+>         if (data->flags & MMC_DATA_WRITE)
+> @@ -1074,6 +1074,7 @@ static void dw_mci_ctrl_thld(struct dw_mci *host, struct mmc_data *data)
+>                 enable = SDMMC_CARD_RD_THR_EN;
+>
+>         if (host->timing != MMC_TIMING_MMC_HS200 &&
+> +           host->timing != MMC_TIMING_MMC_HS400 &&
+>             host->timing != MMC_TIMING_UHS_SDR104)
+>                 goto disable;
+>
+> --
+> 2.7.4
+>
