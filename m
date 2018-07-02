@@ -1,60 +1,57 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH] mmc: dw_mmc should depend on COMMON_CLK
-Date: Mon, 2 Jul 2018 15:32:34 +0200
-Message-ID: <CAMuHMdU709R3woOAvw7EH4=zGiBtezg0YeEer-4wG7pqo2SZBg@mail.gmail.com>
-References: <1528310612-10158-1-git-send-email-clabbe@baylibre.com> <CAPDyKFoRUhwHk6=j0-scQa4W+nbnS_qXZbPUn0eTFm_3kqdwPQ@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: support eMMC DDR mode when running
+ at 3.3V
+Date: Mon, 2 Jul 2018 16:36:30 +0200
+Message-ID: <CAPDyKFqpyuknaYsxCw-pTNJ4XoJ+qptDerGnxBYNVnj-+s=nhw@mail.gmail.com>
+References: <20180628073136.21748-1-stefan@agner.ch>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFoRUhwHk6=j0-scQa4W+nbnS_qXZbPUn0eTFm_3kqdwPQ@mail.gmail.com>
+In-Reply-To: <20180628073136.21748-1-stefan@agner.ch>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Corentin Labbe <clabbe@baylibre.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>
+To: Stefan Agner <stefan@agner.ch>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Fabio Estevam <fabio.estevam@nxp.com>, Haibo Chen <haibo.chen@nxp.com>, Aisheng Dong <aisheng.dong@nxp.com>, Michael Trimarchi <michael@amarulasolutions.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Ulf,
-
-On Mon, Jul 2, 2018 at 3:18 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 6 June 2018 at 20:43, Corentin Labbe <clabbe@baylibre.com> wrote:
-> > This patch fix the following build failure on m68k:
-> > ERROR: "clk_set_rate" [drivers/mmc/host/dw_mmc.ko] undefined!
-> >
-> > Signed-off-by: Corentin Labbe <clabbe@baylibre.com>
+On 28 June 2018 at 09:31, Stefan Agner <stefan@agner.ch> wrote:
+> The uSDHC supports DDR modes for eMMC devices running at 3.3V. This
+> allows to run eMMC with 3.3V signaling voltage at DDR52 mode:
 >
-> Thanks, applied for next!
+>   # cat /sys/kernel/debug/mmc1/ios
+>   clock:          52000000 Hz
+>   vdd:            21 (3.3 ~ 3.4 V)
+>   bus mode:       2 (push-pull)
+>   chip select:    0 (don't care)
+>   power mode:     2 (on)
+>   bus width:      3 (8 bits)
+>   timing spec:    8 (mmc DDR52)
+>   signal voltage: 0 (3.30 V)
+>   driver type:    0 (driver type B)
+>
+> Signed-off-by: Stefan Agner <stefan@agner.ch>
 
-Please drop this patch, I posted proper fixes for this general issue in series
-"[PATCH 0/3] Legacy clock drivers: Normalize clk API"
-(https://lkml.org/lkml/2018/6/11/122).
+Thanks, applied for next!
 
-All fixes above are already in next-20180702.
-Thanks!
+Kind regards
+Uffe
 
-> > ---
-> >  drivers/mmc/host/Kconfig | 2 +-
-> >  1 file changed, 1 insertion(+), 1 deletion(-)
-> >
-> > diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> > index 0581c199c996..77d6ba090436 100644
-> > --- a/drivers/mmc/host/Kconfig
-> > +++ b/drivers/mmc/host/Kconfig
-> > @@ -666,7 +666,7 @@ config MMC_CAVIUM_THUNDERX
-> >
-> >  config MMC_DW
-> >         tristate "Synopsys DesignWare Memory Card Interface"
-> > -       depends on ARC || ARM || ARM64 || MIPS || COMPILE_TEST
-> > +       depends on COMMON_CLK && (ARC || ARM || ARM64 || MIPS || COMPILE_TEST)
-> >         help
-> >           This selects support for the Synopsys DesignWare Mobile Storage IP
-> >           block, this provides host support for SD and MMC interfaces, in both
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+> ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index b716b933f00a..6f444731754d 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -1324,7 +1324,7 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+>
+>         if (esdhc_is_usdhc(imx_data)) {
+>                 host->quirks2 |= SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
+> -               host->mmc->caps |= MMC_CAP_1_8V_DDR;
+> +               host->mmc->caps |= MMC_CAP_1_8V_DDR | MMC_CAP_3_3V_DDR;
+>                 if (!(imx_data->socdata->flags & ESDHC_FLAG_HS200))
+>                         host->quirks2 |= SDHCI_QUIRK2_BROKEN_HS200;
+>
+> --
+> 2.18.0
+>
