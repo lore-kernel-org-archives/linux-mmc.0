@@ -1,45 +1,63 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: dw_mmc should depend on COMMON_CLK
-Date: Mon, 2 Jul 2018 15:16:58 +0200
-Message-ID: <CAPDyKFoRUhwHk6=j0-scQa4W+nbnS_qXZbPUn0eTFm_3kqdwPQ@mail.gmail.com>
-References: <1528310612-10158-1-git-send-email-clabbe@baylibre.com>
+Subject: Re: [PATCH V3 0/4] Changes for SDCC5 version
+Date: Mon, 2 Jul 2018 15:17:21 +0200
+Message-ID: <CAPDyKFof7cV-ixNCySBOTJ2Ht6m2-RNUNWYFxZ1WGf==v1P2qw@mail.gmail.com>
+References: <1529386761-4923-1-git-send-email-vviswana@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1528310612-10158-1-git-send-email-clabbe@baylibre.com>
+In-Reply-To: <1529386761-4923-1-git-send-email-vviswana@codeaurora.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Corentin Labbe <clabbe@baylibre.com>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Vijay Viswanath <vviswana@codeaurora.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, linux-arm-msm <linux-arm-msm@vger.kernel.org>, Georgi Djakov <georgi.djakov@linaro.org>, devicetree@vger.kernel.org, Asutosh Das <asutoshd@codeaurora.org>, Sahitya Tummala <stummala@codeaurora.org>, Venkat Gopalakrishnan <venkatg@codeaurora.org>, Jeremy McNicoll <jeremymc@redhat.com>, Bjorn Andersson <bjorn.andersson@linaro.org>, Harjani Ritesh <riteshh@codeaurora.org>, vbadigan@codeaurora.org, Doug Anderson <dianders@google.com>, sayalil@codeaurora.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 6 June 2018 at 20:43, Corentin Labbe <clabbe@baylibre.com> wrote:
-> This patch fix the following build failure on m68k:
-> ERROR: "clk_set_rate" [drivers/mmc/host/dw_mmc.ko] undefined!
+On 19 June 2018 at 07:39, Vijay Viswanath <vviswana@codeaurora.org> wrote:
+> With SDCC5, the MCI register space got removed and the offset/order of
+> several registers have changed. Based on SDCC version used and the register,
+> we need to pick the base address and offset.
 >
-> Signed-off-by: Corentin Labbe <clabbe@baylibre.com>
+> Depends on patch series: "[PATCH V5 0/2] mmc: sdhci-msm: Configuring IO_PAD support for sdhci-msm"
+>
+> Changes since RFC:
+>         Dropped voltage regulator changes in sdhci-msm
+>         Split the "Register changes for sdcc V5" patch
+>         Instead of checking mci removal for deciding which base addr to use,
+>         new function pointers are defined for the 2 variants of sdcc:
+>                 1) MCI present
+>                 2) V5 (mci removed)
+>         Instead of string comparing with the compatible string from DT file,
+>         the sdhci_msm_probe will now pick the data associated with the
+>         compatible entry and use it to load variant specific address offsets
+>         and msm variant specific read/write ops.
+>
+> Changes since V1:
+>         Removed unused msm_reab & msm_writeb APIs
+>         Changed certain register addresses from uppercase to lowercase hex
+>         letters
+>         Removed extra lines and spaces
+>         Split "[PATCH V1 0/3] Changes for SDCC5 version" patch into two,
+>         one for Documentation and other for the driver changes.
+>
+> Changes since V2:
+>         Used lower case for macro function defenitions
+>         Removed unused function pointers for msm_readb & msm_writeb
+>
+>
+> Sayali Lokhande (3):
+>   mmc: sdhci-msm: Define new Register address map
+>   Documentation: sdhci-msm: Add new compatible string for SDCC v5
+>   mmc: host: Register changes for sdcc V5
+>
+> Vijay Viswanath (1):
+>   mmc: sdhci-msm: Add msm version specific ops and data structures
+>
+>  .../devicetree/bindings/mmc/sdhci-msm.txt          |   7 +-
+>  drivers/mmc/host/sdhci-msm.c                       | 511 ++++++++++++++++-----
+>  2 files changed, 391 insertions(+), 127 deletions(-)
+>
 
 Thanks, applied for next!
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/host/Kconfig | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 0581c199c996..77d6ba090436 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -666,7 +666,7 @@ config MMC_CAVIUM_THUNDERX
->
->  config MMC_DW
->         tristate "Synopsys DesignWare Memory Card Interface"
-> -       depends on ARC || ARM || ARM64 || MIPS || COMPILE_TEST
-> +       depends on COMMON_CLK && (ARC || ARM || ARM64 || MIPS || COMPILE_TEST)
->         help
->           This selects support for the Synopsys DesignWare Mobile Storage IP
->           block, this provides host support for SD and MMC interfaces, in both
-> --
-> 2.16.4
->
