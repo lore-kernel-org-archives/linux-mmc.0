@@ -1,42 +1,60 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: dw_mmc should depend on COMMON_CLK
-Date: Mon, 2 Jul 2018 16:37:58 +0200
-Message-ID: <CAPDyKFrZYixkv7Exjt-L18sNX5sVcOLq_uFVxJmUwdU4Q6kavg@mail.gmail.com>
-References: <1528310612-10158-1-git-send-email-clabbe@baylibre.com>
- <CAPDyKFoRUhwHk6=j0-scQa4W+nbnS_qXZbPUn0eTFm_3kqdwPQ@mail.gmail.com> <CAMuHMdU709R3woOAvw7EH4=zGiBtezg0YeEer-4wG7pqo2SZBg@mail.gmail.com>
+From: Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Subject: Re: [PATCH v2] libertas: fix suspend and resume for SDIO connected cards
+Date: Mon, 02 Jul 2018 17:57:51 +0300
+Message-ID: <87o9fp8z2o.fsf@purkki.adurom.net>
+References: <20180627185845.31799-1-daniel@zonque.org>
+        <CAPDyKFr7snWsk=194u4nKs4301tUARByuEPSFop_fzxn6HVQDQ@mail.gmail.com>
+        <dac693d9-b6f4-fac6-3cfa-ccfc4a6172c6@zonque.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAMuHMdU709R3woOAvw7EH4=zGiBtezg0YeEer-4wG7pqo2SZBg@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Corentin Labbe <clabbe@baylibre.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <dac693d9-b6f4-fac6-3cfa-ccfc4a6172c6-cYrQPVfZoowdnm+yROfE0A@public.gmane.org> (Daniel Mack's
+        message of "Fri, 29 Jun 2018 19:57:45 +0200")
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, "linux-mmc@vger.kernel.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, libertas-dev-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 2 July 2018 at 15:32, Geert Uytterhoeven <geert@linux-m68k.org> wrote:
-> Hi Ulf,
->
-> On Mon, Jul 2, 2018 at 3:18 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
->> On 6 June 2018 at 20:43, Corentin Labbe <clabbe@baylibre.com> wrote:
->> > This patch fix the following build failure on m68k:
->> > ERROR: "clk_set_rate" [drivers/mmc/host/dw_mmc.ko] undefined!
->> >
->> > Signed-off-by: Corentin Labbe <clabbe@baylibre.com>
+Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org> writes:
+
+> On Friday, June 29, 2018 05:39 PM, Ulf Hansson wrote:
+>> On 27 June 2018 at 20:58, Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org> wrote:
+>>> Prior to commit 573185cc7e64 ("mmc: core: Invoke sdio func driver's PM
+>>> callbacks from the sdio bus"), the MMC core used to call into the power
+>>> management functions of SDIO clients itself and removed the card if the
+>>> return code was non-zero. IOW, the mmc handled errors gracefully and didn't
+>>> upchain them to the pm core.
+>>>
+>>> Since this change, the mmc core relies on generic power management
+>>> functions which treat all errors as a reason to cancel the suspend
+>>> immediately. This causes suspend attempts to fail when the libertas
+>>> driver is loaded.
+>>>
+>>> To fix this, power down the card explicitly in if_sdio_suspend() when we
+>>> know we're about to lose power and return success. Also set a flag in these
+>>> cases, and power up the card again in if_sdio_resume().
+>>>
+>>> Signed-off-by: Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org>
+>>> Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>>> Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>
 >>
->> Thanks, applied for next!
+>> Looks good to me! Should be a candidate for stable as well!?
 >
-> Please drop this patch, I posted proper fixes for this general issue in series
-> "[PATCH 0/3] Legacy clock drivers: Normalize clk API"
-> (https://lkml.org/lkml/2018/6/11/122).
->
-> All fixes above are already in next-20180702.
 > Thanks!
+>
+> Yeah, it should probably get a
+>
+> Fixes: 573185cc7e64 ("mmc: core: Invoke sdio func driver's PM
+> callbacks from the sdio bus")
+>
+> as well.
 
-Thanks for letting me know, patch dropped!
+So I'll queue this for wireless-drivers-next and add:
 
-I had the feeling there was a better way. :-)
+Fixes: 573185cc7e64 ("mmc: core: Invoke sdio func driver's PM callbacks from the sdio bus")
+Cc: <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 
-[...]
+Ok?
 
-Kind regards
-Uffe
+-- 
+Kalle Valo
