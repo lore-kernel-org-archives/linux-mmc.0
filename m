@@ -1,67 +1,42 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: dw_mmc: fix errors to use card read/write threshold
- for HS400 mode
-Date: Mon, 2 Jul 2018 16:37:42 +0200
-Message-ID: <CAPDyKFpi5tN__ue+j+QREp-KFEE_X6ib2MQY5oVm8q6m+sDwkA@mail.gmail.com>
-References: <1530280769-14114-1-git-send-email-kehuanlin@pinecone.net>
+Subject: Re: [PATCH] mmc: dw_mmc should depend on COMMON_CLK
+Date: Mon, 2 Jul 2018 16:37:58 +0200
+Message-ID: <CAPDyKFrZYixkv7Exjt-L18sNX5sVcOLq_uFVxJmUwdU4Q6kavg@mail.gmail.com>
+References: <1528310612-10158-1-git-send-email-clabbe@baylibre.com>
+ <CAPDyKFoRUhwHk6=j0-scQa4W+nbnS_qXZbPUn0eTFm_3kqdwPQ@mail.gmail.com> <CAMuHMdU709R3woOAvw7EH4=zGiBtezg0YeEer-4wG7pqo2SZBg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1530280769-14114-1-git-send-email-kehuanlin@pinecone.net>
+In-Reply-To: <CAMuHMdU709R3woOAvw7EH4=zGiBtezg0YeEer-4wG7pqo2SZBg@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Huanlin.Ke" <chgokhl@gmail.com>
-Cc: kehuanlin@pinecone.net, zhangbo_a <zhangbo_a@xiaomi.com>, Jaehoon Chung <jh80.chung@samsung.com>, "open list:SYNOPSYS DESIGNWARE MMC/SD/SDIO DRIVER" <linux-mmc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>, Qing Xia <xiaqing17@hisilicon.com>
+To: Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: Corentin Labbe <clabbe@baylibre.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 29 June 2018 at 15:59, Huanlin.Ke <chgokhl@gmail.com> wrote:
-> The card write threshold is applicable for HS400 mode only, so it should
-> return back except HS400 timing mode.
+On 2 July 2018 at 15:32, Geert Uytterhoeven <geert@linux-m68k.org> wrote:
+> Hi Ulf,
 >
-> The card read threshold is also required for HS400 mode as the host
-> controller incorrectly samples the data if the card clock stops within
-> a block transfer.
+> On Mon, Jul 2, 2018 at 3:18 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> On 6 June 2018 at 20:43, Corentin Labbe <clabbe@baylibre.com> wrote:
+>> > This patch fix the following build failure on m68k:
+>> > ERROR: "clk_set_rate" [drivers/mmc/host/dw_mmc.ko] undefined!
+>> >
+>> > Signed-off-by: Corentin Labbe <clabbe@baylibre.com>
+>>
+>> Thanks, applied for next!
 >
-> Signed-off-by: Huanlin.Ke <kehuanlin@pinecone.net>
-> Signed-off-by: zhangbo_a <zhangbo_a@xiaomi.com>
+> Please drop this patch, I posted proper fixes for this general issue in series
+> "[PATCH 0/3] Legacy clock drivers: Normalize clk API"
+> (https://lkml.org/lkml/2018/6/11/122).
+>
+> All fixes above are already in next-20180702.
+> Thanks!
 
-Thanks for your patch!
+Thanks for letting me know, patch dropped!
 
-I have just applied an earlier version of the patch, posted by Qing
-Xia from Hisilicon.
-https://patchwork.kernel.org/patch/10434913/
+I had the feeling there was a better way. :-)
 
-If it works for you as well, I can add your tested by tags for it.
-
-Also, can you perhaps point me to a commit which introduced the problem?
+[...]
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/host/dw_mmc.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 623f4d2..d4e6983 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1065,7 +1065,7 @@ static void dw_mci_ctrl_thld(struct dw_mci *host, struct mmc_data *data)
->          * It's used when HS400 mode is enabled.
->          */
->         if (data->flags & MMC_DATA_WRITE &&
-> -               !(host->timing != MMC_TIMING_MMC_HS400))
-> +               (host->timing != MMC_TIMING_MMC_HS400))
->                 return;
->
->         if (data->flags & MMC_DATA_WRITE)
-> @@ -1074,6 +1074,7 @@ static void dw_mci_ctrl_thld(struct dw_mci *host, struct mmc_data *data)
->                 enable = SDMMC_CARD_RD_THR_EN;
->
->         if (host->timing != MMC_TIMING_MMC_HS200 &&
-> +           host->timing != MMC_TIMING_MMC_HS400 &&
->             host->timing != MMC_TIMING_UHS_SDR104)
->                 goto disable;
->
-> --
-> 2.7.4
->
