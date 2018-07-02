@@ -1,44 +1,87 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: dw_mmc: fix card threshold control configuration
-Date: Mon, 2 Jul 2018 15:16:32 +0200
-Message-ID: <CAPDyKFrLY=rH+xaYSd=Qr72BVtk0UPeHkY4s0GTeU+0NHks-zg@mail.gmail.com>
-References: <1527590335-171787-1-git-send-email-xiaqing17@hisilicon.com> <CAPDyKFo7FP5bL8doK3P749Rcyzh_H-3SzG+GZVJb2pp9j_ZH_A@mail.gmail.com>
+Subject: Re: [PATCH] mmc: tegra: Use sdhci_pltfm_clk_get_max_clock
+Date: Mon, 2 Jul 2018 15:16:52 +0200
+Message-ID: <CAPDyKFoip8gFssftJKzVHD9PAk+j=Z1CTo=0uY9cGASzW8VRJg@mail.gmail.com>
+References: <1528126540-27004-1-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFo7FP5bL8doK3P749Rcyzh_H-3SzG+GZVJb2pp9j_ZH_A@mail.gmail.com>
+In-Reply-To: <1528126540-27004-1-git-send-email-avienamo@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, Evgeniy Didin <Evgeniy.Didin@synopsys.com>, Doug Anderson <dianders@chromium.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Qing Xia <xiaqing17@hisilicon.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Aapo Vienamo <avienamo@nvidia.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-tegra@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 11 June 2018 at 14:20, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> + Shawn Lin, Evgeniy Didin, Doug Andersson
+On 4 June 2018 at 17:35, Aapo Vienamo <avienamo@nvidia.com> wrote:
+> The sdhci get_max_clock callback is set to sdhci_pltfm_clk_get_max_clock
+> and tegra_sdhci_get_max_clock is removed. It appears that the
+> shdci-tegra specific callback was originally introduced due to the
+> requirement that the host clock has to be twice the bus clock on DDR50
+> mode. As far as I can tell the only effect the removal has on DDR50 mode
+> is in cases where the parent clock is unable to supply the requested
+> clock rate, causing the DDR50 mode to run at a lower frequency.
+> Currently the DDR50 mode isn't enabled on any of the SoCs and would also
+> require configuring the SDHCI clock divider register to function
+> properly.
 >
-> On 29 May 2018 at 12:38, Qing Xia <xiaqing17@hisilicon.com> wrote:
->> From: x00270170 <xiaqing17@hisilicon.com>
->>
->> Card write threshold control is supposed to be set since controller
->> version 2.80a for data write in HS400 mode and data read in
->> HS200/HS400/SDR104 mode. However the current code returns without
->> configuring it in the case of data writing in HS400 mode.
->> Meanwhile the patch fixes that the current code goes to
->> 'disable' when doing data reading in HS400 mode.
->>
->> Signed-off-by: Qing Xia <xiaqing17@hisilicon.com>
+> The problem with tegra_sdhci_get_max_clock is that it divides the clock
+> rate by two and thus artificially limits the maximum frequency of faster
+> signaling modes which don't have the host-bus frequency ratio requirement
+> of DDR50 such as SDR104 and HS200. Furthermore, the call to
+> clk_round_rate() may return an error which isn't handled by
+> tegra_sdhci_get_max_clock.
 >
-> This looks good to me. However, it seems like Jaehoon has been busy,
-> no response yet.
->
-> I have looped in a few more people to see if they thinks this makes sense.
+> Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
 
-It sounds this should be a fix for regression (also confirmed
-off-list). Could you please resend and by adding a fixes tag?
-
-In the meantime, I have applied this for my next branch, as to get it
-tested. I can move it later to fixes if needed.
-
-[...]
+Thanks, applied for next!
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/sdhci-tegra.c | 15 ++-------------
+>  1 file changed, 2 insertions(+), 13 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+> index 970d38f6..c8745b5 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -234,17 +234,6 @@ static void tegra_sdhci_set_uhs_signaling(struct sdhci_host *host,
+>         sdhci_set_uhs_signaling(host, timing);
+>  }
+>
+> -static unsigned int tegra_sdhci_get_max_clock(struct sdhci_host *host)
+> -{
+> -       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> -
+> -       /*
+> -        * DDR modes require the host to run at double the card frequency, so
+> -        * the maximum rate we can support is half of the module input clock.
+> -        */
+> -       return clk_round_rate(pltfm_host->clk, UINT_MAX) / 2;
+> -}
+> -
+>  static void tegra_sdhci_set_tap(struct sdhci_host *host, unsigned int tap)
+>  {
+>         u32 reg;
+> @@ -309,7 +298,7 @@ static const struct sdhci_ops tegra_sdhci_ops = {
+>         .platform_execute_tuning = tegra_sdhci_execute_tuning,
+>         .set_uhs_signaling = tegra_sdhci_set_uhs_signaling,
+>         .voltage_switch = tegra_sdhci_voltage_switch,
+> -       .get_max_clock = tegra_sdhci_get_max_clock,
+> +       .get_max_clock = sdhci_pltfm_clk_get_max_clock,
+>  };
+>
+>  static const struct sdhci_pltfm_data sdhci_tegra20_pdata = {
+> @@ -357,7 +346,7 @@ static const struct sdhci_ops tegra114_sdhci_ops = {
+>         .platform_execute_tuning = tegra_sdhci_execute_tuning,
+>         .set_uhs_signaling = tegra_sdhci_set_uhs_signaling,
+>         .voltage_switch = tegra_sdhci_voltage_switch,
+> -       .get_max_clock = tegra_sdhci_get_max_clock,
+> +       .get_max_clock = sdhci_pltfm_clk_get_max_clock,
+>  };
+>
+>  static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
+> --
+> 2.7.4
+>
