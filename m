@@ -1,57 +1,38 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-of-esdhc: set proper dma mask for ls104x chips
-Date: Mon, 2 Jul 2018 16:37:06 +0200
-Message-ID: <CAPDyKFoNmcg+7JbWq1eeb2Dx7GKSh=FWpZcEeB8RORaBbrr=qA@mail.gmail.com>
-References: <20180628084509.19646-1-laurentiu.tudor@nxp.com>
+Subject: Re: [PATCH v2 0/2] mmc: renesas_sdhi_internal_dmac: fix two issues
+ for error path
+Date: Mon, 2 Jul 2018 16:37:11 +0200
+Message-ID: <CAPDyKFoEM4+7waCsWt1QnkkbT-VNPVvqCsT3j+R1LXpAi5Jr7Q@mail.gmail.com>
+References: <1530266505-19953-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180628084509.19646-1-laurentiu.tudor@nxp.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Laurentiu Tudor <laurentiu.tudor@nxp.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Yangbo Lu <yangbo.lu@nxp.com>
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <1530266505-19953-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+Sender: stable-owner@vger.kernel.org
+To: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, "# 4.0+" <stable@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 28 June 2018 at 10:45, Laurentiu Tudor <laurentiu.tudor@nxp.com> wrote:
-> SDHCI controller in ls1043a and ls1046a generate 40-bit wide addresses
-> when doing DMA. Make sure that the corresponding dma mask is correctly
-> configured.
+On 29 June 2018 at 12:01, Yoshihiro Shimoda
+<yoshihiro.shimoda.uh@renesas.com> wrote:
+> This patch set is based on the mmc.git / fixes branch.
 >
-> Signed-off-by: Laurentiu Tudor <laurentiu.tudor@nxp.com>
+> Changes from v1:
+>  - Add Reviewed-by Geert-san.
+>  - Add a new goto label for error path.
+>
+> Yoshihiro Shimoda (2):
+>   mmc: renesas_sdhi_internal_dmac: Fix missing unmap in error patch
+>   mmc: renesas_sdhi_internal_dmac: Cannot clear the RX_IN_USE in abort
+>
+>  drivers/mmc/host/renesas_sdhi_internal_dmac.c | 15 +++++++--------
+>  1 file changed, 7 insertions(+), 8 deletions(-)
+>
+> --
+> 1.9.1
+>
 
-Thanks, applied for next!
+Thanks, applied for fixes!
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/host/sdhci-of-esdhc.c | 6 ++++++
->  1 file changed, 6 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-> index 4ffa6b173a21..8332f56e6c0d 100644
-> --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> @@ -22,6 +22,7 @@
->  #include <linux/sys_soc.h>
->  #include <linux/clk.h>
->  #include <linux/ktime.h>
-> +#include <linux/dma-mapping.h>
->  #include <linux/mmc/host.h>
->  #include "sdhci-pltfm.h"
->  #include "sdhci-esdhc.h"
-> @@ -427,6 +428,11 @@ static void esdhc_of_adma_workaround(struct sdhci_host *host, u32 intmask)
->  static int esdhc_of_enable_dma(struct sdhci_host *host)
->  {
->         u32 value;
-> +       struct device *dev = mmc_dev(host->mmc);
-> +
-> +       if (of_device_is_compatible(dev->of_node, "fsl,ls1043a-esdhc") ||
-> +           of_device_is_compatible(dev->of_node, "fsl,ls1046a-esdhc"))
-> +               dma_set_mask_and_coherent(dev, DMA_BIT_MASK(40));
->
->         value = sdhci_readl(host, ESDHC_DMA_SYSCTL);
->         value |= ESDHC_DMA_SNOOP;
-> --
-> 2.17.1
->
