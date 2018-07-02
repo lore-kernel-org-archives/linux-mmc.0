@@ -1,60 +1,49 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V3 0/4] Changes for SDCC5 version
-Date: Mon, 2 Jul 2018 15:17:21 +0200
-Message-ID: <CAPDyKFof7cV-ixNCySBOTJ2Ht6m2-RNUNWYFxZ1WGf==v1P2qw@mail.gmail.com>
-References: <1529386761-4923-1-git-send-email-vviswana@codeaurora.org>
+Subject: Re: [PATCH v3 0/2] mmc: sdhci-of-arasan: workaround for broken clocks
+Date: Mon, 2 Jul 2018 15:17:32 +0200
+Message-ID: <CAPDyKFp518uXGyiXL2_ejzHnyCN0RSQDvjCDxNg+_pqw9VANUw@mail.gmail.com>
+References: <20180615081830.zrgx6arwn6ga27gu@laureti-dev>
+ <cover.1529493667.git.h.grohne@intenta.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1529386761-4923-1-git-send-email-vviswana@codeaurora.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Vijay Viswanath <vviswana@codeaurora.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, linux-arm-msm <linux-arm-msm@vger.kernel.org>, Georgi Djakov <georgi.djakov@linaro.org>, devicetree@vger.kernel.org, Asutosh Das <asutoshd@codeaurora.org>, Sahitya Tummala <stummala@codeaurora.org>, Venkat Gopalakrishnan <venkatg@codeaurora.org>, Jeremy McNicoll <jeremymc@redhat.com>, Bjorn Andersson <bjorn.andersson@linaro.org>, Harjani Ritesh <riteshh@codeaurora.org>, vbadigan@codeaurora.org, Doug Anderson <dianders@google.com>, sayalil@codeaurora.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <cover.1529493667.git.h.grohne@intenta.de>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Helmut Grohne <h.grohne@intenta.de>
+Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, Atul Garg <agarg@arasan.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michal.simek@xilinx.com>, Rob Herring <robh+dt@kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, =?UTF-8?Q?S=C3=B6ren_Brinkmann?= <soren.brinkmann@xilinx.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 19 June 2018 at 07:39, Vijay Viswanath <vviswana@codeaurora.org> wrote:
-> With SDCC5, the MCI register space got removed and the offset/order of
-> several registers have changed. Based on SDCC version used and the register,
-> we need to pick the base address and offset.
+On 20 June 2018 at 13:32, Helmut Grohne <h.grohne@intenta.de> wrote:
+> This patch series works around the internal clock indicating stability too
+> quickly to operate. It manifests itself as:
 >
-> Depends on patch series: "[PATCH V5 0/2] mmc: sdhci-msm: Configuring IO_PAD support for sdhci-msm"
+>     mmc0: error -84 whilst initialising SD card
 >
-> Changes since RFC:
->         Dropped voltage regulator changes in sdhci-msm
->         Split the "Register changes for sdcc V5" patch
->         Instead of checking mci removal for deciding which base addr to use,
->         new function pointers are defined for the 2 variants of sdcc:
->                 1) MCI present
->                 2) V5 (mci removed)
->         Instead of string comparing with the compatible string from DT file,
->         the sdhci_msm_probe will now pick the data associated with the
->         compatible entry and use it to load variant specific address offsets
->         and msm variant specific read/write ops.
+> Changes since v2:
+>  * Ulf Hansson requested splitting the patch in accordance with
+>    Documentation/devicetree/bindings/submitting-patches.txt. Also update
+>    recipient list accordingly.
+>  * Added Acked-by from Adrian Hunter.
 >
-> Changes since V1:
->         Removed unused msm_reab & msm_writeb APIs
->         Changed certain register addresses from uppercase to lowercase hex
->         letters
->         Removed extra lines and spaces
->         Split "[PATCH V1 0/3] Changes for SDCC5 version" patch into two,
->         one for Documentation and other for the driver changes.
+> Helmut Grohne (2):
+>   dt-bindings: mmc: broken clock stable indicator on arasan controllers
+>   mmc: sdhci-of-arasan: Add quirk for unstable clocks
 >
-> Changes since V2:
->         Used lower case for macro function defenitions
->         Removed unused function pointers for msm_readb & msm_writeb
+>  Documentation/devicetree/bindings/mmc/arasan,sdhci.txt |  2 ++
+>  drivers/mmc/host/sdhci-of-arasan.c                     | 16 ++++++++++++++++
+>  2 files changed, 18 insertions(+)
 >
->
-> Sayali Lokhande (3):
->   mmc: sdhci-msm: Define new Register address map
->   Documentation: sdhci-msm: Add new compatible string for SDCC v5
->   mmc: host: Register changes for sdcc V5
->
-> Vijay Viswanath (1):
->   mmc: sdhci-msm: Add msm version specific ops and data structures
->
->  .../devicetree/bindings/mmc/sdhci-msm.txt          |   7 +-
->  drivers/mmc/host/sdhci-msm.c                       | 511 ++++++++++++++++-----
->  2 files changed, 391 insertions(+), 127 deletions(-)
+> --
+> 2.11.0
 >
 
 Thanks, applied for next!
