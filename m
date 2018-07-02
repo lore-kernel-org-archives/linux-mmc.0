@@ -1,52 +1,60 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 0/2] mmc: sdhci-of-arasan: workaround for broken clocks
-Date: Mon, 2 Jul 2018 15:17:32 +0200
-Message-ID: <CAPDyKFp518uXGyiXL2_ejzHnyCN0RSQDvjCDxNg+_pqw9VANUw@mail.gmail.com>
-References: <20180615081830.zrgx6arwn6ga27gu@laureti-dev>
- <cover.1529493667.git.h.grohne@intenta.de>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH] mmc: dw_mmc should depend on COMMON_CLK
+Date: Mon, 2 Jul 2018 15:32:34 +0200
+Message-ID: <CAMuHMdU709R3woOAvw7EH4=zGiBtezg0YeEer-4wG7pqo2SZBg@mail.gmail.com>
+References: <1528310612-10158-1-git-send-email-clabbe@baylibre.com> <CAPDyKFoRUhwHk6=j0-scQa4W+nbnS_qXZbPUn0eTFm_3kqdwPQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <cover.1529493667.git.h.grohne@intenta.de>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Helmut Grohne <h.grohne@intenta.de>
-Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, Atul Garg <agarg@arasan.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michal.simek@xilinx.com>, Rob Herring <robh+dt@kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, =?UTF-8?Q?S=C3=B6ren_Brinkmann?= <soren.brinkmann@xilinx.com>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFoRUhwHk6=j0-scQa4W+nbnS_qXZbPUn0eTFm_3kqdwPQ@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Corentin Labbe <clabbe@baylibre.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 20 June 2018 at 13:32, Helmut Grohne <h.grohne@intenta.de> wrote:
-> This patch series works around the internal clock indicating stability too
-> quickly to operate. It manifests itself as:
->
->     mmc0: error -84 whilst initialising SD card
->
-> Changes since v2:
->  * Ulf Hansson requested splitting the patch in accordance with
->    Documentation/devicetree/bindings/submitting-patches.txt. Also update
->    recipient list accordingly.
->  * Added Acked-by from Adrian Hunter.
->
-> Helmut Grohne (2):
->   dt-bindings: mmc: broken clock stable indicator on arasan controllers
->   mmc: sdhci-of-arasan: Add quirk for unstable clocks
->
->  Documentation/devicetree/bindings/mmc/arasan,sdhci.txt |  2 ++
->  drivers/mmc/host/sdhci-of-arasan.c                     | 16 ++++++++++++++++
->  2 files changed, 18 insertions(+)
->
-> --
-> 2.11.0
->
+Hi Ulf,
 
-Thanks, applied for next!
+On Mon, Jul 2, 2018 at 3:18 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 6 June 2018 at 20:43, Corentin Labbe <clabbe@baylibre.com> wrote:
+> > This patch fix the following build failure on m68k:
+> > ERROR: "clk_set_rate" [drivers/mmc/host/dw_mmc.ko] undefined!
+> >
+> > Signed-off-by: Corentin Labbe <clabbe@baylibre.com>
+>
+> Thanks, applied for next!
 
-Kind regards
-Uffe
+Please drop this patch, I posted proper fixes for this general issue in series
+"[PATCH 0/3] Legacy clock drivers: Normalize clk API"
+(https://lkml.org/lkml/2018/6/11/122).
+
+All fixes above are already in next-20180702.
+Thanks!
+
+> > ---
+> >  drivers/mmc/host/Kconfig | 2 +-
+> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> >
+> > diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> > index 0581c199c996..77d6ba090436 100644
+> > --- a/drivers/mmc/host/Kconfig
+> > +++ b/drivers/mmc/host/Kconfig
+> > @@ -666,7 +666,7 @@ config MMC_CAVIUM_THUNDERX
+> >
+> >  config MMC_DW
+> >         tristate "Synopsys DesignWare Memory Card Interface"
+> > -       depends on ARC || ARM || ARM64 || MIPS || COMPILE_TEST
+> > +       depends on COMMON_CLK && (ARC || ARM || ARM64 || MIPS || COMPILE_TEST)
+> >         help
+> >           This selects support for the Synopsys DesignWare Mobile Storage IP
+> >           block, this provides host support for SD and MMC interfaces, in both
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
