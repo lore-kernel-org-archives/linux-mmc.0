@@ -1,60 +1,53 @@
-From: Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Subject: Re: [PATCH v2] libertas: fix suspend and resume for SDIO connected cards
-Date: Mon, 02 Jul 2018 17:57:51 +0300
-Message-ID: <87o9fp8z2o.fsf@purkki.adurom.net>
-References: <20180627185845.31799-1-daniel@zonque.org>
-        <CAPDyKFr7snWsk=194u4nKs4301tUARByuEPSFop_fzxn6HVQDQ@mail.gmail.com>
-        <dac693d9-b6f4-fac6-3cfa-ccfc4a6172c6@zonque.org>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH] mmc: dw_mmc: fix card threshold control configuration
+Date: Mon, 2 Jul 2018 10:00:20 -0700
+Message-ID: <CAD=FV=VBQOeaFGnJBBmVtYZjoJo1WdkwkPFaVJ=zr+C=N9iqQw@mail.gmail.com>
+References: <1527590335-171787-1-git-send-email-xiaqing17@hisilicon.com>
+ <CAPDyKFo7FP5bL8doK3P749Rcyzh_H-3SzG+GZVJb2pp9j_ZH_A@mail.gmail.com> <08a08d60-8176-df54-ff0e-ffc195f40d6c@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <dac693d9-b6f4-fac6-3cfa-ccfc4a6172c6-cYrQPVfZoowdnm+yROfE0A@public.gmane.org> (Daniel Mack's
-        message of "Fri, 29 Jun 2018 19:57:45 +0200")
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, "linux-mmc@vger.kernel.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, libertas-dev-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <08a08d60-8176-df54-ff0e-ffc195f40d6c@rock-chips.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Evgeniy Didin <Evgeniy.Didin@synopsys.com>, Jaehoon Chung <jh80.chung@samsung.com>, Qing Xia <xiaqing17@hisilicon.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org> writes:
+Hi,
 
-> On Friday, June 29, 2018 05:39 PM, Ulf Hansson wrote:
->> On 27 June 2018 at 20:58, Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org> wrote:
->>> Prior to commit 573185cc7e64 ("mmc: core: Invoke sdio func driver's PM
->>> callbacks from the sdio bus"), the MMC core used to call into the power
->>> management functions of SDIO clients itself and removed the card if the
->>> return code was non-zero. IOW, the mmc handled errors gracefully and didn't
->>> upchain them to the pm core.
->>>
->>> Since this change, the mmc core relies on generic power management
->>> functions which treat all errors as a reason to cancel the suspend
->>> immediately. This causes suspend attempts to fail when the libertas
->>> driver is loaded.
->>>
->>> To fix this, power down the card explicitly in if_sdio_suspend() when we
->>> know we're about to lose power and return success. Also set a flag in these
->>> cases, and power up the card again in if_sdio_resume().
->>>
->>> Signed-off-by: Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org>
->>> Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->>> Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>
+On Mon, Jun 11, 2018 at 7:17 AM, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> On 2018/6/11 20:20, Ulf Hansson wrote:
 >>
->> Looks good to me! Should be a candidate for stable as well!?
+>> + Shawn Lin, Evgeniy Didin, Doug Andersson
+>>
+>> On 29 May 2018 at 12:38, Qing Xia <xiaqing17@hisilicon.com> wrote:
+>>>
+>>> From: x00270170 <xiaqing17@hisilicon.com>
+>>>
+>>> Card write threshold control is supposed to be set since controller
+>>> version 2.80a for data write in HS400 mode and data read in
+>>> HS200/HS400/SDR104 mode. However the current code returns without
+>>> configuring it in the case of data writing in HS400 mode.
+>>> Meanwhile the patch fixes that the current code goes to
+>>> 'disable' when doing data reading in HS400 mode.
+>>>
 >
-> Thanks!
->
-> Yeah, it should probably get a
->
-> Fixes: 573185cc7e64 ("mmc: core: Invoke sdio func driver's PM
-> callbacks from the sdio bus")
->
-> as well.
+> I'm more or less unable to review this, as I don't have 2.80a databook,
+> nor a such platform to verify it. :(
 
-So I'll queue this for wireless-drivers-next and add:
+Sorry for not responding earlier.  I didn't have a lot of context here
+so reviewing it never made it to the top of my queue.  ...but quickly
+checking what I can...
 
-Fixes: 573185cc7e64 ("mmc: core: Invoke sdio func driver's PM callbacks from the sdio bus")
-Cc: <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+I'm in almost the same boat as Shawn.  I don't have any HS400 hardware
+using dw_mmc available to me, but I do seem to have the 2.80a databook
+hanging around and it agrees that we need to enable the card write
+threshold for HS400 writes.  That also matches the comments, so the
+patch seems right to me.  Probably Jaehoon would make a better
+reviewer since he submitted the original code and also has more
+familiarity with HS400 on dw_mmc.
 
-Ok?
+I don't think I have enough context to give a full Reviewed-by, but in
+the very least I can confirm that the patch seems sane.
 
--- 
-Kalle Valo
+-Doug
