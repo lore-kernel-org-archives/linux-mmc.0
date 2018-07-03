@@ -1,64 +1,57 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: dw_mmc: fix card threshold control configuration
-Date: Tue, 3 Jul 2018 11:00:30 +0200
-Message-ID: <CAPDyKFrPw63KD5mESDmm2pya6bsz01jHiKguMP1GPhWDDZ644Q@mail.gmail.com>
-References: <1530601587-160436-1-git-send-email-xiaqing17@hisilicon.com>
+From: Laurentiu Tudor <laurentiu.tudor@nxp.com>
+Subject: Re: [PATCH] mmc: sdhci-of-esdhc: set proper dma mask for ls104x chips
+Date: Tue, 3 Jul 2018 11:15:13 +0000
+Message-ID: <61a16c6b-9158-17ea-51f9-2ee5b85ccb78@nxp.com>
+References: <20180628084509.19646-1-laurentiu.tudor@nxp.com>
+ <CAPDyKFoNmcg+7JbWq1eeb2Dx7GKSh=FWpZcEeB8RORaBbrr=qA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1530601587-160436-1-git-send-email-xiaqing17@hisilicon.com>
+In-Reply-To: <CAPDyKFoNmcg+7JbWq1eeb2Dx7GKSh=FWpZcEeB8RORaBbrr=qA@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <93E2212E647BFE44B197BEA55CFD0B55@eurprd04.prod.outlook.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Qing Xia <xiaqing17@hisilicon.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Evgeniy Didin <Evgeniy.Didin@synopsys.com>, Shawn Lin <shawn.lin@rock-chips.com>, Doug Anderson <dianders@chromium.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "Y.b. Lu" <yangbo.lu@nxp.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 3 July 2018 at 09:06, Qing Xia <xiaqing17@hisilicon.com> wrote:
-> From: x00270170 <xiaqing17@hisilicon.com>
->
-> Card write threshold control is supposed to be set since controller
-> version 2.80a for data write in HS400 mode and data read in
-> HS200/HS400/SDR104 mode. However the current code returns without
-> configuring it in the case of data writing in HS400 mode.
-> Meanwhile the patch fixes that the current code goes to
-> 'disable' when doing data reading in HS400 mode.
->
-> Fixes: 7e4bf1bc9543 ("mmc: dw_mmc: add the card write threshold for HS400 mode")
-> Signed-off-by: Qing Xia <xiaqing17@hisilicon.com>
-
-Thanks, applied/moved to fixes for 4.18!
-
-Kind regards
-Uffe
-
-> ---
->  drivers/mmc/host/dw_mmc.c | 7 ++++---
->  1 file changed, 4 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 29a1afa..3ee8f57 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1065,8 +1065,8 @@ static void dw_mci_ctrl_thld(struct dw_mci *host, struct mmc_data *data)
->          * It's used when HS400 mode is enabled.
->          */
->         if (data->flags & MMC_DATA_WRITE &&
-> -               !(host->timing != MMC_TIMING_MMC_HS400))
-> -               return;
-> +               host->timing != MMC_TIMING_MMC_HS400)
-> +               goto disable;
->
->         if (data->flags & MMC_DATA_WRITE)
->                 enable = SDMMC_CARD_WR_THR_EN;
-> @@ -1074,7 +1074,8 @@ static void dw_mci_ctrl_thld(struct dw_mci *host, struct mmc_data *data)
->                 enable = SDMMC_CARD_RD_THR_EN;
->
->         if (host->timing != MMC_TIMING_MMC_HS200 &&
-> -           host->timing != MMC_TIMING_UHS_SDR104)
-> +           host->timing != MMC_TIMING_UHS_SDR104 &&
-> +           host->timing != MMC_TIMING_MMC_HS400)
->                 goto disable;
->
->         blksz_depth = blksz / (1 << host->data_shift);
-> --
-> 2.8.1
->
+SGkgVWZmZSwNCg0KT24gMDIuMDcuMjAxOCAxNzozNywgVWxmIEhhbnNzb24gd3JvdGU6DQo+IE9u
+IDI4IEp1bmUgMjAxOCBhdCAxMDo0NSwgTGF1cmVudGl1IFR1ZG9yIDxsYXVyZW50aXUudHVkb3JA
+bnhwLmNvbT4gd3JvdGU6DQo+PiBTREhDSSBjb250cm9sbGVyIGluIGxzMTA0M2EgYW5kIGxzMTA0
+NmEgZ2VuZXJhdGUgNDAtYml0IHdpZGUgYWRkcmVzc2VzDQo+PiB3aGVuIGRvaW5nIERNQS4gTWFr
+ZSBzdXJlIHRoYXQgdGhlIGNvcnJlc3BvbmRpbmcgZG1hIG1hc2sgaXMgY29ycmVjdGx5DQo+PiBj
+b25maWd1cmVkLg0KPj4NCj4+IFNpZ25lZC1vZmYtYnk6IExhdXJlbnRpdSBUdWRvciA8bGF1cmVu
+dGl1LnR1ZG9yQG54cC5jb20+DQo+IA0KPiBUaGFua3MsIGFwcGxpZWQgZm9yIG5leHQhDQoNClRo
+YW5rcyBmb3IgcGlja2luZyB0aGlzIHVwIQ0KSSBqdXN0IHJlYWxpemVkIHRoYXQgbWF5YmUgSSBz
+aG91bGQgaGF2ZSBwcm92aWRlZCBzb21lIGNvbnRleHQgYXJvdW5kIA0KdGhpcyBwYXRjaC4gSSdt
+IHdvcmtpbmcgb24gZW5hYmxpbmcgc21tdSBvbiB0aGVzZSBjaGlwcyBhbmQgZW5jb3VudGVyZWQg
+DQp0aGUgZm9sbG93aW5nIHByb2JsZW06IHRoZSBzbW11IGlucHV0IGFkZHJlc3Mgc2l6ZSBpcyA0
+OCBiaXRzIHNvIHRoZSBkbWEgDQptYXBwaW5ncyBmb3Igc2RoY2kgZW5kIHVwIDQ4LWJpdCB3aWRl
+LiBIb3dldmVyLCBvbiB0aGVzZSBjaGlwcyBzZGhjaSANCm9ubHkgdXNlIDQwLWJpdHMgb2YgdGhh
+dCBhZGRyZXNzIHNpemUgd2hlbiBkb2luZyBkbWEuDQpTbyB5b3UgZW5kIHVwIHdpdGggYSA0OC1i
+aXQgYWRkcmVzcyB0cmFuc2xhdGlvbiBpbiBzbW11IGJ1dCB0aGUgZGV2aWNlIA0KZ2VuZXJhdGVz
+IHRyYW5zYWN0aW9ucyB3aXRoIGNsaXBwZWQgNDAtYml0IGFkZHJlc3NlcywgdGh1cyBzbW11IGNv
+bnRleHQgDQpmYXVsdHMgYXJlIHRyaWdnZXJlZC4gU2V0dGluZyB1cCB0aGUgY29ycmVjdCBkbWEg
+bWFzayBmaXhlcyB0aGlzIHNpdHVhdGlvbi4NCg0KLS0tDQpCZXN0IFJlZ2FyZHMsIExhdXJlbnRp
+dQ0KDQo+IA0KPj4gLS0tDQo+PiAgIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtZXNkaGMuYyB8
+IDYgKysrKysrDQo+PiAgIDEgZmlsZSBjaGFuZ2VkLCA2IGluc2VydGlvbnMoKykNCj4+DQo+PiBk
+aWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1lc2RoYy5jIGIvZHJpdmVycy9t
+bWMvaG9zdC9zZGhjaS1vZi1lc2RoYy5jDQo+PiBpbmRleCA0ZmZhNmIxNzNhMjEuLjgzMzJmNTZl
+NmMwZCAxMDA2NDQNCj4+IC0tLSBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtZXNkaGMuYw0K
+Pj4gKysrIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1lc2RoYy5jDQo+PiBAQCAtMjIsNiAr
+MjIsNyBAQA0KPj4gICAjaW5jbHVkZSA8bGludXgvc3lzX3NvYy5oPg0KPj4gICAjaW5jbHVkZSA8
+bGludXgvY2xrLmg+DQo+PiAgICNpbmNsdWRlIDxsaW51eC9rdGltZS5oPg0KPj4gKyNpbmNsdWRl
+IDxsaW51eC9kbWEtbWFwcGluZy5oPg0KPj4gICAjaW5jbHVkZSA8bGludXgvbW1jL2hvc3QuaD4N
+Cj4+ICAgI2luY2x1ZGUgInNkaGNpLXBsdGZtLmgiDQo+PiAgICNpbmNsdWRlICJzZGhjaS1lc2Ro
+Yy5oIg0KPj4gQEAgLTQyNyw2ICs0MjgsMTEgQEAgc3RhdGljIHZvaWQgZXNkaGNfb2ZfYWRtYV93
+b3JrYXJvdW5kKHN0cnVjdCBzZGhjaV9ob3N0ICpob3N0LCB1MzIgaW50bWFzaykNCj4+ICAgc3Rh
+dGljIGludCBlc2RoY19vZl9lbmFibGVfZG1hKHN0cnVjdCBzZGhjaV9ob3N0ICpob3N0KQ0KPj4g
+ICB7DQo+PiAgICAgICAgICB1MzIgdmFsdWU7DQo+PiArICAgICAgIHN0cnVjdCBkZXZpY2UgKmRl
+diA9IG1tY19kZXYoaG9zdC0+bW1jKTsNCj4+ICsNCj4+ICsgICAgICAgaWYgKG9mX2RldmljZV9p
+c19jb21wYXRpYmxlKGRldi0+b2Zfbm9kZSwgImZzbCxsczEwNDNhLWVzZGhjIikgfHwNCj4+ICsg
+ICAgICAgICAgIG9mX2RldmljZV9pc19jb21wYXRpYmxlKGRldi0+b2Zfbm9kZSwgImZzbCxsczEw
+NDZhLWVzZGhjIikpDQo+PiArICAgICAgICAgICAgICAgZG1hX3NldF9tYXNrX2FuZF9jb2hlcmVu
+dChkZXYsIERNQV9CSVRfTUFTSyg0MCkpOw0KPj4NCj4+ICAgICAgICAgIHZhbHVlID0gc2RoY2lf
+cmVhZGwoaG9zdCwgRVNESENfRE1BX1NZU0NUTCk7DQo+PiAgICAgICAgICB2YWx1ZSB8PSBFU0RI
+Q19ETUFfU05PT1A7DQo+PiAtLQ0KPj4gMi4xNy4xDQo+Pg==
