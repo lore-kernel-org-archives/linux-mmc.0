@@ -1,109 +1,56 @@
-From: Stefan Agner <stefan@agner.ch>
-Subject: Re: Self-detected stall on CPU when using SD card
-Date: Tue, 03 Jul 2018 15:13:21 +0200
-Message-ID: <aaa1f8ec2668ce0c654b6225a7d8737c@agner.ch>
-References: <037cbd3560a68bad0cea92f453c1b819@agner.ch>
- <0f262b04fab61ec75b7e368a8f4968aa@agner.ch>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <0f262b04fab61ec75b7e368a8f4968aa@agner.ch>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: adrian.hunter@intel.com, aisheng.dong@nxp.com, fabio.estevam@nxp.com
-Cc: linux-mmc-owner@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+From: Marc Zyngier <marc.zyngier@arm.com>
+Subject: [PATCH] mmc: core: Fix struct mmc_gpio corruption
+Date: Tue,  3 Jul 2018 15:11:14 +0100
+Message-ID: <20180703141114.11609-1-marc.zyngier@arm.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: ulf.hansson@linaro.org, linus.walleij@linaro.org, shawn.lin@rock-chips.com
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Dong Aisheng,
+I recently realised that something was amiss with /proc/interrupts
+on my cubietruck:
 
-Maybe you can shed some light on the issue below?
+ 51:          0          0     GICv2  41 Level     mv64xxx_i2c
+ 59:       1047          0     GICv2 117 Level     eth0
+ 66:          2          0  sunxi_pio_edge   1 Edge   XXXXX
 
+where XXXXX has some non-ASCII characters, while I was expecting:
 
-On 26.06.2018 16:45, Stefan Agner wrote:
-> On 26.06.2018 12:53, Stefan Agner wrote:
->> Hi,
->>
->> On our Colibri iMX6 (arch/arm/boot/dts/imx6qdl-colibri.dtsi) we
->> experience the following stack trace when a SD card is plugged in:
->>
-> 
-> [...]
-> 
->> [<c08396f4>] (esdhc_pltfm_set_clock) from [<c083622c>]
->> (sdhci_set_ios+0xd8/0x584)
->>  r10:ffffe000 r9:c1105900 r8:00004097 r7:d818f2e8 r6:d818f480
->> r5:d818f2e8
->>  r4:d818f000
->> [<c0836154>] (sdhci_set_ios) from [<c0836070>]
->> (sdhci_runtime_resume_host+0xa0/0x184)
->>  r9:c1105900 r8:00004097 r7:d818f2e8 r6:d818f648 r5:d818f000 r4:d818f480
-> 
-> [...]
-> 
->>
->> It used to work in v4.9, so I started a git bisect. It pointed me to
->> this commit:
->>
->> Commit d1e4f74f911d ("mmc: sdhci: Do not use spin lock in set_ios
->> paths").
->>
->> Reverting the commit on-top of v4.18-rc1 seems to fix the issue too.
->>
->> Any idea?
-> 
-> I figured out that the same platform had a GPIO Key which triggered all
-> the time. This seems to exacerbate the MMC issue such that it triggers
-> on very boot, about rootfs mount time.
-> 
-> This change seems to fix the issue as well, not sure though whether this
-> is a proper fix:
-> 
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -697,6 +697,7 @@ static inline void esdhc_pltfm_set_clock(struct
-> sdhci_host *host,
->         int ddr_pre_div = imx_data->is_ddr ? 2 : 1;
->         int pre_div = 1;
->         int div = 1;
-> +       unsigned long flags;
->         u32 temp, val;
->  
->         if (clock == 0) {
-> @@ -724,6 +725,7 @@ static inline void esdhc_pltfm_set_clock(struct
-> sdhci_host *host,
->                         pre_div = 2;
->         }
->  
-> +       spin_lock_irqsave(&host->lock, flags);
->         temp = sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
->         temp &= ~(ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN |
-> ESDHC_CLOCK_PEREN
->                 | ESDHC_CLOCK_MASK);
-> @@ -754,6 +756,7 @@ static inline void esdhc_pltfm_set_clock(struct
-> sdhci_host *host,
->                 writel(val | ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
->                 host->ioaddr + ESDHC_VENDOR_SPEC);
->         }
-> +       spin_unlock_irqrestore(&host->lock, flags);
+ 66:          0          0  sunxi_pio_edge   1 Edge      1c0f000.mmc cd
 
-The bits ESDHC_CLOCK_IPGEN, ESDHC_CLOCK_HCKEN, ESDHC_CLOCK_PEREN which
-are cleared and written in that section are actually mentioned as
-"Reserved. Always write as 1." in the reference manual...
+It turns out that the cd_debounce_delay_ms field was recently to
+struct mmc_gpio, and carefully placed at the one spot where it could
+cause damage: right *after* the zero-sized array that contains the
+associated label. This label ends up being passed to the IRQ
+subsystem, and then overwritten by the cd_debounce_delay_ms field.
 
---
-Stefan
+Funky!
 
->  
->         mdelay(1);
->  }
-> 
-> --
-> Stefan
+Let's move that field to a less crowded location.
+
+Fixes: bfd694d5e21c ("mmc: core: Add tunable delay before detecting card after card is inserted")
+Cc: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Marc Zyngier <marc.zyngier@arm.com>
+---
+ drivers/mmc/core/slot-gpio.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
+index ef05e0039378..1ccf9dc07395 100644
+--- a/drivers/mmc/core/slot-gpio.c
++++ b/drivers/mmc/core/slot-gpio.c
+@@ -27,8 +27,8 @@ struct mmc_gpio {
+ 	bool override_cd_active_level;
+ 	irqreturn_t (*cd_gpio_isr)(int irq, void *dev_id);
+ 	char *ro_label;
+-	char cd_label[0];
+ 	u32 cd_debounce_delay_ms;
++	char cd_label[0];
+ };
+ 
+ static irqreturn_t mmc_gpio_cd_irqt(int irq, void *dev_id)
+-- 
+2.17.1
