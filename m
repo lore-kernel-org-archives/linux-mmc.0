@@ -1,57 +1,93 @@
-From: Laurentiu Tudor <laurentiu.tudor@nxp.com>
-Subject: Re: [PATCH] mmc: sdhci-of-esdhc: set proper dma mask for ls104x chips
-Date: Tue, 3 Jul 2018 11:15:13 +0000
-Message-ID: <61a16c6b-9158-17ea-51f9-2ee5b85ccb78@nxp.com>
-References: <20180628084509.19646-1-laurentiu.tudor@nxp.com>
- <CAPDyKFoNmcg+7JbWq1eeb2Dx7GKSh=FWpZcEeB8RORaBbrr=qA@mail.gmail.com>
+From: Marc Zyngier <marc.zyngier@arm.com>
+Subject: Re: [PATCH 1/1] mmc: sunxi: Disable irq during pm_suspend
+Date: Tue, 3 Jul 2018 13:01:50 +0100
+Message-ID: <627d5e40-651a-062c-aac4-742727b23ddb@arm.com>
+References: <1530602925-7714-1-git-send-email-stefan@olimex.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFoNmcg+7JbWq1eeb2Dx7GKSh=FWpZcEeB8RORaBbrr=qA@mail.gmail.com>
-Content-Language: en-US
-Content-ID: <93E2212E647BFE44B197BEA55CFD0B55@eurprd04.prod.outlook.com>
+In-Reply-To: <1530602925-7714-1-git-send-email-stefan@olimex.com>
+Content-Language: en-GB
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "Y.b. Lu" <yangbo.lu@nxp.com>
+To: Stefan Mavrodiev <stefan@olimex.com>, Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@bootlin.com>, Chen-Yu Tsai <wens@csie.org>, "open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..." <linux-mmc@vger.kernel.org>, "moderated list:ARM/Allwinner sunXi SoC support" <linux-arm-kernel@lists.infradead.org>, open list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-SGkgVWZmZSwNCg0KT24gMDIuMDcuMjAxOCAxNzozNywgVWxmIEhhbnNzb24gd3JvdGU6DQo+IE9u
-IDI4IEp1bmUgMjAxOCBhdCAxMDo0NSwgTGF1cmVudGl1IFR1ZG9yIDxsYXVyZW50aXUudHVkb3JA
-bnhwLmNvbT4gd3JvdGU6DQo+PiBTREhDSSBjb250cm9sbGVyIGluIGxzMTA0M2EgYW5kIGxzMTA0
-NmEgZ2VuZXJhdGUgNDAtYml0IHdpZGUgYWRkcmVzc2VzDQo+PiB3aGVuIGRvaW5nIERNQS4gTWFr
-ZSBzdXJlIHRoYXQgdGhlIGNvcnJlc3BvbmRpbmcgZG1hIG1hc2sgaXMgY29ycmVjdGx5DQo+PiBj
-b25maWd1cmVkLg0KPj4NCj4+IFNpZ25lZC1vZmYtYnk6IExhdXJlbnRpdSBUdWRvciA8bGF1cmVu
-dGl1LnR1ZG9yQG54cC5jb20+DQo+IA0KPiBUaGFua3MsIGFwcGxpZWQgZm9yIG5leHQhDQoNClRo
-YW5rcyBmb3IgcGlja2luZyB0aGlzIHVwIQ0KSSBqdXN0IHJlYWxpemVkIHRoYXQgbWF5YmUgSSBz
-aG91bGQgaGF2ZSBwcm92aWRlZCBzb21lIGNvbnRleHQgYXJvdW5kIA0KdGhpcyBwYXRjaC4gSSdt
-IHdvcmtpbmcgb24gZW5hYmxpbmcgc21tdSBvbiB0aGVzZSBjaGlwcyBhbmQgZW5jb3VudGVyZWQg
-DQp0aGUgZm9sbG93aW5nIHByb2JsZW06IHRoZSBzbW11IGlucHV0IGFkZHJlc3Mgc2l6ZSBpcyA0
-OCBiaXRzIHNvIHRoZSBkbWEgDQptYXBwaW5ncyBmb3Igc2RoY2kgZW5kIHVwIDQ4LWJpdCB3aWRl
-LiBIb3dldmVyLCBvbiB0aGVzZSBjaGlwcyBzZGhjaSANCm9ubHkgdXNlIDQwLWJpdHMgb2YgdGhh
-dCBhZGRyZXNzIHNpemUgd2hlbiBkb2luZyBkbWEuDQpTbyB5b3UgZW5kIHVwIHdpdGggYSA0OC1i
-aXQgYWRkcmVzcyB0cmFuc2xhdGlvbiBpbiBzbW11IGJ1dCB0aGUgZGV2aWNlIA0KZ2VuZXJhdGVz
-IHRyYW5zYWN0aW9ucyB3aXRoIGNsaXBwZWQgNDAtYml0IGFkZHJlc3NlcywgdGh1cyBzbW11IGNv
-bnRleHQgDQpmYXVsdHMgYXJlIHRyaWdnZXJlZC4gU2V0dGluZyB1cCB0aGUgY29ycmVjdCBkbWEg
-bWFzayBmaXhlcyB0aGlzIHNpdHVhdGlvbi4NCg0KLS0tDQpCZXN0IFJlZ2FyZHMsIExhdXJlbnRp
-dQ0KDQo+IA0KPj4gLS0tDQo+PiAgIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtZXNkaGMuYyB8
-IDYgKysrKysrDQo+PiAgIDEgZmlsZSBjaGFuZ2VkLCA2IGluc2VydGlvbnMoKykNCj4+DQo+PiBk
-aWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1lc2RoYy5jIGIvZHJpdmVycy9t
-bWMvaG9zdC9zZGhjaS1vZi1lc2RoYy5jDQo+PiBpbmRleCA0ZmZhNmIxNzNhMjEuLjgzMzJmNTZl
-NmMwZCAxMDA2NDQNCj4+IC0tLSBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtZXNkaGMuYw0K
-Pj4gKysrIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1lc2RoYy5jDQo+PiBAQCAtMjIsNiAr
-MjIsNyBAQA0KPj4gICAjaW5jbHVkZSA8bGludXgvc3lzX3NvYy5oPg0KPj4gICAjaW5jbHVkZSA8
-bGludXgvY2xrLmg+DQo+PiAgICNpbmNsdWRlIDxsaW51eC9rdGltZS5oPg0KPj4gKyNpbmNsdWRl
-IDxsaW51eC9kbWEtbWFwcGluZy5oPg0KPj4gICAjaW5jbHVkZSA8bGludXgvbW1jL2hvc3QuaD4N
-Cj4+ICAgI2luY2x1ZGUgInNkaGNpLXBsdGZtLmgiDQo+PiAgICNpbmNsdWRlICJzZGhjaS1lc2Ro
-Yy5oIg0KPj4gQEAgLTQyNyw2ICs0MjgsMTEgQEAgc3RhdGljIHZvaWQgZXNkaGNfb2ZfYWRtYV93
-b3JrYXJvdW5kKHN0cnVjdCBzZGhjaV9ob3N0ICpob3N0LCB1MzIgaW50bWFzaykNCj4+ICAgc3Rh
-dGljIGludCBlc2RoY19vZl9lbmFibGVfZG1hKHN0cnVjdCBzZGhjaV9ob3N0ICpob3N0KQ0KPj4g
-ICB7DQo+PiAgICAgICAgICB1MzIgdmFsdWU7DQo+PiArICAgICAgIHN0cnVjdCBkZXZpY2UgKmRl
-diA9IG1tY19kZXYoaG9zdC0+bW1jKTsNCj4+ICsNCj4+ICsgICAgICAgaWYgKG9mX2RldmljZV9p
-c19jb21wYXRpYmxlKGRldi0+b2Zfbm9kZSwgImZzbCxsczEwNDNhLWVzZGhjIikgfHwNCj4+ICsg
-ICAgICAgICAgIG9mX2RldmljZV9pc19jb21wYXRpYmxlKGRldi0+b2Zfbm9kZSwgImZzbCxsczEw
-NDZhLWVzZGhjIikpDQo+PiArICAgICAgICAgICAgICAgZG1hX3NldF9tYXNrX2FuZF9jb2hlcmVu
-dChkZXYsIERNQV9CSVRfTUFTSyg0MCkpOw0KPj4NCj4+ICAgICAgICAgIHZhbHVlID0gc2RoY2lf
-cmVhZGwoaG9zdCwgRVNESENfRE1BX1NZU0NUTCk7DQo+PiAgICAgICAgICB2YWx1ZSB8PSBFU0RI
-Q19ETUFfU05PT1A7DQo+PiAtLQ0KPj4gMi4xNy4xDQo+Pg==
+On 03/07/18 08:28, Stefan Mavrodiev wrote:
+> When mmc host controller enters suspend state, the clocks are
+> disabled, but irqs are not. For some reason the irqchip emmits
+
+Not so much the irqchip, but the device itself.
+
+> false interrupts, which causes system lock loop.
+
+I'm not sure the interrupts are fake. They are indicative of some state
+of the HW...
+
+> 
+> Debug log is:
+>   ...
+>   sunxi-mmc 1c11000.mmc: setting clk to 52000000, rounded 51200000
+>   sunxi-mmc 1c11000.mmc: enabling the clock
+>   sunxi-mmc 1c11000.mmc: cmd 13(8000014d) arg 10000 ie 0x0000bbc6 len 0
+>   sunxi-mmc 1c11000.mmc: irq: rq (ptrval) mi 00000004 idi 00000000
+>   sunxi-mmc 1c11000.mmc: cmd 6(80000146) arg 3210101 ie 0x0000bbc6 len 0
+>   sunxi-mmc 1c11000.mmc: irq: rq (ptrval) mi 00000004 idi 00000000
+>   sunxi-mmc 1c11000.mmc: cmd 13(8000014d) arg 10000 ie 0x0000bbc6 len 0
+>   sunxi-mmc 1c11000.mmc: irq: rq (ptrval) mi 00000004 idi 00000000
+>   mmc1: new DDR MMC card at address 0001
+>   mmcblk1: mmc1:0001 AGND3R 14.6 GiB
+>   mmcblk1boot0: mmc1:0001 AGND3R partition 1 4.00 MiB
+>   mmcblk1boot1: mmc1:0001 AGND3R partition 2 4.00 MiB
+>   sunxi-mmc 1c11000.mmc: cmd 18(80003352) arg 0 ie 0x0000fbc2 len 409
+>   sunxi-mmc 1c11000.mmc: irq: rq (ptrval) mi 00004000 idi 00000002
+>    mmcblk1: p1
+>   sunxi-mmc 1c11000.mmc: irq: rq   (null) mi 00000000 idi 00000000
+>   sunxi-mmc 1c11000.mmc: irq: rq   (null) mi 00000000 idi 00000000
+>   sunxi-mmc 1c11000.mmc: irq: rq   (null) mi 00000000 idi 00000000
+>   sunxi-mmc 1c11000.mmc: irq: rq   (null) mi 00000000 idi 00000000
+> and so on...
+
+The clock is off, and yet the thing manages to generate interrupts. Great...
+
+> 
+> This issue apears on eMMC cards, routed on MMC2 slot. The patch is
+> tested with A20-OLinuXino-MICRO/LIME/LIME2 boards.
+> 
+> Fixes: 9a8e1e8cc2c0 ("mmc: sunxi: Add runtime_pm support")
+> Signed-off-by: Stefan Mavrodiev <stefan@olimex.com>
+> ---
+>  drivers/mmc/host/sunxi-mmc.c | 2 ++
+>  1 file changed, 2 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+> index e747259..acae7a8 100644
+> --- a/drivers/mmc/host/sunxi-mmc.c
+> +++ b/drivers/mmc/host/sunxi-mmc.c
+> @@ -1446,6 +1446,7 @@ static int sunxi_mmc_runtime_resume(struct device *dev)
+>  	sunxi_mmc_init_host(host);
+>  	sunxi_mmc_set_bus_width(host, mmc->ios.bus_width);
+>  	sunxi_mmc_set_clk(host, &mmc->ios);
+> +	enable_irq(host->irq);
+>  
+>  	return 0;
+>  }
+> @@ -1455,6 +1456,7 @@ static int sunxi_mmc_runtime_suspend(struct device *dev)
+>  	struct mmc_host	*mmc = dev_get_drvdata(dev);
+>  	struct sunxi_mmc_host *host = mmc_priv(mmc);
+>  
+> +	disable_irq(host->irq);
+>  	sunxi_mmc_reset_host(host);
+>  	sunxi_mmc_disable(host);
+>  
+> 
+
+For the record, this patch fixes the boot issues I've observed on my
+cubietruck.
+
+Acked-by: Marc Zyngier <marc.zyngier@arm.com>
+Tested-by: Marc Zyngier <marc.zyngier@arm.com>
+
+	M.
+-- 
+Jazz is not dead. It just smells funny...
