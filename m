@@ -1,39 +1,54 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V2] mmc: core: cd_label must be last entry of mmc_gpio struct
-Date: Tue, 3 Jul 2018 07:35:54 +0200
-Message-ID: <CAPDyKFoVLT1zUPma7xRz_JFzFYpr=YCzENARmCkzwUnTZEX_8A@mail.gmail.com>
-References: <1530494867-15015-1-git-send-email-Anson.Huang@nxp.com>
- <CACRpkdZOCJXHxcYv0CU76J0r2OpxdtDuOiJ9cenrvJCHVsBeAA@mail.gmail.com>
- <AM3PR04MB1315FEF9C8833B30DA665E7DF5420@AM3PR04MB1315.eurprd04.prod.outlook.com>
- <CAOMZO5A7=ptbOiSUDywwQrFd+DAZ3vsE3dSPab7cwOF3_T3qeQ@mail.gmail.com>
+From: Qing Xia <xiaqing17@hisilicon.com>
+Subject: [PATCH v2] mmc: dw_mmc: fix card threshold control configuration
+Date: Tue, 3 Jul 2018 15:06:27 +0800
+Message-ID: <1530601587-160436-1-git-send-email-xiaqing17@hisilicon.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAOMZO5A7=ptbOiSUDywwQrFd+DAZ3vsE3dSPab7cwOF3_T3qeQ@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Fabio Estevam <festevam@gmail.com>, Linus Walleij <linus.walleij@linaro.org>
-Cc: Anson Huang <anson.huang@nxp.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, Adrian Hunter <adrian.hunter@intel.com>, "evgreen@chromium.org" <evgreen@chromium.org>, Shawn Lin <shawn.lin@rock-chips.com>, Fabio Estevam <fabio.estevam@nxp.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, dl-linux-imx <linux-imx@nxp.com>
+To: ulf.hansson@linaro.org, jh80.chung@samsung.com
+Cc: x00270170 <xiaqing17@hisilicon.com>, Evgeniy.Didin@synopsys.com, shawn.lin@rock-chips.com, dianders@chromium.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 3 July 2018 at 04:25, Fabio Estevam <festevam@gmail.com> wrote:
-> On Mon, Jul 2, 2018 at 11:13 PM, Anson Huang <anson.huang@nxp.com> wrote:
->
->> I think either way is OK, since flexible array is used in kernel code quite commonly,
->> so I prefer to make code change as small as possible, the original patch can also prevent
->> similar bug in future. And like below commit Fabio pointed out, it also has same kind
->> of fix: a158531f3c92 ("gpio: 74x164: Fix crash during .remove()"). Thanks.
->
-> I am also fine with this patch or the one from Linus.
->
-> Maybe Anson's patch could be applied to 4.18-rc as a bug fix and
-> Linus' patch could be applied to 4.19-rc1 as a cleanup/improvement?
+From: x00270170 <xiaqing17@hisilicon.com>
 
-Good idea!
+Card write threshold control is supposed to be set since controller
+version 2.80a for data write in HS400 mode and data read in
+HS200/HS400/SDR104 mode. However the current code returns without
+configuring it in the case of data writing in HS400 mode.
+Meanwhile the patch fixes that the current code goes to
+'disable' when doing data reading in HS400 mode.
 
-I have queued up Anson's v2 patch as a fix for 4.18.
+Fixes: 7e4bf1bc9543 ("mmc: dw_mmc: add the card write threshold for HS400 mode")
+Signed-off-by: Qing Xia <xiaqing17@hisilicon.com>
+---
+ drivers/mmc/host/dw_mmc.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
 
-Linus, can please re-post a re-based version of your change on top!? I
-guess you can add Anson's and Fabio's reviewed by tags for it as well.
-
-Kind regards
-Uffe
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 29a1afa..3ee8f57 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1065,8 +1065,8 @@ static void dw_mci_ctrl_thld(struct dw_mci *host, struct mmc_data *data)
+ 	 * It's used when HS400 mode is enabled.
+ 	 */
+ 	if (data->flags & MMC_DATA_WRITE &&
+-		!(host->timing != MMC_TIMING_MMC_HS400))
+-		return;
++		host->timing != MMC_TIMING_MMC_HS400)
++		goto disable;
+ 
+ 	if (data->flags & MMC_DATA_WRITE)
+ 		enable = SDMMC_CARD_WR_THR_EN;
+@@ -1074,7 +1074,8 @@ static void dw_mci_ctrl_thld(struct dw_mci *host, struct mmc_data *data)
+ 		enable = SDMMC_CARD_RD_THR_EN;
+ 
+ 	if (host->timing != MMC_TIMING_MMC_HS200 &&
+-	    host->timing != MMC_TIMING_UHS_SDR104)
++	    host->timing != MMC_TIMING_UHS_SDR104 &&
++	    host->timing != MMC_TIMING_MMC_HS400)
+ 		goto disable;
+ 
+ 	blksz_depth = blksz / (1 << host->data_shift);
+-- 
+2.8.1
