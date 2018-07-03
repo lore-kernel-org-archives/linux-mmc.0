@@ -1,93 +1,109 @@
-From: Marc Zyngier <marc.zyngier@arm.com>
-Subject: Re: [PATCH 1/1] mmc: sunxi: Disable irq during pm_suspend
-Date: Tue, 3 Jul 2018 13:01:50 +0100
-Message-ID: <627d5e40-651a-062c-aac4-742727b23ddb@arm.com>
-References: <1530602925-7714-1-git-send-email-stefan@olimex.com>
+From: Stefan Agner <stefan@agner.ch>
+Subject: Re: Self-detected stall on CPU when using SD card
+Date: Tue, 03 Jul 2018 15:13:21 +0200
+Message-ID: <aaa1f8ec2668ce0c654b6225a7d8737c@agner.ch>
+References: <037cbd3560a68bad0cea92f453c1b819@agner.ch>
+ <0f262b04fab61ec75b7e368a8f4968aa@agner.ch>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1530602925-7714-1-git-send-email-stefan@olimex.com>
-Content-Language: en-GB
-Sender: linux-kernel-owner@vger.kernel.org
-To: Stefan Mavrodiev <stefan@olimex.com>, Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@bootlin.com>, Chen-Yu Tsai <wens@csie.org>, "open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..." <linux-mmc@vger.kernel.org>, "moderated list:ARM/Allwinner sunXi SoC support" <linux-arm-kernel@lists.infradead.org>, open list <linux-kernel@vger.kernel.org>
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <0f262b04fab61ec75b7e368a8f4968aa@agner.ch>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: adrian.hunter@intel.com, aisheng.dong@nxp.com, fabio.estevam@nxp.com
+Cc: linux-mmc-owner@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 03/07/18 08:28, Stefan Mavrodiev wrote:
-> When mmc host controller enters suspend state, the clocks are
-> disabled, but irqs are not. For some reason the irqchip emmits
+Dong Aisheng,
 
-Not so much the irqchip, but the device itself.
+Maybe you can shed some light on the issue below?
 
-> false interrupts, which causes system lock loop.
 
-I'm not sure the interrupts are fake. They are indicative of some state
-of the HW...
-
+On 26.06.2018 16:45, Stefan Agner wrote:
+> On 26.06.2018 12:53, Stefan Agner wrote:
+>> Hi,
+>>
+>> On our Colibri iMX6 (arch/arm/boot/dts/imx6qdl-colibri.dtsi) we
+>> experience the following stack trace when a SD card is plugged in:
+>>
 > 
-> Debug log is:
->   ...
->   sunxi-mmc 1c11000.mmc: setting clk to 52000000, rounded 51200000
->   sunxi-mmc 1c11000.mmc: enabling the clock
->   sunxi-mmc 1c11000.mmc: cmd 13(8000014d) arg 10000 ie 0x0000bbc6 len 0
->   sunxi-mmc 1c11000.mmc: irq: rq (ptrval) mi 00000004 idi 00000000
->   sunxi-mmc 1c11000.mmc: cmd 6(80000146) arg 3210101 ie 0x0000bbc6 len 0
->   sunxi-mmc 1c11000.mmc: irq: rq (ptrval) mi 00000004 idi 00000000
->   sunxi-mmc 1c11000.mmc: cmd 13(8000014d) arg 10000 ie 0x0000bbc6 len 0
->   sunxi-mmc 1c11000.mmc: irq: rq (ptrval) mi 00000004 idi 00000000
->   mmc1: new DDR MMC card at address 0001
->   mmcblk1: mmc1:0001 AGND3R 14.6 GiB
->   mmcblk1boot0: mmc1:0001 AGND3R partition 1 4.00 MiB
->   mmcblk1boot1: mmc1:0001 AGND3R partition 2 4.00 MiB
->   sunxi-mmc 1c11000.mmc: cmd 18(80003352) arg 0 ie 0x0000fbc2 len 409
->   sunxi-mmc 1c11000.mmc: irq: rq (ptrval) mi 00004000 idi 00000002
->    mmcblk1: p1
->   sunxi-mmc 1c11000.mmc: irq: rq   (null) mi 00000000 idi 00000000
->   sunxi-mmc 1c11000.mmc: irq: rq   (null) mi 00000000 idi 00000000
->   sunxi-mmc 1c11000.mmc: irq: rq   (null) mi 00000000 idi 00000000
->   sunxi-mmc 1c11000.mmc: irq: rq   (null) mi 00000000 idi 00000000
-> and so on...
-
-The clock is off, and yet the thing manages to generate interrupts. Great...
-
+> [...]
 > 
-> This issue apears on eMMC cards, routed on MMC2 slot. The patch is
-> tested with A20-OLinuXino-MICRO/LIME/LIME2 boards.
+>> [<c08396f4>] (esdhc_pltfm_set_clock) from [<c083622c>]
+>> (sdhci_set_ios+0xd8/0x584)
+>>  r10:ffffe000 r9:c1105900 r8:00004097 r7:d818f2e8 r6:d818f480
+>> r5:d818f2e8
+>>  r4:d818f000
+>> [<c0836154>] (sdhci_set_ios) from [<c0836070>]
+>> (sdhci_runtime_resume_host+0xa0/0x184)
+>>  r9:c1105900 r8:00004097 r7:d818f2e8 r6:d818f648 r5:d818f000 r4:d818f480
 > 
-> Fixes: 9a8e1e8cc2c0 ("mmc: sunxi: Add runtime_pm support")
-> Signed-off-by: Stefan Mavrodiev <stefan@olimex.com>
-> ---
->  drivers/mmc/host/sunxi-mmc.c | 2 ++
->  1 file changed, 2 insertions(+)
+> [...]
 > 
-> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index e747259..acae7a8 100644
-> --- a/drivers/mmc/host/sunxi-mmc.c
-> +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -1446,6 +1446,7 @@ static int sunxi_mmc_runtime_resume(struct device *dev)
->  	sunxi_mmc_init_host(host);
->  	sunxi_mmc_set_bus_width(host, mmc->ios.bus_width);
->  	sunxi_mmc_set_clk(host, &mmc->ios);
-> +	enable_irq(host->irq);
+>>
+>> It used to work in v4.9, so I started a git bisect. It pointed me to
+>> this commit:
+>>
+>> Commit d1e4f74f911d ("mmc: sdhci: Do not use spin lock in set_ios
+>> paths").
+>>
+>> Reverting the commit on-top of v4.18-rc1 seems to fix the issue too.
+>>
+>> Any idea?
+> 
+> I figured out that the same platform had a GPIO Key which triggered all
+> the time. This seems to exacerbate the MMC issue such that it triggers
+> on very boot, about rootfs mount time.
+> 
+> This change seems to fix the issue as well, not sure though whether this
+> is a proper fix:
+> 
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -697,6 +697,7 @@ static inline void esdhc_pltfm_set_clock(struct
+> sdhci_host *host,
+>         int ddr_pre_div = imx_data->is_ddr ? 2 : 1;
+>         int pre_div = 1;
+>         int div = 1;
+> +       unsigned long flags;
+>         u32 temp, val;
 >  
->  	return 0;
+>         if (clock == 0) {
+> @@ -724,6 +725,7 @@ static inline void esdhc_pltfm_set_clock(struct
+> sdhci_host *host,
+>                         pre_div = 2;
+>         }
+>  
+> +       spin_lock_irqsave(&host->lock, flags);
+>         temp = sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
+>         temp &= ~(ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN |
+> ESDHC_CLOCK_PEREN
+>                 | ESDHC_CLOCK_MASK);
+> @@ -754,6 +756,7 @@ static inline void esdhc_pltfm_set_clock(struct
+> sdhci_host *host,
+>                 writel(val | ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
+>                 host->ioaddr + ESDHC_VENDOR_SPEC);
+>         }
+> +       spin_unlock_irqrestore(&host->lock, flags);
+
+The bits ESDHC_CLOCK_IPGEN, ESDHC_CLOCK_HCKEN, ESDHC_CLOCK_PEREN which
+are cleared and written in that section are actually mentioned as
+"Reserved. Always write as 1." in the reference manual...
+
+--
+Stefan
+
+>  
+>         mdelay(1);
 >  }
-> @@ -1455,6 +1456,7 @@ static int sunxi_mmc_runtime_suspend(struct device *dev)
->  	struct mmc_host	*mmc = dev_get_drvdata(dev);
->  	struct sunxi_mmc_host *host = mmc_priv(mmc);
->  
-> +	disable_irq(host->irq);
->  	sunxi_mmc_reset_host(host);
->  	sunxi_mmc_disable(host);
->  
 > 
-
-For the record, this patch fixes the boot issues I've observed on my
-cubietruck.
-
-Acked-by: Marc Zyngier <marc.zyngier@arm.com>
-Tested-by: Marc Zyngier <marc.zyngier@arm.com>
-
-	M.
--- 
-Jazz is not dead. It just smells funny...
+> --
+> Stefan
