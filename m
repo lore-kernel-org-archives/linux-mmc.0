@@ -1,61 +1,39 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2] libertas: fix suspend and resume for SDIO connected cards
-Date: Tue, 3 Jul 2018 06:51:26 +0200
-Message-ID: <CAPDyKFo9M0jbAy=trp8NAUSRpi85P=QWpy2mTL7yzeKcbQhS7w@mail.gmail.com>
-References: <20180627185845.31799-1-daniel@zonque.org> <CAPDyKFr7snWsk=194u4nKs4301tUARByuEPSFop_fzxn6HVQDQ@mail.gmail.com>
- <dac693d9-b6f4-fac6-3cfa-ccfc4a6172c6@zonque.org> <87o9fp8z2o.fsf@purkki.adurom.net>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V2] mmc: core: cd_label must be last entry of mmc_gpio struct
+Date: Tue, 3 Jul 2018 07:35:54 +0200
+Message-ID: <CAPDyKFoVLT1zUPma7xRz_JFzFYpr=YCzENARmCkzwUnTZEX_8A@mail.gmail.com>
+References: <1530494867-15015-1-git-send-email-Anson.Huang@nxp.com>
+ <CACRpkdZOCJXHxcYv0CU76J0r2OpxdtDuOiJ9cenrvJCHVsBeAA@mail.gmail.com>
+ <AM3PR04MB1315FEF9C8833B30DA665E7DF5420@AM3PR04MB1315.eurprd04.prod.outlook.com>
+ <CAOMZO5A7=ptbOiSUDywwQrFd+DAZ3vsE3dSPab7cwOF3_T3qeQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <87o9fp8z2o.fsf-5ukZ45wKbUHoml4zekdYB16hYfS7NtTn@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Cc: Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, libertas-dev-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAOMZO5A7=ptbOiSUDywwQrFd+DAZ3vsE3dSPab7cwOF3_T3qeQ@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Fabio Estevam <festevam@gmail.com>, Linus Walleij <linus.walleij@linaro.org>
+Cc: Anson Huang <anson.huang@nxp.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, Adrian Hunter <adrian.hunter@intel.com>, "evgreen@chromium.org" <evgreen@chromium.org>, Shawn Lin <shawn.lin@rock-chips.com>, Fabio Estevam <fabio.estevam@nxp.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, dl-linux-imx <linux-imx@nxp.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 2 July 2018 at 16:57, Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org> wrote:
-> Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org> writes:
+On 3 July 2018 at 04:25, Fabio Estevam <festevam@gmail.com> wrote:
+> On Mon, Jul 2, 2018 at 11:13 PM, Anson Huang <anson.huang@nxp.com> wrote:
 >
->> On Friday, June 29, 2018 05:39 PM, Ulf Hansson wrote:
->>> On 27 June 2018 at 20:58, Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org> wrote:
->>>> Prior to commit 573185cc7e64 ("mmc: core: Invoke sdio func driver's PM
->>>> callbacks from the sdio bus"), the MMC core used to call into the power
->>>> management functions of SDIO clients itself and removed the card if the
->>>> return code was non-zero. IOW, the mmc handled errors gracefully and didn't
->>>> upchain them to the pm core.
->>>>
->>>> Since this change, the mmc core relies on generic power management
->>>> functions which treat all errors as a reason to cancel the suspend
->>>> immediately. This causes suspend attempts to fail when the libertas
->>>> driver is loaded.
->>>>
->>>> To fix this, power down the card explicitly in if_sdio_suspend() when we
->>>> know we're about to lose power and return success. Also set a flag in these
->>>> cases, and power up the card again in if_sdio_resume().
->>>>
->>>> Signed-off-by: Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org>
->>>> Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->>>> Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>
->>>
->>> Looks good to me! Should be a candidate for stable as well!?
->>
->> Thanks!
->>
->> Yeah, it should probably get a
->>
->> Fixes: 573185cc7e64 ("mmc: core: Invoke sdio func driver's PM
->> callbacks from the sdio bus")
->>
->> as well.
+>> I think either way is OK, since flexible array is used in kernel code quite commonly,
+>> so I prefer to make code change as small as possible, the original patch can also prevent
+>> similar bug in future. And like below commit Fabio pointed out, it also has same kind
+>> of fix: a158531f3c92 ("gpio: 74x164: Fix crash during .remove()"). Thanks.
 >
-> So I'll queue this for wireless-drivers-next and add:
+> I am also fine with this patch or the one from Linus.
 >
-> Fixes: 573185cc7e64 ("mmc: core: Invoke sdio func driver's PM callbacks from the sdio bus")
-> Cc: <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
->
-> Ok?
+> Maybe Anson's patch could be applied to 4.18-rc as a bug fix and
+> Linus' patch could be applied to 4.19-rc1 as a cleanup/improvement?
 
-That's fine by me.
+Good idea!
+
+I have queued up Anson's v2 patch as a fix for 4.18.
+
+Linus, can please re-post a re-based version of your change on top!? I
+guess you can add Anson's and Fabio's reviewed by tags for it as well.
 
 Kind regards
 Uffe
