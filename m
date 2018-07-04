@@ -1,122 +1,89 @@
 From: Chunyan Zhang <zhang.lyra@gmail.com>
-Subject: Re: [PATCH V2 1/7] mmc: sdhci: add sd host v4 mode
-Date: Wed, 4 Jul 2018 11:02:31 +0800
-Message-ID: <CAAfSe-vfcWU+ewD1KCumQx6OBmLiJ7U5hTO_9J9PgkhxF4ZuBg@mail.gmail.com>
+Subject: Re: [PATCH V2 2/7] mmc: sdhci: made changes for System Address
+ register of SDMA
+Date: Wed, 4 Jul 2018 11:02:43 +0800
+Message-ID: <CAAfSe-tegyiEhHrJ+9pqbhm+sYDnd3WwuSEc4p7qDMDpYJw-xw@mail.gmail.com>
 References: <1529028255-6022-1-git-send-email-zhang.chunyan@linaro.org>
- <1529028255-6022-2-git-send-email-zhang.chunyan@linaro.org>
- <1f3e7e87-be4e-37ab-af46-1c4e5dd79a1d@intel.com> <CAAfSe-ug+M7DO7S1KKQ43FcrRgfGqEpikvivgjBjih8yuTU0sg@mail.gmail.com>
- <38c47bf5-d320-7767-59c1-958d1bbb6dc9@intel.com>
+ <1529028255-6022-3-git-send-email-zhang.chunyan@linaro.org> <2eb994d3-7f23-6ff8-4740-7a444a581e9d@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <38c47bf5-d320-7767-59c1-958d1bbb6dc9@intel.com>
+In-Reply-To: <2eb994d3-7f23-6ff8-4740-7a444a581e9d@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>
 Cc: Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@spreadtrum.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 21 June 2018 at 21:15, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 21/06/18 14:14, Chunyan Zhang wrote:
->> On 21 June 2018 at 18:49, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>> On 15/06/18 05:04, Chunyan Zhang wrote:
->>>> For SD host controller version 4.00 or later ones, there're two
->>>> modes of implementation - Version 3.00 compatible mode or
->>>> Version 4 mode.  This patch introduces a flag to record this.
->>>>
->>>> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
->>>> ---
->>>>  drivers/mmc/host/sdhci.c | 6 ++++++
->>>>  drivers/mmc/host/sdhci.h | 6 ++++++
->>>>  2 files changed, 12 insertions(+)
->>>>
->>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>>> index 2ededa7f..cf5695f 100644
->>>> --- a/drivers/mmc/host/sdhci.c
->>>> +++ b/drivers/mmc/host/sdhci.c
->>>> @@ -3302,6 +3302,12 @@ void __sdhci_read_caps(struct sdhci_host *host, u16 *ver, u32 *caps, u32 *caps1)
->>>>       v = ver ? *ver : sdhci_readw(host, SDHCI_HOST_VERSION);
->>>>       host->version = (v & SDHCI_SPEC_VER_MASK) >> SDHCI_SPEC_VER_SHIFT;
->>>>
->>>> +     if (host->version >= SDHCI_SPEC_400) {
->>>> +             if (sdhci_readw(host, SDHCI_HOST_CONTROL2) &
->>>> +                     SDHCI_CTRL_V4_MODE)
->>>> +                     host->v4_mode = true;
->>>> +     }
->>>
->>> At this point the host controller has just been reset which would mean it
->>> must be in version 3 compatibility mode, which would mean this code doesn't
->>> do anything.
+On 21 June 2018 at 19:22, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 15/06/18 05:04, Chunyan Zhang wrote:
+>> According to the SD host controller specification version 4.10, when
+>> Host Version 4 is enabled, SDMA uses ADMA System Address register
+>> (05Fh-058h) instead of using SDMA System Address register to
+>> support both 32-bit and 64-bit addressing.
 >>
->> Why is it version 3 mode at this point?
->
-> According to the specification, reset clears RW fields to zero.
->
+>> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
+>> ---
+>>  drivers/mmc/host/sdhci.c | 10 ++++++++--
+>>  1 file changed, 8 insertions(+), 2 deletions(-)
 >>
->> I've tested this code on the sd host controller which was introduced
->> in 6/7 in this patch-set, the result showed that it was v4_mode.
->> Moreover without this patch, the Spreadtrum's sdhci driver in patch
->> 6/7 couldn't work.
->>
->> Am I missing something here?
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index cf5695f..f57201f 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -805,6 +805,7 @@ static void sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+>>  static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+>>  {
+>>       u8 ctrl;
+>> +     u32 reg;
 >
-> It seems the Spreadtrum controller doesn't clear the "Host Version 4 Enable"
-> bit upon software reset for all.
->
-> Also this seems the wrong way around.  The driver should decide whether or
-> not to use V4 mode and then the "Host Version 4 Enable" bit should be set
-> accordingly.
->
-> V4 has been around so long that we can't just enable all supporting hardware
-> without risking the possibility it will break some platform.  So I suggest
+> reg could just be an int.
 
-Ok, understand.
-
-> adding a function sdhci_enable_v4_mode() which is called during probe.
-
-Ok, will do, that is more a safe way.
+Why? Shouldn't addresses be unsigned?
 
 >
+>>       struct mmc_data *data = cmd->data;
 >>
->> Best,
->> Chunyan
+>>       if (sdhci_data_line_cmd(cmd))
+>> @@ -894,8 +895,10 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+>>                                            SDHCI_ADMA_ADDRESS_HI);
+>>               } else {
+>>                       WARN_ON(sg_cnt != 1);
+>> +                     reg = host->v4_mode ? SDHCI_ADMA_ADDRESS :
+>> +                             SDHCI_DMA_ADDRESS;
+>>                       sdhci_writel(host, sdhci_sdma_address(host),
+>> -                                  SDHCI_DMA_ADDRESS);
+>> +                                  reg);
+>
+> Shouldn't we support 64-bit SDMA in version 4 mode?
+
+I will address.
+
+>
+>
+>>               }
+>>       }
 >>
->>>
->>>> +
->>>>       if (host->quirks & SDHCI_QUIRK_MISSING_CAPS)
->>>>               return;
->>>>
->>>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
->>>> index c95b0a4..128b0ba 100644
->>>> --- a/drivers/mmc/host/sdhci.h
->>>> +++ b/drivers/mmc/host/sdhci.h
->>>> @@ -184,6 +184,7 @@
->>>>  #define   SDHCI_CTRL_DRV_TYPE_D              0x0030
->>>>  #define  SDHCI_CTRL_EXEC_TUNING              0x0040
->>>>  #define  SDHCI_CTRL_TUNED_CLK                0x0080
->>>> +#define  SDHCI_CTRL_V4_MODE          0x1000
->>>>  #define  SDHCI_CTRL_PRESET_VAL_ENABLE        0x8000
->>>>
->>>>  #define SDHCI_CAPABILITIES   0x40
->>>> @@ -270,6 +271,8 @@
->>>>  #define   SDHCI_SPEC_100     0
->>>>  #define   SDHCI_SPEC_200     1
->>>>  #define   SDHCI_SPEC_300     2
->>>> +#define   SDHCI_SPEC_400     3
->>>> +#define   SDHCI_SPEC_410     4
->>>>
->>>>  /*
->>>>   * End of controller registers.
->>>> @@ -551,6 +554,9 @@ struct sdhci_host {
->>>>       u32                     sdma_boundary;
->>>>
->>>>       unsigned long private[0] ____cacheline_aligned;
->>>> +
->>>> +     /* Host Version 4 Enable */
->>>> +     bool                    v4_mode;
->>>>  };
->>>>
->>>>  struct sdhci_ops {
->>>>
->>>
+>> @@ -2721,6 +2724,7 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
+>>                */
+>>               if (intmask & SDHCI_INT_DMA_END) {
+>>                       u32 dmastart, dmanow;
+>> +                     u32 reg;
+>>
+>>                       dmastart = sdhci_sdma_address(host);
+>>                       dmanow = dmastart + host->data->bytes_xfered;
+>> @@ -2733,7 +2737,9 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
+>>                       host->data->bytes_xfered = dmanow - dmastart;
+>>                       DBG("DMA base 0x%08x, transferred 0x%06x bytes, next 0x%08x\n",
+>>                           dmastart, host->data->bytes_xfered, dmanow);
+>> -                     sdhci_writel(host, dmanow, SDHCI_DMA_ADDRESS);
+>> +                     reg = host->v4_mode ? SDHCI_ADMA_ADDRESS :
+>> +                             SDHCI_DMA_ADDRESS;
+>> +                     sdhci_writel(host, dmanow, reg);
+>
+> Shouldn't we support 64-bit SDMA in version 4 mode?
+>
+>>               }
+>>
+>>               if (intmask & SDHCI_INT_DATA_END) {
 >>
 >
