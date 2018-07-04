@@ -1,37 +1,122 @@
-From: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
-Subject: [PATCH] mmc: sdhci-xenon: mark expected switch fall-through
-Date: Tue, 3 Jul 2018 17:56:59 -0500
-Message-ID: <20180703225659.GA14443@embeddedor.com>
+From: Chunyan Zhang <zhang.lyra@gmail.com>
+Subject: Re: [PATCH V2 1/7] mmc: sdhci: add sd host v4 mode
+Date: Wed, 4 Jul 2018 11:02:31 +0800
+Message-ID: <CAAfSe-vfcWU+ewD1KCumQx6OBmLiJ7U5hTO_9J9PgkhxF4ZuBg@mail.gmail.com>
+References: <1529028255-6022-1-git-send-email-zhang.chunyan@linaro.org>
+ <1529028255-6022-2-git-send-email-zhang.chunyan@linaro.org>
+ <1f3e7e87-be4e-37ab-af46-1c4e5dd79a1d@intel.com> <CAAfSe-ug+M7DO7S1KKQ43FcrRgfGqEpikvivgjBjih8yuTU0sg@mail.gmail.com>
+ <38c47bf5-d320-7767-59c1-958d1bbb6dc9@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
+In-Reply-To: <38c47bf5-d320-7767-59c1-958d1bbb6dc9@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Hu Ziji <huziji@marvell.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, "Gustavo A. R. Silva" <gustavo@embeddedor.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@spreadtrum.com>
 List-Id: linux-mmc@vger.kernel.org
 
-In preparation to enabling -Wimplicit-fallthrough, mark switch cases
-where we are expecting to fall through.
+On 21 June 2018 at 21:15, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 21/06/18 14:14, Chunyan Zhang wrote:
+>> On 21 June 2018 at 18:49, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>> On 15/06/18 05:04, Chunyan Zhang wrote:
+>>>> For SD host controller version 4.00 or later ones, there're two
+>>>> modes of implementation - Version 3.00 compatible mode or
+>>>> Version 4 mode.  This patch introduces a flag to record this.
+>>>>
+>>>> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
+>>>> ---
+>>>>  drivers/mmc/host/sdhci.c | 6 ++++++
+>>>>  drivers/mmc/host/sdhci.h | 6 ++++++
+>>>>  2 files changed, 12 insertions(+)
+>>>>
+>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>>> index 2ededa7f..cf5695f 100644
+>>>> --- a/drivers/mmc/host/sdhci.c
+>>>> +++ b/drivers/mmc/host/sdhci.c
+>>>> @@ -3302,6 +3302,12 @@ void __sdhci_read_caps(struct sdhci_host *host, u16 *ver, u32 *caps, u32 *caps1)
+>>>>       v = ver ? *ver : sdhci_readw(host, SDHCI_HOST_VERSION);
+>>>>       host->version = (v & SDHCI_SPEC_VER_MASK) >> SDHCI_SPEC_VER_SHIFT;
+>>>>
+>>>> +     if (host->version >= SDHCI_SPEC_400) {
+>>>> +             if (sdhci_readw(host, SDHCI_HOST_CONTROL2) &
+>>>> +                     SDHCI_CTRL_V4_MODE)
+>>>> +                     host->v4_mode = true;
+>>>> +     }
+>>>
+>>> At this point the host controller has just been reset which would mean it
+>>> must be in version 3 compatibility mode, which would mean this code doesn't
+>>> do anything.
+>>
+>> Why is it version 3 mode at this point?
+>
+> According to the specification, reset clears RW fields to zero.
+>
+>>
+>> I've tested this code on the sd host controller which was introduced
+>> in 6/7 in this patch-set, the result showed that it was v4_mode.
+>> Moreover without this patch, the Spreadtrum's sdhci driver in patch
+>> 6/7 couldn't work.
+>>
+>> Am I missing something here?
+>
+> It seems the Spreadtrum controller doesn't clear the "Host Version 4 Enable"
+> bit upon software reset for all.
+>
+> Also this seems the wrong way around.  The driver should decide whether or
+> not to use V4 mode and then the "Host Version 4 Enable" bit should be set
+> accordingly.
+>
+> V4 has been around so long that we can't just enable all supporting hardware
+> without risking the possibility it will break some platform.  So I suggest
 
-Warning level 2 was used: -Wimplicit-fallthrough=2
+Ok, understand.
 
-Signed-off-by: Gustavo A. R. Silva <gustavo@embeddedor.com>
----
- drivers/mmc/host/sdhci-xenon-phy.c | 1 +
- 1 file changed, 1 insertion(+)
+> adding a function sdhci_enable_v4_mode() which is called during probe.
 
-diff --git a/drivers/mmc/host/sdhci-xenon-phy.c b/drivers/mmc/host/sdhci-xenon-phy.c
-index a35804b..c335052 100644
---- a/drivers/mmc/host/sdhci-xenon-phy.c
-+++ b/drivers/mmc/host/sdhci-xenon-phy.c
-@@ -526,6 +526,7 @@ static bool xenon_emmc_phy_slow_mode(struct sdhci_host *host,
- 			ret = true;
- 			break;
- 		}
-+		/* else: fall through */
- 	default:
- 		reg &= ~XENON_TIMING_ADJUST_SLOW_MODE;
- 		ret = false;
--- 
-2.7.4
+Ok, will do, that is more a safe way.
+
+>
+>>
+>> Best,
+>> Chunyan
+>>
+>>>
+>>>> +
+>>>>       if (host->quirks & SDHCI_QUIRK_MISSING_CAPS)
+>>>>               return;
+>>>>
+>>>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+>>>> index c95b0a4..128b0ba 100644
+>>>> --- a/drivers/mmc/host/sdhci.h
+>>>> +++ b/drivers/mmc/host/sdhci.h
+>>>> @@ -184,6 +184,7 @@
+>>>>  #define   SDHCI_CTRL_DRV_TYPE_D              0x0030
+>>>>  #define  SDHCI_CTRL_EXEC_TUNING              0x0040
+>>>>  #define  SDHCI_CTRL_TUNED_CLK                0x0080
+>>>> +#define  SDHCI_CTRL_V4_MODE          0x1000
+>>>>  #define  SDHCI_CTRL_PRESET_VAL_ENABLE        0x8000
+>>>>
+>>>>  #define SDHCI_CAPABILITIES   0x40
+>>>> @@ -270,6 +271,8 @@
+>>>>  #define   SDHCI_SPEC_100     0
+>>>>  #define   SDHCI_SPEC_200     1
+>>>>  #define   SDHCI_SPEC_300     2
+>>>> +#define   SDHCI_SPEC_400     3
+>>>> +#define   SDHCI_SPEC_410     4
+>>>>
+>>>>  /*
+>>>>   * End of controller registers.
+>>>> @@ -551,6 +554,9 @@ struct sdhci_host {
+>>>>       u32                     sdma_boundary;
+>>>>
+>>>>       unsigned long private[0] ____cacheline_aligned;
+>>>> +
+>>>> +     /* Host Version 4 Enable */
+>>>> +     bool                    v4_mode;
+>>>>  };
+>>>>
+>>>>  struct sdhci_ops {
+>>>>
+>>>
+>>
+>
