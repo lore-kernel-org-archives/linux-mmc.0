@@ -1,45 +1,97 @@
-From: Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Subject: Re: [v2] libertas: fix suspend and resume for SDIO connected cards
-Date: Wed,  4 Jul 2018 15:13:49 +0000 (UTC)
-Message-ID: <20180704151349.52E3C6028D@smtp.codeaurora.org>
-References: <20180627185845.31799-1-daniel@zonque.org>
+From: Stefan Agner <stefan@agner.ch>
+Subject: Re: [PATCH v2] mmc: sdhci-esdhc-imx: allow 1.8V modes without
+ 100/200MHz pinctrl states
+Date: Wed, 04 Jul 2018 17:18:15 +0200
+Message-ID: <b2cc30701b1c38cd0c40736d04407424@agner.ch>
+References: <20180704150745.21003-1-stefan@agner.ch>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20180627185845.31799-1-daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, libertas-dev-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180704150745.21003-1-stefan@agner.ch>
+Sender: linux-kernel-owner@vger.kernel.org
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc: fabio.estevam@nxp.com, haibo.chen@nxp.com, aisheng.dong@nxp.com, michael@amarulasolutions.com, rmk+kernel@armlinux.org.uk, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org> wrote:
-
-> Prior to commit 573185cc7e64 ("mmc: core: Invoke sdio func driver's PM
-> callbacks from the sdio bus"), the MMC core used to call into the power
-> management functions of SDIO clients itself and removed the card if the
-> return code was non-zero. IOW, the mmc handled errors gracefully and didn't
-> upchain them to the pm core.
+On 04.07.2018 17:07, Stefan Agner wrote:
+> If pinctrl nodes for 100/200MHz are missing, the controller should
+> not select any mode which need signal frequencies 100MHz or higher.
+> To prevent such speed modes the driver currently uses the quirk flag
+> SDHCI_QUIRK2_NO_1_8_V. This works nicely for SD cards since 1.8V
+> signaling is required for all faster modes and slower modes use 3.3V
+> signaling only.
 > 
-> Since this change, the mmc core relies on generic power management
-> functions which treat all errors as a reason to cancel the suspend
-> immediately. This causes suspend attempts to fail when the libertas
-> driver is loaded.
+> However, there are eMMC modes which use 1.8V signaling and run below
+> 100MHz, e.g. DDR52 at 1.8V. With using SDHCI_QUIRK2_NO_1_8_V this
+> mode is prevented. When using a fixed 1.8V regulator as vqmmc-supply
+> the stack has no valid mode to use. In this tenuous situation the
+> kernel continuously prints voltage switching errors:
+>   mmc1: Switching to 3.3V signalling voltage failed
 > 
-> To fix this, power down the card explicitly in if_sdio_suspend() when we
-> know we're about to lose power and return success. Also set a flag in these
-> cases, and power up the card again in if_sdio_resume().
+> Avoid using SDHCI_QUIRK2_NO_1_8_V and prevent faster modes by
+> altering the SDHCI capability register. With that the stack is able
+> to select 1.8V modes even if no faster pinctrl states are available:
+>   # cat /sys/kernel/debug/mmc1/ios
+>   ...
+>   timing spec:    8 (mmc DDR52)
+>   signal voltage: 1 (1.80 V)
+>   ...
 > 
-> Fixes: 573185cc7e64 ("mmc: core: Invoke sdio func driver's PM callbacks from the sdio bus")
-> Cc: <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-> Signed-off-by: Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org>
-> Reviewed-by: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>
-> Reviewed-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Link: http://lkml.kernel.org/r/20180628081331.13051-1-stefan@agner.ch
+> Signed-off-by: Stefan Agner <stefan@agner.ch>
+> ---
 
-Patch applied to wireless-drivers-next.git, thanks.
+Btw, I still get the switching error once during boot-up:
+  mmc1: Switching to 3.3V signalling voltage failed
 
-7444a8092906 libertas: fix suspend and resume for SDIO connected cards
+This is due to the call from mmc_set_initial_signal_voltage. It is a bit
+unfortunate since this is printed as a warning. Not sure if that could
+be prevented somehow?
 
--- 
-https://patchwork.kernel.org/patch/10492407/
+--
+Stefan
 
-https://wireless.wiki.kernel.org/en/developers/documentation/submittingpatches
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 21 +++++++++------------
+>  1 file changed, 9 insertions(+), 12 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c
+> b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index 20a420b765b3..e96d969ab2c3 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -312,6 +312,15 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
+>  
+>  			if (imx_data->socdata->flags & ESDHC_FLAG_HS400)
+>  				val |= SDHCI_SUPPORT_HS400;
+> +
+> +			/*
+> +			 * Do not advertise faster UHS modes if there are no
+> +			 * pinctrl states for 100MHz/200MHz.
+> +			 */
+> +			if (IS_ERR_OR_NULL(imx_data->pins_100mhz) ||
+> +			    IS_ERR_OR_NULL(imx_data->pins_200mhz))
+> +				val &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_DDR50
+> +					 | SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_HS400);
+>  		}
+>  	}
+>  
+> @@ -1157,18 +1166,6 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
+>  						ESDHC_PINCTRL_STATE_100MHZ);
+>  		imx_data->pins_200mhz = pinctrl_lookup_state(imx_data->pinctrl,
+>  						ESDHC_PINCTRL_STATE_200MHZ);
+> -		if (IS_ERR(imx_data->pins_100mhz) ||
+> -				IS_ERR(imx_data->pins_200mhz)) {
+> -			dev_warn(mmc_dev(host->mmc),
+> -				"could not get ultra high speed state, work on normal mode\n");
+> -			/*
+> -			 * fall back to not supporting uhs by specifying no
+> -			 * 1.8v quirk
+> -			 */
+> -			host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
+> -		}
+> -	} else {
+> -		host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
+>  	}
+>  
+>  	/* call to generic mmc_of_parse to support additional capabilities */
