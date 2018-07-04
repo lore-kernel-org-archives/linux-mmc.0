@@ -1,80 +1,110 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-of-esdhc: set proper dma mask for ls104x chips
-Date: Wed, 4 Jul 2018 12:55:00 +0200
-Message-ID: <CAPDyKFrabODyn4qgprFS4+Pfg0Xvy1tBzqDofJOwWuM7HK=0ZQ@mail.gmail.com>
-References: <20180628084509.19646-1-laurentiu.tudor@nxp.com>
- <CAPDyKFoNmcg+7JbWq1eeb2Dx7GKSh=FWpZcEeB8RORaBbrr=qA@mail.gmail.com> <61a16c6b-9158-17ea-51f9-2ee5b85ccb78@nxp.com>
+From: Stefan Agner <stefan@agner.ch>
+Subject: Re: [PATCH 2/3] mmc: sdhci: add quirk to prevent higher speed modes
+Date: Wed, 04 Jul 2018 12:55:01 +0200
+Message-ID: <ffea342896629cf57b78661b04f60eda@agner.ch>
+References: <20180628081331.13051-1-stefan@agner.ch>
+ <20180628081331.13051-3-stefan@agner.ch>
+ <CAPDyKFqPaRRuXdSD50q=et-OvJ=emdbq-XWyeddkiuC5SjuLig@mail.gmail.com>
+ <76c619e6267c5f0adfda80d0fdba3c6b@agner.ch>
+ <CAPDyKFrjSadT0T2+zWhpq-E5kS1bm01y4R+LfyHyhjFBuK_hLQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <61a16c6b-9158-17ea-51f9-2ee5b85ccb78@nxp.com>
+In-Reply-To: <CAPDyKFrjSadT0T2+zWhpq-E5kS1bm01y4R+LfyHyhjFBuK_hLQ@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Laurentiu Tudor <laurentiu.tudor@nxp.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "Y.b. Lu" <yangbo.lu@nxp.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Fabio Estevam <fabio.estevam@nxp.com>, Haibo Chen <haibo.chen@nxp.com>, Aisheng Dong <aisheng.dong@nxp.com>, Michael Trimarchi <michael@amarulasolutions.com>, Russell King <rmk+kernel@armlinux.org.uk>, linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 3 July 2018 at 13:15, Laurentiu Tudor <laurentiu.tudor@nxp.com> wrote:
-> Hi Uffe,
->
-> On 02.07.2018 17:37, Ulf Hansson wrote:
->> On 28 June 2018 at 10:45, Laurentiu Tudor <laurentiu.tudor@nxp.com> wrote:
->>> SDHCI controller in ls1043a and ls1046a generate 40-bit wide addresses
->>> when doing DMA. Make sure that the corresponding dma mask is correctly
->>> configured.
+On 04.07.2018 12:07, Ulf Hansson wrote:
+> On 3 July 2018 at 10:48, Stefan Agner <stefan@agner.ch> wrote:
+>> On 02.07.2018 16:36, Ulf Hansson wrote:
+>>> On 28 June 2018 at 10:13, Stefan Agner <stefan@agner.ch> wrote:
+>>>> Some hosts are capable of running higher speed modes but do not
+>>>> have the board support for it. Introduce a quirk which prevents
+>>>> the stack from using modes running at 100MHz or faster.
 >>>
->>> Signed-off-by: Laurentiu Tudor <laurentiu.tudor@nxp.com>
+>>> To cap the freq, use the DT property "max-frequency". To enable
+>>> certain speed modes, use the corresponding speed mode binding. For
+>>> example "sd-uhs-sdr*" and "mmc-hs200*".
+>>> Documented in Documentation/devicetree/bindings/mmc/mmc.txt
 >>
->> Thanks, applied for next!
->
-> Thanks for picking this up!
-> I just realized that maybe I should have provided some context around
-> this patch. I'm working on enabling smmu on these chips and encountered
-> the following problem: the smmu input address size is 48 bits so the dma
-> mappings for sdhci end up 48-bit wide. However, on these chips sdhci
-> only use 40-bits of that address size when doing dma.
-> So you end up with a 48-bit address translation in smmu but the device
-> generates transactions with clipped 40-bit addresses, thus smmu context
-> faults are triggered. Setting up the correct dma mask fixes this situation.
-
-That's perfect data for the changelog. Care to send a v2, then I
-re-place the one I have just applied!
-
-Kind regards
-Uffe
-
->
-> ---
-> Best Regards, Laurentiu
->
+>> I had bad experience with max-frequency: Some higher speed modes seem
+>> not to work reliably if constraint to low frequencies. E.g. we had lots
+>> of devices fail in practise with HS400@100MHz... So it is doing what it
+>> should, but it just seems that higher speed modes do not necessarily run
+>> well with lower frequencies...
 >>
->>> ---
->>>   drivers/mmc/host/sdhci-of-esdhc.c | 6 ++++++
->>>   1 file changed, 6 insertions(+)
+>> So I'd rather prefer to limit speed modes as it is done right now.
+>>
 >>>
->>> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
->>> index 4ffa6b173a21..8332f56e6c0d 100644
->>> --- a/drivers/mmc/host/sdhci-of-esdhc.c
->>> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
->>> @@ -22,6 +22,7 @@
->>>   #include <linux/sys_soc.h>
->>>   #include <linux/clk.h>
->>>   #include <linux/ktime.h>
->>> +#include <linux/dma-mapping.h>
->>>   #include <linux/mmc/host.h>
->>>   #include "sdhci-pltfm.h"
->>>   #include "sdhci-esdhc.h"
->>> @@ -427,6 +428,11 @@ static void esdhc_of_adma_workaround(struct sdhci_host *host, u32 intmask)
->>>   static int esdhc_of_enable_dma(struct sdhci_host *host)
->>>   {
->>>          u32 value;
->>> +       struct device *dev = mmc_dev(host->mmc);
->>> +
->>> +       if (of_device_is_compatible(dev->of_node, "fsl,ls1043a-esdhc") ||
->>> +           of_device_is_compatible(dev->of_node, "fsl,ls1046a-esdhc"))
->>> +               dma_set_mask_and_coherent(dev, DMA_BIT_MASK(40));
->>>
->>>          value = sdhci_readl(host, ESDHC_DMA_SYSCTL);
->>>          value |= ESDHC_DMA_SNOOP;
->>> --
->>> 2.17.1
->>>
+>>> In case the sdhci cap register, doesn't reflect the board support
+>>> properly, such that you may want to disable some speed modes, then you
+>>> may benefit from using the DT properties "sdhci-caps*.
+>>> Documented in Documentation/devicetree/bindings/mmc/sdhci.txt
+>>
+>> Hm, yeah I guess something like
+>>
+>> sdhci-caps-mask =  /bits/ 64 <((SDHCI_SUPPORT_SDR104 |
+>> SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_DDR50) << 32)>
+>>
+>> would come close.
+>>
+>> But it does not restrict MMC modes such as HS200/HS400. There seem to be
+>> no mmc-caps...
+> 
+> Right.
+> 
+> The solution to fix this, should be to *not* set those DT properties,
+> like "mmc-hs*" for example. That should work, no?
+> 
+
+The controller does not make use of the dt modes so far, so I can't not
+set those properties...
+
+>>
+>>
+>> My aim is to replace the SDHCI_QUIRK2_NO_1_8_V fix, which does not
+>> restrict modes correctly. Currently the driver checks whether >=100MHz
+>> pinctrl settings are available, and if not uses the quirk to restrict
+>> higher speed modes. Removing that would break device tree backward
+>> compatibility...
+> 
+> Looks like the problem is not really SDHCI_QUIRK2_NO_1_8_V, but rather
+> how the pinctrl setting becomes interpreted when setting the quirk.
+> 
+
+Yes, sorry for the confusion. SDHCI_QUIRK2_NO_1_8_V is fine, it is just
+not the quirk this driver needs.
+
+I argue that commit ad93220de7da ("mmc: sdhci-esdhc-imx: change pinctrl
+state according to uhs mode") chose the wrong quirk from the
+beginning...
+
+Afaict, the quirk needed here does not exist.
+
+--
+Stefan
+
+>>
+>> We probably could do something like this:
+>> if (!100mhzpinctrl) {
+>>      if (!sdhci-caps) {
+>>           /*
+>>            * If no 100MHz/200MHz pinctrl are available, SDHC caps should
+>> be used to restrict
+>>            * modes. Falling back to old behavior...
+>>            */
+>>          pr_warn(...)
+>>          host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
+>>      }
+>> }
+>>
+> 
+> I am not sure what makes best sense here. Let me have a look at patch 3 as well.
+> 
+> [...]
+> 
+> Kind regards
+> Uffe
