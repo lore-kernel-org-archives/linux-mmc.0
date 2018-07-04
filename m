@@ -1,135 +1,121 @@
-From: Maxime Ripard <maxime.ripard@bootlin.com>
-Subject: Re: [PATCH v2 1/1] mmc: sunxi: Disable irq during pm_suspend
-Date: Wed, 4 Jul 2018 13:48:10 +0200
-Message-ID: <20180704114810.nwy763c7gvtgb4bq@flea>
-References: <1530685741-20604-1-git-send-email-stefan@olimex.com>
- <CAPDyKFo_fadfNbt8YMS3MMjaxjt1B54DtZJ+-LoH9y5JeRi5pQ@mail.gmail.com>
- <9b8f30fd-12aa-46ba-ced9-aed38ada0059@arm.com>
+From: Stefan Agner <stefan@agner.ch>
+Subject: Re: [PATCH 2/3] mmc: sdhci: add quirk to prevent higher speed modes
+Date: Wed, 04 Jul 2018 15:18:51 +0200
+Message-ID: <6cf2fd635bc65de33edcdf401b035a67@agner.ch>
+References: <20180628081331.13051-1-stefan@agner.ch>
+ <20180628081331.13051-3-stefan@agner.ch>
+ <CAPDyKFqPaRRuXdSD50q=et-OvJ=emdbq-XWyeddkiuC5SjuLig@mail.gmail.com>
+ <76c619e6267c5f0adfda80d0fdba3c6b@agner.ch>
+ <CAPDyKFrjSadT0T2+zWhpq-E5kS1bm01y4R+LfyHyhjFBuK_hLQ@mail.gmail.com>
+ <ffea342896629cf57b78661b04f60eda@agner.ch>
+ <CAPDyKFrDMmMu1kuJdPDyyGKu6b0dR2MF2U4Rnb4hoHAcwNYtuw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="ru7c7wdsakc2z2iq"
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <9b8f30fd-12aa-46ba-ced9-aed38ada0059@arm.com>
+In-Reply-To: <CAPDyKFrDMmMu1kuJdPDyyGKu6b0dR2MF2U4Rnb4hoHAcwNYtuw@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Marc Zyngier <marc.zyngier@arm.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Stefan Mavrodiev <stefan@olimex.com>, Chen-Yu Tsai <wens@csie.org>, "open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..." <linux-mmc@vger.kernel.org>, "moderated list:ARM/Allwinner sunXi SoC support" <linux-arm-kernel@lists.infradead.org>, open list <linux-kernel@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Fabio Estevam <fabio.estevam@nxp.com>, Haibo Chen <haibo.chen@nxp.com>, Aisheng Dong <aisheng.dong@nxp.com>, Michael Trimarchi <michael@amarulasolutions.com>, Russell King <rmk+kernel@armlinux.org.uk>, linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
+On 04.07.2018 13:16, Ulf Hansson wrote:
+> On 4 July 2018 at 12:55, Stefan Agner <stefan@agner.ch> wrote:
+>> On 04.07.2018 12:07, Ulf Hansson wrote:
+>>> On 3 July 2018 at 10:48, Stefan Agner <stefan@agner.ch> wrote:
+>>>> On 02.07.2018 16:36, Ulf Hansson wrote:
+>>>>> On 28 June 2018 at 10:13, Stefan Agner <stefan@agner.ch> wrote:
+>>>>>> Some hosts are capable of running higher speed modes but do not
+>>>>>> have the board support for it. Introduce a quirk which prevents
+>>>>>> the stack from using modes running at 100MHz or faster.
+>>>>>
+>>>>> To cap the freq, use the DT property "max-frequency". To enable
+>>>>> certain speed modes, use the corresponding speed mode binding. For
+>>>>> example "sd-uhs-sdr*" and "mmc-hs200*".
+>>>>> Documented in Documentation/devicetree/bindings/mmc/mmc.txt
+>>>>
+>>>> I had bad experience with max-frequency: Some higher speed modes seem
+>>>> not to work reliably if constraint to low frequencies. E.g. we had lots
+>>>> of devices fail in practise with HS400@100MHz... So it is doing what it
+>>>> should, but it just seems that higher speed modes do not necessarily run
+>>>> well with lower frequencies...
+>>>>
+>>>> So I'd rather prefer to limit speed modes as it is done right now.
+>>>>
+>>>>>
+>>>>> In case the sdhci cap register, doesn't reflect the board support
+>>>>> properly, such that you may want to disable some speed modes, then you
+>>>>> may benefit from using the DT properties "sdhci-caps*.
+>>>>> Documented in Documentation/devicetree/bindings/mmc/sdhci.txt
+>>>>
+>>>> Hm, yeah I guess something like
+>>>>
+>>>> sdhci-caps-mask =  /bits/ 64 <((SDHCI_SUPPORT_SDR104 |
+>>>> SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_DDR50) << 32)>
+>>>>
+>>>> would come close.
+>>>>
+>>>> But it does not restrict MMC modes such as HS200/HS400. There seem to be
+>>>> no mmc-caps...
+>>>
+>>> Right.
+>>>
+>>> The solution to fix this, should be to *not* set those DT properties,
+>>> like "mmc-hs*" for example. That should work, no?
+>>>
+>>
+>> The controller does not make use of the dt modes so far, so I can't not
+>> set those properties...
+> 
+> Then where are the corresponding caps for the eMMC speed modes being set?
+> 
+> Can't you just avoid setting them?
+> 
 
---ru7c7wdsakc2z2iq
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+That was the right question:
 
-On Wed, Jul 04, 2018 at 12:34:01PM +0100, Marc Zyngier wrote:
-> On 04/07/18 11:50, Ulf Hansson wrote:
-> > + Marc
-> >=20
-> > On 4 July 2018 at 08:28, Stefan Mavrodiev <stefan@olimex.com> wrote:
-> >> When mmc host controller enters suspend state, the clocks are
-> >> disabled, but irqs are not. For some reason the irqchip emits
-> >> false interrupts, which causes system lock loop.
-> >>
-> >> Debug log is:
-> >>   ...
-> >>   sunxi-mmc 1c11000.mmc: setting clk to 52000000, rounded 51200000
-> >>   sunxi-mmc 1c11000.mmc: enabling the clock
-> >>   sunxi-mmc 1c11000.mmc: cmd 13(8000014d) arg 10000 ie 0x0000bbc6 len 0
-> >>   sunxi-mmc 1c11000.mmc: irq: rq (ptrval) mi 00000004 idi 00000000
-> >>   sunxi-mmc 1c11000.mmc: cmd 6(80000146) arg 3210101 ie 0x0000bbc6 len=
- 0
-> >>   sunxi-mmc 1c11000.mmc: irq: rq (ptrval) mi 00000004 idi 00000000
-> >>   sunxi-mmc 1c11000.mmc: cmd 13(8000014d) arg 10000 ie 0x0000bbc6 len 0
-> >>   sunxi-mmc 1c11000.mmc: irq: rq (ptrval) mi 00000004 idi 00000000
-> >>   mmc1: new DDR MMC card at address 0001
-> >>   mmcblk1: mmc1:0001 AGND3R 14.6 GiB
-> >>   mmcblk1boot0: mmc1:0001 AGND3R partition 1 4.00 MiB
-> >>   mmcblk1boot1: mmc1:0001 AGND3R partition 2 4.00 MiB
-> >>   sunxi-mmc 1c11000.mmc: cmd 18(80003352) arg 0 ie 0x0000fbc2 len 409
-> >>   sunxi-mmc 1c11000.mmc: irq: rq (ptrval) mi 00004000 idi 00000002
-> >>    mmcblk1: p1
-> >>   sunxi-mmc 1c11000.mmc: irq: rq   (null) mi 00000000 idi 00000000
-> >>   sunxi-mmc 1c11000.mmc: irq: rq   (null) mi 00000000 idi 00000000
-> >>   sunxi-mmc 1c11000.mmc: irq: rq   (null) mi 00000000 idi 00000000
-> >>   sunxi-mmc 1c11000.mmc: irq: rq   (null) mi 00000000 idi 00000000
-> >> and so on...
-> >>
-> >> This issue apears on eMMC cards, routed on MMC2 slot. The patch is
-> >> tested with A20-OLinuXino-MICRO/LIME/LIME2 boards.
-> >>
-> >> Fixes: 9a8e1e8cc2c0 ("mmc: sunxi: Add runtime_pm support")
-> >> Signed-off-by: Stefan Mavrodiev <stefan@olimex.com>
-> >> ---
-> >>  Changes in v2:
-> >>   - Add comment why disable_irq() is necessary
-> >>
-> >> ---
-> >>  drivers/mmc/host/sunxi-mmc.c | 7 +++++++
-> >>  1 file changed, 7 insertions(+)
-> >>
-> >> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc=
-=2Ec
-> >> index e747259..8e7f3e3 100644
-> >> --- a/drivers/mmc/host/sunxi-mmc.c
-> >> +++ b/drivers/mmc/host/sunxi-mmc.c
-> >> @@ -1446,6 +1446,7 @@ static int sunxi_mmc_runtime_resume(struct devic=
-e *dev)
-> >>         sunxi_mmc_init_host(host);
-> >>         sunxi_mmc_set_bus_width(host, mmc->ios.bus_width);
-> >>         sunxi_mmc_set_clk(host, &mmc->ios);
-> >> +       enable_irq(host->irq);
-> >>
-> >>         return 0;
-> >>  }
-> >> @@ -1455,6 +1456,12 @@ static int sunxi_mmc_runtime_suspend(struct dev=
-ice *dev)
-> >>         struct mmc_host *mmc =3D dev_get_drvdata(dev);
-> >>         struct sunxi_mmc_host *host =3D mmc_priv(mmc);
-> >>
-> >> +       /*
-> >> +        * When clocks are off, it's possible receiving
-> >> +        * fake interrupts, which will stall the system.
-> >> +        * Disabling the irq  will prevent this.
-> >> +        */
-> >> +       disable_irq(host->irq);
-> >=20
-> > No, this doesn't work for shared IRQs.
->=20
-> Well, in this case, it does work, because that interrupt line cannot be
-> shared with anything else, if I understand how the SoC is wired: each
-> MMC controller has a dedicated interrupt line to the GIC, and it isn't
-> shared with anything (that's on the A20 though, and I don't know about
-> other SoCs integrating the same IP).
+On closer look, the higher speed MMC modes are actually not set at all!
 
-Yeah, and I've never seen a shared interrupt line within the Allwinner
-SoCs, so I guess we're pretty safe from that regard.
+So just using sdhci-caps-mask = <0x7 0x0>; (which masks
+SDR104/SDR50/DDR50) is doing the job as far as I can tell.
 
-Maxime
+>>
+>>>>
+>>>>
+>>>> My aim is to replace the SDHCI_QUIRK2_NO_1_8_V fix, which does not
+>>>> restrict modes correctly. Currently the driver checks whether >=100MHz
+>>>> pinctrl settings are available, and if not uses the quirk to restrict
+>>>> higher speed modes. Removing that would break device tree backward
+>>>> compatibility...
+>>>
+>>> Looks like the problem is not really SDHCI_QUIRK2_NO_1_8_V, but rather
+>>> how the pinctrl setting becomes interpreted when setting the quirk.
+>>>
+>>
+>> Yes, sorry for the confusion. SDHCI_QUIRK2_NO_1_8_V is fine, it is just
+>> not the quirk this driver needs.
+>>
+>> I argue that commit ad93220de7da ("mmc: sdhci-esdhc-imx: change pinctrl
+>> state according to uhs mode") chose the wrong quirk from the
+>> beginning...
+> 
+> That's seems reasonable! But it's been there since 3.13, so I guess we
+> have to think about backwards compatibility issues, as you stated.
+> 
 
---=20
-Maxime Ripard, Bootlin (formerly Free Electrons)
-Embedded Linux and Kernel engineering
-https://bootlin.com
+It seems that the driver already fakes
+SDHCI_CAPABILITIES/SDHCI_CAPABILITIES_1 in esdhc_readl_le, so instead
+using the sdhci-caps-mask we could implement the work around there. Not
+very clean, but backward compatible and everything self contained in the
+driver.
 
---ru7c7wdsakc2z2iq
-Content-Type: application/pgp-signature; name="signature.asc"
+--
+Stefan
 
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEE0VqZU19dR2zEVaqr0rTAlCFNr3QFAls8s+cACgkQ0rTAlCFN
-r3Q1GA/+LKa52m8o/rn9qqLMPNb78v/VtPvWYtYmjR6jH+NNGduqH90o1SxEy33S
-pRuZHrV/wxcqhFHhksrADzjJyFh3StCep0LMke4h8XzoIfM8xbyk7RRnQfUs2rSu
-sX5FOkk22/efA8wJ1ktxjqbyKcLFbbyLk1GkyG2g52FVfQ6T6gMq1yJEq7DOnGTu
-8itlb04q4znqLezZF+6gL2NgPSDLR27r9Yu98IUQsckWQI9d97OgYkr8cfZgYBY9
-tFJDzPijEBwOCfz8DJe9keb28PuPi/7kLM7Am3aTHWqGZ8nwQQOP/kV18txu1Nb8
-W9BPpaAYOgZZie+wI6TSN5vV0XnfSzktzaBykqRoUrANI6UPeYEVCcMlbW5Cv2DH
-TM0D4X92Ny5aRCD14gtf8/0boEpeoYr1dzmtWwJtpBCXr9nGIGoTethI6t+KDHZt
-2gLVLkmnuzxQgQfF8Q6chNFPoJ0wdybrqXzzzzYWXvho3usNHY76rAHYptsVy5EE
-5Ln/LpT+361Km46tGv7WOuSGEOMKyjFT0h3IOXuhLIgTQpCtwFBh4IywFshkxViY
-n8y+yN9ffGlJ5JIG82wsYgnKgGDN/hS7gtpbIsJFq+f9OI7vUnI+S3dI00WzR3zN
-u+nqH73gPvwnrFNeAhbdZcOjQ5G6oPeL+dnl2gvfsWQ+x4Xrd5E=
-=6DST
------END PGP SIGNATURE-----
-
---ru7c7wdsakc2z2iq--
+>>
+>> Afaict, the quirk needed here does not exist.
+> 
+> [...]
+> 
+> Kind regards
+> Uffe
