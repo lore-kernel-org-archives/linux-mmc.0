@@ -1,90 +1,79 @@
-From: Chunyan Zhang <zhang.lyra@gmail.com>
-Subject: Re: [PATCH V2 5/7] mmc: sdhci: add CMD23 support for v4 mode
-Date: Wed, 4 Jul 2018 11:03:20 +0800
-Message-ID: <CAAfSe-uzbnfAgN6hPhJo39POOOqbz6Ac+2b5B6gnpe7ZeAW3HQ@mail.gmail.com>
-References: <1529028255-6022-1-git-send-email-zhang.chunyan@linaro.org>
- <1529028255-6022-6-git-send-email-zhang.chunyan@linaro.org> <2c91af23-da14-ed70-91b3-d7bfb06f3141@intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: Stefan Mavrodiev <stefan@olimex.com>
+Subject: [PATCH v2 1/1] mmc: sunxi: Disable irq during pm_suspend
+Date: Wed,  4 Jul 2018 09:28:59 +0300
+Message-ID: <1530685741-20604-1-git-send-email-stefan@olimex.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <2c91af23-da14-ed70-91b3-d7bfb06f3141@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@spreadtrum.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@bootlin.com>, Chen-Yu Tsai <wens@csie.org>, "open list:MULTIMEDIA CARD MMC, SECURE
+        DIGITAL SD AND..." <linux-mmc@vger.kernel.org>, "moderated list:ARM/Allwinner
+        sunXi SoC support" <linux-arm-kernel@lists.infradead.org>, open list <linux-kernel@vger.kernel.org>
+Cc: Stefan Mavrodiev <stefan@olimex.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 23 June 2018 at 03:40, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 06/15/2018 05:04 AM, Chunyan Zhang wrote:
->> Host Driver Version 4.10 adds a new bit in Host Control 2 Register
->> for selecting Auto CMD23 or Auto CMD12 for ADMA3 data transfer.
->
-> We don't support ADMA3.  It would require changes to the block driver.
-> So is this change needed?
->
->>
->> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
->> ---
->>  drivers/mmc/host/sdhci.c | 16 +++++++++++++++-
->>  drivers/mmc/host/sdhci.h |  1 +
->>  2 files changed, 16 insertions(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index b8ee124..3b2af7e 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -954,6 +954,20 @@ static inline bool sdhci_auto_cmd12(struct sdhci_host *host,
->>              !mrq->cap_cmd_during_tfr;
->>  }
->>
->> +static inline void sdhci_set_auto_cmd23(struct sdhci_host *host,
->> +                                     struct mmc_command *cmd)
->> +{
->> +     u16 ctrl2;
->> +
->> +     if (host->v4_mode) {
->
-> Isn't this only for a V4.1 controller, and doesn't the mode have to be "Auto
-> Cmd Auto Select"?
+When mmc host controller enters suspend state, the clocks are
+disabled, but irqs are not. For some reason the irqchip emits
+false interrupts, which causes system lock loop.
 
-I will send another version of changes for this new mode "Auto Cmd
-Auto Select", let's see if the next iteration gets better then.
+Debug log is:
+  ...
+  sunxi-mmc 1c11000.mmc: setting clk to 52000000, rounded 51200000
+  sunxi-mmc 1c11000.mmc: enabling the clock
+  sunxi-mmc 1c11000.mmc: cmd 13(8000014d) arg 10000 ie 0x0000bbc6 len 0
+  sunxi-mmc 1c11000.mmc: irq: rq (ptrval) mi 00000004 idi 00000000
+  sunxi-mmc 1c11000.mmc: cmd 6(80000146) arg 3210101 ie 0x0000bbc6 len 0
+  sunxi-mmc 1c11000.mmc: irq: rq (ptrval) mi 00000004 idi 00000000
+  sunxi-mmc 1c11000.mmc: cmd 13(8000014d) arg 10000 ie 0x0000bbc6 len 0
+  sunxi-mmc 1c11000.mmc: irq: rq (ptrval) mi 00000004 idi 00000000
+  mmc1: new DDR MMC card at address 0001
+  mmcblk1: mmc1:0001 AGND3R 14.6 GiB
+  mmcblk1boot0: mmc1:0001 AGND3R partition 1 4.00 MiB
+  mmcblk1boot1: mmc1:0001 AGND3R partition 2 4.00 MiB
+  sunxi-mmc 1c11000.mmc: cmd 18(80003352) arg 0 ie 0x0000fbc2 len 409
+  sunxi-mmc 1c11000.mmc: irq: rq (ptrval) mi 00004000 idi 00000002
+   mmcblk1: p1
+  sunxi-mmc 1c11000.mmc: irq: rq   (null) mi 00000000 idi 00000000
+  sunxi-mmc 1c11000.mmc: irq: rq   (null) mi 00000000 idi 00000000
+  sunxi-mmc 1c11000.mmc: irq: rq   (null) mi 00000000 idi 00000000
+  sunxi-mmc 1c11000.mmc: irq: rq   (null) mi 00000000 idi 00000000
+and so on...
 
-Thanks for your review,
-Chunyan
+This issue apears on eMMC cards, routed on MMC2 slot. The patch is
+tested with A20-OLinuXino-MICRO/LIME/LIME2 boards.
 
->
->
->> +             ctrl2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
->> +             ctrl2 |= SDHCI_CMD23_ENABLE;
->> +             sdhci_writew(host, ctrl2, SDHCI_HOST_CONTROL2);
->> +     } else {
->> +             sdhci_writel(host, cmd->mrq->sbc->arg, SDHCI_ARGUMENT2);
->> +     }
->> +}
->> +
->>  static void sdhci_set_transfer_mode(struct sdhci_host *host,
->>       struct mmc_command *cmd)
->>  {
->> @@ -989,7 +1003,7 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
->>                       mode |= SDHCI_TRNS_AUTO_CMD12;
->>               else if (cmd->mrq->sbc && (host->flags & SDHCI_AUTO_CMD23)) {
->>                       mode |= SDHCI_TRNS_AUTO_CMD23;
->> -                     sdhci_writel(host, cmd->mrq->sbc->arg, SDHCI_ARGUMENT2);
->> +                     sdhci_set_auto_cmd23(host, cmd);
->>               }
->>       }
->>
->> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
->> index 1e84539..d5e1c10 100644
->> --- a/drivers/mmc/host/sdhci.h
->> +++ b/drivers/mmc/host/sdhci.h
->> @@ -185,6 +185,7 @@
->>  #define   SDHCI_CTRL_DRV_TYPE_D              0x0030
->>  #define  SDHCI_CTRL_EXEC_TUNING              0x0040
->>  #define  SDHCI_CTRL_TUNED_CLK                0x0080
->> +#define  SDHCI_CMD23_ENABLE          0x0800
->>  #define  SDHCI_CTRL_V4_MODE          0x1000
->>  #define  SDHCI_CTRL_64BIT_ADDR               0x2000
->>  #define  SDHCI_CTRL_PRESET_VAL_ENABLE        0x8000
->>
->
+Fixes: 9a8e1e8cc2c0 ("mmc: sunxi: Add runtime_pm support")
+Signed-off-by: Stefan Mavrodiev <stefan@olimex.com>
+---
+ Changes in v2:
+  - Add comment why disable_irq() is necessary
+
+---
+ drivers/mmc/host/sunxi-mmc.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index e747259..8e7f3e3 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -1446,6 +1446,7 @@ static int sunxi_mmc_runtime_resume(struct device *dev)
+ 	sunxi_mmc_init_host(host);
+ 	sunxi_mmc_set_bus_width(host, mmc->ios.bus_width);
+ 	sunxi_mmc_set_clk(host, &mmc->ios);
++	enable_irq(host->irq);
+ 
+ 	return 0;
+ }
+@@ -1455,6 +1456,12 @@ static int sunxi_mmc_runtime_suspend(struct device *dev)
+ 	struct mmc_host	*mmc = dev_get_drvdata(dev);
+ 	struct sunxi_mmc_host *host = mmc_priv(mmc);
+ 
++	/*
++	 * When clocks are off, it's possible receiving
++	 * fake interrupts, which will stall the system.
++	 * Disabling the irq  will prevent this.
++	 */
++	disable_irq(host->irq);
+ 	sunxi_mmc_reset_host(host);
+ 	sunxi_mmc_disable(host);
+ 
+-- 
+2.7.4
