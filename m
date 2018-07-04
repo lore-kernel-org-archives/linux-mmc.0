@@ -1,211 +1,88 @@
-From: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
-Subject: [PATCH] mmc: sdhci-of-dwcmshc: add SDHCI OF Synopsys DWC MSHC
- dirver
-Date: Wed, 4 Jul 2018 17:45:24 +0800
-Message-ID: <20180704174524.5f6d50fb@xhacker.debian>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 2/3] mmc: sdhci: add quirk to prevent higher speed modes
+Date: Wed, 4 Jul 2018 12:07:32 +0200
+Message-ID: <CAPDyKFrjSadT0T2+zWhpq-E5kS1bm01y4R+LfyHyhjFBuK_hLQ@mail.gmail.com>
+References: <20180628081331.13051-1-stefan@agner.ch> <20180628081331.13051-3-stefan@agner.ch>
+ <CAPDyKFqPaRRuXdSD50q=et-OvJ=emdbq-XWyeddkiuC5SjuLig@mail.gmail.com> <76c619e6267c5f0adfda80d0fdba3c6b@agner.ch>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <76c619e6267c5f0adfda80d0fdba3c6b@agner.ch>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Prabu Thangamuthu <Prabu.T@synopsys.com>, Manjunath M B <Manjunath.MB@synopsys.com>
+To: Stefan Agner <stefan@agner.ch>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Fabio Estevam <fabio.estevam@nxp.com>, Haibo Chen <haibo.chen@nxp.com>, Aisheng Dong <aisheng.dong@nxp.com>, Michael Trimarchi <michael@amarulasolutions.com>, Russell King <rmk+kernel@armlinux.org.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Add a driver for SDHCI OF Synopsys DesignWare Cores Mobile Storage
-Host Controller.
+On 3 July 2018 at 10:48, Stefan Agner <stefan@agner.ch> wrote:
+> On 02.07.2018 16:36, Ulf Hansson wrote:
+>> On 28 June 2018 at 10:13, Stefan Agner <stefan@agner.ch> wrote:
+>>> Some hosts are capable of running higher speed modes but do not
+>>> have the board support for it. Introduce a quirk which prevents
+>>> the stack from using modes running at 100MHz or faster.
+>>
+>> To cap the freq, use the DT property "max-frequency". To enable
+>> certain speed modes, use the corresponding speed mode binding. For
+>> example "sd-uhs-sdr*" and "mmc-hs200*".
+>> Documented in Documentation/devicetree/bindings/mmc/mmc.txt
+>
+> I had bad experience with max-frequency: Some higher speed modes seem
+> not to work reliably if constraint to low frequencies. E.g. we had lots
+> of devices fail in practise with HS400@100MHz... So it is doing what it
+> should, but it just seems that higher speed modes do not necessarily run
+> well with lower frequencies...
+>
+> So I'd rather prefer to limit speed modes as it is done right now.
+>
+>>
+>> In case the sdhci cap register, doesn't reflect the board support
+>> properly, such that you may want to disable some speed modes, then you
+>> may benefit from using the DT properties "sdhci-caps*.
+>> Documented in Documentation/devicetree/bindings/mmc/sdhci.txt
+>
+> Hm, yeah I guess something like
+>
+> sdhci-caps-mask =  /bits/ 64 <((SDHCI_SUPPORT_SDR104 |
+> SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_DDR50) << 32)>
+>
+> would come close.
+>
+> But it does not restrict MMC modes such as HS200/HS400. There seem to be
+> no mmc-caps...
 
-Signed-off-by: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
----
- .../bindings/mmc/sdhci-of-dwcmshc.txt         |  20 +++
- drivers/mmc/host/Kconfig                      |  10 ++
- drivers/mmc/host/Makefile                     |   1 +
- drivers/mmc/host/sdhci-of-dwcmshc.c           | 117 ++++++++++++++++++
- 4 files changed, 148 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-of-dwcmshc.txt
- create mode 100644 drivers/mmc/host/sdhci-of-dwcmshc.c
+Right.
 
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-of-dwcmshc.txt b/Documentation/devicetree/bindings/mmc/sdhci-of-dwcmshc.txt
-new file mode 100644
-index 000000000000..ee4253b33be2
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/sdhci-of-dwcmshc.txt
-@@ -0,0 +1,20 @@
-+* Synopsys DesignWare Cores Mobile Storage Host Controller
-+
-+Required properties:
-+- compatible: should be one of the following:
-+    "snps,dwcmshc-sdhci"
-+- reg: offset and length of the register set for the device.
-+- interrupts: a single interrupt specifier.
-+- clocks: Array of clocks required for SDHCI; requires at least one for
-+    core clock.
-+- clock-names: Array of names corresponding to clocks property; shall be
-+    "core" for core clock and "bus" for optional bus clock.
-+
-+Example:
-+	sdhci2: sdhci@aa0000 {
-+		compatible = "snps,dwcmshc-sdhci";
-+		reg = <0xaa0000 0x1000>;
-+		interrupts = <GIC_SPI 21 IRQ_TYPE_LEVEL_HIGH>;
-+		clocks = <&emmcclk>;
-+		bus-width = <8>;
-+	}
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 0581c199c996..23beb9ec6dbf 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -176,6 +176,16 @@ config MMC_SDHCI_OF_HLWD
- 
- 	  If unsure, say N.
- 
-+config MMC_SDHCI_OF_DWCMSHC
-+	tristate "SDHCI OF support for the Synopsys DWC MSHC"
-+	depends on MMC_SDHCI_PLTFM
-+	depends on OF
-+	depends on COMMON_CLK
-+	help
-+	  This selects Synopsys DesignWare Cores Mobile Storage Controller.
-+	  If you have a controller with this interface, say Y or M here.
-+	  If unsure, say N.
-+
- config MMC_SDHCI_CADENCE
- 	tristate "SDHCI support for the Cadence SD/SDIO/eMMC controller"
- 	depends on MMC_SDHCI_PLTFM
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index 85dc1322c3de..a18fbba1b97e 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -82,6 +82,7 @@ obj-$(CONFIG_MMC_SDHCI_OF_ARASAN)	+= sdhci-of-arasan.o
- obj-$(CONFIG_MMC_SDHCI_OF_AT91)		+= sdhci-of-at91.o
- obj-$(CONFIG_MMC_SDHCI_OF_ESDHC)	+= sdhci-of-esdhc.o
- obj-$(CONFIG_MMC_SDHCI_OF_HLWD)		+= sdhci-of-hlwd.o
-+obj-$(CONFIG_MMC_SDHCI_OF_DWCMSHC)	+= sdhci-of-dwcmshc.o
- obj-$(CONFIG_MMC_SDHCI_BCM_KONA)	+= sdhci-bcm-kona.o
- obj-$(CONFIG_MMC_SDHCI_IPROC)		+= sdhci-iproc.o
- obj-$(CONFIG_MMC_SDHCI_MSM)		+= sdhci-msm.o
-diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-new file mode 100644
-index 000000000000..93b613cd7c33
---- /dev/null
-+++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-@@ -0,0 +1,117 @@
-+// SPDX-License-Identifier: GPL-2.0
-+/*
-+ * Driver for Synopsys DesignWare Cores Mobile Storage Host Controller
-+ *
-+ * Copyright (C) 2018 Synaptics Incorporated
-+ *
-+ * Author: Jisheng Zhang <jszhang@kernel.org>
-+ */
-+
-+#include <linux/clk.h>
-+#include <linux/module.h>
-+#include <linux/of.h>
-+
-+#include "sdhci-pltfm.h"
-+
-+struct dwcmshc_priv {
-+	/* bus clock */
-+	struct clk	*bus_clk;
-+};
-+
-+static const struct sdhci_ops sdhci_dwcmshc_ops = {
-+	.set_clock		= sdhci_set_clock,
-+	.set_bus_width		= sdhci_set_bus_width,
-+	.set_uhs_signaling	= sdhci_set_uhs_signaling,
-+	.get_max_clock		= sdhci_pltfm_clk_get_max_clock,
-+	.reset			= sdhci_reset,
-+};
-+
-+static const struct sdhci_pltfm_data sdhci_dwcmshc_pdata = {
-+	.ops = &sdhci_dwcmshc_ops,
-+	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-+};
-+
-+static int dwcmshc_probe(struct platform_device *pdev)
-+{
-+	struct sdhci_pltfm_host *pltfm_host;
-+	struct sdhci_host *host;
-+	struct dwcmshc_priv *priv;
-+	int err;
-+
-+	host = sdhci_pltfm_init(pdev, &sdhci_dwcmshc_pdata,
-+				sizeof(struct dwcmshc_priv));
-+	if (IS_ERR(host))
-+		return PTR_ERR(host);
-+
-+	pltfm_host = sdhci_priv(host);
-+	priv = sdhci_pltfm_priv(pltfm_host);
-+
-+	pltfm_host->clk = devm_clk_get(&pdev->dev, "core");
-+	if (IS_ERR(pltfm_host->clk)) {
-+		err = PTR_ERR(pltfm_host->clk);
-+		dev_err(&pdev->dev, "failed to get core clk: %d\n", err);
-+		goto free_pltfm;
-+	}
-+	err = clk_prepare_enable(pltfm_host->clk);
-+	if (err)
-+		goto free_pltfm;
-+
-+	priv->bus_clk = devm_clk_get(&pdev->dev, "bus");
-+	if (!IS_ERR(priv->bus_clk))
-+		clk_prepare_enable(priv->bus_clk);
-+
-+	err = mmc_of_parse(host->mmc);
-+	if (err)
-+		goto err_clk;
-+
-+	sdhci_get_of_property(pdev);
-+
-+	err = sdhci_add_host(host);
-+	if (err)
-+		goto err_clk;
-+
-+	return 0;
-+
-+err_clk:
-+	clk_disable_unprepare(pltfm_host->clk);
-+	clk_disable_unprepare(priv->bus_clk);
-+free_pltfm:
-+	sdhci_pltfm_free(pdev);
-+	return err;
-+}
-+
-+static int dwcmshc_remove(struct platform_device *pdev)
-+{
-+	struct sdhci_host *host = platform_get_drvdata(pdev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-+
-+	sdhci_remove_host(host, 0);
-+
-+	clk_disable_unprepare(pltfm_host->clk);
-+	clk_disable_unprepare(priv->bus_clk);
-+
-+	sdhci_pltfm_free(pdev);
-+
-+	return 0;
-+}
-+
-+static const struct of_device_id sdhci_dwcmshc_dt_ids[] = {
-+	{ .compatible = "snps,dwcmshc-sdhci" },
-+	{}
-+};
-+MODULE_DEVICE_TABLE(of, sdhci_dwcmshc_dt_ids);
-+
-+static struct platform_driver sdhci_dwcmshc_driver = {
-+	.driver	= {
-+		.name	= "sdhci-dwcmshc",
-+		.of_match_table = sdhci_dwcmshc_dt_ids,
-+	},
-+	.probe	= dwcmshc_probe,
-+	.remove	= dwcmshc_remove,
-+};
-+module_platform_driver(sdhci_dwcmshc_driver);
-+
-+MODULE_DESCRIPTION("SDHCI platform driver for Synopsys DWC MSHC");
-+MODULE_AUTHOR("Jisheng Zhang <jszhang@kernel.org>");
-+MODULE_LICENSE("GPL v2");
--- 
-2.18.0
+The solution to fix this, should be to *not* set those DT properties,
+like "mmc-hs*" for example. That should work, no?
+
+>
+>
+> My aim is to replace the SDHCI_QUIRK2_NO_1_8_V fix, which does not
+> restrict modes correctly. Currently the driver checks whether >=100MHz
+> pinctrl settings are available, and if not uses the quirk to restrict
+> higher speed modes. Removing that would break device tree backward
+> compatibility...
+
+Looks like the problem is not really SDHCI_QUIRK2_NO_1_8_V, but rather
+how the pinctrl setting becomes interpreted when setting the quirk.
+
+>
+> We probably could do something like this:
+> if (!100mhzpinctrl) {
+>      if (!sdhci-caps) {
+>           /*
+>            * If no 100MHz/200MHz pinctrl are available, SDHC caps should
+> be used to restrict
+>            * modes. Falling back to old behavior...
+>            */
+>          pr_warn(...)
+>          host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
+>      }
+> }
+>
+
+I am not sure what makes best sense here. Let me have a look at patch 3 as well.
+
+[...]
+
+Kind regards
+Uffe
