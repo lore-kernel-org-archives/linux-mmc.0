@@ -1,195 +1,162 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 13/19] mmc: mmci: send stop cmd if a data command fail
-Date: Wed, 4 Jul 2018 15:37:39 +0200
-Message-ID: <CAPDyKFrbHcyy+rcVPrJAvO+y-ywQ=yE=gT3dbG2kqroQAhMF2Q@mail.gmail.com>
-References: <1528809280-31116-1-git-send-email-ludovic.Barre@st.com> <1528809280-31116-14-git-send-email-ludovic.Barre@st.com>
+From: Marc Zyngier <marc.zyngier@arm.com>
+Subject: Re: [PATCH v2 1/1] mmc: sunxi: Disable irq during pm_suspend
+Date: Wed, 4 Jul 2018 14:45:32 +0100
+Message-ID: <42693731-6020-2fdd-cc68-01e9dd1fb6a3@arm.com>
+References: <1530685741-20604-1-git-send-email-stefan@olimex.com>
+ <CAPDyKFo_fadfNbt8YMS3MMjaxjt1B54DtZJ+-LoH9y5JeRi5pQ@mail.gmail.com>
+ <9b8f30fd-12aa-46ba-ced9-aed38ada0059@arm.com>
+ <CAPDyKFp8Hrmr0XCGnhFYrC3Q79dZizYC5KfRE92AUNa0FRDS5A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1528809280-31116-14-git-send-email-ludovic.Barre@st.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ludovic Barre <ludovic.Barre@st.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Gerald Baeza <gerald.baeza@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, devicetree@vger.kernel.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <CAPDyKFp8Hrmr0XCGnhFYrC3Q79dZizYC5KfRE92AUNa0FRDS5A@mail.gmail.com>
+Content-Language: en-GB
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Stefan Mavrodiev <stefan@olimex.com>, Maxime Ripard <maxime.ripard@bootlin.com>, "open list:MULTIMEDIA CARD (MMC),
+ SECURE DIGITAL (SD) AND..." <linux-mmc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>, Chen-Yu Tsai <wens@csie.org>, "moderated list:ARM/Allwinner sunXi SoC support" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 12 June 2018 at 15:14, Ludovic Barre <ludovic.Barre@st.com> wrote:
-> From: Ludovic Barre <ludovic.barre@st.com>
->
-> The mmc framework follows the requirement of SD_Specification:
-> the STOP_TRANSMISSION is sent on multiple write/read commands
-> and the stop command (alone), not needed on other ADTC commands.
->
-> But, some variants require a stop command "STOP_TRANSMISION" to clear
-> the DPSM "Data Path State Machine" if an error happens on command or data
-> step. If it's not done the next data command will freeze hardware block.
-> Needed to support the STM32 sdmmc variant.
->
-> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
-> ---
->  drivers/mmc/host/mmci.c | 36 +++++++++++++++++++++++++++++++-----
->  drivers/mmc/host/mmci.h |  3 +++
->  2 files changed, 34 insertions(+), 5 deletions(-)
->
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index 87724e1..9af7db8 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -24,6 +24,7 @@
->  #include <linux/mmc/pm.h>
->  #include <linux/mmc/host.h>
->  #include <linux/mmc/card.h>
-> +#include <linux/mmc/mmc.h>
->  #include <linux/mmc/slot-gpio.h>
->  #include <linux/amba/bus.h>
->  #include <linux/clk.h>
-> @@ -522,11 +523,28 @@ static void mmci_set_mask1(struct mmci_host *host, unsigned int mask)
->         host->mask1_reg = mask;
->  }
->
-> -static void mmci_stop_data(struct mmci_host *host)
-> +static int mmci_stop_data(struct mmci_host *host)
+On 04/07/18 14:34, Ulf Hansson wrote:
+> On 4 July 2018 at 13:34, Marc Zyngier <marc.zyngier@arm.com> wrote:
+>> On 04/07/18 11:50, Ulf Hansson wrote:
+>>> + Marc
+>>>
+>>> On 4 July 2018 at 08:28, Stefan Mavrodiev <stefan@olimex.com> wrote:
+>>>> When mmc host controller enters suspend state, the clocks are
+>>>> disabled, but irqs are not. For some reason the irqchip emits
+>>>> false interrupts, which causes system lock loop.
+>>>>
+>>>> Debug log is:
+>>>>   ...
+>>>>   sunxi-mmc 1c11000.mmc: setting clk to 52000000, rounded 51200000
+>>>>   sunxi-mmc 1c11000.mmc: enabling the clock
+>>>>   sunxi-mmc 1c11000.mmc: cmd 13(8000014d) arg 10000 ie 0x0000bbc6 len 0
+>>>>   sunxi-mmc 1c11000.mmc: irq: rq (ptrval) mi 00000004 idi 00000000
+>>>>   sunxi-mmc 1c11000.mmc: cmd 6(80000146) arg 3210101 ie 0x0000bbc6 len 0
+>>>>   sunxi-mmc 1c11000.mmc: irq: rq (ptrval) mi 00000004 idi 00000000
+>>>>   sunxi-mmc 1c11000.mmc: cmd 13(8000014d) arg 10000 ie 0x0000bbc6 len 0
+>>>>   sunxi-mmc 1c11000.mmc: irq: rq (ptrval) mi 00000004 idi 00000000
+>>>>   mmc1: new DDR MMC card at address 0001
+>>>>   mmcblk1: mmc1:0001 AGND3R 14.6 GiB
+>>>>   mmcblk1boot0: mmc1:0001 AGND3R partition 1 4.00 MiB
+>>>>   mmcblk1boot1: mmc1:0001 AGND3R partition 2 4.00 MiB
+>>>>   sunxi-mmc 1c11000.mmc: cmd 18(80003352) arg 0 ie 0x0000fbc2 len 409
+>>>>   sunxi-mmc 1c11000.mmc: irq: rq (ptrval) mi 00004000 idi 00000002
+>>>>    mmcblk1: p1
+>>>>   sunxi-mmc 1c11000.mmc: irq: rq   (null) mi 00000000 idi 00000000
+>>>>   sunxi-mmc 1c11000.mmc: irq: rq   (null) mi 00000000 idi 00000000
+>>>>   sunxi-mmc 1c11000.mmc: irq: rq   (null) mi 00000000 idi 00000000
+>>>>   sunxi-mmc 1c11000.mmc: irq: rq   (null) mi 00000000 idi 00000000
+>>>> and so on...
+>>>>
+>>>> This issue apears on eMMC cards, routed on MMC2 slot. The patch is
+>>>> tested with A20-OLinuXino-MICRO/LIME/LIME2 boards.
+>>>>
+>>>> Fixes: 9a8e1e8cc2c0 ("mmc: sunxi: Add runtime_pm support")
+>>>> Signed-off-by: Stefan Mavrodiev <stefan@olimex.com>
+>>>> ---
+>>>>  Changes in v2:
+>>>>   - Add comment why disable_irq() is necessary
+>>>>
+>>>> ---
+>>>>  drivers/mmc/host/sunxi-mmc.c | 7 +++++++
+>>>>  1 file changed, 7 insertions(+)
+>>>>
+>>>> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+>>>> index e747259..8e7f3e3 100644
+>>>> --- a/drivers/mmc/host/sunxi-mmc.c
+>>>> +++ b/drivers/mmc/host/sunxi-mmc.c
+>>>> @@ -1446,6 +1446,7 @@ static int sunxi_mmc_runtime_resume(struct device *dev)
+>>>>         sunxi_mmc_init_host(host);
+>>>>         sunxi_mmc_set_bus_width(host, mmc->ios.bus_width);
+>>>>         sunxi_mmc_set_clk(host, &mmc->ios);
+>>>> +       enable_irq(host->irq);
+>>>>
+>>>>         return 0;
+>>>>  }
+>>>> @@ -1455,6 +1456,12 @@ static int sunxi_mmc_runtime_suspend(struct device *dev)
+>>>>         struct mmc_host *mmc = dev_get_drvdata(dev);
+>>>>         struct sunxi_mmc_host *host = mmc_priv(mmc);
+>>>>
+>>>> +       /*
+>>>> +        * When clocks are off, it's possible receiving
+>>>> +        * fake interrupts, which will stall the system.
+>>>> +        * Disabling the irq  will prevent this.
+>>>> +        */
+>>>> +       disable_irq(host->irq);
+>>>
+>>> No, this doesn't work for shared IRQs.
+>>
+>> Well, in this case, it does work, because that interrupt line cannot be
+>> shared with anything else, if I understand how the SoC is wired: each
+>> MMC controller has a dedicated interrupt line to the GIC, and it isn't
+>> shared with anything (that's on the A20 though, and I don't know about
+>> other SoCs integrating the same IP).
+> 
+> That's the problem. This may work on some SoCs but not on others.
+> 
+>>
+>>>
+>>>>         sunxi_mmc_reset_host(host);
+>>>>         sunxi_mmc_disable(host);
+>>>>
+>>>> --
+>>>> 2.7.4
+>>>>
+>>>
+>>> The only option today is to use free_irq() in runtime suspend and then
+>>> re-request the irq to re-install the handler at runtime resume.
+>>>
+>>> That's not an optimal solution, which is pointed out in the below
+>>> discussion as well. Moreover, it has also turned out using free_irq()
+>>> is also problematic in cases threaded handlers are used.
+>>>
+>>> Here's the link to the discussion, it's not the only one I know of, so
+>>> this is common problem.
+>>> https://lkml.org/lkml/2016/1/28/213
+>>>
+>>> Care to have a hack on the "common" solution, which in principle means
+>>> adding APIs to genirq that can disable/enable handlers from being
+>>> called, rather than the entire IRQ line.
+>>
+>> That doesn't work. You still end-up with a screaming interrupt, and you
+>> will still spend 100% of your time in interrupt context for nothing.
+>>
+>> Eventually, the kernel will have enough (the /other/ shared handlers
+>> returning IRQ_NONE all the time), and will forcefully kill that
+>> particular interrupt interrupt line, meaning you end-up in the same
+>> situation of having the line disabled for all the users of that
+>> interrupt line. Except that now, it is disabled forever.
+> 
+> Ahh, correct!
+> 
+> Sounds like free_irq() is what we need. Only that it's bit heavy
+> weight as we need to re-install handlers.
+> 
+>>
+>> A better fix would be to kill the interrupt generation at the source
+>> (the MMC controller in this particular case) when suspending.
+> 
+> Right. But using disable_irq() doesn't work a general solution, so
+> something else is needed.
 
-Let's leave this as void function and instead add a check in
-mmci_start_command(), to see if the command is a
-MMC_STOP_TRANSMISSION. If so, then add host->variant->cmdreg_stop to
-the register that is written in it.
+Which is why I asked whether there was a way to prevent interrupts from
+being generated at the MMC controller level. Most IPs have something
+there, and I'd be surprised if there wasn't anything to that effect in
+the SDHCI spec.
 
-And actually, I think this change alone should be a separate patch
-coming before $subject patch in the series, as it addresses the first
-problem of two.
+Thanks,
 
->  {
-> +       struct mmc_command *stop = &host->stop_abort;
-> +       struct mmc_data *data = host->data;
-> +       unsigned int cmd = 0;
-> +
->         mmci_write_datactrlreg(host, 0);
->         mmci_set_mask1(host, 0);
->         host->data = NULL;
-> +
-> +       if (host->variant->cmdreg_stop) {
-> +               cmd |= host->variant->cmdreg_stop;
-> +               if (!data->stop) {
-> +                       memset(stop, 0, sizeof(struct mmc_command));
-> +                       stop->opcode = MMC_STOP_TRANSMISSION;
-> +                       stop->arg = 0;
-> +                       stop->flags = MMC_RSP_R1B | MMC_CMD_AC;
-> +                       data->stop = stop;
-
-I don't understand why you want the host->stop_abort being present in
-the mmci host struct? Can we get rid of that?
-
-Anyway, re-using the data->stop pointer seems reasonable.
-
-> +               }
-> +       }
-> +
-> +       return cmd;
->  }
->
->  static void mmci_init_sg(struct mmci_host *host, struct mmc_data *data)
-> @@ -703,6 +721,7 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
->               unsigned int status)
->  {
->         unsigned int status_err;
-> +       unsigned int cmd_reg = 0;
->
->         /* Make sure we have data to handle */
->         if (!data)
-> @@ -761,7 +780,7 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
->         if (status & MCI_DATAEND || data->error) {
->                 mmci_dma_finalize(host, data);
->
-> -               mmci_stop_data(host);
-> +               cmd_reg = mmci_stop_data(host);
->
->                 if (!data->error)
->                         /* The error clause is handled above, success! */
-> @@ -770,7 +789,7 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
->                 if (!data->stop || host->mrq->sbc) {
->                         mmci_request_end(host, data->mrq);
->                 } else {
-> -                       mmci_start_command(host, data->stop, 0);
-> +                       mmci_start_command(host, data->stop, cmd_reg);
->                 }
->         }
->  }
-> @@ -780,6 +799,8 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
->              unsigned int status)
->  {
->         void __iomem *base = host->base;
-> +       struct mmc_data *data = host->data;
-> +       unsigned int cmd_reg = 0;
->         bool sbc;
->
->         if (!cmd)
-> @@ -865,11 +886,16 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
->         }
->
->         if ((!sbc && !cmd->data) || cmd->error) {
-> -               if (host->data) {
-> +               if (data) {
->                         /* Terminate the DMA transfer */
->                         mmci_dma_error(host);
->
-> -                       mmci_stop_data(host);
-> +                       cmd_reg = mmci_stop_data(host);
-> +
-> +                       if (data->stop) {
-
-This means a change in behavior for !host->variant->cmdreg_stop
-variants, because the mmc core may have assigned data->stop. Did you
-test this path for any of the old variants?
-
-The change as such anyway seems like a good idea. If we had data, we
-may play safe and send a stop command to let the card to try to close
-down the transfer. On the other hand, we don't want this to come as
-side-effect, but rather it deserves is own standalone patch.
-
-I guess there are two options going forward.
-1) Split the patch and see if this works for other variants first and
-the add your changes on top for the new ST variant.
-2) Make this change only to affect the new ST variant.
-
-I am fine with both.
-
-> +                               mmci_start_command(host, data->stop, cmd_reg);
-> +                               return;
-> +                       }
->                 }
->                 mmci_request_end(host, host->mrq);
->         } else if (sbc) {
-> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-> index 2d7e901..4b4cd1d 100644
-> --- a/drivers/mmc/host/mmci.h
-> +++ b/drivers/mmc/host/mmci.h
-> @@ -243,6 +243,7 @@ struct mmci_host;
->   * @cmdreg_lrsp_crc: enable value for long response with crc
->   * @cmdreg_srsp_crc: enable value for short response with crc
->   * @cmdreg_srsp: enable value for short response without crc
-> + * @cmdreg_stop: enable value for stop and abort transmission
->   * @datalength_bits: number of bits in the MMCIDATALENGTH register
->   * @fifosize: number of bytes that can be written when MMCI_TXFIFOEMPTY
->   *           is asserted (likewise for RX)
-> @@ -298,6 +299,7 @@ struct variant_data {
->         unsigned int            cmdreg_lrsp_crc;
->         unsigned int            cmdreg_srsp_crc;
->         unsigned int            cmdreg_srsp;
-> +       unsigned int            cmdreg_stop;
->         unsigned int            datalength_bits;
->         unsigned int            fifosize;
->         unsigned int            fifohalfsize;
-> @@ -343,6 +345,7 @@ struct mmci_host {
->         struct mmc_request      *mrq;
->         struct mmc_command      *cmd;
->         struct mmc_data         *data;
-> +       struct mmc_command      stop_abort;
->         struct mmc_host         *mmc;
->         struct clk              *clk;
->         bool                    singleirq;
-> --
-> 2.7.4
->
-
-Kind regards
-Uffe
+	M.
+-- 
+Jazz is not dead. It just smells funny...
