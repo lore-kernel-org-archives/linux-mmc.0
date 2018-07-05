@@ -1,497 +1,226 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 02/19] mmc: mmci: merge qcom dml feature into mmci dma
-Date: Thu, 5 Jul 2018 17:26:58 +0200
-Message-ID: <CAPDyKFqOOvbNc79hdWhdS4pxkYrh48At-BLuGmX0jDMER3Akdw@mail.gmail.com>
-References: <1528809280-31116-1-git-send-email-ludovic.Barre@st.com> <1528809280-31116-3-git-send-email-ludovic.Barre@st.com>
+Subject: Re: [PATCH v2 1/1] mmc: sunxi: Disable irq during pm_suspend
+Date: Thu, 5 Jul 2018 17:45:29 +0200
+Message-ID: <CAPDyKFqG7rAbRWkcJ3VELQSo641pmHYSaVTEzGauuhm6rMcR=A@mail.gmail.com>
+References: <1530685741-20604-1-git-send-email-stefan@olimex.com>
+ <CAPDyKFo_fadfNbt8YMS3MMjaxjt1B54DtZJ+-LoH9y5JeRi5pQ@mail.gmail.com>
+ <9b8f30fd-12aa-46ba-ced9-aed38ada0059@arm.com> <CAPDyKFp8Hrmr0XCGnhFYrC3Q79dZizYC5KfRE92AUNa0FRDS5A@mail.gmail.com>
+ <20180704212951.43c6a62a@why.wild-wind.fr.eu.org> <CAPDyKFpmd5T249HfQfuovD+=ZrBZw=kV4OUhVAHAiywo7m=haA@mail.gmail.com>
+ <79f3c720-cc1d-f480-8e6b-8dbc3232837a@arm.com> <CAPDyKFof7HKNnzL5dmDX8AKxRgyXab7qJGQ1v6ZSzYKw4Tj+rQ@mail.gmail.com>
+ <90c9c35b-f900-4d75-b813-1b6ba3ee2fc9@arm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1528809280-31116-3-git-send-email-ludovic.Barre@st.com>
+In-Reply-To: <90c9c35b-f900-4d75-b813-1b6ba3ee2fc9@arm.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ludovic Barre <ludovic.Barre@st.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Gerald Baeza <gerald.baeza@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, devicetree@vger.kernel.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Marc Zyngier <marc.zyngier@arm.com>
+Cc: Stefan Mavrodiev <stefan@olimex.com>, Maxime Ripard <maxime.ripard@bootlin.com>, Chen-Yu Tsai <wens@csie.org>, "open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..." <linux-mmc@vger.kernel.org>, "moderated list:ARM/Allwinner sunXi SoC support" <linux-arm-kernel@lists.infradead.org>, open list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 12 June 2018 at 15:14, Ludovic Barre <ludovic.Barre@st.com> wrote:
-> From: Ludovic Barre <ludovic.barre@st.com>
+On 5 July 2018 at 15:56, Marc Zyngier <marc.zyngier@arm.com> wrote:
+> On 05/07/18 13:07, Ulf Hansson wrote:
+>> On 5 July 2018 at 13:40, Marc Zyngier <marc.zyngier@arm.com> wrote:
+>>> On 05/07/18 12:12, Ulf Hansson wrote:
+>>>> On 4 July 2018 at 22:29, Marc Zyngier <marc.zyngier@arm.com> wrote:
+>>>>> On Wed, 4 Jul 2018 15:34:36 +0200
+>>>>> Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>>>>
+>>>>>> On 4 July 2018 at 13:34, Marc Zyngier <marc.zyngier@arm.com> wrote:
+>>>>>>> On 04/07/18 11:50, Ulf Hansson wrote:
+>>>>>>>> + Marc
+>>>>>>>>
+>>>>>>>> On 4 July 2018 at 08:28, Stefan Mavrodiev <stefan@olimex.com> wrote:
+>>>>>>>>> When mmc host controller enters suspend state, the clocks are
+>>>>>>>>> disabled, but irqs are not. For some reason the irqchip emits
+>>>>>>>>> false interrupts, which causes system lock loop.
+>>>>>>>>>
+>>>>>>>>> Debug log is:
+>>>>>>>>>   ...
+>>>>>>>>>   sunxi-mmc 1c11000.mmc: setting clk to 52000000, rounded 51200000
+>>>>>>>>>   sunxi-mmc 1c11000.mmc: enabling the clock
+>>>>>>>>>   sunxi-mmc 1c11000.mmc: cmd 13(8000014d) arg 10000 ie 0x0000bbc6 len 0
+>>>>>>>>>   sunxi-mmc 1c11000.mmc: irq: rq (ptrval) mi 00000004 idi 00000000
+>>>>>>>>>   sunxi-mmc 1c11000.mmc: cmd 6(80000146) arg 3210101 ie 0x0000bbc6 len 0
+>>>>>>>>>   sunxi-mmc 1c11000.mmc: irq: rq (ptrval) mi 00000004 idi 00000000
+>>>>>>>>>   sunxi-mmc 1c11000.mmc: cmd 13(8000014d) arg 10000 ie 0x0000bbc6 len 0
+>>>>>>>>>   sunxi-mmc 1c11000.mmc: irq: rq (ptrval) mi 00000004 idi 00000000
+>>>>>>>>>   mmc1: new DDR MMC card at address 0001
+>>>>>>>>>   mmcblk1: mmc1:0001 AGND3R 14.6 GiB
+>>>>>>>>>   mmcblk1boot0: mmc1:0001 AGND3R partition 1 4.00 MiB
+>>>>>>>>>   mmcblk1boot1: mmc1:0001 AGND3R partition 2 4.00 MiB
+>>>>>>>>>   sunxi-mmc 1c11000.mmc: cmd 18(80003352) arg 0 ie 0x0000fbc2 len 409
+>>>>>>>>>   sunxi-mmc 1c11000.mmc: irq: rq (ptrval) mi 00004000 idi 00000002
+>>>>>>>>>    mmcblk1: p1
+>>>>>>>>>   sunxi-mmc 1c11000.mmc: irq: rq   (null) mi 00000000 idi 00000000
+>>>>>>>>>   sunxi-mmc 1c11000.mmc: irq: rq   (null) mi 00000000 idi 00000000
+>>>>>>>>>   sunxi-mmc 1c11000.mmc: irq: rq   (null) mi 00000000 idi 00000000
+>>>>>>>>>   sunxi-mmc 1c11000.mmc: irq: rq   (null) mi 00000000 idi 00000000
+>>>>>>>>> and so on...
+>>>>>>>>>
+>>>>>>>>> This issue apears on eMMC cards, routed on MMC2 slot. The patch is
+>>>>>>>>> tested with A20-OLinuXino-MICRO/LIME/LIME2 boards.
+>>>>>>>>>
+>>>>>>>>> Fixes: 9a8e1e8cc2c0 ("mmc: sunxi: Add runtime_pm support")
+>>>>>>>>> Signed-off-by: Stefan Mavrodiev <stefan@olimex.com>
+>>>>>>>>> ---
+>>>>>>>>>  Changes in v2:
+>>>>>>>>>   - Add comment why disable_irq() is necessary
+>>>>>>>>>
+>>>>>>>>> ---
+>>>>>>>>>  drivers/mmc/host/sunxi-mmc.c | 7 +++++++
+>>>>>>>>>  1 file changed, 7 insertions(+)
+>>>>>>>>>
+>>>>>>>>> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+>>>>>>>>> index e747259..8e7f3e3 100644
+>>>>>>>>> --- a/drivers/mmc/host/sunxi-mmc.c
+>>>>>>>>> +++ b/drivers/mmc/host/sunxi-mmc.c
+>>>>>>>>> @@ -1446,6 +1446,7 @@ static int sunxi_mmc_runtime_resume(struct device *dev)
+>>>>>>>>>         sunxi_mmc_init_host(host);
+>>>>>>>>>         sunxi_mmc_set_bus_width(host, mmc->ios.bus_width);
+>>>>>>>>>         sunxi_mmc_set_clk(host, &mmc->ios);
+>>>>>>>>> +       enable_irq(host->irq);
+>>>>>>>>>
+>>>>>>>>>         return 0;
+>>>>>>>>>  }
+>>>>>>>>> @@ -1455,6 +1456,12 @@ static int sunxi_mmc_runtime_suspend(struct device *dev)
+>>>>>>>>>         struct mmc_host *mmc = dev_get_drvdata(dev);
+>>>>>>>>>         struct sunxi_mmc_host *host = mmc_priv(mmc);
+>>>>>>>>>
+>>>>>>>>> +       /*
+>>>>>>>>> +        * When clocks are off, it's possible receiving
+>>>>>>>>> +        * fake interrupts, which will stall the system.
+>>>>>>>>> +        * Disabling the irq  will prevent this.
+>>>>>>>>> +        */
+>>>>>>>>> +       disable_irq(host->irq);
+>>>>>>>>
+>>>>>>>> No, this doesn't work for shared IRQs.
+>>>>>>>
+>>>>>>> Well, in this case, it does work, because that interrupt line cannot be
+>>>>>>> shared with anything else, if I understand how the SoC is wired: each
+>>>>>>> MMC controller has a dedicated interrupt line to the GIC, and it isn't
+>>>>>>> shared with anything (that's on the A20 though, and I don't know about
+>>>>>>> other SoCs integrating the same IP).
+>>>>>>
+>>>>>> That's the problem. This may work on some SoCs but not on others.
+>>>>>>
+>>>>>>>
+>>>>>>>>
+>>>>>>>>>         sunxi_mmc_reset_host(host);
+>>>>>>>>>         sunxi_mmc_disable(host);
+>>>>>>>>>
+>>>>>>>>> --
+>>>>>>>>> 2.7.4
+>>>>>>>>>
+>>>>>>>>
+>>>>>>>> The only option today is to use free_irq() in runtime suspend and then
+>>>>>>>> re-request the irq to re-install the handler at runtime resume.
+>>>>>>>>
+>>>>>>>> That's not an optimal solution, which is pointed out in the below
+>>>>>>>> discussion as well. Moreover, it has also turned out using free_irq()
+>>>>>>>> is also problematic in cases threaded handlers are used.
+>>>>>>>>
+>>>>>>>> Here's the link to the discussion, it's not the only one I know of, so
+>>>>>>>> this is common problem.
+>>>>>>>> https://lkml.org/lkml/2016/1/28/213
+>>>>>>>>
+>>>>>>>> Care to have a hack on the "common" solution, which in principle means
+>>>>>>>> adding APIs to genirq that can disable/enable handlers from being
+>>>>>>>> called, rather than the entire IRQ line.
+>>>>>>>
+>>>>>>> That doesn't work. You still end-up with a screaming interrupt, and you
+>>>>>>> will still spend 100% of your time in interrupt context for nothing.
+>>>>>>>
+>>>>>>> Eventually, the kernel will have enough (the /other/ shared handlers
+>>>>>>> returning IRQ_NONE all the time), and will forcefully kill that
+>>>>>>> particular interrupt interrupt line, meaning you end-up in the same
+>>>>>>> situation of having the line disabled for all the users of that
+>>>>>>> interrupt line. Except that now, it is disabled forever.
+>>>>>>
+>>>>>> Ahh, correct!
+>>>>>>
+>>>>>> Sounds like free_irq() is what we need. Only that it's bit heavy
+>>>>>> weight as we need to re-install handlers.
+>>>>>
+>>>>> BTW, free_irq() doesn't help you either in the case of a shared
+>>>>> handler. You'll end-up in the exact same scenario as above.
+>>>>
+>>>> In regards to the spurious interrupt storm issue, yes, I fully agree.
+>>>>
+>>>> On the other hand, in case of a shared IRQ, don't we want the genirq
+>>>> core to deal with disabling the IRQ, rather than the driver?
+>>>
+>>> How do you propose we do that? You have an OR gate between two device,
+>>> and the result of that gate is directly plugged in the interrupt controller.
+>>>
+>>> The only thing the genirq subsystem can do is take the interrupt. If
+>>> nobody cares, the whole interrupt *line* will eventually get disabled.
+>>
+>> Yep, something like that. That would work, right?
+>>
+>>>
+>>>> Also, don't forget the other related issue, which is when the IRQ
+>>>> handler gets invoked (not as a storm, but once is enough), either
+>>>> because of a spurious IRQ or because of a shared IRQ - while the
+>>>> device is in a low power state (runtime suspended with clock gated for
+>>>> example). If that happens and the handler accesses a register the
+>>>> handler may hang.
+>>>
+>>> Doing a free_irq() in that case is fine, as long as the rate of spurious
+>>> interrupts is low.
+>>
+>> Yep.
+>>
+>>>
+>>>>> The real solution to this is to prevent the device itself from
+>>>>> generating interrupts (or to forbid interrupt sharing if it isn't
+>>>>> possible).
+>>>>
+>>>> I fully agree that the device should be configured to not deliver
+>>>> interrupt, this is the first and most important step a driver should
+>>>> take. For example it should mask its device's IRQ register bits.
+>>>>
+>>>> However, this isn't sufficient, because of shared IRQs and buggy HWs
+>>>> delivering spurious IRQs.
+>>>
+>>> It *is* sufficient for shared IRQs. Actually, it is the only way to
+>>> sanely implement shared IRQs (you must gate the interrupt upstream of
+>>> the summing interrupt controller). Buggy HW is another story (and that's
+>>> probably the case here).
+>>>
+>>> Now: can we please get this patch merged? ;-)
+>>
+>> Right, I have applied it for fixes!
 >
-> This patch integrates qcom dml feature into mmci_dma file.
-> Qualcomm Data Mover lite/local is already a variant of mmci dmaengine.
+> Thanks a lot for that.
 >
-> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
-> ---
->  drivers/mmc/host/Makefile        |   1 -
->  drivers/mmc/host/mmci.c          |   1 -
->  drivers/mmc/host/mmci.h          |  35 ++++++++
->  drivers/mmc/host/mmci_dma.c      | 135 ++++++++++++++++++++++++++++-
->  drivers/mmc/host/mmci_qcom_dml.c | 177 ---------------------------------------
->  drivers/mmc/host/mmci_qcom_dml.h |  31 -------
->  6 files changed, 169 insertions(+), 211 deletions(-)
->  delete mode 100644 drivers/mmc/host/mmci_qcom_dml.c
->  delete mode 100644 drivers/mmc/host/mmci_qcom_dml.h
+>> Thanks for the discussion! However it would be nice to reach a
+>> conclusion for the problem generically.
+>
+> The only thing I can come up with is to have a requester-specific
+> callback that would get called when doing a requester-specific
+> disable_irq(). This callback would have to disable the interrupt at the
+> source level, instead of doing it at the irqchip level (and would only
+> make sense for shared interrupts).
+>
+> You'd need a per-action refcount so that enable/disable can nest, and
+> some new APIs to request, enable and disable specific actions.
+>
+> I could look into it if there would be more than one user...
 
-No, this is not the way to go. Instead I I think there are two options.
+Great! If you start hacking on something, please keep me in the loop.
 
-1) Keep mmci_qcom_dml.c|h and thus add new files for the stm32 dma variant.
+For mmc, we have all the mmc sdhci variant drivers/devices which
+likely suffers from similar problems, as there have been a couple of
+different reports. I think the link I gave was for sdhci, reported
+several years ago.
 
-2) Start by renaming mmci_qcom_dml.* to mmc_dma.* and then in the next
-step add the code for stm32 dma into the renamed files.
+I have also received reports for the dw_mmc host driver [1], pointing
+to similar problems that the irq handler can be called when the device
+is in a low power state and thus hanging on register accesses. At that
+point the reporter used CONFIG_DEBUG_SHIRQ to trigger the problems.
 
-I guess if there is some overlap in functionality, 2) may be best as
-it could easier avoid open coding. However, I am fine with whatever
-option and I expect that you knows what is best.
+[1]
+https://patchwork.kernel.org/patch/9898377/
 
 Kind regards
 Uffe
-
->
-> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-> index daecaa98..608a020 100644
-> --- a/drivers/mmc/host/Makefile
-> +++ b/drivers/mmc/host/Makefile
-> @@ -5,7 +5,6 @@
->
->  obj-$(CONFIG_MMC_ARMMMCI) += armmmci.o
->  armmmci-y := mmci.o mmci_dma.o
-> -armmmci-$(CONFIG_MMC_QCOM_DML) += mmci_qcom_dml.o
->  obj-$(CONFIG_MMC_PXA)          += pxamci.o
->  obj-$(CONFIG_MMC_MXC)          += mxcmmc.o
->  obj-$(CONFIG_MMC_MXS)          += mxs-mmc.o
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index 8868be0..7a15afd 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -43,7 +43,6 @@
->
->  #include "mmci.h"
->  #include "mmci_dma.h"
-> -#include "mmci_qcom_dml.h"
->
->  #define DRIVER_NAME "mmci-pl18x"
->
-> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-> index a73bb98..f7cba35 100644
-> --- a/drivers/mmc/host/mmci.h
-> +++ b/drivers/mmc/host/mmci.h
-> @@ -194,6 +194,41 @@
->
->  #define MMCI_PINCTRL_STATE_OPENDRAIN "opendrain"
->
-> +/* QCOM DML Registers */
-> +#define DML_CONFIG                     0x00
-> +#define PRODUCER_CRCI_MSK              GENMASK(1, 0)
-> +#define PRODUCER_CRCI_DISABLE          0
-> +#define PRODUCER_CRCI_X_SEL            BIT(0)
-> +#define PRODUCER_CRCI_Y_SEL            BIT(1)
-> +#define CONSUMER_CRCI_MSK              GENMASK(3, 2)
-> +#define CONSUMER_CRCI_DISABLE          0
-> +#define CONSUMER_CRCI_X_SEL            BIT(2)
-> +#define CONSUMER_CRCI_Y_SEL            BIT(3)
-> +#define PRODUCER_TRANS_END_EN          BIT(4)
-> +#define BYPASS                         BIT(16)
-> +#define DIRECT_MODE                    BIT(17)
-> +#define INFINITE_CONS_TRANS            BIT(18)
-> +
-> +#define DML_SW_RESET                   0x08
-> +#define DML_PRODUCER_START             0x0c
-> +#define DML_CONSUMER_START             0x10
-> +#define DML_PRODUCER_PIPE_LOGICAL_SIZE 0x14
-> +#define DML_CONSUMER_PIPE_LOGICAL_SIZE 0x18
-> +#define DML_PIPE_ID                    0x1c
-> +#define PRODUCER_PIPE_ID_SHFT          0
-> +#define PRODUCER_PIPE_ID_MSK           GENMASK(4, 0)
-> +#define CONSUMER_PIPE_ID_SHFT          16
-> +#define CONSUMER_PIPE_ID_MSK           GENMASK(20, 16)
-> +
-> +#define DML_PRODUCER_BAM_BLOCK_SIZE    0x24
-> +#define DML_PRODUCER_BAM_TRANS_SIZE    0x28
-> +
-> +/* other definitions */
-> +#define PRODUCER_PIPE_LOGICAL_SIZE     4096
-> +#define CONSUMER_PIPE_LOGICAL_SIZE     4096
-> +
-> +#define DML_OFFSET                     0x800
-> +
->  struct clk;
->  struct dma_chan;
->
-> diff --git a/drivers/mmc/host/mmci_dma.c b/drivers/mmc/host/mmci_dma.c
-> index 98a542d..dd7dae5 100644
-> --- a/drivers/mmc/host/mmci_dma.c
-> +++ b/drivers/mmc/host/mmci_dma.c
-> @@ -8,11 +8,11 @@
->  #include <linux/dmaengine.h>
->  #include <linux/mmc/host.h>
->  #include <linux/mmc/card.h>
-> +#include <linux/of.h>
->  #include <linux/scatterlist.h>
->
->  #include "mmci.h"
->  #include "mmci_dma.h"
-> -#include "mmci_qcom_dml.h"
->
->  int mmci_dma_setup(struct mmci_host *host)
->  {
-> @@ -101,6 +101,139 @@ struct dmaengine_priv {
->
->  #define dma_inprogress(dmae) ((dmae)->dma_in_progress)
->
-> +#ifdef CONFIG_MMC_QCOM_DML
-> +void dml_start_xfer(struct mmci_host *host, struct mmc_data *data)
-> +{
-> +       u32 config;
-> +       void __iomem *base = host->base + DML_OFFSET;
-> +
-> +       if (data->flags & MMC_DATA_READ) {
-> +               /* Read operation: configure DML for producer operation */
-> +               /* Set producer CRCI-x and disable consumer CRCI */
-> +               config = readl_relaxed(base + DML_CONFIG);
-> +               config = (config & ~PRODUCER_CRCI_MSK) | PRODUCER_CRCI_X_SEL;
-> +               config = (config & ~CONSUMER_CRCI_MSK) | CONSUMER_CRCI_DISABLE;
-> +               writel_relaxed(config, base + DML_CONFIG);
-> +
-> +               /* Set the Producer BAM block size */
-> +               writel_relaxed(data->blksz, base + DML_PRODUCER_BAM_BLOCK_SIZE);
-> +
-> +               /* Set Producer BAM Transaction size */
-> +               writel_relaxed(data->blocks * data->blksz,
-> +                              base + DML_PRODUCER_BAM_TRANS_SIZE);
-> +               /* Set Producer Transaction End bit */
-> +               config = readl_relaxed(base + DML_CONFIG);
-> +               config |= PRODUCER_TRANS_END_EN;
-> +               writel_relaxed(config, base + DML_CONFIG);
-> +               /* Trigger producer */
-> +               writel_relaxed(1, base + DML_PRODUCER_START);
-> +       } else {
-> +               /* Write operation: configure DML for consumer operation */
-> +               /* Set consumer CRCI-x and disable producer CRCI*/
-> +               config = readl_relaxed(base + DML_CONFIG);
-> +               config = (config & ~CONSUMER_CRCI_MSK) | CONSUMER_CRCI_X_SEL;
-> +               config = (config & ~PRODUCER_CRCI_MSK) | PRODUCER_CRCI_DISABLE;
-> +               writel_relaxed(config, base + DML_CONFIG);
-> +               /* Clear Producer Transaction End bit */
-> +               config = readl_relaxed(base + DML_CONFIG);
-> +               config &= ~PRODUCER_TRANS_END_EN;
-> +               writel_relaxed(config, base + DML_CONFIG);
-> +               /* Trigger consumer */
-> +               writel_relaxed(1, base + DML_CONSUMER_START);
-> +       }
-> +
-> +       /* make sure the dml is configured before dma is triggered */
-> +       wmb();
-> +}
-> +
-> +static int of_get_dml_pipe_index(struct device_node *np, const char *name)
-> +{
-> +       int index;
-> +       struct of_phandle_args dma_spec;
-> +
-> +       index = of_property_match_string(np, "dma-names", name);
-> +
-> +       if (index < 0)
-> +               return -ENODEV;
-> +
-> +       if (of_parse_phandle_with_args(np, "dmas", "#dma-cells", index,
-> +                                      &dma_spec))
-> +               return -ENODEV;
-> +
-> +       if (dma_spec.args_count)
-> +               return dma_spec.args[0];
-> +
-> +       return -ENODEV;
-> +}
-> +
-> +/* Initialize the dml hardware connected to SD Card controller */
-> +int dml_hw_init(struct mmci_host *host, struct device_node *np)
-> +{
-> +       u32 config;
-> +       void __iomem *base;
-> +       int consumer_id, producer_id;
-> +
-> +       consumer_id = of_get_dml_pipe_index(np, "tx");
-> +       producer_id = of_get_dml_pipe_index(np, "rx");
-> +
-> +       if (producer_id < 0 || consumer_id < 0)
-> +               return -ENODEV;
-> +
-> +       base = host->base + DML_OFFSET;
-> +
-> +       /* Reset the DML block */
-> +       writel_relaxed(1, base + DML_SW_RESET);
-> +
-> +       /* Disable the producer and consumer CRCI */
-> +       config = (PRODUCER_CRCI_DISABLE | CONSUMER_CRCI_DISABLE);
-> +       /*
-> +        * Disable the bypass mode. Bypass mode will only be used
-> +        * if data transfer is to happen in PIO mode and don't
-> +        * want the BAM interface to connect with SDCC-DML.
-> +        */
-> +       config &= ~BYPASS;
-> +       /*
-> +        * Disable direct mode as we don't DML to MASTER the AHB bus.
-> +        * BAM connected with DML should MASTER the AHB bus.
-> +        */
-> +       config &= ~DIRECT_MODE;
-> +       /*
-> +        * Disable infinite mode transfer as we won't be doing any
-> +        * infinite size data transfers. All data transfer will be
-> +        * of finite data size.
-> +        */
-> +       config &= ~INFINITE_CONS_TRANS;
-> +       writel_relaxed(config, base + DML_CONFIG);
-> +
-> +       /*
-> +        * Initialize the logical BAM pipe size for producer
-> +        * and consumer.
-> +        */
-> +       writel_relaxed(PRODUCER_PIPE_LOGICAL_SIZE,
-> +                      base + DML_PRODUCER_PIPE_LOGICAL_SIZE);
-> +       writel_relaxed(CONSUMER_PIPE_LOGICAL_SIZE,
-> +                      base + DML_CONSUMER_PIPE_LOGICAL_SIZE);
-> +
-> +       /* Initialize Producer/consumer pipe id */
-> +       writel_relaxed(producer_id | (consumer_id << CONSUMER_PIPE_ID_SHFT),
-> +                      base + DML_PIPE_ID);
-> +
-> +       /* Make sure dml initialization is finished */
-> +       mb();
-> +
-> +       return 0;
-> +}
-> +#else
-> +static inline int dml_hw_init(struct mmci_host *host, struct device_node *np)
-> +{
-> +       return -EINVAL;
-> +}
-> +
-> +static inline void dml_start_xfer(struct mmci_host *host, struct mmc_data *data)
-> +{
-> +}
-> +#endif /* CONFIG_MMC_QCOM_DML */
-> +
->  static int dmaengine_setup(struct mmci_host *host)
->  {
->         const char *rxname, *txname;
-> diff --git a/drivers/mmc/host/mmci_qcom_dml.c b/drivers/mmc/host/mmci_qcom_dml.c
-> deleted file mode 100644
-> index 00750c9..0000000
-> --- a/drivers/mmc/host/mmci_qcom_dml.c
-> +++ /dev/null
-> @@ -1,177 +0,0 @@
-> -/*
-> - *
-> - * Copyright (c) 2011, The Linux Foundation. All rights reserved.
-> - *
-> - * This program is free software; you can redistribute it and/or modify
-> - * it under the terms of the GNU General Public License version 2 and
-> - * only version 2 as published by the Free Software Foundation.
-> - *
-> - * This program is distributed in the hope that it will be useful,
-> - * but WITHOUT ANY WARRANTY; without even the implied warranty of
-> - * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> - * GNU General Public License for more details.
-> - *
-> - */
-> -#include <linux/of.h>
-> -#include <linux/of_dma.h>
-> -#include <linux/bitops.h>
-> -#include <linux/mmc/host.h>
-> -#include <linux/mmc/card.h>
-> -#include "mmci.h"
-> -
-> -/* Registers */
-> -#define DML_CONFIG                     0x00
-> -#define PRODUCER_CRCI_MSK              GENMASK(1, 0)
-> -#define PRODUCER_CRCI_DISABLE          0
-> -#define PRODUCER_CRCI_X_SEL            BIT(0)
-> -#define PRODUCER_CRCI_Y_SEL            BIT(1)
-> -#define CONSUMER_CRCI_MSK              GENMASK(3, 2)
-> -#define CONSUMER_CRCI_DISABLE          0
-> -#define CONSUMER_CRCI_X_SEL            BIT(2)
-> -#define CONSUMER_CRCI_Y_SEL            BIT(3)
-> -#define PRODUCER_TRANS_END_EN          BIT(4)
-> -#define BYPASS                         BIT(16)
-> -#define DIRECT_MODE                    BIT(17)
-> -#define INFINITE_CONS_TRANS            BIT(18)
-> -
-> -#define DML_SW_RESET                   0x08
-> -#define DML_PRODUCER_START             0x0c
-> -#define DML_CONSUMER_START             0x10
-> -#define DML_PRODUCER_PIPE_LOGICAL_SIZE 0x14
-> -#define DML_CONSUMER_PIPE_LOGICAL_SIZE 0x18
-> -#define DML_PIPE_ID                    0x1c
-> -#define PRODUCER_PIPE_ID_SHFT          0
-> -#define PRODUCER_PIPE_ID_MSK           GENMASK(4, 0)
-> -#define CONSUMER_PIPE_ID_SHFT          16
-> -#define CONSUMER_PIPE_ID_MSK           GENMASK(20, 16)
-> -
-> -#define DML_PRODUCER_BAM_BLOCK_SIZE    0x24
-> -#define DML_PRODUCER_BAM_TRANS_SIZE    0x28
-> -
-> -/* other definitions */
-> -#define PRODUCER_PIPE_LOGICAL_SIZE     4096
-> -#define CONSUMER_PIPE_LOGICAL_SIZE     4096
-> -
-> -#define DML_OFFSET                     0x800
-> -
-> -void dml_start_xfer(struct mmci_host *host, struct mmc_data *data)
-> -{
-> -       u32 config;
-> -       void __iomem *base = host->base + DML_OFFSET;
-> -
-> -       if (data->flags & MMC_DATA_READ) {
-> -               /* Read operation: configure DML for producer operation */
-> -               /* Set producer CRCI-x and disable consumer CRCI */
-> -               config = readl_relaxed(base + DML_CONFIG);
-> -               config = (config & ~PRODUCER_CRCI_MSK) | PRODUCER_CRCI_X_SEL;
-> -               config = (config & ~CONSUMER_CRCI_MSK) | CONSUMER_CRCI_DISABLE;
-> -               writel_relaxed(config, base + DML_CONFIG);
-> -
-> -               /* Set the Producer BAM block size */
-> -               writel_relaxed(data->blksz, base + DML_PRODUCER_BAM_BLOCK_SIZE);
-> -
-> -               /* Set Producer BAM Transaction size */
-> -               writel_relaxed(data->blocks * data->blksz,
-> -                              base + DML_PRODUCER_BAM_TRANS_SIZE);
-> -               /* Set Producer Transaction End bit */
-> -               config = readl_relaxed(base + DML_CONFIG);
-> -               config |= PRODUCER_TRANS_END_EN;
-> -               writel_relaxed(config, base + DML_CONFIG);
-> -               /* Trigger producer */
-> -               writel_relaxed(1, base + DML_PRODUCER_START);
-> -       } else {
-> -               /* Write operation: configure DML for consumer operation */
-> -               /* Set consumer CRCI-x and disable producer CRCI*/
-> -               config = readl_relaxed(base + DML_CONFIG);
-> -               config = (config & ~CONSUMER_CRCI_MSK) | CONSUMER_CRCI_X_SEL;
-> -               config = (config & ~PRODUCER_CRCI_MSK) | PRODUCER_CRCI_DISABLE;
-> -               writel_relaxed(config, base + DML_CONFIG);
-> -               /* Clear Producer Transaction End bit */
-> -               config = readl_relaxed(base + DML_CONFIG);
-> -               config &= ~PRODUCER_TRANS_END_EN;
-> -               writel_relaxed(config, base + DML_CONFIG);
-> -               /* Trigger consumer */
-> -               writel_relaxed(1, base + DML_CONSUMER_START);
-> -       }
-> -
-> -       /* make sure the dml is configured before dma is triggered */
-> -       wmb();
-> -}
-> -
-> -static int of_get_dml_pipe_index(struct device_node *np, const char *name)
-> -{
-> -       int index;
-> -       struct of_phandle_args  dma_spec;
-> -
-> -       index = of_property_match_string(np, "dma-names", name);
-> -
-> -       if (index < 0)
-> -               return -ENODEV;
-> -
-> -       if (of_parse_phandle_with_args(np, "dmas", "#dma-cells", index,
-> -                                      &dma_spec))
-> -               return -ENODEV;
-> -
-> -       if (dma_spec.args_count)
-> -               return dma_spec.args[0];
-> -
-> -       return -ENODEV;
-> -}
-> -
-> -/* Initialize the dml hardware connected to SD Card controller */
-> -int dml_hw_init(struct mmci_host *host, struct device_node *np)
-> -{
-> -       u32 config;
-> -       void __iomem *base;
-> -       int consumer_id, producer_id;
-> -
-> -       consumer_id = of_get_dml_pipe_index(np, "tx");
-> -       producer_id = of_get_dml_pipe_index(np, "rx");
-> -
-> -       if (producer_id < 0 || consumer_id < 0)
-> -               return -ENODEV;
-> -
-> -       base = host->base + DML_OFFSET;
-> -
-> -       /* Reset the DML block */
-> -       writel_relaxed(1, base + DML_SW_RESET);
-> -
-> -       /* Disable the producer and consumer CRCI */
-> -       config = (PRODUCER_CRCI_DISABLE | CONSUMER_CRCI_DISABLE);
-> -       /*
-> -        * Disable the bypass mode. Bypass mode will only be used
-> -        * if data transfer is to happen in PIO mode and don't
-> -        * want the BAM interface to connect with SDCC-DML.
-> -        */
-> -       config &= ~BYPASS;
-> -       /*
-> -        * Disable direct mode as we don't DML to MASTER the AHB bus.
-> -        * BAM connected with DML should MASTER the AHB bus.
-> -        */
-> -       config &= ~DIRECT_MODE;
-> -       /*
-> -        * Disable infinite mode transfer as we won't be doing any
-> -        * infinite size data transfers. All data transfer will be
-> -        * of finite data size.
-> -        */
-> -       config &= ~INFINITE_CONS_TRANS;
-> -       writel_relaxed(config, base + DML_CONFIG);
-> -
-> -       /*
-> -        * Initialize the logical BAM pipe size for producer
-> -        * and consumer.
-> -        */
-> -       writel_relaxed(PRODUCER_PIPE_LOGICAL_SIZE,
-> -                      base + DML_PRODUCER_PIPE_LOGICAL_SIZE);
-> -       writel_relaxed(CONSUMER_PIPE_LOGICAL_SIZE,
-> -                      base + DML_CONSUMER_PIPE_LOGICAL_SIZE);
-> -
-> -       /* Initialize Producer/consumer pipe id */
-> -       writel_relaxed(producer_id | (consumer_id << CONSUMER_PIPE_ID_SHFT),
-> -                      base + DML_PIPE_ID);
-> -
-> -       /* Make sure dml initialization is finished */
-> -       mb();
-> -
-> -       return 0;
-> -}
-> diff --git a/drivers/mmc/host/mmci_qcom_dml.h b/drivers/mmc/host/mmci_qcom_dml.h
-> deleted file mode 100644
-> index 6e405d0..0000000
-> --- a/drivers/mmc/host/mmci_qcom_dml.h
-> +++ /dev/null
-> @@ -1,31 +0,0 @@
-> -/*
-> - *
-> - * Copyright (c) 2011, The Linux Foundation. All rights reserved.
-> - *
-> - * This program is free software; you can redistribute it and/or modify
-> - * it under the terms of the GNU General Public License version 2 and
-> - * only version 2 as published by the Free Software Foundation.
-> - *
-> - * This program is distributed in the hope that it will be useful,
-> - * but WITHOUT ANY WARRANTY; without even the implied warranty of
-> - * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> - * GNU General Public License for more details.
-> - *
-> - */
-> -#ifndef __MMC_QCOM_DML_H__
-> -#define __MMC_QCOM_DML_H__
-> -
-> -#ifdef CONFIG_MMC_QCOM_DML
-> -int dml_hw_init(struct mmci_host *host, struct device_node *np);
-> -void dml_start_xfer(struct mmci_host *host, struct mmc_data *data);
-> -#else
-> -static inline int dml_hw_init(struct mmci_host *host, struct device_node *np)
-> -{
-> -       return -ENOSYS;
-> -}
-> -static inline void dml_start_xfer(struct mmci_host *host, struct mmc_data *data)
-> -{
-> -}
-> -#endif /* CONFIG_MMC_QCOM_DML */
-> -
-> -#endif /* __MMC_QCOM_DML_H__ */
-> --
-> 2.7.4
->
