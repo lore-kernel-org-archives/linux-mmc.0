@@ -1,70 +1,79 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: sdhci-of-esdhc: set proper dma mask for ls104x chips
-Date: Thu, 5 Jul 2018 15:09:28 +0200
-Message-ID: <CAPDyKFqogj2PZ_KfzS5CHy2z23Z4P36pTaCsh0V1WxaW36U+Lg@mail.gmail.com>
-References: <CAPDyKFrabODyn4qgprFS4+Pfg0Xvy1tBzqDofJOwWuM7HK=0ZQ@mail.gmail.com>
- <20180704113420.22204-1-laurentiu.tudor@nxp.com>
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: disable clocks before changing frequency
+Date: Thu, 5 Jul 2018 15:09:43 +0200
+Message-ID: <CAPDyKFrHH2Hm+Z1DgJiSunFwaC_yed_oVp82Y0dw7UMAhAq3+w@mail.gmail.com>
+References: <20180705121500.6256-1-stefan@agner.ch>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180704113420.22204-1-laurentiu.tudor@nxp.com>
+In-Reply-To: <20180705121500.6256-1-stefan@agner.ch>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Laurentiu Tudor <laurentiu.tudor@nxp.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Yangbo Lu <yangbo.lu@nxp.com>
+To: Stefan Agner <stefan@agner.ch>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, marcel@ziswiler.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 4 July 2018 at 13:34, Laurentiu Tudor <laurentiu.tudor@nxp.com> wrote:
-> SDHCI controller in ls1043a and ls1046a generate 40-bit wide addresses
-> when doing DMA. Make sure that the corresponding dma mask is correctly
-> configured.
+On 5 July 2018 at 14:15, Stefan Agner <stefan@agner.ch> wrote:
+> In the uSDHC case (e.g. i.MX 6) clocks only get disabled if frequency
+> is set to 0. However, it could be that the stack asks for a frequency
+> change while clocks are on. In that case the function clears the
+> divider registers (by clearing ESDHC_CLOCK_MASK) while the clock is
+> enabled! This causes a short period of time where the clock is
+> undivided (on a i.MX 6DL a clock of 196MHz has been measured).
 >
-> Context: when enabling smmu on these chips the following problem is
-> encountered: the smmu input address size is 48 bits so the dma mappings
-> for sdhci end up 48-bit wide. However, on these chips sdhci only use
-> 40-bits of that address size when doing dma.
-> So you end up with a 48-bit address translation in smmu but the device
-> generates transactions with clipped 40-bit addresses, thus smmu context
-> faults are triggered. Setting up the correct dma mask fixes this
-> situation.
+> For older IP variants the driver disables clock by clearing some bits
+> in ESDHC_SYSTEM_CONTROL.
 >
-> Signed-off-by: Laurentiu Tudor <laurentiu.tudor@nxp.com>
+> Make sure to disable card clock before chainging frequency for uSDHC
+> IP variants too. Also fix indent to make disable/enable clock look
+> alike.
+>
+> Signed-off-by: Stefan Agner <stefan@agner.ch>
 
-Thanks, re-placed v1 with v2 on my next branch.
+Thanks, applied for next!
+
+Please tell if you want this for fixes and if I should add a stable tag.
 
 Kind regards
 Uffe
 
 > ---
-> Changes in v2:
->  - updated commit log with some context
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 14 +++++++-------
+>  1 file changed, 7 insertions(+), 7 deletions(-)
 >
->  drivers/mmc/host/sdhci-of-esdhc.c | 6 ++++++
->  1 file changed, 6 insertions(+)
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index 85fd5a8b0b6d..aa48f4b2541a 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -708,14 +708,14 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
+>         int div = 1;
+>         u32 temp, val;
 >
-> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-> index 4ffa6b173a21..8332f56e6c0d 100644
-> --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> @@ -22,6 +22,7 @@
->  #include <linux/sys_soc.h>
->  #include <linux/clk.h>
->  #include <linux/ktime.h>
-> +#include <linux/dma-mapping.h>
->  #include <linux/mmc/host.h>
->  #include "sdhci-pltfm.h"
->  #include "sdhci-esdhc.h"
-> @@ -427,6 +428,11 @@ static void esdhc_of_adma_workaround(struct sdhci_host *host, u32 intmask)
->  static int esdhc_of_enable_dma(struct sdhci_host *host)
->  {
->         u32 value;
-> +       struct device *dev = mmc_dev(host->mmc);
+> +       if (esdhc_is_usdhc(imx_data)) {
+> +               val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
+> +               writel(val & ~ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
+> +                       host->ioaddr + ESDHC_VENDOR_SPEC);
+> +       }
 > +
-> +       if (of_device_is_compatible(dev->of_node, "fsl,ls1043a-esdhc") ||
-> +           of_device_is_compatible(dev->of_node, "fsl,ls1046a-esdhc"))
-> +               dma_set_mask_and_coherent(dev, DMA_BIT_MASK(40));
+>         if (clock == 0) {
+>                 host->mmc->actual_clock = 0;
+> -
+> -               if (esdhc_is_usdhc(imx_data)) {
+> -                       val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
+> -                       writel(val & ~ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
+> -                                       host->ioaddr + ESDHC_VENDOR_SPEC);
+> -               }
+>                 return;
+>         }
 >
->         value = sdhci_readl(host, ESDHC_DMA_SYSCTL);
->         value |= ESDHC_DMA_SNOOP;
+> @@ -761,7 +761,7 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
+>         if (esdhc_is_usdhc(imx_data)) {
+>                 val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
+>                 writel(val | ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
+> -               host->ioaddr + ESDHC_VENDOR_SPEC);
+> +                       host->ioaddr + ESDHC_VENDOR_SPEC);
+>         }
+>
+>         mdelay(1);
 > --
-> 2.17.1
+> 2.18.0
 >
