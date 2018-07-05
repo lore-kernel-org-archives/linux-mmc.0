@@ -1,217 +1,123 @@
-From: Marc Zyngier <marc.zyngier@arm.com>
-Subject: Re: [PATCH v2 1/1] mmc: sunxi: Disable irq during pm_suspend
-Date: Thu, 5 Jul 2018 14:56:17 +0100
-Message-ID: <90c9c35b-f900-4d75-b813-1b6ba3ee2fc9@arm.com>
-References: <1530685741-20604-1-git-send-email-stefan@olimex.com>
- <CAPDyKFo_fadfNbt8YMS3MMjaxjt1B54DtZJ+-LoH9y5JeRi5pQ@mail.gmail.com>
- <9b8f30fd-12aa-46ba-ced9-aed38ada0059@arm.com>
- <CAPDyKFp8Hrmr0XCGnhFYrC3Q79dZizYC5KfRE92AUNa0FRDS5A@mail.gmail.com>
- <20180704212951.43c6a62a@why.wild-wind.fr.eu.org>
- <CAPDyKFpmd5T249HfQfuovD+=ZrBZw=kV4OUhVAHAiywo7m=haA@mail.gmail.com>
- <79f3c720-cc1d-f480-8e6b-8dbc3232837a@arm.com>
- <CAPDyKFof7HKNnzL5dmDX8AKxRgyXab7qJGQ1v6ZSzYKw4Tj+rQ@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 06/19] mmc: mmci: add variant properties to define cpsm &
+ cmdresp bits
+Date: Thu, 5 Jul 2018 16:20:43 +0200
+Message-ID: <CAPDyKFoFkfX=4znJL1z94kj9ZTojMe=t76xXUCAzYRX59=rpPQ@mail.gmail.com>
+References: <1528809280-31116-1-git-send-email-ludovic.Barre@st.com> <1528809280-31116-7-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFof7HKNnzL5dmDX8AKxRgyXab7qJGQ1v6ZSzYKw4Tj+rQ@mail.gmail.com>
-Content-Language: en-GB
+In-Reply-To: <1528809280-31116-7-git-send-email-ludovic.Barre@st.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Stefan Mavrodiev <stefan@olimex.com>, Maxime Ripard <maxime.ripard@bootlin.com>, Chen-Yu Tsai <wens@csie.org>, "open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..." <linux-mmc@vger.kernel.org>, "moderated list:ARM/Allwinner sunXi SoC support" <linux-arm-kernel@lists.infradead.org>, open list <linux-kernel@vger.kernel.org>
+To: Ludovic Barre <ludovic.Barre@st.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Gerald Baeza <gerald.baeza@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, devicetree@vger.kernel.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 05/07/18 13:07, Ulf Hansson wrote:
-> On 5 July 2018 at 13:40, Marc Zyngier <marc.zyngier@arm.com> wrote:
->> On 05/07/18 12:12, Ulf Hansson wrote:
->>> On 4 July 2018 at 22:29, Marc Zyngier <marc.zyngier@arm.com> wrote:
->>>> On Wed, 4 Jul 2018 15:34:36 +0200
->>>> Ulf Hansson <ulf.hansson@linaro.org> wrote:
->>>>
->>>>> On 4 July 2018 at 13:34, Marc Zyngier <marc.zyngier@arm.com> wrote:
->>>>>> On 04/07/18 11:50, Ulf Hansson wrote:
->>>>>>> + Marc
->>>>>>>
->>>>>>> On 4 July 2018 at 08:28, Stefan Mavrodiev <stefan@olimex.com> wrote:
->>>>>>>> When mmc host controller enters suspend state, the clocks are
->>>>>>>> disabled, but irqs are not. For some reason the irqchip emits
->>>>>>>> false interrupts, which causes system lock loop.
->>>>>>>>
->>>>>>>> Debug log is:
->>>>>>>>   ...
->>>>>>>>   sunxi-mmc 1c11000.mmc: setting clk to 52000000, rounded 51200000
->>>>>>>>   sunxi-mmc 1c11000.mmc: enabling the clock
->>>>>>>>   sunxi-mmc 1c11000.mmc: cmd 13(8000014d) arg 10000 ie 0x0000bbc6 len 0
->>>>>>>>   sunxi-mmc 1c11000.mmc: irq: rq (ptrval) mi 00000004 idi 00000000
->>>>>>>>   sunxi-mmc 1c11000.mmc: cmd 6(80000146) arg 3210101 ie 0x0000bbc6 len 0
->>>>>>>>   sunxi-mmc 1c11000.mmc: irq: rq (ptrval) mi 00000004 idi 00000000
->>>>>>>>   sunxi-mmc 1c11000.mmc: cmd 13(8000014d) arg 10000 ie 0x0000bbc6 len 0
->>>>>>>>   sunxi-mmc 1c11000.mmc: irq: rq (ptrval) mi 00000004 idi 00000000
->>>>>>>>   mmc1: new DDR MMC card at address 0001
->>>>>>>>   mmcblk1: mmc1:0001 AGND3R 14.6 GiB
->>>>>>>>   mmcblk1boot0: mmc1:0001 AGND3R partition 1 4.00 MiB
->>>>>>>>   mmcblk1boot1: mmc1:0001 AGND3R partition 2 4.00 MiB
->>>>>>>>   sunxi-mmc 1c11000.mmc: cmd 18(80003352) arg 0 ie 0x0000fbc2 len 409
->>>>>>>>   sunxi-mmc 1c11000.mmc: irq: rq (ptrval) mi 00004000 idi 00000002
->>>>>>>>    mmcblk1: p1
->>>>>>>>   sunxi-mmc 1c11000.mmc: irq: rq   (null) mi 00000000 idi 00000000
->>>>>>>>   sunxi-mmc 1c11000.mmc: irq: rq   (null) mi 00000000 idi 00000000
->>>>>>>>   sunxi-mmc 1c11000.mmc: irq: rq   (null) mi 00000000 idi 00000000
->>>>>>>>   sunxi-mmc 1c11000.mmc: irq: rq   (null) mi 00000000 idi 00000000
->>>>>>>> and so on...
->>>>>>>>
->>>>>>>> This issue apears on eMMC cards, routed on MMC2 slot. The patch is
->>>>>>>> tested with A20-OLinuXino-MICRO/LIME/LIME2 boards.
->>>>>>>>
->>>>>>>> Fixes: 9a8e1e8cc2c0 ("mmc: sunxi: Add runtime_pm support")
->>>>>>>> Signed-off-by: Stefan Mavrodiev <stefan@olimex.com>
->>>>>>>> ---
->>>>>>>>  Changes in v2:
->>>>>>>>   - Add comment why disable_irq() is necessary
->>>>>>>>
->>>>>>>> ---
->>>>>>>>  drivers/mmc/host/sunxi-mmc.c | 7 +++++++
->>>>>>>>  1 file changed, 7 insertions(+)
->>>>>>>>
->>>>>>>> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
->>>>>>>> index e747259..8e7f3e3 100644
->>>>>>>> --- a/drivers/mmc/host/sunxi-mmc.c
->>>>>>>> +++ b/drivers/mmc/host/sunxi-mmc.c
->>>>>>>> @@ -1446,6 +1446,7 @@ static int sunxi_mmc_runtime_resume(struct device *dev)
->>>>>>>>         sunxi_mmc_init_host(host);
->>>>>>>>         sunxi_mmc_set_bus_width(host, mmc->ios.bus_width);
->>>>>>>>         sunxi_mmc_set_clk(host, &mmc->ios);
->>>>>>>> +       enable_irq(host->irq);
->>>>>>>>
->>>>>>>>         return 0;
->>>>>>>>  }
->>>>>>>> @@ -1455,6 +1456,12 @@ static int sunxi_mmc_runtime_suspend(struct device *dev)
->>>>>>>>         struct mmc_host *mmc = dev_get_drvdata(dev);
->>>>>>>>         struct sunxi_mmc_host *host = mmc_priv(mmc);
->>>>>>>>
->>>>>>>> +       /*
->>>>>>>> +        * When clocks are off, it's possible receiving
->>>>>>>> +        * fake interrupts, which will stall the system.
->>>>>>>> +        * Disabling the irq  will prevent this.
->>>>>>>> +        */
->>>>>>>> +       disable_irq(host->irq);
->>>>>>>
->>>>>>> No, this doesn't work for shared IRQs.
->>>>>>
->>>>>> Well, in this case, it does work, because that interrupt line cannot be
->>>>>> shared with anything else, if I understand how the SoC is wired: each
->>>>>> MMC controller has a dedicated interrupt line to the GIC, and it isn't
->>>>>> shared with anything (that's on the A20 though, and I don't know about
->>>>>> other SoCs integrating the same IP).
->>>>>
->>>>> That's the problem. This may work on some SoCs but not on others.
->>>>>
->>>>>>
->>>>>>>
->>>>>>>>         sunxi_mmc_reset_host(host);
->>>>>>>>         sunxi_mmc_disable(host);
->>>>>>>>
->>>>>>>> --
->>>>>>>> 2.7.4
->>>>>>>>
->>>>>>>
->>>>>>> The only option today is to use free_irq() in runtime suspend and then
->>>>>>> re-request the irq to re-install the handler at runtime resume.
->>>>>>>
->>>>>>> That's not an optimal solution, which is pointed out in the below
->>>>>>> discussion as well. Moreover, it has also turned out using free_irq()
->>>>>>> is also problematic in cases threaded handlers are used.
->>>>>>>
->>>>>>> Here's the link to the discussion, it's not the only one I know of, so
->>>>>>> this is common problem.
->>>>>>> https://lkml.org/lkml/2016/1/28/213
->>>>>>>
->>>>>>> Care to have a hack on the "common" solution, which in principle means
->>>>>>> adding APIs to genirq that can disable/enable handlers from being
->>>>>>> called, rather than the entire IRQ line.
->>>>>>
->>>>>> That doesn't work. You still end-up with a screaming interrupt, and you
->>>>>> will still spend 100% of your time in interrupt context for nothing.
->>>>>>
->>>>>> Eventually, the kernel will have enough (the /other/ shared handlers
->>>>>> returning IRQ_NONE all the time), and will forcefully kill that
->>>>>> particular interrupt interrupt line, meaning you end-up in the same
->>>>>> situation of having the line disabled for all the users of that
->>>>>> interrupt line. Except that now, it is disabled forever.
->>>>>
->>>>> Ahh, correct!
->>>>>
->>>>> Sounds like free_irq() is what we need. Only that it's bit heavy
->>>>> weight as we need to re-install handlers.
->>>>
->>>> BTW, free_irq() doesn't help you either in the case of a shared
->>>> handler. You'll end-up in the exact same scenario as above.
->>>
->>> In regards to the spurious interrupt storm issue, yes, I fully agree.
->>>
->>> On the other hand, in case of a shared IRQ, don't we want the genirq
->>> core to deal with disabling the IRQ, rather than the driver?
->>
->> How do you propose we do that? You have an OR gate between two device,
->> and the result of that gate is directly plugged in the interrupt controller.
->>
->> The only thing the genirq subsystem can do is take the interrupt. If
->> nobody cares, the whole interrupt *line* will eventually get disabled.
-> 
-> Yep, something like that. That would work, right?
-> 
->>
->>> Also, don't forget the other related issue, which is when the IRQ
->>> handler gets invoked (not as a storm, but once is enough), either
->>> because of a spurious IRQ or because of a shared IRQ - while the
->>> device is in a low power state (runtime suspended with clock gated for
->>> example). If that happens and the handler accesses a register the
->>> handler may hang.
->>
->> Doing a free_irq() in that case is fine, as long as the rate of spurious
->> interrupts is low.
-> 
-> Yep.
-> 
->>
->>>> The real solution to this is to prevent the device itself from
->>>> generating interrupts (or to forbid interrupt sharing if it isn't
->>>> possible).
->>>
->>> I fully agree that the device should be configured to not deliver
->>> interrupt, this is the first and most important step a driver should
->>> take. For example it should mask its device's IRQ register bits.
->>>
->>> However, this isn't sufficient, because of shared IRQs and buggy HWs
->>> delivering spurious IRQs.
->>
->> It *is* sufficient for shared IRQs. Actually, it is the only way to
->> sanely implement shared IRQs (you must gate the interrupt upstream of
->> the summing interrupt controller). Buggy HW is another story (and that's
->> probably the case here).
->>
->> Now: can we please get this patch merged? ;-)
-> 
-> Right, I have applied it for fixes!
+On 12 June 2018 at 15:14, Ludovic Barre <ludovic.Barre@st.com> wrote:
+> From: Ludovic Barre <ludovic.barre@st.com>
+>
+> This patch adds command variant properties to define
+> cpsm enable bit and responses.
+> Needed to support the STM32 variant (shift of cpsm bit,
+> specific definition of commands response).
+>
+> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
+> ---
+>  drivers/mmc/host/mmci.c | 47 +++++++++++++++++++++++++++++++++++++++++++----
+>  drivers/mmc/host/mmci.h |  8 ++++++++
+>  2 files changed, 51 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index 801c86b..52562fc 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -51,6 +51,10 @@ static unsigned int fmax = 515633;
+>  static struct variant_data variant_arm = {
+>         .fifosize               = 16 * 4,
+>         .fifohalfsize           = 8 * 4,
+> +       .cmdreg_cpsm_enable     = MCI_CPSM_ENABLE,
+> +       .cmdreg_lrsp_crc        = MCI_CPSM_RESPONSE | MCI_CPSM_LONGRSP,
+> +       .cmdreg_srsp_crc        = MCI_CPSM_RESPONSE,
+> +       .cmdreg_srsp            = MCI_CPSM_RESPONSE,
 
-Thanks a lot for that.
+Do these really needs to be a superset of each other?
 
-> Thanks for the discussion! However it would be nice to reach a
-> conclusion for the problem generically.
+Maybe it becomes easier for the STM32 variant later though...
 
-The only thing I can come up with is to have a requester-specific
-callback that would get called when doing a requester-specific
-disable_irq(). This callback would have to disable the interrupt at the
-source level, instead of doing it at the irqchip level (and would only
-make sense for shared interrupts).
+[...]
 
-You'd need a per-action refcount so that enable/disable can nest, and
-some new APIs to request, enable and disable specific actions.
+> @@ -603,16 +639,19 @@ mmci_start_command(struct mmci_host *host, struct mmc_command *cmd, u32 c)
 
-I could look into it if there would be more than one user...
+While at it, would you mind folding in a cleanup patch removing the
+"u32 c" as in-parameter? It's currently always set to "0" by the
+caller, so it's not needed.
 
-Thanks,
+>         dev_dbg(mmc_dev(host->mmc), "op %02x arg %08x flags %08x\n",
+>             cmd->opcode, cmd->arg, cmd->flags);
+>
+> -       if (readl(base + MMCICOMMAND) & MCI_CPSM_ENABLE) {
+> +       if (readl(base + MMCICOMMAND) & host->variant->cmdreg_cpsm_enable) {
+>                 writel(0, base + MMCICOMMAND);
+>                 mmci_reg_delay(host);
+>         }
+>
+> -       c |= cmd->opcode | MCI_CPSM_ENABLE;
+> +       c |= cmd->opcode | host->variant->cmdreg_cpsm_enable;
+>         if (cmd->flags & MMC_RSP_PRESENT) {
+>                 if (cmd->flags & MMC_RSP_136)
+> -                       c |= MCI_CPSM_LONGRSP;
+> -               c |= MCI_CPSM_RESPONSE;
+> +                       c |= host->variant->cmdreg_lrsp_crc;
 
-	M.
--- 
-Jazz is not dead. It just smells funny...
+This looks weird. Probably because of the naming of the variant data.
+
+Perhaps rename to "cmdreg_lrsp", thus skipping the "_crc" suffix?
+
+> +               else if (cmd->flags & MMC_RSP_CRC)
+> +                       c |= host->variant->cmdreg_srsp_crc;
+
+Why is here an else? We can have both MMC_RSP_136 and MMC_RSP_CRC bits
+set, right!?
+
+> +               else
+> +                       c |= host->variant->cmdreg_srsp;
+
+What do you think about using a switch-case, perhaps with fall-through
+- and then adding those bits that are needed for each response
+bit+variant instead? Could that make this more readable?
+
+>         }
+>         if (/*interrupt*/0)
+>                 c |= MCI_CPSM_INTERRUPT;
+> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+> index 7265ca6..e173305 100644
+> --- a/drivers/mmc/host/mmci.h
+> +++ b/drivers/mmc/host/mmci.h
+> @@ -239,6 +239,10 @@ struct mmci_host;
+>   * @clkreg_enable: enable value for MMCICLOCK register
+>   * @clkreg_8bit_bus_enable: enable value for 8 bit bus
+>   * @clkreg_neg_edge_enable: enable value for inverted data/cmd output
+> + * @cmdreg_cpsm_enable: enable value for CPSM
+> + * @cmdreg_lrsp_crc: enable value for long response with crc
+> + * @cmdreg_srsp_crc: enable value for short response with crc
+> + * @cmdreg_srsp: enable value for short response without crc
+>   * @datalength_bits: number of bits in the MMCIDATALENGTH register
+>   * @fifosize: number of bytes that can be written when MMCI_TXFIFOEMPTY
+>   *           is asserted (likewise for RX)
+> @@ -282,6 +286,10 @@ struct variant_data {
+>         unsigned int            clkreg_enable;
+>         unsigned int            clkreg_8bit_bus_enable;
+>         unsigned int            clkreg_neg_edge_enable;
+> +       unsigned int            cmdreg_cpsm_enable;
+> +       unsigned int            cmdreg_lrsp_crc;
+> +       unsigned int            cmdreg_srsp_crc;
+> +       unsigned int            cmdreg_srsp;
+>         unsigned int            datalength_bits;
+>         unsigned int            fifosize;
+>         unsigned int            fifohalfsize;
+> --
+> 2.7.4
+>
+
+Kind regards
+Uffe
