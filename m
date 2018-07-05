@@ -1,65 +1,53 @@
 From: Stefan Agner <stefan@agner.ch>
-Subject: [PATCH] mmc: sdhci-esdhc-imx: disable clocks before changing frequency
-Date: Thu,  5 Jul 2018 14:15:00 +0200
-Message-ID: <20180705121500.6256-1-stefan@agner.ch>
+Subject: [PATCH] mmc: sdhci: do not try to use 3.3V signaling if not supported
+Date: Thu,  5 Jul 2018 14:18:19 +0200
+Message-ID: <20180705121819.7157-1-stefan@agner.ch>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: adrian.hunter@intel.com, ulf.hansson@linaro.org
 Cc: marcel@ziswiler.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Stefan Agner <stefan@agner.ch>
 List-Id: linux-mmc@vger.kernel.org
 
-In the uSDHC case (e.g. i.MX 6) clocks only get disabled if frequency
-is set to 0. However, it could be that the stack asks for a frequency
-change while clocks are on. In that case the function clears the
-divider registers (by clearing ESDHC_CLOCK_MASK) while the clock is
-enabled! This causes a short period of time where the clock is
-undivided (on a i.MX 6DL a clock of 196MHz has been measured).
+For eMMC devices it is valid to only support 1.8V signaling. When
+vqmmc is set to a fixed 1.8V regulator the stack tries to set 3.3V
+initially and prints the following warning:
+   mmc1: Switching to 3.3V signalling voltage failed
 
-For older IP variants the driver disables clock by clearing some bits
-in ESDHC_SYSTEM_CONTROL.
-
-Make sure to disable card clock before chainging frequency for uSDHC
-IP variants too. Also fix indent to make disable/enable clock look
-alike.
+Clear the MMC_SIGNAL_VOLTAGE_330 flag in case 3.3V is signaling is
+not available. This prevents the stack from even trying to use
+3.3V signaling and avoids the above warning.
 
 Signed-off-by: Stefan Agner <stefan@agner.ch>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 14 +++++++-------
- 1 file changed, 7 insertions(+), 7 deletions(-)
+ drivers/mmc/host/sdhci.c | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 85fd5a8b0b6d..aa48f4b2541a 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -708,14 +708,14 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
- 	int div = 1;
- 	u32 temp, val;
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 1c828e0e9905..a7b5602ef6f7 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -3734,14 +3734,21 @@ int sdhci_setup_host(struct sdhci_host *host)
+ 	    mmc_gpio_get_cd(host->mmc) < 0)
+ 		mmc->caps |= MMC_CAP_NEEDS_POLL;
  
-+	if (esdhc_is_usdhc(imx_data)) {
-+		val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
-+		writel(val & ~ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
-+			host->ioaddr + ESDHC_VENDOR_SPEC);
-+	}
+-	/* If vqmmc regulator and no 1.8V signalling, then there's no UHS */
+ 	if (!IS_ERR(mmc->supply.vqmmc)) {
+ 		ret = regulator_enable(mmc->supply.vqmmc);
 +
- 	if (clock == 0) {
- 		host->mmc->actual_clock = 0;
--
--		if (esdhc_is_usdhc(imx_data)) {
--			val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
--			writel(val & ~ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
--					host->ioaddr + ESDHC_VENDOR_SPEC);
--		}
- 		return;
- 	}
- 
-@@ -761,7 +761,7 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
- 	if (esdhc_is_usdhc(imx_data)) {
- 		val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
- 		writel(val | ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
--		host->ioaddr + ESDHC_VENDOR_SPEC);
-+			host->ioaddr + ESDHC_VENDOR_SPEC);
- 	}
- 
- 	mdelay(1);
++		/* If vqmmc provides no 1.8V signalling, then there's no UHS */
+ 		if (!regulator_is_supported_voltage(mmc->supply.vqmmc, 1700000,
+ 						    1950000))
+ 			host->caps1 &= ~(SDHCI_SUPPORT_SDR104 |
+ 					 SDHCI_SUPPORT_SDR50 |
+ 					 SDHCI_SUPPORT_DDR50);
++
++		/* In eMMC case vqmmc might be a fixed 1.8V regulator */
++		if (!regulator_is_supported_voltage(mmc->supply.vqmmc, 2700000,
++						    3600000))
++			host->flags &= ~SDHCI_SIGNALING_330;
++
+ 		if (ret) {
+ 			pr_warn("%s: Failed to enable vqmmc regulator: %d\n",
+ 				mmc_hostname(mmc), ret);
 -- 
 2.18.0
