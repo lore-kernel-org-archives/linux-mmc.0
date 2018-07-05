@@ -1,52 +1,65 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: sdhci-esdhc-imx: allow 1.8V modes without
- 100/200MHz pinctrl states
-Date: Thu, 5 Jul 2018 13:29:48 +0200
-Message-ID: <CAPDyKFpWzWeXxDfHXpFBboCtJKH97pPotTcmuFigZhET7zA26g@mail.gmail.com>
-References: <20180704150745.21003-1-stefan@agner.ch> <b2cc30701b1c38cd0c40736d04407424@agner.ch>
- <CAPDyKFqhUBteUNwE4aice5kxNkTX-0mHiJELhA57hwEmPH6v6A@mail.gmail.com> <69f6122b8a69f1ab41d2ef8274321689@agner.ch>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: Stefan Agner <stefan@agner.ch>
+Subject: [PATCH] mmc: sdhci-esdhc-imx: disable clocks before changing frequency
+Date: Thu,  5 Jul 2018 13:39:37 +0200
+Message-ID: <20180705113937.16414-1-stefan@agner.ch>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <69f6122b8a69f1ab41d2ef8274321689@agner.ch>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Stefan Agner <stefan@agner.ch>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Fabio Estevam <fabio.estevam@nxp.com>, Haibo Chen <haibo.chen@nxp.com>, Aisheng Dong <aisheng.dong@nxp.com>, Michael Trimarchi <michael@amarulasolutions.com>, Russell King <rmk+kernel@armlinux.org.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc: fabio.estevam@nxp.com, haibo.chen@nxp.com, aisheng.dong@nxp.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Stefan Agner <stefan@agner.ch>
 List-Id: linux-mmc@vger.kernel.org
 
-[...]
+In the uSDHC case (e.g. i.MX 6) clocks only get disabled if frequency
+is set to 0. However, it could be that the stack asks for a frequency
+change while clocks are on. In that case the function clears the
+divider registers (by clearing ESDHC_CLOCK_MASK) while the clock is
+enabled! This causes a short period of time where the clock is
+undivided (on a i.MX 6DL a clock of 196MHz has been measured).
 
->>> Btw, I still get the switching error once during boot-up:
->>>   mmc1: Switching to 3.3V signalling voltage failed
->>
->> I guess the this happens then also at system resume?
->>
->> The core tries first with 3.3 then if it fails, it continues with 1.8V, etc.
->>
->>>
->>> This is due to the call from mmc_set_initial_signal_voltage. It is a bit
->>> unfortunate since this is printed as a warning. Not sure if that could
->>> be prevented somehow?
->>
->> Seems like SDHCI_SIGNALING_330 should not be set, unless 3.3V I/O is
->> supported. That should avoid SDHCI from trying and instead just
->> returning an error code immediately.
->>
->> This seems like a generic issues for all SDHCI variant drivers.
->
-> Hm, can we resolve this in a generic fashion?
->
-> E.g something like this in sdhci_setup_host():
->
-> if (!regulator_is_supported_voltage(mmc->supply.vqmmc, 3200000,
-> 3450000))
->         host->flags &= ~SDHCI_SIGNALING_330;
+For older IP variants the driver disables clock by clearing some bits
+in ESDHC_SYSTEM_CONTROL.
 
-Something like that seems right, but a wider range should be allowed.
-2.7V to 3.6V is allowed according to the specs.
+Make sure to disable card clock before chainging frequency for uSDHC
+IP variants too. Also fix indent to make disable/enable clock look
+alike.
 
-Also, vqmmc is optional, so in case it doesn't exist we must not clear
-the SDHCI_SIGNALING_330 bit.
+Signed-off-by: Stefan Agner <stefan@agner.ch>
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
 
-Kind regards
-Uffe
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 85fd5a8b0b6d..aa48f4b2541a 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -708,14 +708,14 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
+ 	int div = 1;
+ 	u32 temp, val;
+ 
++	if (esdhc_is_usdhc(imx_data)) {
++		val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
++		writel(val & ~ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
++			host->ioaddr + ESDHC_VENDOR_SPEC);
++	}
++
+ 	if (clock == 0) {
+ 		host->mmc->actual_clock = 0;
+-
+-		if (esdhc_is_usdhc(imx_data)) {
+-			val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
+-			writel(val & ~ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
+-					host->ioaddr + ESDHC_VENDOR_SPEC);
+-		}
+ 		return;
+ 	}
+ 
+@@ -761,7 +761,7 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
+ 	if (esdhc_is_usdhc(imx_data)) {
+ 		val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
+ 		writel(val | ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
+-		host->ioaddr + ESDHC_VENDOR_SPEC);
++			host->ioaddr + ESDHC_VENDOR_SPEC);
+ 	}
+ 
+ 	mdelay(1);
+-- 
+2.18.0
