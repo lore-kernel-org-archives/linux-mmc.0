@@ -1,119 +1,76 @@
 From: Stefan Agner <stefan@agner.ch>
-Subject: Re: [PATCH 1/3] mmc: sdhci-esdhc-imx: get rid of support_vsel
-Date: Thu, 05 Jul 2018 13:16:31 +0200
-Message-ID: <318c0d9a93679df5abddeeef499f95c4@agner.ch>
-References: <20180628081331.13051-1-stefan@agner.ch>
- <20180628081331.13051-2-stefan@agner.ch>
- <AM0PR04MB42119E8C29A48E9CDA0F116F80400@AM0PR04MB4211.eurprd04.prod.outlook.com>
+Subject: Re: [PATCH v2] mmc: sdhci-esdhc-imx: allow 1.8V modes without
+ 100/200MHz pinctrl states
+Date: Thu, 05 Jul 2018 13:22:33 +0200
+Message-ID: <69f6122b8a69f1ab41d2ef8274321689@agner.ch>
+References: <20180704150745.21003-1-stefan@agner.ch>
+ <b2cc30701b1c38cd0c40736d04407424@agner.ch>
+ <CAPDyKFqhUBteUNwE4aice5kxNkTX-0mHiJELhA57hwEmPH6v6A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <AM0PR04MB42119E8C29A48E9CDA0F116F80400@AM0PR04MB4211.eurprd04.prod.outlook.com>
+In-Reply-To: <CAPDyKFqhUBteUNwE4aice5kxNkTX-0mHiJELhA57hwEmPH6v6A@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "A.s. Dong" <aisheng.dong@nxp.com>
-Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, Fabio Estevam <fabio.estevam@nxp.com>, Bough Chen <haibo.chen@nxp.com>, michael@amarulasolutions.com, rmk+kernel@armlinux.org.uk, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Fabio Estevam <fabio.estevam@nxp.com>, Haibo Chen <haibo.chen@nxp.com>, Aisheng Dong <aisheng.dong@nxp.com>, Michael Trimarchi <michael@amarulasolutions.com>, Russell King <rmk+kernel@armlinux.org.uk>, linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 05.07.2018 04:52, A.s. Dong wrote:
->> -----Original Message-----
->> From: Stefan Agner [mailto:stefan@agner.ch]
->> Sent: Thursday, June 28, 2018 4:13 PM
->> To: adrian.hunter@intel.com; ulf.hansson@linaro.org
->> Cc: Fabio Estevam <fabio.estevam@nxp.com>; Bough Chen
->> <haibo.chen@nxp.com>; A.s. Dong <aisheng.dong@nxp.com>;
->> michael@amarulasolutions.com; rmk+kernel@armlinux.org.uk; linux-
->> mmc@vger.kernel.org; linux-kernel@vger.kernel.org; Stefan Agner
->> <stefan@agner.ch>
->> Subject: [PATCH 1/3] mmc: sdhci-esdhc-imx: get rid of support_vsel
+On 05.07.2018 11:48, Ulf Hansson wrote:
+> On 4 July 2018 at 17:18, Stefan Agner <stefan@agner.ch> wrote:
+>> On 04.07.2018 17:07, Stefan Agner wrote:
+>>> If pinctrl nodes for 100/200MHz are missing, the controller should
+>>> not select any mode which need signal frequencies 100MHz or higher.
+>>> To prevent such speed modes the driver currently uses the quirk flag
+>>> SDHCI_QUIRK2_NO_1_8_V. This works nicely for SD cards since 1.8V
+>>> signaling is required for all faster modes and slower modes use 3.3V
+>>> signaling only.
+>>>
+>>> However, there are eMMC modes which use 1.8V signaling and run below
+>>> 100MHz, e.g. DDR52 at 1.8V. With using SDHCI_QUIRK2_NO_1_8_V this
+>>> mode is prevented. When using a fixed 1.8V regulator as vqmmc-supply
+>>> the stack has no valid mode to use. In this tenuous situation the
+>>> kernel continuously prints voltage switching errors:
+>>>   mmc1: Switching to 3.3V signalling voltage failed
+>>>
+>>> Avoid using SDHCI_QUIRK2_NO_1_8_V and prevent faster modes by
+>>> altering the SDHCI capability register. With that the stack is able
+>>> to select 1.8V modes even if no faster pinctrl states are available:
+>>>   # cat /sys/kernel/debug/mmc1/ios
+>>>   ...
+>>>   timing spec:    8 (mmc DDR52)
+>>>   signal voltage: 1 (1.80 V)
+>>>   ...
+>>>
+>>> Link: http://lkml.kernel.org/r/20180628081331.13051-1-stefan@agner.ch
+>>> Signed-off-by: Stefan Agner <stefan@agner.ch>
+>>> ---
 >>
->> The field support_vsel is currently only used in the device tree case. Get rid
->> of it. No change in behavior.
+>> Btw, I still get the switching error once during boot-up:
+>>   mmc1: Switching to 3.3V signalling voltage failed
+> 
+> I guess the this happens then also at system resume?
+> 
+> The core tries first with 3.3 then if it fails, it continues with 1.8V, etc.
+> 
 >>
+>> This is due to the call from mmc_set_initial_signal_voltage. It is a bit
+>> unfortunate since this is printed as a warning. Not sure if that could
+>> be prevented somehow?
 > 
-> I'm not sure if it's quite necessary to remove it as it's used to bypass
-> 100Mhz above pad settings look up which is meaningless if user claims
-> no 1-8 v support.
+> Seems like SDHCI_SIGNALING_330 should not be set, unless 3.3V I/O is
+> supported. That should avoid SDHCI from trying and instead just
+> returning an error code immediately.
 > 
-> If you remove it, probably you still need better check the quirk for
-> Pad state look up.
+> This seems like a generic issues for all SDHCI variant drivers.
 
-There should be really no change in behavior, just simplifying code:
+Hm, can we resolve this in a generic fashion?
 
-If no-1-8-v is set, SDHCI_QUIRK2_NO_1_8_V will be set in any case.
+E.g something like this in sdhci_setup_host():
 
-If no-1-8-v is not set, SDHCI_QUIRK2_NO_1_8_V will be set depending on
-whether pinctrl states are available
-
-This has been the case before and after this change.
+if (!regulator_is_supported_voltage(mmc->supply.vqmmc, 3200000,
+3450000))
+	host->flags &= ~SDHCI_SIGNALING_330;
 
 --
 Stefan
-
-> 
-> Regards
-> Dong Aisheng
-> 
->> Signed-off-by: Stefan Agner <stefan@agner.ch>
->> ---
->>  drivers/mmc/host/sdhci-esdhc-imx.c          | 8 ++------
->>  include/linux/platform_data/mmc-esdhc-imx.h | 2 --
->>  2 files changed, 2 insertions(+), 8 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-
->> esdhc-imx.c
->> index 6f444731754d..20a420b765b3 100644
->> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
->> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
->> @@ -1145,18 +1145,14 @@ sdhci_esdhc_imx_probe_dt(struct
->> platform_device *pdev,
->>  			     &boarddata->tuning_start_tap);
->>
->>  	if (of_find_property(np, "no-1-8-v", NULL))
->> -		boarddata->support_vsel = false;
->> -	else
->> -		boarddata->support_vsel = true;
->> +		host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
->>
->>  	if (of_property_read_u32(np, "fsl,delay-line", &boarddata-
->> >delay_line))
->>  		boarddata->delay_line = 0;
->>
->>  	mmc_of_parse_voltage(np, &host->ocr_mask);
->>
->> -	/* sdr50 and sdr104 need work on 1.8v signal voltage */
->> -	if ((boarddata->support_vsel) && esdhc_is_usdhc(imx_data) &&
->> -	    !IS_ERR(imx_data->pins_default)) {
->> +	if (esdhc_is_usdhc(imx_data) && !IS_ERR(imx_data->pins_default))
->> {
->>  		imx_data->pins_100mhz = pinctrl_lookup_state(imx_data-
->> >pinctrl,
->>
->> 	ESDHC_PINCTRL_STATE_100MHZ);
->>  		imx_data->pins_200mhz = pinctrl_lookup_state(imx_data-
->> >pinctrl,
->> diff --git a/include/linux/platform_data/mmc-esdhc-imx.h
->> b/include/linux/platform_data/mmc-esdhc-imx.h
->> index 7daa78a2f342..640dec8b5b0c 100644
->> --- a/include/linux/platform_data/mmc-esdhc-imx.h
->> +++ b/include/linux/platform_data/mmc-esdhc-imx.h
->> @@ -34,7 +34,6 @@ enum cd_types {
->>   * @cd_gpio:	gpio for card_detect interrupt
->>   * @wp_type:	type of write_protect method (see wp_types enum above)
->>   * @cd_type:	type of card_detect method (see cd_types enum above)
->> - * @support_vsel:  indicate it supports 1.8v switching
->>   */
->>
->>  struct esdhc_platform_data {
->> @@ -43,7 +42,6 @@ struct esdhc_platform_data {
->>  	enum wp_types wp_type;
->>  	enum cd_types cd_type;
->>  	int max_bus_width;
->> -	bool support_vsel;
->>  	unsigned int delay_line;
->>  	unsigned int tuning_step;       /* The delay cell steps in tuning
->> procedure */
->>  	unsigned int tuning_start_tap;	/* The start delay cell point in tuning
->> procedure */
->> --
->> 2.18.0
