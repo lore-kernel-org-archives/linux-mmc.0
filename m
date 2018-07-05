@@ -1,209 +1,126 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 18/19] mmc: mmci: add specific clk/pwr procedure for stm32
- sdmmc
-Date: Thu, 5 Jul 2018 16:49:55 +0200
-Message-ID: <CAPDyKFp+PZeO55T2Djh=vRF8nDL6EZ+68pGJH72Pgs10PCdNPg@mail.gmail.com>
-References: <1528809280-31116-1-git-send-email-ludovic.Barre@st.com>
- <1528809280-31116-19-git-send-email-ludovic.Barre@st.com>
+Subject: Re: [PATCH 01/19] mmc: mmci: regroup and define dma operations
+Date: Thu, 5 Jul 2018 17:17:46 +0200
+Message-ID: <CAPDyKFpt5HUeUqaoS9icDodM+r64jB9vQ=zTecO0tuBv=TtOXg@mail.gmail.com>
+References: <1528809280-31116-1-git-send-email-ludovic.Barre@st.com> <1528809280-31116-2-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1528809280-31116-19-git-send-email-ludovic.Barre@st.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1528809280-31116-2-git-send-email-ludovic.Barre@st.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ludovic Barre <ludovic.Barre@st.com>
-Cc: devicetree@vger.kernel.org, Alexandre Torgue <alexandre.torgue@st.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Gerald Baeza <gerald.baeza@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+Cc: Rob Herring <robh+dt@kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Gerald Baeza <gerald.baeza@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, devicetree@vger.kernel.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
 On 12 June 2018 at 15:14, Ludovic Barre <ludovic.Barre@st.com> wrote:
 > From: Ludovic Barre <ludovic.barre@st.com>
 >
-> This patch adds specific clock and power ios for stm32 sdmmc variant.
-> power ios: stm32 dedicated procedure must be done to perform power
-> off/on procedures. To power off, the sdmmc must be reset and set
-> to power cycle state before to disabling vqmmc. This drives low
-> SDMMC_D[7:0], SDMMC_CMD and SDMMC_CK to prevent the Card from
-> being supplied through the signal lines.
-> To power on, set the SDMMC in power-off SDMMC_D[7:0], SDMMC_CMD
-> and SDMMC_CK are driven high. Then we can set the SDMMC to
-> Power-on state.
->
-> clock ios: specific bits behavior:
-> -clock divider card_clk = mclk / (2 * clkdiv)
-> -ddr activation
-> -wide bus 1/4/8bits
-> -bus speed
-> -receive clock selection (in_ck/ck_in/fb_ck)
->
-> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
-> ---
->  drivers/mmc/host/mmci.c | 112 ++++++++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 112 insertions(+)
->
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index 86aef4f..af27a0a 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -50,6 +50,10 @@
->
->  static unsigned int fmax = 515633;
->
-> +static void mmci_sdmmc_set_pwrreg(struct mmci_host *host,
-> +                                 unsigned char power_mode, unsigned int pwr);
-> +static void mmci_sdmmc_set_clkreg(struct mmci_host *host, unsigned int desired);
-> +
->  static struct variant_data variant_arm = {
->         .fifosize               = 16 * 4,
->         .fifohalfsize           = 8 * 4,
-> @@ -490,6 +494,114 @@ static void mmci_set_pwrreg(struct mmci_host *host, unsigned char power_mode,
->         mmci_write_pwrreg(host, pwr);
->  }
->
-> +static void mmci_sdmmc_set_clkreg(struct mmci_host *host, unsigned int desired)
-> +{
-> +       unsigned int clk = 0, ddr = 0;
-> +
-> +       if (host->mmc->ios.timing == MMC_TIMING_MMC_DDR52 ||
-> +           host->mmc->ios.timing == MMC_TIMING_UHS_DDR50)
-> +               ddr = MCI_STM32_CLK_DDR;
-> +
-> +       /*
-> +        * cclk = mclk / (2 * clkdiv)
-> +        * clkdiv 0 => bypass
-> +        * in ddr mode bypass is not possible
-> +        */
-> +       if (desired) {
-> +               if (desired >= host->mclk && !ddr) {
-> +                       host->cclk = host->mclk;
-> +               } else {
-> +                       clk = DIV_ROUND_UP(host->mclk, 2 * desired);
-> +                       if (clk > MCI_STM32_CLK_CLKDIV_MSK)
-> +                               clk = MCI_STM32_CLK_CLKDIV_MSK;
-> +                       host->cclk = host->mclk / (2 * clk);
-> +               }
-> +       }
-> +
-> +       if (host->mmc->ios.bus_width == MMC_BUS_WIDTH_4)
-> +               clk |= MCI_STM32_CLK_WIDEBUS_4;
-> +       if (host->mmc->ios.bus_width == MMC_BUS_WIDTH_8)
-> +               clk |= MCI_STM32_CLK_WIDEBUS_8;
-> +
-> +       clk |= MCI_STM32_CLK_HWFCEN;
-> +       clk |= host->clk_reg_add;
-> +       clk |= ddr;
-> +
-> +       /*
-> +        * SDMMC_FBCK is selected when an external Delay Block is needed
-> +        * with SDR104.
-> +        */
-> +       if (host->mmc->ios.timing >= MMC_TIMING_UHS_SDR50) {
-> +               clk |= MCI_STM32_CLK_BUSSPEED;
-> +               if (host->mmc->ios.timing == MMC_TIMING_UHS_SDR104) {
-> +                       clk &= ~MCI_STM32_CLK_SEL_MSK;
-> +                       clk |= MCI_STM32_CLK_SELFBCK;
-> +               }
-> +       }
-> +
-> +       mmci_write_clkreg(host, clk);
-> +}
-> +
-> +static void mmci_sdmmc_set_pwrreg(struct mmci_host *host,
-> +                                 unsigned char power_mode, unsigned int pwr)
-> +{
-> +       struct mmc_host *mmc = host->mmc;
-> +
-> +       pwr |= host->pwr_reg_add;
-> +
-> +       switch (power_mode) {
-> +       case MMC_POWER_OFF:
-> +               if (!IS_ERR(mmc->supply.vmmc))
-> +                       mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
-> +
-> +               /* Only a reset could disable sdmmc */
-> +               reset_control_assert(host->rst);
-> +               udelay(2);
-> +               reset_control_deassert(host->rst);
+> Prepare mmci driver to manage dma interface by new property.
+> This patch defines and regroups dma operations for mmci drivers.
+> mmci_dma_XX prototypes are added to call member of mmci_dma_ops
+> if not null. Based on legacy need, a mmci dma interface has been
+> defined with:
+> -mmci_dma_setup
+> -mmci_dma_release
+> -mmci_dma_pre_req
+> -mmci_dma_start
+> -mmci_dma_finalize
+> -mmci_dma_post_req
+> -mmci_dma_error
+> -mmci_dma_get_next_data
 
-Could you please elaborate on what goes on here. Do you need to
-reset-the controller when powering off the card?
+As I suggested for one of the other patches, I would rather turn core
+mmci functions into library functions, which can be either invoked
+from variant callbacks or assigned directly to them.
 
-> +
-> +               /* default mask (probe) must be activated */
-> +               writel(MCI_IRQENABLE | host->variant->start_err,
-> +                      host->base + MMCIMASK0);
+In other words, I would leave the functions that you move in this
+patch to stay in mmci.c. Although some needs to be re-factored and we
+also needs to make some of them available to be called from another
+file, hence the functions needs to be shared via mmci.h rather than
+being declared static.
 
-The above seems like it could be made generic. There is no reason to
-keep IRQs enabled when the card is powered off.
+Let me take a concrete example on how I would move forward, hopefully
+that explains it a bit better. Please see below.
 
-> +
-> +               /*
-> +                * Set the SDMMC in Power-cycle state before to disabling vqmmc.
-> +                * This will make that the SDMMC_D[7:0], SDMMC_CMD and SDMMC_CK
-> +                * are driven low, to prevent the Card from being supplied
-> +                * through the signal lines.
-> +                */
-> +               mmci_write_pwrreg(host, MCI_STM32_PWR_CYC | pwr);
-> +
-> +               if (!IS_ERR(host->mmc->supply.vqmmc) && host->vqmmc_enabled) {
-> +                       regulator_disable(host->mmc->supply.vqmmc);
-> +                       host->vqmmc_enabled = false;
-> +               }
-> +               break;
-> +       case MMC_POWER_UP:
-> +               if (!IS_ERR(mmc->supply.vmmc))
-> +                       mmc_regulator_set_ocr(mmc, mmc->supply.vmmc,
-> +                                             mmc->ios.vdd);
-> +               break;
-> +       case MMC_POWER_ON:
-> +               if (!IS_ERR(host->mmc->supply.vqmmc) && !host->vqmmc_enabled) {
-> +                       if (regulator_enable(host->mmc->supply.vqmmc) < 0)
-> +                               dev_err(mmc_dev(host->mmc),
-> +                                       "failed to enable vqmmc regulator\n");
-> +                       else
-> +                               host->vqmmc_enabled = true;
-> +               }
-> +
-> +               /*
-> +                * After a power-cycle state, we must set the SDMMC in
-> +                * Power-off. The SDMMC_D[7:0], SDMMC_CMD and SDMMC_CK are
-> +                * driven high. Then we can set the SDMMC to Power-on state
-> +                */
-> +               mmci_write_pwrreg(host, MCI_PWR_OFF | pwr);
-> +               mdelay(1);
-> +               mmci_write_pwrreg(host, MCI_PWR_ON | pwr);
+[...]
 
-This looks odd. MMC_POWER_ON is the last power phase. For every single
-additional ios change (timing, clock, etc), you will hit this piece of
-code. In other words, there will be a mdelay(1) each time, which is
-probably not needed.
+> -/*
+> - * All the DMA operation mode stuff goes inside this ifdef.
+> - * This assumes that you have a generic DMA device interface,
+> - * no custom DMA interfaces are supported.
+> - */
+> -#ifdef CONFIG_DMA_ENGINE
+> -static void mmci_dma_setup(struct mmci_host *host)
+> -{
+> -       const char *rxname, *txname;
+> -       struct variant_data *variant = host->variant;
+> -
+> -       host->dma_rx_channel = dma_request_slave_channel(mmc_dev(host->mmc), "rx");
+> -       host->dma_tx_channel = dma_request_slave_channel(mmc_dev(host->mmc), "tx");
+> -
+> -       /* initialize pre request cookie */
+> -       host->next_data.cookie = 1;
+> -
+> -       /*
+> -        * If only an RX channel is specified, the driver will
+> -        * attempt to use it bidirectionally, however if it is
+> -        * is specified but cannot be located, DMA will be disabled.
+> -        */
+> -       if (host->dma_rx_channel && !host->dma_tx_channel)
+> -               host->dma_tx_channel = host->dma_rx_channel;
+> -
+> -       if (host->dma_rx_channel)
+> -               rxname = dma_chan_name(host->dma_rx_channel);
+> -       else
+> -               rxname = "none";
+> -
+> -       if (host->dma_tx_channel)
+> -               txname = dma_chan_name(host->dma_tx_channel);
+> -       else
+> -               txname = "none";
+> -
+> -       dev_info(mmc_dev(host->mmc), "DMA channels RX %s, TX %s\n",
+> -                rxname, txname);
+> -
+> -       /*
+> -        * Limit the maximum segment size in any SG entry according to
+> -        * the parameters of the DMA engine device.
+> -        */
+> -       if (host->dma_tx_channel) {
+> -               struct device *dev = host->dma_tx_channel->device->dev;
+> -               unsigned int max_seg_size = dma_get_max_seg_size(dev);
+> -
+> -               if (max_seg_size < host->mmc->max_seg_size)
+> -                       host->mmc->max_seg_size = max_seg_size;
+> -       }
+> -       if (host->dma_rx_channel) {
+> -               struct device *dev = host->dma_rx_channel->device->dev;
+> -               unsigned int max_seg_size = dma_get_max_seg_size(dev);
+> -
+> -               if (max_seg_size < host->mmc->max_seg_size)
+> -                       host->mmc->max_seg_size = max_seg_size;
+> -       }
 
-> +               break;
-> +       }
-> +}
-> +
->  static void
->  mmci_request_end(struct mmci_host *host, struct mmc_request *mrq)
->  {
-> --
-> 2.7.4
->
+Everything above shall be left as generic library function,
+mmci_dma_setup() and I would share it via mmci.h and thus change it
+from being static.
 
-Overall I am wondering if mmci_sdmmc_set_pwrreg() can be made generic
-inside the common mmci ->set_ios() functions instead.
+> -
+> -       if (variant->qcom_dml && host->dma_rx_channel && host->dma_tx_channel)
+> -               if (dml_hw_init(host, host->mmc->parent->of_node))
+> -                       variant->qcom_dml = false;
 
-For example, the reset can be optional and checked with
-if(!IS_ERR(host->rst)) - and the others can probably be conditional
-based on a variant data.
+This piece of code, should be made specific to the qcom variant and
+managed though a "mmci_host_ops" callback. The corresponding code in
+that callback would then start by invoking mmci_dma_setup(), before it
+continues with the qcom specific operations.
 
-What do you think?
+For legacy variants, the corresponding callback would be set directly
+to mmci_dma_setup() and called through the callback from mmci.c when
+needed. There is no need to have a separate file for DMA for the
+legacy variants, I think.
+
+[...]
 
 Kind regards
 Uffe
