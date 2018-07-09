@@ -1,65 +1,76 @@
 From: Chunyan Zhang <zhang.chunyan@linaro.org>
-Subject: [PATCH V3 0/7] mmc: add support for sdhci 4.0
-Date: Mon,  9 Jul 2018 11:19:51 +0800
-Message-ID: <1531106398-14062-1-git-send-email-zhang.chunyan@linaro.org>
+Subject: [PATCH V3 1/7] mmc: sdhci: add sd host v4 mode
+Date: Mon,  9 Jul 2018 11:19:52 +0800
+Message-ID: <1531106398-14062-2-git-send-email-zhang.chunyan@linaro.org>
+References: <1531106398-14062-1-git-send-email-zhang.chunyan@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1531106398-14062-1-git-send-email-zhang.chunyan@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@spreadtrum.com>, zhang.lyra@gmail.com
 List-Id: linux-mmc@vger.kernel.org
 
->From the SD host controller version 4.0 on, SDHCI implementation either
-is version 3 compatible or version 4 mode. This patch-set covers those
-changes which are common for SDHCI 4.0 version, regardless of whether
-they are used with SD or eMMC storage devices.
+For SD host controller version 4.00 or later ones, there're two
+modes of implementation - Version 3.00 compatible mode or
+Version 4 mode.  This patch introduced an interface to enable
+v4 mode.
 
-This patchset also added a new sdhci driver for Spreadtrum's controller
-which supports v4.0 mode.
+Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
+---
+ drivers/mmc/host/sdhci.c | 11 +++++++++++
+ drivers/mmc/host/sdhci.h |  5 +++++
+ 2 files changed, 16 insertions(+)
 
-This patchset has been tested on Spreadtrum's mobile phone, emmc can be
-initialized, mounted, read and written, with these changes for common
-sdhci framework and sdhci-sprd driver.
-
-Changes from V2:
-* Addressed comments from Adrian:
-- Added sdhci_enable_v4_mode() for enabling v4 mode instead of determining by reading from registers;
-- Added support for 64-bit SDMA address in v4 mode;
-- Dropped the changes of ADMA2 data aglinment;
-- Added support for "Auto Cmd Auto Select".
-* Rebased on v4.18-rc2.
-* Dealt with a few issues in sdhci-sprd:
-- Save return value of mmc_of_parse();
-- Add checking for clk_prepare_enable();
-- Use BIT() macro instead.
-
-Changes from v1:
-* Addressed comments from Ulf:
- - Add dt-bindings for Spreadtrum sdhci;
- - Use assigned-clocks* DT bindings to set default source of sdio clock;
- - Removed unuseful print;
- - Removed two functions which are not used;
- - Add back the missing pm_runtime_put_autosuspend() after adding sdhci host.
-
-* Changed Spreadtrum sdhci driver name to sdhci-sprd.
-
-Chunyan Zhang (7):
-  mmc: sdhci: add sd host v4 mode
-  mmc: sdhci: made changes for System Address register of SDMA
-  mmc: sdhci: add ADMA2 64-bit addressing support for V4 mode
-  mmc: sdhci: add 32-bit block count support for v4 mode
-  mmc: sdhci: add Auto CMD Auto Select support
-  mmc: sdhci-sprd: added Spreadtrum's initial host controller
-  dt-bindings: sdhci-sprd: Add bindings for the sdhci-sprd controller
-
- .../devicetree/bindings/mmc/sdhci-sprd.txt         |  41 ++
- drivers/mmc/host/Kconfig                           |  13 +
- drivers/mmc/host/Makefile                          |   1 +
- drivers/mmc/host/sdhci-sprd.c                      | 437 +++++++++++++++++++++
- drivers/mmc/host/sdhci.c                           | 107 +++--
- drivers/mmc/host/sdhci.h                           |  22 +-
- 6 files changed, 596 insertions(+), 25 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-sprd.txt
- create mode 100644 drivers/mmc/host/sdhci-sprd.c
-
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 1c828e0..525862f 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -3321,6 +3321,17 @@ struct sdhci_host *sdhci_alloc_host(struct device *dev,
+ 
+ EXPORT_SYMBOL_GPL(sdhci_alloc_host);
+ 
++/*
++ * Vendor's Host Controller which supports v4 mode can call
++ * this function to enable v4 mode before calling
++ * __sdhci_add_host().
++ */
++void sdhci_enable_v4_mode(struct sdhci_host *host)
++{
++	host->v4_mode = true;
++}
++EXPORT_SYMBOL_GPL(sdhci_enable_v4_mode);
++
+ static int sdhci_set_dma_mask(struct sdhci_host *host)
+ {
+ 	struct mmc_host *mmc = host->mmc;
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 23966f8..e98249b 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -184,6 +184,7 @@
+ #define   SDHCI_CTRL_DRV_TYPE_D		0x0030
+ #define  SDHCI_CTRL_EXEC_TUNING		0x0040
+ #define  SDHCI_CTRL_TUNED_CLK		0x0080
++#define  SDHCI_CTRL_V4_MODE		0x1000
+ #define  SDHCI_CTRL_PRESET_VAL_ENABLE	0x8000
+ 
+ #define SDHCI_CAPABILITIES	0x40
+@@ -566,6 +567,9 @@ struct sdhci_host {
+ 	u64			data_timeout;
+ 
+ 	unsigned long private[0] ____cacheline_aligned;
++
++	/* Host Version 4 Enable */
++	bool			v4_mode;
+ };
+ 
+ struct sdhci_ops {
+@@ -747,5 +751,6 @@ bool sdhci_cqe_irq(struct sdhci_host *host, u32 intmask, int *cmd_error,
+ 		   int *data_error);
+ 
+ void sdhci_dumpregs(struct sdhci_host *host);
++void sdhci_enable_v4_mode(struct sdhci_host *host);
+ 
+ #endif /* __SDHCI_HW_H */
 -- 
 2.7.4
