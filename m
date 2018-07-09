@@ -1,77 +1,72 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: core: improve rationality of bus width setting for HS400es
-Date: Mon, 9 Jul 2018 13:31:14 +0200
-Message-ID: <CAPDyKFpzJV-UQbMa7_tHms7o3hMn9_g=H_M0jW+ZN9G=8XCqRg@mail.gmail.com>
-References: <1531118843-796-1-git-send-email-hongjiefang@asrmicro.com>
+Subject: Re: [PATCH v2] mmc: sdhci-esdhc-imx: allow 1.8V modes without
+ 100/200MHz pinctrl states
+Date: Mon, 9 Jul 2018 13:31:55 +0200
+Message-ID: <CAPDyKFqoZ=od-sJVO9Aj9Ha6QjGqjvrNuyWE2HS_Rtkap_bbKw@mail.gmail.com>
+References: <20180704150745.21003-1-stefan@agner.ch> <CAPDyKFou773HgPzE29Ynr2MVFcaOhb=+uXBrjL+1H8iWx4jdQw@mail.gmail.com>
+ <3d4064a559e741e05105b11c9e7a831d@agner.ch>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1531118843-796-1-git-send-email-hongjiefang@asrmicro.com>
+In-Reply-To: <3d4064a559e741e05105b11c9e7a831d@agner.ch>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Hongjie Fang <hongjiefang@asrmicro.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Linus Walleij <linus.walleij@linaro.org>, Bastian Stender <bst@pengutronix.de>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Chanho Min <chanho.min@lge.com>, Kyle Roeschley <kyle.roeschley@ni.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Stefan Agner <stefan@agner.ch>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Fabio Estevam <fabio.estevam@nxp.com>, Haibo Chen <haibo.chen@nxp.com>, Aisheng Dong <aisheng.dong@nxp.com>, Michael Trimarchi <michael@amarulasolutions.com>, Russell King <rmk+kernel@armlinux.org.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 9 July 2018 at 08:47, Hongjie Fang <hongjiefang@asrmicro.com> wrote:
-> mmc_select_hs400es() calls mmc_select_bus_width() which will try to
-> set 4bit transfer mode if fail to set 8bit mode. The problem is that
-> the bus width should not be set to 4bit in HS400es mode.
-
-I guess it fails because there is something wrong. Can you please
-elaborate under what circumstance the problem occurs?
-
+On 5 July 2018 at 16:22, Stefan Agner <stefan@agner.ch> wrote:
+> On 05.07.2018 15:10, Ulf Hansson wrote:
+>> On 4 July 2018 at 17:07, Stefan Agner <stefan@agner.ch> wrote:
+>>> If pinctrl nodes for 100/200MHz are missing, the controller should
+>>> not select any mode which need signal frequencies 100MHz or higher.
+>>> To prevent such speed modes the driver currently uses the quirk flag
+>>> SDHCI_QUIRK2_NO_1_8_V. This works nicely for SD cards since 1.8V
+>>> signaling is required for all faster modes and slower modes use 3.3V
+>>> signaling only.
+>>>
+>>> However, there are eMMC modes which use 1.8V signaling and run below
+>>> 100MHz, e.g. DDR52 at 1.8V. With using SDHCI_QUIRK2_NO_1_8_V this
+>>> mode is prevented. When using a fixed 1.8V regulator as vqmmc-supply
+>>> the stack has no valid mode to use. In this tenuous situation the
+>>> kernel continuously prints voltage switching errors:
+>>>   mmc1: Switching to 3.3V signalling voltage failed
+>>>
+>>> Avoid using SDHCI_QUIRK2_NO_1_8_V and prevent faster modes by
+>>> altering the SDHCI capability register. With that the stack is able
+>>> to select 1.8V modes even if no faster pinctrl states are available:
+>>>   # cat /sys/kernel/debug/mmc1/ios
+>>>   ...
+>>>   timing spec:    8 (mmc DDR52)
+>>>   signal voltage: 1 (1.80 V)
+>>>   ...
+>>>
+>>> Link: http://lkml.kernel.org/r/20180628081331.13051-1-stefan@agner.ch
+>>> Signed-off-by: Stefan Agner <stefan@agner.ch>
+>>
+>> Thanks, applied for next! Let's see if this turns out okay, then let's
+>> make it a fix and add a stable tag.
+>>
+>> BTW, would you mind looking up the commit it fixes? Or if there is a
+>> certain stable release we should target.
+>>
 >
-> Signed-off-by: Hongjie Fang <hongjiefang@asrmicro.com>
-> ---
->  drivers/mmc/core/mmc.c | 23 +++++++++++++++++++++--
->  1 file changed, 21 insertions(+), 2 deletions(-)
+> The quirk SDHCI_QUIRK2_NO_1_8_V has been used if pinctrl were missing
+> since support has been added for additional pinctrl states (back around
+> 3.13).
 >
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 4466f5d..94c3cc5 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1337,9 +1337,28 @@ static int mmc_select_hs400es(struct mmc_card *card)
->         if (err)
->                 goto out_err;
+> Fixes: ad93220de7da ("mmc: sdhci-esdhc-imx: change pinctrl state
+> according to uhs mode")
 >
-> -       err = mmc_select_bus_width(card);
-> -       if (err < 0)
-> +       /* Switch card to 8 bit mode */
-> +       err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +                        EXT_CSD_BUS_WIDTH,
-> +                        EXT_CSD_BUS_WIDTH_8,
-> +                        card->ext_csd.generic_cmd6_time);
-> +       if (err) {
-> +               pr_err("%s: switch to 8 bit mode for hs400es failed, err:%d\n",
-> +                       mmc_hostname(host), err);
-> +               goto out_err;
-> +       }
-> +
-> +       mmc_set_bus_width(host, MMC_BUS_WIDTH_8);
-> +
-> +       if (!(host->caps & MMC_CAP_BUS_WIDTH_TEST))
-> +               err = mmc_compare_ext_csds(card, MMC_BUS_WIDTH_8);
-> +       else
-> +               err = mmc_bus_test(card, MMC_BUS_WIDTH_8);
-> +       if (err) {
-> +               pr_err("%s: test 8 bit mode for hs400es failed, err:%d\n",
-> +                       mmc_hostname(host), err);
->                 goto out_err;
+> I guess it won't apply on older kernels since the code which applies the
+> quirk has been moved around.
 
-Lot's open coding, no I don't like it.
+Thanks!
 
-Wouldn't it instead be possible to check the return value from
-mmc_select_bus_width(), as it should tell what width it manage to
-select. Then if it isn't 8-bit, then we should bail out. Does that
-work?
+I have moved the patch to fixes and added a stable tag, # v4.13+. It
+applied cleanly on top of that kernel version, if you or anyone else
+needs it for an older kernel, please post a backported patch.
 
-> +       }
->
->         /* Switch card to HS mode */
->         err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> --
-> 1.9.1
->
+[...]
 
 Kind regards
 Uffe
