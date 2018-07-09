@@ -1,7 +1,7 @@
 From: Chunyan Zhang <zhang.chunyan@linaro.org>
-Subject: [PATCH V3 1/7] mmc: sdhci: add sd host v4 mode
-Date: Mon,  9 Jul 2018 11:19:52 +0800
-Message-ID: <1531106398-14062-2-git-send-email-zhang.chunyan@linaro.org>
+Subject: [PATCH V3 2/7] mmc: sdhci: made changes for System Address register of SDMA
+Date: Mon,  9 Jul 2018 11:19:53 +0800
+Message-ID: <1531106398-14062-3-git-send-email-zhang.chunyan@linaro.org>
 References: <1531106398-14062-1-git-send-email-zhang.chunyan@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1531106398-14062-1-git-send-email-zhang.chunyan@linaro.org>
@@ -10,67 +10,79 @@ To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@spreadtrum.com>, zhang.lyra@gmail.com
 List-Id: linux-mmc@vger.kernel.org
 
-For SD host controller version 4.00 or later ones, there're two
-modes of implementation - Version 3.00 compatible mode or
-Version 4 mode.  This patch introduced an interface to enable
-v4 mode.
+According to the SD host controller specification version 4.10, when
+Host Version 4 is enabled, SDMA uses ADMA System Address register
+(05Fh-058h) instead of using SDMA System Address register to
+support both 32-bit and 64-bit addressing.
 
 Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
 ---
- drivers/mmc/host/sdhci.c | 11 +++++++++++
- drivers/mmc/host/sdhci.h |  5 +++++
- 2 files changed, 16 insertions(+)
+ drivers/mmc/host/sdhci.c | 25 ++++++++++++++++++-------
+ 1 file changed, 18 insertions(+), 7 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 1c828e0..525862f 100644
+index 525862f..c7de6a5 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -3321,6 +3321,17 @@ struct sdhci_host *sdhci_alloc_host(struct device *dev,
+@@ -701,7 +701,7 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
+ 	}
+ }
  
- EXPORT_SYMBOL_GPL(sdhci_alloc_host);
- 
-+/*
-+ * Vendor's Host Controller which supports v4 mode can call
-+ * this function to enable v4 mode before calling
-+ * __sdhci_add_host().
-+ */
-+void sdhci_enable_v4_mode(struct sdhci_host *host)
-+{
-+	host->v4_mode = true;
-+}
-+EXPORT_SYMBOL_GPL(sdhci_enable_v4_mode);
-+
- static int sdhci_set_dma_mask(struct sdhci_host *host)
+-static u32 sdhci_sdma_address(struct sdhci_host *host)
++static dma_addr_t sdhci_sdma_address(struct sdhci_host *host)
  {
- 	struct mmc_host *mmc = host->mmc;
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 23966f8..e98249b 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -184,6 +184,7 @@
- #define   SDHCI_CTRL_DRV_TYPE_D		0x0030
- #define  SDHCI_CTRL_EXEC_TUNING		0x0040
- #define  SDHCI_CTRL_TUNED_CLK		0x0080
-+#define  SDHCI_CTRL_V4_MODE		0x1000
- #define  SDHCI_CTRL_PRESET_VAL_ENABLE	0x8000
+ 	if (host->bounce_buffer)
+ 		return host->bounce_addr;
+@@ -709,6 +709,18 @@ static u32 sdhci_sdma_address(struct sdhci_host *host)
+ 		return sg_dma_address(host->data->sg);
+ }
  
- #define SDHCI_CAPABILITIES	0x40
-@@ -566,6 +567,9 @@ struct sdhci_host {
- 	u64			data_timeout;
- 
- 	unsigned long private[0] ____cacheline_aligned;
++static void sdhci_set_sdma_addr(struct sdhci_host *host, dma_addr_t addr)
++{
++	if (host->v4_mode) {
++		sdhci_writel(host, addr, SDHCI_ADMA_ADDRESS);
++		if (host->flags & SDHCI_USE_64_BIT_DMA)
++			sdhci_writel(host, (u64)addr >> 32, SDHCI_ADMA_ADDRESS_HI);
++	} else {
++		sdhci_writel(host, addr, SDHCI_DMA_ADDRESS);
++	}
 +
-+	/* Host Version 4 Enable */
-+	bool			v4_mode;
- };
++}
++
+ static unsigned int sdhci_target_timeout(struct sdhci_host *host,
+ 					 struct mmc_command *cmd,
+ 					 struct mmc_data *data)
+@@ -968,8 +980,7 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+ 					     SDHCI_ADMA_ADDRESS_HI);
+ 		} else {
+ 			WARN_ON(sg_cnt != 1);
+-			sdhci_writel(host, sdhci_sdma_address(host),
+-				     SDHCI_DMA_ADDRESS);
++			sdhci_set_sdma_addr(host, sdhci_sdma_address(host));
+ 		}
+ 	}
  
- struct sdhci_ops {
-@@ -747,5 +751,6 @@ bool sdhci_cqe_irq(struct sdhci_host *host, u32 intmask, int *cmd_error,
- 		   int *data_error);
+@@ -2796,7 +2807,7 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
+ 		 * some controllers are faulty, don't trust them.
+ 		 */
+ 		if (intmask & SDHCI_INT_DMA_END) {
+-			u32 dmastart, dmanow;
++			dma_addr_t dmastart, dmanow;
  
- void sdhci_dumpregs(struct sdhci_host *host);
-+void sdhci_enable_v4_mode(struct sdhci_host *host);
+ 			dmastart = sdhci_sdma_address(host);
+ 			dmanow = dmastart + host->data->bytes_xfered;
+@@ -2807,9 +2818,9 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
+ 				~(SDHCI_DEFAULT_BOUNDARY_SIZE - 1)) +
+ 				SDHCI_DEFAULT_BOUNDARY_SIZE;
+ 			host->data->bytes_xfered = dmanow - dmastart;
+-			DBG("DMA base 0x%08x, transferred 0x%06x bytes, next 0x%08x\n",
+-			    dmastart, host->data->bytes_xfered, dmanow);
+-			sdhci_writel(host, dmanow, SDHCI_DMA_ADDRESS);
++			DBG("DMA base 0x%016llx, transferred 0x%06x bytes, next 0x%016llx\n",
++			    (u64)dmastart, host->data->bytes_xfered, (u64)dmanow);
++			sdhci_set_sdma_addr(host, dmanow);
+ 		}
  
- #endif /* __SDHCI_HW_H */
+ 		if (intmask & SDHCI_INT_DATA_END) {
 -- 
 2.7.4
