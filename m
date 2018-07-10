@@ -1,101 +1,92 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC PATCH 3/3] sdhci: arasan: Add support to read Tap Delay
- values from DT
-Date: Tue, 10 Jul 2018 10:31:39 +0200
-Message-ID: <CAPDyKFoGJOE-h4rLqzMO=wzNjkfcuU_oQ3NLK5=OQfSMj3dDHg@mail.gmail.com>
-References: <1528373500-24663-1-git-send-email-manish.narani@xilinx.com> <1528373500-24663-3-git-send-email-manish.narani@xilinx.com>
+From: =?utf-8?B?RmFuZyBIb25namllKOaWuea0quadsCk=?=
+        <hongjiefang@asrmicro.com>
+Subject: RE: [PATCH] mmc: core: improve rationality of bus width setting for
+ HS400es
+Date: Tue, 10 Jul 2018 10:44:26 +0000
+Message-ID: <63a5c7d969eb4e5d99c5e289e28cab09@mail2012.asrmicro.com>
+References: <1531118843-796-1-git-send-email-hongjiefang@asrmicro.com>
+ <CAPDyKFpzJV-UQbMa7_tHms7o3hMn9_g=H_M0jW+ZN9G=8XCqRg@mail.gmail.com>
+ <86aa8215d6e44e578cd34f0625c5ebef@mail2012.asrmicro.com>
+ <CAPDyKFqfwxGgVhKp-RU1Ksd2BKhxvqdqXf0JV3dzyJdgfeBV+w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1528373500-24663-3-git-send-email-manish.narani@xilinx.com>
+In-Reply-To: <CAPDyKFqfwxGgVhKp-RU1Ksd2BKhxvqdqXf0JV3dzyJdgfeBV+w@mail.gmail.com>
+Content-Language: zh-CN
 Sender: linux-kernel-owner@vger.kernel.org
-To: Manish Narani <manish.narani@xilinx.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Moritz Fischer <mdf@kernel.org>, stefan.krsmanovic@aggios.com, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, devicetree@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michal.simek@xilinx.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Linus Walleij <linus.walleij@linaro.org>, Bastian Stender <bst@pengutronix.de>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Chanho Min <chanho.min@lge.com>, Kyle Roeschley <kyle.roeschley@ni.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 7 June 2018 at 14:11, Manish Narani <manish.narani@xilinx.com> wrote:
-> This patch adds support for reading Tap Delay values from Device Tree
-> and write them via eemi calls. The macros containing these tap delay
-> values are removed from the driver.
->
-> Signed-off-by: Manish Narani <manish.narani@xilinx.com>
-> ---
->  drivers/mmc/host/sdhci-of-arasan.c | 131 +++++++++++++++++++++++++++++++++++++
->  1 file changed, 131 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index e3332a5..fc0fd01 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -36,6 +36,8 @@
->
->  #define PHY_CLK_TOO_SLOW_HZ            400000
->
-> +#define MMC_BANK2              0x2
-> +
->  /*
->   * On some SoCs the syscon area has a feature where the upper 16-bits of
->   * each 32-bit register act as a write mask for the lower 16-bits.  This allows
-> @@ -90,6 +92,10 @@ struct sdhci_arasan_data {
->         struct sdhci_host *host;
->         struct clk      *clk_ahb;
->         struct phy      *phy;
-> +       u32 mio_bank;
-> +       u32 device_id;
-> +       u32 itapdly[MMC_TIMING_MMC_HS400 + 1];
-> +       u32 otapdly[MMC_TIMING_MMC_HS400 + 1];
->         bool            is_phy_on;
->
->         bool            has_cqe;
-> @@ -160,11 +166,36 @@ static int sdhci_arasan_syscon_write(struct sdhci_host *host,
->         return ret;
->  }
->
-> +/**
-> + * arasan_zynqmp_set_tap_delay - Program the tap delays.
-> + * @deviceid:          Unique Id of device
-> + * @itap_delay:                Input Tap Delay
-> + * @oitap_delay:       Output Tap Delay
-> + */
-> +static void arasan_zynqmp_set_tap_delay(u8 deviceid, u8 itap_delay, u8 otap_delay)
-> +{
-> +       const struct zynqmp_eemi_ops *eemi_ops = zynqmp_pm_get_eemi_ops();
-
-No thanks!
-
-Isn't there a more generic framework we can use to change the tap
-values, rather than calling SoC specific functions from the driver?
-
-BTW, what is a tap value, more exactly?
-
-What does changing a tap value mean and where does the property belong, really?
-
-Of course this doesn't even compile, as you have a dependency to
-another series. Next time, please clarify that in a cover-letter
-(maybe you did, but I can't find it).
-
-> +       u32 node_id = (deviceid == 0) ? NODE_SD_0 : NODE_SD_1;
-> +
-> +       if (!eemi_ops || !eemi_ops->ioctl)
-> +               return;
-> +
-> +       if (itap_delay)
-> +               eemi_ops->ioctl(node_id, IOCTL_SET_SD_TAPDELAY,
-> +                               PM_TAPDELAY_INPUT, itap_delay, NULL);
-> +
-> +       if (otap_delay)
-> +               eemi_ops->ioctl(node_id, IOCTL_SET_SD_TAPDELAY,
-> +                               PM_TAPDELAY_OUTPUT, otap_delay, NULL);
-> +}
-
-Another overall comment for the series.
-
-I would recommend to change the order of the patches in the series.
-Let the DT doc change come first, next the driver change and finally
-the change to the DTS file(s). This makes it easier to follow and
-review.
-
-[...]
-
-Kind regards
-Uffe
+DQo+IE9uIDEwIEp1bHkgMjAxOCBhdCAwNzowNCwgRmFuZyBIb25namllKOaWuea0quadsCkgPGhv
+bmdqaWVmYW5nQGFzcm1pY3JvLmNvbT4NCj4gd3JvdGU6DQo+ID4+IE9uIDkgSnVseSAyMDE4IGF0
+IDA4OjQ3LCBIb25namllIEZhbmcgPGhvbmdqaWVmYW5nQGFzcm1pY3JvLmNvbT4gd3JvdGU6DQo+
+ID4+ID4gbW1jX3NlbGVjdF9oczQwMGVzKCkgY2FsbHMgbW1jX3NlbGVjdF9idXNfd2lkdGgoKSB3
+aGljaCB3aWxsIHRyeSB0bw0KPiA+PiA+IHNldCA0Yml0IHRyYW5zZmVyIG1vZGUgaWYgZmFpbCB0
+byBzZXQgOGJpdCBtb2RlLiBUaGUgcHJvYmxlbSBpcyB0aGF0DQo+ID4+ID4gdGhlIGJ1cyB3aWR0
+aCBzaG91bGQgbm90IGJlIHNldCB0byA0Yml0IGluIEhTNDAwZXMgbW9kZS4NCj4gPj4NCj4gPj4g
+SSBndWVzcyBpdCBmYWlscyBiZWNhdXNlIHRoZXJlIGlzIHNvbWV0aGluZyB3cm9uZy4gQ2FuIHlv
+dSBwbGVhc2UNCj4gPj4gZWxhYm9yYXRlIHVuZGVyIHdoYXQgY2lyY3Vtc3RhbmNlIHRoZSBwcm9i
+bGVtIG9jY3Vycz8NCj4gPj4NCj4gPiBUaGlzIHByb2JsZW0gdmVyeSBvY2Nhc2lvbmFsbHkgb2Nj
+dXJyZWQgd2hlbiBzeXN0ZW0gcmVzdW1lIGZyb20NCj4gPiBzdXNwZW5kIHN0YXRlLiBUaGUgY2Fy
+ZCBzdHVjayBpbiB0aGUgcHJvZ3JhbW1pbmcgc3RhdGUgYWZ0ZXIgc2V0dGluZw0KPiA+IDhiaXQg
+bW9kZS4gQWZ0ZXIgdGhhdCwgbW1jX3NlbGVjdF9idXNfd2lkdGgoKSB3aWxsIGNvbnRpbnVlIHRv
+IHNldA0KPiA+IDRiaXQgbW9kZSBhbmQgcmV0dXJuIHdpdGhvdXQgZXJyb3JzLiBPZiBjb3Vyc2Us
+IHRoZSBmb2xsb3dpbmcgUi9XDQo+ID4gcmVxdWVzdHMgd2lsbCBiZSBhbGwgZmFpbGluZy4NCj4g
+DQo+IEkgc2VlLiBTbyBpdCdzIHRoZSBtbWNfc3dpdGNoKCkgb3BlcmF0aW9uIHRoYXQgZmFpbHMs
+IHdoZW4gdHJ5aW5nIDgtYml0LiBIbW0uDQo+IA0KPiA+DQo+ID4gVGhlIHByb2JsZW0gc2NlbmUg
+aXMgaGFyZCB0byByZXByb2R1Y2UuIE1heWJlIGl0IGhhcHBlbmVkDQo+ID4gYmVjYXVzZSB0aGVy
+ZSBpcyBzb21ldGhpbmcgd3JvbmcgYWJvdXQgYnVzIGNsb2NrIG9yIGNvcmUgdm9sdGFnZQ0KPiA+
+IHN0YWJpbGl0eSB3aGVuIHN5c3RlbSBkbyByZXN1bWUuDQo+IA0KPiBZZWFoLCB0aGF0IG5lZWRz
+IGZ1cnRoZXIgZGVidWdnaW5nLg0KPiANCj4gRG9uJ3Qga25vdyB3aGF0IGhvc3QgZHJpdmVyIHlv
+dSBhcmUgdXNpbmcsIGJ1dCBwb3RlbnRpYWxseSB5b3UgY291bGQNCj4gcGxheSB3aXRoIGEgY291
+cGxlIGhvc3Qgc3BlY2lmaWMgbWVjaGFuaXNtLiBUaGUgLT5ob3N0LT5jYXJkX2J1c3koKQ0KPiBj
+YWxsYmFjaywgaG9zdC0+bWF4X2J1c3lfdGltZW91dCBhbmQgTU1DX0NBUF9XQUlUX1dISUxFX0JV
+U1kuDQo+IERlcGVuZGluZyBvbiB0aGVzZSwgX19tbWNfc3dpdGNoKCkgY2hhbmdlcyBpdHMgcG9s
+aWN5IHdoZW4gcG9sbGluZyBmb3INCj4gYnVzeS4gSGF2ZSBhIGxvb2sgYXQgX19tbWNfc3dpdGNo
+KCkgYW5kIG1tY19wb2xsX2Zvcl9idXN5KCksIHRvIHNlZQ0KPiB3aGF0IGdvZXMgb24uDQo+IA0K
+VGhhbmtzLg0KSSB3aWxsIGRvIHRoZSBmdXJ0aGVyIGRlYnVnZ2luZyBhY2NvcmRpbmcgdG8geW91
+ciBhZHZpY2UuDQoNCj4gPg0KPiA+PiA+DQo+ID4+ID4gU2lnbmVkLW9mZi1ieTogSG9uZ2ppZSBG
+YW5nIDxob25namllZmFuZ0Bhc3JtaWNyby5jb20+DQo+ID4+ID4gLS0tDQo+ID4+ID4gIGRyaXZl
+cnMvbW1jL2NvcmUvbW1jLmMgfCAyMyArKysrKysrKysrKysrKysrKysrKystLQ0KPiA+PiA+ICAx
+IGZpbGUgY2hhbmdlZCwgMjEgaW5zZXJ0aW9ucygrKSwgMiBkZWxldGlvbnMoLSkNCj4gPj4gPg0K
+PiA+PiA+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9jb3JlL21tYy5jIGIvZHJpdmVycy9tbWMv
+Y29yZS9tbWMuYw0KPiA+PiA+IGluZGV4IDQ0NjZmNWQuLjk0YzNjYzUgMTAwNjQ0DQo+ID4+ID4g
+LS0tIGEvZHJpdmVycy9tbWMvY29yZS9tbWMuYw0KPiA+PiA+ICsrKyBiL2RyaXZlcnMvbW1jL2Nv
+cmUvbW1jLmMNCj4gPj4gPiBAQCAtMTMzNyw5ICsxMzM3LDI4IEBAIHN0YXRpYyBpbnQgbW1jX3Nl
+bGVjdF9oczQwMGVzKHN0cnVjdCBtbWNfY2FyZA0KPiAqY2FyZCkNCj4gPj4gPiAgICAgICAgIGlm
+IChlcnIpDQo+ID4+ID4gICAgICAgICAgICAgICAgIGdvdG8gb3V0X2VycjsNCj4gPj4gPg0KPiA+
+PiA+IC0gICAgICAgZXJyID0gbW1jX3NlbGVjdF9idXNfd2lkdGgoY2FyZCk7DQo+ID4+ID4gLSAg
+ICAgICBpZiAoZXJyIDwgMCkNCj4gPj4gPiArICAgICAgIC8qIFN3aXRjaCBjYXJkIHRvIDggYml0
+IG1vZGUgKi8NCj4gPj4gPiArICAgICAgIGVyciA9IG1tY19zd2l0Y2goY2FyZCwgRVhUX0NTRF9D
+TURfU0VUX05PUk1BTCwNCj4gPj4gPiArICAgICAgICAgICAgICAgICAgICAgICAgRVhUX0NTRF9C
+VVNfV0lEVEgsDQo+ID4+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgIEVYVF9DU0RfQlVTX1dJ
+RFRIXzgsDQo+ID4+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgIGNhcmQtPmV4dF9jc2QuZ2Vu
+ZXJpY19jbWQ2X3RpbWUpOw0KPiA+PiA+ICsgICAgICAgaWYgKGVycikgew0KPiA+PiA+ICsgICAg
+ICAgICAgICAgICBwcl9lcnIoIiVzOiBzd2l0Y2ggdG8gOCBiaXQgbW9kZSBmb3IgaHM0MDBlcyBm
+YWlsZWQsIGVycjolZFxuIiwNCj4gPj4gPiArICAgICAgICAgICAgICAgICAgICAgICBtbWNfaG9z
+dG5hbWUoaG9zdCksIGVycik7DQo+ID4+ID4gKyAgICAgICAgICAgICAgIGdvdG8gb3V0X2VycjsN
+Cj4gPj4gPiArICAgICAgIH0NCj4gPj4gPiArDQo+ID4+ID4gKyAgICAgICBtbWNfc2V0X2J1c193
+aWR0aChob3N0LCBNTUNfQlVTX1dJRFRIXzgpOw0KPiA+PiA+ICsNCj4gPj4gPiArICAgICAgIGlm
+ICghKGhvc3QtPmNhcHMgJiBNTUNfQ0FQX0JVU19XSURUSF9URVNUKSkNCj4gPj4gPiArICAgICAg
+ICAgICAgICAgZXJyID0gbW1jX2NvbXBhcmVfZXh0X2NzZHMoY2FyZCwgTU1DX0JVU19XSURUSF84
+KTsNCj4gPj4gPiArICAgICAgIGVsc2UNCj4gPj4gPiArICAgICAgICAgICAgICAgZXJyID0gbW1j
+X2J1c190ZXN0KGNhcmQsIE1NQ19CVVNfV0lEVEhfOCk7DQo+ID4+ID4gKyAgICAgICBpZiAoZXJy
+KSB7DQo+ID4+ID4gKyAgICAgICAgICAgICAgIHByX2VycigiJXM6IHRlc3QgOCBiaXQgbW9kZSBm
+b3IgaHM0MDBlcyBmYWlsZWQsIGVycjolZFxuIiwNCj4gPj4gPiArICAgICAgICAgICAgICAgICAg
+ICAgICBtbWNfaG9zdG5hbWUoaG9zdCksIGVycik7DQo+ID4+ID4gICAgICAgICAgICAgICAgIGdv
+dG8gb3V0X2VycjsNCj4gPj4NCj4gPj4gTG90J3Mgb3BlbiBjb2RpbmcsIG5vIEkgZG9uJ3QgbGlr
+ZSBpdC4NCj4gPj4NCj4gPj4gV291bGRuJ3QgaXQgaW5zdGVhZCBiZSBwb3NzaWJsZSB0byBjaGVj
+ayB0aGUgcmV0dXJuIHZhbHVlIGZyb20NCj4gPj4gbW1jX3NlbGVjdF9idXNfd2lkdGgoKSwgYXMg
+aXQgc2hvdWxkIHRlbGwgd2hhdCB3aWR0aCBpdCBtYW5hZ2UgdG8NCj4gPj4gc2VsZWN0LiBUaGVu
+IGlmIGl0IGlzbid0IDgtYml0LCB0aGVuIHdlIHNob3VsZCBiYWlsIG91dC4gRG9lcyB0aGF0DQo+
+ID4+IHdvcms/DQo+ID4+DQo+ID4gQWZ0ZXIgc2V0dGluZyA0Yml0IG1vZGUsIGl0IGNhbid0IHdv
+cmsgYmVjYXVzZSBpdCBjYW5ub3QgYmFjayB0bw0KPiA+IEhTMjAwIG1vZGUgbGlrZSB0aGUgSFM0
+MDAgbW9kZS4NCj4gPiBGb3IgSFM0MDBlcywgaWYgZmFpbCB0byBzZXQgOGJpdCBtb2RlLCBtYXli
+ZSBpdCBpcyBtb3JlIHJlYXNvbmFibGUNCj4gPiB0aGF0IHJldHVybiBlcnJvciBkaXJlY3RseS4N
+Cj4gDQo+IFllYWguIENhcmUgdG8gc2VuZCBhIHBhdGNoIGZvciB0aGF0Pw0KT0suIEkgd2lsbCB0
+cnkgdG8gc2VuZCBhIG5ldyBwYXRjaCB0aGF0IGxldCBtbWNfc2VsZWN0X2J1c193aWR0aCgpDQpy
+ZXR1cm4gZXJyb3IgZGlyZWN0bHkgd2hlbiBmYWlsIHRvIHNldCA4Yml0IGZvciBIUzQwMGVzLg0K
+DQo+IA0KPiBbLi4uXQ0KPiANCj4gS2luZCByZWdhcmRzDQo+IFVmZmUNCg0KQiZSDQpIb25namll
+DQo=
