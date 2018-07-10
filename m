@@ -1,92 +1,134 @@
-From: =?utf-8?B?RmFuZyBIb25namllKOaWuea0quadsCk=?=
-        <hongjiefang@asrmicro.com>
-Subject: RE: [PATCH] mmc: core: improve rationality of bus width setting for
- HS400es
-Date: Tue, 10 Jul 2018 10:44:26 +0000
-Message-ID: <63a5c7d969eb4e5d99c5e289e28cab09@mail2012.asrmicro.com>
-References: <1531118843-796-1-git-send-email-hongjiefang@asrmicro.com>
- <CAPDyKFpzJV-UQbMa7_tHms7o3hMn9_g=H_M0jW+ZN9G=8XCqRg@mail.gmail.com>
- <86aa8215d6e44e578cd34f0625c5ebef@mail2012.asrmicro.com>
- <CAPDyKFqfwxGgVhKp-RU1Ksd2BKhxvqdqXf0JV3dzyJdgfeBV+w@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH RFC 1/2] mmc: sdhci: Allow platform controlled voltage
+ switching
+Date: Tue, 10 Jul 2018 14:07:18 +0300
+Message-ID: <53c6d61f-47f5-2e4e-8280-6f76f707799e@intel.com>
+References: <1529583826-42020-1-git-send-email-vviswana@codeaurora.org>
+ <1529583826-42020-2-git-send-email-vviswana@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFqfwxGgVhKp-RU1Ksd2BKhxvqdqXf0JV3dzyJdgfeBV+w@mail.gmail.com>
-Content-Language: zh-CN
+In-Reply-To: <1529583826-42020-2-git-send-email-vviswana@codeaurora.org>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Linus Walleij <linus.walleij@linaro.org>, Bastian Stender <bst@pengutronix.de>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Chanho Min <chanho.min@lge.com>, Kyle Roeschley <kyle.roeschley@ni.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Vijay Viswanath <vviswana@codeaurora.org>, ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, devicetree@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, jeremymc@redhat.com, bjorn.andersson@linaro.org, riteshh@codeaurora.org, vbadigan@codeaurora.org, dianders@google.com, sayalil@codeaurora.org
 List-Id: linux-mmc@vger.kernel.org
 
-DQo+IE9uIDEwIEp1bHkgMjAxOCBhdCAwNzowNCwgRmFuZyBIb25namllKOaWuea0quadsCkgPGhv
-bmdqaWVmYW5nQGFzcm1pY3JvLmNvbT4NCj4gd3JvdGU6DQo+ID4+IE9uIDkgSnVseSAyMDE4IGF0
-IDA4OjQ3LCBIb25namllIEZhbmcgPGhvbmdqaWVmYW5nQGFzcm1pY3JvLmNvbT4gd3JvdGU6DQo+
-ID4+ID4gbW1jX3NlbGVjdF9oczQwMGVzKCkgY2FsbHMgbW1jX3NlbGVjdF9idXNfd2lkdGgoKSB3
-aGljaCB3aWxsIHRyeSB0bw0KPiA+PiA+IHNldCA0Yml0IHRyYW5zZmVyIG1vZGUgaWYgZmFpbCB0
-byBzZXQgOGJpdCBtb2RlLiBUaGUgcHJvYmxlbSBpcyB0aGF0DQo+ID4+ID4gdGhlIGJ1cyB3aWR0
-aCBzaG91bGQgbm90IGJlIHNldCB0byA0Yml0IGluIEhTNDAwZXMgbW9kZS4NCj4gPj4NCj4gPj4g
-SSBndWVzcyBpdCBmYWlscyBiZWNhdXNlIHRoZXJlIGlzIHNvbWV0aGluZyB3cm9uZy4gQ2FuIHlv
-dSBwbGVhc2UNCj4gPj4gZWxhYm9yYXRlIHVuZGVyIHdoYXQgY2lyY3Vtc3RhbmNlIHRoZSBwcm9i
-bGVtIG9jY3Vycz8NCj4gPj4NCj4gPiBUaGlzIHByb2JsZW0gdmVyeSBvY2Nhc2lvbmFsbHkgb2Nj
-dXJyZWQgd2hlbiBzeXN0ZW0gcmVzdW1lIGZyb20NCj4gPiBzdXNwZW5kIHN0YXRlLiBUaGUgY2Fy
-ZCBzdHVjayBpbiB0aGUgcHJvZ3JhbW1pbmcgc3RhdGUgYWZ0ZXIgc2V0dGluZw0KPiA+IDhiaXQg
-bW9kZS4gQWZ0ZXIgdGhhdCwgbW1jX3NlbGVjdF9idXNfd2lkdGgoKSB3aWxsIGNvbnRpbnVlIHRv
-IHNldA0KPiA+IDRiaXQgbW9kZSBhbmQgcmV0dXJuIHdpdGhvdXQgZXJyb3JzLiBPZiBjb3Vyc2Us
-IHRoZSBmb2xsb3dpbmcgUi9XDQo+ID4gcmVxdWVzdHMgd2lsbCBiZSBhbGwgZmFpbGluZy4NCj4g
-DQo+IEkgc2VlLiBTbyBpdCdzIHRoZSBtbWNfc3dpdGNoKCkgb3BlcmF0aW9uIHRoYXQgZmFpbHMs
-IHdoZW4gdHJ5aW5nIDgtYml0LiBIbW0uDQo+IA0KPiA+DQo+ID4gVGhlIHByb2JsZW0gc2NlbmUg
-aXMgaGFyZCB0byByZXByb2R1Y2UuIE1heWJlIGl0IGhhcHBlbmVkDQo+ID4gYmVjYXVzZSB0aGVy
-ZSBpcyBzb21ldGhpbmcgd3JvbmcgYWJvdXQgYnVzIGNsb2NrIG9yIGNvcmUgdm9sdGFnZQ0KPiA+
-IHN0YWJpbGl0eSB3aGVuIHN5c3RlbSBkbyByZXN1bWUuDQo+IA0KPiBZZWFoLCB0aGF0IG5lZWRz
-IGZ1cnRoZXIgZGVidWdnaW5nLg0KPiANCj4gRG9uJ3Qga25vdyB3aGF0IGhvc3QgZHJpdmVyIHlv
-dSBhcmUgdXNpbmcsIGJ1dCBwb3RlbnRpYWxseSB5b3UgY291bGQNCj4gcGxheSB3aXRoIGEgY291
-cGxlIGhvc3Qgc3BlY2lmaWMgbWVjaGFuaXNtLiBUaGUgLT5ob3N0LT5jYXJkX2J1c3koKQ0KPiBj
-YWxsYmFjaywgaG9zdC0+bWF4X2J1c3lfdGltZW91dCBhbmQgTU1DX0NBUF9XQUlUX1dISUxFX0JV
-U1kuDQo+IERlcGVuZGluZyBvbiB0aGVzZSwgX19tbWNfc3dpdGNoKCkgY2hhbmdlcyBpdHMgcG9s
-aWN5IHdoZW4gcG9sbGluZyBmb3INCj4gYnVzeS4gSGF2ZSBhIGxvb2sgYXQgX19tbWNfc3dpdGNo
-KCkgYW5kIG1tY19wb2xsX2Zvcl9idXN5KCksIHRvIHNlZQ0KPiB3aGF0IGdvZXMgb24uDQo+IA0K
-VGhhbmtzLg0KSSB3aWxsIGRvIHRoZSBmdXJ0aGVyIGRlYnVnZ2luZyBhY2NvcmRpbmcgdG8geW91
-ciBhZHZpY2UuDQoNCj4gPg0KPiA+PiA+DQo+ID4+ID4gU2lnbmVkLW9mZi1ieTogSG9uZ2ppZSBG
-YW5nIDxob25namllZmFuZ0Bhc3JtaWNyby5jb20+DQo+ID4+ID4gLS0tDQo+ID4+ID4gIGRyaXZl
-cnMvbW1jL2NvcmUvbW1jLmMgfCAyMyArKysrKysrKysrKysrKysrKysrKystLQ0KPiA+PiA+ICAx
-IGZpbGUgY2hhbmdlZCwgMjEgaW5zZXJ0aW9ucygrKSwgMiBkZWxldGlvbnMoLSkNCj4gPj4gPg0K
-PiA+PiA+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9jb3JlL21tYy5jIGIvZHJpdmVycy9tbWMv
-Y29yZS9tbWMuYw0KPiA+PiA+IGluZGV4IDQ0NjZmNWQuLjk0YzNjYzUgMTAwNjQ0DQo+ID4+ID4g
-LS0tIGEvZHJpdmVycy9tbWMvY29yZS9tbWMuYw0KPiA+PiA+ICsrKyBiL2RyaXZlcnMvbW1jL2Nv
-cmUvbW1jLmMNCj4gPj4gPiBAQCAtMTMzNyw5ICsxMzM3LDI4IEBAIHN0YXRpYyBpbnQgbW1jX3Nl
-bGVjdF9oczQwMGVzKHN0cnVjdCBtbWNfY2FyZA0KPiAqY2FyZCkNCj4gPj4gPiAgICAgICAgIGlm
-IChlcnIpDQo+ID4+ID4gICAgICAgICAgICAgICAgIGdvdG8gb3V0X2VycjsNCj4gPj4gPg0KPiA+
-PiA+IC0gICAgICAgZXJyID0gbW1jX3NlbGVjdF9idXNfd2lkdGgoY2FyZCk7DQo+ID4+ID4gLSAg
-ICAgICBpZiAoZXJyIDwgMCkNCj4gPj4gPiArICAgICAgIC8qIFN3aXRjaCBjYXJkIHRvIDggYml0
-IG1vZGUgKi8NCj4gPj4gPiArICAgICAgIGVyciA9IG1tY19zd2l0Y2goY2FyZCwgRVhUX0NTRF9D
-TURfU0VUX05PUk1BTCwNCj4gPj4gPiArICAgICAgICAgICAgICAgICAgICAgICAgRVhUX0NTRF9C
-VVNfV0lEVEgsDQo+ID4+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgIEVYVF9DU0RfQlVTX1dJ
-RFRIXzgsDQo+ID4+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgIGNhcmQtPmV4dF9jc2QuZ2Vu
-ZXJpY19jbWQ2X3RpbWUpOw0KPiA+PiA+ICsgICAgICAgaWYgKGVycikgew0KPiA+PiA+ICsgICAg
-ICAgICAgICAgICBwcl9lcnIoIiVzOiBzd2l0Y2ggdG8gOCBiaXQgbW9kZSBmb3IgaHM0MDBlcyBm
-YWlsZWQsIGVycjolZFxuIiwNCj4gPj4gPiArICAgICAgICAgICAgICAgICAgICAgICBtbWNfaG9z
-dG5hbWUoaG9zdCksIGVycik7DQo+ID4+ID4gKyAgICAgICAgICAgICAgIGdvdG8gb3V0X2VycjsN
-Cj4gPj4gPiArICAgICAgIH0NCj4gPj4gPiArDQo+ID4+ID4gKyAgICAgICBtbWNfc2V0X2J1c193
-aWR0aChob3N0LCBNTUNfQlVTX1dJRFRIXzgpOw0KPiA+PiA+ICsNCj4gPj4gPiArICAgICAgIGlm
-ICghKGhvc3QtPmNhcHMgJiBNTUNfQ0FQX0JVU19XSURUSF9URVNUKSkNCj4gPj4gPiArICAgICAg
-ICAgICAgICAgZXJyID0gbW1jX2NvbXBhcmVfZXh0X2NzZHMoY2FyZCwgTU1DX0JVU19XSURUSF84
-KTsNCj4gPj4gPiArICAgICAgIGVsc2UNCj4gPj4gPiArICAgICAgICAgICAgICAgZXJyID0gbW1j
-X2J1c190ZXN0KGNhcmQsIE1NQ19CVVNfV0lEVEhfOCk7DQo+ID4+ID4gKyAgICAgICBpZiAoZXJy
-KSB7DQo+ID4+ID4gKyAgICAgICAgICAgICAgIHByX2VycigiJXM6IHRlc3QgOCBiaXQgbW9kZSBm
-b3IgaHM0MDBlcyBmYWlsZWQsIGVycjolZFxuIiwNCj4gPj4gPiArICAgICAgICAgICAgICAgICAg
-ICAgICBtbWNfaG9zdG5hbWUoaG9zdCksIGVycik7DQo+ID4+ID4gICAgICAgICAgICAgICAgIGdv
-dG8gb3V0X2VycjsNCj4gPj4NCj4gPj4gTG90J3Mgb3BlbiBjb2RpbmcsIG5vIEkgZG9uJ3QgbGlr
-ZSBpdC4NCj4gPj4NCj4gPj4gV291bGRuJ3QgaXQgaW5zdGVhZCBiZSBwb3NzaWJsZSB0byBjaGVj
-ayB0aGUgcmV0dXJuIHZhbHVlIGZyb20NCj4gPj4gbW1jX3NlbGVjdF9idXNfd2lkdGgoKSwgYXMg
-aXQgc2hvdWxkIHRlbGwgd2hhdCB3aWR0aCBpdCBtYW5hZ2UgdG8NCj4gPj4gc2VsZWN0LiBUaGVu
-IGlmIGl0IGlzbid0IDgtYml0LCB0aGVuIHdlIHNob3VsZCBiYWlsIG91dC4gRG9lcyB0aGF0DQo+
-ID4+IHdvcms/DQo+ID4+DQo+ID4gQWZ0ZXIgc2V0dGluZyA0Yml0IG1vZGUsIGl0IGNhbid0IHdv
-cmsgYmVjYXVzZSBpdCBjYW5ub3QgYmFjayB0bw0KPiA+IEhTMjAwIG1vZGUgbGlrZSB0aGUgSFM0
-MDAgbW9kZS4NCj4gPiBGb3IgSFM0MDBlcywgaWYgZmFpbCB0byBzZXQgOGJpdCBtb2RlLCBtYXli
-ZSBpdCBpcyBtb3JlIHJlYXNvbmFibGUNCj4gPiB0aGF0IHJldHVybiBlcnJvciBkaXJlY3RseS4N
-Cj4gDQo+IFllYWguIENhcmUgdG8gc2VuZCBhIHBhdGNoIGZvciB0aGF0Pw0KT0suIEkgd2lsbCB0
-cnkgdG8gc2VuZCBhIG5ldyBwYXRjaCB0aGF0IGxldCBtbWNfc2VsZWN0X2J1c193aWR0aCgpDQpy
-ZXR1cm4gZXJyb3IgZGlyZWN0bHkgd2hlbiBmYWlsIHRvIHNldCA4Yml0IGZvciBIUzQwMGVzLg0K
-DQo+IA0KPiBbLi4uXQ0KPiANCj4gS2luZCByZWdhcmRzDQo+IFVmZmUNCg0KQiZSDQpIb25namll
-DQo=
+On 21/06/18 15:23, Vijay Viswanath wrote:
+> Some controllers can have internal mechanism to inform the SW that it
+> is ready for voltage switching. For such controllers, changing voltage
+> before the HW is ready can result in various issues.
+> 
+> Add a quirk, which can be used by drivers of such controllers.
+> 
+> Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
+> ---
+>  drivers/mmc/host/sdhci.c | 20 +++++++++++++++-----
+>  drivers/mmc/host/sdhci.h |  2 ++
+>  2 files changed, 17 insertions(+), 5 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 1c828e0..f0346d4 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1615,7 +1615,8 @@ void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
+>  void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
+>  		     unsigned short vdd)
+>  {
+> -	if (IS_ERR(host->mmc->supply.vmmc))
+> +	if (IS_ERR(host->mmc->supply.vmmc) ||
+> +			(host->quirks2 & SDHCI_QUIRK2_INTERNAL_PWR_CTL))
+
+I think you should provide your own ->set_power() instead of this
+
+>  		sdhci_set_power_noreg(host, mode, vdd);
+>  	else
+>  		sdhci_set_power_reg(host, mode, vdd);
+> @@ -2009,7 +2010,9 @@ int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+>  		ctrl &= ~SDHCI_CTRL_VDD_180;
+>  		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+>  
+> -		if (!IS_ERR(mmc->supply.vqmmc)) {
+> +		if (!IS_ERR(mmc->supply.vqmmc) &&
+> +				!(host->quirks2 &
+> +					SDHCI_QUIRK2_INTERNAL_PWR_CTL)) {
+
+And your own ->start_signal_voltage_switch()
+
+>  			ret = mmc_regulator_set_vqmmc(mmc, ios);
+>  			if (ret) {
+>  				pr_warn("%s: Switching to 3.3V signalling voltage failed\n",
+> @@ -2032,7 +2035,8 @@ int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+>  	case MMC_SIGNAL_VOLTAGE_180:
+>  		if (!(host->flags & SDHCI_SIGNALING_180))
+>  			return -EINVAL;
+> -		if (!IS_ERR(mmc->supply.vqmmc)) {
+> +		if (!IS_ERR(mmc->supply.vqmmc) &&
+> +			!(host->quirks2 & SDHCI_QUIRK2_INTERNAL_PWR_CTL)) {
+>  			ret = mmc_regulator_set_vqmmc(mmc, ios);
+>  			if (ret) {
+>  				pr_warn("%s: Switching to 1.8V signalling voltage failed\n",
+> @@ -3485,7 +3489,10 @@ int sdhci_setup_host(struct sdhci_host *host)
+>  	 * the host can take the appropriate action if regulators are not
+>  	 * available.
+>  	 */
+> -	ret = mmc_regulator_get_supply(mmc);
+> +	if (!(host->quirks2 & SDHCI_QUIRK2_INTERNAL_PWR_CTL))
+
+Since we expect mmc_regulator_get_supply() to have been called, this could be:
+
+	if (!mmc->supply.vmmc) {
+		ret = mmc_regulator_get_supply(mmc);
+		enable_vqmmc = true;
+	} else {
+		ret = 0;
+	}
+
+> +		ret = mmc_regulator_get_supply(mmc);
+> +	else
+> +		ret = 0;
+>  	if (ret)
+>  		return ret;
+>  
+> @@ -3736,7 +3743,10 @@ int sdhci_setup_host(struct sdhci_host *host)
+>  
+>  	/* If vqmmc regulator and no 1.8V signalling, then there's no UHS */
+>  	if (!IS_ERR(mmc->supply.vqmmc)) {
+> -		ret = regulator_enable(mmc->supply.vqmmc);
+> +		if (!(host->quirks2 & SDHCI_QUIRK2_INTERNAL_PWR_CTL))
+
+And this could be:
+
+		if (enable_vqmmc)
+			ret = regulator_enable(mmc->supply.vqmmc);
+		else
+			ret = 0;
+
+However, you still need to ensure regulator_disable(mmc->supply.vqmmc) is
+only called if regulator_enable() was called.
+
+> +			ret = regulator_enable(mmc->supply.vqmmc);
+> +		else
+> +			ret = 0;
+>  		if (!regulator_is_supported_voltage(mmc->supply.vqmmc, 1700000,
+>  						    1950000))
+>  			host->caps1 &= ~(SDHCI_SUPPORT_SDR104 |
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 23966f8..3b0c97a 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -450,6 +450,8 @@ struct sdhci_host {
+>   * obtainable timeout.
+>   */
+>  #define SDHCI_QUIRK2_DISABLE_HW_TIMEOUT			(1<<17)
+> +/* Regulator voltage changes are being done from platform layer */
+> +#define SDHCI_QUIRK2_INTERNAL_PWR_CTL				(1<<18)
+
+So maybe the quirk is not needed.
+
+>  
+>  	int irq;		/* Device IRQ */
+>  	void __iomem *ioaddr;	/* Mapped address */
+> 
