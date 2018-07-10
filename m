@@ -1,107 +1,99 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: core: improve rationality of bus width setting for HS400es
-Date: Tue, 10 Jul 2018 10:14:48 +0200
-Message-ID: <CAPDyKFqfwxGgVhKp-RU1Ksd2BKhxvqdqXf0JV3dzyJdgfeBV+w@mail.gmail.com>
-References: <1531118843-796-1-git-send-email-hongjiefang@asrmicro.com>
- <CAPDyKFpzJV-UQbMa7_tHms7o3hMn9_g=H_M0jW+ZN9G=8XCqRg@mail.gmail.com> <86aa8215d6e44e578cd34f0625c5ebef@mail2012.asrmicro.com>
+Subject: Re: [RFC PATCH 3/3] sdhci: arasan: Add support to read Tap Delay
+ values from DT
+Date: Tue, 10 Jul 2018 10:31:39 +0200
+Message-ID: <CAPDyKFoGJOE-h4rLqzMO=wzNjkfcuU_oQ3NLK5=OQfSMj3dDHg@mail.gmail.com>
+References: <1528373500-24663-1-git-send-email-manish.narani@xilinx.com> <1528373500-24663-3-git-send-email-manish.narani@xilinx.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <86aa8215d6e44e578cd34f0625c5ebef@mail2012.asrmicro.com>
+In-Reply-To: <1528373500-24663-3-git-send-email-manish.narani@xilinx.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: =?UTF-8?B?RmFuZyBIb25namllKOaWuea0quadsCk=?= <hongjiefang@asrmicro.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Linus Walleij <linus.walleij@linaro.org>, Bastian Stender <bst@pengutronix.de>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Chanho Min <chanho.min@lge.com>, Kyle Roeschley <kyle.roeschley@ni.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Manish Narani <manish.narani@xilinx.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Moritz Fischer <mdf@kernel.org>, stefan.krsmanovic@aggios.com, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, devicetree@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michal.simek@xilinx.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 10 July 2018 at 07:04, Fang Hongjie(=E6=96=B9=E6=B4=AA=E6=9D=B0) <hongji=
-efang@asrmicro.com> wrote:
->> On 9 July 2018 at 08:47, Hongjie Fang <hongjiefang@asrmicro.com> wrote:
->> > mmc_select_hs400es() calls mmc_select_bus_width() which will try to
->> > set 4bit transfer mode if fail to set 8bit mode. The problem is that
->> > the bus width should not be set to 4bit in HS400es mode.
->>
->> I guess it fails because there is something wrong. Can you please
->> elaborate under what circumstance the problem occurs?
->>
-> This problem very occasionally occurred when system resume from
-> suspend state. The card stuck in the programming state after setting
-> 8bit mode. After that, mmc_select_bus_width() will continue to set
-> 4bit mode and return without errors. Of course, the following R/W
-> requests will be all failing.
-
-I see. So it's the mmc_switch() operation that fails, when trying 8-bit. Hm=
-m.
-
+On 7 June 2018 at 14:11, Manish Narani <manish.narani@xilinx.com> wrote:
+> This patch adds support for reading Tap Delay values from Device Tree
+> and write them via eemi calls. The macros containing these tap delay
+> values are removed from the driver.
 >
-> The problem scene is hard to reproduce. Maybe it happened
-> because there is something wrong about bus clock or core voltage
-> stability when system do resume.
-
-Yeah, that needs further debugging.
-
-Don't know what host driver you are using, but potentially you could
-play with a couple host specific mechanism. The ->host->card_busy()
-callback, host->max_busy_timeout and MMC_CAP_WAIT_WHILE_BUSY.
-Depending on these, __mmc_switch() changes its policy when polling for
-busy. Have a look at __mmc_switch() and mmc_poll_for_busy(), to see
-what goes on.
-
+> Signed-off-by: Manish Narani <manish.narani@xilinx.com>
+> ---
+>  drivers/mmc/host/sdhci-of-arasan.c | 131 +++++++++++++++++++++++++++++++++++++
+>  1 file changed, 131 insertions(+)
 >
->> >
->> > Signed-off-by: Hongjie Fang <hongjiefang@asrmicro.com>
->> > ---
->> >  drivers/mmc/core/mmc.c | 23 +++++++++++++++++++++--
->> >  1 file changed, 21 insertions(+), 2 deletions(-)
->> >
->> > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->> > index 4466f5d..94c3cc5 100644
->> > --- a/drivers/mmc/core/mmc.c
->> > +++ b/drivers/mmc/core/mmc.c
->> > @@ -1337,9 +1337,28 @@ static int mmc_select_hs400es(struct mmc_card *=
-card)
->> >         if (err)
->> >                 goto out_err;
->> >
->> > -       err =3D mmc_select_bus_width(card);
->> > -       if (err < 0)
->> > +       /* Switch card to 8 bit mode */
->> > +       err =3D mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->> > +                        EXT_CSD_BUS_WIDTH,
->> > +                        EXT_CSD_BUS_WIDTH_8,
->> > +                        card->ext_csd.generic_cmd6_time);
->> > +       if (err) {
->> > +               pr_err("%s: switch to 8 bit mode for hs400es failed, e=
-rr:%d\n",
->> > +                       mmc_hostname(host), err);
->> > +               goto out_err;
->> > +       }
->> > +
->> > +       mmc_set_bus_width(host, MMC_BUS_WIDTH_8);
->> > +
->> > +       if (!(host->caps & MMC_CAP_BUS_WIDTH_TEST))
->> > +               err =3D mmc_compare_ext_csds(card, MMC_BUS_WIDTH_8);
->> > +       else
->> > +               err =3D mmc_bus_test(card, MMC_BUS_WIDTH_8);
->> > +       if (err) {
->> > +               pr_err("%s: test 8 bit mode for hs400es failed, err:%d=
-\n",
->> > +                       mmc_hostname(host), err);
->> >                 goto out_err;
->>
->> Lot's open coding, no I don't like it.
->>
->> Wouldn't it instead be possible to check the return value from
->> mmc_select_bus_width(), as it should tell what width it manage to
->> select. Then if it isn't 8-bit, then we should bail out. Does that
->> work?
->>
-> After setting 4bit mode, it can't work because it cannot back to
-> HS200 mode like the HS400 mode.
-> For HS400es, if fail to set 8bit mode, maybe it is more reasonable
-> that return error directly.
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index e3332a5..fc0fd01 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -36,6 +36,8 @@
+>
+>  #define PHY_CLK_TOO_SLOW_HZ            400000
+>
+> +#define MMC_BANK2              0x2
+> +
+>  /*
+>   * On some SoCs the syscon area has a feature where the upper 16-bits of
+>   * each 32-bit register act as a write mask for the lower 16-bits.  This allows
+> @@ -90,6 +92,10 @@ struct sdhci_arasan_data {
+>         struct sdhci_host *host;
+>         struct clk      *clk_ahb;
+>         struct phy      *phy;
+> +       u32 mio_bank;
+> +       u32 device_id;
+> +       u32 itapdly[MMC_TIMING_MMC_HS400 + 1];
+> +       u32 otapdly[MMC_TIMING_MMC_HS400 + 1];
+>         bool            is_phy_on;
+>
+>         bool            has_cqe;
+> @@ -160,11 +166,36 @@ static int sdhci_arasan_syscon_write(struct sdhci_host *host,
+>         return ret;
+>  }
+>
+> +/**
+> + * arasan_zynqmp_set_tap_delay - Program the tap delays.
+> + * @deviceid:          Unique Id of device
+> + * @itap_delay:                Input Tap Delay
+> + * @oitap_delay:       Output Tap Delay
+> + */
+> +static void arasan_zynqmp_set_tap_delay(u8 deviceid, u8 itap_delay, u8 otap_delay)
+> +{
+> +       const struct zynqmp_eemi_ops *eemi_ops = zynqmp_pm_get_eemi_ops();
 
-Yeah. Care to send a patch for that?
+No thanks!
+
+Isn't there a more generic framework we can use to change the tap
+values, rather than calling SoC specific functions from the driver?
+
+BTW, what is a tap value, more exactly?
+
+What does changing a tap value mean and where does the property belong, really?
+
+Of course this doesn't even compile, as you have a dependency to
+another series. Next time, please clarify that in a cover-letter
+(maybe you did, but I can't find it).
+
+> +       u32 node_id = (deviceid == 0) ? NODE_SD_0 : NODE_SD_1;
+> +
+> +       if (!eemi_ops || !eemi_ops->ioctl)
+> +               return;
+> +
+> +       if (itap_delay)
+> +               eemi_ops->ioctl(node_id, IOCTL_SET_SD_TAPDELAY,
+> +                               PM_TAPDELAY_INPUT, itap_delay, NULL);
+> +
+> +       if (otap_delay)
+> +               eemi_ops->ioctl(node_id, IOCTL_SET_SD_TAPDELAY,
+> +                               PM_TAPDELAY_OUTPUT, otap_delay, NULL);
+> +}
+
+Another overall comment for the series.
+
+I would recommend to change the order of the patches in the series.
+Let the DT doc change come first, next the driver change and finally
+the change to the DTS file(s). This makes it easier to follow and
+review.
 
 [...]
 
