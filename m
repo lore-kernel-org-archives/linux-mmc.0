@@ -1,42 +1,73 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH V2] mmc: core: cd_label must be last entry of mmc_gpio struct
-Date: Mon, 9 Jul 2018 15:21:10 +0200
-Message-ID: <CACRpkdYs6RCw3Z9jqaPf3H_OExY+AtDFb21rNJXr6Gr2oVUTWQ@mail.gmail.com>
-References: <1530494867-15015-1-git-send-email-Anson.Huang@nxp.com>
- <CACRpkdZOCJXHxcYv0CU76J0r2OpxdtDuOiJ9cenrvJCHVsBeAA@mail.gmail.com>
- <AM3PR04MB1315FEF9C8833B30DA665E7DF5420@AM3PR04MB1315.eurprd04.prod.outlook.com>
- <CAOMZO5A7=ptbOiSUDywwQrFd+DAZ3vsE3dSPab7cwOF3_T3qeQ@mail.gmail.com> <CAPDyKFoVLT1zUPma7xRz_JFzFYpr=YCzENARmCkzwUnTZEX_8A@mail.gmail.com>
+From: =?utf-8?B?RmFuZyBIb25namllKOaWuea0quadsCk=?=
+        <hongjiefang@asrmicro.com>
+Subject: RE: [PATCH] mmc: core: improve rationality of bus width setting for
+ HS400es
+Date: Tue, 10 Jul 2018 05:04:53 +0000
+Message-ID: <86aa8215d6e44e578cd34f0625c5ebef@mail2012.asrmicro.com>
+References: <1531118843-796-1-git-send-email-hongjiefang@asrmicro.com>
+ <CAPDyKFpzJV-UQbMa7_tHms7o3hMn9_g=H_M0jW+ZN9G=8XCqRg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFoVLT1zUPma7xRz_JFzFYpr=YCzENARmCkzwUnTZEX_8A@mail.gmail.com>
+In-Reply-To: <CAPDyKFpzJV-UQbMa7_tHms7o3hMn9_g=H_M0jW+ZN9G=8XCqRg@mail.gmail.com>
+Content-Language: zh-CN
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Fabio Estevam <festevam@gmail.com>, Anson Huang <anson.huang@nxp.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, Adrian Hunter <adrian.hunter@intel.com>, evgreen@chromium.org, Shawn Lin <shawn.lin@rock-chips.com>, Fabio Estevam <fabio.estevam@nxp.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, NXP Linux Team <linux-imx@nxp.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Linus Walleij <linus.walleij@linaro.org>, Bastian Stender <bst@pengutronix.de>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Chanho Min <chanho.min@lge.com>, Kyle Roeschley <kyle.roeschley@ni.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Jul 3, 2018 at 7:35 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 3 July 2018 at 04:25, Fabio Estevam <festevam@gmail.com> wrote:
-> > On Mon, Jul 2, 2018 at 11:13 PM, Anson Huang <anson.huang@nxp.com> wrote:
-> >
-> >> I think either way is OK, since flexible array is used in kernel code quite commonly,
-> >> so I prefer to make code change as small as possible, the original patch can also prevent
-> >> similar bug in future. And like below commit Fabio pointed out, it also has same kind
-> >> of fix: a158531f3c92 ("gpio: 74x164: Fix crash during .remove()"). Thanks.
-> >
-> > I am also fine with this patch or the one from Linus.
-> >
-> > Maybe Anson's patch could be applied to 4.18-rc as a bug fix and
-> > Linus' patch could be applied to 4.19-rc1 as a cleanup/improvement?
->
-> Good idea!
->
-> I have queued up Anson's v2 patch as a fix for 4.18.
->
-> Linus, can please re-post a re-based version of your change on top!? I
-> guess you can add Anson's and Fabio's reviewed by tags for it as well.
-
-Sure thing! I'll fold in Andy's suggested fix as well.
-
-Yours,
-Linus Walleij
+PiBPbiA5IEp1bHkgMjAxOCBhdCAwODo0NywgSG9uZ2ppZSBGYW5nIDxob25namllZmFuZ0Bhc3Jt
+aWNyby5jb20+IHdyb3RlOg0KPiA+IG1tY19zZWxlY3RfaHM0MDBlcygpIGNhbGxzIG1tY19zZWxl
+Y3RfYnVzX3dpZHRoKCkgd2hpY2ggd2lsbCB0cnkgdG8NCj4gPiBzZXQgNGJpdCB0cmFuc2ZlciBt
+b2RlIGlmIGZhaWwgdG8gc2V0IDhiaXQgbW9kZS4gVGhlIHByb2JsZW0gaXMgdGhhdA0KPiA+IHRo
+ZSBidXMgd2lkdGggc2hvdWxkIG5vdCBiZSBzZXQgdG8gNGJpdCBpbiBIUzQwMGVzIG1vZGUuDQo+
+IA0KPiBJIGd1ZXNzIGl0IGZhaWxzIGJlY2F1c2UgdGhlcmUgaXMgc29tZXRoaW5nIHdyb25nLiBD
+YW4geW91IHBsZWFzZQ0KPiBlbGFib3JhdGUgdW5kZXIgd2hhdCBjaXJjdW1zdGFuY2UgdGhlIHBy
+b2JsZW0gb2NjdXJzPw0KPiANClRoaXMgcHJvYmxlbSB2ZXJ5IG9jY2FzaW9uYWxseSBvY2N1cnJl
+ZCB3aGVuIHN5c3RlbSByZXN1bWUgZnJvbQ0Kc3VzcGVuZCBzdGF0ZS4gVGhlIGNhcmQgc3R1Y2sg
+aW4gdGhlIHByb2dyYW1taW5nIHN0YXRlIGFmdGVyIHNldHRpbmcNCjhiaXQgbW9kZS4gQWZ0ZXIg
+dGhhdCwgbW1jX3NlbGVjdF9idXNfd2lkdGgoKSB3aWxsIGNvbnRpbnVlIHRvIHNldA0KNGJpdCBt
+b2RlIGFuZCByZXR1cm4gd2l0aG91dCBlcnJvcnMuIE9mIGNvdXJzZSwgdGhlIGZvbGxvd2luZyBS
+L1cNCnJlcXVlc3RzIHdpbGwgYmUgYWxsIGZhaWxpbmcuDQoNClRoZSBwcm9ibGVtIHNjZW5lIGlz
+IGhhcmQgdG8gcmVwcm9kdWNlLiBNYXliZSBpdCBoYXBwZW5lZA0KYmVjYXVzZSB0aGVyZSBpcyBz
+b21ldGhpbmcgd3JvbmcgYWJvdXQgYnVzIGNsb2NrIG9yIGNvcmUgdm9sdGFnZQ0Kc3RhYmlsaXR5
+IHdoZW4gc3lzdGVtIGRvIHJlc3VtZS4NCg0KPiA+DQo+ID4gU2lnbmVkLW9mZi1ieTogSG9uZ2pp
+ZSBGYW5nIDxob25namllZmFuZ0Bhc3JtaWNyby5jb20+DQo+ID4gLS0tDQo+ID4gIGRyaXZlcnMv
+bW1jL2NvcmUvbW1jLmMgfCAyMyArKysrKysrKysrKysrKysrKysrKystLQ0KPiA+ICAxIGZpbGUg
+Y2hhbmdlZCwgMjEgaW5zZXJ0aW9ucygrKSwgMiBkZWxldGlvbnMoLSkNCj4gPg0KPiA+IGRpZmYg
+LS1naXQgYS9kcml2ZXJzL21tYy9jb3JlL21tYy5jIGIvZHJpdmVycy9tbWMvY29yZS9tbWMuYw0K
+PiA+IGluZGV4IDQ0NjZmNWQuLjk0YzNjYzUgMTAwNjQ0DQo+ID4gLS0tIGEvZHJpdmVycy9tbWMv
+Y29yZS9tbWMuYw0KPiA+ICsrKyBiL2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMNCj4gPiBAQCAtMTMz
+Nyw5ICsxMzM3LDI4IEBAIHN0YXRpYyBpbnQgbW1jX3NlbGVjdF9oczQwMGVzKHN0cnVjdCBtbWNf
+Y2FyZCAqY2FyZCkNCj4gPiAgICAgICAgIGlmIChlcnIpDQo+ID4gICAgICAgICAgICAgICAgIGdv
+dG8gb3V0X2VycjsNCj4gPg0KPiA+IC0gICAgICAgZXJyID0gbW1jX3NlbGVjdF9idXNfd2lkdGgo
+Y2FyZCk7DQo+ID4gLSAgICAgICBpZiAoZXJyIDwgMCkNCj4gPiArICAgICAgIC8qIFN3aXRjaCBj
+YXJkIHRvIDggYml0IG1vZGUgKi8NCj4gPiArICAgICAgIGVyciA9IG1tY19zd2l0Y2goY2FyZCwg
+RVhUX0NTRF9DTURfU0VUX05PUk1BTCwNCj4gPiArICAgICAgICAgICAgICAgICAgICAgICAgRVhU
+X0NTRF9CVVNfV0lEVEgsDQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgIEVYVF9DU0RfQlVT
+X1dJRFRIXzgsDQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgIGNhcmQtPmV4dF9jc2QuZ2Vu
+ZXJpY19jbWQ2X3RpbWUpOw0KPiA+ICsgICAgICAgaWYgKGVycikgew0KPiA+ICsgICAgICAgICAg
+ICAgICBwcl9lcnIoIiVzOiBzd2l0Y2ggdG8gOCBiaXQgbW9kZSBmb3IgaHM0MDBlcyBmYWlsZWQs
+IGVycjolZFxuIiwNCj4gPiArICAgICAgICAgICAgICAgICAgICAgICBtbWNfaG9zdG5hbWUoaG9z
+dCksIGVycik7DQo+ID4gKyAgICAgICAgICAgICAgIGdvdG8gb3V0X2VycjsNCj4gPiArICAgICAg
+IH0NCj4gPiArDQo+ID4gKyAgICAgICBtbWNfc2V0X2J1c193aWR0aChob3N0LCBNTUNfQlVTX1dJ
+RFRIXzgpOw0KPiA+ICsNCj4gPiArICAgICAgIGlmICghKGhvc3QtPmNhcHMgJiBNTUNfQ0FQX0JV
+U19XSURUSF9URVNUKSkNCj4gPiArICAgICAgICAgICAgICAgZXJyID0gbW1jX2NvbXBhcmVfZXh0
+X2NzZHMoY2FyZCwgTU1DX0JVU19XSURUSF84KTsNCj4gPiArICAgICAgIGVsc2UNCj4gPiArICAg
+ICAgICAgICAgICAgZXJyID0gbW1jX2J1c190ZXN0KGNhcmQsIE1NQ19CVVNfV0lEVEhfOCk7DQo+
+ID4gKyAgICAgICBpZiAoZXJyKSB7DQo+ID4gKyAgICAgICAgICAgICAgIHByX2VycigiJXM6IHRl
+c3QgOCBiaXQgbW9kZSBmb3IgaHM0MDBlcyBmYWlsZWQsIGVycjolZFxuIiwNCj4gPiArICAgICAg
+ICAgICAgICAgICAgICAgICBtbWNfaG9zdG5hbWUoaG9zdCksIGVycik7DQo+ID4gICAgICAgICAg
+ICAgICAgIGdvdG8gb3V0X2VycjsNCj4gDQo+IExvdCdzIG9wZW4gY29kaW5nLCBubyBJIGRvbid0
+IGxpa2UgaXQuDQo+IA0KPiBXb3VsZG4ndCBpdCBpbnN0ZWFkIGJlIHBvc3NpYmxlIHRvIGNoZWNr
+IHRoZSByZXR1cm4gdmFsdWUgZnJvbQ0KPiBtbWNfc2VsZWN0X2J1c193aWR0aCgpLCBhcyBpdCBz
+aG91bGQgdGVsbCB3aGF0IHdpZHRoIGl0IG1hbmFnZSB0bw0KPiBzZWxlY3QuIFRoZW4gaWYgaXQg
+aXNuJ3QgOC1iaXQsIHRoZW4gd2Ugc2hvdWxkIGJhaWwgb3V0LiBEb2VzIHRoYXQNCj4gd29yaz8N
+Cj4gDQpBZnRlciBzZXR0aW5nIDRiaXQgbW9kZSwgaXQgY2FuJ3Qgd29yayBiZWNhdXNlIGl0IGNh
+bm5vdCBiYWNrIHRvDQpIUzIwMCBtb2RlIGxpa2UgdGhlIEhTNDAwIG1vZGUuDQpGb3IgSFM0MDBl
+cywgaWYgZmFpbCB0byBzZXQgOGJpdCBtb2RlLCBtYXliZSBpdCBpcyBtb3JlIHJlYXNvbmFibGUN
+CnRoYXQgcmV0dXJuIGVycm9yIGRpcmVjdGx5Lg0KDQo+ID4gKyAgICAgICB9DQo+ID4NCj4gPiAg
+ICAgICAgIC8qIFN3aXRjaCBjYXJkIHRvIEhTIG1vZGUgKi8NCj4gPiAgICAgICAgIGVyciA9IF9f
+bW1jX3N3aXRjaChjYXJkLCBFWFRfQ1NEX0NNRF9TRVRfTk9STUFMLA0KPiA+IC0tDQo+ID4gMS45
+LjENCj4gPg0KPiANCj4gS2luZCByZWdhcmRzDQo+IFVmZmUNCg0KDQpCJlINCkhvbmdqaWUNCg==
