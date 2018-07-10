@@ -1,73 +1,109 @@
-From: =?utf-8?B?RmFuZyBIb25namllKOaWuea0quadsCk=?=
-        <hongjiefang@asrmicro.com>
-Subject: RE: [PATCH] mmc: core: improve rationality of bus width setting for
- HS400es
-Date: Tue, 10 Jul 2018 05:04:53 +0000
-Message-ID: <86aa8215d6e44e578cd34f0625c5ebef@mail2012.asrmicro.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: core: improve rationality of bus width setting for HS400es
+Date: Tue, 10 Jul 2018 10:14:48 +0200
+Message-ID: <CAPDyKFqfwxGgVhKp-RU1Ksd2BKhxvqdqXf0JV3dzyJdgfeBV+w@mail.gmail.com>
 References: <1531118843-796-1-git-send-email-hongjiefang@asrmicro.com>
- <CAPDyKFpzJV-UQbMa7_tHms7o3hMn9_g=H_M0jW+ZN9G=8XCqRg@mail.gmail.com>
+ <CAPDyKFpzJV-UQbMa7_tHms7o3hMn9_g=H_M0jW+ZN9G=8XCqRg@mail.gmail.com> <86aa8215d6e44e578cd34f0625c5ebef@mail2012.asrmicro.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFpzJV-UQbMa7_tHms7o3hMn9_g=H_M0jW+ZN9G=8XCqRg@mail.gmail.com>
-Content-Language: zh-CN
+In-Reply-To: <86aa8215d6e44e578cd34f0625c5ebef@mail2012.asrmicro.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
+To: =?UTF-8?B?RmFuZyBIb25namllKOaWuea0quadsCk=?= <hongjiefang@asrmicro.com>
 Cc: Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Linus Walleij <linus.walleij@linaro.org>, Bastian Stender <bst@pengutronix.de>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Chanho Min <chanho.min@lge.com>, Kyle Roeschley <kyle.roeschley@ni.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-PiBPbiA5IEp1bHkgMjAxOCBhdCAwODo0NywgSG9uZ2ppZSBGYW5nIDxob25namllZmFuZ0Bhc3Jt
-aWNyby5jb20+IHdyb3RlOg0KPiA+IG1tY19zZWxlY3RfaHM0MDBlcygpIGNhbGxzIG1tY19zZWxl
-Y3RfYnVzX3dpZHRoKCkgd2hpY2ggd2lsbCB0cnkgdG8NCj4gPiBzZXQgNGJpdCB0cmFuc2ZlciBt
-b2RlIGlmIGZhaWwgdG8gc2V0IDhiaXQgbW9kZS4gVGhlIHByb2JsZW0gaXMgdGhhdA0KPiA+IHRo
-ZSBidXMgd2lkdGggc2hvdWxkIG5vdCBiZSBzZXQgdG8gNGJpdCBpbiBIUzQwMGVzIG1vZGUuDQo+
-IA0KPiBJIGd1ZXNzIGl0IGZhaWxzIGJlY2F1c2UgdGhlcmUgaXMgc29tZXRoaW5nIHdyb25nLiBD
-YW4geW91IHBsZWFzZQ0KPiBlbGFib3JhdGUgdW5kZXIgd2hhdCBjaXJjdW1zdGFuY2UgdGhlIHBy
-b2JsZW0gb2NjdXJzPw0KPiANClRoaXMgcHJvYmxlbSB2ZXJ5IG9jY2FzaW9uYWxseSBvY2N1cnJl
-ZCB3aGVuIHN5c3RlbSByZXN1bWUgZnJvbQ0Kc3VzcGVuZCBzdGF0ZS4gVGhlIGNhcmQgc3R1Y2sg
-aW4gdGhlIHByb2dyYW1taW5nIHN0YXRlIGFmdGVyIHNldHRpbmcNCjhiaXQgbW9kZS4gQWZ0ZXIg
-dGhhdCwgbW1jX3NlbGVjdF9idXNfd2lkdGgoKSB3aWxsIGNvbnRpbnVlIHRvIHNldA0KNGJpdCBt
-b2RlIGFuZCByZXR1cm4gd2l0aG91dCBlcnJvcnMuIE9mIGNvdXJzZSwgdGhlIGZvbGxvd2luZyBS
-L1cNCnJlcXVlc3RzIHdpbGwgYmUgYWxsIGZhaWxpbmcuDQoNClRoZSBwcm9ibGVtIHNjZW5lIGlz
-IGhhcmQgdG8gcmVwcm9kdWNlLiBNYXliZSBpdCBoYXBwZW5lZA0KYmVjYXVzZSB0aGVyZSBpcyBz
-b21ldGhpbmcgd3JvbmcgYWJvdXQgYnVzIGNsb2NrIG9yIGNvcmUgdm9sdGFnZQ0Kc3RhYmlsaXR5
-IHdoZW4gc3lzdGVtIGRvIHJlc3VtZS4NCg0KPiA+DQo+ID4gU2lnbmVkLW9mZi1ieTogSG9uZ2pp
-ZSBGYW5nIDxob25namllZmFuZ0Bhc3JtaWNyby5jb20+DQo+ID4gLS0tDQo+ID4gIGRyaXZlcnMv
-bW1jL2NvcmUvbW1jLmMgfCAyMyArKysrKysrKysrKysrKysrKysrKystLQ0KPiA+ICAxIGZpbGUg
-Y2hhbmdlZCwgMjEgaW5zZXJ0aW9ucygrKSwgMiBkZWxldGlvbnMoLSkNCj4gPg0KPiA+IGRpZmYg
-LS1naXQgYS9kcml2ZXJzL21tYy9jb3JlL21tYy5jIGIvZHJpdmVycy9tbWMvY29yZS9tbWMuYw0K
-PiA+IGluZGV4IDQ0NjZmNWQuLjk0YzNjYzUgMTAwNjQ0DQo+ID4gLS0tIGEvZHJpdmVycy9tbWMv
-Y29yZS9tbWMuYw0KPiA+ICsrKyBiL2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMNCj4gPiBAQCAtMTMz
-Nyw5ICsxMzM3LDI4IEBAIHN0YXRpYyBpbnQgbW1jX3NlbGVjdF9oczQwMGVzKHN0cnVjdCBtbWNf
-Y2FyZCAqY2FyZCkNCj4gPiAgICAgICAgIGlmIChlcnIpDQo+ID4gICAgICAgICAgICAgICAgIGdv
-dG8gb3V0X2VycjsNCj4gPg0KPiA+IC0gICAgICAgZXJyID0gbW1jX3NlbGVjdF9idXNfd2lkdGgo
-Y2FyZCk7DQo+ID4gLSAgICAgICBpZiAoZXJyIDwgMCkNCj4gPiArICAgICAgIC8qIFN3aXRjaCBj
-YXJkIHRvIDggYml0IG1vZGUgKi8NCj4gPiArICAgICAgIGVyciA9IG1tY19zd2l0Y2goY2FyZCwg
-RVhUX0NTRF9DTURfU0VUX05PUk1BTCwNCj4gPiArICAgICAgICAgICAgICAgICAgICAgICAgRVhU
-X0NTRF9CVVNfV0lEVEgsDQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgIEVYVF9DU0RfQlVT
-X1dJRFRIXzgsDQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgIGNhcmQtPmV4dF9jc2QuZ2Vu
-ZXJpY19jbWQ2X3RpbWUpOw0KPiA+ICsgICAgICAgaWYgKGVycikgew0KPiA+ICsgICAgICAgICAg
-ICAgICBwcl9lcnIoIiVzOiBzd2l0Y2ggdG8gOCBiaXQgbW9kZSBmb3IgaHM0MDBlcyBmYWlsZWQs
-IGVycjolZFxuIiwNCj4gPiArICAgICAgICAgICAgICAgICAgICAgICBtbWNfaG9zdG5hbWUoaG9z
-dCksIGVycik7DQo+ID4gKyAgICAgICAgICAgICAgIGdvdG8gb3V0X2VycjsNCj4gPiArICAgICAg
-IH0NCj4gPiArDQo+ID4gKyAgICAgICBtbWNfc2V0X2J1c193aWR0aChob3N0LCBNTUNfQlVTX1dJ
-RFRIXzgpOw0KPiA+ICsNCj4gPiArICAgICAgIGlmICghKGhvc3QtPmNhcHMgJiBNTUNfQ0FQX0JV
-U19XSURUSF9URVNUKSkNCj4gPiArICAgICAgICAgICAgICAgZXJyID0gbW1jX2NvbXBhcmVfZXh0
-X2NzZHMoY2FyZCwgTU1DX0JVU19XSURUSF84KTsNCj4gPiArICAgICAgIGVsc2UNCj4gPiArICAg
-ICAgICAgICAgICAgZXJyID0gbW1jX2J1c190ZXN0KGNhcmQsIE1NQ19CVVNfV0lEVEhfOCk7DQo+
-ID4gKyAgICAgICBpZiAoZXJyKSB7DQo+ID4gKyAgICAgICAgICAgICAgIHByX2VycigiJXM6IHRl
-c3QgOCBiaXQgbW9kZSBmb3IgaHM0MDBlcyBmYWlsZWQsIGVycjolZFxuIiwNCj4gPiArICAgICAg
-ICAgICAgICAgICAgICAgICBtbWNfaG9zdG5hbWUoaG9zdCksIGVycik7DQo+ID4gICAgICAgICAg
-ICAgICAgIGdvdG8gb3V0X2VycjsNCj4gDQo+IExvdCdzIG9wZW4gY29kaW5nLCBubyBJIGRvbid0
-IGxpa2UgaXQuDQo+IA0KPiBXb3VsZG4ndCBpdCBpbnN0ZWFkIGJlIHBvc3NpYmxlIHRvIGNoZWNr
-IHRoZSByZXR1cm4gdmFsdWUgZnJvbQ0KPiBtbWNfc2VsZWN0X2J1c193aWR0aCgpLCBhcyBpdCBz
-aG91bGQgdGVsbCB3aGF0IHdpZHRoIGl0IG1hbmFnZSB0bw0KPiBzZWxlY3QuIFRoZW4gaWYgaXQg
-aXNuJ3QgOC1iaXQsIHRoZW4gd2Ugc2hvdWxkIGJhaWwgb3V0LiBEb2VzIHRoYXQNCj4gd29yaz8N
-Cj4gDQpBZnRlciBzZXR0aW5nIDRiaXQgbW9kZSwgaXQgY2FuJ3Qgd29yayBiZWNhdXNlIGl0IGNh
-bm5vdCBiYWNrIHRvDQpIUzIwMCBtb2RlIGxpa2UgdGhlIEhTNDAwIG1vZGUuDQpGb3IgSFM0MDBl
-cywgaWYgZmFpbCB0byBzZXQgOGJpdCBtb2RlLCBtYXliZSBpdCBpcyBtb3JlIHJlYXNvbmFibGUN
-CnRoYXQgcmV0dXJuIGVycm9yIGRpcmVjdGx5Lg0KDQo+ID4gKyAgICAgICB9DQo+ID4NCj4gPiAg
-ICAgICAgIC8qIFN3aXRjaCBjYXJkIHRvIEhTIG1vZGUgKi8NCj4gPiAgICAgICAgIGVyciA9IF9f
-bW1jX3N3aXRjaChjYXJkLCBFWFRfQ1NEX0NNRF9TRVRfTk9STUFMLA0KPiA+IC0tDQo+ID4gMS45
-LjENCj4gPg0KPiANCj4gS2luZCByZWdhcmRzDQo+IFVmZmUNCg0KDQpCJlINCkhvbmdqaWUNCg==
+On 10 July 2018 at 07:04, Fang Hongjie(=E6=96=B9=E6=B4=AA=E6=9D=B0) <hongji=
+efang@asrmicro.com> wrote:
+>> On 9 July 2018 at 08:47, Hongjie Fang <hongjiefang@asrmicro.com> wrote:
+>> > mmc_select_hs400es() calls mmc_select_bus_width() which will try to
+>> > set 4bit transfer mode if fail to set 8bit mode. The problem is that
+>> > the bus width should not be set to 4bit in HS400es mode.
+>>
+>> I guess it fails because there is something wrong. Can you please
+>> elaborate under what circumstance the problem occurs?
+>>
+> This problem very occasionally occurred when system resume from
+> suspend state. The card stuck in the programming state after setting
+> 8bit mode. After that, mmc_select_bus_width() will continue to set
+> 4bit mode and return without errors. Of course, the following R/W
+> requests will be all failing.
+
+I see. So it's the mmc_switch() operation that fails, when trying 8-bit. Hm=
+m.
+
+>
+> The problem scene is hard to reproduce. Maybe it happened
+> because there is something wrong about bus clock or core voltage
+> stability when system do resume.
+
+Yeah, that needs further debugging.
+
+Don't know what host driver you are using, but potentially you could
+play with a couple host specific mechanism. The ->host->card_busy()
+callback, host->max_busy_timeout and MMC_CAP_WAIT_WHILE_BUSY.
+Depending on these, __mmc_switch() changes its policy when polling for
+busy. Have a look at __mmc_switch() and mmc_poll_for_busy(), to see
+what goes on.
+
+>
+>> >
+>> > Signed-off-by: Hongjie Fang <hongjiefang@asrmicro.com>
+>> > ---
+>> >  drivers/mmc/core/mmc.c | 23 +++++++++++++++++++++--
+>> >  1 file changed, 21 insertions(+), 2 deletions(-)
+>> >
+>> > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>> > index 4466f5d..94c3cc5 100644
+>> > --- a/drivers/mmc/core/mmc.c
+>> > +++ b/drivers/mmc/core/mmc.c
+>> > @@ -1337,9 +1337,28 @@ static int mmc_select_hs400es(struct mmc_card *=
+card)
+>> >         if (err)
+>> >                 goto out_err;
+>> >
+>> > -       err =3D mmc_select_bus_width(card);
+>> > -       if (err < 0)
+>> > +       /* Switch card to 8 bit mode */
+>> > +       err =3D mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>> > +                        EXT_CSD_BUS_WIDTH,
+>> > +                        EXT_CSD_BUS_WIDTH_8,
+>> > +                        card->ext_csd.generic_cmd6_time);
+>> > +       if (err) {
+>> > +               pr_err("%s: switch to 8 bit mode for hs400es failed, e=
+rr:%d\n",
+>> > +                       mmc_hostname(host), err);
+>> > +               goto out_err;
+>> > +       }
+>> > +
+>> > +       mmc_set_bus_width(host, MMC_BUS_WIDTH_8);
+>> > +
+>> > +       if (!(host->caps & MMC_CAP_BUS_WIDTH_TEST))
+>> > +               err =3D mmc_compare_ext_csds(card, MMC_BUS_WIDTH_8);
+>> > +       else
+>> > +               err =3D mmc_bus_test(card, MMC_BUS_WIDTH_8);
+>> > +       if (err) {
+>> > +               pr_err("%s: test 8 bit mode for hs400es failed, err:%d=
+\n",
+>> > +                       mmc_hostname(host), err);
+>> >                 goto out_err;
+>>
+>> Lot's open coding, no I don't like it.
+>>
+>> Wouldn't it instead be possible to check the return value from
+>> mmc_select_bus_width(), as it should tell what width it manage to
+>> select. Then if it isn't 8-bit, then we should bail out. Does that
+>> work?
+>>
+> After setting 4bit mode, it can't work because it cannot back to
+> HS200 mode like the HS400 mode.
+> For HS400es, if fail to set 8bit mode, maybe it is more reasonable
+> that return error directly.
+
+Yeah. Care to send a patch for that?
+
+[...]
+
+Kind regards
+Uffe
