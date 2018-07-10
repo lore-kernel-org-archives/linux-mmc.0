@@ -1,221 +1,125 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH RFC 2/2] mmc: sdhci-msm: Use internal voltage control
-Date: Tue, 10 Jul 2018 14:26:54 +0300
-Message-ID: <42c8405c-6218-7d0a-3236-ec787d11537d@intel.com>
-References: <1529583826-42020-1-git-send-email-vviswana@codeaurora.org>
- <1529583826-42020-3-git-send-email-vviswana@codeaurora.org>
+Subject: Re: [PATCH V6 1/3] mmc: sdhci: Add support for O2 eMMC HS200 mode
+Date: Tue, 10 Jul 2018 15:23:12 +0300
+Message-ID: <0c2398b7-184b-e464-0613-c5b5609a7094@intel.com>
+References: <20180626154647.11623-1-ernest.zhang@bayhubtech.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1529583826-42020-3-git-send-email-vviswana@codeaurora.org>
+In-Reply-To: <20180626154647.11623-1-ernest.zhang@bayhubtech.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Vijay Viswanath <vviswana@codeaurora.org>, ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, devicetree@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, jeremymc@redhat.com, bjorn.andersson@linaro.org, riteshh@codeaurora.org, vbadigan@codeaurora.org, dianders@google.com, sayalil@codeaurora.org
+To: "ernest.zhang" <ernest.zhang@bayhubtech.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: chuanjin.pang@bayhubtech.com, mike.li@bayhubtech.com, chevron.li@bayhubtech.com, shirley.her@bayhubtech.com, xiaoguang.yu@bayhubtech.com, bobby.wu@bayhubtech.com
 List-Id: linux-mmc@vger.kernel.org
 
-On 21/06/18 15:23, Vijay Viswanath wrote:
-> Some sdhci-msm controllers require that voltage switching be done after
-> the HW is ready for it. The HW informs its readiness through power irq.
-> The voltage switching should happen only then.
+On 26/06/18 18:46, ernest.zhang wrote:
+> When use eMMC as boot device, the eMMC signaling voltage is tied to 1.8v
+> fixed output voltage, bios can set o2 sd host controller PCI configuration
+> register 0x308 bit4 to 1 to let driver skip 3.3v signaling voltage and
+> direct use 1.8v singling voltage in eMMC initialize process.
 > 
-> Use the quirk for internal voltage switching and then control the
-> voltage switching using power irq.
-> 
-> Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
+> Signed-off-by: ernest.zhang <ernest.zhang@bayhubtech.com>
 > ---
->  drivers/mmc/host/sdhci-msm.c | 99 ++++++++++++++++++++++++++++++++++++++------
->  1 file changed, 87 insertions(+), 12 deletions(-)
+> Changes in V6:
+> 	1.Move change log to correct place.
+> 	2.Change HS200 mode clock frequency from 208MHz to 200MHz to meet
+> 	Specification.
+
+That 2nd change should be a separate patch.
+
 > 
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index a0dc3e1..ebdde29 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -43,7 +43,9 @@
->  #define CORE_PWRCTL_IO_LOW	BIT(2)
->  #define CORE_PWRCTL_IO_HIGH	BIT(3)
->  #define CORE_PWRCTL_BUS_SUCCESS BIT(0)
-> +#define CORE_PWRCTL_BUS_FAIL    BIT(1)
->  #define CORE_PWRCTL_IO_SUCCESS	BIT(2)
-> +#define CORE_PWRCTL_IO_FAIL     BIT(3)
->  #define REQ_BUS_OFF		BIT(0)
->  #define REQ_BUS_ON		BIT(1)
->  #define REQ_IO_LOW		BIT(2)
-> @@ -258,6 +260,7 @@ struct sdhci_msm_host {
->  	bool mci_removed;
->  	const struct sdhci_msm_variant_ops *var_ops;
->  	const struct sdhci_msm_offset *offset;
-> +	bool pltfm_init_done;
-
-Wouldn't hurt to explain what 'pltfm_init_done' is for
-
->  };
+> Changes in V5:
+> 	Modify code format to pass checkpatch.pl check and add a summary
+> 	of what has changed in each version.
+> 
+> Changes in V4:
+> 	Skip SDIO and SD initalization when register 0x308 bit 4 is set,
+> 	and modify some typo.
+> 
+> Changes in V3:
+> 	Rebase the patch on the mmc tree 'next' branch.
+> 
+> Changes in V2:
+> 	Modify code format, and delete unused code path.
+> 
+> Changes in V1:
+> 	Check PCIe register 0x308 bit 4 and skip eMMC 3.3v initialization
+> 	process if it is set to 1.
+> ---
+>  drivers/mmc/host/sdhci-pci-o2micro.c | 22 ++++++++++++++++++++--
+>  1 file changed, 20 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+> index 555970a..94cf3cd 100644
+> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
+> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+> @@ -3,6 +3,7 @@
+>   *
+>   * Authors: Peter Guo <peter.guo@bayhubtech.com>
+>   *          Adam Lee <adam.lee@canonical.com>
+> + *          Ernest Zhang <ernest.zhang@bayhubtech.com>
+>   *
+>   * This software is licensed under the terms of the GNU General Public
+>   * License version 2, as published by the Free Software Foundation, and
+> @@ -39,6 +40,7 @@
+>  #define O2_SD_MISC_CTRL4	0xFC
+>  #define O2_SD_TUNING_CTRL	0x300
+>  #define O2_SD_PLL_SETTING	0x304
+> +#define O2_SD_MISC_SETTING	0x308
+>  #define O2_SD_CLK_SETTING	0x328
+>  #define O2_SD_CAP_REG2		0x330
+>  #define O2_SD_CAP_REG0		0x334
+> @@ -184,6 +186,7 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+>  	struct sdhci_pci_chip *chip;
+>  	struct sdhci_host *host;
+>  	u32 reg;
+> +	int ret;
 >  
->  static const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct sdhci_host *host)
-> @@ -1314,8 +1317,9 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
->  {
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->  	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> +	struct mmc_host *mmc = host->mmc;
->  	u32 irq_status, irq_ack = 0;
-> -	int retry = 10;
-> +	int retry = 10, ret = 0;
->  	u32 pwr_state = 0, io_level = 0;
->  	u32 config;
->  	const struct sdhci_msm_offset *msm_offset = msm_host->offset;
-> @@ -1351,14 +1355,59 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
+>  	chip = slot->chip;
+>  	host = slot->host;
+> @@ -197,6 +200,21 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+>  		if (reg & 0x1)
+>  			host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
 >  
->  	/* Handle BUS ON/OFF*/
->  	if (irq_status & CORE_PWRCTL_BUS_ON) {
-> -		pwr_state = REQ_BUS_ON;
-> -		io_level = REQ_IO_HIGH;
-> -		irq_ack |= CORE_PWRCTL_BUS_SUCCESS;
-> +		if (mmc->supply.vmmc) {
-
-Since you call mmc_regulator_get_supply() first, mmc->supply.vmmc will never
-be NULL.  Did you mean:
-
-		if (!IS_ERR(mmc->supply.vmmc))
-
-> +			ret = regulator_set_load(mmc->supply.vmmc, 800000);
-> +			ret |= mmc_regulator_set_ocr(mmc, mmc->supply.vmmc,
-> +					mmc->ios.vdd);
+> +		if (chip->pdev->device == PCI_DEVICE_ID_O2_SEABIRD0) {
+> +			ret = pci_read_config_dword(chip->pdev,
+> +						    O2_SD_MISC_SETTING, &reg);
 > +			if (ret)
-> +				pr_err("%s: vmmc enable failed: %d\n",
-> +						mmc_hostname(mmc), ret);
+> +				return -EIO;
+> +			if (reg & (1 << 4)) {
+> +				pr_info("%s: emmc 1.8v flag is set, force 1.8v signaling voltage\n",
+> +					mmc_hostname(host->mmc));
+> +				host->flags &= ~SDHCI_SIGNALING_330;
+> +				host->flags |= SDHCI_SIGNALING_180;
+> +				host->mmc->caps2 |= MMC_CAP2_NO_SD;
+> +				host->mmc->caps2 |= MMC_CAP2_NO_SDIO;
+> +			}
 > +		}
-> +		if (mmc->supply.vqmmc && !ret) {
+> +
+>  		if (chip->pdev->device != PCI_DEVICE_ID_O2_FUJIN2)
+>  			break;
+>  		/* set dll watch dog timer */
+> @@ -293,7 +311,7 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
+>  
+>  			/* Check Whether subId is 0x11 or 0x12 */
+>  			if ((scratch_32 == 0x11) || (scratch_32 == 0x12)) {
+> -				scratch_32 = 0x2c280000;
+> +				scratch_32 = 0x25100000;
+>  
+>  				/* Set Base Clock to 208MZ */
 
-Ditto for mmc->supply.vqmmc
+Need to change the comment too i.e. 208MZ -> 200 MHz
 
-> +			ret = regulator_set_load(mmc->supply.vqmmc, 22000);
-> +			ret |= mmc_regulator_set_ocr(mmc, mmc->supply.vqmmc,
-> +					mmc->ios.vdd);
-> +			if (!ret)
-> +				ret = regulator_enable(mmc->supply.vqmmc);
-> +			if (ret)
-> +				pr_err("%s: vqmmc enable failed: %d\n",
-> +						mmc_hostname(mmc), ret);
-> +		}
-> +		if (!ret) {
-> +			pwr_state = REQ_BUS_ON;
-> +			io_level = REQ_IO_HIGH;
-> +			irq_ack |= CORE_PWRCTL_BUS_SUCCESS;
-> +		} else {
-> +			pr_err("%s: BUS_ON req failed(%d). irq_status: 0x%08x\n",
-> +					mmc_hostname(mmc), ret, irq_status);
-> +			irq_ack |= CORE_PWRCTL_BUS_FAIL;
-> +		}
->  	}
->  	if (irq_status & CORE_PWRCTL_BUS_OFF) {
-> -		pwr_state = REQ_BUS_OFF;
-> -		io_level = REQ_IO_LOW;
-> -		irq_ack |= CORE_PWRCTL_BUS_SUCCESS;
-> +		if (mmc->supply.vmmc && msm_host->pltfm_init_done) {
-> +			ret = regulator_set_load(mmc->supply.vmmc, 0);
-> +			ret |= mmc_regulator_set_ocr(mmc, mmc->supply.vmmc,
-> +					mmc->ios.vdd);
-> +			if (ret)
-> +				pr_err("%s: vqmmc disabling failed: %d\n",
-> +						mmc_hostname(mmc), ret);
-> +		}
-> +		if (mmc->supply.vqmmc && msm_host->pltfm_init_done && !ret) {
-> +			ret = regulator_set_load(mmc->supply.vqmmc, 0);
-> +			ret |= regulator_disable(mmc->supply.vqmmc);
-> +			if (ret)
-> +				pr_err("%s: vqmmc disabling failed: %d\n",
-> +						mmc_hostname(mmc), ret);
-> +		}
-> +		if (!ret) {
-> +			pwr_state = REQ_BUS_OFF;
-> +			io_level = REQ_IO_LOW;
-> +			irq_ack |= CORE_PWRCTL_BUS_SUCCESS;
-> +		} else {
-> +			pr_err("%s: BUS_ON req failed(%d). irq_status: 0x%08x\n",
-> +					mmc_hostname(mmc), ret, irq_status);
-> +			irq_ack |= CORE_PWRCTL_BUS_FAIL;
-> +		}
->  	}
->  	/* Handle IO LOW/HIGH */
->  	if (irq_status & CORE_PWRCTL_IO_LOW) {
-> @@ -1370,6 +1419,15 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
->  		irq_ack |= CORE_PWRCTL_IO_SUCCESS;
->  	}
+>  				o2_pci_set_baseclk(chip, scratch_32);
+> @@ -388,7 +406,7 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
+>  					       O2_SD_PLL_SETTING, scratch_32);
+>  		} else {
+>  			scratch_32 &= 0x0000FFFF;
+> -			scratch_32 |= 0x2c280000;
+> +			scratch_32 |= 0x25100000;
 >  
-> +	if (io_level && mmc->supply.vqmmc && !pwr_state) {
-> +		ret = mmc_regulator_set_vqmmc(mmc, &mmc->ios);
-> +		if (ret)
-> +			pr_err("%s: IO_level setting failed(%d). signal_voltage: %d, vdd: %d irq_status: 0x%08x\n",
-> +					mmc_hostname(mmc), ret,
-> +					mmc->ios.signal_voltage, mmc->ios.vdd,
-> +					irq_status);
-> +	}
-> +
->  	/*
->  	 * The driver has to acknowledge the interrupt, switch voltages and
->  	 * report back if it succeded or not to this register. The voltage
-> @@ -1415,10 +1473,9 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
->  		msm_host->curr_pwr_state = pwr_state;
->  	if (io_level)
->  		msm_host->curr_io_level = io_level;
-> -
->  	pr_debug("%s: %s: Handled IRQ(%d), irq_status=0x%x, ack=0x%x\n",
-> -		mmc_hostname(msm_host->mmc), __func__, irq, irq_status,
-> -		irq_ack);
-> +			mmc_hostname(msm_host->mmc), __func__,
-> +			irq, irq_status, irq_ack);
->  }
->  
->  static irqreturn_t sdhci_msm_pwr_irq(int irq, void *data)
-> @@ -1605,6 +1662,19 @@ static void sdhci_msm_set_regulator_caps(struct sdhci_msm_host *msm_host)
->  	pr_debug("%s: supported caps: 0x%08x\n", mmc_hostname(mmc), caps);
->  }
->  
-> +static int sdhci_msm_register_vreg(struct sdhci_msm_host *msm_host)
-> +{
-> +	int ret = 0;
-> +
-> +	ret = mmc_regulator_get_supply(msm_host->mmc);
-> +	if (ret)
-> +		return ret;
-> +	sdhci_msm_set_regulator_caps(msm_host);
-> +
-> +	return 0;
-> +
-> +}
-> +
->  static const struct sdhci_msm_variant_ops mci_var_ops = {
->  	.msm_readl_relaxed = sdhci_msm_mci_variant_readl_relaxed,
->  	.msm_writel_relaxed = sdhci_msm_mci_variant_writel_relaxed,
-> @@ -1650,7 +1720,8 @@ static void sdhci_msm_set_regulator_caps(struct sdhci_msm_host *msm_host)
->  	.quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
->  		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
->  		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-> -	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
-> +	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-> +		   SDHCI_QUIRK2_INTERNAL_PWR_CTL,
->  	.ops = &sdhci_msm_ops,
->  };
->  
-> @@ -1819,6 +1890,10 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->  				msm_offset->core_vendor_spec_capabilities0);
->  	}
->  
-> +	ret = sdhci_msm_register_vreg(msm_host);
-> +	if (ret == -EPROBE_DEFER)
-> +		goto clk_disable;
-> +
->  	/*
->  	 * Power on reset state may trigger power irq if previous status of
->  	 * PWRCTL was either BUS_ON or IO_HIGH_V. So before enabling pwr irq
-> @@ -1867,7 +1942,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->  	ret = sdhci_add_host(host);
->  	if (ret)
->  		goto pm_runtime_disable;
-> -	sdhci_msm_set_regulator_caps(msm_host);
-> +	msm_host->pltfm_init_done = true;
->  
->  	pm_runtime_mark_last_busy(&pdev->dev);
->  	pm_runtime_put_autosuspend(&pdev->dev);
+>  			pci_write_config_dword(chip->pdev,
+>  					       O2_SD_PLL_SETTING, scratch_32);
 > 
