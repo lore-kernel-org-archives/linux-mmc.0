@@ -1,162 +1,66 @@
-From: Ludovic BARRE <ludovic.barre@st.com>
-Subject: Re: [PATCH 01/19] mmc: mmci: regroup and define dma operations
-Date: Wed, 11 Jul 2018 11:41:06 +0200
-Message-ID: <d93e6886-1dee-7915-459f-466a54d0c242@st.com>
-References: <1528809280-31116-1-git-send-email-ludovic.Barre@st.com>
- <1528809280-31116-2-git-send-email-ludovic.Barre@st.com>
- <CAPDyKFpt5HUeUqaoS9icDodM+r64jB9vQ=zTecO0tuBv=TtOXg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 8bit
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v.4.18-rc5
+Date: Wed, 11 Jul 2018 14:08:16 +0200
+Message-ID: <20180711120816.13767-1-ulf.hansson@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFpt5HUeUqaoS9icDodM+r64jB9vQ=zTecO0tuBv=TtOXg@mail.gmail.com>
-Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Rob Herring <robh+dt@kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Gerald Baeza <gerald.baeza@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, devicetree@vger.kernel.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
+Hi Linus,
+
+Here's a PR with a couple of MMC fixes intended for v4.18-rc5. Details about the
+highlights are as usual found in the signed tag.
+
+Please pull this in!
+
+Kind regards
+Ulf Hansson
 
 
-On 07/05/2018 05:17 PM, Ulf Hansson wrote:
-> On 12 June 2018 at 15:14, Ludovic Barre <ludovic.Barre@st.com> wrote:
->> From: Ludovic Barre <ludovic.barre@st.com>
->>
->> Prepare mmci driver to manage dma interface by new property.
->> This patch defines and regroups dma operations for mmci drivers.
->> mmci_dma_XX prototypes are added to call member of mmci_dma_ops
->> if not null. Based on legacy need, a mmci dma interface has been
->> defined with:
->> -mmci_dma_setup
->> -mmci_dma_release
->> -mmci_dma_pre_req
->> -mmci_dma_start
->> -mmci_dma_finalize
->> -mmci_dma_post_req
->> -mmci_dma_error
->> -mmci_dma_get_next_data
-> 
-> As I suggested for one of the other patches, I would rather turn core
-> mmci functions into library functions, which can be either invoked
-> from variant callbacks or assigned directly to them.
-> 
-> In other words, I would leave the functions that you move in this
-> patch to stay in mmci.c. Although some needs to be re-factored and we
-> also needs to make some of them available to be called from another
-> file, hence the functions needs to be shared via mmci.h rather than
-> being declared static.
+The following changes since commit 021c91791a5e7e85c567452f1be3e4c2c6cb6063:
 
-In previous exchange mail "STM32MP1 SDMMC driver review"
-we are said:
+  Linux 4.18-rc3 (2018-07-01 16:04:53 -0700)
 
- >>> -dma variant à should fit in Qualcomm implementation, reuse (rename)
- >>> mmci_qcom_dml.c file and integrate ST dma in.
- >>
- >> stm32 sdmmc has an internal dma, no need to use dmaengine API;
- >> So some modifications in mmci (pre/post request, mmci_dma_xx). perhaps
- >> should be done with an ops or not.
- >
- >Yes.
- >
- >The Qualcomm variant is also using an internal DMA, hence I thought
- >there may be something we could re-use, or at least have some new
- >common ops for.
+are available in the Git repository at:
 
-It's not crystal clear for me.
-Do you always agree with a dma ops which allow to address different
-DMA transfer:
--with dmaengine API
--sdmmc idma, without dmaengine API
--...
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v4.18-rc3
 
-> 
-> Let me take a concrete example on how I would move forward, hopefully
-> that explains it a bit better. Please see below.
-> 
-> [...]
-> 
->> -/*
->> - * All the DMA operation mode stuff goes inside this ifdef.
->> - * This assumes that you have a generic DMA device interface,
->> - * no custom DMA interfaces are supported.
->> - */
->> -#ifdef CONFIG_DMA_ENGINE
->> -static void mmci_dma_setup(struct mmci_host *host)
->> -{
->> -       const char *rxname, *txname;
->> -       struct variant_data *variant = host->variant;
->> -
->> -       host->dma_rx_channel = dma_request_slave_channel(mmc_dev(host->mmc), "rx");
->> -       host->dma_tx_channel = dma_request_slave_channel(mmc_dev(host->mmc), "tx");
->> -
->> -       /* initialize pre request cookie */
->> -       host->next_data.cookie = 1;
->> -
->> -       /*
->> -        * If only an RX channel is specified, the driver will
->> -        * attempt to use it bidirectionally, however if it is
->> -        * is specified but cannot be located, DMA will be disabled.
->> -        */
->> -       if (host->dma_rx_channel && !host->dma_tx_channel)
->> -               host->dma_tx_channel = host->dma_rx_channel;
->> -
->> -       if (host->dma_rx_channel)
->> -               rxname = dma_chan_name(host->dma_rx_channel);
->> -       else
->> -               rxname = "none";
->> -
->> -       if (host->dma_tx_channel)
->> -               txname = dma_chan_name(host->dma_tx_channel);
->> -       else
->> -               txname = "none";
->> -
->> -       dev_info(mmc_dev(host->mmc), "DMA channels RX %s, TX %s\n",
->> -                rxname, txname);
->> -
->> -       /*
->> -        * Limit the maximum segment size in any SG entry according to
->> -        * the parameters of the DMA engine device.
->> -        */
->> -       if (host->dma_tx_channel) {
->> -               struct device *dev = host->dma_tx_channel->device->dev;
->> -               unsigned int max_seg_size = dma_get_max_seg_size(dev);
->> -
->> -               if (max_seg_size < host->mmc->max_seg_size)
->> -                       host->mmc->max_seg_size = max_seg_size;
->> -       }
->> -       if (host->dma_rx_channel) {
->> -               struct device *dev = host->dma_rx_channel->device->dev;
->> -               unsigned int max_seg_size = dma_get_max_seg_size(dev);
->> -
->> -               if (max_seg_size < host->mmc->max_seg_size)
->> -                       host->mmc->max_seg_size = max_seg_size;
->> -       }
-> 
-> Everything above shall be left as generic library function,
-> mmci_dma_setup() and I would share it via mmci.h and thus change it
-> from being static.
-> 
+for you to fetch changes up to 92748beac07c471d995fbec642b63572dc01b3dc:
 
-each interfaces mmci_dma_XXX have very different needs depending
-dma_ops (legacy, sdmmc idma)
+  mmc: sdhci-esdhc-imx: allow 1.8V modes without 100/200MHz pinctrl states (2018-07-09 11:17:47 +0200)
 
->> -
->> -       if (variant->qcom_dml && host->dma_rx_channel && host->dma_tx_channel)
->> -               if (dml_hw_init(host, host->mmc->parent->of_node))
->> -                       variant->qcom_dml = false;
-> 
-> This piece of code, should be made specific to the qcom variant and
-> managed though a "mmci_host_ops" callback. The corresponding code in
-> that callback would then start by invoking mmci_dma_setup(), before it
-> continues with the qcom specific operations.
-> 
-> For legacy variants, the corresponding callback would be set directly
-> to mmci_dma_setup() and called through the callback from mmci.c when
-> needed. There is no need to have a separate file for DMA for the
-> legacy variants, I think.
-> 
-> [...]
-> 
-> Kind regards
-> Uffe
-> 
+----------------------------------------------------------------
+MMC core:
+ - Fixup devname in /proc/interrupts for card detect GPIO
+
+MMC host:
+ - sdhci-esdhc-imx: Allow 1.8V speed-modes without 100/200MHz pinctrls
+ - sunxi: Disable IRQ in low power state to prevent IRQ storm
+ - dw_mmc: Fix card threshold control configuration
+ - renesas_sdhi_internal_dmac: Fixup DMA error paths
+
+----------------------------------------------------------------
+Anson Huang (1):
+      mmc: core: cd_label must be last entry of mmc_gpio struct
+
+Stefan Agner (1):
+      mmc: sdhci-esdhc-imx: allow 1.8V modes without 100/200MHz pinctrl states
+
+Stefan Mavrodiev (1):
+      mmc: sunxi: Disable irq during pm_suspend
+
+Yoshihiro Shimoda (2):
+      mmc: renesas_sdhi_internal_dmac: Fix missing unmap in error patch
+      mmc: renesas_sdhi_internal_dmac: Cannot clear the RX_IN_USE in abort
+
+x00270170 (1):
+      mmc: dw_mmc: fix card threshold control configuration
+
+ drivers/mmc/core/slot-gpio.c                  |  2 +-
+ drivers/mmc/host/dw_mmc.c                     |  7 ++++---
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c | 15 +++++++--------
+ drivers/mmc/host/sdhci-esdhc-imx.c            | 21 +++++++++------------
+ drivers/mmc/host/sunxi-mmc.c                  |  7 +++++++
+ 5 files changed, 28 insertions(+), 24 deletions(-)
