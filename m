@@ -1,278 +1,161 @@
 From: Ludovic BARRE <ludovic.barre@st.com>
-Subject: Re: [PATCH 13/19] mmc: mmci: send stop cmd if a data command fail
-Date: Wed, 11 Jul 2018 10:57:11 +0200
-Message-ID: <f8b5540d-d797-60d6-2351-8867b6b2b444@st.com>
+Subject: Re: [PATCH 01/19] mmc: mmci: regroup and define dma operations
+Date: Wed, 11 Jul 2018 11:41:06 +0200
+Message-ID: <d93e6886-1dee-7915-459f-466a54d0c242@st.com>
 References: <1528809280-31116-1-git-send-email-ludovic.Barre@st.com>
- <1528809280-31116-14-git-send-email-ludovic.Barre@st.com>
- <CAPDyKFrbHcyy+rcVPrJAvO+y-ywQ=yE=gT3dbG2kqroQAhMF2Q@mail.gmail.com>
+ <1528809280-31116-2-git-send-email-ludovic.Barre@st.com>
+ <CAPDyKFpt5HUeUqaoS9icDodM+r64jB9vQ=zTecO0tuBv=TtOXg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAPDyKFrbHcyy+rcVPrJAvO+y-ywQ=yE=gT3dbG2kqroQAhMF2Q@mail.gmail.com>
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFpt5HUeUqaoS9icDodM+r64jB9vQ=zTecO0tuBv=TtOXg@mail.gmail.com>
 Content-Language: en-US
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: devicetree@vger.kernel.org, Alexandre Torgue <alexandre.torgue@st.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Gerald Baeza <gerald.baeza@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+Cc: Rob Herring <robh+dt@kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Gerald Baeza <gerald.baeza@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, devicetree@vger.kernel.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-hi Ulf
 
-thanks for review, comments below
 
-On 07/04/2018 03:37 PM, Ulf Hansson wrote:
+On 07/05/2018 05:17 PM, Ulf Hansson wrote:
 > On 12 June 2018 at 15:14, Ludovic Barre <ludovic.Barre@st.com> wrote:
 >> From: Ludovic Barre <ludovic.barre@st.com>
 >>
->> The mmc framework follows the requirement of SD_Specification:
->> the STOP_TRANSMISSION is sent on multiple write/read commands
->> and the stop command (alone), not needed on other ADTC commands.
->>
->> But, some variants require a stop command "STOP_TRANSMISION" to clear
->> the DPSM "Data Path State Machine" if an error happens on command or data
->> step. If it's not done the next data command will freeze hardware block.
->> Needed to support the STM32 sdmmc variant.
->>
->> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
->> ---
->>   drivers/mmc/host/mmci.c | 36 +++++++++++++++++++++++++++++++-----
->>   drivers/mmc/host/mmci.h |  3 +++
->>   2 files changed, 34 insertions(+), 5 deletions(-)
->>
->> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
->> index 87724e1..9af7db8 100644
->> --- a/drivers/mmc/host/mmci.c
->> +++ b/drivers/mmc/host/mmci.c
->> @@ -24,6 +24,7 @@
->>   #include <linux/mmc/pm.h>
->>   #include <linux/mmc/host.h>
->>   #include <linux/mmc/card.h>
->> +#include <linux/mmc/mmc.h>
->>   #include <linux/mmc/slot-gpio.h>
->>   #include <linux/amba/bus.h>
->>   #include <linux/clk.h>
->> @@ -522,11 +523,28 @@ static void mmci_set_mask1(struct mmci_host *host, unsigned int mask)
->>          host->mask1_reg = mask;
->>   }
->>
->> -static void mmci_stop_data(struct mmci_host *host)
->> +static int mmci_stop_data(struct mmci_host *host)
+>> Prepare mmci driver to manage dma interface by new property.
+>> This patch defines and regroups dma operations for mmci drivers.
+>> mmci_dma_XX prototypes are added to call member of mmci_dma_ops
+>> if not null. Based on legacy need, a mmci dma interface has been
+>> defined with:
+>> -mmci_dma_setup
+>> -mmci_dma_release
+>> -mmci_dma_pre_req
+>> -mmci_dma_start
+>> -mmci_dma_finalize
+>> -mmci_dma_post_req
+>> -mmci_dma_error
+>> -mmci_dma_get_next_data
 > 
-> Let's leave this as void function and instead add a check in
-> mmci_start_command(), to see if the command is a
-> MMC_STOP_TRANSMISSION. If so, then add host->variant->cmdreg_stop to
-> the register that is written in it.
+> As I suggested for one of the other patches, I would rather turn core
+> mmci functions into library functions, which can be either invoked
+> from variant callbacks or assigned directly to them.
+> 
+> In other words, I would leave the functions that you move in this
+> patch to stay in mmci.c. Although some needs to be re-factored and we
+> also needs to make some of them available to be called from another
+> file, hence the functions needs to be shared via mmci.h rather than
+> being declared static.
 
-In fact: the cmdreg_stop bit (which abort and reinit the DPSM)
-should have been activated only in error case. But I see a mistake in 
-this piece of code => cmdreg_stop bit is set for all MMC_STOP_TRANSMISSION.
+In previous exchange mail "STM32MP1 SDMMC driver review"
+we are said:
 
-So, I read closely the sdmmc datasheet and it seems possible
-to set cmdreg_stop bit for all MMC_STOP_TRANSMISSION (error or not).
+ >>> -dma variant à should fit in Qualcomm implementation, reuse (rename)
+ >>> mmci_qcom_dml.c file and integrate ST dma in.
+ >>
+ >> stm32 sdmmc has an internal dma, no need to use dmaengine API;
+ >> So some modifications in mmci (pre/post request, mmci_dma_xx). perhaps
+ >> should be done with an ops or not.
+ >
+ >Yes.
+ >
+ >The Qualcomm variant is also using an internal DMA, hence I thought
+ >there may be something we could re-use, or at least have some new
+ >common ops for.
 
-So, I will try your proposition to set cmdreg_stop bit in 
-mmci_start_command() if the command is MMC_STOP_TRANSMISSION.
+It's not crystal clear for me.
+Do you always agree with a dma ops which allow to address different
+DMA transfer:
+-with dmaengine API
+-sdmmc idma, without dmaengine API
+-...
 
 > 
-> And actually, I think this change alone should be a separate patch
-> coming before $subject patch in the series, as it addresses the first
-> problem of two.
+> Let me take a concrete example on how I would move forward, hopefully
+> that explains it a bit better. Please see below.
 > 
->>   {
->> +       struct mmc_command *stop = &host->stop_abort;
->> +       struct mmc_data *data = host->data;
->> +       unsigned int cmd = 0;
->> +
->>          mmci_write_datactrlreg(host, 0);
->>          mmci_set_mask1(host, 0);
->>          host->data = NULL;
->> +
->> +       if (host->variant->cmdreg_stop) {
->> +               cmd |= host->variant->cmdreg_stop;
->> +               if (!data->stop) {
->> +                       memset(stop, 0, sizeof(struct mmc_command));
->> +                       stop->opcode = MMC_STOP_TRANSMISSION;
->> +                       stop->arg = 0;
->> +                       stop->flags = MMC_RSP_R1B | MMC_CMD_AC;
->> +                       data->stop = stop;
+> [...]
 > 
-> I don't understand why you want the host->stop_abort being present in
-> the mmci host struct? Can we get rid of that?
+>> -/*
+>> - * All the DMA operation mode stuff goes inside this ifdef.
+>> - * This assumes that you have a generic DMA device interface,
+>> - * no custom DMA interfaces are supported.
+>> - */
+>> -#ifdef CONFIG_DMA_ENGINE
+>> -static void mmci_dma_setup(struct mmci_host *host)
+>> -{
+>> -       const char *rxname, *txname;
+>> -       struct variant_data *variant = host->variant;
+>> -
+>> -       host->dma_rx_channel = dma_request_slave_channel(mmc_dev(host->mmc), "rx");
+>> -       host->dma_tx_channel = dma_request_slave_channel(mmc_dev(host->mmc), "tx");
+>> -
+>> -       /* initialize pre request cookie */
+>> -       host->next_data.cookie = 1;
+>> -
+>> -       /*
+>> -        * If only an RX channel is specified, the driver will
+>> -        * attempt to use it bidirectionally, however if it is
+>> -        * is specified but cannot be located, DMA will be disabled.
+>> -        */
+>> -       if (host->dma_rx_channel && !host->dma_tx_channel)
+>> -               host->dma_tx_channel = host->dma_rx_channel;
+>> -
+>> -       if (host->dma_rx_channel)
+>> -               rxname = dma_chan_name(host->dma_rx_channel);
+>> -       else
+>> -               rxname = "none";
+>> -
+>> -       if (host->dma_tx_channel)
+>> -               txname = dma_chan_name(host->dma_tx_channel);
+>> -       else
+>> -               txname = "none";
+>> -
+>> -       dev_info(mmc_dev(host->mmc), "DMA channels RX %s, TX %s\n",
+>> -                rxname, txname);
+>> -
+>> -       /*
+>> -        * Limit the maximum segment size in any SG entry according to
+>> -        * the parameters of the DMA engine device.
+>> -        */
+>> -       if (host->dma_tx_channel) {
+>> -               struct device *dev = host->dma_tx_channel->device->dev;
+>> -               unsigned int max_seg_size = dma_get_max_seg_size(dev);
+>> -
+>> -               if (max_seg_size < host->mmc->max_seg_size)
+>> -                       host->mmc->max_seg_size = max_seg_size;
+>> -       }
+>> -       if (host->dma_rx_channel) {
+>> -               struct device *dev = host->dma_rx_channel->device->dev;
+>> -               unsigned int max_seg_size = dma_get_max_seg_size(dev);
+>> -
+>> -               if (max_seg_size < host->mmc->max_seg_size)
+>> -                       host->mmc->max_seg_size = max_seg_size;
+>> -       }
 > 
-> Anyway, re-using the data->stop pointer seems reasonable.
-
-In fact mrq->data->stop could be not referenced (NULL).
-
-for data command, the stop command is allocated in mmc_blk_request
-struct mmc_blk_request {
-   struct mmc_command stop;
-};
-struct mmc_data {
-   struct mmc_command *stop;
-};
-struct mmc_request {
-   struct mmc_command *stop;
-};
-
-in mmc_blk_rw_rq_prep function:
-if data.blocks > 1
-	brq->mrq.stop = &brq->stop;
-else
-	brq->mrq.stop = NULL;
-
-in mmc_mrq_prep function:
-if (mrq->stop) {
-	mrq->data->stop = mrq->stop;
-
-
-Update about this topic:
-This last week I found a new specific need for sdmmc variant.
-On response type MMC_RSP_BUSY (example mmc_switch command cmd6, AC
-command without data): SDMMC needs to set MMCIDATATIMER to define
-busy_timeout.
-If timeout expires Datatimeout and DPSM flags occur.
-So a MMC_STOP_TRANSMISSION with cmdreg_stop bit is required to
-abort and reinitialize the DPSM.
-
-So, I think we could keep "host->stop_abort" which may be used in
-cmd or data requests. The stop_abort command is always the same, so
-stop_abort command could be initialized only while probe function (under 
-variant->cmdreg_stop).
-
-What do you think about it ?
-
+> Everything above shall be left as generic library function,
+> mmci_dma_setup() and I would share it via mmci.h and thus change it
+> from being static.
 > 
->> +               }
->> +       }
->> +
->> +       return cmd;
->>   }
->>
->>   static void mmci_init_sg(struct mmci_host *host, struct mmc_data *data)
->> @@ -703,6 +721,7 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
->>                unsigned int status)
->>   {
->>          unsigned int status_err;
->> +       unsigned int cmd_reg = 0;
->>
->>          /* Make sure we have data to handle */
->>          if (!data)
->> @@ -761,7 +780,7 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
->>          if (status & MCI_DATAEND || data->error) {
->>                  mmci_dma_finalize(host, data);
->>
->> -               mmci_stop_data(host);
->> +               cmd_reg = mmci_stop_data(host);
->>
->>                  if (!data->error)
->>                          /* The error clause is handled above, success! */
->> @@ -770,7 +789,7 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
->>                  if (!data->stop || host->mrq->sbc) {
->>                          mmci_request_end(host, data->mrq);
->>                  } else {
->> -                       mmci_start_command(host, data->stop, 0);
->> +                       mmci_start_command(host, data->stop, cmd_reg);
->>                  }
->>          }
->>   }
->> @@ -780,6 +799,8 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
->>               unsigned int status)
->>   {
->>          void __iomem *base = host->base;
->> +       struct mmc_data *data = host->data;
->> +       unsigned int cmd_reg = 0;
->>          bool sbc;
->>
->>          if (!cmd)
->> @@ -865,11 +886,16 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
->>          }
->>
->>          if ((!sbc && !cmd->data) || cmd->error) {
->> -               if (host->data) {
->> +               if (data) {
->>                          /* Terminate the DMA transfer */
->>                          mmci_dma_error(host);
->>
->> -                       mmci_stop_data(host);
->> +                       cmd_reg = mmci_stop_data(host);
->> +
->> +                       if (data->stop) {
-> 
-> This means a change in behavior for !host->variant->cmdreg_stop
-> variants, because the mmc core may have assigned data->stop. Did you
-> test this path for any of the old variants?
-I just tested on:
--stm32f7 => close to pl180 variant.
--stm32h7 and mp1 => sdmmc variant.
--I like try to snowball but I've not yet find this board.
--no arm or qcom boards
 
-that seem ok for the both (f7/mp1).
+each interfaces mmci_dma_XXX have very different needs depending
+dma_ops (legacy, sdmmc idma)
 
+>> -
+>> -       if (variant->qcom_dml && host->dma_rx_channel && host->dma_tx_channel)
+>> -               if (dml_hw_init(host, host->mmc->parent->of_node))
+>> -                       variant->qcom_dml = false;
 > 
-> The change as such anyway seems like a good idea. If we had data, we
-> may play safe and send a stop command to let the card to try to close
-> down the transfer. On the other hand, we don't want this to come as
-> side-effect, but rather it deserves is own standalone patch.
+> This piece of code, should be made specific to the qcom variant and
+> managed though a "mmci_host_ops" callback. The corresponding code in
+> that callback would then start by invoking mmci_dma_setup(), before it
+> continues with the qcom specific operations.
 > 
-> I guess there are two options going forward.
-> 1) Split the patch and see if this works for other variants first and
-> the add your changes on top for the new ST variant.
-> 2) Make this change only to affect the new ST variant.
-
-At first time, I prefer not to have a side effect on other variant.
-This part must be rework, like I note above in "Update about this 
-topic", the stop transmission with cmdreg_stop bit could be send
-on command without data (like cmd6: mmc_switch)
-
+> For legacy variants, the corresponding callback would be set directly
+> to mmci_dma_setup() and called through the callback from mmci.c when
+> needed. There is no need to have a separate file for DMA for the
+> legacy variants, I think.
 > 
-> I am fine with both.
-> 
->> +                               mmci_start_command(host, data->stop, cmd_reg);
->> +                               return;
->> +                       }
->>                  }
->>                  mmci_request_end(host, host->mrq);
->>          } else if (sbc) {
->> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
->> index 2d7e901..4b4cd1d 100644
->> --- a/drivers/mmc/host/mmci.h
->> +++ b/drivers/mmc/host/mmci.h
->> @@ -243,6 +243,7 @@ struct mmci_host;
->>    * @cmdreg_lrsp_crc: enable value for long response with crc
->>    * @cmdreg_srsp_crc: enable value for short response with crc
->>    * @cmdreg_srsp: enable value for short response without crc
->> + * @cmdreg_stop: enable value for stop and abort transmission
->>    * @datalength_bits: number of bits in the MMCIDATALENGTH register
->>    * @fifosize: number of bytes that can be written when MMCI_TXFIFOEMPTY
->>    *           is asserted (likewise for RX)
->> @@ -298,6 +299,7 @@ struct variant_data {
->>          unsigned int            cmdreg_lrsp_crc;
->>          unsigned int            cmdreg_srsp_crc;
->>          unsigned int            cmdreg_srsp;
->> +       unsigned int            cmdreg_stop;
->>          unsigned int            datalength_bits;
->>          unsigned int            fifosize;
->>          unsigned int            fifohalfsize;
->> @@ -343,6 +345,7 @@ struct mmci_host {
->>          struct mmc_request      *mrq;
->>          struct mmc_command      *cmd;
->>          struct mmc_data         *data;
->> +       struct mmc_command      stop_abort;
->>          struct mmc_host         *mmc;
->>          struct clk              *clk;
->>          bool                    singleirq;
->> --
->> 2.7.4
->>
+> [...]
 > 
 > Kind regards
 > Uffe
