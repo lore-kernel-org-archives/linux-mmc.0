@@ -1,191 +1,268 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 01/19] mmc: mmci: regroup and define dma operations
-Date: Wed, 11 Jul 2018 14:16:00 +0200
-Message-ID: <CAPDyKFo0q5Yps1whPmaUQJAV3tXx91WPmxtMF_ov43qP=djQfg@mail.gmail.com>
+From: Ludovic BARRE <ludovic.barre@st.com>
+Subject: Re: [PATCH 05/19] mmc: mmci: allow to overwrite clock/power procedure
+ to specific variant
+Date: Wed, 11 Jul 2018 14:19:39 +0200
+Message-ID: <973d98c5-b5c7-d1c4-1b20-b6a77500adc3@st.com>
 References: <1528809280-31116-1-git-send-email-ludovic.Barre@st.com>
- <1528809280-31116-2-git-send-email-ludovic.Barre@st.com> <CAPDyKFpt5HUeUqaoS9icDodM+r64jB9vQ=zTecO0tuBv=TtOXg@mail.gmail.com>
- <d93e6886-1dee-7915-459f-466a54d0c242@st.com>
+ <1528809280-31116-6-git-send-email-ludovic.Barre@st.com>
+ <CAPDyKFpwVMX9LoC_abHm09UNhLse8MJBUpCCHkR8NnK7fOU5Yg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <d93e6886-1dee-7915-459f-466a54d0c242@st.com>
+In-Reply-To: <CAPDyKFpwVMX9LoC_abHm09UNhLse8MJBUpCCHkR8NnK7fOU5Yg@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ludovic BARRE <ludovic.barre@st.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Rob Herring <robh+dt@kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Gerald Baeza <gerald.baeza@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, devicetree@vger.kernel.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 11 July 2018 at 11:41, Ludovic BARRE <ludovic.barre@st.com> wrote:
->
->
-> On 07/05/2018 05:17 PM, Ulf Hansson wrote:
+
+
+On 07/05/2018 03:48 PM, Ulf Hansson wrote:
+> On 12 June 2018 at 15:14, Ludovic Barre <ludovic.Barre@st.com> wrote:
+>> From: Ludovic Barre <ludovic.barre@st.com>
 >>
->> On 12 June 2018 at 15:14, Ludovic Barre <ludovic.Barre@st.com> wrote:
->>>
->>> From: Ludovic Barre <ludovic.barre@st.com>
->>>
->>> Prepare mmci driver to manage dma interface by new property.
->>> This patch defines and regroups dma operations for mmci drivers.
->>> mmci_dma_XX prototypes are added to call member of mmci_dma_ops
->>> if not null. Based on legacy need, a mmci dma interface has been
->>> defined with:
->>> -mmci_dma_setup
->>> -mmci_dma_release
->>> -mmci_dma_pre_req
->>> -mmci_dma_start
->>> -mmci_dma_finalize
->>> -mmci_dma_post_req
->>> -mmci_dma_error
->>> -mmci_dma_get_next_data
+>> A specific variant could have different power or clock procedures.
+>> This patch allows to overwrite the default mmci_set_clkreg and
+>> mmci_set_pwrreg for a specific variant.
 >>
+>> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
+>> ---
+>>   drivers/mmc/host/mmci.c | 96 +++++++++++++++++++++++++++++--------------------
+>>   drivers/mmc/host/mmci.h |  7 ++++
+>>   2 files changed, 64 insertions(+), 39 deletions(-)
 >>
->> As I suggested for one of the other patches, I would rather turn core
->> mmci functions into library functions, which can be either invoked
->> from variant callbacks or assigned directly to them.
+>> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+>> index ede95b7..801c86b 100644
+>> --- a/drivers/mmc/host/mmci.c
+>> +++ b/drivers/mmc/host/mmci.c
+>> @@ -374,6 +374,52 @@ static void mmci_set_clkreg(struct mmci_host *host, unsigned int desired)
+>>          mmci_write_clkreg(host, clk);
+>>   }
 >>
->> In other words, I would leave the functions that you move in this
->> patch to stay in mmci.c. Although some needs to be re-factored and we
->> also needs to make some of them available to be called from another
->> file, hence the functions needs to be shared via mmci.h rather than
->> being declared static.
->
->
-> In previous exchange mail "STM32MP1 SDMMC driver review"
-> we are said:
->
->>>> -dma variant =C3=A0 should fit in Qualcomm implementation, reuse (rena=
-me)
->>>> mmci_qcom_dml.c file and integrate ST dma in.
+>> +static void mmci_set_pwrreg(struct mmci_host *host, unsigned char power_mode,
+>> +                           unsigned int pwr)
+>> +{
+>> +       struct variant_data *variant = host->variant;
+>> +       struct mmc_host *mmc = host->mmc;
+>> +
+>> +       switch (power_mode) {
+>> +       case MMC_POWER_OFF:
+>> +               if (!IS_ERR(mmc->supply.vmmc))
+>> +                       mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
+>> +
+>> +               if (!IS_ERR(mmc->supply.vqmmc) && host->vqmmc_enabled) {
+>> +                       regulator_disable(mmc->supply.vqmmc);
+>> +                       host->vqmmc_enabled = false;
+>> +               }
+>> +
+>> +               break;
+>> +       case MMC_POWER_UP:
+>> +               if (!IS_ERR(mmc->supply.vmmc))
+>> +                       mmc_regulator_set_ocr(mmc, mmc->supply.vmmc,
+>> +                                             mmc->ios.vdd);
+>> +
+>> +               /*
+>> +                * The ST Micro variant doesn't have the PL180s MCI_PWR_UP
+>> +                * and instead uses MCI_PWR_ON so apply whatever value is
+>> +                * configured in the variant data.
+>> +                */
+>> +               pwr |= variant->pwrreg_powerup;
+>> +
+>> +               break;
+>> +       case MMC_POWER_ON:
+>> +               if (!IS_ERR(mmc->supply.vqmmc) && !host->vqmmc_enabled) {
+>> +                       if (regulator_enable(mmc->supply.vqmmc) < 0)
+>> +                               dev_err(mmc_dev(mmc),
+>> +                                       "failed to enable vqmmc regulator\n");
+>> +                       else
+>> +                               host->vqmmc_enabled = true;
+>> +               }
+>> +
+>> +               pwr |= MCI_PWR_ON;
+>> +               break;
+>> +       }
+>> +
+>> +       mmci_write_pwrreg(host, pwr);
+>> +}
+>> +
+>>   static void
+>>   mmci_request_end(struct mmci_host *host, struct mmc_request *mrq)
+>>   {
+>> @@ -1031,7 +1077,7 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>   {
+>>          struct mmci_host *host = mmc_priv(mmc);
+>>          struct variant_data *variant = host->variant;
+>> -       u32 pwr = 0;
+>> +       unsigned int pwr = 0;
+> 
+> ?
 
-Apologize if I may have lead you in a wrong direction, that was not my inte=
-nt.
+yes not needed
+rewritten due to re-factoring
 
-However, by looking at $subject patch, your seems to be unnecessarily
-shuffling code around. I would like to avoid that.
-
->>>
->>> stm32 sdmmc has an internal dma, no need to use dmaengine API;
->>> So some modifications in mmci (pre/post request, mmci_dma_xx). perhaps
->>> should be done with an ops or not.
+> 
+>>          unsigned long flags;
+>>          int ret;
 >>
->>Yes.
+>> @@ -1039,42 +1085,6 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>                  host->plat->ios_handler(mmc_dev(mmc), ios))
+>>                          dev_err(mmc_dev(mmc), "platform ios_handler failed\n");
 >>
->>The Qualcomm variant is also using an internal DMA, hence I thought
->>there may be something we could re-use, or at least have some new
->>common ops for.
->
-> It's not crystal clear for me.
-> Do you always agree with a dma ops which allow to address different
-> DMA transfer:
-> -with dmaengine API
-> -sdmmc idma, without dmaengine API
-> -...
+>> -       switch (ios->power_mode) {
+>> -       case MMC_POWER_OFF:
+>> -               if (!IS_ERR(mmc->supply.vmmc))
+>> -                       mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
+>> -
+>> -               if (!IS_ERR(mmc->supply.vqmmc) && host->vqmmc_enabled) {
+>> -                       regulator_disable(mmc->supply.vqmmc);
+>> -                       host->vqmmc_enabled = false;
+>> -               }
+>> -
+>> -               break;
+>> -       case MMC_POWER_UP:
+>> -               if (!IS_ERR(mmc->supply.vmmc))
+>> -                       mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, ios->vdd);
+>> -
+>> -               /*
+>> -                * The ST Micro variant doesn't have the PL180s MCI_PWR_UP
+>> -                * and instead uses MCI_PWR_ON so apply whatever value is
+>> -                * configured in the variant data.
+>> -                */
+>> -               pwr |= variant->pwrreg_powerup;
+>> -
+>> -               break;
+>> -       case MMC_POWER_ON:
+>> -               if (!IS_ERR(mmc->supply.vqmmc) && !host->vqmmc_enabled) {
+>> -                       ret = regulator_enable(mmc->supply.vqmmc);
+>> -                       if (ret < 0)
+>> -                               dev_err(mmc_dev(mmc),
+>> -                                       "failed to enable vqmmc regulator\n");
+>> -                       else
+>> -                               host->vqmmc_enabled = true;
+>> -               }
+>> -
+>> -               pwr |= MCI_PWR_ON;
+>> -               break;
+>> -       }
+> 
+> This above looks like pure re-factoring. Please make the above change
+> a separate patch.
 
-If we can use a mmci ops callback to manage the variant differences,
-that would be perfect. That combined with making the existing DMA
-functions in mmci.c converted to "library" functions, which the mmci
-ops callbacks can call, in order to re-use code.
+OK
 
-When that isn't really suitable, we may need to add a "quirk" instead,
-which would be specific for that particular variant. Along the lines
-of what we already do for variant specifics inside mmci.c.
-
-I think we have to decide on case by case basis, what fits best.
-
-Hope this makes a better explanation. If not, please tell, and I can
-take an initial stab and post a patch to show you with code how I mean
-to move forward.
-
->
->
+> 
 >>
->> Let me take a concrete example on how I would move forward, hopefully
->> that explains it a bit better. Please see below.
+>>          if (variant->signal_direction && ios->power_mode != MMC_POWER_OFF) {
+>>                  /*
+>> @@ -1126,8 +1136,16 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 >>
->> [...]
+>>          spin_lock_irqsave(&host->lock, flags);
 >>
->>> -/*
->>> - * All the DMA operation mode stuff goes inside this ifdef.
->>> - * This assumes that you have a generic DMA device interface,
->>> - * no custom DMA interfaces are supported.
->>> - */
->>> -#ifdef CONFIG_DMA_ENGINE
->>> -static void mmci_dma_setup(struct mmci_host *host)
->>> -{
->>> -       const char *rxname, *txname;
->>> -       struct variant_data *variant =3D host->variant;
->>> -
->>> -       host->dma_rx_channel =3D
->>> dma_request_slave_channel(mmc_dev(host->mmc), "rx");
->>> -       host->dma_tx_channel =3D
->>> dma_request_slave_channel(mmc_dev(host->mmc), "tx");
->>> -
->>> -       /* initialize pre request cookie */
->>> -       host->next_data.cookie =3D 1;
->>> -
->>> -       /*
->>> -        * If only an RX channel is specified, the driver will
->>> -        * attempt to use it bidirectionally, however if it is
->>> -        * is specified but cannot be located, DMA will be disabled.
->>> -        */
->>> -       if (host->dma_rx_channel && !host->dma_tx_channel)
->>> -               host->dma_tx_channel =3D host->dma_rx_channel;
->>> -
->>> -       if (host->dma_rx_channel)
->>> -               rxname =3D dma_chan_name(host->dma_rx_channel);
->>> -       else
->>> -               rxname =3D "none";
->>> -
->>> -       if (host->dma_tx_channel)
->>> -               txname =3D dma_chan_name(host->dma_tx_channel);
->>> -       else
->>> -               txname =3D "none";
->>> -
->>> -       dev_info(mmc_dev(host->mmc), "DMA channels RX %s, TX %s\n",
->>> -                rxname, txname);
->>> -
->>> -       /*
->>> -        * Limit the maximum segment size in any SG entry according to
->>> -        * the parameters of the DMA engine device.
->>> -        */
->>> -       if (host->dma_tx_channel) {
->>> -               struct device *dev =3D host->dma_tx_channel->device->de=
-v;
->>> -               unsigned int max_seg_size =3D dma_get_max_seg_size(dev)=
-;
->>> -
->>> -               if (max_seg_size < host->mmc->max_seg_size)
->>> -                       host->mmc->max_seg_size =3D max_seg_size;
->>> -       }
->>> -       if (host->dma_rx_channel) {
->>> -               struct device *dev =3D host->dma_rx_channel->device->de=
-v;
->>> -               unsigned int max_seg_size =3D dma_get_max_seg_size(dev)=
-;
->>> -
->>> -               if (max_seg_size < host->mmc->max_seg_size)
->>> -                       host->mmc->max_seg_size =3D max_seg_size;
->>> -       }
+>> -       mmci_set_clkreg(host, ios->clock);
+>> -       mmci_write_pwrreg(host, pwr);
+>> +       if (variant->set_clkreg)
+>> +               variant->set_clkreg(host, ios->clock);
+>> +       else
+>> +               mmci_set_clkreg(host, ios->clock);
+> 
+> This means a change in behavior, which I don't think is what you want.
+> 
+> 1) The spin lock will be held while doing the regulator operations.
+
+Yes, you are right, the behavior around spin lock has been modified for
+legacy. I will try to find a solution to avoid behavior change for
+legacy.
+
+For power, sdmmc variant have specific need to reset the sdmmc variant
+and set power register before to disable the vqmmc regulator.
+that's why I move the regulator operation in mmci_set_pwrreg.
+
+> 2) The clock register will be written to before the regulator
+> operations have been done. Not sure if that works fine!?
+
+you are right, it's probably better if the clock is done after power.
+do you agree if I change the order?
+
+> 
+> An overall comment, I think we should create a mmci_host_ops structure
+> and put the needed callbacks in there (kept to a minimum of course),
+> rather than putting them as a part of the variant struct. More
+> importantly, also the legacy mmci variants should get a mmci_host_ops
+> structure assigned during probe.
+> 
+> The point is, I think it makes the code above (and future wise) more
+> flexible. It should also allow us to better share functions between
+> the variants. In principle, I expect that we end up with a bunch of
+> "library" mmci functions that can be invoked from variant's
+> mmci_host_ops (if not assigned directly).
+
+After "Linaro connect" we have exchanged some emails (subject: "STM32MP1 
+SDMMC driver review") and the start point was
+"Goal is not to redesign mmci.c like sdhci.c."
+This it's why I'm surprise by "library" and "mmci_host_ops"
+and comment of patch 01.
+
+So, it's not clear for me on where we wish to go.
+Could you clarify the way, if it's with a mmci_ops like sdhci_ops?
+
+> 
+>> +
+>> +       if (variant->set_pwrreg)
+>> +               variant->set_pwrreg(host, ios->power_mode, pwr);
+>> +       else
+>> +               mmci_set_pwrreg(host, ios->power_mode, pwr);
+>> +
+>>          mmci_reg_delay(host);
 >>
+>>          spin_unlock_irqrestore(&host->lock, flags);
+>> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+>> index 2ba9640..7265ca6 100644
+>> --- a/drivers/mmc/host/mmci.h
+>> +++ b/drivers/mmc/host/mmci.h
+>> @@ -231,6 +231,7 @@
 >>
->> Everything above shall be left as generic library function,
->> mmci_dma_setup() and I would share it via mmci.h and thus change it
->> from being static.
+>>   struct clk;
+>>   struct dma_chan;
+>> +struct mmci_host;
 >>
->
-> each interfaces mmci_dma_XXX have very different needs depending
-> dma_ops (legacy, sdmmc idma)
-
-Right. This was just one example.
-
-If I understand, what you are suggesting is to make all of them being
-variant specific callbacks, so I assume that would solve the problems.
-Just to be clear, I have no problem with that.
-
-Although, that doesn't mean we can't re-use existing dma functions in
-mmci.c, when that makes sense.
-
-[...]
-
-Kind regards
-Uffe
+>>   /**
+>>    * struct variant_data - MMCI variant-specific quirks
+>> @@ -273,6 +274,8 @@ struct dma_chan;
+>>    *            register.
+>>    * @opendrain: bitmask identifying the OPENDRAIN bit inside MMCIPOWER register
+>>    * @mmci_dma: Pointer to platform-specific DMA callbacks.
+>> + * @set_clk_ios: if clock procedure of variant is specific
+>> + * @set_pwr_ios: if power procedure of variant is specific
+>>    */
+>>   struct variant_data {
+>>          unsigned int            clkreg;
+>> @@ -307,6 +310,9 @@ struct variant_data {
+>>          u32                     start_err;
+>>          u32                     opendrain;
+>>          struct mmci_dma_ops     *mmci_dma;
+>> +       void (*set_clkreg)(struct mmci_host *host, unsigned int desired);
+>> +       void (*set_pwrreg)(struct mmci_host *host, unsigned char power_mode,
+>> +                          unsigned int pwr);
+>>   };
+>>
+>>   struct mmci_host {
+>> @@ -328,6 +334,7 @@ struct mmci_host {
+>>          u32                     pwr_reg;
+>>          u32                     pwr_reg_add;
+>>          u32                     clk_reg;
+>> +       u32                     clk_reg_add;
+> 
+> What's this? Some leftover I guess?
+> 
+>>          u32                     datactrl_reg;
+>>          u32                     busy_status;
+>>          u32                     mask1_reg;
+>> --
+>> 2.7.4
+>>
+> 
+> Kind regards
+> Uffe
+> 
