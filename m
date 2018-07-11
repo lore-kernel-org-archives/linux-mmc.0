@@ -1,268 +1,227 @@
-From: Ludovic BARRE <ludovic.barre@st.com>
-Subject: Re: [PATCH 05/19] mmc: mmci: allow to overwrite clock/power procedure
- to specific variant
-Date: Wed, 11 Jul 2018 14:19:39 +0200
-Message-ID: <973d98c5-b5c7-d1c4-1b20-b6a77500adc3@st.com>
-References: <1528809280-31116-1-git-send-email-ludovic.Barre@st.com>
- <1528809280-31116-6-git-send-email-ludovic.Barre@st.com>
- <CAPDyKFpwVMX9LoC_abHm09UNhLse8MJBUpCCHkR8NnK7fOU5Yg@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: sdhci-of-dwcmshc: add SDHCI OF Synopsys DWC MSHC
+ dirver
+Date: Wed, 11 Jul 2018 15:21:18 +0300
+Message-ID: <1a96aba4-911e-5103-ac12-8c9ff1e6a8a4@intel.com>
+References: <20180704174524.5f6d50fb@xhacker.debian>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFpwVMX9LoC_abHm09UNhLse8MJBUpCCHkR8NnK7fOU5Yg@mail.gmail.com>
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20180704174524.5f6d50fb@xhacker.debian>
 Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Rob Herring <robh+dt@kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Gerald Baeza <gerald.baeza@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, devicetree@vger.kernel.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Jisheng Zhang <Jisheng.Zhang@synaptics.com>, Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>
+Cc: devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Manjunath M B <Manjunath.MB@synopsys.com>, Prabu Thangamuthu <Prabu.T@synopsys.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-
-
-On 07/05/2018 03:48 PM, Ulf Hansson wrote:
-> On 12 June 2018 at 15:14, Ludovic Barre <ludovic.Barre@st.com> wrote:
->> From: Ludovic Barre <ludovic.barre@st.com>
->>
->> A specific variant could have different power or clock procedures.
->> This patch allows to overwrite the default mmci_set_clkreg and
->> mmci_set_pwrreg for a specific variant.
->>
->> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
->> ---
->>   drivers/mmc/host/mmci.c | 96 +++++++++++++++++++++++++++++--------------------
->>   drivers/mmc/host/mmci.h |  7 ++++
->>   2 files changed, 64 insertions(+), 39 deletions(-)
->>
->> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
->> index ede95b7..801c86b 100644
->> --- a/drivers/mmc/host/mmci.c
->> +++ b/drivers/mmc/host/mmci.c
->> @@ -374,6 +374,52 @@ static void mmci_set_clkreg(struct mmci_host *host, unsigned int desired)
->>          mmci_write_clkreg(host, clk);
->>   }
->>
->> +static void mmci_set_pwrreg(struct mmci_host *host, unsigned char power_mode,
->> +                           unsigned int pwr)
->> +{
->> +       struct variant_data *variant = host->variant;
->> +       struct mmc_host *mmc = host->mmc;
->> +
->> +       switch (power_mode) {
->> +       case MMC_POWER_OFF:
->> +               if (!IS_ERR(mmc->supply.vmmc))
->> +                       mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
->> +
->> +               if (!IS_ERR(mmc->supply.vqmmc) && host->vqmmc_enabled) {
->> +                       regulator_disable(mmc->supply.vqmmc);
->> +                       host->vqmmc_enabled = false;
->> +               }
->> +
->> +               break;
->> +       case MMC_POWER_UP:
->> +               if (!IS_ERR(mmc->supply.vmmc))
->> +                       mmc_regulator_set_ocr(mmc, mmc->supply.vmmc,
->> +                                             mmc->ios.vdd);
->> +
->> +               /*
->> +                * The ST Micro variant doesn't have the PL180s MCI_PWR_UP
->> +                * and instead uses MCI_PWR_ON so apply whatever value is
->> +                * configured in the variant data.
->> +                */
->> +               pwr |= variant->pwrreg_powerup;
->> +
->> +               break;
->> +       case MMC_POWER_ON:
->> +               if (!IS_ERR(mmc->supply.vqmmc) && !host->vqmmc_enabled) {
->> +                       if (regulator_enable(mmc->supply.vqmmc) < 0)
->> +                               dev_err(mmc_dev(mmc),
->> +                                       "failed to enable vqmmc regulator\n");
->> +                       else
->> +                               host->vqmmc_enabled = true;
->> +               }
->> +
->> +               pwr |= MCI_PWR_ON;
->> +               break;
->> +       }
->> +
->> +       mmci_write_pwrreg(host, pwr);
->> +}
->> +
->>   static void
->>   mmci_request_end(struct mmci_host *host, struct mmc_request *mrq)
->>   {
->> @@ -1031,7 +1077,7 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->>   {
->>          struct mmci_host *host = mmc_priv(mmc);
->>          struct variant_data *variant = host->variant;
->> -       u32 pwr = 0;
->> +       unsigned int pwr = 0;
+On 04/07/18 12:45, Jisheng Zhang wrote:
+> Add a driver for SDHCI OF Synopsys DesignWare Cores Mobile Storage
+> Host Controller.
 > 
-> ?
+> Signed-off-by: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
 
-yes not needed
-rewritten due to re-factoring
+Apart from Ulf's comment:
 
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
+> ---
+>  .../bindings/mmc/sdhci-of-dwcmshc.txt         |  20 +++
+>  drivers/mmc/host/Kconfig                      |  10 ++
+>  drivers/mmc/host/Makefile                     |   1 +
+>  drivers/mmc/host/sdhci-of-dwcmshc.c           | 117 ++++++++++++++++++
+>  4 files changed, 148 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-of-dwcmshc.txt
+>  create mode 100644 drivers/mmc/host/sdhci-of-dwcmshc.c
 > 
->>          unsigned long flags;
->>          int ret;
->>
->> @@ -1039,42 +1085,6 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->>                  host->plat->ios_handler(mmc_dev(mmc), ios))
->>                          dev_err(mmc_dev(mmc), "platform ios_handler failed\n");
->>
->> -       switch (ios->power_mode) {
->> -       case MMC_POWER_OFF:
->> -               if (!IS_ERR(mmc->supply.vmmc))
->> -                       mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
->> -
->> -               if (!IS_ERR(mmc->supply.vqmmc) && host->vqmmc_enabled) {
->> -                       regulator_disable(mmc->supply.vqmmc);
->> -                       host->vqmmc_enabled = false;
->> -               }
->> -
->> -               break;
->> -       case MMC_POWER_UP:
->> -               if (!IS_ERR(mmc->supply.vmmc))
->> -                       mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, ios->vdd);
->> -
->> -               /*
->> -                * The ST Micro variant doesn't have the PL180s MCI_PWR_UP
->> -                * and instead uses MCI_PWR_ON so apply whatever value is
->> -                * configured in the variant data.
->> -                */
->> -               pwr |= variant->pwrreg_powerup;
->> -
->> -               break;
->> -       case MMC_POWER_ON:
->> -               if (!IS_ERR(mmc->supply.vqmmc) && !host->vqmmc_enabled) {
->> -                       ret = regulator_enable(mmc->supply.vqmmc);
->> -                       if (ret < 0)
->> -                               dev_err(mmc_dev(mmc),
->> -                                       "failed to enable vqmmc regulator\n");
->> -                       else
->> -                               host->vqmmc_enabled = true;
->> -               }
->> -
->> -               pwr |= MCI_PWR_ON;
->> -               break;
->> -       }
-> 
-> This above looks like pure re-factoring. Please make the above change
-> a separate patch.
-
-OK
-
-> 
->>
->>          if (variant->signal_direction && ios->power_mode != MMC_POWER_OFF) {
->>                  /*
->> @@ -1126,8 +1136,16 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->>
->>          spin_lock_irqsave(&host->lock, flags);
->>
->> -       mmci_set_clkreg(host, ios->clock);
->> -       mmci_write_pwrreg(host, pwr);
->> +       if (variant->set_clkreg)
->> +               variant->set_clkreg(host, ios->clock);
->> +       else
->> +               mmci_set_clkreg(host, ios->clock);
-> 
-> This means a change in behavior, which I don't think is what you want.
-> 
-> 1) The spin lock will be held while doing the regulator operations.
-
-Yes, you are right, the behavior around spin lock has been modified for
-legacy. I will try to find a solution to avoid behavior change for
-legacy.
-
-For power, sdmmc variant have specific need to reset the sdmmc variant
-and set power register before to disable the vqmmc regulator.
-that's why I move the regulator operation in mmci_set_pwrreg.
-
-> 2) The clock register will be written to before the regulator
-> operations have been done. Not sure if that works fine!?
-
-you are right, it's probably better if the clock is done after power.
-do you agree if I change the order?
-
-> 
-> An overall comment, I think we should create a mmci_host_ops structure
-> and put the needed callbacks in there (kept to a minimum of course),
-> rather than putting them as a part of the variant struct. More
-> importantly, also the legacy mmci variants should get a mmci_host_ops
-> structure assigned during probe.
-> 
-> The point is, I think it makes the code above (and future wise) more
-> flexible. It should also allow us to better share functions between
-> the variants. In principle, I expect that we end up with a bunch of
-> "library" mmci functions that can be invoked from variant's
-> mmci_host_ops (if not assigned directly).
-
-After "Linaro connect" we have exchanged some emails (subject: "STM32MP1 
-SDMMC driver review") and the start point was
-"Goal is not to redesign mmci.c like sdhci.c."
-This it's why I'm surprise by "library" and "mmci_host_ops"
-and comment of patch 01.
-
-So, it's not clear for me on where we wish to go.
-Could you clarify the way, if it's with a mmci_ops like sdhci_ops?
-
-> 
->> +
->> +       if (variant->set_pwrreg)
->> +               variant->set_pwrreg(host, ios->power_mode, pwr);
->> +       else
->> +               mmci_set_pwrreg(host, ios->power_mode, pwr);
->> +
->>          mmci_reg_delay(host);
->>
->>          spin_unlock_irqrestore(&host->lock, flags);
->> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
->> index 2ba9640..7265ca6 100644
->> --- a/drivers/mmc/host/mmci.h
->> +++ b/drivers/mmc/host/mmci.h
->> @@ -231,6 +231,7 @@
->>
->>   struct clk;
->>   struct dma_chan;
->> +struct mmci_host;
->>
->>   /**
->>    * struct variant_data - MMCI variant-specific quirks
->> @@ -273,6 +274,8 @@ struct dma_chan;
->>    *            register.
->>    * @opendrain: bitmask identifying the OPENDRAIN bit inside MMCIPOWER register
->>    * @mmci_dma: Pointer to platform-specific DMA callbacks.
->> + * @set_clk_ios: if clock procedure of variant is specific
->> + * @set_pwr_ios: if power procedure of variant is specific
->>    */
->>   struct variant_data {
->>          unsigned int            clkreg;
->> @@ -307,6 +310,9 @@ struct variant_data {
->>          u32                     start_err;
->>          u32                     opendrain;
->>          struct mmci_dma_ops     *mmci_dma;
->> +       void (*set_clkreg)(struct mmci_host *host, unsigned int desired);
->> +       void (*set_pwrreg)(struct mmci_host *host, unsigned char power_mode,
->> +                          unsigned int pwr);
->>   };
->>
->>   struct mmci_host {
->> @@ -328,6 +334,7 @@ struct mmci_host {
->>          u32                     pwr_reg;
->>          u32                     pwr_reg_add;
->>          u32                     clk_reg;
->> +       u32                     clk_reg_add;
-> 
-> What's this? Some leftover I guess?
-> 
->>          u32                     datactrl_reg;
->>          u32                     busy_status;
->>          u32                     mask1_reg;
->> --
->> 2.7.4
->>
-> 
-> Kind regards
-> Uffe
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-of-dwcmshc.txt b/Documentation/devicetree/bindings/mmc/sdhci-of-dwcmshc.txt
+> new file mode 100644
+> index 000000000000..ee4253b33be2
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-of-dwcmshc.txt
+> @@ -0,0 +1,20 @@
+> +* Synopsys DesignWare Cores Mobile Storage Host Controller
+> +
+> +Required properties:
+> +- compatible: should be one of the following:
+> +    "snps,dwcmshc-sdhci"
+> +- reg: offset and length of the register set for the device.
+> +- interrupts: a single interrupt specifier.
+> +- clocks: Array of clocks required for SDHCI; requires at least one for
+> +    core clock.
+> +- clock-names: Array of names corresponding to clocks property; shall be
+> +    "core" for core clock and "bus" for optional bus clock.
+> +
+> +Example:
+> +	sdhci2: sdhci@aa0000 {
+> +		compatible = "snps,dwcmshc-sdhci";
+> +		reg = <0xaa0000 0x1000>;
+> +		interrupts = <GIC_SPI 21 IRQ_TYPE_LEVEL_HIGH>;
+> +		clocks = <&emmcclk>;
+> +		bus-width = <8>;
+> +	}
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 0581c199c996..23beb9ec6dbf 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -176,6 +176,16 @@ config MMC_SDHCI_OF_HLWD
+>  
+>  	  If unsure, say N.
+>  
+> +config MMC_SDHCI_OF_DWCMSHC
+> +	tristate "SDHCI OF support for the Synopsys DWC MSHC"
+> +	depends on MMC_SDHCI_PLTFM
+> +	depends on OF
+> +	depends on COMMON_CLK
+> +	help
+> +	  This selects Synopsys DesignWare Cores Mobile Storage Controller.
+> +	  If you have a controller with this interface, say Y or M here.
+> +	  If unsure, say N.
+> +
+>  config MMC_SDHCI_CADENCE
+>  	tristate "SDHCI support for the Cadence SD/SDIO/eMMC controller"
+>  	depends on MMC_SDHCI_PLTFM
+> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+> index 85dc1322c3de..a18fbba1b97e 100644
+> --- a/drivers/mmc/host/Makefile
+> +++ b/drivers/mmc/host/Makefile
+> @@ -82,6 +82,7 @@ obj-$(CONFIG_MMC_SDHCI_OF_ARASAN)	+= sdhci-of-arasan.o
+>  obj-$(CONFIG_MMC_SDHCI_OF_AT91)		+= sdhci-of-at91.o
+>  obj-$(CONFIG_MMC_SDHCI_OF_ESDHC)	+= sdhci-of-esdhc.o
+>  obj-$(CONFIG_MMC_SDHCI_OF_HLWD)		+= sdhci-of-hlwd.o
+> +obj-$(CONFIG_MMC_SDHCI_OF_DWCMSHC)	+= sdhci-of-dwcmshc.o
+>  obj-$(CONFIG_MMC_SDHCI_BCM_KONA)	+= sdhci-bcm-kona.o
+>  obj-$(CONFIG_MMC_SDHCI_IPROC)		+= sdhci-iproc.o
+>  obj-$(CONFIG_MMC_SDHCI_MSM)		+= sdhci-msm.o
+> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> new file mode 100644
+> index 000000000000..93b613cd7c33
+> --- /dev/null
+> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> @@ -0,0 +1,117 @@
+> +// SPDX-License-Identifier: GPL-2.0
+> +/*
+> + * Driver for Synopsys DesignWare Cores Mobile Storage Host Controller
+> + *
+> + * Copyright (C) 2018 Synaptics Incorporated
+> + *
+> + * Author: Jisheng Zhang <jszhang@kernel.org>
+> + */
+> +
+> +#include <linux/clk.h>
+> +#include <linux/module.h>
+> +#include <linux/of.h>
+> +
+> +#include "sdhci-pltfm.h"
+> +
+> +struct dwcmshc_priv {
+> +	/* bus clock */
+> +	struct clk	*bus_clk;
+> +};
+> +
+> +static const struct sdhci_ops sdhci_dwcmshc_ops = {
+> +	.set_clock		= sdhci_set_clock,
+> +	.set_bus_width		= sdhci_set_bus_width,
+> +	.set_uhs_signaling	= sdhci_set_uhs_signaling,
+> +	.get_max_clock		= sdhci_pltfm_clk_get_max_clock,
+> +	.reset			= sdhci_reset,
+> +};
+> +
+> +static const struct sdhci_pltfm_data sdhci_dwcmshc_pdata = {
+> +	.ops = &sdhci_dwcmshc_ops,
+> +	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+> +};
+> +
+> +static int dwcmshc_probe(struct platform_device *pdev)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_host;
+> +	struct sdhci_host *host;
+> +	struct dwcmshc_priv *priv;
+> +	int err;
+> +
+> +	host = sdhci_pltfm_init(pdev, &sdhci_dwcmshc_pdata,
+> +				sizeof(struct dwcmshc_priv));
+> +	if (IS_ERR(host))
+> +		return PTR_ERR(host);
+> +
+> +	pltfm_host = sdhci_priv(host);
+> +	priv = sdhci_pltfm_priv(pltfm_host);
+> +
+> +	pltfm_host->clk = devm_clk_get(&pdev->dev, "core");
+> +	if (IS_ERR(pltfm_host->clk)) {
+> +		err = PTR_ERR(pltfm_host->clk);
+> +		dev_err(&pdev->dev, "failed to get core clk: %d\n", err);
+> +		goto free_pltfm;
+> +	}
+> +	err = clk_prepare_enable(pltfm_host->clk);
+> +	if (err)
+> +		goto free_pltfm;
+> +
+> +	priv->bus_clk = devm_clk_get(&pdev->dev, "bus");
+> +	if (!IS_ERR(priv->bus_clk))
+> +		clk_prepare_enable(priv->bus_clk);
+> +
+> +	err = mmc_of_parse(host->mmc);
+> +	if (err)
+> +		goto err_clk;
+> +
+> +	sdhci_get_of_property(pdev);
+> +
+> +	err = sdhci_add_host(host);
+> +	if (err)
+> +		goto err_clk;
+> +
+> +	return 0;
+> +
+> +err_clk:
+> +	clk_disable_unprepare(pltfm_host->clk);
+> +	clk_disable_unprepare(priv->bus_clk);
+> +free_pltfm:
+> +	sdhci_pltfm_free(pdev);
+> +	return err;
+> +}
+> +
+> +static int dwcmshc_remove(struct platform_device *pdev)
+> +{
+> +	struct sdhci_host *host = platform_get_drvdata(pdev);
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
+> +
+> +	sdhci_remove_host(host, 0);
+> +
+> +	clk_disable_unprepare(pltfm_host->clk);
+> +	clk_disable_unprepare(priv->bus_clk);
+> +
+> +	sdhci_pltfm_free(pdev);
+> +
+> +	return 0;
+> +}
+> +
+> +static const struct of_device_id sdhci_dwcmshc_dt_ids[] = {
+> +	{ .compatible = "snps,dwcmshc-sdhci" },
+> +	{}
+> +};
+> +MODULE_DEVICE_TABLE(of, sdhci_dwcmshc_dt_ids);
+> +
+> +static struct platform_driver sdhci_dwcmshc_driver = {
+> +	.driver	= {
+> +		.name	= "sdhci-dwcmshc",
+> +		.of_match_table = sdhci_dwcmshc_dt_ids,
+> +	},
+> +	.probe	= dwcmshc_probe,
+> +	.remove	= dwcmshc_remove,
+> +};
+> +module_platform_driver(sdhci_dwcmshc_driver);
+> +
+> +MODULE_DESCRIPTION("SDHCI platform driver for Synopsys DWC MSHC");
+> +MODULE_AUTHOR("Jisheng Zhang <jszhang@kernel.org>");
+> +MODULE_LICENSE("GPL v2");
 > 
