@@ -1,200 +1,279 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v3 1/1] mmc: sdhci-pci-dwc-mshc: synopsys dwc mshc support
-Date: Wed, 11 Jul 2018 11:40:44 +0300
-Message-ID: <fa16865b-9a23-d833-cad8-ce8ece660343@intel.com>
-References: <1531295777-9515-1-git-send-email-prabu.t@synopsys.com>
+From: Ludovic BARRE <ludovic.barre@st.com>
+Subject: Re: [PATCH 13/19] mmc: mmci: send stop cmd if a data command fail
+Date: Wed, 11 Jul 2018 10:57:11 +0200
+Message-ID: <f8b5540d-d797-60d6-2351-8867b6b2b444@st.com>
+References: <1528809280-31116-1-git-send-email-ludovic.Barre@st.com>
+ <1528809280-31116-14-git-send-email-ludovic.Barre@st.com>
+ <CAPDyKFrbHcyy+rcVPrJAvO+y-ywQ=yE=gT3dbG2kqroQAhMF2Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1531295777-9515-1-git-send-email-prabu.t@synopsys.com>
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <CAPDyKFrbHcyy+rcVPrJAvO+y-ywQ=yE=gT3dbG2kqroQAhMF2Q@mail.gmail.com>
 Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Prabu Thangamuthu <prabu.t@synopsys.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Manjunath M B <Manjunath.MB@synopsys.com>, Prabu T <prabuchml@gmail.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: devicetree@vger.kernel.org, Alexandre Torgue <alexandre.torgue@st.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Gerald Baeza <gerald.baeza@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 11/07/18 10:56, Prabu Thangamuthu wrote:
-> Synopsys has DWC MSHC controller on HPAS-DX platform connected using PCIe
-> interface with SD card slot and eMMC device slots. This patch is to
-> enable SD cards connected on this platform. As Clock generation logic
-> is implemented using MMCM module of HAPS-DX platform, we have separate
-> functions to control the MMCM to generate required clocks with respect
-> to speed mode.
-> 
-> Signed-off-by: Prabu Thangamuthu <prabu.t@synopsys.com>
+hi Ulf
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+thanks for review, comments below
 
-> ---
-> V3 - Updated License.
-> Re-sending the patch using git send-email.
-> V2 - Removed sdhci-pci-dwc-mshc.h and moved into sdhci-pci-dwc-mshc.c
-> Fixed the coding style issue.
-> Removed sdhci_snps_set_power and new approach to support eMMC device
-> voltages will be submitted after completeing validations.
-> V1 - Initial Patch.
+On 07/04/2018 03:37 PM, Ulf Hansson wrote:
+> On 12 June 2018 at 15:14, Ludovic Barre <ludovic.Barre@st.com> wrote:
+>> From: Ludovic Barre <ludovic.barre@st.com>
+>>
+>> The mmc framework follows the requirement of SD_Specification:
+>> the STOP_TRANSMISSION is sent on multiple write/read commands
+>> and the stop command (alone), not needed on other ADTC commands.
+>>
+>> But, some variants require a stop command "STOP_TRANSMISION" to clear
+>> the DPSM "Data Path State Machine" if an error happens on command or data
+>> step. If it's not done the next data command will freeze hardware block.
+>> Needed to support the STM32 sdmmc variant.
+>>
+>> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
+>> ---
+>>   drivers/mmc/host/mmci.c | 36 +++++++++++++++++++++++++++++++-----
+>>   drivers/mmc/host/mmci.h |  3 +++
+>>   2 files changed, 34 insertions(+), 5 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+>> index 87724e1..9af7db8 100644
+>> --- a/drivers/mmc/host/mmci.c
+>> +++ b/drivers/mmc/host/mmci.c
+>> @@ -24,6 +24,7 @@
+>>   #include <linux/mmc/pm.h>
+>>   #include <linux/mmc/host.h>
+>>   #include <linux/mmc/card.h>
+>> +#include <linux/mmc/mmc.h>
+>>   #include <linux/mmc/slot-gpio.h>
+>>   #include <linux/amba/bus.h>
+>>   #include <linux/clk.h>
+>> @@ -522,11 +523,28 @@ static void mmci_set_mask1(struct mmci_host *host, unsigned int mask)
+>>          host->mask1_reg = mask;
+>>   }
+>>
+>> -static void mmci_stop_data(struct mmci_host *host)
+>> +static int mmci_stop_data(struct mmci_host *host)
 > 
->  MAINTAINERS                           |  7 +++
->  drivers/mmc/host/Makefile             |  3 +-
->  drivers/mmc/host/sdhci-pci-core.c     |  1 +
->  drivers/mmc/host/sdhci-pci-dwc-mshc.c | 84 +++++++++++++++++++++++++++++++++++
->  drivers/mmc/host/sdhci-pci.h          |  3 ++
->  5 files changed, 97 insertions(+), 1 deletion(-)
->  create mode 100644 drivers/mmc/host/sdhci-pci-dwc-mshc.c
+> Let's leave this as void function and instead add a check in
+> mmci_start_command(), to see if the command is a
+> MMC_STOP_TRANSMISSION. If so, then add host->variant->cmdreg_stop to
+> the register that is written in it.
+
+In fact: the cmdreg_stop bit (which abort and reinit the DPSM)
+should have been activated only in error case. But I see a mistake in 
+this piece of code => cmdreg_stop bit is set for all MMC_STOP_TRANSMISSION.
+
+So, I read closely the sdmmc datasheet and it seems possible
+to set cmdreg_stop bit for all MMC_STOP_TRANSMISSION (error or not).
+
+So, I will try your proposition to set cmdreg_stop bit in 
+mmci_start_command() if the command is MMC_STOP_TRANSMISSION.
+
 > 
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index a29d10f..d062f51 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -12813,6 +12813,13 @@ S:	Maintained
->  F:	drivers/mmc/host/sdhci*
->  F:	include/linux/mmc/sdhci*
->  
-> +SYNOPSYS SDHCI COMPLIANT DWC MSHC DRIVER
-> +M:	Prabu Thangamuthu <prabu.t@synopsys.com>
-> +M:	Manjunath M B <manjumb@synopsys.com>
-> +L:	linux-mmc@vger.kernel.org
-> +S:	Maintained
-> +F:	drivers/mmc/host/sdhci-pci-dwc-mshc.c
-> +
->  SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) SAMSUNG DRIVER
->  M:	Ben Dooks <ben-linux@fluff.org>
->  M:	Jaehoon Chung <jh80.chung@samsung.com>
-> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-> index a18fbba..ce8398e 100644
-> --- a/drivers/mmc/host/Makefile
-> +++ b/drivers/mmc/host/Makefile
-> @@ -11,7 +11,8 @@ obj-$(CONFIG_MMC_MXC)		+= mxcmmc.o
->  obj-$(CONFIG_MMC_MXS)		+= mxs-mmc.o
->  obj-$(CONFIG_MMC_SDHCI)		+= sdhci.o
->  obj-$(CONFIG_MMC_SDHCI_PCI)	+= sdhci-pci.o
-> -sdhci-pci-y			+= sdhci-pci-core.o sdhci-pci-o2micro.o sdhci-pci-arasan.o
-> +sdhci-pci-y			+= sdhci-pci-core.o sdhci-pci-o2micro.o sdhci-pci-arasan.o \
-> +				   sdhci-pci-dwc-mshc.o
->  obj-$(subst m,y,$(CONFIG_MMC_SDHCI_PCI))	+= sdhci-pci-data.o
->  obj-$(CONFIG_MMC_SDHCI_ACPI)	+= sdhci-acpi.o
->  obj-$(CONFIG_MMC_SDHCI_PXAV3)	+= sdhci-pxav3.o
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index 3d36761..7bfd366 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -1513,6 +1513,7 @@ static int amd_probe(struct sdhci_pci_chip *chip)
->  	SDHCI_PCI_DEVICE(O2, SEABIRD0, o2),
->  	SDHCI_PCI_DEVICE(O2, SEABIRD1, o2),
->  	SDHCI_PCI_DEVICE(ARASAN, PHY_EMMC, arasan),
-> +	SDHCI_PCI_DEVICE(SYNOPSYS, DWC_MSHC, snps),
->  	SDHCI_PCI_DEVICE_CLASS(AMD, SYSTEM_SDHCI, PCI_CLASS_MASK, amd),
->  	/* Generic SD host controller */
->  	{PCI_DEVICE_CLASS(SYSTEM_SDHCI, PCI_CLASS_MASK)},
-> diff --git a/drivers/mmc/host/sdhci-pci-dwc-mshc.c b/drivers/mmc/host/sdhci-pci-dwc-mshc.c
-> new file mode 100644
-> index 0000000..f78d654
-> --- /dev/null
-> +++ b/drivers/mmc/host/sdhci-pci-dwc-mshc.c
-> @@ -0,0 +1,84 @@
-> +// SPDX-License-Identifier: GPL-2.0
-> +/*
-> + * SDHCI driver for Synopsys DWC_MSHC controller
-> + *
-> + * Copyright (C) 2018 Synopsys, Inc. (www.synopsys.com)
-> + *
-> + * Authors:
-> + *	Prabu Thangamuthu <prabu.t@synopsys.com>
-> + *	Manjunath M B <manjumb@synopsys.com>
-> + */
-> +
-> +#include "sdhci.h"
-> +#include "sdhci-pci.h"
-> +
-> +#define SDHCI_VENDOR_PTR_R	0xE8
-> +
-> +/* Synopsys vendor specific registers */
-> +#define SDHC_GPIO_OUT		0x34
-> +#define SDHC_AT_CTRL_R		0x40
-> +#define SDHC_SW_TUNE_EN		0x00000010
-> +
-> +/* MMCM DRP */
-> +#define SDHC_MMCM_DIV_REG	0x1020
-> +#define DIV_REG_100_MHZ		0x1145
-> +#define DIV_REG_200_MHZ		0x1083
-> +#define SDHC_MMCM_CLKFBOUT	0x1024
-> +#define CLKFBOUT_100_MHZ	0x0000
-> +#define CLKFBOUT_200_MHZ	0x0080
-> +#define SDHC_CCLK_MMCM_RST	0x00000001
-> +
-> +static void sdhci_snps_set_clock(struct sdhci_host *host, unsigned int clock)
-> +{
-> +	u16 clk;
-> +	u32 reg, vendor_ptr;
-> +
-> +	vendor_ptr = sdhci_readw(host, SDHCI_VENDOR_PTR_R);
-> +
-> +	/* Disable software managed rx tuning */
-> +	reg = sdhci_readl(host, (SDHC_AT_CTRL_R + vendor_ptr));
-> +	reg &= ~SDHC_SW_TUNE_EN;
-> +	sdhci_writel(host, reg, (SDHC_AT_CTRL_R + vendor_ptr));
-> +
-> +	if (clock <= 52000000) {
-> +		sdhci_set_clock(host, clock);
-> +	} else {
-> +		/* Assert reset to MMCM */
-> +		reg = sdhci_readl(host, (SDHC_GPIO_OUT + vendor_ptr));
-> +		reg |= SDHC_CCLK_MMCM_RST;
-> +		sdhci_writel(host, reg, (SDHC_GPIO_OUT + vendor_ptr));
-> +
-> +		/* Configure MMCM */
-> +		if (clock == 100000000) {
-> +			sdhci_writel(host, DIV_REG_100_MHZ, SDHC_MMCM_DIV_REG);
-> +			sdhci_writel(host, CLKFBOUT_100_MHZ,
-> +					SDHC_MMCM_CLKFBOUT);
-> +		} else {
-> +			sdhci_writel(host, DIV_REG_200_MHZ, SDHC_MMCM_DIV_REG);
-> +			sdhci_writel(host, CLKFBOUT_200_MHZ,
-> +					SDHC_MMCM_CLKFBOUT);
-> +		}
-> +
-> +		/* De-assert reset to MMCM */
-> +		reg = sdhci_readl(host, (SDHC_GPIO_OUT + vendor_ptr));
-> +		reg &= ~SDHC_CCLK_MMCM_RST;
-> +		sdhci_writel(host, reg, (SDHC_GPIO_OUT + vendor_ptr));
-> +
-> +		/* Enable clock */
-> +		clk = SDHCI_PROG_CLOCK_MODE | SDHCI_CLOCK_INT_EN |
-> +			SDHCI_CLOCK_CARD_EN;
-> +		sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-> +	}
-> +}
-> +
-> +static const struct sdhci_ops sdhci_snps_ops = {
-> +	.set_clock	= sdhci_snps_set_clock,
-> +	.enable_dma	= sdhci_pci_enable_dma,
-> +	.set_bus_width	= sdhci_set_bus_width,
-> +	.reset		= sdhci_reset,
-> +	.set_uhs_signaling = sdhci_set_uhs_signaling,
-> +};
-> +
-> +const struct sdhci_pci_fixes sdhci_snps = {
-> +	.ops		= &sdhci_snps_ops,
-> +};
-> diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
-> index 59af288..2ef0bdc 100644
-> --- a/drivers/mmc/host/sdhci-pci.h
-> +++ b/drivers/mmc/host/sdhci-pci.h
-> @@ -61,6 +61,8 @@
->  #define PCI_VENDOR_ID_ARASAN		0x16e6
->  #define PCI_DEVICE_ID_ARASAN_PHY_EMMC	0x0670
->  
-> +#define PCI_DEVICE_ID_SYNOPSYS_DWC_MSHC 0xc202
-> +
->  /*
->   * PCI device class and mask
->   */
-> @@ -184,5 +186,6 @@ static inline void *sdhci_pci_priv(struct sdhci_pci_slot *slot)
->  #endif
->  
->  extern const struct sdhci_pci_fixes sdhci_arasan;
-> +extern const struct sdhci_pci_fixes sdhci_snps;
->  
->  #endif /* __SDHCI_PCI_H */
+> And actually, I think this change alone should be a separate patch
+> coming before $subject patch in the series, as it addresses the first
+> problem of two.
+> 
+>>   {
+>> +       struct mmc_command *stop = &host->stop_abort;
+>> +       struct mmc_data *data = host->data;
+>> +       unsigned int cmd = 0;
+>> +
+>>          mmci_write_datactrlreg(host, 0);
+>>          mmci_set_mask1(host, 0);
+>>          host->data = NULL;
+>> +
+>> +       if (host->variant->cmdreg_stop) {
+>> +               cmd |= host->variant->cmdreg_stop;
+>> +               if (!data->stop) {
+>> +                       memset(stop, 0, sizeof(struct mmc_command));
+>> +                       stop->opcode = MMC_STOP_TRANSMISSION;
+>> +                       stop->arg = 0;
+>> +                       stop->flags = MMC_RSP_R1B | MMC_CMD_AC;
+>> +                       data->stop = stop;
+> 
+> I don't understand why you want the host->stop_abort being present in
+> the mmci host struct? Can we get rid of that?
+> 
+> Anyway, re-using the data->stop pointer seems reasonable.
+
+In fact mrq->data->stop could be not referenced (NULL).
+
+for data command, the stop command is allocated in mmc_blk_request
+struct mmc_blk_request {
+   struct mmc_command stop;
+};
+struct mmc_data {
+   struct mmc_command *stop;
+};
+struct mmc_request {
+   struct mmc_command *stop;
+};
+
+in mmc_blk_rw_rq_prep function:
+if data.blocks > 1
+	brq->mrq.stop = &brq->stop;
+else
+	brq->mrq.stop = NULL;
+
+in mmc_mrq_prep function:
+if (mrq->stop) {
+	mrq->data->stop = mrq->stop;
+
+
+Update about this topic:
+This last week I found a new specific need for sdmmc variant.
+On response type MMC_RSP_BUSY (example mmc_switch command cmd6, AC
+command without data): SDMMC needs to set MMCIDATATIMER to define
+busy_timeout.
+If timeout expires Datatimeout and DPSM flags occur.
+So a MMC_STOP_TRANSMISSION with cmdreg_stop bit is required to
+abort and reinitialize the DPSM.
+
+So, I think we could keep "host->stop_abort" which may be used in
+cmd or data requests. The stop_abort command is always the same, so
+stop_abort command could be initialized only while probe function (under 
+variant->cmdreg_stop).
+
+What do you think about it ?
+
+> 
+>> +               }
+>> +       }
+>> +
+>> +       return cmd;
+>>   }
+>>
+>>   static void mmci_init_sg(struct mmci_host *host, struct mmc_data *data)
+>> @@ -703,6 +721,7 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
+>>                unsigned int status)
+>>   {
+>>          unsigned int status_err;
+>> +       unsigned int cmd_reg = 0;
+>>
+>>          /* Make sure we have data to handle */
+>>          if (!data)
+>> @@ -761,7 +780,7 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
+>>          if (status & MCI_DATAEND || data->error) {
+>>                  mmci_dma_finalize(host, data);
+>>
+>> -               mmci_stop_data(host);
+>> +               cmd_reg = mmci_stop_data(host);
+>>
+>>                  if (!data->error)
+>>                          /* The error clause is handled above, success! */
+>> @@ -770,7 +789,7 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
+>>                  if (!data->stop || host->mrq->sbc) {
+>>                          mmci_request_end(host, data->mrq);
+>>                  } else {
+>> -                       mmci_start_command(host, data->stop, 0);
+>> +                       mmci_start_command(host, data->stop, cmd_reg);
+>>                  }
+>>          }
+>>   }
+>> @@ -780,6 +799,8 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+>>               unsigned int status)
+>>   {
+>>          void __iomem *base = host->base;
+>> +       struct mmc_data *data = host->data;
+>> +       unsigned int cmd_reg = 0;
+>>          bool sbc;
+>>
+>>          if (!cmd)
+>> @@ -865,11 +886,16 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+>>          }
+>>
+>>          if ((!sbc && !cmd->data) || cmd->error) {
+>> -               if (host->data) {
+>> +               if (data) {
+>>                          /* Terminate the DMA transfer */
+>>                          mmci_dma_error(host);
+>>
+>> -                       mmci_stop_data(host);
+>> +                       cmd_reg = mmci_stop_data(host);
+>> +
+>> +                       if (data->stop) {
+> 
+> This means a change in behavior for !host->variant->cmdreg_stop
+> variants, because the mmc core may have assigned data->stop. Did you
+> test this path for any of the old variants?
+I just tested on:
+-stm32f7 => close to pl180 variant.
+-stm32h7 and mp1 => sdmmc variant.
+-I like try to snowball but I've not yet find this board.
+-no arm or qcom boards
+
+that seem ok for the both (f7/mp1).
+
+> 
+> The change as such anyway seems like a good idea. If we had data, we
+> may play safe and send a stop command to let the card to try to close
+> down the transfer. On the other hand, we don't want this to come as
+> side-effect, but rather it deserves is own standalone patch.
+> 
+> I guess there are two options going forward.
+> 1) Split the patch and see if this works for other variants first and
+> the add your changes on top for the new ST variant.
+> 2) Make this change only to affect the new ST variant.
+
+At first time, I prefer not to have a side effect on other variant.
+This part must be rework, like I note above in "Update about this 
+topic", the stop transmission with cmdreg_stop bit could be send
+on command without data (like cmd6: mmc_switch)
+
+> 
+> I am fine with both.
+> 
+>> +                               mmci_start_command(host, data->stop, cmd_reg);
+>> +                               return;
+>> +                       }
+>>                  }
+>>                  mmci_request_end(host, host->mrq);
+>>          } else if (sbc) {
+>> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+>> index 2d7e901..4b4cd1d 100644
+>> --- a/drivers/mmc/host/mmci.h
+>> +++ b/drivers/mmc/host/mmci.h
+>> @@ -243,6 +243,7 @@ struct mmci_host;
+>>    * @cmdreg_lrsp_crc: enable value for long response with crc
+>>    * @cmdreg_srsp_crc: enable value for short response with crc
+>>    * @cmdreg_srsp: enable value for short response without crc
+>> + * @cmdreg_stop: enable value for stop and abort transmission
+>>    * @datalength_bits: number of bits in the MMCIDATALENGTH register
+>>    * @fifosize: number of bytes that can be written when MMCI_TXFIFOEMPTY
+>>    *           is asserted (likewise for RX)
+>> @@ -298,6 +299,7 @@ struct variant_data {
+>>          unsigned int            cmdreg_lrsp_crc;
+>>          unsigned int            cmdreg_srsp_crc;
+>>          unsigned int            cmdreg_srsp;
+>> +       unsigned int            cmdreg_stop;
+>>          unsigned int            datalength_bits;
+>>          unsigned int            fifosize;
+>>          unsigned int            fifohalfsize;
+>> @@ -343,6 +345,7 @@ struct mmci_host {
+>>          struct mmc_request      *mrq;
+>>          struct mmc_command      *cmd;
+>>          struct mmc_data         *data;
+>> +       struct mmc_command      stop_abort;
+>>          struct mmc_host         *mmc;
+>>          struct clk              *clk;
+>>          bool                    singleirq;
+>> --
+>> 2.7.4
+>>
+> 
+> Kind regards
+> Uffe
 > 
