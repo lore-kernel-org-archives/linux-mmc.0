@@ -1,145 +1,64 @@
-From: Ludovic BARRE <ludovic.barre@st.com>
-Subject: Re: [PATCH 01/19] mmc: mmci: regroup and define dma operations
-Date: Thu, 12 Jul 2018 11:09:32 +0200
-Message-ID: <f407426c-766c-c46f-85cd-7bf76bcab554@st.com>
-References: <1528809280-31116-1-git-send-email-ludovic.Barre@st.com>
- <1528809280-31116-2-git-send-email-ludovic.Barre@st.com>
- <CAPDyKFpt5HUeUqaoS9icDodM+r64jB9vQ=zTecO0tuBv=TtOXg@mail.gmail.com>
- <d93e6886-1dee-7915-459f-466a54d0c242@st.com>
- <CAPDyKFo0q5Yps1whPmaUQJAV3tXx91WPmxtMF_ov43qP=djQfg@mail.gmail.com>
+From: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+Subject: Re: [PATCH] mmc: sunxi: Use new timing mode for A64
+ eMMC controller
+Date: Thu, 12 Jul 2018 18:17:23 +0800
+Message-ID: <CAGb2v65rE2nQbyeiSPAyTzw-n-EQsUwQABx3nrvXTu4JogFPBQ@mail.gmail.com>
+References: <20180712030225.15681-1-wens@csie.org> <20180712071959.fi4rhgwv2iuoelbl@flea>
+Reply-To: wens-jdAy2FN1RRM@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAPDyKFo0q5Yps1whPmaUQJAV3tXx91WPmxtMF_ov43qP=djQfg@mail.gmail.com>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: devicetree@vger.kernel.org, Alexandre Torgue <alexandre.torgue@st.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Gerald Baeza <gerald.baeza@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-sunxi+bncBCMILY6JWQBBBSWVTTNAKGQEXSRMEHI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+In-Reply-To: <20180712071959.fi4rhgwv2iuoelbl@flea>
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: Maxime Ripard <maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-sunxi <linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-CgpPbiAwNy8xMS8yMDE4IDAyOjE2IFBNLCBVbGYgSGFuc3NvbiB3cm90ZToKPiBPbiAxMSBKdWx5
-IDIwMTggYXQgMTE6NDEsIEx1ZG92aWMgQkFSUkUgPGx1ZG92aWMuYmFycmVAc3QuY29tPiB3cm90
-ZToKPj4KPj4KPj4gT24gMDcvMDUvMjAxOCAwNToxNyBQTSwgVWxmIEhhbnNzb24gd3JvdGU6Cj4+
-Pgo+Pj4gT24gMTIgSnVuZSAyMDE4IGF0IDE1OjE0LCBMdWRvdmljIEJhcnJlIDxsdWRvdmljLkJh
-cnJlQHN0LmNvbT4gd3JvdGU6Cj4+Pj4KPj4+PiBGcm9tOiBMdWRvdmljIEJhcnJlIDxsdWRvdmlj
-LmJhcnJlQHN0LmNvbT4KPj4+Pgo+Pj4+IFByZXBhcmUgbW1jaSBkcml2ZXIgdG8gbWFuYWdlIGRt
-YSBpbnRlcmZhY2UgYnkgbmV3IHByb3BlcnR5Lgo+Pj4+IFRoaXMgcGF0Y2ggZGVmaW5lcyBhbmQg
-cmVncm91cHMgZG1hIG9wZXJhdGlvbnMgZm9yIG1tY2kgZHJpdmVycy4KPj4+PiBtbWNpX2RtYV9Y
-WCBwcm90b3R5cGVzIGFyZSBhZGRlZCB0byBjYWxsIG1lbWJlciBvZiBtbWNpX2RtYV9vcHMKPj4+
-PiBpZiBub3QgbnVsbC4gQmFzZWQgb24gbGVnYWN5IG5lZWQsIGEgbW1jaSBkbWEgaW50ZXJmYWNl
-IGhhcyBiZWVuCj4+Pj4gZGVmaW5lZCB3aXRoOgo+Pj4+IC1tbWNpX2RtYV9zZXR1cAo+Pj4+IC1t
-bWNpX2RtYV9yZWxlYXNlCj4+Pj4gLW1tY2lfZG1hX3ByZV9yZXEKPj4+PiAtbW1jaV9kbWFfc3Rh
-cnQKPj4+PiAtbW1jaV9kbWFfZmluYWxpemUKPj4+PiAtbW1jaV9kbWFfcG9zdF9yZXEKPj4+PiAt
-bW1jaV9kbWFfZXJyb3IKPj4+PiAtbW1jaV9kbWFfZ2V0X25leHRfZGF0YQo+Pj4KPj4+Cj4+PiBB
-cyBJIHN1Z2dlc3RlZCBmb3Igb25lIG9mIHRoZSBvdGhlciBwYXRjaGVzLCBJIHdvdWxkIHJhdGhl
-ciB0dXJuIGNvcmUKPj4+IG1tY2kgZnVuY3Rpb25zIGludG8gbGlicmFyeSBmdW5jdGlvbnMsIHdo
-aWNoIGNhbiBiZSBlaXRoZXIgaW52b2tlZAo+Pj4gZnJvbSB2YXJpYW50IGNhbGxiYWNrcyBvciBh
-c3NpZ25lZCBkaXJlY3RseSB0byB0aGVtLgo+Pj4KPj4+IEluIG90aGVyIHdvcmRzLCBJIHdvdWxk
-IGxlYXZlIHRoZSBmdW5jdGlvbnMgdGhhdCB5b3UgbW92ZSBpbiB0aGlzCj4+PiBwYXRjaCB0byBz
-dGF5IGluIG1tY2kuYy4gQWx0aG91Z2ggc29tZSBuZWVkcyB0byBiZSByZS1mYWN0b3JlZCBhbmQg
-d2UKPj4+IGFsc28gbmVlZHMgdG8gbWFrZSBzb21lIG9mIHRoZW0gYXZhaWxhYmxlIHRvIGJlIGNh
-bGxlZCBmcm9tIGFub3RoZXIKPj4+IGZpbGUsIGhlbmNlIHRoZSBmdW5jdGlvbnMgbmVlZHMgdG8g
-YmUgc2hhcmVkIHZpYSBtbWNpLmggcmF0aGVyIHRoYW4KPj4+IGJlaW5nIGRlY2xhcmVkIHN0YXRp
-Yy4KPj4KPj4KPj4gSW4gcHJldmlvdXMgZXhjaGFuZ2UgbWFpbCAiU1RNMzJNUDEgU0RNTUMgZHJp
-dmVyIHJldmlldyIKPj4gd2UgYXJlIHNhaWQ6Cj4+Cj4+Pj4+IC1kbWEgdmFyaWFudCDDoCBzaG91
-bGQgZml0IGluIFF1YWxjb21tIGltcGxlbWVudGF0aW9uLCByZXVzZSAocmVuYW1lKQo+Pj4+PiBt
-bWNpX3Fjb21fZG1sLmMgZmlsZSBhbmQgaW50ZWdyYXRlIFNUIGRtYSBpbi4KPiAKPiBBcG9sb2dp
-emUgaWYgSSBtYXkgaGF2ZSBsZWFkIHlvdSBpbiBhIHdyb25nIGRpcmVjdGlvbiwgdGhhdCB3YXMg
-bm90IG15IGludGVudC4KPiAKPiBIb3dldmVyLCBieSBsb29raW5nIGF0ICRzdWJqZWN0IHBhdGNo
-LCB5b3VyIHNlZW1zIHRvIGJlIHVubmVjZXNzYXJpbHkKPiBzaHVmZmxpbmcgY29kZSBhcm91bmQu
-IEkgd291bGQgbGlrZSB0byBhdm9pZCB0aGF0Lgo+IAo+Pj4+Cj4+Pj4gc3RtMzIgc2RtbWMgaGFz
-IGFuIGludGVybmFsIGRtYSwgbm8gbmVlZCB0byB1c2UgZG1hZW5naW5lIEFQSTsKPj4+PiBTbyBz
-b21lIG1vZGlmaWNhdGlvbnMgaW4gbW1jaSAocHJlL3Bvc3QgcmVxdWVzdCwgbW1jaV9kbWFfeHgp
-LiBwZXJoYXBzCj4+Pj4gc2hvdWxkIGJlIGRvbmUgd2l0aCBhbiBvcHMgb3Igbm90Lgo+Pj4KPj4+
-IFllcy4KPj4+Cj4+PiBUaGUgUXVhbGNvbW0gdmFyaWFudCBpcyBhbHNvIHVzaW5nIGFuIGludGVy
-bmFsIERNQSwgaGVuY2UgSSB0aG91Z2h0Cj4+PiB0aGVyZSBtYXkgYmUgc29tZXRoaW5nIHdlIGNv
-dWxkIHJlLXVzZSwgb3IgYXQgbGVhc3QgaGF2ZSBzb21lIG5ldwo+Pj4gY29tbW9uIG9wcyBmb3Iu
-Cj4+Cj4+IEl0J3Mgbm90IGNyeXN0YWwgY2xlYXIgZm9yIG1lLgo+PiBEbyB5b3UgYWx3YXlzIGFn
-cmVlIHdpdGggYSBkbWEgb3BzIHdoaWNoIGFsbG93IHRvIGFkZHJlc3MgZGlmZmVyZW50Cj4+IERN
-QSB0cmFuc2ZlcjoKPj4gLXdpdGggZG1hZW5naW5lIEFQSQo+PiAtc2RtbWMgaWRtYSwgd2l0aG91
-dCBkbWFlbmdpbmUgQVBJCj4+IC0uLi4KPiAKPiBJZiB3ZSBjYW4gdXNlIGEgbW1jaSBvcHMgY2Fs
-bGJhY2sgdG8gbWFuYWdlIHRoZSB2YXJpYW50IGRpZmZlcmVuY2VzLAo+IHRoYXQgd291bGQgYmUg
-cGVyZmVjdC4gVGhhdCBjb21iaW5lZCB3aXRoIG1ha2luZyB0aGUgZXhpc3RpbmcgRE1BCj4gZnVu
-Y3Rpb25zIGluIG1tY2kuYyBjb252ZXJ0ZWQgdG8gImxpYnJhcnkiIGZ1bmN0aW9ucywgd2hpY2gg
-dGhlIG1tY2kKPiBvcHMgY2FsbGJhY2tzIGNhbiBjYWxsLCBpbiBvcmRlciB0byByZS11c2UgY29k
-ZS4KPiAKPiBXaGVuIHRoYXQgaXNuJ3QgcmVhbGx5IHN1aXRhYmxlLCB3ZSBtYXkgbmVlZCB0byBh
-ZGQgYSAicXVpcmsiIGluc3RlYWQsCj4gd2hpY2ggd291bGQgYmUgc3BlY2lmaWMgZm9yIHRoYXQg
-cGFydGljdWxhciB2YXJpYW50LiBBbG9uZyB0aGUgbGluZXMKPiBvZiB3aGF0IHdlIGFscmVhZHkg
-ZG8gZm9yIHZhcmlhbnQgc3BlY2lmaWNzIGluc2lkZSBtbWNpLmMuCj4gCj4gSSB0aGluayB3ZSBo
-YXZlIHRvIGRlY2lkZSBvbiBjYXNlIGJ5IGNhc2UgYmFzaXMsIHdoYXQgZml0cyBiZXN0Lgo+IAo+
-IEhvcGUgdGhpcyBtYWtlcyBhIGJldHRlciBleHBsYW5hdGlvbi4gSWYgbm90LCBwbGVhc2UgdGVs
-bCwgYW5kIEkgY2FuCj4gdGFrZSBhbiBpbml0aWFsIHN0YWIgYW5kIHBvc3QgYSBwYXRjaCB0byBz
-aG93IHlvdSB3aXRoIGNvZGUgaG93IEkgbWVhbgo+IHRvIG1vdmUgZm9yd2FyZC4KPiAKPj4KPj4K
-Pj4+Cj4+PiBMZXQgbWUgdGFrZSBhIGNvbmNyZXRlIGV4YW1wbGUgb24gaG93IEkgd291bGQgbW92
-ZSBmb3J3YXJkLCBob3BlZnVsbHkKPj4+IHRoYXQgZXhwbGFpbnMgaXQgYSBiaXQgYmV0dGVyLiBQ
-bGVhc2Ugc2VlIGJlbG93Lgo+Pj4KPj4+IFsuLi5dCj4+Pgo+Pj4+IC0vKgo+Pj4+IC0gKiBBbGwg
-dGhlIERNQSBvcGVyYXRpb24gbW9kZSBzdHVmZiBnb2VzIGluc2lkZSB0aGlzIGlmZGVmLgo+Pj4+
-IC0gKiBUaGlzIGFzc3VtZXMgdGhhdCB5b3UgaGF2ZSBhIGdlbmVyaWMgRE1BIGRldmljZSBpbnRl
-cmZhY2UsCj4+Pj4gLSAqIG5vIGN1c3RvbSBETUEgaW50ZXJmYWNlcyBhcmUgc3VwcG9ydGVkLgo+
-Pj4+IC0gKi8KPj4+PiAtI2lmZGVmIENPTkZJR19ETUFfRU5HSU5FCj4+Pj4gLXN0YXRpYyB2b2lk
-IG1tY2lfZG1hX3NldHVwKHN0cnVjdCBtbWNpX2hvc3QgKmhvc3QpCj4+Pj4gLXsKPj4+PiAtICAg
-ICAgIGNvbnN0IGNoYXIgKnJ4bmFtZSwgKnR4bmFtZTsKPj4+PiAtICAgICAgIHN0cnVjdCB2YXJp
-YW50X2RhdGEgKnZhcmlhbnQgPSBob3N0LT52YXJpYW50Owo+Pj4+IC0KPj4+PiAtICAgICAgIGhv
-c3QtPmRtYV9yeF9jaGFubmVsID0KPj4+PiBkbWFfcmVxdWVzdF9zbGF2ZV9jaGFubmVsKG1tY19k
-ZXYoaG9zdC0+bW1jKSwgInJ4Iik7Cj4+Pj4gLSAgICAgICBob3N0LT5kbWFfdHhfY2hhbm5lbCA9
-Cj4+Pj4gZG1hX3JlcXVlc3Rfc2xhdmVfY2hhbm5lbChtbWNfZGV2KGhvc3QtPm1tYyksICJ0eCIp
-Owo+Pj4+IC0KPj4+PiAtICAgICAgIC8qIGluaXRpYWxpemUgcHJlIHJlcXVlc3QgY29va2llICov
-Cj4+Pj4gLSAgICAgICBob3N0LT5uZXh0X2RhdGEuY29va2llID0gMTsKPj4+PiAtCj4+Pj4gLSAg
-ICAgICAvKgo+Pj4+IC0gICAgICAgICogSWYgb25seSBhbiBSWCBjaGFubmVsIGlzIHNwZWNpZmll
-ZCwgdGhlIGRyaXZlciB3aWxsCj4+Pj4gLSAgICAgICAgKiBhdHRlbXB0IHRvIHVzZSBpdCBiaWRp
-cmVjdGlvbmFsbHksIGhvd2V2ZXIgaWYgaXQgaXMKPj4+PiAtICAgICAgICAqIGlzIHNwZWNpZmll
-ZCBidXQgY2Fubm90IGJlIGxvY2F0ZWQsIERNQSB3aWxsIGJlIGRpc2FibGVkLgo+Pj4+IC0gICAg
-ICAgICovCj4+Pj4gLSAgICAgICBpZiAoaG9zdC0+ZG1hX3J4X2NoYW5uZWwgJiYgIWhvc3QtPmRt
-YV90eF9jaGFubmVsKQo+Pj4+IC0gICAgICAgICAgICAgICBob3N0LT5kbWFfdHhfY2hhbm5lbCA9
-IGhvc3QtPmRtYV9yeF9jaGFubmVsOwo+Pj4+IC0KPj4+PiAtICAgICAgIGlmIChob3N0LT5kbWFf
-cnhfY2hhbm5lbCkKPj4+PiAtICAgICAgICAgICAgICAgcnhuYW1lID0gZG1hX2NoYW5fbmFtZSho
-b3N0LT5kbWFfcnhfY2hhbm5lbCk7Cj4+Pj4gLSAgICAgICBlbHNlCj4+Pj4gLSAgICAgICAgICAg
-ICAgIHJ4bmFtZSA9ICJub25lIjsKPj4+PiAtCj4+Pj4gLSAgICAgICBpZiAoaG9zdC0+ZG1hX3R4
-X2NoYW5uZWwpCj4+Pj4gLSAgICAgICAgICAgICAgIHR4bmFtZSA9IGRtYV9jaGFuX25hbWUoaG9z
-dC0+ZG1hX3R4X2NoYW5uZWwpOwo+Pj4+IC0gICAgICAgZWxzZQo+Pj4+IC0gICAgICAgICAgICAg
-ICB0eG5hbWUgPSAibm9uZSI7Cj4+Pj4gLQo+Pj4+IC0gICAgICAgZGV2X2luZm8obW1jX2Rldiho
-b3N0LT5tbWMpLCAiRE1BIGNoYW5uZWxzIFJYICVzLCBUWCAlc1xuIiwKPj4+PiAtICAgICAgICAg
-ICAgICAgIHJ4bmFtZSwgdHhuYW1lKTsKPj4+PiAtCj4+Pj4gLSAgICAgICAvKgo+Pj4+IC0gICAg
-ICAgICogTGltaXQgdGhlIG1heGltdW0gc2VnbWVudCBzaXplIGluIGFueSBTRyBlbnRyeSBhY2Nv
-cmRpbmcgdG8KPj4+PiAtICAgICAgICAqIHRoZSBwYXJhbWV0ZXJzIG9mIHRoZSBETUEgZW5naW5l
-IGRldmljZS4KPj4+PiAtICAgICAgICAqLwo+Pj4+IC0gICAgICAgaWYgKGhvc3QtPmRtYV90eF9j
-aGFubmVsKSB7Cj4+Pj4gLSAgICAgICAgICAgICAgIHN0cnVjdCBkZXZpY2UgKmRldiA9IGhvc3Qt
-PmRtYV90eF9jaGFubmVsLT5kZXZpY2UtPmRldjsKPj4+PiAtICAgICAgICAgICAgICAgdW5zaWdu
-ZWQgaW50IG1heF9zZWdfc2l6ZSA9IGRtYV9nZXRfbWF4X3NlZ19zaXplKGRldik7Cj4+Pj4gLQo+
-Pj4+IC0gICAgICAgICAgICAgICBpZiAobWF4X3NlZ19zaXplIDwgaG9zdC0+bW1jLT5tYXhfc2Vn
-X3NpemUpCj4+Pj4gLSAgICAgICAgICAgICAgICAgICAgICAgaG9zdC0+bW1jLT5tYXhfc2VnX3Np
-emUgPSBtYXhfc2VnX3NpemU7Cj4+Pj4gLSAgICAgICB9Cj4+Pj4gLSAgICAgICBpZiAoaG9zdC0+
-ZG1hX3J4X2NoYW5uZWwpIHsKPj4+PiAtICAgICAgICAgICAgICAgc3RydWN0IGRldmljZSAqZGV2
-ID0gaG9zdC0+ZG1hX3J4X2NoYW5uZWwtPmRldmljZS0+ZGV2Owo+Pj4+IC0gICAgICAgICAgICAg
-ICB1bnNpZ25lZCBpbnQgbWF4X3NlZ19zaXplID0gZG1hX2dldF9tYXhfc2VnX3NpemUoZGV2KTsK
-Pj4+PiAtCj4+Pj4gLSAgICAgICAgICAgICAgIGlmIChtYXhfc2VnX3NpemUgPCBob3N0LT5tbWMt
-Pm1heF9zZWdfc2l6ZSkKPj4+PiAtICAgICAgICAgICAgICAgICAgICAgICBob3N0LT5tbWMtPm1h
-eF9zZWdfc2l6ZSA9IG1heF9zZWdfc2l6ZTsKPj4+PiAtICAgICAgIH0KPj4+Cj4+Pgo+Pj4gRXZl
-cnl0aGluZyBhYm92ZSBzaGFsbCBiZSBsZWZ0IGFzIGdlbmVyaWMgbGlicmFyeSBmdW5jdGlvbiwK
-Pj4+IG1tY2lfZG1hX3NldHVwKCkgYW5kIEkgd291bGQgc2hhcmUgaXQgdmlhIG1tY2kuaCBhbmQg
-dGh1cyBjaGFuZ2UgaXQKPj4+IGZyb20gYmVpbmcgc3RhdGljLgo+Pj4KPj4KPj4gZWFjaCBpbnRl
-cmZhY2VzIG1tY2lfZG1hX1hYWCBoYXZlIHZlcnkgZGlmZmVyZW50IG5lZWRzIGRlcGVuZGluZwo+
-PiBkbWFfb3BzIChsZWdhY3ksIHNkbW1jIGlkbWEpCj4gCj4gUmlnaHQuIFRoaXMgd2FzIGp1c3Qg
-b25lIGV4YW1wbGUuCj4gCj4gSWYgSSB1bmRlcnN0YW5kLCB3aGF0IHlvdSBhcmUgc3VnZ2VzdGlu
-ZyBpcyB0byBtYWtlIGFsbCBvZiB0aGVtIGJlaW5nCj4gdmFyaWFudCBzcGVjaWZpYyBjYWxsYmFj
-a3MsIHNvIEkgYXNzdW1lIHRoYXQgd291bGQgc29sdmUgdGhlIHByb2JsZW1zLgo+IEp1c3QgdG8g
-YmUgY2xlYXIsIEkgaGF2ZSBubyBwcm9ibGVtIHdpdGggdGhhdC4KPiAKPiBBbHRob3VnaCwgdGhh
-dCBkb2Vzbid0IG1lYW4gd2UgY2FuJ3QgcmUtdXNlIGV4aXN0aW5nIGRtYSBmdW5jdGlvbnMgaW4K
-PiBtbWNpLmMsIHdoZW4gdGhhdCBtYWtlcyBzZW5zZS4KClllcywgd2hlbiBleGFtaW5lIGRtYWVu
-Z2luZV9YWCBvcHMgYW5kIHNkbW1jX2lkbWFfWFggb3BzIChpbiBwYXRjaCAwMQphbmQgMTcpIHRo
-ZXJlIGFyZSBmZXcgY29tbW9uIHBpZWNlIG9mIGNvZGUuIFNvIEkgdGhpbmsgd2Ugd2lsbCBoYXZl
-IHNhbWUKZG1hIGZ1bmN0aW9ucyBwb2ludGVyIGluIG1tY2lfb3BzLiBIb3dldmVyLCB0aGUgY29v
-a2llIG1hbmFnZW1lbnQgbWF5IGJlCnNoYXJlZAoKPiAKPiBbLi4uXQo+IAo+IEtpbmQgcmVnYXJk
-cwo+IFVmZmUKPiAKCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fCmxpbnV4LWFybS1rZXJuZWwgbWFpbGluZyBsaXN0CmxpbnV4LWFybS1rZXJuZWxAbGlzdHMu
-aW5mcmFkZWFkLm9yZwpodHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9tYWlsbWFuL2xpc3RpbmZv
-L2xpbnV4LWFybS1rZXJuZWwK
+On Thu, Jul 12, 2018 at 3:19 PM, Maxime Ripard
+<maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org> wrote:
+> Hi,
+>
+> On Thu, Jul 12, 2018 at 11:02:25AM +0800, Chen-Yu Tsai wrote:
+>> The eMMC controller is also a new timing mode controller, but it doesn't
+>> have the timing mode switch. It does however have signal delay and
+>> calibration controls, typical of Allwinner MMC controllers that support
+>> the new timing mode.
+>>
+>> Enable the new timing mode setting for the A64 eMMC controller. This
+>> also enables MMC HS-DDR modes, which gives higher throughput for eMMC
+>> chips that support it, and can deliver such throughput.
+>>
+>> Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+>
+> That doesn't look right. The datasheet explicitly mentions that this
+> bit doesn't apply to the eMMC controller, and the BSP is doing the same:
+> https://github.com/longsleep/linux-pine64/blob/lichee-dev-v3.10.65/drivers/mmc/host/sunxi-mmc-sun50iw1p1-1.c
+>
+> vs
+> https://github.com/longsleep/linux-pine64/blob/lichee-dev-v3.10.65/drivers/mmc/host/sunxi-mmc-sun50iw1p1-2.c
+
+You mean the bit in SDXC_REG_SD_NTSR? Yes I know that doesn't exist for
+the eMMC controller. I mentioned this in the commit message. It doesn't
+exist, and writes to it become a no-op.
+
+Would a comment, or comments, help with making this clear?
+
+> And I definitely remember having HS-DDR working back when I added the
+> a64 eMMC support.
+
+Well it doesn't at the moment. My BPI-M64 reports:
+
+    [    1.634276] mmc2: new high speed MMC card at address 0001
+
+And with the patch:
+
+    [    1.632552] mmc2: new DDR MMC card at address 0001
+
+Regards
+ChenYu
