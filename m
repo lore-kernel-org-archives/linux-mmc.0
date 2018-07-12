@@ -1,65 +1,55 @@
 From: Stefan Agner <stefan@agner.ch>
-Subject: [PATCH 3/3] mmc: tegra: prevent ACMD23 on Tegra 3
-Date: Thu, 12 Jul 2018 09:39:04 +0200
-Message-ID: <20180712073904.4705-3-stefan@agner.ch>
-References: <20180712073904.4705-1-stefan@agner.ch>
+Subject: [PATCH v2 1/2] mmc: sdhci-esdhc-imx: disable clocks before changing frequency
+Date: Thu, 12 Jul 2018 10:06:49 +0200
+Message-ID: <20180712080650.13878-1-stefan@agner.ch>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180712073904.4705-1-stefan@agner.ch>
 Sender: linux-kernel-owner@vger.kernel.org
 To: adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc: thierry.reding@gmail.com, jonathanh@nvidia.com, marcel.ziswiler@toradex.com, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, Stefan Agner <stefan@agner.ch>
+Cc: fabio.estevam@nxp.com, haibo.chen@nxp.com, aisheng.dong@nxp.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Stefan Agner <stefan@agner.ch>
 List-Id: linux-mmc@vger.kernel.org
 
-It seems that SD3.0 advertisement needs to be set for higher eMMC
-speed modes (namely DDR52) as well. The TRM states that the SD3.0
-advertisement bit should be set for all controller instances, even
-for those not supporting UHS-I mode...
+In the uSDHC case (e.g. i.MX 6) clocks only get disabled if frequency
+is set to 0. However, it could be that the stack asks for a frequency
+change while clocks are on. In that case the function clears the
+divider registers (by clearing ESDHC_CLOCK_MASK) while the clock is
+enabled! This causes a short period of time where the clock is
+undivided (on a i.MX 6DL a clock of 196MHz has been measured).
 
-When specifying vqmmc-supply as a fixed 1.8V regulator on a Tegra
-SD/MMC instance which is connected to a eMMC device, the stack
-enables SD3.0. However, enabling it has consequences: If SDHCI 3.0
-support is advertised the stack enables Auto-CMD23. Unfortunately
-Auto-CMD23 seems not to work well with Tegra 3 currently. It leads
-to regular warnings:
-  mmc2: Got command interrupt 0x00010000 even though no command operation was in progress.
+For older IP variants the driver disables clock by clearing some bits
+in ESDHC_SYSTEM_CONTROL.
 
-It is not entirely clear why those errors happens. It seems that
-a Linux 3.1 based downstream kernel which has Auto-CMD23 support
-does not show those warnings.
-
-Use quirk SDHCI_QUIRK2_ACMD23_BROKEN to prevent Auto-CMD23 being
-used for now. With this the eMMC works stable on high-speed mode
-while still announcing SD3.0.
-
-This allows to use mmc-ddr-1_8v to enables DDR52 mode. In DDR52
-mode read speed improves from about 42MiB/s to 72MiB/s on an
-Apalis T30.
+Make sure to disable card clock before changing frequency for uSDHC
+IP variants too.
 
 Signed-off-by: Stefan Agner <stefan@agner.ch>
 ---
- drivers/mmc/host/sdhci-tegra.c | 10 +++++++++-
- 1 file changed, 9 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 888a1ad511db..11c0b2069c7c 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -336,7 +336,15 @@ static const struct sdhci_pltfm_data sdhci_tegra30_pdata = {
- 		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
- 		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
- 	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
--		   SDHCI_QUIRK2_BROKEN_HS200,
-+		   SDHCI_QUIRK2_BROKEN_HS200 |
-+		   /*
-+		    * Auto-CMD23 leads to "Got command interrupt 0x00010000 even
-+		    * though no command operation was in progress."
-+		    *
-+		    * The exact reason is unknown, as the same hardware seems
-+		    * to support Auto CMD23 on a downstream 3.1 kernel.
-+		    */
-+		   SDHCI_QUIRK2_ACMD23_BROKEN,
- 	.ops  = &tegra_sdhci_ops,
- };
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 85fd5a8b0b6d..acacd8481473 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -708,14 +708,14 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
+ 	int div = 1;
+ 	u32 temp, val;
+ 
++	if (esdhc_is_usdhc(imx_data)) {
++		val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
++		writel(val & ~ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
++			host->ioaddr + ESDHC_VENDOR_SPEC);
++	}
++
+ 	if (clock == 0) {
+ 		host->mmc->actual_clock = 0;
+-
+-		if (esdhc_is_usdhc(imx_data)) {
+-			val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
+-			writel(val & ~ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
+-					host->ioaddr + ESDHC_VENDOR_SPEC);
+-		}
+ 		return;
+ 	}
  
 -- 
 2.18.0
