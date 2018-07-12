@@ -1,7 +1,7 @@
 From: Stefan Agner <stefan@agner.ch>
 Subject: [PATCH v2 1/2] mmc: sdhci-esdhc-imx: disable clocks before changing frequency
-Date: Thu, 12 Jul 2018 10:06:49 +0200
-Message-ID: <20180712080650.13878-1-stefan@agner.ch>
+Date: Thu, 12 Jul 2018 10:07:24 +0200
+Message-ID: <20180712080725.14250-1-stefan@agner.ch>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: adrian.hunter@intel.com, ulf.hansson@linaro.org
