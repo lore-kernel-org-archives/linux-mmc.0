@@ -1,54 +1,43 @@
-From: Kees Cook <keescook@chromium.org>
-Subject: [PATCH] mmc: mxcmmc: Fix missing parentheses and brace
-Date: Thu, 12 Jul 2018 12:59:37 -0700
-Message-ID: <20180712195937.GA36007@beast>
+From: Marcel Ziswiler <marcel.ziswiler@toradex.com>
+Subject: Re: [RESEND PATCH] mmc: tegra: enable ddr_signaling for
+ MMC_TIMING_MMC_DDR52
+Date: Thu, 12 Jul 2018 20:28:49 +0000
+Message-ID: <1531427327.5479.4.camel@toradex.com>
+References: <20180712173837.2921-1-tszucs@protonmail.ch>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
+In-Reply-To: <20180712173837.2921-1-tszucs@protonmail.ch>
+Content-Language: en-US
+Content-ID: <A8534ED6D00B8544AD6A779A03A07E15@eurprd05.prod.outlook.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Christoph Hellwig <hch@lst.de>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: "tszucs@protonmail.ch" <tszucs@protonmail.ch>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>
+Cc: "jonathanh@nvidia.com" <jonathanh@nvidia.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "thierry.reding@gmail.com" <thierry.reding@gmail.com>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Looks like the adjusted syntax wasn't fully build tested. This fixes
-failures with powerpc builds:
-
-drivers/mmc/host/mxcmmc.c: In function ‘mxcmci_swap_buffers’:
-drivers/mmc/host/mxcmmc.c:296:51: error: expected ‘)’ before ‘;’ token
-   void *buf = kmap_atomic(sg_page(sg) + sg->offset;
-                                                   ^
-drivers/mmc/host/mxcmmc.c:299:1: error: expected ‘,’ or ‘;’ before ‘}’ token
- }
- ^
-
-Fixes: b189e7589f6d3 ("mmc: mxcmmc: handle highmem pages")
-Signed-off-by: Kees Cook <keescook@chromium.org>
----
- drivers/mmc/host/mxcmmc.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-index 75f781c11e89..de4e6e5bf304 100644
---- a/drivers/mmc/host/mxcmmc.c
-+++ b/drivers/mmc/host/mxcmmc.c
-@@ -293,9 +293,10 @@ static void mxcmci_swap_buffers(struct mmc_data *data)
- 	int i;
- 
- 	for_each_sg(data->sg, sg, data->sg_len, i) {
--		void *buf = kmap_atomic(sg_page(sg) + sg->offset;
-+		void *buf = kmap_atomic(sg_page(sg) + sg->offset);
- 		buffer_swap32(buf, sg->length);
- 		kunmap_atomic(buf);
-+	}
- }
- #else
- static inline void mxcmci_swap_buffers(struct mmc_data *data) {}
--- 
-2.17.1
-
-
--- 
-Kees Cook
-Pixel Security
+T24gVGh1LCAyMDE4LTA3LTEyIGF0IDE5OjM4ICswMjAwLCBUYW3DoXMgU3rFsWNzIHdyb3RlOg0K
+PiBUaGlzIGZpeGVzIHNhbXBsaW5nIGVycm9ycyB3aXRoIGVNTUMgbW9kdWxlcyB1c2luZyBERFI1
+MiB3aGVuIGhvc3QNCj4gY2FwYWJpbGl0aWVzDQo+IHZpYSBzZXR0aW5nIE5WUVVJUktfRU5BQkxF
+X0REUjUwIGFuZCBOVlFVSVJLX0VOQUJMRV9TREhDSV9TUEVDXzMwMA0KPiBhcmUgZW5hYmxlZC4N
+Cj4gDQo+IFNpZ25lZC1vZmYtYnk6IFRhbcOhcyBTesWxY3MgPHRzenVjc0Bwcm90b25tYWlsLmNo
+Pg0KPiAtLS0NCj4gIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktdGVncmEuYyB8IDIgKy0NCj4gIDEg
+ZmlsZSBjaGFuZ2VkLCAxIGluc2VydGlvbigrKSwgMSBkZWxldGlvbigtKQ0KPiANCj4gZGlmZiAt
+LWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktdGVncmEuYyBiL2RyaXZlcnMvbW1jL2hvc3Qv
+c2RoY2ktDQo+IHRlZ3JhLmMNCj4gaW5kZXggOTcwZDM4ZjY4OTM5Li5hM2JmYWE3MDY3YzggMTAw
+NjQ0DQo+IC0tLSBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktdGVncmEuYw0KPiArKysgYi9kcml2
+ZXJzL21tYy9ob3N0L3NkaGNpLXRlZ3JhLmMNCj4gQEAgLTIyOCw3ICsyMjgsNyBAQCBzdGF0aWMg
+dm9pZCB0ZWdyYV9zZGhjaV9zZXRfdWhzX3NpZ25hbGluZyhzdHJ1Y3QNCj4gc2RoY2lfaG9zdCAq
+aG9zdCwNCj4gIAlzdHJ1Y3Qgc2RoY2lfcGx0Zm1faG9zdCAqcGx0Zm1faG9zdCA9IHNkaGNpX3By
+aXYoaG9zdCk7DQo+ICAJc3RydWN0IHNkaGNpX3RlZ3JhICp0ZWdyYV9ob3N0ID0NCj4gc2RoY2lf
+cGx0Zm1fcHJpdihwbHRmbV9ob3N0KTsNCj4gIA0KPiAtCWlmICh0aW1pbmcgPT0gTU1DX1RJTUlO
+R19VSFNfRERSNTApDQo+ICsJaWYgKHRpbWluZyA9PSBNTUNfVElNSU5HX1VIU19ERFI1MCB8fCB0
+aW1pbmcgPT0NCj4gTU1DX1RJTUlOR19NTUNfRERSNTIpDQo+ICAJCXRlZ3JhX2hvc3QtPmRkcl9z
+aWduYWxpbmcgPSB0cnVlOw0KPiAgDQo+ICAJc2RoY2lfc2V0X3Voc19zaWduYWxpbmcoaG9zdCwg
+dGltaW5nKTsNCg0KVGhpcyBpcyByZWFsbHkgYSBkdXBsaWNhdGUgb2YgU3RlZmFuJ3MgIltQQVRD
+SCAyLzNdIG1tYzogdGVncmE6IGZpeCBlTU1DIEREUjUyDQptb2RlIiBbMV0gcmVzcC4gU3RlZmFu
+J3MgaXMgYSBkdXBsaWNhdGUgb2YgVGFtw6FzJy4gV2UgbWlzc2VkIGl0IGFzIGl0IHNvbWVob3cN
+CmJvdW5jZWQgdGhlIHRlZ3JhIG1haWxpbmcgbGlzdC4gV2UgYmFzaWNhbGx5IGludmVzdGlnYXRl
+ZCB0aGlzIHVwb24gVGFtw6FzJw0KcmVxdWVzdCAodS1ibG94IGJlaW5nIG91ciBjdXN0b21lcikg
+bW9yZSBvciBsZXNzIGluIHBhcmFsbGVsLg0KDQpbMV0gaHR0cHM6Ly9sb3JlLmtlcm5lbC5vcmcv
+bGttbC8yMDE4MDcxMjA3MzkwNC40NzA1LTItc3RlZmFuQGFnbmVyLmNo
