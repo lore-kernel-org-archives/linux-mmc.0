@@ -1,64 +1,66 @@
-From: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
-Subject: Re: [PATCH] mmc: sunxi: Use new timing mode for A64
- eMMC controller
-Date: Thu, 12 Jul 2018 18:17:23 +0800
-Message-ID: <CAGb2v65rE2nQbyeiSPAyTzw-n-EQsUwQABx3nrvXTu4JogFPBQ@mail.gmail.com>
-References: <20180712030225.15681-1-wens@csie.org> <20180712071959.fi4rhgwv2iuoelbl@flea>
-Reply-To: wens-jdAy2FN1RRM@public.gmane.org
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v2 1/2] mmc: sdhci-esdhc-imx: disable clocks before
+ changing frequency
+Date: Thu, 12 Jul 2018 15:51:16 +0300
+Message-ID: <ae108a16-80ca-0e44-d6d4-e122debc06b1@intel.com>
+References: <20180712080725.14250-1-stefan@agner.ch>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-sunxi+bncBCMILY6JWQBBBSWVTTNAKGQEXSRMEHI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-In-Reply-To: <20180712071959.fi4rhgwv2iuoelbl@flea>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Maxime Ripard <maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-sunxi <linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180712080725.14250-1-stefan@agner.ch>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Stefan Agner <stefan@agner.ch>, ulf.hansson@linaro.org
+Cc: fabio.estevam@nxp.com, haibo.chen@nxp.com, aisheng.dong@nxp.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Jul 12, 2018 at 3:19 PM, Maxime Ripard
-<maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org> wrote:
-> Hi,
->
-> On Thu, Jul 12, 2018 at 11:02:25AM +0800, Chen-Yu Tsai wrote:
->> The eMMC controller is also a new timing mode controller, but it doesn't
->> have the timing mode switch. It does however have signal delay and
->> calibration controls, typical of Allwinner MMC controllers that support
->> the new timing mode.
->>
->> Enable the new timing mode setting for the A64 eMMC controller. This
->> also enables MMC HS-DDR modes, which gives higher throughput for eMMC
->> chips that support it, and can deliver such throughput.
->>
->> Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
->
-> That doesn't look right. The datasheet explicitly mentions that this
-> bit doesn't apply to the eMMC controller, and the BSP is doing the same:
-> https://github.com/longsleep/linux-pine64/blob/lichee-dev-v3.10.65/drivers/mmc/host/sunxi-mmc-sun50iw1p1-1.c
->
-> vs
-> https://github.com/longsleep/linux-pine64/blob/lichee-dev-v3.10.65/drivers/mmc/host/sunxi-mmc-sun50iw1p1-2.c
+On 12/07/18 11:07, Stefan Agner wrote:
+> In the uSDHC case (e.g. i.MX 6) clocks only get disabled if frequency
+> is set to 0. However, it could be that the stack asks for a frequency
+> change while clocks are on. In that case the function clears the
+> divider registers (by clearing ESDHC_CLOCK_MASK) while the clock is
+> enabled! This causes a short period of time where the clock is
+> undivided (on a i.MX 6DL a clock of 196MHz has been measured).
+> 
+> For older IP variants the driver disables clock by clearing some bits
+> in ESDHC_SYSTEM_CONTROL.
+> 
+> Make sure to disable card clock before changing frequency for uSDHC
+> IP variants too.
+> 
+> Signed-off-by: Stefan Agner <stefan@agner.ch>
 
-You mean the bit in SDXC_REG_SD_NTSR? Yes I know that doesn't exist for
-the eMMC controller. I mentioned this in the commit message. It doesn't
-exist, and writes to it become a no-op.
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Would a comment, or comments, help with making this clear?
 
-> And I definitely remember having HS-DDR working back when I added the
-> a64 eMMC support.
-
-Well it doesn't at the moment. My BPI-M64 reports:
-
-    [    1.634276] mmc2: new high speed MMC card at address 0001
-
-And with the patch:
-
-    [    1.632552] mmc2: new DDR MMC card at address 0001
-
-Regards
-ChenYu
+> ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 12 ++++++------
+>  1 file changed, 6 insertions(+), 6 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index 85fd5a8b0b6d..acacd8481473 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -708,14 +708,14 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
+>  	int div = 1;
+>  	u32 temp, val;
+>  
+> +	if (esdhc_is_usdhc(imx_data)) {
+> +		val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
+> +		writel(val & ~ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
+> +			host->ioaddr + ESDHC_VENDOR_SPEC);
+> +	}
+> +
+>  	if (clock == 0) {
+>  		host->mmc->actual_clock = 0;
+> -
+> -		if (esdhc_is_usdhc(imx_data)) {
+> -			val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
+> -			writel(val & ~ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
+> -					host->ioaddr + ESDHC_VENDOR_SPEC);
+> -		}
+>  		return;
+>  	}
+>  
+> 
