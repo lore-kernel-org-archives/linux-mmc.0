@@ -1,34 +1,67 @@
-From: Jon Hunter <jonathanh@nvidia.com>
-Subject: Re: REGRESSION: [PATCH] mmc: tegra: Use sdhci_pltfm_clk_get_max_clock
-Date: Fri, 13 Jul 2018 15:04:13 +0100
-Message-ID: <cd24b840-3509-1c03-373b-85026c01b0f7@nvidia.com>
-References: <1528126540-27004-1-git-send-email-avienamo@nvidia.com>
- <CAPDyKFoip8gFssftJKzVHD9PAk+j=Z1CTo=0uY9cGASzW8VRJg@mail.gmail.com>
- <1531446183.5479.14.camel@toradex.com>
- <20180713155541.286425e9@dhcp-10-21-25-168>
+From: Marcel Ziswiler <marcel.ziswiler@toradex.com>
+Subject: Re: [PATCH 1/3] mmc: tegra: prevent HS200 on Tegra 3
+Date: Fri, 13 Jul 2018 15:39:24 +0000
+Message-ID: <1531496362.5479.34.camel@toradex.com>
+References: <20180712073904.4705-1-stefan@agner.ch>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180713155541.286425e9@dhcp-10-21-25-168>
+In-Reply-To: <20180712073904.4705-1-stefan@agner.ch>
 Content-Language: en-US
+Content-ID: <7B68E3230CB86349A40D3B819127BEC6@eurprd05.prod.outlook.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Aapo Vienamo <avienamo@nvidia.com>, Marcel Ziswiler <marcel.ziswiler@toradex.com>
-Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, Stefan Agner <stefan.agner@toradex.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "thierry.reding@gmail.com" <thierry.reding@gmail.com>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>
+To: "stefan@agner.ch" <stefan@agner.ch>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>
+Cc: "jonathanh@nvidia.com" <jonathanh@nvidia.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "thierry.reding@gmail.com" <thierry.reding@gmail.com>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-
-On 13/07/18 13:55, Aapo Vienamo wrote:
-> This happens because sdhci_pltfm_clk_get_max_clock() does not actually
-> return the maximum clock rate but the current one, leading to smaller
-> clock rates on some platforms. I'll send a patch that fixes this for
-> sdhci-tegra. Although this raises the question whether the current
-> behaviour of sdhci_pltfm_clk_get_max_clock() is desirable or not.
-
-Agree. There is something not right here. 
-
-Cheers,
-Jon
-
--- 
-nvpublic
+T24gVGh1LCAyMDE4LTA3LTEyIGF0IDA5OjM5ICswMjAwLCBTdGVmYW4gQWduZXIgd3JvdGU6DQo+
+IFRoZSBzdGFjayBhc3N1bWVzIHRoYXQgU0RIQyBjb250cm9sbGVyIHdoaWNoIHN1cHBvcnQgU0Qz
+LjAgKFNEUjEwNCkNCj4gZG8NCj4gc3VwcG9ydCBIUzIwMC4gVGhpcyBpcyBub3QgdGhlIGNhc2Ug
+Zm9yIFRlZ3JhIDMsIHdoaWNoIGRvZXMgc3VwcG9ydA0KPiBTRA0KPiAzLjANCj4gYnV0IG9ubHkg
+c3VwcG9ydHMgZU1NQyBzcGVjIDQuNDEuDQo+IA0KPiBVc2UgU0RIQ0lfUVVJUksyX0JST0tFTl9I
+UzIwMCB0byBpbmRpY2F0ZSB0aGF0IHRoZSBjb250cm9sbGVyIGRvZXMNCj4gbm90DQo+IHN1cHBv
+cnQgSFMyMDAuDQo+IA0KPiBOb3RlIHRoYXQgY29tbWl0IDE1NmUxNGIxMjZmZiAoIm1tYzogc2Ro
+Y2k6IGZpeCBjYXBzMiBmb3IgSFMyMDAiKQ0KPiBhZGRlZA0KPiB0aGUgdGllIGJldHdlZW4gU0Qz
+LjAgKFNEUjEwNCkgYW5kIEhTMjAwLiBJIGRvbid0IHRoaW5rIHRoYXQgdGhpcyBpcw0KPiBuZWNl
+c3Nhcmx5IHRydWUuIEl0IGlzIGZ1bGx5IGxlZ2l0aW1hdGUgdG8gc3VwcG9ydCBTRDMuMCBhbmQg
+bm90DQo+IHN1cHBvcnQNCj4gSFMyMDAuIFRoZSBxdWlyayBuYW1pbmcgc3VnZ2VzdHMgc29tZXRo
+aW5nIGlzIGJyb2tlbiBpbiB0aGUNCj4gY29udHJvbGxlciwNCj4gYnV0IHRoaXMgaXMgbm90IHRo
+ZSBjYXNlOiBUaGUgY29udHJvbGxlciBzaW1wbHkgZG9lcyBub3Qgc3VwcG9ydA0KPiBIUzIwMC4N
+Cj4gDQo+IEZpeGVzOiA3YWQyZWQxZGZjYmUgKCJtbWM6IHRlZ3JhOiBlbmFibGUgVUhTLUkgbW9k
+ZXMiKQ0KPiBTaWduZWQtb2ZmLWJ5OiBTdGVmYW4gQWduZXIgPHN0ZWZhbkBhZ25lci5jaD4NCg0K
+VGhlIHdob2xlIHNlcmllcyBzdHJlc3MtdGVzdGVkIG92ZXJuaWdodCBvbiB2YXJpb3VzIEFwYWxp
+cyBUMzAgYXMgd2VsbA0KYXMgQ29saWJyaSBUMzAgbW9kdWxlczoNCg0KVGVzdGVkLWJ5OiBNYXJj
+ZWwgWmlzd2lsZXIgPG1hcmNlbC56aXN3aWxlckB0b3JhZGV4LmNvbT4NCg0KPiAtLS0NCj4gIGRy
+aXZlcnMvbW1jL2hvc3Qvc2RoY2ktdGVncmEuYyB8IDMgKystDQo+ICAxIGZpbGUgY2hhbmdlZCwg
+MiBpbnNlcnRpb25zKCspLCAxIGRlbGV0aW9uKC0pDQo+IA0KPiBkaWZmIC0tZ2l0IGEvZHJpdmVy
+cy9tbWMvaG9zdC9zZGhjaS10ZWdyYS5jIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS0NCj4gdGVn
+cmEuYw0KPiBpbmRleCA5NzBkMzhmNjg5MzkuLjEzN2RmMDZiOWI2ZSAxMDA2NDQNCj4gLS0tIGEv
+ZHJpdmVycy9tbWMvaG9zdC9zZGhjaS10ZWdyYS5jDQo+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3Qv
+c2RoY2ktdGVncmEuYw0KPiBAQCAtMzM0LDcgKzMzNCw4IEBAIHN0YXRpYyBjb25zdCBzdHJ1Y3Qg
+c2RoY2lfcGx0Zm1fZGF0YQ0KPiBzZGhjaV90ZWdyYTMwX3BkYXRhID0gew0KPiAgCQkgIFNESENJ
+X1FVSVJLX05PX0hJU1BEX0JJVCB8DQo+ICAJCSAgU0RIQ0lfUVVJUktfQlJPS0VOX0FETUFfWkVS
+T0xFTl9ERVNDIHwNCj4gIAkJICBTREhDSV9RVUlSS19DQVBfQ0xPQ0tfQkFTRV9CUk9LRU4sDQo+
+IC0JLnF1aXJrczIgPSBTREhDSV9RVUlSSzJfUFJFU0VUX1ZBTFVFX0JST0tFTiwNCj4gKwkucXVp
+cmtzMiA9IFNESENJX1FVSVJLMl9QUkVTRVRfVkFMVUVfQlJPS0VOIHwNCj4gKwkJICAgU0RIQ0lf
+UVVJUksyX0JST0tFTl9IUzIwMCwNCj4gIAkub3BzICA9ICZ0ZWdyYV9zZGhjaV9vcHMsDQo+ICB9
+Ow0KDQpXb3JrcyBxdWl0ZSBuaWNlbHkgb24gdG9kYXkncyBuZXh0IG9uY2UgWzFdIGlzIGFsc28g
+YXBwbGllZDoNCg0Kcm9vdEBhcGFsaXMtdDMwOn4jIGNhdCAvc3lzL2tlcm5lbC9kZWJ1Zy9tbWMx
+L2lvcyANCmNsb2NrOiAgICAgICAgICA1MjAwMDAwMCBIeg0KYWN0dWFsIGNsb2NrOiAgIDUxMDAw
+MDAwIEh6DQp2ZGQ6ICAgICAgICAgICAgMjEgKDMuMyB+IDMuNCBWKQ0KYnVzIG1vZGU6ICAgICAg
+IDIgKHB1c2gtcHVsbCkNCmNoaXAgc2VsZWN0OiAgICAwIChkb24ndCBjYXJlKQ0KcG93ZXIgbW9k
+ZTogICAgIDIgKG9uKQ0KYnVzIHdpZHRoOiAgICAgIDMgKDggYml0cykNCnRpbWluZyBzcGVjOiAg
+ICA4IChtbWMgRERSNTIpDQpzaWduYWwgdm9sdGFnZTogMSAoMS44MCBWKQ0KZHJpdmVyIHR5cGU6
+ICAgIDAgKGRyaXZlciB0eXBlIEIpDQpyb290QGFwYWxpcy10MzA6fiMgaGRwYXJtIC10IC9kZXYv
+bW1jYmxrMQ0KDQovZGV2L21tY2JsazE6DQogVGltaW5nIGJ1ZmZlcmVkIGRpc2sgcmVhZHM6IDIz
+NiBNQiBpbiAgMy4wMSBzZWNvbmRzID0gIDc4LjQyIE1CL3NlYw0KDQpyb290QGNvbGlicmktdDMw
+On4jIGNhdCAvc3lzL2tlcm5lbC9kZWJ1Zy9tbWMwL2lvcyANCmNsb2NrOiAgICAgICAgICA1MjAw
+MDAwMCBIeg0KYWN0dWFsIGNsb2NrOiAgIDUxMDAwMDAwIEh6DQp2ZGQ6ICAgICAgICAgICAgMjEg
+KDMuMyB+IDMuNCBWKQ0KYnVzIG1vZGU6ICAgICAgIDIgKHB1c2gtcHVsbCkNCmNoaXAgc2VsZWN0
+OiAgICAwIChkb24ndCBjYXJlKQ0KcG93ZXIgbW9kZTogICAgIDIgKG9uKQ0KYnVzIHdpZHRoOiAg
+ICAgIDMgKDggYml0cykNCnRpbWluZyBzcGVjOiAgICA4IChtbWMgRERSNTIpDQpzaWduYWwgdm9s
+dGFnZTogMSAoMS44MCBWKQ0KZHJpdmVyIHR5cGU6ICAgIDAgKGRyaXZlciB0eXBlIEIpDQpyb290
+QGNvbGlicmktdDMwOn4jIGhkcGFybSAtdCAvZGV2L21tY2JsazANCg0KL2Rldi9tbWNibGswOg0K
+IFRpbWluZyBidWZmZXJlZCBkaXNrIHJlYWRzOiAxNjggTUIgaW4gIDMuMDAgc2Vjb25kcyA9ICA1
+NS45OSBNQi9zZWMNCg0KWzFdIGh0dHBzOi8vbG9yZS5rZXJuZWwub3JnL2xrbWwvMTUzMTQ4Nzg2
+NS0xNzQyNy0xLWdpdC1zZW5kLWVtYWlsLWF2aWUNCm5hbW9AbnZpZGlhLmNvbQ==
