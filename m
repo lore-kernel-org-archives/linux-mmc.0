@@ -1,121 +1,201 @@
-From: Marcel Ziswiler <marcel.ziswiler@toradex.com>
-Subject: REGRESSION: [PATCH] mmc: tegra: Use sdhci_pltfm_clk_get_max_clock
-Date: Fri, 13 Jul 2018 01:43:05 +0000
-Message-ID: <1531446183.5479.14.camel@toradex.com>
+From: Aapo Vienamo <avienamo@nvidia.com>
+Subject: Re: REGRESSION: [PATCH] mmc: tegra: Use
+ sdhci_pltfm_clk_get_max_clock
+Date: Fri, 13 Jul 2018 12:50:05 +0300
+Message-ID: <20180713125005.69895f06@dhcp-10-21-25-168>
 References: <1528126540-27004-1-git-send-email-avienamo@nvidia.com>
-         <CAPDyKFoip8gFssftJKzVHD9PAk+j=Z1CTo=0uY9cGASzW8VRJg@mail.gmail.com>
+        <CAPDyKFoip8gFssftJKzVHD9PAk+j=Z1CTo=0uY9cGASzW8VRJg@mail.gmail.com>
+        <1531446183.5479.14.camel@toradex.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="US-ASCII"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFoip8gFssftJKzVHD9PAk+j=Z1CTo=0uY9cGASzW8VRJg@mail.gmail.com>
-Content-Language: en-US
-Content-ID: <9F5FCC96CB214F4A8EB39CE0D1FEDCB8@eurprd05.prod.outlook.com>
+In-Reply-To: <1531446183.5479.14.camel@toradex.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "avienamo@nvidia.com" <avienamo@nvidia.com>, Stefan Agner <stefan.agner@toradex.com>
-Cc: "jonathanh@nvidia.com" <jonathanh@nvidia.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "thierry.reding@gmail.com" <thierry.reding@gmail.com>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>
+To: Marcel Ziswiler <marcel.ziswiler@toradex.com>
+Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, Stefan Agner <stefan.agner@toradex.com>, "jonathanh@nvidia.com" <jonathanh@nvidia.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "thierry.reding@gmail.com" <thierry.reding@gmail.com>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-T24gTW9uLCAyMDE4LTA3LTAyIGF0IDE1OjE2ICswMjAwLCBVbGYgSGFuc3NvbiB3cm90ZToNCj4g
-T24gNCBKdW5lIDIwMTggYXQgMTc6MzUsIEFhcG8gVmllbmFtbyA8YXZpZW5hbW9AbnZpZGlhLmNv
-bT4gd3JvdGU6DQo+ID4gVGhlIHNkaGNpIGdldF9tYXhfY2xvY2sgY2FsbGJhY2sgaXMgc2V0IHRv
-DQo+ID4gc2RoY2lfcGx0Zm1fY2xrX2dldF9tYXhfY2xvY2sNCj4gPiBhbmQgdGVncmFfc2RoY2lf
-Z2V0X21heF9jbG9jayBpcyByZW1vdmVkLiBJdCBhcHBlYXJzIHRoYXQgdGhlDQo+ID4gc2hkY2kt
-dGVncmEgc3BlY2lmaWMgY2FsbGJhY2sgd2FzIG9yaWdpbmFsbHkgaW50cm9kdWNlZCBkdWUgdG8g
-dGhlDQo+ID4gcmVxdWlyZW1lbnQgdGhhdCB0aGUgaG9zdCBjbG9jayBoYXMgdG8gYmUgdHdpY2Ug
-dGhlIGJ1cyBjbG9jayBvbg0KPiA+IEREUjUwDQo+ID4gbW9kZS4gQXMgZmFyIGFzIEkgY2FuIHRl
-bGwgdGhlIG9ubHkgZWZmZWN0IHRoZSByZW1vdmFsIGhhcyBvbiBERFI1MA0KPiA+IG1vZGUNCj4g
-PiBpcyBpbiBjYXNlcyB3aGVyZSB0aGUgcGFyZW50IGNsb2NrIGlzIHVuYWJsZSB0byBzdXBwbHkg
-dGhlDQo+ID4gcmVxdWVzdGVkDQo+ID4gY2xvY2sgcmF0ZSwgY2F1c2luZyB0aGUgRERSNTAgbW9k
-ZSB0byBydW4gYXQgYSBsb3dlciBmcmVxdWVuY3kuDQo+ID4gQ3VycmVudGx5IHRoZSBERFI1MCBt
-b2RlIGlzbid0IGVuYWJsZWQgb24gYW55IG9mIHRoZSBTb0NzIGFuZCB3b3VsZA0KPiA+IGFsc28N
-Cj4gPiByZXF1aXJlIGNvbmZpZ3VyaW5nIHRoZSBTREhDSSBjbG9jayBkaXZpZGVyIHJlZ2lzdGVy
-IHRvIGZ1bmN0aW9uDQo+ID4gcHJvcGVybHkuDQo+ID4gDQo+ID4gVGhlIHByb2JsZW0gd2l0aCB0
-ZWdyYV9zZGhjaV9nZXRfbWF4X2Nsb2NrIGlzIHRoYXQgaXQgZGl2aWRlcyB0aGUNCj4gPiBjbG9j
-aw0KPiA+IHJhdGUgYnkgdHdvIGFuZCB0aHVzIGFydGlmaWNpYWxseSBsaW1pdHMgdGhlIG1heGlt
-dW0gZnJlcXVlbmN5IG9mDQo+ID4gZmFzdGVyDQo+ID4gc2lnbmFsaW5nIG1vZGVzIHdoaWNoIGRv
-bid0IGhhdmUgdGhlIGhvc3QtYnVzIGZyZXF1ZW5jeSByYXRpbw0KPiA+IHJlcXVpcmVtZW50DQo+
-ID4gb2YgRERSNTAgc3VjaCBhcyBTRFIxMDQgYW5kIEhTMjAwLiBGdXJ0aGVybW9yZSwgdGhlIGNh
-bGwgdG8NCj4gPiBjbGtfcm91bmRfcmF0ZSgpIG1heSByZXR1cm4gYW4gZXJyb3Igd2hpY2ggaXNu
-J3QgaGFuZGxlZCBieQ0KPiA+IHRlZ3JhX3NkaGNpX2dldF9tYXhfY2xvY2suDQo+ID4gDQo+ID4g
-U2lnbmVkLW9mZi1ieTogQWFwbyBWaWVuYW1vIDxhdmllbmFtb0BudmlkaWEuY29tPg0KPiANCj4g
-VGhhbmtzLCBhcHBsaWVkIGZvciBuZXh0IQ0KPiANCj4gS2luZCByZWdhcmRzDQo+IFVmZmUNCj4g
-DQo+ID4gLS0tDQo+ID4gIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktdGVncmEuYyB8IDE1ICsrLS0t
-LS0tLS0tLS0tLQ0KPiA+ICAxIGZpbGUgY2hhbmdlZCwgMiBpbnNlcnRpb25zKCspLCAxMyBkZWxl
-dGlvbnMoLSkNCj4gPiANCj4gPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS10
-ZWdyYS5jDQo+ID4gYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLXRlZ3JhLmMNCj4gPiBpbmRleCA5
-NzBkMzhmNi4uYzg3NDViNSAxMDA2NDQNCj4gPiAtLS0gYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNp
-LXRlZ3JhLmMNCj4gPiArKysgYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLXRlZ3JhLmMNCj4gPiBA
-QCAtMjM0LDE3ICsyMzQsNiBAQCBzdGF0aWMgdm9pZA0KPiA+IHRlZ3JhX3NkaGNpX3NldF91aHNf
-c2lnbmFsaW5nKHN0cnVjdCBzZGhjaV9ob3N0ICpob3N0LA0KPiA+ICAgICAgICAgc2RoY2lfc2V0
-X3Voc19zaWduYWxpbmcoaG9zdCwgdGltaW5nKTsNCj4gPiAgfQ0KPiA+IA0KPiA+IC1zdGF0aWMg
-dW5zaWduZWQgaW50IHRlZ3JhX3NkaGNpX2dldF9tYXhfY2xvY2soc3RydWN0IHNkaGNpX2hvc3QN
-Cj4gPiAqaG9zdCkNCj4gPiAtew0KPiA+IC0gICAgICAgc3RydWN0IHNkaGNpX3BsdGZtX2hvc3Qg
-KnBsdGZtX2hvc3QgPSBzZGhjaV9wcml2KGhvc3QpOw0KPiA+IC0NCj4gPiAtICAgICAgIC8qDQo+
-ID4gLSAgICAgICAgKiBERFIgbW9kZXMgcmVxdWlyZSB0aGUgaG9zdCB0byBydW4gYXQgZG91Ymxl
-IHRoZSBjYXJkDQo+ID4gZnJlcXVlbmN5LCBzbw0KPiA+IC0gICAgICAgICogdGhlIG1heGltdW0g
-cmF0ZSB3ZSBjYW4gc3VwcG9ydCBpcyBoYWxmIG9mIHRoZSBtb2R1bGUNCj4gPiBpbnB1dCBjbG9j
-ay4NCj4gPiAtICAgICAgICAqLw0KPiA+IC0gICAgICAgcmV0dXJuIGNsa19yb3VuZF9yYXRlKHBs
-dGZtX2hvc3QtPmNsaywgVUlOVF9NQVgpIC8gMjsNCj4gPiAtfQ0KPiA+IC0NCj4gPiAgc3RhdGlj
-IHZvaWQgdGVncmFfc2RoY2lfc2V0X3RhcChzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdCwgdW5zaWdu
-ZWQNCj4gPiBpbnQgdGFwKQ0KPiA+ICB7DQo+ID4gICAgICAgICB1MzIgcmVnOw0KPiA+IEBAIC0z
-MDksNyArMjk4LDcgQEAgc3RhdGljIGNvbnN0IHN0cnVjdCBzZGhjaV9vcHMgdGVncmFfc2RoY2lf
-b3BzID0NCj4gPiB7DQo+ID4gICAgICAgICAucGxhdGZvcm1fZXhlY3V0ZV90dW5pbmcgPSB0ZWdy
-YV9zZGhjaV9leGVjdXRlX3R1bmluZywNCj4gPiAgICAgICAgIC5zZXRfdWhzX3NpZ25hbGluZyA9
-IHRlZ3JhX3NkaGNpX3NldF91aHNfc2lnbmFsaW5nLA0KPiA+ICAgICAgICAgLnZvbHRhZ2Vfc3dp
-dGNoID0gdGVncmFfc2RoY2lfdm9sdGFnZV9zd2l0Y2gsDQo+ID4gLSAgICAgICAuZ2V0X21heF9j
-bG9jayA9IHRlZ3JhX3NkaGNpX2dldF9tYXhfY2xvY2ssDQo+ID4gKyAgICAgICAuZ2V0X21heF9j
-bG9jayA9IHNkaGNpX3BsdGZtX2Nsa19nZXRfbWF4X2Nsb2NrLA0KPiA+ICB9Ow0KPiA+IA0KPiA+
-ICBzdGF0aWMgY29uc3Qgc3RydWN0IHNkaGNpX3BsdGZtX2RhdGEgc2RoY2lfdGVncmEyMF9wZGF0
-YSA9IHsNCj4gPiBAQCAtMzU3LDcgKzM0Niw3IEBAIHN0YXRpYyBjb25zdCBzdHJ1Y3Qgc2RoY2lf
-b3BzDQo+ID4gdGVncmExMTRfc2RoY2lfb3BzID0gew0KPiA+ICAgICAgICAgLnBsYXRmb3JtX2V4
-ZWN1dGVfdHVuaW5nID0gdGVncmFfc2RoY2lfZXhlY3V0ZV90dW5pbmcsDQo+ID4gICAgICAgICAu
-c2V0X3Voc19zaWduYWxpbmcgPSB0ZWdyYV9zZGhjaV9zZXRfdWhzX3NpZ25hbGluZywNCj4gPiAg
-ICAgICAgIC52b2x0YWdlX3N3aXRjaCA9IHRlZ3JhX3NkaGNpX3ZvbHRhZ2Vfc3dpdGNoLA0KPiA+
-IC0gICAgICAgLmdldF9tYXhfY2xvY2sgPSB0ZWdyYV9zZGhjaV9nZXRfbWF4X2Nsb2NrLA0KPiA+
-ICsgICAgICAgLmdldF9tYXhfY2xvY2sgPSBzZGhjaV9wbHRmbV9jbGtfZ2V0X21heF9jbG9jaywN
-Cj4gPiAgfTsNCj4gPiANCj4gPiAgc3RhdGljIGNvbnN0IHN0cnVjdCBzZGhjaV9wbHRmbV9kYXRh
-IHNkaGNpX3RlZ3JhMTE0X3BkYXRhID0gew0KPiA+IC0tDQo+ID4gMi43LjQNCg0KSG0sIGZvciB1
-cyB0aGlzIGRlZmluaXRlbHkgYnJlYWtzIHN0dWZmLiBXaGlsZSB1c2luZyBTdGVmYW4ncyBwYXRj
-aCBzZXQNClsxXSB3ZSBtYXkgbm90IG9ubHkgcnVuIGVNTUMgYXQgRERSNTIgZXZlbiBTRCBjYXJk
-cyBydW4gc3RhYmxlIGF0DQpTRFIxMDQuIFdpdGggdGhpcyBwYXRjaCBob3dldmVyIHRoZSBjbG9j
-ayBnZXRzIGNyaXBwbGVkIHRvIDQ1LjMzIHJlc3AuDQo0OCBNSHogYWx3YXlzLiBUaGlzIGlzIG9i
-c2VydmVkIGJvdGggb24gQXBhbGlzL0NvbGlicmkgVDMwIGFzIHdlbGwgYXMNCkFwYWxpcyBUSzEu
-DQoNCkN1cnJlbnQgbmV4dC0yMDE4MDcxMiBqdXN0IHdpdGggU3RlZmFuJ3MgMyBwYXRjaGVzOg0K
-DQpyb290QGFwYWxpcy10MzA6fiMgY2F0IC9zeXMva2VybmVsL2RlYnVnL21tYzEvaW9zIA0KY2xv
-Y2s6ICAgICAgICAgIDQ4MDAwMDAwIEh6DQphY3R1YWwgY2xvY2s6ICAgNDUzMzMzMzMgSHoNCnZk
-ZDogICAgICAgICAgICAyMSAoMy4zIH4gMy40IFYpDQpidXMgbW9kZTogICAgICAgMiAocHVzaC1w
-dWxsKQ0KY2hpcCBzZWxlY3Q6ICAgIDAgKGRvbid0IGNhcmUpDQpwb3dlciBtb2RlOiAgICAgMiAo
-b24pDQpidXMgd2lkdGg6ICAgICAgMyAoOCBiaXRzKQ0KdGltaW5nIHNwZWM6ICAgIDggKG1tYyBE
-RFI1MikNCnNpZ25hbCB2b2x0YWdlOiAxICgxLjgwIFYpDQpkcml2ZXIgdHlwZTogICAgMCAoZHJp
-dmVyIHR5cGUgQikNCnJvb3RAYXBhbGlzLXQzMDp+IyBoZHBhcm0gLXQgL2Rldi9tbWNibGsxDQoN
-Ci9kZXYvbW1jYmxrMToNCiBUaW1pbmcgYnVmZmVyZWQgZGlzayByZWFkczogMjE4IE1CIGluICAz
-LjAzIHNlY29uZHMgPSAgNzEuOTUgTUIvc2VjDQoNCnJvb3RAYXBhbGlzLXQzMDp+IyBjYXQgL3N5
-cy9rZXJuZWwvZGVidWcvbW1jMi9pb3MgDQpjbG9jazogICAgICAgICAgNDgwMDAwMDAgSHoNCmFj
-dHVhbCBjbG9jazogICA0ODAwMDAwMCBIeg0KdmRkOiAgICAgICAgICAgIDIxICgzLjMgfiAzLjQg
-VikNCmJ1cyBtb2RlOiAgICAgICAyIChwdXNoLXB1bGwpDQpjaGlwIHNlbGVjdDogICAgMCAoZG9u
-J3QgY2FyZSkNCnBvd2VyIG1vZGU6ICAgICAyIChvbikNCmJ1cyB3aWR0aDogICAgICAyICg0IGJp
-dHMpDQp0aW1pbmcgc3BlYzogICAgNiAoc2QgdWhzIFNEUjEwNCkNCnNpZ25hbCB2b2x0YWdlOiAx
-ICgxLjgwIFYpDQpkcml2ZXIgdHlwZTogICAgMCAoZHJpdmVyIHR5cGUgQikNCnJvb3RAYXBhbGlz
-LXQzMDp+IyBoZHBhcm0gLXQgL2Rldi9tbWNibGsyDQoNCi9kZXYvbW1jYmxrMjoNCiBUaW1pbmcg
-YnVmZmVyZWQgZGlzayByZWFkczogIDY2IE1CIGluICAzLjA2IHNlY29uZHMgPSAgMjEuNjAgTUIv
-c2VjDQoNCkFuZCB3aXRoIHRoaXMgcGF0Y2ggcmV2ZXJ0ZWQgaXQgd29ya3MgYXMgZXhwZWN0ZWQg
-YWdhaW46DQoNCnJvb3RAYXBhbGlzLXQzMDp+IyBjYXQgL3N5cy9rZXJuZWwvZGVidWcvbW1jMS9p
-b3MgDQpjbG9jazogICAgICAgICAgNTIwMDAwMDAgSHoNCmFjdHVhbCBjbG9jazogICA1MTAwMDAw
-MCBIeg0KdmRkOiAgICAgICAgICAgIDIxICgzLjMgfiAzLjQgVikNCmJ1cyBtb2RlOiAgICAgICAy
-IChwdXNoLXB1bGwpDQpjaGlwIHNlbGVjdDogICAgMCAoZG9uJ3QgY2FyZSkNCnBvd2VyIG1vZGU6
-ICAgICAyIChvbikNCmJ1cyB3aWR0aDogICAgICAzICg4IGJpdHMpDQp0aW1pbmcgc3BlYzogICAg
-OCAobW1jIEREUjUyKQ0Kc2lnbmFsIHZvbHRhZ2U6IDEgKDEuODAgVikNCmRyaXZlciB0eXBlOiAg
-ICAwIChkcml2ZXIgdHlwZSBCKQ0Kcm9vdEBhcGFsaXMtdDMwOn4jIGhkcGFybSAtdCAvZGV2L21t
-Y2JsazENCg0KL2Rldi9tbWNibGsxOg0KIFRpbWluZyBidWZmZXJlZCBkaXNrIHJlYWRzOiAyNDAg
-TUIgaW4gIDMuMDIgc2Vjb25kcyA9ICA3OS41MCBNQi9zZWMNCg0Kcm9vdEBhcGFsaXMtdDMwOn4j
-IGNhdCAvc3lzL2tlcm5lbC9kZWJ1Zy9tbWMyL2lvcyANCmNsb2NrOiAgICAgICAgICAyMDQwMDAw
-MDAgSHoNCmFjdHVhbCBjbG9jazogICAyMDQwMDAwMDAgSHoNCnZkZDogICAgICAgICAgICAyMSAo
-My4zIH4gMy40IFYpDQpidXMgbW9kZTogICAgICAgMiAocHVzaC1wdWxsKQ0KY2hpcCBzZWxlY3Q6
-ICAgIDAgKGRvbid0IGNhcmUpDQpwb3dlciBtb2RlOiAgICAgMiAob24pDQpidXMgd2lkdGg6ICAg
-ICAgMiAoNCBiaXRzKQ0KdGltaW5nIHNwZWM6ICAgIDYgKHNkIHVocyBTRFIxMDQpDQpzaWduYWwg
-dm9sdGFnZTogMSAoMS44MCBWKQ0KZHJpdmVyIHR5cGU6ICAgIDAgKGRyaXZlciB0eXBlIEIpDQpy
-b290QGFwYWxpcy10MzA6fiMgaGRwYXJtIC10IC9kZXYvbW1jYmxrMg0KDQovZGV2L21tY2JsazI6
-DQogVGltaW5nIGJ1ZmZlcmVkIGRpc2sgcmVhZHM6IDI1OCBNQiBpbiAgMy4wMSBzZWNvbmRzID0g
-IDg1LjU4IE1CL3NlYw0KDQpbMV0gaHR0cHM6Ly9sb3JlLmtlcm5lbC5vcmcvbGttbC8yMDE4MDcx
-MjA3MzkwNC40NzA1LTEtc3RlZmFuQGFnbmVyLmNo
+On Fri, 13 Jul 2018 01:43:05 +0000
+Marcel Ziswiler <marcel.ziswiler@toradex.com> wrote:
+
+> On Mon, 2018-07-02 at 15:16 +0200, Ulf Hansson wrote:
+> > On 4 June 2018 at 17:35, Aapo Vienamo <avienamo@nvidia.com> wrote:  
+> > > The sdhci get_max_clock callback is set to
+> > > sdhci_pltfm_clk_get_max_clock
+> > > and tegra_sdhci_get_max_clock is removed. It appears that the
+> > > shdci-tegra specific callback was originally introduced due to the
+> > > requirement that the host clock has to be twice the bus clock on
+> > > DDR50
+> > > mode. As far as I can tell the only effect the removal has on DDR50
+> > > mode
+> > > is in cases where the parent clock is unable to supply the
+> > > requested
+> > > clock rate, causing the DDR50 mode to run at a lower frequency.
+> > > Currently the DDR50 mode isn't enabled on any of the SoCs and would
+> > > also
+> > > require configuring the SDHCI clock divider register to function
+> > > properly.
+> > > 
+> > > The problem with tegra_sdhci_get_max_clock is that it divides the
+> > > clock
+> > > rate by two and thus artificially limits the maximum frequency of
+> > > faster
+> > > signaling modes which don't have the host-bus frequency ratio
+> > > requirement
+> > > of DDR50 such as SDR104 and HS200. Furthermore, the call to
+> > > clk_round_rate() may return an error which isn't handled by
+> > > tegra_sdhci_get_max_clock.
+> > > 
+> > > Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>  
+> > 
+> > Thanks, applied for next!
+> > 
+> > Kind regards
+> > Uffe
+> >   
+> > > ---
+> > >  drivers/mmc/host/sdhci-tegra.c | 15 ++-------------
+> > >  1 file changed, 2 insertions(+), 13 deletions(-)
+> > > 
+> > > diff --git a/drivers/mmc/host/sdhci-tegra.c
+> > > b/drivers/mmc/host/sdhci-tegra.c
+> > > index 970d38f6..c8745b5 100644
+> > > --- a/drivers/mmc/host/sdhci-tegra.c
+> > > +++ b/drivers/mmc/host/sdhci-tegra.c
+> > > @@ -234,17 +234,6 @@ static void
+> > > tegra_sdhci_set_uhs_signaling(struct sdhci_host *host,
+> > >         sdhci_set_uhs_signaling(host, timing);
+> > >  }
+> > > 
+> > > -static unsigned int tegra_sdhci_get_max_clock(struct sdhci_host
+> > > *host)
+> > > -{
+> > > -       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> > > -
+> > > -       /*
+> > > -        * DDR modes require the host to run at double the card
+> > > frequency, so
+> > > -        * the maximum rate we can support is half of the module
+> > > input clock.
+> > > -        */
+> > > -       return clk_round_rate(pltfm_host->clk, UINT_MAX) / 2;
+> > > -}
+> > > -
+> > >  static void tegra_sdhci_set_tap(struct sdhci_host *host, unsigned
+> > > int tap)
+> > >  {
+> > >         u32 reg;
+> > > @@ -309,7 +298,7 @@ static const struct sdhci_ops tegra_sdhci_ops =
+> > > {
+> > >         .platform_execute_tuning = tegra_sdhci_execute_tuning,
+> > >         .set_uhs_signaling = tegra_sdhci_set_uhs_signaling,
+> > >         .voltage_switch = tegra_sdhci_voltage_switch,
+> > > -       .get_max_clock = tegra_sdhci_get_max_clock,
+> > > +       .get_max_clock = sdhci_pltfm_clk_get_max_clock,
+> > >  };
+> > > 
+> > >  static const struct sdhci_pltfm_data sdhci_tegra20_pdata = {
+> > > @@ -357,7 +346,7 @@ static const struct sdhci_ops
+> > > tegra114_sdhci_ops = {
+> > >         .platform_execute_tuning = tegra_sdhci_execute_tuning,
+> > >         .set_uhs_signaling = tegra_sdhci_set_uhs_signaling,
+> > >         .voltage_switch = tegra_sdhci_voltage_switch,
+> > > -       .get_max_clock = tegra_sdhci_get_max_clock,
+> > > +       .get_max_clock = sdhci_pltfm_clk_get_max_clock,
+> > >  };
+> > > 
+> > >  static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
+> > > --
+> > > 2.7.4  
+> 
+> Hm, for us this definitely breaks stuff. While using Stefan's patch set
+> [1] we may not only run eMMC at DDR52 even SD cards run stable at
+> SDR104. With this patch however the clock gets crippled to 45.33 resp.
+> 48 MHz always. This is observed both on Apalis/Colibri T30 as well as
+> Apalis TK1.
+
+Well, strictly speaking this isn't a regression as DDR52/50 modes were
+not enable at the time when the patch was applied. However, these issues
+should be addressed properly none the less.
+
+The patch was written in preparation of implementing support for higher
+speed modes like HS200 and HS400, where limiting the max_clock like that
+isn't an option. Some other solution than reverting the patch has to be
+found.
+
+> Current next-20180712 just with Stefan's 3 patches:
+> 
+> root@apalis-t30:~# cat /sys/kernel/debug/mmc1/ios 
+> clock:          48000000 Hz
+> actual clock:   45333333 Hz
+> vdd:            21 (3.3 ~ 3.4 V)
+> bus mode:       2 (push-pull)
+> chip select:    0 (don't care)
+> power mode:     2 (on)
+> bus width:      3 (8 bits)
+> timing spec:    8 (mmc DDR52)
+> signal voltage: 1 (1.80 V)
+> driver type:    0 (driver type B)
+> root@apalis-t30:~# hdparm -t /dev/mmcblk1
+> 
+> /dev/mmcblk1:
+>  Timing buffered disk reads: 218 MB in  3.03 seconds =  71.95 MB/sec
+> 
+> root@apalis-t30:~# cat /sys/kernel/debug/mmc2/ios 
+> clock:          48000000 Hz
+> actual clock:   48000000 Hz
+> vdd:            21 (3.3 ~ 3.4 V)
+> bus mode:       2 (push-pull)
+> chip select:    0 (don't care)
+> power mode:     2 (on)
+> bus width:      2 (4 bits)
+> timing spec:    6 (sd uhs SDR104)
+> signal voltage: 1 (1.80 V)
+> driver type:    0 (driver type B)
+> root@apalis-t30:~# hdparm -t /dev/mmcblk2
+> 
+> /dev/mmcblk2:
+>  Timing buffered disk reads:  66 MB in  3.06 seconds =  21.60 MB/sec
+> 
+> And with this patch reverted it works as expected again:
+> 
+> root@apalis-t30:~# cat /sys/kernel/debug/mmc1/ios 
+> clock:          52000000 Hz
+> actual clock:   51000000 Hz
+> vdd:            21 (3.3 ~ 3.4 V)
+> bus mode:       2 (push-pull)
+> chip select:    0 (don't care)
+> power mode:     2 (on)
+> bus width:      3 (8 bits)
+> timing spec:    8 (mmc DDR52)
+> signal voltage: 1 (1.80 V)
+> driver type:    0 (driver type B)
+> root@apalis-t30:~# hdparm -t /dev/mmcblk1
+> 
+> /dev/mmcblk1:
+>  Timing buffered disk reads: 240 MB in  3.02 seconds =  79.50 MB/sec
+> 
+> root@apalis-t30:~# cat /sys/kernel/debug/mmc2/ios 
+> clock:          204000000 Hz
+> actual clock:   204000000 Hz
+> vdd:            21 (3.3 ~ 3.4 V)
+> bus mode:       2 (push-pull)
+> chip select:    0 (don't care)
+> power mode:     2 (on)
+> bus width:      2 (4 bits)
+> timing spec:    6 (sd uhs SDR104)
+> signal voltage: 1 (1.80 V)
+> driver type:    0 (driver type B)
+> root@apalis-t30:~# hdparm -t /dev/mmcblk2
+> 
+> /dev/mmcblk2:
+>  Timing buffered disk reads: 258 MB in  3.01 seconds =  85.58 MB/sec
+> 
+> [1] https://lore.kernel.org/lkml/20180712073904.4705-1-stefan@agner.ch
+
+The fact that you're getting totally different clocks, especially on
+SDR104, doesn't make much sense. I'll try to reproduce this and track
+down what's going on.
+
+ -Aapo
