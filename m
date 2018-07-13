@@ -1,53 +1,78 @@
-From: Aapo Vienamo <avienamo@nvidia.com>
+From: Marcel Ziswiler <marcel.ziswiler@toradex.com>
 Subject: Re: [PATCH] mmc: tegra: Add and use tegra_sdhci_get_max_clock()
-Date: Fri, 13 Jul 2018 18:39:25 +0300
-Message-ID: <20180713183925.67d7d5f4@dhcp-10-21-25-168>
+Date: Fri, 13 Jul 2018 15:42:36 +0000
+Message-ID: <1531496554.5479.37.camel@toradex.com>
 References: <1531487865-17427-1-git-send-email-avienamo@nvidia.com>
-        <6af41450-4770-3b2d-05b8-914f90743a7e@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <6af41450-4770-3b2d-05b8-914f90743a7e@nvidia.com>
+In-Reply-To: <1531487865-17427-1-git-send-email-avienamo@nvidia.com>
+Content-Language: en-US
+Content-ID: <70698C4AA526F74D8CE98F940EB91637@eurprd05.prod.outlook.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jon Hunter <jonathanh@nvidia.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Thierry Reding <thierry.reding@gmail.com>, Marcel Ziswiler <marcel.ziswiler@toradex.com>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
+To: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "avienamo@nvidia.com" <avienamo@nvidia.com>, "jonathanh@nvidia.com" <jonathanh@nvidia.com>, "thierry.reding@gmail.com" <thierry.reding@gmail.com>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, Stefan Agner <stefan.agner@toradex.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, 13 Jul 2018 15:01:21 +0100
-Jon Hunter <jonathanh@nvidia.com> wrote:
-
-> On 13/07/18 14:17, Aapo Vienamo wrote:
-> > Implement and use tegra_sdhci_get_max_clock() which returns the true
-> > maximum host clock rate. The issue with tegra_sdhci_get_max_clock() is  
-> 
-> Don't you mean sdhci_pltfm_clk_get_max_clock above? Does this function
-> need fixing then? Or at least should there be another variant added
-> because there is nothing Tegra specific we are doing below?
-
-There are several drivers which use sdhci_pltfm_clk_get_max_clock() in
-its current state and changing it could have unforeseen side-effects on
-drivers which I'm unable to test. Adding another variant of 
-sdhci_pltfm_clk_get_max_clock() would probably be a more feasible
-approach.
-
-> > that it returns the current clock rate of the host instead of the
-> > maximum one, which can lead to unnecessarily small clock rates.
-> > 
-> > This differs from the previous implementation of
-> > tegra_sdhci_get_max_clock() in that it doesn't divide the result by two.  
-> 
-> Why?
-
-As far as I can tell the original tegra_sdhci_get_max_clock() was
-implemented this way in order to force sdhci_calc_clk() to always set
-the SDHCI clock divider to two on sdhci_set_clock(). The requirement to
-configure the SDHCI divider to two is specific to DDR50/52 modes on
-Tegra.
-
-The .get_max_clock() callback retuning half of the actual maximum will
-result in HS200 and HS400 modes not being able to run at full speed.
-Another mechanism to enforce the divider requirement has to be figured
-out in order to enable DDR50/52 modes on Tegra SoCs.
-
- -Aapo
+T24gRnJpLCAyMDE4LTA3LTEzIGF0IDE2OjE3ICswMzAwLCBBYXBvIFZpZW5hbW8gd3JvdGU6DQo+
+IEltcGxlbWVudCBhbmQgdXNlIHRlZ3JhX3NkaGNpX2dldF9tYXhfY2xvY2soKSB3aGljaCByZXR1
+cm5zIHRoZSB0cnVlDQo+IG1heGltdW0gaG9zdCBjbG9jayByYXRlLiBUaGUgaXNzdWUgd2l0aCB0
+ZWdyYV9zZGhjaV9nZXRfbWF4X2Nsb2NrKCkNCj4gaXMNCj4gdGhhdCBpdCByZXR1cm5zIHRoZSBj
+dXJyZW50IGNsb2NrIHJhdGUgb2YgdGhlIGhvc3QgaW5zdGVhZCBvZiB0aGUNCj4gbWF4aW11bSBv
+bmUsIHdoaWNoIGNhbiBsZWFkIHRvIHVubmVjZXNzYXJpbHkgc21hbGwgY2xvY2sgcmF0ZXMuDQo+
+IA0KPiBUaGlzIGRpZmZlcnMgZnJvbSB0aGUgcHJldmlvdXMgaW1wbGVtZW50YXRpb24gb2YNCj4g
+dGVncmFfc2RoY2lfZ2V0X21heF9jbG9jaygpIGluIHRoYXQgaXQgZG9lc24ndCBkaXZpZGUgdGhl
+IHJlc3VsdCBieQ0KPiB0d28uDQo+IA0KPiBTaWduZWQtb2ZmLWJ5OiBBYXBvIFZpZW5hbW8gPGF2
+aWVuYW1vQG52aWRpYS5jb20+DQoNClRoZSB3aG9sZSBzZXJpZXMgc3RyZXNzLXRlc3RlZCBvbiB2
+YXJpb3VzIEFwYWxpcyBUMzAgYXMgd2VsbCBhcyBDb2xpYnJpDQpUMzAgbW9kdWxlczoNCg0KVGVz
+dGVkLWJ5OiBNYXJjZWwgWmlzd2lsZXIgPG1hcmNlbC56aXN3aWxlckB0b3JhZGV4LmNvbT4NCg0K
+PiAtLS0NCj4gIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktdGVncmEuYyB8IDExICsrKysrKysrKy0t
+DQo+ICAxIGZpbGUgY2hhbmdlZCwgOSBpbnNlcnRpb25zKCspLCAyIGRlbGV0aW9ucygtKQ0KPiAN
+Cj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktdGVncmEuYyBiL2RyaXZlcnMv
+bW1jL2hvc3Qvc2RoY2ktDQo+IHRlZ3JhLmMNCj4gaW5kZXggMjhiOThlMi4uZGRmMDAxNjYgMTAw
+NjQ0DQo+IC0tLSBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktdGVncmEuYw0KPiArKysgYi9kcml2
+ZXJzL21tYy9ob3N0L3NkaGNpLXRlZ3JhLmMNCj4gQEAgLTIzNSw2ICsyMzUsMTMgQEAgc3RhdGlj
+IHZvaWQgdGVncmFfc2RoY2lfc2V0X3Voc19zaWduYWxpbmcoc3RydWN0DQo+IHNkaGNpX2hvc3Qg
+Kmhvc3QsDQo+ICAJc2RoY2lfc2V0X3Voc19zaWduYWxpbmcoaG9zdCwgdGltaW5nKTsNCj4gIH0N
+Cj4gIA0KPiArc3RhdGljIHVuc2lnbmVkIGludCB0ZWdyYV9zZGhjaV9nZXRfbWF4X2Nsb2NrKHN0
+cnVjdCBzZGhjaV9ob3N0DQo+ICpob3N0KQ0KPiArew0KPiArCXN0cnVjdCBzZGhjaV9wbHRmbV9o
+b3N0ICpwbHRmbV9ob3N0ID0gc2RoY2lfcHJpdihob3N0KTsNCj4gKw0KPiArCXJldHVybiBjbGtf
+cm91bmRfcmF0ZShwbHRmbV9ob3N0LT5jbGssIFVJTlRfTUFYKTsNCj4gK30NCj4gKw0KPiAgc3Rh
+dGljIHZvaWQgdGVncmFfc2RoY2lfc2V0X3RhcChzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdCwgdW5z
+aWduZWQNCj4gaW50IHRhcCkNCj4gIHsNCj4gIAl1MzIgcmVnOw0KPiBAQCAtMjk5LDcgKzMwNiw3
+IEBAIHN0YXRpYyBjb25zdCBzdHJ1Y3Qgc2RoY2lfb3BzIHRlZ3JhX3NkaGNpX29wcyA9IHsNCj4g
+IAkucGxhdGZvcm1fZXhlY3V0ZV90dW5pbmcgPSB0ZWdyYV9zZGhjaV9leGVjdXRlX3R1bmluZywN
+Cj4gIAkuc2V0X3Voc19zaWduYWxpbmcgPSB0ZWdyYV9zZGhjaV9zZXRfdWhzX3NpZ25hbGluZywN
+Cj4gIAkudm9sdGFnZV9zd2l0Y2ggPSB0ZWdyYV9zZGhjaV92b2x0YWdlX3N3aXRjaCwNCj4gLQku
+Z2V0X21heF9jbG9jayA9IHNkaGNpX3BsdGZtX2Nsa19nZXRfbWF4X2Nsb2NrLA0KPiArCS5nZXRf
+bWF4X2Nsb2NrID0gdGVncmFfc2RoY2lfZ2V0X21heF9jbG9jaywNCj4gIH07DQo+ICANCj4gIHN0
+YXRpYyBjb25zdCBzdHJ1Y3Qgc2RoY2lfcGx0Zm1fZGF0YSBzZGhjaV90ZWdyYTIwX3BkYXRhID0g
+ew0KPiBAQCAtMzU2LDcgKzM2Myw3IEBAIHN0YXRpYyBjb25zdCBzdHJ1Y3Qgc2RoY2lfb3BzIHRl
+Z3JhMTE0X3NkaGNpX29wcw0KPiA9IHsNCj4gIAkucGxhdGZvcm1fZXhlY3V0ZV90dW5pbmcgPSB0
+ZWdyYV9zZGhjaV9leGVjdXRlX3R1bmluZywNCj4gIAkuc2V0X3Voc19zaWduYWxpbmcgPSB0ZWdy
+YV9zZGhjaV9zZXRfdWhzX3NpZ25hbGluZywNCj4gIAkudm9sdGFnZV9zd2l0Y2ggPSB0ZWdyYV9z
+ZGhjaV92b2x0YWdlX3N3aXRjaCwNCj4gLQkuZ2V0X21heF9jbG9jayA9IHNkaGNpX3BsdGZtX2Ns
+a19nZXRfbWF4X2Nsb2NrLA0KPiArCS5nZXRfbWF4X2Nsb2NrID0gdGVncmFfc2RoY2lfZ2V0X21h
+eF9jbG9jaywNCj4gIH07DQo+ICANCj4gIHN0YXRpYyBjb25zdCBzdHJ1Y3Qgc2RoY2lfcGx0Zm1f
+ZGF0YSBzZGhjaV90ZWdyYTExNF9wZGF0YSA9IHsNCg0KV29ya3MgcXVpdGUgbmljZWx5IG9uIHRv
+ZGF5J3MgbmV4dCB0b2dldGhlciB3aXRoIFN0ZWZhbidzIHBhdGNoIHNldCBbMV06DQoNCnJvb3RA
+YXBhbGlzLXQzMDp+IyBjYXQgL3N5cy9rZXJuZWwvZGVidWcvbW1jMS9pb3MgDQpjbG9jazogICAg
+ICAgICAgNTIwMDAwMDAgSHoNCmFjdHVhbCBjbG9jazogICA1MTAwMDAwMCBIeg0KdmRkOiAgICAg
+ICAgICAgIDIxICgzLjMgfiAzLjQgVikNCmJ1cyBtb2RlOiAgICAgICAyIChwdXNoLXB1bGwpDQpj
+aGlwIHNlbGVjdDogICAgMCAoZG9uJ3QgY2FyZSkNCnBvd2VyIG1vZGU6ICAgICAyIChvbikNCmJ1
+cyB3aWR0aDogICAgICAzICg4IGJpdHMpDQp0aW1pbmcgc3BlYzogICAgOCAobW1jIEREUjUyKQ0K
+c2lnbmFsIHZvbHRhZ2U6IDEgKDEuODAgVikNCmRyaXZlciB0eXBlOiAgICAwIChkcml2ZXIgdHlw
+ZSBCKQ0Kcm9vdEBhcGFsaXMtdDMwOn4jIGhkcGFybSAtdCAvZGV2L21tY2JsazENCg0KL2Rldi9t
+bWNibGsxOg0KIFRpbWluZyBidWZmZXJlZCBkaXNrIHJlYWRzOiAyMzYgTUIgaW4gIDMuMDEgc2Vj
+b25kcyA9ICA3OC40MiBNQi9zZWMNCg0Kcm9vdEBjb2xpYnJpLXQzMDp+IyBjYXQgL3N5cy9rZXJu
+ZWwvZGVidWcvbW1jMC9pb3MgDQpjbG9jazogICAgICAgICAgNTIwMDAwMDAgSHoNCmFjdHVhbCBj
+bG9jazogICA1MTAwMDAwMCBIeg0KdmRkOiAgICAgICAgICAgIDIxICgzLjMgfiAzLjQgVikNCmJ1
+cyBtb2RlOiAgICAgICAyIChwdXNoLXB1bGwpDQpjaGlwIHNlbGVjdDogICAgMCAoZG9uJ3QgY2Fy
+ZSkNCnBvd2VyIG1vZGU6ICAgICAyIChvbikNCmJ1cyB3aWR0aDogICAgICAzICg4IGJpdHMpDQp0
+aW1pbmcgc3BlYzogICAgOCAobW1jIEREUjUyKQ0Kc2lnbmFsIHZvbHRhZ2U6IDEgKDEuODAgVikN
+CmRyaXZlciB0eXBlOiAgICAwIChkcml2ZXIgdHlwZSBCKQ0Kcm9vdEBjb2xpYnJpLXQzMDp+IyBo
+ZHBhcm0gLXQgL2Rldi9tbWNibGswDQoNCi9kZXYvbW1jYmxrMDoNCiBUaW1pbmcgYnVmZmVyZWQg
+ZGlzayByZWFkczogMTY4IE1CIGluICAzLjAwIHNlY29uZHMgPSAgNTUuOTkgTUIvc2VjDQoNClsx
+XSBodHRwczovL2xvcmUua2VybmVsLm9yZy9sa21sLzIwMTgwNzEyMDczOTA0LjQ3MDUtMS1zdGVm
+YW5AYWduZXIuY2g=
