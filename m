@@ -1,99 +1,63 @@
-From: Ludovic BARRE <ludovic.barre@st.com>
-Subject: Re: [PATCH 02/19] mmc: mmci: merge qcom dml feature into mmci dma
-Date: Fri, 13 Jul 2018 15:08:45 +0200
-Message-ID: <ed45398d-552c-7bae-d77a-4e0d99b21759@st.com>
-References: <1528809280-31116-1-git-send-email-ludovic.Barre@st.com>
- <1528809280-31116-3-git-send-email-ludovic.Barre@st.com>
- <CAPDyKFqOOvbNc79hdWhdS4pxkYrh48At-BLuGmX0jDMER3Akdw@mail.gmail.com>
- <c09e8f7a-3bf7-abb3-b49c-011ae29f8d67@st.com>
- <CAPDyKFrN3GMez1vyc6xQUH_Qp7UrDj88rG9pAP_oTLHOB6k91g@mail.gmail.com>
+From: Aapo Vienamo <avienamo@nvidia.com>
+Subject: [PATCH] mmc: tegra: Add and use tegra_sdhci_get_max_clock()
+Date: Fri, 13 Jul 2018 16:17:45 +0300
+Message-ID: <1531487865-17427-1-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAPDyKFrN3GMez1vyc6xQUH_Qp7UrDj88rG9pAP_oTLHOB6k91g@mail.gmail.com>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: devicetree@vger.kernel.org, Alexandre Torgue <alexandre.torgue@st.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Gerald Baeza <gerald.baeza@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Marcel Ziswiler <marcel.ziswiler@toradex.com>
+Cc: linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, Aapo Vienamo <avienamo@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
+Implement and use tegra_sdhci_get_max_clock() which returns the true
+maximum host clock rate. The issue with tegra_sdhci_get_max_clock() is
+that it returns the current clock rate of the host instead of the
+maximum one, which can lead to unnecessarily small clock rates.
 
+This differs from the previous implementation of
+tegra_sdhci_get_max_clock() in that it doesn't divide the result by two.
 
-On 07/13/2018 01:17 PM, Ulf Hansson wrote:
-> On 11 July 2018 at 17:19, Ludovic BARRE <ludovic.barre@st.com> wrote:
->>
->>
->> On 07/05/2018 05:26 PM, Ulf Hansson wrote:
->>>
->>> On 12 June 2018 at 15:14, Ludovic Barre <ludovic.Barre@st.com> wrote:
->>>>
->>>> From: Ludovic Barre <ludovic.barre@st.com>
->>>>
->>>> This patch integrates qcom dml feature into mmci_dma file.
->>>> Qualcomm Data Mover lite/local is already a variant of mmci dmaengine.
->>>>
->>>> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
->>>> ---
->>>>    drivers/mmc/host/Makefile        |   1 -
->>>>    drivers/mmc/host/mmci.c          |   1 -
->>>>    drivers/mmc/host/mmci.h          |  35 ++++++++
->>>>    drivers/mmc/host/mmci_dma.c      | 135 ++++++++++++++++++++++++++++-
->>>>    drivers/mmc/host/mmci_qcom_dml.c | 177
->>>> ---------------------------------------
->>>>    drivers/mmc/host/mmci_qcom_dml.h |  31 -------
->>>>    6 files changed, 169 insertions(+), 211 deletions(-)
->>>>    delete mode 100644 drivers/mmc/host/mmci_qcom_dml.c
->>>>    delete mode 100644 drivers/mmc/host/mmci_qcom_dml.h
->>>
->>>
->>> No, this is not the way to go. Instead I I think there are two options.
->>>
->>> 1) Keep mmci_qcom_dml.c|h and thus add new files for the stm32 dma
->>> variant.
->>>
->>> 2) Start by renaming mmci_qcom_dml.* to mmc_dma.* and then in the next
->>> step add the code for stm32 dma into the renamed files.
->>>
->>> I guess if there is some overlap in functionality, 2) may be best as
->>> it could easier avoid open coding. However, I am fine with whatever
->>> option and I expect that you knows what is best.
->>
->>
->> After patch 01 & 05 comments:
->> I will try to define a mmci_ops which contain some functions pointer
->> called by mmci.c (core).
->> A variant defines its mmci_ops.
->> where do you define the specific function:
->> -in a single file, mmci-ops.c or other (for the name, I'm not inspirated)
->> -or in specific file for each variant mmci-qcom.c or mmci-stm32.c
->>
->> following the comment (above), I think we define a single file?
-> 
-> If I understand the question, the problem is how we should assign the
-> mmc host ops, which corresponds to the probed variant data!?
-> 
-> I took a stub at it and posted two patches which I think you should be
-> able to build upon. Please have a look.
+Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
+---
+ drivers/mmc/host/sdhci-tegra.c | 11 +++++++++--
+ 1 file changed, 9 insertions(+), 2 deletions(-)
 
-I review your patch on mmci_host_ops and init, I agree with your series,
-I was going in the same direction.
-The comment above was on file organization, what do you prefer?
--a single file with: all callback and all mmci_host_ops of each variant
--or each variant in specific file (like sdhci): mmci-qcom.c | 
-mmci-stm32.c ...
-
-> 
-> [...]
-> 
-> Kind regards
-> Uffe
-> 
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index 28b98e2..ddf00166 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -235,6 +235,13 @@ static void tegra_sdhci_set_uhs_signaling(struct sdhci_host *host,
+ 	sdhci_set_uhs_signaling(host, timing);
+ }
+ 
++static unsigned int tegra_sdhci_get_max_clock(struct sdhci_host *host)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++
++	return clk_round_rate(pltfm_host->clk, UINT_MAX);
++}
++
+ static void tegra_sdhci_set_tap(struct sdhci_host *host, unsigned int tap)
+ {
+ 	u32 reg;
+@@ -299,7 +306,7 @@ static const struct sdhci_ops tegra_sdhci_ops = {
+ 	.platform_execute_tuning = tegra_sdhci_execute_tuning,
+ 	.set_uhs_signaling = tegra_sdhci_set_uhs_signaling,
+ 	.voltage_switch = tegra_sdhci_voltage_switch,
+-	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
++	.get_max_clock = tegra_sdhci_get_max_clock,
+ };
+ 
+ static const struct sdhci_pltfm_data sdhci_tegra20_pdata = {
+@@ -356,7 +363,7 @@ static const struct sdhci_ops tegra114_sdhci_ops = {
+ 	.platform_execute_tuning = tegra_sdhci_execute_tuning,
+ 	.set_uhs_signaling = tegra_sdhci_set_uhs_signaling,
+ 	.voltage_switch = tegra_sdhci_voltage_switch,
+-	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
++	.get_max_clock = tegra_sdhci_get_max_clock,
+ };
+ 
+ static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
+-- 
+2.7.4
