@@ -1,67 +1,53 @@
-From: Marcel Ziswiler <marcel.ziswiler@toradex.com>
-Subject: Re: [PATCH 1/3] mmc: tegra: prevent HS200 on Tegra 3
-Date: Fri, 13 Jul 2018 15:39:24 +0000
-Message-ID: <1531496362.5479.34.camel@toradex.com>
-References: <20180712073904.4705-1-stefan@agner.ch>
+From: Aapo Vienamo <avienamo@nvidia.com>
+Subject: Re: [PATCH] mmc: tegra: Add and use tegra_sdhci_get_max_clock()
+Date: Fri, 13 Jul 2018 18:39:25 +0300
+Message-ID: <20180713183925.67d7d5f4@dhcp-10-21-25-168>
+References: <1531487865-17427-1-git-send-email-avienamo@nvidia.com>
+        <6af41450-4770-3b2d-05b8-914f90743a7e@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="US-ASCII"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180712073904.4705-1-stefan@agner.ch>
-Content-Language: en-US
-Content-ID: <7B68E3230CB86349A40D3B819127BEC6@eurprd05.prod.outlook.com>
+In-Reply-To: <6af41450-4770-3b2d-05b8-914f90743a7e@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "stefan@agner.ch" <stefan@agner.ch>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>
-Cc: "jonathanh@nvidia.com" <jonathanh@nvidia.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "thierry.reding@gmail.com" <thierry.reding@gmail.com>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>
+To: Jon Hunter <jonathanh@nvidia.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Thierry Reding <thierry.reding@gmail.com>, Marcel Ziswiler <marcel.ziswiler@toradex.com>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-T24gVGh1LCAyMDE4LTA3LTEyIGF0IDA5OjM5ICswMjAwLCBTdGVmYW4gQWduZXIgd3JvdGU6DQo+
-IFRoZSBzdGFjayBhc3N1bWVzIHRoYXQgU0RIQyBjb250cm9sbGVyIHdoaWNoIHN1cHBvcnQgU0Qz
-LjAgKFNEUjEwNCkNCj4gZG8NCj4gc3VwcG9ydCBIUzIwMC4gVGhpcyBpcyBub3QgdGhlIGNhc2Ug
-Zm9yIFRlZ3JhIDMsIHdoaWNoIGRvZXMgc3VwcG9ydA0KPiBTRA0KPiAzLjANCj4gYnV0IG9ubHkg
-c3VwcG9ydHMgZU1NQyBzcGVjIDQuNDEuDQo+IA0KPiBVc2UgU0RIQ0lfUVVJUksyX0JST0tFTl9I
-UzIwMCB0byBpbmRpY2F0ZSB0aGF0IHRoZSBjb250cm9sbGVyIGRvZXMNCj4gbm90DQo+IHN1cHBv
-cnQgSFMyMDAuDQo+IA0KPiBOb3RlIHRoYXQgY29tbWl0IDE1NmUxNGIxMjZmZiAoIm1tYzogc2Ro
-Y2k6IGZpeCBjYXBzMiBmb3IgSFMyMDAiKQ0KPiBhZGRlZA0KPiB0aGUgdGllIGJldHdlZW4gU0Qz
-LjAgKFNEUjEwNCkgYW5kIEhTMjAwLiBJIGRvbid0IHRoaW5rIHRoYXQgdGhpcyBpcw0KPiBuZWNl
-c3Nhcmx5IHRydWUuIEl0IGlzIGZ1bGx5IGxlZ2l0aW1hdGUgdG8gc3VwcG9ydCBTRDMuMCBhbmQg
-bm90DQo+IHN1cHBvcnQNCj4gSFMyMDAuIFRoZSBxdWlyayBuYW1pbmcgc3VnZ2VzdHMgc29tZXRo
-aW5nIGlzIGJyb2tlbiBpbiB0aGUNCj4gY29udHJvbGxlciwNCj4gYnV0IHRoaXMgaXMgbm90IHRo
-ZSBjYXNlOiBUaGUgY29udHJvbGxlciBzaW1wbHkgZG9lcyBub3Qgc3VwcG9ydA0KPiBIUzIwMC4N
-Cj4gDQo+IEZpeGVzOiA3YWQyZWQxZGZjYmUgKCJtbWM6IHRlZ3JhOiBlbmFibGUgVUhTLUkgbW9k
-ZXMiKQ0KPiBTaWduZWQtb2ZmLWJ5OiBTdGVmYW4gQWduZXIgPHN0ZWZhbkBhZ25lci5jaD4NCg0K
-VGhlIHdob2xlIHNlcmllcyBzdHJlc3MtdGVzdGVkIG92ZXJuaWdodCBvbiB2YXJpb3VzIEFwYWxp
-cyBUMzAgYXMgd2VsbA0KYXMgQ29saWJyaSBUMzAgbW9kdWxlczoNCg0KVGVzdGVkLWJ5OiBNYXJj
-ZWwgWmlzd2lsZXIgPG1hcmNlbC56aXN3aWxlckB0b3JhZGV4LmNvbT4NCg0KPiAtLS0NCj4gIGRy
-aXZlcnMvbW1jL2hvc3Qvc2RoY2ktdGVncmEuYyB8IDMgKystDQo+ICAxIGZpbGUgY2hhbmdlZCwg
-MiBpbnNlcnRpb25zKCspLCAxIGRlbGV0aW9uKC0pDQo+IA0KPiBkaWZmIC0tZ2l0IGEvZHJpdmVy
-cy9tbWMvaG9zdC9zZGhjaS10ZWdyYS5jIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS0NCj4gdGVn
-cmEuYw0KPiBpbmRleCA5NzBkMzhmNjg5MzkuLjEzN2RmMDZiOWI2ZSAxMDA2NDQNCj4gLS0tIGEv
-ZHJpdmVycy9tbWMvaG9zdC9zZGhjaS10ZWdyYS5jDQo+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3Qv
-c2RoY2ktdGVncmEuYw0KPiBAQCAtMzM0LDcgKzMzNCw4IEBAIHN0YXRpYyBjb25zdCBzdHJ1Y3Qg
-c2RoY2lfcGx0Zm1fZGF0YQ0KPiBzZGhjaV90ZWdyYTMwX3BkYXRhID0gew0KPiAgCQkgIFNESENJ
-X1FVSVJLX05PX0hJU1BEX0JJVCB8DQo+ICAJCSAgU0RIQ0lfUVVJUktfQlJPS0VOX0FETUFfWkVS
-T0xFTl9ERVNDIHwNCj4gIAkJICBTREhDSV9RVUlSS19DQVBfQ0xPQ0tfQkFTRV9CUk9LRU4sDQo+
-IC0JLnF1aXJrczIgPSBTREhDSV9RVUlSSzJfUFJFU0VUX1ZBTFVFX0JST0tFTiwNCj4gKwkucXVp
-cmtzMiA9IFNESENJX1FVSVJLMl9QUkVTRVRfVkFMVUVfQlJPS0VOIHwNCj4gKwkJICAgU0RIQ0lf
-UVVJUksyX0JST0tFTl9IUzIwMCwNCj4gIAkub3BzICA9ICZ0ZWdyYV9zZGhjaV9vcHMsDQo+ICB9
-Ow0KDQpXb3JrcyBxdWl0ZSBuaWNlbHkgb24gdG9kYXkncyBuZXh0IG9uY2UgWzFdIGlzIGFsc28g
-YXBwbGllZDoNCg0Kcm9vdEBhcGFsaXMtdDMwOn4jIGNhdCAvc3lzL2tlcm5lbC9kZWJ1Zy9tbWMx
-L2lvcyANCmNsb2NrOiAgICAgICAgICA1MjAwMDAwMCBIeg0KYWN0dWFsIGNsb2NrOiAgIDUxMDAw
-MDAwIEh6DQp2ZGQ6ICAgICAgICAgICAgMjEgKDMuMyB+IDMuNCBWKQ0KYnVzIG1vZGU6ICAgICAg
-IDIgKHB1c2gtcHVsbCkNCmNoaXAgc2VsZWN0OiAgICAwIChkb24ndCBjYXJlKQ0KcG93ZXIgbW9k
-ZTogICAgIDIgKG9uKQ0KYnVzIHdpZHRoOiAgICAgIDMgKDggYml0cykNCnRpbWluZyBzcGVjOiAg
-ICA4IChtbWMgRERSNTIpDQpzaWduYWwgdm9sdGFnZTogMSAoMS44MCBWKQ0KZHJpdmVyIHR5cGU6
-ICAgIDAgKGRyaXZlciB0eXBlIEIpDQpyb290QGFwYWxpcy10MzA6fiMgaGRwYXJtIC10IC9kZXYv
-bW1jYmxrMQ0KDQovZGV2L21tY2JsazE6DQogVGltaW5nIGJ1ZmZlcmVkIGRpc2sgcmVhZHM6IDIz
-NiBNQiBpbiAgMy4wMSBzZWNvbmRzID0gIDc4LjQyIE1CL3NlYw0KDQpyb290QGNvbGlicmktdDMw
-On4jIGNhdCAvc3lzL2tlcm5lbC9kZWJ1Zy9tbWMwL2lvcyANCmNsb2NrOiAgICAgICAgICA1MjAw
-MDAwMCBIeg0KYWN0dWFsIGNsb2NrOiAgIDUxMDAwMDAwIEh6DQp2ZGQ6ICAgICAgICAgICAgMjEg
-KDMuMyB+IDMuNCBWKQ0KYnVzIG1vZGU6ICAgICAgIDIgKHB1c2gtcHVsbCkNCmNoaXAgc2VsZWN0
-OiAgICAwIChkb24ndCBjYXJlKQ0KcG93ZXIgbW9kZTogICAgIDIgKG9uKQ0KYnVzIHdpZHRoOiAg
-ICAgIDMgKDggYml0cykNCnRpbWluZyBzcGVjOiAgICA4IChtbWMgRERSNTIpDQpzaWduYWwgdm9s
-dGFnZTogMSAoMS44MCBWKQ0KZHJpdmVyIHR5cGU6ICAgIDAgKGRyaXZlciB0eXBlIEIpDQpyb290
-QGNvbGlicmktdDMwOn4jIGhkcGFybSAtdCAvZGV2L21tY2JsazANCg0KL2Rldi9tbWNibGswOg0K
-IFRpbWluZyBidWZmZXJlZCBkaXNrIHJlYWRzOiAxNjggTUIgaW4gIDMuMDAgc2Vjb25kcyA9ICA1
-NS45OSBNQi9zZWMNCg0KWzFdIGh0dHBzOi8vbG9yZS5rZXJuZWwub3JnL2xrbWwvMTUzMTQ4Nzg2
-NS0xNzQyNy0xLWdpdC1zZW5kLWVtYWlsLWF2aWUNCm5hbW9AbnZpZGlhLmNvbQ==
+On Fri, 13 Jul 2018 15:01:21 +0100
+Jon Hunter <jonathanh@nvidia.com> wrote:
+
+> On 13/07/18 14:17, Aapo Vienamo wrote:
+> > Implement and use tegra_sdhci_get_max_clock() which returns the true
+> > maximum host clock rate. The issue with tegra_sdhci_get_max_clock() is  
+> 
+> Don't you mean sdhci_pltfm_clk_get_max_clock above? Does this function
+> need fixing then? Or at least should there be another variant added
+> because there is nothing Tegra specific we are doing below?
+
+There are several drivers which use sdhci_pltfm_clk_get_max_clock() in
+its current state and changing it could have unforeseen side-effects on
+drivers which I'm unable to test. Adding another variant of 
+sdhci_pltfm_clk_get_max_clock() would probably be a more feasible
+approach.
+
+> > that it returns the current clock rate of the host instead of the
+> > maximum one, which can lead to unnecessarily small clock rates.
+> > 
+> > This differs from the previous implementation of
+> > tegra_sdhci_get_max_clock() in that it doesn't divide the result by two.  
+> 
+> Why?
+
+As far as I can tell the original tegra_sdhci_get_max_clock() was
+implemented this way in order to force sdhci_calc_clk() to always set
+the SDHCI clock divider to two on sdhci_set_clock(). The requirement to
+configure the SDHCI divider to two is specific to DDR50/52 modes on
+Tegra.
+
+The .get_max_clock() callback retuning half of the actual maximum will
+result in HS200 and HS400 modes not being able to run at full speed.
+Another mechanism to enforce the divider requirement has to be figured
+out in order to enable DDR50/52 modes on Tegra SoCs.
+
+ -Aapo
