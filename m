@@ -1,75 +1,194 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 02/19] mmc: mmci: merge qcom dml feature into mmci dma
-Date: Fri, 13 Jul 2018 13:17:49 +0200
-Message-ID: <CAPDyKFrN3GMez1vyc6xQUH_Qp7UrDj88rG9pAP_oTLHOB6k91g@mail.gmail.com>
-References: <1528809280-31116-1-git-send-email-ludovic.Barre@st.com>
- <1528809280-31116-3-git-send-email-ludovic.Barre@st.com> <CAPDyKFqOOvbNc79hdWhdS4pxkYrh48At-BLuGmX0jDMER3Akdw@mail.gmail.com>
- <c09e8f7a-3bf7-abb3-b49c-011ae29f8d67@st.com>
+From: Aapo Vienamo <avienamo@nvidia.com>
+Subject: Re: REGRESSION: [PATCH] mmc: tegra: Use
+ sdhci_pltfm_clk_get_max_clock
+Date: Fri, 13 Jul 2018 15:55:41 +0300
+Message-ID: <20180713155541.286425e9@dhcp-10-21-25-168>
+References: <1528126540-27004-1-git-send-email-avienamo@nvidia.com>
+        <CAPDyKFoip8gFssftJKzVHD9PAk+j=Z1CTo=0uY9cGASzW8VRJg@mail.gmail.com>
+        <1531446183.5479.14.camel@toradex.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="US-ASCII"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <c09e8f7a-3bf7-abb3-b49c-011ae29f8d67@st.com>
+In-Reply-To: <1531446183.5479.14.camel@toradex.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ludovic BARRE <ludovic.barre@st.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Gerald Baeza <gerald.baeza@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, devicetree@vger.kernel.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Marcel Ziswiler <marcel.ziswiler@toradex.com>
+Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, Stefan Agner <stefan.agner@toradex.com>, "jonathanh@nvidia.com" <jonathanh@nvidia.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "thierry.reding@gmail.com" <thierry.reding@gmail.com>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 11 July 2018 at 17:19, Ludovic BARRE <ludovic.barre@st.com> wrote:
->
->
-> On 07/05/2018 05:26 PM, Ulf Hansson wrote:
->>
->> On 12 June 2018 at 15:14, Ludovic Barre <ludovic.Barre@st.com> wrote:
->>>
->>> From: Ludovic Barre <ludovic.barre@st.com>
->>>
->>> This patch integrates qcom dml feature into mmci_dma file.
->>> Qualcomm Data Mover lite/local is already a variant of mmci dmaengine.
->>>
->>> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
->>> ---
->>>   drivers/mmc/host/Makefile        |   1 -
->>>   drivers/mmc/host/mmci.c          |   1 -
->>>   drivers/mmc/host/mmci.h          |  35 ++++++++
->>>   drivers/mmc/host/mmci_dma.c      | 135 ++++++++++++++++++++++++++++-
->>>   drivers/mmc/host/mmci_qcom_dml.c | 177
->>> ---------------------------------------
->>>   drivers/mmc/host/mmci_qcom_dml.h |  31 -------
->>>   6 files changed, 169 insertions(+), 211 deletions(-)
->>>   delete mode 100644 drivers/mmc/host/mmci_qcom_dml.c
->>>   delete mode 100644 drivers/mmc/host/mmci_qcom_dml.h
->>
->>
->> No, this is not the way to go. Instead I I think there are two options.
->>
->> 1) Keep mmci_qcom_dml.c|h and thus add new files for the stm32 dma
->> variant.
->>
->> 2) Start by renaming mmci_qcom_dml.* to mmc_dma.* and then in the next
->> step add the code for stm32 dma into the renamed files.
->>
->> I guess if there is some overlap in functionality, 2) may be best as
->> it could easier avoid open coding. However, I am fine with whatever
->> option and I expect that you knows what is best.
->
->
-> After patch 01 & 05 comments:
-> I will try to define a mmci_ops which contain some functions pointer
-> called by mmci.c (core).
-> A variant defines its mmci_ops.
-> where do you define the specific function:
-> -in a single file, mmci-ops.c or other (for the name, I'm not inspirated)
-> -or in specific file for each variant mmci-qcom.c or mmci-stm32.c
->
-> following the comment (above), I think we define a single file?
+On Fri, 13 Jul 2018 01:43:05 +0000
+Marcel Ziswiler <marcel.ziswiler@toradex.com> wrote:
 
-If I understand the question, the problem is how we should assign the
-mmc host ops, which corresponds to the probed variant data!?
+> On Mon, 2018-07-02 at 15:16 +0200, Ulf Hansson wrote:
+> > On 4 June 2018 at 17:35, Aapo Vienamo <avienamo@nvidia.com> wrote:  
+> > > The sdhci get_max_clock callback is set to
+> > > sdhci_pltfm_clk_get_max_clock
+> > > and tegra_sdhci_get_max_clock is removed. It appears that the
+> > > shdci-tegra specific callback was originally introduced due to the
+> > > requirement that the host clock has to be twice the bus clock on
+> > > DDR50
+> > > mode. As far as I can tell the only effect the removal has on DDR50
+> > > mode
+> > > is in cases where the parent clock is unable to supply the
+> > > requested
+> > > clock rate, causing the DDR50 mode to run at a lower frequency.
+> > > Currently the DDR50 mode isn't enabled on any of the SoCs and would
+> > > also
+> > > require configuring the SDHCI clock divider register to function
+> > > properly.
+> > > 
+> > > The problem with tegra_sdhci_get_max_clock is that it divides the
+> > > clock
+> > > rate by two and thus artificially limits the maximum frequency of
+> > > faster
+> > > signaling modes which don't have the host-bus frequency ratio
+> > > requirement
+> > > of DDR50 such as SDR104 and HS200. Furthermore, the call to
+> > > clk_round_rate() may return an error which isn't handled by
+> > > tegra_sdhci_get_max_clock.
+> > > 
+> > > Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>  
+> > 
+> > Thanks, applied for next!
+> > 
+> > Kind regards
+> > Uffe
+> >   
+> > > ---
+> > >  drivers/mmc/host/sdhci-tegra.c | 15 ++-------------
+> > >  1 file changed, 2 insertions(+), 13 deletions(-)
+> > > 
+> > > diff --git a/drivers/mmc/host/sdhci-tegra.c
+> > > b/drivers/mmc/host/sdhci-tegra.c
+> > > index 970d38f6..c8745b5 100644
+> > > --- a/drivers/mmc/host/sdhci-tegra.c
+> > > +++ b/drivers/mmc/host/sdhci-tegra.c
+> > > @@ -234,17 +234,6 @@ static void
+> > > tegra_sdhci_set_uhs_signaling(struct sdhci_host *host,
+> > >         sdhci_set_uhs_signaling(host, timing);
+> > >  }
+> > > 
+> > > -static unsigned int tegra_sdhci_get_max_clock(struct sdhci_host
+> > > *host)
+> > > -{
+> > > -       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> > > -
+> > > -       /*
+> > > -        * DDR modes require the host to run at double the card
+> > > frequency, so
+> > > -        * the maximum rate we can support is half of the module
+> > > input clock.
+> > > -        */
+> > > -       return clk_round_rate(pltfm_host->clk, UINT_MAX) / 2;
+> > > -}
+> > > -
+> > >  static void tegra_sdhci_set_tap(struct sdhci_host *host, unsigned
+> > > int tap)
+> > >  {
+> > >         u32 reg;
+> > > @@ -309,7 +298,7 @@ static const struct sdhci_ops tegra_sdhci_ops =
+> > > {
+> > >         .platform_execute_tuning = tegra_sdhci_execute_tuning,
+> > >         .set_uhs_signaling = tegra_sdhci_set_uhs_signaling,
+> > >         .voltage_switch = tegra_sdhci_voltage_switch,
+> > > -       .get_max_clock = tegra_sdhci_get_max_clock,
+> > > +       .get_max_clock = sdhci_pltfm_clk_get_max_clock,
+> > >  };
+> > > 
+> > >  static const struct sdhci_pltfm_data sdhci_tegra20_pdata = {
+> > > @@ -357,7 +346,7 @@ static const struct sdhci_ops
+> > > tegra114_sdhci_ops = {
+> > >         .platform_execute_tuning = tegra_sdhci_execute_tuning,
+> > >         .set_uhs_signaling = tegra_sdhci_set_uhs_signaling,
+> > >         .voltage_switch = tegra_sdhci_voltage_switch,
+> > > -       .get_max_clock = tegra_sdhci_get_max_clock,
+> > > +       .get_max_clock = sdhci_pltfm_clk_get_max_clock,
+> > >  };
+> > > 
+> > >  static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
+> > > --
+> > > 2.7.4  
+> 
+> Hm, for us this definitely breaks stuff. While using Stefan's patch set
+> [1] we may not only run eMMC at DDR52 even SD cards run stable at
+> SDR104. With this patch however the clock gets crippled to 45.33 resp.
+> 48 MHz always. This is observed both on Apalis/Colibri T30 as well as
+> Apalis TK1.
+> 
+> Current next-20180712 just with Stefan's 3 patches:
+> 
+> root@apalis-t30:~# cat /sys/kernel/debug/mmc1/ios 
+> clock:          48000000 Hz
+> actual clock:   45333333 Hz
+> vdd:            21 (3.3 ~ 3.4 V)
+> bus mode:       2 (push-pull)
+> chip select:    0 (don't care)
+> power mode:     2 (on)
+> bus width:      3 (8 bits)
+> timing spec:    8 (mmc DDR52)
+> signal voltage: 1 (1.80 V)
+> driver type:    0 (driver type B)
+> root@apalis-t30:~# hdparm -t /dev/mmcblk1
+> 
+> /dev/mmcblk1:
+>  Timing buffered disk reads: 218 MB in  3.03 seconds =  71.95 MB/sec
+> 
+> root@apalis-t30:~# cat /sys/kernel/debug/mmc2/ios 
+> clock:          48000000 Hz
+> actual clock:   48000000 Hz
+> vdd:            21 (3.3 ~ 3.4 V)
+> bus mode:       2 (push-pull)
+> chip select:    0 (don't care)
+> power mode:     2 (on)
+> bus width:      2 (4 bits)
+> timing spec:    6 (sd uhs SDR104)
+> signal voltage: 1 (1.80 V)
+> driver type:    0 (driver type B)
+> root@apalis-t30:~# hdparm -t /dev/mmcblk2
+> 
+> /dev/mmcblk2:
+>  Timing buffered disk reads:  66 MB in  3.06 seconds =  21.60 MB/sec
+> 
+> And with this patch reverted it works as expected again:
+> 
+> root@apalis-t30:~# cat /sys/kernel/debug/mmc1/ios 
+> clock:          52000000 Hz
+> actual clock:   51000000 Hz
+> vdd:            21 (3.3 ~ 3.4 V)
+> bus mode:       2 (push-pull)
+> chip select:    0 (don't care)
+> power mode:     2 (on)
+> bus width:      3 (8 bits)
+> timing spec:    8 (mmc DDR52)
+> signal voltage: 1 (1.80 V)
+> driver type:    0 (driver type B)
+> root@apalis-t30:~# hdparm -t /dev/mmcblk1
+> 
+> /dev/mmcblk1:
+>  Timing buffered disk reads: 240 MB in  3.02 seconds =  79.50 MB/sec
+> 
+> root@apalis-t30:~# cat /sys/kernel/debug/mmc2/ios 
+> clock:          204000000 Hz
+> actual clock:   204000000 Hz
+> vdd:            21 (3.3 ~ 3.4 V)
+> bus mode:       2 (push-pull)
+> chip select:    0 (don't care)
+> power mode:     2 (on)
+> bus width:      2 (4 bits)
+> timing spec:    6 (sd uhs SDR104)
+> signal voltage: 1 (1.80 V)
+> driver type:    0 (driver type B)
+> root@apalis-t30:~# hdparm -t /dev/mmcblk2
+> 
+> /dev/mmcblk2:
+>  Timing buffered disk reads: 258 MB in  3.01 seconds =  85.58 MB/sec
+> 
+> [1] https://lore.kernel.org/lkml/20180712073904.4705-1-stefan@agner.ch
 
-I took a stub at it and posted two patches which I think you should be
-able to build upon. Please have a look.
+This happens because sdhci_pltfm_clk_get_max_clock() does not actually
+return the maximum clock rate but the current one, leading to smaller
+clock rates on some platforms. I'll send a patch that fixes this for
+sdhci-tegra. Although this raises the question whether the current
+behaviour of sdhci_pltfm_clk_get_max_clock() is desirable or not.
 
-[...]
-
-Kind regards
-Uffe
+ -Aapo
