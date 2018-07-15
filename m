@@ -1,61 +1,33 @@
-From: Randy Dunlap <rdunlap@infradead.org>
-Subject: Re: [PATCH] mmc: mxcmmc: Fix missing parentheses and brace
-Date: Fri, 13 Jul 2018 21:16:57 -0700
-Message-ID: <4bba8958-b328-68c1-6eec-61ffe0f2f086@infradead.org>
-References: <20180712195937.GA36007@beast>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Subject: Re: [PATCH v2] mmc: dw_mmc: fix card threshold control configuration
+Date: Sun, 15 Jul 2018 13:31:04 -0700
+Message-ID: <CA+55aFxONTOE8A+Mm=V2mieqnJ=Zypvu+NJeede2aR7kLu5SMA@mail.gmail.com>
+References: <1530601587-160436-1-git-send-email-xiaqing17@hisilicon.com> <CAPDyKFrPw63KD5mESDmm2pya6bsz01jHiKguMP1GPhWDDZ644Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180712195937.GA36007@beast>
-Content-Language: en-US
+In-Reply-To: <CAPDyKFrPw63KD5mESDmm2pya6bsz01jHiKguMP1GPhWDDZ644Q@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Kees Cook <keescook@chromium.org>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Christoph Hellwig <hch@lst.de>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: xiaqing17@hisilicon.com, Jaehoon Chung <jh80.chung@samsung.com>, Evgeniy.Didin@synopsys.com, shawn.lin@rock-chips.com, Douglas Anderson <dianders@chromium.org>, linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 07/12/2018 12:59 PM, Kees Cook wrote:
-> Looks like the adjusted syntax wasn't fully build tested. This fixes
-> failures with powerpc builds:
-> 
-> drivers/mmc/host/mxcmmc.c: In function ‘mxcmci_swap_buffers’:
-> drivers/mmc/host/mxcmmc.c:296:51: error: expected ‘)’ before ‘;’ token
->    void *buf = kmap_atomic(sg_page(sg) + sg->offset;
->                                                    ^
-> drivers/mmc/host/mxcmmc.c:299:1: error: expected ‘,’ or ‘;’ before ‘}’ token
->  }
->  ^
-> 
-> Fixes: b189e7589f6d3 ("mmc: mxcmmc: handle highmem pages")
-> Signed-off-by: Kees Cook <keescook@chromium.org>
+On Tue, Jul 3, 2018 at 2:00 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> On 3 July 2018 at 09:06, Qing Xia <xiaqing17@hisilicon.com> wrote:
+> > From: x00270170 <xiaqing17@hisilicon.com>
+> >
+> > Card write threshold control is supposed to be set since controller
+>> [..]
+> > Signed-off-by: Qing Xia <xiaqing17@hisilicon.com>
+>
+> Thanks, applied/moved to fixes for 4.18!
 
-Acked-by: Randy Dunlap <rdunlap@infradead.org>
-Tested-by: Randy Dunlap <rdunlap@infradead.org>
+.. and during making my 4.18-rc5 announcement, I saw the odd name in
+the shortlog.
 
-Thanks.
+Now Qing Xia is forever attributed as "x00270170". Very odd.
 
-> ---
->  drivers/mmc/host/mxcmmc.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-> index 75f781c11e89..de4e6e5bf304 100644
-> --- a/drivers/mmc/host/mxcmmc.c
-> +++ b/drivers/mmc/host/mxcmmc.c
-> @@ -293,9 +293,10 @@ static void mxcmci_swap_buffers(struct mmc_data *data)
->  	int i;
->  
->  	for_each_sg(data->sg, sg, data->sg_len, i) {
-> -		void *buf = kmap_atomic(sg_page(sg) + sg->offset;
-> +		void *buf = kmap_atomic(sg_page(sg) + sg->offset);
->  		buffer_swap32(buf, sg->length);
->  		kunmap_atomic(buf);
-> +	}
->  }
->  #else
->  static inline void mxcmci_swap_buffers(struct mmc_data *data) {}
-> 
+Oh well.
 
-
--- 
-~Randy
+                Linus
