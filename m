@@ -1,60 +1,96 @@
-From: Aapo Vienamo <avienamo@nvidia.com>
-Subject: [PATCH] mmc: tegra: Force correct divider calculation on DDR50/52
-Date: Mon, 16 Jul 2018 17:34:29 +0300
-Message-ID: <1531751669-26584-1-git-send-email-avienamo@nvidia.com>
+From: =?utf-8?Q?Ond=C5=99ej?= Jirman <megous@megous.com>
+Subject: Re: [PATCH v3 0/7] mmc: sunxi: Add runtime PM support
+Date: Mon, 16 Jul 2018 19:14:28 +0200
+Message-ID: <20180716171428.ud3zsmeccds545si@core>
+References: <cover.e9b9c0ab5bc9ffcc52a15e1c2f41462729da5b61.1523888566.git-series.maxime.ripard@bootlin.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Marcel Ziswiler <marcel.ziswiler@toradex.com>, Stefan Agner <stefan@agner.ch>
-Cc: linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, Aapo Vienamo <avienamo@nvidia.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <cover.e9b9c0ab5bc9ffcc52a15e1c2f41462729da5b61.1523888566.git-series.maxime.ripard@bootlin.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Maxime Ripard <maxime.ripard@bootlin.com>
+Cc: ulf.hansson@linaro.org, Quentin Schulz <quentin.schulz@bootlin.com>, linux-mmc@vger.kernel.org, Chen-Yu Tsai <wens@csie.org>, Thomas Petazzoni <thomas.petazzoni@bootlin.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Tegra SDHCI controllers require the SDHCI clock divider to be configured
-to divide the clock by two in DDR50/52 modes. Incorrectly configured
-clock divider results in corrupted data.
+Hello Maxime,
 
-Prevent the possibility of incorrectly calculating the divider value due
-to clock rate rounding or low parent clock frequency by not assigning
-host->max_clk to clk_get_rate() on tegra_sdhci_set_clock().
+On Mon, Apr 16, 2018 at 04:22:58PM +0200, Maxime Ripard wrote:
+> Hi,
+> 
+> Since it's introduction, our MMC controller has had its external clocks
+> running all the time.
+> 
+> While that was working great, the power usage and most importantly the EMI
+> that it generated was pretty bad.
+> 
+> Let's implement some runtime_pm hooks with an autosuspend to shut down the
+> whole block when the MMC is not active.
+> 
+> However, some SDIO devices will not probe properly if we keep shutting down
+> the controller, so the autosuspend is disabled for the SDIO devices.
 
-See the comments for further details.
+I've tested your patches on TBS A711 tablet (A83T). I get this in the log:
 
-Fixes: a8e326a ("mmc: tegra: implement module external clock change")
-Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
----
- drivers/mmc/host/sdhci-tegra.c | 17 ++++++++++++++++-
- 1 file changed, 16 insertions(+), 1 deletion(-)
+  sunxi-mmc 1c10000.mmc: fatal err update clk timeout
 
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index ddf00166..908b23e 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -210,9 +210,24 @@ static void tegra_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
- 	if (!clock)
- 		return sdhci_set_clock(host, clock);
- 
-+	/*
-+	 * In DDR50/52 modes the Tegra SDHCI controllers require the SDHCI
-+	 * divider to be configured to divided the host clock by two. The SDHCI
-+	 * clock divider is calculated as part of sdhci_set_clock() by
-+	 * sdhci_calc_clk(). The divider is calculated from host->max_clk and
-+	 * the requested clock rate.
-+	 *
-+	 * By setting the host->max_clk to clock * 2 the divider calculation
-+	 * will always result in the correct value for DDR50/52 modes,
-+	 * regardless of clock rate rounding, which may happen if the value
-+	 * from clk_get_rate() is used.
-+	 */
- 	host_clk = tegra_host->ddr_signaling ? clock * 2 : clock;
- 	clk_set_rate(pltfm_host->clk, host_clk);
--	host->max_clk = clk_get_rate(pltfm_host->clk);
-+	if (tegra_host->ddr_signaling)
-+		host->max_clk = host_clk;
-+	else
-+		host->max_clk = clk_get_rate(pltfm_host->clk);
- 
- 	sdhci_set_clock(host, clock);
- 
--- 
-2.7.4
+Interestingly, this only happens after the first boot. If I hard power cycle the
+tablet (removing/reinserting the battery) the first boot after that, there's no
+timeout, and WiFi chip connected to the mmc controller works.
+
+Any other reboot (even power cycling via PMIC), it fails with the above error.
+Maybe there's some unforeseen interaction of runtime PM with mmc-powerseq used
+for the wifi chip power seuencing? Do you know what's the above error about?
+I don't know anything about mmc subsystem.
+
+Reverting "mmc: sunxi: Add runtime_pm support" (+ various cleanup patches
+afterwards) helps.
+
+thank you and regards,
+  o.
+
+> Let me know what you think,
+> Maxime
+> 
+> Changes from v2:
+>   - Dropped the patches already applied
+>   - Do not power up or down the card during a runtime_resume or
+>     runtime_suspend, but only take care of the controller
+>   - In order to do the above, split the set_ios function into smaller
+>     chunks that can be called from set_ios and our runtime_resume hook
+> 
+> Changes from v1:
+>   - Disable entirely the controller
+>   - Made sure the driver would work with CONFIG_PM off
+>   - Fixed an issue with the SDIO devices
+>   - Rebased on top of 4.16
+> 
+> Maxime Ripard (7):
+>   mmc: sunxi: Reorder the headers
+>   mmc: sunxi: Change sunxi_mmc_init_host argument type
+>   mmc: sunxi: Move bus width configuration to a function
+>   mmc: sunxi: Move clock configuration to a function
+>   mmc: sunxi: Move the card power configuration to a function
+>   mmc: sunxi: Add runtime_pm support
+>   mmc: sunxi: Drop the init / reset of the controller from set_ios
+> 
+>  drivers/mmc/host/sunxi-mmc.c | 185 +++++++++++++++++++++++-------------
+>  1 file changed, 122 insertions(+), 63 deletions(-)
+> 
+> base-commit: 60cc43fc888428bb2f18f08997432d426a243338
+> -- 
+> git-series 0.9.1
+> 
+> _______________________________________________
+> linux-arm-kernel mailing list
+> linux-arm-kernel@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
