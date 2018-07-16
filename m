@@ -1,57 +1,67 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/3] mmc: tegra: prevent HS200 on Tegra 3
-Date: Mon, 16 Jul 2018 12:11:14 +0200
-Message-ID: <CAPDyKFq=zPvoCHUbeCSCdZAj7BWkuJxe9xRruwhkV1WK8WA61w@mail.gmail.com>
-References: <20180712073904.4705-1-stefan@agner.ch>
+Subject: Re: [PATCH v2 1/2] mmc: sdhci-esdhc-imx: disable clocks before
+ changing frequency
+Date: Mon, 16 Jul 2018 12:11:20 +0200
+Message-ID: <CAPDyKFrwn--7=jRzSrQ2ZDgn1NL8C2ckYgtneH45b8ejNn-e0w@mail.gmail.com>
+References: <20180712080650.13878-1-stefan@agner.ch>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180712073904.4705-1-stefan@agner.ch>
+In-Reply-To: <20180712080650.13878-1-stefan@agner.ch>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Stefan Agner <stefan@agner.ch>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Thierry Reding <thierry.reding@gmail.com>, Jon Hunter <jonathanh@nvidia.com>, Marcel Ziswiler <marcel.ziswiler@toradex.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-tegra@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Fabio Estevam <fabio.estevam@nxp.com>, Haibo Chen <haibo.chen@nxp.com>, Aisheng Dong <aisheng.dong@nxp.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 12 July 2018 at 09:39, Stefan Agner <stefan@agner.ch> wrote:
-> The stack assumes that SDHC controller which support SD3.0 (SDR104) do
-> support HS200. This is not the case for Tegra 3, which does support SD
-> 3.0
-> but only supports eMMC spec 4.41.
+On 12 July 2018 at 10:06, Stefan Agner <stefan@agner.ch> wrote:
+> In the uSDHC case (e.g. i.MX 6) clocks only get disabled if frequency
+> is set to 0. However, it could be that the stack asks for a frequency
+> change while clocks are on. In that case the function clears the
+> divider registers (by clearing ESDHC_CLOCK_MASK) while the clock is
+> enabled! This causes a short period of time where the clock is
+> undivided (on a i.MX 6DL a clock of 196MHz has been measured).
 >
-> Use SDHCI_QUIRK2_BROKEN_HS200 to indicate that the controller does not
-> support HS200.
+> For older IP variants the driver disables clock by clearing some bits
+> in ESDHC_SYSTEM_CONTROL.
 >
-> Note that commit 156e14b126ff ("mmc: sdhci: fix caps2 for HS200") added
-> the tie between SD3.0 (SDR104) and HS200. I don't think that this is
-> necessarly true. It is fully legitimate to support SD3.0 and not support
-> HS200. The quirk naming suggests something is broken in the controller,
-> but this is not the case: The controller simply does not support HS200.
+> Make sure to disable card clock before changing frequency for uSDHC
+> IP variants too.
 >
-> Fixes: 7ad2ed1dfcbe ("mmc: tegra: enable UHS-I modes")
 > Signed-off-by: Stefan Agner <stefan@agner.ch>
 
-Thanks, applied all three patches for next!
+Thanks, applied for next!
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/sdhci-tegra.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 12 ++++++------
+>  1 file changed, 6 insertions(+), 6 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index 970d38f68939..137df06b9b6e 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -334,7 +334,8 @@ static const struct sdhci_pltfm_data sdhci_tegra30_pdata = {
->                   SDHCI_QUIRK_NO_HISPD_BIT |
->                   SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
->                   SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-> -       .quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
-> +       .quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-> +                  SDHCI_QUIRK2_BROKEN_HS200,
->         .ops  = &tegra_sdhci_ops,
->  };
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index 85fd5a8b0b6d..acacd8481473 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -708,14 +708,14 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
+>         int div = 1;
+>         u32 temp, val;
+>
+> +       if (esdhc_is_usdhc(imx_data)) {
+> +               val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
+> +               writel(val & ~ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
+> +                       host->ioaddr + ESDHC_VENDOR_SPEC);
+> +       }
+> +
+>         if (clock == 0) {
+>                 host->mmc->actual_clock = 0;
+> -
+> -               if (esdhc_is_usdhc(imx_data)) {
+> -                       val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
+> -                       writel(val & ~ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
+> -                                       host->ioaddr + ESDHC_VENDOR_SPEC);
+> -               }
+>                 return;
+>         }
 >
 > --
 > 2.18.0
