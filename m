@@ -1,33 +1,100 @@
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Subject: Re: [PATCH v2] mmc: dw_mmc: fix card threshold control configuration
-Date: Sun, 15 Jul 2018 13:31:04 -0700
-Message-ID: <CA+55aFxONTOE8A+Mm=V2mieqnJ=Zypvu+NJeede2aR7kLu5SMA@mail.gmail.com>
-References: <1530601587-160436-1-git-send-email-xiaqing17@hisilicon.com> <CAPDyKFrPw63KD5mESDmm2pya6bsz01jHiKguMP1GPhWDDZ644Q@mail.gmail.com>
+From: "ernest.zhang" <ernest.zhang@bayhubtech.com>
+Subject: [PATCH V7 1/5] mmc: sdhci: Add support for O2 eMMC HS200 mode
+Date: Mon, 16 Jul 2018 14:26:51 +0800
+Message-ID: <20180716062655.24703-1-ernest.zhang@bayhubtech.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFrPw63KD5mESDmm2pya6bsz01jHiKguMP1GPhWDDZ644Q@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: xiaqing17@hisilicon.com, Jaehoon Chung <jh80.chung@samsung.com>, Evgeniy.Didin@synopsys.com, shawn.lin@rock-chips.com, Douglas Anderson <dianders@chromium.org>, linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: ernest.zhang@bayhubtech.com, chuanjin.pang@bayhubtech.com, mike.li@bayhubtech.com, chevron.li@bayhubtech.com, shirley.her@bayhubtech.com, xiaoguang.yu@bayhubtech.com, bobby.wu@bayhubtech.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Jul 3, 2018 at 2:00 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> On 3 July 2018 at 09:06, Qing Xia <xiaqing17@hisilicon.com> wrote:
-> > From: x00270170 <xiaqing17@hisilicon.com>
-> >
-> > Card write threshold control is supposed to be set since controller
->> [..]
-> > Signed-off-by: Qing Xia <xiaqing17@hisilicon.com>
->
-> Thanks, applied/moved to fixes for 4.18!
+When use eMMC as boot device, the eMMC signaling voltage is tied to 1.8v
+fixed output voltage, bios can set o2 sd host controller PCI configuration
+register 0x308 bit4 to 1 to let driver skip 3.3v signaling voltage and
+direct use 1.8v singling voltage in eMMC initialize process.
 
-.. and during making my 4.18-rc5 announcement, I saw the odd name in
-the shortlog.
+Signed-off-by: ernest.zhang <ernest.zhang@bayhubtech.com>
+---
+Changes in V7:
+	Move V6 change item 2 to a seperate patch file
 
-Now Qing Xia is forever attributed as "x00270170". Very odd.
+Changes in V6:
+	1.Move change log to correct place.
+	2.Change HS200 mode clock frequency from 208MHz to 200MHz to meet
+	Specification.
 
-Oh well.
+Changes in V5:
+	Modify code format to pass checkpatch.pl check and add a summary
+	of what has changed in each version.
 
-                Linus
+Changes in V4:
+	Skip SDIO and SD initalization when register 0x308 bit 4 is set,
+	and modify some typo.
+
+Changes in V3:
+	Rebase the patch on the mmc tree 'next' branch.
+
+Changes in V2:
+	Modify code format, and delete unused code path.
+
+Changes in V1:
+	Check PCIe register 0x308 bit 4 and skip eMMC 3.3v initialization
+	process if it is set to 1.
+---
+ drivers/mmc/host/sdhci-pci-o2micro.c | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+index 555970a29c94..ba59db6a126c 100644
+--- a/drivers/mmc/host/sdhci-pci-o2micro.c
++++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+@@ -3,6 +3,7 @@
+  *
+  * Authors: Peter Guo <peter.guo@bayhubtech.com>
+  *          Adam Lee <adam.lee@canonical.com>
++ *          Ernest Zhang <ernest.zhang@bayhubtech.com>
+  *
+  * This software is licensed under the terms of the GNU General Public
+  * License version 2, as published by the Free Software Foundation, and
+@@ -39,6 +40,7 @@
+ #define O2_SD_MISC_CTRL4	0xFC
+ #define O2_SD_TUNING_CTRL	0x300
+ #define O2_SD_PLL_SETTING	0x304
++#define O2_SD_MISC_SETTING	0x308
+ #define O2_SD_CLK_SETTING	0x328
+ #define O2_SD_CAP_REG2		0x330
+ #define O2_SD_CAP_REG0		0x334
+@@ -184,6 +186,7 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+ 	struct sdhci_pci_chip *chip;
+ 	struct sdhci_host *host;
+ 	u32 reg;
++	int ret;
+ 
+ 	chip = slot->chip;
+ 	host = slot->host;
+@@ -197,6 +200,21 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+ 		if (reg & 0x1)
+ 			host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
+ 
++		if (chip->pdev->device == PCI_DEVICE_ID_O2_SEABIRD0) {
++			ret = pci_read_config_dword(chip->pdev,
++						    O2_SD_MISC_SETTING, &reg);
++			if (ret)
++				return -EIO;
++			if (reg & (1 << 4)) {
++				pr_info("%s: emmc 1.8v flag is set, force 1.8v signaling voltage\n",
++					mmc_hostname(host->mmc));
++				host->flags &= ~SDHCI_SIGNALING_330;
++				host->flags |= SDHCI_SIGNALING_180;
++				host->mmc->caps2 |= MMC_CAP2_NO_SD;
++				host->mmc->caps2 |= MMC_CAP2_NO_SDIO;
++			}
++		}
++
+ 		if (chip->pdev->device != PCI_DEVICE_ID_O2_FUJIN2)
+ 			break;
+ 		/* set dll watch dog timer */
+-- 
+2.17.1
