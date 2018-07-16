@@ -1,77 +1,61 @@
-From: Jon Hunter <jonathanh@nvidia.com>
-Subject: Re: [PATCH] mmc: tegra: Force correct divider calculation on DDR50/52
-Date: Mon, 16 Jul 2018 21:03:08 +0100
-Message-ID: <16caa6d0-4368-8931-a77c-23fb76bee200@nvidia.com>
-References: <1531751669-26584-1-git-send-email-avienamo@nvidia.com>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH v2 1/2] dt: bindings: Add bindings for SDHCI Synopsys DWC
+ MSHC
+Date: Mon, 16 Jul 2018 15:59:13 -0600
+Message-ID: <20180716215913.GA4269@rob-hp-laptop>
+References: <20180706151930.78b3024b@xhacker.debian>
+ <20180706152047.0b0a4944@xhacker.debian>
+ <20180711161206.GA1558@rob-hp-laptop>
+ <20180712100611.5887a195@xhacker.debian>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1531751669-26584-1-git-send-email-avienamo@nvidia.com>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <20180712100611.5887a195@xhacker.debian>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Aapo Vienamo <avienamo@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Thierry Reding <thierry.reding@gmail.com>, Marcel Ziswiler <marcel.ziswiler@toradex.com>, Stefan Agner <stefan@agner.ch>
-Cc: linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Manjunath M B <Manjunath.MB@synopsys.com>, Prabu Thangamuthu <Prabu.T@synopsys.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-
-On 16/07/18 15:34, Aapo Vienamo wrote:
-> Tegra SDHCI controllers require the SDHCI clock divider to be configured
-> to divide the clock by two in DDR50/52 modes. Incorrectly configured
-> clock divider results in corrupted data.
+On Thu, Jul 12, 2018 at 10:06:11AM +0800, Jisheng Zhang wrote:
+> Hi Rob,
 > 
-> Prevent the possibility of incorrectly calculating the divider value due
-> to clock rate rounding or low parent clock frequency by not assigning
-> host->max_clk to clk_get_rate() on tegra_sdhci_set_clock().
+> On Wed, 11 Jul 2018 10:12:06 -0600 Rob Herring wrote:
 > 
-> See the comments for further details.
+> > On Fri, Jul 06, 2018 at 03:20:47PM +0800, Jisheng Zhang wrote:
+> > > Synopsys SDHCI compatible DesignWare Cores Mobile Storage Host
+> > > Controller can support eMMC/SD/SDIO. Add the bindings.
+> > > 
+> > > Signed-off-by: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+> > > ---
+> > >  .../bindings/mmc/sdhci-of-dwcmshc.txt         | 20 +++++++++++++++++++
+> > >  1 file changed, 20 insertions(+)
+> > >  create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-of-dwcmshc.txt
+> > > 
+> > > diff --git a/Documentation/devicetree/bindings/mmc/sdhci-of-dwcmshc.txt b/Documentation/devicetree/bindings/mmc/sdhci-of-dwcmshc.txt
+> > > new file mode 100644
+> > > index 000000000000..ee4253b33be2
+> > > --- /dev/null
+> > > +++ b/Documentation/devicetree/bindings/mmc/sdhci-of-dwcmshc.txt
+> > > @@ -0,0 +1,20 @@
+> > > +* Synopsys DesignWare Cores Mobile Storage Host Controller
+> > > +
+> > > +Required properties:
+> > > +- compatible: should be one of the following:
+> > > +    "snps,dwcmshc-sdhci"  
+> > 
+> > Needs to note that there must also be an SoC specific compatible.
 > 
-> Fixes: a8e326a ("mmc: tegra: implement module external clock change")
-> Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
-> ---
->  drivers/mmc/host/sdhci-tegra.c | 17 ++++++++++++++++-
->  1 file changed, 16 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index ddf00166..908b23e 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -210,9 +210,24 @@ static void tegra_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
->  	if (!clock)
->  		return sdhci_set_clock(host, clock);
->  
-> +	/*
-> +	 * In DDR50/52 modes the Tegra SDHCI controllers require the SDHCI 
-> +	 * divider to be configured to divided the host clock by two. The SDHC
-> +	 * clock divider is calculated as part of sdhci_set_clock() by
-> +	 * sdhci_calc_clk(). The divider is calculated from host->max_clk and
-> +	 * the requested clock rate.
-> +	 *
-> +	 * By setting the host->max_clk to clock * 2 the divider calculation
-> +	 * will always result in the correct value for DDR50/52 modes,
-> +	 * regardless of clock rate rounding, which may happen if the value
-> +	 * from clk_get_rate() is used.
-> +	 */
->  	host_clk = tegra_host->ddr_signaling ? clock * 2 : clock;
->  	clk_set_rate(pltfm_host->clk, host_clk);
-> -	host->max_clk = clk_get_rate(pltfm_host->clk);
-> +	if (tegra_host->ddr_signaling)
-> +		host->max_clk = host_clk;
-> +	else
-> +		host->max_clk = clk_get_rate(pltfm_host->clk);
->  
->  	sdhci_set_clock(host, clock);
->  
+> Currently, there's no SoC specific code in this driver, so the binding could
+> be extended to SoC compatible if necessary. What do you think?
 
-I see what you are saying, but should we be concerned that we are not
-getting the rate we are requesting in the first place?
+Doesn't matter what's in the driver, it can use this compatible.
 
-Maybe it would help if you could provide a specific example showing a
-case where we request rate X and get Y, and then this leads to a bad
-rate Z later.
- 
-Cheers
-Jon
+But experience has shown that a compatible for a licensed IP is never 
+sufficient. There are versions of the blocks, configuration options, and 
+integration differences.
 
--- 
-nvpublic
+I'm not asking you to add any SoC specific compatible now unless you 
+are working on a particular SoC, but just state one is needed. 
+
+Rob
