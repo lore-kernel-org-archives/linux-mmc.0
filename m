@@ -1,69 +1,83 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH RFC 0/7] Add devfreq based clock scaling support for mmc
-Date: Mon, 16 Jul 2018 12:11:38 +0200
-Message-ID: <CAPDyKFoe_qeHiMa0QFu7NjTRam_jU6iWYScPPWDZq8V_h-MMKQ@mail.gmail.com>
-References: <1531475583-7050-1-git-send-email-sayalil@codeaurora.org>
+Subject: Re: [PATCH] mmc: tegra: Add and use tegra_sdhci_get_max_clock()
+Date: Mon, 16 Jul 2018 12:11:43 +0200
+Message-ID: <CAPDyKFqY31RSebKxUtiPsXFZD35aJFxerakHgjyq7gqrRCHmBA@mail.gmail.com>
+References: <1531487865-17427-1-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1531475583-7050-1-git-send-email-sayalil@codeaurora.org>
+In-Reply-To: <1531487865-17427-1-git-send-email-avienamo@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Sayali Lokhande <sayalil@codeaurora.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, linux-arm-msm <linux-arm-msm@vger.kernel.org>, Georgi Djakov <georgi.djakov@linaro.org>, devicetree@vger.kernel.org, Asutosh Das <asutoshd@codeaurora.org>, Sahitya Tummala <stummala@codeaurora.org>, Venkat Gopalakrishnan <venkatg@codeaurora.org>, Vijay Viswanath <vviswana@codeaurora.org>, Bjorn Andersson <bjorn.andersson@linaro.org>, Harjani Ritesh <riteshh@codeaurora.org>, vbadigan@codeaurora.org
+To: Aapo Vienamo <avienamo@nvidia.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Marcel Ziswiler <marcel.ziswiler@toradex.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-tegra@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Stefan Agner <stefan@agner.ch>
 List-Id: linux-mmc@vger.kernel.org
 
-On 13 July 2018 at 11:52, Sayali Lokhande <sayalil@codeaurora.org> wrote:
-> This change adds the use of devfreq based clock scaling to MMC.
-> Both eMMC and SD card can use it.
-> For some workloads, such as video playback, it isn't necessary
-> for these cards to run at high speed. Running at lower frequency,
-> in such cases can still meet the deadlines for data transfers.
-> Scaling down the clock frequency dynamically has power savings
-> not only because the bus is running at lower frequency but also
-> has an advantage of scaling down the system core voltage, if supported.
-> Provide an ondemand clock scaling support similar to the cpufreq
-> ondemand governor having two thresholds, up_threshold and
-> down_threshold to decide whether to increase the frequency or
-> scale it down respectively as per load.
->
-> Sahitya Tummala (1):
->   devfreq: Add new flag to do simple clock scaling
->
-> Sayali Lokhande (6):
->   mmc: core: devfreq: Add devfreq based clock scaling support
->   mmc: core: Add sysfs entries for dynamic control of clock scaling
->   mmc: core: add support for devfreq suspend/resume
->   mmc: sdhci-msm: Kconfig: select devfreq ondemand for sdhci-msm
->   mmc: sdhci-msm: Enable clock scaling property
->   mmc: core: Add a debugfs entry to set max clock rate
->
->  .../devicetree/bindings/mmc/sdhci-msm.txt          |  10 +
->  Documentation/mmc/mmc-dev-attrs.txt                |  38 ++
->  drivers/devfreq/governor_simpleondemand.c          |  25 +-
->  drivers/mmc/core/core.c                            | 672 +++++++++++++++++++++
->  drivers/mmc/core/core.h                            |   9 +
->  drivers/mmc/core/debugfs.c                         |  90 +++
->  drivers/mmc/core/host.c                            | 163 ++++-
->  drivers/mmc/core/mmc.c                             | 227 ++++++-
->  drivers/mmc/core/sd.c                              |  85 ++-
->  drivers/mmc/host/Kconfig                           |   2 +
->  drivers/mmc/host/sdhci-msm.c                       |  38 ++
->  drivers/mmc/host/sdhci-pltfm.c                     |  11 +
->  drivers/mmc/host/sdhci.c                           |  27 +
->  drivers/mmc/host/sdhci.h                           |   8 +
->  include/linux/devfreq.h                            |   4 +
->  include/linux/mmc/card.h                           |   5 +
->  include/linux/mmc/host.h                           |  70 +++
->  17 files changed, 1475 insertions(+), 9 deletions(-)
->
-> --
-> The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-> a Linux Foundation Collaborative Project
->
++Stefan
 
-Thanks for you patchse! Just wanted to let you know that I am current
-in holiday mode, so I needs some more time to review this properly.
-Apologize for the inconvenience.
+On 13 July 2018 at 15:17, Aapo Vienamo <avienamo@nvidia.com> wrote:
+> Implement and use tegra_sdhci_get_max_clock() which returns the true
+> maximum host clock rate. The issue with tegra_sdhci_get_max_clock() is
+> that it returns the current clock rate of the host instead of the
+> maximum one, which can lead to unnecessarily small clock rates.
+>
+> This differs from the previous implementation of
+> tegra_sdhci_get_max_clock() in that it doesn't divide the result by two.
+>
+> Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
+
+Thanks, applied for next!
+
+I realize there are some discussions and tests going on in regards to
+the changes for tegra driver. However, I decided to apply all pending
+patches from Stefan and you, to get them tested in next for a while to
+see how it plays.
+
+Please tell if you want me to drop some changes - or if you prefer to
+send patches on top to fix further related issues.
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/sdhci-tegra.c | 11 +++++++++--
+>  1 file changed, 9 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+> index 28b98e2..ddf00166 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -235,6 +235,13 @@ static void tegra_sdhci_set_uhs_signaling(struct sdhci_host *host,
+>         sdhci_set_uhs_signaling(host, timing);
+>  }
+>
+> +static unsigned int tegra_sdhci_get_max_clock(struct sdhci_host *host)
+> +{
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +
+> +       return clk_round_rate(pltfm_host->clk, UINT_MAX);
+> +}
+> +
+>  static void tegra_sdhci_set_tap(struct sdhci_host *host, unsigned int tap)
+>  {
+>         u32 reg;
+> @@ -299,7 +306,7 @@ static const struct sdhci_ops tegra_sdhci_ops = {
+>         .platform_execute_tuning = tegra_sdhci_execute_tuning,
+>         .set_uhs_signaling = tegra_sdhci_set_uhs_signaling,
+>         .voltage_switch = tegra_sdhci_voltage_switch,
+> -       .get_max_clock = sdhci_pltfm_clk_get_max_clock,
+> +       .get_max_clock = tegra_sdhci_get_max_clock,
+>  };
+>
+>  static const struct sdhci_pltfm_data sdhci_tegra20_pdata = {
+> @@ -356,7 +363,7 @@ static const struct sdhci_ops tegra114_sdhci_ops = {
+>         .platform_execute_tuning = tegra_sdhci_execute_tuning,
+>         .set_uhs_signaling = tegra_sdhci_set_uhs_signaling,
+>         .voltage_switch = tegra_sdhci_voltage_switch,
+> -       .get_max_clock = sdhci_pltfm_clk_get_max_clock,
+> +       .get_max_clock = tegra_sdhci_get_max_clock,
+>  };
+>
+>  static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
+> --
+> 2.7.4
+>
