@@ -1,100 +1,102 @@
 From: "ernest.zhang" <ernest.zhang@bayhubtech.com>
-Subject: [PATCH V7 1/5] mmc: sdhci: Add support for O2 eMMC HS200 mode
-Date: Mon, 16 Jul 2018 14:26:51 +0800
-Message-ID: <20180716062655.24703-1-ernest.zhang@bayhubtech.com>
+Subject: [PATCH V7 3/5] mmc: sdhci: Export sdhci tuning function symbol
+Date: Mon, 16 Jul 2018 14:26:53 +0800
+Message-ID: <20180716062655.24703-3-ernest.zhang@bayhubtech.com>
+References: <20180716062655.24703-1-ernest.zhang@bayhubtech.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180716062655.24703-1-ernest.zhang@bayhubtech.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 Cc: ernest.zhang@bayhubtech.com, chuanjin.pang@bayhubtech.com, mike.li@bayhubtech.com, chevron.li@bayhubtech.com, shirley.her@bayhubtech.com, xiaoguang.yu@bayhubtech.com, bobby.wu@bayhubtech.com
 List-Id: linux-mmc@vger.kernel.org
 
-When use eMMC as boot device, the eMMC signaling voltage is tied to 1.8v
-fixed output voltage, bios can set o2 sd host controller PCI configuration
-register 0x308 bit4 to 1 to let driver skip 3.3v signaling voltage and
-direct use 1.8v singling voltage in eMMC initialize process.
+Export sdhci tuning function symbols which are used by other SD Host
+controller driver modules.
 
 Signed-off-by: ernest.zhang <ernest.zhang@bayhubtech.com>
 ---
 Changes in V7:
-	Move V6 change item 2 to a seperate patch file
+	Export sdhci tuning function symbols
 
-Changes in V6:
-	1.Move change log to correct place.
-	2.Change HS200 mode clock frequency from 208MHz to 200MHz to meet
-	Specification.
-
-Changes in V5:
-	Modify code format to pass checkpatch.pl check and add a summary
-	of what has changed in each version.
-
-Changes in V4:
-	Skip SDIO and SD initalization when register 0x308 bit 4 is set,
-	and modify some typo.
-
-Changes in V3:
-	Rebase the patch on the mmc tree 'next' branch.
-
-Changes in V2:
-	Modify code format, and delete unused code path.
-
-Changes in V1:
-	Check PCIe register 0x308 bit 4 and skip eMMC 3.3v initialization
-	process if it is set to 1.
+Changes in V1~V6
+	N/A
 ---
- drivers/mmc/host/sdhci-pci-o2micro.c | 18 ++++++++++++++++++
- 1 file changed, 18 insertions(+)
+ drivers/mmc/host/sdhci.c | 12 ++++++++----
+ drivers/mmc/host/sdhci.h |  5 +++++
+ 2 files changed, 13 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
-index 555970a29c94..ba59db6a126c 100644
---- a/drivers/mmc/host/sdhci-pci-o2micro.c
-+++ b/drivers/mmc/host/sdhci-pci-o2micro.c
-@@ -3,6 +3,7 @@
-  *
-  * Authors: Peter Guo <peter.guo@bayhubtech.com>
-  *          Adam Lee <adam.lee@canonical.com>
-+ *          Ernest Zhang <ernest.zhang@bayhubtech.com>
-  *
-  * This software is licensed under the terms of the GNU General Public
-  * License version 2, as published by the Free Software Foundation, and
-@@ -39,6 +40,7 @@
- #define O2_SD_MISC_CTRL4	0xFC
- #define O2_SD_TUNING_CTRL	0x300
- #define O2_SD_PLL_SETTING	0x304
-+#define O2_SD_MISC_SETTING	0x308
- #define O2_SD_CLK_SETTING	0x328
- #define O2_SD_CAP_REG2		0x330
- #define O2_SD_CAP_REG0		0x334
-@@ -184,6 +186,7 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
- 	struct sdhci_pci_chip *chip;
- 	struct sdhci_host *host;
- 	u32 reg;
-+	int ret;
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index a7b5602ef6f7..bcea179a8d70 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2103,7 +2103,7 @@ static int sdhci_prepare_hs400_tuning(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	return 0;
+ }
  
- 	chip = slot->chip;
- 	host = slot->host;
-@@ -197,6 +200,21 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
- 		if (reg & 0x1)
- 			host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
+-static void sdhci_start_tuning(struct sdhci_host *host)
++void sdhci_start_tuning(struct sdhci_host *host)
+ {
+ 	u16 ctrl;
  
-+		if (chip->pdev->device == PCI_DEVICE_ID_O2_SEABIRD0) {
-+			ret = pci_read_config_dword(chip->pdev,
-+						    O2_SD_MISC_SETTING, &reg);
-+			if (ret)
-+				return -EIO;
-+			if (reg & (1 << 4)) {
-+				pr_info("%s: emmc 1.8v flag is set, force 1.8v signaling voltage\n",
-+					mmc_hostname(host->mmc));
-+				host->flags &= ~SDHCI_SIGNALING_330;
-+				host->flags |= SDHCI_SIGNALING_180;
-+				host->mmc->caps2 |= MMC_CAP2_NO_SD;
-+				host->mmc->caps2 |= MMC_CAP2_NO_SDIO;
-+			}
-+		}
+@@ -2126,14 +2126,16 @@ static void sdhci_start_tuning(struct sdhci_host *host)
+ 	sdhci_writel(host, SDHCI_INT_DATA_AVAIL, SDHCI_INT_ENABLE);
+ 	sdhci_writel(host, SDHCI_INT_DATA_AVAIL, SDHCI_SIGNAL_ENABLE);
+ }
++EXPORT_SYMBOL_GPL(sdhci_start_tuning);
+ 
+-static void sdhci_end_tuning(struct sdhci_host *host)
++void sdhci_end_tuning(struct sdhci_host *host)
+ {
+ 	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
+ 	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
+ }
++EXPORT_SYMBOL_GPL(sdhci_end_tuning);
+ 
+-static void sdhci_reset_tuning(struct sdhci_host *host)
++void sdhci_reset_tuning(struct sdhci_host *host)
+ {
+ 	u16 ctrl;
+ 
+@@ -2142,6 +2144,7 @@ static void sdhci_reset_tuning(struct sdhci_host *host)
+ 	ctrl &= ~SDHCI_CTRL_EXEC_TUNING;
+ 	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+ }
++EXPORT_SYMBOL_GPL(sdhci_reset_tuning);
+ 
+ static void sdhci_abort_tuning(struct sdhci_host *host, u32 opcode)
+ {
+@@ -2162,7 +2165,7 @@ static void sdhci_abort_tuning(struct sdhci_host *host, u32 opcode)
+  * interrupt setup is different to other commands and there is no timeout
+  * interrupt so special handling is needed.
+  */
+-static void sdhci_send_tuning(struct sdhci_host *host, u32 opcode)
++void sdhci_send_tuning(struct sdhci_host *host, u32 opcode)
+ {
+ 	struct mmc_host *mmc = host->mmc;
+ 	struct mmc_command cmd = {};
+@@ -2212,6 +2215,7 @@ static void sdhci_send_tuning(struct sdhci_host *host, u32 opcode)
+ 			   msecs_to_jiffies(50));
+ 
+ }
++EXPORT_SYMBOL_GPL(sdhci_send_tuning);
+ 
+ static void __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
+ {
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 23966f887da6..f0bd36ce3817 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -748,4 +748,9 @@ bool sdhci_cqe_irq(struct sdhci_host *host, u32 intmask, int *cmd_error,
+ 
+ void sdhci_dumpregs(struct sdhci_host *host);
+ 
++void sdhci_start_tuning(struct sdhci_host *host);
++void sdhci_end_tuning(struct sdhci_host *host);
++void sdhci_reset_tuning(struct sdhci_host *host);
++void sdhci_send_tuning(struct sdhci_host *host, u32 opcode);
 +
- 		if (chip->pdev->device != PCI_DEVICE_ID_O2_FUJIN2)
- 			break;
- 		/* set dll watch dog timer */
+ #endif /* __SDHCI_HW_H */
 -- 
 2.17.1
