@@ -1,197 +1,124 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH RFC 1/2] mmc: sdhci: Allow platform controlled voltage
- switching
-Date: Tue, 17 Jul 2018 11:42:07 +0300
-Message-ID: <6e8c713f-6569-25f3-dec5-f08001b3c6f3@intel.com>
-References: <1529583826-42020-1-git-send-email-vviswana@codeaurora.org>
- <1529583826-42020-2-git-send-email-vviswana@codeaurora.org>
- <53c6d61f-47f5-2e4e-8280-6f76f707799e@intel.com>
- <0d9b1934-d80d-a726-8094-688c97474afa@codeaurora.org>
- <78dfa5db-712b-bb0c-ad03-761371beef10@intel.com>
- <c721395a-0198-d533-5e40-42e4856f34e5@codeaurora.org>
+From: Aapo Vienamo <avienamo@nvidia.com>
+Subject: Re: [PATCH] mmc: tegra: Force correct divider calculation on
+ DDR50/52
+Date: Tue, 17 Jul 2018 12:08:50 +0300
+Message-ID: <20180717120850.774c4e9d@dhcp-10-21-25-168>
+References: <1531751669-26584-1-git-send-email-avienamo@nvidia.com>
+        <16caa6d0-4368-8931-a77c-23fb76bee200@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="US-ASCII"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <c721395a-0198-d533-5e40-42e4856f34e5@codeaurora.org>
-Content-Language: en-US
+In-Reply-To: <16caa6d0-4368-8931-a77c-23fb76bee200@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Vijay Viswanath <vviswana@codeaurora.org>, ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, devicetree@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, jeremymc@redhat.com, bjorn.andersson@linaro.org, riteshh@codeaurora.org, vbadigan@codeaurora.org, dianders@google.com, sayalil@codeaurora.org, Evan Green <evgreen@chromium.org>
+To: Jon Hunter <jonathanh@nvidia.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Thierry Reding <thierry.reding@gmail.com>, Marcel Ziswiler <marcel.ziswiler@toradex.com>, Stefan Agner <stefan@agner.ch>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 17/07/18 11:40, Vijay Viswanath wrote:
-> 
-> 
-> On 7/17/2018 1:00 PM, Adrian Hunter wrote:
->> On 17/07/18 08:14, Vijay Viswanath wrote:
->>>
->>>
->>> On 7/10/2018 4:37 PM, Adrian Hunter wrote:
->>>> On 21/06/18 15:23, Vijay Viswanath wrote:
->>>>> Some controllers can have internal mechanism to inform the SW that it
->>>>> is ready for voltage switching. For such controllers, changing voltage
->>>>> before the HW is ready can result in various issues.
->>>>>
->>>>> Add a quirk, which can be used by drivers of such controllers.
->>>>>
->>>>> Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
->>>>> ---
->>>>>    drivers/mmc/host/sdhci.c | 20 +++++++++++++++-----
->>>>>    drivers/mmc/host/sdhci.h |  2 ++
->>>>>    2 files changed, 17 insertions(+), 5 deletions(-)
->>>>>
->>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>>>> index 1c828e0..f0346d4 100644
->>>>> --- a/drivers/mmc/host/sdhci.c
->>>>> +++ b/drivers/mmc/host/sdhci.c
->>>>> @@ -1615,7 +1615,8 @@ void sdhci_set_power_noreg(struct sdhci_host *host,
->>>>> unsigned char mode,
->>>>>    void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
->>>>>                 unsigned short vdd)
->>>>>    {
->>>>> -    if (IS_ERR(host->mmc->supply.vmmc))
->>>>> +    if (IS_ERR(host->mmc->supply.vmmc) ||
->>>>> +            (host->quirks2 & SDHCI_QUIRK2_INTERNAL_PWR_CTL))
->>>>
->>>> I think you should provide your own ->set_power() instead of this
->>>>
->>>
->>> will do
->>>
->>>>>            sdhci_set_power_noreg(host, mode, vdd);
->>>>>        else
->>>>>            sdhci_set_power_reg(host, mode, vdd);
->>>>> @@ -2009,7 +2010,9 @@ int sdhci_start_signal_voltage_switch(struct
->>>>> mmc_host *mmc,
->>>>>            ctrl &= ~SDHCI_CTRL_VDD_180;
->>>>>            sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
->>>>>    -        if (!IS_ERR(mmc->supply.vqmmc)) {
->>>>> +        if (!IS_ERR(mmc->supply.vqmmc) &&
->>>>> +                !(host->quirks2 &
->>>>> +                    SDHCI_QUIRK2_INTERNAL_PWR_CTL)) {
->>>>
->>>> And your own ->start_signal_voltage_switch()
->>>>
->>>
->>> sdhci_msm_start_signal_voltage_switch() would be an exact copy of
->>> sdhci_start_signal_voltage_switch()..... will incorporate this if not using
->>> quirk.
->>>
->>>>>                ret = mmc_regulator_set_vqmmc(mmc, ios);
->>>>>                if (ret) {
->>>>>                    pr_warn("%s: Switching to 3.3V signalling voltage
->>>>> failed\n",
->>>>> @@ -2032,7 +2035,8 @@ int sdhci_start_signal_voltage_switch(struct
->>>>> mmc_host *mmc,
->>>>>        case MMC_SIGNAL_VOLTAGE_180:
->>>>>            if (!(host->flags & SDHCI_SIGNALING_180))
->>>>>                return -EINVAL;
->>>>> -        if (!IS_ERR(mmc->supply.vqmmc)) {
->>>>> +        if (!IS_ERR(mmc->supply.vqmmc) &&
->>>>> +            !(host->quirks2 & SDHCI_QUIRK2_INTERNAL_PWR_CTL)) {
->>>>>                ret = mmc_regulator_set_vqmmc(mmc, ios);
->>>>>                if (ret) {
->>>>>                    pr_warn("%s: Switching to 1.8V signalling voltage
->>>>> failed\n",
->>>>> @@ -3485,7 +3489,10 @@ int sdhci_setup_host(struct sdhci_host *host)
->>>>>         * the host can take the appropriate action if regulators are not
->>>>>         * available.
->>>>>         */
->>>>> -    ret = mmc_regulator_get_supply(mmc);
->>>>> +    if (!(host->quirks2 & SDHCI_QUIRK2_INTERNAL_PWR_CTL))
->>>>
->>>> Since we expect mmc_regulator_get_supply() to have been called, this could
->>>> be:
->>>>
->>>>      if (!mmc->supply.vmmc) {
->>>>          ret = mmc_regulator_get_supply(mmc);
->>>>          enable_vqmmc = true;
->>>>      } else {
->>>>          ret = 0;
->>>>      }
->>>>>> +        ret = mmc_regulator_get_supply(mmc);
->>>>> +    else
->>>>> +        ret = 0;
->>>>>        if (ret)
->>>>>            return ret;
->>>>>    @@ -3736,7 +3743,10 @@ int sdhci_setup_host(struct sdhci_host *host)
->>>>>          /* If vqmmc regulator and no 1.8V signalling, then there's no
->>>>> UHS */
->>>>>        if (!IS_ERR(mmc->supply.vqmmc)) {
->>>>> -        ret = regulator_enable(mmc->supply.vqmmc);
->>>>> +        if (!(host->quirks2 & SDHCI_QUIRK2_INTERNAL_PWR_CTL))
->>>>
->>>> And this could be:
->>>>
->>>>          if (enable_vqmmc)
->>>>              ret = regulator_enable(mmc->supply.vqmmc);
->>>>          else
->>>>              ret = 0;
->>>>   > However, you still need to ensure
->>>> regulator_disable(mmc->supply.vqmmc) is
->>>> only called if regulator_enable() was called.
->>> I missed this. Will cover it.
->>>
->>> Also I missed one more place where we are doing regulator_disable. During
->>> sdhci-msm unbinding, we would end up doing an extra regulator disable
->>> (thanks Evan for pointing it out) in sdhci_remove_host.
->>>
->>> To avoid the quirk( or having any flag), it would require copying the code
->>> of sdhci_start_signal_voltage_switch() and sdhci_remove_host() and creating
->>
->> You do not need to duplicate sdhci_remove_host(), just change it so that it
->> only  disables what was enabled i.e.
->>
->>     if (host->vqmmc_enabled)
->>         regulator_disable(mmc->supply.vqmmc);
->>
-> 
-> Ok, so we will be adding a new flag "vqmmc_enabled" in sdhci_host, ryt ?
+On Mon, 16 Jul 2018 21:03:08 +0100
+Jon Hunter <jonathanh@nvidia.com> wrote:
 
-Yes
+> On 16/07/18 15:34, Aapo Vienamo wrote:
+> > Tegra SDHCI controllers require the SDHCI clock divider to be configured
+> > to divide the clock by two in DDR50/52 modes. Incorrectly configured
+> > clock divider results in corrupted data.
+> > 
+> > Prevent the possibility of incorrectly calculating the divider value due
+> > to clock rate rounding or low parent clock frequency by not assigning
+> > host->max_clk to clk_get_rate() on tegra_sdhci_set_clock().
+> > 
+> > See the comments for further details.
+> > 
+> > Fixes: a8e326a ("mmc: tegra: implement module external clock change")
+> > Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
+> > ---
+> >  drivers/mmc/host/sdhci-tegra.c | 17 ++++++++++++++++-
+> >  1 file changed, 16 insertions(+), 1 deletion(-)
+> > 
+> > diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+> > index ddf00166..908b23e 100644
+> > --- a/drivers/mmc/host/sdhci-tegra.c
+> > +++ b/drivers/mmc/host/sdhci-tegra.c
+> > @@ -210,9 +210,24 @@ static void tegra_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+> >  	if (!clock)
+> >  		return sdhci_set_clock(host, clock);
+> >  
+> > +	/*
+> > +	 * In DDR50/52 modes the Tegra SDHCI controllers require the SDHCI 
+> > +	 * divider to be configured to divided the host clock by two. The SDHC
+> > +	 * clock divider is calculated as part of sdhci_set_clock() by
+> > +	 * sdhci_calc_clk(). The divider is calculated from host->max_clk and
+> > +	 * the requested clock rate.
+> > +	 *
+> > +	 * By setting the host->max_clk to clock * 2 the divider calculation
+> > +	 * will always result in the correct value for DDR50/52 modes,
+> > +	 * regardless of clock rate rounding, which may happen if the value
+> > +	 * from clk_get_rate() is used.
+> > +	 */
+> >  	host_clk = tegra_host->ddr_signaling ? clock * 2 : clock;
+> >  	clk_set_rate(pltfm_host->clk, host_clk);
+> > -	host->max_clk = clk_get_rate(pltfm_host->clk);
+> > +	if (tegra_host->ddr_signaling)
+> > +		host->max_clk = host_clk;
+> > +	else
+> > +		host->max_clk = clk_get_rate(pltfm_host->clk);
+> >  
+> >  	sdhci_set_clock(host, clock);
+> >    
+> 
+> I see what you are saying, but should we be concerned that we are not
+> getting the rate we are requesting in the first place?
 
-> Just wanted to clarify
-> 
->>> 2 new functions in sdhci_msm layer which would do the exact same as above,
->>> with just the regulator parts removed.
->>>
->>> This looks messy (considering any future changes to the 2 sdhci API will
->>> need to be copied to their duplicate sdhci_msm API) and a bit overkill to
->>> avoid quirk. At the same time, I don't know how useful such a quirk would be
->>> to other platform drivers.
->>>
->>> Please let me know your view/suggestions.
->>
->> Let's try without the quirk.
->>
->>>>
->>>>> +            ret = regulator_enable(mmc->supply.vqmmc);
->>>>> +        else
->>>>> +            ret = 0;
->>>>>            if (!regulator_is_supported_voltage(mmc->supply.vqmmc, 1700000,
->>>>>                                1950000))
->>>>>                host->caps1 &= ~(SDHCI_SUPPORT_SDR104 |
->>>>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
->>>>> index 23966f8..3b0c97a 100644
->>>>> --- a/drivers/mmc/host/sdhci.h
->>>>> +++ b/drivers/mmc/host/sdhci.h
->>>>> @@ -450,6 +450,8 @@ struct sdhci_host {
->>>>>     * obtainable timeout.
->>>>>     */
->>>>>    #define SDHCI_QUIRK2_DISABLE_HW_TIMEOUT            (1<<17)
->>>>> +/* Regulator voltage changes are being done from platform layer */
->>>>> +#define SDHCI_QUIRK2_INTERNAL_PWR_CTL                (1<<18)
->>>>
->>>> So maybe the quirk is not needed.
->>>>
->>>>>          int irq;        /* Device IRQ */
->>>>>        void __iomem *ioaddr;    /* Mapped address */
->>>>>
->>>>
->>>
->>> Thanks for the review & suggestions!
->>> Vijay
->>>
->>
-> 
+The rates themselves aren't as critical as the divider on DDR50/52. It's
+true that in most sane configurations we should not hit the cases where
+the divider will not get configured correctly if the value from
+clk_get_rate() is used.
+
+> Maybe it would help if you could provide a specific example showing a
+> case where we request rate X and get Y, and then this leads to a bad
+> rate Z later.
+
+There are two possible cases where the divider will get configured
+incorrectly: either to divide by one or anything greater than two. I
+verified that at least on t124 greater dividers also fail in practice.
+
+One option is that the parent clock is unable to supply a rate low
+enough. Lets consider DDR50 mode: we request 100 MHz from the parent
+clock and let's say it gets rounded to 104 MHz. In this case we end up
+with a divider of four because 104 MHz / 2 <= 50 MHz is false, and the
+divider is incremented to the next step. This happens because the
+divider is calculated the following manner in sdhci_calc_clk(), where in
+this case host->max_clk would be 104 MHz and clock 50 MHz:
+
+	for (div = 2; div < SDHCI_MAX_DIV_SPEC_300;
+	     div += 2) {
+		if ((host->max_clk / div) <= clock)
+			break;
+	}
+
+With the patch we would get DDR50 mode runinng at 52 MHz and without
+the patch all IO to the device would fail.
+
+The less likely option is that divider of one is calculated if
+host->max_clk is less than or equal to clock. This would happen if the
+parent clock is unable to supply a high enough clock rate. So let's say
+we are setting up the clocks for DDR50 and request the parent clock to
+supply 100 MHz and we get say 50 MHz instead. In this case originally we
+would get I/O errors, but with the patch we end up with at DDR50 mode
+where the bus is actually run at 25 MHz.
+
+While at least the later case would most likely be a bug or
+misconfiguration, it would be still nice to have a mechanism for
+graceful dergadation instead of complete failure.
+
+Another option I considered was verifying the parent clock behaviour
+during probe and masking DDR50/52 out from the host capability bits
+depending on the results. The problem with that is that the exact rate
+requested is determined based on CSD register values read from the MMC
+device itself.
+
+It's really unfortunate that we have this quirk in the hardware as
+dealing with it in a robust manner results in a fair bit of complexity.
+Oh well.
+
+ -Aapo
