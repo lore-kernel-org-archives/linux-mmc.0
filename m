@@ -1,51 +1,88 @@
-From: Mark Brown <broonie@kernel.org>
-Subject: Re: [PATCH v1 3/7] Documentation: spi-rockchip: add description for
- px30
-Date: Tue, 17 Jul 2018 11:34:34 +0100
-Message-ID: <20180717103434.GA8555@sirena.org.uk>
-References: <1531813747-8804-1-git-send-email-cl@rock-chips.com>
- <1531813747-8804-4-git-send-email-cl@rock-chips.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V3 4/7] mmc: sdhci: add 32-bit block count support for v4
+ mode
+Date: Tue, 17 Jul 2018 13:36:10 +0300
+Message-ID: <b7eeeb0b-1584-52c7-43d3-228f5653697e@intel.com>
+References: <1531106398-14062-1-git-send-email-zhang.chunyan@linaro.org>
+ <1531106398-14062-5-git-send-email-zhang.chunyan@linaro.org>
+ <892181d5-61f2-55da-2a79-1d2cbfc00f8f@intel.com>
+ <CAAfSe-tJGM7GMb6pCAMhKVDu9XSEjmyGYkgVCQZr__C0Q0goiQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="lrZ03NoBR/3+SXJZ"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1531813747-8804-4-git-send-email-cl@rock-chips.com>
+In-Reply-To: <CAAfSe-tJGM7GMb6pCAMhKVDu9XSEjmyGYkgVCQZr__C0Q0goiQ@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: cl@rock-chips.com
-Cc: heiko@sntech.de, robh+dt@kernel.org, mark.rutland@arm.com, klaus.goger@theobroma-systems.com, jagan@amarulasolutions.com, djw@t-chip.com.cn, jacob-chen@iotwrt.com, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, frank.wang@rock-chips.com, lgirdwood@gmail.com, alsa-devel@alsa-project.org, gregkh@linuxfoundation.org, catalin.marinas@arm.com, will.deacon@arm.com, yamada.masahiro@socionext.com, arnd@arndb.de, zhangqing@rock-chips.com, shawn.lin@rock-chips.com, kever.yang@rock-chips.com, david.wu@rock-chips.com, huangtao@rock-chips.com, tony.xie@rock-chips.com, sugar.zhang@rock-chips.com, huibin.hong@rock-chips.com, william.wu@rock-chips.com, san
+To: Chunyan Zhang <zhang.lyra@gmail.com>
+Cc: Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@spreadtrum.com>
 List-Id: linux-mmc@vger.kernel.org
 
+On 17/07/18 12:14, Chunyan Zhang wrote:
+> Hi,
+> 
+> On 17 July 2018 at 16:29, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> On 09/07/18 06:19, Chunyan Zhang wrote:
+>>> When Host Version 4 is enabled, SDMA System Address register is
+>>> re-defined as 32-bit Block Count, and SDMA uses ADMA System
+>>> Address register (05Fh-058h) instead.
+>>>
+>>> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
+>>> ---
+>>>  drivers/mmc/host/sdhci.c | 4 +++-
+>>>  drivers/mmc/host/sdhci.h | 1 +
+>>>  2 files changed, 4 insertions(+), 1 deletion(-)
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>> index 7871ae2..f64e766 100644
+>>> --- a/drivers/mmc/host/sdhci.c
+>>> +++ b/drivers/mmc/host/sdhci.c
+>>> @@ -889,6 +889,7 @@ static void sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+>>>  static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+>>>  {
+>>>       u8 ctrl;
+>>> +     u32 reg;
+>>>       struct mmc_data *data = cmd->data;
+>>>
+>>>       host->data_timeout = 0;
+>>> @@ -1021,7 +1022,8 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+>>>       /* Set the DMA boundary value and block size */
+>>>       sdhci_writew(host, SDHCI_MAKE_BLKSZ(host->sdma_boundary, data->blksz),
+>>>                    SDHCI_BLOCK_SIZE);
+>>> -     sdhci_writew(host, data->blocks, SDHCI_BLOCK_COUNT);
+>>> +     reg = host->v4_mode ? SDHCI_32BIT_BLK_CNT : SDHCI_BLOCK_COUNT;
+>>> +     sdhci_writew(host, data->blocks, reg);
+>>
+>> The specification says to set 16-bit block count register to zero when using
+>> 32-bit block count.  It also says it is valid for V4.1 onwards and also for
+>> V4 with SDMA and auto-CMD23.
+>>
+>> So maybe we should continue to use the 16-bit block count register with V4.0
+> 
+> Ok.
+> 
+> Where can I get a V4.0 specification? I only have V4.10 on hands.
 
---lrZ03NoBR/3+SXJZ
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+I do not have a copy I can share, but the 4.1 specification already
+indicates what is V4.1 (onwards) and what only requires Host Version 4 Enable.
 
-On Tue, Jul 17, 2018 at 03:49:03PM +0800, cl@rock-chips.com wrote:
-> From: Liang Chen <cl@rock-chips.com>
->=20
-> Add "rockchip,px30-spi", "rockchip,rk3066-spi" for spi on px30 platform.
-
-Please submit patches using subject lines reflecting the style for the
-subsystem.  This makes it easier for people to identify relevant
-patches.  Look at what existing commits in the area you're changing are
-doing and make sure your subject lines visually resemble what they're
-doing.
-
---lrZ03NoBR/3+SXJZ
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAltNxjcACgkQJNaLcl1U
-h9DddAf/ZhXQY60brHxYGhfzQMhjXm+A6Gw/eRa3+bM/zfnLUPej7OAaLnh6KH5T
-fTbPHzwa137TOXy/TrJvFmJymK5h7vBGJMAqZ53j08G+2/ghSzBpNaLZ9zgQeuvy
-+2bbwRnk7s6H42dukgDomTy98UAh2zh3E9CueNH4Ev+FyLD5nxQVlYnzjhr7msFN
-ppwPrc7R26rv9S4wtd9g4CHKvlTOPrwM+L0LXCjg7DtS41HZtGouxGS0/eB/TPkQ
-vZS92+kGvcJs4+fiP/oK6g2EJSO6bQtFg8LZj9ejIouxiJj+FOGCEdquzQxI8dGg
-jCqMB/asqioX1//AlCtsC6Wd8Yvm9A==
-=hLie
------END PGP SIGNATURE-----
-
---lrZ03NoBR/3+SXJZ--
+> 
+>>
+>>>  }
+>>>
+>>>  static inline bool sdhci_auto_cmd12(struct sdhci_host *host,
+>>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+>>> index 24fa58a..889e48b 100644
+>>> --- a/drivers/mmc/host/sdhci.h
+>>> +++ b/drivers/mmc/host/sdhci.h
+>>> @@ -28,6 +28,7 @@
+>>>
+>>>  #define SDHCI_DMA_ADDRESS    0x00
+>>>  #define SDHCI_ARGUMENT2              SDHCI_DMA_ADDRESS
+>>> +#define SDHCI_32BIT_BLK_CNT  SDHCI_DMA_ADDRESS
+>>>
+>>>  #define SDHCI_BLOCK_SIZE     0x04
+>>>  #define  SDHCI_MAKE_BLKSZ(dma, blksz) (((dma & 0x7) << 12) | (blksz & 0xFFF))
+>>>
+>>
+> 
