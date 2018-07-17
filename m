@@ -1,127 +1,66 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V3 5/7] mmc: sdhci: add Auto CMD Auto Select support
-Date: Tue, 17 Jul 2018 14:16:16 +0300
-Message-ID: <3cc11907-5248-ea5a-5e2a-f93e12ef4e68@intel.com>
-References: <1531106398-14062-1-git-send-email-zhang.chunyan@linaro.org>
- <1531106398-14062-6-git-send-email-zhang.chunyan@linaro.org>
+From: Maxime Ripard <maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [PATCH] mmc: sunxi: remove output of virtual base address
+Date: Tue, 17 Jul 2018 13:43:48 +0200
+Message-ID: <20180717114348.lv2ngzrekp5zpcmk@flea.home>
+References: <20180717100958.12042-1-andre.przywara@arm.com>
+Reply-To: maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1531106398-14062-6-git-send-email-zhang.chunyan@linaro.org>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@spreadtrum.com>, zhang.lyra@gmail.com
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="4w2zg7vpcd6q4q6r"
+Return-path: <linux-sunxi+bncBDSJBYGBRIMBB5NMW7NAKGQEUR35GAI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Content-Disposition: inline
+In-Reply-To: <20180717100958.12042-1-andre.przywara-5wv7dgnIgG8@public.gmane.org>
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 09/07/18 06:19, Chunyan Zhang wrote:
-> As SD Host Controller Specification v4.10 documents:
-> Host Controller Version 4.10 defines this "Auto CMD Auto Select" mode.
-> Selection of Auto CMD depends on setting of CMD23 Enable in the Host
-> Control 2 register which indicates whether card supports CMD23. If CMD23
-> Enable =1, Auto CMD23 is used and if CMD23 Enable =0, Auto CMD12 is
-> used. In case of Version 4.10 or later, use of Auto CMD Auto Select is
-> recommended rather than use of Auto CMD12 Enable or Auto CMD23
-> Enable.
+
+--4w2zg7vpcd6q4q6r
+Content-Type: text/plain; charset="UTF-8"
+Content-Disposition: inline
+
+1;5202;0c
+On Tue, Jul 17, 2018 at 11:09:58AM +0100, Andre Przywara wrote:
+> Recent Linux versions refuse to print actual virtual kernel addresses,
+> to not give a hint about the location of the kernel in a randomized virtual
+> address space. This affects the output of the sunxi MMC controller
+> driver, which now produces the rather uninformative line:
 > 
-> This patch add this new mode support.
+> [    1.482660] sunxi-mmc 1c0f000.mmc: base:0x(____ptrval____) irq:8
 > 
-> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
+> Since the virtual base address is not really interesting in the first
+> place, let's just drop this value. We have the physical address as part
+> of the DT node name, which is way more useful for debugging purposes.
+> 
+> Signed-off-by: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
 > ---
->  drivers/mmc/host/sdhci.c | 39 ++++++++++++++++++++++++++++-----------
->  drivers/mmc/host/sdhci.h |  2 ++
->  2 files changed, 30 insertions(+), 11 deletions(-)
+>  drivers/mmc/host/sunxi-mmc.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index f64e766..1ca3871 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1033,6 +1033,33 @@ static inline bool sdhci_auto_cmd12(struct sdhci_host *host,
->  	       !mrq->cap_cmd_during_tfr;
->  }
+> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+> index 8e7f3e35ee3d..811b08d2d0f2 100644
+> --- a/drivers/mmc/host/sunxi-mmc.c
+> +++ b/drivers/mmc/host/sunxi-mmc.c
+> @@ -1407,7 +1407,7 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
+>  	if (ret)
+>  		goto error_free_dma;
 >  
-> +static inline void sdhci_auto_cmd_enable(struct sdhci_host *host,
-> +					 struct mmc_command *cmd,
-> +					 u16 *mode)
-> +{
-> +	/*
-> +	 * In case of Version 4.10 or later, use of 'Auto CMD Auto
-> +	 * Select' is recommended rather than use of 'Auto CMD12
-> +	 * Enable' or 'Auto CMD23 Enable'.
-> +	 */
-> +	if (host->version >= SDHCI_SPEC_410) {
-> +		*mode |= SDHCI_TRNS_AUTO_SEL;
+> -	dev_info(&pdev->dev, "base:0x%p irq:%u\n", host->reg_base, host->irq);
+> +	dev_info(&pdev->dev, "irq:%u\n", host->irq);
 
-The rules for selecting auto commands still need to be applied.  In effect:
+Can't we just remove it? It doesn't look like it brings much value anyway.
 
-	if (sdhci_auto_cmd12(host, cmd->mrq) &&
-	    (cmd->opcode != SD_IO_RW_EXTENDED)) {
-		*mode |= SDHCI_TRNS_AUTO_SEL;
-	} else if (cmd->mrq->sbc && (host->flags & SDHCI_AUTO_CMD23)) {
-		*mode |= SDHCI_TRNS_AUTO_SEL;
-		sdhci_writel(host, cmd->mrq->sbc->arg, SDHCI_ARGUMENT2);
-	}
+Maxime
 
-Also the selection of Host Control 2 register CMD23 Enable should be done by
-SDHCI (if supported by the card) not the Spreadtrum driver.
-
-> +		return;
-> +	}
-> +
-> +	/*
-> +	 * If we are sending CMD23, CMD12 never gets sent
-> +	 * on successful completion (so no Auto-CMD12).
-> +	 */
-> +	if (sdhci_auto_cmd12(host, cmd->mrq) &&
-> +	    (cmd->opcode != SD_IO_RW_EXTENDED)) {
-> +		*mode |= SDHCI_TRNS_AUTO_CMD12;
-> +	} else if (cmd->mrq->sbc && (host->flags & SDHCI_AUTO_CMD23)) {
-> +		*mode |= SDHCI_TRNS_AUTO_CMD23;
-> +		sdhci_writel(host, cmd->mrq->sbc->arg, SDHCI_ARGUMENT2);
-> +	}
-> +}
-> +
->  static void sdhci_set_transfer_mode(struct sdhci_host *host,
->  	struct mmc_command *cmd)
->  {
-> @@ -1059,17 +1086,7 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
->  
->  	if (mmc_op_multi(cmd->opcode) || data->blocks > 1) {
->  		mode = SDHCI_TRNS_BLK_CNT_EN | SDHCI_TRNS_MULTI;
-> -		/*
-> -		 * If we are sending CMD23, CMD12 never gets sent
-> -		 * on successful completion (so no Auto-CMD12).
-> -		 */
-> -		if (sdhci_auto_cmd12(host, cmd->mrq) &&
-> -		    (cmd->opcode != SD_IO_RW_EXTENDED))
-> -			mode |= SDHCI_TRNS_AUTO_CMD12;
-> -		else if (cmd->mrq->sbc && (host->flags & SDHCI_AUTO_CMD23)) {
-> -			mode |= SDHCI_TRNS_AUTO_CMD23;
-> -			sdhci_writel(host, cmd->mrq->sbc->arg, SDHCI_ARGUMENT2);
-> -		}
-> +		sdhci_auto_cmd_enable(host, cmd, &mode);
->  	}
->  
->  	if (data->flags & MMC_DATA_READ)
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 889e48b..8263ac6 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -42,6 +42,7 @@
->  #define  SDHCI_TRNS_BLK_CNT_EN	0x02
->  #define  SDHCI_TRNS_AUTO_CMD12	0x04
->  #define  SDHCI_TRNS_AUTO_CMD23	0x08
-> +#define  SDHCI_TRNS_AUTO_SEL	0x0C
->  #define  SDHCI_TRNS_READ	0x10
->  #define  SDHCI_TRNS_MULTI	0x20
->  
-> @@ -185,6 +186,7 @@
->  #define   SDHCI_CTRL_DRV_TYPE_D		0x0030
->  #define  SDHCI_CTRL_EXEC_TUNING		0x0040
->  #define  SDHCI_CTRL_TUNED_CLK		0x0080
-> +#define  SDHCI_CMD23_ENABLE		0x0800
->  #define  SDHCI_CTRL_V4_MODE		0x1000
->  #define  SDHCI_CTRL_64BIT_ADDR		0x2000
->  #define  SDHCI_CTRL_PRESET_VAL_ENABLE	0x8000
-> 
+-- 
+Maxime Ripard, Bootlin (formerly Free Electrons)
+Embedded Linux and Kernel engineering
+https://bootlin.com
+--4w2zg7vpcd6q4q6r--
