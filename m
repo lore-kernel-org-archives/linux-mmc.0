@@ -1,67 +1,51 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: tegra: Force correct divider calculation on DDR50/52
-Date: Tue, 17 Jul 2018 13:26:58 +0300
-Message-ID: <875ad3f9-81b9-2c50-be1d-4550fd9e3b44@intel.com>
-References: <1531751669-26584-1-git-send-email-avienamo@nvidia.com>
+From: Mark Brown <broonie@kernel.org>
+Subject: Re: [PATCH v1 3/7] Documentation: spi-rockchip: add description for
+ px30
+Date: Tue, 17 Jul 2018 11:34:34 +0100
+Message-ID: <20180717103434.GA8555@sirena.org.uk>
+References: <1531813747-8804-1-git-send-email-cl@rock-chips.com>
+ <1531813747-8804-4-git-send-email-cl@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="lrZ03NoBR/3+SXJZ"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1531751669-26584-1-git-send-email-avienamo@nvidia.com>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <1531813747-8804-4-git-send-email-cl@rock-chips.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Aapo Vienamo <avienamo@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Marcel Ziswiler <marcel.ziswiler@toradex.com>, Stefan Agner <stefan@agner.ch>
-Cc: linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
+To: cl@rock-chips.com
+Cc: heiko@sntech.de, robh+dt@kernel.org, mark.rutland@arm.com, klaus.goger@theobroma-systems.com, jagan@amarulasolutions.com, djw@t-chip.com.cn, jacob-chen@iotwrt.com, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, frank.wang@rock-chips.com, lgirdwood@gmail.com, alsa-devel@alsa-project.org, gregkh@linuxfoundation.org, catalin.marinas@arm.com, will.deacon@arm.com, yamada.masahiro@socionext.com, arnd@arndb.de, zhangqing@rock-chips.com, shawn.lin@rock-chips.com, kever.yang@rock-chips.com, david.wu@rock-chips.com, huangtao@rock-chips.com, tony.xie@rock-chips.com, sugar.zhang@rock-chips.com, huibin.hong@rock-chips.com, william.wu@rock-chips.com, san
 List-Id: linux-mmc@vger.kernel.org
 
-On 16/07/18 17:34, Aapo Vienamo wrote:
-> Tegra SDHCI controllers require the SDHCI clock divider to be configured
-> to divide the clock by two in DDR50/52 modes. Incorrectly configured
-> clock divider results in corrupted data.
-> 
-> Prevent the possibility of incorrectly calculating the divider value due
-> to clock rate rounding or low parent clock frequency by not assigning
-> host->max_clk to clk_get_rate() on tegra_sdhci_set_clock().
-> 
-> See the comments for further details.
-> 
-> Fixes: a8e326a ("mmc: tegra: implement module external clock change")
-> Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+--lrZ03NoBR/3+SXJZ
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-> ---
->  drivers/mmc/host/sdhci-tegra.c | 17 ++++++++++++++++-
->  1 file changed, 16 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index ddf00166..908b23e 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -210,9 +210,24 @@ static void tegra_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
->  	if (!clock)
->  		return sdhci_set_clock(host, clock);
->  
-> +	/*
-> +	 * In DDR50/52 modes the Tegra SDHCI controllers require the SDHCI
-> +	 * divider to be configured to divided the host clock by two. The SDHCI
-> +	 * clock divider is calculated as part of sdhci_set_clock() by
-> +	 * sdhci_calc_clk(). The divider is calculated from host->max_clk and
-> +	 * the requested clock rate.
-> +	 *
-> +	 * By setting the host->max_clk to clock * 2 the divider calculation
-> +	 * will always result in the correct value for DDR50/52 modes,
-> +	 * regardless of clock rate rounding, which may happen if the value
-> +	 * from clk_get_rate() is used.
-> +	 */
->  	host_clk = tegra_host->ddr_signaling ? clock * 2 : clock;
->  	clk_set_rate(pltfm_host->clk, host_clk);
-> -	host->max_clk = clk_get_rate(pltfm_host->clk);
-> +	if (tegra_host->ddr_signaling)
-> +		host->max_clk = host_clk;
-> +	else
-> +		host->max_clk = clk_get_rate(pltfm_host->clk);
->  
->  	sdhci_set_clock(host, clock);
->  
-> 
+On Tue, Jul 17, 2018 at 03:49:03PM +0800, cl@rock-chips.com wrote:
+> From: Liang Chen <cl@rock-chips.com>
+>=20
+> Add "rockchip,px30-spi", "rockchip,rk3066-spi" for spi on px30 platform.
+
+Please submit patches using subject lines reflecting the style for the
+subsystem.  This makes it easier for people to identify relevant
+patches.  Look at what existing commits in the area you're changing are
+doing and make sure your subject lines visually resemble what they're
+doing.
+
+--lrZ03NoBR/3+SXJZ
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAltNxjcACgkQJNaLcl1U
+h9DddAf/ZhXQY60brHxYGhfzQMhjXm+A6Gw/eRa3+bM/zfnLUPej7OAaLnh6KH5T
+fTbPHzwa137TOXy/TrJvFmJymK5h7vBGJMAqZ53j08G+2/ghSzBpNaLZ9zgQeuvy
++2bbwRnk7s6H42dukgDomTy98UAh2zh3E9CueNH4Ev+FyLD5nxQVlYnzjhr7msFN
+ppwPrc7R26rv9S4wtd9g4CHKvlTOPrwM+L0LXCjg7DtS41HZtGouxGS0/eB/TPkQ
+vZS92+kGvcJs4+fiP/oK6g2EJSO6bQtFg8LZj9ejIouxiJj+FOGCEdquzQxI8dGg
+jCqMB/asqioX1//AlCtsC6Wd8Yvm9A==
+=hLie
+-----END PGP SIGNATURE-----
+
+--lrZ03NoBR/3+SXJZ--
