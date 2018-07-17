@@ -1,88 +1,127 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V3 4/7] mmc: sdhci: add 32-bit block count support for v4
- mode
-Date: Tue, 17 Jul 2018 13:36:10 +0300
-Message-ID: <b7eeeb0b-1584-52c7-43d3-228f5653697e@intel.com>
+Subject: Re: [PATCH V3 5/7] mmc: sdhci: add Auto CMD Auto Select support
+Date: Tue, 17 Jul 2018 14:16:16 +0300
+Message-ID: <3cc11907-5248-ea5a-5e2a-f93e12ef4e68@intel.com>
 References: <1531106398-14062-1-git-send-email-zhang.chunyan@linaro.org>
- <1531106398-14062-5-git-send-email-zhang.chunyan@linaro.org>
- <892181d5-61f2-55da-2a79-1d2cbfc00f8f@intel.com>
- <CAAfSe-tJGM7GMb6pCAMhKVDu9XSEjmyGYkgVCQZr__C0Q0goiQ@mail.gmail.com>
+ <1531106398-14062-6-git-send-email-zhang.chunyan@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAAfSe-tJGM7GMb6pCAMhKVDu9XSEjmyGYkgVCQZr__C0Q0goiQ@mail.gmail.com>
+In-Reply-To: <1531106398-14062-6-git-send-email-zhang.chunyan@linaro.org>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Chunyan Zhang <zhang.lyra@gmail.com>
-Cc: Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@spreadtrum.com>
+To: Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@spreadtrum.com>, zhang.lyra@gmail.com
 List-Id: linux-mmc@vger.kernel.org
 
-On 17/07/18 12:14, Chunyan Zhang wrote:
-> Hi,
+On 09/07/18 06:19, Chunyan Zhang wrote:
+> As SD Host Controller Specification v4.10 documents:
+> Host Controller Version 4.10 defines this "Auto CMD Auto Select" mode.
+> Selection of Auto CMD depends on setting of CMD23 Enable in the Host
+> Control 2 register which indicates whether card supports CMD23. If CMD23
+> Enable =1, Auto CMD23 is used and if CMD23 Enable =0, Auto CMD12 is
+> used. In case of Version 4.10 or later, use of Auto CMD Auto Select is
+> recommended rather than use of Auto CMD12 Enable or Auto CMD23
+> Enable.
 > 
-> On 17 July 2018 at 16:29, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> On 09/07/18 06:19, Chunyan Zhang wrote:
->>> When Host Version 4 is enabled, SDMA System Address register is
->>> re-defined as 32-bit Block Count, and SDMA uses ADMA System
->>> Address register (05Fh-058h) instead.
->>>
->>> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
->>> ---
->>>  drivers/mmc/host/sdhci.c | 4 +++-
->>>  drivers/mmc/host/sdhci.h | 1 +
->>>  2 files changed, 4 insertions(+), 1 deletion(-)
->>>
->>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>> index 7871ae2..f64e766 100644
->>> --- a/drivers/mmc/host/sdhci.c
->>> +++ b/drivers/mmc/host/sdhci.c
->>> @@ -889,6 +889,7 @@ static void sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
->>>  static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
->>>  {
->>>       u8 ctrl;
->>> +     u32 reg;
->>>       struct mmc_data *data = cmd->data;
->>>
->>>       host->data_timeout = 0;
->>> @@ -1021,7 +1022,8 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
->>>       /* Set the DMA boundary value and block size */
->>>       sdhci_writew(host, SDHCI_MAKE_BLKSZ(host->sdma_boundary, data->blksz),
->>>                    SDHCI_BLOCK_SIZE);
->>> -     sdhci_writew(host, data->blocks, SDHCI_BLOCK_COUNT);
->>> +     reg = host->v4_mode ? SDHCI_32BIT_BLK_CNT : SDHCI_BLOCK_COUNT;
->>> +     sdhci_writew(host, data->blocks, reg);
->>
->> The specification says to set 16-bit block count register to zero when using
->> 32-bit block count.  It also says it is valid for V4.1 onwards and also for
->> V4 with SDMA and auto-CMD23.
->>
->> So maybe we should continue to use the 16-bit block count register with V4.0
+> This patch add this new mode support.
 > 
-> Ok.
+> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
+> ---
+>  drivers/mmc/host/sdhci.c | 39 ++++++++++++++++++++++++++++-----------
+>  drivers/mmc/host/sdhci.h |  2 ++
+>  2 files changed, 30 insertions(+), 11 deletions(-)
 > 
-> Where can I get a V4.0 specification? I only have V4.10 on hands.
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index f64e766..1ca3871 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1033,6 +1033,33 @@ static inline bool sdhci_auto_cmd12(struct sdhci_host *host,
+>  	       !mrq->cap_cmd_during_tfr;
+>  }
+>  
+> +static inline void sdhci_auto_cmd_enable(struct sdhci_host *host,
+> +					 struct mmc_command *cmd,
+> +					 u16 *mode)
+> +{
+> +	/*
+> +	 * In case of Version 4.10 or later, use of 'Auto CMD Auto
+> +	 * Select' is recommended rather than use of 'Auto CMD12
+> +	 * Enable' or 'Auto CMD23 Enable'.
+> +	 */
+> +	if (host->version >= SDHCI_SPEC_410) {
+> +		*mode |= SDHCI_TRNS_AUTO_SEL;
 
-I do not have a copy I can share, but the 4.1 specification already
-indicates what is V4.1 (onwards) and what only requires Host Version 4 Enable.
+The rules for selecting auto commands still need to be applied.  In effect:
 
-> 
->>
->>>  }
->>>
->>>  static inline bool sdhci_auto_cmd12(struct sdhci_host *host,
->>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
->>> index 24fa58a..889e48b 100644
->>> --- a/drivers/mmc/host/sdhci.h
->>> +++ b/drivers/mmc/host/sdhci.h
->>> @@ -28,6 +28,7 @@
->>>
->>>  #define SDHCI_DMA_ADDRESS    0x00
->>>  #define SDHCI_ARGUMENT2              SDHCI_DMA_ADDRESS
->>> +#define SDHCI_32BIT_BLK_CNT  SDHCI_DMA_ADDRESS
->>>
->>>  #define SDHCI_BLOCK_SIZE     0x04
->>>  #define  SDHCI_MAKE_BLKSZ(dma, blksz) (((dma & 0x7) << 12) | (blksz & 0xFFF))
->>>
->>
+	if (sdhci_auto_cmd12(host, cmd->mrq) &&
+	    (cmd->opcode != SD_IO_RW_EXTENDED)) {
+		*mode |= SDHCI_TRNS_AUTO_SEL;
+	} else if (cmd->mrq->sbc && (host->flags & SDHCI_AUTO_CMD23)) {
+		*mode |= SDHCI_TRNS_AUTO_SEL;
+		sdhci_writel(host, cmd->mrq->sbc->arg, SDHCI_ARGUMENT2);
+	}
+
+Also the selection of Host Control 2 register CMD23 Enable should be done by
+SDHCI (if supported by the card) not the Spreadtrum driver.
+
+> +		return;
+> +	}
+> +
+> +	/*
+> +	 * If we are sending CMD23, CMD12 never gets sent
+> +	 * on successful completion (so no Auto-CMD12).
+> +	 */
+> +	if (sdhci_auto_cmd12(host, cmd->mrq) &&
+> +	    (cmd->opcode != SD_IO_RW_EXTENDED)) {
+> +		*mode |= SDHCI_TRNS_AUTO_CMD12;
+> +	} else if (cmd->mrq->sbc && (host->flags & SDHCI_AUTO_CMD23)) {
+> +		*mode |= SDHCI_TRNS_AUTO_CMD23;
+> +		sdhci_writel(host, cmd->mrq->sbc->arg, SDHCI_ARGUMENT2);
+> +	}
+> +}
+> +
+>  static void sdhci_set_transfer_mode(struct sdhci_host *host,
+>  	struct mmc_command *cmd)
+>  {
+> @@ -1059,17 +1086,7 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
+>  
+>  	if (mmc_op_multi(cmd->opcode) || data->blocks > 1) {
+>  		mode = SDHCI_TRNS_BLK_CNT_EN | SDHCI_TRNS_MULTI;
+> -		/*
+> -		 * If we are sending CMD23, CMD12 never gets sent
+> -		 * on successful completion (so no Auto-CMD12).
+> -		 */
+> -		if (sdhci_auto_cmd12(host, cmd->mrq) &&
+> -		    (cmd->opcode != SD_IO_RW_EXTENDED))
+> -			mode |= SDHCI_TRNS_AUTO_CMD12;
+> -		else if (cmd->mrq->sbc && (host->flags & SDHCI_AUTO_CMD23)) {
+> -			mode |= SDHCI_TRNS_AUTO_CMD23;
+> -			sdhci_writel(host, cmd->mrq->sbc->arg, SDHCI_ARGUMENT2);
+> -		}
+> +		sdhci_auto_cmd_enable(host, cmd, &mode);
+>  	}
+>  
+>  	if (data->flags & MMC_DATA_READ)
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 889e48b..8263ac6 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -42,6 +42,7 @@
+>  #define  SDHCI_TRNS_BLK_CNT_EN	0x02
+>  #define  SDHCI_TRNS_AUTO_CMD12	0x04
+>  #define  SDHCI_TRNS_AUTO_CMD23	0x08
+> +#define  SDHCI_TRNS_AUTO_SEL	0x0C
+>  #define  SDHCI_TRNS_READ	0x10
+>  #define  SDHCI_TRNS_MULTI	0x20
+>  
+> @@ -185,6 +186,7 @@
+>  #define   SDHCI_CTRL_DRV_TYPE_D		0x0030
+>  #define  SDHCI_CTRL_EXEC_TUNING		0x0040
+>  #define  SDHCI_CTRL_TUNED_CLK		0x0080
+> +#define  SDHCI_CMD23_ENABLE		0x0800
+>  #define  SDHCI_CTRL_V4_MODE		0x1000
+>  #define  SDHCI_CTRL_64BIT_ADDR		0x2000
+>  #define  SDHCI_CTRL_PRESET_VAL_ENABLE	0x8000
 > 
