@@ -1,312 +1,557 @@
-From: Srinath Mannam <srinath.mannam@broadcom.com>
-Subject: [PATCH] mmc: host: iproc: Add ACPI support to IPROC SDHCI
-Date: Tue, 17 Jul 2018 22:15:07 +0530
-Message-ID: <1531845907-26213-1-git-send-email-srinath.mannam@broadcom.com>
+From: Chunyan Zhang <zhang.lyra@gmail.com>
+Subject: Re: [PATCH V3 6/7] mmc: sdhci-sprd: added Spreadtrum's initial host controller
+Date: Wed, 18 Jul 2018 15:24:26 +0800
+Message-ID: <CAAfSe-s7k99Pp_FMcw0mO=KAadraLeKVBB9pY4GqGsqzpmxEyQ@mail.gmail.com>
+References: <1531106398-14062-1-git-send-email-zhang.chunyan@linaro.org>
+ <1531106398-14062-7-git-send-email-zhang.chunyan@linaro.org> <645aaecf-af5e-ef96-b942-3a8eb8d8af82@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <645aaecf-af5e-ef96-b942-3a8eb8d8af82@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Jon Mason <jonmason@broadcom.com>
-Cc: bcm-kernel-feedback-list@broadcom.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Srinath Mannam <srinath.mannam@broadcom.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@spreadtrum.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Add ACPI support to all IPROC SDHCI varients
+On 17 July 2018 at 19:52, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 09/07/18 06:19, Chunyan Zhang wrote:
+>> From: Chunyan Zhang <chunyan.zhang@spreadtrum.com>
+>>
+>> This patch adds the initial support of Secure Digital Host Controller
+>> Interface compliant controller found in some latest Spreadtrum chipsets.
+>> This patch has been tested on the version of SPRD-R11 controller.
+>>
+>> R11 is a variant based on SD v4.0 specification.
+>>
+>> With this driver, R11 mmc can be initialized, can be mounted, read and
+>> written.
+>>
+>> Original-by: Billows Wu <billows.wu@spreadtrum.com>
+>> Signed-off-by: Chunyan Zhang <chunyan.zhang@spreadtrum.com>
+>> ---
+>>  drivers/mmc/host/Kconfig      |  13 ++
+>>  drivers/mmc/host/Makefile     |   1 +
+>>  drivers/mmc/host/sdhci-sprd.c | 437 ++++++++++++++++++++++++++++++++++++++++++
+>>  3 files changed, 451 insertions(+)
+>>  create mode 100644 drivers/mmc/host/sdhci-sprd.c
+>>
+>> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+>> index 0581c19..c5424dc 100644
+>> --- a/drivers/mmc/host/Kconfig
+>> +++ b/drivers/mmc/host/Kconfig
+>> @@ -581,6 +581,19 @@ config MMC_SDRICOH_CS
+>>         To compile this driver as a module, choose M here: the
+>>         module will be called sdricoh_cs.
+>>
+>> +config MMC_SDHCI_SPRD
+>> +     tristate "Spreadtrum SDIO host Controller"
+>> +     depends on ARCH_SPRD
+>> +     depends on MMC_SDHCI_PLTFM
+>> +     select MMC_SDHCI_IO_ACCESSORS
+>> +     help
+>> +       This selects the SDIO Host Controller in Spreadtrum
+>> +       SoCs, this driver supports R11(IP version: R11P0).
+>> +
+>> +       If you have a controller with this interface, say Y or M here.
+>> +
+>> +       If unsure, say N.
+>> +
+>>  config MMC_TMIO_CORE
+>>       tristate
+>>
+>> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+>> index 85dc132..b0b6802 100644
+>> --- a/drivers/mmc/host/Makefile
+>> +++ b/drivers/mmc/host/Makefile
+>> @@ -89,6 +89,7 @@ obj-$(CONFIG_MMC_SDHCI_ST)          += sdhci-st.o
+>>  obj-$(CONFIG_MMC_SDHCI_MICROCHIP_PIC32)      += sdhci-pic32.o
+>>  obj-$(CONFIG_MMC_SDHCI_BRCMSTB)              += sdhci-brcmstb.o
+>>  obj-$(CONFIG_MMC_SDHCI_OMAP)         += sdhci-omap.o
+>> +obj-$(CONFIG_MMC_SDHCI_SPRD)         += sdhci-sprd.o
+>>  obj-$(CONFIG_MMC_CQHCI)                      += cqhci.o
+>>
+>>  ifeq ($(CONFIG_CB710_DEBUG),y)
+>> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
+>> new file mode 100644
+>> index 0000000..8d37ecb
+>> --- /dev/null
+>> +++ b/drivers/mmc/host/sdhci-sprd.c
+>> @@ -0,0 +1,437 @@
+>> +// SPDX-License-Identifier: GPL-2.0
+>> +//
+>> +// Secure Digital Host Controller
+>> +//
+>> +// Copyright (C) 2018 Spreadtrum, Inc.
+>> +// Author: Chunyan Zhang <chunyan.zhang@spreadtrum.com>
+>> +
+>> +#include <linux/delay.h>
+>> +#include <linux/dma-mapping.h>
+>> +#include <linux/highmem.h>
+>> +#include <linux/module.h>
+>> +#include <linux/of.h>
+>> +#include <linux/of_device.h>
+>> +#include <linux/of_gpio.h>
+>> +#include <linux/platform_device.h>
+>> +#include <linux/pm_runtime.h>
+>> +#include <linux/regulator/consumer.h>
+>> +#include <linux/slab.h>
+>> +
+>> +#include "sdhci-pltfm.h"
+>> +
+>> +#define SDHCI_SPRD_REG_32_DLL_DLY_OFFSET     0x208
+>> +#define  SDHCIBSPRD_IT_WR_DLY_INV            BIT(5)
+>> +#define  SDHCI_SPRD_BIT_CMD_DLY_INV          BIT(13)
+>> +#define  SDHCI_SPRD_BIT_POSRD_DLY_INV                BIT(21)
+>> +#define  SDHCI_SPRD_BIT_NEGRD_DLY_INV                BIT(29)
+>> +
+>> +#define SDHCI_SPRD_REG_32_BUSY_POSI          0x250
+>> +#define  SDHCI_SPRD_BIT_OUTR_CLK_AUTO_EN     BIT(25)
+>> +#define  SDHCI_SPRD_BIT_INNR_CLK_AUTO_EN     BIT(24)
+>> +
+>> +#define SDHCI_SPRD_REG_DEBOUNCE              0x28C
+>> +#define  SDHCI_SPRD_BIT_DLL_BAK              BIT(0)
+>> +#define  SDHCI_SPRD_BIT_DLL_VAL              BIT(1)
+>> +
+>> +#define  SDHCI_SPRD_INT_SIGNAL_MASK  0x1B7F410B
+>> +
+>> +/* SDHCI_HOST_CONTROL2 */
+>> +#define  SDHCI_SPRD_CTRL_HS200               0x0005
+>> +#define  SDHCI_SPRD_CTRL_HS400               0x0006
+>> +
+>> +/* SDHCI_SOFTWARE_RESET */
+>> +#define  SDHCI_HW_RESET_CARD         0x8 /* For Spreadtrum's design */
+>> +
+>> +#define SDHCI_SPRD_MAX_CUR           0xFFFFFF
+>> +#define SDHCI_SPRD_CLK_MAX_DIV               1023
+>> +
+>> +#define SDHCI_SPRD_CLK_DEF_RATE              26000000
+>> +
+>> +struct sdhci_sprd_host {
+>> +     u32 version;
+>> +     struct clk *clk_sdio;
+>> +     struct clk *clk_enable;
+>> +     u32 base_rate;
+>> +};
+>> +
+>> +#define TO_SPRD_HOST(host) sdhci_pltfm_priv(sdhci_priv(host))
+>> +
+>> +static void sdhci_sprd_init_config(struct sdhci_host *host)
+>> +{
+>> +     u16 val;
+>> +
+>> +     /* set 64-bit addressing modes */
+>> +     val = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+>> +     val |= SDHCI_CTRL_64BIT_ADDR;
+>> +     sdhci_writew(host, val, SDHCI_HOST_CONTROL2);
+>
+> SDHCI should do that when enabling 64-bit DMA in V4 mode.  Needs to be done
+> either in sdhci_prepare_data() or after every reset or resume (e.g. when
+> ->enable_dma() is called).
 
-Signed-off-by: Srinath Mannam <srinath.mannam@broadcom.com>
-Reviewed-by: Ray Jui <ray.jui@broadcom.com>
-Reviewed-by: Scott Branden <scott.branden@broadcom.com>
-Reviewed-by: Vladimir Olovyannikov <vladimir.olovyannikov@broadcom.com>
----
- drivers/mmc/host/Kconfig       |   1 +
- drivers/mmc/host/sdhci-iproc.c | 187 ++++++++++++++++++++++++++++-------------
- 2 files changed, 128 insertions(+), 60 deletions(-)
+Ok, then how about doing in sdhci_do_reset() once reset-for-all? That
+also can avoid to set this register each time when sending cmd if
+doing in sdhci_prepare_data().
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 0581c19..bc6702e 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -334,6 +334,7 @@ config MMC_SDHCI_IPROC
- 	tristate "SDHCI support for the BCM2835 & iProc SD/MMC Controller"
- 	depends on ARCH_BCM2835 || ARCH_BCM_IPROC || COMPILE_TEST
- 	depends on MMC_SDHCI_PLTFM
-+	depends on OF || ACPI
- 	default ARCH_BCM_IPROC
- 	select MMC_SDHCI_IO_ACCESSORS
- 	help
-diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
-index d0e83db..7c5c923 100644
---- a/drivers/mmc/host/sdhci-iproc.c
-+++ b/drivers/mmc/host/sdhci-iproc.c
-@@ -15,6 +15,7 @@
-  * iProc SDHCI platform driver
-  */
- 
-+#include <linux/acpi.h>
- #include <linux/delay.h>
- #include <linux/module.h>
- #include <linux/mmc/host.h>
-@@ -162,9 +163,19 @@ static void sdhci_iproc_writeb(struct sdhci_host *host, u8 val, int reg)
- 	sdhci_iproc_writel(host, newval, reg & ~3);
- }
- 
-+static unsigned int sdhci_iproc_get_max_clock(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+
-+	if (pltfm_host->clk)
-+		return sdhci_pltfm_clk_get_max_clock(host);
-+	else
-+		return pltfm_host->clock;
-+}
-+
- static const struct sdhci_ops sdhci_iproc_ops = {
- 	.set_clock = sdhci_set_clock,
--	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
-+	.get_max_clock = sdhci_iproc_get_max_clock,
- 	.set_bus_width = sdhci_set_bus_width,
- 	.reset = sdhci_reset,
- 	.set_uhs_signaling = sdhci_set_uhs_signaling,
-@@ -178,34 +189,24 @@ static const struct sdhci_ops sdhci_iproc_32only_ops = {
- 	.write_w = sdhci_iproc_writew,
- 	.write_b = sdhci_iproc_writeb,
- 	.set_clock = sdhci_set_clock,
--	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
-+	.get_max_clock = sdhci_iproc_get_max_clock,
- 	.set_bus_width = sdhci_set_bus_width,
- 	.reset = sdhci_reset,
- 	.set_uhs_signaling = sdhci_set_uhs_signaling,
- };
- 
-+enum sdhci_pltfm_type {
-+	SDHCI_PLTFM_IPROC_CYGNUS,
-+	SDHCI_PLTFM_IPROC,
-+	SDHCI_PLTFM_BCM2835,
-+};
-+
- static const struct sdhci_pltfm_data sdhci_iproc_cygnus_pltfm_data = {
- 	.quirks = SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK,
- 	.quirks2 = SDHCI_QUIRK2_ACMD23_BROKEN | SDHCI_QUIRK2_HOST_OFF_CARD_ON,
- 	.ops = &sdhci_iproc_32only_ops,
- };
- 
--static const struct sdhci_iproc_data iproc_cygnus_data = {
--	.pdata = &sdhci_iproc_cygnus_pltfm_data,
--	.caps = ((0x1 << SDHCI_MAX_BLOCK_SHIFT)
--			& SDHCI_MAX_BLOCK_MASK) |
--		SDHCI_CAN_VDD_330 |
--		SDHCI_CAN_VDD_180 |
--		SDHCI_CAN_DO_SUSPEND |
--		SDHCI_CAN_DO_HISPD |
--		SDHCI_CAN_DO_ADMA2 |
--		SDHCI_CAN_DO_SDMA,
--	.caps1 = SDHCI_DRIVER_TYPE_C |
--		 SDHCI_DRIVER_TYPE_D |
--		 SDHCI_SUPPORT_DDR50,
--	.mmc_caps = MMC_CAP_1_8V_DDR,
--};
--
- static const struct sdhci_pltfm_data sdhci_iproc_pltfm_data = {
- 	.quirks = SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
- 		  SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12,
-@@ -213,21 +214,6 @@ static const struct sdhci_pltfm_data sdhci_iproc_pltfm_data = {
- 	.ops = &sdhci_iproc_ops,
- };
- 
--static const struct sdhci_iproc_data iproc_data = {
--	.pdata = &sdhci_iproc_pltfm_data,
--	.caps = ((0x1 << SDHCI_MAX_BLOCK_SHIFT)
--			& SDHCI_MAX_BLOCK_MASK) |
--		SDHCI_CAN_VDD_330 |
--		SDHCI_CAN_VDD_180 |
--		SDHCI_CAN_DO_SUSPEND |
--		SDHCI_CAN_DO_HISPD |
--		SDHCI_CAN_DO_ADMA2 |
--		SDHCI_CAN_DO_SDMA,
--	.caps1 = SDHCI_DRIVER_TYPE_C |
--		 SDHCI_DRIVER_TYPE_D |
--		 SDHCI_SUPPORT_DDR50,
--};
--
- static const struct sdhci_pltfm_data sdhci_bcm2835_pltfm_data = {
- 	.quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
- 		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
-@@ -237,38 +223,104 @@ static const struct sdhci_pltfm_data sdhci_bcm2835_pltfm_data = {
- 	.ops = &sdhci_iproc_32only_ops,
- };
- 
--static const struct sdhci_iproc_data bcm2835_data = {
--	.pdata = &sdhci_bcm2835_pltfm_data,
--	.caps = ((0x1 << SDHCI_MAX_BLOCK_SHIFT)
--			& SDHCI_MAX_BLOCK_MASK) |
--		SDHCI_CAN_VDD_330 |
--		SDHCI_CAN_DO_HISPD,
--	.caps1 = SDHCI_DRIVER_TYPE_A |
--		 SDHCI_DRIVER_TYPE_C,
--	.mmc_caps = 0x00000000,
-+static const struct sdhci_iproc_data sdhci_iproc_data_list[] = {
-+	[SDHCI_PLTFM_IPROC_CYGNUS] = {
-+		/* SDHCI IPROC CYGNUS */
-+		.pdata = &sdhci_iproc_cygnus_pltfm_data,
-+		.caps = ((0x1 << SDHCI_MAX_BLOCK_SHIFT)
-+				& SDHCI_MAX_BLOCK_MASK) |
-+			SDHCI_CAN_VDD_330 |
-+			SDHCI_CAN_VDD_180 |
-+			SDHCI_CAN_DO_SUSPEND |
-+			SDHCI_CAN_DO_HISPD |
-+			SDHCI_CAN_DO_ADMA2 |
-+			SDHCI_CAN_DO_SDMA,
-+		.caps1 = SDHCI_DRIVER_TYPE_C |
-+			SDHCI_DRIVER_TYPE_D |
-+			SDHCI_SUPPORT_DDR50,
-+		.mmc_caps = MMC_CAP_1_8V_DDR,
-+	},
-+	[SDHCI_PLTFM_IPROC] = {
-+		/* SDHCI IPROC */
-+		.pdata = &sdhci_iproc_pltfm_data,
-+		.caps = ((0x1 << SDHCI_MAX_BLOCK_SHIFT)
-+				& SDHCI_MAX_BLOCK_MASK) |
-+			SDHCI_CAN_VDD_330 |
-+			SDHCI_CAN_VDD_180 |
-+			SDHCI_CAN_DO_SUSPEND |
-+			SDHCI_CAN_DO_HISPD |
-+			SDHCI_CAN_DO_ADMA2 |
-+			SDHCI_CAN_DO_SDMA,
-+		.caps1 = SDHCI_DRIVER_TYPE_C |
-+			SDHCI_DRIVER_TYPE_D |
-+			SDHCI_SUPPORT_DDR50,
-+	},
-+	[SDHCI_PLTFM_BCM2835] = {
-+		/* SDHCI BCM2835 */
-+		.pdata = &sdhci_bcm2835_pltfm_data,
-+		.caps = ((0x1 << SDHCI_MAX_BLOCK_SHIFT)
-+				& SDHCI_MAX_BLOCK_MASK) |
-+			SDHCI_CAN_VDD_330 |
-+			SDHCI_CAN_DO_HISPD,
-+		.caps1 = SDHCI_DRIVER_TYPE_A |
-+			SDHCI_DRIVER_TYPE_C,
-+		.mmc_caps = 0x00000000,
-+
-+	},
- };
- 
- static const struct of_device_id sdhci_iproc_of_match[] = {
--	{ .compatible = "brcm,bcm2835-sdhci", .data = &bcm2835_data },
--	{ .compatible = "brcm,sdhci-iproc-cygnus", .data = &iproc_cygnus_data},
--	{ .compatible = "brcm,sdhci-iproc", .data = &iproc_data },
-+	{
-+		.compatible = "brcm,bcm2835-sdhci",
-+		.data = (void *)SDHCI_PLTFM_BCM2835
-+	},
-+	{
-+		.compatible = "brcm,sdhci-iproc-cygnus",
-+		.data = (void *)SDHCI_PLTFM_IPROC_CYGNUS
-+	},
-+	{
-+		.compatible = "brcm,sdhci-iproc",
-+		.data = (void *)SDHCI_PLTFM_IPROC
-+	},
- 	{ }
- };
- MODULE_DEVICE_TABLE(of, sdhci_iproc_of_match);
- 
-+static const struct acpi_device_id sdhci_iproc_acpi_ids[] = {
-+	{ .id = "BRCM5871", .driver_data = SDHCI_PLTFM_IPROC_CYGNUS },
-+	{ .id = "BRCM5872", .driver_data = SDHCI_PLTFM_IPROC },
-+	{ /* sentinel */ }
-+};
-+MODULE_DEVICE_TABLE(acpi, sdhci_iproc_acpi_ids);
-+
- static int sdhci_iproc_probe(struct platform_device *pdev)
- {
-+	struct device *dev = &pdev->dev;
- 	const struct of_device_id *match;
-+	const struct acpi_device_id *acpi_id;
- 	const struct sdhci_iproc_data *iproc_data;
- 	struct sdhci_host *host;
- 	struct sdhci_iproc_host *iproc_host;
- 	struct sdhci_pltfm_host *pltfm_host;
- 	int ret;
-+	enum sdhci_pltfm_type plat_type;
-+
-+	if (dev->of_node) {
-+		match = of_match_device(sdhci_iproc_of_match, dev);
-+		if (match)
-+			plat_type = (enum sdhci_pltfm_type)match->data;
-+		else
-+			return -ENODEV;
-+	} else if (has_acpi_companion(dev)) {
-+		acpi_id = acpi_match_device(sdhci_iproc_acpi_ids, dev);
-+		if (acpi_id)
-+			plat_type = (enum sdhci_pltfm_type)acpi_id->driver_data;
-+		else
-+			return -ENODEV;
-+	} else
-+		return -ENODEV;
- 
--	match = of_match_device(sdhci_iproc_of_match, &pdev->dev);
--	if (!match)
--		return -EINVAL;
--	iproc_data = match->data;
-+	iproc_data = &sdhci_iproc_data_list[plat_type];
- 
- 	host = sdhci_pltfm_init(pdev, iproc_data->pdata, sizeof(*iproc_host));
- 	if (IS_ERR(host))
-@@ -284,17 +336,30 @@ static int sdhci_iproc_probe(struct platform_device *pdev)
- 
- 	host->mmc->caps |= iproc_host->data->mmc_caps;
- 
--	pltfm_host->clk = devm_clk_get(&pdev->dev, NULL);
--	if (IS_ERR(pltfm_host->clk)) {
--		ret = PTR_ERR(pltfm_host->clk);
--		goto err;
--	}
--	ret = clk_prepare_enable(pltfm_host->clk);
--	if (ret) {
--		dev_err(&pdev->dev, "failed to enable host clk\n");
--		goto err;
-+	if (dev->of_node) {
-+		pltfm_host->clk = devm_clk_get(dev, NULL);
-+		if (IS_ERR(pltfm_host->clk)) {
-+			ret = PTR_ERR(pltfm_host->clk);
-+			goto err;
-+		}
-+		ret = clk_prepare_enable(pltfm_host->clk);
-+		if (ret) {
-+			dev_err(dev, "failed to enable host clk\n");
-+			goto err;
-+		}
-+	} else if (has_acpi_companion(dev)) {
-+		/*
-+		 * When Driver probe with ACPI device, clock devices
-+		 * are not available, so sdhci clock get from
-+		 * clock-frequency property given in _DSD object.
-+		 */
-+		device_property_read_u32(dev, "clock-frequency",
-+					 &pltfm_host->clock);
-+		if (!pltfm_host->clock) {
-+			ret = -ENODEV;
-+			goto err;
-+		}
- 	}
--
- 	if (iproc_host->data->pdata->quirks & SDHCI_QUIRK_MISSING_CAPS) {
- 		host->caps = iproc_host->data->caps;
- 		host->caps1 = iproc_host->data->caps1;
-@@ -307,7 +372,8 @@ static int sdhci_iproc_probe(struct platform_device *pdev)
- 	return 0;
- 
- err_clk:
--	clk_disable_unprepare(pltfm_host->clk);
-+	if (dev->of_node)
-+		clk_disable_unprepare(pltfm_host->clk);
- err:
- 	sdhci_pltfm_free(pdev);
- 	return ret;
-@@ -317,6 +383,7 @@ static struct platform_driver sdhci_iproc_driver = {
- 	.driver = {
- 		.name = "sdhci-iproc",
- 		.of_match_table = sdhci_iproc_of_match,
-+		.acpi_match_table = ACPI_PTR(sdhci_iproc_acpi_ids),
- 		.pm = &sdhci_pltfm_pmops,
- 	},
- 	.probe = sdhci_iproc_probe,
--- 
-2.7.4
+I also prefer to move writing of SDHCI_HOST_CONTROL from
+sdhci_prepare_data() to sdhci_do_reset(), can that work properly?
+Since I noticed that flags of DMA (ADMA/SDMA) were set during
+initialization (i.e. probe).
+
+What's your opinion?
+
+>
+>> +
+>> +     /* set dll backup mode */
+>> +     val = sdhci_readl(host, SDHCI_SPRD_REG_DEBOUNCE);
+>> +     val |= SDHCI_SPRD_BIT_DLL_BAK | SDHCI_SPRD_BIT_DLL_VAL;
+>> +     sdhci_writel(host, val, SDHCI_SPRD_REG_DEBOUNCE);
+>> +
+>> +     /* set CMD23 enabled */
+>> +     val = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+>> +     val |= SDHCI_CMD23_ENABLE;
+>> +     sdhci_writew(host, val, SDHCI_HOST_CONTROL2);
+>
+> SDHCI should do that.  Needs to be done either when enabling auto-CMD23 or
+> after every reset or resume.
+
+Ok, will do in sdhci_do_reset() as well.
+
+>
+>> +}
+>> +
+>> +static inline u32 sdhci_sprd_readl(struct sdhci_host *host, int reg)
+>> +{
+>> +     if (unlikely(reg == SDHCI_MAX_CURRENT))
+>> +             return SDHCI_SPRD_MAX_CUR;
+>> +
+>> +     return readl_relaxed(host->ioaddr + reg);
+>> +}
+>> +
+>> +static inline void sdhci_sprd_writel(struct sdhci_host *host, u32 val, int reg)
+>> +{
+>> +     /* SDHCI_MAX_CURRENT is reserved on Spreadtrum's platform */
+>> +     if (unlikely(reg == SDHCI_MAX_CURRENT))
+>> +             return;
+>> +
+>> +     if (unlikely(reg == SDHCI_SIGNAL_ENABLE || reg == SDHCI_INT_ENABLE))
+>> +             val = val & SDHCI_SPRD_INT_SIGNAL_MASK;
+>> +
+>> +     writel_relaxed(val, host->ioaddr + reg);
+>> +}
+>> +
+>> +static inline void sdhci_sprd_writeb(struct sdhci_host *host, u8 val, int reg)
+>> +{
+>> +     if (unlikely(reg == SDHCI_SOFTWARE_RESET)) {
+>> +             if (readb_relaxed(host->ioaddr + reg) & SDHCI_HW_RESET_CARD)
+>> +                     val |= SDHCI_HW_RESET_CARD;
+>> +     }
+>> +
+>> +     writeb_relaxed(val, host->ioaddr + reg);
+>> +}
+>> +
+>> +static inline void sdhci_sprd_sd_clk_off(struct sdhci_host *host)
+>> +{
+>> +     u16 ctrl = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+>> +
+>> +     ctrl &= ~SDHCI_CLOCK_CARD_EN;
+>> +     sdhci_writew(host, ctrl, SDHCI_CLOCK_CONTROL);
+>> +}
+>> +
+>> +static inline void
+>> +sdhci_sprd_set_dll_invert(struct sdhci_host *host, u32 mask, bool en)
+>> +{
+>> +     u32 dll_dly_offset;
+>> +
+>> +     dll_dly_offset = sdhci_readl(host, SDHCI_SPRD_REG_32_DLL_DLY_OFFSET);
+>> +     if (en)
+>> +             dll_dly_offset |= mask;
+>> +     else
+>> +             dll_dly_offset &= ~mask;
+>> +     sdhci_writel(host, dll_dly_offset, SDHCI_SPRD_REG_32_DLL_DLY_OFFSET);
+>> +}
+>> +
+>> +static inline u32 sdhci_sprd_calc_div(u32 base_clk, u32 clk)
+>> +{
+>> +     u32 div;
+>> +
+>> +     /* select 2x clock source */
+>> +     if (base_clk <= clk * 2)
+>> +             return 0;
+>> +
+>> +     div = (u32) (base_clk / (clk * 2));
+>> +
+>> +     if ((base_clk / div) > (clk * 2))
+>> +             div++;
+>> +
+>> +     if (div > SDHCI_SPRD_CLK_MAX_DIV)
+>> +             div = SDHCI_SPRD_CLK_MAX_DIV;
+>> +
+>> +     if (div % 2)
+>> +             div = (div + 1) / 2;
+>> +     else
+>> +             div = div / 2;
+>> +
+>> +     return div;
+>> +}
+>> +
+>> +static inline void _sdhci_sprd_set_clock(struct sdhci_host *host,
+>> +                                     unsigned int clk)
+>> +{
+>> +     struct sdhci_sprd_host *sprd_host = TO_SPRD_HOST(host);
+>> +     u32 div, val, mask;
+>> +
+>> +     div = sdhci_sprd_calc_div(sprd_host->base_rate, clk);
+>> +
+>> +     clk |= ((div & 0x300) >> 2) | ((div & 0xFF) << 8);
+>> +     sdhci_enable_clk(host, clk);
+>> +
+>> +     /* enable auto gate sdhc_enable_auto_gate */
+>> +     val = sdhci_readl(host, SDHCI_SPRD_REG_32_BUSY_POSI);
+>> +     mask = SDHCI_SPRD_BIT_OUTR_CLK_AUTO_EN |
+>> +            SDHCI_SPRD_BIT_INNR_CLK_AUTO_EN;
+>> +     if (mask != (val & mask)) {
+>> +             val |= mask;
+>> +             sdhci_writel(host, val, SDHCI_SPRD_REG_32_BUSY_POSI);
+>> +     }
+>> +}
+>> +
+>> +static void sdhci_sprd_set_clock(struct sdhci_host *host, unsigned int clock)
+>> +{
+>> +     bool en = false;
+>> +
+>> +     if (clock == 0) {
+>> +             sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+>> +     } else if (clock != host->clock) {
+>> +             sdhci_sprd_sd_clk_off(host);
+>> +             _sdhci_sprd_set_clock(host, clock);
+>> +
+>> +             if (clock <= 400000)
+>> +                     en = true;
+>> +             sdhci_sprd_set_dll_invert(host, SDHCI_SPRD_BIT_CMD_DLY_INV |
+>> +                                       SDHCI_SPRD_BIT_POSRD_DLY_INV, en);
+>> +     } else {
+>> +             _sdhci_sprd_set_clock(host, clock);
+>> +     }
+>> +}
+>> +
+>> +static unsigned int sdhci_sprd_get_max_clock(struct sdhci_host *host)
+>> +{
+>> +     struct sdhci_sprd_host *sprd_host = TO_SPRD_HOST(host);
+>> +
+>> +     return clk_round_rate(sprd_host->clk_sdio, ULONG_MAX);
+>> +}
+>> +
+>> +static unsigned int sdhci_sprd_get_min_clock(struct sdhci_host *host)
+>> +{
+>> +     return 400000;
+>> +}
+>> +
+>> +static void sdhci_sprd_set_uhs_signaling(struct sdhci_host *host,
+>> +                                      unsigned int timing)
+>> +{
+>> +     u16 ctrl_2;
+>> +
+>> +     if (timing == host->timing)
+>> +             return;
+>> +
+>> +     ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+>> +     /* Select Bus Speed Mode for host */
+>> +     ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
+>> +     switch (timing) {
+>> +     case MMC_TIMING_UHS_SDR12:
+>> +             ctrl_2 = SDHCI_CTRL_UHS_SDR12;
+>
+> Shouldn't this and the following ones be '|=' not '='
+>
+>> +             break;
+>> +     case MMC_TIMING_MMC_HS:
+>> +     case MMC_TIMING_SD_HS:
+>> +     case MMC_TIMING_UHS_SDR25:
+>> +             ctrl_2 = SDHCI_CTRL_UHS_SDR25;
+>> +             break;
+>> +     case MMC_TIMING_UHS_SDR50:
+>> +             ctrl_2 = SDHCI_CTRL_UHS_SDR50;
+>> +             break;
+>> +     case MMC_TIMING_UHS_SDR104:
+>> +             ctrl_2 = SDHCI_CTRL_UHS_SDR104;
+>> +             break;
+>> +     case MMC_TIMING_UHS_DDR50:
+>> +     case MMC_TIMING_MMC_DDR52:
+>> +             ctrl_2 = SDHCI_CTRL_UHS_DDR50;
+>> +             break;
+>> +     case MMC_TIMING_MMC_HS200:
+>> +             ctrl_2 = SDHCI_SPRD_CTRL_HS200;
+>> +             break;
+>> +     case MMC_TIMING_MMC_HS400:
+>> +             ctrl_2 = SDHCI_SPRD_CTRL_HS400;
+>> +             break;
+>> +     default:
+>> +             break;
+>> +     }
+>> +
+>> +     sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
+>> +}
+>> +
+>> +static void sdhci_sprd_hw_reset(struct sdhci_host *host)
+>> +{
+>> +     int val;
+>> +
+>> +     /* Note: don't use sdhci_readb/writeb() API here */
+>> +     val = readb_relaxed(host->ioaddr + SDHCI_SOFTWARE_RESET);
+>> +     val &= ~SDHCI_HW_RESET_CARD;
+>> +     writeb_relaxed(val, host->ioaddr + SDHCI_SOFTWARE_RESET);
+>> +     udelay(10);
+>> +
+>> +     val |= SDHCI_HW_RESET_CARD;
+>> +     writeb_relaxed(val, host->ioaddr + SDHCI_SOFTWARE_RESET);
+>> +     udelay(300);
+>
+> usleep_range() maybe
+
+Ok, I will have another look at it.
+
+Thanks for the comments,
+Chunyan
+
+>
+>> +}
+>> +
+>> +static struct sdhci_ops sdhci_sprd_ops = {
+>> +     .read_l = sdhci_sprd_readl,
+>> +     .write_l = sdhci_sprd_writel,
+>> +     .write_b = sdhci_sprd_writeb,
+>> +     .set_clock = sdhci_sprd_set_clock,
+>> +     .get_max_clock = sdhci_sprd_get_max_clock,
+>> +     .get_min_clock = sdhci_sprd_get_min_clock,
+>> +     .set_bus_width = sdhci_set_bus_width,
+>> +     .reset = sdhci_reset,
+>> +     .set_uhs_signaling = sdhci_sprd_set_uhs_signaling,
+>> +     .hw_reset = sdhci_sprd_hw_reset,
+>> +};
+>> +
+>> +static const struct sdhci_pltfm_data sdhci_sprd_pdata = {
+>> +     .quirks = SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK,
+>> +     .quirks2 = SDHCI_QUIRK2_BROKEN_HS200,
+>> +     .ops = &sdhci_sprd_ops,
+>> +};
+>> +
+>> +static int sdhci_sprd_probe(struct platform_device *pdev)
+>> +{
+>> +     struct sdhci_host *host;
+>> +     struct sdhci_sprd_host *sprd_host;
+>> +     struct clk *clk;
+>> +     int ret = 0;
+>> +
+>> +     host = sdhci_pltfm_init(pdev, &sdhci_sprd_pdata, sizeof(*sprd_host));
+>> +     if (IS_ERR(host))
+>> +             return PTR_ERR(host);
+>> +
+>> +     host->dma_mask = DMA_BIT_MASK(64);
+>> +     pdev->dev.dma_mask = &host->dma_mask;
+>> +
+>> +     host->mmc->caps = MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED |
+>> +             MMC_CAP_ERASE | MMC_CAP_CMD23;
+>> +     ret = mmc_of_parse(host->mmc);
+>> +     if (ret)
+>> +             goto pltfm_free;
+>> +
+>> +     sprd_host = TO_SPRD_HOST(host);
+>> +
+>> +     clk = devm_clk_get(&pdev->dev, "sdio");
+>> +     if (IS_ERR(clk)) {
+>> +             ret = PTR_ERR(clk);
+>> +             goto pltfm_free;
+>> +     }
+>> +     sprd_host->clk_sdio = clk;
+>> +     sprd_host->base_rate = clk_get_rate(sprd_host->clk_sdio);
+>> +     if (!sprd_host->base_rate)
+>> +             sprd_host->base_rate = SDHCI_SPRD_CLK_DEF_RATE;
+>> +
+>> +     clk = devm_clk_get(&pdev->dev, "enable");
+>> +     if (IS_ERR(clk)) {
+>> +             ret = PTR_ERR(clk);
+>> +             goto pltfm_free;
+>> +     }
+>> +     sprd_host->clk_enable = clk;
+>> +
+>> +     ret = clk_prepare_enable(sprd_host->clk_sdio);
+>> +     if (ret)
+>> +             goto pltfm_free;
+>> +
+>> +     clk_prepare_enable(sprd_host->clk_enable);
+>> +     if (ret)
+>> +             goto clk_disable;
+>> +
+>> +     sdhci_sprd_init_config(host);
+>> +     host->version = sdhci_readw(host, SDHCI_HOST_VERSION);
+>> +     sprd_host->version = ((host->version & SDHCI_VENDOR_VER_MASK) >>
+>> +                            SDHCI_VENDOR_VER_SHIFT);
+>> +
+>> +     pm_runtime_get_noresume(&pdev->dev);
+>> +     pm_runtime_set_active(&pdev->dev);
+>> +     pm_runtime_enable(&pdev->dev);
+>> +     pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
+>> +     pm_runtime_use_autosuspend(&pdev->dev);
+>> +     pm_suspend_ignore_children(&pdev->dev, 1);
+>> +
+>> +     sdhci_enable_v4_mode(host);
+>> +     ret = sdhci_add_host(host);
+>> +     if (ret) {
+>> +             dev_err(&pdev->dev, "failed to add mmc host: %d\n", ret);
+>> +             goto pm_runtime_disable;
+>> +     }
+>> +
+>> +     pm_runtime_mark_last_busy(&pdev->dev);
+>> +     pm_runtime_put_autosuspend(&pdev->dev);
+>> +
+>> +     return 0;
+>> +
+>> +pm_runtime_disable:
+>> +     pm_runtime_disable(&pdev->dev);
+>> +     pm_runtime_set_suspended(&pdev->dev);
+>> +
+>> +     clk_disable_unprepare(sprd_host->clk_enable);
+>> +
+>> +clk_disable:
+>> +     clk_disable_unprepare(sprd_host->clk_sdio);
+>> +
+>> +pltfm_free:
+>> +     sdhci_pltfm_free(pdev);
+>> +     return ret;
+>> +}
+>> +
+>> +static int sdhci_sprd_remove(struct platform_device *pdev)
+>> +{
+>> +     struct sdhci_host *host = platform_get_drvdata(pdev);
+>> +     struct sdhci_sprd_host *sprd_host = TO_SPRD_HOST(host);
+>> +     struct mmc_host *mmc = host->mmc;
+>> +
+>> +     mmc_remove_host(mmc);
+>> +     clk_disable_unprepare(sprd_host->clk_sdio);
+>> +     clk_disable_unprepare(sprd_host->clk_enable);
+>> +
+>> +     mmc_free_host(mmc);
+>> +
+>> +     return 0;
+>> +}
+>> +
+>> +static const struct of_device_id sdhci_sprd_of_match[] = {
+>> +     { .compatible = "sprd,sdhci-r11", },
+>> +     { }
+>> +};
+>> +MODULE_DEVICE_TABLE(of, sdhci_sprd_of_match);
+>> +
+>> +#ifdef CONFIG_PM
+>> +static int sdhci_sprd_runtime_suspend(struct device *dev)
+>> +{
+>> +     struct sdhci_host *host = dev_get_drvdata(dev);
+>> +     struct sdhci_sprd_host *sprd_host = TO_SPRD_HOST(host);
+>> +
+>> +     sdhci_runtime_suspend_host(host);
+>> +
+>> +     clk_disable_unprepare(sprd_host->clk_sdio);
+>> +     clk_disable_unprepare(sprd_host->clk_enable);
+>> +
+>> +     return 0;
+>> +}
+>> +
+>> +static int sdhci_sprd_runtime_resume(struct device *dev)
+>> +{
+>> +     struct sdhci_host *host = dev_get_drvdata(dev);
+>> +     struct sdhci_sprd_host *sprd_host = TO_SPRD_HOST(host);
+>> +
+>> +     clk_prepare_enable(sprd_host->clk_enable);
+>> +     clk_prepare_enable(sprd_host->clk_sdio);
+>
+> Drivers usually check the error returns of clk_prepare_enable().
+>
+>> +
+>> +     sdhci_runtime_resume_host(host);
+>> +
+>> +     return 0;
+>> +}
+>> +#endif
+>> +
+>> +static const struct dev_pm_ops sdhci_sprd_pm_ops = {
+>> +     SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
+>> +                             pm_runtime_force_resume)
+>> +     SET_RUNTIME_PM_OPS(sdhci_sprd_runtime_suspend,
+>> +                        sdhci_sprd_runtime_resume, NULL)
+>> +};
+>> +
+>> +static struct platform_driver sdhci_sprd_driver = {
+>> +     .probe = sdhci_sprd_probe,
+>> +     .remove = sdhci_sprd_remove,
+>> +     .driver = {
+>> +             .name = "sdhci_sprd_r11",
+>> +             .of_match_table = of_match_ptr(sdhci_sprd_of_match),
+>> +             .pm = &sdhci_sprd_pm_ops,
+>> +     },
+>> +};
+>> +module_platform_driver(sdhci_sprd_driver);
+>> +
+>> +MODULE_DESCRIPTION("Spreadtrum sdio host controller r11 driver");
+>> +MODULE_LICENSE("GPL v2");
+>> +MODULE_ALIAS("platform:sdhci-sprd-r11");
+>>
+>
