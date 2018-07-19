@@ -1,56 +1,65 @@
-From: Icenowy Zheng <icenowy@aosc.io>
-Subject: [PATCH v2 3/3] arm64: allwinner: h6: enable MMC0/2 on Pine H64
-Date: Thu, 19 Jul 2018 12:28:10 +0800
-Message-ID: <20180719042810.6546-4-icenowy@aosc.io>
-References: <20180719042810.6546-1-icenowy@aosc.io>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180719042810.6546-1-icenowy@aosc.io>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Rob Herring <robh+dt@kernel.org>, Maxime Ripard <maxime.ripard@bootlin.com>, Chen-Yu Tsai <wens@csie.org>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-sunxi@googlegroups.com, Icenowy Zheng <icenowy@aosc.io>
+From: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
+Subject: [PATCH v2] mmc: sunxi: remove output of virtual base address
+Date: Thu, 19 Jul 2018 14:35:54 +0100
+Message-ID: <20180719133554.30737-1-andre.przywara@arm.com>
+Reply-To: andre.przywara-5wv7dgnIgG8@public.gmane.org
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-sunxi+bncBDNZNK75ZIKRBPVHYLNAKGQE5M4LB5A-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-The Pine H64 board have a MicroSD slot connected to MMC0 controller of
-the H6 SoC and a eMMC slot connected to MMC2.
+Recent Linux versions refuse to print actual virtual kernel addresses,
+to not give a hint about the location of the kernel in a randomized virtual
+address space. This affects the output of the sunxi MMC controller
+driver, which now produces the rather uninformative line:
 
-Enable them in the device tree.
+[    1.482660] sunxi-mmc 1c0f000.mmc: base:0x(____ptrval____) irq:8
 
-Signed-off-by: Icenowy Zheng <icenowy@aosc.io>
+Since the virtual base address is not really interesting in the first
+place, let's just drop this value. The same applies to Linux' notion of
+the interrupt number, which is independent from the GIC SPI number.
+We have the physical address as part of the DT node name, which is way
+more useful for debugging purposes.
+To keep a success message in the driver, we print some information that
+is not too obvious and that we learned while probing the device:
+the maximum request size and whether it uses the new timing mode.
+So the output turns into:
+sunxi-mmc 1c0f000.mmc: max request size: 16384 KB, uses new timings mode
+sunxi-mmc 1c11000.mmc: max request size: 2048 KB
+
+Signed-off-by: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
 ---
-Changes in v2:
-- Use real regulator instead of dummy regulator.
+Changelog v1 ... v2:
+- dropped output of Linux interrupt number
+- added max request size and timings mode output
 
- .../boot/dts/allwinner/sun50i-h6-pine-h64.dts  | 18 ++++++++++++++++++
- 1 file changed, 18 insertions(+)
+ drivers/mmc/host/sunxi-mmc.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
-diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h6-pine-h64.dts b/arch/arm64/boot/dts/allwinner/sun50i-h6-pine-h64.dts
-index 1673636358ef..ceffc40810ee 100644
---- a/arch/arm64/boot/dts/allwinner/sun50i-h6-pine-h64.dts
-+++ b/arch/arm64/boot/dts/allwinner/sun50i-h6-pine-h64.dts
-@@ -41,6 +41,24 @@
- 	};
- };
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index 8e7f3e35ee3d..fbbc09d82338 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -1407,7 +1407,10 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		goto error_free_dma;
  
-+&mmc0 {
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&mmc0_pins>;
-+	vmmc-supply = <&reg_cldo1>;
-+	cd-gpios = <&pio 5 6 GPIO_ACTIVE_LOW>;
-+	status = "okay";
-+};
+-	dev_info(&pdev->dev, "base:0x%p irq:%u\n", host->reg_base, host->irq);
++	dev_info(&pdev->dev, "max request size: %u KB%s\n",
++		 mmc->max_req_size >> 10,
++		 host->use_new_timings ? ", uses new timings mode" : "");
 +
-+&mmc2 {
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&mmc2_pins>;
-+	vmmc-supply = <&reg_cldo1>;
-+	vqmmc-supply = <&reg_bldo2>;
-+	non-removable;
-+	cap-mmc-hw-reset;
-+	status = "okay";
-+};
-+
- &r_i2c {
- 	status = "okay";
+ 	return 0;
  
+ error_free_dma:
 -- 
-2.17.1
+2.14.4
