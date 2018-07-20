@@ -1,99 +1,44 @@
-From: Manish Narani <MNARANI@xilinx.com>
-Subject: RE: [RFC PATCH 3/3] sdhci: arasan: Add support to read Tap Delay
- values from DT
-Date: Fri, 20 Jul 2018 06:23:16 +0000
-Message-ID: <SN6PR02MB4959F4BE25593EC7589DC34AC1510@SN6PR02MB4959.namprd02.prod.outlook.com>
-References: <1528373500-24663-1-git-send-email-manish.narani@xilinx.com>
- <1528373500-24663-3-git-send-email-manish.narani@xilinx.com>
- <CAPDyKFoGJOE-h4rLqzMO=wzNjkfcuU_oQ3NLK5=OQfSMj3dDHg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Vijay Viswanath <vviswana@codeaurora.org>
+Subject: [PATCH V1 0/3] Internal voltage control for platform drivers
+Date: Fri, 20 Jul 2018 16:16:03 +0530
+Message-ID: <1532083566-43215-1-git-send-email-vviswana@codeaurora.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFoGJOE-h4rLqzMO=wzNjkfcuU_oQ3NLK5=OQfSMj3dDHg@mail.gmail.com>
-Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Moritz Fischer <mdf@kernel.org>, "stefan.krsmanovic@aggios.com" <stefan.krsmanovic@aggios.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michals@xilinx.com>
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, devicetree@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, jeremymc@redhat.com, vviswana@codeaurora.org, bjorn.andersson@linaro.org, riteshh@codeaurora.org, vbadigan@codeaurora.org, evgreen@chromium.org, dianders@google.com, sayalil@codeaurora.org
 List-Id: linux-mmc@vger.kernel.org
 
-SGkgVWZmZSwNCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBVbGYgSGFu
-c3NvbiBbbWFpbHRvOnVsZi5oYW5zc29uQGxpbmFyby5vcmddDQo+IFNlbnQ6IFR1ZXNkYXksIEp1
-bHkgMTAsIDIwMTggMjowMiBQTQ0KPiBUbzogTWFuaXNoIE5hcmFuaSA8TU5BUkFOSUB4aWxpbngu
-Y29tPg0KPiBDYzogUm9iIEhlcnJpbmcgPHJvYmgrZHRAa2VybmVsLm9yZz47IE1hcmsgUnV0bGFu
-ZA0KPiA8bWFyay5ydXRsYW5kQGFybS5jb20+OyBDYXRhbGluIE1hcmluYXMgPGNhdGFsaW4ubWFy
-aW5hc0Bhcm0uY29tPjsgV2lsbA0KPiBEZWFjb24gPHdpbGwuZGVhY29uQGFybS5jb20+OyBNb3Jp
-dHogRmlzY2hlciA8bWRmQGtlcm5lbC5vcmc+Ow0KPiBzdGVmYW4ua3JzbWFub3ZpY0BhZ2dpb3Mu
-Y29tOyBMaW51eCBBUk0gPGxpbnV4LWFybS0NCj4ga2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmc+
-OyBMaW51eCBLZXJuZWwgTWFpbGluZyBMaXN0IDxsaW51eC0NCj4ga2VybmVsQHZnZXIua2VybmVs
-Lm9yZz47IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc7DQo+IGRldmljZXRyZWVAdmdlci5rZXJu
-ZWwub3JnOyBBZHJpYW4gSHVudGVyIDxhZHJpYW4uaHVudGVyQGludGVsLmNvbT47DQo+IE1pY2hh
-bCBTaW1layA8bWljaGFsc0B4aWxpbnguY29tPg0KPiBTdWJqZWN0OiBSZTogW1JGQyBQQVRDSCAz
-LzNdIHNkaGNpOiBhcmFzYW46IEFkZCBzdXBwb3J0IHRvIHJlYWQgVGFwIERlbGF5DQo+IHZhbHVl
-cyBmcm9tIERUDQo+IA0KPiBPbiA3IEp1bmUgMjAxOCBhdCAxNDoxMSwgTWFuaXNoIE5hcmFuaSA8
-bWFuaXNoLm5hcmFuaUB4aWxpbnguY29tPiB3cm90ZToNCj4gPiBUaGlzIHBhdGNoIGFkZHMgc3Vw
-cG9ydCBmb3IgcmVhZGluZyBUYXAgRGVsYXkgdmFsdWVzIGZyb20gRGV2aWNlIFRyZWUNCj4gPiBh
-bmQgd3JpdGUgdGhlbSB2aWEgZWVtaSBjYWxscy4gVGhlIG1hY3JvcyBjb250YWluaW5nIHRoZXNl
-IHRhcCBkZWxheQ0KPiA+IHZhbHVlcyBhcmUgcmVtb3ZlZCBmcm9tIHRoZSBkcml2ZXIuDQo+ID4N
-Cj4gPiBTaWduZWQtb2ZmLWJ5OiBNYW5pc2ggTmFyYW5pIDxtYW5pc2gubmFyYW5pQHhpbGlueC5j
-b20+DQo+ID4gLS0tDQo+ID4gIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtYXJhc2FuLmMgfCAx
-MzENCj4gPiArKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrDQo+ID4gIDEgZmls
-ZSBjaGFuZ2VkLCAxMzEgaW5zZXJ0aW9ucygrKQ0KPiA+DQo+ID4gZGlmZiAtLWdpdCBhL2RyaXZl
-cnMvbW1jL2hvc3Qvc2RoY2ktb2YtYXJhc2FuLmMNCj4gPiBiL2RyaXZlcnMvbW1jL2hvc3Qvc2Ro
-Y2ktb2YtYXJhc2FuLmMNCj4gPiBpbmRleCBlMzMzMmE1Li5mYzBmZDAxIDEwMDY0NA0KPiA+IC0t
-LSBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtYXJhc2FuLmMNCj4gPiArKysgYi9kcml2ZXJz
-L21tYy9ob3N0L3NkaGNpLW9mLWFyYXNhbi5jDQo+ID4gQEAgLTM2LDYgKzM2LDggQEANCj4gPg0K
-PiA+ICAjZGVmaW5lIFBIWV9DTEtfVE9PX1NMT1dfSFogICAgICAgICAgICA0MDAwMDANCj4gPg0K
-PiA+ICsjZGVmaW5lIE1NQ19CQU5LMiAgICAgICAgICAgICAgMHgyDQo+ID4gKw0KPiA+ICAvKg0K
-PiA+ICAgKiBPbiBzb21lIFNvQ3MgdGhlIHN5c2NvbiBhcmVhIGhhcyBhIGZlYXR1cmUgd2hlcmUg
-dGhlIHVwcGVyIDE2LWJpdHMgb2YNCj4gPiAgICogZWFjaCAzMi1iaXQgcmVnaXN0ZXIgYWN0IGFz
-IGEgd3JpdGUgbWFzayBmb3IgdGhlIGxvd2VyIDE2LWJpdHMuDQo+ID4gVGhpcyBhbGxvd3MgQEAg
-LTkwLDYgKzkyLDEwIEBAIHN0cnVjdCBzZGhjaV9hcmFzYW5fZGF0YSB7DQo+ID4gICAgICAgICBz
-dHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdDsNCj4gPiAgICAgICAgIHN0cnVjdCBjbGsgICAgICAqY2xr
-X2FoYjsNCj4gPiAgICAgICAgIHN0cnVjdCBwaHkgICAgICAqcGh5Ow0KPiA+ICsgICAgICAgdTMy
-IG1pb19iYW5rOw0KPiA+ICsgICAgICAgdTMyIGRldmljZV9pZDsNCj4gPiArICAgICAgIHUzMiBp
-dGFwZGx5W01NQ19USU1JTkdfTU1DX0hTNDAwICsgMV07DQo+ID4gKyAgICAgICB1MzIgb3RhcGRs
-eVtNTUNfVElNSU5HX01NQ19IUzQwMCArIDFdOw0KPiA+ICAgICAgICAgYm9vbCAgICAgICAgICAg
-IGlzX3BoeV9vbjsNCj4gPg0KPiA+ICAgICAgICAgYm9vbCAgICAgICAgICAgIGhhc19jcWU7DQo+
-ID4gQEAgLTE2MCwxMSArMTY2LDM2IEBAIHN0YXRpYyBpbnQgc2RoY2lfYXJhc2FuX3N5c2Nvbl93
-cml0ZShzdHJ1Y3QNCj4gc2RoY2lfaG9zdCAqaG9zdCwNCj4gPiAgICAgICAgIHJldHVybiByZXQ7
-DQo+ID4gIH0NCj4gPg0KPiA+ICsvKioNCj4gPiArICogYXJhc2FuX3p5bnFtcF9zZXRfdGFwX2Rl
-bGF5IC0gUHJvZ3JhbSB0aGUgdGFwIGRlbGF5cy4NCj4gPiArICogQGRldmljZWlkOiAgICAgICAg
-ICBVbmlxdWUgSWQgb2YgZGV2aWNlDQo+ID4gKyAqIEBpdGFwX2RlbGF5OiAgICAgICAgICAgICAg
-ICBJbnB1dCBUYXAgRGVsYXkNCj4gPiArICogQG9pdGFwX2RlbGF5OiAgICAgICBPdXRwdXQgVGFw
-IERlbGF5DQo+ID4gKyAqLw0KPiA+ICtzdGF0aWMgdm9pZCBhcmFzYW5fenlucW1wX3NldF90YXBf
-ZGVsYXkodTggZGV2aWNlaWQsIHU4IGl0YXBfZGVsYXksDQo+ID4gK3U4IG90YXBfZGVsYXkpIHsN
-Cj4gPiArICAgICAgIGNvbnN0IHN0cnVjdCB6eW5xbXBfZWVtaV9vcHMgKmVlbWlfb3BzID0NCj4g
-PiArenlucW1wX3BtX2dldF9lZW1pX29wcygpOw0KPiANCj4gTm8gdGhhbmtzIQ0KPiANCj4gSXNu
-J3QgdGhlcmUgYSBtb3JlIGdlbmVyaWMgZnJhbWV3b3JrIHdlIGNhbiB1c2UgdG8gY2hhbmdlIHRo
-ZSB0YXAgdmFsdWVzLA0KPiByYXRoZXIgdGhhbiBjYWxsaW5nIFNvQyBzcGVjaWZpYyBmdW5jdGlv
-bnMgZnJvbSB0aGUgZHJpdmVyPw0KWWVzLCBUaGFua3MgZm9yIHlvdXIgc3VnZ2VzdGlvbi4gSSB3
-aWxsIHdvcmsgb24gdGhlIGdlbmVyaWMgZnJhbWV3b3JrIHdoaWNoIHdpbGwgYmUgdXNlZCB0byBj
-aGFuZ2UgdGFwIHZhbHVlcw0KVmlhIFNvQyBkcml2ZXJzLg0KPiANCj4gQlRXLCB3aGF0IGlzIGEg
-dGFwIHZhbHVlLCBtb3JlIGV4YWN0bHk/DQo+IFdoYXQgZG9lcyBjaGFuZ2luZyBhIHRhcCB2YWx1
-ZSBtZWFuIGFuZCB3aGVyZSBkb2VzIHRoZSBwcm9wZXJ0eSBiZWxvbmcsDQo+IHJlYWxseT8NClRh
-cCBWYWx1ZSBpcyB0aGUgZGVsYXkgb2YgY2xvY2sgcGhhc2Ugd2hpY2ggaXMgdXNlZCB0byBhZGp1
-c3QgcGhhc2UgdG8gdGhlIHdvcmtpbmcgdmFsdWUuIFRoZSBhdXRvIHR1bmluZw0KcHJvY2VzcyBn
-ZW5lcmFsbHkgc2V0cyB0YXAgdmFsdWVzIGludGVybmFsbHkgaW4gY29udHJvbGxlciBpbiBTRCBV
-SFMgbW9kZXMuIEJ1dCBmb3Igb3RoZXIgbW9kZXMgd2hlcmUNCmF1dG8gdHVuaW5nIGlzIGFwcGxp
-Y2FibGUsIHdlIGFyZSBkZXRlcm1pbmluZyB0YXAgdmFsdWVzIHZpYSB0cmlhbCAmIGVycm9yIG1l
-dGhvZCBmb3Igc3BlY2lmaWMgU29DLg0KPiA+IA0KPiBPZiBjb3Vyc2UgdGhpcyBkb2Vzbid0IGV2
-ZW4gY29tcGlsZSwgYXMgeW91IGhhdmUgYSBkZXBlbmRlbmN5IHRvIGFub3RoZXINCj4gc2VyaWVz
-LiBOZXh0IHRpbWUsIHBsZWFzZSBjbGFyaWZ5IHRoYXQgaW4gYSBjb3Zlci1sZXR0ZXIgKG1heWJl
-IHlvdSBkaWQsIGJ1dCBJDQo+IGNhbid0IGZpbmQgaXQpLg0KPiANCj4gPiArICAgICAgIHUzMiBu
-b2RlX2lkID0gKGRldmljZWlkID09IDApID8gTk9ERV9TRF8wIDogTk9ERV9TRF8xOw0KPiA+ICsN
-Cj4gPiArICAgICAgIGlmICghZWVtaV9vcHMgfHwgIWVlbWlfb3BzLT5pb2N0bCkNCj4gPiArICAg
-ICAgICAgICAgICAgcmV0dXJuOw0KPiA+ICsNCj4gPiArICAgICAgIGlmIChpdGFwX2RlbGF5KQ0K
-PiA+ICsgICAgICAgICAgICAgICBlZW1pX29wcy0+aW9jdGwobm9kZV9pZCwgSU9DVExfU0VUX1NE
-X1RBUERFTEFZLA0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgUE1fVEFQREVM
-QVlfSU5QVVQsIGl0YXBfZGVsYXksIE5VTEwpOw0KPiA+ICsNCj4gPiArICAgICAgIGlmIChvdGFw
-X2RlbGF5KQ0KPiA+ICsgICAgICAgICAgICAgICBlZW1pX29wcy0+aW9jdGwobm9kZV9pZCwgSU9D
-VExfU0VUX1NEX1RBUERFTEFZLA0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-UE1fVEFQREVMQVlfT1VUUFVULCBvdGFwX2RlbGF5LCBOVUxMKTsNCj4gPiArfQ0KPiANCj4gQW5v
-dGhlciBvdmVyYWxsIGNvbW1lbnQgZm9yIHRoZSBzZXJpZXMuDQo+IA0KPiBJIHdvdWxkIHJlY29t
-bWVuZCB0byBjaGFuZ2UgdGhlIG9yZGVyIG9mIHRoZSBwYXRjaGVzIGluIHRoZSBzZXJpZXMuDQo+
-IExldCB0aGUgRFQgZG9jIGNoYW5nZSBjb21lIGZpcnN0LCBuZXh0IHRoZSBkcml2ZXIgY2hhbmdl
-IGFuZCBmaW5hbGx5IHRoZSBjaGFuZ2UNCj4gdG8gdGhlIERUUyBmaWxlKHMpLiBUaGlzIG1ha2Vz
-IGl0IGVhc2llciB0byBmb2xsb3cgYW5kIHJldmlldy4NClN1cmUsIEkgd2lsbCBkbyB0aGF0Lg0K
-DQpUaGFua3MgJiBSZWdhcmRzLA0KTWFuaXNoDQoNCj4gDQo+IFsuLi5dDQo+IA0KPiBLaW5kIHJl
-Z2FyZHMNCj4gVWZmZQ0K
+Certain SDHC controllers may require that voltage switching happen after
+sepcial conditions. Added a QUIRK for such controllers to use.
+
+For SDHCI-MSM controllers, power irq is a signal from controller to SW
+that it is ready for voltage switch. So added support to register
+voltage regulators from the msm driver and use them.
+Voltage switching from core layer is causing CRC/cmd timeout errors in
+some chipsets.
+
+Changes since RFC:
+	- Added DT option to pass regulator load values the sdhci-msm driver
+	should vote during BUS_ON and BUS_OFF power irq.
+	- Removed quirk and used local flags in sdhci_add_host to to avoid
+	scenario of both sdhci & sdhci-msm layer controlling the regulators.
+	- Introduced two sdhci msm layer APIs to replace the respective
+	sdhci layer APIs. This is again to stop sdhci layer from
+	controlling regulators if sdhci_msm layer is present.
+
+Tested on: sdm845
+Requies patch series:"[PATCH V3 0/4] Changes for SDCC5 version"
+
+Vijay Viswanath (3):
+  mmc: sdhci: Allow platform controlled voltage switching
+  Documentation: sdhci-msm: Add entries for passing load values
+  mmc: sdhci-msm: Use internal voltage control
+
+ .../devicetree/bindings/mmc/sdhci-msm.txt          |   6 +
+ drivers/mmc/host/sdhci-msm.c                       | 220 +++++++++++++++++++--
+ drivers/mmc/host/sdhci.c                           |  21 +-
+ 3 files changed, 231 insertions(+), 16 deletions(-)
+
+-- 
+ Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc. 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a Linux Foundation Collaborative Project.
