@@ -1,136 +1,120 @@
-From: Maxime Ripard <maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [PATCH v2] mmc: sunxi: remove output of virtual
- base address
-Date: Fri, 20 Jul 2018 16:17:28 +0200
-Message-ID: <20180720141728.6te2ffbqsiisoein@flea>
-References: <20180719133554.30737-1-andre.przywara@arm.com>
- <20180719144650.hq3rtevp3gjkpvxh@flea>
- <6d0ade81-c55d-8262-0f78-4d7d55e549cb@arm.com>
-Reply-To: maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org
+From: Maxime Ripard <maxime.ripard@bootlin.com>
+Subject: Re: [PATCH v3 0/7] mmc: sunxi: Add runtime PM support
+Date: Fri, 20 Jul 2018 16:51:43 +0200
+Message-ID: <20180720145143.qgvlk2gbegxwwcfs@flea>
+References: <cover.e9b9c0ab5bc9ffcc52a15e1c2f41462729da5b61.1523888566.git-series.maxime.ripard@bootlin.com>
+ <20180716171428.ud3zsmeccds545si@core>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="raahg6hdn6m7t22z"
-Return-path: <linux-sunxi+bncBDSJBYGBRIMBBBW6Y7NAKGQE2I3JTVA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-Content-Disposition: inline
-In-Reply-To: <6d0ade81-c55d-8262-0f78-4d7d55e549cb-5wv7dgnIgG8@public.gmane.org>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Content-Type: multipart/mixed; boundary="===============6941415843493561596=="
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20180716171428.ud3zsmeccds545si@core>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Chen-Yu Tsai <wens@csie.org>, ulf.hansson@linaro.org, Thomas Petazzoni <thomas.petazzoni@bootlin.com>, linux-mmc@vger.kernel.org, Quentin Schulz <quentin.schulz@bootlin.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
 
---raahg6hdn6m7t22z
-Content-Type: text/plain; charset="UTF-8"
+--===============6941415843493561596==
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="idkpt7dudc67luip"
 Content-Disposition: inline
 
-On Thu, Jul 19, 2018 at 04:10:50PM +0100, Andre Przywara wrote:
-> Hi,
-> 
-> On 19/07/18 15:46, Maxime Ripard wrote:
-> > On Thu, Jul 19, 2018 at 02:35:54PM +0100, Andre Przywara wrote:
-> >> Recent Linux versions refuse to print actual virtual kernel addresses,
-> >> to not give a hint about the location of the kernel in a randomized virtual
-> >> address space. This affects the output of the sunxi MMC controller
-> >> driver, which now produces the rather uninformative line:
-> >>
-> >> [    1.482660] sunxi-mmc 1c0f000.mmc: base:0x(____ptrval____) irq:8
-> >>
-> >> Since the virtual base address is not really interesting in the first
-> >> place, let's just drop this value. The same applies to Linux' notion of
-> >> the interrupt number, which is independent from the GIC SPI number.
-> >> We have the physical address as part of the DT node name, which is way
-> >> more useful for debugging purposes.
-> >> To keep a success message in the driver, we print some information that
-> >> is not too obvious and that we learned while probing the device:
-> >> the maximum request size and whether it uses the new timing mode.
-> >> So the output turns into:
-> >> sunxi-mmc 1c0f000.mmc: max request size: 16384 KB, uses new timings mode
-> >> sunxi-mmc 1c11000.mmc: max request size: 2048 KB
-> >>
-> >> Signed-off-by: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
-> >> ---
-> >> Changelog v1 ... v2:
-> >> - dropped output of Linux interrupt number
-> >> - added max request size and timings mode output
-> >>
-> >>  drivers/mmc/host/sunxi-mmc.c | 5 ++++-
-> >>  1 file changed, 4 insertions(+), 1 deletion(-)
-> >>
-> >> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> >> index 8e7f3e35ee3d..fbbc09d82338 100644
-> >> --- a/drivers/mmc/host/sunxi-mmc.c
-> >> +++ b/drivers/mmc/host/sunxi-mmc.c
-> >> @@ -1407,7 +1407,10 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
-> >>  	if (ret)
-> >>  		goto error_free_dma;
-> >>  
-> >> -	dev_info(&pdev->dev, "base:0x%p irq:%u\n", host->reg_base, host->irq);
-> >> +	dev_info(&pdev->dev, "max request size: %u KB%s\n",
-> >> +		 mmc->max_req_size >> 10,
-> >> +		 host->use_new_timings ? ", uses new timings mode" : "");
-> > 
-> > I really don't know how to feel about this one.
-> > 
-> > This isn't more useful to the regular user wanting to see if the
-> > driver is probed, which is what this message should be about. 
-> > 
-> > And this one isn't clearer or more obvious than the previous one
-> > (which was already pretty bad). I really think having some message
-> > that basically says "MMC controller initialized" or something along
-> > those lines would work better.
-> 
-> I see your point, and am happy to change that.
-> On the other hand there might be people that complain about chatty
-> drivers, and printing a line just to says "Success!!!!!" is a bit BSP
-> kernel like ;-).
 
-Well, we're currently printing copyright notices, so I guess we're
-worse than the BSPs :)
+--idkpt7dudc67luip
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-> That dmesg line could as well be used to print something useful, and
-> transport the "success" message along with that.  So basically I
-> scanned the probe function for some information that would justify
-> an output (something non-obvious or information probed), to avoid
-> dropping this at all (as you initially said yesterday).
-> MMC_CAP_1_8V_DDR was another candidate, btw.
-> 
-> > However, I can also see value in having this printed, for developers,
-> > but maybe as dev_dbg?
-> 
-> I think it's useful to have this in non-debug kernels as well, because
-> this is what people tend to use. And this would allow developers to much
-> easier debug user problems, for instance when they create board DTs:
-> When this line doesn't appear, there might be a regulator missing, for
-> instance. If it's there, the MMC driver is happy and we have one less
-> thing to worry about.
-> 
-> So why not combine the benefit of the success message and the
-> information for developers, if we have that one line of output anyway?
-> I think we have way more chattier drivers and way more cryptic messages
-> in the dmesg, so a single line with some technical details does not
-> hurt, especially if we have that already.
-> 
-> But I don't have a strong opinion on that, so leave it up for Ulf and
-> you to decide: keep this patch (or print some other info); replace the
-> output with a success message or drop the line at all.
+Hi Ondrej,
 
-How about both then?
+On Mon, Jul 16, 2018 at 07:14:28PM +0200, Ond=C5=99ej Jirman wrote:
+> On Mon, Apr 16, 2018 at 04:22:58PM +0200, Maxime Ripard wrote:
+> > Hi,
+> >=20
+> > Since it's introduction, our MMC controller has had its external clocks
+> > running all the time.
+> >=20
+> > While that was working great, the power usage and most importantly the =
+EMI
+> > that it generated was pretty bad.
+> >=20
+> > Let's implement some runtime_pm hooks with an autosuspend to shut down =
+the
+> > whole block when the MMC is not active.
+> >=20
+> > However, some SDIO devices will not probe properly if we keep shutting =
+down
+> > the controller, so the autosuspend is disabled for the SDIO devices.
+>=20
+> I've tested your patches on TBS A711 tablet (A83T). I get this in the log:
+>=20
+>   sunxi-mmc 1c10000.mmc: fatal err update clk timeout
+>=20
+> Interestingly, this only happens after the first boot. If I hard power cy=
+cle the
+> tablet (removing/reinserting the battery) the first boot after that, ther=
+e's no
+> timeout, and WiFi chip connected to the mmc controller works.
+>=20
+> Any other reboot (even power cycling via PMIC), it fails with the above e=
+rror.
+> Maybe there's some unforeseen interaction of runtime PM with mmc-powerseq=
+ used
+> for the wifi chip power seuencing? Do you know what's the above error abo=
+ut?
+> I don't know anything about mmc subsystem.
 
-Something like "initialized with %d request size and new timings\n" ?
+It's kind of weird. Do you have an oscilloscope available to look at
+the clock signal (and the reset gpio) and see if there's any
+difference of behaviour?
 
-It makes it obvious enough for someone that doesn't really has an
-idea, while outputting the proper informations you wanted.
-
+Thanks!
 Maxime
 
--- 
+--=20
 Maxime Ripard, Bootlin (formerly Free Electrons)
 Embedded Linux and Kernel engineering
 https://bootlin.com
---raahg6hdn6m7t22z--
+
+--idkpt7dudc67luip
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEE0VqZU19dR2zEVaqr0rTAlCFNr3QFAltR9v4ACgkQ0rTAlCFN
+r3SWPxAAlfmt5AJFbYpvD6Ey/oCUarn1FrcLBJnWlhc9EZKRaex9rcvXisug0+3V
+ZG25OfCfZtoAirIf6eFuLUe67NnkenL/JdSSMdK3LKX7e2D4om122F/AfY/eOKyL
+t/t4WrSBNj4rk33yXcXWWofuDSYLLkj/gZcWS9crX/2lFTdBjQrZL+a9sRkQ1kC2
+J6JP/ytqZK6PHuSCd/Bzrio+qKmsZHgAIA7HQVXI44DQ6cQ446urh0V/Sg3qf3Qa
+AfSJbfOVC/XpqXVBFtE4E1urQvQVepIN0nAHV5fCYsJZgOwk/56vTCrGFqscVlC+
+MTP953vO0/4hHoguAqB5FW4h2erxE9Xo5Fb/wlkggzzUc8dJjKyU51bWJN5FPGXG
+f5q8/70w57E1s7dD/lTdMzPnnc6efzetKvqoYZfgSToni5RHP1Ih0ewsSt9sdObb
+kn8dzYvQL/9+zIG7SHx5E0Y8WRF2Uu9SJheUPHsnovmz3D2EoCKq3iHdtBWk/s8A
+DyBi6IqP/cnuyZ4BfZzVwn1X1RRuKPtadhUW0IdBiwQZsGsDz3QGgIykzoLPBT+Y
+YT6Pxf7tj7GA9bMpvcHImFStyCs6oYwxMZi8e8mKx6/UYFWZgkB0jTvkekRTS7an
+POz7SZF4rPeXUCfoGROnkAqmFxHuMb3cPHS9YaUhrMdwAzgZE7o=
+=M8v7
+-----END PGP SIGNATURE-----
+
+--idkpt7dudc67luip--
+
+
+--===============6941415843493561596==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+linux-arm-kernel mailing list
+linux-arm-kernel@lists.infradead.org
+http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+
+--===============6941415843493561596==--
