@@ -1,44 +1,94 @@
 From: Vijay Viswanath <vviswana@codeaurora.org>
-Subject: [PATCH V1 0/3] Internal voltage control for platform drivers
-Date: Fri, 20 Jul 2018 16:16:03 +0530
-Message-ID: <1532083566-43215-1-git-send-email-vviswana@codeaurora.org>
+Subject: [PATCH V1 1/3] mmc: sdhci: Allow platform controlled voltage switching
+Date: Fri, 20 Jul 2018 16:16:04 +0530
+Message-ID: <1532083566-43215-2-git-send-email-vviswana@codeaurora.org>
+References: <1532083566-43215-1-git-send-email-vviswana@codeaurora.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1532083566-43215-1-git-send-email-vviswana@codeaurora.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: adrian.hunter@intel.com, ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, devicetree@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, jeremymc@redhat.com, vviswana@codeaurora.org, bjorn.andersson@linaro.org, riteshh@codeaurora.org, vbadigan@codeaurora.org, evgreen@chromium.org, dianders@google.com, sayalil@codeaurora.org
 List-Id: linux-mmc@vger.kernel.org
 
-Certain SDHC controllers may require that voltage switching happen after
-sepcial conditions. Added a QUIRK for such controllers to use.
+Some controllers can have internal mechanism to inform the SW that it
+is ready for voltage switching. For such controllers, changing voltage
+before the HW is ready can result in various issues.
 
-For SDHCI-MSM controllers, power irq is a signal from controller to SW
-that it is ready for voltage switch. So added support to register
-voltage regulators from the msm driver and use them.
-Voltage switching from core layer is causing CRC/cmd timeout errors in
-some chipsets.
+During setup/cleanup of host, check whether regulator enable/disable
+was already done by platform driver.
 
-Changes since RFC:
-	- Added DT option to pass regulator load values the sdhci-msm driver
-	should vote during BUS_ON and BUS_OFF power irq.
-	- Removed quirk and used local flags in sdhci_add_host to to avoid
-	scenario of both sdhci & sdhci-msm layer controlling the regulators.
-	- Introduced two sdhci msm layer APIs to replace the respective
-	sdhci layer APIs. This is again to stop sdhci layer from
-	controlling regulators if sdhci_msm layer is present.
+Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
+---
+ drivers/mmc/host/sdhci.c | 21 ++++++++++++++++-----
+ 1 file changed, 16 insertions(+), 5 deletions(-)
 
-Tested on: sdm845
-Requies patch series:"[PATCH V3 0/4] Changes for SDCC5 version"
-
-Vijay Viswanath (3):
-  mmc: sdhci: Allow platform controlled voltage switching
-  Documentation: sdhci-msm: Add entries for passing load values
-  mmc: sdhci-msm: Use internal voltage control
-
- .../devicetree/bindings/mmc/sdhci-msm.txt          |   6 +
- drivers/mmc/host/sdhci-msm.c                       | 220 +++++++++++++++++++--
- drivers/mmc/host/sdhci.c                           |  21 +-
- 3 files changed, 231 insertions(+), 16 deletions(-)
-
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 1c828e0..494a1e2 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -3472,6 +3472,7 @@ int sdhci_setup_host(struct sdhci_host *host)
+ 	unsigned int override_timeout_clk;
+ 	u32 max_clk;
+ 	int ret;
++	bool enable_vqmmc = false;
+ 
+ 	WARN_ON(host == NULL);
+ 	if (host == NULL)
+@@ -3485,7 +3486,12 @@ int sdhci_setup_host(struct sdhci_host *host)
+ 	 * the host can take the appropriate action if regulators are not
+ 	 * available.
+ 	 */
+-	ret = mmc_regulator_get_supply(mmc);
++	if (!mmc->supply.vmmc) {
++		ret = mmc_regulator_get_supply(mmc);
++		enable_vqmmc  = true;
++	} else {
++		ret = 0;
++	}
+ 	if (ret)
+ 		return ret;
+ 
+@@ -3736,7 +3742,10 @@ int sdhci_setup_host(struct sdhci_host *host)
+ 
+ 	/* If vqmmc regulator and no 1.8V signalling, then there's no UHS */
+ 	if (!IS_ERR(mmc->supply.vqmmc)) {
+-		ret = regulator_enable(mmc->supply.vqmmc);
++		if (enable_vqmmc)
++			ret = regulator_enable(mmc->supply.vqmmc);
++		else
++			ret = 0;
+ 		if (!regulator_is_supported_voltage(mmc->supply.vqmmc, 1700000,
+ 						    1950000))
+ 			host->caps1 &= ~(SDHCI_SUPPORT_SDR104 |
+@@ -3984,7 +3993,7 @@ int sdhci_setup_host(struct sdhci_host *host)
+ 	return 0;
+ 
+ unreg:
+-	if (!IS_ERR(mmc->supply.vqmmc))
++	if (!IS_ERR(mmc->supply.vqmmc) && enable_vqmmc)
+ 		regulator_disable(mmc->supply.vqmmc);
+ undma:
+ 	if (host->align_buffer)
+@@ -4002,7 +4011,8 @@ void sdhci_cleanup_host(struct sdhci_host *host)
+ {
+ 	struct mmc_host *mmc = host->mmc;
+ 
+-	if (!IS_ERR(mmc->supply.vqmmc))
++	if (!IS_ERR(mmc->supply.vqmmc) &&
++			(regulator_is_enabled(mmc->supply.vqmmc) > 0))
+ 		regulator_disable(mmc->supply.vqmmc);
+ 
+ 	if (host->align_buffer)
+@@ -4135,7 +4145,8 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
+ 
+ 	tasklet_kill(&host->finish_tasklet);
+ 
+-	if (!IS_ERR(mmc->supply.vqmmc))
++	if (!IS_ERR(mmc->supply.vqmmc) &&
++			(regulator_is_enabled(mmc->supply.vqmmc) > 0))
+ 		regulator_disable(mmc->supply.vqmmc);
+ 
+ 	if (host->align_buffer)
 -- 
  Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc. 
 Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a Linux Foundation Collaborative Project.
