@@ -1,80 +1,32 @@
 From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH RFC 2/7] mmc: core: devfreq: Add devfreq based clock
- scaling support
-Date: Fri, 20 Jul 2018 09:24:36 -0600
-Message-ID: <20180720152436.GA4566@rob-hp-laptop>
-References: <1531475583-7050-1-git-send-email-sayalil@codeaurora.org>
- <1531475583-7050-3-git-send-email-sayalil@codeaurora.org>
+Subject: Re: [PATCH v1 1/7] Documentation: usb: dwc2: add description for px30
+Date: Fri, 20 Jul 2018 10:38:30 -0600
+Message-ID: <20180720163830.GA23635@rob-hp-laptop>
+References: <1531813747-8804-1-git-send-email-cl@rock-chips.com>
+ <1531813747-8804-2-git-send-email-cl@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1531475583-7050-3-git-send-email-sayalil@codeaurora.org>
+In-Reply-To: <1531813747-8804-2-git-send-email-cl@rock-chips.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Sayali Lokhande <sayalil@codeaurora.org>
-Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, devicetree@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, vviswana@codeaurora.org, bjorn.andersson@linaro.org, riteshh@codeaurora.org, vbadigan@codeaurora.org, Talel Shenhar <tatias@codeaurora.org>
+To: cl@rock-chips.com
+Cc: heiko@sntech.de, mark.rutland@arm.com, klaus.goger@theobroma-systems.com, jagan@amarulasolutions.com, djw@t-chip.com.cn, jacob-chen@iotwrt.com, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, frank.wang@rock-chips.com, lgirdwood@gmail.com, broonie@kernel.org, alsa-devel@alsa-project.org, gregkh@linuxfoundation.org, catalin.marinas@arm.com, will.deacon@arm.com, yamada.masahiro@socionext.com, arnd@arndb.de, zhangqing@rock-chips.com, shawn.lin@rock-chips.com, kever.yang@rock-chips.com, david.wu@rock-chips.com, huangtao@rock-chips.com, tony.xie@rock-chips.com, sugar.zhang@rock-chips.com, huibin.hong@rock-chips.com, william.wu@rock-chips.com, san
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Jul 13, 2018 at 03:22:58PM +0530, Sayali Lokhande wrote:
-> This change adds the use of devfreq to MMC.
-> Both eMMC and SD card will use it.
-> For some workloads, such as video playback, it isn't
-> necessary for these cards to run at high speed.
-> Running at lower frequency, for example 52MHz, in such
-> cases can still meet the deadlines for data transfers.
-> Scaling down the clock frequency dynamically has power
-> savings not only because the bus is running at lower frequency
-> but also has an advantage of scaling down the system core
-> voltage, if supported.
-> Provide an ondemand clock scaling support similar to the
-> cpufreq ondemand governor having two thresholds,
-> up_threshold and down_threshold to decide whether to
-> increase the frequency or scale it down respectively.
-> The sampling interval is in the order of milliseconds.
-> If sampling interval is too low, frequent switching of
-> frequencies can lead to high power consumption and if
-> sampling interval is too high, the clock scaling logic
-> would take long time to realize that the underlying
-> hardware (controller and card) is busy and scale up
-> the clocks.
+On Tue, Jul 17, 2018 at 03:49:01PM +0800, cl@rock-chips.com wrote:
+> From: Liang Chen <cl@rock-chips.com>
 > 
-> Signed-off-by: Talel Shenhar <tatias@codeaurora.org>
-> Signed-off-by: Sayali Lokhande <sayalil@codeaurora.org>
+> This patch adds the compatible of dwc2 for PX30 SoCs.
+
+'dt-bindings: usb: ...' for the subject.
+
+> 
+> Signed-off-by: Liang Chen <cl@rock-chips.com>
 > ---
->  .../devicetree/bindings/mmc/sdhci-msm.txt          |  10 +
->  drivers/mmc/core/core.c                            | 560 +++++++++++++++++++++
->  drivers/mmc/core/core.h                            |   7 +
->  drivers/mmc/core/debugfs.c                         |  46 ++
->  drivers/mmc/core/host.c                            |   8 +
->  drivers/mmc/core/mmc.c                             | 200 +++++++-
->  drivers/mmc/core/sd.c                              |  72 ++-
->  drivers/mmc/host/sdhci-msm.c                       |  37 ++
->  drivers/mmc/host/sdhci-pltfm.c                     |  11 +
->  drivers/mmc/host/sdhci.c                           |  27 +
->  drivers/mmc/host/sdhci.h                           |   8 +
->  include/linux/mmc/card.h                           |   5 +
->  include/linux/mmc/host.h                           |  70 +++
->  13 files changed, 1059 insertions(+), 2 deletions(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-> index 502b3b8..bd8470a 100644
-> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-> @@ -26,6 +26,15 @@ Required properties:
->  	"cal"	- reference clock for RCLK delay calibration (optional)
->  	"sleep"	- sleep clock for RCLK delay calibration (optional)
->  
-> +Optional Properties:
-> +- qcom,devfreq,freq-table - specifies supported frequencies for clock scaling.
-> +				    Clock scaling logic shall toggle between these frequencies based
-> +				    on card load. In case the defined frequencies are over or below
-> +				    the supported card frequencies, they will be overridden
-> +				    during card init. In case this entry is not supplied,
-> +				    the driver will construct one based on the card
-> +				    supported max and min frequencies.
-> +				    The frequencies must be ordered from lowest to highest.
+>  Documentation/devicetree/bindings/usb/dwc2.txt | 1 +
+>  1 file changed, 1 insertion(+)
 
-This should be a common binding in which case will just a list of 
-frequencies be sufficient.
+Otherwise,
 
-Rob
+Acked-by: Rob Herring <robh@kernel.org>
