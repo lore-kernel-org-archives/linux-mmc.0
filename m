@@ -1,19 +1,19 @@
 From: kbuild test robot <lkp@intel.com>
-Subject: Re: [PATCH 3/7] arm64: dts: Add Tegra210 sdmmc pinctrl voltage states
-Date: Sat, 21 Jul 2018 08:14:35 +0800
-Message-ID: <201807210812.1tfxE4ok%fengguang.wu@intel.com>
-References: <1532090746-15863-4-git-send-email-avienamo@nvidia.com>
+Subject: Re: [PATCH 4/7] arm64: dts: Add Tegra186 sdmmc pinctrl voltage states
+Date: Sat, 21 Jul 2018 09:29:27 +0800
+Message-ID: <201807210936.funBShwg%fengguang.wu@intel.com>
+References: <1532090746-15863-5-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="1yeeQ81UyVL57Vl7"
+Content-Type: multipart/mixed; boundary="DocE+STaALJfprDB"
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1532090746-15863-4-git-send-email-avienamo@nvidia.com>
+In-Reply-To: <1532090746-15863-5-git-send-email-avienamo@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
 Cc: kbuild-all@01.org, Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, Mikko Perttunen <mperttunen@nvidia.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, Aapo Vienamo <avienamo@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
 
---1yeeQ81UyVL57Vl7
+--DocE+STaALJfprDB
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 
@@ -37,30 +37,31 @@ reproduce:
 
 All errors (new ones prefixed by >>):
 
-   In file included from arch/arm64/boot/dts/nvidia/tegra210-p2530.dtsi:2:0,
-                    from arch/arm64/boot/dts/nvidia/tegra210-p2371-0000.dts:4:
->> arch/arm64/boot/dts/nvidia/tegra210.dtsi:6:10: fatal error: dt-bindings/pinctrl/pinctrl-tegra-io-pad.h: No such file or directory
+   In file included from arch/arm64/boot/dts/nvidia/tegra186-p3310.dtsi:2:0,
+                    from arch/arm64/boot/dts/nvidia/tegra186-p2771-0000.dts:6:
+>> arch/arm64/boot/dts/nvidia/tegra186.dtsi:7:10: fatal error: dt-bindings/pinctrl/pinctrl-tegra-io-pad.h: No such file or directory
     #include <dt-bindings/pinctrl/pinctrl-tegra-io-pad.h>
              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    compilation terminated.
 
-vim +6 arch/arm64/boot/dts/nvidia/tegra210.dtsi
+vim +7 arch/arm64/boot/dts/nvidia/tegra186.dtsi
 
-   > 6	#include <dt-bindings/pinctrl/pinctrl-tegra-io-pad.h>
-     7	#include <dt-bindings/interrupt-controller/arm-gic.h>
-     8	#include <dt-bindings/thermal/tegra124-soctherm.h>
-     9	
+   > 7	#include <dt-bindings/pinctrl/pinctrl-tegra-io-pad.h>
+     8	#include <dt-bindings/power/tegra186-powergate.h>
+     9	#include <dt-bindings/reset/tegra186-reset.h>
+    10	#include <dt-bindings/thermal/tegra186-bpmp-thermal.h>
+    11	
 
 ---
 0-DAY kernel test infrastructure                Open Source Technology Center
 https://lists.01.org/pipermail/kbuild-all                   Intel Corporation
 
---1yeeQ81UyVL57Vl7
+--DocE+STaALJfprDB
 Content-Type: application/gzip
 Content-Disposition: attachment; filename=".config.gz"
 Content-Transfer-Encoding: base64
 
-H4sICFJvUlsAAy5jb25maWcAjBxrc9u48fv9Ck3uSzudXCVZkZ12/AEkQQkVXwZISfYXjGIr
+H4sICL6DUlsAAy5jb25maWcAjBxrc9u48fv9Ck3uSzudXCVZkZ12/AEkQQkVXwZISfYXjGIr
 Oc/ZcirLd82/7y7ABwCCcjo3qbm7eO97Af36y68j8nZ6ed6dHu93T08/Rt/2h/1xd9o/jL4+
 Pu3/PYryUZaXIxqx8jcgTh4Pb//75+74PJ+NZr9Nrn4bfzzeX4xW++Nh/zQKXw5fH7+9QfvH
 l8Mvv/4C//0KwOfv0NXxX6Pd7nj/+3z28Qk7+fjt8Pbx2/396G/R/svj7jC6/G0KvU0mf9d/
@@ -779,4 +780,4 @@ zPS9vRZpERkbQq4jPV8GRUMvE2tgwZV5K0Sp9f6Pv/uOZBJhJAij+ugWowBadA+Wg1GkBcxz
 OzrKZGlEmU3HmbDiHsIPK9RmKoIKo9rBnWWsc+nLcW1qcy5cpUlB2khBORntCvEXPxZODYsf
 5sUiMdqzHcG1vs4AopTaBq62ybGeqrU5EDXj/w+2EOFNWo8CAA==
 
---1yeeQ81UyVL57Vl7--
+--DocE+STaALJfprDB--
