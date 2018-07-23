@@ -1,46 +1,78 @@
-From: Icenowy Zheng <icenowy-h8G6r0blFSE@public.gmane.org>
-Subject: [PATCH] mmc: sunxi: allow 3.3V DDR when DDR is available
-Date: Sun, 22 Jul 2018 20:54:07 +0800
-Message-ID: <20180722125407.43107-1-icenowy@aosc.io>
-Reply-To: icenowy-h8G6r0blFSE@public.gmane.org
+From: Chunyan Zhang <zhang.lyra@gmail.com>
+Subject: Re: [PATCH V3 4/7] mmc: sdhci: add 32-bit block count support for v4 mode
+Date: Mon, 23 Jul 2018 15:11:34 +0800
+Message-ID: <CAAfSe-v1J3tW7O0D4=yTTqk=sXx3cvdFS=V9dj4fOcRx3S5UPA@mail.gmail.com>
+References: <1531106398-14062-1-git-send-email-zhang.chunyan@linaro.org>
+ <1531106398-14062-5-git-send-email-zhang.chunyan@linaro.org> <892181d5-61f2-55da-2a79-1d2cbfc00f8f@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-sunxi+bncBDS6XAN6ZADRBCP52HNAKGQE65OFTCI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Icenowy Zheng <icenowy-h8G6r0blFSE@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <892181d5-61f2-55da-2a79-1d2cbfc00f8f@intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@spreadtrum.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Some Allwinner boards feature an on-board eMMC with fixed 3.3V voltage
-(e.g. Banana Pi M2+), and in this case both the eMMC and the SoC are
-capable of doing 3.3V DDR transmission.
+On 17 July 2018 at 16:29, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 09/07/18 06:19, Chunyan Zhang wrote:
+>> When Host Version 4 is enabled, SDMA System Address register is
+>> re-defined as 32-bit Block Count, and SDMA uses ADMA System
+>> Address register (05Fh-058h) instead.
+>>
+>> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
+>> ---
+>>  drivers/mmc/host/sdhci.c | 4 +++-
+>>  drivers/mmc/host/sdhci.h | 1 +
+>>  2 files changed, 4 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index 7871ae2..f64e766 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -889,6 +889,7 @@ static void sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+>>  static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+>>  {
+>>       u8 ctrl;
+>> +     u32 reg;
+>>       struct mmc_data *data = cmd->data;
+>>
+>>       host->data_timeout = 0;
+>> @@ -1021,7 +1022,8 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+>>       /* Set the DMA boundary value and block size */
+>>       sdhci_writew(host, SDHCI_MAKE_BLKSZ(host->sdma_boundary, data->blksz),
+>>                    SDHCI_BLOCK_SIZE);
+>> -     sdhci_writew(host, data->blocks, SDHCI_BLOCK_COUNT);
+>> +     reg = host->v4_mode ? SDHCI_32BIT_BLK_CNT : SDHCI_BLOCK_COUNT;
+>> +     sdhci_writew(host, data->blocks, reg);
+>
+> The specification says to set 16-bit block count register to zero when using
+> 32-bit block count.  It also says it is valid for V4.1 onwards and also for
 
-Add capability of 3.3V DDR when DDR is available (extra clock or new
-timing).
+I found that the 16-bit block count register is zero without being
+wrriten by driver, and the weird thing on my board is that the
+initialization would be interrupted by SDHCI_INT_ADMA_ERROR if setting
+"16-bit block count register" to zero manually.  So I will add a check
+of whether it is zero already before writing it.
 
-Signed-off-by: Icenowy Zheng <icenowy-h8G6r0blFSE@public.gmane.org>
----
- drivers/mmc/host/sunxi-mmc.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index 8e7f3e35ee3d..4ea8e2611079 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -1388,7 +1388,7 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
- 				  MMC_CAP_ERASE | MMC_CAP_SDIO_IRQ;
- 
- 	if (host->cfg->clk_delays || host->use_new_timings)
--		mmc->caps      |= MMC_CAP_1_8V_DDR;
-+		mmc->caps      |= MMC_CAP_1_8V_DDR | MMC_CAP_3_3V_DDR;
- 
- 	ret = mmc_of_parse(mmc);
- 	if (ret)
--- 
-2.18.0
+> V4 with SDMA and auto-CMD23.
+>
+> So maybe we should continue to use the 16-bit block count register with V4.0
+>
+>>  }
+>>
+>>  static inline bool sdhci_auto_cmd12(struct sdhci_host *host,
+>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+>> index 24fa58a..889e48b 100644
+>> --- a/drivers/mmc/host/sdhci.h
+>> +++ b/drivers/mmc/host/sdhci.h
+>> @@ -28,6 +28,7 @@
+>>
+>>  #define SDHCI_DMA_ADDRESS    0x00
+>>  #define SDHCI_ARGUMENT2              SDHCI_DMA_ADDRESS
+>> +#define SDHCI_32BIT_BLK_CNT  SDHCI_DMA_ADDRESS
+>>
+>>  #define SDHCI_BLOCK_SIZE     0x04
+>>  #define  SDHCI_MAKE_BLKSZ(dma, blksz) (((dma & 0x7) << 12) | (blksz & 0xFFF))
+>>
+>
