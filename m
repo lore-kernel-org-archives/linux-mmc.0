@@ -1,16 +1,14 @@
-From: =?utf-8?Q?Ond=C5=99ej?= Jirman <megous@megous.com>
-Subject: Re: [PATCH v3 0/7] mmc: sunxi: Add runtime PM support
-Date: Mon, 23 Jul 2018 18:16:34 +0200
-Message-ID: <20180723161634.j7akxttoothslyhi@core>
-References: <cover.e9b9c0ab5bc9ffcc52a15e1c2f41462729da5b61.1523888566.git-series.maxime.ripard@bootlin.com>
- <20180716171428.ud3zsmeccds545si@core>
- <20180720145143.qgvlk2gbegxwwcfs@flea>
+From: Mark Brown <broonie@kernel.org>
+Subject: Re: [PATCH v2 3/6] dt-bindings: sound: rockchip-i2s: add description
+ for px30
+Date: Mon, 23 Jul 2018 20:10:08 +0100
+Message-ID: <20180723191008.GL13981@sirena.org.uk>
+References: <1532337924-4185-1-git-send-email-cl@rock-chips.com>
+ <1532337924-4185-4-git-send-email-cl@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/mixed; boundary="===============3309507783022417474=="
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <20180720145143.qgvlk2gbegxwwcfs@flea>
+In-Reply-To: <1532337924-4185-4-git-send-email-cl@rock-chips.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -20,53 +18,60 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Maxime Ripard <maxime.ripard@bootlin.com>
-Cc: ulf.hansson@linaro.org, Quentin Schulz <quentin.schulz@bootlin.com>, linux-mmc@vger.kernel.org, Chen-Yu Tsai <wens@csie.org>, Thomas Petazzoni <thomas.petazzoni@bootlin.com>, linux-arm-kernel@lists.infradead.org
+To: cl@rock-chips.com
+Cc: mark.rutland@arm.com, ulf.hansson@linaro.org, heiko@sntech.de, huibin.hong@rock-chips.com, catalin.marinas@arm.com, shawn.lin@rock-chips.com, will.deacon@arm.com, alsa-devel@alsa-project.org, hjc@rock-chips.com, yamada.masahiro@socionext.com, tony.xie@rock-chips.com, klaus.goger@theobroma-systems.com, sugar.zhang@rock-chips.com, linux-rockchip@lists.infradead.org, jacob-chen@iotwrt.com, jagan@amarulasolutions.com, huangtao@rock-chips.com, devicetree@vger.kernel.org, arnd@arndb.de, frank.wang@rock-chips.com, zhangqing@rock-chips.com, kever.yang@rock-chips.com, robh+dt@kernel.org, djw@t-chip.com.cn, sandy.huang@rock-chips.com, linux-arm-kernel@lists.infradead.org, gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, lgirdwood@gmail.com, linux-kernel@vger.kernel.org, david.wu@rock-chips.com, william.wu@rock-chips.com
 List-Id: linux-mmc@vger.kernel.org
 
-SGkgTWF4aW1lLAoKT24gRnJpLCBKdWwgMjAsIDIwMTggYXQgMDQ6NTE6NDNQTSArMDIwMCwgTWF4
-aW1lIFJpcGFyZCB3cm90ZToKPiBIaSBPbmRyZWosCj4gCj4gT24gTW9uLCBKdWwgMTYsIDIwMTgg
-YXQgMDc6MTQ6MjhQTSArMDIwMCwgT25kxZllaiBKaXJtYW4gd3JvdGU6Cj4gPiBPbiBNb24sIEFw
-ciAxNiwgMjAxOCBhdCAwNDoyMjo1OFBNICswMjAwLCBNYXhpbWUgUmlwYXJkIHdyb3RlOgo+ID4g
-PiBIaSwKPiA+ID4gCj4gPiA+IFNpbmNlIGl0J3MgaW50cm9kdWN0aW9uLCBvdXIgTU1DIGNvbnRy
-b2xsZXIgaGFzIGhhZCBpdHMgZXh0ZXJuYWwgY2xvY2tzCj4gPiA+IHJ1bm5pbmcgYWxsIHRoZSB0
-aW1lLgo+ID4gPiAKPiA+ID4gV2hpbGUgdGhhdCB3YXMgd29ya2luZyBncmVhdCwgdGhlIHBvd2Vy
-IHVzYWdlIGFuZCBtb3N0IGltcG9ydGFudGx5IHRoZSBFTUkKPiA+ID4gdGhhdCBpdCBnZW5lcmF0
-ZWQgd2FzIHByZXR0eSBiYWQuCj4gPiA+IAo+ID4gPiBMZXQncyBpbXBsZW1lbnQgc29tZSBydW50
-aW1lX3BtIGhvb2tzIHdpdGggYW4gYXV0b3N1c3BlbmQgdG8gc2h1dCBkb3duIHRoZQo+ID4gPiB3
-aG9sZSBibG9jayB3aGVuIHRoZSBNTUMgaXMgbm90IGFjdGl2ZS4KPiA+ID4gCj4gPiA+IEhvd2V2
-ZXIsIHNvbWUgU0RJTyBkZXZpY2VzIHdpbGwgbm90IHByb2JlIHByb3Blcmx5IGlmIHdlIGtlZXAg
-c2h1dHRpbmcgZG93bgo+ID4gPiB0aGUgY29udHJvbGxlciwgc28gdGhlIGF1dG9zdXNwZW5kIGlz
-IGRpc2FibGVkIGZvciB0aGUgU0RJTyBkZXZpY2VzLgo+ID4gCj4gPiBJJ3ZlIHRlc3RlZCB5b3Vy
-IHBhdGNoZXMgb24gVEJTIEE3MTEgdGFibGV0IChBODNUKS4gSSBnZXQgdGhpcyBpbiB0aGUgbG9n
-Ogo+ID4gCj4gPiAgIHN1bnhpLW1tYyAxYzEwMDAwLm1tYzogZmF0YWwgZXJyIHVwZGF0ZSBjbGsg
-dGltZW91dAo+ID4gCj4gPiBJbnRlcmVzdGluZ2x5LCB0aGlzIG9ubHkgaGFwcGVucyBhZnRlciB0
-aGUgZmlyc3QgYm9vdC4gSWYgSSBoYXJkIHBvd2VyIGN5Y2xlIHRoZQo+ID4gdGFibGV0IChyZW1v
-dmluZy9yZWluc2VydGluZyB0aGUgYmF0dGVyeSkgdGhlIGZpcnN0IGJvb3QgYWZ0ZXIgdGhhdCwg
-dGhlcmUncyBubwo+ID4gdGltZW91dCwgYW5kIFdpRmkgY2hpcCBjb25uZWN0ZWQgdG8gdGhlIG1t
-YyBjb250cm9sbGVyIHdvcmtzLgo+ID4gCj4gPiBBbnkgb3RoZXIgcmVib290IChldmVuIHBvd2Vy
-IGN5Y2xpbmcgdmlhIFBNSUMpLCBpdCBmYWlscyB3aXRoIHRoZSBhYm92ZSBlcnJvci4KPiA+IE1h
-eWJlIHRoZXJlJ3Mgc29tZSB1bmZvcmVzZWVuIGludGVyYWN0aW9uIG9mIHJ1bnRpbWUgUE0gd2l0
-aCBtbWMtcG93ZXJzZXEgdXNlZAo+ID4gZm9yIHRoZSB3aWZpIGNoaXAgcG93ZXIgc2V1ZW5jaW5n
-PyBEbyB5b3Uga25vdyB3aGF0J3MgdGhlIGFib3ZlIGVycm9yIGFib3V0Pwo+ID4gSSBkb24ndCBr
-bm93IGFueXRoaW5nIGFib3V0IG1tYyBzdWJzeXN0ZW0uCj4gCj4gSXQncyBraW5kIG9mIHdlaXJk
-LiBEbyB5b3UgaGF2ZSBhbiBvc2NpbGxvc2NvcGUgYXZhaWxhYmxlIHRvIGxvb2sgYXQKPiB0aGUg
-Y2xvY2sgc2lnbmFsIChhbmQgdGhlIHJlc2V0IGdwaW8pIGFuZCBzZWUgaWYgdGhlcmUncyBhbnkK
-PiBkaWZmZXJlbmNlIG9mIGJlaGF2aW91cj8KCk5vLCBJIGRvbid0LiBJIGNhbiB0cnkgc29tZSBw
-cmludGtzIG9uIHRoZSBrZXJuZWwgc2lkZSBpZiBpdCB0b2dnbGVzIHRoZSBXaUZpCnJlc2V0L3Bv
-d2VyIGVuYWJsZSBncGlvcyBkaWZmZXJudGx5LgoKSXQgbG9va3MgbGlrZSBzb21ldGhpbmcncyBk
-aWZmZXJlbnQgb24gaW5pdGlhbGl6YXRpb24gd2hlbiBib290aW5nIHRoZSBrZXJuZWwuCldpRmkg
-d29ya3MgZmluZSBmb3IgZXh0ZW5kZWQgcGVyaW9kcyBvZiB0aW1lIGFmdGVyIHRoZSBoYXJkIHBv
-d2VyIGN5Y2xlLiBCdXQKd2hlbiByZWJvb3RpbmcsIGl0IGZhaWxzLgoKQWRkaW5nIHRvIHRoZSB3
-ZWlyZG5lc3MgZmFjdG9yIG1heSBiZSB0aGUgZmFjdCB0aGF0IFdpRmkgaXMgbm90IGNvbm5lY3Rl
-ZCB2aWEKUE1JQywgc28gaXQgZ2V0cyBwb3dlciBhbG1vc3QgZGlyZWN0bHkgZnJvbSB0aGUgYmF0
-dGVyeS4gU28ga2VybmVsIG1heSBub3QgYmUKZG9pbmcgdGhlIFdpRmkgcmVzZXQgcHJvcGVybHkg
-b24gYm9vdCAod2hpY2ggaXMgZmluZSByaWdodCBhZnRlciB0aGUgaGFyZCBwb3dlcgpjeWNsZSwg
-YnV0IGxlYXZlcyB0aGUgV2lGaSBpbiB1bmtub3duIHN0YXRlIG9uIHN1YnNlcXVlbnQgcmVib290
-cykuCgpUaGFuayB5b3UgYW5kIHJlZ2FyZHMsCiAgby4KCj4gVGhhbmtzIQo+IE1heGltZQo+IAo+
-IC0tIAo+IE1heGltZSBSaXBhcmQsIEJvb3RsaW4gKGZvcm1lcmx5IEZyZWUgRWxlY3Ryb25zKQo+
-IEVtYmVkZGVkIExpbnV4IGFuZCBLZXJuZWwgZW5naW5lZXJpbmcKPiBodHRwczovL2Jvb3RsaW4u
-Y29tCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpsaW51
-eC1hcm0ta2VybmVsIG1haWxpbmcgbGlzdApsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVh
-ZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1h
-cm0ta2VybmVsCg==
+
+--===============3309507783022417474==
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="OX2aLCKeO1apYW07"
+Content-Disposition: inline
+
+
+--OX2aLCKeO1apYW07
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Mon, Jul 23, 2018 at 05:25:21PM +0800, cl@rock-chips.com wrote:
+> From: Liang Chen <cl@rock-chips.com>
+>=20
+> Add "rockchip,px30-i2s", "rockchip,rk3066-i2s" for i2s on px30 platform.
+
+Please submit patches using subject lines reflecting the style for the
+subsystem.  This makes it easier for people to identify relevant
+patches.  Look at what existing commits in the area you're changing are
+doing and make sure your subject lines visually resemble what they're
+doing.
+
+--OX2aLCKeO1apYW07
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAltWKA8ACgkQJNaLcl1U
+h9BhLgf/Y0UU7Id4l6ICoIlmMMIaggZlIIZfIWDu4AXODkAXnewyj9blyVs+cdVm
+u5Frz8gAdH51Jm7o3t+JKQcHdl5yYEGi9Yf8Ob3KhbgpuBma3jUY6krtczVDaGdN
+r1QkRRCEmAw0Bxl6olyHG8sq4gFcp1Ixo1/WydCWG4vGr1ryZmsFjZDw1j9N10nJ
+9oHwx3ZqaRUiJAFttkrhSxrYlAK11KHfFjb2Luj6c7tnNATE69+kXkKSlRv/6Y+v
+PM3VEPiSGV7yIDYu6qCnzobhCG+MbkxF8Th5dEu2CjAxdtm7bZfe6kLcuPcBmY64
+WxWcdNYvUCqwYV1EpA4OzaR4zYnYPg==
+=Am74
+-----END PGP SIGNATURE-----
+
+--OX2aLCKeO1apYW07--
+
+
+--===============3309507783022417474==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+linux-arm-kernel mailing list
+linux-arm-kernel@lists.infradead.org
+http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+
+--===============3309507783022417474==--
