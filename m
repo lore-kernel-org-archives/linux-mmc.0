@@ -1,62 +1,72 @@
-From: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
-Subject: [PATCH v3] mmc: sunxi: remove output of virtual base address
-Date: Mon, 23 Jul 2018 16:34:31 +0100
-Message-ID: <20180723153431.8669-1-andre.przywara@arm.com>
-Reply-To: andre.przywara-5wv7dgnIgG8@public.gmane.org
+From: =?utf-8?Q?Ond=C5=99ej?= Jirman <megous@megous.com>
+Subject: Re: [PATCH v3 0/7] mmc: sunxi: Add runtime PM support
+Date: Mon, 23 Jul 2018 18:16:34 +0200
+Message-ID: <20180723161634.j7akxttoothslyhi@core>
+References: <cover.e9b9c0ab5bc9ffcc52a15e1c2f41462729da5b61.1523888566.git-series.maxime.ripard@bootlin.com>
+ <20180716171428.ud3zsmeccds545si@core>
+ <20180720145143.qgvlk2gbegxwwcfs@flea>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-sunxi+bncBDNZNK75ZIKRBDHL27NAKGQEYSCPE6Y-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <20180720145143.qgvlk2gbegxwwcfs@flea>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Maxime Ripard <maxime.ripard@bootlin.com>
+Cc: ulf.hansson@linaro.org, Quentin Schulz <quentin.schulz@bootlin.com>, linux-mmc@vger.kernel.org, Chen-Yu Tsai <wens@csie.org>, Thomas Petazzoni <thomas.petazzoni@bootlin.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Recent Linux versions refuse to print actual virtual kernel addresses,
-to not give a hint about the location of the kernel in a randomized virtual
-address space. This affects the output of the sunxi MMC controller
-driver, which now produces the rather uninformative line:
-
-[    1.482660] sunxi-mmc 1c0f000.mmc: base:0x(____ptrval____) irq:8
-
-Since the virtual base address is not really interesting in the first
-place, let's just drop this value. The same applies to Linux' notion of
-the interrupt number, which is independent from the GIC SPI number.
-We have the physical address as part of the DT node name, which is way
-more useful for debugging purposes.
-To keep a success message in the driver, we make this purpose explicit
-with the word "initialized", plus print some information that is not too
-obvious and that we learned while probing the device:
-the maximum request size and whether it uses the new timing mode.
-So the output turns into:
-[    1.750626] sunxi-mmc 1c0f000.mmc: initialized, max. request size: 16384 KB, uses new timings mode
-[    1.786699] sunxi-mmc 1c11000.mmc: initialized, max. request size: 2048 KB
-
-Signed-off-by: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
----
- drivers/mmc/host/sunxi-mmc.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index 8e7f3e35ee3d..c18cf035ac00 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -1407,7 +1407,10 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
- 	if (ret)
- 		goto error_free_dma;
- 
--	dev_info(&pdev->dev, "base:0x%p irq:%u\n", host->reg_base, host->irq);
-+	dev_info(&pdev->dev, "initialized, max. request size: %u KB%s\n",
-+		 mmc->max_req_size >> 10,
-+		 host->use_new_timings ? ", uses new timings mode" : "");
-+
- 	return 0;
- 
- error_free_dma:
--- 
-2.14.4
+SGkgTWF4aW1lLAoKT24gRnJpLCBKdWwgMjAsIDIwMTggYXQgMDQ6NTE6NDNQTSArMDIwMCwgTWF4
+aW1lIFJpcGFyZCB3cm90ZToKPiBIaSBPbmRyZWosCj4gCj4gT24gTW9uLCBKdWwgMTYsIDIwMTgg
+YXQgMDc6MTQ6MjhQTSArMDIwMCwgT25kxZllaiBKaXJtYW4gd3JvdGU6Cj4gPiBPbiBNb24sIEFw
+ciAxNiwgMjAxOCBhdCAwNDoyMjo1OFBNICswMjAwLCBNYXhpbWUgUmlwYXJkIHdyb3RlOgo+ID4g
+PiBIaSwKPiA+ID4gCj4gPiA+IFNpbmNlIGl0J3MgaW50cm9kdWN0aW9uLCBvdXIgTU1DIGNvbnRy
+b2xsZXIgaGFzIGhhZCBpdHMgZXh0ZXJuYWwgY2xvY2tzCj4gPiA+IHJ1bm5pbmcgYWxsIHRoZSB0
+aW1lLgo+ID4gPiAKPiA+ID4gV2hpbGUgdGhhdCB3YXMgd29ya2luZyBncmVhdCwgdGhlIHBvd2Vy
+IHVzYWdlIGFuZCBtb3N0IGltcG9ydGFudGx5IHRoZSBFTUkKPiA+ID4gdGhhdCBpdCBnZW5lcmF0
+ZWQgd2FzIHByZXR0eSBiYWQuCj4gPiA+IAo+ID4gPiBMZXQncyBpbXBsZW1lbnQgc29tZSBydW50
+aW1lX3BtIGhvb2tzIHdpdGggYW4gYXV0b3N1c3BlbmQgdG8gc2h1dCBkb3duIHRoZQo+ID4gPiB3
+aG9sZSBibG9jayB3aGVuIHRoZSBNTUMgaXMgbm90IGFjdGl2ZS4KPiA+ID4gCj4gPiA+IEhvd2V2
+ZXIsIHNvbWUgU0RJTyBkZXZpY2VzIHdpbGwgbm90IHByb2JlIHByb3Blcmx5IGlmIHdlIGtlZXAg
+c2h1dHRpbmcgZG93bgo+ID4gPiB0aGUgY29udHJvbGxlciwgc28gdGhlIGF1dG9zdXNwZW5kIGlz
+IGRpc2FibGVkIGZvciB0aGUgU0RJTyBkZXZpY2VzLgo+ID4gCj4gPiBJJ3ZlIHRlc3RlZCB5b3Vy
+IHBhdGNoZXMgb24gVEJTIEE3MTEgdGFibGV0IChBODNUKS4gSSBnZXQgdGhpcyBpbiB0aGUgbG9n
+Ogo+ID4gCj4gPiAgIHN1bnhpLW1tYyAxYzEwMDAwLm1tYzogZmF0YWwgZXJyIHVwZGF0ZSBjbGsg
+dGltZW91dAo+ID4gCj4gPiBJbnRlcmVzdGluZ2x5LCB0aGlzIG9ubHkgaGFwcGVucyBhZnRlciB0
+aGUgZmlyc3QgYm9vdC4gSWYgSSBoYXJkIHBvd2VyIGN5Y2xlIHRoZQo+ID4gdGFibGV0IChyZW1v
+dmluZy9yZWluc2VydGluZyB0aGUgYmF0dGVyeSkgdGhlIGZpcnN0IGJvb3QgYWZ0ZXIgdGhhdCwg
+dGhlcmUncyBubwo+ID4gdGltZW91dCwgYW5kIFdpRmkgY2hpcCBjb25uZWN0ZWQgdG8gdGhlIG1t
+YyBjb250cm9sbGVyIHdvcmtzLgo+ID4gCj4gPiBBbnkgb3RoZXIgcmVib290IChldmVuIHBvd2Vy
+IGN5Y2xpbmcgdmlhIFBNSUMpLCBpdCBmYWlscyB3aXRoIHRoZSBhYm92ZSBlcnJvci4KPiA+IE1h
+eWJlIHRoZXJlJ3Mgc29tZSB1bmZvcmVzZWVuIGludGVyYWN0aW9uIG9mIHJ1bnRpbWUgUE0gd2l0
+aCBtbWMtcG93ZXJzZXEgdXNlZAo+ID4gZm9yIHRoZSB3aWZpIGNoaXAgcG93ZXIgc2V1ZW5jaW5n
+PyBEbyB5b3Uga25vdyB3aGF0J3MgdGhlIGFib3ZlIGVycm9yIGFib3V0Pwo+ID4gSSBkb24ndCBr
+bm93IGFueXRoaW5nIGFib3V0IG1tYyBzdWJzeXN0ZW0uCj4gCj4gSXQncyBraW5kIG9mIHdlaXJk
+LiBEbyB5b3UgaGF2ZSBhbiBvc2NpbGxvc2NvcGUgYXZhaWxhYmxlIHRvIGxvb2sgYXQKPiB0aGUg
+Y2xvY2sgc2lnbmFsIChhbmQgdGhlIHJlc2V0IGdwaW8pIGFuZCBzZWUgaWYgdGhlcmUncyBhbnkK
+PiBkaWZmZXJlbmNlIG9mIGJlaGF2aW91cj8KCk5vLCBJIGRvbid0LiBJIGNhbiB0cnkgc29tZSBw
+cmludGtzIG9uIHRoZSBrZXJuZWwgc2lkZSBpZiBpdCB0b2dnbGVzIHRoZSBXaUZpCnJlc2V0L3Bv
+d2VyIGVuYWJsZSBncGlvcyBkaWZmZXJudGx5LgoKSXQgbG9va3MgbGlrZSBzb21ldGhpbmcncyBk
+aWZmZXJlbnQgb24gaW5pdGlhbGl6YXRpb24gd2hlbiBib290aW5nIHRoZSBrZXJuZWwuCldpRmkg
+d29ya3MgZmluZSBmb3IgZXh0ZW5kZWQgcGVyaW9kcyBvZiB0aW1lIGFmdGVyIHRoZSBoYXJkIHBv
+d2VyIGN5Y2xlLiBCdXQKd2hlbiByZWJvb3RpbmcsIGl0IGZhaWxzLgoKQWRkaW5nIHRvIHRoZSB3
+ZWlyZG5lc3MgZmFjdG9yIG1heSBiZSB0aGUgZmFjdCB0aGF0IFdpRmkgaXMgbm90IGNvbm5lY3Rl
+ZCB2aWEKUE1JQywgc28gaXQgZ2V0cyBwb3dlciBhbG1vc3QgZGlyZWN0bHkgZnJvbSB0aGUgYmF0
+dGVyeS4gU28ga2VybmVsIG1heSBub3QgYmUKZG9pbmcgdGhlIFdpRmkgcmVzZXQgcHJvcGVybHkg
+b24gYm9vdCAod2hpY2ggaXMgZmluZSByaWdodCBhZnRlciB0aGUgaGFyZCBwb3dlcgpjeWNsZSwg
+YnV0IGxlYXZlcyB0aGUgV2lGaSBpbiB1bmtub3duIHN0YXRlIG9uIHN1YnNlcXVlbnQgcmVib290
+cykuCgpUaGFuayB5b3UgYW5kIHJlZ2FyZHMsCiAgby4KCj4gVGhhbmtzIQo+IE1heGltZQo+IAo+
+IC0tIAo+IE1heGltZSBSaXBhcmQsIEJvb3RsaW4gKGZvcm1lcmx5IEZyZWUgRWxlY3Ryb25zKQo+
+IEVtYmVkZGVkIExpbnV4IGFuZCBLZXJuZWwgZW5naW5lZXJpbmcKPiBodHRwczovL2Jvb3RsaW4u
+Y29tCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpsaW51
+eC1hcm0ta2VybmVsIG1haWxpbmcgbGlzdApsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVh
+ZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1h
+cm0ta2VybmVsCg==
