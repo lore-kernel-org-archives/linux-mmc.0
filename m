@@ -1,7 +1,7 @@
 From: Aapo Vienamo <avienamo@nvidia.com>
-Subject: [PATCH 05/10] dt-bindings: Add Tegra SDHCI pad pdpu offset bindings
-Date: Tue, 24 Jul 2018 17:34:21 +0300
-Message-ID: <1532442865-6391-4-git-send-email-avienamo@nvidia.com>
+Subject: [PATCH 07/10] arm64: dts: tegra186: Add sdmmc pad auto calibration offsets
+Date: Tue, 24 Jul 2018 17:34:23 +0300
+Message-ID: <1532442865-6391-6-git-send-email-avienamo@nvidia.com>
 References: <1532442591-5640-1-git-send-email-avienamo@nvidia.com>
  <1532442865-6391-1-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
@@ -13,69 +13,65 @@ To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark
 Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, Aapo Vienamo <avienamo@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Add bindings documentation for pad pull up and pull down offset values to be
-programmed before executing automatic pad drive strength calibration.
+Add the calibration offset properties used for automatic pad drive
+strength calibration.
 
 Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
 ---
- .../bindings/mmc/nvidia,tegra20-sdhci.txt          | 32 ++++++++++++++++++++++
- 1 file changed, 32 insertions(+)
+ arch/arm64/boot/dts/nvidia/tegra186.dtsi | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-index 90c214d..949f616 100644
---- a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-+++ b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-@@ -24,6 +24,7 @@ Required properties:
- Optional properties:
- - power-gpios : Specify GPIOs for power control
+diff --git a/arch/arm64/boot/dts/nvidia/tegra186.dtsi b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
+index 7669756..ee8e6cf 100644
+--- a/arch/arm64/boot/dts/nvidia/tegra186.dtsi
++++ b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
+@@ -240,6 +240,12 @@
+ 		pinctrl-names = "sdmmc-3v3", "sdmmc-1v8";
+ 		pinctrl-0 = <&sdmmc1_3v3>;
+ 		pinctrl-1 = <&sdmmc1_1v8>;
++		pad-autocal-pull-up-offset-3v3-timeout = <0x07>;
++		pad-autocal-pull-down-offset-3v3-timeout = <0x06>;
++		pad-autocal-pull-up-offset-1v8-timeout = <0x07>;
++		pad-autocal-pull-down-offset-1v8-timeout = <0x07>;
++		pad-autocal-pull-up-offset-sdr104 = <0x03>;
++		pad-autocal-pull-down-offset-sdr104 = <0x05>;
+ 		status = "disabled";
+ 	};
  
-+Optional properties for Tegra210 and Tegra186:
- Example:
+@@ -254,6 +260,10 @@
+ 		pinctrl-names = "sdmmc-3v3", "sdmmc-1v8";
+ 		pinctrl-0 = <&sdmmc2_3v3>;
+ 		pinctrl-1 = <&sdmmc2_1v8>;
++		pad-autocal-pull-up-offset-3v3-timeout = <0x07>;
++		pad-autocal-pull-down-offset-3v3-timeout = <0x06>;
++		pad-autocal-pull-up-offset-1v8-timeout = <0x07>;
++		pad-autocal-pull-down-offset-1v8-timeout = <0x07>;
+ 		status = "disabled";
+ 	};
  
- sdhci@c8000200 {
-@@ -45,6 +46,33 @@ Optional properties for Tegra210 and Tegra186:
-   for controllers supporting multiple voltage levels. The order of names
-   should correspond to the pin configuration states in pinctrl-0 and
-   pinctrl-1.
-+- pad-autocal-pull-up-offset-3v3, pad-autocal-pull-down-offset-3v3 :
-+  Specify drive strength calibration offsets for 3.3 V signaling modes.
-+- pad-autocal-pull-up-offset-1v8, pad-autocal-pull-down-offset-1v8 :
-+  Specify drive strength calibration offsets for 1.8 V signaling modes.
-+- pad-autocal-pull-up-offset-3v3-timeout,
-+  pad-autocal-pull-down-offset-3v3-timeout : Specify drive strength
-+  used as a fallback in case the automatic calibration times out on a
-+  3.3 V signaling mode.
-+- pad-autocal-pull-up-offset-1v8-timeout,
-+  pad-autocal-pull-down-offset-1v8-timeout : Specify drive strength
-+  used as a fallback in case the automatic calibration times out on a
-+  1.8 V signaling mode.
-+- pad-autocal-pull-up-offset-sdr104,
-+  pad-autocal-pull-down-offset-sdr104 : Specify drive strength
-+  calibration offsets for SDR104 mode.
-+- pad-autocal-pull-up-offset-hs400,
-+  pad-autocal-pull-down-offset-hs400 : Specify drive strength
-+  calibration offsets for HS400 mode.
-+
-+  Notes on the pad calibration pull up and pulldown offset values:
-+    - The property values are drive codes which are programmed into the
-+      PD_OFFSET and PU_OFFSET sections of the
-+      SDHCI_TEGRA_AUTO_CAL_CONFIG register.
-+    - A higher value corresponds to higher drive strength. Please refer
-+      to the reference manual of the SoC for correct values.
-+    - The SDR104 and HS400 timing specific values are used in
-+      corresponding modes if specified.
+@@ -268,6 +278,12 @@
+ 		pinctrl-names = "sdmmc-3v3", "sdmmc-1v8";
+ 		pinctrl-0 = <&sdmmc3_3v3>;
+ 		pinctrl-1 = <&sdmmc3_1v8>;
++		pad-autocal-pull-up-offset-1v8 = <0x00>;
++		pad-autocal-pull-down-offset-1v8 = <0x7a>;
++		pad-autocal-pull-up-offset-3v3-timeout = <0x07>;
++		pad-autocal-pull-down-offset-3v3-timeout = <0x06>;
++		pad-autocal-pull-up-offset-1v8-timeout = <0x07>;
++		pad-autocal-pull-down-offset-1v8-timeout = <0x07>;
+ 		status = "disabled";
+ 	};
  
- Example:
- sdhci@700b0000 {
-@@ -58,5 +86,9 @@ sdhci@700b0000 {
- 	pinctrl-names = "sdmmc-3v3", "sdmmc-1v8";
- 	pinctrl-0 = <&sdmmc1_3v3>;
- 	pinctrl-1 = <&sdmmc1_1v8>;
-+	pad-autocal-pull-up-offset-3v3 = <0x00>;
-+	pad-autocal-pull-down-offset-3v3 = <0x7d>;
-+	pad-autocal-pull-up-offset-1v8 = <0x7b>;
-+	pad-autocal-pull-down-offset-1v8 = <0x7b>;
- 	status = "disabled";
- };
+@@ -279,6 +295,10 @@
+ 		clock-names = "sdhci";
+ 		resets = <&bpmp TEGRA186_RESET_SDMMC4>;
+ 		reset-names = "sdhci";
++		pad-autocal-pull-up-offset-hs400 = <0x05>;
++		pad-autocal-pull-down-offset-hs400 = <0x05>;
++		pad-autocal-pull-up-offset-1v8-timeout = <0x0a>;
++		pad-autocal-pull-down-offset-1v8-timeout = <0x0a>;
+ 		status = "disabled";
+ 	};
+ 
 -- 
 2.7.4
