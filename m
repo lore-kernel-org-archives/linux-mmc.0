@@ -1,62 +1,42 @@
-From: Maxime Ripard <maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [PATCH v3] mmc: sunxi: remove output of virtual
- base address
-Date: Tue, 24 Jul 2018 10:46:17 +0200
-Message-ID: <20180724084617.fqgrhyuz3xx72l4g@flea>
-References: <20180723153431.8669-1-andre.przywara@arm.com>
-Reply-To: maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org
+From: Aapo Vienamo <avienamo@nvidia.com>
+Subject: [PATCH 00/10] Update the pad autocal procedure
+Date: Tue, 24 Jul 2018 17:29:41 +0300
+Message-ID: <1532442591-5640-1-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="vbm63uevf4hfdsah"
-Return-path: <linux-sunxi+bncBDSJBYGBRIMBBW6O3PNAKGQEASFGQ7Y-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-Content-Disposition: inline
-In-Reply-To: <20180723153431.8669-1-andre.przywara-5wv7dgnIgG8@public.gmane.org>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, Mikko Perttunen <mperttunen@nvidia.com>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, Aapo Vienamo <avienamo@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
+Hi all,
 
---vbm63uevf4hfdsah
-Content-Type: text/plain; charset="UTF-8"
-Content-Disposition: inline
+Update the tegra_sdhci_pad_autocalib() pad drive strength calibration
+procedure to match the ones specified in the TRMs of the more recent
+SoCs. This was tested on Tegra186, Tegra210, and Tegra124, although it
+should not break things older generations either.
 
-On Mon, Jul 23, 2018 at 04:34:31PM +0100, Andre Przywara wrote:
-> Recent Linux versions refuse to print actual virtual kernel addresses,
-> to not give a hint about the location of the kernel in a randomized virtual
-> address space. This affects the output of the sunxi MMC controller
-> driver, which now produces the rather uninformative line:
-> 
-> [    1.482660] sunxi-mmc 1c0f000.mmc: base:0x(____ptrval____) irq:8
-> 
-> Since the virtual base address is not really interesting in the first
-> place, let's just drop this value. The same applies to Linux' notion of
-> the interrupt number, which is independent from the GIC SPI number.
-> We have the physical address as part of the DT node name, which is way
-> more useful for debugging purposes.
-> To keep a success message in the driver, we make this purpose explicit
-> with the word "initialized", plus print some information that is not too
-> obvious and that we learned while probing the device:
-> the maximum request size and whether it uses the new timing mode.
-> So the output turns into:
-> [    1.750626] sunxi-mmc 1c0f000.mmc: initialized, max. request size: 16384 KB, uses new timings mode
-> [    1.786699] sunxi-mmc 1c11000.mmc: initialized, max. request size: 2048 KB
-> 
-> Signed-off-by: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
+This series depends on the "Tegra SDHCI enable 1.8 V signaling on
+Tegar210 and Tegra186" series posted earlier.
 
-Acked-by: Maxime Ripard <maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org>
+Aapo Vienamo (10):
+  mmc: tegra: Poll for calibration completion
+  mmc: tegra: Set calibration pad voltage reference
+  mmc: tegra: Power on the calibration pad
+  mmc: tegra: Disable card clock during pad calibration
+  dt-bindings: Add Tegra SDHCI pad pdpu offset bindings
+  mmc: tegra: Program pad autocal offsets from dt
+  arm64: dts: tegra186: Add sdmmc pad auto calibration offsets
+  arm64: dts: tegra210: Add sdmmc pad auto calibration offsets
+  mmc: tegra: Perform pad calibration after voltage switch
+  mmc: tegra: Enable pad calibration on Tegra210 and Tegra186
 
-Thanks!
-Maxime
+ .../bindings/mmc/nvidia,tegra20-sdhci.txt          |  32 +++
+ arch/arm64/boot/dts/nvidia/tegra186.dtsi           |  20 ++
+ arch/arm64/boot/dts/nvidia/tegra210.dtsi           |  12 +
+ drivers/mmc/host/sdhci-tegra.c                     | 242 ++++++++++++++++++++-
+ 4 files changed, 297 insertions(+), 9 deletions(-)
 
 -- 
-Maxime Ripard, Bootlin (formerly Free Electrons)
-Embedded Linux and Kernel engineering
-https://bootlin.com
---vbm63uevf4hfdsah--
+2.7.4
