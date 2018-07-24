@@ -1,37 +1,47 @@
-From: =?gb2312?B?RmFuZyBIb25namllKLe9uum93Ck=?=
-        <hongjiefang@asrmicro.com>
-Subject: RE: [PATCH V4] mmc: core: improve reasonableness of bus width
- setting for HS400es
-Date: Tue, 24 Jul 2018 05:49:34 +0000
-Message-ID: <155c45c3b69d487ab204398becdaf677@mail2012.asrmicro.com>
-References: <1531818865-7387-1-git-send-email-hongjiefang@asrmicro.com>
+From: Maxime Ripard <maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [PATCH] mmc: sunxi: allow 3.3V DDR when DDR is available
+Date: Tue, 24 Jul 2018 10:44:47 +0200
+Message-ID: <20180724084447.bbqxchp5yamzc54i@flea>
+References: <20180722125407.43107-1-icenowy@aosc.io>
+Reply-To: maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1531818865-7387-1-git-send-email-hongjiefang@asrmicro.com>
-Content-Language: zh-CN
-Sender: linux-kernel-owner@vger.kernel.org
-To: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
-Cc: "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "linus.walleij@linaro.org" <linus.walleij@linaro.org>, "wsa+renesas@sang-engineering.com" <wsa+renesas@sang-engineering.com>, "bst@pengutronix.de" <bst@pengutronix.de>, "chanho.min@lge.com" <chanho.min@lge.com>, "kyle.roeschley@ni.com" <kyle.roeschley@ni.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="jlvfgcrbutgcc7oa"
+Return-path: <linux-sunxi+bncBDSJBYGBRIMBBCWO3PNAKGQEFBCCW7A-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Content-Disposition: inline
+In-Reply-To: <20180722125407.43107-1-icenowy-h8G6r0blFSE@public.gmane.org>
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: Icenowy Zheng <icenowy-h8G6r0blFSE@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-PiBtbWNfc2VsZWN0X2hzNDAwZXMoKSBjYWxscyBtbWNfc2VsZWN0X2J1c193aWR0aCgpIHdoaWNo
-IHdpbGwgY29udGludWUNCj4gdG8gc2V0IDRiaXQgdHJhbnNmZXIgbW9kZSBpZiBmYWlsIHRvIHNl
-dCA4Yml0IG1vZGUuIFRoZSBidXMgd2lkdGgNCj4gc2hvdWxkIG5vdCBiZSBzZXQgdG8gNGJpdCBp
-biBIUzQwMGVzLg0KPiANCj4gV2hlbiBmYWlsIHRvIHNldCA4Yml0IG1vZGUsIG5lZWQgcmV0dXJu
-IGVycm9yIGRpcmVjdGx5IGZvciBIUzQwMGVzLg0KPiANCj4gU2lnbmVkLW9mZi1ieTogSG9uZ2pp
-ZSBGYW5nIDxob25namllZmFuZ0Bhc3JtaWNyby5jb20+DQo+IC0tLQ0KPiAgZHJpdmVycy9tbWMv
-Y29yZS9tbWMuYyB8IDYgKysrKystDQo+ICAxIGZpbGUgY2hhbmdlZCwgNSBpbnNlcnRpb25zKCsp
-LCAxIGRlbGV0aW9uKC0pDQo+IA0KPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvY29yZS9tbWMu
-YyBiL2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMNCj4gaW5kZXggNDQ2NmY1ZC4uMGRiYzUxMiAxMDA2
-NDQNCj4gLS0tIGEvZHJpdmVycy9tbWMvY29yZS9tbWMuYw0KPiArKysgYi9kcml2ZXJzL21tYy9j
-b3JlL21tYy5jDQo+IEBAIC0xMzM4LDggKzEzMzgsMTIgQEAgc3RhdGljIGludCBtbWNfc2VsZWN0
-X2hzNDAwZXMoc3RydWN0IG1tY19jYXJkICpjYXJkKQ0KPiAgCQlnb3RvIG91dF9lcnI7DQo+IA0K
-PiAgCWVyciA9IG1tY19zZWxlY3RfYnVzX3dpZHRoKGNhcmQpOw0KPiAtCWlmIChlcnIgPCAwKQ0K
-PiArCWlmIChlcnIgIT0gTU1DX0JVU19XSURUSF84KSB7DQo+ICsJCXByX2VycigiJXM6IHN3aXRj
-aCB0byA4Yml0IGJ1cyB3aWR0aCBmYWlsZWQsIGVycjolZFxuIiwNCj4gKwkJCW1tY19ob3N0bmFt
-ZShob3N0KSwgZXJyKTsNCj4gKwkJZXJyID0gLUVJTzsNCj4gIAkJZ290byBvdXRfZXJyOw0KPiAr
-CX0NCj4gDQo+ICAJLyogU3dpdGNoIGNhcmQgdG8gSFMgbW9kZSAqLw0KPiAgCWVyciA9IF9fbW1j
-X3N3aXRjaChjYXJkLCBFWFRfQ1NEX0NNRF9TRVRfTk9STUFMLA0KPiAtLQ0KPiAxLjkuMQ0KDQpQ
-aW5nLg0KQW55IHN1Z2dlc3Rpb24gZm9yIGl0Pw0KDQpCJlINCkhvbmdqaWUNCg==
+
+--jlvfgcrbutgcc7oa
+Content-Type: text/plain; charset="UTF-8"
+Content-Disposition: inline
+
+On Sun, Jul 22, 2018 at 08:54:07PM +0800, Icenowy Zheng wrote:
+> Some Allwinner boards feature an on-board eMMC with fixed 3.3V voltage
+> (e.g. Banana Pi M2+), and in this case both the eMMC and the SoC are
+> capable of doing 3.3V DDR transmission.
+> 
+> Add capability of 3.3V DDR when DDR is available (extra clock or new
+> timing).
+> 
+> Signed-off-by: Icenowy Zheng <icenowy-h8G6r0blFSE@public.gmane.org>
+
+Acked-by: Maxime Ripard <maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org>
+
+Maxime
+
+-- 
+Maxime Ripard, Bootlin (formerly Free Electrons)
+Embedded Linux and Kernel engineering
+https://bootlin.com
+--jlvfgcrbutgcc7oa--
