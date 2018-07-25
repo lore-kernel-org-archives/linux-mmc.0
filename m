@@ -1,55 +1,44 @@
 From: Mikko Perttunen <cyndis@kapsi.fi>
-Subject: Re: [PATCH 5/7] arm64: dts: tegra210-p2180: Allow ldo2 to go down to
- 1.8 V
-Date: Wed, 25 Jul 2018 09:50:59 +0300
-Message-ID: <2bb6f4a6-5f5d-0ab6-ae62-169bd03739ca@kapsi.fi>
+Subject: Re: [PATCH 6/7] arm64: dts: tegra210-p2180: Correct sdmmc4
+ vqmmc-supply
+Date: Wed, 25 Jul 2018 09:53:44 +0300
+Message-ID: <2e6f0b68-38df-8cfd-9d6b-6de08bcaf97c@kapsi.fi>
 References: <1532090746-15863-1-git-send-email-avienamo@nvidia.com>
- <1532090746-15863-6-git-send-email-avienamo@nvidia.com>
+ <1532090746-15863-7-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1532090746-15863-6-git-send-email-avienamo@nvidia.com>
+In-Reply-To: <1532090746-15863-7-git-send-email-avienamo@nvidia.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
 To: Aapo Vienamo <avienamo@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, Mikko Perttunen <mperttunen@nvidia.com>
 Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
+Technically this shouldn't be required since VDD_1V8 is always on 
+anyway, but I think it's nicer to specify regulators anyway, so +1!
+
 Reviewed-by: Mikko Perttunen <mperttunen@nvidia.com>
 
 On 20.07.2018 15:45, Aapo Vienamo wrote:
-> Set regulator-min-microvolt property of ldo2 to 1.8 V in
-> tegra210-p2180.dtsi. ldo2 is used by the sdmmc1 SDHCI controller and its
-> voltage needs to be adjusted down to 1.8 V to support faster signaling
-> modes. It appears that the comment about the SDHCI driver requesting
-> invalid voltages no longer applies.
+> On p2180 sdmmc4 is powered from a fixed 1.8 V regulator.
 > 
 > Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
 > ---
->   arch/arm64/boot/dts/nvidia/tegra210-p2180.dtsi | 11 +----------
->   1 file changed, 1 insertion(+), 10 deletions(-)
+>   arch/arm64/boot/dts/nvidia/tegra210-p2180.dtsi | 1 +
+>   1 file changed, 1 insertion(+)
 > 
 > diff --git a/arch/arm64/boot/dts/nvidia/tegra210-p2180.dtsi b/arch/arm64/boot/dts/nvidia/tegra210-p2180.dtsi
-> index 212e663..8496101 100644
+> index 8496101..053458a 100644
 > --- a/arch/arm64/boot/dts/nvidia/tegra210-p2180.dtsi
 > +++ b/arch/arm64/boot/dts/nvidia/tegra210-p2180.dtsi
-> @@ -178,16 +178,7 @@
+> @@ -273,6 +273,7 @@
+>   		status = "okay";
+>   		bus-width = <8>;
+>   		non-removable;
+> +		vqmmc-supply = <&vdd_1v8>;
+>   	};
 >   
->   				vddio_sdmmc: ldo2 {
->   					regulator-name = "VDDIO_SDMMC";
-> -					/*
-> -					 * Technically this supply should have
-> -					 * a supported range from 1.8 - 3.3 V.
-> -					 * However, that would cause the SDHCI
-> -					 * driver to request 2.7 V upon access
-> -					 * and that in turn will cause traffic
-> -					 * to be broken. Leave it at 3.3 V for
-> -					 * now.
-> -					 */
-> -					regulator-min-microvolt = <3300000>;
-> +					regulator-min-microvolt = <1800000>;
->   					regulator-max-microvolt = <3300000>;
->   					regulator-always-on;
->   					regulator-boot-on;
+>   	clocks {
 > 
