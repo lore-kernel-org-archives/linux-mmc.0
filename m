@@ -1,14 +1,15 @@
 From: Mikko Perttunen <cyndis@kapsi.fi>
-Subject: Re: [PATCH 4/7] arm64: dts: Add Tegra186 sdmmc pinctrl voltage states
-Date: Wed, 25 Jul 2018 09:50:27 +0300
-Message-ID: <6a37f483-4430-e70e-62a8-4e4181463735@kapsi.fi>
+Subject: Re: [PATCH 5/7] arm64: dts: tegra210-p2180: Allow ldo2 to go down to
+ 1.8 V
+Date: Wed, 25 Jul 2018 09:50:59 +0300
+Message-ID: <2bb6f4a6-5f5d-0ab6-ae62-169bd03739ca@kapsi.fi>
 References: <1532090746-15863-1-git-send-email-avienamo@nvidia.com>
- <1532090746-15863-5-git-send-email-avienamo@nvidia.com>
+ <1532090746-15863-6-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1532090746-15863-5-git-send-email-avienamo@nvidia.com>
+In-Reply-To: <1532090746-15863-6-git-send-email-avienamo@nvidia.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
 To: Aapo Vienamo <avienamo@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, Mikko Perttunen <mperttunen@nvidia.com>
@@ -18,91 +19,37 @@ List-Id: linux-mmc@vger.kernel.org
 Reviewed-by: Mikko Perttunen <mperttunen@nvidia.com>
 
 On 20.07.2018 15:45, Aapo Vienamo wrote:
-> Add pad voltage configuration nodes for sdmmc pads with configurable
-> voltages on Tegra186.
+> Set regulator-min-microvolt property of ldo2 to 1.8 V in
+> tegra210-p2180.dtsi. ldo2 is used by the sdmmc1 SDHCI controller and its
+> voltage needs to be adjusted down to 1.8 V to support faster signaling
+> modes. It appears that the comment about the SDHCI driver requesting
+> invalid voltages no longer applies.
 > 
 > Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
 > ---
->   arch/arm64/boot/dts/nvidia/tegra186.dtsi | 40 ++++++++++++++++++++++++++++++++
->   1 file changed, 40 insertions(+)
+>   arch/arm64/boot/dts/nvidia/tegra210-p2180.dtsi | 11 +----------
+>   1 file changed, 1 insertion(+), 10 deletions(-)
 > 
-> diff --git a/arch/arm64/boot/dts/nvidia/tegra186.dtsi b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
-> index b762227..7669756 100644
-> --- a/arch/arm64/boot/dts/nvidia/tegra186.dtsi
-> +++ b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
-> @@ -4,6 +4,7 @@
->   #include <dt-bindings/interrupt-controller/arm-gic.h>
->   #include <dt-bindings/mailbox/tegra186-hsp.h>
->   #include <dt-bindings/memory/tegra186-mc.h>
-> +#include <dt-bindings/pinctrl/pinctrl-tegra-io-pad.h>
->   #include <dt-bindings/power/tegra186-powergate.h>
->   #include <dt-bindings/reset/tegra186-reset.h>
->   #include <dt-bindings/thermal/tegra186-bpmp-thermal.h>
-> @@ -236,6 +237,9 @@
->   		clock-names = "sdhci";
->   		resets = <&bpmp TEGRA186_RESET_SDMMC1>;
->   		reset-names = "sdhci";
-> +		pinctrl-names = "sdmmc-3v3", "sdmmc-1v8";
-> +		pinctrl-0 = <&sdmmc1_3v3>;
-> +		pinctrl-1 = <&sdmmc1_1v8>;
->   		status = "disabled";
->   	};
+> diff --git a/arch/arm64/boot/dts/nvidia/tegra210-p2180.dtsi b/arch/arm64/boot/dts/nvidia/tegra210-p2180.dtsi
+> index 212e663..8496101 100644
+> --- a/arch/arm64/boot/dts/nvidia/tegra210-p2180.dtsi
+> +++ b/arch/arm64/boot/dts/nvidia/tegra210-p2180.dtsi
+> @@ -178,16 +178,7 @@
 >   
-> @@ -247,6 +251,9 @@
->   		clock-names = "sdhci";
->   		resets = <&bpmp TEGRA186_RESET_SDMMC2>;
->   		reset-names = "sdhci";
-> +		pinctrl-names = "sdmmc-3v3", "sdmmc-1v8";
-> +		pinctrl-0 = <&sdmmc2_3v3>;
-> +		pinctrl-1 = <&sdmmc2_1v8>;
->   		status = "disabled";
->   	};
->   
-> @@ -258,6 +265,9 @@
->   		clock-names = "sdhci";
->   		resets = <&bpmp TEGRA186_RESET_SDMMC3>;
->   		reset-names = "sdhci";
-> +		pinctrl-names = "sdmmc-3v3", "sdmmc-1v8";
-> +		pinctrl-0 = <&sdmmc3_3v3>;
-> +		pinctrl-1 = <&sdmmc3_1v8>;
->   		status = "disabled";
->   	};
->   
-> @@ -368,6 +378,36 @@
->   		      <0 0x0c380000 0 0x10000>,
->   		      <0 0x0c390000 0 0x10000>;
->   		reg-names = "pmc", "wake", "aotag", "scratch";
-> +
-> +		sdmmc1_3v3: sdmmc1-3v3 {
-> +			pins = "sdmmc1-hv";
-> +			power-source = <TEGRA_IO_PAD_VOLTAGE_3V3>;
-> +		};
-> +
-> +		sdmmc1_1v8: sdmmc1-1v8 {
-> +			pins = "sdmmc1-hv";
-> +			power-source = <TEGRA_IO_PAD_VOLTAGE_1V8>;
-> +		};
-> +
-> +		sdmmc2_3v3: sdmmc2-3v3 {
-> +			pins = "sdmmc2-hv";
-> +			power-source = <TEGRA_IO_PAD_VOLTAGE_3V3>;
-> +		};
-> +
-> +		sdmmc2_1v8: sdmmc2-1v8 {
-> +			pins = "sdmmc2-hv";
-> +			power-source = <TEGRA_IO_PAD_VOLTAGE_1V8>;
-> +		};
-> +
-> +		sdmmc3_3v3: sdmmc3-3v3 {
-> +			pins = "sdmmc3-hv";
-> +			power-source = <TEGRA_IO_PAD_VOLTAGE_3V3>;
-> +		};
-> +
-> +		sdmmc3_1v8: sdmmc3-1v8 {
-> +			pins = "sdmmc3-hv";
-> +			power-source = <TEGRA_IO_PAD_VOLTAGE_1V8>;
-> +		};
->   	};
->   
->   	ccplex@e000000 {
+>   				vddio_sdmmc: ldo2 {
+>   					regulator-name = "VDDIO_SDMMC";
+> -					/*
+> -					 * Technically this supply should have
+> -					 * a supported range from 1.8 - 3.3 V.
+> -					 * However, that would cause the SDHCI
+> -					 * driver to request 2.7 V upon access
+> -					 * and that in turn will cause traffic
+> -					 * to be broken. Leave it at 3.3 V for
+> -					 * now.
+> -					 */
+> -					regulator-min-microvolt = <3300000>;
+> +					regulator-min-microvolt = <1800000>;
+>   					regulator-max-microvolt = <3300000>;
+>   					regulator-always-on;
+>   					regulator-boot-on;
 > 
