@@ -1,14 +1,15 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V7 3/5] mmc: sdhci: Export sdhci tuning function symbol
-Date: Wed, 25 Jul 2018 10:46:30 +0300
-Message-ID: <737e5260-1216-5eb8-aa4f-e1e22044350a@intel.com>
+Subject: Re: [PATCH V7 5/5] mmc: sdhci: Add MSI interrupt support for O2 SD
+ host
+Date: Wed, 25 Jul 2018 10:48:47 +0300
+Message-ID: <4c711813-e688-afca-371c-9396325fdbe5@intel.com>
 References: <20180716062655.24703-1-ernest.zhang@bayhubtech.com>
- <20180716062655.24703-3-ernest.zhang@bayhubtech.com>
+ <20180716062655.24703-5-ernest.zhang@bayhubtech.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180716062655.24703-3-ernest.zhang@bayhubtech.com>
+In-Reply-To: <20180716062655.24703-5-ernest.zhang@bayhubtech.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
 To: "ernest.zhang" <ernest.zhang@bayhubtech.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
@@ -16,8 +17,7 @@ Cc: chuanjin.pang@bayhubtech.com, mike.li@bayhubtech.com, chevron.li@bayhubtech.
 List-Id: linux-mmc@vger.kernel.org
 
 On 16/07/18 09:26, ernest.zhang wrote:
-> Export sdhci tuning function symbols which are used by other SD Host
-> controller driver modules.
+> Add MSI interrupt support if the SD host device can support MSI interrupt.
 > 
 > Signed-off-by: ernest.zhang <ernest.zhang@bayhubtech.com>
 
@@ -25,84 +25,71 @@ Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
 > Changes in V7:
-> 	Export sdhci tuning function symbols
+> 	N/A
 > 
-> Changes in V1~V6
+> Changes in V6:
+> 	1. Move change log to correct place.
+> 	2. Reduce unneeded pr_info prints.
+> 	3. In function sdhci_pci_o2_probe_slot, remove using local
+> 	variable 'mmc' instead of using 'host->mmc'.
+> 	4. Make the msi enable code a sperate function.
+> 
+> Changes in V5:
+> 	1. Because pci_enable_msi is marked as deprecated and should not be
+> 	used in new code, use pci_alloc_irq_vectors instead.
+> 	2. Remove unneeded CONFIG_PCI_MSI macro check.
+> 
+> Changes in V4:
+> 	Enable MSI interrupt if the MSI capability bit is set in
+> 	capability register.
+> 
+> Changes in V1~V3:
 > 	N/A
 > ---
->  drivers/mmc/host/sdhci.c | 12 ++++++++----
->  drivers/mmc/host/sdhci.h |  5 +++++
->  2 files changed, 13 insertions(+), 4 deletions(-)
+>  drivers/mmc/host/sdhci-pci-o2micro.c | 25 +++++++++++++++++++++++++
+>  1 file changed, 25 insertions(+)
 > 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index a7b5602ef6f7..bcea179a8d70 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2103,7 +2103,7 @@ static int sdhci_prepare_hs400_tuning(struct mmc_host *mmc, struct mmc_ios *ios)
->  	return 0;
+> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+> index 7747e8ba2e3d..56bc71763956 100644
+> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
+> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+> @@ -260,6 +260,29 @@ static void sdhci_pci_o2_fujin2_pci_init(struct sdhci_pci_chip *chip)
+>  	pci_write_config_dword(chip->pdev, O2_SD_MISC_CTRL4, scratch_32);
 >  }
 >  
-> -static void sdhci_start_tuning(struct sdhci_host *host)
-> +void sdhci_start_tuning(struct sdhci_host *host)
->  {
->  	u16 ctrl;
->  
-> @@ -2126,14 +2126,16 @@ static void sdhci_start_tuning(struct sdhci_host *host)
->  	sdhci_writel(host, SDHCI_INT_DATA_AVAIL, SDHCI_INT_ENABLE);
->  	sdhci_writel(host, SDHCI_INT_DATA_AVAIL, SDHCI_SIGNAL_ENABLE);
->  }
-> +EXPORT_SYMBOL_GPL(sdhci_start_tuning);
->  
-> -static void sdhci_end_tuning(struct sdhci_host *host)
-> +void sdhci_end_tuning(struct sdhci_host *host)
->  {
->  	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
->  	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
->  }
-> +EXPORT_SYMBOL_GPL(sdhci_end_tuning);
->  
-> -static void sdhci_reset_tuning(struct sdhci_host *host)
-> +void sdhci_reset_tuning(struct sdhci_host *host)
->  {
->  	u16 ctrl;
->  
-> @@ -2142,6 +2144,7 @@ static void sdhci_reset_tuning(struct sdhci_host *host)
->  	ctrl &= ~SDHCI_CTRL_EXEC_TUNING;
->  	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
->  }
-> +EXPORT_SYMBOL_GPL(sdhci_reset_tuning);
->  
->  static void sdhci_abort_tuning(struct sdhci_host *host, u32 opcode)
->  {
-> @@ -2162,7 +2165,7 @@ static void sdhci_abort_tuning(struct sdhci_host *host, u32 opcode)
->   * interrupt setup is different to other commands and there is no timeout
->   * interrupt so special handling is needed.
->   */
-> -static void sdhci_send_tuning(struct sdhci_host *host, u32 opcode)
-> +void sdhci_send_tuning(struct sdhci_host *host, u32 opcode)
->  {
->  	struct mmc_host *mmc = host->mmc;
->  	struct mmc_command cmd = {};
-> @@ -2212,6 +2215,7 @@ static void sdhci_send_tuning(struct sdhci_host *host, u32 opcode)
->  			   msecs_to_jiffies(50));
->  
->  }
-> +EXPORT_SYMBOL_GPL(sdhci_send_tuning);
->  
->  static void __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
->  {
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 23966f887da6..f0bd36ce3817 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -748,4 +748,9 @@ bool sdhci_cqe_irq(struct sdhci_host *host, u32 intmask, int *cmd_error,
->  
->  void sdhci_dumpregs(struct sdhci_host *host);
->  
-> +void sdhci_start_tuning(struct sdhci_host *host);
-> +void sdhci_end_tuning(struct sdhci_host *host);
-> +void sdhci_reset_tuning(struct sdhci_host *host);
-> +void sdhci_send_tuning(struct sdhci_host *host, u32 opcode);
+> +static void sdhci_pci_o2_enable_msi(struct sdhci_pci_chip *chip,
+> +				    struct sdhci_host *host)
+> +{
+> +	int ret;
 > +
->  #endif /* __SDHCI_HW_H */
+> +	ret = pci_find_capability(chip->pdev, PCI_CAP_ID_MSI);
+> +	if (!ret) {
+> +		pr_info("%s: unsupport msi, use INTx irq\n",
+> +			mmc_hostname(host->mmc));
+> +		return;
+> +	}
+> +
+> +	ret = pci_alloc_irq_vectors(chip->pdev, 1, 1,
+> +				    PCI_IRQ_MSI | PCI_IRQ_MSIX);
+> +	if (ret < 0) {
+> +		pr_err("%s: enable PCI MSI failed, err=%d\n",
+> +		       mmc_hostname(host->mmc), ret);
+> +		return;
+> +	}
+> +
+> +	host->irq = pci_irq_vector(chip->pdev, 0);
+> +}
+> +
+>  int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+>  {
+>  	struct sdhci_pci_chip *chip;
+> @@ -279,6 +302,8 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+>  		if (reg & 0x1)
+>  			host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
+>  
+> +		sdhci_pci_o2_enable_msi(chip, host);
+> +
+>  		if (chip->pdev->device == PCI_DEVICE_ID_O2_SEABIRD0) {
+>  			ret = pci_read_config_dword(chip->pdev,
+>  						    O2_SD_MISC_SETTING, &reg);
 > 
