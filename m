@@ -1,13 +1,15 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V7 1/5] mmc: sdhci: Add support for O2 eMMC HS200 mode
-Date: Wed, 25 Jul 2018 10:44:20 +0300
-Message-ID: <aeb89f9c-a012-d54a-128e-ccd295a01110@intel.com>
+Subject: Re: [PATCH V7 2/5] mmc: sdhci: Change O2 Host HS200 mode clock
+ frequency to 200MHz
+Date: Wed, 25 Jul 2018 10:45:20 +0300
+Message-ID: <06a9dcec-846e-495c-4519-4af13549fe0e@intel.com>
 References: <20180716062655.24703-1-ernest.zhang@bayhubtech.com>
+ <20180716062655.24703-2-ernest.zhang@bayhubtech.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180716062655.24703-1-ernest.zhang@bayhubtech.com>
+In-Reply-To: <20180716062655.24703-2-ernest.zhang@bayhubtech.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
 To: "ernest.zhang" <ernest.zhang@bayhubtech.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
@@ -15,93 +17,49 @@ Cc: chuanjin.pang@bayhubtech.com, mike.li@bayhubtech.com, chevron.li@bayhubtech.
 List-Id: linux-mmc@vger.kernel.org
 
 On 16/07/18 09:26, ernest.zhang wrote:
-> When use eMMC as boot device, the eMMC signaling voltage is tied to 1.8v
-> fixed output voltage, bios can set o2 sd host controller PCI configuration
-> register 0x308 bit4 to 1 to let driver skip 3.3v signaling voltage and
-> direct use 1.8v singling voltage in eMMC initialize process.
+> O2 SD Host HS200 mode clock frequency current is 208MHz, should be changed
+> to 200MHz to meet specification.
 > 
 > Signed-off-by: ernest.zhang <ernest.zhang@bayhubtech.com>
+
+You left in the misleading comment.  Fix that and add:
 
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
-> Changes in V7:
-> 	Move V6 change item 2 to a seperate patch file
-> 
-> Changes in V6:
-> 	1.Move change log to correct place.
-> 	2.Change HS200 mode clock frequency from 208MHz to 200MHz to meet
+> Change in V7:
+> 	Change HS200 mode clock frequency from 208MHz to 200MHz to meet
 > 	Specification.
 > 
-> Changes in V5:
-> 	Modify code format to pass checkpatch.pl check and add a summary
-> 	of what has changed in each version.
-> 
-> Changes in V4:
-> 	Skip SDIO and SD initalization when register 0x308 bit 4 is set,
-> 	and modify some typo.
-> 
-> Changes in V3:
-> 	Rebase the patch on the mmc tree 'next' branch.
-> 
-> Changes in V2:
-> 	Modify code format, and delete unused code path.
-> 
-> Changes in V1:
-> 	Check PCIe register 0x308 bit 4 and skip eMMC 3.3v initialization
-> 	process if it is set to 1.
+> Change in V1~V6:
+> 	N/A
 > ---
->  drivers/mmc/host/sdhci-pci-o2micro.c | 18 ++++++++++++++++++
->  1 file changed, 18 insertions(+)
+>  drivers/mmc/host/sdhci-pci-o2micro.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 > 
 > diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
-> index 555970a29c94..ba59db6a126c 100644
+> index ba59db6a126c..94cf3cd75dd3 100644
 > --- a/drivers/mmc/host/sdhci-pci-o2micro.c
 > +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
-> @@ -3,6 +3,7 @@
->   *
->   * Authors: Peter Guo <peter.guo@bayhubtech.com>
->   *          Adam Lee <adam.lee@canonical.com>
-> + *          Ernest Zhang <ernest.zhang@bayhubtech.com>
->   *
->   * This software is licensed under the terms of the GNU General Public
->   * License version 2, as published by the Free Software Foundation, and
-> @@ -39,6 +40,7 @@
->  #define O2_SD_MISC_CTRL4	0xFC
->  #define O2_SD_TUNING_CTRL	0x300
->  #define O2_SD_PLL_SETTING	0x304
-> +#define O2_SD_MISC_SETTING	0x308
->  #define O2_SD_CLK_SETTING	0x328
->  #define O2_SD_CAP_REG2		0x330
->  #define O2_SD_CAP_REG0		0x334
-> @@ -184,6 +186,7 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
->  	struct sdhci_pci_chip *chip;
->  	struct sdhci_host *host;
->  	u32 reg;
-> +	int ret;
+> @@ -311,7 +311,7 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
 >  
->  	chip = slot->chip;
->  	host = slot->host;
-> @@ -197,6 +200,21 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
->  		if (reg & 0x1)
->  			host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
+>  			/* Check Whether subId is 0x11 or 0x12 */
+>  			if ((scratch_32 == 0x11) || (scratch_32 == 0x12)) {
+> -				scratch_32 = 0x2c280000;
+> +				scratch_32 = 0x25100000;
 >  
-> +		if (chip->pdev->device == PCI_DEVICE_ID_O2_SEABIRD0) {
-> +			ret = pci_read_config_dword(chip->pdev,
-> +						    O2_SD_MISC_SETTING, &reg);
-> +			if (ret)
-> +				return -EIO;
-> +			if (reg & (1 << 4)) {
-> +				pr_info("%s: emmc 1.8v flag is set, force 1.8v signaling voltage\n",
-> +					mmc_hostname(host->mmc));
-> +				host->flags &= ~SDHCI_SIGNALING_330;
-> +				host->flags |= SDHCI_SIGNALING_180;
-> +				host->mmc->caps2 |= MMC_CAP2_NO_SD;
-> +				host->mmc->caps2 |= MMC_CAP2_NO_SDIO;
-> +			}
-> +		}
-> +
->  		if (chip->pdev->device != PCI_DEVICE_ID_O2_FUJIN2)
->  			break;
->  		/* set dll watch dog timer */
+>  				/* Set Base Clock to 208MZ */
+
+That comment is misleading now.
+
+>  				o2_pci_set_baseclk(chip, scratch_32);
+> @@ -406,7 +406,7 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
+>  					       O2_SD_PLL_SETTING, scratch_32);
+>  		} else {
+>  			scratch_32 &= 0x0000FFFF;
+> -			scratch_32 |= 0x2c280000;
+> +			scratch_32 |= 0x25100000;
+>  
+>  			pci_write_config_dword(chip->pdev,
+>  					       O2_SD_PLL_SETTING, scratch_32);
 > 
