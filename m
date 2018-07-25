@@ -1,14 +1,14 @@
 From: Mikko Perttunen <cyndis@kapsi.fi>
-Subject: Re: [PATCH 3/7] arm64: dts: Add Tegra210 sdmmc pinctrl voltage states
-Date: Wed, 25 Jul 2018 09:49:27 +0300
-Message-ID: <e33f9c5b-1277-c05a-1b4b-babecfefbba3@kapsi.fi>
+Subject: Re: [PATCH 4/7] arm64: dts: Add Tegra186 sdmmc pinctrl voltage states
+Date: Wed, 25 Jul 2018 09:50:27 +0300
+Message-ID: <6a37f483-4430-e70e-62a8-4e4181463735@kapsi.fi>
 References: <1532090746-15863-1-git-send-email-avienamo@nvidia.com>
- <1532090746-15863-4-git-send-email-avienamo@nvidia.com>
+ <1532090746-15863-5-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1532090746-15863-4-git-send-email-avienamo@nvidia.com>
+In-Reply-To: <1532090746-15863-5-git-send-email-avienamo@nvidia.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
 To: Aapo Vienamo <avienamo@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, Mikko Perttunen <mperttunen@nvidia.com>
@@ -19,55 +19,28 @@ Reviewed-by: Mikko Perttunen <mperttunen@nvidia.com>
 
 On 20.07.2018 15:45, Aapo Vienamo wrote:
 > Add pad voltage configuration nodes for sdmmc pads with configurable
-> voltages on Tegra210.
+> voltages on Tegra186.
 > 
 > Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
 > ---
->   arch/arm64/boot/dts/nvidia/tegra210.dtsi | 27 +++++++++++++++++++++++++++
->   1 file changed, 27 insertions(+)
+>   arch/arm64/boot/dts/nvidia/tegra186.dtsi | 40 ++++++++++++++++++++++++++++++++
+>   1 file changed, 40 insertions(+)
 > 
-> diff --git a/arch/arm64/boot/dts/nvidia/tegra210.dtsi b/arch/arm64/boot/dts/nvidia/tegra210.dtsi
-> index 3be920e..bc1918e 100644
-> --- a/arch/arm64/boot/dts/nvidia/tegra210.dtsi
-> +++ b/arch/arm64/boot/dts/nvidia/tegra210.dtsi
-> @@ -3,6 +3,7 @@
->   #include <dt-bindings/gpio/tegra-gpio.h>
->   #include <dt-bindings/memory/tegra210-mc.h>
->   #include <dt-bindings/pinctrl/pinctrl-tegra.h>
-> +#include <dt-bindings/pinctrl/pinctrl-tegra-io-pad.h>
+> diff --git a/arch/arm64/boot/dts/nvidia/tegra186.dtsi b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
+> index b762227..7669756 100644
+> --- a/arch/arm64/boot/dts/nvidia/tegra186.dtsi
+> +++ b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
+> @@ -4,6 +4,7 @@
 >   #include <dt-bindings/interrupt-controller/arm-gic.h>
->   #include <dt-bindings/thermal/tegra124-soctherm.h>
->   
-> @@ -776,6 +777,26 @@
->   				#power-domain-cells = <0>;
->   			};
->   		};
-> +
-> +		sdmmc1_3v3: sdmmc1-3v3 {
-> +			pins = "sdmmc1";
-> +			power-source = <TEGRA_IO_PAD_VOLTAGE_3V3>;
-> +		};
-> +
-> +		sdmmc1_1v8: sdmmc1-1v8 {
-> +			pins = "sdmmc1";
-> +			power-source = <TEGRA_IO_PAD_VOLTAGE_1V8>;
-> +		};
-> +
-> +		sdmmc3_3v3: sdmmc3-3v3 {
-> +			pins = "sdmmc3";
-> +			power-source = <TEGRA_IO_PAD_VOLTAGE_3V3>;
-> +		};
-> +
-> +		sdmmc3_1v8: sdmmc3-1v8 {
-> +			pins = "sdmmc3";
-> +			power-source = <TEGRA_IO_PAD_VOLTAGE_1V8>;
-> +		};
->   	};
->   
->   	fuse@7000f800 {
-> @@ -1027,6 +1048,9 @@
+>   #include <dt-bindings/mailbox/tegra186-hsp.h>
+>   #include <dt-bindings/memory/tegra186-mc.h>
+> +#include <dt-bindings/pinctrl/pinctrl-tegra-io-pad.h>
+>   #include <dt-bindings/power/tegra186-powergate.h>
+>   #include <dt-bindings/reset/tegra186-reset.h>
+>   #include <dt-bindings/thermal/tegra186-bpmp-thermal.h>
+> @@ -236,6 +237,9 @@
 >   		clock-names = "sdhci";
->   		resets = <&tegra_car 14>;
+>   		resets = <&bpmp TEGRA186_RESET_SDMMC1>;
 >   		reset-names = "sdhci";
 > +		pinctrl-names = "sdmmc-3v3", "sdmmc-1v8";
 > +		pinctrl-0 = <&sdmmc1_3v3>;
@@ -75,9 +48,19 @@ On 20.07.2018 15:45, Aapo Vienamo wrote:
 >   		status = "disabled";
 >   	};
 >   
-> @@ -1049,6 +1073,9 @@
+> @@ -247,6 +251,9 @@
 >   		clock-names = "sdhci";
->   		resets = <&tegra_car 69>;
+>   		resets = <&bpmp TEGRA186_RESET_SDMMC2>;
+>   		reset-names = "sdhci";
+> +		pinctrl-names = "sdmmc-3v3", "sdmmc-1v8";
+> +		pinctrl-0 = <&sdmmc2_3v3>;
+> +		pinctrl-1 = <&sdmmc2_1v8>;
+>   		status = "disabled";
+>   	};
+>   
+> @@ -258,6 +265,9 @@
+>   		clock-names = "sdhci";
+>   		resets = <&bpmp TEGRA186_RESET_SDMMC3>;
 >   		reset-names = "sdhci";
 > +		pinctrl-names = "sdmmc-3v3", "sdmmc-1v8";
 > +		pinctrl-0 = <&sdmmc3_3v3>;
@@ -85,4 +68,41 @@ On 20.07.2018 15:45, Aapo Vienamo wrote:
 >   		status = "disabled";
 >   	};
 >   
+> @@ -368,6 +378,36 @@
+>   		      <0 0x0c380000 0 0x10000>,
+>   		      <0 0x0c390000 0 0x10000>;
+>   		reg-names = "pmc", "wake", "aotag", "scratch";
+> +
+> +		sdmmc1_3v3: sdmmc1-3v3 {
+> +			pins = "sdmmc1-hv";
+> +			power-source = <TEGRA_IO_PAD_VOLTAGE_3V3>;
+> +		};
+> +
+> +		sdmmc1_1v8: sdmmc1-1v8 {
+> +			pins = "sdmmc1-hv";
+> +			power-source = <TEGRA_IO_PAD_VOLTAGE_1V8>;
+> +		};
+> +
+> +		sdmmc2_3v3: sdmmc2-3v3 {
+> +			pins = "sdmmc2-hv";
+> +			power-source = <TEGRA_IO_PAD_VOLTAGE_3V3>;
+> +		};
+> +
+> +		sdmmc2_1v8: sdmmc2-1v8 {
+> +			pins = "sdmmc2-hv";
+> +			power-source = <TEGRA_IO_PAD_VOLTAGE_1V8>;
+> +		};
+> +
+> +		sdmmc3_3v3: sdmmc3-3v3 {
+> +			pins = "sdmmc3-hv";
+> +			power-source = <TEGRA_IO_PAD_VOLTAGE_3V3>;
+> +		};
+> +
+> +		sdmmc3_1v8: sdmmc3-1v8 {
+> +			pins = "sdmmc3-hv";
+> +			power-source = <TEGRA_IO_PAD_VOLTAGE_1V8>;
+> +		};
+>   	};
+>   
+>   	ccplex@e000000 {
 > 
