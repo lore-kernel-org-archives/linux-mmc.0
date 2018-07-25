@@ -1,76 +1,53 @@
-From: Aapo Vienamo <avienamo@nvidia.com>
-Subject: Re: [PATCH 02/10] mmc: tegra: Set calibration pad voltage reference
-Date: Wed, 25 Jul 2018 13:00:13 +0300
-Message-ID: <20180725130013.7c86bfea@dhcp-10-21-25-168>
-References: <1532442591-5640-1-git-send-email-avienamo@nvidia.com>
-        <1532442865-6391-1-git-send-email-avienamo@nvidia.com>
-        <d5018027-f333-8432-f8ed-81a2cdfedea8@kapsi.fi>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH] mmc: tmio: remove unneeded variable in
+ tmio_mmc_start_command()
+Date: Wed, 25 Jul 2018 12:18:11 +0200
+Message-ID: <20180725101811.6yk2zwszxnglwbcx@ninjato>
+References: <1532508374-28957-1-git-send-email-yamada.masahiro@socionext.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="nytesogl7eas6chi"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <d5018027-f333-8432-f8ed-81a2cdfedea8@kapsi.fi>
+Content-Disposition: inline
+In-Reply-To: <1532508374-28957-1-git-send-email-yamada.masahiro@socionext.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Mikko Perttunen <cyndis@kapsi.fi>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, Mikko Perttunen <mperttunen@nvidia.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 25 Jul 2018 10:08:46 +0300
-Mikko Perttunen <cyndis@kapsi.fi> wrote:
 
-> On 24.07.2018 17:34, Aapo Vienamo wrote:
-> > Configure the voltage reference used by the automatic pad drive strength
-> > calibration procedure. The value is a magic number from the TRM.
-> > 
-> > Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
-> > ---
-> >   drivers/mmc/host/sdhci-tegra.c | 14 ++++++++++++--
-> >   1 file changed, 12 insertions(+), 2 deletions(-)
-> > 
-> > diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> > index e40ca43..6008e2f 100644
-> > --- a/drivers/mmc/host/sdhci-tegra.c
-> > +++ b/drivers/mmc/host/sdhci-tegra.c
-> > @@ -49,6 +49,10 @@
-> >   #define SDHCI_AUTO_CAL_START			BIT(31)
-> >   #define SDHCI_AUTO_CAL_ENABLE			BIT(29)
-> >   
-> > +#define SDHCI_TEGRA_SDMEM_COMP_PADCTRL			0x1e0
-> > +#define SDHCI_TEGRA_SDMEM_COMP_PADCTRL_VREF_SEL_MASK	0x0000000f
-> > +#define SDHCI_TEGRA_SDMEM_COMP_PADCTRL_VREF_SEL_VAL	0x7
-> > +
-> >   #define SDHCI_TEGRA_AUTO_CAL_STATUS     0x1ec
-> >   #define SDHCI_TEGRA_AUTO_CAL_ACTIVE     BIT(31)
-> >   
-> > @@ -152,7 +156,7 @@ static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
-> >   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> >   	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
-> >   	const struct sdhci_tegra_soc_data *soc_data = tegra_host->soc_data;
-> > -	u32 misc_ctrl, clk_ctrl;
-> > +	u32 misc_ctrl, clk_ctrl, pad_ctrl;
-> >   
-> >   	sdhci_reset(host, mask);
-> >   
-> > @@ -193,8 +197,14 @@ static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
-> >   	sdhci_writel(host, misc_ctrl, SDHCI_TEGRA_VENDOR_MISC_CTRL);
-> >   	sdhci_writel(host, clk_ctrl, SDHCI_TEGRA_VENDOR_CLOCK_CTRL);
-> >   
-> > -	if (soc_data->nvquirks & NVQUIRK_HAS_PADCALIB)
-> > +	if (soc_data->nvquirks & NVQUIRK_HAS_PADCALIB) {
-> > +		pad_ctrl = sdhci_readl(host, SDHCI_TEGRA_SDMEM_COMP_PADCTRL);
-> > +		pad_ctrl &= ~SDHCI_TEGRA_SDMEM_COMP_PADCTRL_VREF_SEL_MASK;
-> > +		pad_ctrl |= SDHCI_TEGRA_SDMEM_COMP_PADCTRL_VREF_SEL_VAL;
-> > +		sdhci_writel(host, pad_ctrl, SDHCI_TEGRA_SDMEM_COMP_PADCTRL);
-> > +  
-> 
-> Will this happen to only eMMC controllers or for all controllers? My 
-> docs are saying this should be set to 0x7 for SDMMC2/4 and 0x1 or 0x2 
-> for SDMMC1/3 depending on voltage. Not sure how downstream is 
-> programming it, though.
+--nytesogl7eas6chi
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-The Tegra210 TRM specifies that VREF_SEL should be set 0x7 for all of
-the controllers, there's no mention of this depending on the mode. The
-same value is also programmed by the downstream kernels for Tegra210
-and Tegra186.
+On Wed, Jul 25, 2018 at 05:46:14PM +0900, Masahiro Yamada wrote:
+> Pass TMIO_MASK_CMD to tmio_mmc_enable_mmc_irqs() directly,
+> and remove the variable, irq_mask.
+>=20
+> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 
- -Aapo
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+
+
+--nytesogl7eas6chi
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAltYTl8ACgkQFA3kzBSg
+KbZXIA/+PT9xcJ/J1LK8EN5l3KaMInvK0UpkRkGfevWGmdDxE5SK/OmQZu276ZmQ
+3hqZpbc6t5x0x7q5Knvk4c1RJGORvR9Mb34mJ+CeoL/dKbZNxNb/+H7WEe/bWe58
+pkdMy7BGQSZ2N8nUPXvDKMFkGFIkQdztiQnGHO7H+DP7RyR8IYbjLtQaEKHUqX+/
+5JB5G8souuInfPot8z/B2JVm0gRz9CXBhVxpPHK6XGgF2soeVWLTZvoucamunFbR
+TA40iBe4A4PoOM+14hXyO1c1Ge4ZF3M7vmbIBpCOiWV24TEJKCacvkdkwnys3Rzn
+Zj0KUEsRzRQ8hJE/fzYPWFnYO4zAvGXBY+vTxa4pyDg1+NfjAwpz5iehKlOug2sK
+x+a1DN0s2cW0m4qEVy7PNok9QsjtA3YjTMzmqyDQ8IYjXHA2GtvPq35XLDs71/fc
+bLvHsnKxvJ6CVKI6x3AnfmjL8WBjuGMXO0HVSjMra93YuzSItWUis4rHc73wefB6
+dUOVXkhKclnum8k2XQRsg1CuMwLmZ0zw4T8so+Xrw4y0Xg5v5CmYwCyTNS8yB6gc
+ATgQT0lO7GUlS6rTOppFHcgc2a41ah7nGZbmp9QaocGtspb3Llh1PS35pB9qR/Ip
+U7t4UskTSjwgoEyztgTOZMfUjn2kNFzpEPF3qxwtGjcd+MFK+BA=
+=sRwi
+-----END PGP SIGNATURE-----
+
+--nytesogl7eas6chi--
