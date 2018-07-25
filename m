@@ -1,44 +1,48 @@
 From: Mikko Perttunen <cyndis@kapsi.fi>
-Subject: Re: [PATCH 6/7] arm64: dts: tegra210-p2180: Correct sdmmc4
- vqmmc-supply
-Date: Wed, 25 Jul 2018 09:53:44 +0300
-Message-ID: <2e6f0b68-38df-8cfd-9d6b-6de08bcaf97c@kapsi.fi>
+Subject: Re: [PATCH 7/7] arm64: dts: tegra210-p2597: Remove no-1-8-v from
+ sdmmc1
+Date: Wed, 25 Jul 2018 09:58:37 +0300
+Message-ID: <8946636e-5da7-baf1-5390-669f7442e6ff@kapsi.fi>
 References: <1532090746-15863-1-git-send-email-avienamo@nvidia.com>
- <1532090746-15863-7-git-send-email-avienamo@nvidia.com>
+ <1532090746-15863-8-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1532090746-15863-7-git-send-email-avienamo@nvidia.com>
+In-Reply-To: <1532090746-15863-8-git-send-email-avienamo@nvidia.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
 To: Aapo Vienamo <avienamo@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, Mikko Perttunen <mperttunen@nvidia.com>
 Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Technically this shouldn't be required since VDD_1V8 is always on 
-anyway, but I think it's nicer to specify regulators anyway, so +1!
+Looks like patch 6 will probably cause tegra-sdhci to start advertising 
+faster modes (see " if (!IS_ERR(host->mmc->supply.vqmmc))" in 
+sdhci-tegra.c). With that patch and this, will the SDHCI core start to 
+try putting us into these higher modes? Clearly that won't work yet 
+before the upcoming patches.
 
-Reviewed-by: Mikko Perttunen <mperttunen@nvidia.com>
+Mikko
 
 On 20.07.2018 15:45, Aapo Vienamo wrote:
-> On p2180 sdmmc4 is powered from a fixed 1.8 V regulator.
+> Allow sdmmc1 to set the signaling voltage to 1.8 V in order to support
+> faster signaling modes.
 > 
 > Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
 > ---
->   arch/arm64/boot/dts/nvidia/tegra210-p2180.dtsi | 1 +
->   1 file changed, 1 insertion(+)
+>   arch/arm64/boot/dts/nvidia/tegra210-p2597.dtsi | 1 -
+>   1 file changed, 1 deletion(-)
 > 
-> diff --git a/arch/arm64/boot/dts/nvidia/tegra210-p2180.dtsi b/arch/arm64/boot/dts/nvidia/tegra210-p2180.dtsi
-> index 8496101..053458a 100644
-> --- a/arch/arm64/boot/dts/nvidia/tegra210-p2180.dtsi
-> +++ b/arch/arm64/boot/dts/nvidia/tegra210-p2180.dtsi
-> @@ -273,6 +273,7 @@
+> diff --git a/arch/arm64/boot/dts/nvidia/tegra210-p2597.dtsi b/arch/arm64/boot/dts/nvidia/tegra210-p2597.dtsi
+> index 9d5a0e6..365726d 100644
+> --- a/arch/arm64/boot/dts/nvidia/tegra210-p2597.dtsi
+> +++ b/arch/arm64/boot/dts/nvidia/tegra210-p2597.dtsi
+> @@ -1452,7 +1452,6 @@
+>   	sdhci@700b0000 {
 >   		status = "okay";
->   		bus-width = <8>;
->   		non-removable;
-> +		vqmmc-supply = <&vdd_1v8>;
->   	};
+>   		bus-width = <4>;
+> -		no-1-8-v;
 >   
->   	clocks {
+>   		cd-gpios = <&gpio TEGRA_GPIO(Z, 1) GPIO_ACTIVE_LOW>;
+>   
 > 
