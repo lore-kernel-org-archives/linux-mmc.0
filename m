@@ -1,34 +1,50 @@
-From: Aapo Vienamo <avienamo@nvidia.com>
-Subject: Re: [PATCH 00/10] Update the pad autocal procedure
-Date: Wed, 25 Jul 2018 17:28:26 +0300
-Message-ID: <20180725172826.2658feb5@dhcp-10-21-25-168>
-References: <1532442591-5640-1-git-send-email-avienamo@nvidia.com>
-        <f41a905c-5364-14a5-122b-09cbd1efa2f9@gmail.com>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH V1 2/3] Documentation: sdhci-msm: Add entries for passing
+ load values
+Date: Wed, 25 Jul 2018 11:55:22 -0600
+Message-ID: <20180725175522.GA10185@rob-hp-laptop>
+References: <1532083566-43215-1-git-send-email-vviswana@codeaurora.org>
+ <1532083566-43215-3-git-send-email-vviswana@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <f41a905c-5364-14a5-122b-09cbd1efa2f9@gmail.com>
+Content-Disposition: inline
+In-Reply-To: <1532083566-43215-3-git-send-email-vviswana@codeaurora.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Peter Geis <pgwipeout@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, Mikko Perttunen <mperttunen@nvidia.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Vijay Viswanath <vviswana@codeaurora.org>
+Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, devicetree@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, jeremymc@redhat.com, bjorn.andersson@linaro.org, riteshh@codeaurora.org, vbadigan@codeaurora.org, evgreen@chromium.org, dianders@google.com, sayalil@codeaurora.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 25 Jul 2018 08:06:18 -0400
-Peter Geis <pgwipeout@gmail.com> wrote:
+On Fri, Jul 20, 2018 at 04:16:05PM +0530, Vijay Viswanath wrote:
+> The load a particular sdhc controller should request from a regulator
+> is device specific and hence each device should individually vote for
+> the required load.
 
-> On 07/24/2018 10:29 AM, Aapo Vienamo wrote:
-> > Aapo Vienamo (10):
-> > 
-> >    mmc: tegra: Enable pad calibration on Tegra210 and Tegra186  
+"dt-bindings: mmc: ..." for the subject.
+
 > 
-> Good Morning,
+> Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
+> ---
+>  Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 6 ++++++
+>  1 file changed, 6 insertions(+)
 > 
-> You seem to be missing patch 10/10.
-> Checked 
-> https://lore.kernel.org/patchwork/project/lkml/list/?series=360525 to be 
-> sure.
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> index 502b3b8..ee34f28 100644
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> @@ -26,6 +26,11 @@ Required properties:
+>  	"cal"	- reference clock for RCLK delay calibration (optional)
+>  	"sleep"	- sleep clock for RCLK delay calibration (optional)
+>  
+> +Optional properties:
+> +- <supply>-current-level - specifies load levels for supply during BUS_ON
+> +			and BUS_OFF states in power irq. Should be specified in
+> +			pairs (lpm, hpm), for BUS_OFF and BUS_ON respectively.
+> +			Units uA.
 
-Missing patch sent. Thanks for pointing that out.
+This should probably be a common regulator property (or maybe one exists 
+already).
 
- -Aapo
+It is missing vendor prefix and unit suffix as-is.
+
+Rob
