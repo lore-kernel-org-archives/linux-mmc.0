@@ -1,15 +1,14 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V7 2/5] mmc: sdhci: Change O2 Host HS200 mode clock
- frequency to 200MHz
-Date: Wed, 25 Jul 2018 10:45:20 +0300
-Message-ID: <06a9dcec-846e-495c-4519-4af13549fe0e@intel.com>
+Subject: Re: [PATCH V7 3/5] mmc: sdhci: Export sdhci tuning function symbol
+Date: Wed, 25 Jul 2018 10:46:30 +0300
+Message-ID: <737e5260-1216-5eb8-aa4f-e1e22044350a@intel.com>
 References: <20180716062655.24703-1-ernest.zhang@bayhubtech.com>
- <20180716062655.24703-2-ernest.zhang@bayhubtech.com>
+ <20180716062655.24703-3-ernest.zhang@bayhubtech.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180716062655.24703-2-ernest.zhang@bayhubtech.com>
+In-Reply-To: <20180716062655.24703-3-ernest.zhang@bayhubtech.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
 To: "ernest.zhang" <ernest.zhang@bayhubtech.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
@@ -17,49 +16,93 @@ Cc: chuanjin.pang@bayhubtech.com, mike.li@bayhubtech.com, chevron.li@bayhubtech.
 List-Id: linux-mmc@vger.kernel.org
 
 On 16/07/18 09:26, ernest.zhang wrote:
-> O2 SD Host HS200 mode clock frequency current is 208MHz, should be changed
-> to 200MHz to meet specification.
+> Export sdhci tuning function symbols which are used by other SD Host
+> controller driver modules.
 > 
 > Signed-off-by: ernest.zhang <ernest.zhang@bayhubtech.com>
-
-You left in the misleading comment.  Fix that and add:
 
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
-> Change in V7:
-> 	Change HS200 mode clock frequency from 208MHz to 200MHz to meet
-> 	Specification.
+> Changes in V7:
+> 	Export sdhci tuning function symbols
 > 
-> Change in V1~V6:
+> Changes in V1~V6
 > 	N/A
 > ---
->  drivers/mmc/host/sdhci-pci-o2micro.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
+>  drivers/mmc/host/sdhci.c | 12 ++++++++----
+>  drivers/mmc/host/sdhci.h |  5 +++++
+>  2 files changed, 13 insertions(+), 4 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
-> index ba59db6a126c..94cf3cd75dd3 100644
-> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
-> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
-> @@ -311,7 +311,7 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index a7b5602ef6f7..bcea179a8d70 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2103,7 +2103,7 @@ static int sdhci_prepare_hs400_tuning(struct mmc_host *mmc, struct mmc_ios *ios)
+>  	return 0;
+>  }
 >  
->  			/* Check Whether subId is 0x11 or 0x12 */
->  			if ((scratch_32 == 0x11) || (scratch_32 == 0x12)) {
-> -				scratch_32 = 0x2c280000;
-> +				scratch_32 = 0x25100000;
+> -static void sdhci_start_tuning(struct sdhci_host *host)
+> +void sdhci_start_tuning(struct sdhci_host *host)
+>  {
+>  	u16 ctrl;
 >  
->  				/* Set Base Clock to 208MZ */
-
-That comment is misleading now.
-
->  				o2_pci_set_baseclk(chip, scratch_32);
-> @@ -406,7 +406,7 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
->  					       O2_SD_PLL_SETTING, scratch_32);
->  		} else {
->  			scratch_32 &= 0x0000FFFF;
-> -			scratch_32 |= 0x2c280000;
-> +			scratch_32 |= 0x25100000;
+> @@ -2126,14 +2126,16 @@ static void sdhci_start_tuning(struct sdhci_host *host)
+>  	sdhci_writel(host, SDHCI_INT_DATA_AVAIL, SDHCI_INT_ENABLE);
+>  	sdhci_writel(host, SDHCI_INT_DATA_AVAIL, SDHCI_SIGNAL_ENABLE);
+>  }
+> +EXPORT_SYMBOL_GPL(sdhci_start_tuning);
 >  
->  			pci_write_config_dword(chip->pdev,
->  					       O2_SD_PLL_SETTING, scratch_32);
+> -static void sdhci_end_tuning(struct sdhci_host *host)
+> +void sdhci_end_tuning(struct sdhci_host *host)
+>  {
+>  	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
+>  	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
+>  }
+> +EXPORT_SYMBOL_GPL(sdhci_end_tuning);
+>  
+> -static void sdhci_reset_tuning(struct sdhci_host *host)
+> +void sdhci_reset_tuning(struct sdhci_host *host)
+>  {
+>  	u16 ctrl;
+>  
+> @@ -2142,6 +2144,7 @@ static void sdhci_reset_tuning(struct sdhci_host *host)
+>  	ctrl &= ~SDHCI_CTRL_EXEC_TUNING;
+>  	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+>  }
+> +EXPORT_SYMBOL_GPL(sdhci_reset_tuning);
+>  
+>  static void sdhci_abort_tuning(struct sdhci_host *host, u32 opcode)
+>  {
+> @@ -2162,7 +2165,7 @@ static void sdhci_abort_tuning(struct sdhci_host *host, u32 opcode)
+>   * interrupt setup is different to other commands and there is no timeout
+>   * interrupt so special handling is needed.
+>   */
+> -static void sdhci_send_tuning(struct sdhci_host *host, u32 opcode)
+> +void sdhci_send_tuning(struct sdhci_host *host, u32 opcode)
+>  {
+>  	struct mmc_host *mmc = host->mmc;
+>  	struct mmc_command cmd = {};
+> @@ -2212,6 +2215,7 @@ static void sdhci_send_tuning(struct sdhci_host *host, u32 opcode)
+>  			   msecs_to_jiffies(50));
+>  
+>  }
+> +EXPORT_SYMBOL_GPL(sdhci_send_tuning);
+>  
+>  static void __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
+>  {
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 23966f887da6..f0bd36ce3817 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -748,4 +748,9 @@ bool sdhci_cqe_irq(struct sdhci_host *host, u32 intmask, int *cmd_error,
+>  
+>  void sdhci_dumpregs(struct sdhci_host *host);
+>  
+> +void sdhci_start_tuning(struct sdhci_host *host);
+> +void sdhci_end_tuning(struct sdhci_host *host);
+> +void sdhci_reset_tuning(struct sdhci_host *host);
+> +void sdhci_send_tuning(struct sdhci_host *host, u32 opcode);
+> +
+>  #endif /* __SDHCI_HW_H */
 > 
