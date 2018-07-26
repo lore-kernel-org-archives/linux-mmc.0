@@ -1,109 +1,328 @@
-From: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
-Subject: Re: [PATCH mmc-next 3/3] mmc: sdhci-of-dwcmshc: solve 128MB DMA
- boundary limitation
-Date: Thu, 26 Jul 2018 11:34:25 +0800
-Message-ID: <20180726113425.722240bc@xhacker.debian>
-References: <20180725174235.1ca764cf@xhacker.debian>
-        <20180725174749.6fc97d4d@xhacker.debian>
+From: Srinath Mannam <srinath.mannam@broadcom.com>
+Subject: Re: [PATCH] mmc: host: iproc: Add ACPI support to IPROC SDHCI
+Date: Thu, 26 Jul 2018 10:36:37 +0530
+Message-ID: <CABe79T4XdiZWaSwK3UGrk1oNrFTo1fqFP8dcvTbV1H-pHWpW+Q@mail.gmail.com>
+References: <1531845907-26213-1-git-send-email-srinath.mannam@broadcom.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180725174749.6fc97d4d@xhacker.debian>
+In-Reply-To: <1531845907-26213-1-git-send-email-srinath.mannam@broadcom.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Jon Mason <jonmason@broadcom.com>
+Cc: BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>, linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Srinath Mannam <srinath.mannam@broadcom.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 25 Jul 2018 17:47:49 +0800 Jisheng Zhang wrote:
+Hi Ulf Hansson,
 
-> When using DMA, if the DMA addr spans 128MB boundary, we have to split
-> the DMA transfer into two so that each one doesn't exceed the boundary.
-> 
-> Signed-off-by: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+Kindly review this patch.
+
+Thank you,
+
+Regards,
+Srinath.
+
+On Tue, Jul 17, 2018 at 10:15 PM, Srinath Mannam
+<srinath.mannam@broadcom.com> wrote:
+> Add ACPI support to all IPROC SDHCI varients
+>
+> Signed-off-by: Srinath Mannam <srinath.mannam@broadcom.com>
+> Reviewed-by: Ray Jui <ray.jui@broadcom.com>
+> Reviewed-by: Scott Branden <scott.branden@broadcom.com>
+> Reviewed-by: Vladimir Olovyannikov <vladimir.olovyannikov@broadcom.com>
 > ---
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 41 +++++++++++++++++++++++++++++
->  1 file changed, 41 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index 1b7cd144fb01..01b5cb772554 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -13,16 +13,45 @@
->  
->  #include "sdhci-pltfm.h"
->  
-> +#define BOUNDARY_OK(addr, len) \
-> +	((addr | (SZ_128M - 1)) == ((addr + len) | (SZ_128M - 1)))
-
-this should be
-((addr | (SZ_128M - 1)) == ((addr + len - 1) | (SZ_128M - 1)))
-
-> +
->  struct dwcmshc_priv {
->  	struct clk	*bus_clk;
->  };
->  
-> +/*
-> + * if DMA addr spans 128MB boundary, we split the DMA transfer into two
-> + * so that the DMA transfer doesn't exceed the boundary.
-> + */
-> +static unsigned int dwcmshc_adma_write_desc(struct sdhci_host *host,
-> +					    void *desc, dma_addr_t addr,
-> +					    int len, unsigned int cmd)
+>  drivers/mmc/host/Kconfig       |   1 +
+>  drivers/mmc/host/sdhci-iproc.c | 187 ++++++++++++++++++++++++++++-------------
+>  2 files changed, 128 insertions(+), 60 deletions(-)
+>
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 0581c19..bc6702e 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -334,6 +334,7 @@ config MMC_SDHCI_IPROC
+>         tristate "SDHCI support for the BCM2835 & iProc SD/MMC Controller"
+>         depends on ARCH_BCM2835 || ARCH_BCM_IPROC || COMPILE_TEST
+>         depends on MMC_SDHCI_PLTFM
+> +       depends on OF || ACPI
+>         default ARCH_BCM_IPROC
+>         select MMC_SDHCI_IO_ACCESSORS
+>         help
+> diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
+> index d0e83db..7c5c923 100644
+> --- a/drivers/mmc/host/sdhci-iproc.c
+> +++ b/drivers/mmc/host/sdhci-iproc.c
+> @@ -15,6 +15,7 @@
+>   * iProc SDHCI platform driver
+>   */
+>
+> +#include <linux/acpi.h>
+>  #include <linux/delay.h>
+>  #include <linux/module.h>
+>  #include <linux/mmc/host.h>
+> @@ -162,9 +163,19 @@ static void sdhci_iproc_writeb(struct sdhci_host *host, u8 val, int reg)
+>         sdhci_iproc_writel(host, newval, reg & ~3);
+>  }
+>
+> +static unsigned int sdhci_iproc_get_max_clock(struct sdhci_host *host)
 > +{
-> +	int tmplen, offset;
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
 > +
-> +	if (BOUNDARY_OK(addr, len))
-> +		return _sdhci_adma_write_desc(host, desc, addr, len, cmd);
-> +
-> +	offset = addr & (SZ_128M - 1);
-> +	tmplen = SZ_128M - offset;
-> +	_sdhci_adma_write_desc(host, desc, addr, tmplen, cmd);
-> +
-> +	addr += tmplen;
-> +	len -= tmplen;
-> +	desc += host->desc_sz;
-> +	_sdhci_adma_write_desc(host, desc, addr, len, cmd);
-> +
-> +	return host->desc_sz * 2;
+> +       if (pltfm_host->clk)
+> +               return sdhci_pltfm_clk_get_max_clock(host);
+> +       else
+> +               return pltfm_host->clock;
 > +}
 > +
->  static const struct sdhci_ops sdhci_dwcmshc_ops = {
->  	.set_clock		= sdhci_set_clock,
->  	.set_bus_width		= sdhci_set_bus_width,
->  	.set_uhs_signaling	= sdhci_set_uhs_signaling,
->  	.get_max_clock		= sdhci_pltfm_clk_get_max_clock,
->  	.reset			= sdhci_reset,
-> +	.adma_write_desc	= dwcmshc_adma_write_desc,
+>  static const struct sdhci_ops sdhci_iproc_ops = {
+>         .set_clock = sdhci_set_clock,
+> -       .get_max_clock = sdhci_pltfm_clk_get_max_clock,
+> +       .get_max_clock = sdhci_iproc_get_max_clock,
+>         .set_bus_width = sdhci_set_bus_width,
+>         .reset = sdhci_reset,
+>         .set_uhs_signaling = sdhci_set_uhs_signaling,
+> @@ -178,34 +189,24 @@ static const struct sdhci_ops sdhci_iproc_32only_ops = {
+>         .write_w = sdhci_iproc_writew,
+>         .write_b = sdhci_iproc_writeb,
+>         .set_clock = sdhci_set_clock,
+> -       .get_max_clock = sdhci_pltfm_clk_get_max_clock,
+> +       .get_max_clock = sdhci_iproc_get_max_clock,
+>         .set_bus_width = sdhci_set_bus_width,
+>         .reset = sdhci_reset,
+>         .set_uhs_signaling = sdhci_set_uhs_signaling,
 >  };
->  
->  static const struct sdhci_pltfm_data sdhci_dwcmshc_pdata = {
-> @@ -36,12 +65,24 @@ static int dwcmshc_probe(struct platform_device *pdev)
->  	struct sdhci_host *host;
->  	struct dwcmshc_priv *priv;
->  	int err;
-> +	u32 extra;
->  
->  	host = sdhci_pltfm_init(pdev, &sdhci_dwcmshc_pdata,
->  				sizeof(struct dwcmshc_priv));
->  	if (IS_ERR(host))
->  		return PTR_ERR(host);
->  
-> +	/*
-> +	 * The DMA descriptor table number is calculated as the maximum
-> +	 * number of segments times 2, to allow for an alignment
-> +	 * descriptor for each segment, plus 1 for a nop end descriptor,
-> +	 * plus extra number for cross 128M boundary handling.
-> +	 */
-> +	extra = totalram_pages / (SZ_128M / PAGE_SIZE) + 1;
-
-will use DIV_ROUND_UP instead.
-
-> +	if (extra > SDHCI_MAX_SEGS)
-> +		extra = SDHCI_MAX_SEGS;
-> +	host->adma_table_num = SDHCI_MAX_SEGS * 2 + 1 + extra;
+>
+> +enum sdhci_pltfm_type {
+> +       SDHCI_PLTFM_IPROC_CYGNUS,
+> +       SDHCI_PLTFM_IPROC,
+> +       SDHCI_PLTFM_BCM2835,
+> +};
 > +
->  	pltfm_host = sdhci_priv(host);
->  	priv = sdhci_pltfm_priv(pltfm_host);
->  
+>  static const struct sdhci_pltfm_data sdhci_iproc_cygnus_pltfm_data = {
+>         .quirks = SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK,
+>         .quirks2 = SDHCI_QUIRK2_ACMD23_BROKEN | SDHCI_QUIRK2_HOST_OFF_CARD_ON,
+>         .ops = &sdhci_iproc_32only_ops,
+>  };
+>
+> -static const struct sdhci_iproc_data iproc_cygnus_data = {
+> -       .pdata = &sdhci_iproc_cygnus_pltfm_data,
+> -       .caps = ((0x1 << SDHCI_MAX_BLOCK_SHIFT)
+> -                       & SDHCI_MAX_BLOCK_MASK) |
+> -               SDHCI_CAN_VDD_330 |
+> -               SDHCI_CAN_VDD_180 |
+> -               SDHCI_CAN_DO_SUSPEND |
+> -               SDHCI_CAN_DO_HISPD |
+> -               SDHCI_CAN_DO_ADMA2 |
+> -               SDHCI_CAN_DO_SDMA,
+> -       .caps1 = SDHCI_DRIVER_TYPE_C |
+> -                SDHCI_DRIVER_TYPE_D |
+> -                SDHCI_SUPPORT_DDR50,
+> -       .mmc_caps = MMC_CAP_1_8V_DDR,
+> -};
+> -
+>  static const struct sdhci_pltfm_data sdhci_iproc_pltfm_data = {
+>         .quirks = SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
+>                   SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12,
+> @@ -213,21 +214,6 @@ static const struct sdhci_pltfm_data sdhci_iproc_pltfm_data = {
+>         .ops = &sdhci_iproc_ops,
+>  };
+>
+> -static const struct sdhci_iproc_data iproc_data = {
+> -       .pdata = &sdhci_iproc_pltfm_data,
+> -       .caps = ((0x1 << SDHCI_MAX_BLOCK_SHIFT)
+> -                       & SDHCI_MAX_BLOCK_MASK) |
+> -               SDHCI_CAN_VDD_330 |
+> -               SDHCI_CAN_VDD_180 |
+> -               SDHCI_CAN_DO_SUSPEND |
+> -               SDHCI_CAN_DO_HISPD |
+> -               SDHCI_CAN_DO_ADMA2 |
+> -               SDHCI_CAN_DO_SDMA,
+> -       .caps1 = SDHCI_DRIVER_TYPE_C |
+> -                SDHCI_DRIVER_TYPE_D |
+> -                SDHCI_SUPPORT_DDR50,
+> -};
+> -
+>  static const struct sdhci_pltfm_data sdhci_bcm2835_pltfm_data = {
+>         .quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
+>                   SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
+> @@ -237,38 +223,104 @@ static const struct sdhci_pltfm_data sdhci_bcm2835_pltfm_data = {
+>         .ops = &sdhci_iproc_32only_ops,
+>  };
+>
+> -static const struct sdhci_iproc_data bcm2835_data = {
+> -       .pdata = &sdhci_bcm2835_pltfm_data,
+> -       .caps = ((0x1 << SDHCI_MAX_BLOCK_SHIFT)
+> -                       & SDHCI_MAX_BLOCK_MASK) |
+> -               SDHCI_CAN_VDD_330 |
+> -               SDHCI_CAN_DO_HISPD,
+> -       .caps1 = SDHCI_DRIVER_TYPE_A |
+> -                SDHCI_DRIVER_TYPE_C,
+> -       .mmc_caps = 0x00000000,
+> +static const struct sdhci_iproc_data sdhci_iproc_data_list[] = {
+> +       [SDHCI_PLTFM_IPROC_CYGNUS] = {
+> +               /* SDHCI IPROC CYGNUS */
+> +               .pdata = &sdhci_iproc_cygnus_pltfm_data,
+> +               .caps = ((0x1 << SDHCI_MAX_BLOCK_SHIFT)
+> +                               & SDHCI_MAX_BLOCK_MASK) |
+> +                       SDHCI_CAN_VDD_330 |
+> +                       SDHCI_CAN_VDD_180 |
+> +                       SDHCI_CAN_DO_SUSPEND |
+> +                       SDHCI_CAN_DO_HISPD |
+> +                       SDHCI_CAN_DO_ADMA2 |
+> +                       SDHCI_CAN_DO_SDMA,
+> +               .caps1 = SDHCI_DRIVER_TYPE_C |
+> +                       SDHCI_DRIVER_TYPE_D |
+> +                       SDHCI_SUPPORT_DDR50,
+> +               .mmc_caps = MMC_CAP_1_8V_DDR,
+> +       },
+> +       [SDHCI_PLTFM_IPROC] = {
+> +               /* SDHCI IPROC */
+> +               .pdata = &sdhci_iproc_pltfm_data,
+> +               .caps = ((0x1 << SDHCI_MAX_BLOCK_SHIFT)
+> +                               & SDHCI_MAX_BLOCK_MASK) |
+> +                       SDHCI_CAN_VDD_330 |
+> +                       SDHCI_CAN_VDD_180 |
+> +                       SDHCI_CAN_DO_SUSPEND |
+> +                       SDHCI_CAN_DO_HISPD |
+> +                       SDHCI_CAN_DO_ADMA2 |
+> +                       SDHCI_CAN_DO_SDMA,
+> +               .caps1 = SDHCI_DRIVER_TYPE_C |
+> +                       SDHCI_DRIVER_TYPE_D |
+> +                       SDHCI_SUPPORT_DDR50,
+> +       },
+> +       [SDHCI_PLTFM_BCM2835] = {
+> +               /* SDHCI BCM2835 */
+> +               .pdata = &sdhci_bcm2835_pltfm_data,
+> +               .caps = ((0x1 << SDHCI_MAX_BLOCK_SHIFT)
+> +                               & SDHCI_MAX_BLOCK_MASK) |
+> +                       SDHCI_CAN_VDD_330 |
+> +                       SDHCI_CAN_DO_HISPD,
+> +               .caps1 = SDHCI_DRIVER_TYPE_A |
+> +                       SDHCI_DRIVER_TYPE_C,
+> +               .mmc_caps = 0x00000000,
+> +
+> +       },
+>  };
+>
+>  static const struct of_device_id sdhci_iproc_of_match[] = {
+> -       { .compatible = "brcm,bcm2835-sdhci", .data = &bcm2835_data },
+> -       { .compatible = "brcm,sdhci-iproc-cygnus", .data = &iproc_cygnus_data},
+> -       { .compatible = "brcm,sdhci-iproc", .data = &iproc_data },
+> +       {
+> +               .compatible = "brcm,bcm2835-sdhci",
+> +               .data = (void *)SDHCI_PLTFM_BCM2835
+> +       },
+> +       {
+> +               .compatible = "brcm,sdhci-iproc-cygnus",
+> +               .data = (void *)SDHCI_PLTFM_IPROC_CYGNUS
+> +       },
+> +       {
+> +               .compatible = "brcm,sdhci-iproc",
+> +               .data = (void *)SDHCI_PLTFM_IPROC
+> +       },
+>         { }
+>  };
+>  MODULE_DEVICE_TABLE(of, sdhci_iproc_of_match);
+>
+> +static const struct acpi_device_id sdhci_iproc_acpi_ids[] = {
+> +       { .id = "BRCM5871", .driver_data = SDHCI_PLTFM_IPROC_CYGNUS },
+> +       { .id = "BRCM5872", .driver_data = SDHCI_PLTFM_IPROC },
+> +       { /* sentinel */ }
+> +};
+> +MODULE_DEVICE_TABLE(acpi, sdhci_iproc_acpi_ids);
+> +
+>  static int sdhci_iproc_probe(struct platform_device *pdev)
+>  {
+> +       struct device *dev = &pdev->dev;
+>         const struct of_device_id *match;
+> +       const struct acpi_device_id *acpi_id;
+>         const struct sdhci_iproc_data *iproc_data;
+>         struct sdhci_host *host;
+>         struct sdhci_iproc_host *iproc_host;
+>         struct sdhci_pltfm_host *pltfm_host;
+>         int ret;
+> +       enum sdhci_pltfm_type plat_type;
+> +
+> +       if (dev->of_node) {
+> +               match = of_match_device(sdhci_iproc_of_match, dev);
+> +               if (match)
+> +                       plat_type = (enum sdhci_pltfm_type)match->data;
+> +               else
+> +                       return -ENODEV;
+> +       } else if (has_acpi_companion(dev)) {
+> +               acpi_id = acpi_match_device(sdhci_iproc_acpi_ids, dev);
+> +               if (acpi_id)
+> +                       plat_type = (enum sdhci_pltfm_type)acpi_id->driver_data;
+> +               else
+> +                       return -ENODEV;
+> +       } else
+> +               return -ENODEV;
+>
+> -       match = of_match_device(sdhci_iproc_of_match, &pdev->dev);
+> -       if (!match)
+> -               return -EINVAL;
+> -       iproc_data = match->data;
+> +       iproc_data = &sdhci_iproc_data_list[plat_type];
+>
+>         host = sdhci_pltfm_init(pdev, iproc_data->pdata, sizeof(*iproc_host));
+>         if (IS_ERR(host))
+> @@ -284,17 +336,30 @@ static int sdhci_iproc_probe(struct platform_device *pdev)
+>
+>         host->mmc->caps |= iproc_host->data->mmc_caps;
+>
+> -       pltfm_host->clk = devm_clk_get(&pdev->dev, NULL);
+> -       if (IS_ERR(pltfm_host->clk)) {
+> -               ret = PTR_ERR(pltfm_host->clk);
+> -               goto err;
+> -       }
+> -       ret = clk_prepare_enable(pltfm_host->clk);
+> -       if (ret) {
+> -               dev_err(&pdev->dev, "failed to enable host clk\n");
+> -               goto err;
+> +       if (dev->of_node) {
+> +               pltfm_host->clk = devm_clk_get(dev, NULL);
+> +               if (IS_ERR(pltfm_host->clk)) {
+> +                       ret = PTR_ERR(pltfm_host->clk);
+> +                       goto err;
+> +               }
+> +               ret = clk_prepare_enable(pltfm_host->clk);
+> +               if (ret) {
+> +                       dev_err(dev, "failed to enable host clk\n");
+> +                       goto err;
+> +               }
+> +       } else if (has_acpi_companion(dev)) {
+> +               /*
+> +                * When Driver probe with ACPI device, clock devices
+> +                * are not available, so sdhci clock get from
+> +                * clock-frequency property given in _DSD object.
+> +                */
+> +               device_property_read_u32(dev, "clock-frequency",
+> +                                        &pltfm_host->clock);
+> +               if (!pltfm_host->clock) {
+> +                       ret = -ENODEV;
+> +                       goto err;
+> +               }
+>         }
+> -
+>         if (iproc_host->data->pdata->quirks & SDHCI_QUIRK_MISSING_CAPS) {
+>                 host->caps = iproc_host->data->caps;
+>                 host->caps1 = iproc_host->data->caps1;
+> @@ -307,7 +372,8 @@ static int sdhci_iproc_probe(struct platform_device *pdev)
+>         return 0;
+>
+>  err_clk:
+> -       clk_disable_unprepare(pltfm_host->clk);
+> +       if (dev->of_node)
+> +               clk_disable_unprepare(pltfm_host->clk);
+>  err:
+>         sdhci_pltfm_free(pdev);
+>         return ret;
+> @@ -317,6 +383,7 @@ static struct platform_driver sdhci_iproc_driver = {
+>         .driver = {
+>                 .name = "sdhci-iproc",
+>                 .of_match_table = sdhci_iproc_of_match,
+> +               .acpi_match_table = ACPI_PTR(sdhci_iproc_acpi_ids),
+>                 .pm = &sdhci_pltfm_pmops,
+>         },
+>         .probe = sdhci_iproc_probe,
+> --
+> 2.7.4
+>
