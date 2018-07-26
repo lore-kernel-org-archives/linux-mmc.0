@@ -1,52 +1,55 @@
 From: Aapo Vienamo <avienamo@nvidia.com>
-Subject: [PATCH v2 00/10] Tegra SDHCI enable 1.8 V signaling on Tegar210 and Tegra186
-Date: Thu, 26 Jul 2018 15:19:10 +0300
-Message-ID: <1532607560-11253-1-git-send-email-avienamo@nvidia.com>
+Subject: [PATCH v2 01/10] dt-bindings: mmc: tegra: Add pad voltage control properties
+Date: Thu, 26 Jul 2018 15:19:11 +0300
+Message-ID: <1532607560-11253-2-git-send-email-avienamo@nvidia.com>
+References: <1532607560-11253-1-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1532607560-11253-1-git-send-email-avienamo@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, Mikko Perttunen <mperttunen@nvidia.com>
 Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, Aapo Vienamo <avienamo@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi all,
+Document the pinctrl bindings used by the SDHCI driver to reconfigure
+pad voltages on controllers supporting multiple voltage levels.
 
-Reconfigure pad voltages as part of mmc voltage switching on
-controllers with adjustable voltages. Allow for reconfiguration of the
-signaling voltage of SDMMC1 on Tegra210 P2597 and fix SDMMC4 signaling
-voltage regulator configuration on Tegra210 P2180.
+Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
+Reviewed-by: Mikko Perttunen <mperttunen@nvidia.com>
+---
+ .../bindings/mmc/nvidia,tegra20-sdhci.txt          | 22 ++++++++++++++++++++++
+ 1 file changed, 22 insertions(+)
 
-This series depends on the "Tegra PMC pinctrl pad configuration" series posted
-earlier.
-
-Changelog:
-v2:
-	- Change the pinctrl bindings commit title
-	- Use IS_ERR in tegra_sdhci_init_pinctrl_info()
-	- Add nvidia,only-1-8-v property
-	- Disable UHS modes in case the pad and regulator configuration
-	  is invalid
-
-Aapo Vienamo (10):
-  dt-bindings: mmc: tegra: Add pad voltage control properties
-  dt-bindings: mmc: tegra: Add nvidia,only-1-8-v property
-  mmc: tegra: Reconfigure pad voltages during voltage switching
-  arm64: dts: Add Tegra210 sdmmc pinctrl voltage states
-  arm64: dts: Add Tegra186 sdmmc pinctrl voltage states
-  arm64: dts: tegra210-p2180: Allow ldo2 to go down to 1.8 V
-  arm64: dts: tegra210-p2180: Correct sdmmc4 vqmmc-supply
-  arm64: dts: tegra210-p2597: Remove no-1-8-v from sdmmc1
-  arm64: dts: tegra210: Add nvidia,only-1-8-v to sdmmc4
-  arm64: dts: tegra186: Add nvidia,only-1-8-v to sdmmc4
-
- .../bindings/mmc/nvidia,tegra20-sdhci.txt          |  24 ++++
- arch/arm64/boot/dts/nvidia/tegra186.dtsi           |  41 ++++++
- arch/arm64/boot/dts/nvidia/tegra210-p2180.dtsi     |  12 +-
- arch/arm64/boot/dts/nvidia/tegra210-p2597.dtsi     |   1 -
- arch/arm64/boot/dts/nvidia/tegra210.dtsi           |  28 +++++
- drivers/mmc/host/sdhci-tegra.c                     | 140 +++++++++++++++++++--
- 6 files changed, 222 insertions(+), 24 deletions(-)
-
+diff --git a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
+index 9bce578..90c214d 100644
+--- a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
++++ b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
+@@ -38,3 +38,25 @@ sdhci@c8000200 {
+ 	power-gpios = <&gpio 155 0>; /* gpio PT3 */
+ 	bus-width = <8>;
+ };
++
++Optional properties for Tegra210 and Tegra186:
++- pinctrl-names, pinctrl-0, pinctrl-1 : Specify pad voltage
++  configurations. Valid pinctrl-names are "sdmmc-3v3" and "sdmmc-1v8"
++  for controllers supporting multiple voltage levels. The order of names
++  should correspond to the pin configuration states in pinctrl-0 and
++  pinctrl-1.
++
++Example:
++sdhci@700b0000 {
++	compatible = "nvidia,tegra210-sdhci", "nvidia,tegra124-sdhci";
++	reg = <0x0 0x700b0000 0x0 0x200>;
++	interrupts = <GIC_SPI 14 IRQ_TYPE_LEVEL_HIGH>;
++	clocks = <&tegra_car TEGRA210_CLK_SDMMC1>;
++	clock-names = "sdhci";
++	resets = <&tegra_car 14>;
++	reset-names = "sdhci";
++	pinctrl-names = "sdmmc-3v3", "sdmmc-1v8";
++	pinctrl-0 = <&sdmmc1_3v3>;
++	pinctrl-1 = <&sdmmc1_1v8>;
++	status = "disabled";
++};
 -- 
 2.7.4
