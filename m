@@ -1,50 +1,69 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH V1 2/3] Documentation: sdhci-msm: Add entries for passing
- load values
-Date: Wed, 25 Jul 2018 11:55:22 -0600
-Message-ID: <20180725175522.GA10185@rob-hp-laptop>
-References: <1532083566-43215-1-git-send-email-vviswana@codeaurora.org>
- <1532083566-43215-3-git-send-email-vviswana@codeaurora.org>
+From: Icenowy Zheng <icenowy-h8G6r0blFSE@public.gmane.org>
+Subject: Re: [PATCH v2 1/3] dt-binding: mmc: sunxi: add H6
+ compatible (with A64 fallback)
+Date: Thu, 26 Jul 2018 09:14:26 +0800
+Message-ID: <8520892860b672631ffc99f6318c2aeba251dc2e.camel@aosc.io>
+References: <20180719042810.6546-1-icenowy@aosc.io>
+	 <20180719042810.6546-2-icenowy@aosc.io>
+Reply-To: icenowy-h8G6r0blFSE@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1532083566-43215-3-git-send-email-vviswana@codeaurora.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Vijay Viswanath <vviswana@codeaurora.org>
-Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, devicetree@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, jeremymc@redhat.com, bjorn.andersson@linaro.org, riteshh@codeaurora.org, vbadigan@codeaurora.org, evgreen@chromium.org, dianders@google.com, sayalil@codeaurora.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-sunxi+bncBDS6XAN6ZADRBB6B4TNAKGQEKYWKXBA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+In-Reply-To: <20180719042810.6546-2-icenowy-h8G6r0blFSE@public.gmane.org>
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Jul 20, 2018 at 04:16:05PM +0530, Vijay Viswanath wrote:
-> The load a particular sdhc controller should request from a regulator
-> is device specific and hence each device should individually vote for
-> the required load.
-
-"dt-bindings: mmc: ..." for the subject.
-
-> 
-> Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
+=E5=9C=A8 2018-07-19=E5=9B=9B=E7=9A=84 12:28 +0800=EF=BC=8CIcenowy Zheng=E5=
+=86=99=E9=81=93=EF=BC=9A
+> The MMC controllers on H6 is similar to the ones on A64, but with
+> some
+> new features.
+>=20
+> Add compatible strings for them (with the A64 compatible strings as
+> fallback, in order to make them to work with A64 drivers).
+>=20
+> Signed-off-by: Icenowy Zheng <icenowy-h8G6r0blFSE@public.gmane.org>
 > ---
->  Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 6 ++++++
->  1 file changed, 6 insertions(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-> index 502b3b8..ee34f28 100644
-> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-> @@ -26,6 +26,11 @@ Required properties:
->  	"cal"	- reference clock for RCLK delay calibration (optional)
->  	"sleep"	- sleep clock for RCLK delay calibration (optional)
->  
-> +Optional properties:
-> +- <supply>-current-level - specifies load levels for supply during BUS_ON
-> +			and BUS_OFF states in power irq. Should be specified in
-> +			pairs (lpm, hpm), for BUS_OFF and BUS_ON respectively.
-> +			Units uA.
+> Changes in v2:
+> - Add A64 fallback.
+>=20
+>  Documentation/devicetree/bindings/mmc/sunxi-mmc.txt | 2 ++
+>  1 file changed, 2 insertions(+)
+>=20
+> diff --git a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
+> b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
+> index 132e0007d7d6..e9cb3ec5e502 100644
+> --- a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
+> @@ -16,6 +16,8 @@ Required properties:
+>     * "allwinner,sun9i-a80-mmc"
+>     * "allwinner,sun50i-a64-emmc"
+>     * "allwinner,sun50i-a64-mmc"
+> +   * "allwinner,sun50i-h6-emmc", "allwinner.sun50i-a64-emmc"
+> +   * "allwinner,sun50i-h6-mmc", "allwinner.sun50i-a64-mmc"
 
-This should probably be a common regulator property (or maybe one exists 
-already).
+BTW it seems that the driver performs quite bad on H6 when dealing it
+as an A64.
 
-It is missing vendor prefix and unit suffix as-is.
+I get 1.5MB/s on a card, although the card can reach 20MB/s read speed
+(testing on BSP).
 
-Rob
+>   - reg : mmc controller base registers
+>   - clocks : a list with 4 phandle + clock specifier pairs
+>   - clock-names : must contain "ahb", "mmc", "output" and "sample"
+
+--=20
+You received this message because you are subscribed to the Google Groups "=
+linux-sunxi" group.
+To unsubscribe from this group and stop receiving emails from it, send an e=
+mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
+For more options, visit https://groups.google.com/d/optout.
