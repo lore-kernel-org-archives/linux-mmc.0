@@ -1,54 +1,106 @@
 From: Aapo Vienamo <avienamo@nvidia.com>
-Subject: [PATCH v2 00/10] Tegra SDHCI update the pad autocal procedure
-Date: Thu, 26 Jul 2018 15:26:46 +0300
-Message-ID: <1532608016-14319-1-git-send-email-avienamo@nvidia.com>
+Subject: [PATCH v2 02/10] mmc: tegra: Set calibration pad voltage reference
+Date: Thu, 26 Jul 2018 15:26:48 +0300
+Message-ID: <1532608016-14319-3-git-send-email-avienamo@nvidia.com>
+References: <1532608016-14319-1-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1532608016-14319-1-git-send-email-avienamo@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, Mikko Perttunen <mperttunen@nvidia.com>
 Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, Aapo Vienamo <avienamo@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi all,
+Configure the voltage reference used by the automatic pad drive strength
+calibration procedure. The value is a magic number from the TRM.
 
-Update the tegra_sdhci_pad_autocalib() pad drive strength calibration
-procedure to match the ones specified in the TRMs of the more recent
-SoCs. This was tested on Tegra186, Tegra210, and Tegra124, although it
-should not break things older generations either.
+Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
+---
+ drivers/mmc/host/sdhci-tegra.c | 56 +++++++++++++++++++++++++-----------------
+ 1 file changed, 33 insertions(+), 23 deletions(-)
 
-This series depends on the "Tegra SDHCI enable 1.8 V signaling on
-Tegar210 and Tegra186" series posted earlier.
-
-Changelog:
-v2:
-	- Rename the series
-	- Align the register macros
-	- Use readl_poll_timeout() in tegra_sdhci_pad_autocalib()
-	- Move SDHCI_TEGRA_PAD_E_INPUT_OR_E_PWRD define to correc patch
-	- Use !!(reg & SDHCI_CLOCK_CARD_EN) in
-	  tegra_sdhci_configure_card_clk()
-	- Add "nvidia," prefix to pad drive strength offset dt props
-	- Read the drive strength properties as u32 instead of u8
-	- Disable autocalibration if it times out
-
-Aapo Vienamo (10):
-  mmc: tegra: Poll for calibration completion
-  mmc: tegra: Set calibration pad voltage reference
-  mmc: tegra: Power on the calibration pad
-  mmc: tegra: Disable card clock during pad calibration
-  dt-bindings: Add Tegra SDHCI pad pdpu offset bindings
-  mmc: tegra: Program pad autocal offsets from dt
-  arm64: dts: tegra186: Add sdmmc pad auto calibration offsets
-  arm64: dts: tegra210: Add sdmmc pad auto calibration offsets
-  mmc: tegra: Perform pad calibration after voltage switch
-  mmc: tegra: Enable pad calibration on Tegra210 and Tegra186
-
- .../bindings/mmc/nvidia,tegra20-sdhci.txt          |  34 +++
- arch/arm64/boot/dts/nvidia/tegra186.dtsi           |  20 ++
- arch/arm64/boot/dts/nvidia/tegra210.dtsi           |  12 +
- drivers/mmc/host/sdhci-tegra.c                     | 280 +++++++++++++++++++--
- 4 files changed, 319 insertions(+), 27 deletions(-)
-
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index 27b5ef9..51eda20 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -40,27 +40,31 @@
+ #define SDHCI_CLOCK_CTRL_PADPIPE_CLKEN_OVERRIDE		BIT(3)
+ #define SDHCI_CLOCK_CTRL_SPI_MODE_CLKEN_OVERRIDE	BIT(2)
+ 
+-#define SDHCI_TEGRA_VENDOR_MISC_CTRL		0x120
+-#define SDHCI_MISC_CTRL_ENABLE_SDR104		0x8
+-#define SDHCI_MISC_CTRL_ENABLE_SDR50		0x10
+-#define SDHCI_MISC_CTRL_ENABLE_SDHCI_SPEC_300	0x20
+-#define SDHCI_MISC_CTRL_ENABLE_DDR50		0x200
+-
+-#define SDHCI_TEGRA_AUTO_CAL_CONFIG		0x1e4
+-#define SDHCI_AUTO_CAL_START			BIT(31)
+-#define SDHCI_AUTO_CAL_ENABLE			BIT(29)
+-
+-#define SDHCI_TEGRA_AUTO_CAL_STATUS		0x1ec
+-#define SDHCI_TEGRA_AUTO_CAL_ACTIVE		BIT(31)
+-
+-#define NVQUIRK_FORCE_SDHCI_SPEC_200	BIT(0)
+-#define NVQUIRK_ENABLE_BLOCK_GAP_DET	BIT(1)
+-#define NVQUIRK_ENABLE_SDHCI_SPEC_300	BIT(2)
+-#define NVQUIRK_ENABLE_SDR50		BIT(3)
+-#define NVQUIRK_ENABLE_SDR104		BIT(4)
+-#define NVQUIRK_ENABLE_DDR50		BIT(5)
+-#define NVQUIRK_HAS_PADCALIB		BIT(6)
+-#define NVQUIRK_NEEDS_PAD_CONTROL	BIT(7)
++#define SDHCI_TEGRA_VENDOR_MISC_CTRL			0x120
++#define SDHCI_MISC_CTRL_ENABLE_SDR104			0x8
++#define SDHCI_MISC_CTRL_ENABLE_SDR50			0x10
++#define SDHCI_MISC_CTRL_ENABLE_SDHCI_SPEC_300		0x20
++#define SDHCI_MISC_CTRL_ENABLE_DDR50			0x200
++
++#define SDHCI_TEGRA_AUTO_CAL_CONFIG			0x1e4
++#define SDHCI_AUTO_CAL_START				BIT(31)
++#define SDHCI_AUTO_CAL_ENABLE				BIT(29)
++
++#define SDHCI_TEGRA_SDMEM_COMP_PADCTRL			0x1e0
++#define SDHCI_TEGRA_SDMEM_COMP_PADCTRL_VREF_SEL_MASK	0x0000000f
++#define SDHCI_TEGRA_SDMEM_COMP_PADCTRL_VREF_SEL_VAL	0x7
++
++#define SDHCI_TEGRA_AUTO_CAL_STATUS			0x1ec
++#define SDHCI_TEGRA_AUTO_CAL_ACTIVE			BIT(31)
++
++#define NVQUIRK_FORCE_SDHCI_SPEC_200			BIT(0)
++#define NVQUIRK_ENABLE_BLOCK_GAP_DET			BIT(1)
++#define NVQUIRK_ENABLE_SDHCI_SPEC_300			BIT(2)
++#define NVQUIRK_ENABLE_SDR50				BIT(3)
++#define NVQUIRK_ENABLE_SDR104				BIT(4)
++#define NVQUIRK_ENABLE_DDR50				BIT(5)
++#define NVQUIRK_HAS_PADCALIB				BIT(6)
++#define NVQUIRK_NEEDS_PAD_CONTROL			BIT(7)
+ 
+ struct sdhci_tegra_soc_data {
+ 	const struct sdhci_pltfm_data *pdata;
+@@ -188,7 +192,7 @@ static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
+ 	const struct sdhci_tegra_soc_data *soc_data = tegra_host->soc_data;
+-	u32 misc_ctrl, clk_ctrl;
++	u32 misc_ctrl, clk_ctrl, pad_ctrl;
+ 	bool uhs_valid;
+ 
+ 	sdhci_reset(host, mask);
+@@ -225,8 +229,14 @@ static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
+ 	sdhci_writel(host, misc_ctrl, SDHCI_TEGRA_VENDOR_MISC_CTRL);
+ 	sdhci_writel(host, clk_ctrl, SDHCI_TEGRA_VENDOR_CLOCK_CTRL);
+ 
+-	if (soc_data->nvquirks & NVQUIRK_HAS_PADCALIB)
++	if (soc_data->nvquirks & NVQUIRK_HAS_PADCALIB) {
++		pad_ctrl = sdhci_readl(host, SDHCI_TEGRA_SDMEM_COMP_PADCTRL);
++		pad_ctrl &= ~SDHCI_TEGRA_SDMEM_COMP_PADCTRL_VREF_SEL_MASK;
++		pad_ctrl |= SDHCI_TEGRA_SDMEM_COMP_PADCTRL_VREF_SEL_VAL;
++		sdhci_writel(host, pad_ctrl, SDHCI_TEGRA_SDMEM_COMP_PADCTRL);
++
+ 		tegra_host->pad_calib_required = true;
++	}
+ 
+ 	tegra_host->ddr_signaling = false;
+ }
 -- 
 2.7.4
