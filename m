@@ -1,8 +1,8 @@
 From: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
-Subject: [PATCH mmc-next v2 1/3] mmc: sdhci: add adma_table_num member to
- struct sdhci_host
-Date: Thu, 26 Jul 2018 15:12:07 +0800
-Message-ID: <20180726151207.6d8898f4@xhacker.debian>
+Subject: [PATCH mmc-next v2 2/3] mmc: sdhci: introduce adma_write_desc()
+ hook to struct sdhci_ops
+Date: Thu, 26 Jul 2018 15:12:55 +0800
+Message-ID: <20180726151255.764aedb7@xhacker.debian>
 References: <20180726151017.4da1e336@xhacker.debian>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
@@ -14,68 +14,116 @@ To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-This patch adds adma_table_num member to struct sdhci_host to give more
-flexibility to drivers to control the ADMA table number.
-
-Default value of adma_table_num is set to (SDHCI_MAX_SEGS * 2 + 1).
+Add this hook so that it can be overridden with driver specific
+implementations. We also rename the original sdhci_adma_write_desc()
+to _sdhci_adma_write_desc() and export it, so that it could be reused
+by driver's specific implementations.
 
 Signed-off-by: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
 ---
- drivers/mmc/host/sdhci.c | 17 +++++++++--------
- drivers/mmc/host/sdhci.h |  2 ++
- 2 files changed, 11 insertions(+), 8 deletions(-)
+ drivers/mmc/host/sdhci.c | 31 +++++++++++++++++++++++--------
+ drivers/mmc/host/sdhci.h |  6 ++++++
+ 2 files changed, 29 insertions(+), 8 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index a7b5602ef6f7..14dd4a49e03b 100644
+index 14dd4a49e03b..50c846d99182 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -3316,6 +3316,13 @@ struct sdhci_host *sdhci_alloc_host(struct device *dev,
- 
- 	host->sdma_boundary = SDHCI_DEFAULT_BOUNDARY_ARG;
- 
-+	/*
-+	 * The DMA descriptor table number is calculated as the maximum
-+	 * number of segments times 2, to allow for an alignment
-+	 * descriptor for each segment, plus 1 for a nop end descriptor.
-+	 */
-+	host->adma_table_num = SDHCI_MAX_SEGS * 2 + 1;
-+
- 	return host;
+@@ -554,8 +554,8 @@ static void sdhci_kunmap_atomic(void *buffer, unsigned long *flags)
+ 	local_irq_restore(*flags);
  }
  
-@@ -3561,18 +3568,12 @@ int sdhci_setup_host(struct sdhci_host *host)
- 		dma_addr_t dma;
- 		void *buf;
+-static void sdhci_adma_write_desc(struct sdhci_host *host, void *desc,
+-				  dma_addr_t addr, int len, unsigned cmd)
++unsigned int _sdhci_adma_write_desc(struct sdhci_host *host, void *desc,
++				    dma_addr_t addr, int len, unsigned int cmd)
+ {
+ 	struct sdhci_adma2_64_desc *dma_desc = desc;
  
--		/*
--		 * The DMA descriptor table size is calculated as the maximum
--		 * number of segments times 2, to allow for an alignment
--		 * descriptor for each segment, plus 1 for a nop end descriptor,
--		 * all multipled by the descriptor size.
--		 */
- 		if (host->flags & SDHCI_USE_64_BIT_DMA) {
--			host->adma_table_sz = (SDHCI_MAX_SEGS * 2 + 1) *
-+			host->adma_table_sz = host->adma_table_num *
- 					      SDHCI_ADMA2_64_DESC_SZ;
- 			host->desc_sz = SDHCI_ADMA2_64_DESC_SZ;
- 		} else {
--			host->adma_table_sz = (SDHCI_MAX_SEGS * 2 + 1) *
-+			host->adma_table_sz = host->adma_table_num *
- 					      SDHCI_ADMA2_32_DESC_SZ;
- 			host->desc_sz = SDHCI_ADMA2_32_DESC_SZ;
+@@ -566,6 +566,19 @@ static void sdhci_adma_write_desc(struct sdhci_host *host, void *desc,
+ 
+ 	if (host->flags & SDHCI_USE_64_BIT_DMA)
+ 		dma_desc->addr_hi = cpu_to_le32((u64)addr >> 32);
++
++	return host->desc_sz;
++}
++EXPORT_SYMBOL_GPL(_sdhci_adma_write_desc);
++
++static unsigned int sdhci_adma_write_desc(struct sdhci_host *host, void *desc,
++					  dma_addr_t addr, int len,
++					  unsigned int cmd)
++{
++	if (host->ops->adma_write_desc)
++		return host->ops->adma_write_desc(host, desc, addr, len, cmd);
++
++	return _sdhci_adma_write_desc(host, desc, addr, len, cmd);
+ }
+ 
+ static void sdhci_adma_mark_end(void *desc)
+@@ -585,6 +598,7 @@ static void sdhci_adma_table_pre(struct sdhci_host *host,
+ 	void *desc, *align;
+ 	char *buffer;
+ 	int len, offset, i;
++	unsigned int desc_sz;
+ 
+ 	/*
+ 	 * The spec does not specify endianness of descriptor table.
+@@ -618,15 +632,16 @@ static void sdhci_adma_table_pre(struct sdhci_host *host,
+ 			}
+ 
+ 			/* tran, valid */
+-			sdhci_adma_write_desc(host, desc, align_addr, offset,
+-					      ADMA2_TRAN_VALID);
++			desc_sz = sdhci_adma_write_desc(host, desc,
++							align_addr, offset,
++							ADMA2_TRAN_VALID);
+ 
+ 			BUG_ON(offset > 65536);
+ 
+ 			align += SDHCI_ADMA2_ALIGN;
+ 			align_addr += SDHCI_ADMA2_ALIGN;
+ 
+-			desc += host->desc_sz;
++			desc += desc_sz;
+ 
+ 			addr += offset;
+ 			len -= offset;
+@@ -636,9 +651,9 @@ static void sdhci_adma_table_pre(struct sdhci_host *host,
+ 
+ 		if (len) {
+ 			/* tran, valid */
+-			sdhci_adma_write_desc(host, desc, addr, len,
+-					      ADMA2_TRAN_VALID);
+-			desc += host->desc_sz;
++			desc_sz = sdhci_adma_write_desc(host, desc, addr, len,
++							ADMA2_TRAN_VALID);
++			desc += desc_sz;
  		}
+ 
+ 		/*
 diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 23966f887da6..d55fd7033e93 100644
+index d55fd7033e93..0aad0ee8f63b 100644
 --- a/drivers/mmc/host/sdhci.h
 +++ b/drivers/mmc/host/sdhci.h
-@@ -563,6 +563,8 @@ struct sdhci_host {
- 	/* Host SDMA buffer boundary. */
- 	u32			sdma_boundary;
+@@ -605,6 +605,9 @@ struct sdhci_ops {
+ 	void    (*adma_workaround)(struct sdhci_host *host, u32 intmask);
+ 	void    (*card_event)(struct sdhci_host *host);
+ 	void	(*voltage_switch)(struct sdhci_host *host);
++	unsigned int	(*adma_write_desc)(struct sdhci_host *host, void *desc,
++					   dma_addr_t addr, int len,
++					   unsigned int cmd);
+ };
  
-+	u32			adma_table_num;
-+
- 	u64			data_timeout;
+ #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+@@ -735,6 +738,9 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
+ int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+ 				      struct mmc_ios *ios);
+ void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable);
++unsigned int _sdhci_adma_write_desc(struct sdhci_host *host, void *desc,
++				    dma_addr_t addr, int len,
++				    unsigned int cmd);
  
- 	unsigned long private[0] ____cacheline_aligned;
+ #ifdef CONFIG_PM
+ int sdhci_suspend_host(struct sdhci_host *host);
 -- 
 2.18.0
