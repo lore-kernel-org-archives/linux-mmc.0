@@ -1,7 +1,7 @@
 From: Aapo Vienamo <avienamo@nvidia.com>
-Subject: [PATCH v2 09/10] arm64: dts: tegra210: Add nvidia,only-1-8-v to sdmmc4
-Date: Thu, 26 Jul 2018 15:19:19 +0300
-Message-ID: <1532607560-11253-10-git-send-email-avienamo@nvidia.com>
+Subject: [PATCH v2 10/10] arm64: dts: tegra186: Add nvidia,only-1-8-v to sdmmc4
+Date: Thu, 26 Jul 2018 15:19:20 +0300
+Message-ID: <1532607560-11253-11-git-send-email-avienamo@nvidia.com>
 References: <1532607560-11253-1-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -16,16 +16,16 @@ Mark sdmmc4 as 1.8 V only.
 
 Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
 ---
- arch/arm64/boot/dts/nvidia/tegra210.dtsi | 1 +
+ arch/arm64/boot/dts/nvidia/tegra186.dtsi | 1 +
  1 file changed, 1 insertion(+)
 
-diff --git a/arch/arm64/boot/dts/nvidia/tegra210.dtsi b/arch/arm64/boot/dts/nvidia/tegra210.dtsi
-index bc1918e..c449566 100644
---- a/arch/arm64/boot/dts/nvidia/tegra210.dtsi
-+++ b/arch/arm64/boot/dts/nvidia/tegra210.dtsi
-@@ -1087,6 +1087,7 @@
+diff --git a/arch/arm64/boot/dts/nvidia/tegra186.dtsi b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
+index 7669756..fc14dd3 100644
+--- a/arch/arm64/boot/dts/nvidia/tegra186.dtsi
++++ b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
+@@ -279,6 +279,7 @@
  		clock-names = "sdhci";
- 		resets = <&tegra_car 15>;
+ 		resets = <&bpmp TEGRA186_RESET_SDMMC4>;
  		reset-names = "sdhci";
 +		nvidia,only-1-8-v;
  		status = "disabled";
