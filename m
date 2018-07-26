@@ -1,7 +1,7 @@
 From: Aapo Vienamo <avienamo@nvidia.com>
-Subject: [PATCH v2 04/10] mmc: tegra: Disable card clock during pad calibration
-Date: Thu, 26 Jul 2018 15:26:50 +0300
-Message-ID: <1532608016-14319-5-git-send-email-avienamo@nvidia.com>
+Subject: [PATCH v2 05/10] dt-bindings: Add Tegra SDHCI pad pdpu offset bindings
+Date: Thu, 26 Jul 2018 15:26:51 +0300
+Message-ID: <1532608016-14319-6-git-send-email-avienamo@nvidia.com>
 References: <1532608016-14319-1-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,62 +12,71 @@ To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark
 Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, Aapo Vienamo <avienamo@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Disable the card clock during automatic pad drive strength calibration
-and re-enable it afterwards.
+Add bindings documentation for pad pull up and pull down offset values to be
+programmed before executing automatic pad drive strength calibration.
 
 Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
 ---
- drivers/mmc/host/sdhci-tegra.c | 26 ++++++++++++++++++++++++++
- 1 file changed, 26 insertions(+)
+ .../bindings/mmc/nvidia,tegra20-sdhci.txt          | 34 ++++++++++++++++++++++
+ 1 file changed, 34 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 363490e..79ecdd0 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -259,11 +259,35 @@ static void tegra_sdhci_configure_cal_pad(struct sdhci_host *host, bool enable)
- 	udelay(1);
- }
+diff --git a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
+index 95010cf..c3d8a15 100644
+--- a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
++++ b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
+@@ -24,6 +24,7 @@ Required properties:
+ Optional properties:
+ - power-gpios : Specify GPIOs for power control
  
-+static bool tegra_sdhci_configure_card_clk(struct sdhci_host *host, bool enable)
-+{
-+	bool orig_enabled;
-+	u32 reg;
-+
-+	reg = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-+	orig_enabled = !!(reg & SDHCI_CLOCK_CARD_EN);
-+
-+	if (orig_enabled == enable)
-+		return orig_enabled;
-+
-+	if (enable)
-+		reg |= SDHCI_CLOCK_CARD_EN;
-+	else
-+		reg &= ~SDHCI_CLOCK_CARD_EN;
-+
-+	sdhci_writew(host, reg, SDHCI_CLOCK_CONTROL);
-+
-+	return orig_enabled;
-+}
-+
- static void tegra_sdhci_pad_autocalib(struct sdhci_host *host)
- {
-+	bool card_clk_enabled;
- 	u32 reg;
- 	int ret;
++Optional properties for Tegra210 and Tegra186:
+ Example:
  
-+	card_clk_enabled = tegra_sdhci_configure_card_clk(host, false);
+ sdhci@c8000200 {
+@@ -47,6 +48,35 @@ Optional properties for Tegra210 and Tegra186:
+   pinctrl-1.
+ - nvidia,only-1-8-v : The presence of this property indicates that the
+   controller operates at a 1.8 V fixed I/O voltage.
++- nvidia,pad-autocal-pull-up-offset-3v3,
++  nvidia,pad-autocal-pull-down-offset-3v3 : Specify drive strength
++  calibration offsets for 3.3 V signaling modes.
++- nvidia,pad-autocal-pull-up-offset-1v8,
++  nvidia,pad-autocal-pull-down-offset-1v8 : Specify drive strength
++  calibration offsets for 1.8 V signaling modes.
++- nvidia,pad-autocal-pull-up-offset-3v3-timeout,
++  nvidia,pad-autocal-pull-down-offset-3v3-timeout : Specify drive
++  strength used as a fallback in case the automatic calibration times
++  out on a 3.3 V signaling mode.
++- nvidia,pad-autocal-pull-up-offset-1v8-timeout,
++  nvidia,pad-autocal-pull-down-offset-1v8-timeout : Specify drive
++  strength used as a fallback in case the automatic calibration times
++  out on a 1.8 V signaling mode.
++- nvidia,pad-autocal-pull-up-offset-sdr104,
++  nvidia,pad-autocal-pull-down-offset-sdr104 : Specify drive strength
++  calibration offsets for SDR104 mode.
++- nvidia,pad-autocal-pull-up-offset-hs400,
++  nvidia,pad-autocal-pull-down-offset-hs400 : Specify drive strength
++  calibration offsets for HS400 mode.
 +
- 	tegra_sdhci_configure_cal_pad(host, true);
++  Notes on the pad calibration pull up and pulldown offset values:
++    - The property values are drive codes which are programmed into the
++      PD_OFFSET and PU_OFFSET sections of the
++      SDHCI_TEGRA_AUTO_CAL_CONFIG register.
++    - A higher value corresponds to higher drive strength. Please refer
++      to the reference manual of the SoC for correct values.
++    - The SDR104 and HS400 timing specific values are used in
++      corresponding modes if specified.
  
- 	reg = sdhci_readl(host, SDHCI_TEGRA_AUTO_CAL_CONFIG);
-@@ -277,6 +301,8 @@ static void tegra_sdhci_pad_autocalib(struct sdhci_host *host)
- 
- 	tegra_sdhci_configure_cal_pad(host, false);
- 
-+	tegra_sdhci_configure_card_clk(host, card_clk_enabled);
-+
- 	if (ret)
- 		dev_err(mmc_dev(host->mmc), "Pad autocal timed out\n");
- }
+ Example:
+ sdhci@700b0000 {
+@@ -60,5 +90,9 @@ sdhci@700b0000 {
+ 	pinctrl-names = "sdmmc-3v3", "sdmmc-1v8";
+ 	pinctrl-0 = <&sdmmc1_3v3>;
+ 	pinctrl-1 = <&sdmmc1_1v8>;
++	pad-autocal-pull-up-offset-3v3 = <0x00>;
++	pad-autocal-pull-down-offset-3v3 = <0x7d>;
++	pad-autocal-pull-up-offset-1v8 = <0x7b>;
++	pad-autocal-pull-down-offset-1v8 = <0x7b>;
+ 	status = "disabled";
+ };
 -- 
 2.7.4
