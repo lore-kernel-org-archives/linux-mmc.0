@@ -1,7 +1,7 @@
 From: Aapo Vienamo <avienamo@nvidia.com>
-Subject: [PATCH v2 01/10] dt-bindings: mmc: tegra: Add pad voltage control properties
-Date: Thu, 26 Jul 2018 15:19:11 +0300
-Message-ID: <1532607560-11253-2-git-send-email-avienamo@nvidia.com>
+Subject: [PATCH v2 02/10] dt-bindings: mmc: tegra: Add nvidia,only-1-8-v property
+Date: Thu, 26 Jul 2018 15:19:12 +0300
+Message-ID: <1532607560-11253-3-git-send-email-avienamo@nvidia.com>
 References: <1532607560-11253-1-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,44 +12,29 @@ To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark
 Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, Aapo Vienamo <avienamo@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Document the pinctrl bindings used by the SDHCI driver to reconfigure
-pad voltages on controllers supporting multiple voltage levels.
+Add a property to mark controllers which operate at a 1.8 V fixed I/O
+voltage.
+
+This feature of the hardware needs to be signaled this way because it
+cannot be probed at runtime or reliably derived from other properties.
 
 Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
-Reviewed-by: Mikko Perttunen <mperttunen@nvidia.com>
 ---
- .../bindings/mmc/nvidia,tegra20-sdhci.txt          | 22 ++++++++++++++++++++++
- 1 file changed, 22 insertions(+)
+ Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt | 2 ++
+ 1 file changed, 2 insertions(+)
 
 diff --git a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-index 9bce578..90c214d 100644
+index 90c214d..95010cf 100644
 --- a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
 +++ b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-@@ -38,3 +38,25 @@ sdhci@c8000200 {
- 	power-gpios = <&gpio 155 0>; /* gpio PT3 */
- 	bus-width = <8>;
- };
-+
-+Optional properties for Tegra210 and Tegra186:
-+- pinctrl-names, pinctrl-0, pinctrl-1 : Specify pad voltage
-+  configurations. Valid pinctrl-names are "sdmmc-3v3" and "sdmmc-1v8"
-+  for controllers supporting multiple voltage levels. The order of names
-+  should correspond to the pin configuration states in pinctrl-0 and
-+  pinctrl-1.
-+
-+Example:
-+sdhci@700b0000 {
-+	compatible = "nvidia,tegra210-sdhci", "nvidia,tegra124-sdhci";
-+	reg = <0x0 0x700b0000 0x0 0x200>;
-+	interrupts = <GIC_SPI 14 IRQ_TYPE_LEVEL_HIGH>;
-+	clocks = <&tegra_car TEGRA210_CLK_SDMMC1>;
-+	clock-names = "sdhci";
-+	resets = <&tegra_car 14>;
-+	reset-names = "sdhci";
-+	pinctrl-names = "sdmmc-3v3", "sdmmc-1v8";
-+	pinctrl-0 = <&sdmmc1_3v3>;
-+	pinctrl-1 = <&sdmmc1_1v8>;
-+	status = "disabled";
-+};
+@@ -45,6 +45,8 @@ Optional properties for Tegra210 and Tegra186:
+   for controllers supporting multiple voltage levels. The order of names
+   should correspond to the pin configuration states in pinctrl-0 and
+   pinctrl-1.
++- nvidia,only-1-8-v : The presence of this property indicates that the
++  controller operates at a 1.8 V fixed I/O voltage.
+ 
+ Example:
+ sdhci@700b0000 {
 -- 
 2.7.4
