@@ -1,72 +1,54 @@
 From: Aapo Vienamo <avienamo@nvidia.com>
-Subject: [PATCH v2 01/10] mmc: tegra: Poll for calibration completion
-Date: Thu, 26 Jul 2018 15:26:47 +0300
-Message-ID: <1532608016-14319-2-git-send-email-avienamo@nvidia.com>
-References: <1532608016-14319-1-git-send-email-avienamo@nvidia.com>
+Subject: [PATCH v2 00/10] Tegra SDHCI update the pad autocal procedure
+Date: Thu, 26 Jul 2018 15:26:46 +0300
+Message-ID: <1532608016-14319-1-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1532608016-14319-1-git-send-email-avienamo@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, Mikko Perttunen <mperttunen@nvidia.com>
 Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, Aapo Vienamo <avienamo@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Implement polling with 10 ms timeout for automatic pad drive strength
-calibration.
+Hi all,
 
-Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
----
- drivers/mmc/host/sdhci-tegra.c | 21 ++++++++++++++++-----
- 1 file changed, 16 insertions(+), 5 deletions(-)
+Update the tegra_sdhci_pad_autocalib() pad drive strength calibration
+procedure to match the ones specified in the TRMs of the more recent
+SoCs. This was tested on Tegra186, Tegra210, and Tegra124, although it
+should not break things older generations either.
 
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 9587365..27b5ef9 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -16,6 +16,7 @@
- #include <linux/err.h>
- #include <linux/module.h>
- #include <linux/init.h>
-+#include <linux/iopoll.h>
- #include <linux/platform_device.h>
- #include <linux/clk.h>
- #include <linux/io.h>
-@@ -49,6 +50,9 @@
- #define SDHCI_AUTO_CAL_START			BIT(31)
- #define SDHCI_AUTO_CAL_ENABLE			BIT(29)
- 
-+#define SDHCI_TEGRA_AUTO_CAL_STATUS		0x1ec
-+#define SDHCI_TEGRA_AUTO_CAL_ACTIVE		BIT(31)
-+
- #define NVQUIRK_FORCE_SDHCI_SPEC_200	BIT(0)
- #define NVQUIRK_ENABLE_BLOCK_GAP_DET	BIT(1)
- #define NVQUIRK_ENABLE_SDHCI_SPEC_300	BIT(2)
-@@ -229,13 +233,20 @@ static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
- 
- static void tegra_sdhci_pad_autocalib(struct sdhci_host *host)
- {
--	u32 val;
-+	u32 reg;
-+	int ret;
-+
-+	reg = sdhci_readl(host, SDHCI_TEGRA_AUTO_CAL_CONFIG);
-+	reg |= SDHCI_AUTO_CAL_ENABLE | SDHCI_AUTO_CAL_START;
-+	sdhci_writel(host, reg, SDHCI_TEGRA_AUTO_CAL_CONFIG);
- 
--	mdelay(1);
-+	/* 10 ms timeout */
-+	ret = readl_poll_timeout(host->ioaddr + SDHCI_TEGRA_AUTO_CAL_STATUS,
-+				 reg, !(reg & SDHCI_TEGRA_AUTO_CAL_ACTIVE),
-+				 1, 10000);
- 
--	val = sdhci_readl(host, SDHCI_TEGRA_AUTO_CAL_CONFIG);
--	val |= SDHCI_AUTO_CAL_ENABLE | SDHCI_AUTO_CAL_START;
--	sdhci_writel(host,val, SDHCI_TEGRA_AUTO_CAL_CONFIG);
-+	if (ret)
-+		dev_err(mmc_dev(host->mmc), "Pad autocal timed out\n");
- }
- 
- static void tegra_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+This series depends on the "Tegra SDHCI enable 1.8 V signaling on
+Tegar210 and Tegra186" series posted earlier.
+
+Changelog:
+v2:
+	- Rename the series
+	- Align the register macros
+	- Use readl_poll_timeout() in tegra_sdhci_pad_autocalib()
+	- Move SDHCI_TEGRA_PAD_E_INPUT_OR_E_PWRD define to correc patch
+	- Use !!(reg & SDHCI_CLOCK_CARD_EN) in
+	  tegra_sdhci_configure_card_clk()
+	- Add "nvidia," prefix to pad drive strength offset dt props
+	- Read the drive strength properties as u32 instead of u8
+	- Disable autocalibration if it times out
+
+Aapo Vienamo (10):
+  mmc: tegra: Poll for calibration completion
+  mmc: tegra: Set calibration pad voltage reference
+  mmc: tegra: Power on the calibration pad
+  mmc: tegra: Disable card clock during pad calibration
+  dt-bindings: Add Tegra SDHCI pad pdpu offset bindings
+  mmc: tegra: Program pad autocal offsets from dt
+  arm64: dts: tegra186: Add sdmmc pad auto calibration offsets
+  arm64: dts: tegra210: Add sdmmc pad auto calibration offsets
+  mmc: tegra: Perform pad calibration after voltage switch
+  mmc: tegra: Enable pad calibration on Tegra210 and Tegra186
+
+ .../bindings/mmc/nvidia,tegra20-sdhci.txt          |  34 +++
+ arch/arm64/boot/dts/nvidia/tegra186.dtsi           |  20 ++
+ arch/arm64/boot/dts/nvidia/tegra210.dtsi           |  12 +
+ drivers/mmc/host/sdhci-tegra.c                     | 280 +++++++++++++++++++--
+ 4 files changed, 319 insertions(+), 27 deletions(-)
+
 -- 
 2.7.4
