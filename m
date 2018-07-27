@@ -1,93 +1,140 @@
-From: "Ernest Zhang(WH)" <ernest.zhang@bayhubtech.com>
-Subject: [PATCH V8 2/5] mmc: sdhci: Change O2 Host HS200 mode clock frequency
- to 200MHz
-Date: Fri, 27 Jul 2018 16:23:40 +0000
-Message-ID: <BYAPR04MB476082C4951D3D7EE47B3881E52A0@BYAPR04MB4760.namprd04.prod.outlook.com>
+From: Dmitry Osipenko <digetx@gmail.com>
+Subject: Re: [PATCH 3/3] mmc: tegra: prevent ACMD23 on Tegra 3
+Date: Fri, 27 Jul 2018 22:52:11 +0300
+Message-ID: <4098188.Bd2NGYzoJE@dimapc>
+References: <20180712073904.4705-1-stefan@agner.ch> <24fffc2c52b58301c37d95fe5d1ad355@agner.ch> <3a970d5d-4f18-0167-ab22-2032e8bf743d@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Language: zh-CN
+In-Reply-To: <3a970d5d-4f18-0167-ab22-2032e8bf743d@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Cc: "Chuanjin Pang (WH)" <chuanjin.pang@bayhubtech.com>, "Mike Li (WH)" <mike.li@bayhubtech.com>, "Chevron Li (WH)" <chevron.li@bayhubtech.com>, "Shirley Her (SC)" <shirley.her@bayhubtech.com>, "Xiaoguang Yu (WH)" <xiaoguang.yu@bayhubtech.com>, "Bobby Wu (WH)" <bobby.wu@bayhubtech.com>
+To: Peter Geis <pgwipeout@gmail.com>
+Cc: Stefan Agner <stefan@agner.ch>, adrian.hunter@intel.com, ulf.hansson@linaro.org, thierry.reding@gmail.com, jonathanh@nvidia.com, marcel.ziswiler@toradex.com, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-tegra-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-TzIgU0QgSG9zdCBIUzIwMCBtb2RlIGNsb2NrIGZyZXF1ZW5jeSBjdXJyZW50IGlzIDIwOE1Ieiwg
-c2hvdWxkIGJlIGNoYW5nZWQgdG8gMjAwTUh6IHRvIG1lZXQgc3BlY2lmaWNhdGlvbi4NCg0KU2ln
-bmVkLW9mZi1ieTogZXJuZXN0LnpoYW5nIDxlcm5lc3QuemhhbmdAYmF5aHVidGVjaC5jb20+DQot
-LS0NCkNoYW5nZSBpbiBWODoNCglUaGUgc2V0IGJhc2UgY2xvY2sgY29kZSBjb21tZW50IGhhcyBi
-ZWVuIGNoYW5nZWQgaW4gYWNjb3JkYW5jZSB3aXRoDQoJY29kZSBjaGFuZ2UgaW4gVjcuDQoNCkNo
-YW5nZSBpbiBWNzoNCglDaGFuZ2UgSFMyMDAgbW9kZSBjbG9jayBmcmVxdWVuY3kgZnJvbSAyMDhN
-SHogdG8gMjAwTUh6IHRvIG1lZXQNCglTcGVjaWZpY2F0aW9uLg0KDQpDaGFuZ2UgaW4gVjF+VjY6
-DQoJTi9BDQotLS0NCiBkcml2ZXJzL21tYy9ob3N0L3NkaGNpLXBjaS1vMm1pY3JvLmMgfCA2ICsr
-Ky0tLQ0KIDEgZmlsZSBjaGFuZ2VkLCAzIGluc2VydGlvbnMoKyksIDMgZGVsZXRpb25zKC0pDQoN
-CmRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLXBjaS1vMm1pY3JvLmMgYi9kcml2
-ZXJzL21tYy9ob3N0L3NkaGNpLXBjaS1vMm1pY3JvLmMNCmluZGV4IGJhNTlkYjZhMTI2Yy4uOWU3
-YmFjZGE0NzE3IDEwMDY0NA0KLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1wY2ktbzJtaWNy
-by5jDQorKysgYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLXBjaS1vMm1pY3JvLmMNCkBAIC0zMTEs
-OSArMzExLDkgQEAgaW50IHNkaGNpX3BjaV9vMl9wcm9iZShzdHJ1Y3Qgc2RoY2lfcGNpX2NoaXAg
-KmNoaXApDQogDQogCQkJLyogQ2hlY2sgV2hldGhlciBzdWJJZCBpcyAweDExIG9yIDB4MTIgKi8N
-CiAJCQlpZiAoKHNjcmF0Y2hfMzIgPT0gMHgxMSkgfHwgKHNjcmF0Y2hfMzIgPT0gMHgxMikpIHsN
-Ci0JCQkJc2NyYXRjaF8zMiA9IDB4MmMyODAwMDA7DQorCQkJCXNjcmF0Y2hfMzIgPSAweDI1MTAw
-MDAwOw0KIA0KLQkJCQkvKiBTZXQgQmFzZSBDbG9jayB0byAyMDhNWiAqLw0KKwkJCQkvKiBTZXQg
-QmFzZSBDbG9jayB0byAyMDBNWiAqLw0KIAkJCQlvMl9wY2lfc2V0X2Jhc2VjbGsoY2hpcCwgc2Ny
-YXRjaF8zMik7DQogCQkJCXJldCA9IHBjaV9yZWFkX2NvbmZpZ19kd29yZChjaGlwLT5wZGV2LA0K
-IAkJCQkJCQkgICAgTzJfU0RfRlVOQ19SRUc0LA0KQEAgLTQwNiw3ICs0MDYsNyBAQCBpbnQgc2Ro
-Y2lfcGNpX28yX3Byb2JlKHN0cnVjdCBzZGhjaV9wY2lfY2hpcCAqY2hpcCkNCiAJCQkJCSAgICAg
-ICBPMl9TRF9QTExfU0VUVElORywgc2NyYXRjaF8zMik7DQogCQl9IGVsc2Ugew0KIAkJCXNjcmF0
-Y2hfMzIgJj0gMHgwMDAwRkZGRjsNCi0JCQlzY3JhdGNoXzMyIHw9IDB4MmMyODAwMDA7DQorCQkJ
-c2NyYXRjaF8zMiB8PSAweDI1MTAwMDAwOw0KIA0KIAkJCXBjaV93cml0ZV9jb25maWdfZHdvcmQo
-Y2hpcC0+cGRldiwNCiAJCQkJCSAgICAgICBPMl9TRF9QTExfU0VUVElORywgc2NyYXRjaF8zMik7
-DQotLQ0KMi4xNy4xDQoNCg0KLS0tLS3pgq7ku7bljp/ku7YtLS0tLQ0K5Y+R5Lu25Lq6OiBBZHJp
-YW4gSHVudGVyIDxhZHJpYW4uaHVudGVyQGludGVsLmNvbT4gDQrlj5HpgIHml7bpl7Q6IEZyaWRh
-eSwgSnVseSAyNywgMjAxOCAyOjU4IFBNDQrmlLbku7bkuro6IEVybmVzdCBaaGFuZyhXSCkgPGVy
-bmVzdC56aGFuZ0BiYXlodWJ0ZWNoLmNvbT47IFVsZiBIYW5zc29uIDx1bGYuaGFuc3NvbkBsaW5h
-cm8ub3JnPjsgbGludXgtbW1jQHZnZXIua2VybmVsLm9yZzsgbGludXgta2VybmVsQHZnZXIua2Vy
-bmVsLm9yZw0K5oqE6YCBOiBDaHVhbmppbiBQYW5nIChXSCkgPGNodWFuamluLnBhbmdAYmF5aHVi
-dGVjaC5jb20+OyBNaWtlIExpIChXSCkgPG1pa2UubGlAYmF5aHVidGVjaC5jb20+OyBDaGV2cm9u
-IExpIChXSCkgPGNoZXZyb24ubGlAYmF5aHVidGVjaC5jb20+OyBTaGlybGV5IEhlciAoU0MpIDxz
-aGlybGV5LmhlckBiYXlodWJ0ZWNoLmNvbT47IFhpYW9ndWFuZyBZdSAoV0gpIDx4aWFvZ3Vhbmcu
-eXVAYmF5aHVidGVjaC5jb20+OyBCb2JieSBXdSAoV0gpIDxib2JieS53dUBiYXlodWJ0ZWNoLmNv
-bT4NCuS4u+mimDogUmU6IFtQQVRDSCBWNyAyLzVdIG1tYzogc2RoY2k6IENoYW5nZSBPMiBIb3N0
-IEhTMjAwIG1vZGUgY2xvY2sgZnJlcXVlbmN5IHRvIDIwME1Ieg0KDQpPbiAyNy8wNy8xOCAwOTo0
-OSwgRXJuZXN0IFpoYW5nKFdIKSB3cm90ZToNCj4gSGkgQWRyaWFuLA0KPiAJRG8gSSBuZWVkIHJl
-LXN1Ym1pdCBhbGwgNSBwYXRjaGVzIGFmdGVyIGZpeCB0aGF0IGFuZCBjaGFuZ2UgdGhlIHZlcnNp
-b24gdG8gdjg/DQoNCllvdSBjYW4gcmVwbHkgdG8gdGhpcyBlbWFpbCB3aXRoIFBBVENIIFY4IDIv
-NSB0aGF0IGhhcyBteSBBY2sgYW5kIHRoZSBjb21tZW50IGZpeGVkLg0KDQo+IEJSDQo+IA0KPiAt
-LS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBBZHJpYW4gSHVudGVyIFttYWlsdG86
-YWRyaWFuLmh1bnRlckBpbnRlbC5jb21dDQo+IFNlbnQ6IDIwMTjlubQ35pyIMjXml6UgMTU6NDUN
-Cj4gVG86IEVybmVzdCBaaGFuZyhXSCk7IFVsZiBIYW5zc29uOyBsaW51eC1tbWNAdmdlci5rZXJu
-ZWwub3JnOyANCj4gbGludXgta2VybmVsQHZnZXIua2VybmVsLm9yZw0KPiBDYzogQ2h1YW5qaW4g
-UGFuZyAoV0gpOyBNaWtlIExpIChXSCk7IENoZXZyb24gTGkgKFdIKTsgU2hpcmxleSBIZXIgDQo+
-IChTQyk7IFhpYW9ndWFuZyBZdSAoV0gpOyBCb2JieSBXdSAoV0gpDQo+IFN1YmplY3Q6IFJlOiBb
-UEFUQ0ggVjcgMi81XSBtbWM6IHNkaGNpOiBDaGFuZ2UgTzIgSG9zdCBIUzIwMCBtb2RlIA0KPiBj
-bG9jayBmcmVxdWVuY3kgdG8gMjAwTUh6DQo+IA0KPiBPbiAxNi8wNy8xOCAwOToyNiwgZXJuZXN0
-LnpoYW5nIHdyb3RlOg0KPj4gTzIgU0QgSG9zdCBIUzIwMCBtb2RlIGNsb2NrIGZyZXF1ZW5jeSBj
-dXJyZW50IGlzIDIwOE1Ieiwgc2hvdWxkIGJlIA0KPj4gY2hhbmdlZCB0byAyMDBNSHogdG8gbWVl
-dCBzcGVjaWZpY2F0aW9uLg0KPj4NCj4+IFNpZ25lZC1vZmYtYnk6IGVybmVzdC56aGFuZyA8ZXJu
-ZXN0LnpoYW5nQGJheWh1YnRlY2guY29tPg0KPiANCj4gWW91IGxlZnQgaW4gdGhlIG1pc2xlYWRp
-bmcgY29tbWVudC4gIEZpeCB0aGF0IGFuZCBhZGQ6DQo+IA0KPiBBY2tlZC1ieTogQWRyaWFuIEh1
-bnRlciA8YWRyaWFuLmh1bnRlckBpbnRlbC5jb20+DQo+IA0KPj4gLS0tDQo+PiBDaGFuZ2UgaW4g
-Vjc6DQo+PiAJQ2hhbmdlIEhTMjAwIG1vZGUgY2xvY2sgZnJlcXVlbmN5IGZyb20gMjA4TUh6IHRv
-IDIwME1IeiB0byBtZWV0DQo+PiAJU3BlY2lmaWNhdGlvbi4NCj4+DQo+PiBDaGFuZ2UgaW4gVjF+
-VjY6DQo+PiAJTi9BDQo+PiAtLS0NCj4+ICBkcml2ZXJzL21tYy9ob3N0L3NkaGNpLXBjaS1vMm1p
-Y3JvLmMgfCA0ICsrLS0NCj4+ICAxIGZpbGUgY2hhbmdlZCwgMiBpbnNlcnRpb25zKCspLCAyIGRl
-bGV0aW9ucygtKQ0KPj4NCj4+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLXBj
-aS1vMm1pY3JvLmMNCj4+IGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1wY2ktbzJtaWNyby5jDQo+
-PiBpbmRleCBiYTU5ZGI2YTEyNmMuLjk0Y2YzY2Q3NWRkMyAxMDA2NDQNCj4+IC0tLSBhL2RyaXZl
-cnMvbW1jL2hvc3Qvc2RoY2ktcGNpLW8ybWljcm8uYw0KPj4gKysrIGIvZHJpdmVycy9tbWMvaG9z
-dC9zZGhjaS1wY2ktbzJtaWNyby5jDQo+PiBAQCAtMzExLDcgKzMxMSw3IEBAIGludCBzZGhjaV9w
-Y2lfbzJfcHJvYmUoc3RydWN0IHNkaGNpX3BjaV9jaGlwDQo+PiAqY2hpcCkNCj4+ICANCj4+ICAJ
-CQkvKiBDaGVjayBXaGV0aGVyIHN1YklkIGlzIDB4MTEgb3IgMHgxMiAqLw0KPj4gIAkJCWlmICgo
-c2NyYXRjaF8zMiA9PSAweDExKSB8fCAoc2NyYXRjaF8zMiA9PSAweDEyKSkgew0KPj4gLQkJCQlz
-Y3JhdGNoXzMyID0gMHgyYzI4MDAwMDsNCj4+ICsJCQkJc2NyYXRjaF8zMiA9IDB4MjUxMDAwMDA7
-DQo+PiAgDQo+PiAgCQkJCS8qIFNldCBCYXNlIENsb2NrIHRvIDIwOE1aICovDQo+IA0KPiBUaGF0
-IGNvbW1lbnQgaXMgbWlzbGVhZGluZyBub3cuDQo+IA0KPj4gIAkJCQlvMl9wY2lfc2V0X2Jhc2Vj
-bGsoY2hpcCwgc2NyYXRjaF8zMik7IEBAIC00MDYsNyArNDA2LDcgQEAgaW50IA0KPj4gc2RoY2lf
-cGNpX28yX3Byb2JlKHN0cnVjdCBzZGhjaV9wY2lfY2hpcCAqY2hpcCkNCj4+ICAJCQkJCSAgICAg
-ICBPMl9TRF9QTExfU0VUVElORywgc2NyYXRjaF8zMik7DQo+PiAgCQl9IGVsc2Ugew0KPj4gIAkJ
-CXNjcmF0Y2hfMzIgJj0gMHgwMDAwRkZGRjsNCj4+IC0JCQlzY3JhdGNoXzMyIHw9IDB4MmMyODAw
-MDA7DQo+PiArCQkJc2NyYXRjaF8zMiB8PSAweDI1MTAwMDAwOw0KPj4gIA0KPj4gIAkJCXBjaV93
-cml0ZV9jb25maWdfZHdvcmQoY2hpcC0+cGRldiwNCj4+ICAJCQkJCSAgICAgICBPMl9TRF9QTExf
-U0VUVElORywgc2NyYXRjaF8zMik7DQo+Pg0KPiANCg0K
+On Thursday, 26 July 2018 20:48:55 MSK Peter Geis wrote:
+> On 07/26/2018 01:36 PM, Stefan Agner wrote:
+> > On 26.07.2018 18:39, Peter Geis wrote:
+> >>>>>> I finally got around to testing this on the Ouya (Tegra 3).
+> >>>>> 
+> >>>>> Thanks for testing!
+> >>>>> 
+> >>>>>> I found that the "Got command interrupt 0x00010000 even though no
+> >>>>>> command operation was in progress." error occurred when the interface
+> >>>>>> is unstable.
+> >>>>>> I've had a lot of problems with sdmmc4 stability on the Ouya above 34
+> >>>>>> Mhz, probably due to the fact that they are using the internal cmd
+> >>>>>> and
+> >>>>>> clock pull-up resistors, against the TRM's instruction.
+> >>>>>> At 39Mhz, I saw the error this patch corrects.
+> >>>>>> With the patch, the error went away, but the interface is still
+> >>>>>> unstable under load.
+> >>>>> 
+> >>>>> How does this instability manifest exactly?
+> >>>> 
+> >>>> At the very edge of stability, you see write errors under heavy load.
+> >>>> As clock rate increases, the write errors occur more frequently.
+> >>>> At a certain point, you start getting read errors.
+> >>>> Following that you get constant io errors during card probing.
+> >>>> Eventually the emmc will fail to initialize, with errors 87 or 110.
+> >>> 
+> >>> What mode are you running at actually? E.g. what is the ios file saying?
+> >>> cat /sys/kernel/debug/mmcX/ios
+> >> 
+> >> This is the best functionality I've been able to get prior to the
+> >> patches:
+> >> root@ouya:~# cat /sys/kernel/debug/mmc0/ios
+> >> clock:          30000000 Hz
+> >> actual clock:   29142858 Hz
+> >> vdd:            21 (3.3 ~ 3.4 V)
+> >> bus mode:       2 (push-pull)
+> >> chip select:    0 (don't care)
+> >> power mode:     2 (on)
+> >> bus width:      3 (8 bits)
+> >> timing spec:    9 (mmc HS200)
+> >> signal voltage: 1 (1.80 V)
+> >> driver type:    0 (driver type B)
+> > 
+> > Yeah HS200 is definilty not supported by the controller and really
+> > should not be used.
+> > 
+> >> Now I am trying DDR, but even with the patches I'm not able to remain
+> >> stable above 17Mhz (34Mhz clock).
+> >> 
+> >> I've also tried just straight mmc-hs mode, but even that makes no
+> >> difference.> 
+> > So you tried timing spec 1 (mmc HS)?
+> > 
+> > How did you exactly enable mmc-hs mode?
+> 
+> cap-mmc-highspeed;
+> 
+> > I suggest to *not set* vqmmc and apply patch 1. It will report that
+> > signaling voltage is 3.3V, but that did not really matter in our case.
+> > This was our baseline and always worked stable on mainline. I also would
+> > use that mode when tweaking pinmux etc...
+> 
+> Will do, thanks.
+> 
+> >>>> I've been tweaking the pull up/down values to try and improve the
+> >>>> stability, but without access to anything but the TRM it's a lot of
+> >>>> trial and error.
+> >>> 
+> >>> Hm, maybe Marcel's recent fixes in our device tree are helpful?
+> >>> https://lkml.org/lkml/2018/7/22/165
+> >>> 
+> >>> Also make sure to have a complete pinmux such that alternative pins for
+> >>> sdmmc4 are *not* muxed as sdmmc4.
+> >> 
+> >> That was my first issue, which was preventing sdmmc4 from working at all.
+> >> Just double checked all of the spare function pins, they are all
+> >> assigned elsewhere.
+> > 
+> > Ok.
+> > 
+> >>>>>> Lowering down to 32Mhz, without the patch there are no errors.
+> >>>>> 
+> >>>>> So the patch does not make it less stable right?
+> >>>> 
+> >>>> No, it did not affect stability.
+> >>>> Although I'd conduct some performance testing to check for degradation.
+> >>>> Of course I'm nowhere near the limits of the controller, so it is
+> >>>> doubtful I'd see a hit.
+> >>> 
+> >>> Ok, and this is with the complete patchset applied correct?
+> >>> 
+> >>> Btw, what device tree are you using? Ouya is not upstream as far as I
+> >>> can tell?
+> >> 
+> >> Indeed, I have the full patchset.
+> >> 
+> >> Ouya is an old android game console that I've been working on getting
+> >> mainline working on.
+> > 
+> > I know, I have one sitting here too. I only tried to tinker a bit at the
+> > very beginning...
+> 
+> It runs Xubuntu very well now with mainline.
+> I've got most everything roughly supported with the exception of audio.
+> 
+> >> I've written most of the device tree, with contributions from Matt
+> >> Merhar.
+> >> It's almost bit for bit a cardhu dev board, but with everything not
+> >> necessary to function removed.
+> >> They cut a lot of corners with the board design.
+> >> Last stable kernel was 3.2, but it ran fine at 52mhz, mind you it
+> >> reported it was running mode 5.
+> > 
+> > That is what we saw too. With Apalis/Colibri T30 L4T downstream kernel
+> > (which is 3.1 with quite some patches) 52MHz DDR worked fine,
+> > surprisingly even with ACMD23. However, speed is slightly slower than
+> > mainline 52MHz without ACMD23...
+> 
+> I noticed the same thing, speed with the original kernel on the MMC was
+> worse at 52Mhz than it was at 34Mhz in HS-200 mode on mainline.
+> I'd be happy with it where it is, but the fact that it worked at 52Mhz
+> before makes me believe something isn't quite there yet.
+> I selected HS-200 mode just to force 1.8v mode.
+
+What's the card model your Ouya's eMMC has?
