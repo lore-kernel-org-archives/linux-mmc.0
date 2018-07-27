@@ -1,181 +1,175 @@
-From: Peter Geis <pgwipeout@gmail.com>
-Subject: Re: [PATCH 3/3] mmc: tegra: prevent ACMD23 on Tegra 3
-Date: Thu, 26 Jul 2018 13:48:55 -0400
-Message-ID: <3a970d5d-4f18-0167-ab22-2032e8bf743d@gmail.com>
-References: <20180712073904.4705-1-stefan@agner.ch>
- <20180712073904.4705-3-stefan@agner.ch>
- <430c718d-9ede-d47a-44c0-b8e47e297720@gmail.com>
- <1553c44e99b96a813af129d1c4169222@agner.ch>
- <553f9ed6-8f7c-775b-d731-fd9732f74b07@gmail.com>
- <7edc8c666dbbc0743221c86286ff583a@agner.ch>
- <12ae1da9-cd09-b15d-9a81-461ca9cc06d7@gmail.com>
- <24fffc2c52b58301c37d95fe5d1ad355@agner.ch>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Subject: [PATCH] mmc: tmio: allow DMA request hook to return error status
+Date: Fri, 27 Jul 2018 10:14:06 +0900
+Message-ID: <1532654046-11901-1-git-send-email-yamada.masahiro@socionext.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <24fffc2c52b58301c37d95fe5d1ad355@agner.ch>
-Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Stefan Agner <stefan@agner.ch>
-Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, thierry.reding@gmail.com, jonathanh@nvidia.com, marcel.ziswiler@toradex.com, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-tegra-owner@vger.kernel.org
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org, Masahiro Yamada <yamada.masahiro@socionext.com>
 List-Id: linux-mmc@vger.kernel.org
 
+dma_request_chan() may return ERR_PTR(-EPROBE_DEFER), but
+tmio_mmc_request_dma() cannot propagate it since it is a
+void function.
 
+Change the return type to int so that the driver can retry
+probing later in case the DMA-engine driver is probed after
+the TMIO MMC driver.
 
-On 07/26/2018 01:36 PM, Stefan Agner wrote:
-> On 26.07.2018 18:39, Peter Geis wrote:
->>>>>> I finally got around to testing this on the Ouya (Tegra 3).
->>>>>
->>>>> Thanks for testing!
->>>>>
->>>>>>
->>>>>> I found that the "Got command interrupt 0x00010000 even though no
->>>>>> command operation was in progress." error occurred when the interface
->>>>>> is unstable.
->>>>>> I've had a lot of problems with sdmmc4 stability on the Ouya above 34
->>>>>> Mhz, probably due to the fact that they are using the internal cmd and
->>>>>> clock pull-up resistors, against the TRM's instruction.
->>>>>> At 39Mhz, I saw the error this patch corrects.
->>>>>> With the patch, the error went away, but the interface is still
->>>>>> unstable under load.
->>>>>
->>>>> How does this instability manifest exactly?
->>>>>
->>>>
->>>> At the very edge of stability, you see write errors under heavy load.
->>>> As clock rate increases, the write errors occur more frequently.
->>>> At a certain point, you start getting read errors.
->>>> Following that you get constant io errors during card probing.
->>>> Eventually the emmc will fail to initialize, with errors 87 or 110.
->>>
->>> What mode are you running at actually? E.g. what is the ios file saying?
->>> cat /sys/kernel/debug/mmcX/ios
->>
->> This is the best functionality I've been able to get prior to the patches:
->> root@ouya:~# cat /sys/kernel/debug/mmc0/ios
->> clock:          30000000 Hz
->> actual clock:   29142858 Hz
->> vdd:            21 (3.3 ~ 3.4 V)
->> bus mode:       2 (push-pull)
->> chip select:    0 (don't care)
->> power mode:     2 (on)
->> bus width:      3 (8 bits)
->> timing spec:    9 (mmc HS200)
->> signal voltage: 1 (1.80 V)
->> driver type:    0 (driver type B)
->>
-> 
-> Yeah HS200 is definilty not supported by the controller and really
-> should not be used.
-> 
->> Now I am trying DDR, but even with the patches I'm not able to remain
->> stable above 17Mhz (34Mhz clock).
->>
->> I've also tried just straight mmc-hs mode, but even that makes no difference.
->>
-> 
-> So you tried timing spec 1 (mmc HS)?
-> 
-> How did you exactly enable mmc-hs mode?
+I moved the call for tmio_mmc_request_dma() up because it may
+fail now.  I also removed unneeded clearing of host->chan_{tx,rx}
+because (struct tmio_mmc_host) is allocated by kzalloc().
 
-cap-mmc-highspeed;
+Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+---
 
-> 
-> I suggest to *not set* vqmmc and apply patch 1. It will report that
-> signaling voltage is 3.3V, but that did not really matter in our case.
-> This was our baseline and always worked stable on mainline. I also would
-> use that mode when tweaking pinmux etc...
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c |  4 +++-
+ drivers/mmc/host/renesas_sdhi_sys_dmac.c      | 14 ++++++++------
+ drivers/mmc/host/tmio_mmc.h                   |  3 +--
+ drivers/mmc/host/tmio_mmc_core.c              | 21 ++++++++++-----------
+ 4 files changed, 22 insertions(+), 20 deletions(-)
 
-Will do, thanks.
-
-> 
->>>
->>>>
->>>> I've been tweaking the pull up/down values to try and improve the
->>>> stability, but without access to anything but the TRM it's a lot of
->>>> trial and error.
->>>>
->>>
->>> Hm, maybe Marcel's recent fixes in our device tree are helpful?
->>> https://lkml.org/lkml/2018/7/22/165
->>>
->>> Also make sure to have a complete pinmux such that alternative pins for
->>> sdmmc4 are *not* muxed as sdmmc4.
->>
->> That was my first issue, which was preventing sdmmc4 from working at all.
->> Just double checked all of the spare function pins, they are all
->> assigned elsewhere.
->>
-> 
-> Ok.
-> 
->>>
->>>>>>
->>>>>> Lowering down to 32Mhz, without the patch there are no errors.
->>>>>
->>>>> So the patch does not make it less stable right?
->>>>>
->>>>
->>>> No, it did not affect stability.
->>>> Although I'd conduct some performance testing to check for degradation.
->>>> Of course I'm nowhere near the limits of the controller, so it is
->>>> doubtful I'd see a hit.
->>>
->>> Ok, and this is with the complete patchset applied correct?
->>>
->>> Btw, what device tree are you using? Ouya is not upstream as far as I
->>> can tell?
->>
->> Indeed, I have the full patchset.
->>
->> Ouya is an old android game console that I've been working on getting
->> mainline working on.
-> 
-> I know, I have one sitting here too. I only tried to tinker a bit at the
-> very beginning...
-
-It runs Xubuntu very well now with mainline.
-I've got most everything roughly supported with the exception of audio.
-
-> 
->> I've written most of the device tree, with contributions from Matt Merhar.
->> It's almost bit for bit a cardhu dev board, but with everything not
->> necessary to function removed.
->> They cut a lot of corners with the board design.
->> Last stable kernel was 3.2, but it ran fine at 52mhz, mind you it
->> reported it was running mode 5.
-> 
-> That is what we saw too. With Apalis/Colibri T30 L4T downstream kernel
-> (which is 3.1 with quite some patches) 52MHz DDR worked fine,
-> surprisingly even with ACMD23. However, speed is slightly slower than
-> mainline 52MHz without ACMD23...
-
-I noticed the same thing, speed with the original kernel on the MMC was 
-worse at 52Mhz than it was at 34Mhz in HS-200 mode on mainline.
-I'd be happy with it where it is, but the fact that it worked at 52Mhz 
-before makes me believe something isn't quite there yet.
-I selected HS-200 mode just to force 1.8v mode.
-
-> 
-> --
-> Stefan
-> 
->>
->> To get this speed, I have the pins all driven down at 4, and up at 24.
->> Default is 2 down and 18 up from driver init.
->> The pin pull ups are exactly as the original kernel, all pins pulled
->> up except reset, which is pulled down.
->>
->>>
->>> --
->>> Stefan
->>>
->>>>
->>>>> --
->>>>> Stefan
->>>>>
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe linux-tegra" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+index d032bd6..f3475a5 100644
+--- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
++++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+@@ -230,7 +230,7 @@ static void renesas_sdhi_internal_dmac_complete_tasklet_fn(unsigned long arg)
+ 	spin_unlock_irq(&host->lock);
+ }
+ 
+-static void
++static int
+ renesas_sdhi_internal_dmac_request_dma(struct tmio_mmc_host *host,
+ 				       struct tmio_mmc_data *pdata)
+ {
+@@ -245,6 +245,8 @@ renesas_sdhi_internal_dmac_request_dma(struct tmio_mmc_host *host,
+ 	tasklet_init(&host->dma_issue,
+ 		     renesas_sdhi_internal_dmac_issue_tasklet_fn,
+ 		     (unsigned long)host);
++
++	return 0;
+ }
+ 
+ static void
+diff --git a/drivers/mmc/host/renesas_sdhi_sys_dmac.c b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+index 4bb46c4..3f806f5 100644
+--- a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
++++ b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+@@ -359,15 +359,15 @@ static void renesas_sdhi_sys_dmac_issue_tasklet_fn(unsigned long priv)
+ 		dma_async_issue_pending(chan);
+ }
+ 
+-static void renesas_sdhi_sys_dmac_request_dma(struct tmio_mmc_host *host,
+-					      struct tmio_mmc_data *pdata)
++static int renesas_sdhi_sys_dmac_request_dma(struct tmio_mmc_host *host,
++					     struct tmio_mmc_data *pdata)
+ {
+ 	struct renesas_sdhi *priv = host_to_priv(host);
+ 
+ 	/* We can only either use DMA for both Tx and Rx or not use it at all */
+ 	if (!host->pdev->dev.of_node &&
+ 	    (!pdata->chan_priv_tx || !pdata->chan_priv_rx))
+-		return;
++		return 0;
+ 
+ 	if (!host->chan_tx && !host->chan_rx) {
+ 		struct resource *res = platform_get_resource(host->pdev,
+@@ -377,7 +377,7 @@ static void renesas_sdhi_sys_dmac_request_dma(struct tmio_mmc_host *host,
+ 		int ret;
+ 
+ 		if (!res)
+-			return;
++			return 0;
+ 
+ 		dma_cap_zero(mask);
+ 		dma_cap_set(DMA_SLAVE, mask);
+@@ -389,7 +389,7 @@ static void renesas_sdhi_sys_dmac_request_dma(struct tmio_mmc_host *host,
+ 			host->chan_tx);
+ 
+ 		if (!host->chan_tx)
+-			return;
++			return 0;
+ 
+ 		cfg.direction = DMA_MEM_TO_DEV;
+ 		cfg.dst_addr = res->start +
+@@ -433,7 +433,7 @@ static void renesas_sdhi_sys_dmac_request_dma(struct tmio_mmc_host *host,
+ 
+ 	renesas_sdhi_sys_dmac_enable_dma(host, true);
+ 
+-	return;
++	return 0;
+ 
+ ebouncebuf:
+ ecfgrx:
+@@ -443,6 +443,8 @@ static void renesas_sdhi_sys_dmac_request_dma(struct tmio_mmc_host *host,
+ ecfgtx:
+ 	dma_release_channel(host->chan_tx);
+ 	host->chan_tx = NULL;
++
++	return 0;
+ }
+ 
+ static void renesas_sdhi_sys_dmac_release_dma(struct tmio_mmc_host *host)
+diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+index e7d6513..d8383d4 100644
+--- a/drivers/mmc/host/tmio_mmc.h
++++ b/drivers/mmc/host/tmio_mmc.h
+@@ -115,8 +115,7 @@ struct tmio_mmc_host;
+ struct tmio_mmc_dma_ops {
+ 	void (*start)(struct tmio_mmc_host *host, struct mmc_data *data);
+ 	void (*enable)(struct tmio_mmc_host *host, bool enable);
+-	void (*request)(struct tmio_mmc_host *host,
+-			struct tmio_mmc_data *pdata);
++	int (*request)(struct tmio_mmc_host *host, struct tmio_mmc_data *pdata);
+ 	void (*release)(struct tmio_mmc_host *host);
+ 	void (*abort)(struct tmio_mmc_host *host);
+ 	void (*dataend)(struct tmio_mmc_host *host);
+diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+index 3cb554c..09c2d0c 100644
+--- a/drivers/mmc/host/tmio_mmc_core.c
++++ b/drivers/mmc/host/tmio_mmc_core.c
+@@ -65,15 +65,13 @@ static inline void tmio_mmc_enable_dma(struct tmio_mmc_host *host, bool enable)
+ 		host->dma_ops->enable(host, enable);
+ }
+ 
+-static inline void tmio_mmc_request_dma(struct tmio_mmc_host *host,
+-					struct tmio_mmc_data *pdata)
++static inline int tmio_mmc_request_dma(struct tmio_mmc_host *host,
++				       struct tmio_mmc_data *pdata)
+ {
+-	if (host->dma_ops) {
+-		host->dma_ops->request(host, pdata);
+-	} else {
+-		host->chan_tx = NULL;
+-		host->chan_rx = NULL;
+-	}
++	if (host->dma_ops)
++		return host->dma_ops->request(host, pdata);
++
++	return 0;
+ }
+ 
+ static inline void tmio_mmc_release_dma(struct tmio_mmc_host *host)
+@@ -1218,6 +1216,10 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host)
+ 			return ret;
+ 	}
+ 
++	ret = tmio_mmc_request_dma(_host, pdata);
++	if (ret)
++		return ret;
++
+ 	mmc->caps |= MMC_CAP_4_BIT_DATA | pdata->capabilities;
+ 	mmc->caps2 |= pdata->capabilities2;
+ 	mmc->max_segs = pdata->max_segs ? : 32;
+@@ -1286,9 +1288,6 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host)
+ 	INIT_DELAYED_WORK(&_host->delayed_reset_work, tmio_mmc_reset_work);
+ 	INIT_WORK(&_host->done, tmio_mmc_done_work);
+ 
+-	/* See if we also get DMA */
+-	tmio_mmc_request_dma(_host, pdata);
+-
+ 	pm_runtime_set_active(&pdev->dev);
+ 	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
+ 	pm_runtime_use_autosuspend(&pdev->dev);
+-- 
+2.7.4
