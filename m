@@ -1,55 +1,86 @@
-From: "Ernest Zhang(WH)" <ernest.zhang@bayhubtech.com>
-Subject: RE: [PATCH V7 2/5] mmc: sdhci: Change O2 Host HS200 mode clock
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V7 2/5] mmc: sdhci: Change O2 Host HS200 mode clock
  frequency to 200MHz
-Date: Fri, 27 Jul 2018 06:49:59 +0000
-Message-ID: <BYAPR04MB4760BF8783C0E58A75D00F25E52A0@BYAPR04MB4760.namprd04.prod.outlook.com>
+Date: Fri, 27 Jul 2018 09:58:27 +0300
+Message-ID: <a56c0e30-cf71-5294-bc3a-1179808bd85b@intel.com>
 References: <20180716062655.24703-1-ernest.zhang@bayhubtech.com>
  <20180716062655.24703-2-ernest.zhang@bayhubtech.com>
  <06a9dcec-846e-495c-4519-4af13549fe0e@intel.com>
+ <BYAPR04MB4760BF8783C0E58A75D00F25E52A0@BYAPR04MB4760.namprd04.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <06a9dcec-846e-495c-4519-4af13549fe0e@intel.com>
+In-Reply-To: <BYAPR04MB4760BF8783C0E58A75D00F25E52A0@BYAPR04MB4760.namprd04.prod.outlook.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: "Ernest Zhang(WH)" <ernest.zhang@bayhubtech.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 Cc: "Chuanjin Pang (WH)" <chuanjin.pang@bayhubtech.com>, "Mike Li (WH)" <mike.li@bayhubtech.com>, "Chevron Li (WH)" <chevron.li@bayhubtech.com>, "Shirley Her (SC)" <shirley.her@bayhubtech.com>, "Xiaoguang Yu (WH)" <xiaoguang.yu@bayhubtech.com>, "Bobby Wu (WH)" <bobby.wu@bayhubtech.com>
 List-Id: linux-mmc@vger.kernel.org
 
-SGkgQWRyaWFuLA0KCURvIEkgbmVlZCByZS1zdWJtaXQgYWxsIDUgcGF0Y2hlcyBhZnRlciBmaXgg
-dGhhdCBhbmQgY2hhbmdlIHRoZSB2ZXJzaW9uIHRvIHY4Pw0KQlINCg0KLS0tLS1PcmlnaW5hbCBN
-ZXNzYWdlLS0tLS0NCkZyb206IEFkcmlhbiBIdW50ZXIgW21haWx0bzphZHJpYW4uaHVudGVyQGlu
-dGVsLmNvbV0gDQpTZW50OiAyMDE45bm0N+aciDI15pelIDE1OjQ1DQpUbzogRXJuZXN0IFpoYW5n
-KFdIKTsgVWxmIEhhbnNzb247IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc7IGxpbnV4LWtlcm5l
-bEB2Z2VyLmtlcm5lbC5vcmcNCkNjOiBDaHVhbmppbiBQYW5nIChXSCk7IE1pa2UgTGkgKFdIKTsg
-Q2hldnJvbiBMaSAoV0gpOyBTaGlybGV5IEhlciAoU0MpOyBYaWFvZ3VhbmcgWXUgKFdIKTsgQm9i
-YnkgV3UgKFdIKQ0KU3ViamVjdDogUmU6IFtQQVRDSCBWNyAyLzVdIG1tYzogc2RoY2k6IENoYW5n
-ZSBPMiBIb3N0IEhTMjAwIG1vZGUgY2xvY2sgZnJlcXVlbmN5IHRvIDIwME1Ieg0KDQpPbiAxNi8w
-Ny8xOCAwOToyNiwgZXJuZXN0LnpoYW5nIHdyb3RlOg0KPiBPMiBTRCBIb3N0IEhTMjAwIG1vZGUg
-Y2xvY2sgZnJlcXVlbmN5IGN1cnJlbnQgaXMgMjA4TUh6LCBzaG91bGQgYmUgDQo+IGNoYW5nZWQg
-dG8gMjAwTUh6IHRvIG1lZXQgc3BlY2lmaWNhdGlvbi4NCj4gDQo+IFNpZ25lZC1vZmYtYnk6IGVy
-bmVzdC56aGFuZyA8ZXJuZXN0LnpoYW5nQGJheWh1YnRlY2guY29tPg0KDQpZb3UgbGVmdCBpbiB0
-aGUgbWlzbGVhZGluZyBjb21tZW50LiAgRml4IHRoYXQgYW5kIGFkZDoNCg0KQWNrZWQtYnk6IEFk
-cmlhbiBIdW50ZXIgPGFkcmlhbi5odW50ZXJAaW50ZWwuY29tPg0KDQo+IC0tLQ0KPiBDaGFuZ2Ug
-aW4gVjc6DQo+IAlDaGFuZ2UgSFMyMDAgbW9kZSBjbG9jayBmcmVxdWVuY3kgZnJvbSAyMDhNSHog
-dG8gMjAwTUh6IHRvIG1lZXQNCj4gCVNwZWNpZmljYXRpb24uDQo+IA0KPiBDaGFuZ2UgaW4gVjF+
-VjY6DQo+IAlOL0ENCj4gLS0tDQo+ICBkcml2ZXJzL21tYy9ob3N0L3NkaGNpLXBjaS1vMm1pY3Jv
-LmMgfCA0ICsrLS0NCj4gIDEgZmlsZSBjaGFuZ2VkLCAyIGluc2VydGlvbnMoKyksIDIgZGVsZXRp
-b25zKC0pDQo+IA0KPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1wY2ktbzJt
-aWNyby5jIA0KPiBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktcGNpLW8ybWljcm8uYw0KPiBpbmRl
-eCBiYTU5ZGI2YTEyNmMuLjk0Y2YzY2Q3NWRkMyAxMDA2NDQNCj4gLS0tIGEvZHJpdmVycy9tbWMv
-aG9zdC9zZGhjaS1wY2ktbzJtaWNyby5jDQo+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kt
-cGNpLW8ybWljcm8uYw0KPiBAQCAtMzExLDcgKzMxMSw3IEBAIGludCBzZGhjaV9wY2lfbzJfcHJv
-YmUoc3RydWN0IHNkaGNpX3BjaV9jaGlwIA0KPiAqY2hpcCkNCj4gIA0KPiAgCQkJLyogQ2hlY2sg
-V2hldGhlciBzdWJJZCBpcyAweDExIG9yIDB4MTIgKi8NCj4gIAkJCWlmICgoc2NyYXRjaF8zMiA9
-PSAweDExKSB8fCAoc2NyYXRjaF8zMiA9PSAweDEyKSkgew0KPiAtCQkJCXNjcmF0Y2hfMzIgPSAw
-eDJjMjgwMDAwOw0KPiArCQkJCXNjcmF0Y2hfMzIgPSAweDI1MTAwMDAwOw0KPiAgDQo+ICAJCQkJ
-LyogU2V0IEJhc2UgQ2xvY2sgdG8gMjA4TVogKi8NCg0KVGhhdCBjb21tZW50IGlzIG1pc2xlYWRp
-bmcgbm93Lg0KDQo+ICAJCQkJbzJfcGNpX3NldF9iYXNlY2xrKGNoaXAsIHNjcmF0Y2hfMzIpOyBA
-QCAtNDA2LDcgKzQwNiw3IEBAIGludCANCj4gc2RoY2lfcGNpX28yX3Byb2JlKHN0cnVjdCBzZGhj
-aV9wY2lfY2hpcCAqY2hpcCkNCj4gIAkJCQkJICAgICAgIE8yX1NEX1BMTF9TRVRUSU5HLCBzY3Jh
-dGNoXzMyKTsNCj4gIAkJfSBlbHNlIHsNCj4gIAkJCXNjcmF0Y2hfMzIgJj0gMHgwMDAwRkZGRjsN
-Cj4gLQkJCXNjcmF0Y2hfMzIgfD0gMHgyYzI4MDAwMDsNCj4gKwkJCXNjcmF0Y2hfMzIgfD0gMHgy
-NTEwMDAwMDsNCj4gIA0KPiAgCQkJcGNpX3dyaXRlX2NvbmZpZ19kd29yZChjaGlwLT5wZGV2LA0K
-PiAgCQkJCQkgICAgICAgTzJfU0RfUExMX1NFVFRJTkcsIHNjcmF0Y2hfMzIpOw0KPiANCg0K
+On 27/07/18 09:49, Ernest Zhang(WH) wrote:
+> Hi Adrian,
+> 	Do I need re-submit all 5 patches after fix that and change the version to v8?
+
+You can reply to this email with PATCH V8 2/5 that has my Ack and the
+comment fixed.
+
+> BR
+> 
+> -----Original Message-----
+> From: Adrian Hunter [mailto:adrian.hunter@intel.com] 
+> Sent: 2018年7月25日 15:45
+> To: Ernest Zhang(WH); Ulf Hansson; linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org
+> Cc: Chuanjin Pang (WH); Mike Li (WH); Chevron Li (WH); Shirley Her (SC); Xiaoguang Yu (WH); Bobby Wu (WH)
+> Subject: Re: [PATCH V7 2/5] mmc: sdhci: Change O2 Host HS200 mode clock frequency to 200MHz
+> 
+> On 16/07/18 09:26, ernest.zhang wrote:
+>> O2 SD Host HS200 mode clock frequency current is 208MHz, should be 
+>> changed to 200MHz to meet specification.
+>>
+>> Signed-off-by: ernest.zhang <ernest.zhang@bayhubtech.com>
+> 
+> You left in the misleading comment.  Fix that and add:
+> 
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> 
+>> ---
+>> Change in V7:
+>> 	Change HS200 mode clock frequency from 208MHz to 200MHz to meet
+>> 	Specification.
+>>
+>> Change in V1~V6:
+>> 	N/A
+>> ---
+>>  drivers/mmc/host/sdhci-pci-o2micro.c | 4 ++--
+>>  1 file changed, 2 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c 
+>> b/drivers/mmc/host/sdhci-pci-o2micro.c
+>> index ba59db6a126c..94cf3cd75dd3 100644
+>> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
+>> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+>> @@ -311,7 +311,7 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip 
+>> *chip)
+>>  
+>>  			/* Check Whether subId is 0x11 or 0x12 */
+>>  			if ((scratch_32 == 0x11) || (scratch_32 == 0x12)) {
+>> -				scratch_32 = 0x2c280000;
+>> +				scratch_32 = 0x25100000;
+>>  
+>>  				/* Set Base Clock to 208MZ */
+> 
+> That comment is misleading now.
+> 
+>>  				o2_pci_set_baseclk(chip, scratch_32); @@ -406,7 +406,7 @@ int 
+>> sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
+>>  					       O2_SD_PLL_SETTING, scratch_32);
+>>  		} else {
+>>  			scratch_32 &= 0x0000FFFF;
+>> -			scratch_32 |= 0x2c280000;
+>> +			scratch_32 |= 0x25100000;
+>>  
+>>  			pci_write_config_dword(chip->pdev,
+>>  					       O2_SD_PLL_SETTING, scratch_32);
+>>
+> 
