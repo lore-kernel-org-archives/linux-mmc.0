@@ -1,273 +1,352 @@
-From: Aapo Vienamo <avienamo@nvidia.com>
-Subject: Re: [PATCH v2 03/10] mmc: tegra: Reconfigure pad voltages during
- voltage switching
-Date: Fri, 27 Jul 2018 11:44:42 +0300
-Message-ID: <20180727114442.44de2672@dhcp-10-21-25-168>
-References: <1532607560-11253-1-git-send-email-avienamo@nvidia.com>
-        <1532607560-11253-4-git-send-email-avienamo@nvidia.com>
-        <2f0684610c182fd007a152a903994d62@agner.ch>
+From: Srinath Mannam <srinath.mannam@broadcom.com>
+Subject: Re: [PATCH] mmc: host: iproc: Add ACPI support to IPROC SDHCI
+Date: Fri, 27 Jul 2018 14:29:47 +0530
+Message-ID: <CABe79T6w11k_=OVf=LdTmGNS+sQcueL_fqp9ipi_zNyHgXVxsQ@mail.gmail.com>
+References: <1531845907-26213-1-git-send-email-srinath.mannam@broadcom.com> <b8bc96ee-e035-7a51-499f-b16dc3c7edd0@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <2f0684610c182fd007a152a903994d62@agner.ch>
+In-Reply-To: <b8bc96ee-e035-7a51-499f-b16dc3c7edd0@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Stefan Agner <stefan@agner.ch>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, Mikko Perttunen <mperttunen@nvidia.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-tegra-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Jon Mason <jonmason@broadcom.com>, BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>, linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 26 Jul 2018 15:33:11 +0200
-Stefan Agner <stefan@agner.ch> wrote:
+Hi Adrian Hunter,
 
-> On 26.07.2018 14:19, Aapo Vienamo wrote:
-> > Parse the pinctrl state and nvidia,only-1-8-v properties from the device
-> > tree and implement pad voltage state reconfiguration in the mmc
-> > start_signal_voltage_switch() callback. Validate the pinctrl and
-> > regulator configuration before unmasking UHS modes. Add
-> > NVQUIRK_NEEDS_PAD_CONTROL and add set it for Tegra210 and Tegra186.
-> > 
-> > The pad configuration is done in the mmc callback because the order of
-> > pad reconfiguration and sdhci voltage switch depend on the voltage to
-> > which the transition occurs.
-> > 
-> > Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
-> > ---
-> >  drivers/mmc/host/sdhci-tegra.c | 140 +++++++++++++++++++++++++++++++++++++----
-> >  1 file changed, 127 insertions(+), 13 deletions(-)
-> > 
-> > diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> > index ddf00166..9587365 100644
-> > --- a/drivers/mmc/host/sdhci-tegra.c
-> > +++ b/drivers/mmc/host/sdhci-tegra.c
-> > @@ -21,6 +21,7 @@
-> >  #include <linux/io.h>
-> >  #include <linux/of.h>
-> >  #include <linux/of_device.h>
-> > +#include <linux/pinctrl/consumer.h>
-> >  #include <linux/reset.h>
-> >  #include <linux/mmc/card.h>
-> >  #include <linux/mmc/host.h>
-> > @@ -55,6 +56,7 @@
-> >  #define NVQUIRK_ENABLE_SDR104		BIT(4)
-> >  #define NVQUIRK_ENABLE_DDR50		BIT(5)
-> >  #define NVQUIRK_HAS_PADCALIB		BIT(6)
-> > +#define NVQUIRK_NEEDS_PAD_CONTROL	BIT(7)
-> >  
-> >  struct sdhci_tegra_soc_data {
-> >  	const struct sdhci_pltfm_data *pdata;
-> > @@ -66,8 +68,13 @@ struct sdhci_tegra {
-> >  	struct gpio_desc *power_gpio;
-> >  	bool ddr_signaling;
-> >  	bool pad_calib_required;
-> > +	bool pad_control_available;
-> > +	bool only_1v8;
-> >  
-> >  	struct reset_control *rst;
-> > +	struct pinctrl *pinctrl_sdmmc;
-> > +	struct pinctrl_state *pinctrl_state_3v3;
-> > +	struct pinctrl_state *pinctrl_state_1v8;
-> >  };
-> >  
-> >  static u16 tegra_sdhci_readw(struct sdhci_host *host, int reg)
-> > @@ -138,12 +145,47 @@ static unsigned int tegra_sdhci_get_ro(struct
-> > sdhci_host *host)
-> >  	return mmc_gpio_get_ro(host->mmc);
-> >  }
-> >  
-> > +static bool tegra_sdhci_is_uhs_valid(struct sdhci_host *host)
-> > +{
-> > +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > +	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
-> > +	const struct sdhci_tegra_soc_data *soc_data = tegra_host->soc_data;
-> > +
-> > +	/*
-> > +	 * The 1.8 V only host controllers don't need to have configurable
-> > +	 * regulators and pad voltages. In this case the UHS modes can be
-> > +	 * enabled regardless.
-> > +	 */
-> > +	if (tegra_host->only_1v8)
-> > +		return true;  
-> 
-> Hm, SD always needs 3.3V capabilities, not?
+Thank you very much for review and feedback.
+Please find my comments inline..
 
-Yes, the controllers used for eMMCs should have the only_1v8 property
-set and they exit the function here. With controllers used for SD cards,
-the regulator and pad configurations are verified later in the function.
+On Fri, Jul 27, 2018 at 11:50 AM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 17/07/18 19:45, Srinath Mannam wrote:
+>> Add ACPI support to all IPROC SDHCI varients
+>>
+>> Signed-off-by: Srinath Mannam <srinath.mannam@broadcom.com>
+>> Reviewed-by: Ray Jui <ray.jui@broadcom.com>
+>> Reviewed-by: Scott Branden <scott.branden@broadcom.com>
+>> Reviewed-by: Vladimir Olovyannikov <vladimir.olovyannikov@broadcom.com>
+>> ---
+>>  drivers/mmc/host/Kconfig       |   1 +
+>>  drivers/mmc/host/sdhci-iproc.c | 187 ++++++++++++++++++++++++++++-------------
+>>  2 files changed, 128 insertions(+), 60 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+>> index 0581c19..bc6702e 100644
+>> --- a/drivers/mmc/host/Kconfig
+>> +++ b/drivers/mmc/host/Kconfig
+>> @@ -334,6 +334,7 @@ config MMC_SDHCI_IPROC
+>>       tristate "SDHCI support for the BCM2835 & iProc SD/MMC Controller"
+>>       depends on ARCH_BCM2835 || ARCH_BCM_IPROC || COMPILE_TEST
+>>       depends on MMC_SDHCI_PLTFM
+>> +     depends on OF || ACPI
+>>       default ARCH_BCM_IPROC
+>>       select MMC_SDHCI_IO_ACCESSORS
+>>       help
+>> diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
+>> index d0e83db..7c5c923 100644
+>> --- a/drivers/mmc/host/sdhci-iproc.c
+>> +++ b/drivers/mmc/host/sdhci-iproc.c
+>> @@ -15,6 +15,7 @@
+>>   * iProc SDHCI platform driver
+>>   */
+>>
+>> +#include <linux/acpi.h>
+>>  #include <linux/delay.h>
+>>  #include <linux/module.h>
+>>  #include <linux/mmc/host.h>
+>> @@ -162,9 +163,19 @@ static void sdhci_iproc_writeb(struct sdhci_host *host, u8 val, int reg)
+>>       sdhci_iproc_writel(host, newval, reg & ~3);
+>>  }
+>>
+>> +static unsigned int sdhci_iproc_get_max_clock(struct sdhci_host *host)
+>> +{
+>> +     struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>> +
+>> +     if (pltfm_host->clk)
+>> +             return sdhci_pltfm_clk_get_max_clock(host);
+>> +     else
+>> +             return pltfm_host->clock;
+>> +}
+>> +
+>>  static const struct sdhci_ops sdhci_iproc_ops = {
+>>       .set_clock = sdhci_set_clock,
+>> -     .get_max_clock = sdhci_pltfm_clk_get_max_clock,
+>> +     .get_max_clock = sdhci_iproc_get_max_clock,
+>>       .set_bus_width = sdhci_set_bus_width,
+>>       .reset = sdhci_reset,
+>>       .set_uhs_signaling = sdhci_set_uhs_signaling,
+>> @@ -178,34 +189,24 @@ static const struct sdhci_ops sdhci_iproc_32only_ops = {
+>>       .write_w = sdhci_iproc_writew,
+>>       .write_b = sdhci_iproc_writeb,
+>>       .set_clock = sdhci_set_clock,
+>> -     .get_max_clock = sdhci_pltfm_clk_get_max_clock,
+>> +     .get_max_clock = sdhci_iproc_get_max_clock,
+>>       .set_bus_width = sdhci_set_bus_width,
+>>       .reset = sdhci_reset,
+>>       .set_uhs_signaling = sdhci_set_uhs_signaling,
+>>  };
+>>
+>> +enum sdhci_pltfm_type {
+>> +     SDHCI_PLTFM_IPROC_CYGNUS,
+>> +     SDHCI_PLTFM_IPROC,
+>> +     SDHCI_PLTFM_BCM2835,
+>> +};
+>> +
+>>  static const struct sdhci_pltfm_data sdhci_iproc_cygnus_pltfm_data = {
+>>       .quirks = SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK,
+>>       .quirks2 = SDHCI_QUIRK2_ACMD23_BROKEN | SDHCI_QUIRK2_HOST_OFF_CARD_ON,
+>>       .ops = &sdhci_iproc_32only_ops,
+>>  };
+>>
+>> -static const struct sdhci_iproc_data iproc_cygnus_data = {
+>> -     .pdata = &sdhci_iproc_cygnus_pltfm_data,
+>> -     .caps = ((0x1 << SDHCI_MAX_BLOCK_SHIFT)
+>> -                     & SDHCI_MAX_BLOCK_MASK) |
+>> -             SDHCI_CAN_VDD_330 |
+>> -             SDHCI_CAN_VDD_180 |
+>> -             SDHCI_CAN_DO_SUSPEND |
+>> -             SDHCI_CAN_DO_HISPD |
+>> -             SDHCI_CAN_DO_ADMA2 |
+>> -             SDHCI_CAN_DO_SDMA,
+>> -     .caps1 = SDHCI_DRIVER_TYPE_C |
+>> -              SDHCI_DRIVER_TYPE_D |
+>> -              SDHCI_SUPPORT_DDR50,
+>> -     .mmc_caps = MMC_CAP_1_8V_DDR,
+>> -};
+>> -
+>>  static const struct sdhci_pltfm_data sdhci_iproc_pltfm_data = {
+>>       .quirks = SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
+>>                 SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12,
+>> @@ -213,21 +214,6 @@ static const struct sdhci_pltfm_data sdhci_iproc_pltfm_data = {
+>>       .ops = &sdhci_iproc_ops,
+>>  };
+>>
+>> -static const struct sdhci_iproc_data iproc_data = {
+>> -     .pdata = &sdhci_iproc_pltfm_data,
+>> -     .caps = ((0x1 << SDHCI_MAX_BLOCK_SHIFT)
+>> -                     & SDHCI_MAX_BLOCK_MASK) |
+>> -             SDHCI_CAN_VDD_330 |
+>> -             SDHCI_CAN_VDD_180 |
+>> -             SDHCI_CAN_DO_SUSPEND |
+>> -             SDHCI_CAN_DO_HISPD |
+>> -             SDHCI_CAN_DO_ADMA2 |
+>> -             SDHCI_CAN_DO_SDMA,
+>> -     .caps1 = SDHCI_DRIVER_TYPE_C |
+>> -              SDHCI_DRIVER_TYPE_D |
+>> -              SDHCI_SUPPORT_DDR50,
+>> -};
+>> -
+>>  static const struct sdhci_pltfm_data sdhci_bcm2835_pltfm_data = {
+>>       .quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
+>>                 SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
+>> @@ -237,38 +223,104 @@ static const struct sdhci_pltfm_data sdhci_bcm2835_pltfm_data = {
+>>       .ops = &sdhci_iproc_32only_ops,
+>>  };
+>>
+>> -static const struct sdhci_iproc_data bcm2835_data = {
+>> -     .pdata = &sdhci_bcm2835_pltfm_data,
+>> -     .caps = ((0x1 << SDHCI_MAX_BLOCK_SHIFT)
+>> -                     & SDHCI_MAX_BLOCK_MASK) |
+>> -             SDHCI_CAN_VDD_330 |
+>> -             SDHCI_CAN_DO_HISPD,
+>> -     .caps1 = SDHCI_DRIVER_TYPE_A |
+>> -              SDHCI_DRIVER_TYPE_C,
+>> -     .mmc_caps = 0x00000000,
+>> +static const struct sdhci_iproc_data sdhci_iproc_data_list[] = {
+>
+> Why change to an array?  Also would need to be a separate patch.
+In the existing device tree support, data parameter of of_device_id
+list contains pointers of "sdhci_iproc_data" structure.
+But driver_data parameter in acpi_device_id list is ulong. so we can't
+assign "sdhci_iproc_data" structure pointer which can be 64bit.
+Hence, it is required to take array of "sdhci_iproc_data" structures,
+so that array index can assign to both data and driver_data
+parameters of of_device_id and acpi_device_id lists respectively. same
+pattern found in some other drivers.
+This method is required to use in the part of adding ACPI support. so
+I keep in single patch.
 
-> So if the controller is 1.8V only, then only eMMC modes are allowed.
-> 
-> You can use MMC_CAP2_HSX00_1_8V in caps2.
+>
+>> +     [SDHCI_PLTFM_IPROC_CYGNUS] = {
+>> +             /* SDHCI IPROC CYGNUS */
+>> +             .pdata = &sdhci_iproc_cygnus_pltfm_data,
+>> +             .caps = ((0x1 << SDHCI_MAX_BLOCK_SHIFT)
+>> +                             & SDHCI_MAX_BLOCK_MASK) |
+>> +                     SDHCI_CAN_VDD_330 |
+>> +                     SDHCI_CAN_VDD_180 |
+>> +                     SDHCI_CAN_DO_SUSPEND |
+>> +                     SDHCI_CAN_DO_HISPD |
+>> +                     SDHCI_CAN_DO_ADMA2 |
+>> +                     SDHCI_CAN_DO_SDMA,
+>> +             .caps1 = SDHCI_DRIVER_TYPE_C |
+>> +                     SDHCI_DRIVER_TYPE_D |
+>> +                     SDHCI_SUPPORT_DDR50,
+>> +             .mmc_caps = MMC_CAP_1_8V_DDR,
+>> +     },
+>> +     [SDHCI_PLTFM_IPROC] = {
+>> +             /* SDHCI IPROC */
+>> +             .pdata = &sdhci_iproc_pltfm_data,
+>> +             .caps = ((0x1 << SDHCI_MAX_BLOCK_SHIFT)
+>> +                             & SDHCI_MAX_BLOCK_MASK) |
+>> +                     SDHCI_CAN_VDD_330 |
+>> +                     SDHCI_CAN_VDD_180 |
+>> +                     SDHCI_CAN_DO_SUSPEND |
+>> +                     SDHCI_CAN_DO_HISPD |
+>> +                     SDHCI_CAN_DO_ADMA2 |
+>> +                     SDHCI_CAN_DO_SDMA,
+>> +             .caps1 = SDHCI_DRIVER_TYPE_C |
+>> +                     SDHCI_DRIVER_TYPE_D |
+>> +                     SDHCI_SUPPORT_DDR50,
+>> +     },
+>> +     [SDHCI_PLTFM_BCM2835] = {
+>> +             /* SDHCI BCM2835 */
+>> +             .pdata = &sdhci_bcm2835_pltfm_data,
+>> +             .caps = ((0x1 << SDHCI_MAX_BLOCK_SHIFT)
+>> +                             & SDHCI_MAX_BLOCK_MASK) |
+>> +                     SDHCI_CAN_VDD_330 |
+>> +                     SDHCI_CAN_DO_HISPD,
+>> +             .caps1 = SDHCI_DRIVER_TYPE_A |
+>> +                     SDHCI_DRIVER_TYPE_C,
+>> +             .mmc_caps = 0x00000000,
+>> +
+>> +     },
+>>  };
+>>
+>>  static const struct of_device_id sdhci_iproc_of_match[] = {
+>> -     { .compatible = "brcm,bcm2835-sdhci", .data = &bcm2835_data },
+>> -     { .compatible = "brcm,sdhci-iproc-cygnus", .data = &iproc_cygnus_data},
+>> -     { .compatible = "brcm,sdhci-iproc", .data = &iproc_data },
+>> +     {
+>> +             .compatible = "brcm,bcm2835-sdhci",
+>> +             .data = (void *)SDHCI_PLTFM_BCM2835
+>> +     },
+>> +     {
+>> +             .compatible = "brcm,sdhci-iproc-cygnus",
+>> +             .data = (void *)SDHCI_PLTFM_IPROC_CYGNUS
+>> +     },
+>> +     {
+>> +             .compatible = "brcm,sdhci-iproc",
+>> +             .data = (void *)SDHCI_PLTFM_IPROC
+>> +     },
+>>       { }
+>>  };
+>>  MODULE_DEVICE_TABLE(of, sdhci_iproc_of_match);
+>>
+>> +static const struct acpi_device_id sdhci_iproc_acpi_ids[] = {
+>> +     { .id = "BRCM5871", .driver_data = SDHCI_PLTFM_IPROC_CYGNUS },
+>> +     { .id = "BRCM5872", .driver_data = SDHCI_PLTFM_IPROC },
+>> +     { /* sentinel */ }
+>> +};
+>> +MODULE_DEVICE_TABLE(acpi, sdhci_iproc_acpi_ids);
+>> +
+>>  static int sdhci_iproc_probe(struct platform_device *pdev)
+>>  {
+>> +     struct device *dev = &pdev->dev;
+>>       const struct of_device_id *match;
+>> +     const struct acpi_device_id *acpi_id;
+>>       const struct sdhci_iproc_data *iproc_data;
+>>       struct sdhci_host *host;
+>>       struct sdhci_iproc_host *iproc_host;
+>>       struct sdhci_pltfm_host *pltfm_host;
+>>       int ret;
+>> +     enum sdhci_pltfm_type plat_type;
+>> +
+>> +     if (dev->of_node) {
+>> +             match = of_match_device(sdhci_iproc_of_match, dev);
+>> +             if (match)
+>> +                     plat_type = (enum sdhci_pltfm_type)match->data;
+>> +             else
+>> +                     return -ENODEV;
+>> +     } else if (has_acpi_companion(dev)) {
+>> +             acpi_id = acpi_match_device(sdhci_iproc_acpi_ids, dev);
+>> +             if (acpi_id)
+>> +                     plat_type = (enum sdhci_pltfm_type)acpi_id->driver_data;
+>> +             else
+>> +                     return -ENODEV;
+>> +     } else
+>> +             return -ENODEV;
+>>
+>> -     match = of_match_device(sdhci_iproc_of_match, &pdev->dev);
+>> -     if (!match)
+>> -             return -EINVAL;
+>> -     iproc_data = match->data;
+>> +     iproc_data = &sdhci_iproc_data_list[plat_type];
+>>
+>>       host = sdhci_pltfm_init(pdev, iproc_data->pdata, sizeof(*iproc_host));
+>>       if (IS_ERR(host))
+>> @@ -284,17 +336,30 @@ static int sdhci_iproc_probe(struct platform_device *pdev)
+>>
+>>       host->mmc->caps |= iproc_host->data->mmc_caps;
+>>
+>> -     pltfm_host->clk = devm_clk_get(&pdev->dev, NULL);
+>> -     if (IS_ERR(pltfm_host->clk)) {
+>> -             ret = PTR_ERR(pltfm_host->clk);
+>> -             goto err;
+>> -     }
+>> -     ret = clk_prepare_enable(pltfm_host->clk);
+>> -     if (ret) {
+>> -             dev_err(&pdev->dev, "failed to enable host clk\n");
+>> -             goto err;
+>> +     if (dev->of_node) {
+>> +             pltfm_host->clk = devm_clk_get(dev, NULL);
+>> +             if (IS_ERR(pltfm_host->clk)) {
+>> +                     ret = PTR_ERR(pltfm_host->clk);
+>> +                     goto err;
+>> +             }
+>> +             ret = clk_prepare_enable(pltfm_host->clk);
+>> +             if (ret) {
+>> +                     dev_err(dev, "failed to enable host clk\n");
+>> +                     goto err;
+>> +             }
+>> +     } else if (has_acpi_companion(dev)) {
+>> +             /*
+>> +              * When Driver probe with ACPI device, clock devices
+>> +              * are not available, so sdhci clock get from
+>> +              * clock-frequency property given in _DSD object.
+>> +              */
+>> +             device_property_read_u32(dev, "clock-frequency",
+>> +                                      &pltfm_host->clock);
+>
+> Is this a new property, or is it documented?  Did you consider enhancing
+> __sdhci_read_caps() and using the existing "sdhci-caps" and
+> "sdhci-caps-mask" properties?
+>
+"clock-frequency" is not a new property also used in "sdhci-pltfm.c"
+to get clock
+frequency and use in the case of clock device node is not passed from
+device tree node.
+But In the case of ACPI support, ACPI does not support common clock framework.
+so clock frequency get by "clock-frequency" property given in _DSD
+object of ACPI device node.
 
-I can't quite follow you, how this should be used here?
-
-> So far the Tegra SDHCI driver did not use device tree to indicate modes,
-> but maybe we should start doing that. In this case you can use
-> mmc-hs200-1_8v/mmc-hs400-1_8v to indicate higher eMMC speed modes.
-> 
-> > +
-> > +	/*
-> > +	 * If the board does not define a regulator for the SDHCI IO voltage,
-> > +	 * then don't advertise support for UHS modes even if the device
-> > +	 * supports it because the IO voltage cannot be configured.
-> > +	 */
-> > +	if (IS_ERR(host->mmc->supply.vqmmc))
-> > +		return false;  
-> 
-> The stack should already check that and mask caps1 accordingly (see
-> sdhci_setup_host).
-
-True, the logic seems to be duplicated here. Although also
-tegra_sdhci_reset() needs to be change so that the bits masked off by
-sdhci_setup_host() aren't set if this check is removed.
-
-> > +
-> > +	/*
-> > +	 * Later SoC generations require software pad voltage configuration.
-> > +	 * The UHS modes should only be enabled if the pad configuration states
-> > +	 * are available on platforms where they are required in order to switch
-> > +	 * the signaling voltage.
-> > +	 */
-> > +	if (soc_data->nvquirks & NVQUIRK_NEEDS_PAD_CONTROL)
-> > +		return tegra_host->pad_control_available;
-> > +
-> > +	return false;
-> > +}
-> > +
-> >  static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
-> >  {
-> >  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> >  	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
-> >  	const struct sdhci_tegra_soc_data *soc_data = tegra_host->soc_data;
-> >  	u32 misc_ctrl, clk_ctrl;
-> > +	bool uhs_valid;
-> >  
-> >  	sdhci_reset(host, mask);
-> >  
-> > @@ -160,13 +202,8 @@ static void tegra_sdhci_reset(struct sdhci_host
-> > *host, u8 mask)
-> >  
-> >  	clk_ctrl &= ~SDHCI_CLOCK_CTRL_SPI_MODE_CLKEN_OVERRIDE;
-> >  
-> > -	/*
-> > -	 * If the board does not define a regulator for the SDHCI
-> > -	 * IO voltage, then don't advertise support for UHS modes
-> > -	 * even if the device supports it because the IO voltage
-> > -	 * cannot be configured.
-> > -	 */
-> > -	if (!IS_ERR(host->mmc->supply.vqmmc)) {
-> > +	uhs_valid = tegra_sdhci_is_uhs_valid(host);
-> > +	if (uhs_valid) {
-> >  		/* Erratum: Enable SDHCI spec v3.00 support */
-> >  		if (soc_data->nvquirks & NVQUIRK_ENABLE_SDHCI_SPEC_300)
-> >  			misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDHCI_SPEC_300;
-> > @@ -286,14 +323,80 @@ static int tegra_sdhci_execute_tuning(struct
-> > sdhci_host *host, u32 opcode)
-> >  	return mmc_send_tuning(host->mmc, opcode, NULL);
-> >  }
-> >  
-> > -static void tegra_sdhci_voltage_switch(struct sdhci_host *host)
-> > +static int tegra_sdhci_set_padctrl(struct sdhci_host *host, int voltage)
-> >  {
-> >  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> >  	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
-> > -	const struct sdhci_tegra_soc_data *soc_data = tegra_host->soc_data;
-> > +	int ret;
-> > +
-> > +	if (!tegra_host->pad_control_available)
-> > +		return 0;
-> > +
-> > +	if (voltage == MMC_SIGNAL_VOLTAGE_180) {
-> > +		ret = pinctrl_select_state(tegra_host->pinctrl_sdmmc,
-> > +					   tegra_host->pinctrl_state_1v8);
-> > +		if (ret < 0)
-> > +			dev_err(mmc_dev(host->mmc),
-> > +				"setting 1.8V failed, ret: %d\n", ret);
-> > +	} else {
-> > +		ret = pinctrl_select_state(tegra_host->pinctrl_sdmmc,
-> > +					   tegra_host->pinctrl_state_3v3);
-> > +		if (ret < 0)
-> > +			dev_err(mmc_dev(host->mmc),
-> > +				"setting 3.3V failed, ret: %d\n", ret);
-> > +	}
-> >  
-> > -	if (soc_data->nvquirks & NVQUIRK_HAS_PADCALIB)
-> > -		tegra_host->pad_calib_required = true;
-> > +	return ret;
-> > +}
-> > +
-> > +static int sdhci_tegra_start_signal_voltage_switch(struct mmc_host *mmc,
-> > +						   struct mmc_ios *ios)
-> > +{
-> > +	struct sdhci_host *host = mmc_priv(mmc);
-> > +	int ret = 0;
-> > +
-> > +	if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330) {
-> > +		ret = tegra_sdhci_set_padctrl(host, ios->signal_voltage);
-> > +		if (ret < 0)
-> > +			return ret;
-> > +		ret = sdhci_start_signal_voltage_switch(mmc, ios);
-> > +	} else if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_180) {
-> > +		ret = sdhci_start_signal_voltage_switch(mmc, ios);
-> > +		if (ret < 0)
-> > +			return ret;
-> > +		ret = tegra_sdhci_set_padctrl(host, ios->signal_voltage);  
-> 
-> So depending on voltage you first set the pads setting and then do the
-> signaling voltage switch. Is this necessary? Why?
-
-This is done to enforce the constraint of keeping the signaling voltage
-always less or equal to the pad voltage. Driving 3.3 V into a pad that
-has been configured to 1.8 V will damage it. This is stated in the
-Tegra210 and Tegra186 TRMs in SDMMC Initialization Sequece sections of
-controllers supporting voltage switching.
-
-Here when switching from 3.3 V to 1.8 V the regulator is first
-configured to 1.8 V by sdhci_start_signal_voltage_switch() and after
-that the pad is configured to 1.8 V. When going in the other direction
-the pad needs to be first configured to 3.3 V before the regulator
-voltage can be raised.
-
-> > +	}
-> > +
-> > +	return ret;
-> > +}
-> > +
-> > +static void tegra_sdhci_init_pinctrl_info(struct device *dev,
-> > +					  struct sdhci_tegra *tegra_host)
-> > +{
-> > +	tegra_host->pinctrl_sdmmc = devm_pinctrl_get(dev);
-> > +	if (IS_ERR(tegra_host->pinctrl_sdmmc)) {
-> > +		dev_dbg(dev, "No pinctrl info, err: %ld\n",
-> > +			PTR_ERR(tegra_host->pinctrl_sdmmc));
-> > +		return;
-> > +	}
-> > +
-> > +	tegra_host->pinctrl_state_3v3 =
-> > +		pinctrl_lookup_state(tegra_host->pinctrl_sdmmc, "sdmmc-3v3");
-> > +	if (IS_ERR(tegra_host->pinctrl_state_3v3)) {
-> > +		dev_err(dev, "Missing 3.3V pad state, err: %ld\n",
-> > +			PTR_ERR(tegra_host->pinctrl_state_3v3));
-> > +		return;
-> > +	}
-> > +
-> > +	tegra_host->pinctrl_state_1v8 =
-> > +		pinctrl_lookup_state(tegra_host->pinctrl_sdmmc, "sdmmc-1v8");
-> > +	if (IS_ERR(tegra_host->pinctrl_state_1v8)) {
-> > +		dev_err(dev, "Missing 1.8V pad state, err: %ld\n",
-> > +			  PTR_ERR(tegra_host->pinctrl_state_3v3));  
-> 
-> Is missing pad states considered as error? If yes, we should return a
-> error code and make the probe function fail.
-> 
-> If it is ok to run it without the states, then this should be dev_warn
-> or dev_info.
-
-I don't think failing probe due to missing pinctrl entries can be done
-because it would break backwards compatibility with pre-existing dtbs.
-Also SDHCI controllers with fixed signaling voltage don't support pad
-voltage reconfiguration and therefore the pinctrl properties won't be
-there either. In the case of fixed voltage SDHCI controllers the
-"nvidia,only-1-8-v" property is used to signal that pad reconfiguration
-doesn't need to be performed.
-
- -Aapo
+>> +             if (!pltfm_host->clock) {
+>> +                     ret = -ENODEV;
+>> +                     goto err;
+>> +             }
+>>       }
+>> -
+>>       if (iproc_host->data->pdata->quirks & SDHCI_QUIRK_MISSING_CAPS) {
+>>               host->caps = iproc_host->data->caps;
+>>               host->caps1 = iproc_host->data->caps1;
+>> @@ -307,7 +372,8 @@ static int sdhci_iproc_probe(struct platform_device *pdev)
+>>       return 0;
+>>
+>>  err_clk:
+>> -     clk_disable_unprepare(pltfm_host->clk);
+>> +     if (dev->of_node)
+>> +             clk_disable_unprepare(pltfm_host->clk);
+>>  err:
+>>       sdhci_pltfm_free(pdev);
+>>       return ret;
+>> @@ -317,6 +383,7 @@ static struct platform_driver sdhci_iproc_driver = {
+>>       .driver = {
+>>               .name = "sdhci-iproc",
+>>               .of_match_table = sdhci_iproc_of_match,
+>> +             .acpi_match_table = ACPI_PTR(sdhci_iproc_acpi_ids),
+>>               .pm = &sdhci_pltfm_pmops,
+>>       },
+>>       .probe = sdhci_iproc_probe,
+>>
+>
+Regards,
+Srinath.
