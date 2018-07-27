@@ -1,56 +1,54 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH] mmc: tmio: allow DMA request hook to return error status
-Date: Fri, 27 Jul 2018 09:51:25 +0200
-Message-ID: <CAMuHMdXvbWrt44T4Sr_bDjS1YFfqZ82JHpH7f00FKYBHntyWSg@mail.gmail.com>
-References: <1532654046-11901-1-git-send-email-yamada.masahiro@socionext.com>
+From: Aapo Vienamo <avienamo@nvidia.com>
+Subject: Re: [PATCH v2 02/10] dt-bindings: mmc: tegra: Add nvidia,only-1-8-v
+ property
+Date: Fri, 27 Jul 2018 11:05:55 +0300
+Message-ID: <20180727110555.1b7ad97d@dhcp-10-21-25-168>
+References: <1532607560-11253-1-git-send-email-avienamo@nvidia.com>
+        <1532607560-11253-3-git-send-email-avienamo@nvidia.com>
+        <484a31bdaad6d76b4fbb7d6fa80cbb8d@agner.ch>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="US-ASCII"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1532654046-11901-1-git-send-email-yamada.masahiro@socionext.com>
+In-Reply-To: <484a31bdaad6d76b4fbb7d6fa80cbb8d@agner.ch>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Stefan Agner <stefan@agner.ch>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, Mikko Perttunen <mperttunen@nvidia.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-tegra-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Yamada-san,
+On Thu, 26 Jul 2018 15:05:55 +0200
+Stefan Agner <stefan@agner.ch> wrote:
 
-On Fri, Jul 27, 2018 at 3:15 AM Masahiro Yamada
-<yamada.masahiro@socionext.com> wrote:
-> dma_request_chan() may return ERR_PTR(-EPROBE_DEFER), but
-> tmio_mmc_request_dma() cannot propagate it since it is a
-> void function.
->
-> Change the return type to int so that the driver can retry
-> probing later in case the DMA-engine driver is probed after
-> the TMIO MMC driver.
->
-> I moved the call for tmio_mmc_request_dma() up because it may
-> fail now.  I also removed unneeded clearing of host->chan_{tx,rx}
-> because (struct tmio_mmc_host) is allocated by kzalloc().
->
-> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+> On 26.07.2018 14:19, Aapo Vienamo wrote:
+> > Add a property to mark controllers which operate at a 1.8 V fixed I/O
+> > voltage.
+> > 
+> > This feature of the hardware needs to be signaled this way because it
+> > cannot be probed at runtime or reliably derived from other properties.  
+> 
+> Is this really needed? Can we not use vqmmc to determine which voltage
+> the controller runs on?
+> 
+> There is already some precedence in the SDHCI core to determine which
+> voltage levels are supported:
+> https://lkml.org/lkml/2018/7/5/342
 
-Thanks for your patch!
+This property is introduced to solve a slightly different issue. The
+thing is that supplying a fixed voltage SDHCI controller from a variable
+regulator is still a valid configuration. Which means that testing the
+capabilities of the regulator doesn't actually describe the SDHCI
+controller itself.
 
-Isn't the idea to fall back to PIO if the DMA-engine driver is not found?
+In practice this property is used to communicate whether pad
+reconfiguration and voltage switching needs to be performed or not. This
+cannot be determined from the absence or presence of the pinctrl
+properties either because they naturally won't be there on older dtbs.
 
-Unfortunately there's no way to distinguish between "DMA-engine hasn't been
-probed yet" and "DMA-engine is not available" (e.g. CONFIG_RCAR_DMAC=n).
-In both cases, dma_request_chan() will return -EPROBE_DEFER.
-So if you treat this as an actual error, and propagate it, the following
-will happen:
-  - In case 1, the MMC driver will be reprobed successfully later.
-  - In case 2,the MMC driver will never succeed.
+The logic behind this goes like this: if this property is present,
+there's no need to perform pad or regulator reconfiguration and UHS
+modes can be enabled. If this property is missing then valid pinctrl and
+regulator properties are required to enable UHS signaling. This is
+implemented in tegra_sdhci_is_uhs_valid() in "[PATCH v2 03/10] mmc:
+tegra: Reconfigure pad voltages during voltage switching"
 
-Or am I missing something?
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+ -Aapo
