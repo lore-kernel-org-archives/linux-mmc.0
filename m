@@ -1,8 +1,8 @@
 From: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
-Subject: [PATCH mmc-next v3 0/3] solve SDHCI DWC MSHC 128MB DMA boundary
- limitation
-Date: Mon, 30 Jul 2018 10:42:28 +0800
-Message-ID: <20180730104228.28b58bd0@xhacker.debian>
+Subject: [PATCH mmc-next v3 1/3] mmc: sdhci: add adma_table_num member to
+ struct sdhci_host
+Date: Mon, 30 Jul 2018 10:44:24 +0800
+Message-ID: <20180730104424.44fa39a5@xhacker.debian>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
@@ -12,33 +12,68 @@ To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-When using DMA, if the DMA addr spans 128MB boundary, we have to split
-the DMA transfer into two so that each one doesn't exceed the boundary.
+This patch adds adma_table_num member to struct sdhci_host to give more
+flexibility to drivers to control the ADMA table number.
 
-patch1 adds adma_table_num to struct sdhci_host so that driver can
-control the ADMA table number.
-patch2 introduces adma_write_desc() hook to struct sdhci_ops so that
-driver can override it.
-patch3 finally solves the 128MB boundary limitation.
+Default value of adma_table_num is set to (SDHCI_MAX_SEGS * 2 + 1).
 
-since v2:
-  - make use of "likely" to check (!len || BOUNDARY_OK(addr, len))
-  - explictly include <linux/sizes.h> for SZ_128M
+Signed-off-by: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+---
+ drivers/mmc/host/sdhci.c | 17 +++++++++--------
+ drivers/mmc/host/sdhci.h |  2 ++
+ 2 files changed, 11 insertions(+), 8 deletions(-)
 
-since v1:
-  - fix BOUNDARY_OK macro if addr+len is aligned to 128MB
-  - use DIV_ROUND_UP to cal extra desc num
-  - fix !len for dwcmshc_adma_write_desc()
-
-Jisheng Zhang (3):
-  mmc: sdhci: add adma_table_num member to struct sdhci_host
-  mmc: sdhci: introduce adma_write_desc() hook to struct sdhci_ops
-  mmc: sdhci-of-dwcmshc: solve 128MB DMA boundary limitation
-
- drivers/mmc/host/sdhci-of-dwcmshc.c | 43 ++++++++++++++++++++++++++
- drivers/mmc/host/sdhci.c            | 48 +++++++++++++++++++----------
- drivers/mmc/host/sdhci.h            |  8 +++++
- 3 files changed, 83 insertions(+), 16 deletions(-)
-
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index a7b5602ef6f7..14dd4a49e03b 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -3316,6 +3316,13 @@ struct sdhci_host *sdhci_alloc_host(struct device *dev,
+ 
+ 	host->sdma_boundary = SDHCI_DEFAULT_BOUNDARY_ARG;
+ 
++	/*
++	 * The DMA descriptor table number is calculated as the maximum
++	 * number of segments times 2, to allow for an alignment
++	 * descriptor for each segment, plus 1 for a nop end descriptor.
++	 */
++	host->adma_table_num = SDHCI_MAX_SEGS * 2 + 1;
++
+ 	return host;
+ }
+ 
+@@ -3561,18 +3568,12 @@ int sdhci_setup_host(struct sdhci_host *host)
+ 		dma_addr_t dma;
+ 		void *buf;
+ 
+-		/*
+-		 * The DMA descriptor table size is calculated as the maximum
+-		 * number of segments times 2, to allow for an alignment
+-		 * descriptor for each segment, plus 1 for a nop end descriptor,
+-		 * all multipled by the descriptor size.
+-		 */
+ 		if (host->flags & SDHCI_USE_64_BIT_DMA) {
+-			host->adma_table_sz = (SDHCI_MAX_SEGS * 2 + 1) *
++			host->adma_table_sz = host->adma_table_num *
+ 					      SDHCI_ADMA2_64_DESC_SZ;
+ 			host->desc_sz = SDHCI_ADMA2_64_DESC_SZ;
+ 		} else {
+-			host->adma_table_sz = (SDHCI_MAX_SEGS * 2 + 1) *
++			host->adma_table_sz = host->adma_table_num *
+ 					      SDHCI_ADMA2_32_DESC_SZ;
+ 			host->desc_sz = SDHCI_ADMA2_32_DESC_SZ;
+ 		}
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 23966f887da6..d55fd7033e93 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -563,6 +563,8 @@ struct sdhci_host {
+ 	/* Host SDMA buffer boundary. */
+ 	u32			sdma_boundary;
+ 
++	u32			adma_table_num;
++
+ 	u64			data_timeout;
+ 
+ 	unsigned long private[0] ____cacheline_aligned;
 -- 
 2.18.0
