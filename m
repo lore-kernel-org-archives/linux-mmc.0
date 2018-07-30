@@ -1,94 +1,66 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 02/19] mmc: mmci: merge qcom dml feature into mmci dma
-Date: Mon, 30 Jul 2018 17:15:14 +0200
-Message-ID: <CAPDyKFqqj8muP4r2U8rB9rf7f3oB_US+R-oA-PxE26KYxx-j3g@mail.gmail.com>
-References: <1528809280-31116-1-git-send-email-ludovic.Barre@st.com>
- <1528809280-31116-3-git-send-email-ludovic.Barre@st.com> <CAPDyKFqOOvbNc79hdWhdS4pxkYrh48At-BLuGmX0jDMER3Akdw@mail.gmail.com>
- <c09e8f7a-3bf7-abb3-b49c-011ae29f8d67@st.com> <CAPDyKFrN3GMez1vyc6xQUH_Qp7UrDj88rG9pAP_oTLHOB6k91g@mail.gmail.com>
- <ed45398d-552c-7bae-d77a-4e0d99b21759@st.com>
+From: Aapo Vienamo <avienamo@nvidia.com>
+Subject: Re: [PATCH v2 00/10] Tegra SDHCI update the pad autocal procedure
+Date: Mon, 30 Jul 2018 18:43:51 +0300
+Message-ID: <20180730184351.5044cb6e@dhcp-10-21-25-168>
+References: <1532608016-14319-1-git-send-email-avienamo@nvidia.com>
+        <CAPDyKFo+nv+9qYV=J5k-63cDhQO=L==87RLMj_7BnjEjUf5iEQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="US-ASCII"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <ed45398d-552c-7bae-d77a-4e0d99b21759@st.com>
+In-Reply-To: <CAPDyKFo+nv+9qYV=J5k-63cDhQO=L==87RLMj_7BnjEjUf5iEQ@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ludovic BARRE <ludovic.barre@st.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Gerald Baeza <gerald.baeza@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, devicetree@vger.kernel.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, Mikko Perttunen <mperttunen@nvidia.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 13 July 2018 at 15:08, Ludovic BARRE <ludovic.barre@st.com> wrote:
->
->
-> On 07/13/2018 01:17 PM, Ulf Hansson wrote:
->>
->> On 11 July 2018 at 17:19, Ludovic BARRE <ludovic.barre@st.com> wrote:
->>>
->>>
->>>
->>> On 07/05/2018 05:26 PM, Ulf Hansson wrote:
->>>>
->>>>
->>>> On 12 June 2018 at 15:14, Ludovic Barre <ludovic.Barre@st.com> wrote:
->>>>>
->>>>>
->>>>> From: Ludovic Barre <ludovic.barre@st.com>
->>>>>
->>>>> This patch integrates qcom dml feature into mmci_dma file.
->>>>> Qualcomm Data Mover lite/local is already a variant of mmci dmaengine.
->>>>>
->>>>> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
->>>>> ---
->>>>>    drivers/mmc/host/Makefile        |   1 -
->>>>>    drivers/mmc/host/mmci.c          |   1 -
->>>>>    drivers/mmc/host/mmci.h          |  35 ++++++++
->>>>>    drivers/mmc/host/mmci_dma.c      | 135 ++++++++++++++++++++++++++++-
->>>>>    drivers/mmc/host/mmci_qcom_dml.c | 177
->>>>> ---------------------------------------
->>>>>    drivers/mmc/host/mmci_qcom_dml.h |  31 -------
->>>>>    6 files changed, 169 insertions(+), 211 deletions(-)
->>>>>    delete mode 100644 drivers/mmc/host/mmci_qcom_dml.c
->>>>>    delete mode 100644 drivers/mmc/host/mmci_qcom_dml.h
->>>>
->>>>
->>>>
->>>> No, this is not the way to go. Instead I I think there are two options.
->>>>
->>>> 1) Keep mmci_qcom_dml.c|h and thus add new files for the stm32 dma
->>>> variant.
->>>>
->>>> 2) Start by renaming mmci_qcom_dml.* to mmc_dma.* and then in the next
->>>> step add the code for stm32 dma into the renamed files.
->>>>
->>>> I guess if there is some overlap in functionality, 2) may be best as
->>>> it could easier avoid open coding. However, I am fine with whatever
->>>> option and I expect that you knows what is best.
->>>
->>>
->>>
->>> After patch 01 & 05 comments:
->>> I will try to define a mmci_ops which contain some functions pointer
->>> called by mmci.c (core).
->>> A variant defines its mmci_ops.
->>> where do you define the specific function:
->>> -in a single file, mmci-ops.c or other (for the name, I'm not inspirated)
->>> -or in specific file for each variant mmci-qcom.c or mmci-stm32.c
->>>
->>> following the comment (above), I think we define a single file?
->>
->>
->> If I understand the question, the problem is how we should assign the
->> mmc host ops, which corresponds to the probed variant data!?
->>
->> I took a stub at it and posted two patches which I think you should be
->> able to build upon. Please have a look.
->
->
-> I review your patch on mmci_host_ops and init, I agree with your series,
-> I was going in the same direction.
-> The comment above was on file organization, what do you prefer?
-> -a single file with: all callback and all mmci_host_ops of each variant
-> -or each variant in specific file (like sdhci): mmci-qcom.c | mmci-stm32.c
+On Mon, 30 Jul 2018 17:07:59 +0200
+Ulf Hansson <ulf.hansson@linaro.org> wrote:
 
-The latter seems better.
+> On 26 July 2018 at 14:26, Aapo Vienamo <avienamo@nvidia.com> wrote:
+> > Hi all,
+> >
+> > Update the tegra_sdhci_pad_autocalib() pad drive strength calibration
+> > procedure to match the ones specified in the TRMs of the more recent
+> > SoCs. This was tested on Tegra186, Tegra210, and Tegra124, although it
+> > should not break things older generations either.
+> >
+> > This series depends on the "Tegra SDHCI enable 1.8 V signaling on
+> > Tegar210 and Tegra186" series posted earlier.  
+> 
+> According to the cover letter of the above series, it states that it
+> depends on $subject series. A circular dependency. :-)
 
-Kind regards
-Uffe
+The dependency chain goes like this: "Tegra SDHCI update the pad
+autocal procedure" -> "Tegra SDHCI enable 1.8 V signaling on Tegar210
+and Tegra186" -> "Tegra PMC pinctrl pad configuration".
+
+> In fact, there should be no dependency at all or else there seems to
+> be a DT compatibility problem here...
+
+>From a functionality perspective there's no strict dependency, however,
+I don't think "[PATCH v2 09/10] mmc: tegra: Perform pad calibration
+after voltage switch" can be applied cleanly without
+"[PATCH v2 03/10] mmc: tegra: Reconfigure pad voltages during voltage
+switching" from the "Tegra SDHCI enable 1.8 V signaling on Tegar210 and
+Tegra186" series.
+
+> Anyway, I think it actually makes sense to fold in all changes into
+> one series. Make sure the dt-doc changes comes first, then the driver
+> changes and finally arm64/dts changes. This should make it easy to
+> follow the review and I can pick the mmc parts and the soc maintainer
+> can pick the arm64/dts changes.
+
+I've sent the changes in multiple part because I've been working on
+further changes to the driver while the previous parts have been
+getting reviewed. This is still the case and there's still going to be
+at least one more series which adds support for HS200 tuning and some
+smaller changes after it. However, the HS200 work is probably going to
+be ready for review in a day or two. I can send these as a one series
+from now on, although at this point it would be 27 patches in total
+and even more with the HS200 patches.
+
+I can do that if you prefer to do it that way. Makes my life somewhat
+easier too.
+
+ -Aapo
