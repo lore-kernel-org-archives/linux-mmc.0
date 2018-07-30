@@ -1,110 +1,70 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V7 1/5] mmc: sdhci: Add support for O2 eMMC HS200 mode
-Date: Mon, 30 Jul 2018 17:05:51 +0200
-Message-ID: <CAPDyKFpxP67XttkJxTKdwBSYiJePdw_1icwCVZWBwD5WJ5XBVA@mail.gmail.com>
-References: <20180716062655.24703-1-ernest.zhang@bayhubtech.com>
+Subject: Re: [PATCH] mmc: tegra: Force correct divider calculation on DDR50/52
+Date: Mon, 30 Jul 2018 17:05:59 +0200
+Message-ID: <CAPDyKFoRtSH6Run5WE-iyPgFOjxanNtHq6QtR007_KcW5Ld3=A@mail.gmail.com>
+References: <1531751669-26584-1-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180716062655.24703-1-ernest.zhang@bayhubtech.com>
+In-Reply-To: <1531751669-26584-1-git-send-email-avienamo@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "ernest.zhang" <ernest.zhang@bayhubtech.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, chuanjin.pang@bayhubtech.com, mike.li@bayhubtech.com, chevron.li@bayhubtech.com, "Shirley Her (SC)" <shirley.her@bayhubtech.com>, xiaoguang.yu@bayhubtech.com, bobby.wu@bayhubtech.com
+To: Aapo Vienamo <avienamo@nvidia.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Marcel Ziswiler <marcel.ziswiler@toradex.com>, Stefan Agner <stefan@agner.ch>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-tegra@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 16 July 2018 at 08:26, ernest.zhang <ernest.zhang@bayhubtech.com> wrote:
-> When use eMMC as boot device, the eMMC signaling voltage is tied to 1.8v
-> fixed output voltage, bios can set o2 sd host controller PCI configuration
-> register 0x308 bit4 to 1 to let driver skip 3.3v signaling voltage and
-> direct use 1.8v singling voltage in eMMC initialize process.
+On 16 July 2018 at 16:34, Aapo Vienamo <avienamo@nvidia.com> wrote:
+> Tegra SDHCI controllers require the SDHCI clock divider to be configured
+> to divide the clock by two in DDR50/52 modes. Incorrectly configured
+> clock divider results in corrupted data.
 >
-> Signed-off-by: ernest.zhang <ernest.zhang@bayhubtech.com>
+> Prevent the possibility of incorrectly calculating the divider value due
+> to clock rate rounding or low parent clock frequency by not assigning
+> host->max_clk to clk_get_rate() on tegra_sdhci_set_clock().
+>
+> See the comments for further details.
+>
+> Fixes: a8e326a ("mmc: tegra: implement module external clock change")
+> Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
 
-Thanks, the series applied for next!
+Thanks, applied for next!
 
 Kind regards
 Uffe
 
 > ---
-> Changes in V7:
->         Move V6 change item 2 to a seperate patch file
+>  drivers/mmc/host/sdhci-tegra.c | 17 ++++++++++++++++-
+>  1 file changed, 16 insertions(+), 1 deletion(-)
 >
-> Changes in V6:
->         1.Move change log to correct place.
->         2.Change HS200 mode clock frequency from 208MHz to 200MHz to meet
->         Specification.
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+> index ddf00166..908b23e 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -210,9 +210,24 @@ static void tegra_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+>         if (!clock)
+>                 return sdhci_set_clock(host, clock);
 >
-> Changes in V5:
->         Modify code format to pass checkpatch.pl check and add a summary
->         of what has changed in each version.
+> +       /*
+> +        * In DDR50/52 modes the Tegra SDHCI controllers require the SDHCI
+> +        * divider to be configured to divided the host clock by two. The SDHCI
+> +        * clock divider is calculated as part of sdhci_set_clock() by
+> +        * sdhci_calc_clk(). The divider is calculated from host->max_clk and
+> +        * the requested clock rate.
+> +        *
+> +        * By setting the host->max_clk to clock * 2 the divider calculation
+> +        * will always result in the correct value for DDR50/52 modes,
+> +        * regardless of clock rate rounding, which may happen if the value
+> +        * from clk_get_rate() is used.
+> +        */
+>         host_clk = tegra_host->ddr_signaling ? clock * 2 : clock;
+>         clk_set_rate(pltfm_host->clk, host_clk);
+> -       host->max_clk = clk_get_rate(pltfm_host->clk);
+> +       if (tegra_host->ddr_signaling)
+> +               host->max_clk = host_clk;
+> +       else
+> +               host->max_clk = clk_get_rate(pltfm_host->clk);
 >
-> Changes in V4:
->         Skip SDIO and SD initalization when register 0x308 bit 4 is set,
->         and modify some typo.
+>         sdhci_set_clock(host, clock);
 >
-> Changes in V3:
->         Rebase the patch on the mmc tree 'next' branch.
->
-> Changes in V2:
->         Modify code format, and delete unused code path.
->
-> Changes in V1:
->         Check PCIe register 0x308 bit 4 and skip eMMC 3.3v initialization
->         process if it is set to 1.
-> ---
->  drivers/mmc/host/sdhci-pci-o2micro.c | 18 ++++++++++++++++++
->  1 file changed, 18 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
-> index 555970a29c94..ba59db6a126c 100644
-> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
-> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
-> @@ -3,6 +3,7 @@
->   *
->   * Authors: Peter Guo <peter.guo@bayhubtech.com>
->   *          Adam Lee <adam.lee@canonical.com>
-> + *          Ernest Zhang <ernest.zhang@bayhubtech.com>
->   *
->   * This software is licensed under the terms of the GNU General Public
->   * License version 2, as published by the Free Software Foundation, and
-> @@ -39,6 +40,7 @@
->  #define O2_SD_MISC_CTRL4       0xFC
->  #define O2_SD_TUNING_CTRL      0x300
->  #define O2_SD_PLL_SETTING      0x304
-> +#define O2_SD_MISC_SETTING     0x308
->  #define O2_SD_CLK_SETTING      0x328
->  #define O2_SD_CAP_REG2         0x330
->  #define O2_SD_CAP_REG0         0x334
-> @@ -184,6 +186,7 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
->         struct sdhci_pci_chip *chip;
->         struct sdhci_host *host;
->         u32 reg;
-> +       int ret;
->
->         chip = slot->chip;
->         host = slot->host;
-> @@ -197,6 +200,21 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
->                 if (reg & 0x1)
->                         host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
->
-> +               if (chip->pdev->device == PCI_DEVICE_ID_O2_SEABIRD0) {
-> +                       ret = pci_read_config_dword(chip->pdev,
-> +                                                   O2_SD_MISC_SETTING, &reg);
-> +                       if (ret)
-> +                               return -EIO;
-> +                       if (reg & (1 << 4)) {
-> +                               pr_info("%s: emmc 1.8v flag is set, force 1.8v signaling voltage\n",
-> +                                       mmc_hostname(host->mmc));
-> +                               host->flags &= ~SDHCI_SIGNALING_330;
-> +                               host->flags |= SDHCI_SIGNALING_180;
-> +                               host->mmc->caps2 |= MMC_CAP2_NO_SD;
-> +                               host->mmc->caps2 |= MMC_CAP2_NO_SDIO;
-> +                       }
-> +               }
-> +
->                 if (chip->pdev->device != PCI_DEVICE_ID_O2_FUJIN2)
->                         break;
->                 /* set dll watch dog timer */
 > --
-> 2.17.1
+> 2.7.4
 >
