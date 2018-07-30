@@ -1,118 +1,112 @@
-From: Robin Murphy <robin.murphy@arm.com>
-Subject: Re: [PATCH mmc-next v2 3/3] mmc: sdhci-of-dwcmshc: solve 128MB DMA
- boundary limitation
-Date: Mon, 30 Jul 2018 12:06:08 +0100
-Message-ID: <edaa7605-e0e0-b17a-8403-c3d7d60d7989@arm.com>
-References: <20180726151017.4da1e336@xhacker.debian>
- <20180726151424.4bcecf41@xhacker.debian>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V4 1/7] mmc: sdhci: add sd host v4 mode
+Date: Mon, 30 Jul 2018 16:04:17 +0300
+Message-ID: <87ecfb68-775a-2a17-5b42-ae02b354e3d7@intel.com>
+References: <1532340508-8749-1-git-send-email-zhang.chunyan@linaro.org>
+ <1532340508-8749-2-git-send-email-zhang.chunyan@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180726151424.4bcecf41@xhacker.debian>
+In-Reply-To: <1532340508-8749-2-git-send-email-zhang.chunyan@linaro.org>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jisheng Zhang <Jisheng.Zhang@synaptics.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@spreadtrum.com>, Jason Wu <jason.wu@unisoc.com>, zhang.lyra@gmail.com
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Jisheng,
-
-On 26/07/18 08:14, Jisheng Zhang wrote:
-> When using DMA, if the DMA addr spans 128MB boundary, we have to split
-> the DMA transfer into two so that each one doesn't exceed the boundary.
-
-Out of interest, is the driver already setting its segment boundary mask 
-appropriately? This sounds like the exact kind of hardware restriction 
-that dma_parms is intended to describe, which scatterlist-generating 
-code is *supposed* to already respect.
-
-Robin.
-
-> Signed-off-by: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
-> ---
->   drivers/mmc/host/sdhci-of-dwcmshc.c | 42 +++++++++++++++++++++++++++++
->   1 file changed, 42 insertions(+)
+On 23/07/18 13:08, Chunyan Zhang wrote:
+> For SD host controller version 4.00 or later ones, there're two
+> modes of implementation - Version 3.00 compatible mode or
+> Version 4 mode.  This patch introduced an interface to enable
+> v4 mode.
 > 
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index 1b7cd144fb01..7e189514bc83 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -8,21 +8,51 @@
->    */
->   
->   #include <linux/clk.h>
-> +#include <linux/mm.h>
->   #include <linux/module.h>
->   #include <linux/of.h>
->   
->   #include "sdhci-pltfm.h"
->   
-> +#define BOUNDARY_OK(addr, len) \
-> +	((addr | (SZ_128M - 1)) == ((addr + len - 1) | (SZ_128M - 1)))
-> +
->   struct dwcmshc_priv {
->   	struct clk	*bus_clk;
->   };
->   
-> +/*
-> + * if DMA addr spans 128MB boundary, we split the DMA transfer into two
-> + * so that the DMA transfer doesn't exceed the boundary.
-> + */
-> +static unsigned int dwcmshc_adma_write_desc(struct sdhci_host *host,
-> +					    void *desc, dma_addr_t addr,
-> +					    int len, unsigned int cmd)
+> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
+> ---
+>  drivers/mmc/host/sdhci.c | 28 ++++++++++++++++++++++++++++
+>  drivers/mmc/host/sdhci.h |  5 +++++
+>  2 files changed, 33 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 1c828e0..cab5350 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -123,6 +123,30 @@ EXPORT_SYMBOL_GPL(sdhci_dumpregs);
+>   *                                                                           *
+>  \*****************************************************************************/
+>  
+> +static void sdhci_do_enable_v4_mode(struct sdhci_host *host)
 > +{
-> +	int tmplen, offset;
+> +	u16 ctrl2;
 > +
-> +	if (BOUNDARY_OK(addr, len) || !len)
-> +		return _sdhci_adma_write_desc(host, desc, addr, len, cmd);
+> +	ctrl2 = sdhci_readb(host, SDHCI_HOST_CONTROL2);
+> +	if (ctrl2 & SDHCI_CTRL_V4_MODE)
+> +		return;
 > +
-> +	offset = addr & (SZ_128M - 1);
-> +	tmplen = SZ_128M - offset;
-> +	_sdhci_adma_write_desc(host, desc, addr, tmplen, cmd);
-> +
-> +	addr += tmplen;
-> +	len -= tmplen;
-> +	desc += host->desc_sz;
-> +	_sdhci_adma_write_desc(host, desc, addr, len, cmd);
-> +
-> +	return host->desc_sz * 2;
+> +	ctrl2 |= SDHCI_CTRL_V4_MODE;
+> +	sdhci_writeb(host, ctrl2, SDHCI_HOST_CONTROL);
 > +}
 > +
->   static const struct sdhci_ops sdhci_dwcmshc_ops = {
->   	.set_clock		= sdhci_set_clock,
->   	.set_bus_width		= sdhci_set_bus_width,
->   	.set_uhs_signaling	= sdhci_set_uhs_signaling,
->   	.get_max_clock		= sdhci_pltfm_clk_get_max_clock,
->   	.reset			= sdhci_reset,
-> +	.adma_write_desc	= dwcmshc_adma_write_desc,
->   };
->   
->   static const struct sdhci_pltfm_data sdhci_dwcmshc_pdata = {
-> @@ -36,12 +66,24 @@ static int dwcmshc_probe(struct platform_device *pdev)
->   	struct sdhci_host *host;
->   	struct dwcmshc_priv *priv;
->   	int err;
-> +	u32 extra;
->   
->   	host = sdhci_pltfm_init(pdev, &sdhci_dwcmshc_pdata,
->   				sizeof(struct dwcmshc_priv));
->   	if (IS_ERR(host))
->   		return PTR_ERR(host);
->   
-> +	/*
-> +	 * The DMA descriptor table number is calculated as the maximum
-> +	 * number of segments times 2, to allow for an alignment
-> +	 * descriptor for each segment, plus 1 for a nop end descriptor,
-> +	 * plus extra number for cross 128M boundary handling.
-> +	 */
-> +	extra = DIV_ROUND_UP(totalram_pages, SZ_128M / PAGE_SIZE);
-> +	if (extra > SDHCI_MAX_SEGS)
-> +		extra = SDHCI_MAX_SEGS;
-> +	host->adma_table_num = SDHCI_MAX_SEGS * 2 + 1 + extra;
+> +/*
+> + * Vendor's Host Controller which supports v4 mode can call
+> + * this function to enable v4 mode before calling
+> + * __sdhci_add_host().
+> + */
+> +void sdhci_enable_v4_mode(struct sdhci_host *host)
+> +{
+> +	host->v4_mode = true;
+> +	sdhci_do_enable_v4_mode(host);
+> +}
+> +EXPORT_SYMBOL_GPL(sdhci_enable_v4_mode);
 > +
->   	pltfm_host = sdhci_priv(host);
->   	priv = sdhci_pltfm_priv(pltfm_host);
->   
+>  static inline bool sdhci_data_line_cmd(struct mmc_command *cmd)
+>  {
+>  	return cmd->data || cmd->flags & MMC_RSP_BUSY;
+> @@ -224,6 +248,10 @@ static void sdhci_do_reset(struct sdhci_host *host, u8 mask)
+>  
+>  		/* Resetting the controller clears many */
+>  		host->preset_enabled = false;
+> +
+> +		if (host->v4_mode)
+> +			sdhci_do_enable_v4_mode(host);
+
+Instead of sdhci_do_reset() I would rather add this to sdhci_init() and
+__sdhci_read_caps()
+
+> +
+>  	}
+>  }
+>  
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 23966f8..519d939 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -184,6 +184,7 @@
+>  #define   SDHCI_CTRL_DRV_TYPE_D		0x0030
+>  #define  SDHCI_CTRL_EXEC_TUNING		0x0040
+>  #define  SDHCI_CTRL_TUNED_CLK		0x0080
+> +#define  SDHCI_CTRL_V4_MODE		0x1000
+>  #define  SDHCI_CTRL_PRESET_VAL_ENABLE	0x8000
+>  
+>  #define SDHCI_CAPABILITIES	0x40
+> @@ -565,6 +566,9 @@ struct sdhci_host {
+>  
+>  	u64			data_timeout;
+>  
+> +	/* Host Version 4 Enable */
+> +	bool			v4_mode;
+
+Let's put this with the other bools i.e. after bool irq_wake_enabled;
+
+> +
+>  	unsigned long private[0] ____cacheline_aligned;
+>  };
+>  
+> @@ -747,5 +751,6 @@ bool sdhci_cqe_irq(struct sdhci_host *host, u32 intmask, int *cmd_error,
+>  		   int *data_error);
+>  
+>  void sdhci_dumpregs(struct sdhci_host *host);
+> +void sdhci_enable_v4_mode(struct sdhci_host *host);
+>  
+>  #endif /* __SDHCI_HW_H */
 > 
