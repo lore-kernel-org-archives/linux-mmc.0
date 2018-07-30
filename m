@@ -1,47 +1,26 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3] mmc: sunxi: remove output of virtual
- base address
-Date: Mon, 30 Jul 2018 17:06:39 +0200
-Message-ID: <CAPDyKFpa=BHDQfBFxc6LUjq1fBuC2=rqYp28xWS3QBc=rTOYjQ@mail.gmail.com>
-References: <20180723153431.8669-1-andre.przywara@arm.com>
-Reply-To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2 2/6] dt-bindings: mmc: rockchip-dw-mshc: add
+ description for px30
+Date: Mon, 30 Jul 2018 17:06:32 +0200
+Message-ID: <CAPDyKFo2GmxKwXDTOxnNY_wb4ydmVjGAZD3=bZYLhfEvjmGyXQ@mail.gmail.com>
+References: <1532337924-4185-1-git-send-email-cl@rock-chips.com> <1532337924-4185-3-git-send-email-cl@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-sunxi+bncBDF57NG2XIHRBAGT7TNAKGQE7WX3EII-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-In-Reply-To: <20180723153431.8669-1-andre.przywara-5wv7dgnIgG8@public.gmane.org>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
-Cc: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-sunxi <linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1532337924-4185-3-git-send-email-cl@rock-chips.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: cl@rock-chips.com
+Cc: Heiko Stuebner <heiko@sntech.de>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, klaus.goger@theobroma-systems.com, hjc@rock-chips.com, jagan@amarulasolutions.com, djw@t-chip.com.cn, jacob-chen@iotwrt.com, devicetree@vger.kernel.org, Linux ARM <linux-arm-kernel@lists.infradead.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Frank Wang <frank.wang@rock-chips.com>, Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, alsa-devel@alsa-project.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 23 July 2018 at 17:34, Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org> wrote:
-> Recent Linux versions refuse to print actual virtual kernel addresses,
-> to not give a hint about the location of the kernel in a randomized virtual
-> address space. This affects the output of the sunxi MMC controller
-> driver, which now produces the rather uninformative line:
+On 23 July 2018 at 11:25,  <cl@rock-chips.com> wrote:
+> From: Liang Chen <cl@rock-chips.com>
 >
-> [    1.482660] sunxi-mmc 1c0f000.mmc: base:0x(____ptrval____) irq:8
+> Add "rockchip,px30-dw-mshc", "rockchip,rk3288-dw-mshc" for
+> dwmmc on px30 platform.
 >
-> Since the virtual base address is not really interesting in the first
-> place, let's just drop this value. The same applies to Linux' notion of
-> the interrupt number, which is independent from the GIC SPI number.
-> We have the physical address as part of the DT node name, which is way
-> more useful for debugging purposes.
-> To keep a success message in the driver, we make this purpose explicit
-> with the word "initialized", plus print some information that is not too
-> obvious and that we learned while probing the device:
-> the maximum request size and whether it uses the new timing mode.
-> So the output turns into:
-> [    1.750626] sunxi-mmc 1c0f000.mmc: initialized, max. request size: 16384 KB, uses new timings mode
-> [    1.786699] sunxi-mmc 1c11000.mmc: initialized, max. request size: 2048 KB
->
-> Signed-off-by: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
+> Acked-by: Rob Herring <robh@kernel.org>
+> Signed-off-by: Liang Chen <cl@rock-chips.com>
 
 Thanks, applied for next!
 
@@ -49,25 +28,22 @@ Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/sunxi-mmc.c | 5 ++++-
->  1 file changed, 4 insertions(+), 1 deletion(-)
+>  Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt | 1 +
+>  1 file changed, 1 insertion(+)
 >
-> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index 8e7f3e35ee3d..c18cf035ac00 100644
-> --- a/drivers/mmc/host/sunxi-mmc.c
-> +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -1407,7 +1407,10 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
->         if (ret)
->                 goto error_free_dma;
->
-> -       dev_info(&pdev->dev, "base:0x%p irq:%u\n", host->reg_base, host->irq);
-> +       dev_info(&pdev->dev, "initialized, max. request size: %u KB%s\n",
-> +                mmc->max_req_size >> 10,
-> +                host->use_new_timings ? ", uses new timings mode" : "");
-> +
->         return 0;
->
->  error_free_dma:
+> diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
+> index 8ce49b2..6f629b1 100644
+> --- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
+> @@ -14,6 +14,7 @@ Required Properties:
+>                                                         before RK3288
+>         - "rockchip,rk3288-dw-mshc": for Rockchip RK3288
+>         - "rockchip,rv1108-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RV1108
+> +       - "rockchip,px30-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip PX30
+>         - "rockchip,rk3036-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK3036
+>         - "rockchip,rk3228-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK322x
+>         - "rockchip,rk3328-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK3328
 > --
-> 2.14.4
+> 1.9.1
+>
 >
