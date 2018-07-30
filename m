@@ -1,54 +1,109 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: tmio: remove unneeded variable in tmio_mmc_start_command()
-Date: Mon, 30 Jul 2018 17:06:51 +0200
-Message-ID: <CAPDyKFrbyiYhj_Q_hWCoxFG0pdg805ors9CuNm8Hb7Xh+2Wksg@mail.gmail.com>
-References: <1532508374-28957-1-git-send-email-yamada.masahiro@socionext.com>
+Subject: Re: [PATCH 1/2] mmc: tmio: rename files and CONFIG options to have
+ the same prefix
+Date: Mon, 30 Jul 2018 17:07:02 +0200
+Message-ID: <CAPDyKFpK=UnwdNtb3XcgcRBJZeE0X5osM-tk8E85TCs3CeDq7Q@mail.gmail.com>
+References: <1532575736-20138-1-git-send-email-yamada.masahiro@socionext.com> <1532575736-20138-2-git-send-email-yamada.masahiro@socionext.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1532508374-28957-1-git-send-email-yamada.masahiro@socionext.com>
+In-Reply-To: <1532575736-20138-2-git-send-email-yamada.masahiro@socionext.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 25 July 2018 at 10:46, Masahiro Yamada <yamada.masahiro@socionext.com> wrote:
-> Pass TMIO_MASK_CMD to tmio_mmc_enable_mmc_irqs() directly,
-> and remove the variable, irq_mask.
+On 26 July 2018 at 05:28, Masahiro Yamada <yamada.masahiro@socionext.com> wrote:
+> As commit b6147490e6aa ("mmc: tmio: split core functionality, DMA and
+> MFD glue") said, these MMC controllers use the IP from Panasonic.
+>
+> TMIO (Toshiba Mobile IO) MMC was the first upstreamed user of this IP.
+> The common driver code was split and expanded as 'tmio-mmc-core', then
+> it become historical misnomer since 'tmio' is not the name of this IP.
+>
+> I pointed out this [1], and suggested to re-organize the names in the
+> form of:
+>
+>   <IP-name>.c            (common code for this IP)
+>   <IP-name>_tmio.c       (Toshiba Mobile IO)
+>   <IP-name>_sdhi.c       (Renesas SDHI)
+>   <IP-name>_uniphier.c   (Socionext UniPhier)
+>
+> The <IP-name> in my mind was 'mnsd' because names of Panasonic chips
+> are prefixed with 'MN'.
+>
+> This is the naming scheme as we see in dw_mmc* and sdhci-*.
+>
+> In the discussion with Wolfram Sang, my suggestion was rejected
+> because it implied drastic function renaming, which is too invasive.
+>
+> Ulf Hansson was still happy with file renaming to clarify the
+> relationship between variants.  So, the accepted solution was:
+>
+>  - Make 'tmio_mmc' the _right_ core name
+>  - Align all variant files with the same prefix.
+>  - Do not rename functions
+>
+> This commit renames files as follows:
+>
+>   tmio_mmc_core.c              -> tmio_mmc.c
+>   tmio_mmc.c                   -> tmio_mmc_original.c
+>   renesas_sdhi_core.c          -> tmio_mmc_sdhi.c
+>   renesas_sdhi.h               -> tmio_mmc_sdhi.h
+>   renesas_sdhi_internal_dmac.c -> tmio_mmc_sdhi_internal_dmac.c
+>   renesas_sdhi_sys_dmac.c      -> tmio_mmc_sdhi_sys_dmac.c
+>
+> Also rename CONFIG options to match to the file names:
+>
+>   MMC_TMIO_CORE          -> MMC_TMIO
+>   MMC_TMIO               -> MMC_TMIO_ORIGINAL
+>   MMC_SDHI               -> MMC_TMIO_SDHI
+>   MMC_SDHI_SYS_DMAC      -> MMC_TMIO_SDHI_SYS_DMAC
+>   MMC_SDHI_INTERNAL_DMAC -> MMC_TMIO_SDHI_INTERNAL_DMAC
+>
+> I touched eseries_pxa_defconfig and pxa_defconfig in this commit
+> because they are inactive, but renaming of CONFIG options generally
+> takes some development cycles.  Old names will be kept until the
+> migration is completed, like Renesas folks did when they renamed
+> ARCH_SHMOBILE_MULTI to ARCH_RENESAS.
+>
+> [1] https://www.spinics.net/lists/linux-mmc/msg46952.html
 >
 > Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 
-Thanks, applied for next!
-
-Kind regards
-Uffe
+I am awaiting some feedback from Wolfram before applying.
 
 > ---
 >
->  drivers/mmc/host/tmio_mmc_core.c | 3 +--
->  1 file changed, 1 insertion(+), 2 deletions(-)
+>  MAINTAINERS                                        |    1 -
+>  arch/arm/configs/eseries_pxa_defconfig             |    2 +-
+>  arch/arm/configs/pxa_defconfig                     |    2 +-
+>  drivers/mmc/host/Kconfig                           |   25 +-
+>  drivers/mmc/host/Makefile                          |    8 +-
+>  drivers/mmc/host/tmio_mmc.c                        | 1415 ++++++++++++++++++--
+>  drivers/mmc/host/tmio_mmc_core.c                   | 1394 -------------------
+>  drivers/mmc/host/tmio_mmc_original.c               |  167 +++
+
+I think there should be another way to format the patch to get better diffstat.
+
+I guess it depends a bit on what version of git you are using, but
+trying the -M option may help.
+
+
+>  .../host/{renesas_sdhi_core.c => tmio_mmc_sdhi.c}  |    2 +-
+>  .../mmc/host/{renesas_sdhi.h => tmio_mmc_sdhi.h}   |    0
+>  ...ternal_dmac.c => tmio_mmc_sdhi_internal_dmac.c} |    2 +-
+>  ...as_sdhi_sys_dmac.c => tmio_mmc_sdhi_sys_dmac.c} |    2 +-
+>  12 files changed, 1518 insertions(+), 1502 deletions(-)
+>  delete mode 100644 drivers/mmc/host/tmio_mmc_core.c
+>  create mode 100644 drivers/mmc/host/tmio_mmc_original.c
+>  rename drivers/mmc/host/{renesas_sdhi_core.c => tmio_mmc_sdhi.c} (99%)
+>  rename drivers/mmc/host/{renesas_sdhi.h => tmio_mmc_sdhi.h} (100%)
+>  rename drivers/mmc/host/{renesas_sdhi_internal_dmac.c => tmio_mmc_sdhi_internal_dmac.c} (99%)
+>  rename drivers/mmc/host/{renesas_sdhi_sys_dmac.c => tmio_mmc_sdhi_sys_dmac.c} (99%)
 >
-> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-> index 3080299..3cb554c 100644
-> --- a/drivers/mmc/host/tmio_mmc_core.c
-> +++ b/drivers/mmc/host/tmio_mmc_core.c
-> @@ -309,7 +309,6 @@ static int tmio_mmc_start_command(struct tmio_mmc_host *host,
->  {
->         struct mmc_data *data = host->data;
->         int c = cmd->opcode;
-> -       u32 irq_mask = TMIO_MASK_CMD;
->
->         switch (mmc_resp_type(cmd)) {
->         case MMC_RSP_NONE: c |= RESP_NONE; break;
-> @@ -349,7 +348,7 @@ static int tmio_mmc_start_command(struct tmio_mmc_host *host,
->                         c |= TRANSFER_READ;
->         }
->
-> -       tmio_mmc_enable_mmc_irqs(host, irq_mask);
-> +       tmio_mmc_enable_mmc_irqs(host, TMIO_MASK_CMD);
->
->         /* Fire off the command */
->         sd_ctrl_write32_as_16_and_16(host, CTL_ARG_REG, cmd->arg);
-> --
-> 2.7.4
->
+
+[...]
+
+Kind regards
+Uffe
