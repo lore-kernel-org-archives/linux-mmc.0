@@ -1,155 +1,110 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V4 5/7] mmc: sdhci: add Auto CMD Auto Select support
-Date: Mon, 30 Jul 2018 16:06:06 +0300
-Message-ID: <33ceb61c-3e09-c336-e9b9-87c01336f56c@intel.com>
-References: <1532340508-8749-1-git-send-email-zhang.chunyan@linaro.org>
- <1532340508-8749-6-git-send-email-zhang.chunyan@linaro.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V7 1/5] mmc: sdhci: Add support for O2 eMMC HS200 mode
+Date: Mon, 30 Jul 2018 17:05:51 +0200
+Message-ID: <CAPDyKFpxP67XttkJxTKdwBSYiJePdw_1icwCVZWBwD5WJ5XBVA@mail.gmail.com>
+References: <20180716062655.24703-1-ernest.zhang@bayhubtech.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1532340508-8749-6-git-send-email-zhang.chunyan@linaro.org>
-Content-Language: en-US
+In-Reply-To: <20180716062655.24703-1-ernest.zhang@bayhubtech.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@spreadtrum.com>, Jason Wu <jason.wu@unisoc.com>, zhang.lyra@gmail.com
+To: "ernest.zhang" <ernest.zhang@bayhubtech.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, chuanjin.pang@bayhubtech.com, mike.li@bayhubtech.com, chevron.li@bayhubtech.com, "Shirley Her (SC)" <shirley.her@bayhubtech.com>, xiaoguang.yu@bayhubtech.com, bobby.wu@bayhubtech.com
 List-Id: linux-mmc@vger.kernel.org
 
-On 23/07/18 13:08, Chunyan Zhang wrote:
-> As SD Host Controller Specification v4.10 documents:
-> Host Controller Version 4.10 defines this "Auto CMD Auto Select" mode.
-> Selection of Auto CMD depends on setting of CMD23 Enable in the Host
-> Control 2 register which indicates whether card supports CMD23. If CMD23
-> Enable =1, Auto CMD23 is used and if CMD23 Enable =0, Auto CMD12 is
-> used. In case of Version 4.10 or later, use of Auto CMD Auto Select is
-> recommended rather than use of Auto CMD12 Enable or Auto CMD23
-> Enable.
-> 
-> This patch add this new mode support.
-> 
-> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
+On 16 July 2018 at 08:26, ernest.zhang <ernest.zhang@bayhubtech.com> wrote:
+> When use eMMC as boot device, the eMMC signaling voltage is tied to 1.8v
+> fixed output voltage, bios can set o2 sd host controller PCI configuration
+> register 0x308 bit4 to 1 to let driver skip 3.3v signaling voltage and
+> direct use 1.8v singling voltage in eMMC initialize process.
+>
+> Signed-off-by: ernest.zhang <ernest.zhang@bayhubtech.com>
+
+Thanks, the series applied for next!
+
+Kind regards
+Uffe
+
 > ---
->  drivers/mmc/host/sdhci.c | 61 +++++++++++++++++++++++++++++++++++++++---------
->  drivers/mmc/host/sdhci.h |  2 ++
->  2 files changed, 52 insertions(+), 11 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 5acea3d..5c60590 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -311,6 +311,23 @@ static void sdhci_config_dma(struct sdhci_host *host)
->  	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
->  }
->  
-> +static void sdhci_enable_cmd23(struct sdhci_host *host)
-> +{
-> +	u16 ctrl2;
+> Changes in V7:
+>         Move V6 change item 2 to a seperate patch file
+>
+> Changes in V6:
+>         1.Move change log to correct place.
+>         2.Change HS200 mode clock frequency from 208MHz to 200MHz to meet
+>         Specification.
+>
+> Changes in V5:
+>         Modify code format to pass checkpatch.pl check and add a summary
+>         of what has changed in each version.
+>
+> Changes in V4:
+>         Skip SDIO and SD initalization when register 0x308 bit 4 is set,
+>         and modify some typo.
+>
+> Changes in V3:
+>         Rebase the patch on the mmc tree 'next' branch.
+>
+> Changes in V2:
+>         Modify code format, and delete unused code path.
+>
+> Changes in V1:
+>         Check PCIe register 0x308 bit 4 and skip eMMC 3.3v initialization
+>         process if it is set to 1.
+> ---
+>  drivers/mmc/host/sdhci-pci-o2micro.c | 18 ++++++++++++++++++
+>  1 file changed, 18 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+> index 555970a29c94..ba59db6a126c 100644
+> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
+> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+> @@ -3,6 +3,7 @@
+>   *
+>   * Authors: Peter Guo <peter.guo@bayhubtech.com>
+>   *          Adam Lee <adam.lee@canonical.com>
+> + *          Ernest Zhang <ernest.zhang@bayhubtech.com>
+>   *
+>   * This software is licensed under the terms of the GNU General Public
+>   * License version 2, as published by the Free Software Foundation, and
+> @@ -39,6 +40,7 @@
+>  #define O2_SD_MISC_CTRL4       0xFC
+>  #define O2_SD_TUNING_CTRL      0x300
+>  #define O2_SD_PLL_SETTING      0x304
+> +#define O2_SD_MISC_SETTING     0x308
+>  #define O2_SD_CLK_SETTING      0x328
+>  #define O2_SD_CAP_REG2         0x330
+>  #define O2_SD_CAP_REG0         0x334
+> @@ -184,6 +186,7 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+>         struct sdhci_pci_chip *chip;
+>         struct sdhci_host *host;
+>         u32 reg;
+> +       int ret;
+>
+>         chip = slot->chip;
+>         host = slot->host;
+> @@ -197,6 +200,21 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+>                 if (reg & 0x1)
+>                         host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
+>
+> +               if (chip->pdev->device == PCI_DEVICE_ID_O2_SEABIRD0) {
+> +                       ret = pci_read_config_dword(chip->pdev,
+> +                                                   O2_SD_MISC_SETTING, &reg);
+> +                       if (ret)
+> +                               return -EIO;
+> +                       if (reg & (1 << 4)) {
+> +                               pr_info("%s: emmc 1.8v flag is set, force 1.8v signaling voltage\n",
+> +                                       mmc_hostname(host->mmc));
+> +                               host->flags &= ~SDHCI_SIGNALING_330;
+> +                               host->flags |= SDHCI_SIGNALING_180;
+> +                               host->mmc->caps2 |= MMC_CAP2_NO_SD;
+> +                               host->mmc->caps2 |= MMC_CAP2_NO_SDIO;
+> +                       }
+> +               }
 > +
-> +	/*
-> +	 * This is used along with "Auto CMD Auto Select" feature,
-> +	 * which is introduced from v4.10, if card supports CMD23,
-> +	 * Auto CMD23 should be used instead of Auto CMD12.
-> +	 */
-> +	if (host->version >= SDHCI_SPEC_410 &&
-> +	    (host->mmc->caps & MMC_CAP_CMD23)) {
-
-That is the host capability.  It needs to be the card capability.
-
-> +		ctrl2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> +		ctrl2 |= SDHCI_CMD23_ENABLE;
-> +		sdhci_writew(host, ctrl2, SDHCI_HOST_CONTROL2);
-> +	}
-> +}
-> +
->  static void sdhci_init(struct sdhci_host *host, int soft)
->  {
->  	struct mmc_host *mmc = host->mmc;
-> @@ -329,6 +346,8 @@ static void sdhci_init(struct sdhci_host *host, int soft)
->  		host->clock = 0;
->  		mmc->ops->set_ios(mmc, &mmc->ios);
->  	}
-> +
-> +	sdhci_enable_cmd23(host);
->  }
->  
->  static void sdhci_reinit(struct sdhci_host *host)
-> @@ -1093,6 +1112,36 @@ static inline bool sdhci_auto_cmd12(struct sdhci_host *host,
->  	       !mrq->cap_cmd_during_tfr;
->  }
->  
-> +static inline void sdhci_auto_cmd_select(struct sdhci_host *host,
-> +					 struct mmc_command *cmd,
-> +					 u16 *mode)
-> +{
-> +	bool use_cmd12 = sdhci_auto_cmd12(host, cmd->mrq) &&
-> +			 (cmd->opcode != SD_IO_RW_EXTENDED);
-> +	bool use_cmd23 = cmd->mrq->sbc && (host->flags & SDHCI_AUTO_CMD23);
-> +
-> +	/*
-> +	 * In case of Version 4.10 or later, use of 'Auto CMD Auto
-> +	 * Select' is recommended rather than use of 'Auto CMD12
-> +	 * Enable' or 'Auto CMD23 Enable'.
-> +	 */
-> +	if (host->version >= SDHCI_SPEC_410 && (use_cmd12 || use_cmd23)) {
-> +		*mode |= SDHCI_TRNS_AUTO_SEL;
-
-As noted in patch 4, the CMD23 argument is not just the block count for eMMC.
-
-> +		return;
-> +	}
-> +
-> +	/*
-> +	 * If we are sending CMD23, CMD12 never gets sent
-> +	 * on successful completion (so no Auto-CMD12).
-> +	 */
-> +	if (use_cmd12) {
-> +		*mode |= SDHCI_TRNS_AUTO_CMD12;
-> +	} else if (use_cmd23) {
-> +		*mode |= SDHCI_TRNS_AUTO_CMD23;
-> +		sdhci_writel(host, cmd->mrq->sbc->arg, SDHCI_ARGUMENT2);
-> +	}
-> +}
-> +
->  static void sdhci_set_transfer_mode(struct sdhci_host *host,
->  	struct mmc_command *cmd)
->  {
-> @@ -1119,17 +1168,7 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
->  
->  	if (mmc_op_multi(cmd->opcode) || data->blocks > 1) {
->  		mode = SDHCI_TRNS_BLK_CNT_EN | SDHCI_TRNS_MULTI;
-> -		/*
-> -		 * If we are sending CMD23, CMD12 never gets sent
-> -		 * on successful completion (so no Auto-CMD12).
-> -		 */
-> -		if (sdhci_auto_cmd12(host, cmd->mrq) &&
-> -		    (cmd->opcode != SD_IO_RW_EXTENDED))
-> -			mode |= SDHCI_TRNS_AUTO_CMD12;
-> -		else if (cmd->mrq->sbc && (host->flags & SDHCI_AUTO_CMD23)) {
-> -			mode |= SDHCI_TRNS_AUTO_CMD23;
-> -			sdhci_writel(host, cmd->mrq->sbc->arg, SDHCI_ARGUMENT2);
-> -		}
-> +		sdhci_auto_cmd_select(host, cmd, &mode);
->  	}
->  
->  	if (data->flags & MMC_DATA_READ)
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 81aae07..a8f4ec2 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -42,6 +42,7 @@
->  #define  SDHCI_TRNS_BLK_CNT_EN	0x02
->  #define  SDHCI_TRNS_AUTO_CMD12	0x04
->  #define  SDHCI_TRNS_AUTO_CMD23	0x08
-> +#define  SDHCI_TRNS_AUTO_SEL	0x0C
->  #define  SDHCI_TRNS_READ	0x10
->  #define  SDHCI_TRNS_MULTI	0x20
->  
-> @@ -185,6 +186,7 @@
->  #define   SDHCI_CTRL_DRV_TYPE_D		0x0030
->  #define  SDHCI_CTRL_EXEC_TUNING		0x0040
->  #define  SDHCI_CTRL_TUNED_CLK		0x0080
-> +#define  SDHCI_CMD23_ENABLE		0x0800
->  #define  SDHCI_CTRL_V4_MODE		0x1000
->  #define  SDHCI_CTRL_64BIT_ADDR		0x2000
->  #define  SDHCI_CTRL_PRESET_VAL_ENABLE	0x8000
-> 
+>                 if (chip->pdev->device != PCI_DEVICE_ID_O2_FUJIN2)
+>                         break;
+>                 /* set dll watch dog timer */
+> --
+> 2.17.1
+>
