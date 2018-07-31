@@ -1,82 +1,231 @@
-From: Stefan Agner <stefan@agner.ch>
-Subject: Re: [PATCH v2 00/10] Tegra SDHCI update the pad autocal procedure
-Date: Tue, 31 Jul 2018 11:33:20 +0200
-Message-ID: <56e6c8c572a429a987dd7ef7bd898768@agner.ch>
-References: <1532608016-14319-1-git-send-email-avienamo@nvidia.com>
- <CAPDyKFo+nv+9qYV=J5k-63cDhQO=L==87RLMj_7BnjEjUf5iEQ@mail.gmail.com>
- <20180730184351.5044cb6e@dhcp-10-21-25-168>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V4 5/7] mmc: sdhci: add Auto CMD Auto Select support
+Date: Tue, 31 Jul 2018 12:36:29 +0300
+Message-ID: <c036244d-e944-f0c7-3efd-886def5fb22c@intel.com>
+References: <1532340508-8749-1-git-send-email-zhang.chunyan@linaro.org>
+ <1532340508-8749-6-git-send-email-zhang.chunyan@linaro.org>
+ <33ceb61c-3e09-c336-e9b9-87c01336f56c@intel.com>
+ <CAAfSe-vVEve63y-Pc0QF6w7vc37cbbbOknGkp9SmocXyNX3J4g@mail.gmail.com>
+ <f810df5a-2cc4-a534-9fdc-2575ae81cf4b@intel.com>
+ <CAAfSe-uyjnBGk7w2KMgrgEYVgYY6p6EqCWTUW+r2BWDoYmPpLg@mail.gmail.com>
+ <23282747-4ae1-d627-a537-590b9315b941@intel.com>
+ <CAAfSe-vp_6zFPo+UYKiR+St1ajv8WXP_OL-OZh_POiUybzDHeQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180730184351.5044cb6e@dhcp-10-21-25-168>
+In-Reply-To: <CAAfSe-vp_6zFPo+UYKiR+St1ajv8WXP_OL-OZh_POiUybzDHeQ@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Aapo Vienamo <avienamo@nvidia.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, Mikko Perttunen <mperttunen@nvidia.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-tegra-owner@vger.kernel.org
+To: Chunyan Zhang <zhang.lyra@gmail.com>
+Cc: Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@spreadtrum.com>, Jason Wu <jason.wu@unisoc.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 30.07.2018 17:43, Aapo Vienamo wrote:
-> On Mon, 30 Jul 2018 17:07:59 +0200
-> Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> 
->> On 26 July 2018 at 14:26, Aapo Vienamo <avienamo@nvidia.com> wrote:
->> > Hi all,
->> >
->> > Update the tegra_sdhci_pad_autocalib() pad drive strength calibration
->> > procedure to match the ones specified in the TRMs of the more recent
->> > SoCs. This was tested on Tegra186, Tegra210, and Tegra124, although it
->> > should not break things older generations either.
-
-I can give this a try on Tegra 3 here.
-
->> >
->> > This series depends on the "Tegra SDHCI enable 1.8 V signaling on
->> > Tegar210 and Tegra186" series posted earlier.
+On 31/07/18 12:20, Chunyan Zhang wrote:
+> On 31 July 2018 at 16:56, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> On 31/07/18 11:36, Chunyan Zhang wrote:
+>>> On 31 July 2018 at 16:05, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>> On 31/07/18 10:04, Chunyan Zhang wrote:
+>>>>> Hi Adrian,
+>>>>>
+>>>>> On 30 July 2018 at 21:06, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>>>> On 23/07/18 13:08, Chunyan Zhang wrote:
+>>>>>>> As SD Host Controller Specification v4.10 documents:
+>>>>>>> Host Controller Version 4.10 defines this "Auto CMD Auto Select" mode.
+>>>>>>> Selection of Auto CMD depends on setting of CMD23 Enable in the Host
+>>>>>>> Control 2 register which indicates whether card supports CMD23. If CMD23
+>>>>>>> Enable =1, Auto CMD23 is used and if CMD23 Enable =0, Auto CMD12 is
+>>>>>>> used. In case of Version 4.10 or later, use of Auto CMD Auto Select is
+>>>>>>> recommended rather than use of Auto CMD12 Enable or Auto CMD23
+>>>>>>> Enable.
+>>>>>>>
+>>>>>>> This patch add this new mode support.
+>>>>>>>
+>>>>>>> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
+>>>>>>> ---
+>>>>>>>  drivers/mmc/host/sdhci.c | 61 +++++++++++++++++++++++++++++++++++++++---------
+>>>>>>>  drivers/mmc/host/sdhci.h |  2 ++
+>>>>>>>  2 files changed, 52 insertions(+), 11 deletions(-)
+>>>>>>>
+>>>>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>>>>>> index 5acea3d..5c60590 100644
+>>>>>>> --- a/drivers/mmc/host/sdhci.c
+>>>>>>> +++ b/drivers/mmc/host/sdhci.c
+>>>>>>> @@ -311,6 +311,23 @@ static void sdhci_config_dma(struct sdhci_host *host)
+>>>>>>>       sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+>>>>>>>  }
+>>>>>>>
+>>>>>>> +static void sdhci_enable_cmd23(struct sdhci_host *host)
+>>>>>>> +{
+>>>>>>> +     u16 ctrl2;
+>>>>>>> +
+>>>>>>> +     /*
+>>>>>>> +      * This is used along with "Auto CMD Auto Select" feature,
+>>>>>>> +      * which is introduced from v4.10, if card supports CMD23,
+>>>>>>> +      * Auto CMD23 should be used instead of Auto CMD12.
+>>>>>>> +      */
+>>>>>>> +     if (host->version >= SDHCI_SPEC_410 &&
+>>>>>>> +         (host->mmc->caps & MMC_CAP_CMD23)) {
+>>>>>>
+>>>>>> That is the host capability.  It needs to be the card capability.
+>>>>>
+>>>>> Could you please elaborate the issue?
+>>>>>
+>>>>> I thought we're setting for host here.  Do you mean we need to see the
+>>>>> card capability?
+>>>>
+>>>> Yes. SDHCI_TRNS_AUTO_SEL selects auto-CMD23 or auto-CMD12 based on this
+>>>> setting, so this must reflect the card's capability.
+>>>
+>>> Got it, but how to know if the card supports CMD23?
 >>
->> According to the cover letter of the above series, it states that it
->> depends on $subject series. A circular dependency. :-)
+>> At the moment the only way of knowing is if a request is received with mrq->sbc
+>>
+>>>
+>>>>
+>>>>>
+>>>>>>
+>>>>>>> +             ctrl2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+>>>>>>> +             ctrl2 |= SDHCI_CMD23_ENABLE;
+>>>>>>> +             sdhci_writew(host, ctrl2, SDHCI_HOST_CONTROL2);
+>>>>>>> +     }
+>>>>>>> +}
+>>>>>>> +
+>>>>>>>  static void sdhci_init(struct sdhci_host *host, int soft)
+>>>>>>>  {
+>>>>>>>       struct mmc_host *mmc = host->mmc;
+>>>>>>> @@ -329,6 +346,8 @@ static void sdhci_init(struct sdhci_host *host, int soft)
+>>>>>>>               host->clock = 0;
+>>>>>>>               mmc->ops->set_ios(mmc, &mmc->ios);
+>>>>>>>       }
+>>>>>>> +
+>>>>>>> +     sdhci_enable_cmd23(host);
+>>>>>>>  }
+>>>>>>>
+>>>>>>>  static void sdhci_reinit(struct sdhci_host *host)
+>>>>>>> @@ -1093,6 +1112,36 @@ static inline bool sdhci_auto_cmd12(struct sdhci_host *host,
+>>>>>>>              !mrq->cap_cmd_during_tfr;
+>>>>>>>  }
+>>>>>>>
+>>>>>>> +static inline void sdhci_auto_cmd_select(struct sdhci_host *host,
+>>>>>>> +                                      struct mmc_command *cmd,
+>>>>>>> +                                      u16 *mode)
+>>>>>>> +{
+>>>>>>> +     bool use_cmd12 = sdhci_auto_cmd12(host, cmd->mrq) &&
+>>>>>>> +                      (cmd->opcode != SD_IO_RW_EXTENDED);
+>>>>>>> +     bool use_cmd23 = cmd->mrq->sbc && (host->flags & SDHCI_AUTO_CMD23);
+>>>>>>> +
+>>>>>>> +     /*
+>>>>>>> +      * In case of Version 4.10 or later, use of 'Auto CMD Auto
+>>>>>>> +      * Select' is recommended rather than use of 'Auto CMD12
+>>>>>>> +      * Enable' or 'Auto CMD23 Enable'.
+>>>>>>> +      */
+>>>>>>> +     if (host->version >= SDHCI_SPEC_410 && (use_cmd12 || use_cmd23)) {
+>>>>>>> +             *mode |= SDHCI_TRNS_AUTO_SEL;
+>>>>>>
+>>>>>> As noted in patch 4, the CMD23 argument is not just the block count for eMMC.
+>>>>>
+>>>>> Probably I haven't got your point...
+>>>>>
+>>>>> >From what I understand, auto_sel mode doesn't need argument2. Doesn't
+>>>>> this work for eMMC?
+>>>>
+>>>> CMD23 always needs an argument
+>>>
+>>> But setting argument for CMD23 will cover the block count value we set
+>>> before, that will lead mounting emmc to fail.
+>>
+>> Does it fail because it contains cmd->mrq->sbc->arg or does it fail because
+>> it gets written twice?
 > 
-> The dependency chain goes like this: "Tegra SDHCI update the pad
-> autocal procedure" -> "Tegra SDHCI enable 1.8 V signaling on Tegar210
-> and Tegra186" -> "Tegra PMC pinctrl pad configuration".
+> Seems that the argument is too big compared with block count, hardware
+> think it is a super block count.
 > 
->> In fact, there should be no dependency at all or else there seems to
->> be a DT compatibility problem here...
-> 
-> From a functionality perspective there's no strict dependency, however,
-> I don't think "[PATCH v2 09/10] mmc: tegra: Perform pad calibration
-> after voltage switch" can be applied cleanly without
-> "[PATCH v2 03/10] mmc: tegra: Reconfigure pad voltages during voltage
-> switching" from the "Tegra SDHCI enable 1.8 V signaling on Tegar210 and
-> Tegra186" series.
-> 
->> Anyway, I think it actually makes sense to fold in all changes into
->> one series. Make sure the dt-doc changes comes first, then the driver
->> changes and finally arm64/dts changes. This should make it easy to
->> follow the review and I can pick the mmc parts and the soc maintainer
->> can pick the arm64/dts changes.
-> 
-> I've sent the changes in multiple part because I've been working on
-> further changes to the driver while the previous parts have been
-> getting reviewed. This is still the case and there's still going to be
-> at least one more series which adds support for HS200 tuning and some
-> smaller changes after it. However, the HS200 work is probably going to
-> be ready for review in a day or two. I can send these as a one series
-> from now on, although at this point it would be 27 patches in total
-> and even more with the HS200 patches.
-> 
-> I can do that if you prefer to do it that way. Makes my life somewhat
-> easier too.
+> More details of the error information:
+> https://www.irccloud.com/pastebin/uYlVEUsP/
 
-...that would make it easier for my testing too, so I wait for the next
-revision and will give it a try on Tegra 3 then.
+Does it work with auto-CMD23 instead of auto-CMD-auto-select?
+Does it work if the 16-bit block count register is used?
 
---
-Stefan
+Obviously, if we can't pass the CMD23 argument correctly then we can't use
+auto-CMD23.
 
 > 
->  -Aapo
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-tegra" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>>
+>>>>
+>>>>>
+>>>>> The test platform I used was just eMMC only, haven't found problem.
+>>>>
+>>>> Because the bits that are missing from the CMD23 argument (reliable write,
+>>>> context id, etc) will not make the command fail.
+>>>>
+>>>>>
+>>>>> Thanks,
+>>>>> Chunyan
+>>>>>
+>>>>>>
+>>>>>>> +             return;
+>>>>>>> +     }
+>>>>>>> +
+>>>>>>> +     /*
+>>>>>>> +      * If we are sending CMD23, CMD12 never gets sent
+>>>>>>> +      * on successful completion (so no Auto-CMD12).
+>>>>>>> +      */
+>>>>>>> +     if (use_cmd12) {
+>>>>>>> +             *mode |= SDHCI_TRNS_AUTO_CMD12;
+>>>>>>> +     } else if (use_cmd23) {
+>>>>>>> +             *mode |= SDHCI_TRNS_AUTO_CMD23;
+>>>>>>> +             sdhci_writel(host, cmd->mrq->sbc->arg, SDHCI_ARGUMENT2);
+>>>>>>> +     }
+>>>>>>> +}
+>>>>>>> +
+>>>>>>>  static void sdhci_set_transfer_mode(struct sdhci_host *host,
+>>>>>>>       struct mmc_command *cmd)
+>>>>>>>  {
+>>>>>>> @@ -1119,17 +1168,7 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
+>>>>>>>
+>>>>>>>       if (mmc_op_multi(cmd->opcode) || data->blocks > 1) {
+>>>>>>>               mode = SDHCI_TRNS_BLK_CNT_EN | SDHCI_TRNS_MULTI;
+>>>>>>> -             /*
+>>>>>>> -              * If we are sending CMD23, CMD12 never gets sent
+>>>>>>> -              * on successful completion (so no Auto-CMD12).
+>>>>>>> -              */
+>>>>>>> -             if (sdhci_auto_cmd12(host, cmd->mrq) &&
+>>>>>>> -                 (cmd->opcode != SD_IO_RW_EXTENDED))
+>>>>>>> -                     mode |= SDHCI_TRNS_AUTO_CMD12;
+>>>>>>> -             else if (cmd->mrq->sbc && (host->flags & SDHCI_AUTO_CMD23)) {
+>>>>>>> -                     mode |= SDHCI_TRNS_AUTO_CMD23;
+>>>>>>> -                     sdhci_writel(host, cmd->mrq->sbc->arg, SDHCI_ARGUMENT2);
+>>>>>>> -             }
+>>>>>>> +             sdhci_auto_cmd_select(host, cmd, &mode);
+>>>>>>>       }
+>>>>>>>
+>>>>>>>       if (data->flags & MMC_DATA_READ)
+>>>>>>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+>>>>>>> index 81aae07..a8f4ec2 100644
+>>>>>>> --- a/drivers/mmc/host/sdhci.h
+>>>>>>> +++ b/drivers/mmc/host/sdhci.h
+>>>>>>> @@ -42,6 +42,7 @@
+>>>>>>>  #define  SDHCI_TRNS_BLK_CNT_EN       0x02
+>>>>>>>  #define  SDHCI_TRNS_AUTO_CMD12       0x04
+>>>>>>>  #define  SDHCI_TRNS_AUTO_CMD23       0x08
+>>>>>>> +#define  SDHCI_TRNS_AUTO_SEL 0x0C
+>>>>>>>  #define  SDHCI_TRNS_READ     0x10
+>>>>>>>  #define  SDHCI_TRNS_MULTI    0x20
+>>>>>>>
+>>>>>>> @@ -185,6 +186,7 @@
+>>>>>>>  #define   SDHCI_CTRL_DRV_TYPE_D              0x0030
+>>>>>>>  #define  SDHCI_CTRL_EXEC_TUNING              0x0040
+>>>>>>>  #define  SDHCI_CTRL_TUNED_CLK                0x0080
+>>>>>>> +#define  SDHCI_CMD23_ENABLE          0x0800
+>>>>>>>  #define  SDHCI_CTRL_V4_MODE          0x1000
+>>>>>>>  #define  SDHCI_CTRL_64BIT_ADDR               0x2000
+>>>>>>>  #define  SDHCI_CTRL_PRESET_VAL_ENABLE        0x8000
+>>>>>>>
+>>>>>>
+>>>>>
+>>>>
+>>>
+>>
+> 
