@@ -1,57 +1,174 @@
-From: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
-Subject: Re: [PATCH mmc-next v2 3/3] mmc: sdhci-of-dwcmshc: solve 128MB DMA
- boundary limitation
-Date: Tue, 31 Jul 2018 13:52:57 +0800
-Message-ID: <20180731135257.268924f3@xhacker.debian>
-References: <20180726151017.4da1e336@xhacker.debian>
-        <20180726151424.4bcecf41@xhacker.debian>
-        <edaa7605-e0e0-b17a-8403-c3d7d60d7989@arm.com>
-        <20180731112924.6a1e8388@xhacker.debian>
+From: Chunyan Zhang <zhang.lyra@gmail.com>
+Subject: Re: [PATCH V4 5/7] mmc: sdhci: add Auto CMD Auto Select support
+Date: Tue, 31 Jul 2018 15:04:41 +0800
+Message-ID: <CAAfSe-vVEve63y-Pc0QF6w7vc37cbbbOknGkp9SmocXyNX3J4g@mail.gmail.com>
+References: <1532340508-8749-1-git-send-email-zhang.chunyan@linaro.org>
+ <1532340508-8749-6-git-send-email-zhang.chunyan@linaro.org> <33ceb61c-3e09-c336-e9b9-87c01336f56c@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180731112924.6a1e8388@xhacker.debian>
+In-Reply-To: <33ceb61c-3e09-c336-e9b9-87c01336f56c@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Robin Murphy <robin.murphy@arm.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@spreadtrum.com>, Jason Wu <jason.wu@unisoc.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 31 Jul 2018 11:29:24 +0800
-Jisheng Zhang <Jisheng.Zhang@synaptics.com> wrote:
+Hi Adrian,
 
-> Hi Robin,
-> 
-> On Mon, 30 Jul 2018 12:06:08 +0100 Robin Murphy wrote:
-> 
-> > Hi Jisheng,
-> > 
-> > On 26/07/18 08:14, Jisheng Zhang wrote:  
-> > > When using DMA, if the DMA addr spans 128MB boundary, we have to split
-> > > the DMA transfer into two so that each one doesn't exceed the boundary.    
-> > 
-> > Out of interest, is the driver already setting its segment boundary mask 
-> > appropriately? This sounds like the exact kind of hardware restriction 
-> > that dma_parms is intended to describe, which scatterlist-generating 
-> > code is *supposed* to already respect.  
-> 
-> Thanks for the nice input. It may provide an elegant solution for this
-> limitation. 
-> 
-> To simplify the situation, let's assume no iommu, only swiotlb. And
-> the DDR is less than 4GB so swiotlb on arm64 doesn't init.
-> 
-> There's no dma range limitation with the HW, the only limitation
-> is boundary, while dma_capable() doesn't check the boundary mask, so if
-> we taking this solution, we need to teach dma_capable() about the boundary
-> mask, I'm not sure whether this is acceptable.
-> 
-> Another problem is swiotlb initialization. When to init swiotlb, we dunno
-> there's such boundary limitation HW. Is there any elegant solution for
-> this problem?
-> 
+On 30 July 2018 at 21:06, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 23/07/18 13:08, Chunyan Zhang wrote:
+>> As SD Host Controller Specification v4.10 documents:
+>> Host Controller Version 4.10 defines this "Auto CMD Auto Select" mode.
+>> Selection of Auto CMD depends on setting of CMD23 Enable in the Host
+>> Control 2 register which indicates whether card supports CMD23. If CMD23
+>> Enable =1, Auto CMD23 is used and if CMD23 Enable =0, Auto CMD12 is
+>> used. In case of Version 4.10 or later, use of Auto CMD Auto Select is
+>> recommended rather than use of Auto CMD12 Enable or Auto CMD23
+>> Enable.
+>>
+>> This patch add this new mode support.
+>>
+>> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
+>> ---
+>>  drivers/mmc/host/sdhci.c | 61 +++++++++++++++++++++++++++++++++++++++---------
+>>  drivers/mmc/host/sdhci.h |  2 ++
+>>  2 files changed, 52 insertions(+), 11 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index 5acea3d..5c60590 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -311,6 +311,23 @@ static void sdhci_config_dma(struct sdhci_host *host)
+>>       sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+>>  }
+>>
+>> +static void sdhci_enable_cmd23(struct sdhci_host *host)
+>> +{
+>> +     u16 ctrl2;
+>> +
+>> +     /*
+>> +      * This is used along with "Auto CMD Auto Select" feature,
+>> +      * which is introduced from v4.10, if card supports CMD23,
+>> +      * Auto CMD23 should be used instead of Auto CMD12.
+>> +      */
+>> +     if (host->version >= SDHCI_SPEC_410 &&
+>> +         (host->mmc->caps & MMC_CAP_CMD23)) {
+>
+> That is the host capability.  It needs to be the card capability.
 
-One more problem is: swiotlb isn't available on all platforms, e.g arm?
-How to solve this SDHCI HW's limitation on arm soc w/o iommu?
+Could you please elaborate the issue?
 
-Thanks
+I thought we're setting for host here.  Do you mean we need to see the
+card capability?
+
+>
+>> +             ctrl2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+>> +             ctrl2 |= SDHCI_CMD23_ENABLE;
+>> +             sdhci_writew(host, ctrl2, SDHCI_HOST_CONTROL2);
+>> +     }
+>> +}
+>> +
+>>  static void sdhci_init(struct sdhci_host *host, int soft)
+>>  {
+>>       struct mmc_host *mmc = host->mmc;
+>> @@ -329,6 +346,8 @@ static void sdhci_init(struct sdhci_host *host, int soft)
+>>               host->clock = 0;
+>>               mmc->ops->set_ios(mmc, &mmc->ios);
+>>       }
+>> +
+>> +     sdhci_enable_cmd23(host);
+>>  }
+>>
+>>  static void sdhci_reinit(struct sdhci_host *host)
+>> @@ -1093,6 +1112,36 @@ static inline bool sdhci_auto_cmd12(struct sdhci_host *host,
+>>              !mrq->cap_cmd_during_tfr;
+>>  }
+>>
+>> +static inline void sdhci_auto_cmd_select(struct sdhci_host *host,
+>> +                                      struct mmc_command *cmd,
+>> +                                      u16 *mode)
+>> +{
+>> +     bool use_cmd12 = sdhci_auto_cmd12(host, cmd->mrq) &&
+>> +                      (cmd->opcode != SD_IO_RW_EXTENDED);
+>> +     bool use_cmd23 = cmd->mrq->sbc && (host->flags & SDHCI_AUTO_CMD23);
+>> +
+>> +     /*
+>> +      * In case of Version 4.10 or later, use of 'Auto CMD Auto
+>> +      * Select' is recommended rather than use of 'Auto CMD12
+>> +      * Enable' or 'Auto CMD23 Enable'.
+>> +      */
+>> +     if (host->version >= SDHCI_SPEC_410 && (use_cmd12 || use_cmd23)) {
+>> +             *mode |= SDHCI_TRNS_AUTO_SEL;
+>
+> As noted in patch 4, the CMD23 argument is not just the block count for eMMC.
+
+Probably I haven't got your point...
+
+>From what I understand, auto_sel mode doesn't need argument2. Doesn't
+this work for eMMC?
+
+The test platform I used was just eMMC only, haven't found problem.
+
+Thanks,
+Chunyan
+
+>
+>> +             return;
+>> +     }
+>> +
+>> +     /*
+>> +      * If we are sending CMD23, CMD12 never gets sent
+>> +      * on successful completion (so no Auto-CMD12).
+>> +      */
+>> +     if (use_cmd12) {
+>> +             *mode |= SDHCI_TRNS_AUTO_CMD12;
+>> +     } else if (use_cmd23) {
+>> +             *mode |= SDHCI_TRNS_AUTO_CMD23;
+>> +             sdhci_writel(host, cmd->mrq->sbc->arg, SDHCI_ARGUMENT2);
+>> +     }
+>> +}
+>> +
+>>  static void sdhci_set_transfer_mode(struct sdhci_host *host,
+>>       struct mmc_command *cmd)
+>>  {
+>> @@ -1119,17 +1168,7 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
+>>
+>>       if (mmc_op_multi(cmd->opcode) || data->blocks > 1) {
+>>               mode = SDHCI_TRNS_BLK_CNT_EN | SDHCI_TRNS_MULTI;
+>> -             /*
+>> -              * If we are sending CMD23, CMD12 never gets sent
+>> -              * on successful completion (so no Auto-CMD12).
+>> -              */
+>> -             if (sdhci_auto_cmd12(host, cmd->mrq) &&
+>> -                 (cmd->opcode != SD_IO_RW_EXTENDED))
+>> -                     mode |= SDHCI_TRNS_AUTO_CMD12;
+>> -             else if (cmd->mrq->sbc && (host->flags & SDHCI_AUTO_CMD23)) {
+>> -                     mode |= SDHCI_TRNS_AUTO_CMD23;
+>> -                     sdhci_writel(host, cmd->mrq->sbc->arg, SDHCI_ARGUMENT2);
+>> -             }
+>> +             sdhci_auto_cmd_select(host, cmd, &mode);
+>>       }
+>>
+>>       if (data->flags & MMC_DATA_READ)
+>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+>> index 81aae07..a8f4ec2 100644
+>> --- a/drivers/mmc/host/sdhci.h
+>> +++ b/drivers/mmc/host/sdhci.h
+>> @@ -42,6 +42,7 @@
+>>  #define  SDHCI_TRNS_BLK_CNT_EN       0x02
+>>  #define  SDHCI_TRNS_AUTO_CMD12       0x04
+>>  #define  SDHCI_TRNS_AUTO_CMD23       0x08
+>> +#define  SDHCI_TRNS_AUTO_SEL 0x0C
+>>  #define  SDHCI_TRNS_READ     0x10
+>>  #define  SDHCI_TRNS_MULTI    0x20
+>>
+>> @@ -185,6 +186,7 @@
+>>  #define   SDHCI_CTRL_DRV_TYPE_D              0x0030
+>>  #define  SDHCI_CTRL_EXEC_TUNING              0x0040
+>>  #define  SDHCI_CTRL_TUNED_CLK                0x0080
+>> +#define  SDHCI_CMD23_ENABLE          0x0800
+>>  #define  SDHCI_CTRL_V4_MODE          0x1000
+>>  #define  SDHCI_CTRL_64BIT_ADDR               0x2000
+>>  #define  SDHCI_CTRL_PRESET_VAL_ENABLE        0x8000
+>>
+>
