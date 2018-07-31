@@ -1,111 +1,119 @@
-From: Maxime Ripard <maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [PATCH] mmc: sunxi: Use new timing mode for A64
- eMMC controller
-Date: Tue, 31 Jul 2018 16:19:32 +0200
-Message-ID: <20180731141932.5fgaybgkshhk2rww@flea>
-References: <20180712030225.15681-1-wens@csie.org>
- <20180712071959.fi4rhgwv2iuoelbl@flea>
- <CAGb2v65rE2nQbyeiSPAyTzw-n-EQsUwQABx3nrvXTu4JogFPBQ@mail.gmail.com>
- <20180717151558.wn7v33whtljqt53w@flea>
- <CAGb2v64NRVaWpbDqiX0JX7_6uvypUpNEecPUj-sSjaK5X-hdQA@mail.gmail.com>
- <20180718152203.svrt6wmr2vwh4rb5@flea>
- <CAGb2v67XaWoBGX2Tn_J8LfBJiJja0yfRbM+QyHPLnXvQtBuGGw@mail.gmail.com>
-Reply-To: maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org
+From: Mark Brown <broonie@kernel.org>
+Subject: Re: next/master boot: 179 boots: 11 failed, 167 passed with 1
+ offline (next-20180731)
+Date: Tue, 31 Jul 2018 17:06:23 +0100
+Message-ID: <20180731160623.GH5719@sirena.org.uk>
+References: <5b607cc4.1c69fb81.6c1d6.6534@mx.google.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="yffzoo2gxwyeuv2d"
-Return-path: <linux-sunxi+bncBDSJBYGBRIMBB5O7QHNQKGQEUS6GQZA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-Content-Disposition: inline
-In-Reply-To: <CAGb2v67XaWoBGX2Tn_J8LfBJiJja0yfRbM+QyHPLnXvQtBuGGw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-sunxi <linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Content-Type: multipart/mixed; boundary="===============3175613517232453340=="
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <5b607cc4.1c69fb81.6c1d6.6534@mx.google.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Andy Gross <andy.gross@linaro.org>, David Brown <david.brown@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, Ludovic Barre <ludovic.barre@st.com>
+Cc: kernel-build-reports@lists.linaro.org, khilman@baylibre.com, linux-mmc@vger.kernel.org, linux-next@vger.kernel.org, linux-arm-msm@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
 
---yffzoo2gxwyeuv2d
-Content-Type: text/plain; charset="UTF-8"
+--===============3175613517232453340==
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="gKijDXBCEH69PxaN"
 Content-Disposition: inline
 
-On Mon, Jul 30, 2018 at 05:27:43PM +0800, Chen-Yu Tsai wrote:
-> On Wed, Jul 18, 2018 at 11:22 PM, Maxime Ripard
-> <maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org> wrote:
-> > On Tue, Jul 17, 2018 at 11:43:03PM +0800, Chen-Yu Tsai wrote:
-> >> On Tue, Jul 17, 2018 at 11:15 PM, Maxime Ripard
-> >> <maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org> wrote:
-> >> > On Thu, Jul 12, 2018 at 06:17:23PM +0800, Chen-Yu Tsai wrote:
-> >> >> On Thu, Jul 12, 2018 at 3:19 PM, Maxime Ripard
-> >> >> <maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org> wrote:
-> >> >> > Hi,
-> >> >> >
-> >> >> > On Thu, Jul 12, 2018 at 11:02:25AM +0800, Chen-Yu Tsai wrote:
-> >> >> >> The eMMC controller is also a new timing mode controller, but it doesn't
-> >> >> >> have the timing mode switch. It does however have signal delay and
-> >> >> >> calibration controls, typical of Allwinner MMC controllers that support
-> >> >> >> the new timing mode.
-> >> >> >>
-> >> >> >> Enable the new timing mode setting for the A64 eMMC controller. This
-> >> >> >> also enables MMC HS-DDR modes, which gives higher throughput for eMMC
-> >> >> >> chips that support it, and can deliver such throughput.
-> >> >> >>
-> >> >> >> Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
-> >> >> >
-> >> >> > That doesn't look right. The datasheet explicitly mentions that this
-> >> >> > bit doesn't apply to the eMMC controller, and the BSP is doing the same:
-> >> >> > https://github.com/longsleep/linux-pine64/blob/lichee-dev-v3.10.65/drivers/mmc/host/sunxi-mmc-sun50iw1p1-1.c
-> >> >> >
-> >> >> > vs
-> >> >> > https://github.com/longsleep/linux-pine64/blob/lichee-dev-v3.10.65/drivers/mmc/host/sunxi-mmc-sun50iw1p1-2.c
-> >> >>
-> >> >> You mean the bit in SDXC_REG_SD_NTSR? Yes I know that doesn't exist
-> >> >> for the eMMC controller. I mentioned this in the commit message. It
-> >> >> doesn't exist, and writes to it become a no-op.
-> >> >>
-> >> >> Would a comment, or comments, help with making this clear?
-> >> >
-> >> > Ah right. Maybe we should move the calibration under can_calibrate
-> >> > though, or create another boolean for this?
-> >> >
-> >> > Putting it under has_new_timings while the SoC doesn't use it looks
-> >> > very confusing.
-> >>
-> >> IIRC we don't support calibration anyway. This boolean simply signals
-> >> the usage of the new timing mode, whether by choice, or because it is
-> >> the only mode the controller supports.
-> >
-> > This is not the semantic I had in mind when I introduced it. The
-> > original intent was to set the new timing bit all the time for
-> > SoCs. If we want to change that semantic, then we also need to make
-> > sure what this bit means is documented properly.
-> 
-> In the driver:
-> 
->     /* hardware only supports new timing mode */
->     bool needs_new_timings;
-> 
->     /* hardware can switch between old and new timing modes */
->     bool has_timings_switch;
-> 
-> So if the A64 / H6 eMMC controller only supports / is stuck with the new
-> timing mode, that surely fits the description of the first one, right?
 
-I guess so, yes
+--gKijDXBCEH69PxaN
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-> As for setting the new timing bit all the time, yes it is set, but it's
-> a no-op. Would a comment clarifying this at the point the hardware bit
-> is set suffice?
+On Tue, Jul 31, 2018 at 08:14:12AM -0700, kernelci.org bot wrote:
 
-Yep. Thanks!
-Maxime
+Today's -next fails to boot on a variety of Qualcomm 32 bit platforms:
 
--- 
-Maxime Ripard, Bootlin (formerly Free Electrons)
-Embedded Linux and Kernel engineering
-https://bootlin.com
---yffzoo2gxwyeuv2d--
+>     multi_v7_defconfig:
+>         qcom-apq8064-cm-qs600:
+>             lab-baylibre-seattle: new failure (last pass: next-20180730)
+>         qcom-apq8064-ifc6410:
+>             lab-baylibre-seattle: new failure (last pass: next-20180730)
+>=20
+>     qcom_defconfig:
+>         qcom-apq8064-cm-qs600:
+>             lab-baylibre-seattle: new failure (last pass: next-20180730)
+
+The logs are all somewhat similar, for example:
+
+   https://storage.kernelci.org/next/master/next-20180731/arm/multi_v7_defc=
+onfig/lab-baylibre-seattle/boot-qcom-apq8064-cm-qs600.html
+
+detects a DMA problem during MMCI initialization:
+
+[    2.237566] mmci-pl18x 121c0000.sdcc: mmc2: PL180 manf 51 rev0 at 0x121c=
+0000 irq 32,0 (pio)
+[    2.244790] mmci-pl18x 121c0000.sdcc: DMA channels RX dma2chan1, TX dma2=
+chan2
+[    2.271722] mmci-pl18x 12400000.sdcc: error during DMA transfer!
+[    2.271757] mmci-pl18x 12400000.sdcc: buggy DMA detected. Taking evasive=
+ action.
+[    2.276798] ------------[ cut here ]------------
+[    2.284185] WARNING: CPU: 0 PID: 0 at ../include/linux/dma-mapping.h:551=
+ bam_free_chan+0x2d8/0x2e0
+[    2.288772] Modules linked in:
+[    2.297534] CPU: 0 PID: 0 Comm: swapper/0 Not tainted 4.18.0-rc7-next-20=
+180731 #1
+
+then panics:
+
+[    2.513796] ------------[ cut here ]------------
+[    2.518367] kernel BUG at ../mm/vmalloc.c:1608!
+[    2.522968] Internal error: Oops - BUG: 0 [#1] SMP ARM
+
+trying to release the DMA channel.  I've not done any bisection or
+anything but I do note 8bb2299d2d0b5cc (mmc: mmci: Add and implement a
+->dma_setup() callback for qcom dml) and some related commits in the MMC
+tree.
+
+More details for each of the failed boots at:
+
+  https://kernelci.org/boot/id/5b6054f559b5144b9396baa9/
+  https://kernelci.org/boot/id/5b60551259b5144abb96bab6/
+  https://kernelci.org/boot/id/5b6054e259b5144b1e96bab2/
+
+including full logs, details of the build and so on.
+
+--gKijDXBCEH69PxaN
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAltgiP8ACgkQJNaLcl1U
+h9D2GQf/a6b1VF7LuVwtXj8TF0zF4ZYBg+iI4bWY0djl1iD7Xx87fqsQ1rmQrzy6
+pyBgKCZcb66v514+Qj4FKLkO9D9iFxFM4FNJjvXFchlxiL4fO/4cyeRjpgXMwmww
+/4AUgAxTO7Za2xKZ4ysk5BVQ2845oEYn01Gxc1IyC0m8gXuv3rSOSKBCBWFc+WEC
+4+e2QFecVsi7whSMrGLuWdPACXpK4NjBh9ScA/HbWAjT/Gl8XNmZtvyYnp0DcrJY
+2kyBGreEemiE8voSLDmYyMerSCsuqbn+FLwH1tGTn2v7mDd0xExEatQtNWuVwC1X
+KiToDsKyf9zMi12kL29DIAN/uCdW6w==
+=K646
+-----END PGP SIGNATURE-----
+
+--gKijDXBCEH69PxaN--
+
+
+--===============3175613517232453340==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+linux-arm-kernel mailing list
+linux-arm-kernel@lists.infradead.org
+http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+
+--===============3175613517232453340==--
