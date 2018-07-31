@@ -1,91 +1,383 @@
-From: Stefan Agner <stefan@agner.ch>
-Subject: Re: [PATCH v2 03/10] mmc: tegra: Power on the calibration pad
-Date: Tue, 31 Jul 2018 11:41:57 +0200
-Message-ID: <e4319add2110282f8ddc4c3016512516@agner.ch>
-References: <1532608016-14319-1-git-send-email-avienamo@nvidia.com>
- <1532608016-14319-4-git-send-email-avienamo@nvidia.com>
+From: Aapo Vienamo <avienamo@nvidia.com>
+Subject: Re: [PATCH v2 03/10] mmc: tegra: Reconfigure pad voltages during
+ voltage switching
+Date: Tue, 31 Jul 2018 14:59:38 +0300
+Message-ID: <20180731145938.58c9a96c@dhcp-10-21-25-168>
+References: <f11437bcf65c4b9a711b0411509e07c9@agner.ch>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset="US-ASCII"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1532608016-14319-4-git-send-email-avienamo@nvidia.com>
+In-Reply-To: <f11437bcf65c4b9a711b0411509e07c9@agner.ch>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Aapo Vienamo <avienamo@nvidia.com>
+To: Stefan Agner <stefan@agner.ch>
 Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, Mikko Perttunen <mperttunen@nvidia.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-tegra-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 26.07.2018 14:26, Aapo Vienamo wrote:
-> Automatic pad drive strength calibration is performed on a separate pad
-> identical to the ones used for driving the actual bus. Power on the
-> calibration pad during the calibration procedure and power it off
-> afterwards to save power.
+On Tue, 31 Jul 2018 11:15:41 +0200
+Stefan Agner <stefan@agner.ch> wrote:
+
+> On 27.07.2018 10:44, Aapo Vienamo wrote:
+> > On Thu, 26 Jul 2018 15:33:11 +0200
+> > Stefan Agner <stefan@agner.ch> wrote:
+> >   
+> >> On 26.07.2018 14:19, Aapo Vienamo wrote:  
+> >> > Parse the pinctrl state and nvidia,only-1-8-v properties from the device
+> >> > tree and implement pad voltage state reconfiguration in the mmc
+> >> > start_signal_voltage_switch() callback. Validate the pinctrl and
+> >> > regulator configuration before unmasking UHS modes. Add
+> >> > NVQUIRK_NEEDS_PAD_CONTROL and add set it for Tegra210 and Tegra186.
+> >> >
+> >> > The pad configuration is done in the mmc callback because the order of
+> >> > pad reconfiguration and sdhci voltage switch depend on the voltage to
+> >> > which the transition occurs.
+> >> >
+> >> > Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
+> >> > ---
+> >> >  drivers/mmc/host/sdhci-tegra.c | 140 +++++++++++++++++++++++++++++++++++++----
+> >> >  1 file changed, 127 insertions(+), 13 deletions(-)
+> >> >
+> >> > diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+> >> > index ddf00166..9587365 100644
+> >> > --- a/drivers/mmc/host/sdhci-tegra.c
+> >> > +++ b/drivers/mmc/host/sdhci-tegra.c
+> >> > @@ -21,6 +21,7 @@
+> >> >  #include <linux/io.h>
+> >> >  #include <linux/of.h>
+> >> >  #include <linux/of_device.h>
+> >> > +#include <linux/pinctrl/consumer.h>
+> >> >  #include <linux/reset.h>
+> >> >  #include <linux/mmc/card.h>
+> >> >  #include <linux/mmc/host.h>
+> >> > @@ -55,6 +56,7 @@
+> >> >  #define NVQUIRK_ENABLE_SDR104		BIT(4)
+> >> >  #define NVQUIRK_ENABLE_DDR50		BIT(5)
+> >> >  #define NVQUIRK_HAS_PADCALIB		BIT(6)
+> >> > +#define NVQUIRK_NEEDS_PAD_CONTROL	BIT(7)
+> >> >
+> >> >  struct sdhci_tegra_soc_data {
+> >> >  	const struct sdhci_pltfm_data *pdata;
+> >> > @@ -66,8 +68,13 @@ struct sdhci_tegra {
+> >> >  	struct gpio_desc *power_gpio;
+> >> >  	bool ddr_signaling;
+> >> >  	bool pad_calib_required;
+> >> > +	bool pad_control_available;
+> >> > +	bool only_1v8;
+> >> >
+> >> >  	struct reset_control *rst;
+> >> > +	struct pinctrl *pinctrl_sdmmc;
+> >> > +	struct pinctrl_state *pinctrl_state_3v3;
+> >> > +	struct pinctrl_state *pinctrl_state_1v8;
+> >> >  };
+> >> >
+> >> >  static u16 tegra_sdhci_readw(struct sdhci_host *host, int reg)
+> >> > @@ -138,12 +145,47 @@ static unsigned int tegra_sdhci_get_ro(struct
+> >> > sdhci_host *host)
+> >> >  	return mmc_gpio_get_ro(host->mmc);
+> >> >  }
+> >> >
+> >> > +static bool tegra_sdhci_is_uhs_valid(struct sdhci_host *host)
+> >> > +{
+> >> > +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> >> > +	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
+> >> > +	const struct sdhci_tegra_soc_data *soc_data = tegra_host->soc_data;
+> >> > +
+> >> > +	/*
+> >> > +	 * The 1.8 V only host controllers don't need to have configurable
+> >> > +	 * regulators and pad voltages. In this case the UHS modes can be
+> >> > +	 * enabled regardless.
+> >> > +	 */
+> >> > +	if (tegra_host->only_1v8)
+> >> > +		return true;  
+> >>
+> >> Hm, SD always needs 3.3V capabilities, not?  
+> > 
+> > Yes, the controllers used for eMMCs should have the only_1v8 property
+> > set and they exit the function here. With controllers used for SD cards,
+> > the regulator and pad configurations are verified later in the function.
+> >   
 > 
-> Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
-> Reviewed-by: Mikko Perttunen <mperttunen@nvidia.com>
-> ---
->  drivers/mmc/host/sdhci-tegra.c | 22 ++++++++++++++++++++++
->  1 file changed, 22 insertions(+)
+> By returning true you ask the controller to enable UHS modes. However,
+> if you have 1.8V only, there should be no UHS modes advertised (since SD
+> cards require 1.8V).
 > 
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index 51eda20..363490e 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -53,6 +53,7 @@
->  #define SDHCI_TEGRA_SDMEM_COMP_PADCTRL			0x1e0
->  #define SDHCI_TEGRA_SDMEM_COMP_PADCTRL_VREF_SEL_MASK	0x0000000f
->  #define SDHCI_TEGRA_SDMEM_COMP_PADCTRL_VREF_SEL_VAL	0x7
-> +#define SDHCI_TEGRA_SDMEM_COMP_PADCTRL_E_INPUT_E_PWRD	BIT(31)
->  
->  #define SDHCI_TEGRA_AUTO_CAL_STATUS			0x1ec
->  #define SDHCI_TEGRA_AUTO_CAL_ACTIVE			BIT(31)
-> @@ -241,11 +242,30 @@ static void tegra_sdhci_reset(struct sdhci_host
-> *host, u8 mask)
->  	tegra_host->ddr_signaling = false;
->  }
->  
-> +static void tegra_sdhci_configure_cal_pad(struct sdhci_host *host, bool enable)
-> +{
-> +	u32 reg;
-> +
-> +	/*
-> +	 * Enable or disable the additional I/O pad used by the drive strength
-> +	 * calibration process.
-> +	 */
-> +	reg = sdhci_readl(host, SDHCI_TEGRA_SDMEM_COMP_PADCTRL);
-> +	if (enable)
-> +		reg |= SDHCI_TEGRA_SDMEM_COMP_PADCTRL_E_INPUT_E_PWRD;
-> +	else
-> +		reg &= ~SDHCI_TEGRA_SDMEM_COMP_PADCTRL_E_INPUT_E_PWRD;
-> +	sdhci_writel(host, reg, SDHCI_TEGRA_SDMEM_COMP_PADCTRL);
-> +	udelay(1);
+> That assumes that UHS modes are a SD card thing only (which I think
+> strictly speaking should be the case).
+> 
+> However, at least on Tegra 3 it seems that enabling SD 3.0 is also
+> required for higher eMMC speeds:
+> https://patchwork.kernel.org/patch/10521147/
+> 
+> So UHS is probably not so much about SD card UHS modes but more about
+> higher speed modes in general...
 
-Is this necessary on enable and disable?
+True.
 
-If it only necessary on enable, I suggest to move it after the call to:
-tegra_sdhci_configure_cal_pad(host, true);
+> >> So if the controller is 1.8V only, then only eMMC modes are allowed.
+> >>
+> >> You can use MMC_CAP2_HSX00_1_8V in caps2.  
+> > 
+> > I can't quite follow you, how this should be used here?
+> >   
+> 
+> Similar to 
+> 
+>         if (tegra_host->soc_data->nvquirks & NVQUIRK_ENABLE_DDR50)      
+>                                                                    
+>                 host->mmc->caps |= MMC_CAP_1_8V_DDR
+> 
+> You can enable higher speed eMMC modes without advertising SD card
+> modes.
 
---
-Stefan
+Makes sense. Thanks for clearing that up.
 
-> +}
+> >> So far the Tegra SDHCI driver did not use device tree to indicate modes,
+> >> but maybe we should start doing that. In this case you can use
+> >> mmc-hs200-1_8v/mmc-hs400-1_8v to indicate higher eMMC speed modes.
+> >>  
+> >> > +
+> >> > +	/*
+> >> > +	 * If the board does not define a regulator for the SDHCI IO voltage,
+> >> > +	 * then don't advertise support for UHS modes even if the device
+> >> > +	 * supports it because the IO voltage cannot be configured.
+> >> > +	 */
+> >> > +	if (IS_ERR(host->mmc->supply.vqmmc))
+> >> > +		return false;  
+> >>
+> >> The stack should already check that and mask caps1 accordingly (see
+> >> sdhci_setup_host).  
+> > 
+> > True, the logic seems to be duplicated here. Although also
+> > tegra_sdhci_reset() needs to be change so that the bits masked off by
+> > sdhci_setup_host() aren't set if this check is removed.
+> >   
+> 
+> sdhci_setup_host() calls reset before doing initialization (e.g. in
+> __sdhci_read_caps).
+> 
+> Checking just for vqmmc presence is bogus IMHO. It does not say anything
+> about the exact capabilities of that regulator.
+
+Yes, by itself it doesn't make much sense. It looks like the regulator
+voltage checking code from sdhci_setup_host() has to be duplicated to
+the tegra driver because the regulator checks are done after the reset
+callback. The sdhci-tegra driver needs to make sure that the faster
+signaling modes are enabled only if pinctrl properties are present on SD
+controllers with variable voltage regulators.
+
+> I think we should do something like this:
+> 
+> 	if (there is a host->mmc->supply.vqmmc) {
+> 		if (host->mmc->supply.vqmmc can do 1.8V (or/and also 1.2V?)) {
+> 			/* 
+> 			 * Enable SDHCI spec v3.00 support
+> 			 * This is required for SD UHS modes as well as higher eMMC speeds
+> 			 */
+> 			if (soc_data->nvquirks & NVQUIRK_ENABLE_SDHCI_SPEC_300)
+> 				misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDHCI_SPEC_300;
+> 
+> 			if (host->mmc->supply.vqmmc can do 3.3V) {
+> 				/*
+> 				 * Proper SD voltage switching is possible, advertise SD UHS 
+> 				 * modes as supported by host
+> 				 */
+> 				if (soc_data->nvquirks & NVQUIRK_ENABLE_SDR50)
+> 					misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDR50;
+> 				if (soc_data->nvquirks & NVQUIRK_ENABLE_DDR50)
+> 					misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_DDR50;
+> 				if (soc_data->nvquirks & NVQUIRK_ENABLE_SDR104)
+> 					misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDR104;
+> 				if (soc_data->nvquirks & SDHCI_MISC_CTRL_ENABLE_SDR50)
+> 					clk_ctrl |= SDHCI_CLOCK_CTRL_SDR50_TUNING_OVERRIDE;
+> 			}
+> 		}
+> 	}
+> 
+> 
+> 
+> 
+> >> > +
+> >> > +	/*
+> >> > +	 * Later SoC generations require software pad voltage configuration.
+> >> > +	 * The UHS modes should only be enabled if the pad configuration states
+> >> > +	 * are available on platforms where they are required in order to switch
+> >> > +	 * the signaling voltage.
+> >> > +	 */
+> >> > +	if (soc_data->nvquirks & NVQUIRK_NEEDS_PAD_CONTROL)
+> >> > +		return tegra_host->pad_control_available;
+> >> > +
+> >> > +	return false;
+> >> > +}
+> >> > +
+> >> >  static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
+> >> >  {
+> >> >  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> >> >  	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
+> >> >  	const struct sdhci_tegra_soc_data *soc_data = tegra_host->soc_data;
+> >> >  	u32 misc_ctrl, clk_ctrl;
+> >> > +	bool uhs_valid;
+> >> >
+> >> >  	sdhci_reset(host, mask);
+> >> >
+> >> > @@ -160,13 +202,8 @@ static void tegra_sdhci_reset(struct sdhci_host
+> >> > *host, u8 mask)
+> >> >
+> >> >  	clk_ctrl &= ~SDHCI_CLOCK_CTRL_SPI_MODE_CLKEN_OVERRIDE;
+> >> >
+> >> > -	/*
+> >> > -	 * If the board does not define a regulator for the SDHCI
+> >> > -	 * IO voltage, then don't advertise support for UHS modes
+> >> > -	 * even if the device supports it because the IO voltage
+> >> > -	 * cannot be configured.
+> >> > -	 */
+> >> > -	if (!IS_ERR(host->mmc->supply.vqmmc)) {
+> >> > +	uhs_valid = tegra_sdhci_is_uhs_valid(host);
+> >> > +	if (uhs_valid) {
+> >> >  		/* Erratum: Enable SDHCI spec v3.00 support */
+> >> >  		if (soc_data->nvquirks & NVQUIRK_ENABLE_SDHCI_SPEC_300)
+> >> >  			misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDHCI_SPEC_300;
+> >> > @@ -286,14 +323,80 @@ static int tegra_sdhci_execute_tuning(struct
+> >> > sdhci_host *host, u32 opcode)
+> >> >  	return mmc_send_tuning(host->mmc, opcode, NULL);
+> >> >  }
+> >> >
+> >> > -static void tegra_sdhci_voltage_switch(struct sdhci_host *host)
+> >> > +static int tegra_sdhci_set_padctrl(struct sdhci_host *host, int voltage)
+> >> >  {
+> >> >  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> >> >  	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
+> >> > -	const struct sdhci_tegra_soc_data *soc_data = tegra_host->soc_data;
+> >> > +	int ret;
+> >> > +
+> >> > +	if (!tegra_host->pad_control_available)
+> >> > +		return 0;
+> >> > +
+> >> > +	if (voltage == MMC_SIGNAL_VOLTAGE_180) {
+> >> > +		ret = pinctrl_select_state(tegra_host->pinctrl_sdmmc,
+> >> > +					   tegra_host->pinctrl_state_1v8);
+> >> > +		if (ret < 0)
+> >> > +			dev_err(mmc_dev(host->mmc),
+> >> > +				"setting 1.8V failed, ret: %d\n", ret);
+> >> > +	} else {
+> >> > +		ret = pinctrl_select_state(tegra_host->pinctrl_sdmmc,
+> >> > +					   tegra_host->pinctrl_state_3v3);
+> >> > +		if (ret < 0)
+> >> > +			dev_err(mmc_dev(host->mmc),
+> >> > +				"setting 3.3V failed, ret: %d\n", ret);
+> >> > +	}
+> >> >
+> >> > -	if (soc_data->nvquirks & NVQUIRK_HAS_PADCALIB)
+> >> > -		tegra_host->pad_calib_required = true;  
+> 
+> Is this really not needed anymore?
+
+Good catch. That probably happened accidentally during a rebase.
+
+> >> > +	return ret;
+> >> > +}
+> >> > +
+> >> > +static int sdhci_tegra_start_signal_voltage_switch(struct mmc_host *mmc,
+> >> > +						   struct mmc_ios *ios)
+> >> > +{
+> >> > +	struct sdhci_host *host = mmc_priv(mmc);
+> >> > +	int ret = 0;
+> >> > +
+> >> > +	if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330) {
+> >> > +		ret = tegra_sdhci_set_padctrl(host, ios->signal_voltage);
+> >> > +		if (ret < 0)
+> >> > +			return ret;
+> >> > +		ret = sdhci_start_signal_voltage_switch(mmc, ios);
+> >> > +	} else if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_180) {
+> >> > +		ret = sdhci_start_signal_voltage_switch(mmc, ios);
+> >> > +		if (ret < 0)
+> >> > +			return ret;
+> >> > +		ret = tegra_sdhci_set_padctrl(host, ios->signal_voltage);  
+> >>
+> >> So depending on voltage you first set the pads setting and then do the
+> >> signaling voltage switch. Is this necessary? Why?  
+> > 
+> > This is done to enforce the constraint of keeping the signaling voltage
+> > always less or equal to the pad voltage. Driving 3.3 V into a pad that
+> > has been configured to 1.8 V will damage it. This is stated in the
+> > Tegra210 and Tegra186 TRMs in SDMMC Initialization Sequece sections of
+> > controllers supporting voltage switching.
+> > 
+> > Here when switching from 3.3 V to 1.8 V the regulator is first
+> > configured to 1.8 V by sdhci_start_signal_voltage_switch() and after
+> > that the pad is configured to 1.8 V. When going in the other direction
+> > the pad needs to be first configured to 3.3 V before the regulator
+> > voltage can be raised.  
+> 
+> Ok makes sense. Can you add a comment, e.g. /* Order of operation
+> matters, it make sure to keep signaling voltage below pad voltage */
+> 
+> >   
+> >> > +	}
+> >> > +
+> >> > +	return ret;
+> >> > +}
+> >> > +
+> >> > +static void tegra_sdhci_init_pinctrl_info(struct device *dev,
+> >> > +					  struct sdhci_tegra *tegra_host)
+> >> > +{
+> >> > +	tegra_host->pinctrl_sdmmc = devm_pinctrl_get(dev);
+> >> > +	if (IS_ERR(tegra_host->pinctrl_sdmmc)) {
+> >> > +		dev_dbg(dev, "No pinctrl info, err: %ld\n",
+> >> > +			PTR_ERR(tegra_host->pinctrl_sdmmc));
+> >> > +		return;
+> >> > +	}
+> >> > +
+> >> > +	tegra_host->pinctrl_state_3v3 =
+> >> > +		pinctrl_lookup_state(tegra_host->pinctrl_sdmmc, "sdmmc-3v3");
+> >> > +	if (IS_ERR(tegra_host->pinctrl_state_3v3)) {
+> >> > +		dev_err(dev, "Missing 3.3V pad state, err: %ld\n",
+> >> > +			PTR_ERR(tegra_host->pinctrl_state_3v3));
+> >> > +		return;
+> >> > +	}
+> >> > +
+> >> > +	tegra_host->pinctrl_state_1v8 =
+> >> > +		pinctrl_lookup_state(tegra_host->pinctrl_sdmmc, "sdmmc-1v8");
+> >> > +	if (IS_ERR(tegra_host->pinctrl_state_1v8)) {
+> >> > +		dev_err(dev, "Missing 1.8V pad state, err: %ld\n",
+> >> > +			  PTR_ERR(tegra_host->pinctrl_state_3v3));  
+> >>
+> >> Is missing pad states considered as error? If yes, we should return a
+> >> error code and make the probe function fail.
+> >>
+> >> If it is ok to run it without the states, then this should be dev_warn
+> >> or dev_info.  
+> > 
+> > I don't think failing probe due to missing pinctrl entries can be done
+> > because it would break backwards compatibility with pre-existing dtbs.
+> > Also SDHCI controllers with fixed signaling voltage don't support pad
+> > voltage reconfiguration and therefore the pinctrl properties won't be
+> > there either. In the case of fixed voltage SDHCI controllers the
+> > "nvidia,only-1-8-v" property is used to signal that pad reconfiguration
+> > doesn't need to be performed.  
+> 
+> Ok, if they are not mandatory, just use dev_warn(...).
+> 
+> Btw,
+> 
+> +    if (soc_data->nvquirks & NVQUIRK_NEEDS_PAD_CONTROL) {
+> +        host->mmc_host_ops.start_signal_voltage_switch =
+> +            sdhci_tegra_start_signal_voltage_switch;
+> +        tegra_sdhci_init_pinctrl_info(&pdev->dev, tegra_host);
+> +    }
 > +
->  static void tegra_sdhci_pad_autocalib(struct sdhci_host *host)
->  {
->  	u32 reg;
->  	int ret;
->  
-> +	tegra_sdhci_configure_cal_pad(host, true);
-> +
->  	reg = sdhci_readl(host, SDHCI_TEGRA_AUTO_CAL_CONFIG);
->  	reg |= SDHCI_AUTO_CAL_ENABLE | SDHCI_AUTO_CAL_START;
->  	sdhci_writel(host, reg, SDHCI_TEGRA_AUTO_CAL_CONFIG);
-> @@ -255,6 +275,8 @@ static void tegra_sdhci_pad_autocalib(struct
-> sdhci_host *host)
->  				 reg, !(reg & SDHCI_TEGRA_AUTO_CAL_ACTIVE),
->  				 1, 10000);
->  
-> +	tegra_sdhci_configure_cal_pad(host, false);
-> +
->  	if (ret)
->  		dev_err(mmc_dev(host->mmc), "Pad autocal timed out\n");
->  }
+> 
+> Can we make tegra_sdhci_init_pinctrl_info return a boolean and do the
+> tegra_host->pad_control_available assignment here? I think this would be
+> cleaner.
+> 
+> It also won't assign host->mmc_host_ops.start_signal_voltage_switch if
+> not needed.
+> 
+> 	if (soc_data->nvquirks & NVQUIRK_NEEDS_PAD_CONTROL &&
+> 	    tegra_sdhci_init_pinctrl_info(&pdev->dev, tegra_host)) {
+> 		host->mmc_host_ops.start_signal_voltage_switch =
+> 			sdhci_tegra_start_signal_voltage_switch;
+> 		tegra_host->pad_control_available = true;
+> 	}
+
+ -Aapo
