@@ -1,141 +1,62 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: Re: [PATCH 1/2] mmc: tmio: rename files and CONFIG options to have
- the same prefix
-Date: Tue, 31 Jul 2018 21:12:18 +0900
-Message-ID: <CAK7LNAScJFUPK=mMmNWYw-yJ9iaxaibituYRDU2x5kGpbsEd5A@mail.gmail.com>
-References: <1532575736-20138-1-git-send-email-yamada.masahiro@socionext.com>
- <1532575736-20138-2-git-send-email-yamada.masahiro@socionext.com> <CAPDyKFpK=UnwdNtb3XcgcRBJZeE0X5osM-tk8E85TCs3CeDq7Q@mail.gmail.com>
+From: Alan Martinovic <alan.martinovic-+NedCK/4fiIAvxtiuMwx3w@public.gmane.org>
+Subject: Fixed index for mmcblk
+Date: Tue, 31 Jul 2018 15:18:06 +0200
+Message-ID: <CAOT_U5YXF5ZZBuo_Ugm4us6fhB8vgz9sXXqnTnmnODDr4UjkEA@mail.gmail.com>
+Reply-To: alan.martinovic-+NedCK/4fiIAvxtiuMwx3w@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFpK=UnwdNtb3XcgcRBJZeE0X5osM-tk8E85TCs3CeDq7Q@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, DTML <devicetree@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Return-path: <linux-sunxi+bncBCH3LBVQUEEBBD6DQHNQKGQEIBUG73Y-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-2018-07-31 0:07 GMT+09:00 Ulf Hansson <ulf.hansson@linaro.org>:
-> On 26 July 2018 at 05:28, Masahiro Yamada <yamada.masahiro@socionext.com> wrote:
->> As commit b6147490e6aa ("mmc: tmio: split core functionality, DMA and
->> MFD glue") said, these MMC controllers use the IP from Panasonic.
->>
->> TMIO (Toshiba Mobile IO) MMC was the first upstreamed user of this IP.
->> The common driver code was split and expanded as 'tmio-mmc-core', then
->> it become historical misnomer since 'tmio' is not the name of this IP.
->>
->> I pointed out this [1], and suggested to re-organize the names in the
->> form of:
->>
->>   <IP-name>.c            (common code for this IP)
->>   <IP-name>_tmio.c       (Toshiba Mobile IO)
->>   <IP-name>_sdhi.c       (Renesas SDHI)
->>   <IP-name>_uniphier.c   (Socionext UniPhier)
->>
->> The <IP-name> in my mind was 'mnsd' because names of Panasonic chips
->> are prefixed with 'MN'.
->>
->> This is the naming scheme as we see in dw_mmc* and sdhci-*.
->>
->> In the discussion with Wolfram Sang, my suggestion was rejected
->> because it implied drastic function renaming, which is too invasive.
->>
->> Ulf Hansson was still happy with file renaming to clarify the
->> relationship between variants.  So, the accepted solution was:
->>
->>  - Make 'tmio_mmc' the _right_ core name
->>  - Align all variant files with the same prefix.
->>  - Do not rename functions
->>
->> This commit renames files as follows:
->>
->>   tmio_mmc_core.c              -> tmio_mmc.c
->>   tmio_mmc.c                   -> tmio_mmc_original.c
->>   renesas_sdhi_core.c          -> tmio_mmc_sdhi.c
->>   renesas_sdhi.h               -> tmio_mmc_sdhi.h
->>   renesas_sdhi_internal_dmac.c -> tmio_mmc_sdhi_internal_dmac.c
->>   renesas_sdhi_sys_dmac.c      -> tmio_mmc_sdhi_sys_dmac.c
->>
->> Also rename CONFIG options to match to the file names:
->>
->>   MMC_TMIO_CORE          -> MMC_TMIO
->>   MMC_TMIO               -> MMC_TMIO_ORIGINAL
->>   MMC_SDHI               -> MMC_TMIO_SDHI
->>   MMC_SDHI_SYS_DMAC      -> MMC_TMIO_SDHI_SYS_DMAC
->>   MMC_SDHI_INTERNAL_DMAC -> MMC_TMIO_SDHI_INTERNAL_DMAC
->>
->> I touched eseries_pxa_defconfig and pxa_defconfig in this commit
->> because they are inactive, but renaming of CONFIG options generally
->> takes some development cycles.  Old names will be kept until the
->> migration is completed, like Renesas folks did when they renamed
->> ARCH_SHMOBILE_MULTI to ARCH_RENESAS.
->>
->> [1] https://www.spinics.net/lists/linux-mmc/msg46952.html
->>
->> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
->
-> I am awaiting some feedback from Wolfram before applying.
+Hi,
+I have an embedded device which gets the roots information
+passed as a kernel parameter   root=/dev/mmcblk0p2
+
+Am currently migrating to a new kernel and porting device
+tree changes to be based on the following dts:
+https://github.com/friendlyarm/linux/blob/sunxi-4.14.y/arch/arm/boot/dts/sun8i-h3-nanopi-neo.dts
+https://github.com/friendlyarm/linux/blob/sunxi-4.14.y/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi
+
+What I've noticed is that the new kernel/device tree seems to change the
+index for mmcblk (it was mmcblk0 with the previous combination for
+mainline 4.14 kernel):
+
+[    1.962308] sunxi-mmc 1c0f000.mmc: Got CD GPIO
+[    2.003604] sunxi-mmc 1c0f000.mmc: base:0xe0873000 irq:26
+... ... ...
+[    2.092684] mmc1: host does not support reading read-only switch,
+assuming write-enable
+[    2.094600] mmc1: Problem switching card into high-speed mode!
+[    2.094725] mmc1: new SDHC card at address 0001
+[    2.095211] mmcblk1: mmc1:0001 00000 3.68 GiB
+[    2.097424]  mmcblk1: p1 p2 p3 p4
 
 
+The device tree has the following entries regarded to mmc:
 
-If this is not welcome, please feel free to throw away.
-(then, I will name my driver 'uniphier-sd.c')
+&mmc0 {
+    bus-width = <4>;
+    cd-gpios = <&pio 5 6 GPIO_ACTIVE_HIGH>;
+    cd-inverted;
+    pinctrl-names = "default";
+    pinctrl-0 = <&mmc0_pins_a>, <&mmc0_cd_pin>;
+    boot_device = <0>;
+    status = "okay";
+    vmmc-supply = <&reg_vcc3v3>;
+};
+&mmc2 {
+    boot_device = <0>;
+};
 
-I am neutral about this renaming because it
-is trying to make the wrong thing correct.
+Is there a way to have the index fixed and stable?
 
-
-It will also produce a different inconsistency.
-Even if we rename renesas_sdhi_core.c to tmio_mmc_sdhi.c ,
-functions in it will be kept renesas_sdhi_*
-I understand they want to keep the file name and function names consistent.
-
-
-Thanks.
-
-
-
-
->> ---
->>
->>  MAINTAINERS                                        |    1 -
->>  arch/arm/configs/eseries_pxa_defconfig             |    2 +-
->>  arch/arm/configs/pxa_defconfig                     |    2 +-
->>  drivers/mmc/host/Kconfig                           |   25 +-
->>  drivers/mmc/host/Makefile                          |    8 +-
->>  drivers/mmc/host/tmio_mmc.c                        | 1415 ++++++++++++++++++--
->>  drivers/mmc/host/tmio_mmc_core.c                   | 1394 -------------------
->>  drivers/mmc/host/tmio_mmc_original.c               |  167 +++
->
-> I think there should be another way to format the patch to get better diffstat.
->
-> I guess it depends a bit on what version of git you are using, but
-> trying the -M option may help.
->
->
->>  .../host/{renesas_sdhi_core.c => tmio_mmc_sdhi.c}  |    2 +-
->>  .../mmc/host/{renesas_sdhi.h => tmio_mmc_sdhi.h}   |    0
->>  ...ternal_dmac.c => tmio_mmc_sdhi_internal_dmac.c} |    2 +-
->>  ...as_sdhi_sys_dmac.c => tmio_mmc_sdhi_sys_dmac.c} |    2 +-
->>  12 files changed, 1518 insertions(+), 1502 deletions(-)
->>  delete mode 100644 drivers/mmc/host/tmio_mmc_core.c
->>  create mode 100644 drivers/mmc/host/tmio_mmc_original.c
->>  rename drivers/mmc/host/{renesas_sdhi_core.c => tmio_mmc_sdhi.c} (99%)
->>  rename drivers/mmc/host/{renesas_sdhi.h => tmio_mmc_sdhi.h} (100%)
->>  rename drivers/mmc/host/{renesas_sdhi_internal_dmac.c => tmio_mmc_sdhi_internal_dmac.c} (99%)
->>  rename drivers/mmc/host/{renesas_sdhi_sys_dmac.c => tmio_mmc_sdhi_sys_dmac.c} (99%)
->>
->
-> [...]
->
-> Kind regards
-> Uffe
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
--- 
-Best Regards
-Masahiro Yamada
+Be Well,
+Alan
