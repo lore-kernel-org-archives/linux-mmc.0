@@ -1,72 +1,111 @@
-From: Vladimir Zapolskiy <vz-ChpfBGZJDbMAvxtiuMwx3w@public.gmane.org>
-Subject: Re: Fixed index for mmcblk
-Date: Tue, 31 Jul 2018 17:17:08 +0300
-Message-ID: <abf2601e-799a-eb3d-c864-6959b818037b@mleia.com>
-References: <CAOT_U5YXF5ZZBuo_Ugm4us6fhB8vgz9sXXqnTnmnODDr4UjkEA@mail.gmail.com>
-Reply-To: vz-ChpfBGZJDbMAvxtiuMwx3w@public.gmane.org
+From: Maxime Ripard <maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [PATCH] mmc: sunxi: Use new timing mode for A64
+ eMMC controller
+Date: Tue, 31 Jul 2018 16:19:32 +0200
+Message-ID: <20180731141932.5fgaybgkshhk2rww@flea>
+References: <20180712030225.15681-1-wens@csie.org>
+ <20180712071959.fi4rhgwv2iuoelbl@flea>
+ <CAGb2v65rE2nQbyeiSPAyTzw-n-EQsUwQABx3nrvXTu4JogFPBQ@mail.gmail.com>
+ <20180717151558.wn7v33whtljqt53w@flea>
+ <CAGb2v64NRVaWpbDqiX0JX7_6uvypUpNEecPUj-sSjaK5X-hdQA@mail.gmail.com>
+ <20180718152203.svrt6wmr2vwh4rb5@flea>
+ <CAGb2v67XaWoBGX2Tn_J8LfBJiJja0yfRbM+QyHPLnXvQtBuGGw@mail.gmail.com>
+Reply-To: maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-sunxi+bncBCAMRWGQV4CRBZ66QHNQKGQEMKPBMCQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="yffzoo2gxwyeuv2d"
+Return-path: <linux-sunxi+bncBDSJBYGBRIMBB5O7QHNQKGQEUS6GQZA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-In-Reply-To: <CAOT_U5YXF5ZZBuo_Ugm4us6fhB8vgz9sXXqnTnmnODDr4UjkEA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <CAGb2v67XaWoBGX2Tn_J8LfBJiJja0yfRbM+QyHPLnXvQtBuGGw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Archive: <https://groups.google.com/group/linux-sunxi
 List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
  <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Alan Martinovic <alan.martinovic-+NedCK/4fiIAvxtiuMwx3w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+To: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-sunxi <linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 07/31/2018 04:18 PM, Alan Martinovic wrote:
-> Hi,
-> I have an embedded device which gets the roots information
-> passed as a kernel parameter   root=/dev/mmcblk0p2
-> 
-> Am currently migrating to a new kernel and porting device
-> tree changes to be based on the following dts:
-> https://github.com/friendlyarm/linux/blob/sunxi-4.14.y/arch/arm/boot/dts/sun8i-h3-nanopi-neo.dts
-> https://github.com/friendlyarm/linux/blob/sunxi-4.14.y/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi
-> 
-> What I've noticed is that the new kernel/device tree seems to change the
-> index for mmcblk (it was mmcblk0 with the previous combination for
-> mainline 4.14 kernel):
-> 
-> [    1.962308] sunxi-mmc 1c0f000.mmc: Got CD GPIO
-> [    2.003604] sunxi-mmc 1c0f000.mmc: base:0xe0873000 irq:26
-> ... ... ...
-> [    2.092684] mmc1: host does not support reading read-only switch,
-> assuming write-enable
-> [    2.094600] mmc1: Problem switching card into high-speed mode!
-> [    2.094725] mmc1: new SDHC card at address 0001
-> [    2.095211] mmcblk1: mmc1:0001 00000 3.68 GiB
-> [    2.097424]  mmcblk1: p1 p2 p3 p4
-> 
-> 
-> The device tree has the following entries regarded to mmc:
-> 
-> &mmc0 {
->     bus-width = <4>;
->     cd-gpios = <&pio 5 6 GPIO_ACTIVE_HIGH>;
->     cd-inverted;
->     pinctrl-names = "default";
->     pinctrl-0 = <&mmc0_pins_a>, <&mmc0_cd_pin>;
->     boot_device = <0>;
->     status = "okay";
->     vmmc-supply = <&reg_vcc3v3>;
-> };
-> &mmc2 {
->     boot_device = <0>;
-> };
-> 
-> Is there a way to have the index fixed and stable?
-> 
 
-You should use UUIDs or labels.
+--yffzoo2gxwyeuv2d
+Content-Type: text/plain; charset="UTF-8"
+Content-Disposition: inline
 
-Please read carefully https://lkml.org/lkml/2016/4/29/674
+On Mon, Jul 30, 2018 at 05:27:43PM +0800, Chen-Yu Tsai wrote:
+> On Wed, Jul 18, 2018 at 11:22 PM, Maxime Ripard
+> <maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org> wrote:
+> > On Tue, Jul 17, 2018 at 11:43:03PM +0800, Chen-Yu Tsai wrote:
+> >> On Tue, Jul 17, 2018 at 11:15 PM, Maxime Ripard
+> >> <maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org> wrote:
+> >> > On Thu, Jul 12, 2018 at 06:17:23PM +0800, Chen-Yu Tsai wrote:
+> >> >> On Thu, Jul 12, 2018 at 3:19 PM, Maxime Ripard
+> >> >> <maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org> wrote:
+> >> >> > Hi,
+> >> >> >
+> >> >> > On Thu, Jul 12, 2018 at 11:02:25AM +0800, Chen-Yu Tsai wrote:
+> >> >> >> The eMMC controller is also a new timing mode controller, but it doesn't
+> >> >> >> have the timing mode switch. It does however have signal delay and
+> >> >> >> calibration controls, typical of Allwinner MMC controllers that support
+> >> >> >> the new timing mode.
+> >> >> >>
+> >> >> >> Enable the new timing mode setting for the A64 eMMC controller. This
+> >> >> >> also enables MMC HS-DDR modes, which gives higher throughput for eMMC
+> >> >> >> chips that support it, and can deliver such throughput.
+> >> >> >>
+> >> >> >> Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+> >> >> >
+> >> >> > That doesn't look right. The datasheet explicitly mentions that this
+> >> >> > bit doesn't apply to the eMMC controller, and the BSP is doing the same:
+> >> >> > https://github.com/longsleep/linux-pine64/blob/lichee-dev-v3.10.65/drivers/mmc/host/sunxi-mmc-sun50iw1p1-1.c
+> >> >> >
+> >> >> > vs
+> >> >> > https://github.com/longsleep/linux-pine64/blob/lichee-dev-v3.10.65/drivers/mmc/host/sunxi-mmc-sun50iw1p1-2.c
+> >> >>
+> >> >> You mean the bit in SDXC_REG_SD_NTSR? Yes I know that doesn't exist
+> >> >> for the eMMC controller. I mentioned this in the commit message. It
+> >> >> doesn't exist, and writes to it become a no-op.
+> >> >>
+> >> >> Would a comment, or comments, help with making this clear?
+> >> >
+> >> > Ah right. Maybe we should move the calibration under can_calibrate
+> >> > though, or create another boolean for this?
+> >> >
+> >> > Putting it under has_new_timings while the SoC doesn't use it looks
+> >> > very confusing.
+> >>
+> >> IIRC we don't support calibration anyway. This boolean simply signals
+> >> the usage of the new timing mode, whether by choice, or because it is
+> >> the only mode the controller supports.
+> >
+> > This is not the semantic I had in mind when I introduced it. The
+> > original intent was to set the new timing bit all the time for
+> > SoCs. If we want to change that semantic, then we also need to make
+> > sure what this bit means is documented properly.
+> 
+> In the driver:
+> 
+>     /* hardware only supports new timing mode */
+>     bool needs_new_timings;
+> 
+>     /* hardware can switch between old and new timing modes */
+>     bool has_timings_switch;
+> 
+> So if the A64 / H6 eMMC controller only supports / is stuck with the new
+> timing mode, that surely fits the description of the first one, right?
 
---
-Best wishes,
-Vladimir
+I guess so, yes
+
+> As for setting the new timing bit all the time, yes it is set, but it's
+> a no-op. Would a comment clarifying this at the point the hardware bit
+> is set suffice?
+
+Yep. Thanks!
+Maxime
+
+-- 
+Maxime Ripard, Bootlin (formerly Free Electrons)
+Embedded Linux and Kernel engineering
+https://bootlin.com
+--yffzoo2gxwyeuv2d--
