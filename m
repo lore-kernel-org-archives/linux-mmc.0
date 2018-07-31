@@ -1,7 +1,7 @@
 From: Chunyan Zhang <zhang.lyra@gmail.com>
 Subject: Re: [PATCH V4 5/7] mmc: sdhci: add Auto CMD Auto Select support
-Date: Tue, 31 Jul 2018 17:20:52 +0800
-Message-ID: <CAAfSe-vp_6zFPo+UYKiR+St1ajv8WXP_OL-OZh_POiUybzDHeQ@mail.gmail.com>
+Date: Tue, 31 Jul 2018 17:27:47 +0800
+Message-ID: <CAAfSe-v+Qe0yTJGhD33PwGV6YMi0Q2LxuF_X6H1sSHkxB9GAMw@mail.gmail.com>
 References: <1532340508-8749-1-git-send-email-zhang.chunyan@linaro.org>
  <1532340508-8749-6-git-send-email-zhang.chunyan@linaro.org>
  <33ceb61c-3e09-c336-e9b9-87c01336f56c@intel.com> <CAAfSe-vVEve63y-Pc0QF6w7vc37cbbbOknGkp9SmocXyNX3J4g@mail.gmail.com>
@@ -74,6 +74,9 @@ On 31 July 2018 at 16:56, Adrian Hunter <adrian.hunter@intel.com> wrote:
 >> Got it, but how to know if the card supports CMD23?
 >
 > At the moment the only way of knowing is if a request is received with mrq->sbc
+
+Ok. I will move this setting to sdhci_auto_cmd_select() for use_cmd23 is true.
+
 >
 >>
 >>>
@@ -131,13 +134,6 @@ On 31 July 2018 at 16:56, Adrian Hunter <adrian.hunter@intel.com> wrote:
 >
 > Does it fail because it contains cmd->mrq->sbc->arg or does it fail because
 > it gets written twice?
-
-Seems that the argument is too big compared with block count, hardware
-think it is a super block count.
-
-More details of the error information:
-https://www.irccloud.com/pastebin/uYlVEUsP/
-
 >
 >>
 >>>
