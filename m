@@ -1,60 +1,130 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH 01/14] mmc: mmci: fix qcom dma issue during mmci init with new
- dma_setup callback
-Date: Wed, 1 Aug 2018 11:36:48 +0200
-Message-ID: <1533116221-380-2-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH 02/14] mmc: mmci: internalize dma map/unmap into mmci dma functions
+Date: Wed, 1 Aug 2018 11:36:49 +0200
+Message-ID: <1533116221-380-3-git-send-email-ludovic.Barre@st.com>
 References: <1533116221-380-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1533116221-380-1-git-send-email-ludovic.Barre@st.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
-Cc: devicetree@vger.kernel.org, Alexandre Torgue <alexandre.torgue@st.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ludovic Barre <ludovic.barre@st.com>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Gerald Baeza <gerald.baeza@st.com>, linux-arm-kernel@lists.infradead.org
+Cc: Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Gerald Baeza <gerald.baeza@st.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, Ludovic Barre <ludovic.barre@st.com>
 List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-This patch fixes qcom dma issue during mmci init.
-Like init callback of qcom variant is not set, the qcom dma
-is not correctly initialized and fail while dma transfer
-("buggy DMA detected. Taking evasive action").
+This patch internalizes the management of dma map/unmap into
+mmci dma interfaces. This allows to simplify and prepare the next dma
+callbacks for mmci host ops.
+mmci_dma_unmap was called in mmci_data_irq & mmci_cmd_irq functions
+and can be integrated in mmci_dma_data_error.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.c | 1 +
- drivers/mmc/host/mmci.h | 1 +
- 2 files changed, 2 insertions(+)
+ drivers/mmc/host/mmci.c | 44 +++++++++++++++++++-------------------------
+ 1 file changed, 19 insertions(+), 25 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 71e9336..1841d250 100644
+index 1841d250..d8fa178 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -208,6 +208,7 @@ static struct variant_data variant_qcom = {
- 	.mmcimask1		= true,
- 	.start_err		= MCI_STARTBITERR,
- 	.opendrain		= MCI_ROD,
-+	.init			= qcom_variant_init,
- };
+@@ -482,17 +482,7 @@ static inline void mmci_dma_release(struct mmci_host *host)
+ 	host->dma_rx_channel = host->dma_tx_channel = NULL;
+ }
  
- /* Busy detection for the ST Micro variant */
-diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 517591d..696a066 100644
---- a/drivers/mmc/host/mmci.h
-+++ b/drivers/mmc/host/mmci.h
-@@ -338,3 +338,4 @@ struct mmci_host {
- #endif
- };
+-static void mmci_dma_data_error(struct mmci_host *host)
+-{
+-	dev_err(mmc_dev(host->mmc), "error during DMA transfer!\n");
+-	dmaengine_terminate_all(host->dma_current);
+-	host->dma_in_progress = false;
+-	host->dma_current = NULL;
+-	host->dma_desc_current = NULL;
+-	host->data->host_cookie = 0;
+-}
+-
+-static void mmci_dma_unmap(struct mmci_host *host, struct mmc_data *data)
++static void __mmci_dma_unmap(struct mmci_host *host, struct mmc_data *data)
+ {
+ 	struct dma_chan *chan;
  
-+void qcom_variant_init(struct mmci_host *host);
+@@ -505,6 +495,18 @@ static void mmci_dma_unmap(struct mmci_host *host, struct mmc_data *data)
+ 		     mmc_get_dma_dir(data));
+ }
+ 
++static void mmci_dma_data_error(struct mmci_host *host)
++{
++	dev_err(mmc_dev(host->mmc), "error during DMA transfer!\n");
++	dmaengine_terminate_all(host->dma_current);
++	host->dma_in_progress = false;
++	host->dma_current = NULL;
++	host->dma_desc_current = NULL;
++	host->data->host_cookie = 0;
++
++	__mmci_dma_unmap(host, host->data);
++}
++
+ static void mmci_dma_finalize(struct mmci_host *host, struct mmc_data *data)
+ {
+ 	u32 status;
+@@ -528,11 +530,10 @@ static void mmci_dma_finalize(struct mmci_host *host, struct mmc_data *data)
+ 		mmci_dma_data_error(host);
+ 		if (!data->error)
+ 			data->error = -EIO;
++	} else if (!data->host_cookie) {
++		__mmci_dma_unmap(host, data);
+ 	}
+ 
+-	if (!data->host_cookie)
+-		mmci_dma_unmap(host, data);
+-
+ 	/*
+ 	 * Use of DMA with scatter-gather is impossible.
+ 	 * Give up with DMA and switch back to PIO mode.
+@@ -704,7 +705,7 @@ static void mmci_post_request(struct mmc_host *mmc, struct mmc_request *mrq,
+ 	if (!data || !data->host_cookie)
+ 		return;
+ 
+-	mmci_dma_unmap(host, data);
++	__mmci_dma_unmap(host, data);
+ 
+ 	if (err) {
+ 		struct mmci_host_next *next = &host->next_data;
+@@ -742,10 +743,6 @@ static inline void mmci_dma_release(struct mmci_host *host)
+ {
+ }
+ 
+-static inline void mmci_dma_unmap(struct mmci_host *host, struct mmc_data *data)
+-{
+-}
+-
+ static inline void mmci_dma_finalize(struct mmci_host *host,
+ 				     struct mmc_data *data)
+ {
+@@ -906,10 +903,8 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
+ 		u32 remain, success;
+ 
+ 		/* Terminate the DMA transfer */
+-		if (dma_inprogress(host)) {
++		if (dma_inprogress(host))
+ 			mmci_dma_data_error(host);
+-			mmci_dma_unmap(host, data);
+-		}
+ 
+ 		/*
+ 		 * Calculate how far we are into the transfer.  Note that
+@@ -1055,10 +1050,9 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+ 	if ((!sbc && !cmd->data) || cmd->error) {
+ 		if (host->data) {
+ 			/* Terminate the DMA transfer */
+-			if (dma_inprogress(host)) {
++			if (dma_inprogress(host))
+ 				mmci_dma_data_error(host);
+-				mmci_dma_unmap(host, host->data);
+-			}
++
+ 			mmci_stop_data(host);
+ 		}
+ 		mmci_request_end(host, host->mrq);
 -- 
 2.7.4
