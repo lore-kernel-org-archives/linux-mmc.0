@@ -1,102 +1,109 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/2] mmc: tmio: rename files and CONFIG options to have
- the same prefix
-Date: Wed, 1 Aug 2018 11:35:12 +0200
-Message-ID: <CAPDyKFph7X=SvG4=DhRf0eiLcKcX=tD42QAO96q9S+Ebecn20w@mail.gmail.com>
-References: <1532575736-20138-1-git-send-email-yamada.masahiro@socionext.com>
- <1532575736-20138-2-git-send-email-yamada.masahiro@socionext.com>
- <CAPDyKFpK=UnwdNtb3XcgcRBJZeE0X5osM-tk8E85TCs3CeDq7Q@mail.gmail.com> <CAK7LNAScJFUPK=mMmNWYw-yJ9iaxaibituYRDU2x5kGpbsEd5A@mail.gmail.com>
+From: Ludovic Barre <ludovic.Barre@st.com>
+Subject: [PATCH 03/14] mmc: mmci: internalize dma_inprogress into mmci dma
+ functions
+Date: Wed, 1 Aug 2018 11:36:50 +0200
+Message-ID: <1533116221-380-4-git-send-email-ludovic.Barre@st.com>
+References: <1533116221-380-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAK7LNAScJFUPK=mMmNWYw-yJ9iaxaibituYRDU2x5kGpbsEd5A@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, DTML <devicetree@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1533116221-380-1-git-send-email-ludovic.Barre@st.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
+Cc: devicetree@vger.kernel.org, Alexandre Torgue <alexandre.torgue@st.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ludovic Barre <ludovic.barre@st.com>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Gerald Baeza <gerald.baeza@st.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 31 July 2018 at 14:12, Masahiro Yamada <yamada.masahiro@socionext.com> wrote:
-> 2018-07-31 0:07 GMT+09:00 Ulf Hansson <ulf.hansson@linaro.org>:
->> On 26 July 2018 at 05:28, Masahiro Yamada <yamada.masahiro@socionext.com> wrote:
->>> As commit b6147490e6aa ("mmc: tmio: split core functionality, DMA and
->>> MFD glue") said, these MMC controllers use the IP from Panasonic.
->>>
->>> TMIO (Toshiba Mobile IO) MMC was the first upstreamed user of this IP.
->>> The common driver code was split and expanded as 'tmio-mmc-core', then
->>> it become historical misnomer since 'tmio' is not the name of this IP.
->>>
->>> I pointed out this [1], and suggested to re-organize the names in the
->>> form of:
->>>
->>>   <IP-name>.c            (common code for this IP)
->>>   <IP-name>_tmio.c       (Toshiba Mobile IO)
->>>   <IP-name>_sdhi.c       (Renesas SDHI)
->>>   <IP-name>_uniphier.c   (Socionext UniPhier)
->>>
->>> The <IP-name> in my mind was 'mnsd' because names of Panasonic chips
->>> are prefixed with 'MN'.
->>>
->>> This is the naming scheme as we see in dw_mmc* and sdhci-*.
->>>
->>> In the discussion with Wolfram Sang, my suggestion was rejected
->>> because it implied drastic function renaming, which is too invasive.
->>>
->>> Ulf Hansson was still happy with file renaming to clarify the
->>> relationship between variants.  So, the accepted solution was:
->>>
->>>  - Make 'tmio_mmc' the _right_ core name
->>>  - Align all variant files with the same prefix.
->>>  - Do not rename functions
->>>
->>> This commit renames files as follows:
->>>
->>>   tmio_mmc_core.c              -> tmio_mmc.c
->>>   tmio_mmc.c                   -> tmio_mmc_original.c
->>>   renesas_sdhi_core.c          -> tmio_mmc_sdhi.c
->>>   renesas_sdhi.h               -> tmio_mmc_sdhi.h
->>>   renesas_sdhi_internal_dmac.c -> tmio_mmc_sdhi_internal_dmac.c
->>>   renesas_sdhi_sys_dmac.c      -> tmio_mmc_sdhi_sys_dmac.c
->>>
->>> Also rename CONFIG options to match to the file names:
->>>
->>>   MMC_TMIO_CORE          -> MMC_TMIO
->>>   MMC_TMIO               -> MMC_TMIO_ORIGINAL
->>>   MMC_SDHI               -> MMC_TMIO_SDHI
->>>   MMC_SDHI_SYS_DMAC      -> MMC_TMIO_SDHI_SYS_DMAC
->>>   MMC_SDHI_INTERNAL_DMAC -> MMC_TMIO_SDHI_INTERNAL_DMAC
->>>
->>> I touched eseries_pxa_defconfig and pxa_defconfig in this commit
->>> because they are inactive, but renaming of CONFIG options generally
->>> takes some development cycles.  Old names will be kept until the
->>> migration is completed, like Renesas folks did when they renamed
->>> ARCH_SHMOBILE_MULTI to ARCH_RENESAS.
->>>
->>> [1] https://www.spinics.net/lists/linux-mmc/msg46952.html
->>>
->>> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
->>
->> I am awaiting some feedback from Wolfram before applying.
->
->
->
-> If this is not welcome, please feel free to throw away.
-> (then, I will name my driver 'uniphier-sd.c')
->
-> I am neutral about this renaming because it
-> is trying to make the wrong thing correct.
->
->
-> It will also produce a different inconsistency.
-> Even if we rename renesas_sdhi_core.c to tmio_mmc_sdhi.c ,
-> functions in it will be kept renesas_sdhi_*
-> I understand they want to keep the file name and function names consistent.
+From: Ludovic Barre <ludovic.barre@st.com>
 
-Yes, we have discussed this, back an forth.
+This patch internalizes the dma_inprogress into mmci dma interfaces.
+This allows to simplify and prepare the next dma callbacks
+for mmci host ops. __dma_inprogress is called in mmci_dma_data_error
+and mmci_dma_finalize.
 
-I have no strong opinions, but instead rely on you reaching an
-agreement with Wolfram on the way forward.
+Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
+---
+ drivers/mmc/host/mmci.c | 16 ++++++++++------
+ drivers/mmc/host/mmci.h |  4 +---
+ 2 files changed, 11 insertions(+), 9 deletions(-)
 
-[...]
-
-Kind regards
-Uffe
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index d8fa178..8144a87 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -497,6 +497,9 @@ static void __mmci_dma_unmap(struct mmci_host *host, struct mmc_data *data)
+ 
+ static void mmci_dma_data_error(struct mmci_host *host)
+ {
++	if (!__dma_inprogress(host))
++		return;
++
+ 	dev_err(mmc_dev(host->mmc), "error during DMA transfer!\n");
+ 	dmaengine_terminate_all(host->dma_current);
+ 	host->dma_in_progress = false;
+@@ -512,6 +515,9 @@ static void mmci_dma_finalize(struct mmci_host *host, struct mmc_data *data)
+ 	u32 status;
+ 	int i;
+ 
++	if (!__dma_inprogress(dmae))
++		return;
++
+ 	/* Wait up to 1ms for the DMA to complete */
+ 	for (i = 0; ; i++) {
+ 		status = readl(host->base + MMCISTATUS);
+@@ -903,8 +909,7 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
+ 		u32 remain, success;
+ 
+ 		/* Terminate the DMA transfer */
+-		if (dma_inprogress(host))
+-			mmci_dma_data_error(host);
++		mmci_dma_data_error(host);
+ 
+ 		/*
+ 		 * Calculate how far we are into the transfer.  Note that
+@@ -942,8 +947,8 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
+ 		dev_err(mmc_dev(host->mmc), "stray MCI_DATABLOCKEND interrupt\n");
+ 
+ 	if (status & MCI_DATAEND || data->error) {
+-		if (dma_inprogress(host))
+-			mmci_dma_finalize(host, data);
++		mmci_dma_finalize(host, data);
++
+ 		mmci_stop_data(host);
+ 
+ 		if (!data->error)
+@@ -1050,8 +1055,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+ 	if ((!sbc && !cmd->data) || cmd->error) {
+ 		if (host->data) {
+ 			/* Terminate the DMA transfer */
+-			if (dma_inprogress(host))
+-				mmci_dma_data_error(host);
++			mmci_dma_data_error(host);
+ 
+ 			mmci_stop_data(host);
+ 		}
+diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+index 696a066..f1ec066 100644
+--- a/drivers/mmc/host/mmci.h
++++ b/drivers/mmc/host/mmci.h
+@@ -332,9 +332,7 @@ struct mmci_host {
+ 	struct mmci_host_next	next_data;
+ 	bool			dma_in_progress;
+ 
+-#define dma_inprogress(host)	((host)->dma_in_progress)
+-#else
+-#define dma_inprogress(host)	(0)
++#define __dma_inprogress(host)	((host)->dma_in_progress)
+ #endif
+ };
+ 
+-- 
+2.7.4
