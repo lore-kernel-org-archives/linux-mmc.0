@@ -1,7 +1,7 @@
 From: Aapo Vienamo <avienamo@nvidia.com>
-Subject: [PATCH 07/40] soc/tegra: pmc: Implement tegra_io_pad_is_powered()
-Date: Wed, 1 Aug 2018 19:31:57 +0300
-Message-ID: <1533141150-10511-8-git-send-email-avienamo@nvidia.com>
+Subject: [PATCH 06/40] soc/tegra: pmc: Factor out DPD register bit calculation
+Date: Wed, 1 Aug 2018 19:31:56 +0300
+Message-ID: <1533141150-10511-7-git-send-email-avienamo@nvidia.com>
 References: <1533141150-10511-1-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,41 +12,55 @@ To: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Thier
 Cc: devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Aapo Vienamo <avienamo@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Implement a function to query whether a pad is in deep power down mode.
-This will is needed by the pinctrl callbacks.
+Factor out the the code to calculate the correct DPD register and bit
+number for a given pad. This logic will be needed to query the status
+register.
 
 Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
 Acked-by: Jon Hunter <jonathanh@nvidia.com>
 ---
- drivers/soc/tegra/pmc.c | 16 ++++++++++++++++
- 1 file changed, 16 insertions(+)
+ drivers/soc/tegra/pmc.c | 20 +++++++++++++++++---
+ 1 file changed, 17 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/soc/tegra/pmc.c b/drivers/soc/tegra/pmc.c
-index 393ca72..784c182 100644
+index f926332..393ca72 100644
 --- a/drivers/soc/tegra/pmc.c
 +++ b/drivers/soc/tegra/pmc.c
-@@ -1075,6 +1075,22 @@ int tegra_io_pad_power_disable(enum tegra_io_pad id)
+@@ -922,11 +922,12 @@ tegra_io_pad_find(struct tegra_pmc *pmc, enum tegra_io_pad id)
+ 	return NULL;
  }
- EXPORT_SYMBOL(tegra_io_pad_power_disable);
  
-+static int tegra_io_pad_is_powered(enum tegra_io_pad id)
+-static int tegra_io_pad_prepare(enum tegra_io_pad id, unsigned long *request,
+-				unsigned long *status, u32 *mask)
++static int tegra_io_pad_get_dpd_register_bit(enum tegra_io_pad id,
++					     unsigned long *request,
++					     unsigned long *status,
++					     u32 *mask)
+ {
+ 	const struct tegra_io_pad_soc *pad;
+-	unsigned long rate, value;
+ 
+ 	pad = tegra_io_pad_find(pmc, id);
+ 	if (!pad) {
+@@ -947,6 +948,19 @@ static int tegra_io_pad_prepare(enum tegra_io_pad id, unsigned long *request,
+ 		*request = pmc->soc->regs->dpd2_req;
+ 	}
+ 
++	return 0;
++}
++
++static int tegra_io_pad_prepare(enum tegra_io_pad id, unsigned long *request,
++				unsigned long *status, u32 *mask)
 +{
-+	unsigned long request, status;
-+	u32 mask;
-+	u32 value;
++	unsigned long rate, value;
 +	int err;
 +
-+	err = tegra_io_pad_get_dpd_register_bit(id, &request, &status, &mask);
++	err = tegra_io_pad_get_dpd_register_bit(id, request, status, mask);
 +	if (err)
 +		return err;
 +
-+	value = tegra_pmc_readl(status);
-+
-+	return !(value & mask);
-+}
-+
- int tegra_io_pad_set_voltage(enum tegra_io_pad id,
- 			     enum tegra_io_pad_voltage voltage)
- {
+ 	if (pmc->clk) {
+ 		rate = clk_get_rate(pmc->clk);
+ 		if (!rate) {
 -- 
 2.7.4
