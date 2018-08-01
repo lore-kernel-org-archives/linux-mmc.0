@@ -1,48 +1,56 @@
-From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH 00/14] mmc: mmci: prepare dma callbacks with mmci_host_ops
-Date: Wed, 1 Aug 2018 11:36:47 +0200
-Message-ID: <1533116221-380-1-git-send-email-ludovic.Barre@st.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: mxcmmc: Fix missing parentheses and brace
+Date: Wed, 1 Aug 2018 11:41:39 +0200
+Message-ID: <CAPDyKFpdfVx4QqOEsBhOrTPp7iVo=qqFr7AFr-e2Sfqef+CtWQ@mail.gmail.com>
+References: <20180712195937.GA36007@beast> <CAPDyKFpi87UaKLScADOT_gkXkXpLR6r2J71G78zVn0hkc3ng5g@mail.gmail.com>
+ <CAGXu5jJbS-P9X+6jPVkiVqDN1vF5ZFiwxRD0fHk+yYnhb9qKGQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAGXu5jJbS-P9X+6jPVkiVqDN1vF5ZFiwxRD0fHk+yYnhb9qKGQ@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
-Cc: Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Gerald Baeza <gerald.baeza@st.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, Ludovic Barre <ludovic.barre@st.com>
+To: Kees Cook <keescook@chromium.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, Christoph Hellwig <hch@lst.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Ludovic Barre <ludovic.barre@st.com>
+On 31 July 2018 at 22:27, Kees Cook <keescook@chromium.org> wrote:
+> On Mon, Jul 16, 2018 at 3:11 AM, Ulf Hansson <ulf.hansson@linaro.org> wro=
+te:
+>> On 12 July 2018 at 21:59, Kees Cook <keescook@chromium.org> wrote:
+>>> Looks like the adjusted syntax wasn't fully build tested. This fixes
+>>> failures with powerpc builds:
+>>>
+>>> drivers/mmc/host/mxcmmc.c: In function =E2=80=98mxcmci_swap_buffers=E2=
+=80=99:
+>>> drivers/mmc/host/mxcmmc.c:296:51: error: expected =E2=80=98)=E2=80=99 b=
+efore =E2=80=98;=E2=80=99 token
+>>>    void *buf =3D kmap_atomic(sg_page(sg) + sg->offset;
+>>>                                                    ^
+>>> drivers/mmc/host/mxcmmc.c:299:1: error: expected =E2=80=98,=E2=80=99 or=
+ =E2=80=98;=E2=80=99 before =E2=80=98}=E2=80=99 token
+>>>  }
+>>>  ^
+>>>
+>>> Fixes: b189e7589f6d3 ("mmc: mxcmmc: handle highmem pages")
+>>> Signed-off-by: Kees Cook <keescook@chromium.org>
+>>
+>> Thanks, applied for fixes!
+>
+> I just checked again, and while I see this in linux-next, I would
+> expect this to be in 4.18, since this fixes a 4.18-introduced build
+> failure for some PPC configurations. Can this please be included in
+> 4.18?
 
-This patch series prepares and adds callbacks for dma transfert at
-mmci_host_ops. This series is composed of 3 parts:
--Internalize specific needs of legacy dmaengine.
--Create and setup dma_priv pointer
--Create generic callbacks  which share some features
-(like cookie...) and call specific needs
+Yes it will, I was just about to create a PR for it.
 
-This patch series must be applied on top of 
-"mmc: mmci: Add and implement a ->dma_setup() callback for qcom dml"
+However, I have deliberately slowed down the pace of sending fixes to
+Linus, because of trying to achieve a somewhat better test coverage.
 
-Ludovic Barre (14):
-  mmc: mmci: fix qcom dma issue during mmci init with new dma_setup
-    callback
-  mmc: mmci: internalize dma map/unmap into mmci dma functions
-  mmc: mmci: internalize dma_inprogress into mmci dma functions
-  mmc: mmci: introduce dma_priv pointer to mmci_host
-  mmc: mmci: move mmci next cookie to mci host
-  mmc: mmci: merge prepare data functions
-  mmc: mmci: add prepare/unprepare_data callbacks
-  mmc: mmci: add get_next_data callback
-  mmc: mmci: modify dma_setup callback
-  mmc: mmci: add dma_release callback
-  mmc: mmci: add dma_start callback
-  mmc: mmci: add dma_finalize callback
-  mmc: mmci: add dma_error callback
-  mmc: mmci: add validate_data callback
+If you want to test the latest 4.18 rcs with pending fixes, we have
+the pending-fixes branch in Stephen's next tree.
 
- drivers/mmc/host/mmci.c          | 458 ++++++++++++++++++++++++---------------
- drivers/mmc/host/mmci.h          |  45 ++--
- drivers/mmc/host/mmci_qcom_dml.c |  15 +-
- 3 files changed, 322 insertions(+), 196 deletions(-)
+[...]
 
--- 
-2.7.4
+Kind regards
+Uffe
