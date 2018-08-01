@@ -1,7 +1,7 @@
 From: Aapo Vienamo <avienamo@nvidia.com>
-Subject: [PATCH 40/40] arm64: dts: tegra210: Assign clocks for sdmmc1 and sdmmc4
-Date: Wed, 1 Aug 2018 19:32:30 +0300
-Message-ID: <1533141150-10511-41-git-send-email-avienamo@nvidia.com>
+Subject: [PATCH 04/40] dt-bindings: mmc: Add Tegra SDHCI sampling trimmer values
+Date: Wed, 1 Aug 2018 19:31:54 +0300
+Message-ID: <1533141150-10511-5-git-send-email-avienamo@nvidia.com>
 References: <1533141150-10511-1-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,40 +12,41 @@ To: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Thier
 Cc: devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Aapo Vienamo <avienamo@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Use assigned-clock properties to configure pllc4 as the parent clock
-for sdmmc4 on Tegra210. pllc4 offers better jitter perfomance than
-the default pllp and is required by HS200 and HS400 modes.
+Document the Tegra SDHCI inbound and outbound sampling trimmer values.
 
 Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
 ---
- arch/arm64/boot/dts/nvidia/tegra210.dtsi | 8 ++++++++
- 1 file changed, 8 insertions(+)
+ .../devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt          | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
 
-diff --git a/arch/arm64/boot/dts/nvidia/tegra210.dtsi b/arch/arm64/boot/dts/nvidia/tegra210.dtsi
-index 0951acc..14da98a 100644
---- a/arch/arm64/boot/dts/nvidia/tegra210.dtsi
-+++ b/arch/arm64/boot/dts/nvidia/tegra210.dtsi
-@@ -1057,6 +1057,11 @@
- 		nvidia,pad-autocal-pull-down-offset-1v8 = <0x7b>;
- 		nvidia,default-tap = <0x2>;
- 		nvidia,default-trim = <0x4>;
-+		assigned-clocks = <&tegra_car TEGRA210_CLK_SDMMC4>,
-+				  <&tegra_car TEGRA210_CLK_PLL_C4_OUT0>,
-+				  <&tegra_car TEGRA210_CLK_PLL_C4>;
-+		assigned-clock-parents = <&tegra_car TEGRA210_CLK_PLL_C4_OUT0>;
-+		assigned-clock-rates = <200000000>, <1000000000>, <1000000000>;
- 		status = "disabled";
- 	};
+diff --git a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
+index 2e973b5..3c7960a 100644
+--- a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
++++ b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
+@@ -68,6 +68,10 @@ Optional properties for Tegra210 and Tegra186:
+ - nvidia,pad-autocal-pull-up-offset-hs400,
+   nvidia,pad-autocal-pull-down-offset-hs400 : Specify drive strength
+   calibration offsets for HS400 mode.
++- nvidia,default-tap : Specify the default inbound sampling clock
++  trimmer value for non-tunable modes.
++- nvidia,default-trim : Specify the default outbound clock trimmer
++  value.
  
-@@ -1107,6 +1112,9 @@
- 		nvidia,pad-autocal-pull-down-offset-1v8 = <0x05>;
- 		nvidia,default-tap = <0x8>;
- 		nvidia,default-trim = <0x0>;
-+		assigned-clocks = <&tegra_car TEGRA210_CLK_SDMMC4>,
-+				  <&tegra_car TEGRA210_CLK_PLL_C4_OUT0>;
-+		assigned-clock-parents = <&tegra_car TEGRA210_CLK_PLL_C4_OUT0>;
- 		status = "disabled";
- 	};
+   Notes on the pad calibration pull up and pulldown offset values:
+     - The property values are drive codes which are programmed into the
+@@ -78,6 +82,13 @@ Optional properties for Tegra210 and Tegra186:
+     - The SDR104 and HS400 timing specific values are used in
+       corresponding modes if specified.
  
++  Notes on tap and trim values:
++    - The values are used for compensating trace length differences
++      by adjusting the sampling point.
++    - The values are programmed to the Vendor Clock Control Register.
++      Please refer to the reference manual of the SoC for correct
++      values.
++
+ Example:
+ sdhci@700b0000 {
+ 	compatible = "nvidia,tegra210-sdhci", "nvidia,tegra124-sdhci";
 -- 
 2.7.4
