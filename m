@@ -1,7 +1,7 @@
 From: Aapo Vienamo <avienamo@nvidia.com>
-Subject: [PATCH 29/40] mmc: tegra: Enable UHS and HS200 modes for Tegra186
-Date: Wed, 1 Aug 2018 19:32:19 +0300
-Message-ID: <1533141150-10511-30-git-send-email-avienamo@nvidia.com>
+Subject: [PATCH 28/40] mmc: tegra: Enable UHS and HS200 modes for Tegra210
+Date: Wed, 1 Aug 2018 19:32:18 +0300
+Message-ID: <1533141150-10511-29-git-send-email-avienamo@nvidia.com>
 References: <1533141150-10511-1-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -20,11 +20,11 @@ Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
  1 file changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 03a6bf7..7f1ac4a 100644
+index 2e07dcd..03a6bf7 100644
 --- a/drivers/mmc/host/sdhci-tegra.c
 +++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -872,7 +872,9 @@ static const struct sdhci_tegra_soc_data soc_data_tegra186 = {
- 	.pdata = &sdhci_tegra186_pdata,
+@@ -843,7 +843,9 @@ static const struct sdhci_tegra_soc_data soc_data_tegra210 = {
+ 	.pdata = &sdhci_tegra210_pdata,
  	.nvquirks = NVQUIRK_NEEDS_PAD_CONTROL |
  		    NVQUIRK_HAS_PADCALIB |
 -		    NVQUIRK_DIS_CARD_CLK_CONFIG_TAP,
@@ -33,6 +33,6 @@ index 03a6bf7..7f1ac4a 100644
 +		    NVQUIRK_ENABLE_SDR104,
  };
  
- static const struct of_device_id sdhci_tegra_dt_match[] = {
+ static const struct sdhci_pltfm_data sdhci_tegra186_pdata = {
 -- 
 2.7.4
