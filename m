@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH 06/14] mmc: mmci: merge prepare data functions
-Date: Wed, 1 Aug 2018 11:36:53 +0200
-Message-ID: <1533116221-380-7-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH 05/14] mmc: mmci: move mmci next cookie to mci host
+Date: Wed, 1 Aug 2018 11:36:52 +0200
+Message-ID: <1533116221-380-6-git-send-email-ludovic.Barre@st.com>
 References: <1533116221-380-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,70 +14,77 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-This patch merges the prepare data functions.
-This allows to define a single access to prepare data service.
-This prepares integration for mmci host ops.
+This patch moves next cookie to mmci host structure to
+share same cookie management between all variants.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.c | 22 +++++++++-------------
- 1 file changed, 9 insertions(+), 13 deletions(-)
+ drivers/mmc/host/mmci.c | 10 ++++------
+ drivers/mmc/host/mmci.h |  2 ++
+ 2 files changed, 6 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 5646c2e6..e4d80f1 100644
+index bdc48c3..5646c2e6 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -651,11 +651,16 @@ static int __mmci_dma_prep_data(struct mmci_host *host, struct mmc_data *data,
- 	return -ENOMEM;
- }
+@@ -418,7 +418,6 @@ static void mmci_init_sg(struct mmci_host *host, struct mmc_data *data)
+ struct dmaengine_next {
+ 	struct dma_async_tx_descriptor *dma_desc;
+ 	struct dma_chan	*dma_chan;
+-	s32 cookie;
+ };
  
--static inline int mmci_dma_prep_data(struct mmci_host *host,
--				     struct mmc_data *data)
-+static inline int mmci_dma_prepare_data(struct mmci_host *host,
-+					struct mmc_data *data,
-+					bool next)
- {
+ struct dmaengine_priv {
+@@ -449,7 +448,7 @@ static int mmci_dma_setup(struct mmci_host *host)
+ 							 "tx");
+ 
+ 	/* initialize pre request cookie */
+-	dmae->next_data.cookie = 1;
++	host->next_cookie = 1;
+ 
+ 	/*
+ 	 * If only an RX channel is specified, the driver will
+@@ -716,7 +715,7 @@ static void mmci_get_next_data(struct mmci_host *host, struct mmc_data *data)
  	struct dmaengine_priv *dmae = host->dma_priv;
-+	struct dmaengine_next *nd = &dmae->next_data;
+ 	struct dmaengine_next *next = &dmae->next_data;
  
-+	if (next)
-+		return __mmci_dma_prep_data(host, data, &nd->dma_chan,
-+					    &nd->dma_desc);
- 	/* Check if next job is already prepared. */
- 	if (dmae->dma_current && dmae->dma_desc_current)
- 		return 0;
-@@ -665,22 +670,13 @@ static inline int mmci_dma_prep_data(struct mmci_host *host,
- 				    &dmae->dma_desc_current);
- }
+-	WARN_ON(data->host_cookie && data->host_cookie != next->cookie);
++	WARN_ON(data->host_cookie && data->host_cookie != host->next_cookie);
+ 	WARN_ON(!data->host_cookie && (next->dma_desc || next->dma_chan));
  
--static inline int mmci_dma_prep_next(struct mmci_host *host,
--				     struct mmc_data *data)
--{
+ 	dmae->dma_desc_current = next->dma_desc;
+@@ -728,9 +727,7 @@ static void mmci_get_next_data(struct mmci_host *host, struct mmc_data *data)
+ static void mmci_pre_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ {
+ 	struct mmci_host *host = mmc_priv(mmc);
 -	struct dmaengine_priv *dmae = host->dma_priv;
+ 	struct mmc_data *data = mrq->data;
 -	struct dmaengine_next *nd = &dmae->next_data;
--
--	return __mmci_dma_prep_data(host, data, &nd->dma_chan, &nd->dma_desc);
--}
--
- static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
- {
- 	struct dmaengine_priv *dmae = host->dma_priv;
- 	struct mmc_data *data = host->data;
- 	int ret;
  
--	ret = mmci_dma_prep_data(host, host->data);
-+	ret = mmci_dma_prepare_data(host, host->data, false);
- 	if (ret)
- 		return ret;
- 
-@@ -737,7 +733,7 @@ static void mmci_pre_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	if (mmci_validate_data(host, data))
+ 	if (!data)
+ 		return;
+@@ -741,7 +738,8 @@ static void mmci_pre_request(struct mmc_host *mmc, struct mmc_request *mrq)
  		return;
  
--	if (!mmci_dma_prep_next(host, data))
-+	if (!mmci_dma_prepare_data(host, data, true))
- 		data->host_cookie = ++host->next_cookie < 0 ?
- 			1 : host->next_cookie;
+ 	if (!mmci_dma_prep_next(host, data))
+-		data->host_cookie = ++nd->cookie < 0 ? 1 : nd->cookie;
++		data->host_cookie = ++host->next_cookie < 0 ?
++			1 : host->next_cookie;
  }
+ 
+ static void mmci_post_request(struct mmc_host *mmc, struct mmc_request *mrq,
+diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+index 260a1de..d2ec4fd 100644
+--- a/drivers/mmc/host/mmci.h
++++ b/drivers/mmc/host/mmci.h
+@@ -318,6 +318,8 @@ struct mmci_host {
+ 	int (*get_rx_fifocnt)(struct mmci_host *h, u32 status, int remain);
+ 
+ 	void			*dma_priv;
++
++	s32			next_cookie;
+ };
+ 
+ void qcom_variant_init(struct mmci_host *host);
 -- 
 2.7.4
