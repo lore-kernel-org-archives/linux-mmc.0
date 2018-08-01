@@ -1,7 +1,7 @@
 From: Aapo Vienamo <avienamo@nvidia.com>
-Subject: [PATCH 21/40] mmc: tegra: Parse default trim and tap from dt
-Date: Wed, 1 Aug 2018 19:32:11 +0300
-Message-ID: <1533141150-10511-22-git-send-email-avienamo@nvidia.com>
+Subject: [PATCH 22/40] mmc: tegra: Configure default tap values
+Date: Wed, 1 Aug 2018 19:32:12 +0300
+Message-ID: <1533141150-10511-23-git-send-email-avienamo@nvidia.com>
 References: <1533141150-10511-1-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,60 +12,193 @@ To: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Thier
 Cc: devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Aapo Vienamo <avienamo@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Parse the default inbound and outbound sampling trimmer values from
-the device tree.
+Set the default inbound timing adjustment tap value on reset and on
+non-tunable modes.
+
+The default tap value is not programmed on tunable modes because the
+tuning sequence is used instead to determine the tap value.
 
 Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
 ---
- drivers/mmc/host/sdhci-tegra.c | 22 ++++++++++++++++++++++
- 1 file changed, 22 insertions(+)
+ drivers/mmc/host/sdhci-tegra.c | 131 ++++++++++++++++++++++++-----------------
+ 1 file changed, 76 insertions(+), 55 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index a2375ad..bd3305e 100644
+index bd3305e..9550d35 100644
 --- a/drivers/mmc/host/sdhci-tegra.c
 +++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -107,6 +107,9 @@ struct sdhci_tegra {
- 	struct pinctrl_state *pinctrl_state_1v8;
- 
- 	struct sdhci_tegra_autocal_offsets autocal_offsets;
-+
-+	u32 default_tap;
-+	u32 default_trim;
- };
- 
- static u16 tegra_sdhci_readw(struct sdhci_host *host, int reg)
-@@ -460,6 +463,23 @@ static void tegra_sdhci_parse_pad_autocal_dt(struct sdhci_host *host)
- 		autocal->pull_down_hs400 = autocal->pull_down_1v8;
+@@ -213,6 +213,57 @@ static bool tegra_sdhci_is_pad_and_regulator_valid(struct sdhci_host *host)
+ 	return true;
  }
  
-+static void tegra_sdhci_parse_default_tap_and_trim(struct sdhci_host *host)
++static bool tegra_sdhci_configure_card_clk(struct sdhci_host *host, bool enable)
++{
++	bool orig_enabled;
++	u32 reg;
++
++	reg = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
++	orig_enabled = !!(reg & SDHCI_CLOCK_CARD_EN);
++
++	if (orig_enabled == enable)
++		return orig_enabled;
++
++	if (enable)
++		reg |= SDHCI_CLOCK_CARD_EN;
++	else
++		reg &= ~SDHCI_CLOCK_CARD_EN;
++
++	sdhci_writew(host, reg, SDHCI_CLOCK_CONTROL);
++
++	return orig_enabled;
++}
++
++static void tegra_sdhci_set_tap(struct sdhci_host *host, unsigned int tap)
 +{
 +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
 +	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
-+	int err;
++	const struct sdhci_tegra_soc_data *soc_data = tegra_host->soc_data;
++	bool card_clk_enabled = false;
++	u32 reg;
 +
-+	err = device_property_read_u32(host->mmc->parent, "nvidia,default-tap",
-+				       &tegra_host->default_tap);
-+	if (err)
-+		tegra_host->default_tap = 0;
++	/*
++	 * Touching the tap values is a bit tricky on some SoC generations.
++	 * The quirk enables a workaround for a glitch that sometimes occurs if
++	 * the tap values are changed.
++	 */
 +
-+	err = device_property_read_u32(host->mmc->parent, "nvidia,default-trim",
-+				       &tegra_host->default_trim);
-+	if (err)
-+		tegra_host->default_trim = 0;
++	if (soc_data->nvquirks & NVQUIRK_DIS_CARD_CLK_CONFIG_TAP)
++		card_clk_enabled = tegra_sdhci_configure_card_clk(host, false);
++
++	reg = sdhci_readl(host, SDHCI_TEGRA_VENDOR_CLOCK_CTRL);
++	reg &= ~SDHCI_CLOCK_CTRL_TAP_MASK;
++	reg |= tap << SDHCI_CLOCK_CTRL_TAP_SHIFT;
++	sdhci_writel(host, reg, SDHCI_TEGRA_VENDOR_CLOCK_CTRL);
++
++	if (soc_data->nvquirks & NVQUIRK_DIS_CARD_CLK_CONFIG_TAP &&
++		    card_clk_enabled) {
++		udelay(1);
++		sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
++		tegra_sdhci_configure_card_clk(host, card_clk_enabled);
++	}
 +}
 +
- static void tegra_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
  {
  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-@@ -865,6 +885,8 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
+@@ -226,6 +277,8 @@ static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
+ 	if (!(mask & SDHCI_RESET_ALL))
+ 		return;
  
- 	tegra_sdhci_parse_pad_autocal_dt(host);
- 
-+	tegra_sdhci_parse_default_tap_and_trim(host);
++	tegra_sdhci_set_tap(host, tegra_host->default_tap);
 +
- 	tegra_host->power_gpio = devm_gpiod_get_optional(&pdev->dev, "power",
- 							 GPIOD_OUT_HIGH);
- 	if (IS_ERR(tegra_host->power_gpio)) {
+ 	misc_ctrl = sdhci_readl(host, SDHCI_TEGRA_VENDOR_MISC_CTRL);
+ 	clk_ctrl = sdhci_readl(host, SDHCI_TEGRA_VENDOR_CLOCK_CTRL);
+ 
+@@ -286,27 +339,6 @@ static void tegra_sdhci_configure_cal_pad(struct sdhci_host *host, bool enable)
+ 	}
+ }
+ 
+-static bool tegra_sdhci_configure_card_clk(struct sdhci_host *host, bool enable)
+-{
+-	bool orig_enabled;
+-	u32 reg;
+-
+-	reg = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+-	orig_enabled = !!(reg & SDHCI_CLOCK_CARD_EN);
+-
+-	if (orig_enabled == enable)
+-		return orig_enabled;
+-
+-	if (enable)
+-		reg |= SDHCI_CLOCK_CARD_EN;
+-	else
+-		reg &= ~SDHCI_CLOCK_CARD_EN;
+-
+-	sdhci_writew(host, reg, SDHCI_CLOCK_CONTROL);
+-
+-	return orig_enabled;
+-}
+-
+ static void tegra_sdhci_set_pad_autocal_offset(struct sdhci_host *host,
+ 					       u16 pdpu)
+ {
+@@ -501,19 +533,6 @@ static void tegra_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	}
+ }
+ 
+-static void tegra_sdhci_set_uhs_signaling(struct sdhci_host *host,
+-					  unsigned timing)
+-{
+-	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
+-
+-	if (timing == MMC_TIMING_UHS_DDR50 ||
+-	    timing == MMC_TIMING_MMC_DDR52)
+-		tegra_host->ddr_signaling = true;
+-
+-	sdhci_set_uhs_signaling(host, timing);
+-}
+-
+ static unsigned int tegra_sdhci_get_max_clock(struct sdhci_host *host)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+@@ -521,34 +540,36 @@ static unsigned int tegra_sdhci_get_max_clock(struct sdhci_host *host)
+ 	return clk_round_rate(pltfm_host->clk, UINT_MAX);
+ }
+ 
+-static void tegra_sdhci_set_tap(struct sdhci_host *host, unsigned int tap)
++static void tegra_sdhci_set_uhs_signaling(struct sdhci_host *host,
++					  unsigned timing)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
+-	const struct sdhci_tegra_soc_data *soc_data = tegra_host->soc_data;
+-	bool card_clk_enabled = false;
+-	u32 reg;
++	bool set_default_tap = false;
+ 
+-	/*
+-	 * Touching the tap values is a bit tricky on some SoC generations.
+-	 * The quirk enables a workaround for a glitch that sometimes occurs if
+-	 * the tap values are changed.
+-	 */
++	switch (timing) {
++	case MMC_TIMING_UHS_SDR50:
++	case MMC_TIMING_UHS_SDR104:
++	case MMC_TIMING_MMC_HS200:
++	case MMC_TIMING_MMC_HS400:
++		/* Don't set default tap on tunable modes. */
++		break;
++	case MMC_TIMING_MMC_DDR52:
++	case MMC_TIMING_UHS_DDR50:
++		tegra_host->ddr_signaling = true;
++		set_default_tap = true;
++		break;
++	default:
++		set_default_tap = true;
++		break;
++	}
+ 
+-	if (soc_data->nvquirks & NVQUIRK_DIS_CARD_CLK_CONFIG_TAP)
+-		card_clk_enabled = tegra_sdhci_configure_card_clk(host, false);
++	sdhci_set_uhs_signaling(host, timing);
+ 
+-	reg = sdhci_readl(host, SDHCI_TEGRA_VENDOR_CLOCK_CTRL);
+-	reg &= ~SDHCI_CLOCK_CTRL_TAP_MASK;
+-	reg |= tap << SDHCI_CLOCK_CTRL_TAP_SHIFT;
+-	sdhci_writel(host, reg, SDHCI_TEGRA_VENDOR_CLOCK_CTRL);
++	tegra_sdhci_pad_autocalib(host);
+ 
+-	if (soc_data->nvquirks & NVQUIRK_DIS_CARD_CLK_CONFIG_TAP &&
+-		    card_clk_enabled) {
+-		udelay(1);
+-		sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
+-		tegra_sdhci_configure_card_clk(host, card_clk_enabled);
+-	}
++	if (set_default_tap)
++		tegra_sdhci_set_tap(host, tegra_host->default_tap);
+ }
+ 
+ static int tegra_sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
 -- 
 2.7.4
