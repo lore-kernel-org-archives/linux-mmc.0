@@ -1,7 +1,7 @@
 From: Aapo Vienamo <avienamo@nvidia.com>
-Subject: [PATCH 28/40] mmc: tegra: Enable UHS and HS200 modes for Tegra210
-Date: Wed, 1 Aug 2018 19:32:18 +0300
-Message-ID: <1533141150-10511-29-git-send-email-avienamo@nvidia.com>
+Subject: [PATCH 31/40] arm64: dts: Add Tegra186 sdmmc pinctrl voltage states
+Date: Wed, 1 Aug 2018 19:32:21 +0300
+Message-ID: <1533141150-10511-32-git-send-email-avienamo@nvidia.com>
 References: <1533141150-10511-1-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,27 +12,93 @@ To: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Thier
 Cc: devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Aapo Vienamo <avienamo@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Set nvquirks to enable higher speed modes.
+Add pad voltage configuration nodes for sdmmc pads with configurable
+voltages on Tegra186.
 
 Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
+Reviewed-by: Mikko Perttunen <mperttunen@nvidia.com>
 ---
- drivers/mmc/host/sdhci-tegra.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ arch/arm64/boot/dts/nvidia/tegra186.dtsi | 40 ++++++++++++++++++++++++++++++++
+ 1 file changed, 40 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 2e07dcd..03a6bf7 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -843,7 +843,9 @@ static const struct sdhci_tegra_soc_data soc_data_tegra210 = {
- 	.pdata = &sdhci_tegra210_pdata,
- 	.nvquirks = NVQUIRK_NEEDS_PAD_CONTROL |
- 		    NVQUIRK_HAS_PADCALIB |
--		    NVQUIRK_DIS_CARD_CLK_CONFIG_TAP,
-+		    NVQUIRK_DIS_CARD_CLK_CONFIG_TAP |
-+		    NVQUIRK_ENABLE_SDR50 |
-+		    NVQUIRK_ENABLE_SDR104,
- };
+diff --git a/arch/arm64/boot/dts/nvidia/tegra186.dtsi b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
+index b762227..7669756 100644
+--- a/arch/arm64/boot/dts/nvidia/tegra186.dtsi
++++ b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
+@@ -4,6 +4,7 @@
+ #include <dt-bindings/interrupt-controller/arm-gic.h>
+ #include <dt-bindings/mailbox/tegra186-hsp.h>
+ #include <dt-bindings/memory/tegra186-mc.h>
++#include <dt-bindings/pinctrl/pinctrl-tegra-io-pad.h>
+ #include <dt-bindings/power/tegra186-powergate.h>
+ #include <dt-bindings/reset/tegra186-reset.h>
+ #include <dt-bindings/thermal/tegra186-bpmp-thermal.h>
+@@ -236,6 +237,9 @@
+ 		clock-names = "sdhci";
+ 		resets = <&bpmp TEGRA186_RESET_SDMMC1>;
+ 		reset-names = "sdhci";
++		pinctrl-names = "sdmmc-3v3", "sdmmc-1v8";
++		pinctrl-0 = <&sdmmc1_3v3>;
++		pinctrl-1 = <&sdmmc1_1v8>;
+ 		status = "disabled";
+ 	};
  
- static const struct sdhci_pltfm_data sdhci_tegra186_pdata = {
+@@ -247,6 +251,9 @@
+ 		clock-names = "sdhci";
+ 		resets = <&bpmp TEGRA186_RESET_SDMMC2>;
+ 		reset-names = "sdhci";
++		pinctrl-names = "sdmmc-3v3", "sdmmc-1v8";
++		pinctrl-0 = <&sdmmc2_3v3>;
++		pinctrl-1 = <&sdmmc2_1v8>;
+ 		status = "disabled";
+ 	};
+ 
+@@ -258,6 +265,9 @@
+ 		clock-names = "sdhci";
+ 		resets = <&bpmp TEGRA186_RESET_SDMMC3>;
+ 		reset-names = "sdhci";
++		pinctrl-names = "sdmmc-3v3", "sdmmc-1v8";
++		pinctrl-0 = <&sdmmc3_3v3>;
++		pinctrl-1 = <&sdmmc3_1v8>;
+ 		status = "disabled";
+ 	};
+ 
+@@ -368,6 +378,36 @@
+ 		      <0 0x0c380000 0 0x10000>,
+ 		      <0 0x0c390000 0 0x10000>;
+ 		reg-names = "pmc", "wake", "aotag", "scratch";
++
++		sdmmc1_3v3: sdmmc1-3v3 {
++			pins = "sdmmc1-hv";
++			power-source = <TEGRA_IO_PAD_VOLTAGE_3V3>;
++		};
++
++		sdmmc1_1v8: sdmmc1-1v8 {
++			pins = "sdmmc1-hv";
++			power-source = <TEGRA_IO_PAD_VOLTAGE_1V8>;
++		};
++
++		sdmmc2_3v3: sdmmc2-3v3 {
++			pins = "sdmmc2-hv";
++			power-source = <TEGRA_IO_PAD_VOLTAGE_3V3>;
++		};
++
++		sdmmc2_1v8: sdmmc2-1v8 {
++			pins = "sdmmc2-hv";
++			power-source = <TEGRA_IO_PAD_VOLTAGE_1V8>;
++		};
++
++		sdmmc3_3v3: sdmmc3-3v3 {
++			pins = "sdmmc3-hv";
++			power-source = <TEGRA_IO_PAD_VOLTAGE_3V3>;
++		};
++
++		sdmmc3_1v8: sdmmc3-1v8 {
++			pins = "sdmmc3-hv";
++			power-source = <TEGRA_IO_PAD_VOLTAGE_1V8>;
++		};
+ 	};
+ 
+ 	ccplex@e000000 {
 -- 
 2.7.4
