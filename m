@@ -1,7 +1,7 @@
 From: Aapo Vienamo <avienamo@nvidia.com>
-Subject: [PATCH 37/40] arm64: dts: tegra210: Add SDHCI tap and trim values
-Date: Wed, 1 Aug 2018 19:32:27 +0300
-Message-ID: <1533141150-10511-38-git-send-email-avienamo@nvidia.com>
+Subject: [PATCH 38/40] arm64: dts: tegra186: Add SDHCI tap and trim values
+Date: Wed, 1 Aug 2018 19:32:28 +0300
+Message-ID: <1533141150-10511-39-git-send-email-avienamo@nvidia.com>
 References: <1533141150-10511-1-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -13,50 +13,50 @@ Cc: devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.k
 List-Id: linux-mmc@vger.kernel.org
 
 Add SDHCI inbound and outbound SDHCI sampling trimmer values for
-Tegra210.
+Tegra186.
 
 Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
 ---
- arch/arm64/boot/dts/nvidia/tegra210.dtsi | 8 ++++++++
+ arch/arm64/boot/dts/nvidia/tegra186.dtsi | 8 ++++++++
  1 file changed, 8 insertions(+)
 
-diff --git a/arch/arm64/boot/dts/nvidia/tegra210.dtsi b/arch/arm64/boot/dts/nvidia/tegra210.dtsi
-index 2a80f2b..0951acc 100644
---- a/arch/arm64/boot/dts/nvidia/tegra210.dtsi
-+++ b/arch/arm64/boot/dts/nvidia/tegra210.dtsi
-@@ -1055,6 +1055,8 @@
- 		nvidia,pad-autocal-pull-down-offset-3v3 = <0x7d>;
- 		nvidia,pad-autocal-pull-up-offset-1v8 = <0x7b>;
- 		nvidia,pad-autocal-pull-down-offset-1v8 = <0x7b>;
-+		nvidia,default-tap = <0x2>;
-+		nvidia,default-trim = <0x4>;
+diff --git a/arch/arm64/boot/dts/nvidia/tegra186.dtsi b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
+index b7020dd..3b2fe0d 100644
+--- a/arch/arm64/boot/dts/nvidia/tegra186.dtsi
++++ b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
+@@ -246,6 +246,8 @@
+ 		nvidia,pad-autocal-pull-down-offset-1v8-timeout = <0x07>;
+ 		nvidia,pad-autocal-pull-up-offset-sdr104 = <0x03>;
+ 		nvidia,pad-autocal-pull-down-offset-sdr104 = <0x05>;
++		nvidia,default-tap = <0x5>;
++		nvidia,default-trim = <0xb>;
  		status = "disabled";
  	};
  
-@@ -1068,6 +1070,8 @@
- 		reset-names = "sdhci";
- 		nvidia,pad-autocal-pull-up-offset-1v8 = <0x05>;
- 		nvidia,pad-autocal-pull-down-offset-1v8 = <0x05>;
-+		nvidia,default-tap = <0x8>;
-+		nvidia,default-trim = <0x0>;
+@@ -264,6 +266,8 @@
+ 		nvidia,pad-autocal-pull-down-offset-3v3-timeout = <0x06>;
+ 		nvidia,pad-autocal-pull-up-offset-1v8-timeout = <0x07>;
+ 		nvidia,pad-autocal-pull-down-offset-1v8-timeout = <0x07>;
++		nvidia,default-tap = <0x5>;
++		nvidia,default-trim = <0xb>;
  		status = "disabled";
  	};
  
-@@ -1086,6 +1090,8 @@
- 		nvidia,pad-autocal-pull-down-offset-3v3 = <0x7d>;
- 		nvidia,pad-autocal-pull-up-offset-1v8 = <0x7b>;
- 		nvidia,pad-autocal-pull-down-offset-1v8 = <0x7b>;
-+		nvidia,default-tap = <0x3>;
-+		nvidia,default-trim = <0x3>;
+@@ -284,6 +288,8 @@
+ 		nvidia,pad-autocal-pull-down-offset-3v3-timeout = <0x06>;
+ 		nvidia,pad-autocal-pull-up-offset-1v8-timeout = <0x07>;
+ 		nvidia,pad-autocal-pull-down-offset-1v8-timeout = <0x07>;
++		nvidia,default-tap = <0x5>;
++		nvidia,default-trim = <0xb>;
  		status = "disabled";
  	};
  
-@@ -1099,6 +1105,8 @@
- 		reset-names = "sdhci";
- 		nvidia,pad-autocal-pull-up-offset-1v8 = <0x05>;
- 		nvidia,pad-autocal-pull-down-offset-1v8 = <0x05>;
-+		nvidia,default-tap = <0x8>;
-+		nvidia,default-trim = <0x0>;
+@@ -299,6 +305,8 @@
+ 		nvidia,pad-autocal-pull-down-offset-hs400 = <0x05>;
+ 		nvidia,pad-autocal-pull-up-offset-1v8-timeout = <0x0a>;
+ 		nvidia,pad-autocal-pull-down-offset-1v8-timeout = <0x0a>;
++		nvidia,default-tap = <0x5>;
++		nvidia,default-trim = <0x9>;
  		status = "disabled";
  	};
  
