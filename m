@@ -1,7 +1,7 @@
 From: <cl@rock-chips.com>
-Subject: [PATCH v3 2/4] dt-bindings: rockchip: grf: add grf and pmugrf description for px30
-Date: Wed,  1 Aug 2018 16:45:14 +0800
-Message-ID: <1533113116-8820-3-git-send-email-cl@rock-chips.com>
+Subject: [PATCH v3 4/4] arm64: dts: rockchip: add PX30 eavluation board devicetree
+Date: Wed,  1 Aug 2018 16:45:16 +0800
+Message-ID: <1533113116-8820-5-git-send-email-cl@rock-chips.com>
 References: <1533113116-8820-1-git-send-email-cl@rock-chips.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1533113116-8820-1-git-send-email-cl@rock-chips.com>
@@ -12,33 +12,517 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Liang Chen <cl@rock-chips.com>
 
-This patch adds the compatible of GRF and PMUGRF for PX30 SoCs.
+This patch add px30-evb.dts for PX30 evaluation board.
+Tested on PX30 evb.
 
 Acked-by: Rob Herring <robh@kernel.org>
 Signed-off-by: Liang Chen <cl@rock-chips.com>
 ---
- Documentation/devicetree/bindings/soc/rockchip/grf.txt | 2 ++
- 1 file changed, 2 insertions(+)
+ Documentation/devicetree/bindings/arm/rockchip.txt |   4 +
+ arch/arm64/boot/dts/rockchip/Makefile              |   1 +
+ arch/arm64/boot/dts/rockchip/px30-evb.dts          | 470 +++++++++++++++++++++
+ 3 files changed, 475 insertions(+)
+ create mode 100644 arch/arm64/boot/dts/rockchip/px30-evb.dts
 
-diff --git a/Documentation/devicetree/bindings/soc/rockchip/grf.txt b/Documentation/devicetree/bindings/soc/rockchip/grf.txt
-index 7dc5ce8..46e27cd 100644
---- a/Documentation/devicetree/bindings/soc/rockchip/grf.txt
-+++ b/Documentation/devicetree/bindings/soc/rockchip/grf.txt
-@@ -13,6 +13,7 @@ On RK3328 SoCs, the GRF adds a section for USB2PHYGRF,
- Required Properties:
+diff --git a/Documentation/devicetree/bindings/arm/rockchip.txt b/Documentation/devicetree/bindings/arm/rockchip.txt
+index 1c1d62d..e33b23a 100644
+--- a/Documentation/devicetree/bindings/arm/rockchip.txt
++++ b/Documentation/devicetree/bindings/arm/rockchip.txt
+@@ -158,6 +158,10 @@ Rockchip platforms device tree bindings
+     Required root node properties:
+       - compatible = "rockchip,rv1108-evb", "rockchip,rv1108";
  
- - compatible: GRF should be one of the following:
-+   - "rockchip,px30-grf", "syscon": for px30
-    - "rockchip,rk3036-grf", "syscon": for rk3036
-    - "rockchip,rk3066-grf", "syscon": for rk3066
-    - "rockchip,rk3188-grf", "syscon": for rk3188
-@@ -23,6 +24,7 @@ Required Properties:
-    - "rockchip,rk3399-grf", "syscon": for rk3399
-    - "rockchip,rv1108-grf", "syscon": for rv1108
- - compatible: PMUGRF should be one of the following:
-+   - "rockchip,px30-pmugrf", "syscon": for px30
-    - "rockchip,rk3368-pmugrf", "syscon": for rk3368
-    - "rockchip,rk3399-pmugrf", "syscon": for rk3399
- - compatible: SGRF should be one of the following
++- Rockchip PX30 evb:
++    Required root node properties:
++      - compatible = "rockchip,px30-evb", "rockchip,px30";
++
+ - Rockchip RK3368 evb:
+     Required root node properties:
+       - compatible = "rockchip,rk3368-evb-act8846", "rockchip,rk3368";
+diff --git a/arch/arm64/boot/dts/rockchip/Makefile b/arch/arm64/boot/dts/rockchip/Makefile
+index 48a83f8..19aa9c6 100644
+--- a/arch/arm64/boot/dts/rockchip/Makefile
++++ b/arch/arm64/boot/dts/rockchip/Makefile
+@@ -14,3 +14,4 @@ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-gru-kevin.dtb
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-puma-haikou.dtb
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-sapphire.dtb
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-sapphire-excavator.dtb
++dtb-$(CONFIG_ARCH_ROCKCHIP) += px30-evb.dtb
+diff --git a/arch/arm64/boot/dts/rockchip/px30-evb.dts b/arch/arm64/boot/dts/rockchip/px30-evb.dts
+new file mode 100644
+index 0000000..f7bd2e3
+--- /dev/null
++++ b/arch/arm64/boot/dts/rockchip/px30-evb.dts
+@@ -0,0 +1,470 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright (c) 2018 Fuzhou Rockchip Electronics Co., Ltd
++ */
++
++/dts-v1/;
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/input/input.h>
++#include <dt-bindings/pinctrl/rockchip.h>
++#include "px30.dtsi"
++
++/ {
++	model = "Rockchip PX30 EVB";
++	compatible = "rockchip,px30-evb", "rockchip,px30";
++
++	adc-keys {
++		compatible = "adc-keys";
++		io-channels = <&saradc 2>;
++		io-channel-names = "buttons";
++		poll-interval = <100>;
++		keyup-threshold-microvolt = <1800000>;
++
++		esc-key {
++			linux,code = <KEY_ESC>;
++			label = "esc";
++			press-threshold-microvolt = <1310000>;
++		};
++
++		home-key {
++			linux,code = <KEY_HOME>;
++			label = "home";
++			press-threshold-microvolt = <624000>;
++		};
++
++		menu-key {
++			linux,code = <KEY_MENU>;
++			label = "menu";
++			press-threshold-microvolt = <987000>;
++		};
++
++		vol-down-key {
++			linux,code = <KEY_VOLUMEDOWN>;
++			label = "volume down";
++			press-threshold-microvolt = <300000>;
++		};
++
++		vol-up-key {
++			linux,code = <KEY_VOLUMEUP>;
++			label = "volume up";
++			press-threshold-microvolt = <17000>;
++		};
++	};
++
++	backlight: backlight {
++		compatible = "pwm-backlight";
++		pwms = <&pwm1 0 25000 0>;
++	};
++
++	chosen {
++		bootargs = "console=ttyS2,1500000n8";
++	};
++
++	sdio_pwrseq: sdio-pwrseq {
++		compatible = "mmc-pwrseq-simple";
++		pinctrl-names = "default";
++		pinctrl-0 = <&wifi_enable_h>;
++
++		/*
++		 * On the module itself this is one of these (depending
++		 * on the actual card populated):
++		 * - SDIO_RESET_L_WL_REG_ON
++		 * - PDN (power down when low)
++		 */
++		reset-gpios = <&gpio0 RK_PA2 GPIO_ACTIVE_LOW>; /* GPIO3_A4 */
++	};
++
++	vcc_phy: vcc-phy-regulator {
++		compatible = "regulator-fixed";
++		regulator-name = "vcc_phy";
++		regulator-always-on;
++		regulator-boot-on;
++	};
++
++	vcc5v0_sys: vccsys {
++		compatible = "regulator-fixed";
++		regulator-name = "vcc5v0_sys";
++		regulator-always-on;
++		regulator-boot-on;
++		regulator-min-microvolt = <5000000>;
++		regulator-max-microvolt = <5000000>;
++	};
++};
++
++&cpu0 {
++	cpu-supply = <&vdd_arm>;
++};
++
++&display_subsystem {
++	status = "okay";
++};
++
++&emmc {
++	bus-width = <8>;
++	cap-mmc-highspeed;
++	mmc-hs200-1_8v;
++	non-removable;
++	status = "okay";
++};
++
++&gmac {
++	phy-supply = <&vcc_phy>;
++	clock_in_out = "output";
++	snps,reset-gpio = <&gpio2 13 GPIO_ACTIVE_LOW>;
++	snps,reset-active-low;
++	snps,reset-delays-us = <0 50000 50000>;
++	status = "okay";
++};
++
++&i2c0 {
++	status = "okay";
++
++	rk809: pmic@20 {
++		compatible = "rockchip,rk809";
++		reg = <0x20>;
++		interrupt-parent = <&gpio0>;
++		interrupts = <7 IRQ_TYPE_LEVEL_LOW>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pmic_int>;
++		rockchip,system-power-controller;
++		wakeup-source;
++		#clock-cells = <1>;
++		clock-output-names = "rk808-clkout1", "rk808-clkout2";
++
++		vcc1-supply = <&vcc5v0_sys>;
++		vcc2-supply = <&vcc5v0_sys>;
++		vcc3-supply = <&vcc5v0_sys>;
++		vcc4-supply = <&vcc5v0_sys>;
++		vcc5-supply = <&vcc3v3_sys>;
++		vcc6-supply = <&vcc3v3_sys>;
++		vcc7-supply = <&vcc3v3_sys>;
++		vcc8-supply = <&vcc3v3_sys>;
++		vcc9-supply = <&vcc5v0_sys>;
++
++		pwrkey {
++			status = "okay";
++		};
++
++		regulators {
++			vdd_logic: DCDC_REG1 {
++				regulator-always-on;
++				regulator-boot-on;
++				regulator-min-microvolt = <950000>;
++				regulator-max-microvolt = <1350000>;
++				regulator-ramp-delay = <6001>;
++				regulator-initial-mode = <0x2>;
++				regulator-name = "vdd_logic";
++				regulator-state-mem {
++					regulator-on-in-suspend;
++					regulator-suspend-microvolt = <950000>;
++				};
++			};
++
++			vdd_arm: DCDC_REG2 {
++				regulator-always-on;
++				regulator-boot-on;
++				regulator-min-microvolt = <950000>;
++				regulator-max-microvolt = <1350000>;
++				regulator-ramp-delay = <6001>;
++				regulator-initial-mode = <0x2>;
++				regulator-name = "vdd_arm";
++				regulator-state-mem {
++					regulator-off-in-suspend;
++					regulator-suspend-microvolt = <950000>;
++				};
++			};
++
++			vcc_ddr: DCDC_REG3 {
++				regulator-always-on;
++				regulator-boot-on;
++				regulator-name = "vcc_ddr";
++				regulator-initial-mode = <0x2>;
++				regulator-state-mem {
++					regulator-on-in-suspend;
++				};
++			};
++
++			vcc_3v0: DCDC_REG4 {
++				regulator-always-on;
++				regulator-boot-on;
++				regulator-min-microvolt = <3000000>;
++				regulator-max-microvolt = <3000000>;
++				regulator-initial-mode = <0x2>;
++				regulator-name = "vcc_3v0";
++				regulator-state-mem {
++					regulator-on-in-suspend;
++					regulator-suspend-microvolt = <3000000>;
++				};
++			};
++
++			vcc_1v0: LDO_REG1 {
++				regulator-always-on;
++				regulator-boot-on;
++				regulator-min-microvolt = <1000000>;
++				regulator-max-microvolt = <1000000>;
++				regulator-name = "vcc_1v0";
++				regulator-state-mem {
++					regulator-on-in-suspend;
++					regulator-suspend-microvolt = <1000000>;
++				};
++			};
++
++			vcc1v8_soc: LDO_REG2 {
++				regulator-always-on;
++				regulator-boot-on;
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++
++				regulator-name = "vcc1v8_soc";
++				regulator-state-mem {
++					regulator-on-in-suspend;
++					regulator-suspend-microvolt = <1800000>;
++				};
++			};
++
++			vdd1v0_soc: LDO_REG3 {
++				regulator-always-on;
++				regulator-boot-on;
++				regulator-min-microvolt = <1000000>;
++				regulator-max-microvolt = <1000000>;
++
++				regulator-name = "vcc1v0_soc";
++				regulator-state-mem {
++					regulator-on-in-suspend;
++					regulator-suspend-microvolt = <1000000>;
++				};
++			};
++
++			vcc3v0_pmu: LDO_REG4 {
++				regulator-always-on;
++				regulator-boot-on;
++				regulator-min-microvolt = <3000000>;
++				regulator-max-microvolt = <3000000>;
++
++				regulator-name = "vcc3v0_pmu";
++				regulator-state-mem {
++					regulator-on-in-suspend;
++					regulator-suspend-microvolt = <3000000>;
++
++				};
++			};
++
++			vccio_sd: LDO_REG5 {
++				regulator-always-on;
++				regulator-boot-on;
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <3300000>;
++
++				regulator-name = "vccio_sd";
++				regulator-state-mem {
++					regulator-on-in-suspend;
++					regulator-suspend-microvolt = <3300000>;
++				};
++			};
++
++			vcc_sd: LDO_REG6 {
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
++
++				regulator-name = "vcc_sd";
++				regulator-state-mem {
++					regulator-on-in-suspend;
++					regulator-suspend-microvolt = <3300000>;
++
++				};
++			};
++
++			vcc2v8_dvp: LDO_REG7 {
++				regulator-always-on;
++				regulator-boot-on;
++				regulator-min-microvolt = <2800000>;
++				regulator-max-microvolt = <2800000>;
++
++				regulator-name = "vcc2v8_dvp";
++				regulator-state-mem {
++					regulator-off-in-suspend;
++					regulator-suspend-microvolt = <2800000>;
++				};
++			};
++
++			vcc1v8_dvp: LDO_REG8 {
++				regulator-always-on;
++				regulator-boot-on;
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++
++				regulator-name = "vcc1v8_dvp";
++				regulator-state-mem {
++					regulator-on-in-suspend;
++					regulator-suspend-microvolt = <1800000>;
++				};
++			};
++
++			vdd1v5_dvp: LDO_REG9 {
++				regulator-always-on;
++				regulator-boot-on;
++				regulator-min-microvolt = <1500000>;
++				regulator-max-microvolt = <1500000>;
++
++				regulator-name = "vdd1v5_dvp";
++				regulator-state-mem {
++					regulator-off-in-suspend;
++					regulator-suspend-microvolt = <1500000>;
++				};
++			};
++
++			vcc3v3_sys: DCDC_REG5 {
++				regulator-always-on;
++				regulator-boot-on;
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-name = "vcc3v3_sys";
++				regulator-state-mem {
++					regulator-on-in-suspend;
++					regulator-suspend-microvolt = <3300000>;
++				};
++			};
++
++			vcc3v3_lcd: SWITCH_REG1 {
++				regulator-boot-on;
++				regulator-name = "vcc3v3_lcd";
++			};
++
++			vcc5v0_host: SWITCH_REG2 {
++				regulator-always-on;
++				regulator-boot-on;
++				regulator-name = "vcc5v0_host";
++			};
++		};
++	};
++};
++
++&i2s1_2ch {
++	status = "okay";
++	#sound-dai-cells = <0>;
++};
++
++&io_domains {
++	status = "okay";
++
++	vccio1-supply = <&vcc1v8_soc>;
++	vccio2-supply = <&vccio_sd>;
++	vccio3-supply = <&vcc_3v0>;
++	vccio4-supply = <&vcc3v0_pmu>;
++	vccio5-supply = <&vcc_3v0>;
++};
++
++&pinctrl {
++	headphone {
++		hp_det: hp-det {
++			rockchip,pins = <2 RK_PB0 RK_FUNC_GPIO &pcfg_pull_down>;
++		};
++	};
++
++	pmic {
++		pmic_int: pmic_int {
++			rockchip,pins =
++				<0 RK_PA7 RK_FUNC_GPIO &pcfg_pull_up>;
++		};
++
++		soc_slppin_gpio: soc_slppin_gpio {
++			rockchip,pins =
++				<0 RK_PA4 RK_FUNC_GPIO &pcfg_output_low>;
++		};
++
++		soc_slppin_slp: soc_slppin_slp {
++			rockchip,pins =
++				<0 RK_PA4 RK_FUNC_1 &pcfg_pull_none>;
++		};
++
++		soc_slppin_rst: soc_slppin_rst {
++			rockchip,pins =
++				<0 RK_PA4 RK_FUNC_2 &pcfg_pull_none>;
++		};
++	};
++
++	sdio-pwrseq {
++		wifi_enable_h: wifi-enable-h {
++			rockchip,pins = <0 RK_PA2 RK_FUNC_GPIO &pcfg_pull_none>;
++		};
++	};
++};
++
++&pmu_io_domains {
++	status = "okay";
++
++	pmuio1-supply = <&vcc3v0_pmu>;
++	pmuio2-supply = <&vcc3v0_pmu>;
++};
++
++&pwm1 {
++	status = "okay";
++};
++
++&saradc {
++	status = "okay";
++	vref-supply = <&vcc1v8_soc>;
++};
++
++&sdmmc {
++	bus-width = <4>;
++	cap-mmc-highspeed;
++	cap-sd-highspeed;
++	card-detect-delay = <800>;
++	/*cd-gpios = <&gpio2 4 GPIO_ACTIVE_HIGH>; [> CD GPIO <]*/
++	sd-uhs-sdr12;
++	sd-uhs-sdr25;
++	sd-uhs-sdr50;
++	sd-uhs-sdr104;
++	vqmmc-supply = <&vccio_sd>;
++	vmmc-supply = <&vcc_sd>;
++	status = "okay";
++};
++
++&sdio {
++	bus-width = <4>;
++	cap-sd-highspeed;
++	keep-power-in-suspend;
++	non-removable;
++	mmc-pwrseq = <&sdio_pwrseq>;
++	sd-uhs-sdr104;
++	status = "okay";
++};
++
++&uart1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&uart1_xfer &uart1_cts>;
++	status = "okay";
++};
++
++&uart2 {
++	status = "okay";
++};
++
++&usb20_otg {
++	status = "okay";
++};
++
++&usb_host0_ehci {
++	status = "okay";
++};
++
++&usb_host0_ohci {
++	status = "okay";
++};
++
++&vopb {
++	status = "okay";
++};
++
++&vopb_mmu {
++	status = "okay";
++};
++
++&vopl {
++	status = "okay";
++};
++
++&vopl_mmu {
++	status = "okay";
++};
 -- 
 1.9.1
