@@ -1,54 +1,43 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: mxcmmc: Fix missing parentheses and brace
-Date: Wed, 1 Aug 2018 11:41:39 +0200
-Message-ID: <CAPDyKFpdfVx4QqOEsBhOrTPp7iVo=qqFr7AFr-e2Sfqef+CtWQ@mail.gmail.com>
-References: <20180712195937.GA36007@beast> <CAPDyKFpi87UaKLScADOT_gkXkXpLR6r2J71G78zVn0hkc3ng5g@mail.gmail.com>
- <CAGXu5jJbS-P9X+6jPVkiVqDN1vF5ZFiwxRD0fHk+yYnhb9qKGQ@mail.gmail.com>
+Subject: Re: next/master boot: 179 boots: 11 failed,
+ 167 passed with 1 offline (next-20180731)
+Date: Wed, 1 Aug 2018 11:58:58 +0200
+Message-ID: <CAPDyKFoJ173XKL-xSRJtvk5_3E2cx1Pb-rs=7g9d9+Gt8QAOqQ@mail.gmail.com>
+References: <5b607cc4.1c69fb81.6c1d6.6534@mx.google.com>
+ <20180731160623.GH5719@sirena.org.uk>
+ <c50e3311-9dca-c64b-ca58-6a44e3559e98@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAGXu5jJbS-P9X+6jPVkiVqDN1vF5ZFiwxRD0fHk+yYnhb9qKGQ@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Kees Cook <keescook@chromium.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, Christoph Hellwig <hch@lst.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <c50e3311-9dca-c64b-ca58-6a44e3559e98@st.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ludovic BARRE <ludovic.barre@st.com>
+Cc: kernel-build-reports@lists.linaro.org, Kevin Hilman <khilman@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, David Brown <david.brown@linaro.org>, Mark Brown <broonie@kernel.org>, linux-next@vger.kernel.org, linux-arm-msm <linux-arm-msm@vger.kernel.org>, Andy Gross <andy.gross@linaro.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 31 July 2018 at 22:27, Kees Cook <keescook@chromium.org> wrote:
-> On Mon, Jul 16, 2018 at 3:11 AM, Ulf Hansson <ulf.hansson@linaro.org> wro=
-te:
->> On 12 July 2018 at 21:59, Kees Cook <keescook@chromium.org> wrote:
->>> Looks like the adjusted syntax wasn't fully build tested. This fixes
->>> failures with powerpc builds:
->>>
->>> drivers/mmc/host/mxcmmc.c: In function =E2=80=98mxcmci_swap_buffers=E2=
-=80=99:
->>> drivers/mmc/host/mxcmmc.c:296:51: error: expected =E2=80=98)=E2=80=99 b=
-efore =E2=80=98;=E2=80=99 token
->>>    void *buf =3D kmap_atomic(sg_page(sg) + sg->offset;
->>>                                                    ^
->>> drivers/mmc/host/mxcmmc.c:299:1: error: expected =E2=80=98,=E2=80=99 or=
- =E2=80=98;=E2=80=99 before =E2=80=98}=E2=80=99 token
->>>  }
->>>  ^
->>>
->>> Fixes: b189e7589f6d3 ("mmc: mxcmmc: handle highmem pages")
->>> Signed-off-by: Kees Cook <keescook@chromium.org>
->>
->> Thanks, applied for fixes!
+On 1 August 2018 at 10:19, Ludovic BARRE <ludovic.barre@st.com> wrote:
+> hi Mark, Ulf
 >
-> I just checked again, and while I see this in linux-next, I would
-> expect this to be in 4.18, since this fixes a 4.18-introduced build
-> failure for some PPC configurations. Can this please be included in
-> 4.18?
+> When I see log, I think the patch in attachment could fix this issue
+> , but like I've not qcom board I can't test if it's fixed :-(.
+>
+> Ulf: for patch delivery, you prefer a patch delivery on mailing list ?
 
-Yes it will, I was just about to create a PR for it.
+Thanks for looking into this.
 
-However, I have deliberately slowed down the pace of sending fixes to
-Linus, because of trying to achieve a somewhat better test coverage.
+However, no need to post a fix this time (your patch fixed the issue,
+but should declare the qcom_variant_init() in mmci.h.
 
-If you want to test the latest 4.18 rcs with pending fixes, we have
-the pending-fixes branch in Stephen's next tree.
+I have already amended the patch, so no further actions is needed.
 
 [...]
 
