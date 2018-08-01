@@ -1,86 +1,64 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: next/master boot: 179 boots: 11 failed,
- 167 passed with 1 offline (next-20180731)
-Date: Wed, 1 Aug 2018 12:05:46 +0200
-Message-ID: <CAPDyKFqm_eJzh3Tw-0dhh_juM+DTstrsA0DoCNFd9qHTFYqxBg@mail.gmail.com>
-References: <5b607cc4.1c69fb81.6c1d6.6534@mx.google.com>
- <20180731160623.GH5719@sirena.org.uk>
+Subject: Re: [PATCH 01/14] mmc: mmci: fix qcom dma issue during mmci init with
+ new dma_setup callback
+Date: Wed, 1 Aug 2018 12:08:38 +0200
+Message-ID: <CAPDyKFq4Qx5e8Hk40F5DpTJn3g1bnm6sbQERS0Lt-OGmzEdLyQ@mail.gmail.com>
+References: <1533116221-380-1-git-send-email-ludovic.Barre@st.com> <1533116221-380-2-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20180731160623.GH5719@sirena.org.uk>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Mark Brown <broonie@kernel.org>
-Cc: kernel-build-reports@lists.linaro.org, Kevin Hilman <khilman@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, David Brown <david.brown@linaro.org>, linux-next@vger.kernel.org, Ludovic Barre <ludovic.barre@st.com>, linux-arm-msm <linux-arm-msm@vger.kernel.org>, Andy Gross <andy.gross@linaro.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1533116221-380-2-git-send-email-ludovic.Barre@st.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ludovic Barre <ludovic.Barre@st.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Gerald Baeza <gerald.baeza@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 31 July 2018 at 18:06, Mark Brown <broonie@kernel.org> wrote:
-> On Tue, Jul 31, 2018 at 08:14:12AM -0700, kernelci.org bot wrote:
+On 1 August 2018 at 11:36, Ludovic Barre <ludovic.Barre@st.com> wrote:
+> From: Ludovic Barre <ludovic.barre@st.com>
 >
-> Today's -next fails to boot on a variety of Qualcomm 32 bit platforms:
+> This patch fixes qcom dma issue during mmci init.
+> Like init callback of qcom variant is not set, the qcom dma
+> is not correctly initialized and fail while dma transfer
+> ("buggy DMA detected. Taking evasive action").
 >
->>     multi_v7_defconfig:
->>         qcom-apq8064-cm-qs600:
->>             lab-baylibre-seattle: new failure (last pass: next-20180730)
->>         qcom-apq8064-ifc6410:
->>             lab-baylibre-seattle: new failure (last pass: next-20180730)
->>
->>     qcom_defconfig:
->>         qcom-apq8064-cm-qs600:
->>             lab-baylibre-seattle: new failure (last pass: next-20180730)
+> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
+> ---
+>  drivers/mmc/host/mmci.c | 1 +
+>  drivers/mmc/host/mmci.h | 1 +
+>  2 files changed, 2 insertions(+)
 >
-> The logs are all somewhat similar, for example:
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index 71e9336..1841d250 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -208,6 +208,7 @@ static struct variant_data variant_qcom = {
+>         .mmcimask1              = true,
+>         .start_err              = MCI_STARTBITERR,
+>         .opendrain              = MCI_ROD,
+> +       .init                   = qcom_variant_init,
+>  };
 >
->    https://storage.kernelci.org/next/master/next-20180731/arm/multi_v7_defconfig/lab-baylibre-seattle/boot-qcom-apq8064-cm-qs600.html
+>  /* Busy detection for the ST Micro variant */
+> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+> index 517591d..696a066 100644
+> --- a/drivers/mmc/host/mmci.h
+> +++ b/drivers/mmc/host/mmci.h
+> @@ -338,3 +338,4 @@ struct mmci_host {
+>  #endif
+>  };
 >
-> detects a DMA problem during MMCI initialization:
->
-> [    2.237566] mmci-pl18x 121c0000.sdcc: mmc2: PL180 manf 51 rev0 at 0x121c0000 irq 32,0 (pio)
-> [    2.244790] mmci-pl18x 121c0000.sdcc: DMA channels RX dma2chan1, TX dma2chan2
-> [    2.271722] mmci-pl18x 12400000.sdcc: error during DMA transfer!
-> [    2.271757] mmci-pl18x 12400000.sdcc: buggy DMA detected. Taking evasive action.
-> [    2.276798] ------------[ cut here ]------------
-> [    2.284185] WARNING: CPU: 0 PID: 0 at ../include/linux/dma-mapping.h:551 bam_free_chan+0x2d8/0x2e0
-> [    2.288772] Modules linked in:
-> [    2.297534] CPU: 0 PID: 0 Comm: swapper/0 Not tainted 4.18.0-rc7-next-20180731 #1
->
-> then panics:
->
-> [    2.513796] ------------[ cut here ]------------
-> [    2.518367] kernel BUG at ../mm/vmalloc.c:1608!
-> [    2.522968] Internal error: Oops - BUG: 0 [#1] SMP ARM
->
-> trying to release the DMA channel.  I've not done any bisection or
-> anything but I do note 8bb2299d2d0b5cc (mmc: mmci: Add and implement a
-> ->dma_setup() callback for qcom dml) and some related commits in the MMC
-> tree.
->
-> More details for each of the failed boots at:
->
->   https://kernelci.org/boot/id/5b6054f559b5144b9396baa9/
->   https://kernelci.org/boot/id/5b60551259b5144abb96bab6/
->   https://kernelci.org/boot/id/5b6054e259b5144b1e96bab2/
->
-> including full logs, details of the build and so on.
+> +void qcom_variant_init(struct mmci_host *host);
 
-Mark, thanks for reporting.
+This isn't needed.
 
-Problem was a simple one liner that should have been added to included
-in my patch "mmc: mmci: Add and implement a ->dma_setup() callback for
-qcom dml". The missing oneliner caused mmci to wrongly use dma for the
-qcom variant.
+> --
+> 2.7.4
+>
 
-I have amended the patch and published it, it should reach the next
-tree as of tomorrow. Apologize for the mess it created.
+Anyway, we can just drop this patch from your series as I amended the
+patch causing the problem.
+
+I will continue to review the rest.
 
 Kind regards
 Uffe
