@@ -1,179 +1,128 @@
-From: Srinath Mannam <srinath.mannam@broadcom.com>
-Subject: Re: [PATCH v3 2/2] mmc: host: iproc: Add ACPI support to IPROC SDHCI
-Date: Wed, 1 Aug 2018 23:33:03 +0530
-Message-ID: <CABe79T5WnYwDDixC+duPkjXWrGW=LCFGoOSaRJh7g9e3+zz4eA@mail.gmail.com>
-References: <1532931343-9499-1-git-send-email-srinath.mannam@broadcom.com> <1532931343-9499-3-git-send-email-srinath.mannam@broadcom.com>
+From: Feng Tang <feng.tang@intel.com>
+Subject: Re: [PATCH] mmc: Move the mmc driver init earlier
+Date: Thu, 2 Aug 2018 17:15:39 +0800
+Message-ID: <20180802091539.m5k7cdoad6hfkdfy@shbuild888>
+References: <20180608095154.22413-1-feng.tang@intel.com>
+ <CAPDyKFrs3ngkVVQaq34V9qzV3KoFdy=B+UbLnzR=fHKsOco=tg@mail.gmail.com>
+ <20180612084234.gjzq66xsqblryrkm@shbuild888>
+ <CAPDyKFq8WZhQQ9EBjfuVvu=YHB9AdwvMHwyKOY5Wxku1V5PtmA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1532931343-9499-3-git-send-email-srinath.mannam@broadcom.com>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFq8WZhQQ9EBjfuVvu=YHB9AdwvMHwyKOY5Wxku1V5PtmA@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Vikram Prakash <vikram.prakash@broadcom.com>
-Cc: BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>, linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Srinath Mannam <srinath.mannam@broadcom.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Adrian Hunter <adrian.hunter@intel.com>, ajan@linux.intel.com, Alan Cox <gnomes@lxorguk.ukuu.org.uk>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Adrian Hunter,
+Hi Ulf,
 
-Kindly provide your review comments and feedback.
+On Tue, Jun 12, 2018 at 12:29:50PM +0200, Ulf Hansson wrote:
+> On 12 June 2018 at 10:42, Feng Tang <feng.tang@intel.com> wrote:
+> > Hi Ulf,
+> >
+> > Thanks for the review.
+> >
+> > On Tue, Jun 12, 2018 at 08:25:44AM +0200, Ulf Hansson wrote:
+> >> On 8 June 2018 at 11:51, Feng Tang <feng.tang@intel.com> wrote:
+> >> > When doing some boot time optimization for an eMMC rootfs NUCs,
+> >> > we found the rootfs may spend around 100 microseconds waiting
+> >> > for eMMC card to be initialized, then the rootfs could be
+> >> > mounted.
+> >> >         [    1.216561] Waiting for root device /dev/mmcblk1p1...
+> >> >         [    1.289262] mmc1: new HS400 MMC card at address 0001
+> >> >         [    1.289667] mmcblk1: mmc1:0001 R1J56L 14.7 GiB
+> >> >         [    1.289772] mmcblk1boot0: mmc1:0001 R1J56L partition 1 8.00 MiB
+> >> >         [    1.289869] mmcblk1boot1: mmc1:0001 R1J56L partition 2 8.00 MiB
+> >> >         [    1.289967] mmcblk1rpmb: mmc1:0001 R1J56L partition 3 4.00 MiB
+> >> >         [    1.292798]  mmcblk1: p1 p2 p3
+> >> >         [    1.300576] EXT4-fs (mmcblk1p1): couldn't mount as ext3 due to feature incompatibilities
+> >> >         [    1.300912] EXT4-fs (mmcblk1p1): couldn't mount as ext2 due to feature incompatibilities
+> >> >
+> >> > And this is a common problem for smartphones, tablets, embedded
+> >> > devices and automotive products. This patch will make the eMMC/SD
+> >> > card  start initializing earlier, by changing its order in drivers/Makefile.
+> >> >
+> >> > On our platform, the waiting for eMMC card is almost eliminated with the patch,
+> >> > which is critical to boot time.
+> >>
+> >> I am wondering what kernel version you are running here. There have
+> >> been some changes to the mmc initialization path, which perhaps can
+> >> help.
+> > These logs in commit msg are based on kernel 4.14, and the patch is generated
+> > against kernel 4.17.
+> 
+> Right. So it's quite recent, even if lot's of changes have been made
+> to the mmc core since then.
+> 
+> A few things (old/new) that is important.
+> 1) Check if your mmc host driver support MMC_CAP_WAIT_WHILE_BUSY. That
+> should have some effect, avoiding unnecessary polling.
 
-Thank you.
+I've followed your suggestion to try 4.18-rc4 kernel, and there is around
+15% reduction in the rootfs mount's waiting for eMMC storage. And our
+SDHCI pci controller does support MMC_CAP_WAIT_WHILE_BUSY.
 
-Regards,
-Srinath.
+> 
+> 2) Since 4.18 rc1, you will be able to configure an over estimated
+> "power on" delay (via DT as well). Look at commit
+> 6d796c68cd15234a33a4bd2ef7231125fea2dc6c.
+> 
+> 3) If you use a DT based platform, I think what people do is to
+> re-organize the order of device nodes, such that as many as possible
+> -EPROBE_DEFER is avoided to be returned by drivers. This is also not a
+> good solution, but the best we have at this moment.
 
-On Mon, Jul 30, 2018 at 11:45 AM, Srinath Mannam
-<srinath.mannam@broadcom.com> wrote:
-> Add ACPI support to all IPROC SDHCI varients
->
-> Signed-off-by: Srinath Mannam <srinath.mannam@broadcom.com>
-> Reviewed-by: Ray Jui <ray.jui@broadcom.com>
-> Reviewed-by: Scott Branden <scott.branden@broadcom.com>
-> Reviewed-by: Vladimir Olovyannikov <vladimir.olovyannikov@broadcom.com>
-> ---
->  drivers/mmc/host/Kconfig       |  1 +
->  drivers/mmc/host/sdhci-iproc.c | 63 +++++++++++++++++++++++++++++-------------
->  2 files changed, 45 insertions(+), 19 deletions(-)
->
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 0581c19..bc6702e 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -334,6 +334,7 @@ config MMC_SDHCI_IPROC
->         tristate "SDHCI support for the BCM2835 & iProc SD/MMC Controller"
->         depends on ARCH_BCM2835 || ARCH_BCM_IPROC || COMPILE_TEST
->         depends on MMC_SDHCI_PLTFM
-> +       depends on OF || ACPI
->         default ARCH_BCM_IPROC
->         select MMC_SDHCI_IO_ACCESSORS
->         help
-> diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
-> index d0e83db..abf5269 100644
-> --- a/drivers/mmc/host/sdhci-iproc.c
-> +++ b/drivers/mmc/host/sdhci-iproc.c
-> @@ -15,6 +15,7 @@
->   * iProc SDHCI platform driver
->   */
->
-> +#include <linux/acpi.h>
->  #include <linux/delay.h>
->  #include <linux/module.h>
->  #include <linux/mmc/host.h>
-> @@ -162,9 +163,19 @@ static void sdhci_iproc_writeb(struct sdhci_host *host, u8 val, int reg)
->         sdhci_iproc_writel(host, newval, reg & ~3);
->  }
->
-> +static unsigned int sdhci_iproc_get_max_clock(struct sdhci_host *host)
-> +{
-> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +
-> +       if (pltfm_host->clk)
-> +               return sdhci_pltfm_clk_get_max_clock(host);
-> +       else
-> +               return pltfm_host->clock;
-> +}
-> +
->  static const struct sdhci_ops sdhci_iproc_ops = {
->         .set_clock = sdhci_set_clock,
-> -       .get_max_clock = sdhci_pltfm_clk_get_max_clock,
-> +       .get_max_clock = sdhci_iproc_get_max_clock,
->         .set_bus_width = sdhci_set_bus_width,
->         .reset = sdhci_reset,
->         .set_uhs_signaling = sdhci_set_uhs_signaling,
-> @@ -178,7 +189,7 @@ static const struct sdhci_ops sdhci_iproc_32only_ops = {
->         .write_w = sdhci_iproc_writew,
->         .write_b = sdhci_iproc_writeb,
->         .set_clock = sdhci_set_clock,
-> -       .get_max_clock = sdhci_pltfm_clk_get_max_clock,
-> +       .get_max_clock = sdhci_iproc_get_max_clock,
->         .set_bus_width = sdhci_set_bus_width,
->         .reset = sdhci_reset,
->         .set_uhs_signaling = sdhci_set_uhs_signaling,
-> @@ -256,19 +267,29 @@ static const struct of_device_id sdhci_iproc_of_match[] = {
->  };
->  MODULE_DEVICE_TABLE(of, sdhci_iproc_of_match);
->
-> +static const struct acpi_device_id sdhci_iproc_acpi_ids[] = {
-> +       { .id = "BRCM5871", .driver_data = (kernel_ulong_t)&iproc_cygnus_data },
-> +       { .id = "BRCM5872", .driver_data = (kernel_ulong_t)&iproc_data },
-> +       { /* sentinel */ }
-> +};
-> +MODULE_DEVICE_TABLE(acpi, sdhci_iproc_acpi_ids);
-> +
->  static int sdhci_iproc_probe(struct platform_device *pdev)
->  {
-> -       const struct of_device_id *match;
-> -       const struct sdhci_iproc_data *iproc_data;
-> +       struct device *dev = &pdev->dev;
-> +       const struct sdhci_iproc_data *iproc_data = NULL;
->         struct sdhci_host *host;
->         struct sdhci_iproc_host *iproc_host;
->         struct sdhci_pltfm_host *pltfm_host;
->         int ret;
->
-> -       match = of_match_device(sdhci_iproc_of_match, &pdev->dev);
-> -       if (!match)
-> -               return -EINVAL;
-> -       iproc_data = match->data;
-> +       if (dev->of_node)
-> +               iproc_data = of_device_get_match_data(dev);
-> +       else if (has_acpi_companion(dev))
-> +               iproc_data = acpi_device_get_match_data(dev);
-> +
-> +       if (!iproc_data)
-> +               return -ENODEV;
->
->         host = sdhci_pltfm_init(pdev, iproc_data->pdata, sizeof(*iproc_host));
->         if (IS_ERR(host))
-> @@ -280,19 +301,21 @@ static int sdhci_iproc_probe(struct platform_device *pdev)
->         iproc_host->data = iproc_data;
->
->         mmc_of_parse(host->mmc);
-> -       sdhci_get_of_property(pdev);
-> +       sdhci_get_property(pdev);
->
->         host->mmc->caps |= iproc_host->data->mmc_caps;
->
-> -       pltfm_host->clk = devm_clk_get(&pdev->dev, NULL);
-> -       if (IS_ERR(pltfm_host->clk)) {
-> -               ret = PTR_ERR(pltfm_host->clk);
-> -               goto err;
-> -       }
-> -       ret = clk_prepare_enable(pltfm_host->clk);
-> -       if (ret) {
-> -               dev_err(&pdev->dev, "failed to enable host clk\n");
-> -               goto err;
-> +       if (dev->of_node) {
-> +               pltfm_host->clk = devm_clk_get(dev, NULL);
-> +               if (IS_ERR(pltfm_host->clk)) {
-> +                       ret = PTR_ERR(pltfm_host->clk);
-> +                       goto err;
-> +               }
-> +               ret = clk_prepare_enable(pltfm_host->clk);
-> +               if (ret) {
-> +                       dev_err(dev, "failed to enable host clk\n");
-> +                       goto err;
-> +               }
->         }
->
->         if (iproc_host->data->pdata->quirks & SDHCI_QUIRK_MISSING_CAPS) {
-> @@ -307,7 +330,8 @@ static int sdhci_iproc_probe(struct platform_device *pdev)
->         return 0;
->
->  err_clk:
-> -       clk_disable_unprepare(pltfm_host->clk);
-> +       if (dev->of_node)
-> +               clk_disable_unprepare(pltfm_host->clk);
->  err:
->         sdhci_pltfm_free(pdev);
->         return ret;
-> @@ -317,6 +341,7 @@ static struct platform_driver sdhci_iproc_driver = {
->         .driver = {
->                 .name = "sdhci-iproc",
->                 .of_match_table = sdhci_iproc_of_match,
-> +               .acpi_match_table = ACPI_PTR(sdhci_iproc_acpi_ids),
->                 .pm = &sdhci_pltfm_pmops,
->         },
->         .probe = sdhci_iproc_probe,
-> --
-> 2.7.4
->
+Our platform is NUC with Celeron processors, whose most IO controllers
+are PCI device.
+
+> 
+> >
+> >>
+> >> >
+> >> > Signed-off-by: Feng Tang <feng.tang@intel.com>
+> >> > ---
+> >> >  drivers/Makefile | 4 +++-
+> >> >  1 file changed, 3 insertions(+), 1 deletion(-)
+> >> >
+> >> > diff --git a/drivers/Makefile b/drivers/Makefile
+> >> > index 24cd47014657..c473afd3c688 100644
+> >> > --- a/drivers/Makefile
+> >> > +++ b/drivers/Makefile
+> >> > @@ -50,6 +50,9 @@ obj-$(CONFIG_REGULATOR)               += regulator/
+> >> >  # reset controllers early, since gpu drivers might rely on them to initialize
+> >> >  obj-$(CONFIG_RESET_CONTROLLER) += reset/
+> >> >
+> >> > +# put mmc early as many morden devices use emm/sd card as rootfs storage
+> >> > +obj-y                          += mmc/
+> >> > +
+> >>
+> >> Your suggested approach isn't really a solution, as it may work for
+> >> your particular case but not for everybody else.
+> >
+> > Do you mean the patch may break some platforms? Yes, I only tested on
+> > some IA based NUCs, and I did think about other architectures, things
+> > that may affect MMC are gpio/clk/pinctrl, and those are still earlier
+> > than mmc after change.
+> 
+> I don't know if it breaks things, potentially it could, if drivers
+> don't implement support for -EPROBE_DEFER properly.
+> 
+> However, more importantly, it's not real fix to the problem, just
+> something that seems to work for you.
+
+IMHO I don't think the 100ms waiting is a problem of mmc core or SDHCI
+host controller :), complex HWs' initializations take time, like the
+SATA disk, the GFX.
+
+Currently the mmc folder is too late in the drivers/Makefile, and network
+device, thermal, spi, usb and many other controllers get initialized 
+before mmc (which is the common rootfs storage for smartphones and 
+embedded devices), which triggers the not necessary "Waiting for rootfs
+device" (like the 100ms extra boot time in our platform).
+
+That's why I propose the leap the mmc subsystem earlier to avoid it.
+
+Thanks,
+Feng
