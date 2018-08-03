@@ -1,147 +1,178 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V8 2/5] mmc: sdhci: Change O2 Host HS200 mode clock
- frequency to 200MHz
-Date: Fri, 3 Aug 2018 16:04:38 +0300
-Message-ID: <d107eacd-10ad-fd0a-0944-7b36745c79c5@intel.com>
-References: <BYAPR04MB476082C4951D3D7EE47B3881E52A0@BYAPR04MB4760.namprd04.prod.outlook.com>
+Subject: Re: [PATCH v3 2/2] mmc: host: iproc: Add ACPI support to IPROC SDHCI
+Date: Fri, 3 Aug 2018 16:17:03 +0300
+Message-ID: <7a67a1f9-9cd1-103e-cfa1-e032f346e164@intel.com>
+References: <1532931343-9499-1-git-send-email-srinath.mannam@broadcom.com>
+ <1532931343-9499-3-git-send-email-srinath.mannam@broadcom.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <BYAPR04MB476082C4951D3D7EE47B3881E52A0@BYAPR04MB4760.namprd04.prod.outlook.com>
+In-Reply-To: <1532931343-9499-3-git-send-email-srinath.mannam@broadcom.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Ernest Zhang(WH)" <ernest.zhang@bayhubtech.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Cc: "Chuanjin Pang (WH)" <chuanjin.pang@bayhubtech.com>, "Mike Li (WH)" <mike.li@bayhubtech.com>, "Chevron Li (WH)" <chevron.li@bayhubtech.com>, "Shirley Her (SC)" <shirley.her@bayhubtech.com>, "Xiaoguang Yu (WH)" <xiaoguang.yu@bayhubtech.com>, "Bobby Wu (WH)" <bobby.wu@bayhubtech.com>
+To: Srinath Mannam <srinath.mannam@broadcom.com>, Ulf Hansson <ulf.hansson@linaro.org>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, vikram.prakash@broadcom.com
+Cc: bcm-kernel-feedback-list@broadcom.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 27/07/18 19:23, Ernest Zhang(WH) wrote:
-> O2 SD Host HS200 mode clock frequency current is 208MHz, should be changed to 200MHz to meet specification.
+On 30/07/18 09:15, Srinath Mannam wrote:
+> Add ACPI support to all IPROC SDHCI varients
 > 
-> Signed-off-by: ernest.zhang <ernest.zhang@bayhubtech.com>
+> Signed-off-by: Srinath Mannam <srinath.mannam@broadcom.com>
+> Reviewed-by: Ray Jui <ray.jui@broadcom.com>
+> Reviewed-by: Scott Branden <scott.branden@broadcom.com>
+> Reviewed-by: Vladimir Olovyannikov <vladimir.olovyannikov@broadcom.com>
+
+One minor comment below, otherwise:
 
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
-> Change in V8:
-> 	The set base clock code comment has been changed in accordance with
-> 	code change in V7.
+>  drivers/mmc/host/Kconfig       |  1 +
+>  drivers/mmc/host/sdhci-iproc.c | 63 +++++++++++++++++++++++++++++-------------
+>  2 files changed, 45 insertions(+), 19 deletions(-)
 > 
-> Change in V7:
-> 	Change HS200 mode clock frequency from 208MHz to 200MHz to meet
-> 	Specification.
-> 
-> Change in V1~V6:
-> 	N/A
-> ---
->  drivers/mmc/host/sdhci-pci-o2micro.c | 6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
-> index ba59db6a126c..9e7bacda4717 100644
-> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
-> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
-> @@ -311,9 +311,9 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 0581c19..bc6702e 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -334,6 +334,7 @@ config MMC_SDHCI_IPROC
+>  	tristate "SDHCI support for the BCM2835 & iProc SD/MMC Controller"
+>  	depends on ARCH_BCM2835 || ARCH_BCM_IPROC || COMPILE_TEST
+>  	depends on MMC_SDHCI_PLTFM
+> +	depends on OF || ACPI
+>  	default ARCH_BCM_IPROC
+>  	select MMC_SDHCI_IO_ACCESSORS
+>  	help
+> diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
+> index d0e83db..abf5269 100644
+> --- a/drivers/mmc/host/sdhci-iproc.c
+> +++ b/drivers/mmc/host/sdhci-iproc.c
+> @@ -15,6 +15,7 @@
+>   * iProc SDHCI platform driver
+>   */
 >  
->  			/* Check Whether subId is 0x11 or 0x12 */
->  			if ((scratch_32 == 0x11) || (scratch_32 == 0x12)) {
-> -				scratch_32 = 0x2c280000;
-> +				scratch_32 = 0x25100000;
+> +#include <linux/acpi.h>
+>  #include <linux/delay.h>
+>  #include <linux/module.h>
+>  #include <linux/mmc/host.h>
+> @@ -162,9 +163,19 @@ static void sdhci_iproc_writeb(struct sdhci_host *host, u8 val, int reg)
+>  	sdhci_iproc_writel(host, newval, reg & ~3);
+>  }
 >  
-> -				/* Set Base Clock to 208MZ */
-> +				/* Set Base Clock to 200MZ */
+> +static unsigned int sdhci_iproc_get_max_clock(struct sdhci_host *host)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +
+> +	if (pltfm_host->clk)
+> +		return sdhci_pltfm_clk_get_max_clock(host);
+> +	else
+> +		return pltfm_host->clock;
+> +}
+> +
+>  static const struct sdhci_ops sdhci_iproc_ops = {
+>  	.set_clock = sdhci_set_clock,
+> -	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+> +	.get_max_clock = sdhci_iproc_get_max_clock,
+>  	.set_bus_width = sdhci_set_bus_width,
+>  	.reset = sdhci_reset,
+>  	.set_uhs_signaling = sdhci_set_uhs_signaling,
+> @@ -178,7 +189,7 @@ static const struct sdhci_ops sdhci_iproc_32only_ops = {
+>  	.write_w = sdhci_iproc_writew,
+>  	.write_b = sdhci_iproc_writeb,
+>  	.set_clock = sdhci_set_clock,
+> -	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+> +	.get_max_clock = sdhci_iproc_get_max_clock,
+>  	.set_bus_width = sdhci_set_bus_width,
+>  	.reset = sdhci_reset,
+>  	.set_uhs_signaling = sdhci_set_uhs_signaling,
+> @@ -256,19 +267,29 @@ static const struct of_device_id sdhci_iproc_of_match[] = {
+>  };
+>  MODULE_DEVICE_TABLE(of, sdhci_iproc_of_match);
+>  
+> +static const struct acpi_device_id sdhci_iproc_acpi_ids[] = {
+> +	{ .id = "BRCM5871", .driver_data = (kernel_ulong_t)&iproc_cygnus_data },
+> +	{ .id = "BRCM5872", .driver_data = (kernel_ulong_t)&iproc_data },
+> +	{ /* sentinel */ }
+> +};
+> +MODULE_DEVICE_TABLE(acpi, sdhci_iproc_acpi_ids);
+> +
+>  static int sdhci_iproc_probe(struct platform_device *pdev)
+>  {
+> -	const struct of_device_id *match;
+> -	const struct sdhci_iproc_data *iproc_data;
+> +	struct device *dev = &pdev->dev;
+> +	const struct sdhci_iproc_data *iproc_data = NULL;
+>  	struct sdhci_host *host;
+>  	struct sdhci_iproc_host *iproc_host;
+>  	struct sdhci_pltfm_host *pltfm_host;
+>  	int ret;
+>  
+> -	match = of_match_device(sdhci_iproc_of_match, &pdev->dev);
+> -	if (!match)
+> -		return -EINVAL;
+> -	iproc_data = match->data;
+> +	if (dev->of_node)
+> +		iproc_data = of_device_get_match_data(dev);
+> +	else if (has_acpi_companion(dev))
+> +		iproc_data = acpi_device_get_match_data(dev);
 
-MZ -> MHz
+Can you use device_get_match_data() here
 
->  				o2_pci_set_baseclk(chip, scratch_32);
->  				ret = pci_read_config_dword(chip->pdev,
->  							    O2_SD_FUNC_REG4,
-> @@ -406,7 +406,7 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
->  					       O2_SD_PLL_SETTING, scratch_32);
->  		} else {
->  			scratch_32 &= 0x0000FFFF;
-> -			scratch_32 |= 0x2c280000;
-> +			scratch_32 |= 0x25100000;
+> +
+> +	if (!iproc_data)
+> +		return -ENODEV;
 >  
->  			pci_write_config_dword(chip->pdev,
->  					       O2_SD_PLL_SETTING, scratch_32);
-> --
-> 2.17.1
-> 
-> 
-> -----邮件原件-----
-> 发件人: Adrian Hunter <adrian.hunter@intel.com> 
-> 发送时间: Friday, July 27, 2018 2:58 PM
-> 收件人: Ernest Zhang(WH) <ernest.zhang@bayhubtech.com>; Ulf Hansson <ulf.hansson@linaro.org>; linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org
-> 抄送: Chuanjin Pang (WH) <chuanjin.pang@bayhubtech.com>; Mike Li (WH) <mike.li@bayhubtech.com>; Chevron Li (WH) <chevron.li@bayhubtech.com>; Shirley Her (SC) <shirley.her@bayhubtech.com>; Xiaoguang Yu (WH) <xiaoguang.yu@bayhubtech.com>; Bobby Wu (WH) <bobby.wu@bayhubtech.com>
-> 主题: Re: [PATCH V7 2/5] mmc: sdhci: Change O2 Host HS200 mode clock frequency to 200MHz
-> 
-> On 27/07/18 09:49, Ernest Zhang(WH) wrote:
->> Hi Adrian,
->> 	Do I need re-submit all 5 patches after fix that and change the version to v8?
-> 
-> You can reply to this email with PATCH V8 2/5 that has my Ack and the comment fixed.
-> 
->> BR
->>
->> -----Original Message-----
->> From: Adrian Hunter [mailto:adrian.hunter@intel.com]
->> Sent: 2018年7月25日 15:45
->> To: Ernest Zhang(WH); Ulf Hansson; linux-mmc@vger.kernel.org; 
->> linux-kernel@vger.kernel.org
->> Cc: Chuanjin Pang (WH); Mike Li (WH); Chevron Li (WH); Shirley Her 
->> (SC); Xiaoguang Yu (WH); Bobby Wu (WH)
->> Subject: Re: [PATCH V7 2/5] mmc: sdhci: Change O2 Host HS200 mode 
->> clock frequency to 200MHz
->>
->> On 16/07/18 09:26, ernest.zhang wrote:
->>> O2 SD Host HS200 mode clock frequency current is 208MHz, should be 
->>> changed to 200MHz to meet specification.
->>>
->>> Signed-off-by: ernest.zhang <ernest.zhang@bayhubtech.com>
->>
->> You left in the misleading comment.  Fix that and add:
->>
->> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
->>
->>> ---
->>> Change in V7:
->>> 	Change HS200 mode clock frequency from 208MHz to 200MHz to meet
->>> 	Specification.
->>>
->>> Change in V1~V6:
->>> 	N/A
->>> ---
->>>  drivers/mmc/host/sdhci-pci-o2micro.c | 4 ++--
->>>  1 file changed, 2 insertions(+), 2 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c
->>> b/drivers/mmc/host/sdhci-pci-o2micro.c
->>> index ba59db6a126c..94cf3cd75dd3 100644
->>> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
->>> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
->>> @@ -311,7 +311,7 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip
->>> *chip)
->>>  
->>>  			/* Check Whether subId is 0x11 or 0x12 */
->>>  			if ((scratch_32 == 0x11) || (scratch_32 == 0x12)) {
->>> -				scratch_32 = 0x2c280000;
->>> +				scratch_32 = 0x25100000;
->>>  
->>>  				/* Set Base Clock to 208MZ */
->>
->> That comment is misleading now.
->>
->>>  				o2_pci_set_baseclk(chip, scratch_32); @@ -406,7 +406,7 @@ int 
->>> sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
->>>  					       O2_SD_PLL_SETTING, scratch_32);
->>>  		} else {
->>>  			scratch_32 &= 0x0000FFFF;
->>> -			scratch_32 |= 0x2c280000;
->>> +			scratch_32 |= 0x25100000;
->>>  
->>>  			pci_write_config_dword(chip->pdev,
->>>  					       O2_SD_PLL_SETTING, scratch_32);
->>>
->>
+>  	host = sdhci_pltfm_init(pdev, iproc_data->pdata, sizeof(*iproc_host));
+>  	if (IS_ERR(host))
+> @@ -280,19 +301,21 @@ static int sdhci_iproc_probe(struct platform_device *pdev)
+>  	iproc_host->data = iproc_data;
+>  
+>  	mmc_of_parse(host->mmc);
+> -	sdhci_get_of_property(pdev);
+> +	sdhci_get_property(pdev);
+>  
+>  	host->mmc->caps |= iproc_host->data->mmc_caps;
+>  
+> -	pltfm_host->clk = devm_clk_get(&pdev->dev, NULL);
+> -	if (IS_ERR(pltfm_host->clk)) {
+> -		ret = PTR_ERR(pltfm_host->clk);
+> -		goto err;
+> -	}
+> -	ret = clk_prepare_enable(pltfm_host->clk);
+> -	if (ret) {
+> -		dev_err(&pdev->dev, "failed to enable host clk\n");
+> -		goto err;
+> +	if (dev->of_node) {
+> +		pltfm_host->clk = devm_clk_get(dev, NULL);
+> +		if (IS_ERR(pltfm_host->clk)) {
+> +			ret = PTR_ERR(pltfm_host->clk);
+> +			goto err;
+> +		}
+> +		ret = clk_prepare_enable(pltfm_host->clk);
+> +		if (ret) {
+> +			dev_err(dev, "failed to enable host clk\n");
+> +			goto err;
+> +		}
+>  	}
+>  
+>  	if (iproc_host->data->pdata->quirks & SDHCI_QUIRK_MISSING_CAPS) {
+> @@ -307,7 +330,8 @@ static int sdhci_iproc_probe(struct platform_device *pdev)
+>  	return 0;
+>  
+>  err_clk:
+> -	clk_disable_unprepare(pltfm_host->clk);
+> +	if (dev->of_node)
+> +		clk_disable_unprepare(pltfm_host->clk);
+>  err:
+>  	sdhci_pltfm_free(pdev);
+>  	return ret;
+> @@ -317,6 +341,7 @@ static struct platform_driver sdhci_iproc_driver = {
+>  	.driver = {
+>  		.name = "sdhci-iproc",
+>  		.of_match_table = sdhci_iproc_of_match,
+> +		.acpi_match_table = ACPI_PTR(sdhci_iproc_acpi_ids),
+>  		.pm = &sdhci_pltfm_pmops,
+>  	},
+>  	.probe = sdhci_iproc_probe,
 > 
