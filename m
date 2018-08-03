@@ -1,29 +1,147 @@
-From: Heiko Stuebner <heiko@sntech.de>
-Subject: Re: [PATCH v3 1/4] dt-bindings: usb: dwc2: add description for px30
-Date: Thu, 02 Aug 2018 15:03:15 +0200
-Message-ID: <1906917.Z0b3HQLJhP@phil>
-References: <1533113116-8820-1-git-send-email-cl@rock-chips.com> <1533113116-8820-2-git-send-email-cl@rock-chips.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V8 2/5] mmc: sdhci: Change O2 Host HS200 mode clock
+ frequency to 200MHz
+Date: Fri, 3 Aug 2018 16:04:38 +0300
+Message-ID: <d107eacd-10ad-fd0a-0944-7b36745c79c5@intel.com>
+References: <BYAPR04MB476082C4951D3D7EE47B3881E52A0@BYAPR04MB4760.namprd04.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1533113116-8820-2-git-send-email-cl@rock-chips.com>
+In-Reply-To: <BYAPR04MB476082C4951D3D7EE47B3881E52A0@BYAPR04MB4760.namprd04.prod.outlook.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: cl@rock-chips.com
-Cc: robh+dt@kernel.org, mark.rutland@arm.com, klaus.goger@theobroma-systems.com, hjc@rock-chips.com, jagan@amarulasolutions.com, djw@t-chip.com.cn, jacob-chen@iotwrt.com, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, frank.wang@rock-chips.com, lgirdwood@gmail.com, broonie@kernel.org, alsa-devel@alsa-project.org, gregkh@linuxfoundation.org, catalin.marinas@arm.com, will.deacon@arm.com, yamada.masahiro@socionext.com, arnd@arndb.de, zhangqing@rock-chips.com, shawn.lin@rock-chips.com, kever.yang@rock-chips.com, david.wu@rock-chips.com, huangtao@rock-chips.com, tony.xie@rock-chips.com, sugar.zhang@rock-chips.com, huibin.hong@rock-chips.com
+To: "Ernest Zhang(WH)" <ernest.zhang@bayhubtech.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: "Chuanjin Pang (WH)" <chuanjin.pang@bayhubtech.com>, "Mike Li (WH)" <mike.li@bayhubtech.com>, "Chevron Li (WH)" <chevron.li@bayhubtech.com>, "Shirley Her (SC)" <shirley.her@bayhubtech.com>, "Xiaoguang Yu (WH)" <xiaoguang.yu@bayhubtech.com>, "Bobby Wu (WH)" <bobby.wu@bayhubtech.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Am Mittwoch, 1. August 2018, 10:45:13 CEST schrieb cl@rock-chips.com:
-> From: Liang Chen <cl@rock-chips.com>
+On 27/07/18 19:23, Ernest Zhang(WH) wrote:
+> O2 SD Host HS200 mode clock frequency current is 208MHz, should be changed to 200MHz to meet specification.
 > 
-> This patch adds the compatible of dwc2 for PX30 SoCs.
+> Signed-off-by: ernest.zhang <ernest.zhang@bayhubtech.com>
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
+> ---
+> Change in V8:
+> 	The set base clock code comment has been changed in accordance with
+> 	code change in V7.
 > 
-> Acked-by: Rob Herring <robh@kernel.org>
-> Signed-off-by: Liang Chen <cl@rock-chips.com>
+> Change in V7:
+> 	Change HS200 mode clock frequency from 208MHz to 200MHz to meet
+> 	Specification.
+> 
+> Change in V1~V6:
+> 	N/A
+> ---
+>  drivers/mmc/host/sdhci-pci-o2micro.c | 6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+> index ba59db6a126c..9e7bacda4717 100644
+> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
+> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+> @@ -311,9 +311,9 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
+>  
+>  			/* Check Whether subId is 0x11 or 0x12 */
+>  			if ((scratch_32 == 0x11) || (scratch_32 == 0x12)) {
+> -				scratch_32 = 0x2c280000;
+> +				scratch_32 = 0x25100000;
+>  
+> -				/* Set Base Clock to 208MZ */
+> +				/* Set Base Clock to 200MZ */
 
-I've split out the dwc2 things from the px30 dts and readded them
-in a new series and also moved the binding addition over there [0]
+MZ -> MHz
 
-Heiko
-
-[0] https://patchwork.kernel.org/cover/10553569/
+>  				o2_pci_set_baseclk(chip, scratch_32);
+>  				ret = pci_read_config_dword(chip->pdev,
+>  							    O2_SD_FUNC_REG4,
+> @@ -406,7 +406,7 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
+>  					       O2_SD_PLL_SETTING, scratch_32);
+>  		} else {
+>  			scratch_32 &= 0x0000FFFF;
+> -			scratch_32 |= 0x2c280000;
+> +			scratch_32 |= 0x25100000;
+>  
+>  			pci_write_config_dword(chip->pdev,
+>  					       O2_SD_PLL_SETTING, scratch_32);
+> --
+> 2.17.1
+> 
+> 
+> -----邮件原件-----
+> 发件人: Adrian Hunter <adrian.hunter@intel.com> 
+> 发送时间: Friday, July 27, 2018 2:58 PM
+> 收件人: Ernest Zhang(WH) <ernest.zhang@bayhubtech.com>; Ulf Hansson <ulf.hansson@linaro.org>; linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org
+> 抄送: Chuanjin Pang (WH) <chuanjin.pang@bayhubtech.com>; Mike Li (WH) <mike.li@bayhubtech.com>; Chevron Li (WH) <chevron.li@bayhubtech.com>; Shirley Her (SC) <shirley.her@bayhubtech.com>; Xiaoguang Yu (WH) <xiaoguang.yu@bayhubtech.com>; Bobby Wu (WH) <bobby.wu@bayhubtech.com>
+> 主题: Re: [PATCH V7 2/5] mmc: sdhci: Change O2 Host HS200 mode clock frequency to 200MHz
+> 
+> On 27/07/18 09:49, Ernest Zhang(WH) wrote:
+>> Hi Adrian,
+>> 	Do I need re-submit all 5 patches after fix that and change the version to v8?
+> 
+> You can reply to this email with PATCH V8 2/5 that has my Ack and the comment fixed.
+> 
+>> BR
+>>
+>> -----Original Message-----
+>> From: Adrian Hunter [mailto:adrian.hunter@intel.com]
+>> Sent: 2018年7月25日 15:45
+>> To: Ernest Zhang(WH); Ulf Hansson; linux-mmc@vger.kernel.org; 
+>> linux-kernel@vger.kernel.org
+>> Cc: Chuanjin Pang (WH); Mike Li (WH); Chevron Li (WH); Shirley Her 
+>> (SC); Xiaoguang Yu (WH); Bobby Wu (WH)
+>> Subject: Re: [PATCH V7 2/5] mmc: sdhci: Change O2 Host HS200 mode 
+>> clock frequency to 200MHz
+>>
+>> On 16/07/18 09:26, ernest.zhang wrote:
+>>> O2 SD Host HS200 mode clock frequency current is 208MHz, should be 
+>>> changed to 200MHz to meet specification.
+>>>
+>>> Signed-off-by: ernest.zhang <ernest.zhang@bayhubtech.com>
+>>
+>> You left in the misleading comment.  Fix that and add:
+>>
+>> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+>>
+>>> ---
+>>> Change in V7:
+>>> 	Change HS200 mode clock frequency from 208MHz to 200MHz to meet
+>>> 	Specification.
+>>>
+>>> Change in V1~V6:
+>>> 	N/A
+>>> ---
+>>>  drivers/mmc/host/sdhci-pci-o2micro.c | 4 ++--
+>>>  1 file changed, 2 insertions(+), 2 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c
+>>> b/drivers/mmc/host/sdhci-pci-o2micro.c
+>>> index ba59db6a126c..94cf3cd75dd3 100644
+>>> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
+>>> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+>>> @@ -311,7 +311,7 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip
+>>> *chip)
+>>>  
+>>>  			/* Check Whether subId is 0x11 or 0x12 */
+>>>  			if ((scratch_32 == 0x11) || (scratch_32 == 0x12)) {
+>>> -				scratch_32 = 0x2c280000;
+>>> +				scratch_32 = 0x25100000;
+>>>  
+>>>  				/* Set Base Clock to 208MZ */
+>>
+>> That comment is misleading now.
+>>
+>>>  				o2_pci_set_baseclk(chip, scratch_32); @@ -406,7 +406,7 @@ int 
+>>> sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
+>>>  					       O2_SD_PLL_SETTING, scratch_32);
+>>>  		} else {
+>>>  			scratch_32 &= 0x0000FFFF;
+>>> -			scratch_32 |= 0x2c280000;
+>>> +			scratch_32 |= 0x25100000;
+>>>  
+>>>  			pci_write_config_dword(chip->pdev,
+>>>  					       O2_SD_PLL_SETTING, scratch_32);
+>>>
+>>
+> 
