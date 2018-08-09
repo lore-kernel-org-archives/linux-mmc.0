@@ -1,62 +1,73 @@
-From: Peter Geis <pgwipeout@gmail.com>
-Subject: Re: [PATCH 5/8] arm64: dts: tegra186: Add SDMMC4 DQS trim value
-Date: Thu, 9 Aug 2018 08:23:16 -0400
-Message-ID: <03fc6726-25ff-20de-d271-ebae19b753c7@gmail.com>
-References: <1533650404-18125-1-git-send-email-avienamo@nvidia.com>
- <1533650404-18125-6-git-send-email-avienamo@nvidia.com>
- <20180809114922.GN21639@ulmo> <20180809150226.64657f56@dhcp-10-21-25-168>
+From: Thierry Reding <thierry.reding@gmail.com>
+Subject: Re: [PATCH 10/40] soc/tegra: pmc: Implement pad configuration via
+ pinctrl
+Date: Thu, 9 Aug 2018 14:27:06 +0200
+Message-ID: <20180809122706.GT21639@ulmo>
+References: <1533141150-10511-1-git-send-email-avienamo@nvidia.com>
+ <1533141150-10511-11-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="v15hXiddb3kq3Bam"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180809150226.64657f56@dhcp-10-21-25-168>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <1533141150-10511-11-git-send-email-avienamo@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Aapo Vienamo <avienamo@nvidia.com>, Thierry Reding <thierry.reding@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Jonathan Hunter <jonathanh@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, Mikko Perttunen <mperttunen@nvidia.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Aapo Vienamo <avienamo@nvidia.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Jonathan Hunter <jonathanh@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Mikko Perttunen <mperttunen@nvidia.com>, Stefan Agner <stefan@agner.ch>, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
 
+--v15hXiddb3kq3Bam
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-On 08/09/2018 08:02 AM, Aapo Vienamo wrote:
-> On Thu, 9 Aug 2018 13:49:22 +0200
-> Thierry Reding <thierry.reding@gmail.com> wrote:
-> 
->> On Tue, Aug 07, 2018 at 05:00:01PM +0300, Aapo Vienamo wrote:
->>> Add the HS400 DQS trim value for Tegra186 SDMMC4.
->>>
->>> Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
->>> ---
->>>   arch/arm64/boot/dts/nvidia/tegra186.dtsi | 1 +
->>>   1 file changed, 1 insertion(+)
->>>
->>> diff --git a/arch/arm64/boot/dts/nvidia/tegra186.dtsi b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
->>> index 6e9ef26..9e07bc6 100644
->>> --- a/arch/arm64/boot/dts/nvidia/tegra186.dtsi
->>> +++ b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
->>> @@ -313,6 +313,7 @@
->>>   		nvidia,pad-autocal-pull-down-offset-1v8-timeout = <0x0a>;
->>>   		nvidia,default-tap = <0x5>;
->>>   		nvidia,default-trim = <0x9>;
->>> +		nvidia,dqs-trim = <63>;
->>>   		status = "disabled";
->>>   	};
->>>     
->>
->> Isn't this technically dependent on the board layout and as such would
->> belong in the board DTS file? Or does this value work on all existing
->> Tegra186 platforms?
-> 
-> This value is specified as part of the controller initialization
-> sequence in the TRM. I've understood that this (and other tap and trim)
-> value(s) are used for compensating the propagation delay differences
-> that are caused by the internal SoC layout.
-> 
->   -Aapo
-> --
+On Wed, Aug 01, 2018 at 07:32:00PM +0300, Aapo Vienamo wrote:
+> Register a pinctrl device and implement get and set functions for
+> PIN_CONFIG_LOW_POWER_MODE and PIN_CONFIG_POWER_SOURCE parameters.
+>=20
+> Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
+> Acked-by: Jon Hunter <jonathanh@nvidia.com>
+> ---
+>  drivers/soc/tegra/pmc.c | 187 ++++++++++++++++++++++++++++++++++++++++++=
++++++-
+>  1 file changed, 185 insertions(+), 2 deletions(-)
+>=20
+> diff --git a/drivers/soc/tegra/pmc.c b/drivers/soc/tegra/pmc.c
+[...]
+> @@ -1704,6 +1863,12 @@ static const u8 tegra124_cpu_powergates[] =3D {
+>  		.name	=3D (_name),			\
+>  	})
+> =20
+> +#define TEGRA_IO_PIN_DESC(_id, _dpd, _voltage, _name)	\
+> +	((struct pinctrl_pin_desc) {			\
+> +		.number =3D (_id),			\
+> +		.name	=3D (_name)			\
+> +	})
+> +
 
-The Tegra2 and Tegra3 TRMs also specify recommended DQS values, and I am 
-working on at least one device that differs in the platform data from 
-the default value.
-I see that you mentioned this is for the newer devices that support 
-HS200/HS400 modes, but does it enable setting DQS on older devices?
+Do we really need the explicit cast to struct pinctrl_pin_desc here?
+
+Thierry
+
+--v15hXiddb3kq3Bam
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAltsMxoACgkQ3SOs138+
+s6G7Rg/7B8Fm6KFvtD0N3miwZP45DmwbCTXTCEWTPZTYnII1X5RaNv1dM7ayNm7P
+qZRHNilYwChe/O+5h9CsWLbR4TaTqQSVwd+hMJ8GAmgerwrChVuSsN/q77Z1DHG7
+7Vy+uwQL0Dwqw9C4en61SHAuUhJuuDYtPtY3UikfZ2M/TDd8zcplGzdL3SonrHGj
+t6T0AItW+EXMFEr6oI/4aYdGgPPjrapMeaU3ir4vwO440HXWWIrm9ymAPVMjt2ym
+xhUTzJqI7qLrFYj78jdmUQTwQDnfLSqY07jwslGH9firpIAW7goSvy72899lggng
+4qVAKqClYSGI1ADlDaX9drkL4WcLwTSymHCj1Rh7MoHgbPFxAC1+VmpvkEqhhvE4
+6KHfOW34WzdPkyf/ZX4Kslveg7S8xTuif78Ws3kGOus/wlTdkT1SBBZGJUr9wybM
+zKMlP0Nyp0JISmzyprFEd4ZoOmT1oraAG6DudSBYra6xNRByI9W7wAj7obFCAp8B
+8t7bO1T3TcL9IAjfUzDsM4IghokQn1BZZh7vkfsyphsVwOeLMLlej05EaQrVduS0
+wOgbmECGbBa5468PlIyiurjEJXaKWcKjubs/+rWEoDgKCry68+hzq09OgG2rlvU9
+u0MfxFJnD9uenTQY6pJfSNlmtKTeHZwLIHfX5aM3gBW7KkxwBG8=
+=teHV
+-----END PGP SIGNATURE-----
+
+--v15hXiddb3kq3Bam--
