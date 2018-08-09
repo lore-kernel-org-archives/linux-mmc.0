@@ -1,105 +1,100 @@
 From: Thierry Reding <thierry.reding@gmail.com>
-Subject: Re: [PATCH 03/40] dt-bindings: Add Tegra SDHCI pad pdpu offset
- bindings
-Date: Thu, 9 Aug 2018 14:18:18 +0200
-Message-ID: <20180809121818.GQ21639@ulmo>
+Subject: Re: [PATCH 05/40] soc/tegra: pmc: Fix pad voltage configuration for
+ Tegra186
+Date: Thu, 9 Aug 2018 14:20:45 +0200
+Message-ID: <20180809122045.GR21639@ulmo>
 References: <1533141150-10511-1-git-send-email-avienamo@nvidia.com>
- <1533141150-10511-4-git-send-email-avienamo@nvidia.com>
+ <1533141150-10511-6-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="QVgWX4+QEldMe/r9"
+        protocol="application/pgp-signature"; boundary="OiITrshLgfui8fEl"
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1533141150-10511-4-git-send-email-avienamo@nvidia.com>
+In-Reply-To: <1533141150-10511-6-git-send-email-avienamo@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Aapo Vienamo <avienamo@nvidia.com>
 Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Jonathan Hunter <jonathanh@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Mikko Perttunen <mperttunen@nvidia.com>, Stefan Agner <stefan@agner.ch>, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
 
---QVgWX4+QEldMe/r9
+--OiITrshLgfui8fEl
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Wed, Aug 01, 2018 at 07:31:53PM +0300, Aapo Vienamo wrote:
-> Add bindings documentation for pad pull up and pull down offset values to=
- be
-> programmed before executing automatic pad drive strength calibration.
+On Wed, Aug 01, 2018 at 07:31:55PM +0300, Aapo Vienamo wrote:
+> Implement support for the PMC_IMPL_E_33V_PWR register which replaces
+> PMC_PWR_DET register interface of the SoC generations preceding
+> Tegra186. Also add the voltage bit offsets to the tegra186_io_pads[]
+> table and the AO_HV pad.
 >=20
 > Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
+> Acked-by: Jon Hunter <jonathanh@nvidia.com>
 > ---
->  .../bindings/mmc/nvidia,tegra20-sdhci.txt          | 36 ++++++++++++++++=
-++++++
->  1 file changed, 36 insertions(+)
+>  drivers/soc/tegra/pmc.c | 55 ++++++++++++++++++++++++++++++++++---------=
+------
+>  include/soc/tegra/pmc.h |  1 +
+>  2 files changed, 39 insertions(+), 17 deletions(-)
 >=20
-> diff --git a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.t=
-xt b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-> index 90c214d..2e973b5 100644
-> --- a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-> +++ b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-> @@ -24,6 +24,7 @@ Required properties:
->  Optional properties:
->  - power-gpios : Specify GPIOs for power control
+> diff --git a/drivers/soc/tegra/pmc.c b/drivers/soc/tegra/pmc.c
+> index 2d6f3fc..f926332 100644
+> --- a/drivers/soc/tegra/pmc.c
+> +++ b/drivers/soc/tegra/pmc.c
+> @@ -65,6 +65,8 @@
 > =20
-> +Optional properties for Tegra210 and Tegra186:
-
-This looks like a stray addition.
-
->  Example:
+>  #define PWRGATE_STATUS			0x38
 > =20
->  sdhci@c8000200 {
-> @@ -45,6 +46,37 @@ Optional properties for Tegra210 and Tegra186:
->    for controllers supporting multiple voltage levels. The order of names
->    should correspond to the pin configuration states in pinctrl-0 and
->    pinctrl-1.
-> +- nvidia,only-1-8-v : The presence of this property indicates that the
-> +  controller operates at a 1.8 V fixed I/O voltage.
-> +- nvidia,pad-autocal-pull-up-offset-3v3,
-> +  nvidia,pad-autocal-pull-down-offset-3v3 : Specify drive strength
-> +  calibration offsets for 3.3 V signaling modes.
-> +- nvidia,pad-autocal-pull-up-offset-1v8,
-> +  nvidia,pad-autocal-pull-down-offset-1v8 : Specify drive strength
-> +  calibration offsets for 1.8 V signaling modes.
-> +- nvidia,pad-autocal-pull-up-offset-3v3-timeout,
-> +  nvidia,pad-autocal-pull-down-offset-3v3-timeout : Specify drive
-> +  strength used as a fallback in case the automatic calibration times
-> +  out on a 3.3 V signaling mode.
-> +- nvidia,pad-autocal-pull-up-offset-1v8-timeout,
-> +  nvidia,pad-autocal-pull-down-offset-1v8-timeout : Specify drive
-> +  strength used as a fallback in case the automatic calibration times
-> +  out on a 1.8 V signaling mode.
-> +- nvidia,pad-autocal-pull-up-offset-sdr104,
-> +  nvidia,pad-autocal-pull-down-offset-sdr104 : Specify drive strength
-> +  calibration offsets for SDR104 mode.
-> +- nvidia,pad-autocal-pull-up-offset-hs400,
-> +  nvidia,pad-autocal-pull-down-offset-hs400 : Specify drive strength
-> +  calibration offsets for HS400 mode.
+> +#define PMC_IMPL_E_33V_PWR		0x40
+> +
+>  #define PMC_PWR_DET			0x48
+> =20
+>  #define PMC_SCRATCH0_MODE_RECOVERY	BIT(31)
+> @@ -154,6 +156,7 @@ struct tegra_pmc_soc {
+>  	bool has_tsense_reset;
+>  	bool has_gpu_clamps;
+>  	bool needs_mbist_war;
+> +	bool has_impl_33v_pwr;
+> =20
+>  	const struct tegra_io_pad_soc *io_pads;
+>  	unsigned int num_io_pads;
+> @@ -1073,20 +1076,29 @@ int tegra_io_pad_set_voltage(enum tegra_io_pad id,
+> =20
+>  	mutex_lock(&pmc->powergates_lock);
+> =20
+> -	/* write-enable PMC_PWR_DET_VALUE[pad->voltage] */
+> -	value =3D tegra_pmc_readl(PMC_PWR_DET);
+> -	value |=3D BIT(pad->voltage);
+> -	tegra_pmc_writel(value, PMC_PWR_DET);
+> +	if (pmc->soc->has_impl_33v_pwr) {
+> +		value =3D tegra_pmc_readl(PMC_IMPL_E_33V_PWR);
+> +		if (voltage =3D=3D TEGRA_IO_PAD_1800000UV)
+> +			value &=3D ~BIT(pad->voltage);
+> +		else
+> +			value |=3D BIT(pad->voltage);
 
-There's no mention here about how many values each of these properties
-needs. I guess given that the property names are singular it implies a
-single value.
+Nit: blank lines surrounding the if ... else ... block might improve
+readability of this a little.
 
 Thierry
 
---QVgWX4+QEldMe/r9
+--OiITrshLgfui8fEl
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAltsMQoACgkQ3SOs138+
-s6Fevg/+MNfOC0Z9TgoTTFq8en1xRYQOPng4O9aKl/54+TC2EtpsPQAcpGQGpqgd
-D0FgOxD+hdkdoQwWG0831rxAGW03ICVsVdqnsUOHBeBgDsKA55JVs1Ixl0Hl41cU
-RQHD6QYm3iLDjSPi6qintqSidND9fVAU2JHVLdgzQDo+LkFOJ00kcfAheqrl8Keb
-1yAm4rN69k1aNwMI6buxo1l8jFk3UJa12AVwseUoZNB9AtzkVf0Ei9EYvoIYiuQ2
-Y3aEBJxOmAME5V1Dpy2B0uAIfbrQk0fMbx7KdbycUvARThzj+C8JnVz3O7KgDY24
-XkyqDLwfi+VRZiDNPeWOWX45nkTDq+Fvw4WfIzqJB26dYPWm1mh4D+JhG3BgPtdW
-F4oohcSmNCpeiu18CUiccKVrn25TcIVJpS2PdryqRGLHTuhpALAwyOThdxA2WAhP
-Wfn1LQH8sV1Rmhs18hF7OB1j33LhjkfXiT3lEp0Ouy4Qejm9S6Qj39hzX58c/Et7
-Wu9QY/e6VOIok1sMCAEnegfZQjxPKzL0XRztqKaOQ5PjHcrjUlOkpH9Vv+C4We8G
-J2jJYeL1D0CANSKDpndk/PT6V50hBzqaXbavFZsPYU7syp7tCejSO21EHkzV8ok2
-bFNxgbE05xtuY3U53z0LLW4A1zhoeclPvIbz+cmAwKnFtEstSTI=
-=ZtE+
+iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAltsMZ0ACgkQ3SOs138+
+s6FWNw/+OAM3l/QWbf2RLvaGYH+1pFSK3IB/yN1mQPefXKHM6vQtEsXTBqO07MMx
+2XKoA7oZ7EfSb6HJLR3Ns7LtaH7uP7+5qWRsuMzU4Ep2xKnY3s+gxb4Ngm14tzi9
+8pS/FNrhLqvaNtSmUtYdedGElifLRvbonzdSmSKbyX6asjibFiJA7T40nWBokgxH
+qIow1tkIdNbocj/ifspmz8rKPxPAwUKsE8su/nvZ5+WJPA+BDhe8i+/ADSH55XOo
+Oc0yTHNMAT7DbCqqrHxwbgmljTeN8ESbwHhFfLWTabwpw2X25Fav5p4KHy89ICnM
+zzRtJ+XiHCPZ4ue8GEDgJ97LOSxCrtqyzDXIQ+AcMp1hLcMP4NNST8drd9dSu0Bx
+COTlEmtweN4Y22AeNRHxQaTOFwWxdw4IqGK8isDAq66c45EZIAqigYmmXEj7E7fb
+nD/3fuJAUjXSoAKusqiEL5WDl6WBhkTRPYGzfVQdLTkjRJvE07Opqscq0L7xJRh2
+TPoagtVIAdK4wx/OrJ/Hw6w5ve9hQVpqYdJQUUQqZFAm1xIaJ6KUzVLxTmXuMIrS
+FaVsnxCbO1nTRGVL4r3uGwjcNt3N+tFMLDHmsJcQ9EKGIZ1Vr7ctz8DvsktoK31P
+WkxJWpl6kAhjgAyHj4zfoBpR3AzTeNVefcOOIBpH1AxDkuYJsG0=
+=NXuf
 -----END PGP SIGNATURE-----
 
---QVgWX4+QEldMe/r9--
+--OiITrshLgfui8fEl--
