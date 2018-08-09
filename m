@@ -1,123 +1,257 @@
-From: Thierry Reding <thierry.reding@gmail.com>
-Subject: Re: [PATCH 1/8] dt-bindings: mmc: Add DQS trim value to Tegra SDHCI
-Date: Thu, 9 Aug 2018 16:09:48 +0200
-Message-ID: <20180809140948.GI21639@ulmo>
-References: <1533650404-18125-1-git-send-email-avienamo@nvidia.com>
- <1533650404-18125-2-git-send-email-avienamo@nvidia.com>
- <20180809113609.GI21639@ulmo>
- <20180809144515.06089abe@dhcp-10-21-25-168>
- <20180809134648.GD21639@ulmo>
- <20180809170604.4353fe1b@dhcp-10-21-25-168>
+From: Aapo Vienamo <avienamo@nvidia.com>
+Subject: Re: [PATCH 01/40] dt-bindings: Add Tegra PMC pad configuration
+ bindings
+Date: Thu, 9 Aug 2018 19:24:26 +0300
+Message-ID: <20180809192426.3f3b7c16@dhcp-10-21-25-168>
+References: <1533141150-10511-1-git-send-email-avienamo@nvidia.com>
+        <1533141150-10511-2-git-send-email-avienamo@nvidia.com>
+        <20180809121350.GO21639@ulmo>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="Fh0SynPkUvrWGMR0"
+Content-Type: text/plain; charset="US-ASCII"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20180809170604.4353fe1b@dhcp-10-21-25-168>
+In-Reply-To: <20180809121350.GO21639@ulmo>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Aapo Vienamo <avienamo@nvidia.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Jonathan Hunter <jonathanh@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, Mikko Perttunen <mperttunen@nvidia.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Thierry Reding <thierry.reding@gmail.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Jonathan Hunter <jonathanh@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Mikko Perttunen <mperttunen@nvidia.com>, Stefan Agner <stefan@agner.ch>, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
+On Thu, 9 Aug 2018 14:13:50 +0200
+Thierry Reding <thierry.reding@gmail.com> wrote:
 
---Fh0SynPkUvrWGMR0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+> On Wed, Aug 01, 2018 at 07:31:51PM +0300, Aapo Vienamo wrote:
+> > Document the PMC pinctrl bindings for pad power state and signaling
+> > voltage configuration. Both nvidia,tegra186-pmc.txt and
+> > nvidia,tegra20-pmc.txt are modified as they both cover SoC generations
+> > for which these bindings apply.
+> > 
+> > Add a header defining Tegra PMC pad voltage configurations.
+> > 
+> > Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
+> > Acked-by: Jon Hunter <jonathanh@nvidia.com>
+> > Reviewed-by: Rob Herring <robh@kernel.org>
+> > ---
+> >  .../bindings/arm/tegra/nvidia,tegra186-pmc.txt     |  92 ++++++++++++++++++
+> >  .../bindings/arm/tegra/nvidia,tegra20-pmc.txt      | 103 +++++++++++++++++++++
+> >  include/dt-bindings/pinctrl/pinctrl-tegra-io-pad.h |  18 ++++
+> >  3 files changed, 213 insertions(+)
+> >  create mode 100644 include/dt-bindings/pinctrl/pinctrl-tegra-io-pad.h
+> > 
+> > diff --git a/Documentation/devicetree/bindings/arm/tegra/nvidia,tegra186-pmc.txt b/Documentation/devicetree/bindings/arm/tegra/nvidia,tegra186-pmc.txt
+> > index 5a3bf7c..d7fed4d 100644
+> > --- a/Documentation/devicetree/bindings/arm/tegra/nvidia,tegra186-pmc.txt
+> > +++ b/Documentation/devicetree/bindings/arm/tegra/nvidia,tegra186-pmc.txt
+> > @@ -34,3 +34,95 @@ Board DTS:
+> >  	pmc@c360000 {
+> >  		nvidia,invert-interrupt;
+> >  	};
+> > +
+> > +== Pad Control ==
+> > +
+> > +On Tegra SoCs a pad is a set of pins which are configured as a group.
+> > +The pin grouping is a fixed attribute of the hardware. The PMC can be
+> > +used to set pad power state and signaling voltage. A pad can be either
+> > +in active or power down mode. The support for power state and signaling
+> > +voltage configuration varies depending on the pad in question. 3.3 V and
+> > +1.8 V signaling voltages are supported on pins where software
+> > +controllable signaling voltage switching is available.
+> > +
+> > +Pad configurations are described is with pin configuration nodes which  
+> 
+> The "is" in the middle there seems to be left-over from a previous
+> formulation of the sentence.
+> 
+> > +are placed under the pmc node and they are referred to by the pinctrl
+> > +client properties. For more information see
+> > +Documentation/devicetree/bindings/pinctrl/pinctrl-bindings.txt.
+> > +
+> > +Following pads are present on Tegra186:  
+> 
+> "The following pads..."
+> 
+> > +csia		csib		dsi		mipi-bias
+> > +pex-clk-bias	pex-clk3	pex-clk2	pex-clk1
+> > +usb0		usb1		usb2		usb-bias
+> > +uart		audio		hsic		dbg
+> > +hdmi-dp0	hdmi-dp1	pex-cntrl	sdmmc2-hv
+> > +sdmmc4		cam		dsib		dsic
+> > +dsid		csic		csid		csie
+> > +dsif		spi		ufs		dmic-hv
+> > +edp		sdmmc1-hv	sdmmc3-hv	conn
+> > +audio-hv	ao-hv
+> > +
+> > +Required pin configuration properties:
+> > +  - pins: Must contain name of the pad(s) to be configured.  
+> 
+> "the name". Also, I'm assuming that this can take a list of names, so
+> perhaps this should read:
+> 
+> 	- pins: A list of strings, each of which contains the name of a pad
+> 	    to be configured.
+> 
+> > +
+> > +Optional pin configuration properties:
+> > +  - low-power-enable: Configure the pad into power down mode
+> > +  - low-power-disable: Configure the pad into active mode  
+> 
+> Do we need both of these? low-power could be a boolean property to mean
+> that the pad(s) should be configured in power down mode. If absent it
+> would mean that the pad(s) should be configured in normal mode. The only
+> reason why I can think of them to have to be separate is if we want to
+> define a configuration where the power mode is not touched. But is that
+> really something we need or want?
 
-On Thu, Aug 09, 2018 at 05:06:04PM +0300, Aapo Vienamo wrote:
-> On Thu, 9 Aug 2018 15:46:48 +0200
-> Thierry Reding <thierry.reding@gmail.com> wrote:
->=20
-> > On Thu, Aug 09, 2018 at 02:45:15PM +0300, Aapo Vienamo wrote:
-> > > On Thu, 9 Aug 2018 13:36:09 +0200
-> > > Thierry Reding <thierry.reding@gmail.com> wrote:
-> > >  =20
-> > > > On Tue, Aug 07, 2018 at 04:59:57PM +0300, Aapo Vienamo wrote: =20
-> > > > > Document HS400 DQS trim value device tree property.
-> > > > >=20
-> > > > > Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
-> > > > > ---
-> > > > >  Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt |=
- 3 +++
-> > > > >  1 file changed, 3 insertions(+)
-> > > > >=20
-> > > > > diff --git a/Documentation/devicetree/bindings/mmc/nvidia,tegra20=
--sdhci.txt b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-> > > > > index 3c7960a..7d294f3 100644
-> > > > > --- a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.=
-txt
-> > > > > +++ b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.=
-txt
-> > > > > @@ -72,6 +72,7 @@ Optional properties for Tegra210 and Tegra186:
-> > > > >    trimmer value for non-tunable modes.
-> > > > >  - nvidia,default-trim : Specify the default outbound clock trimm=
-er
-> > > > >    value.
-> > > > > +- nvidia,dqs-trim : Specify DQS trim value for HS400 timing
-> > > > > =20
-> > > > >    Notes on the pad calibration pull up and pulldown offset value=
-s:
-> > > > >      - The property values are drive codes which are programmed i=
-nto the
-> > > > > @@ -88,6 +89,8 @@ Optional properties for Tegra210 and Tegra186:
-> > > > >      - The values are programmed to the Vendor Clock Control Regi=
-ster.
-> > > > >        Please refer to the reference manual of the SoC for correct
-> > > > >        values.
-> > > > > +    - The DQS trim values are only used on controllers which sup=
-port
-> > > > > +      HS400 timing.   =20
-> > > >=20
-> > > > One of these additions says "DQS trim values", the other says "DQS =
-trim
-> > > > value". It is unclear from the above how many values there are. I t=
-hink
-> > > > this should be more explicit. Also, I don't see why the note about =
-which
-> > > > controllers the DQS trim value(s) applies to is in a separate parag=
-raph.
-> > > > Couldn't it be moved to the property description? =20
-> > >=20
-> > > It's a single value. The plural form is a mistake.
-> > >  =20
-> > > > Also, I think the bindings should specify which generations of Tegr=
-a do
-> > > > support HS400. Where else are people supposed to find that informat=
-ion? =20
-> > >=20
-> > > This property is under the "Optional properties for Tegra210 and
-> > > Tegra186" section and it only applies for the said generations. =20
-> >=20
-> > What's the point of specifying that they are only used on controllers
-> > which support HS400? Are you saying that only a subset of the SDHCI
-> > controllers on Tegra210 and Tegra186 support HS400?
->=20
-> Yes, on Tegra210 and Tegra186 only SDMMC4 supports HS400.
+These are standard pinctrl properties. While not relevant to the OS and
+driver agnostic bindings documentation, the way Linux pinctrl works
+would make omitting either of those properties tricky to implement in a
+pinctrl provider driver. As far as I can tell, the power state should
+be stated explicitly if it's modified in any of the pin configurations.
 
-Good. I think that'd be good to have as part of the DT bindings
-documentation.
+> > +  - power-source: Must contain either TEGRA_IO_PAD_VOLTAGE_1V8 or
+> > +    TEGRA_IO_PAD_VOLTAGE_3V3 to select between signaling voltages.
+> > +    The values are defined in
+> > +    include/dt-bindings/pinctrl/pinctrl-tegra-io-pad.h.  
+> 
+> Why is this called "power-source"? This defines the signaling voltage of
+> the pad, so why not something like "power-level", or "voltage", or
+> "output-voltage"?
+> 
+> Or is this because it is a mux that will internally select either a
+> 1.8 V or a 3.3 V source? In which case I guess this is okay. Perhaps
+> give some explanation of the mechanics of the underlying hardware to
+> make this more obvious.
 
-Thierry
+At least in the case of SDMMC, the pad is powered from an external
+adjustable regulator, however the pad must be configured to a voltage
+matching the voltage that is supplied to the pad from the regulator. The
+TRM does not go into much detail on the actual mechanisms behind this.
+I wanted to avoid introcuding new vendor specific properties and just
+stick with the standard pinctrl ones.
 
---Fh0SynPkUvrWGMR0
-Content-Type: application/pgp-signature; name="signature.asc"
+> > +
+> > +Note: The power state can be configured on all of the above pads except
+> > +      for ao-hv. Following pads have software configurable signaling
+> > +      voltages: sdmmc2-hv, dmic-hv, sdmmc1-hv, sdmmc3-hv, audio-hv,
+> > +      ao-hv.
+> > +
+> > +Pad configuration state example:
+> > +	pmc: pmc@7000e400 {
+> > +		compatible = "nvidia,tegra186-pmc";
+> > +		reg = <0 0x0c360000 0 0x10000>,
+> > +		      <0 0x0c370000 0 0x10000>,
+> > +		      <0 0x0c380000 0 0x10000>,
+> > +		      <0 0x0c390000 0 0x10000>;
+> > +		reg-names = "pmc", "wake", "aotag", "scratch";
+> > +
+> > +		...
+> > +
+> > +		sdmmc1_3v3: sdmmc1-3v3 {
+> > +			pins = "sdmmc1-hv";
+> > +			power-source = <TEGRA_IO_PAD_VOLTAGE_3V3>;
+> > +		};
+> > +
+> > +		sdmmc1_1v8: sdmmc1-1v8 {
+> > +			pins = "sdmmc1-hv";
+> > +			power-source = <TEGRA_IO_PAD_VOLTAGE_1V8>;
+> > +		};  
+> 
+> Wouldn't these be implicitly low-power-disable? What if these are off by
+> default? Selecting these states would change the power source but keep
+> them in power down, no? Don't we want something like the below instead?
 
------BEGIN PGP SIGNATURE-----
+The power state isn't modified. By default the pads are powered.
 
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAltsSysACgkQ3SOs138+
-s6EWbQ/+NU+mxZMPHIiKWhWZqLzgavH9rVHffJwEXQuzkR1NY+/O6nz6PGTuLeqo
-t8WgvETzPaJm6LWVFzwjg0lYi2FWOVB4pfesVC3oNKT4KtD4IxCMEERcDEUAaga0
-V2QEefuiLbxVzGHTxQ/e+N2Wf1ODUzkuz+zstsEIdG7EH7CyK10hfDE1tJ6fDH1u
-G4SV2UB9ifP704PhZZyIHDfYMUX+tA8LBpcwj6SIRJw66oSzXTodGUy/QvySymak
-bkRnA9RV/76Zcb+BbgSS6P/GTpGkLtwXm1reKBolBUPG3q0BBOjj4pw8Y9Ut4l//
-tbNCoeOJMa6MqXoKA8FhfHhAVAQp+J5VVqgAaSWhMM/z7DBK8sYk/akL5FViolJe
-TI3byWJ2liN47uyGbAaYMQnnJWJoF9nq3IkH153LS8/aVUI0Db9JOGhkjQjCs59r
-mk7FF+bXiTWVxGFFmTGM38sIsFnzuxGGfO7CIJv+Mn3xnUvBz5qPcmpWqOri5x5F
-J7KKJUem1ccxpRKYXeSR8pFtfkFIGVwZ+GemBZUgv61ncZ0HmEaSSfxR8urWq/Oo
-8WJGVYpAIZ702VnY+eT3pc1W9qCIpz0pq/HxLFZvggjxru6ttcIx551jnNHLsBno
-8y9I3T44M87Sd29+d98e24EA63oKNHQAIWYOd6rB0J3Ra8QQ2Nc=
-=txHf
------END PGP SIGNATURE-----
+> 		sdmmc1_3v3: sdmmc1-3v3 {
+> 			pins = "sdmmc1-hv";
+> 			power-source = <TEGRA_IO_PAD_VOLTAGE_3V3>;
+> 			/* low-power-disable implied here */
+> 		};
+> 
+> 		sdmmc1_1v8: sdmmc1-1v8 {
+> 			pins = "sdmmc1-hv";
+> 			power-source = <TEGRA_IO_PAD_VOLTAGE_1V8>;
+> 			/* low-power-disable implied here */
+> 		};
+> 
+> 		sdmmc1_off: sdmmc1-off {
+> 			pins = "sdmmc1-hv";
+> 			low-power;
+> 		};
+> 
+> That would allow the SDHCI driver to select between the two signaling
+> modes and a separate state for powering down the pad.
+> 
+> > +
+> > +		hdmi_off: hdmi-off {
+> > +			pins = "hdmi";
+> > +			low-power-enable;
+> > +		}
+> > +
+> > +		hdmi_on: hdmi-on {
+> > +			pins = "hdmi";
+> > +			low-power-disable;
+> > +		}  
+> 
+> These would similarily become:
+> 
+> 		hdmi_off: hdmi-off {
+> 			pins = "hdmi";
+> 			low-power;
+> 		};
+> 
+> 		hdmi_on: hdmi-on {
+> 			pins = "hdmi";
+> 		};
+> 
+> > diff --git a/Documentation/devicetree/bindings/arm/tegra/nvidia,tegra20-pmc.txt b/Documentation/devicetree/bindings/arm/tegra/nvidia,tegra20-pmc.txt
+> > index a74b37b..5363b90 100644
+> > --- a/Documentation/devicetree/bindings/arm/tegra/nvidia,tegra20-pmc.txt
+> > +++ b/Documentation/devicetree/bindings/arm/tegra/nvidia,tegra20-pmc.txt
+> > @@ -195,3 +195,106 @@ Example:
+> >  		power-domains = <&pd_audio>;
+> >  		...
+> >  	};
+> > +
+> > +== Pad Control ==
+> > +
+> > +On Tegra SoCs a pad is a set of pins which are configured as a group.
+> > +The pin grouping is a fixed attribute of the hardware. The PMC can be
+> > +used to set pad power state and signaling voltage. A pad can be either
+> > +in active or power down mode. The support for power state and signaling
+> > +voltage configuration varies depending on the pad in question. 3.3 V and
+> > +1.8 V signaling voltages are supported on pins where software
+> > +controllable signaling voltage switching is available.
+> > +
+> > +The pad configuration state nodes are placed under the pmc node and they
+> > +are referred to by the pinctrl client properties. For more information
+> > +see Documentation/devicetree/bindings/pinctrl/pinctrl-bindings.txt.
+> > +The pad name should be used as the value of the pins property in pin
+> > +configuration nodes.
+> > +
+> > +Following pads are present on Tegra124 and Tegra132:
+> > +audio		bb		cam		comp
+> > +csia		csb		cse		dsi
+> > +dsib		dsic		dsid		hdmi
+> > +hsic		hv		lvds		mipi-bias
+> > +nand		pex-bias	pex-clk1	pex-clk2
+> > +pex-cntrl	sdmmc1		sdmmc3		sdmmc4
+> > +sys_ddc		uart		usb0		usb1
+> > +usb2		usb_bias
+> > +
+> > +Following pads are present on Tegra210:
+> > +audio		audio-hv	cam		csia
+> > +csib		csic		csid		csie
+> > +csif		dbg		debug-nonao	dmic
+> > +dp		dsi		dsib		dsic
+> > +dsid		emmc		emmc2		gpio
+> > +hdmi		hsic		lvds		mipi-bias
+> > +pex-bias	pex-clk1	pex-clk2	pex-cntrl
+> > +sdmmc1		sdmmc3		spi		spi-hv
+> > +uart		usb0		usb1		usb2
+> > +usb3		usb-bias  
+> 
+> What about chips prior to Tegra124?
 
---Fh0SynPkUvrWGMR0--
+PMC pad configuration of this sort was introduced in Tegra124.
+
+ -Aapo
