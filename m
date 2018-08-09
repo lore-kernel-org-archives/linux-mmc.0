@@ -1,83 +1,133 @@
 From: Thierry Reding <thierry.reding@gmail.com>
-Subject: Re: [PATCH 1/8] dt-bindings: mmc: Add DQS trim value to Tegra SDHCI
-Date: Thu, 9 Aug 2018 13:36:09 +0200
-Message-ID: <20180809113609.GI21639@ulmo>
+Subject: Re: [PATCH 2/8] mmc: tegra: Parse and program DQS trim value
+Date: Thu, 9 Aug 2018 13:40:46 +0200
+Message-ID: <20180809114046.GJ21639@ulmo>
 References: <1533650404-18125-1-git-send-email-avienamo@nvidia.com>
- <1533650404-18125-2-git-send-email-avienamo@nvidia.com>
+ <1533650404-18125-3-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="xQR6quUbZ63TTuTU"
+        protocol="application/pgp-signature"; boundary="LG0Ll82vYr46+VA1"
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1533650404-18125-2-git-send-email-avienamo@nvidia.com>
+In-Reply-To: <1533650404-18125-3-git-send-email-avienamo@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Aapo Vienamo <avienamo@nvidia.com>
 Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Jonathan Hunter <jonathanh@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, Mikko Perttunen <mperttunen@nvidia.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
 
---xQR6quUbZ63TTuTU
+--LG0Ll82vYr46+VA1
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, Aug 07, 2018 at 04:59:57PM +0300, Aapo Vienamo wrote:
-> Document HS400 DQS trim value device tree property.
+On Tue, Aug 07, 2018 at 04:59:58PM +0300, Aapo Vienamo wrote:
+> Parse and program the HS400 DQS trim value from dt. Program a fallback
+> value in case the property is missing.
 >=20
 > Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
 > ---
->  Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt | 3 +++
->  1 file changed, 3 insertions(+)
+>  drivers/mmc/host/sdhci-tegra.c | 32 +++++++++++++++++++++++++++++---
+>  1 file changed, 29 insertions(+), 3 deletions(-)
 >=20
-> diff --git a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.t=
-xt b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-> index 3c7960a..7d294f3 100644
-> --- a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-> +++ b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-> @@ -72,6 +72,7 @@ Optional properties for Tegra210 and Tegra186:
->    trimmer value for non-tunable modes.
->  - nvidia,default-trim : Specify the default outbound clock trimmer
->    value.
-> +- nvidia,dqs-trim : Specify DQS trim value for HS400 timing
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegr=
+a.c
+> index 7f1ac4a..426f7ea 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -43,6 +43,10 @@
+>  #define SDHCI_CLOCK_CTRL_PADPIPE_CLKEN_OVERRIDE		BIT(3)
+>  #define SDHCI_CLOCK_CTRL_SPI_MODE_CLKEN_OVERRIDE	BIT(2)
 > =20
->    Notes on the pad calibration pull up and pulldown offset values:
->      - The property values are drive codes which are programmed into the
-> @@ -88,6 +89,8 @@ Optional properties for Tegra210 and Tegra186:
->      - The values are programmed to the Vendor Clock Control Register.
->        Please refer to the reference manual of the SoC for correct
->        values.
-> +    - The DQS trim values are only used on controllers which support
-> +      HS400 timing.
+> +#define SDHCI_TEGRA_VENDOR_CAP_OVERRIDES		0x10c
+> +#define SDHCI_TEGRA_CAP_OVERRIDES_DQS_TRIM_MASK		0x00003f00
+> +#define SDHCI_TEGRA_CAP_OVERRIDES_DQS_TRIM_SHIFT	8
+> +
+>  #define SDHCI_TEGRA_VENDOR_MISC_CTRL			0x120
+>  #define SDHCI_MISC_CTRL_ENABLE_SDR104			0x8
+>  #define SDHCI_MISC_CTRL_ENABLE_SDR50			0x10
+> @@ -112,6 +116,7 @@ struct sdhci_tegra {
+> =20
+>  	u32 default_tap;
+>  	u32 default_trim;
+> +	u32 dqs_trim;
+>  };
+> =20
+>  static u16 tegra_sdhci_readw(struct sdhci_host *host, int reg)
+> @@ -500,7 +505,7 @@ static void tegra_sdhci_parse_pad_autocal_dt(struct s=
+dhci_host *host)
+>  		autocal->pull_down_hs400 =3D autocal->pull_down_1v8;
+>  }
+> =20
+> -static void tegra_sdhci_parse_default_tap_and_trim(struct sdhci_host *ho=
+st)
+> +static void tegra_sdhci_parse_tap_and_trim(struct sdhci_host *host)
+>  {
+>  	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
+>  	struct sdhci_tegra *tegra_host =3D sdhci_pltfm_priv(pltfm_host);
+> @@ -515,6 +520,11 @@ static void tegra_sdhci_parse_default_tap_and_trim(s=
+truct sdhci_host *host)
+>  				       &tegra_host->default_trim);
+>  	if (err)
+>  		tegra_host->default_trim =3D 0;
+> +
+> +	err =3D device_property_read_u32(host->mmc->parent, "nvidia,dqs-trim",
+> +				       &tegra_host->dqs_trim);
+> +	if (err)
+> +		tegra_host->dqs_trim =3D 0x11;
 
-One of these additions says "DQS trim values", the other says "DQS trim
-value". It is unclear from the above how many values there are. I think
-this should be more explicit. Also, I don't see why the note about which
-controllers the DQS trim value(s) applies to is in a separate paragraph.
-Couldn't it be moved to the property description?
+Okay, so there's only one value. I think that should be clarified in the
+bindings documentation. It should mention that a single cell is used for
+this. Also, I assume there are lower and upper limits for the valid
+range of DQS trim values. Might make sense to specify those in the DT
+bindings as well.
 
-Also, I think the bindings should specify which generations of Tegra do
-support HS400. Where else are people supposed to find that information?
+>  }
+> =20
+>  static void tegra_sdhci_set_clock(struct sdhci_host *host, unsigned int =
+clock)
+> @@ -545,20 +555,33 @@ static unsigned int tegra_sdhci_get_max_clock(struc=
+t sdhci_host *host)
+>  	return clk_round_rate(pltfm_host->clk, UINT_MAX);
+>  }
+> =20
+> +static void tegra_sdhci_set_dqs_trim(struct sdhci_host *host, u8 val)
+> +{
+> +	u32 reg;
+> +
+> +	reg =3D sdhci_readl(host, SDHCI_TEGRA_VENDOR_CAP_OVERRIDES);
+> +	reg &=3D ~SDHCI_TEGRA_CAP_OVERRIDES_DQS_TRIM_MASK;
+> +	reg |=3D val<<SDHCI_TEGRA_CAP_OVERRIDES_DQS_TRIM_SHIFT;
+> +	sdhci_writel(host, reg, SDHCI_TEGRA_VENDOR_CAP_OVERRIDES);
+> +}
+
+Nit: I dislike using "reg" as a variable representing a register value
+because I keep interpreting it as designating a register offset. Hence
+I tend to use more explicit "offset" for actual register offsets and
+"value" for register values.
+
+But maybe that's just me.
 
 Thierry
 
---xQR6quUbZ63TTuTU
+--LG0Ll82vYr46+VA1
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAltsJygACgkQ3SOs138+
-s6F+PQ//Sy+W2dQjwsIevUD60h4o/MYKtvLKHwJAfy7RZJ8Bj9HLJMSE66Sx7+Kn
-nZPNrn76YGF6tBXsjgkvMaF2yNOsny9ggCbx8ktdpXyZPAGx7Z5ZNJPai93h1+ea
-QXrj7aUxyl1ZgPA7aAA5VbYgwH4xUSD8qhuQBbrZFmlD7KJw0k5+K06S0E3CY8Je
-TDEuvIEWMX4WMUOvc/vNK756ieW8r0NrU++iuy6m/11DU+fn29gZ79ThYSFQyNPA
-zSCYNf00ec7jN4uCTqVPvUO6/dguNAG80xwJGzkuBiaJXaF1PiWdmXI9iS/JvYgw
-4Qs5D1BnM734ysrlwEisju+qgktPNMKl+yrVdkiG6KfWkcOtV4yYzfbnhUoP1UdV
-Y8PygMgDQtdfH7aHok4NUoIdetbvYIecdvrvGhqcEIsxWYifUnjbil9lQOzf8PPF
-P9Hkp0+MHI86wGJRR5+gIeUKmRN8/LODM6YOGBY0AnVVS3c0gMRGx324MU/gNwkA
-qurn0ML81uTrv1U0ANNt6rxRt38hoMHbCThPmvaID580tNgleKbcLRb1t86odlIK
-R5McG56coeNySKU6UL5O3nLZsbNeW4nioEYIRgwJ9+un5J+AVd8zpQJRatffgOkl
-pFuu4AZuYiHYXsymmBrPK24iqi6MVbYGUpG3AjtnagA3vhyc9KU=
-=CKUn
+iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAltsKD0ACgkQ3SOs138+
+s6FmkQ/9F0beuA1UTQrpplGHi+FBskWP++XGlYwBOXM4LFWV+zGE21JLLcyC3S42
+xVjbSPLhPk6NGak5cCQ+uJuVfdSJpNXZRdW5x+tMqO7WsPjINfL44VDTmg2mUdfF
+0Dud5Kyv9lI5RrMKKsJiFnia7gyUyrB/eaoh4gmOklD7iv4D8PdjoD8CCawPjvCo
+GK7mF3GxUo01I7x5gVByC/VjKbmG6if5IhiYhHml80OiPOcOtqhAsiuUAnTCSb1B
+IiWuDZXnjwWR6uVe0c3/vNAPoaOUvJZdt9TVdntIr6Ib0bOYVCF/i5OF4wQgJGa2
+rMZBdY1b6EtWL8/twMenlFXNN09g7c5+j8D+ScrZplLVO4gunOETy9mCqUP/lnLM
+iqD9TtyzD8FW7yxYPoMyYJNv3Byl6g1uxt1xjBzb/N8a5NLgIijGt6ETMed3jZTD
+5nk0rC5j7tQ0902GlvTAkkUXe6vemIMWXne+Dq+fEphDMPH6XmbW24UuZs+BKwfq
+oteAddY+d+QkMl/q7DjbYDFajWTQczyqVo05cy7YcjJMUZEdHQTdjkXbJZZOyQE7
+EgoDS033AczK7R3HMs2nDNTP+i0d7LR8ilgvf4aHETXv1EGMqGTz7LzSkb4Y34fv
+1OYbSxz1V9YYqPLt2ISHD5ppPJcuWLH0Z+8CkSBuBBrXOSj+Vv8=
+=Hq+P
 -----END PGP SIGNATURE-----
 
---xQR6quUbZ63TTuTU--
+--LG0Ll82vYr46+VA1--
