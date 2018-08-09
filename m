@@ -1,76 +1,81 @@
-From: Thierry Reding <thierry.reding@gmail.com>
-Subject: Re: [PATCH 07/40] soc/tegra: pmc: Implement tegra_io_pad_is_powered()
-Date: Thu, 9 Aug 2018 14:22:26 +0200
-Message-ID: <20180809122226.GS21639@ulmo>
-References: <1533141150-10511-1-git-send-email-avienamo@nvidia.com>
- <1533141150-10511-8-git-send-email-avienamo@nvidia.com>
+From: Aapo Vienamo <avienamo@nvidia.com>
+Subject: Re: [PATCH 3/8] mmc: tegra: Implement HS400 enhanced strobe
+Date: Thu, 9 Aug 2018 15:22:54 +0300
+Message-ID: <20180809152254.03b97af0@dhcp-10-21-25-168>
+References: <1533650404-18125-1-git-send-email-avienamo@nvidia.com>
+        <1533650404-18125-4-git-send-email-avienamo@nvidia.com>
+        <20180809114345.GL21639@ulmo>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="WVXkb2QE2eH0aWe4"
+Content-Type: text/plain; charset="US-ASCII"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1533141150-10511-8-git-send-email-avienamo@nvidia.com>
+In-Reply-To: <20180809114345.GL21639@ulmo>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Aapo Vienamo <avienamo@nvidia.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Jonathan Hunter <jonathanh@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Mikko Perttunen <mperttunen@nvidia.com>, Stefan Agner <stefan@agner.ch>, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+To: Thierry Reding <thierry.reding@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Jonathan Hunter <jonathanh@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, Mikko Perttunen <mperttunen@nvidia.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
+On Thu, 9 Aug 2018 13:43:45 +0200
+Thierry Reding <thierry.reding@gmail.com> wrote:
 
---WVXkb2QE2eH0aWe4
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+> On Tue, Aug 07, 2018 at 04:59:59PM +0300, Aapo Vienamo wrote:
+> > Implement HS400 enhanced strobe.  
+> 
+> Can you provide a little more information about what the impact is of
+> this? Does this increase throughput? How much?
 
-On Wed, Aug 01, 2018 at 07:31:57PM +0300, Aapo Vienamo wrote:
-> Implement a function to query whether a pad is in deep power down mode.
-> This will is needed by the pinctrl callbacks.
+The eMMC enhanced strobe is a mechanism that can be used instead of the
+HS400 tuning procedure. Note that the delay line calibration implemented
+later on in this series is Tegra specific and has to be performed
+regardless of which type of HS400 tuning mechanism is used.
 
-"This is needed..."
+> > 
+> > Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
+> > ---
+> >  drivers/mmc/host/sdhci-tegra.c | 22 ++++++++++++++++++++++
+> >  1 file changed, 22 insertions(+)
+> > 
+> > diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+> > index 426f7ea..d81143b 100644
+> > --- a/drivers/mmc/host/sdhci-tegra.c
+> > +++ b/drivers/mmc/host/sdhci-tegra.c
+> > @@ -43,6 +43,9 @@
+> >  #define SDHCI_CLOCK_CTRL_PADPIPE_CLKEN_OVERRIDE		BIT(3)
+> >  #define SDHCI_CLOCK_CTRL_SPI_MODE_CLKEN_OVERRIDE	BIT(2)
+> >  
+> > +#define SDHCI_TEGRA_VENDOR_SYS_SW_CTRL			0x104
+> > +#define SDHCI_TEGRA_SYS_SW_CTRL_ENHANCED_STROBE		BIT(31)
+> > +
+> >  #define SDHCI_TEGRA_VENDOR_CAP_OVERRIDES		0x10c
+> >  #define SDHCI_TEGRA_CAP_OVERRIDES_DQS_TRIM_MASK		0x00003f00
+> >  #define SDHCI_TEGRA_CAP_OVERRIDES_DQS_TRIM_SHIFT	8
+> > @@ -271,6 +274,22 @@ static void tegra_sdhci_set_tap(struct sdhci_host *host, unsigned int tap)
+> >  	}
+> >  }
+> >  
+> > +static void tegra_sdhci_hs400_enhanced_strobe(struct mmc_host *mmc,
+> > +					      struct mmc_ios *ios)
+> > +{
+> > +	struct sdhci_host *host = mmc_priv(mmc);
+> > +	u32 reg;
+> > +
+> > +	reg = sdhci_readl(host, SDHCI_TEGRA_VENDOR_SYS_SW_CTRL);
+> > +	pr_err("enhanced strobe: %d\n", ios->enhanced_strobe);  
+> 
+> Left-over debug error?
 
->=20
-> Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
-> Acked-by: Jon Hunter <jonathanh@nvidia.com>
-> ---
->  drivers/soc/tegra/pmc.c | 16 ++++++++++++++++
->  1 file changed, 16 insertions(+)
->=20
-> diff --git a/drivers/soc/tegra/pmc.c b/drivers/soc/tegra/pmc.c
-> index 393ca72..784c182 100644
-> --- a/drivers/soc/tegra/pmc.c
-> +++ b/drivers/soc/tegra/pmc.c
-> @@ -1075,6 +1075,22 @@ int tegra_io_pad_power_disable(enum tegra_io_pad i=
-d)
->  }
->  EXPORT_SYMBOL(tegra_io_pad_power_disable);
-> =20
-> +static int tegra_io_pad_is_powered(enum tegra_io_pad id)
-> +{
-> +	unsigned long request, status;
-> +	u32 mask;
-> +	u32 value;
+Yep.
 
-These can go on a single line.
+> 
+> > +	if (ios->enhanced_strobe)
+> > +		reg |= SDHCI_TEGRA_SYS_SW_CTRL_ENHANCED_STROBE;
+> > +	else
+> > +		reg &= ~SDHCI_TEGRA_SYS_SW_CTRL_ENHANCED_STROBE;
+> > +	sdhci_writel(host, reg, SDHCI_TEGRA_VENDOR_SYS_SW_CTRL);  
+> 
+> You might want to add blank lines around the if ... else ... block for
+> readability.
 
-Thierry
+True.
 
---WVXkb2QE2eH0aWe4
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAltsMgIACgkQ3SOs138+
-s6HcZxAAqCg/j/84XaWdFZuexhsITHhgWr2RXdBAqYHGBTA8sLTPH8pyJW/S3mD6
-ke/0fdpETpE8jtqJdWaWytiaycw4aLmwcWz/QMozEJ6SY4IBUKBBiPYKrNzhWTHO
-Av/l1sBGyQ0zN2SeoJjHttsykzRis1k/9ATv0whkJdUytTuPkpf4X2o142rGYsuV
-NpUkVoDYIHzI7YrHTfppWCpqiEFv4zEm/qCGJxkCNAlDU7xI48+WbGQjIaTmyoxD
-XVEVpaEi8GEU1vkgyQtY8l3PS2ywJ7OaH1naRTUs8BtkobxnYqpjRpJFNs8TQp+A
-ZHf/xKZXPAu0j/RkbFnu576Mujde0r+W0zVWRHXRA4dEmQnZJeGxon97S1qNo5LG
-N7ibgxCoPhumQvCkqyhEPW82CpfUpTI/yDbLd0aXXr1AQV/AvMH/KkxIST44JnyH
-DtQBt2OVeG8cYzonDXdXV5ZUGQyNPhPLwoxAgrQSSF45GUC/caxN1sy0ZchgZ+J2
-gO2S5qQCBCNTojn7lK9oY7geKG3/ZX4Ci1HY50qi03pxO8xRDBfTN+B4x4Snw+zR
-excumyHUyrvVKR/CsUDMmG7wVCfGS9ruh5+g8lXLxH4iwEwZ1nE0bXttm6+8Yeoa
-1sB+B/adpqEUdp/YeR/Qns3DJGXMw1jnychvgfu2Y8GlFW2Wu7s=
-=WfhN
------END PGP SIGNATURE-----
-
---WVXkb2QE2eH0aWe4--
+ -Aapo
