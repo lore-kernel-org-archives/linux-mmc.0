@@ -1,99 +1,72 @@
 From: Thierry Reding <thierry.reding@gmail.com>
-Subject: Re: [PATCH 4/8] mmc: tegra: Implement HS400 delay line calibration
-Date: Thu, 9 Aug 2018 13:48:05 +0200
-Message-ID: <20180809114805.GM21639@ulmo>
+Subject: Re: [PATCH 5/8] arm64: dts: tegra186: Add SDMMC4 DQS trim value
+Date: Thu, 9 Aug 2018 13:49:22 +0200
+Message-ID: <20180809114922.GN21639@ulmo>
 References: <1533650404-18125-1-git-send-email-avienamo@nvidia.com>
- <1533650404-18125-5-git-send-email-avienamo@nvidia.com>
+ <1533650404-18125-6-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="WuedheRyq6FDfQ9j"
+        protocol="application/pgp-signature"; boundary="uMPAU7A2Er6+wvsD"
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1533650404-18125-5-git-send-email-avienamo@nvidia.com>
+In-Reply-To: <1533650404-18125-6-git-send-email-avienamo@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Aapo Vienamo <avienamo@nvidia.com>
 Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Jonathan Hunter <jonathanh@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, Mikko Perttunen <mperttunen@nvidia.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
 
---WuedheRyq6FDfQ9j
+--uMPAU7A2Er6+wvsD
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, Aug 07, 2018 at 05:00:00PM +0300, Aapo Vienamo wrote:
-> Implement HS400 specific delay line calibration procedure.
+On Tue, Aug 07, 2018 at 05:00:01PM +0300, Aapo Vienamo wrote:
+> Add the HS400 DQS trim value for Tegra186 SDMMC4.
 >=20
 > Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
 > ---
->  drivers/mmc/host/sdhci-tegra.c | 29 +++++++++++++++++++++++++++++
->  1 file changed, 29 insertions(+)
-
-Should this be before the previous patch in order to make sure the
-calibration is performed as soon as the feature is available. This is
-counting beans I guess, but it is technically possible for someone to
-get everything up to patch 3/8 and then get the corresponding changes
-in the DTS files to enable the mode and then have HS400 enabled without
-this calibration.
-
-Thierry
-
+>  arch/arm64/boot/dts/nvidia/tegra186.dtsi | 1 +
+>  1 file changed, 1 insertion(+)
 >=20
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegr=
-a.c
-> index d81143b..d0b68b7 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -56,6 +56,12 @@
->  #define SDHCI_MISC_CTRL_ENABLE_SDHCI_SPEC_300		0x20
->  #define SDHCI_MISC_CTRL_ENABLE_DDR50			0x200
+> diff --git a/arch/arm64/boot/dts/nvidia/tegra186.dtsi b/arch/arm64/boot/d=
+ts/nvidia/tegra186.dtsi
+> index 6e9ef26..9e07bc6 100644
+> --- a/arch/arm64/boot/dts/nvidia/tegra186.dtsi
+> +++ b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
+> @@ -313,6 +313,7 @@
+>  		nvidia,pad-autocal-pull-down-offset-1v8-timeout =3D <0x0a>;
+>  		nvidia,default-tap =3D <0x5>;
+>  		nvidia,default-trim =3D <0x9>;
+> +		nvidia,dqs-trim =3D <63>;
+>  		status =3D "disabled";
+>  	};
 > =20
-> +#define SDHCI_TEGRA_VENDOR_DLLCAL_CFG			0x1b0
-> +#define SDHCI_TEGRA_DLLCAL_CALIBRATE			BIT(31)
-> +
-> +#define SDHCI_TEGRA_VENDOR_DLLCAL_STA			0x1bc
-> +#define SDHCI_TEGRA_DLLCAL_STA_ACTIVE			BIT(31)
-> +
->  #define SDHCI_VNDR_TUN_CTRL0_0				0x1c0
->  #define SDHCI_VNDR_TUN_CTRL0_TUN_HW_TAP			0x20000
-> =20
-> @@ -584,6 +590,24 @@ static void tegra_sdhci_set_dqs_trim(struct sdhci_ho=
-st *host, u8 val)
->  	sdhci_writel(host, reg, SDHCI_TEGRA_VENDOR_CAP_OVERRIDES);
->  }
-> =20
-> +static void tegra_sdhci_hs400_dll_cal(struct sdhci_host *host)
-> +{
-> +	u32 reg;
-> +	int err;
-> +
-> +	reg =3D sdhci_readl(host, SDHCI_TEGRA_VENDOR_DLLCAL_CFG);
-> +	reg |=3D SDHCI_TEGRA_DLLCAL_CALIBRATE;
-> +	sdhci_writel(host, reg, SDHCI_TEGRA_VENDOR_DLLCAL_CFG);
 
-Is this self-clearing? Or do we need to clear it manually in order for
-a subsequent calibration procedure to succeed?
+Isn't this technically dependent on the board layout and as such would
+belong in the board DTS file? Or does this value work on all existing
+Tegra186 platforms?
 
 Thierry
 
---WuedheRyq6FDfQ9j
+--uMPAU7A2Er6+wvsD
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAltsKfUACgkQ3SOs138+
-s6G9MQ//QdjtfxfjkrmCbxq8Dr3mrsjX03o7Ttvkc5lnKy8OEFDf39wCEsM3ftEY
-ibBbCDxaEy72T4324+oPhQnHDBeT8Is6yNiKRfeA0Zp1zkyruPZW9B2wbSQ575tB
-mGq6oX6ePd0+C7Ok0NGL14wmZV1EL0ZPTQpZLmGEwUjXn6MyHG3jY5VuUGmedPyl
-ExpMQ0EE8Nw+HECTdJlZYaIntjTkhDTrPGO4xDLA0VOXrlF8zCihsZf7UiRsHxP8
-2dmmL9u1ul9iPwpKrbhD7ycfnKfDtwGoCNRLzvgN1Xx8vKYuUv527HmmBaGOJiYb
-eu6AaiUXQtZ+8V6hqurK0p9/CZvukLXdbNji4EuNdgJHbXy9BBTNYlaCiMCnBzoq
-4dfmQHxO/vDDNx8EPlSvNBOblAkfanI7p24LWDcl+BDXT5RzJvmpeYZKTAx46vQ0
-+tJHrZYOO9axSo9xgKNXUKa1YOUSgqHUmSJXL0MqwjcHFjJYxdrwF/crf3ksmdqG
-hjd0wwnw1Mdc36sXYQjQDQCtl08qhjkQzzDxvRtd7k4oe0TF23Y1LezJ/Zc4oR/G
-r72ubrAmPjvajsExNo+MLY+mczYEfc+clFqfbjoR9UezxSQfihSQQIcWZku6ZDRY
-fNkXCXTg/eWkJYbZmS+1H3mmyJeJdgWyAxX/hSa4RCsXa+Zp9Eo=
-=t5sc
+iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAltsKkIACgkQ3SOs138+
+s6FaxhAAkSMLQgzbXmF3OtTbNWRdMzt74oz8j77GI5emDQIIoqQ+pCLWVyXEUT1B
+WQ4qw+1pjv9A/D0voG7KgAsdGdjAZ8yeSZlWNr/Fbyv7g+s/5PwSGF4kV0Mvr/ts
+UaTNHQhp16yvY+RLoTA14PrbevAMrNibF9DAg9k6uOlndyfqmZWk8HI8PJHLPkSR
+1F3EXr3+5T7S0IkjxXLIFutKzzWxZYoo9ETBdGuaCnZUGQK93cWldPAl3FywyHai
+WQCJh08lTI+Rg2F18Z5/SSLGzBZ17/jNhv8IYm02JQz4WHmIq2u4bY87mGIX4D/K
+ZDui4/NFiIduZ4zZk7CXzy1QjKP/sXUTqnaDYI1NWVWgMF9CqZaBOfhzpWlzo89F
+UjTWUHy2fwvkkzPis4rQGX/IAyu8B1cya7VjmArhu6XyYjVMiOlUlm6t2X0V2xA1
+rho2tpdmkC04i/ZKTEIFIWEwIQ97Keu1iCKdblmHjCEjmoLml1sP0tkVXDF3uup5
+dC7ulRKVnU5NJN84lwZOVOIFVAxJqGL/uP+FDSgniRrH8w94uMsceKEsDGnb3aNh
+bxAtQorWWqG84Ujsnw3HbXDllRCEPchcEArS2GiCjd7akO/8gosaXXC3o206HNjW
+aCMNHzqTwu8iNJxWY7ME/0eDWAZBy5HeUPqePFYRJqajJoUDE9I=
+=MO3S
 -----END PGP SIGNATURE-----
 
---WuedheRyq6FDfQ9j--
+--uMPAU7A2Er6+wvsD--
