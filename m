@@ -1,106 +1,304 @@
-From: Thierry Reding <thierry.reding@gmail.com>
-Subject: Re: [PATCH 15/40] mmc: tegra: Power on the calibration pad
-Date: Thu, 9 Aug 2018 14:52:26 +0200
-Message-ID: <20180809125226.GW21639@ulmo>
+From: Aapo Vienamo <avienamo@nvidia.com>
+Subject: Re: [PATCH 12/40] mmc: tegra: Reconfigure pad voltages during
+ voltage switching
+Date: Thu, 9 Aug 2018 15:52:39 +0300
+Message-ID: <20180809155239.00265efd@dhcp-10-21-25-168>
 References: <1533141150-10511-1-git-send-email-avienamo@nvidia.com>
- <1533141150-10511-16-git-send-email-avienamo@nvidia.com>
+        <1533141150-10511-13-git-send-email-avienamo@nvidia.com>
+        <20180809124346.GU21639@ulmo>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="7kW37LRKoI6fR2de"
+Content-Type: text/plain; charset="US-ASCII"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1533141150-10511-16-git-send-email-avienamo@nvidia.com>
+In-Reply-To: <20180809124346.GU21639@ulmo>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Aapo Vienamo <avienamo@nvidia.com>
+To: Thierry Reding <thierry.reding@gmail.com>
 Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Jonathan Hunter <jonathanh@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Mikko Perttunen <mperttunen@nvidia.com>, Stefan Agner <stefan@agner.ch>, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
+On Thu, 9 Aug 2018 14:43:46 +0200
+Thierry Reding <thierry.reding@gmail.com> wrote:
 
---7kW37LRKoI6fR2de
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+> On Wed, Aug 01, 2018 at 07:32:02PM +0300, Aapo Vienamo wrote:
+> > Parse the pinctrl state and nvidia,only-1-8-v properties from the device
+> > tree. Validate the pinctrl and regulator configuration before unmasking
+> > UHS modes. Implement pad voltage state reconfiguration in the mmc
+> > start_signal_voltage_switch() callback. Add NVQUIRK_NEEDS_PAD_CONTROL
+> > and add set it for Tegra210 and Tegra186.
+> > 
+> > The pad configuration is done in the mmc callback because the order of
+> > pad reconfiguration and sdhci voltage switch depend on the voltage to
+> > which the transition occurs.
+> > 
+> > Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
+> > ---
+> >  drivers/mmc/host/sdhci-tegra.c | 138 ++++++++++++++++++++++++++++++++++++++---
+> >  1 file changed, 131 insertions(+), 7 deletions(-)
+> > 
+> > diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+> > index ddf00166..7d98455 100644
+> > --- a/drivers/mmc/host/sdhci-tegra.c
+> > +++ b/drivers/mmc/host/sdhci-tegra.c
+> > @@ -21,6 +21,8 @@
+> >  #include <linux/io.h>
+> >  #include <linux/of.h>
+> >  #include <linux/of_device.h>
+> > +#include <linux/pinctrl/consumer.h>
+> > +#include <linux/regulator/consumer.h>
+> >  #include <linux/reset.h>
+> >  #include <linux/mmc/card.h>
+> >  #include <linux/mmc/host.h>
+> > @@ -55,6 +57,7 @@
+> >  #define NVQUIRK_ENABLE_SDR104		BIT(4)
+> >  #define NVQUIRK_ENABLE_DDR50		BIT(5)
+> >  #define NVQUIRK_HAS_PADCALIB		BIT(6)
+> > +#define NVQUIRK_NEEDS_PAD_CONTROL	BIT(7)
+> >  
+> >  struct sdhci_tegra_soc_data {
+> >  	const struct sdhci_pltfm_data *pdata;
+> > @@ -66,8 +69,12 @@ struct sdhci_tegra {
+> >  	struct gpio_desc *power_gpio;
+> >  	bool ddr_signaling;
+> >  	bool pad_calib_required;
+> > +	bool pad_control_available;
+> >  
+> >  	struct reset_control *rst;
+> > +	struct pinctrl *pinctrl_sdmmc;
+> > +	struct pinctrl_state *pinctrl_state_3v3;
+> > +	struct pinctrl_state *pinctrl_state_1v8;
+> >  };
+> >  
+> >  static u16 tegra_sdhci_readw(struct sdhci_host *host, int reg)
+> > @@ -138,12 +145,46 @@ static unsigned int tegra_sdhci_get_ro(struct sdhci_host *host)
+> >  	return mmc_gpio_get_ro(host->mmc);
+> >  }
+> >  
+> > +static bool tegra_sdhci_is_pad_and_regulator_valid(struct sdhci_host *host)
+> > +{
+> > +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> > +	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
+> > +	int has_1v8, has_3v3;  
+> 
+> Can these be boolean?
 
-On Wed, Aug 01, 2018 at 07:32:05PM +0300, Aapo Vienamo wrote:
-> Automatic pad drive strength calibration is performed on a separate pad
-> identical to the ones used for driving the actual bus. Power on the
-> calibration pad during the calibration procedure and power it off
-> afterwards to save power.
->=20
-> Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
-> Reviewed-by: Mikko Perttunen <mperttunen@nvidia.com>
-> ---
->  drivers/mmc/host/sdhci-tegra.c | 24 ++++++++++++++++++++++++
->  1 file changed, 24 insertions(+)
->=20
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegr=
-a.c
-> index 53c035b9..9e22fec 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -54,6 +54,7 @@
->  #define SDHCI_TEGRA_SDMEM_COMP_PADCTRL			0x1e0
->  #define SDHCI_TEGRA_SDMEM_COMP_PADCTRL_VREF_SEL_MASK	0x0000000f
->  #define SDHCI_TEGRA_SDMEM_COMP_PADCTRL_VREF_SEL_VAL	0x7
-> +#define SDHCI_TEGRA_SDMEM_COMP_PADCTRL_E_INPUT_E_PWRD	BIT(31)
-> =20
->  #define SDHCI_TEGRA_AUTO_CAL_STATUS			0x1ec
->  #define SDHCI_TEGRA_AUTO_CAL_ACTIVE			BIT(31)
-> @@ -240,11 +241,32 @@ static void tegra_sdhci_reset(struct sdhci_host *ho=
-st, u8 mask)
->  	tegra_host->ddr_signaling =3D false;
->  }
-> =20
-> +static void tegra_sdhci_configure_cal_pad(struct sdhci_host *host, bool =
-enable)
-> +{
-> +	u32 reg;
-> +
-> +	/*
-> +	 * Enable or disable the additional I/O pad used by the drive strength
-> +	 * calibration process.
-> +	 */
-> +	reg =3D sdhci_readl(host, SDHCI_TEGRA_SDMEM_COMP_PADCTRL);
-> +	if (enable) {
-> +		reg |=3D SDHCI_TEGRA_SDMEM_COMP_PADCTRL_E_INPUT_E_PWRD;
-> +		sdhci_writel(host, reg, SDHCI_TEGRA_SDMEM_COMP_PADCTRL);
-> +		udelay(1);
-> +	} else {
-> +		reg &=3D ~SDHCI_TEGRA_SDMEM_COMP_PADCTRL_E_INPUT_E_PWRD;
-> +		sdhci_writel(host, reg, SDHCI_TEGRA_SDMEM_COMP_PADCTRL);
-> +	}
+In some cases regulator_is_supported_voltage() can return a negative
+error code. 
 
-Might be worth extracting the common write as well. This would of course
-mean that we either have to conditionalize the udelay() again, or we
-just keep it in both cases. Doesn't really hurt to wait a little on
-disabling, right?
+> > +
+> > +	/*
+> > +	 * The SoCs which have NVQUIRK_NEEDS_PAD_CONTROL require software pad
+> > +	 * voltage configuration in order to perform voltage switching. This
+> > +	 * means that valid pinctrl info is required on SDHCI instances capable
+> > +	 * of performing voltage switching. Whether or not an SDHCI instance is
+> > +	 * capable of voltage switching is determined based on the regulator.
+> > +	 */
+> > +
+> > +	if (!(tegra_host->soc_data->nvquirks & NVQUIRK_NEEDS_PAD_CONTROL))
+> > +		return true;
+> > +
+> > +	if (IS_ERR(host->mmc->supply.vqmmc))
+> > +		return false;
+> > +
+> > +	has_1v8 = regulator_is_supported_voltage(host->mmc->supply.vqmmc,
+> > +						 1700000, 1950000);
+> > +
+> > +	has_3v3 = regulator_is_supported_voltage(host->mmc->supply.vqmmc,
+> > +						 2700000, 3600000);
+> > +
+> > +	if (has_1v8 == 1 && has_3v3 == 1)
+> > +		return tegra_host->pad_control_available;
+> > +
+> > +	/* Fixed voltage, no pad control required. */
+> > +	return true;
+> > +}
+> > +
+> >  static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
+> >  {
+> >  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> >  	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
+> >  	const struct sdhci_tegra_soc_data *soc_data = tegra_host->soc_data;
+> >  	u32 misc_ctrl, clk_ctrl;
+> > +	bool pad_and_regulators_valid;  
+> 
+> This seems to be used only once. Why not simply use the function call in
+> the if condition directly?
+> 
+> >  
+> >  	sdhci_reset(host, mask);
+> >  
+> > @@ -160,13 +201,8 @@ static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
+> >  
+> >  	clk_ctrl &= ~SDHCI_CLOCK_CTRL_SPI_MODE_CLKEN_OVERRIDE;
+> >  
+> > -	/*
+> > -	 * If the board does not define a regulator for the SDHCI
+> > -	 * IO voltage, then don't advertise support for UHS modes
+> > -	 * even if the device supports it because the IO voltage
+> > -	 * cannot be configured.
+> > -	 */
+> > -	if (!IS_ERR(host->mmc->supply.vqmmc)) {
+> > +	pad_and_regulators_valid = tegra_sdhci_is_pad_and_regulator_valid(host);
+> > +	if (pad_and_regulators_valid) {
+> >  		/* Erratum: Enable SDHCI spec v3.00 support */
+> >  		if (soc_data->nvquirks & NVQUIRK_ENABLE_SDHCI_SPEC_300)
+> >  			misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDHCI_SPEC_300;
+> > @@ -286,6 +322,84 @@ static int tegra_sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
+> >  	return mmc_send_tuning(host->mmc, opcode, NULL);
+> >  }
+> >  
+> > +static int tegra_sdhci_set_padctrl(struct sdhci_host *host, int voltage)
+> > +{
+> > +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> > +	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
+> > +	int ret;
+> > +
+> > +	if (!tegra_host->pad_control_available)
+> > +		return 0;  
+> 
+> This seems unnecessary. ->pad_control_available is set at the end of
+> tegra_sdhci_init_pinctrl_info() after we have successfully obtained
+> the various pinctrl states. At the same time, we only set up the
+> ->start_signal_voltage_switch() callback when we have pinctrl states  
+> available, so this is in fact a duplicate check, right? If we don't
+> pad control, then the callback will be NULL and we never and up
+> calling tegra_sdhci_set_padctrl().
 
-Either way is fine with me. Though it would be nice if we could make the
-udelay() go away and use a sleeping variant if possible. This isn't run
-very often, so even if we overshoot by a couple of microseconds it isn't
-that bad. 1 us is pretty short, but I've been burnt by busy loops a
-couple of times, so I like to avoid them at all costs.
+True, this seems to be a remnant of previous itrations of the series.
 
-Thierry
+> > +
+> > +	if (voltage == MMC_SIGNAL_VOLTAGE_180) {
+> > +		ret = pinctrl_select_state(tegra_host->pinctrl_sdmmc,
+> > +					   tegra_host->pinctrl_state_1v8);
+> > +		if (ret < 0)
+> > +			dev_err(mmc_dev(host->mmc),
+> > +				"setting 1.8V failed, ret: %d\n", ret);
+> > +	} else {
+> > +		ret = pinctrl_select_state(tegra_host->pinctrl_sdmmc,
+> > +					   tegra_host->pinctrl_state_3v3);
+> > +		if (ret < 0)
+> > +			dev_err(mmc_dev(host->mmc),
+> > +				"setting 3.3V failed, ret: %d\n", ret);
+> > +	}  
+> 
+> Can we remove the ", ret" from these error messages. The user doesn't
+> understand what ret means in the context of this message. Just a:
+> 
+> 	"... failed: %d\n"
+> 
+> is good enough.
+> 
+> > +
+> > +	return ret;
+> > +}
+> > +
+> > +static int sdhci_tegra_start_signal_voltage_switch(struct mmc_host *mmc,
+> > +						   struct mmc_ios *ios)
+> > +{
+> > +	struct sdhci_host *host = mmc_priv(mmc);
+> > +	int ret = 0;
+> > +
+> > +	if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330) {
+> > +		ret = tegra_sdhci_set_padctrl(host, ios->signal_voltage);
+> > +		if (ret < 0)
+> > +			return ret;
+> > +		ret = sdhci_start_signal_voltage_switch(mmc, ios);
+> > +	} else if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_180) {
+> > +		ret = sdhci_start_signal_voltage_switch(mmc, ios);
+> > +		if (ret < 0)
+> > +			return ret;
+> > +		ret = tegra_sdhci_set_padctrl(host, ios->signal_voltage);
+> > +	}
+> > +
+> > +	return ret;
+> > +}
+> > +
+> > +static int tegra_sdhci_init_pinctrl_info(struct device *dev,
+> > +					 struct sdhci_tegra *tegra_host)
+> > +{
+> > +	tegra_host->pinctrl_sdmmc = devm_pinctrl_get(dev);
+> > +	if (IS_ERR(tegra_host->pinctrl_sdmmc)) {
+> > +		dev_dbg(dev, "No pinctrl info, err: %ld\n",
+> > +			PTR_ERR(tegra_host->pinctrl_sdmmc));
+> > +		return -1;
+> > +	}
+> > +
+> > +	tegra_host->pinctrl_state_3v3 =
+> > +		pinctrl_lookup_state(tegra_host->pinctrl_sdmmc, "sdmmc-3v3");
+> > +	if (IS_ERR(tegra_host->pinctrl_state_3v3)) {
+> > +		dev_warn(dev, "Missing 3.3V pad state, err: %ld\n",
+> > +			 PTR_ERR(tegra_host->pinctrl_state_3v3));
+> > +		return -1;
+> > +	}
+> > +
+> > +	tegra_host->pinctrl_state_1v8 =
+> > +		pinctrl_lookup_state(tegra_host->pinctrl_sdmmc, "sdmmc-1v8");
+> > +	if (IS_ERR(tegra_host->pinctrl_state_1v8)) {
+> > +		dev_warn(dev, "Missing 1.8V pad state, err: %ld\n",
+> > +			 PTR_ERR(tegra_host->pinctrl_state_3v3));
+> > +		return -1;
+> > +	}  
+> 
+> Why not propagate the error message? I know we really only care about
+> success vs. failure in the caller, but it will be confusing to anyone
+> that may eventually end up looking at the error code to see -EPERM.
 
---7kW37LRKoI6fR2de
-Content-Type: application/pgp-signature; name="signature.asc"
+Fair point.
 
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAltsOQoACgkQ3SOs138+
-s6GZtxAAoh/mGnKo4jAJUsNpr86cp6zTl3H564xjbckbeB0P7XHqLkqvnOYab14D
-fywWzwse5T1zB6cNeps6OpmLkjptQeQ91suM5N/4kvHHjlWJmOtfh6OZ0+w7MtF/
-FI5gxpXdpV77t5cny8rGBl+sn34TXyxTTWWBTlAPOwT1EqlSt4FfGZIF5jCt/BRS
-yneA0xmznO0GY9PTjc/x48Rl0AMjACowGItoAyL0J5YLxIRKoUT3ygsaDwYa/KRd
-dE6xN2H+y84d3+C7Jkwk2ytgqCkQP+kkYpACt/JmhvCrJrtX7TtVF7s37w2oJZYC
-0cXlrgYAJsDFUejofCn60t3QhRArJ+rpnM+TfPYFiuA6EMLgA7tgJtzNlFx0GB3X
-mA7Hcyp/LZl7apdrHYNjVZN5SpRN0geeoCDw2WDuUw7BCg6ga+juuxLI30HcISRD
-dILKNjTElMnXmBbb8p7Xo4Kn6v406yTWknIRGdOV0mdZ1xv/Fiyw2v+R3yEqdXyt
-Dz+eyK8ciV1uRvJO1W4xAO28ENq7lfAAkr0dFU0I2/K3eJjaulwLPmtjSsbZVH1G
-yuEQqv7zdmJ2VPuxxfbwZLQAdogJDflmUJisk6s5DiKSlR0dVryrt8svUe/sX1Xa
-8FbI3dfkY4oZHv9riRlJ/+K4gJzATTW6I0NoWUfBJ550qDtSv5A=
-=Blms
------END PGP SIGNATURE-----
-
---7kW37LRKoI6fR2de--
+> If we really don't care about the return error, why not just make the
+> function return a boolean (false for failure, true for success)?
+> 
+> Also, same as earlier, can we remove ", err" from the messages? That's
+> code specific context and doesn't belong in an error message.
+> 
+> > +
+> > +	tegra_host->pad_control_available = true;
+> > +
+> > +	return 0;
+> > +}
+> > +
+> >  static void tegra_sdhci_voltage_switch(struct sdhci_host *host)
+> >  {
+> >  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> > @@ -419,6 +533,7 @@ static const struct sdhci_pltfm_data sdhci_tegra210_pdata = {
+> >  
+> >  static const struct sdhci_tegra_soc_data soc_data_tegra210 = {
+> >  	.pdata = &sdhci_tegra210_pdata,
+> > +	.nvquirks = NVQUIRK_NEEDS_PAD_CONTROL,
+> >  };
+> >  
+> >  static const struct sdhci_pltfm_data sdhci_tegra186_pdata = {
+> > @@ -442,6 +557,7 @@ static const struct sdhci_pltfm_data sdhci_tegra186_pdata = {
+> >  
+> >  static const struct sdhci_tegra_soc_data soc_data_tegra186 = {
+> >  	.pdata = &sdhci_tegra186_pdata,
+> > +	.nvquirks = NVQUIRK_NEEDS_PAD_CONTROL,
+> >  };
+> >  
+> >  static const struct of_device_id sdhci_tegra_dt_match[] = {
+> > @@ -478,8 +594,16 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
+> >  	tegra_host = sdhci_pltfm_priv(pltfm_host);
+> >  	tegra_host->ddr_signaling = false;
+> >  	tegra_host->pad_calib_required = false;
+> > +	tegra_host->pad_control_available = false;
+> >  	tegra_host->soc_data = soc_data;
+> >  
+> > +	if (soc_data->nvquirks & NVQUIRK_NEEDS_PAD_CONTROL) {  
+> 
+> Nit: I think all of these quirks could eventually just move into boolean
+> flags to make tests like this easier to read. Nothing to worry about for
+> now, though.
+> 
+> Thierry
+> 
+> > +		rc = tegra_sdhci_init_pinctrl_info(&pdev->dev, tegra_host);
+> > +		if (rc == 0)
+> > +			host->mmc_host_ops.start_signal_voltage_switch =
+> > +				sdhci_tegra_start_signal_voltage_switch;
+> > +	}
+> > +
+> >  	rc = mmc_of_parse(host->mmc);
+> >  	if (rc)
+> >  		goto err_parse_dt;
+> > -- 
+> > 2.7.4
+> >   
