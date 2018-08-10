@@ -1,51 +1,54 @@
 From: Aapo Vienamo <avienamo@nvidia.com>
-Subject: [PATCH v2 40/40] arm64: dts: tegra210: Assign clocks for sdmmc1 and sdmmc4
-Date: Fri, 10 Aug 2018 21:08:42 +0300
-Message-ID: <1533924522-1037-41-git-send-email-avienamo@nvidia.com>
-References: <1533924522-1037-1-git-send-email-avienamo@nvidia.com>
+Subject: [PATCH v2 0/8] Tegra SDHCI support HS400 on Tegra210 and Tegra186
+Date: Fri, 10 Aug 2018 21:13:57 +0300
+Message-ID: <1533924845-1466-1-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1533924522-1037-1-git-send-email-avienamo@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Mikko Perttunen <mperttunen@nvidia.com>, Stefan Agner <stefan@agner.ch>
-Cc: devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Aapo Vienamo <avienamo@nvidia.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, Mikko Perttunen <mperttunen@nvidia.com>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, Aapo Vienamo <avienamo@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Use assigned-clock properties to configure pllc4 as the parent clock
-for sdmmc4 on Tegra210. pllc4 offers better jitter perfomance than
-the default pllp and is required by HS200 and HS400 modes.
+Hi all,
+This series implements support for HS400 signaling on Tegra210 and
+Tegra186. This includes programming the DQS trimmer values, implementing
+enhanced strobe and HS400 delay line calibration.
 
-Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
----
- arch/arm64/boot/dts/nvidia/tegra210.dtsi | 8 ++++++++
- 1 file changed, 8 insertions(+)
+This series depends on the "Tegra SDHCI add support for HS200 and UHS
+signaling" series.
 
-diff --git a/arch/arm64/boot/dts/nvidia/tegra210.dtsi b/arch/arm64/boot/dts/nvidia/tegra210.dtsi
-index 0951acc..14da98a 100644
---- a/arch/arm64/boot/dts/nvidia/tegra210.dtsi
-+++ b/arch/arm64/boot/dts/nvidia/tegra210.dtsi
-@@ -1057,6 +1057,11 @@
- 		nvidia,pad-autocal-pull-down-offset-1v8 = <0x7b>;
- 		nvidia,default-tap = <0x2>;
- 		nvidia,default-trim = <0x4>;
-+		assigned-clocks = <&tegra_car TEGRA210_CLK_SDMMC4>,
-+				  <&tegra_car TEGRA210_CLK_PLL_C4_OUT0>,
-+				  <&tegra_car TEGRA210_CLK_PLL_C4>;
-+		assigned-clock-parents = <&tegra_car TEGRA210_CLK_PLL_C4_OUT0>;
-+		assigned-clock-rates = <200000000>, <1000000000>, <1000000000>;
- 		status = "disabled";
- 	};
- 
-@@ -1107,6 +1112,9 @@
- 		nvidia,pad-autocal-pull-down-offset-1v8 = <0x05>;
- 		nvidia,default-tap = <0x8>;
- 		nvidia,default-trim = <0x0>;
-+		assigned-clocks = <&tegra_car TEGRA210_CLK_SDMMC4>,
-+				  <&tegra_car TEGRA210_CLK_PLL_C4_OUT0>;
-+		assigned-clock-parents = <&tegra_car TEGRA210_CLK_PLL_C4_OUT0>;
- 		status = "disabled";
- 	};
- 
+Changelog:
+v2:
+	- Document in dt-bindings which controllers support HS400
+	- Use val instead of reg in tegra_sdhci_set_dqs_trim()
+	- Change "dt" to "DT" in "mmc: tegra: Parse and program DQS trim
+	  value" commit message
+	- Add spaces around << in tegra_sdhci_set_dqs_trim()
+	- Make the "mmc: tegra: Implement HS400 enhanced strobe" commit
+	  message more detailed
+	- Remove a debug print from tegra_sdhci_hs400_enhanced_strobe()
+	- Add blank lines around if-else-block in
+	  tegra_sdhci_hs400_enhanced_strobe()
+	- Use val instead of reg in tegra_sdhci_hs400_enhanced_strobe()
+	- Make commit message of "mmc: tegra: Implement HS400 delay line
+	  calibration" more detailed
+
+Aapo Vienamo (8):
+  dt-bindings: mmc: Add DQS trim value to Tegra SDHCI
+  mmc: tegra: Parse and program DQS trim value
+  mmc: tegra: Implement HS400 enhanced strobe
+  mmc: tegra: Implement HS400 delay line calibration
+  arm64: dts: tegra186: Add SDMMC4 DQS trim value
+  arm64: dts: tegra210: Add SDMMC4 DQS trim value
+  arm64: dts: tegra186: Enable HS400
+  arm64: dts: tegra210: Enable HS400
+
+ .../bindings/mmc/nvidia,tegra20-sdhci.txt          |  4 ++
+ arch/arm64/boot/dts/nvidia/tegra186.dtsi           |  2 +
+ arch/arm64/boot/dts/nvidia/tegra210.dtsi           |  2 +
+ drivers/mmc/host/sdhci-tegra.c                     | 84 +++++++++++++++++++++-
+ 4 files changed, 89 insertions(+), 3 deletions(-)
+
 -- 
 2.7.4
