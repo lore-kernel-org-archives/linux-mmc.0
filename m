@@ -1,7 +1,7 @@
 From: Aapo Vienamo <avienamo@nvidia.com>
-Subject: [PATCH v2 27/40] mmc: tegra: Set SDHCI_QUIRK2_TUNE_DIS_CARD_CLK on Tegra210
-Date: Fri, 10 Aug 2018 21:08:29 +0300
-Message-ID: <1533924522-1037-28-git-send-email-avienamo@nvidia.com>
+Subject: [PATCH v2 28/40] mmc: tegra: Enable UHS and HS200 modes for Tegra210
+Date: Fri, 10 Aug 2018 21:08:30 +0300
+Message-ID: <1533924522-1037-29-git-send-email-avienamo@nvidia.com>
 References: <1533924522-1037-1-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,26 +12,27 @@ To: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Thier
 Cc: devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Aapo Vienamo <avienamo@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-This prevents a possible hardware hang during tuning.
+Set nvquirks to enable higher speed modes.
 
 Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
 ---
- drivers/mmc/host/sdhci-tegra.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-tegra.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 3a53593..0959102 100644
+index 0959102..8cfa8f4 100644
 --- a/drivers/mmc/host/sdhci-tegra.c
 +++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -837,7 +837,8 @@ static const struct sdhci_pltfm_data sdhci_tegra210_pdata = {
- 		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
- 		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
- 	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
--		   SDHCI_QUIRK2_TUNE_SKIP_XFERMODE_REG_PROG,
-+		   SDHCI_QUIRK2_TUNE_SKIP_XFERMODE_REG_PROG |
-+		   SDHCI_QUIRK2_TUNE_DIS_CARD_CLK,
- 	.ops  = &tegra210_sdhci_ops,
+@@ -846,7 +846,9 @@ static const struct sdhci_tegra_soc_data soc_data_tegra210 = {
+ 	.pdata = &sdhci_tegra210_pdata,
+ 	.nvquirks = NVQUIRK_NEEDS_PAD_CONTROL |
+ 		    NVQUIRK_HAS_PADCALIB |
+-		    NVQUIRK_DIS_CARD_CLK_CONFIG_TAP,
++		    NVQUIRK_DIS_CARD_CLK_CONFIG_TAP |
++		    NVQUIRK_ENABLE_SDR50 |
++		    NVQUIRK_ENABLE_SDR104,
  };
  
+ static const struct sdhci_pltfm_data sdhci_tegra186_pdata = {
 -- 
 2.7.4
