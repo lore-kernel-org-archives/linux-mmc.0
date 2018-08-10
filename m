@@ -1,7 +1,7 @@
 From: Aapo Vienamo <avienamo@nvidia.com>
-Subject: [PATCH v2 20/40] mmc: tegra: Add a workaround for tap value change glitch
-Date: Fri, 10 Aug 2018 21:08:22 +0300
-Message-ID: <1533924522-1037-21-git-send-email-avienamo@nvidia.com>
+Subject: [PATCH v2 21/40] mmc: tegra: Parse default trim and tap from dt
+Date: Fri, 10 Aug 2018 21:08:23 +0300
+Message-ID: <1533924522-1037-22-git-send-email-avienamo@nvidia.com>
 References: <1533924522-1037-1-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,90 +12,60 @@ To: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Thier
 Cc: devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Aapo Vienamo <avienamo@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Add quirk to disable the card clock during configuration of the tap
-value in tegra_sdhci_set_tap() and issue sdhci_reset() after value
-change. This is a workaround to avoid propagation of a potential
-glitch caused by setting the tap value.
+Parse the default inbound and outbound sampling trimmer values from
+the device tree.
 
 Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
 ---
- drivers/mmc/host/sdhci-tegra.c | 30 ++++++++++++++++++++++++++++--
- 1 file changed, 28 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sdhci-tegra.c | 22 ++++++++++++++++++++++
+ 1 file changed, 22 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 955c317..e82fb92 100644
+index e82fb92..0c39c54 100644
 --- a/drivers/mmc/host/sdhci-tegra.c
 +++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -47,6 +47,9 @@
- #define SDHCI_MISC_CTRL_ENABLE_SDHCI_SPEC_300		0x20
- #define SDHCI_MISC_CTRL_ENABLE_DDR50			0x200
+@@ -107,6 +107,9 @@ struct sdhci_tegra {
+ 	struct pinctrl_state *pinctrl_state_1v8;
  
-+#define SDHCI_VNDR_TUN_CTRL0_0				0x1c0
-+#define SDHCI_VNDR_TUN_CTRL0_TUN_HW_TAP			0x20000
+ 	struct sdhci_tegra_autocal_offsets autocal_offsets;
 +
- #define SDHCI_TEGRA_AUTO_CAL_CONFIG			0x1e4
- #define SDHCI_AUTO_CAL_START				BIT(31)
- #define SDHCI_AUTO_CAL_ENABLE				BIT(29)
-@@ -68,6 +71,7 @@
- #define NVQUIRK_ENABLE_DDR50				BIT(5)
- #define NVQUIRK_HAS_PADCALIB				BIT(6)
- #define NVQUIRK_NEEDS_PAD_CONTROL			BIT(7)
-+#define NVQUIRK_DIS_CARD_CLK_CONFIG_TAP			BIT(8)
++	u32 default_tap;
++	u32 default_trim;
+ };
  
- struct sdhci_tegra_soc_data {
- 	const struct sdhci_pltfm_data *pdata;
-@@ -500,12 +504,32 @@ static unsigned int tegra_sdhci_get_max_clock(struct sdhci_host *host)
- 
- static void tegra_sdhci_set_tap(struct sdhci_host *host, unsigned int tap)
- {
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
-+	const struct sdhci_tegra_soc_data *soc_data = tegra_host->soc_data;
-+	bool card_clk_enabled = false;
- 	u32 reg;
- 
-+	/*
-+	 * Touching the tap values is a bit tricky on some SoC generations.
-+	 * The quirk enables a workaround for a glitch that sometimes occurs if
-+	 * the tap values are changed.
-+	 */
-+
-+	if (soc_data->nvquirks & NVQUIRK_DIS_CARD_CLK_CONFIG_TAP)
-+		card_clk_enabled = tegra_sdhci_configure_card_clk(host, false);
-+
- 	reg = sdhci_readl(host, SDHCI_TEGRA_VENDOR_CLOCK_CTRL);
- 	reg &= ~SDHCI_CLOCK_CTRL_TAP_MASK;
- 	reg |= tap << SDHCI_CLOCK_CTRL_TAP_SHIFT;
- 	sdhci_writel(host, reg, SDHCI_TEGRA_VENDOR_CLOCK_CTRL);
-+
-+	if (soc_data->nvquirks & NVQUIRK_DIS_CARD_CLK_CONFIG_TAP &&
-+	    card_clk_enabled) {
-+		usleep_range(1, 2);
-+		sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
-+		tegra_sdhci_configure_card_clk(host, card_clk_enabled);
-+	}
+ static u16 tegra_sdhci_readw(struct sdhci_host *host, int reg)
+@@ -461,6 +464,23 @@ static void tegra_sdhci_parse_pad_autocal_dt(struct sdhci_host *host)
+ 		autocal->pull_down_hs400 = autocal->pull_down_1v8;
  }
  
- static int tegra_sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
-@@ -759,7 +783,8 @@ static const struct sdhci_pltfm_data sdhci_tegra210_pdata = {
- static const struct sdhci_tegra_soc_data soc_data_tegra210 = {
- 	.pdata = &sdhci_tegra210_pdata,
- 	.nvquirks = NVQUIRK_NEEDS_PAD_CONTROL |
--		    NVQUIRK_HAS_PADCALIB,
-+		    NVQUIRK_HAS_PADCALIB |
-+		    NVQUIRK_DIS_CARD_CLK_CONFIG_TAP,
- };
++static void tegra_sdhci_parse_default_tap_and_trim(struct sdhci_host *host)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
++	int err;
++
++	err = device_property_read_u32(host->mmc->parent, "nvidia,default-tap",
++				       &tegra_host->default_tap);
++	if (err)
++		tegra_host->default_tap = 0;
++
++	err = device_property_read_u32(host->mmc->parent, "nvidia,default-trim",
++				       &tegra_host->default_trim);
++	if (err)
++		tegra_host->default_trim = 0;
++}
++
+ static void tegra_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+@@ -866,6 +886,8 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
  
- static const struct sdhci_pltfm_data sdhci_tegra186_pdata = {
-@@ -784,7 +809,8 @@ static const struct sdhci_pltfm_data sdhci_tegra186_pdata = {
- static const struct sdhci_tegra_soc_data soc_data_tegra186 = {
- 	.pdata = &sdhci_tegra186_pdata,
- 	.nvquirks = NVQUIRK_NEEDS_PAD_CONTROL |
--		    NVQUIRK_HAS_PADCALIB,
-+		    NVQUIRK_HAS_PADCALIB |
-+		    NVQUIRK_DIS_CARD_CLK_CONFIG_TAP,
- };
+ 	tegra_sdhci_parse_pad_autocal_dt(host);
  
- static const struct of_device_id sdhci_tegra_dt_match[] = {
++	tegra_sdhci_parse_default_tap_and_trim(host);
++
+ 	tegra_host->power_gpio = devm_gpiod_get_optional(&pdev->dev, "power",
+ 							 GPIOD_OUT_HIGH);
+ 	if (IS_ERR(tegra_host->power_gpio)) {
 -- 
 2.7.4
