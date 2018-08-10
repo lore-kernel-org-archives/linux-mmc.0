@@ -1,7 +1,7 @@
 From: Aapo Vienamo <avienamo@nvidia.com>
-Subject: [PATCH v2 23/40] mmc: tegra: Configure default trim value on reset
-Date: Fri, 10 Aug 2018 21:08:25 +0300
-Message-ID: <1533924522-1037-24-git-send-email-avienamo@nvidia.com>
+Subject: [PATCH v2 24/40] mmc: tegra: Use standard SDHCI tuning on Tegra210 and Tegra186
+Date: Fri, 10 Aug 2018 21:08:26 +0300
+Message-ID: <1533924522-1037-25-git-send-email-avienamo@nvidia.com>
 References: <1533924522-1037-1-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,46 +12,55 @@ To: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Thier
 Cc: devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Aapo Vienamo <avienamo@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Program the outbound sampling trim value in tegra_sdhci_reset(). Unlike
-the outbound tap value this does not depend on the signaling mode and
-needs to be only programmed once.
+Add a new sdhci_ops struct for Tegra210 and Tegra186 which doesn't
+set the custom tuning callback used on previous SoC generations.
 
 Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
 ---
- drivers/mmc/host/sdhci-tegra.c | 7 ++++++-
- 1 file changed, 6 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-tegra.c | 17 +++++++++++++++--
+ 1 file changed, 15 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 208a269..7f1b0b4 100644
+index 7f1b0b4..bac2034 100644
 --- a/drivers/mmc/host/sdhci-tegra.c
 +++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -37,6 +37,8 @@
- #define SDHCI_TEGRA_VENDOR_CLOCK_CTRL			0x100
- #define SDHCI_CLOCK_CTRL_TAP_MASK			0x00ff0000
- #define SDHCI_CLOCK_CTRL_TAP_SHIFT			16
-+#define SDHCI_CLOCK_CTRL_TRIM_MASK			0x1f000000
-+#define SDHCI_CLOCK_CTRL_TRIM_SHIFT			24
- #define SDHCI_CLOCK_CTRL_SDR50_TUNING_OVERRIDE		BIT(5)
- #define SDHCI_CLOCK_CTRL_PADPIPE_CLKEN_OVERRIDE		BIT(3)
- #define SDHCI_CLOCK_CTRL_SPI_MODE_CLKEN_OVERRIDE	BIT(2)
-@@ -287,7 +289,8 @@ static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
- 		       SDHCI_MISC_CTRL_ENABLE_DDR50 |
- 		       SDHCI_MISC_CTRL_ENABLE_SDR104);
+@@ -816,6 +816,19 @@ static const struct sdhci_tegra_soc_data soc_data_tegra124 = {
+ 	.pdata = &sdhci_tegra124_pdata,
+ };
  
--	clk_ctrl &= ~SDHCI_CLOCK_CTRL_SPI_MODE_CLKEN_OVERRIDE;
-+	clk_ctrl &= ~(SDHCI_CLOCK_CTRL_TRIM_MASK |
-+		      SDHCI_CLOCK_CTRL_SPI_MODE_CLKEN_OVERRIDE);
- 
- 	if (tegra_sdhci_is_pad_and_regulator_valid(host)) {
- 		/* Erratum: Enable SDHCI spec v3.00 support */
-@@ -304,6 +307,8 @@ static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
- 			clk_ctrl |= SDHCI_CLOCK_CTRL_SDR50_TUNING_OVERRIDE;
- 	}
- 
-+	clk_ctrl |= tegra_host->default_trim << SDHCI_CLOCK_CTRL_TRIM_SHIFT;
++static const struct sdhci_ops tegra210_sdhci_ops = {
++	.get_ro     = tegra_sdhci_get_ro,
++	.read_w     = tegra_sdhci_readw,
++	.write_w    = tegra_sdhci_writew,
++	.write_l    = tegra_sdhci_writel,
++	.set_clock  = tegra_sdhci_set_clock,
++	.set_bus_width = sdhci_set_bus_width,
++	.reset      = tegra_sdhci_reset,
++	.set_uhs_signaling = tegra_sdhci_set_uhs_signaling,
++	.voltage_switch = tegra_sdhci_voltage_switch,
++	.get_max_clock = tegra_sdhci_get_max_clock,
++};
 +
- 	sdhci_writel(host, misc_ctrl, SDHCI_TEGRA_VENDOR_MISC_CTRL);
- 	sdhci_writel(host, clk_ctrl, SDHCI_TEGRA_VENDOR_CLOCK_CTRL);
+ static const struct sdhci_pltfm_data sdhci_tegra210_pdata = {
+ 	.quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
+ 		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
+@@ -824,7 +837,7 @@ static const struct sdhci_pltfm_data sdhci_tegra210_pdata = {
+ 		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
+ 		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+ 	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+-	.ops  = &tegra114_sdhci_ops,
++	.ops  = &tegra210_sdhci_ops,
+ };
  
+ static const struct sdhci_tegra_soc_data soc_data_tegra210 = {
+@@ -850,7 +863,7 @@ static const struct sdhci_pltfm_data sdhci_tegra186_pdata = {
+ 		    * But it is not supported as of now.
+ 		    */
+ 		   SDHCI_QUIRK2_BROKEN_64_BIT_DMA,
+-	.ops  = &tegra114_sdhci_ops,
++	.ops  = &tegra210_sdhci_ops,
+ };
+ 
+ static const struct sdhci_tegra_soc_data soc_data_tegra186 = {
 -- 
 2.7.4
