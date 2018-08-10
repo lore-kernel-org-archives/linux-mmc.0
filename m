@@ -1,7 +1,7 @@
 From: Aapo Vienamo <avienamo@nvidia.com>
-Subject: [PATCH v2 4/8] mmc: tegra: Implement HS400 delay line calibration
-Date: Fri, 10 Aug 2018 21:14:01 +0300
-Message-ID: <1533924845-1466-5-git-send-email-avienamo@nvidia.com>
+Subject: [PATCH v2 3/8] mmc: tegra: Implement HS400 enhanced strobe
+Date: Fri, 10 Aug 2018 21:14:00 +0300
+Message-ID: <1533924845-1466-4-git-send-email-avienamo@nvidia.com>
 References: <1533924845-1466-1-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,82 +12,61 @@ To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark
 Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, Aapo Vienamo <avienamo@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Implement HS400 specific delay line calibration procedure. This is a
-Tegra specific procedure and has to be performed regardless whether
-enhanced strobe or HS400 tuning is used.
+Implement eMMC HS400 enhanced strobe. Enhanced strobe is an alternative
+mechanism to the HS400 tuning procedure.
 
 Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
 ---
- drivers/mmc/host/sdhci-tegra.c | 29 +++++++++++++++++++++++++++++
- 1 file changed, 29 insertions(+)
+ drivers/mmc/host/sdhci-tegra.c | 23 +++++++++++++++++++++++
+ 1 file changed, 23 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index c0bb0f0..0ae82d3 100644
+index 6ec92bc..c0bb0f0 100644
 --- a/drivers/mmc/host/sdhci-tegra.c
 +++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -56,6 +56,12 @@
- #define SDHCI_MISC_CTRL_ENABLE_SDHCI_SPEC_300		0x20
- #define SDHCI_MISC_CTRL_ENABLE_DDR50			0x200
+@@ -43,6 +43,9 @@
+ #define SDHCI_CLOCK_CTRL_PADPIPE_CLKEN_OVERRIDE		BIT(3)
+ #define SDHCI_CLOCK_CTRL_SPI_MODE_CLKEN_OVERRIDE	BIT(2)
  
-+#define SDHCI_TEGRA_VENDOR_DLLCAL_CFG			0x1b0
-+#define SDHCI_TEGRA_DLLCAL_CALIBRATE			BIT(31)
++#define SDHCI_TEGRA_VENDOR_SYS_SW_CTRL			0x104
++#define SDHCI_TEGRA_SYS_SW_CTRL_ENHANCED_STROBE		BIT(31)
 +
-+#define SDHCI_TEGRA_VENDOR_DLLCAL_STA			0x1bc
-+#define SDHCI_TEGRA_DLLCAL_STA_ACTIVE			BIT(31)
-+
- #define SDHCI_VNDR_TUN_CTRL0_0				0x1c0
- #define SDHCI_VNDR_TUN_CTRL0_TUN_HW_TAP			0x20000
- 
-@@ -587,6 +593,24 @@ static void tegra_sdhci_set_dqs_trim(struct sdhci_host *host, u8 trim)
- 	sdhci_writel(host, val, SDHCI_TEGRA_VENDOR_CAP_OVERRIDES);
+ #define SDHCI_TEGRA_VENDOR_CAP_OVERRIDES		0x10c
+ #define SDHCI_TEGRA_CAP_OVERRIDES_DQS_TRIM_MASK		0x00003f00
+ #define SDHCI_TEGRA_CAP_OVERRIDES_DQS_TRIM_SHIFT	8
+@@ -272,6 +275,23 @@ static void tegra_sdhci_set_tap(struct sdhci_host *host, unsigned int tap)
+ 	}
  }
  
-+static void tegra_sdhci_hs400_dll_cal(struct sdhci_host *host)
++static void tegra_sdhci_hs400_enhanced_strobe(struct mmc_host *mmc,
++					      struct mmc_ios *ios)
 +{
-+	u32 reg;
-+	int err;
++	struct sdhci_host *host = mmc_priv(mmc);
++	u32 val;
 +
-+	reg = sdhci_readl(host, SDHCI_TEGRA_VENDOR_DLLCAL_CFG);
-+	reg |= SDHCI_TEGRA_DLLCAL_CALIBRATE;
-+	sdhci_writel(host, reg, SDHCI_TEGRA_VENDOR_DLLCAL_CFG);
++	val = sdhci_readl(host, SDHCI_TEGRA_VENDOR_SYS_SW_CTRL);
 +
-+	/* 1 ms sleep, 5 ms timeout */
-+	err = readl_poll_timeout(host->ioaddr + SDHCI_TEGRA_VENDOR_DLLCAL_STA,
-+				 reg, !(reg & SDHCI_TEGRA_DLLCAL_STA_ACTIVE),
-+				 1000, 5000);
-+	if (err)
-+		dev_err(mmc_dev(host->mmc),
-+			"HS400 delay line calibration timed out\n");
++	if (ios->enhanced_strobe)
++		val |= SDHCI_TEGRA_SYS_SW_CTRL_ENHANCED_STROBE;
++	else
++		val &= ~SDHCI_TEGRA_SYS_SW_CTRL_ENHANCED_STROBE;
++
++	sdhci_writel(host, val, SDHCI_TEGRA_VENDOR_SYS_SW_CTRL);
++
 +}
 +
- static void tegra_sdhci_set_uhs_signaling(struct sdhci_host *host,
- 					  unsigned timing)
+ static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
  {
-@@ -594,6 +618,7 @@ static void tegra_sdhci_set_uhs_signaling(struct sdhci_host *host,
- 	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
- 	bool set_default_tap = false;
- 	bool set_dqs_trim = false;
-+	bool do_hs400_dll_cal = false;
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+@@ -950,6 +970,9 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
+ 				sdhci_tegra_start_signal_voltage_switch;
+ 	}
  
- 	switch (timing) {
- 	case MMC_TIMING_UHS_SDR50:
-@@ -603,6 +628,7 @@ static void tegra_sdhci_set_uhs_signaling(struct sdhci_host *host,
- 		break;
- 	case MMC_TIMING_MMC_HS400:
- 		set_dqs_trim = true;
-+		do_hs400_dll_cal = true;
- 		break;
- 	case MMC_TIMING_MMC_DDR52:
- 	case MMC_TIMING_UHS_DDR50:
-@@ -623,6 +649,9 @@ static void tegra_sdhci_set_uhs_signaling(struct sdhci_host *host,
- 
- 	if (set_dqs_trim)
- 		tegra_sdhci_set_dqs_trim(host, tegra_host->dqs_trim);
++	host->mmc_host_ops.hs400_enhanced_strobe =
++			tegra_sdhci_hs400_enhanced_strobe;
 +
-+	if (do_hs400_dll_cal)
-+		tegra_sdhci_hs400_dll_cal(host);
- }
- 
- static int tegra_sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
+ 	rc = mmc_of_parse(host->mmc);
+ 	if (rc)
+ 		goto err_parse_dt;
 -- 
 2.7.4
