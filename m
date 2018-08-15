@@ -1,143 +1,29 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH mmc-next v3 2/3] mmc: sdhci: introduce adma_write_desc()
- hook to struct sdhci_ops
-Date: Wed, 15 Aug 2018 17:07:11 +0300
-Message-ID: <0bf86945-d2da-3e04-0cfc-b7bc1a2c1702@intel.com>
-References: <20180730104228.28b58bd0@xhacker.debian>
- <20180730104531.388b4f39@xhacker.debian>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH 2/2] mmc: renesas_sdhi: Add r8a774a1 support
+Date: Wed, 15 Aug 2018 14:24:05 -0600
+Message-ID: <20180815202405.GA13760@rob-hp-laptop>
+References: <1534250074-15890-1-git-send-email-fabrizio.castro@bp.renesas.com>
+ <1534250074-15890-3-git-send-email-fabrizio.castro@bp.renesas.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180730104531.388b4f39@xhacker.debian>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <1534250074-15890-3-git-send-email-fabrizio.castro@bp.renesas.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jisheng Zhang <Jisheng.Zhang@synaptics.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Fabrizio Castro <fabrizio.castro@bp.renesas.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, Simon Horman <horms@verge.net.au>, Geert Uytterhoeven <geert+renesas@glider.be>, Chris Paterson <Chris.Paterson2@renesas.com>, Biju Das <biju.das@bp.renesas.com>, linux-renesas-soc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 30/07/18 05:45, Jisheng Zhang wrote:
-> Add this hook so that it can be overridden with driver specific
-> implementations. We also rename the original sdhci_adma_write_desc()
-> to _sdhci_adma_write_desc() and export it, so that it could be reused
-> by driver's specific implementations.
+On Tue, Aug 14, 2018 at 01:34:34PM +0100, Fabrizio Castro wrote:
+> Document RZ/G2M (R8A774A1) SoC bindings.
 > 
-> Signed-off-by: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+> Signed-off-by: Fabrizio Castro <fabrizio.castro@bp.renesas.com>
+> Reviewed-by: Biju Das <biju.das@bp.renesas.com>
 > ---
->  drivers/mmc/host/sdhci.c | 31 +++++++++++++++++++++++--------
->  drivers/mmc/host/sdhci.h |  6 ++++++
->  2 files changed, 29 insertions(+), 8 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 14dd4a49e03b..50c846d99182 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -554,8 +554,8 @@ static void sdhci_kunmap_atomic(void *buffer, unsigned long *flags)
->  	local_irq_restore(*flags);
->  }
->  
-> -static void sdhci_adma_write_desc(struct sdhci_host *host, void *desc,
-> -				  dma_addr_t addr, int len, unsigned cmd)
-> +unsigned int _sdhci_adma_write_desc(struct sdhci_host *host, void *desc,
-> +				    dma_addr_t addr, int len, unsigned int cmd)
->  {
->  	struct sdhci_adma2_64_desc *dma_desc = desc;
->  
-> @@ -566,6 +566,19 @@ static void sdhci_adma_write_desc(struct sdhci_host *host, void *desc,
->  
->  	if (host->flags & SDHCI_USE_64_BIT_DMA)
->  		dma_desc->addr_hi = cpu_to_le32((u64)addr >> 32);
-> +
-> +	return host->desc_sz;
-> +}
-> +EXPORT_SYMBOL_GPL(_sdhci_adma_write_desc);
+>  Documentation/devicetree/bindings/mmc/tmio_mmc.txt | 4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
 
-Let's make the exported name without the _ i.e.sdhci_adma_write_desc
+Not sure why you didn't use 'dt-bindings: mmc: ' for the subject like 
+the others, but anyways:
 
-> +
-> +static unsigned int sdhci_adma_write_desc(struct sdhci_host *host, void *desc,
-
-Let's inline this and use __ i.e.
-
-static inline void __sdhci_adma_write_desc(struct sdhci_host *host,
-
-> +					  dma_addr_t addr, int len,
-> +					  unsigned int cmd)
-> +{
-> +	if (host->ops->adma_write_desc)
-> +		return host->ops->adma_write_desc(host, desc, addr, len, cmd);
-> +
-> +	return _sdhci_adma_write_desc(host, desc, addr, len, cmd);
->  }
->  
->  static void sdhci_adma_mark_end(void *desc)
-> @@ -585,6 +598,7 @@ static void sdhci_adma_table_pre(struct sdhci_host *host,
->  	void *desc, *align;
->  	char *buffer;
->  	int len, offset, i;
-> +	unsigned int desc_sz;
->  
->  	/*
->  	 * The spec does not specify endianness of descriptor table.
-> @@ -618,15 +632,16 @@ static void sdhci_adma_table_pre(struct sdhci_host *host,
->  			}
->  
->  			/* tran, valid */
-> -			sdhci_adma_write_desc(host, desc, align_addr, offset,
-> -					      ADMA2_TRAN_VALID);
-> +			desc_sz = sdhci_adma_write_desc(host, desc,
-
-Instead of returning desc_sz, might just as well pass &desc and have the
-function set its new value.
-
-> +							align_addr, offset,
-> +							ADMA2_TRAN_VALID);
->  
->  			BUG_ON(offset > 65536);
->  
->  			align += SDHCI_ADMA2_ALIGN;
->  			align_addr += SDHCI_ADMA2_ALIGN;
->  
-> -			desc += host->desc_sz;
-> +			desc += desc_sz;
->  
->  			addr += offset;
->  			len -= offset;
-> @@ -636,9 +651,9 @@ static void sdhci_adma_table_pre(struct sdhci_host *host,
->  
->  		if (len) {
->  			/* tran, valid */
-> -			sdhci_adma_write_desc(host, desc, addr, len,
-> -					      ADMA2_TRAN_VALID);
-> -			desc += host->desc_sz;
-> +			desc_sz = sdhci_adma_write_desc(host, desc, addr, len,
-> +							ADMA2_TRAN_VALID);
-> +			desc += desc_sz;
->  		}
->  
->  		/*
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index d55fd7033e93..0aad0ee8f63b 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -605,6 +605,9 @@ struct sdhci_ops {
->  	void    (*adma_workaround)(struct sdhci_host *host, u32 intmask);
->  	void    (*card_event)(struct sdhci_host *host);
->  	void	(*voltage_switch)(struct sdhci_host *host);
-> +	unsigned int	(*adma_write_desc)(struct sdhci_host *host, void *desc,
-> +					   dma_addr_t addr, int len,
-> +					   unsigned int cmd);
->  };
->  
->  #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
-> @@ -735,6 +738,9 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
->  int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
->  				      struct mmc_ios *ios);
->  void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable);
-> +unsigned int _sdhci_adma_write_desc(struct sdhci_host *host, void *desc,
-> +				    dma_addr_t addr, int len,
-> +				    unsigned int cmd);
->  
->  #ifdef CONFIG_PM
->  int sdhci_suspend_host(struct sdhci_host *host);
-> 
+Reviewed-by: Rob Herring <robh@kernel.org>
