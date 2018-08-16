@@ -1,72 +1,60 @@
-From: Chunyan Zhang <zhang.chunyan@linaro.org>
-Subject: [PATCH V5 10/10] dt-bindings: sdhci-sprd: Add bindings for the sdhci-sprd controller
-Date: Thu, 16 Aug 2018 15:54:24 +0800
-Message-ID: <1534406064-10065-11-git-send-email-zhang.chunyan@linaro.org>
-References: <1534406064-10065-1-git-send-email-zhang.chunyan@linaro.org>
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: Re: [PATCH 1/1] mmc: dw_mmc: hi3798cv200: add MMC_CAP_CMD23 capability
+Date: Thu, 16 Aug 2018 16:01:51 +0800
+Message-ID: <CAAQ0ZWRj6VhgY_hBz0iaxG8rJQVOVCKn4GOpoC_m1opp+qEyqQ@mail.gmail.com>
+References: <1534333184-25599-1-git-send-email-igor.opaniuk@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1534406064-10065-1-git-send-email-zhang.chunyan@linaro.org>
+In-Reply-To: <1534333184-25599-1-git-send-email-igor.opaniuk@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@unisoc.com>, Jason Wu <jason.wu@unisoc.com>, Chunyan Zhang <zhang.lyra@gmail.com>
+To: igor.opaniuk@linaro.org
+Cc: linux-mmc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, tianshuliang <tianshuliang@hisilicon.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Chunyan Zhang <chunyan.zhang@spreadtrum.com>
+On Wed, Aug 15, 2018 at 7:39 PM Igor Opaniuk <igor.opaniuk@linaro.org> wrote:
+>
+> Enable access to the RPMB on the on-board eMMC of the
+> Poplar board.
+>
+> Signed-off-by: Igor Opaniuk <igor.opaniuk@linaro.org>
+> ---
+>  drivers/mmc/host/dw_mmc-hi3798cv200.c | 8 ++++++++
+>  1 file changed, 8 insertions(+)
+>
+> diff --git a/drivers/mmc/host/dw_mmc-hi3798cv200.c b/drivers/mmc/host/dw_mmc-hi3798cv200.c
+> index f9b333f..7a023f0 100644
+> --- a/drivers/mmc/host/dw_mmc-hi3798cv200.c
+> +++ b/drivers/mmc/host/dw_mmc-hi3798cv200.c
+> @@ -23,6 +23,12 @@ struct hi3798cv200_priv {
+>         struct clk *drive_clk;
+>  };
+>
+> +static unsigned long dw_mci_hi3798cv200_caps[] = {
+> +       MMC_CAP_CMD23,
+> +       MMC_CAP_CMD23,
+> +       0
+> +};
 
-This patch adds the device-tree binding documentation for Spreadtrum
-SDHCI driver.
+I believe the three dwmmc blocks integrated on Hi3798CV200 SoC are
+identical on CMD23 support.  So I expect the zero to be MMC_CAP_CMD23
+as well.
 
-Signed-off-by: Chunyan Zhang <chunyan.zhang@spreadtrum.com>
----
- .../devicetree/bindings/mmc/sdhci-sprd.txt         | 41 ++++++++++++++++++++++
- 1 file changed, 41 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-sprd.txt
+Shawn
 
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-sprd.txt b/Documentation/devicetree/bindings/mmc/sdhci-sprd.txt
-new file mode 100644
-index 0000000..45c9978
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/sdhci-sprd.txt
-@@ -0,0 +1,41 @@
-+* Spreadtrum SDHCI controller (sdhci-sprd)
-+
-+The Secure Digital (SD) Host controller on Spreadtrum SoCs provides an interface
-+for MMC, SD and SDIO types of cards.
-+
-+This file documents differences between the core properties in mmc.txt
-+and the properties used by the sdhci-sprd driver.
-+
-+Required properties:
-+- compatible: Should contain "sprd,sdhci-r11".
-+- reg: physical base address of the controller and length.
-+- interrupts: Interrupts used by the SDHCI controller.
-+- clocks: Should contain phandle for the clock feeding the SDHCI controller
-+- clock-names: Should contain the following:
-+	"sdio" - SDIO source clock (required)
-+	"enable" - gate clock which used for enabling/disabling the device (required)
-+
-+Optional properties:
-+- assigned-clocks: the same with "sdio" clock
-+- assigned-clock-parents: the default parent of "sdio" clock
-+
-+Examples:
-+
-+sdio0: sdio@20600000 {
-+	compatible  = "sprd,sdhci-r11";
-+	reg = <0 0x20600000 0 0x1000>;
-+	interrupts = <GIC_SPI 60 IRQ_TYPE_LEVEL_HIGH>;
-+
-+	clock-names = "sdio", "enable";
-+	clocks = <&ap_clk CLK_EMMC_2X>,
-+		 <&apahb_gate CLK_EMMC_EB>;
-+	assigned-clocks = <&ap_clk CLK_EMMC_2X>;
-+	assigned-clock-parents = <&rpll CLK_RPLL_390M>;
-+
-+	bus-width = <8>;
-+	non-removable;
-+	no-sdio;
-+	no-sd;
-+	cap-mmc-hw-reset;
-+	status = "okay";
-+};
--- 
-2.7.4
+> +
+>  static void dw_mci_hi3798cv200_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+>  {
+>         struct hi3798cv200_priv *priv = host->priv;
+> @@ -160,6 +166,8 @@ static int dw_mci_hi3798cv200_init(struct dw_mci *host)
+>  }
+>
+>  static const struct dw_mci_drv_data hi3798cv200_data = {
+> +       .caps = dw_mci_hi3798cv200_caps,
+> +       .num_caps = ARRAY_SIZE(dw_mci_hi3798cv200_caps),
+>         .init = dw_mci_hi3798cv200_init,
+>         .set_ios = dw_mci_hi3798cv200_set_ios,
+>         .execute_tuning = dw_mci_hi3798cv200_execute_tuning,
+> --
+> 2.7.4
+>
