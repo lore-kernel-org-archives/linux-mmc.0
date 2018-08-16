@@ -1,7 +1,7 @@
 From: Chunyan Zhang <zhang.chunyan@linaro.org>
-Subject: [PATCH V5 05/10] mmc: sdhci: Add 32-bit block count support for v4 mode
-Date: Thu, 16 Aug 2018 15:54:19 +0800
-Message-ID: <1534406064-10065-6-git-send-email-zhang.chunyan@linaro.org>
+Subject: [PATCH V5 06/10] mmc: sdhci: Disable auto-CMD23 if stuff bits is set in CMD23 argument
+Date: Thu, 16 Aug 2018 15:54:20 +0800
+Message-ID: <1534406064-10065-7-git-send-email-zhang.chunyan@linaro.org>
 References: <1534406064-10065-1-git-send-email-zhang.chunyan@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1534406064-10065-1-git-send-email-zhang.chunyan@linaro.org>
@@ -10,54 +10,47 @@ To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@unisoc.com>, Jason Wu <jason.wu@unisoc.com>, Chunyan Zhang <zhang.lyra@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Host Controller Version 4.10 re-defines SDMA System Address register
-as 32-bit Block Count for v4 mode, and SDMA uses ADMA System
-Address register (05Fh-058h) instead if v4 mode is enabled. Also
-when using 32-bit block count, 16-bit block count register need
-to be set to zero.
+For version 4.10 and aboves, SDHCI_ARGUMENT2 is also uses to indicate
+32-bit number of blocks, it doesn't support stuff bits in argument of
+CMD23, but only block count for the following command (CMD18/25).
 
 Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
 ---
- drivers/mmc/host/sdhci.c | 14 +++++++++++++-
- drivers/mmc/host/sdhci.h |  1 +
- 2 files changed, 14 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci.c | 9 +++++++++
+ drivers/mmc/host/sdhci.h | 1 +
+ 2 files changed, 10 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 1dea1c4..b3328ee 100644
+index b3328ee..a72ad0d 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -1073,7 +1073,19 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
- 	/* Set the DMA boundary value and block size */
- 	sdhci_writew(host, SDHCI_MAKE_BLKSZ(host->sdma_boundary, data->blksz),
- 		     SDHCI_BLOCK_SIZE);
--	sdhci_writew(host, data->blocks, SDHCI_BLOCK_COUNT);
-+
-+	/*
-+	 * For Version 4.10 onwards, if v4 mode is enabled, 16-bit Block Count
-+	 * register need to be set to zero, 32-bit Block Count register would
-+	 * be selected.
-+	 */
-+	if (host->version >= SDHCI_SPEC_410 && host->v4_mode) {
-+		if (sdhci_readw(host, SDHCI_BLOCK_COUNT))
-+			sdhci_writew(host, 0, SDHCI_BLOCK_COUNT);
-+		sdhci_writew(host, data->blocks, SDHCI_32BIT_BLK_CNT);
-+	} else {
-+		sdhci_writew(host, data->blocks, SDHCI_BLOCK_COUNT);
-+	}
- }
+@@ -1729,6 +1729,15 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 		}
+ 	}
  
- static inline bool sdhci_auto_cmd12(struct sdhci_host *host,
++	/*
++	 * For version 4.10 and above, ARGUMENT2 register is also used as 32-bit
++	 * block count register which don't support stuff bits of CMD23 argument
++	 */
++	if (host->version >= SDHCI_SPEC_410 &&
++	    mrq->sbc && (mrq->sbc->arg & SDHCI_ARG2_STUFF) &&
++	    (host->flags & SDHCI_AUTO_CMD23))
++		host->flags &= ~SDHCI_AUTO_CMD23;
++
+ 	if (!present || host->flags & SDHCI_DEVICE_DEAD) {
+ 		mrq->cmd->error = -ENOMEDIUM;
+ 		sdhci_finish_mrq(host, mrq);
 diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index f95eda2..d34971ac 100644
+index d34971ac..daf8c1e 100644
 --- a/drivers/mmc/host/sdhci.h
 +++ b/drivers/mmc/host/sdhci.h
 @@ -28,6 +28,7 @@
  
  #define SDHCI_DMA_ADDRESS	0x00
  #define SDHCI_ARGUMENT2		SDHCI_DMA_ADDRESS
-+#define SDHCI_32BIT_BLK_CNT	SDHCI_DMA_ADDRESS
++#define  SDHCI_ARG2_STUFF	GENMASK(31, 16)
+ #define SDHCI_32BIT_BLK_CNT	SDHCI_DMA_ADDRESS
  
  #define SDHCI_BLOCK_SIZE	0x04
- #define  SDHCI_MAKE_BLKSZ(dma, blksz) (((dma & 0x7) << 12) | (blksz & 0xFFF))
 -- 
 2.7.4
