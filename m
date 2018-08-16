@@ -1,29 +1,64 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH 2/2] mmc: renesas_sdhi: Add r8a774a1 support
-Date: Wed, 15 Aug 2018 14:24:05 -0600
-Message-ID: <20180815202405.GA13760@rob-hp-laptop>
-References: <1534250074-15890-1-git-send-email-fabrizio.castro@bp.renesas.com>
- <1534250074-15890-3-git-send-email-fabrizio.castro@bp.renesas.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Chunyan Zhang <zhang.chunyan@linaro.org>
+Subject: [PATCH V5 00/10] mmc: add support for sdhci 4.0
+Date: Thu, 16 Aug 2018 15:54:14 +0800
+Message-ID: <1534406064-10065-1-git-send-email-zhang.chunyan@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1534250074-15890-3-git-send-email-fabrizio.castro@bp.renesas.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Fabrizio Castro <fabrizio.castro@bp.renesas.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, Simon Horman <horms@verge.net.au>, Geert Uytterhoeven <geert+renesas@glider.be>, Chris Paterson <Chris.Paterson2@renesas.com>, Biju Das <biju.das@bp.renesas.com>, linux-renesas-soc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@unisoc.com>, Jason Wu <jason.wu@unisoc.com>, Chunyan Zhang <zhang.lyra@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Aug 14, 2018 at 01:34:34PM +0100, Fabrizio Castro wrote:
-> Document RZ/G2M (R8A774A1) SoC bindings.
-> 
-> Signed-off-by: Fabrizio Castro <fabrizio.castro@bp.renesas.com>
-> Reviewed-by: Biju Das <biju.das@bp.renesas.com>
-> ---
->  Documentation/devicetree/bindings/mmc/tmio_mmc.txt | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
+>From the SD host controller version 4.0 on, SDHCI implementation either
+is version 3 compatible or version 4 mode. This patch-set covers those
+changes which are common for SDHCI 4.0 version, regardless of whether
+they are used with SD or eMMC storage devices.
 
-Not sure why you didn't use 'dt-bindings: mmc: ' for the subject like 
-the others, but anyways:
+This patchset also added a new sdhci driver for Spreadtrum's controller
+which supports v4.0 mode.
 
-Reviewed-by: Rob Herring <robh@kernel.org>
+This patchset has been tested on Spreadtrum's mobile phone, emmc can be
+initialized, mounted, read and written, with these changes for common
+sdhci framework and sdhci-sprd driver.
+
+Changes from V4:
+* Addressed Adrian's comments:
+- Enable v4 mode in __sdhci_read_caps() and sdhci_init() instead of sdhci_do_reset();
+- Move the added member 'v4_mode' to following with other bools;
+- Add more comments in the added function sdhci_config_dma();
+- Instead of enabling auto-CMD23 in init, enabled it only if receiving sbc from
+  cards and the argument is suitable for host to deal with;
+- Make the addition of the SDHCI_SPEC_4xx defines a separate patch;
+- Disable auto-CMD23 if stuff bits is set in the argument of CMD23 in sdhci_request().
+
+* For V4 mode, SDMA also can use auto-CMD23, adjusted host->flags in sdhci_setup_host().
+
+Previous patch series:
+v4: https://lkml.org/lkml/2018/7/23/269
+v3: https://lkml.org/lkml/2018/7/8/239
+v2: https://lkml.org/lkml/2018/6/14/936
+v1: https://lkml.org/lkml/2018/6/8/108
+
+Chunyan Zhang (10):
+  mmc: sdhci: Add version V4 definition
+  mmc: sdhci: Add sd host v4 mode
+  mmc: sdhci: Change SDMA address register for v4 mode
+  mmc: sdhci: Add ADMA2 64-bit addressing support for V4 mode
+  mmc: sdhci: Add 32-bit block count support for v4 mode
+  mmc: sdhci: Disable auto-CMD23 if stuff bits is set in CMD23 argument
+  mmc: sdhci: Add Auto CMD Auto Select support
+  mmc: sdhci: SDMA may use Auto-CMD23 in v4 mode
+  mmc: sdhci-sprd: Add Spreadtrum's initial host controller
+  dt-bindings: sdhci-sprd: Add bindings for the sdhci-sprd controller
+
+ .../devicetree/bindings/mmc/sdhci-sprd.txt         |  41 ++
+ drivers/mmc/host/Kconfig                           |  13 +
+ drivers/mmc/host/Makefile                          |   1 +
+ drivers/mmc/host/sdhci-sprd.c                      | 464 +++++++++++++++++++++
+ drivers/mmc/host/sdhci.c                           | 251 ++++++++---
+ drivers/mmc/host/sdhci.h                           |  22 +-
+ 6 files changed, 741 insertions(+), 51 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-sprd.txt
+ create mode 100644 drivers/mmc/host/sdhci-sprd.c
+
+-- 
+2.7.4
