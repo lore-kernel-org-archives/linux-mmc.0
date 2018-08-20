@@ -1,53 +1,66 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH 2/2] mmc: renesas_sdhi: Add r8a774a1 support
-Date: Mon, 20 Aug 2018 18:51:51 +0200
-Message-ID: <20180820165151.3y4lvkmrqmxvvac5@ninjato>
-References: <1534250074-15890-1-git-send-email-fabrizio.castro@bp.renesas.com>
- <1534250074-15890-3-git-send-email-fabrizio.castro@bp.renesas.com>
+From: Janusz Krzysztofik <jmkrzyszt@gmail.com>
+Subject: [RFC RFT PATCH 0/4] gpiolib: speed up GPIO array processing
+Date: Tue, 21 Aug 2018 01:43:37 +0200
+Message-ID: <20180820234341.5271-1-jmkrzyszt@gmail.com>
+References: <20180813223448.21316-1-jmkrzyszt@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="nfcgs3n53von3wrt"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1534250074-15890-3-git-send-email-fabrizio.castro@bp.renesas.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Fabrizio Castro <fabrizio.castro@bp.renesas.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, Simon Horman <horms@verge.net.au>, Geert Uytterhoeven <geert+renesas@glider.be>, Chris Paterson <Chris.Paterson2@renesas.com>, Biju Das <biju.das@bp.renesas.com>, linux-renesas-soc@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <20180813223448.21316-1-jmkrzyszt@gmail.com>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Andrew Lunn <andrew@lunn.ch>, Ulf Hansson <ulf.hansson@linaro.org>, linux-doc@vger.kernel.org, linux-iio@vger.kernel.org, Dominik Brodowski <linux@dominikbrodowski.net>, netdev@vger.kernel.org, linux-i2c@vger.kernel.org, Peter Meerwald-Stadler <pmeerw@pmeerw.net>, devel@driverdev.osuosl.org, Florian Fainelli <f.fainelli@gmail.com>, Jonathan Corbet <corbet@lwn.net>, Janusz Krzysztofik <jmkrzyszt@gmail.com>, Kishon Vijay Abraham I <kishon@ti.com>, linux-serial@vger.kernel.org, Jiri Slaby <jslaby@suse.com>, Michael Hennerich <Michael.Hennerich@analog.com>, linux-gpio@vger.kernel.org, Lars-Peter Clausen <lars@metafoo.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Peter Rosin <peda@axentia.se>, Miguel Ojeda Sandonis <miguel.ojeda.sandonis@gmail.com>, Peter Korsgaard <peter.korsgaard@barco.com>, Hartmut Knaack <kna>
 List-Id: linux-mmc@vger.kernel.org
 
 
---nfcgs3n53von3wrt
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+This series is a follow up of the former "mtd: rawnand: ams-delta: Use
+gpio-omap accessors for data I/O" which already contained some changes
+to gpiolib.  Those previous attempts were commented by Borris Brezillon
+who suggested using GPIO API modified to accept bitmaps, and by Linus
+Walleij who suggested still more great ideas for further immprovement
+of the proposed API changes - thanks!
 
-On Tue, Aug 14, 2018 at 01:34:34PM +0100, Fabrizio Castro wrote:
-> Document RZ/G2M (R8A774A1) SoC bindings.
->=20
-> Signed-off-by: Fabrizio Castro <fabrizio.castro@bp.renesas.com>
-> Reviewed-by: Biju Das <biju.das@bp.renesas.com>
+The goal is to boost performans of get/set array functions while
+processing GPIO arrays which represent pins of a signle chip in
+hardware order.  If resulting performance is close to PIO, GPIO API
+can be used for data I/O without much loss of speed.
 
-Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Created and tested on a low end Amstrad Delta board with NAND driver
+updated to use GPIO API for data I/O.  Performance degrade compared to
+PIO is much better than before the optimization but still not quite
+satisfactory.
 
 
---nfcgs3n53von3wrt
-Content-Type: application/pgp-signature; name="signature.asc"
+Janusz Krzysztofik (4):
+      gpiolib: Pass bitmaps, not integer arrays, to get/set array
+      gpiolib: Identify arrays matching GPIO hardware
+      gpiolib: Pass array info to get/set array functions
+      gpiolib: Implement fast processing path in get/set array
 
------BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlt68acACgkQFA3kzBSg
-KbZ35g//UOlA9RJRNyNuI9nn+G62ljoELZqoJIYjrOjbmUWGDg3Xs2nK+L/6op8H
-hQ2wUjkhAKQft8lBHXrrKaHRj7fYdWa/G0qsBpg5CNkc07YJ6Uf+eXIi/4SxhtCn
-uaNVgJvj1RPumLDTJJF/5XEIOqyl+InUigFWqarHTVk3IVez3+CufiPTjWxWEY+3
-xaf4HgjyDfapvVedlBts8pQTLCOX2ezJcf2yw8YYZOs7a8M1YAIl1KIxhXzQxllB
-BtFYcbShUGqp3j0Gd7ENZkEFzYJimChJYkBjACnElfDkHS4HmlQDJd8+ww2j8E/I
-GHjQR0RfaZO3aVrFAGMAPYLqdRtFbYcv5dcvrSplUPm9X3GXkGRn9fjQIBC+vyvy
-BtqK8fRxoJQP2k4N/lgCyv6ZeAT+4zsl39jcg31W1A1HVrdSo9vnI3bFYiS4Toxu
-1ZuFADKcjNLA36MnUTgpYLIij9nip0jua4uwPTOCWFBtU46V7bK0nu6sFz6u799B
-eb5X3/1DX4qN8EbrzXhYcnsu2MO3rzpbUZrwEBd6qPy/zDVphBFiz8oC/z491L1i
-/snQ0FcZ+PcMwzBVeZRDe/zOkBQdM1ywTT8kngW0vDKFswRtnIJwNcmlYbUWOdMc
-Qv9ABeIYKAukUTp0mmONhe9iRf3JCRQh0PuLuupAe4JSxiBgfmQ=
-=iZ8f
------END PGP SIGNATURE-----
-
---nfcgs3n53von3wrt--
+ Documentation/driver-api/gpio/board.rst     |   15 +
+ Documentation/driver-api/gpio/consumer.rst  |   48 +++-
+ drivers/auxdisplay/hd44780.c                |   64 +++---
+ drivers/bus/ts-nbus.c                       |   25 --
+ drivers/gpio/gpio-max3191x.c                |   23 +-
+ drivers/gpio/gpiolib.c                      |  279 ++++++++++++++++++++++------
+ drivers/gpio/gpiolib.h                      |   15 +
+ drivers/i2c/muxes/i2c-mux-gpio.c            |    5 
+ drivers/mmc/core/pwrseq_simple.c            |   15 -
+ drivers/mux/gpio.c                          |    7 
+ drivers/net/phy/mdio-mux-gpio.c             |    5 
+ drivers/pcmcia/soc_common.c                 |   14 -
+ drivers/phy/motorola/phy-mapphone-mdm6600.c |   21 +-
+ drivers/staging/iio/adc/ad7606.c            |   12 -
+ drivers/tty/serial/serial_mctrl_gpio.c      |    9 
+ include/linux/gpio/consumer.h               |   35 ++-
+ 16 files changed, 410 insertions(+), 182 deletions(-)
