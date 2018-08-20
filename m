@@ -1,51 +1,34 @@
-From: Ludovic Desroches <ludovic.desroches@microchip.com>
-Subject: [PATCH 2/2] mmc: android-goldfish: fix bad logic of sg_copy_{from,to}_buffer conversion
-Date: Mon, 20 Aug 2018 10:54:45 +0200
-Message-ID: <20180820085445.14632-3-ludovic.desroches@microchip.com>
-References: <20180820085445.14632-1-ludovic.desroches@microchip.com>
+From: Aapo Vienamo <avienamo@nvidia.com>
+Subject: [PATCH 0/2] Tegra SDHCI rerun pad calibration periodically
+Date: Mon, 20 Aug 2018 12:23:31 +0300
+Message-ID: <1534757013-4524-1-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180820085445.14632-1-ludovic.desroches@microchip.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: ulf.hansson@linaro.org, linux-kernel@vger.kernel.org, nicolas.ferre@microchip.com, alexandre.belloni@bootlin.com, dgilbert@interlog.com, Ludovic Desroches <ludovic.desroches@microchip.com>
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>
+Cc: linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, Aapo Vienamo <avienamo@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-The conversion to sg_copy_{from,to}_buffer has been done in the wrong
-way. sg_copy_to_buffer is a copy from an SG list to a linear buffer so
-it can't replace memcpy(dest, host->virt_base, data->sg->length) where
-dest is the virtual address of the SG. Same for sg_copy_from_buffer
-but in the opposite way.
+Hi all,
 
-Signed-off-by: Ludovic Desroches <ludovic.desroches@microchip.com>
-Suggested-by: Douglas Gilbert <dgilbert@interlog.com>
-Fixes: 53d7e098ba08 ("mmc: android-goldfish: use sg_copy_{from,to}_buffer")
----
- drivers/mmc/host/android-goldfish.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+This series implements pad drive strength recalibration. The calibration
+is rerun to compensate possible changes in temperature. The calibration
+procedure is rerun as part of mmc_host_ops.request before
+sdhci_request() is run. The calibration is executed only if the 100 ms
+recalibration interval has passed.
 
-diff --git a/drivers/mmc/host/android-goldfish.c b/drivers/mmc/host/android-goldfish.c
-index 294de177632c..61e4e2a213c9 100644
---- a/drivers/mmc/host/android-goldfish.c
-+++ b/drivers/mmc/host/android-goldfish.c
-@@ -217,7 +217,7 @@ static void goldfish_mmc_xfer_done(struct goldfish_mmc_host *host,
- 			 * We don't really have DMA, so we need
- 			 * to copy from our platform driver buffer
- 			 */
--			sg_copy_to_buffer(data->sg, 1, host->virt_base,
-+			sg_copy_from_buffer(data->sg, 1, host->virt_base,
- 					data->sg->length);
- 		}
- 		host->data->bytes_xfered += data->sg->length;
-@@ -393,7 +393,7 @@ static void goldfish_mmc_prepare_data(struct goldfish_mmc_host *host,
- 		 * We don't really have DMA, so we need to copy to our
- 		 * platform driver buffer
- 		 */
--		sg_copy_from_buffer(data->sg, 1, host->virt_base,
-+		sg_copy_to_buffer(data->sg, 1, host->virt_base,
- 				data->sg->length);
- 	}
- }
+This series depends on the "Tegra SDHCI add support for HS200 and UHS
+signaling" series.
+
+Aapo Vienamo (2):
+  mmc: sdhci: Export sdhci_request()
+  mmc: tegra: Implement periodic pad calibration
+
+ drivers/mmc/host/sdhci-tegra.c | 22 ++++++++++++++++++++++
+ drivers/mmc/host/sdhci.c       |  3 ++-
+ drivers/mmc/host/sdhci.h       |  1 +
+ 3 files changed, 25 insertions(+), 1 deletion(-)
+
 -- 
-2.12.2
+2.7.4
