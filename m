@@ -1,214 +1,108 @@
-From: Janusz Krzysztofik <jmkrzyszt@gmail.com>
-Subject: [RFC RFT PATCH v4 4/4] gpiolib: Implement fast processing path in get/set array
-Date: Tue, 21 Aug 2018 01:43:41 +0200
-Message-ID: <20180820234341.5271-5-jmkrzyszt@gmail.com>
+From: Peter Rosin <peda@axentia.se>
+Subject: Re: [RFC RFT PATCH v4 1/4] gpiolib: Pass bitmaps, not integer arrays,
+ to get/set array
+Date: Tue, 21 Aug 2018 08:49:24 +0200
+Message-ID: <0e79bdc3-ca20-6823-c86f-5e9da7dafbc9@axentia.se>
 References: <20180813223448.21316-1-jmkrzyszt@gmail.com>
  <20180820234341.5271-1-jmkrzyszt@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180820234341.5271-1-jmkrzyszt@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Jonathan Corbet <corbet@lwn.net>, Miguel Ojeda Sandonis <miguel.ojeda.sandonis@gmail.com>, Peter Korsgaard <peter.korsgaard@barco.com>, Peter Rosin <peda@axentia.se>, Ulf Hansson <ulf.hansson@linaro.org>, Andrew Lunn <andrew@lunn.ch>, Florian Fainelli <f.fainelli@gmail.com>, "David S. Miller" <davem@davemloft.net>, Dominik Brodowski <linux@dominikbrodowski.net>, Kishon Vijay Abraham I <kishon@ti.com>, Lars-Peter Clausen <lars@metafoo.de>, Michael Hennerich <Michael.Hennerich@analog.com>, Jonathan Cameron <jic23@kernel.org>, Hartmut Knaack <knaack.h@gmx.de>, Peter Meerwald-Stadler <pmeerw@pmeerw.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jiri Slaby <jslaby@suse.com>, linux-gpio@vger.kernel.org, linux-doc@vger.kernel.org, linux-i2c@vger.ker
+ <20180820234341.5271-2-jmkrzyszt@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <20180820234341.5271-2-jmkrzyszt@gmail.com>
+Content-Language: en-US
+Sender: netdev-owner@vger.kernel.org
+To: Janusz Krzysztofik <jmkrzyszt@gmail.com>, Linus Walleij <linus.walleij@linaro.org>
+Cc: Jonathan Corbet <corbet@lwn.net>, Miguel Ojeda Sandonis <miguel.ojeda.sandonis@gmail.com>, Peter Korsgaard <peter.korsgaard@barco.com>, Ulf Hansson <ulf.hansson@linaro.org>, Andrew Lunn <andrew@lunn.ch>, Florian Fainelli <f.fainelli@gmail.com>, "David S. Miller" <davem@davemloft.net>, Dominik Brodowski <linux@dominikbrodowski.net>, Kishon Vijay Abraham I <kishon@ti.com>, Lars-Peter Clausen <lars@metafoo.de>, Michael Hennerich <Michael.Hennerich@analog.com>, Jonathan Cameron <jic23@kernel.org>, Hartmut Knaack <knaack.h@gmx.de>, Peter Meerwald-Stadler <pmeerw@pmeerw.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jiri Slaby <jslaby@suse.com>, linux-gpio@vger.kernel.org, linux-doc@vger.kernel.org, linux-i2c@vger.kernel.org, linux-mmc@vger.kernel.
 List-Id: linux-mmc@vger.kernel.org
 
-Certain GPIO descriptor arrays returned by gpio_get_array() may contain
-information on direct mapping of array members to pins of a single GPIO
-chip in hardware order.  In such cases, bitmaps of values can be passed
-directly from/to the chip's .get/set_multiple() callbacks without
-wasting time on iterations.
+On 2018-08-21 01:43, Janusz Krzysztofik wrote:
+> Most users of get/set array functions iterate consecutive bits of data,
+> usually a single integer, while or processing array of results obtained
+> from or building an array of values to be passed to those functions.
+> Save time wasted on those iterations by changing the functions' API to
+> accept bitmaps.
+> 
+> All current users are updated as well.
+> 
+> More benefits from the change are expected as soon as planned support
+> for accepting/passing those bitmaps directly from/to respective GPIO
+> chip callbacks if applicable is implemented.
+> 
+> Signed-off-by: Janusz Krzysztofik <jmkrzyszt@gmail.com>
+> ---
+>  Documentation/driver-api/gpio/consumer.rst  | 22 ++++----
+>  drivers/auxdisplay/hd44780.c                | 52 +++++++++--------
+>  drivers/bus/ts-nbus.c                       | 19 ++-----
+>  drivers/gpio/gpio-max3191x.c                | 17 +++---
+>  drivers/gpio/gpiolib.c                      | 86 +++++++++++++++--------------
+>  drivers/gpio/gpiolib.h                      |  4 +-
+>  drivers/i2c/muxes/i2c-mux-gpio.c            |  3 +-
+>  drivers/mmc/core/pwrseq_simple.c            | 13 ++---
+>  drivers/mux/gpio.c                          |  4 +-
+>  drivers/net/phy/mdio-mux-gpio.c             |  3 +-
+>  drivers/pcmcia/soc_common.c                 | 11 ++--
+>  drivers/phy/motorola/phy-mapphone-mdm6600.c | 17 +++---
+>  drivers/staging/iio/adc/ad7606.c            |  9 +--
+>  drivers/tty/serial/serial_mctrl_gpio.c      |  7 ++-
+>  include/linux/gpio/consumer.h               | 18 +++---
+>  15 files changed, 138 insertions(+), 147 deletions(-)
+> 
 
-Add respective code to gpiod_get/set_array_bitmap_complex() functions.
-Pins not applicable for fast path are processed as before, skipping
-over the 'fast' ones.
+*snip*
 
-Signed-off-by: Janusz Krzysztofik <jmkrzyszt@gmail.com>
----
- Documentation/driver-api/gpio/board.rst    | 15 ++++++
- Documentation/driver-api/gpio/consumer.rst |  8 +++
- drivers/gpio/gpiolib.c                     | 87 ++++++++++++++++++++++++++++--
- 3 files changed, 105 insertions(+), 5 deletions(-)
+> diff --git a/drivers/i2c/muxes/i2c-mux-gpio.c b/drivers/i2c/muxes/i2c-mux-gpio.c
+> index 401308e3d036..d675e0ca2fa4 100644
+> --- a/drivers/i2c/muxes/i2c-mux-gpio.c
+> +++ b/drivers/i2c/muxes/i2c-mux-gpio.c
+> @@ -27,13 +27,14 @@ struct gpiomux {
+>  
+>  static void i2c_mux_gpio_set(const struct gpiomux *mux, unsigned val)
+>  {
+> +	unsigned long value_bitmap[1] = { val, };
+>  	int i;
+>  
+>  	for (i = 0; i < mux->data.n_gpios; i++)
+>  		mux->values[i] = (val >> i) & 1;
+>  
+>  	gpiod_set_array_value_cansleep(mux->data.n_gpios,
+> -				       mux->gpios, mux->values);
+> +				       mux->gpios, value_bitmap);
+>  }
+>  
+>  static int i2c_mux_gpio_select(struct i2c_mux_core *muxc, u32 chan)
 
-diff --git a/Documentation/driver-api/gpio/board.rst b/Documentation/driver-api/gpio/board.rst
-index 2c112553df84..c66821e033c2 100644
---- a/Documentation/driver-api/gpio/board.rst
-+++ b/Documentation/driver-api/gpio/board.rst
-@@ -193,3 +193,18 @@ And the table can be added to the board code as follows::
- 
- The line will be hogged as soon as the gpiochip is created or - in case the
- chip was created earlier - when the hog table is registered.
-+
-+Arrays of pins
-+--------------
-+In addition to requesting pins belonging to a function one by one, a device may
-+also request an array of pins assigned to the function.  The way those pins are
-+mapped to the device determines if the array qualifies for fast bitmap
-+processing.  If yes, a bitmap is passed over get/set array functions directly
-+between a caller and a respective .get/set_multiple() callback of a GPIO chip.
-+
-+In order to qualify for fast bitmap processing, the pin mapping must meet the
-+following requirements:
-+- it must belong to the same chip as other 'fast' pins of the function,
-+- its index within the function must match its hardware number within the chip.
-+
-+Open drain and open source pins are excluded from fast bitmap output processing.
-diff --git a/Documentation/driver-api/gpio/consumer.rst b/Documentation/driver-api/gpio/consumer.rst
-index 0afd95a12b10..cf992e5ab976 100644
---- a/Documentation/driver-api/gpio/consumer.rst
-+++ b/Documentation/driver-api/gpio/consumer.rst
-@@ -388,6 +388,14 @@ array_info should be set to NULL.
- Note that for optimal performance GPIOs belonging to the same chip should be
- contiguous within the array of descriptors.
- 
-+Still better performance may be achieved if array indexes of the descriptors
-+match hardware pin numbers of a single chip.  If an array passed to a get/set
-+array function matches the one obtained from gpiod_get_array() and array_info
-+associated with the array is also passed, the function may take a fast bitmap
-+processing path, passing the value_bitmap argument directly to the respective
-+.get/set_multiple() callback of the chip.  That allows for utilization of GPIO
-+banks as data I/O ports without much loss of performance.
-+
- The return value of gpiod_get_array_value() and its variants is 0 on success
- or negative on error. Note the difference to gpiod_get_value(), which returns
- 0 or 1 on success to convey the GPIO value. With the array functions, the GPIO
-diff --git a/drivers/gpio/gpiolib.c b/drivers/gpio/gpiolib.c
-index 4d26cdbdb7cf..b799a89c4c17 100644
---- a/drivers/gpio/gpiolib.c
-+++ b/drivers/gpio/gpiolib.c
-@@ -2787,7 +2787,36 @@ int gpiod_get_array_value_complex(bool raw, bool can_sleep,
- 				  struct gpio_array *array_info,
- 				  unsigned long *value_bitmap)
- {
--	int i = 0;
-+	int err, i = 0;
-+
-+	/*
-+	 * Validate array_info against desc_array and its size.
-+	 * It should immediately follow desc_array if both
-+	 * have been obtained from the same gpiod_get_array() call.
-+	 */
-+	if (array_info && array_info->desc == desc_array &&
-+	    array_size <= array_info->size &&
-+	    (void *)array_info == desc_array + array_info->size) {
-+		if (!can_sleep)
-+			WARN_ON(array_info->chip->can_sleep);
-+
-+		err = gpio_chip_get_multiple(array_info->chip,
-+					     array_info->get_mask,
-+					     value_bitmap);
-+		if (err)
-+			return err;
-+
-+		if (!raw && !bitmap_empty(array_info->invert_mask, array_size))
-+			bitmap_xor(value_bitmap, value_bitmap,
-+				   array_info->invert_mask, array_size);
-+
-+		if (bitmap_full(array_info->get_mask, array_size))
-+			return 0;
-+
-+		i = find_first_zero_bit(array_info->get_mask, array_size);
-+	} else {
-+		array_info = NULL;
-+	}
- 
- 	while (i < array_size) {
- 		struct gpio_chip *chip = desc_array[i]->gdev->chip;
-@@ -2818,7 +2847,12 @@ int gpiod_get_array_value_complex(bool raw, bool can_sleep,
- 			int hwgpio = gpio_chip_hwgpio(desc);
- 
- 			__set_bit(hwgpio, mask);
--			i++;
-+
-+			if (array_info)
-+				find_next_zero_bit(array_info->get_mask,
-+						   array_size, i);
-+			else
-+				i++;
- 		} while ((i < array_size) &&
- 			 (desc_array[i]->gdev->chip == chip));
- 
-@@ -2829,7 +2863,7 @@ int gpiod_get_array_value_complex(bool raw, bool can_sleep,
- 			return ret;
- 		}
- 
--		for (j = first; j < i; j++) {
-+		for (j = first; j < i; ) {
- 			const struct gpio_desc *desc = desc_array[j];
- 			int hwgpio = gpio_chip_hwgpio(desc);
- 			int value = test_bit(hwgpio, bits);
-@@ -2838,6 +2872,11 @@ int gpiod_get_array_value_complex(bool raw, bool can_sleep,
- 				value = !value;
- 			__assign_bit(j, value_bitmap, value);
- 			trace_gpio_value(desc_to_gpio(desc), 1, value);
-+
-+			if (array_info)
-+				find_next_zero_bit(array_info->get_mask, i, j);
-+			else
-+				j++;
- 		}
- 
- 		if (mask != fastpath)
-@@ -3039,6 +3078,32 @@ int gpiod_set_array_value_complex(bool raw, bool can_sleep,
- {
- 	int i = 0;
- 
-+	/*
-+	 * Validate array_info against desc_array and its size.
-+	 * It should immediately follow desc_array if both
-+	 * have been obtained from the same gpiod_get_array() call.
-+	 */
-+	if (array_info && array_info->desc == desc_array &&
-+	    array_size <= array_info->size &&
-+	    (void *)array_info == desc_array + array_info->size) {
-+		if (!can_sleep)
-+			WARN_ON(array_info->chip->can_sleep);
-+
-+		if (!raw && !bitmap_empty(array_info->invert_mask, array_size))
-+			bitmap_xor(value_bitmap, value_bitmap,
-+				   array_info->invert_mask, array_size);
-+
-+		gpio_chip_set_multiple(array_info->chip, array_info->set_mask,
-+				       value_bitmap);
-+
-+		if (bitmap_full(array_info->set_mask, array_size))
-+			return 0;
-+
-+		i = find_first_zero_bit(array_info->set_mask, array_size);
-+	} else {
-+		array_info = NULL;
-+	}
-+
- 	while (i < array_size) {
- 		struct gpio_chip *chip = desc_array[i]->gdev->chip;
- 		unsigned long fastpath[2 * BITS_TO_LONGS(FASTPATH_NGPIO)];
-@@ -3066,7 +3131,14 @@ int gpiod_set_array_value_complex(bool raw, bool can_sleep,
- 			int hwgpio = gpio_chip_hwgpio(desc);
- 			int value = test_bit(i, value_bitmap);
- 
--			if (!raw && test_bit(FLAG_ACTIVE_LOW, &desc->flags))
-+			/*
-+			 * Pins applicable for fast input but not for
-+			 * fast output processing may have been already
-+			 * inverted inside the fast path, skip them.
-+			 */
-+			if (!raw && !(array_info &&
-+			    test_bit(i, array_info->invert_mask)) &&
-+			    test_bit(FLAG_ACTIVE_LOW, &desc->flags))
- 				value = !value;
- 			trace_gpio_value(desc_to_gpio(desc), 0, value);
- 			/*
-@@ -3085,7 +3157,12 @@ int gpiod_set_array_value_complex(bool raw, bool can_sleep,
- 					__clear_bit(hwgpio, bits);
- 				count++;
- 			}
--			i++;
-+
-+			if (array_info)
-+				find_next_zero_bit(array_info->set_mask,
-+						   array_size, i);
-+			else
-+				i++;
- 		} while ((i < array_size) &&
- 			 (desc_array[i]->gdev->chip == chip));
- 		/* push collected bits to outputs */
--- 
-2.16.4
+Please take the opportunity to completely get rid of the values member
+in struct mux_gpio. It no longer serves any purpose.
+
+*snip*
+
+> diff --git a/drivers/mux/gpio.c b/drivers/mux/gpio.c
+> index 6fdd9316db8b..cc2d5f50472a 100644
+> --- a/drivers/mux/gpio.c
+> +++ b/drivers/mux/gpio.c
+> @@ -23,14 +23,14 @@ struct mux_gpio {
+>  static int mux_gpio_set(struct mux_control *mux, int state)
+>  {
+>  	struct mux_gpio *mux_gpio = mux_chip_priv(mux->chip);
+> +	unsigned long value_bitmap[1] = { state, };
+>  	int i;
+>  
+>  	for (i = 0; i < mux_gpio->gpios->ndescs; i++)
+>  		mux_gpio->val[i] = (state >> i) & 1;
+>  
+>  	gpiod_set_array_value_cansleep(mux_gpio->gpios->ndescs,
+> -				       mux_gpio->gpios->desc,
+> -				       mux_gpio->val);
+> +				       mux_gpio->gpios->desc, value_bitmap);
+>  
+>  	return 0;
+>  }
+
+Dito (but the member name is val).
+
+*snip*
+
+Cheers,
+Peter
