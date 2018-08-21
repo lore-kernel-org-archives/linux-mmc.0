@@ -1,63 +1,99 @@
-From: Paul Cercueil <paul@crapouillou.net>
-Subject: [PATCH] mmc: jz4740: Add support for the JZ4725B
-Date: Tue, 21 Aug 2018 17:21:51 +0200
-Message-ID: <20180821152151.32113-1-paul@crapouillou.net>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>
-Cc: Ezequiel Garcia <ezequiel@collabora.co.uk>, od@zcrc.me, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, Paul Cercueil <paul@crapouillou.net>
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Subject: [PATCH 00/11] tree-wide: use SPDX identifier for Renesas drivers
+Date: Wed, 22 Aug 2018 00:02:13 +0200
+Message-ID: <20180821220233.9202-1-wsa+renesas@sang-engineering.com>
+Return-path: <netdev-owner@vger.kernel.org>
+Sender: netdev-owner@vger.kernel.org
+To: linux-renesas-soc@vger.kernel.org
+Cc: Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, dmaengine@vger.kernel.org, linux-can@vger.kernel.org, linux-clk@vger.kernel.org, linux-i2c@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-pwm@vger.kernel.org, linux-spi@vger.kernel.org, linux-watchdog@vger.kernel.org, netdev@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-The JZ4725B is the first JZ SoC version that introduced a 32-bit IMASK
-register, not the JZ4750.
+Here is my first batch of SPDX conversion patches. Mostly low hanging fruits,
+only a handful of drivers needed corrections in MODULE_LICENSE, too.
 
-Signed-off-by: Paul Cercueil <paul@crapouillou.net>
----
- Documentation/devicetree/bindings/mmc/jz4740.txt | 1 +
- drivers/mmc/host/jz4740_mmc.c                    | 5 +++--
- 2 files changed, 4 insertions(+), 2 deletions(-)
+checkpatch is happy as well.
 
-diff --git a/Documentation/devicetree/bindings/mmc/jz4740.txt b/Documentation/devicetree/bindings/mmc/jz4740.txt
-index 7cd8c432d7c8..8a6f87f13114 100644
---- a/Documentation/devicetree/bindings/mmc/jz4740.txt
-+++ b/Documentation/devicetree/bindings/mmc/jz4740.txt
-@@ -7,6 +7,7 @@ described in mmc.txt.
- Required properties:
- - compatible: Should be one of the following:
-   - "ingenic,jz4740-mmc" for the JZ4740
-+  - "ingenic,jz4725b-mmc" for the JZ4725B
-   - "ingenic,jz4780-mmc" for the JZ4780
- - reg: Should contain the MMC controller registers location and length.
- - interrupts: Should contain the interrupt specifier of the MMC controller.
-diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
-index 993386c9ea50..0c1efd5100b7 100644
---- a/drivers/mmc/host/jz4740_mmc.c
-+++ b/drivers/mmc/host/jz4740_mmc.c
-@@ -115,7 +115,7 @@
- 
- enum jz4740_mmc_version {
- 	JZ_MMC_JZ4740,
--	JZ_MMC_JZ4750,
-+	JZ_MMC_JZ4725B,
- 	JZ_MMC_JZ4780,
- };
- 
-@@ -176,7 +176,7 @@ struct jz4740_mmc_host {
- static void jz4740_mmc_write_irq_mask(struct jz4740_mmc_host *host,
- 				      uint32_t val)
- {
--	if (host->version >= JZ_MMC_JZ4750)
-+	if (host->version >= JZ_MMC_JZ4725B)
- 		return writel(val, host->base + JZ_REG_MMC_IMASK);
- 	else
- 		return writew(val, host->base + JZ_REG_MMC_IMASK);
-@@ -1012,6 +1012,7 @@ static void jz4740_mmc_free_gpios(struct platform_device *pdev)
- 
- static const struct of_device_id jz4740_mmc_of_match[] = {
- 	{ .compatible = "ingenic,jz4740-mmc", .data = (void *) JZ_MMC_JZ4740 },
-+	{ .compatible = "ingenic,jz4725b-mmc", .data = (void *)JZ_MMC_JZ4725B },
- 	{ .compatible = "ingenic,jz4780-mmc", .data = (void *) JZ_MMC_JZ4780 },
- 	{},
- };
+I think an ack from Morimoto-san with his Renesas email address would be nice
+to make it more official? Still, I *am* contracted by Renesas.
+
+Thanks,
+
+   Wolfram
+
+Wolfram Sang (11):
+  clk: renesas: use SPDX identifier for Renesas drivers
+  dmaengine: use SPDX identifier for Renesas drivers
+  i2c: use SPDX identifier for Renesas drivers
+  mmc: use SPDX identifier for Renesas drivers
+  can: rcar: use SPDX identifier for Renesas drivers
+  net: ethernet: renesas: use SPDX identifier for Renesas drivers
+  phy: renesas: use SPDX identifier for Renesas drivers
+  pwm: use SPDX identifier for Renesas drivers
+  soc: renesas: use SPDX identifier for Renesas drivers
+  spi: use SPDX identifier for Renesas drivers
+  watchdog: use SPDX identifier for Renesas drivers
+
+ drivers/clk/renesas/clk-div6.c                |  5 +----
+ drivers/clk/renesas/r8a7795-cpg-mssr.c        |  5 +----
+ drivers/clk/renesas/r8a7796-cpg-mssr.c        |  5 +----
+ drivers/clk/renesas/r8a77995-cpg-mssr.c       |  5 +----
+ drivers/clk/renesas/rcar-gen3-cpg.c           |  5 +----
+ drivers/clk/renesas/rcar-usb2-clock-sel.c     |  5 +----
+ drivers/clk/renesas/renesas-cpg-mssr.c        |  5 +----
+ drivers/clk/renesas/renesas-cpg-mssr.h        |  5 +----
+ drivers/dma/nbpfaxi.c                         |  5 +----
+ drivers/dma/sh/shdma-arm.h                    |  5 +----
+ drivers/dma/sh/shdma-base.c                   |  5 +----
+ drivers/dma/sh/shdma-of.c                     |  5 +----
+ drivers/dma/sh/shdma-r8a73a4.c                |  5 +----
+ drivers/dma/sh/shdma.h                        |  6 +-----
+ drivers/dma/sh/shdmac.c                       |  6 +-----
+ drivers/dma/sh/sudmac.c                       |  5 +----
+ drivers/dma/sh/usb-dmac.c                     |  5 +----
+ drivers/i2c/busses/i2c-emev2.c                |  5 +----
+ drivers/i2c/busses/i2c-highlander.c           |  5 +----
+ drivers/i2c/busses/i2c-rcar.c                 | 10 +---------
+ drivers/i2c/busses/i2c-riic.c                 |  5 +----
+ drivers/i2c/busses/i2c-sh_mobile.c            | 10 +---------
+ drivers/mmc/host/renesas_sdhi.h               |  5 +----
+ drivers/mmc/host/renesas_sdhi_core.c          |  5 +----
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c |  5 +----
+ drivers/mmc/host/renesas_sdhi_sys_dmac.c      |  5 +----
+ drivers/mmc/host/sh_mmcif.c                   |  7 ++-----
+ drivers/mmc/host/tmio_mmc.c                   |  5 +----
+ drivers/mmc/host/tmio_mmc.h                   |  6 +-----
+ drivers/mmc/host/tmio_mmc_core.c              |  5 +----
+ drivers/mmc/host/usdhi6rol0.c                 |  5 +----
+ drivers/net/can/rcar/rcar_can.c               |  6 +-----
+ drivers/net/can/rcar/rcar_canfd.c             |  6 +-----
+ drivers/net/ethernet/renesas/ravb.h           |  5 +----
+ drivers/net/ethernet/renesas/ravb_main.c      |  5 +----
+ drivers/net/ethernet/renesas/sh_eth.c         | 13 +------------
+ drivers/net/ethernet/renesas/sh_eth.h         | 13 +------------
+ drivers/phy/renesas/phy-rcar-gen2.c           |  5 +----
+ drivers/phy/renesas/phy-rcar-gen3-usb2.c      |  5 +----
+ drivers/phy/renesas/phy-rcar-gen3-usb3.c      |  5 +----
+ drivers/pwm/pwm-rcar.c                        |  5 +----
+ drivers/pwm/pwm-renesas-tpu.c                 | 10 +---------
+ drivers/soc/renesas/r8a7743-sysc.c            |  5 +----
+ drivers/soc/renesas/r8a7745-sysc.c            |  5 +----
+ drivers/soc/renesas/r8a7779-sysc.c            |  5 +----
+ drivers/soc/renesas/r8a7790-sysc.c            |  5 +----
+ drivers/soc/renesas/r8a7791-sysc.c            |  5 +----
+ drivers/soc/renesas/r8a7792-sysc.c            |  5 +----
+ drivers/soc/renesas/r8a7794-sysc.c            |  5 +----
+ drivers/soc/renesas/r8a7795-sysc.c            |  5 +----
+ drivers/soc/renesas/r8a7796-sysc.c            |  5 +----
+ drivers/soc/renesas/r8a77970-sysc.c           |  5 +----
+ drivers/soc/renesas/r8a77995-sysc.c           |  5 +----
+ drivers/soc/renesas/rcar-sysc.h               |  5 +----
+ drivers/soc/renesas/renesas-soc.c             | 10 +---------
+ drivers/spi/spi-rspi.c                        | 10 +---------
+ drivers/spi/spi-sh-hspi.c                     | 12 ++----------
+ drivers/spi/spi-sh-msiof.c                    |  6 +-----
+ drivers/spi/spi-sh.c                          | 12 ++----------
+ drivers/watchdog/renesas_wdt.c                |  5 +----
+ 60 files changed, 63 insertions(+), 300 deletions(-)
+
 -- 
 2.11.0
