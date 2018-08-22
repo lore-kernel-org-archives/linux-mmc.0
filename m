@@ -1,64 +1,46 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 1/1] mmc: dw_mmc: hi3798cv200: add MMC_CAP_CMD23 cap
-Date: Wed, 22 Aug 2018 11:48:38 +0200
-Message-ID: <CAPDyKFpQfOgdzpqM9VytADxE9ZHOAw=6VzTgP=WD=iM93eRRnQ@mail.gmail.com>
-References: <1534770297-5242-1-git-send-email-igor.opaniuk@linaro.org>
+Subject: Re: [PATCH] mmc: jz4740: Drop dependency on MACH_JZ4740/80
+Date: Wed, 22 Aug 2018 11:48:43 +0200
+Message-ID: <CAPDyKFqF0kQO1xgSV1s0QjG=JUwhvXwy8h8gOD=A4_RPf5GhGg@mail.gmail.com>
+References: <20180821130320.1682-1-paul@crapouillou.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1534770297-5242-1-git-send-email-igor.opaniuk@linaro.org>
+In-Reply-To: <20180821130320.1682-1-paul@crapouillou.net>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Igor Opaniuk <igor.opaniuk@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Guo <shawn.guo@linaro.org>, tianshuliang <tianshuliang@hisilicon.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Paul Cercueil <paul@crapouillou.net>
+Cc: od@zcrc.me, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 20 August 2018 at 15:04, Igor Opaniuk <igor.opaniuk@linaro.org> wrote:
-> Enable access to the RPMB on the on-board eMMC of the
-> Poplar board.
+On 21 August 2018 at 15:03, Paul Cercueil <paul@crapouillou.net> wrote:
+> Depending on MACH_JZ4740 | MACH_JZ4780 prevent us from creating a generic
+> kernel that works on more than one MIPS board. Instead, we just depend on
+> MIPS being set.
 >
-> Signed-off-by: Igor Opaniuk <igor.opaniuk@linaro.org>
+> Signed-off-by: Paul Cercueil <paul@crapouillou.net>
 
-Thanks, queued for v.4.20!
+Thanks, queued for v4.20!
 
 Kind regards
 Uffe
 
 > ---
+>  drivers/mmc/host/Kconfig | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> v2:
-> - as there are three dwmmc blocks integrated on Hi3798CV200 SoC with
-> identical CMD23 support, provide MMC_CAP_CMD23 capability instead of 0 for
-> the third block also.
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 0581c199c996..71d9bdc52422 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -761,7 +761,7 @@ config MMC_SH_MMCIF
 >
->  drivers/mmc/host/dw_mmc-hi3798cv200.c | 8 ++++++++
->  1 file changed, 8 insertions(+)
->
-> diff --git a/drivers/mmc/host/dw_mmc-hi3798cv200.c b/drivers/mmc/host/dw_mmc-hi3798cv200.c
-> index f9b333f..bc51cef 100644
-> --- a/drivers/mmc/host/dw_mmc-hi3798cv200.c
-> +++ b/drivers/mmc/host/dw_mmc-hi3798cv200.c
-> @@ -23,6 +23,12 @@ struct hi3798cv200_priv {
->         struct clk *drive_clk;
->  };
->
-> +static unsigned long dw_mci_hi3798cv200_caps[] = {
-> +       MMC_CAP_CMD23,
-> +       MMC_CAP_CMD23,
-> +       MMC_CAP_CMD23
-> +};
-> +
->  static void dw_mci_hi3798cv200_set_ios(struct dw_mci *host, struct mmc_ios *ios)
->  {
->         struct hi3798cv200_priv *priv = host->priv;
-> @@ -160,6 +166,8 @@ static int dw_mci_hi3798cv200_init(struct dw_mci *host)
->  }
->
->  static const struct dw_mci_drv_data hi3798cv200_data = {
-> +       .caps = dw_mci_hi3798cv200_caps,
-> +       .num_caps = ARRAY_SIZE(dw_mci_hi3798cv200_caps),
->         .init = dw_mci_hi3798cv200_init,
->         .set_ios = dw_mci_hi3798cv200_set_ios,
->         .execute_tuning = dw_mci_hi3798cv200_execute_tuning,
+>  config MMC_JZ4740
+>         tristate "Ingenic JZ47xx SD/Multimedia Card Interface support"
+> -       depends on MACH_JZ4740 || MACH_JZ4780
+> +       depends on MIPS
+>         help
+>           This selects support for the SD/MMC controller on Ingenic
+>           JZ4740, JZ4750, JZ4770 and JZ4780 SoCs.
 > --
-> 2.7.4
+> 2.11.0
 >
