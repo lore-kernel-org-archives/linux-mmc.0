@@ -1,75 +1,64 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: jz4740: Add support for the JZ4725B
-Date: Wed, 22 Aug 2018 11:49:15 +0200
-Message-ID: <CAPDyKFr+xbnMdzj90bHi84gD9W4U0CUvrExBdmhJ-1miFi8xog@mail.gmail.com>
-References: <20180821152151.32113-1-paul@crapouillou.net>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 1/2] mmc: sdhci: Export sdhci_request()
+Date: Wed, 22 Aug 2018 13:54:53 +0300
+Message-ID: <96cc4c64-088d-a2ca-44d2-615e8af9cadd@intel.com>
+References: <1534757013-4524-1-git-send-email-avienamo@nvidia.com>
+ <1534757013-4524-2-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180821152151.32113-1-paul@crapouillou.net>
+In-Reply-To: <1534757013-4524-2-git-send-email-avienamo@nvidia.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Paul Cercueil <paul@crapouillou.net>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ezequiel Garcia <ezequiel@collabora.co.uk>, od@zcrc.me, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Aapo Vienamo <avienamo@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>
+Cc: linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 21 August 2018 at 17:21, Paul Cercueil <paul@crapouillou.net> wrote:
-> The JZ4725B is the first JZ SoC version that introduced a 32-bit IMASK
-> register, not the JZ4750.
->
-> Signed-off-by: Paul Cercueil <paul@crapouillou.net>
+On 20/08/18 12:23, Aapo Vienamo wrote:
+> Allow SDHCI drivers to hook code before and after sdhci_request() by
+> making it externally visible.
+> 
+> Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
 
-Thanks, queued for v4.20!
-
-Kind regards
-Uffe
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
->  Documentation/devicetree/bindings/mmc/jz4740.txt | 1 +
->  drivers/mmc/host/jz4740_mmc.c                    | 5 +++--
->  2 files changed, 4 insertions(+), 2 deletions(-)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/jz4740.txt b/Documentation/devicetree/bindings/mmc/jz4740.txt
-> index 7cd8c432d7c8..8a6f87f13114 100644
-> --- a/Documentation/devicetree/bindings/mmc/jz4740.txt
-> +++ b/Documentation/devicetree/bindings/mmc/jz4740.txt
-> @@ -7,6 +7,7 @@ described in mmc.txt.
->  Required properties:
->  - compatible: Should be one of the following:
->    - "ingenic,jz4740-mmc" for the JZ4740
-> +  - "ingenic,jz4725b-mmc" for the JZ4725B
->    - "ingenic,jz4780-mmc" for the JZ4780
->  - reg: Should contain the MMC controller registers location and length.
->  - interrupts: Should contain the interrupt specifier of the MMC controller.
-> diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
-> index 993386c9ea50..0c1efd5100b7 100644
-> --- a/drivers/mmc/host/jz4740_mmc.c
-> +++ b/drivers/mmc/host/jz4740_mmc.c
-> @@ -115,7 +115,7 @@
->
->  enum jz4740_mmc_version {
->         JZ_MMC_JZ4740,
-> -       JZ_MMC_JZ4750,
-> +       JZ_MMC_JZ4725B,
->         JZ_MMC_JZ4780,
->  };
->
-> @@ -176,7 +176,7 @@ struct jz4740_mmc_host {
->  static void jz4740_mmc_write_irq_mask(struct jz4740_mmc_host *host,
->                                       uint32_t val)
+>  drivers/mmc/host/sdhci.c | 3 ++-
+>  drivers/mmc/host/sdhci.h | 1 +
+>  2 files changed, 3 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index da47f7b..1e0c0a6 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1636,7 +1636,7 @@ EXPORT_SYMBOL_GPL(sdhci_set_power);
+>   *                                                                           *
+>  \*****************************************************************************/
+>  
+> -static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+> +void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
 >  {
-> -       if (host->version >= JZ_MMC_JZ4750)
-> +       if (host->version >= JZ_MMC_JZ4725B)
->                 return writel(val, host->base + JZ_REG_MMC_IMASK);
->         else
->                 return writew(val, host->base + JZ_REG_MMC_IMASK);
-> @@ -1012,6 +1012,7 @@ static void jz4740_mmc_free_gpios(struct platform_device *pdev)
->
->  static const struct of_device_id jz4740_mmc_of_match[] = {
->         { .compatible = "ingenic,jz4740-mmc", .data = (void *) JZ_MMC_JZ4740 },
-> +       { .compatible = "ingenic,jz4725b-mmc", .data = (void *)JZ_MMC_JZ4725B },
->         { .compatible = "ingenic,jz4780-mmc", .data = (void *) JZ_MMC_JZ4780 },
->         {},
->  };
-> --
-> 2.11.0
->
+>  	struct sdhci_host *host;
+>  	int present;
+> @@ -1675,6 +1675,7 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>  	mmiowb();
+>  	spin_unlock_irqrestore(&host->lock, flags);
+>  }
+> +EXPORT_SYMBOL_GPL(sdhci_request);
+>  
+>  void sdhci_set_bus_width(struct sdhci_host *host, int width)
+>  {
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index cc963a5..73c4744 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -729,6 +729,7 @@ void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
+>  		     unsigned short vdd);
+>  void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
+>  			   unsigned short vdd);
+> +void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq);
+>  void sdhci_set_bus_width(struct sdhci_host *host, int width);
+>  void sdhci_reset(struct sdhci_host *host, u8 mask);
+>  void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing);
+> 
