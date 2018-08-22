@@ -1,54 +1,33 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v4 0/2] Add ACPI support to IPROC SDHCI
-Date: Wed, 22 Aug 2018 11:48:14 +0200
-Message-ID: <CAPDyKFq1u55-9WCXm_AJOqW=1_1ivg57Mgzp8D=ixAE2SAkpdg@mail.gmail.com>
-References: <1533455572-22012-1-git-send-email-srinath.mannam@broadcom.com>
+Subject: Re: [PATCH 0/2] Add SDHI support to r8a774a1
+Date: Wed, 22 Aug 2018 11:48:18 +0200
+Message-ID: <CAPDyKFq3=gF941BZ9DCcjkg95mDEMMV8k+6856k6t2P=KObaNw@mail.gmail.com>
+References: <1534250074-15890-1-git-send-email-fabrizio.castro@bp.renesas.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1533455572-22012-1-git-send-email-srinath.mannam@broadcom.com>
+In-Reply-To: <1534250074-15890-1-git-send-email-fabrizio.castro@bp.renesas.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Srinath Mannam <srinath.mannam@broadcom.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, vikram.prakash@broadcom.com, BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Fabrizio Castro <fabrizio.castro@bp.renesas.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Simon Horman <horms@verge.net.au>, Geert Uytterhoeven <geert+renesas@glider.be>, Chris Paterson <Chris.Paterson2@renesas.com>, Biju Das <biju.das@bp.renesas.com>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 5 August 2018 at 09:52, Srinath Mannam <srinath.mannam@broadcom.com> wrote:
-> This patch series adds
->   - Feature to get generic device properties in the
->     place of DT properties.
->   - ACPI support to IPROC SDHCI varients
+On 14 August 2018 at 14:34, Fabrizio Castro
+<fabrizio.castro@bp.renesas.com> wrote:
+> Dear All,
 >
-> This patch series is based off v4.18-rc3
+> this series aims at documenting SDHI support for RZ/G2M (a.k.a. R8A774A1).
 >
-> Changes from v3:
->   - Replaced separate device tree and ACPI get match data APIs
->     with single device_get_match_data API.
+> Cheers,
+> Fab
 >
-> Changes from v2:
->   - Added patch "Convert DT properties to generic device properties"
->     given by Adrian Hunter to this patch series because
->     "Add ACPI support to IPROC SDHCI" patch is depends on this.
+> Fabrizio Castro (2):
+>   mmc: renesas_sdhi_internal_dmac: Whitelist r8a774a1
+>   mmc: renesas_sdhi: Add r8a774a1 support
 >
-> Changes from v1:
->   - Removed sdhci_iproc_data array change and add directly
->     into of and acpi id tables.
->   - Add a change to get match data directly.
->   - Removed clock-frequency property read change.
->   - Used sdhci_get_property to get properties.
->   - Verified with patch given by Adrian Hunter
->     mmc: sdhci-pltfm: Convert DT properties to generic device properties
->
-> Adrian Hunter (1):
->   mmc: sdhci-pltfm: Convert DT properties to generic device properties
->
-> Srinath Mannam (1):
->   mmc: host: iproc: Add ACPI support to IPROC SDHCI
->
->  drivers/mmc/host/Kconfig       |  1 +
->  drivers/mmc/host/sdhci-iproc.c | 59 ++++++++++++++++++++++++------------
->  drivers/mmc/host/sdhci-pltfm.c | 68 +++++++++++++++++++++++++-----------------
->  drivers/mmc/host/sdhci-pltfm.h |  7 ++++-
->  4 files changed, 87 insertions(+), 48 deletions(-)
+>  Documentation/devicetree/bindings/mmc/tmio_mmc.txt | 4 +++-
+>  drivers/mmc/host/renesas_sdhi_internal_dmac.c      | 1 +
+>  2 files changed, 4 insertions(+), 1 deletion(-)
 >
 > --
 > 2.7.4
