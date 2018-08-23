@@ -1,47 +1,87 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 4/6] mmc: uniphier-sd: add UniPhier SD/eMMC controller driver
-Date: Thu, 23 Aug 2018 12:43:40 +0200
-Message-ID: <CAPDyKFoW=wuYZw+VV6TncLgtMbFdvJCfYOzL8xg7x2WimqNN2A@mail.gmail.com>
-References: <1534999460-15111-1-git-send-email-yamada.masahiro@socionext.com> <1534999460-15111-5-git-send-email-yamada.masahiro@socionext.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v4 1/3] mmc: sdhci: add adma_table_cnt member to struct
+ sdhci_host
+Date: Thu, 23 Aug 2018 14:27:16 +0300
+Message-ID: <082e4ee7-3b6a-f4a0-0db9-bfa63e05ec16@intel.com>
+References: <20180823180549.78e508db@xhacker.debian>
+ <20180823180700.3432c4db@xhacker.debian>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1534999460-15111-5-git-send-email-yamada.masahiro@socionext.com>
+In-Reply-To: <20180823180700.3432c4db@xhacker.debian>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Masami Hiramatsu <mhiramat@kernel.org>, Jassi Brar <jaswinder.singh@linaro.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Jisheng Zhang <Jisheng.Zhang@synaptics.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-[...]
+On 23/08/18 13:07, Jisheng Zhang wrote:
+> This patch adds adma_table_cnt member to struct sdhci_host to give more
+> flexibility to drivers to control the ADMA table count.
+> 
+> Default value of adma_table_cnt is set to (SDHCI_MAX_SEGS * 2 + 1).
+> 
+> Signed-off-by: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
 
-> +static void uniphier_sd_external_dma_request(struct tmio_mmc_host *host,
-> +                                            struct tmio_mmc_data *pdata)
-> +{
-> +       struct uniphier_sd_priv *priv = uniphier_sd_priv(host);
-> +       struct dma_chan *chan;
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
+> ---
+>  drivers/mmc/host/sdhci.c | 17 +++++++++--------
+>  drivers/mmc/host/sdhci.h |  3 +++
+>  2 files changed, 12 insertions(+), 8 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 1b3fbd9bd5c5..52ccf4644384 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -3322,6 +3322,13 @@ struct sdhci_host *sdhci_alloc_host(struct device *dev,
+>  
+>  	host->sdma_boundary = SDHCI_DEFAULT_BOUNDARY_ARG;
+>  
+> +	/*
+> +	 * The DMA table descriptor count is calculated as the maximum
+> +	 * number of segments times 2, to allow for an alignment
+> +	 * descriptor for each segment, plus 1 for a nop end descriptor.
+> +	 */
+> +	host->adma_table_cnt = SDHCI_MAX_SEGS * 2 + 1;
 > +
-> +       chan = dma_request_chan(mmc_dev(host->mmc), "rx-tx");
-> +       if (IS_ERR(chan)) {
-> +               dev_warn(mmc_dev(host->mmc),
-> +                        "failed to request DMA channel. falling back to PIO\n");
-> +               return; /* just use PIO even for -EPROBE_DEFER */
-> +       }
+>  	return host;
+>  }
+>  
+> @@ -3567,18 +3574,12 @@ int sdhci_setup_host(struct sdhci_host *host)
+>  		dma_addr_t dma;
+>  		void *buf;
+>  
+> -		/*
+> -		 * The DMA descriptor table size is calculated as the maximum
+> -		 * number of segments times 2, to allow for an alignment
+> -		 * descriptor for each segment, plus 1 for a nop end descriptor,
+> -		 * all multipled by the descriptor size.
+> -		 */
+>  		if (host->flags & SDHCI_USE_64_BIT_DMA) {
+> -			host->adma_table_sz = (SDHCI_MAX_SEGS * 2 + 1) *
+> +			host->adma_table_sz = host->adma_table_cnt *
+>  					      SDHCI_ADMA2_64_DESC_SZ;
+>  			host->desc_sz = SDHCI_ADMA2_64_DESC_SZ;
+>  		} else {
+> -			host->adma_table_sz = (SDHCI_MAX_SEGS * 2 + 1) *
+> +			host->adma_table_sz = host->adma_table_cnt *
+>  					      SDHCI_ADMA2_32_DESC_SZ;
+>  			host->desc_sz = SDHCI_ADMA2_32_DESC_SZ;
+>  		}
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index f0bd36ce3817..25bddd21de31 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -563,6 +563,9 @@ struct sdhci_host {
+>  	/* Host SDMA buffer boundary. */
+>  	u32			sdma_boundary;
+>  
+> +	/* Host ADMA table count */
+> +	u32			adma_table_cnt;
 > +
-> +       /* this driver uses a single channel for both RX an TX */
-> +       priv->chan = chan;
-> +       host->chan_rx = chan;
-> +       host->chan_tx = chan;
-> +
-> +       tasklet_init(&host->dma_issue, uniphier_sd_external_dma_issue,
-> +                    (unsigned long)host);
-
-Isn't it time to get rid of tasklets for tmio?
-
-No worries, I don't require that to be changed prior $subject patch,
-however using threaded IRQs is a justified modernization for the tmio
-variants.
-
-[...]
-
-Kind regards
-Uffe
+>  	u64			data_timeout;
+>  
+>  	unsigned long private[0] ____cacheline_aligned;
+> 
