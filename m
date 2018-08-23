@@ -1,139 +1,121 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v4 2/3] mmc: sdhci: introduce adma_write_desc() hook to
- struct sdhci_ops
-Date: Thu, 23 Aug 2018 14:29:49 +0300
-Message-ID: <239c59fc-9081-15fc-295c-345818d01f99@intel.com>
+Subject: Re: [PATCH v4 3/3] mmc: sdhci-of-dwcmshc: solve 128MB DMA boundary
+ limitation
+Date: Thu, 23 Aug 2018 14:51:26 +0300
+Message-ID: <6302a5a4-35cf-3d8f-fcac-a15141fcf1d0@intel.com>
 References: <20180823180549.78e508db@xhacker.debian>
- <20180823180822.7e904f73@xhacker.debian>
+ <20180823180926.444b34b5@xhacker.debian>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180823180822.7e904f73@xhacker.debian>
+In-Reply-To: <20180823180926.444b34b5@xhacker.debian>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
 To: Jisheng Zhang <Jisheng.Zhang@synaptics.com>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 23/08/18 13:08, Jisheng Zhang wrote:
-> Add this hook so that it can be overridden with driver specific
-> implementations. We also let the original sdhci_adma_write_desc()
-> accept &desc so that the function can set its new value. Then export
-> the function so that it could be reused by driver's specific
-> implementations.
+On 23/08/18 13:09, Jisheng Zhang wrote:
+> When using DMA, if the DMA addr spans 128MB boundary, we have to split
+> the DMA transfer into two so that each one doesn't exceed the boundary.
 > 
 > Signed-off-by: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
-
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-
 > ---
->  drivers/mmc/host/sdhci.c | 37 +++++++++++++++++++++++--------------
->  drivers/mmc/host/sdhci.h |  4 ++++
->  2 files changed, 27 insertions(+), 14 deletions(-)
+>  drivers/mmc/host/sdhci-of-dwcmshc.c | 39 +++++++++++++++++++++++++++++
+>  1 file changed, 39 insertions(+)
 > 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 52ccf4644384..eb21d2db7f05 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -554,10 +554,10 @@ static void sdhci_kunmap_atomic(void *buffer, unsigned long *flags)
->  	local_irq_restore(*flags);
->  }
+> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> index 1b7cd144fb01..df0a3aeabe19 100644
+> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
+> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> @@ -8,21 +8,48 @@
+>   */
 >  
-> -static void sdhci_adma_write_desc(struct sdhci_host *host, void *desc,
-> -				  dma_addr_t addr, int len, unsigned cmd)
-> +void sdhci_adma_write_desc(struct sdhci_host *host, void **desc,
-> +			   dma_addr_t addr, int len, unsigned int cmd)
->  {
-> -	struct sdhci_adma2_64_desc *dma_desc = desc;
-> +	struct sdhci_adma2_64_desc *dma_desc = *desc;
+>  #include <linux/clk.h>
+> +#include <linux/mm.h>
+>  #include <linux/module.h>
+>  #include <linux/of.h>
+> +#include <linux/sizes.h>
 >  
->  	/* 32-bit and 64-bit descriptors have these members in same position */
->  	dma_desc->cmd = cpu_to_le16(cmd);
-> @@ -566,6 +566,19 @@ static void sdhci_adma_write_desc(struct sdhci_host *host, void *desc,
+>  #include "sdhci-pltfm.h"
 >  
->  	if (host->flags & SDHCI_USE_64_BIT_DMA)
->  		dma_desc->addr_hi = cpu_to_le32((u64)addr >> 32);
+> +#define BOUNDARY_OK(addr, len) \
+> +	((addr | (SZ_128M - 1)) == ((addr + len - 1) | (SZ_128M - 1)))
 > +
-> +	*desc += host->desc_sz;
-> +}
-> +EXPORT_SYMBOL_GPL(sdhci_adma_write_desc);
-> +
-> +static inline void __sdhci_adma_write_desc(struct sdhci_host *host,
-> +					   void **desc, dma_addr_t addr,
-> +					   int len, unsigned int cmd)
-> +{
-> +	if (host->ops->adma_write_desc)
-> +		host->ops->adma_write_desc(host, desc, addr, len, cmd);
-> +
-> +	sdhci_adma_write_desc(host, desc, addr, len, cmd);
->  }
->  
->  static void sdhci_adma_mark_end(void *desc)
-> @@ -618,28 +631,24 @@ static void sdhci_adma_table_pre(struct sdhci_host *host,
->  			}
->  
->  			/* tran, valid */
-> -			sdhci_adma_write_desc(host, desc, align_addr, offset,
-> -					      ADMA2_TRAN_VALID);
-> +			__sdhci_adma_write_desc(host, &desc, align_addr,
-> +						offset, ADMA2_TRAN_VALID);
->  
->  			BUG_ON(offset > 65536);
->  
->  			align += SDHCI_ADMA2_ALIGN;
->  			align_addr += SDHCI_ADMA2_ALIGN;
->  
-> -			desc += host->desc_sz;
-> -
->  			addr += offset;
->  			len -= offset;
->  		}
->  
->  		BUG_ON(len > 65536);
->  
-> -		if (len) {
-> -			/* tran, valid */
-> -			sdhci_adma_write_desc(host, desc, addr, len,
-> -					      ADMA2_TRAN_VALID);
-> -			desc += host->desc_sz;
-> -		}
-> +		/* tran, valid */
-> +		if (len)
-> +			__sdhci_adma_write_desc(host, &desc, addr, len,
-> +						ADMA2_TRAN_VALID);
->  
->  		/*
->  		 * If this triggers then we have a calculation bug
-> @@ -656,7 +665,7 @@ static void sdhci_adma_table_pre(struct sdhci_host *host,
->  		}
->  	} else {
->  		/* Add a terminating entry - nop, end, valid */
-> -		sdhci_adma_write_desc(host, desc, 0, 0, ADMA2_NOP_END_VALID);
-> +		__sdhci_adma_write_desc(host, &desc, 0, 0, ADMA2_NOP_END_VALID);
->  	}
->  }
->  
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 25bddd21de31..2115416f973a 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -606,6 +606,8 @@ struct sdhci_ops {
->  	void    (*adma_workaround)(struct sdhci_host *host, u32 intmask);
->  	void    (*card_event)(struct sdhci_host *host);
->  	void	(*voltage_switch)(struct sdhci_host *host);
-> +	void	(*adma_write_desc)(struct sdhci_host *host, void **desc,
-> +				   dma_addr_t addr, int len, unsigned int cmd);
+>  struct dwcmshc_priv {
+>  	struct clk	*bus_clk;
 >  };
 >  
->  #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
-> @@ -736,6 +738,8 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
->  int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
->  				      struct mmc_ios *ios);
->  void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable);
-> +void sdhci_adma_write_desc(struct sdhci_host *host, void **desc,
-> +			   dma_addr_t addr, int len, unsigned int cmd);
+> +/*
+> + * If DMA addr spans 128MB boundary, we split the DMA transfer into two
+> + * so that the DMA transfer doesn't exceed the boundary.
+> + */
+> +static void dwcmshc_adma_write_desc(struct sdhci_host *host, void **desc,
+> +				    dma_addr_t addr, int len, unsigned int cmd)
+> +{
+> +	int tmplen, offset;
+> +
+> +	if (likely(!len || BOUNDARY_OK(addr, len)))
+> +		sdhci_adma_write_desc(host, desc, addr, len, cmd);
+
+Doesn't this need a return? i.e.
+
+		return;
+	}
+
+> +
+> +	offset = addr & (SZ_128M - 1);
+> +	tmplen = SZ_128M - offset;
+> +	sdhci_adma_write_desc(host, desc, addr, tmplen, cmd);
+> +
+> +	addr += tmplen;
+> +	len -= tmplen;
+> +	sdhci_adma_write_desc(host, desc, addr, len, cmd);
+> +}
+> +
+>  static const struct sdhci_ops sdhci_dwcmshc_ops = {
+>  	.set_clock		= sdhci_set_clock,
+>  	.set_bus_width		= sdhci_set_bus_width,
+>  	.set_uhs_signaling	= sdhci_set_uhs_signaling,
+>  	.get_max_clock		= sdhci_pltfm_clk_get_max_clock,
+>  	.reset			= sdhci_reset,
+> +	.adma_write_desc	= dwcmshc_adma_write_desc,
+>  };
 >  
->  #ifdef CONFIG_PM
->  int sdhci_suspend_host(struct sdhci_host *host);
+>  static const struct sdhci_pltfm_data sdhci_dwcmshc_pdata = {
+> @@ -36,12 +63,24 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>  	struct sdhci_host *host;
+>  	struct dwcmshc_priv *priv;
+>  	int err;
+> +	u32 extra;
+>  
+>  	host = sdhci_pltfm_init(pdev, &sdhci_dwcmshc_pdata,
+>  				sizeof(struct dwcmshc_priv));
+>  	if (IS_ERR(host))
+>  		return PTR_ERR(host);
+>  
+> +	/*
+> +	 * The DMA table descriptor count is calculated as the maximum
+> +	 * number of segments times 2, to allow for an alignment
+> +	 * descriptor for each segment, plus 1 for a nop end descriptor,
+> +	 * plus extra number for cross 128M boundary handling.
+> +	 */
+> +	extra = DIV_ROUND_UP(totalram_pages, SZ_128M / PAGE_SIZE);
+
+You are assuming here that totalram_pages gives you the highest physical
+page number.  Is that true?
+
+> +	if (extra > SDHCI_MAX_SEGS)
+> +		extra = SDHCI_MAX_SEGS;
+> +	host->adma_table_cnt = SDHCI_MAX_SEGS * 2 + 1 + extra;
+
+That should be:
+
+	host->adma_table_cnt += extra;
+
+> +
+>  	pltfm_host = sdhci_priv(host);
+>  	priv = sdhci_pltfm_priv(pltfm_host);
+>  
 > 
