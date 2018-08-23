@@ -1,84 +1,58 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 2/2] mmc: tegra: Implement periodic pad calibration
-Date: Wed, 22 Aug 2018 13:56:57 +0300
-Message-ID: <3bdbaef6-522d-92ea-c0d1-1aea9fd069d9@intel.com>
-References: <1534757013-4524-1-git-send-email-avienamo@nvidia.com>
- <1534757013-4524-3-git-send-email-avienamo@nvidia.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Subject: [PATCH v3 1/6] mmc: tmio: replace tmio_mmc_clk_stop() calls with tmio_mmc_set_clock()
+Date: Thu, 23 Aug 2018 13:44:15 +0900
+Message-ID: <1534999460-15111-2-git-send-email-yamada.masahiro@socionext.com>
+References: <1534999460-15111-1-git-send-email-yamada.masahiro@socionext.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1534757013-4524-3-git-send-email-avienamo@nvidia.com>
-Content-Language: en-US
+In-Reply-To: <1534999460-15111-1-git-send-email-yamada.masahiro@socionext.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Aapo Vienamo <avienamo@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>
-Cc: linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-renesas-soc@vger.kernel.org, Masami Hiramatsu <mhiramat@kernel.org>, Jassi Brar <jaswinder.singh@linaro.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 20/08/18 12:23, Aapo Vienamo wrote:
-> Rerun the pad calibration procedure before sdhci_request() if
-> the 100 ms recalibration interval has been exceeded.
-> 
-> Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
+tmio_mmc_clk_stop(host) is equivalent to tmio_mmc_set_clock(host, 0).
+This replacement is needed for the next commit.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
 
-> ---
->  drivers/mmc/host/sdhci-tegra.c | 22 ++++++++++++++++++++++
->  1 file changed, 22 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index 94624ec..ef18a0c 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -30,6 +30,7 @@
->  #include <linux/mmc/mmc.h>
->  #include <linux/mmc/slot-gpio.h>
->  #include <linux/gpio/consumer.h>
-> +#include <linux/ktime.h>
->  
->  #include "sdhci-pltfm.h"
->  
-> @@ -122,6 +123,7 @@ struct sdhci_tegra {
->  	struct pinctrl_state *pinctrl_state_1v8;
->  
->  	struct sdhci_tegra_autocal_offsets autocal_offsets;
-> +	ktime_t last_calib;
->  
->  	u32 default_tap;
->  	u32 default_trim;
-> @@ -533,6 +535,22 @@ static void tegra_sdhci_parse_pad_autocal_dt(struct sdhci_host *host)
->  		autocal->pull_down_hs400 = autocal->pull_down_1v8;
->  }
->  
-> +static void tegra_sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
-> +{
-> +	struct sdhci_host *host = mmc_priv(mmc);
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
-> +	ktime_t since_calib = ktime_sub(ktime_get(), tegra_host->last_calib);
-> +
-> +	/* 100 ms calibration interval is specified in the TRM */
-> +	if (ktime_to_ms(since_calib) > 100) {
-> +		tegra_sdhci_pad_autocalib(host);
-> +		tegra_host->last_calib = ktime_get();
-> +	}
-> +
-> +	sdhci_request(mmc, mrq);
-> +}
-> +
->  static void tegra_sdhci_parse_tap_and_trim(struct sdhci_host *host)
->  {
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> @@ -1014,6 +1032,10 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
->  				sdhci_tegra_start_signal_voltage_switch;
->  	}
->  
-> +	/* Hook to periodically rerun pad calibration */
-> +	if (soc_data->nvquirks & NVQUIRK_HAS_PADCALIB)
-> +		host->mmc_host_ops.request = tegra_sdhci_request;
-> +
->  	host->mmc_host_ops.hs400_enhanced_strobe =
->  			tegra_sdhci_hs400_enhanced_strobe;
->  
-> 
+Changes in v3: None
+Changes in v2: None
+
+ drivers/mmc/host/tmio_mmc_core.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+index 261b4d6..5717ffa 100644
+--- a/drivers/mmc/host/tmio_mmc_core.c
++++ b/drivers/mmc/host/tmio_mmc_core.c
+@@ -1043,7 +1043,7 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	switch (ios->power_mode) {
+ 	case MMC_POWER_OFF:
+ 		tmio_mmc_power_off(host);
+-		tmio_mmc_clk_stop(host);
++		tmio_mmc_set_clock(host, 0);
+ 		break;
+ 	case MMC_POWER_UP:
+ 		tmio_mmc_power_on(host, ios->vdd);
+@@ -1310,7 +1310,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host)
+ 	if (pdata->flags & TMIO_MMC_SDIO_IRQ)
+ 		_host->sdio_irq_mask = TMIO_SDIO_MASK_ALL;
+ 
+-	tmio_mmc_clk_stop(_host);
++	tmio_mmc_set_clock(_host, 0);
+ 	tmio_mmc_reset(_host);
+ 
+ 	_host->sdcard_irq_mask = sd_ctrl_read16_and_16_as_32(_host, CTL_IRQ_MASK);
+@@ -1394,7 +1394,7 @@ int tmio_mmc_host_runtime_suspend(struct device *dev)
+ 	tmio_mmc_disable_mmc_irqs(host, TMIO_MASK_ALL);
+ 
+ 	if (host->clk_cache)
+-		tmio_mmc_clk_stop(host);
++		tmio_mmc_set_clock(host, 0);
+ 
+ 	tmio_mmc_clk_disable(host);
+ 
+-- 
+2.7.4
