@@ -1,7 +1,7 @@
 From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: [PATCH v3 5/6] mmc: renesas_sdhi: merge clk_{start,stop} functions to set_clock
-Date: Thu, 23 Aug 2018 13:44:19 +0900
-Message-ID: <1534999460-15111-6-git-send-email-yamada.masahiro@socionext.com>
+Subject: [PATCH v3 6/6] mmc: tmio: refactor CLK_CTL bit calculation
+Date: Thu, 23 Aug 2018 13:44:20 +0900
+Message-ID: <1534999460-15111-7-git-send-email-yamada.masahiro@socionext.com>
 References: <1534999460-15111-1-git-send-email-yamada.masahiro@socionext.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1534999460-15111-1-git-send-email-yamada.masahiro@socionext.com>
@@ -10,8 +10,15 @@ To: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org
 Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-renesas-soc@vger.kernel.org, Masami Hiramatsu <mhiramat@kernel.org>, Jassi Brar <jaswinder.singh@linaro.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-renesas_sdhi_clk_start() and renesas_sdhi_clk_stop() are now only
-called from renesas_sdhi_set_clock().  Merge them.
+  for (clk = 0x80000080; new_clock >= (clock << 1); clk >>= 1)
+          clock <<= 1;
+
+... is too tricky, hence I replaced with
+
+  roundup_pow_of_two(divisor) >> 2
+
+'(clk >> 22) & 0x1' is the bit test for the 1/1 divisor, but
+it is not clear.  'divisor <= 1' is easier to understand.
 
 Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 ---
@@ -19,74 +26,45 @@ Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 Changes in v3: None
 Changes in v2: None
 
- drivers/mmc/host/renesas_sdhi_core.c | 38 ++++++++++++------------------------
- 1 file changed, 12 insertions(+), 26 deletions(-)
+ drivers/mmc/host/tmio_mmc.c | 18 +++++++++++++-----
+ 1 file changed, 13 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index cb6e889..0e88737 100644
---- a/drivers/mmc/host/renesas_sdhi_core.c
-+++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -155,35 +155,17 @@ static unsigned int renesas_sdhi_clk_update(struct tmio_mmc_host *host,
- 	return ret == 0 ? best_freq : clk_get_rate(priv->clk);
- }
- 
--static void renesas_sdhi_clk_start(struct tmio_mmc_host *host)
-+static void renesas_sdhi_set_clock(struct tmio_mmc_host *host,
-+				   unsigned int new_clock)
+diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
+index b031a77..e04c322 100644
+--- a/drivers/mmc/host/tmio_mmc.c
++++ b/drivers/mmc/host/tmio_mmc.c
+@@ -48,19 +48,27 @@ static void tmio_mmc_clk_stop(struct tmio_mmc_host *host)
+ static void tmio_mmc_set_clock(struct tmio_mmc_host *host,
+ 			       unsigned int new_clock)
  {
--	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, CLK_CTL_SCLKEN |
--		sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
--
--	/* HW engineers overrode docs: no sleep needed on R-Car2+ */
--	if (!(host->pdata->flags & TMIO_MMC_MIN_RCAR2))
--		usleep_range(10000, 11000);
--}
-+	u32 clk = 0, clock;
- 
--static void renesas_sdhi_clk_stop(struct tmio_mmc_host *host)
--{
- 	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, ~CLK_CTL_SCLKEN &
- 		sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
- 
--	/* HW engineers overrode docs: no sleep needed on R-Car2+ */
--	if (!(host->pdata->flags & TMIO_MMC_MIN_RCAR2))
--		usleep_range(10000, 11000);
--}
--
--static void renesas_sdhi_set_clock(struct tmio_mmc_host *host,
--				   unsigned int new_clock)
--{
 -	u32 clk = 0, clock;
-+	if (new_clock == 0)
-+		goto out;
++	unsigned int clock, divisor;
++	u32 clk = 0;
++	int clk_sel;
  
--	if (new_clock == 0) {
--		renesas_sdhi_clk_stop(host);
--		return;
--	}
- 	/*
- 	 * Both HS400 and HS200/SD104 set 200MHz, but some devices need to
- 	 * set 400MHz to distinguish the CPG settings in HS400.
-@@ -206,13 +188,17 @@ static void renesas_sdhi_set_clock(struct tmio_mmc_host *host,
- 			clk &= ~0xff;
+ 	if (new_clock == 0) {
+ 		tmio_mmc_clk_stop(host);
+ 		return;
  	}
  
--	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, ~CLK_CTL_SCLKEN &
--			sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
- 	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, clk & CLK_CTL_DIV_MASK);
- 	if (!(host->pdata->flags & TMIO_MMC_MIN_RCAR2))
- 		usleep_range(10000, 11000);
+-	clock = host->mmc->f_min;
++	divisor = host->pdata->hclk / new_clock;
  
--	renesas_sdhi_clk_start(host);
-+	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, CLK_CTL_SCLKEN |
-+		sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
-+
-+out:
-+	/* HW engineers overrode docs: no sleep needed on R-Car2+ */
-+	if (!(host->pdata->flags & TMIO_MMC_MIN_RCAR2))
-+		usleep_range(10000, 11000);
- }
+-	for (clk = 0x80000080; new_clock >= (clock << 1); clk >>= 1)
+-		clock <<= 1;
++	if (divisor <= 1) {
++		clk_sel = 1;
++		clk = 0;
++	} else {
++		clk_sel = 0;
++		/* bit7 set: 1/512, ... bit0 set:1/4, all bits clear: 1/2 */
++		clk = roundup_pow_of_two(divisor) >> 2;
++	}
  
- static void renesas_sdhi_clk_disable(struct tmio_mmc_host *host)
+-	host->pdata->set_clk_div(host->pdev, (clk >> 22) & 1);
++	host->pdata->set_clk_div(host->pdev, clk_sel);
+ 
+ 	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, ~CLK_CTL_SCLKEN &
+ 			sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
 -- 
 2.7.4
