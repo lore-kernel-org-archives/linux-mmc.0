@@ -1,121 +1,73 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v4 3/3] mmc: sdhci-of-dwcmshc: solve 128MB DMA boundary
- limitation
-Date: Thu, 23 Aug 2018 14:51:26 +0300
-Message-ID: <6302a5a4-35cf-3d8f-fcac-a15141fcf1d0@intel.com>
-References: <20180823180549.78e508db@xhacker.debian>
- <20180823180926.444b34b5@xhacker.debian>
+Subject: Re: [PATCH V5 05/10] mmc: sdhci: Add 32-bit block count support for
+ v4 mode
+Date: Thu, 23 Aug 2018 15:48:16 +0300
+Message-ID: <22b4b7de-01a4-2f40-6e77-885473c409ac@intel.com>
+References: <1534406064-10065-1-git-send-email-zhang.chunyan@linaro.org>
+ <1534406064-10065-6-git-send-email-zhang.chunyan@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180823180926.444b34b5@xhacker.debian>
+In-Reply-To: <1534406064-10065-6-git-send-email-zhang.chunyan@linaro.org>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jisheng Zhang <Jisheng.Zhang@synaptics.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@unisoc.com>, Jason Wu <jason.wu@unisoc.com>, Chunyan Zhang <zhang.lyra@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 23/08/18 13:09, Jisheng Zhang wrote:
-> When using DMA, if the DMA addr spans 128MB boundary, we have to split
-> the DMA transfer into two so that each one doesn't exceed the boundary.
+On 16/08/18 10:54, Chunyan Zhang wrote:
+> Host Controller Version 4.10 re-defines SDMA System Address register
+> as 32-bit Block Count for v4 mode, and SDMA uses ADMA System
+> Address register (05Fh-058h) instead if v4 mode is enabled. Also
+> when using 32-bit block count, 16-bit block count register need
+> to be set to zero.
 > 
-> Signed-off-by: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
 > ---
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 39 +++++++++++++++++++++++++++++
->  1 file changed, 39 insertions(+)
+>  drivers/mmc/host/sdhci.c | 14 +++++++++++++-
+>  drivers/mmc/host/sdhci.h |  1 +
+>  2 files changed, 14 insertions(+), 1 deletion(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index 1b7cd144fb01..df0a3aeabe19 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -8,21 +8,48 @@
->   */
->  
->  #include <linux/clk.h>
-> +#include <linux/mm.h>
->  #include <linux/module.h>
->  #include <linux/of.h>
-> +#include <linux/sizes.h>
->  
->  #include "sdhci-pltfm.h"
->  
-> +#define BOUNDARY_OK(addr, len) \
-> +	((addr | (SZ_128M - 1)) == ((addr + len - 1) | (SZ_128M - 1)))
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 1dea1c4..b3328ee 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1073,7 +1073,19 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+>  	/* Set the DMA boundary value and block size */
+>  	sdhci_writew(host, SDHCI_MAKE_BLKSZ(host->sdma_boundary, data->blksz),
+>  		     SDHCI_BLOCK_SIZE);
+> -	sdhci_writew(host, data->blocks, SDHCI_BLOCK_COUNT);
 > +
->  struct dwcmshc_priv {
->  	struct clk	*bus_clk;
->  };
->  
-> +/*
-> + * If DMA addr spans 128MB boundary, we split the DMA transfer into two
-> + * so that the DMA transfer doesn't exceed the boundary.
-> + */
-> +static void dwcmshc_adma_write_desc(struct sdhci_host *host, void **desc,
-> +				    dma_addr_t addr, int len, unsigned int cmd)
-> +{
-> +	int tmplen, offset;
-> +
-> +	if (likely(!len || BOUNDARY_OK(addr, len)))
-> +		sdhci_adma_write_desc(host, desc, addr, len, cmd);
-
-Doesn't this need a return? i.e.
-
-		return;
-	}
-
-> +
-> +	offset = addr & (SZ_128M - 1);
-> +	tmplen = SZ_128M - offset;
-> +	sdhci_adma_write_desc(host, desc, addr, tmplen, cmd);
-> +
-> +	addr += tmplen;
-> +	len -= tmplen;
-> +	sdhci_adma_write_desc(host, desc, addr, len, cmd);
-> +}
-> +
->  static const struct sdhci_ops sdhci_dwcmshc_ops = {
->  	.set_clock		= sdhci_set_clock,
->  	.set_bus_width		= sdhci_set_bus_width,
->  	.set_uhs_signaling	= sdhci_set_uhs_signaling,
->  	.get_max_clock		= sdhci_pltfm_clk_get_max_clock,
->  	.reset			= sdhci_reset,
-> +	.adma_write_desc	= dwcmshc_adma_write_desc,
->  };
->  
->  static const struct sdhci_pltfm_data sdhci_dwcmshc_pdata = {
-> @@ -36,12 +63,24 @@ static int dwcmshc_probe(struct platform_device *pdev)
->  	struct sdhci_host *host;
->  	struct dwcmshc_priv *priv;
->  	int err;
-> +	u32 extra;
->  
->  	host = sdhci_pltfm_init(pdev, &sdhci_dwcmshc_pdata,
->  				sizeof(struct dwcmshc_priv));
->  	if (IS_ERR(host))
->  		return PTR_ERR(host);
->  
 > +	/*
-> +	 * The DMA table descriptor count is calculated as the maximum
-> +	 * number of segments times 2, to allow for an alignment
-> +	 * descriptor for each segment, plus 1 for a nop end descriptor,
-> +	 * plus extra number for cross 128M boundary handling.
+> +	 * For Version 4.10 onwards, if v4 mode is enabled, 16-bit Block Count
+> +	 * register need to be set to zero, 32-bit Block Count register would
+> +	 * be selected.
 > +	 */
-> +	extra = DIV_ROUND_UP(totalram_pages, SZ_128M / PAGE_SIZE);
+> +	if (host->version >= SDHCI_SPEC_410 && host->v4_mode) {
+> +		if (sdhci_readw(host, SDHCI_BLOCK_COUNT))
+> +			sdhci_writew(host, 0, SDHCI_BLOCK_COUNT);
+> +		sdhci_writew(host, data->blocks, SDHCI_32BIT_BLK_CNT);
 
-You are assuming here that totalram_pages gives you the highest physical
-page number.  Is that true?
+Since it causes problems for auto-cmd23, use of 32-bit block count needs to
+be optional.  I suggest adding a quirk for this.
 
-> +	if (extra > SDHCI_MAX_SEGS)
-> +		extra = SDHCI_MAX_SEGS;
-> +	host->adma_table_cnt = SDHCI_MAX_SEGS * 2 + 1 + extra;
-
-That should be:
-
-	host->adma_table_cnt += extra;
-
-> +
->  	pltfm_host = sdhci_priv(host);
->  	priv = sdhci_pltfm_priv(pltfm_host);
+> +	} else {
+> +		sdhci_writew(host, data->blocks, SDHCI_BLOCK_COUNT);
+> +	}
+>  }
 >  
+>  static inline bool sdhci_auto_cmd12(struct sdhci_host *host,
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index f95eda2..d34971ac 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -28,6 +28,7 @@
+>  
+>  #define SDHCI_DMA_ADDRESS	0x00
+>  #define SDHCI_ARGUMENT2		SDHCI_DMA_ADDRESS
+> +#define SDHCI_32BIT_BLK_CNT	SDHCI_DMA_ADDRESS
+>  
+>  #define SDHCI_BLOCK_SIZE	0x04
+>  #define  SDHCI_MAKE_BLKSZ(dma, blksz) (((dma & 0x7) << 12) | (blksz & 0xFFF))
 > 
