@@ -1,94 +1,63 @@
-From: Thierry Reding <thierry.reding@gmail.com>
-Subject: Re: [PATCH v2 0/8] Tegra SDHCI support HS400 on Tegra210 and Tegra186
-Date: Fri, 24 Aug 2018 11:11:03 +0200
-Message-ID: <20180824091103.GA9100@ulmo>
-References: <1533924845-1466-1-git-send-email-avienamo@nvidia.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="RnlQjJ0d97Da+TV1"
+From: Chunyan Zhang <zhang.chunyan@linaro.org>
+Subject: [PATCH V6 0/9] mmc: add support for sdhci 4.0
+Date: Fri, 24 Aug 2018 17:20:19 +0800
+Message-ID: <1535102428-20332-1-git-send-email-zhang.chunyan@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1533924845-1466-1-git-send-email-avienamo@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: Aapo Vienamo <avienamo@nvidia.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Jonathan Hunter <jonathanh@nvidia.com>, Mikko Perttunen <mperttunen@nvidia.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@unisoc.com>, Jason Wu <jason.wu@unisoc.com>, Chunyan Zhang <chunyan.zhang@unisoc.com>, Chunyan Zhang <zhang.lyra@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
+>From the SD host controller version 4.0 on, SDHCI implementation either
+is version 3 compatible or version 4 mode. This patch-set covers those
+changes which are common for SDHCI 4.0 version, regardless of whether
+they are used with SD or eMMC storage devices.
 
---RnlQjJ0d97Da+TV1
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+This patchset also added a new sdhci driver for Spreadtrum's controller
+which supports v4.0 mode.
 
-On Fri, Aug 10, 2018 at 09:13:57PM +0300, Aapo Vienamo wrote:
-> Hi all,
-> This series implements support for HS400 signaling on Tegra210 and
-> Tegra186. This includes programming the DQS trimmer values, implementing
-> enhanced strobe and HS400 delay line calibration.
->=20
-> This series depends on the "Tegra SDHCI add support for HS200 and UHS
-> signaling" series.
->=20
-> Changelog:
-> v2:
-> 	- Document in dt-bindings which controllers support HS400
-> 	- Use val instead of reg in tegra_sdhci_set_dqs_trim()
-> 	- Change "dt" to "DT" in "mmc: tegra: Parse and program DQS trim
-> 	  value" commit message
-> 	- Add spaces around << in tegra_sdhci_set_dqs_trim()
-> 	- Make the "mmc: tegra: Implement HS400 enhanced strobe" commit
-> 	  message more detailed
-> 	- Remove a debug print from tegra_sdhci_hs400_enhanced_strobe()
-> 	- Add blank lines around if-else-block in
-> 	  tegra_sdhci_hs400_enhanced_strobe()
-> 	- Use val instead of reg in tegra_sdhci_hs400_enhanced_strobe()
-> 	- Make commit message of "mmc: tegra: Implement HS400 delay line
-> 	  calibration" more detailed
->=20
-> Aapo Vienamo (8):
->   dt-bindings: mmc: Add DQS trim value to Tegra SDHCI
->   mmc: tegra: Parse and program DQS trim value
->   mmc: tegra: Implement HS400 enhanced strobe
->   mmc: tegra: Implement HS400 delay line calibration
->   arm64: dts: tegra186: Add SDMMC4 DQS trim value
->   arm64: dts: tegra210: Add SDMMC4 DQS trim value
->   arm64: dts: tegra186: Enable HS400
->   arm64: dts: tegra210: Enable HS400
->=20
->  .../bindings/mmc/nvidia,tegra20-sdhci.txt          |  4 ++
->  arch/arm64/boot/dts/nvidia/tegra186.dtsi           |  2 +
->  arch/arm64/boot/dts/nvidia/tegra210.dtsi           |  2 +
->  drivers/mmc/host/sdhci-tegra.c                     | 84 ++++++++++++++++=
-+++++-
->  4 files changed, 89 insertions(+), 3 deletions(-)
+This patchset has been tested on Spreadtrum's mobile phone, emmc can be
+initialized, mounted, read and written, with these changes for common
+sdhci framework and sdhci-sprd driver.
 
-Ulf, Adrian,
+This patchset is based on the unmerged patch: https://lkml.org/lkml/2018/8/20/140
 
-Aapo just reminded me of this small series that also has a dependency on
-the UHS signalling series posted earlier. I think it's easiest if I just
-stash this on top of the existing branch that I have and send this along
-with the rest as part of a pull request early after v4.19-rc1.
+Changes from V5:
+- Added SDHCI_QUIRK2_BROKEN_32BIT_BLK_CNT;
+- Removed sdhci_enable_cmd23();
+- Added setting SDHCI_ARGUMENT2 for CMD23 in v4_mode;
+- Clear SDHCI_CMD23_ENABLE when not using CMD23;
+- Moved disabling auto-CMD23 to sprd sdhci driver;
+- Added sdhci_sprd_request() function to hook to mmc_host_ops.request.
 
-Thierry
 
---RnlQjJ0d97Da+TV1
-Content-Type: application/pgp-signature; name="signature.asc"
+Previous patch series:
+v5: https://lkml.org/lkml/2018/8/16/122
+v4: https://lkml.org/lkml/2018/7/23/269
+v3: https://lkml.org/lkml/2018/7/8/239
+v2: https://lkml.org/lkml/2018/6/14/936
+v1: https://lkml.org/lkml/2018/6/8/108
 
------BEGIN PGP SIGNATURE-----
+Chunyan Zhang (9):
+  mmc: sdhci: Add version V4 definition
+  mmc: sdhci: Add sd host v4 mode
+  mmc: sdhci: Change SDMA address register for v4 mode
+  mmc: sdhci: Add ADMA2 64-bit addressing support for V4 mode
+  mmc: sdhci: Add 32-bit block count support for v4 mode
+  mmc: sdhci: Add Auto CMD Auto Select support
+  mmc: sdhci: SDMA may use Auto-CMD23 in v4 mode
+  mmc: sdhci-sprd: Add Spreadtrum's initial host controller
+  dt-bindings: sdhci-sprd: Add bindings for the sdhci-sprd controller
 
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAlt/y6QACgkQ3SOs138+
-s6Geow/8CNBjRVUWrjNn8USykHyGclhdyCpr/77F6uuL3MmDMAVZGt1U7o0RTDYb
-T55DEJ+4e1uoaWjSbd+DnPQ+IHKON+sSykG0rrGJvQxnEWEYZjnzfKkmfpnQZPna
-R13JQlTVtRCa4/QYBJUMu1Do9e4kCgrA5Kd8h1cRTrAerQkJXWX6mELxnYx8Bk6R
-zYefZ7pPxjQCoRLD3sMiLLsd+hxdLKsuIda5ztEySErZWQYZzhHGgltvDPkfeZ//
-N9ZmGHyLSpwsGj2WL13SzRCbgqUt8s6ZtgtEz4W3WqNq+Dw1Gid0WtdUeVvzQHH8
-eK6F2keTobhlMEqQCgyWd3HGiugnZCFaEa2nAa8lcGXNhxKWLVxDfJ7QGtSeATVj
-5zL+sm7obWV+juGM3U/IHW/u4wn8N+BgAT1sm0f91rDTMcOQyOIh8gBhX/vNm60h
-OJaoZKVv0NnDK9E3VJ+Iw3a4b1DODnTl8AX5wpBYMk+QdG8OiLJjGPLGwBFN1vtg
-xnzRej7hSSkQOaFB8GZGppXibn63qZ19gLM1j1GIJElQGVVUtBTmXKcdZ2WwwIAB
-fmSAj0yItCi6UacuoVzTkdaYb60F86wDF9ohUlehD1fLJOFWpxZzfq6sZQpJyMie
-x7OGxoHF6l84SSz6pUVXNn4LByqu4n6Nweh3FcrpWEvjJEiNbdc=
-=gC/o
------END PGP SIGNATURE-----
+ .../devicetree/bindings/mmc/sdhci-sprd.txt         |  41 ++
+ drivers/mmc/host/Kconfig                           |  13 +
+ drivers/mmc/host/Makefile                          |   1 +
+ drivers/mmc/host/sdhci-sprd.c                      | 485 +++++++++++++++++++++
+ drivers/mmc/host/sdhci.c                           | 225 ++++++++--
+ drivers/mmc/host/sdhci.h                           |  23 +-
+ 6 files changed, 738 insertions(+), 50 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-sprd.txt
+ create mode 100644 drivers/mmc/host/sdhci-sprd.c
 
---RnlQjJ0d97Da+TV1--
+-- 
+2.7.4
