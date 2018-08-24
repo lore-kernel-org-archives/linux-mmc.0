@@ -1,182 +1,94 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V5 07/10] mmc: sdhci: Add Auto CMD Auto Select support
-Date: Fri, 24 Aug 2018 09:55:41 +0300
-Message-ID: <c1e0a508-c47b-c02f-7df9-d3e928526e86@intel.com>
-References: <1534406064-10065-1-git-send-email-zhang.chunyan@linaro.org>
- <1534406064-10065-8-git-send-email-zhang.chunyan@linaro.org>
- <0dc112ca-1c01-d8ae-c6f0-80492264f5a4@intel.com>
- <CAAfSe-uZ3ghR+8dZ7CD03UnGX2Uf1fv=-5s656ZkybcU8LWzJQ@mail.gmail.com>
+From: Thierry Reding <thierry.reding@gmail.com>
+Subject: Re: [PATCH v2 0/8] Tegra SDHCI support HS400 on Tegra210 and Tegra186
+Date: Fri, 24 Aug 2018 11:11:03 +0200
+Message-ID: <20180824091103.GA9100@ulmo>
+References: <1533924845-1466-1-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="RnlQjJ0d97Da+TV1"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAAfSe-uZ3ghR+8dZ7CD03UnGX2Uf1fv=-5s656ZkybcU8LWzJQ@mail.gmail.com>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <1533924845-1466-1-git-send-email-avienamo@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Chunyan Zhang <zhang.lyra@gmail.com>
-Cc: Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@unisoc.com>, Jason Wu <jason.wu@unisoc.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Aapo Vienamo <avienamo@nvidia.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Jonathan Hunter <jonathanh@nvidia.com>, Mikko Perttunen <mperttunen@nvidia.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 24/08/18 09:52, Chunyan Zhang wrote:
-> On 23 August 2018 at 20:55, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> On 16/08/18 10:54, Chunyan Zhang wrote:
->>> As SD Host Controller Specification v4.10 documents:
->>> Host Controller Version 4.10 defines this "Auto CMD Auto Select" mode.
->>> Selection of Auto CMD depends on setting of CMD23 Enable in the Host
->>> Control 2 register which indicates whether card supports CMD23. If CMD23
->>> Enable =1, Auto CMD23 is used and if CMD23 Enable =0, Auto CMD12 is
->>> used. In case of Version 4.10 or later, use of Auto CMD Auto Select is
->>> recommended rather than use of Auto CMD12 Enable or Auto CMD23
->>> Enable.
->>>
->>> This patch add this new mode support.
->>>
->>> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
->>> ---
->>>  drivers/mmc/host/sdhci.c | 67 ++++++++++++++++++++++++++++++++++++++++--------
->>>  drivers/mmc/host/sdhci.h |  2 ++
->>>  2 files changed, 58 insertions(+), 11 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>> index a72ad0d..06c2ae9 100644
->>> --- a/drivers/mmc/host/sdhci.c
->>> +++ b/drivers/mmc/host/sdhci.c
->>> @@ -312,6 +312,23 @@ static void sdhci_config_dma(struct sdhci_host *host)
->>>       sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
->>>  }
->>>
->>> +static void sdhci_enable_cmd23(struct sdhci_host *host)
->>> +{
->>> +     u16 ctrl2;
->>> +
->>> +     /*
->>> +      * This is used along with "Auto CMD Auto Select" feature,
->>> +      * which is introduced from v4.10, if card supports CMD23,
->>> +      * Auto CMD23 should be used instead of Auto CMD12.
->>> +      */
->>> +     if (host->version >= SDHCI_SPEC_410 &&
->>> +         (host->mmc->caps & MMC_CAP_CMD23)) {
->>
->> The caller has already checked those conditions
->>
->>> +             ctrl2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
->>> +             ctrl2 |= SDHCI_CMD23_ENABLE;
->>> +             sdhci_writew(host, ctrl2, SDHCI_HOST_CONTROL2);
->>> +     }
->>> +}
->>> +
->>>  static void sdhci_init(struct sdhci_host *host, int soft)
->>>  {
->>>       struct mmc_host *mmc = host->mmc;
->>> @@ -1095,6 +1112,44 @@ static inline bool sdhci_auto_cmd12(struct sdhci_host *host,
->>>              !mrq->cap_cmd_during_tfr;
->>>  }
->>>
->>> +static inline void sdhci_auto_cmd_select(struct sdhci_host *host,
->>> +                                      struct mmc_command *cmd,
->>> +                                      u16 *mode)
->>> +{
->>> +     bool use_cmd12 = sdhci_auto_cmd12(host, cmd->mrq) &&
->>> +                      (cmd->opcode != SD_IO_RW_EXTENDED);
->>> +     bool use_cmd23 = cmd->mrq->sbc && (host->flags & SDHCI_AUTO_CMD23);
->>> +
->>> +     /*
->>> +      * In case of Version 4.10 or later, use of 'Auto CMD Auto
->>> +      * Select' is recommended rather than use of 'Auto CMD12
->>> +      * Enable' or 'Auto CMD23 Enable'.
->>> +      */
->>> +     if (host->version >= SDHCI_SPEC_410 && (use_cmd12 || use_cmd23)) {
->>> +             *mode |= SDHCI_TRNS_AUTO_SEL;
->>> +             /*
->>> +              * Note no need to set SDHCI_ARGUMENT2 here, since for version
->>> +              * 4.10 and aboves, it doesn't support stuff bits of CMD23
->>> +              * argument but only number of blocks which have been set
->>> +              * already during prepare data.
->>
->> The argument will only have already been written in v4_mode.
-> 
-> It seems that we still need to set SDHCI_ARGUMENT2 here, if adding a
-> quirk for broken using 32-bit block count and also moved below to
-> sdhci-sprd.c
 
-Yes
+--RnlQjJ0d97Da+TV1
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-> 
-> "
-> +     /*
-> +      * For version 4.10 and above, ARGUMENT2 register is also used as 32-bit
-> +      * block count register which don't support stuff bits of CMD23 argument
-> +      */
-> +     if (host->version >= SDHCI_SPEC_410 &&
-> +         mrq->sbc && (mrq->sbc->arg & SDHCI_ARG2_STUFF) &&
-> +         (host->flags & SDHCI_AUTO_CMD23))
-> +             host->flags &= ~SDHCI_AUTO_CMD23
-> "
-> 
->>
->>> +              */
->>> +             if (use_cmd23)
->>> +                     sdhci_enable_cmd23(host);
->>
->> Need to ensure that SDHCI_CMD23_ENABLE is cleared for !use_cmd23
->>
->>> +             return;
->>> +     }
->>> +
->>> +     /*
->>> +      * If we are sending CMD23, CMD12 never gets sent
->>> +      * on successful completion (so no Auto-CMD12).
->>> +      */
->>> +     if (use_cmd12) {
->>> +             *mode |= SDHCI_TRNS_AUTO_CMD12;
->>> +     } else if (use_cmd23) {
->>> +             *mode |= SDHCI_TRNS_AUTO_CMD23;
->>> +             sdhci_writel(host, cmd->mrq->sbc->arg, SDHCI_ARGUMENT2);
->>> +     }
->>> +}
->>> +
->>>  static void sdhci_set_transfer_mode(struct sdhci_host *host,
->>>       struct mmc_command *cmd)
->>>  {
->>> @@ -1121,17 +1176,7 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
->>>
->>>       if (mmc_op_multi(cmd->opcode) || data->blocks > 1) {
->>>               mode = SDHCI_TRNS_BLK_CNT_EN | SDHCI_TRNS_MULTI;
->>> -             /*
->>> -              * If we are sending CMD23, CMD12 never gets sent
->>> -              * on successful completion (so no Auto-CMD12).
->>> -              */
->>> -             if (sdhci_auto_cmd12(host, cmd->mrq) &&
->>> -                 (cmd->opcode != SD_IO_RW_EXTENDED))
->>> -                     mode |= SDHCI_TRNS_AUTO_CMD12;
->>> -             else if (cmd->mrq->sbc && (host->flags & SDHCI_AUTO_CMD23)) {
->>> -                     mode |= SDHCI_TRNS_AUTO_CMD23;
->>> -                     sdhci_writel(host, cmd->mrq->sbc->arg, SDHCI_ARGUMENT2);
->>> -             }
->>> +             sdhci_auto_cmd_select(host, cmd, &mode);
->>>       }
->>>
->>>       if (data->flags & MMC_DATA_READ)
->>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
->>> index daf8c1e..a8d5be5 100644
->>> --- a/drivers/mmc/host/sdhci.h
->>> +++ b/drivers/mmc/host/sdhci.h
->>> @@ -43,6 +43,7 @@
->>>  #define  SDHCI_TRNS_BLK_CNT_EN       0x02
->>>  #define  SDHCI_TRNS_AUTO_CMD12       0x04
->>>  #define  SDHCI_TRNS_AUTO_CMD23       0x08
->>> +#define  SDHCI_TRNS_AUTO_SEL 0x0C
->>>  #define  SDHCI_TRNS_READ     0x10
->>>  #define  SDHCI_TRNS_MULTI    0x20
->>>
->>> @@ -186,6 +187,7 @@
->>>  #define   SDHCI_CTRL_DRV_TYPE_D              0x0030
->>>  #define  SDHCI_CTRL_EXEC_TUNING              0x0040
->>>  #define  SDHCI_CTRL_TUNED_CLK                0x0080
->>> +#define  SDHCI_CMD23_ENABLE          0x0800
->>>  #define  SDHCI_CTRL_V4_MODE          0x1000
->>>  #define  SDHCI_CTRL_64BIT_ADDR               0x2000
->>>  #define  SDHCI_CTRL_PRESET_VAL_ENABLE        0x8000
->>>
->>
-> 
+On Fri, Aug 10, 2018 at 09:13:57PM +0300, Aapo Vienamo wrote:
+> Hi all,
+> This series implements support for HS400 signaling on Tegra210 and
+> Tegra186. This includes programming the DQS trimmer values, implementing
+> enhanced strobe and HS400 delay line calibration.
+>=20
+> This series depends on the "Tegra SDHCI add support for HS200 and UHS
+> signaling" series.
+>=20
+> Changelog:
+> v2:
+> 	- Document in dt-bindings which controllers support HS400
+> 	- Use val instead of reg in tegra_sdhci_set_dqs_trim()
+> 	- Change "dt" to "DT" in "mmc: tegra: Parse and program DQS trim
+> 	  value" commit message
+> 	- Add spaces around << in tegra_sdhci_set_dqs_trim()
+> 	- Make the "mmc: tegra: Implement HS400 enhanced strobe" commit
+> 	  message more detailed
+> 	- Remove a debug print from tegra_sdhci_hs400_enhanced_strobe()
+> 	- Add blank lines around if-else-block in
+> 	  tegra_sdhci_hs400_enhanced_strobe()
+> 	- Use val instead of reg in tegra_sdhci_hs400_enhanced_strobe()
+> 	- Make commit message of "mmc: tegra: Implement HS400 delay line
+> 	  calibration" more detailed
+>=20
+> Aapo Vienamo (8):
+>   dt-bindings: mmc: Add DQS trim value to Tegra SDHCI
+>   mmc: tegra: Parse and program DQS trim value
+>   mmc: tegra: Implement HS400 enhanced strobe
+>   mmc: tegra: Implement HS400 delay line calibration
+>   arm64: dts: tegra186: Add SDMMC4 DQS trim value
+>   arm64: dts: tegra210: Add SDMMC4 DQS trim value
+>   arm64: dts: tegra186: Enable HS400
+>   arm64: dts: tegra210: Enable HS400
+>=20
+>  .../bindings/mmc/nvidia,tegra20-sdhci.txt          |  4 ++
+>  arch/arm64/boot/dts/nvidia/tegra186.dtsi           |  2 +
+>  arch/arm64/boot/dts/nvidia/tegra210.dtsi           |  2 +
+>  drivers/mmc/host/sdhci-tegra.c                     | 84 ++++++++++++++++=
++++++-
+>  4 files changed, 89 insertions(+), 3 deletions(-)
+
+Ulf, Adrian,
+
+Aapo just reminded me of this small series that also has a dependency on
+the UHS signalling series posted earlier. I think it's easiest if I just
+stash this on top of the existing branch that I have and send this along
+with the rest as part of a pull request early after v4.19-rc1.
+
+Thierry
+
+--RnlQjJ0d97Da+TV1
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAlt/y6QACgkQ3SOs138+
+s6Geow/8CNBjRVUWrjNn8USykHyGclhdyCpr/77F6uuL3MmDMAVZGt1U7o0RTDYb
+T55DEJ+4e1uoaWjSbd+DnPQ+IHKON+sSykG0rrGJvQxnEWEYZjnzfKkmfpnQZPna
+R13JQlTVtRCa4/QYBJUMu1Do9e4kCgrA5Kd8h1cRTrAerQkJXWX6mELxnYx8Bk6R
+zYefZ7pPxjQCoRLD3sMiLLsd+hxdLKsuIda5ztEySErZWQYZzhHGgltvDPkfeZ//
+N9ZmGHyLSpwsGj2WL13SzRCbgqUt8s6ZtgtEz4W3WqNq+Dw1Gid0WtdUeVvzQHH8
+eK6F2keTobhlMEqQCgyWd3HGiugnZCFaEa2nAa8lcGXNhxKWLVxDfJ7QGtSeATVj
+5zL+sm7obWV+juGM3U/IHW/u4wn8N+BgAT1sm0f91rDTMcOQyOIh8gBhX/vNm60h
+OJaoZKVv0NnDK9E3VJ+Iw3a4b1DODnTl8AX5wpBYMk+QdG8OiLJjGPLGwBFN1vtg
+xnzRej7hSSkQOaFB8GZGppXibn63qZ19gLM1j1GIJElQGVVUtBTmXKcdZ2WwwIAB
+fmSAj0yItCi6UacuoVzTkdaYb60F86wDF9ohUlehD1fLJOFWpxZzfq6sZQpJyMie
+x7OGxoHF6l84SSz6pUVXNn4LByqu4n6Nweh3FcrpWEvjJEiNbdc=
+=gC/o
+-----END PGP SIGNATURE-----
+
+--RnlQjJ0d97Da+TV1--
