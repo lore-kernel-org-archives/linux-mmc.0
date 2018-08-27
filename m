@@ -1,106 +1,69 @@
-From: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
-Subject: [PATCH v5 3/3] mmc: sdhci-of-dwcmshc: solve 128MB DMA boundary
- limitation
-Date: Mon, 27 Aug 2018 16:24:19 +0800
-Message-ID: <20180827162419.61afe238@xhacker.debian>
-References: <20180827162026.3901de27@xhacker.debian>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2 0/8] Tegra SDHCI support HS400 on Tegra210 and Tegra186
+Date: Mon, 27 Aug 2018 11:50:52 +0200
+Message-ID: <CAPDyKFrXQwjvNQeAbWfNeoc+wSfb+EeD-XrudHjeKGxsYS2-9A@mail.gmail.com>
+References: <1533924845-1466-1-git-send-email-avienamo@nvidia.com> <20180824091103.GA9100@ulmo>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180827162026.3901de27@xhacker.debian>
+In-Reply-To: <20180824091103.GA9100@ulmo>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Thierry Reding <thierry.reding@gmail.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Aapo Vienamo <avienamo@nvidia.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Jonathan Hunter <jonathanh@nvidia.com>, Mikko Perttunen <mperttunen@nvidia.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, linux-tegra@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-When using DMA, if the DMA addr spans 128MB boundary, we have to split
-the DMA transfer into two so that each one doesn't exceed the boundary.
+On 24 August 2018 at 11:11, Thierry Reding <thierry.reding@gmail.com> wrote:
+> On Fri, Aug 10, 2018 at 09:13:57PM +0300, Aapo Vienamo wrote:
+>> Hi all,
+>> This series implements support for HS400 signaling on Tegra210 and
+>> Tegra186. This includes programming the DQS trimmer values, implementing
+>> enhanced strobe and HS400 delay line calibration.
+>>
+>> This series depends on the "Tegra SDHCI add support for HS200 and UHS
+>> signaling" series.
+>>
+>> Changelog:
+>> v2:
+>>       - Document in dt-bindings which controllers support HS400
+>>       - Use val instead of reg in tegra_sdhci_set_dqs_trim()
+>>       - Change "dt" to "DT" in "mmc: tegra: Parse and program DQS trim
+>>         value" commit message
+>>       - Add spaces around << in tegra_sdhci_set_dqs_trim()
+>>       - Make the "mmc: tegra: Implement HS400 enhanced strobe" commit
+>>         message more detailed
+>>       - Remove a debug print from tegra_sdhci_hs400_enhanced_strobe()
+>>       - Add blank lines around if-else-block in
+>>         tegra_sdhci_hs400_enhanced_strobe()
+>>       - Use val instead of reg in tegra_sdhci_hs400_enhanced_strobe()
+>>       - Make commit message of "mmc: tegra: Implement HS400 delay line
+>>         calibration" more detailed
+>>
+>> Aapo Vienamo (8):
+>>   dt-bindings: mmc: Add DQS trim value to Tegra SDHCI
+>>   mmc: tegra: Parse and program DQS trim value
+>>   mmc: tegra: Implement HS400 enhanced strobe
+>>   mmc: tegra: Implement HS400 delay line calibration
+>>   arm64: dts: tegra186: Add SDMMC4 DQS trim value
+>>   arm64: dts: tegra210: Add SDMMC4 DQS trim value
+>>   arm64: dts: tegra186: Enable HS400
+>>   arm64: dts: tegra210: Enable HS400
+>>
+>>  .../bindings/mmc/nvidia,tegra20-sdhci.txt          |  4 ++
+>>  arch/arm64/boot/dts/nvidia/tegra186.dtsi           |  2 +
+>>  arch/arm64/boot/dts/nvidia/tegra210.dtsi           |  2 +
+>>  drivers/mmc/host/sdhci-tegra.c                     | 84 +++++++++++++++++++++-
+>>  4 files changed, 89 insertions(+), 3 deletions(-)
+>
+> Ulf, Adrian,
+>
+> Aapo just reminded me of this small series that also has a dependency on
+> the UHS signalling series posted earlier. I think it's easiest if I just
+> stash this on top of the existing branch that I have and send this along
+> with the rest as part of a pull request early after v4.19-rc1.
 
-Signed-off-by: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
----
- drivers/mmc/host/sdhci-of-dwcmshc.c | 41 +++++++++++++++++++++++++++++
- 1 file changed, 41 insertions(+)
+Yep, that would be convenient for me.
 
-diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-index 1b7cd144fb01..cfbdae8703a1 100644
---- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-+++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-@@ -8,21 +8,50 @@
-  */
- 
- #include <linux/clk.h>
-+#include <linux/mm.h>
- #include <linux/module.h>
- #include <linux/of.h>
-+#include <linux/sizes.h>
- 
- #include "sdhci-pltfm.h"
- 
-+#define BOUNDARY_OK(addr, len) \
-+	((addr | (SZ_128M - 1)) == ((addr + len - 1) | (SZ_128M - 1)))
-+
- struct dwcmshc_priv {
- 	struct clk	*bus_clk;
- };
- 
-+/*
-+ * If DMA addr spans 128MB boundary, we split the DMA transfer into two
-+ * so that each DMA transfer doesn't exceed the boundary.
-+ */
-+static void dwcmshc_adma_write_desc(struct sdhci_host *host, void **desc,
-+				    dma_addr_t addr, int len, unsigned int cmd)
-+{
-+	int tmplen, offset;
-+
-+	if (likely(!len || BOUNDARY_OK(addr, len))) {
-+		sdhci_adma_write_desc(host, desc, addr, len, cmd);
-+		return;
-+	}
-+
-+	offset = addr & (SZ_128M - 1);
-+	tmplen = SZ_128M - offset;
-+	sdhci_adma_write_desc(host, desc, addr, tmplen, cmd);
-+
-+	addr += tmplen;
-+	len -= tmplen;
-+	sdhci_adma_write_desc(host, desc, addr, len, cmd);
-+}
-+
- static const struct sdhci_ops sdhci_dwcmshc_ops = {
- 	.set_clock		= sdhci_set_clock,
- 	.set_bus_width		= sdhci_set_bus_width,
- 	.set_uhs_signaling	= sdhci_set_uhs_signaling,
- 	.get_max_clock		= sdhci_pltfm_clk_get_max_clock,
- 	.reset			= sdhci_reset,
-+	.adma_write_desc	= dwcmshc_adma_write_desc,
- };
- 
- static const struct sdhci_pltfm_data sdhci_dwcmshc_pdata = {
-@@ -36,12 +65,24 @@ static int dwcmshc_probe(struct platform_device *pdev)
- 	struct sdhci_host *host;
- 	struct dwcmshc_priv *priv;
- 	int err;
-+	u32 extra;
- 
- 	host = sdhci_pltfm_init(pdev, &sdhci_dwcmshc_pdata,
- 				sizeof(struct dwcmshc_priv));
- 	if (IS_ERR(host))
- 		return PTR_ERR(host);
- 
-+	/*
-+	 * The DMA table descriptor count is calculated as the maximum
-+	 * number of segments times 2, to allow for an alignment
-+	 * descriptor for each segment, plus 1 for a nop end descriptor,
-+	 * plus extra number for cross 128M boundary handling.
-+	 */
-+	extra = DIV_ROUND_UP(totalram_pages, SZ_128M / PAGE_SIZE);
-+	if (extra > SDHCI_MAX_SEGS)
-+		extra = SDHCI_MAX_SEGS;
-+	host->adma_table_cnt += extra;
-+
- 	pltfm_host = sdhci_priv(host);
- 	priv = sdhci_pltfm_priv(pltfm_host);
- 
--- 
-2.18.0
+Although, we first need some input from Adrian.
+
+Kind regards
+Uffe
