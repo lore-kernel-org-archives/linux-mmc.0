@@ -1,63 +1,66 @@
-From: Thierry Reding <thierry.reding@gmail.com>
-Subject: Re: [PATCH 1/2] mmc: sdhci: Export sdhci_request()
-Date: Mon, 27 Aug 2018 12:11:52 +0200
-Message-ID: <20180827101152.GA19520@ulmo>
-References: <1534757013-4524-1-git-send-email-avienamo@nvidia.com>
- <1534757013-4524-2-git-send-email-avienamo@nvidia.com>
- <CAPDyKFrxMWBisB5uuhFjxosExJx5cqLnTLE5Eoxp5LVdFk_43g@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v2 0/8] Tegra SDHCI support HS400 on Tegra210 and Tegra186
+Date: Mon, 27 Aug 2018 13:26:05 +0300
+Message-ID: <095142c4-2697-d9e1-4930-a39e27b7ef40@intel.com>
+References: <1533924845-1466-1-git-send-email-avienamo@nvidia.com>
+ <20180827100826.GA18542@ulmo>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="a8Wt8u1KmwUX3Y2C"
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFrxMWBisB5uuhFjxosExJx5cqLnTLE5Eoxp5LVdFk_43g@mail.gmail.com>
+In-Reply-To: <20180827100826.GA18542@ulmo>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Aapo Vienamo <avienamo@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, Jonathan Hunter <jonathanh@nvidia.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-tegra@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Thierry Reding <thierry.reding@gmail.com>
+Cc: Aapo Vienamo <avienamo@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Jonathan Hunter <jonathanh@nvidia.com>, Mikko Perttunen <mperttunen@nvidia.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
+On 27/08/18 13:08, Thierry Reding wrote:
+> On Fri, Aug 10, 2018 at 09:13:57PM +0300, Aapo Vienamo wrote:
+>> Hi all,
+>> This series implements support for HS400 signaling on Tegra210 and
+>> Tegra186. This includes programming the DQS trimmer values, implementing
+>> enhanced strobe and HS400 delay line calibration.
+>>
+>> This series depends on the "Tegra SDHCI add support for HS200 and UHS
+>> signaling" series.
+>>
+>> Changelog:
+>> v2:
+>> 	- Document in dt-bindings which controllers support HS400
+>> 	- Use val instead of reg in tegra_sdhci_set_dqs_trim()
+>> 	- Change "dt" to "DT" in "mmc: tegra: Parse and program DQS trim
+>> 	  value" commit message
+>> 	- Add spaces around << in tegra_sdhci_set_dqs_trim()
+>> 	- Make the "mmc: tegra: Implement HS400 enhanced strobe" commit
+>> 	  message more detailed
+>> 	- Remove a debug print from tegra_sdhci_hs400_enhanced_strobe()
+>> 	- Add blank lines around if-else-block in
+>> 	  tegra_sdhci_hs400_enhanced_strobe()
+>> 	- Use val instead of reg in tegra_sdhci_hs400_enhanced_strobe()
+>> 	- Make commit message of "mmc: tegra: Implement HS400 delay line
+>> 	  calibration" more detailed
+>>
+>> Aapo Vienamo (8):
+>>   dt-bindings: mmc: Add DQS trim value to Tegra SDHCI
+>>   mmc: tegra: Parse and program DQS trim value
+>>   mmc: tegra: Implement HS400 enhanced strobe
+>>   mmc: tegra: Implement HS400 delay line calibration
+>>   arm64: dts: tegra186: Add SDMMC4 DQS trim value
+>>   arm64: dts: tegra210: Add SDMMC4 DQS trim value
+>>   arm64: dts: tegra186: Enable HS400
+>>   arm64: dts: tegra210: Enable HS400
+>>
+>>  .../bindings/mmc/nvidia,tegra20-sdhci.txt          |  4 ++
+>>  arch/arm64/boot/dts/nvidia/tegra186.dtsi           |  2 +
+>>  arch/arm64/boot/dts/nvidia/tegra210.dtsi           |  2 +
+>>  drivers/mmc/host/sdhci-tegra.c                     | 84 +++++++++++++++++++++-
+>>  4 files changed, 89 insertions(+), 3 deletions(-)
+> 
+> Adrian,
+> 
+> any chance you could take a brief look at these? They are a prerequisite
+> for the 2-patch series ("[PATCH 0/2] Tegra SDHCI rerun pad calibration
+> periodically") that you already acked.
 
---a8Wt8u1KmwUX3Y2C
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-On Mon, Aug 27, 2018 at 12:07:08PM +0200, Ulf Hansson wrote:
-> On 20 August 2018 at 11:23, Aapo Vienamo <avienamo@nvidia.com> wrote:
-> > Allow SDHCI drivers to hook code before and after sdhci_request() by
-> > making it externally visible.
-> >
-> > Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
->=20
-> This one happens to be useful for other variants but Tegras, hence I
-> have applied this one for next. Thanks!
->=20
-> Thierry, you may thus drop this one from your PR. Also, you should
-> probably base your pull request on top of my next branch, as I have
-> already started to queue up some changes for sdhci.
-
-Will do that, thanks.
-
-Thierry
-
---a8Wt8u1KmwUX3Y2C
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAluDzmgACgkQ3SOs138+
-s6HJMBAArzWv4Ra35OlaCrF3Md8xwNK5WJhNrGaR/yk9G/UX6JcU9wuwSarV1DPc
-WfuzF5iZzDqUdQTMGKugrNmDAzu+rtTdM0IaUcciayVh2tJk2DMreMiEpvembtT/
-ta/6p69uKnxbyke/mN4nMIFfT2sQlEprb6LJf4YHn5DluQ8eylH8plXMDRLyjlgS
-bzvvyAMZfTYNGJNSVFOmYOfOx1Z5QbevVp0+ksWnNiAO5TSr33LP+TyNoQOwGyao
-vhT4o2DN1ZtVzwbx8WrNZFr5JBQijfw/9mqTroi9vJlK4eFnn8scZL+I9K1Cg1hw
-qWnjSiwQAhayGV8eO7/OK0IZpaXTMKkPd44XftYBj5hUMoTbfUrnfh7Myka5zJeO
-s2LM/LVqONPqaH1pjCg/UGwJY1EyzjOLtkoYdG4KRMWMq3Txwcwibff8LlMEk468
-5ah5Libu4U/505eU4535F04Qfg8yzLcPn5JpzKVGwte2hNdekwJIDvqYWlxnSVcq
-BH6gVOrRn5J8XLSd1LyxwZ0vALwX/GcfVEXllAVMywKRqDxpZZgq3bbLDO/tDtbK
-1UTn0qEFGdlE/rdVkBZiOHZ6hxcE60wK/JCIhJhXi21vizUt4/qWj4EaUh08LDd/
-wuXE0xtP5JteeL5XvUKzXKxZgebv3DdhriwwgSz6Rn6ZBYY56YM=
-=R8vG
------END PGP SIGNATURE-----
-
---a8Wt8u1KmwUX3Y2C--
+Sure, I'll try and have a look today.
