@@ -1,71 +1,58 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/2] mmc: sdhci: Export sdhci_request()
-Date: Mon, 27 Aug 2018 12:07:08 +0200
-Message-ID: <CAPDyKFrxMWBisB5uuhFjxosExJx5cqLnTLE5Eoxp5LVdFk_43g@mail.gmail.com>
-References: <1534757013-4524-1-git-send-email-avienamo@nvidia.com> <1534757013-4524-2-git-send-email-avienamo@nvidia.com>
+Subject: Re: [PATCH V5 06/10] mmc: sdhci: Disable auto-CMD23 if stuff bits is
+ set in CMD23 argument
+Date: Mon, 27 Aug 2018 12:07:23 +0200
+Message-ID: <CAPDyKFpL_o2N_yteF=rTH5gy4Mm-HrQU5bL5i8s2dWjpTK_Fng@mail.gmail.com>
+References: <1534406064-10065-1-git-send-email-zhang.chunyan@linaro.org>
+ <1534406064-10065-7-git-send-email-zhang.chunyan@linaro.org> <9de08b30-cb92-01c6-caf3-c4abc3591dcf@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1534757013-4524-2-git-send-email-avienamo@nvidia.com>
+In-Reply-To: <9de08b30-cb92-01c6-caf3-c4abc3591dcf@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Aapo Vienamo <avienamo@nvidia.com>, Thierry Reding <thierry.reding@gmail.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Jonathan Hunter <jonathanh@nvidia.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-tegra@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Chunyan Zhang <zhang.chunyan@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@unisoc.com>, Jason Wu <jason.wu@unisoc.com>, Chunyan Zhang <zhang.lyra@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 20 August 2018 at 11:23, Aapo Vienamo <avienamo@nvidia.com> wrote:
-> Allow SDHCI drivers to hook code before and after sdhci_request() by
-> making it externally visible.
+On 23 August 2018 at 14:50, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 16/08/18 10:54, Chunyan Zhang wrote:
+>> For version 4.10 and aboves, SDHCI_ARGUMENT2 is also uses to indicate
+>> 32-bit number of blocks, it doesn't support stuff bits in argument of
+>> CMD23, but only block count for the following command (CMD18/25).
+>>
+>> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
+>> ---
+>>  drivers/mmc/host/sdhci.c | 9 +++++++++
+>>  drivers/mmc/host/sdhci.h | 1 +
+>>  2 files changed, 10 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index b3328ee..a72ad0d 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -1729,6 +1729,15 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>>               }
+>>       }
+>>
+>> +     /*
+>> +      * For version 4.10 and above, ARGUMENT2 register is also used as 32-bit
+>> +      * block count register which don't support stuff bits of CMD23 argument
+>> +      */
+>> +     if (host->version >= SDHCI_SPEC_410 &&
+>> +         mrq->sbc && (mrq->sbc->arg & SDHCI_ARG2_STUFF) &&
+>> +         (host->flags & SDHCI_AUTO_CMD23))
+>> +             host->flags &= ~SDHCI_AUTO_CMD23;
 >
-> Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
+> I would prefer this be done in sdhci-sprd.c by hooking ->request().  Someone
+> sent a patch recently to export sdhci_request().
 
-This one happens to be useful for other variants but Tegras, hence I
-have applied this one for next. Thanks!
+Right. So I have picked up the patch you were referring to.
+https://lkml.org/lkml/2018/8/20/140
 
-Thierry, you may thus drop this one from your PR. Also, you should
-probably base your pull request on top of my next branch, as I have
-already started to queue up some changes for sdhci.
+Chunyan, you may now preferably base your next version on top of my
+mmc tree's next branch.
+
+[...]
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/host/sdhci.c | 3 ++-
->  drivers/mmc/host/sdhci.h | 1 +
->  2 files changed, 3 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index da47f7b..1e0c0a6 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1636,7 +1636,7 @@ EXPORT_SYMBOL_GPL(sdhci_set_power);
->   *                                                                           *
->  \*****************************************************************************/
->
-> -static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
-> +void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
->  {
->         struct sdhci_host *host;
->         int present;
-> @@ -1675,6 +1675,7 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
->         mmiowb();
->         spin_unlock_irqrestore(&host->lock, flags);
->  }
-> +EXPORT_SYMBOL_GPL(sdhci_request);
->
->  void sdhci_set_bus_width(struct sdhci_host *host, int width)
->  {
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index cc963a5..73c4744 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -729,6 +729,7 @@ void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
->                      unsigned short vdd);
->  void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
->                            unsigned short vdd);
-> +void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq);
->  void sdhci_set_bus_width(struct sdhci_host *host, int width);
->  void sdhci_reset(struct sdhci_host *host, u8 mask);
->  void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing);
-> --
-> 2.7.4
->
