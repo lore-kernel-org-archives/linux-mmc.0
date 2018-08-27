@@ -1,58 +1,94 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V5 06/10] mmc: sdhci: Disable auto-CMD23 if stuff bits is
- set in CMD23 argument
-Date: Mon, 27 Aug 2018 12:07:23 +0200
-Message-ID: <CAPDyKFpL_o2N_yteF=rTH5gy4Mm-HrQU5bL5i8s2dWjpTK_Fng@mail.gmail.com>
-References: <1534406064-10065-1-git-send-email-zhang.chunyan@linaro.org>
- <1534406064-10065-7-git-send-email-zhang.chunyan@linaro.org> <9de08b30-cb92-01c6-caf3-c4abc3591dcf@intel.com>
+From: Thierry Reding <thierry.reding@gmail.com>
+Subject: Re: [PATCH v2 0/8] Tegra SDHCI support HS400 on Tegra210 and Tegra186
+Date: Mon, 27 Aug 2018 12:08:26 +0200
+Message-ID: <20180827100826.GA18542@ulmo>
+References: <1533924845-1466-1-git-send-email-avienamo@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="HlL+5n6rz5pIUxbD"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <9de08b30-cb92-01c6-caf3-c4abc3591dcf@intel.com>
+Content-Disposition: inline
+In-Reply-To: <1533924845-1466-1-git-send-email-avienamo@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Chunyan Zhang <zhang.chunyan@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@unisoc.com>, Jason Wu <jason.wu@unisoc.com>, Chunyan Zhang <zhang.lyra@gmail.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Aapo Vienamo <avienamo@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Jonathan Hunter <jonathanh@nvidia.com>, Mikko Perttunen <mperttunen@nvidia.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 23 August 2018 at 14:50, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 16/08/18 10:54, Chunyan Zhang wrote:
->> For version 4.10 and aboves, SDHCI_ARGUMENT2 is also uses to indicate
->> 32-bit number of blocks, it doesn't support stuff bits in argument of
->> CMD23, but only block count for the following command (CMD18/25).
->>
->> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
->> ---
->>  drivers/mmc/host/sdhci.c | 9 +++++++++
->>  drivers/mmc/host/sdhci.h | 1 +
->>  2 files changed, 10 insertions(+)
->>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index b3328ee..a72ad0d 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -1729,6 +1729,15 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
->>               }
->>       }
->>
->> +     /*
->> +      * For version 4.10 and above, ARGUMENT2 register is also used as 32-bit
->> +      * block count register which don't support stuff bits of CMD23 argument
->> +      */
->> +     if (host->version >= SDHCI_SPEC_410 &&
->> +         mrq->sbc && (mrq->sbc->arg & SDHCI_ARG2_STUFF) &&
->> +         (host->flags & SDHCI_AUTO_CMD23))
->> +             host->flags &= ~SDHCI_AUTO_CMD23;
->
-> I would prefer this be done in sdhci-sprd.c by hooking ->request().  Someone
-> sent a patch recently to export sdhci_request().
 
-Right. So I have picked up the patch you were referring to.
-https://lkml.org/lkml/2018/8/20/140
+--HlL+5n6rz5pIUxbD
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Chunyan, you may now preferably base your next version on top of my
-mmc tree's next branch.
+On Fri, Aug 10, 2018 at 09:13:57PM +0300, Aapo Vienamo wrote:
+> Hi all,
+> This series implements support for HS400 signaling on Tegra210 and
+> Tegra186. This includes programming the DQS trimmer values, implementing
+> enhanced strobe and HS400 delay line calibration.
+>=20
+> This series depends on the "Tegra SDHCI add support for HS200 and UHS
+> signaling" series.
+>=20
+> Changelog:
+> v2:
+> 	- Document in dt-bindings which controllers support HS400
+> 	- Use val instead of reg in tegra_sdhci_set_dqs_trim()
+> 	- Change "dt" to "DT" in "mmc: tegra: Parse and program DQS trim
+> 	  value" commit message
+> 	- Add spaces around << in tegra_sdhci_set_dqs_trim()
+> 	- Make the "mmc: tegra: Implement HS400 enhanced strobe" commit
+> 	  message more detailed
+> 	- Remove a debug print from tegra_sdhci_hs400_enhanced_strobe()
+> 	- Add blank lines around if-else-block in
+> 	  tegra_sdhci_hs400_enhanced_strobe()
+> 	- Use val instead of reg in tegra_sdhci_hs400_enhanced_strobe()
+> 	- Make commit message of "mmc: tegra: Implement HS400 delay line
+> 	  calibration" more detailed
+>=20
+> Aapo Vienamo (8):
+>   dt-bindings: mmc: Add DQS trim value to Tegra SDHCI
+>   mmc: tegra: Parse and program DQS trim value
+>   mmc: tegra: Implement HS400 enhanced strobe
+>   mmc: tegra: Implement HS400 delay line calibration
+>   arm64: dts: tegra186: Add SDMMC4 DQS trim value
+>   arm64: dts: tegra210: Add SDMMC4 DQS trim value
+>   arm64: dts: tegra186: Enable HS400
+>   arm64: dts: tegra210: Enable HS400
+>=20
+>  .../bindings/mmc/nvidia,tegra20-sdhci.txt          |  4 ++
+>  arch/arm64/boot/dts/nvidia/tegra186.dtsi           |  2 +
+>  arch/arm64/boot/dts/nvidia/tegra210.dtsi           |  2 +
+>  drivers/mmc/host/sdhci-tegra.c                     | 84 ++++++++++++++++=
++++++-
+>  4 files changed, 89 insertions(+), 3 deletions(-)
 
-[...]
+Adrian,
 
-Kind regards
-Uffe
+any chance you could take a brief look at these? They are a prerequisite
+for the 2-patch series ("[PATCH 0/2] Tegra SDHCI rerun pad calibration
+periodically") that you already acked.
+
+Thanks,
+Thierry
+
+--HlL+5n6rz5pIUxbD
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAluDzZgACgkQ3SOs138+
+s6H3hw/9HaeWCaPSJbgLBGq7COZn7QIwSefhS9Y6LS+y2WLqTHEG2BP2egIac67T
+U8oUBCJXRQMUgoxVD2xppMS7jATTSo+DtMJ3kmIKoPfu0PNj42Cq55aOmZkxUlGc
+N7PgbmFvrZm0/3jIRvJWUgQpplQsanqeFrY718rja9FwjEsArFmWhTg6QIEslfP6
++s18OrV3iYnj2ULr+DxIRua53LoGy2w90KhXvUmCLncTG9EZ49NyDlJB0cYWdVHX
+x1yQDW6FHD6BgZGqjO8CqQ38H1fyLFzW66nkewSPvrJGTC7ySZS4HB/GQzkPher3
+xb8ETt6LMgXV497wr/acnF65L3dnV85szaVCO9Xuqy7ugf8TmcpyvkA8mZ8FWrea
+Nmhvuz1QSGIvGG5QytJxoOxe4Smmjuc4Zw3AidkLbaNMq280LVOkj0kkFaGbXHxm
+rX6Q3fNm+jIu0gI0Pqojoj7RX9J3I/LeWC2yvSGZDZ0l39IbVR2aedDyRwFM/Jj7
+YiCK7vkqMofsq5NZ2luhSFIb3YCDsXK/1hTfTzl/YB+u0Ff7KbwDa2ArD88FGAxu
+5Om0Npyb0D2AYfnLBMHfQX3Lp3B1e3p1SmIXtJLG0U0BIqIccjlAO8SLD8j9xrrY
+O3c0SxJNMijN6EJwi6J1TAbxttEGWTFsolHhLUL/R9o8GQPeegA=
+=1iCJ
+-----END PGP SIGNATURE-----
+
+--HlL+5n6rz5pIUxbD--
