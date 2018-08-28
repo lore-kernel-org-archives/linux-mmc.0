@@ -1,49 +1,62 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: Convert to using %pOFn instead of device_node.name
-Date: Tue, 28 Aug 2018 10:59:53 +0300
-Message-ID: <b64da243-c049-31aa-625c-e9e4d751b213@intel.com>
-References: <20180828015252.28511-1-robh@kernel.org>
- <20180828015252.28511-32-robh@kernel.org>
+From: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+Subject: [PATCH v6 0/3] solve SDHCI DWC MSHC 128MB DMA boundary limitation
+Date: Tue, 28 Aug 2018 17:45:34 +0800
+Message-ID: <20180828174534.00fb5e24@xhacker.debian>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180828015252.28511-32-robh@kernel.org>
-Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Rob Herring <robh@kernel.org>, linux-kernel@vger.kernel.org
-Cc: Hu Ziji <huziji@marvell.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 28/08/18 04:52, Rob Herring wrote:
-> In preparation to remove the node name pointer from struct device_node,
-> convert printf users to use the %pOFn format specifier.
-> 
-> Cc: Adrian Hunter <adrian.hunter@intel.com>
-> Cc: Hu Ziji <huziji@marvell.com>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: linux-mmc@vger.kernel.org
-> Signed-off-by: Rob Herring <robh@kernel.org>
+When using DMA, if the DMA addr spans 128MB boundary, we have to split
+the DMA transfer into two so that each one doesn't exceed the boundary.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+patch1 adds adma_table_cnt to struct sdhci_host so that driver can
+control the ADMA table count.
+patch2 introduces adma_write_desc() hook to struct sdhci_ops so that
+driver can override it.
+patch3 finally solves the 128MB boundary limitation.
 
-> ---
->  drivers/mmc/host/sdhci-xenon-phy.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-xenon-phy.c b/drivers/mmc/host/sdhci-xenon-phy.c
-> index c335052d0c02..5956e90380e8 100644
-> --- a/drivers/mmc/host/sdhci-xenon-phy.c
-> +++ b/drivers/mmc/host/sdhci-xenon-phy.c
-> @@ -660,8 +660,8 @@ static int get_dt_pad_ctrl_data(struct sdhci_host *host,
->  		return 0;
->  
->  	if (of_address_to_resource(np, 1, &iomem)) {
-> -		dev_err(mmc_dev(host->mmc), "Unable to find SoC PAD ctrl register address for %s\n",
-> -			np->name);
-> +		dev_err(mmc_dev(host->mmc), "Unable to find SoC PAD ctrl register address for %pOFn\n",
-> +			np);
->  		return -EINVAL;
->  	}
->  
-> 
+since v5:
+  - use dma_get_required_mask() to calculate the extra adma_table_cnt
+
+since v4:
+  - add Adrian's ack to patch 1 and patch 2
+  - address Adrian's comment -- if the boundary is fine, we have to
+    return after writing dma desc once; adma_table_cnt updating could
+    make use of the fact that it's already initialized by the common
+    sdhci code, we just need to tune.
+
+since v3:
+  - s/adma_table_num/adma_table_cnt
+  - add comment to adma_table_cnt
+  - make the exported function name without the _
+  - let sdhci_adma_write_desc() accept &desc param and set the new desc
+    value
+
+since v2:
+  - make use of "likely" to check (!len || BOUNDARY_OK(addr, len))
+  - explicitly include <linux/sizes.h> for SZ_128M
+
+since v1:
+  - fix BOUNDARY_OK macro if addr+len is aligned to 128MB
+  - use DIV_ROUND_UP to cal extra desc num
+  - fix !len for dwcmshc_adma_write_desc()
+
+
+
+Jisheng Zhang (3):
+  mmc: sdhci: add adma_table_cnt member to struct sdhci_host
+  mmc: sdhci: introduce adma_write_desc() hook to struct sdhci_ops
+  mmc: sdhci-of-dwcmshc: solve 128MB DMA boundary limitation
+
+ drivers/mmc/host/sdhci-of-dwcmshc.c | 39 +++++++++++++++++++++
+ drivers/mmc/host/sdhci.c            | 54 +++++++++++++++++------------
+ drivers/mmc/host/sdhci.h            |  7 ++++
+ 3 files changed, 78 insertions(+), 22 deletions(-)
+
+-- 
+2.18.0
