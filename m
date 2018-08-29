@@ -1,62 +1,45 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH v3 6/6] mmc: tmio: refactor CLK_CTL bit calculation
-Date: Wed, 29 Aug 2018 10:49:13 +0200
-Message-ID: <20180829084913.fgdrigpeu3vi7vqs@ninjato>
-References: <1534999460-15111-1-git-send-email-yamada.masahiro@socionext.com>
- <1534999460-15111-7-git-send-email-yamada.masahiro@socionext.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [RFC RFT PATCH 0/4] gpiolib: speed up GPIO array processing
+Date: Wed, 29 Aug 2018 11:06:21 +0200
+Message-ID: <CACRpkdbgY6VNP-K-c5ErQtmO7E83D6c=49TN5siF8VTNh_66Jg@mail.gmail.com>
+References: <20180813223448.21316-1-jmkrzyszt@gmail.com> <20180820234341.5271-1-jmkrzyszt@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="pznduqydquaabgg3"
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1534999460-15111-7-git-send-email-yamada.masahiro@socionext.com>
+In-Reply-To: <20180820234341.5271-1-jmkrzyszt@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-renesas-soc@vger.kernel.org, Masami Hiramatsu <mhiramat@kernel.org>, Jassi Brar <jaswinder.singh@linaro.org>, linux-kernel@vger.kernel.org
+To: Janusz Krzysztofik <jmkrzyszt@gmail.com>
+Cc: Jonathan Corbet <corbet@lwn.net>, Miguel Ojeda Sandonis <miguel.ojeda.sandonis@gmail.com>, Peter Korsgaard <peter.korsgaard@barco.com>, Peter Rosin <peda@axentia.se>, Ulf Hansson <ulf.hansson@linaro.org>, Andrew Lunn <andrew@lunn.ch>, Florian Fainelli <f.fainelli@gmail.com>, "David S. Miller" <davem@davemloft.net>, Dominik Brodowski <linux@dominikbrodowski.net>, kishon@ti.com, Lars-Peter Clausen <lars@metafoo.de>, Michael Hennerich <Michael.Hennerich@analog.com>, Jonathan Cameron <jic23@kernel.org>, Hartmut Knaack <knaack.h@gmx.de>, Peter Meerwald <pmeerw@pmeerw.net>, Greg KH <gregkh@linuxfoundation.org>, Jiri Slaby <jslaby@suse.com>, "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>, linux-doc@vger.kernel.org, linux-i2c@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
+On Tue, Aug 21, 2018 at 1:42 AM Janusz Krzysztofik <jmkrzyszt@gmail.com> wrote:
 
---pznduqydquaabgg3
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+> This series is a follow up of the former "mtd: rawnand: ams-delta: Use
+> gpio-omap accessors for data I/O" which already contained some changes
+> to gpiolib.  Those previous attempts were commented by Borris Brezillon
+> who suggested using GPIO API modified to accept bitmaps, and by Linus
+> Walleij who suggested still more great ideas for further immprovement
+> of the proposed API changes - thanks!
+>
+> The goal is to boost performans of get/set array functions while
+> processing GPIO arrays which represent pins of a signle chip in
+> hardware order.  If resulting performance is close to PIO, GPIO API
+> can be used for data I/O without much loss of speed.
 
+Hands down, this is a very pretty patch set. I'm a big fan already.
 
-> +	if (divisor <= 1) {
-> +		clk_sel = 1;
-> +		clk = 0;
-> +	} else {
-> +		clk_sel = 0;
-> +		/* bit7 set: 1/512, ... bit0 set:1/4, all bits clear: 1/2 */
-> +		clk = roundup_pow_of_two(divisor) >> 2;
-> +	}
+This is mainly because it fulfills the requirement for libraries
+to be narrow and deep, which is what we want.
+This refers to John Ousterhouts software design philosophy,
+here is a great lecture if you haven't seen it already:
+https://www.youtube.com/watch?v=bmSAYlu0NcY
 
-What about
+Let's get this into v1 and get some testing and merge it for v4.20
+ASAP so we get some proper testing before the v4.20 merge
+window. It would be excellent if some of the current users of
+the array API could provide tested-by's or at least ACKs.
 
-	clk_sel = (divisor <= 1);
-	clk = clk_sel ? 0 : (roundup_pow_of_two(divisor) >> 2)
+For example ts-nbus.c must be a big benefactor.
 
-More concise, but I think still readable. I don't mind super much,
-though.
-
-
---pznduqydquaabgg3
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAluGXgkACgkQFA3kzBSg
-Kbawzw//cevnWqN2we7+wnmAITrE0rMxOUPFT0P8nDc/r98bsBxxSw7WHr8Sm527
-7gzrdc7oM78IozpZIX3pd0YfdrKWbN2vEW698a5qSczi3DIhhBWPgfQNQJ0DrX6N
-INY828lP6/eTm5N53QSEn7Xic4Y1DzSPWL+DPbH3S/HZCNcrOB4dSb89mpqurW+P
-EdzL35ro3V19VHGJ1cp6JBCevR9J62cCRox2x0EwsRdgVFfL8tnnHVPzRNoFyI8x
-sNqcW1o15xLoKwhJQjZjX3U8ofNrDYTjOCGjuk3N7Qe0DHJh3caVSOkX6PYbw3Ob
-m7EL+gU6gJAWbMrv+TilDiJDm3nEpoIU+Lr1gD3VRZBmTwD/UMqoTif0Rm+5g7La
-lk6HPFgstRkvLdKmcUzCpbipmrgnGc0RTuwtGdpTperOH3eq4u/MH2p83M4qAezL
-o/q/jJNSpzH1XSnfWzS2tkh9bgbTYbI5YwYohIzbWuPfW+7m1BhPsgaUvyWjD5sE
-A0p3Pxadvw6WOKHxkmfISzU09RyFt8m8DzbM4mDcFp3/Cjb/bWuyotYPvuZOjLJS
-S9cr4WahvILZ5J2OIGdg8+FIuwRMO0D7y8SKmtOkAqH9cOsMvGPZfdAMxDFvwBJo
-ysNzt9eZroXfkNY84z1sdJ5v3OleH1BBVzbs5APP+PfA/XjYl6Y=
-=r6vt
------END PGP SIGNATURE-----
-
---pznduqydquaabgg3--
+Yours,
+Linus Walleij
