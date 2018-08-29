@@ -1,72 +1,74 @@
-From: Chunyan Zhang <zhang.chunyan@linaro.org>
-Subject: [PATCH V7 9/9] dt-bindings: sdhci-sprd: Add bindings for the sdhci-sprd controller
-Date: Wed, 29 Aug 2018 15:03:04 +0800
-Message-ID: <1535526184-32718-10-git-send-email-zhang.chunyan@linaro.org>
-References: <1535526184-32718-1-git-send-email-zhang.chunyan@linaro.org>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH v3 0/6] mmc: tmio: refactor TMIO core a bit and add
+ UniPhier SD/eMMC controller support
+Date: Wed, 29 Aug 2018 10:27:09 +0200
+Message-ID: <20180829082708.2li4opnruodugo36@ninjato>
+References: <1534999460-15111-1-git-send-email-yamada.masahiro@socionext.com>
+ <CAPDyKFore4GkGyMn-4VA-2h1MbNp9sQ0Szif+Mjj5qtM-7autw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="cebslwlmy6zsog4x"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1535526184-32718-1-git-send-email-zhang.chunyan@linaro.org>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFore4GkGyMn-4VA-2h1MbNp9sQ0Szif+Mjj5qtM-7autw@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@unisoc.com>, Jason Wu <jason.wu@unisoc.com>, Chunyan Zhang <chunyan.zhang@unisoc.com>, Chunyan Zhang <zhang.lyra@gmail.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Masahiro Yamada <yamada.masahiro@socionext.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Masami Hiramatsu <mhiramat@kernel.org>, Jassi Brar <jaswinder.singh@linaro.org>, DTML <devicetree@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Chunyan Zhang <chunyan.zhang@unisoc.com>
 
-This patch adds the device-tree binding documentation for Spreadtrum
-SDHCI driver.
+--cebslwlmy6zsog4x
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Signed-off-by: Chunyan Zhang <chunyan.zhang@unisoc.com>
----
- .../devicetree/bindings/mmc/sdhci-sprd.txt         | 41 ++++++++++++++++++++++
- 1 file changed, 41 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-sprd.txt
+On Thu, Aug 23, 2018 at 12:43:31PM +0200, Ulf Hansson wrote:
+> On 23 August 2018 at 06:44, Masahiro Yamada
+> <yamada.masahiro@socionext.com> wrote:
+> >
+> > Add UniPhier SD/eMMC controller support.
+> >
+> > As a preparation, I changed tmio_mmc_set_clock() to a platform hook.
+> > The clock rate setting is platform-specific, and UniPhier variants
+> > will add another way.  I thought it would be better to split this
+> > to a hook to avoid a mess.
+> >
+> > V3 is rebase on top of Linus' tree.
+>=20
+> I have queued patch 1 -> 4, waiting for further reviews for patch 5 and 6.
 
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-sprd.txt b/Documentation/devicetree/bindings/mmc/sdhci-sprd.txt
-new file mode 100644
-index 0000000..45c9978
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/sdhci-sprd.txt
-@@ -0,0 +1,41 @@
-+* Spreadtrum SDHCI controller (sdhci-sprd)
-+
-+The Secure Digital (SD) Host controller on Spreadtrum SoCs provides an interface
-+for MMC, SD and SDIO types of cards.
-+
-+This file documents differences between the core properties in mmc.txt
-+and the properties used by the sdhci-sprd driver.
-+
-+Required properties:
-+- compatible: Should contain "sprd,sdhci-r11".
-+- reg: physical base address of the controller and length.
-+- interrupts: Interrupts used by the SDHCI controller.
-+- clocks: Should contain phandle for the clock feeding the SDHCI controller
-+- clock-names: Should contain the following:
-+	"sdio" - SDIO source clock (required)
-+	"enable" - gate clock which used for enabling/disabling the device (required)
-+
-+Optional properties:
-+- assigned-clocks: the same with "sdio" clock
-+- assigned-clock-parents: the default parent of "sdio" clock
-+
-+Examples:
-+
-+sdio0: sdio@20600000 {
-+	compatible  = "sprd,sdhci-r11";
-+	reg = <0 0x20600000 0 0x1000>;
-+	interrupts = <GIC_SPI 60 IRQ_TYPE_LEVEL_HIGH>;
-+
-+	clock-names = "sdio", "enable";
-+	clocks = <&ap_clk CLK_EMMC_2X>,
-+		 <&apahb_gate CLK_EMMC_EB>;
-+	assigned-clocks = <&ap_clk CLK_EMMC_2X>;
-+	assigned-clock-parents = <&rpll CLK_RPLL_390M>;
-+
-+	bus-width = <8>;
-+	non-removable;
-+	no-sdio;
-+	no-sd;
-+	cap-mmc-hw-reset;
-+	status = "okay";
-+};
--- 
-2.7.4
+I have re-tested patches 1-4 as applied to mmc/next and it all works
+fine. For those
+
+Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+
+Now, going to check patches 5+6...
+
+> > I dropped 6/7 because Renesas added more quirks
+> > in the current MW.
+
+Totally fine. We need to cleanup HS400 support more, then we can try the
+simplification you did for tmio_mmc.c, too. Thanks!
+
+
+--cebslwlmy6zsog4x
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAluGWNgACgkQFA3kzBSg
+KbZx3w//Wl0REQpw7bHVLUNFsr+rZYLXxVh2tOiagstUyLIo0LEbSWgT8v1wD2FM
+f/fAVq0/YABZRHJdF8T8yq7nsHicxhkbEmQEmrAfpYOL6HOCm9U3YiMZXuKx+NFZ
+mex9FRk3VyqPKDeKoYNvMoFSVkQeWwAB1WqKxgym0AmbggLK/mg2ehNQHrMYMCVE
+p1u6rTNEkx48nDvmsO/zOU6Nm9y7A59+dBjLz94Fzm85+Xq2daSKiOysERXEgep/
+plj22wcdeIoFMSZTl6hrB6n9wAhQeAferpvJQ74sE3Zd9QTcAujylS4SxGC62F2p
+Pz3rO7Dm31xuI/3jwm4UnPqXqEooeO7N90NoX8oeaTOpITLCHst9o7u2dbL8EYUL
+epQCGH/4eLarrYm89bQ2VxOz6ELoiRajVpeZo2naThKFT3YILRNc666C3YpfEbDj
+a/cBh3j9MiqkkjsfMuFXrPhSoA5/Z0LvEbQ6tI0N383NIgqGif2w5uKudvOl+tdL
+s4seGwFYFAs+SA55IeabRMKIB0SGlzEIjIJEyCb4mfA3gyrs83xdUHqVDYvULCGu
+/YRqwFZLltX27jxvgO4TrTH2Ad37BM2i8thINpSsgp5tyz42ZPiZalhghlnxhsYD
+unrToWX16xTd6yf/vQTtopZ7lbCbPQTNuILCXxENBRA9rYM6YKU=
+=7Y8v
+-----END PGP SIGNATURE-----
+
+--cebslwlmy6zsog4x--
