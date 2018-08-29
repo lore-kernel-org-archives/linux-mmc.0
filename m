@@ -1,153 +1,60 @@
 From: Janusz Krzysztofik <jmkrzyszt@gmail.com>
-Subject: Re: [RFC RFT PATCH v4 1/4] gpiolib: Pass bitmaps, not integer arrays, to get/set array
-Date: Wed, 29 Aug 2018 20:01:01 +0200
-Message-ID: <21039309.e3MgZOjmZl@z50>
-References: <20180813223448.21316-1-jmkrzyszt@gmail.com> <20180820234341.5271-2-jmkrzyszt@gmail.com> <CANiq72kM9bYJ1Q+dbLumjfQLZW223ZTrYEFqfQ2Jv2SAjrD1NA@mail.gmail.com>
+Subject: Re: [RFC RFT PATCH 0/4] gpiolib: speed up GPIO array processing
+Date: Wed, 29 Aug 2018 20:16:20 +0200
+Message-ID: <1595423.PPW7Q1vFt0@z50>
+References: <20180813223448.21316-1-jmkrzyszt@gmail.com> <20180820234341.5271-1-jmkrzyszt@gmail.com> <CACRpkdbgY6VNP-K-c5ErQtmO7E83D6c=49TN5siF8VTNh_66Jg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7Bit
 Return-path: <netdev-owner@vger.kernel.org>
-In-Reply-To: <CANiq72kM9bYJ1Q+dbLumjfQLZW223ZTrYEFqfQ2Jv2SAjrD1NA@mail.gmail.com>
+In-Reply-To: <CACRpkdbgY6VNP-K-c5ErQtmO7E83D6c=49TN5siF8VTNh_66Jg@mail.gmail.com>
 Sender: netdev-owner@vger.kernel.org
-To: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Jonathan Corbet <corbet@lwn.net>, Peter Korsgaard <peter.korsgaard@barco.com>, Peter Rosin <peda@axentia.se>, Ulf Hansson <ulf.hansson@linaro.org>, Andrew Lunn <andrew@lunn.ch>, Florian Fainelli <f.fainelli@gmail.com>, "David S. Miller" <davem@davemloft.net>, Dominik Brodowski <linux@dominikbrodowski.net>, Kishon Vijay Abraham I <kishon@ti.com>, Lars-Peter Clausen <lars@metafoo.de>, Michael Hennerich <Michael.Hennerich@analog.com>, Jonathan Cameron <jic23@kernel.org>, Hartmut Knaack <knaack.h@gmx.de>, Peter Meerwald-Stadler <pmeerw@pmeerw.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jiri Slaby <jslaby@suse.com>, linux-gpio@vger.kernel.org, Linux Doc Mailing List <linux-doc@vger.kernel.org>
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Jonathan Corbet <corbet@lwn.net>, Miguel Ojeda Sandonis <miguel.ojeda.sandonis@gmail.com>, Peter Korsgaard <peter.korsgaard@barco.com>, Peter Rosin <peda@axentia.se>, Ulf Hansson <ulf.hansson@linaro.org>, Andrew Lunn <andrew@lunn.ch>, Florian Fainelli <f.fainelli@gmail.com>, "David S. Miller" <davem@davemloft.net>, Dominik Brodowski <linux@dominikbrodowski.net>, kishon@ti.com, Lars-Peter Clausen <lars@metafoo.de>, Michael Hennerich <Michael.Hennerich@analog.com>, Jonathan Cameron <jic23@kernel.org>, Hartmut Knaack <knaack.h@gmx.de>, Peter Meerwald <pmeerw@pmeerw.net>, Greg KH <gregkh@linuxfoundation.org>, Jiri Slaby <jslaby@suse.com>, "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>, linux-doc@vger.kernel.org, linux-i2c@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Wednesday, August 29, 2018 2:03:18 PM CEST Miguel Ojeda wrote:
-> Hi Janusz,
+Hi Linus,
+
+On Wednesday, August 29, 2018 11:06:21 AM CEST Linus Walleij wrote:
+> On Tue, Aug 21, 2018 at 1:42 AM Janusz Krzysztofik <jmkrzyszt@gmail.com> 
+wrote:
 > 
-> On Tue, Aug 21, 2018 at 1:43 AM, Janusz Krzysztofik <jmkrzyszt@gmail.com> wrote:
-> > Most users of get/set array functions iterate consecutive bits of data,
-> > usually a single integer, while or processing array of results obtained
-> > from or building an array of values to be passed to those functions.
-> > Save time wasted on those iterations by changing the functions' API to
-> > accept bitmaps.
+> > This series is a follow up of the former "mtd: rawnand: ams-delta: Use
+> > gpio-omap accessors for data I/O" which already contained some changes
+> > to gpiolib.  Those previous attempts were commented by Borris Brezillon
+> > who suggested using GPIO API modified to accept bitmaps, and by Linus
+> > Walleij who suggested still more great ideas for further immprovement
+> > of the proposed API changes - thanks!
 > >
-> > All current users are updated as well.
-> >
-> > More benefits from the change are expected as soon as planned support
-> > for accepting/passing those bitmaps directly from/to respective GPIO
-> > chip callbacks if applicable is implemented.
-> >
-> > Signed-off-by: Janusz Krzysztofik <jmkrzyszt@gmail.com>
-> > ---
-> >  Documentation/driver-api/gpio/consumer.rst  | 22 ++++----
-> >  drivers/auxdisplay/hd44780.c                | 52 +++++++++--------
+> > The goal is to boost performans of get/set array functions while
+> > processing GPIO arrays which represent pins of a signle chip in
+> > hardware order.  If resulting performance is close to PIO, GPIO API
+> > can be used for data I/O without much loss of speed.
 > 
-> [CC'ing Willy and Geert for hd44780]
+> Hands down, this is a very pretty patch set. I'm a big fan already.
 > 
-> > diff --git a/drivers/auxdisplay/hd44780.c b/drivers/auxdisplay/hd44780.c
-> > index f1a42f0f1ded..d340473aa142 100644
-> > --- a/drivers/auxdisplay/hd44780.c
-> > +++ b/drivers/auxdisplay/hd44780.c
-> > @@ -62,20 +62,19 @@ static void hd44780_strobe_gpio(struct hd44780 *hd)
-> >  /* write to an LCD panel register in 8 bit GPIO mode */
-> >  static void hd44780_write_gpio8(struct hd44780 *hd, u8 val, unsigned int rs)
-> >  {
-> > -       int values[10]; /* for DATA[0-7], RS, RW */
-> > -       unsigned int i, n;
-> > +       unsigned long value_bitmap[1];  /* for DATA[0-7], RS, RW */
+> This is mainly because it fulfills the requirement for libraries
+> to be narrow and deep, which is what we want.
+> This refers to John Ousterhouts software design philosophy,
+> here is a great lecture if you haven't seen it already:
+> https://www.youtube.com/watch?v=bmSAYlu0NcY
 > 
-> Why [1]? I understand it is because in other cases it may be more than
-> one,
+> Let's get this into v1 and get some testing and merge it for v4.20
+> ASAP
 
-Yes, I tried to point out the fact the new API accepts a bitmap of an arbitrary 
-length, and I tried to use the same code pattern across changes to the API 
-users.
-
-> but...
-> 
-> > +       unsigned int n;
-> >
-> > -       for (i = 0; i < 8; i++)
-> > -               values[PIN_DATA0 + i] = !!(val & BIT(i));
-> > -       values[PIN_CTRL_RS] = rs;
-> > +       value_bitmap[0] = val;
-> > +       __assign_bit(PIN_CTRL_RS, value_bitmap, rs);
-> >         n = 9;
-> >         if (hd->pins[PIN_CTRL_RW]) {
-> > -               values[PIN_CTRL_RW] = 0;
-> > +               __clear_bit(PIN_CTRL_RW, value_bitmap);
-> >                 n++;
-> >         }
-> >
-> >         /* Present the data to the port */
-> > -       gpiod_set_array_value_cansleep(n, &hd->pins[PIN_DATA0], values);
-> > +       gpiod_set_array_value_cansleep(n, &hd->pins[PIN_DATA0], value_bitmap);
-> >
-> >         hd44780_strobe_gpio(hd);
-> >  }
-> > @@ -83,32 +82,31 @@ static void hd44780_write_gpio8(struct hd44780 *hd, u8 val, unsigned int rs)
-> >  /* write to an LCD panel register in 4 bit GPIO mode */
-> >  static void hd44780_write_gpio4(struct hd44780 *hd, u8 val, unsigned int rs)
-> >  {
-> > -       int values[10]; /* for DATA[0-7], RS, RW, but DATA[0-3] is unused */
-> > -       unsigned int i, n;
-> > +       /* for DATA[0-7], RS, RW, but DATA[0-3] is unused */
-> > +       unsigned long value_bitmap[0];
-> 
-> This one is even more strange... :-)
-
-This one is an error, should be 1 of course :-), thanks.
-
-> > +       unsigned int n;
-> >
-> >         /* High nibble + RS, RW */
-> > -       for (i = 4; i < 8; i++)
-> > -               values[PIN_DATA0 + i] = !!(val & BIT(i));
-> > -       values[PIN_CTRL_RS] = rs;
-> > +       value_bitmap[0] = val;
-> > +       __assign_bit(PIN_CTRL_RS, value_bitmap, rs);
-> >         n = 5;
-> >         if (hd->pins[PIN_CTRL_RW]) {
-> > -               values[PIN_CTRL_RW] = 0;
-> > +               __clear_bit(PIN_CTRL_RW, value_bitmap);
-> >                 n++;
-> >         }
-> > +       value_bitmap[0] = value_bitmap[0] >> PIN_DATA4;
-> 
-> Maybe >>=?
-
-OK.
-
-Answering you question below:
-To make my changes as clear as I could imagine, I decided to use the same indexing as in the original code, i.e., assign high nibble of val to bits 4-7 and two other values - rs and an optional 0 - to bits 8 and 9, respectively.
-Unlike in case of array of integers, where for the high nibble part you could just pass a pointer to a sub-array starting at the 5th value (i.e., &values[PIN_DATA4]), it was not possible to do the same for and arbitrary bit of a bitmap, e.g., pass a pointer to the 5th bit of *value_bitmap as an argument pointing to bit 0 of a bitmap to be processed. That's why I shifted the bitmap right by 4 bits.
-Then, ...
-
-> >
-> >         /* Present the data to the port */
-> > -       gpiod_set_array_value_cansleep(n, &hd->pins[PIN_DATA4],
-> > -                                      &values[PIN_DATA4]);
-> > +       gpiod_set_array_value_cansleep(n, &hd->pins[PIN_DATA4], value_bitmap);
-> >
-> >         hd44780_strobe_gpio(hd);
-> >
-> >         /* Low nibble */
-> > -       for (i = 0; i < 4; i++)
-> > -               values[PIN_DATA4 + i] = !!(val & BIT(i));
-> > +       value_bitmap[0] &= ~((1 << PIN_DATA4) - 1);
-> > +       value_bitmap[0] |= val & ~((1 << PIN_DATA4) - 1);
-> 
-> Are you sure this is correct? You are basically doing an or of
-> value_bitmap and val and clearing the low-nibble.
-
-having the rs and optional 0 already assigned to bits 4 and 5 of the bitmap, I just cleared bits 0-3 still containing the high nibble of val and assigned the low nibble of it to those bits, getting a result ready to be passed as an argument to gpiod_set_array_value_cansleep() below.
-
-I hope I didn't miss anything.
+Please hold on for a while, I'm going to resubmit soon, with the comment from 
+Peter Rosin on i2c-mux-gpio addressed and the error discovered by Miguel Ojeda 
+in hd44780 fixed.
 
 Thanks,
 Janusz
 
-> >
-> >         /* Present the data to the port */
-> > -       gpiod_set_array_value_cansleep(n, &hd->pins[PIN_DATA4],
-> > -                                      &values[PIN_DATA4]);
-> > +       gpiod_set_array_value_cansleep(n, &hd->pins[PIN_DATA4], value_bitmap);
-> >
-> >         hd44780_strobe_gpio(hd);
-> >  }
+> so we get some proper testing before the v4.20 merge
+> window. It would be excellent if some of the current users of
+> the array API could provide tested-by's or at least ACKs.
 > 
-> Cheers,
-> Miguel
+> For example ts-nbus.c must be a big benefactor.
+> 
+> Yours,
+> Linus Walleij
 > 
