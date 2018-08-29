@@ -1,58 +1,62 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH v3 5/6] mmc: renesas_sdhi: merge clk_{start,stop}
- functions to set_clock
-Date: Wed, 29 Aug 2018 10:40:27 +0200
-Message-ID: <20180829084027.6bymirtwvb4oiye2@ninjato>
+Subject: Re: [PATCH v3 6/6] mmc: tmio: refactor CLK_CTL bit calculation
+Date: Wed, 29 Aug 2018 10:49:13 +0200
+Message-ID: <20180829084913.fgdrigpeu3vi7vqs@ninjato>
 References: <1534999460-15111-1-git-send-email-yamada.masahiro@socionext.com>
- <1534999460-15111-6-git-send-email-yamada.masahiro@socionext.com>
+ <1534999460-15111-7-git-send-email-yamada.masahiro@socionext.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="5hvbzvoscyba3qyo"
+        protocol="application/pgp-signature"; boundary="pznduqydquaabgg3"
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1534999460-15111-6-git-send-email-yamada.masahiro@socionext.com>
+In-Reply-To: <1534999460-15111-7-git-send-email-yamada.masahiro@socionext.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Masahiro Yamada <yamada.masahiro@socionext.com>
 Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-renesas-soc@vger.kernel.org, Masami Hiramatsu <mhiramat@kernel.org>, Jassi Brar <jaswinder.singh@linaro.org>, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
 
---5hvbzvoscyba3qyo
+--pznduqydquaabgg3
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-On Thu, Aug 23, 2018 at 01:44:19PM +0900, Masahiro Yamada wrote:
-> renesas_sdhi_clk_start() and renesas_sdhi_clk_stop() are now only
-> called from renesas_sdhi_set_clock().  Merge them.
->=20
-> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
-
-Nice cleanup, works fine, and I don't see any issues with the
-datasheets. Thanks!
-
-Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
 
---5hvbzvoscyba3qyo
+> +	if (divisor <= 1) {
+> +		clk_sel = 1;
+> +		clk = 0;
+> +	} else {
+> +		clk_sel = 0;
+> +		/* bit7 set: 1/512, ... bit0 set:1/4, all bits clear: 1/2 */
+> +		clk = roundup_pow_of_two(divisor) >> 2;
+> +	}
+
+What about
+
+	clk_sel = (divisor <= 1);
+	clk = clk_sel ? 0 : (roundup_pow_of_two(divisor) >> 2)
+
+More concise, but I think still readable. I don't mind super much,
+though.
+
+
+--pznduqydquaabgg3
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAluGW/sACgkQFA3kzBSg
-Kbb1jg//Y3mpILZagitNh8Wly47dk54Leo3sO4RFOWHTHtPYH5Wf+NEb+9AG9B8s
-yXE11YuK0+UN+PBIibCnCw7b/HnUbMF70sBtx+8BmU/Bxonan1qljAvDOA8Mj6RG
-VHrLu9o1AbNkNGkThbv3Jz6JGXiqxXdIRhpHd2kKJaMA+FYsFgpjXRoUeia6xJyk
-HlEQWiBb5X1EH5zppXX+zQt1DyKf1eQkN0w8HudJcGRsIju2KQtVgt1I7go8ZWki
-5R4O2RiM6JPLyHSuHWPdhf6mdtBDVxAPaIOl65NlfSQrEkKJq6jaYe+NS3pi05nN
-rbcywEEhOcFMYwoGhzRbKeDuFGoqCOMVDED4uHTxiDoYcd/kDa8xgwoRcuKxPT58
-bGUNF1G1yoOwXh0nXMNg2AgPwq6ijJfrSHNmb0u4RSx2C0mDCUiJENvPredx/k3y
-Ndo3B3R7hYZJHBw5fOEkt695bdx43HLG9y7fIKDbwf+rpP+ch/caKZAyaRsWJmxS
-3hyYUxoIDcIGNmew+vLChbJlophTcuYkWp2Gy5cTGfFl6xf6KgOLFLieOil3u4oF
-/iYcBeNwRc/zpA9QBihC+xTGCwabn9419ZHOa+1+I1v57t88ZBELmJIBtuJVq7EG
-VIeKg085sFhrDWL1xAkdMDvlkWUUiZ4D5bjI9gk3v4N1saVNWYo=
-=MxpU
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAluGXgkACgkQFA3kzBSg
+Kbawzw//cevnWqN2we7+wnmAITrE0rMxOUPFT0P8nDc/r98bsBxxSw7WHr8Sm527
+7gzrdc7oM78IozpZIX3pd0YfdrKWbN2vEW698a5qSczi3DIhhBWPgfQNQJ0DrX6N
+INY828lP6/eTm5N53QSEn7Xic4Y1DzSPWL+DPbH3S/HZCNcrOB4dSb89mpqurW+P
+EdzL35ro3V19VHGJ1cp6JBCevR9J62cCRox2x0EwsRdgVFfL8tnnHVPzRNoFyI8x
+sNqcW1o15xLoKwhJQjZjX3U8ofNrDYTjOCGjuk3N7Qe0DHJh3caVSOkX6PYbw3Ob
+m7EL+gU6gJAWbMrv+TilDiJDm3nEpoIU+Lr1gD3VRZBmTwD/UMqoTif0Rm+5g7La
+lk6HPFgstRkvLdKmcUzCpbipmrgnGc0RTuwtGdpTperOH3eq4u/MH2p83M4qAezL
+o/q/jJNSpzH1XSnfWzS2tkh9bgbTYbI5YwYohIzbWuPfW+7m1BhPsgaUvyWjD5sE
+A0p3Pxadvw6WOKHxkmfISzU09RyFt8m8DzbM4mDcFp3/Cjb/bWuyotYPvuZOjLJS
+S9cr4WahvILZ5J2OIGdg8+FIuwRMO0D7y8SKmtOkAqH9cOsMvGPZfdAMxDFvwBJo
+ysNzt9eZroXfkNY84z1sdJ5v3OleH1BBVzbs5APP+PfA/XjYl6Y=
+=r6vt
 -----END PGP SIGNATURE-----
 
---5hvbzvoscyba3qyo--
+--pznduqydquaabgg3--
