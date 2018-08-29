@@ -1,66 +1,115 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC RFT PATCH 0/4] gpiolib: speed up GPIO array processing
-Date: Wed, 29 Aug 2018 12:19:41 +0200
-Message-ID: <CAPDyKFoWrsq9Qu3AOM=6xmpqOGU8XwaAmKZr9_xD-dpAzwWENg@mail.gmail.com>
-References: <20180813223448.21316-1-jmkrzyszt@gmail.com> <20180820234341.5271-1-jmkrzyszt@gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V7 2/9] mmc: sdhci: Add sd host v4 mode
+Date: Wed, 29 Aug 2018 13:44:13 +0300
+Message-ID: <9e5ea176-1d13-3ac6-ad09-3b748a398f17@intel.com>
+References: <1535526184-32718-1-git-send-email-zhang.chunyan@linaro.org>
+ <1535526184-32718-3-git-send-email-zhang.chunyan@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180820234341.5271-1-jmkrzyszt@gmail.com>
+In-Reply-To: <1535526184-32718-3-git-send-email-zhang.chunyan@linaro.org>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Janusz Krzysztofik <jmkrzyszt@gmail.com>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Jonathan Corbet <corbet@lwn.net>, Miguel Ojeda Sandonis <miguel.ojeda.sandonis@gmail.com>, Peter Korsgaard <peter.korsgaard@barco.com>, Peter Rosin <peda@axentia.se>, Andrew Lunn <andrew@lunn.ch>, Florian Fainelli <f.fainelli@gmail.com>, "David S. Miller" <davem@davemloft.net>, Dominik Brodowski <linux@dominikbrodowski.net>, Kishon Vijay Abraham I <kishon@ti.com>, Lars-Peter Clausen <lars@metafoo.de>, Michael Hennerich <Michael.Hennerich@analog.com>, Jonathan Cameron <jic23@kernel.org>, Hartmut Knaack <knaack.h@gmx.de>, Peter Meerwald-Stadler <pmeerw@pmeerw.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jiri Slaby <jslaby@suse.com>, linux-gpio@vger.kernel.org, linux-doc@vger.kernel.org, linux-i2c@vger.kernel.
+To: Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@unisoc.com>, Jason Wu <jason.wu@unisoc.com>, Chunyan Zhang <chunyan.zhang@unisoc.com>, Chunyan Zhang <zhang.lyra@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 21 August 2018 at 01:43, Janusz Krzysztofik <jmkrzyszt@gmail.com> wrote:
->
-> This series is a follow up of the former "mtd: rawnand: ams-delta: Use
-> gpio-omap accessors for data I/O" which already contained some changes
-> to gpiolib.  Those previous attempts were commented by Borris Brezillon
-> who suggested using GPIO API modified to accept bitmaps, and by Linus
-> Walleij who suggested still more great ideas for further immprovement
-> of the proposed API changes - thanks!
->
-> The goal is to boost performans of get/set array functions while
-> processing GPIO arrays which represent pins of a signle chip in
-> hardware order.  If resulting performance is close to PIO, GPIO API
-> can be used for data I/O without much loss of speed.
->
-> Created and tested on a low end Amstrad Delta board with NAND driver
-> updated to use GPIO API for data I/O.  Performance degrade compared to
-> PIO is much better than before the optimization but still not quite
-> satisfactory.
->
->
-> Janusz Krzysztofik (4):
->       gpiolib: Pass bitmaps, not integer arrays, to get/set array
->       gpiolib: Identify arrays matching GPIO hardware
->       gpiolib: Pass array info to get/set array functions
->       gpiolib: Implement fast processing path in get/set array
->
->
->  Documentation/driver-api/gpio/board.rst     |   15 +
->  Documentation/driver-api/gpio/consumer.rst  |   48 +++-
->  drivers/auxdisplay/hd44780.c                |   64 +++---
->  drivers/bus/ts-nbus.c                       |   25 --
->  drivers/gpio/gpio-max3191x.c                |   23 +-
->  drivers/gpio/gpiolib.c                      |  279 ++++++++++++++++++++++------
->  drivers/gpio/gpiolib.h                      |   15 +
->  drivers/i2c/muxes/i2c-mux-gpio.c            |    5
->  drivers/mmc/core/pwrseq_simple.c            |   15 -
->  drivers/mux/gpio.c                          |    7
->  drivers/net/phy/mdio-mux-gpio.c             |    5
->  drivers/pcmcia/soc_common.c                 |   14 -
->  drivers/phy/motorola/phy-mapphone-mdm6600.c |   21 +-
->  drivers/staging/iio/adc/ad7606.c            |   12 -
->  drivers/tty/serial/serial_mctrl_gpio.c      |    9
->  include/linux/gpio/consumer.h               |   35 ++-
->  16 files changed, 410 insertions(+), 182 deletions(-)
->
+On 29/08/18 10:02, Chunyan Zhang wrote:
+> For SD host controller version 4.00 or later ones, there're two
+> modes of implementation - Version 3.00 compatible mode or
+> Version 4 mode.  This patch introduced an interface to enable
+> v4 mode.
+> 
+> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
 
-For the mmc related changes:
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
-
-Kind regards
-Uffe
+> ---
+>  drivers/mmc/host/sdhci.c | 29 +++++++++++++++++++++++++++++
+>  drivers/mmc/host/sdhci.h |  3 +++
+>  2 files changed, 32 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 01bf88c..0c61105 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -123,6 +123,29 @@ EXPORT_SYMBOL_GPL(sdhci_dumpregs);
+>   *                                                                           *
+>  \*****************************************************************************/
+>  
+> +static void sdhci_do_enable_v4_mode(struct sdhci_host *host)
+> +{
+> +	u16 ctrl2;
+> +
+> +	ctrl2 = sdhci_readb(host, SDHCI_HOST_CONTROL2);
+> +	if (ctrl2 & SDHCI_CTRL_V4_MODE)
+> +		return;
+> +
+> +	ctrl2 |= SDHCI_CTRL_V4_MODE;
+> +	sdhci_writeb(host, ctrl2, SDHCI_HOST_CONTROL);
+> +}
+> +
+> +/*
+> + * This can be called before sdhci_add_host() by Vendor's host controller
+> + * driver to enable v4 mode if supported.
+> + */
+> +void sdhci_enable_v4_mode(struct sdhci_host *host)
+> +{
+> +	host->v4_mode = true;
+> +	sdhci_do_enable_v4_mode(host);
+> +}
+> +EXPORT_SYMBOL_GPL(sdhci_enable_v4_mode);
+> +
+>  static inline bool sdhci_data_line_cmd(struct mmc_command *cmd)
+>  {
+>  	return cmd->data || cmd->flags & MMC_RSP_BUSY;
+> @@ -252,6 +275,9 @@ static void sdhci_init(struct sdhci_host *host, int soft)
+>  	else
+>  		sdhci_do_reset(host, SDHCI_RESET_ALL);
+>  
+> +	if (host->v4_mode)
+> +		sdhci_do_enable_v4_mode(host);
+> +
+>  	sdhci_set_default_irqs(host);
+>  
+>  	host->cqe_on = false;
+> @@ -3378,6 +3404,9 @@ void __sdhci_read_caps(struct sdhci_host *host, u16 *ver, u32 *caps, u32 *caps1)
+>  
+>  	sdhci_do_reset(host, SDHCI_RESET_ALL);
+>  
+> +	if (host->v4_mode)
+> +		sdhci_do_enable_v4_mode(host);
+> +
+>  	of_property_read_u64(mmc_dev(host->mmc)->of_node,
+>  			     "sdhci-caps-mask", &dt_caps_mask);
+>  	of_property_read_u64(mmc_dev(host->mmc)->of_node,
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index dbd48a8..61611e3 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -184,6 +184,7 @@
+>  #define   SDHCI_CTRL_DRV_TYPE_D		0x0030
+>  #define  SDHCI_CTRL_EXEC_TUNING		0x0040
+>  #define  SDHCI_CTRL_TUNED_CLK		0x0080
+> +#define  SDHCI_CTRL_V4_MODE		0x1000
+>  #define  SDHCI_CTRL_PRESET_VAL_ENABLE	0x8000
+>  
+>  #define SDHCI_CAPABILITIES	0x40
+> @@ -504,6 +505,7 @@ struct sdhci_host {
+>  	bool preset_enabled;	/* Preset is enabled */
+>  	bool pending_reset;	/* Cmd/data reset is pending */
+>  	bool irq_wake_enabled;	/* IRQ wakeup is enabled */
+> +	bool v4_mode;		/* Host Version 4 Enable */
+>  
+>  	struct mmc_request *mrqs_done[SDHCI_MAX_MRQS];	/* Requests done */
+>  	struct mmc_command *cmd;	/* Current command */
+> @@ -752,6 +754,7 @@ bool sdhci_cqe_irq(struct sdhci_host *host, u32 intmask, int *cmd_error,
+>  		   int *data_error);
+>  
+>  void sdhci_dumpregs(struct sdhci_host *host);
+> +void sdhci_enable_v4_mode(struct sdhci_host *host);
+>  
+>  void sdhci_start_tuning(struct sdhci_host *host);
+>  void sdhci_end_tuning(struct sdhci_host *host);
+> 
