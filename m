@@ -1,72 +1,88 @@
-From: Chunyan Zhang <zhang.chunyan@linaro.org>
-Subject: [PATCH V8 9/9] dt-bindings: sdhci-sprd: Add bindings for the sdhci-sprd controller
-Date: Thu, 30 Aug 2018 16:21:45 +0800
-Message-ID: <1535617305-16952-10-git-send-email-zhang.chunyan@linaro.org>
-References: <1535617305-16952-1-git-send-email-zhang.chunyan@linaro.org>
+From: Chunyan Zhang <zhang.lyra@gmail.com>
+Subject: Re: [PATCH V7 7/9] mmc: sdhci: SDMA may use Auto-CMD23 in v4 mode
+Date: Thu, 30 Aug 2018 16:23:03 +0800
+Message-ID: <CAAfSe-tKKiV0CCN2Oz6wY5XmfO2aAJHPBcaP48YiEji=PUV5sw@mail.gmail.com>
+References: <1535526184-32718-1-git-send-email-zhang.chunyan@linaro.org>
+ <1535526184-32718-8-git-send-email-zhang.chunyan@linaro.org>
+ <a38f8d87-a373-5de4-c3b5-bba68f8ffeec@intel.com> <CAAfSe-s-W467D2dk-_7AWQz9ZaysROf5otoN-o-yu3Eu5ZVC4g@mail.gmail.com>
+ <48e8ec2c-c3e3-ad08-2c1e-a0feb9ba0820@intel.com> <CAAfSe-sATpAmhemU896e4kCj_EUwA+3dkjXN2yxXO5Cvje6J=Q@mail.gmail.com>
+ <145ef368-3aae-c6ae-14c9-6e8f50503dcf@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1535617305-16952-1-git-send-email-zhang.chunyan@linaro.org>
+In-Reply-To: <145ef368-3aae-c6ae-14c9-6e8f50503dcf@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@unisoc.com>, Jason Wu <jason.wu@unisoc.com>, Chunyan Zhang <chunyan.zhang@unisoc.com>, Chunyan Zhang <zhang.lyra@gmail.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@unisoc.com>, Jason Wu <jason.wu@unisoc.com>, Chunyan Zhang <chunyan.zhang@unisoc.com>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Chunyan Zhang <chunyan.zhang@unisoc.com>
+On 30 August 2018 at 15:51, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 30/08/18 10:04, Chunyan Zhang wrote:
+>> On 30 August 2018 at 13:59, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>> On 29/08/18 14:39, Chunyan Zhang wrote:
+>>>> On 29 August 2018 at 18:59, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>>> On 29/08/18 10:03, Chunyan Zhang wrote:
+>>>>>> When Host Version 4 Enable is set to 1, SDMA uses ADMA System Address
+>>>>>> register (05Fh-058h) instead of using register (000h-004h) to indicate
+>>>>>> its system address of data location. The register (000h-004h) is
+>>>>>> re-assigned to 32-bit Block Count and Auto CMD23 argument, so then SDMA
+>>>>>> may use Auto CMD23.
+>>>>>>
+>>>>>> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
+>>>>>> ---
+>>>>>>  drivers/mmc/host/sdhci.c | 8 ++++++--
+>>>>>>  1 file changed, 6 insertions(+), 2 deletions(-)
+>>>>>>
+>>>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>>>>> index 62d843ac90..ac92e0f 100644
+>>>>>> --- a/drivers/mmc/host/sdhci.c
+>>>>>> +++ b/drivers/mmc/host/sdhci.c
+>>>>>> @@ -3834,10 +3834,14 @@ int sdhci_setup_host(struct sdhci_host *host)
+>>>>>>       if (host->quirks & SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12)
+>>>>>>               host->flags |= SDHCI_AUTO_CMD12;
+>>>>>>
+>>>>>> -     /* Auto-CMD23 stuff only works in ADMA or PIO. */
+>>>>>> +     /*
+>>>>>> +      * For v3 mode, Auto-CMD23 stuff only works in ADMA or PIO;
+>>>>>
+>>>>> ; -> .
+>>>>>
+>>>>>> +      * For v4 mode, SDMA may use Auto-CMD23 as well.
+>>>>>> +      */
+>>>>>>       if ((host->version >= SDHCI_SPEC_300) &&
+>>>>>>           ((host->flags & SDHCI_USE_ADMA) ||
+>>>>>> -          !(host->flags & SDHCI_USE_SDMA)) &&
+>>>>>> +          (!host->v4_mode && !(host->flags & SDHCI_USE_SDMA)) ||
+>>>>>> +          (host->v4_mode && (host->flags & SDHCI_USE_SDMA))) &&
+>>>>>>            !(host->quirks2 & SDHCI_QUIRK2_ACMD23_BROKEN)) {
+>>>>>
+>>>>> This is over complicated.  We can use auto-CMD23 if not using SDMA or if in
+>>>>> v4_mode i.e.
+>>>>>
+>>>>>         if (host->version >= SDHCI_SPEC_300 &&
+>>>>>             (!(host->flags & SDHCI_USE_SDMA) || host->v4_mode) &&
+>>>>>             !(host->quirks2 & SDHCI_QUIRK2_ACMD23_BROKEN)) {
+>>>>>
+>>>>
+>>>> So no matter whether SDHCI_USE_ADMA is selected, right?
+>>>
+>>> Yes
+>>
+>> I think you mean like this:
+>>
+>> if ((host->version >= SDHCI_SPEC_300) &&
+>>     ((host->flags & SDHCI_USE_ADMA) ||
+>>      !(host->flags & SDHCI_USE_SDMA) || host->v4_mode) &&
+>>      !(host->quirks2 & SDHCI_QUIRK2_ACMD23_BROKEN))
+>>
+>> Otherwise, without checking (host->flags & SDHCI_USE_ADMA), if using
+>> ADMA and SDMA on v3 mode, auto-CMD23 would not be selected.
+>
+> Yeah you are right - I was thinking SDHCI_USE_SDMA and SDHCI_USE_ADMA were
+> mutually exclusive.  Thanks!
 
-This patch adds the device-tree binding documentation for Spreadtrum
-SDHCI driver.
+Many thanks for your review!
 
-Signed-off-by: Chunyan Zhang <chunyan.zhang@unisoc.com>
----
- .../devicetree/bindings/mmc/sdhci-sprd.txt         | 41 ++++++++++++++++++++++
- 1 file changed, 41 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-sprd.txt
+Chunyan
 
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-sprd.txt b/Documentation/devicetree/bindings/mmc/sdhci-sprd.txt
-new file mode 100644
-index 0000000..45c9978
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/sdhci-sprd.txt
-@@ -0,0 +1,41 @@
-+* Spreadtrum SDHCI controller (sdhci-sprd)
-+
-+The Secure Digital (SD) Host controller on Spreadtrum SoCs provides an interface
-+for MMC, SD and SDIO types of cards.
-+
-+This file documents differences between the core properties in mmc.txt
-+and the properties used by the sdhci-sprd driver.
-+
-+Required properties:
-+- compatible: Should contain "sprd,sdhci-r11".
-+- reg: physical base address of the controller and length.
-+- interrupts: Interrupts used by the SDHCI controller.
-+- clocks: Should contain phandle for the clock feeding the SDHCI controller
-+- clock-names: Should contain the following:
-+	"sdio" - SDIO source clock (required)
-+	"enable" - gate clock which used for enabling/disabling the device (required)
-+
-+Optional properties:
-+- assigned-clocks: the same with "sdio" clock
-+- assigned-clock-parents: the default parent of "sdio" clock
-+
-+Examples:
-+
-+sdio0: sdio@20600000 {
-+	compatible  = "sprd,sdhci-r11";
-+	reg = <0 0x20600000 0 0x1000>;
-+	interrupts = <GIC_SPI 60 IRQ_TYPE_LEVEL_HIGH>;
-+
-+	clock-names = "sdio", "enable";
-+	clocks = <&ap_clk CLK_EMMC_2X>,
-+		 <&apahb_gate CLK_EMMC_EB>;
-+	assigned-clocks = <&ap_clk CLK_EMMC_2X>;
-+	assigned-clock-parents = <&rpll CLK_RPLL_390M>;
-+
-+	bus-width = <8>;
-+	non-removable;
-+	no-sdio;
-+	no-sd;
-+	cap-mmc-hw-reset;
-+	status = "okay";
-+};
--- 
-2.7.4
+>
