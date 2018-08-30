@@ -1,7 +1,7 @@
 From: Aapo Vienamo <avienamo@nvidia.com>
-Subject: [PATCH v3 33/38] arm64: dts: tegra186: Add sdmmc pad auto calibration offsets
-Date: Thu, 30 Aug 2018 18:06:34 +0300
-Message-ID: <20180830150639.21048-34-avienamo@nvidia.com>
+Subject: [PATCH v3 34/38] arm64: dts: tegra210: Add sdmmc pad auto calibration offsets
+Date: Thu, 30 Aug 2018 18:06:35 +0300
+Message-ID: <20180830150639.21048-35-avienamo@nvidia.com>
 References: <20180830150639.21048-1-avienamo@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -18,58 +18,50 @@ strength calibration.
 Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
 Acked-by: Thierry Reding <treding@nvidia.com>
 ---
- arch/arm64/boot/dts/nvidia/tegra186.dtsi | 20 ++++++++++++++++++++
- 1 file changed, 20 insertions(+)
+ arch/arm64/boot/dts/nvidia/tegra210.dtsi | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
 
-diff --git a/arch/arm64/boot/dts/nvidia/tegra186.dtsi b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
-index 7669756c060f..b7020dd2be44 100644
---- a/arch/arm64/boot/dts/nvidia/tegra186.dtsi
-+++ b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
-@@ -240,6 +240,12 @@
+diff --git a/arch/arm64/boot/dts/nvidia/tegra210.dtsi b/arch/arm64/boot/dts/nvidia/tegra210.dtsi
+index bc1918e07cc3..2a80f2bd80e5 100644
+--- a/arch/arm64/boot/dts/nvidia/tegra210.dtsi
++++ b/arch/arm64/boot/dts/nvidia/tegra210.dtsi
+@@ -1051,6 +1051,10 @@
  		pinctrl-names = "sdmmc-3v3", "sdmmc-1v8";
  		pinctrl-0 = <&sdmmc1_3v3>;
  		pinctrl-1 = <&sdmmc1_1v8>;
-+		nvidia,pad-autocal-pull-up-offset-3v3-timeout = <0x07>;
-+		nvidia,pad-autocal-pull-down-offset-3v3-timeout = <0x06>;
-+		nvidia,pad-autocal-pull-up-offset-1v8-timeout = <0x07>;
-+		nvidia,pad-autocal-pull-down-offset-1v8-timeout = <0x07>;
-+		nvidia,pad-autocal-pull-up-offset-sdr104 = <0x03>;
-+		nvidia,pad-autocal-pull-down-offset-sdr104 = <0x05>;
++		nvidia,pad-autocal-pull-up-offset-3v3 = <0x00>;
++		nvidia,pad-autocal-pull-down-offset-3v3 = <0x7d>;
++		nvidia,pad-autocal-pull-up-offset-1v8 = <0x7b>;
++		nvidia,pad-autocal-pull-down-offset-1v8 = <0x7b>;
  		status = "disabled";
  	};
  
-@@ -254,6 +260,10 @@
- 		pinctrl-names = "sdmmc-3v3", "sdmmc-1v8";
- 		pinctrl-0 = <&sdmmc2_3v3>;
- 		pinctrl-1 = <&sdmmc2_1v8>;
-+		nvidia,pad-autocal-pull-up-offset-3v3-timeout = <0x07>;
-+		nvidia,pad-autocal-pull-down-offset-3v3-timeout = <0x06>;
-+		nvidia,pad-autocal-pull-up-offset-1v8-timeout = <0x07>;
-+		nvidia,pad-autocal-pull-down-offset-1v8-timeout = <0x07>;
+@@ -1062,6 +1066,8 @@
+ 		clock-names = "sdhci";
+ 		resets = <&tegra_car 9>;
+ 		reset-names = "sdhci";
++		nvidia,pad-autocal-pull-up-offset-1v8 = <0x05>;
++		nvidia,pad-autocal-pull-down-offset-1v8 = <0x05>;
  		status = "disabled";
  	};
  
-@@ -268,6 +278,12 @@
+@@ -1076,6 +1082,10 @@
  		pinctrl-names = "sdmmc-3v3", "sdmmc-1v8";
  		pinctrl-0 = <&sdmmc3_3v3>;
  		pinctrl-1 = <&sdmmc3_1v8>;
-+		nvidia,pad-autocal-pull-up-offset-1v8 = <0x00>;
-+		nvidia,pad-autocal-pull-down-offset-1v8 = <0x7a>;
-+		nvidia,pad-autocal-pull-up-offset-3v3-timeout = <0x07>;
-+		nvidia,pad-autocal-pull-down-offset-3v3-timeout = <0x06>;
-+		nvidia,pad-autocal-pull-up-offset-1v8-timeout = <0x07>;
-+		nvidia,pad-autocal-pull-down-offset-1v8-timeout = <0x07>;
++		nvidia,pad-autocal-pull-up-offset-3v3 = <0x00>;
++		nvidia,pad-autocal-pull-down-offset-3v3 = <0x7d>;
++		nvidia,pad-autocal-pull-up-offset-1v8 = <0x7b>;
++		nvidia,pad-autocal-pull-down-offset-1v8 = <0x7b>;
  		status = "disabled";
  	};
  
-@@ -279,6 +295,10 @@
+@@ -1087,6 +1097,8 @@
  		clock-names = "sdhci";
- 		resets = <&bpmp TEGRA186_RESET_SDMMC4>;
+ 		resets = <&tegra_car 15>;
  		reset-names = "sdhci";
-+		nvidia,pad-autocal-pull-up-offset-hs400 = <0x05>;
-+		nvidia,pad-autocal-pull-down-offset-hs400 = <0x05>;
-+		nvidia,pad-autocal-pull-up-offset-1v8-timeout = <0x0a>;
-+		nvidia,pad-autocal-pull-down-offset-1v8-timeout = <0x0a>;
++		nvidia,pad-autocal-pull-up-offset-1v8 = <0x05>;
++		nvidia,pad-autocal-pull-down-offset-1v8 = <0x05>;
  		status = "disabled";
  	};
  
