@@ -1,7 +1,7 @@
 From: Aapo Vienamo <avienamo@nvidia.com>
-Subject: [PATCH v3 17/38] mmc: tegra: Perform pad calibration after voltage switch
-Date: Thu, 30 Aug 2018 18:06:18 +0300
-Message-ID: <20180830150639.21048-18-avienamo@nvidia.com>
+Subject: [PATCH v3 18/38] mmc: tegra: Enable pad calibration on Tegra210 and Tegra186
+Date: Thu, 30 Aug 2018 18:06:19 +0300
+Message-ID: <20180830150639.21048-19-avienamo@nvidia.com>
 References: <20180830150639.21048-1-avienamo@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,37 +12,38 @@ To: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Thier
 Cc: devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Aapo Vienamo <avienamo@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Run the automatic pad calibration after voltage switching if
-tegra_host->pad_calib_required is set.
+Set NVQUIRK_HAS_PADCALIB on Tegra210 and Tegra186 to enable automatic
+pad drive strength calibration.
 
 Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
 Acked-by: Thierry Reding <treding@nvidia.com>
 ---
- drivers/mmc/host/sdhci-tegra.c | 5 +++++
- 1 file changed, 5 insertions(+)
+ drivers/mmc/host/sdhci-tegra.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index a3e31f18db48..71b3b3e1c648 100644
+index 71b3b3e1c648..caa9a1b30d2e 100644
 --- a/drivers/mmc/host/sdhci-tegra.c
 +++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -587,6 +587,8 @@ static int sdhci_tegra_start_signal_voltage_switch(struct mmc_host *mmc,
- 						   struct mmc_ios *ios)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
- 	int ret = 0;
+@@ -773,7 +773,8 @@ static const struct sdhci_pltfm_data sdhci_tegra210_pdata = {
  
- 	if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330) {
-@@ -601,6 +603,9 @@ static int sdhci_tegra_start_signal_voltage_switch(struct mmc_host *mmc,
- 		ret = tegra_sdhci_set_padctrl(host, ios->signal_voltage);
- 	}
+ static const struct sdhci_tegra_soc_data soc_data_tegra210 = {
+ 	.pdata = &sdhci_tegra210_pdata,
+-	.nvquirks = NVQUIRK_NEEDS_PAD_CONTROL,
++	.nvquirks = NVQUIRK_NEEDS_PAD_CONTROL |
++		    NVQUIRK_HAS_PADCALIB,
+ };
  
-+	if (tegra_host->pad_calib_required)
-+		tegra_sdhci_pad_autocalib(host);
-+
- 	return ret;
- }
+ static const struct sdhci_pltfm_data sdhci_tegra186_pdata = {
+@@ -797,7 +798,8 @@ static const struct sdhci_pltfm_data sdhci_tegra186_pdata = {
  
+ static const struct sdhci_tegra_soc_data soc_data_tegra186 = {
+ 	.pdata = &sdhci_tegra186_pdata,
+-	.nvquirks = NVQUIRK_NEEDS_PAD_CONTROL,
++	.nvquirks = NVQUIRK_NEEDS_PAD_CONTROL |
++		    NVQUIRK_HAS_PADCALIB,
+ };
+ 
+ static const struct of_device_id sdhci_tegra_dt_match[] = {
 -- 
 2.18.0
