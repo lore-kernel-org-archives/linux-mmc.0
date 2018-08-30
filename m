@@ -1,7 +1,7 @@
 From: Aapo Vienamo <avienamo@nvidia.com>
-Subject: [PATCH v3 23/38] mmc: tegra: Use standard SDHCI tuning on Tegra210 and Tegra186
-Date: Thu, 30 Aug 2018 18:06:24 +0300
-Message-ID: <20180830150639.21048-24-avienamo@nvidia.com>
+Subject: [PATCH v3 24/38] mmc: tegra: Remove tegra_sdhci_writew() from tegra210_sdhci_ops
+Date: Thu, 30 Aug 2018 18:06:25 +0300
+Message-ID: <20180830150639.21048-25-avienamo@nvidia.com>
 References: <20180830150639.21048-1-avienamo@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,56 +12,28 @@ To: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Thier
 Cc: devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Aapo Vienamo <avienamo@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Add a new sdhci_ops struct for Tegra210 and Tegra186 which doesn't
-set the custom tuning callback used on previous SoC generations.
+tegra_sdhci_writew() defers the write to SDHCI_TRANSFER_MODE until
+SDHCI_COMMAND is written. This is not necessary on Tegra210 and Tegra186
+and it breaks read-modify-write operations on SDHCI_TRANSFER_MODE
+because writes to SDHCI_TRANSFER_MODE aren't visible until SDHCI_COMMAND
+has been written to. This results in tuning failures on Tegra210.
 
 Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
-Acked-by: Thierry Reding <treding@nvidia.com>
 ---
- drivers/mmc/host/sdhci-tegra.c | 17 +++++++++++++++--
- 1 file changed, 15 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sdhci-tegra.c | 1 -
+ 1 file changed, 1 deletion(-)
 
 diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 704c82cf7adf..f68557a01d5d 100644
+index f68557a01d5d..0bdce437e752 100644
 --- a/drivers/mmc/host/sdhci-tegra.c
 +++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -831,6 +831,19 @@ static const struct sdhci_tegra_soc_data soc_data_tegra124 = {
- 	.pdata = &sdhci_tegra124_pdata,
- };
- 
-+static const struct sdhci_ops tegra210_sdhci_ops = {
-+	.get_ro     = tegra_sdhci_get_ro,
-+	.read_w     = tegra_sdhci_readw,
-+	.write_w    = tegra_sdhci_writew,
-+	.write_l    = tegra_sdhci_writel,
-+	.set_clock  = tegra_sdhci_set_clock,
-+	.set_bus_width = sdhci_set_bus_width,
-+	.reset      = tegra_sdhci_reset,
-+	.set_uhs_signaling = tegra_sdhci_set_uhs_signaling,
-+	.voltage_switch = tegra_sdhci_voltage_switch,
-+	.get_max_clock = tegra_sdhci_get_max_clock,
-+};
-+
- static const struct sdhci_pltfm_data sdhci_tegra210_pdata = {
- 	.quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
- 		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
-@@ -839,7 +852,7 @@ static const struct sdhci_pltfm_data sdhci_tegra210_pdata = {
- 		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
- 		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
- 	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
--	.ops  = &tegra114_sdhci_ops,
-+	.ops  = &tegra210_sdhci_ops,
- };
- 
- static const struct sdhci_tegra_soc_data soc_data_tegra210 = {
-@@ -865,7 +878,7 @@ static const struct sdhci_pltfm_data sdhci_tegra186_pdata = {
- 		    * But it is not supported as of now.
- 		    */
- 		   SDHCI_QUIRK2_BROKEN_64_BIT_DMA,
--	.ops  = &tegra114_sdhci_ops,
-+	.ops  = &tegra210_sdhci_ops,
- };
- 
- static const struct sdhci_tegra_soc_data soc_data_tegra186 = {
+@@ -834,7 +834,6 @@ static const struct sdhci_tegra_soc_data soc_data_tegra124 = {
+ static const struct sdhci_ops tegra210_sdhci_ops = {
+ 	.get_ro     = tegra_sdhci_get_ro,
+ 	.read_w     = tegra_sdhci_readw,
+-	.write_w    = tegra_sdhci_writew,
+ 	.write_l    = tegra_sdhci_writel,
+ 	.set_clock  = tegra_sdhci_set_clock,
+ 	.set_bus_width = sdhci_set_bus_width,
 -- 
 2.18.0
