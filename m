@@ -1,583 +1,221 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V8 8/9] mmc: sdhci-sprd: Add Spreadtrum's initial host
- controller
-Date: Thu, 30 Aug 2018 11:41:01 +0300
-Message-ID: <1382b9c6-c519-b8eb-8a32-7724dc5482a0@intel.com>
-References: <1535617305-16952-1-git-send-email-zhang.chunyan@linaro.org>
- <1535617305-16952-9-git-send-email-zhang.chunyan@linaro.org>
+From: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
+Subject: Re: [PATCH v5 1/4] gpiolib: Pass bitmaps, not integer arrays, to
+ get/set array
+Date: Thu, 30 Aug 2018 13:10:59 +0200
+Message-ID: <CANiq72kJT15ELkYr2U5r4-pvGunQFLmZ5dhdZLnjmM7NWBnkNQ@mail.gmail.com>
+References: <20180820234341.5271-1-jmkrzyszt@gmail.com> <20180829204900.19390-1-jmkrzyszt@gmail.com>
+ <20180829204900.19390-2-jmkrzyszt@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1535617305-16952-9-git-send-email-zhang.chunyan@linaro.org>
-Content-Language: en-US
+In-Reply-To: <20180829204900.19390-2-jmkrzyszt@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@unisoc.com>, Jason Wu <jason.wu@unisoc.com>, Chunyan Zhang <chunyan.zhang@unisoc.com>, Chunyan Zhang <zhang.lyra@gmail.com>
+To: Janusz Krzysztofik <jmkrzyszt@gmail.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>, Jonathan Corbet <corbet@lwn.net>, Peter Korsgaard <peter.korsgaard@barco.com>, Peter Rosin <peda@axentia.se>, Ulf Hansson <ulf.hansson@linaro.org>, Andrew Lunn <andrew@lunn.ch>, Florian Fainelli <f.fainelli@gmail.com>, "David S. Miller" <davem@davemloft.net>, Dominik Brodowski <linux@dominikbrodowski.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kishon Vijay Abraham I <kishon@ti.com>, Lars-Peter Clausen <lars@metafoo.de>, Michael Hennerich <Michael.Hennerich@analog.com>, Jonathan Cameron <jic23@kernel.org>, Hartmut Knaack <knaack.h@gmx.de>, Peter Meerwald-Stadler <pmeerw@pmeerw.net>, Jiri Slaby <jslaby@suse.com>, Willy Tarreau <w@1wt.eu>, Geert Uytterhoeven <geert@linux-m68k.org>, Linux
 List-Id: linux-mmc@vger.kernel.org
 
-On 30/08/18 11:21, Chunyan Zhang wrote:
-> From: Chunyan Zhang <chunyan.zhang@unisoc.com>
-> 
-> This patch adds the initial support of Secure Digital Host Controller
-> Interface compliant controller found in some latest Spreadtrum chipsets.
-> This patch has been tested on the version of SPRD-R11 controller.
-> 
-> R11 is a variant based on SD v4.0 specification.
-> 
-> With this driver, R11 mmc can be initialized, can be mounted, read and
-> written.
-> 
-> Original-by: Billows Wu <billows.wu@unisoc.com>
-> Signed-off-by: Chunyan Zhang <chunyan.zhang@unisoc.com>
+Hi Janusz,
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-
+On Wed, Aug 29, 2018 at 10:48 PM, Janusz Krzysztofik
+<jmkrzyszt@gmail.com> wrote:
+> Most users of get/set array functions iterate consecutive bits of data,
+> usually a single integer, while processing array of results obtained
+> from, or building an array of values to be passed to those functions.
+> Save time wasted on those iterations by changing the functions' API to
+> accept bitmaps.
+>
+> All current users are updated as well.
+>
+> More benefits from the change are expected as soon as planned support
+> for accepting/passing those bitmaps directly from/to respective GPIO
+> chip callbacks if applicable is implemented.
+>
+> Cc: Jonathan Corbet <corbet@lwn.net>
+> Cc: Miguel Ojeda Sandonis <miguel.ojeda.sandonis@gmail.com>
+> Cc: Peter Korsgaard <peter.korsgaard@barco.com>
+> Cc: Peter Rosin <peda@axentia.se>
+> Cc: Andrew Lunn <andrew@lunn.ch>
+> Cc: Florian Fainelli <f.fainelli@gmail.com>
+> Cc: "David S. Miller" <davem@davemloft.net>
+> Cc: Dominik Brodowski <linux@dominikbrodowski.net>
+> Cc: Kishon Vijay Abraham I <kishon@ti.com>
+> Cc: Lars-Peter Clausen <lars@metafoo.de>
+> Cc: Michael Hennerich <Michael.Hennerich@analog.com>
+> Cc: Jonathan Cameron <jic23@kernel.org>
+> Cc: Hartmut Knaack <knaack.h@gmx.de>
+> Cc: Peter Meerwald-Stadler <pmeerw@pmeerw.net>
+> Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+> Cc: Jiri Slaby <jslaby@suse.com>
+> Signed-off-by: Janusz Krzysztofik <jmkrzyszt@gmail.com>
+> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 > ---
->  drivers/mmc/host/Kconfig      |  13 ++
->  drivers/mmc/host/Makefile     |   1 +
->  drivers/mmc/host/sdhci-sprd.c | 498 ++++++++++++++++++++++++++++++++++++++++++
->  3 files changed, 512 insertions(+)
->  create mode 100644 drivers/mmc/host/sdhci-sprd.c
-> 
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index d09feb6..cf984f0 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -593,6 +593,19 @@ config MMC_SDRICOH_CS
->  	  To compile this driver as a module, choose M here: the
->  	  module will be called sdricoh_cs.
->  
-> +config MMC_SDHCI_SPRD
-> +	tristate "Spreadtrum SDIO host Controller"
-> +	depends on ARCH_SPRD
-> +	depends on MMC_SDHCI_PLTFM
-> +	select MMC_SDHCI_IO_ACCESSORS
-> +	help
-> +	  This selects the SDIO Host Controller in Spreadtrum
-> +	  SoCs, this driver supports R11(IP version: R11P0).
-> +
-> +	  If you have a controller with this interface, say Y or M here.
-> +
-> +	  If unsure, say N.
-> +
->  config MMC_TMIO_CORE
->  	tristate
->  
-> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-> index a835d1a..5363d06 100644
-> --- a/drivers/mmc/host/Makefile
-> +++ b/drivers/mmc/host/Makefile
-> @@ -92,6 +92,7 @@ obj-$(CONFIG_MMC_SDHCI_ST)		+= sdhci-st.o
->  obj-$(CONFIG_MMC_SDHCI_MICROCHIP_PIC32)	+= sdhci-pic32.o
->  obj-$(CONFIG_MMC_SDHCI_BRCMSTB)		+= sdhci-brcmstb.o
->  obj-$(CONFIG_MMC_SDHCI_OMAP)		+= sdhci-omap.o
-> +obj-$(CONFIG_MMC_SDHCI_SPRD)		+= sdhci-sprd.o
->  obj-$(CONFIG_MMC_CQHCI)			+= cqhci.o
->  
->  ifeq ($(CONFIG_CB710_DEBUG),y)
-> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-> new file mode 100644
-> index 0000000..3d5128e
-> --- /dev/null
-> +++ b/drivers/mmc/host/sdhci-sprd.c
-> @@ -0,0 +1,498 @@
-> +// SPDX-License-Identifier: GPL-2.0
-> +//
-> +// Secure Digital Host Controller
-> +//
-> +// Copyright (C) 2018 Spreadtrum, Inc.
-> +// Author: Chunyan Zhang <chunyan.zhang@unisoc.com>
-> +
-> +#include <linux/delay.h>
-> +#include <linux/dma-mapping.h>
-> +#include <linux/highmem.h>
-> +#include <linux/module.h>
-> +#include <linux/of.h>
-> +#include <linux/of_device.h>
-> +#include <linux/of_gpio.h>
-> +#include <linux/platform_device.h>
-> +#include <linux/pm_runtime.h>
-> +#include <linux/regulator/consumer.h>
-> +#include <linux/slab.h>
-> +
-> +#include "sdhci-pltfm.h"
-> +
-> +/* SDHCI_ARGUMENT2 register high 16bit */
-> +#define SDHCI_SPRD_ARG2_STUFF		GENMASK(31, 16)
-> +
-> +#define SDHCI_SPRD_REG_32_DLL_DLY_OFFSET	0x208
-> +#define  SDHCIBSPRD_IT_WR_DLY_INV		BIT(5)
-> +#define  SDHCI_SPRD_BIT_CMD_DLY_INV		BIT(13)
-> +#define  SDHCI_SPRD_BIT_POSRD_DLY_INV		BIT(21)
-> +#define  SDHCI_SPRD_BIT_NEGRD_DLY_INV		BIT(29)
-> +
-> +#define SDHCI_SPRD_REG_32_BUSY_POSI		0x250
-> +#define  SDHCI_SPRD_BIT_OUTR_CLK_AUTO_EN	BIT(25)
-> +#define  SDHCI_SPRD_BIT_INNR_CLK_AUTO_EN	BIT(24)
-> +
-> +#define SDHCI_SPRD_REG_DEBOUNCE		0x28C
-> +#define  SDHCI_SPRD_BIT_DLL_BAK		BIT(0)
-> +#define  SDHCI_SPRD_BIT_DLL_VAL		BIT(1)
-> +
-> +#define  SDHCI_SPRD_INT_SIGNAL_MASK	0x1B7F410B
-> +
-> +/* SDHCI_HOST_CONTROL2 */
-> +#define  SDHCI_SPRD_CTRL_HS200		0x0005
-> +#define  SDHCI_SPRD_CTRL_HS400		0x0006
-> +
-> +/*
-> + * According to the standard specification, BIT(3) of SDHCI_SOFTWARE_RESET is
-> + * reserved, and only used on Spreadtrum's design, the hardware cannot work
-> + * if this bit is cleared.
-> + * 1 : normal work
-> + * 0 : hardware reset
-> + */
-> +#define  SDHCI_HW_RESET_CARD		BIT(3)
-> +
-> +#define SDHCI_SPRD_MAX_CUR		0xFFFFFF
-> +#define SDHCI_SPRD_CLK_MAX_DIV		1023
-> +
-> +#define SDHCI_SPRD_CLK_DEF_RATE		26000000
-> +
-> +struct sdhci_sprd_host {
-> +	u32 version;
-> +	struct clk *clk_sdio;
-> +	struct clk *clk_enable;
-> +	u32 base_rate;
-> +	int flags; /* backup of host attribute */
-> +};
-> +
-> +#define TO_SPRD_HOST(host) sdhci_pltfm_priv(sdhci_priv(host))
-> +
-> +static void sdhci_sprd_init_config(struct sdhci_host *host)
-> +{
-> +	u16 val;
-> +
-> +	/* set dll backup mode */
-> +	val = sdhci_readl(host, SDHCI_SPRD_REG_DEBOUNCE);
-> +	val |= SDHCI_SPRD_BIT_DLL_BAK | SDHCI_SPRD_BIT_DLL_VAL;
-> +	sdhci_writel(host, val, SDHCI_SPRD_REG_DEBOUNCE);
-> +}
-> +
-> +static inline u32 sdhci_sprd_readl(struct sdhci_host *host, int reg)
-> +{
-> +	if (unlikely(reg == SDHCI_MAX_CURRENT))
-> +		return SDHCI_SPRD_MAX_CUR;
-> +
-> +	return readl_relaxed(host->ioaddr + reg);
-> +}
-> +
-> +static inline void sdhci_sprd_writel(struct sdhci_host *host, u32 val, int reg)
-> +{
-> +	/* SDHCI_MAX_CURRENT is reserved on Spreadtrum's platform */
-> +	if (unlikely(reg == SDHCI_MAX_CURRENT))
-> +		return;
-> +
-> +	if (unlikely(reg == SDHCI_SIGNAL_ENABLE || reg == SDHCI_INT_ENABLE))
-> +		val = val & SDHCI_SPRD_INT_SIGNAL_MASK;
-> +
-> +	writel_relaxed(val, host->ioaddr + reg);
-> +}
-> +
-> +static inline void sdhci_sprd_writew(struct sdhci_host *host, u16 val, int reg)
-> +{
-> +	/* SDHCI_BLOCK_COUNT is Read Only on Spreadtrum's platform */
-> +	if (unlikely(reg == SDHCI_BLOCK_COUNT))
-> +		return;
-> +
-> +	writew_relaxed(val, host->ioaddr + reg);
-> +}
-> +
-> +static inline void sdhci_sprd_writeb(struct sdhci_host *host, u8 val, int reg)
-> +{
-> +	/*
-> +	 * Since BIT(3) of SDHCI_SOFTWARE_RESET is reserved according to the
-> +	 * standard specification, sdhci_reset() write this register directly
-> +	 * without checking other reserved bits, that will clear BIT(3) which
-> +	 * is defined as hardware reset on Spreadtrum's platform and clearing
-> +	 * it by mistake will lead the card not work. So here we need to work
-> +	 * around it.
-> +	 */
-> +	if (unlikely(reg == SDHCI_SOFTWARE_RESET)) {
-> +		if (readb_relaxed(host->ioaddr + reg) & SDHCI_HW_RESET_CARD)
-> +			val |= SDHCI_HW_RESET_CARD;
-> +	}
-> +
-> +	writeb_relaxed(val, host->ioaddr + reg);
-> +}
-> +
-> +static inline void sdhci_sprd_sd_clk_off(struct sdhci_host *host)
-> +{
-> +	u16 ctrl = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> +
-> +	ctrl &= ~SDHCI_CLOCK_CARD_EN;
-> +	sdhci_writew(host, ctrl, SDHCI_CLOCK_CONTROL);
-> +}
-> +
-> +static inline void
-> +sdhci_sprd_set_dll_invert(struct sdhci_host *host, u32 mask, bool en)
-> +{
-> +	u32 dll_dly_offset;
-> +
-> +	dll_dly_offset = sdhci_readl(host, SDHCI_SPRD_REG_32_DLL_DLY_OFFSET);
-> +	if (en)
-> +		dll_dly_offset |= mask;
-> +	else
-> +		dll_dly_offset &= ~mask;
-> +	sdhci_writel(host, dll_dly_offset, SDHCI_SPRD_REG_32_DLL_DLY_OFFSET);
-> +}
-> +
-> +static inline u32 sdhci_sprd_calc_div(u32 base_clk, u32 clk)
-> +{
-> +	u32 div;
-> +
-> +	/* select 2x clock source */
-> +	if (base_clk <= clk * 2)
-> +		return 0;
-> +
-> +	div = (u32) (base_clk / (clk * 2));
-> +
-> +	if ((base_clk / div) > (clk * 2))
-> +		div++;
-> +
-> +	if (div > SDHCI_SPRD_CLK_MAX_DIV)
-> +		div = SDHCI_SPRD_CLK_MAX_DIV;
-> +
-> +	if (div % 2)
-> +		div = (div + 1) / 2;
-> +	else
-> +		div = div / 2;
-> +
-> +	return div;
-> +}
-> +
-> +static inline void _sdhci_sprd_set_clock(struct sdhci_host *host,
-> +					unsigned int clk)
-> +{
-> +	struct sdhci_sprd_host *sprd_host = TO_SPRD_HOST(host);
-> +	u32 div, val, mask;
-> +
-> +	div = sdhci_sprd_calc_div(sprd_host->base_rate, clk);
-> +
-> +	clk |= ((div & 0x300) >> 2) | ((div & 0xFF) << 8);
-> +	sdhci_enable_clk(host, clk);
-> +
-> +	/* enable auto gate sdhc_enable_auto_gate */
-> +	val = sdhci_readl(host, SDHCI_SPRD_REG_32_BUSY_POSI);
-> +	mask = SDHCI_SPRD_BIT_OUTR_CLK_AUTO_EN |
-> +	       SDHCI_SPRD_BIT_INNR_CLK_AUTO_EN;
-> +	if (mask != (val & mask)) {
-> +		val |= mask;
-> +		sdhci_writel(host, val, SDHCI_SPRD_REG_32_BUSY_POSI);
-> +	}
-> +}
-> +
-> +static void sdhci_sprd_set_clock(struct sdhci_host *host, unsigned int clock)
-> +{
-> +	bool en = false;
-> +
-> +	if (clock == 0) {
-> +		sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
-> +	} else if (clock != host->clock) {
-> +		sdhci_sprd_sd_clk_off(host);
-> +		_sdhci_sprd_set_clock(host, clock);
-> +
-> +		if (clock <= 400000)
-> +			en = true;
-> +		sdhci_sprd_set_dll_invert(host, SDHCI_SPRD_BIT_CMD_DLY_INV |
-> +					  SDHCI_SPRD_BIT_POSRD_DLY_INV, en);
-> +	} else {
-> +		_sdhci_sprd_set_clock(host, clock);
-> +	}
-> +}
-> +
-> +static unsigned int sdhci_sprd_get_max_clock(struct sdhci_host *host)
-> +{
-> +	struct sdhci_sprd_host *sprd_host = TO_SPRD_HOST(host);
-> +
-> +	return clk_round_rate(sprd_host->clk_sdio, ULONG_MAX);
-> +}
-> +
-> +static unsigned int sdhci_sprd_get_min_clock(struct sdhci_host *host)
-> +{
-> +	return 400000;
-> +}
-> +
-> +static void sdhci_sprd_set_uhs_signaling(struct sdhci_host *host,
-> +					 unsigned int timing)
-> +{
-> +	u16 ctrl_2;
-> +
-> +	if (timing == host->timing)
-> +		return;
-> +
-> +	ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> +	/* Select Bus Speed Mode for host */
-> +	ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
-> +	switch (timing) {
-> +	case MMC_TIMING_UHS_SDR12:
-> +		ctrl_2 |= SDHCI_CTRL_UHS_SDR12;
-> +		break;
-> +	case MMC_TIMING_MMC_HS:
-> +	case MMC_TIMING_SD_HS:
-> +	case MMC_TIMING_UHS_SDR25:
-> +		ctrl_2 |= SDHCI_CTRL_UHS_SDR25;
-> +		break;
-> +	case MMC_TIMING_UHS_SDR50:
-> +		ctrl_2 |= SDHCI_CTRL_UHS_SDR50;
-> +		break;
-> +	case MMC_TIMING_UHS_SDR104:
-> +		ctrl_2 |= SDHCI_CTRL_UHS_SDR104;
-> +		break;
-> +	case MMC_TIMING_UHS_DDR50:
-> +	case MMC_TIMING_MMC_DDR52:
-> +		ctrl_2 |= SDHCI_CTRL_UHS_DDR50;
-> +		break;
-> +	case MMC_TIMING_MMC_HS200:
-> +		ctrl_2 |= SDHCI_SPRD_CTRL_HS200;
-> +		break;
-> +	case MMC_TIMING_MMC_HS400:
-> +		ctrl_2 |= SDHCI_SPRD_CTRL_HS400;
-> +		break;
-> +	default:
-> +		break;
-> +	}
-> +
-> +	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
-> +}
-> +
-> +static void sdhci_sprd_hw_reset(struct sdhci_host *host)
-> +{
-> +	int val;
-> +
-> +	/*
-> +	 * Note: don't use sdhci_writeb() API here since it is redirected to
-> +	 * sdhci_sprd_writeb() in which we have a workaround for
-> +	 * SDHCI_SOFTWARE_RESET which would make bit SDHCI_HW_RESET_CARD can
-> +	 * not be cleared.
-> +	 */
-> +	val = readb_relaxed(host->ioaddr + SDHCI_SOFTWARE_RESET);
-> +	val &= ~SDHCI_HW_RESET_CARD;
-> +	writeb_relaxed(val, host->ioaddr + SDHCI_SOFTWARE_RESET);
-> +	/* wait for 10 us */
-> +	usleep_range(10, 20);
-> +
-> +	val |= SDHCI_HW_RESET_CARD;
-> +	writeb_relaxed(val, host->ioaddr + SDHCI_SOFTWARE_RESET);
-> +	usleep_range(300, 500);
-> +}
-> +
-> +static struct sdhci_ops sdhci_sprd_ops = {
-> +	.read_l = sdhci_sprd_readl,
-> +	.write_l = sdhci_sprd_writel,
-> +	.write_b = sdhci_sprd_writeb,
-> +	.set_clock = sdhci_sprd_set_clock,
-> +	.get_max_clock = sdhci_sprd_get_max_clock,
-> +	.get_min_clock = sdhci_sprd_get_min_clock,
-> +	.set_bus_width = sdhci_set_bus_width,
-> +	.reset = sdhci_reset,
-> +	.set_uhs_signaling = sdhci_sprd_set_uhs_signaling,
-> +	.hw_reset = sdhci_sprd_hw_reset,
-> +};
-> +
-> +static void sdhci_sprd_request(struct mmc_host *mmc, struct mmc_request *mrq)
-> +{
-> +	struct sdhci_host *host = mmc_priv(mmc);
-> +	struct sdhci_sprd_host *sprd_host = TO_SPRD_HOST(host);
-> +
-> +	host->flags |= sprd_host->flags & SDHCI_AUTO_CMD23;
-> +
-> +	/*
-> +	 * From version 4.10 onward, ARGUMENT2 register is also as 32-bit
-> +	 * block count register which doesn't support stuff bits of
-> +	 * CMD23 argument on Spreadtrum's sd host controller.
-> +	 */
-> +	if (host->version >= SDHCI_SPEC_410 &&
-> +	    mrq->sbc && (mrq->sbc->arg & SDHCI_SPRD_ARG2_STUFF) &&
-> +	    (host->flags & SDHCI_AUTO_CMD23))
-> +		host->flags &= ~SDHCI_AUTO_CMD23;
-> +
-> +	sdhci_request(mmc, mrq);
-> +}
-> +
-> +static const struct sdhci_pltfm_data sdhci_sprd_pdata = {
-> +	.quirks = SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK,
-> +	.quirks2 = SDHCI_QUIRK2_BROKEN_HS200 |
-> +		   SDHCI_QUIRK2_USE_32BIT_BLK_CNT,
-> +	.ops = &sdhci_sprd_ops,
-> +};
-> +
-> +static int sdhci_sprd_probe(struct platform_device *pdev)
-> +{
-> +	struct sdhci_host *host;
-> +	struct sdhci_sprd_host *sprd_host;
-> +	struct clk *clk;
-> +	int ret = 0;
-> +
-> +	host = sdhci_pltfm_init(pdev, &sdhci_sprd_pdata, sizeof(*sprd_host));
-> +	if (IS_ERR(host))
-> +		return PTR_ERR(host);
-> +
-> +	host->dma_mask = DMA_BIT_MASK(64);
-> +	pdev->dev.dma_mask = &host->dma_mask;
-> +	host->mmc_host_ops.request = sdhci_sprd_request;
-> +
-> +	host->mmc->caps = MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED |
-> +		MMC_CAP_ERASE | MMC_CAP_CMD23;
-> +	ret = mmc_of_parse(host->mmc);
-> +	if (ret)
-> +		goto pltfm_free;
-> +
-> +	sprd_host = TO_SPRD_HOST(host);
-> +
-> +	clk = devm_clk_get(&pdev->dev, "sdio");
-> +	if (IS_ERR(clk)) {
-> +		ret = PTR_ERR(clk);
-> +		goto pltfm_free;
-> +	}
-> +	sprd_host->clk_sdio = clk;
-> +	sprd_host->base_rate = clk_get_rate(sprd_host->clk_sdio);
-> +	if (!sprd_host->base_rate)
-> +		sprd_host->base_rate = SDHCI_SPRD_CLK_DEF_RATE;
-> +
-> +	clk = devm_clk_get(&pdev->dev, "enable");
-> +	if (IS_ERR(clk)) {
-> +		ret = PTR_ERR(clk);
-> +		goto pltfm_free;
-> +	}
-> +	sprd_host->clk_enable = clk;
-> +
-> +	ret = clk_prepare_enable(sprd_host->clk_sdio);
-> +	if (ret)
-> +		goto pltfm_free;
-> +
-> +	clk_prepare_enable(sprd_host->clk_enable);
-> +	if (ret)
-> +		goto clk_disable;
-> +
-> +	sdhci_sprd_init_config(host);
-> +	host->version = sdhci_readw(host, SDHCI_HOST_VERSION);
-> +	sprd_host->version = ((host->version & SDHCI_VENDOR_VER_MASK) >>
-> +			       SDHCI_VENDOR_VER_SHIFT);
-> +
-> +	pm_runtime_get_noresume(&pdev->dev);
-> +	pm_runtime_set_active(&pdev->dev);
-> +	pm_runtime_enable(&pdev->dev);
-> +	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
-> +	pm_runtime_use_autosuspend(&pdev->dev);
-> +	pm_suspend_ignore_children(&pdev->dev, 1);
-> +
-> +	sdhci_enable_v4_mode(host);
-> +
-> +	ret = sdhci_setup_host(host);
-> +	if (ret)
-> +		goto pm_runtime_disable;
-> +
-> +	sprd_host->flags = host->flags;
-> +
-> +	ret = __sdhci_add_host(host);
-> +	if (ret)
-> +		goto err_cleanup_host;
-> +
-> +	pm_runtime_mark_last_busy(&pdev->dev);
-> +	pm_runtime_put_autosuspend(&pdev->dev);
-> +
-> +	return 0;
-> +
-> +err_cleanup_host:
-> +	sdhci_cleanup_host(host);
-> +
-> +pm_runtime_disable:
-> +	pm_runtime_disable(&pdev->dev);
-> +	pm_runtime_set_suspended(&pdev->dev);
-> +
-> +	clk_disable_unprepare(sprd_host->clk_enable);
-> +
-> +clk_disable:
-> +	clk_disable_unprepare(sprd_host->clk_sdio);
-> +
-> +pltfm_free:
-> +	sdhci_pltfm_free(pdev);
-> +	return ret;
-> +}
-> +
-> +static int sdhci_sprd_remove(struct platform_device *pdev)
-> +{
-> +	struct sdhci_host *host = platform_get_drvdata(pdev);
-> +	struct sdhci_sprd_host *sprd_host = TO_SPRD_HOST(host);
-> +	struct mmc_host *mmc = host->mmc;
-> +
-> +	mmc_remove_host(mmc);
-> +	clk_disable_unprepare(sprd_host->clk_sdio);
-> +	clk_disable_unprepare(sprd_host->clk_enable);
-> +
-> +	mmc_free_host(mmc);
-> +
-> +	return 0;
-> +}
-> +
-> +static const struct of_device_id sdhci_sprd_of_match[] = {
-> +	{ .compatible = "sprd,sdhci-r11", },
-> +	{ }
-> +};
-> +MODULE_DEVICE_TABLE(of, sdhci_sprd_of_match);
-> +
-> +#ifdef CONFIG_PM
-> +static int sdhci_sprd_runtime_suspend(struct device *dev)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
-> +	struct sdhci_sprd_host *sprd_host = TO_SPRD_HOST(host);
-> +
-> +	sdhci_runtime_suspend_host(host);
-> +
-> +	clk_disable_unprepare(sprd_host->clk_sdio);
-> +	clk_disable_unprepare(sprd_host->clk_enable);
-> +
-> +	return 0;
-> +}
-> +
-> +static int sdhci_sprd_runtime_resume(struct device *dev)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
-> +	struct sdhci_sprd_host *sprd_host = TO_SPRD_HOST(host);
-> +	int ret;
-> +
-> +	ret = clk_prepare_enable(sprd_host->clk_enable);
-> +	if (ret)
-> +		return ret;
-> +
-> +	ret = clk_prepare_enable(sprd_host->clk_sdio);
-> +	if (ret) {
-> +		clk_disable_unprepare(sprd_host->clk_enable);
-> +		return ret;
-> +	}
-> +
-> +	sdhci_runtime_resume_host(host);
-> +
-> +	return 0;
-> +}
-> +#endif
-> +
-> +static const struct dev_pm_ops sdhci_sprd_pm_ops = {
-> +	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
-> +				pm_runtime_force_resume)
-> +	SET_RUNTIME_PM_OPS(sdhci_sprd_runtime_suspend,
-> +			   sdhci_sprd_runtime_resume, NULL)
-> +};
-> +
-> +static struct platform_driver sdhci_sprd_driver = {
-> +	.probe = sdhci_sprd_probe,
-> +	.remove = sdhci_sprd_remove,
-> +	.driver = {
-> +		.name = "sdhci_sprd_r11",
-> +		.of_match_table = of_match_ptr(sdhci_sprd_of_match),
-> +		.pm = &sdhci_sprd_pm_ops,
-> +	},
-> +};
-> +module_platform_driver(sdhci_sprd_driver);
-> +
-> +MODULE_DESCRIPTION("Spreadtrum sdio host controller r11 driver");
-> +MODULE_LICENSE("GPL v2");
-> +MODULE_ALIAS("platform:sdhci-sprd-r11");
-> 
+>  Documentation/driver-api/gpio/consumer.rst  | 22 ++++----
+>  drivers/auxdisplay/hd44780.c                | 52 +++++++++--------
+>  drivers/bus/ts-nbus.c                       | 19 ++-----
+>  drivers/gpio/gpio-max3191x.c                | 17 +++---
+>  drivers/gpio/gpiolib.c                      | 86 +++++++++++++++--------------
+>  drivers/gpio/gpiolib.h                      |  4 +-
+>  drivers/i2c/muxes/i2c-mux-gpio.c            |  8 +--
+>  drivers/mmc/core/pwrseq_simple.c            | 13 ++---
+>  drivers/mux/gpio.c                          |  9 +--
+>  drivers/net/phy/mdio-mux-gpio.c             |  3 +-
+>  drivers/pcmcia/soc_common.c                 | 11 ++--
+>  drivers/phy/motorola/phy-mapphone-mdm6600.c | 17 +++---
+>  drivers/staging/iio/adc/ad7606.c            |  9 +--
+>  drivers/tty/serial/serial_mctrl_gpio.c      |  7 ++-
+>  include/linux/gpio/consumer.h               | 18 +++---
+>  15 files changed, 140 insertions(+), 155 deletions(-)
+>
+> diff --git a/Documentation/driver-api/gpio/consumer.rst b/Documentation/driver-api/gpio/consumer.rst
+> index aa03f389d41d..ed68042ddccf 100644
+> --- a/Documentation/driver-api/gpio/consumer.rst
+> +++ b/Documentation/driver-api/gpio/consumer.rst
+> @@ -323,29 +323,29 @@ The following functions get or set the values of an array of GPIOs::
+>
+>         int gpiod_get_array_value(unsigned int array_size,
+>                                   struct gpio_desc **desc_array,
+> -                                 int *value_array);
+> +                                 unsigned long *value_bitmap);
+>         int gpiod_get_raw_array_value(unsigned int array_size,
+>                                       struct gpio_desc **desc_array,
+> -                                     int *value_array);
+> +                                     unsigned long *value_bitmap);
+>         int gpiod_get_array_value_cansleep(unsigned int array_size,
+>                                            struct gpio_desc **desc_array,
+> -                                          int *value_array);
+> +                                          unsigned long *value_bitmap);
+>         int gpiod_get_raw_array_value_cansleep(unsigned int array_size,
+>                                            struct gpio_desc **desc_array,
+> -                                          int *value_array);
+> +                                          unsigned long *value_bitmap);
+>
+>         void gpiod_set_array_value(unsigned int array_size,
+>                                    struct gpio_desc **desc_array,
+> -                                  int *value_array)
+> +                                  unsigned long *value_bitmap)
+>         void gpiod_set_raw_array_value(unsigned int array_size,
+>                                        struct gpio_desc **desc_array,
+> -                                      int *value_array)
+> +                                      unsigned long *value_bitmap)
+>         void gpiod_set_array_value_cansleep(unsigned int array_size,
+>                                             struct gpio_desc **desc_array,
+> -                                           int *value_array)
+> +                                           unsigned long *value_bitmap)
+>         void gpiod_set_raw_array_value_cansleep(unsigned int array_size,
+>                                                 struct gpio_desc **desc_array,
+> -                                               int *value_array)
+> +                                               unsigned long *value_bitmap)
+>
+>  The array can be an arbitrary set of GPIOs. The functions will try to access
+>  GPIOs belonging to the same bank or chip simultaneously if supported by the
+> @@ -356,8 +356,8 @@ accessed sequentially.
+>  The functions take three arguments:
+>         * array_size    - the number of array elements
+>         * desc_array    - an array of GPIO descriptors
+> -       * value_array   - an array to store the GPIOs' values (get) or
+> -                         an array of values to assign to the GPIOs (set)
+> +       * value_bitmap  - a bitmap to store the GPIOs' values (get) or
+> +                         a bitmap of values to assign to the GPIOs (set)
+>
+>  The descriptor array can be obtained using the gpiod_get_array() function
+>  or one of its variants. If the group of descriptors returned by that function
+> @@ -366,7 +366,7 @@ the struct gpio_descs returned by gpiod_get_array()::
+>
+>         struct gpio_descs *my_gpio_descs = gpiod_get_array(...);
+>         gpiod_set_array_value(my_gpio_descs->ndescs, my_gpio_descs->desc,
+> -                             my_gpio_values);
+> +                             my_gpio_value_bitmap);
+>
+>  It is also possible to access a completely arbitrary array of descriptors. The
+>  descriptors may be obtained using any combination of gpiod_get() and
+> diff --git a/drivers/auxdisplay/hd44780.c b/drivers/auxdisplay/hd44780.c
+> index f1a42f0f1ded..bbbd6a29bf01 100644
+> --- a/drivers/auxdisplay/hd44780.c
+> +++ b/drivers/auxdisplay/hd44780.c
+> @@ -62,20 +62,19 @@ static void hd44780_strobe_gpio(struct hd44780 *hd)
+>  /* write to an LCD panel register in 8 bit GPIO mode */
+>  static void hd44780_write_gpio8(struct hd44780 *hd, u8 val, unsigned int rs)
+>  {
+> -       int values[10]; /* for DATA[0-7], RS, RW */
+> -       unsigned int i, n;
+> +       unsigned long value_bitmap[1];  /* for DATA[0-7], RS, RW */
+
+(I read your comments in the other email)
+
+I still find this odd, but if everyone is going to have this change
+done like this, consistency is better.
+
+> +       unsigned int n;
+>
+> -       for (i = 0; i < 8; i++)
+> -               values[PIN_DATA0 + i] = !!(val & BIT(i));
+> -       values[PIN_CTRL_RS] = rs;
+> +       value_bitmap[0] = val;
+> +       __assign_bit(PIN_CTRL_RS, value_bitmap, rs);
+>         n = 9;
+>         if (hd->pins[PIN_CTRL_RW]) {
+> -               values[PIN_CTRL_RW] = 0;
+> +               __clear_bit(PIN_CTRL_RW, value_bitmap);
+>                 n++;
+>         }
+>
+>         /* Present the data to the port */
+> -       gpiod_set_array_value_cansleep(n, &hd->pins[PIN_DATA0], values);
+> +       gpiod_set_array_value_cansleep(n, &hd->pins[PIN_DATA0], value_bitmap);
+>
+>         hd44780_strobe_gpio(hd);
+>  }
+> @@ -83,32 +82,31 @@ static void hd44780_write_gpio8(struct hd44780 *hd, u8 val, unsigned int rs)
+>  /* write to an LCD panel register in 4 bit GPIO mode */
+>  static void hd44780_write_gpio4(struct hd44780 *hd, u8 val, unsigned int rs)
+>  {
+> -       int values[10]; /* for DATA[0-7], RS, RW, but DATA[0-3] is unused */
+> -       unsigned int i, n;
+> +       /* for DATA[0-7], RS, RW, but DATA[0-3] is unused */
+> +       unsigned long value_bitmap[1];
+
+Ditto.
+
+> +       unsigned int n;
+>
+>         /* High nibble + RS, RW */
+> -       for (i = 4; i < 8; i++)
+> -               values[PIN_DATA0 + i] = !!(val & BIT(i));
+> -       values[PIN_CTRL_RS] = rs;
+> +       value_bitmap[0] = val;
+> +       __assign_bit(PIN_CTRL_RS, value_bitmap, rs);
+>         n = 5;
+>         if (hd->pins[PIN_CTRL_RW]) {
+> -               values[PIN_CTRL_RW] = 0;
+> +               __clear_bit(PIN_CTRL_RW, value_bitmap);
+>                 n++;
+>         }
+> +       value_bitmap[0] >>= PIN_DATA4;
+>
+>         /* Present the data to the port */
+> -       gpiod_set_array_value_cansleep(n, &hd->pins[PIN_DATA4],
+> -                                      &values[PIN_DATA4]);
+> +       gpiod_set_array_value_cansleep(n, &hd->pins[PIN_DATA4], value_bitmap);
+>
+>         hd44780_strobe_gpio(hd);
+>
+>         /* Low nibble */
+> -       for (i = 0; i < 4; i++)
+> -               values[PIN_DATA4 + i] = !!(val & BIT(i));
+> +       value_bitmap[0] &= ~((1 << PIN_DATA4) - 1);
+> +       value_bitmap[0] |= val & ~((1 << PIN_DATA4) - 1);
+
+This is still wrong! What I originally meant in my v4 review is that
+there is an extra ~ in the second line.
+
+Also, a couple of general comments:
+
+ - Please review the list of CCs (I was not CC'd originally, so maybe
+there are other maintainers that aren't, either)
+ - In general, the new code seems harder to read than the original one
+(but that is my impression).
+
+Thanks for your effort! :-)
+
+Cheers,
+Miguel
