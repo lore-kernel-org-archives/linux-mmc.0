@@ -1,52 +1,31 @@
-From: Aapo Vienamo <avienamo@nvidia.com>
-Subject: [PATCH v3 38/38] arm64: dts: tegra210: Assign clocks for sdmmc1 and sdmmc4
-Date: Thu, 30 Aug 2018 18:06:39 +0300
-Message-ID: <20180830150639.21048-39-avienamo@nvidia.com>
-References: <20180830150639.21048-1-avienamo@nvidia.com>
+From: David Laight <David.Laight@ACULAB.COM>
+Subject: RE: [PATCH v5 1/4] gpiolib: Pass bitmaps, not integer arrays, to
+ get/set array
+Date: Thu, 30 Aug 2018 15:35:39 +0000
+Message-ID: <34ad57ec954c481d87ef6af58453ee9f@AcuMS.aculab.com>
+References: <20180820234341.5271-1-jmkrzyszt@gmail.com>
+ <20180829204900.19390-1-jmkrzyszt@gmail.com>
+ <20180829204900.19390-2-jmkrzyszt@gmail.com>
+ <CANiq72kJT15ELkYr2U5r4-pvGunQFLmZ5dhdZLnjmM7NWBnkNQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180830150639.21048-1-avienamo@nvidia.com>
+In-Reply-To: <CANiq72kJT15ELkYr2U5r4-pvGunQFLmZ5dhdZLnjmM7NWBnkNQ@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Mikko Perttunen <mperttunen@nvidia.com>, Stefan Agner <stefan@agner.ch>
-Cc: devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Aapo Vienamo <avienamo@nvidia.com>
+To: 'Miguel Ojeda' <miguel.ojeda.sandonis@gmail.com>, Janusz Krzysztofik <jmkrzyszt@gmail.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>, Jonathan Corbet <corbet@lwn.net>, Peter Korsgaard <peter.korsgaard@barco.com>, Peter Rosin <peda@axentia.se>, Ulf Hansson <ulf.hansson@linaro.org>, Andrew Lunn <andrew@lunn.ch>, Florian Fainelli <f.fainelli@gmail.com>, "David S. Miller" <davem@davemloft.net>, Dominik Brodowski <linux@dominikbrodowski.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kishon Vijay Abraham I <kishon@ti.com>, Lars-Peter Clausen <lars@metafoo.de>, Michael Hennerich <Michael.Hennerich@analog.com>, Jonathan Cameron <jic23@kernel.org>, Hartmut Knaack <knaack.h@gmx.de>, Peter Meerwald-Stadler <pmeerw@pmeerw.net>, Jiri Slaby <jslaby@suse.com>, Willy Tarreau <w@1wt.eu>, Geert Uytterhoeven <geert@linux-m68k.org>, Linux
 List-Id: linux-mmc@vger.kernel.org
 
-Use assigned-clock properties to configure pllc4 as the parent clock
-for sdmmc4 on Tegra210. pllc4 offers better jitter perfomance than
-the default pllp and is required by HS200 and HS400 modes.
-
-Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
-Acked-by: Thierry Reding <treding@nvidia.com>
----
- arch/arm64/boot/dts/nvidia/tegra210.dtsi | 8 ++++++++
- 1 file changed, 8 insertions(+)
-
-diff --git a/arch/arm64/boot/dts/nvidia/tegra210.dtsi b/arch/arm64/boot/dts/nvidia/tegra210.dtsi
-index 0951acc69cc8..14da98ac65e8 100644
---- a/arch/arm64/boot/dts/nvidia/tegra210.dtsi
-+++ b/arch/arm64/boot/dts/nvidia/tegra210.dtsi
-@@ -1057,6 +1057,11 @@
- 		nvidia,pad-autocal-pull-down-offset-1v8 = <0x7b>;
- 		nvidia,default-tap = <0x2>;
- 		nvidia,default-trim = <0x4>;
-+		assigned-clocks = <&tegra_car TEGRA210_CLK_SDMMC4>,
-+				  <&tegra_car TEGRA210_CLK_PLL_C4_OUT0>,
-+				  <&tegra_car TEGRA210_CLK_PLL_C4>;
-+		assigned-clock-parents = <&tegra_car TEGRA210_CLK_PLL_C4_OUT0>;
-+		assigned-clock-rates = <200000000>, <1000000000>, <1000000000>;
- 		status = "disabled";
- 	};
- 
-@@ -1107,6 +1112,9 @@
- 		nvidia,pad-autocal-pull-down-offset-1v8 = <0x05>;
- 		nvidia,default-tap = <0x8>;
- 		nvidia,default-trim = <0x0>;
-+		assigned-clocks = <&tegra_car TEGRA210_CLK_SDMMC4>,
-+				  <&tegra_car TEGRA210_CLK_PLL_C4_OUT0>;
-+		assigned-clock-parents = <&tegra_car TEGRA210_CLK_PLL_C4_OUT0>;
- 		status = "disabled";
- 	};
- 
--- 
-2.18.0
+RnJvbTogTWlndWVsIE9qZWRhDQo+IFNlbnQ6IDMwIEF1Z3VzdCAyMDE4IDEyOjExDQouLi4NCj4g
+PiArICAgICAgIHVuc2lnbmVkIGxvbmcgdmFsdWVfYml0bWFwWzFdOyAgLyogZm9yIERBVEFbMC03
+XSwgUlMsIFJXICovDQo+IA0KPiAoSSByZWFkIHlvdXIgY29tbWVudHMgaW4gdGhlIG90aGVyIGVt
+YWlsKQ0KPiANCj4gSSBzdGlsbCBmaW5kIHRoaXMgb2RkLCBidXQgaWYgZXZlcnlvbmUgaXMgZ29p
+bmcgdG8gaGF2ZSB0aGlzIGNoYW5nZQ0KPiBkb25lIGxpa2UgdGhpcywgY29uc2lzdGVuY3kgaXMg
+YmV0dGVyLg0KDQpNYXliZSB0aGVyZSBvdWdodCB0byBiZSBhIGRlZmluZSBzbyB5b3UgY2FuIGRv
+Og0KCURFRklORV9CSVRNQVAodmFsdWVfYml0bWFwLCAzMik7DQoNCldoaWxlIGl0IG1pZ2h0IGp1
+c3QgZ2VuZXJhdGUgYW4gdW5zaWduZWQgbG9uZyBbXSB0aGVyZSBpcyBwcm9iYWJseQ0Kc2NvcGUg
+Zm9yIHN0cm9uZ2VyIHR5cGluZy4NCg0KCURhdmlkDQoNCi0NClJlZ2lzdGVyZWQgQWRkcmVzcyBM
+YWtlc2lkZSwgQnJhbWxleSBSb2FkLCBNb3VudCBGYXJtLCBNaWx0b24gS2V5bmVzLCBNSzEgMVBU
+LCBVSw0KUmVnaXN0cmF0aW9uIE5vOiAxMzk3Mzg2IChXYWxlcykNCg==
