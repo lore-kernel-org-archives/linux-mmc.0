@@ -1,46 +1,65 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH v5 1/4] gpiolib: Pass bitmaps, not integer arrays, to
- get/set array
-Date: Fri, 31 Aug 2018 11:14:31 +0200
-Message-ID: <CACRpkdYmd=Efh4-YsTzRAhtKLWHuhJ-9D6iVagkg=+zxU=KLHA@mail.gmail.com>
-References: <20180820234341.5271-1-jmkrzyszt@gmail.com> <20180829204900.19390-1-jmkrzyszt@gmail.com>
- <20180829204900.19390-2-jmkrzyszt@gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v3 02/38] dt-bindings: mmc: tegra: Add pad voltage control properties
+Date: Fri, 31 Aug 2018 15:15:35 +0200
+Message-ID: <CAPDyKFouUgYrx_oEJF8WHrtDbtEifSJnk-a0LeJEKw9eQFXX3A@mail.gmail.com>
+References: <20180830150639.21048-1-avienamo@nvidia.com> <20180830150639.21048-3-avienamo@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180829204900.19390-2-jmkrzyszt@gmail.com>
+In-Reply-To: <20180830150639.21048-3-avienamo@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Janusz Krzysztofik <jmkrzyszt@gmail.com>
-Cc: Jonathan Corbet <corbet@lwn.net>, Miguel Ojeda Sandonis <miguel.ojeda.sandonis@gmail.com>, Peter Korsgaard <peter.korsgaard@barco.com>, Peter Rosin <peda@axentia.se>, Ulf Hansson <ulf.hansson@linaro.org>, Andrew Lunn <andrew@lunn.ch>, Florian Fainelli <f.fainelli@gmail.com>, "David S. Miller" <davem@davemloft.net>, Dominik Brodowski <linux@dominikbrodowski.net>, Greg KH <gregkh@linuxfoundation.org>, kishon@ti.com, Lars-Peter Clausen <lars@metafoo.de>, Michael Hennerich <Michael.Hennerich@analog.com>, Jonathan Cameron <jic23@kernel.org>, Hartmut Knaack <knaack.h@gmx.de>, Peter Meerwald <pmeerw@pmeerw.net>, Jiri Slaby <jslaby@suse.com>, Willy Tarreau <w@1wt.eu>, Geert Uytterhoeven <geert@linux-m68k.org>, linux-doc@vger.kernel.org, linux-i2c@vger.kernel
+To: Aapo Vienamo <avienamo@nvidia.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, Mikko Perttunen <mperttunen@nvidia.com>, Stefan Agner <stefan@agner.ch>, DTML <devicetree@vger.kernel.org>, linux-tegra@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Aug 29, 2018 at 10:48 PM Janusz Krzysztofik <jmkrzyszt@gmail.com> wrote:
+On 30 August 2018 at 17:06, Aapo Vienamo <avienamo@nvidia.com> wrote:
+> Document the pinctrl bindings used by the SDHCI driver to reconfigure
+> pad voltages on controllers supporting multiple voltage levels.
+>
+> Signed-off-by: Aapo Vienamo <avienamo@nvidia.com>
+> Reviewed-by: Mikko Perttunen <mperttunen@nvidia.com>
+> Reviewed-by: Rob Herring <robh@kernel.org>
+> Acked-by: Thierry Reding <treding@nvidia.com>
 
-So it's no secret that I strongly fancy this patch set.
+Applied for next, thanks!
 
-What would be great at this point is to have some people test
-that the drivers still work as expected, even better if they can do
-some benchmarking.
+Kind regards
+Uffe
 
-> -               values[PIN_DATA0 + i] = !!(val & BIT(i));
-> -       values[PIN_CTRL_RS] = rs;
-> +       value_bitmap[0] = val;
-> +       __assign_bit(PIN_CTRL_RS, value_bitmap, rs);
->         n = 9;
->         if (hd->pins[PIN_CTRL_RW]) {
-> -               values[PIN_CTRL_RW] = 0;
-> +               __clear_bit(PIN_CTRL_RW, value_bitmap);
-
-This seems fine to me, but I understand the comment that the
-code becomes harder to read.
-
-I think part of it is those __assign_bit() and __clear_bit() with
-the double-underscore of unclear meaning. The meaning is
-"non atomic" IIRC, so maybe I should move forward
-with my plan to send a sed script to Torvalds just renaming all
-of those to something sane in the next merge window.
-
-Like __assign_bit() -> assign_bit_nonatomic()
-
-Yours,
-Linus Walleij
+> ---
+>  .../bindings/mmc/nvidia,tegra20-sdhci.txt     | 22 +++++++++++++++++++
+>  1 file changed, 22 insertions(+)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
+> index 9bce57862ed6..90c214dbfb16 100644
+> --- a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
+> +++ b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
+> @@ -38,3 +38,25 @@ sdhci@c8000200 {
+>         power-gpios = <&gpio 155 0>; /* gpio PT3 */
+>         bus-width = <8>;
+>  };
+> +
+> +Optional properties for Tegra210 and Tegra186:
+> +- pinctrl-names, pinctrl-0, pinctrl-1 : Specify pad voltage
+> +  configurations. Valid pinctrl-names are "sdmmc-3v3" and "sdmmc-1v8"
+> +  for controllers supporting multiple voltage levels. The order of names
+> +  should correspond to the pin configuration states in pinctrl-0 and
+> +  pinctrl-1.
+> +
+> +Example:
+> +sdhci@700b0000 {
+> +       compatible = "nvidia,tegra210-sdhci", "nvidia,tegra124-sdhci";
+> +       reg = <0x0 0x700b0000 0x0 0x200>;
+> +       interrupts = <GIC_SPI 14 IRQ_TYPE_LEVEL_HIGH>;
+> +       clocks = <&tegra_car TEGRA210_CLK_SDMMC1>;
+> +       clock-names = "sdhci";
+> +       resets = <&tegra_car 14>;
+> +       reset-names = "sdhci";
+> +       pinctrl-names = "sdmmc-3v3", "sdmmc-1v8";
+> +       pinctrl-0 = <&sdmmc1_3v3>;
+> +       pinctrl-1 = <&sdmmc1_1v8>;
+> +       status = "disabled";
+> +};
+> --
+> 2.18.0
+>
