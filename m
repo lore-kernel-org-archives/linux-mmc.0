@@ -1,89 +1,94 @@
-From: Thierry Reding <thierry.reding@gmail.com>
-Subject: Re: [PATCH v2 0/8] Tegra SDHCI support HS400 on Tegra210 and Tegra186
-Date: Fri, 31 Aug 2018 16:02:21 +0200
-Message-ID: <20180831140221.GC7926@ulmo>
-References: <1533924845-1466-1-git-send-email-avienamo@nvidia.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="7qSK/uQB79J36Y4o"
+From: Janusz Krzysztofik <jmkrzyszt@gmail.com>
+Subject: [PATH v6 0/4] gpiolib: speed up GPIO array processing
+Date: Sat,  1 Sep 2018 00:56:12 +0200
+Message-ID: <20180831225616.29221-1-jmkrzyszt@gmail.com>
+References: <20180829204900.19390-1-jmkrzyszt@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1533924845-1466-1-git-send-email-avienamo@nvidia.com>
+In-Reply-To: <20180829204900.19390-1-jmkrzyszt@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Aapo Vienamo <avienamo@nvidia.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Jonathan Hunter <jonathanh@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, Mikko Perttunen <mperttunen@nvidia.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Jonathan Corbet <corbet@lwn.net>, Miguel Ojeda Sandonis <miguel.ojeda.sandonis@gmail.com>, Peter Korsgaard <peter.korsgaard@barco.com>, Peter Rosin <peda@axentia.se>, Ulf Hansson <ulf.hansson@linaro.org>, Andrew Lunn <andrew@lunn.ch>, Florian Fainelli <f.fainelli@gmail.com>, "David S. Miller" <davem@davemloft.net>, Dominik Brodowski <linux@dominikbrodowski.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kishon Vijay Abraham I <kishon@ti.com>, Lars-Peter Clausen <lars@metafoo.de>, Michael Hennerich <Michael.Hennerich@analog.com>, Jonathan Cameron <jic23@kernel.org>, Hartmut Knaack <knaack.h@gmx.de>, Peter Meerwald-Stadler <pmeerw@pmeerw.net>, Jiri Slaby <jslaby@suse.com>, Willy Tarreau <w@1wt.eu>, Geert Uytterhoeven <geert@linux-m68k.org>
 List-Id: linux-mmc@vger.kernel.org
 
 
---7qSK/uQB79J36Y4o
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+The goal is to boost performance of get/set array functions while
+processing GPIO arrays which represent pins of a signle chip in
+hardware order.  If resulting performance is close to PIO, GPIO API
+can be used for data I/O without much loss of speed.
 
-On Fri, Aug 10, 2018 at 09:13:57PM +0300, Aapo Vienamo wrote:
-> Hi all,
-> This series implements support for HS400 signaling on Tegra210 and
-> Tegra186. This includes programming the DQS trimmer values, implementing
-> enhanced strobe and HS400 delay line calibration.
->=20
-> This series depends on the "Tegra SDHCI add support for HS200 and UHS
-> signaling" series.
->=20
-> Changelog:
-> v2:
-> 	- Document in dt-bindings which controllers support HS400
-> 	- Use val instead of reg in tegra_sdhci_set_dqs_trim()
-> 	- Change "dt" to "DT" in "mmc: tegra: Parse and program DQS trim
-> 	  value" commit message
-> 	- Add spaces around << in tegra_sdhci_set_dqs_trim()
-> 	- Make the "mmc: tegra: Implement HS400 enhanced strobe" commit
-> 	  message more detailed
-> 	- Remove a debug print from tegra_sdhci_hs400_enhanced_strobe()
-> 	- Add blank lines around if-else-block in
-> 	  tegra_sdhci_hs400_enhanced_strobe()
-> 	- Use val instead of reg in tegra_sdhci_hs400_enhanced_strobe()
-> 	- Make commit message of "mmc: tegra: Implement HS400 delay line
-> 	  calibration" more detailed
->=20
-> Aapo Vienamo (8):
->   dt-bindings: mmc: Add DQS trim value to Tegra SDHCI
->   mmc: tegra: Parse and program DQS trim value
->   mmc: tegra: Implement HS400 enhanced strobe
->   mmc: tegra: Implement HS400 delay line calibration
->   arm64: dts: tegra186: Add SDMMC4 DQS trim value
->   arm64: dts: tegra210: Add SDMMC4 DQS trim value
->   arm64: dts: tegra186: Enable HS400
->   arm64: dts: tegra210: Enable HS400
->=20
->  .../bindings/mmc/nvidia,tegra20-sdhci.txt          |  4 ++
->  arch/arm64/boot/dts/nvidia/tegra186.dtsi           |  2 +
->  arch/arm64/boot/dts/nvidia/tegra210.dtsi           |  2 +
->  drivers/mmc/host/sdhci-tegra.c                     | 84 ++++++++++++++++=
-+++++-
->  4 files changed, 89 insertions(+), 3 deletions(-)
+Created and tested on a low end Amstrad Delta board with NAND driver
+updated to use GPIO API for data I/O.  Performance degrade compared to
+PIO is much better than before the optimization but still not quite
+satisfactory.
 
-For patches 1-4:
+Janusz Krzysztofik (4):
+      gpiolib: Pass bitmaps, not integer arrays, to get/set array
+      gpiolib: Identify arrays matching GPIO hardware
+      gpiolib: Pass array info to get/set array functions
+      gpiolib: Implement fast processing path in get/set array
 
-Acked-by: Thierry Reding <treding@nvidia.com>
+Changelog:
+v6:
+[PATCH v6 1/4] gpiolib: Pass bitmaps, not integer arrays, to get/set
+- use DECLARE_BITMAP() macro for declaring value_bitmap - great idea by
+  David Laight, thanks!
+drivers/auxdisplay/hd44780.c:
+- simplify the code and adjust comments as recommended by Geert
+  Uytterhoeven - thanks!,
+drivers/i2c/muxes/i2c-mux-gpio.c:
+- drop .values member of struct gpiomux - details prvided by Peter
+  Rosin, thanks!, 
+drivers/mux/gpio.c:
+- drop .val member of struct mux_gpio - details prvided by Peter
+  Rosin, thanks!,
+drivers/net/phy/mdio-mux-gpio.c:
+- drop .values member of struct mdio_mux_gpio_state and is processsing.
 
---7qSK/uQB79J36Y4o
-Content-Type: application/pgp-signature; name="signature.asc"
+v5:
+[PATCH v5 1/4] gpiolib: Pass bitmaps, not integer arrays, to get/set
+- drivers/i2c/muxes/i2c-mux-gpio.c:
+  - drop assigment of values to struct gpiomux.values, as recommended
+    by Peter Rosin - thanks!,
+  - mark the .values member of the structure as obsolete,
+- drivers/mux/gpio.c:
+  - drop assigment of values to struct mux_gpio.val, also recommended
+    by Peter Rosin - thanks!,
+  - merk the .val member of the structure as obsolete,
+- drivers/auxdisplay/hd44780.c:
+  - fix incorrect bitmap size,
+  - use >>= operator to simplify notation,
+  both catched by Miguel Ojeda - thanks!,
+- add Cc: clauses as well as Acked-by: collected so far.
+[PATCH v5 2/4] gpiolib: Identify arrays matching GPIO hardware
+- add Cc: clause.
+[PATCH v5 3/4] gpiolib: Pass array info to get/set array functions
+- add Cc: clauses as well as Acked-by: collected so far.
+[PATCH v5 4/4] gpiolib: Implement fast processing path in get/set
+- add Cc: clause.
 
------BEGIN PGP SIGNATURE-----
+v4:
+That series was a follow up of the former "mtd: rawnand: ams-delta: Use
+gpio-omap accessors for data I/O" which already contained some changes
+to gpiolib.  Those previous attempts were commented by Borris Brezillon
+who suggested using GPIO API modified to accept bitmaps, and by Linus
+Walleij who suggested still more great ideas for further immprovement
+of the proposed API changes - thanks!
 
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAluJSm0ACgkQ3SOs138+
-s6G42w/9FFECWR0d1VfPjK22NxVRpLNi0S8yD9l63nPrfpgape2cpCFscZPIs6m/
-DsbobOqn/5MDiRDeG5NAcYtYyjeiedCXDFcP42q3qw2HRuxtHew9MoX0JAa0VhtO
-dCGy1uueuOjmoPJNh2S3JWNbCrRipyXmRPbb4sAGWPoXEh5+qqxfbC8A+NFXwfTZ
-5VgdnJJOuIAWpw60iV9Lpn+RroIOUCY3mQL0rbGcctT6afWtGdzCh5JHQosCQhIg
-Ijc2a2g97MyUjhP64BSKrrQ1XueVoC3tvrz8sj7JUo6iwZwscNMuEAny+V5omCkh
-7BgPTlDpH2bJ+7tgRjjulvvuzNsAmOWxCojTpPwOBpM32GdL+BWPTjYPYKh7o4H9
-0Fjn7G2Oq1HZPgxpGwLgn9XYUhCt0kE2XYgRdaObGiLBlUH04ubrtfHiYC2yo60P
-Pq/b8FATrwe7twgOn7vDTQABNZuJ8lkN3F1iFgkfRvymoR1K6hPb4RWiMijffH8i
-vSXushblghKfZRqUiARC6g0hSVnMd/A9T87aFPcymumlgWGtt/mR7MoYP89fgT7W
-X7asGvLlEWMgQGimnJ9shxAEEzVRWsF09/u1PmM3i2g7BuhuRQhBR9XHxmQH/kMy
-2mmo+SmTM4l9zQdtJLY3hP6Vt5LdqLYNuPUpMSigiAa8EPsaQ5w=
-=/mTD
------END PGP SIGNATURE-----
-
---7qSK/uQB79J36Y4o--
+diffstat:
+ Documentation/driver-api/gpio/board.rst     |   15 +
+ Documentation/driver-api/gpio/consumer.rst  |   48 +++-
+ drivers/auxdisplay/hd44780.c                |   74 +++----
+ drivers/bus/ts-nbus.c                       |   27 +-
+ drivers/gpio/gpio-max3191x.c                |   23 +-
+ drivers/gpio/gpiolib.c                      |  279 ++++++++++++++++++++++------
+ drivers/gpio/gpiolib.h                      |   15 +
+ drivers/i2c/muxes/i2c-mux-gpio.c            |   16 -
+ drivers/mmc/core/pwrseq_simple.c            |   15 -
+ drivers/mux/gpio.c                          |   18 -
+ drivers/net/phy/mdio-mux-gpio.c             |   13 -
+ drivers/pcmcia/soc_common.c                 |   14 -
+ drivers/phy/motorola/phy-mapphone-mdm6600.c |   21 +-
+ drivers/staging/iio/adc/ad7606.c            |   12 -
+ drivers/tty/serial/serial_mctrl_gpio.c      |    9 
+ include/linux/gpio/consumer.h               |   35 ++-
+ 16 files changed, 417 insertions(+), 217 deletions(-)
