@@ -1,135 +1,46 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v3 00/38] Tegra SDHCI add support for HS200 and UHS
- signaling
-Date: Fri, 31 Aug 2018 10:20:34 +0300
-Message-ID: <c0b484dc-bfb1-244b-f40e-e6511b8888ba@intel.com>
-References: <20180830150639.21048-1-avienamo@nvidia.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH v5 1/4] gpiolib: Pass bitmaps, not integer arrays, to
+ get/set array
+Date: Fri, 31 Aug 2018 11:14:31 +0200
+Message-ID: <CACRpkdYmd=Efh4-YsTzRAhtKLWHuhJ-9D6iVagkg=+zxU=KLHA@mail.gmail.com>
+References: <20180820234341.5271-1-jmkrzyszt@gmail.com> <20180829204900.19390-1-jmkrzyszt@gmail.com>
+ <20180829204900.19390-2-jmkrzyszt@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180830150639.21048-1-avienamo@nvidia.com>
-Content-Language: en-US
+In-Reply-To: <20180829204900.19390-2-jmkrzyszt@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Aapo Vienamo <avienamo@nvidia.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>, Mikko Perttunen <mperttunen@nvidia.com>, Stefan Agner <stefan@agner.ch>
-Cc: devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+To: Janusz Krzysztofik <jmkrzyszt@gmail.com>
+Cc: Jonathan Corbet <corbet@lwn.net>, Miguel Ojeda Sandonis <miguel.ojeda.sandonis@gmail.com>, Peter Korsgaard <peter.korsgaard@barco.com>, Peter Rosin <peda@axentia.se>, Ulf Hansson <ulf.hansson@linaro.org>, Andrew Lunn <andrew@lunn.ch>, Florian Fainelli <f.fainelli@gmail.com>, "David S. Miller" <davem@davemloft.net>, Dominik Brodowski <linux@dominikbrodowski.net>, Greg KH <gregkh@linuxfoundation.org>, kishon@ti.com, Lars-Peter Clausen <lars@metafoo.de>, Michael Hennerich <Michael.Hennerich@analog.com>, Jonathan Cameron <jic23@kernel.org>, Hartmut Knaack <knaack.h@gmx.de>, Peter Meerwald <pmeerw@pmeerw.net>, Jiri Slaby <jslaby@suse.com>, Willy Tarreau <w@1wt.eu>, Geert Uytterhoeven <geert@linux-m68k.org>, linux-doc@vger.kernel.org, linux-i2c@vger.kernel
 List-Id: linux-mmc@vger.kernel.org
 
-On 30/08/18 18:06, Aapo Vienamo wrote:
-> Hi all,
-> 
-> This series implements support for faster signaling modes on Tegra
-> SDHCI controllers. This series consist of several parts: changes
-> required for 1.8 V signaling and pad control, pad calibration, and
-> tuning. Following earlies patch sets have been merged into this
-> larger set: "Tegra PMC pinctrl pad configuration", "Tegra SDHCI enable
-> 1.8 V signaling on Tegar210 and Tegra186", "Tegra SDHCI update the
-> padautocal procedure". Also the patches for enabling SDHCI tuning
-> are added.
+On Wed, Aug 29, 2018 at 10:48 PM Janusz Krzysztofik <jmkrzyszt@gmail.com> wrote:
 
-For sdhci-related patches 11 thru' 27
+So it's no secret that I strongly fancy this patch set.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+What would be great at this point is to have some people test
+that the drivers still work as expected, even better if they can do
+some benchmarking.
 
+> -               values[PIN_DATA0 + i] = !!(val & BIT(i));
+> -       values[PIN_CTRL_RS] = rs;
+> +       value_bitmap[0] = val;
+> +       __assign_bit(PIN_CTRL_RS, value_bitmap, rs);
+>         n = 9;
+>         if (hd->pins[PIN_CTRL_RW]) {
+> -               values[PIN_CTRL_RW] = 0;
+> +               __clear_bit(PIN_CTRL_RW, value_bitmap);
 
-> 
-> Changelog:
-> v3:
-> 	- Remove tegra_sdhci_writew() from tegra210_sdhci_ops to prevent
-> 	  incorrect access to SDHCI_TRANSFER_MODE on Tegra210.
-> 	- Drop "mmc: sdhci: Add a quirk to skip clearing the transfer
-> 	  mode register on tuning". This is no longer needed since it
-> 	  was effectively a workaround to the behavior caused by
-> 	  tegra_sdhci_writew() on Tegra210.
-> 	- Implement disabling of the card clock during issuing of the
-> 	  tuning command in tegra210_sdhci_writew().
-> 	- Drop "mmc: sdhci: Add a quirk to disable card clock during
-> 	  tuning". This is now implemented in the sdhci-tegra driver.
-> 	
-> v2:
-> 	- Fix grammar in PMC device tree bindings docs
-> 	- Remove a stray line from tegra sdhci bindings
-> 	- Cosmetic changes to PMC pinctrl driver
-> 	- Fix a typo in "soc/tegra: pmc: Implement
-> 	  tegra_io_pad_is_powered()" commit message
-> 	- Declare mask and value on the same line in
-> 	  tegra_io_pad_is_powered()
-> 	- Move the call to tegra_sdhci_is_pad_and_regulator_valid() to
-> 	  inside the if condition in tegra_sdhci_reset()
-> 	- Use usleep_range() in tegra_sdhci_configure_cal_pad()
-> 	- Move sdhci_writel() out of the enable if-else body in
-> 	  tegra_sdhci_configure_cal_pad()
-> 	- Add a delay before starting polling in
-> 	  tegra_sdhci_pad_autocalib()
-> 	- Use usleep_range() in tegra_sdhci_set_tap()
-> 	- Rename orig_enabled to status in
-> 	  tegra_sdhci_configure_card_clk()
-> 	- Fix if condition wrapping alignment in tegra_sdhci_set_tap()
-> 
-> v1:
-> 	- Probe the regulator voltage capabilities to determine whether pinctrl
-> 	  is needed in tegra_sdhci_r eset
-> 	- Don't remove tegra_sdhci_voltage_switch()
-> 	- Use dev_warn() in tegra_sdhci_init_pinctrl_info()
-> 	- Don't change start_signal_voltage_switch callback if pinctrl info
-> 	  invalid
-> 	- Only call udelay(1) on enable in tegra_sdhci_configure_cal_pad()
-> 	- Add nvidia, prefix to pad autocal offset dt props in the example
-> 
-> See the original patch sets for earlier changelogs.
-> 
-> 
-> Aapo Vienamo (38):
->   dt-bindings: Add Tegra PMC pad configuration bindings
->   dt-bindings: mmc: tegra: Add pad voltage control properties
->   dt-bindings: Add Tegra SDHCI pad pdpu offset bindings
->   dt-bindings: mmc: Add Tegra SDHCI sampling trimmer values
->   soc/tegra: pmc: Fix pad voltage configuration for Tegra186
->   soc/tegra: pmc: Factor out DPD register bit calculation
->   soc/tegra: pmc: Implement tegra_io_pad_is_powered()
->   soc/tegra: pmc: Use X macro to generate IO pad tables
->   soc/tegra: pmc: Remove public pad voltage APIs
->   soc/tegra: pmc: Implement pad configuration via pinctrl
->   mmc: tegra: Reconfigure pad voltages during voltage switching
->   mmc: tegra: Poll for calibration completion
->   mmc: tegra: Set calibration pad voltage reference
->   mmc: tegra: Power on the calibration pad
->   mmc: tegra: Disable card clock during pad calibration
->   mmc: tegra: Program pad autocal offsets from dt
->   mmc: tegra: Perform pad calibration after voltage switch
->   mmc: tegra: Enable pad calibration on Tegra210 and Tegra186
->   mmc: tegra: Add a workaround for tap value change glitch
->   mmc: tegra: Parse default trim and tap from dt
->   mmc: tegra: Configure default tap values
->   mmc: tegra: Configure default trim value on reset
->   mmc: tegra: Use standard SDHCI tuning on Tegra210 and Tegra186
->   mmc: tegra: Remove tegra_sdhci_writew() from tegra210_sdhci_ops
->   mmc: tegra: Disable card clock during tuning cmd on Tegra210
->   mmc: tegra: Enable UHS and HS200 modes for Tegra210
->   mmc: tegra: Enable UHS and HS200 modes for Tegra186
->   arm64: dts: Add Tegra210 sdmmc pinctrl voltage states
->   arm64: dts: Add Tegra186 sdmmc pinctrl voltage states
->   arm64: dts: tegra210-p2180: Allow ldo2 to go down to 1.8 V
->   arm64: dts: tegra210-p2180: Correct sdmmc4 vqmmc-supply
->   arm64: dts: tegra210-p2597: Remove no-1-8-v from sdmmc1
->   arm64: dts: tegra186: Add sdmmc pad auto calibration offsets
->   arm64: dts: tegra210: Add sdmmc pad auto calibration offsets
->   arm64: dts: tegra210: Add SDHCI tap and trim values
->   arm64: dts: tegra186: Add SDHCI tap and trim values
->   arm64: dts: tegra186: Assign clocks for sdmmc1 and sdmmc4
->   arm64: dts: tegra210: Assign clocks for sdmmc1 and sdmmc4
-> 
->  .../arm/tegra/nvidia,tegra186-pmc.txt         |  93 +++
->  .../bindings/arm/tegra/nvidia,tegra20-pmc.txt | 103 ++++
->  .../bindings/mmc/nvidia,tegra20-sdhci.txt     |  68 ++
->  arch/arm64/boot/dts/nvidia/tegra186.dtsi      |  74 +++
->  .../arm64/boot/dts/nvidia/tegra210-p2180.dtsi |  12 +-
->  .../arm64/boot/dts/nvidia/tegra210-p2597.dtsi |   1 -
->  arch/arm64/boot/dts/nvidia/tegra210.dtsi      |  55 ++
->  drivers/mmc/host/sdhci-tegra.c                | 583 ++++++++++++++++--
->  drivers/soc/tegra/pmc.c                       | 511 +++++++++++----
->  .../pinctrl/pinctrl-tegra-io-pad.h            |  18 +
->  include/soc/tegra/pmc.h                       |  20 +-
->  11 files changed, 1328 insertions(+), 210 deletions(-)
->  create mode 100644 include/dt-bindings/pinctrl/pinctrl-tegra-io-pad.h
-> 
+This seems fine to me, but I understand the comment that the
+code becomes harder to read.
+
+I think part of it is those __assign_bit() and __clear_bit() with
+the double-underscore of unclear meaning. The meaning is
+"non atomic" IIRC, so maybe I should move forward
+with my plan to send a sed script to Torvalds just renaming all
+of those to something sane in the next merge window.
+
+Like __assign_bit() -> assign_bit_nonatomic()
+
+Yours,
+Linus Walleij
