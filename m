@@ -1,89 +1,46 @@
-From: Peter Rosin <peda@axentia.se>
-Subject: Re: [PATCH v6 1/4] gpiolib: Pass bitmaps, not integer arrays, to
- get/set array
-Date: Sat, 1 Sep 2018 02:23:17 +0200
-Message-ID: <47a7e66f-8635-7131-8a0c-c26cf849fd50@axentia.se>
-References: <20180829204900.19390-1-jmkrzyszt@gmail.com>
- <20180831225616.29221-1-jmkrzyszt@gmail.com>
- <20180831225616.29221-2-jmkrzyszt@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+From: Andreas Kemnade <andreas@kemnade.info>
+Subject: [PATCH] mmc: omap_hsmmc: fix wakeirq handling on removal
+Date: Sun,  2 Sep 2018 09:30:58 +0200
+Message-ID: <20180902073058.17053-1-andreas@kemnade.info>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180831225616.29221-2-jmkrzyszt@gmail.com>
-Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Janusz Krzysztofik <jmkrzyszt@gmail.com>, Linus Walleij <linus.walleij@linaro.org>
-Cc: Jonathan Corbet <corbet@lwn.net>, Miguel Ojeda Sandonis <miguel.ojeda.sandonis@gmail.com>, Peter Korsgaard <peter.korsgaard@barco.com>, Ulf Hansson <ulf.hansson@linaro.org>, Andrew Lunn <andrew@lunn.ch>, Florian Fainelli <f.fainelli@gmail.com>, "David S. Miller" <davem@davemloft.net>, Dominik Brodowski <linux@dominikbrodowski.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kishon Vijay Abraham I <kishon@ti.com>, Lars-Peter Clausen <lars@metafoo.de>, Michael Hennerich <Michael.Hennerich@analog.com>, Jonathan Cameron <jic23@kernel.org>, Hartmut Knaack <knaack.h@gmx.de>, Peter Meerwald-Stadler <pmeerw@pmeerw.net>, Jiri Slaby <jslaby@suse.com>, Willy Tarreau <w@1wt.eu>, Geert Uytterhoeven <geert@linux-m68k.org>, linux-doc@vger.kernel.org, linux-i2
+To: ulf.hansson@linaro.org, kishon@ti.com, wsa+renesas@sang-engineering.com, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org, Tony Lindgren <tony@atomide.com>, Discussions about the Letux Kernel <letux-kernel@openphoenux.org>
+Cc: Andreas Kemnade <andreas@kemnade.info>
 List-Id: linux-mmc@vger.kernel.org
 
-On 2018-09-01 00:56, Janusz Krzysztofik wrote:
-> Most users of get/set array functions iterate consecutive bits of data,
-> usually a single integer, while processing array of results obtained
-> from, or building an array of values to be passed to those functions.
-> Save time wasted on those iterations by changing the functions' API to
-> accept bitmaps.
-> 
-> All current users are updated as well.
-> 
-> More benefits from the change are expected as soon as planned support
-> for accepting/passing those bitmaps directly from/to respective GPIO
-> chip callbacks if applicable is implemented.
+after unbinding mmc I get things like this:
+[  185.294067] mmc1: card 0001 removed
+[  185.305206] omap_hsmmc 480b4000.mmc: wake IRQ with no resume: -13
 
-> diff --git a/drivers/i2c/muxes/i2c-mux-gpio.c b/drivers/i2c/muxes/i2c-mux-gpio.c
-> index 401308e3d036..e28ddc20000d 100644
-> --- a/drivers/i2c/muxes/i2c-mux-gpio.c
-> +++ b/drivers/i2c/muxes/i2c-mux-gpio.c
-> @@ -22,18 +22,16 @@ struct gpiomux {
->  	struct i2c_mux_gpio_platform_data data;
->  	unsigned gpio_base;
->  	struct gpio_desc **gpios;
-> -	int *values;
->  };
->  
->  static void i2c_mux_gpio_set(const struct gpiomux *mux, unsigned val)
->  {
-> -	int i;
-> -
-> -	for (i = 0; i < mux->data.n_gpios; i++)
-> -		mux->values[i] = (val >> i) & 1;
-> +	DECLARE_BITMAP(value_bitmap, mux->data.n_gpios);
+The wakeirq stays in /proc-interrupts
 
-Picking a random driver for this comment, it applies to many of them.
+rebinding shows this:
+[  289.795959] genirq: Flags mismatch irq 112. 0000200a (480b4000.mmc:wakeup) vs. 0000200a (480b4000.mmc:wakeup)
+[  289.808959] omap_hsmmc 480b4000.mmc: Unable to request wake IRQ
+[  289.815338] omap_hsmmc 480b4000.mmc: no SDIO IRQ support, falling back to polling
 
-I think this creates a VLA? Can't you, for the bit-count, just go with
-BITS_PER_TYPE(unsigned)? Or whatever is appropriate for the driver
-in question.
+That bug seems to be introduced by switching from devm_request_irq()
+to generic wakeirq handling.
 
-Also, I find that where you use DECLARE_BITMAP, the _bitmap suffix is
-just noise and I would very much like to zap it.
+So let us cleanup at removal.
 
-Cheers,
-Peter
+Signed-off-by: Andreas Kemnade <andreas@kemnade.info>
+Fixes: 5b83b2234be6 ("mmc: omap_hsmmc: Change wake-up interrupt to use generic wakeirq")
+---
+ drivers/mmc/host/omap_hsmmc.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-> +	
-> +	*value_bitmap = val;
->  
->  	gpiod_set_array_value_cansleep(mux->data.n_gpios,
-> -				       mux->gpios, mux->values);
-> +				       mux->gpios, value_bitmap);
->  }
->  
->  static int i2c_mux_gpio_select(struct i2c_mux_core *muxc, u32 chan)
-> @@ -182,15 +180,13 @@ static int i2c_mux_gpio_probe(struct platform_device *pdev)
->  		return -EPROBE_DEFER;
->  
->  	muxc = i2c_mux_alloc(parent, &pdev->dev, mux->data.n_values,
-> -			     mux->data.n_gpios * sizeof(*mux->gpios) +
-> -			     mux->data.n_gpios * sizeof(*mux->values), 0,
-> +			     mux->data.n_gpios * sizeof(*mux->gpios), 0,
->  			     i2c_mux_gpio_select, NULL);
->  	if (!muxc) {
->  		ret = -ENOMEM;
->  		goto alloc_failed;
->  	}
->  	mux->gpios = muxc->priv;
-> -	mux->values = (int *)(mux->gpios + mux->data.n_gpios);
->  	muxc->priv = mux;
->  
->  	platform_set_drvdata(pdev, muxc);
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 071693ebfe18..68760d4a5d3d 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -2177,6 +2177,7 @@ static int omap_hsmmc_remove(struct platform_device *pdev)
+ 	dma_release_channel(host->tx_chan);
+ 	dma_release_channel(host->rx_chan);
+ 
++	dev_pm_clear_wake_irq(host->dev);
+ 	pm_runtime_dont_use_autosuspend(host->dev);
+ 	pm_runtime_put_sync(host->dev);
+ 	pm_runtime_disable(host->dev);
+-- 
+2.11.0
