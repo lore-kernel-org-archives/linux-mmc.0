@@ -1,92 +1,34 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 06/14] mmc: mmci: merge prepare data functions
-Date: Mon, 3 Sep 2018 14:15:39 +0200
-Message-ID: <CAPDyKFqNOgK8sMa-o7jWecD2Y76+LdjmtYTq+1-ApapQv3fZxQ@mail.gmail.com>
-References: <1533116221-380-1-git-send-email-ludovic.Barre@st.com> <1533116221-380-7-git-send-email-ludovic.Barre@st.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH v7 3/4] gpiolib: Pass array info to get/set array functions
+Date: Mon, 3 Sep 2018 16:21:33 +0200
+Message-ID: <CAMuHMdV66N_YAvvZjk7kEf_aLNNFo6HA8S4JjzkM2d3QC-ZS5A@mail.gmail.com>
+References: <20180831225616.29221-1-jmkrzyszt@gmail.com> <20180902120144.6855-1-jmkrzyszt@gmail.com>
+ <20180902120144.6855-4-jmkrzyszt@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1533116221-380-7-git-send-email-ludovic.Barre@st.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ludovic Barre <ludovic.Barre@st.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Gerald Baeza <gerald.baeza@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <20180902120144.6855-4-jmkrzyszt@gmail.com>
+Sender: netdev-owner@vger.kernel.org
+To: Janusz Krzysztofik <jmkrzyszt@gmail.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>, Jonathan Corbet <corbet@lwn.net>, Miguel Ojeda Sandonis <miguel.ojeda.sandonis@gmail.com>, peter.korsgaard@barco.com, Peter Rosin <peda@axentia.se>, Ulf Hansson <ulf.hansson@linaro.org>, Andrew Lunn <andrew@lunn.ch>, Florian Fainelli <f.fainelli@gmail.com>, "David S. Miller" <davem@davemloft.net>, Dominik Brodowski <linux@dominikbrodowski.net>, Greg KH <gregkh@linuxfoundation.org>, Kishon Vijay Abraham I <kishon@ti.com>, Lars-Peter Clausen <lars@metafoo.de>, Michael Hennerich <Michael.Hennerich@analog.com>, Jonathan Cameron <jic23@kernel.org>, Hartmut Knaack <knaack.h@gmx.de>, Peter Meerwald <pmeerw@pmeerw.net>, Jiri Slaby <jslaby@suse.com>, Willy Tarreau <w@1wt.eu>, "open list:DOCUMENTATION" <linux-doc@vger.>
 List-Id: linux-mmc@vger.kernel.org
 
-On 1 August 2018 at 11:36, Ludovic Barre <ludovic.Barre@st.com> wrote:
-> From: Ludovic Barre <ludovic.barre@st.com>
->
-> This patch merges the prepare data functions.
-> This allows to define a single access to prepare data service.
-> This prepares integration for mmci host ops.
->
-> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
-> ---
->  drivers/mmc/host/mmci.c | 22 +++++++++-------------
->  1 file changed, 9 insertions(+), 13 deletions(-)
->
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index 5646c2e6..e4d80f1 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -651,11 +651,16 @@ static int __mmci_dma_prep_data(struct mmci_host *host, struct mmc_data *data,
->         return -ENOMEM;
->  }
->
-> -static inline int mmci_dma_prep_data(struct mmci_host *host,
-> -                                    struct mmc_data *data)
-> +static inline int mmci_dma_prepare_data(struct mmci_host *host,
+On Sun, Sep 2, 2018 at 2:01 PM Janusz Krzysztofik <jmkrzyszt@gmail.com> wrote:
+> In order to make use of array info obtained from gpiod_get_array() and
+> speed up processing of arrays matching single GPIO chip layout, that
+> information must be passed to get/set array functions.  Extend the
+> functions' API with that additional parameter and update all users.
+> Pass NULL if a user bulids an array itself from single GPIOs.
 
-Nitpick: I don't see the reason to why you need to rename this
-function here, please keep it as is.
+builds
 
-> +                                       struct mmc_data *data,
-> +                                       bool next)
->  {
->         struct dmaengine_priv *dmae = host->dma_priv;
-> +       struct dmaengine_next *nd = &dmae->next_data;
->
-> +       if (next)
-> +               return __mmci_dma_prep_data(host, data, &nd->dma_chan,
-> +                                           &nd->dma_desc);
->         /* Check if next job is already prepared. */
->         if (dmae->dma_current && dmae->dma_desc_current)
->                 return 0;
-> @@ -665,22 +670,13 @@ static inline int mmci_dma_prep_data(struct mmci_host *host,
->                                     &dmae->dma_desc_current);
->  }
->
-> -static inline int mmci_dma_prep_next(struct mmci_host *host,
-> -                                    struct mmc_data *data)
-> -{
-> -       struct dmaengine_priv *dmae = host->dma_priv;
-> -       struct dmaengine_next *nd = &dmae->next_data;
-> -
-> -       return __mmci_dma_prep_data(host, data, &nd->dma_chan, &nd->dma_desc);
-> -}
-> -
->  static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
->  {
->         struct dmaengine_priv *dmae = host->dma_priv;
->         struct mmc_data *data = host->data;
->         int ret;
->
-> -       ret = mmci_dma_prep_data(host, host->data);
-> +       ret = mmci_dma_prepare_data(host, host->data, false);
->         if (ret)
->                 return ret;
->
-> @@ -737,7 +733,7 @@ static void mmci_pre_request(struct mmc_host *mmc, struct mmc_request *mrq)
->         if (mmci_validate_data(host, data))
->                 return;
->
-> -       if (!mmci_dma_prep_next(host, data))
-> +       if (!mmci_dma_prepare_data(host, data, true))
->                 data->host_cookie = ++host->next_cookie < 0 ?
->                         1 : host->next_cookie;
->  }
-> --
-> 2.7.4
->
+Gr{oetje,eeting}s,
 
-Kind regards
-Uffe
+                        Geert
+
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
