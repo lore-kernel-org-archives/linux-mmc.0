@@ -1,22 +1,11 @@
 From: Jaejoong Kim <climbbb.kim@gmail.com>
-Subject: [PATCH 04/25] s390: char: tty3270: Change return type to void
-Date: Tue,  4 Sep 2018 11:44:30 +0900
-Message-ID: <1536029091-4426-5-git-send-email-climbbb.kim@gmail.com>
+Subject: [PATCH 05/25] tty: hvc: hvc_console: Change return type to void
+Date: Tue,  4 Sep 2018 11:44:31 +0900
+Message-ID: <1536029091-4426-6-git-send-email-climbbb.kim@gmail.com>
 References: <1536029091-4426-1-git-send-email-climbbb.kim@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1536029091-4426-1-git-send-email-climbbb.kim@gmail.com>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-um@lists.infradead.org, netdev@vger.kernel.org, linux-mmc@vger.kernel.org, linux-s390@vger.kernel.org, devel@driverdev.osuosl.org, greybus-dev@lists.linaro.org, linuxppc-dev@lists.ozlabs.org, linux-serial@vger.kernel.org, sparclinux@vger.kernel.org, linux-usb@vger.kernel.org, linux-bluetooth@vger.kernel.org, linux-kernel@vger.kernel.org
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jiri Slaby <jslaby@suse.com>
 List-Id: linux-mmc@vger.kernel.org
@@ -26,26 +15,34 @@ to void. Now apply this and remove the obsolete error check.
 
 Signed-off-by: Jaejoong Kim <climbbb.kim@gmail.com>
 ---
- drivers/s390/char/tty3270.c | 7 +------
- 1 file changed, 1 insertion(+), 6 deletions(-)
+ drivers/tty/hvc/hvc_console.c | 7 ++-----
+ 1 file changed, 2 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/s390/char/tty3270.c b/drivers/s390/char/tty3270.c
-index 5b8af27..2915f95 100644
---- a/drivers/s390/char/tty3270.c
-+++ b/drivers/s390/char/tty3270.c
-@@ -1017,12 +1017,7 @@ static int tty3270_install(struct tty_driver *driver, struct tty_struct *tty)
- 	raw3270_activate_view(&tp->view);
+diff --git a/drivers/tty/hvc/hvc_console.c b/drivers/tty/hvc/hvc_console.c
+index 5414c4a..13fad62 100644
+--- a/drivers/tty/hvc/hvc_console.c
++++ b/drivers/tty/hvc/hvc_console.c
+@@ -329,7 +329,6 @@ static void hvc_unthrottle(struct tty_struct *tty)
+ static int hvc_install(struct tty_driver *driver, struct tty_struct *tty)
+ {
+ 	struct hvc_struct *hp;
+-	int rc;
  
- port_install:
--	rc = tty_port_install(&tp->port, driver, tty);
--	if (rc) {
--		raw3270_put_view(&tp->view);
--		return rc;
--	}
--
-+	tty_port_install(&tp->port, driver, tty);
- 	tty->driver_data = tp;
+ 	/* Auto increments kref reference if found. */
+ 	hp = hvc_get_by_index(tty->index);
+@@ -337,11 +336,9 @@ static int hvc_install(struct tty_driver *driver, struct tty_struct *tty)
+ 		return -ENODEV;
  
- 	return 0;
+ 	tty->driver_data = hp;
++	tty_port_install(&hp->port, driver, tty);
+ 
+-	rc = tty_port_install(&hp->port, driver, tty);
+-	if (rc)
+-		tty_port_put(&hp->port);
+-	return rc;
++	return 0;
+ }
+ 
+ /*
 -- 
 2.7.4
