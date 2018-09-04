@@ -1,7 +1,7 @@
 From: Jaejoong Kim <climbbb.kim@gmail.com>
-Subject: [PATCH 10/25] tty: synclink: Change return type to void
-Date: Tue,  4 Sep 2018 11:44:36 +0900
-Message-ID: <1536029091-4426-11-git-send-email-climbbb.kim@gmail.com>
+Subject: [PATCH 11/25] tty: synclinkmp: Change return type to void
+Date: Tue,  4 Sep 2018 11:44:37 +0900
+Message-ID: <1536029091-4426-12-git-send-email-climbbb.kim@gmail.com>
 References: <1536029091-4426-1-git-send-email-climbbb.kim@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -26,16 +26,16 @@ to void. Now apply this and remove the obsolete error check.
 
 Signed-off-by: Jaejoong Kim <climbbb.kim@gmail.com>
 ---
- drivers/tty/synclink.c | 3 ++-
+ drivers/tty/synclinkmp.c | 3 ++-
  1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/tty/synclink.c b/drivers/tty/synclink.c
-index fbdf4d0..6e7e4d6 100644
---- a/drivers/tty/synclink.c
-+++ b/drivers/tty/synclink.c
-@@ -3355,8 +3355,9 @@ static int mgsl_install(struct tty_driver *driver, struct tty_struct *tty)
- 	if (mgsl_paranoia_check(info, tty->name, "mgsl_open"))
- 		return -ENODEV;
+diff --git a/drivers/tty/synclinkmp.c b/drivers/tty/synclinkmp.c
+index 1e4d5b9..2d99a5b 100644
+--- a/drivers/tty/synclinkmp.c
++++ b/drivers/tty/synclinkmp.c
+@@ -734,8 +734,9 @@ static int install(struct tty_driver *driver, struct tty_struct *tty)
+ 	}
+ 
  	tty->driver_data = info;
 +	tty_port_install(&info->port, driver, tty);
  
@@ -43,6 +43,6 @@ index fbdf4d0..6e7e4d6 100644
 +	return 0;
  }
  
- /* mgsl_open()
+ /* Called when a port is opened.  Init and enable port.
 -- 
 2.7.4
