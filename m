@@ -1,46 +1,35 @@
-From: Jaejoong Kim <climbbb.kim@gmail.com>
-Subject: [PATCH 25/25] usb: usb-serial: Change return type to void
-Date: Tue,  4 Sep 2018 11:44:51 +0900
-Message-ID: <1536029091-4426-26-git-send-email-climbbb.kim@gmail.com>
-References: <1536029091-4426-1-git-send-email-climbbb.kim@gmail.com>
-Return-path: <netdev-owner@vger.kernel.org>
-In-Reply-To: <1536029091-4426-1-git-send-email-climbbb.kim@gmail.com>
-Sender: netdev-owner@vger.kernel.org
-To: linux-um@lists.infradead.org, netdev@vger.kernel.org, linux-mmc@vger.kernel.org, linux-s390@vger.kernel.org, devel@driverdev.osuosl.org, greybus-dev@lists.linaro.org, linuxppc-dev@lists.ozlabs.org, linux-serial@vger.kernel.org, sparclinux@vger.kernel.org, linux-usb@vger.kernel.org, linux-bluetooth@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jiri Slaby <jslaby@suse.com>
+From: YueHaibing <yuehaibing@huawei.com>
+Subject: [PATCH] mmc: tegra: fix inconsistent IS_ERR and PTR_ERR
+Date: Tue, 4 Sep 2018 10:59:09 +0800
+Message-ID: <20180904025909.13700-1-yuehaibing@huawei.com>
+Mime-Version: 1.0
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org, thierry.reding@gmail.com, jonathanh@nvidia.com
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, YueHaibing <yuehaibing@huawei.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Since tty_standard_install() always returns 0, the return type has changed
-to void. Now apply this and remove the obsolete error check.
+Fix inconsistent IS_ERR and PTR_ERR in tegra_sdhci_init_pinctrl_info,
+the proper pointer to be passed as argument is 'pinctrl_state_1v8'
 
-Signed-off-by: Jaejoong Kim <climbbb.kim@gmail.com>
+Signed-off-by: YueHaibing <yuehaibing@huawei.com>
 ---
- drivers/usb/serial/usb-serial.c | 6 +-----
- 1 file changed, 1 insertion(+), 5 deletions(-)
+ drivers/mmc/host/sdhci-tegra.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/usb/serial/usb-serial.c b/drivers/usb/serial/usb-serial.c
-index f7aaa7f..5cfc2ca 100644
---- a/drivers/usb/serial/usb-serial.c
-+++ b/drivers/usb/serial/usb-serial.c
-@@ -192,9 +192,7 @@ static int serial_install(struct tty_driver *driver, struct tty_struct *tty)
- 	if (retval)
- 		goto error_get_interface;
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index e80716c..c789158 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -724,7 +724,7 @@ static int tegra_sdhci_init_pinctrl_info(struct device *dev,
+ 		pinctrl_lookup_state(tegra_host->pinctrl_sdmmc, "sdmmc-1v8");
+ 	if (IS_ERR(tegra_host->pinctrl_state_1v8)) {
+ 		dev_warn(dev, "Missing 1.8V pad state, err: %ld\n",
+-			 PTR_ERR(tegra_host->pinctrl_state_3v3));
++			 PTR_ERR(tegra_host->pinctrl_state_1v8));
+ 		return -1;
+ 	}
  
--	retval = tty_standard_install(driver, tty);
--	if (retval)
--		goto error_init_termios;
-+	tty_standard_install(driver, tty);
- 
- 	mutex_unlock(&serial->disc_mutex);
- 
-@@ -206,8 +204,6 @@ static int serial_install(struct tty_driver *driver, struct tty_struct *tty)
- 
- 	return retval;
- 
-- error_init_termios:
--	usb_autopm_put_interface(serial->interface);
-  error_get_interface:
- 	module_put(serial->type->driver.owner);
-  error_module_get:
 -- 
-2.7.4
+2.7.0
