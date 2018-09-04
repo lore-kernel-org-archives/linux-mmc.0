@@ -1,11 +1,22 @@
 From: Jaejoong Kim <climbbb.kim@gmail.com>
-Subject: [PATCH 13/25] usb: xhci: dbc: Change return type to void
-Date: Tue,  4 Sep 2018 11:44:39 +0900
-Message-ID: <1536029091-4426-14-git-send-email-climbbb.kim@gmail.com>
+Subject: [PATCH 14/25] Bluetooth: Change return type to void
+Date: Tue,  4 Sep 2018 11:44:40 +0900
+Message-ID: <1536029091-4426-15-git-send-email-climbbb.kim@gmail.com>
 References: <1536029091-4426-1-git-send-email-climbbb.kim@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
 In-Reply-To: <1536029091-4426-1-git-send-email-climbbb.kim@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
 To: linux-um@lists.infradead.org, netdev@vger.kernel.org, linux-mmc@vger.kernel.org, linux-s390@vger.kernel.org, devel@driverdev.osuosl.org, greybus-dev@lists.linaro.org, linuxppc-dev@lists.ozlabs.org, linux-serial@vger.kernel.org, sparclinux@vger.kernel.org, linux-usb@vger.kernel.org, linux-bluetooth@vger.kernel.org, linux-kernel@vger.kernel.org
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jiri Slaby <jslaby@suse.com>
 List-Id: linux-mmc@vger.kernel.org
@@ -15,23 +26,33 @@ to void. Now apply this and remove the obsolete error check.
 
 Signed-off-by: Jaejoong Kim <climbbb.kim@gmail.com>
 ---
- drivers/usb/host/xhci-dbgtty.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ net/bluetooth/rfcomm/tty.c | 7 +------
+ 1 file changed, 1 insertion(+), 6 deletions(-)
 
-diff --git a/drivers/usb/host/xhci-dbgtty.c b/drivers/usb/host/xhci-dbgtty.c
-index aff79ff..18d661c 100644
---- a/drivers/usb/host/xhci-dbgtty.c
-+++ b/drivers/usb/host/xhci-dbgtty.c
-@@ -174,8 +174,9 @@ static int dbc_tty_install(struct tty_driver *driver, struct tty_struct *tty)
- 	struct dbc_port		*port = driver->driver_state;
+diff --git a/net/bluetooth/rfcomm/tty.c b/net/bluetooth/rfcomm/tty.c
+index 5e44d84..b654420 100644
+--- a/net/bluetooth/rfcomm/tty.c
++++ b/net/bluetooth/rfcomm/tty.c
+@@ -710,7 +710,6 @@ static int rfcomm_tty_install(struct tty_driver *driver, struct tty_struct *tty)
+ {
+ 	struct rfcomm_dev *dev;
+ 	struct rfcomm_dlc *dlc;
+-	int err;
  
- 	tty->driver_data = port;
-+	tty_port_install(&port->port, driver, tty);
+ 	dev = rfcomm_dev_get(tty->index);
+ 	if (!dev)
+@@ -725,11 +724,7 @@ static int rfcomm_tty_install(struct tty_driver *driver, struct tty_struct *tty)
+ 	set_bit(RFCOMM_TTY_ATTACHED, &dev->flags);
  
--	return tty_port_install(&port->port, driver, tty);
-+	return 0;
- }
+ 	/* install the tty_port */
+-	err = tty_port_install(&dev->port, driver, tty);
+-	if (err) {
+-		rfcomm_tty_cleanup(tty);
+-		return err;
+-	}
++	tty_port_install(&dev->port, driver, tty);
  
- static int dbc_tty_open(struct tty_struct *tty, struct file *file)
+ 	/* take over the tty_port reference if the port was created with the
+ 	 * flag RFCOMM_RELEASE_ONHUP. This will force the release of the port
 -- 
 2.7.4
