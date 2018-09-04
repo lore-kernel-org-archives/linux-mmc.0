@@ -1,7 +1,7 @@
 From: Jaejoong Kim <climbbb.kim@gmail.com>
-Subject: [PATCH 17/25] misc: pti: Change return type to void
-Date: Tue,  4 Sep 2018 11:44:43 +0900
-Message-ID: <1536029091-4426-18-git-send-email-climbbb.kim@gmail.com>
+Subject: [PATCH 18/25] mmc: core: sdio_uart: Change return type to void
+Date: Tue,  4 Sep 2018 11:44:44 +0900
+Message-ID: <1536029091-4426-19-git-send-email-climbbb.kim@gmail.com>
 References: <1536029091-4426-1-git-send-email-climbbb.kim@gmail.com>
 Return-path: <netdev-owner@vger.kernel.org>
 In-Reply-To: <1536029091-4426-1-git-send-email-climbbb.kim@gmail.com>
@@ -15,49 +15,28 @@ to void. Now apply this and remove the obsolete error check.
 
 Signed-off-by: Jaejoong Kim <climbbb.kim@gmail.com>
 ---
- drivers/misc/pti.c | 28 +++++++++++++---------------
- 1 file changed, 13 insertions(+), 15 deletions(-)
+ drivers/mmc/core/sdio_uart.c | 11 ++++-------
+ 1 file changed, 4 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/misc/pti.c b/drivers/misc/pti.c
-index 41f2a9f..5c885a1 100644
---- a/drivers/misc/pti.c
-+++ b/drivers/misc/pti.c
-@@ -462,26 +462,24 @@ static int pti_tty_install(struct tty_driver *driver, struct tty_struct *tty)
+diff --git a/drivers/mmc/core/sdio_uart.c b/drivers/mmc/core/sdio_uart.c
+index 25e1130..b727186 100644
+--- a/drivers/mmc/core/sdio_uart.c
++++ b/drivers/mmc/core/sdio_uart.c
+@@ -731,14 +731,11 @@ static int sdio_uart_install(struct tty_driver *driver, struct tty_struct *tty)
  {
  	int idx = tty->index;
- 	struct pti_tty *pti_tty_data;
+ 	struct sdio_uart_port *port = sdio_uart_port_get(idx);
 -	int ret = tty_standard_install(driver, tty);
  
--	if (ret == 0) {
--		pti_tty_data = kmalloc(sizeof(struct pti_tty), GFP_KERNEL);
--		if (pti_tty_data == NULL)
--			return -ENOMEM;
-+	tty_standard_install(driver, tty);
-+	pti_tty_data = kmalloc(sizeof(struct pti_tty), GFP_KERNEL);
-+	if (pti_tty_data == NULL)
-+		return -ENOMEM;
- 
--		if (idx == PTITTY_MINOR_START)
--			pti_tty_data->mc = pti_request_masterchannel(0, NULL);
--		else
--			pti_tty_data->mc = pti_request_masterchannel(2, NULL);
-+	if (idx == PTITTY_MINOR_START)
-+		pti_tty_data->mc = pti_request_masterchannel(0, NULL);
-+	else
-+		pti_tty_data->mc = pti_request_masterchannel(2, NULL);
- 
--		if (pti_tty_data->mc == NULL) {
--			kfree(pti_tty_data);
--			return -ENXIO;
--		}
--		tty->driver_data = pti_tty_data;
-+	if (pti_tty_data->mc == NULL) {
-+		kfree(pti_tty_data);
-+		return -ENXIO;
- 	}
-+	tty->driver_data = pti_tty_data;
- 
+-	if (ret == 0)
+-		/* This is the ref sdio_uart_port get provided */
+-		tty->driver_data = port;
+-	else
+-		sdio_uart_port_put(port);
 -	return ret;
++	tty_standard_install(driver, tty);
++	tty->driver_data = port;
++
 +	return 0;
  }
  
