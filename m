@@ -1,7 +1,7 @@
 From: Jaejoong Kim <climbbb.kim@gmail.com>
-Subject: [PATCH 11/25] tty: synclinkmp: Change return type to void
-Date: Tue,  4 Sep 2018 11:44:37 +0900
-Message-ID: <1536029091-4426-12-git-send-email-climbbb.kim@gmail.com>
+Subject: [PATCH 12/25] tty: vt: Change return type to void
+Date: Tue,  4 Sep 2018 11:44:38 +0900
+Message-ID: <1536029091-4426-13-git-send-email-climbbb.kim@gmail.com>
 References: <1536029091-4426-1-git-send-email-climbbb.kim@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -26,23 +26,24 @@ to void. Now apply this and remove the obsolete error check.
 
 Signed-off-by: Jaejoong Kim <climbbb.kim@gmail.com>
 ---
- drivers/tty/synclinkmp.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ drivers/tty/vt/vt.c | 5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
 
-diff --git a/drivers/tty/synclinkmp.c b/drivers/tty/synclinkmp.c
-index 1e4d5b9..2d99a5b 100644
---- a/drivers/tty/synclinkmp.c
-+++ b/drivers/tty/synclinkmp.c
-@@ -734,8 +734,9 @@ static int install(struct tty_driver *driver, struct tty_struct *tty)
+diff --git a/drivers/tty/vt/vt.c b/drivers/tty/vt/vt.c
+index 5f1183b..cc72254 100644
+--- a/drivers/tty/vt/vt.c
++++ b/drivers/tty/vt/vt.c
+@@ -3222,10 +3222,7 @@ static int con_install(struct tty_driver *driver, struct tty_struct *tty)
+ 		goto unlock;
  	}
  
- 	tty->driver_data = info;
-+	tty_port_install(&info->port, driver, tty);
+-	ret = tty_port_install(&vc->port, driver, tty);
+-	if (ret)
+-		goto unlock;
+-
++	tty_port_install(&vc->port, driver, tty);
+ 	tty->driver_data = vc;
+ 	vc->port.tty = tty;
  
--	return tty_port_install(&info->port, driver, tty);
-+	return 0;
- }
- 
- /* Called when a port is opened.  Init and enable port.
 -- 
 2.7.4
