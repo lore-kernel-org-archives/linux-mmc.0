@@ -1,7 +1,7 @@
 From: Jaejoong Kim <climbbb.kim@gmail.com>
-Subject: [PATCH 06/25] tty: hvc: hvcs: Change return type to void
-Date: Tue,  4 Sep 2018 11:44:32 +0900
-Message-ID: <1536029091-4426-7-git-send-email-climbbb.kim@gmail.com>
+Subject: [PATCH 07/25] tty: mips_ejtag_fdc: Change return type to void
+Date: Tue,  4 Sep 2018 11:44:33 +0900
+Message-ID: <1536029091-4426-8-git-send-email-climbbb.kim@gmail.com>
 References: <1536029091-4426-1-git-send-email-climbbb.kim@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -26,31 +26,23 @@ to void. Now apply this and remove the obsolete error check.
 
 Signed-off-by: Jaejoong Kim <climbbb.kim@gmail.com>
 ---
- drivers/tty/hvc/hvcs.c | 10 ++--------
- 1 file changed, 2 insertions(+), 8 deletions(-)
+ drivers/tty/mips_ejtag_fdc.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/tty/hvc/hvcs.c b/drivers/tty/hvc/hvcs.c
-index cb4db1b..4dfa70c 100644
---- a/drivers/tty/hvc/hvcs.c
-+++ b/drivers/tty/hvc/hvcs.c
-@@ -1140,16 +1140,10 @@ static int hvcs_install(struct tty_driver *driver, struct tty_struct *tty)
- 		goto err_put;
- 	}
+diff --git a/drivers/tty/mips_ejtag_fdc.c b/drivers/tty/mips_ejtag_fdc.c
+index 4c1cd49..33e06b4 100644
+--- a/drivers/tty/mips_ejtag_fdc.c
++++ b/drivers/tty/mips_ejtag_fdc.c
+@@ -763,7 +763,9 @@ static int mips_ejtag_fdc_tty_install(struct tty_driver *driver,
+ 	struct mips_ejtag_fdc_tty *priv = driver->driver_state;
  
--	retval = tty_port_install(&hvcsd->port, driver, tty);
--	if (retval)
--		goto err_irq;
-+	tty_port_install(&hvcsd->port, driver, tty);
- 
- 	return 0;
--err_irq:
--	spin_lock_irqsave(&hvcsd->lock, flags);
--	vio_disable_interrupts(hvcsd->vdev);
--	spin_unlock_irqrestore(&hvcsd->lock, flags);
--	free_irq(irq, hvcsd);
+ 	tty->driver_data = &priv->ports[tty->index];
+-	return tty_port_install(&priv->ports[tty->index].port, driver, tty);
++	tty_port_install(&priv->ports[tty->index].port, driver, tty);
 +
- err_put:
- 	tty_port_put(&hvcsd->port);
++	return 0;
+ }
  
+ static int mips_ejtag_fdc_tty_open(struct tty_struct *tty, struct file *filp)
 -- 
 2.7.4
