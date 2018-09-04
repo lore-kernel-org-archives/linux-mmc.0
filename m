@@ -1,11 +1,22 @@
 From: Jaejoong Kim <climbbb.kim@gmail.com>
-Subject: [PATCH 21/25] staging: greybus: uart: Change return type to void
-Date: Tue,  4 Sep 2018 11:44:47 +0900
-Message-ID: <1536029091-4426-22-git-send-email-climbbb.kim@gmail.com>
+Subject: [PATCH 22/25] tty: nozomi: Change return type to void
+Date: Tue,  4 Sep 2018 11:44:48 +0900
+Message-ID: <1536029091-4426-23-git-send-email-climbbb.kim@gmail.com>
 References: <1536029091-4426-1-git-send-email-climbbb.kim@gmail.com>
-Return-path: <netdev-owner@vger.kernel.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
 In-Reply-To: <1536029091-4426-1-git-send-email-climbbb.kim@gmail.com>
-Sender: netdev-owner@vger.kernel.org
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
 To: linux-um@lists.infradead.org, netdev@vger.kernel.org, linux-mmc@vger.kernel.org, linux-s390@vger.kernel.org, devel@driverdev.osuosl.org, greybus-dev@lists.linaro.org, linuxppc-dev@lists.ozlabs.org, linux-serial@vger.kernel.org, sparclinux@vger.kernel.org, linux-usb@vger.kernel.org, linux-bluetooth@vger.kernel.org, linux-kernel@vger.kernel.org
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jiri Slaby <jslaby@suse.com>
 List-Id: linux-mmc@vger.kernel.org
@@ -15,36 +26,29 @@ to void. Now apply this and remove the obsolete error check.
 
 Signed-off-by: Jaejoong Kim <climbbb.kim@gmail.com>
 ---
- drivers/staging/greybus/uart.c | 10 ++--------
- 1 file changed, 2 insertions(+), 8 deletions(-)
+ drivers/tty/nozomi.c | 8 +++-----
+ 1 file changed, 3 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/staging/greybus/uart.c b/drivers/staging/greybus/uart.c
-index 8a00632..182155b 100644
---- a/drivers/staging/greybus/uart.c
-+++ b/drivers/staging/greybus/uart.c
-@@ -393,21 +393,15 @@ static void release_minor(struct gb_tty *gb_tty)
- static int gb_tty_install(struct tty_driver *driver, struct tty_struct *tty)
+diff --git a/drivers/tty/nozomi.c b/drivers/tty/nozomi.c
+index fed820e..479583d 100644
+--- a/drivers/tty/nozomi.c
++++ b/drivers/tty/nozomi.c
+@@ -1555,13 +1555,11 @@ static int ntty_install(struct tty_driver *driver, struct tty_struct *tty)
  {
- 	struct gb_tty *gb_tty;
--	int retval;
- 
- 	gb_tty = get_gb_by_minor(tty->index);
- 	if (!gb_tty)
+ 	struct port *port = get_port_by_tty(tty);
+ 	struct nozomi *dc = get_dc_by_tty(tty);
+-	int ret;
+ 	if (!port || !dc || dc->state != NOZOMI_STATE_READY)
  		return -ENODEV;
- 
--	retval = tty_standard_install(driver, tty);
--	if (retval)
--		goto error;
--
+-	ret = tty_standard_install(driver, tty);
+-	if (ret == 0)
+-		tty->driver_data = port;
+-	return ret;
 +	tty_standard_install(driver, tty);
- 	tty->driver_data = gb_tty;
-+
- 	return 0;
--error:
--	tty_port_put(&gb_tty->port);
--	return retval;
++	tty->driver_data = port;
++	return 0;
  }
  
- static int gb_tty_open(struct tty_struct *tty, struct file *file)
+ static void ntty_cleanup(struct tty_struct *tty)
 -- 
 2.7.4
