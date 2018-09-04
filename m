@@ -1,22 +1,11 @@
 From: Jaejoong Kim <climbbb.kim@gmail.com>
-Subject: [PATCH 12/25] tty: vt: Change return type to void
-Date: Tue,  4 Sep 2018 11:44:38 +0900
-Message-ID: <1536029091-4426-13-git-send-email-climbbb.kim@gmail.com>
+Subject: [PATCH 13/25] usb: xhci: dbc: Change return type to void
+Date: Tue,  4 Sep 2018 11:44:39 +0900
+Message-ID: <1536029091-4426-14-git-send-email-climbbb.kim@gmail.com>
 References: <1536029091-4426-1-git-send-email-climbbb.kim@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1536029091-4426-1-git-send-email-climbbb.kim@gmail.com>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-um@lists.infradead.org, netdev@vger.kernel.org, linux-mmc@vger.kernel.org, linux-s390@vger.kernel.org, devel@driverdev.osuosl.org, greybus-dev@lists.linaro.org, linuxppc-dev@lists.ozlabs.org, linux-serial@vger.kernel.org, sparclinux@vger.kernel.org, linux-usb@vger.kernel.org, linux-bluetooth@vger.kernel.org, linux-kernel@vger.kernel.org
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jiri Slaby <jslaby@suse.com>
 List-Id: linux-mmc@vger.kernel.org
@@ -26,24 +15,23 @@ to void. Now apply this and remove the obsolete error check.
 
 Signed-off-by: Jaejoong Kim <climbbb.kim@gmail.com>
 ---
- drivers/tty/vt/vt.c | 5 +----
- 1 file changed, 1 insertion(+), 4 deletions(-)
+ drivers/usb/host/xhci-dbgtty.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/tty/vt/vt.c b/drivers/tty/vt/vt.c
-index 5f1183b..cc72254 100644
---- a/drivers/tty/vt/vt.c
-+++ b/drivers/tty/vt/vt.c
-@@ -3222,10 +3222,7 @@ static int con_install(struct tty_driver *driver, struct tty_struct *tty)
- 		goto unlock;
- 	}
+diff --git a/drivers/usb/host/xhci-dbgtty.c b/drivers/usb/host/xhci-dbgtty.c
+index aff79ff..18d661c 100644
+--- a/drivers/usb/host/xhci-dbgtty.c
++++ b/drivers/usb/host/xhci-dbgtty.c
+@@ -174,8 +174,9 @@ static int dbc_tty_install(struct tty_driver *driver, struct tty_struct *tty)
+ 	struct dbc_port		*port = driver->driver_state;
  
--	ret = tty_port_install(&vc->port, driver, tty);
--	if (ret)
--		goto unlock;
--
-+	tty_port_install(&vc->port, driver, tty);
- 	tty->driver_data = vc;
- 	vc->port.tty = tty;
+ 	tty->driver_data = port;
++	tty_port_install(&port->port, driver, tty);
  
+-	return tty_port_install(&port->port, driver, tty);
++	return 0;
+ }
+ 
+ static int dbc_tty_open(struct tty_struct *tty, struct file *file)
 -- 
 2.7.4
