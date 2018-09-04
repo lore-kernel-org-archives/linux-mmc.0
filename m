@@ -1,22 +1,11 @@
 From: Jaejoong Kim <climbbb.kim@gmail.com>
-Subject: [PATCH 07/25] tty: mips_ejtag_fdc: Change return type to void
-Date: Tue,  4 Sep 2018 11:44:33 +0900
-Message-ID: <1536029091-4426-8-git-send-email-climbbb.kim@gmail.com>
+Subject: [PATCH 08/25] tty: n_gsm: Change return type to void
+Date: Tue,  4 Sep 2018 11:44:34 +0900
+Message-ID: <1536029091-4426-9-git-send-email-climbbb.kim@gmail.com>
 References: <1536029091-4426-1-git-send-email-climbbb.kim@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1536029091-4426-1-git-send-email-climbbb.kim@gmail.com>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-um@lists.infradead.org, netdev@vger.kernel.org, linux-mmc@vger.kernel.org, linux-s390@vger.kernel.org, devel@driverdev.osuosl.org, greybus-dev@lists.linaro.org, linuxppc-dev@lists.ozlabs.org, linux-serial@vger.kernel.org, sparclinux@vger.kernel.org, linux-usb@vger.kernel.org, linux-bluetooth@vger.kernel.org, linux-kernel@vger.kernel.org
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jiri Slaby <jslaby@suse.com>
 List-Id: linux-mmc@vger.kernel.org
@@ -26,23 +15,36 @@ to void. Now apply this and remove the obsolete error check.
 
 Signed-off-by: Jaejoong Kim <climbbb.kim@gmail.com>
 ---
- drivers/tty/mips_ejtag_fdc.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ drivers/tty/n_gsm.c | 9 +--------
+ 1 file changed, 1 insertion(+), 8 deletions(-)
 
-diff --git a/drivers/tty/mips_ejtag_fdc.c b/drivers/tty/mips_ejtag_fdc.c
-index 4c1cd49..33e06b4 100644
---- a/drivers/tty/mips_ejtag_fdc.c
-+++ b/drivers/tty/mips_ejtag_fdc.c
-@@ -763,7 +763,9 @@ static int mips_ejtag_fdc_tty_install(struct tty_driver *driver,
- 	struct mips_ejtag_fdc_tty *priv = driver->driver_state;
+diff --git a/drivers/tty/n_gsm.c b/drivers/tty/n_gsm.c
+index 86b7e20..c52fa2d 100644
+--- a/drivers/tty/n_gsm.c
++++ b/drivers/tty/n_gsm.c
+@@ -2917,7 +2917,6 @@ static int gsmtty_install(struct tty_driver *driver, struct tty_struct *tty)
+ 	unsigned int line = tty->index;
+ 	unsigned int mux = line >> 6;
+ 	bool alloc = false;
+-	int ret;
  
- 	tty->driver_data = &priv->ports[tty->index];
--	return tty_port_install(&priv->ports[tty->index].port, driver, tty);
-+	tty_port_install(&priv->ports[tty->index].port, driver, tty);
-+
-+	return 0;
- }
+ 	line = line & 0x3F;
  
- static int mips_ejtag_fdc_tty_open(struct tty_struct *tty, struct file *filp)
+@@ -2949,14 +2948,8 @@ static int gsmtty_install(struct tty_driver *driver, struct tty_struct *tty)
+ 		mutex_unlock(&gsm->mutex);
+ 		return -ENOMEM;
+ 	}
+-	ret = tty_port_install(&dlci->port, driver, tty);
+-	if (ret) {
+-		if (alloc)
+-			dlci_put(dlci);
+-		mutex_unlock(&gsm->mutex);
+-		return ret;
+-	}
+ 
++	tty_port_install(&dlci->port, driver, tty);
+ 	dlci_get(dlci);
+ 	dlci_get(gsm->dlci[0]);
+ 	mux_get(gsm);
 -- 
 2.7.4
