@@ -1,7 +1,7 @@
 From: Jaejoong Kim <climbbb.kim@gmail.com>
-Subject: [PATCH 09/25] tty: serial: kgdb_nmi: Change return type to void
-Date: Tue,  4 Sep 2018 11:44:35 +0900
-Message-ID: <1536029091-4426-10-git-send-email-climbbb.kim@gmail.com>
+Subject: [PATCH 10/25] tty: synclink: Change return type to void
+Date: Tue,  4 Sep 2018 11:44:36 +0900
+Message-ID: <1536029091-4426-11-git-send-email-climbbb.kim@gmail.com>
 References: <1536029091-4426-1-git-send-email-climbbb.kim@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -26,39 +26,23 @@ to void. Now apply this and remove the obsolete error check.
 
 Signed-off-by: Jaejoong Kim <climbbb.kim@gmail.com>
 ---
- drivers/tty/serial/kgdb_nmi.c | 11 +----------
- 1 file changed, 1 insertion(+), 10 deletions(-)
+ drivers/tty/synclink.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/tty/serial/kgdb_nmi.c b/drivers/tty/serial/kgdb_nmi.c
-index 4029272..ed8f806 100644
---- a/drivers/tty/serial/kgdb_nmi.c
-+++ b/drivers/tty/serial/kgdb_nmi.c
-@@ -234,7 +234,6 @@ static const struct tty_port_operations kgdb_nmi_tty_port_ops = {
- static int kgdb_nmi_tty_install(struct tty_driver *drv, struct tty_struct *tty)
- {
- 	struct kgdb_nmi_tty_priv *priv;
--	int ret;
+diff --git a/drivers/tty/synclink.c b/drivers/tty/synclink.c
+index fbdf4d0..6e7e4d6 100644
+--- a/drivers/tty/synclink.c
++++ b/drivers/tty/synclink.c
+@@ -3355,8 +3355,9 @@ static int mgsl_install(struct tty_driver *driver, struct tty_struct *tty)
+ 	if (mgsl_paranoia_check(info, tty->name, "mgsl_open"))
+ 		return -ENODEV;
+ 	tty->driver_data = info;
++	tty_port_install(&info->port, driver, tty);
  
- 	priv = kzalloc(sizeof(*priv), GFP_KERNEL);
- 	if (!priv)
-@@ -245,17 +244,9 @@ static int kgdb_nmi_tty_install(struct tty_driver *drv, struct tty_struct *tty)
- 	tty_port_init(&priv->port);
- 	priv->port.ops = &kgdb_nmi_tty_port_ops;
- 	tty->driver_data = priv;
-+	tty_port_install(&priv->port, drv, tty);
- 
--	ret = tty_port_install(&priv->port, drv, tty);
--	if (ret) {
--		pr_err("%s: can't install tty port: %d\n", __func__, ret);
--		goto err;
--	}
- 	return 0;
--err:
--	tty_port_destroy(&priv->port);
--	kfree(priv);
--	return ret;
+-	return tty_port_install(&info->port, driver, tty);
++	return 0;
  }
  
- static void kgdb_nmi_tty_cleanup(struct tty_struct *tty)
+ /* mgsl_open()
 -- 
 2.7.4
