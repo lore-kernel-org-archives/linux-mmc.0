@@ -1,109 +1,87 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH v7 1/4] gpiolib: Pass bitmaps, not integer arrays, to
- get/set array
-Date: Mon, 3 Sep 2018 17:07:44 +0200
-Message-ID: <CAMuHMdXScsLg+LsQDn0dU8qSV30uWaeGQsNDPssm0H5y6UPAWw@mail.gmail.com>
-References: <20180831225616.29221-1-jmkrzyszt@gmail.com> <20180902120144.6855-1-jmkrzyszt@gmail.com>
- <20180902120144.6855-2-jmkrzyszt@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
-Return-path: <netdev-owner@vger.kernel.org>
-In-Reply-To: <20180902120144.6855-2-jmkrzyszt@gmail.com>
-Sender: netdev-owner@vger.kernel.org
-To: Janusz Krzysztofik <jmkrzyszt@gmail.com>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Jonathan Corbet <corbet@lwn.net>, Miguel Ojeda Sandonis <miguel.ojeda.sandonis@gmail.com>, peter.korsgaard@barco.com, Peter Rosin <peda@axentia.se>, Ulf Hansson <ulf.hansson@linaro.org>, Andrew Lunn <andrew@lunn.ch>, Florian Fainelli <f.fainelli@gmail.com>, "David S. Miller" <davem@davemloft.net>, Dominik Brodowski <linux@dominikbrodowski.net>, Greg KH <gregkh@linuxfoundation.org>, Kishon Vijay Abraham I <kishon@ti.com>, Lars-Peter Clausen <lars@metafoo.de>, Michael Hennerich <Michael.Hennerich@analog.com>, Jonathan Cameron <jic23@kernel.org>, Hartmut Knaack <knaack.h@gmx.de>, Peter Meerwald <pmeerw@pmeerw.net>, Jiri Slaby <jslaby@suse.com>, Willy Tarreau <w@1wt.eu>, "open list:DOCUMENTATION" <linux-doc@vger.>
+From: Jaejoong Kim <climbbb.kim@gmail.com>
+Subject: [PATCH 00/25] Change tty_port(standard)_install's return type
+Date: Tue,  4 Sep 2018 11:44:26 +0900
+Message-ID: <1536029091-4426-1-git-send-email-climbbb.kim@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-um@lists.infradead.org, netdev@vger.kernel.org, linux-mmc@vger.kernel.org, linux-s390@vger.kernel.org, devel@driverdev.osuosl.org, greybus-dev@lists.linaro.org, linuxppc-dev@lists.ozlabs.org, linux-serial@vger.kernel.org, sparclinux@vger.kernel.org, linux-usb@vger.kernel.org, linux-bluetooth@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jiri Slaby <jslaby@suse.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Janusz,
+Many drivers with tty use the tty_stand_install(). But, there is no
+need to handle the error, since it always returns 0. So, change the
+return type of tty_standard_install() and tty_port_install() to void
+type and remove unnecessary exception handling where we use these
+functions.
 
-On Sun, Sep 2, 2018 at 2:01 PM Janusz Krzysztofik <jmkrzyszt@gmail.com> wrote:
-> Most users of get/set array functions iterate consecutive bits of data,
-> usually a single integer, while processing array of results obtained
-> from, or building an array of values to be passed to those functions.
-> Save time wasted on those iterations by changing the functions' API to
-> accept bitmaps.
->
-> All current users are updated as well.
->
-> More benefits from the change are expected as soon as planned support
-> for accepting/passing those bitmaps directly from/to respective GPIO
-> chip callbacks if applicable is implemented.
->
-> Cc: Jonathan Corbet <corbet@lwn.net>
-> Cc: Miguel Ojeda Sandonis <miguel.ojeda.sandonis@gmail.com>
-> Cc: Geert Uytterhoeven <geert@linux-m68k.org>
-> Cc: Sebastien Bourdelin <sebastien.bourdelin@savoirfairelinux.com>
-> Cc: Lukas Wunner <lukas@wunner.de>
-> Cc: Peter Korsgaard <peter.korsgaard@barco.com>
-> Cc: Peter Rosin <peda@axentia.se>
-> Cc: Andrew Lunn <andrew@lunn.ch>
-> Cc: Florian Fainelli <f.fainelli@gmail.com>
-> Cc: "David S. Miller" <davem@davemloft.net>
-> Cc: Rojhalat Ibrahim <imr@rtschenk.de>
-> Cc: Dominik Brodowski <linux@dominikbrodowski.net>
-> Cc: Russell King <rmk+kernel@armlinux.org.uk>
-> Cc: Kishon Vijay Abraham I <kishon@ti.com>
-> Cc: Tony Lindgren <tony@atomide.com>
-> Cc: Lars-Peter Clausen <lars@metafoo.de>
-> Cc: Michael Hennerich <Michael.Hennerich@analog.com>
-> Cc: Jonathan Cameron <jic23@kernel.org>
-> Cc: Hartmut Knaack <knaack.h@gmx.de>
-> Cc: Peter Meerwald-Stadler <pmeerw@pmeerw.net>
-> Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-> Cc: Jiri Slaby <jslaby@suse.com>
-> Cc: Yegor Yefremov <yegorslists@googlemail.com>
-> Cc: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
-> Signed-off-by: Janusz Krzysztofik <jmkrzyszt@gmail.com>
-> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+Change return type for tty functions. Patch No.01
+  tty: Change return type to void
 
-> --- a/drivers/auxdisplay/hd44780.c
-> +++ b/drivers/auxdisplay/hd44780.c
-> @@ -62,17 +62,12 @@ static void hd44780_strobe_gpio(struct hd44780 *hd)
->  /* write to an LCD panel register in 8 bit GPIO mode */
->  static void hd44780_write_gpio8(struct hd44780 *hd, u8 val, unsigned int rs)
->  {
-> -       int values[10]; /* for DATA[0-7], RS, RW */
-> -       unsigned int i, n;
-> -
-> -       for (i = 0; i < 8; i++)
-> -               values[PIN_DATA0 + i] = !!(val & BIT(i));
-> -       values[PIN_CTRL_RS] = rs;
-> -       n = 9;
-> -       if (hd->pins[PIN_CTRL_RW]) {
-> -               values[PIN_CTRL_RW] = 0;
-> -               n++;
-> -       }
-> +       DECLARE_BITMAP(values, 10); /* for DATA[0-7], RS, RW */
-> +       unsigned int n;
-> +
-> +       *values = val;
+Apply tty_port_install() changes. Patch No.02~14
+  isdn: i4l: isdn_tty: Change return type to void
+  ...
+  Bluetooth: Change return type to void
 
-Given DECLARE_BITMAP() creates an array, the above line looks a bit funny now.
+Apply tty_standard_install() changes. Patch No.15~25
+  um: Change return type to void
+  ...
+  usb: usb-serial: Change return type to void
 
-IMHO, either you use
+Jaejoong Kim (25):
+  tty: Change return type to void
+  isdn: i4l: isdn_tty: Change return type to void
+  s390: char: con3215: Change return type to void
+  s390: char: tty3270: Change return type to void
+  tty: hvc: hvc_console: Change return type to void
+  tty: hvc: hvcs: Change return type to void
+  tty: mips_ejtag_fdc: Change return type to void
+  tty: n_gsm: Change return type to void
+  tty: serial: kgdb_nmi: Change return type to void
+  tty: synclink: Change return type to void
+  tty: synclinkmp: Change return type to void
+  tty: vt: Change return type to void
+  usb: xhci: dbc: Change return type to void
+  Bluetooth: Change return type to void
+  um: Change return type to void
+  isdn: capi: Change return type to void
+  misc: pti: Change return type to void
+  mmc: core: sdio_uart: Change return type to void
+  staging: fwserial: Change return type to void
+  staging: gdm724x: gdm_tty: Change return type to void
+  staging: greybus: uart: Change return type to void
+  tty: nozomi: Change return type to void
+  tty: vcc: Change return type to void
+  usb: cdc-acm: Change return type to void
+  usb: usb-serial: Change return type to void
 
-    unsigned long values;
-    values = val;
-    __assign_bit(8, &values, rs);
-
-or
-
-    DECLARE_BITMAP(values, 10);
-    values[0] = val;
-    __assign_bit(8, values, rs);
-
-Nevertheless, for hd44780.c:
-Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
-Tested-by: Geert Uytterhoeven <geert+renesas@glider.be>
-
-Gr{oetje,eeting}s,
-
-                        Geert
+ arch/um/drivers/line.c              |  7 +------
+ drivers/isdn/capi/capi.c            | 10 ++++------
+ drivers/isdn/i4l/isdn_tty.c         |  3 ++-
+ drivers/misc/pti.c                  | 28 +++++++++++++---------------
+ drivers/mmc/core/sdio_uart.c        | 11 ++++-------
+ drivers/s390/char/con3215.c         |  3 ++-
+ drivers/s390/char/tty3270.c         |  7 +------
+ drivers/staging/fwserial/fwserial.c | 22 ++++++++--------------
+ drivers/staging/gdm724x/gdm_tty.c   | 11 +++--------
+ drivers/staging/greybus/uart.c      | 10 ++--------
+ drivers/tty/hvc/hvc_console.c       |  7 ++-----
+ drivers/tty/hvc/hvcs.c              | 10 ++--------
+ drivers/tty/mips_ejtag_fdc.c        |  4 +++-
+ drivers/tty/n_gsm.c                 |  9 +--------
+ drivers/tty/nozomi.c                |  8 +++-----
+ drivers/tty/serial/kgdb_nmi.c       | 11 +----------
+ drivers/tty/synclink.c              |  3 ++-
+ drivers/tty/synclinkmp.c            |  3 ++-
+ drivers/tty/tty_io.c                | 10 ++++++----
+ drivers/tty/tty_port.c              |  4 ++--
+ drivers/tty/vcc.c                   |  5 +----
+ drivers/tty/vt/vt.c                 |  5 +----
+ drivers/usb/class/cdc-acm.c         | 10 +---------
+ drivers/usb/host/xhci-dbgtty.c      |  3 ++-
+ drivers/usb/serial/usb-serial.c     |  6 +-----
+ include/linux/tty.h                 |  4 ++--
+ net/bluetooth/rfcomm/tty.c          |  7 +------
+ 27 files changed, 73 insertions(+), 148 deletions(-)
 
 -- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+2.7.4
