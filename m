@@ -1,21 +1,21 @@
 From: kbuild test robot <lkp@intel.com>
-Subject: Re: [PATCH v7 1/4] gpiolib: Pass bitmaps, not integer arrays, to
- get/set array
-Date: Wed, 5 Sep 2018 14:46:23 +0800
-Message-ID: <201809051406.YdSU6OCu%fengguang.wu@intel.com>
-References: <20180902120144.6855-2-jmkrzyszt@gmail.com>
+Subject: Re: [PATCH v7 3/4] gpiolib: Pass array info to get/set array
+ functions
+Date: Wed, 5 Sep 2018 15:11:33 +0800
+Message-ID: <201809051529.H8Kp88Cj%fengguang.wu@intel.com>
+References: <20180902120144.6855-4-jmkrzyszt@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="XsQoSWH+UP9D9v3l"
-Return-path: <netdev-owner@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="OXfL5xGRrasGEqWY"
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20180902120144.6855-2-jmkrzyszt@gmail.com>
-Sender: netdev-owner@vger.kernel.org
+In-Reply-To: <20180902120144.6855-4-jmkrzyszt@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Janusz Krzysztofik <jmkrzyszt@gmail.com>
 Cc: kbuild-all@01.org, Linus Walleij <linus.walleij@linaro.org>, Jonathan Corbet <corbet@lwn.net>, Miguel Ojeda Sandonis <miguel.ojeda.sandonis@gmail.com>, Peter Korsgaard <peter.korsgaard@barco.com>, Peter Rosin <peda@axentia.se>, Ulf Hansson <ulf.hansson@linaro.org>, Andrew Lunn <andrew@lunn.ch>, Florian Fainelli <f.fainelli@gmail.com>, "David S. Miller" <davem@davemloft.net>, Dominik Brodowski <linux@dominikbrodowski.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kishon Vijay Abraham I <kishon@ti.com>, Lars-Peter Clausen <lars@metafoo.de>, Michael Hennerich <Michael.Hennerich@analog.com>, Jonathan Cameron <jic23@kernel.org>, Hartmut Knaack <knaack.h@gmx.de>, Peter Meerwald-Stadler <pmeerw@pmeerw.net>, Jiri Slaby <jslaby@suse.com>, Willy
 List-Id: linux-mmc@vger.kernel.org
 
 
---XsQoSWH+UP9D9v3l
+--OXfL5xGRrasGEqWY
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 
@@ -38,24 +38,38 @@ reproduce:
 All errors (new ones prefixed by >>):
 
    drivers/phy/motorola/phy-mapphone-mdm6600.c: In function 'phy_mdm6600_cmd':
->> drivers/phy/motorola/phy-mapphone-mdm6600.c:165:36: error: passing argument 3 of 'gpiod_set_array_value_cansleep' from incompatible pointer type [-Werror=incompatible-pointer-types]
-               ddata->cmd_gpios->desc, values);
-                                       ^~~~~~
+   drivers/phy/motorola/phy-mapphone-mdm6600.c:166:12: error: passing argument 3 of 'gpiod_set_array_value_cansleep' from incompatible pointer type [-Werror=incompatible-pointer-types]
+               ddata->cmd_gpios->info, values);
+               ^~~~~
    In file included from drivers/phy/motorola/phy-mapphone-mdm6600.c:16:0:
-   include/linux/gpio/consumer.h:400:20: note: expected 'int *' but argument is of type 'long unsigned int *'
+   include/linux/gpio/consumer.h:417:20: note: expected 'int *' but argument is of type 'struct gpio_array *'
+    static inline void gpiod_set_array_value_cansleep(unsigned int array_size,
+                       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>> drivers/phy/motorola/phy-mapphone-mdm6600.c:164:2: error: too many arguments to function 'gpiod_set_array_value_cansleep'
+     gpiod_set_array_value_cansleep(PHY_MDM6600_NR_CMD_LINES,
+     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   In file included from drivers/phy/motorola/phy-mapphone-mdm6600.c:16:0:
+   include/linux/gpio/consumer.h:417:20: note: declared here
     static inline void gpiod_set_array_value_cansleep(unsigned int array_size,
                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    drivers/phy/motorola/phy-mapphone-mdm6600.c: In function 'phy_mdm6600_status':
->> drivers/phy/motorola/phy-mapphone-mdm6600.c:184:13: error: passing argument 3 of 'gpiod_get_array_value_cansleep' from incompatible pointer type [-Werror=incompatible-pointer-types]
-                values);
-                ^~~~~~
+   drivers/phy/motorola/phy-mapphone-mdm6600.c:185:13: error: passing argument 3 of 'gpiod_get_array_value_cansleep' from incompatible pointer type [-Werror=incompatible-pointer-types]
+                ddata->status_gpios->info,
+                ^~~~~
    In file included from drivers/phy/motorola/phy-mapphone-mdm6600.c:16:0:
-   include/linux/gpio/consumer.h:387:19: note: expected 'int *' but argument is of type 'long unsigned int *'
+   include/linux/gpio/consumer.h:404:19: note: expected 'int *' but argument is of type 'struct gpio_array *'
+    static inline int gpiod_get_array_value_cansleep(unsigned int array_size,
+                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>> drivers/phy/motorola/phy-mapphone-mdm6600.c:183:10: error: too many arguments to function 'gpiod_get_array_value_cansleep'
+     error = gpiod_get_array_value_cansleep(PHY_MDM6600_NR_STATUS_LINES,
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   In file included from drivers/phy/motorola/phy-mapphone-mdm6600.c:16:0:
+   include/linux/gpio/consumer.h:404:19: note: declared here
     static inline int gpiod_get_array_value_cansleep(unsigned int array_size,
                       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    cc1: some warnings being treated as errors
 
-vim +/gpiod_set_array_value_cansleep +165 drivers/phy/motorola/phy-mapphone-mdm6600.c
+vim +/gpiod_set_array_value_cansleep +164 drivers/phy/motorola/phy-mapphone-mdm6600.c
 
 5d1ebbda0 Tony Lindgren      2018-03-08  151  
 5d1ebbda0 Tony Lindgren      2018-03-08  152  /**
@@ -70,45 +84,47 @@ vim +/gpiod_set_array_value_cansleep +165 drivers/phy/motorola/phy-mapphone-mdm6
 5d1ebbda0 Tony Lindgren      2018-03-08  161  
 916010a73 Janusz Krzysztofik 2018-09-02  162  	*values = val;
 5d1ebbda0 Tony Lindgren      2018-03-08  163  
-5d1ebbda0 Tony Lindgren      2018-03-08  164  	gpiod_set_array_value_cansleep(PHY_MDM6600_NR_CMD_LINES,
-5d1ebbda0 Tony Lindgren      2018-03-08 @165  				       ddata->cmd_gpios->desc, values);
-5d1ebbda0 Tony Lindgren      2018-03-08  166  }
-5d1ebbda0 Tony Lindgren      2018-03-08  167  
-5d1ebbda0 Tony Lindgren      2018-03-08  168  /**
-5d1ebbda0 Tony Lindgren      2018-03-08  169   * phy_mdm6600_status() - read mdm6600 status lines
-5d1ebbda0 Tony Lindgren      2018-03-08  170   * @ddata: device driver data
-5d1ebbda0 Tony Lindgren      2018-03-08  171   */
-5d1ebbda0 Tony Lindgren      2018-03-08  172  static void phy_mdm6600_status(struct work_struct *work)
-5d1ebbda0 Tony Lindgren      2018-03-08  173  {
-5d1ebbda0 Tony Lindgren      2018-03-08  174  	struct phy_mdm6600 *ddata;
-5d1ebbda0 Tony Lindgren      2018-03-08  175  	struct device *dev;
-916010a73 Janusz Krzysztofik 2018-09-02  176  	DECLARE_BITMAP(values, PHY_MDM6600_NR_STATUS_LINES);
-5d1ebbda0 Tony Lindgren      2018-03-08  177  	int error, i, val = 0;
-5d1ebbda0 Tony Lindgren      2018-03-08  178  
-5d1ebbda0 Tony Lindgren      2018-03-08  179  	ddata = container_of(work, struct phy_mdm6600, status_work.work);
-5d1ebbda0 Tony Lindgren      2018-03-08  180  	dev = ddata->dev;
-5d1ebbda0 Tony Lindgren      2018-03-08  181  
-ad5003300 Tony Lindgren      2018-05-31  182  	error = gpiod_get_array_value_cansleep(PHY_MDM6600_NR_STATUS_LINES,
-5d1ebbda0 Tony Lindgren      2018-03-08  183  					       ddata->status_gpios->desc,
-5d1ebbda0 Tony Lindgren      2018-03-08 @184  					       values);
-5d1ebbda0 Tony Lindgren      2018-03-08  185  	if (error)
-5d1ebbda0 Tony Lindgren      2018-03-08  186  		return;
-5d1ebbda0 Tony Lindgren      2018-03-08  187  
-ad5003300 Tony Lindgren      2018-05-31  188  	for (i = 0; i < PHY_MDM6600_NR_STATUS_LINES; i++) {
-916010a73 Janusz Krzysztofik 2018-09-02  189  		val |= test_bit(i, values) << i;
-5d1ebbda0 Tony Lindgren      2018-03-08  190  		dev_dbg(ddata->dev, "XXX %s: i: %i values[i]: %i val: %i\n",
-916010a73 Janusz Krzysztofik 2018-09-02  191  			__func__, i, test_bit(i, values), val);
-5d1ebbda0 Tony Lindgren      2018-03-08  192  	}
-5d1ebbda0 Tony Lindgren      2018-03-08  193  	ddata->status = val;
-5d1ebbda0 Tony Lindgren      2018-03-08  194  
-5d1ebbda0 Tony Lindgren      2018-03-08  195  	dev_info(dev, "modem status: %i %s\n",
-5d1ebbda0 Tony Lindgren      2018-03-08  196  		 ddata->status,
-5d1ebbda0 Tony Lindgren      2018-03-08  197  		 phy_mdm6600_status_name[ddata->status & 7]);
-5d1ebbda0 Tony Lindgren      2018-03-08  198  	complete(&ddata->ack);
-5d1ebbda0 Tony Lindgren      2018-03-08  199  }
-5d1ebbda0 Tony Lindgren      2018-03-08  200  
+5d1ebbda0 Tony Lindgren      2018-03-08 @164  	gpiod_set_array_value_cansleep(PHY_MDM6600_NR_CMD_LINES,
+dea6937cb Janusz Krzysztofik 2018-09-02  165  				       ddata->cmd_gpios->desc,
+dea6937cb Janusz Krzysztofik 2018-09-02 @166  				       ddata->cmd_gpios->info, values);
+5d1ebbda0 Tony Lindgren      2018-03-08  167  }
+5d1ebbda0 Tony Lindgren      2018-03-08  168  
+5d1ebbda0 Tony Lindgren      2018-03-08  169  /**
+5d1ebbda0 Tony Lindgren      2018-03-08  170   * phy_mdm6600_status() - read mdm6600 status lines
+5d1ebbda0 Tony Lindgren      2018-03-08  171   * @ddata: device driver data
+5d1ebbda0 Tony Lindgren      2018-03-08  172   */
+5d1ebbda0 Tony Lindgren      2018-03-08  173  static void phy_mdm6600_status(struct work_struct *work)
+5d1ebbda0 Tony Lindgren      2018-03-08  174  {
+5d1ebbda0 Tony Lindgren      2018-03-08  175  	struct phy_mdm6600 *ddata;
+5d1ebbda0 Tony Lindgren      2018-03-08  176  	struct device *dev;
+916010a73 Janusz Krzysztofik 2018-09-02  177  	DECLARE_BITMAP(values, PHY_MDM6600_NR_STATUS_LINES);
+5d1ebbda0 Tony Lindgren      2018-03-08  178  	int error, i, val = 0;
+5d1ebbda0 Tony Lindgren      2018-03-08  179  
+5d1ebbda0 Tony Lindgren      2018-03-08  180  	ddata = container_of(work, struct phy_mdm6600, status_work.work);
+5d1ebbda0 Tony Lindgren      2018-03-08  181  	dev = ddata->dev;
+5d1ebbda0 Tony Lindgren      2018-03-08  182  
+ad5003300 Tony Lindgren      2018-05-31 @183  	error = gpiod_get_array_value_cansleep(PHY_MDM6600_NR_STATUS_LINES,
+5d1ebbda0 Tony Lindgren      2018-03-08  184  					       ddata->status_gpios->desc,
+dea6937cb Janusz Krzysztofik 2018-09-02 @185  					       ddata->status_gpios->info,
+5d1ebbda0 Tony Lindgren      2018-03-08  186  					       values);
+5d1ebbda0 Tony Lindgren      2018-03-08  187  	if (error)
+5d1ebbda0 Tony Lindgren      2018-03-08  188  		return;
+5d1ebbda0 Tony Lindgren      2018-03-08  189  
+ad5003300 Tony Lindgren      2018-05-31  190  	for (i = 0; i < PHY_MDM6600_NR_STATUS_LINES; i++) {
+916010a73 Janusz Krzysztofik 2018-09-02  191  		val |= test_bit(i, values) << i;
+5d1ebbda0 Tony Lindgren      2018-03-08  192  		dev_dbg(ddata->dev, "XXX %s: i: %i values[i]: %i val: %i\n",
+916010a73 Janusz Krzysztofik 2018-09-02  193  			__func__, i, test_bit(i, values), val);
+5d1ebbda0 Tony Lindgren      2018-03-08  194  	}
+5d1ebbda0 Tony Lindgren      2018-03-08  195  	ddata->status = val;
+5d1ebbda0 Tony Lindgren      2018-03-08  196  
+5d1ebbda0 Tony Lindgren      2018-03-08  197  	dev_info(dev, "modem status: %i %s\n",
+5d1ebbda0 Tony Lindgren      2018-03-08  198  		 ddata->status,
+5d1ebbda0 Tony Lindgren      2018-03-08  199  		 phy_mdm6600_status_name[ddata->status & 7]);
+5d1ebbda0 Tony Lindgren      2018-03-08  200  	complete(&ddata->ack);
+5d1ebbda0 Tony Lindgren      2018-03-08  201  }
+5d1ebbda0 Tony Lindgren      2018-03-08  202  
 
-:::::: The code at line 165 was first introduced by commit
+:::::: The code at line 164 was first introduced by commit
 :::::: 5d1ebbda0318b1ba55eaa1fae3fd867af17b0774 phy: mapphone-mdm6600: Add USB PHY driver for MDM6600 on Droid 4
 
 :::::: TO: Tony Lindgren <tony@atomide.com>
@@ -118,12 +134,12 @@ ad5003300 Tony Lindgren      2018-05-31  188  	for (i = 0; i < PHY_MDM6600_NR_ST
 0-DAY kernel test infrastructure                Open Source Technology Center
 https://lists.01.org/pipermail/kbuild-all                   Intel Corporation
 
---XsQoSWH+UP9D9v3l
+--OXfL5xGRrasGEqWY
 Content-Type: application/gzip
 Content-Disposition: attachment; filename=".config.gz"
 Content-Transfer-Encoding: base64
 
-H4sICEh6j1sAAy5jb25maWcAjDxdc+O2ru/9FZ7tSztntk2yqc/23skDJVE2a32FpPyRF02a
+H4sICMmAj1sAAy5jb25maWcAjDxdc+O2ru/9FZ7tSztntk2yqc/23skDJVE2a32FpPyRF02a
 eLeZJvYexznd/fcXICWLpCDv7XTaiABBkATxRdA//vDjhL0d9y/3x6eH++fnb5PP2932cH/c
 Pk4+PT1v/3eSlJOi1BOeCP0LIGdPu7evv379OG2m15PrXy5//+Xi/eHhcrLYHnbb50m83316
 +vwGBJ72ux9+/AH+/REaX74ArcP/TD4/PLyfTn5Ktn8+3e8m01+uoffvP9s/JlcXl/++vLia
@@ -691,4 +707,4 @@ qcbx71SKTbIUt1i+ucOM0bY0Gq5+oX68ZQ1RbvlPiBhhHu+FxPthO9rdjAblzcbBoI5pXCP+
 N+pqwQAsB71A5fyBWdAXlMA9QUciobUQIaaCS0881aKfrye+qILEKHiAJgBlfwzk3kdQuw2n
 60L9wkFHrATFAytolMwJE4eMg4HLUBzT3nCl7qFoG6EB80CduYzSAQA=
 
---XsQoSWH+UP9D9v3l--
+--OXfL5xGRrasGEqWY--
