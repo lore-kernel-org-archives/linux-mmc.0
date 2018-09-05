@@ -1,176 +1,138 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 00/14] mmc: mmci: prepare dma callbacks with mmci_host_ops
-Date: Wed, 5 Sep 2018 12:43:51 +0200
-Message-ID: <CAPDyKFpgJmDy-UE9Uri2XT7rQpVFAxwEVO7i7qNcJtfhHRU2og@mail.gmail.com>
-References: <1533116221-380-1-git-send-email-ludovic.Barre@st.com>
- <CAPDyKFqArwShaUZAit4fHa7F6UNC_z7Yc1GMpBuQcrkkwrB84g@mail.gmail.com> <5e9e5114-40d0-d178-4fdc-edfd5963c170@st.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <5e9e5114-40d0-d178-4fdc-edfd5963c170@st.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ludovic BARRE <ludovic.barre@st.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Gerald Baeza <gerald.baeza@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+From: Janusz Krzysztofik <jmkrzyszt@gmail.com>
+Subject: [PATCH v8 0/4] gpiolib: speed up GPIO array processing
+Date: Wed,  5 Sep 2018 23:50:04 +0200
+Message-ID: <20180905215008.1649-1-jmkrzyszt@gmail.com>
+References: <20180902120144.6855-1-jmkrzyszt@gmail.com>
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <20180902120144.6855-1-jmkrzyszt@gmail.com>
+Sender: netdev-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Jonathan Corbet <corbet@lwn.net>, Miguel Ojeda Sandonis <miguel.ojeda.sandonis@gmail.com>, Peter Korsgaard <peter.korsgaard@barco.com>, Peter Rosin <peda@axentia.se>, Ulf Hansson <ulf.hansson@linaro.org>, Andrew Lunn <andrew@lunn.ch>, Florian Fainelli <f.fainelli@gmail.com>, "David S. Miller" <davem@davemloft.net>, Dominik Brodowski <linux@dominikbrodowski.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kishon Vijay Abraham I <kishon@ti.com>, Lars-Peter Clausen <lars@metafoo.de>, Michael Hennerich <Michael.Hennerich@analog.com>, Jonathan Cameron <jic23@kernel.org>, Hartmut Knaack <knaack.h@gmx.de>, Peter Meerwald-Stadler <pmeerw@pmeerw.net>, Jiri Slaby <jslaby@suse.com>, Willy Tarreau <w@1wt.eu>, Geert Uytterhoeven <geert@linux-m68k.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 5 September 2018 at 11:13, Ludovic BARRE <ludovic.barre@st.com> wrote:
->
->
-> On 09/04/2018 12:00 PM, Ulf Hansson wrote:
->>
->> On 1 August 2018 at 11:36, Ludovic Barre <ludovic.Barre@st.com> wrote:
->>>
->>> From: Ludovic Barre <ludovic.barre@st.com>
->>>
->>> This patch series prepares and adds callbacks for dma transfert at
->>> mmci_host_ops. This series is composed of 3 parts:
->>> -Internalize specific needs of legacy dmaengine.
->>> -Create and setup dma_priv pointer
->>> -Create generic callbacks  which share some features
->>> (like cookie...) and call specific needs
->>
->>
->> I have now reviewed part of this series and provided you with some
->> comments, but will stop at this point.
->
->
-> thanks for your review
->
->>
->> Overall, the comments are about renaming and picking better function
->> names. Those comments should be easy to address in a new version.
->
->
-> yes, there is no problem for the naming, I will change following your
-> recommendations.
->
->>
->> However, the other more important point is the number of variant
->> callbacks you are adding. It's of course a balance to pick the right
->> level, to get both flexibility but also to avoid open coding. In the
->> end we don't want to get too many callbacks, but then it's better to
->> share common mmci code for variants, through mmci.h.
->>
->> Finally, I would like to see a patch on top adding the support for the
->> new ST variant, so I can see how the callbacks and changes really are
->> being used. Can you please add that?
->>
->
-> yes, I prepare a patch with sdmmc variant to show how callbacks are used.
->
-> About comment on patch 07/14:
->> So, having callbacks for dealing with dma_map|unmap() kind of
->> operations, becomes rather fine-grained and not very flexible.
->> Instead, what do you think of allowing the variant init function to
->> dynamically assign the ->pre_req() and the ->post_req() callbacks in
->> the struct mmc_host_ops. Common mmci functions to manage these
->> operations can instead be shared via mmci.h and called by the
->> variants.
->
-> I think we have the same goal or idea, regroup the common needs to avoid
-> too much specific drift.
->
-> I will try to describe the functions which are commons and the link to
-> specific mmci_host_ops callbacks.
->
-> (I use function names of this series, but it's just for this example)
->
-> commons function used by mmci core:
-> -mmci_pre_request:
->  check data and cookie, call common mmci_validate_data
->  and mmci_prepare_data.
->
-> -mmci_post_request:
->  check data and cookie then call common mmci_unprepare_data
->
-> -mmci_validate_data:
->  check the common constraint of variants, call specific
->  validate_data if defined.
->
-> -mmci_prepare_data:
->  setup common next cookie, call specific prepare data if defined
->
-> -mmci_unprepare_data:
->  clear the common cookie, call specific unprepare data if defined
->
-> -mmci_get_next_data:
->  check cookie, call specific get_next_data if defined
->
-> -mmci_dma_setup:
->  initialize common next_cookie, call specific dma_setup if defined
->
-> -mmci_dma_release
->  just call dma_release if defined
->
-> -mmci_dma_start
->  call common prepare data if not yet done (by next)
->  call specific dma_start
->  write common registers to start transfer and setup mmci mask
->
-> -mmci_dma_finalize:
->  just call dma_finalize if defined
->
-> -mmci_dma_error
->  just call dma_error if defined
->
-> mmci_host_ops specific:
-> struct mmci_host_ops
-> validate_data:  could be use to check specific constraint of variant.
->                 sdmmc has constraints on base & size for each element
->                 excepted the last element which has no constraint on
->                 size.
-> prepare_data:   specific needs to prepare current or next data request.
->                 mmci: dma_map_sg on channel, use dmaengine api
->                 "dmaengine_prep_slave_sg" to queue a transfer
->                 sdmmc: dma_map_sg on sdmmc device and prepare the link
->                 list of internal dma
->
-> unprepare_data: specific needs to unprepare the data of request
->                 mmci: dma_unmap_sg on channel, use dmaengine api to
->                 terminate transfert.
->                 sdmmc: just unmap on sdmmc device.
->
-> get_next_data:  manage specific needs to move on next data
->                 mmci: get next dmaengine descriptor and channel
->                 sdmmc: today, nothing
->
-> dma_setup:      setup specific need if you use a Direct Memory Access
->                 mmci: use dmaengine api to request slave channel.
->                 sdmmc: alloc memory for link list, and define specific
->                 mmc->max_segs and mmc->max_seg_size.
->
-> dma_release:    release specific resource if you use a Direct Memory
->                 access.
->                 mmci: use dmaengine api to release channel
->                 sdmmc: nothing
->
-> dma_start:      set specific needs to start dma request
->                 mmci: use dmaengine api to submit and pending a dma
->                 transfert.
->                 sdmmc: set specific sdmmc registers to start an internal
->                 dma transfert
->
-> dma_finalize:   set specific needs to finalize a request
->                 mmci: specific check on fifo status and
->                 channel/descriptor management.
->                 sdmmc: just clear a specific register of sdmmc
->
-> dma_error:      specific error management.
->                 mmci: dmaengine api to terminate a transfer
->                 sdmmc: nothing
 
-Ludo, thanks for the detailed explanation and summary!
+The goal is to boost performance of get/set array functions while
+processing GPIO arrays which represent pins of a signle chip in
+hardware order.  If resulting performance is close to PIO, GPIO API
+can be used for data I/O without much loss of speed.
 
-Following this, it looks like it makes sense to keep the callbacks as
-on the level you have suggested. At least, I don't want to delay you
-from getting this upstream, by just giving some vague ideas of how to
-change the number of callbacks.
+Created and tested on a low end Amstrad Delta board with NAND driver
+updated to use GPIO API for data I/O.  Performance degrade compared to
+PIO is much better than before the optimization though not quite
+satisfactory on my test hardware.
 
-So, I am fine if you stick to the existing approach! Then, if we later
-on realizes that it makes sense to share more common code through
-mmci.h, to get rid of some callback, we can always do that on top.
 
-[...]
+Janusz Krzysztofik (4):
+      gpiolib: Pass bitmaps, not integer arrays, to get/set array
+      gpiolib: Identify arrays matching GPIO hardware
+      gpiolib: Pass array info to get/set array functions
+      gpiolib: Implement fast processing path in get/set array
 
-Kind regards
-Uffe
+
+Changelog:
+v8:
+[PATCH v8 1/4] gpiolib: Pass bitmaps, not integer arrays, to get/set array:
+- replace *values with values[0] where applicable - suggessted by Geert
+  Uytterhoeven, thanks,
+- drop !! from 3rd argument of __assign_bit() where applicable - suggested
+  by Lukas Wunner, thanks,
+drivers/gpio/gpiolib.c:
+- s/bitnap/bitmap/ - catched by Lukas Wunner, thanks,
+drivers/phy/motorola/phy-mapphone-mdm6600.c:
+- assign ddata->status directly from bitmap, not an intermediate 'val'
+  variable, now used only for debugging purposes,
+include/linux/gpio/consumer.h:
+- also update API of inline function replacements used if CONFIG_GPIOLIB
+  is not defined - catched by kbuild test robot,
+[PATCH v8 3/4] gpiolib: Pass array info to get/set array functions:
+commit message:
+- s/bulids/builds/ - catched by Geert Uytterhoeven, thanks,
+drivers/gpio/gpiolib.c:
+- add information on array_info arguments to array function descriptions -
+  catched by kbuild test robot,
+include/linux/gpio/consumer.h:
+- also update API of inline function replacements used if CONFIG_GPIOLIB
+  is not defined - catched by kbuild test robot.
+
+v7:
+- add more people to Cc: - authors and/or those who contributed most to
+  the drivers in scope of the change,
+[PATCH v7 1/4] gpiolib: Pass bitmaps, not integer arrays, to get/set:
+- avoid VLAs, use data source type bit number as bitmap size if not
+  constant - great recommendation by Peter Rosin, thanks,
+- revert names of local variables declared with DECLARE_BITMAP() from
+  'value_bitmap' to original names of value arrays they replace (but not
+  'value_array') - inspired by Peter Rosin suggestion - thanks!
+drivers/gpio/gpio-max3191x.c:
+- use bitmap_alloc() to be more consistent with DECLARE_BITMAP() pattern
+  used by other consumers,
+drivers/phy/motorola/phy-mapphone-mdm6600.c:
+- no need to mask unused bits of val before its assignment to bitmap,
+  passing PHY_MDM6600_NR_CMD_LINES to gpiod_set_array_value() as array/
+  bitmap size provides sufficient protection.
+
+v6:
+[PATCH v6 1/4] gpiolib: Pass bitmaps, not integer arrays, to get/set
+- use DECLARE_BITMAP() macro for declaring value_bitmap - great idea by
+  David Laight, thanks!
+drivers/auxdisplay/hd44780.c:
+- simplify the code and adjust comments as recommended by Geert
+  Uytterhoeven - thanks!,
+drivers/i2c/muxes/i2c-mux-gpio.c:
+- drop .values member of struct gpiomux - details provided by Peter
+  Rosin, thanks!, 
+drivers/mux/gpio.c:
+- drop .val member of struct mux_gpio - details provided by Peter
+  Rosin, thanks!,
+drivers/net/phy/mdio-mux-gpio.c:
+- drop .values member of struct mdio_mux_gpio_state and its processsing.
+
+v5:
+[PATCH v5 1/4] gpiolib: Pass bitmaps, not integer arrays, to get/set
+- drivers/i2c/muxes/i2c-mux-gpio.c:
+  - drop assigment of values to struct gpiomux.values, as recommended
+    by Peter Rosin - thanks!,
+  - mark the .values member of the structure as obsolete,
+- drivers/mux/gpio.c:
+  - drop assigment of values to struct mux_gpio.val, also recommended
+    by Peter Rosin - thanks!,
+  - merk the .val member of the structure as obsolete,
+- drivers/auxdisplay/hd44780.c:
+  - fix incorrect bitmap size,
+  - use >>= operator to simplify notation,
+  both catched by Miguel Ojeda - thanks!,
+- add Cc: clauses as well as Acked-by: collected so far.
+[PATCH v5 2/4] gpiolib: Identify arrays matching GPIO hardware
+- add Cc: clause.
+[PATCH v5 3/4] gpiolib: Pass array info to get/set array functions
+- add Cc: clauses as well as Acked-by: collected so far.
+[PATCH v5 4/4] gpiolib: Implement fast processing path in get/set
+- add Cc: clause.
+
+v4:
+That series was a follow up of the former "mtd: rawnand: ams-delta: Use
+gpio-omap accessors for data I/O" which already contained some changes
+to gpiolib.  Those previous attempts were commented by Borris Brezillon
+who suggested using GPIO API modified to accept bitmaps, and by Linus
+Walleij who suggested still more great ideas for further immprovement
+of the proposed API changes - thanks!
+
+
+diffstat:
+ Documentation/driver-api/gpio/board.rst     |   15 +
+ Documentation/driver-api/gpio/consumer.rst  |   48 +++-
+ drivers/auxdisplay/hd44780.c                |   67 ++----
+ drivers/bus/ts-nbus.c                       |   20 -
+ drivers/gpio/gpio-max3191x.c                |   16 -
+ drivers/gpio/gpiolib.c                      |  281 ++++++++++++++++++++++------
+ drivers/gpio/gpiolib.h                      |   15 +
+ drivers/i2c/muxes/i2c-mux-gpio.c            |   16 -
+ drivers/mmc/core/pwrseq_simple.c            |   15 -
+ drivers/mux/gpio.c                          |   16 -
+ drivers/net/phy/mdio-mux-gpio.c             |   13 -
+ drivers/pcmcia/soc_common.c                 |    9 
+ drivers/phy/motorola/phy-mapphone-mdm6600.c |   19 -
+ drivers/staging/iio/adc/ad7606.c            |   12 -
+ drivers/tty/serial/serial_mctrl_gpio.c      |    9 
+ include/linux/gpio/consumer.h               |   59 ++++-
+ 16 files changed, 420 insertions(+), 210 deletions(-)
