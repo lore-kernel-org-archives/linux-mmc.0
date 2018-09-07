@@ -1,69 +1,129 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V8 0/9] mmc: add support for sdhci 4.0
-Date: Fri, 7 Sep 2018 10:51:25 +0200
-Message-ID: <CAPDyKFq4x74p807d9n3kmn9JpT8RRmABvSrsb6JujxGbANDLcA@mail.gmail.com>
-References: <1535617305-16952-1-git-send-email-zhang.chunyan@linaro.org>
+Subject: Re: [PATCH] mmc: sunxi: Clarify new timing mode usage and
+ implementation
+Date: Fri, 7 Sep 2018 10:51:29 +0200
+Message-ID: <CAPDyKFqowXBstKSDMJJzb0ZjcOM6yrpEN0z9BRWZmRO7sS1ZhA@mail.gmail.com>
+References: <20180906153107.20225-1-wens@csie.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1535617305-16952-1-git-send-email-zhang.chunyan@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chunyan Zhang <zhang.chunyan@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linaro.org>, Billows Wu <billows.wu@unisoc.com>, Jason Wu <jason.wu@unisoc.com>, Chunyan Zhang <chunyan.zhang@unisoc.com>, Chunyan Zhang <zhang.lyra@gmail.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20180906153107.20225-1-wens@csie.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Chen-Yu Tsai <wens@csie.org>
+Cc: Maxime Ripard <maxime.ripard@bootlin.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 30 August 2018 at 10:21, Chunyan Zhang <zhang.chunyan@linaro.org> wrote:
-> From the SD host controller version 4.0 on, SDHCI implementation either
-> is version 3 compatible or version 4 mode. This patch-set covers those
-> changes which are common for SDHCI 4.0 version, regardless of whether
-> they are used with SD or eMMC storage devices.
+On 6 September 2018 at 17:31, Chen-Yu Tsai <wens@csie.org> wrote:
+> Newer sunxi mmc controller variants support what they call the "new
+> timing mode". Support for this was implemented in two ways, according
+> to the hardware that was seen at the time.
 >
-> This patchset also added a new sdhci driver for Spreadtrum's controller
-> which supports v4.0 mode.
+> The first type retained the old timing mode, and both the clock and mmc
+> controllers had switches to select which mode was used. Both switches
+> had to be set to the same setting. This variant was denoted with the
+> .has_timings_switch field in the sunxi_mmc_cfg structure. This hardware
+> is only seen on the A83T.
 >
-> This patchset has been tested on Spreadtrum's mobile phone, emmc can be
-> initialized, mounted, read and written, with these changes for common
-> sdhci framework and sdhci-sprd driver.
+> The second type did away with the old timing mode. The clock controller
+> no longer had the mode selection or clock delay setting bits. In some
+> cases the mmc controller retained its mode selection bit, but this
+> always needed to be set to the new mode, or instabilities would occur.
+> In a few cases, such as the A64 and H6 eMMC controller, the mode
+> selection bit is gone, but the controller still behaves like the new
+> timing mode, requiring the module clock to be double the card clock
+> in DDR transfer modes. This variant is denoted with the
+> .needs_new_timings field.
 >
-> Changes from V7:
-> - Added Adrian's acked-by on patch 1-6;
-> - Addressed comments.
+> This patch adds more comments explaining the two fields, as well as
+> the possibly nonexistent mode switch in the mmc controller.
 >
-> Previous patch series:
-> v7: https://lkml.org/lkml/2018/8/29/130
-> v6: http://lkml.org/lkml/2018/8/24/205
-> v5: https://lkml.org/lkml/2018/8/16/122
-> v4: https://lkml.org/lkml/2018/7/23/269
-> v3: https://lkml.org/lkml/2018/7/8/239
-> v2: https://lkml.org/lkml/2018/6/14/936
-> v1: https://lkml.org/lkml/2018/6/8/108
+> The .has_timings_switch is renamed to .ccu_has_timings_switch to clarify
+> its meaning.
 >
-> Chunyan Zhang (9):
->   mmc: sdhci: Add version V4 definition
->   mmc: sdhci: Add sd host v4 mode
->   mmc: sdhci: Change SDMA address register for v4 mode
->   mmc: sdhci: Add ADMA2 64-bit addressing support for V4 mode
->   mmc: sdhci: Add 32-bit block count support for v4 mode
->   mmc: sdhci: Add Auto CMD Auto Select support
->   mmc: sdhci: SDMA may use Auto-CMD23 in v4 mode
->   mmc: sdhci-sprd: Add Spreadtrum's initial host controller
->   dt-bindings: sdhci-sprd: Add bindings for the sdhci-sprd controller
->
->  .../devicetree/bindings/mmc/sdhci-sprd.txt         |  41 ++
->  drivers/mmc/host/Kconfig                           |  13 +
->  drivers/mmc/host/Makefile                          |   1 +
->  drivers/mmc/host/sdhci-sprd.c                      | 498 +++++++++++++++++++++
->  drivers/mmc/host/sdhci.c                           | 223 +++++++--
->  drivers/mmc/host/sdhci.h                           |  28 +-
->  6 files changed, 754 insertions(+), 50 deletions(-)
->  create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-sprd.txt
->  create mode 100644 drivers/mmc/host/sdhci-sprd.c
->
-> --
-> 2.7.4
->
+> Signed-off-by: Chen-Yu Tsai <wens@csie.org>
 
 Applied for next, thanks!
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/sunxi-mmc.c | 23 +++++++++++++++++------
+>  1 file changed, 17 insertions(+), 6 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+> index 568349e1fbc2..5f8d3ea0a0f8 100644
+> --- a/drivers/mmc/host/sunxi-mmc.c
+> +++ b/drivers/mmc/host/sunxi-mmc.c
+> @@ -258,11 +258,16 @@ struct sunxi_mmc_cfg {
+>         /* Does DATA0 needs to be masked while the clock is updated */
+>         bool mask_data0;
+>
+> -       /* hardware only supports new timing mode */
+> +       /*
+> +        * hardware only supports new timing mode, either due to lack of
+> +        * a mode switch in the clock controller, or the mmc controller
+> +        * is permanently configured in the new timing mode, without the
+> +        * NTSR mode switch.
+> +        */
+>         bool needs_new_timings;
+>
+> -       /* hardware can switch between old and new timing modes */
+> -       bool has_timings_switch;
+> +       /* clock hardware can switch between old and new timing modes */
+> +       bool ccu_has_timings_switch;
+>  };
+>
+>  struct sunxi_mmc_host {
+> @@ -787,7 +792,7 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
+>                 clock <<= 1;
+>         }
+>
+> -       if (host->use_new_timings && host->cfg->has_timings_switch) {
+> +       if (host->use_new_timings && host->cfg->ccu_has_timings_switch) {
+>                 ret = sunxi_ccu_set_mmc_timing_mode(host->clk_mmc, true);
+>                 if (ret) {
+>                         dev_err(mmc_dev(mmc),
+> @@ -822,6 +827,12 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
+>         /* update card clock rate to account for internal divider */
+>         rate /= div;
+>
+> +       /*
+> +        * Configure the controller to use the new timing mode if needed.
+> +        * On controllers that only support the new timing mode, such as
+> +        * the eMMC controller on the A64, this register does not exist,
+> +        * and any writes to it are ignored.
+> +        */
+>         if (host->use_new_timings) {
+>                 /* Don't touch the delay bits */
+>                 rval = mmc_readl(host, REG_SD_NTSR);
+> @@ -1145,7 +1156,7 @@ static const struct sunxi_mmc_cfg sun8i_a83t_emmc_cfg = {
+>         .idma_des_size_bits = 16,
+>         .clk_delays = sunxi_mmc_clk_delays,
+>         .can_calibrate = false,
+> -       .has_timings_switch = true,
+> +       .ccu_has_timings_switch = true,
+>  };
+>
+>  static const struct sunxi_mmc_cfg sun9i_a80_cfg = {
+> @@ -1351,7 +1362,7 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
+>                 goto error_free_host;
+>         }
+>
+> -       if (host->cfg->has_timings_switch) {
+> +       if (host->cfg->ccu_has_timings_switch) {
+>                 /*
+>                  * Supports both old and new timing modes.
+>                  * Try setting the clk to new timing mode.
+> --
+> 2.19.0.rc1
+>
