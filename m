@@ -1,13 +1,13 @@
 From: Maxime Ripard <maxime.ripard@bootlin.com>
-Subject: Re: [PATCH resend] mmc: sunxi: Use new timing mode for A64 eMMC
- controller
-Date: Fri, 7 Sep 2018 10:15:06 +0200
-Message-ID: <20180907081506.lj26hmbaisacefih@flea>
-References: <20180906153304.22239-1-wens@csie.org>
+Subject: Re: [PATCH] mmc: sunxi: Clarify new timing mode usage and
+ implementation
+Date: Fri, 7 Sep 2018 10:14:49 +0200
+Message-ID: <20180907081449.roowspmgmtd5zcs6@flea>
+References: <20180906153107.20225-1-wens@csie.org>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============7161781507083962342=="
+Content-Type: multipart/mixed; boundary="===============1824519697787138667=="
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20180906153304.22239-1-wens@csie.org>
+In-Reply-To: <20180906153107.20225-1-wens@csie.org>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -22,31 +22,49 @@ Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-k
 List-Id: linux-mmc@vger.kernel.org
 
 
---===============7161781507083962342==
+--===============1824519697787138667==
 Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="vrv2k7n7ccak4zpw"
+	protocol="application/pgp-signature"; boundary="srsd3wpsq32tfxwc"
 Content-Disposition: inline
 
 
---vrv2k7n7ccak4zpw
+--srsd3wpsq32tfxwc
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Thu, Sep 06, 2018 at 11:33:04PM +0800, Chen-Yu Tsai wrote:
-> The eMMC controller is also a new timing mode controller, but it doesn't
-> have the timing mode switch. It does however have signal delay and
-> calibration controls, typical of Allwinner MMC controllers that support
-> the new timing mode.
+On Thu, Sep 06, 2018 at 11:31:07PM +0800, Chen-Yu Tsai wrote:
+> Newer sunxi mmc controller variants support what they call the "new
+> timing mode". Support for this was implemented in two ways, according
+> to the hardware that was seen at the time.
 >=20
-> Enable the new timing mode setting for the A64 eMMC controller. This
-> also enables MMC HS-DDR modes, which gives higher throughput for eMMC
-> chips that support it, and can deliver such throughput.
+> The first type retained the old timing mode, and both the clock and mmc
+> controllers had switches to select which mode was used. Both switches
+> had to be set to the same setting. This variant was denoted with the
+> .has_timings_switch field in the sunxi_mmc_cfg structure. This hardware
+> is only seen on the A83T.
+>=20
+> The second type did away with the old timing mode. The clock controller
+> no longer had the mode selection or clock delay setting bits. In some
+> cases the mmc controller retained its mode selection bit, but this
+> always needed to be set to the new mode, or instabilities would occur.
+> In a few cases, such as the A64 and H6 eMMC controller, the mode
+> selection bit is gone, but the controller still behaves like the new
+> timing mode, requiring the module clock to be double the card clock
+> in DDR transfer modes. This variant is denoted with the
+> .needs_new_timings field.
+>=20
+> This patch adds more comments explaining the two fields, as well as
+> the possibly nonexistent mode switch in the mmc controller.
+>=20
+> The .has_timings_switch is renamed to .ccu_has_timings_switch to clarify
+> its meaning.
 >=20
 > Signed-off-by: Chen-Yu Tsai <wens@csie.org>
 
 Acked-by: Maxime Ripard <maxime.ripard@bootlin.com>
 
+Thanks!
 Maxime
 
 --=20
@@ -54,30 +72,30 @@ Maxime Ripard, Bootlin
 Embedded Linux and Kernel engineering
 https://bootlin.com
 
---vrv2k7n7ccak4zpw
+--srsd3wpsq32tfxwc
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEE0VqZU19dR2zEVaqr0rTAlCFNr3QFAluSM4kACgkQ0rTAlCFN
-r3Sr/Q//Vk8TcsbRlRT25Bbvrdm5h8gbNcbRNxQDBat02MwA91p2xzMWWdffJCeE
-Bk6Bt4Z0KxpiuL27dQKONXbxwpbCJBmgPM6zkhHcpZLwSDz5H33LfNZu2/V4f7J8
-38VmPSGjHaNoIq+2V4WtN1FWgTZqZdcmUUUOJ1Ey5Bl5tLks+44NeF1urLllbhrH
-EsDAEzCmoxI4te1Gt5VFguzEz8gn5dc8Y0xou35kC4/6sQt17FIz9P9mGXYdUxW8
-McnKkJhk1wxTIGLEZNrr/TZfUlhc31NdeOTSAXxRerVCBAvvF0OQb23cP6hOOshe
-jAsre6yu2iMhCq1hDR3SAtKVFEBbcq9yX6aITmcrjAcheIlDT3lZ2IcogNcuZScP
-+tKZYXFVA6I09uRBF+k6FaWgTq4ihSP8OToAbQz7mozYRVAm+HiH44woIeHLR3e+
-fqe4RInonm++zrkOyFqCYkFDV5pHXTaSPTLb+v5X4pV6vcNoWL6Ybv+7nMtTQDiy
-ZZVVAOfOOpZGQuz9hdg9bE3Tu2MGHgZONnMcj6fRgayhfV95wdDTL2FKqKhHq2Lm
-WJXY1gTucTM/cUttIktmoxTEZpuRoGNzlsksZtSUNONtmYWRtdomqJzNt8F4xjsO
-JVY+NMZwTr9rS6MzfdFrOcgIfyvghoxuEvCNv/USv9H+DfZWcNY=
-=1jAB
+iQIzBAABCAAdFiEE0VqZU19dR2zEVaqr0rTAlCFNr3QFAluSM3kACgkQ0rTAlCFN
+r3STCg//f+NQ1qe11RRvj+GCjJZep2gCjhJolyMWzsZAGJkqGA2UX0xAP/OO/zNA
+xnP+yrjNod1Wx+1pG3bdVV79gvaHcduZSoSFLUBWJQ4SyUEgMBkOGY0nsVTe+wso
+ATk8q7IhIngo234fo+S8gUbDeKx+p/VHK1lKmOGffL6wGotUSLdo7bUYSlDnWYfm
+ah2tsxV5lpYFgDZsrc068F/EDEagWPV++iDe7m20VgNfekgS9EQDIMMK57uLIajo
+30JrC37FQQpa84E8DvI7yelw3jBmCXUi4LvxGTDfbGgXwTanKkqsWd+0pxFaMlu2
+x4fL9U+oGI7eht5J64WzdQ9mRiCfO4NoWyw2jgKmZ09qIKGxTuvpvrbezOdui/JN
+gcuYy2On6MDJpil97+a3JrLo24rNptUQFNl1ldNU558zILTfYe8KRHZZYK/2SSaZ
+y7te0CnTlCHWU7FXw6Jt2+DlTAI2g5PMCKbp90sWr3GyCNZnmXope8GdUOsGvYhH
+rAYZ+C3XxHrWpB++J6D5svkWWSAI89XTDc0rvL7D0o+qQhFu0heo0I+L3R2uU5QE
+eaU9ltpVTqHwVGUWO8QMStVS7FAB8upB+cnoJmnDuvtTegZB01P/l1h1c3qD14vD
+IKa3nuODThDDbAe8YV4ZAsvYepixf9J2UJZpdejRZCR7mm06NRs=
+=HkjY
 -----END PGP SIGNATURE-----
 
---vrv2k7n7ccak4zpw--
+--srsd3wpsq32tfxwc--
 
 
---===============7161781507083962342==
+--===============1824519697787138667==
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -88,4 +106,4 @@ linux-arm-kernel mailing list
 linux-arm-kernel@lists.infradead.org
 http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
 
---===============7161781507083962342==--
+--===============1824519697787138667==--
