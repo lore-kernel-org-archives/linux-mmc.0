@@ -1,14 +1,14 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sunxi: Clarify new timing mode usage and
- implementation
-Date: Fri, 7 Sep 2018 10:51:29 +0200
-Message-ID: <CAPDyKFqowXBstKSDMJJzb0ZjcOM6yrpEN0z9BRWZmRO7sS1ZhA@mail.gmail.com>
-References: <20180906153107.20225-1-wens@csie.org>
+Subject: Re: [PATCH resend] mmc: sunxi: Use new timing mode for A64 eMMC
+ controller
+Date: Fri, 7 Sep 2018 10:51:36 +0200
+Message-ID: <CAPDyKFonwT+Xid9mrfPAA_91uNajNdibeg_JPftzO37pK1Nt5w@mail.gmail.com>
+References: <20180906153304.22239-1-wens@csie.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20180906153107.20225-1-wens@csie.org>
+In-Reply-To: <20180906153304.22239-1-wens@csie.org>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -22,32 +22,15 @@ To: Chen-Yu Tsai <wens@csie.org>
 Cc: Maxime Ripard <maxime.ripard@bootlin.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 6 September 2018 at 17:31, Chen-Yu Tsai <wens@csie.org> wrote:
-> Newer sunxi mmc controller variants support what they call the "new
-> timing mode". Support for this was implemented in two ways, according
-> to the hardware that was seen at the time.
+On 6 September 2018 at 17:33, Chen-Yu Tsai <wens@csie.org> wrote:
+> The eMMC controller is also a new timing mode controller, but it doesn't
+> have the timing mode switch. It does however have signal delay and
+> calibration controls, typical of Allwinner MMC controllers that support
+> the new timing mode.
 >
-> The first type retained the old timing mode, and both the clock and mmc
-> controllers had switches to select which mode was used. Both switches
-> had to be set to the same setting. This variant was denoted with the
-> .has_timings_switch field in the sunxi_mmc_cfg structure. This hardware
-> is only seen on the A83T.
->
-> The second type did away with the old timing mode. The clock controller
-> no longer had the mode selection or clock delay setting bits. In some
-> cases the mmc controller retained its mode selection bit, but this
-> always needed to be set to the new mode, or instabilities would occur.
-> In a few cases, such as the A64 and H6 eMMC controller, the mode
-> selection bit is gone, but the controller still behaves like the new
-> timing mode, requiring the module clock to be double the card clock
-> in DDR transfer modes. This variant is denoted with the
-> .needs_new_timings field.
->
-> This patch adds more comments explaining the two fields, as well as
-> the possibly nonexistent mode switch in the mmc controller.
->
-> The .has_timings_switch is renamed to .ccu_has_timings_switch to clarify
-> its meaning.
+> Enable the new timing mode setting for the A64 eMMC controller. This
+> also enables MMC HS-DDR modes, which gives higher throughput for eMMC
+> chips that support it, and can deliver such throughput.
 >
 > Signed-off-by: Chen-Yu Tsai <wens@csie.org>
 
@@ -57,73 +40,27 @@ Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/sunxi-mmc.c | 23 +++++++++++++++++------
->  1 file changed, 17 insertions(+), 6 deletions(-)
+>
+> This is just a resend. A separate patch clarifying the usage of the new
+> timing mode should meet Maxime's request for comments clarifying the
+> new timing mode usage from the initial submission of this patch.
+>
+> ---
+>  drivers/mmc/host/sunxi-mmc.c | 1 +
+>  1 file changed, 1 insertion(+)
 >
 > diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index 568349e1fbc2..5f8d3ea0a0f8 100644
+> index 5f8d3ea0a0f8..279e326e397e 100644
 > --- a/drivers/mmc/host/sunxi-mmc.c
 > +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -258,11 +258,16 @@ struct sunxi_mmc_cfg {
->         /* Does DATA0 needs to be masked while the clock is updated */
->         bool mask_data0;
->
-> -       /* hardware only supports new timing mode */
-> +       /*
-> +        * hardware only supports new timing mode, either due to lack of
-> +        * a mode switch in the clock controller, or the mmc controller
-> +        * is permanently configured in the new timing mode, without the
-> +        * NTSR mode switch.
-> +        */
->         bool needs_new_timings;
->
-> -       /* hardware can switch between old and new timing modes */
-> -       bool has_timings_switch;
-> +       /* clock hardware can switch between old and new timing modes */
-> +       bool ccu_has_timings_switch;
+> @@ -1177,6 +1177,7 @@ static const struct sunxi_mmc_cfg sun50i_a64_emmc_cfg = {
+>         .idma_des_size_bits = 13,
+>         .clk_delays = NULL,
+>         .can_calibrate = true,
+> +       .needs_new_timings = true,
 >  };
 >
->  struct sunxi_mmc_host {
-> @@ -787,7 +792,7 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
->                 clock <<= 1;
->         }
->
-> -       if (host->use_new_timings && host->cfg->has_timings_switch) {
-> +       if (host->use_new_timings && host->cfg->ccu_has_timings_switch) {
->                 ret = sunxi_ccu_set_mmc_timing_mode(host->clk_mmc, true);
->                 if (ret) {
->                         dev_err(mmc_dev(mmc),
-> @@ -822,6 +827,12 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
->         /* update card clock rate to account for internal divider */
->         rate /= div;
->
-> +       /*
-> +        * Configure the controller to use the new timing mode if needed.
-> +        * On controllers that only support the new timing mode, such as
-> +        * the eMMC controller on the A64, this register does not exist,
-> +        * and any writes to it are ignored.
-> +        */
->         if (host->use_new_timings) {
->                 /* Don't touch the delay bits */
->                 rval = mmc_readl(host, REG_SD_NTSR);
-> @@ -1145,7 +1156,7 @@ static const struct sunxi_mmc_cfg sun8i_a83t_emmc_cfg = {
->         .idma_des_size_bits = 16,
->         .clk_delays = sunxi_mmc_clk_delays,
->         .can_calibrate = false,
-> -       .has_timings_switch = true,
-> +       .ccu_has_timings_switch = true,
->  };
->
->  static const struct sunxi_mmc_cfg sun9i_a80_cfg = {
-> @@ -1351,7 +1362,7 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
->                 goto error_free_host;
->         }
->
-> -       if (host->cfg->has_timings_switch) {
-> +       if (host->cfg->ccu_has_timings_switch) {
->                 /*
->                  * Supports both old and new timing modes.
->                  * Try setting the clk to new timing mode.
+>  static const struct of_device_id sunxi_mmc_of_match[] = {
 > --
 > 2.19.0.rc1
 >
