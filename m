@@ -1,66 +1,48 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH resend] mmc: sunxi: Use new timing mode for A64 eMMC
- controller
-Date: Fri, 7 Sep 2018 10:51:36 +0200
-Message-ID: <CAPDyKFonwT+Xid9mrfPAA_91uNajNdibeg_JPftzO37pK1Nt5w@mail.gmail.com>
-References: <20180906153304.22239-1-wens@csie.org>
+From: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+Subject: Re: Rockchip RV1108 mainline kernel support
+Date: Mon, 10 Sep 2018 14:42:36 +0200
+Message-ID: <8240937.RLPrvYGblP@phil>
+References: <CAAPZna3aGkUmDeAwM4J6LpeC9m1VA=CUQN_ChiwvTLkaE2zdrw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20180906153304.22239-1-wens@csie.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Chen-Yu Tsai <wens@csie.org>
-Cc: Maxime Ripard <maxime.ripard@bootlin.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <CAAPZna3aGkUmDeAwM4J6LpeC9m1VA=CUQN_ChiwvTLkaE2zdrw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Fabio Berton <fabio.berton-fKevB0iiKLMBZ+LybsDmbA@public.gmane.org>
+Cc: andy.yan-TNX95d0MmH7DzftRWevZcw@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 6 September 2018 at 17:33, Chen-Yu Tsai <wens@csie.org> wrote:
-> The eMMC controller is also a new timing mode controller, but it doesn't
-> have the timing mode switch. It does however have signal delay and
-> calibration controls, typical of Allwinner MMC controllers that support
-> the new timing mode.
->
-> Enable the new timing mode setting for the A64 eMMC controller. This
-> also enables MMC HS-DDR modes, which gives higher throughput for eMMC
-> chips that support it, and can deliver such throughput.
->
-> Signed-off-by: Chen-Yu Tsai <wens@csie.org>
+Hi Fabio,
 
-Applied for next, thanks!
+Am Donnerstag, 19. Juli 2018, 15:53:02 CEST schrieb Fabio Berton:
+> We're adding support to a custom Rockchip RV1108 in mainline kernel.
+> 
+> Currently this custom board runs fine on the Rockchip 3.10 vendor kernel.
+> 
+> The main problems is that kernel 4.17 can't detect eMMC.
+> 
+> I would appreciate any help on how to make the mainline kernel to
+> detect eMMC on this board
 
-Kind regards
-Uffe
+Maybe you already solved your issue already, I just found your mail in
+my inbox again.
 
-> ---
->
-> This is just a resend. A separate patch clarifying the usage of the new
-> timing mode should meet Maxime's request for comments clarifying the
-> new timing mode usage from the initial submission of this patch.
->
-> ---
->  drivers/mmc/host/sunxi-mmc.c | 1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index 5f8d3ea0a0f8..279e326e397e 100644
-> --- a/drivers/mmc/host/sunxi-mmc.c
-> +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -1177,6 +1177,7 @@ static const struct sunxi_mmc_cfg sun50i_a64_emmc_cfg = {
->         .idma_des_size_bits = 13,
->         .clk_delays = NULL,
->         .can_calibrate = true,
-> +       .needs_new_timings = true,
->  };
->
->  static const struct of_device_id sunxi_mmc_of_match[] = {
-> --
-> 2.19.0.rc1
->
+So far I haven't gotten any rv1108-based board to do tests on, so it's a
+bit hard trying to find problem sources.
+
+On most recent Rockchip boards the (dw-)mmc runs just fine, but in your
+log + kernel commandline I noticed that you could try to add the
+"rootwait"  commandline option, as at the time of the failing rootfs the
+emmc may simply not have finished probing the card yet.
+
+
+Heiko
