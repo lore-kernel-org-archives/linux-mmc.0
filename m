@@ -1,27 +1,29 @@
-From: Vladimir Zapolskiy <vz@mleia.com>
-Subject: Re: [PATCH] mmc: mxcmmc: replace spin_lock_irqsave with spin_lock in
- ISR
-Date: Tue, 11 Sep 2018 19:00:53 +0300
-Message-ID: <1c5cd9ec-3c33-0ad8-d1bf-a5d3883c9e5c@mleia.com>
-References: <20180911144701.53383-1-hangdianqj@163.com>
+From: Alan Cox <gnomes@lxorguk.ukuu.org.uk>
+Subject: Re: [PATCH 00/25] Change tty_port(standard)_install's return type
+Date: Wed, 12 Sep 2018 15:41:19 +0100
+Message-ID: <20180912154119.1fce639d@alans-desktop>
+References: <1536029091-4426-1-git-send-email-climbbb.kim@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180911144701.53383-1-hangdianqj@163.com>
-Content-Language: en-US
+In-Reply-To: <1536029091-4426-1-git-send-email-climbbb.kim@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: jun qian <hangdianqj@163.com>, Ulf Hansson <ulf.hansson@linaro.org>, Kees Cook <keescook@chromium.org>, Allen <allen.lkml@gmail.com>
-Cc: Randy Dunlap <rdunlap@infradead.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Jaejoong Kim <climbbb.kim@gmail.com>
+Cc: linux-um@lists.infradead.org, netdev@vger.kernel.org, linux-mmc@vger.kernel.org, linux-s390@vger.kernel.org, devel@driverdev.osuosl.org, greybus-dev@lists.linaro.org, linuxppc-dev@lists.ozlabs.org, linux-serial@vger.kernel.org, sparclinux@vger.kernel.org, linux-usb@vger.kernel.org, linux-bluetooth@vger.kernel.org, linux-kernel@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jiri Slaby <jslaby@suse.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 09/11/2018 05:47 PM, jun qian wrote:
-> As you are already in ISR, it is unnecessary to call spin_lock_irqsave.
-> 
-> Signed-off-by: jun qian <hangdianqj@163.com>
+On Tue,  4 Sep 2018 11:44:26 +0900
+Jaejoong Kim <climbbb.kim@gmail.com> wrote:
 
-Reviewed-by: Vladimir Zapolskiy <vz@mleia.com>
+> Many drivers with tty use the tty_stand_install(). But, there is no
+> need to handle the error, since it always returns 0.
 
----
-Best wishes,
-Vladimir
+
+And what happens if another change means it can fail again. It's just a
+property of the current implementation that it can't. It used to fail.
+
+This seems to be a ton of unneccessary churn that will end up just having
+to be reversed again some day in the future.
+
+Alan
