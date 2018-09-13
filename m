@@ -1,29 +1,30 @@
-From: Alan Cox <gnomes@lxorguk.ukuu.org.uk>
-Subject: Re: [PATCH 00/25] Change tty_port(standard)_install's return type
-Date: Wed, 12 Sep 2018 15:41:19 +0100
-Message-ID: <20180912154119.1fce639d@alans-desktop>
-References: <1536029091-4426-1-git-send-email-climbbb.kim@gmail.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH v8 0/4] gpiolib: speed up GPIO array processing
+Date: Thu, 13 Sep 2018 11:22:06 +0200
+Message-ID: <CACRpkdbAG1N0v-BrXruf5088L0x3XwSHbFTWOFxjHQWx0LKz5g@mail.gmail.com>
+References: <20180902120144.6855-1-jmkrzyszt@gmail.com> <20180905215008.1649-1-jmkrzyszt@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1536029091-4426-1-git-send-email-climbbb.kim@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jaejoong Kim <climbbb.kim@gmail.com>
-Cc: linux-um@lists.infradead.org, netdev@vger.kernel.org, linux-mmc@vger.kernel.org, linux-s390@vger.kernel.org, devel@driverdev.osuosl.org, greybus-dev@lists.linaro.org, linuxppc-dev@lists.ozlabs.org, linux-serial@vger.kernel.org, sparclinux@vger.kernel.org, linux-usb@vger.kernel.org, linux-bluetooth@vger.kernel.org, linux-kernel@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jiri Slaby <jslaby@suse.com>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <20180905215008.1649-1-jmkrzyszt@gmail.com>
+Sender: netdev-owner@vger.kernel.org
+To: Janusz Krzysztofik <jmkrzyszt@gmail.com>
+Cc: Jonathan Corbet <corbet@lwn.net>, Miguel Ojeda Sandonis <miguel.ojeda.sandonis@gmail.com>, Peter Korsgaard <peter.korsgaard@barco.com>, Peter Rosin <peda@axentia.se>, Ulf Hansson <ulf.hansson@linaro.org>, Andrew Lunn <andrew@lunn.ch>, Florian Fainelli <f.fainelli@gmail.com>, "David S. Miller" <davem@davemloft.net>, Dominik Brodowski <linux@dominikbrodowski.net>, Greg KH <gregkh@linuxfoundation.org>, kishon@ti.com, Lars-Peter Clausen <lars@metafoo.de>, Michael Hennerich <Michael.Hennerich@analog.com>, Jonathan Cameron <jic23@kernel.org>, Hartmut Knaack <knaack.h@gmx.de>, Peter Meerwald <pmeerw@pmeerw.net>, Jiri Slaby <jslaby@suse.com>, Willy Tarreau <w@1wt.eu>, Geert Uytterhoeven <geert@linux-m68k.org>, Sebastien Bourdelin <sebastien.bourdelin@savoirf>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue,  4 Sep 2018 11:44:26 +0900
-Jaejoong Kim <climbbb.kim@gmail.com> wrote:
+On Wed, Sep 5, 2018 at 11:49 PM Janusz Krzysztofik <jmkrzyszt@gmail.com> wrote:
 
-> Many drivers with tty use the tty_stand_install(). But, there is no
-> need to handle the error, since it always returns 0.
+> The goal is to boost performance of get/set array functions while
+> processing GPIO arrays which represent pins of a signle chip in
+> hardware order.  If resulting performance is close to PIO, GPIO API
+> can be used for data I/O without much loss of speed.
 
+I applied the v8 to an immutable branch and pushed to kernelorg
+so the build servers can churn it a bit, and if it works fine
+then we can merge this into the devel branch and also set up
+that as something other subsystems can pull in if they need it.
 
-And what happens if another change means it can fail again. It's just a
-property of the current implementation that it can't. It used to fail.
+I'm really excited to merge this!
 
-This seems to be a ton of unneccessary churn that will end up just having
-to be reversed again some day in the future.
-
-Alan
+Yours,
+Linus Walleij
