@@ -1,48 +1,54 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v4.19-rc4
-Date: Thu, 13 Sep 2018 17:06:04 +0200
-Message-ID: <20180913150604.3887-1-ulf.hansson@linaro.org>
+From: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+Subject: [PATCH mmc-next] mmc: sdhci: fix __sdhci_adma_write_desc
+Date: Mon, 17 Sep 2018 13:30:41 +0800
+Message-ID: <20180917133041.66100101@xhacker.debian>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Linus,
+If hosts provides ops->adma_write_desc, we should not fall back to the
+general sdhci_adma_write_desc().
 
-Here's a PR with a couple of MMC fixes intended for v4.19-rc4. Details about the
-highlights are as usual found in the signed tag.
+Signed-off-by: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+---
 
-Please pull this in!
+Hi Ulf, Adrian,
 
-Kind regards
-Ulf Hansson
+When I introduced .adma_write_desc, I made a mistake since v4 -- if the host
+provide ops->adma_write_desc, we should just call it and don't fall back
+to the general sdhci_adma_write_desc(). Before v4, the adma_write_desc return
+int, since v4 there's no return value, so when I prepared the v4, I just
+removed return, this is where the mistake is from. I dunno how to handle
+this case, fold the patch into previous commit or apply it as a separate patch?
 
+I'm very sorry for this. In fact, Adrian caught another similar bug during
+review.
 
-The following changes since commit 57361846b52bc686112da6ca5368d11210796804:
+Sorry about the inconvenience,
+Jisheng
 
-  Linux 4.19-rc2 (2018-09-02 14:37:30 -0700)
+ drivers/mmc/host/sdhci.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-are available in the Git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v4.19-rc2
-
-for you to fetch changes up to c483a5cc9d09f4ceaa9abb106f863cc89cb643d9:
-
-  mmc: meson-mx-sdio: fix OF child-node lookup (2018-09-05 08:28:45 +0200)
-
-----------------------------------------------------------------
-MMC host:
- - meson-mx-sdio: Fix OF child-node lookup
- - omap_hsmmc: Fix wakeirq handling on removal
-
-----------------------------------------------------------------
-Andreas Kemnade (1):
-      mmc: omap_hsmmc: fix wakeirq handling on removal
-
-Johan Hovold (1):
-      mmc: meson-mx-sdio: fix OF child-node lookup
-
- drivers/mmc/host/meson-mx-sdio.c | 8 ++++++--
- drivers/mmc/host/omap_hsmmc.c    | 1 +
- 2 files changed, 7 insertions(+), 2 deletions(-)
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 0dda6f4b6a24..99bdae53fa2e 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -649,8 +649,8 @@ static inline void __sdhci_adma_write_desc(struct sdhci_host *host,
+ {
+ 	if (host->ops->adma_write_desc)
+ 		host->ops->adma_write_desc(host, desc, addr, len, cmd);
+-
+-	sdhci_adma_write_desc(host, desc, addr, len, cmd);
++	else
++		sdhci_adma_write_desc(host, desc, addr, len, cmd);
+ }
+ 
+ static void sdhci_adma_mark_end(void *desc)
+-- 
+2.19.0
