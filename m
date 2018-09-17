@@ -1,68 +1,57 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH mmc-next] mmc: sdhci: fix __sdhci_adma_write_desc
-Date: Mon, 17 Sep 2018 20:35:15 +0200
-Message-ID: <CAPDyKFrBQHxOr5qfWir7SorJEvmvCjT_jNABwFXhGoR=_Zcc=Q@mail.gmail.com>
-References: <20180917133041.66100101@xhacker.debian>
+Subject: Re: [PATCH] mmc: mxcmmc: replace spin_lock_irqsave with spin_lock in ISR
+Date: Mon, 17 Sep 2018 20:35:33 +0200
+Message-ID: <CAPDyKFqr61j91qPKMv49nSKnwUbiZxPXDCYpbX4CNvN7eVGWGw@mail.gmail.com>
+References: <20180911144701.53383-1-hangdianqj@163.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180917133041.66100101@xhacker.debian>
+In-Reply-To: <20180911144701.53383-1-hangdianqj@163.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: jun qian <hangdianqj@163.com>
+Cc: Kees Cook <keescook@chromium.org>, Allen <allen.lkml@gmail.com>, Randy Dunlap <rdunlap@infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 17 September 2018 at 07:30, Jisheng Zhang
-<Jisheng.Zhang@synaptics.com> wrote:
-> If hosts provides ops->adma_write_desc, we should not fall back to the
-> general sdhci_adma_write_desc().
+On 11 September 2018 at 16:47, jun qian <hangdianqj@163.com> wrote:
+> As you are already in ISR, it is unnecessary to call spin_lock_irqsave.
 >
-> Signed-off-by: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
-> ---
->
-> Hi Ulf, Adrian,
->
-> When I introduced .adma_write_desc, I made a mistake since v4 -- if the host
-> provide ops->adma_write_desc, we should just call it and don't fall back
-> to the general sdhci_adma_write_desc(). Before v4, the adma_write_desc return
-> int, since v4 there's no return value, so when I prepared the v4, I just
-> removed return, this is where the mistake is from. I dunno how to handle
-> this case, fold the patch into previous commit or apply it as a separate patch?
->
-> I'm very sorry for this. In fact, Adrian caught another similar bug during
-> review.
->
-> Sorry about the inconvenience,
-> Jisheng
+> Signed-off-by: jun qian <hangdianqj@163.com>
 
-No worries, mistakes happens - the important thing is that we fix them!
-
-Thanks for providing the information above.
-
-I have applied this as is for next.
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
+> ---
+>  drivers/mmc/host/mxcmmc.c | 5 ++---
+>  1 file changed, 2 insertions(+), 3 deletions(-)
 >
->  drivers/mmc/host/sdhci.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 0dda6f4b6a24..99bdae53fa2e 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -649,8 +649,8 @@ static inline void __sdhci_adma_write_desc(struct sdhci_host *host,
+> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+> index de4e6e5bf304..4d17032d15ee 100644
+> --- a/drivers/mmc/host/mxcmmc.c
+> +++ b/drivers/mmc/host/mxcmmc.c
+> @@ -728,7 +728,6 @@ static void mxcmci_cmd_done(struct mxcmci_host *host, unsigned int stat)
+>  static irqreturn_t mxcmci_irq(int irq, void *devid)
 >  {
->         if (host->ops->adma_write_desc)
->                 host->ops->adma_write_desc(host, desc, addr, len, cmd);
-> -
-> -       sdhci_adma_write_desc(host, desc, addr, len, cmd);
-> +       else
-> +               sdhci_adma_write_desc(host, desc, addr, len, cmd);
->  }
+>         struct mxcmci_host *host = devid;
+> -       unsigned long flags;
+>         bool sdio_irq;
+>         u32 stat;
 >
->  static void sdhci_adma_mark_end(void *desc)
+> @@ -740,9 +739,9 @@ static irqreturn_t mxcmci_irq(int irq, void *devid)
+>
+>         dev_dbg(mmc_dev(host->mmc), "%s: 0x%08x\n", __func__, stat);
+>
+> -       spin_lock_irqsave(&host->lock, flags);
+> +       spin_lock(&host->lock);
+>         sdio_irq = (stat & STATUS_SDIO_INT_ACTIVE) && host->use_sdio;
+> -       spin_unlock_irqrestore(&host->lock, flags);
+> +       spin_unlock(&host->lock);
+>
+>         if (mxcmci_use_dma(host) && (stat & (STATUS_WRITE_OP_DONE)))
+>                 mxcmci_writel(host, STATUS_WRITE_OP_DONE, MMC_REG_STATUS);
 > --
-> 2.19.0
+> 2.17.1
+>
+>
 >
