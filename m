@@ -1,12 +1,10 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V2 06/27] mmc: mmci: merge prepare data functions
-Date: Tue, 18 Sep 2018 12:55:23 +0200
-Message-ID: <1537268144-21152-7-git-send-email-ludovic.Barre@st.com>
-References: <1537268144-21152-1-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V2 00/27] mmc: mmci: add sdmmc variant for stm32
+Date: Tue, 18 Sep 2018 12:55:17 +0200
+Message-ID: <1537268144-21152-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1537268144-21152-1-git-send-email-ludovic.Barre@st.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
 Cc: Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, benjamin.gaignard@linaro.org, Gerald Baeza <gerald.baeza@st.com>, Loic Pallardy <loic.pallardy@st.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com, Ludovic Barre <ludovic.barre@st.com>
@@ -14,70 +12,58 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-This patch merges the prepare data functions.
-This allows to define a single access to prepare data service.
-This prepares integration for mmci host ops.
+The goal of this serie is to add support of sdmmc for stm32.
+Be to able to add this new variant it is needed to do some changes in
+mmci core:
+-Internalize specific needs of legacy dmaengine.
+-Create and setup dma_priv pointer
+-Create generic callbacks which share some features (like cookie...)
+and call specific needs
 
-Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
----
 change v2:
 -rename to mmci_prep/unprep_data
+-rename specific dma engine structure to mmci_dmae_next/priv
+-follow "_" recommandation
+-remove dma prefixe of mmci_dmae_priv fields
 
- drivers/mmc/host/mmci.c | 19 +++++++------------
- 1 file changed, 7 insertions(+), 12 deletions(-)
+Ludovic Barre (27):
+  mmc: mmci: internalize dma map/unmap into mmci dma functions
+  mmc: mmci: internalize dma_inprogress into mmci dma functions
+  mmc: mmci: convert dma_setup callback to return an int
+  mmc: mmci: introduce dma_priv pointer to mmci_host
+  mmc: mmci: move mmci next cookie to mci host
+  mmc: mmci: merge prepare data functions
+  mmc: mmci: add prepare/unprepare_data callbacks
+  mmc: mmci: add get_next_data callback
+  mmc: mmci: modify dma_setup callback
+  mmc: mmci: add dma_release callback
+  mmc: mmci: add dma_start callback
+  mmc: mmci: add dma_finalize callback
+  mmc: mmci: add dma_error callback
+  mmc: mmci: add validate_data callback
+  mmc: mmci: add set_clk/pwrreg callbacks
+  mmc: mmci: add datactrl block size variant property
+  mmc: mmci: expand startbiterr to irqmask and error check
+  mmc: mmci: add variant properties to define cpsm & cmdresp bits
+  mmc: mmci: add variant property to define dpsm bit
+  mmc: mmci: add variant property to define irq pio mask
+  mmc: mmci: add variant property to write datactrl before command
+  mmc: mmci: add variant property to not read datacnt
+  mmc: mmci: add variant property to request a reset
+  mmc: mmci: add clock divider for stm32 sdmmc
+  mmc: mmci: add stm32 sdmmc registers
+  mmc: mmci: add DT bindings for STM32 sdmmc
+  mmc: mmci: add stm32 sdmmc variant
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 43f2a1a..0cbe71c 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -652,10 +652,14 @@ static int __mmci_dma_prep_data(struct mmci_host *host, struct mmc_data *data,
- }
- 
- static inline int mmci_dma_prep_data(struct mmci_host *host,
--				     struct mmc_data *data)
-+				     struct mmc_data *data,
-+				     bool next)
- {
- 	struct mmci_dmae_priv *dmae = host->dma_priv;
-+	struct mmci_dmae_next *nd = &dmae->next_data;
- 
-+	if (next)
-+		return __mmci_dma_prep_data(host, data, &nd->chan, &nd->desc);
- 	/* Check if next job is already prepared. */
- 	if (dmae->cur && dmae->desc_current)
- 		return 0;
-@@ -665,22 +669,13 @@ static inline int mmci_dma_prep_data(struct mmci_host *host,
- 				    &dmae->desc_current);
- }
- 
--static inline int mmci_dma_prep_next(struct mmci_host *host,
--				     struct mmc_data *data)
--{
--	struct mmci_dmae_priv *dmae = host->dma_priv;
--	struct mmci_dmae_next *nd = &dmae->next_data;
--
--	return __mmci_dma_prep_data(host, data, &nd->chan, &nd->desc);
--}
--
- static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
- {
- 	struct mmci_dmae_priv *dmae = host->dma_priv;
- 	struct mmc_data *data = host->data;
- 	int ret;
- 
--	ret = mmci_dma_prep_data(host, host->data);
-+	ret = mmci_dma_prep_data(host, host->data, false);
- 	if (ret)
- 		return ret;
- 
-@@ -737,7 +732,7 @@ static void mmci_pre_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	if (mmci_validate_data(host, data))
- 		return;
- 
--	if (!mmci_dma_prep_next(host, data))
-+	if (!mmci_dma_prep_data(host, data, true))
- 		data->host_cookie = ++host->next_cookie < 0 ?
- 			1 : host->next_cookie;
- }
+ Documentation/devicetree/bindings/mmc/mmci.txt |  11 +
+ drivers/mmc/host/Kconfig                       |  10 +
+ drivers/mmc/host/Makefile                      |   1 +
+ drivers/mmc/host/mmci.c                        | 646 +++++++++++++++++--------
+ drivers/mmc/host/mmci.h                        | 147 +++++-
+ drivers/mmc/host/mmci_qcom_dml.c               |  15 +-
+ drivers/mmc/host/mmci_stm32_sdmmc.c            | 282 +++++++++++
+ 7 files changed, 880 insertions(+), 232 deletions(-)
+ create mode 100644 drivers/mmc/host/mmci_stm32_sdmmc.c
+
 -- 
 2.7.4
