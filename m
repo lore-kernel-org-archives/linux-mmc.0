@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V2 24/27] mmc: mmci: add clock divider for stm32 sdmmc
-Date: Tue, 18 Sep 2018 12:55:41 +0200
-Message-ID: <1537268144-21152-25-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V2 21/27] mmc: mmci: add variant property to write datactrl before command
+Date: Tue, 18 Sep 2018 12:55:38 +0200
+Message-ID: <1537268144-21152-22-git-send-email-ludovic.Barre@st.com>
 References: <1537268144-21152-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,46 +14,59 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-The STM32 sdmmc variant has a different clock divider.
+This patch adds a boolean property to allow to write datactrl
+before to send command, whatever the command type (read or write).
+Needed to support the STM32 sdmmc variant.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.c | 2 ++
+ drivers/mmc/host/mmci.c | 6 ++++--
  drivers/mmc/host/mmci.h | 2 ++
- 2 files changed, 4 insertions(+)
+ 2 files changed, 6 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 6b3c33f..d622fbb 100644
+index f61b10b..b525ba4 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -1834,6 +1834,8 @@ static int mmci_probe(struct amba_device *dev,
- 	 */
- 	if (variant->st_clkdiv)
- 		mmc->f_min = DIV_ROUND_UP(host->mclk, 257);
-+	else if (variant->stm32_clkdiv)
-+		mmc->f_min = DIV_ROUND_UP(host->mclk, 2046);
- 	else if (variant->explicit_mclk_control)
- 		mmc->f_min = clk_round_rate(host->clk, 100000);
- 	else
+@@ -1239,7 +1239,8 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+ 		mmci_request_end(host, host->mrq);
+ 	} else if (sbc) {
+ 		mmci_start_command(host, host->mrq->cmd, 0);
+-	} else if (!(cmd->data->flags & MMC_DATA_READ)) {
++	} else if (!host->variant->datactrl_first &&
++		   !(cmd->data->flags & MMC_DATA_READ)) {
+ 		mmci_start_data(host, cmd->data);
+ 	}
+ }
+@@ -1503,7 +1504,8 @@ static void mmci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 	if (mrq->data)
+ 		mmci_get_next_data(host, mrq->data);
+ 
+-	if (mrq->data && mrq->data->flags & MMC_DATA_READ)
++	if (mrq->data &&
++	    (host->variant->datactrl_first || mrq->data->flags & MMC_DATA_READ))
+ 		mmci_start_data(host, mrq->data);
+ 
+ 	if (mrq->sbc)
 diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 2d46a08..dcb1255 100644
+index bb25160..89e6733 100644
 --- a/drivers/mmc/host/mmci.h
 +++ b/drivers/mmc/host/mmci.h
-@@ -216,6 +216,7 @@ struct mmci_host;
-  * @data_cmd_enable: enable value for data commands.
-  * @st_sdio: enable ST specific SDIO logic
-  * @st_clkdiv: true if using a ST-specific clock divider algorithm
-+ * @stm32_clkdiv: true if using a STM32-specific clock divider algorithm
-  * @datactrl_mask_ddrmode: ddr mode mask in datactrl register.
-  * @blksz_datactrl16: true if Block size is at b16..b30 position in datactrl register
-  * @blksz_datactrl4: true if Block size is at b4..b16 position in datactrl
-@@ -270,6 +271,7 @@ struct variant_data {
- 	bool			datacnt_useless;
+@@ -223,6 +223,7 @@ struct mmci_host;
+  * @datactrl_mask_sdio: SDIO enable mask in datactrl register
+  * @datactrl_blksz: block size in power of two
+  * @datactrl_dpsm_enable: enable value for DPSM
++ * @datactrl_first: true if data must be setup before send command
+  * @pwrreg_powerup: power up value for MMCIPOWER register
+  * @f_max: maximum clk frequency supported by the controller.
+  * @signal_direction: input/out direction of bus signals can be indicated
+@@ -262,6 +263,7 @@ struct variant_data {
+ 	unsigned int		datactrl_mask_sdio;
+ 	unsigned int		datactrl_blocksz;
+ 	unsigned int		datactrl_dpsm_enable;
++	bool			datactrl_first;
  	bool			st_sdio;
  	bool			st_clkdiv;
-+	bool			stm32_clkdiv;
  	bool			blksz_datactrl16;
- 	bool			blksz_datactrl4;
- 	u32			pwrreg_powerup;
 -- 
 2.7.4
