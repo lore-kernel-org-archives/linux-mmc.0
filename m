@@ -1,10 +1,12 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V2 00/27] mmc: mmci: add sdmmc variant for stm32
-Date: Tue, 18 Sep 2018 12:55:17 +0200
-Message-ID: <1537268144-21152-1-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V2 01/27] mmc: mmci: internalize dma map/unmap into mmci dma functions
+Date: Tue, 18 Sep 2018 12:55:18 +0200
+Message-ID: <1537268144-21152-2-git-send-email-ludovic.Barre@st.com>
+References: <1537268144-21152-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1537268144-21152-1-git-send-email-ludovic.Barre@st.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
 Cc: Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, benjamin.gaignard@linaro.org, Gerald Baeza <gerald.baeza@st.com>, Loic Pallardy <loic.pallardy@st.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com, Ludovic Barre <ludovic.barre@st.com>
@@ -12,58 +14,105 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-The goal of this serie is to add support of sdmmc for stm32.
-Be to able to add this new variant it is needed to do some changes in
-mmci core:
--Internalize specific needs of legacy dmaengine.
--Create and setup dma_priv pointer
--Create generic callbacks which share some features (like cookie...)
-and call specific needs
+This patch internalizes the management of dma map/unmap into
+mmci dma interfaces. This allows to simplify and prepare the next dma
+callbacks for mmci host ops.
+mmci_dma_unmap was called in mmci_data_irq & mmci_cmd_irq functions
+and can be integrated in mmci_dma_data_error.
 
-change v2:
--rename to mmci_prep/unprep_data
--rename specific dma engine structure to mmci_dmae_next/priv
--follow "_" recommandation
--remove dma prefixe of mmci_dmae_priv fields
+Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
+---
+ drivers/mmc/host/mmci.c | 40 +++++++++++++++++-----------------------
+ 1 file changed, 17 insertions(+), 23 deletions(-)
 
-Ludovic Barre (27):
-  mmc: mmci: internalize dma map/unmap into mmci dma functions
-  mmc: mmci: internalize dma_inprogress into mmci dma functions
-  mmc: mmci: convert dma_setup callback to return an int
-  mmc: mmci: introduce dma_priv pointer to mmci_host
-  mmc: mmci: move mmci next cookie to mci host
-  mmc: mmci: merge prepare data functions
-  mmc: mmci: add prepare/unprepare_data callbacks
-  mmc: mmci: add get_next_data callback
-  mmc: mmci: modify dma_setup callback
-  mmc: mmci: add dma_release callback
-  mmc: mmci: add dma_start callback
-  mmc: mmci: add dma_finalize callback
-  mmc: mmci: add dma_error callback
-  mmc: mmci: add validate_data callback
-  mmc: mmci: add set_clk/pwrreg callbacks
-  mmc: mmci: add datactrl block size variant property
-  mmc: mmci: expand startbiterr to irqmask and error check
-  mmc: mmci: add variant properties to define cpsm & cmdresp bits
-  mmc: mmci: add variant property to define dpsm bit
-  mmc: mmci: add variant property to define irq pio mask
-  mmc: mmci: add variant property to write datactrl before command
-  mmc: mmci: add variant property to not read datacnt
-  mmc: mmci: add variant property to request a reset
-  mmc: mmci: add clock divider for stm32 sdmmc
-  mmc: mmci: add stm32 sdmmc registers
-  mmc: mmci: add DT bindings for STM32 sdmmc
-  mmc: mmci: add stm32 sdmmc variant
-
- Documentation/devicetree/bindings/mmc/mmci.txt |  11 +
- drivers/mmc/host/Kconfig                       |  10 +
- drivers/mmc/host/Makefile                      |   1 +
- drivers/mmc/host/mmci.c                        | 646 +++++++++++++++++--------
- drivers/mmc/host/mmci.h                        | 147 +++++-
- drivers/mmc/host/mmci_qcom_dml.c               |  15 +-
- drivers/mmc/host/mmci_stm32_sdmmc.c            | 282 +++++++++++
- 7 files changed, 880 insertions(+), 232 deletions(-)
- create mode 100644 drivers/mmc/host/mmci_stm32_sdmmc.c
-
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 1841d250..bf0bb07 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -482,16 +482,6 @@ static inline void mmci_dma_release(struct mmci_host *host)
+ 	host->dma_rx_channel = host->dma_tx_channel = NULL;
+ }
+ 
+-static void mmci_dma_data_error(struct mmci_host *host)
+-{
+-	dev_err(mmc_dev(host->mmc), "error during DMA transfer!\n");
+-	dmaengine_terminate_all(host->dma_current);
+-	host->dma_in_progress = false;
+-	host->dma_current = NULL;
+-	host->dma_desc_current = NULL;
+-	host->data->host_cookie = 0;
+-}
+-
+ static void mmci_dma_unmap(struct mmci_host *host, struct mmc_data *data)
+ {
+ 	struct dma_chan *chan;
+@@ -505,6 +495,18 @@ static void mmci_dma_unmap(struct mmci_host *host, struct mmc_data *data)
+ 		     mmc_get_dma_dir(data));
+ }
+ 
++static void mmci_dma_data_error(struct mmci_host *host)
++{
++	dev_err(mmc_dev(host->mmc), "error during DMA transfer!\n");
++	dmaengine_terminate_all(host->dma_current);
++	host->dma_in_progress = false;
++	host->dma_current = NULL;
++	host->dma_desc_current = NULL;
++	host->data->host_cookie = 0;
++
++	mmci_dma_unmap(host, host->data);
++}
++
+ static void mmci_dma_finalize(struct mmci_host *host, struct mmc_data *data)
+ {
+ 	u32 status;
+@@ -528,10 +530,9 @@ static void mmci_dma_finalize(struct mmci_host *host, struct mmc_data *data)
+ 		mmci_dma_data_error(host);
+ 		if (!data->error)
+ 			data->error = -EIO;
+-	}
+-
+-	if (!data->host_cookie)
++	} else if (!data->host_cookie) {
+ 		mmci_dma_unmap(host, data);
++	}
+ 
+ 	/*
+ 	 * Use of DMA with scatter-gather is impossible.
+@@ -742,10 +743,6 @@ static inline void mmci_dma_release(struct mmci_host *host)
+ {
+ }
+ 
+-static inline void mmci_dma_unmap(struct mmci_host *host, struct mmc_data *data)
+-{
+-}
+-
+ static inline void mmci_dma_finalize(struct mmci_host *host,
+ 				     struct mmc_data *data)
+ {
+@@ -906,10 +903,8 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
+ 		u32 remain, success;
+ 
+ 		/* Terminate the DMA transfer */
+-		if (dma_inprogress(host)) {
++		if (dma_inprogress(host))
+ 			mmci_dma_data_error(host);
+-			mmci_dma_unmap(host, data);
+-		}
+ 
+ 		/*
+ 		 * Calculate how far we are into the transfer.  Note that
+@@ -1055,10 +1050,9 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+ 	if ((!sbc && !cmd->data) || cmd->error) {
+ 		if (host->data) {
+ 			/* Terminate the DMA transfer */
+-			if (dma_inprogress(host)) {
++			if (dma_inprogress(host))
+ 				mmci_dma_data_error(host);
+-				mmci_dma_unmap(host, host->data);
+-			}
++
+ 			mmci_stop_data(host);
+ 		}
+ 		mmci_request_end(host, host->mrq);
 -- 
 2.7.4
