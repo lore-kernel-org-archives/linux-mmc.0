@@ -1,57 +1,120 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: mxcmmc: replace spin_lock_irqsave with spin_lock in ISR
-Date: Mon, 17 Sep 2018 20:35:33 +0200
-Message-ID: <CAPDyKFqr61j91qPKMv49nSKnwUbiZxPXDCYpbX4CNvN7eVGWGw@mail.gmail.com>
-References: <20180911144701.53383-1-hangdianqj@163.com>
+From: Ludovic Barre <ludovic.Barre@st.com>
+Subject: [PATCH V2 09/27] mmc: mmci: modify dma_setup callback
+Date: Tue, 18 Sep 2018 12:55:26 +0200
+Message-ID: <1537268144-21152-10-git-send-email-ludovic.Barre@st.com>
+References: <1537268144-21152-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180911144701.53383-1-hangdianqj@163.com>
+In-Reply-To: <1537268144-21152-1-git-send-email-ludovic.Barre@st.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: jun qian <hangdianqj@163.com>
-Cc: Kees Cook <keescook@chromium.org>, Allen <allen.lkml@gmail.com>, Randy Dunlap <rdunlap@infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
+Cc: Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, benjamin.gaignard@linaro.org, Gerald Baeza <gerald.baeza@st.com>, Loic Pallardy <loic.pallardy@st.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com, Ludovic Barre <ludovic.barre@st.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 11 September 2018 at 16:47, jun qian <hangdianqj@163.com> wrote:
-> As you are already in ISR, it is unnecessary to call spin_lock_irqsave.
->
-> Signed-off-by: jun qian <hangdianqj@163.com>
+From: Ludovic Barre <ludovic.barre@st.com>
 
-Applied for next, thanks!
+This patch creates a generic mmci_dma_setup which calls
+dma_setup callback and manages common next_cookie.
+This patch is needed for sdmmc variant which has a different
+dma settings.
 
-Kind regards
-Uffe
+Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
+---
+ drivers/mmc/host/mmci.c          | 25 +++++++++++++------------
+ drivers/mmc/host/mmci.h          |  1 +
+ drivers/mmc/host/mmci_qcom_dml.c |  2 ++
+ 3 files changed, 16 insertions(+), 12 deletions(-)
 
-> ---
->  drivers/mmc/host/mxcmmc.c | 5 ++---
->  1 file changed, 2 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-> index de4e6e5bf304..4d17032d15ee 100644
-> --- a/drivers/mmc/host/mxcmmc.c
-> +++ b/drivers/mmc/host/mxcmmc.c
-> @@ -728,7 +728,6 @@ static void mxcmci_cmd_done(struct mxcmci_host *host, unsigned int stat)
->  static irqreturn_t mxcmci_irq(int irq, void *devid)
->  {
->         struct mxcmci_host *host = devid;
-> -       unsigned long flags;
->         bool sdio_irq;
->         u32 stat;
->
-> @@ -740,9 +739,9 @@ static irqreturn_t mxcmci_irq(int irq, void *devid)
->
->         dev_dbg(mmc_dev(host->mmc), "%s: 0x%08x\n", __func__, stat);
->
-> -       spin_lock_irqsave(&host->lock, flags);
-> +       spin_lock(&host->lock);
->         sdio_irq = (stat & STATUS_SDIO_INT_ACTIVE) && host->use_sdio;
-> -       spin_unlock_irqrestore(&host->lock, flags);
-> +       spin_unlock(&host->lock);
->
->         if (mxcmci_use_dma(host) && (stat & (STATUS_WRITE_OP_DONE)))
->                 mxcmci_writel(host, STATUS_WRITE_OP_DONE, MMC_REG_STATUS);
-> --
-> 2.17.1
->
->
->
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 55c4222..2a433ed 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -398,6 +398,17 @@ void mmci_get_next_data(struct mmci_host *host, struct mmc_data *data)
+ 		host->ops->get_next_data(host, data);
+ }
+ 
++int mmci_dma_setup(struct mmci_host *host)
++{
++	if (!host->ops || !host->ops->dma_setup)
++		return 0;
++
++	/* initialize pre request cookie */
++	host->next_cookie = 1;
++
++	return host->ops->dma_setup(host);
++}
++
+ static void
+ mmci_request_end(struct mmci_host *host, struct mmc_request *mrq)
+ {
+@@ -472,7 +483,7 @@ struct mmci_dmae_priv {
+ 
+ #define mmci_dmae_inprogress(dmae) ((dmae)->in_progress)
+ 
+-static int mmci_dma_setup(struct mmci_host *host)
++int mmci_dmae_setup(struct mmci_host *host)
+ {
+ 	const char *rxname, *txname;
+ 	struct mmci_dmae_priv *dmae;
+@@ -488,9 +499,6 @@ static int mmci_dma_setup(struct mmci_host *host)
+ 	dmae->tx_channel = dma_request_slave_channel(mmc_dev(host->mmc),
+ 						     "tx");
+ 
+-	/* initialize pre request cookie */
+-	host->next_cookie = 1;
+-
+ 	/*
+ 	 * If only an RX channel is specified, the driver will
+ 	 * attempt to use it bidirectionally, however if it is
+@@ -531,9 +539,6 @@ static int mmci_dma_setup(struct mmci_host *host)
+ 			host->mmc->max_seg_size = max_seg_size;
+ 	}
+ 
+-	if (host->ops && host->ops->dma_setup)
+-		return host->ops->dma_setup(host);
+-
+ 	return 0;
+ }
+ 
+@@ -793,14 +798,10 @@ static struct mmci_host_ops mmci_variant_ops = {
+ 	.prep_data = mmci_dmae_prep_data,
+ 	.unprep_data = mmci_dmae_unprep_data,
+ 	.get_next_data = mmci_dmae_get_next_data,
++	.dma_setup = mmci_dmae_setup,
+ };
+ #else
+ /* Blank functions if the DMA engine is not available */
+-static inline int mmci_dma_setup(struct mmci_host *host)
+-{
+-	return 0;
+-}
+-
+ static inline void mmci_dma_release(struct mmci_host *host)
+ {
+ }
+diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+index c0a84cf..5057e13 100644
+--- a/drivers/mmc/host/mmci.h
++++ b/drivers/mmc/host/mmci.h
+@@ -335,4 +335,5 @@ int mmci_dmae_prep_data(struct mmci_host *host, struct mmc_data *data,
+ void mmci_dmae_unprep_data(struct mmci_host *host, struct mmc_data *data,
+ 			   int err);
+ void mmci_dmae_get_next_data(struct mmci_host *host, struct mmc_data *data);
++int mmci_dmae_setup(struct mmci_host *host);
+ 
+diff --git a/drivers/mmc/host/mmci_qcom_dml.c b/drivers/mmc/host/mmci_qcom_dml.c
+index 432a823..003c497 100644
+--- a/drivers/mmc/host/mmci_qcom_dml.c
++++ b/drivers/mmc/host/mmci_qcom_dml.c
+@@ -126,6 +126,8 @@ static int qcom_dma_setup(struct mmci_host *host)
+ 	int consumer_id, producer_id;
+ 	struct device_node *np = host->mmc->parent->of_node;
+ 
++	mmci_dmae_setup(host);
++
+ 	consumer_id = of_get_dml_pipe_index(np, "tx");
+ 	producer_id = of_get_dml_pipe_index(np, "rx");
+ 
+-- 
+2.7.4
