@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V2 17/27] mmc: mmci: expand startbiterr to irqmask and error check
-Date: Tue, 18 Sep 2018 12:55:34 +0200
-Message-ID: <1537268144-21152-18-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V2 05/27] mmc: mmci: move mmci next cookie to mci host
+Date: Tue, 18 Sep 2018 12:55:22 +0200
+Message-ID: <1537268144-21152-6-git-send-email-ludovic.Barre@st.com>
 References: <1537268144-21152-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,104 +14,77 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-All variants don't pretend to have a startbiterr.
--While data error check, if status register return an error
-(like  MCI_DATACRCFAIL) we must avoid to check MCI_STARTBITERR
-(if not desired).
--expand start_err to MCI_IRQENABLE to avoid to set this bit by default.
+This patch moves next cookie to mmci host structure to
+share same cookie management between all variants.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.c | 27 ++++++++++++++++-----------
- drivers/mmc/host/mmci.h |  6 +++---
- 2 files changed, 19 insertions(+), 14 deletions(-)
+ drivers/mmc/host/mmci.c | 10 ++++------
+ drivers/mmc/host/mmci.h |  2 ++
+ 2 files changed, 6 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index e2272c7..53f613f 100644
+index 6de7c8d..43f2a1a 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -1014,14 +1014,18 @@ static void
- mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
- 	      unsigned int status)
+@@ -418,7 +418,6 @@ static void mmci_init_sg(struct mmci_host *host, struct mmc_data *data)
+ struct mmci_dmae_next {
+ 	struct dma_async_tx_descriptor *desc;
+ 	struct dma_chan	*chan;
+-	s32 cookie;
+ };
+ 
+ struct mmci_dmae_priv {
+@@ -449,7 +448,7 @@ static int mmci_dma_setup(struct mmci_host *host)
+ 						     "tx");
+ 
+ 	/* initialize pre request cookie */
+-	dmae->next_data.cookie = 1;
++	host->next_cookie = 1;
+ 
+ 	/*
+ 	 * If only an RX channel is specified, the driver will
+@@ -716,7 +715,7 @@ static void mmci_get_next_data(struct mmci_host *host, struct mmc_data *data)
+ 	struct mmci_dmae_priv *dmae = host->dma_priv;
+ 	struct mmci_dmae_next *next = &dmae->next_data;
+ 
+-	WARN_ON(data->host_cookie && data->host_cookie != next->cookie);
++	WARN_ON(data->host_cookie && data->host_cookie != host->next_cookie);
+ 	WARN_ON(!data->host_cookie && (next->desc || next->chan));
+ 
+ 	dmae->desc_current = next->desc;
+@@ -728,9 +727,7 @@ static void mmci_get_next_data(struct mmci_host *host, struct mmc_data *data)
+ static void mmci_pre_request(struct mmc_host *mmc, struct mmc_request *mrq)
  {
-+	unsigned int status_err;
-+
- 	/* Make sure we have data to handle */
+ 	struct mmci_host *host = mmc_priv(mmc);
+-	struct mmci_dmae_priv *dmae = host->dma_priv;
+ 	struct mmc_data *data = mrq->data;
+-	struct mmci_dmae_next *nd = &dmae->next_data;
+ 
  	if (!data)
  		return;
+@@ -741,7 +738,8 @@ static void mmci_pre_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 		return;
  
- 	/* First check for errors */
--	if (status & (MCI_DATACRCFAIL | MCI_DATATIMEOUT |
--		      host->variant->start_err |
--		      MCI_TXUNDERRUN | MCI_RXOVERRUN)) {
-+	status_err = status & (host->variant->start_err |
-+			       MCI_DATACRCFAIL | MCI_DATATIMEOUT |
-+			       MCI_TXUNDERRUN | MCI_RXOVERRUN);
-+
-+	if (status_err) {
- 		u32 remain, success;
+ 	if (!mmci_dma_prep_next(host, data))
+-		data->host_cookie = ++nd->cookie < 0 ? 1 : nd->cookie;
++		data->host_cookie = ++host->next_cookie < 0 ?
++			1 : host->next_cookie;
+ }
  
- 		/* Terminate the DMA transfer */
-@@ -1038,18 +1042,18 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
- 		success = data->blksz * data->blocks - remain;
- 
- 		dev_dbg(mmc_dev(host->mmc), "MCI ERROR IRQ, status 0x%08x at 0x%08x\n",
--			status, success);
--		if (status & MCI_DATACRCFAIL) {
-+			status_err, success);
-+		if (status_err & MCI_DATACRCFAIL) {
- 			/* Last block was not successful */
- 			success -= 1;
- 			data->error = -EILSEQ;
--		} else if (status & MCI_DATATIMEOUT) {
-+		} else if (status_err & MCI_DATATIMEOUT) {
- 			data->error = -ETIMEDOUT;
--		} else if (status & MCI_STARTBITERR) {
-+		} else if (status_err & MCI_STARTBITERR) {
- 			data->error = -ECOMM;
--		} else if (status & MCI_TXUNDERRUN) {
-+		} else if (status_err & MCI_TXUNDERRUN) {
- 			data->error = -EIO;
--		} else if (status & MCI_RXOVERRUN) {
-+		} else if (status_err & MCI_RXOVERRUN) {
- 			if (success > host->variant->fifosize)
- 				success -= host->variant->fifosize;
- 			else
-@@ -1911,7 +1915,7 @@ static int mmci_probe(struct amba_device *dev,
- 			goto clk_disable;
- 	}
- 
--	writel(MCI_IRQENABLE, host->base + MMCIMASK0);
-+	writel(MCI_IRQENABLE | variant->start_err, host->base + MMCIMASK0);
- 
- 	amba_set_drvdata(dev, mmc);
- 
-@@ -2000,7 +2004,8 @@ static void mmci_restore(struct mmci_host *host)
- 		writel(host->datactrl_reg, host->base + MMCIDATACTRL);
- 		writel(host->pwr_reg, host->base + MMCIPOWER);
- 	}
--	writel(MCI_IRQENABLE, host->base + MMCIMASK0);
-+	writel(MCI_IRQENABLE | host->variant->start_err,
-+	       host->base + MMCIMASK0);
- 	mmci_reg_delay(host);
- 
- 	spin_unlock_irqrestore(&host->lock, flags);
+ static void mmci_post_request(struct mmc_host *mmc, struct mmc_request *mrq,
 diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 9d347ca..59c952f 100644
+index 260a1de..d2ec4fd 100644
 --- a/drivers/mmc/host/mmci.h
 +++ b/drivers/mmc/host/mmci.h
-@@ -181,9 +181,9 @@
- #define MMCIFIFO		0x080 /* to 0x0bc */
+@@ -318,6 +318,8 @@ struct mmci_host {
+ 	int (*get_rx_fifocnt)(struct mmci_host *h, u32 status, int remain);
  
- #define MCI_IRQENABLE	\
--	(MCI_CMDCRCFAILMASK|MCI_DATACRCFAILMASK|MCI_CMDTIMEOUTMASK|	\
--	MCI_DATATIMEOUTMASK|MCI_TXUNDERRUNMASK|MCI_RXOVERRUNMASK|	\
--	MCI_CMDRESPENDMASK|MCI_CMDSENTMASK|MCI_STARTBITERRMASK)
-+	(MCI_CMDCRCFAILMASK | MCI_DATACRCFAILMASK | MCI_CMDTIMEOUTMASK | \
-+	MCI_DATATIMEOUTMASK | MCI_TXUNDERRUNMASK | MCI_RXOVERRUNMASK |	\
-+	MCI_CMDRESPENDMASK | MCI_CMDSENTMASK)
+ 	void			*dma_priv;
++
++	s32			next_cookie;
+ };
  
- /* These interrupts are directed to IRQ1 when two IRQ lines are available */
- #define MCI_IRQ1MASK \
+ void qcom_variant_init(struct mmci_host *host);
 -- 
 2.7.4
