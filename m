@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V2 23/27] mmc: mmci: add variant property to request a reset
-Date: Tue, 18 Sep 2018 12:55:40 +0200
-Message-ID: <1537268144-21152-24-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V2 18/27] mmc: mmci: add variant properties to define cpsm & cmdresp bits
+Date: Tue, 18 Sep 2018 12:55:35 +0200
+Message-ID: <1537268144-21152-19-git-send-email-ludovic.Barre@st.com>
 References: <1537268144-21152-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,85 +14,169 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-Some variants could require a reset.
-STM32 sdmmc variant needs to reset hardware block
-during the power cycle procedure (for re-initialization)
+This patch adds command variant properties to define
+cpsm enable bit and responses.
+Needed to support the STM32 variant (shift of cpsm bit,
+specific definition of commands response).
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- Documentation/devicetree/bindings/mmc/mmci.txt | 2 ++
- drivers/mmc/host/mmci.c                        | 9 +++++++++
- drivers/mmc/host/mmci.h                        | 4 ++++
- 3 files changed, 15 insertions(+)
+ drivers/mmc/host/mmci.c | 47 +++++++++++++++++++++++++++++++++++++++++++----
+ drivers/mmc/host/mmci.h |  8 ++++++++
+ 2 files changed, 51 insertions(+), 4 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/mmci.txt b/Documentation/devicetree/bindings/mmc/mmci.txt
-index 03796cf..e952707 100644
---- a/Documentation/devicetree/bindings/mmc/mmci.txt
-+++ b/Documentation/devicetree/bindings/mmc/mmci.txt
-@@ -11,6 +11,8 @@ Required properties:
- - compatible             : contains "arm,pl18x", "arm,primecell".
- - vmmc-supply            : phandle to the regulator device tree node, mentioned
-                            as the VCC/VDD supply in the eMMC/SD specs.
-+depend of variant:
-+- resets                 : phandle to internal reset line.
- 
- Optional properties:
- - arm,primecell-periphid : contains the PrimeCell Peripheral ID, it overrides
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index b1d5bc5..6b3c33f 100644
+index 53f613f..0b4425f 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -37,6 +37,7 @@
- #include <linux/pm_runtime.h>
- #include <linux/types.h>
- #include <linux/pinctrl/consumer.h>
-+#include <linux/reset.h>
+@@ -51,6 +51,10 @@ static unsigned int fmax = 515633;
+ static struct variant_data variant_arm = {
+ 	.fifosize		= 16 * 4,
+ 	.fifohalfsize		= 8 * 4,
++	.cmdreg_cpsm_enable	= MCI_CPSM_ENABLE,
++	.cmdreg_lrsp_crc	= MCI_CPSM_RESPONSE | MCI_CPSM_LONGRSP,
++	.cmdreg_srsp_crc	= MCI_CPSM_RESPONSE,
++	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
+ 	.datalength_bits	= 16,
+ 	.datactrl_blocksz	= 11,
+ 	.pwrreg_powerup		= MCI_PWR_UP,
+@@ -65,6 +69,10 @@ static struct variant_data variant_arm = {
+ static struct variant_data variant_arm_extended_fifo = {
+ 	.fifosize		= 128 * 4,
+ 	.fifohalfsize		= 64 * 4,
++	.cmdreg_cpsm_enable	= MCI_CPSM_ENABLE,
++	.cmdreg_lrsp_crc	= MCI_CPSM_RESPONSE | MCI_CPSM_LONGRSP,
++	.cmdreg_srsp_crc	= MCI_CPSM_RESPONSE,
++	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
+ 	.datalength_bits	= 16,
+ 	.datactrl_blocksz	= 11,
+ 	.pwrreg_powerup		= MCI_PWR_UP,
+@@ -79,6 +87,10 @@ static struct variant_data variant_arm_extended_fifo_hwfc = {
+ 	.fifosize		= 128 * 4,
+ 	.fifohalfsize		= 64 * 4,
+ 	.clkreg_enable		= MCI_ARM_HWFCEN,
++	.cmdreg_cpsm_enable	= MCI_CPSM_ENABLE,
++	.cmdreg_lrsp_crc	= MCI_CPSM_RESPONSE | MCI_CPSM_LONGRSP,
++	.cmdreg_srsp_crc	= MCI_CPSM_RESPONSE,
++	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
+ 	.datalength_bits	= 16,
+ 	.datactrl_blocksz	= 11,
+ 	.pwrreg_powerup		= MCI_PWR_UP,
+@@ -94,6 +106,10 @@ static struct variant_data variant_u300 = {
+ 	.fifohalfsize		= 8 * 4,
+ 	.clkreg_enable		= MCI_ST_U300_HWFCEN,
+ 	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
++	.cmdreg_cpsm_enable	= MCI_CPSM_ENABLE,
++	.cmdreg_lrsp_crc	= MCI_CPSM_RESPONSE | MCI_CPSM_LONGRSP,
++	.cmdreg_srsp_crc	= MCI_CPSM_RESPONSE,
++	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
+ 	.datalength_bits	= 16,
+ 	.datactrl_blocksz	= 11,
+ 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
+@@ -114,6 +130,10 @@ static struct variant_data variant_nomadik = {
+ 	.fifohalfsize		= 8 * 4,
+ 	.clkreg			= MCI_CLK_ENABLE,
+ 	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
++	.cmdreg_cpsm_enable	= MCI_CPSM_ENABLE,
++	.cmdreg_lrsp_crc	= MCI_CPSM_RESPONSE | MCI_CPSM_LONGRSP,
++	.cmdreg_srsp_crc	= MCI_CPSM_RESPONSE,
++	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
+ 	.datalength_bits	= 24,
+ 	.datactrl_blocksz	= 11,
+ 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
+@@ -137,6 +157,10 @@ static struct variant_data variant_ux500 = {
+ 	.clkreg_enable		= MCI_ST_UX500_HWFCEN,
+ 	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
+ 	.clkreg_neg_edge_enable	= MCI_ST_UX500_NEG_EDGE,
++	.cmdreg_cpsm_enable	= MCI_CPSM_ENABLE,
++	.cmdreg_lrsp_crc	= MCI_CPSM_RESPONSE | MCI_CPSM_LONGRSP,
++	.cmdreg_srsp_crc	= MCI_CPSM_RESPONSE,
++	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
+ 	.datalength_bits	= 24,
+ 	.datactrl_blocksz	= 11,
+ 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
+@@ -164,6 +188,10 @@ static struct variant_data variant_ux500v2 = {
+ 	.clkreg_enable		= MCI_ST_UX500_HWFCEN,
+ 	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
+ 	.clkreg_neg_edge_enable	= MCI_ST_UX500_NEG_EDGE,
++	.cmdreg_cpsm_enable	= MCI_CPSM_ENABLE,
++	.cmdreg_lrsp_crc	= MCI_CPSM_RESPONSE | MCI_CPSM_LONGRSP,
++	.cmdreg_srsp_crc	= MCI_CPSM_RESPONSE,
++	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
+ 	.datactrl_mask_ddrmode	= MCI_DPSM_ST_DDRMODE,
+ 	.datalength_bits	= 24,
+ 	.datactrl_blocksz	= 11,
+@@ -193,6 +221,10 @@ static struct variant_data variant_stm32 = {
+ 	.clkreg_enable		= MCI_ST_UX500_HWFCEN,
+ 	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
+ 	.clkreg_neg_edge_enable	= MCI_ST_UX500_NEG_EDGE,
++	.cmdreg_cpsm_enable	= MCI_CPSM_ENABLE,
++	.cmdreg_lrsp_crc	= MCI_CPSM_RESPONSE | MCI_CPSM_LONGRSP,
++	.cmdreg_srsp_crc	= MCI_CPSM_RESPONSE,
++	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
+ 	.datalength_bits	= 24,
+ 	.datactrl_blocksz	= 11,
+ 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
+@@ -213,6 +245,10 @@ static struct variant_data variant_qcom = {
+ 				  MCI_QCOM_CLK_SELECT_IN_FBCLK,
+ 	.clkreg_8bit_bus_enable = MCI_QCOM_CLK_WIDEBUS_8,
+ 	.datactrl_mask_ddrmode	= MCI_QCOM_CLK_SELECT_IN_DDR_MODE,
++	.cmdreg_cpsm_enable	= MCI_CPSM_ENABLE,
++	.cmdreg_lrsp_crc	= MCI_CPSM_RESPONSE | MCI_CPSM_LONGRSP,
++	.cmdreg_srsp_crc	= MCI_CPSM_RESPONSE,
++	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
+ 	.data_cmd_enable	= MCI_CPSM_QCOM_DATCMD,
+ 	.blksz_datactrl4	= true,
+ 	.datalength_bits	= 24,
+@@ -987,16 +1023,19 @@ mmci_start_command(struct mmci_host *host, struct mmc_command *cmd, u32 c)
+ 	dev_dbg(mmc_dev(host->mmc), "op %02x arg %08x flags %08x\n",
+ 	    cmd->opcode, cmd->arg, cmd->flags);
  
- #include <asm/div64.h>
- #include <asm/io.h>
-@@ -1854,6 +1855,14 @@ static int mmci_probe(struct amba_device *dev,
+-	if (readl(base + MMCICOMMAND) & MCI_CPSM_ENABLE) {
++	if (readl(base + MMCICOMMAND) & host->variant->cmdreg_cpsm_enable) {
+ 		writel(0, base + MMCICOMMAND);
+ 		mmci_reg_delay(host);
+ 	}
  
- 	dev_dbg(mmc_dev(mmc), "clocking block at %u Hz\n", mmc->f_max);
- 
-+	if (variant->reset) {
-+		host->rst = devm_reset_control_get_exclusive(&dev->dev, NULL);
-+		if (IS_ERR(host->rst)) {
-+			ret = PTR_ERR(host->rst);
-+			goto clk_disable;
-+		}
-+	}
-+
- 	/* Get regulators and the supported OCR mask */
- 	ret = mmc_regulator_get_supply(mmc);
- 	if (ret)
+-	c |= cmd->opcode | MCI_CPSM_ENABLE;
++	c |= cmd->opcode | host->variant->cmdreg_cpsm_enable;
+ 	if (cmd->flags & MMC_RSP_PRESENT) {
+ 		if (cmd->flags & MMC_RSP_136)
+-			c |= MCI_CPSM_LONGRSP;
+-		c |= MCI_CPSM_RESPONSE;
++			c |= host->variant->cmdreg_lrsp_crc;
++		else if (cmd->flags & MMC_RSP_CRC)
++			c |= host->variant->cmdreg_srsp_crc;
++		else
++			c |= host->variant->cmdreg_srsp;
+ 	}
+ 	if (/*interrupt*/0)
+ 		c |= MCI_CPSM_INTERRUPT;
 diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 7fd89b7..2d46a08 100644
+index 59c952f..b7ad41f 100644
 --- a/drivers/mmc/host/mmci.h
 +++ b/drivers/mmc/host/mmci.h
-@@ -247,6 +247,7 @@ struct mmci_host;
-  * @start_err: bitmask identifying the STARTBITERR bit inside MMCISTATUS
-  *	       register.
-  * @opendrain: bitmask identifying the OPENDRAIN bit inside MMCIPOWER register
-+ * @reset: true if variant has need reset signal.
-  */
- struct variant_data {
- 	unsigned int		clkreg;
-@@ -285,6 +286,7 @@ struct variant_data {
- 	bool			qcom_dml;
- 	bool			reversed_irq_handling;
- 	bool			mmcimask1;
-+	bool			reset;
- 	unsigned int		irq_pio_mask;
- 	u32			start_err;
- 	u32			opendrain;
-@@ -318,6 +320,8 @@ struct mmci_host {
- 	struct clk		*clk;
- 	bool			singleirq;
- 
-+	struct reset_control	*rst;
-+
- 	spinlock_t		lock;
- 
- 	unsigned int		mclk;
+@@ -204,6 +204,10 @@ struct mmci_host;
+  * @clkreg_enable: enable value for MMCICLOCK register
+  * @clkreg_8bit_bus_enable: enable value for 8 bit bus
+  * @clkreg_neg_edge_enable: enable value for inverted data/cmd output
++ * @cmdreg_cpsm_enable: enable value for CPSM
++ * @cmdreg_lrsp_crc: enable value for long response with crc
++ * @cmdreg_srsp_crc: enable value for short response with crc
++ * @cmdreg_srsp: enable value for short response without crc
+  * @datalength_bits: number of bits in the MMCIDATALENGTH register
+  * @fifosize: number of bytes that can be written when MMCI_TXFIFOEMPTY
+  *	      is asserted (likewise for RX)
+@@ -243,6 +247,10 @@ struct variant_data {
+ 	unsigned int		clkreg_enable;
+ 	unsigned int		clkreg_8bit_bus_enable;
+ 	unsigned int		clkreg_neg_edge_enable;
++	unsigned int		cmdreg_cpsm_enable;
++	unsigned int		cmdreg_lrsp_crc;
++	unsigned int		cmdreg_srsp_crc;
++	unsigned int		cmdreg_srsp;
+ 	unsigned int		datalength_bits;
+ 	unsigned int		fifosize;
+ 	unsigned int		fifohalfsize;
 -- 
 2.7.4
