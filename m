@@ -1,7 +1,7 @@
 From: Manish Narani <manish.narani@xilinx.com>
-Subject: [RFC PATCH 3/4] mmc: sdhci-of-arasan: Add auto tuning support for ZynqMP platform
-Date: Tue, 18 Sep 2018 19:15:38 +0530
-Message-ID: <1537278339-9257-4-git-send-email-manish.narani@xilinx.com>
+Subject: [RFC PATCH 2/4] dt-bindings: mmc: arasan: Document 'xlnx,zynqmp-8.9a' controller
+Date: Tue, 18 Sep 2018 19:15:37 +0530
+Message-ID: <1537278339-9257-3-git-send-email-manish.narani@xilinx.com>
 References: <1537278339-9257-1-git-send-email-manish.narani@xilinx.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,137 +12,49 @@ To: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, michal.sim
 Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Add support of SD auto tuning for ZynqMP platform. Before tuning
-execution, reset the DLL and after the auto tuning process gets
-completed, reset the DLL to load the newly obtained SDHC tuned tap
-value.
+Add documentation for 'xlnx,zynqmp-8.9a' SDHCI controller and required
+properties followed by example.
 
 Signed-off-by: Manish Narani <manish.narani@xilinx.com>
 ---
- drivers/mmc/host/sdhci-of-arasan.c | 83 ++++++++++++++++++++++++++++++++++++++
- 1 file changed, 83 insertions(+)
+ Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index a40bcc2..1a8bbd2 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -26,6 +26,7 @@
- #include <linux/phy/phy.h>
- #include <linux/regmap.h>
- #include <linux/of.h>
-+#include <linux/firmware/xlnx-zynqmp.h>
+diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+index f6ddba3..72769e0 100644
+--- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
++++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+@@ -15,6 +15,7 @@ Required Properties:
+     - "arasan,sdhci-5.1": generic Arasan SDHCI 5.1 PHY
+     - "rockchip,rk3399-sdhci-5.1", "arasan,sdhci-5.1": rk3399 eMMC PHY
+       For this device it is strongly suggested to include arasan,soc-ctl-syscon.
++    - "xlnx,zynqmp-8.9a", "arasan,sdhci-8.9a": Xilinx ZynqMP Arasan SDHCI 8.9a PHY
+   - reg: From mmc bindings: Register location and length.
+   - clocks: From clock bindings: Handles to clock inputs.
+   - clock-names: From clock bindings: Tuple including "clk_xin" and "clk_ahb"
+@@ -24,6 +25,9 @@ Required Properties for "arasan,sdhci-5.1":
+   - phys: From PHY bindings: Phandle for the Generic PHY for arasan.
+   - phy-names:  MUST be "phy_arasan".
  
- #include "cqhci.h"
- #include "sdhci-pltfm.h"
-@@ -98,6 +99,7 @@ struct sdhci_arasan_data {
- 
- 	struct regmap	*soc_ctl_base;
- 	const struct sdhci_arasan_soc_ctl_map *soc_ctl_map;
-+	unsigned int	device_id;
- 	unsigned int	quirks; /* Arasan deviations from spec */
- 
- /* Controller does not have CD wired and will not function normally without */
-@@ -163,6 +165,72 @@ static int sdhci_arasan_syscon_write(struct sdhci_host *host,
- 	return ret;
- }
- 
-+static void zynqmp_dll_reset(u8 deviceid)
-+{
-+	const struct zynqmp_eemi_ops *eemi_ops = zynqmp_pm_get_eemi_ops();
++Required Properties for "xlnx,zynqmp-8.9a":
++  - xlnx,device_id: SD controller device ID. Must be either <0> or <1>.
 +
-+	if (!eemi_ops || !eemi_ops->ioctl)
-+		return;
+ Optional Properties:
+   - arasan,soc-ctl-syscon: A phandle to a syscon device (see ../mfd/syscon.txt)
+     used to access core corecfg registers.  Offsets of registers in this
+@@ -75,3 +79,13 @@ Example:
+ 		phy-names = "phy_arasan";
+ 		#clock-cells = <0>;
+ 	};
 +
-+	/* Issue DLL Reset */
-+	if (deviceid == 0)
-+		eemi_ops->ioctl(NODE_SD_0, IOCTL_SD_DLL_RESET,
-+				PM_DLL_RESET_PULSE, 0, NULL);
-+	else
-+		eemi_ops->ioctl(NODE_SD_1, IOCTL_SD_DLL_RESET,
-+				PM_DLL_RESET_PULSE, 0, NULL);
-+}
-+
-+static void arasan_zynqmp_dll_reset(struct sdhci_host *host, u8 deviceid)
-+{
-+	u16 clk;
-+	unsigned long timeout;
-+
-+	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-+	clk &= ~(SDHCI_CLOCK_CARD_EN | SDHCI_CLOCK_INT_EN);
-+	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-+
-+	/* Issue DLL Reset */
-+	zynqmp_dll_reset(deviceid);
-+
-+	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-+	clk |= SDHCI_CLOCK_INT_EN;
-+	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-+
-+	/* Wait max 20 ms */
-+	timeout = 20;
-+	while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
-+				& SDHCI_CLOCK_INT_STABLE)) {
-+		if (timeout == 0) {
-+			dev_err(mmc_dev(host->mmc),
-+				": Internal clock never stabilised.\n");
-+			return;
-+		}
-+		timeout--;
-+		mdelay(1);
-+	}
-+
-+	clk |= SDHCI_CLOCK_CARD_EN;
-+	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-+}
-+
-+static int arasan_zynqmp_execute_tuning(struct mmc_host *mmc, u32 opcode) {
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
-+	int err;
-+
-+	arasan_zynqmp_dll_reset(host, sdhci_arasan->device_id);
-+
-+	err = sdhci_execute_tuning(mmc, opcode);
-+	if (err)
-+		return err;
-+
-+	arasan_zynqmp_dll_reset(host, sdhci_arasan->device_id);
-+
-+	return 0;
-+}
-+
- static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-@@ -469,6 +537,7 @@ static const struct of_device_id sdhci_arasan_of_match[] = {
- 	{ .compatible = "arasan,sdhci-8.9a" },
- 	{ .compatible = "arasan,sdhci-5.1" },
- 	{ .compatible = "arasan,sdhci-4.9a" },
-+	{ .compatible = "xlnx,zynqmp-8.9a" },
- 
- 	{ /* sentinel */ }
- };
-@@ -792,6 +861,20 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 		goto unreg_clk;
- 	}
- 
-+	if (of_device_is_compatible(pdev->dev.of_node, "xlnx,zynqmp-8.9a")) {
-+		ret = of_property_read_u32(pdev->dev.of_node,
-+					   "xlnx,device_id",
-+					   &sdhci_arasan->device_id);
-+		if (ret < 0) {
-+			dev_err(&pdev->dev,
-+				"\"xlnx,device_id \" property is missing.\n");
-+			goto unreg_clk;
-+		}
-+
-+		host->mmc_host_ops.execute_tuning =
-+			arasan_zynqmp_execute_tuning;
-+	}
-+
- 	sdhci_arasan->phy = ERR_PTR(-ENODEV);
- 	if (of_device_is_compatible(pdev->dev.of_node,
- 				    "arasan,sdhci-5.1")) {
++	sdhci: sdhci@ff160000 {
++		compatible = "xlnx,zynqmp-8.9a", "arasan,sdhci-8.9a";
++		reg = <0x0 0xff160000 0x0 0x1000>;
++		interrupt-parent = <&gic>;
++		interrupts = <0 48 4>;
++		clock-names = "clk_xin", "clk_ahb";
++		clocks = <&clk 54>, <&clk 31>;
++		xlnx,device_id = <0>;
++	};
 -- 
 2.1.1
