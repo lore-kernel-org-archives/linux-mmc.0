@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V2 11/27] mmc: mmci: add dma_start callback
-Date: Tue, 18 Sep 2018 12:55:28 +0200
-Message-ID: <1537268144-21152-12-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V2 13/27] mmc: mmci: add dma_error callback
+Date: Tue, 18 Sep 2018 12:55:30 +0200
+Message-ID: <1537268144-21152-14-git-send-email-ludovic.Barre@st.com>
 References: <1537268144-21152-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,158 +14,110 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-This patch adds dma_start callback to mmci_host_ops.
-Create a generic mmci_dma_start function which regroup
-common action between variant.
+This patch adds dma_error callback at mmci_host_ops
+to allow to call specific variant.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.c          | 63 +++++++++++++++++++++++-----------------
+ drivers/mmc/host/mmci.c          | 20 +++++++++++---------
  drivers/mmc/host/mmci.h          |  2 ++
  drivers/mmc/host/mmci_qcom_dml.c |  1 +
- 3 files changed, 39 insertions(+), 27 deletions(-)
+ 3 files changed, 14 insertions(+), 9 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 562b382..10c7adc 100644
+index 1158d5c..5a8b09c 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -415,6 +415,38 @@ void mmci_dma_release(struct mmci_host *host)
- 		host->ops->dma_release(host);
+@@ -453,6 +453,12 @@ void mmci_dma_finalize(struct mmci_host *host, struct mmc_data *data)
+ 		host->ops->dma_finalize(host, data);
  }
  
-+int mmci_dma_start(struct mmci_host *host, unsigned int datactrl)
++void mmci_dma_error(struct mmci_host *host)
 +{
-+	struct mmc_data *data = host->data;
-+	int ret;
-+
-+	ret = mmci_prep_data(host, data, false);
-+	if (ret)
-+		return ret;
-+
-+	if (!host->ops || !host->ops->dma_start)
-+		return -EINVAL;
-+
-+	/* Okay, go for it. */
-+	dev_vdbg(mmc_dev(host->mmc),
-+		 "Submit MMCI DMA job, sglen %d blksz %04x blks %04x flags %08x\n",
-+		 data->sg_len, data->blksz, data->blocks, data->flags);
-+
-+	host->ops->dma_start(host, &datactrl);
-+
-+	/* Trigger the DMA transfer */
-+	mmci_write_datactrlreg(host, datactrl);
-+
-+	/*
-+	 * Let the MMCI say when the data is ended and it's time
-+	 * to fire next DMA request. When that happens, MMCI will
-+	 * call mmci_data_end()
-+	 */
-+	writel(readl(host->base + MMCIMASK0) | MCI_DATAENDMASK,
-+	       host->base + MMCIMASK0);
-+	return 0;
++	if (host->ops && host->ops->dma_error)
++		host->ops->dma_error(host);
 +}
 +
  static void
  mmci_request_end(struct mmci_host *host, struct mmc_request *mrq)
  {
-@@ -721,20 +753,11 @@ int mmci_dmae_prep_data(struct mmci_host *host,
- 				    &dmae->desc_current);
+@@ -615,7 +621,7 @@ static void mmci_dma_unmap(struct mmci_host *host, struct mmc_data *data)
+ 		     mmc_get_dma_dir(data));
  }
  
--static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
-+int mmci_dmae_start(struct mmci_host *host, unsigned int *datactrl)
+-static void mmci_dma_data_error(struct mmci_host *host)
++void mmci_dmae_error(struct mmci_host *host)
  {
  	struct mmci_dmae_priv *dmae = host->dma_priv;
- 	struct mmc_data *data = host->data;
--	int ret;
--
--	ret = mmci_dmae_prep_data(host, host->data, false);
--	if (ret)
--		return ret;
  
--	/* Okay, go for it. */
--	dev_vdbg(mmc_dev(host->mmc),
--		 "Submit MMCI DMA job, sglen %d blksz %04x blks %04x flags %08x\n",
--		 data->sg_len, data->blksz, data->blocks, data->flags);
- 	dmae->in_progress = true;
- 	dmaengine_submit(dmae->desc_current);
- 	dma_async_issue_pending(dmae->cur);
-@@ -742,18 +765,8 @@ static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
- 	if (host->variant->qcom_dml)
- 		dml_start_xfer(host, data);
- 
--	datactrl |= MCI_DPSM_DMAENABLE;
--
--	/* Trigger the DMA transfer */
--	mmci_write_datactrlreg(host, datactrl);
-+	*datactrl |= MCI_DPSM_DMAENABLE;
- 
--	/*
--	 * Let the MMCI say when the data is ended and it's time
--	 * to fire next DMA request. When that happens, MMCI will
--	 * call mmci_data_end()
--	 */
--	writel(readl(host->base + MMCIMASK0) | MCI_DATAENDMASK,
--	       host->base + MMCIMASK0);
- 	return 0;
- }
- 
-@@ -806,6 +819,7 @@ static struct mmci_host_ops mmci_variant_ops = {
- 	.get_next_data = mmci_dmae_get_next_data,
- 	.dma_setup = mmci_dmae_setup,
+@@ -656,7 +662,7 @@ void mmci_dmae_finalize(struct mmci_host *host, struct mmc_data *data)
+ 	 * contiguous buffers.  On TX, we'll get a FIFO underrun error.
+ 	 */
+ 	if (status & MCI_RXDATAAVLBLMASK) {
+-		mmci_dma_data_error(host);
++		mmci_dma_error(host);
+ 		if (!data->error)
+ 			data->error = -EIO;
+ 	} else if (!data->host_cookie) {
+@@ -827,13 +833,9 @@ static struct mmci_host_ops mmci_variant_ops = {
  	.dma_release = mmci_dmae_release,
-+	.dma_start = mmci_dmae_start,
+ 	.dma_start = mmci_dmae_start,
+ 	.dma_finalize = mmci_dmae_finalize,
++	.dma_error = mmci_dmae_error,
  };
  #else
- /* Blank functions if the DMA engine is not available */
-@@ -818,11 +832,6 @@ static inline void mmci_dma_data_error(struct mmci_host *host)
- {
- }
- 
--static inline int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
+-/* Blank functions if the DMA engine is not available */
+-static inline void mmci_dma_data_error(struct mmci_host *host)
 -{
--	return -ENOSYS;
 -}
 -
  static struct mmci_host_ops mmci_variant_ops = {};
  #endif
  
-@@ -925,7 +934,7 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
- 	 * Attempt to use DMA operation mode, if this
- 	 * should fail, fall back to PIO mode
- 	 */
--	if (!mmci_dma_start_data(host, datactrl))
-+	if (!mmci_dma_start(host, datactrl))
- 		return;
+@@ -1011,7 +1013,7 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
+ 		u32 remain, success;
  
- 	/* IRQ mode, map the SG list for CPU reading/writing */
+ 		/* Terminate the DMA transfer */
+-		mmci_dma_data_error(host);
++		mmci_dma_error(host);
+ 
+ 		/*
+ 		 * Calculate how far we are into the transfer.  Note that
+@@ -1157,7 +1159,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+ 	if ((!sbc && !cmd->data) || cmd->error) {
+ 		if (host->data) {
+ 			/* Terminate the DMA transfer */
+-			mmci_dma_data_error(host);
++			mmci_dma_error(host);
+ 
+ 			mmci_stop_data(host);
+ 		}
 diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 5a19114..72f449f 100644
+index 7838155..17f9ad4 100644
 --- a/drivers/mmc/host/mmci.h
 +++ b/drivers/mmc/host/mmci.h
-@@ -280,6 +280,7 @@ struct mmci_host_ops {
- 	void (*get_next_data)(struct mmci_host *host, struct mmc_data *data);
- 	int (*dma_setup)(struct mmci_host *host);
+@@ -282,6 +282,7 @@ struct mmci_host_ops {
  	void (*dma_release)(struct mmci_host *host);
-+	int (*dma_start)(struct mmci_host *host, unsigned int *datactrl);
+ 	int (*dma_start)(struct mmci_host *host, unsigned int *datactrl);
+ 	void (*dma_finalize)(struct mmci_host *host, struct mmc_data *data);
++	void (*dma_error)(struct mmci_host *host);
  };
  
  struct mmci_host {
-@@ -338,4 +339,5 @@ void mmci_dmae_unprep_data(struct mmci_host *host, struct mmc_data *data,
- void mmci_dmae_get_next_data(struct mmci_host *host, struct mmc_data *data);
- int mmci_dmae_setup(struct mmci_host *host);
+@@ -342,3 +343,4 @@ int mmci_dmae_setup(struct mmci_host *host);
  void mmci_dmae_release(struct mmci_host *host);
-+int mmci_dmae_start(struct mmci_host *host, unsigned int *datactrl);
- 
+ int mmci_dmae_start(struct mmci_host *host, unsigned int *datactrl);
+ void mmci_dmae_finalize(struct mmci_host *host, struct mmc_data *data);
++void mmci_dmae_error(struct mmci_host *host);
 diff --git a/drivers/mmc/host/mmci_qcom_dml.c b/drivers/mmc/host/mmci_qcom_dml.c
-index e3e195d..e2e756c 100644
+index f1fd48a..a352115 100644
 --- a/drivers/mmc/host/mmci_qcom_dml.c
 +++ b/drivers/mmc/host/mmci_qcom_dml.c
-@@ -187,6 +187,7 @@ static struct mmci_host_ops qcom_variant_ops = {
- 	.get_next_data = mmci_dmae_get_next_data,
- 	.dma_setup = qcom_dma_setup,
+@@ -189,6 +189,7 @@ static struct mmci_host_ops qcom_variant_ops = {
  	.dma_release = mmci_dmae_release,
-+	.dma_start = mmci_dmae_start,
+ 	.dma_start = mmci_dmae_start,
+ 	.dma_finalize = mmci_dmae_finalize,
++	.dma_error = mmci_dmae_error,
  };
  
  void qcom_variant_init(struct mmci_host *host)
