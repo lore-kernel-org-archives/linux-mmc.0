@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V2 16/27] mmc: mmci: add datactrl block size variant property
-Date: Tue, 18 Sep 2018 12:55:33 +0200
-Message-ID: <1537268144-21152-17-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V2 11/27] mmc: mmci: add dma_start callback
+Date: Tue, 18 Sep 2018 12:55:28 +0200
+Message-ID: <1537268144-21152-12-git-send-email-ludovic.Barre@st.com>
 References: <1537268144-21152-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,126 +14,160 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-This patch allows to define a datactrl block size
-by variant, requested by STM32 sdmmc variant.
+This patch adds dma_start callback to mmci_host_ops.
+Create a generic mmci_dma_start function which regroup
+common action between variant.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.c | 13 +++++++++++--
- drivers/mmc/host/mmci.h |  2 ++
- 2 files changed, 13 insertions(+), 2 deletions(-)
+ drivers/mmc/host/mmci.c          | 63 +++++++++++++++++++++++-----------------
+ drivers/mmc/host/mmci.h          |  2 ++
+ drivers/mmc/host/mmci_qcom_dml.c |  1 +
+ 3 files changed, 39 insertions(+), 27 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 9d93fe7..e2272c7 100644
+index 562b382..10c7adc 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -52,6 +52,7 @@ static struct variant_data variant_arm = {
- 	.fifosize		= 16 * 4,
- 	.fifohalfsize		= 8 * 4,
- 	.datalength_bits	= 16,
-+	.datactrl_blocksz	= 11,
- 	.pwrreg_powerup		= MCI_PWR_UP,
- 	.f_max			= 100000000,
- 	.reversed_irq_handling	= true,
-@@ -65,6 +66,7 @@ static struct variant_data variant_arm_extended_fifo = {
- 	.fifosize		= 128 * 4,
- 	.fifohalfsize		= 64 * 4,
- 	.datalength_bits	= 16,
-+	.datactrl_blocksz	= 11,
- 	.pwrreg_powerup		= MCI_PWR_UP,
- 	.f_max			= 100000000,
- 	.mmcimask1		= true,
-@@ -78,6 +80,7 @@ static struct variant_data variant_arm_extended_fifo_hwfc = {
- 	.fifohalfsize		= 64 * 4,
- 	.clkreg_enable		= MCI_ARM_HWFCEN,
- 	.datalength_bits	= 16,
-+	.datactrl_blocksz	= 11,
- 	.pwrreg_powerup		= MCI_PWR_UP,
- 	.f_max			= 100000000,
- 	.mmcimask1		= true,
-@@ -92,6 +95,7 @@ static struct variant_data variant_u300 = {
- 	.clkreg_enable		= MCI_ST_U300_HWFCEN,
- 	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
- 	.datalength_bits	= 16,
-+	.datactrl_blocksz	= 11,
- 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
- 	.st_sdio			= true,
- 	.pwrreg_powerup		= MCI_PWR_ON,
-@@ -111,6 +115,7 @@ static struct variant_data variant_nomadik = {
- 	.clkreg			= MCI_CLK_ENABLE,
- 	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
- 	.datalength_bits	= 24,
-+	.datactrl_blocksz	= 11,
- 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
- 	.st_sdio		= true,
- 	.st_clkdiv		= true,
-@@ -133,6 +138,7 @@ static struct variant_data variant_ux500 = {
- 	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
- 	.clkreg_neg_edge_enable	= MCI_ST_UX500_NEG_EDGE,
- 	.datalength_bits	= 24,
-+	.datactrl_blocksz	= 11,
- 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
- 	.st_sdio		= true,
- 	.st_clkdiv		= true,
-@@ -160,6 +166,7 @@ static struct variant_data variant_ux500v2 = {
- 	.clkreg_neg_edge_enable	= MCI_ST_UX500_NEG_EDGE,
- 	.datactrl_mask_ddrmode	= MCI_DPSM_ST_DDRMODE,
- 	.datalength_bits	= 24,
-+	.datactrl_blocksz	= 11,
- 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
- 	.st_sdio		= true,
- 	.st_clkdiv		= true,
-@@ -187,6 +194,7 @@ static struct variant_data variant_stm32 = {
- 	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
- 	.clkreg_neg_edge_enable	= MCI_ST_UX500_NEG_EDGE,
- 	.datalength_bits	= 24,
-+	.datactrl_blocksz	= 11,
- 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
- 	.st_sdio		= true,
- 	.st_clkdiv		= true,
-@@ -208,6 +216,7 @@ static struct variant_data variant_qcom = {
- 	.data_cmd_enable	= MCI_CPSM_QCOM_DATCMD,
- 	.blksz_datactrl4	= true,
- 	.datalength_bits	= 24,
-+	.datactrl_blocksz	= 11,
- 	.pwrreg_powerup		= MCI_PWR_UP,
- 	.f_max			= 208000000,
- 	.explicit_mclk_control	= true,
-@@ -1840,13 +1849,13 @@ static int mmci_probe(struct amba_device *dev,
- 	/*
- 	 * Block size can be up to 2048 bytes, but must be a power of two.
+@@ -415,6 +415,38 @@ void mmci_dma_release(struct mmci_host *host)
+ 		host->ops->dma_release(host);
+ }
+ 
++int mmci_dma_start(struct mmci_host *host, unsigned int datactrl)
++{
++	struct mmc_data *data = host->data;
++	int ret;
++
++	ret = mmci_prep_data(host, data, false);
++	if (ret)
++		return ret;
++
++	if (!host->ops || !host->ops->dma_start)
++		return -EINVAL;
++
++	/* Okay, go for it. */
++	dev_vdbg(mmc_dev(host->mmc),
++		 "Submit MMCI DMA job, sglen %d blksz %04x blks %04x flags %08x\n",
++		 data->sg_len, data->blksz, data->blocks, data->flags);
++
++	host->ops->dma_start(host, &datactrl);
++
++	/* Trigger the DMA transfer */
++	mmci_write_datactrlreg(host, datactrl);
++
++	/*
++	 * Let the MMCI say when the data is ended and it's time
++	 * to fire next DMA request. When that happens, MMCI will
++	 * call mmci_data_end()
++	 */
++	writel(readl(host->base + MMCIMASK0) | MCI_DATAENDMASK,
++	       host->base + MMCIMASK0);
++	return 0;
++}
++
+ static void
+ mmci_request_end(struct mmci_host *host, struct mmc_request *mrq)
+ {
+@@ -721,20 +753,11 @@ int mmci_dmae_prep_data(struct mmci_host *host,
+ 				    &dmae->desc_current);
+ }
+ 
+-static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
++int mmci_dmae_start(struct mmci_host *host, unsigned int *datactrl)
+ {
+ 	struct mmci_dmae_priv *dmae = host->dma_priv;
+ 	struct mmc_data *data = host->data;
+-	int ret;
+-
+-	ret = mmci_dmae_prep_data(host, host->data, false);
+-	if (ret)
+-		return ret;
+ 
+-	/* Okay, go for it. */
+-	dev_vdbg(mmc_dev(host->mmc),
+-		 "Submit MMCI DMA job, sglen %d blksz %04x blks %04x flags %08x\n",
+-		 data->sg_len, data->blksz, data->blocks, data->flags);
+ 	dmae->in_progress = true;
+ 	dmaengine_submit(dmae->desc_current);
+ 	dma_async_issue_pending(dmae->cur);
+@@ -742,18 +765,8 @@ static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
+ 	if (host->variant->qcom_dml)
+ 		dml_start_xfer(host, data);
+ 
+-	datactrl |= MCI_DPSM_DMAENABLE;
+-
+-	/* Trigger the DMA transfer */
+-	mmci_write_datactrlreg(host, datactrl);
++	*datactrl |= MCI_DPSM_DMAENABLE;
+ 
+-	/*
+-	 * Let the MMCI say when the data is ended and it's time
+-	 * to fire next DMA request. When that happens, MMCI will
+-	 * call mmci_data_end()
+-	 */
+-	writel(readl(host->base + MMCIMASK0) | MCI_DATAENDMASK,
+-	       host->base + MMCIMASK0);
+ 	return 0;
+ }
+ 
+@@ -806,6 +819,7 @@ static struct mmci_host_ops mmci_variant_ops = {
+ 	.get_next_data = mmci_dmae_get_next_data,
+ 	.dma_setup = mmci_dmae_setup,
+ 	.dma_release = mmci_dmae_release,
++	.dma_start = mmci_dmae_start,
+ };
+ #else
+ /* Blank functions if the DMA engine is not available */
+@@ -818,11 +832,6 @@ static inline void mmci_dma_data_error(struct mmci_host *host)
+ {
+ }
+ 
+-static inline int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
+-{
+-	return -ENOSYS;
+-}
+-
+ static struct mmci_host_ops mmci_variant_ops = {};
+ #endif
+ 
+@@ -925,7 +934,7 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
+ 	 * Attempt to use DMA operation mode, if this
+ 	 * should fail, fall back to PIO mode
  	 */
--	mmc->max_blk_size = 1 << 11;
-+	mmc->max_blk_size = 1 << variant->datactrl_blocksz;
+-	if (!mmci_dma_start_data(host, datactrl))
++	if (!mmci_dma_start(host, datactrl))
+ 		return;
  
- 	/*
- 	 * Limit the number of blocks transferred so that we don't overflow
- 	 * the maximum request size.
- 	 */
--	mmc->max_blk_count = mmc->max_req_size >> 11;
-+	mmc->max_blk_count = mmc->max_req_size >> variant->datactrl_blocksz;
- 
- 	spin_lock_init(&host->lock);
- 
+ 	/* IRQ mode, map the SG list for CPU reading/writing */
 diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 2d0e00d..9d347ca 100644
+index 5a19114..72f449f 100644
 --- a/drivers/mmc/host/mmci.h
 +++ b/drivers/mmc/host/mmci.h
-@@ -217,6 +217,7 @@ struct mmci_host;
-  * @blksz_datactrl4: true if Block size is at b4..b16 position in datactrl
-  *		     register
-  * @datactrl_mask_sdio: SDIO enable mask in datactrl register
-+ * @datactrl_blksz: block size in power of two
-  * @pwrreg_powerup: power up value for MMCIPOWER register
-  * @f_max: maximum clk frequency supported by the controller.
-  * @signal_direction: input/out direction of bus signals can be indicated
-@@ -248,6 +249,7 @@ struct variant_data {
- 	unsigned int		data_cmd_enable;
- 	unsigned int		datactrl_mask_ddrmode;
- 	unsigned int		datactrl_mask_sdio;
-+	unsigned int		datactrl_blocksz;
- 	bool			st_sdio;
- 	bool			st_clkdiv;
- 	bool			blksz_datactrl16;
+@@ -280,6 +280,7 @@ struct mmci_host_ops {
+ 	void (*get_next_data)(struct mmci_host *host, struct mmc_data *data);
+ 	int (*dma_setup)(struct mmci_host *host);
+ 	void (*dma_release)(struct mmci_host *host);
++	int (*dma_start)(struct mmci_host *host, unsigned int *datactrl);
+ };
+ 
+ struct mmci_host {
+@@ -338,4 +339,5 @@ void mmci_dmae_unprep_data(struct mmci_host *host, struct mmc_data *data,
+ void mmci_dmae_get_next_data(struct mmci_host *host, struct mmc_data *data);
+ int mmci_dmae_setup(struct mmci_host *host);
+ void mmci_dmae_release(struct mmci_host *host);
++int mmci_dmae_start(struct mmci_host *host, unsigned int *datactrl);
+ 
+diff --git a/drivers/mmc/host/mmci_qcom_dml.c b/drivers/mmc/host/mmci_qcom_dml.c
+index e3e195d..e2e756c 100644
+--- a/drivers/mmc/host/mmci_qcom_dml.c
++++ b/drivers/mmc/host/mmci_qcom_dml.c
+@@ -187,6 +187,7 @@ static struct mmci_host_ops qcom_variant_ops = {
+ 	.get_next_data = mmci_dmae_get_next_data,
+ 	.dma_setup = qcom_dma_setup,
+ 	.dma_release = mmci_dmae_release,
++	.dma_start = mmci_dmae_start,
+ };
+ 
+ void qcom_variant_init(struct mmci_host *host)
 -- 
 2.7.4
