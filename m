@@ -1,7 +1,7 @@
 From: Manish Narani <manish.narani@xilinx.com>
-Subject: [RFC PATCH 1/4] firmware: xilinx: Add SD Node and DLL Reset Data APIs
-Date: Tue, 18 Sep 2018 19:15:36 +0530
-Message-ID: <1537278339-9257-2-git-send-email-manish.narani@xilinx.com>
+Subject: [RFC PATCH 4/4] arm64: zynqmp: Add new SDHCI compatible string
+Date: Tue, 18 Sep 2018 19:15:39 +0530
+Message-ID: <1537278339-9257-5-git-send-email-manish.narani@xilinx.com>
 References: <1537278339-9257-1-git-send-email-manish.narani@xilinx.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,44 +12,44 @@ To: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, michal.sim
 Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Add ZynqMP firmware SD Node data API to be used in call from SDHCI
-driver. Also add DLL Reset data API to used for DLL reset calls from any
-drivers.
+Mainline kernel has arasan compatible string now. Append this new
+compatible string for ZynqMP SDHCI controller. Also add a required
+property indicating ZynqMP SDHCI controller device ID.
 
 Signed-off-by: Manish Narani <manish.narani@xilinx.com>
 ---
- include/linux/firmware/xlnx-zynqmp.h | 12 ++++++++++++
- 1 file changed, 12 insertions(+)
+ arch/arm64/boot/dts/xilinx/zynqmp.dtsi | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
-diff --git a/include/linux/firmware/xlnx-zynqmp.h b/include/linux/firmware/xlnx-zynqmp.h
-index 58a7478..743687b 100644
---- a/include/linux/firmware/xlnx-zynqmp.h
-+++ b/include/linux/firmware/xlnx-zynqmp.h
-@@ -58,13 +58,25 @@ enum pm_ret_status {
- 	XST_PM_ABORT_SUSPEND,
- };
+diff --git a/arch/arm64/boot/dts/xilinx/zynqmp.dtsi b/arch/arm64/boot/dts/xilinx/zynqmp.dtsi
+index 29ce234..1def7e1 100644
+--- a/arch/arm64/boot/dts/xilinx/zynqmp.dtsi
++++ b/arch/arm64/boot/dts/xilinx/zynqmp.dtsi
+@@ -485,21 +485,23 @@
+ 		};
  
-+enum pm_node_id {
-+	NODE_SD_0 = 39,
-+	NODE_SD_1,
-+};
-+
- enum pm_ioctl_id {
-+	IOCTL_SD_DLL_RESET = 6,
- 	IOCTL_SET_PLL_FRAC_MODE = 8,
- 	IOCTL_GET_PLL_FRAC_MODE,
- 	IOCTL_SET_PLL_FRAC_DATA,
- 	IOCTL_GET_PLL_FRAC_DATA,
- };
+ 		sdhci0: sdhci@ff160000 {
+-			compatible = "arasan,sdhci-8.9a";
++			compatible = "xlnx,zynqmp-8.9a", "arasan,sdhci-8.9a";
+ 			status = "disabled";
+ 			interrupt-parent = <&gic>;
+ 			interrupts = <0 48 4>;
+ 			reg = <0x0 0xff160000 0x0 0x1000>;
+ 			clock-names = "clk_xin", "clk_ahb";
++			xlnx,device_id = <0>;
+ 		};
  
-+enum dll_reset_type {
-+	PM_DLL_RESET_ASSERT,
-+	PM_DLL_RESET_RELEASE,
-+	PM_DLL_RESET_PULSE,
-+};
-+
- enum pm_query_id {
- 	PM_QID_INVALID,
- 	PM_QID_CLOCK_GET_NAME,
+ 		sdhci1: sdhci@ff170000 {
+-			compatible = "arasan,sdhci-8.9a";
++			compatible = "xlnx,zynqmp-8.9a", "arasan,sdhci-8.9a";
+ 			status = "disabled";
+ 			interrupt-parent = <&gic>;
+ 			interrupts = <0 49 4>;
+ 			reg = <0x0 0xff170000 0x0 0x1000>;
+ 			clock-names = "clk_xin", "clk_ahb";
++			xlnx,device_id = <1>;
+ 		};
+ 
+ 		smmu: smmu@fd800000 {
 -- 
 2.1.1
