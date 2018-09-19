@@ -1,46 +1,36 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: [PATCH] mmc: core: Fix debounce time to use microseconds
-Date: Tue, 18 Sep 2018 16:16:56 -0700
-Message-ID: <20180918231656.21778-1-tony@atomide.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH v8 0/4] gpiolib: speed up GPIO array processing
+Date: Wed, 19 Sep 2018 11:08:57 -0700
+Message-ID: <CACRpkdbdYmsFD3XOVLWjoGsPSU4UnTKtkYm5VQxGmoeQZewWZA@mail.gmail.com>
+References: <20180902120144.6855-1-jmkrzyszt@gmail.com> <20180905215008.1649-1-jmkrzyszt@gmail.com>
+ <CACRpkdbAG1N0v-BrXruf5088L0x3XwSHbFTWOFxjHQWx0LKz5g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <CACRpkdbAG1N0v-BrXruf5088L0x3XwSHbFTWOFxjHQWx0LKz5g@mail.gmail.com>
+Sender: netdev-owner@vger.kernel.org
+To: Janusz Krzysztofik <jmkrzyszt@gmail.com>
+Cc: Jonathan Corbet <corbet@lwn.net>, Miguel Ojeda Sandonis <miguel.ojeda.sandonis@gmail.com>, Peter Korsgaard <peter.korsgaard@barco.com>, Peter Rosin <peda@axentia.se>, Ulf Hansson <ulf.hansson@linaro.org>, Andrew Lunn <andrew@lunn.ch>, Florian Fainelli <f.fainelli@gmail.com>, "David S. Miller" <davem@davemloft.net>, Dominik Brodowski <linux@dominikbrodowski.net>, Greg KH <gregkh@linuxfoundation.org>, kishon@ti.com, Lars-Peter Clausen <lars@metafoo.de>, Michael Hennerich <Michael.Hennerich@analog.com>, Jonathan Cameron <jic23@kernel.org>, Hartmut Knaack <knaack.h@gmx.de>, Peter Meerwald <pmeerw@pmeerw.net>, Jiri Slaby <jslaby@suse.com>, Willy Tarreau <w@1wt.eu>, Geert Uytterhoeven <geert@linux-m68k.org>, Sebastien Bourdelin <sebastien.bourdelin@savoirf>
 List-Id: linux-mmc@vger.kernel.org
 
-The debounce value in device tree is in milliseconds but needs to be in
-microseconds for mmc_gpiod_request_cd().
+On Thu, Sep 13, 2018 at 2:22 AM Linus Walleij <linus.walleij@linaro.org> wrote:
+> On Wed, Sep 5, 2018 at 11:49 PM Janusz Krzysztofik <jmkrzyszt@gmail.com> wrote:
+>
+> > The goal is to boost performance of get/set array functions while
+> > processing GPIO arrays which represent pins of a signle chip in
+> > hardware order.  If resulting performance is close to PIO, GPIO API
+> > can be used for data I/O without much loss of speed.
+>
+> I applied the v8 to an immutable branch and pushed to kernelorg
+> so the build servers can churn it a bit, and if it works fine
+> then we can merge this into the devel branch and also set up
+> that as something other subsystems can pull in if they need it.
+>
+> I'm really excited to merge this!
 
-Fixes: bfd694d5e21c ("mmc: core: Add tunable delay before detecting card
-after card is inserted")
-Cc: Shawn Lin <shawn.lin@rock-chips.com>
-Signed-off-by: Tony Lindgren <tony@atomide.com>
----
- drivers/mmc/core/host.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+The branch built with no problems, and now I merged this into
+devel. If that also builds fine, I will let it hit linux-next so we can
+stabilize it for v4.20.
 
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -235,7 +235,7 @@ int mmc_of_parse(struct mmc_host *host)
- 			host->caps |= MMC_CAP_NEEDS_POLL;
- 
- 		ret = mmc_gpiod_request_cd(host, "cd", 0, true,
--					   cd_debounce_delay_ms,
-+					   cd_debounce_delay_ms * 1000,
- 					   &cd_gpio_invert);
- 		if (!ret)
- 			dev_info(host->parent, "Got CD GPIO\n");
--- 
-2.19.0
+Yours,
+Linus Walleij
