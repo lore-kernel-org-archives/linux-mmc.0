@@ -1,52 +1,238 @@
-From: Manish Narani <manish.narani@xilinx.com>
-Subject: [RFC PATCH v2 0/4] Add support for SD Tap Delay setting for ZynqMP
-Date: Thu, 20 Sep 2018 15:00:41 +0530
-Message-ID: <1537435845-6682-1-git-send-email-manish.narani@xilinx.com>
+From: Marek Szyprowski <m.szyprowski@samsung.com>
+Subject: Re: [PATCH v7 4/4] gpiolib: Implement fast processing path in
+ get/set array
+Date: Thu, 20 Sep 2018 12:11:48 +0200
+Message-ID: <20180920101151eucas1p221f5a1715b8556bb9d99bf08fe09ce6f~WE-_cEf4l0754207542eucas1p27@eucas1p2.samsung.com>
+References: <20180831225616.29221-1-jmkrzyszt@gmail.com>
+        <20180902120144.6855-1-jmkrzyszt@gmail.com>
+        <20180902120144.6855-5-jmkrzyszt@gmail.com>
+        <CGME20180920101151eucas1p221f5a1715b8556bb9d99bf08fe09ce6f@eucas1p2.samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, michal.simek@xilinx.com, adrian.hunter@intel.com, manish.narani@xilinx.com, amit.kucheria@linaro.org, sudeep.holla@arm.com, leoyang.li@nxp.com, jollys@xilinx.com, rajanv@xilinx.com
-Cc: devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180902120144.6855-5-jmkrzyszt@gmail.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Janusz Krzysztofik <jmkrzyszt@gmail.com>, Linus Walleij <linus.walleij@linaro.org>
+Cc: Jonathan Corbet <corbet@lwn.net>, Miguel Ojeda Sandonis <miguel.ojeda.sandonis@gmail.com>, Peter Korsgaard <peter.korsgaard@barco.com>, Peter Rosin <peda@axentia.se>, Ulf Hansson <ulf.hansson@linaro.org>, Andrew Lunn <andrew@lunn.ch>, Florian Fainelli <f.fainelli@gmail.com>, "David S. Miller" <davem@davemloft.net>, Dominik Brodowski <linux@dominikbrodowski.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kishon Vijay Abraham I <kishon@ti.com>, Lars-Peter Clausen <lars@metafoo.de>, Michael Hennerich <Michael.Hennerich@analog.com>, Jonathan Cameron <jic23@kernel.org>, Hartmut Knaack <knaack.h@gmx.de>, Peter Meerwald-Stadler <pmeerw@pmeerw.net>, Jiri Slaby <jslaby@suse.com>, Willy Tarreau <w@1wt.eu>, Geert Uytterhoeven <geert@linux-m68k.org>
 List-Id: linux-mmc@vger.kernel.org
 
-This series of patches are created On top of the
-below series of patches.
-1. https://lkml.org/lkml/2018/8/3/687 
-2. https://lkml.org/lkml/2018/9/18/1034
+Hi All,
 
-As the ZynqMP Firmware Driver is not yet merged, sending RFC to make
-modifications before sending the final patches.
+On 2018-09-02 14:01, Janusz Krzysztofik wrote:
+> Certain GPIO descriptor arrays returned by gpio_get_array() may contain
+> information on direct mapping of array members to pins of a single GPIO
+> chip in hardware order.  In such cases, bitmaps of values can be passed
+> directly from/to the chip's .get/set_multiple() callbacks without
+> wasting time on iterations.
+>
+> Add respective code to gpiod_get/set_array_bitmap_complex() functions.
+> Pins not applicable for fast path are processed as before, skipping
+> over the 'fast' ones.
+>
+> Cc: Jonathan Corbet <corbet@lwn.net>
+> Signed-off-by: Janusz Krzysztofik <jmkrzyszt@gmail.com>
 
-Changes in v2:
-- s/_/-/ in the property name
-- Changed order of the patches : DT binding change -> driver change -> DT change
+I've just noticed that this patch landed in today's linux-next. Sadly it
+breaks booting of Exynos5250-based Samsung Snow Chromebook (ARM 32bit,
+device-tree source arch/arm/boot/dts/exynos5250-snow.dts).
 
-Manish Narani (4):
-  dt: bindings: Add SD tap value properties details for
-    'xlnx,zynqmp-8.9a'
-  firmware: xilinx: Add macros and API for SD tap delays
-  sdhci: arasan: Add support to read and set tap delays from DT for
-    ZynqMP
-  arm64: zynqmp: Add 'xlnx,mio-bank' property in SDHCI node
+Booting hangs after detecting MMC cards. Reverting this patch fixes the
+boot. I will try later to add some debugs and investigate it further what
+really happens when booting hangs.
 
- .../devicetree/bindings/mmc/arasan,sdhci.txt       |  19 ++
- arch/arm64/boot/dts/xilinx/zynqmp.dtsi             |   2 +
- drivers/firmware/xilinx/Makefile                   |   1 +
- drivers/firmware/xilinx/zynqmp-tap-delays.c        |  39 ++++
- drivers/mmc/host/sdhci-of-arasan.c                 | 215 +++++++++++++++++++++
- include/linux/firmware/xlnx-zynqmp.h               |  33 +++-
- 6 files changed, 308 insertions(+), 1 deletion(-)
- create mode 100644 drivers/firmware/xilinx/zynqmp-tap-delays.c
+> ---
+>   Documentation/driver-api/gpio/board.rst    | 15 ++++++
+>   Documentation/driver-api/gpio/consumer.rst |  8 +++
+>   drivers/gpio/gpiolib.c                     | 87 ++++++++++++++++++++++++++++--
+>   3 files changed, 105 insertions(+), 5 deletions(-)
+>
+> diff --git a/Documentation/driver-api/gpio/board.rst b/Documentation/driver-api/gpio/board.rst
+> index 2c112553df84..c66821e033c2 100644
+> --- a/Documentation/driver-api/gpio/board.rst
+> +++ b/Documentation/driver-api/gpio/board.rst
+> @@ -193,3 +193,18 @@ And the table can be added to the board code as follows::
+>   
+>   The line will be hogged as soon as the gpiochip is created or - in case the
+>   chip was created earlier - when the hog table is registered.
+> +
+> +Arrays of pins
+> +--------------
+> +In addition to requesting pins belonging to a function one by one, a device may
+> +also request an array of pins assigned to the function.  The way those pins are
+> +mapped to the device determines if the array qualifies for fast bitmap
+> +processing.  If yes, a bitmap is passed over get/set array functions directly
+> +between a caller and a respective .get/set_multiple() callback of a GPIO chip.
+> +
+> +In order to qualify for fast bitmap processing, the pin mapping must meet the
+> +following requirements:
+> +- it must belong to the same chip as other 'fast' pins of the function,
+> +- its index within the function must match its hardware number within the chip.
+> +
+> +Open drain and open source pins are excluded from fast bitmap output processing.
+> diff --git a/Documentation/driver-api/gpio/consumer.rst b/Documentation/driver-api/gpio/consumer.rst
+> index 0afd95a12b10..cf992e5ab976 100644
+> --- a/Documentation/driver-api/gpio/consumer.rst
+> +++ b/Documentation/driver-api/gpio/consumer.rst
+> @@ -388,6 +388,14 @@ array_info should be set to NULL.
+>   Note that for optimal performance GPIOs belonging to the same chip should be
+>   contiguous within the array of descriptors.
+>   
+> +Still better performance may be achieved if array indexes of the descriptors
+> +match hardware pin numbers of a single chip.  If an array passed to a get/set
+> +array function matches the one obtained from gpiod_get_array() and array_info
+> +associated with the array is also passed, the function may take a fast bitmap
+> +processing path, passing the value_bitmap argument directly to the respective
+> +.get/set_multiple() callback of the chip.  That allows for utilization of GPIO
+> +banks as data I/O ports without much loss of performance.
+> +
+>   The return value of gpiod_get_array_value() and its variants is 0 on success
+>   or negative on error. Note the difference to gpiod_get_value(), which returns
+>   0 or 1 on success to convey the GPIO value. With the array functions, the GPIO
+> diff --git a/drivers/gpio/gpiolib.c b/drivers/gpio/gpiolib.c
+> index cef6ee31fe05..b9d083fb13ee 100644
+> --- a/drivers/gpio/gpiolib.c
+> +++ b/drivers/gpio/gpiolib.c
+> @@ -2789,7 +2789,36 @@ int gpiod_get_array_value_complex(bool raw, bool can_sleep,
+>   				  struct gpio_array *array_info,
+>   				  unsigned long *value_bitmap)
+>   {
+> -	int i = 0;
+> +	int err, i = 0;
+> +
+> +	/*
+> +	 * Validate array_info against desc_array and its size.
+> +	 * It should immediately follow desc_array if both
+> +	 * have been obtained from the same gpiod_get_array() call.
+> +	 */
+> +	if (array_info && array_info->desc == desc_array &&
+> +	    array_size <= array_info->size &&
+> +	    (void *)array_info == desc_array + array_info->size) {
+> +		if (!can_sleep)
+> +			WARN_ON(array_info->chip->can_sleep);
+> +
+> +		err = gpio_chip_get_multiple(array_info->chip,
+> +					     array_info->get_mask,
+> +					     value_bitmap);
+> +		if (err)
+> +			return err;
+> +
+> +		if (!raw && !bitmap_empty(array_info->invert_mask, array_size))
+> +			bitmap_xor(value_bitmap, value_bitmap,
+> +				   array_info->invert_mask, array_size);
+> +
+> +		if (bitmap_full(array_info->get_mask, array_size))
+> +			return 0;
+> +
+> +		i = find_first_zero_bit(array_info->get_mask, array_size);
+> +	} else {
+> +		array_info = NULL;
+> +	}
+>   
+>   	while (i < array_size) {
+>   		struct gpio_chip *chip = desc_array[i]->gdev->chip;
+> @@ -2820,7 +2849,12 @@ int gpiod_get_array_value_complex(bool raw, bool can_sleep,
+>   			int hwgpio = gpio_chip_hwgpio(desc);
+>   
+>   			__set_bit(hwgpio, mask);
+> -			i++;
+> +
+> +			if (array_info)
+> +				find_next_zero_bit(array_info->get_mask,
+> +						   array_size, i);
+> +			else
+> +				i++;
+>   		} while ((i < array_size) &&
+>   			 (desc_array[i]->gdev->chip == chip));
+>   
+> @@ -2831,7 +2865,7 @@ int gpiod_get_array_value_complex(bool raw, bool can_sleep,
+>   			return ret;
+>   		}
+>   
+> -		for (j = first; j < i; j++) {
+> +		for (j = first; j < i; ) {
+>   			const struct gpio_desc *desc = desc_array[j];
+>   			int hwgpio = gpio_chip_hwgpio(desc);
+>   			int value = test_bit(hwgpio, bits);
+> @@ -2840,6 +2874,11 @@ int gpiod_get_array_value_complex(bool raw, bool can_sleep,
+>   				value = !value;
+>   			__assign_bit(j, value_bitmap, value);
+>   			trace_gpio_value(desc_to_gpio(desc), 1, value);
+> +
+> +			if (array_info)
+> +				find_next_zero_bit(array_info->get_mask, i, j);
+> +			else
+> +				j++;
+>   		}
+>   
+>   		if (mask != fastpath)
+> @@ -3041,6 +3080,32 @@ int gpiod_set_array_value_complex(bool raw, bool can_sleep,
+>   {
+>   	int i = 0;
+>   
+> +	/*
+> +	 * Validate array_info against desc_array and its size.
+> +	 * It should immediately follow desc_array if both
+> +	 * have been obtained from the same gpiod_get_array() call.
+> +	 */
+> +	if (array_info && array_info->desc == desc_array &&
+> +	    array_size <= array_info->size &&
+> +	    (void *)array_info == desc_array + array_info->size) {
+> +		if (!can_sleep)
+> +			WARN_ON(array_info->chip->can_sleep);
+> +
+> +		if (!raw && !bitmap_empty(array_info->invert_mask, array_size))
+> +			bitmap_xor(value_bitmap, value_bitmap,
+> +				   array_info->invert_mask, array_size);
+> +
+> +		gpio_chip_set_multiple(array_info->chip, array_info->set_mask,
+> +				       value_bitmap);
+> +
+> +		if (bitmap_full(array_info->set_mask, array_size))
+> +			return 0;
+> +
+> +		i = find_first_zero_bit(array_info->set_mask, array_size);
+> +	} else {
+> +		array_info = NULL;
+> +	}
+> +
+>   	while (i < array_size) {
+>   		struct gpio_chip *chip = desc_array[i]->gdev->chip;
+>   		unsigned long fastpath[2 * BITS_TO_LONGS(FASTPATH_NGPIO)];
+> @@ -3068,7 +3133,14 @@ int gpiod_set_array_value_complex(bool raw, bool can_sleep,
+>   			int hwgpio = gpio_chip_hwgpio(desc);
+>   			int value = test_bit(i, value_bitmap);
+>   
+> -			if (!raw && test_bit(FLAG_ACTIVE_LOW, &desc->flags))
+> +			/*
+> +			 * Pins applicable for fast input but not for
+> +			 * fast output processing may have been already
+> +			 * inverted inside the fast path, skip them.
+> +			 */
+> +			if (!raw && !(array_info &&
+> +			    test_bit(i, array_info->invert_mask)) &&
+> +			    test_bit(FLAG_ACTIVE_LOW, &desc->flags))
+>   				value = !value;
+>   			trace_gpio_value(desc_to_gpio(desc), 0, value);
+>   			/*
+> @@ -3087,7 +3159,12 @@ int gpiod_set_array_value_complex(bool raw, bool can_sleep,
+>   					__clear_bit(hwgpio, bits);
+>   				count++;
+>   			}
+> -			i++;
+> +
+> +			if (array_info)
+> +				find_next_zero_bit(array_info->set_mask,
+> +						   array_size, i);
+> +			else
+> +				i++;
+>   		} while ((i < array_size) &&
+>   			 (desc_array[i]->gdev->chip == chip));
+>   		/* push collected bits to outputs */
+>
 
+Best regards
 -- 
-2.1.1
+Marek Szyprowski, PhD
+Samsung R&D Institute Poland
