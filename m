@@ -1,7 +1,7 @@
 From: Anand Moon <linux.amoon@gmail.com>
-Subject: [PATCHv3 3/7] ARM: dts: exynos5422: update maximum frequency for sdcard to 200MHz
-Date: Thu, 20 Sep 2018 17:58:22 +0000
-Message-ID: <20180920175826.1284-4-linux.amoon@gmail.com>
+Subject: [PATCHv3 4/7] ARM: dts: exynos5422: use cd-gpio method to detect sd-card
+Date: Thu, 20 Sep 2018 17:58:23 +0000
+Message-ID: <20180920175826.1284-5-linux.amoon@gmail.com>
 References: <20180920175826.1284-1-linux.amoon@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20180920175826.1284-1-linux.amoon@gmail.com>
@@ -10,37 +10,27 @@ To: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Kukji
 Cc: devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-set the max-frequency to 200MHz for optimal performace.
+add the Card Detect GPIO property for sdcard detect, to fix
+the warning message during boot time.
+of_get_named_gpiod_flags: can't parse 'cp-gpios' property of node '/soc/mmc@12220000[0]'
 
 Signed-off-by: Anand Moon <linux.amoon@gmail.com>
 ---
-This patch is new to this series.
-
-microSD card.
-root@odroid:~# sudo cat /sys/kernel/debug/mmc1/ios
-clock:          200000000 Hz
-actual clock:   200000000 Hz
-vdd:            16 (2.8 ~ 2.9 V)
-bus mode:       2 (push-pull)
-chip select:    0 (don't care)
-power mode:     2 (on)
-bus width:      2 (4 bits)
-timing spec:    6 (sd uhs SDR104)
-signal voltage: 1 (1.80 V)
-driver type:    0 (driver type B)
+[0] http://lists.infradead.org/pipermail/linux-arm-kernel/2015-October/376261.html
+Fixed the commit message.
 ---
  arch/arm/boot/dts/exynos5422-odroid-core.dtsi | 1 +
  1 file changed, 1 insertion(+)
 
 diff --git a/arch/arm/boot/dts/exynos5422-odroid-core.dtsi b/arch/arm/boot/dts/exynos5422-odroid-core.dtsi
-index 01593f4537ae..914ee08c7eb2 100644
+index 914ee08c7eb2..03fe02ceae66 100644
 --- a/arch/arm/boot/dts/exynos5422-odroid-core.dtsi
 +++ b/arch/arm/boot/dts/exynos5422-odroid-core.dtsi
-@@ -368,6 +368,7 @@
- 	pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus1 &sd2_bus4>;
+@@ -369,6 +369,7 @@
  	bus-width = <4>;
  	cap-sd-highspeed;
-+	max-frequency = <200000000>;
+ 	max-frequency = <200000000>;
++	cd-gpios = <&gpc2 2 GPIO_ACTIVE_LOW>;
  	vmmc-supply = <&ldo19_reg>;
  	vqmmc-supply = <&ldo13_reg>;
  	sd-uhs-sdr50;
