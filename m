@@ -1,7 +1,7 @@
 From: Manish Narani <manish.narani@xilinx.com>
-Subject: [RFC PATCH v2 2/4] firmware: xilinx: Add macros and API for SD tap delays
-Date: Thu, 20 Sep 2018 15:00:43 +0530
-Message-ID: <1537435845-6682-3-git-send-email-manish.narani@xilinx.com>
+Subject: [RFC PATCH v2 4/4] arm64: zynqmp: Add 'xlnx,mio-bank' property in SDHCI node
+Date: Thu, 20 Sep 2018 15:00:45 +0530
+Message-ID: <1537435845-6682-5-git-send-email-manish.narani@xilinx.com>
 References: <1537435845-6682-1-git-send-email-manish.narani@xilinx.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,64 +12,33 @@ To: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, michal.sim
 Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Add ZynqMP firmware SD tap delay macros and API for setting tap values.
+Add a required property indicating the MIO Bank number for SDHCI
+controller in ZynqMP.
 
 Signed-off-by: Manish Narani <manish.narani@xilinx.com>
 ---
- include/linux/firmware/xlnx-zynqmp.h | 29 ++++++++++++++++++++++++++++-
- 1 file changed, 28 insertions(+), 1 deletion(-)
+ arch/arm64/boot/dts/xilinx/zynqmp.dtsi | 2 ++
+ 1 file changed, 2 insertions(+)
 
-diff --git a/include/linux/firmware/xlnx-zynqmp.h b/include/linux/firmware/xlnx-zynqmp.h
-index 743687b..40feebc 100644
---- a/include/linux/firmware/xlnx-zynqmp.h
-+++ b/include/linux/firmware/xlnx-zynqmp.h
-@@ -22,6 +22,27 @@
- #define ZYNQMP_TZ_VERSION_MAJOR	1
- #define ZYNQMP_TZ_VERSION_MINOR	0
+diff --git a/arch/arm64/boot/dts/xilinx/zynqmp.dtsi b/arch/arm64/boot/dts/xilinx/zynqmp.dtsi
+index 1def7e1..7ef002d 100644
+--- a/arch/arm64/boot/dts/xilinx/zynqmp.dtsi
++++ b/arch/arm64/boot/dts/xilinx/zynqmp.dtsi
+@@ -492,6 +492,7 @@
+ 			reg = <0x0 0xff160000 0x0 0x1000>;
+ 			clock-names = "clk_xin", "clk_ahb";
+ 			xlnx,device_id = <0>;
++			xlnx,mio-bank = <0>;
+ 		};
  
-+#define ZYNQMP_ITAPDLYSEL_SD_HSD	0x15
-+#define ZYNQMP_ITAPDLYSEL_SDR25		0x15
-+#define ZYNQMP_ITAPDLYSEL_SDR50		0x0
-+#define ZYNQMP_ITAPDLYSEL_SDR104_B2	0x0
-+#define ZYNQMP_ITAPDLYSEL_SDR104_B0	0x0
-+#define ZYNQMP_ITAPDLYSEL_MMC_HSD	0x15
-+#define ZYNQMP_ITAPDLYSEL_SD_DDR50	0x3D
-+#define ZYNQMP_ITAPDLYSEL_MMC_DDR52	0x12
-+#define ZYNQMP_ITAPDLYSEL_MMC_HS200_B2	0x0
-+#define ZYNQMP_ITAPDLYSEL_MMC_HS200_B0	0x0
-+#define ZYNQMP_OTAPDLYSEL_SD_HSD	0x05
-+#define ZYNQMP_OTAPDLYSEL_SDR25		0x05
-+#define ZYNQMP_OTAPDLYSEL_SDR50		0x03
-+#define ZYNQMP_OTAPDLYSEL_SDR104_B0	0x03
-+#define ZYNQMP_OTAPDLYSEL_SDR104_B2	0x02
-+#define ZYNQMP_OTAPDLYSEL_MMC_HSD	0x06
-+#define ZYNQMP_OTAPDLYSEL_SD_DDR50	0x04
-+#define ZYNQMP_OTAPDLYSEL_MMC_DDR52	0x06
-+#define ZYNQMP_OTAPDLYSEL_MMC_HS200_B0	0x03
-+#define ZYNQMP_OTAPDLYSEL_MMC_HS200_B2	0x02
-+
- #define ZYNQMP_TZ_VERSION	((ZYNQMP_TZ_VERSION_MAJOR << 16) | \
- 					ZYNQMP_TZ_VERSION_MINOR)
+ 		sdhci1: sdhci@ff170000 {
+@@ -502,6 +503,7 @@
+ 			reg = <0x0 0xff170000 0x0 0x1000>;
+ 			clock-names = "clk_xin", "clk_ahb";
+ 			xlnx,device_id = <1>;
++			xlnx,mio-bank = <1>;
+ 		};
  
-@@ -65,12 +86,18 @@ enum pm_node_id {
- 
- enum pm_ioctl_id {
- 	IOCTL_SD_DLL_RESET = 6,
--	IOCTL_SET_PLL_FRAC_MODE = 8,
-+	IOCTL_SET_SD_TAPDELAY,
-+	IOCTL_SET_PLL_FRAC_MODE,
- 	IOCTL_GET_PLL_FRAC_MODE,
- 	IOCTL_SET_PLL_FRAC_DATA,
- 	IOCTL_GET_PLL_FRAC_DATA,
- };
- 
-+enum tap_delay_type {
-+	PM_TAPDELAY_INPUT,
-+	PM_TAPDELAY_OUTPUT,
-+};
-+
- enum dll_reset_type {
- 	PM_DLL_RESET_ASSERT,
- 	PM_DLL_RESET_RELEASE,
+ 		smmu: smmu@fd800000 {
 -- 
 2.1.1
