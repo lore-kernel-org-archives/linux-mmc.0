@@ -1,55 +1,48 @@
-From: Anand Moon <linux.amoon@gmail.com>
-Subject: [PATCHv3 7/7] mmc: dw_mmc-exynos: Add tuning for sdr and ddr timing for USH-I mode
-Date: Thu, 20 Sep 2018 17:58:26 +0000
-Message-ID: <20180920175826.1284-8-linux.amoon@gmail.com>
-References: <20180920175826.1284-1-linux.amoon@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180920175826.1284-1-linux.amoon@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Kukjin Kim <kgene@kernel.org>, Krzysztof Kozlowski <krzk@kernel.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: Re: [PATCH v7 4/4] gpiolib: Implement fast processing path in
+ get/set array
+Date: Thu, 20 Sep 2018 21:05:29 +0300
+Message-ID: <20180920180529.hjc54yoqmvnpvvt7@mwanda>
+References: <20180831225616.29221-1-jmkrzyszt@gmail.com>
+ <CGME20180920101151eucas1p221f5a1715b8556bb9d99bf08fe09ce6f@eucas1p2.samsung.com>
+ <20180920101151eucas1p221f5a1715b8556bb9d99bf08fe09ce6f~WE-_cEf4l0754207542eucas1p27@eucas1p2.samsung.com>
+ <9860023.SlBYqtbjDV@z50>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+Content-Disposition: inline
+In-Reply-To: <9860023.SlBYqtbjDV@z50>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: Janusz Krzysztofik <jmkrzyszt@gmail.com>
+Cc: Andrew Lunn <andrew@lunn.ch>, Ulf Hansson <ulf.hansson@linaro.org>, linux-doc@vger.kernel.org, linux-iio@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Dominik Brodowski <linux@dominikbrodowski.net>, Yegor Yefremov <yegorslists@googlemail.com>, "David S. Miller" <davem@davemloft.net>, linux-i2c@vger.kernel.org, Peter Meerwald-Stadler <pmeerw@pmeerw.net>, Marek Szyprowski <m.szyprowski@samsung.com>, devel@driverdev.osuosl.org, Florian Fainelli <f.fainelli@gmail.com>, Jonathan Corbet <corbet@lwn.net>, Krzysztof Kozlowski <krzk@kernel.org>, Kishon Vijay Abraham I <kishon@ti.com>, Tony Lindgren <tony@atomide.com>, Peter Korsgaard <peter.korsgaard@barco.com>, Geert Uytterhoeven <geert@linux-m68k.org>, linux-serial@vger.kernel.org, Jiri Slaby <jslaby@suse.com>, Michael Hennerich <Michael.Hennerich@analog.com>, Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= <u.kleine-koenig@pe>
 List-Id: linux-mmc@vger.kernel.org
 
-Add tuning for sdr and ddr timing for USH-I mode sdr104/sdr50/ddr50
-for host controller.
+On Thu, Sep 20, 2018 at 05:48:22PM +0200, Janusz Krzysztofik wrote:
+> diff --git a/drivers/gpio/gpiolib.c b/drivers/gpio/gpiolib.c
+> index a53d17745d21..5bc3447949c9 100644
+> --- a/drivers/gpio/gpiolib.c
+> +++ b/drivers/gpio/gpiolib.c
+> @@ -2880,7 +2880,7 @@ int gpiod_get_array_value_complex(bool raw, bool can_sleep,
+>  			__set_bit(hwgpio, mask);
+>  
+>  			if (array_info)
+> -				find_next_zero_bit(array_info->get_mask,
+> +				i = find_next_zero_bit(array_info->get_mask,
+>  						   array_size, i);
 
-CC: Jaehoon Chung <jh80.chung@samsung.com>
-CC: Marek Szyprowski <m.szyprowski@samsung.com>
-Signed-off-by: Anand Moon <linux.amoon@gmail.com>
----
-This patch is new to this series
----
- drivers/mmc/host/dw_mmc-exynos.c | 11 +++++++++++
- 1 file changed, 11 insertions(+)
+We could mark find_next_zero_bit() and friends as a __must_check
+functions so we avoid this bug in the future.  I have a more complicated
+idea how to detect these bugs in a generic way using Smatch but it will
+take longer to implement.
 
-diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-index ab47b018716a..d46c3439b508 100644
---- a/drivers/mmc/host/dw_mmc-exynos.c
-+++ b/drivers/mmc/host/dw_mmc-exynos.c
-@@ -253,6 +253,8 @@ static void dw_mci_exynos_config_hs400(struct dw_mci *host, u32 timing)
- 	if (timing == MMC_TIMING_MMC_HS400) {
- 		dqs |= DATA_STROBE_EN;
- 		strobe = DQS_CTRL_RD_DELAY(strobe, priv->dqs_delay);
-+	} else if (timing == MMC_TIMING_UHS_SDR104) {
-+		dqs &= 0xffffff00;
- 	} else {
- 		dqs &= ~DATA_STROBE_EN;
- 	}
-@@ -312,6 +314,15 @@ static void dw_mci_exynos_set_ios(struct dw_mci *host, struct mmc_ios *ios)
- 		if (ios->bus_width == MMC_BUS_WIDTH_8)
- 			wanted <<= 1;
- 		break;
-+	case MMC_TIMING_UHS_SDR104:
-+	case MMC_TIMING_UHS_SDR50:
-+		clksel = (priv->sdr_timing & 0xfff8ffff) |
-+			(priv->ciu_div << 16);
-+		break;
-+	case MMC_TIMING_UHS_DDR50:
-+		clksel = (priv->ddr_timing & 0xfff8ffff) |
-+			(priv->ciu_div << 16);
-+		break;
- 	default:
- 		clksel = priv->sdr_timing;
- 	}
--- 
-2.17.1
+regards,
+dan carpenter
