@@ -1,7 +1,7 @@
 From: Anand Moon <linux.amoon@gmail.com>
-Subject: [PATCHv3 5/7] ARM: dts: exynos5422: use wp-gpio method to detect sd-card
-Date: Thu, 20 Sep 2018 17:58:24 +0000
-Message-ID: <20180920175826.1284-6-linux.amoon@gmail.com>
+Subject: [PATCHv3 6/7] ARM: dts: exynos5422: update maximum frequency for emmc to 200MHz
+Date: Thu, 20 Sep 2018 17:58:25 +0000
+Message-ID: <20180920175826.1284-7-linux.amoon@gmail.com>
 References: <20180920175826.1284-1-linux.amoon@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20180920175826.1284-1-linux.amoon@gmail.com>
@@ -10,29 +10,39 @@ To: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Kukji
 Cc: devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-add the Write Protect GPIO property for sdcard, to fix
-the warning message during boot time.
-of_get_named_gpiod_flags: can't parse 'wp-gpios' property of node '/soc/mmc@12220000[0]'
+set the max-frequency to 200MHz for optimal performace of eMMC.
 
 Signed-off-by: Anand Moon <linux.amoon@gmail.com>
 ---
-New patch to this series.
-If we keep the wp-gpio GPIO_ACTIVE_LOW sdcard boot into RO mode.
+This patch is new to this series.
+
+MMC
+root@odroid:~# sudo cat /sys/kernel/debug/mmc0/ios
+clock:          200000000 Hz
+actual clock:   200000000 Hz
+vdd:            7 (1.65 - 1.95 V)
+bus mode:       2 (push-pull)
+chip select:    0 (don't care)
+power mode:     2 (on)
+bus width:      3 (8 bits)
+timing spec:    10 (mmc HS400)
+signal voltage: 1 (1.80 V)
+driver type:    0 (driver type B)
 ---
- arch/arm/boot/dts/exynos5422-odroid-core.dtsi | 1 +
+ arch/arm/boot/dts/exynos5422-odroidxu3-common.dtsi | 1 +
  1 file changed, 1 insertion(+)
 
-diff --git a/arch/arm/boot/dts/exynos5422-odroid-core.dtsi b/arch/arm/boot/dts/exynos5422-odroid-core.dtsi
-index 03fe02ceae66..475c38bbc99e 100644
---- a/arch/arm/boot/dts/exynos5422-odroid-core.dtsi
-+++ b/arch/arm/boot/dts/exynos5422-odroid-core.dtsi
-@@ -370,6 +370,7 @@
- 	cap-sd-highspeed;
- 	max-frequency = <200000000>;
- 	cd-gpios = <&gpc2 2 GPIO_ACTIVE_LOW>;
-+	wp-gpios = <&gpc4 0 GPIO_ACTIVE_HIGH>;
- 	vmmc-supply = <&ldo19_reg>;
- 	vqmmc-supply = <&ldo13_reg>;
- 	sd-uhs-sdr50;
+diff --git a/arch/arm/boot/dts/exynos5422-odroidxu3-common.dtsi b/arch/arm/boot/dts/exynos5422-odroidxu3-common.dtsi
+index 96e281c0a118..5748f840becc 100644
+--- a/arch/arm/boot/dts/exynos5422-odroidxu3-common.dtsi
++++ b/arch/arm/boot/dts/exynos5422-odroidxu3-common.dtsi
+@@ -386,6 +386,7 @@
+ 	cap-mmc-highspeed;
+ 	mmc-hs200-1_8v;
+ 	mmc-hs400-1_8v;
++	max-frequency = <200000000>;
+ 	vmmc-supply = <&ldo18_reg>;
+ 	vqmmc-supply = <&ldo3_reg>;
+ };
 -- 
 2.17.1
