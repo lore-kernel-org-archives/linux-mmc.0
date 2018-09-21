@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V2 14/27] mmc: mmci: add validate_data callback
-Date: Fri, 21 Sep 2018 11:46:08 +0200
-Message-ID: <1537523181-14578-15-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V2 21/27] mmc: mmci: add variant property to write datactrl before command
+Date: Fri, 21 Sep 2018 11:46:15 +0200
+Message-ID: <1537523181-14578-22-git-send-email-ludovic.Barre@st.com>
 References: <1537523181-14578-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,84 +14,59 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-This patch adds validate_data callback at mmci_host_ops
-to check specific constraints of variant.
-Move mmci_validate_data function to regroup mmci_host_ops interfaces.
+This patch adds a boolean property to allow to write datactrl
+before to send command, whatever the command type (read or write).
+Needed to support the STM32 sdmmc variant.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.c | 39 +++++++++++++++++++++------------------
- drivers/mmc/host/mmci.h |  1 +
- 2 files changed, 22 insertions(+), 18 deletions(-)
+ drivers/mmc/host/mmci.c | 6 ++++--
+ drivers/mmc/host/mmci.h | 2 ++
+ 2 files changed, 6 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 5a8b09c..1593942 100644
+index f61b10b..b525ba4 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -234,24 +234,6 @@ static int mmci_card_busy(struct mmc_host *mmc)
- 	return busy;
+@@ -1239,7 +1239,8 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+ 		mmci_request_end(host, host->mrq);
+ 	} else if (sbc) {
+ 		mmci_start_command(host, host->mrq->cmd, 0);
+-	} else if (!(cmd->data->flags & MMC_DATA_READ)) {
++	} else if (!host->variant->datactrl_first &&
++		   !(cmd->data->flags & MMC_DATA_READ)) {
+ 		mmci_start_data(host, cmd->data);
+ 	}
  }
+@@ -1503,7 +1504,8 @@ static void mmci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 	if (mrq->data)
+ 		mmci_get_next_data(host, mrq->data);
  
--/*
-- * Validate mmc prerequisites
-- */
--static int mmci_validate_data(struct mmci_host *host,
--			      struct mmc_data *data)
--{
--	if (!data)
--		return 0;
--
--	if (!is_power_of_2(data->blksz)) {
--		dev_err(mmc_dev(host->mmc),
--			"unsupported block size (%d bytes)\n", data->blksz);
--		return -EINVAL;
--	}
--
--	return 0;
--}
--
- static void mmci_reg_delay(struct mmci_host *host)
- {
- 	/*
-@@ -365,6 +347,27 @@ static void mmci_set_clkreg(struct mmci_host *host, unsigned int desired)
- 	mmci_write_clkreg(host, clk);
- }
+-	if (mrq->data && mrq->data->flags & MMC_DATA_READ)
++	if (mrq->data &&
++	    (host->variant->datactrl_first || mrq->data->flags & MMC_DATA_READ))
+ 		mmci_start_data(host, mrq->data);
  
-+/*
-+ * Validate mmc prerequisites
-+ */
-+static int mmci_validate_data(struct mmci_host *host,
-+			      struct mmc_data *data)
-+{
-+	if (!data)
-+		return 0;
-+
-+	if (!is_power_of_2(data->blksz)) {
-+		dev_err(mmc_dev(host->mmc),
-+			"unsupported block size (%d bytes)\n", data->blksz);
-+		return -EINVAL;
-+	}
-+
-+	if (host->ops && host->ops->validate_data)
-+		return host->ops->validate_data(host, data);
-+
-+	return 0;
-+}
-+
- int mmci_prep_data(struct mmci_host *host, struct mmc_data *data, bool next)
- {
- 	int err;
+ 	if (mrq->sbc)
 diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 320f122..cf48377 100644
+index cd72c2e..93e879b 100644
 --- a/drivers/mmc/host/mmci.h
 +++ b/drivers/mmc/host/mmci.h
-@@ -273,6 +273,7 @@ struct variant_data {
- 
- /* mmci variant callbacks */
- struct mmci_host_ops {
-+	int (*validate_data)(struct mmci_host *host, struct mmc_data *data);
- 	int (*prep_data)(struct mmci_host *host, struct mmc_data *data,
- 			 bool next);
- 	void (*unprep_data)(struct mmci_host *host, struct mmc_data *data,
+@@ -223,6 +223,7 @@ struct mmci_host;
+  * @datactrl_mask_sdio: SDIO enable mask in datactrl register
+  * @datactrl_blksz: block size in power of two
+  * @datactrl_dpsm_enable: enable value for DPSM
++ * @datactrl_first: true if data must be setup before send command
+  * @pwrreg_powerup: power up value for MMCIPOWER register
+  * @f_max: maximum clk frequency supported by the controller.
+  * @signal_direction: input/out direction of bus signals can be indicated
+@@ -262,6 +263,7 @@ struct variant_data {
+ 	unsigned int		datactrl_mask_sdio;
+ 	unsigned int		datactrl_blocksz;
+ 	unsigned int		datactrl_dpsm_enable;
++	bool			datactrl_first;
+ 	bool			st_sdio;
+ 	bool			st_clkdiv;
+ 	bool			blksz_datactrl16;
 -- 
 2.7.4
