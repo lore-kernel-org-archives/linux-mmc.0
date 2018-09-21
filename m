@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V2 26/27] mmc: mmci: add DT bindings for STM32 sdmmc
-Date: Fri, 21 Sep 2018 11:46:20 +0200
-Message-ID: <1537523181-14578-27-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V2 23/27] mmc: mmci: add variant property to request a reset
+Date: Fri, 21 Sep 2018 11:46:17 +0200
+Message-ID: <1537523181-14578-24-git-send-email-ludovic.Barre@st.com>
 References: <1537523181-14578-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,77 +14,85 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-STM32 sdmmc variant has support to:
--Indicate signal directions (only one property
-for d0dir, d123dir, cmd_dir)
--Select command and data phase relation.
--Select "clock in" from an external driver.
+Some variants could require a reset.
+STM32 sdmmc variant needs to reset hardware block
+during the power cycle procedure (for re-initialization)
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
-change v3:
--remove space at end of "st,use-ckin "
-
- Documentation/devicetree/bindings/mmc/mmci.txt | 9 +++++++++
- drivers/mmc/host/mmci.c                        | 6 ++++++
- drivers/mmc/host/mmci.h                        | 1 +
- 3 files changed, 16 insertions(+)
+ Documentation/devicetree/bindings/mmc/mmci.txt | 2 ++
+ drivers/mmc/host/mmci.c                        | 9 +++++++++
+ drivers/mmc/host/mmci.h                        | 4 ++++
+ 3 files changed, 15 insertions(+)
 
 diff --git a/Documentation/devicetree/bindings/mmc/mmci.txt b/Documentation/devicetree/bindings/mmc/mmci.txt
-index e952707..d678933 100644
+index 03796cf..e952707 100644
 --- a/Documentation/devicetree/bindings/mmc/mmci.txt
 +++ b/Documentation/devicetree/bindings/mmc/mmci.txt
-@@ -19,6 +19,7 @@ Optional properties:
-                            the ID provided by the HW
- - vqmmc-supply           : phandle to the regulator device tree node, mentioned
-                            as the VCCQ/VDD_IO supply in the eMMC/SD specs.
-+specific for ux500 variant:
- - st,sig-dir-dat0        : bus signal direction pin used for DAT[0].
- - st,sig-dir-dat2        : bus signal direction pin used for DAT[2].
- - st,sig-dir-dat31       : bus signal direction pin used for DAT[3] and DAT[1].
-@@ -26,6 +27,14 @@ Optional properties:
- - st,sig-dir-cmd         : cmd signal direction pin used for CMD.
- - st,sig-pin-fbclk       : feedback clock signal pin used.
+@@ -11,6 +11,8 @@ Required properties:
+ - compatible             : contains "arm,pl18x", "arm,primecell".
+ - vmmc-supply            : phandle to the regulator device tree node, mentioned
+                            as the VCC/VDD supply in the eMMC/SD specs.
++depend of variant:
++- resets                 : phandle to internal reset line.
  
-+specific for sdmmc variant:
-+- st,sig-dir             : signal direction polarity used for cmd, dat0 dat123.
-+- st,neg-edge            : data & command phase relation, generated on
-+                           sd clock falling edge.
-+- st,use-ckin            : use ckin pin from an external driver to sample
-+                           the receive data (example: with voltage
-+			   switch transceiver).
-+
- Deprecated properties:
- - mmc-cap-mmc-highspeed  : indicates whether MMC is high speed capable.
- - mmc-cap-sd-highspeed   : indicates whether SD is high speed capable.
+ Optional properties:
+ - arm,primecell-periphid : contains the PrimeCell Peripheral ID, it overrides
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index d622fbb..4057456 100644
+index b1d5bc5..6b3c33f 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -1708,6 +1708,12 @@ static int mmci_of_parse(struct device_node *np, struct mmc_host *mmc)
- 		host->pwr_reg_add |= MCI_ST_CMDDIREN;
- 	if (of_get_property(np, "st,sig-pin-fbclk", NULL))
- 		host->pwr_reg_add |= MCI_ST_FBCLKEN;
-+	if (of_get_property(np, "st,sig-dir", NULL))
-+		host->pwr_reg_add |= MCI_STM32_DIRPOL;
-+	if (of_get_property(np, "st,neg-edge", NULL))
-+		host->clk_reg_add |= MCI_STM32_CLK_NEGEDGE;
-+	if (of_get_property(np, "st,use-ckin", NULL))
-+		host->clk_reg_add |= MCI_STM32_CLK_SELCKIN;
+@@ -37,6 +37,7 @@
+ #include <linux/pm_runtime.h>
+ #include <linux/types.h>
+ #include <linux/pinctrl/consumer.h>
++#include <linux/reset.h>
  
- 	if (of_get_property(np, "mmc-cap-mmc-highspeed", NULL))
- 		mmc->caps |= MMC_CAP_MMC_HIGHSPEED;
+ #include <asm/div64.h>
+ #include <asm/io.h>
+@@ -1854,6 +1855,14 @@ static int mmci_probe(struct amba_device *dev,
+ 
+ 	dev_dbg(mmc_dev(mmc), "clocking block at %u Hz\n", mmc->f_max);
+ 
++	if (variant->reset) {
++		host->rst = devm_reset_control_get_exclusive(&dev->dev, NULL);
++		if (IS_ERR(host->rst)) {
++			ret = PTR_ERR(host->rst);
++			goto clk_disable;
++		}
++	}
++
+ 	/* Get regulators and the supported OCR mask */
+ 	ret = mmc_regulator_get_supply(mmc);
+ 	if (ret)
 diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 75b9c5c..017d9b8 100644
+index e130689..f0fa185 100644
 --- a/drivers/mmc/host/mmci.h
 +++ b/drivers/mmc/host/mmci.h
-@@ -389,6 +389,7 @@ struct mmci_host {
- 	u32			pwr_reg;
- 	u32			pwr_reg_add;
- 	u32			clk_reg;
-+	u32			clk_reg_add;
- 	u32			datactrl_reg;
- 	u32			busy_status;
- 	u32			mask1_reg;
+@@ -247,6 +247,7 @@ struct mmci_host;
+  * @start_err: bitmask identifying the STARTBITERR bit inside MMCISTATUS
+  *	       register.
+  * @opendrain: bitmask identifying the OPENDRAIN bit inside MMCIPOWER register
++ * @reset: true if variant has need reset signal.
+  */
+ struct variant_data {
+ 	unsigned int		clkreg;
+@@ -285,6 +286,7 @@ struct variant_data {
+ 	bool			qcom_dml;
+ 	bool			reversed_irq_handling;
+ 	bool			mmcimask1;
++	bool			reset;
+ 	unsigned int		irq_pio_mask;
+ 	u32			start_err;
+ 	u32			opendrain;
+@@ -318,6 +320,8 @@ struct mmci_host {
+ 	struct clk		*clk;
+ 	bool			singleirq;
+ 
++	struct reset_control	*rst;
++
+ 	spinlock_t		lock;
+ 
+ 	unsigned int		mclk;
 -- 
 2.7.4
