@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V2 17/27] mmc: mmci: expand startbiterr to irqmask and error check
-Date: Fri, 21 Sep 2018 11:46:11 +0200
-Message-ID: <1537523181-14578-18-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V2 11/27] mmc: mmci: add dma_start callback
+Date: Fri, 21 Sep 2018 11:46:05 +0200
+Message-ID: <1537523181-14578-12-git-send-email-ludovic.Barre@st.com>
 References: <1537523181-14578-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,104 +14,165 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-All variants don't pretend to have a startbiterr.
--While data error check, if status register return an error
-(like  MCI_DATACRCFAIL) we must avoid to check MCI_STARTBITERR
-(if not desired).
--expand start_err to MCI_IRQENABLE to avoid to set this bit by default.
+This patch adds dma_start callback to mmci_host_ops.
+Create a generic mmci_dma_start function which regroup
+common action between variant.
+
+Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
+
+# Conflicts:
+#	drivers/mmc/host/mmci.h
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.c | 27 ++++++++++++++++-----------
- drivers/mmc/host/mmci.h |  6 +++---
- 2 files changed, 19 insertions(+), 14 deletions(-)
+ drivers/mmc/host/mmci.c          | 63 +++++++++++++++++++++++-----------------
+ drivers/mmc/host/mmci.h          |  2 ++
+ drivers/mmc/host/mmci_qcom_dml.c |  1 +
+ 3 files changed, 39 insertions(+), 27 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index e2272c7..53f613f 100644
+index 562b382..10c7adc 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -1014,14 +1014,18 @@ static void
- mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
- 	      unsigned int status)
- {
-+	unsigned int status_err;
+@@ -415,6 +415,38 @@ void mmci_dma_release(struct mmci_host *host)
+ 		host->ops->dma_release(host);
+ }
+ 
++int mmci_dma_start(struct mmci_host *host, unsigned int datactrl)
++{
++	struct mmc_data *data = host->data;
++	int ret;
 +
- 	/* Make sure we have data to handle */
- 	if (!data)
++	ret = mmci_prep_data(host, data, false);
++	if (ret)
++		return ret;
++
++	if (!host->ops || !host->ops->dma_start)
++		return -EINVAL;
++
++	/* Okay, go for it. */
++	dev_vdbg(mmc_dev(host->mmc),
++		 "Submit MMCI DMA job, sglen %d blksz %04x blks %04x flags %08x\n",
++		 data->sg_len, data->blksz, data->blocks, data->flags);
++
++	host->ops->dma_start(host, &datactrl);
++
++	/* Trigger the DMA transfer */
++	mmci_write_datactrlreg(host, datactrl);
++
++	/*
++	 * Let the MMCI say when the data is ended and it's time
++	 * to fire next DMA request. When that happens, MMCI will
++	 * call mmci_data_end()
++	 */
++	writel(readl(host->base + MMCIMASK0) | MCI_DATAENDMASK,
++	       host->base + MMCIMASK0);
++	return 0;
++}
++
+ static void
+ mmci_request_end(struct mmci_host *host, struct mmc_request *mrq)
+ {
+@@ -721,20 +753,11 @@ int mmci_dmae_prep_data(struct mmci_host *host,
+ 				    &dmae->desc_current);
+ }
+ 
+-static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
++int mmci_dmae_start(struct mmci_host *host, unsigned int *datactrl)
+ {
+ 	struct mmci_dmae_priv *dmae = host->dma_priv;
+ 	struct mmc_data *data = host->data;
+-	int ret;
+-
+-	ret = mmci_dmae_prep_data(host, host->data, false);
+-	if (ret)
+-		return ret;
+ 
+-	/* Okay, go for it. */
+-	dev_vdbg(mmc_dev(host->mmc),
+-		 "Submit MMCI DMA job, sglen %d blksz %04x blks %04x flags %08x\n",
+-		 data->sg_len, data->blksz, data->blocks, data->flags);
+ 	dmae->in_progress = true;
+ 	dmaengine_submit(dmae->desc_current);
+ 	dma_async_issue_pending(dmae->cur);
+@@ -742,18 +765,8 @@ static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
+ 	if (host->variant->qcom_dml)
+ 		dml_start_xfer(host, data);
+ 
+-	datactrl |= MCI_DPSM_DMAENABLE;
+-
+-	/* Trigger the DMA transfer */
+-	mmci_write_datactrlreg(host, datactrl);
++	*datactrl |= MCI_DPSM_DMAENABLE;
+ 
+-	/*
+-	 * Let the MMCI say when the data is ended and it's time
+-	 * to fire next DMA request. When that happens, MMCI will
+-	 * call mmci_data_end()
+-	 */
+-	writel(readl(host->base + MMCIMASK0) | MCI_DATAENDMASK,
+-	       host->base + MMCIMASK0);
+ 	return 0;
+ }
+ 
+@@ -806,6 +819,7 @@ static struct mmci_host_ops mmci_variant_ops = {
+ 	.get_next_data = mmci_dmae_get_next_data,
+ 	.dma_setup = mmci_dmae_setup,
+ 	.dma_release = mmci_dmae_release,
++	.dma_start = mmci_dmae_start,
+ };
+ #else
+ /* Blank functions if the DMA engine is not available */
+@@ -818,11 +832,6 @@ static inline void mmci_dma_data_error(struct mmci_host *host)
+ {
+ }
+ 
+-static inline int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
+-{
+-	return -ENOSYS;
+-}
+-
+ static struct mmci_host_ops mmci_variant_ops = {};
+ #endif
+ 
+@@ -925,7 +934,7 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
+ 	 * Attempt to use DMA operation mode, if this
+ 	 * should fail, fall back to PIO mode
+ 	 */
+-	if (!mmci_dma_start_data(host, datactrl))
++	if (!mmci_dma_start(host, datactrl))
  		return;
  
- 	/* First check for errors */
--	if (status & (MCI_DATACRCFAIL | MCI_DATATIMEOUT |
--		      host->variant->start_err |
--		      MCI_TXUNDERRUN | MCI_RXOVERRUN)) {
-+	status_err = status & (host->variant->start_err |
-+			       MCI_DATACRCFAIL | MCI_DATATIMEOUT |
-+			       MCI_TXUNDERRUN | MCI_RXOVERRUN);
-+
-+	if (status_err) {
- 		u32 remain, success;
- 
- 		/* Terminate the DMA transfer */
-@@ -1038,18 +1042,18 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
- 		success = data->blksz * data->blocks - remain;
- 
- 		dev_dbg(mmc_dev(host->mmc), "MCI ERROR IRQ, status 0x%08x at 0x%08x\n",
--			status, success);
--		if (status & MCI_DATACRCFAIL) {
-+			status_err, success);
-+		if (status_err & MCI_DATACRCFAIL) {
- 			/* Last block was not successful */
- 			success -= 1;
- 			data->error = -EILSEQ;
--		} else if (status & MCI_DATATIMEOUT) {
-+		} else if (status_err & MCI_DATATIMEOUT) {
- 			data->error = -ETIMEDOUT;
--		} else if (status & MCI_STARTBITERR) {
-+		} else if (status_err & MCI_STARTBITERR) {
- 			data->error = -ECOMM;
--		} else if (status & MCI_TXUNDERRUN) {
-+		} else if (status_err & MCI_TXUNDERRUN) {
- 			data->error = -EIO;
--		} else if (status & MCI_RXOVERRUN) {
-+		} else if (status_err & MCI_RXOVERRUN) {
- 			if (success > host->variant->fifosize)
- 				success -= host->variant->fifosize;
- 			else
-@@ -1911,7 +1915,7 @@ static int mmci_probe(struct amba_device *dev,
- 			goto clk_disable;
- 	}
- 
--	writel(MCI_IRQENABLE, host->base + MMCIMASK0);
-+	writel(MCI_IRQENABLE | variant->start_err, host->base + MMCIMASK0);
- 
- 	amba_set_drvdata(dev, mmc);
- 
-@@ -2000,7 +2004,8 @@ static void mmci_restore(struct mmci_host *host)
- 		writel(host->datactrl_reg, host->base + MMCIDATACTRL);
- 		writel(host->pwr_reg, host->base + MMCIPOWER);
- 	}
--	writel(MCI_IRQENABLE, host->base + MMCIMASK0);
-+	writel(MCI_IRQENABLE | host->variant->start_err,
-+	       host->base + MMCIMASK0);
- 	mmci_reg_delay(host);
- 
- 	spin_unlock_irqrestore(&host->lock, flags);
+ 	/* IRQ mode, map the SG list for CPU reading/writing */
 diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 46c8862..fcb332d 100644
+index a05f9a2..df1826b 100644
 --- a/drivers/mmc/host/mmci.h
 +++ b/drivers/mmc/host/mmci.h
-@@ -181,9 +181,9 @@
- #define MMCIFIFO		0x080 /* to 0x0bc */
+@@ -280,6 +280,7 @@ struct mmci_host_ops {
+ 	void (*get_next_data)(struct mmci_host *host, struct mmc_data *data);
+ 	int (*dma_setup)(struct mmci_host *host);
+ 	void (*dma_release)(struct mmci_host *host);
++	int (*dma_start)(struct mmci_host *host, unsigned int *datactrl);
+ };
  
- #define MCI_IRQENABLE	\
--	(MCI_CMDCRCFAILMASK|MCI_DATACRCFAILMASK|MCI_CMDTIMEOUTMASK|	\
--	MCI_DATATIMEOUTMASK|MCI_TXUNDERRUNMASK|MCI_RXOVERRUNMASK|	\
--	MCI_CMDRESPENDMASK|MCI_CMDSENTMASK|MCI_STARTBITERRMASK)
-+	(MCI_CMDCRCFAILMASK | MCI_DATACRCFAILMASK | MCI_CMDTIMEOUTMASK | \
-+	MCI_DATATIMEOUTMASK | MCI_TXUNDERRUNMASK | MCI_RXOVERRUNMASK |	\
-+	MCI_CMDRESPENDMASK | MCI_CMDSENTMASK)
+ struct mmci_host {
+@@ -337,4 +338,5 @@ void mmci_dmae_unprep_data(struct mmci_host *host, struct mmc_data *data,
+ void mmci_dmae_get_next_data(struct mmci_host *host, struct mmc_data *data);
+ int mmci_dmae_setup(struct mmci_host *host);
+ void mmci_dmae_release(struct mmci_host *host);
++int mmci_dmae_start(struct mmci_host *host, unsigned int *datactrl);
  
- /* These interrupts are directed to IRQ1 when two IRQ lines are available */
- #define MCI_IRQ1MASK \
+diff --git a/drivers/mmc/host/mmci_qcom_dml.c b/drivers/mmc/host/mmci_qcom_dml.c
+index e3e195d..e2e756c 100644
+--- a/drivers/mmc/host/mmci_qcom_dml.c
++++ b/drivers/mmc/host/mmci_qcom_dml.c
+@@ -187,6 +187,7 @@ static struct mmci_host_ops qcom_variant_ops = {
+ 	.get_next_data = mmci_dmae_get_next_data,
+ 	.dma_setup = qcom_dma_setup,
+ 	.dma_release = mmci_dmae_release,
++	.dma_start = mmci_dmae_start,
+ };
+ 
+ void qcom_variant_init(struct mmci_host *host)
 -- 
 2.7.4
