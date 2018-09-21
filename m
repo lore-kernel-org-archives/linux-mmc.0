@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V2 10/27] mmc: mmci: add dma_release callback
-Date: Fri, 21 Sep 2018 11:46:04 +0200
-Message-ID: <1537523181-14578-11-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V2 01/27] mmc: mmci: internalize dma map/unmap into mmci dma functions
+Date: Fri, 21 Sep 2018 11:45:55 +0200
+Message-ID: <1537523181-14578-2-git-send-email-ludovic.Barre@st.com>
 References: <1537523181-14578-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,91 +14,105 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-This patch adds dma_release callback at mmci_host_ops
-to allow to call specific variant.
-
-Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
-
-# Conflicts:
-#	drivers/mmc/host/mmci.h
+This patch internalizes the management of dma map/unmap into
+mmci dma interfaces. This allows to simplify and prepare the next dma
+callbacks for mmci host ops.
+mmci_dma_unmap was called in mmci_data_irq & mmci_cmd_irq functions
+and can be integrated in mmci_dma_data_error.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.c          | 13 ++++++++-----
- drivers/mmc/host/mmci.h          |  2 ++
- drivers/mmc/host/mmci_qcom_dml.c |  1 +
- 3 files changed, 11 insertions(+), 5 deletions(-)
+ drivers/mmc/host/mmci.c | 40 +++++++++++++++++-----------------------
+ 1 file changed, 17 insertions(+), 23 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 2a433ed..562b382 100644
+index 1841d250..bf0bb07 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -409,6 +409,12 @@ int mmci_dma_setup(struct mmci_host *host)
- 	return host->ops->dma_setup(host);
+@@ -482,16 +482,6 @@ static inline void mmci_dma_release(struct mmci_host *host)
+ 	host->dma_rx_channel = host->dma_tx_channel = NULL;
  }
  
-+void mmci_dma_release(struct mmci_host *host)
+-static void mmci_dma_data_error(struct mmci_host *host)
+-{
+-	dev_err(mmc_dev(host->mmc), "error during DMA transfer!\n");
+-	dmaengine_terminate_all(host->dma_current);
+-	host->dma_in_progress = false;
+-	host->dma_current = NULL;
+-	host->dma_desc_current = NULL;
+-	host->data->host_cookie = 0;
+-}
+-
+ static void mmci_dma_unmap(struct mmci_host *host, struct mmc_data *data)
+ {
+ 	struct dma_chan *chan;
+@@ -505,6 +495,18 @@ static void mmci_dma_unmap(struct mmci_host *host, struct mmc_data *data)
+ 		     mmc_get_dma_dir(data));
+ }
+ 
++static void mmci_dma_data_error(struct mmci_host *host)
 +{
-+	if (host->ops && host->ops->dma_release)
-+		host->ops->dma_release(host);
++	dev_err(mmc_dev(host->mmc), "error during DMA transfer!\n");
++	dmaengine_terminate_all(host->dma_current);
++	host->dma_in_progress = false;
++	host->dma_current = NULL;
++	host->dma_desc_current = NULL;
++	host->data->host_cookie = 0;
++
++	mmci_dma_unmap(host, host->data);
 +}
 +
- static void
- mmci_request_end(struct mmci_host *host, struct mmc_request *mrq)
+ static void mmci_dma_finalize(struct mmci_host *host, struct mmc_data *data)
  {
-@@ -546,7 +552,7 @@ int mmci_dmae_setup(struct mmci_host *host)
-  * This is used in or so inline it
-  * so it can be discarded.
-  */
--static inline void mmci_dma_release(struct mmci_host *host)
-+void mmci_dmae_release(struct mmci_host *host)
- {
- 	struct mmci_dmae_priv *dmae = host->dma_priv;
+ 	u32 status;
+@@ -528,10 +530,9 @@ static void mmci_dma_finalize(struct mmci_host *host, struct mmc_data *data)
+ 		mmci_dma_data_error(host);
+ 		if (!data->error)
+ 			data->error = -EIO;
+-	}
+-
+-	if (!data->host_cookie)
++	} else if (!data->host_cookie) {
+ 		mmci_dma_unmap(host, data);
++	}
  
-@@ -799,13 +805,10 @@ static struct mmci_host_ops mmci_variant_ops = {
- 	.unprep_data = mmci_dmae_unprep_data,
- 	.get_next_data = mmci_dmae_get_next_data,
- 	.dma_setup = mmci_dmae_setup,
-+	.dma_release = mmci_dmae_release,
- };
- #else
- /* Blank functions if the DMA engine is not available */
--static inline void mmci_dma_release(struct mmci_host *host)
+ 	/*
+ 	 * Use of DMA with scatter-gather is impossible.
+@@ -742,10 +743,6 @@ static inline void mmci_dma_release(struct mmci_host *host)
+ {
+ }
+ 
+-static inline void mmci_dma_unmap(struct mmci_host *host, struct mmc_data *data)
 -{
 -}
 -
  static inline void mmci_dma_finalize(struct mmci_host *host,
  				     struct mmc_data *data)
  {
-diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 72fe02d..a05f9a2 100644
---- a/drivers/mmc/host/mmci.h
-+++ b/drivers/mmc/host/mmci.h
-@@ -279,6 +279,7 @@ struct mmci_host_ops {
- 			    int err);
- 	void (*get_next_data)(struct mmci_host *host, struct mmc_data *data);
- 	int (*dma_setup)(struct mmci_host *host);
-+	void (*dma_release)(struct mmci_host *host);
- };
+@@ -906,10 +903,8 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
+ 		u32 remain, success;
  
- struct mmci_host {
-@@ -335,4 +336,5 @@ void mmci_dmae_unprep_data(struct mmci_host *host, struct mmc_data *data,
- 			   int err);
- void mmci_dmae_get_next_data(struct mmci_host *host, struct mmc_data *data);
- int mmci_dmae_setup(struct mmci_host *host);
-+void mmci_dmae_release(struct mmci_host *host);
+ 		/* Terminate the DMA transfer */
+-		if (dma_inprogress(host)) {
++		if (dma_inprogress(host))
+ 			mmci_dma_data_error(host);
+-			mmci_dma_unmap(host, data);
+-		}
  
-diff --git a/drivers/mmc/host/mmci_qcom_dml.c b/drivers/mmc/host/mmci_qcom_dml.c
-index 003c497..e3e195d 100644
---- a/drivers/mmc/host/mmci_qcom_dml.c
-+++ b/drivers/mmc/host/mmci_qcom_dml.c
-@@ -186,6 +186,7 @@ static struct mmci_host_ops qcom_variant_ops = {
- 	.unprep_data = mmci_dmae_unprep_data,
- 	.get_next_data = mmci_dmae_get_next_data,
- 	.dma_setup = qcom_dma_setup,
-+	.dma_release = mmci_dmae_release,
- };
- 
- void qcom_variant_init(struct mmci_host *host)
+ 		/*
+ 		 * Calculate how far we are into the transfer.  Note that
+@@ -1055,10 +1050,9 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+ 	if ((!sbc && !cmd->data) || cmd->error) {
+ 		if (host->data) {
+ 			/* Terminate the DMA transfer */
+-			if (dma_inprogress(host)) {
++			if (dma_inprogress(host))
+ 				mmci_dma_data_error(host);
+-				mmci_dma_unmap(host, host->data);
+-			}
++
+ 			mmci_stop_data(host);
+ 		}
+ 		mmci_request_end(host, host->mrq);
 -- 
 2.7.4
