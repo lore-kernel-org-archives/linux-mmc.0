@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V2 15/27] mmc: mmci: add set_clk/pwrreg callbacks
-Date: Fri, 21 Sep 2018 11:46:09 +0200
-Message-ID: <1537523181-14578-16-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V2 20/27] mmc: mmci: add variant property to define irq pio mask
+Date: Fri, 21 Sep 2018 11:46:14 +0200
+Message-ID: <1537523181-14578-21-git-send-email-ludovic.Barre@st.com>
 References: <1537523181-14578-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,80 +14,139 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-This patch adds set_clkreg and set_pwrreg callbacks
-at mmci_host_ops to allow to call specific variant.
-extends visibility of mmci_write_clk/pwrreg functions
-to be used into specific file variant.
+This patch allows to define specific pio mask for variants.
+Needed to support the STM32 sdmmc variant which has some bits
+with different meaning (bits: 21,20,13,12,9)
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.c | 16 ++++++++++++----
- drivers/mmc/host/mmci.h |  5 +++++
- 2 files changed, 17 insertions(+), 4 deletions(-)
+ drivers/mmc/host/mmci.c | 13 +++++++++++--
+ drivers/mmc/host/mmci.h |  5 ++++-
+ 2 files changed, 15 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 1593942..9d93fe7 100644
+index 761b50f..f61b10b 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -252,7 +252,7 @@ static void mmci_reg_delay(struct mmci_host *host)
- /*
-  * This must be called with host->lock held
-  */
--static void mmci_write_clkreg(struct mmci_host *host, u32 clk)
-+void mmci_write_clkreg(struct mmci_host *host, u32 clk)
- {
- 	if (host->clk_reg != clk) {
- 		host->clk_reg = clk;
-@@ -263,7 +263,7 @@ static void mmci_write_clkreg(struct mmci_host *host, u32 clk)
- /*
-  * This must be called with host->lock held
-  */
--static void mmci_write_pwrreg(struct mmci_host *host, u32 pwr)
-+void mmci_write_pwrreg(struct mmci_host *host, u32 pwr)
- {
- 	if (host->pwr_reg != pwr) {
- 		host->pwr_reg = pwr;
-@@ -1543,8 +1543,16 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+@@ -62,6 +62,7 @@ static struct variant_data variant_arm = {
+ 	.f_max			= 100000000,
+ 	.reversed_irq_handling	= true,
+ 	.mmcimask1		= true,
++	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
+ 	.start_err		= MCI_STARTBITERR,
+ 	.opendrain		= MCI_ROD,
+ 	.init			= mmci_variant_init,
+@@ -80,6 +81,7 @@ static struct variant_data variant_arm_extended_fifo = {
+ 	.pwrreg_powerup		= MCI_PWR_UP,
+ 	.f_max			= 100000000,
+ 	.mmcimask1		= true,
++	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
+ 	.start_err		= MCI_STARTBITERR,
+ 	.opendrain		= MCI_ROD,
+ 	.init			= mmci_variant_init,
+@@ -99,6 +101,7 @@ static struct variant_data variant_arm_extended_fifo_hwfc = {
+ 	.pwrreg_powerup		= MCI_PWR_UP,
+ 	.f_max			= 100000000,
+ 	.mmcimask1		= true,
++	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
+ 	.start_err		= MCI_STARTBITERR,
+ 	.opendrain		= MCI_ROD,
+ 	.init			= mmci_variant_init,
+@@ -124,6 +127,7 @@ static struct variant_data variant_u300 = {
+ 	.pwrreg_clkgate		= true,
+ 	.pwrreg_nopower		= true,
+ 	.mmcimask1		= true,
++	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
+ 	.start_err		= MCI_STARTBITERR,
+ 	.opendrain		= MCI_OD,
+ 	.init			= mmci_variant_init,
+@@ -150,6 +154,7 @@ static struct variant_data variant_nomadik = {
+ 	.pwrreg_clkgate		= true,
+ 	.pwrreg_nopower		= true,
+ 	.mmcimask1		= true,
++	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
+ 	.start_err		= MCI_STARTBITERR,
+ 	.opendrain		= MCI_OD,
+ 	.init			= mmci_variant_init,
+@@ -182,6 +187,7 @@ static struct variant_data variant_ux500 = {
+ 	.busy_detect_mask	= MCI_ST_BUSYENDMASK,
+ 	.pwrreg_nopower		= true,
+ 	.mmcimask1		= true,
++	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
+ 	.start_err		= MCI_STARTBITERR,
+ 	.opendrain		= MCI_OD,
+ 	.init			= mmci_variant_init,
+@@ -216,6 +222,7 @@ static struct variant_data variant_ux500v2 = {
+ 	.busy_detect_mask	= MCI_ST_BUSYENDMASK,
+ 	.pwrreg_nopower		= true,
+ 	.mmcimask1		= true,
++	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
+ 	.start_err		= MCI_STARTBITERR,
+ 	.opendrain		= MCI_OD,
+ 	.init			= mmci_variant_init,
+@@ -232,6 +239,7 @@ static struct variant_data variant_stm32 = {
+ 	.cmdreg_lrsp_crc	= MCI_CPSM_RESPONSE | MCI_CPSM_LONGRSP,
+ 	.cmdreg_srsp_crc	= MCI_CPSM_RESPONSE,
+ 	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
++	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
+ 	.datalength_bits	= 24,
+ 	.datactrl_blocksz	= 11,
+ 	.datactrl_dpsm_enable	= MCI_DPSM_ENABLE,
+@@ -268,6 +276,7 @@ static struct variant_data variant_qcom = {
+ 	.qcom_fifo		= true,
+ 	.qcom_dml		= true,
+ 	.mmcimask1		= true,
++	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
+ 	.start_err		= MCI_STARTBITERR,
+ 	.opendrain		= MCI_ROD,
+ 	.init			= qcom_variant_init,
+@@ -537,7 +546,7 @@ static void mmci_set_mask1(struct mmci_host *host, unsigned int mask)
+ 	if (host->singleirq) {
+ 		unsigned int mask0 = readl(base + MMCIMASK0);
  
- 	spin_lock_irqsave(&host->lock, flags);
+-		mask0 &= ~MCI_IRQ1MASK;
++		mask0 &= ~variant->irq_pio_mask;
+ 		mask0 |= mask;
  
--	mmci_set_clkreg(host, ios->clock);
--	mmci_write_pwrreg(host, pwr);
-+	if (host->ops && host->ops->set_clkreg)
-+		host->ops->set_clkreg(host, ios->clock);
-+	else
-+		mmci_set_clkreg(host, ios->clock);
-+
-+	if (host->ops && host->ops->set_pwrreg)
-+		host->ops->set_pwrreg(host, pwr);
-+	else
-+		mmci_write_pwrreg(host, pwr);
-+
- 	mmci_reg_delay(host);
+ 		writel(mask0, base + MMCIMASK0);
+@@ -1430,7 +1439,7 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
+ 			if (status & host->mask1_reg)
+ 				mmci_pio_irq(irq, dev_id);
  
- 	spin_unlock_irqrestore(&host->lock, flags);
+-			status &= ~MCI_IRQ1MASK;
++			status &= ~host->variant->irq_pio_mask;
+ 		}
+ 
+ 		/*
 diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index cf48377..44e06bb 100644
+index 52ff459..cd72c2e 100644
 --- a/drivers/mmc/host/mmci.h
 +++ b/drivers/mmc/host/mmci.h
-@@ -284,6 +284,8 @@ struct mmci_host_ops {
- 	int (*dma_start)(struct mmci_host *host, unsigned int *datactrl);
- 	void (*dma_finalize)(struct mmci_host *host, struct mmc_data *data);
- 	void (*dma_error)(struct mmci_host *host);
-+	void (*set_clkreg)(struct mmci_host *host, unsigned int desired);
-+	void (*set_pwrreg)(struct mmci_host *host, unsigned int pwr);
- };
+@@ -186,7 +186,7 @@
+ 	MCI_CMDRESPENDMASK | MCI_CMDSENTMASK)
  
- struct mmci_host {
-@@ -332,6 +334,9 @@ struct mmci_host {
- 	s32			next_cookie;
- };
+ /* These interrupts are directed to IRQ1 when two IRQ lines are available */
+-#define MCI_IRQ1MASK \
++#define MCI_IRQ_PIO_MASK \
+ 	(MCI_RXFIFOHALFFULLMASK | MCI_RXDATAAVLBLMASK | \
+ 	 MCI_TXFIFOHALFEMPTYMASK)
  
-+void mmci_write_clkreg(struct mmci_host *host, u32 clk);
-+void mmci_write_pwrreg(struct mmci_host *host, u32 pwr);
-+
- void mmci_variant_init(struct mmci_host *host);
- 
- int mmci_dmae_prep_data(struct mmci_host *host, struct mmc_data *data,
+@@ -239,6 +239,8 @@ struct mmci_host;
+  * @qcom_dml: enables qcom specific dma glue for dma transfers.
+  * @reversed_irq_handling: handle data irq before cmd irq.
+  * @mmcimask1: true if variant have a MMCIMASK1 register.
++ * @irq_pio_mask: bitmask used to manage interrupt pio transfert in mmcimask
++ *		  register
+  * @start_err: bitmask identifying the STARTBITERR bit inside MMCISTATUS
+  *	       register.
+  * @opendrain: bitmask identifying the OPENDRAIN bit inside MMCIPOWER register
+@@ -278,6 +280,7 @@ struct variant_data {
+ 	bool			qcom_dml;
+ 	bool			reversed_irq_handling;
+ 	bool			mmcimask1;
++	unsigned int		irq_pio_mask;
+ 	u32			start_err;
+ 	u32			opendrain;
+ 	void (*init)(struct mmci_host *host);
 -- 
 2.7.4
