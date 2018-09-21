@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V2 12/27] mmc: mmci: add dma_finalize callback
-Date: Fri, 21 Sep 2018 11:46:06 +0200
-Message-ID: <1537523181-14578-13-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V2 22/27] mmc: mmci: add variant property to not read datacnt
+Date: Fri, 21 Sep 2018 11:46:16 +0200
+Message-ID: <1537523181-14578-23-git-send-email-ludovic.Barre@st.com>
 References: <1537523181-14578-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,92 +14,57 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-This patch adds dma_finalize callback at mmci_host_ops
-to allow to call specific variant.
-
-Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
-
-# Conflicts:
-#	drivers/mmc/host/mmci.h
+This patch adds a boolean property to not read datacnt register.
+Needed to support the STM32 sdmmc variant. MMCIDATACNT
+register should be read only after the data transfer is completed.
+When reading after an error event the read data count value may be
+different from the real number of data bytes transferred.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.c          | 14 ++++++++------
- drivers/mmc/host/mmci.h          |  3 ++-
- drivers/mmc/host/mmci_qcom_dml.c |  1 +
- 3 files changed, 11 insertions(+), 7 deletions(-)
+ drivers/mmc/host/mmci.c | 8 ++++++--
+ drivers/mmc/host/mmci.h | 3 +++
+ 2 files changed, 9 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 10c7adc..1158d5c 100644
+index b525ba4..b1d5bc5 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -447,6 +447,12 @@ int mmci_dma_start(struct mmci_host *host, unsigned int datactrl)
- 	return 0;
- }
+@@ -1095,8 +1095,12 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
+ 		 * can be as much as a FIFO-worth of data ahead.  This
+ 		 * matters for FIFO overruns only.
+ 		 */
+-		remain = readl(host->base + MMCIDATACNT);
+-		success = data->blksz * data->blocks - remain;
++		if (!host->variant->datacnt_useless) {
++			remain = readl(host->base + MMCIDATACNT);
++			success = data->blksz * data->blocks - remain;
++		} else {
++			success = 0;
++		}
  
-+void mmci_dma_finalize(struct mmci_host *host, struct mmc_data *data)
-+{
-+	if (host->ops && host->ops->dma_finalize)
-+		host->ops->dma_finalize(host, data);
-+}
-+
- static void
- mmci_request_end(struct mmci_host *host, struct mmc_request *mrq)
- {
-@@ -626,7 +632,7 @@ static void mmci_dma_data_error(struct mmci_host *host)
- 	mmci_dma_unmap(host, host->data);
- }
- 
--static void mmci_dma_finalize(struct mmci_host *host, struct mmc_data *data)
-+void mmci_dmae_finalize(struct mmci_host *host, struct mmc_data *data)
- {
- 	struct mmci_dmae_priv *dmae = host->dma_priv;
- 	u32 status;
-@@ -820,14 +826,10 @@ static struct mmci_host_ops mmci_variant_ops = {
- 	.dma_setup = mmci_dmae_setup,
- 	.dma_release = mmci_dmae_release,
- 	.dma_start = mmci_dmae_start,
-+	.dma_finalize = mmci_dmae_finalize,
- };
- #else
- /* Blank functions if the DMA engine is not available */
--static inline void mmci_dma_finalize(struct mmci_host *host,
--				     struct mmc_data *data)
--{
--}
--
- static inline void mmci_dma_data_error(struct mmci_host *host)
- {
- }
+ 		dev_dbg(mmc_dev(host->mmc), "MCI ERROR IRQ, status 0x%08x at 0x%08x\n",
+ 			status_err, success);
 diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index df1826b..b793cfb 100644
+index 93e879b..e130689 100644
 --- a/drivers/mmc/host/mmci.h
 +++ b/drivers/mmc/host/mmci.h
-@@ -281,6 +281,7 @@ struct mmci_host_ops {
- 	int (*dma_setup)(struct mmci_host *host);
- 	void (*dma_release)(struct mmci_host *host);
- 	int (*dma_start)(struct mmci_host *host, unsigned int *datactrl);
-+	void (*dma_finalize)(struct mmci_host *host, struct mmc_data *data);
- };
- 
- struct mmci_host {
-@@ -339,4 +340,4 @@ void mmci_dmae_get_next_data(struct mmci_host *host, struct mmc_data *data);
- int mmci_dmae_setup(struct mmci_host *host);
- void mmci_dmae_release(struct mmci_host *host);
- int mmci_dmae_start(struct mmci_host *host, unsigned int *datactrl);
--
-+void mmci_dmae_finalize(struct mmci_host *host, struct mmc_data *data);
-diff --git a/drivers/mmc/host/mmci_qcom_dml.c b/drivers/mmc/host/mmci_qcom_dml.c
-index e2e756c..f1fd48a 100644
---- a/drivers/mmc/host/mmci_qcom_dml.c
-+++ b/drivers/mmc/host/mmci_qcom_dml.c
-@@ -188,6 +188,7 @@ static struct mmci_host_ops qcom_variant_ops = {
- 	.dma_setup = qcom_dma_setup,
- 	.dma_release = mmci_dmae_release,
- 	.dma_start = mmci_dmae_start,
-+	.dma_finalize = mmci_dmae_finalize,
- };
- 
- void qcom_variant_init(struct mmci_host *host)
+@@ -224,6 +224,8 @@ struct mmci_host;
+  * @datactrl_blksz: block size in power of two
+  * @datactrl_dpsm_enable: enable value for DPSM
+  * @datactrl_first: true if data must be setup before send command
++ * @datacnt_useless: true if you could not use datacnt register to read
++ *		     remaining data
+  * @pwrreg_powerup: power up value for MMCIPOWER register
+  * @f_max: maximum clk frequency supported by the controller.
+  * @signal_direction: input/out direction of bus signals can be indicated
+@@ -264,6 +266,7 @@ struct variant_data {
+ 	unsigned int		datactrl_blocksz;
+ 	unsigned int		datactrl_dpsm_enable;
+ 	bool			datactrl_first;
++	bool			datacnt_useless;
+ 	bool			st_sdio;
+ 	bool			st_clkdiv;
+ 	bool			blksz_datactrl16;
 -- 
 2.7.4
