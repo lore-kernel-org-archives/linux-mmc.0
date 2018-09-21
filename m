@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V2 22/27] mmc: mmci: add variant property to not read datacnt
-Date: Fri, 21 Sep 2018 11:46:16 +0200
-Message-ID: <1537523181-14578-23-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V2 15/27] mmc: mmci: add set_clk/pwrreg callbacks
+Date: Fri, 21 Sep 2018 11:46:09 +0200
+Message-ID: <1537523181-14578-16-git-send-email-ludovic.Barre@st.com>
 References: <1537523181-14578-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,57 +14,80 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-This patch adds a boolean property to not read datacnt register.
-Needed to support the STM32 sdmmc variant. MMCIDATACNT
-register should be read only after the data transfer is completed.
-When reading after an error event the read data count value may be
-different from the real number of data bytes transferred.
+This patch adds set_clkreg and set_pwrreg callbacks
+at mmci_host_ops to allow to call specific variant.
+extends visibility of mmci_write_clk/pwrreg functions
+to be used into specific file variant.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.c | 8 ++++++--
- drivers/mmc/host/mmci.h | 3 +++
- 2 files changed, 9 insertions(+), 2 deletions(-)
+ drivers/mmc/host/mmci.c | 16 ++++++++++++----
+ drivers/mmc/host/mmci.h |  5 +++++
+ 2 files changed, 17 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index b525ba4..b1d5bc5 100644
+index 1593942..9d93fe7 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -1095,8 +1095,12 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
- 		 * can be as much as a FIFO-worth of data ahead.  This
- 		 * matters for FIFO overruns only.
- 		 */
--		remain = readl(host->base + MMCIDATACNT);
--		success = data->blksz * data->blocks - remain;
-+		if (!host->variant->datacnt_useless) {
-+			remain = readl(host->base + MMCIDATACNT);
-+			success = data->blksz * data->blocks - remain;
-+		} else {
-+			success = 0;
-+		}
+@@ -252,7 +252,7 @@ static void mmci_reg_delay(struct mmci_host *host)
+ /*
+  * This must be called with host->lock held
+  */
+-static void mmci_write_clkreg(struct mmci_host *host, u32 clk)
++void mmci_write_clkreg(struct mmci_host *host, u32 clk)
+ {
+ 	if (host->clk_reg != clk) {
+ 		host->clk_reg = clk;
+@@ -263,7 +263,7 @@ static void mmci_write_clkreg(struct mmci_host *host, u32 clk)
+ /*
+  * This must be called with host->lock held
+  */
+-static void mmci_write_pwrreg(struct mmci_host *host, u32 pwr)
++void mmci_write_pwrreg(struct mmci_host *host, u32 pwr)
+ {
+ 	if (host->pwr_reg != pwr) {
+ 		host->pwr_reg = pwr;
+@@ -1543,8 +1543,16 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
  
- 		dev_dbg(mmc_dev(host->mmc), "MCI ERROR IRQ, status 0x%08x at 0x%08x\n",
- 			status_err, success);
+ 	spin_lock_irqsave(&host->lock, flags);
+ 
+-	mmci_set_clkreg(host, ios->clock);
+-	mmci_write_pwrreg(host, pwr);
++	if (host->ops && host->ops->set_clkreg)
++		host->ops->set_clkreg(host, ios->clock);
++	else
++		mmci_set_clkreg(host, ios->clock);
++
++	if (host->ops && host->ops->set_pwrreg)
++		host->ops->set_pwrreg(host, pwr);
++	else
++		mmci_write_pwrreg(host, pwr);
++
+ 	mmci_reg_delay(host);
+ 
+ 	spin_unlock_irqrestore(&host->lock, flags);
 diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 93e879b..e130689 100644
+index cf48377..44e06bb 100644
 --- a/drivers/mmc/host/mmci.h
 +++ b/drivers/mmc/host/mmci.h
-@@ -224,6 +224,8 @@ struct mmci_host;
-  * @datactrl_blksz: block size in power of two
-  * @datactrl_dpsm_enable: enable value for DPSM
-  * @datactrl_first: true if data must be setup before send command
-+ * @datacnt_useless: true if you could not use datacnt register to read
-+ *		     remaining data
-  * @pwrreg_powerup: power up value for MMCIPOWER register
-  * @f_max: maximum clk frequency supported by the controller.
-  * @signal_direction: input/out direction of bus signals can be indicated
-@@ -264,6 +266,7 @@ struct variant_data {
- 	unsigned int		datactrl_blocksz;
- 	unsigned int		datactrl_dpsm_enable;
- 	bool			datactrl_first;
-+	bool			datacnt_useless;
- 	bool			st_sdio;
- 	bool			st_clkdiv;
- 	bool			blksz_datactrl16;
+@@ -284,6 +284,8 @@ struct mmci_host_ops {
+ 	int (*dma_start)(struct mmci_host *host, unsigned int *datactrl);
+ 	void (*dma_finalize)(struct mmci_host *host, struct mmc_data *data);
+ 	void (*dma_error)(struct mmci_host *host);
++	void (*set_clkreg)(struct mmci_host *host, unsigned int desired);
++	void (*set_pwrreg)(struct mmci_host *host, unsigned int pwr);
+ };
+ 
+ struct mmci_host {
+@@ -332,6 +334,9 @@ struct mmci_host {
+ 	s32			next_cookie;
+ };
+ 
++void mmci_write_clkreg(struct mmci_host *host, u32 clk);
++void mmci_write_pwrreg(struct mmci_host *host, u32 pwr);
++
+ void mmci_variant_init(struct mmci_host *host);
+ 
+ int mmci_dmae_prep_data(struct mmci_host *host, struct mmc_data *data,
 -- 
 2.7.4
