@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V2 19/27] mmc: mmci: add variant property to define dpsm bit
-Date: Fri, 21 Sep 2018 11:46:13 +0200
-Message-ID: <1537523181-14578-20-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V2 16/27] mmc: mmci: add datactrl block size variant property
+Date: Fri, 21 Sep 2018 11:46:10 +0200
+Message-ID: <1537523181-14578-17-git-send-email-ludovic.Barre@st.com>
 References: <1537523181-14578-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,124 +14,124 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-This patch adds datactrl variant property to define
-dpsm enable bit. Needed to support the STM32 variant
-(STM32 has no dpsm enable bit).
+This patch allows to define a datactrl block size
+by variant, requested by STM32 sdmmc variant.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.c | 15 ++++++++++++---
+ drivers/mmc/host/mmci.c | 13 +++++++++++--
  drivers/mmc/host/mmci.h |  2 ++
- 2 files changed, 14 insertions(+), 3 deletions(-)
+ 2 files changed, 13 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 0b4425f..761b50f 100644
+index 9d93fe7..e2272c7 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -57,6 +57,7 @@ static struct variant_data variant_arm = {
- 	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
+@@ -52,6 +52,7 @@ static struct variant_data variant_arm = {
+ 	.fifosize		= 16 * 4,
+ 	.fifohalfsize		= 8 * 4,
  	.datalength_bits	= 16,
- 	.datactrl_blocksz	= 11,
-+	.datactrl_dpsm_enable	= MCI_DPSM_ENABLE,
++	.datactrl_blocksz	= 11,
  	.pwrreg_powerup		= MCI_PWR_UP,
  	.f_max			= 100000000,
  	.reversed_irq_handling	= true,
-@@ -75,6 +76,7 @@ static struct variant_data variant_arm_extended_fifo = {
- 	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
+@@ -65,6 +66,7 @@ static struct variant_data variant_arm_extended_fifo = {
+ 	.fifosize		= 128 * 4,
+ 	.fifohalfsize		= 64 * 4,
  	.datalength_bits	= 16,
- 	.datactrl_blocksz	= 11,
-+	.datactrl_dpsm_enable	= MCI_DPSM_ENABLE,
++	.datactrl_blocksz	= 11,
  	.pwrreg_powerup		= MCI_PWR_UP,
  	.f_max			= 100000000,
  	.mmcimask1		= true,
-@@ -93,6 +95,7 @@ static struct variant_data variant_arm_extended_fifo_hwfc = {
- 	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
+@@ -78,6 +80,7 @@ static struct variant_data variant_arm_extended_fifo_hwfc = {
+ 	.fifohalfsize		= 64 * 4,
+ 	.clkreg_enable		= MCI_ARM_HWFCEN,
  	.datalength_bits	= 16,
- 	.datactrl_blocksz	= 11,
-+	.datactrl_dpsm_enable	= MCI_DPSM_ENABLE,
++	.datactrl_blocksz	= 11,
  	.pwrreg_powerup		= MCI_PWR_UP,
  	.f_max			= 100000000,
  	.mmcimask1		= true,
-@@ -112,6 +115,7 @@ static struct variant_data variant_u300 = {
- 	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
+@@ -92,6 +95,7 @@ static struct variant_data variant_u300 = {
+ 	.clkreg_enable		= MCI_ST_U300_HWFCEN,
+ 	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
  	.datalength_bits	= 16,
- 	.datactrl_blocksz	= 11,
-+	.datactrl_dpsm_enable	= MCI_DPSM_ENABLE,
++	.datactrl_blocksz	= 11,
  	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
  	.st_sdio			= true,
  	.pwrreg_powerup		= MCI_PWR_ON,
-@@ -136,6 +140,7 @@ static struct variant_data variant_nomadik = {
- 	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
+@@ -111,6 +115,7 @@ static struct variant_data variant_nomadik = {
+ 	.clkreg			= MCI_CLK_ENABLE,
+ 	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
  	.datalength_bits	= 24,
- 	.datactrl_blocksz	= 11,
-+	.datactrl_dpsm_enable	= MCI_DPSM_ENABLE,
++	.datactrl_blocksz	= 11,
  	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
  	.st_sdio		= true,
  	.st_clkdiv		= true,
-@@ -163,6 +168,7 @@ static struct variant_data variant_ux500 = {
- 	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
+@@ -133,6 +138,7 @@ static struct variant_data variant_ux500 = {
+ 	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
+ 	.clkreg_neg_edge_enable	= MCI_ST_UX500_NEG_EDGE,
  	.datalength_bits	= 24,
- 	.datactrl_blocksz	= 11,
-+	.datactrl_dpsm_enable	= MCI_DPSM_ENABLE,
++	.datactrl_blocksz	= 11,
  	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
  	.st_sdio		= true,
  	.st_clkdiv		= true,
-@@ -195,6 +201,7 @@ static struct variant_data variant_ux500v2 = {
+@@ -160,6 +166,7 @@ static struct variant_data variant_ux500v2 = {
+ 	.clkreg_neg_edge_enable	= MCI_ST_UX500_NEG_EDGE,
  	.datactrl_mask_ddrmode	= MCI_DPSM_ST_DDRMODE,
  	.datalength_bits	= 24,
- 	.datactrl_blocksz	= 11,
-+	.datactrl_dpsm_enable	= MCI_DPSM_ENABLE,
++	.datactrl_blocksz	= 11,
  	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
  	.st_sdio		= true,
  	.st_clkdiv		= true,
-@@ -227,6 +234,7 @@ static struct variant_data variant_stm32 = {
- 	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
+@@ -187,6 +194,7 @@ static struct variant_data variant_stm32 = {
+ 	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
+ 	.clkreg_neg_edge_enable	= MCI_ST_UX500_NEG_EDGE,
  	.datalength_bits	= 24,
- 	.datactrl_blocksz	= 11,
-+	.datactrl_dpsm_enable	= MCI_DPSM_ENABLE,
++	.datactrl_blocksz	= 11,
  	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
  	.st_sdio		= true,
  	.st_clkdiv		= true,
-@@ -253,6 +261,7 @@ static struct variant_data variant_qcom = {
+@@ -208,6 +216,7 @@ static struct variant_data variant_qcom = {
+ 	.data_cmd_enable	= MCI_CPSM_QCOM_DATCMD,
  	.blksz_datactrl4	= true,
  	.datalength_bits	= 24,
- 	.datactrl_blocksz	= 11,
-+	.datactrl_dpsm_enable	= MCI_DPSM_ENABLE,
++	.datactrl_blocksz	= 11,
  	.pwrreg_powerup		= MCI_PWR_UP,
  	.f_max			= 208000000,
  	.explicit_mclk_control	= true,
-@@ -948,11 +957,11 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
- 	BUG_ON(1 << blksz_bits != data->blksz);
+@@ -1840,13 +1849,13 @@ static int mmci_probe(struct amba_device *dev,
+ 	/*
+ 	 * Block size can be up to 2048 bytes, but must be a power of two.
+ 	 */
+-	mmc->max_blk_size = 1 << 11;
++	mmc->max_blk_size = 1 << variant->datactrl_blocksz;
  
- 	if (variant->blksz_datactrl16)
--		datactrl = MCI_DPSM_ENABLE | (data->blksz << 16);
-+		datactrl = variant->datactrl_dpsm_enable | (data->blksz << 16);
- 	else if (variant->blksz_datactrl4)
--		datactrl = MCI_DPSM_ENABLE | (data->blksz << 4);
-+		datactrl = variant->datactrl_dpsm_enable | (data->blksz << 4);
- 	else
--		datactrl = MCI_DPSM_ENABLE | blksz_bits << 4;
-+		datactrl = variant->datactrl_dpsm_enable | blksz_bits << 4;
+ 	/*
+ 	 * Limit the number of blocks transferred so that we don't overflow
+ 	 * the maximum request size.
+ 	 */
+-	mmc->max_blk_count = mmc->max_req_size >> 11;
++	mmc->max_blk_count = mmc->max_req_size >> variant->datactrl_blocksz;
  
- 	if (data->flags & MMC_DATA_READ)
- 		datactrl |= MCI_DPSM_DIRECTION;
+ 	spin_lock_init(&host->lock);
+ 
 diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 6e71ee77..52ff459 100644
+index 44e06bb..46c8862 100644
 --- a/drivers/mmc/host/mmci.h
 +++ b/drivers/mmc/host/mmci.h
-@@ -222,6 +222,7 @@ struct mmci_host;
+@@ -217,6 +217,7 @@ struct mmci_host;
+  * @blksz_datactrl4: true if Block size is at b4..b16 position in datactrl
   *		     register
   * @datactrl_mask_sdio: SDIO enable mask in datactrl register
-  * @datactrl_blksz: block size in power of two
-+ * @datactrl_dpsm_enable: enable value for DPSM
++ * @datactrl_blksz: block size in power of two
   * @pwrreg_powerup: power up value for MMCIPOWER register
   * @f_max: maximum clk frequency supported by the controller.
   * @signal_direction: input/out direction of bus signals can be indicated
-@@ -258,6 +259,7 @@ struct variant_data {
+@@ -248,6 +249,7 @@ struct variant_data {
+ 	unsigned int		data_cmd_enable;
  	unsigned int		datactrl_mask_ddrmode;
  	unsigned int		datactrl_mask_sdio;
- 	unsigned int		datactrl_blocksz;
-+	unsigned int		datactrl_dpsm_enable;
++	unsigned int		datactrl_blocksz;
  	bool			st_sdio;
  	bool			st_clkdiv;
  	bool			blksz_datactrl16;
