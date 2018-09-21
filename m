@@ -1,160 +1,58 @@
-From: Janusz Krzysztofik <jmkrzyszt@gmail.com>
-Subject: Re: [PATCH v7 4/4] gpiolib: Implement fast processing path in get/set array
-Date: Fri, 21 Sep 2018 13:26:25 +0200
-Message-ID: <CAGfqbt6chUGTDQ-yjppMydet+LFLAjpVzzRsr4+ho3Nu9y_2UQ@mail.gmail.com>
-References: <20180831225616.29221-1-jmkrzyszt@gmail.com> <20180920101151eucas1p221f5a1715b8556bb9d99bf08fe09ce6f~WE-_cEf4l0754207542eucas1p27@eucas1p2.samsung.com>
- <9860023.SlBYqtbjDV@z50> <CGME20180920161947epcas3p491e6c136fe05d9672c81b7b4b8328f64@epcas3p4.samsung.com>
- <15226900.TQMLYV7PZ0@z50> <20180921081806eucas1p182d4646e8510b5f0356214af7edba11e~WXF8Ptw4M0970709707eucas1p1p@eucas1p1.samsung.com>
- <CAGfqbt7xJxGbq3oOJp9S0Sg7Z9=T6Dy52MDNWSDdsU==kPt1KQ@mail.gmail.com>
+From: Anand Moon <linux.amoon@gmail.com>
+Subject: Re: [PATCHv3 0/7] Add support for UHS-I on Exynos5422 odroid boards
+Date: Fri, 21 Sep 2018 18:00:18 +0530
+Message-ID: <CANAwSgT-1pz-NQMb68F7m0rAFNkpCOyFqFPf7-HbZe+92+sPPQ@mail.gmail.com>
+References: <20180920175826.1284-1-linux.amoon@gmail.com> <CAJKOXPdsAK1_9JRzq7_pVfDwBK6WGkFbYUsbcsujCh31Fzsz6g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAGfqbt7xJxGbq3oOJp9S0Sg7Z9=T6Dy52MDNWSDdsU==kPt1KQ@mail.gmail.com>
+In-Reply-To: <CAJKOXPdsAK1_9JRzq7_pVfDwBK6WGkFbYUsbcsujCh31Fzsz6g@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Marek Szyprowski <m.szyprowski@samsung.com>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Jonathan Corbet <corbet@lwn.net>, Miguel Ojeda Sandonis <miguel.ojeda.sandonis@gmail.com>, Peter Korsgaard <peter.korsgaard@barco.com>, Peter Rosin <peda@axentia.se>, Ulf Hansson <ulf.hansson@linaro.org>, Andrew Lunn <andrew@lunn.ch>, Florian Fainelli <f.fainelli@gmail.com>, "David S. Miller" <davem@davemloft.net>, Dominik Brodowski <linux@dominikbrodowski.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kishon Vijay Abraham I <kishon@ti.com>, Lars-Peter Clausen <lars@metafoo.de>, Michael Hennerich <Michael.Hennerich@analog.com>, Jonathan Cameron <jic23@kernel.org>, Hartmut Knaack <knaack.h@gmx.de>, Peter Meerwald-Stadler <pmeerw@pmeerw.net>, Jiri Slaby <jslaby@suse.com>, Willy Tarreau <w@1wt.eu>
+To: Krzysztof Kozlowski <krzk@kernel.org>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Kukjin Kim <kgene@kernel.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, devicetree <devicetree@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, linux-samsung-soc@vger.kernel.org, Linux Kernel <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Marek,
+Hi Krzysztof,
 
-2018-09-21 12:51 GMT+02:00, Janusz Krzysztofik <jmkrzyszt@gmail.com>:
-> Hi Marek,
+On Fri, 21 Sep 2018 at 16:26, Krzysztof Kozlowski <krzk@kernel.org> wrote:
 >
-> 2018-09-21 10:18 GMT+02:00, Marek Szyprowski <m.szyprowski@samsung.com>:
->> Hi Janusz,
->>
->> On 2018-09-20 18:21, Janusz Krzysztofik wrote:
->>> On Thursday, September 20, 2018 5:48:22 PM CEST Janusz Krzysztofik
->>> wrote:
->>>> On Thursday, September 20, 2018 12:11:48 PM CEST Marek Szyprowski
->>>> wrote:
->>>>> On 2018-09-02 14:01, Janusz Krzysztofik wrote:
->>>>>> Certain GPIO descriptor arrays returned by gpio_get_array() may
->>>>>> contain
->>>>>> information on direct mapping of array members to pins of a single
->>>>>> GPIO
->>>>>> chip in hardware order.  In such cases, bitmaps of values can be
->>>>>> passed
->>>>>> directly from/to the chip's .get/set_multiple() callbacks without
->>>>>> wasting time on iterations.
->>>>>>
->>>>>> Add respective code to gpiod_get/set_array_bitmap_complex()
->>>>>> functions.
->>>>>> Pins not applicable for fast path are processed as before, skipping
->>>>>> over the 'fast' ones.
->>>>>>
->>>>>> Cc: Jonathan Corbet <corbet@lwn.net>
->>>>>> Signed-off-by: Janusz Krzysztofik <jmkrzyszt@gmail.com>
->>>>> I've just noticed that this patch landed in today's linux-next. Sadly
->>>>> it
->>>>> breaks booting of Exynos5250-based Samsung Snow Chromebook (ARM 32bit,
->>>>> device-tree source arch/arm/boot/dts/exynos5250-snow.dts).
->>>>>
->>>>> Booting hangs after detecting MMC cards. Reverting this patch fixes
->>>>> the
->>>>> boot. I will try later to add some debugs and investigate it further
->>>>> what
->>>>> really happens when booting hangs.
->>>> Hi Marek,
->>>>
->>>> Thanks for reporting. Could you please try the following fix?
->>> Hi again,
->>>
->>> I realized the patch was not correct, j, not i, should be updated in
->>> second
->>> hunk. Please try the following one.
->>>
->>> Thanks,
->>> Janusz
->>>
->>> >From a919c504850f6cb40e8e81267a3a37537f7c4fd4 Mon Sep 17 00:00:00 2001
->>> From: Janusz Krzysztofik <jmkrzyszt@gmail.com>
->>> Date: Thu, 20 Sep 2018 17:37:21 +0200
->>> Subject: [PATCH] gpiolib: Fix bitmap index not updated
->>> While skipping fast path bits, bitmap index is not updated with next
->>> found zero bit position. Fix it.
->>>
->>> Signed-off-by: Janusz Krzysztofik <jmkrzyszt@gmail.com>
->>
->> This one also doesn't help. A quick compare of logs with this version and
->> a working system shows, that with your patch (and fix) there are no calls
->> to
->> gpx0-2 pin (which are a part of mmc pwrseq), what causes mmc failure. If
->> you need any more information (what kind of logs will help?), let me
->> know.
+> On Thu, 20 Sep 2018 at 19:58, Anand Moon <linux.amoon@gmail.com> wrote:
+> >
+> > This is series v3 since my previous patches we incomplete with driver
+> > changes missing.
+> >
+> > These changes add UHS-I tuning for dw_mmc-exynos driver.
+> > Some new patches are added to enhance the performace.
+>
+> Patches look like based on some older version of kernel tree (or
+> current mainline) and probably they will not apply on my tree. The
+> easiest is to base on top of linux-next or, for DTS patches, on my
+> next/dt branch.
+>
+> Best regards,
+> Krzysztof
+>
+Yes this patch is based on current mainline.
+I will try to re-base on your next/dt branch and resend them.
 
-One more question. You said before that booting hanged after detecting MMC
-cards.  Without the fix, I could imagine it keeps iterating with index not
-updated and simply never returns from gpiod_get/set_array_bitmap_complex().
-Is the behaviour you observe the same with the fix applied?
-
-Thanks,
-Janusz
-
-> There is a debug message on array_info content available at the end of
-> gpiod_get_array(), could you please activate it and post the message so
-> we can understand better what is going on?
->
-> On the other hand, I've had a look your device-tree configuration and
-> it looks like that specific setup won't benefit from the fast bitmap path.
-> You have pin 2 at position 0 and pin 1 at position 1 of the array.
-> Hence, the fast bitmap path covers only pin 1, and pin 2 is processed
-> by the old path with apparently buggy code for skipping over fast pins.
->
-> As a temporary workaround, you could try to revert the order of pins in
-> your dts file (pin 1 at position 0, pin 2 at 1) and the mmc pwrseq code
-> should work for you again by taking the original old path, not skipping
-> over fast pins.  Results of such check may also help us to better
-> understand and resolve the issue.
->
-> Thanks,
-> Janusz
->
->>
->>> ---
->>>   drivers/gpio/gpiolib.c | 7 ++++---
->>>   1 file changed, 4 insertions(+), 3 deletions(-)
->>>
->>> diff --git a/drivers/gpio/gpiolib.c b/drivers/gpio/gpiolib.c
->>> index a53d17745d21..369bdd358fcc 100644
->>> --- a/drivers/gpio/gpiolib.c
->>> +++ b/drivers/gpio/gpiolib.c
->>> @@ -2880,7 +2880,7 @@ int gpiod_get_array_value_complex(bool raw, bool
->>> can_sleep,
->>>   			__set_bit(hwgpio, mask);
->>>
->>>   			if (array_info)
->>> -				find_next_zero_bit(array_info->get_mask,
->>> +				i = find_next_zero_bit(array_info->get_mask,
->>>   						   array_size, i);
->>>   			else
->>>   				i++;
->>> @@ -2905,7 +2905,8 @@ int gpiod_get_array_value_complex(bool raw, bool
->>> can_sleep,
->>>   			trace_gpio_value(desc_to_gpio(desc), 1, value);
->>>
->>>   			if (array_info)
->>> -				find_next_zero_bit(array_info->get_mask, i, j);
->>> +				j = find_next_zero_bit(array_info->get_mask, i,
->>> +						       j);
->>>   			else
->>>   				j++;
->>>   		}
->>> @@ -3192,7 +3193,7 @@ int gpiod_set_array_value_complex(bool raw, bool
->>> can_sleep,
->>>   			}
->>>
->>>   			if (array_info)
->>> -				find_next_zero_bit(array_info->set_mask,
->>> +				i = find_next_zero_bit(array_info->set_mask,
->>>   						   array_size, i);
->>>   			else
->>>   				i++;
->>
->> Best regards
->> --
->> Marek Szyprowski, PhD
->> Samsung R&D Institute Poland
->>
->>
->
+Best Regards
+-Anand
+> >
+> > Anand Moon (7):
+> >   ARM: dts: exynos5422: Added UHS-I bus speed support
+> >   ARM: dts: exynos5422: fix regulator min values of LDO13 for Odroid
+> >     XU3/XU4
+> >   ARM: dts: exynos5422: update maximum frequency for sdcard to 200MHz
+> >   ARM: dts: exynos5422: use cd-gpio method to detect sd-card
+> >   ARM: dts: exynos5422: use wp-gpio method to detect sd-card
+> >   ARM: dts: exynos5422: update maximum frequency for emmc to 200MHz
+> >   mmc: dw_mmc-exynos: Add tuning for sdr and ddr timing for USH-I mode
+> >
+> >  arch/arm/boot/dts/exynos5422-odroid-core.dtsi      |  8 +++++++-
+> >  arch/arm/boot/dts/exynos5422-odroidxu3-common.dtsi |  1 +
+> >  drivers/mmc/host/dw_mmc-exynos.c                   | 11 +++++++++++
+> >  3 files changed, 19 insertions(+), 1 deletion(-)
+> >
+> > --
+> > 2.17.1
+> >
