@@ -1,118 +1,76 @@
-From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V2 01/27] mmc: mmci: internalize dma map/unmap into mmci dma functions
-Date: Fri, 21 Sep 2018 11:45:55 +0200
-Message-ID: <1537523181-14578-2-git-send-email-ludovic.Barre@st.com>
-References: <1537523181-14578-1-git-send-email-ludovic.Barre@st.com>
+From: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Subject: Re: [PATCH V2 2/3] dt-bindings: mmc: sdhci-msm: Add entries for
+ passing load values
+Date: Fri, 21 Sep 2018 16:02:06 +0530
+Message-ID: <8f26b82c-b966-11d3-4fb6-0137a0a8cd4a@codeaurora.org>
+References: <1537424558-17989-1-git-send-email-vbadigan@codeaurora.org>
+ <1537424558-17989-3-git-send-email-vbadigan@codeaurora.org>
+ <CAE=gft6w_iV+vm=u=ZKNvDLVTHcAO+AR0A9Yg9etTHW8bJy05w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1537523181-14578-1-git-send-email-ludovic.Barre@st.com>
+In-Reply-To: <CAE=gft6w_iV+vm=u=ZKNvDLVTHcAO+AR0A9Yg9etTHW8bJy05w@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
-Cc: Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, benjamin.gaignard@linaro.org, Gerald Baeza <gerald.baeza@st.com>, Loic Pallardy <loic.pallardy@st.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com, Ludovic Barre <ludovic.barre@st.com>
+To: Evan Green <evgreen@chromium.org>
+Cc: adrian.hunter@intel.com, Ulf Hansson <ulf.hansson@linaro.org>, robh+dt@kernel.org, linux-mmc@vger.kernel.org, asutoshd@codeaurora.org, riteshh@codeaurora.org, stummala@codeaurora.org, sayali <sayalil@codeaurora.org>, Doug Anderson <dianders@google.com>, vviswana@codeaurora.org, mark.rutland@arm.com, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Ludovic Barre <ludovic.barre@st.com>
+Hi Evan,
 
-This patch internalizes the management of dma map/unmap into
-mmci dma interfaces. This allows to simplify and prepare the next dma
-callbacks for mmci host ops.
-mmci_dma_unmap was called in mmci_data_irq & mmci_cmd_irq functions
-and can be integrated in mmci_dma_data_error.
 
-Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
----
- drivers/mmc/host/mmci.c | 40 +++++++++++++++++-----------------------
- 1 file changed, 17 insertions(+), 23 deletions(-)
+On 9/21/2018 5:45 AM, Evan Green wrote:
+> On Wed, Sep 19, 2018 at 11:24 PM Veerabhadrarao Badiganti
+> <vbadigan@codeaurora.org> wrote:
+>> From: Vijay Viswanath <vviswana@codeaurora.org>
+>>
+>> The load a particular sdhc controller should request from a regulator
+>> is device specific and hence each device should individually vote for
+>> the required load.
+>>
+>> Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
+>> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+>> ---
+>>   Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 6 ++++++
+>>   1 file changed, 6 insertions(+)
+>>
+>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+>> index 502b3b8..3720385 100644
+>> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+>> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+>> @@ -26,6 +26,11 @@ Required properties:
+>>          "cal"   - reference clock for RCLK delay calibration (optional)
+>>          "sleep" - sleep clock for RCLK delay calibration (optional)
+>>
+>> +Optional properties:
+>> +- qcom,<supply>-current-level-microamp - specifies load levels for supply during BUS_ON and
+>> +                                       BUS_OFF states in power irq. Should be specified in
+>> +                                       pairs (lpm, hpm), for BUS_OFF and BUS_ON respectively.
+>> +                                       Units uA.
+>>   Example:
+>>
+>>          sdhc_1: sdhci@f9824900 {
+>> @@ -37,6 +42,7 @@ Example:
+>>
+>>                  vmmc-supply = <&pm8941_l20>;
+>>                  vqmmc-supply = <&pm8941_s3>;
+>> +               qcom,vqmmc-current-level-microamp = <200 22000>;
+>>
+>>                  pinctrl-names = "default";
+>>                  pinctrl-0 = <&sdc1_clk &sdc1_cmd &sdc1_data>;
+>> --
+>> Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc., is a member of Code Aurora Forum, a Linux Foundation Collaborative Project
+>>
+> Aren't the regulator load levels pretty coarse? Would it be safe to
+> say that pretty much all sd/mmc devices need the high powered mode, or
+> are there really some devices that can get by with LPM all the time?
+> -Evan
+The load levels here are min and max supported by the regulator. To 
+cover all devices
+we do set it to max load. We can't make any assumptions on this,  as 
+peak current may vary
+from device to device.
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 1841d250..bf0bb07 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -482,16 +482,6 @@ static inline void mmci_dma_release(struct mmci_host *host)
- 	host->dma_rx_channel = host->dma_tx_channel = NULL;
- }
- 
--static void mmci_dma_data_error(struct mmci_host *host)
--{
--	dev_err(mmc_dev(host->mmc), "error during DMA transfer!\n");
--	dmaengine_terminate_all(host->dma_current);
--	host->dma_in_progress = false;
--	host->dma_current = NULL;
--	host->dma_desc_current = NULL;
--	host->data->host_cookie = 0;
--}
--
- static void mmci_dma_unmap(struct mmci_host *host, struct mmc_data *data)
- {
- 	struct dma_chan *chan;
-@@ -505,6 +495,18 @@ static void mmci_dma_unmap(struct mmci_host *host, struct mmc_data *data)
- 		     mmc_get_dma_dir(data));
- }
- 
-+static void mmci_dma_data_error(struct mmci_host *host)
-+{
-+	dev_err(mmc_dev(host->mmc), "error during DMA transfer!\n");
-+	dmaengine_terminate_all(host->dma_current);
-+	host->dma_in_progress = false;
-+	host->dma_current = NULL;
-+	host->dma_desc_current = NULL;
-+	host->data->host_cookie = 0;
-+
-+	mmci_dma_unmap(host, host->data);
-+}
-+
- static void mmci_dma_finalize(struct mmci_host *host, struct mmc_data *data)
- {
- 	u32 status;
-@@ -528,10 +530,9 @@ static void mmci_dma_finalize(struct mmci_host *host, struct mmc_data *data)
- 		mmci_dma_data_error(host);
- 		if (!data->error)
- 			data->error = -EIO;
--	}
--
--	if (!data->host_cookie)
-+	} else if (!data->host_cookie) {
- 		mmci_dma_unmap(host, data);
-+	}
- 
- 	/*
- 	 * Use of DMA with scatter-gather is impossible.
-@@ -742,10 +743,6 @@ static inline void mmci_dma_release(struct mmci_host *host)
- {
- }
- 
--static inline void mmci_dma_unmap(struct mmci_host *host, struct mmc_data *data)
--{
--}
--
- static inline void mmci_dma_finalize(struct mmci_host *host,
- 				     struct mmc_data *data)
- {
-@@ -906,10 +903,8 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
- 		u32 remain, success;
- 
- 		/* Terminate the DMA transfer */
--		if (dma_inprogress(host)) {
-+		if (dma_inprogress(host))
- 			mmci_dma_data_error(host);
--			mmci_dma_unmap(host, data);
--		}
- 
- 		/*
- 		 * Calculate how far we are into the transfer.  Note that
-@@ -1055,10 +1050,9 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
- 	if ((!sbc && !cmd->data) || cmd->error) {
- 		if (host->data) {
- 			/* Terminate the DMA transfer */
--			if (dma_inprogress(host)) {
-+			if (dma_inprogress(host))
- 				mmci_dma_data_error(host);
--				mmci_dma_unmap(host, host->data);
--			}
-+
- 			mmci_stop_data(host);
- 		}
- 		mmci_request_end(host, host->mrq);
--- 
-2.7.4
+Thanks,
+Veera
