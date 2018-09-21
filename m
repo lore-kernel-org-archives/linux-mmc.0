@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V2 02/27] mmc: mmci: internalize dma_inprogress into mmci dma functions
-Date: Fri, 21 Sep 2018 11:45:56 +0200
-Message-ID: <1537523181-14578-3-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V2 06/27] mmc: mmci: merge prepare data functions
+Date: Fri, 21 Sep 2018 11:46:00 +0200
+Message-ID: <1537523181-14578-7-git-send-email-ludovic.Barre@st.com>
 References: <1537523181-14578-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,87 +14,70 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-This patch internalizes the dma_inprogress into mmci dma interfaces.
-This allows to simplify and prepare the next dma callbacks
-for mmci host ops. dma_inprogress is called in mmci_dma_data_error
-and mmci_dma_finalize.
+This patch merges the prepare data functions.
+This allows to define a single access to prepare data service.
+This prepares integration for mmci host ops.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
-change v3:
--remove __dma_inprogress rename
+change v2:
+-rename to mmci_prep/unprep_data
 
- drivers/mmc/host/mmci.c | 16 ++++++++++------
- drivers/mmc/host/mmci.h |  2 --
- 2 files changed, 10 insertions(+), 8 deletions(-)
+ drivers/mmc/host/mmci.c | 19 +++++++------------
+ 1 file changed, 7 insertions(+), 12 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index bf0bb07..cbd67bc 100644
+index 43f2a1a..0cbe71c 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -497,6 +497,9 @@ static void mmci_dma_unmap(struct mmci_host *host, struct mmc_data *data)
+@@ -652,10 +652,14 @@ static int __mmci_dma_prep_data(struct mmci_host *host, struct mmc_data *data,
+ }
  
- static void mmci_dma_data_error(struct mmci_host *host)
+ static inline int mmci_dma_prep_data(struct mmci_host *host,
+-				     struct mmc_data *data)
++				     struct mmc_data *data,
++				     bool next)
  {
-+	if (!dma_inprogress(host))
-+		return;
-+
- 	dev_err(mmc_dev(host->mmc), "error during DMA transfer!\n");
- 	dmaengine_terminate_all(host->dma_current);
- 	host->dma_in_progress = false;
-@@ -512,6 +515,9 @@ static void mmci_dma_finalize(struct mmci_host *host, struct mmc_data *data)
- 	u32 status;
- 	int i;
+ 	struct mmci_dmae_priv *dmae = host->dma_priv;
++	struct mmci_dmae_next *nd = &dmae->next_data;
  
-+	if (!dma_inprogress(host))
-+		return;
-+
- 	/* Wait up to 1ms for the DMA to complete */
- 	for (i = 0; ; i++) {
- 		status = readl(host->base + MMCISTATUS);
-@@ -903,8 +909,7 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
- 		u32 remain, success;
++	if (next)
++		return __mmci_dma_prep_data(host, data, &nd->chan, &nd->desc);
+ 	/* Check if next job is already prepared. */
+ 	if (dmae->cur && dmae->desc_current)
+ 		return 0;
+@@ -665,22 +669,13 @@ static inline int mmci_dma_prep_data(struct mmci_host *host,
+ 				    &dmae->desc_current);
+ }
  
- 		/* Terminate the DMA transfer */
--		if (dma_inprogress(host))
--			mmci_dma_data_error(host);
-+		mmci_dma_data_error(host);
+-static inline int mmci_dma_prep_next(struct mmci_host *host,
+-				     struct mmc_data *data)
+-{
+-	struct mmci_dmae_priv *dmae = host->dma_priv;
+-	struct mmci_dmae_next *nd = &dmae->next_data;
+-
+-	return __mmci_dma_prep_data(host, data, &nd->chan, &nd->desc);
+-}
+-
+ static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
+ {
+ 	struct mmci_dmae_priv *dmae = host->dma_priv;
+ 	struct mmc_data *data = host->data;
+ 	int ret;
  
- 		/*
- 		 * Calculate how far we are into the transfer.  Note that
-@@ -942,8 +947,8 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
- 		dev_err(mmc_dev(host->mmc), "stray MCI_DATABLOCKEND interrupt\n");
+-	ret = mmci_dma_prep_data(host, host->data);
++	ret = mmci_dma_prep_data(host, host->data, false);
+ 	if (ret)
+ 		return ret;
  
- 	if (status & MCI_DATAEND || data->error) {
--		if (dma_inprogress(host))
--			mmci_dma_finalize(host, data);
-+		mmci_dma_finalize(host, data);
-+
- 		mmci_stop_data(host);
+@@ -737,7 +732,7 @@ static void mmci_pre_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 	if (mmci_validate_data(host, data))
+ 		return;
  
- 		if (!data->error)
-@@ -1050,8 +1055,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
- 	if ((!sbc && !cmd->data) || cmd->error) {
- 		if (host->data) {
- 			/* Terminate the DMA transfer */
--			if (dma_inprogress(host))
--				mmci_dma_data_error(host);
-+			mmci_dma_data_error(host);
- 
- 			mmci_stop_data(host);
- 		}
-diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 517591d..21aaf9a 100644
---- a/drivers/mmc/host/mmci.h
-+++ b/drivers/mmc/host/mmci.h
-@@ -333,8 +333,6 @@ struct mmci_host {
- 	bool			dma_in_progress;
- 
- #define dma_inprogress(host)	((host)->dma_in_progress)
--#else
--#define dma_inprogress(host)	(0)
- #endif
- };
- 
+-	if (!mmci_dma_prep_next(host, data))
++	if (!mmci_dma_prep_data(host, data, true))
+ 		data->host_cookie = ++host->next_cookie < 0 ?
+ 			1 : host->next_cookie;
+ }
 -- 
 2.7.4
