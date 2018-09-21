@@ -1,15 +1,15 @@
 From: Evan Green <evgreen@chromium.org>
-Subject: Re: [PATCH V2 1/3] mmc: sdhci: Allow platform controlled voltage switching
-Date: Fri, 21 Sep 2018 13:08:43 -0700
-Message-ID: <CAE=gft7k6gsX-xbW1cr+z2SYeHh=zbmNoUxxXOuG9zZz+DYcWQ@mail.gmail.com>
-References: <1537424558-17989-1-git-send-email-vbadigan@codeaurora.org> <1537424558-17989-2-git-send-email-vbadigan@codeaurora.org>
+Subject: Re: [PATCH V2 3/3] mmc: sdhci-msm: Use internal voltage control
+Date: Fri, 21 Sep 2018 13:09:46 -0700
+Message-ID: <CAE=gft483AkgBcF5P5EADzWFmjSqsxhzKjoQfmKxmrHyWSBApQ@mail.gmail.com>
+References: <1537424558-17989-1-git-send-email-vbadigan@codeaurora.org> <1537424558-17989-4-git-send-email-vbadigan@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1537424558-17989-2-git-send-email-vbadigan@codeaurora.org>
+In-Reply-To: <1537424558-17989-4-git-send-email-vbadigan@codeaurora.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: vbadigan@codeaurora.org
-Cc: adrian.hunter@intel.com, Ulf Hansson <ulf.hansson@linaro.org>, robh+dt@kernel.org, linux-mmc@vger.kernel.org, asutoshd@codeaurora.org, riteshh@codeaurora.org, stummala@codeaurora.org, sayali <sayalil@codeaurora.org>, Doug Anderson <dianders@google.com>, vviswana@codeaurora.org, linux-kernel@vger.kernel.org
+Cc: adrian.hunter@intel.com, Ulf Hansson <ulf.hansson@linaro.org>, robh+dt@kernel.org, linux-mmc@vger.kernel.org, asutoshd@codeaurora.org, riteshh@codeaurora.org, stummala@codeaurora.org, sayali <sayalil@codeaurora.org>, Doug Anderson <dianders@google.com>, vviswana@codeaurora.org, venkatg@codeaurora.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
 On Wed, Sep 19, 2018 at 11:24 PM Veerabhadrarao Badiganti
@@ -17,131 +17,332 @@ On Wed, Sep 19, 2018 at 11:24 PM Veerabhadrarao Badiganti
 >
 > From: Vijay Viswanath <vviswana@codeaurora.org>
 >
-> Some controllers can have internal mechanism to inform the SW that it
-> is ready for voltage switching. For such controllers, changing voltage
-> before the HW is ready can result in various issues.
+> Some sdhci-msm controllers require that voltage switching be done after
+> the HW is ready for it. The HW informs its readiness through power irq.
+> The voltage switching should happen only then.
 >
-> During setup/cleanup of host, check whether regulator enable/disable
-> was already done by platform driver.
+> Use the quirk for internal voltage switching and then control the
+> voltage switching using power irq.
 >
+> Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
+> Signed-off-by: Venkat Gopalakrishnan <venkatg@codeaurora.org>
 > Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
 > Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
 > ---
->  drivers/mmc/host/sdhci.c | 22 +++++++++++++++-------
->  drivers/mmc/host/sdhci.h |  1 +
->  2 files changed, 16 insertions(+), 7 deletions(-)
+>  drivers/mmc/host/sdhci-msm.c | 211 +++++++++++++++++++++++++++++++++++++++++--
+>  1 file changed, 203 insertions(+), 8 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 99bdae5..04b3fd2 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -3616,6 +3616,7 @@ int sdhci_setup_host(struct sdhci_host *host)
->         unsigned int override_timeout_clk;
->         u32 max_clk;
->         int ret;
-> +       bool enable_vqmmc = false;
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 3cc8bfe..486462d 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -43,7 +43,9 @@
+>  #define CORE_PWRCTL_IO_LOW     BIT(2)
+>  #define CORE_PWRCTL_IO_HIGH    BIT(3)
+>  #define CORE_PWRCTL_BUS_SUCCESS BIT(0)
+> +#define CORE_PWRCTL_BUS_FAIL    BIT(1)
+>  #define CORE_PWRCTL_IO_SUCCESS BIT(2)
+> +#define CORE_PWRCTL_IO_FAIL     BIT(3)
+>  #define REQ_BUS_OFF            BIT(0)
+>  #define REQ_BUS_ON             BIT(1)
+>  #define REQ_IO_LOW             BIT(2)
+> @@ -258,6 +260,10 @@ struct sdhci_msm_host {
+>         bool mci_removed;
+>         const struct sdhci_msm_variant_ops *var_ops;
+>         const struct sdhci_msm_offset *offset;
+> +       bool vmmc_load;
+> +       u32 vmmc_level[2];
+> +       bool vqmmc_load;
+> +       u32 vqmmc_level[2];
+>  };
 >
->         WARN_ON(host == NULL);
->         if (host == NULL)
-> @@ -3629,9 +3630,12 @@ int sdhci_setup_host(struct sdhci_host *host)
->          * the host can take the appropriate action if regulators are not
->          * available.
->          */
-> -       ret = mmc_regulator_get_supply(mmc);
-> -       if (ret)
-> -               return ret;
-> +       if (!mmc->supply.vmmc) {
-> +               ret = mmc_regulator_get_supply(mmc);
+>  static const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct sdhci_host *host)
+> @@ -1211,6 +1217,74 @@ static void sdhci_msm_set_uhs_signaling(struct sdhci_host *host,
+>                 sdhci_msm_hs400(host, &mmc->ios);
+>  }
+>
+> +static int sdhci_msm_set_vmmc(struct sdhci_msm_host *msm_host,
+> +                             struct mmc_host *mmc, int level)
+> +{
+> +       int load = msm_host->vmmc_level[level];
+> +       int ret;
+> +
+> +       if (IS_ERR(mmc->supply.vmmc))
+> +               return 0;
+> +
+> +       if (msm_host->vmmc_load) {
+> +               ret = regulator_set_load(mmc->supply.vmmc, load);
 > +               if (ret)
-> +                       return ret;
-> +               enable_vqmmc  = true;
-
-The coupling of logic strikes me as a little bit odd, it's saying if
-vmmc is already present, then don't turn on vqmmc. I guess what it's
-trying to say is "hands off all the regulators, I've got this". It
-might be cleaner to set enable_vqmmc based on whether or not
-mmc->supply.vqmmc exists before the get_supply call, rather than
-coupling it into whether or not vmmc exists.
-
-Actually, what might be even nicer is to change
-mmc_regulator_get_supply to only get supplies that it doesn't already
-have. You'd still have your enable_vqmmc local, but the
-mmc_regulator_get_supply call would be outside the conditional, and
-the logic of "don't enable vqmmc if it existed before" would make more
-sense.
-
+> +                       goto out;
 > +       }
->
->         DBG("Version:   0x%08x | Present:  0x%08x\n",
->             sdhci_readw(host, SDHCI_HOST_VERSION),
-> @@ -3880,7 +3884,11 @@ int sdhci_setup_host(struct sdhci_host *host)
->                 mmc->caps |= MMC_CAP_NEEDS_POLL;
->
->         if (!IS_ERR(mmc->supply.vqmmc)) {
-> -               ret = regulator_enable(mmc->supply.vqmmc);
-> +               if (enable_vqmmc) {
-> +                       ret = regulator_enable(mmc->supply.vqmmc);
-> +                       host->vqmmc_enabled = !ret;
-> +               } else
-> +                       ret = 0;
+> +
+> +       ret = mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, mmc->ios.vdd);
 
-I think it's preferred that if your "if" had curly braces, then the
-else part needs it too. Actually, can you move the if (ret) pr_warn
-stuff up and inside of your if statement above? That keeps the logic
-together, and then you don't need an else case at all!
+This is new, isn't it? Could you explain why this is needed?
 
->
->                 /* If vqmmc provides no 1.8V signalling, then there's no UHS */
->                 if (!regulator_is_supported_voltage(mmc->supply.vqmmc, 1700000,
-> @@ -4136,7 +4144,7 @@ int sdhci_setup_host(struct sdhci_host *host)
->         return 0;
->
->  unreg:
-> -       if (!IS_ERR(mmc->supply.vqmmc))
-> +       if (host->vqmmc_enabled)
->                 regulator_disable(mmc->supply.vqmmc);
->  undma:
->         if (host->align_buffer)
-> @@ -4154,7 +4162,7 @@ void sdhci_cleanup_host(struct sdhci_host *host)
+> +out:
+> +       if (ret)
+> +               pr_err("%s: vmmc set load/ocr failed: %d\n",
+> +                               mmc_hostname(mmc), ret);
+> +
+> +       return ret;
+> +}
+> +
+> +static int sdhci_msm_set_vqmmc(struct sdhci_msm_host *msm_host,
+> +                             struct mmc_host *mmc, int level)
+> +{
+> +       int load = msm_host->vqmmc_level[level];
+> +       int ret;
+> +       struct mmc_ios ios;
+> +
+> +       if (IS_ERR(mmc->supply.vqmmc))
+> +               return 0;
+> +
+> +       if (msm_host->vqmmc_load) {
+> +               ret = regulator_set_load(mmc->supply.vqmmc, load);
+> +               if (ret)
+> +                       goto out;
+> +       }
+> +
+> +       /*
+> +        * The IO voltage regulator maynot always support a voltage close to
+
+s/maynot/may not/
+
+> +        * vdd. Set IO voltage based on  capability of the regulator.
+
+remove extra space between on and capability.
+
+> +        */
+> +       if (level) {
+> +               if (msm_host->caps_0 & CORE_3_0V_SUPPORT)
+> +                       ios.signal_voltage = MMC_SIGNAL_VOLTAGE_330;
+> +               else if (msm_host->caps_0 & CORE_1_8V_SUPPORT)
+> +                       ios.signal_voltage = MMC_SIGNAL_VOLTAGE_180;
+> +               if (msm_host->caps_0 & CORE_VOLT_SUPPORT) {
+> +                       pr_debug("%s: %s: setting signal voltage: %d\n",
+> +                                       mmc_hostname(mmc), __func__,
+> +                                       ios.signal_voltage);
+> +                       ret = mmc_regulator_set_vqmmc(mmc, &ios);
+> +                       if (ret)
+> +                               goto out;
+> +               }
+> +               ret = regulator_enable(mmc->supply.vqmmc);
+> +       } else {
+> +               ret = regulator_disable(mmc->supply.vqmmc);
+> +       }
+> +out:
+> +       if (ret)
+> +               pr_err("%s: vqmmc failed: %d\n", mmc_hostname(mmc), ret);
+> +
+> +       return ret;
+> +}
+> +
+>  static inline void sdhci_msm_init_pwr_irq_wait(struct sdhci_msm_host *msm_host)
 >  {
->         struct mmc_host *mmc = host->mmc;
+>         init_waitqueue_head(&msm_host->pwr_irq_wait);
+> @@ -1314,8 +1388,9 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
+>  {
+>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>         struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> +       struct mmc_host *mmc = host->mmc;
+>         u32 irq_status, irq_ack = 0;
+> -       int retry = 10;
+> +       int retry = 10, ret = 0;
+>         u32 pwr_state = 0, io_level = 0;
+>         u32 config;
+>         const struct sdhci_msm_offset *msm_offset = msm_host->offset;
+> @@ -1351,14 +1426,34 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
 >
-> -       if (!IS_ERR(mmc->supply.vqmmc))
-> +       if (host->vqmmc_enabled)
->                 regulator_disable(mmc->supply.vqmmc);
->
->         if (host->align_buffer)
-> @@ -4287,7 +4295,7 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
->
->         tasklet_kill(&host->finish_tasklet);
->
-> -       if (!IS_ERR(mmc->supply.vqmmc))
-> +       if (host->vqmmc_enabled)
->                 regulator_disable(mmc->supply.vqmmc);
->
->         if (host->align_buffer)
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index b001cf4..3c28152 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -524,6 +524,7 @@ struct sdhci_host {
->         bool pending_reset;     /* Cmd/data reset is pending */
->         bool irq_wake_enabled;  /* IRQ wakeup is enabled */
->         bool v4_mode;           /* Host Version 4 Enable */
-> +       bool vqmmc_enabled;     /* Vqmmc is enabled */
+>         /* Handle BUS ON/OFF*/
+>         if (irq_status & CORE_PWRCTL_BUS_ON) {
+> -               pwr_state = REQ_BUS_ON;
+> -               io_level = REQ_IO_HIGH;
+> -               irq_ack |= CORE_PWRCTL_BUS_SUCCESS;
+> +               ret = sdhci_msm_set_vmmc(msm_host, mmc, 1);
+> +               if (!ret)
+> +                       ret = sdhci_msm_set_vqmmc(msm_host, mmc, 1);
 
-This is kind of unpleasant. It's confused by the fact that other host
-controllers have a vqmmc_enabled member, but they use it to mean what
-it sounds like, "is vqmmc currently enabled". Here you're really using
-it to mean "don't ever disable vqmmc in sdhci, because the platform
-code sort of owns vqmmc". It only "sort of" owns it in that sdhci is
-still free to call regulator_is_supported_voltage and
-mmc_regulator_set_vqmmc, but somehow not regulator_disable. Is there
-any way to clean up the semantics here?
+Should you put vmmc back to 0 if setting vqmmc to 1 fails?
 
+> +
+> +               if (!ret) {
+> +                       pwr_state = REQ_BUS_ON;
+> +                       io_level = REQ_IO_HIGH;
+> +                       irq_ack |= CORE_PWRCTL_BUS_SUCCESS;
+> +               } else {
+> +                       pr_err("%s: BUS_ON req failed(%d). irq_status: 0x%08x\n",
+> +                                       mmc_hostname(mmc), ret, irq_status);
+> +                       irq_ack |= CORE_PWRCTL_BUS_FAIL;
+> +               }
+>         }
+>         if (irq_status & CORE_PWRCTL_BUS_OFF) {
+> -               pwr_state = REQ_BUS_OFF;
+> -               io_level = REQ_IO_LOW;
+> -               irq_ack |= CORE_PWRCTL_BUS_SUCCESS;
+> +               ret = sdhci_msm_set_vmmc(msm_host, mmc, 0);
+> +               if (!ret)
+> +                       ret = sdhci_msm_set_vqmmc(msm_host, mmc, 0);
+> +
+> +               if (!ret) {
+> +                       pwr_state = REQ_BUS_OFF;
+> +                       io_level = REQ_IO_LOW;
+> +                       irq_ack |= CORE_PWRCTL_BUS_SUCCESS;
+> +               } else {
+> +                       pr_err("%s: BUS_ON req failed(%d). irq_status: 0x%08x\n",
+> +                                       mmc_hostname(mmc), ret, irq_status);
+> +                       irq_ack |= CORE_PWRCTL_BUS_FAIL;
+> +               }
+>         }
+>         /* Handle IO LOW/HIGH */
+>         if (irq_status & CORE_PWRCTL_IO_LOW) {
+> @@ -1370,6 +1465,15 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
+>                 irq_ack |= CORE_PWRCTL_IO_SUCCESS;
+>         }
 >
->         struct mmc_request *mrqs_done[SDHCI_MAX_MRQS];  /* Requests done */
->         struct mmc_command *cmd;        /* Current command */
+> +       if (io_level && !IS_ERR(mmc->supply.vqmmc) && !pwr_state) {
+> +               ret = mmc_regulator_set_vqmmc(mmc, &mmc->ios);
+> +               if (ret)
+> +                       pr_err("%s: IO_level setting failed(%d). signal_voltage: %d, vdd: %d irq_status: 0x%08x\n",
+> +                                       mmc_hostname(mmc), ret,
+> +                                       mmc->ios.signal_voltage, mmc->ios.vdd,
+> +                                       irq_status);
+> +       }
+> +
+>         /*
+>          * The driver has to acknowledge the interrupt, switch voltages and
+>          * report back if it succeded or not to this register. The voltage
+> @@ -1605,6 +1709,91 @@ static void sdhci_msm_set_regulator_caps(struct sdhci_msm_host *msm_host)
+>         pr_debug("%s: supported caps: 0x%08x\n", mmc_hostname(mmc), caps);
+>  }
+>
+> +static int sdhci_msm_register_vreg(struct sdhci_msm_host *msm_host)
+> +{
+> +       int ret = 0;
+> +
+> +       ret = mmc_regulator_get_supply(msm_host->mmc);
+> +       if (ret)
+> +               return ret;
+> +       if (device_property_read_u32_array(&msm_host->pdev->dev,
+> +                       "qcom,vmmc-current-level-microamp",
+> +                       msm_host->vmmc_level, 2) >= 0)
+> +               msm_host->vmmc_load = true;
+> +       if (device_property_read_u32_array(&msm_host->pdev->dev,
+> +                       "qcom,vqmmc-current-level-microamp",
+> +                       msm_host->vqmmc_level, 2) >= 0)
+> +               msm_host->vqmmc_load = true;
+> +
+> +       sdhci_msm_set_regulator_caps(msm_host);
+> +
+> +       return 0;
+> +
+> +}
+> +
+> +static int sdhci_msm_start_signal_voltage_switch(struct mmc_host *mmc,
+> +                                     struct mmc_ios *ios)
+> +{
+> +       struct sdhci_host *host = mmc_priv(mmc);
+> +       u16 ctrl;
+> +
+> +       /*
+> +        * Signal Voltage Switching is only applicable for Host Controllers
+> +        * v3.00 and above.
+> +        */
+> +       if (host->version < SDHCI_SPEC_300)
+> +               return 0;
+> +
+> +       ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+> +
+> +       switch (ios->signal_voltage) {
+> +       case MMC_SIGNAL_VOLTAGE_330:
+> +               if (!(host->flags & SDHCI_SIGNALING_330))
+> +                       return -EINVAL;
+> +               /* Set 1.8V Signal Enable in the Host Control2 register to 0 */
+> +               ctrl &= ~SDHCI_CTRL_VDD_180;
+> +               sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+> +
+> +               /* 3.3V regulator output should be stable within 5 ms */
+> +               ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+> +               if (!(ctrl & SDHCI_CTRL_VDD_180))
+> +                       return 0;
+> +
+> +               pr_warn("%s: 3.3V regulator output did not became stable\n",
+> +                       mmc_hostname(mmc));
+> +
+> +               return -EAGAIN;
+> +       case MMC_SIGNAL_VOLTAGE_180:
+> +               if (!(host->flags & SDHCI_SIGNALING_180))
+> +                       return -EINVAL;
+> +
+> +               /*
+> +                * Enable 1.8V Signal Enable in the Host Control2
+> +                * register
+> +                */
+> +               ctrl |= SDHCI_CTRL_VDD_180;
+> +               sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+> +
+> +               /* 1.8V regulator output should be stable within 5 ms */
+> +               ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+> +               if (ctrl & SDHCI_CTRL_VDD_180)
+> +                       return 0;
+> +
+> +               pr_warn("%s: 1.8V regulator output did not became stable\n",
+> +                       mmc_hostname(mmc));
+> +
+> +               return -EAGAIN;
+> +       case MMC_SIGNAL_VOLTAGE_120:
+> +               if (!(host->flags & SDHCI_SIGNALING_120))
+> +                       return -EINVAL;
+
+So the state of SDHCI_CTRL_VDD_180 doesn't matter when trying to set
+1.2V? I tried looking at the SDHC spec, but it was similarly silent
+about 1.2V. So I guess it's fine?
+
+
+> +               return 0;
+> +       default:
+> +               /* No signal voltage switch required */
+> +               return 0;
+> +       }
+> +
+> +}
+> +
+>  static const struct sdhci_msm_variant_ops mci_var_ops = {
+>         .msm_readl_relaxed = sdhci_msm_mci_variant_readl_relaxed,
+>         .msm_writel_relaxed = sdhci_msm_mci_variant_writel_relaxed,
+> @@ -1644,6 +1833,7 @@ static void sdhci_msm_set_regulator_caps(struct sdhci_msm_host *msm_host)
+>         .set_uhs_signaling = sdhci_msm_set_uhs_signaling,
+>         .write_w = sdhci_msm_writew,
+>         .write_b = sdhci_msm_writeb,
+> +       .set_power = sdhci_set_power_noreg,
+>  };
+>
+>  static const struct sdhci_pltfm_data sdhci_msm_pdata = {
+> @@ -1818,6 +2008,10 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>                                 msm_offset->core_vendor_spec_capabilities0);
+>         }
+>
+> +       ret = sdhci_msm_register_vreg(msm_host);
+> +       if (ret)
+> +               goto clk_disable;
+> +
+>         /*
+>          * Power on reset state may trigger power irq if previous status of
+>          * PWRCTL was either BUS_ON or IO_HIGH_V. So before enabling pwr irq
+> @@ -1862,11 +2056,12 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>                                          MSM_MMC_AUTOSUSPEND_DELAY_MS);
+>         pm_runtime_use_autosuspend(&pdev->dev);
+>
+> +       host->mmc_host_ops.start_signal_voltage_switch =
+> +               sdhci_msm_start_signal_voltage_switch;
+>         host->mmc_host_ops.execute_tuning = sdhci_msm_execute_tuning;
+>         ret = sdhci_add_host(host);
+>         if (ret)
+>                 goto pm_runtime_disable;
+> -       sdhci_msm_set_regulator_caps(msm_host);
+>
+>         pm_runtime_mark_last_busy(&pdev->dev);
+>         pm_runtime_put_autosuspend(&pdev->dev);
 > --
 > Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc., is a member of Code Aurora Forum, a Linux Foundation Collaborative Project
 >
