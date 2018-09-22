@@ -1,8 +1,10 @@
 From: Anand Moon <linux.amoon@gmail.com>
 Subject: [PATCHv4 0/6] Add support for UHS-I on Exynos5422 odroid boards
-Date: Sat, 22 Sep 2018 07:52:31 +0000
-Message-ID: <20180922075238.884-1-linux.amoon@gmail.com>
+Date: Sat, 22 Sep 2018 07:52:32 +0000
+Message-ID: <20180922075238.884-2-linux.amoon@gmail.com>
+References: <20180922075238.884-1-linux.amoon@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180922075238.884-1-linux.amoon@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Kukjin Kim <kgene@kernel.org>, Krzysztof Kozlowski <krzk@kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
