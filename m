@@ -1,47 +1,87 @@
 From: Anand Moon <linux.amoon@gmail.com>
-Subject: [PATCHv4 5/6] ARM: dts: exynos: update maximum frequency for emmc to 200MHz
-Date: Sat, 22 Sep 2018 07:52:37 +0000
-Message-ID: <20180922075238.884-7-linux.amoon@gmail.com>
-References: <20180922075238.884-1-linux.amoon@gmail.com>
+Subject: Re: [PATCHv3 5/7] ARM: dts: exynos5422: use wp-gpio method to detect sd-card
+Date: Sat, 22 Sep 2018 13:25:15 +0530
+Message-ID: <CANAwSgQmu6kA9CZUP_Xy5M461f+p1N+hgi4yCu_f-9AOVv+-Kw@mail.gmail.com>
+References: <20180920175826.1284-1-linux.amoon@gmail.com> <20180920175826.1284-6-linux.amoon@gmail.com>
+ <CAJKOXPdUVjG1xR-q-K98RQpqsWzw-emEv2_3x3CoS+XK8cye2Q@mail.gmail.com>
+ <CANAwSgQQgObh-N0CbBM9iNxOGUd2uwoKNFVDBymEALzMtHxOhA@mail.gmail.com> <20180921210900.GA12384@kozik-lap>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180922075238.884-1-linux.amoon@gmail.com>
+In-Reply-To: <20180921210900.GA12384@kozik-lap>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Kukjin Kim <kgene@kernel.org>, Krzysztof Kozlowski <krzk@kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+To: Krzysztof Kozlowski <krzk@kernel.org>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Kukjin Kim <kgene@kernel.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, devicetree <devicetree@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, linux-samsung-soc@vger.kernel.org, Linux Kernel <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Set the max-frequency to 200MHz for optimal performace of eMMC.
+Hi Krzysztof,
+On Sat, 22 Sep 2018 at 02:39, Krzysztof Kozlowski <krzk@kernel.org> wrote:
+>
+> On Fri, Sep 21, 2018 at 06:01:07PM +0530, Anand Moon wrote:
+> > Hi Krzysztof,
+> >
+> > On Fri, 21 Sep 2018 at 16:42, Krzysztof Kozlowski <krzk@kernel.org> wrote:
+> > >
+> > > On Thu, 20 Sep 2018 at 19:59, Anand Moon <linux.amoon@gmail.com> wrote:
+> > > >
+> > > > add the Write Protect GPIO property for sdcard, to fix
+> > > > the warning message during boot time.
+> > > > of_get_named_gpiod_flags: can't parse 'wp-gpios' property of node '/soc/mmc@12220000[0]'
+> > > >
+> > > > Signed-off-by: Anand Moon <linux.amoon@gmail.com>
+> > > > ---
+> > > > New patch to this series.
+> > > > If we keep the wp-gpio GPIO_ACTIVE_LOW sdcard boot into RO mode.
+> > > > ---
+> > > >  arch/arm/boot/dts/exynos5422-odroid-core.dtsi | 1 +
+> > > >  1 file changed, 1 insertion(+)
+> > > >
+> > > > diff --git a/arch/arm/boot/dts/exynos5422-odroid-core.dtsi b/arch/arm/boot/dts/exynos5422-odroid-core.dtsi
+> > > > index 03fe02ceae66..475c38bbc99e 100644
+> > > > --- a/arch/arm/boot/dts/exynos5422-odroid-core.dtsi
+> > > > +++ b/arch/arm/boot/dts/exynos5422-odroid-core.dtsi
+> > > > @@ -370,6 +370,7 @@
+> > > >         cap-sd-highspeed;
+> > > >         max-frequency = <200000000>;
+> > > >         cd-gpios = <&gpc2 2 GPIO_ACTIVE_LOW>;
+> > > > +       wp-gpios = <&gpc4 0 GPIO_ACTIVE_HIGH>;
+> > >
+> > > Two issues here:
+> > > 1. You need also proper pinctrl setting.
+> >
+> > Thanks for pointing out. Yes proper pinctrl is needed to support this setting.
+> > probably pinctrl sd2_wp is needed to support this feature.
+> >
+> > > 2. On schematics the WP is not connected... so how do you know that it
+> > From XU4_MAIN_REV0.1 schematics page 7 "Micro Socket" their is no
+> > connection to WP pin.
+> > but below schematics page "EXYNOS 5422 MMC UFS" it's shows
+> > XMMC2WP/GPC4_0/EXT_INT13_0.
+> >
+> > > is active high? How did you test it? How do you want to test it on
+> > > microSD?
+> >
+> > I just tested this with the DTS change to GPIO_ACTIVE_LOW which
+> > resulted the microSD card booted into RO mode.
+> > So I set this to GPIO_ACTIVE_HIGH just to avoid warning.
+> >
+> > I will study the changes requires and then post proper separate patch
+> > to support this feature.
+>
+> Please squash it with cd-gpios change and send it only for the purpose
+> of describing the hardware. They do not have any meaningful change from
+> functional point of view (maybe except slower code as now it goes
+> through gpio subsystem instead of just reading dw-mmc registers).
+>
+> Please use full sentences in commit msg (so start with capital letter)
+> and remove reference for warning because there is no warning.
+> You can follow up on my change for XU:
+> https://patchwork.kernel.org/patch/10610985/
+>
+Ok I have tried to squash the changes into single patch.
 
-Signed-off-by: Anand Moon <linux.amoon@gmail.com>
----
-eMMC
+> Best regards,
+> Krzysztof
 
-root@odroid:~# sudo cat /sys/kernel/debug/mmc0/ios
-clock:          200000000 Hz
-actual clock:   200000000 Hz
-vdd:            7 (1.65 - 1.95 V)
-bus mode:       2 (push-pull)
-chip select:    0 (don't care)
-power mode:     2 (on)
-bus width:      3 (8 bits)
-timing spec:    10 (mmc HS400)
-signal voltage: 1 (1.80 V)
-driver type:    0 (driver type B)
----
- arch/arm/boot/dts/exynos5422-odroidxu3-common.dtsi | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/arch/arm/boot/dts/exynos5422-odroidxu3-common.dtsi b/arch/arm/boot/dts/exynos5422-odroidxu3-common.dtsi
-index e522edb2bb82..1f2d3987dde1 100644
---- a/arch/arm/boot/dts/exynos5422-odroidxu3-common.dtsi
-+++ b/arch/arm/boot/dts/exynos5422-odroidxu3-common.dtsi
-@@ -392,6 +392,7 @@
- 	cap-mmc-highspeed;
- 	mmc-hs200-1_8v;
- 	mmc-hs400-1_8v;
-+	max-frequency = <200000000>;
- 	vmmc-supply = <&ldo18_reg>;
- 	vqmmc-supply = <&ldo3_reg>;
- };
--- 
-2.17.1
+Best Regards
+-Anand
