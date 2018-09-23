@@ -1,125 +1,60 @@
-From: Janusz Krzysztofik <jmkrzyszt@gmail.com>
-Subject: Re: [PATCH v7 4/4] gpiolib: Implement fast processing path in get/set
- array
-Date: Sun, 23 Sep 2018 12:43:53 +0200
-Message-ID: <2785169.v6aIfS3K2k@z50>
-References: <20180831225616.29221-1-jmkrzyszt@gmail.com>
- <CAGfqbt7xJxGbq3oOJp9S0Sg7Z9=T6Dy52MDNWSDdsU==kPt1KQ@mail.gmail.com>
- <20180921141409eucas1p190a47e2608429870d23516ee5e75c191~Wb8z_FmwI1466414664eucas1p1F@eucas1p1.samsung.com>
+From: Yu Zhao <yuzhao@google.com>
+Subject: [PATCH] mmc: add quirk for O2 Micro dev 0x8620 rev 0x01
+Date: Sun, 23 Sep 2018 14:39:24 -0600
+Message-ID: <20180923203924.68452-1-yuzhao@google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <20180921141409eucas1p190a47e2608429870d23516ee5e75c191~Wb8z_FmwI1466414664eucas1p1F@eucas1p1.samsung.com>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
-To: Marek Szyprowski <m.szyprowski@samsung.com>
-Cc: Andrew Lunn <andrew@lunn.ch>, Ulf Hansson <ulf.hansson@linaro.org>, linux-doc@vger.kernel.org, linux-iio@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Dominik Brodowski <linux@dominikbrodowski.net>, Peter Rosin <peda@axentia.se>, netdev@vger.kernel.org, linux-i2c@vger.kernel.org, Peter Meerwald-Stadler <pmeerw@pmeerw.net>, devel@driverdev.osuosl.org, Florian Fainelli <f.fainelli@gmail.com>, Jonathan Corbet <corbet@lwn.net>, Janusz Krzysztofik <jmkrzyszt@gmail.com>, Krzysztof Kozlowski <krzk@kernel.org>, Kishon Vijay Abraham I <kishon@ti.com>, Tony Lindgren <tony@atomide.com>, Lukas Wunner <lukas@wunner.de>, Geert Uytterhoeven <geert@linux-m68k.org>, linux-serial@vger.kernel.org, Jiri Slaby <jslaby@suse.com>, Michael Hennerich <Michael.Hennerich@analog.com>, =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= <u.kleine-koenig@pengutronix.de>, linux-gpio@vger.kernel.org, Russ
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Yu Zhao <yuzhao@google.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Friday, September 21, 2018 4:14:06 PM CEST Marek Szyprowski wrote:
-> Hi Janusz,
-> 
-> 
-> On 2018-09-21 12:51, Janusz Krzysztofik wrote:
-> > 2018-09-21 10:18 GMT+02:00, Marek Szyprowski <m.szyprowski@samsung.com>:
-> >> On 2018-09-20 18:21, Janusz Krzysztofik wrote:
-> >>> On Thursday, September 20, 2018 5:48:22 PM CEST Janusz Krzysztofik wrote:
-> >>>> On Thursday, September 20, 2018 12:11:48 PM CEST Marek Szyprowski 
-wrote:
-> >>>>> On 2018-09-02 14:01, Janusz Krzysztofik wrote:
-> >>>>>> Certain GPIO descriptor arrays returned by gpio_get_array() may
-> >>>>>> contain
-> >>>>>> information on direct mapping of array members to pins of a single
-> >>>>>> GPIO
-> >>>>>> chip in hardware order.  In such cases, bitmaps of values can be
-> >>>>>> passed
-> >>>>>> directly from/to the chip's .get/set_multiple() callbacks without
-> >>>>>> wasting time on iterations.
-> >>>>>>
-> >>>>>> Add respective code to gpiod_get/set_array_bitmap_complex() 
-functions.
-> >>>>>> Pins not applicable for fast path are processed as before, skipping
-> >>>>>> over the 'fast' ones.
-> >>>>>>
-> >>>>>> Cc: Jonathan Corbet <corbet@lwn.net>
-> >>>>>> Signed-off-by: Janusz Krzysztofik <jmkrzyszt@gmail.com>
-> >>>>> I've just noticed that this patch landed in today's linux-next. Sadly
-> >>>>> it
-> >>>>> breaks booting of Exynos5250-based Samsung Snow Chromebook (ARM 32bit,
-> >>>>> device-tree source arch/arm/boot/dts/exynos5250-snow.dts).
-> >>>>>
-> >>>>> Booting hangs after detecting MMC cards. Reverting this patch fixes the
-> >>>>> boot. I will try later to add some debugs and investigate it further
-> >>>>> what
-> >>>>> really happens when booting hangs.
-> >>>> Hi Marek,
-> >>>>
-> >>>> Thanks for reporting. Could you please try the following fix?
-> >>> Hi again,
-> >>>
-> >>> I realized the patch was not correct, j, not i, should be updated in
-> >>> second
-> >>> hunk. Please try the following one.
-> >>>
-> >>> Thanks,
-> >>> Janusz
-> >>>
-> >>> >From a919c504850f6cb40e8e81267a3a37537f7c4fd4 Mon Sep 17 00:00:00 2001
-> >>> From: Janusz Krzysztofik <jmkrzyszt@gmail.com>
-> >>> Date: Thu, 20 Sep 2018 17:37:21 +0200
-> >>> Subject: [PATCH] gpiolib: Fix bitmap index not updated
-> >>> While skipping fast path bits, bitmap index is not updated with next
-> >>> found zero bit position. Fix it.
-> >>>
-> >>> Signed-off-by: Janusz Krzysztofik <jmkrzyszt@gmail.com>
-> >> This one also doesn't help. A quick compare of logs with this version and
-> >> a working system shows, that with your patch (and fix) there are no calls
-> >> to
-> >> gpx0-2 pin (which are a part of mmc pwrseq), what causes mmc failure. If
-> >> you need any more information (what kind of logs will help?), let me 
-know.
-> > There is a debug message on array_info content available at the end of
-> > gpiod_get_array(), could you please activate it and post the message so
-> > we can understand better what is going on?
-> 
-> With debug enabled on next-20180919:
-> [    2.499153] pwrseq_simple mmc3_pwrseq: GPIO array info: chip=gpx0, 
-> size=2, get_mask=2, set_mask=2, invert_mask=2
+This device reports SDHCI_CLOCK_INT_STABLE even though it's not
+ready to take SDHCI_CLOCK_CARD_EN. The symptom is that reading
+SDHCI_CLOCK_CONTROL after enabling the clock shows absence of the
+bit from the register (e.g. expecting 0x0000fa07 = 0x0000fa03 |
+SDHCI_CLOCK_CARD_EN but only observed the first operand).
 
-Looks good to me, i..e., in line with what one could expect.  However, ...
+mmc1: Timeout waiting for hardware cmd interrupt.
+mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
+mmc1: sdhci: Sys addr:  0x00000000 | Version:  0x00000603
+mmc1: sdhci: Blk size:  0x00000000 | Blk cnt:  0x00000000
+mmc1: sdhci: Argument:  0x00000000 | Trn mode: 0x00000000
+mmc1: sdhci: Present:   0x01ff0001 | Host ctl: 0x00000001
+mmc1: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+mmc1: sdhci: Wake-up:   0x00000000 | Clock:    0x0000fa03
+mmc1: sdhci: Timeout:   0x00000000 | Int stat: 0x00000000
+mmc1: sdhci: Int enab:  0x00ff0083 | Sig enab: 0x00ff0083
+mmc1: sdhci: AC12 err:  0x00000000 | Slot int: 0x00000000
+mmc1: sdhci: Caps:      0x25fcc8bf | Caps_1:   0x00002077
+mmc1: sdhci: Cmd:       0x00000000 | Max curr: 0x005800c8
+mmc1: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
+mmc1: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+mmc1: sdhci: Host ctl2: 0x00000008
+mmc1: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0x00000000
+mmc1: sdhci: ============================================
 
-> On next-20180920 I get no this message and booting hangs.
-> 
-> Same with next-20180920 + your second fix from this thread.
-> 
-> I will try to debug this more on Monday.
-> 
-> > On the other hand, I've had a look your device-tree configuration and
-> > it looks like that specific setup won't benefit from the fast bitmap path.
-> > You have pin 2 at position 0 and pin 1 at position 1 of the array.
-> > Hence, the fast bitmap path covers only pin 1, and pin 2 is processed
-> > by the old path with apparently buggy code for skipping over fast pins.
-> >
-> > As a temporary workaround, you could try to revert the order of pins in
-> > your dts file (pin 1 at position 0, pin 2 at 1) and the mmc pwrseq code
-> > should work for you again by taking the original old path, not skipping
-> > over fast pins.  Results of such check may also help us to better
-> > understand and resolve the issue.
-> 
-> Changing the order of mmc pwrseq gpio pins fixes boot hang.
+The problem happens during wakeup from S3. Adding a delay quirk
+after power up reliably fixes the problem.
 
-Not being able to discover more coding bugs in the code modified by the series, 
-I'm wondering if the reason for the issue you are observing comes from the 
-fact both pins are no longer manipulated together within a single 
-.set_multiple() chip callback. I'm working on a fix which prevents from that.
+Signed-off-by: Yu Zhao <yuzhao@google.com>
+---
+ drivers/mmc/host/sdhci-pci-o2micro.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
-Thanks,
-Janusz
+diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+index 77e9bc4aaee9..3e5ecf7ce101 100644
+--- a/drivers/mmc/host/sdhci-pci-o2micro.c
++++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+@@ -490,6 +490,8 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
+ 		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
+ 		break;
+ 	case PCI_DEVICE_ID_O2_SEABIRD0:
++		if (chip->pdev->revision == 0x01)
++			chip->quirks |= SDHCI_QUIRK_DELAY_AFTER_POWER;
+ 	case PCI_DEVICE_ID_O2_SEABIRD1:
+ 		/* UnLock WP */
+ 		ret = pci_read_config_byte(chip->pdev,
+-- 
+2.19.0.444.g18242da7ef-goog
