@@ -1,401 +1,390 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V2 04/27] mmc: mmci: introduce dma_priv pointer to mmci_host
-Date: Mon, 24 Sep 2018 20:52:06 +0200
-Message-ID: <CAPDyKFqQNN9X+x=pg9TOArT4-Tx9jNkpM2T+rAxQj-rzHXC0OA@mail.gmail.com>
-References: <1537523181-14578-1-git-send-email-ludovic.Barre@st.com> <1537523181-14578-5-git-send-email-ludovic.Barre@st.com>
+Subject: Re: [RFC PATCH v2 3/4] sdhci: arasan: Add support to read and set tap
+ delays from DT for ZynqMP
+Date: Mon, 24 Sep 2018 21:13:16 +0200
+Message-ID: <CAPDyKFpPWuM2so4piKOfmGQgRuXX+jm8yTLFhxkZRuRNQoCAeQ@mail.gmail.com>
+References: <1537435845-6682-1-git-send-email-manish.narani@xilinx.com> <1537435845-6682-4-git-send-email-manish.narani@xilinx.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1537523181-14578-5-git-send-email-ludovic.Barre@st.com>
+In-Reply-To: <1537435845-6682-4-git-send-email-manish.narani@xilinx.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ludovic Barre <ludovic.Barre@st.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Benjamin Gaignard <benjamin.gaignard@linaro.org>, Gerald Baeza <gerald.baeza@st.com>, Loic Pallardy <loic.pallardy@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-stm32@st-md-mailman.stormreply.com
+To: Manish Narani <manish.narani@xilinx.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Michal Simek <michal.simek@xilinx.com>, Adrian Hunter <adrian.hunter@intel.com>, Amit Kucheria <amit.kucheria@linaro.org>, Sudeep Holla <sudeep.holla@arm.com>, Yang-Leo Li <leoyang.li@nxp.com>, jollys@xilinx.com, rajanv@xilinx.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 21 September 2018 at 11:45, Ludovic Barre <ludovic.Barre@st.com> wrote:
-> From: Ludovic Barre <ludovic.barre@st.com>
->
-> This patch introduces dma_priv pointer to define specific
-> needs for each dma engine. This patch is needed to prepare
-> sdmmc variant with internal dma which not use dmaengine API.
->
-> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
-> ---
-> change v2:
-> -rename specific dma engine structure to mmci_dmae_next/priv
-> -remove dma prefixe of mmci_dmae_priv fields, rename "current"
-> field to "cur" this avoid build issue with "current" defined
-> in include/asm-generic/current.h
->
->  drivers/mmc/host/mmci.c | 155 ++++++++++++++++++++++++++++++------------------
->  drivers/mmc/host/mmci.h |  18 +-----
->  2 files changed, 99 insertions(+), 74 deletions(-)
->
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index 2f845f3..6de7c8d 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -415,31 +415,57 @@ static void mmci_init_sg(struct mmci_host *host, struct mmc_data *data)
->   * no custom DMA interfaces are supported.
->   */
->  #ifdef CONFIG_DMA_ENGINE
-> +struct mmci_dmae_next {
-> +       struct dma_async_tx_descriptor *desc;
-> +       struct dma_chan *chan;
-> +       s32 cookie;
-> +};
-> +
-> +struct mmci_dmae_priv {
-> +       struct dma_chan *cur;
-> +       struct dma_chan *rx_channel;
-> +       struct dma_chan *tx_channel;
-> +       struct dma_async_tx_descriptor  *desc_current;
-> +       struct mmci_dmae_next next_data;
-> +       bool in_progress;
+On 20 September 2018 at 11:30, Manish Narani <manish.narani@xilinx.com> wrote:
+> Apart from taps set by auto tuning, ZynqMP platform has feature to set
+> the tap values manually. Add support to read tap delay values from
+> DT and set the same in HW via ZynqMP SoC framework. Reading Tap
+> Delays from DT is optional, if the property is not available in DT the
+> driver will use the pre-defined Tap Delay Values.
 
-I am wondering whether it would make sense to keep the "bool
-in_progress" in the struct mmci_host. I guess it will be used for all
-dma variants anyway!?
+As far as I understand the Tap Delay Values are properties of the clock signal.
 
-> +};
-> +
-> +#define mmci_dmae_inprogress(dmae) ((dmae)->in_progress)
-> +
->  static int mmci_dma_setup(struct mmci_host *host)
->  {
->         const char *rxname, *txname;
-> +       struct mmci_dmae_priv *dmae;
-> +
-> +       dmae = devm_kzalloc(mmc_dev(host->mmc), sizeof(*dmae), GFP_KERNEL);
-> +       if (!dmae)
-> +               return -ENOMEM;
->
-> -       host->dma_rx_channel = dma_request_slave_channel(mmc_dev(host->mmc), "rx");
-> -       host->dma_tx_channel = dma_request_slave_channel(mmc_dev(host->mmc), "tx");
-> +       host->dma_priv = dmae;
-> +
-> +       dmae->rx_channel = dma_request_slave_channel(mmc_dev(host->mmc),
-> +                                                    "rx");
-> +       dmae->tx_channel = dma_request_slave_channel(mmc_dev(host->mmc),
-> +                                                    "tx");
->
->         /* initialize pre request cookie */
-> -       host->next_data.cookie = 1;
-> +       dmae->next_data.cookie = 1;
->
->         /*
->          * If only an RX channel is specified, the driver will
->          * attempt to use it bidirectionally, however if it is
->          * is specified but cannot be located, DMA will be disabled.
->          */
-> -       if (host->dma_rx_channel && !host->dma_tx_channel)
-> -               host->dma_tx_channel = host->dma_rx_channel;
-> +       if (dmae->rx_channel && !dmae->tx_channel)
-> +               dmae->tx_channel = dmae->rx_channel;
->
-> -       if (host->dma_rx_channel)
-> -               rxname = dma_chan_name(host->dma_rx_channel);
-> +       if (dmae->rx_channel)
-> +               rxname = dma_chan_name(dmae->rx_channel);
->         else
->                 rxname = "none";
->
-> -       if (host->dma_tx_channel)
-> -               txname = dma_chan_name(host->dma_tx_channel);
-> +       if (dmae->tx_channel)
-> +               txname = dma_chan_name(dmae->tx_channel);
->         else
->                 txname = "none";
->
-> @@ -450,15 +476,15 @@ static int mmci_dma_setup(struct mmci_host *host)
->          * Limit the maximum segment size in any SG entry according to
->          * the parameters of the DMA engine device.
->          */
-> -       if (host->dma_tx_channel) {
-> -               struct device *dev = host->dma_tx_channel->device->dev;
-> +       if (dmae->tx_channel) {
-> +               struct device *dev = dmae->tx_channel->device->dev;
->                 unsigned int max_seg_size = dma_get_max_seg_size(dev);
->
->                 if (max_seg_size < host->mmc->max_seg_size)
->                         host->mmc->max_seg_size = max_seg_size;
->         }
-> -       if (host->dma_rx_channel) {
-> -               struct device *dev = host->dma_rx_channel->device->dev;
-> +       if (dmae->rx_channel) {
-> +               struct device *dev = dmae->rx_channel->device->dev;
->                 unsigned int max_seg_size = dma_get_max_seg_size(dev);
->
->                 if (max_seg_size < host->mmc->max_seg_size)
-> @@ -477,21 +503,24 @@ static int mmci_dma_setup(struct mmci_host *host)
->   */
->  static inline void mmci_dma_release(struct mmci_host *host)
->  {
-> -       if (host->dma_rx_channel)
-> -               dma_release_channel(host->dma_rx_channel);
-> -       if (host->dma_tx_channel)
-> -               dma_release_channel(host->dma_tx_channel);
-> -       host->dma_rx_channel = host->dma_tx_channel = NULL;
-> +       struct mmci_dmae_priv *dmae = host->dma_priv;
-> +
-> +       if (dmae->rx_channel)
-> +               dma_release_channel(dmae->rx_channel);
-> +       if (dmae->tx_channel)
-> +               dma_release_channel(dmae->tx_channel);
-> +       dmae->rx_channel = dmae->tx_channel = NULL;
->  }
->
->  static void mmci_dma_unmap(struct mmci_host *host, struct mmc_data *data)
->  {
-> +       struct mmci_dmae_priv *dmae = host->dma_priv;
->         struct dma_chan *chan;
->
->         if (data->flags & MMC_DATA_READ)
-> -               chan = host->dma_rx_channel;
-> +               chan = dmae->rx_channel;
->         else
-> -               chan = host->dma_tx_channel;
-> +               chan = dmae->tx_channel;
->
->         dma_unmap_sg(chan->device->dev, data->sg, data->sg_len,
->                      mmc_get_dma_dir(data));
-> @@ -499,14 +528,16 @@ static void mmci_dma_unmap(struct mmci_host *host, struct mmc_data *data)
->
->  static void mmci_dma_data_error(struct mmci_host *host)
->  {
-> -       if (!dma_inprogress(host))
-> +       struct mmci_dmae_priv *dmae = host->dma_priv;
-> +
-> +       if (!mmci_dmae_inprogress(dmae))
->                 return;
->
->         dev_err(mmc_dev(host->mmc), "error during DMA transfer!\n");
-> -       dmaengine_terminate_all(host->dma_current);
-> -       host->dma_in_progress = false;
-> -       host->dma_current = NULL;
-> -       host->dma_desc_current = NULL;
-> +       dmaengine_terminate_all(dmae->cur);
-> +       dmae->in_progress = false;
-> +       dmae->cur = NULL;
-> +       dmae->desc_current = NULL;
->         host->data->host_cookie = 0;
->
->         mmci_dma_unmap(host, host->data);
-> @@ -514,10 +545,11 @@ static void mmci_dma_data_error(struct mmci_host *host)
->
->  static void mmci_dma_finalize(struct mmci_host *host, struct mmc_data *data)
->  {
-> +       struct mmci_dmae_priv *dmae = host->dma_priv;
->         u32 status;
->         int i;
->
-> -       if (!dma_inprogress(host))
-> +       if (!mmci_dmae_inprogress(dmae))
->                 return;
->
->         /* Wait up to 1ms for the DMA to complete */
-> @@ -551,9 +583,9 @@ static void mmci_dma_finalize(struct mmci_host *host, struct mmc_data *data)
->                 mmci_dma_release(host);
->         }
->
-> -       host->dma_in_progress = false;
-> -       host->dma_current = NULL;
-> -       host->dma_desc_current = NULL;
-> +       dmae->in_progress = false;
-> +       dmae->cur = NULL;
-> +       dmae->desc_current = NULL;
->  }
->
->  /* prepares DMA channel and DMA descriptor, returns non-zero on failure */
-> @@ -561,6 +593,7 @@ static int __mmci_dma_prep_data(struct mmci_host *host, struct mmc_data *data,
->                                 struct dma_chan **dma_chan,
->                                 struct dma_async_tx_descriptor **dma_desc)
->  {
-> +       struct mmci_dmae_priv *dmae = host->dma_priv;
->         struct variant_data *variant = host->variant;
->         struct dma_slave_config conf = {
->                 .src_addr = host->phybase + MMCIFIFO,
-> @@ -579,10 +612,10 @@ static int __mmci_dma_prep_data(struct mmci_host *host, struct mmc_data *data,
->
->         if (data->flags & MMC_DATA_READ) {
->                 conf.direction = DMA_DEV_TO_MEM;
-> -               chan = host->dma_rx_channel;
-> +               chan = dmae->rx_channel;
->         } else {
->                 conf.direction = DMA_MEM_TO_DEV;
-> -               chan = host->dma_tx_channel;
-> +               chan = dmae->tx_channel;
->         }
->
->         /* If there's no DMA channel, fall back to PIO */
-> @@ -622,26 +655,31 @@ static int __mmci_dma_prep_data(struct mmci_host *host, struct mmc_data *data,
->  static inline int mmci_dma_prep_data(struct mmci_host *host,
->                                      struct mmc_data *data)
->  {
-> +       struct mmci_dmae_priv *dmae = host->dma_priv;
-> +
->         /* Check if next job is already prepared. */
-> -       if (host->dma_current && host->dma_desc_current)
-> +       if (dmae->cur && dmae->desc_current)
->                 return 0;
->
->         /* No job were prepared thus do it now. */
-> -       return __mmci_dma_prep_data(host, data, &host->dma_current,
-> -                                   &host->dma_desc_current);
-> +       return __mmci_dma_prep_data(host, data, &dmae->cur,
-> +                                   &dmae->desc_current);
->  }
->
->  static inline int mmci_dma_prep_next(struct mmci_host *host,
->                                      struct mmc_data *data)
->  {
-> -       struct mmci_host_next *nd = &host->next_data;
-> -       return __mmci_dma_prep_data(host, data, &nd->dma_chan, &nd->dma_desc);
-> +       struct mmci_dmae_priv *dmae = host->dma_priv;
-> +       struct mmci_dmae_next *nd = &dmae->next_data;
-> +
-> +       return __mmci_dma_prep_data(host, data, &nd->chan, &nd->desc);
->  }
->
->  static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
->  {
-> -       int ret;
-> +       struct mmci_dmae_priv *dmae = host->dma_priv;
->         struct mmc_data *data = host->data;
-> +       int ret;
+Sounds like the backend part for changing the Tap delay values should
+be implemented in the ZynqMP clock driver. Then the arasan mmc driver
+should call clk_set|get_phase() to change the values.
 
-Looks like "white space". Anyway, please avoid move the declaration of
-ret, unless needed.
-
->
->         ret = mmci_dma_prep_data(host, host->data);
->         if (ret)
-> @@ -651,9 +689,9 @@ static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
->         dev_vdbg(mmc_dev(host->mmc),
->                  "Submit MMCI DMA job, sglen %d blksz %04x blks %04x flags %08x\n",
->                  data->sg_len, data->blksz, data->blocks, data->flags);
-> -       host->dma_in_progress = true;
-> -       dmaengine_submit(host->dma_desc_current);
-> -       dma_async_issue_pending(host->dma_current);
-> +       dmae->in_progress = true;
-> +       dmaengine_submit(dmae->desc_current);
-> +       dma_async_issue_pending(dmae->cur);
->
->         if (host->variant->qcom_dml)
->                 dml_start_xfer(host, data);
-> @@ -675,22 +713,24 @@ static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
->
->  static void mmci_get_next_data(struct mmci_host *host, struct mmc_data *data)
->  {
-> -       struct mmci_host_next *next = &host->next_data;
-> +       struct mmci_dmae_priv *dmae = host->dma_priv;
-> +       struct mmci_dmae_next *next = &dmae->next_data;
->
->         WARN_ON(data->host_cookie && data->host_cookie != next->cookie);
-> -       WARN_ON(!data->host_cookie && (next->dma_desc || next->dma_chan));
-> +       WARN_ON(!data->host_cookie && (next->desc || next->chan));
->
-> -       host->dma_desc_current = next->dma_desc;
-> -       host->dma_current = next->dma_chan;
-> -       next->dma_desc = NULL;
-> -       next->dma_chan = NULL;
-> +       dmae->desc_current = next->desc;
-> +       dmae->cur = next->chan;
-> +       next->desc = NULL;
-> +       next->chan = NULL;
->  }
->
->  static void mmci_pre_request(struct mmc_host *mmc, struct mmc_request *mrq)
->  {
->         struct mmci_host *host = mmc_priv(mmc);
-> +       struct mmci_dmae_priv *dmae = host->dma_priv;
->         struct mmc_data *data = mrq->data;
-> -       struct mmci_host_next *nd = &host->next_data;
-> +       struct mmci_dmae_next *nd = &dmae->next_data;
->
->         if (!data)
->                 return;
-> @@ -708,6 +748,7 @@ static void mmci_post_request(struct mmc_host *mmc, struct mmc_request *mrq,
->                               int err)
->  {
->         struct mmci_host *host = mmc_priv(mmc);
-> +       struct mmci_dmae_priv *dmae = host->dma_priv;
->         struct mmc_data *data = mrq->data;
->
->         if (!data || !data->host_cookie)
-> @@ -716,24 +757,24 @@ static void mmci_post_request(struct mmc_host *mmc, struct mmc_request *mrq,
->         mmci_dma_unmap(host, data);
->
->         if (err) {
-> -               struct mmci_host_next *next = &host->next_data;
-> +               struct mmci_dmae_next *next = &dmae->next_data;
->                 struct dma_chan *chan;
->                 if (data->flags & MMC_DATA_READ)
-> -                       chan = host->dma_rx_channel;
-> +                       chan = dmae->rx_channel;
->                 else
-> -                       chan = host->dma_tx_channel;
-> +                       chan = dmae->tx_channel;
->                 dmaengine_terminate_all(chan);
->
-> -               if (host->dma_desc_current == next->dma_desc)
-> -                       host->dma_desc_current = NULL;
-> +               if (dmae->desc_current == next->desc)
-> +                       dmae->desc_current = NULL;
->
-> -               if (host->dma_current == next->dma_chan) {
-> -                       host->dma_in_progress = false;
-> -                       host->dma_current = NULL;
-> +               if (dmae->cur == next->chan) {
-> +                       dmae->in_progress = false;
-> +                       dmae->cur = NULL;
->                 }
->
-> -               next->dma_desc = NULL;
-> -               next->dma_chan = NULL;
-> +               next->desc = NULL;
-> +               next->chan = NULL;
->                 data->host_cookie = 0;
->         }
->  }
-> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-> index 06299ac..1e9a45b 100644
-> --- a/drivers/mmc/host/mmci.h
-> +++ b/drivers/mmc/host/mmci.h
-> @@ -276,12 +276,6 @@ struct mmci_host_ops {
->         int (*dma_setup)(struct mmci_host *host);
->  };
->
-> -struct mmci_host_next {
-> -       struct dma_async_tx_descriptor  *dma_desc;
-> -       struct dma_chan                 *dma_chan;
-> -       s32                             cookie;
-> -};
-> -
->  struct mmci_host {
->         phys_addr_t             phybase;
->         void __iomem            *base;
-> @@ -323,16 +317,6 @@ struct mmci_host {
->         unsigned int            size;
->         int (*get_rx_fifocnt)(struct mmci_host *h, u32 status, int remain);
->
-> -#ifdef CONFIG_DMA_ENGINE
-> -       /* DMA stuff */
-> -       struct dma_chan         *dma_current;
-> -       struct dma_chan         *dma_rx_channel;
-> -       struct dma_chan         *dma_tx_channel;
-> -       struct dma_async_tx_descriptor  *dma_desc_current;
-> -       struct mmci_host_next   next_data;
-> -       bool                    dma_in_progress;
-> -
-> -#define dma_inprogress(host)   ((host)->dma_in_progress)
-> -#endif
-> +       void                    *dma_priv;
->  };
->
-> --
-> 2.7.4
->
+Would that work?
 
 Kind regards
 Uffe
+
+>
+> Signed-off-by: Manish Narani <manish.narani@xilinx.com>
+> ---
+>  drivers/firmware/xilinx/Makefile            |   1 +
+>  drivers/firmware/xilinx/zynqmp-tap-delays.c |  39 +++++
+>  drivers/mmc/host/sdhci-of-arasan.c          | 215 ++++++++++++++++++++++++++++
+>  include/linux/firmware/xlnx-zynqmp.h        |   4 +
+>  4 files changed, 259 insertions(+)
+>  create mode 100644 drivers/firmware/xilinx/zynqmp-tap-delays.c
+>
+> diff --git a/drivers/firmware/xilinx/Makefile b/drivers/firmware/xilinx/Makefile
+> index 875a537..c32b2a3 100644
+> --- a/drivers/firmware/xilinx/Makefile
+> +++ b/drivers/firmware/xilinx/Makefile
+> @@ -2,4 +2,5 @@
+>  # Makefile for Xilinx firmwares
+>
+>  obj-$(CONFIG_ZYNQMP_FIRMWARE) += zynqmp.o
+> +obj-$(CONFIG_ZYNQMP_FIRMWARE) += zynqmp-tap-delays.o
+>  obj-$(CONFIG_ZYNQMP_FIRMWARE_DEBUG) += zynqmp-debug.o
+> diff --git a/drivers/firmware/xilinx/zynqmp-tap-delays.c b/drivers/firmware/xilinx/zynqmp-tap-delays.c
+> new file mode 100644
+> index 0000000..2e5cab3
+> --- /dev/null
+> +++ b/drivers/firmware/xilinx/zynqmp-tap-delays.c
+> @@ -0,0 +1,39 @@
+> +// SPDX-License-Identifier: GPL-2.0
+> +/*
+> + * Xilinx Zynq MPSoC Tap Delay Programming
+> + *
+> + *  Copyright (C) 2014-2018 Xilinx, Inc.
+> + *
+> + *  Manish Narani <mnarani@xilinx.com>
+> + */
+> +
+> +#include <linux/delay.h>
+> +#include <linux/types.h>
+> +#include <linux/firmware/xlnx-zynqmp.h>
+> +
+> +/**
+> + * zynqmp_set_tap_delay - Program the tap delays.
+> + * @deviceid:          Unique Id of device
+> + * @itap_delay:                Input Tap Delay
+> + * @oitap_delay:       Output Tap Delay
+> + */
+> +void zynqmp_set_tap_delay(u8 deviceid, u8 itap_delay, u8 otap_delay)
+> +{
+> +       const struct zynqmp_eemi_ops *eemi_ops = zynqmp_pm_get_eemi_ops();
+> +       u32 node_id = (deviceid == 0) ? NODE_SD_0 : NODE_SD_1;
+> +
+> +       if (!eemi_ops || !eemi_ops->ioctl)
+> +               return;
+> +
+> +       /* Set the Input Tap Delay */
+> +       if (itap_delay)
+> +               eemi_ops->ioctl(node_id, IOCTL_SET_SD_TAPDELAY,
+> +                               PM_TAPDELAY_INPUT, itap_delay, NULL);
+> +
+> +       /* Set the Output Tap Delay */
+> +       if (otap_delay)
+> +               eemi_ops->ioctl(node_id, IOCTL_SET_SD_TAPDELAY,
+> +                               PM_TAPDELAY_OUTPUT, otap_delay, NULL);
+> +}
+> +EXPORT_SYMBOL_GPL(zynqmp_set_tap_delay);
+> +
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index 1a8bbd2..57f89af 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -77,6 +77,18 @@ struct sdhci_arasan_soc_ctl_map {
+>  };
+>
+>  /**
+> + * struct sdhci_arasan_zynqmp_data
+> + * @mio_bank           Memory IO Bank number
+> + * @itapdly            Input Tap Delays array for different host timings
+> + * @otapdly            Output Tap Delays array for different host timings
+> + */
+> +struct sdhci_arasan_zynqmp_data {
+> +       u32 mio_bank;
+> +       u32 itapdly[MMC_TIMING_MMC_HS400 + 1];
+> +       u32 otapdly[MMC_TIMING_MMC_HS400 + 1];
+> +};
+> +
+> +/**
+>   * struct sdhci_arasan_data
+>   * @host:              Pointer to the main SDHCI host structure.
+>   * @clk_ahb:           Pointer to the AHB clock
+> @@ -99,6 +111,7 @@ struct sdhci_arasan_data {
+>
+>         struct regmap   *soc_ctl_base;
+>         const struct sdhci_arasan_soc_ctl_map *soc_ctl_map;
+> +       struct sdhci_arasan_zynqmp_data zynqmp_data;
+>         unsigned int    device_id;
+>         unsigned int    quirks; /* Arasan deviations from spec */
+>
+> @@ -235,7 +248,11 @@ static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
+>  {
+>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>         struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
+> +       struct device *dev = mmc_dev(host->mmc);
+> +       unsigned int timing = host->timing;
+>         bool ctrl_phy = false;
+> +       u8 itap_delay;
+> +       u8 otap_delay;
+>
+>         if (!IS_ERR(sdhci_arasan->phy)) {
+>                 if (!sdhci_arasan->is_phy_on && clock <= PHY_CLK_TOO_SLOW_HZ) {
+> @@ -278,6 +295,17 @@ static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
+>
+>         sdhci_set_clock(host, clock);
+>
+> +       if (of_device_is_compatible(dev->of_node, "xlnx,zynqmp-8.9a")) {
+> +               if ((host->version >= SDHCI_SPEC_300) &&
+> +                   (timing != MMC_TIMING_LEGACY) &&
+> +                   (timing != MMC_TIMING_UHS_SDR12)) {
+> +                       itap_delay = sdhci_arasan->zynqmp_data.itapdly[timing];
+> +                       otap_delay = sdhci_arasan->zynqmp_data.otapdly[timing];
+> +                       zynqmp_set_tap_delay(sdhci_arasan->device_id,
+> +                                            itap_delay, otap_delay);
+> +               }
+> +       }
+> +
+>         if (sdhci_arasan->quirks & SDHCI_ARASAN_QUIRK_CLOCK_UNSTABLE)
+>                 /*
+>                  * Some controllers immediately report SDHCI_CLOCK_INT_STABLE
+> @@ -723,6 +751,182 @@ static void sdhci_arasan_unregister_sdclk(struct device *dev)
+>         of_clk_del_provider(dev->of_node);
+>  }
+>
+> +/**
+> + * arasan_zynqmp_dt_parse_tap_delays - Read Tap Delay values from DT
+> + *
+> + * Called at initialization to parse the values of Tap Delays.
+> + *
+> + * @dev:               Pointer to our struct device.
+> + */
+> +static void arasan_zynqmp_dt_parse_tap_delays(struct device *dev)
+> +{
+> +       struct platform_device *pdev = to_platform_device(dev);
+> +       struct sdhci_host *host = platform_get_drvdata(pdev);
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +       struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
+> +       u32 mio_bank = sdhci_arasan->zynqmp_data.mio_bank;
+> +       u32 *itapdly = sdhci_arasan->zynqmp_data.itapdly;
+> +       u32 *otapdly = sdhci_arasan->zynqmp_data.otapdly;
+> +       struct device_node *np = dev->of_node;
+> +       int ret;
+> +
+> +       /*
+> +        * Read Tap Delay values from DT, if the DT does not contain the
+> +        * Tap Values then use the pre-defined values
+> +        */
+> +       ret = of_property_read_u32(np, "xlnx,itap-delay-sd-hsd",
+> +                                  &itapdly[MMC_TIMING_SD_HS]);
+> +       if (ret) {
+> +               dev_dbg(dev,
+> +                       "Using predefined itapdly for MMC_TIMING_SD_HS\n");
+> +               itapdly[MMC_TIMING_SD_HS] = ZYNQMP_ITAPDLYSEL_SD_HSD;
+> +       }
+> +
+> +       ret = of_property_read_u32(np, "xlnx,otap-delay-sd-hsd",
+> +                                  &otapdly[MMC_TIMING_SD_HS]);
+> +       if (ret) {
+> +               dev_dbg(dev,
+> +                       "Using predefined otapdly for MMC_TIMING_SD_HS\n");
+> +               otapdly[MMC_TIMING_SD_HS] = ZYNQMP_OTAPDLYSEL_SD_HSD;
+> +       }
+> +
+> +       ret = of_property_read_u32(np, "xlnx,itap-delay-sdr25",
+> +                                  &itapdly[MMC_TIMING_UHS_SDR25]);
+> +       if (ret) {
+> +               dev_dbg(dev,
+> +                       "Using predefined itapdly for MMC_TIMING_UHS_SDR25\n");
+> +               itapdly[MMC_TIMING_UHS_SDR25] = ZYNQMP_ITAPDLYSEL_SDR25;
+> +       }
+> +
+> +       ret = of_property_read_u32(np, "xlnx,otap-delay-sdr25",
+> +                                  &otapdly[MMC_TIMING_UHS_SDR25]);
+> +       if (ret) {
+> +               dev_dbg(dev,
+> +                       "Using predefined otapdly for MMC_TIMING_UHS_SDR25\n");
+> +               otapdly[MMC_TIMING_UHS_SDR25] = ZYNQMP_OTAPDLYSEL_SDR25;
+> +       }
+> +
+> +       ret = of_property_read_u32(np, "xlnx,itap-delay-sdr50",
+> +                                  &itapdly[MMC_TIMING_UHS_SDR50]);
+> +       if (ret) {
+> +               dev_dbg(dev,
+> +                       "Using predefined itapdly for MMC_TIMING_UHS_SDR50\n");
+> +               itapdly[MMC_TIMING_UHS_SDR50] = ZYNQMP_ITAPDLYSEL_SDR50;
+> +       }
+> +
+> +       ret = of_property_read_u32(np, "xlnx,otap-delay-sdr50",
+> +                                  &otapdly[MMC_TIMING_UHS_SDR50]);
+> +       if (ret) {
+> +               dev_dbg(dev,
+> +                       "Using predefined otapdly for MMC_TIMING_UHS_SDR50\n");
+> +               otapdly[MMC_TIMING_UHS_SDR50] = ZYNQMP_OTAPDLYSEL_SDR50;
+> +       }
+> +
+> +       ret = of_property_read_u32(np, "xlnx,itap-delay-sd-ddr50",
+> +                                  &itapdly[MMC_TIMING_UHS_DDR50]);
+> +       if (ret) {
+> +               dev_dbg(dev,
+> +                       "Using predefined itapdly for MMC_TIMING_UHS_DDR50\n");
+> +               itapdly[MMC_TIMING_UHS_DDR50] = ZYNQMP_ITAPDLYSEL_SD_DDR50;
+> +       }
+> +
+> +       ret = of_property_read_u32(np, "xlnx,otap-delay-sd-ddr50",
+> +                                  &otapdly[MMC_TIMING_UHS_DDR50]);
+> +       if (ret) {
+> +               dev_dbg(dev,
+> +                       "Using predefined otapdly for MMC_TIMING_UHS_DDR50\n");
+> +               otapdly[MMC_TIMING_UHS_DDR50] = ZYNQMP_OTAPDLYSEL_SD_DDR50;
+> +       }
+> +
+> +       ret = of_property_read_u32(np, "xlnx,itap-delay-mmc-hsd",
+> +                                  &itapdly[MMC_TIMING_MMC_HS]);
+> +       if (ret) {
+> +               dev_dbg(dev,
+> +                       "Using predefined itapdly for MMC_TIMING_MMC_HS\n");
+> +               itapdly[MMC_TIMING_MMC_HS] = ZYNQMP_ITAPDLYSEL_MMC_HSD;
+> +       }
+> +
+> +       ret = of_property_read_u32(np, "xlnx,otap-delay-mmc-hsd",
+> +                                  &otapdly[MMC_TIMING_MMC_HS]);
+> +       if (ret) {
+> +               dev_dbg(dev,
+> +                       "Using predefined otapdly for MMC_TIMING_MMC_HS\n");
+> +               otapdly[MMC_TIMING_MMC_HS] = ZYNQMP_OTAPDLYSEL_MMC_HSD;
+> +       }
+> +
+> +       ret = of_property_read_u32(np, "xlnx,itap-delay-mmc-ddr52",
+> +                                  &itapdly[MMC_TIMING_MMC_DDR52]);
+> +       if (ret) {
+> +               dev_dbg(dev,
+> +                       "Using predefined itapdly for MMC_TIMING_MMC_DDR52\n");
+> +               itapdly[MMC_TIMING_MMC_DDR52] = ZYNQMP_ITAPDLYSEL_MMC_DDR52;
+> +       }
+> +
+> +       ret = of_property_read_u32(np, "xlnx,otap-delay-mmc-ddr52",
+> +                                  &otapdly[MMC_TIMING_MMC_DDR52]);
+> +       if (ret) {
+> +               dev_dbg(dev,
+> +                       "Using predefined otapdly for MMC_TIMING_MMC_DDR52\n");
+> +               otapdly[MMC_TIMING_MMC_DDR52] = ZYNQMP_OTAPDLYSEL_MMC_DDR52;
+> +       }
+> +
+> +       ret = of_property_read_u32(np, "xlnx,itap-delay-sdr104",
+> +                                  &itapdly[MMC_TIMING_UHS_SDR104]);
+> +       if (ret) {
+> +               dev_dbg(dev,
+> +                       "Using predefined itapdly for MMC_TIMING_UHS_SDR104\n");
+> +               if (mio_bank == 2) {
+> +                       itapdly[MMC_TIMING_UHS_SDR104] =
+> +                               ZYNQMP_ITAPDLYSEL_SDR104_B2;
+> +               } else {
+> +                       itapdly[MMC_TIMING_UHS_SDR104] =
+> +                               ZYNQMP_ITAPDLYSEL_SDR104_B0;
+> +               }
+> +       }
+> +
+> +       ret = of_property_read_u32(np, "xlnx,otap-delay-sdr104",
+> +                                  &otapdly[MMC_TIMING_UHS_SDR104]);
+> +       if (ret) {
+> +               dev_dbg(dev,
+> +                       "Using predefined otapdly for MMC_TIMING_UHS_SDR104\n");
+> +               if (mio_bank == 2) {
+> +                       otapdly[MMC_TIMING_UHS_SDR104] =
+> +                               ZYNQMP_OTAPDLYSEL_SDR104_B2;
+> +               } else {
+> +                       otapdly[MMC_TIMING_UHS_SDR104] =
+> +                               ZYNQMP_OTAPDLYSEL_SDR104_B0;
+> +               }
+> +       }
+> +
+> +       ret = of_property_read_u32(np, "xlnx,itap-delay-mmc-hs200",
+> +                                  &itapdly[MMC_TIMING_MMC_HS200]);
+> +       if (ret) {
+> +               dev_dbg(dev,
+> +                       "Using predefined itapdly for MMC_TIMING_MMC_HS200\n");
+> +               if (mio_bank == 2) {
+> +                       itapdly[MMC_TIMING_MMC_HS200] =
+> +                               ZYNQMP_ITAPDLYSEL_MMC_HS200_B2;
+> +               } else {
+> +                       itapdly[MMC_TIMING_MMC_HS200] =
+> +                               ZYNQMP_ITAPDLYSEL_MMC_HS200_B0;
+> +               }
+> +       }
+> +
+> +       ret = of_property_read_u32(np, "xlnx,otap-delay-mmc-hs200",
+> +                                  &otapdly[MMC_TIMING_MMC_HS200]);
+> +       if (ret) {
+> +               dev_dbg(dev,
+> +                       "Using predefined otapdly for MMC_TIMING_MMC_HS200\n");
+> +               if (mio_bank == 2) {
+> +                       otapdly[MMC_TIMING_MMC_HS200] =
+> +                               ZYNQMP_OTAPDLYSEL_MMC_HS200_B2;
+> +               } else {
+> +                       otapdly[MMC_TIMING_MMC_HS200] =
+> +                               ZYNQMP_OTAPDLYSEL_MMC_HS200_B0;
+> +               }
+> +       }
+> +}
+> +
+>  static int sdhci_arasan_add_host(struct sdhci_arasan_data *sdhci_arasan)
+>  {
+>         struct sdhci_host *host = sdhci_arasan->host;
+> @@ -863,6 +1067,15 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+>
+>         if (of_device_is_compatible(pdev->dev.of_node, "xlnx,zynqmp-8.9a")) {
+>                 ret = of_property_read_u32(pdev->dev.of_node,
+> +                                          "xlnx,mio-bank",
+> +                                          &sdhci_arasan->zynqmp_data.mio_bank);
+> +               if (ret < 0) {
+> +                       dev_err(&pdev->dev,
+> +                               "\"xlnx,mio-bank \" property is missing.\n");
+> +                       goto unreg_clk;
+> +               }
+> +
+> +               ret = of_property_read_u32(pdev->dev.of_node,
+>                                            "xlnx,device_id",
+>                                            &sdhci_arasan->device_id);
+>                 if (ret < 0) {
+> @@ -871,6 +1084,8 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+>                         goto unreg_clk;
+>                 }
+>
+> +               arasan_zynqmp_dt_parse_tap_delays(&pdev->dev);
+> +
+>                 host->mmc_host_ops.execute_tuning =
+>                         arasan_zynqmp_execute_tuning;
+>         }
+> diff --git a/include/linux/firmware/xlnx-zynqmp.h b/include/linux/firmware/xlnx-zynqmp.h
+> index 40feebc..b00388f 100644
+> --- a/include/linux/firmware/xlnx-zynqmp.h
+> +++ b/include/linux/firmware/xlnx-zynqmp.h
+> @@ -144,11 +144,15 @@ struct zynqmp_eemi_ops {
+>
+>  #if IS_REACHABLE(CONFIG_ARCH_ZYNQMP)
+>  const struct zynqmp_eemi_ops *zynqmp_pm_get_eemi_ops(void);
+> +/* API for programming the tap delays */
+> +void zynqmp_set_tap_delay(u8 deviceid, u8 itap_delay, u8 otap_delay);
+>  #else
+>  static inline struct zynqmp_eemi_ops *zynqmp_pm_get_eemi_ops(void)
+>  {
+>         return NULL;
+>  }
+> +inline void zynqmp_set_tap_delay(u8 deviceid, u8 itap_delay,
+> +                                       u8 otap_delay) {}
+>  #endif
+>
+>  #endif /* __FIRMWARE_ZYNQMP_H__ */
+> --
+> 2.1.1
+>
