@@ -1,88 +1,83 @@
-From: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-Subject: Re: [PATCH V3 0/4] Changes for SDCC5 version
-Date: Tue, 25 Sep 2018 16:47:26 +0530
-Message-ID: <bcdeaf0c-fb04-67f5-8580-a3f5110bcba5@codeaurora.org>
-References: <1529386761-4923-1-git-send-email-vviswana@codeaurora.org>
- <20180924194412.GA27477@arch>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [RFC PATCH 2/4] dt-bindings: mmc: arasan: Document
+ 'xlnx,zynqmp-8.9a' controller
+Date: Mon, 24 Sep 2018 14:31:43 -0700
+Message-ID: <5baa1aef.1c69fb81.e8e5f.3dbb@mx.google.com>
+References: <1537278339-9257-1-git-send-email-manish.narani@xilinx.com>
+ <1537278339-9257-3-git-send-email-manish.narani@xilinx.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180924194412.GA27477@arch>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Craig Tatlor <ctatlor97@gmail.com>, Vijay Viswanath <vviswana@codeaurora.org>
-Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, devicetree@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, jeremymc@redhat.com, bjorn.andersson@linaro.org, riteshh@codeaurora.org, dianders@google.com, sayalil@codeaurora.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <1537278339-9257-3-git-send-email-manish.narani@xilinx.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Manish Narani <manish.narani@xilinx.com>
+Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, michal.simek@xilinx.com, amit.kucheria@linaro.org, leoyang.li@nxp.com, jollys@xilinx.com, rajanv@xilinx.com, sudeep.holla@arm.com, olof@lixom.net, adrian.hunter@intel.com, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
+On Tue, Sep 18, 2018 at 07:15:37PM +0530, Manish Narani wrote:
+> Add documentation for 'xlnx,zynqmp-8.9a' SDHCI controller and required
+> properties followed by example.
+> 
+> Signed-off-by: Manish Narani <manish.narani@xilinx.com>
+> ---
+>  Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 14 ++++++++++++++
+>  1 file changed, 14 insertions(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> index f6ddba3..72769e0 100644
+> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> @@ -15,6 +15,7 @@ Required Properties:
+>      - "arasan,sdhci-5.1": generic Arasan SDHCI 5.1 PHY
+>      - "rockchip,rk3399-sdhci-5.1", "arasan,sdhci-5.1": rk3399 eMMC PHY
+>        For this device it is strongly suggested to include arasan,soc-ctl-syscon.
+> +    - "xlnx,zynqmp-8.9a", "arasan,sdhci-8.9a": Xilinx ZynqMP Arasan SDHCI 8.9a PHY
 
-On 9/25/2018 1:18 AM, Craig Tatlor wrote:
-> What socs have you tested this on?
-> On sdm660 it seems to crash device
-> when writing pwr ctl.
+xlnx,zynqmp-sdhci. The version number is for Arasan.
 
-Hi
-We have tested this on SDM845.
-SDM660 also has SDCC5 controller, so you would need to define
-"qcom,sdhci-msm-v5" in your platform dt.
-Can you confirm if you have defined this?
+>    - reg: From mmc bindings: Register location and length.
+>    - clocks: From clock bindings: Handles to clock inputs.
+>    - clock-names: From clock bindings: Tuple including "clk_xin" and "clk_ahb"
+> @@ -24,6 +25,9 @@ Required Properties for "arasan,sdhci-5.1":
+>    - phys: From PHY bindings: Phandle for the Generic PHY for arasan.
+>    - phy-names:  MUST be "phy_arasan".
+>  
+> +Required Properties for "xlnx,zynqmp-8.9a":
+> +  - xlnx,device_id: SD controller device ID. Must be either <0> or <1>.
+> +
 
-BTW, can you please share few details of the platform that you are checking?
-We are not aware of any dev platform based on SDM660. This is just for 
-my info.
+What's this for?
 
-> On Tue, Jun 19, 2018 at 11:09:17AM +0530, Vijay Viswanath wrote:
->> With SDCC5, the MCI register space got removed and the offset/order of
->> several registers have changed. Based on SDCC version used and the register,
->> we need to pick the base address and offset.
->>
->> Depends on patch series: "[PATCH V5 0/2] mmc: sdhci-msm: Configuring IO_PAD support for sdhci-msm"
->>
->> Changes since RFC:
->> 	Dropped voltage regulator changes in sdhci-msm
->> 	Split the "Register changes for sdcc V5" patch
->> 	Instead of checking mci removal for deciding which base addr to use,
->> 	new function pointers are defined for the 2 variants of sdcc:
->> 		1) MCI present
->> 		2) V5 (mci removed)
->> 	Instead of string comparing with the compatible string from DT file,
->> 	the sdhci_msm_probe will now pick the data associated with the
->> 	compatible entry and use it to load variant specific address offsets
->> 	and msm variant specific read/write ops.
->>
->> Changes since V1:
->> 	Removed unused msm_reab & msm_writeb APIs
->> 	Changed certain register addresses from uppercase to lowercase hex
->> 	letters
->> 	Removed extra lines and spaces
->> 	Split "[PATCH V1 0/3] Changes for SDCC5 version" patch into two,
->> 	one for Documentation and other for the driver changes.
->>
->> Changes since V2:
->> 	Used lower case for macro function defenitions
->> 	Removed unused function pointers for msm_readb & msm_writeb
->>
->>
->> Sayali Lokhande (3):
->>    mmc: sdhci-msm: Define new Register address map
->>    Documentation: sdhci-msm: Add new compatible string for SDCC v5
->>    mmc: host: Register changes for sdcc V5
->>
->> Vijay Viswanath (1):
->>    mmc: sdhci-msm: Add msm version specific ops and data structures
->>
->>   .../devicetree/bindings/mmc/sdhci-msm.txt          |   7 +-
->>   drivers/mmc/host/sdhci-msm.c                       | 511 ++++++++++++++++-----
->>   2 files changed, 391 insertions(+), 127 deletions(-)
->>
->> -- 
->>   Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc.
->> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a Linux Foundation Collaborative Project.
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-arm-msm" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>  Optional Properties:
+>    - arasan,soc-ctl-syscon: A phandle to a syscon device (see ../mfd/syscon.txt)
+>      used to access core corecfg registers.  Offsets of registers in this
+> @@ -75,3 +79,13 @@ Example:
+>  		phy-names = "phy_arasan";
+>  		#clock-cells = <0>;
+>  	};
+> +
+> +	sdhci: sdhci@ff160000 {
 
-Thanks,
-Veera
+mmc@...
+
+> +		compatible = "xlnx,zynqmp-8.9a", "arasan,sdhci-8.9a";
+> +		reg = <0x0 0xff160000 0x0 0x1000>;
+> +		interrupt-parent = <&gic>;
+> +		interrupts = <0 48 4>;
+> +		clock-names = "clk_xin", "clk_ahb";
+> +		clocks = <&clk 54>, <&clk 31>;
+> +		xlnx,device_id = <0>;
+> +	};
+> -- 
+> 2.1.1
+> 
