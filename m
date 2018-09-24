@@ -1,187 +1,98 @@
-From: Ludovic BARRE <ludovic.barre@st.com>
-Subject: Re: [PATCH V2 03/27] mmc: mmci: convert dma_setup callback to return
- an int
-Date: Mon, 24 Sep 2018 18:12:44 +0200
-Message-ID: <15c31e3b-646a-f5db-b45a-3e2f556d9fd5@st.com>
-References: <1537523181-14578-1-git-send-email-ludovic.Barre@st.com>
- <1537523181-14578-4-git-send-email-ludovic.Barre@st.com>
- <CAPDyKFqnN0gg9WsbNPQcodqUXJmFEzMM+ST36s6oEZ2OPoONug@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V2 05/27] mmc: mmci: move mmci next cookie to mci host
+Date: Mon, 24 Sep 2018 20:46:30 +0200
+Message-ID: <CAPDyKFqhyVrRGRraGQzx9kwRxLtr56Gwc_NKqNqwLvZuM=jM1A@mail.gmail.com>
+References: <1537523181-14578-1-git-send-email-ludovic.Barre@st.com> <1537523181-14578-6-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFqnN0gg9WsbNPQcodqUXJmFEzMM+ST36s6oEZ2OPoONug@mail.gmail.com>
-Content-Language: en-US
+In-Reply-To: <1537523181-14578-6-git-send-email-ludovic.Barre@st.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+To: Ludovic Barre <ludovic.Barre@st.com>
 Cc: Rob Herring <robh+dt@kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Benjamin Gaignard <benjamin.gaignard@linaro.org>, Gerald Baeza <gerald.baeza@st.com>, Loic Pallardy <loic.pallardy@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-stm32@st-md-mailman.stormreply.com
 List-Id: linux-mmc@vger.kernel.org
 
-hi Ulf
+On 21 September 2018 at 11:45, Ludovic Barre <ludovic.Barre@st.com> wrote:
+> From: Ludovic Barre <ludovic.barre@st.com>
+>
+> This patch moves next cookie to mmci host structure to
+> share same cookie management between all variants.
 
-On 09/24/2018 04:28 PM, Ulf Hansson wrote:
-> On 21 September 2018 at 11:45, Ludovic Barre <ludovic.Barre@st.com> wrote:
->> From: Ludovic Barre <ludovic.barre@st.com>
->>
->> This patch converts dma_setup callback to return an integer
->> This patch is needed to prepare sdmmc variant with internal dma
->>
->> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
->> ---
->>   drivers/mmc/host/mmci.c          | 14 ++++++++++----
->>   drivers/mmc/host/mmci.h          |  2 +-
->>   drivers/mmc/host/mmci_qcom_dml.c |  6 ++++--
->>   3 files changed, 15 insertions(+), 7 deletions(-)
->>
->> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
->> index cbd67bc..2f845f3 100644
->> --- a/drivers/mmc/host/mmci.c
->> +++ b/drivers/mmc/host/mmci.c
->> @@ -415,7 +415,7 @@ static void mmci_init_sg(struct mmci_host *host, struct mmc_data *data)
->>    * no custom DMA interfaces are supported.
->>    */
->>   #ifdef CONFIG_DMA_ENGINE
->> -static void mmci_dma_setup(struct mmci_host *host)
->> +static int mmci_dma_setup(struct mmci_host *host)
->>   {
->>          const char *rxname, *txname;
->>
->> @@ -466,7 +466,9 @@ static void mmci_dma_setup(struct mmci_host *host)
->>          }
->>
->>          if (host->ops && host->ops->dma_setup)
->> -               host->ops->dma_setup(host);
->> +               return host->ops->dma_setup(host);
->> +
-> 
-> Looks like you need to implement a error handling, instead of just
-> returning the error code.
+I would suggest you to squash this with patch4, as I think it makes
+more sense to keep these changes together.
 
-yes, today if a dma_setup is defined, we can't fallback to pio mode.
-A use_dma variable (defined in mmci_host) could be setted follow the 
-return code of ops->dma_setup
+>
+> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
+> ---
+>  drivers/mmc/host/mmci.c | 10 ++++------
+>  drivers/mmc/host/mmci.h |  2 ++
+>  2 files changed, 6 insertions(+), 6 deletions(-)
+>
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index 6de7c8d..43f2a1a 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -418,7 +418,6 @@ static void mmci_init_sg(struct mmci_host *host, struct mmc_data *data)
+>  struct mmci_dmae_next {
+>         struct dma_async_tx_descriptor *desc;
+>         struct dma_chan *chan;
+> -       s32 cookie;
+>  };
+>
+>  struct mmci_dmae_priv {
+> @@ -449,7 +448,7 @@ static int mmci_dma_setup(struct mmci_host *host)
+>                                                      "tx");
+>
+>         /* initialize pre request cookie */
+> -       dmae->next_data.cookie = 1;
+> +       host->next_cookie = 1;
+>
+>         /*
+>          * If only an RX channel is specified, the driver will
+> @@ -716,7 +715,7 @@ static void mmci_get_next_data(struct mmci_host *host, struct mmc_data *data)
+>         struct mmci_dmae_priv *dmae = host->dma_priv;
+>         struct mmci_dmae_next *next = &dmae->next_data;
+>
+> -       WARN_ON(data->host_cookie && data->host_cookie != next->cookie);
+> +       WARN_ON(data->host_cookie && data->host_cookie != host->next_cookie);
+>         WARN_ON(!data->host_cookie && (next->desc || next->chan));
+>
+>         dmae->desc_current = next->desc;
+> @@ -728,9 +727,7 @@ static void mmci_get_next_data(struct mmci_host *host, struct mmc_data *data)
+>  static void mmci_pre_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>  {
+>         struct mmci_host *host = mmc_priv(mmc);
+> -       struct mmci_dmae_priv *dmae = host->dma_priv;
+>         struct mmc_data *data = mrq->data;
+> -       struct mmci_dmae_next *nd = &dmae->next_data;
+>
+>         if (!data)
+>                 return;
+> @@ -741,7 +738,8 @@ static void mmci_pre_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>                 return;
+>
+>         if (!mmci_dma_prep_next(host, data))
+> -               data->host_cookie = ++nd->cookie < 0 ? 1 : nd->cookie;
+> +               data->host_cookie = ++host->next_cookie < 0 ?
+> +                       1 : host->next_cookie;
+>  }
+>
+>  static void mmci_post_request(struct mmc_host *mmc, struct mmc_request *mrq,
+> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+> index 1e9a45b..5bb1ce2 100644
+> --- a/drivers/mmc/host/mmci.h
+> +++ b/drivers/mmc/host/mmci.h
+> @@ -318,5 +318,7 @@ struct mmci_host {
+>         int (*get_rx_fifocnt)(struct mmci_host *h, u32 status, int remain);
+>
+>         void                    *dma_priv;
+> +
+> +       s32                     next_cookie;
+>  };
+>
+> --
+> 2.7.4
+>
 
-example:
-
-void mmci_dma_setup(struct mmci_host *host)
-{
-	int err;
-
-	if (!host->ops || !host->ops->dma_setup)
-		return;
-
-	err = host->ops->dma_setup(host);
-	if (err)
-		return;
-	
-	host->use_dma = true;
-	
-	/* initialize pre request cookie */
-	host->next_cookie = 1;
-}
-
-use_dma variable could be check by mmci_host_ops variant functions.
-
-are you agree with this proposal?
-
-> 
->> +       return 0;
->>   }
->>
->>   /*
->> @@ -741,8 +743,10 @@ static void mmci_post_request(struct mmc_host *mmc, struct mmc_request *mrq,
->>   static void mmci_get_next_data(struct mmci_host *host, struct mmc_data *data)
->>   {
->>   }
->> -static inline void mmci_dma_setup(struct mmci_host *host)
->> +
->> +static inline int mmci_dma_setup(struct mmci_host *host)
->>   {
->> +       return 0;
->>   }
->>
->>   static inline void mmci_dma_release(struct mmci_host *host)
->> @@ -1796,7 +1800,9 @@ static int mmci_probe(struct amba_device *dev,
->>                   amba_rev(dev), (unsigned long long)dev->res.start,
->>                   dev->irq[0], dev->irq[1]);
->>
->> -       mmci_dma_setup(host);
->> +       ret = mmci_dma_setup(host);
->> +       if (ret)
->> +               goto clk_disable;
->>
->>          pm_runtime_set_autosuspend_delay(&dev->dev, 50);
->>          pm_runtime_use_autosuspend(&dev->dev);
->> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
->> index 21aaf9a..06299ac 100644
->> --- a/drivers/mmc/host/mmci.h
->> +++ b/drivers/mmc/host/mmci.h
->> @@ -273,7 +273,7 @@ struct variant_data {
->>
->>   /* mmci variant callbacks */
->>   struct mmci_host_ops {
->> -       void (*dma_setup)(struct mmci_host *host);
->> +       int (*dma_setup)(struct mmci_host *host);
->>   };
->>
->>   struct mmci_host_next {
->> diff --git a/drivers/mmc/host/mmci_qcom_dml.c b/drivers/mmc/host/mmci_qcom_dml.c
->> index be3fab5..1bb59cf 100644
->> --- a/drivers/mmc/host/mmci_qcom_dml.c
->> +++ b/drivers/mmc/host/mmci_qcom_dml.c
->> @@ -119,7 +119,7 @@ static int of_get_dml_pipe_index(struct device_node *np, const char *name)
->>   }
->>
->>   /* Initialize the dml hardware connected to SD Card controller */
->> -static void qcom_dma_setup(struct mmci_host *host)
->> +static int qcom_dma_setup(struct mmci_host *host)
->>   {
->>          u32 config;
->>          void __iomem *base;
->> @@ -131,7 +131,7 @@ static void qcom_dma_setup(struct mmci_host *host)
->>
->>          if (producer_id < 0 || consumer_id < 0) {
->>                  host->variant->qcom_dml = false;
-> 
-> It seems like the existing code is an attempt to fallback to use pio
-> mode. However, I doubt it works as is.
-
-oops, I seen that like a variant identification issue, so if it's a
-fallback to pio mode it doesn't work.
-
-> 
->> -               return;
->> +               return -EINVAL;
-> 
-> My point is, if you return an error code here, it means that the error
-> code becomes propagated and ->probe() will fail.
-> 
-> Ideally, we should be able fall back to pio mode when dma doesn't
-> work. I have looped in Srinivas who implemented the qcom dml support,
-> let's see if he can explains the intent with the code.
-> 
-> I also volunteer to help out running some tests on the 410c platform,
-> however allow me a day or two to do that.
-
-yes, I would be more reassured
-
-> 
->>          }
->>
->>          base = host->base + DML_OFFSET;
->> @@ -175,6 +175,8 @@ static void qcom_dma_setup(struct mmci_host *host)
->>
->>          /* Make sure dml initialization is finished */
->>          mb();
->> +
->> +       return 0;
->>   }
->>
->>   static struct mmci_host_ops qcom_variant_ops = {
->> --
->> 2.7.4
->>
-> 
-> Kind regards
-> Uffe
-> 
+Kind regards
+Uffe
