@@ -1,80 +1,138 @@
-From: Janusz Krzysztofik <jmkrzyszt@gmail.com>
-Subject: [PATCH] mmc: pwrseq_simple: Fix incorrect handling of GPIO bitmap
-Date: Tue, 25 Sep 2018 21:24:33 +0200
-Message-ID: <20180925192433.1377-1-jmkrzyszt@gmail.com>
-References: <CAGfqbt4n4g_24kWGPhXojooiQQOmVeq-TfYucFERXJGMci87Xw@mail.gmail.com>
+From: Rajat Jain <rajatja@google.com>
+Subject: sdhci driver card-detect is broken because gpiolib can't fallback to _CRS?
+Date: Tue, 25 Sep 2018 13:54:57 -0700
+Message-ID: <CACK8Z6Ebo0giDifRHBg13pe_mO18vb1n0+LGMoMjkLai6X9MNg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAGfqbt4n4g_24kWGPhXojooiQQOmVeq-TfYucFERXJGMci87Xw@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Janusz Krzysztofik <jmkrzyszt@gmail.com>, linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org, linux-kernel@vger.kernel.org, Marek Szyprowski <m.szyprowski@samsung.com>, Krzysztof Kozlowski <krzk@kernel.org>, Linux Samsung SOC <linux-samsung-soc@vger.kernel.org>
+To: Mika Westerberg <mika.westerberg@linux.intel.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Linus Walleij <linus.walleij@linaro.org>, Dmitry Torokhov <dtor@google.com>, linux-gpio@vger.kernel.org, linux-acpi@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc: Rajat Jain <rajatxjain@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Commit b9762bebc633 ("gpiolib: Pass bitmaps, not integer arrays, to
-get/set array") changed the way GPIO values are passed to
-gpiod_get/set_array_value() and friends.  The updated code of
-mmc_pwrseq_simple_set_gpios_value() incorrectly uses the 'value'
-argument as a bitmap of GPIO values and assigns it directly to the
-'values' bitmap variable passed to gpiod_set_array_value_cansleep()
-instead of filling that bitmap with bits equal to the 'value' argument.
-As a result, boot hanging caused by incorrectly handled MMC device
-has been observed.
-
-As a side effect of that incorrect interpreation of the 'value'
-argument, wrong assumption is taken about the 'values' bitmap size 
-never exceding the number of bits of the 'value' argument type.
-
-Fix it.
-
-Reported-by: Marek Szyprowski <m.szyprowski@samsung.com>
-Signed-off-by: Janusz Krzysztofik <jmkrzyszt@gmail.com>
----
 Hi,
 
-I hope I've finally identified the root cause of the boot hang reported
-by Marek Szyprowski.  I've reviewed the code of other divers updated for
-the modified GPIO API and found no more issues of that kind.
+With commit f10e4bf6632b5b ("gpio: acpi: Even more tighten up ACPI
+GPIO lookups"), the gpio lookups were tightened up such that _CRS
+method will *only* be tried for lookup, if the ACPI node for the
+device does not contain any _DSD properties, AND con_id=NULL:
 
-Marek, can you please test this fix on top of next-20180920 with the fix
-"gpiolib: Fix missing updates of bitmap index" also applied?
+bool acpi_can_fallback_to_crs(struct acpi_device *adev, const char *con_id)
+{
+        /* Never allow fallback if the device has properties */
+        if (adev->data.properties || adev->driver_gpios)
+                return false;
 
-I've assumed this fix, if tested successfully, will be merged via GPIO
-tree, hence I've selected Linus as the main recipient of this message.
+        return con_id == NULL;
+}
+
+>From the commit log of the said commit, the following types of cases
+were identified:
+
+    Case 1: (I think this represents the modern BIOS, because this is
+what we want everyone to use i.e. we want to be able to lookup using
+_DSD preferably:)
+
+        Device (DEVX)
+        {
+            ...
+            Name (_CRS, ResourceTemplate ()
+            {
+                GpioIo (Exclusive, PullUp, 0, 0, IoRestrictionInputOnly,
+                        "\\_SB.GPO0", 0, ResourceConsumer) {15}
+            })
+            Name (_DSD, Package ()
+            {
+                ToUUID("daffd814-6eba-4d8c-8a91-bc9bbf4aa301"),
+                Package ()
+                {
+                    Package () {"some-gpios", Package() {^DEVX, 0, 0, 0 }},
+                }
+            })
+        }
+
+    Case 2: (I think this represents the Legacy BIOS, because this is
+what has been in use historically, i.e. need to lookup via the _CRS):
+
+        Device (DEVX)
+        {
+            ...
+            Name (_CRS, ResourceTemplate ()
+            {
+                GpioIo (Exclusive, PullUp, 0, 0, IoRestrictionInputOnly,
+                        "\\_SB.GPO0", 0, ResourceConsumer) {27}
+            })
+        }
+
+Ideally a driver should be able to support both legacy and modern BIOS
+(i.e. both the above cases). But it seems to me that as per the
+current code, the driver has to be aware of what kind of BIOS it is,
+because it needs to deal with them differently:
+
+* Use con_id=NULL if it is dealing with a legacy BIOS (i.e. no _DSD
+properties in the ACPI).
+* Use con_id=<actual string> if it is dealing with a modern BIOS (i.e.
+which provides _DSD for the <string> property)
+
+Questions:
+
+1) Is the above a correct understanding of what the gpiolib expects?
+So it seems to be that _CRS is not really a "fallback option" anymore
+at the gpiolib end anymore (i.e. if a driver wants to support both the
+cases (legacy and modern), then it would need to do the fallback
+explicitly?)
+
+2) If so, it seems that the the sdhci driver is broken for modern BIOS
+as it uses con_id = NULL when calling mmc_gpiod_request_cd(). We can
+possibly fix this by either relaxing.the rules to allow _CRS fallback
+in gpiolib, or change the sdhci driver to try first using "cd" and
+then NULL as the con_id. What do you think?
+
+This is what I see on my system (running 4.19-rc3'ish):
+
+sdhci-pci 0000:00:14.5: SDHCI controller found [8086:34f8] (rev 0)
+sdhci-pci 0000:00:14.5: GPIO lookup for consumer (null)
+sdhci-pci 0000:00:14.5: using ACPI for GPIO lookup
+acpi device:03: GPIO: looking up gpios
+acpi device:03: GPIO: looking up gpio
+sdhci-pci 0000:00:14.5: using lookup tables for GPIO lookup
+sdhci-pci 0000:00:14.5: No GPIO consumer (null) found
+sdhci-pci 0000:00:14.5: failed to setup card detect gpio
+
+This is how my ACPI looks for the device:
+
+    Scope (\_SB.PCI0.SDXC)
+    {
+        Name (_CRS, ResourceTemplate ()  // _CRS: Current Resource Settings
+        {
+            GpioInt (Edge, ActiveBoth, SharedAndWake, PullNone, 0x2710,
+                "\\_SB.PCI0.GPIO", 0x00, ResourceConsumer, ,
+                )
+                {   // Pin list
+                    0x0005
+                }
+        })
+        Name (_DSD, Package (0x02)  // _DSD: Device-Specific Data
+        {
+            ToUUID ("daffd814-6eba-4d8c-8a91-bc9bbf4aa301") /* Device
+Properties for _DSD */,
+            Package (0x01)
+            {
+                Package (0x02)
+                {
+                    "cd-gpio",
+                    Package (0x04)
+                    {
+                        \_SB.PCI0.SDXC,
+                        Zero,
+                        Zero,
+                        One
+                    }
+                }
+            }
+        })
+    }
 
 Thanks,
-Janusz
 
- drivers/mmc/core/pwrseq_simple.c | 13 +++++++++++--
- 1 file changed, 11 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
-index 7f882a2bb872..ece34c734693 100644
---- a/drivers/mmc/core/pwrseq_simple.c
-+++ b/drivers/mmc/core/pwrseq_simple.c
-@@ -40,13 +40,22 @@ static void mmc_pwrseq_simple_set_gpios_value(struct mmc_pwrseq_simple *pwrseq,
- 	struct gpio_descs *reset_gpios = pwrseq->reset_gpios;
- 
- 	if (!IS_ERR(reset_gpios)) {
--		DECLARE_BITMAP(values, BITS_PER_TYPE(value));
-+		unsigned long *values;
- 		int nvalues = reset_gpios->ndescs;
- 
--		values[0] = value;
-+		values = bitmap_alloc(nvalues, GFP_KERNEL);
-+		if (!values)
-+			return;
-+
-+		if (value)
-+			bitmap_fill(values, nvalues);
-+		else
-+			bitmap_zero(values, nvalues);
- 
- 		gpiod_set_array_value_cansleep(nvalues, reset_gpios->desc,
- 					       reset_gpios->info, values);
-+
-+		kfree(values);
- 	}
- }
- 
--- 
-2.16.4
+Rajat
