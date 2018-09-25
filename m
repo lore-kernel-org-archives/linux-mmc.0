@@ -1,148 +1,57 @@
-From: Craig <ctatlor97@gmail.com>
-Subject: Re: [PATCH V3 0/4] Changes for SDCC5 version
-Date: Tue, 25 Sep 2018 16:39:33 +0100
-Message-ID: <C01C1C07-13FA-4693-9493-2FAEE9153577@gmail.com>
-References: <1529386761-4923-1-git-send-email-vviswana@codeaurora.org> <20180924194412.GA27477@arch> <bcdeaf0c-fb04-67f5-8580-a3f5110bcba5@codeaurora.org>
+From: Evan Green <evgreen@chromium.org>
+Subject: Re: [PATCH 1/2] dt-bindings: mmc: sdhci-msm: Add flag for restoring dll
+Date: Tue, 25 Sep 2018 10:38:23 -0700
+Message-ID: <CAE=gft6Bxtdev+1Zo58LHNaYkB5MTfUZx8eFayvuixVJFWMw_Q@mail.gmail.com>
+References: <1537887875-29494-1-git-send-email-vbadigan@codeaurora.org> <1537887875-29494-2-git-send-email-vbadigan@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <bcdeaf0c-fb04-67f5-8580-a3f5110bcba5@codeaurora.org>
+In-Reply-To: <1537887875-29494-2-git-send-email-vbadigan@codeaurora.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>, Vijay Viswanath <vviswana@codeaurora.org>
-Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, devicetree@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, jeremymc@redhat.com, bjorn.andersson@linaro.org, riteshh@codeaurora.org, dianders@google.com, sayalil@codeaurora.org
+To: vbadigan@codeaurora.org
+Cc: adrian.hunter@intel.com, Ulf Hansson <ulf.hansson@linaro.org>, robh+dt@kernel.org, asutoshd@codeaurora.org, riteshh@codeaurora.org, stummala@codeaurora.org, sayali <sayalil@codeaurora.org>, Doug Anderson <dianders@google.com>, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-
-
-On 25 September 2018 12:17:26 BST, Veerabhadrarao Badiganti <vbadigan@code=
-aurora=2Eorg> wrote:
+On Tue, Sep 25, 2018 at 8:05 AM Veerabhadrarao Badiganti
+<vbadigan@codeaurora.org> wrote:
 >
->On 9/25/2018 1:18 AM, Craig Tatlor wrote:
->> What socs have you tested this on?
->> On sdm660 it seems to crash device
->> when writing pwr ctl=2E
+> The dll settings of SDHC controller needs to be restored whenever
+> controller clocks are gated. This restoration is needed only on
+> few SDHCI-MSM controllers. This dt flag indicates whether dll
+> restoration is needed or not.
 >
->Hi
->We have tested this on SDM845=2E
->SDM660 also has SDCC5 controller, so you would need to define
->"qcom,sdhci-msm-v5" in your platform dt=2E
->Can you confirm if you have defined this?
+> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+> ---
+>  Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 4 ++++
+>  1 file changed, 4 insertions(+)
 >
-Hi,
-Yes my DT entry is as follows
-
-        sdhc_1: sdhci@f9824900 {                                          =
-                       =20
-                compatible =3D "qcom,sdhci-msm-v5";                       =
-                         =20
-                reg =3D <0xc0c4000 0x1000>, <0xc0c5000 0x1000>;           =
-                         =20
-                interrupts =3D <GIC_SPI 112 IRQ_TYPE_LEVEL_HIGH>;         =
-                         =20
-                interrupt-names =3D "pwr_irq";                            =
-                         =20
-                                                                          =
-                       =20
-                bus-width =3D <8>;                                        =
-                         =20
-                non-removable;                                            =
-                       =20
-                                                                          =
-                       =20
-                vmmc-supply =3D <&pm660l_l4>;                             =
-                         =20
-                vqmmc-supply =3D <&pm660_l8>;                             =
-                         =20
-                                                                          =
-                       =20
-                pinctrl-names =3D "default";                              =
-                         =20
-                pinctrl-0 =3D <&sdc1_clk &sdc1_cmd &sdc1_data &sdc1_rclk>;=
-                         =20
-                                                                          =
-                       =20
-                clocks =3D <&gcc GCC_SDCC1_APPS_CLK>, <&gcc GCC_SDCC1_AHB_=
-CLK>;                    =20
-                clock-names =3D "core", "iface";                          =
-                         =20
-        };         =20
-
->BTW, can you please share few details of the platform that you are
->checking?
->We are not aware of any dev platform based on SDM660=2E This is just for=
-=20
->my info
-
-I'm checking on the sony xperia xa2 (pioneer) smartphone=2E
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> index 3720385..207ce36 100644
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> @@ -31,6 +31,8 @@ Optional properties:
+>                                         BUS_OFF states in power irq. Should be specified in
+>                                         pairs (lpm, hpm), for BUS_OFF and BUS_ON respectively.
+>                                         Units uA.
+> +- qcom,restore-dll-config - Flag indicates that restoration of dll config after clock gating
+> +                           is needed on given platform. This wouldn't be needed for every MSM.
+>  Example:
 >
->> On Tue, Jun 19, 2018 at 11:09:17AM +0530, Vijay Viswanath wrote:
->>> With SDCC5, the MCI register space got removed and the offset/order
->of
->>> several registers have changed=2E Based on SDCC version used and the
->register,
->>> we need to pick the base address and offset=2E
->>>
->>> Depends on patch series: "[PATCH V5 0/2] mmc: sdhci-msm: Configuring
->IO_PAD support for sdhci-msm"
->>>
->>> Changes since RFC:
->>> 	Dropped voltage regulator changes in sdhci-msm
->>> 	Split the "Register changes for sdcc V5" patch
->>> 	Instead of checking mci removal for deciding which base addr to
->use,
->>> 	new function pointers are defined for the 2 variants of sdcc:
->>> 		1) MCI present
->>> 		2) V5 (mci removed)
->>> 	Instead of string comparing with the compatible string from DT
->file,
->>> 	the sdhci_msm_probe will now pick the data associated with the
->>> 	compatible entry and use it to load variant specific address
->offsets
->>> 	and msm variant specific read/write ops=2E
->>>
->>> Changes since V1:
->>> 	Removed unused msm_reab & msm_writeb APIs
->>> 	Changed certain register addresses from uppercase to lowercase hex
->>> 	letters
->>> 	Removed extra lines and spaces
->>> 	Split "[PATCH V1 0/3] Changes for SDCC5 version" patch into two,
->>> 	one for Documentation and other for the driver changes=2E
->>>
->>> Changes since V2:
->>> 	Used lower case for macro function defenitions
->>> 	Removed unused function pointers for msm_readb & msm_writeb
->>>
->>>
->>> Sayali Lokhande (3):
->>>    mmc: sdhci-msm: Define new Register address map
->>>    Documentation: sdhci-msm: Add new compatible string for SDCC v5
->>>    mmc: host: Register changes for sdcc V5
->>>
->>> Vijay Viswanath (1):
->>>    mmc: sdhci-msm: Add msm version specific ops and data structures
->>>
->>>   =2E=2E=2E/devicetree/bindings/mmc/sdhci-msm=2Etxt          |   7 +-
->>>   drivers/mmc/host/sdhci-msm=2Ec                       | 511
->++++++++++++++++-----
->>>   2 files changed, 391 insertions(+), 127 deletions(-)
->>>
->>> --=20
->>>   Qualcomm India Private Limited, on behalf of Qualcomm Innovation
->Center, Inc=2E
->>> Qualcomm Innovation Center, Inc=2E is a member of Code Aurora Forum, a
->Linux Foundation Collaborative Project=2E
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe
->linux-arm-msm" in
->>> the body of a message to majordomo@vger=2Ekernel=2Eorg
->>> More majordomo info at  http://vger=2Ekernel=2Eorg/majordomo-info=2Eht=
-ml
+>         sdhc_1: sdhci@f9824900 {
+> @@ -49,6 +51,8 @@ Example:
 >
->Thanks,
->Veera
+>                 clocks = <&gcc GCC_SDCC1_APPS_CLK>, <&gcc GCC_SDCC1_AHB_CLK>;
+>                 clock-names = "core", "iface";
+> +
+> +               qcom,restore-dll-config;
 
---=20
-Sent from my Android device with K-9 Mail=2E Please excuse my brevity=2E
+Hi Veera,
+I'm not sure this is the best approach. It might be better to key this
+behavior off of the compatible string. Actually I'm noticing now that
+the binding for this device doesn't include an SoC-specific compatible
+string, which I think is now the preferred way (eg
+"qcom,sdm845-sdhci", "qcom,sdhci-msm-v5"). I think we should add that
+to sdhci-msm.txt, then use the compatible string to enable this
+behavior you're adding now.
+
+-Evan
