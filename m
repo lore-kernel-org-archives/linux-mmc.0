@@ -1,57 +1,80 @@
-From: Evan Green <evgreen@chromium.org>
-Subject: Re: [PATCH 1/2] dt-bindings: mmc: sdhci-msm: Add flag for restoring dll
-Date: Tue, 25 Sep 2018 10:38:23 -0700
-Message-ID: <CAE=gft6Bxtdev+1Zo58LHNaYkB5MTfUZx8eFayvuixVJFWMw_Q@mail.gmail.com>
-References: <1537887875-29494-1-git-send-email-vbadigan@codeaurora.org> <1537887875-29494-2-git-send-email-vbadigan@codeaurora.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: Janusz Krzysztofik <jmkrzyszt@gmail.com>
+Subject: [PATCH] mmc: pwrseq_simple: Fix incorrect handling of GPIO bitmap
+Date: Tue, 25 Sep 2018 21:24:33 +0200
+Message-ID: <20180925192433.1377-1-jmkrzyszt@gmail.com>
+References: <CAGfqbt4n4g_24kWGPhXojooiQQOmVeq-TfYucFERXJGMci87Xw@mail.gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1537887875-29494-2-git-send-email-vbadigan@codeaurora.org>
+In-Reply-To: <CAGfqbt4n4g_24kWGPhXojooiQQOmVeq-TfYucFERXJGMci87Xw@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: vbadigan@codeaurora.org
-Cc: adrian.hunter@intel.com, Ulf Hansson <ulf.hansson@linaro.org>, robh+dt@kernel.org, asutoshd@codeaurora.org, riteshh@codeaurora.org, stummala@codeaurora.org, sayali <sayalil@codeaurora.org>, Doug Anderson <dianders@google.com>, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Janusz Krzysztofik <jmkrzyszt@gmail.com>, linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org, linux-kernel@vger.kernel.org, Marek Szyprowski <m.szyprowski@samsung.com>, Krzysztof Kozlowski <krzk@kernel.org>, Linux Samsung SOC <linux-samsung-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Sep 25, 2018 at 8:05 AM Veerabhadrarao Badiganti
-<vbadigan@codeaurora.org> wrote:
->
-> The dll settings of SDHC controller needs to be restored whenever
-> controller clocks are gated. This restoration is needed only on
-> few SDHCI-MSM controllers. This dt flag indicates whether dll
-> restoration is needed or not.
->
-> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-> ---
->  Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 4 ++++
->  1 file changed, 4 insertions(+)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-> index 3720385..207ce36 100644
-> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-> @@ -31,6 +31,8 @@ Optional properties:
->                                         BUS_OFF states in power irq. Should be specified in
->                                         pairs (lpm, hpm), for BUS_OFF and BUS_ON respectively.
->                                         Units uA.
-> +- qcom,restore-dll-config - Flag indicates that restoration of dll config after clock gating
-> +                           is needed on given platform. This wouldn't be needed for every MSM.
->  Example:
->
->         sdhc_1: sdhci@f9824900 {
-> @@ -49,6 +51,8 @@ Example:
->
->                 clocks = <&gcc GCC_SDCC1_APPS_CLK>, <&gcc GCC_SDCC1_AHB_CLK>;
->                 clock-names = "core", "iface";
-> +
-> +               qcom,restore-dll-config;
+Commit b9762bebc633 ("gpiolib: Pass bitmaps, not integer arrays, to
+get/set array") changed the way GPIO values are passed to
+gpiod_get/set_array_value() and friends.  The updated code of
+mmc_pwrseq_simple_set_gpios_value() incorrectly uses the 'value'
+argument as a bitmap of GPIO values and assigns it directly to the
+'values' bitmap variable passed to gpiod_set_array_value_cansleep()
+instead of filling that bitmap with bits equal to the 'value' argument.
+As a result, boot hanging caused by incorrectly handled MMC device
+has been observed.
 
-Hi Veera,
-I'm not sure this is the best approach. It might be better to key this
-behavior off of the compatible string. Actually I'm noticing now that
-the binding for this device doesn't include an SoC-specific compatible
-string, which I think is now the preferred way (eg
-"qcom,sdm845-sdhci", "qcom,sdhci-msm-v5"). I think we should add that
-to sdhci-msm.txt, then use the compatible string to enable this
-behavior you're adding now.
+As a side effect of that incorrect interpreation of the 'value'
+argument, wrong assumption is taken about the 'values' bitmap size 
+never exceding the number of bits of the 'value' argument type.
 
--Evan
+Fix it.
+
+Reported-by: Marek Szyprowski <m.szyprowski@samsung.com>
+Signed-off-by: Janusz Krzysztofik <jmkrzyszt@gmail.com>
+---
+Hi,
+
+I hope I've finally identified the root cause of the boot hang reported
+by Marek Szyprowski.  I've reviewed the code of other divers updated for
+the modified GPIO API and found no more issues of that kind.
+
+Marek, can you please test this fix on top of next-20180920 with the fix
+"gpiolib: Fix missing updates of bitmap index" also applied?
+
+I've assumed this fix, if tested successfully, will be merged via GPIO
+tree, hence I've selected Linus as the main recipient of this message.
+
+Thanks,
+Janusz
+
+ drivers/mmc/core/pwrseq_simple.c | 13 +++++++++++--
+ 1 file changed, 11 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
+index 7f882a2bb872..ece34c734693 100644
+--- a/drivers/mmc/core/pwrseq_simple.c
++++ b/drivers/mmc/core/pwrseq_simple.c
+@@ -40,13 +40,22 @@ static void mmc_pwrseq_simple_set_gpios_value(struct mmc_pwrseq_simple *pwrseq,
+ 	struct gpio_descs *reset_gpios = pwrseq->reset_gpios;
+ 
+ 	if (!IS_ERR(reset_gpios)) {
+-		DECLARE_BITMAP(values, BITS_PER_TYPE(value));
++		unsigned long *values;
+ 		int nvalues = reset_gpios->ndescs;
+ 
+-		values[0] = value;
++		values = bitmap_alloc(nvalues, GFP_KERNEL);
++		if (!values)
++			return;
++
++		if (value)
++			bitmap_fill(values, nvalues);
++		else
++			bitmap_zero(values, nvalues);
+ 
+ 		gpiod_set_array_value_cansleep(nvalues, reset_gpios->desc,
+ 					       reset_gpios->info, values);
++
++		kfree(values);
+ 	}
+ }
+ 
+-- 
+2.16.4
