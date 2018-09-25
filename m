@@ -1,49 +1,37 @@
-From: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-Subject: [PATCH 1/2] dt-bindings: mmc: sdhci-msm: Add flag for restoring dll
-Date: Tue, 25 Sep 2018 20:34:34 +0530
-Message-ID: <1537887875-29494-2-git-send-email-vbadigan@codeaurora.org>
-References: <1537887875-29494-1-git-send-email-vbadigan@codeaurora.org>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH V2 26/27] mmc: mmci: add DT bindings for STM32 sdmmc
+Date: Tue, 25 Sep 2018 10:27:34 -0500
+Message-ID: <20180925152734.GA28148@bogus>
+References: <1537523181-14578-1-git-send-email-ludovic.Barre@st.com>
+ <1537523181-14578-27-git-send-email-ludovic.Barre@st.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1537887875-29494-1-git-send-email-vbadigan@codeaurora.org>
+Content-Disposition: inline
+In-Reply-To: <1537523181-14578-27-git-send-email-ludovic.Barre@st.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org, robh+dt@kernel.org
-Cc: asutoshd@codeaurora.org, riteshh@codeaurora.org, stummala@codeaurora.org, sayalil@codeaurora.org, evgreen@chromium.org, dianders@google.com, Veerabhadrarao Badiganti <vbadigan@codeaurora.org>, Mark Rutland <mark.rutland@arm.com>, "open list:MULTIMEDIA CARD MMC, SECURE
-        DIGITAL SD AND..." <linux-mmc@vger.kernel.org>, "open list:OPEN FIRMWARE AND FLATTENED
-        DEVICE TREE BINDINGS" <devicetree@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
+To: Ludovic Barre <ludovic.Barre@st.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, benjamin.gaignard@linaro.org, Gerald Baeza <gerald.baeza@st.com>, Loic Pallardy <loic.pallardy@st.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com
 List-Id: linux-mmc@vger.kernel.org
 
-The dll settings of SDHC controller needs to be restored whenever
-controller clocks are gated. This restoration is needed only on
-few SDHCI-MSM controllers. This dt flag indicates whether dll
-restoration is needed or not.
+On Fri, Sep 21, 2018 at 11:46:20AM +0200, Ludovic Barre wrote:
+> From: Ludovic Barre <ludovic.barre@st.com>
+> 
+> STM32 sdmmc variant has support to:
+> -Indicate signal directions (only one property
+> for d0dir, d123dir, cmd_dir)
+> -Select command and data phase relation.
+> -Select "clock in" from an external driver.
+> 
+> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
+> ---
+> change v3:
+> -remove space at end of "st,use-ckin "
+> 
+>  Documentation/devicetree/bindings/mmc/mmci.txt | 9 +++++++++
 
-Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
----
- Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 4 ++++
- 1 file changed, 4 insertions(+)
+I acked v1. Please add acks when posting new versions.
 
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-index 3720385..207ce36 100644
---- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-+++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-@@ -31,6 +31,8 @@ Optional properties:
- 					BUS_OFF states in power irq. Should be specified in
- 					pairs (lpm, hpm), for BUS_OFF and BUS_ON respectively.
- 					Units uA.
-+- qcom,restore-dll-config - Flag indicates that restoration of dll config after clock gating
-+			    is needed on given platform. This wouldn't be needed for every MSM.
- Example:
- 
- 	sdhc_1: sdhci@f9824900 {
-@@ -49,6 +51,8 @@ Example:
- 
- 		clocks = <&gcc GCC_SDCC1_APPS_CLK>, <&gcc GCC_SDCC1_AHB_CLK>;
- 		clock-names = "core", "iface";
-+
-+		qcom,restore-dll-config;
- 	};
- 
- 	sdhc_2: sdhci@f98a4900 {
--- 
-Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc.
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a Linux Foundation Collaborative Project
+>  drivers/mmc/host/mmci.c                        | 6 ++++++
+>  drivers/mmc/host/mmci.h                        | 1 +
+>  3 files changed, 16 insertions(+)
