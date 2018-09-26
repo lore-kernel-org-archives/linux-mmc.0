@@ -1,20 +1,25 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH] mmc: pwrseq_simple: Fix incorrect handling of GPIO bitmap
-Date: Wed, 26 Sep 2018 09:50:18 +0200
-Message-ID: <CACRpkdaXE7Me8Q0Rrcooo_v_2oBJN1RSGUNHYudtTGQY7x8kqg@mail.gmail.com>
+From: Marek Szyprowski <m.szyprowski@samsung.com>
+Subject: Re: [PATCH] mmc: pwrseq_simple: Fix incorrect handling of GPIO
+ bitmap
+Date: Wed, 26 Sep 2018 10:14:43 +0200
+Message-ID: <20180926081445eucas1p265a9e6e80a1dbb35b2fe66c5f035dff5~X5RcU8klm1224512245eucas1p29@eucas1p2.samsung.com>
 References: <CAGfqbt4n4g_24kWGPhXojooiQQOmVeq-TfYucFERXJGMci87Xw@mail.gmail.com>
- <20180925192433.1377-1-jmkrzyszt@gmail.com>
+        <CGME20180925192325epcas1p41b5c57a1ff7c9bc00f9a6d3b2e601820@epcas1p4.samsung.com>
+        <20180925192433.1377-1-jmkrzyszt@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20180925192433.1377-1-jmkrzyszt@gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Janusz Krzysztofik <jmkrzyszt@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Krzysztof Kozlowski <krzk@kernel.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>
+To: Janusz Krzysztofik <jmkrzyszt@gmail.com>, Linus Walleij <linus.walleij@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org, linux-kernel@vger.kernel.org, Krzysztof Kozlowski <krzk@kernel.org>, Linux Samsung SOC <linux-samsung-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Sep 25, 2018 at 9:23 PM Janusz Krzysztofik <jmkrzyszt@gmail.com> wrote:
+Hi Janusz,
 
+On 2018-09-25 21:24, Janusz Krzysztofik wrote:
 > Commit b9762bebc633 ("gpiolib: Pass bitmaps, not integer arrays, to
 > get/set array") changed the way GPIO values are passed to
 > gpiod_get/set_array_value() and friends.  The updated code of
@@ -33,11 +38,64 @@ On Tue, Sep 25, 2018 at 9:23 PM Janusz Krzysztofik <jmkrzyszt@gmail.com> wrote:
 >
 > Reported-by: Marek Szyprowski <m.szyprowski@samsung.com>
 > Signed-off-by: Janusz Krzysztofik <jmkrzyszt@gmail.com>
+> ---
+> Hi,
+>
+> I hope I've finally identified the root cause of the boot hang reported
+> by Marek Szyprowski.  I've reviewed the code of other divers updated for
+> the modified GPIO API and found no more issues of that kind.
+>
+> Marek, can you please test this fix on top of next-20180920 with the fix
+> "gpiolib: Fix missing updates of bitmap index" also applied?
 
-Nice!
+Yes, I've just did such test (next-20180920 + "gpiolib: Fix missing
+updates of bitmap index" + "mmc: pwrseq_simple: Fix incorrect handling
+of GPIO bitmap") and sadly it doesn't fix the boot hang.
 
-Provided this works, Ulf can I have your ACK so I can queue this
-with the rest of the gpio array rework in the GPIO tree?
+With some more debugs in mmc_pwrseq_simple I've noticed that
+gpiod_set_array_value_cansleep() never ends and busyloops somewhere.
+I'm checking this now.
 
-Yours,
-Linus Walleij
+> I've assumed this fix, if tested successfully, will be merged via GPIO
+> tree, hence I've selected Linus as the main recipient of this message.
+>
+> Thanks,
+> Janusz
+>
+>   drivers/mmc/core/pwrseq_simple.c | 13 +++++++++++--
+>   1 file changed, 11 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
+> index 7f882a2bb872..ece34c734693 100644
+> --- a/drivers/mmc/core/pwrseq_simple.c
+> +++ b/drivers/mmc/core/pwrseq_simple.c
+> @@ -40,13 +40,22 @@ static void mmc_pwrseq_simple_set_gpios_value(struct mmc_pwrseq_simple *pwrseq,
+>   	struct gpio_descs *reset_gpios = pwrseq->reset_gpios;
+>   
+>   	if (!IS_ERR(reset_gpios)) {
+> -		DECLARE_BITMAP(values, BITS_PER_TYPE(value));
+> +		unsigned long *values;
+>   		int nvalues = reset_gpios->ndescs;
+>   
+> -		values[0] = value;
+> +		values = bitmap_alloc(nvalues, GFP_KERNEL);
+> +		if (!values)
+> +			return;
+> +
+> +		if (value)
+> +			bitmap_fill(values, nvalues);
+> +		else
+> +			bitmap_zero(values, nvalues);
+>   
+>   		gpiod_set_array_value_cansleep(nvalues, reset_gpios->desc,
+>   					       reset_gpios->info, values);
+> +
+> +		kfree(values);
+>   	}
+>   }
+>   
+
+Best regards
+-- 
+Marek Szyprowski, PhD
+Samsung R&D Institute Poland
