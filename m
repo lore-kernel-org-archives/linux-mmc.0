@@ -1,53 +1,80 @@
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Subject: Re: [PATCHv4 0/6] Add support for UHS-I on Exynos5422 odroid boards
-Date: Wed, 26 Sep 2018 21:07:30 +0200
-Message-ID: <20180926190730.GB6461@kozik-lap>
-References: <20180922075238.884-1-linux.amoon@gmail.com>
- <20180922075238.884-2-linux.amoon@gmail.com>
+From: Rajat Jain <rajatja@google.com>
+Subject: Re: sdhci driver card-detect is broken because gpiolib can't fallback
+ to _CRS?
+Date: Wed, 26 Sep 2018 12:25:40 -0700
+Message-ID: <CACK8Z6F1jkSN3KXiv+0X2uh61pBkpSMpHrdMHwLarbSAFoHMUA@mail.gmail.com>
+References: <CACK8Z6Ebo0giDifRHBg13pe_mO18vb1n0+LGMoMjkLai6X9MNg@mail.gmail.com>
+ <20180926074756.GD2664@lahna.fi.intel.com> <CAHp75Vdf7NxFtgZx+hqsA1YZY4szD5Ba9jbyo4CeeDHeaU3YAQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20180922075238.884-2-linux.amoon@gmail.com>
+In-Reply-To: <CAHp75Vdf7NxFtgZx+hqsA1YZY4szD5Ba9jbyo4CeeDHeaU3YAQ@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Anand Moon <linux.amoon@gmail.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Kukjin Kim <kgene@kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+To: Andy Shevchenko <andy.shevchenko@gmail.com>
+Cc: Mika Westerberg <mika.westerberg@linux.intel.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Linus Walleij <linus.walleij@linaro.org>, Dmitry Torokhov <dtor@google.com>, linux-gpio@vger.kernel.org, linux-acpi@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "Hunter, Adrian" <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Rajat Jain <rajatxjain@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Sat, Sep 22, 2018 at 07:52:32AM +0000, Anand Moon wrote:
-> This is series v4 since my previous patches were incomplete with driver
-> changes missing.
-> 
-> v4 changes.
-> squash cd-gpios and wp-gpio changes into single patch.
-> change the subject prefix to "ARM: dts: exynos:"
-> 
-> These changes add UHS-I tuning for dw_mmc-exynos driver.
-> 
-> Rebased on Krzysztof branch next/dt
-> [0] git://git.kernel.org/pub/scm/linux/kernel/git/krzk/linux.git 
-> 
+Hi,
 
-Except the one about CD and WP pins (where I replied), they look ok. It
-would be nice if you get tested-by tags for them.
+Thanks Mika and Andy for your inputs.
 
-Best regards,
-Krzysztof
+On Wed, Sep 26, 2018 at 1:42 AM Andy Shevchenko
+<andy.shevchenko@gmail.com> wrote:
+>
+> On Wed, Sep 26, 2018 at 10:49 AM Mika Westerberg
+> <mika.westerberg@linux.intel.com> wrote:
+> >
+> > Hi,
+> >
+> > On Tue, Sep 25, 2018 at 01:54:57PM -0700, Rajat Jain wrote:
+> > > * Use con_id=NULL if it is dealing with a legacy BIOS (i.e. no _DSD
+> > > properties in the ACPI).
+> > > * Use con_id=<actual string> if it is dealing with a modern BIOS (i.e.
+> > > which provides _DSD for the <string> property)
+> >
+> > Or you can use con_id=<actual string> everywhere and supply
+> > acpi_dev_add_driver_gpios() where needed to cover cases where BIOS does
+> > not provide _DSD.
 
-> Anand Moon (6):
->   ARM: dts: exynos: Added UHS-I bus speed support
->   ARM: dts: exynos: fix regulator min values of LDO13 for Odroid XU3/XU4
->   ARM: dts: exynos: update maximum frequency for sdcard to 200MHz
->   ARM: dts: exynos: Add CD and WP pins to Odroid XU3/XU4 SD card
->   ARM: dts: exynos: update maximum frequency for emmc to 200MHz
->   mmc: dw_mmc-exynos: Add tuning for sdr and ddr timing for USH-I mode
-> 
->  arch/arm/boot/dts/exynos5420-pinctrl.dtsi          |  8 ++++++++
->  arch/arm/boot/dts/exynos5422-odroid-core.dtsi      | 10 ++++++++--
->  arch/arm/boot/dts/exynos5422-odroidxu3-common.dtsi |  1 +
->  drivers/mmc/host/dw_mmc-exynos.c                   | 11 +++++++++++
->  4 files changed, 28 insertions(+), 2 deletions(-)
-> 
-> -- 
-> 2.17.1
-> 
+This sounds like a good idea and I'd like to do this. I have some
+questions though:
+
+1) If the BIOS does provide a _DSD entry for "cd-gpio", and
+additionally driver also uses devm_acpi_dev_add_driver_gpios() to add
+one more entry for the same string "cd-gpio", which one will (should?)
+actually be returned by the gpiolib? The one in BIOS or the one that
+was added by the driver?
+
+2) Related, I'm trying to understand how can a driver use
+devm_acpi_dev_add_driver_gpios(), for *only* the case where the BIOS
+does not have a _DSD (Or should it really care)? Does the driver need
+to check for _DSD using some other ACPI call?
+
+> See also Documentation/acpi/gpio-properties.txt for
+> > more information.
+>
+> Thanks, Mika. That is exactly the way how I suggested to fix and
+> actually fixed a lot of drivers already.
+>
+> Run `git grep -n -w devm_acpi_dev_add_driver_gpios` to find examples.
+>
+> > In case of SDHCI I think the correct way is to stick using _CRS lookup
+> > only because there typically is just one GpioInt() and I have not seen a
+> > single BIOS yet where they implement _DSD for this besides yours. If
+> > there is not way to change the BIOS implementation then I guess we just
+> > need to amend the driver to call acpi_dev_add_driver_gpios().
+
+Since we shouldn't discourage a BIOS that is trying to do the right
+thing by exposing the details in _DST, I think it would be preferable
+if we can solve this in the kernel.
+
+Thanks,
+
+Rajat
+
+>
+> True.
+>
+> --
+> With Best Regards,
+> Andy Shevchenko
