@@ -1,56 +1,88 @@
-From: Frieder Schrempf <frieder.schrempf@exceet.de>
-Subject: Re: [PATCH 2/2] mmc: Add mmc_force_detect_change_begin / _end
- functions
-Date: Wed, 26 Sep 2018 16:44:44 +0200
-Message-ID: <f9028dcb-c217-4efc-60a7-d0a2c1804a08@exceet.de>
-References: <CAPDyKFqDrdD+N+foLCwsVABtboz1Vn=OtJs14gp07zJfXHVKSA@mail.gmail.com>
+From: Krzysztof Kozlowski <krzk@kernel.org>
+Subject: Re: [PATCHv4 4/6] ARM: dts: exynos: Add CD and WP pins to Odroid
+ XU3/XU4 SD card
+Date: Wed, 26 Sep 2018 21:06:39 +0200
+Message-ID: <20180926190639.GA6461@kozik-lap>
+References: <20180922075238.884-1-linux.amoon@gmail.com>
+ <20180922075238.884-6-linux.amoon@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFqDrdD+N+foLCwsVABtboz1Vn=OtJs14gp07zJfXHVKSA@mail.gmail.com>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <20180922075238.884-6-linux.amoon@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, hdegoede@redhat.com, quentin.schulz@free-electrons.com
-Cc: gregkh@linuxfoundation.org, linus.walleij@linaro.org, shawn.lin@rock-chips.com, adrian.hunter@intel.com, baolin.wang@linaro.org, maxime.ripard@free-electrons.com, thomas.petazzoni@free-electrons.com, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devel@driverdev.osuosl.org, icenowy@aosc.xyz, wens@csie.org
+To: Anand Moon <linux.amoon@gmail.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Kukjin Kim <kgene@kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+On Sat, Sep 22, 2018 at 07:52:36AM +0000, Anand Moon wrote:
+> Add the card-detect and write-protect GPIO pins for OdroidXU3/XU4
+> SD card by adding pinctrl setting for wp-gpio pin and set it to
+> active low.
+> 
+> This also removes debug messages:
+>     dwmmc_exynos 12220000.mmc: No GPIO consumer cd found
+>     dwmmc_exynos 12220000.mmc: No GPIO consumer wp found
+> 
+> Suggested-by: Krzysztof Kozlowski <krzk@kernel.org>
+> Signed-off-by: Anand Moon <linux.amoon@gmail.com>
+> ---
+> Fix the commit message and squash it with cd-gpios and wp-gpio
+> patches into single patch as suggested by Krzysztof.
 
-On Fri, Feb 09, 2018 at 03:01:00PM +0100, Ulf Hansson wrote:
-> [...]
->
-> >> > I'd like to know if any progress has been made on that problem 
-(I may
-> >> > have missed patches).
-> >> > Had you had the time to look at the issue?
-> >>
-> >> I have looked at the issue, but not manage to cook some patches 
-for it.
-> >>
-> >> However, it's on my top of my TODO list for mmc. No promises, but
-> >> perhaps and hopefully I manage to get something posted during the
-> >> coming release cycle.
+As Marek pointed to my Odroid XU patch, there is no point of adding
+cd-gpios and wp-gpios properties.
 
-I would be interested in a ESP8089 driver in mainline and that's why I 
-want to pick up this discussion.
+Adding pin configuration for wp pin is also not needed. Reset values are
+working properly. However there might be meaning of adding it just in
+case - if bootloader decided to touch it...
 
-What is the current status of the "mmc_reprobe_device" implementation, 
-that Hans was explaining and Ulf wanted to provide some months ago?
+Best regards,
+Krzysztof
 
-BTW, I am not on any of the mailing lists involved, so I tried to 
-recreate the proper mail headers manually for the reply to the correct 
-thread.
 
-Thanks,
-Frieder
-
-> >>
-> >
-> > Cool! If you ever need some testing, I'd be glad to test your patches
-> > (even if they are in a draft/RFC state).
-> >
-> > Also, when you send patches, I'd appreciate being Cc'ed so that I can
-> > put my Tested-by :) Thanks!
->
-> Absolutely! I appreciate it.
+> ---
+>  arch/arm/boot/dts/exynos5420-pinctrl.dtsi     | 8 ++++++++
+>  arch/arm/boot/dts/exynos5422-odroid-core.dtsi | 4 +++-
+>  2 files changed, 11 insertions(+), 1 deletion(-)
+> 
+> diff --git a/arch/arm/boot/dts/exynos5420-pinctrl.dtsi b/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
+> index dda8ca2d2324..9a39a0d8ec86 100644
+> --- a/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
+> +++ b/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
+> @@ -289,6 +289,14 @@
+>  		samsung,pin-pud = <EXYNOS_PIN_PULL_UP>;
+>  		samsung,pin-drv = <EXYNOS5420_PIN_DRV_LV4>;
+>  	};
+> +
+> +	sd2_wp: sd2-wp {
+> +		samsung,pins = "gpc4-0";
+> +		samsung,pin-function = <EXYNOS_PIN_FUNC_2>;
+> +		/* Pin is floating so pull it up to disable write-protect */
+> +		samsung,pin-pud = <EXYNOS_PIN_PULL_UP>;
+> +		samsung,pin-drv = <EXYNOS5420_PIN_DRV_LV4>;
+> +	};
+>  };
+>  
+>  &pinctrl_2 {
+> diff --git a/arch/arm/boot/dts/exynos5422-odroid-core.dtsi b/arch/arm/boot/dts/exynos5422-odroid-core.dtsi
+> index a80b6c045154..2aacfb669140 100644
+> --- a/arch/arm/boot/dts/exynos5422-odroid-core.dtsi
+> +++ b/arch/arm/boot/dts/exynos5422-odroid-core.dtsi
+> @@ -498,10 +498,12 @@
+>  	samsung,dw-mshc-sdr-timing = <0 4>;
+>  	samsung,dw-mshc-ddr-timing = <0 2>;
+>  	pinctrl-names = "default";
+> -	pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus1 &sd2_bus4>;
+> +	pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_wp &sd2_bus1 &sd2_bus4>;
+>  	bus-width = <4>;
+>  	cap-sd-highspeed;
+>  	max-frequency = <200000000>;
+> +	cd-gpios = <&gpc2 2 GPIO_ACTIVE_LOW>;
+> +	wp-gpios = <&gpc4 0 GPIO_ACTIVE_LOW>;
+>  	vmmc-supply = <&ldo19_reg>;
+>  	vqmmc-supply = <&ldo13_reg>;
+>  	sd-uhs-sdr50;
+> -- 
+> 2.17.1
+> 
