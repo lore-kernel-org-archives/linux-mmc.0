@@ -1,88 +1,53 @@
 From: Krzysztof Kozlowski <krzk@kernel.org>
-Subject: Re: [PATCHv4 4/6] ARM: dts: exynos: Add CD and WP pins to Odroid
- XU3/XU4 SD card
-Date: Wed, 26 Sep 2018 21:06:39 +0200
-Message-ID: <20180926190639.GA6461@kozik-lap>
+Subject: Re: [PATCHv4 0/6] Add support for UHS-I on Exynos5422 odroid boards
+Date: Wed, 26 Sep 2018 21:07:30 +0200
+Message-ID: <20180926190730.GB6461@kozik-lap>
 References: <20180922075238.884-1-linux.amoon@gmail.com>
- <20180922075238.884-6-linux.amoon@gmail.com>
+ <20180922075238.884-2-linux.amoon@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20180922075238.884-6-linux.amoon@gmail.com>
+In-Reply-To: <20180922075238.884-2-linux.amoon@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Anand Moon <linux.amoon@gmail.com>
 Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Kukjin Kim <kgene@kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Sat, Sep 22, 2018 at 07:52:36AM +0000, Anand Moon wrote:
-> Add the card-detect and write-protect GPIO pins for OdroidXU3/XU4
-> SD card by adding pinctrl setting for wp-gpio pin and set it to
-> active low.
+On Sat, Sep 22, 2018 at 07:52:32AM +0000, Anand Moon wrote:
+> This is series v4 since my previous patches were incomplete with driver
+> changes missing.
 > 
-> This also removes debug messages:
->     dwmmc_exynos 12220000.mmc: No GPIO consumer cd found
->     dwmmc_exynos 12220000.mmc: No GPIO consumer wp found
+> v4 changes.
+> squash cd-gpios and wp-gpio changes into single patch.
+> change the subject prefix to "ARM: dts: exynos:"
 > 
-> Suggested-by: Krzysztof Kozlowski <krzk@kernel.org>
-> Signed-off-by: Anand Moon <linux.amoon@gmail.com>
-> ---
-> Fix the commit message and squash it with cd-gpios and wp-gpio
-> patches into single patch as suggested by Krzysztof.
+> These changes add UHS-I tuning for dw_mmc-exynos driver.
+> 
+> Rebased on Krzysztof branch next/dt
+> [0] git://git.kernel.org/pub/scm/linux/kernel/git/krzk/linux.git 
+> 
 
-As Marek pointed to my Odroid XU patch, there is no point of adding
-cd-gpios and wp-gpios properties.
-
-Adding pin configuration for wp pin is also not needed. Reset values are
-working properly. However there might be meaning of adding it just in
-case - if bootloader decided to touch it...
+Except the one about CD and WP pins (where I replied), they look ok. It
+would be nice if you get tested-by tags for them.
 
 Best regards,
 Krzysztof
 
-
-> ---
->  arch/arm/boot/dts/exynos5420-pinctrl.dtsi     | 8 ++++++++
->  arch/arm/boot/dts/exynos5422-odroid-core.dtsi | 4 +++-
->  2 files changed, 11 insertions(+), 1 deletion(-)
+> Anand Moon (6):
+>   ARM: dts: exynos: Added UHS-I bus speed support
+>   ARM: dts: exynos: fix regulator min values of LDO13 for Odroid XU3/XU4
+>   ARM: dts: exynos: update maximum frequency for sdcard to 200MHz
+>   ARM: dts: exynos: Add CD and WP pins to Odroid XU3/XU4 SD card
+>   ARM: dts: exynos: update maximum frequency for emmc to 200MHz
+>   mmc: dw_mmc-exynos: Add tuning for sdr and ddr timing for USH-I mode
 > 
-> diff --git a/arch/arm/boot/dts/exynos5420-pinctrl.dtsi b/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
-> index dda8ca2d2324..9a39a0d8ec86 100644
-> --- a/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
-> +++ b/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
-> @@ -289,6 +289,14 @@
->  		samsung,pin-pud = <EXYNOS_PIN_PULL_UP>;
->  		samsung,pin-drv = <EXYNOS5420_PIN_DRV_LV4>;
->  	};
-> +
-> +	sd2_wp: sd2-wp {
-> +		samsung,pins = "gpc4-0";
-> +		samsung,pin-function = <EXYNOS_PIN_FUNC_2>;
-> +		/* Pin is floating so pull it up to disable write-protect */
-> +		samsung,pin-pud = <EXYNOS_PIN_PULL_UP>;
-> +		samsung,pin-drv = <EXYNOS5420_PIN_DRV_LV4>;
-> +	};
->  };
->  
->  &pinctrl_2 {
-> diff --git a/arch/arm/boot/dts/exynos5422-odroid-core.dtsi b/arch/arm/boot/dts/exynos5422-odroid-core.dtsi
-> index a80b6c045154..2aacfb669140 100644
-> --- a/arch/arm/boot/dts/exynos5422-odroid-core.dtsi
-> +++ b/arch/arm/boot/dts/exynos5422-odroid-core.dtsi
-> @@ -498,10 +498,12 @@
->  	samsung,dw-mshc-sdr-timing = <0 4>;
->  	samsung,dw-mshc-ddr-timing = <0 2>;
->  	pinctrl-names = "default";
-> -	pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus1 &sd2_bus4>;
-> +	pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_wp &sd2_bus1 &sd2_bus4>;
->  	bus-width = <4>;
->  	cap-sd-highspeed;
->  	max-frequency = <200000000>;
-> +	cd-gpios = <&gpc2 2 GPIO_ACTIVE_LOW>;
-> +	wp-gpios = <&gpc4 0 GPIO_ACTIVE_LOW>;
->  	vmmc-supply = <&ldo19_reg>;
->  	vqmmc-supply = <&ldo13_reg>;
->  	sd-uhs-sdr50;
+>  arch/arm/boot/dts/exynos5420-pinctrl.dtsi          |  8 ++++++++
+>  arch/arm/boot/dts/exynos5422-odroid-core.dtsi      | 10 ++++++++--
+>  arch/arm/boot/dts/exynos5422-odroidxu3-common.dtsi |  1 +
+>  drivers/mmc/host/dw_mmc-exynos.c                   | 11 +++++++++++
+>  4 files changed, 28 insertions(+), 2 deletions(-)
+> 
 > -- 
 > 2.17.1
 > 
