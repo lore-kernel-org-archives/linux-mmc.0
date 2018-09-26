@@ -1,69 +1,48 @@
-From: Marek Szyprowski <m.szyprowski@samsung.com>
-Subject: Re: [PATCH] mmc: pwrseq_simple: Fix incorrect handling of GPIO
- bitmap
-Date: Wed, 26 Sep 2018 10:27:30 +0200
-Message-ID: <20180926082731eucas1p1fb936eedca21be0b8cd4dd281e422f27~X5cmfM67m0415004150eucas1p1b@eucas1p1.samsung.com>
-References: <CAGfqbt4n4g_24kWGPhXojooiQQOmVeq-TfYucFERXJGMci87Xw@mail.gmail.com>
-        <CGME20180925192325epcas1p41b5c57a1ff7c9bc00f9a6d3b2e601820@epcas1p4.samsung.com>
-        <20180925192433.1377-1-jmkrzyszt@gmail.com>
-        <7a4906d9-ffb1-f2af-07e7-d5815dcd0d8c@samsung.com>
+From: Andy Shevchenko <andy.shevchenko@gmail.com>
+Subject: Re: sdhci driver card-detect is broken because gpiolib can't fallback
+ to _CRS?
+Date: Wed, 26 Sep 2018 11:42:21 +0300
+Message-ID: <CAHp75Vdf7NxFtgZx+hqsA1YZY4szD5Ba9jbyo4CeeDHeaU3YAQ@mail.gmail.com>
+References: <CACK8Z6Ebo0giDifRHBg13pe_mO18vb1n0+LGMoMjkLai6X9MNg@mail.gmail.com>
+ <20180926074756.GD2664@lahna.fi.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <7a4906d9-ffb1-f2af-07e7-d5815dcd0d8c@samsung.com>
-Content-Language: en-US
+In-Reply-To: <20180926074756.GD2664@lahna.fi.intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Janusz Krzysztofik <jmkrzyszt@gmail.com>, Linus Walleij <linus.walleij@linaro.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org, linux-kernel@vger.kernel.org, Krzysztof Kozlowski <krzk@kernel.org>, Linux Samsung SOC <linux-samsung-soc@vger.kernel.org>
+To: Mika Westerberg <mika.westerberg@linux.intel.com>
+Cc: Rajat Jain <rajatja@google.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Linus Walleij <linus.walleij@linaro.org>, Dmitry Torokhov <dtor@google.com>, "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Rajat Jain <rajatxjain@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi again,
-
-On 2018-09-26 10:14, Marek Szyprowski wrote:
-> On 2018-09-25 21:24, Janusz Krzysztofik wrote:
->> Commit b9762bebc633 ("gpiolib: Pass bitmaps, not integer arrays, to
->> get/set array") changed the way GPIO values are passed to
->> gpiod_get/set_array_value() and friends.  The updated code of
->> mmc_pwrseq_simple_set_gpios_value() incorrectly uses the 'value'
->> argument as a bitmap of GPIO values and assigns it directly to the
->> 'values' bitmap variable passed to gpiod_set_array_value_cansleep()
->> instead of filling that bitmap with bits equal to the 'value' argument.
->> As a result, boot hanging caused by incorrectly handled MMC device
->> has been observed.
->>
->> As a side effect of that incorrect interpreation of the 'value'
->> argument, wrong assumption is taken about the 'values' bitmap size
->> never exceding the number of bits of the 'value' argument type.
->>
->> Fix it.
->>
->> Reported-by: Marek Szyprowski <m.szyprowski@samsung.com>
->> Signed-off-by: Janusz Krzysztofik <jmkrzyszt@gmail.com>
->> ---
->> Hi,
->>
->> I hope I've finally identified the root cause of the boot hang reported
->> by Marek Szyprowski.  I've reviewed the code of other divers updated for
->> the modified GPIO API and found no more issues of that kind.
->>
->> Marek, can you please test this fix on top of next-20180920 with the fix
->> "gpiolib: Fix missing updates of bitmap index" also applied?
+On Wed, Sep 26, 2018 at 10:49 AM Mika Westerberg
+<mika.westerberg@linux.intel.com> wrote:
 >
-> Yes, I've just did such test (next-20180920 + "gpiolib: Fix missing
-> updates of bitmap index" + "mmc: pwrseq_simple: Fix incorrect handling
-> of GPIO bitmap") and sadly it doesn't fix the boot hang.
+> Hi,
 >
-> With some more debugs in mmc_pwrseq_simple I've noticed that
-> gpiod_set_array_value_cansleep() never ends and busyloops somewhere.
-> I'm checking this now.
+> On Tue, Sep 25, 2018 at 01:54:57PM -0700, Rajat Jain wrote:
+> > * Use con_id=NULL if it is dealing with a legacy BIOS (i.e. no _DSD
+> > properties in the ACPI).
+> > * Use con_id=<actual string> if it is dealing with a modern BIOS (i.e.
+> > which provides _DSD for the <string> property)
+>
+> Or you can use con_id=<actual string> everywhere and supply
+> acpi_dev_add_driver_gpios() where needed to cover cases where BIOS does
+> not provide _DSD. See also Documentation/acpi/gpio-properties.txt for
+> more information.
 
-I busyloops inside the internal do { } while loop (lines 3163-3201) in
-gpiod_set_array_value_complex(). 'i' is never incremented.
+Thanks, Mika. That is exactly the way how I suggested to fix and
+actually fixed a lot of drivers already.
 
- > ...
+Run `git grep -n -w devm_acpi_dev_add_driver_gpios` to find examples.
 
-Best regards
+> In case of SDHCI I think the correct way is to stick using _CRS lookup
+> only because there typically is just one GpioInt() and I have not seen a
+> single BIOS yet where they implement _DSD for this besides yours. If
+> there is not way to change the BIOS implementation then I guess we just
+> need to amend the driver to call acpi_dev_add_driver_gpios().
+
+True.
+
 -- 
-Marek Szyprowski, PhD
-Samsung R&D Institute Poland
+With Best Regards,
+Andy Shevchenko
