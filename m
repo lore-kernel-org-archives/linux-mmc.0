@@ -1,77 +1,46 @@
-From: Hans de Goede <hdegoede@redhat.com>
-Subject: Re: [PATCH 2/2] mmc: Add mmc_force_detect_change_begin / _end
- functions
-Date: Wed, 26 Sep 2018 22:19:22 +0200
-Message-ID: <d9795fde-6bdd-b6fa-da41-839d44df6435@redhat.com>
-References: <CAPDyKFqDrdD+N+foLCwsVABtboz1Vn=OtJs14gp07zJfXHVKSA@mail.gmail.com>
- <f9028dcb-c217-4efc-60a7-d0a2c1804a08@exceet.de>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: core: Allow building PWRSEQ_SD8787 with LIBERTAS_SDIO
+Date: Thu, 27 Sep 2018 01:48:38 +0200
+Message-ID: <CAPDyKFqOWu=uQWteB02bG2y3zCyQ2B1zGE+7nKyCn47O-30-hQ@mail.gmail.com>
+References: <20180924085632.448693-1-lkundrak@v3.sk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <f9028dcb-c217-4efc-60a7-d0a2c1804a08@exceet.de>
-Content-Language: en-US
+In-Reply-To: <20180924085632.448693-1-lkundrak@v3.sk>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Frieder Schrempf <frieder.schrempf@exceet.de>, ulf.hansson@linaro.org, quentin.schulz@free-electrons.com
-Cc: gregkh@linuxfoundation.org, linus.walleij@linaro.org, shawn.lin@rock-chips.com, adrian.hunter@intel.com, baolin.wang@linaro.org, maxime.ripard@free-electrons.com, thomas.petazzoni@free-electrons.com, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devel@driverdev.osuosl.org, icenowy@aosc.xyz, wens@csie.org
+To: Lubomir Rintel <lkundrak@v3.sk>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+On 24 September 2018 at 10:56, Lubomir Rintel <lkundrak@v3.sk> wrote:
+> The sd8686 "libertas" SDIO adapter's power is controlled with WLAN_RST
+> and WLAN_PD pins -- pretty much the same way as sd8787. Allow building
+> the power sequencing driver along with the libertas Wi-Fi driver.
+>
+> Signed-off-by: Lubomir Rintel <lkundrak@v3.sk>
 
-On 26-09-18 16:44, Frieder Schrempf wrote:
-> Hi,
-> 
-> On Fri, Feb 09, 2018 at 03:01:00PM +0100, Ulf Hansson wrote:
->> [...]
->>
->> >> > I'd like to know if any progress has been made on that problem 
-> (I may
->> >> > have missed patches).
->> >> > Had you had the time to look at the issue?
->> >>
->> >> I have looked at the issue, but not manage to cook some patches 
-> for it.
->> >>
->> >> However, it's on my top of my TODO list for mmc. No promises, but
->> >> perhaps and hopefully I manage to get something posted during the
->> >> coming release cycle.
-> 
-> I would be interested in a ESP8089 driver in mainline and that's why I want to pick up this discussion.
-> 
-> What is the current status of the "mmc_reprobe_device" implementation, that Hans was explaining and Ulf wanted to provide some months ago?
+Applied for next, thanks!
 
-Ulf did eventually write a new way to deal with this and then Quentin
-did manage to get the esp8089 driver to work with it, the new function
-to use for this is added by this commit:
+Kind regards
+Uffe
 
-https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/drivers/mmc/core?id=1433269c4d2461be1f36db5dbb453976b38996ff
-
-I'm not sure what the status of upstreaming the ep8089 driver is now
-that we've this in place.
-
-Quentin, do you have a version of the esp8089 driver somewhere
-which will work correctly with the new mmc_sw_reset() function?
-
-Also what is the status of adding this driver to say staging?
-
-Regards,
-
-Hans
-
-
-
-> 
-> BTW, I am not on any of the mailing lists involved, so I tried to recreate the proper mail headers manually for the reply to the correct thread.
-> 
-> Thanks,
-> Frieder
-> 
->> >>
->> >
->> > Cool! If you ever need some testing, I'd be glad to test your patches
->> > (even if they are in a draft/RFC state).
->> >
->> > Also, when you send patches, I'd appreciate being Cc'ed so that I can
->> > put my Tested-by :) Thanks!
->>
->> Absolutely! I appreciate it.
+> ---
+>  drivers/mmc/core/Kconfig | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/core/Kconfig b/drivers/mmc/core/Kconfig
+> index 42e89060cd41..2f38a7ad07e0 100644
+> --- a/drivers/mmc/core/Kconfig
+> +++ b/drivers/mmc/core/Kconfig
+> @@ -14,7 +14,7 @@ config PWRSEQ_EMMC
+>
+>  config PWRSEQ_SD8787
+>         tristate "HW reset support for SD8787 BT + Wifi module"
+> -       depends on OF && (MWIFIEX || BT_MRVL_SDIO)
+> +       depends on OF && (MWIFIEX || BT_MRVL_SDIO || LIBERTAS_SDIO)
+>         help
+>           This selects hardware reset support for the SD8787 BT + Wifi
+>           module. By default this option is set to n.
+> --
+> 2.19.0
+>
