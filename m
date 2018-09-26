@@ -1,173 +1,172 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V2 03/27] mmc: mmci: convert dma_setup callback to return
- an int
-Date: Thu, 27 Sep 2018 01:49:39 +0200
-Message-ID: <CAPDyKFq2FmggcuRRYmeW-ChL-SiEboCTCu745kZHGeNLi_qQjg@mail.gmail.com>
-References: <1537523181-14578-1-git-send-email-ludovic.Barre@st.com>
- <1537523181-14578-4-git-send-email-ludovic.Barre@st.com> <CAPDyKFqnN0gg9WsbNPQcodqUXJmFEzMM+ST36s6oEZ2OPoONug@mail.gmail.com>
- <15c31e3b-646a-f5db-b45a-3e2f556d9fd5@st.com>
+Subject: Re: [PATCH] mmc: mmci: Drop support for pdata GPIO numbers
+Date: Thu, 27 Sep 2018 01:48:10 +0200
+Message-ID: <CAPDyKFpSbyspzcGrAp3McwtG04=o6UfymEnrjLCZ=+JY-YWfHA@mail.gmail.com>
+References: <20180920230110.19927-1-linus.walleij@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <15c31e3b-646a-f5db-b45a-3e2f556d9fd5@st.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ludovic BARRE <ludovic.barre@st.com>
-Cc: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Rob Herring <robh+dt@kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Benjamin Gaignard <benjamin.gaignard@linaro.org>, Gerald Baeza <gerald.baeza@st.com>, Loic Pallardy <loic.pallardy@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-stm32@st-md-mailman.stormreply.com
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20180920230110.19927-1-linus.walleij@linaro.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Russell King <linux@arm.linux.org.uk>
 List-Id: linux-mmc@vger.kernel.org
 
-On 24 September 2018 at 18:12, Ludovic BARRE <ludovic.barre@st.com> wrote:
-> hi Ulf
+On 21 September 2018 at 01:01, Linus Walleij <linus.walleij@linaro.org> wrote:
+> All the machines using the MMCI are passing GPIOs for the
+> card detect and write protect using the device tree or
+> descriptor table (one single case, Integrator/AP IM-PD1).
 >
+> Drop support for passing global GPIO numbers through
+> platform data, noone is using it.
 >
-> On 09/24/2018 04:28 PM, Ulf Hansson wrote:
->>
->> On 21 September 2018 at 11:45, Ludovic Barre <ludovic.Barre@st.com> wrote:
->>>
->>> From: Ludovic Barre <ludovic.barre@st.com>
->>>
->>> This patch converts dma_setup callback to return an integer
->>> This patch is needed to prepare sdmmc variant with internal dma
->>>
->>> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
->>> ---
->>>   drivers/mmc/host/mmci.c          | 14 ++++++++++----
->>>   drivers/mmc/host/mmci.h          |  2 +-
->>>   drivers/mmc/host/mmci_qcom_dml.c |  6 ++++--
->>>   3 files changed, 15 insertions(+), 7 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
->>> index cbd67bc..2f845f3 100644
->>> --- a/drivers/mmc/host/mmci.c
->>> +++ b/drivers/mmc/host/mmci.c
->>> @@ -415,7 +415,7 @@ static void mmci_init_sg(struct mmci_host *host,
->>> struct mmc_data *data)
->>>    * no custom DMA interfaces are supported.
->>>    */
->>>   #ifdef CONFIG_DMA_ENGINE
->>> -static void mmci_dma_setup(struct mmci_host *host)
->>> +static int mmci_dma_setup(struct mmci_host *host)
->>>   {
->>>          const char *rxname, *txname;
->>>
->>> @@ -466,7 +466,9 @@ static void mmci_dma_setup(struct mmci_host *host)
->>>          }
->>>
->>>          if (host->ops && host->ops->dma_setup)
->>> -               host->ops->dma_setup(host);
->>> +               return host->ops->dma_setup(host);
->>> +
->>
->>
->> Looks like you need to implement a error handling, instead of just
->> returning the error code.
->
->
-> yes, today if a dma_setup is defined, we can't fallback to pio mode.
-> A use_dma variable (defined in mmci_host) could be setted follow the return
-> code of ops->dma_setup
->
-> example:
->
-> void mmci_dma_setup(struct mmci_host *host)
-> {
->         int err;
->
->         if (!host->ops || !host->ops->dma_setup)
->                 return;
->
->         err = host->ops->dma_setup(host);
->         if (err)
->                 return;
->
->         host->use_dma = true;
->
->         /* initialize pre request cookie */
->         host->next_cookie = 1;
-> }
->
-> use_dma variable could be check by mmci_host_ops variant functions.
->
-> are you agree with this proposal?
->
+> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 
-Yep, makes sense!
-
->
->>
->>> +       return 0;
->>>   }
->>>
->>>   /*
->>> @@ -741,8 +743,10 @@ static void mmci_post_request(struct mmc_host *mmc,
->>> struct mmc_request *mrq,
->>>   static void mmci_get_next_data(struct mmci_host *host, struct mmc_data
->>> *data)
->>>   {
->>>   }
->>> -static inline void mmci_dma_setup(struct mmci_host *host)
->>> +
->>> +static inline int mmci_dma_setup(struct mmci_host *host)
->>>   {
->>> +       return 0;
->>>   }
->>>
->>>   static inline void mmci_dma_release(struct mmci_host *host)
->>> @@ -1796,7 +1800,9 @@ static int mmci_probe(struct amba_device *dev,
->>>                   amba_rev(dev), (unsigned long long)dev->res.start,
->>>                   dev->irq[0], dev->irq[1]);
->>>
->>> -       mmci_dma_setup(host);
->>> +       ret = mmci_dma_setup(host);
->>> +       if (ret)
->>> +               goto clk_disable;
->>>
->>>          pm_runtime_set_autosuspend_delay(&dev->dev, 50);
->>>          pm_runtime_use_autosuspend(&dev->dev);
->>> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
->>> index 21aaf9a..06299ac 100644
->>> --- a/drivers/mmc/host/mmci.h
->>> +++ b/drivers/mmc/host/mmci.h
->>> @@ -273,7 +273,7 @@ struct variant_data {
->>>
->>>   /* mmci variant callbacks */
->>>   struct mmci_host_ops {
->>> -       void (*dma_setup)(struct mmci_host *host);
->>> +       int (*dma_setup)(struct mmci_host *host);
->>>   };
->>>
->>>   struct mmci_host_next {
->>> diff --git a/drivers/mmc/host/mmci_qcom_dml.c
->>> b/drivers/mmc/host/mmci_qcom_dml.c
->>> index be3fab5..1bb59cf 100644
->>> --- a/drivers/mmc/host/mmci_qcom_dml.c
->>> +++ b/drivers/mmc/host/mmci_qcom_dml.c
->>> @@ -119,7 +119,7 @@ static int of_get_dml_pipe_index(struct device_node
->>> *np, const char *name)
->>>   }
->>>
->>>   /* Initialize the dml hardware connected to SD Card controller */
->>> -static void qcom_dma_setup(struct mmci_host *host)
->>> +static int qcom_dma_setup(struct mmci_host *host)
->>>   {
->>>          u32 config;
->>>          void __iomem *base;
->>> @@ -131,7 +131,7 @@ static void qcom_dma_setup(struct mmci_host *host)
->>>
->>>          if (producer_id < 0 || consumer_id < 0) {
->>>                  host->variant->qcom_dml = false;
->>
->>
->> It seems like the existing code is an attempt to fallback to use pio
->> mode. However, I doubt it works as is.
->
->
-> oops, I seen that like a variant identification issue, so if it's a
-> fallback to pio mode it doesn't work.
-
-Right. Let's see if we can get some input from Srinivas, else I will
-run some test on my 410c board to see the behavior - very soon.
-
-[...]
+Applied for next, thanks!
 
 Kind regards
 Uffe
+
+> ---
+>  arch/arm/mach-integrator/integrator_cp.c |  2 --
+>  arch/arm/mach-versatile/versatile_dt.c   |  4 ---
+>  drivers/mmc/host/mmci.c                  | 34 +++++-------------------
+>  include/linux/amba/mmci.h                | 11 ++------
+>  4 files changed, 8 insertions(+), 43 deletions(-)
+>
+> diff --git a/arch/arm/mach-integrator/integrator_cp.c b/arch/arm/mach-integrator/integrator_cp.c
+> index 772a7cf2010e..976ded5c5916 100644
+> --- a/arch/arm/mach-integrator/integrator_cp.c
+> +++ b/arch/arm/mach-integrator/integrator_cp.c
+> @@ -80,8 +80,6 @@ static unsigned int mmc_status(struct device *dev)
+>  static struct mmci_platform_data mmc_data = {
+>         .ocr_mask       = MMC_VDD_32_33|MMC_VDD_33_34,
+>         .status         = mmc_status,
+> -       .gpio_wp        = -1,
+> -       .gpio_cd        = -1,
+>  };
+>
+>  static u64 notrace intcp_read_sched_clock(void)
+> diff --git a/arch/arm/mach-versatile/versatile_dt.c b/arch/arm/mach-versatile/versatile_dt.c
+> index 3c8d39c12909..e9d60687e416 100644
+> --- a/arch/arm/mach-versatile/versatile_dt.c
+> +++ b/arch/arm/mach-versatile/versatile_dt.c
+> @@ -89,15 +89,11 @@ unsigned int mmc_status(struct device *dev)
+>  static struct mmci_platform_data mmc0_plat_data = {
+>         .ocr_mask       = MMC_VDD_32_33|MMC_VDD_33_34,
+>         .status         = mmc_status,
+> -       .gpio_wp        = -1,
+> -       .gpio_cd        = -1,
+>  };
+>
+>  static struct mmci_platform_data mmc1_plat_data = {
+>         .ocr_mask       = MMC_VDD_32_33|MMC_VDD_33_34,
+>         .status         = mmc_status,
+> -       .gpio_wp        = -1,
+> -       .gpio_cd        = -1,
+>  };
+>
+>  /*
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index 1841d250e9e2..4b843712dc01 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -28,8 +28,7 @@
+>  #include <linux/amba/bus.h>
+>  #include <linux/clk.h>
+>  #include <linux/scatterlist.h>
+> -#include <linux/gpio.h>
+> -#include <linux/of_gpio.h>
+> +#include <linux/of.h>
+>  #include <linux/regulator/consumer.h>
+>  #include <linux/dmaengine.h>
+>  #include <linux/dma-mapping.h>
+> @@ -1675,13 +1674,6 @@ static int mmci_probe(struct amba_device *dev,
+>         else if (plat->ocr_mask)
+>                 dev_warn(mmc_dev(mmc), "Platform OCR mask is ignored\n");
+>
+> -       /* DT takes precedence over platform data. */
+> -       if (!np) {
+> -               if (!plat->cd_invert)
+> -                       mmc->caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
+> -               mmc->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
+> -       }
+> -
+>         /* We support these capabilities. */
+>         mmc->caps |= MMC_CAP_CMD23;
+>
+> @@ -1749,30 +1741,16 @@ static int mmci_probe(struct amba_device *dev,
+>          * - not using DT but using a descriptor table, or
+>          * - using a table of descriptors ALONGSIDE DT, or
+>          * look up these descriptors named "cd" and "wp" right here, fail
+> -        * silently of these do not exist and proceed to try platform data
+> +        * silently of these do not exist
+>          */
+>         if (!np) {
+>                 ret = mmc_gpiod_request_cd(mmc, "cd", 0, false, 0, NULL);
+> -               if (ret < 0) {
+> -                       if (ret == -EPROBE_DEFER)
+> -                               goto clk_disable;
+> -                       else if (gpio_is_valid(plat->gpio_cd)) {
+> -                               ret = mmc_gpio_request_cd(mmc, plat->gpio_cd, 0);
+> -                               if (ret)
+> -                                       goto clk_disable;
+> -                       }
+> -               }
+> +               if (ret == -EPROBE_DEFER)
+> +                       goto clk_disable;
+>
+>                 ret = mmc_gpiod_request_ro(mmc, "wp", 0, false, 0, NULL);
+> -               if (ret < 0) {
+> -                       if (ret == -EPROBE_DEFER)
+> -                               goto clk_disable;
+> -                       else if (gpio_is_valid(plat->gpio_wp)) {
+> -                               ret = mmc_gpio_request_ro(mmc, plat->gpio_wp);
+> -                               if (ret)
+> -                                       goto clk_disable;
+> -                       }
+> -               }
+> +               if (ret == -EPROBE_DEFER)
+> +                       goto clk_disable;
+>         }
+>
+>         ret = devm_request_irq(&dev->dev, dev->irq[0], mmci_irq, IRQF_SHARED,
+> diff --git a/include/linux/amba/mmci.h b/include/linux/amba/mmci.h
+> index da8357ba11bc..c92ebc39fc1f 100644
+> --- a/include/linux/amba/mmci.h
+> +++ b/include/linux/amba/mmci.h
+> @@ -18,20 +18,13 @@
+>   * mask into a value to be binary (or set some other custom bits
+>   * in MMCIPWR) or:ed and written into the MMCIPWR register of the
+>   * block.  May also control external power based on the power_mode.
+> - * @status: if no GPIO read function was given to the block in
+> - * gpio_wp (below) this function will be called to determine
+> - * whether a card is present in the MMC slot or not
+> - * @gpio_wp: read this GPIO pin to see if the card is write protected
+> - * @gpio_cd: read this GPIO pin to detect card insertion
+> - * @cd_invert: true if the gpio_cd pin value is active low
+> + * @status: if no GPIO line was given to the block in this function will
+> + * be called to determine whether a card is present in the MMC slot or not
+>   */
+>  struct mmci_platform_data {
+>         unsigned int ocr_mask;
+>         int (*ios_handler)(struct device *, struct mmc_ios *);
+>         unsigned int (*status)(struct device *);
+> -       int     gpio_wp;
+> -       int     gpio_cd;
+> -       bool    cd_invert;
+>  };
+>
+>  #endif
+> --
+> 2.17.1
+>
