@@ -1,61 +1,68 @@
-From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Subject: Re: [PATCH V2 03/27] mmc: mmci: convert dma_setup callback to return
- an int
-Date: Thu, 27 Sep 2018 09:55:05 +0100
-Message-ID: <55622e1c-190f-6903-ab04-16089264f277@linaro.org>
-References: <1537523181-14578-1-git-send-email-ludovic.Barre@st.com>
- <1537523181-14578-4-git-send-email-ludovic.Barre@st.com>
- <CAPDyKFqnN0gg9WsbNPQcodqUXJmFEzMM+ST36s6oEZ2OPoONug@mail.gmail.com>
+From: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Subject: Re: [PATCH 1/2] dt-bindings: mmc: sdhci-msm: Add flag for restoring
+ dll
+Date: Thu, 27 Sep 2018 16:50:57 +0530
+Message-ID: <5194544b-866a-f0b5-3638-acf6f67fb9c8@codeaurora.org>
+References: <1537887875-29494-1-git-send-email-vbadigan@codeaurora.org>
+ <1537887875-29494-2-git-send-email-vbadigan@codeaurora.org>
+ <CAE=gft6Bxtdev+1Zo58LHNaYkB5MTfUZx8eFayvuixVJFWMw_Q@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFqnN0gg9WsbNPQcodqUXJmFEzMM+ST36s6oEZ2OPoONug@mail.gmail.com>
+In-Reply-To: <CAE=gft6Bxtdev+1Zo58LHNaYkB5MTfUZx8eFayvuixVJFWMw_Q@mail.gmail.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Ludovic Barre <ludovic.Barre@st.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Benjamin Gaignard <benjamin.gaignard@linaro.org>, Gerald Baeza <gerald.baeza@st.com>, Loic Pallardy <loic.pallardy@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-stm32@st-md-mailman.stormreply.com
+To: Evan Green <evgreen@chromium.org>
+Cc: adrian.hunter@intel.com, Ulf Hansson <ulf.hansson@linaro.org>, robh+dt@kernel.org, asutoshd@codeaurora.org, riteshh@codeaurora.org, stummala@codeaurora.org, sayali <sayalil@codeaurora.org>, Doug Anderson <dianders@google.com>, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Thanks for looping me!
 
-On 24/09/18 15:28, Ulf Hansson wrote:
->>   /* Initialize the dml hardware connected to SD Card controller */
->> -static void qcom_dma_setup(struct mmci_host *host)
->> +static int qcom_dma_setup(struct mmci_host *host)
->>   {
->>          u32 config;
->>          void __iomem *base;
->> @@ -131,7 +131,7 @@ static void qcom_dma_setup(struct mmci_host *host)
+
+On 9/25/2018 11:08 PM, Evan Green wrote:
+> On Tue, Sep 25, 2018 at 8:05 AM Veerabhadrarao Badiganti
+> <vbadigan@codeaurora.org> wrote:
+>> The dll settings of SDHC controller needs to be restored whenever
+>> controller clocks are gated. This restoration is needed only on
+>> few SDHCI-MSM controllers. This dt flag indicates whether dll
+>> restoration is needed or not.
 >>
->>          if (producer_id < 0 || consumer_id < 0) {
->>                  host->variant->qcom_dml = false;
-> It seems like the existing code is an attempt to fallback to use pio
-> mode. However, I doubt it works as is.
+>> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+>> ---
+>>   Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 4 ++++
+>>   1 file changed, 4 insertions(+)
+>>
+>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+>> index 3720385..207ce36 100644
+>> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+>> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+>> @@ -31,6 +31,8 @@ Optional properties:
+>>                                          BUS_OFF states in power irq. Should be specified in
+>>                                          pairs (lpm, hpm), for BUS_OFF and BUS_ON respectively.
+>>                                          Units uA.
+>> +- qcom,restore-dll-config - Flag indicates that restoration of dll config after clock gating
+>> +                           is needed on given platform. This wouldn't be needed for every MSM.
+>>   Example:
+>>
+>>          sdhc_1: sdhci@f9824900 {
+>> @@ -49,6 +51,8 @@ Example:
+>>
+>>                  clocks = <&gcc GCC_SDCC1_APPS_CLK>, <&gcc GCC_SDCC1_AHB_CLK>;
+>>                  clock-names = "core", "iface";
+>> +
+>> +               qcom,restore-dll-config;
+> Hi Veera,
+> I'm not sure this is the best approach. It might be better to key this
+> behavior off of the compatible string. Actually I'm noticing now that
+> the binding for this device doesn't include an SoC-specific compatible
+> string, which I think is now the preferred way (eg
+> "qcom,sdm845-sdhci", "qcom,sdhci-msm-v5"). I think we should add that
+> to sdhci-msm.txt, then use the compatible string to enable this
+> behavior you're adding now.
 
-If I remember it correctly, Yes, that was the intent. we should still be 
-able to use the pio mode if the dma setup fails.
+Thanks Evan. I will update this one.
 
-I believe pio mode should work, Last time when I tried (3-4 years back) 
-it did work!
+> -Evan
 
-> 
->> -               return;
->> +               return -EINVAL;
-> My point is, if you return an error code here, it means that the error
-> code becomes propagated and ->probe() will fail.
-That would be very bad!, We should report it and may be just continue 
-with pio mode.
-
-> 
-> Ideally, we should be able fall back to pio mode when dma doesn't
-> work. I have looped in Srinivas who implemented the qcom dml support,
-> let's see if he can explains the intent with the code.
-> 
-> I also volunteer to help out running some tests on the 410c platform,
-I think you meant IFC6410.. DB410c uses sdhci.
-
-
---srini
-> however allow me a day or two to do that.
-> 
+Thanks,
+Veera
