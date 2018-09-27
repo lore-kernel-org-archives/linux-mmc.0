@@ -1,7 +1,7 @@
 From: Anand Moon <linux.amoon@gmail.com>
-Subject: [PATCHv5 1/6] ARM: dts: exynos: Added UHS-I bus speed support
-Date: Thu, 27 Sep 2018 14:07:33 +0000
-Message-ID: <20180927140738.1006-2-linux.amoon@gmail.com>
+Subject: [PATCHv5 3/6] ARM: dts: exynos: update maximum frequency for sdcard to 200MHz
+Date: Thu, 27 Sep 2018 14:07:35 +0000
+Message-ID: <20180927140738.1006-4-linux.amoon@gmail.com>
 References: <20180927140738.1006-1-linux.amoon@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20180927140738.1006-1-linux.amoon@gmail.com>
@@ -10,32 +10,39 @@ To: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Kukji
 Cc: devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Added support for UHS-I bus speed tuning for SDR50, DDR50 SDR104.
+set the max-frequency to 200MHz for optimal performace.
 
 Signed-off-by: Anand Moon <linux.amoon@gmail.com>
 ---
+This patch is new to this series.
+
+microSD card.
+root@odroid:~# sudo cat /sys/kernel/debug/mmc1/ios
+clock:          200000000 Hz
+actual clock:   200000000 Hz
+vdd:            16 (2.8 ~ 2.9 V)
+bus mode:       2 (push-pull)
+chip select:    0 (don't care)
+power mode:     2 (on)
+bus width:      2 (4 bits)
+timing spec:    6 (sd uhs SDR104)
+signal voltage: 1 (1.80 V)
+driver type:    0 (driver type B)
 ---
-[0] http://lists.infradead.org/pipermail/linux-arm-kernel/2015-October/376263.html
-Changes from above.
-Fix the subject and commit message.
-drop sd-uhs-sdr12 and sd-uhs-sdr25 as host driver is not enable as of now.
----
- arch/arm/boot/dts/exynos5422-odroid-core.dtsi | 3 +++
- 1 file changed, 3 insertions(+)
+ arch/arm/boot/dts/exynos5422-odroid-core.dtsi | 1 +
+ 1 file changed, 1 insertion(+)
 
 diff --git a/arch/arm/boot/dts/exynos5422-odroid-core.dtsi b/arch/arm/boot/dts/exynos5422-odroid-core.dtsi
-index 2fac4baf1eb4..0508e6891f41 100644
+index 15ab380e5fcf..a80b6c045154 100644
 --- a/arch/arm/boot/dts/exynos5422-odroid-core.dtsi
 +++ b/arch/arm/boot/dts/exynos5422-odroid-core.dtsi
-@@ -503,6 +503,9 @@
+@@ -501,6 +501,7 @@
+ 	pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus1 &sd2_bus4>;
+ 	bus-width = <4>;
  	cap-sd-highspeed;
++	max-frequency = <200000000>;
  	vmmc-supply = <&ldo19_reg>;
  	vqmmc-supply = <&ldo13_reg>;
-+	sd-uhs-sdr50;
-+	sd-uhs-sdr104;
-+	sd-uhs-ddr50;
- };
- 
- &nocp_mem0_0 {
+ 	sd-uhs-sdr50;
 -- 
 2.17.1
