@@ -1,172 +1,75 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: mmci: Drop support for pdata GPIO numbers
-Date: Thu, 27 Sep 2018 01:48:10 +0200
-Message-ID: <CAPDyKFpSbyspzcGrAp3McwtG04=o6UfymEnrjLCZ=+JY-YWfHA@mail.gmail.com>
-References: <20180920230110.19927-1-linus.walleij@linaro.org>
+From: Yu Zhao <yuzhao@google.com>
+Subject: Re: [PATCH] mmc: add quirk for O2 Micro dev 0x8620 rev 0x01
+Date: Wed, 26 Sep 2018 19:40:40 -0600
+Message-ID: <20180927014040.GA183684@google.com>
+References: <20180923203924.68452-1-yuzhao@google.com>
+ <CAPDyKFqiUO-7O6bgrszuR3YKMkEoPT4976gvDKvUWpYuNp03ag@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20180920230110.19927-1-linus.walleij@linaro.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Russell King <linux@arm.linux.org.uk>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFqiUO-7O6bgrszuR3YKMkEoPT4976gvDKvUWpYuNp03ag@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Guenter Roeck <groeck@google.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 21 September 2018 at 01:01, Linus Walleij <linus.walleij@linaro.org> wrote:
-> All the machines using the MMCI are passing GPIOs for the
-> card detect and write protect using the device tree or
-> descriptor table (one single case, Integrator/AP IM-PD1).
->
-> Drop support for passing global GPIO numbers through
-> platform data, noone is using it.
->
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+On Thu, Sep 27, 2018 at 01:48:58AM +0200, Ulf Hansson wrote:
+> On 23 September 2018 at 22:39, Yu Zhao <yuzhao@google.com> wrote:
+> > This device reports SDHCI_CLOCK_INT_STABLE even though it's not
+> > ready to take SDHCI_CLOCK_CARD_EN. The symptom is that reading
+> > SDHCI_CLOCK_CONTROL after enabling the clock shows absence of the
+> > bit from the register (e.g. expecting 0x0000fa07 = 0x0000fa03 |
+> > SDHCI_CLOCK_CARD_EN but only observed the first operand).
+> >
+> > mmc1: Timeout waiting for hardware cmd interrupt.
+> > mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
+> > mmc1: sdhci: Sys addr:  0x00000000 | Version:  0x00000603
+> > mmc1: sdhci: Blk size:  0x00000000 | Blk cnt:  0x00000000
+> > mmc1: sdhci: Argument:  0x00000000 | Trn mode: 0x00000000
+> > mmc1: sdhci: Present:   0x01ff0001 | Host ctl: 0x00000001
+> > mmc1: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+> > mmc1: sdhci: Wake-up:   0x00000000 | Clock:    0x0000fa03
+> > mmc1: sdhci: Timeout:   0x00000000 | Int stat: 0x00000000
+> > mmc1: sdhci: Int enab:  0x00ff0083 | Sig enab: 0x00ff0083
+> > mmc1: sdhci: AC12 err:  0x00000000 | Slot int: 0x00000000
+> > mmc1: sdhci: Caps:      0x25fcc8bf | Caps_1:   0x00002077
+> > mmc1: sdhci: Cmd:       0x00000000 | Max curr: 0x005800c8
+> > mmc1: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
+> > mmc1: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+> > mmc1: sdhci: Host ctl2: 0x00000008
+> > mmc1: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0x00000000
+> > mmc1: sdhci: ============================================
+> >
+> > The problem happens during wakeup from S3. Adding a delay quirk
+> > after power up reliably fixes the problem.
+> >
+> > Signed-off-by: Yu Zhao <yuzhao@google.com>
+> 
+> Applied for next, thanks!
+> 
+> Kind regards
+> Uffe
+> 
+> > ---
+> >  drivers/mmc/host/sdhci-pci-o2micro.c | 2 ++
+> >  1 file changed, 2 insertions(+)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+> > index 77e9bc4aaee9..3e5ecf7ce101 100644
+> > --- a/drivers/mmc/host/sdhci-pci-o2micro.c
+> > +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+> > @@ -490,6 +490,8 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
+> >                 pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
+> >                 break;
+> >         case PCI_DEVICE_ID_O2_SEABIRD0:
+> > +               if (chip->pdev->revision == 0x01)
+> > +                       chip->quirks |= SDHCI_QUIRK_DELAY_AFTER_POWER;
 
-Applied for next, thanks!
+Hi Uffe,
 
-Kind regards
-Uffe
+I apologize for the missing /* fall through */ here. Could you
+please add it in case it causes any static checker problem?
+Or I can send a v2.
 
-> ---
->  arch/arm/mach-integrator/integrator_cp.c |  2 --
->  arch/arm/mach-versatile/versatile_dt.c   |  4 ---
->  drivers/mmc/host/mmci.c                  | 34 +++++-------------------
->  include/linux/amba/mmci.h                | 11 ++------
->  4 files changed, 8 insertions(+), 43 deletions(-)
->
-> diff --git a/arch/arm/mach-integrator/integrator_cp.c b/arch/arm/mach-integrator/integrator_cp.c
-> index 772a7cf2010e..976ded5c5916 100644
-> --- a/arch/arm/mach-integrator/integrator_cp.c
-> +++ b/arch/arm/mach-integrator/integrator_cp.c
-> @@ -80,8 +80,6 @@ static unsigned int mmc_status(struct device *dev)
->  static struct mmci_platform_data mmc_data = {
->         .ocr_mask       = MMC_VDD_32_33|MMC_VDD_33_34,
->         .status         = mmc_status,
-> -       .gpio_wp        = -1,
-> -       .gpio_cd        = -1,
->  };
->
->  static u64 notrace intcp_read_sched_clock(void)
-> diff --git a/arch/arm/mach-versatile/versatile_dt.c b/arch/arm/mach-versatile/versatile_dt.c
-> index 3c8d39c12909..e9d60687e416 100644
-> --- a/arch/arm/mach-versatile/versatile_dt.c
-> +++ b/arch/arm/mach-versatile/versatile_dt.c
-> @@ -89,15 +89,11 @@ unsigned int mmc_status(struct device *dev)
->  static struct mmci_platform_data mmc0_plat_data = {
->         .ocr_mask       = MMC_VDD_32_33|MMC_VDD_33_34,
->         .status         = mmc_status,
-> -       .gpio_wp        = -1,
-> -       .gpio_cd        = -1,
->  };
->
->  static struct mmci_platform_data mmc1_plat_data = {
->         .ocr_mask       = MMC_VDD_32_33|MMC_VDD_33_34,
->         .status         = mmc_status,
-> -       .gpio_wp        = -1,
-> -       .gpio_cd        = -1,
->  };
->
->  /*
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index 1841d250e9e2..4b843712dc01 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -28,8 +28,7 @@
->  #include <linux/amba/bus.h>
->  #include <linux/clk.h>
->  #include <linux/scatterlist.h>
-> -#include <linux/gpio.h>
-> -#include <linux/of_gpio.h>
-> +#include <linux/of.h>
->  #include <linux/regulator/consumer.h>
->  #include <linux/dmaengine.h>
->  #include <linux/dma-mapping.h>
-> @@ -1675,13 +1674,6 @@ static int mmci_probe(struct amba_device *dev,
->         else if (plat->ocr_mask)
->                 dev_warn(mmc_dev(mmc), "Platform OCR mask is ignored\n");
->
-> -       /* DT takes precedence over platform data. */
-> -       if (!np) {
-> -               if (!plat->cd_invert)
-> -                       mmc->caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
-> -               mmc->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
-> -       }
-> -
->         /* We support these capabilities. */
->         mmc->caps |= MMC_CAP_CMD23;
->
-> @@ -1749,30 +1741,16 @@ static int mmci_probe(struct amba_device *dev,
->          * - not using DT but using a descriptor table, or
->          * - using a table of descriptors ALONGSIDE DT, or
->          * look up these descriptors named "cd" and "wp" right here, fail
-> -        * silently of these do not exist and proceed to try platform data
-> +        * silently of these do not exist
->          */
->         if (!np) {
->                 ret = mmc_gpiod_request_cd(mmc, "cd", 0, false, 0, NULL);
-> -               if (ret < 0) {
-> -                       if (ret == -EPROBE_DEFER)
-> -                               goto clk_disable;
-> -                       else if (gpio_is_valid(plat->gpio_cd)) {
-> -                               ret = mmc_gpio_request_cd(mmc, plat->gpio_cd, 0);
-> -                               if (ret)
-> -                                       goto clk_disable;
-> -                       }
-> -               }
-> +               if (ret == -EPROBE_DEFER)
-> +                       goto clk_disable;
->
->                 ret = mmc_gpiod_request_ro(mmc, "wp", 0, false, 0, NULL);
-> -               if (ret < 0) {
-> -                       if (ret == -EPROBE_DEFER)
-> -                               goto clk_disable;
-> -                       else if (gpio_is_valid(plat->gpio_wp)) {
-> -                               ret = mmc_gpio_request_ro(mmc, plat->gpio_wp);
-> -                               if (ret)
-> -                                       goto clk_disable;
-> -                       }
-> -               }
-> +               if (ret == -EPROBE_DEFER)
-> +                       goto clk_disable;
->         }
->
->         ret = devm_request_irq(&dev->dev, dev->irq[0], mmci_irq, IRQF_SHARED,
-> diff --git a/include/linux/amba/mmci.h b/include/linux/amba/mmci.h
-> index da8357ba11bc..c92ebc39fc1f 100644
-> --- a/include/linux/amba/mmci.h
-> +++ b/include/linux/amba/mmci.h
-> @@ -18,20 +18,13 @@
->   * mask into a value to be binary (or set some other custom bits
->   * in MMCIPWR) or:ed and written into the MMCIPWR register of the
->   * block.  May also control external power based on the power_mode.
-> - * @status: if no GPIO read function was given to the block in
-> - * gpio_wp (below) this function will be called to determine
-> - * whether a card is present in the MMC slot or not
-> - * @gpio_wp: read this GPIO pin to see if the card is write protected
-> - * @gpio_cd: read this GPIO pin to detect card insertion
-> - * @cd_invert: true if the gpio_cd pin value is active low
-> + * @status: if no GPIO line was given to the block in this function will
-> + * be called to determine whether a card is present in the MMC slot or not
->   */
->  struct mmci_platform_data {
->         unsigned int ocr_mask;
->         int (*ios_handler)(struct device *, struct mmc_ios *);
->         unsigned int (*status)(struct device *);
-> -       int     gpio_wp;
-> -       int     gpio_cd;
-> -       bool    cd_invert;
->  };
->
->  #endif
-> --
-> 2.17.1
->
+Thank you.
