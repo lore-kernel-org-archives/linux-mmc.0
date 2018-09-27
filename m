@@ -1,68 +1,67 @@
-From: Andy Shevchenko <andy.shevchenko@gmail.com>
-Subject: Re: sdhci driver card-detect is broken because gpiolib can't fallback
- to _CRS?
-Date: Thu, 27 Sep 2018 10:26:42 +0300
-Message-ID: <CAHp75VcQ0SviZ6vsn_5inn5oZxxj-5ZQq5bC+bXPxuF8KOa_Rg@mail.gmail.com>
-References: <CACK8Z6Ebo0giDifRHBg13pe_mO18vb1n0+LGMoMjkLai6X9MNg@mail.gmail.com>
- <20180926074756.GD2664@lahna.fi.intel.com> <CAHp75Vdf7NxFtgZx+hqsA1YZY4szD5Ba9jbyo4CeeDHeaU3YAQ@mail.gmail.com>
- <CACK8Z6F1jkSN3KXiv+0X2uh61pBkpSMpHrdMHwLarbSAFoHMUA@mail.gmail.com>
+From: Maxime Ripard <maxime.ripard@bootlin.com>
+Subject: Re: [PATCH 2/2] mmc: Add mmc_force_detect_change_begin / _end
+ functions
+Date: Thu, 27 Sep 2018 10:14:53 +0200
+Message-ID: <20180927081452.a2xw25sdoqtadntu@flea>
+References: <CAPDyKFqDrdD+N+foLCwsVABtboz1Vn=OtJs14gp07zJfXHVKSA@mail.gmail.com>
+ <f9028dcb-c217-4efc-60a7-d0a2c1804a08@exceet.de>
+ <d9795fde-6bdd-b6fa-da41-839d44df6435@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CACK8Z6F1jkSN3KXiv+0X2uh61pBkpSMpHrdMHwLarbSAFoHMUA@mail.gmail.com>
+Content-Disposition: inline
+In-Reply-To: <d9795fde-6bdd-b6fa-da41-839d44df6435@redhat.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Rajat Jain <rajatja@google.com>
-Cc: Mika Westerberg <mika.westerberg@linux.intel.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Linus Walleij <linus.walleij@linaro.org>, Dmitry Torokhov <dtor@google.com>, "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Rajat Jain <rajatxjain@gmail.com>
+To: Hans de Goede <hdegoede@redhat.com>
+Cc: Frieder Schrempf <frieder.schrempf@exceet.de>, ulf.hansson@linaro.org, quentin.schulz@free-electrons.com, gregkh@linuxfoundation.org, linus.walleij@linaro.org, shawn.lin@rock-chips.com, adrian.hunter@intel.com, baolin.wang@linaro.org, thomas.petazzoni@free-electrons.com, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devel@driverdev.osuosl.org, icenowy@aosc.xyz, wens@csie.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Sep 26, 2018 at 10:26 PM Rajat Jain <rajatja@google.com> wrote:
-> On Wed, Sep 26, 2018 at 1:42 AM Andy Shevchenko
-> <andy.shevchenko@gmail.com> wrote:
-> > On Wed, Sep 26, 2018 at 10:49 AM Mika Westerberg
-> > <mika.westerberg@linux.intel.com> wrote:
+On Wed, Sep 26, 2018 at 10:19:22PM +0200, Hans de Goede wrote:
+> On 26-09-18 16:44, Frieder Schrempf wrote:
+> > Hi,
+> > 
+> > On Fri, Feb 09, 2018 at 03:01:00PM +0100, Ulf Hansson wrote:
+> > > [...]
+> > > 
+> > > >> > I'd like to know if any progress has been made on that problem
+> > (I may
+> > > >> > have missed patches).
+> > > >> > Had you had the time to look at the issue?
+> > > >>
+> > > >> I have looked at the issue, but not manage to cook some patches
+> > for it.
+> > > >>
+> > > >> However, it's on my top of my TODO list for mmc. No promises, but
+> > > >> perhaps and hopefully I manage to get something posted during the
+> > > >> coming release cycle.
+> > 
+> > I would be interested in a ESP8089 driver in mainline and that's why I want to pick up this discussion.
+> > 
+> > What is the current status of the "mmc_reprobe_device" implementation, that Hans was explaining and Ulf wanted to provide some months ago?
+> 
+> Ulf did eventually write a new way to deal with this and then Quentin
+> did manage to get the esp8089 driver to work with it, the new function
+> to use for this is added by this commit:
+> 
+> https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/drivers/mmc/core?id=1433269c4d2461be1f36db5dbb453976b38996ff
+> 
+> I'm not sure what the status of upstreaming the ep8089 driver is now
+> that we've this in place.
+> 
+> Quentin, do you have a version of the esp8089 driver somewhere
+> which will work correctly with the new mmc_sw_reset() function?
+> 
+> Also what is the status of adding this driver to say staging?
 
-> > > Or you can use con_id=<actual string> everywhere and supply
-> > > acpi_dev_add_driver_gpios() where needed to cover cases where BIOS does
-> > > not provide _DSD.
->
-> This sounds like a good idea and I'd like to do this. I have some
-> questions though:
->
-> 1) If the BIOS does provide a _DSD entry for "cd-gpio", and
-> additionally driver also uses devm_acpi_dev_add_driver_gpios() to add
-> one more entry for the same string "cd-gpio", which one will (should?)
-> actually be returned by the gpiolib? The one in BIOS or the one that
-> was added by the driver?
+IIRC, we tried to get it into staging, and we got told that it was too
+nice for staging at this point. So we're basically stuck somewhere
+between staging and !staging, with the driver being too nice for the
+former, and not nice enough for the latter :)
 
-Of course the one that BIOS provides. This hardcoded mapping tables is
-a fallback for *old* BIOSes which do not have _DSD.
-
-> 2) Related, I'm trying to understand how can a driver use
-> devm_acpi_dev_add_driver_gpios(), for *only* the case where the BIOS
-> does not have a _DSD (Or should it really care)? Does the driver need
-> to check for _DSD using some other ACPI call?
-
-The magic happens internally in ACPI core.
-Whenever one calls gpiod_get() with a name on ACPI-enabled platform,
-_DSD would be checked first.
-
-> > See also Documentation/acpi/gpio-properties.txt for
-> > > more information.
-
-> > > In case of SDHCI I think the correct way is to stick using _CRS lookup
-> > > only because there typically is just one GpioInt() and I have not seen a
-> > > single BIOS yet where they implement _DSD for this besides yours. If
-> > > there is not way to change the BIOS implementation then I guess we just
-> > > need to amend the driver to call acpi_dev_add_driver_gpios().
->
-> Since we shouldn't discourage a BIOS that is trying to do the right
-> thing by exposing the details in _DST, I think it would be preferable
-> if we can solve this in the kernel.
-
-Patches are welcome, I think.
-
-Btw, is there any existing hardware on the market with such BIOS?
+Maxime
 
 -- 
-With Best Regards,
-Andy Shevchenko
+Maxime Ripard, Bootlin
+Embedded Linux and Kernel engineering
+https://bootlin.com
