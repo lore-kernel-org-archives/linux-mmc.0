@@ -1,7 +1,7 @@
 From: Anand Moon <linux.amoon@gmail.com>
-Subject: [PATCHv5 5/6] ARM: dts: exynos: update maximum frequency for emmc to 200MHz
-Date: Thu, 27 Sep 2018 14:07:37 +0000
-Message-ID: <20180927140738.1006-6-linux.amoon@gmail.com>
+Subject: [PATCHv5 6/6] mmc: dw_mmc-exynos: Add tuning for sdr and ddr timing for USH-I mode
+Date: Thu, 27 Sep 2018 14:07:38 +0000
+Message-ID: <20180927140738.1006-7-linux.amoon@gmail.com>
 References: <20180927140738.1006-1-linux.amoon@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20180927140738.1006-1-linux.amoon@gmail.com>
@@ -10,38 +10,46 @@ To: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Kukji
 Cc: devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Set the max-frequency to 200MHz for optimal performace of eMMC.
+Add tuning for sdr and ddr timing for USH-I mode sdr104/sdr50/ddr50
+for host controller.
 
+Cc: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Marek Szyprowski <m.szyprowski@samsung.com>
 Signed-off-by: Anand Moon <linux.amoon@gmail.com>
 ---
-eMMC
-
-root@odroid:~# sudo cat /sys/kernel/debug/mmc0/ios
-clock:          200000000 Hz
-actual clock:   200000000 Hz
-vdd:            7 (1.65 - 1.95 V)
-bus mode:       2 (push-pull)
-chip select:    0 (don't care)
-power mode:     2 (on)
-bus width:      3 (8 bits)
-timing spec:    10 (mmc HS400)
-signal voltage: 1 (1.80 V)
-driver type:    0 (driver type B)
+No changes from previous patch
 ---
- arch/arm/boot/dts/exynos5422-odroidxu3-common.dtsi | 1 +
- 1 file changed, 1 insertion(+)
+ drivers/mmc/host/dw_mmc-exynos.c | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
 
-diff --git a/arch/arm/boot/dts/exynos5422-odroidxu3-common.dtsi b/arch/arm/boot/dts/exynos5422-odroidxu3-common.dtsi
-index e522edb2bb82..1f2d3987dde1 100644
---- a/arch/arm/boot/dts/exynos5422-odroidxu3-common.dtsi
-+++ b/arch/arm/boot/dts/exynos5422-odroidxu3-common.dtsi
-@@ -392,6 +392,7 @@
- 	cap-mmc-highspeed;
- 	mmc-hs200-1_8v;
- 	mmc-hs400-1_8v;
-+	max-frequency = <200000000>;
- 	vmmc-supply = <&ldo18_reg>;
- 	vqmmc-supply = <&ldo3_reg>;
- };
+diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+index ab47b018716a..d46c3439b508 100644
+--- a/drivers/mmc/host/dw_mmc-exynos.c
++++ b/drivers/mmc/host/dw_mmc-exynos.c
+@@ -253,6 +253,8 @@ static void dw_mci_exynos_config_hs400(struct dw_mci *host, u32 timing)
+ 	if (timing == MMC_TIMING_MMC_HS400) {
+ 		dqs |= DATA_STROBE_EN;
+ 		strobe = DQS_CTRL_RD_DELAY(strobe, priv->dqs_delay);
++	} else if (timing == MMC_TIMING_UHS_SDR104) {
++		dqs &= 0xffffff00;
+ 	} else {
+ 		dqs &= ~DATA_STROBE_EN;
+ 	}
+@@ -312,6 +314,15 @@ static void dw_mci_exynos_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+ 		if (ios->bus_width == MMC_BUS_WIDTH_8)
+ 			wanted <<= 1;
+ 		break;
++	case MMC_TIMING_UHS_SDR104:
++	case MMC_TIMING_UHS_SDR50:
++		clksel = (priv->sdr_timing & 0xfff8ffff) |
++			(priv->ciu_div << 16);
++		break;
++	case MMC_TIMING_UHS_DDR50:
++		clksel = (priv->ddr_timing & 0xfff8ffff) |
++			(priv->ciu_div << 16);
++		break;
+ 	default:
+ 		clksel = priv->sdr_timing;
+ 	}
 -- 
 2.17.1
