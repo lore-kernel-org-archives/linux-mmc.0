@@ -1,7 +1,7 @@
 From: Anand Moon <linux.amoon@gmail.com>
-Subject: [PATCHv5 2/6] ARM: dts: exynos: fix regulator min values of LDO13 for Odroid XU3/XU4
-Date: Thu, 27 Sep 2018 14:07:34 +0000
-Message-ID: <20180927140738.1006-3-linux.amoon@gmail.com>
+Subject: [PATCHv5 4/6] ARM: dts: exynos: Add pin configuration for SD write protect on Odroid XU3/XU4
+Date: Thu, 27 Sep 2018 14:07:36 +0000
+Message-ID: <20180927140738.1006-5-linux.amoon@gmail.com>
 References: <20180927140738.1006-1-linux.amoon@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20180927140738.1006-1-linux.amoon@gmail.com>
@@ -10,32 +10,54 @@ To: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Kukji
 Cc: devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Looking at the schematic sd_2 min/max range from 1.8V/2.8V so fix the
-regulator min value to 1.8V. Without these changes sdcard will failed
-to detect on booting when UHS-I tuning is enabled.
+Add SD card write-protect pin configuration to be sure that it will be
+properly pulled down to indicate write access.
 
+Suggested-by: Krzysztof Kozlowski <krzk@kernel.org>
 Signed-off-by: Anand Moon <linux.amoon@gmail.com>
 ---
-[0] http://lists.infradead.org/pipermail/linux-arm-kernel/2015-October/376262.html
-Fixed the commit message.
-drop the ramp-delay changes.
-drop the vmmc-supply/vqmmc-supply changes.
+Changes since v4:
+1. Remove cd-gpios and wp-gpios leaving only WP pin configuration (after
+   Marek Szyprowski feedback).
+2. Pull pin down.
+3. change the subject and commit message.
+Sorry Krzysztof if I have copied your commit message to describe the
+changes.
 ---
+ arch/arm/boot/dts/exynos5420-pinctrl.dtsi     | 7 +++++++
  arch/arm/boot/dts/exynos5422-odroid-core.dtsi | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ 2 files changed, 8 insertions(+), 1 deletion(-)
 
+diff --git a/arch/arm/boot/dts/exynos5420-pinctrl.dtsi b/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
+index dda8ca2d2324..b82af7c89654 100644
+--- a/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
++++ b/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
+@@ -289,6 +289,13 @@
+ 		samsung,pin-pud = <EXYNOS_PIN_PULL_UP>;
+ 		samsung,pin-drv = <EXYNOS5420_PIN_DRV_LV4>;
+ 	};
++
++	sd2_wp: sd2-wp {
++		samsung,pins = "gpc4-0";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_2>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_DOWN>;
++		samsung,pin-drv = <EXYNOS5420_PIN_DRV_LV4>;
++	};
+ };
+ 
+ &pinctrl_2 {
 diff --git a/arch/arm/boot/dts/exynos5422-odroid-core.dtsi b/arch/arm/boot/dts/exynos5422-odroid-core.dtsi
-index 0508e6891f41..15ab380e5fcf 100644
+index a80b6c045154..54811960e322 100644
 --- a/arch/arm/boot/dts/exynos5422-odroid-core.dtsi
 +++ b/arch/arm/boot/dts/exynos5422-odroid-core.dtsi
-@@ -231,7 +231,7 @@
- 
- 			ldo13_reg: LDO13 {
- 				regulator-name = "vddq_mmc2";
--				regulator-min-microvolt = <2800000>;
-+				regulator-min-microvolt = <1800000>;
- 				regulator-max-microvolt = <2800000>;
- 			};
- 
+@@ -498,7 +498,7 @@
+ 	samsung,dw-mshc-sdr-timing = <0 4>;
+ 	samsung,dw-mshc-ddr-timing = <0 2>;
+ 	pinctrl-names = "default";
+-	pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus1 &sd2_bus4>;
++	pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_wp &sd2_bus1 &sd2_bus4>;
+ 	bus-width = <4>;
+ 	cap-sd-highspeed;
+ 	max-frequency = <200000000>;
 -- 
 2.17.1
