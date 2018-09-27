@@ -1,55 +1,68 @@
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Subject: Re: [PATCHv4 4/6] ARM: dts: exynos: Add CD and WP pins to Odroid
- XU3/XU4 SD card
-Date: Thu, 27 Sep 2018 08:28:22 +0200
-Message-ID: <CAJKOXPeRauojpS9kEbQK8k+BQLSGEHEVsAwi406tW3zN2RzPWQ@mail.gmail.com>
-References: <20180922075238.884-1-linux.amoon@gmail.com> <20180922075238.884-6-linux.amoon@gmail.com>
- <20180926190639.GA6461@kozik-lap> <CANAwSgSPkKL3jaHHSkEhgocKT_Sq4zg3Z=+7d5889ttpnNPHDA@mail.gmail.com>
+From: Andy Shevchenko <andy.shevchenko@gmail.com>
+Subject: Re: sdhci driver card-detect is broken because gpiolib can't fallback
+ to _CRS?
+Date: Thu, 27 Sep 2018 10:26:42 +0300
+Message-ID: <CAHp75VcQ0SviZ6vsn_5inn5oZxxj-5ZQq5bC+bXPxuF8KOa_Rg@mail.gmail.com>
+References: <CACK8Z6Ebo0giDifRHBg13pe_mO18vb1n0+LGMoMjkLai6X9MNg@mail.gmail.com>
+ <20180926074756.GD2664@lahna.fi.intel.com> <CAHp75Vdf7NxFtgZx+hqsA1YZY4szD5Ba9jbyo4CeeDHeaU3YAQ@mail.gmail.com>
+ <CACK8Z6F1jkSN3KXiv+0X2uh61pBkpSMpHrdMHwLarbSAFoHMUA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CANAwSgSPkKL3jaHHSkEhgocKT_Sq4zg3Z=+7d5889ttpnNPHDA@mail.gmail.com>
+In-Reply-To: <CACK8Z6F1jkSN3KXiv+0X2uh61pBkpSMpHrdMHwLarbSAFoHMUA@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux.amoon@gmail.com
-Cc: robh+dt@kernel.org, mark.rutland@arm.com, kgene@kernel.org, Jaehoon Chung <jh80.chung@samsung.com>, ulf.hansson@linaro.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+To: Rajat Jain <rajatja@google.com>
+Cc: Mika Westerberg <mika.westerberg@linux.intel.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Linus Walleij <linus.walleij@linaro.org>, Dmitry Torokhov <dtor@google.com>, "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Rajat Jain <rajatxjain@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 27 Sep 2018 at 05:45, Anand Moon <linux.amoon@gmail.com> wrote:
->
-> Hi Krzysztof,
-> On Thu, 27 Sep 2018 at 00:36, Krzysztof Kozlowski <krzk@kernel.org> wrote:
-> >
-> > On Sat, Sep 22, 2018 at 07:52:36AM +0000, Anand Moon wrote:
-> > > Add the card-detect and write-protect GPIO pins for OdroidXU3/XU4
-> > > SD card by adding pinctrl setting for wp-gpio pin and set it to
-> > > active low.
-> > >
-> > > This also removes debug messages:
-> > >     dwmmc_exynos 12220000.mmc: No GPIO consumer cd found
-> > >     dwmmc_exynos 12220000.mmc: No GPIO consumer wp found
-> > >
-> > > Suggested-by: Krzysztof Kozlowski <krzk@kernel.org>
-> > > Signed-off-by: Anand Moon <linux.amoon@gmail.com>
-> > > ---
-> > > Fix the commit message and squash it with cd-gpios and wp-gpio
-> > > patches into single patch as suggested by Krzysztof.
-> >
-> > As Marek pointed to my Odroid XU patch, there is no point of adding
-> > cd-gpios and wp-gpios properties.
-> >
-> > Adding pin configuration for wp pin is also not needed. Reset values are
-> > working properly. However there might be meaning of adding it just in
-> > case - if bootloader decided to touch it...
-> >
-> > Best regards,
-> > Krzysztof
-> >
->
-> Do I need to send the all the patches again or just resend this as per
-> your patch for Odroid XU.
-> with dropping the cd-gpios and wp-gpios changes.
+On Wed, Sep 26, 2018 at 10:26 PM Rajat Jain <rajatja@google.com> wrote:
+> On Wed, Sep 26, 2018 at 1:42 AM Andy Shevchenko
+> <andy.shevchenko@gmail.com> wrote:
+> > On Wed, Sep 26, 2018 at 10:49 AM Mika Westerberg
+> > <mika.westerberg@linux.intel.com> wrote:
 
-I am fine with both (resend all or only this).
+> > > Or you can use con_id=<actual string> everywhere and supply
+> > > acpi_dev_add_driver_gpios() where needed to cover cases where BIOS does
+> > > not provide _DSD.
+>
+> This sounds like a good idea and I'd like to do this. I have some
+> questions though:
+>
+> 1) If the BIOS does provide a _DSD entry for "cd-gpio", and
+> additionally driver also uses devm_acpi_dev_add_driver_gpios() to add
+> one more entry for the same string "cd-gpio", which one will (should?)
+> actually be returned by the gpiolib? The one in BIOS or the one that
+> was added by the driver?
 
-Best regards,
-Krzysztof
+Of course the one that BIOS provides. This hardcoded mapping tables is
+a fallback for *old* BIOSes which do not have _DSD.
+
+> 2) Related, I'm trying to understand how can a driver use
+> devm_acpi_dev_add_driver_gpios(), for *only* the case where the BIOS
+> does not have a _DSD (Or should it really care)? Does the driver need
+> to check for _DSD using some other ACPI call?
+
+The magic happens internally in ACPI core.
+Whenever one calls gpiod_get() with a name on ACPI-enabled platform,
+_DSD would be checked first.
+
+> > See also Documentation/acpi/gpio-properties.txt for
+> > > more information.
+
+> > > In case of SDHCI I think the correct way is to stick using _CRS lookup
+> > > only because there typically is just one GpioInt() and I have not seen a
+> > > single BIOS yet where they implement _DSD for this besides yours. If
+> > > there is not way to change the BIOS implementation then I guess we just
+> > > need to amend the driver to call acpi_dev_add_driver_gpios().
+>
+> Since we shouldn't discourage a BIOS that is trying to do the right
+> thing by exposing the details in _DST, I think it would be preferable
+> if we can solve this in the kernel.
+
+Patches are welcome, I think.
+
+Btw, is there any existing hardware on the market with such BIOS?
+
+-- 
+With Best Regards,
+Andy Shevchenko
