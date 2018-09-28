@@ -1,37 +1,69 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH] mmc: slot-gpio: Fix debounce time to use miliseconds
- again
-Date: Fri, 28 Sep 2018 09:30:11 -0700
-Message-ID: <20180928163010.GR5659@atomide.com>
-References: <CGME20180928122141eucas1p2feee237ecf064b6abddeda569f356c86@eucas1p2.samsung.com>
- <20180928122040.2221-1-m.szyprowski@samsung.com>
- <CAPDyKFqbwGhLOZ+VrS07KDWY-j8RLC0mwJEKvhWVHbQQdZqUrw@mail.gmail.com>
+From: Sean Wang <sean.wang@mediatek.com>
+Subject: Re: [PATCH 2/2] mmc: mediatek: add bus_clk control
+Date: Sat, 29 Sep 2018 01:28:56 +0800
+Message-ID: <1538155736.30348.85.camel@mtkswgap22>
+References: <1538134855-11198-1-git-send-email-chaotian.jing@mediatek.com>
+         <1538134855-11198-3-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <stable-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFqbwGhLOZ+VrS07KDWY-j8RLC0mwJEKvhWVHbQQdZqUrw@mail.gmail.com>
-Sender: stable-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Marek Szyprowski <m.szyprowski@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Lin <shawn.lin@rock-chips.com>, Linus Walleij <linus.walleij@linaro.org>, Krzysztof Kozlowski <krzk@kernel.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, "# 4.0+" <stable@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1538134855-11198-3-git-send-email-chaotian.jing@mediatek.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chaotian Jing <chaotian.jing@mediatek.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Matthias Brugger <matthias.bgg@gmail.com>, Ryder Lee <ryder.lee@mediatek.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, srv_heupstream@mediatek.com
 List-Id: linux-mmc@vger.kernel.org
 
-* Ulf Hansson <ulf.hansson@linaro.org> [180928 15:50]:
-> On 28 September 2018 at 14:20, Marek Szyprowski
-> <m.szyprowski@samsung.com> wrote:
-> > The debounce value passed to mmc_gpiod_request_cd() function is in
-> > microseconds, but msecs_to_jiffies() requires the value to be in
-> > miliseconds to properly calculate the delay, so adjust the value stored
-> > in cd_debounce_delay_ms context entry.
-> >
-> > Fixes: 1d71926bbd59 ("mmc: core: Fix debounce time to use microseconds")
-> > Fixes: bfd694d5e21c ("mmc: core: Add tunable delay before detecting card
-> > after card is inserted")
-> > Cc: stable@vger.kernel.org # v4.18+
-> > Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
+Hi,
+
+On Fri, 2018-09-28 at 19:40 +0800, Chaotian Jing wrote:
+> when gate MSDC0_HCLK, access register will hang, even the MSDC driver
+> will never accessing register after HCLK was gated, but for safety, need
+> gate the bus_clk(which used to access register) too.
 > 
-> Applied for fixes!
+> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+> ---
+>  drivers/mmc/host/mtk-sd.c | 6 ++++++
+>  1 file changed, 6 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index 0484138..1c1c967 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -387,6 +387,7 @@ struct msdc_host {
+>  
+>  	struct clk *src_clk;	/* msdc source clock */
+>  	struct clk *h_clk;      /* msdc h_clk */
+> +	struct clk *bus_clk;	/* bus clock which used to access register */
+>  	struct clk *src_clk_cg; /* msdc source clock control gate */
+>  	u32 mclk;		/* mmc subsystem clock frequency */
+>  	u32 src_clk_freq;	/* source clock frequency */
+> @@ -660,12 +661,14 @@ static void msdc_gate_clock(struct msdc_host *host)
+>  {
+>  	clk_disable_unprepare(host->src_clk_cg);
+>  	clk_disable_unprepare(host->src_clk);
+> +	clk_disable_unprepare(host->bus_clk);
+>  	clk_disable_unprepare(host->h_clk);
+>  }
+>  
+>  static void msdc_ungate_clock(struct msdc_host *host)
+>  {
+>  	clk_prepare_enable(host->h_clk);
+> +	clk_prepare_enable(host->bus_clk);
+>  	clk_prepare_enable(host->src_clk);
+>  	clk_prepare_enable(host->src_clk_cg);
+>  	while (!(readl(host->base + MSDC_CFG) & MSDC_CFG_CKSTB))
+> @@ -1900,6 +1903,9 @@ static int msdc_drv_probe(struct platform_device *pdev)
+>  		goto host_free;
+>  	}
+>  
+> +	host->bus_clk = devm_clk_get(&pdev->dev, "bus_clk");
+> +	if (IS_ERR(host->bus_clk))
+> +		host->bus_clk = NULL;
 
-Heh thanks for fixing it, looks like I totally missed that part :)
+The implementation would cause all SoCs to treat the bus_clk as the optional.
+It seems you should add a flag to see what SoC requires the bus_clk to successfully access the related registers.
 
-Tony
+>  	/*source clock control gate is optional clock*/
+>  	host->src_clk_cg = devm_clk_get(&pdev->dev, "source_cg");
+>  	if (IS_ERR(host->src_clk_cg))
