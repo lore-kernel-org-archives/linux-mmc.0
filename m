@@ -1,62 +1,48 @@
 From: Chaotian Jing <chaotian.jing@mediatek.com>
-Subject: [PATCH v1 2/2] mmc: mediatek: add bus_clk control
-Date: Sat, 29 Sep 2018 10:29:55 +0800
-Message-ID: <1538188195-3608-2-git-send-email-chaotian.jing@mediatek.com>
-References: <1538188195-3608-1-git-send-email-chaotian.jing@mediatek.com>
+Subject: Re: [PATCH 1/2] mmc: dt-bindings: add "bus-clk" for MT2712
+Date: Sat, 29 Sep 2018 10:37:56 +0800
+Message-ID: <1538188676.3674.1.camel@mhfsdcap03>
+References: <1538134855-11198-1-git-send-email-chaotian.jing@mediatek.com>
+         <1538134855-11198-2-git-send-email-chaotian.jing@mediatek.com>
+         <1538156040.30348.89.camel@mtkswgap22>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1538188195-3608-1-git-send-email-chaotian.jing@mediatek.com>
+In-Reply-To: <1538156040.30348.89.camel@mtkswgap22>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Matthias Brugger <matthias.bgg@gmail.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Ryder Lee <ryder.lee@mediatek.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Sean Wang <sean.wang@mediatek.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, srv_heupstream@mediatek.com
+To: Sean Wang <sean.wang@mediatek.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Matthias Brugger <matthias.bgg@gmail.com>, Ryder Lee <ryder.lee@mediatek.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, srv_heupstream@mediatek.com
 List-Id: linux-mmc@vger.kernel.org
 
-when gate MSDC0_HCLK, access register will hang, even the MSDC driver
-will never accessing register after HCLK was gated, but for safety, need
-gate the bus_clk(which used to access register) too.
+On Sat, 2018-09-29 at 01:34 +0800, Sean Wang wrote:
+> On Fri, 2018-09-28 at 19:40 +0800, Chaotian Jing wrote:
+> > On MT2712 MSDC0/3, HCLK/bus-clk need gate/ungate together,
+> > or will hang when access MSDC register.
+> > 
+> > Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+> > ---
+> >  Documentation/devicetree/bindings/mmc/mtk-sd.txt | 1 +
+> >  1 file changed, 1 insertion(+)
+> > 
+> > diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.txt b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+> > index f33467a..182299b 100644
+> > --- a/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+> > +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+> > @@ -22,6 +22,7 @@ Required properties:
+> >  	"source" - source clock (required)
+> >  	"hclk" - HCLK which used for host (required)
+> >  	"source_cg" - independent source clock gate (required for MT2712)
+> > +	"bus_clk" - bus clk used for internal register access(required for MT2712 MSDC0/3)
+> 
+> use a full name in the description such as changing "clk" to "clock" and
+> 
+> add an extra blank char prior to left parenthesis
+> 
+OK, fixed at v1 version.
 
-Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
----
- drivers/mmc/host/mtk-sd.c | 6 ++++++
- 1 file changed, 6 insertions(+)
-
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 0484138..1c1c967 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -387,6 +387,7 @@ struct msdc_host {
- 
- 	struct clk *src_clk;	/* msdc source clock */
- 	struct clk *h_clk;      /* msdc h_clk */
-+	struct clk *bus_clk;	/* bus clock which used to access register */
- 	struct clk *src_clk_cg; /* msdc source clock control gate */
- 	u32 mclk;		/* mmc subsystem clock frequency */
- 	u32 src_clk_freq;	/* source clock frequency */
-@@ -660,12 +661,14 @@ static void msdc_gate_clock(struct msdc_host *host)
- {
- 	clk_disable_unprepare(host->src_clk_cg);
- 	clk_disable_unprepare(host->src_clk);
-+	clk_disable_unprepare(host->bus_clk);
- 	clk_disable_unprepare(host->h_clk);
- }
- 
- static void msdc_ungate_clock(struct msdc_host *host)
- {
- 	clk_prepare_enable(host->h_clk);
-+	clk_prepare_enable(host->bus_clk);
- 	clk_prepare_enable(host->src_clk);
- 	clk_prepare_enable(host->src_clk_cg);
- 	while (!(readl(host->base + MSDC_CFG) & MSDC_CFG_CKSTB))
-@@ -1900,6 +1903,9 @@ static int msdc_drv_probe(struct platform_device *pdev)
- 		goto host_free;
- 	}
- 
-+	host->bus_clk = devm_clk_get(&pdev->dev, "bus_clk");
-+	if (IS_ERR(host->bus_clk))
-+		host->bus_clk = NULL;
- 	/*source clock control gate is optional clock*/
- 	host->src_clk_cg = devm_clk_get(&pdev->dev, "source_cg");
- 	if (IS_ERR(host->src_clk_cg))
--- 
-1.8.1.1.dirty
+> >  - pinctrl-names: should be "default", "state_uhs"
+> >  - pinctrl-0: should contain default/high speed pin ctrl
+> >  - pinctrl-1: should contain uhs mode pin ctrl
+> 
+> 
