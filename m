@@ -1,74 +1,100 @@
-From: Chaotian Jing <chaotian.jing@mediatek.com>
-Subject: Re: [PATCH 2/2] mmc: mediatek: add bus_clk control
-Date: Sat, 29 Sep 2018 10:39:42 +0800
-Message-ID: <1538188782.3674.3.camel@mhfsdcap03>
-References: <1538134855-11198-1-git-send-email-chaotian.jing@mediatek.com>
-         <1538134855-11198-3-git-send-email-chaotian.jing@mediatek.com>
-         <1538155736.30348.85.camel@mtkswgap22>
+From: Janusz Krzysztofik <jmkrzyszt@gmail.com>
+Subject: [PATCH] gpiolib: Fix incorrect use of find_next_zero_bit()
+Date: Sat, 29 Sep 2018 14:20:22 +0200
+Message-ID: <20180929122022.6825-1-jmkrzyszt@gmail.com>
+References: <20180923235336.22148-2-jmkrzyszt@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1538155736.30348.85.camel@mtkswgap22>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Sean Wang <sean.wang@mediatek.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Matthias Brugger <matthias.bgg@gmail.com>, Ryder Lee <ryder.lee@mediatek.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, srv_heupstream@mediatek.com
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <20180923235336.22148-2-jmkrzyszt@gmail.com>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Andrew Lunn <andrew@lunn.ch>, Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>, Dominik Brodowski <linux@dominikbrodowski.net>, Yegor Yefremov <yegorslists@googlemail.com>, netdev@vger.kernel.org, linux-i2c@vger.kernel.org, Peter Meerwald-Stadler <pmeerw@pmeerw.net>, Marek Szyprowski <m.szyprowski@samsung.com>, devel@driverdev.osuosl.org, Florian Fainelli <f.fainelli@gmail.com>, Peter Rosin <peda@axentia.se>, Janusz Krzysztofik <jmkrzyszt@gmail.com>, Krzysztof Kozlowski <krzk@kernel.org>, Kishon Vijay Abraham I <kishon@ti.com>, linux-iio@vger.kernel.org, Peter Korsgaard <peter.korsgaard@barco.com>, Geert Uytterhoeven <geert@linux-m68k.org>, linux-serial@vger.kernel.org, Jiri Slaby <jslaby@suse.com>, Michael Hennerich <Michael.Hennerich@analog.com>, =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>, linux-gpio@vger.kernel.org, Russ
 List-Id: linux-mmc@vger.kernel.org
 
-On Sat, 2018-09-29 at 01:28 +0800, Sean Wang wrote:
-> Hi,
-> 
-> On Fri, 2018-09-28 at 19:40 +0800, Chaotian Jing wrote:
-> > when gate MSDC0_HCLK, access register will hang, even the MSDC driver
-> > will never accessing register after HCLK was gated, but for safety, need
-> > gate the bus_clk(which used to access register) too.
-> > 
-> > Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
-> > ---
-> >  drivers/mmc/host/mtk-sd.c | 6 ++++++
-> >  1 file changed, 6 insertions(+)
-> > 
-> > diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> > index 0484138..1c1c967 100644
-> > --- a/drivers/mmc/host/mtk-sd.c
-> > +++ b/drivers/mmc/host/mtk-sd.c
-> > @@ -387,6 +387,7 @@ struct msdc_host {
-> >  
-> >  	struct clk *src_clk;	/* msdc source clock */
-> >  	struct clk *h_clk;      /* msdc h_clk */
-> > +	struct clk *bus_clk;	/* bus clock which used to access register */
-> >  	struct clk *src_clk_cg; /* msdc source clock control gate */
-> >  	u32 mclk;		/* mmc subsystem clock frequency */
-> >  	u32 src_clk_freq;	/* source clock frequency */
-> > @@ -660,12 +661,14 @@ static void msdc_gate_clock(struct msdc_host *host)
-> >  {
-> >  	clk_disable_unprepare(host->src_clk_cg);
-> >  	clk_disable_unprepare(host->src_clk);
-> > +	clk_disable_unprepare(host->bus_clk);
-> >  	clk_disable_unprepare(host->h_clk);
-> >  }
-> >  
-> >  static void msdc_ungate_clock(struct msdc_host *host)
-> >  {
-> >  	clk_prepare_enable(host->h_clk);
-> > +	clk_prepare_enable(host->bus_clk);
-> >  	clk_prepare_enable(host->src_clk);
-> >  	clk_prepare_enable(host->src_clk_cg);
-> >  	while (!(readl(host->base + MSDC_CFG) & MSDC_CFG_CKSTB))
-> > @@ -1900,6 +1903,9 @@ static int msdc_drv_probe(struct platform_device *pdev)
-> >  		goto host_free;
-> >  	}
-> >  
-> > +	host->bus_clk = devm_clk_get(&pdev->dev, "bus_clk");
-> > +	if (IS_ERR(host->bus_clk))
-> > +		host->bus_clk = NULL;
-> 
-> The implementation would cause all SoCs to treat the bus_clk as the optional.
-> It seems you should add a flag to see what SoC requires the bus_clk to successfully access the related registers.
+Commit b17566a6b08b ("gpiolib: Implement fast processing path in
+get/set array"), already fixed to some extent with commit 5d581d7e8cdc
+("gpiolib: Fix missing updates of bitmap index"), introduced a new mode
+of processing bitmaps where bits applicable for fast bitmap processing
+path are supposed to be skipped while iterating bits which don't apply.
+Unfortunately, find_next_zero_bit() function supposed to skip over
+those fast bits is always called with a 'start' argument equal to an
+index of last zero bit found and returns that index value again an
+again, causing an infinite loop.
 
->  Yes, but is no harm to other SoCs, just like the handle of "source_cg"
-> >  	/*source clock control gate is optional clock*/
-> >  	host->src_clk_cg = devm_clk_get(&pdev->dev, "source_cg");
-> >  	if (IS_ERR(host->src_clk_cg))
-> 
-> 
+Fix it by incrementing the index uncoditionally before
+find_next_zero_bit() is optionally called.
+
+Reported-by: Marek Szyprowski <m.szyprowski@samsung.com>
+Signed-off-by: Janusz Krzysztofik <jmkrzyszt@gmail.com>
+---
+Marek,
+
+Could you please test it on top of next-20180920 with "gpiolib: Fix
+missing updates of bitmap index" and optionally "mmc: pwrseq_simple:
+Fix incorrect handling of GPIO bitmap" also applied?
+
+Thanks,
+Janusz
+
+
+ drivers/gpio/gpiolib.c | 9 +++------
+ 1 file changed, 3 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/gpio/gpiolib.c b/drivers/gpio/gpiolib.c
+index 6ae13e3e05f1..940b543e966d 100644
+--- a/drivers/gpio/gpiolib.c
++++ b/drivers/gpio/gpiolib.c
+@@ -2878,12 +2878,11 @@ int gpiod_get_array_value_complex(bool raw, bool can_sleep,
+ 			int hwgpio = gpio_chip_hwgpio(desc);
+ 
+ 			__set_bit(hwgpio, mask);
++			i++;
+ 
+ 			if (array_info)
+ 				i = find_next_zero_bit(array_info->get_mask,
+ 						       array_size, i);
+-			else
+-				i++;
+ 		} while ((i < array_size) &&
+ 			 (desc_array[i]->gdev->chip == chip));
+ 
+@@ -2903,12 +2902,11 @@ int gpiod_get_array_value_complex(bool raw, bool can_sleep,
+ 				value = !value;
+ 			__assign_bit(j, value_bitmap, value);
+ 			trace_gpio_value(desc_to_gpio(desc), 1, value);
++			j++;
+ 
+ 			if (array_info)
+ 				j = find_next_zero_bit(array_info->get_mask, i,
+ 						       j);
+-			else
+-				j++;
+ 		}
+ 
+ 		if (mask != fastpath)
+@@ -3191,12 +3189,11 @@ int gpiod_set_array_value_complex(bool raw, bool can_sleep,
+ 					__clear_bit(hwgpio, bits);
+ 				count++;
+ 			}
++			i++;
+ 
+ 			if (array_info)
+ 				i = find_next_zero_bit(array_info->set_mask,
+ 						       array_size, i);
+-			else
+-				i++;
+ 		} while ((i < array_size) &&
+ 			 (desc_array[i]->gdev->chip == chip));
+ 		/* push collected bits to outputs */
+-- 
+2.16.4
