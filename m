@@ -1,39 +1,51 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH] gpiolib: Fix incorrect use of find_next_zero_bit()
-Date: Mon, 1 Oct 2018 11:37:07 +0200
-Message-ID: <CACRpkdbxh3uoVbc1udouxKaN+sc+q_vB7oj_B8PEa4wi=wLedg@mail.gmail.com>
-References: <20180923235336.22148-2-jmkrzyszt@gmail.com> <20180929122022.6825-1-jmkrzyszt@gmail.com>
+From: Ludovic BARRE <ludovic.barre@st.com>
+Subject: Re: [PATCH V2 09/27] mmc: mmci: modify dma_setup callback
+Date: Mon, 1 Oct 2018 11:43:12 +0200
+Message-ID: <f47e4e0e-2e6a-2de0-ecb6-488d00fb1115@st.com>
+References: <1537523181-14578-1-git-send-email-ludovic.Barre@st.com>
+ <1537523181-14578-10-git-send-email-ludovic.Barre@st.com>
+ <CAPDyKFq-KUNuftT1F7TXMU-Jceqi9GYTWC4Jb7qn3UdpXHR+9Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <netdev-owner@vger.kernel.org>
-In-Reply-To: <20180929122022.6825-1-jmkrzyszt@gmail.com>
-Sender: netdev-owner@vger.kernel.org
-To: Janusz Krzysztofik <jmkrzyszt@gmail.com>
-Cc: Miguel Ojeda Sandonis <miguel.ojeda.sandonis@gmail.com>, Peter Korsgaard <peter.korsgaard@barco.com>, Peter Rosin <peda@axentia.se>, Ulf Hansson <ulf.hansson@linaro.org>, Andrew Lunn <andrew@lunn.ch>, Florian Fainelli <f.fainelli@gmail.com>, "David S. Miller" <davem@davemloft.net>, Dominik Brodowski <linux@dominikbrodowski.net>, Greg KH <gregkh@linuxfoundation.org>, kishon@ti.com, Lars-Peter Clausen <lars@metafoo.de>, Michael Hennerich <Michael.Hennerich@analog.com>, Jonathan Cameron <jic23@kernel.org>, Hartmut Knaack <knaack.h@gmx.de>, Peter Meerwald <pmeerw@pmeerw.net>, Jiri Slaby <jslaby@suse.com>, Willy Tarreau <w@1wt.eu>, Geert Uytterhoeven <geert@linux-m68k.org>, Sebastien Bourdelin <sebastien.bourdelin@savoirfairelinux.com>, Lukas Wunner <luka>
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFq-KUNuftT1F7TXMU-Jceqi9GYTWC4Jb7qn3UdpXHR+9Q@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Rob Herring <robh+dt@kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Benjamin Gaignard <benjamin.gaignard@linaro.org>, Gerald Baeza <gerald.baeza@st.com>, Loic Pallardy <loic.pallardy@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-stm32@st-md-mailman.stormreply.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Sat, Sep 29, 2018 at 2:19 PM Janusz Krzysztofik <jmkrzyszt@gmail.com> wrote:
+hi Ulf
 
-> Commit b17566a6b08b ("gpiolib: Implement fast processing path in
-> get/set array"), already fixed to some extent with commit 5d581d7e8cdc
-> ("gpiolib: Fix missing updates of bitmap index"), introduced a new mode
-> of processing bitmaps where bits applicable for fast bitmap processing
-> path are supposed to be skipped while iterating bits which don't apply.
-> Unfortunately, find_next_zero_bit() function supposed to skip over
-> those fast bits is always called with a 'start' argument equal to an
-> index of last zero bit found and returns that index value again an
-> again, causing an infinite loop.
->
-> Fix it by incrementing the index uncoditionally before
-> find_next_zero_bit() is optionally called.
->
-> Reported-by: Marek Szyprowski <m.szyprowski@samsung.com>
-> Signed-off-by: Janusz Krzysztofik <jmkrzyszt@gmail.com>
+On 10/01/2018 11:30 AM, Ulf Hansson wrote:
+> On 21 September 2018 at 11:46, Ludovic Barre <ludovic.Barre@st.com> wrote:
+>> From: Ludovic Barre <ludovic.barre@st.com>
+>>
+>> This patch creates a generic mmci_dma_setup which calls
+>> dma_setup callback and manages common next_cookie.
+>> This patch is needed for sdmmc variant which has a different
+>> dma settings.
+>>
+>> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
+>>
+>> # Conflicts:
+>> #       drivers/mmc/host/mmci.h
+>>
+> 
+> Please remove this. Looks like some of the other patches in the series
+> have this in their changelogs as well, please have a look and fix them
+> all.
+> 
 
-Patch applied with Marek's Tested-by.
+yes, it's a mistake due to rush work (like Version of cover letter).
+sorry
 
-Thanks to both of you for digging in and fixing this up!
-Now we are in good shape for the v4.20 cycle :)
+BR
+Ludo
 
-Yours,
-Linus Walleij
+> [...]
+> 
+> Kind regards
+> Uffe
+> 
