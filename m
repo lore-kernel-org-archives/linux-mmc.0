@@ -1,12 +1,12 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V2 23/27] mmc: mmci: add variant property to request a reset
-Date: Mon, 1 Oct 2018 11:30:44 +0200
-Message-ID: <CAPDyKFqxBuQcafS2KFqPDwb4=V1Jwoovb4+VsJZjAA5CeKs2kw@mail.gmail.com>
-References: <1537523181-14578-1-git-send-email-ludovic.Barre@st.com> <1537523181-14578-24-git-send-email-ludovic.Barre@st.com>
+Subject: Re: [PATCH V2 26/27] mmc: mmci: add DT bindings for STM32 sdmmc
+Date: Mon, 1 Oct 2018 11:30:58 +0200
+Message-ID: <CAPDyKFoiZMnYqtp_FofYEV=xKD+Azb2qKf=R=LdRsE+doxqW+A@mail.gmail.com>
+References: <1537523181-14578-1-git-send-email-ludovic.Barre@st.com> <1537523181-14578-27-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1537523181-14578-24-git-send-email-ludovic.Barre@st.com>
+In-Reply-To: <1537523181-14578-27-git-send-email-ludovic.Barre@st.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ludovic Barre <ludovic.Barre@st.com>
 Cc: Rob Herring <robh+dt@kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Benjamin Gaignard <benjamin.gaignard@linaro.org>, Gerald Baeza <gerald.baeza@st.com>, Loic Pallardy <loic.pallardy@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-stm32@st-md-mailman.stormreply.com
@@ -15,99 +15,50 @@ List-Id: linux-mmc@vger.kernel.org
 On 21 September 2018 at 11:46, Ludovic Barre <ludovic.Barre@st.com> wrote:
 > From: Ludovic Barre <ludovic.barre@st.com>
 >
-> Some variants could require a reset.
-> STM32 sdmmc variant needs to reset hardware block
-> during the power cycle procedure (for re-initialization)
+> STM32 sdmmc variant has support to:
+> -Indicate signal directions (only one property
+> for d0dir, d123dir, cmd_dir)
+> -Select command and data phase relation.
+> -Select "clock in" from an external driver.
 >
 > Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 > ---
->  Documentation/devicetree/bindings/mmc/mmci.txt | 2 ++
->  drivers/mmc/host/mmci.c                        | 9 +++++++++
->  drivers/mmc/host/mmci.h                        | 4 ++++
->  3 files changed, 15 insertions(+)
+> change v3:
+> -remove space at end of "st,use-ckin "
+>
+>  Documentation/devicetree/bindings/mmc/mmci.txt | 9 +++++++++
+
+Please split this. DT doc changes should be separate patches.
+
+>  drivers/mmc/host/mmci.c                        | 6 ++++++
+>  drivers/mmc/host/mmci.h                        | 1 +
+>  3 files changed, 16 insertions(+)
 >
 > diff --git a/Documentation/devicetree/bindings/mmc/mmci.txt b/Documentation/devicetree/bindings/mmc/mmci.txt
-> index 03796cf..e952707 100644
+> index e952707..d678933 100644
 > --- a/Documentation/devicetree/bindings/mmc/mmci.txt
 > +++ b/Documentation/devicetree/bindings/mmc/mmci.txt
-> @@ -11,6 +11,8 @@ Required properties:
->  - compatible             : contains "arm,pl18x", "arm,primecell".
->  - vmmc-supply            : phandle to the regulator device tree node, mentioned
->                             as the VCC/VDD supply in the eMMC/SD specs.
-> +depend of variant:
-> +- resets                 : phandle to internal reset line.
+> @@ -19,6 +19,7 @@ Optional properties:
+>                             the ID provided by the HW
+>  - vqmmc-supply           : phandle to the regulator device tree node, mentioned
+>                             as the VCCQ/VDD_IO supply in the eMMC/SD specs.
+> +specific for ux500 variant:
+>  - st,sig-dir-dat0        : bus signal direction pin used for DAT[0].
+>  - st,sig-dir-dat2        : bus signal direction pin used for DAT[2].
+>  - st,sig-dir-dat31       : bus signal direction pin used for DAT[3] and DAT[1].
+> @@ -26,6 +27,14 @@ Optional properties:
+>  - st,sig-dir-cmd         : cmd signal direction pin used for CMD.
+>  - st,sig-pin-fbclk       : feedback clock signal pin used.
 >
+> +specific for sdmmc variant:
+> +- st,sig-dir             : signal direction polarity used for cmd, dat0 dat123.
+> +- st,neg-edge            : data & command phase relation, generated on
+> +                           sd clock falling edge.
+> +- st,use-ckin            : use ckin pin from an external driver to sample
+> +                           the receive data (example: with voltage
+> +                          switch transceiver).
 
-This looks like a thing depending on the SoC, rather than on the
-variant. Therefore, I suggest you move this to be an optional DT
-property.
-
-Also, please move the DT doc update into a separate patch.
-
->  Optional properties:
->  - arm,primecell-periphid : contains the PrimeCell Peripheral ID, it overrides
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index b1d5bc5..6b3c33f 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -37,6 +37,7 @@
->  #include <linux/pm_runtime.h>
->  #include <linux/types.h>
->  #include <linux/pinctrl/consumer.h>
-> +#include <linux/reset.h>
->
->  #include <asm/div64.h>
->  #include <asm/io.h>
-> @@ -1854,6 +1855,14 @@ static int mmci_probe(struct amba_device *dev,
->
->         dev_dbg(mmc_dev(mmc), "clocking block at %u Hz\n", mmc->f_max);
->
-> +       if (variant->reset) {
-> +               host->rst = devm_reset_control_get_exclusive(&dev->dev, NULL);
-
-As suggested, let's make this optional and not depending on the variant.
-
-> +               if (IS_ERR(host->rst)) {
-> +                       ret = PTR_ERR(host->rst);
-> +                       goto clk_disable;
-> +               }
-> +       }
-> +
->         /* Get regulators and the supported OCR mask */
->         ret = mmc_regulator_get_supply(mmc);
->         if (ret)
-> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-> index e130689..f0fa185 100644
-> --- a/drivers/mmc/host/mmci.h
-> +++ b/drivers/mmc/host/mmci.h
-> @@ -247,6 +247,7 @@ struct mmci_host;
->   * @start_err: bitmask identifying the STARTBITERR bit inside MMCISTATUS
->   *            register.
->   * @opendrain: bitmask identifying the OPENDRAIN bit inside MMCIPOWER register
-> + * @reset: true if variant has need reset signal.
->   */
->  struct variant_data {
->         unsigned int            clkreg;
-> @@ -285,6 +286,7 @@ struct variant_data {
->         bool                    qcom_dml;
->         bool                    reversed_irq_handling;
->         bool                    mmcimask1;
-> +       bool                    reset;
->         unsigned int            irq_pio_mask;
->         u32                     start_err;
->         u32                     opendrain;
-> @@ -318,6 +320,8 @@ struct mmci_host {
->         struct clk              *clk;
->         bool                    singleirq;
->
-> +       struct reset_control    *rst;
-> +
->         spinlock_t              lock;
->
->         unsigned int            mclk;
-> --
-> 2.7.4
->
+[...]
 
 Kind regards
 Uffe
