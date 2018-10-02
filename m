@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V4 20/25] dt-bindings: mmci: add optional reset property
-Date: Tue, 2 Oct 2018 14:09:22 +0200
-Message-ID: <1538482167-13819-21-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V4 22/25] mmc: mmci: add clock divider for stm32 sdmmc
+Date: Tue, 2 Oct 2018 14:09:24 +0200
+Message-ID: <1538482167-13819-23-git-send-email-ludovic.Barre@st.com>
 References: <1538482167-13819-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,25 +14,46 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-This patch adds a optional reset management.
+The STM32 sdmmc variant has a different clock divider.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
-Acked-by: Rob Herring <robh@kernel.org>
 ---
- Documentation/devicetree/bindings/mmc/mmci.txt | 1 +
- 1 file changed, 1 insertion(+)
+ drivers/mmc/host/mmci.c | 2 ++
+ drivers/mmc/host/mmci.h | 2 ++
+ 2 files changed, 4 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/mmci.txt b/Documentation/devicetree/bindings/mmc/mmci.txt
-index 03796cf..4e69b25 100644
---- a/Documentation/devicetree/bindings/mmc/mmci.txt
-+++ b/Documentation/devicetree/bindings/mmc/mmci.txt
-@@ -15,6 +15,7 @@ Required properties:
- Optional properties:
- - arm,primecell-periphid : contains the PrimeCell Peripheral ID, it overrides
-                            the ID provided by the HW
-+- resets                 : phandle to internal reset line.
- - vqmmc-supply           : phandle to the regulator device tree node, mentioned
-                            as the VCCQ/VDD_IO supply in the eMMC/SD specs.
- - st,sig-dir-dat0        : bus signal direction pin used for DAT[0].
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 0898cc9..0421e18 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -1857,6 +1857,8 @@ static int mmci_probe(struct amba_device *dev,
+ 	 */
+ 	if (variant->st_clkdiv)
+ 		mmc->f_min = DIV_ROUND_UP(host->mclk, 257);
++	else if (variant->stm32_clkdiv)
++		mmc->f_min = DIV_ROUND_UP(host->mclk, 2046);
+ 	else if (variant->explicit_mclk_control)
+ 		mmc->f_min = clk_round_rate(host->clk, 100000);
+ 	else
+diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+index f793426..1520289 100644
+--- a/drivers/mmc/host/mmci.h
++++ b/drivers/mmc/host/mmci.h
+@@ -216,6 +216,7 @@ struct mmci_host;
+  * @data_cmd_enable: enable value for data commands.
+  * @st_sdio: enable ST specific SDIO logic
+  * @st_clkdiv: true if using a ST-specific clock divider algorithm
++ * @stm32_clkdiv: true if using a STM32-specific clock divider algorithm
+  * @datactrl_mask_ddrmode: ddr mode mask in datactrl register.
+  * @blksz_datactrl16: true if Block size is at b16..b30 position in datactrl register
+  * @blksz_datactrl4: true if Block size is at b4..b16 position in datactrl
+@@ -269,6 +270,7 @@ struct variant_data {
+ 	u8			datacnt_useless:1;
+ 	u8			st_sdio:1;
+ 	u8			st_clkdiv:1;
++	u8			stm32_clkdiv:1;
+ 	u8			blksz_datactrl16:1;
+ 	u8			blksz_datactrl4:1;
+ 	u32			pwrreg_powerup;
 -- 
 2.7.4
