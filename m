@@ -1,179 +1,110 @@
-From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V4 08/25] mmc: mmci: add dma_start callback
-Date: Tue, 2 Oct 2018 14:09:10 +0200
-Message-ID: <1538482167-13819-9-git-send-email-ludovic.Barre@st.com>
-References: <1538482167-13819-1-git-send-email-ludovic.Barre@st.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: [PATCH] block: BFQ default for single queue devices
+Date: Tue,  2 Oct 2018 14:43:29 +0200
+Message-ID: <20181002124329.21248-1-linus.walleij@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1538482167-13819-1-git-send-email-ludovic.Barre@st.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
-Cc: Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, benjamin.gaignard@linaro.org, Gerald Baeza <gerald.baeza@st.com>, Loic Pallardy <loic.pallardy@st.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com, Ludovic Barre <ludovic.barre@st.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
+List-Post: <mailto:linux-mtd@lists.infradead.org>
+List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-mtd" <linux-mtd-bounces@lists.infradead.org>
+Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
+To: linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Paolo Valente <paolo.valente@linaro.org>, Artem Bityutskiy <dedekind1@gmail.com>, Richard Weinberger <richard@nod.at>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, linux-mtd@lists.infradead.org, Pavel Machek <pavel@ucw.cz>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Ludovic Barre <ludovic.barre@st.com>
+This sets BFQ as the default scheduler for single queue
+block devices (nr_hw_queues == 1) if it is available. This
+affects notably MMC/SD-cards but notably also UBI and
+the loopback device.
 
-This patch adds dma_start callback to mmci_host_ops.
-Create a generic mmci_dma_start function which regroup
-common action between variant.
+I have been running it for a while without any negative
+effects on my pet systems and I want some wider testing
+so let's throw it out there and see what people say.
+Admittedly my use cases are limited.
 
-Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
+I talked to Pavel a bit back and it turns out he has a
+usecase for BFQ as well and I bet he also would like it
+as default scheduler for that system (Pavel tell us more,
+I don't remember what it was!)
+
+Intuitively I could understand that maybe we want to
+leave the loop device (possibly others? nbd? rbd?) as
+"none", as it is probably relying on a scheduler on the
+device below it, so I'm open to passing in a scheduler hint
+from the respective subsystem in say struct blk_mq_tag_set.
+However that makes for a bit of syntactic dissonance
+with the struct member ".nr_hw_queues" (I wonder how
+the loop device can have 1 "hardware queue"?) so
+maybe we should in that case also rename that struct
+member to ".nr_queues" fair and square before we start
+making adjustments for treating queues differently whether
+they are in hardware or actually not.
+
+Cc: Pavel Machek <pavel@ucw.cz>
+Cc: Paolo Valente <paolo.valente@linaro.org>
+Cc: Jens Axboe <axboe@kernel.dk>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Richard Weinberger <richard@nod.at>
+Cc: Artem Bityutskiy <dedekind1@gmail.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>
+Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- drivers/mmc/host/mmci.c          | 69 +++++++++++++++++++++++-----------------
- drivers/mmc/host/mmci.h          |  2 ++
- drivers/mmc/host/mmci_qcom_dml.c |  1 +
- 3 files changed, 42 insertions(+), 30 deletions(-)
+ block/elevator.c | 21 ++++++++++++++-------
+ 1 file changed, 14 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 8f482f3..53d2012 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -417,6 +417,41 @@ void mmci_get_next_data(struct mmci_host *host, struct mmc_data *data)
- 		host->ops->get_next_data(host, data);
+diff --git a/block/elevator.c b/block/elevator.c
+index e18ac68626e3..e5a2c39eee7b 100644
+--- a/block/elevator.c
++++ b/block/elevator.c
+@@ -948,13 +948,15 @@ int elevator_switch_mq(struct request_queue *q,
  }
  
-+int mmci_dma_start(struct mmci_host *host, unsigned int datactrl)
-+{
-+	struct mmc_data *data = host->data;
-+	int ret;
-+
-+	if (!host->use_dma)
-+		return -EINVAL;
-+
-+	ret = mmci_prep_data(host, data, false);
-+	if (ret)
-+		return ret;
-+
-+	if (!host->ops || !host->ops->dma_start)
-+		return -EINVAL;
-+
-+	/* Okay, go for it. */
-+	dev_vdbg(mmc_dev(host->mmc),
-+		 "Submit MMCI DMA job, sglen %d blksz %04x blks %04x flags %08x\n",
-+		 data->sg_len, data->blksz, data->blocks, data->flags);
-+
-+	host->ops->dma_start(host, &datactrl);
-+
-+	/* Trigger the DMA transfer */
-+	mmci_write_datactrlreg(host, datactrl);
-+
-+	/*
-+	 * Let the MMCI say when the data is ended and it's time
-+	 * to fire next DMA request. When that happens, MMCI will
-+	 * call mmci_data_end()
-+	 */
-+	writel(readl(host->base + MMCIMASK0) | MCI_DATAENDMASK,
-+	       host->base + MMCIMASK0);
-+	return 0;
-+}
-+
- static void
- mmci_request_end(struct mmci_host *host, struct mmc_request *mrq)
+ /*
+- * For blk-mq devices, we default to using mq-deadline, if available, for single
+- * queue devices.  If deadline isn't available OR we have multiple queues,
+- * default to "none".
++ * For blk-mq devices, we default to using:
++ * - "none" for multiqueue devices (nr_hw_queues != 1)
++ * - "bfq", if available, for single queue devices
++ * - "mq-deadline" if "bfq" is not available for single queue devices
++ * - "none" for single queue devices as well as last resort
+  */
+ int elevator_init_mq(struct request_queue *q)
  {
-@@ -729,23 +764,11 @@ int mmci_dmae_prep_data(struct mmci_host *host,
- 				    &dmae->desc_current);
- }
+-	struct elevator_type *e;
++	struct elevator_type *e = NULL;
+ 	int err = 0;
  
--static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
-+int mmci_dmae_start(struct mmci_host *host, unsigned int *datactrl)
- {
--	int ret;
- 	struct mmci_dmae_priv *dmae = host->dma_priv;
- 	struct mmc_data *data = host->data;
+ 	if (q->nr_hw_queues != 1)
+@@ -968,9 +970,14 @@ int elevator_init_mq(struct request_queue *q)
+ 	if (unlikely(q->elevator))
+ 		goto out_unlock;
  
--	if (!host->use_dma)
--		return -EINVAL;
--
--	ret = mmci_dmae_prep_data(host, host->data, false);
--	if (ret)
--		return ret;
--
--	/* Okay, go for it. */
--	dev_vdbg(mmc_dev(host->mmc),
--		 "Submit MMCI DMA job, sglen %d blksz %04x blks %04x flags %08x\n",
--		 data->sg_len, data->blksz, data->blocks, data->flags);
- 	host->dma_in_progress = true;
- 	dmaengine_submit(dmae->desc_current);
- 	dma_async_issue_pending(dmae->cur);
-@@ -753,18 +776,8 @@ static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
- 	if (host->variant->qcom_dml)
- 		dml_start_xfer(host, data);
+-	e = elevator_get(q, "mq-deadline", false);
+-	if (!e)
+-		goto out_unlock;
++	if (IS_ENABLED(CONFIG_IOSCHED_BFQ))
++		e = elevator_get(q, "bfq", false);
++
++	if (!e) {
++		e = elevator_get(q, "mq-deadline", false);
++		if (!e)
++			goto out_unlock;
++	}
  
--	datactrl |= MCI_DPSM_DMAENABLE;
-+	*datactrl |= MCI_DPSM_DMAENABLE;
- 
--	/* Trigger the DMA transfer */
--	mmci_write_datactrlreg(host, datactrl);
--
--	/*
--	 * Let the MMCI say when the data is ended and it's time
--	 * to fire next DMA request. When that happens, MMCI will
--	 * call mmci_data_end()
--	 */
--	writel(readl(host->base + MMCIMASK0) | MCI_DATAENDMASK,
--	       host->base + MMCIMASK0);
- 	return 0;
- }
- 
-@@ -823,6 +836,7 @@ static struct mmci_host_ops mmci_variant_ops = {
- 	.get_next_data = mmci_dmae_get_next_data,
- 	.dma_setup = mmci_dmae_setup,
- 	.dma_release = mmci_dmae_release,
-+	.dma_start = mmci_dmae_start,
- };
- #else
- /* Blank functions if the DMA engine is not available */
-@@ -835,11 +849,6 @@ static inline void mmci_dma_data_error(struct mmci_host *host)
- {
- }
- 
--static inline int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
--{
--	return -ENOSYS;
--}
--
- static struct mmci_host_ops mmci_variant_ops = {};
- #endif
- 
-@@ -942,7 +951,7 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
- 	 * Attempt to use DMA operation mode, if this
- 	 * should fail, fall back to PIO mode
- 	 */
--	if (!mmci_dma_start_data(host, datactrl))
-+	if (!mmci_dma_start(host, datactrl))
- 		return;
- 
- 	/* IRQ mode, map the SG list for CPU reading/writing */
-diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 9deca99..1bb4a14 100644
---- a/drivers/mmc/host/mmci.h
-+++ b/drivers/mmc/host/mmci.h
-@@ -280,6 +280,7 @@ struct mmci_host_ops {
- 	void (*get_next_data)(struct mmci_host *host, struct mmc_data *data);
- 	int (*dma_setup)(struct mmci_host *host);
- 	void (*dma_release)(struct mmci_host *host);
-+	int (*dma_start)(struct mmci_host *host, unsigned int *datactrl);
- };
- 
- struct mmci_host {
-@@ -341,4 +342,5 @@ void mmci_dmae_unprep_data(struct mmci_host *host, struct mmc_data *data,
- void mmci_dmae_get_next_data(struct mmci_host *host, struct mmc_data *data);
- int mmci_dmae_setup(struct mmci_host *host);
- void mmci_dmae_release(struct mmci_host *host);
-+int mmci_dmae_start(struct mmci_host *host, unsigned int *datactrl);
- 
-diff --git a/drivers/mmc/host/mmci_qcom_dml.c b/drivers/mmc/host/mmci_qcom_dml.c
-index 5334427..ae1c193 100644
---- a/drivers/mmc/host/mmci_qcom_dml.c
-+++ b/drivers/mmc/host/mmci_qcom_dml.c
-@@ -188,6 +188,7 @@ static struct mmci_host_ops qcom_variant_ops = {
- 	.get_next_data = mmci_dmae_get_next_data,
- 	.dma_setup = qcom_dma_setup,
- 	.dma_release = mmci_dmae_release,
-+	.dma_start = mmci_dmae_start,
- };
- 
- void qcom_variant_init(struct mmci_host *host)
+ 	err = blk_mq_init_sched(q, e);
+ 	if (err)
 -- 
-2.7.4
+2.17.1
+
+
+______________________________________________________
+Linux MTD discussion mailing list
+http://lists.infradead.org/mailman/listinfo/linux-mtd/
