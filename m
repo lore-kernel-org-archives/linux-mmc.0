@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V4 24/25] dt-bindings: mmci: add stm32 sdmmc variant
-Date: Tue, 2 Oct 2018 14:09:26 +0200
-Message-ID: <1538482167-13819-25-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V4 14/25] mmc: mmci: expand startbiterr to irqmask and error check
+Date: Tue, 2 Oct 2018 14:09:16 +0200
+Message-ID: <1538482167-13819-15-git-send-email-ludovic.Barre@st.com>
 References: <1538482167-13819-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,43 +14,104 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-This patch adds properties for stm32 sdmmc variant.
+All variants don't pretend to have a startbiterr.
+-While data error check, if status register return an error
+(like  MCI_DATACRCFAIL) we must avoid to check MCI_STARTBITERR
+(if not desired).
+-expand start_err to MCI_IRQENABLE to avoid to set this bit by default.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
-Acked-by: Rob Herring <robh@kernel.org>
 ---
- Documentation/devicetree/bindings/mmc/mmci.txt | 10 ++++++++++
- 1 file changed, 10 insertions(+)
+ drivers/mmc/host/mmci.c | 27 ++++++++++++++++-----------
+ drivers/mmc/host/mmci.h |  6 +++---
+ 2 files changed, 19 insertions(+), 14 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/mmci.txt b/Documentation/devicetree/bindings/mmc/mmci.txt
-index 4e69b25..6d3c626 100644
---- a/Documentation/devicetree/bindings/mmc/mmci.txt
-+++ b/Documentation/devicetree/bindings/mmc/mmci.txt
-@@ -16,8 +16,10 @@ Optional properties:
- - arm,primecell-periphid : contains the PrimeCell Peripheral ID, it overrides
-                            the ID provided by the HW
- - resets                 : phandle to internal reset line.
-+			   Should be defined for sdmmc variant.
- - vqmmc-supply           : phandle to the regulator device tree node, mentioned
-                            as the VCCQ/VDD_IO supply in the eMMC/SD specs.
-+specific for ux500 variant:
- - st,sig-dir-dat0        : bus signal direction pin used for DAT[0].
- - st,sig-dir-dat2        : bus signal direction pin used for DAT[2].
- - st,sig-dir-dat31       : bus signal direction pin used for DAT[3] and DAT[1].
-@@ -25,6 +27,14 @@ Optional properties:
- - st,sig-dir-cmd         : cmd signal direction pin used for CMD.
- - st,sig-pin-fbclk       : feedback clock signal pin used.
- 
-+specific for sdmmc variant:
-+- st,sig-dir             : signal direction polarity used for cmd, dat0 dat123.
-+- st,neg-edge            : data & command phase relation, generated on
-+                           sd clock falling edge.
-+- st,use-ckin            : use ckin pin from an external driver to sample
-+                           the receive data (example: with voltage
-+			   switch transceiver).
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 59a2188..168bb6d 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -1037,14 +1037,18 @@ static void
+ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
+ 	      unsigned int status)
+ {
++	unsigned int status_err;
 +
- Deprecated properties:
- - mmc-cap-mmc-highspeed  : indicates whether MMC is high speed capable.
- - mmc-cap-sd-highspeed   : indicates whether SD is high speed capable.
+ 	/* Make sure we have data to handle */
+ 	if (!data)
+ 		return;
+ 
+ 	/* First check for errors */
+-	if (status & (MCI_DATACRCFAIL | MCI_DATATIMEOUT |
+-		      host->variant->start_err |
+-		      MCI_TXUNDERRUN | MCI_RXOVERRUN)) {
++	status_err = status & (host->variant->start_err |
++			       MCI_DATACRCFAIL | MCI_DATATIMEOUT |
++			       MCI_TXUNDERRUN | MCI_RXOVERRUN);
++
++	if (status_err) {
+ 		u32 remain, success;
+ 
+ 		/* Terminate the DMA transfer */
+@@ -1061,18 +1065,18 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
+ 		success = data->blksz * data->blocks - remain;
+ 
+ 		dev_dbg(mmc_dev(host->mmc), "MCI ERROR IRQ, status 0x%08x at 0x%08x\n",
+-			status, success);
+-		if (status & MCI_DATACRCFAIL) {
++			status_err, success);
++		if (status_err & MCI_DATACRCFAIL) {
+ 			/* Last block was not successful */
+ 			success -= 1;
+ 			data->error = -EILSEQ;
+-		} else if (status & MCI_DATATIMEOUT) {
++		} else if (status_err & MCI_DATATIMEOUT) {
+ 			data->error = -ETIMEDOUT;
+-		} else if (status & MCI_STARTBITERR) {
++		} else if (status_err & MCI_STARTBITERR) {
+ 			data->error = -ECOMM;
+-		} else if (status & MCI_TXUNDERRUN) {
++		} else if (status_err & MCI_TXUNDERRUN) {
+ 			data->error = -EIO;
+-		} else if (status & MCI_RXOVERRUN) {
++		} else if (status_err & MCI_RXOVERRUN) {
+ 			if (success > host->variant->fifosize)
+ 				success -= host->variant->fifosize;
+ 			else
+@@ -1913,7 +1917,7 @@ static int mmci_probe(struct amba_device *dev,
+ 			goto clk_disable;
+ 	}
+ 
+-	writel(MCI_IRQENABLE, host->base + MMCIMASK0);
++	writel(MCI_IRQENABLE | variant->start_err, host->base + MMCIMASK0);
+ 
+ 	amba_set_drvdata(dev, mmc);
+ 
+@@ -2000,7 +2004,8 @@ static void mmci_restore(struct mmci_host *host)
+ 		writel(host->datactrl_reg, host->base + MMCIDATACTRL);
+ 		writel(host->pwr_reg, host->base + MMCIPOWER);
+ 	}
+-	writel(MCI_IRQENABLE, host->base + MMCIMASK0);
++	writel(MCI_IRQENABLE | host->variant->start_err,
++	       host->base + MMCIMASK0);
+ 	mmci_reg_delay(host);
+ 
+ 	spin_unlock_irqrestore(&host->lock, flags);
+diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+index 042cbef..8aafafd 100644
+--- a/drivers/mmc/host/mmci.h
++++ b/drivers/mmc/host/mmci.h
+@@ -181,9 +181,9 @@
+ #define MMCIFIFO		0x080 /* to 0x0bc */
+ 
+ #define MCI_IRQENABLE	\
+-	(MCI_CMDCRCFAILMASK|MCI_DATACRCFAILMASK|MCI_CMDTIMEOUTMASK|	\
+-	MCI_DATATIMEOUTMASK|MCI_TXUNDERRUNMASK|MCI_RXOVERRUNMASK|	\
+-	MCI_CMDRESPENDMASK|MCI_CMDSENTMASK|MCI_STARTBITERRMASK)
++	(MCI_CMDCRCFAILMASK | MCI_DATACRCFAILMASK | MCI_CMDTIMEOUTMASK | \
++	MCI_DATATIMEOUTMASK | MCI_TXUNDERRUNMASK | MCI_RXOVERRUNMASK |	\
++	MCI_CMDRESPENDMASK | MCI_CMDSENTMASK)
+ 
+ /* These interrupts are directed to IRQ1 when two IRQ lines are available */
+ #define MCI_IRQ1MASK \
 -- 
 2.7.4
