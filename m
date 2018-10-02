@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V4 07/25] mmc: mmci: add dma_release callback
-Date: Tue, 2 Oct 2018 14:09:09 +0200
-Message-ID: <1538482167-13819-8-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V4 18/25] mmc: mmci: add variant property to write datactrl before command
+Date: Tue, 2 Oct 2018 14:09:20 +0200
+Message-ID: <1538482167-13819-19-git-send-email-ludovic.Barre@st.com>
 References: <1538482167-13819-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,95 +14,59 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-This patch adds dma_release callback at mmci_host_ops
-to allow to call specific variant.
+This patch adds a boolean property to allow to write datactrl
+before to send command, whatever the command type (read or write).
+Needed to support the STM32 sdmmc variant.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.c          | 15 ++++++++-------
- drivers/mmc/host/mmci.h          |  2 ++
- drivers/mmc/host/mmci_qcom_dml.c |  1 +
- 3 files changed, 11 insertions(+), 7 deletions(-)
+ drivers/mmc/host/mmci.c | 6 ++++--
+ drivers/mmc/host/mmci.h | 2 ++
+ 2 files changed, 6 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 9236d4f..8f482f3 100644
+index ac33d23..e639841 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -378,6 +378,12 @@ void mmci_dma_setup(struct mmci_host *host)
- 	host->use_dma = true;
+@@ -1262,7 +1262,8 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+ 		mmci_request_end(host, host->mrq);
+ 	} else if (sbc) {
+ 		mmci_start_command(host, host->mrq->cmd, 0);
+-	} else if (!(cmd->data->flags & MMC_DATA_READ)) {
++	} else if (!host->variant->datactrl_first &&
++		   !(cmd->data->flags & MMC_DATA_READ)) {
+ 		mmci_start_data(host, cmd->data);
+ 	}
  }
+@@ -1526,7 +1527,8 @@ static void mmci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 	if (mrq->data)
+ 		mmci_get_next_data(host, mrq->data);
  
-+void mmci_dma_release(struct mmci_host *host)
-+{
-+	if (host->ops && host->ops->dma_release)
-+		host->ops->dma_release(host);
-+}
-+
- int mmci_prep_data(struct mmci_host *host, struct mmc_data *data, bool next)
- {
- 	int err;
-@@ -482,8 +488,6 @@ struct mmci_dmae_priv {
- 	struct mmci_dmae_next next_data;
- };
+-	if (mrq->data && mrq->data->flags & MMC_DATA_READ)
++	if (mrq->data &&
++	    (host->variant->datactrl_first || mrq->data->flags & MMC_DATA_READ))
+ 		mmci_start_data(host, mrq->data);
  
--static inline void mmci_dma_release(struct mmci_host *host);
--
- int mmci_dmae_setup(struct mmci_host *host)
- {
- 	const char *rxname, *txname;
-@@ -552,7 +556,7 @@ int mmci_dmae_setup(struct mmci_host *host)
-  * This is used in or so inline it
-  * so it can be discarded.
-  */
--static inline void mmci_dma_release(struct mmci_host *host)
-+void mmci_dmae_release(struct mmci_host *host)
- {
- 	struct mmci_dmae_priv *dmae = host->dma_priv;
- 
-@@ -818,13 +822,10 @@ static struct mmci_host_ops mmci_variant_ops = {
- 	.unprep_data = mmci_dmae_unprep_data,
- 	.get_next_data = mmci_dmae_get_next_data,
- 	.dma_setup = mmci_dmae_setup,
-+	.dma_release = mmci_dmae_release,
- };
- #else
- /* Blank functions if the DMA engine is not available */
--static inline void mmci_dma_release(struct mmci_host *host)
--{
--}
--
- static inline void mmci_dma_finalize(struct mmci_host *host,
- 				     struct mmc_data *data)
- {
+ 	if (mrq->sbc)
 diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 8d65d55..9deca99 100644
+index 4b10c82..4e5c6c6 100644
 --- a/drivers/mmc/host/mmci.h
 +++ b/drivers/mmc/host/mmci.h
-@@ -279,6 +279,7 @@ struct mmci_host_ops {
- 			    int err);
- 	void (*get_next_data)(struct mmci_host *host, struct mmc_data *data);
- 	int (*dma_setup)(struct mmci_host *host);
-+	void (*dma_release)(struct mmci_host *host);
- };
- 
- struct mmci_host {
-@@ -339,4 +340,5 @@ void mmci_dmae_unprep_data(struct mmci_host *host, struct mmc_data *data,
- 			   int err);
- void mmci_dmae_get_next_data(struct mmci_host *host, struct mmc_data *data);
- int mmci_dmae_setup(struct mmci_host *host);
-+void mmci_dmae_release(struct mmci_host *host);
- 
-diff --git a/drivers/mmc/host/mmci_qcom_dml.c b/drivers/mmc/host/mmci_qcom_dml.c
-index 16ae40e..5334427 100644
---- a/drivers/mmc/host/mmci_qcom_dml.c
-+++ b/drivers/mmc/host/mmci_qcom_dml.c
-@@ -187,6 +187,7 @@ static struct mmci_host_ops qcom_variant_ops = {
- 	.unprep_data = mmci_dmae_unprep_data,
- 	.get_next_data = mmci_dmae_get_next_data,
- 	.dma_setup = qcom_dma_setup,
-+	.dma_release = mmci_dmae_release,
- };
- 
- void qcom_variant_init(struct mmci_host *host)
+@@ -223,6 +223,7 @@ struct mmci_host;
+  * @datactrl_mask_sdio: SDIO enable mask in datactrl register
+  * @datactrl_blksz: block size in power of two
+  * @datactrl_dpsm_enable: enable value for DPSM
++ * @datactrl_first: true if data must be setup before send command
+  * @pwrreg_powerup: power up value for MMCIPOWER register
+  * @f_max: maximum clk frequency supported by the controller.
+  * @signal_direction: input/out direction of bus signals can be indicated
+@@ -262,6 +263,7 @@ struct variant_data {
+ 	unsigned int		datactrl_mask_sdio;
+ 	unsigned int		datactrl_blocksz;
+ 	unsigned int		datactrl_dpsm_enable;
++	u8			datactrl_first:1;
+ 	u8			st_sdio:1;
+ 	u8			st_clkdiv:1;
+ 	u8			blksz_datactrl16:1;
 -- 
 2.7.4
