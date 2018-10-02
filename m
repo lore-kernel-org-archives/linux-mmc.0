@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V4 12/25] mmc: mmci: add set_clk/pwrreg callbacks
-Date: Tue, 2 Oct 2018 14:09:14 +0200
-Message-ID: <1538482167-13819-13-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V4 11/25] mmc: mmci: add validate_data callback
+Date: Tue, 2 Oct 2018 14:09:13 +0200
+Message-ID: <1538482167-13819-12-git-send-email-ludovic.Barre@st.com>
 References: <1538482167-13819-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,80 +14,84 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-This patch adds set_clkreg and set_pwrreg callbacks
-at mmci_host_ops to allow to call specific variant.
-extends visibility of mmci_write_clk/pwrreg functions
-to be used into specific file variant.
+This patch adds validate_data callback at mmci_host_ops
+to check specific constraints of variant.
+Move mmci_validate_data function to regroup mmci_host_ops interfaces.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.c | 16 ++++++++++++----
- drivers/mmc/host/mmci.h |  5 +++++
- 2 files changed, 17 insertions(+), 4 deletions(-)
+ drivers/mmc/host/mmci.c | 39 +++++++++++++++++++++------------------
+ drivers/mmc/host/mmci.h |  1 +
+ 2 files changed, 22 insertions(+), 18 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index c8fdb24..c221955 100644
+index 1835d77..c8fdb24 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -251,7 +251,7 @@ static void mmci_reg_delay(struct mmci_host *host)
- /*
-  * This must be called with host->lock held
-  */
--static void mmci_write_clkreg(struct mmci_host *host, u32 clk)
-+void mmci_write_clkreg(struct mmci_host *host, u32 clk)
+@@ -233,24 +233,6 @@ static int mmci_card_busy(struct mmc_host *mmc)
+ 	return busy;
+ }
+ 
+-/*
+- * Validate mmc prerequisites
+- */
+-static int mmci_validate_data(struct mmci_host *host,
+-			      struct mmc_data *data)
+-{
+-	if (!data)
+-		return 0;
+-
+-	if (!is_power_of_2(data->blksz)) {
+-		dev_err(mmc_dev(host->mmc),
+-			"unsupported block size (%d bytes)\n", data->blksz);
+-		return -EINVAL;
+-	}
+-
+-	return 0;
+-}
+-
+ static void mmci_reg_delay(struct mmci_host *host)
  {
- 	if (host->clk_reg != clk) {
- 		host->clk_reg = clk;
-@@ -262,7 +262,7 @@ static void mmci_write_clkreg(struct mmci_host *host, u32 clk)
- /*
-  * This must be called with host->lock held
-  */
--static void mmci_write_pwrreg(struct mmci_host *host, u32 pwr)
-+void mmci_write_pwrreg(struct mmci_host *host, u32 pwr)
+ 	/*
+@@ -384,6 +366,27 @@ void mmci_dma_release(struct mmci_host *host)
+ 		host->ops->dma_release(host);
+ }
+ 
++/*
++ * Validate mmc prerequisites
++ */
++static int mmci_validate_data(struct mmci_host *host,
++			      struct mmc_data *data)
++{
++	if (!data)
++		return 0;
++
++	if (!is_power_of_2(data->blksz)) {
++		dev_err(mmc_dev(host->mmc),
++			"unsupported block size (%d bytes)\n", data->blksz);
++		return -EINVAL;
++	}
++
++	if (host->ops && host->ops->validate_data)
++		return host->ops->validate_data(host, data);
++
++	return 0;
++}
++
+ int mmci_prep_data(struct mmci_host *host, struct mmc_data *data, bool next)
  {
- 	if (host->pwr_reg != pwr) {
- 		host->pwr_reg = pwr;
-@@ -1566,8 +1566,16 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 
- 	spin_lock_irqsave(&host->lock, flags);
- 
--	mmci_set_clkreg(host, ios->clock);
--	mmci_write_pwrreg(host, pwr);
-+	if (host->ops && host->ops->set_clkreg)
-+		host->ops->set_clkreg(host, ios->clock);
-+	else
-+		mmci_set_clkreg(host, ios->clock);
-+
-+	if (host->ops && host->ops->set_pwrreg)
-+		host->ops->set_pwrreg(host, pwr);
-+	else
-+		mmci_write_pwrreg(host, pwr);
-+
- 	mmci_reg_delay(host);
- 
- 	spin_unlock_irqrestore(&host->lock, flags);
+ 	int err;
 diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 9e701d8..78fa281 100644
+index 2c9e679..9e701d8 100644
 --- a/drivers/mmc/host/mmci.h
 +++ b/drivers/mmc/host/mmci.h
-@@ -284,6 +284,8 @@ struct mmci_host_ops {
- 	int (*dma_start)(struct mmci_host *host, unsigned int *datactrl);
- 	void (*dma_finalize)(struct mmci_host *host, struct mmc_data *data);
- 	void (*dma_error)(struct mmci_host *host);
-+	void (*set_clkreg)(struct mmci_host *host, unsigned int desired);
-+	void (*set_pwrreg)(struct mmci_host *host, unsigned int pwr);
- };
+@@ -273,6 +273,7 @@ struct variant_data {
  
- struct mmci_host {
-@@ -338,6 +340,9 @@ struct mmci_host {
- 
- void mmci_variant_init(struct mmci_host *host);
- 
-+void mmci_write_clkreg(struct mmci_host *host, u32 clk);
-+void mmci_write_pwrreg(struct mmci_host *host, u32 pwr);
-+
- int mmci_dmae_prep_data(struct mmci_host *host, struct mmc_data *data,
- 			bool next);
- void mmci_dmae_unprep_data(struct mmci_host *host, struct mmc_data *data,
+ /* mmci variant callbacks */
+ struct mmci_host_ops {
++	int (*validate_data)(struct mmci_host *host, struct mmc_data *data);
+ 	int (*prep_data)(struct mmci_host *host, struct mmc_data *data,
+ 			 bool next);
+ 	void (*unprep_data)(struct mmci_host *host, struct mmc_data *data,
 -- 
 2.7.4
