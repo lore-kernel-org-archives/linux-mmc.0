@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V4 19/25] mmc: mmci: add variant property to not read datacnt
-Date: Tue, 2 Oct 2018 14:09:21 +0200
-Message-ID: <1538482167-13819-20-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V4 21/25] mmc: mmci: add optional reset property
+Date: Tue, 2 Oct 2018 14:09:23 +0200
+Message-ID: <1538482167-13819-22-git-send-email-ludovic.Barre@st.com>
 References: <1538482167-13819-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,57 +14,53 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-This patch adds a boolean property to not read datacnt register.
-Needed to support the STM32 sdmmc variant. MMCIDATACNT
-register should be read only after the data transfer is completed.
-When reading after an error event the read data count value may be
-different from the real number of data bytes transferred.
+This patch adds a optional reset management.
+STM32 sdmmc variant needs to reset hardware block
+during the power cycle procedure (for re-initialization).
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.c | 8 ++++++--
- drivers/mmc/host/mmci.h | 3 +++
- 2 files changed, 9 insertions(+), 2 deletions(-)
+ drivers/mmc/host/mmci.c | 7 +++++++
+ drivers/mmc/host/mmci.h | 2 ++
+ 2 files changed, 9 insertions(+)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index e639841..969b665 100644
+index 969b665..0898cc9 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -1118,8 +1118,12 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
- 		 * can be as much as a FIFO-worth of data ahead.  This
- 		 * matters for FIFO overruns only.
- 		 */
--		remain = readl(host->base + MMCIDATACNT);
--		success = data->blksz * data->blocks - remain;
-+		if (!host->variant->datacnt_useless) {
-+			remain = readl(host->base + MMCIDATACNT);
-+			success = data->blksz * data->blocks - remain;
-+		} else {
-+			success = 0;
-+		}
+@@ -36,6 +36,7 @@
+ #include <linux/pm_runtime.h>
+ #include <linux/types.h>
+ #include <linux/pinctrl/consumer.h>
++#include <linux/reset.h>
  
- 		dev_dbg(mmc_dev(host->mmc), "MCI ERROR IRQ, status 0x%08x at 0x%08x\n",
- 			status_err, success);
+ #include <asm/div64.h>
+ #include <asm/io.h>
+@@ -1877,6 +1878,12 @@ static int mmci_probe(struct amba_device *dev,
+ 
+ 	dev_dbg(mmc_dev(mmc), "clocking block at %u Hz\n", mmc->f_max);
+ 
++	host->rst = devm_reset_control_get_optional_exclusive(&dev->dev, NULL);
++	if (IS_ERR(host->rst)) {
++		ret = PTR_ERR(host->rst);
++		goto clk_disable;
++	}
++
+ 	/* Get regulators and the supported OCR mask */
+ 	ret = mmc_regulator_get_supply(mmc);
+ 	if (ret)
 diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 4e5c6c6..33c243f 100644
+index 33c243f..f793426 100644
 --- a/drivers/mmc/host/mmci.h
 +++ b/drivers/mmc/host/mmci.h
-@@ -224,6 +224,8 @@ struct mmci_host;
-  * @datactrl_blksz: block size in power of two
-  * @datactrl_dpsm_enable: enable value for DPSM
-  * @datactrl_first: true if data must be setup before send command
-+ * @datacnt_useless: true if you could not use datacnt register to read
-+ *		     remaining data
-  * @pwrreg_powerup: power up value for MMCIPOWER register
-  * @f_max: maximum clk frequency supported by the controller.
-  * @signal_direction: input/out direction of bus signals can be indicated
-@@ -264,6 +266,7 @@ struct variant_data {
- 	unsigned int		datactrl_blocksz;
- 	unsigned int		datactrl_dpsm_enable;
- 	u8			datactrl_first:1;
-+	u8			datacnt_useless:1;
- 	u8			st_sdio:1;
- 	u8			st_clkdiv:1;
- 	u8			blksz_datactrl16:1;
+@@ -318,6 +318,8 @@ struct mmci_host {
+ 	struct clk		*clk;
+ 	u8			singleirq:1;
+ 
++	struct reset_control	*rst;
++
+ 	spinlock_t		lock;
+ 
+ 	unsigned int		mclk;
 -- 
 2.7.4
