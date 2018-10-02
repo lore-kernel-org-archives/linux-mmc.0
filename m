@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V4 22/25] mmc: mmci: add clock divider for stm32 sdmmc
-Date: Tue, 2 Oct 2018 14:09:24 +0200
-Message-ID: <1538482167-13819-23-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V4 05/25] mmc: mmci: add prepare/unprepare_data callbacks
+Date: Tue, 2 Oct 2018 14:09:07 +0200
+Message-ID: <1538482167-13819-6-git-send-email-ludovic.Barre@st.com>
 References: <1538482167-13819-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,46 +14,233 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-The STM32 sdmmc variant has a different clock divider.
+This patch adds prepare/unprepare callbacks to mmci_host_ops.
+Like this mmci_pre/post_request can be generic, mmci_prepare_data
+and mmci_unprepare_data provide common next_cookie management.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.c | 2 ++
- drivers/mmc/host/mmci.h | 2 ++
- 2 files changed, 4 insertions(+)
+ drivers/mmc/host/mmci.c          | 101 ++++++++++++++++++++++++++-------------
+ drivers/mmc/host/mmci.h          |   8 ++++
+ drivers/mmc/host/mmci_qcom_dml.c |   2 +
+ 3 files changed, 78 insertions(+), 33 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 0898cc9..0421e18 100644
+index 392fb59..7f66724 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -1857,6 +1857,8 @@ static int mmci_probe(struct amba_device *dev,
- 	 */
- 	if (variant->st_clkdiv)
- 		mmc->f_min = DIV_ROUND_UP(host->mclk, 257);
-+	else if (variant->stm32_clkdiv)
-+		mmc->f_min = DIV_ROUND_UP(host->mclk, 2046);
- 	else if (variant->explicit_mclk_control)
- 		mmc->f_min = clk_round_rate(host->clk, 100000);
- 	else
+@@ -378,6 +378,31 @@ void mmci_dma_setup(struct mmci_host *host)
+ 	host->use_dma = true;
+ }
+ 
++int mmci_prep_data(struct mmci_host *host, struct mmc_data *data, bool next)
++{
++	int err;
++
++	if (!host->ops || !host->ops->prep_data)
++		return 0;
++
++	err = host->ops->prep_data(host, data, next);
++
++	if (next && !err)
++		data->host_cookie = ++host->next_cookie < 0 ?
++			1 : host->next_cookie;
++
++	return err;
++}
++
++void mmci_unprep_data(struct mmci_host *host, struct mmc_data *data,
++		      int err)
++{
++	if (host->ops && host->ops->unprep_data)
++		host->ops->unprep_data(host, data, err);
++
++	data->host_cookie = 0;
++}
++
+ static void
+ mmci_request_end(struct mmci_host *host, struct mmc_request *mrq)
+ {
+@@ -608,7 +633,7 @@ static void mmci_dma_finalize(struct mmci_host *host, struct mmc_data *data)
+ }
+ 
+ /* prepares DMA channel and DMA descriptor, returns non-zero on failure */
+-static int __mmci_dma_prep_data(struct mmci_host *host, struct mmc_data *data,
++static int _mmci_dmae_prep_data(struct mmci_host *host, struct mmc_data *data,
+ 				struct dma_chan **dma_chan,
+ 				struct dma_async_tx_descriptor **dma_desc)
+ {
+@@ -671,21 +696,24 @@ static int __mmci_dma_prep_data(struct mmci_host *host, struct mmc_data *data,
+ 	return -ENOMEM;
+ }
+ 
+-static inline int mmci_dma_prep_data(struct mmci_host *host,
+-				     struct mmc_data *data,
+-				     bool next)
++int mmci_dmae_prep_data(struct mmci_host *host,
++			struct mmc_data *data,
++			bool next)
+ {
+ 	struct mmci_dmae_priv *dmae = host->dma_priv;
+ 	struct mmci_dmae_next *nd = &dmae->next_data;
+ 
++	if (!host->use_dma)
++		return -EINVAL;
++
+ 	if (next)
+-		return __mmci_dma_prep_data(host, data, &nd->chan, &nd->desc);
++		return _mmci_dmae_prep_data(host, data, &nd->chan, &nd->desc);
+ 	/* Check if next job is already prepared. */
+ 	if (dmae->cur && dmae->desc_current)
+ 		return 0;
+ 
+ 	/* No job were prepared thus do it now. */
+-	return __mmci_dma_prep_data(host, data, &dmae->cur,
++	return _mmci_dmae_prep_data(host, data, &dmae->cur,
+ 				    &dmae->desc_current);
+ }
+ 
+@@ -698,7 +726,7 @@ static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
+ 	if (!host->use_dma)
+ 		return -EINVAL;
+ 
+-	ret = mmci_dma_prep_data(host, host->data, false);
++	ret = mmci_dmae_prep_data(host, host->data, false);
+ 	if (ret)
+ 		return ret;
+ 
+@@ -745,32 +773,13 @@ static void mmci_get_next_data(struct mmci_host *host, struct mmc_data *data)
+ 	next->chan = NULL;
+ }
+ 
+-static void mmci_pre_request(struct mmc_host *mmc, struct mmc_request *mrq)
+-{
+-	struct mmci_host *host = mmc_priv(mmc);
+-	struct mmc_data *data = mrq->data;
+-
+-	if (!host->use_dma || !data)
+-		return;
+-
+-	BUG_ON(data->host_cookie);
+-
+-	if (mmci_validate_data(host, data))
+-		return;
+-
+-	if (!mmci_dma_prep_data(host, data, true))
+-		data->host_cookie = ++host->next_cookie < 0 ?
+-			1 : host->next_cookie;
+-}
++void mmci_dmae_unprep_data(struct mmci_host *host,
++			   struct mmc_data *data, int err)
+ 
+-static void mmci_post_request(struct mmc_host *mmc, struct mmc_request *mrq,
+-			      int err)
+ {
+-	struct mmci_host *host = mmc_priv(mmc);
+ 	struct mmci_dmae_priv *dmae = host->dma_priv;
+-	struct mmc_data *data = mrq->data;
+ 
+-	if (!host->use_dma || !data || !data->host_cookie)
++	if (!host->use_dma)
+ 		return;
+ 
+ 	mmci_dma_unmap(host, data);
+@@ -794,11 +803,12 @@ static void mmci_post_request(struct mmc_host *mmc, struct mmc_request *mrq,
+ 
+ 		next->desc = NULL;
+ 		next->chan = NULL;
+-		data->host_cookie = 0;
+ 	}
+ }
+ 
+ static struct mmci_host_ops mmci_variant_ops = {
++	.prep_data = mmci_dmae_prep_data,
++	.unprep_data = mmci_dmae_unprep_data,
+ 	.dma_setup = mmci_dmae_setup,
+ };
+ #else
+@@ -825,9 +835,6 @@ static inline int mmci_dma_start_data(struct mmci_host *host, unsigned int datac
+ 	return -ENOSYS;
+ }
+ 
+-#define mmci_pre_request NULL
+-#define mmci_post_request NULL
+-
+ static struct mmci_host_ops mmci_variant_ops = {};
+ #endif
+ 
+@@ -836,6 +843,34 @@ void mmci_variant_init(struct mmci_host *host)
+ 	host->ops = &mmci_variant_ops;
+ }
+ 
++static void mmci_pre_request(struct mmc_host *mmc, struct mmc_request *mrq)
++{
++	struct mmci_host *host = mmc_priv(mmc);
++	struct mmc_data *data = mrq->data;
++
++	if (!data)
++		return;
++
++	WARN_ON(data->host_cookie);
++
++	if (mmci_validate_data(host, data))
++		return;
++
++	mmci_prep_data(host, data, true);
++}
++
++static void mmci_post_request(struct mmc_host *mmc, struct mmc_request *mrq,
++			      int err)
++{
++	struct mmci_host *host = mmc_priv(mmc);
++	struct mmc_data *data = mrq->data;
++
++	if (!data || !data->host_cookie)
++		return;
++
++	mmci_unprep_data(host, data, err);
++}
++
+ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
+ {
+ 	struct variant_data *variant = host->variant;
 diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index f793426..1520289 100644
+index 2524ed1..e43be60 100644
 --- a/drivers/mmc/host/mmci.h
 +++ b/drivers/mmc/host/mmci.h
-@@ -216,6 +216,7 @@ struct mmci_host;
-  * @data_cmd_enable: enable value for data commands.
-  * @st_sdio: enable ST specific SDIO logic
-  * @st_clkdiv: true if using a ST-specific clock divider algorithm
-+ * @stm32_clkdiv: true if using a STM32-specific clock divider algorithm
-  * @datactrl_mask_ddrmode: ddr mode mask in datactrl register.
-  * @blksz_datactrl16: true if Block size is at b16..b30 position in datactrl register
-  * @blksz_datactrl4: true if Block size is at b4..b16 position in datactrl
-@@ -269,6 +270,7 @@ struct variant_data {
- 	u8			datacnt_useless:1;
- 	u8			st_sdio:1;
- 	u8			st_clkdiv:1;
-+	u8			stm32_clkdiv:1;
- 	u8			blksz_datactrl16:1;
- 	u8			blksz_datactrl4:1;
- 	u32			pwrreg_powerup;
+@@ -273,6 +273,10 @@ struct variant_data {
+ 
+ /* mmci variant callbacks */
+ struct mmci_host_ops {
++	int (*prep_data)(struct mmci_host *host, struct mmc_data *data,
++			 bool next);
++	void (*unprep_data)(struct mmci_host *host, struct mmc_data *data,
++			    int err);
+ 	int (*dma_setup)(struct mmci_host *host);
+ };
+ 
+@@ -328,5 +332,9 @@ struct mmci_host {
+ 
+ void mmci_variant_init(struct mmci_host *host);
+ 
++int mmci_dmae_prep_data(struct mmci_host *host, struct mmc_data *data,
++			bool next);
++void mmci_dmae_unprep_data(struct mmci_host *host, struct mmc_data *data,
++			   int err);
+ int mmci_dmae_setup(struct mmci_host *host);
+ 
+diff --git a/drivers/mmc/host/mmci_qcom_dml.c b/drivers/mmc/host/mmci_qcom_dml.c
+index c8d7592..9f60ac0 100644
+--- a/drivers/mmc/host/mmci_qcom_dml.c
++++ b/drivers/mmc/host/mmci_qcom_dml.c
+@@ -183,6 +183,8 @@ static int qcom_dma_setup(struct mmci_host *host)
+ }
+ 
+ static struct mmci_host_ops qcom_variant_ops = {
++	.prep_data = mmci_dmae_prep_data,
++	.unprep_data = mmci_dmae_unprep_data,
+ 	.dma_setup = qcom_dma_setup,
+ };
+ 
 -- 
 2.7.4
