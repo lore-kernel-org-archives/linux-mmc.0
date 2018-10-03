@@ -1,80 +1,31 @@
-From: Oleksandr Natalenko <oleksandr@natalenko.name>
+From: Christoph Hellwig <hch@infradead.org>
 Subject: Re: [PATCH] block: BFQ default for single queue devices
-Date: Wed, 03 Oct 2018 13:49:25 +0200
-Message-ID: <1eca41df95ff660eb247a3de666adeb4@natalenko.name>
+Date: Wed, 3 Oct 2018 05:51:46 -0700
+Message-ID: <20181003125146.GA9313@infradead.org>
 References: <20181002124329.21248-1-linus.walleij@linaro.org>
  <05fdbe23-ec01-895f-e67e-abff85c1ece2@kernel.dk>
  <B5321A64-8A1A-42FF-A337-F4524BDA179B@linaro.org>
+ <1538550325.14984.108.camel@gmail.com>
+ <CACRpkdaLZXGKMQGJPH02p2QPkxUDA03Y=cu_wBR_+rFaLWTw7g@mail.gmail.com>
+ <BN3PR0401MB164003C967C45F2681F503A7E7E90@BN3PR0401MB1640.namprd04.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
-In-Reply-To: <B5321A64-8A1A-42FF-A337-F4524BDA179B@linaro.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
- <mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
-List-Post: <mailto:linux-mtd@lists.infradead.org>
-List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
- <mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-mtd" <linux-mtd-bounces@lists.infradead.org>
-Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
-To: Paolo Valente <paolo.valente@linaro.org>
-Cc: Jens Axboe <axboe@kernel.dk>, Andreas Herrmann <aherrmann@suse.com>, Ulf Hansson <ulf.hansson@linaro.org>, Jan Kara <jack@suse.cz>, Mel Gorman <mgorman@suse.com>, Artem Bityutskiy <dedekind1@gmail.com>, Richard Weinberger <richard@nod.at>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Chunyan Zhang <zhang.chunyan@linaro.org>, linux-block <linux-block@vger.kernel.org>, Mark Brown <broonie@kernel.org>, linux-mtd@lists.infradead.org, Pavel Machek <pavel@ucw.cz>, 'Paolo Valente' via bfq-iosched <bfq-iosched@googlegroups.com>, linux-kernel <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <BN3PR0401MB164003C967C45F2681F503A7E7E90@BN3PR0401MB1640.namprd04.prod.outlook.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Damien Le Moal <Damien.LeMoal@wdc.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>, Artem Bityutskiy <dedekind1@gmail.com>, Paolo Valente <paolo.valente@linaro.org>, Jens Axboe <axboe@kernel.dk>, linux-block <linux-block@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-mtd@lists.infradead.org" <linux-mtd@lists.infradead.org>, Pavel Machek <pavel@ucw.cz>, Ulf Hansson <ulf.hansson@linaro.org>, Richard Weinberger <richard@nod.at>, Adrian Hunter <adrian.hunter@intel.com>, Jan Kara <jack@suse.cz>, "aherrmann@suse.com" <aherrmann@suse.com>, "mgorman@suse.com" <mgorman@suse.com>, Chunyan Zhang <zhang.chunyan@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "bfq-iosched@googlegroups.com" <bfq-iosched@googlegroups.com>, "oleksandr@natalenko.name" <oleksandr@n>
 List-Id: linux-mmc@vger.kernel.org
 
-SGkuCgpPbiAwMy4xMC4yMDE4IDA4OjI5LCBQYW9sbyBWYWxlbnRlIHdyb3RlOgo+IEFzIGFsc28g
-TGludXMgVG9ydmFsZHMgY29tcGxhaW5lZCBbMV0sIHBlb3BsZSBmZWVsIGxvc3QgYW1vbmcKPiBJ
-L08tc2NoZWR1bGVyIG9wdGlvbnMuICBBY3R1YWwgZGlmZmVyZW5jZXMgYWNyb3NzIEkvTyBzY2hl
-ZHVsZXJzIGFyZQo+IGJhc2ljYWxseSBvYnNjdXJlIHRvIG5vbiBleHBlcnRzLiAgSW4gdGhpcyBy
-ZXNwZWN0LCBMaW51eC1rZXJuZWwKPiAndXNlcnMnIGFyZSB3YXkgbW9yZSB0aGFuIGEgZmV3IHRv
-cC1sZXZlbCBkaXN0cm9zIHRoYXQgY2FuIGFmZm9yZCBhCj4gc3Ryb25nIHBlcmZvcm1hbmNlIHRl
-YW0sIGFuZCB0aGF0LCBiYXNpbmcgb24gdGhlIGlucHV0IG9mIHN1Y2ggYSB0ZWFtLAo+IG1pZ2h0
-IHZlbnR1cmUgbGlnaHQtaGVhcnRlZGx5IHRvIGNoYW5nZSBhIGNyaXRpY2FsIGNvbXBvbmVudCBs
-aWtlIGFuCj4gSS9PIHNjaGVkdWxlci4gIFBsdXMsIGFzIExpbnVzIFdhbGxlaWogcG9pbnRlZCBv
-dXQsIHNvbWUgdXNlcnMgc2ltcGx5Cj4gYXJlIG5vdCBkaXN0cm9zIHRoYXQgdXNlIHVkZXYuCgpJ
-IGZlZWwgYSBjb250cmFkaWN0aW9uIGluIHRoaXMgY291bnRlci1hcmd1bWVudC4gT24gb25lIGhh
-bmQsIHRoZXJlIGFyZSAKbG90cyBvZiwgbGV0J3MgY2FsbCB0aGVtLCBob21lIHVzZXJzLCB0aGF0
-IHVzZSBtYWpvciBkaXN0cmlidXRpb25zIHdpdGggCnVkZXYsIHNvIHRoZSBkaXN0cmlidXRpb24g
-bWFpbnRhaW5lcnMgY2FuIHJlYXNvbmFibHkgZGVjaWRlIHdoaWNoIApzY2hlZHVsZXIgdG8gdXNl
-IGZvciB3aGljaCB0eXBlIG9mIGRldmljZSBiYXNlZCBvbiB0aGUgdWRldiBydWxlIGFuZCAKY29t
-bW9uIHNlbnNlIHByb3ZpZGVkIHZpYSBEb2N1bWVudGF0aW9uLyBieSBsaW51eC1ibG9jayBkZXZz
-LiBNb3Jlb3ZlciwgCm1vc3QgbGlrZWx5LCB0aG9zZSBydWxlcyBzaG91bGQgYmUgc2ltaWxhciBv
-ciB0aGUgc2FtZSBhY3Jvc3MgYWxsIHRoZSAKbWFqb3IgZGlzdHJvcyBhbmQgYXZhaWxhYmxlIHZp
-YSBzb21lIChzeXN0ZW1kPykgdXBzdHJlYW0uCgpPbiBhbm90aGVyIGhhbmQsIHRoZSB1c2VycyBv
-ZiBlbWJlZGRlZCBkZXZpY2VzLCBtZW50aW9uZWQgYnkgTGludXMsIApzaG91bGQgYWxyZWFkeSBr
-bm93IHdoYXQgc2NoZWR1bGVyIHRvIGNob29zZSBiZWNhdXNlIGRlYWxpbmcgd2l0aCAKZW1iZWRk
-ZWQgd29ybGQgYXNzdW1lcyB0aGUgcGVyc29uIGNhbiBkZWNpZGUgdGhpcyBvbiB0aGVpciBvd24s
-IG9yIHdpdGggCnRoZSBoZWxwIG9mIGFib3ZlbWVudGlvbmVkIHVkZXYgc2NyaXB0cyBhbmQvb3Ig
-RG9jdW1lbnRhdGlvbi8gYXMgYSAKcmVmZXJlbmNlIHBvaW50LgoKU28gSSBzZWUgbm8gb2JzdGFj
-bGVzIGhlcmUsIGFuZCB0aGUgY2hvaWNlIHRvIHJlbHkgb24gdWRldiBieSBkZWZhdWx0IApzb3Vu
-ZHMgcmVhc29uYWJsZS4KClRoZSBxdWVzdGlvbiB0aGF0IHJlbWFpbiBpcyB3aGV0aGVyIGl0IGlz
-IHJlYWxseSBpbXBvcnRhbnQgdG8gbW91bnQgYSAKcm9vdCBwYXJ0aXRpb24gd2hpbGUgYWxyZWFk
-eSB1c2luZyBzb21lIHNwZWNpZmljIHNjaGVkdWxlcj8gV2h5IGl0IApjYW5ub3QgYmUgZG9uZSB3
-aXRoICJub25lIiwgZm9yIGluc3RhbmNlPwoKPiBTbywgcHJvYmFibHkgOTklIG9mIExpbnV4LWtl
-cm5lbCB1c2VycyB3aWxsIGp1c3Qgc3RpY2sgdG8gdGhlIGRlZmF1bHQKPiBJL08gc2NoZWR1bGVy
-LCBtcS1kZWFkbGluZSwgYXNzdW1pbmcgdGhhdCB0aGUgYWxnb3JpdGhtIGJ5IHdoaWNoIHRoYXQK
-PiBzY2hlZHVsZXIgd2FzIGNob3NlbiB3YXMgbm90ICJwaWNrIHRoZSBzY2hlZHVsZXIgd2l0aCB0
-aGUgbG9uZ2VzdAo+IG5hbWUiLCBidXQgInBpY2sgdGhlIGJlc3Qgc2NoZWR1bGVyIGZvciBtb3N0
-IGNhc2VzIi4gIFRoZSBwcm9ibGVtIGlzCj4gdGhhdCwgZm9yIHNpbmdsZS1xdWV1ZSBkZXZpY2Vz
-IHdpdGggYSBzcGVlZCBiZWxvdyA0MDAvNTAwIEtJT1BTLCB0aGUKPiBkZWZhdWx0IHNjaGVkdWxl
-ciBpcyBhcHBhcmVudGx5IGluY29tcGFyYWJseSB3b3JzZSB0aGFuIGJmcSBpbiB0ZXJtcwo+IG9m
-IHJlc3BvbnNpdmVuZXNzIGFuZCBsYXRlbmN5IGZvciB0aW1lLXNlbnNpdGl2ZSBhcHBsaWNhdGlv
-bnMgWzJdLCBhbmQKPiBpbiB0ZXJtcyBvZiB0aHJvdWdocHV0IHJlYWNoZWQgd2hpbGUgY29udHJv
-bGxpbmcgSS9PIFszXS4gIEFuZCwgaW4gYWxsCj4gb3RoZXIgdGVzdHMgcmFuIHNvIGZhciwgYnkg
-YW55IGVudGl0eSBvciBncm91cCBJJ20gYXdhcmUgb2YsIGJmcQo+IHJlc3VsdHMgYmFzaWNhbGx5
-IG9uIHBhciB3aXRoIG9yIGJldHRlciB0aGFuIG1xLWRlYWRsaW5lLgoKQW5kIHRoYXQncyB3aHkg
-bWFqb3IgZGlzdHJpYnV0aW9ucyBhcmUgbGlrZWx5IHRvIGRlZmF1bHQgdG8gQkZRIHZpYSAKdWRl
-di4gTm8gb25lIGFyZ3VlcyB3aXRoIEJGUSBzdXBlcmlvcml0eSBoZXJlIOKYui4KCj4gU28sIEkg
-ZG8gdW5kZXJzdGFuZCB5b3VyIG5lZWQgZm9yIGNvbnNlcnZhdGl2ZW5lc3MsIGJ1dCwgYWZ0ZXIg
-c28gbXVjaAo+IGV2aWRlbmNlIG9uIHNpbmdsZS1xdWV1ZSBkZXZpY2VzLCBhbmQgc28gbWFueSB5
-ZWFycyEgOiksIHdoYXQncyB0aGUKPiBwb2ludCBpbiBrZWVwaW5nIExpbnV4IHdvcnNlIGZvciB2
-aXJ0dWFsbHkgZXZlcnlib2R5LCBieSBkZWZhdWx0PwoKIEZyb20gbXkgcG9pbnQgb2YgdmlldyB0
-aGlzIGlzIG5vdCBhIGNvbnNlcnZhdGl2ZSBhcHByb2FjaCBhdCBhbGwuIE9uIApjb250cmFyeSwg
-b2ZmbG9hZGluZyBkZWNpc2lvbnMgdG8gdXNlcnNwYWNlIGFsaWducyBwcmV0dHkgd2VsbCB3aXRo
-IApyZWNlbnQgdHJlbmRzIGxpa2UgcHJlc3N1cmUgbWV0cmljcy91c2Vyc3BhY2UgT09NIGtpbGxl
-ciwgZUJQRiBldGMuIFRoZSAKbGVzcyB1bm5lY2Vzc2FyeSBsb2dpYyB0aGUga2VybmVsIGhhbmRs
-ZXMsIHRoZSBtb3JlIGZsZXhpYmlsaXR5IGl0IAphZmZvcmRzLgoKLS0gCiAgIE9sZWtzYW5kciBO
-YXRhbGVua28gKHBvc3QtZmFjdHVtKQoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fCkxpbnV4IE1URCBkaXNjdXNzaW9uIG1haWxpbmcgbGlzdApo
-dHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9tYWlsbWFuL2xpc3RpbmZvL2xpbnV4LW10ZC8K
+On Wed, Oct 03, 2018 at 07:42:15AM +0000, Damien Le Moal wrote:
+> Of note also is that host-managed like sequential zone devices are also likely
+> to show up soon with the work being done in the NVMe standard on the new "Zoned
+> namespace" feature proposal. These devices will also require a scheduler like
+> mq-deadline guaranteeing per-zone in-order delivery of sequential write
+> requests. Looking only at the number of queues of the device is not enough to
+> choose the best (most reasonnable/appropriate) scheduler.
+
+We actually have a plan to avoid the need for a non-reordering scheduler
+there (including a Linux prototype for it).  Lets see if it survives the
+committee.
