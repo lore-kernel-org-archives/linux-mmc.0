@@ -1,137 +1,253 @@
-From: Damien Le Moal <Damien.LeMoal@wdc.com>
-Subject: Re: [PATCH] block: BFQ default for single queue devices
-Date: Wed, 3 Oct 2018 08:53:03 +0000
-Message-ID: <BN3PR0401MB1640A32A9464999E7E28689EE7E90@BN3PR0401MB1640.namprd04.prod.outlook.com>
-References: <20181002124329.21248-1-linus.walleij@linaro.org>
- <05fdbe23-ec01-895f-e67e-abff85c1ece2@kernel.dk>
- <B5321A64-8A1A-42FF-A337-F4524BDA179B@linaro.org>
- <1538550325.14984.108.camel@gmail.com>
- <CACRpkdaLZXGKMQGJPH02p2QPkxUDA03Y=cu_wBR_+rFaLWTw7g@mail.gmail.com>
- <BN3PR0401MB164003C967C45F2681F503A7E7E90@BN3PR0401MB1640.namprd04.prod.outlook.com>
- <CACRpkdbHiq9bstRzyg-fJfXKnXr8wD1YzAooLAwQKM0OzP=HVA@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V4 02/25] mmc: mmci: create generic mmci_dma_setup
+Date: Wed, 3 Oct 2018 11:22:00 +0200
+Message-ID: <CAPDyKFpZKdZ5Oh29_EpgDqpwppa63Uci-FeLHF2KZBxVcO4COQ@mail.gmail.com>
+References: <1538482167-13819-1-git-send-email-ludovic.Barre@st.com> <1538482167-13819-3-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Language: en-US
+In-Reply-To: <1538482167-13819-3-git-send-email-ludovic.Barre@st.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Artem Bityutskiy <dedekind1@gmail.com>, Paolo Valente <paolo.valente@linaro.org>, Jens Axboe <axboe@kernel.dk>, linux-block <linux-block@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-mtd@lists.infradead.org" <linux-mtd@lists.infradead.org>, Pavel Machek <pavel@ucw.cz>, Ulf Hansson <ulf.hansson@linaro.org>, Richard Weinberger <richard@nod.at>, Adrian Hunter <adrian.hunter@intel.com>, Jan Kara <jack@suse.cz>, "aherrmann@suse.com" <aherrmann@suse.com>, "mgorman@suse.com" <mgorman@suse.com>, Chunyan Zhang <zhang.chunyan@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "bfq-iosched@googlegroups.com" <bfq-iosched@googlegroups.com>, "oleksandr@natalenko.name" <oleksandr@natalenko.name>, Mark Brown <broonie@kernel>
+To: Ludovic Barre <ludovic.Barre@st.com>
+Cc: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Rob Herring <robh+dt@kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Benjamin Gaignard <benjamin.gaignard@linaro.org>, Gerald Baeza <gerald.baeza@st.com>, Loic Pallardy <loic.pallardy@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-stm32@st-md-mailman.stormreply.com
 List-Id: linux-mmc@vger.kernel.org
 
-Linus,=0A=
-=0A=
-On 2018/10/03 17:28, Linus Walleij wrote:=0A=
-> On Wed, Oct 3, 2018 at 9:42 AM Damien Le Moal <Damien.LeMoal@wdc.com> wro=
-te:=0A=
-> =0A=
->> There is another class of outliers: host-managed SMR disks (SATA and SCS=
-I,=0A=
->> definitely single hw queue). For these, using mq-deadline is mandatory i=
-n many=0A=
->> cases in order to guarantee sequential write command delivery to the dev=
-ice=0A=
->> driver. Having the default changed to bfq, which as far as I know is not=
- SMR=0A=
->> friendly (can sequential writes within a single zone be reordered ?) is =
-asking=0A=
->> for troubles (unaligned write errors showing up).=0A=
-> =0A=
-> Ah, that is interesting.=0A=
-> =0A=
-> Which device driver files are we talking about here, specifically?=0A=
-> I'd like to take a look.=0A=
-=0A=
-Currently, sd.c (SCSI disk) as well as null_blk can expose host-managed zon=
-ed=0A=
-block devices.=0A=
-=0A=
-> I guess what you say is not that you are looking for the deadline=0A=
-> scheduling per se (as in deadline scheduling is nice), what you want is=
-=0A=
-> the zone locking semantics in that scheduler, is that right?=0A=
-=0A=
-Yes, correct. The scheduling policy in itself does not really matter, but s=
-hould=0A=
-not deviate from the mandatory HM write policy: "within a sequential write=
-=0A=
-required zone, writes must be issued sequentially". That could somewhat imp=
-acts=0A=
-the scheduler code itself if said scheduler think that not dispatching=0A=
-sequential writes in sequence is a good idea :) No sane scheduler would tha=
-t=0A=
-though (at least on HDDs) so the impact on the scheduler code itself is red=
-uced.=0A=
-=0A=
-> I.e. this business:=0A=
-> blk_queue_is_zoned(q)=0A=
-> blk_req_zone_write_lock(rq);=0A=
-> blk_req_zone_write_unlock(rq);=0A=
-> and mq-deadline solves this with a spinlock.=0A=
-=0A=
-Yes. These are the helper functions handling the zone write locking to simp=
-lify=0A=
-the task of the scheduler to limit the number of in-flight write request to=
- one=0A=
-per zone at most at any time. This is the trick to avoid write reordering=
-=0A=
-stack-wide, since most of the time, reordering happens not because of the=
-=0A=
-scheduler itself, but the blk-mq (or legacy path) around it (e.g. requeue d=
-ue to=0A=
-resource shortage, multiple contexts running the queues, etc).=0A=
-=0A=
-> I will augment the patch to enforce mq-deadline=0A=
-> if blk_queue_is_zoned(q) is true, as it is clear that=0A=
-> any device with that characteristic must use mq-deadline.=0A=
-> =0A=
-> Paoly might be interested in looking into whether BFQ could=0A=
-> also handle zoned devices in the future, I have no idea of how=0A=
-> hard that would be.=0A=
-=0A=
-It was rather easy with deadline, but the scheduler code was simple to star=
-t=0A=
-with. Basically, the only thing needed is on dispatch to skip any write req=
-uest=0A=
-to a zone that is already locked (i.e. a write is already ongoing). For rea=
-ds,=0A=
-there are no constraints so nothing needs to be changed. Zone unlocking mus=
-t be=0A=
-done on completion of the write request so the scheduler completion method =
-needs=0A=
-to change a little too.=0A=
-=0A=
-> The zoned business seems a bit fragile. Should it even be=0A=
-> allowed to select any other scheduler than deadline on these=0A=
-> devices? Presenting all compiled in schedulers in=0A=
-> /sysblock/device/queue/scheduler sounds like just giving=0A=
-> sysadmins too much rope.=0A=
-=0A=
-Yes, that is debatable. But the above "one write per zone" trick can be als=
-o=0A=
-handled by an application, which makes using any other scheduler OK. Look a=
-t the=0A=
-recent SMR support code in fio from Bart. Some of the tests (in t/zbd) for =
-some=0A=
-I/O patterns are just fine with any scheduler. In fact any pattern is OK be=
-cause=0A=
-fio is SMR aware and never issues more than one write per zone. That is how=
-ever=0A=
-true only and only for I/O sizes that are small enough as to not cause the=
-=0A=
-kernel to generate multiple BIOs for each I/O call. Otherwise, deadline &=
-=0A=
-mq-deadline become necessary.=0A=
-=0A=
-But I agree, it is a little fragile. Application developer and sysadmins re=
-ally=0A=
-need to know what will be running on the disk to make the right choice. And=
-=0A=
-knowing that is not necessarily straightforward.=0A=
-=0A=
-Best regards.=0A=
-=0A=
-=0A=
--- =0A=
-Damien Le Moal=0A=
-Western Digital Research=0A=
++ Srinivas
+
+[...]
+
+>  #ifdef CONFIG_DMA_ENGINE
+> -static void mmci_dma_setup(struct mmci_host *host)
+> +static inline void mmci_dma_release(struct mmci_host *host);
+> +
+> +int mmci_dmae_setup(struct mmci_host *host)
+>  {
+>         const char *rxname, *txname;
+>
+> @@ -464,8 +485,12 @@ static void mmci_dma_setup(struct mmci_host *host)
+>                         host->mmc->max_seg_size = max_seg_size;
+>         }
+>
+> -       if (host->ops && host->ops->dma_setup)
+> -               host->ops->dma_setup(host);
+> +       if (!host->dma_tx_channel || !host->dma_rx_channel) {
+> +               mmci_dma_release(host);
+
+This doesn't look right to me. The existing code allows a tx channel
+to be used, even if an rx channel could not be setup. It seems
+reasonable to still allow that.
+
+> +               return -EINVAL;
+> +       }
+> +
+> +       return 0;
+>  }
+>
+>  /*
+> @@ -496,7 +521,7 @@ static void mmci_dma_unmap(struct mmci_host *host, struct mmc_data *data)
+>
+>  static void mmci_dma_data_error(struct mmci_host *host)
+>  {
+> -       if (!dma_inprogress(host))
+> +       if (!host->use_dma || !dma_inprogress(host))
+
+Adding the check for use_dma here seems like an unnecessary check,
+unless there is a reason for it due to following changes on top. In
+such case, please make it a part of the patch(es) where it's actually
+needed.
+
+>                 return;
+>
+>         dev_err(mmc_dev(host->mmc), "error during DMA transfer!\n");
+> @@ -514,7 +539,7 @@ static void mmci_dma_finalize(struct mmci_host *host, struct mmc_data *data)
+>         u32 status;
+>         int i;
+>
+> -       if (!dma_inprogress(host))
+> +       if (!host->use_dma || !dma_inprogress(host))
+
+Ditto.
+
+>                 return;
+>
+>         /* Wait up to 1ms for the DMA to complete */
+> @@ -546,6 +571,7 @@ static void mmci_dma_finalize(struct mmci_host *host, struct mmc_data *data)
+>         if (status & MCI_RXDATAAVLBLMASK) {
+>                 dev_err(mmc_dev(host->mmc), "buggy DMA detected. Taking evasive action.\n");
+>                 mmci_dma_release(host);
+> +               host->use_dma = false;
+>         }
+>
+>         host->dma_in_progress = false;
+> @@ -640,6 +666,9 @@ static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
+>         int ret;
+>         struct mmc_data *data = host->data;
+>
+> +       if (!host->use_dma)
+> +               return -EINVAL;
+> +
+>         ret = mmci_dma_prep_data(host, host->data);
+>         if (ret)
+>                 return ret;
+> @@ -674,6 +703,9 @@ static void mmci_get_next_data(struct mmci_host *host, struct mmc_data *data)
+>  {
+>         struct mmci_host_next *next = &host->next_data;
+>
+> +       if (!host->use_dma)
+> +               return;
+> +
+>         WARN_ON(data->host_cookie && data->host_cookie != next->cookie);
+>         WARN_ON(!data->host_cookie && (next->dma_desc || next->dma_chan));
+>
+> @@ -689,7 +721,7 @@ static void mmci_pre_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>         struct mmc_data *data = mrq->data;
+>         struct mmci_host_next *nd = &host->next_data;
+>
+> -       if (!data)
+> +       if (!host->use_dma || !data)
+>                 return;
+>
+>         BUG_ON(data->host_cookie);
+> @@ -707,7 +739,7 @@ static void mmci_post_request(struct mmc_host *mmc, struct mmc_request *mrq,
+>         struct mmci_host *host = mmc_priv(mmc);
+>         struct mmc_data *data = mrq->data;
+>
+> -       if (!data || !data->host_cookie)
+> +       if (!host->use_dma || !data || !data->host_cookie)
+
+Ditto.
+
+>                 return;
+>
+>         mmci_dma_unmap(host, data);
+> @@ -735,14 +767,14 @@ static void mmci_post_request(struct mmc_host *mmc, struct mmc_request *mrq,
+>         }
+>  }
+>
+> +static struct mmci_host_ops mmci_variant_ops = {
+> +       .dma_setup = mmci_dmae_setup,
+> +};
+>  #else
+>  /* Blank functions if the DMA engine is not available */
+>  static void mmci_get_next_data(struct mmci_host *host, struct mmc_data *data)
+>  {
+>  }
+> -static inline void mmci_dma_setup(struct mmci_host *host)
+> -{
+> -}
+>
+>  static inline void mmci_dma_release(struct mmci_host *host)
+>  {
+> @@ -765,8 +797,14 @@ static inline int mmci_dma_start_data(struct mmci_host *host, unsigned int datac
+>  #define mmci_pre_request NULL
+>  #define mmci_post_request NULL
+>
+> +static struct mmci_host_ops mmci_variant_ops = {};
+
+This seems a bit unnecessary. See more about why, below.
+
+>  #endif
+>
+> +void mmci_variant_init(struct mmci_host *host)
+
+Looks like you should make mmci_variant_init() internal to mmci.c,
+thus covert it to static.
+
+Moreover, I suggest you define a "static inline void
+mmci_variant_init()", when CONFIG_DMA_ENGINE is unset. In that way you
+don't need to assign host->ops at all for this case.
+
+> +{
+> +       host->ops = &mmci_variant_ops;
+> +}
+> +
+>  static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
+>  {
+>         struct variant_data *variant = host->variant;
+> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+> index 01e6c6b..f7fe80f 100644
+> --- a/drivers/mmc/host/mmci.h
+> +++ b/drivers/mmc/host/mmci.h
+> @@ -273,7 +273,7 @@ struct variant_data {
+>
+>  /* mmci variant callbacks */
+>  struct mmci_host_ops {
+> -       void (*dma_setup)(struct mmci_host *host);
+> +       int (*dma_setup)(struct mmci_host *host);
+>  };
+>
+>  struct mmci_host_next {
+> @@ -323,6 +323,7 @@ struct mmci_host {
+>         unsigned int            size;
+>         int (*get_rx_fifocnt)(struct mmci_host *h, u32 status, int remain);
+>
+> +       u8                      use_dma:1;
+>  #ifdef CONFIG_DMA_ENGINE
+>         /* DMA stuff */
+>         struct dma_chan         *dma_current;
+> @@ -336,3 +337,7 @@ struct mmci_host {
+>  #endif
+>  };
+>
+> +void mmci_variant_init(struct mmci_host *host);
+> +
+> +int mmci_dmae_setup(struct mmci_host *host);
+> +
+> diff --git a/drivers/mmc/host/mmci_qcom_dml.c b/drivers/mmc/host/mmci_qcom_dml.c
+> index be3fab5..c8d7592 100644
+> --- a/drivers/mmc/host/mmci_qcom_dml.c
+> +++ b/drivers/mmc/host/mmci_qcom_dml.c
+> @@ -119,19 +119,22 @@ static int of_get_dml_pipe_index(struct device_node *np, const char *name)
+>  }
+>
+>  /* Initialize the dml hardware connected to SD Card controller */
+> -static void qcom_dma_setup(struct mmci_host *host)
+> +static int qcom_dma_setup(struct mmci_host *host)
+>  {
+>         u32 config;
+>         void __iomem *base;
+>         int consumer_id, producer_id;
+>         struct device_node *np = host->mmc->parent->of_node;
+>
+> +       if (mmci_dmae_setup(host))
+> +               return -EINVAL;
+> +
+>         consumer_id = of_get_dml_pipe_index(np, "tx");
+>         producer_id = of_get_dml_pipe_index(np, "rx");
+>
+>         if (producer_id < 0 || consumer_id < 0) {
+>                 host->variant->qcom_dml = false;
+> -               return;
+> +               return -EINVAL;
+
+Seems like you need to call a corresponding dma release function here,
+before returning the error code.
+
+Probably an "mmci_dmae_release()" needs to be implemented as a part of
+this change - and then also called from here. This is according to
+Srinivas recommendations, which means falling back to pio. As a matter
+of fact this also needs to be clearly stated in the changelog, as you
+are really also improving the behavior for the Qcom variant.
+
+Unfortunate, I am not able to test this as I don't have the HW (which
+I thought I had). Perhaps Srinivas can help, once we have something
+ready for him to test.
+
+>         }
+>
+>         base = host->base + DML_OFFSET;
+> @@ -175,6 +178,8 @@ static void qcom_dma_setup(struct mmci_host *host)
+>
+>         /* Make sure dml initialization is finished */
+>         mb();
+> +
+> +       return 0;
+>  }
+>
+>  static struct mmci_host_ops qcom_variant_ops = {
+> --
+> 2.7.4
+>
+
+Kind regards
+Uffe
