@@ -1,101 +1,96 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH 1/2] mmc: tmio: move MFD variant reset to a platform hook
-Date: Wed, 3 Oct 2018 01:01:15 +0200
-Message-ID: <20181002230115.GB812@kunai>
-References: <1538397062-19162-1-git-send-email-yamada.masahiro@socionext.com>
- <1538397062-19162-2-git-send-email-yamada.masahiro@socionext.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="NMuMz9nt05w80d4+"
+From: Paolo Valente <paolo.valente@linaro.org>
+Subject: Re: [PATCH] block: BFQ default for single queue devices
+Date: Wed, 3 Oct 2018 08:29:10 +0200
+Message-ID: <B5321A64-8A1A-42FF-A337-F4524BDA179B@linaro.org>
+References: <20181002124329.21248-1-linus.walleij@linaro.org>
+ <05fdbe23-ec01-895f-e67e-abff85c1ece2@kernel.dk>
+Mime-Version: 1.0 (Mac OS X Mail 11.5 \(3445.9.1\))
+Content-Type: text/plain;
+        charset=us-ascii
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1538397062-19162-2-git-send-email-yamada.masahiro@socionext.com>
+In-Reply-To: <05fdbe23-ec01-895f-e67e-abff85c1ece2@kernel.dk>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Jens Axboe <axboe@kernel.dk>
+Cc: Linus Walleij <linus.walleij@linaro.org>, linux-block <linux-block@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-mtd@lists.infradead.org, Pavel Machek <pavel@ucw.cz>, Ulf Hansson <ulf.hansson@linaro.org>, Richard Weinberger <richard@nod.at>, Artem Bityutskiy <dedekind1@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, Jan Kara <jack@suse.cz>, Andreas Herrmann <aherrmann@suse.com>, Mel Gorman <mgorman@suse.com>, Chunyan Zhang <zhang.chunyan@linaro.org>, linux-kernel <linux-kernel@vger.kernel.org>, 'Paolo Valente' via bfq-iosched <bfq-iosched@googlegroups.com>, Oleksandr Natalenko <oleksandr@natalenko.name>, Mark Brown <broonie@kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
 
---NMuMz9nt05w80d4+
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
 
-Hi Yamada-san,
-
-On Mon, Oct 01, 2018 at 09:31:01PM +0900, Masahiro Yamada wrote:
-> CTL_RESET_SDIO register is specific to the TMIO MFD (tmio_mmc.c).
+> Il giorno 02 ott 2018, alle ore 16:31, Jens Axboe <axboe@kernel.dk> ha =
+scritto:
 >=20
-> Add a new hook host->reset for performing a platform-specific reset
-> sequence, and move CTL_RESET_SDIO over there.
+> On 10/2/18 6:43 AM, Linus Walleij wrote:
+>> This sets BFQ as the default scheduler for single queue
+>> block devices (nr_hw_queues =3D=3D 1) if it is available. This
+>> affects notably MMC/SD-cards but notably also UBI and
+>> the loopback device.
+>>=20
+>> I have been running it for a while without any negative
+>> effects on my pet systems and I want some wider testing
+>> so let's throw it out there and see what people say.
+>> Admittedly my use cases are limited.
+>>=20
+>> I talked to Pavel a bit back and it turns out he has a
+>> usecase for BFQ as well and I bet he also would like it
+>> as default scheduler for that system (Pavel tell us more,
+>> I don't remember what it was!)
+>>=20
+>> Intuitively I could understand that maybe we want to
+>> leave the loop device (possibly others? nbd? rbd?) as
+>> "none", as it is probably relying on a scheduler on the
+>> device below it, so I'm open to passing in a scheduler hint
+>> from the respective subsystem in say struct blk_mq_tag_set.
+>> However that makes for a bit of syntactic dissonance
+>> with the struct member ".nr_hw_queues" (I wonder how
+>> the loop device can have 1 "hardware queue"?) so
+>> maybe we should in that case also rename that struct
+>> member to ".nr_queues" fair and square before we start
+>> making adjustments for treating queues differently whether
+>> they are in hardware or actually not.
 >=20
-> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+> I think this should just be done with udev rules, and I'd
+> prefer if the distros would lead the way on this, as they
+> are the ones that will most likely see the most bug reports
+> on a change like this.
+>=20
 
-I like it in general.
+Hi Jens,
+I see your point, but I doubt this is the way to go, because of the
+following flaws.
 
-> +static void tmio_mmc_reset(struct tmio_mmc_host *host)
-> +{
-> +	sd_ctrl_write16(host, CTL_RESET_SDIO, 0x0000);
-> +	usleep_range(10000, 11000);
-> +	sd_ctrl_write16(host, CTL_RESET_SDIO, 0x0001);
-> +	usleep_range(10000, 11000);
-> +}
-> +
+As also Linus Torvalds complained [1], people feel lost among
+I/O-scheduler options.  Actual differences across I/O schedulers are
+basically obscure to non experts.  In this respect, Linux-kernel
+'users' are way more than a few top-level distros that can afford a
+strong performance team, and that, basing on the input of such a team,
+might venture light-heartedly to change a critical component like an
+I/O scheduler.  Plus, as Linus Walleij pointed out, some users simply
+are not distros that use udev.
 
-Are you sure resetting SDIO works independently of resetting SD? Maybe
-we should add resetting SD here, too, to keep the pattern...
+So, probably 99% of Linux-kernel users will just stick to the default
+I/O scheduler, mq-deadline, assuming that the algorithm by which that
+scheduler was chosen was not "pick the scheduler with the longest
+name", but "pick the best scheduler for most cases".  The problem is
+that, for single-queue devices with a speed below 400/500 KIOPS, the
+default scheduler is apparently incomparably worse than bfq in terms
+of responsiveness and latency for time-sensitive applications [2], and
+in terms of throughput reached while controlling I/O [3].  And, in all
+other tests ran so far, by any entity or group I'm aware of, bfq
+results basically on par with or better than mq-deadline.
 
-> --- a/drivers/mmc/host/tmio_mmc_core.c
-> +++ b/drivers/mmc/host/tmio_mmc_core.c
-> @@ -164,14 +164,13 @@ static void tmio_mmc_reset(struct tmio_mmc_host *ho=
-st)
->  {
->  	/* FIXME - should we set stop clock reg here */
->  	sd_ctrl_write16(host, CTL_RESET_SD, 0x0000);
-> -	if (host->pdata->flags & TMIO_MMC_HAVE_HIGH_REG)
-> -		sd_ctrl_write16(host, CTL_RESET_SDIO, 0x0000);
->  	usleep_range(10000, 11000);
->  	sd_ctrl_write16(host, CTL_RESET_SD, 0x0001);
-> -	if (host->pdata->flags & TMIO_MMC_HAVE_HIGH_REG)
-> -		sd_ctrl_write16(host, CTL_RESET_SDIO, 0x0001);
->  	usleep_range(10000, 11000);
+So, I do understand your need for conservativeness, but, after so much
+evidence on single-queue devices, and so many years! :), what's the
+point in keeping Linux worse for virtually everybody, by default?
 
-=2E.. and have this simplified reset pattern either also in a seperate
-function, or doing...
+Thanks,
+Paolo
 
-> =20
-> +	if (host->reset)
-> +		host->reset(host);
-	else
-		simplified_reset_pattern
-
-?
-
-What's your opinion?
-
-Regards,
-
-   Wolfram
+[1] https://lkml.org/lkml/2017/2/21/791
+[2] http://algo.ing.unimo.it/people/paolo/disk_sched/results.php
+[3] https://lwn.net/Articles/763603/
 
 
---NMuMz9nt05w80d4+
-Content-Type: application/pgp-signature; name="signature.asc"
 
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAluz+LsACgkQFA3kzBSg
-KbZjpg//SLluqM1Huz74ZSqUTGeIfpin4OLgALKBMIcZCrX51riSpKsHhuLyYWqs
-AgZGDET8Ye5AlC5E3bPvY4rWXG2c3t55VbNt5hGcqvU78xekqGwSMjUBGrD0grs5
-eYUvReRihz4oGOqDIp2cu9Jjy4nM78FYTVMV6RjVMXWGaeuob9UWxip1S7L8acNd
-+bsWcaApoqfDh6Rt4HhighW94OxGTx38Io+LcbwUFOV4gMlGo0GzPvcelNvS3CJ0
-TeQwuscF5txjLfyVbz+pcPARKyDun1xjYekOGKr97Kp+8dQbQwPlSiqSq9oPrf/S
-N4bDNGREifbY50FU2mtQbEfrF48NJ3F6x1pLUDXICMTrp260K5XFEiPNjXScZLch
-zT2OUyf8QuCjsl1PsaM/DJFjiPcy1v9R2PYYLls3dS4PiVT8w07jV6xCbOX3pw+n
-zECu9zPBJE2X/tSrZQqtCl7MNjem+AIbUrAtGotBPlGXjoOzzlPKlu9LxRMzEx8h
-5sqC5dQh36zX/ShkKllHiuhB0aIs+dNLzcT/gZbJJidONHOd6fpmIKegLJJEA7kF
-2cA2zqSSTS3uI3fpwCuWU+BACiMrBBAwYPRNdCAtwWqdcdZyby/KATPCQG/HLW39
-yW9WfRLACN5HhwUTFWvRiLuV+cM7aN4EfbPHcBsW8XUCz0WOUv0=
-=fc5y
------END PGP SIGNATURE-----
-
---NMuMz9nt05w80d4+--
+> --=20
+> Jens Axboe
