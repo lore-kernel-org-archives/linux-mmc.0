@@ -1,101 +1,43 @@
-From: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-Subject: Re: [PATCH V2 2/3] dt-bindings: mmc: sdhci-msm: Add entries for
- passing load values
-Date: Thu, 4 Oct 2018 18:43:17 +0530
-Message-ID: <3bbb160d-6963-ba97-710f-41247cff53b6@codeaurora.org>
-References: <1537424558-17989-1-git-send-email-vbadigan@codeaurora.org>
- <1537424558-17989-3-git-send-email-vbadigan@codeaurora.org>
- <CAE=gft6w_iV+vm=u=ZKNvDLVTHcAO+AR0A9Yg9etTHW8bJy05w@mail.gmail.com>
- <8f26b82c-b966-11d3-4fb6-0137a0a8cd4a@codeaurora.org>
- <CAE=gft52RWSibZRPukRX_L7ACOSUnqHc0FbsoCSvzAr=My-1kA@mail.gmail.com>
+From: Bart Van Assche <bvanassche@acm.org>
+Subject: Re: [PATCH] block: BFQ default for single queue devices
+Date: Thu, 04 Oct 2018 08:10:57 -0700
+Message-ID: <1538665857.230807.1.camel@acm.org>
+References: <20181002124329.21248-1-linus.walleij@linaro.org>
+         <05fdbe23-ec01-895f-e67e-abff85c1ece2@kernel.dk>
+         <B5321A64-8A1A-42FF-A337-F4524BDA179B@linaro.org>
+         <1eca41df95ff660eb247a3de666adeb4@natalenko.name>
+         <CACRpkdYG2Y=rspbZ_o=H3REXTEfOcaiqEyQD4kzO=G=d63V3yA@mail.gmail.com>
+         <20181004101305.GA6412@sirena.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-7"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAE=gft52RWSibZRPukRX_L7ACOSUnqHc0FbsoCSvzAr=My-1kA@mail.gmail.com>
-Content-Language: en-US
+In-Reply-To: <20181004101305.GA6412@sirena.org.uk>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Evan Green <evgreen@chromium.org>
-Cc: adrian.hunter@intel.com, Ulf Hansson <ulf.hansson@linaro.org>, robh+dt@kernel.org, linux-mmc@vger.kernel.org, asutoshd@codeaurora.org, riteshh@codeaurora.org, stummala@codeaurora.org, sayali <sayalil@codeaurora.org>, Doug Anderson <dianders@google.com>, vviswana@codeaurora.org, mark.rutland@arm.com, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Mark Brown <broonie@kernel.org>, Linus Walleij <linus.walleij@linaro.org>
+Cc: oleksandr@natalenko.name, Paolo Valente <paolo.valente@linaro.org>, Jens Axboe <axboe@kernel.dk>, linux-block <linux-block@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-mtd@lists.infradead.org, Pavel Machek <pavel@ucw.cz>, Ulf Hansson <ulf.hansson@linaro.org>, Richard Weinberger <richard@nod.at>, Artem Bityutskiy <dedekind1@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, Jan Kara <jack@suse.cz>, aherrmann@suse.com, mgorman@suse.com, Chunyan Zhang <zhang.chunyan@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, bfq-iosched@googlegroups.com
 List-Id: linux-mmc@vger.kernel.org
 
+On Thu, 2018-10-04 at 11:13 +-0100, Mark Brown wrote:
++AD4 On Thu, Oct 04, 2018 at 10:14:38AM +-0200, Linus Walleij wrote:
++AD4 
++AD4 +AD4 And these are millions and millions of deployed
++AD4 +AD4 systems not using udev+-systemd we are talking about,
++AD4 +AD4 they are not fringe hobby projects. It's not that I
++AD4 +AD4 personally dislike udev or anything, I kind of like
++AD4 +AD4 it, but these tailored distros simply don't use it
++AD4 +AD4 and they are huge in numbers. They need help to do
++AD4 +AD4 the right thing. Fixing a udev rule doesn't solve
++AD4 +AD4 even half the world's problems I'm afraid.
++AD4 
++AD4 Further, even those embedded systems that do use udev (some of them do
++AD4 lean heavily on modern init stuff like that and systemd, especially when
++AD4 boot time is a priority) they'll still need to get the relevant udev
++AD4 rule installed somehow.
 
+Hi Mark,
 
-On 9/22/2018 1:36 AM, Evan Green wrote:
-> On Fri, Sep 21, 2018 at 3:32 AM Veerabhadrarao Badiganti
-> <vbadigan@codeaurora.org> wrote:
->> Hi Evan,
->>
->>
->> On 9/21/2018 5:45 AM, Evan Green wrote:
->>> On Wed, Sep 19, 2018 at 11:24 PM Veerabhadrarao Badiganti
->>> <vbadigan@codeaurora.org> wrote:
->>>> From: Vijay Viswanath <vviswana@codeaurora.org>
->>>>
->>>> The load a particular sdhc controller should request from a regulator
->>>> is device specific and hence each device should individually vote for
->>>> the required load.
->>>>
->>>> Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
->>>> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
->>>> ---
->>>>    Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 6 ++++++
->>>>    1 file changed, 6 insertions(+)
->>>>
->>>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->>>> index 502b3b8..3720385 100644
->>>> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->>>> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->>>> @@ -26,6 +26,11 @@ Required properties:
->>>>           "cal"   - reference clock for RCLK delay calibration (optional)
->>>>           "sleep" - sleep clock for RCLK delay calibration (optional)
->>>>
->>>> +Optional properties:
->>>> +- qcom,<supply>-current-level-microamp - specifies load levels for supply during BUS_ON and
->>>> +                                       BUS_OFF states in power irq. Should be specified in
->>>> +                                       pairs (lpm, hpm), for BUS_OFF and BUS_ON respectively.
->>>> +                                       Units uA.
->>>>    Example:
->>>>
->>>>           sdhc_1: sdhci@f9824900 {
->>>> @@ -37,6 +42,7 @@ Example:
->>>>
->>>>                   vmmc-supply = <&pm8941_l20>;
->>>>                   vqmmc-supply = <&pm8941_s3>;
->>>> +               qcom,vqmmc-current-level-microamp = <200 22000>;
->>>>
->>>>                   pinctrl-names = "default";
->>>>                   pinctrl-0 = <&sdc1_clk &sdc1_cmd &sdc1_data>;
->>>> --
->>>> Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc., is a member of Code Aurora Forum, a Linux Foundation Collaborative Project
->>>>
->>> Aren't the regulator load levels pretty coarse? Would it be safe to
->>> say that pretty much all sd/mmc devices need the high powered mode, or
->>> are there really some devices that can get by with LPM all the time?
->>> -Evan
->> The load levels here are min and max supported by the regulator. To
->> cover all devices
->> we do set it to max load. We can't make any assumptions on this,  as
->> peak current may vary
->> from device to device.
-> Hi Veera,
-> If it were up to me, I would just assume all devices need high power
-> mode for BUS_ON and low power mode for BUS_OFF, and skip adding this
-> binding until you actually came up with a device that needed lower
-> power mode for BUS_ON, or high power mode for BUS_OFF (when would that
-> be, anyway?) Are there any actual use cases you've seen that need
-> different values in here?
-> -Evan
+Are you aware that the systemd source tree includes a set of udev rules?
+See also https://github.com/systemd/systemd/tree/master/rules.
 
-Hi Evan,
-With the present implementation if these load values are not supplied in 
-dt, its not setting
-any load at all. Without setting  load, I'm observing CRC/timeout/tuning 
-errors.
-I can update the code to fallback to default values when these are not 
-supplied in dt, but these values
-will be different from SD card and eMMC devices.
-So, this dt binding is needed.
-
-Thanks
-Veera
+Bart.
