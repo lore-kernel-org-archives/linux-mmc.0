@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V5 16/24] mmc: mmci: add variant property to define irq pio mask
-Date: Fri, 5 Oct 2018 15:22:54 +0200
-Message-ID: <1538745782-27446-17-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V5 22/24] mmc: mmci: add stm32 sdmmc registers
+Date: Fri, 5 Oct 2018 15:23:00 +0200
+Message-ID: <1538745782-27446-23-git-send-email-ludovic.Barre@st.com>
 References: <1538745782-27446-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,139 +14,119 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-This patch allows to define specific pio mask for variants.
-Needed to support the STM32 sdmmc variant which has some bits
-with different meaning (bits: 21,20,13,12,9)
+This patch adds stm32 sdmmc specific registers.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.c | 13 +++++++++++--
- drivers/mmc/host/mmci.h |  5 ++++-
- 2 files changed, 15 insertions(+), 3 deletions(-)
+ drivers/mmc/host/mmci.h | 56 +++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 56 insertions(+)
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index db9c4fe..438d70b 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -61,6 +61,7 @@ static struct variant_data variant_arm = {
- 	.f_max			= 100000000,
- 	.reversed_irq_handling	= true,
- 	.mmcimask1		= true,
-+	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
- 	.start_err		= MCI_STARTBITERR,
- 	.opendrain		= MCI_ROD,
- 	.init			= mmci_variant_init,
-@@ -79,6 +80,7 @@ static struct variant_data variant_arm_extended_fifo = {
- 	.pwrreg_powerup		= MCI_PWR_UP,
- 	.f_max			= 100000000,
- 	.mmcimask1		= true,
-+	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
- 	.start_err		= MCI_STARTBITERR,
- 	.opendrain		= MCI_ROD,
- 	.init			= mmci_variant_init,
-@@ -98,6 +100,7 @@ static struct variant_data variant_arm_extended_fifo_hwfc = {
- 	.pwrreg_powerup		= MCI_PWR_UP,
- 	.f_max			= 100000000,
- 	.mmcimask1		= true,
-+	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
- 	.start_err		= MCI_STARTBITERR,
- 	.opendrain		= MCI_ROD,
- 	.init			= mmci_variant_init,
-@@ -123,6 +126,7 @@ static struct variant_data variant_u300 = {
- 	.pwrreg_clkgate		= true,
- 	.pwrreg_nopower		= true,
- 	.mmcimask1		= true,
-+	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
- 	.start_err		= MCI_STARTBITERR,
- 	.opendrain		= MCI_OD,
- 	.init			= mmci_variant_init,
-@@ -149,6 +153,7 @@ static struct variant_data variant_nomadik = {
- 	.pwrreg_clkgate		= true,
- 	.pwrreg_nopower		= true,
- 	.mmcimask1		= true,
-+	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
- 	.start_err		= MCI_STARTBITERR,
- 	.opendrain		= MCI_OD,
- 	.init			= mmci_variant_init,
-@@ -181,6 +186,7 @@ static struct variant_data variant_ux500 = {
- 	.busy_detect_mask	= MCI_ST_BUSYENDMASK,
- 	.pwrreg_nopower		= true,
- 	.mmcimask1		= true,
-+	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
- 	.start_err		= MCI_STARTBITERR,
- 	.opendrain		= MCI_OD,
- 	.init			= mmci_variant_init,
-@@ -215,6 +221,7 @@ static struct variant_data variant_ux500v2 = {
- 	.busy_detect_mask	= MCI_ST_BUSYENDMASK,
- 	.pwrreg_nopower		= true,
- 	.mmcimask1		= true,
-+	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
- 	.start_err		= MCI_STARTBITERR,
- 	.opendrain		= MCI_OD,
- 	.init			= mmci_variant_init,
-@@ -231,6 +238,7 @@ static struct variant_data variant_stm32 = {
- 	.cmdreg_lrsp_crc	= MCI_CPSM_RESPONSE | MCI_CPSM_LONGRSP,
- 	.cmdreg_srsp_crc	= MCI_CPSM_RESPONSE,
- 	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
-+	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
- 	.datalength_bits	= 24,
- 	.datactrl_blocksz	= 11,
- 	.datactrl_dpsm_enable	= MCI_DPSM_ENABLE,
-@@ -267,6 +275,7 @@ static struct variant_data variant_qcom = {
- 	.qcom_fifo		= true,
- 	.qcom_dml		= true,
- 	.mmcimask1		= true,
-+	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
- 	.start_err		= MCI_STARTBITERR,
- 	.opendrain		= MCI_ROD,
- 	.init			= qcom_variant_init,
-@@ -552,7 +561,7 @@ static void mmci_set_mask1(struct mmci_host *host, unsigned int mask)
- 	if (host->singleirq) {
- 		unsigned int mask0 = readl(base + MMCIMASK0);
- 
--		mask0 &= ~MCI_IRQ1MASK;
-+		mask0 &= ~variant->irq_pio_mask;
- 		mask0 |= mask;
- 
- 		writel(mask0, base + MMCIMASK0);
-@@ -1452,7 +1461,7 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
- 			if (status & host->mask1_reg)
- 				mmci_pio_irq(irq, dev_id);
- 
--			status &= ~MCI_IRQ1MASK;
-+			status &= ~host->variant->irq_pio_mask;
- 		}
- 
- 		/*
 diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index e41dd94..d9db184 100644
+index e2ea8a5..a300fde 100644
 --- a/drivers/mmc/host/mmci.h
 +++ b/drivers/mmc/host/mmci.h
-@@ -186,7 +186,7 @@
- 	MCI_CMDRESPENDMASK | MCI_CMDSENTMASK)
+@@ -23,6 +23,14 @@
+ #define MCI_ST_DATA31DIREN	(1 << 5)
+ #define MCI_ST_FBCLKEN		(1 << 7)
+ #define MCI_ST_DATA74DIREN	(1 << 8)
++/*
++ * The STM32 sdmmc does not have PWR_UP/OD/ROD
++ * and uses the power register for
++ */
++#define MCI_STM32_PWR_CYC	0x02
++#define MCI_STM32_VSWITCH	BIT(2)
++#define MCI_STM32_VSWITCHEN	BIT(3)
++#define MCI_STM32_DIRPOL	BIT(4)
  
- /* These interrupts are directed to IRQ1 when two IRQ lines are available */
--#define MCI_IRQ1MASK \
-+#define MCI_IRQ_PIO_MASK \
+ #define MMCICLOCK		0x004
+ #define MCI_CLK_ENABLE		(1 << 8)
+@@ -50,6 +58,19 @@
+ #define MCI_QCOM_CLK_SELECT_IN_FBCLK	BIT(15)
+ #define MCI_QCOM_CLK_SELECT_IN_DDR_MODE	(BIT(14) | BIT(15))
+ 
++/* Modified on STM32 sdmmc */
++#define MCI_STM32_CLK_CLKDIV_MSK	GENMASK(9, 0)
++#define MCI_STM32_CLK_WIDEBUS_4		BIT(14)
++#define MCI_STM32_CLK_WIDEBUS_8		BIT(15)
++#define MCI_STM32_CLK_NEGEDGE		BIT(16)
++#define MCI_STM32_CLK_HWFCEN		BIT(17)
++#define MCI_STM32_CLK_DDR		BIT(18)
++#define MCI_STM32_CLK_BUSSPEED		BIT(19)
++#define MCI_STM32_CLK_SEL_MSK		GENMASK(21, 20)
++#define MCI_STM32_CLK_SELCK		(0 << 20)
++#define MCI_STM32_CLK_SELCKIN		(1 << 20)
++#define MCI_STM32_CLK_SELFBCK		(2 << 20)
++
+ #define MMCIARGUMENT		0x008
+ 
+ /* The command register controls the Command Path State Machine (CPSM) */
+@@ -72,6 +93,15 @@
+ #define MCI_CPSM_QCOM_CCSDISABLE	BIT(15)
+ #define MCI_CPSM_QCOM_AUTO_CMD19	BIT(16)
+ #define MCI_CPSM_QCOM_AUTO_CMD21	BIT(21)
++/* Command register in STM32 sdmmc versions */
++#define MCI_CPSM_STM32_CMDTRANS		BIT(6)
++#define MCI_CPSM_STM32_CMDSTOP		BIT(7)
++#define MCI_CPSM_STM32_WAITRESP_MASK	GENMASK(9, 8)
++#define MCI_CPSM_STM32_NORSP		(0 << 8)
++#define MCI_CPSM_STM32_SRSP_CRC		(1 << 8)
++#define MCI_CPSM_STM32_SRSP		(2 << 8)
++#define MCI_CPSM_STM32_LRSP_CRC		(3 << 8)
++#define MCI_CPSM_STM32_ENABLE		BIT(12)
+ 
+ #define MMCIRESPCMD		0x010
+ #define MMCIRESPONSE0		0x014
+@@ -130,6 +160,8 @@
+ #define MCI_ST_SDIOIT		(1 << 22)
+ #define MCI_ST_CEATAEND		(1 << 23)
+ #define MCI_ST_CARDBUSY		(1 << 24)
++/* Extended status bits for the STM32 variants */
++#define MCI_STM32_BUSYD0	BIT(20)
+ 
+ #define MMCICLEAR		0x038
+ #define MCI_CMDCRCFAILCLR	(1 << 0)
+@@ -175,11 +207,32 @@
+ #define MCI_ST_SDIOITMASK	(1 << 22)
+ #define MCI_ST_CEATAENDMASK	(1 << 23)
+ #define MCI_ST_BUSYENDMASK	(1 << 24)
++/* Extended status bits for the STM32 variants */
++#define MCI_STM32_BUSYD0ENDMASK	BIT(21)
+ 
+ #define MMCIMASK1		0x040
+ #define MMCIFIFOCNT		0x048
+ #define MMCIFIFO		0x080 /* to 0x0bc */
+ 
++/* STM32 sdmmc registers for IDMA (Internal DMA) */
++#define MMCI_STM32_IDMACTRLR	0x050
++#define MMCI_STM32_IDMAEN	BIT(0)
++#define MMCI_STM32_IDMALLIEN	BIT(1)
++
++#define MMCI_STM32_IDMABSIZER		0x054
++#define MMCI_STM32_IDMABNDT_SHIFT	5
++#define MMCI_STM32_IDMABNDT_MASK	GENMASK(12, 5)
++
++#define MMCI_STM32_IDMABASE0R	0x058
++
++#define MMCI_STM32_IDMALAR	0x64
++#define MMCI_STM32_IDMALA_MASK	GENMASK(13, 0)
++#define MMCI_STM32_ABR		BIT(29)
++#define MMCI_STM32_ULS		BIT(30)
++#define MMCI_STM32_ULA		BIT(31)
++
++#define MMCI_STM32_IDMABAR	0x68
++
+ #define MCI_IRQENABLE	\
+ 	(MCI_CMDCRCFAILMASK | MCI_DATACRCFAILMASK | MCI_CMDTIMEOUTMASK | \
+ 	MCI_DATATIMEOUTMASK | MCI_TXUNDERRUNMASK | MCI_RXOVERRUNMASK |	\
+@@ -190,6 +243,9 @@
  	(MCI_RXFIFOHALFFULLMASK | MCI_RXDATAAVLBLMASK | \
  	 MCI_TXFIFOHALFEMPTYMASK)
  
-@@ -239,6 +239,8 @@ struct mmci_host;
-  * @qcom_dml: enables qcom specific dma glue for dma transfers.
-  * @reversed_irq_handling: handle data irq before cmd irq.
-  * @mmcimask1: true if variant have a MMCIMASK1 register.
-+ * @irq_pio_mask: bitmask used to manage interrupt pio transfert in mmcimask
-+ *		  register
-  * @start_err: bitmask identifying the STARTBITERR bit inside MMCISTATUS
-  *	       register.
-  * @opendrain: bitmask identifying the OPENDRAIN bit inside MMCIPOWER register
-@@ -278,6 +280,7 @@ struct variant_data {
- 	u8			qcom_dml:1;
- 	u8			reversed_irq_handling:1;
- 	u8			mmcimask1:1;
-+	unsigned int		irq_pio_mask;
- 	u32			start_err;
- 	u32			opendrain;
- 	void (*init)(struct mmci_host *host);
++#define MCI_IRQ_PIO_STM32_MASK \
++	(MCI_RXFIFOHALFFULLMASK | MCI_TXFIFOHALFEMPTYMASK)
++
+ #define NR_SG		128
+ 
+ #define MMCI_PINCTRL_STATE_OPENDRAIN "opendrain"
 -- 
 2.7.4
