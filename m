@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V5 01/24] mmc: mmci: Change struct members from bool to u8
-Date: Fri, 5 Oct 2018 15:22:39 +0200
-Message-ID: <1538745782-27446-2-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V5 09/24] mmc: mmci: add dma_error callback
+Date: Fri, 5 Oct 2018 15:22:47 +0200
+Message-ID: <1538745782-27446-10-git-send-email-ludovic.Barre@st.com>
 References: <1538745782-27446-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,90 +14,125 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-Recent versions of checkpatch have a new warning based on a documented
-preference of Linus to not use bool in structures due to wasted space and
-the size of bool is implementation dependent.  For more information, see
-the email thread at https://lkml.org/lkml/2017/11/21/384
-
-fix checkpatch --strict issues:
--CHECK: Avoid using bool structure members because of possible alignment
- issues - see: https://lkml.org/lkml/2017/11/21/384
--WARNING: Avoid using bool as bitfield. Prefer bool bitfields as
- unsigned int or u<8|16|32>
+This patch adds dma_error callback at mmci_host_ops
+to allow to call specific variant.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.h | 32 ++++++++++++++++----------------
- 1 file changed, 16 insertions(+), 16 deletions(-)
+ drivers/mmc/host/mmci.c          | 26 +++++++++++++++-----------
+ drivers/mmc/host/mmci.h          |  2 ++
+ drivers/mmc/host/mmci_qcom_dml.c |  1 +
+ 3 files changed, 18 insertions(+), 11 deletions(-)
 
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 2d88f8c..657ec84 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -465,6 +465,15 @@ void mmci_dma_finalize(struct mmci_host *host, struct mmc_data *data)
+ 		host->ops->dma_finalize(host, data);
+ }
+ 
++void mmci_dma_error(struct mmci_host *host)
++{
++	if (!host->use_dma)
++		return;
++
++	if (host->ops && host->ops->dma_error)
++		host->ops->dma_error(host);
++}
++
+ static void
+ mmci_request_end(struct mmci_host *host, struct mmc_request *mrq)
+ {
+@@ -627,11 +636,11 @@ static void mmci_dma_unmap(struct mmci_host *host, struct mmc_data *data)
+ 		     mmc_get_dma_dir(data));
+ }
+ 
+-static void mmci_dma_data_error(struct mmci_host *host)
++void mmci_dmae_error(struct mmci_host *host)
+ {
+ 	struct mmci_dmae_priv *dmae = host->dma_priv;
+ 
+-	if (!host->use_dma || !dma_inprogress(host))
++	if (!dma_inprogress(host))
+ 		return;
+ 
+ 	dev_err(mmc_dev(host->mmc), "error during DMA transfer!\n");
+@@ -668,7 +677,7 @@ void mmci_dmae_finalize(struct mmci_host *host, struct mmc_data *data)
+ 	 * contiguous buffers.  On TX, we'll get a FIFO underrun error.
+ 	 */
+ 	if (status & MCI_RXDATAAVLBLMASK) {
+-		mmci_dma_data_error(host);
++		mmci_dma_error(host);
+ 		if (!data->error)
+ 			data->error = -EIO;
+ 	} else if (!data->host_cookie) {
+@@ -848,18 +857,13 @@ static struct mmci_host_ops mmci_variant_ops = {
+ 	.dma_release = mmci_dmae_release,
+ 	.dma_start = mmci_dmae_start,
+ 	.dma_finalize = mmci_dmae_finalize,
++	.dma_error = mmci_dmae_error,
+ };
+ 
+ void mmci_variant_init(struct mmci_host *host)
+ {
+ 	host->ops = &mmci_variant_ops;
+ }
+-#else
+-/* Blank functions if the DMA engine is not available */
+-static inline void mmci_dma_data_error(struct mmci_host *host)
+-{
+-}
+-
+ #endif
+ 
+ static void mmci_pre_request(struct mmc_host *mmc, struct mmc_request *mrq)
+@@ -1031,7 +1035,7 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
+ 		u32 remain, success;
+ 
+ 		/* Terminate the DMA transfer */
+-		mmci_dma_data_error(host);
++		mmci_dma_error(host);
+ 
+ 		/*
+ 		 * Calculate how far we are into the transfer.  Note that
+@@ -1177,7 +1181,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+ 	if ((!sbc && !cmd->data) || cmd->error) {
+ 		if (host->data) {
+ 			/* Terminate the DMA transfer */
+-			mmci_dma_data_error(host);
++			mmci_dma_error(host);
+ 
+ 			mmci_stop_data(host);
+ 		}
 diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 21aaf9a..01e6c6b 100644
+index 49274cb..45aad99 100644
 --- a/drivers/mmc/host/mmci.h
 +++ b/drivers/mmc/host/mmci.h
-@@ -248,24 +248,24 @@ struct variant_data {
- 	unsigned int		data_cmd_enable;
- 	unsigned int		datactrl_mask_ddrmode;
- 	unsigned int		datactrl_mask_sdio;
--	bool			st_sdio;
--	bool			st_clkdiv;
--	bool			blksz_datactrl16;
--	bool			blksz_datactrl4;
-+	u8			st_sdio:1;
-+	u8			st_clkdiv:1;
-+	u8			blksz_datactrl16:1;
-+	u8			blksz_datactrl4:1;
- 	u32			pwrreg_powerup;
- 	u32			f_max;
--	bool			signal_direction;
--	bool			pwrreg_clkgate;
--	bool			busy_detect;
-+	u8			signal_direction:1;
-+	u8			pwrreg_clkgate:1;
-+	u8			busy_detect:1;
- 	u32			busy_dpsm_flag;
- 	u32			busy_detect_flag;
- 	u32			busy_detect_mask;
--	bool			pwrreg_nopower;
--	bool			explicit_mclk_control;
--	bool			qcom_fifo;
--	bool			qcom_dml;
--	bool			reversed_irq_handling;
--	bool			mmcimask1;
-+	u8			pwrreg_nopower:1;
-+	u8			explicit_mclk_control:1;
-+	u8			qcom_fifo:1;
-+	u8			qcom_dml:1;
-+	u8			reversed_irq_handling:1;
-+	u8			mmcimask1:1;
- 	u32			start_err;
- 	u32			opendrain;
- 	void (*init)(struct mmci_host *host);
-@@ -290,7 +290,7 @@ struct mmci_host {
- 	struct mmc_data		*data;
- 	struct mmc_host		*mmc;
- 	struct clk		*clk;
--	bool			singleirq;
-+	u8			singleirq:1;
+@@ -282,6 +282,7 @@ struct mmci_host_ops {
+ 	void (*dma_release)(struct mmci_host *host);
+ 	int (*dma_start)(struct mmci_host *host, unsigned int *datactrl);
+ 	void (*dma_finalize)(struct mmci_host *host, struct mmc_data *data);
++	void (*dma_error)(struct mmci_host *host);
+ };
  
- 	spinlock_t		lock;
+ struct mmci_host {
+@@ -351,3 +352,4 @@ int mmci_dmae_setup(struct mmci_host *host);
+ void mmci_dmae_release(struct mmci_host *host);
+ int mmci_dmae_start(struct mmci_host *host, unsigned int *datactrl);
+ void mmci_dmae_finalize(struct mmci_host *host, struct mmc_data *data);
++void mmci_dmae_error(struct mmci_host *host);
+diff --git a/drivers/mmc/host/mmci_qcom_dml.c b/drivers/mmc/host/mmci_qcom_dml.c
+index 9725762..a669190 100644
+--- a/drivers/mmc/host/mmci_qcom_dml.c
++++ b/drivers/mmc/host/mmci_qcom_dml.c
+@@ -190,6 +190,7 @@ static struct mmci_host_ops qcom_variant_ops = {
+ 	.dma_release = mmci_dmae_release,
+ 	.dma_start = mmci_dmae_start,
+ 	.dma_finalize = mmci_dmae_finalize,
++	.dma_error = mmci_dmae_error,
+ };
  
-@@ -304,7 +304,7 @@ struct mmci_host {
- 	u32			datactrl_reg;
- 	u32			busy_status;
- 	u32			mask1_reg;
--	bool			vqmmc_enabled;
-+	u8			vqmmc_enabled:1;
- 	struct mmci_platform_data *plat;
- 	struct mmci_host_ops	*ops;
- 	struct variant_data	*variant;
-@@ -330,7 +330,7 @@ struct mmci_host {
- 	struct dma_chan		*dma_tx_channel;
- 	struct dma_async_tx_descriptor	*dma_desc_current;
- 	struct mmci_host_next	next_data;
--	bool			dma_in_progress;
-+	u8			dma_in_progress:1;
- 
- #define dma_inprogress(host)	((host)->dma_in_progress)
- #endif
+ void qcom_variant_init(struct mmci_host *host)
 -- 
 2.7.4
