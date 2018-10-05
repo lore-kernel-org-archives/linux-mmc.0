@@ -1,116 +1,129 @@
-From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V5 06/24] mmc: mmci: add get_next_data callback
-Date: Fri, 5 Oct 2018 15:22:44 +0200
-Message-ID: <1538745782-27446-7-git-send-email-ludovic.Barre@st.com>
-References: <1538745782-27446-1-git-send-email-ludovic.Barre@st.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V5 02/24] mmc: mmci: create common mmci_dma_setup/release
+Date: Fri, 5 Oct 2018 15:47:12 +0200
+Message-ID: <CAPDyKFogS_74csmZm5_M3D-JFNn_8fi2sxcHpRwVxZOqZhndVg@mail.gmail.com>
+References: <1538745782-27446-1-git-send-email-ludovic.Barre@st.com> <1538745782-27446-3-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1538745782-27446-1-git-send-email-ludovic.Barre@st.com>
+In-Reply-To: <1538745782-27446-3-git-send-email-ludovic.Barre@st.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
-Cc: srinivas.kandagatla@linaro.org, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com, Ludovic Barre <ludovic.barre@st.com>
+To: Ludovic Barre <ludovic.Barre@st.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-stm32@st-md-mailman.stormreply.com
 List-Id: linux-mmc@vger.kernel.org
 
-From: Ludovic Barre <ludovic.barre@st.com>
+On 5 October 2018 at 15:22, Ludovic Barre <ludovic.Barre@st.com> wrote:
+> From: Ludovic Barre <ludovic.barre@st.com>
+>
+> This patch creates a common mmci_dma_setup/release which calls
+> dma_setup/release callbacks of mmci_host_ops and manages
+> common features like use_dma... If there is a fallbacks to
+> pio mode, dma functions must check use_dma.
+>
+> error management:
+> -mmci_dmae_setup fail if Tx and Rx dma channels are not defined
+> -qcom_dma_setup fail if one of both dma channels is not defined,
+>  Qcom has no specific resource to release, just mmci dmae resource.
 
-This patch adds get_next_data callback to mmci_host_ops.
-Generic mmci_get_next_data factorizes next_cookie check and
-the host ops call.
+Makes perfect sense!
 
-Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
----
- drivers/mmc/host/mmci.c          | 16 ++++++++++------
- drivers/mmc/host/mmci.h          |  2 ++
- drivers/mmc/host/mmci_qcom_dml.c |  1 +
- 3 files changed, 13 insertions(+), 6 deletions(-)
+[...]
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 9bcd219..074350e1 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -413,6 +413,14 @@ void mmci_unprep_data(struct mmci_host *host, struct mmc_data *data,
- 	data->host_cookie = 0;
- }
- 
-+void mmci_get_next_data(struct mmci_host *host, struct mmc_data *data)
-+{
-+	WARN_ON(data->host_cookie && data->host_cookie != host->next_cookie);
-+
-+	if (host->ops && host->ops->get_next_data)
-+		host->ops->get_next_data(host, data);
-+}
-+
- static void
- mmci_request_end(struct mmci_host *host, struct mmc_request *mrq)
- {
-@@ -761,7 +769,7 @@ static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
- 	return 0;
- }
- 
--static void mmci_get_next_data(struct mmci_host *host, struct mmc_data *data)
-+void mmci_dmae_get_next_data(struct mmci_host *host, struct mmc_data *data)
- {
- 	struct mmci_dmae_priv *dmae = host->dma_priv;
- 	struct mmci_dmae_next *next = &dmae->next_data;
-@@ -769,7 +777,6 @@ static void mmci_get_next_data(struct mmci_host *host, struct mmc_data *data)
- 	if (!host->use_dma)
- 		return;
- 
--	WARN_ON(data->host_cookie && data->host_cookie != host->next_cookie);
- 	WARN_ON(!data->host_cookie && (next->desc || next->chan));
- 
- 	dmae->desc_current = next->desc;
-@@ -814,6 +821,7 @@ void mmci_dmae_unprep_data(struct mmci_host *host,
- static struct mmci_host_ops mmci_variant_ops = {
- 	.prep_data = mmci_dmae_prep_data,
- 	.unprep_data = mmci_dmae_unprep_data,
-+	.get_next_data = mmci_dmae_get_next_data,
- 	.dma_setup = mmci_dmae_setup,
- 	.dma_release = mmci_dmae_release,
- };
-@@ -824,10 +832,6 @@ void mmci_variant_init(struct mmci_host *host)
- }
- #else
- /* Blank functions if the DMA engine is not available */
--static void mmci_get_next_data(struct mmci_host *host, struct mmc_data *data)
--{
--}
--
- static inline void mmci_dma_finalize(struct mmci_host *host,
- 				     struct mmc_data *data)
- {
-diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 8e7ba8a..acaf343 100644
---- a/drivers/mmc/host/mmci.h
-+++ b/drivers/mmc/host/mmci.h
-@@ -277,6 +277,7 @@ struct mmci_host_ops {
- 			 bool next);
- 	void (*unprep_data)(struct mmci_host *host, struct mmc_data *data,
- 			    int err);
-+	void (*get_next_data)(struct mmci_host *host, struct mmc_data *data);
- 	int (*dma_setup)(struct mmci_host *host);
- 	void (*dma_release)(struct mmci_host *host);
- };
-@@ -343,6 +344,7 @@ int mmci_dmae_prep_data(struct mmci_host *host, struct mmc_data *data,
- 			bool next);
- void mmci_dmae_unprep_data(struct mmci_host *host, struct mmc_data *data,
- 			   int err);
-+void mmci_dmae_get_next_data(struct mmci_host *host, struct mmc_data *data);
- int mmci_dmae_setup(struct mmci_host *host);
- void mmci_dmae_release(struct mmci_host *host);
- 
-diff --git a/drivers/mmc/host/mmci_qcom_dml.c b/drivers/mmc/host/mmci_qcom_dml.c
-index 029e82d..5334427 100644
---- a/drivers/mmc/host/mmci_qcom_dml.c
-+++ b/drivers/mmc/host/mmci_qcom_dml.c
-@@ -185,6 +185,7 @@ static int qcom_dma_setup(struct mmci_host *host)
- static struct mmci_host_ops qcom_variant_ops = {
- 	.prep_data = mmci_dmae_prep_data,
- 	.unprep_data = mmci_dmae_unprep_data,
-+	.get_next_data = mmci_dmae_get_next_data,
- 	.dma_setup = qcom_dma_setup,
- 	.dma_release = mmci_dmae_release,
- };
--- 
-2.7.4
+> +void mmci_dma_setup(struct mmci_host *host)
+> +{
+> +       if (!host->ops || !host->ops->dma_setup)
+> +               return;
+> +
+> +       if (host->ops->dma_setup(host)) {
+> +               mmci_dma_release(host);
+
+Please remove this and let the variants clean up themselves. That
+makes it more straight forward.
+
+> +               return;
+> +       }
+> +
+> +       host->use_dma = true;
+> +}
+> +
+
+[...]
+
+> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+> index 01e6c6b..9b0a960 100644
+> --- a/drivers/mmc/host/mmci.h
+> +++ b/drivers/mmc/host/mmci.h
+> @@ -273,7 +273,8 @@ struct variant_data {
+>
+>  /* mmci variant callbacks */
+>  struct mmci_host_ops {
+> -       void (*dma_setup)(struct mmci_host *host);
+> +       int (*dma_setup)(struct mmci_host *host);
+> +       void (*dma_release)(struct mmci_host *host);
+>  };
+>
+>  struct mmci_host_next {
+> @@ -323,6 +324,7 @@ struct mmci_host {
+>         unsigned int            size;
+>         int (*get_rx_fifocnt)(struct mmci_host *h, u32 status, int remain);
+>
+> +       u8                      use_dma:1;
+>  #ifdef CONFIG_DMA_ENGINE
+>         /* DMA stuff */
+>         struct dma_chan         *dma_current;
+> @@ -336,3 +338,14 @@ struct mmci_host {
+>  #endif
+>  };
+>
+> +#ifdef CONFIG_DMA_ENGINE
+> +void mmci_variant_init(struct mmci_host *host);
+> +#else
+> +static inline void mmci_variant_init(struct mmci_host *host)
+> +{
+> +}
+> +#endif
+
+This can be kept in mmci.c instead.
+
+> +
+> +int mmci_dmae_setup(struct mmci_host *host);
+> +void mmci_dmae_release(struct mmci_host *host);
+> +
+> diff --git a/drivers/mmc/host/mmci_qcom_dml.c b/drivers/mmc/host/mmci_qcom_dml.c
+> index be3fab5..aa070a9 100644
+> --- a/drivers/mmc/host/mmci_qcom_dml.c
+> +++ b/drivers/mmc/host/mmci_qcom_dml.c
+> @@ -119,19 +119,22 @@ static int of_get_dml_pipe_index(struct device_node *np, const char *name)
+>  }
+>
+>  /* Initialize the dml hardware connected to SD Card controller */
+> -static void qcom_dma_setup(struct mmci_host *host)
+> +static int qcom_dma_setup(struct mmci_host *host)
+>  {
+>         u32 config;
+>         void __iomem *base;
+>         int consumer_id, producer_id;
+>         struct device_node *np = host->mmc->parent->of_node;
+>
+> +       if (mmci_dmae_setup(host))
+> +               return -EINVAL;
+> +
+>         consumer_id = of_get_dml_pipe_index(np, "tx");
+>         producer_id = of_get_dml_pipe_index(np, "rx");
+>
+>         if (producer_id < 0 || consumer_id < 0) {
+>                 host->variant->qcom_dml = false;
+> -               return;
+> +               return -EINVAL;
+
+This relies on error handling to be done by mmci_dma_setup(), which as
+stated, feels a bit wrong.
+
+I would rather just call mmci_dmae_realease() here, before returning -EINVAL.
+
+[...]
+
+Otherwise, this looks good to me now.
+
+Kind regards
+Uffe
