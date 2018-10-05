@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V5 04/24] mmc: mmci: merge prepare data functions
-Date: Fri, 5 Oct 2018 15:22:42 +0200
-Message-ID: <1538745782-27446-5-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V5 11/24] mmc: mmci: add set_clk/pwrreg callbacks
+Date: Fri, 5 Oct 2018 15:22:49 +0200
+Message-ID: <1538745782-27446-12-git-send-email-ludovic.Barre@st.com>
 References: <1538745782-27446-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,68 +14,80 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-This patch merges the prepare data functions.
-This allows to define a single access to prepare data service.
-This prepares integration for mmci host ops.
+This patch adds set_clkreg and set_pwrreg callbacks
+at mmci_host_ops to allow to call specific variant.
+extends visibility of mmci_write_clk/pwrreg functions
+to be used into specific file variant.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.c | 19 +++++++------------
- 1 file changed, 7 insertions(+), 12 deletions(-)
+ drivers/mmc/host/mmci.c | 16 ++++++++++++----
+ drivers/mmc/host/mmci.h |  5 +++++
+ 2 files changed, 17 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 792de67..be22fa9 100644
+index 0444aba..e5cd199 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -677,10 +677,14 @@ static int __mmci_dma_prep_data(struct mmci_host *host, struct mmc_data *data,
- }
- 
- static inline int mmci_dma_prep_data(struct mmci_host *host,
--				     struct mmc_data *data)
-+				     struct mmc_data *data,
-+				     bool next)
+@@ -251,7 +251,7 @@ static void mmci_reg_delay(struct mmci_host *host)
+ /*
+  * This must be called with host->lock held
+  */
+-static void mmci_write_clkreg(struct mmci_host *host, u32 clk)
++void mmci_write_clkreg(struct mmci_host *host, u32 clk)
  {
- 	struct mmci_dmae_priv *dmae = host->dma_priv;
-+	struct mmci_dmae_next *nd = &dmae->next_data;
- 
-+	if (next)
-+		return __mmci_dma_prep_data(host, data, &nd->chan, &nd->desc);
- 	/* Check if next job is already prepared. */
- 	if (dmae->cur && dmae->desc_current)
- 		return 0;
-@@ -690,15 +694,6 @@ static inline int mmci_dma_prep_data(struct mmci_host *host,
- 				    &dmae->desc_current);
- }
- 
--static inline int mmci_dma_prep_next(struct mmci_host *host,
--				     struct mmc_data *data)
--{
--	struct mmci_dmae_priv *dmae = host->dma_priv;
--	struct mmci_dmae_next *nd = &dmae->next_data;
--
--	return __mmci_dma_prep_data(host, data, &nd->chan, &nd->desc);
--}
--
- static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
+ 	if (host->clk_reg != clk) {
+ 		host->clk_reg = clk;
+@@ -262,7 +262,7 @@ static void mmci_write_clkreg(struct mmci_host *host, u32 clk)
+ /*
+  * This must be called with host->lock held
+  */
+-static void mmci_write_pwrreg(struct mmci_host *host, u32 pwr)
++void mmci_write_pwrreg(struct mmci_host *host, u32 pwr)
  {
- 	int ret;
-@@ -708,7 +703,7 @@ static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
- 	if (!host->use_dma)
- 		return -EINVAL;
+ 	if (host->pwr_reg != pwr) {
+ 		host->pwr_reg = pwr;
+@@ -1565,8 +1565,16 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
  
--	ret = mmci_dma_prep_data(host, host->data);
-+	ret = mmci_dma_prep_data(host, host->data, false);
- 	if (ret)
- 		return ret;
+ 	spin_lock_irqsave(&host->lock, flags);
  
-@@ -768,7 +763,7 @@ static void mmci_pre_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	if (mmci_validate_data(host, data))
- 		return;
+-	mmci_set_clkreg(host, ios->clock);
+-	mmci_write_pwrreg(host, pwr);
++	if (host->ops && host->ops->set_clkreg)
++		host->ops->set_clkreg(host, ios->clock);
++	else
++		mmci_set_clkreg(host, ios->clock);
++
++	if (host->ops && host->ops->set_pwrreg)
++		host->ops->set_pwrreg(host, pwr);
++	else
++		mmci_write_pwrreg(host, pwr);
++
+ 	mmci_reg_delay(host);
  
--	if (!mmci_dma_prep_next(host, data))
-+	if (!mmci_dma_prep_data(host, data, true))
- 		data->host_cookie = ++host->next_cookie < 0 ?
- 			1 : host->next_cookie;
+ 	spin_unlock_irqrestore(&host->lock, flags);
+diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+index f103465..e4bb527 100644
+--- a/drivers/mmc/host/mmci.h
++++ b/drivers/mmc/host/mmci.h
+@@ -284,6 +284,8 @@ struct mmci_host_ops {
+ 	int (*dma_start)(struct mmci_host *host, unsigned int *datactrl);
+ 	void (*dma_finalize)(struct mmci_host *host, struct mmc_data *data);
+ 	void (*dma_error)(struct mmci_host *host);
++	void (*set_clkreg)(struct mmci_host *host, unsigned int desired);
++	void (*set_pwrreg)(struct mmci_host *host, unsigned int pwr);
+ };
+ 
+ struct mmci_host {
+@@ -344,6 +346,9 @@ static inline void mmci_variant_init(struct mmci_host *host)
  }
+ #endif
+ 
++void mmci_write_clkreg(struct mmci_host *host, u32 clk);
++void mmci_write_pwrreg(struct mmci_host *host, u32 pwr);
++
+ int mmci_dmae_prep_data(struct mmci_host *host, struct mmc_data *data,
+ 			bool next);
+ void mmci_dmae_unprep_data(struct mmci_host *host, struct mmc_data *data,
 -- 
 2.7.4
