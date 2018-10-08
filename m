@@ -1,44 +1,93 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v1 1/2] mmc: dt-bindings: add "bus-clk" for MT2712
-Date: Mon, 8 Oct 2018 13:51:20 +0200
-Message-ID: <CAPDyKFoS82cFE=C0OXLa3rULET7QsMW0dOt0B_jJ61C6G2bPGw@mail.gmail.com>
-References: <1538188195-3608-1-git-send-email-chaotian.jing@mediatek.com>
+From: Ludovic Barre <ludovic.Barre@st.com>
+Subject: [PATCH V6 10/23] mmc: mmci: add set_clk/pwrreg callbacks
+Date: Mon, 8 Oct 2018 14:08:42 +0200
+Message-ID: <1539000535-13261-11-git-send-email-ludovic.Barre@st.com>
+References: <1539000535-13261-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1538188195-3608-1-git-send-email-chaotian.jing@mediatek.com>
+In-Reply-To: <1539000535-13261-1-git-send-email-ludovic.Barre@st.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Chaotian Jing <chaotian.jing@mediatek.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Matthias Brugger <matthias.bgg@gmail.com>, Ryder Lee <ryder.lee@mediatek.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Sean Wang <sean.wang@mediatek.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, linux-mediatek@lists.infradead.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, srv_heupstream <srv_heupstream@mediatek.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
+Cc: srinivas.kandagatla@linaro.org, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com, Ludovic Barre <ludovic.barre@st.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 29 September 2018 at 04:29, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
-> On MT2712 MSDC0/3, HCLK/bus-clk need gate/ungate together,
-> or will hang when access MSDC register.
->
-> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+From: Ludovic Barre <ludovic.barre@st.com>
 
-Applied for next, thanks!
+This patch adds set_clkreg and set_pwrreg callbacks
+at mmci_host_ops to allow to call specific variant.
+extends visibility of mmci_write_clk/pwrreg functions
+to be used into specific file variant.
 
-Kind regards
-Uffe
+Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
+---
+ drivers/mmc/host/mmci.c | 16 ++++++++++++----
+ drivers/mmc/host/mmci.h |  5 +++++
+ 2 files changed, 17 insertions(+), 4 deletions(-)
 
-> ---
->  Documentation/devicetree/bindings/mmc/mtk-sd.txt | 1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.txt b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-> index f33467a..f2208f4 100644
-> --- a/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-> @@ -22,6 +22,7 @@ Required properties:
->         "source" - source clock (required)
->         "hclk" - HCLK which used for host (required)
->         "source_cg" - independent source clock gate (required for MT2712)
-> +       "bus_clk" - bus clock used for internal register access (required for MT2712 MSDC0/3)
->  - pinctrl-names: should be "default", "state_uhs"
->  - pinctrl-0: should contain default/high speed pin ctrl
->  - pinctrl-1: should contain uhs mode pin ctrl
-> --
-> 1.8.1.1.dirty
->
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 91ef2ede..1b99ae3 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -257,7 +257,7 @@ static void mmci_reg_delay(struct mmci_host *host)
+ /*
+  * This must be called with host->lock held
+  */
+-static void mmci_write_clkreg(struct mmci_host *host, u32 clk)
++void mmci_write_clkreg(struct mmci_host *host, u32 clk)
+ {
+ 	if (host->clk_reg != clk) {
+ 		host->clk_reg = clk;
+@@ -268,7 +268,7 @@ static void mmci_write_clkreg(struct mmci_host *host, u32 clk)
+ /*
+  * This must be called with host->lock held
+  */
+-static void mmci_write_pwrreg(struct mmci_host *host, u32 pwr)
++void mmci_write_pwrreg(struct mmci_host *host, u32 pwr)
+ {
+ 	if (host->pwr_reg != pwr) {
+ 		host->pwr_reg = pwr;
+@@ -1571,8 +1571,16 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 
+ 	spin_lock_irqsave(&host->lock, flags);
+ 
+-	mmci_set_clkreg(host, ios->clock);
+-	mmci_write_pwrreg(host, pwr);
++	if (host->ops && host->ops->set_clkreg)
++		host->ops->set_clkreg(host, ios->clock);
++	else
++		mmci_set_clkreg(host, ios->clock);
++
++	if (host->ops && host->ops->set_pwrreg)
++		host->ops->set_pwrreg(host, pwr);
++	else
++		mmci_write_pwrreg(host, pwr);
++
+ 	mmci_reg_delay(host);
+ 
+ 	spin_unlock_irqrestore(&host->lock, flags);
+diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+index ed59baf..dbb5ad4 100644
+--- a/drivers/mmc/host/mmci.h
++++ b/drivers/mmc/host/mmci.h
+@@ -284,6 +284,8 @@ struct mmci_host_ops {
+ 	int (*dma_start)(struct mmci_host *host, unsigned int *datactrl);
+ 	void (*dma_finalize)(struct mmci_host *host, struct mmc_data *data);
+ 	void (*dma_error)(struct mmci_host *host);
++	void (*set_clkreg)(struct mmci_host *host, unsigned int desired);
++	void (*set_pwrreg)(struct mmci_host *host, unsigned int pwr);
+ };
+ 
+ struct mmci_host {
+@@ -336,6 +338,9 @@ struct mmci_host {
+ 
+ #define dma_inprogress(host)	((host)->dma_in_progress)
+ 
++void mmci_write_clkreg(struct mmci_host *host, u32 clk);
++void mmci_write_pwrreg(struct mmci_host *host, u32 pwr);
++
+ int mmci_dmae_prep_data(struct mmci_host *host, struct mmc_data *data,
+ 			bool next);
+ void mmci_dmae_unprep_data(struct mmci_host *host, struct mmc_data *data,
+-- 
+2.7.4
