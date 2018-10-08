@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V6 02/23] mmc: mmci: introduce dma_priv pointer to mmci_host
-Date: Mon, 8 Oct 2018 14:08:34 +0200
-Message-ID: <1539000535-13261-3-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V6 05/23] mmc: mmci: add get_next_data callback
+Date: Mon, 8 Oct 2018 14:08:37 +0200
+Message-ID: <1539000535-13261-6-git-send-email-ludovic.Barre@st.com>
 References: <1539000535-13261-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,385 +14,103 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
--Introduces dma_priv pointer to define specific
-needs for each dma engine. This patch is needed to prepare
-sdmmc variant with internal dma which not use dmaengine API.
--Moves next cookie to mmci host structure to share same cookie
-management between all variants.
+This patch adds get_next_data callback to mmci_host_ops.
+Generic mmci_get_next_data factorizes next_cookie check and
+the host ops call.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.c | 144 ++++++++++++++++++++++++++++++------------------
- drivers/mmc/host/mmci.h |  19 ++-----
- 2 files changed, 94 insertions(+), 69 deletions(-)
+ drivers/mmc/host/mmci.c          | 16 ++++++++++------
+ drivers/mmc/host/mmci.h          |  2 ++
+ drivers/mmc/host/mmci_qcom_dml.c |  1 +
+ 3 files changed, 13 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 120382b..922a47b 100644
+index 4db2b3f..8d483dd 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -386,6 +386,9 @@ void mmci_dma_setup(struct mmci_host *host)
- 	if (host->ops->dma_setup(host))
- 		return;
- 
-+	/* initialize pre request cookie */
-+	host->next_cookie = 1;
-+
- 	host->use_dma = true;
+@@ -417,6 +417,14 @@ void mmci_unprep_data(struct mmci_host *host, struct mmc_data *data,
+ 	data->host_cookie = 0;
  }
  
-@@ -447,31 +450,50 @@ static void mmci_init_sg(struct mmci_host *host, struct mmc_data *data)
-  * no custom DMA interfaces are supported.
-  */
- #ifdef CONFIG_DMA_ENGINE
-+struct mmci_dmae_next {
-+	struct dma_async_tx_descriptor *desc;
-+	struct dma_chan	*chan;
-+};
-+
-+struct mmci_dmae_priv {
-+	struct dma_chan	*cur;
-+	struct dma_chan	*rx_channel;
-+	struct dma_chan	*tx_channel;
-+	struct dma_async_tx_descriptor	*desc_current;
-+	struct mmci_dmae_next next_data;
-+};
-+
- int mmci_dmae_setup(struct mmci_host *host)
- {
- 	const char *rxname, *txname;
-+	struct mmci_dmae_priv *dmae;
- 
--	host->dma_rx_channel = dma_request_slave_channel(mmc_dev(host->mmc), "rx");
--	host->dma_tx_channel = dma_request_slave_channel(mmc_dev(host->mmc), "tx");
-+	dmae = devm_kzalloc(mmc_dev(host->mmc), sizeof(*dmae), GFP_KERNEL);
-+	if (!dmae)
-+		return -ENOMEM;
- 
--	/* initialize pre request cookie */
--	host->next_data.cookie = 1;
-+	host->dma_priv = dmae;
-+
-+	dmae->rx_channel = dma_request_slave_channel(mmc_dev(host->mmc),
-+						     "rx");
-+	dmae->tx_channel = dma_request_slave_channel(mmc_dev(host->mmc),
-+						     "tx");
- 
- 	/*
- 	 * If only an RX channel is specified, the driver will
- 	 * attempt to use it bidirectionally, however if it is
- 	 * is specified but cannot be located, DMA will be disabled.
- 	 */
--	if (host->dma_rx_channel && !host->dma_tx_channel)
--		host->dma_tx_channel = host->dma_rx_channel;
-+	if (dmae->rx_channel && !dmae->tx_channel)
-+		dmae->tx_channel = dmae->rx_channel;
- 
--	if (host->dma_rx_channel)
--		rxname = dma_chan_name(host->dma_rx_channel);
-+	if (dmae->rx_channel)
-+		rxname = dma_chan_name(dmae->rx_channel);
- 	else
- 		rxname = "none";
- 
--	if (host->dma_tx_channel)
--		txname = dma_chan_name(host->dma_tx_channel);
-+	if (dmae->tx_channel)
-+		txname = dma_chan_name(dmae->tx_channel);
- 	else
- 		txname = "none";
- 
-@@ -482,22 +504,22 @@ int mmci_dmae_setup(struct mmci_host *host)
- 	 * Limit the maximum segment size in any SG entry according to
- 	 * the parameters of the DMA engine device.
- 	 */
--	if (host->dma_tx_channel) {
--		struct device *dev = host->dma_tx_channel->device->dev;
-+	if (dmae->tx_channel) {
-+		struct device *dev = dmae->tx_channel->device->dev;
- 		unsigned int max_seg_size = dma_get_max_seg_size(dev);
- 
- 		if (max_seg_size < host->mmc->max_seg_size)
- 			host->mmc->max_seg_size = max_seg_size;
- 	}
--	if (host->dma_rx_channel) {
--		struct device *dev = host->dma_rx_channel->device->dev;
-+	if (dmae->rx_channel) {
-+		struct device *dev = dmae->rx_channel->device->dev;
- 		unsigned int max_seg_size = dma_get_max_seg_size(dev);
- 
- 		if (max_seg_size < host->mmc->max_seg_size)
- 			host->mmc->max_seg_size = max_seg_size;
- 	}
- 
--	if (!host->dma_tx_channel && !host->dma_rx_channel) {
-+	if (!dmae->tx_channel || !dmae->rx_channel) {
- 		mmci_dmae_release(host);
- 		return -EINVAL;
- 	}
-@@ -511,21 +533,24 @@ int mmci_dmae_setup(struct mmci_host *host)
-  */
- void mmci_dmae_release(struct mmci_host *host)
- {
--	if (host->dma_rx_channel)
--		dma_release_channel(host->dma_rx_channel);
--	if (host->dma_tx_channel)
--		dma_release_channel(host->dma_tx_channel);
--	host->dma_rx_channel = host->dma_tx_channel = NULL;
-+	struct mmci_dmae_priv *dmae = host->dma_priv;
-+
-+	if (dmae->rx_channel)
-+		dma_release_channel(dmae->rx_channel);
-+	if (dmae->tx_channel)
-+		dma_release_channel(dmae->tx_channel);
-+	dmae->rx_channel = dmae->tx_channel = NULL;
- }
- 
- static void mmci_dma_unmap(struct mmci_host *host, struct mmc_data *data)
- {
-+	struct mmci_dmae_priv *dmae = host->dma_priv;
- 	struct dma_chan *chan;
- 
- 	if (data->flags & MMC_DATA_READ)
--		chan = host->dma_rx_channel;
-+		chan = dmae->rx_channel;
- 	else
--		chan = host->dma_tx_channel;
-+		chan = dmae->tx_channel;
- 
- 	dma_unmap_sg(chan->device->dev, data->sg, data->sg_len,
- 		     mmc_get_dma_dir(data));
-@@ -533,14 +558,16 @@ static void mmci_dma_unmap(struct mmci_host *host, struct mmc_data *data)
- 
- static void mmci_dma_data_error(struct mmci_host *host)
- {
-+	struct mmci_dmae_priv *dmae = host->dma_priv;
-+
- 	if (!host->use_dma || !dma_inprogress(host))
- 		return;
- 
- 	dev_err(mmc_dev(host->mmc), "error during DMA transfer!\n");
--	dmaengine_terminate_all(host->dma_current);
-+	dmaengine_terminate_all(dmae->cur);
- 	host->dma_in_progress = false;
--	host->dma_current = NULL;
--	host->dma_desc_current = NULL;
-+	dmae->cur = NULL;
-+	dmae->desc_current = NULL;
- 	host->data->host_cookie = 0;
- 
- 	mmci_dma_unmap(host, host->data);
-@@ -548,6 +575,7 @@ static void mmci_dma_data_error(struct mmci_host *host)
- 
- static void mmci_dma_finalize(struct mmci_host *host, struct mmc_data *data)
- {
-+	struct mmci_dmae_priv *dmae = host->dma_priv;
- 	u32 status;
- 	int i;
- 
-@@ -586,8 +614,8 @@ static void mmci_dma_finalize(struct mmci_host *host, struct mmc_data *data)
- 	}
- 
- 	host->dma_in_progress = false;
--	host->dma_current = NULL;
--	host->dma_desc_current = NULL;
-+	dmae->cur = NULL;
-+	dmae->desc_current = NULL;
- }
- 
- /* prepares DMA channel and DMA descriptor, returns non-zero on failure */
-@@ -595,6 +623,7 @@ static int __mmci_dma_prep_data(struct mmci_host *host, struct mmc_data *data,
- 				struct dma_chan **dma_chan,
- 				struct dma_async_tx_descriptor **dma_desc)
- {
-+	struct mmci_dmae_priv *dmae = host->dma_priv;
- 	struct variant_data *variant = host->variant;
- 	struct dma_slave_config conf = {
- 		.src_addr = host->phybase + MMCIFIFO,
-@@ -613,10 +642,10 @@ static int __mmci_dma_prep_data(struct mmci_host *host, struct mmc_data *data,
- 
- 	if (data->flags & MMC_DATA_READ) {
- 		conf.direction = DMA_DEV_TO_MEM;
--		chan = host->dma_rx_channel;
-+		chan = dmae->rx_channel;
- 	} else {
- 		conf.direction = DMA_MEM_TO_DEV;
--		chan = host->dma_tx_channel;
-+		chan = dmae->tx_channel;
- 	}
- 
- 	/* If there's no DMA channel, fall back to PIO */
-@@ -656,25 +685,30 @@ static int __mmci_dma_prep_data(struct mmci_host *host, struct mmc_data *data,
- static inline int mmci_dma_prep_data(struct mmci_host *host,
- 				     struct mmc_data *data)
- {
-+	struct mmci_dmae_priv *dmae = host->dma_priv;
-+
- 	/* Check if next job is already prepared. */
--	if (host->dma_current && host->dma_desc_current)
-+	if (dmae->cur && dmae->desc_current)
- 		return 0;
- 
- 	/* No job were prepared thus do it now. */
--	return __mmci_dma_prep_data(host, data, &host->dma_current,
--				    &host->dma_desc_current);
-+	return __mmci_dma_prep_data(host, data, &dmae->cur,
-+				    &dmae->desc_current);
- }
- 
- static inline int mmci_dma_prep_next(struct mmci_host *host,
- 				     struct mmc_data *data)
- {
--	struct mmci_host_next *nd = &host->next_data;
--	return __mmci_dma_prep_data(host, data, &nd->dma_chan, &nd->dma_desc);
-+	struct mmci_dmae_priv *dmae = host->dma_priv;
-+	struct mmci_dmae_next *nd = &dmae->next_data;
-+
-+	return __mmci_dma_prep_data(host, data, &nd->chan, &nd->desc);
- }
- 
- static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
- {
- 	int ret;
-+	struct mmci_dmae_priv *dmae = host->dma_priv;
- 	struct mmc_data *data = host->data;
- 
- 	if (!host->use_dma)
-@@ -689,8 +723,8 @@ static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
- 		 "Submit MMCI DMA job, sglen %d blksz %04x blks %04x flags %08x\n",
- 		 data->sg_len, data->blksz, data->blocks, data->flags);
- 	host->dma_in_progress = true;
--	dmaengine_submit(host->dma_desc_current);
--	dma_async_issue_pending(host->dma_current);
-+	dmaengine_submit(dmae->desc_current);
-+	dma_async_issue_pending(dmae->cur);
- 
- 	if (host->variant->qcom_dml)
- 		dml_start_xfer(host, data);
-@@ -712,25 +746,25 @@ static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
- 
- static void mmci_get_next_data(struct mmci_host *host, struct mmc_data *data)
- {
--	struct mmci_host_next *next = &host->next_data;
-+	struct mmci_dmae_priv *dmae = host->dma_priv;
-+	struct mmci_dmae_next *next = &dmae->next_data;
- 
- 	if (!host->use_dma)
- 		return;
- 
--	WARN_ON(data->host_cookie && data->host_cookie != next->cookie);
--	WARN_ON(!data->host_cookie && (next->dma_desc || next->dma_chan));
++void mmci_get_next_data(struct mmci_host *host, struct mmc_data *data)
++{
 +	WARN_ON(data->host_cookie && data->host_cookie != host->next_cookie);
-+	WARN_ON(!data->host_cookie && (next->desc || next->chan));
- 
--	host->dma_desc_current = next->dma_desc;
--	host->dma_current = next->dma_chan;
--	next->dma_desc = NULL;
--	next->dma_chan = NULL;
-+	dmae->desc_current = next->desc;
-+	dmae->cur = next->chan;
-+	next->desc = NULL;
-+	next->chan = NULL;
++
++	if (host->ops && host->ops->get_next_data)
++		host->ops->get_next_data(host, data);
++}
++
+ static void
+ mmci_request_end(struct mmci_host *host, struct mmc_request *mrq)
+ {
+@@ -767,7 +775,7 @@ static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
+ 	return 0;
  }
  
- static void mmci_pre_request(struct mmc_host *mmc, struct mmc_request *mrq)
+-static void mmci_get_next_data(struct mmci_host *host, struct mmc_data *data)
++void mmci_dmae_get_next_data(struct mmci_host *host, struct mmc_data *data)
  {
- 	struct mmci_host *host = mmc_priv(mmc);
- 	struct mmc_data *data = mrq->data;
--	struct mmci_host_next *nd = &host->next_data;
- 
- 	if (!host->use_dma || !data)
- 		return;
-@@ -741,13 +775,15 @@ static void mmci_pre_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 	struct mmci_dmae_priv *dmae = host->dma_priv;
+ 	struct mmci_dmae_next *next = &dmae->next_data;
+@@ -775,7 +783,6 @@ static void mmci_get_next_data(struct mmci_host *host, struct mmc_data *data)
+ 	if (!host->use_dma)
  		return;
  
- 	if (!mmci_dma_prep_next(host, data))
--		data->host_cookie = ++nd->cookie < 0 ? 1 : nd->cookie;
-+		data->host_cookie = ++host->next_cookie < 0 ?
-+			1 : host->next_cookie;
- }
+-	WARN_ON(data->host_cookie && data->host_cookie != host->next_cookie);
+ 	WARN_ON(!data->host_cookie && (next->desc || next->chan));
  
- static void mmci_post_request(struct mmc_host *mmc, struct mmc_request *mrq,
- 			      int err)
+ 	dmae->desc_current = next->desc;
+@@ -820,6 +827,7 @@ void mmci_dmae_unprep_data(struct mmci_host *host,
+ static struct mmci_host_ops mmci_variant_ops = {
+ 	.prep_data = mmci_dmae_prep_data,
+ 	.unprep_data = mmci_dmae_unprep_data,
++	.get_next_data = mmci_dmae_get_next_data,
+ 	.dma_setup = mmci_dmae_setup,
+ 	.dma_release = mmci_dmae_release,
+ };
+@@ -830,10 +838,6 @@ void mmci_variant_init(struct mmci_host *host)
+ }
+ #else
+ /* Blank functions if the DMA engine is not available */
+-static void mmci_get_next_data(struct mmci_host *host, struct mmc_data *data)
+-{
+-}
+-
+ static inline void mmci_dma_finalize(struct mmci_host *host,
+ 				     struct mmc_data *data)
  {
- 	struct mmci_host *host = mmc_priv(mmc);
-+	struct mmci_dmae_priv *dmae = host->dma_priv;
- 	struct mmc_data *data = mrq->data;
- 
- 	if (!host->use_dma || !data || !data->host_cookie)
-@@ -756,24 +792,24 @@ static void mmci_post_request(struct mmc_host *mmc, struct mmc_request *mrq,
- 	mmci_dma_unmap(host, data);
- 
- 	if (err) {
--		struct mmci_host_next *next = &host->next_data;
-+		struct mmci_dmae_next *next = &dmae->next_data;
- 		struct dma_chan *chan;
- 		if (data->flags & MMC_DATA_READ)
--			chan = host->dma_rx_channel;
-+			chan = dmae->rx_channel;
- 		else
--			chan = host->dma_tx_channel;
-+			chan = dmae->tx_channel;
- 		dmaengine_terminate_all(chan);
- 
--		if (host->dma_desc_current == next->dma_desc)
--			host->dma_desc_current = NULL;
-+		if (dmae->desc_current == next->desc)
-+			dmae->desc_current = NULL;
- 
--		if (host->dma_current == next->dma_chan) {
-+		if (dmae->cur == next->chan) {
- 			host->dma_in_progress = false;
--			host->dma_current = NULL;
-+			dmae->cur = NULL;
- 		}
- 
--		next->dma_desc = NULL;
--		next->dma_chan = NULL;
-+		next->desc = NULL;
-+		next->chan = NULL;
- 		data->host_cookie = 0;
- 	}
- }
 diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 34bb5e6..1d5ba4e 100644
+index decb1c7..a6a85aa 100644
 --- a/drivers/mmc/host/mmci.h
 +++ b/drivers/mmc/host/mmci.h
-@@ -277,12 +277,6 @@ struct mmci_host_ops {
+@@ -277,6 +277,7 @@ struct mmci_host_ops {
+ 			 bool next);
+ 	void (*unprep_data)(struct mmci_host *host, struct mmc_data *data,
+ 			    int err);
++	void (*get_next_data)(struct mmci_host *host, struct mmc_data *data);
+ 	int (*dma_setup)(struct mmci_host *host);
  	void (*dma_release)(struct mmci_host *host);
  };
- 
--struct mmci_host_next {
--	struct dma_async_tx_descriptor	*dma_desc;
--	struct dma_chan			*dma_chan;
--	s32				cookie;
--};
--
- struct mmci_host {
- 	phys_addr_t		phybase;
- 	void __iomem		*base;
-@@ -325,19 +319,14 @@ struct mmci_host {
- 	int (*get_rx_fifocnt)(struct mmci_host *h, u32 status, int remain);
- 
- 	u8			use_dma:1;
--#ifdef CONFIG_DMA_ENGINE
--	/* DMA stuff */
--	struct dma_chan		*dma_current;
--	struct dma_chan		*dma_rx_channel;
--	struct dma_chan		*dma_tx_channel;
--	struct dma_async_tx_descriptor	*dma_desc_current;
--	struct mmci_host_next	next_data;
- 	u8			dma_in_progress:1;
-+	void			*dma_priv;
- 
--#define dma_inprogress(host)	((host)->dma_in_progress)
--#endif
-+	s32			next_cookie;
- };
- 
-+#define dma_inprogress(host)	((host)->dma_in_progress)
-+
+@@ -335,6 +336,7 @@ int mmci_dmae_prep_data(struct mmci_host *host, struct mmc_data *data,
+ 			bool next);
+ void mmci_dmae_unprep_data(struct mmci_host *host, struct mmc_data *data,
+ 			   int err);
++void mmci_dmae_get_next_data(struct mmci_host *host, struct mmc_data *data);
  int mmci_dmae_setup(struct mmci_host *host);
  void mmci_dmae_release(struct mmci_host *host);
  
+diff --git a/drivers/mmc/host/mmci_qcom_dml.c b/drivers/mmc/host/mmci_qcom_dml.c
+index 156e30b..da4c43a 100644
+--- a/drivers/mmc/host/mmci_qcom_dml.c
++++ b/drivers/mmc/host/mmci_qcom_dml.c
+@@ -186,6 +186,7 @@ static int qcom_dma_setup(struct mmci_host *host)
+ static struct mmci_host_ops qcom_variant_ops = {
+ 	.prep_data = mmci_dmae_prep_data,
+ 	.unprep_data = mmci_dmae_unprep_data,
++	.get_next_data = mmci_dmae_get_next_data,
+ 	.dma_setup = qcom_dma_setup,
+ 	.dma_release = mmci_dmae_release,
+ };
 -- 
 2.7.4
