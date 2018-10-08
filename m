@@ -1,159 +1,80 @@
-From: Bjorn Andersson <bjorn.andersson@linaro.org>
-Subject: Re: [PATCH V3 0/4] Changes for SDCC5 version
-Date: Sun, 7 Oct 2018 23:56:53 -0700
-Message-ID: <20181008065653.GB2550@tuxbook-pro>
-References: <1529386761-4923-1-git-send-email-vviswana@codeaurora.org>
- <20180924194412.GA27477@arch>
- <bcdeaf0c-fb04-67f5-8580-a3f5110bcba5@codeaurora.org>
- <C01C1C07-13FA-4693-9493-2FAEE9153577@gmail.com>
- <74ABB71C-6B0C-44AE-BC30-1F385ADC3E42@gmail.com>
+From: Frieder Schrempf <frieder.schrempf@exceet.de>
+Subject: Re: [PATCH 2/2] mmc: Add mmc_force_detect_change_begin / _end
+ functions
+Date: Mon, 8 Oct 2018 11:53:21 +0200
+Message-ID: <85c2baea-8dbb-ef1b-93d2-7749c5a100e6@exceet.de>
+References: <CAPDyKFqDrdD+N+foLCwsVABtboz1Vn=OtJs14gp07zJfXHVKSA@mail.gmail.com>
+ <f9028dcb-c217-4efc-60a7-d0a2c1804a08@exceet.de>
+ <d9795fde-6bdd-b6fa-da41-839d44df6435@redhat.com>
+ <20180927081452.a2xw25sdoqtadntu@flea>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <74ABB71C-6B0C-44AE-BC30-1F385ADC3E42@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Craig <ctatlor97@gmail.com>
-Cc: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>, Vijay Viswanath <vviswana@codeaurora.org>, adrian.hunter@intel.com, ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, devicetree@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, jeremymc@redhat.com, riteshh@codeaurora.org, dianders@google.com, sayalil@codeaurora.org
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <20180927081452.a2xw25sdoqtadntu@flea>
+Content-Language: en-US
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: Maxime Ripard <maxime.ripard@bootlin.com>, Hans de Goede <hdegoede@redhat.com>, quentin.schulz@free-electrons.com
+Cc: devel@driverdev.osuosl.org, ulf.hansson@linaro.org, baolin.wang@linaro.org, gregkh@linuxfoundation.org, linus.walleij@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, linux-kernel@vger.kernel.org, wens@csie.org, icenowy@aosc.xyz, shawn.lin@rock-chips.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Sun 07 Oct 01:07 PDT 2018, Craig wrote:
+Hi,
 
-> Any updates on this?
+On 27.09.2018 10:14, Maxime Ripard wrote:
+> On Wed, Sep 26, 2018 at 10:19:22PM +0200, Hans de Goede wrote:
+>> On 26-09-18 16:44, Frieder Schrempf wrote:
+>>> Hi,
+>>>
+>>> On Fri, Feb 09, 2018 at 03:01:00PM +0100, Ulf Hansson wrote:
+>>>> [...]
+>>>>
+>>>>>>> I'd like to know if any progress has been made on that problem
+>>> (I may
+>>>>>>> have missed patches).
+>>>>>>> Had you had the time to look at the issue?
+>>>>>>
+>>>>>> I have looked at the issue, but not manage to cook some patches
+>>> for it.
+>>>>>>
+>>>>>> However, it's on my top of my TODO list for mmc. No promises, but
+>>>>>> perhaps and hopefully I manage to get something posted during the
+>>>>>> coming release cycle.
+>>>
+>>> I would be interested in a ESP8089 driver in mainline and that's why I want to pick up this discussion.
+>>>
+>>> What is the current status of the "mmc_reprobe_device" implementation, that Hans was explaining and Ulf wanted to provide some months ago?
+>>
+>> Ulf did eventually write a new way to deal with this and then Quentin
+>> did manage to get the esp8089 driver to work with it, the new function
+>> to use for this is added by this commit:
+>>
+>> https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/drivers/mmc/core?id=1433269c4d2461be1f36db5dbb453976b38996ff
+>>
+>> I'm not sure what the status of upstreaming the ep8089 driver is now
+>> that we've this in place.
+>>
+>> Quentin, do you have a version of the esp8089 driver somewhere
+>> which will work correctly with the new mmc_sw_reset() function?
+>>
+>> Also what is the status of adding this driver to say staging?
 > 
+> IIRC, we tried to get it into staging, and we got told that it was too
+> nice for staging at this point. So we're basically stuck somewhere
+> between staging and !staging, with the driver being too nice for the
+> former, and not nice enough for the latter :)
 
-FWIW I used qcom,sdhci-msm-v5 on QCS404 successfully.
+Ok, and is there someone willing to continue upstreaming the driver? 
+Maybe someone can rebase and resend the latest approach?
 
-Regards,
-Bjorn
+After all it looks like a lot of work has already been done.
 
-> On 25 September 2018 16:39:33 BST, Craig <ctatlor97@gmail.com> wrote:
-> >
-> >
-> >On 25 September 2018 12:17:26 BST, Veerabhadrarao Badiganti
-> ><vbadigan@codeaurora.org> wrote:
-> >>
-> >>On 9/25/2018 1:18 AM, Craig Tatlor wrote:
-> >>> What socs have you tested this on?
-> >>> On sdm660 it seems to crash device
-> >>> when writing pwr ctl.
-> >>
-> >>Hi
-> >>We have tested this on SDM845.
-> >>SDM660 also has SDCC5 controller, so you would need to define
-> >>"qcom,sdhci-msm-v5" in your platform dt.
-> >>Can you confirm if you have defined this?
-> >>
-> >Hi,
-> >Yes my DT entry is as follows
-> >
-> >sdhc_1: sdhci@f9824900 {                                               
-> >                  
-> >compatible = "qcom,sdhci-msm-v5";                                      
-> >          
-> >reg = <0xc0c4000 0x1000>, <0xc0c5000 0x1000>;                          
-> >          
-> >interrupts = <GIC_SPI 112 IRQ_TYPE_LEVEL_HIGH>;                        
-> >          
-> >interrupt-names = "pwr_irq";                                           
-> >          
-> >                                                                       
-> >bus-width = <8>;                                                       
-> >          
-> >non-removable;                                                         
-> >          
-> >                                                                       
-> >vmmc-supply = <&pm660l_l4>;                                            
-> >          
-> >vqmmc-supply = <&pm660_l8>;                                            
-> >          
-> >                                                                       
-> >pinctrl-names = "default";                                             
-> >          
-> >pinctrl-0 = <&sdc1_clk &sdc1_cmd &sdc1_data &sdc1_rclk>;               
-> >          
-> >                                                                       
-> >clocks = <&gcc GCC_SDCC1_APPS_CLK>, <&gcc GCC_SDCC1_AHB_CLK>;          
-> >          
-> >clock-names = "core", "iface";                                         
-> >          
-> >        };          
-> >
-> >>BTW, can you please share few details of the platform that you are
-> >>checking?
-> >>We are not aware of any dev platform based on SDM660. This is just for
-> >
-> >>my info
-> >
-> >I'm checking on the sony xperia xa2 (pioneer) smartphone.
-> >>
-> >>> On Tue, Jun 19, 2018 at 11:09:17AM +0530, Vijay Viswanath wrote:
-> >>>> With SDCC5, the MCI register space got removed and the offset/order
-> >>of
-> >>>> several registers have changed. Based on SDCC version used and the
-> >>register,
-> >>>> we need to pick the base address and offset.
-> >>>>
-> >>>> Depends on patch series: "[PATCH V5 0/2] mmc: sdhci-msm:
-> >Configuring
-> >>IO_PAD support for sdhci-msm"
-> >>>>
-> >>>> Changes since RFC:
-> >>>> 	Dropped voltage regulator changes in sdhci-msm
-> >>>> 	Split the "Register changes for sdcc V5" patch
-> >>>> 	Instead of checking mci removal for deciding which base addr to
-> >>use,
-> >>>> 	new function pointers are defined for the 2 variants of sdcc:
-> >>>> 		1) MCI present
-> >>>> 		2) V5 (mci removed)
-> >>>> 	Instead of string comparing with the compatible string from DT
-> >>file,
-> >>>> 	the sdhci_msm_probe will now pick the data associated with the
-> >>>> 	compatible entry and use it to load variant specific address
-> >>offsets
-> >>>> 	and msm variant specific read/write ops.
-> >>>>
-> >>>> Changes since V1:
-> >>>> 	Removed unused msm_reab & msm_writeb APIs
-> >>>> 	Changed certain register addresses from uppercase to lowercase hex
-> >>>> 	letters
-> >>>> 	Removed extra lines and spaces
-> >>>> 	Split "[PATCH V1 0/3] Changes for SDCC5 version" patch into two,
-> >>>> 	one for Documentation and other for the driver changes.
-> >>>>
-> >>>> Changes since V2:
-> >>>> 	Used lower case for macro function defenitions
-> >>>> 	Removed unused function pointers for msm_readb & msm_writeb
-> >>>>
-> >>>>
-> >>>> Sayali Lokhande (3):
-> >>>>    mmc: sdhci-msm: Define new Register address map
-> >>>>    Documentation: sdhci-msm: Add new compatible string for SDCC v5
-> >>>>    mmc: host: Register changes for sdcc V5
-> >>>>
-> >>>> Vijay Viswanath (1):
-> >>>>    mmc: sdhci-msm: Add msm version specific ops and data structures
-> >>>>
-> >>>>   .../devicetree/bindings/mmc/sdhci-msm.txt          |   7 +-
-> >>>>   drivers/mmc/host/sdhci-msm.c                       | 511
-> >>++++++++++++++++-----
-> >>>>   2 files changed, 391 insertions(+), 127 deletions(-)
-> >>>>
-> >>>> -- 
-> >>>>   Qualcomm India Private Limited, on behalf of Qualcomm Innovation
-> >>Center, Inc.
-> >>>> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-> >a
-> >>Linux Foundation Collaborative Project.
-> >>>>
-> >>>> --
-> >>>> To unsubscribe from this list: send the line "unsubscribe
-> >>linux-arm-msm" in
-> >>>> the body of a message to majordomo@vger.kernel.org
-> >>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>
-> >>Thanks,
-> >>Veera
-> 
-> -- 
-> Sent from my Android device with K-9 Mail. Please excuse my brevity.
+Thanks,
+Frieder
