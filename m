@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V6 12/23] mmc: mmci: expand startbiterr to irqmask and error check
-Date: Mon, 8 Oct 2018 14:08:44 +0200
-Message-ID: <1539000535-13261-13-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V6 03/23] mmc: mmci: merge prepare data functions
+Date: Mon, 8 Oct 2018 14:08:35 +0200
+Message-ID: <1539000535-13261-4-git-send-email-ludovic.Barre@st.com>
 References: <1539000535-13261-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,104 +14,68 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-All variants don't pretend to have a startbiterr.
--While data error check, if status register return an error
-(like  MCI_DATACRCFAIL) we must avoid to check MCI_STARTBITERR
-(if not desired).
--expand start_err to MCI_IRQENABLE to avoid to set this bit by default.
+This patch merges the prepare data functions.
+This allows to define a single access to prepare data service.
+This prepares integration for mmci host ops.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.c | 27 ++++++++++++++++-----------
- drivers/mmc/host/mmci.h |  6 +++---
- 2 files changed, 19 insertions(+), 14 deletions(-)
+ drivers/mmc/host/mmci.c | 19 +++++++------------
+ 1 file changed, 7 insertions(+), 12 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 0e8b65d..737adf4 100644
+index 922a47b..f862a1b 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -1042,14 +1042,18 @@ static void
- mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
- 	      unsigned int status)
+@@ -683,10 +683,14 @@ static int __mmci_dma_prep_data(struct mmci_host *host, struct mmc_data *data,
+ }
+ 
+ static inline int mmci_dma_prep_data(struct mmci_host *host,
+-				     struct mmc_data *data)
++				     struct mmc_data *data,
++				     bool next)
  {
-+	unsigned int status_err;
-+
- 	/* Make sure we have data to handle */
- 	if (!data)
+ 	struct mmci_dmae_priv *dmae = host->dma_priv;
++	struct mmci_dmae_next *nd = &dmae->next_data;
+ 
++	if (next)
++		return __mmci_dma_prep_data(host, data, &nd->chan, &nd->desc);
+ 	/* Check if next job is already prepared. */
+ 	if (dmae->cur && dmae->desc_current)
+ 		return 0;
+@@ -696,15 +700,6 @@ static inline int mmci_dma_prep_data(struct mmci_host *host,
+ 				    &dmae->desc_current);
+ }
+ 
+-static inline int mmci_dma_prep_next(struct mmci_host *host,
+-				     struct mmc_data *data)
+-{
+-	struct mmci_dmae_priv *dmae = host->dma_priv;
+-	struct mmci_dmae_next *nd = &dmae->next_data;
+-
+-	return __mmci_dma_prep_data(host, data, &nd->chan, &nd->desc);
+-}
+-
+ static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
+ {
+ 	int ret;
+@@ -714,7 +709,7 @@ static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
+ 	if (!host->use_dma)
+ 		return -EINVAL;
+ 
+-	ret = mmci_dma_prep_data(host, host->data);
++	ret = mmci_dma_prep_data(host, host->data, false);
+ 	if (ret)
+ 		return ret;
+ 
+@@ -774,7 +769,7 @@ static void mmci_pre_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 	if (mmci_validate_data(host, data))
  		return;
  
- 	/* First check for errors */
--	if (status & (MCI_DATACRCFAIL | MCI_DATATIMEOUT |
--		      host->variant->start_err |
--		      MCI_TXUNDERRUN | MCI_RXOVERRUN)) {
-+	status_err = status & (host->variant->start_err |
-+			       MCI_DATACRCFAIL | MCI_DATATIMEOUT |
-+			       MCI_TXUNDERRUN | MCI_RXOVERRUN);
-+
-+	if (status_err) {
- 		u32 remain, success;
- 
- 		/* Terminate the DMA transfer */
-@@ -1066,18 +1070,18 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
- 		success = data->blksz * data->blocks - remain;
- 
- 		dev_dbg(mmc_dev(host->mmc), "MCI ERROR IRQ, status 0x%08x at 0x%08x\n",
--			status, success);
--		if (status & MCI_DATACRCFAIL) {
-+			status_err, success);
-+		if (status_err & MCI_DATACRCFAIL) {
- 			/* Last block was not successful */
- 			success -= 1;
- 			data->error = -EILSEQ;
--		} else if (status & MCI_DATATIMEOUT) {
-+		} else if (status_err & MCI_DATATIMEOUT) {
- 			data->error = -ETIMEDOUT;
--		} else if (status & MCI_STARTBITERR) {
-+		} else if (status_err & MCI_STARTBITERR) {
- 			data->error = -ECOMM;
--		} else if (status & MCI_TXUNDERRUN) {
-+		} else if (status_err & MCI_TXUNDERRUN) {
- 			data->error = -EIO;
--		} else if (status & MCI_RXOVERRUN) {
-+		} else if (status_err & MCI_RXOVERRUN) {
- 			if (success > host->variant->fifosize)
- 				success -= host->variant->fifosize;
- 			else
-@@ -1918,7 +1922,7 @@ static int mmci_probe(struct amba_device *dev,
- 			goto clk_disable;
- 	}
- 
--	writel(MCI_IRQENABLE, host->base + MMCIMASK0);
-+	writel(MCI_IRQENABLE | variant->start_err, host->base + MMCIMASK0);
- 
- 	amba_set_drvdata(dev, mmc);
- 
-@@ -2005,7 +2009,8 @@ static void mmci_restore(struct mmci_host *host)
- 		writel(host->datactrl_reg, host->base + MMCIDATACTRL);
- 		writel(host->pwr_reg, host->base + MMCIPOWER);
- 	}
--	writel(MCI_IRQENABLE, host->base + MMCIMASK0);
-+	writel(MCI_IRQENABLE | host->variant->start_err,
-+	       host->base + MMCIMASK0);
- 	mmci_reg_delay(host);
- 
- 	spin_unlock_irqrestore(&host->lock, flags);
-diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index d5979e8..8e7ea44 100644
---- a/drivers/mmc/host/mmci.h
-+++ b/drivers/mmc/host/mmci.h
-@@ -181,9 +181,9 @@
- #define MMCIFIFO		0x080 /* to 0x0bc */
- 
- #define MCI_IRQENABLE	\
--	(MCI_CMDCRCFAILMASK|MCI_DATACRCFAILMASK|MCI_CMDTIMEOUTMASK|	\
--	MCI_DATATIMEOUTMASK|MCI_TXUNDERRUNMASK|MCI_RXOVERRUNMASK|	\
--	MCI_CMDRESPENDMASK|MCI_CMDSENTMASK|MCI_STARTBITERRMASK)
-+	(MCI_CMDCRCFAILMASK | MCI_DATACRCFAILMASK | MCI_CMDTIMEOUTMASK | \
-+	MCI_DATATIMEOUTMASK | MCI_TXUNDERRUNMASK | MCI_RXOVERRUNMASK |	\
-+	MCI_CMDRESPENDMASK | MCI_CMDSENTMASK)
- 
- /* These interrupts are directed to IRQ1 when two IRQ lines are available */
- #define MCI_IRQ1MASK \
+-	if (!mmci_dma_prep_next(host, data))
++	if (!mmci_dma_prep_data(host, data, true))
+ 		data->host_cookie = ++host->next_cookie < 0 ?
+ 			1 : host->next_cookie;
+ }
 -- 
 2.7.4
