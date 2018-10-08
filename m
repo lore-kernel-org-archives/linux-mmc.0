@@ -1,59 +1,61 @@
-From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V6 20/23] mmc: mmci: add clock divider for stm32 sdmmc
-Date: Mon, 8 Oct 2018 14:08:52 +0200
-Message-ID: <1539000535-13261-21-git-send-email-ludovic.Barre@st.com>
-References: <1539000535-13261-1-git-send-email-ludovic.Barre@st.com>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: Sayali Lokhande <sayalil@codeaurora.org>
+Subject: [PATCH V1 0/7] Add devfreq based clock scaling support for mmc
+Date: Mon,  8 Oct 2018 18:27:59 +0530
+Message-ID: <1539003486-24087-1-git-send-email-sayalil@codeaurora.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1539000535-13261-1-git-send-email-ludovic.Barre@st.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
-Cc: srinivas.kandagatla@linaro.org, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com, Ludovic Barre <ludovic.barre@st.com>
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org, robh+dt@kernel.org, robh@kernel.org, mark.rutland@arm.com
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, devicetree@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, vviswana@codeaurora.org, bjorn.andersson@linaro.org, riteshh@codeaurora.org, vbadigan@codeaurora.org, dianders@google.com, sayalil@codeaurora.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Ludovic Barre <ludovic.barre@st.com>
+This change adds the use of devfreq based clock scaling to MMC.
+Both eMMC and SD card can use it.
+For some workloads, such as video playback, it isn't necessary
+for these cards to run at high speed. Running at lower frequency,
+in such cases can still meet the deadlines for data transfers.
+Scaling down the clock frequency dynamically has power savings
+not only because the bus is running at lower frequency but also
+has an advantage of scaling down the system core voltage, if supported.
+Provide an ondemand clock scaling support similar to the cpufreq
+ondemand governor having two thresholds, up_threshold and
+down_threshold to decide whether to increase the frequency or
+scale it down respectively as per load.
 
-The STM32 sdmmc variant has a different clock divider.
+Changes since RFC --> V1 :
+	mmc: core: devfreq: Add devfreq based clock scaling support
+	Updated condition to check *freq passed to mmc_devfreq_set_target()
+	with target_freq instead of checking with current freq.
 
-Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
----
- drivers/mmc/host/mmci.c | 2 ++
- drivers/mmc/host/mmci.h | 2 ++
- 2 files changed, 4 insertions(+)
+Sahitya Tummala (1):
+  devfreq: Add new flag to do simple clock scaling
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index d636a0e..ad2f62f 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -1862,6 +1862,8 @@ static int mmci_probe(struct amba_device *dev,
- 	 */
- 	if (variant->st_clkdiv)
- 		mmc->f_min = DIV_ROUND_UP(host->mclk, 257);
-+	else if (variant->stm32_clkdiv)
-+		mmc->f_min = DIV_ROUND_UP(host->mclk, 2046);
- 	else if (variant->explicit_mclk_control)
- 		mmc->f_min = clk_round_rate(host->clk, 100000);
- 	else
-diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 8ecb1ee..a962cfa 100644
---- a/drivers/mmc/host/mmci.h
-+++ b/drivers/mmc/host/mmci.h
-@@ -216,6 +216,7 @@ struct mmci_host;
-  * @data_cmd_enable: enable value for data commands.
-  * @st_sdio: enable ST specific SDIO logic
-  * @st_clkdiv: true if using a ST-specific clock divider algorithm
-+ * @stm32_clkdiv: true if using a STM32-specific clock divider algorithm
-  * @datactrl_mask_ddrmode: ddr mode mask in datactrl register.
-  * @blksz_datactrl16: true if Block size is at b16..b30 position in datactrl register
-  * @blksz_datactrl4: true if Block size is at b4..b16 position in datactrl
-@@ -269,6 +270,7 @@ struct variant_data {
- 	u8			datacnt_useless:1;
- 	u8			st_sdio:1;
- 	u8			st_clkdiv:1;
-+	u8			stm32_clkdiv:1;
- 	u8			blksz_datactrl16:1;
- 	u8			blksz_datactrl4:1;
- 	u32			pwrreg_powerup;
+Sayali Lokhande (6):
+  mmc: core: devfreq: Add devfreq based clock scaling support
+  mmc: core: Add sysfs entries for dynamic control of clock scaling
+  mmc: core: add support for devfreq suspend/resume
+  mmc: sdhci-msm: Kconfig: select devfreq ondemand for sdhci-msm
+  mmc: sdhci-msm: Enable clock scaling property
+  mmc: core: Add a debugfs entry to set max clock rate
+
+ .../devicetree/bindings/mmc/sdhci-msm.txt          |  10 +
+ Documentation/mmc/mmc-dev-attrs.txt                |  38 ++
+ drivers/devfreq/governor_simpleondemand.c          |  25 +-
+ drivers/mmc/core/core.c                            | 668 +++++++++++++++++++++
+ drivers/mmc/core/core.h                            |   9 +
+ drivers/mmc/core/debugfs.c                         |  90 +++
+ drivers/mmc/core/host.c                            | 163 ++++-
+ drivers/mmc/core/mmc.c                             | 227 ++++++-
+ drivers/mmc/core/sd.c                              |  85 ++-
+ drivers/mmc/host/Kconfig                           |   2 +
+ drivers/mmc/host/sdhci-msm.c                       |  38 ++
+ drivers/mmc/host/sdhci-pltfm.c                     |  11 +
+ drivers/mmc/host/sdhci.c                           |  27 +
+ drivers/mmc/host/sdhci.h                           |   8 +
+ include/linux/devfreq.h                            |   4 +
+ include/linux/mmc/card.h                           |   5 +
+ include/linux/mmc/host.h                           |  70 +++
+ 17 files changed, 1471 insertions(+), 9 deletions(-)
+
 -- 
-2.7.4
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project
