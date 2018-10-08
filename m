@@ -1,93 +1,128 @@
-From: Sayali Lokhande <sayalil@codeaurora.org>
-Subject: [PATCH V1 7/7] mmc: core: Add a debugfs entry to set max clock rate
-Date: Mon,  8 Oct 2018 18:28:06 +0530
-Message-ID: <1539003486-24087-8-git-send-email-sayalil@codeaurora.org>
-References: <1539003486-24087-1-git-send-email-sayalil@codeaurora.org>
+From: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Subject: [PATCH V3 1/3] mmc: sdhci: Allow platform controlled voltage switching
+Date: Mon,  8 Oct 2018 18:48:57 +0530
+Message-ID: <1539004739-32060-2-git-send-email-vbadigan@codeaurora.org>
+References: <1539004739-32060-1-git-send-email-vbadigan@codeaurora.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1539003486-24087-1-git-send-email-sayalil@codeaurora.org>
+In-Reply-To: <1539004739-32060-1-git-send-email-vbadigan@codeaurora.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org, robh+dt@kernel.org, robh@kernel.org, mark.rutland@arm.com
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, devicetree@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, vviswana@codeaurora.org, bjorn.andersson@linaro.org, riteshh@codeaurora.org, vbadigan@codeaurora.org, dianders@google.com, sayalil@codeaurora.org, Sujit Reddy Thumma <sthumma@codeaurora.org>
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org, robh+dt@kernel.org, evgreen@chromium.org, dianders@google.com
+Cc: asutoshd@codeaurora.org, riteshh@codeaurora.org, stummala@codeaurora.org, sayalil@codeaurora.org, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, Vijay Viswanath <vviswana@codeaurora.org>, Veerabhadrarao Badiganti <vbadigan@codeaurora.org>, open list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Limiting the max frequency supported by host controller
-to a certain value can be useful for testing power consumption
-at various frequencies that are supported by the host.
-Note: If the card supports less than desired value then the
-frequency of operation would be limited to that frequency.
-Usage:
-mount -t debugfs none /sys/kernel/debug
-echo <desired_frequency> > /sys/kernel/debug/mmcX/max_clock
-cat /sys/kernel/debug/mmcX/max_clock
+From: Vijay Viswanath <vviswana@codeaurora.org>
 
-Signed-off-by: Sujit Reddy Thumma <sthumma@codeaurora.org>
-Signed-off-by: Sayali Lokhande <sayalil@codeaurora.org>
+Some controllers can have internal mechanism to inform the SW that it
+is ready for voltage switching. For such controllers, changing voltage
+before the HW is ready can result in various issues.
+
+During setup/cleanup of host, check whether regulator enable/disable
+was already done by platform driver.
+
+Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
+Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
 ---
- drivers/mmc/core/debugfs.c | 44 ++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 44 insertions(+)
+ drivers/mmc/host/sdhci.c | 32 +++++++++++++++++++-------------
+ drivers/mmc/host/sdhci.h |  1 +
+ 2 files changed, 20 insertions(+), 13 deletions(-)
 
-diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
-index 630ca8e..26499f7 100644
---- a/drivers/mmc/core/debugfs.c
-+++ b/drivers/mmc/core/debugfs.c
-@@ -262,6 +262,46 @@ static int mmc_scale_set(void *data, u64 val)
- DEFINE_SIMPLE_ATTRIBUTE(mmc_scale_fops, mmc_scale_get, mmc_scale_set,
- 	"%llu\n");
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 99bdae5..ea7ce1d 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -3616,6 +3616,7 @@ int sdhci_setup_host(struct sdhci_host *host)
+ 	unsigned int override_timeout_clk;
+ 	u32 max_clk;
+ 	int ret;
++	bool enable_vqmmc = false;
  
-+static int mmc_max_clock_get(void *data, u64 *val)
-+{
-+	struct mmc_host *host = data;
-+
-+	if (!host)
-+		return -EINVAL;
-+
-+	*val = host->f_max;
-+
-+	return 0;
-+}
-+
-+static int mmc_max_clock_set(void *data, u64 val)
-+{
-+	struct mmc_host *host = data;
-+	int err = -EINVAL;
-+	unsigned long freq = val;
-+	unsigned int old_freq;
-+
-+	if (!host || (val < host->f_min))
-+		goto out;
-+
-+	mmc_claim_host(host);
-+	if (host->bus_ops && host->bus_ops->change_bus_speed) {
-+		old_freq = host->f_max;
-+		host->f_max = freq;
-+
-+		err = host->bus_ops->change_bus_speed(host, &freq);
-+
-+		if (err)
-+			host->f_max = old_freq;
+ 	WARN_ON(host == NULL);
+ 	if (host == NULL)
+@@ -3629,9 +3630,12 @@ int sdhci_setup_host(struct sdhci_host *host)
+ 	 * the host can take the appropriate action if regulators are not
+ 	 * available.
+ 	 */
+-	ret = mmc_regulator_get_supply(mmc);
+-	if (ret)
+-		return ret;
++	if (!mmc->supply.vqmmc) {
++		ret = mmc_regulator_get_supply(mmc);
++		if (ret)
++			return ret;
++		enable_vqmmc  = true;
 +	}
-+	mmc_release_host(host);
-+out:
-+	return err;
-+}
-+
-+DEFINE_SIMPLE_ATTRIBUTE(mmc_max_clock_fops, mmc_max_clock_get,
-+		mmc_max_clock_set, "%llu\n");
-+
- void mmc_add_host_debugfs(struct mmc_host *host)
- {
- 	struct dentry *root;
-@@ -290,6 +330,10 @@ void mmc_add_host_debugfs(struct mmc_host *host)
- 			&mmc_clock_fops))
- 		goto err_node;
  
-+	if (!debugfs_create_file("max_clock", 0600, root, host,
-+		&mmc_max_clock_fops))
-+		goto err_node;
-+
- 	if (!debugfs_create_file("scale", 0600, root, host,
- 		&mmc_scale_fops))
- 		goto err_node;
+ 	DBG("Version:   0x%08x | Present:  0x%08x\n",
+ 	    sdhci_readw(host, SDHCI_HOST_VERSION),
+@@ -3880,7 +3884,15 @@ int sdhci_setup_host(struct sdhci_host *host)
+ 		mmc->caps |= MMC_CAP_NEEDS_POLL;
+ 
+ 	if (!IS_ERR(mmc->supply.vqmmc)) {
+-		ret = regulator_enable(mmc->supply.vqmmc);
++		if (enable_vqmmc) {
++			ret = regulator_enable(mmc->supply.vqmmc);
++			if (ret) {
++				pr_warn("%s: Failed to enable vqmmc regulator: %d\n",
++					mmc_hostname(mmc), ret);
++				mmc->supply.vqmmc = ERR_PTR(-EINVAL);
++			}
++			host->vqmmc_enabled = !ret;
++		}
+ 
+ 		/* If vqmmc provides no 1.8V signalling, then there's no UHS */
+ 		if (!regulator_is_supported_voltage(mmc->supply.vqmmc, 1700000,
+@@ -3893,12 +3905,6 @@ int sdhci_setup_host(struct sdhci_host *host)
+ 		if (!regulator_is_supported_voltage(mmc->supply.vqmmc, 2700000,
+ 						    3600000))
+ 			host->flags &= ~SDHCI_SIGNALING_330;
+-
+-		if (ret) {
+-			pr_warn("%s: Failed to enable vqmmc regulator: %d\n",
+-				mmc_hostname(mmc), ret);
+-			mmc->supply.vqmmc = ERR_PTR(-EINVAL);
+-		}
+ 	}
+ 
+ 	if (host->quirks2 & SDHCI_QUIRK2_NO_1_8_V) {
+@@ -4136,7 +4142,7 @@ int sdhci_setup_host(struct sdhci_host *host)
+ 	return 0;
+ 
+ unreg:
+-	if (!IS_ERR(mmc->supply.vqmmc))
++	if (host->vqmmc_enabled)
+ 		regulator_disable(mmc->supply.vqmmc);
+ undma:
+ 	if (host->align_buffer)
+@@ -4154,7 +4160,7 @@ void sdhci_cleanup_host(struct sdhci_host *host)
+ {
+ 	struct mmc_host *mmc = host->mmc;
+ 
+-	if (!IS_ERR(mmc->supply.vqmmc))
++	if (host->vqmmc_enabled)
+ 		regulator_disable(mmc->supply.vqmmc);
+ 
+ 	if (host->align_buffer)
+@@ -4287,7 +4293,7 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
+ 
+ 	tasklet_kill(&host->finish_tasklet);
+ 
+-	if (!IS_ERR(mmc->supply.vqmmc))
++	if (host->vqmmc_enabled)
+ 		regulator_disable(mmc->supply.vqmmc);
+ 
+ 	if (host->align_buffer)
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index b001cf4..3c28152 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -524,6 +524,7 @@ struct sdhci_host {
+ 	bool pending_reset;	/* Cmd/data reset is pending */
+ 	bool irq_wake_enabled;	/* IRQ wakeup is enabled */
+ 	bool v4_mode;		/* Host Version 4 Enable */
++	bool vqmmc_enabled;	/* Vqmmc is enabled */
+ 
+ 	struct mmc_request *mrqs_done[SDHCI_MAX_MRQS];	/* Requests done */
+ 	struct mmc_command *cmd;	/* Current command */
 -- 
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project
+Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc.
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a Linux Foundation Collaborative Project.
