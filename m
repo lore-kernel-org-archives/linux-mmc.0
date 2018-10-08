@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V6 10/23] mmc: mmci: add set_clk/pwrreg callbacks
-Date: Mon, 8 Oct 2018 14:08:42 +0200
-Message-ID: <1539000535-13261-11-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V6 12/23] mmc: mmci: expand startbiterr to irqmask and error check
+Date: Mon, 8 Oct 2018 14:08:44 +0200
+Message-ID: <1539000535-13261-13-git-send-email-ludovic.Barre@st.com>
 References: <1539000535-13261-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,80 +14,104 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-This patch adds set_clkreg and set_pwrreg callbacks
-at mmci_host_ops to allow to call specific variant.
-extends visibility of mmci_write_clk/pwrreg functions
-to be used into specific file variant.
+All variants don't pretend to have a startbiterr.
+-While data error check, if status register return an error
+(like  MCI_DATACRCFAIL) we must avoid to check MCI_STARTBITERR
+(if not desired).
+-expand start_err to MCI_IRQENABLE to avoid to set this bit by default.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.c | 16 ++++++++++++----
- drivers/mmc/host/mmci.h |  5 +++++
- 2 files changed, 17 insertions(+), 4 deletions(-)
+ drivers/mmc/host/mmci.c | 27 ++++++++++++++++-----------
+ drivers/mmc/host/mmci.h |  6 +++---
+ 2 files changed, 19 insertions(+), 14 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 91ef2ede..1b99ae3 100644
+index 0e8b65d..737adf4 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -257,7 +257,7 @@ static void mmci_reg_delay(struct mmci_host *host)
- /*
-  * This must be called with host->lock held
-  */
--static void mmci_write_clkreg(struct mmci_host *host, u32 clk)
-+void mmci_write_clkreg(struct mmci_host *host, u32 clk)
+@@ -1042,14 +1042,18 @@ static void
+ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
+ 	      unsigned int status)
  {
- 	if (host->clk_reg != clk) {
- 		host->clk_reg = clk;
-@@ -268,7 +268,7 @@ static void mmci_write_clkreg(struct mmci_host *host, u32 clk)
- /*
-  * This must be called with host->lock held
-  */
--static void mmci_write_pwrreg(struct mmci_host *host, u32 pwr)
-+void mmci_write_pwrreg(struct mmci_host *host, u32 pwr)
- {
- 	if (host->pwr_reg != pwr) {
- 		host->pwr_reg = pwr;
-@@ -1571,8 +1571,16 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 
- 	spin_lock_irqsave(&host->lock, flags);
- 
--	mmci_set_clkreg(host, ios->clock);
--	mmci_write_pwrreg(host, pwr);
-+	if (host->ops && host->ops->set_clkreg)
-+		host->ops->set_clkreg(host, ios->clock);
-+	else
-+		mmci_set_clkreg(host, ios->clock);
++	unsigned int status_err;
 +
-+	if (host->ops && host->ops->set_pwrreg)
-+		host->ops->set_pwrreg(host, pwr);
-+	else
-+		mmci_write_pwrreg(host, pwr);
+ 	/* Make sure we have data to handle */
+ 	if (!data)
+ 		return;
+ 
+ 	/* First check for errors */
+-	if (status & (MCI_DATACRCFAIL | MCI_DATATIMEOUT |
+-		      host->variant->start_err |
+-		      MCI_TXUNDERRUN | MCI_RXOVERRUN)) {
++	status_err = status & (host->variant->start_err |
++			       MCI_DATACRCFAIL | MCI_DATATIMEOUT |
++			       MCI_TXUNDERRUN | MCI_RXOVERRUN);
 +
++	if (status_err) {
+ 		u32 remain, success;
+ 
+ 		/* Terminate the DMA transfer */
+@@ -1066,18 +1070,18 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
+ 		success = data->blksz * data->blocks - remain;
+ 
+ 		dev_dbg(mmc_dev(host->mmc), "MCI ERROR IRQ, status 0x%08x at 0x%08x\n",
+-			status, success);
+-		if (status & MCI_DATACRCFAIL) {
++			status_err, success);
++		if (status_err & MCI_DATACRCFAIL) {
+ 			/* Last block was not successful */
+ 			success -= 1;
+ 			data->error = -EILSEQ;
+-		} else if (status & MCI_DATATIMEOUT) {
++		} else if (status_err & MCI_DATATIMEOUT) {
+ 			data->error = -ETIMEDOUT;
+-		} else if (status & MCI_STARTBITERR) {
++		} else if (status_err & MCI_STARTBITERR) {
+ 			data->error = -ECOMM;
+-		} else if (status & MCI_TXUNDERRUN) {
++		} else if (status_err & MCI_TXUNDERRUN) {
+ 			data->error = -EIO;
+-		} else if (status & MCI_RXOVERRUN) {
++		} else if (status_err & MCI_RXOVERRUN) {
+ 			if (success > host->variant->fifosize)
+ 				success -= host->variant->fifosize;
+ 			else
+@@ -1918,7 +1922,7 @@ static int mmci_probe(struct amba_device *dev,
+ 			goto clk_disable;
+ 	}
+ 
+-	writel(MCI_IRQENABLE, host->base + MMCIMASK0);
++	writel(MCI_IRQENABLE | variant->start_err, host->base + MMCIMASK0);
+ 
+ 	amba_set_drvdata(dev, mmc);
+ 
+@@ -2005,7 +2009,8 @@ static void mmci_restore(struct mmci_host *host)
+ 		writel(host->datactrl_reg, host->base + MMCIDATACTRL);
+ 		writel(host->pwr_reg, host->base + MMCIPOWER);
+ 	}
+-	writel(MCI_IRQENABLE, host->base + MMCIMASK0);
++	writel(MCI_IRQENABLE | host->variant->start_err,
++	       host->base + MMCIMASK0);
  	mmci_reg_delay(host);
  
  	spin_unlock_irqrestore(&host->lock, flags);
 diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index ed59baf..dbb5ad4 100644
+index d5979e8..8e7ea44 100644
 --- a/drivers/mmc/host/mmci.h
 +++ b/drivers/mmc/host/mmci.h
-@@ -284,6 +284,8 @@ struct mmci_host_ops {
- 	int (*dma_start)(struct mmci_host *host, unsigned int *datactrl);
- 	void (*dma_finalize)(struct mmci_host *host, struct mmc_data *data);
- 	void (*dma_error)(struct mmci_host *host);
-+	void (*set_clkreg)(struct mmci_host *host, unsigned int desired);
-+	void (*set_pwrreg)(struct mmci_host *host, unsigned int pwr);
- };
+@@ -181,9 +181,9 @@
+ #define MMCIFIFO		0x080 /* to 0x0bc */
  
- struct mmci_host {
-@@ -336,6 +338,9 @@ struct mmci_host {
+ #define MCI_IRQENABLE	\
+-	(MCI_CMDCRCFAILMASK|MCI_DATACRCFAILMASK|MCI_CMDTIMEOUTMASK|	\
+-	MCI_DATATIMEOUTMASK|MCI_TXUNDERRUNMASK|MCI_RXOVERRUNMASK|	\
+-	MCI_CMDRESPENDMASK|MCI_CMDSENTMASK|MCI_STARTBITERRMASK)
++	(MCI_CMDCRCFAILMASK | MCI_DATACRCFAILMASK | MCI_CMDTIMEOUTMASK | \
++	MCI_DATATIMEOUTMASK | MCI_TXUNDERRUNMASK | MCI_RXOVERRUNMASK |	\
++	MCI_CMDRESPENDMASK | MCI_CMDSENTMASK)
  
- #define dma_inprogress(host)	((host)->dma_in_progress)
- 
-+void mmci_write_clkreg(struct mmci_host *host, u32 clk);
-+void mmci_write_pwrreg(struct mmci_host *host, u32 pwr);
-+
- int mmci_dmae_prep_data(struct mmci_host *host, struct mmc_data *data,
- 			bool next);
- void mmci_dmae_unprep_data(struct mmci_host *host, struct mmc_data *data,
+ /* These interrupts are directed to IRQ1 when two IRQ lines are available */
+ #define MCI_IRQ1MASK \
 -- 
 2.7.4
