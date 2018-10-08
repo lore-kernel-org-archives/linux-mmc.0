@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V6 19/23] mmc: mmci: add optional reset property
-Date: Mon, 8 Oct 2018 14:08:51 +0200
-Message-ID: <1539000535-13261-20-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V6 14/23] mmc: mmci: add variant property to define dpsm bit
+Date: Mon, 8 Oct 2018 14:08:46 +0200
+Message-ID: <1539000535-13261-15-git-send-email-ludovic.Barre@st.com>
 References: <1539000535-13261-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,53 +14,126 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-This patch adds a optional reset management.
-STM32 sdmmc variant needs to reset hardware block
-during the power cycle procedure (for re-initialization).
+This patch adds datactrl variant property to define
+dpsm enable bit. Needed to support the STM32 variant
+(STM32 has no dpsm enable bit).
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.c | 7 +++++++
- drivers/mmc/host/mmci.h | 2 ++
- 2 files changed, 9 insertions(+)
+ drivers/mmc/host/mmci.c | 15 ++++++++++++---
+ drivers/mmc/host/mmci.h |  2 ++
+ 2 files changed, 14 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 7607599..d636a0e 100644
+index 9f0cef0..0443b3a 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -36,6 +36,7 @@
- #include <linux/pm_runtime.h>
- #include <linux/types.h>
- #include <linux/pinctrl/consumer.h>
-+#include <linux/reset.h>
+@@ -62,6 +62,7 @@ static struct variant_data variant_arm = {
+ 	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
+ 	.datalength_bits	= 16,
+ 	.datactrl_blocksz	= 11,
++	.datactrl_dpsm_enable	= MCI_DPSM_ENABLE,
+ 	.pwrreg_powerup		= MCI_PWR_UP,
+ 	.f_max			= 100000000,
+ 	.reversed_irq_handling	= true,
+@@ -80,6 +81,7 @@ static struct variant_data variant_arm_extended_fifo = {
+ 	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
+ 	.datalength_bits	= 16,
+ 	.datactrl_blocksz	= 11,
++	.datactrl_dpsm_enable	= MCI_DPSM_ENABLE,
+ 	.pwrreg_powerup		= MCI_PWR_UP,
+ 	.f_max			= 100000000,
+ 	.mmcimask1		= true,
+@@ -98,6 +100,7 @@ static struct variant_data variant_arm_extended_fifo_hwfc = {
+ 	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
+ 	.datalength_bits	= 16,
+ 	.datactrl_blocksz	= 11,
++	.datactrl_dpsm_enable	= MCI_DPSM_ENABLE,
+ 	.pwrreg_powerup		= MCI_PWR_UP,
+ 	.f_max			= 100000000,
+ 	.mmcimask1		= true,
+@@ -117,6 +120,7 @@ static struct variant_data variant_u300 = {
+ 	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
+ 	.datalength_bits	= 16,
+ 	.datactrl_blocksz	= 11,
++	.datactrl_dpsm_enable	= MCI_DPSM_ENABLE,
+ 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
+ 	.st_sdio			= true,
+ 	.pwrreg_powerup		= MCI_PWR_ON,
+@@ -141,6 +145,7 @@ static struct variant_data variant_nomadik = {
+ 	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
+ 	.datalength_bits	= 24,
+ 	.datactrl_blocksz	= 11,
++	.datactrl_dpsm_enable	= MCI_DPSM_ENABLE,
+ 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
+ 	.st_sdio		= true,
+ 	.st_clkdiv		= true,
+@@ -168,6 +173,7 @@ static struct variant_data variant_ux500 = {
+ 	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
+ 	.datalength_bits	= 24,
+ 	.datactrl_blocksz	= 11,
++	.datactrl_dpsm_enable	= MCI_DPSM_ENABLE,
+ 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
+ 	.st_sdio		= true,
+ 	.st_clkdiv		= true,
+@@ -200,6 +206,7 @@ static struct variant_data variant_ux500v2 = {
+ 	.datactrl_mask_ddrmode	= MCI_DPSM_ST_DDRMODE,
+ 	.datalength_bits	= 24,
+ 	.datactrl_blocksz	= 11,
++	.datactrl_dpsm_enable	= MCI_DPSM_ENABLE,
+ 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
+ 	.st_sdio		= true,
+ 	.st_clkdiv		= true,
+@@ -232,6 +239,7 @@ static struct variant_data variant_stm32 = {
+ 	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
+ 	.datalength_bits	= 24,
+ 	.datactrl_blocksz	= 11,
++	.datactrl_dpsm_enable	= MCI_DPSM_ENABLE,
+ 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
+ 	.st_sdio		= true,
+ 	.st_clkdiv		= true,
+@@ -258,6 +266,7 @@ static struct variant_data variant_qcom = {
+ 	.blksz_datactrl4	= true,
+ 	.datalength_bits	= 24,
+ 	.datactrl_blocksz	= 11,
++	.datactrl_dpsm_enable	= MCI_DPSM_ENABLE,
+ 	.pwrreg_powerup		= MCI_PWR_UP,
+ 	.f_max			= 208000000,
+ 	.explicit_mclk_control	= true,
+@@ -976,11 +985,11 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
+ 	BUG_ON(1 << blksz_bits != data->blksz);
  
- #include <asm/div64.h>
- #include <asm/io.h>
-@@ -1882,6 +1883,12 @@ static int mmci_probe(struct amba_device *dev,
+ 	if (variant->blksz_datactrl16)
+-		datactrl = MCI_DPSM_ENABLE | (data->blksz << 16);
++		datactrl = variant->datactrl_dpsm_enable | (data->blksz << 16);
+ 	else if (variant->blksz_datactrl4)
+-		datactrl = MCI_DPSM_ENABLE | (data->blksz << 4);
++		datactrl = variant->datactrl_dpsm_enable | (data->blksz << 4);
+ 	else
+-		datactrl = MCI_DPSM_ENABLE | blksz_bits << 4;
++		datactrl = variant->datactrl_dpsm_enable | blksz_bits << 4;
  
- 	dev_dbg(mmc_dev(mmc), "clocking block at %u Hz\n", mmc->f_max);
- 
-+	host->rst = devm_reset_control_get_optional_exclusive(&dev->dev, NULL);
-+	if (IS_ERR(host->rst)) {
-+		ret = PTR_ERR(host->rst);
-+		goto clk_disable;
-+	}
-+
- 	/* Get regulators and the supported OCR mask */
- 	ret = mmc_regulator_get_supply(mmc);
- 	if (ret)
+ 	if (data->flags & MMC_DATA_READ)
+ 		datactrl |= MCI_DPSM_DIRECTION;
 diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index cdcadd2..8ecb1ee 100644
+index 531c247..04d021e 100644
 --- a/drivers/mmc/host/mmci.h
 +++ b/drivers/mmc/host/mmci.h
-@@ -318,6 +318,8 @@ struct mmci_host {
- 	struct clk		*clk;
- 	u8			singleirq:1;
- 
-+	struct reset_control	*rst;
-+
- 	spinlock_t		lock;
- 
- 	unsigned int		mclk;
+@@ -222,6 +222,7 @@ struct mmci_host;
+  *		     register
+  * @datactrl_mask_sdio: SDIO enable mask in datactrl register
+  * @datactrl_blksz: block size in power of two
++ * @datactrl_dpsm_enable: enable value for DPSM
+  * @pwrreg_powerup: power up value for MMCIPOWER register
+  * @f_max: maximum clk frequency supported by the controller.
+  * @signal_direction: input/out direction of bus signals can be indicated
+@@ -258,6 +259,7 @@ struct variant_data {
+ 	unsigned int		datactrl_mask_ddrmode;
+ 	unsigned int		datactrl_mask_sdio;
+ 	unsigned int		datactrl_blocksz;
++	unsigned int		datactrl_dpsm_enable;
+ 	u8			st_sdio:1;
+ 	u8			st_clkdiv:1;
+ 	u8			blksz_datactrl16:1;
 -- 
 2.7.4
