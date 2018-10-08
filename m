@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V6 21/23] mmc: mmci: add stm32 sdmmc registers
-Date: Mon, 8 Oct 2018 14:08:53 +0200
-Message-ID: <1539000535-13261-22-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V6 06/23] mmc: mmci: add dma_start callback
+Date: Mon, 8 Oct 2018 14:08:38 +0200
+Message-ID: <1539000535-13261-7-git-send-email-ludovic.Barre@st.com>
 References: <1539000535-13261-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,119 +14,166 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-This patch adds stm32 sdmmc specific registers.
+This patch adds dma_start callback to mmci_host_ops.
+Create a generic mmci_dma_start function which regroup
+common action between variant.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.h | 56 +++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 56 insertions(+)
+ drivers/mmc/host/mmci.c          | 69 +++++++++++++++++++++++-----------------
+ drivers/mmc/host/mmci.h          |  2 ++
+ drivers/mmc/host/mmci_qcom_dml.c |  1 +
+ 3 files changed, 42 insertions(+), 30 deletions(-)
 
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 8d483dd..72584f4 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -425,6 +425,41 @@ void mmci_get_next_data(struct mmci_host *host, struct mmc_data *data)
+ 		host->ops->get_next_data(host, data);
+ }
+ 
++int mmci_dma_start(struct mmci_host *host, unsigned int datactrl)
++{
++	struct mmc_data *data = host->data;
++	int ret;
++
++	if (!host->use_dma)
++		return -EINVAL;
++
++	ret = mmci_prep_data(host, data, false);
++	if (ret)
++		return ret;
++
++	if (!host->ops || !host->ops->dma_start)
++		return -EINVAL;
++
++	/* Okay, go for it. */
++	dev_vdbg(mmc_dev(host->mmc),
++		 "Submit MMCI DMA job, sglen %d blksz %04x blks %04x flags %08x\n",
++		 data->sg_len, data->blksz, data->blocks, data->flags);
++
++	host->ops->dma_start(host, &datactrl);
++
++	/* Trigger the DMA transfer */
++	mmci_write_datactrlreg(host, datactrl);
++
++	/*
++	 * Let the MMCI say when the data is ended and it's time
++	 * to fire next DMA request. When that happens, MMCI will
++	 * call mmci_data_end()
++	 */
++	writel(readl(host->base + MMCIMASK0) | MCI_DATAENDMASK,
++	       host->base + MMCIMASK0);
++	return 0;
++}
++
+ static void
+ mmci_request_end(struct mmci_host *host, struct mmc_request *mrq)
+ {
+@@ -736,23 +771,11 @@ int mmci_dmae_prep_data(struct mmci_host *host,
+ 				    &dmae->desc_current);
+ }
+ 
+-static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
++int mmci_dmae_start(struct mmci_host *host, unsigned int *datactrl)
+ {
+-	int ret;
+ 	struct mmci_dmae_priv *dmae = host->dma_priv;
+ 	struct mmc_data *data = host->data;
+ 
+-	if (!host->use_dma)
+-		return -EINVAL;
+-
+-	ret = mmci_dmae_prep_data(host, host->data, false);
+-	if (ret)
+-		return ret;
+-
+-	/* Okay, go for it. */
+-	dev_vdbg(mmc_dev(host->mmc),
+-		 "Submit MMCI DMA job, sglen %d blksz %04x blks %04x flags %08x\n",
+-		 data->sg_len, data->blksz, data->blocks, data->flags);
+ 	host->dma_in_progress = true;
+ 	dmaengine_submit(dmae->desc_current);
+ 	dma_async_issue_pending(dmae->cur);
+@@ -760,18 +783,8 @@ static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
+ 	if (host->variant->qcom_dml)
+ 		dml_start_xfer(host, data);
+ 
+-	datactrl |= MCI_DPSM_DMAENABLE;
++	*datactrl |= MCI_DPSM_DMAENABLE;
+ 
+-	/* Trigger the DMA transfer */
+-	mmci_write_datactrlreg(host, datactrl);
+-
+-	/*
+-	 * Let the MMCI say when the data is ended and it's time
+-	 * to fire next DMA request. When that happens, MMCI will
+-	 * call mmci_data_end()
+-	 */
+-	writel(readl(host->base + MMCIMASK0) | MCI_DATAENDMASK,
+-	       host->base + MMCIMASK0);
+ 	return 0;
+ }
+ 
+@@ -830,6 +843,7 @@ static struct mmci_host_ops mmci_variant_ops = {
+ 	.get_next_data = mmci_dmae_get_next_data,
+ 	.dma_setup = mmci_dmae_setup,
+ 	.dma_release = mmci_dmae_release,
++	.dma_start = mmci_dmae_start,
+ };
+ 
+ void mmci_variant_init(struct mmci_host *host)
+@@ -847,11 +861,6 @@ static inline void mmci_dma_data_error(struct mmci_host *host)
+ {
+ }
+ 
+-static inline int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
+-{
+-	return -ENOSYS;
+-}
+-
+ #endif
+ 
+ static void mmci_pre_request(struct mmc_host *mmc, struct mmc_request *mrq)
+@@ -948,7 +957,7 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
+ 	 * Attempt to use DMA operation mode, if this
+ 	 * should fail, fall back to PIO mode
+ 	 */
+-	if (!mmci_dma_start_data(host, datactrl))
++	if (!mmci_dma_start(host, datactrl))
+ 		return;
+ 
+ 	/* IRQ mode, map the SG list for CPU reading/writing */
 diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index a962cfa..e242f44 100644
+index a6a85aa..7bca597 100644
 --- a/drivers/mmc/host/mmci.h
 +++ b/drivers/mmc/host/mmci.h
-@@ -23,6 +23,14 @@
- #define MCI_ST_DATA31DIREN	(1 << 5)
- #define MCI_ST_FBCLKEN		(1 << 7)
- #define MCI_ST_DATA74DIREN	(1 << 8)
-+/*
-+ * The STM32 sdmmc does not have PWR_UP/OD/ROD
-+ * and uses the power register for
-+ */
-+#define MCI_STM32_PWR_CYC	0x02
-+#define MCI_STM32_VSWITCH	BIT(2)
-+#define MCI_STM32_VSWITCHEN	BIT(3)
-+#define MCI_STM32_DIRPOL	BIT(4)
+@@ -280,6 +280,7 @@ struct mmci_host_ops {
+ 	void (*get_next_data)(struct mmci_host *host, struct mmc_data *data);
+ 	int (*dma_setup)(struct mmci_host *host);
+ 	void (*dma_release)(struct mmci_host *host);
++	int (*dma_start)(struct mmci_host *host, unsigned int *datactrl);
+ };
  
- #define MMCICLOCK		0x004
- #define MCI_CLK_ENABLE		(1 << 8)
-@@ -50,6 +58,19 @@
- #define MCI_QCOM_CLK_SELECT_IN_FBCLK	BIT(15)
- #define MCI_QCOM_CLK_SELECT_IN_DDR_MODE	(BIT(14) | BIT(15))
+ struct mmci_host {
+@@ -339,4 +340,5 @@ void mmci_dmae_unprep_data(struct mmci_host *host, struct mmc_data *data,
+ void mmci_dmae_get_next_data(struct mmci_host *host, struct mmc_data *data);
+ int mmci_dmae_setup(struct mmci_host *host);
+ void mmci_dmae_release(struct mmci_host *host);
++int mmci_dmae_start(struct mmci_host *host, unsigned int *datactrl);
  
-+/* Modified on STM32 sdmmc */
-+#define MCI_STM32_CLK_CLKDIV_MSK	GENMASK(9, 0)
-+#define MCI_STM32_CLK_WIDEBUS_4		BIT(14)
-+#define MCI_STM32_CLK_WIDEBUS_8		BIT(15)
-+#define MCI_STM32_CLK_NEGEDGE		BIT(16)
-+#define MCI_STM32_CLK_HWFCEN		BIT(17)
-+#define MCI_STM32_CLK_DDR		BIT(18)
-+#define MCI_STM32_CLK_BUSSPEED		BIT(19)
-+#define MCI_STM32_CLK_SEL_MSK		GENMASK(21, 20)
-+#define MCI_STM32_CLK_SELCK		(0 << 20)
-+#define MCI_STM32_CLK_SELCKIN		(1 << 20)
-+#define MCI_STM32_CLK_SELFBCK		(2 << 20)
-+
- #define MMCIARGUMENT		0x008
+diff --git a/drivers/mmc/host/mmci_qcom_dml.c b/drivers/mmc/host/mmci_qcom_dml.c
+index da4c43a..66af406 100644
+--- a/drivers/mmc/host/mmci_qcom_dml.c
++++ b/drivers/mmc/host/mmci_qcom_dml.c
+@@ -189,6 +189,7 @@ static struct mmci_host_ops qcom_variant_ops = {
+ 	.get_next_data = mmci_dmae_get_next_data,
+ 	.dma_setup = qcom_dma_setup,
+ 	.dma_release = mmci_dmae_release,
++	.dma_start = mmci_dmae_start,
+ };
  
- /* The command register controls the Command Path State Machine (CPSM) */
-@@ -72,6 +93,15 @@
- #define MCI_CPSM_QCOM_CCSDISABLE	BIT(15)
- #define MCI_CPSM_QCOM_AUTO_CMD19	BIT(16)
- #define MCI_CPSM_QCOM_AUTO_CMD21	BIT(21)
-+/* Command register in STM32 sdmmc versions */
-+#define MCI_CPSM_STM32_CMDTRANS		BIT(6)
-+#define MCI_CPSM_STM32_CMDSTOP		BIT(7)
-+#define MCI_CPSM_STM32_WAITRESP_MASK	GENMASK(9, 8)
-+#define MCI_CPSM_STM32_NORSP		(0 << 8)
-+#define MCI_CPSM_STM32_SRSP_CRC		(1 << 8)
-+#define MCI_CPSM_STM32_SRSP		(2 << 8)
-+#define MCI_CPSM_STM32_LRSP_CRC		(3 << 8)
-+#define MCI_CPSM_STM32_ENABLE		BIT(12)
- 
- #define MMCIRESPCMD		0x010
- #define MMCIRESPONSE0		0x014
-@@ -130,6 +160,8 @@
- #define MCI_ST_SDIOIT		(1 << 22)
- #define MCI_ST_CEATAEND		(1 << 23)
- #define MCI_ST_CARDBUSY		(1 << 24)
-+/* Extended status bits for the STM32 variants */
-+#define MCI_STM32_BUSYD0	BIT(20)
- 
- #define MMCICLEAR		0x038
- #define MCI_CMDCRCFAILCLR	(1 << 0)
-@@ -175,11 +207,32 @@
- #define MCI_ST_SDIOITMASK	(1 << 22)
- #define MCI_ST_CEATAENDMASK	(1 << 23)
- #define MCI_ST_BUSYENDMASK	(1 << 24)
-+/* Extended status bits for the STM32 variants */
-+#define MCI_STM32_BUSYD0ENDMASK	BIT(21)
- 
- #define MMCIMASK1		0x040
- #define MMCIFIFOCNT		0x048
- #define MMCIFIFO		0x080 /* to 0x0bc */
- 
-+/* STM32 sdmmc registers for IDMA (Internal DMA) */
-+#define MMCI_STM32_IDMACTRLR	0x050
-+#define MMCI_STM32_IDMAEN	BIT(0)
-+#define MMCI_STM32_IDMALLIEN	BIT(1)
-+
-+#define MMCI_STM32_IDMABSIZER		0x054
-+#define MMCI_STM32_IDMABNDT_SHIFT	5
-+#define MMCI_STM32_IDMABNDT_MASK	GENMASK(12, 5)
-+
-+#define MMCI_STM32_IDMABASE0R	0x058
-+
-+#define MMCI_STM32_IDMALAR	0x64
-+#define MMCI_STM32_IDMALA_MASK	GENMASK(13, 0)
-+#define MMCI_STM32_ABR		BIT(29)
-+#define MMCI_STM32_ULS		BIT(30)
-+#define MMCI_STM32_ULA		BIT(31)
-+
-+#define MMCI_STM32_IDMABAR	0x68
-+
- #define MCI_IRQENABLE	\
- 	(MCI_CMDCRCFAILMASK | MCI_DATACRCFAILMASK | MCI_CMDTIMEOUTMASK | \
- 	MCI_DATATIMEOUTMASK | MCI_TXUNDERRUNMASK | MCI_RXOVERRUNMASK |	\
-@@ -190,6 +243,9 @@
- 	(MCI_RXFIFOHALFFULLMASK | MCI_RXDATAAVLBLMASK | \
- 	 MCI_TXFIFOHALFEMPTYMASK)
- 
-+#define MCI_IRQ_PIO_STM32_MASK \
-+	(MCI_RXFIFOHALFFULLMASK | MCI_TXFIFOHALFEMPTYMASK)
-+
- #define NR_SG		128
- 
- #define MMCI_PINCTRL_STATE_OPENDRAIN "opendrain"
+ void qcom_variant_init(struct mmci_host *host)
 -- 
 2.7.4
