@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V6 18/23] dt-bindings: mmci: add optional reset property
-Date: Mon, 8 Oct 2018 14:08:50 +0200
-Message-ID: <1539000535-13261-19-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V6 15/23] mmc: mmci: add variant property to define irq pio mask
+Date: Mon, 8 Oct 2018 14:08:47 +0200
+Message-ID: <1539000535-13261-16-git-send-email-ludovic.Barre@st.com>
 References: <1539000535-13261-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,25 +14,139 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-This patch adds a optional reset management.
+This patch allows to define specific pio mask for variants.
+Needed to support the STM32 sdmmc variant which has some bits
+with different meaning (bits: 21,20,13,12,9)
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
-Acked-by: Rob Herring <robh@kernel.org>
 ---
- Documentation/devicetree/bindings/mmc/mmci.txt | 1 +
- 1 file changed, 1 insertion(+)
+ drivers/mmc/host/mmci.c | 13 +++++++++++--
+ drivers/mmc/host/mmci.h |  5 ++++-
+ 2 files changed, 15 insertions(+), 3 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/mmci.txt b/Documentation/devicetree/bindings/mmc/mmci.txt
-index 03796cf..4e69b25 100644
---- a/Documentation/devicetree/bindings/mmc/mmci.txt
-+++ b/Documentation/devicetree/bindings/mmc/mmci.txt
-@@ -15,6 +15,7 @@ Required properties:
- Optional properties:
- - arm,primecell-periphid : contains the PrimeCell Peripheral ID, it overrides
-                            the ID provided by the HW
-+- resets                 : phandle to internal reset line.
- - vqmmc-supply           : phandle to the regulator device tree node, mentioned
-                            as the VCCQ/VDD_IO supply in the eMMC/SD specs.
- - st,sig-dir-dat0        : bus signal direction pin used for DAT[0].
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 0443b3a..ca442fb 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -67,6 +67,7 @@ static struct variant_data variant_arm = {
+ 	.f_max			= 100000000,
+ 	.reversed_irq_handling	= true,
+ 	.mmcimask1		= true,
++	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
+ 	.start_err		= MCI_STARTBITERR,
+ 	.opendrain		= MCI_ROD,
+ 	.init			= mmci_variant_init,
+@@ -85,6 +86,7 @@ static struct variant_data variant_arm_extended_fifo = {
+ 	.pwrreg_powerup		= MCI_PWR_UP,
+ 	.f_max			= 100000000,
+ 	.mmcimask1		= true,
++	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
+ 	.start_err		= MCI_STARTBITERR,
+ 	.opendrain		= MCI_ROD,
+ 	.init			= mmci_variant_init,
+@@ -104,6 +106,7 @@ static struct variant_data variant_arm_extended_fifo_hwfc = {
+ 	.pwrreg_powerup		= MCI_PWR_UP,
+ 	.f_max			= 100000000,
+ 	.mmcimask1		= true,
++	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
+ 	.start_err		= MCI_STARTBITERR,
+ 	.opendrain		= MCI_ROD,
+ 	.init			= mmci_variant_init,
+@@ -129,6 +132,7 @@ static struct variant_data variant_u300 = {
+ 	.pwrreg_clkgate		= true,
+ 	.pwrreg_nopower		= true,
+ 	.mmcimask1		= true,
++	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
+ 	.start_err		= MCI_STARTBITERR,
+ 	.opendrain		= MCI_OD,
+ 	.init			= mmci_variant_init,
+@@ -155,6 +159,7 @@ static struct variant_data variant_nomadik = {
+ 	.pwrreg_clkgate		= true,
+ 	.pwrreg_nopower		= true,
+ 	.mmcimask1		= true,
++	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
+ 	.start_err		= MCI_STARTBITERR,
+ 	.opendrain		= MCI_OD,
+ 	.init			= mmci_variant_init,
+@@ -187,6 +192,7 @@ static struct variant_data variant_ux500 = {
+ 	.busy_detect_mask	= MCI_ST_BUSYENDMASK,
+ 	.pwrreg_nopower		= true,
+ 	.mmcimask1		= true,
++	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
+ 	.start_err		= MCI_STARTBITERR,
+ 	.opendrain		= MCI_OD,
+ 	.init			= mmci_variant_init,
+@@ -221,6 +227,7 @@ static struct variant_data variant_ux500v2 = {
+ 	.busy_detect_mask	= MCI_ST_BUSYENDMASK,
+ 	.pwrreg_nopower		= true,
+ 	.mmcimask1		= true,
++	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
+ 	.start_err		= MCI_STARTBITERR,
+ 	.opendrain		= MCI_OD,
+ 	.init			= mmci_variant_init,
+@@ -237,6 +244,7 @@ static struct variant_data variant_stm32 = {
+ 	.cmdreg_lrsp_crc	= MCI_CPSM_RESPONSE | MCI_CPSM_LONGRSP,
+ 	.cmdreg_srsp_crc	= MCI_CPSM_RESPONSE,
+ 	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
++	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
+ 	.datalength_bits	= 24,
+ 	.datactrl_blocksz	= 11,
+ 	.datactrl_dpsm_enable	= MCI_DPSM_ENABLE,
+@@ -273,6 +281,7 @@ static struct variant_data variant_qcom = {
+ 	.qcom_fifo		= true,
+ 	.qcom_dml		= true,
+ 	.mmcimask1		= true,
++	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
+ 	.start_err		= MCI_STARTBITERR,
+ 	.opendrain		= MCI_ROD,
+ 	.init			= qcom_variant_init,
+@@ -556,7 +565,7 @@ static void mmci_set_mask1(struct mmci_host *host, unsigned int mask)
+ 	if (host->singleirq) {
+ 		unsigned int mask0 = readl(base + MMCIMASK0);
+ 
+-		mask0 &= ~MCI_IRQ1MASK;
++		mask0 &= ~variant->irq_pio_mask;
+ 		mask0 |= mask;
+ 
+ 		writel(mask0, base + MMCIMASK0);
+@@ -1458,7 +1467,7 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
+ 			if (status & host->mask1_reg)
+ 				mmci_pio_irq(irq, dev_id);
+ 
+-			status &= ~MCI_IRQ1MASK;
++			status &= ~host->variant->irq_pio_mask;
+ 		}
+ 
+ 		/*
+diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+index 04d021e..783a7ad 100644
+--- a/drivers/mmc/host/mmci.h
++++ b/drivers/mmc/host/mmci.h
+@@ -186,7 +186,7 @@
+ 	MCI_CMDRESPENDMASK | MCI_CMDSENTMASK)
+ 
+ /* These interrupts are directed to IRQ1 when two IRQ lines are available */
+-#define MCI_IRQ1MASK \
++#define MCI_IRQ_PIO_MASK \
+ 	(MCI_RXFIFOHALFFULLMASK | MCI_RXDATAAVLBLMASK | \
+ 	 MCI_TXFIFOHALFEMPTYMASK)
+ 
+@@ -239,6 +239,8 @@ struct mmci_host;
+  * @qcom_dml: enables qcom specific dma glue for dma transfers.
+  * @reversed_irq_handling: handle data irq before cmd irq.
+  * @mmcimask1: true if variant have a MMCIMASK1 register.
++ * @irq_pio_mask: bitmask used to manage interrupt pio transfert in mmcimask
++ *		  register
+  * @start_err: bitmask identifying the STARTBITERR bit inside MMCISTATUS
+  *	       register.
+  * @opendrain: bitmask identifying the OPENDRAIN bit inside MMCIPOWER register
+@@ -278,6 +280,7 @@ struct variant_data {
+ 	u8			qcom_dml:1;
+ 	u8			reversed_irq_handling:1;
+ 	u8			mmcimask1:1;
++	unsigned int		irq_pio_mask;
+ 	u32			start_err;
+ 	u32			opendrain;
+ 	void (*init)(struct mmci_host *host);
 -- 
 2.7.4
