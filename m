@@ -1,59 +1,70 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCHv5 0/6] Add support for UHS-I on Exynos5422 odroid boards
-Date: Mon, 8 Oct 2018 13:51:08 +0200
-Message-ID: <CAPDyKFp-gnxqknz1ic5jrQ2G0M3X9rMVgj9sWeOiWOX+S7VODw@mail.gmail.com>
-References: <20180927140738.1006-1-linux.amoon@gmail.com>
+Subject: Re: [PATCH v1 2/2] mmc: mediatek: add bus_clk control
+Date: Mon, 8 Oct 2018 13:51:15 +0200
+Message-ID: <CAPDyKFr7BeED5Zzkfacknrh=usBwHXcDF=GGPYNpOb9R7itopA@mail.gmail.com>
+References: <1538188195-3608-1-git-send-email-chaotian.jing@mediatek.com> <1538188195-3608-2-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180927140738.1006-1-linux.amoon@gmail.com>
+In-Reply-To: <1538188195-3608-2-git-send-email-chaotian.jing@mediatek.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Anand Moon <linux.amoon@gmail.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Kukjin Kim <kgene@kernel.org>, Krzysztof Kozlowski <krzk@kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>, DTML <devicetree@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Chaotian Jing <chaotian.jing@mediatek.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Matthias Brugger <matthias.bgg@gmail.com>, Ryder Lee <ryder.lee@mediatek.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Sean Wang <sean.wang@mediatek.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, linux-mediatek@lists.infradead.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, srv_heupstream <srv_heupstream@mediatek.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 27 September 2018 at 16:07, Anand Moon <linux.amoon@gmail.com> wrote:
-> This is series v4 since my previous patches were incomplete with driver
-> changes missing.
+On 29 September 2018 at 04:29, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
+> when gate MSDC0_HCLK, access register will hang, even the MSDC driver
+> will never accessing register after HCLK was gated, but for safety, need
+> gate the bus_clk(which used to access register) too.
 >
-> v5 changes.
-> drop the cd-gpios wp-gpio gpio pin setting, just add the pinctrl
-> configration to support write protect.
->
-> v4 changes.
-> squash cd-gpios and wp-gpio changes into single patch.
-> change the subject prefix to "ARM: dts: exynos:"
->
-> These changes add UHS-I tuning for dw_mmc-exynos driver.
->
-> Rebased on Krzysztof branch next/dt
-> [0] git://git.kernel.org/pub/scm/linux/kernel/git/krzk/linux.git
->
-> Anand Moon (6):
->   ARM: dts: exynos: Added UHS-I bus speed support
->   ARM: dts: exynos: fix regulator min values of LDO13 for Odroid XU3/XU4
->   ARM: dts: exynos: update maximum frequency for sdcard to 200MHz
->   ARM: dts: exynos: Add pin configuration for SD write protect on Odroid
->     XU3/XU4
->   ARM: dts: exynos: update maximum frequency for emmc to 200MHz
->   mmc: dw_mmc-exynos: Add tuning for sdr and ddr timing for USH-I mode
->
->  arch/arm/boot/dts/exynos5420-pinctrl.dtsi          |  7 +++++++
->  arch/arm/boot/dts/exynos5422-odroid-core.dtsi      |  8 ++++++--
->  arch/arm/boot/dts/exynos5422-odroidxu3-common.dtsi |  1 +
->  drivers/mmc/host/dw_mmc-exynos.c                   | 11 +++++++++++
->  4 files changed, 25 insertions(+), 2 deletions(-)
->
-> --
-> 2.17.1
->
+> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
 
-Anand,
-
-I have applied the mmc patch for next, thanks!
-
-In regards to the DTS changes, I assume the soc maintainers will pick
-them up, but maybe you need to resend them separately.
+Applied for next, thanks!
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/mtk-sd.c | 6 ++++++
+>  1 file changed, 6 insertions(+)
+>
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index 0484138..1c1c967 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -387,6 +387,7 @@ struct msdc_host {
+>
+>         struct clk *src_clk;    /* msdc source clock */
+>         struct clk *h_clk;      /* msdc h_clk */
+> +       struct clk *bus_clk;    /* bus clock which used to access register */
+>         struct clk *src_clk_cg; /* msdc source clock control gate */
+>         u32 mclk;               /* mmc subsystem clock frequency */
+>         u32 src_clk_freq;       /* source clock frequency */
+> @@ -660,12 +661,14 @@ static void msdc_gate_clock(struct msdc_host *host)
+>  {
+>         clk_disable_unprepare(host->src_clk_cg);
+>         clk_disable_unprepare(host->src_clk);
+> +       clk_disable_unprepare(host->bus_clk);
+>         clk_disable_unprepare(host->h_clk);
+>  }
+>
+>  static void msdc_ungate_clock(struct msdc_host *host)
+>  {
+>         clk_prepare_enable(host->h_clk);
+> +       clk_prepare_enable(host->bus_clk);
+>         clk_prepare_enable(host->src_clk);
+>         clk_prepare_enable(host->src_clk_cg);
+>         while (!(readl(host->base + MSDC_CFG) & MSDC_CFG_CKSTB))
+> @@ -1900,6 +1903,9 @@ static int msdc_drv_probe(struct platform_device *pdev)
+>                 goto host_free;
+>         }
+>
+> +       host->bus_clk = devm_clk_get(&pdev->dev, "bus_clk");
+> +       if (IS_ERR(host->bus_clk))
+> +               host->bus_clk = NULL;
+>         /*source clock control gate is optional clock*/
+>         host->src_clk_cg = devm_clk_get(&pdev->dev, "source_cg");
+>         if (IS_ERR(host->src_clk_cg))
+> --
+> 1.8.1.1.dirty
+>
