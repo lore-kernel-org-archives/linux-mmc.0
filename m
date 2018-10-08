@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V6 13/23] mmc: mmci: add variant properties to define cpsm & cmdresp bits
-Date: Mon, 8 Oct 2018 14:08:45 +0200
-Message-ID: <1539000535-13261-14-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V6 07/23] mmc: mmci: add dma_finalize callback
+Date: Mon, 8 Oct 2018 14:08:39 +0200
+Message-ID: <1539000535-13261-8-git-send-email-ludovic.Barre@st.com>
 References: <1539000535-13261-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,169 +14,101 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-This patch adds command variant properties to define
-cpsm enable bit and responses.
-Needed to support the STM32 variant (shift of cpsm bit,
-specific definition of commands response).
+This patch adds dma_finalize callback at mmci_host_ops
+to allow to call specific variant.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.c | 47 +++++++++++++++++++++++++++++++++++++++++++----
- drivers/mmc/host/mmci.h |  8 ++++++++
- 2 files changed, 51 insertions(+), 4 deletions(-)
+ drivers/mmc/host/mmci.c          | 19 ++++++++++++-------
+ drivers/mmc/host/mmci.h          |  3 ++-
+ drivers/mmc/host/mmci_qcom_dml.c |  1 +
+ 3 files changed, 15 insertions(+), 8 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 737adf4..9f0cef0 100644
+index 72584f4..4570042 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -56,6 +56,10 @@ static unsigned int fmax = 515633;
- static struct variant_data variant_arm = {
- 	.fifosize		= 16 * 4,
- 	.fifohalfsize		= 8 * 4,
-+	.cmdreg_cpsm_enable	= MCI_CPSM_ENABLE,
-+	.cmdreg_lrsp_crc	= MCI_CPSM_RESPONSE | MCI_CPSM_LONGRSP,
-+	.cmdreg_srsp_crc	= MCI_CPSM_RESPONSE,
-+	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
- 	.datalength_bits	= 16,
- 	.datactrl_blocksz	= 11,
- 	.pwrreg_powerup		= MCI_PWR_UP,
-@@ -70,6 +74,10 @@ static struct variant_data variant_arm = {
- static struct variant_data variant_arm_extended_fifo = {
- 	.fifosize		= 128 * 4,
- 	.fifohalfsize		= 64 * 4,
-+	.cmdreg_cpsm_enable	= MCI_CPSM_ENABLE,
-+	.cmdreg_lrsp_crc	= MCI_CPSM_RESPONSE | MCI_CPSM_LONGRSP,
-+	.cmdreg_srsp_crc	= MCI_CPSM_RESPONSE,
-+	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
- 	.datalength_bits	= 16,
- 	.datactrl_blocksz	= 11,
- 	.pwrreg_powerup		= MCI_PWR_UP,
-@@ -84,6 +92,10 @@ static struct variant_data variant_arm_extended_fifo_hwfc = {
- 	.fifosize		= 128 * 4,
- 	.fifohalfsize		= 64 * 4,
- 	.clkreg_enable		= MCI_ARM_HWFCEN,
-+	.cmdreg_cpsm_enable	= MCI_CPSM_ENABLE,
-+	.cmdreg_lrsp_crc	= MCI_CPSM_RESPONSE | MCI_CPSM_LONGRSP,
-+	.cmdreg_srsp_crc	= MCI_CPSM_RESPONSE,
-+	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
- 	.datalength_bits	= 16,
- 	.datactrl_blocksz	= 11,
- 	.pwrreg_powerup		= MCI_PWR_UP,
-@@ -99,6 +111,10 @@ static struct variant_data variant_u300 = {
- 	.fifohalfsize		= 8 * 4,
- 	.clkreg_enable		= MCI_ST_U300_HWFCEN,
- 	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
-+	.cmdreg_cpsm_enable	= MCI_CPSM_ENABLE,
-+	.cmdreg_lrsp_crc	= MCI_CPSM_RESPONSE | MCI_CPSM_LONGRSP,
-+	.cmdreg_srsp_crc	= MCI_CPSM_RESPONSE,
-+	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
- 	.datalength_bits	= 16,
- 	.datactrl_blocksz	= 11,
- 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
-@@ -119,6 +135,10 @@ static struct variant_data variant_nomadik = {
- 	.fifohalfsize		= 8 * 4,
- 	.clkreg			= MCI_CLK_ENABLE,
- 	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
-+	.cmdreg_cpsm_enable	= MCI_CPSM_ENABLE,
-+	.cmdreg_lrsp_crc	= MCI_CPSM_RESPONSE | MCI_CPSM_LONGRSP,
-+	.cmdreg_srsp_crc	= MCI_CPSM_RESPONSE,
-+	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
- 	.datalength_bits	= 24,
- 	.datactrl_blocksz	= 11,
- 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
-@@ -142,6 +162,10 @@ static struct variant_data variant_ux500 = {
- 	.clkreg_enable		= MCI_ST_UX500_HWFCEN,
- 	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
- 	.clkreg_neg_edge_enable	= MCI_ST_UX500_NEG_EDGE,
-+	.cmdreg_cpsm_enable	= MCI_CPSM_ENABLE,
-+	.cmdreg_lrsp_crc	= MCI_CPSM_RESPONSE | MCI_CPSM_LONGRSP,
-+	.cmdreg_srsp_crc	= MCI_CPSM_RESPONSE,
-+	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
- 	.datalength_bits	= 24,
- 	.datactrl_blocksz	= 11,
- 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
-@@ -169,6 +193,10 @@ static struct variant_data variant_ux500v2 = {
- 	.clkreg_enable		= MCI_ST_UX500_HWFCEN,
- 	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
- 	.clkreg_neg_edge_enable	= MCI_ST_UX500_NEG_EDGE,
-+	.cmdreg_cpsm_enable	= MCI_CPSM_ENABLE,
-+	.cmdreg_lrsp_crc	= MCI_CPSM_RESPONSE | MCI_CPSM_LONGRSP,
-+	.cmdreg_srsp_crc	= MCI_CPSM_RESPONSE,
-+	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
- 	.datactrl_mask_ddrmode	= MCI_DPSM_ST_DDRMODE,
- 	.datalength_bits	= 24,
- 	.datactrl_blocksz	= 11,
-@@ -198,6 +226,10 @@ static struct variant_data variant_stm32 = {
- 	.clkreg_enable		= MCI_ST_UX500_HWFCEN,
- 	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
- 	.clkreg_neg_edge_enable	= MCI_ST_UX500_NEG_EDGE,
-+	.cmdreg_cpsm_enable	= MCI_CPSM_ENABLE,
-+	.cmdreg_lrsp_crc	= MCI_CPSM_RESPONSE | MCI_CPSM_LONGRSP,
-+	.cmdreg_srsp_crc	= MCI_CPSM_RESPONSE,
-+	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
- 	.datalength_bits	= 24,
- 	.datactrl_blocksz	= 11,
- 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
-@@ -218,6 +250,10 @@ static struct variant_data variant_qcom = {
- 				  MCI_QCOM_CLK_SELECT_IN_FBCLK,
- 	.clkreg_8bit_bus_enable = MCI_QCOM_CLK_WIDEBUS_8,
- 	.datactrl_mask_ddrmode	= MCI_QCOM_CLK_SELECT_IN_DDR_MODE,
-+	.cmdreg_cpsm_enable	= MCI_CPSM_ENABLE,
-+	.cmdreg_lrsp_crc	= MCI_CPSM_RESPONSE | MCI_CPSM_LONGRSP,
-+	.cmdreg_srsp_crc	= MCI_CPSM_RESPONSE,
-+	.cmdreg_srsp		= MCI_CPSM_RESPONSE,
- 	.data_cmd_enable	= MCI_CPSM_QCOM_DATCMD,
- 	.blksz_datactrl4	= true,
- 	.datalength_bits	= 24,
-@@ -1015,16 +1051,19 @@ mmci_start_command(struct mmci_host *host, struct mmc_command *cmd, u32 c)
- 	dev_dbg(mmc_dev(host->mmc), "op %02x arg %08x flags %08x\n",
- 	    cmd->opcode, cmd->arg, cmd->flags);
+@@ -460,6 +460,15 @@ int mmci_dma_start(struct mmci_host *host, unsigned int datactrl)
+ 	return 0;
+ }
  
--	if (readl(base + MMCICOMMAND) & MCI_CPSM_ENABLE) {
-+	if (readl(base + MMCICOMMAND) & host->variant->cmdreg_cpsm_enable) {
- 		writel(0, base + MMCICOMMAND);
- 		mmci_reg_delay(host);
- 	}
++void mmci_dma_finalize(struct mmci_host *host, struct mmc_data *data)
++{
++	if (!host->use_dma)
++		return;
++
++	if (host->ops && host->ops->dma_finalize)
++		host->ops->dma_finalize(host, data);
++}
++
+ static void
+ mmci_request_end(struct mmci_host *host, struct mmc_request *mrq)
+ {
+@@ -641,13 +650,13 @@ static void mmci_dma_data_error(struct mmci_host *host)
+ 	mmci_dma_unmap(host, host->data);
+ }
  
--	c |= cmd->opcode | MCI_CPSM_ENABLE;
-+	c |= cmd->opcode | host->variant->cmdreg_cpsm_enable;
- 	if (cmd->flags & MMC_RSP_PRESENT) {
- 		if (cmd->flags & MMC_RSP_136)
--			c |= MCI_CPSM_LONGRSP;
--		c |= MCI_CPSM_RESPONSE;
-+			c |= host->variant->cmdreg_lrsp_crc;
-+		else if (cmd->flags & MMC_RSP_CRC)
-+			c |= host->variant->cmdreg_srsp_crc;
-+		else
-+			c |= host->variant->cmdreg_srsp;
- 	}
- 	if (/*interrupt*/0)
- 		c |= MCI_CPSM_INTERRUPT;
+-static void mmci_dma_finalize(struct mmci_host *host, struct mmc_data *data)
++void mmci_dmae_finalize(struct mmci_host *host, struct mmc_data *data)
+ {
+ 	struct mmci_dmae_priv *dmae = host->dma_priv;
+ 	u32 status;
+ 	int i;
+ 
+-	if (!host->use_dma || !dma_inprogress(host))
++	if (!dma_inprogress(host))
+ 		return;
+ 
+ 	/* Wait up to 1ms for the DMA to complete */
+@@ -844,6 +853,7 @@ static struct mmci_host_ops mmci_variant_ops = {
+ 	.dma_setup = mmci_dmae_setup,
+ 	.dma_release = mmci_dmae_release,
+ 	.dma_start = mmci_dmae_start,
++	.dma_finalize = mmci_dmae_finalize,
+ };
+ 
+ void mmci_variant_init(struct mmci_host *host)
+@@ -852,11 +862,6 @@ void mmci_variant_init(struct mmci_host *host)
+ }
+ #else
+ /* Blank functions if the DMA engine is not available */
+-static inline void mmci_dma_finalize(struct mmci_host *host,
+-				     struct mmc_data *data)
+-{
+-}
+-
+ static inline void mmci_dma_data_error(struct mmci_host *host)
+ {
+ }
 diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 8e7ea44..531c247 100644
+index 7bca597..8c1493b 100644
 --- a/drivers/mmc/host/mmci.h
 +++ b/drivers/mmc/host/mmci.h
-@@ -204,6 +204,10 @@ struct mmci_host;
-  * @clkreg_enable: enable value for MMCICLOCK register
-  * @clkreg_8bit_bus_enable: enable value for 8 bit bus
-  * @clkreg_neg_edge_enable: enable value for inverted data/cmd output
-+ * @cmdreg_cpsm_enable: enable value for CPSM
-+ * @cmdreg_lrsp_crc: enable value for long response with crc
-+ * @cmdreg_srsp_crc: enable value for short response with crc
-+ * @cmdreg_srsp: enable value for short response without crc
-  * @datalength_bits: number of bits in the MMCIDATALENGTH register
-  * @fifosize: number of bytes that can be written when MMCI_TXFIFOEMPTY
-  *	      is asserted (likewise for RX)
-@@ -243,6 +247,10 @@ struct variant_data {
- 	unsigned int		clkreg_enable;
- 	unsigned int		clkreg_8bit_bus_enable;
- 	unsigned int		clkreg_neg_edge_enable;
-+	unsigned int		cmdreg_cpsm_enable;
-+	unsigned int		cmdreg_lrsp_crc;
-+	unsigned int		cmdreg_srsp_crc;
-+	unsigned int		cmdreg_srsp;
- 	unsigned int		datalength_bits;
- 	unsigned int		fifosize;
- 	unsigned int		fifohalfsize;
+@@ -281,6 +281,7 @@ struct mmci_host_ops {
+ 	int (*dma_setup)(struct mmci_host *host);
+ 	void (*dma_release)(struct mmci_host *host);
+ 	int (*dma_start)(struct mmci_host *host, unsigned int *datactrl);
++	void (*dma_finalize)(struct mmci_host *host, struct mmc_data *data);
+ };
+ 
+ struct mmci_host {
+@@ -341,4 +342,4 @@ void mmci_dmae_get_next_data(struct mmci_host *host, struct mmc_data *data);
+ int mmci_dmae_setup(struct mmci_host *host);
+ void mmci_dmae_release(struct mmci_host *host);
+ int mmci_dmae_start(struct mmci_host *host, unsigned int *datactrl);
+-
++void mmci_dmae_finalize(struct mmci_host *host, struct mmc_data *data);
+diff --git a/drivers/mmc/host/mmci_qcom_dml.c b/drivers/mmc/host/mmci_qcom_dml.c
+index 66af406..c2ef73f 100644
+--- a/drivers/mmc/host/mmci_qcom_dml.c
++++ b/drivers/mmc/host/mmci_qcom_dml.c
+@@ -190,6 +190,7 @@ static struct mmci_host_ops qcom_variant_ops = {
+ 	.dma_setup = qcom_dma_setup,
+ 	.dma_release = mmci_dmae_release,
+ 	.dma_start = mmci_dmae_start,
++	.dma_finalize = mmci_dmae_finalize,
+ };
+ 
+ void qcom_variant_init(struct mmci_host *host)
 -- 
 2.7.4
