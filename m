@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V6 22/23] dt-bindings: mmci: add stm32 sdmmc variant
-Date: Mon, 8 Oct 2018 14:08:54 +0200
-Message-ID: <1539000535-13261-23-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V6 20/23] mmc: mmci: add clock divider for stm32 sdmmc
+Date: Mon, 8 Oct 2018 14:08:52 +0200
+Message-ID: <1539000535-13261-21-git-send-email-ludovic.Barre@st.com>
 References: <1539000535-13261-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,43 +14,46 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-This patch adds properties for stm32 sdmmc variant.
+The STM32 sdmmc variant has a different clock divider.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
-Acked-by: Rob Herring <robh@kernel.org>
 ---
- Documentation/devicetree/bindings/mmc/mmci.txt | 10 ++++++++++
- 1 file changed, 10 insertions(+)
+ drivers/mmc/host/mmci.c | 2 ++
+ drivers/mmc/host/mmci.h | 2 ++
+ 2 files changed, 4 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/mmci.txt b/Documentation/devicetree/bindings/mmc/mmci.txt
-index 4e69b25..6d3c626 100644
---- a/Documentation/devicetree/bindings/mmc/mmci.txt
-+++ b/Documentation/devicetree/bindings/mmc/mmci.txt
-@@ -16,8 +16,10 @@ Optional properties:
- - arm,primecell-periphid : contains the PrimeCell Peripheral ID, it overrides
-                            the ID provided by the HW
- - resets                 : phandle to internal reset line.
-+			   Should be defined for sdmmc variant.
- - vqmmc-supply           : phandle to the regulator device tree node, mentioned
-                            as the VCCQ/VDD_IO supply in the eMMC/SD specs.
-+specific for ux500 variant:
- - st,sig-dir-dat0        : bus signal direction pin used for DAT[0].
- - st,sig-dir-dat2        : bus signal direction pin used for DAT[2].
- - st,sig-dir-dat31       : bus signal direction pin used for DAT[3] and DAT[1].
-@@ -25,6 +27,14 @@ Optional properties:
- - st,sig-dir-cmd         : cmd signal direction pin used for CMD.
- - st,sig-pin-fbclk       : feedback clock signal pin used.
- 
-+specific for sdmmc variant:
-+- st,sig-dir             : signal direction polarity used for cmd, dat0 dat123.
-+- st,neg-edge            : data & command phase relation, generated on
-+                           sd clock falling edge.
-+- st,use-ckin            : use ckin pin from an external driver to sample
-+                           the receive data (example: with voltage
-+			   switch transceiver).
-+
- Deprecated properties:
- - mmc-cap-mmc-highspeed  : indicates whether MMC is high speed capable.
- - mmc-cap-sd-highspeed   : indicates whether SD is high speed capable.
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index d636a0e..ad2f62f 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -1862,6 +1862,8 @@ static int mmci_probe(struct amba_device *dev,
+ 	 */
+ 	if (variant->st_clkdiv)
+ 		mmc->f_min = DIV_ROUND_UP(host->mclk, 257);
++	else if (variant->stm32_clkdiv)
++		mmc->f_min = DIV_ROUND_UP(host->mclk, 2046);
+ 	else if (variant->explicit_mclk_control)
+ 		mmc->f_min = clk_round_rate(host->clk, 100000);
+ 	else
+diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+index 8ecb1ee..a962cfa 100644
+--- a/drivers/mmc/host/mmci.h
++++ b/drivers/mmc/host/mmci.h
+@@ -216,6 +216,7 @@ struct mmci_host;
+  * @data_cmd_enable: enable value for data commands.
+  * @st_sdio: enable ST specific SDIO logic
+  * @st_clkdiv: true if using a ST-specific clock divider algorithm
++ * @stm32_clkdiv: true if using a STM32-specific clock divider algorithm
+  * @datactrl_mask_ddrmode: ddr mode mask in datactrl register.
+  * @blksz_datactrl16: true if Block size is at b16..b30 position in datactrl register
+  * @blksz_datactrl4: true if Block size is at b4..b16 position in datactrl
+@@ -269,6 +270,7 @@ struct variant_data {
+ 	u8			datacnt_useless:1;
+ 	u8			st_sdio:1;
+ 	u8			st_clkdiv:1;
++	u8			stm32_clkdiv:1;
+ 	u8			blksz_datactrl16:1;
+ 	u8			blksz_datactrl4:1;
+ 	u32			pwrreg_powerup;
 -- 
 2.7.4
