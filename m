@@ -1,191 +1,89 @@
-From: Craig <ctatlor97@gmail.com>
-Subject: Re: [PATCH V3 0/4] Changes for SDCC5 version
-Date: Tue, 09 Oct 2018 07:15:40 +0100
-Message-ID: <5A5AEF0D-6996-410E-962C-43B9944F0E28@gmail.com>
-References: <1529386761-4923-1-git-send-email-vviswana@codeaurora.org> <20180924194412.GA27477@arch> <bcdeaf0c-fb04-67f5-8580-a3f5110bcba5@codeaurora.org> <C01C1C07-13FA-4693-9493-2FAEE9153577@gmail.com> <74ABB71C-6B0C-44AE-BC30-1F385ADC3E42@gmail.com> <20181008065653.GB2550@tuxbook-pro> <4881900d-c8e5-278f-012f-541ad13ffca8@codeaurora.org>
+From: Faiz Abbas <faiz_abbas@ti.com>
+Subject: Re: [PATCH 1/6] dt-bindings: phy: am654-mmc-phy: Document new phy
+ bindings
+Date: Tue, 9 Oct 2018 12:04:10 +0530
+Message-ID: <92ff5e6a-455f-bd26-4f26-c5ff24ab6134@ti.com>
+References: <20181004111451.9539-1-faiz_abbas@ti.com>
+ <20181004111451.9539-2-faiz_abbas@ti.com>
+ <ad9945db-de08-36fc-47b8-499ce2079d92@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <4881900d-c8e5-278f-012f-541ad13ffca8@codeaurora.org>
+In-Reply-To: <ad9945db-de08-36fc-47b8-499ce2079d92@ti.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>, Bjorn Andersson <bjorn.andersson@linaro.org>
-Cc: Vijay Viswanath <vviswana@codeaurora.org>, adrian.hunter@intel.com, ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, devicetree@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, jeremymc@redhat.com, riteshh@codeaurora.org, dianders@google.com, sayalil@codeaurora.org
+To: "Andrew F. Davis" <afd@ti.com>, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: kishon@ti.com, ulf.hansson@linaro.org, robh+dt@kernel.org, catalin.marinas@arm.com, adrian.hunter@intel.com
 List-Id: linux-mmc@vger.kernel.org
 
+Hi Andrew,
 
-
-On 9 October 2018 07:01:57 BST, Veerabhadrarao Badiganti <vbadigan@codeaur=
-ora=2Eorg> wrote:
->Hi
->
->
->On 10/8/2018 12:26 PM, Bjorn Andersson wrote:
->> On Sun 07 Oct 01:07 PDT 2018, Craig wrote:
+On Friday 05 October 2018 09:28 PM, Andrew F. Davis wrote:
+> On 10/04/2018 06:14 AM, Faiz Abbas wrote:
+>> Add information to document bindings for the MMC PHY
+>> on TI's AM654 devices.
 >>
->>> Any updates on this?
->>>
->> FWIW I used qcom,sdhci-msm-v5 on QCS404 successfully=2E
+>> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+>> Signed-off-by: Sekhar Nori <nsekhar@ti.com>
+>> ---
+>>  .../devicetree/bindings/phy/am654-mmc-phy.txt | 42 +++++++++++++++++++
+>>  1 file changed, 42 insertions(+)
+>>  create mode 100644 Documentation/devicetree/bindings/phy/am654-mmc-phy.txt
 >>
->> Regards,
->> Bjorn
->
->The base address and interrupt numbers needs to be updated in your dt=2E
->you can refer the below link to update interrupt number and base
->address
->https://android=2Egooglesource=2Ecom/kernel/msm/+/android-msm-wahoo-4=2E4=
--oreo-m2/arch/arm/boot/dts/qcom/sdm660=2Edtsi
-They look correct, driver only uses pwr irq and the actual reg field is fi=
-ne, just node name wrong, which wouldn't cause issues=2E
->>> On 25 September 2018 16:39:33 BST, Craig <ctatlor97@gmail=2Ecom>
->wrote:
->>>>
->>>> On 25 September 2018 12:17:26 BST, Veerabhadrarao Badiganti
->>>> <vbadigan@codeaurora=2Eorg> wrote:
->>>>> On 9/25/2018 1:18 AM, Craig Tatlor wrote:
->>>>>> What socs have you tested this on?
->>>>>> On sdm660 it seems to crash device
->>>>>> when writing pwr ctl=2E
->>>>> Hi
->>>>> We have tested this on SDM845=2E
->>>>> SDM660 also has SDCC5 controller, so you would need to define
->>>>> "qcom,sdhci-msm-v5" in your platform dt=2E
->>>>> Can you confirm if you have defined this?
->>>>>
->>>> Hi,
->>>> Yes my DT entry is as follows
->>>>
->>>> sdhc_1: sdhci@f9824900 {
->Update this address=2E This could be the reason for the crash that you
->are=20
->observing=2E
->
->>>>     =20
->>>>              =20
->>>> compatible =3D "qcom,sdhci-msm-v5";
->>>>          =20
->>>> reg =3D <0xc0c4000 0x1000>, <0xc0c5000 0x1000>;
->>>>          =20
->>>> interrupts =3D <GIC_SPI 112 IRQ_TYPE_LEVEL_HIGH>;
->>>>          =20
->
->Please update this interrupt map aswell=2E
->
->>>> interrupt-names =3D "pwr_irq";
->>>>          =20
->>>>                                                                   =20
->  =20
->>>> bus-width =3D <8>;
->>>>          =20
->>>> non-removable;
->>>>          =20
->>>>                                                                   =20
->  =20
->>>> vmmc-supply =3D <&pm660l_l4>;
->>>>          =20
->>>> vqmmc-supply =3D <&pm660_l8>;
->>>>          =20
->>>>                                                                   =20
->  =20
->>>> pinctrl-names =3D "default";
->>>>          =20
->>>> pinctrl-0 =3D <&sdc1_clk &sdc1_cmd &sdc1_data &sdc1_rclk>;
->>>>          =20
->>>>                                                                   =20
->  =20
->>>> clocks =3D <&gcc GCC_SDCC1_APPS_CLK>, <&gcc GCC_SDCC1_AHB_CLK>;
->>>>          =20
->>>> clock-names =3D "core", "iface";
->>>>          =20
->>>>         };
->>>>
->>>>> BTW, can you please share few details of the platform that you are
->>>>> checking?
->>>>> We are not aware of any dev platform based on SDM660=2E This is just
->for
->>>>> my info
->>>> I'm checking on the sony xperia xa2 (pioneer) smartphone=2E
->>>>>> On Tue, Jun 19, 2018 at 11:09:17AM +0530, Vijay Viswanath wrote:
->>>>>>> With SDCC5, the MCI register space got removed and the
->offset/order
->>>>> of
->>>>>>> several registers have changed=2E Based on SDCC version used and
->the
->>>>> register,
->>>>>>> we need to pick the base address and offset=2E
->>>>>>>
->>>>>>> Depends on patch series: "[PATCH V5 0/2] mmc: sdhci-msm:
->>>> Configuring
->>>>> IO_PAD support for sdhci-msm"
->>>>>>> Changes since RFC:
->>>>>>> 	Dropped voltage regulator changes in sdhci-msm
->>>>>>> 	Split the "Register changes for sdcc V5" patch
->>>>>>> 	Instead of checking mci removal for deciding which base addr to
->>>>> use,
->>>>>>> 	new function pointers are defined for the 2 variants of sdcc:
->>>>>>> 		1) MCI present
->>>>>>> 		2) V5 (mci removed)
->>>>>>> 	Instead of string comparing with the compatible string from DT
->>>>> file,
->>>>>>> 	the sdhci_msm_probe will now pick the data associated with the
->>>>>>> 	compatible entry and use it to load variant specific address
->>>>> offsets
->>>>>>> 	and msm variant specific read/write ops=2E
->>>>>>>
->>>>>>> Changes since V1:
->>>>>>> 	Removed unused msm_reab & msm_writeb APIs
->>>>>>> 	Changed certain register addresses from uppercase to lowercase
->hex
->>>>>>> 	letters
->>>>>>> 	Removed extra lines and spaces
->>>>>>> 	Split "[PATCH V1 0/3] Changes for SDCC5 version" patch into
->two,
->>>>>>> 	one for Documentation and other for the driver changes=2E
->>>>>>>
->>>>>>> Changes since V2:
->>>>>>> 	Used lower case for macro function defenitions
->>>>>>> 	Removed unused function pointers for msm_readb & msm_writeb
->>>>>>>
->>>>>>>
->>>>>>> Sayali Lokhande (3):
->>>>>>>     mmc: sdhci-msm: Define new Register address map
->>>>>>>     Documentation: sdhci-msm: Add new compatible string for SDCC
->v5
->>>>>>>     mmc: host: Register changes for sdcc V5
->>>>>>>
->>>>>>> Vijay Viswanath (1):
->>>>>>>     mmc: sdhci-msm: Add msm version specific ops and data
->structures
->>>>>>>
->>>>>>>    =2E=2E=2E/devicetree/bindings/mmc/sdhci-msm=2Etxt          |   =
-7 +-
->>>>>>>    drivers/mmc/host/sdhci-msm=2Ec                       | 511
->>>>> ++++++++++++++++-----
->>>>>>>    2 files changed, 391 insertions(+), 127 deletions(-)
->>>>>>>
->>>>>>> --=20
->>>>>>>    Qualcomm India Private Limited, on behalf of Qualcomm
->Innovation
->>>>> Center, Inc=2E
->>>>>>> Qualcomm Innovation Center, Inc=2E is a member of Code Aurora
->Forum,
->>>> a
->>>>> Linux Foundation Collaborative Project=2E
->>>>>>> --
->>>>>>> To unsubscribe from this list: send the line "unsubscribe
->>>>> linux-arm-msm" in
->>>>>>> the body of a message to majordomo@vger=2Ekernel=2Eorg
->>>>>>> More majordomo info at=20
->http://vger=2Ekernel=2Eorg/majordomo-info=2Ehtml
->>>>> Thanks,
->>>>> Veera
->>> --=20
->>> Sent from my Android device with K-9 Mail=2E Please excuse my brevity=
-=2E
->
->Thanks,
->Veera
+>> diff --git a/Documentation/devicetree/bindings/phy/am654-mmc-phy.txt b/Documentation/devicetree/bindings/phy/am654-mmc-phy.txt
+>> new file mode 100644
+>> index 000000000000..766921612758
+>> --- /dev/null
+>> +++ b/Documentation/devicetree/bindings/phy/am654-mmc-phy.txt
+> 
+> 
+> Name ti,am654-mmc-phy.txt might be more consistent name.
 
---=20
-Sent from my Android device with K-9 Mail=2E Please excuse my brevity=2E
+Ok.
+
+> 
+> 
+>> @@ -0,0 +1,42 @@
+>> +TI AM654 MMC PHY
+>> +-------------------
+>> +
+>> +Required properties:
+>> + - compatible: ti,am654-emmc-phy
+>> + - #phy-cells: must be 0
+>> + - reg: PHY registers address offset and size
+>> + - clocks: must be phandle of the clock provider which is the host
+>> +	   controller
+>> + - clock-names: must be "mmcclk"
+>> + - ti,otap-del-sel: Output Tap Delay select.
+>> + - ti,trm-icp: DLL trim select.
+>> + - ti,driver-strength-ohm: driver strength in ohms.
+>> +			   Valid values are 33, 40, 50, 66, and 100 ohms.
+>> +
+>> +Example:
+>> +			mmc_phy1: mmc_phy@10100 {
+>> +				compatible = "ti,am654-mmc-phy";
+>> +				reg = <0x10100 0x34>;
+>> +				clocks = <&sdhci1>;
+>> +				clock-names = "mmcclk";
+>> +				#phy-cells = <0>;
+>> +				ti,otap-del-sel = <0x2>;
+>> +				ti,trm-icp = <0x8>;
+>> +				status = "disabled";
+> 
+> 
+> No need for disabled in the example case. 
+
+Ok.
+
+> Also not sure the host
+> controller example below needs to be here, there are already examples
+> for that binding in mmc/arasan,sdhci.txt.
+> 
+
+I had added it because it is a clock source in clocks=<&sdhci1> so it
+should have #clock-cells and clock-output-names. I suppose I can just
+reference it here.
+
+Thanks,
+Faiz
