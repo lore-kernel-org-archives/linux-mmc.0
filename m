@@ -1,39 +1,57 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 5/6] mmc: sdhci-of-arasan: Add Support for AM654 MMC and PHY
-Date: Tue, 9 Oct 2018 09:35:13 +0200
-Message-ID: <CAPDyKFrt=6da_r3EwX0UxmHkHU0wLN9BME1XTsapU8YjBXpdsQ@mail.gmail.com>
-References: <20181004111451.9539-1-faiz_abbas@ti.com> <20181004111451.9539-6-faiz_abbas@ti.com>
- <CAPDyKFpRU1bQB6LMt30c8hGhTYnYp7FBVOz092TEzkiXfoDdgQ@mail.gmail.com> <f1979ee5-404b-4397-8acb-837fbda83eec@ti.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] libertas: call into generic suspend code before turning
+ off power
+Date: Tue, 9 Oct 2018 09:43:38 +0200
+Message-ID: <CAPDyKFoo-gnjUg9Khc3EPm=cvHgyR_VNW8xgjP1Tea7wjRfvSw@mail.gmail.com>
+References: <20181008200357.10819-1-daniel@zonque.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <f1979ee5-404b-4397-8acb-837fbda83eec@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Faiz Abbas <faiz_abbas@ti.com>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kishon <kishon@ti.com>, Rob Herring <robh+dt@kernel.org>, Catalin Marinas <catalin.marinas@arm.com>, Adrian Hunter <adrian.hunter@intel.com>
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20181008200357.10819-1-daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org>
+Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, libertas-dev-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 9 October 2018 at 09:35, Faiz Abbas <faiz_abbas@ti.com> wrote:
-> Hi Uffe,
+On 8 October 2018 at 22:03, Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org> wrote:
+> When powering down a SDIO connected card during suspend, make sure to call
+> into the generic lbs_suspend() function before pulling the plug. This will
+> make sure the card is successfully deregistered from the system to avoid
+> communication to the card starving out.
 >
-> On Tuesday 09 October 2018 01:00 PM, Ulf Hansson wrote:
->> On 4 October 2018 at 13:14, Faiz Abbas <faiz_abbas@ti.com> wrote:
->>> The current arasan sdhci PHY configuration isn't compatible
->>> with the PHY on TI's AM654 devices.
->>>
->>> Therefore, add a new compatible, AM654 specific quirks
->>> and a new AM654 specific set_clock function which
->>> configures the PHY in a sane way.
->>>
->>> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
->>> Signed-off-by: Sekhar Nori <nsekhar@ti.com>
->>
->> Applied for next, thanks!
->>
->
-> Do I need to repost these in the v2 ?
+> Fixes: 7444a8092906 ("libertas: fix suspend and resume for SDIO connected cards")
+> Signed-off-by: Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org>
 
-No. It's okay if you drop them from the series.
+Reviewed-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+
+BTW, if you need this to reach 4.19 I have already queued some other
+mmc fixes so I can take this as well, if it helps. I need and ack of
+course.
 
 Kind regards
 Uffe
+
+> ---
+> If possible, this should go in for 4.19.
+>
+>  drivers/net/wireless/marvell/libertas/if_sdio.c | 4 ++++
+>  1 file changed, 4 insertions(+)
+>
+> diff --git a/drivers/net/wireless/marvell/libertas/if_sdio.c b/drivers/net/wireless/marvell/libertas/if_sdio.c
+> index 43743c26c071..39bf85d0ade0 100644
+> --- a/drivers/net/wireless/marvell/libertas/if_sdio.c
+> +++ b/drivers/net/wireless/marvell/libertas/if_sdio.c
+> @@ -1317,6 +1317,10 @@ static int if_sdio_suspend(struct device *dev)
+>         if (priv->wol_criteria == EHS_REMOVE_WAKEUP) {
+>                 dev_info(dev, "Suspend without wake params -- powering down card\n");
+>                 if (priv->fw_ready) {
+> +                       ret = lbs_suspend(priv);
+> +                       if (ret)
+> +                               return ret;
+> +
+>                         priv->power_up_on_resume = true;
+>                         if_sdio_power_off(card);
+>                 }
+> --
+> 2.17.1
+>
