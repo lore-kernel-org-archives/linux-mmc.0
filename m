@@ -1,34 +1,41 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V6 00/23] mmc: mmci: add sdmmc variant for stm32
-Date: Tue, 9 Oct 2018 13:18:27 +0200
-Message-ID: <CAPDyKFp4DEtavAqDg-ymaCcus+Hddv0OrgfS54HsTX+aWdzN+w@mail.gmail.com>
-References: <1539000535-13261-1-git-send-email-ludovic.Barre@st.com>
- <CAPDyKFp0oHHS=bkXj_AbiLmbNxW07pFnk-4m9kwQtYkh_ogKgw@mail.gmail.com> <cb919bf8-caa2-b2fe-fee4-ae2f0f4c04b5@st.com>
+From: Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Subject: Re: [PATCH] libertas: call into generic suspend code before turning off power
+Date: Tue, 09 Oct 2018 16:36:30 +0300
+Message-ID: <87efczqm1t.fsf@purkki.adurom.net>
+References: <20181008200357.10819-1-daniel@zonque.org>
+        <CAPDyKFoo-gnjUg9Khc3EPm=cvHgyR_VNW8xgjP1Tea7wjRfvSw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <cb919bf8-caa2-b2fe-fee4-ae2f0f4c04b5@st.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ludovic BARRE <ludovic.barre@st.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-stm32@st-md-mailman.stormreply.com
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAPDyKFoo-gnjUg9Khc3EPm=cvHgyR_VNW8xgjP1Tea7wjRfvSw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+        (Ulf Hansson's message of "Tue, 9 Oct 2018 09:43:38 +0200")
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, "linux-mmc@vger.kernel.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, libertas-dev-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 9 October 2018 at 09:54, Ludovic BARRE <ludovic.barre@st.com> wrote:
-> hi Ulf
->
-> On 10/09/2018 09:30 AM, Ulf Hansson wrote:
->>
->> Applied for next, thanks!
->>
->> FYI, I made little fixup of the help text in the Kconfig for the last
->> patch.
->
->
-> Thanks for your review.
-> Did you had a feedback on Qcom platform tests?
+Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> writes:
 
-Nope. I am leaving the tests for Qcom platforms to be done by
-kernelci, let's see what the reports are.
+> On 8 October 2018 at 22:03, Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org> wrote:
+>> When powering down a SDIO connected card during suspend, make sure to call
+>> into the generic lbs_suspend() function before pulling the plug. This will
+>> make sure the card is successfully deregistered from the system to avoid
+>> communication to the card starving out.
+>>
+>> Fixes: 7444a8092906 ("libertas: fix suspend and resume for SDIO connected cards")
+>> Signed-off-by: Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org>
+>
+> Reviewed-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>
+> BTW, if you need this to reach 4.19 I have already queued some other
+> mmc fixes so I can take this as well, if it helps. I need and ack of
+> course.
 
-Kind regards
-Uffe
+I'm not planning to send anything to 4.19 anymore and this is so simple
+that hopefully it cause any conflicts with -next patches, so feel free
+to do that:
+
+Acked-by: Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+
+-- 
+Kalle Valo
