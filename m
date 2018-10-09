@@ -1,7 +1,7 @@
 From: James Nuss <jamesnuss@nanometrics.ca>
-Subject: [PATCH 5/7] mmc-utils: remove write_reliability set command
-Date: Tue,  9 Oct 2018 13:31:09 -0400
-Message-ID: <212d6c6557b21584f9e3254ff72d57ca2682e2b2.1539103468.git.jamesnuss@nanometrics.ca>
+Subject: [PATCH 2/7] mmc-utils: treat FIRMWARE_VERSION as binary field instead of string
+Date: Tue,  9 Oct 2018 13:31:06 -0400
+Message-ID: <e2b6431104a6a822840d4e7b984d7aa23048a0af.1539103468.git.jamesnuss@nanometrics.ca>
 References: <cover.1539103468.git.jamesnuss@nanometrics.ca>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="US-ASCII"
@@ -14,127 +14,59 @@ To: linux-mmc@vger.kernel.org
 Cc: linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-The "write_reliability set" command is dangerous since it will only set
-write-reliability on one partition per command and this command is a
-one-time programmable action. This makes it impossible to set
-write-reliability on multiple partitions.
+The FIRMWARE_VERSION field is 8-bytes in size and contains non-printable
+characters.
 
-Remove the command so it cannot be used in the future.
-Use "write_reliability set_register" instead.
+Treat this field as binary and print individual byte values in hex
 
 Signed-off-by: James Nuss <jamesnuss@nanometrics.ca>
 ---
- mmc.c      |  5 -----
- mmc_cmds.c | 67 --------------------------------------------------------------
- mmc_cmds.h |  1 -
- 3 files changed, 73 deletions(-)
+ mmc.h      |  9 ++++++++-
+ mmc_cmds.c | 11 +++++++++--
+ 2 files changed, 17 insertions(+), 3 deletions(-)
 
-diff --git a/mmc.c b/mmc.c
-index aaefd3d..655546b 100644
---- a/mmc.c
-+++ b/mmc.c
-@@ -97,11 +97,6 @@ static struct Command commands[] = {
- 		"Enable the enhanced user area for the <device>.\nDry-run only unless -y or -c is passed.\nUse -c if more partitioning settings are still to come.\nNOTE!  This is a one-time programmable (unreversible) change.",
- 	  NULL
- 	},
--	{ do_write_reliability_set, -2,
--	  "write_reliability set", "<-y|-n|-c> " "<partition> " "<device>\n"
--		"Enable write reliability per partition for the <device>.\nDry-run only unless -y or -c is passed.\nUse -c if more partitioning settings are still to come.\nNOTE!  This is a one-time programmable (unreversible) change.",
--	  NULL
--	},
- 	{ do_write_reliability_set_register, -2,
- 	  "write_reliability set_register", "<partition-mask> " "<device>\n"
- 		"Set the write-reliability register (WR_REL_SET) for the <device>.\n"
+diff --git a/mmc.h b/mmc.h
+index 5d8a7e3..86e209a 100644
+--- a/mmc.h
++++ b/mmc.h
+@@ -59,7 +59,14 @@
+ #define EXT_CSD_OPTIMAL_READ_SIZE	266	/* RO */
+ #define EXT_CSD_OPTIMAL_WRITE_SIZE	265	/* RO */
+ #define EXT_CSD_OPTIMAL_TRIM_UNIT_SIZE	264	/* RO */
+-#define EXT_CSD_FIRMWARE_VERSION	254	/* RO */
++#define EXT_CSD_FIRMWARE_VERSION_7	261	/* RO */
++#define EXT_CSD_FIRMWARE_VERSION_6	260	/* RO */
++#define EXT_CSD_FIRMWARE_VERSION_5	259	/* RO */
++#define EXT_CSD_FIRMWARE_VERSION_4	258	/* RO */
++#define EXT_CSD_FIRMWARE_VERSION_3	257	/* RO */
++#define EXT_CSD_FIRMWARE_VERSION_2	256	/* RO */
++#define EXT_CSD_FIRMWARE_VERSION_1	255	/* RO */
++#define EXT_CSD_FIRMWARE_VERSION_0	254	/* RO */
+ #define EXT_CSD_CACHE_SIZE_3		252
+ #define EXT_CSD_CACHE_SIZE_2		251
+ #define EXT_CSD_CACHE_SIZE_1		250
 diff --git a/mmc_cmds.c b/mmc_cmds.c
-index 68c73ef..9565bc9 100644
+index 97ea111..45aa4c0 100644
 --- a/mmc_cmds.c
 +++ b/mmc_cmds.c
-@@ -1303,73 +1303,6 @@ int do_write_reliability_set_register(int nargs, char **argv)
- 	return 0;
- }
+@@ -1758,8 +1758,15 @@ int do_read_extcsd(int nargs, char **argv)
+ 	}
  
--int do_write_reliability_set(int nargs, char **argv)
--{
--	__u8 value;
--	__u8 ext_csd[512];
--	int fd, ret;
--
--	int dry_run = 1;
--	int partition;
--	char *device;
--
--	if (nargs != 4) {
--		fprintf(stderr,"Usage: mmc write_reliability set <-y|-n|-c> <partition> </path/to/mmcblkX>\n");
--		exit(1);
--	}
--
--	if (!strcmp("-y", argv[1])) {
--		dry_run = 0;
--	} else if (!strcmp("-c", argv[1])) {
--		dry_run = 2;
--	}
--
--	partition = strtol(argv[2], NULL, 10);
--	device = argv[3];
--
--	fd = open(device, O_RDWR);
--	if (fd < 0) {
--		perror("open");
--		exit(1);
--	}
--
--	ret = read_extcsd(fd, ext_csd);
--	if (ret) {
--		fprintf(stderr, "Could not read EXT_CSD from %s\n", device);
--		exit(1);
--	}
--
--	/* assert not PARTITION_SETTING_COMPLETED */
--	if (ext_csd[EXT_CSD_PARTITION_SETTING_COMPLETED])
--	{
--		printf(" Device is already partitioned\n");
--		exit(1);
--	}
--
--	/* assert HS_CTRL_REL */
--	if (!(ext_csd[EXT_CSD_WR_REL_PARAM] & HS_CTRL_REL)) {
--		printf("Cannot set write reliability parameters, WR_REL_SET is "
--				"read-only\n");
--		exit(1);
--	}
--
--	value = ext_csd[EXT_CSD_WR_REL_SET] | (1<<partition);
--	ret = write_extcsd_value(fd, EXT_CSD_WR_REL_SET, value);
--	if (ret) {
--		fprintf(stderr, "Could not write 0x%02x to EXT_CSD[%d] in %s\n",
--				value, EXT_CSD_WR_REL_SET, device);
--		exit(1);
--	}
--
--	printf("Done setting EXT_CSD_WR_REL_SET to 0x%02x on %s\n",
--		value, device);
--
--	if (set_partitioning_setting_completed(dry_run, device, fd))
--		exit(1);
--
--	return 0;
--}
--
- int do_read_extcsd(int nargs, char **argv)
- {
- 	__u8 ext_csd[512], ext_csd_rev, reg;
-diff --git a/mmc_cmds.h b/mmc_cmds.h
-index 8ca9ac9..cf6c6fb 100644
---- a/mmc_cmds.h
-+++ b/mmc_cmds.h
-@@ -34,7 +34,6 @@ int do_sanitize(int nargs, char **argv);
- int do_status_get(int nargs, char **argv);
- int do_create_gp_partition(int nargs, char **argv);
- int do_enh_area_set(int nargs, char **argv);
--int do_write_reliability_set(int nargs, char **argv);
- int do_write_reliability_set_register(int nargs, char **argv);
- int do_rpmb_write_key(int nargs, char **argv);
- int do_rpmb_read_counter(int nargs, char **argv);
+ 	if (ext_csd_rev >= 7) {
+-		printf("eMMC Firmware Version: %s\n",
+-			(char*)&ext_csd[EXT_CSD_FIRMWARE_VERSION]);
++		printf("Firmware Version: 0x%02x%02x%02x%02x%02x%02x%02x%02x\n",
++			ext_csd[EXT_CSD_FIRMWARE_VERSION_7],
++			ext_csd[EXT_CSD_FIRMWARE_VERSION_6],
++			ext_csd[EXT_CSD_FIRMWARE_VERSION_5],
++			ext_csd[EXT_CSD_FIRMWARE_VERSION_4],
++			ext_csd[EXT_CSD_FIRMWARE_VERSION_3],
++			ext_csd[EXT_CSD_FIRMWARE_VERSION_2],
++			ext_csd[EXT_CSD_FIRMWARE_VERSION_1],
++			ext_csd[EXT_CSD_FIRMWARE_VERSION_0]);
+ 		printf("eMMC Life Time Estimation A [EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_A]: 0x%02x\n",
+ 			ext_csd[EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_A]);
+ 		printf("eMMC Life Time Estimation B [EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_B]: 0x%02x\n",
 -- 
 2.7.4
 
