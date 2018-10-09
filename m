@@ -1,82 +1,74 @@
-From: James Nuss <jamesnuss@nanometrics.ca>
-Subject: [PATCH 2/7] mmc-utils: treat FIRMWARE_VERSION as binary field instead of string
-Date: Tue,  9 Oct 2018 13:31:06 -0400
-Message-ID: <e2b6431104a6a822840d4e7b984d7aa23048a0af.1539103468.git.jamesnuss@nanometrics.ca>
-References: <cover.1539103468.git.jamesnuss@nanometrics.ca>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH v2 1/2] mmc: tmio: move MFD variant reset to a platform
+ hook
+Date: Wed, 10 Oct 2018 01:48:30 +0200
+Message-ID: <20181009234830.v7yzhnrtqcfwmm45@katana>
+References: <1538566587-29452-1-git-send-email-yamada.masahiro@socionext.com>
+ <1538566587-29452-2-git-send-email-yamada.masahiro@socionext.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="oknejck5xq3nafxl"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <cover.1539103468.git.jamesnuss@nanometrics.ca>
-In-Reply-To: <cover.1539103468.git.jamesnuss@nanometrics.ca>
-References: <cover.1539103468.git.jamesnuss@nanometrics.ca>
+Content-Disposition: inline
+In-Reply-To: <1538566587-29452-2-git-send-email-yamada.masahiro@socionext.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org
+To: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-The FIRMWARE_VERSION field is 8-bytes in size and contains non-printable
-characters.
 
-Treat this field as binary and print individual byte values in hex
-
-Signed-off-by: James Nuss <jamesnuss@nanometrics.ca>
----
- mmc.h      |  9 ++++++++-
- mmc_cmds.c | 11 +++++++++--
- 2 files changed, 17 insertions(+), 3 deletions(-)
-
-diff --git a/mmc.h b/mmc.h
-index 5d8a7e3..86e209a 100644
---- a/mmc.h
-+++ b/mmc.h
-@@ -59,7 +59,14 @@
- #define EXT_CSD_OPTIMAL_READ_SIZE	266	/* RO */
- #define EXT_CSD_OPTIMAL_WRITE_SIZE	265	/* RO */
- #define EXT_CSD_OPTIMAL_TRIM_UNIT_SIZE	264	/* RO */
--#define EXT_CSD_FIRMWARE_VERSION	254	/* RO */
-+#define EXT_CSD_FIRMWARE_VERSION_7	261	/* RO */
-+#define EXT_CSD_FIRMWARE_VERSION_6	260	/* RO */
-+#define EXT_CSD_FIRMWARE_VERSION_5	259	/* RO */
-+#define EXT_CSD_FIRMWARE_VERSION_4	258	/* RO */
-+#define EXT_CSD_FIRMWARE_VERSION_3	257	/* RO */
-+#define EXT_CSD_FIRMWARE_VERSION_2	256	/* RO */
-+#define EXT_CSD_FIRMWARE_VERSION_1	255	/* RO */
-+#define EXT_CSD_FIRMWARE_VERSION_0	254	/* RO */
- #define EXT_CSD_CACHE_SIZE_3		252
- #define EXT_CSD_CACHE_SIZE_2		251
- #define EXT_CSD_CACHE_SIZE_1		250
-diff --git a/mmc_cmds.c b/mmc_cmds.c
-index 97ea111..45aa4c0 100644
---- a/mmc_cmds.c
-+++ b/mmc_cmds.c
-@@ -1758,8 +1758,15 @@ int do_read_extcsd(int nargs, char **argv)
- 	}
- 
- 	if (ext_csd_rev >= 7) {
--		printf("eMMC Firmware Version: %s\n",
--			(char*)&ext_csd[EXT_CSD_FIRMWARE_VERSION]);
-+		printf("Firmware Version: 0x%02x%02x%02x%02x%02x%02x%02x%02x\n",
-+			ext_csd[EXT_CSD_FIRMWARE_VERSION_7],
-+			ext_csd[EXT_CSD_FIRMWARE_VERSION_6],
-+			ext_csd[EXT_CSD_FIRMWARE_VERSION_5],
-+			ext_csd[EXT_CSD_FIRMWARE_VERSION_4],
-+			ext_csd[EXT_CSD_FIRMWARE_VERSION_3],
-+			ext_csd[EXT_CSD_FIRMWARE_VERSION_2],
-+			ext_csd[EXT_CSD_FIRMWARE_VERSION_1],
-+			ext_csd[EXT_CSD_FIRMWARE_VERSION_0]);
- 		printf("eMMC Life Time Estimation A [EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_A]: 0x%02x\n",
- 			ext_csd[EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_A]);
- 		printf("eMMC Life Time Estimation B [EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_B]: 0x%02x\n",
--- 
-2.7.4
+--oknejck5xq3nafxl
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
 
--- 
-This message is intended exclusively for the individual or entity to which 
-it is addressed. This communication may contain information that is 
-proprietary, privileged, confidential or otherwise legally exempt from 
-disclosure. If you are not the named addressee, or have been inadvertently 
-and erroneously referenced in the address line, you are not authorized to 
-read, print, retain, copy or disseminate this message or any part of it. If 
-you have received this message in error, please notify the sender 
-immediately by e-mail and delete all copies of the message.
+> +static void tmio_mmc_reset(struct tmio_mmc_host *host)
+> +{
+> +	/* FIXME - should we set stop clock reg here */
+> +	sd_ctrl_write16(host, CTL_RESET_SD, 0x0000);
+> +	sd_ctrl_write16(host, CTL_RESET_SDIO, 0x0000);
+> +	usleep_range(10000, 11000);
+> +	sd_ctrl_write16(host, CTL_RESET_SD, 0x0001);
+> +	sd_ctrl_write16(host, CTL_RESET_SDIO, 0x0001);
+> +	usleep_range(10000, 11000);
+> +
+> +	if (host->pdata->flags & TMIO_MMC_SDIO_IRQ) {
+> +		sd_ctrl_write16(host, CTL_SDIO_IRQ_MASK, host->sdio_irq_mask);
+> +		sd_ctrl_write16(host, CTL_TRANSACTION_CTL, 0x0001);
+> +	}
+> +}
+
+Yes, looks much safer now.
+
+> +	host->reset = tmio_mmc_reset;
+
+So, you populate the new pointer here...
+
+> +	if (!_host->reset)
+> +		_host->reset = tmio_mmc_reset;
+
+... and here. But it seems never used anywhere? Or am I missing
+something?
+
+
+--oknejck5xq3nafxl
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlu9PkkACgkQFA3kzBSg
+KbZnuA/+I2qZqk1fuGlq0wqo0xDfpv+d77LyeWBXWDsVa8I8YCjA0qK1Z0Bm7POJ
+L9W+Pv+zvxE1AcEScUagPXLBW6fEK27NrjzKhGO15udXaQEOPVJ9wFNfHcrbKJVy
+WnebEAfESUXoLbQ7CLyyNzoQUsilScErUHFtgLltN95MVYkTpd/8YlVeB+GWl6xj
+MvD+MYtRw0xj+PAmanjtl2dn+oNUE6Tdg4A8VA33+qE8ujXtayOjHw5lmWXYnOav
+bKe5dOMVKNw1Gc7QO0wFWYF6/0b+TYNTvE2WdsbUZx79RcNjL1DYiRRMadLATn2P
+zPDnNiqnZzJsANYugn8ubvtv8XrT/degeXW4eiX6auNy0y8A1FTpD/mtLCQA5SZE
+XemCYB32Pi/uFLUALD79lgP20lQqZvyWrxZd1r02dfhULO9DZ5GEDUlyglvxNWI2
+5xsm5XqIR2MVqmWqwH0FwDOOoRVwYc3uH6Y65trJYMioIWEPP0h4qdfA+n+1aHTJ
+KYJn2aESqgTDBmwW7X+KdtRjw1aNLVU5GnOE9Sacd5pjY9DlX0Ye4RIwyBSRDmkW
+RM7j6sBEEn51sSmPP+J7qFLgM29aSjRsp4AVpCPHkGz0ATv3y55yG+kN7JKnVVjm
+XxaludJs1Rma5SticTpNJPd6GYDfsubj6vU9NYYijX9lGS2mVnU=
+=5rVW
+-----END PGP SIGNATURE-----
+
+--oknejck5xq3nafxl--
