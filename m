@@ -1,40 +1,44 @@
-From: Avri Altman <Avri.Altman@wdc.com>
-Subject: RE: [PATCH 2/7] mmc-utils: treat FIRMWARE_VERSION as binary field
- instead of string
-Date: Wed, 10 Oct 2018 08:43:24 +0000
-Message-ID: <SN6PR04MB4925CB991DADD39F28A31D13FCE00@SN6PR04MB4925.namprd04.prod.outlook.com>
-References: <cover.1539103468.git.jamesnuss@nanometrics.ca>
- <e2b6431104a6a822840d4e7b984d7aa23048a0af.1539103468.git.jamesnuss@nanometrics.ca>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] libertas: call into generic suspend code before turning
+ off power
+Date: Wed, 10 Oct 2018 14:04:14 +0200
+Message-ID: <CAPDyKFrrnbU98sr2UtM_fPc9P66Ft9uHU30bhbQduQR0vNCfTA@mail.gmail.com>
+References: <20181008200357.10819-1-daniel@zonque.org> <CAPDyKFoo-gnjUg9Khc3EPm=cvHgyR_VNW8xgjP1Tea7wjRfvSw@mail.gmail.com>
+ <87efczqm1t.fsf@purkki.adurom.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <e2b6431104a6a822840d4e7b984d7aa23048a0af.1539103468.git.jamesnuss@nanometrics.ca>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: James Nuss <jamesnuss@nanometrics.ca>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <87efczqm1t.fsf-5ukZ45wKbUHoml4zekdYB16hYfS7NtTn@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org>
+Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, libertas-dev-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
+On 9 October 2018 at 15:36, Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org> wrote:
+> Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> writes:
+>
+>> On 8 October 2018 at 22:03, Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org> wrote:
+>>> When powering down a SDIO connected card during suspend, make sure to call
+>>> into the generic lbs_suspend() function before pulling the plug. This will
+>>> make sure the card is successfully deregistered from the system to avoid
+>>> communication to the card starving out.
+>>>
+>>> Fixes: 7444a8092906 ("libertas: fix suspend and resume for SDIO connected cards")
+>>> Signed-off-by: Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org>
+>>
+>> Reviewed-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>>
+>> BTW, if you need this to reach 4.19 I have already queued some other
+>> mmc fixes so I can take this as well, if it helps. I need and ack of
+>> course.
+>
+> I'm not planning to send anything to 4.19 anymore and this is so simple
+> that hopefully it cause any conflicts with -next patches, so feel free
+> to do that:
+>
+> Acked-by: Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 
-> +++ b/mmc_cmds.c
-> @@ -1758,8 +1758,15 @@ int do_read_extcsd(int nargs, char **argv)
->  	}
->=20
->  	if (ext_csd_rev >=3D 7) {
-> -		printf("eMMC Firmware Version: %s\n",
-> -			(char*)&ext_csd[EXT_CSD_FIRMWARE_VERSION]);
-> +		printf("Firmware Version:
-> 0x%02x%02x%02x%02x%02x%02x%02x%02x\n",
-> +			ext_csd[EXT_CSD_FIRMWARE_VERSION_7],
-> +			ext_csd[EXT_CSD_FIRMWARE_VERSION_6],
-> +			ext_csd[EXT_CSD_FIRMWARE_VERSION_5],
-> +			ext_csd[EXT_CSD_FIRMWARE_VERSION_4],
-> +			ext_csd[EXT_CSD_FIRMWARE_VERSION_3],
-> +			ext_csd[EXT_CSD_FIRMWARE_VERSION_2],
-> +			ext_csd[EXT_CSD_FIRMWARE_VERSION_1],
-> +			ext_csd[EXT_CSD_FIRMWARE_VERSION_0]);
-ExtCSD[261:254] is an ASCII string, just add a terminating null.
+Applied for fixes, thanks!
 
-Thanks,
-Avri
+Kind regards
+Uffe
