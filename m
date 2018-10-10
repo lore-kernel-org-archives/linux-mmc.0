@@ -1,61 +1,45 @@
-From: James Nuss <jamesnuss@nanometrics.ca>
-Subject: Re: [PATCH 2/7] mmc-utils: treat FIRMWARE_VERSION as binary field
+From: Avri Altman <Avri.Altman@wdc.com>
+Subject: RE: [PATCH 2/7] mmc-utils: treat FIRMWARE_VERSION as binary field
  instead of string
-Date: Wed, 10 Oct 2018 09:52:44 -0400
-Message-ID: <CALgcdhhqvn3YWvQjtFfo46wH1N29-4vThNDzN1B2AROLY-kovw@mail.gmail.com>
+Date: Wed, 10 Oct 2018 13:59:36 +0000
+Message-ID: <SN6PR04MB4925102E47C0D0B6E6083124FCE00@SN6PR04MB4925.namprd04.prod.outlook.com>
 References: <cover.1539103468.git.jamesnuss@nanometrics.ca>
  <e2b6431104a6a822840d4e7b984d7aa23048a0af.1539103468.git.jamesnuss@nanometrics.ca>
  <SN6PR04MB4925CB991DADD39F28A31D13FCE00@SN6PR04MB4925.namprd04.prod.outlook.com>
+ <CALgcdhhqvn3YWvQjtFfo46wH1N29-4vThNDzN1B2AROLY-kovw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <SN6PR04MB4925CB991DADD39F28A31D13FCE00@SN6PR04MB4925.namprd04.prod.outlook.com>
+In-Reply-To: <CALgcdhhqvn3YWvQjtFfo46wH1N29-4vThNDzN1B2AROLY-kovw@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Avri.Altman@wdc.com
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: James Nuss <jamesnuss@nanometrics.ca>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Oct 10, 2018 at 4:43 AM Avri Altman <Avri.Altman@wdc.com> wrote:
->
->
-> > +++ b/mmc_cmds.c
-> > @@ -1758,8 +1758,15 @@ int do_read_extcsd(int nargs, char **argv)
-> >       }
-> >
-> >       if (ext_csd_rev >= 7) {
-> > -             printf("eMMC Firmware Version: %s\n",
-> > -                     (char*)&ext_csd[EXT_CSD_FIRMWARE_VERSION]);
-> > +             printf("Firmware Version:
-> > 0x%02x%02x%02x%02x%02x%02x%02x%02x\n",
-> > +                     ext_csd[EXT_CSD_FIRMWARE_VERSION_7],
-> > +                     ext_csd[EXT_CSD_FIRMWARE_VERSION_6],
-> > +                     ext_csd[EXT_CSD_FIRMWARE_VERSION_5],
-> > +                     ext_csd[EXT_CSD_FIRMWARE_VERSION_4],
-> > +                     ext_csd[EXT_CSD_FIRMWARE_VERSION_3],
-> > +                     ext_csd[EXT_CSD_FIRMWARE_VERSION_2],
-> > +                     ext_csd[EXT_CSD_FIRMWARE_VERSION_1],
-> > +                     ext_csd[EXT_CSD_FIRMWARE_VERSION_0]);
-> ExtCSD[261:254] is an ASCII string, just add a terminating null.
-
-Unfortunately I found two different manufacturers which put
-non-printable characters in this 8-byte field. So I don't think it can
-be treated as ASCII in all cases. Printing out the hex value seemed
-liked the most comprehensive solution.
-
->
-> Thanks,
-> Avri
->
-
-
---
-
--- 
-This message is intended exclusively for the individual or entity to which 
-it is addressed. This communication may contain information that is 
-proprietary, privileged, confidential or otherwise legally exempt from 
-disclosure. If you are not the named addressee, or have been inadvertently 
-and erroneously referenced in the address line, you are not authorized to 
-read, print, retain, copy or disseminate this message or any part of it. If 
-you have received this message in error, please notify the sender 
-immediately by e-mail and delete all copies of the message.
+PiANCj4gT24gV2VkLCBPY3QgMTAsIDIwMTggYXQgNDo0MyBBTSBBdnJpIEFsdG1hbiA8QXZyaS5B
+bHRtYW5Ad2RjLmNvbT4gd3JvdGU6DQo+ID4NCj4gPg0KPiA+ID4gKysrIGIvbW1jX2NtZHMuYw0K
+PiA+ID4gQEAgLTE3NTgsOCArMTc1OCwxNSBAQCBpbnQgZG9fcmVhZF9leHRjc2QoaW50IG5hcmdz
+LCBjaGFyICoqYXJndikNCj4gPiA+ICAgICAgIH0NCj4gPiA+DQo+ID4gPiAgICAgICBpZiAoZXh0
+X2NzZF9yZXYgPj0gNykgew0KPiA+ID4gLSAgICAgICAgICAgICBwcmludGYoImVNTUMgRmlybXdh
+cmUgVmVyc2lvbjogJXNcbiIsDQo+ID4gPiAtICAgICAgICAgICAgICAgICAgICAgKGNoYXIqKSZl
+eHRfY3NkW0VYVF9DU0RfRklSTVdBUkVfVkVSU0lPTl0pOw0KPiA+ID4gKyAgICAgICAgICAgICBw
+cmludGYoIkZpcm13YXJlIFZlcnNpb246DQo+ID4gPiAweCUwMnglMDJ4JTAyeCUwMnglMDJ4JTAy
+eCUwMnglMDJ4XG4iLA0KPiA+ID4gKyAgICAgICAgICAgICAgICAgICAgIGV4dF9jc2RbRVhUX0NT
+RF9GSVJNV0FSRV9WRVJTSU9OXzddLA0KPiA+ID4gKyAgICAgICAgICAgICAgICAgICAgIGV4dF9j
+c2RbRVhUX0NTRF9GSVJNV0FSRV9WRVJTSU9OXzZdLA0KPiA+ID4gKyAgICAgICAgICAgICAgICAg
+ICAgIGV4dF9jc2RbRVhUX0NTRF9GSVJNV0FSRV9WRVJTSU9OXzVdLA0KPiA+ID4gKyAgICAgICAg
+ICAgICAgICAgICAgIGV4dF9jc2RbRVhUX0NTRF9GSVJNV0FSRV9WRVJTSU9OXzRdLA0KPiA+ID4g
+KyAgICAgICAgICAgICAgICAgICAgIGV4dF9jc2RbRVhUX0NTRF9GSVJNV0FSRV9WRVJTSU9OXzNd
+LA0KPiA+ID4gKyAgICAgICAgICAgICAgICAgICAgIGV4dF9jc2RbRVhUX0NTRF9GSVJNV0FSRV9W
+RVJTSU9OXzJdLA0KPiA+ID4gKyAgICAgICAgICAgICAgICAgICAgIGV4dF9jc2RbRVhUX0NTRF9G
+SVJNV0FSRV9WRVJTSU9OXzFdLA0KPiA+ID4gKyAgICAgICAgICAgICAgICAgICAgIGV4dF9jc2Rb
+RVhUX0NTRF9GSVJNV0FSRV9WRVJTSU9OXzBdKTsNCj4gPiBFeHRDU0RbMjYxOjI1NF0gaXMgYW4g
+QVNDSUkgc3RyaW5nLCBqdXN0IGFkZCBhIHRlcm1pbmF0aW5nIG51bGwuDQo+IA0KPiBVbmZvcnR1
+bmF0ZWx5IEkgZm91bmQgdHdvIGRpZmZlcmVudCBtYW51ZmFjdHVyZXJzIHdoaWNoIHB1dA0KPiBu
+b24tcHJpbnRhYmxlIGNoYXJhY3RlcnMgaW4gdGhpcyA4LWJ5dGUgZmllbGQuIFNvIEkgZG9uJ3Qg
+dGhpbmsgaXQgY2FuDQo+IGJlIHRyZWF0ZWQgYXMgQVNDSUkgaW4gYWxsIGNhc2VzLiBQcmludGlu
+ZyBvdXQgdGhlIGhleCB2YWx1ZSBzZWVtZWQNCj4gbGlrZWQgdGhlIG1vc3QgY29tcHJlaGVuc2l2
+ZSBzb2x1dGlvbi4NCk5BSyB3aXRoIHByZWp1ZGljZS4NClRoaXMgaW50ZXJmZXJlIHdpdGggdGhl
+IG91dHB1dCB0aGF0IHdlL291ciBjbGllbnRzIGV4cGVjdHMuDQo=
