@@ -1,45 +1,106 @@
-From: Avri Altman <Avri.Altman@wdc.com>
-Subject: RE: [PATCH 2/7] mmc-utils: treat FIRMWARE_VERSION as binary field
- instead of string
-Date: Wed, 10 Oct 2018 13:59:36 +0000
-Message-ID: <SN6PR04MB4925102E47C0D0B6E6083124FCE00@SN6PR04MB4925.namprd04.prod.outlook.com>
-References: <cover.1539103468.git.jamesnuss@nanometrics.ca>
- <e2b6431104a6a822840d4e7b984d7aa23048a0af.1539103468.git.jamesnuss@nanometrics.ca>
- <SN6PR04MB4925CB991DADD39F28A31D13FCE00@SN6PR04MB4925.namprd04.prod.outlook.com>
- <CALgcdhhqvn3YWvQjtFfo46wH1N29-4vThNDzN1B2AROLY-kovw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Yinbo Zhu <yinbo.zhu@nxp.com>
+Subject: [PATCH v2] arm64: dts: lx2160a: enable eSDHC controller
+Date: Thu, 11 Oct 2018 14:35:22 +0800
+Message-ID: <20181011063522.7767-1-yinbo.zhu@nxp.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CALgcdhhqvn3YWvQjtFfo46wH1N29-4vThNDzN1B2AROLY-kovw@mail.gmail.com>
-Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: James Nuss <jamesnuss@nanometrics.ca>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: yinbo.zhu@nxp.com, yangbo.lu@nxp.com, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, ulf.hansson@linaro.org, leoyang.li@nxp.com
+Cc: xiaobo.xie@nxp.com, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-PiANCj4gT24gV2VkLCBPY3QgMTAsIDIwMTggYXQgNDo0MyBBTSBBdnJpIEFsdG1hbiA8QXZyaS5B
-bHRtYW5Ad2RjLmNvbT4gd3JvdGU6DQo+ID4NCj4gPg0KPiA+ID4gKysrIGIvbW1jX2NtZHMuYw0K
-PiA+ID4gQEAgLTE3NTgsOCArMTc1OCwxNSBAQCBpbnQgZG9fcmVhZF9leHRjc2QoaW50IG5hcmdz
-LCBjaGFyICoqYXJndikNCj4gPiA+ICAgICAgIH0NCj4gPiA+DQo+ID4gPiAgICAgICBpZiAoZXh0
-X2NzZF9yZXYgPj0gNykgew0KPiA+ID4gLSAgICAgICAgICAgICBwcmludGYoImVNTUMgRmlybXdh
-cmUgVmVyc2lvbjogJXNcbiIsDQo+ID4gPiAtICAgICAgICAgICAgICAgICAgICAgKGNoYXIqKSZl
-eHRfY3NkW0VYVF9DU0RfRklSTVdBUkVfVkVSU0lPTl0pOw0KPiA+ID4gKyAgICAgICAgICAgICBw
-cmludGYoIkZpcm13YXJlIFZlcnNpb246DQo+ID4gPiAweCUwMnglMDJ4JTAyeCUwMnglMDJ4JTAy
-eCUwMnglMDJ4XG4iLA0KPiA+ID4gKyAgICAgICAgICAgICAgICAgICAgIGV4dF9jc2RbRVhUX0NT
-RF9GSVJNV0FSRV9WRVJTSU9OXzddLA0KPiA+ID4gKyAgICAgICAgICAgICAgICAgICAgIGV4dF9j
-c2RbRVhUX0NTRF9GSVJNV0FSRV9WRVJTSU9OXzZdLA0KPiA+ID4gKyAgICAgICAgICAgICAgICAg
-ICAgIGV4dF9jc2RbRVhUX0NTRF9GSVJNV0FSRV9WRVJTSU9OXzVdLA0KPiA+ID4gKyAgICAgICAg
-ICAgICAgICAgICAgIGV4dF9jc2RbRVhUX0NTRF9GSVJNV0FSRV9WRVJTSU9OXzRdLA0KPiA+ID4g
-KyAgICAgICAgICAgICAgICAgICAgIGV4dF9jc2RbRVhUX0NTRF9GSVJNV0FSRV9WRVJTSU9OXzNd
-LA0KPiA+ID4gKyAgICAgICAgICAgICAgICAgICAgIGV4dF9jc2RbRVhUX0NTRF9GSVJNV0FSRV9W
-RVJTSU9OXzJdLA0KPiA+ID4gKyAgICAgICAgICAgICAgICAgICAgIGV4dF9jc2RbRVhUX0NTRF9G
-SVJNV0FSRV9WRVJTSU9OXzFdLA0KPiA+ID4gKyAgICAgICAgICAgICAgICAgICAgIGV4dF9jc2Rb
-RVhUX0NTRF9GSVJNV0FSRV9WRVJTSU9OXzBdKTsNCj4gPiBFeHRDU0RbMjYxOjI1NF0gaXMgYW4g
-QVNDSUkgc3RyaW5nLCBqdXN0IGFkZCBhIHRlcm1pbmF0aW5nIG51bGwuDQo+IA0KPiBVbmZvcnR1
-bmF0ZWx5IEkgZm91bmQgdHdvIGRpZmZlcmVudCBtYW51ZmFjdHVyZXJzIHdoaWNoIHB1dA0KPiBu
-b24tcHJpbnRhYmxlIGNoYXJhY3RlcnMgaW4gdGhpcyA4LWJ5dGUgZmllbGQuIFNvIEkgZG9uJ3Qg
-dGhpbmsgaXQgY2FuDQo+IGJlIHRyZWF0ZWQgYXMgQVNDSUkgaW4gYWxsIGNhc2VzLiBQcmludGlu
-ZyBvdXQgdGhlIGhleCB2YWx1ZSBzZWVtZWQNCj4gbGlrZWQgdGhlIG1vc3QgY29tcHJlaGVuc2l2
-ZSBzb2x1dGlvbi4NCk5BSyB3aXRoIHByZWp1ZGljZS4NClRoaXMgaW50ZXJmZXJlIHdpdGggdGhl
-IG91dHB1dCB0aGF0IHdlL291ciBjbGllbnRzIGV4cGVjdHMuDQo=
+There are two eSDHC controllers in lx2160a. This patch is to
+enable eSDHC for RDB and QDS board.
+
+Signed-off-by: Yinbo Zhu <yinbo.zhu@nxp.com>
+---
+Change in v2:
+		squash all lx2160a esdhc dts patch into the original patch
+
+ arch/arm64/boot/dts/freescale/fsl-lx2160a-qds.dts |    8 ++++++
+ arch/arm64/boot/dts/freescale/fsl-lx2160a-rdb.dts |   15 ++++++++++++
+ arch/arm64/boot/dts/freescale/fsl-lx2160a.dtsi    |   25 +++++++++++++++++++++
+ 3 files changed, 48 insertions(+), 0 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/fsl-lx2160a-qds.dts b/arch/arm64/boot/dts/freescale/fsl-lx2160a-qds.dts
+index bc30173..b58b96c 100644
+--- a/arch/arm64/boot/dts/freescale/fsl-lx2160a-qds.dts
++++ b/arch/arm64/boot/dts/freescale/fsl-lx2160a-qds.dts
+@@ -294,6 +294,14 @@
+ 	status = "okay";
+ };
+ 
++&esdhc0 {
++	status = "okay";
++};
++
++&esdhc1 {
++	status = "okay";
++};
++
+ &dspi0 {
+ 	dflash0: n25q128a {
+ 		#address-cells = <1>;
+diff --git a/arch/arm64/boot/dts/freescale/fsl-lx2160a-rdb.dts b/arch/arm64/boot/dts/freescale/fsl-lx2160a-rdb.dts
+index 53b0e80..cbe8919 100644
+--- a/arch/arm64/boot/dts/freescale/fsl-lx2160a-rdb.dts
++++ b/arch/arm64/boot/dts/freescale/fsl-lx2160a-rdb.dts
+@@ -170,6 +170,21 @@
+ 	status = "okay";
+ };
+ 
++&esdhc0 {
++	sd-uhs-sdr104;
++	sd-uhs-sdr50;
++	sd-uhs-sdr25;
++	sd-uhs-sdr12;
++	status = "okay";
++};
++
++&esdhc1 {
++	mmc-hs200-1_8v;
++	mmc-hs400-1_8v;
++	bus-width = <8>;
++	status = "okay";
++};
++
+ &fspi {
+ 	status = "okay";
+ 	nxp,fspi-has-second-chip;
+diff --git a/arch/arm64/boot/dts/freescale/fsl-lx2160a.dtsi b/arch/arm64/boot/dts/freescale/fsl-lx2160a.dtsi
+index fa4a1f8..174544a 100644
+--- a/arch/arm64/boot/dts/freescale/fsl-lx2160a.dtsi
++++ b/arch/arm64/boot/dts/freescale/fsl-lx2160a.dtsi
+@@ -356,6 +356,31 @@
+ 			little-endian;
+ 		};
+ 
++		esdhc0: esdhc@2140000 {
++			compatible = "fsl,esdhc";
++			reg = <0x0 0x2140000 0x0 0x10000>;
++			interrupts = <0 28 0x4>; /* Level high type */
++			clocks = <&clockgen 4 1>;
++			voltage-ranges = <1800 1800 3300 3300>;
++			sdhci,auto-cmd12;
++			little-endian;
++			bus-width = <4>;
++			status = "disabled";
++		};
++
++		esdhc1: esdhc@2150000 {
++			compatible = "fsl,esdhc";
++			reg = <0x0 0x2150000 0x0 0x10000>;
++			interrupts = <0 63 0x4>; /* Level high type */
++			clocks = <&clockgen 4 1>;
++			voltage-ranges = <1800 1800 3300 3300>;
++			sdhci,auto-cmd12;
++			broken-cd;
++			little-endian;
++			bus-width = <4>;
++			status = "disabled";
++		};
++
+ 		gpio0: gpio@2300000 {
+ 			compatible = "fsl,ls2080a-gpio", "fsl,qoriq-gpio";
+ 			reg = <0x0 0x2300000 0x0 0x10000>;
+-- 
+1.7.1
