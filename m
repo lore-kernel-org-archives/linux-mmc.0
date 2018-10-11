@@ -1,106 +1,42 @@
-From: Yinbo Zhu <yinbo.zhu@nxp.com>
-Subject: [PATCH v2] arm64: dts: lx2160a: enable eSDHC controller
-Date: Thu, 11 Oct 2018 14:35:22 +0800
-Message-ID: <20181011063522.7767-1-yinbo.zhu@nxp.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V6 00/23] mmc: mmci: add sdmmc variant for stm32
+Date: Thu, 11 Oct 2018 12:33:40 +0200
+Message-ID: <CAPDyKFqTNUihEk-i+t4OU1Eq5iBS57XZ4d8P2QbecgW_uT6NnA@mail.gmail.com>
+References: <1539000535-13261-1-git-send-email-ludovic.Barre@st.com>
+ <CAPDyKFp0oHHS=bkXj_AbiLmbNxW07pFnk-4m9kwQtYkh_ogKgw@mail.gmail.com>
+ <cb919bf8-caa2-b2fe-fee4-ae2f0f4c04b5@st.com> <CAPDyKFp4DEtavAqDg-ymaCcus+Hddv0OrgfS54HsTX+aWdzN+w@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFp4DEtavAqDg-ymaCcus+Hddv0OrgfS54HsTX+aWdzN+w@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: yinbo.zhu@nxp.com, yangbo.lu@nxp.com, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, ulf.hansson@linaro.org, leoyang.li@nxp.com
-Cc: xiaobo.xie@nxp.com, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+To: Ludovic BARRE <ludovic.barre@st.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-stm32@st-md-mailman.stormreply.com
 List-Id: linux-mmc@vger.kernel.org
 
-There are two eSDHC controllers in lx2160a. This patch is to
-enable eSDHC for RDB and QDS board.
+On 9 October 2018 at 13:18, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 9 October 2018 at 09:54, Ludovic BARRE <ludovic.barre@st.com> wrote:
+>> hi Ulf
+>>
+>> On 10/09/2018 09:30 AM, Ulf Hansson wrote:
+>>>
+>>> Applied for next, thanks!
+>>>
+>>> FYI, I made little fixup of the help text in the Kconfig for the last
+>>> patch.
+>>
+>>
+>> Thanks for your review.
+>> Did you had a feedback on Qcom platform tests?
+>
+> Nope. I am leaving the tests for Qcom platforms to be done by
+> kernelci, let's see what the reports are.
 
-Signed-off-by: Yinbo Zhu <yinbo.zhu@nxp.com>
----
-Change in v2:
-		squash all lx2160a esdhc dts patch into the original patch
+FYI:
 
- arch/arm64/boot/dts/freescale/fsl-lx2160a-qds.dts |    8 ++++++
- arch/arm64/boot/dts/freescale/fsl-lx2160a-rdb.dts |   15 ++++++++++++
- arch/arm64/boot/dts/freescale/fsl-lx2160a.dtsi    |   25 +++++++++++++++++++++
- 3 files changed, 48 insertions(+), 0 deletions(-)
+https://kernelci.org/boot/id/5bbdcd2b59b5147001b435a4/
 
-diff --git a/arch/arm64/boot/dts/freescale/fsl-lx2160a-qds.dts b/arch/arm64/boot/dts/freescale/fsl-lx2160a-qds.dts
-index bc30173..b58b96c 100644
---- a/arch/arm64/boot/dts/freescale/fsl-lx2160a-qds.dts
-+++ b/arch/arm64/boot/dts/freescale/fsl-lx2160a-qds.dts
-@@ -294,6 +294,14 @@
- 	status = "okay";
- };
- 
-+&esdhc0 {
-+	status = "okay";
-+};
-+
-+&esdhc1 {
-+	status = "okay";
-+};
-+
- &dspi0 {
- 	dflash0: n25q128a {
- 		#address-cells = <1>;
-diff --git a/arch/arm64/boot/dts/freescale/fsl-lx2160a-rdb.dts b/arch/arm64/boot/dts/freescale/fsl-lx2160a-rdb.dts
-index 53b0e80..cbe8919 100644
---- a/arch/arm64/boot/dts/freescale/fsl-lx2160a-rdb.dts
-+++ b/arch/arm64/boot/dts/freescale/fsl-lx2160a-rdb.dts
-@@ -170,6 +170,21 @@
- 	status = "okay";
- };
- 
-+&esdhc0 {
-+	sd-uhs-sdr104;
-+	sd-uhs-sdr50;
-+	sd-uhs-sdr25;
-+	sd-uhs-sdr12;
-+	status = "okay";
-+};
-+
-+&esdhc1 {
-+	mmc-hs200-1_8v;
-+	mmc-hs400-1_8v;
-+	bus-width = <8>;
-+	status = "okay";
-+};
-+
- &fspi {
- 	status = "okay";
- 	nxp,fspi-has-second-chip;
-diff --git a/arch/arm64/boot/dts/freescale/fsl-lx2160a.dtsi b/arch/arm64/boot/dts/freescale/fsl-lx2160a.dtsi
-index fa4a1f8..174544a 100644
---- a/arch/arm64/boot/dts/freescale/fsl-lx2160a.dtsi
-+++ b/arch/arm64/boot/dts/freescale/fsl-lx2160a.dtsi
-@@ -356,6 +356,31 @@
- 			little-endian;
- 		};
- 
-+		esdhc0: esdhc@2140000 {
-+			compatible = "fsl,esdhc";
-+			reg = <0x0 0x2140000 0x0 0x10000>;
-+			interrupts = <0 28 0x4>; /* Level high type */
-+			clocks = <&clockgen 4 1>;
-+			voltage-ranges = <1800 1800 3300 3300>;
-+			sdhci,auto-cmd12;
-+			little-endian;
-+			bus-width = <4>;
-+			status = "disabled";
-+		};
-+
-+		esdhc1: esdhc@2150000 {
-+			compatible = "fsl,esdhc";
-+			reg = <0x0 0x2150000 0x0 0x10000>;
-+			interrupts = <0 63 0x4>; /* Level high type */
-+			clocks = <&clockgen 4 1>;
-+			voltage-ranges = <1800 1800 3300 3300>;
-+			sdhci,auto-cmd12;
-+			broken-cd;
-+			little-endian;
-+			bus-width = <4>;
-+			status = "disabled";
-+		};
-+
- 		gpio0: gpio@2300000 {
- 			compatible = "fsl,ls2080a-gpio", "fsl,qoriq-gpio";
- 			reg = <0x0 0x2300000 0x0 0x10000>;
--- 
-1.7.1
+Looks good!
+
+Kind regards
+Uffe
