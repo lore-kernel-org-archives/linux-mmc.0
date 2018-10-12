@@ -1,71 +1,90 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [RFC PATCH v2 1/4] dt: bindings: Add SD tap value properties
- details for 'xlnx,zynqmp-8.9a'
-Date: Fri, 12 Oct 2018 11:29:56 -0500
-Message-ID: <20181012162956.GA7339@bogus>
-References: <1537435845-6682-1-git-send-email-manish.narani@xilinx.com>
- <1537435845-6682-2-git-send-email-manish.narani@xilinx.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Janusz Krzysztofik <jmkrzyszt@gmail.com>
+Subject: [RFT PATCH] mmc: pwrseq_simple: Fix incorrect handling of GPIO bitmap
+Date: Fri, 12 Oct 2018 21:09:01 +0200
+Message-ID: <20181012190901.1243-1-jmkrzyszt@gmail.com>
+References: <20180925192433.1377-1-jmkrzyszt@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1537435845-6682-2-git-send-email-manish.narani@xilinx.com>
+In-Reply-To: <20180925192433.1377-1-jmkrzyszt@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Manish Narani <manish.narani@xilinx.com>
-Cc: ulf.hansson@linaro.org, mark.rutland@arm.com, michal.simek@xilinx.com, adrian.hunter@intel.com, amit.kucheria@linaro.org, sudeep.holla@arm.com, leoyang.li@nxp.com, jollys@xilinx.com, rajanv@xilinx.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Linus Walleij <linus.walleij@linaro.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Krzysztof Kozlowski <krzk@kernel.org>, linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org, Linux Samsung SOC <linux-samsung-soc@vger.kernel.org>, linux-kernel@vger.kernel.org, Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>, Pengutronix Kernel Team <kernel@pengutronix.de>, Fabio Estevam <fabio.estevam@nxp.com>, NXP Linux Team <linux-imx@nxp.com>, linux-arm-kernel@lists.infradead.org, Kukjin Kim <kgene@kernel.org>, =?UTF-8?q?Beno=C3=AEt=20Cousson?= <bcousson@baylibre.com>, Tony Lindgren <tony@atomide.com>, Enric Balletbo i Serra <eballetbo@gmail.com>, Javier Martinez Canillas <javier@dowhile0.org>, linux-omap@vger.kernel.org, Heiko Stuebner <heiko@>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Sep 20, 2018 at 03:00:42PM +0530, Manish Narani wrote:
-> Add documentation for MIO bank required property and Tap Delays optional
-> properties in devicetree bindings.
-> 
-> Signed-off-by: Manish Narani <manish.narani@xilinx.com>
-> ---
->  .../devicetree/bindings/mmc/arasan,sdhci.txt          | 19 +++++++++++++++++++
->  1 file changed, 19 insertions(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> index 72769e0..6cc95fa 100644
-> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> @@ -27,6 +27,7 @@ Required Properties for "arasan,sdhci-5.1":
->  
->  Required Properties for "xlnx,zynqmp-8.9a":
->    - xlnx,device_id: SD controller device ID. Must be either <0> or <1>.
-> +  - xlnx,mio-bank: The value will be 0/1/2 depending on MIO bank selection.
->  
->  Optional Properties:
->    - arasan,soc-ctl-syscon: A phandle to a syscon device (see ../mfd/syscon.txt)
-> @@ -44,6 +45,24 @@ Optional Properties:
->    - xlnx,int-clock-stable-broken: when present, the controller always reports
->      that the internal clock is stable even when it is not.
->  
-> +Optional Properties for "xlnx,zynqmp-8.9a":
-> + - xlnx,itap-delay-sd-hsd: Input Tap Delay for SD HS.
-> + - xlnx,itap-delay-sdr25: Input Tap Delay for SDR25.
-> + - xlnx,itap-delay-sdr50: Input Tap Delay for SDR50.
-> + - xlnx,itap-delay-sdr104: Input Tap Delay for SDR104.
-> + - xlnx,itap-delay-sd-ddr50: Input Tap Delay for SD DDR50.
-> + - xlnx,itap-delay-mmc-hsd: Input Tap Delay for MMC HS.
-> + - xlnx,itap-delay-mmc-ddr52: Input Tap Delay for MMC DDR52.
-> + - xlnx,itap-delay-mmc-hs200: Input Tap Delay for MMC HS200.
-> + - xlnx,otap-delay-sd-hsd: Output Tap Delay for SD HS.
-> + - xlnx,otap-delay-sdr25: Output Tap Delay for SDR25.
-> + - xlnx,otap-delay-sdr50: Output Tap Delay for SDR50.
-> + - xlnx,otap-delay-sdr104: Output Tap Delay for SDR104.
-> + - xlnx,otap-delay-sd-ddr50: Output Tap Delay for DDR50.
-> + - xlnx,otap-delay-mmc-hsd: Output Tap Delay for MMC HS.
-> + - xlnx,otap-delay-mmc-ddr52: Output Tap Delay for MMC DDR52.
-> + - xlnx,otap-delay-mmc-hs200: Output Tap Delay for MMC HS200.
+Commit b9762bebc633 ("gpiolib: Pass bitmaps, not integer arrays, to
+get/set array") changed the way GPIO values are passed to
+gpiod_get/set_array_value() and friends.  The new code introduced into
+mmc_pwrseq_simple_set_gpios_value() incorrectly interpretes the 'value'
+argument as a bitmap of GPIO values and assigns it directly to the
+'values' bitmap variable passed to gpiod_set_array_value_cansleep()
+instead of filling that bitmap with bits equal to the 'value' argument.
+As a result, only member 0 of the array is handled correctly.
 
-type, values, units for all of these?
+Moreover, wrong assumption is taken about the 'values' bitmap size not
+exceding the number of bits of the 'value' argument type.
 
-Perhaps combine to pairs of values for input and output delays?
+Fix it.
 
-> +
->  Example:
->  	sdhci@e0100000 {
->  		compatible = "arasan,sdhci-8.9a";
-> -- 
-> 2.1.1
-> 
+Signed-off-by: Janusz Krzysztofik <jmkrzyszt@gmail.com>
+---
+Hi,
+
+I think that patch has been missed while we were resolving issues 
+related to GPIO fast bitmap processing.  Since all issues other than the 
+one addreessed by this patch have been been hopefully identified and 
+fixed, GPIO tree seems now to be in good shape in regard to that. 
+However, I believe pwrseq_simple is still broken.  Hence, I'm 
+resubmitting this patch to Ulf for inclusion in MMC tree, Cc: many other 
+people who are kindly requested to test it if possible.
+
+I've identified the following DT files representing devices which may be 
+affected (have more than one GPIO assigned to pwrseq_simple):
+- arch/arm/boot/dts/imx6qdl-sr-som-brcm.dtsi
+- arch/arm/boot/dts/exynos5250-snow-common.dtsi
+- arch/arm/boot/dts/imx6sl-warp.dts
+- arch/arm/boot/dts/omap3-igep0030.dts
+- arch/arm/boot/dts/omap3-igep0020.dts
+- arch/arm/boot/dts/rk3036-kylin.dts
+- arch/arm64/boot/dts/rockchip/rk3368-r88.dts
+- arch/arm64/boot/dts/amlogic/meson-gxbb-vega-s95.dtsi
+
+Please start with checking if pwrseq_simple from linux-next works for 
+you and if not, please test if this patch fixes the issue.
+
+Thanks,
+Janusz
+
+
+ drivers/mmc/core/pwrseq_simple.c | 13 +++++++++++--
+ 1 file changed, 11 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
+index 7f882a2bb872..ece34c734693 100644
+--- a/drivers/mmc/core/pwrseq_simple.c
++++ b/drivers/mmc/core/pwrseq_simple.c
+@@ -40,13 +40,22 @@ static void mmc_pwrseq_simple_set_gpios_value(struct mmc_pwrseq_simple *pwrseq,
+ 	struct gpio_descs *reset_gpios = pwrseq->reset_gpios;
+ 
+ 	if (!IS_ERR(reset_gpios)) {
+-		DECLARE_BITMAP(values, BITS_PER_TYPE(value));
++		unsigned long *values;
+ 		int nvalues = reset_gpios->ndescs;
+ 
+-		values[0] = value;
++		values = bitmap_alloc(nvalues, GFP_KERNEL);
++		if (!values)
++			return;
++
++		if (value)
++			bitmap_fill(values, nvalues);
++		else
++			bitmap_zero(values, nvalues);
+ 
+ 		gpiod_set_array_value_cansleep(nvalues, reset_gpios->desc,
+ 					       reset_gpios->info, values);
++
++		kfree(values);
+ 	}
+ }
+ 
+-- 
+2.16.4
