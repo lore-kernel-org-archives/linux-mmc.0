@@ -1,227 +1,71 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: [PATCH] mmc: tmio: simplify the DMA mode test
-Date: Sat, 13 Oct 2018 00:03:08 +0900
-Message-ID: <1539356588-18191-1-git-send-email-yamada.masahiro@socionext.com>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [RFC PATCH v2 1/4] dt: bindings: Add SD tap value properties
+ details for 'xlnx,zynqmp-8.9a'
+Date: Fri, 12 Oct 2018 11:29:56 -0500
+Message-ID: <20181012162956.GA7339@bogus>
+References: <1537435845-6682-1-git-send-email-manish.narani@xilinx.com>
+ <1537435845-6682-2-git-send-email-manish.narani@xilinx.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-mmc@vger.kernel.org, Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: linux-renesas-soc@vger.kernel.org, Masahiro Yamada <yamada.masahiro@socionext.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1537435845-6682-2-git-send-email-manish.narani@xilinx.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Manish Narani <manish.narani@xilinx.com>
+Cc: ulf.hansson@linaro.org, mark.rutland@arm.com, michal.simek@xilinx.com, adrian.hunter@intel.com, amit.kucheria@linaro.org, sudeep.holla@arm.com, leoyang.li@nxp.com, jollys@xilinx.com, rajanv@xilinx.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-host->chan_{rx,tx} represents the DMA capability of the platform.
-Even if DMA is supported, there are cases where we want to use PIO,
-for example, data length is short enough as commit 5f52c3552946
-("mmc: tmio: use PIO for short transfers") mentioned.
+On Thu, Sep 20, 2018 at 03:00:42PM +0530, Manish Narani wrote:
+> Add documentation for MIO bank required property and Tap Delays optional
+> properties in devicetree bindings.
+> 
+> Signed-off-by: Manish Narani <manish.narani@xilinx.com>
+> ---
+>  .../devicetree/bindings/mmc/arasan,sdhci.txt          | 19 +++++++++++++++++++
+>  1 file changed, 19 insertions(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> index 72769e0..6cc95fa 100644
+> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> @@ -27,6 +27,7 @@ Required Properties for "arasan,sdhci-5.1":
+>  
+>  Required Properties for "xlnx,zynqmp-8.9a":
+>    - xlnx,device_id: SD controller device ID. Must be either <0> or <1>.
+> +  - xlnx,mio-bank: The value will be 0/1/2 depending on MIO bank selection.
+>  
+>  Optional Properties:
+>    - arasan,soc-ctl-syscon: A phandle to a syscon device (see ../mfd/syscon.txt)
+> @@ -44,6 +45,24 @@ Optional Properties:
+>    - xlnx,int-clock-stable-broken: when present, the controller always reports
+>      that the internal clock is stable even when it is not.
+>  
+> +Optional Properties for "xlnx,zynqmp-8.9a":
+> + - xlnx,itap-delay-sd-hsd: Input Tap Delay for SD HS.
+> + - xlnx,itap-delay-sdr25: Input Tap Delay for SDR25.
+> + - xlnx,itap-delay-sdr50: Input Tap Delay for SDR50.
+> + - xlnx,itap-delay-sdr104: Input Tap Delay for SDR104.
+> + - xlnx,itap-delay-sd-ddr50: Input Tap Delay for SD DDR50.
+> + - xlnx,itap-delay-mmc-hsd: Input Tap Delay for MMC HS.
+> + - xlnx,itap-delay-mmc-ddr52: Input Tap Delay for MMC DDR52.
+> + - xlnx,itap-delay-mmc-hs200: Input Tap Delay for MMC HS200.
+> + - xlnx,otap-delay-sd-hsd: Output Tap Delay for SD HS.
+> + - xlnx,otap-delay-sdr25: Output Tap Delay for SDR25.
+> + - xlnx,otap-delay-sdr50: Output Tap Delay for SDR50.
+> + - xlnx,otap-delay-sdr104: Output Tap Delay for SDR104.
+> + - xlnx,otap-delay-sd-ddr50: Output Tap Delay for DDR50.
+> + - xlnx,otap-delay-mmc-hsd: Output Tap Delay for MMC HS.
+> + - xlnx,otap-delay-mmc-ddr52: Output Tap Delay for MMC DDR52.
+> + - xlnx,otap-delay-mmc-hs200: Output Tap Delay for MMC HS200.
 
-Regarding the hardware control flow, we are interested in whether DMA
-is currently enabled or not, instead of whether the platform has the
-DMA capability.
+type, values, units for all of these?
 
-Hence, the several conditionals in tmio_mmc_core.c end up with
-checking host->chan_{rx,tx} and !host->force_pio. This is not nice.
+Perhaps combine to pairs of values for input and output delays?
 
-Let's flip the flag host->force_pio into host->dma_on.
-
-host->dma_on represents whether the DMA is currently enabled or not.
-This flag is set false in the beginning of each command, then should
-be set true by tmio_mmc_start_dma() when the DMA is turned on.
-
-Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
----
-
- drivers/mmc/host/renesas_sdhi_internal_dmac.c |  3 ++-
- drivers/mmc/host/renesas_sdhi_sys_dmac.c      | 10 ++++------
- drivers/mmc/host/tmio_mmc.h                   |  2 +-
- drivers/mmc/host/tmio_mmc_core.c              | 14 +++++++-------
- drivers/mmc/host/uniphier-sd.c                |  6 ++++--
- 5 files changed, 18 insertions(+), 17 deletions(-)
-
-diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-index ca0b439..885676b 100644
---- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-+++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-@@ -201,13 +201,14 @@ renesas_sdhi_internal_dmac_start_dma(struct tmio_mmc_host *host,
- 	renesas_sdhi_internal_dmac_dm_write(host, DM_DTRAN_ADDR,
- 					    sg_dma_address(sg));
- 
-+	host->dma_on = true;
-+
- 	return;
- 
- force_pio_with_unmap:
- 	dma_unmap_sg(&host->pdev->dev, sg, host->sg_len, mmc_get_dma_dir(data));
- 
- force_pio:
--	host->force_pio = true;
- 	renesas_sdhi_internal_dmac_enable_dma(host, false);
- }
- 
-diff --git a/drivers/mmc/host/renesas_sdhi_sys_dmac.c b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-index 5389c48..3c97831 100644
---- a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-+++ b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-@@ -213,10 +213,8 @@ static void renesas_sdhi_sys_dmac_start_dma_rx(struct tmio_mmc_host *host)
- 		goto pio;
- 	}
- 
--	if (sg->length < TMIO_MMC_MIN_DMA_LEN) {
--		host->force_pio = true;
-+	if (sg->length < TMIO_MMC_MIN_DMA_LEN)
- 		return;
--	}
- 
- 	/* The only sg element can be unaligned, use our bounce buffer then */
- 	if (!aligned) {
-@@ -240,6 +238,7 @@ static void renesas_sdhi_sys_dmac_start_dma_rx(struct tmio_mmc_host *host)
- 			desc = NULL;
- 			ret = cookie;
- 		}
-+		host->dma_on = true;
- 	}
- pio:
- 	if (!desc) {
-@@ -286,10 +285,8 @@ static void renesas_sdhi_sys_dmac_start_dma_tx(struct tmio_mmc_host *host)
- 		goto pio;
- 	}
- 
--	if (sg->length < TMIO_MMC_MIN_DMA_LEN) {
--		host->force_pio = true;
-+	if (sg->length < TMIO_MMC_MIN_DMA_LEN)
- 		return;
--	}
- 
- 	/* The only sg element can be unaligned, use our bounce buffer then */
- 	if (!aligned) {
-@@ -318,6 +315,7 @@ static void renesas_sdhi_sys_dmac_start_dma_tx(struct tmio_mmc_host *host)
- 			desc = NULL;
- 			ret = cookie;
- 		}
-+		host->dma_on = true;
- 	}
- pio:
- 	if (!desc) {
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index 18b4308..1c3bdad 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -142,7 +142,7 @@ struct tmio_mmc_host {
- 	struct tmio_mmc_data *pdata;
- 
- 	/* DMA support */
--	bool			force_pio;
-+	bool			dma_on;
- 	struct dma_chan		*chan_rx;
- 	struct dma_chan		*chan_tx;
- 	struct tasklet_struct	dma_issue;
-diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-index a571106..38be3fc 100644
---- a/drivers/mmc/host/tmio_mmc_core.c
-+++ b/drivers/mmc/host/tmio_mmc_core.c
-@@ -364,7 +364,7 @@ static void tmio_mmc_pio_irq(struct tmio_mmc_host *host)
- 	unsigned int count;
- 	unsigned long flags;
- 
--	if ((host->chan_tx || host->chan_rx) && !host->force_pio) {
-+	if (host->dma_on) {
- 		pr_err("PIO IRQ in DMA mode!\n");
- 		return;
- 	} else if (!data) {
-@@ -436,7 +436,7 @@ void tmio_mmc_do_data_irq(struct tmio_mmc_host *host)
- 	 */
- 
- 	if (data->flags & MMC_DATA_READ) {
--		if (host->chan_rx && !host->force_pio)
-+		if (host->dma_on)
- 			tmio_mmc_check_bounce_buffer(host);
- 		dev_dbg(&host->pdev->dev, "Complete Rx request %p\n",
- 			host->mrq);
-@@ -473,7 +473,7 @@ static void tmio_mmc_data_irq(struct tmio_mmc_host *host, unsigned int stat)
- 	if (stat & TMIO_STAT_CRCFAIL || stat & TMIO_STAT_STOPBIT_ERR ||
- 	    stat & TMIO_STAT_TXUNDERRUN)
- 		data->error = -EILSEQ;
--	if (host->chan_tx && (data->flags & MMC_DATA_WRITE) && !host->force_pio) {
-+	if (host->dma_on && (data->flags & MMC_DATA_WRITE)) {
- 		u32 status = sd_ctrl_read16_and_16_as_32(host, CTL_STATUS);
- 		bool done = false;
- 
-@@ -497,7 +497,7 @@ static void tmio_mmc_data_irq(struct tmio_mmc_host *host, unsigned int stat)
- 			tmio_mmc_disable_mmc_irqs(host, TMIO_STAT_DATAEND);
- 			tmio_mmc_dataend_dma(host);
- 		}
--	} else if (host->chan_rx && (data->flags & MMC_DATA_READ) && !host->force_pio) {
-+	} else if (host->dma_on && (data->flags & MMC_DATA_READ)) {
- 		tmio_mmc_disable_mmc_irqs(host, TMIO_STAT_DATAEND);
- 		tmio_mmc_dataend_dma(host);
- 	} else {
-@@ -550,7 +550,7 @@ static void tmio_mmc_cmd_irq(struct tmio_mmc_host *host, unsigned int stat)
- 	 */
- 	if (host->data && (!cmd->error || cmd->error == -EILSEQ)) {
- 		if (host->data->flags & MMC_DATA_READ) {
--			if (host->force_pio || !host->chan_rx) {
-+			if (!host->dma_on) {
- 				tmio_mmc_enable_mmc_irqs(host, TMIO_MASK_READOP);
- 			} else {
- 				tmio_mmc_disable_mmc_irqs(host,
-@@ -558,7 +558,7 @@ static void tmio_mmc_cmd_irq(struct tmio_mmc_host *host, unsigned int stat)
- 				tasklet_schedule(&host->dma_issue);
- 			}
- 		} else {
--			if (host->force_pio || !host->chan_tx) {
-+			if (!host->dma_on) {
- 				tmio_mmc_enable_mmc_irqs(host, TMIO_MASK_WRITEOP);
- 			} else {
- 				tmio_mmc_disable_mmc_irqs(host,
-@@ -688,7 +688,7 @@ static int tmio_mmc_start_data(struct tmio_mmc_host *host,
- 
- 	tmio_mmc_init_sg(host, data);
- 	host->data = data;
--	host->force_pio = false;
-+	host->dma_on = false;
- 
- 	/* Set transfer length / blocksize */
- 	sd_ctrl_write16(host, CTL_SD_XFER_LEN, data->blksz);
-diff --git a/drivers/mmc/host/uniphier-sd.c b/drivers/mmc/host/uniphier-sd.c
-index 1ee9fd0..91a2be4 100644
---- a/drivers/mmc/host/uniphier-sd.c
-+++ b/drivers/mmc/host/uniphier-sd.c
-@@ -157,13 +157,14 @@ static void uniphier_sd_external_dma_start(struct tmio_mmc_host *host,
- 	if (cookie < 0)
- 		goto unmap_sg;
- 
-+	host->dma_on = true;
-+
- 	return;
- 
- unmap_sg:
- 	dma_unmap_sg(mmc_dev(host->mmc), host->sg_ptr, host->sg_len,
- 		     priv->dma_dir);
- force_pio:
--	host->force_pio = true;
- 	uniphier_sd_dma_endisable(host, 0);
- }
- 
-@@ -283,9 +284,10 @@ static void uniphier_sd_internal_dma_start(struct tmio_mmc_host *host,
- 	writel(lower_32_bits(dma_addr), host->ctl + UNIPHIER_SD_DMA_ADDR_L);
- 	writel(upper_32_bits(dma_addr), host->ctl + UNIPHIER_SD_DMA_ADDR_H);
- 
-+	host->dma_on = true;
-+
- 	return;
- force_pio:
--	host->force_pio = true;
- 	uniphier_sd_dma_endisable(host, 0);
- }
- 
--- 
-2.7.4
+> +
+>  Example:
+>  	sdhci@e0100000 {
+>  		compatible = "arasan,sdhci-8.9a";
+> -- 
+> 2.1.1
+> 
