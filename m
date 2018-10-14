@@ -1,53 +1,71 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH 2/2] mmc: uniphier-sd: avoid using broken DMA RX channel
-Date: Mon, 15 Oct 2018 00:35:34 +0200
-Message-ID: <20181014223534.GG3260@kunai>
-References: <1539356258-12374-1-git-send-email-yamada.masahiro@socionext.com>
- <1539356258-12374-3-git-send-email-yamada.masahiro@socionext.com>
+Subject: Re: [PATCH] mmc: tmio: simplify the DMA mode test
+Date: Mon, 15 Oct 2018 00:36:36 +0200
+Message-ID: <20181014223636.GH3260@kunai>
+References: <1539356588-18191-1-git-send-email-yamada.masahiro@socionext.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="OFj+1YLvsEfSXdCH"
+        protocol="application/pgp-signature"; boundary="wj9ZLJVQDRFjGSdK"
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1539356258-12374-3-git-send-email-yamada.masahiro@socionext.com>
+In-Reply-To: <1539356588-18191-1-git-send-email-yamada.masahiro@socionext.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
 
---OFj+1YLvsEfSXdCH
+--wj9ZLJVQDRFjGSdK
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Fri, Oct 12, 2018 at 11:57:38PM +0900, Masahiro Yamada wrote:
-> host->chan_rx is NULL when UNIPHIER_SD_CAP_BROKEN_DMA_RX quirk flag
-> is set. In this case, it should not set up DMA.
+On Sat, Oct 13, 2018 at 12:03:08AM +0900, Masahiro Yamada wrote:
+> host->chan_{rx,tx} represents the DMA capability of the platform.
+> Even if DMA is supported, there are cases where we want to use PIO,
+> for example, data length is short enough as commit 5f52c3552946
+> ("mmc: tmio: use PIO for short transfers") mentioned.
+>=20
+> Regarding the hardware control flow, we are interested in whether DMA
+> is currently enabled or not, instead of whether the platform has the
+> DMA capability.
+>=20
+> Hence, the several conditionals in tmio_mmc_core.c end up with
+> checking host->chan_{rx,tx} and !host->force_pio. This is not nice.
+>=20
+> Let's flip the flag host->force_pio into host->dma_on.
+>=20
+> host->dma_on represents whether the DMA is currently enabled or not.
+> This flag is set false in the beginning of each command, then should
+> be set true by tmio_mmc_start_dma() when the DMA is turned on.
 >=20
 > Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 
-Acked-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+I like it. Much easier to read!
+
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+
+Also here, I'd like to test this on Monday on some more devices.
 
 
---OFj+1YLvsEfSXdCH
+--wj9ZLJVQDRFjGSdK
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlvDxLYACgkQFA3kzBSg
-KbY9khAAoHCwQFucHtw3l83bHMbMnG/2J0ScVnEdsY2d3izomHfJZNCSa9Ser/gp
-2IPqGrfhGSmO8ISz7yHeHpR7rM96N6KhnCQsAd/lvzPhlzcWfhlYtLrZls7lpJIj
-/sTWD7kj4h0NvVkI1RgUu4AGchchBaX6CD2FbON6T0ktS4Omti8yjwf9mLKm0r9D
-39R5vcmPqHEGBqGAWfpKSRRxzge5Q5tHVv1nb64xTAR5V6sIlBoRDwvfuuG/NyVk
-+QCx/g7UbXobx5oS8O5fta6FMAFFRvF9NiT6rEWBOUM1Z7MiP2yfAspLZIxVt7fy
-1SJAavmrDC9huuL3dsl6KKWlc7JH/BNKar2gq17/XpDlBVSejWppIQo37Tqnou8C
-YoNPjtHFtk81kQ/Tb/6w0b9SLlZ51+PTSvYCxMMxEzrsJu69jNUKLkhjJ75cgIUj
-kOUSa3E98yPTOo1ZLBVBllKa4sEcbQdEU5xrzMpQTutx2JXfMVKeX3w+CsLnH7E+
-fX8EAUjaRu3vbhnd/3lD05Xwk49QEIY6y7f8yEuH8/uNGKuoa0tZNz5b+oQXLd7d
-tV7dpfCVRib7ZUGOobZizVHrMwR5n+zOHSAVmdn6E0nAJj1cKM6sKN8tEaH3fx0O
-myIXWHecDp8nc8hKLycZ6WmqDCh6ULdrE0Vp024+6wRJmth927Y=
-=pBgP
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlvDxPQACgkQFA3kzBSg
+KbbJOA/+OuewvEmCiaXXXhz7btIO+397hN2g3rGS9oodRKJgOOZcmRlVGhC6BdID
+jXHcEyIaMzpM/oo06dmEWBF2tbOpO0+ybAtT1si9GwcXOI3IEcUS846HafjNEMJb
+j2DCTp2hcsKmRrx73LUQCsbTqxPH3kBnr55ErMKUjxkK8C039yBHrg37lDDPDRwK
+LUuhD5OB9jGxibcWDhObjOTn4YkZnYlXdNI+eW/bID8JlmrvZfOazK4CfPBXnsWQ
+82Tvq91+kzlB94k0m7aH6cOyyTQFvysN/xpwt+rgE+Va3aDnprmaT45ct4JOuQvA
+SmddIrlRwqYCg0Cz1uhurPQOT9l7YN3J2e/07Wn8avz/Ygr3iZ3MMS8cGuyRTaaX
+vKmpzMv1BknlAPZ/ZxMsLzlO7hyBpP1D85feG+ntm8UOEEw0c8mNvho+TfAVXJNV
+nxFhvhtqAO4vn9TOoiS6kwkMS9WJtHS1iC1d+mXFvkmo2mkWGRYUY8wEdD2Fz1S3
+6CM5bfNl6zfG2A0H8vl0a8Hq5/cmzOxprKPr8PsyZDm1L7TMw9Qe1ogUUOvIjLH0
+j6uhb6Tn3SvPoTUdCsZMfeo+z6u8htsXYR9yQbuIOB5Bys5NYekIMCbRnMPOaj6t
+ShjV6DYIPk82rh58Qdf7KJyMDitX2RNcZT5PsNHmUPD5ed5FBMw=
+=cPem
 -----END PGP SIGNATURE-----
 
---OFj+1YLvsEfSXdCH--
+--wj9ZLJVQDRFjGSdK--
