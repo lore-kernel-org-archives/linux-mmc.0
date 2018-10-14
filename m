@@ -1,63 +1,58 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH v3 2/2] mmc: tmio: remove TMIO_MMC_HAVE_HIGH_REG flag
-Date: Mon, 15 Oct 2018 00:28:12 +0200
-Message-ID: <20181014222812.GC3260@kunai>
+Subject: Re: [PATCH v3 0/2] mmc: tmio: remove confusing
+ TMIO_MMC_HAVE_HIGH_REG flag
+Date: Mon, 15 Oct 2018 00:30:12 +0200
+Message-ID: <20181014223011.GD3260@kunai>
 References: <1539143492-32605-1-git-send-email-yamada.masahiro@socionext.com>
- <1539143492-32605-3-git-send-email-yamada.masahiro@socionext.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="8X7/QrJGcKSMr1RN"
+        protocol="application/pgp-signature"; boundary="76DTJ5CE0DCVQemd"
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1539143492-32605-3-git-send-email-yamada.masahiro@socionext.com>
+In-Reply-To: <1539143492-32605-1-git-send-email-yamada.masahiro@socionext.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Masahiro Yamada <yamada.masahiro@socionext.com>
 Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-renesas-soc@vger.kernel.org, Lee Jones <lee.jones@linaro.org>, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
 
---8X7/QrJGcKSMr1RN
+--76DTJ5CE0DCVQemd
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Wed, Oct 10, 2018 at 12:51:32PM +0900, Masahiro Yamada wrote:
-> TMIO_MMC_HAVE_HIGH_REG is confusing due to its counter-intuitive name.
+On Wed, Oct 10, 2018 at 12:51:30PM +0900, Masahiro Yamada wrote:
+> CTL_SDIO_REGS is a register specific to tmio_mmc.c
 >=20
-> All the TMIO MMC variants (TMIO MMC, Renesas SDHI, UniPhier SD) actually
-> have high registers. It is just that each of them implements its own
-> registers there. The original IP from Panasonic only defines registers
-> 0x00-0xff in the bus_shift=3D1 review. The register area above them is
-> platform-dependent.
+> Currently, we handle it in tmio_mmc_core.c, hence need
+> TMIO_MMC_HAVE_HIGH_REG flag to prevent the other platforms
+> from accessing to it.
 >=20
-> In fact, TMIO_MMC_HAVE_HIGH_REG is set only by tmio-mmc.c and used to
-> test the accessibility of CTL_SDIO_REGS. Because it is specific to
-> the TMIO MFD variant, the right thing to do is to move such registers
-> to tmio_mmc.c and delete the TMIO_MMC_HAVE_HIGH_REG flag.
->=20
-> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+> We can just move CTL_SDIO_REGS to tmio_mmc.c
+> and delete the confusing TMIO_MMC_HAVE_HIGH_REG flag.
 
-Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Looks good, thanks! Ulf, please give me Monday to test the changes on
+some more devices...
 
 
---8X7/QrJGcKSMr1RN
+--76DTJ5CE0DCVQemd
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlvDwvsACgkQFA3kzBSg
-Kbay1A/+On/wewSBWptZO6Mw0kGifN4qaygGNAXiH0OW51Ep9ac+jqqAkwCmvBT2
-66YruBNec5gVTbJ3M/OKzDIaw+gFjCd4U9X3Ygg6i+GxX0YR45DXLmyiYM+QMtWf
-Zj4BCSWi11nj2ROwGaLKhcQKpCOkRvh93XeaVdkIDUPNWIlb5lkE3qEw1pOEXddl
-MkfJL80GPMCoFU1kRSZ1AFhhxKxcKO8OJggk9iBp2B62ICDlm6wL1HbtaXv64nHm
-DIVJu/KXijJ7ggo0tEywxonqdWVa00v7LyLWSg4EZL/wL1r/fG/e3/idlNKGF0ui
-XyVu7b4uCr6jQSQO37qK9MZyVnvQ/4JYxHVuPOE4344lGgx+29CMI4fDGUnE6qM3
-pPALSfuxUcC67WVLLeNANPnc7czf6nZOoWbDhlg1/WaDw8d1cR5hwoF2lvSmc3Ah
-z2GMzr/MCcxNVb0XCi5Vkeg5jirx0TeVI/ZKVuMQ8uzRnXF9WBrFvPM5JY4Egnpz
-nOWkXpbX0k4Bxppxodv6zS+uhR+aGBpOy1/6zg2hZYRbbhG6c19O8IH50xfTEblI
-DIy2xnr0HhvtMoCuGPgvqyQAoZlHxvI51uJcA2dXri70wXdmPYbk8JsBCCM+eSYG
-P1XDhhCHQ/mc7slHlZ/rzr4vyf3zQFxopk7gJlybeCKy1g5Ebc0=
-=biCc
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlvDw3MACgkQFA3kzBSg
+KbZLfQ/5Af4/pUZqW/1cDPQlI5MGOgP5r7qOdRItI0JWBkRYEJbxo/3RJDRCki78
+CA9tiz0wUQoWYOrNrgQcPXb7wX68ph8yu7v9upuEZiY6/u8t1k/ez2aSIrZ4nY8g
+s0ePf8txDjTYDYfsMaUsm1G8OvuH1TnCp/NOkBo+FxUtxwCq4vpBQzi0mfYyq0hs
+B8gwzuR8Q8oqCpmttvlnfgW08Odo6UNGNgGLcKSL1I21GtGAawuFDChzkJALKdi2
+WUnaMRaULXFMhvdv7UzxzAcd8ES6HaPKWUlXw6LEnvLWMtM7XYDLSC4ev8mERSAu
+Yd4VxNw8D8QdSbiHsbR5TAFhYB5MTwwVIVrNrNurZyom0ftBE8+s0nZ8v4HFGixS
+r6qYNCvQvRyArsLwmZ2eMthEw7DR6d73aDlKm/4gROwbuuKXlR3kwZU9jqCrS+/6
+dIZUapbH0r8xfQaYqFZrGPhYfWKjr8i2sEzcLzU0IWMT+75E03w9UOkMLJgfHonX
+3kA15Mkuqii+D3CmT7d/mvxRZSSwiYjQMzZEbGYlNzn2aoU7PLjGeEjkMY6bvNDI
+KNRGu1eEltAdQHltfGeMLUJwN7NEPRWhFv2Alv9/nvQmzfY6bwucum6rbBP0AGOr
+H2lvrrdf9AZQJvl4jZUXAThOwSCzVOJ6qjr9Ns0Wp7ujfuwl6x0=
+=XJV3
 -----END PGP SIGNATURE-----
 
---8X7/QrJGcKSMr1RN--
+--76DTJ5CE0DCVQemd--
