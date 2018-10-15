@@ -1,77 +1,41 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH] mmc: tmio: simplify the DMA mode test
-Date: Mon, 15 Oct 2018 13:33:32 +0200
-Message-ID: <20181015113332.uqnd4kmoabzto5kr@ninjato>
-References: <1539356588-18191-1-git-send-email-yamada.masahiro@socionext.com>
- <20181014223636.GH3260@kunai>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 0/2] mmc: uniphier-sd: two bug-fixes
+Date: Mon, 15 Oct 2018 14:51:15 +0200
+Message-ID: <CAPDyKFpAa=ucJvTLhNi-fQ3Fvd1in8rstxQouPY+_k_bFoAjZQ@mail.gmail.com>
+References: <1539356258-12374-1-git-send-email-yamada.masahiro@socionext.com>
+ <20181014223311.GE3260@kunai> <CAK7LNATPf4mEdH16eZzLg4x3tP-jvXcTWqqY0DgCpmGjt9x9zg@mail.gmail.com>
+ <20181015073339.GB981@kunai>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="7goolrfafe6rco6m"
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20181014223636.GH3260@kunai>
+In-Reply-To: <20181015073339.GB981@kunai>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: linux-mmc@vger.kernel.org, Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: Masahiro Yamada <yamada.masahiro@socionext.com>, linux-mmc <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
+On 15 October 2018 at 09:33, Wolfram Sang <wsa@the-dreams.de> wrote:
+>
+>> Some sub-systems rebase, and some do not.
+>> It is up to the sub-system maintainer.
+>
+> We used to have a very strict rule to not rebase anything which ends up
+> in linux-next. Dunno what happened to this rule but I liked it.
+>
+>> I know what you are saying, but this is how we develop in linux-next.
+>
+> I wonder about that...
+>
+>> You need to use "git rebase --onto".
+>
+> And what about lists with commit IDs tracking patches on their way
+> upstream? Yes, there is git-patch-id, yet I think it is easier to admit
+> that incremental changes happen anyway. I know Ulf view differs...
+>
 
---7goolrfafe6rco6m
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+For this particular case I can avoid the re-base, as you prefer.
+However, in general can't commit to not rebase, as it depends on case
+by case basis.
 
-On Mon, Oct 15, 2018 at 12:36:36AM +0200, Wolfram Sang wrote:
-> On Sat, Oct 13, 2018 at 12:03:08AM +0900, Masahiro Yamada wrote:
-> > host->chan_{rx,tx} represents the DMA capability of the platform.
-> > Even if DMA is supported, there are cases where we want to use PIO,
-> > for example, data length is short enough as commit 5f52c3552946
-> > ("mmc: tmio: use PIO for short transfers") mentioned.
-> >=20
-> > Regarding the hardware control flow, we are interested in whether DMA
-> > is currently enabled or not, instead of whether the platform has the
-> > DMA capability.
-> >=20
-> > Hence, the several conditionals in tmio_mmc_core.c end up with
-> > checking host->chan_{rx,tx} and !host->force_pio. This is not nice.
-> >=20
-> > Let's flip the flag host->force_pio into host->dma_on.
-> >=20
-> > host->dma_on represents whether the DMA is currently enabled or not.
-> > This flag is set false in the beginning of each command, then should
-> > be set true by tmio_mmc_start_dma() when the DMA is turned on.
-> >=20
-> > Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
->=20
-> I like it. Much easier to read!
->=20
-> Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-
-Tested on R-Car H3 ES1.0 and ES2.0, M3N, and H2. No regressions,
-especially no performance regressions (since "when to enable DMA" code
-was refactored).
-
-Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-
-
---7goolrfafe6rco6m
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlvEewwACgkQFA3kzBSg
-KbZMBRAApYq21ZuXhgZCqB8ZFEjOPPo3rbUqZiTDFtUIaIbfywVpqLMtbeIjGn2K
-7Sx6fuvtIs+usb292zwZfV4RBQHJek35T60MAs2z/t6Ye4WjKQlTinWEMwqQfoJW
-mbFZc6jlXlA7vTc4ji72l8htng7weUuqAruwuPtoE57dHLNIKyUxyKd2zAmwN7yg
-DFfrGmiDHh7B9s/bewdmMFbQ3lLz/LNOHyrhOtYH0l7gLPPN79BhF2NnOa7aqf/d
-ATR81u/VQAGnuITtY6PQhxhNO/EKaFXv1awO244yczvs72M441t4hWG66gMgDB6g
-d7aVEajAuARFvgYpJ0t2BxI1mMtAOFCjS/zN26lyl3tk4UHSC/vX4s/6WL99Dra8
-3Hyi1mfLWL6ypusEpXeEQPAEAqH8W5nfYpTU3WzxsZaLElS3qOMfvYBk/hAnI2c6
-OZJcOcN7NL/4NN38tOty2jWCLB5RSBwdbmmR33L1GhmQ+0T2nTtrO6nmVah1RkXi
-juQn9Zdox/vJr5vIG1O0nex87v3r2MKDdfGrGFkbvD3hiqGXPhX2906pQrkiSCux
-S0H0QIo7tj0cxkxDzP14s8Rkus3mLFhkHrdWSYANFKWh2fla+jIJUhP67Ydgs575
-gelVZHlD8xxC/d3ncv7LiFKeWQQLMfFUeqUEIsDCPCXKUrbC46g=
-=J9y+
------END PGP SIGNATURE-----
-
---7goolrfafe6rco6m--
+Kind regards
+Uffe
