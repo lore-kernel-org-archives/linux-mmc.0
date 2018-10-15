@@ -1,12 +1,12 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/2] mmc: uniphier-sd: fix DMA disabling
-Date: Mon, 15 Oct 2018 15:15:43 +0200
-Message-ID: <CAPDyKFqa__C+34=tFRnysEz0R2Xy-ZAZSHp1JEv=pOEsfK2VWQ@mail.gmail.com>
-References: <1539356258-12374-1-git-send-email-yamada.masahiro@socionext.com> <1539356258-12374-2-git-send-email-yamada.masahiro@socionext.com>
+Subject: Re: [PATCH 2/2] mmc: uniphier-sd: avoid using broken DMA RX channel
+Date: Mon, 15 Oct 2018 15:15:47 +0200
+Message-ID: <CAPDyKFpYggUu2WDsR1CENKJDyCpZ1Nh+DrO3=oT1euGLNurxBg@mail.gmail.com>
+References: <1539356258-12374-1-git-send-email-yamada.masahiro@socionext.com> <1539356258-12374-3-git-send-email-yamada.masahiro@socionext.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1539356258-12374-2-git-send-email-yamada.masahiro@socionext.com>
+In-Reply-To: <1539356258-12374-3-git-send-email-yamada.masahiro@socionext.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Masahiro Yamada <yamada.masahiro@socionext.com>
 Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
@@ -14,10 +14,8 @@ List-Id: linux-mmc@vger.kernel.org
 
 On 12 October 2018 at 16:57, Masahiro Yamada
 <yamada.masahiro@socionext.com> wrote:
-> Once DMA is enabled, it is not possible to disable it because
-> uniphier_sd_dma_endisable() always sets the DMA_ENABLE_DMASDRW bit
-> regardless of the argument 'enable'. It should disable DMA when
-> 'enable' is false.
+> host->chan_rx is NULL when UNIPHIER_SD_CAP_BROKEN_DMA_RX quirk flag
+> is set. In this case, it should not set up DMA.
 >
 > Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 
@@ -26,24 +24,26 @@ Applied for next, thanks!
 Kind regards
 Uffe
 
+
 > ---
 >
->  drivers/mmc/host/uniphier-sd.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  drivers/mmc/host/uniphier-sd.c | 3 +++
+>  1 file changed, 3 insertions(+)
 >
 > diff --git a/drivers/mmc/host/uniphier-sd.c b/drivers/mmc/host/uniphier-sd.c
-> index 10e7b30..10d49aa 100644
+> index 10d49aa..1ee9fd0 100644
 > --- a/drivers/mmc/host/uniphier-sd.c
 > +++ b/drivers/mmc/host/uniphier-sd.c
-> @@ -78,7 +78,7 @@ static void *uniphier_sd_priv(struct tmio_mmc_host *host)
+> @@ -251,6 +251,9 @@ static void uniphier_sd_internal_dma_start(struct tmio_mmc_host *host,
+>         u32 dma_mode;
+>         int sg_len;
 >
->  static void uniphier_sd_dma_endisable(struct tmio_mmc_host *host, int enable)
->  {
-> -       sd_ctrl_write16(host, CTL_DMA_ENABLE, DMA_ENABLE_DMASDRW);
-> +       sd_ctrl_write16(host, CTL_DMA_ENABLE, enable ? DMA_ENABLE_DMASDRW : 0);
->  }
+> +       if ((data->flags & MMC_DATA_READ) && !host->chan_rx)
+> +               goto force_pio;
+> +
+>         if (WARN_ON(host->sg_len != 1))
+>                 goto force_pio;
 >
->  /* external DMA engine */
 > --
 > 2.7.4
 >
