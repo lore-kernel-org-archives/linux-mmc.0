@@ -1,100 +1,64 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFT PATCH] mmc: pwrseq_simple: Fix incorrect handling of GPIO bitmap
-Date: Mon, 15 Oct 2018 12:29:08 +0200
-Message-ID: <CAPDyKFo+wbVRAZuSvTTVQ1Poy8eLXO3yt_Ss30dC+Edab9L38Q@mail.gmail.com>
-References: <20180925192433.1377-1-jmkrzyszt@gmail.com> <20181012190901.1243-1-jmkrzyszt@gmail.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH v3 1/2] mmc: tmio: move MFD variant reset to a platform
+ hook
+Date: Mon, 15 Oct 2018 13:32:10 +0200
+Message-ID: <20181015113210.bmrn5jxfhh43yl5v@ninjato>
+References: <1539143492-32605-1-git-send-email-yamada.masahiro@socionext.com>
+ <1539143492-32605-2-git-send-email-yamada.masahiro@socionext.com>
+ <20181014222757.GB3260@kunai>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="3tih2gcnk2ua3tyl"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181012190901.1243-1-jmkrzyszt@gmail.com>
+Content-Disposition: inline
+In-Reply-To: <20181014222757.GB3260@kunai>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Janusz Krzysztofik <jmkrzyszt@gmail.com>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Krzysztof Kozlowski <krzk@kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-gpio@vger.kernel.org, Linux Samsung SOC <linux-samsung-soc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>, Pengutronix Kernel Team <kernel@pengutronix.de>, Fabio Estevam <fabio.estevam@nxp.com>, NXP Linux Team <linux-imx@nxp.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Kukjin Kim <kgene@kernel.org>, =?UTF-8?Q?Beno=C3=AEt_Cousson?= <bcousson@baylibre.com>, Tony Lindgren <tony@atomide.com>, Enric Balletbo i Serra <eballetbo@gmail.com>, Javier
+To: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 12 October 2018 at 21:09, Janusz Krzysztofik <jmkrzyszt@gmail.com> wrote:
-> Commit b9762bebc633 ("gpiolib: Pass bitmaps, not integer arrays, to
-> get/set array") changed the way GPIO values are passed to
-> gpiod_get/set_array_value() and friends.  The new code introduced into
-> mmc_pwrseq_simple_set_gpios_value() incorrectly interpretes the 'value'
-> argument as a bitmap of GPIO values and assigns it directly to the
-> 'values' bitmap variable passed to gpiod_set_array_value_cansleep()
-> instead of filling that bitmap with bits equal to the 'value' argument.
-> As a result, only member 0 of the array is handled correctly.
->
-> Moreover, wrong assumption is taken about the 'values' bitmap size not
-> exceding the number of bits of the 'value' argument type.
->
-> Fix it.
->
-> Signed-off-by: Janusz Krzysztofik <jmkrzyszt@gmail.com>
 
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+--3tih2gcnk2ua3tyl
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Kind regards
-Uffe
+On Mon, Oct 15, 2018 at 12:27:58AM +0200, Wolfram Sang wrote:
+> On Wed, Oct 10, 2018 at 12:51:31PM +0900, Masahiro Yamada wrote:
+> > CTL_RESET_SDIO register is specific to the TMIO MFD (tmio_mmc.c).
+> >=20
+> > Add a new hook host->reset() for performing a platform-specific
+> > reset sequence, and move CTL_RESET_SDIO over there.
+> >=20
+> > Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+>=20
+> Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-> ---
-> Hi,
->
-> I think that patch has been missed while we were resolving issues
-> related to GPIO fast bitmap processing.  Since all issues other than the
-> one addreessed by this patch have been been hopefully identified and
-> fixed, GPIO tree seems now to be in good shape in regard to that.
-> However, I believe pwrseq_simple is still broken.  Hence, I'm
-> resubmitting this patch to Ulf for inclusion in MMC tree, Cc: many other
-> people who are kindly requested to test it if possible.
->
-> I've identified the following DT files representing devices which may be
-> affected (have more than one GPIO assigned to pwrseq_simple):
-> - arch/arm/boot/dts/imx6qdl-sr-som-brcm.dtsi
-> - arch/arm/boot/dts/exynos5250-snow-common.dtsi
-> - arch/arm/boot/dts/imx6sl-warp.dts
-> - arch/arm/boot/dts/omap3-igep0030.dts
-> - arch/arm/boot/dts/omap3-igep0020.dts
-> - arch/arm/boot/dts/rk3036-kylin.dts
-> - arch/arm64/boot/dts/rockchip/rk3368-r88.dts
-> - arch/arm64/boot/dts/amlogic/meson-gxbb-vega-s95.dtsi
->
-> Please start with checking if pwrseq_simple from linux-next works for
-> you and if not, please test if this patch fixes the issue.
->
-> Thanks,
-> Janusz
->
->
->  drivers/mmc/core/pwrseq_simple.c | 13 +++++++++++--
->  1 file changed, 11 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
-> index 7f882a2bb872..ece34c734693 100644
-> --- a/drivers/mmc/core/pwrseq_simple.c
-> +++ b/drivers/mmc/core/pwrseq_simple.c
-> @@ -40,13 +40,22 @@ static void mmc_pwrseq_simple_set_gpios_value(struct mmc_pwrseq_simple *pwrseq,
->         struct gpio_descs *reset_gpios = pwrseq->reset_gpios;
->
->         if (!IS_ERR(reset_gpios)) {
-> -               DECLARE_BITMAP(values, BITS_PER_TYPE(value));
-> +               unsigned long *values;
->                 int nvalues = reset_gpios->ndescs;
->
-> -               values[0] = value;
-> +               values = bitmap_alloc(nvalues, GFP_KERNEL);
-> +               if (!values)
-> +                       return;
-> +
-> +               if (value)
-> +                       bitmap_fill(values, nvalues);
-> +               else
-> +                       bitmap_zero(values, nvalues);
->
->                 gpiod_set_array_value_cansleep(nvalues, reset_gpios->desc,
->                                                reset_gpios->info, values);
-> +
-> +               kfree(values);
->         }
->  }
->
-> --
-> 2.16.4
->
+Tested on R-Car H3 ES1.0 and ES2.0, M3N, and H2. No regressions. I
+pulled the SD card out during transfer to ensure the reset function will
+surely be called.
+
+Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+
+
+--3tih2gcnk2ua3tyl
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlvEerYACgkQFA3kzBSg
+KbYc9RAApdABe3wiKFrfOU4fkWeHcMNIInga/R+oYrKZJS1zEWwGN+swrNlEhPOk
+iQ6FR3VC+HWJG6ExLehDUKyQSl5YFeBKNWN9+T4jwZAZ6uQsrEBMjesjxWhuh6GJ
+xSFS875l3CezsDruRS57wHLI0G5VBIvJZBMg/pWa0BwZ5tkOiEwB3Y7+ZXzCB/Dx
+4aTURpq/TfotoF9XlLpR0kaQiR9WEbtrQk8GAJgD6lfnAJfOMDr+h605ojG/oeej
+ouv6m/1uOm7QpM5i3+vh7QCC8BkALl5nH+EiLJ6BuJwzSpcPnd4/rk17bOEwwwAz
+ivEcosBYHzFqV7nVS4TYYwhAKhJXQENxcU7Hirwxrrt2ktZVsKkrD9AraWd96Pde
+mq+AE3USSbLVjHERA6kCccMBW6wvoxUMyfW59qjpBGWmZEqkFfojkCNT+2EwD9ke
+5UWFj3/H8xiv66YfX6sTfPHWEIYgcq5ML8u2gonkiN7A6/qkY2DZCNyQyxh29ACo
+Vd6zvoKo07RzRfLMYZiFsaaUs1ctzPgMqnsLIor3QCfJ5E6tEo6pNCjN1Dq/AxuU
+H07+8pHKlYdmp/6sztqRTPmUXPSiqmg4a8C9wk3V8AuZQXAMYAyTCOjydExZAfSQ
+1A9UWN4IWjinaBx0EDfrU1iWVo0FoNkWhdusPHnfyz1FshQrbF4=
+=2CYy
+-----END PGP SIGNATURE-----
+
+--3tih2gcnk2ua3tyl--
