@@ -1,25 +1,18 @@
-From: Marek Szyprowski <m.szyprowski@samsung.com>
-Subject: Re: [RFT PATCH] mmc: pwrseq_simple: Fix incorrect handling of GPIO
- bitmap
-Date: Mon, 15 Oct 2018 10:32:08 +0200
-Message-ID: <20181015083209eucas1p2fb3d1961745fdb3007dec317c6441142~duxEkRvmp2005320053eucas1p2D@eucas1p2.samsung.com>
-References: <20180925192433.1377-1-jmkrzyszt@gmail.com>
-        <CGME20181012190748epcas5p3dc41f6d0f9c69f22351209b2e7ea66f3@epcas5p3.samsung.com>
-        <20181012190901.1243-1-jmkrzyszt@gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [RFT PATCH] mmc: pwrseq_simple: Fix incorrect handling of GPIO bitmap
+Date: Mon, 15 Oct 2018 12:29:08 +0200
+Message-ID: <CAPDyKFo+wbVRAZuSvTTVQ1Poy8eLXO3yt_Ss30dC+Edab9L38Q@mail.gmail.com>
+References: <20180925192433.1377-1-jmkrzyszt@gmail.com> <20181012190901.1243-1-jmkrzyszt@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20181012190901.1243-1-jmkrzyszt@gmail.com>
-Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Janusz Krzysztofik <jmkrzyszt@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Krzysztof Kozlowski <krzk@kernel.org>, linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org, Linux Samsung SOC <linux-samsung-soc@vger.kernel.org>, linux-kernel@vger.kernel.org, Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>, Pengutronix Kernel Team <kernel@pengutronix.de>, Fabio Estevam <fabio.estevam@nxp.com>, NXP Linux Team <linux-imx@nxp.com>, linux-arm-kernel@lists.infradead.org, Kukjin Kim <kgene@kernel.org>, =?UTF-8?Q?Beno=c3=aet_Cousson?= <bcousson@baylibre.com>, Tony Lindgren <tony@atomide.com>, Enric Balletbo i Serra <eballetbo@gmail.com>, Javier Martinez Canillas <javier@dowhile0.org>, linux-omap@vger.kernel.org, Heiko Stuebner <heiko@sntech.de>, linux-rockchip@lists.infradead.org
+To: Janusz Krzysztofik <jmkrzyszt@gmail.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Krzysztof Kozlowski <krzk@kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-gpio@vger.kernel.org, Linux Samsung SOC <linux-samsung-soc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>, Pengutronix Kernel Team <kernel@pengutronix.de>, Fabio Estevam <fabio.estevam@nxp.com>, NXP Linux Team <linux-imx@nxp.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Kukjin Kim <kgene@kernel.org>, =?UTF-8?Q?Beno=C3=AEt_Cousson?= <bcousson@baylibre.com>, Tony Lindgren <tony@atomide.com>, Enric Balletbo i Serra <eballetbo@gmail.com>, Javier
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Janusz,
-
-On 2018-10-12 21:09, Janusz Krzysztofik wrote:
+On 12 October 2018 at 21:09, Janusz Krzysztofik <jmkrzyszt@gmail.com> wrote:
 > Commit b9762bebc633 ("gpiolib: Pass bitmaps, not integer arrays, to
 > get/set array") changed the way GPIO values are passed to
 > gpiod_get/set_array_value() and friends.  The new code introduced into
@@ -35,28 +28,27 @@ On 2018-10-12 21:09, Janusz Krzysztofik wrote:
 > Fix it.
 >
 > Signed-off-by: Janusz Krzysztofik <jmkrzyszt@gmail.com>
+
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+
+Kind regards
+Uffe
+
 > ---
 > Hi,
 >
-> I think that patch has been missed while we were resolving issues 
-> related to GPIO fast bitmap processing.  Since all issues other than the 
-> one addreessed by this patch have been been hopefully identified and 
-> fixed, GPIO tree seems now to be in good shape in regard to that. 
-> However, I believe pwrseq_simple is still broken.  Hence, I'm 
-> resubmitting this patch to Ulf for inclusion in MMC tree, Cc: many other 
+> I think that patch has been missed while we were resolving issues
+> related to GPIO fast bitmap processing.  Since all issues other than the
+> one addreessed by this patch have been been hopefully identified and
+> fixed, GPIO tree seems now to be in good shape in regard to that.
+> However, I believe pwrseq_simple is still broken.  Hence, I'm
+> resubmitting this patch to Ulf for inclusion in MMC tree, Cc: many other
 > people who are kindly requested to test it if possible.
 >
-> I've identified the following DT files representing devices which may be 
+> I've identified the following DT files representing devices which may be
 > affected (have more than one GPIO assigned to pwrseq_simple):
 > - arch/arm/boot/dts/imx6qdl-sr-som-brcm.dtsi
 > - arch/arm/boot/dts/exynos5250-snow-common.dtsi
-
-On Samsung Snow Chromebook it doesn't change anything. Board boots and
-detects WiFi SDIO card before and after applying it on top on Linux
-next-20181012.
-
-Tested-by: Marek Szyprowski <m.szyprowski
-
 > - arch/arm/boot/dts/imx6sl-warp.dts
 > - arch/arm/boot/dts/omap3-igep0030.dts
 > - arch/arm/boot/dts/omap3-igep0020.dts
@@ -64,7 +56,7 @@ Tested-by: Marek Szyprowski <m.szyprowski
 > - arch/arm64/boot/dts/rockchip/rk3368-r88.dts
 > - arch/arm64/boot/dts/amlogic/meson-gxbb-vega-s95.dtsi
 >
-> Please start with checking if pwrseq_simple from linux-next works for 
+> Please start with checking if pwrseq_simple from linux-next works for
 > you and if not, please test if this patch fixes the issue.
 >
 > Thanks,
@@ -79,32 +71,30 @@ Tested-by: Marek Szyprowski <m.szyprowski
 > --- a/drivers/mmc/core/pwrseq_simple.c
 > +++ b/drivers/mmc/core/pwrseq_simple.c
 > @@ -40,13 +40,22 @@ static void mmc_pwrseq_simple_set_gpios_value(struct mmc_pwrseq_simple *pwrseq,
->  	struct gpio_descs *reset_gpios = pwrseq->reset_gpios;
->  
->  	if (!IS_ERR(reset_gpios)) {
-> -		DECLARE_BITMAP(values, BITS_PER_TYPE(value));
-> +		unsigned long *values;
->  		int nvalues = reset_gpios->ndescs;
->  
-> -		values[0] = value;
-> +		values = bitmap_alloc(nvalues, GFP_KERNEL);
-> +		if (!values)
-> +			return;
+>         struct gpio_descs *reset_gpios = pwrseq->reset_gpios;
+>
+>         if (!IS_ERR(reset_gpios)) {
+> -               DECLARE_BITMAP(values, BITS_PER_TYPE(value));
+> +               unsigned long *values;
+>                 int nvalues = reset_gpios->ndescs;
+>
+> -               values[0] = value;
+> +               values = bitmap_alloc(nvalues, GFP_KERNEL);
+> +               if (!values)
+> +                       return;
 > +
-> +		if (value)
-> +			bitmap_fill(values, nvalues);
-> +		else
-> +			bitmap_zero(values, nvalues);
->  
->  		gpiod_set_array_value_cansleep(nvalues, reset_gpios->desc,
->  					       reset_gpios->info, values);
+> +               if (value)
+> +                       bitmap_fill(values, nvalues);
+> +               else
+> +                       bitmap_zero(values, nvalues);
+>
+>                 gpiod_set_array_value_cansleep(nvalues, reset_gpios->desc,
+>                                                reset_gpios->info, values);
 > +
-> +		kfree(values);
->  	}
+> +               kfree(values);
+>         }
 >  }
->  
-
-Best regards
--- 
-Marek Szyprowski, PhD
-Samsung R&D Institute Poland
+>
+> --
+> 2.16.4
+>
