@@ -1,10 +1,10 @@
-From: Oleksandr Natalenko <oleksandr@natalenko.name>
+From: Bart Van Assche <bvanassche@acm.org>
 Subject: Re: [PATCH v2] block: BFQ default for single queue devices
-Date: Mon, 15 Oct 2018 16:32:53 +0200
-Message-ID: <18744e21b9f5aa4b3ab721a007a3e9a2@natalenko.name>
+Date: Mon, 15 Oct 2018 08:02:15 -0700
+Message-ID: <1539615735.129692.3.camel@acm.org>
 References: <20181015141059.26579-1-linus.walleij@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
 In-Reply-To: <20181015141059.26579-1-linus.walleij@linaro.org>
@@ -17,127 +17,26 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
  <mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-mtd" <linux-mtd-bounces@lists.infradead.org>
 Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@infradead.org>, Ulf Hansson <ulf.hansson@linaro.org>, Paolo Valente <paolo.valente@linaro.org>, Jan Kara <jack@suse.cz>, Bart Van Assche <bvanassche@acm.org>, Artem Bityutskiy <dedekind1@gmail.com>, Richard Weinberger <richard@nod.at>, Jonathan Corbet <corbet@lwn.net>, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, linux-block@vger.kernel.org, Mark Brown <broonie@kernel.org>, linux-mtd@lists.infradead.org, Pavel Machek <pavel@ucw.cz>, Johannes Thumshirn <jthumshirn@suse.de>, Damien Le Moal <Damien.LeMoal@wdc.com>, Alan Cox <gnomes@lxorguk.ukuu.org.uk>
+To: Linus Walleij <linus.walleij@linaro.org>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>
+Cc: Alan Cox <gnomes@lxorguk.ukuu.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Paolo Valente <paolo.valente@linaro.org>, Jan Kara <jack@suse.cz>, Artem Bityutskiy <dedekind1@gmail.com>, Richard Weinberger <richard@nod.at>, Jonathan Corbet <corbet@lwn.net>, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Oleksandr Natalenko <oleksandr@natalenko.name>, Christoph Hellwig <hch@infradead.org>, Mark Brown <broonie@kernel.org>, linux-mtd@lists.infradead.org, Pavel Machek <pavel@ucw.cz>, Johannes Thumshirn <jthumshirn@suse.de>, Damien Le Moal <Damien.LeMoal@wdc.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi.
-
-On 15.10.2018 16:10, Linus Walleij wrote:
-> This sets BFQ as the default scheduler for single queue
-> block devices (nr_hw_queues == 1) if it is available. This
-> affects notably MMC/SD-cards but also UBI and the loopback
-> device.
-> 
-> I have been running it for a while without any negative
-> effects on my pet systems and I want some wider testing
-> so let's throw it out there and see what people say.
-> Admittedly my use cases are limited. I need to keep this
-> patch around for my personal needs anyway.
-> 
-> We take special care to avoid using BFQ on zoned devices
-> (in particular SMR, shingled magnetic recording devices)
-> as these currently require mq-deadline to group writes
-> together.
-> 
-> I have opted against introducing any default scheduler
-> through Kconfig as the mq-deadline enforcement for
-> zoned devices has to be done at runtime anyways and
-> too many config options will make things confusing.
-> 
-> My argument for setting a default policy in the kernel
-> as opposed to user space is the "reasonable defaults"
-> type, analogous to how we have one default CPU scheduling
-> policy (CFS) that make most sense for most tasks, and
-> how automatic process group scheduling happens in most
-> distributions without userspace involvement. The BFQ
-> scheduling policy makes most sense for single hardware
-> queue devices and many embedded systems will not have
-> the clever userspace tools (such as udev) to make an
-> educated choice of scheduling policy. Defaults should be
-> those that make most sense for the hardware.
-> 
-> Cc: Pavel Machek <pavel@ucw.cz>
-> Cc: Paolo Valente <paolo.valente@linaro.org>
-> Cc: Jens Axboe <axboe@kernel.dk>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: Richard Weinberger <richard@nod.at>
-> Cc: Adrian Hunter <adrian.hunter@intel.com>
-> Cc: Bart Van Assche <bvanassche@acm.org>
-> Cc: Jan Kara <jack@suse.cz>
-> Cc: Artem Bityutskiy <dedekind1@gmail.com>
-> Cc: Christoph Hellwig <hch@infradead.org>
-> Cc: Alan Cox <gnomes@lxorguk.ukuu.org.uk>
-> Cc: Mark Brown <broonie@kernel.org>
-> Cc: Damien Le Moal <Damien.LeMoal@wdc.com>
-> Cc: Johannes Thumshirn <jthumshirn@suse.de>
-> Cc: Oleksandr Natalenko <oleksandr@natalenko.name>
-> Cc: Jonathan Corbet <corbet@lwn.net>
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
-> ---
-> ChangeLog v1->v2:
-> - Add a quirk so that devices with zoned writes are forced
->   to use the deadline scheduler, this is necessary since only
->   that scheduler supports zoned writes.
-> - There is a summary article in LWN for subscribers:
->   https://lwn.net/Articles/767987/
-> ---
->  block/elevator.c | 22 ++++++++++++++++++----
->  1 file changed, 18 insertions(+), 4 deletions(-)
-> 
-> diff --git a/block/elevator.c b/block/elevator.c
-> index 8fdcd64ae12e..6e6048ca3471 100644
-> --- a/block/elevator.c
-> +++ b/block/elevator.c
-> @@ -948,13 +948,16 @@ int elevator_switch_mq(struct request_queue *q,
->  }
-> 
->  /*
-> - * For blk-mq devices, we default to using mq-deadline, if available,
-> for single
-> - * queue devices.  If deadline isn't available OR we have multiple 
-> queues,
-> - * default to "none".
+On Mon, 2018-10-15 at 16:10 +0200, Linus Walleij wrote:
 > + * For blk-mq devices, we default to using:
 > + * - "none" for multiqueue devices (nr_hw_queues != 1)
 > + * - "bfq", if available, for single queue devices
 > + * - "mq-deadline" if "bfq" is not available for single queue devices
 > + * - "none" for single queue devices as well as last resort
->   */
->  int elevator_init_mq(struct request_queue *q)
->  {
->  	struct elevator_type *e;
-> +	const char *policy;
->  	int err = 0;
-> 
->  	if (q->nr_hw_queues != 1)
-> @@ -968,7 +971,18 @@ int elevator_init_mq(struct request_queue *q)
->  	if (unlikely(q->elevator))
->  		goto out_unlock;
-> 
-> -	e = elevator_get(q, "mq-deadline", false);
-> +	/*
-> +	 * Zoned devices must use a deadline scheduler because currently
-> +	 * that is the only scheduler respecting zoned writes.
-> +	 */
-> +	if (blk_queue_is_zoned(q))
-> +		policy = "mq-deadline";
-> +	else if (IS_ENABLED(CONFIG_IOSCHED_BFQ))
-> +		policy = "bfq";
-> +	else
-> +		policy = "mq-deadline";
 
-If more rules will be needed in the future, shall we just add extra ifs, 
-or it would be better to craft some struct/table now + policy search 
-helper?
+For SATA SSDs nr_hw_queues == 1 so this patch will also affect these SSDs.
+Since this patch is an attempt to improve performance, I'd like to see
+measurement data for one or more recent SATA SSDs before a decision is
+taken about what to do with this patch. 
 
-> +
-> +	e = elevator_get(q, policy, false);
->  	if (!e)
->  		goto out_unlock;
+Thanks,
 
--- 
-   Oleksandr Natalenko (post-factum)
+Bart.
+
 
 ______________________________________________________
 Linux MTD discussion mailing list
