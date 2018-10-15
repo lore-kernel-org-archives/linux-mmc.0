@@ -1,148 +1,36 @@
-From: Paolo Valente <paolo.valente@linaro.org>
-Subject: Re: [PATCH v2] block: BFQ default for single queue devices
-Date: Mon, 15 Oct 2018 16:22:25 +0200
-Message-ID: <D52B79BA-9F47-46E4-A110-0A72050761F9@linaro.org>
-References: <20181015141059.26579-1-linus.walleij@linaro.org>
-Mime-Version: 1.0 (Mac OS X Mail 11.5 \(3445.9.1\))
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
-In-Reply-To: <20181015141059.26579-1-linus.walleij@linaro.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
- <mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
-List-Post: <mailto:linux-mtd@lists.infradead.org>
-List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
- <mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-mtd" <linux-mtd-bounces@lists.infradead.org>
-Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@infradead.org>, Ulf Hansson <ulf.hansson@linaro.org>, Jan Kara <jack@suse.cz>, Bart Van Assche <bvanassche@acm.org>, Artem Bityutskiy <dedekind1@gmail.com>, Richard Weinberger <richard@nod.at>, Jonathan Corbet <corbet@lwn.net>, linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Oleksandr Natalenko <oleksandr@natalenko.name>, linux-block <linux-block@vger.kernel.org>, Mark Brown <broonie@kernel.org>, linux-mtd@lists.infradead.org, Pavel Machek <pavel@ucw.cz>, Johannes Thumshirn <jthumshirn@suse.de>, Damien Le Moal <Damien.LeMoal@wdc.com>, Alan Cox <gnomes@lxorguk.ukuu.org.uk>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [RFT PATCH] mmc: pwrseq_simple: Fix incorrect handling of GPIO bitmap
+Date: Mon, 15 Oct 2018 16:27:10 +0200
+Message-ID: <CACRpkdYB1Wz8VC3aDpB_4KQcdbE-_Fy48zF_idKDM0pqiOEnXg@mail.gmail.com>
+References: <20180925192433.1377-1-jmkrzyszt@gmail.com> <20181012190901.1243-1-jmkrzyszt@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20181012190901.1243-1-jmkrzyszt@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Janusz Krzysztofik <jmkrzyszt@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Krzysztof Kozlowski <krzk@kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>, Sascha Hauer <kernel@pengutronix.de>, Fabio Estevam <fabio.estevam@nxp.com>, NXP Linux Team <linux-imx@nxp.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Kukjin Kim <kgene@kernel.org>, =?UTF-8?Q?Beno=C3=AEt_Cousson?= <bcousson@baylibre.com>, ext Tony Lindgren <tony@atomide.com>, Enric Balletbo i Serra <eballetbo@gmail.com>, Javier
 List-Id: linux-mmc@vger.kernel.org
 
+On Fri, Oct 12, 2018 at 9:07 PM Janusz Krzysztofik <jmkrzyszt@gmail.com> wrote:
 
+> Commit b9762bebc633 ("gpiolib: Pass bitmaps, not integer arrays, to
+> get/set array") changed the way GPIO values are passed to
+> gpiod_get/set_array_value() and friends.  The new code introduced into
+> mmc_pwrseq_simple_set_gpios_value() incorrectly interpretes the 'value'
+> argument as a bitmap of GPIO values and assigns it directly to the
+> 'values' bitmap variable passed to gpiod_set_array_value_cansleep()
+> instead of filling that bitmap with bits equal to the 'value' argument.
+> As a result, only member 0 of the array is handled correctly.
+>
+> Moreover, wrong assumption is taken about the 'values' bitmap size not
+> exceding the number of bits of the 'value' argument type.
+>
+> Fix it.
+>
+> Signed-off-by: Janusz Krzysztofik <jmkrzyszt@gmail.com>
 
-> Il giorno 15 ott 2018, alle ore 16:10, Linus Walleij <linus.walleij@linaro.org> ha scritto:
-> 
-> This sets BFQ as the default scheduler for single queue
-> block devices (nr_hw_queues == 1) if it is available. This
-> affects notably MMC/SD-cards but also UBI and the loopback
-> device.
-> 
-> I have been running it for a while without any negative
-> effects on my pet systems and I want some wider testing
-> so let's throw it out there and see what people say.
-> Admittedly my use cases are limited. I need to keep this
-> patch around for my personal needs anyway.
-> 
-> We take special care to avoid using BFQ on zoned devices
-> (in particular SMR, shingled magnetic recording devices)
-> as these currently require mq-deadline to group writes
-> together.
-> 
-> I have opted against introducing any default scheduler
-> through Kconfig as the mq-deadline enforcement for
-> zoned devices has to be done at runtime anyways and
-> too many config options will make things confusing.
-> 
-> My argument for setting a default policy in the kernel
-> as opposed to user space is the "reasonable defaults"
-> type, analogous to how we have one default CPU scheduling
-> policy (CFS) that make most sense for most tasks, and
-> how automatic process group scheduling happens in most
-> distributions without userspace involvement. The BFQ
-> scheduling policy makes most sense for single hardware
-> queue devices and many embedded systems will not have
-> the clever userspace tools (such as udev) to make an
-> educated choice of scheduling policy. Defaults should be
-> those that make most sense for the hardware.
-> 
-> Cc: Pavel Machek <pavel@ucw.cz>
-> Cc: Paolo Valente <paolo.valente@linaro.org>
-> Cc: Jens Axboe <axboe@kernel.dk>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: Richard Weinberger <richard@nod.at>
-> Cc: Adrian Hunter <adrian.hunter@intel.com>
-> Cc: Bart Van Assche <bvanassche@acm.org>
-> Cc: Jan Kara <jack@suse.cz>
-> Cc: Artem Bityutskiy <dedekind1@gmail.com>
-> Cc: Christoph Hellwig <hch@infradead.org>
-> Cc: Alan Cox <gnomes@lxorguk.ukuu.org.uk>
-> Cc: Mark Brown <broonie@kernel.org>
-> Cc: Damien Le Moal <Damien.LeMoal@wdc.com>
-> Cc: Johannes Thumshirn <jthumshirn@suse.de>
-> Cc: Oleksandr Natalenko <oleksandr@natalenko.name>
-> Cc: Jonathan Corbet <corbet@lwn.net>
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+Patch applied with Ulf's and Marek's tags!
 
-Unless someone reports (hopefully reproducible) regressions with
-common single-queue hardware, then
-Acked-by: Paolo Valente <paolo.valente@linaro.org>
-
-Thanks,
-Paolo
-
-> ---
-> ChangeLog v1->v2:
-> - Add a quirk so that devices with zoned writes are forced
->  to use the deadline scheduler, this is necessary since only
->  that scheduler supports zoned writes.
-> - There is a summary article in LWN for subscribers:
->  https://lwn.net/Articles/767987/
-> ---
-> block/elevator.c | 22 ++++++++++++++++++----
-> 1 file changed, 18 insertions(+), 4 deletions(-)
-> 
-> diff --git a/block/elevator.c b/block/elevator.c
-> index 8fdcd64ae12e..6e6048ca3471 100644
-> --- a/block/elevator.c
-> +++ b/block/elevator.c
-> @@ -948,13 +948,16 @@ int elevator_switch_mq(struct request_queue *q,
-> }
-> 
-> /*
-> - * For blk-mq devices, we default to using mq-deadline, if available, for single
-> - * queue devices.  If deadline isn't available OR we have multiple queues,
-> - * default to "none".
-> + * For blk-mq devices, we default to using:
-> + * - "none" for multiqueue devices (nr_hw_queues != 1)
-> + * - "bfq", if available, for single queue devices
-> + * - "mq-deadline" if "bfq" is not available for single queue devices
-> + * - "none" for single queue devices as well as last resort
->  */
-> int elevator_init_mq(struct request_queue *q)
-> {
-> 	struct elevator_type *e;
-> +	const char *policy;
-> 	int err = 0;
-> 
-> 	if (q->nr_hw_queues != 1)
-> @@ -968,7 +971,18 @@ int elevator_init_mq(struct request_queue *q)
-> 	if (unlikely(q->elevator))
-> 		goto out_unlock;
-> 
-> -	e = elevator_get(q, "mq-deadline", false);
-> +	/*
-> +	 * Zoned devices must use a deadline scheduler because currently
-> +	 * that is the only scheduler respecting zoned writes.
-> +	 */
-> +	if (blk_queue_is_zoned(q))
-> +		policy = "mq-deadline";
-> +	else if (IS_ENABLED(CONFIG_IOSCHED_BFQ))
-> +		policy = "bfq";
-> +	else
-> +		policy = "mq-deadline";
-> +
-> +	e = elevator_get(q, policy, false);
-> 	if (!e)
-> 		goto out_unlock;
-> 
-> -- 
-> 2.17.2
-> 
-
-
-______________________________________________________
-Linux MTD discussion mailing list
-http://lists.infradead.org/mailman/listinfo/linux-mtd/
+Yours,
+Linus Walleij
