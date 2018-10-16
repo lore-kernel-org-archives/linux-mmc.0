@@ -1,151 +1,156 @@
-From: Jens Axboe <axboe@kernel.dk>
-Subject: Re: [PATCH v2] block: BFQ default for single queue devices
-Date: Tue, 16 Oct 2018 11:35:59 -0600
-Message-ID: <7375c004-ac6e-c692-4282-46de554285d5@kernel.dk>
-References: <20181015141059.26579-1-linus.walleij@linaro.org>
- <d25e02de-e1be-0fb7-237b-3e53d56c6f64@kernel.dk>
- <307F6078-0A77-4AAA-BE1A-55C2ACC328CC@linaro.org>
- <ab70f1dd-6943-9642-aafa-71840fd44f07@kernel.dk>
- <689F28AA-92B5-48B5-BBE7-0B589F163228@linaro.org>
+From: Evan Green <evgreen@chromium.org>
+Subject: Re: [PATCH V3 1/3] mmc: sdhci: Allow platform controlled voltage switching
+Date: Tue, 16 Oct 2018 15:09:15 -0700
+Message-ID: <CAE=gft631u+ie3PRFkc5t1f3iYwuhbxDbxKUqvdZS5cFJaJbsA@mail.gmail.com>
+References: <1539004739-32060-1-git-send-email-vbadigan@codeaurora.org> <1539004739-32060-2-git-send-email-vbadigan@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
-In-Reply-To: <689F28AA-92B5-48B5-BBE7-0B589F163228@linaro.org>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
- <mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
-List-Post: <mailto:linux-mtd@lists.infradead.org>
-List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
- <mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-mtd" <linux-mtd-bounces@lists.infradead.org>
-Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
-To: Paolo Valente <paolo.valente@linaro.org>
-Cc: Christoph Hellwig <hch@infradead.org>, Ulf Hansson <ulf.hansson@linaro.org>, Jan Kara <jack@suse.cz>, Bart Van Assche <bvanassche@acm.org>, Artem Bityutskiy <dedekind1@gmail.com>, Richard Weinberger <richard@nod.at>, Linus Walleij <linus.walleij@linaro.org>, Jonathan Corbet <corbet@lwn.net>, linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Oleksandr Natalenko <oleksandr@natalenko.name>, linux-block <linux-block@vger.kernel.org>, Mark Brown <broonie@kernel.org>, linux-mtd@lists.infradead.org, Pavel Machek <pavel@ucw.cz>, Johannes Thumshirn <jthumshirn@suse.de>, Damien Le Moal <Damien.LeMoal@wdc.com>, Alan Cox <gnomes@lxorguk.ukuu.org.uk>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1539004739-32060-2-git-send-email-vbadigan@codeaurora.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: vbadigan@codeaurora.org
+Cc: adrian.hunter@intel.com, Ulf Hansson <ulf.hansson@linaro.org>, robh+dt@kernel.org, Doug Anderson <dianders@google.com>, asutoshd@codeaurora.org, riteshh@codeaurora.org, stummala@codeaurora.org, sayali <sayalil@codeaurora.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, vviswana@codeaurora.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 10/15/18 1:44 PM, Paolo Valente wrote:
-> 
-> 
->> Il giorno 15 ott 2018, alle ore 21:26, Jens Axboe <axboe@kernel.dk> ha scritto:
->>
->> On 10/15/18 12:26 PM, Paolo Valente wrote:
->>>
->>>
->>>> Il giorno 15 ott 2018, alle ore 17:39, Jens Axboe <axboe@kernel.dk> ha scritto:
->>>>
->>>> On 10/15/18 8:10 AM, Linus Walleij wrote:
->>>>> This sets BFQ as the default scheduler for single queue
->>>>> block devices (nr_hw_queues == 1) if it is available. This
->>>>> affects notably MMC/SD-cards but also UBI and the loopback
->>>>> device.
->>>>>
->>>>> I have been running it for a while without any negative
->>>>> effects on my pet systems and I want some wider testing
->>>>> so let's throw it out there and see what people say.
->>>>> Admittedly my use cases are limited. I need to keep this
->>>>> patch around for my personal needs anyway.
->>>>>
->>>>> We take special care to avoid using BFQ on zoned devices
->>>>> (in particular SMR, shingled magnetic recording devices)
->>>>> as these currently require mq-deadline to group writes
->>>>> together.
->>>>>
->>>>> I have opted against introducing any default scheduler
->>>>> through Kconfig as the mq-deadline enforcement for
->>>>> zoned devices has to be done at runtime anyways and
->>>>> too many config options will make things confusing.
->>>>>
->>>>> My argument for setting a default policy in the kernel
->>>>> as opposed to user space is the "reasonable defaults"
->>>>> type, analogous to how we have one default CPU scheduling
->>>>> policy (CFS) that make most sense for most tasks, and
->>>>> how automatic process group scheduling happens in most
->>>>> distributions without userspace involvement. The BFQ
->>>>> scheduling policy makes most sense for single hardware
->>>>> queue devices and many embedded systems will not have
->>>>> the clever userspace tools (such as udev) to make an
->>>>> educated choice of scheduling policy. Defaults should be
->>>>> those that make most sense for the hardware.
->>>>
->>>> I still don't like this. There are going to be tons of
->>>> cases where the single queue device is some hw raid setup
->>>> or similar, where performance is going to be much worse with
->>>> BFQ than it is with mq-deadline, for instance. That's just
->>>> one case.
->>>>
->>>
->>> Hi Jens,
->>> in my RAID tests bfq performed as well as in non-RAID tests.  Probably
->>> you refer to the fact that, in a RAID configuration, IOPS can become
->>> very high.  But, if that is the case, then the response to your
->>> objections already emerged in the previous thread.  Let me sum it up
->>> again.
->>>
->>> I tested bfq on virtually every device in the range from few hundred
->>> of IOPS to 50-100KIOPS.  Then, through the public script I already
->>> mentioned, I found the maximum number of IOPS that bfq can handle:
->>> about 400K with a commodity CPU.
->>>
->>> In particular, in all my tests with real hardware, bfq
->>> - is not even comparable to that of any of the other scheduler, in
->>>  terms of responsiveness, latency for real-time applications, ability
->>>  to provide strong bandwidth guarantees, ability to boost throughput
->>>  while guaranteeing bandwidths;
->>> - is a little worse than the other scheduler for only one test, on
->>>  only some hardware: total throughput with random reads, were it may
->>>  lose up to 10-15% of throughput.  Of course, the scheduler that reach
->>>  a higher throughput leave the machine unusable during the test.
->>>
->>> So I really cannot see a reason why bfq could do worse than any of
->>> these other schedulers for some single-queue device (conservatively)
->>> below 300KIOPS.
->>>
->>> Finally, since, AFAICT, single-queue devices doing 400+ KIOPS are
->>> probably less than 1% of all the single-queue storage around (USB
->>> drives, HDDs, eMMC, standard SSDs, ...), by sticking to mq-deadline we
->>> are sacrificing 99% of the hardware, to help 1% of the hardware, for
->>> one kind of test cases.
->>
->> I should have been more clear - I'm not worried about IOPS overhead,
->> I'm worried about scheduling decisions that lower performance on
->> (for instance) raid composed of many drives (rotational or otherwise).
->>
->> If you have actual data (on what hardware, and what kind of tests)
->> to disprove that worry, then that's great, and I'd love to see that.
->>
-> 
-> Here are some old results with a very simple configuration:
-> http://algo.ing.unimo.it/people/paolo/disk_sched/old-results/4.4.0-v7r11/
-> http://algo.ing.unimo.it/people/paolo/disk_sched/old-results/3.14.0-v7r3/
-> http://algo.ing.unimo.it/people/paolo/disk_sched/old-results/3.13.0-v7r2/
-> 
-> Then I stopped repeating tests that always yielded the same good results.
-> 
-> As for more professional systems, a well-known company doing
-> real-time packet-traffic dumping asked me to modify bfq so as to
-> guarantee lossless data writing also during queries.  The involved box
-> had a RAID reaching a few Gbps, and everything worked well.
-> 
-> Anyway, if you have specific issues in mind, I can check more deeply.
+On Mon, Oct 8, 2018 at 6:22 AM Veerabhadrarao Badiganti
+<vbadigan@codeaurora.org> wrote:
+>
+> From: Vijay Viswanath <vviswana@codeaurora.org>
+>
+> Some controllers can have internal mechanism to inform the SW that it
+> is ready for voltage switching. For such controllers, changing voltage
+> before the HW is ready can result in various issues.
+>
+> During setup/cleanup of host, check whether regulator enable/disable
+> was already done by platform driver.
+>
+> Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
+> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+> ---
+>  drivers/mmc/host/sdhci.c | 32 +++++++++++++++++++-------------
+>  drivers/mmc/host/sdhci.h |  1 +
+>  2 files changed, 20 insertions(+), 13 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 99bdae5..ea7ce1d 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -3616,6 +3616,7 @@ int sdhci_setup_host(struct sdhci_host *host)
+>         unsigned int override_timeout_clk;
+>         u32 max_clk;
+>         int ret;
+> +       bool enable_vqmmc = false;
+>
+>         WARN_ON(host == NULL);
+>         if (host == NULL)
+> @@ -3629,9 +3630,12 @@ int sdhci_setup_host(struct sdhci_host *host)
+>          * the host can take the appropriate action if regulators are not
+>          * available.
+>          */
+> -       ret = mmc_regulator_get_supply(mmc);
+> -       if (ret)
+> -               return ret;
+> +       if (!mmc->supply.vqmmc) {
+> +               ret = mmc_regulator_get_supply(mmc);
+> +               if (ret)
+> +                       return ret;
+> +               enable_vqmmc  = true;
+> +       }
 
-Do you have anything more recent? All of these predate the current
-code (by a lot), and isn't even mq. I'm mostly just interested in
-plain fast NVMe device, and a big box hardware raid setup with
-a ton of drives.
+Did you not like my suggestion in the previous patch of changing
+mmc_regulator_get_supply to only get supplies that were not set
+previously? What you have here is almost the same, except you've got
+this weird coupling where if vqmmc is already present, you implicitly
+skip looking at vmmc entirely (since mmc_regulator_get_supply does
+more than just get vqmmc).
 
-I do still think that this should be going through the distros, they
-need to be the ones driving this, as they will ultimately be the
-ones getting customer reports on regressions. The qual/test cycle
-they do is useful for this. In mainline, if we make a change like
-this, we'll figure out if it worked many releases down the line.
+>
+>         DBG("Version:   0x%08x | Present:  0x%08x\n",
+>             sdhci_readw(host, SDHCI_HOST_VERSION),
+> @@ -3880,7 +3884,15 @@ int sdhci_setup_host(struct sdhci_host *host)
+>                 mmc->caps |= MMC_CAP_NEEDS_POLL;
+>
+>         if (!IS_ERR(mmc->supply.vqmmc)) {
+> -               ret = regulator_enable(mmc->supply.vqmmc);
+> +               if (enable_vqmmc) {
+> +                       ret = regulator_enable(mmc->supply.vqmmc);
+> +                       if (ret) {
+> +                               pr_warn("%s: Failed to enable vqmmc regulator: %d\n",
+> +                                       mmc_hostname(mmc), ret);
+> +                               mmc->supply.vqmmc = ERR_PTR(-EINVAL);
+> +                       }
+> +                       host->vqmmc_enabled = !ret;
+> +               }
+>
+>                 /* If vqmmc provides no 1.8V signalling, then there's no UHS */
+>                 if (!regulator_is_supported_voltage(mmc->supply.vqmmc, 1700000,
+> @@ -3893,12 +3905,6 @@ int sdhci_setup_host(struct sdhci_host *host)
+>                 if (!regulator_is_supported_voltage(mmc->supply.vqmmc, 2700000,
+>                                                     3600000))
+>                         host->flags &= ~SDHCI_SIGNALING_330;
+> -
+> -               if (ret) {
+> -                       pr_warn("%s: Failed to enable vqmmc regulator: %d\n",
+> -                               mmc_hostname(mmc), ret);
+> -                       mmc->supply.vqmmc = ERR_PTR(-EINVAL);
+> -               }
+>         }
+>
+>         if (host->quirks2 & SDHCI_QUIRK2_NO_1_8_V) {
+> @@ -4136,7 +4142,7 @@ int sdhci_setup_host(struct sdhci_host *host)
+>         return 0;
+>
+>  unreg:
+> -       if (!IS_ERR(mmc->supply.vqmmc))
+> +       if (host->vqmmc_enabled)
+>                 regulator_disable(mmc->supply.vqmmc);
+>  undma:
+>         if (host->align_buffer)
+> @@ -4154,7 +4160,7 @@ void sdhci_cleanup_host(struct sdhci_host *host)
+>  {
+>         struct mmc_host *mmc = host->mmc;
+>
+> -       if (!IS_ERR(mmc->supply.vqmmc))
+> +       if (host->vqmmc_enabled)
+>                 regulator_disable(mmc->supply.vqmmc);
+>
+>         if (host->align_buffer)
+> @@ -4287,7 +4293,7 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
+>
+>         tasklet_kill(&host->finish_tasklet);
+>
+> -       if (!IS_ERR(mmc->supply.vqmmc))
+> +       if (host->vqmmc_enabled)
+>                 regulator_disable(mmc->supply.vqmmc);
+>
+>         if (host->align_buffer)
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index b001cf4..3c28152 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -524,6 +524,7 @@ struct sdhci_host {
+>         bool pending_reset;     /* Cmd/data reset is pending */
+>         bool irq_wake_enabled;  /* IRQ wakeup is enabled */
+>         bool v4_mode;           /* Host Version 4 Enable */
+> +       bool vqmmc_enabled;     /* Vqmmc is enabled */
 
--- 
-Jens Axboe
+I still don't love this, since it doesn't mean what it says. Everyone
+else that has a vqmmc_enabled member uses it to actually mean "vqmmc
+is enabled", but this doesn't mean that. For example, you don't clear
+this when you disable the regulator in patch 3, so this would be set
+even if the regulator is disabled, and you don't set it when sdhci
+enables the regulator, so the regulator is on when this flag is not
+set.
 
+At the very least, I think a rename is in order. I'm struggling with
+the rename, since
+"vqmmc_pltfrm_enable_but_feel_free_to_call_set_voltage_anywhere" is
+too long. I guess vqmmc_pltfrm_enabled is the best I've got for now.
 
-______________________________________________________
-Linux MTD discussion mailing list
-http://lists.infradead.org/mailman/listinfo/linux-mtd/
+>
+>         struct mmc_request *mrqs_done[SDHCI_MAX_MRQS];  /* Requests done */
+>         struct mmc_command *cmd;        /* Current command */
+> --
+> Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc.
+> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a Linux Foundation Collaborative Project.
+>
