@@ -1,155 +1,187 @@
 From: Evan Green <evgreen@chromium.org>
-Subject: Re: [PATCH V3 1/3] mmc: sdhci: Allow platform controlled voltage switching
-Date: Tue, 16 Oct 2018 15:09:15 -0700
-Message-ID: <CAE=gft631u+ie3PRFkc5t1f3iYwuhbxDbxKUqvdZS5cFJaJbsA@mail.gmail.com>
-References: <1539004739-32060-1-git-send-email-vbadigan@codeaurora.org> <1539004739-32060-2-git-send-email-vbadigan@codeaurora.org>
+Subject: Re: [PATCH V2 2/2] mmc: sdhci-msm: Re-initialize DLL if MCLK is gated dynamically
+Date: Tue, 16 Oct 2018 15:28:07 -0700
+Message-ID: <CAE=gft4tWoMTUwvLWLL6k0x1AqbBTM=5=dAckEEHiu6zLXskGA@mail.gmail.com>
+References: <1539005138-32560-1-git-send-email-vbadigan@codeaurora.org> <1539005138-32560-3-git-send-email-vbadigan@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1539004739-32060-2-git-send-email-vbadigan@codeaurora.org>
+In-Reply-To: <1539005138-32560-3-git-send-email-vbadigan@codeaurora.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: vbadigan@codeaurora.org
-Cc: adrian.hunter@intel.com, Ulf Hansson <ulf.hansson@linaro.org>, robh+dt@kernel.org, Doug Anderson <dianders@google.com>, asutoshd@codeaurora.org, riteshh@codeaurora.org, stummala@codeaurora.org, sayali <sayalil@codeaurora.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, vviswana@codeaurora.org, linux-kernel@vger.kernel.org
+Cc: adrian.hunter@intel.com, Ulf Hansson <ulf.hansson@linaro.org>, robh+dt@kernel.org, Doug Anderson <dianders@google.com>, asutoshd@codeaurora.org, riteshh@codeaurora.org, stummala@codeaurora.org, sayali <sayalil@codeaurora.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Oct 8, 2018 at 6:22 AM Veerabhadrarao Badiganti
+On Mon, Oct 8, 2018 at 6:26 AM Veerabhadrarao Badiganti
 <vbadigan@codeaurora.org> wrote:
 >
-> From: Vijay Viswanath <vviswana@codeaurora.org>
+> On few SDHCI-MSM controllers, the host controller's clock tuning
+> circuit may go out of sync if controller clocks are gated which
+> eventually will result in data CRC, command CRC/timeout errors.
+> To overcome this h/w limitation, the DLL needs to be re-initialized
+> and restored with its old settings once clocks are ungated.
 >
-> Some controllers can have internal mechanism to inform the SW that it
-> is ready for voltage switching. For such controllers, changing voltage
-> before the HW is ready can result in various issues.
->
-> During setup/cleanup of host, check whether regulator enable/disable
-> was already done by platform driver.
->
-> Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
 > Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
 > ---
->  drivers/mmc/host/sdhci.c | 32 +++++++++++++++++++-------------
->  drivers/mmc/host/sdhci.h |  1 +
->  2 files changed, 20 insertions(+), 13 deletions(-)
+>  drivers/mmc/host/sdhci-msm.c | 67 ++++++++++++++++++++++++++++++++++++++++++--
+>  1 file changed, 65 insertions(+), 2 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 99bdae5..ea7ce1d 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -3616,6 +3616,7 @@ int sdhci_setup_host(struct sdhci_host *host)
->         unsigned int override_timeout_clk;
->         u32 max_clk;
->         int ret;
-> +       bool enable_vqmmc = false;
->
->         WARN_ON(host == NULL);
->         if (host == NULL)
-> @@ -3629,9 +3630,12 @@ int sdhci_setup_host(struct sdhci_host *host)
->          * the host can take the appropriate action if regulators are not
->          * available.
->          */
-> -       ret = mmc_regulator_get_supply(mmc);
-> -       if (ret)
-> -               return ret;
-> +       if (!mmc->supply.vqmmc) {
-> +               ret = mmc_regulator_get_supply(mmc);
-> +               if (ret)
-> +                       return ret;
-> +               enable_vqmmc  = true;
-> +       }
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 6918e70..1eb70c0 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -234,6 +234,7 @@ struct sdhci_msm_variant_ops {
+>   */
+>  struct sdhci_msm_variant_info {
+>         bool mci_removed;
+> +       bool uses_sdcdc10;
 
-Did you not like my suggestion in the previous patch of changing
-mmc_regulator_get_supply to only get supplies that were not set
-previously? What you have here is almost the same, except you've got
-this weird coupling where if vqmmc is already present, you implicitly
-skip looking at vmmc entirely (since mmc_regulator_get_supply does
-more than just get vqmmc).
+What does that flag mean? Couldn't this just be called something like
+restore_dll_config?
 
+>         const struct sdhci_msm_variant_ops *var_ops;
+>         const struct sdhci_msm_offset *offset;
+>  };
+> @@ -264,6 +265,8 @@ struct sdhci_msm_host {
+>         u32 vmmc_level[2];
+>         bool vqmmc_load;
+>         u32 vqmmc_level[2];
+> +       bool uses_sdcdc10_dll;
+> +       bool restore_sdr_dll_cfg;
+
+restore_sdr_dll_cfg appears to not be used.
+
+>  };
 >
->         DBG("Version:   0x%08x | Present:  0x%08x\n",
->             sdhci_readw(host, SDHCI_HOST_VERSION),
-> @@ -3880,7 +3884,15 @@ int sdhci_setup_host(struct sdhci_host *host)
->                 mmc->caps |= MMC_CAP_NEEDS_POLL;
+>  static const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct sdhci_host *host)
+> @@ -1031,6 +1034,36 @@ static int sdhci_msm_hs400_dll_calibration(struct sdhci_host *host)
+>         return ret;
+>  }
 >
->         if (!IS_ERR(mmc->supply.vqmmc)) {
-> -               ret = regulator_enable(mmc->supply.vqmmc);
-> +               if (enable_vqmmc) {
-> +                       ret = regulator_enable(mmc->supply.vqmmc);
-> +                       if (ret) {
-> +                               pr_warn("%s: Failed to enable vqmmc regulator: %d\n",
-> +                                       mmc_hostname(mmc), ret);
-> +                               mmc->supply.vqmmc = ERR_PTR(-EINVAL);
-> +                       }
-> +                       host->vqmmc_enabled = !ret;
-> +               }
->
->                 /* If vqmmc provides no 1.8V signalling, then there's no UHS */
->                 if (!regulator_is_supported_voltage(mmc->supply.vqmmc, 1700000,
-> @@ -3893,12 +3905,6 @@ int sdhci_setup_host(struct sdhci_host *host)
->                 if (!regulator_is_supported_voltage(mmc->supply.vqmmc, 2700000,
->                                                     3600000))
->                         host->flags &= ~SDHCI_SIGNALING_330;
-> -
-> -               if (ret) {
-> -                       pr_warn("%s: Failed to enable vqmmc regulator: %d\n",
-> -                               mmc_hostname(mmc), ret);
-> -                       mmc->supply.vqmmc = ERR_PTR(-EINVAL);
-> -               }
->         }
->
->         if (host->quirks2 & SDHCI_QUIRK2_NO_1_8_V) {
-> @@ -4136,7 +4142,7 @@ int sdhci_setup_host(struct sdhci_host *host)
->         return 0;
->
->  unreg:
-> -       if (!IS_ERR(mmc->supply.vqmmc))
-> +       if (host->vqmmc_enabled)
->                 regulator_disable(mmc->supply.vqmmc);
->  undma:
->         if (host->align_buffer)
-> @@ -4154,7 +4160,7 @@ void sdhci_cleanup_host(struct sdhci_host *host)
+> +static int sdhci_msm_restore_sdr_dll_config(struct sdhci_host *host)
+> +{
+> +       struct mmc_ios ios = host->mmc->ios;
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +       struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> +       int ret;
+> +
+> +       /*
+> +        * SDR DLL comes into picure only if clock frequency is greater than
+> +        * 100MHz. And its needed only for SDR104, HS200 and HS400 cards.
+> +        * Its not needed for HS400es cards.
+> +        */
+> +       if (host->clock <= CORE_FREQ_100MHZ ||
+> +           !(ios.timing == MMC_TIMING_MMC_HS400 ||
+> +           ios.timing == MMC_TIMING_MMC_HS200 ||
+> +           ios.timing == MMC_TIMING_UHS_SDR104) ||
+> +           ios.enhanced_strobe)
+> +               return 0;
+> +
+> +       /* Reset the tuning block */
+> +       ret = msm_init_cm_dll(host);
+
+Is this reinit required? It's kind of meaty.
+
+> +       if (ret)
+> +               return ret;
+> +
+> +       /* Restore the tuning block */
+> +       ret = msm_config_cm_dll_phase(host, msm_host->saved_tuning_phase);
+> +
+> +       return ret;
+> +}
+> +
+>  static int sdhci_msm_execute_tuning(struct mmc_host *mmc, u32 opcode)
 >  {
->         struct mmc_host *mmc = host->mmc;
+>         struct sdhci_host *host = mmc_priv(mmc);
+> @@ -1075,7 +1108,6 @@ static int sdhci_msm_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>                 if (rc)
+>                         return rc;
 >
-> -       if (!IS_ERR(mmc->supply.vqmmc))
-> +       if (host->vqmmc_enabled)
->                 regulator_disable(mmc->supply.vqmmc);
+> -               msm_host->saved_tuning_phase = phase;
+>                 rc = mmc_send_tuning(mmc, opcode, NULL);
+>                 if (!rc) {
+>                         /* Tuning is successful at this tuning point */
+> @@ -1100,6 +1132,7 @@ static int sdhci_msm_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>                 rc = msm_config_cm_dll_phase(host, phase);
+>                 if (rc)
+>                         return rc;
+> +               msm_host->saved_tuning_phase = phase;
+>                 dev_dbg(mmc_dev(mmc), "%s: Setting the tuning phase to %d\n",
+>                          mmc_hostname(mmc), phase);
+>         } else {
+> @@ -1807,19 +1840,39 @@ static int sdhci_msm_start_signal_voltage_switch(struct mmc_host *mmc,
 >
->         if (host->align_buffer)
-> @@ -4287,7 +4293,7 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
+>  static const struct sdhci_msm_variant_info sdhci_msm_mci_var = {
+>         .mci_removed = false,
+> +       .uses_sdcdc10 = false,
+> +       .var_ops = &mci_var_ops,
+> +       .offset = &sdhci_msm_mci_offset,
+> +};
+> +
+> +static const struct sdhci_msm_variant_info sdhci_msm_mci_sdcdc10_var = {
+> +       .mci_removed = false,
+> +       .uses_sdcdc10 = true,
+>         .var_ops = &mci_var_ops,
+>         .offset = &sdhci_msm_mci_offset,
+>  };
 >
->         tasklet_kill(&host->finish_tasklet);
+>  static const struct sdhci_msm_variant_info sdhci_msm_v5_var = {
+>         .mci_removed = true,
+> +       .uses_sdcdc10 = false,
+> +       .var_ops = &v5_var_ops,
+> +       .offset = &sdhci_msm_v5_offset,
+> +};
+> +
+> +static const struct sdhci_msm_variant_info sdhci_msm_v5_sdcdc10_var = {
+> +       .mci_removed = true,
+> +       .uses_sdcdc10 = true,
+>         .var_ops = &v5_var_ops,
+>         .offset = &sdhci_msm_v5_offset,
+>  };
 >
-> -       if (!IS_ERR(mmc->supply.vqmmc))
-> +       if (host->vqmmc_enabled)
->                 regulator_disable(mmc->supply.vqmmc);
+>  static const struct of_device_id sdhci_msm_dt_match[] = {
+>         {.compatible = "qcom,sdhci-msm-v4", .data = &sdhci_msm_mci_var},
+> +       {.compatible = "qcom,sdhci-msm-v4-sdcdc10",
+> +                                           .data = &sdhci_msm_mci_sdcdc10_var},
+>         {.compatible = "qcom,sdhci-msm-v5", .data = &sdhci_msm_v5_var},
+> +       {.compatible = "qcom,sdhci-msm-v5-sdcdc10",
+> +                                           .data = &sdhci_msm_v5_sdcdc10_var},
+>         {},
+>  };
 >
->         if (host->align_buffer)
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index b001cf4..3c28152 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -524,6 +524,7 @@ struct sdhci_host {
->         bool pending_reset;     /* Cmd/data reset is pending */
->         bool irq_wake_enabled;  /* IRQ wakeup is enabled */
->         bool v4_mode;           /* Host Version 4 Enable */
-> +       bool vqmmc_enabled;     /* Vqmmc is enabled */
+> @@ -1880,6 +1933,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>         var_info = of_device_get_match_data(&pdev->dev);
+>
+>         msm_host->mci_removed = var_info->mci_removed;
+> +       msm_host->uses_sdcdc10_dll = var_info->uses_sdcdc10;
+>         msm_host->var_ops = var_info->var_ops;
+>         msm_host->offset = var_info->offset;
+>
+> @@ -2124,9 +2178,18 @@ static int sdhci_msm_runtime_resume(struct device *dev)
+>         struct sdhci_host *host = dev_get_drvdata(dev);
+>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>         struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> +       int ret;
+>
+> -       return clk_bulk_prepare_enable(ARRAY_SIZE(msm_host->bulk_clks),
+> +       ret = clk_bulk_prepare_enable(ARRAY_SIZE(msm_host->bulk_clks),
+>                                        msm_host->bulk_clks);
 
-I still don't love this, since it doesn't mean what it says. Everyone
-else that has a vqmmc_enabled member uses it to actually mean "vqmmc
-is enabled", but this doesn't mean that. For example, you don't clear
-this when you disable the regulator in patch 3, so this would be set
-even if the regulator is disabled, and you don't set it when sdhci
-enables the regulator, so the regulator is on when this flag is not
-set.
+It might be nicer to just put an if (ret) return ret; here, instead of
+rolling it into the next conditional.
 
-At the very least, I think a rename is in order. I'm struggling with
-the rename, since
-"vqmmc_pltfrm_enable_but_feel_free_to_call_set_voltage_anywhere" is
-too long. I guess vqmmc_pltfrm_enabled is the best I've got for now.
-
+> +       /*
+> +        * Whenever core-clock is gated dynamically, it's needed to
+> +        * restore the SDR DLL settings when the clock is ungated.
+> +        */
+> +       if (!ret && msm_host->uses_sdcdc10_dll && msm_host->clk_rate)
+> +               ret = sdhci_msm_restore_sdr_dll_config(host);
+> +
+> +       return ret;
+>  }
+>  #endif
 >
->         struct mmc_request *mrqs_done[SDHCI_MAX_MRQS];  /* Requests done */
->         struct mmc_command *cmd;        /* Current command */
 > --
 > Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc.
 > Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a Linux Foundation Collaborative Project.
