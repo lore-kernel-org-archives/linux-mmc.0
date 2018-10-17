@@ -1,43 +1,29 @@
-From: Ezequiel Garcia <ezequiel@collabora.com>
+From: Aaro Koskinen <aaro.koskinen@iki.fi>
 Subject: Re: Bug report: MIPS CI20/jz4740-mmc DMA and PREEMPT_NONE
-Date: Wed, 17 Oct 2018 14:55:18 -0300
-Message-ID: <75b42b9f86b504bbd84dfab1e2c6fd0965216c67.camel@collabora.com>
+Date: Wed, 17 Oct 2018 22:50:50 +0300
+Message-ID: <20181017195050.GA20347@darkstar.musicnaut.iki.fi>
 References: <20181014170431.GK3461@darkstar.musicnaut.iki.fi>
+ <CA+7wUszkduiKMVx5Et3Q2-2tz72CXUKE1_kndC6V1d45uEY2Aw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181014170431.GK3461@darkstar.musicnaut.iki.fi>
+Content-Disposition: inline
+In-Reply-To: <CA+7wUszkduiKMVx5Et3Q2-2tz72CXUKE1_kndC6V1d45uEY2Aw@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Aaro Koskinen <aaro.koskinen@iki.fi>, linux-mips@linux-mips.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Mathieu Malaterre <malat@debian.org>, Ezequiel Garcia <ezequiel@collabora.co.uk>
+To: Mathieu Malaterre <malat@debian.org>
+Cc: Linux-MIPS <linux-mips@linux-mips.org>, linux-mmc@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Ezequiel Garcia <ezequiel@collabora.co.uk>
 List-Id: linux-mmc@vger.kernel.org
 
-On Sun, 2018-10-14 at 20:04 +0300, Aaro Koskinen wrote:
-> Hi,
-> 
-> There is something wrong with jz4740-mmc in current mainline kernel
-> (tested v4.18 and 4.19-rc, the MMC support for CI20 does not exist
-> prior those), as the DMA support does not work properly if I disable
-> kernel pre-emption. The console gets flooded with:
-> 
-> [   16.461094] jz4740-mmc 13450000.mmc: [jz4740_mmc_prepare_dma_data] invalid cookie: data->host_cookie 567 host->next_data.cookie 568
-> [   16.473120] jz4740-mmc 13450000.mmc: [jz4740_mmc_prepare_dma_data] invalid cookie: data->host_cookie 568 host->next_data.cookie 569
-> [   16.485144] jz4740-mmc 13450000.mmc: [jz4740_mmc_prepare_dma_data] invalid cookie: data->host_cookie 569 host->next_data.cookie 570
-> [   16.497170] jz4740-mmc 13450000.mmc: [jz4740_mmc_prepare_dma_data] invalid cookie: data->host_cookie 570 host->next_data.cookie 571
-> [   16.509194] jz4740-mmc 13450000.mmc: [jz4740_mmc_prepare_dma_data] invalid cookie: data->host_cookie 571 host->next_data.cookie 572
-> [   16.532421] jz4740-mmc 13450000.mmc: [jz4740_mmc_prepare_dma_data] invalid cookie: data->host_cookie 572 host->next_data.cookie 573
-> [   16.544594] jz4740-mmc 13450000.mmc: [jz4740_mmc_prepare_dma_data] invalid cookie: data->host_cookie 573 host->next_data.cookie 574
-> [   16.556621] jz4740-mmc 13450000.mmc: [jz4740_mmc_prepare_dma_data] invalid cookie: data->host_cookie 574 host->next_data.cookie 575
-> [   16.568638] jz4740-mmc 13450000.mmc: [jz4740_mmc_prepare_dma_data] invalid cookie: data->host_cookie 575 host->next_data.cookie 576
-> [   16.601092] jz4740-mmc 13450000.mmc: [jz4740_mmc_prepare_dma_data] invalid cookie: data->host_cookie 582 host->next_data.cookie 583
-> 
-> etc. ad inf.
-> 
-> This should be easily reproducible on CI20 board with ci20_defconfig
-> and setting CONFIG_PREEMPT_NONE=y.
-> 
+Hi,
 
-Will take a look as soon as possible, most likely after ELCE.
+On Wed, Oct 17, 2018 at 03:38:07PM +0200, Mathieu Malaterre wrote:
+> Since CONFIG_PREEMPT has been 'y' since at least commit 0752f92934292
+> could you confirm that the original mmc driver (kernel from imgtech
+> people) did work ok with PREEMPT_NONE (sorry I did not do my homework)
+> ?
 
-Thanks,
-Eze
+Sorry, cannot confirm or test that. I have only used the mainline kernel
+on this board, since v4.5 or so with my own custom config which has
+been PREEMPT_NONE until now.
+
+A.
