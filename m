@@ -1,71 +1,49 @@
-From: Jan Kara <jack@suse.cz>
-Subject: Re: [PATCH v2] block: BFQ default for single queue devices
-Date: Wed, 17 Oct 2018 12:05:26 +0200
-Message-ID: <20181017100526.GB23493@quack2.suse.cz>
-References: <20181015141059.26579-1-linus.walleij@linaro.org>
- <d25e02de-e1be-0fb7-237b-3e53d56c6f64@kernel.dk>
- <307F6078-0A77-4AAA-BE1A-55C2ACC328CC@linaro.org>
- <ab70f1dd-6943-9642-aafa-71840fd44f07@kernel.dk>
- <689F28AA-92B5-48B5-BBE7-0B589F163228@linaro.org>
- <7375c004-ac6e-c692-4282-46de554285d5@kernel.dk>
+From: Mathieu Malaterre <malat@debian.org>
+Subject: Re: Bug report: MIPS CI20/jz4740-mmc DMA and PREEMPT_NONE
+Date: Wed, 17 Oct 2018 15:38:07 +0200
+Message-ID: <CA+7wUszkduiKMVx5Et3Q2-2tz72CXUKE1_kndC6V1d45uEY2Aw@mail.gmail.com>
+References: <20181014170431.GK3461@darkstar.musicnaut.iki.fi>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <7375c004-ac6e-c692-4282-46de554285d5@kernel.dk>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
- <mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
-List-Post: <mailto:linux-mtd@lists.infradead.org>
-List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
- <mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-mtd" <linux-mtd-bounces@lists.infradead.org>
-Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
-To: Jens Axboe <axboe@kernel.dk>
-Cc: Christoph Hellwig <hch@infradead.org>, Ulf Hansson <ulf.hansson@linaro.org>, Paolo Valente <paolo.valente@linaro.org>, Jan Kara <jack@suse.cz>, Bart Van Assche <bvanassche@acm.org>, Artem Bityutskiy <dedekind1@gmail.com>, Richard Weinberger <richard@nod.at>, Linus Walleij <linus.walleij@linaro.org>, Jonathan Corbet <corbet@lwn.net>, linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Oleksandr Natalenko <oleksandr@natalenko.name>, linux-block <linux-block@vger.kernel.org>, Mark Brown <broonie@kernel.org>, linux-mtd@lists.infradead.org, Pavel Machek <pavel@ucw.cz>, Johannes Thumshirn <jthumshirn@suse.de>, Damien Le Moal <Damien.LeMoal@wdc.com>, Alan Cox <gnomes@lxorguk.ukuu.org.uk>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20181014170431.GK3461@darkstar.musicnaut.iki.fi>
+Sender: linux-kernel-owner@vger.kernel.org
+To: aaro.koskinen@iki.fi
+Cc: Linux-MIPS <linux-mips@linux-mips.org>, linux-mmc@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Ezequiel Garcia <ezequiel@collabora.co.uk>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue 16-10-18 11:35:59, Jens Axboe wrote:
-> On 10/15/18 1:44 PM, Paolo Valente wrote:
-> > Here are some old results with a very simple configuration:
-> > http://algo.ing.unimo.it/people/paolo/disk_sched/old-results/4.4.0-v7r11/
-> > http://algo.ing.unimo.it/people/paolo/disk_sched/old-results/3.14.0-v7r3/
-> > http://algo.ing.unimo.it/people/paolo/disk_sched/old-results/3.13.0-v7r2/
-> > 
-> > Then I stopped repeating tests that always yielded the same good results.
-> > 
-> > As for more professional systems, a well-known company doing
-> > real-time packet-traffic dumping asked me to modify bfq so as to
-> > guarantee lossless data writing also during queries.  The involved box
-> > had a RAID reaching a few Gbps, and everything worked well.
-> > 
-> > Anyway, if you have specific issues in mind, I can check more deeply.
-> 
-> Do you have anything more recent? All of these predate the current
-> code (by a lot), and isn't even mq. I'm mostly just interested in
-> plain fast NVMe device, and a big box hardware raid setup with
-> a ton of drives.
-> 
-> I do still think that this should be going through the distros, they
-> need to be the ones driving this, as they will ultimately be the
-> ones getting customer reports on regressions. The qual/test cycle
-> they do is useful for this. In mainline, if we make a change like
-> this, we'll figure out if it worked many releases down the line.
+Hi,
 
-Well, the problem with this is that big distro people really don't care
-much because they already use udev for tuning the IO scheduler. So whatever
-defaults the kernel is going to pick likely won't be seen by distro
-customers. Embedded people seem to be driving this effort because they
-either don't run udev or they feel not all their teams building new
-products have enough expertise to come up with a proper set of rules...
+On Sun, Oct 14, 2018 at 7:04 PM Aaro Koskinen <aaro.koskinen@iki.fi> wrote:
+>
+> Hi,
+>
+> There is something wrong with jz4740-mmc in current mainline kernel
+> (tested v4.18 and 4.19-rc, the MMC support for CI20 does not exist
+> prior those), as the DMA support does not work properly if I disable
+> kernel pre-emption. The console gets flooded with:
+>
+> [   16.461094] jz4740-mmc 13450000.mmc: [jz4740_mmc_prepare_dma_data] invalid cookie: data->host_cookie 567 host->next_data.cookie 568
+> [   16.473120] jz4740-mmc 13450000.mmc: [jz4740_mmc_prepare_dma_data] invalid cookie: data->host_cookie 568 host->next_data.cookie 569
+> [   16.485144] jz4740-mmc 13450000.mmc: [jz4740_mmc_prepare_dma_data] invalid cookie: data->host_cookie 569 host->next_data.cookie 570
+> [   16.497170] jz4740-mmc 13450000.mmc: [jz4740_mmc_prepare_dma_data] invalid cookie: data->host_cookie 570 host->next_data.cookie 571
+> [   16.509194] jz4740-mmc 13450000.mmc: [jz4740_mmc_prepare_dma_data] invalid cookie: data->host_cookie 571 host->next_data.cookie 572
+> [   16.532421] jz4740-mmc 13450000.mmc: [jz4740_mmc_prepare_dma_data] invalid cookie: data->host_cookie 572 host->next_data.cookie 573
+> [   16.544594] jz4740-mmc 13450000.mmc: [jz4740_mmc_prepare_dma_data] invalid cookie: data->host_cookie 573 host->next_data.cookie 574
+> [   16.556621] jz4740-mmc 13450000.mmc: [jz4740_mmc_prepare_dma_data] invalid cookie: data->host_cookie 574 host->next_data.cookie 575
+> [   16.568638] jz4740-mmc 13450000.mmc: [jz4740_mmc_prepare_dma_data] invalid cookie: data->host_cookie 575 host->next_data.cookie 576
+> [   16.601092] jz4740-mmc 13450000.mmc: [jz4740_mmc_prepare_dma_data] invalid cookie: data->host_cookie 582 host->next_data.cookie 583
+>
+> etc. ad inf.
+>
+> This should be easily reproducible on CI20 board with ci20_defconfig
+> and setting CONFIG_PREEMPT_NONE=y.
 
-								Honza
--- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
+Since CONFIG_PREEMPT has been 'y' since at least commit 0752f92934292
+could you confirm that the original mmc driver (kernel from imgtech
+people) did work ok with PREEMPT_NONE (sorry I did not do my homework)
+?
 
-______________________________________________________
-Linux MTD discussion mailing list
-http://lists.infradead.org/mailman/listinfo/linux-mtd/
+Thanks
+
+> A.
