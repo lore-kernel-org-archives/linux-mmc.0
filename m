@@ -1,42 +1,100 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH V3 3/8] dt-bindings: mmc: fsl-imx-esdhc: add imx8qxp
- compatible string
-Date: Thu, 18 Oct 2018 14:48:56 -0500
-Message-ID: <20181018194856.GA23231@bogus>
-References: <1539886483-15775-1-git-send-email-aisheng.dong@nxp.com>
- <1539886483-15775-4-git-send-email-aisheng.dong@nxp.com>
+From: Rajat Jain <rajatja@google.com>
+Subject: [PATCH] mmc: sdhci-pci: Try "cd" for card-detect lookup before using NULL
+Date: Thu, 18 Oct 2018 14:51:01 -0700
+Message-ID: <20181018215101.169847-1-rajatja@google.com>
+References: <CACRpkdY7eaYk81CU8gmHKfWB82_qNJur=c=7SCRuW+BNeL=Oiw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <1539886483-15775-4-git-send-email-aisheng.dong@nxp.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-Cc: "A.s. Dong" <aisheng.dong@nxp.com>, Mark Rutland <mark.rutland@arm.com>, Ulf Hansson <ulf.hansson@linaro.org>, "dongas86@gmail.com" <dongas86@gmail.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "catalin.marinas@arm.com" <catalin.marinas@arm.com>, "will.deacon@arm.com" <will.deacon@arm.com>, Bough Chen <haibo.chen@nxp.com>, "robh+dt@kernel.org" <robh+dt@kernel.org>, dl-linux-imx <linux-imx@nxp.com>, "kernel@pengutronix.de" <kernel@pengutronix.de>, "linux-serial@vger.kernel.org" <linux-serial@vger.kernel.org>, Fabio Estevam <fabio.estevam@nxp.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "shawnguo@kernel.org" <shawnguo@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CACRpkdY7eaYk81CU8gmHKfWB82_qNJur=c=7SCRuW+BNeL=Oiw@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>
+Cc: Rajat Jain <rajatja@google.com>, rajatxjain@gmail.com, linux-kernel@vger.kernel.org, Mika Westerberg <mika.westerberg@linux.intel.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Dmitry Torokhov <dtor@google.com>, linux-gpio@vger.kernel.org, linux-acpi@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 18 Oct 2018 18:19:24 +0000, "A.s. Dong" wrote:
-> Add imx8qxp compatible string
-> 
-> Cc: Rob Herring <robh+dt@kernel.org>
-> Cc: Mark Rutland <mark.rutland@arm.com>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: linux-serial@vger.kernel.org
-> Cc: devicetree@vger.kernel.org
-> Cc: linux-mmc@vger.kernel.org
-> Cc: Haibo Chen <haibo.chen@nxp.com>
-> Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
-> ---
->  Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt | 1 +
->  1 file changed, 1 insertion(+)
-> 
+Problem:
 
-Reviewed-by: Rob Herring <robh@kernel.org>
+The card detect IRQ does not work with modern BIOS (that want
+to use DSD to provide the card detect GPIO to the driver).
+
+Details:
+
+(Discussion: https://lkml.org/lkml/2018/9/25/1113)
+
+The mmc core provides the mmc_gpiod_request_cd() API to let host drivers
+request the gpio descriptor for the "card detect" (or carrier detect?) pin.
+This pin is specified in the ACPI for the SDHC device:
+
+ * Either as a resource using _CRS. This is a method used by legacy BIOS.
+   (The driver needs to tell which resource index).
+
+ * Or as a named property ("cd-gpio") in DSD (which may internally point
+   to an entry in _CRS). This way, the driver can lookup using a string.
+   This is what modern BIOS prefer to use.
+
+This API finally results in a call to the following code:
+
+struct gpio_desc *acpi_find_gpio(..., const char *con_id,...)
+{
+...
+   /* Lookup gpio (using "<con_id>-gpio") in the _DSD */
+...
+   if (!acpi_can_fallback_to_crs(adev, con_id))
+          return ERR_PTR(-ENOENT);
+...
+   /* Falling back to _CRS is allowed, Lookup gpio in the _CRS */
+...
+}
+
+Note that this means that if the ACPI has _DSD properties, the kernel
+will never use _CRS for the lookup (Because acpi_can_fallback_to_crs()
+will always be false for any device hat has _DSD entries).
+
+The SDHCI driver is thus currently broken on a modern BIOS (even if
+BIOS provides both _CRS and DSD entries, either of which could be used for
+a successful lookup). Ironically, none of these will be used for the
+lookup currently because:
+
+* Since the con_id is NULL, acpi_find_gpio() does not find a matching
+  entry in DSDT. (The DSDT entry has the property name = "cd-gpio")
+
+* Because ACPI contains DSDT entries, thus acpi_can_fallback_to_crs()
+  returns false (because device properties have been populated from
+  DSD), thus the _CRS is never used for the lookup.
+
+Fix:
+
+Try "cd" for lookup in the _DSD before falling back to using NULL so
+as to try looking up in the _CRS.
+
+I've tested this patch successfully with both Legacy BIOS (that
+provide only _CRS method) as well as modern BIOS (that provide both
+_CRS and DSD). Also the use of "cd" also appears to be farly consistent
+across other users of this API (other MMC host controller drivers).
+
+Signed-off-by: Rajat Jain <rajatja@google.com>
+---
+ drivers/mmc/host/sdhci-pci-core.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 7bfd366d970d..e53333c695b3 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -1762,8 +1762,13 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
+ 		device_init_wakeup(&pdev->dev, true);
+ 
+ 	if (slot->cd_idx >= 0) {
+-		ret = mmc_gpiod_request_cd(host->mmc, NULL, slot->cd_idx,
++		ret = mmc_gpiod_request_cd(host->mmc, "cd", slot->cd_idx,
+ 					   slot->cd_override_level, 0, NULL);
++		if (ret && ret != -EPROBE_DEFER)
++			ret = mmc_gpiod_request_cd(host->mmc, NULL,
++						   slot->cd_idx,
++						   slot->cd_override_level,
++						   0, NULL);
+ 		if (ret == -EPROBE_DEFER)
+ 			goto remove;
+ 
+-- 
+2.19.1.568.g152ad8e336-goog
