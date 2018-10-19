@@ -1,100 +1,117 @@
-From: Rajat Jain <rajatja@google.com>
-Subject: [PATCH] mmc: sdhci-pci: Try "cd" for card-detect lookup before using NULL
-Date: Thu, 18 Oct 2018 14:51:01 -0700
-Message-ID: <20181018215101.169847-1-rajatja@google.com>
-References: <CACRpkdY7eaYk81CU8gmHKfWB82_qNJur=c=7SCRuW+BNeL=Oiw@mail.gmail.com>
+From: Pavel Machek <pavel@ucw.cz>
+Subject: Re: [PATCH v2] block: BFQ default for single queue devices
+Date: Fri, 19 Oct 2018 10:22:03 +0200
+Message-ID: <20181019082203.GA10361@amd>
+References: <20181015141059.26579-1-linus.walleij@linaro.org>
+ <d25e02de-e1be-0fb7-237b-3e53d56c6f64@kernel.dk>
+ <307F6078-0A77-4AAA-BE1A-55C2ACC328CC@linaro.org>
+ <ab70f1dd-6943-9642-aafa-71840fd44f07@kernel.dk>
+ <689F28AA-92B5-48B5-BBE7-0B589F163228@linaro.org>
+ <7375c004-ac6e-c692-4282-46de554285d5@kernel.dk>
+ <20181017100526.GB23493@quack2.suse.cz>
+ <e54c3943-0335-6db4-1c86-f093432fd84b@kernel.dk>
+ <20181018072110.GI23493@quack2.suse.cz>
+ <3a844733-ddcd-2f5f-80fc-645daeec0046@kernel.dk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CACRpkdY7eaYk81CU8gmHKfWB82_qNJur=c=7SCRuW+BNeL=Oiw@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>
-Cc: Rajat Jain <rajatja@google.com>, rajatxjain@gmail.com, linux-kernel@vger.kernel.org, Mika Westerberg <mika.westerberg@linux.intel.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Dmitry Torokhov <dtor@google.com>, linux-gpio@vger.kernel.org, linux-acpi@vger.kernel.org
+Content-Type: multipart/mixed; boundary="===============6795593822803636053=="
+Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
+In-Reply-To: <3a844733-ddcd-2f5f-80fc-645daeec0046@kernel.dk>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
+List-Post: <mailto:linux-mtd@lists.infradead.org>
+List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-mtd" <linux-mtd-bounces@lists.infradead.org>
+Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
+To: Jens Axboe <axboe@kernel.dk>
+Cc: Christoph Hellwig <hch@infradead.org>, Ulf Hansson <ulf.hansson@linaro.org>, Paolo Valente <paolo.valente@linaro.org>, Jan Kara <jack@suse.cz>, Bart Van Assche <bvanassche@acm.org>, Artem Bityutskiy <dedekind1@gmail.com>, Richard Weinberger <richard@nod.at>, Linus Walleij <linus.walleij@linaro.org>, Jonathan Corbet <corbet@lwn.net>, linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Oleksandr Natalenko <oleksandr@natalenko.name>, linux-block <linux-block@vger.kernel.org>, Mark Brown <broonie@kernel.org>, linux-mtd@lists.infradead.org, Johannes Thumshirn <jthumshirn@suse.de>, Damien Le Moal <Damien.LeMoal@wdc.com>, Alan Cox <gnomes@lxorguk.ukuu.org.uk>
 List-Id: linux-mmc@vger.kernel.org
 
-Problem:
 
-The card detect IRQ does not work with modern BIOS (that want
-to use DSD to provide the card detect GPIO to the driver).
+--===============6795593822803636053==
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="6c2NcOVqGQ03X4Wi"
+Content-Disposition: inline
 
-Details:
 
-(Discussion: https://lkml.org/lkml/2018/9/25/1113)
+--6c2NcOVqGQ03X4Wi
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-The mmc core provides the mmc_gpiod_request_cd() API to let host drivers
-request the gpio descriptor for the "card detect" (or carrier detect?) pin.
-This pin is specified in the ACPI for the SDHC device:
+Hi!
 
- * Either as a resource using _CRS. This is a method used by legacy BIOS.
-   (The driver needs to tell which resource index).
+> >> Which is also the approach that I've been advocating for here, instead
+> >> of a kernel patch...
+> >=20
+> > I know you've been advocating the use of udev for IO scheduler selectio=
+n.
+> > But do you want to force everybody to use udev? And for people who build
+> > their own (usually small) systems, do you want to force them to think a=
+bout
+> > IO scheduler selection and writing appropriate rules? These are the
+> > problems people were mentioning and I'm not sure what is your opinion on
+> > this.
+>=20
+> I don't want to force everybody to use udev, use whatever you like on
+> your platform. For most people that is udev, for embedded it's something
+> else. As you said, distros already do this via udev. When I've had to
+> do it on my systems, I've added a udev rule to do it.
 
- * Or as a named property ("cd-gpio") in DSD (which may internally point
-   to an entry in _CRS). This way, the driver can lookup using a string.
-   This is what modern BIOS prefer to use.
+This is not really helpful.
 
-This API finally results in a call to the following code:
+So you want me and everyone else and everyone on embedded to mess with
+udev? No, thanks.
 
-struct gpio_desc *acpi_find_gpio(..., const char *con_id,...)
-{
-...
-   /* Lookup gpio (using "<con_id>-gpio") in the _DSD */
-...
-   if (!acpi_can_fallback_to_crs(adev, con_id))
-          return ERR_PTR(-ENOENT);
-...
-   /* Falling back to _CRS is allowed, Lookup gpio in the _CRS */
-...
-}
+There are people booting with init=3D/bin/bash, too, running fsck. Would
+not it be nice to use reasonable schedulers there?
 
-Note that this means that if the ACPI has _DSD properties, the kernel
-will never use _CRS for the lookup (Because acpi_can_fallback_to_crs()
-will always be false for any device hat has _DSD entries).
+> My opinion is that the kernel makes various schedulers available.
+> Deciding which one to use is policy that should go into user space.
+> The default should be something that's solid and works, fancier
+> setups and tuning should be left to user space.
 
-The SDHCI driver is thus currently broken on a modern BIOS (even if
-BIOS provides both _CRS and DSD entries, either of which could be used for
-a successful lookup). Ironically, none of these will be used for the
-lookup currently because:
+Kernel should do reasonable thing by default, and it seems to be easy
+in this case.
 
-* Since the con_id is NULL, acpi_find_gpio() does not find a matching
-  entry in DSDT. (The DSDT entry has the property name = "cd-gpio")
+You keep repeating "but someone's super fast raid might get slowed
+down". Those 5 people in the world probably already have their udev
+rules.
 
-* Because ACPI contains DSDT entries, thus acpi_can_fallback_to_crs()
-  returns false (because device properties have been populated from
-  DSD), thus the _CRS is never used for the lookup.
+Now, lets do the right thing by default for the rest of the world,
+including you.
 
-Fix:
+									Pavel
+--=20
+(english) http://www.livejournal.com/~pavelmachek
+(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blo=
+g.html
 
-Try "cd" for lookup in the _DSD before falling back to using NULL so
-as to try looking up in the _CRS.
+--6c2NcOVqGQ03X4Wi
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
 
-I've tested this patch successfully with both Legacy BIOS (that
-provide only _CRS method) as well as modern BIOS (that provide both
-_CRS and DSD). Also the use of "cd" also appears to be farly consistent
-across other users of this API (other MMC host controller drivers).
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
 
-Signed-off-by: Rajat Jain <rajatja@google.com>
----
- drivers/mmc/host/sdhci-pci-core.c | 7 ++++++-
- 1 file changed, 6 insertions(+), 1 deletion(-)
+iEYEARECAAYFAlvJlCsACgkQMOfwapXb+vL1IwCgit5dOxDWtdXw1i8XcEkaM/mV
+gWcAn0AGVebP340nriahxA1X90Hu6773
+=G7J+
+-----END PGP SIGNATURE-----
 
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 7bfd366d970d..e53333c695b3 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -1762,8 +1762,13 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
- 		device_init_wakeup(&pdev->dev, true);
- 
- 	if (slot->cd_idx >= 0) {
--		ret = mmc_gpiod_request_cd(host->mmc, NULL, slot->cd_idx,
-+		ret = mmc_gpiod_request_cd(host->mmc, "cd", slot->cd_idx,
- 					   slot->cd_override_level, 0, NULL);
-+		if (ret && ret != -EPROBE_DEFER)
-+			ret = mmc_gpiod_request_cd(host->mmc, NULL,
-+						   slot->cd_idx,
-+						   slot->cd_override_level,
-+						   0, NULL);
- 		if (ret == -EPROBE_DEFER)
- 			goto remove;
- 
--- 
-2.19.1.568.g152ad8e336-goog
+--6c2NcOVqGQ03X4Wi--
+
+
+--===============6795593822803636053==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+______________________________________________________
+Linux MTD discussion mailing list
+http://lists.infradead.org/mailman/listinfo/linux-mtd/
+
+--===============6795593822803636053==--
