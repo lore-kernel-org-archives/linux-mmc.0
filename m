@@ -1,52 +1,147 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH v2] block: BFQ default for single queue devices
-Date: Fri, 19 Oct 2018 10:33:47 +0200
-Message-ID: <CACRpkdZgethKLu3P4taLfzqjGULyoP-T7bhUUpRKtjDRteNnxA@mail.gmail.com>
-References: <20181015141059.26579-1-linus.walleij@linaro.org>
- <18744e21b9f5aa4b3ab721a007a3e9a2@natalenko.name>
+From: Matthias Brugger <matthias.bgg@gmail.com>
+Subject: Re: [PATCH 4/6] mmc: mediatek: tune CMD/DATA together
+Date: Fri, 19 Oct 2018 10:46:38 +0200
+Message-ID: <51d95ab5-896e-c386-7a3e-362e8a3c2960@gmail.com>
+References: <1539415250-32337-1-git-send-email-chaotian.jing@mediatek.com>
+ <1539415250-32337-5-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
-In-Reply-To: <18744e21b9f5aa4b3ab721a007a3e9a2@natalenko.name>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
- <mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
-List-Post: <mailto:linux-mtd@lists.infradead.org>
-List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
- <mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-mtd" <linux-mtd-bounces@lists.infradead.org>
-Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
-To: Oleksandr Natalenko <oleksandr@natalenko.name>
-Cc: Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@infradead.org>, Ulf Hansson <ulf.hansson@linaro.org>, Paolo Valente <paolo.valente@linaro.org>, Jan Kara <jack@suse.cz>, Bart Van Assche <bvanassche@acm.org>, Artem Bityutskiy <dedekind1@gmail.com>, Richard Weinberger <richard@nod.at>, Jonathan Corbet <corbet@lwn.net>, linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-block <linux-block@vger.kernel.org>, Mark Brown <broonie@kernel.org>, linux-mtd@lists.infradead.org, Pavel Machek <pavel@ucw.cz>, Johannes Thumshirn <jthumshirn@suse.de>, Damien Le Moal <Damien.LeMoal@wdc.com>, One Thousand Gnomes <gnomes@lxorguk.ukuu.org.uk>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1539415250-32337-5-git-send-email-chaotian.jing@mediatek.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chaotian Jing <chaotian.jing@mediatek.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ryder Lee <ryder.lee@mediatek.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Sean Wang <sean.wang@mediatek.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, srv_heupstream@mediatek.com, jjian.zhou@mediatek.com, wenbin.mei@mediatek.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Oct 15, 2018 at 4:32 PM Oleksandr Natalenko
-<oleksandr@natalenko.name> wrote:
-> On 15.10.2018 16:10, Linus Walleij wrote:
 
-> > +     /*
-> > +      * Zoned devices must use a deadline scheduler because currently
-> > +      * that is the only scheduler respecting zoned writes.
-> > +      */
-> > +     if (blk_queue_is_zoned(q))
-> > +             policy = "mq-deadline";
-> > +     else if (IS_ENABLED(CONFIG_IOSCHED_BFQ))
-> > +             policy = "bfq";
-> > +     else
-> > +             policy = "mq-deadline";
->
-> If more rules will be needed in the future, shall we just add extra ifs,
-> or it would be better to craft some struct/table now + policy search
-> helper?
 
-Let's do it when it happens. Premature optimization is the root
-of all evil ;)
+On 13/10/2018 09:20, Chaotian Jing wrote:
+> for MSDC IP which supports both data tune and async fifo, it can
+> tune cmd/data together. which can save the time and make the tune
+> result of CMD more stable as data line are 4bit or 8bit.
+> 
+> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+> ---
+>  drivers/mmc/host/mtk-sd.c | 87 +++++++++++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 87 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index fe80a1d..09d7e44 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -1773,12 +1773,98 @@ static int msdc_tune_data(struct mmc_host *mmc, u32 opcode)
+>  	return final_delay == 0xff ? -EIO : 0;
+>  }
+>  
+> +/*
+> + * MSDC IP which supports data tune + async fifo can do CMD/DAT tune
+> + * together, which can save the tuning time.
+> + */
+> +static int msdc_tune_together(struct mmc_host *mmc, u32 opcode)
+> +{
+> +	struct msdc_host *host = mmc_priv(mmc);
+> +	u32 rise_delay = 0, fall_delay = 0;
+> +	struct msdc_delay_phase final_rise_delay, final_fall_delay = { 0,};
+> +	u8 final_delay, final_maxlen;
+> +	u32 tune_reg = host->dev_comp->pad_tune_reg;
+> +	int i, ret;
+> +
+> +	sdr_set_field(host->base + MSDC_PATCH_BIT, MSDC_INT_DAT_LATCH_CK_SEL,
+> +		      host->latch_ck);
+> +
+> +	sdr_clr_bits(host->base + MSDC_IOCON, MSDC_IOCON_RSPL);
+> +	sdr_clr_bits(host->base + MSDC_IOCON,
+> +		     MSDC_IOCON_DSPL | MSDC_IOCON_W_DSPL);
+> +	for (i = 0 ; i < PAD_DELAY_MAX; i++) {
+> +		sdr_set_field(host->base + tune_reg,
+> +			      MSDC_PAD_TUNE_CMDRDLY, i);
+> +		sdr_set_field(host->base + tune_reg,
+> +			      MSDC_PAD_TUNE_DATRRDLY, i);
+> +		ret = mmc_send_tuning(mmc, opcode, NULL);
+> +		if (!ret)
+> +			rise_delay |= (1 << i);
+> +	}
+> +	final_rise_delay = get_best_delay(host, rise_delay);
+> +	/* if rising edge has enough margin, then do not scan falling edge */
+> +	if (final_rise_delay.maxlen >= 12 ||
+> +	    (final_rise_delay.start == 0 && final_rise_delay.maxlen >= 4))
+> +		goto skip_fall;
+> +
+> +	sdr_set_bits(host->base + MSDC_IOCON, MSDC_IOCON_RSPL);
+> +	sdr_set_bits(host->base + MSDC_IOCON,
+> +		     MSDC_IOCON_DSPL | MSDC_IOCON_W_DSPL);
+> +	for (i = 0; i < PAD_DELAY_MAX; i++) {
+> +		sdr_set_field(host->base + tune_reg,
+> +			      MSDC_PAD_TUNE_CMDRDLY, i);
+> +		sdr_set_field(host->base + tune_reg,
+> +			      MSDC_PAD_TUNE_DATRRDLY, i);
+> +		ret = mmc_send_tuning(mmc, opcode, NULL);
+> +		if (!ret)
+> +			fall_delay |= (1 << i);
+> +	}
+> +	final_fall_delay = get_best_delay(host, fall_delay);
+> +
+> +skip_fall:
+> +	final_maxlen = max(final_rise_delay.maxlen, final_fall_delay.maxlen);
+> +	if (final_maxlen == final_rise_delay.maxlen) {
+> +		sdr_clr_bits(host->base + MSDC_IOCON, MSDC_IOCON_RSPL);
+> +		sdr_clr_bits(host->base + MSDC_IOCON,
+> +			     MSDC_IOCON_DSPL | MSDC_IOCON_W_DSPL);
+> +		sdr_set_field(host->base + tune_reg, MSDC_PAD_TUNE_CMDRDLY,
+> +			      final_rise_delay.final_phase);
+> +		sdr_set_field(host->base + tune_reg,
+> +			      MSDC_PAD_TUNE_DATRRDLY,
+> +			      final_rise_delay.final_phase);
+> +		final_delay = final_rise_delay.final_phase;
+> +	} else {
+> +		sdr_set_bits(host->base + MSDC_IOCON, MSDC_IOCON_RSPL);
+> +		sdr_set_bits(host->base + MSDC_IOCON,
+> +			     MSDC_IOCON_DSPL | MSDC_IOCON_W_DSPL);
+> +		sdr_set_field(host->base + tune_reg, MSDC_PAD_TUNE_CMDRDLY,
+> +			      final_fall_delay.final_phase);
+> +		sdr_set_field(host->base + tune_reg,
+> +			      MSDC_PAD_TUNE_DATRRDLY,
+> +			      final_fall_delay.final_phase);
+> +		final_delay = final_fall_delay.final_phase;
+> +	}
+> +
+> +	dev_dbg(host->dev, "Final pad delay: %x\n", final_delay);
+> +	return final_delay == 0xff ? -EIO : 0;
+> +}
+> +
+>  static int msdc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>  {
+>  	struct msdc_host *host = mmc_priv(mmc);
+>  	int ret;
+>  	u32 tune_reg = host->dev_comp->pad_tune_reg;
+>  
+> +	if (host->dev_comp->data_tune && host->dev_comp->async_fifo) {
+> +		ret = msdc_tune_together(mmc, opcode);
+> +		if (host->hs400_mode) {
+> +			sdr_clr_bits(host->base + MSDC_IOCON,
+> +				     MSDC_IOCON_DSPL | MSDC_IOCON_W_DSPL);
+> +			sdr_set_field(host->base + tune_reg,
+> +				      MSDC_PAD_TUNE_DATRRDLY, 0);
+> +		}
+> +		goto tune_done;
+> +	}
+>  	if (host->hs400_mode &&
 
-Yours,
-Linus Walleij
+Couldn't we put a else if here instead of using a goto?
 
-______________________________________________________
-Linux MTD discussion mailing list
-http://lists.infradead.org/mailman/listinfo/linux-mtd/
+Regards,
+Matthias
+
+>  	    host->dev_comp->hs400_tune)
+>  		ret = hs400_tune_response(mmc, opcode);
+> @@ -1794,6 +1880,7 @@ static int msdc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>  			dev_err(host->dev, "Tune data fail!\n");
+>  	}
+>  
+> +tune_done:
+>  	host->saved_tune_para.iocon = readl(host->base + MSDC_IOCON);
+>  	host->saved_tune_para.pad_tune = readl(host->base + tune_reg);
+>  	host->saved_tune_para.pad_cmd_tune = readl(host->base + PAD_CMD_TUNE);
+> 
