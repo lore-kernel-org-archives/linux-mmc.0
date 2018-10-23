@@ -1,34 +1,72 @@
 From: Anisse Astier <anisse@astier.eu>
-Subject: [PATCH v2 0/3] sdhci-pci voltage switch fixes
-Date: Tue, 23 Oct 2018 12:07:26 +0200
-Message-ID: <20181023100729.28864-1-anisse@astier.eu>
-References: <20181022134026.GB18413@jaya> <20181018102112.31054-1-anisse@astier.eu> <88d3fffb-df8d-f29e-f7c1-3bef815435d2@intel.com> <20181019092513.GA2150@jaya> <89d02cd8-c910-76fe-3b08-5dd056ba8a11@intel.com> <20181019134237.GA2762@jaya> <e329ed2e-75b5-e9f0-04e8-097594003e66@intel.com> <20181022091436.GA18413@jaya> <656f1d2e-e27a-cee4-78e1-774e45f067a6@intel.com>
+Subject: [PATCH v2 1/3] mmc: sdhci-pci: disable 1.8V with dmi quirk
+Date: Tue, 23 Oct 2018 12:07:27 +0200
+Message-ID: <20181023100729.28864-2-anisse@astier.eu>
+References: <20181023100729.28864-1-anisse@astier.eu>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20181023100729.28864-1-anisse@astier.eu>
 In-Reply-To: <20181022134026.GB18413@jaya>
+References: <20181022134026.GB18413@jaya>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>
 Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Anisse Astier <anisse@astier.eu>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+If the motherboard is known not to support 1.8V properly, add the
+necessary quirk on probe.
 
-This new patch series changes the approach to enabling the no-1.8V
-quirk. We determined that not having the DSM method might not be a good
-enough signal for the board/eMMC not supporting 1.8V.
+This fixes an issue on a Gemini Lake (GLK) laptop : eMMC driver will
+timeout on boot (from 60seconds to 10minutes ) as the cqhci attempts CQE
+recovery after a failed voltage switch. In earlier kernels, the problem
+existed, but only delayed boot for about 10 seconds after an I/O error,
+allowing booting on the eMMC (almost) unnoticed.
 
-It now uses a DMI quirk; I've also added another machine which benefited
-from the previous patch, but for which the issue is harder to reproduce.
+Signed-off-by: Anisse Astier <anisse@astier.eu>
+---
+ drivers/mmc/host/sdhci-pci-core.c | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
 
-I've kept the previous cleanup of the voltage_switch callback in an
-optional third patch, but it does not enable any quirk.
-
-Anisse Astier (3):
-  mmc: sdhci-pci: disable 1.8V with dmi quirk
-  mmc: sdhci-pci: add new machine with 1.8V dmi quirk
-  mmc: sdhci-pci: only install voltage switch method when useful
-
- drivers/mmc/host/sdhci-pci-core.c | 34 +++++++++++++++++++++++++++++++
- 1 file changed, 34 insertions(+)
-
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 7bfd366d970d..396413f7c854 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -29,6 +29,7 @@
+ #include <linux/mmc/slot-gpio.h>
+ #include <linux/mmc/sdhci-pci-data.h>
+ #include <linux/acpi.h>
++#include <linux/dmi.h>
+ 
+ #include "cqhci.h"
+ 
+@@ -703,6 +704,16 @@ static int intel_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	return 0;
+ }
+ 
++static const struct dmi_system_id board_no_1_8v[] = {
++	{
++		.matches = {
++			DMI_MATCH(DMI_SYS_VENDOR, "Notebook"),
++			DMI_MATCH(DMI_PRODUCT_NAME, "N75_77GU"),
++		},
++	},
++	{ }
++};
++
+ static void byt_probe_slot(struct sdhci_pci_slot *slot)
+ {
+ 	struct mmc_host_ops *ops = &slot->host->mmc_host_ops;
+@@ -710,6 +721,12 @@ static void byt_probe_slot(struct sdhci_pci_slot *slot)
+ 	byt_read_dsm(slot);
+ 
+ 	ops->execute_tuning = intel_execute_tuning;
++
++	if (dmi_check_system(board_no_1_8v)) {
++		pr_debug("%s: motherboard does not support 1.8V\n",
++				mmc_hostname(slot->host->mmc));
++		slot->host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
++	}
+ 	ops->start_signal_voltage_switch = intel_start_signal_voltage_switch;
+ }
+ 
 -- 
 2.17.2
