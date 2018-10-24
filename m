@@ -1,56 +1,114 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] Revert "mmc: mxs: fix card detection in case of
- 'broken-cd' flag set"
-Date: Wed, 24 Oct 2018 16:21:58 +0200
-Message-ID: <CAPDyKFoeK6uf3UGLQ0Qe+xqgGRbe-MsG2tD78EBHWfAt0uwiEg@mail.gmail.com>
-References: <20181024141008.30312-1-michael.thalmeier@hale.at>
+From: Dmitry Torokhov <dtor@google.com>
+Subject: Re: [PATCH] mmc: sdhci-pci: Try "cd" for card-detect lookup before
+ using NULL
+Date: Wed, 24 Oct 2018 11:03:11 -0700
+Message-ID: <CAE_wzQ-80NCNbzbFx1eEDwEEOEAbv-5u+W171iUagY2pOahbmw@mail.gmail.com>
+References: <CACRpkdY7eaYk81CU8gmHKfWB82_qNJur=c=7SCRuW+BNeL=Oiw@mail.gmail.com>
+ <20181018215101.169847-1-rajatja@google.com> <CAHp75Vd_r4QGR5xw2cJigM2J3WStg_0PdynBXMZOyZh+t1znKg@mail.gmail.com>
+ <CACK8Z6HOsUcPFyf-GguxPxh_Zdj6gCXP=FpGw-vQXJfnM=cquw@mail.gmail.com> <20181024100230.GQ10650@smile.fi.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181024141008.30312-1-michael.thalmeier@hale.at>
+In-Reply-To: <20181024100230.GQ10650@smile.fi.intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Michael Thalmeier <michael.thalmeier@hale.at>
-Cc: Roman Peniaev <r.peniaev@gmail.com>, Sascha Hauer <s.hauer@pengutronix.de>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, michael@thalmeier.at
+To: andy.shevchenko@gmail.com
+Cc: Rajat Jain <rajatja@google.com>, adrian.hunter@intel.com, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, rajatxjain@gmail.com, lkml <linux-kernel@vger.kernel.org>, Mika Westerberg <mika.westerberg@linux.intel.com>, linux-gpio@vger.kernel.org, ACPI Devel Maling List <linux-acpi@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 24 October 2018 at 16:10, Michael Thalmeier
-<michael.thalmeier@hale.at> wrote:
-> This reverts commit 6f726f495f2d ("mmc: mxs: fix card detection in case of 'broken-cd' flag set").
->
-> Since mxs_mmc_probe always sets MMC_CAP_NEEDS_POLL unconditionally, card
-> detect is not working properly any more since commit 6f726f495f2d.
-> Instead of querying the card detect status mxs_mmc_get_cd now always
-> returns 1 which causes probing commands being sent to the mmc card.
->
-> The expected behaviour of commit 6f726f495f2d should be reachable by setting
-> broken_cd instead.
+Hi Andy,
 
-I would rather make a new fix on top, rather than reverting a four
-year old patch. Can you please look into that instead?
+On Wed, Oct 24, 2018 at 3:02 AM Andy Shevchenko
+<andy.shevchenko@gmail.com> wrote:
+>
+> On Mon, Oct 22, 2018 at 04:34:55PM -0700, Rajat Jain wrote:
+> > On Fri, Oct 19, 2018 at 2:13 AM Andy Shevchenko
+> > <andy.shevchenko@gmail.com> wrote:
+> > > On Fri, Oct 19, 2018 at 12:53 AM Rajat Jain <rajatja@google.com> wrote:
+>
+> > > > across other users of this API (other MMC host controller drivers).
+> > >
+> > > >         if (slot->cd_idx >= 0) {
+> > > > -               ret = mmc_gpiod_request_cd(host->mmc, NULL, slot->cd_idx,
+> > > > +               ret = mmc_gpiod_request_cd(host->mmc, "cd", slot->cd_idx,
+> > > >                                            slot->cd_override_level, 0, NULL);
+> > >
+> > > Yes.
+> > >
+> > > > +               if (ret && ret != -EPROBE_DEFER)
+> > > > +                       ret = mmc_gpiod_request_cd(host->mmc, NULL,
+> > > > +                                                  slot->cd_idx,
+> > > > +                                                  slot->cd_override_level,
+> > > > +                                                  0, NULL);
+> > >
+> > > And no. Instead of this part you need to provide an ACPI GPIO mapping table.
+> >
+> > Sure, I am willing to do so, and I tried earlier too. However, certain
+> > doubts arose in my mind when I tried that and I posted my questions
+> > earlier (https://lkml.org/lkml/2018/9/28/507) but couldn't elicit any
+> > response. Unfortunately I still do not have answers. My primary
+> > questions are:
+> >
+> > 1) - It seems that 1 SDHCI device may support multiple slots (looking
+> > at the code). It is not clear to me if they could share card detect
+> > interrupts, or should have separate ones?
+>
+> This is more likely question to HW engineers of your platform with a caveat
+> that there should be a way to distinguish exact slot in which card is being
+> inserted.
+>
+> > Also, the driver may not
+> > really know?
+>
+> I think in such case the bug in HW design and / or driver.
 
-Kind regards
-Uffe
+Why? You can have a shared or dedicated interrupt and the driver does
+not really need to know if it can poll the status.
 
 >
-> Signed-off-by: Michael Thalmeier <michael.thalmeier@hale.at>
-> ---
->  drivers/mmc/host/mxs-mmc.c | 3 +--
->  1 file changed, 1 insertion(+), 2 deletions(-)
+> > So should I add 1 or two pins using the
+> > devm_acpi_dev_add_driver_gpios().
 >
-> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-> index add1e70..cfdae61 100644
-> --- a/drivers/mmc/host/mxs-mmc.c
-> +++ b/drivers/mmc/host/mxs-mmc.c
-> @@ -86,8 +86,7 @@ static int mxs_mmc_get_cd(struct mmc_host *mmc)
->         if (ret >= 0)
->                 return ret;
+> This depends on the above, e.g. HW design, ACPI tables.
+
+Yes, it depends on the HW design and that is exactly why the approach
+with devm_acpi_dev_add_driver_gpios() does not work well here: this is
+a generic driver used on many platforms and you are trying to put the
+platform knowledge into the driver. Here we are lucky I guess as I do
+not believe anyone is using more than one slot, so we can have a tavle
+with a single entry, but actually doing the fallback the way Rajat was
+proposing is more correct. Or you have a table with N entries, where N
+is hopefully sufficiently large.
+
 >
-> -       present = mmc->caps & MMC_CAP_NEEDS_POLL ||
-> -               !(readl(ssp->base + HW_SSP_STATUS(ssp)) &
-> +       present = !(readl(ssp->base + HW_SSP_STATUS(ssp)) &
->                         BM_SSP_STATUS_CARD_DETECT);
 >
->         if (mmc->caps2 & MMC_CAP2_CD_ACTIVE_HIGH)
-> --
-> 2.9.2
+> > Is some one familiar with SDHC
+> > driver can answer these questions, it shall be great.
 >
+> Actually above questions better to ask in linux-mmc mailing list, which by the
+> fact is in Cc list already. So, wait for someone to clarify.
+>
+>
+> > 2) I'm not really sure what should I set "active_low" to? Isn't this
+> > something that should be specified by platform / ACPI too, and driver
+> > should just be able to say say choose whatever the ACPI says?
+> >
+> > struct acpi_gpio_params {
+> >         unsigned int crs_entry_index;
+> >         unsigned int line_index;
+> >         bool active_low;
+> > };
+>
+>
+> ACPI specification misses this property, that's why we have it in the
+> structure. In your case it should be provided by _DSD and thus be consistent
+> with the hardcoded values.
+
+Again, you think as if the driver was platform specific; it is not. I
+have 1000s of systems with different ACPI tables. Let's say half of
+them use one polarity, and half another. Which polarity do you propose
+to use?
+
+Thanks.
+
+-- 
+Dmitry
