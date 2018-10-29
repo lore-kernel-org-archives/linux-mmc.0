@@ -1,98 +1,102 @@
-From: Rajat Jain <rajatxjain@gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-pci: Try "cd" for card-detect lookup before
+From: Rajat Jain <rajatja@google.com>
+Subject: [PATCH v2] mmc: sdhci-pci: Try "cd" for card-detect lookup before
  using NULL
-Date: Mon, 29 Oct 2018 12:43:24 -0700
-Message-ID: <CAA93t1oaZ5zkv+BsGnYZg6pqKv0DzXi3j8oZHUyTyffUWHtHug@mail.gmail.com>
-References: <CACRpkdY7eaYk81CU8gmHKfWB82_qNJur=c=7SCRuW+BNeL=Oiw@mail.gmail.com>
- <20181018215101.169847-1-rajatja@google.com> <CAHp75Vd_r4QGR5xw2cJigM2J3WStg_0PdynBXMZOyZh+t1znKg@mail.gmail.com>
- <CACK8Z6HOsUcPFyf-GguxPxh_Zdj6gCXP=FpGw-vQXJfnM=cquw@mail.gmail.com>
- <20181024100230.GQ10650@smile.fi.intel.com> <CAE_wzQ-80NCNbzbFx1eEDwEEOEAbv-5u+W171iUagY2pOahbmw@mail.gmail.com>
- <CAHp75VfMHqT+aAGVaXzXGbzF2=VEABOOaGhkjfV-D0NPbBM+Rw@mail.gmail.com>
- <CACK8Z6GMsfVEpefzwvVgS44Eg=PQzcNOaC3GA9F2OzrBxvpchw@mail.gmail.com> <20181029174356.GR10650@smile.fi.intel.com>
-Reply-To: rajatxjain@gmail.com
+Date: Mon, 29 Oct 2018 15:17:01 -0700
+Message-ID: <20181029221701.51376-1-rajatja@google.com>
+References: <CAA93t1oaZ5zkv+BsGnYZg6pqKv0DzXi3j8oZHUyTyffUWHtHug@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181029174356.GR10650@smile.fi.intel.com>
+In-Reply-To: <CAA93t1oaZ5zkv+BsGnYZg6pqKv0DzXi3j8oZHUyTyffUWHtHug@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Andy Shevchenko <andy.shevchenko@gmail.com>
-Cc: Rajat Jain <rajatja@google.com>, Dmitry Torokhov <dtor@google.com>, "Hunter, Adrian" <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Mika Westerberg <mika.westerberg@linux.intel.com>, linux-gpio@vger.kernel.org, linux-acpi@vger.kernel.org
+To: adrian.hunter@intel.com, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Rajat Jain <rajatxjain@gmail.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Mika Westerberg <mika.westerberg@linux.intel.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Dmitry Torokhov <dtor@google.com>, linux-gpio@vger.kernel.org, linux-acpi@vger.kernel.org, Andy Shevchenko <andy.shevchenko@gmail.com>
+Cc: Rajat Jain <rajatja@google.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Oct 29, 2018 at 10:44 AM Andy Shevchenko
-<andy.shevchenko@gmail.com> wrote:
->
-> On Mon, Oct 29, 2018 at 10:22:02AM -0700, Rajat Jain wrote:
-> > On Mon, Oct 29, 2018 at 8:23 AM Andy Shevchenko
-> > <andy.shevchenko@gmail.com> wrote:
-> > > On Wed, Oct 24, 2018 at 9:03 PM Dmitry Torokhov <dtor@google.com> wrote:
-> > > > On Wed, Oct 24, 2018 at 3:02 AM Andy Shevchenko
-> > > > <andy.shevchenko@gmail.com> wrote:
-> > > > > On Mon, Oct 22, 2018 at 04:34:55PM -0700, Rajat Jain wrote:
-> > > > > > On Fri, Oct 19, 2018 at 2:13 AM Andy Shevchenko
-> > > > > > <andy.shevchenko@gmail.com> wrote:
->
-> > > > > > Also, the driver may not
-> > > > > > really know?
-> > > > >
-> > > > > I think in such case the bug in HW design and / or driver.
-> > > >
-> > > > Why? You can have a shared or dedicated interrupt and the driver does
-> > > > not really need to know if it can poll the status.
-> > >
-> > > Yes, that's my point either we get 1:1 mapping between slot and GPIOs
-> > > or have a possibility to read back from some register(s) the actual
-> > > status of all of them, otherwise it's a bad design.
-> >
-> > No, AFAIU, the driver only should only be able to read the status of
-> > *the* interrupt that was fired? (as opposite to the ability to read
-> > *all of them* when an interrupt fires).
->
-> I can't be sure in the details of this (sdhci) driver, I'm not a maintainer of
-> that one. So, my above conclusions are purely generic.
->
-> > > > > > 2) I'm not really sure what should I set "active_low" to? Isn't this
-> > > > > > something that should be specified by platform / ACPI too, and driver
-> > > > > > should just be able to say say choose whatever the ACPI says?
-> > > > > >
-> > > > > > struct acpi_gpio_params {
-> > > > > >         unsigned int crs_entry_index;
-> > > > > >         unsigned int line_index;
-> > > > > >         bool active_low;
-> > > > > > };
->
->
-> > > > > ACPI specification misses this property, that's why we have it in the
-> > > > > structure. In your case it should be provided by _DSD and thus be consistent
-> > > > > with the hardcoded values.
-> > > >
-> > > > Again, you think as if the driver was platform specific; it is not. I
-> > > > have 1000s of systems with different ACPI tables. Let's say half of
-> > > > them use one polarity, and half another. Which polarity do you propose
-> > > > to use?
-> > >
-> > > Use one table for one half and another for the rest.
-> >
-> > But how does driver determine which table to use for which platform?
-> > (Currently the driver is platform independent).
->
-> Based on vendor and device IDs in any form of it.
+Problem:
 
-The vendor ID and device ID here would mean building a table of
-platforms ids in this (currently platform independent) driver. I'm not
-sure if my original patch introduces any problems that are worth
-solving using such a table.
+The card detect IRQ does not work with modern BIOS (that want
+to use _DSD to provide the card detect GPIO to the driver).
 
-I would thus prefer to solve it using my original patch, I would
-respin it taking care of your other review comments.
+Details:
 
-Thanks and best regards,
+The mmc core provides the mmc_gpiod_request_cd() API to let host drivers
+request the gpio descriptor for the "card detect" pin.
+This pin is specified in the ACPI for the SDHC device:
 
-Rajat
+ * Either as a resource using _CRS. This is a method used by legacy BIOS.
+   (The driver needs to tell which resource index).
 
->
-> --
-> With Best Regards,
-> Andy Shevchenko
->
->
+ * Or as a named property ("cd-gpios"/"cd-gpio") in _DSD (which internally
+   points to an entry in _CRS). This way, the driver can lookup using a
+   string. This is what modern BIOS prefer to use.
+
+This API finally results in a call to the following code:
+
+struct gpio_desc *acpi_find_gpio(..., const char *con_id,...)
+{
+...
+   /* Lookup gpio (using "<con_id>-gpio") in the _DSD */
+...
+   if (!acpi_can_fallback_to_crs(adev, con_id))
+          return ERR_PTR(-ENOENT);
+...
+   /* Falling back to _CRS is allowed, Lookup gpio in the _CRS */
+...
+}
+
+Note that this means that if the ACPI has _DSD properties, the kernel
+will never use _CRS for the lookup (Because acpi_can_fallback_to_crs()
+will always be false for any device hat has _DSD entries).
+
+The SDHCI driver is thus currently broken on a modern BIOS, even if
+BIOS provides both _CRS (for index based lookup) and _DSD entries (for
+string based lookup). Ironically, none of these will be used for the
+lookup currently because:
+
+* Since the con_id is NULL, acpi_find_gpio() does not find a matching
+  entry in DSDT. (The _DSDT entry has the property name = "cd-gpios")
+
+* Because ACPI contains DSDT entries, thus acpi_can_fallback_to_crs()
+  returns false (because device properties have been populated from
+  _DSD), thus the _CRS is never used for the lookup.
+
+Fix:
+
+Try "cd" for lookup in the _DSD before falling back to using NULL so
+as to try looking up in the _CRS.
+
+I've tested this patch successfully with both Legacy BIOS (that
+provide only _CRS method) as well as modern BIOS (that provide both
+_CRS and _DSD). Also the use of "cd" appears to be fairly consistent
+across other users of this API (other MMC host controller drivers).
+
+Link: https://lkml.org/lkml/2018/9/25/1113
+Signed-off-by: Rajat Jain <rajatja@google.com>
+---
+v2: Fix the commit log to take care of Andy's comments.
+
+ drivers/mmc/host/sdhci-pci-core.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 7bfd366d970d..e53333c695b3 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -1762,8 +1762,13 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
+ 		device_init_wakeup(&pdev->dev, true);
+ 
+ 	if (slot->cd_idx >= 0) {
+-		ret = mmc_gpiod_request_cd(host->mmc, NULL, slot->cd_idx,
++		ret = mmc_gpiod_request_cd(host->mmc, "cd", slot->cd_idx,
+ 					   slot->cd_override_level, 0, NULL);
++		if (ret && ret != -EPROBE_DEFER)
++			ret = mmc_gpiod_request_cd(host->mmc, NULL,
++						   slot->cd_idx,
++						   slot->cd_override_level,
++						   0, NULL);
+ 		if (ret == -EPROBE_DEFER)
+ 			goto remove;
+ 
+-- 
+2.19.1.568.g152ad8e336-goog
