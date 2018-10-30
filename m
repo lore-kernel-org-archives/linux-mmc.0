@@ -1,109 +1,147 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v2] mmc: sdhci-pci: Try "cd" for card-detect lookup before
- using NULL
-Date: Tue, 30 Oct 2018 09:53:28 +0200
-Message-ID: <79f9fb1f-9318-6265-d642-11d57719f287@intel.com>
-References: <CAA93t1oaZ5zkv+BsGnYZg6pqKv0DzXi3j8oZHUyTyffUWHtHug@mail.gmail.com>
- <20181029221701.51376-1-rajatja@google.com>
+From: Ludovic Barre <ludovic.Barre@st.com>
+Subject: [PATCH] mmc: mmci: add variant property to send stop cmd if a command fail
+Date: Tue, 30 Oct 2018 11:16:29 +0100
+Message-ID: <1540894589-4004-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181029221701.51376-1-rajatja@google.com>
-Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Rajat Jain <rajatja@google.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Rajat Jain <rajatxjain@gmail.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Mika Westerberg <mika.westerberg@linux.intel.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Dmitry Torokhov <dtor@google.com>, linux-gpio@vger.kernel.org, linux-acpi@vger.kernel.org, Andy Shevchenko <andy.shevchenko@gmail.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
+Cc: srinivas.kandagatla@linaro.org, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com, Ludovic Barre <ludovic.barre@st.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 30/10/18 12:17 AM, Rajat Jain wrote:
-> Problem:
-> 
-> The card detect IRQ does not work with modern BIOS (that want
-> to use _DSD to provide the card detect GPIO to the driver).
-> 
-> Details:
-> 
-> The mmc core provides the mmc_gpiod_request_cd() API to let host drivers
-> request the gpio descriptor for the "card detect" pin.
-> This pin is specified in the ACPI for the SDHC device:
-> 
->  * Either as a resource using _CRS. This is a method used by legacy BIOS.
->    (The driver needs to tell which resource index).
-> 
->  * Or as a named property ("cd-gpios"/"cd-gpio") in _DSD (which internally
->    points to an entry in _CRS). This way, the driver can lookup using a
->    string. This is what modern BIOS prefer to use.
-> 
-> This API finally results in a call to the following code:
-> 
-> struct gpio_desc *acpi_find_gpio(..., const char *con_id,...)
-> {
-> ...
->    /* Lookup gpio (using "<con_id>-gpio") in the _DSD */
-> ...
->    if (!acpi_can_fallback_to_crs(adev, con_id))
->           return ERR_PTR(-ENOENT);
-> ...
->    /* Falling back to _CRS is allowed, Lookup gpio in the _CRS */
-> ...
-> }
-> 
-> Note that this means that if the ACPI has _DSD properties, the kernel
-> will never use _CRS for the lookup (Because acpi_can_fallback_to_crs()
-> will always be false for any device hat has _DSD entries).
-> 
-> The SDHCI driver is thus currently broken on a modern BIOS, even if
-> BIOS provides both _CRS (for index based lookup) and _DSD entries (for
-> string based lookup). Ironically, none of these will be used for the
-> lookup currently because:
-> 
-> * Since the con_id is NULL, acpi_find_gpio() does not find a matching
->   entry in DSDT. (The _DSDT entry has the property name = "cd-gpios")
-> 
-> * Because ACPI contains DSDT entries, thus acpi_can_fallback_to_crs()
->   returns false (because device properties have been populated from
->   _DSD), thus the _CRS is never used for the lookup.
-> 
-> Fix:
-> 
-> Try "cd" for lookup in the _DSD before falling back to using NULL so
-> as to try looking up in the _CRS.
-> 
-> I've tested this patch successfully with both Legacy BIOS (that
-> provide only _CRS method) as well as modern BIOS (that provide both
-> _CRS and _DSD). Also the use of "cd" appears to be fairly consistent
-> across other users of this API (other MMC host controller drivers).
-> 
-> Link: https://lkml.org/lkml/2018/9/25/1113
-> Signed-off-by: Rajat Jain <rajatja@google.com>
+From: Ludovic Barre <ludovic.barre@st.com>
 
-This is good enough for a fix.  An ACPI GPIO mappings table can be done later.
+The mmc framework follows the requirement of SD_Specification:
+the STOP_TRANSMISSION is sent on multiple write/read commands
+and the stop command (alone), not needed on other ADTC commands.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+But, if an error happens on command or data step, some variants
+require a stop command "STOP_TRANSMISION" to clear the DPSM
+"Data Path State Machine". If it's not done the next data
+command freezes hardware block.
+Needed to support the STM32 sdmmc variant.
 
-> ---
-> v2: Fix the commit log to take care of Andy's comments.
-> 
->  drivers/mmc/host/sdhci-pci-core.c | 7 ++++++-
->  1 file changed, 6 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index 7bfd366d970d..e53333c695b3 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -1762,8 +1762,13 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
->  		device_init_wakeup(&pdev->dev, true);
->  
->  	if (slot->cd_idx >= 0) {
-> -		ret = mmc_gpiod_request_cd(host->mmc, NULL, slot->cd_idx,
-> +		ret = mmc_gpiod_request_cd(host->mmc, "cd", slot->cd_idx,
->  					   slot->cd_override_level, 0, NULL);
-> +		if (ret && ret != -EPROBE_DEFER)
-> +			ret = mmc_gpiod_request_cd(host->mmc, NULL,
-> +						   slot->cd_idx,
-> +						   slot->cd_override_level,
-> +						   0, NULL);
->  		if (ret == -EPROBE_DEFER)
->  			goto remove;
->  
-> 
+Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
+---
+ drivers/mmc/host/mmci.c | 33 +++++++++++++++++++++++++++++++++
+ drivers/mmc/host/mmci.h |  4 ++++
+ 2 files changed, 37 insertions(+)
+
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 19650ed..ecedca3 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -21,6 +21,7 @@
+ #include <linux/err.h>
+ #include <linux/highmem.h>
+ #include <linux/log2.h>
++#include <linux/mmc/mmc.h>
+ #include <linux/mmc/pm.h>
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/card.h>
+@@ -57,6 +58,8 @@ void sdmmc_variant_init(struct mmci_host *host);
+ #else
+ static inline void sdmmc_variant_init(struct mmci_host *host) {}
+ #endif
++static void
++mmci_start_command(struct mmci_host *host, struct mmc_command *cmd, u32 c);
+ 
+ static unsigned int fmax = 515633;
+ 
+@@ -274,6 +277,7 @@ static struct variant_data variant_stm32_sdmmc = {
+ 	.cmdreg_lrsp_crc	= MCI_CPSM_STM32_LRSP_CRC,
+ 	.cmdreg_srsp_crc	= MCI_CPSM_STM32_SRSP_CRC,
+ 	.cmdreg_srsp		= MCI_CPSM_STM32_SRSP,
++	.cmdreg_stop		= MCI_CPSM_STM32_CMDSTOP,
+ 	.data_cmd_enable	= MCI_CPSM_STM32_CMDTRANS,
+ 	.irq_pio_mask		= MCI_IRQ_PIO_STM32_MASK,
+ 	.datactrl_first		= true,
+@@ -574,6 +578,24 @@ void mmci_dma_error(struct mmci_host *host)
+ static void
+ mmci_request_end(struct mmci_host *host, struct mmc_request *mrq)
+ {
++	/*
++	 * If an error happens on command or data step, some variants
++	 * require a stop command to reinit the DPSM.
++	 * If it's not done the next data command freeze hardware block.
++	 */
++	if (host->variant->cmdreg_stop) {
++		u32 dpsm;
++
++		dpsm = readl_relaxed(host->base + MMCISTATUS);
++		dpsm &= MCI_STM32_DPSMACTIVE;
++
++		if (dpsm && ((mrq->cmd && mrq->cmd->error) ||
++			     (mrq->data && mrq->data->error))) {
++			mmci_start_command(host, &host->stop_abort, 0);
++			return;
++		}
++	}
++
+ 	writel(0, host->base + MMCICOMMAND);
+ 
+ 	BUG_ON(host->data);
+@@ -1106,6 +1128,10 @@ mmci_start_command(struct mmci_host *host, struct mmc_command *cmd, u32 c)
+ 		mmci_reg_delay(host);
+ 	}
+ 
++	if (host->variant->cmdreg_stop &&
++	    cmd->opcode == MMC_STOP_TRANSMISSION)
++		c |= host->variant->cmdreg_stop;
++
+ 	c |= cmd->opcode | host->variant->cmdreg_cpsm_enable;
+ 	if (cmd->flags & MMC_RSP_PRESENT) {
+ 		if (cmd->flags & MMC_RSP_136)
+@@ -1957,6 +1983,13 @@ static int mmci_probe(struct amba_device *dev,
+ 		mmc->max_busy_timeout = 0;
+ 	}
+ 
++	/* prepare the stop command, used to abort and reinitialized the DPSM */
++	if (variant->cmdreg_stop) {
++		host->stop_abort.opcode = MMC_STOP_TRANSMISSION;
++		host->stop_abort.arg = 0;
++		host->stop_abort.flags = MMC_RSP_R1B | MMC_CMD_AC;
++	}
++
+ 	mmc->ops = &mmci_ops;
+ 
+ 	/* We support these PM capabilities. */
+diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+index ec13d90..afb6ec4 100644
+--- a/drivers/mmc/host/mmci.h
++++ b/drivers/mmc/host/mmci.h
+@@ -166,6 +166,7 @@
+ #define MCI_ST_CEATAEND		(1 << 23)
+ #define MCI_ST_CARDBUSY		(1 << 24)
+ /* Extended status bits for the STM32 variants */
++#define MCI_STM32_DPSMACTIVE	BIT(12)
+ #define MCI_STM32_BUSYD0	BIT(20)
+ 
+ #define MMCICLEAR		0x038
+@@ -269,6 +270,7 @@ struct mmci_host;
+  * @cmdreg_lrsp_crc: enable value for long response with crc
+  * @cmdreg_srsp_crc: enable value for short response with crc
+  * @cmdreg_srsp: enable value for short response without crc
++ * @cmdreg_stop: enable value for stop and abort transmission
+  * @datalength_bits: number of bits in the MMCIDATALENGTH register
+  * @fifosize: number of bytes that can be written when MMCI_TXFIFOEMPTY
+  *	      is asserted (likewise for RX)
+@@ -322,6 +324,7 @@ struct variant_data {
+ 	unsigned int		cmdreg_lrsp_crc;
+ 	unsigned int		cmdreg_srsp_crc;
+ 	unsigned int		cmdreg_srsp;
++	unsigned int		cmdreg_stop;
+ 	unsigned int		datalength_bits;
+ 	unsigned int		fifosize;
+ 	unsigned int		fifohalfsize;
+@@ -384,6 +387,7 @@ struct mmci_host {
+ 	void __iomem		*base;
+ 	struct mmc_request	*mrq;
+ 	struct mmc_command	*cmd;
++	struct mmc_command	stop_abort;
+ 	struct mmc_data		*data;
+ 	struct mmc_host		*mmc;
+ 	struct clk		*clk;
+-- 
+2.7.4
