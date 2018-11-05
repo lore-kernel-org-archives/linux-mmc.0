@@ -1,51 +1,43 @@
-From: Pavel Machek <pavel@ucw.cz>
-Subject: Re: [PATCH] mmc: core: Allow building PWRSEQ_SD8787 with
- LIBERTAS_SDIO
-Date: Sun, 4 Nov 2018 12:27:48 +0100
-Message-ID: <20181104112748.GA23864@amd>
-References: <20180924085632.448693-1-lkundrak@v3.sk>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="Kj7319i9nmIyA2yE"
+From: Chunyan Zhang <zhang.chunyan@linaro.org>
+Subject: [PATCH RFC 0/3] Add support for using external dma in SDHCI
+Date: Mon,  5 Nov 2018 11:16:47 +0800
+Message-ID: <1541387810-24867-1-git-send-email-zhang.chunyan@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20180924085632.448693-1-lkundrak@v3.sk>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Lubomir Rintel <lkundrak@v3.sk>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Mark Brown <broonie@kernel.org>, Kishon Vijay Abraham I <kishon@ti.com>, Sekhar Nori <nsekhar@ti.com>, Chunyan Zhang <zhang.lyra@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
+Currently the generic SDHCI code in the Linux kernel supports the SD
+standard DMA integrated into the host controller but does not have any
+support for external DMA controllers implemented using dmaengine meaning
+that custom code is needed for any systems that use a generic DMA
+controller with SDHCI which in practice means any SDHCI controller that
+doesn't have an integrated DMA controller so we should have this as a
+generic feature.
 
---Kj7319i9nmIyA2yE
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+There are already a number of controller specific drivers that have dmaengine
+code, and some could use sdhci.c actually, but needed to implement mmc_ops->request()
+in their specific driver for sending command with external dma using dmaengine
+framework, with this patchset, them will take advantage of the generic support.
+TI's omap controller is the case as an example.
 
-On Mon 2018-09-24 10:56:32, Lubomir Rintel wrote:
-> The sd8686 "libertas" SDIO adapter's power is controlled with WLAN_RST
-> and WLAN_PD pins -- pretty much the same way as sd8787. Allow building
-> the power sequencing driver along with the libertas Wi-Fi driver.
->=20
-> Signed-off-by: Lubomir Rintel <lkundrak@v3.sk>
+Any comments are very appreciated.
 
-Acked-by: Pavel Machek <pavel@ucw.cz>
+Thanks,
+Chunyan
 
+Chunyan Zhang (3):
+  mmc: sdhci: add support for using external DMA devices
+  mmc: sdhci-omap: Add using external dma
+  dt-bindings: sdhci-omap: Add example for using dmaengine
 
---=20
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blo=
-g.html
+ .../devicetree/bindings/mmc/sdhci-omap.txt         |   7 ++
+ drivers/mmc/host/Kconfig                           |  13 ++
+ drivers/mmc/host/sdhci-omap.c                      |   7 ++
+ drivers/mmc/host/sdhci.c                           | 137 ++++++++++++++++++++-
+ drivers/mmc/host/sdhci.h                           |  12 ++
+ 5 files changed, 175 insertions(+), 1 deletion(-)
 
---Kj7319i9nmIyA2yE
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iEYEARECAAYFAlve17QACgkQMOfwapXb+vKWNgCeMzaGv4KnWlTqZ6vX2L3EPoUm
-FLcAniiholgipOF0kEebW1kfEzuvIps8
-=G8ky
------END PGP SIGNATURE-----
-
---Kj7319i9nmIyA2yE--
+-- 
+2.7.4
