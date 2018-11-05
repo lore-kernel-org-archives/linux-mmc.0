@@ -1,74 +1,68 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: Re: [PATCH RFC 2/3] mmc: sdhci-omap: Add using external dma
-Date: Mon, 5 Nov 2018 09:55:24 +0530
-Message-ID: <be0a18e8-8ee6-4d4e-6dcc-6ba6e39033c9@ti.com>
-References: <1541387810-24867-1-git-send-email-zhang.chunyan@linaro.org>
- <1541387810-24867-3-git-send-email-zhang.chunyan@linaro.org>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH V3 1/2] dt-bindings: mmc: sdhci-msm: Add new compatible
+ string for SDM845 SOC
+Date: Mon, 5 Nov 2018 14:36:57 -0600
+Message-ID: <20181105203657.GA32282@bogus>
+References: <1541073999-11752-1-git-send-email-vbadigan@codeaurora.org>
+ <1541073999-11752-2-git-send-email-vbadigan@codeaurora.org>
+ <CAD=FV=V9AdCgOSonb0tu==DgKRKeZxto+aGwxmdbHAqrmfMrDQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1541387810-24867-3-git-send-email-zhang.chunyan@linaro.org>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <CAD=FV=V9AdCgOSonb0tu==DgKRKeZxto+aGwxmdbHAqrmfMrDQ@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Mark Brown <broonie@kernel.org>, Sekhar Nori <nsekhar@ti.com>, Chunyan Zhang <zhang.lyra@gmail.com>
+To: Doug Anderson <dianders@google.com>
+Cc: vbadigan@codeaurora.org, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Evan Green <evgreen@chromium.org>, Asutosh Das <asutoshd@codeaurora.org>, riteshh@codeaurora.org, stummala@codeaurora.org, sayalil@codeaurora.org, Mark Rutland <mark.rutland@arm.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
-
-On 05/11/18 8:46 AM, Chunyan Zhang wrote:
-> sdhci-omap can support both external dma controllers via dmaengine
-> framework as well as ADMA in which the controller acts as DMA master.
+On Thu, Nov 01, 2018 at 01:29:54PM -0700, Doug Anderson wrote:
+> Hi,
 > 
-> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
-> ---
->  drivers/mmc/host/sdhci-omap.c | 7 +++++++
->  1 file changed, 7 insertions(+)
+> On Thu, Nov 1, 2018 at 5:07 AM Veerabhadrarao Badiganti
+> <vbadigan@codeaurora.org> wrote:
+> >
+> > For SDM845 SOC, new compatible string  "qcom,sdm845-sdhci" is added.
+> >
+> > Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+> > ---
+> >  Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 1 +
+> >  1 file changed, 1 insertion(+)
+> >
+> > diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> > index 502b3b8..f2ffbeb 100644
+> > --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> > +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> > @@ -7,6 +7,7 @@ Required properties:
+> >  - compatible: Should contain:
+> >                 "qcom,sdhci-msm-v4" for sdcc versions less than 5.0
+> >                 "qcom,sdhci-msm-v5" for sdcc versions >= 5.0
+> > +               "qcom,sdm845-sdhci" for sdm845 SOC
 > 
-> diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-> index 88347ce..0a8162c 100644
-> --- a/drivers/mmc/host/sdhci-omap.c
-> +++ b/drivers/mmc/host/sdhci-omap.c
-> @@ -896,6 +896,7 @@ static int sdhci_omap_probe(struct platform_device *pdev)
->  	const struct of_device_id *match;
->  	struct sdhci_omap_data *data;
->  	const struct soc_device_attribute *soc;
-> +	struct resource *regs;
->  
->  	match = of_match_device(omap_sdhci_match, dev);
->  	if (!match)
-> @@ -908,6 +909,10 @@ static int sdhci_omap_probe(struct platform_device *pdev)
->  	}
->  	offset = data->offset;
->  
-> +	regs = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-> +	if (!regs)
-> +		return -ENXIO;
-> +
->  	host = sdhci_pltfm_init(pdev, &sdhci_omap_pdata,
->  				sizeof(*omap_host));
->  	if (IS_ERR(host)) {
-> @@ -924,6 +929,7 @@ static int sdhci_omap_probe(struct platform_device *pdev)
->  	omap_host->timing = MMC_TIMING_LEGACY;
->  	omap_host->flags = data->flags;
->  	host->ioaddr += offset;
-> +	host->mapbase = regs->start;
->  
->  	mmc = host->mmc;
->  	sdhci_get_of_property(pdev);
-> @@ -991,6 +997,7 @@ static int sdhci_omap_probe(struct platform_device *pdev)
->  	host->mmc_host_ops.execute_tuning = sdhci_omap_execute_tuning;
->  	host->mmc_host_ops.enable_sdio_irq = sdhci_omap_enable_sdio_irq;
->  
-> +	sdhci_switch_extdma(host, true);
+> It's up to Rob of course, but IMO it seems a nicer way forward to
+> include both the SoC-specific string and the "version" string in all
+> cases.  I'd write this for the full text:
 
-A number of devices using sdhci-omap supports ADMA. So switching to external
-DMA shouldn't be unconditional.
+Fine by me if you update all the dts files.
 
-IMHO sdhci.c should see if the device supports ADMA or SDMA. If not it should
-try switching to external DMA and if external DMA too is not supported, it
-should use PIO.
+> 
+>  - compatible: Should contain a SoC-specific string and a IP version string:
+>       version strings:
+>            "qcom,sdhci-msm-v4" for sdcc versions less than 5.0
+>            "qcom,sdhci-msm-v5" for sdcc version 5.0
+>       full compatible strings with SoC and version:
+>            "qcom,apq8084", "qcom,sdhci-msm-v4"
+>            "qcom,msm8974", "qcom,sdhci-msm-v4"
+>            "qcom,msm8916", "qcom,sdhci-msm-v4"
+>            "qcom,msm8992", "qcom,sdhci-msm-v4"
+>            "qcom,msm8996", "qcom,sdhci-msm-v4"
 
-Thanks
-Kishon
+I assume you meant to append '-sdhci' here?
+
+>            "qcom,sdm845-sdhci", "qcom,sdhci-msm-v5"
+> 
+>    NOTE that some old device tree files may be floating around that only
+>    have the string "qcom,sdhci-msm-v4" without the SoC compatible string
+>    but doing that should be considered a deprecated practice.
+> 
+> -Doug
