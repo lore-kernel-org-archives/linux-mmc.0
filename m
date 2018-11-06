@@ -1,38 +1,54 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH RFC 2/3] mmc: sdhci-omap: Add using external dma
-Date: Tue, 6 Nov 2018 13:51:17 +0100
-Message-ID: <CAK8P3a2X4tbx_R-5VgfApF-UPmJ_XuzH3hO_uVAfffC6h8WrJw@mail.gmail.com>
-References: <1541387810-24867-1-git-send-email-zhang.chunyan@linaro.org>
- <1541387810-24867-3-git-send-email-zhang.chunyan@linaro.org> <be0a18e8-8ee6-4d4e-6dcc-6ba6e39033c9@ti.com>
+From: Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+Subject: [PATCH] mmc: core: Remove timeout when enabling cache
+Date: Tue,  6 Nov 2018 14:30:07 +0100
+Message-ID: <20181106133007.12318-1-sjoerd.simons@collabora.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <be0a18e8-8ee6-4d4e-6dcc-6ba6e39033c9@ti.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>
-Cc: Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Mark Brown <broonie@kernel.org>, Sekhar Nori <nsekhar@ti.com>, Chunyan Zhang <zhang.lyra@gmail.com>
+To: linux-mmc@vger.kernel.org
+Cc: kernel@collabora.com, linux-kernel@vger.kernel.org, Hongjie Fang <hongjiefang@asrmicro.com>, Bastian Stender <bst@pengutronix.de>, Kyle Roeschley <kyle.roeschley@ni.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>, Harish Jenny K N <harish_kandiga@mentor.com>, Simon Horman <horms+renesas@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
 
-On 11/5/18, Kishon Vijay Abraham I <kishon@ti.com> wrote:
-> On 05/11/18 8:46 AM, Chunyan Zhang wrote:
->>
->> +	sdhci_switch_extdma(host, true);
->
-> A number of devices using sdhci-omap supports ADMA. So switching to
-> external
-> DMA shouldn't be unconditional.
->
-> IMHO sdhci.c should see if the device supports ADMA or SDMA. If not it
-> should
-> try switching to external DMA and if external DMA too is not supported, it
-> should use PIO.
+On some of our boards containing Micron eMMC chips compatible with
+the eMMC 5.0 specification we starting seeing boot failures due to
+timeouts:
+  mmc1: error -110 whilst initialising MMC card
 
-What's the reasoning for preferring ADMA/SDMA over external DMA if
-both are supported?
+It turns out that switching the cache on after a power loss event can
+take quite long. In some simple testing thusfar we've seen values up to
+700ms, which is far longer then the GENERIC_CMD6_TIME of the chip
+(250ms).
 
-I'd expect that if the external DMA for some reason is worse than
-ADMA, we just wouldn't list it in the DT at all, but if it's listed and
-ADMA also works, then the driver should try to use it before falling
-back to ADMA.
+Looking at both the eMMC 4.51 and 5.0 specification there doesn't seem
+to be a defined upper bound for the CACHE_CTRL ON command. For both
+CACHE_CTRL OFF and FLUSH_CACHE it is documented that they can take
+essentially unbounded time, but CACHE_CTRL ON i get the impression that
+it's assumed to be "fast". Unfortunately this is not true in reality.
 
-       Arnd
+To resolve this, simply drop the timeout from CACHE_CTRL ON and assume
+it might take an unbounded time similar to the FLUSH_CACHE command.
+
+Signed-off-by: Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+
+---
+
+ drivers/mmc/core/mmc.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index bc1bd2c25613..ac70b508a939 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1794,8 +1794,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 	if (!mmc_card_broken_hpi(card) &&
+ 	    card->ext_csd.cache_size > 0) {
+ 		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+-				EXT_CSD_CACHE_CTRL, 1,
+-				card->ext_csd.generic_cmd6_time);
++				EXT_CSD_CACHE_CTRL, 1, 0);
+ 		if (err && err != -EBADMSG)
+ 			goto free_card;
+ 
+-- 
+2.19.1
