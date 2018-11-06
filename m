@@ -1,45 +1,38 @@
 From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH RFC 1/3] mmc: sdhci: add support for using external DMA devices
-Date: Tue, 6 Nov 2018 12:16:00 +0100
-Message-ID: <CAK8P3a2aUjLsP70zSjkavR4-mkV9iEVCw96Vces4N15Dno8SHw@mail.gmail.com>
-References: <1541387810-24867-1-git-send-email-zhang.chunyan@linaro.org> <1541387810-24867-2-git-send-email-zhang.chunyan@linaro.org>
+Subject: Re: [PATCH RFC 2/3] mmc: sdhci-omap: Add using external dma
+Date: Tue, 6 Nov 2018 13:51:17 +0100
+Message-ID: <CAK8P3a2X4tbx_R-5VgfApF-UPmJ_XuzH3hO_uVAfffC6h8WrJw@mail.gmail.com>
+References: <1541387810-24867-1-git-send-email-zhang.chunyan@linaro.org>
+ <1541387810-24867-3-git-send-email-zhang.chunyan@linaro.org> <be0a18e8-8ee6-4d4e-6dcc-6ba6e39033c9@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1541387810-24867-2-git-send-email-zhang.chunyan@linaro.org>
+In-Reply-To: <be0a18e8-8ee6-4d4e-6dcc-6ba6e39033c9@ti.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Chunyan Zhang <zhang.chunyan@linaro.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Mark Brown <broonie@kernel.org>, Kishon Vijay Abraham I <kishon@ti.com>, Sekhar Nori <nsekhar@ti.com>, Chunyan Zhang <zhang.lyra@gmail.com>
+To: Kishon Vijay Abraham I <kishon@ti.com>
+Cc: Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Mark Brown <broonie@kernel.org>, Sekhar Nori <nsekhar@ti.com>, Chunyan Zhang <zhang.lyra@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 11/5/18, Chunyan Zhang <zhang.chunyan@linaro.org> wrote:
-> Some standard SD host controller can support both external dma
-> controllers as well as ADMA in which the controller acts as
-> DMA master.
+On 11/5/18, Kishon Vijay Abraham I <kishon@ti.com> wrote:
+> On 05/11/18 8:46 AM, Chunyan Zhang wrote:
+>>
+>> +	sdhci_switch_extdma(host, true);
 >
-> Currently the generic SDHCI code supports ADMA/SDMA integrated into
-> the host controller but does not have any support for external DMA
-> controllers implemented using dmaengine meaning that custom code is
-> needed for any systems that use a generic DMA controller with SDHCI.
+> A number of devices using sdhci-omap supports ADMA. So switching to
+> external
+> DMA shouldn't be unconditional.
 >
-> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
+> IMHO sdhci.c should see if the device supports ADMA or SDMA. If not it
+> should
+> try switching to external DMA and if external DMA too is not supported, it
+> should use PIO.
 
-Looks good to me overall, but I think I found one small bug:
+What's the reasoning for preferring ADMA/SDMA over external DMA if
+both are supported?
 
+I'd expect that if the external DMA for some reason is worse than
+ADMA, we just wouldn't list it in the DT at all, but if it's listed and
+ADMA also works, then the driver should try to use it before falling
+back to ADMA.
 
-> +	dma->rx_chan = dma_request_chan(mmc->parent, "rx");
-> +	if (IS_ERR(dma->rx_chan)) {
-> +		ret = PTR_ERR(dma->rx_chan);
-> +		if (ret == -EPROBE_DEFER && dma->tx_chan)
-> +			dma_release_channel(dma->tx_chan);
-> +
-> +		dma->rx_chan = NULL;
-> +		pr_warn("Failed to request RX DMA channel.\n");
-> +	}
-
-The error handling looks wrong here: if you get EPROBE_DEFER,
-you want to skip the warning message. If you get any other error code,
-you want the warning message and also the dma_release_channel()
-which should be unconditional here.
-
-        Arnd
+       Arnd
