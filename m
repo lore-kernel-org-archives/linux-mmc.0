@@ -1,48 +1,60 @@
-From: Chunyan Zhang <zhang.chunyan@linaro.org>
-Subject: Re: [PATCH RFC 2/3] mmc: sdhci-omap: Add using external dma
-Date: Wed, 7 Nov 2018 11:00:57 +0800
-Message-ID: <CAG2=9p-skR8xqqBrULS6_EWFX0H_mvvOJKDGVfzf026H_dychg@mail.gmail.com>
-References: <1541387810-24867-1-git-send-email-zhang.chunyan@linaro.org>
- <1541387810-24867-3-git-send-email-zhang.chunyan@linaro.org>
- <be0a18e8-8ee6-4d4e-6dcc-6ba6e39033c9@ti.com> <CAK8P3a2X4tbx_R-5VgfApF-UPmJ_XuzH3hO_uVAfffC6h8WrJw@mail.gmail.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH] mmc: core: Remove timeout when enabling cache
+Date: Wed, 7 Nov 2018 09:47:41 +0100
+Message-ID: <20181107084741.GA31092@kunai>
+References: <20181106133007.12318-1-sjoerd.simons@collabora.co.uk>
+ <9051c212-6e2a-bc39-3686-693e6cd87f1d@ti.com>
+ <303b49cbb5b687d6b6a7ad4048eda459586c0806.camel@collabora.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="pf9I7BMVVzbSWLtt"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAK8P3a2X4tbx_R-5VgfApF-UPmJ_XuzH3hO_uVAfffC6h8WrJw@mail.gmail.com>
+Content-Disposition: inline
+In-Reply-To: <303b49cbb5b687d6b6a7ad4048eda459586c0806.camel@collabora.co.uk>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Kishon Vijay Abraham I <kishon@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Mark Brown <broonie@kernel.org>, Sekhar Nori <nsekhar@ti.com>, Lyra Zhang <zhang.lyra@gmail.com>
+To: Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+Cc: Faiz Abbas <faiz_abbas@ti.com>, linux-mmc@vger.kernel.org, kernel@collabora.com, linux-kernel@vger.kernel.org, Hongjie Fang <hongjiefang@asrmicro.com>, Bastian Stender <bst@pengutronix.de>, Kyle Roeschley <kyle.roeschley@ni.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>, Harish Jenny K N <harish_kandiga@mentor.com>, Simon Horman <horms+renesas@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 6 Nov 2018 at 20:51, Arnd Bergmann <arnd@arndb.de> wrote:
->
-> On 11/5/18, Kishon Vijay Abraham I <kishon@ti.com> wrote:
-> > On 05/11/18 8:46 AM, Chunyan Zhang wrote:
-> >>
-> >> +    sdhci_switch_extdma(host, true);
-> >
-> > A number of devices using sdhci-omap supports ADMA. So switching to
-> > external
-> > DMA shouldn't be unconditional.
-> >
-> > IMHO sdhci.c should see if the device supports ADMA or SDMA. If not it
-> > should
-> > try switching to external DMA and if external DMA too is not supported, it
-> > should use PIO.
->
-> What's the reasoning for preferring ADMA/SDMA over external DMA if
-> both are supported?
->
-> I'd expect that if the external DMA for some reason is worse than
-> ADMA, we just wouldn't list it in the DT at all, but if it's listed and
-> ADMA also works, then the driver should try to use it before falling
-> back to ADMA.
 
-Thanks Arnd and Kishon, let's see what Andrian and Ulf would suggest,
-and then I will address in next version of patchset.
+--pf9I7BMVVzbSWLtt
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Thanks again,
-Chunyan
 
->
->        Arnd
+> That also happens to be one of the cards we deploy; However i did
+> wonder about adding a quirk but decided against it as it was not clear
+> to me from the specification that CACHE ON really is meant to complete
+> within GENERIC_CMD6_TIMEOUT. That and i fret about ending up in hit-a-
+> mole games as the failure is really quite tedious (boot failure).=20
+
+I agree that we should use the more defensive variant as a default. I
+mean there should be no performance regression since most cards will
+respond just faster, or? The only downside I could see is that we might
+miss a real timeout with no bounds set and might get stuck? Maybe it is
+worth contacting eMMC spec people to at least know what is the expected
+behaviour?
+
+
+--pf9I7BMVVzbSWLtt
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlvipqgACgkQFA3kzBSg
+KbYHLw/7Bv4FJNQWjg+ox2ikLhOwBTCA17ia1KziTy3hpkArpy0hZR4yn+0qBDrl
+kXcsMqMzEQHp4IFZrvFQuNOGR/ItKOW7whg4d3B0VJB2wDtu02Dna05PEe4txu4G
+qjId6n9UHvuR2xBW5wo23MWqXiTMdTcQb5hn0Df1vh8AsajoRTXfLvz0i9RYAJiG
+omER+4GgvToO/PZWdoqskorPIJPRVsz90QIVaeFPoXkDHr2XM+XYsK3Iaos3RJRO
+7W95u8+R4CWAvYbxVvNFgj8oD/y91ntVbkcJz+km6BgR/Y0ck3YeqE0SKbRtFrkk
+YgaqISJDE2MpLR9WKOCGOqTN7bDdiaDgIGUZAErngyBI4WmjUPscZf71UY++SxnV
+5r2u0wyZ5MnXaiQez8+u6G6Z4VrnyhTwHtZDOBeFeQHlcEGKSVEjZ4I4JloNWM0d
+eylx8dAUqvNQQVadwXvlqGxzXN2/2V+dGKc5l1t+h/8vUYMqSHP46qPsCKVgQmcn
+2DRahrpE80xT+//2+XNq3ffGBdzCg/q3WwSqa3bkp861O1Jemp42GQwLHjF9Q/E4
+mk40YBIe4+w6CfVgJ6vXpq/3vcpZ/AivlHuCleXvz02pHC0/irVbeXlmJ5IkPevC
+4cUTJlAc+N3wDvWnEgxmH6e/yyTN1MiZqx+s6NcSxPXkIRdifaI=
+=2ZIL
+-----END PGP SIGNATURE-----
+
+--pf9I7BMVVzbSWLtt--
