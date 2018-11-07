@@ -1,80 +1,57 @@
-From: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-Subject: Re: [PATCH V3 1/2] dt-bindings: mmc: sdhci-msm: Add new compatible
- string for SDM845 SOC
-Date: Tue, 6 Nov 2018 23:29:32 +0530
-Message-ID: <ccbba1f3-0838-52ce-ce68-38f93ebbe584@codeaurora.org>
-References: <1541073999-11752-1-git-send-email-vbadigan@codeaurora.org>
- <1541073999-11752-2-git-send-email-vbadigan@codeaurora.org>
- <CAD=FV=V9AdCgOSonb0tu==DgKRKeZxto+aGwxmdbHAqrmfMrDQ@mail.gmail.com>
- <20181105203657.GA32282@bogus>
- <CAD=FV=VitZ4dyYGxinQ=nsrfM+U7duGbxeN3bdbRxfx-2AWxyQ@mail.gmail.com>
+From: Chunyan Zhang <zhang.chunyan@linaro.org>
+Subject: Re: [PATCH RFC 1/3] mmc: sdhci: add support for using external DMA devices
+Date: Wed, 7 Nov 2018 10:56:16 +0800
+Message-ID: <CAG2=9p8ELyjbOx1Ez2LExpYA4bDh_2RcD68e0EV0DHpaPwjXPg@mail.gmail.com>
+References: <1541387810-24867-1-git-send-email-zhang.chunyan@linaro.org>
+ <1541387810-24867-2-git-send-email-zhang.chunyan@linaro.org> <CAK8P3a2aUjLsP70zSjkavR4-mkV9iEVCw96Vces4N15Dno8SHw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAD=FV=VitZ4dyYGxinQ=nsrfM+U7duGbxeN3bdbRxfx-2AWxyQ@mail.gmail.com>
-Content-Language: en-US
+In-Reply-To: <CAK8P3a2aUjLsP70zSjkavR4-mkV9iEVCw96Vces4N15Dno8SHw@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Doug Anderson <dianders@google.com>, Rob Herring <robh@kernel.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Evan Green <evgreen@chromium.org>, Asutosh Das <asutoshd@codeaurora.org>, riteshh@codeaurora.org, stummala@codeaurora.org, sayalil@codeaurora.org, Mark Rutland <mark.rutland@arm.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Mark Brown <broonie@kernel.org>, Kishon Vijay Abraham I <kishon@ti.com>, Sekhar Nori <nsekhar@ti.com>, Lyra Zhang <zhang.lyra@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
+On Tue, 6 Nov 2018 at 19:16, Arnd Bergmann <arnd@arndb.de> wrote:
+>
+> On 11/5/18, Chunyan Zhang <zhang.chunyan@linaro.org> wrote:
+> > Some standard SD host controller can support both external dma
+> > controllers as well as ADMA in which the controller acts as
+> > DMA master.
+> >
+> > Currently the generic SDHCI code supports ADMA/SDMA integrated into
+> > the host controller but does not have any support for external DMA
+> > controllers implemented using dmaengine meaning that custom code is
+> > needed for any systems that use a generic DMA controller with SDHCI.
+> >
+> > Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
+>
+> Looks good to me overall, but I think I found one small bug:
+>
+>
+> > +     dma->rx_chan = dma_request_chan(mmc->parent, "rx");
+> > +     if (IS_ERR(dma->rx_chan)) {
+> > +             ret = PTR_ERR(dma->rx_chan);
+> > +             if (ret == -EPROBE_DEFER && dma->tx_chan)
+> > +                     dma_release_channel(dma->tx_chan);
+> > +
+> > +             dma->rx_chan = NULL;
+> > +             pr_warn("Failed to request RX DMA channel.\n");
+> > +     }
+>
+> The error handling looks wrong here: if you get EPROBE_DEFER,
+> you want to skip the warning message. If you get any other error code,
 
+Right, will address.
 
-On 11/6/2018 2:41 AM, Doug Anderson wrote:
-> Hi,
->
-> On Mon, Nov 5, 2018 at 12:37 PM Rob Herring <robh@kernel.org> wrote:
->> On Thu, Nov 01, 2018 at 01:29:54PM -0700, Doug Anderson wrote:
->>> Hi,
->>>
->>> On Thu, Nov 1, 2018 at 5:07 AM Veerabhadrarao Badiganti
->>> <vbadigan@codeaurora.org> wrote:
->>>> For SDM845 SOC, new compatible string  "qcom,sdm845-sdhci" is added.
->>>>
->>>> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
->>>> ---
->>>>   Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 1 +
->>>>   1 file changed, 1 insertion(+)
->>>>
->>>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->>>> index 502b3b8..f2ffbeb 100644
->>>> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->>>> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->>>> @@ -7,6 +7,7 @@ Required properties:
->>>>   - compatible: Should contain:
->>>>                  "qcom,sdhci-msm-v4" for sdcc versions less than 5.0
->>>>                  "qcom,sdhci-msm-v5" for sdcc versions >= 5.0
->>>> +               "qcom,sdm845-sdhci" for sdm845 SOC
->>> It's up to Rob of course, but IMO it seems a nicer way forward to
->>> include both the SoC-specific string and the "version" string in all
->>> cases.  I'd write this for the full text:
->> Fine by me if you update all the dts files.
-> Done and done.
->
-> https://lkml.kernel.org/r/20181105210921.253707-1-dianders@chromium.org
-> https://lkml.kernel.org/r/20181105210921.253707-2-dianders@chromium.org
->
->
->>>   - compatible: Should contain a SoC-specific string and a IP version string:
->>>        version strings:
->>>             "qcom,sdhci-msm-v4" for sdcc versions less than 5.0
->>>             "qcom,sdhci-msm-v5" for sdcc version 5.0
->>>        full compatible strings with SoC and version:
->>>             "qcom,apq8084", "qcom,sdhci-msm-v4"
->>>             "qcom,msm8974", "qcom,sdhci-msm-v4"
->>>             "qcom,msm8916", "qcom,sdhci-msm-v4"
->>>             "qcom,msm8992", "qcom,sdhci-msm-v4"
->>>             "qcom,msm8996", "qcom,sdhci-msm-v4"
->> I assume you meant to append '-sdhci' here?
-> Oops, yes!
->
->             "qcom,apq8084-sdhci", "qcom,sdhci-msm-v4"
->             "qcom,msm8974-sdhci", "qcom,sdhci-msm-v4"
->             "qcom,msm8916-sdhci", "qcom,sdhci-msm-v4"
->             "qcom,msm8992-sdhci", "qcom,sdhci-msm-v4"
->             "qcom,msm8996-sdhci", "qcom,sdhci-msm-v4"
+> you want the warning message and also the dma_release_channel()
+> which should be unconditional here.
 
-Thank you. Will update the documentation.
+Will address.
 
-> -Doug
+Thanks for the review,
+Chunyan
+
+>
+>         Arnd
