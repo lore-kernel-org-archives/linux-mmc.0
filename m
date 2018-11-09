@@ -1,56 +1,54 @@
-From: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-Subject: Re: [PATCH V3 2/3] dt-bindings: mmc: sdhci-msm: Add entries for
- passing load values
-Date: Thu, 8 Nov 2018 19:43:00 +0530
-Message-ID: <a0781e8c-2448-eecf-2736-150fa5ea8d4f@codeaurora.org>
-References: <1539004739-32060-1-git-send-email-vbadigan@codeaurora.org>
- <1539004739-32060-3-git-send-email-vbadigan@codeaurora.org>
- <20181012145516.GA10205@bogus>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: Re: [PATCH RFC 2/3] mmc: sdhci-omap: Add using external dma
+Date: Fri, 9 Nov 2018 10:57:45 +0530
+Message-ID: <44e1a97e-0446-283f-72f7-fd8d39a74b0f@ti.com>
+References: <1541387810-24867-1-git-send-email-zhang.chunyan@linaro.org>
+ <1541387810-24867-3-git-send-email-zhang.chunyan@linaro.org>
+ <be0a18e8-8ee6-4d4e-6dcc-6ba6e39033c9@ti.com>
+ <CAK8P3a2X4tbx_R-5VgfApF-UPmJ_XuzH3hO_uVAfffC6h8WrJw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181012145516.GA10205@bogus>
+In-Reply-To: <CAK8P3a2X4tbx_R-5VgfApF-UPmJ_XuzH3hO_uVAfffC6h8WrJw@mail.gmail.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Rob Herring <robh@kernel.org>
-Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, evgreen@chromium.org, dianders@google.com, asutoshd@codeaurora.org, riteshh@codeaurora.org, stummala@codeaurora.org, sayalil@codeaurora.org, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, Vijay Viswanath <vviswana@codeaurora.org>, Mark Rutland <mark.rutland@arm.com>, "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Mark Brown <broonie@kernel.org>, Sekhar Nori <nsekhar@ti.com>, Chunyan Zhang <zhang.lyra@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
+Hi Arnd,
 
-
-On 10/12/2018 8:25 PM, Rob Herring wrote:
-> On Mon, Oct 08, 2018 at 06:48:58PM +0530, Veerabhadrarao Badiganti wrote:
->> From: Vijay Viswanath <vviswana@codeaurora.org>
+On 06/11/18 6:21 PM, Arnd Bergmann wrote:
+> On 11/5/18, Kishon Vijay Abraham I <kishon@ti.com> wrote:
+>> On 05/11/18 8:46 AM, Chunyan Zhang wrote:
+>>>
+>>> +	sdhci_switch_extdma(host, true);
 >>
->> The load a particular sdhc controller should request from a regulator
->> is device specific and hence each device should individually vote for
->> the required load.
+>> A number of devices using sdhci-omap supports ADMA. So switching to
+>> external
+>> DMA shouldn't be unconditional.
 >>
->> Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
->> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
->> ---
->>   Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 8 ++++++++
->>   1 file changed, 8 insertions(+)
->>
->> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->> index 502b3b8..cb22178 100644
->> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->> @@ -25,6 +25,10 @@ Required properties:
->>   	"xo"	- TCXO clock (optional)
->>   	"cal"	- reference clock for RCLK delay calibration (optional)
->>   	"sleep"	- sleep clock for RCLK delay calibration (optional)
->> +- qcom,<supply>-current-level-microamp - specifies load levels for supply during BUS_ON and
->> +					BUS_OFF states in power irq. Should be specified in
->> +					pairs (lpm, hpm), for BUS_OFF and BUS_ON respectively.
->> +					Units uA.
-> Seems like something that should be common?
+>> IMHO sdhci.c should see if the device supports ADMA or SDMA. If not it
+>> should
+>> try switching to external DMA and if external DMA too is not supported, it
+>> should use PIO.
+> 
+> What's the reasoning for preferring ADMA/SDMA over external DMA if
+> both are supported?
 
-Hi Rob,
-Can you please little elaborate your comment?
-Do mean this should be common for all vendors, not specific to qcom-mmc?
+Generally from our experiments we've found ADMA gives better throughput than
+DMA. I have to ascertain the actual reasons for that.
+> 
+> I'd expect that if the external DMA for some reason is worse than
+> ADMA, we just wouldn't list it in the DT at all, but if it's listed and
+> ADMA also works, then the driver should try to use it before falling
+> back to ADMA.
 
+I would agree that for newer dtbs. However if you consider omap_hsmmc, external
+DMA bindings are already added in dt. If we try to switch to sdhci-omap with
+the same bindings, systems with older dtbs will use external DMA and give
+lesser throughput.
 
-Thanks,
-Veera
+Thanks
+Kishon
