@@ -1,81 +1,60 @@
-From: Stefan Wahren <stefan.wahren@i2se.com>
-Subject: [PATCH 00/17] bcm2835: Treewide switch to SPDX identifier
-Date: Sat, 10 Nov 2018 15:17:56 +0100
-Message-ID: <1541859476-6210-1-git-send-email-stefan.wahren@i2se.com>
+From: Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>
+Subject: [PATCH 11/17] mmc: bcm2835: Switch to SPDX identifier
+Date: Sat, 10 Nov 2018 17:10:05 +0100
+Message-ID: <1541866205-7737-1-git-send-email-stefan.wahren@i2se.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Florian Fainelli <f.fainelli@gmail.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Eric Anholt <eric@anholt.net>, Matt Mackall <mpm@selenic.com>, Herbert Xu <herbert@gondor.apana.org.au>, Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@kernel.org>, Daniel Lezcano <daniel.lezcano@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Vinod Koul <vkoul@kernel.org>, Jason Cooper <jason@lakedaemon.net>, Marc Zyngier <marc.zyngier@arm.com>, Jassi Brar <jassisinghbrar@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, Thierry Reding <thierry.reding@gmail.com>, Mark Brown <broonie@kernel.org>, Zhang Rui <rui.zhang@intel.com>, Eduardo Valentin <edube>
-Cc: Stefan Wahren <stefan.wahren@i2se.com>, linux-pwm@vger.kernel.org, alsa-devel@alsa-project.org, linux-pm@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-spi@vger.kernel.org, linux-i2c@vger.kernel.org, linux-gpio@vger.kernel.org, bcm-kernel-feedback-list@broadcom.com, linux-crypto@vger.kernel.org, dmaengine@vger.kernel.org, linux-clk@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rpi-kernel@lists.infradead.org
+Return-path: <linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rpi-kernel>,
+ <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rpi-kernel/>
+List-Post: <mailto:linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rpi-kernel>,
+ <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "linux-rpi-kernel" <linux-rpi-kernel-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Eric Anholt <eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-After fixing the module license of some bcm2835 drivers in "Fix MODULE_LICENSE
-of bcm2835 drivers", we can finally switch all outstanding bcm2835 /
-Raspberry Pi drivers to SPDX identifier and drop the unnecessary license text.
-I omit the staging area, because there are proposed a lot of changes for
-vc04_services. 
+Adopt the SPDX license identifier headers to ease license compliance
+management.
 
-I hope it is okay to have the binding header integrated in the tree-wise
-patches instead of a separate one. This should avoid conflicts while merging.
+Cc: Phil Elwell <phil-FnsA7b+Nu9XbIbC87yuRow@public.gmane.org>
+Signed-off-by: Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>
+---
+ drivers/mmc/host/bcm2835.c | 13 +------------
+ 1 file changed, 1 insertion(+), 12 deletions(-)
 
-Stefan Wahren (17):
-  ARM: dts: bcm2835-rpi-zero: Switch to SPDX identifier
-  ARM: mach-bcm: Switch bcm2835 and platsmp to SPDX identifier
-  hw_random: bcm2835-rng: Switch to SPDX identifier
-  clk: bcm2835: Switch to SPDX identifier
-  clocksource: bcm2835: Switch to SPDX identifier
-  dma: bcm2835: Switch to SPDX identifier
-  firmware: raspberrypi: Switch to SPDX identifier
-  i2c: bcm2835: Switch to SPDX identifier
-  irqchip: bcm283x: Switch to SPDX identifier
-  mailbox: bcm2835: Switch to SPDX identifier
-  mmc: bcm2835: Switch to SPDX identifier
-  pinctrl: bcm2835: Switch to SPDX identifier
-  pwm: bcm2835: Switch to SPDX identifier
-  soc: bcm: Switch raspberrypi-power to SPDX identifier
-  spi: bcm2835: Switch to SPDX identifier
-  thermal: bcm2835: Switch to SPDX identifier
-  ASoc: bcm2835-i2s: Switch to SPDX identifier
-
- arch/arm/boot/dts/bcm2835-rpi-zero-w.dts      |  8 +-------
- arch/arm/boot/dts/bcm2835-rpi-zero.dts        |  8 +-------
- arch/arm/mach-bcm/board_bcm2835.c             | 11 +----------
- arch/arm/mach-bcm/platsmp.c                   | 10 +---------
- arch/arm/mach-bcm/platsmp.h                   |  6 +-----
- drivers/char/hw_random/bcm2835-rng.c          |  7 ++-----
- drivers/clk/bcm/clk-bcm2835-aux.c             | 11 +----------
- drivers/clk/bcm/clk-bcm2835.c                 | 12 +-----------
- drivers/clocksource/bcm2835_timer.c           | 15 +--------------
- drivers/dma/bcm2835-dma.c                     | 11 +----------
- drivers/firmware/raspberrypi.c                |  5 +----
- drivers/i2c/busses/i2c-bcm2835.c              | 10 +---------
- drivers/irqchip/irq-bcm2835.c                 | 11 +----------
- drivers/irqchip/irq-bcm2836.c                 | 11 +----------
- drivers/mailbox/bcm2835-mailbox.c             |  8 +-------
- drivers/mmc/host/bcm2835.c                    | 13 +------------
- drivers/pinctrl/bcm/pinctrl-bcm2835.c         | 11 +----------
- drivers/pwm/pwm-bcm2835.c                     |  5 +----
- drivers/soc/bcm/raspberrypi-power.c           |  5 +----
- drivers/spi/spi-bcm2835.c                     | 11 +----------
- drivers/spi/spi-bcm2835aux.c                  | 11 +----------
- drivers/thermal/broadcom/bcm2835_thermal.c    | 11 +----------
- include/dt-bindings/clock/bcm2835-aux.h       | 10 +---------
- include/dt-bindings/clock/bcm2835.h           | 10 +---------
- include/dt-bindings/pinctrl/bcm2835.h         |  8 +-------
- include/dt-bindings/power/raspberrypi-power.h |  5 +----
- include/soc/bcm2835/raspberrypi-firmware.h    |  5 +----
- sound/soc/bcm/bcm2835-i2s.c                   | 10 +---------
- 28 files changed, 29 insertions(+), 230 deletions(-)
-
+diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
+index 768972a..4301bc5 100644
+--- a/drivers/mmc/host/bcm2835.c
++++ b/drivers/mmc/host/bcm2835.c
+@@ -1,3 +1,4 @@
++// SPDX-License-Identifier: GPL-2.0
+ /*
+  * bcm2835 sdhost driver.
+  *
+@@ -25,18 +26,6 @@
+  *  sdhci-bcm2708.c by Broadcom
+  *  sdhci-bcm2835.c by Stephen Warren and Oleksandr Tymoshenko
+  *  sdhci.c and sdhci-pci.c by Pierre Ossman
+- *
+- * This program is free software; you can redistribute it and/or modify it
+- * under the terms and conditions of the GNU General Public License,
+- * version 2, as published by the Free Software Foundation.
+- *
+- * This program is distributed in the hope it will be useful, but WITHOUT
+- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+- * more details.
+- *
+- * You should have received a copy of the GNU General Public License
+- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  */
+ #include <linux/clk.h>
+ #include <linux/delay.h>
 -- 
 2.7.4
