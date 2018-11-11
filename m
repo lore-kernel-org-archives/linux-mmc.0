@@ -1,7 +1,7 @@
 From: Stefan Wahren <stefan.wahren@i2se.com>
-Subject: [PATCH V2 2/7] mmc: bcm2835: Recover from MMC_SEND_EXT_CSD
-Date: Sun, 11 Nov 2018 21:23:54 +0100
-Message-ID: <1541967839-2847-3-git-send-email-stefan.wahren@i2se.com>
+Subject: [PATCH V2 4/7] mmc: bcm2835: Avoid possible races on data requests
+Date: Sun, 11 Nov 2018 21:23:56 +0100
+Message-ID: <1541967839-2847-5-git-send-email-stefan.wahren@i2se.com>
 References: <1541967839-2847-1-git-send-email-stefan.wahren@i2se.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,50 +21,51 @@ To: Eric Anholt <eric@anholt.net>, Florian Fainelli <f.fainelli@gmail.com>, Ulf 
 Cc: Stefan Wahren <stefan.wahren@i2se.com>, Phil Elwell <phil@raspberrypi.org>, linux-mmc@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, Michal Suchanek <msuchanek@suse.de>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Phil Elwell <phil@raspberrypi.org>
+There are two accesses on the data requests which are not protected by
+the mutex. So fix this accordingly.
 
-If the user issues an "mmc extcsd read", the SD controller receives
-what it thinks is a SEND_IF_COND command with an unexpected data block.
-The resulting operations leave the FSM stuck in READWAIT, a state which
-persists until the MMC framework resets the controller, by which point
-the root filesystem is likely to have been unmounted.
-
-A less heavyweight solution is to detect the condition and nudge the
-FSM by asserting the (self-clearing) FORCE_DATA_MODE bit.
-
-Link: https://github.com/raspberrypi/linux/issues/2728
-Signed-off-by: Phil Elwell <phil@raspberrypi.org>
 Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
 ---
- drivers/mmc/host/bcm2835.c | 9 +++++++++
- 1 file changed, 9 insertions(+)
+ drivers/mmc/host/bcm2835.c | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
-index f1712df..a251be2 100644
+index 45724ef..1c60798 100644
 --- a/drivers/mmc/host/bcm2835.c
 +++ b/drivers/mmc/host/bcm2835.c
-@@ -773,6 +773,8 @@ static void bcm2835_finish_command(struct bcm2835_host *host)
+@@ -1064,10 +1064,12 @@ static void bcm2835_dma_complete_work(struct work_struct *work)
+ {
+ 	struct bcm2835_host *host =
+ 		container_of(work, struct bcm2835_host, dma_work);
+-	struct mmc_data *data = host->data;
++	struct mmc_data *data;
  
- 		if (!(sdhsts & SDHSTS_CRC7_ERROR) ||
- 		    (host->cmd->opcode != MMC_SEND_OP_COND)) {
-+			u32 edm, fsm;
+ 	mutex_lock(&host->mutex);
+ 
++	data = host->data;
 +
- 			if (sdhsts & SDHSTS_CMD_TIME_OUT) {
- 				host->cmd->error = -ETIMEDOUT;
- 			} else {
-@@ -781,6 +783,13 @@ static void bcm2835_finish_command(struct bcm2835_host *host)
- 				bcm2835_dumpregs(host);
- 				host->cmd->error = -EILSEQ;
- 			}
-+			edm = readl(host->ioaddr + SDEDM);
-+			fsm = edm & SDEDM_FSM_MASK;
-+			if (fsm == SDEDM_FSM_READWAIT ||
-+			    fsm == SDEDM_FSM_WRITESTART1)
-+				/* Kick the FSM out of its wait */
-+				writel(edm | SDEDM_FORCE_DATA_MODE,
-+				       host->ioaddr + SDEDM);
- 			bcm2835_finish_request(host);
- 			return;
- 		}
+ 	if (host->dma_chan) {
+ 		dma_unmap_sg(host->dma_chan->device->dev,
+ 			     data->sg, data->sg_len,
+@@ -1192,9 +1194,6 @@ static void bcm2835_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 		return;
+ 	}
+ 
+-	if (host->use_dma && mrq->data && (mrq->data->blocks > PIO_THRESHOLD))
+-		bcm2835_prepare_dma(host, mrq->data);
+-
+ 	mutex_lock(&host->mutex);
+ 
+ 	WARN_ON(host->mrq);
+@@ -1218,6 +1217,9 @@ static void bcm2835_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 		return;
+ 	}
+ 
++	if (host->use_dma && mrq->data && (mrq->data->blocks > PIO_THRESHOLD))
++		bcm2835_prepare_dma(host, mrq->data);
++
+ 	host->use_sbc = !!mrq->sbc && host->mrq->data &&
+ 			(host->mrq->data->flags & MMC_DATA_READ);
+ 	if (host->use_sbc) {
 -- 
 2.7.4
