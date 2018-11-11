@@ -1,71 +1,46 @@
-From: Stefan Wahren <stefan.wahren@i2se.com>
-Subject: [PATCH 4/7] mmc: bcm2835: Avoid possible races on data requests
-Date: Sun, 11 Nov 2018 14:45:27 +0100
-Message-ID: <1541943930-23873-5-git-send-email-stefan.wahren@i2se.com>
+From: Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>
+Subject: [PATCH 5/7] mmc: bcm2835: Terminate timeout work synchronously
+Date: Sun, 11 Nov 2018 14:45:28 +0100
+Message-ID: <1541943930-23873-6-git-send-email-stefan.wahren@i2se.com>
 References: <1541943930-23873-1-git-send-email-stefan.wahren@i2se.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1541943930-23873-1-git-send-email-stefan.wahren@i2se.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Eric Anholt <eric@anholt.net>, Florian Fainelli <f.fainelli@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Stefan Wahren <stefan.wahren@i2se.com>, Phil Elwell <phil@raspberrypi.org>, linux-mmc@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, Michal Suchanek <msuchanek@suse.de>, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <1541943930-23873-1-git-send-email-stefan.wahren-eS4NqCHxEME@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rpi-kernel>,
+ <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rpi-kernel/>
+List-Post: <mailto:linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rpi-kernel>,
+ <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "linux-rpi-kernel" <linux-rpi-kernel-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Eric Anholt <eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org>, Florian Fainelli <f.fainelli-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Michal Suchanek <msuchanek-l3A5Bk7waGM@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-There are two accesses on the data requests which are not protected by
-the mutex. So fix this accordingly.
+It's better to make sure that the timeout work is really terminated
+before calling mmc_request_done.
 
-Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
+Signed-off-by: Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>
 ---
- drivers/mmc/host/bcm2835.c | 10 ++++++----
- 1 file changed, 6 insertions(+), 4 deletions(-)
+ drivers/mmc/host/bcm2835.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
-index 45724ef..1c60798 100644
+index 1c60798..2c7589f 100644
 --- a/drivers/mmc/host/bcm2835.c
 +++ b/drivers/mmc/host/bcm2835.c
-@@ -1064,10 +1064,12 @@ static void bcm2835_dma_complete_work(struct work_struct *work)
- {
- 	struct bcm2835_host *host =
- 		container_of(work, struct bcm2835_host, dma_work);
--	struct mmc_data *data = host->data;
-+	struct mmc_data *data;
+@@ -608,7 +608,7 @@ static void bcm2835_finish_request(struct bcm2835_host *host)
+ 	struct dma_chan *terminate_chan = NULL;
+ 	struct mmc_request *mrq;
  
- 	mutex_lock(&host->mutex);
+-	cancel_delayed_work(&host->timeout_work);
++	cancel_delayed_work_sync(&host->timeout_work);
  
-+	data = host->data;
-+
- 	if (host->dma_chan) {
- 		dma_unmap_sg(host->dma_chan->device->dev,
- 			     data->sg, data->sg_len,
-@@ -1192,9 +1194,6 @@ static void bcm2835_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 		return;
- 	}
+ 	mrq = host->mrq;
  
--	if (host->use_dma && mrq->data && (mrq->data->blocks > PIO_THRESHOLD))
--		bcm2835_prepare_dma(host, mrq->data);
--
- 	mutex_lock(&host->mutex);
- 
- 	WARN_ON(host->mrq);
-@@ -1218,6 +1217,9 @@ static void bcm2835_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 		return;
- 	}
- 
-+	if (host->use_dma && mrq->data && (mrq->data->blocks > PIO_THRESHOLD))
-+		bcm2835_prepare_dma(host, mrq->data);
-+
- 	host->use_sbc = !!mrq->sbc && host->mrq->data &&
- 			(host->mrq->data->flags & MMC_DATA_READ);
- 	if (host->use_sbc) {
 -- 
 2.7.4
