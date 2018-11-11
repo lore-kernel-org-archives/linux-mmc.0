@@ -1,7 +1,7 @@
 From: Stefan Wahren <stefan.wahren@i2se.com>
-Subject: [PATCH 6/7] mmc: bcm2835: Refactor dma_map_sg handling
-Date: Sun, 11 Nov 2018 14:45:29 +0100
-Message-ID: <1541943930-23873-7-git-send-email-stefan.wahren@i2se.com>
+Subject: [PATCH 7/7] mmc: bcm2835: Properly handle dmaengine_prep_slave_sg
+Date: Sun, 11 Nov 2018 14:45:30 +0100
+Message-ID: <1541943930-23873-8-git-send-email-stefan.wahren@i2se.com>
 References: <1541943930-23873-1-git-send-email-stefan.wahren@i2se.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,49 +21,39 @@ To: Eric Anholt <eric@anholt.net>, Florian Fainelli <f.fainelli@gmail.com>, Ulf 
 Cc: Stefan Wahren <stefan.wahren@i2se.com>, Phil Elwell <phil@raspberrypi.org>, linux-mmc@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, Michal Suchanek <msuchanek@suse.de>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-There are two variables len within bcm2835_prepare_dma. So rename the result
-of dma_map_sg to sg_len. While we are at this add a bail out to simplify the
-following change.
+In case dmaengine_prep_slave_sg fails we need to call dma_unmap_sg.
 
 Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
 ---
- drivers/mmc/host/bcm2835.c | 16 +++++++---------
- 1 file changed, 7 insertions(+), 9 deletions(-)
+ drivers/mmc/host/bcm2835.c | 15 +++++++++------
+ 1 file changed, 9 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
-index 2c7589f..c42bdaa 100644
+index c42bdaa..82e4b08 100644
 --- a/drivers/mmc/host/bcm2835.c
 +++ b/drivers/mmc/host/bcm2835.c
-@@ -464,7 +464,7 @@ static void bcm2835_transfer_pio(struct bcm2835_host *host)
- static
- void bcm2835_prepare_dma(struct bcm2835_host *host, struct mmc_data *data)
- {
--	int len, dir_data, dir_slave;
-+	int sg_len, dir_data, dir_slave;
- 	struct dma_async_tx_descriptor *desc = NULL;
- 	struct dma_chan *dma_chan;
+@@ -518,13 +518,16 @@ void bcm2835_prepare_dma(struct bcm2835_host *host, struct mmc_data *data)
+ 	desc = dmaengine_prep_slave_sg(dma_chan, data->sg, sg_len, dir_slave,
+ 				       DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
  
-@@ -510,15 +510,13 @@ void bcm2835_prepare_dma(struct bcm2835_host *host, struct mmc_data *data)
- 				     &host->dma_cfg_rx :
- 				     &host->dma_cfg_tx);
- 
--	len = dma_map_sg(dma_chan->device->dev, data->sg, data->sg_len,
--			 dir_data);
-+	sg_len = dma_map_sg(dma_chan->device->dev, data->sg, data->sg_len,
-+			    dir_data);
-+	if (!sg_len)
+-	if (desc) {
+-		desc->callback = bcm2835_dma_complete;
+-		desc->callback_param = host;
+-		host->dma_desc = desc;
+-		host->dma_chan = dma_chan;
+-		host->dma_dir = dir_data;
++	if (!desc) {
++		dma_unmap_sg(dma_chan->device->dev, data->sg, sg_len, dir_data);
 +		return;
+ 	}
++
++	desc->callback = bcm2835_dma_complete;
++	desc->callback_param = host;
++	host->dma_desc = desc;
++	host->dma_chan = dma_chan;
++	host->dma_dir = dir_data;
+ }
  
--	if (len > 0) {
--		desc = dmaengine_prep_slave_sg(dma_chan, data->sg,
--					       len, dir_slave,
--					       DMA_PREP_INTERRUPT |
--					       DMA_CTRL_ACK);
--	}
-+	desc = dmaengine_prep_slave_sg(dma_chan, data->sg, sg_len, dir_slave,
-+				       DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
- 
- 	if (desc) {
- 		desc->callback = bcm2835_dma_complete;
+ static void bcm2835_start_dma(struct bcm2835_host *host)
 -- 
 2.7.4
