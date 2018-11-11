@@ -1,7 +1,7 @@
 From: Stefan Wahren <stefan.wahren@i2se.com>
-Subject: [PATCH V2 4/7] mmc: bcm2835: Avoid possible races on data requests
-Date: Sun, 11 Nov 2018 21:23:56 +0100
-Message-ID: <1541967839-2847-5-git-send-email-stefan.wahren@i2se.com>
+Subject: [PATCH V2 6/7] mmc: bcm2835: Refactor dma_map_sg handling
+Date: Sun, 11 Nov 2018 21:23:58 +0100
+Message-ID: <1541967839-2847-7-git-send-email-stefan.wahren@i2se.com>
 References: <1541967839-2847-1-git-send-email-stefan.wahren@i2se.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,51 +21,49 @@ To: Eric Anholt <eric@anholt.net>, Florian Fainelli <f.fainelli@gmail.com>, Ulf 
 Cc: Stefan Wahren <stefan.wahren@i2se.com>, Phil Elwell <phil@raspberrypi.org>, linux-mmc@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, Michal Suchanek <msuchanek@suse.de>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-There are two accesses on the data requests which are not protected by
-the mutex. So fix this accordingly.
+There are two variables len within bcm2835_prepare_dma. So rename the result
+of dma_map_sg to sg_len. While we are at this add a bail out to simplify the
+following change.
 
 Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
 ---
- drivers/mmc/host/bcm2835.c | 10 ++++++----
- 1 file changed, 6 insertions(+), 4 deletions(-)
+ drivers/mmc/host/bcm2835.c | 16 +++++++---------
+ 1 file changed, 7 insertions(+), 9 deletions(-)
 
 diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
-index 45724ef..1c60798 100644
+index 2c7589f..c42bdaa 100644
 --- a/drivers/mmc/host/bcm2835.c
 +++ b/drivers/mmc/host/bcm2835.c
-@@ -1064,10 +1064,12 @@ static void bcm2835_dma_complete_work(struct work_struct *work)
+@@ -464,7 +464,7 @@ static void bcm2835_transfer_pio(struct bcm2835_host *host)
+ static
+ void bcm2835_prepare_dma(struct bcm2835_host *host, struct mmc_data *data)
  {
- 	struct bcm2835_host *host =
- 		container_of(work, struct bcm2835_host, dma_work);
--	struct mmc_data *data = host->data;
-+	struct mmc_data *data;
+-	int len, dir_data, dir_slave;
++	int sg_len, dir_data, dir_slave;
+ 	struct dma_async_tx_descriptor *desc = NULL;
+ 	struct dma_chan *dma_chan;
  
- 	mutex_lock(&host->mutex);
+@@ -510,15 +510,13 @@ void bcm2835_prepare_dma(struct bcm2835_host *host, struct mmc_data *data)
+ 				     &host->dma_cfg_rx :
+ 				     &host->dma_cfg_tx);
  
-+	data = host->data;
-+
- 	if (host->dma_chan) {
- 		dma_unmap_sg(host->dma_chan->device->dev,
- 			     data->sg, data->sg_len,
-@@ -1192,9 +1194,6 @@ static void bcm2835_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 		return;
- 	}
+-	len = dma_map_sg(dma_chan->device->dev, data->sg, data->sg_len,
+-			 dir_data);
++	sg_len = dma_map_sg(dma_chan->device->dev, data->sg, data->sg_len,
++			    dir_data);
++	if (!sg_len)
++		return;
  
--	if (host->use_dma && mrq->data && (mrq->data->blocks > PIO_THRESHOLD))
--		bcm2835_prepare_dma(host, mrq->data);
--
- 	mutex_lock(&host->mutex);
+-	if (len > 0) {
+-		desc = dmaengine_prep_slave_sg(dma_chan, data->sg,
+-					       len, dir_slave,
+-					       DMA_PREP_INTERRUPT |
+-					       DMA_CTRL_ACK);
+-	}
++	desc = dmaengine_prep_slave_sg(dma_chan, data->sg, sg_len, dir_slave,
++				       DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
  
- 	WARN_ON(host->mrq);
-@@ -1218,6 +1217,9 @@ static void bcm2835_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 		return;
- 	}
- 
-+	if (host->use_dma && mrq->data && (mrq->data->blocks > PIO_THRESHOLD))
-+		bcm2835_prepare_dma(host, mrq->data);
-+
- 	host->use_sbc = !!mrq->sbc && host->mrq->data &&
- 			(host->mrq->data->flags & MMC_DATA_READ);
- 	if (host->use_sbc) {
+ 	if (desc) {
+ 		desc->callback = bcm2835_dma_complete;
 -- 
 2.7.4
