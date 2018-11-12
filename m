@@ -1,56 +1,61 @@
 From: Chunyan Zhang <zhang.chunyan@linaro.org>
-Subject: [PATCH v2 0/3] Add support for using external dma in SDHCI
-Date: Mon, 12 Nov 2018 15:26:03 +0800
-Message-ID: <1542007566-9449-1-git-send-email-zhang.chunyan@linaro.org>
+Subject: [PATCH v2 2/3] mmc: sdhci-omap: Add using external dma
+Date: Mon, 12 Nov 2018 15:26:05 +0800
+Message-ID: <1542007566-9449-3-git-send-email-zhang.chunyan@linaro.org>
+References: <1542007566-9449-1-git-send-email-zhang.chunyan@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1542007566-9449-1-git-send-email-zhang.chunyan@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Mark Brown <broonie@kernel.org>, Kishon Vijay Abraham I <kishon@ti.com>, Sekhar Nori <nsekhar@ti.com>, Chunyan Zhang <zhang.lyra@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Currently the generic SDHCI code in the Linux kernel supports the SD
-standard DMA integrated into the host controller but does not have any
-support for external DMA controllers implemented using dmaengine meaning
-that custom code is needed for any systems that use a generic DMA
-controller with SDHCI which in practice means any SDHCI controller that
-doesn't have an integrated DMA controller so we should have this as a
-generic feature.
+sdhci-omap can support both external dma controller via dmaengine framework
+as well as ADMA which standard SD host controller provides.
 
-There are already a number of controller specific drivers that have dmaengine
-code, and some could use sdhci.c actually, but needed to implement mmc_ops->request()
-in their specific driver for sending command with external dma using dmaengine
-framework, with this patchset, them will take advantage of the generic support.
-TI's omap controller is the case as an example.
+Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
+---
+ drivers/mmc/host/sdhci-omap.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
 
-Any comments are very appreciated.
-
-Thanks,
-Chunyan
-
-Changes from v1 (https://lkml.org/lkml/2018/11/5/110):
-(The code on patch 1/3 only was revised)
-* Address comments from Arnd:
-- Release channel when failed to request it unconditionally;
-- Skip warning message if get EPROBE_DEFER;
-* Address Andrian's comments:
-- Replace extdma with external_dma;
-- Add release dma resources in sdhci_cleanup_host() and sdhci_remove_host();
-- Release dma resources once dmaengine_submit() failed.
-- Put rx/tx_chan in struct sdhci_host, and removed unused structure.
-* Fall back to the DMA/PIO which standard SDHCI supports, if sdhci_external_dma_setup()
-  or sdhci_external_dma_init failed;
-
-Chunyan Zhang (3):
-  mmc: sdhci: add support for using external DMA devices
-  mmc: sdhci-omap: Add using external dma
-  dt-bindings: sdhci-omap: Add example for using external dma
-
- .../devicetree/bindings/mmc/sdhci-omap.txt         |   7 +
- drivers/mmc/host/Kconfig                           |  13 ++
- drivers/mmc/host/sdhci-omap.c                      |   7 +
- drivers/mmc/host/sdhci.c                           | 181 ++++++++++++++++++++-
- drivers/mmc/host/sdhci.h                           |   8 +
- 5 files changed, 215 insertions(+), 1 deletion(-)
-
+diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+index 88347ce..ccc79f2 100644
+--- a/drivers/mmc/host/sdhci-omap.c
++++ b/drivers/mmc/host/sdhci-omap.c
+@@ -896,6 +896,7 @@ static int sdhci_omap_probe(struct platform_device *pdev)
+ 	const struct of_device_id *match;
+ 	struct sdhci_omap_data *data;
+ 	const struct soc_device_attribute *soc;
++	struct resource *regs;
+ 
+ 	match = of_match_device(omap_sdhci_match, dev);
+ 	if (!match)
+@@ -908,6 +909,10 @@ static int sdhci_omap_probe(struct platform_device *pdev)
+ 	}
+ 	offset = data->offset;
+ 
++	regs = platform_get_resource(pdev, IORESOURCE_MEM, 0);
++	if (!regs)
++		return -ENXIO;
++
+ 	host = sdhci_pltfm_init(pdev, &sdhci_omap_pdata,
+ 				sizeof(*omap_host));
+ 	if (IS_ERR(host)) {
+@@ -924,6 +929,7 @@ static int sdhci_omap_probe(struct platform_device *pdev)
+ 	omap_host->timing = MMC_TIMING_LEGACY;
+ 	omap_host->flags = data->flags;
+ 	host->ioaddr += offset;
++	host->mapbase = regs->start;
+ 
+ 	mmc = host->mmc;
+ 	sdhci_get_of_property(pdev);
+@@ -991,6 +997,7 @@ static int sdhci_omap_probe(struct platform_device *pdev)
+ 	host->mmc_host_ops.execute_tuning = sdhci_omap_execute_tuning;
+ 	host->mmc_host_ops.enable_sdio_irq = sdhci_omap_enable_sdio_irq;
+ 
++	sdhci_switch_external_dma(host, true);
+ 	ret = sdhci_setup_host(host);
+ 	if (ret)
+ 		goto err_put_sync;
 -- 
 2.7.4
