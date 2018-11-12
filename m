@@ -1,95 +1,79 @@
-From: Andy Shevchenko <andy.shevchenko@gmail.com>
-Subject: Re: [PATCH v2] mmc: sdhci-pci: Try "cd" for card-detect lookup before
- using NULL
-Date: Mon, 12 Nov 2018 13:25:49 +0200
-Message-ID: <CAHp75VezX-agNFp2wEHorH7U9NmZgpX-PfXdBbGDETnJY2AFGA@mail.gmail.com>
-References: <CAA93t1oaZ5zkv+BsGnYZg6pqKv0DzXi3j8oZHUyTyffUWHtHug@mail.gmail.com>
- <20181029221701.51376-1-rajatja@google.com> <CAPDyKFpqzpxUzZe-ekfwg1Nqeg1RFB1bdbSNwrGPwtfNds4p0w@mail.gmail.com>
+From: Peter Ujfalusi <peter.ujfalusi@ti.com>
+Subject: Re: [PATCH] mmc: core: Lower max_seg_size if too high for DMA
+Date: Mon, 12 Nov 2018 18:48:30 +0200
+Message-ID: <2099ae8d-ef53-ac6f-a25d-c1e1acc0d5f4@ti.com>
+References: <20181031155738.18367-1-tony@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFpqzpxUzZe-ekfwg1Nqeg1RFB1bdbSNwrGPwtfNds4p0w@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Rajat Jain <rajatja@google.com>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Rajat Jain <rajatxjain@gmail.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Mika Westerberg <mika.westerberg@linux.intel.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Dmitry Torokhov <dtor@google.com>, "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>, ACPI Devel Maling List <linux-acpi@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20181031155738.18367-1-tony@atomide.com>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Tony Lindgren <tony@atomide.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Russell King <rmk+kernel@armlinux.org.uk>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Kishon Vijay Abraham I <kishon@ti.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Nov 12, 2018 at 1:05 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> On 29 October 2018 at 23:17, Rajat Jain <rajatja@google.com> wrote:
-> > Problem:
-> >
-> > The card detect IRQ does not work with modern BIOS (that want
-> > to use _DSD to provide the card detect GPIO to the driver).
-> >
-> > Details:
-> >
-> > The mmc core provides the mmc_gpiod_request_cd() API to let host drivers
-> > request the gpio descriptor for the "card detect" pin.
-> > This pin is specified in the ACPI for the SDHC device:
-> >
-> >  * Either as a resource using _CRS. This is a method used by legacy BIOS.
-> >    (The driver needs to tell which resource index).
-> >
-> >  * Or as a named property ("cd-gpios"/"cd-gpio") in _DSD (which internally
-> >    points to an entry in _CRS). This way, the driver can lookup using a
-> >    string. This is what modern BIOS prefer to use.
-> >
-> > This API finally results in a call to the following code:
-> >
-> > struct gpio_desc *acpi_find_gpio(..., const char *con_id,...)
-> > {
-> > ...
-> >    /* Lookup gpio (using "<con_id>-gpio") in the _DSD */
-> > ...
-> >    if (!acpi_can_fallback_to_crs(adev, con_id))
-> >           return ERR_PTR(-ENOENT);
-> > ...
-> >    /* Falling back to _CRS is allowed, Lookup gpio in the _CRS */
-> > ...
-> > }
-> >
-> > Note that this means that if the ACPI has _DSD properties, the kernel
-> > will never use _CRS for the lookup (Because acpi_can_fallback_to_crs()
-> > will always be false for any device hat has _DSD entries).
-> >
-> > The SDHCI driver is thus currently broken on a modern BIOS, even if
-> > BIOS provides both _CRS (for index based lookup) and _DSD entries (for
-> > string based lookup). Ironically, none of these will be used for the
-> > lookup currently because:
-> >
-> > * Since the con_id is NULL, acpi_find_gpio() does not find a matching
-> >   entry in DSDT. (The _DSDT entry has the property name = "cd-gpios")
-> >
-> > * Because ACPI contains DSDT entries, thus acpi_can_fallback_to_crs()
-> >   returns false (because device properties have been populated from
-> >   _DSD), thus the _CRS is never used for the lookup.
-> >
-> > Fix:
-> >
-> > Try "cd" for lookup in the _DSD before falling back to using NULL so
-> > as to try looking up in the _CRS.
-> >
-> > I've tested this patch successfully with both Legacy BIOS (that
-> > provide only _CRS method) as well as modern BIOS (that provide both
-> > _CRS and _DSD). Also the use of "cd" appears to be fairly consistent
-> > across other users of this API (other MMC host controller drivers).
-> >
-> > Link: https://lkml.org/lkml/2018/9/25/1113
-> > Signed-off-by: Rajat Jain <rajatja@google.com>
->
-> Applied for fixes, thanks!
->
-> Should I add a stable tag to this as well?
-
-If you go with that it might make sense to have Fixes tag against
-
-commit f10e4bf6632b5be11cea875b66ba959833a69258
-Author: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Date:   Tue May 23 20:03:19 2017 +0300
-
-   gpio: acpi: Even more tighten up ACPI GPIO lookups
-
--- 
-With Best Regards,
-Andy Shevchenko
+VG9ueSwKCk9uIDIwMTgtMTAtMzEgMTc6NTcsIFRvbnkgTGluZGdyZW4gd3JvdGU6Cj4gV2l0aCBD
+T05GSUdfRE1BX0FQSV9ERUJVR19TRyBhIGRldmljZSBtYXkgcHJvZHVjZSB0aGUgZm9sbG93aW5n
+IHdhcm5pbmc6Cj4gCj4gIkRNQS1BUEk6IG1hcHBpbmcgc2cgc2VnbWVudCBsb25nZXIgdGhhbiBk
+ZXZpY2UgY2xhaW1zIHRvIHN1cHBvcnQiCj4gCj4gV2UgZGVmYXVsdCB0byA2NEtpQiBpZiBhIERN
+QSBlbmdpbmUgZHJpdmVyIGRvZXMgbm90IGluaXRpYWxpemUgZG1hX3Bhcm1zCj4gYW5kIGNhbGwg
+ZG1hX3NldF9tYXhfc2VnX3NpemUoKS4gVGhpcyBtYXkgYmUgbG93ZXIgdGhhdCB3aGF0IG1hbnkg
+TU1DCj4gZHJpdmVycyBkbyB3aXRoIG1tYy0+bWF4X3NlZ19zaXplID0gbW1jLT5tYXhfYmxrX3Np
+emUgKiBtbWMtPm1heF9ibGtfY291bnQuCj4gCj4gTGV0J3MgZG8gYSBzYW5pdHkgY2hlY2sgZm9y
+IG1heF9zZWdfc2l6ZSBiZWluZyBoaWdoZXIgdGhhbiB3aGF0IERNQQo+IHN1cHBvcnRzIGluIG1t
+Y19hZGRfaG9zdCgpIGFuZCBsb3dlciBpdCBhcyBuZWVkZWQuCgpJIHRyaWVkIHRvIGFkZHJlc3Mg
+aXQgd2l0aDoKCmh0dHBzOi8vcGF0Y2h3b3JrLmtlcm5lbC5vcmcvcGF0Y2gvOTk0ODk2Ny8KaHR0
+cHM6Ly9wYXRjaHdvcmsua2VybmVsLm9yZy9wYXRjaC85OTQ4OTg5LwpodHRwczovL3BhdGNod29y
+ay5rZXJuZWwub3JnL3BhdGNoLzk5NDg5NzUvCgpidXQgaXQgaXMgYmFjayBpbiB0aGUgZHJhd2lu
+ZyBib2FyZCBmb3Igbm93LgoKVGhlIHByb2JsZW0gaXMgdGhhdCB3aXRoIGVETUEvU0RNQSB0aGUg
+c2l6ZSBsaW1pdCBpcyBub3QgYnl0ZXMsIGJ1dCB0aGUKbnVtYmVyIG9mIGJ1cnN0cy4gRGlmZmVy
+ZW50IGFkZHJfd2lkdGggYW5kIGJ1cnN0IGNvbWJpbmF0aW9uIHdvdWxkCnJlc3VsdCBkaWZmZXJl
+bnQgbWF4X3NlZ19zaXplIGFuZCBJIGNhbiBub3QgZ3Vlc3MgYmVmb3JlIHRoZSB1c2VyCnByb3Zp
+ZGUgdGhlICBkbWFfc2xhdmVfY29uZmlnIHZpYSBkbWFlbmdpbmVfc2xhdmVfY29uZmlnKCkuCgpJ
+IGhhdmUgZXhwZXJpbWVudGFsIHBhdGNoZXMgdG8gbW9kaWZ5IHRoZSBtYXhfc2VnX3NpemUgb2Yg
+dGhlIF9jaGFubmVsXwpwcm9hY3RpdmVseSBpbiByZXNwb25zZSBzbGF2ZV9jb25maWcgYW5kIHRo
+ZW4gd2Ugc2hvdWxkIGhhdmUgYW4gQVBJIHRvCnF1ZXJ5IGl0IGZyb20gdGhlIERNQSBfY2hhbm5l
+bF8sIG5vdCBmcm9tIHRoZSBETUEgZGV2aWNlIGFzIGVhY2ggY2hhbm5lbApjYW4gaGF2ZSBkaWZm
+ZXJlbnQgbGltaXQgb24gdGhlIG1heF9zZWdfc2l6ZS4KCj4gCj4gQ2M6IEtpc2hvbiBWaWpheSBB
+YnJhaGFtIEkgPGtpc2hvbkB0aS5jb20+Cj4gQ2M6IFBldGVyIFVqZmFsdXNpIDxwZXRlci51amZh
+bHVzaUB0aS5jb20+Cj4gQ2M6IFJ1c3NlbGwgS2luZyA8cm1rK2tlcm5lbEBhcm1saW51eC5vcmcu
+dWs+Cj4gUmVwb3J0ZWQtYnk6IFJ1c3NlbGwgS2luZyA8cm1rK2tlcm5lbEBhcm1saW51eC5vcmcu
+dWs+Cj4gU2lnbmVkLW9mZi1ieTogVG9ueSBMaW5kZ3JlbiA8dG9ueUBhdG9taWRlLmNvbT4KClJl
+dmlld2VkLWJ5OiBQZXRlciBVamZhbHVzaSA8cGV0ZXIudWpmYWx1c2lAdGkuY29tPgoKPiAtLS0K
+PiAgZHJpdmVycy9tbWMvY29yZS9ob3N0LmMgfCAxNiArKysrKysrKysrKysrKysrCj4gIDEgZmls
+ZSBjaGFuZ2VkLCAxNiBpbnNlcnRpb25zKCspCj4gCj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1j
+L2NvcmUvaG9zdC5jIGIvZHJpdmVycy9tbWMvY29yZS9ob3N0LmMKPiAtLS0gYS9kcml2ZXJzL21t
+Yy9jb3JlL2hvc3QuYwo+ICsrKyBiL2RyaXZlcnMvbW1jL2NvcmUvaG9zdC5jCj4gQEAgLTEzLDYg
+KzEzLDcgQEAKPiAgICovCj4gIAo+ICAjaW5jbHVkZSA8bGludXgvZGV2aWNlLmg+Cj4gKyNpbmNs
+dWRlIDxsaW51eC9kbWEtbWFwcGluZy5oPgo+ICAjaW5jbHVkZSA8bGludXgvZXJyLmg+Cj4gICNp
+bmNsdWRlIDxsaW51eC9pZHIuaD4KPiAgI2luY2x1ZGUgPGxpbnV4L29mLmg+Cj4gQEAgLTQxNSw2
+ICs0MTYsMTkgQEAgc3RydWN0IG1tY19ob3N0ICptbWNfYWxsb2NfaG9zdChpbnQgZXh0cmEsIHN0
+cnVjdCBkZXZpY2UgKmRldikKPiAgCj4gIEVYUE9SVF9TWU1CT0wobW1jX2FsbG9jX2hvc3QpOwo+
+ICAKPiArc3RhdGljIHZvaWQgbW1jX2NoZWNrX21heF9zZWdfc2l6ZShzdHJ1Y3QgbW1jX2hvc3Qg
+Kmhvc3QpCj4gK3sKPiArCXVuc2lnbmVkIGludCBtYXhfc2VnX3NpemUgPSBkbWFfZ2V0X21heF9z
+ZWdfc2l6ZShtbWNfZGV2KGhvc3QpKTsKPiArCj4gKwlpZiAoaG9zdC0+bWF4X3NlZ19zaXplIDw9
+IG1heF9zZWdfc2l6ZSkKPiArCQlyZXR1cm47Cj4gKwo+ICsJZGV2X2luZm8obW1jX2Rldihob3N0
+KSwgIkxvd2VyaW5nIG1heF9zZWdfc2l6ZSBmb3IgRE1BOiAldSB2cyAldVxuIiwKPiArCQkgaG9z
+dC0+bWF4X3NlZ19zaXplLCBtYXhfc2VnX3NpemUpOwo+ICsKPiArCWhvc3QtPm1heF9zZWdfc2l6
+ZSA9IG1heF9zZWdfc2l6ZTsKPiArfQo+ICsKPiAgLyoqCj4gICAqCW1tY19hZGRfaG9zdCAtIGlu
+aXRpYWxpc2UgaG9zdCBoYXJkd2FyZQo+ICAgKglAaG9zdDogbW1jIGhvc3QKPiBAQCAtNDMwLDYg
+KzQ0NCw4IEBAIGludCBtbWNfYWRkX2hvc3Qoc3RydWN0IG1tY19ob3N0ICpob3N0KQo+ICAJV0FS
+Tl9PTigoaG9zdC0+Y2FwcyAmIE1NQ19DQVBfU0RJT19JUlEpICYmCj4gIAkJIWhvc3QtPm9wcy0+
+ZW5hYmxlX3NkaW9faXJxKTsKPiAgCj4gKwltbWNfY2hlY2tfbWF4X3NlZ19zaXplKGhvc3QpOwo+
+ICsKPiAgCWVyciA9IGRldmljZV9hZGQoJmhvc3QtPmNsYXNzX2Rldik7Cj4gIAlpZiAoZXJyKQo+
+ICAJCXJldHVybiBlcnI7Cj4gCgotIFDDqXRlcgoKVGV4YXMgSW5zdHJ1bWVudHMgRmlubGFuZCBP
+eSwgUG9ya2thbGFua2F0dSAyMiwgMDAxODAgSGVsc2lua2kuClktdHVubnVzL0J1c2luZXNzIElE
+OiAwNjE1NTIxLTQuIEtvdGlwYWlra2EvRG9taWNpbGU6IEhlbHNpbmtpCgpfX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpsaW51eC1hcm0ta2VybmVsIG1haWxp
+bmcgbGlzdApsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3Rz
+LmluZnJhZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1hcm0ta2VybmVsCg==
