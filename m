@@ -1,46 +1,72 @@
 From: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-Subject: [PATCH V2 0/2] Re-initialize DLL when MCLK is gated dynamically
-Date: Mon, 12 Nov 2018 12:08:22 +0530
-Message-ID: <1542004704-17066-1-git-send-email-vbadigan@codeaurora.org>
+Subject: [PATCH V2 1/2] dt-bindings: mmc: sdhci-msm: Add SoC-specific compatible strings
+Date: Mon, 12 Nov 2018 12:08:23 +0530
+Message-ID: <1542004704-17066-2-git-send-email-vbadigan@codeaurora.org>
+References: <1542004704-17066-1-git-send-email-vbadigan@codeaurora.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1542004704-17066-1-git-send-email-vbadigan@codeaurora.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: adrian.hunter@intel.com, ulf.hansson@linaro.org, robh+dt@kernel.org, evgreen@chromium.org, dianders@google.com
-Cc: asutoshd@codeaurora.org, riteshh@codeaurora.org, stummala@codeaurora.org, sayalil@codeaurora.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org, Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Cc: asutoshd@codeaurora.org, riteshh@codeaurora.org, stummala@codeaurora.org, sayalil@codeaurora.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org, Veerabhadrarao Badiganti <vbadigan@codeaurora.org>, Mark Rutland <mark.rutland@arm.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On few SDHCI-MSM controllers, the host controller's clock tuning
-circuit may go out of sync if controller clocks are gated which
-eventually, result in data CRC and command CRC/timeout errors.
-To fix this issue, the DLL needs to be re-initialized and restored with
-its old settings once clocks are ungated. SDHC cotroller on SDM845 SOC
-has this limitation.
+Add SoC-specific compatible strings for qcom-sdhci controller.
 
-Changes since V3:
-	- Introduced SoC specific dt compatible string for sdhci-msm
-	controller
-	- Moved the condition which checks whether tuning is needed or
-	not, to a common function.
+Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+---
+ Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 21 +++++++++++++++++----
+ 1 file changed, 17 insertions(+), 4 deletions(-)
 
-Changes since V2:
-	- Removed an unused variable.
-	- Renamed the newly introduced flags to be more meaningful.
-	- Added new dt compatible string for SDM845 SOC.
-
-Changes since V1:
-	- Replaced dt flag with a dt compatible string to
-	indicate SHDCI-MSM controller varients which need this fix.
-	- Moved the DLL settings restoration logic from request 
-	context to platform driver runtime pm context.
-
-Tested on: sdm845
-Veerabhadrarao Badiganti (2):
-  dt-bindings: mmc: sdhci-msm: Add SoC-specific compatible strings
-  mmc: sdhci-msm: Re-initialize DLL if MCLK is gated dynamically
-
- .../devicetree/bindings/mmc/sdhci-msm.txt          | 21 ++++--
- drivers/mmc/host/sdhci-msm.c                       | 78 +++++++++++++++++++---
- 2 files changed, 84 insertions(+), 15 deletions(-)
-
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+index 502b3b8..b72871a 100644
+--- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
++++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+@@ -4,12 +4,25 @@ This file documents differences between the core properties in mmc.txt
+ and the properties used by the sdhci-msm driver.
+ 
+ Required properties:
+-- compatible: Should contain:
++- compatible: Should contain a SoC-specific string and a IP version string:
++	version strings:
+ 		"qcom,sdhci-msm-v4" for sdcc versions less than 5.0
+-		"qcom,sdhci-msm-v5" for sdcc versions >= 5.0
++		"qcom,sdhci-msm-v5" for sdcc version 5.0
+ 		For SDCC version 5.0.0, MCI registers are removed from SDCC
+ 		interface and some registers are moved to HC. New compatible
+ 		string is added to support this change - "qcom,sdhci-msm-v5".
++	full compatible strings with SoC and version:
++		"qcom,apq8084-sdhci", "qcom,sdhci-msm-v4"
++		"qcom,msm8974-sdhci", "qcom,sdhci-msm-v4"
++		"qcom,msm8916-sdhci", "qcom,sdhci-msm-v4"
++		"qcom,msm8992-sdhci", "qcom,sdhci-msm-v4"
++		"qcom,msm8996-sdhci", "qcom,sdhci-msm-v4"
++		"qcom,sdm845-sdhci", "qcom,sdhci-msm-v5"
++		"qcom,qcs404-sdhci", "qcom,sdhci-msm-v5"
++	NOTE that some old device tree files may be floating around that only
++	have the string "qcom,sdhci-msm-v4" without the SoC compatible string
++	but doing that should be considered a deprecated practice.
++
+ - reg: Base address and length of the register in the following order:
+ 	- Host controller register map (required)
+ 	- SD Core register map (required)
+@@ -29,7 +42,7 @@ Required properties:
+ Example:
+ 
+ 	sdhc_1: sdhci@f9824900 {
+-		compatible = "qcom,sdhci-msm-v4";
++		compatible = "qcom,msm8974-sdhci", "qcom,sdhci-msm-v4";
+ 		reg = <0xf9824900 0x11c>, <0xf9824000 0x800>;
+ 		interrupts = <0 123 0>;
+ 		bus-width = <8>;
+@@ -46,7 +59,7 @@ Example:
+ 	};
+ 
+ 	sdhc_2: sdhci@f98a4900 {
+-		compatible = "qcom,sdhci-msm-v4";
++		compatible = "qcom,msm8974-sdhci", "qcom,sdhci-msm-v4";
+ 		reg = <0xf98a4900 0x11c>, <0xf98a4000 0x800>;
+ 		interrupts = <0 125 0>;
+ 		bus-width = <4>;
 -- 
 Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc.
 Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a Linux Foundation Collaborative Project.
