@@ -1,7 +1,7 @@
 From: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-Subject: [PATCH V5 1/2] dt-bindings: mmc: sdhci-msm: Add SoC-specific compatible strings
-Date: Mon, 12 Nov 2018 12:22:16 +0530
-Message-ID: <1542005537-19154-2-git-send-email-vbadigan@codeaurora.org>
+Subject: [PATCH V5 2/2] mmc: sdhci-msm: Re-initialize DLL if MCLK is gated dynamically
+Date: Mon, 12 Nov 2018 12:22:17 +0530
+Message-ID: <1542005537-19154-3-git-send-email-vbadigan@codeaurora.org>
 References: <1542005537-19154-1-git-send-email-vbadigan@codeaurora.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1542005537-19154-1-git-send-email-vbadigan@codeaurora.org>
@@ -10,63 +10,174 @@ To: adrian.hunter@intel.com, ulf.hansson@linaro.org, robh+dt@kernel.org, evgreen
 Cc: asutoshd@codeaurora.org, riteshh@codeaurora.org, stummala@codeaurora.org, sayalil@codeaurora.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org, Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Add SoC-specific compatible strings for qcom-sdhci controller.
+On few SDHCI-MSM controllers, the host controller's clock tuning
+circuit may go out of sync if controller clocks are gated which
+eventually will result in data CRC, command CRC/timeout errors.
+To overcome this h/w limitation, the DLL needs to be re-initialized
+and restored with its old settings once clocks are ungated.
 
 Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
 ---
- Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 21 +++++++++++++++++----
- 1 file changed, 17 insertions(+), 4 deletions(-)
+ drivers/mmc/host/sdhci-msm.c | 78 +++++++++++++++++++++++++++++++++++++-------
+ 1 file changed, 67 insertions(+), 11 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-index 502b3b8..b72871a 100644
---- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-+++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-@@ -4,12 +4,25 @@ This file documents differences between the core properties in mmc.txt
- and the properties used by the sdhci-msm driver.
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 3cc8bfe..4cac593 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -232,6 +232,7 @@ struct sdhci_msm_variant_ops {
+  */
+ struct sdhci_msm_variant_info {
+ 	bool mci_removed;
++	bool restore_dll_config;
+ 	const struct sdhci_msm_variant_ops *var_ops;
+ 	const struct sdhci_msm_offset *offset;
+ };
+@@ -256,6 +257,7 @@ struct sdhci_msm_host {
+ 	bool pwr_irq_flag;
+ 	u32 caps_0;
+ 	bool mci_removed;
++	bool restore_dll_config;
+ 	const struct sdhci_msm_variant_ops *var_ops;
+ 	const struct sdhci_msm_offset *offset;
+ };
+@@ -1025,6 +1027,48 @@ static int sdhci_msm_hs400_dll_calibration(struct sdhci_host *host)
+ 	return ret;
+ }
  
- Required properties:
--- compatible: Should contain:
-+- compatible: Should contain a SoC-specific string and a IP version string:
-+	version strings:
- 		"qcom,sdhci-msm-v4" for sdcc versions less than 5.0
--		"qcom,sdhci-msm-v5" for sdcc versions >= 5.0
-+		"qcom,sdhci-msm-v5" for sdcc version 5.0
- 		For SDCC version 5.0.0, MCI registers are removed from SDCC
- 		interface and some registers are moved to HC. New compatible
- 		string is added to support this change - "qcom,sdhci-msm-v5".
-+	full compatible strings with SoC and version:
-+		"qcom,apq8084-sdhci", "qcom,sdhci-msm-v4"
-+		"qcom,msm8974-sdhci", "qcom,sdhci-msm-v4"
-+		"qcom,msm8916-sdhci", "qcom,sdhci-msm-v4"
-+		"qcom,msm8992-sdhci", "qcom,sdhci-msm-v4"
-+		"qcom,msm8996-sdhci", "qcom,sdhci-msm-v4"
-+		"qcom,sdm845-sdhci", "qcom,sdhci-msm-v5"
-+		"qcom,qcs404-sdhci", "qcom,sdhci-msm-v5"
-+	NOTE that some old device tree files may be floating around that only
-+	have the string "qcom,sdhci-msm-v4" without the SoC compatible string
-+	but doing that should be considered a deprecated practice.
++static bool sdhci_msm_is_tuning_needed(struct sdhci_host *host)
++{
++	struct mmc_ios *ios = &host->mmc->ios;
 +
- - reg: Base address and length of the register in the following order:
- 	- Host controller register map (required)
- 	- SD Core register map (required)
-@@ -29,7 +42,7 @@ Required properties:
- Example:
++	/*
++	 * Tuning is required for SDR104, HS200 and HS400 cards and
++	 * if clock frequency is greater than 100MHz in these modes.
++	 */
++	if (host->clock <= CORE_FREQ_100MHZ ||
++	    !(ios->timing == MMC_TIMING_MMC_HS400 ||
++	    ios->timing == MMC_TIMING_MMC_HS200 ||
++	    ios->timing == MMC_TIMING_UHS_SDR104) ||
++	    ios->enhanced_strobe)
++		return false;
++
++	return true;
++}
++
++static int sdhci_msm_restore_sdr_dll_config(struct sdhci_host *host)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
++	int ret;
++
++	/*
++	 * SDR DLL comes into picture only for timing modes which needs
++	 * tuning.
++	 */
++	if (!sdhci_msm_is_tuning_needed(host))
++		return 0;
++
++	/* Reset the tuning block */
++	ret = msm_init_cm_dll(host);
++	if (ret)
++		return ret;
++
++	/* Restore the tuning block */
++	ret = msm_config_cm_dll_phase(host, msm_host->saved_tuning_phase);
++
++	return ret;
++}
++
+ static int sdhci_msm_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ {
+ 	struct sdhci_host *host = mmc_priv(mmc);
+@@ -1035,14 +1079,7 @@ static int sdhci_msm_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
  
- 	sdhc_1: sdhci@f9824900 {
--		compatible = "qcom,sdhci-msm-v4";
-+		compatible = "qcom,msm8974-sdhci", "qcom,sdhci-msm-v4";
- 		reg = <0xf9824900 0x11c>, <0xf9824000 0x800>;
- 		interrupts = <0 123 0>;
- 		bus-width = <8>;
-@@ -46,7 +59,7 @@ Example:
- 	};
+-	/*
+-	 * Tuning is required for SDR104, HS200 and HS400 cards and
+-	 * if clock frequency is greater than 100MHz in these modes.
+-	 */
+-	if (host->clock <= CORE_FREQ_100MHZ ||
+-	    !(ios.timing == MMC_TIMING_MMC_HS400 ||
+-	    ios.timing == MMC_TIMING_MMC_HS200 ||
+-	    ios.timing == MMC_TIMING_UHS_SDR104))
++	if (!sdhci_msm_is_tuning_needed(host))
+ 		return 0;
  
- 	sdhc_2: sdhci@f98a4900 {
--		compatible = "qcom,sdhci-msm-v4";
-+		compatible = "qcom,msm8974-sdhci", "qcom,sdhci-msm-v4";
- 		reg = <0xf98a4900 0x11c>, <0xf98a4000 0x800>;
- 		interrupts = <0 125 0>;
- 		bus-width = <4>;
+ 	/*
+@@ -1069,7 +1106,6 @@ static int sdhci_msm_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 		if (rc)
+ 			return rc;
+ 
+-		msm_host->saved_tuning_phase = phase;
+ 		rc = mmc_send_tuning(mmc, opcode, NULL);
+ 		if (!rc) {
+ 			/* Tuning is successful at this tuning point */
+@@ -1094,6 +1130,7 @@ static int sdhci_msm_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 		rc = msm_config_cm_dll_phase(host, phase);
+ 		if (rc)
+ 			return rc;
++		msm_host->saved_tuning_phase = phase;
+ 		dev_dbg(mmc_dev(mmc), "%s: Setting the tuning phase to %d\n",
+ 			 mmc_hostname(mmc), phase);
+ 	} else {
+@@ -1616,7 +1653,6 @@ static void sdhci_msm_set_regulator_caps(struct sdhci_msm_host *msm_host)
+ };
+ 
+ static const struct sdhci_msm_variant_info sdhci_msm_mci_var = {
+-	.mci_removed = false,
+ 	.var_ops = &mci_var_ops,
+ 	.offset = &sdhci_msm_mci_offset,
+ };
+@@ -1627,9 +1663,17 @@ static void sdhci_msm_set_regulator_caps(struct sdhci_msm_host *msm_host)
+ 	.offset = &sdhci_msm_v5_offset,
+ };
+ 
++static const struct sdhci_msm_variant_info sdm845_sdhci_var = {
++	.mci_removed = true,
++	.restore_dll_config = true,
++	.var_ops = &v5_var_ops,
++	.offset = &sdhci_msm_v5_offset,
++};
++
+ static const struct of_device_id sdhci_msm_dt_match[] = {
+ 	{.compatible = "qcom,sdhci-msm-v4", .data = &sdhci_msm_mci_var},
+ 	{.compatible = "qcom,sdhci-msm-v5", .data = &sdhci_msm_v5_var},
++	{.compatible = "qcom,sdm845-sdhci", .data = &sdm845_sdhci_var},
+ 	{},
+ };
+ 
+@@ -1689,6 +1733,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+ 	var_info = of_device_get_match_data(&pdev->dev);
+ 
+ 	msm_host->mci_removed = var_info->mci_removed;
++	msm_host->restore_dll_config = var_info->restore_dll_config;
+ 	msm_host->var_ops = var_info->var_ops;
+ 	msm_host->offset = var_info->offset;
+ 
+@@ -1928,9 +1973,20 @@ static int sdhci_msm_runtime_resume(struct device *dev)
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
++	int ret;
+ 
+-	return clk_bulk_prepare_enable(ARRAY_SIZE(msm_host->bulk_clks),
++	ret = clk_bulk_prepare_enable(ARRAY_SIZE(msm_host->bulk_clks),
+ 				       msm_host->bulk_clks);
++	if (ret)
++		return ret;
++	/*
++	 * Whenever core-clock is gated dynamically, it's needed to
++	 * restore the SDR DLL settings when the clock is ungated.
++	 */
++	if (msm_host->restore_dll_config && msm_host->clk_rate)
++		return sdhci_msm_restore_sdr_dll_config(host);
++
++	return 0;
+ }
+ #endif
+ 
 -- 
 Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc.
 Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a Linux Foundation Collaborative Project.
