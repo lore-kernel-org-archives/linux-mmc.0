@@ -1,79 +1,162 @@
-From: Peter Ujfalusi <peter.ujfalusi@ti.com>
-Subject: Re: [PATCH] mmc: core: Lower max_seg_size if too high for DMA
-Date: Mon, 12 Nov 2018 18:48:30 +0200
-Message-ID: <2099ae8d-ef53-ac6f-a25d-c1e1acc0d5f4@ti.com>
-References: <20181031155738.18367-1-tony@atomide.com>
+From: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Subject: Re: [PATCH V3 1/3] mmc: sdhci: Allow platform controlled voltage
+ switching
+Date: Mon, 12 Nov 2018 22:49:36 +0530
+Message-ID: <dcb4a579-b308-76c0-7cc3-22bb95147470@codeaurora.org>
+References: <1539004739-32060-1-git-send-email-vbadigan@codeaurora.org>
+ <1539004739-32060-2-git-send-email-vbadigan@codeaurora.org>
+ <CAE=gft631u+ie3PRFkc5t1f3iYwuhbxDbxKUqvdZS5cFJaJbsA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20181031155738.18367-1-tony@atomide.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAE=gft631u+ie3PRFkc5t1f3iYwuhbxDbxKUqvdZS5cFJaJbsA@mail.gmail.com>
 Content-Language: en-US
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Tony Lindgren <tony@atomide.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Russell King <rmk+kernel@armlinux.org.uk>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Kishon Vijay Abraham I <kishon@ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Evan Green <evgreen@chromium.org>
+Cc: adrian.hunter@intel.com, Ulf Hansson <ulf.hansson@linaro.org>, robh+dt@kernel.org, Doug Anderson <dianders@google.com>, asutoshd@codeaurora.org, riteshh@codeaurora.org, stummala@codeaurora.org, sayali <sayalil@codeaurora.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, vviswana@codeaurora.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-VG9ueSwKCk9uIDIwMTgtMTAtMzEgMTc6NTcsIFRvbnkgTGluZGdyZW4gd3JvdGU6Cj4gV2l0aCBD
-T05GSUdfRE1BX0FQSV9ERUJVR19TRyBhIGRldmljZSBtYXkgcHJvZHVjZSB0aGUgZm9sbG93aW5n
-IHdhcm5pbmc6Cj4gCj4gIkRNQS1BUEk6IG1hcHBpbmcgc2cgc2VnbWVudCBsb25nZXIgdGhhbiBk
-ZXZpY2UgY2xhaW1zIHRvIHN1cHBvcnQiCj4gCj4gV2UgZGVmYXVsdCB0byA2NEtpQiBpZiBhIERN
-QSBlbmdpbmUgZHJpdmVyIGRvZXMgbm90IGluaXRpYWxpemUgZG1hX3Bhcm1zCj4gYW5kIGNhbGwg
-ZG1hX3NldF9tYXhfc2VnX3NpemUoKS4gVGhpcyBtYXkgYmUgbG93ZXIgdGhhdCB3aGF0IG1hbnkg
-TU1DCj4gZHJpdmVycyBkbyB3aXRoIG1tYy0+bWF4X3NlZ19zaXplID0gbW1jLT5tYXhfYmxrX3Np
-emUgKiBtbWMtPm1heF9ibGtfY291bnQuCj4gCj4gTGV0J3MgZG8gYSBzYW5pdHkgY2hlY2sgZm9y
-IG1heF9zZWdfc2l6ZSBiZWluZyBoaWdoZXIgdGhhbiB3aGF0IERNQQo+IHN1cHBvcnRzIGluIG1t
-Y19hZGRfaG9zdCgpIGFuZCBsb3dlciBpdCBhcyBuZWVkZWQuCgpJIHRyaWVkIHRvIGFkZHJlc3Mg
-aXQgd2l0aDoKCmh0dHBzOi8vcGF0Y2h3b3JrLmtlcm5lbC5vcmcvcGF0Y2gvOTk0ODk2Ny8KaHR0
-cHM6Ly9wYXRjaHdvcmsua2VybmVsLm9yZy9wYXRjaC85OTQ4OTg5LwpodHRwczovL3BhdGNod29y
-ay5rZXJuZWwub3JnL3BhdGNoLzk5NDg5NzUvCgpidXQgaXQgaXMgYmFjayBpbiB0aGUgZHJhd2lu
-ZyBib2FyZCBmb3Igbm93LgoKVGhlIHByb2JsZW0gaXMgdGhhdCB3aXRoIGVETUEvU0RNQSB0aGUg
-c2l6ZSBsaW1pdCBpcyBub3QgYnl0ZXMsIGJ1dCB0aGUKbnVtYmVyIG9mIGJ1cnN0cy4gRGlmZmVy
-ZW50IGFkZHJfd2lkdGggYW5kIGJ1cnN0IGNvbWJpbmF0aW9uIHdvdWxkCnJlc3VsdCBkaWZmZXJl
-bnQgbWF4X3NlZ19zaXplIGFuZCBJIGNhbiBub3QgZ3Vlc3MgYmVmb3JlIHRoZSB1c2VyCnByb3Zp
-ZGUgdGhlICBkbWFfc2xhdmVfY29uZmlnIHZpYSBkbWFlbmdpbmVfc2xhdmVfY29uZmlnKCkuCgpJ
-IGhhdmUgZXhwZXJpbWVudGFsIHBhdGNoZXMgdG8gbW9kaWZ5IHRoZSBtYXhfc2VnX3NpemUgb2Yg
-dGhlIF9jaGFubmVsXwpwcm9hY3RpdmVseSBpbiByZXNwb25zZSBzbGF2ZV9jb25maWcgYW5kIHRo
-ZW4gd2Ugc2hvdWxkIGhhdmUgYW4gQVBJIHRvCnF1ZXJ5IGl0IGZyb20gdGhlIERNQSBfY2hhbm5l
-bF8sIG5vdCBmcm9tIHRoZSBETUEgZGV2aWNlIGFzIGVhY2ggY2hhbm5lbApjYW4gaGF2ZSBkaWZm
-ZXJlbnQgbGltaXQgb24gdGhlIG1heF9zZWdfc2l6ZS4KCj4gCj4gQ2M6IEtpc2hvbiBWaWpheSBB
-YnJhaGFtIEkgPGtpc2hvbkB0aS5jb20+Cj4gQ2M6IFBldGVyIFVqZmFsdXNpIDxwZXRlci51amZh
-bHVzaUB0aS5jb20+Cj4gQ2M6IFJ1c3NlbGwgS2luZyA8cm1rK2tlcm5lbEBhcm1saW51eC5vcmcu
-dWs+Cj4gUmVwb3J0ZWQtYnk6IFJ1c3NlbGwgS2luZyA8cm1rK2tlcm5lbEBhcm1saW51eC5vcmcu
-dWs+Cj4gU2lnbmVkLW9mZi1ieTogVG9ueSBMaW5kZ3JlbiA8dG9ueUBhdG9taWRlLmNvbT4KClJl
-dmlld2VkLWJ5OiBQZXRlciBVamZhbHVzaSA8cGV0ZXIudWpmYWx1c2lAdGkuY29tPgoKPiAtLS0K
-PiAgZHJpdmVycy9tbWMvY29yZS9ob3N0LmMgfCAxNiArKysrKysrKysrKysrKysrCj4gIDEgZmls
-ZSBjaGFuZ2VkLCAxNiBpbnNlcnRpb25zKCspCj4gCj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1j
-L2NvcmUvaG9zdC5jIGIvZHJpdmVycy9tbWMvY29yZS9ob3N0LmMKPiAtLS0gYS9kcml2ZXJzL21t
-Yy9jb3JlL2hvc3QuYwo+ICsrKyBiL2RyaXZlcnMvbW1jL2NvcmUvaG9zdC5jCj4gQEAgLTEzLDYg
-KzEzLDcgQEAKPiAgICovCj4gIAo+ICAjaW5jbHVkZSA8bGludXgvZGV2aWNlLmg+Cj4gKyNpbmNs
-dWRlIDxsaW51eC9kbWEtbWFwcGluZy5oPgo+ICAjaW5jbHVkZSA8bGludXgvZXJyLmg+Cj4gICNp
-bmNsdWRlIDxsaW51eC9pZHIuaD4KPiAgI2luY2x1ZGUgPGxpbnV4L29mLmg+Cj4gQEAgLTQxNSw2
-ICs0MTYsMTkgQEAgc3RydWN0IG1tY19ob3N0ICptbWNfYWxsb2NfaG9zdChpbnQgZXh0cmEsIHN0
-cnVjdCBkZXZpY2UgKmRldikKPiAgCj4gIEVYUE9SVF9TWU1CT0wobW1jX2FsbG9jX2hvc3QpOwo+
-ICAKPiArc3RhdGljIHZvaWQgbW1jX2NoZWNrX21heF9zZWdfc2l6ZShzdHJ1Y3QgbW1jX2hvc3Qg
-Kmhvc3QpCj4gK3sKPiArCXVuc2lnbmVkIGludCBtYXhfc2VnX3NpemUgPSBkbWFfZ2V0X21heF9z
-ZWdfc2l6ZShtbWNfZGV2KGhvc3QpKTsKPiArCj4gKwlpZiAoaG9zdC0+bWF4X3NlZ19zaXplIDw9
-IG1heF9zZWdfc2l6ZSkKPiArCQlyZXR1cm47Cj4gKwo+ICsJZGV2X2luZm8obW1jX2Rldihob3N0
-KSwgIkxvd2VyaW5nIG1heF9zZWdfc2l6ZSBmb3IgRE1BOiAldSB2cyAldVxuIiwKPiArCQkgaG9z
-dC0+bWF4X3NlZ19zaXplLCBtYXhfc2VnX3NpemUpOwo+ICsKPiArCWhvc3QtPm1heF9zZWdfc2l6
-ZSA9IG1heF9zZWdfc2l6ZTsKPiArfQo+ICsKPiAgLyoqCj4gICAqCW1tY19hZGRfaG9zdCAtIGlu
-aXRpYWxpc2UgaG9zdCBoYXJkd2FyZQo+ICAgKglAaG9zdDogbW1jIGhvc3QKPiBAQCAtNDMwLDYg
-KzQ0NCw4IEBAIGludCBtbWNfYWRkX2hvc3Qoc3RydWN0IG1tY19ob3N0ICpob3N0KQo+ICAJV0FS
-Tl9PTigoaG9zdC0+Y2FwcyAmIE1NQ19DQVBfU0RJT19JUlEpICYmCj4gIAkJIWhvc3QtPm9wcy0+
-ZW5hYmxlX3NkaW9faXJxKTsKPiAgCj4gKwltbWNfY2hlY2tfbWF4X3NlZ19zaXplKGhvc3QpOwo+
-ICsKPiAgCWVyciA9IGRldmljZV9hZGQoJmhvc3QtPmNsYXNzX2Rldik7Cj4gIAlpZiAoZXJyKQo+
-ICAJCXJldHVybiBlcnI7Cj4gCgotIFDDqXRlcgoKVGV4YXMgSW5zdHJ1bWVudHMgRmlubGFuZCBP
-eSwgUG9ya2thbGFua2F0dSAyMiwgMDAxODAgSGVsc2lua2kuClktdHVubnVzL0J1c2luZXNzIElE
-OiAwNjE1NTIxLTQuIEtvdGlwYWlra2EvRG9taWNpbGU6IEhlbHNpbmtpCgpfX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpsaW51eC1hcm0ta2VybmVsIG1haWxp
-bmcgbGlzdApsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3Rz
-LmluZnJhZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1hcm0ta2VybmVsCg==
+
+On 10/17/2018 3:39 AM, Evan Green wrote:
+> On Mon, Oct 8, 2018 at 6:22 AM Veerabhadrarao Badiganti
+> <vbadigan@codeaurora.org> wrote:
+>> From: Vijay Viswanath <vviswana@codeaurora.org>
+>>
+>> Some controllers can have internal mechanism to inform the SW that it
+>> is ready for voltage switching. For such controllers, changing voltage
+>> before the HW is ready can result in various issues.
+>>
+>> During setup/cleanup of host, check whether regulator enable/disable
+>> was already done by platform driver.
+>>
+>> Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
+>> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+>> ---
+>>   drivers/mmc/host/sdhci.c | 32 +++++++++++++++++++-------------
+>>   drivers/mmc/host/sdhci.h |  1 +
+>>   2 files changed, 20 insertions(+), 13 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index 99bdae5..ea7ce1d 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -3616,6 +3616,7 @@ int sdhci_setup_host(struct sdhci_host *host)
+>>          unsigned int override_timeout_clk;
+>>          u32 max_clk;
+>>          int ret;
+>> +       bool enable_vqmmc = false;
+>>
+>>          WARN_ON(host == NULL);
+>>          if (host == NULL)
+>> @@ -3629,9 +3630,12 @@ int sdhci_setup_host(struct sdhci_host *host)
+>>           * the host can take the appropriate action if regulators are not
+>>           * available.
+>>           */
+>> -       ret = mmc_regulator_get_supply(mmc);
+>> -       if (ret)
+>> -               return ret;
+>> +       if (!mmc->supply.vqmmc) {
+>> +               ret = mmc_regulator_get_supply(mmc);
+>> +               if (ret)
+>> +                       return ret;
+>> +               enable_vqmmc  = true;
+>> +       }
+> Did you not like my suggestion in the previous patch of changing
+> mmc_regulator_get_supply to only get supplies that were not set
+> previously? What you have here is almost the same, except you've got
+> this weird coupling where if vqmmc is already present, you implicitly
+> skip looking at vmmc entirely (since mmc_regulator_get_supply does
+> more than just get vqmmc).
+
+sure. Will update mmc_regulator_get_supply() as you suggested.
+
+>>          DBG("Version:   0x%08x | Present:  0x%08x\n",
+>>              sdhci_readw(host, SDHCI_HOST_VERSION),
+>> @@ -3880,7 +3884,15 @@ int sdhci_setup_host(struct sdhci_host *host)
+>>                  mmc->caps |= MMC_CAP_NEEDS_POLL;
+>>
+>>          if (!IS_ERR(mmc->supply.vqmmc)) {
+>> -               ret = regulator_enable(mmc->supply.vqmmc);
+>> +               if (enable_vqmmc) {
+>> +                       ret = regulator_enable(mmc->supply.vqmmc);
+>> +                       if (ret) {
+>> +                               pr_warn("%s: Failed to enable vqmmc regulator: %d\n",
+>> +                                       mmc_hostname(mmc), ret);
+>> +                               mmc->supply.vqmmc = ERR_PTR(-EINVAL);
+>> +                       }
+>> +                       host->vqmmc_enabled = !ret;
+>> +               }
+>>
+>>                  /* If vqmmc provides no 1.8V signalling, then there's no UHS */
+>>                  if (!regulator_is_supported_voltage(mmc->supply.vqmmc, 1700000,
+>> @@ -3893,12 +3905,6 @@ int sdhci_setup_host(struct sdhci_host *host)
+>>                  if (!regulator_is_supported_voltage(mmc->supply.vqmmc, 2700000,
+>>                                                      3600000))
+>>                          host->flags &= ~SDHCI_SIGNALING_330;
+>> -
+>> -               if (ret) {
+>> -                       pr_warn("%s: Failed to enable vqmmc regulator: %d\n",
+>> -                               mmc_hostname(mmc), ret);
+>> -                       mmc->supply.vqmmc = ERR_PTR(-EINVAL);
+>> -               }
+>>          }
+>>
+>>          if (host->quirks2 & SDHCI_QUIRK2_NO_1_8_V) {
+>> @@ -4136,7 +4142,7 @@ int sdhci_setup_host(struct sdhci_host *host)
+>>          return 0;
+>>
+>>   unreg:
+>> -       if (!IS_ERR(mmc->supply.vqmmc))
+>> +       if (host->vqmmc_enabled)
+>>                  regulator_disable(mmc->supply.vqmmc);
+>>   undma:
+>>          if (host->align_buffer)
+>> @@ -4154,7 +4160,7 @@ void sdhci_cleanup_host(struct sdhci_host *host)
+>>   {
+>>          struct mmc_host *mmc = host->mmc;
+>>
+>> -       if (!IS_ERR(mmc->supply.vqmmc))
+>> +       if (host->vqmmc_enabled)
+>>                  regulator_disable(mmc->supply.vqmmc);
+>>
+>>          if (host->align_buffer)
+>> @@ -4287,7 +4293,7 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
+>>
+>>          tasklet_kill(&host->finish_tasklet);
+>>
+>> -       if (!IS_ERR(mmc->supply.vqmmc))
+>> +       if (host->vqmmc_enabled)
+>>                  regulator_disable(mmc->supply.vqmmc);
+>>
+>>          if (host->align_buffer)
+>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+>> index b001cf4..3c28152 100644
+>> --- a/drivers/mmc/host/sdhci.h
+>> +++ b/drivers/mmc/host/sdhci.h
+>> @@ -524,6 +524,7 @@ struct sdhci_host {
+>>          bool pending_reset;     /* Cmd/data reset is pending */
+>>          bool irq_wake_enabled;  /* IRQ wakeup is enabled */
+>>          bool v4_mode;           /* Host Version 4 Enable */
+>> +       bool vqmmc_enabled;     /* Vqmmc is enabled */
+> I still don't love this, since it doesn't mean what it says. Everyone
+> else that has a vqmmc_enabled member uses it to actually mean "vqmmc
+> is enabled", but this doesn't mean that. For example, you don't clear
+> this when you disable the regulator in patch 3, so this would be set
+> even if the regulator is disabled, and you don't set it when sdhci
+> enables the regulator, so the regulator is on when this flag is not
+> set.
+>
+> At the very least, I think a rename is in order. I'm struggling with
+> the rename, since
+> "vqmmc_pltfrm_enable_but_feel_free_to_call_set_voltage_anywhere" is
+> too long. I guess vqmmc_pltfrm_enabled is the best I've got for now.
+
+Sure. Will rename it.
+
+>>          struct mmc_request *mrqs_done[SDHCI_MAX_MRQS];  /* Requests done */
+>>          struct mmc_command *cmd;        /* Current command */
+>> --
+>> Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc.
+>> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a Linux Foundation Collaborative Project.
+>>
