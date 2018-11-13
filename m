@@ -1,107 +1,112 @@
-From: Rajat Jain <rajatja@google.com>
-Subject: Re: [PATCH v2] mmc: sdhci-pci: Try "cd" for card-detect lookup before
- using NULL
-Date: Mon, 12 Nov 2018 17:26:27 -0800
-Message-ID: <CACK8Z6F0xrC340SHmnZHEb2jYizna_ZCeK_NGGeg_7iRb7wUsw@mail.gmail.com>
-References: <CAA93t1oaZ5zkv+BsGnYZg6pqKv0DzXi3j8oZHUyTyffUWHtHug@mail.gmail.com>
- <20181029221701.51376-1-rajatja@google.com> <CAPDyKFpqzpxUzZe-ekfwg1Nqeg1RFB1bdbSNwrGPwtfNds4p0w@mail.gmail.com>
- <CAHp75VezX-agNFp2wEHorH7U9NmZgpX-PfXdBbGDETnJY2AFGA@mail.gmail.com>
+From: Eugeniy Paltsev <eugeniy.paltsev@synopsys.com>
+Subject: Re: MMC: bonnie++ runs with errors after switching mmc to blk-mq
+Date: Tue, 13 Nov 2018 16:45:55 +0000
+Message-ID: <1542127554.10282.27.camel@synopsys.com>
+References: <1541774198.20621.50.camel@synopsys.com>
+ <CACRpkdYL3NTmQieC025W=Qh515U-+75dD_39vQkZYsvuLc8Vvw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAHp75VezX-agNFp2wEHorH7U9NmZgpX-PfXdBbGDETnJY2AFGA@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Andy Shevchenko <andy.shevchenko@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "Hunter, Adrian" <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Rajat Jain <rajatxjain@gmail.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Mika Westerberg <mika.westerberg@linux.intel.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Dmitry Torokhov <dtor@google.com>, linux-gpio@vger.kernel.org, linux-acpi@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org>
+In-Reply-To: <CACRpkdYL3NTmQieC025W=Qh515U-+75dD_39vQkZYsvuLc8Vvw@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <C8E265BE966CD747A097FEC9FDA9F2B5@internal.synopsys.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-snps-arc>,
+ <mailto:linux-snps-arc-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-snps-arc/>
+List-Post: <mailto:linux-snps-arc@lists.infradead.org>
+List-Help: <mailto:linux-snps-arc-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-snps-arc>,
+ <mailto:linux-snps-arc-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-snps-arc" <linux-snps-arc-bounces@lists.infradead.org>
+Errors-To: linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org
+To: "eugeniy.paltsev@synopsys.com" <eugeniy.paltsev@synopsys.com>, "linus.walleij@linaro.org" <linus.walleij@linaro.org>
+Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "paolo.valente@linaro.org" <paolo.valente@linaro.org>, Vineet Gupta <vineet.gupta1@synopsys.com>, "alexey.brodkin@synopsys.com" <alexey.brodkin@synopsys.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "jh80.chung@samsung.com" <jh80.chung@samsung.com>, "linux-snps-arc@lists.infradead.org" <linux-snps-arc@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Nov 12, 2018 at 3:26 AM Andy Shevchenko
-<andy.shevchenko@gmail.com> wrote:
->
-> On Mon, Nov 12, 2018 at 1:05 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> >
-> > On 29 October 2018 at 23:17, Rajat Jain <rajatja@google.com> wrote:
-> > > Problem:
-> > >
-> > > The card detect IRQ does not work with modern BIOS (that want
-> > > to use _DSD to provide the card detect GPIO to the driver).
-> > >
-> > > Details:
-> > >
-> > > The mmc core provides the mmc_gpiod_request_cd() API to let host drivers
-> > > request the gpio descriptor for the "card detect" pin.
-> > > This pin is specified in the ACPI for the SDHC device:
-> > >
-> > >  * Either as a resource using _CRS. This is a method used by legacy BIOS.
-> > >    (The driver needs to tell which resource index).
-> > >
-> > >  * Or as a named property ("cd-gpios"/"cd-gpio") in _DSD (which internally
-> > >    points to an entry in _CRS). This way, the driver can lookup using a
-> > >    string. This is what modern BIOS prefer to use.
-> > >
-> > > This API finally results in a call to the following code:
-> > >
-> > > struct gpio_desc *acpi_find_gpio(..., const char *con_id,...)
-> > > {
-> > > ...
-> > >    /* Lookup gpio (using "<con_id>-gpio") in the _DSD */
-> > > ...
-> > >    if (!acpi_can_fallback_to_crs(adev, con_id))
-> > >           return ERR_PTR(-ENOENT);
-> > > ...
-> > >    /* Falling back to _CRS is allowed, Lookup gpio in the _CRS */
-> > > ...
-> > > }
-> > >
-> > > Note that this means that if the ACPI has _DSD properties, the kernel
-> > > will never use _CRS for the lookup (Because acpi_can_fallback_to_crs()
-> > > will always be false for any device hat has _DSD entries).
-> > >
-> > > The SDHCI driver is thus currently broken on a modern BIOS, even if
-> > > BIOS provides both _CRS (for index based lookup) and _DSD entries (for
-> > > string based lookup). Ironically, none of these will be used for the
-> > > lookup currently because:
-> > >
-> > > * Since the con_id is NULL, acpi_find_gpio() does not find a matching
-> > >   entry in DSDT. (The _DSDT entry has the property name = "cd-gpios")
-> > >
-> > > * Because ACPI contains DSDT entries, thus acpi_can_fallback_to_crs()
-> > >   returns false (because device properties have been populated from
-> > >   _DSD), thus the _CRS is never used for the lookup.
-> > >
-> > > Fix:
-> > >
-> > > Try "cd" for lookup in the _DSD before falling back to using NULL so
-> > > as to try looking up in the _CRS.
-> > >
-> > > I've tested this patch successfully with both Legacy BIOS (that
-> > > provide only _CRS method) as well as modern BIOS (that provide both
-> > > _CRS and _DSD). Also the use of "cd" appears to be fairly consistent
-> > > across other users of this API (other MMC host controller drivers).
-> > >
-> > > Link: https://lkml.org/lkml/2018/9/25/1113
-> > > Signed-off-by: Rajat Jain <rajatja@google.com>
-> >
-> > Applied for fixes, thanks!
-> >
-> > Should I add a stable tag to this as well?
->
-> If you go with that it might make sense to have Fixes tag against
->
-> commit f10e4bf6632b5be11cea875b66ba959833a69258
-> Author: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-> Date:   Tue May 23 20:03:19 2017 +0300
->
->    gpio: acpi: Even more tighten up ACPI GPIO lookups
->
+On Tue, 2018-11-13 at 09:09 +0100, Linus Walleij wrote:
+> On Fri, Nov 9, 2018 at 3:36 PM Eugeniy Paltsev
+> <eugeniy.paltsev@synopsys.com> wrote:
+> 
+> > I still can reproduce errors about hung task when I run bonnie++ benchmark on arc/hsdk board
+> > (ARC HS38 CPU, Synopsys DW MMC controller).
+> 
+> Hm I didn't use bonnie++ but I used iozone excessively to verify
+> Adrians patches, at times leaving it running for days without
+> any problems. (Though not on these hardwares.)
+> 
+> > Error message
+> > is like:
+> > ----------------------------->8----------------------------
+> > # mount /dev/mmcblk0p4 /mnt/mmcblk0p4
+> > EXT4-fs (mmcblk0p4): mounted filesystem with
+> > ordered data mode. Opts: (null)
+> > # bonnie++ -u root -r 256 -s 512 -x 1  -d /mnt/mmcblk0p4
+> > Using uid:0, gid:0.
+> > Writing with putc()...done
+> > Writing
+> > intelligently...done
+> > Rewriting...INFO: task bonnie++:187 blocked for more than 10 seconds.
+> >       Not tainted 4.19.0 #2
+> 
+> I'm not sure hanging for more than 10 seconds is really a
+> problem. eMMCs can sometimes become really slow
+> when doing internal garbage collection. Are you sure
+> this is not the case?
 
-I agree.
+Actually I'm not an expert in eMMC stuff so it's 
+difficult to me to talk about eMMCs internal garbage collection.
 
-Thanks,
+>  If you run it without the hang checks,
+> will it still complete, or is this one of those benchmarks
+> that just keep running until you interrupt it?
 
-Rajat
+bonnie++ completes regardless of hung tasks detection enabling/disabling.
+
+Nevertheless as I can see write speed differs significantly in
+case of clean run and run with hung task notifications
+(look at shrinked bonnie++ output bellow)
+
+Moreover I launched bonnie++ on kernel build from commit c3d53d0da69d
+[one commit behind 81196976ed94 (mmc: block: Add blk-mq support)]
+and I don't see significant differs in write speed values between
+multiple bonnie++ runs. (There is no hung task notifications as well)
 
 
-> --
-> With Best Regards,
-> Andy Shevchenko
+Good case (ARM, CubieBoard2):
+------Sequential Output------
+-Per Chr-|--Block--|-Rewrite-
+K/sec %CP|K/sec %CP|K/sec %CP
+ 5825  98|12996   7| 9873   5
+
+
+Bad (with hung task notification) case (ARM, CubieBoard2):
+------Sequential Output------
+-Per Chr-|--Block--|-Rewrite-
+K/sec %CP|K/sec %CP|K/sec %CP
+ 5630  95| 6275   3| 4723   2
+
+
+> > (filemap_fdatawait_keep_errors) from
+> > [<c02cc3d0>] (jbd2_journal_commit_transaction+0x9b8/0x167c)
+> > [ 6402.570857] [<c02cc3d0>]
+> > (jbd2_journal_commit_transaction) from [<c02d0478>] (kjournald2+0xe4/0x2c8)
+> > [ 6402.580011] [<c02d0478>] (kjournald2) from [<c013ab04>]
+> 
+> This seems more like some excessive wait in the file system
+> journal to me (OK I might be wrong). Which is also known
+> to thrash the specific sectors where the journal is kept
+> which may very well lead to a lot of garbage collection
+> in the card. (OK I am half-guessing...)
+> 
+> What filesystem are you using on this eMMC?
+
+I use ext4 in both of cases.
+
+> If something exotic, could you just try ext4 as most
+> embedded systems use and see what happens?
+> 
+> Yours,
+> Linus Walleij
+-- 
+ Eugeniy Paltsev
