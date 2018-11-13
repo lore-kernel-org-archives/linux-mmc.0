@@ -1,42 +1,26 @@
-From: Ezequiel Garcia <ezequiel@vanguardiasur.com.ar>
-Subject: Re: Bug report: MIPS CI20/jz4740-mmc DMA and PREEMPT_NONE
-Date: Mon, 12 Nov 2018 18:04:06 -0300
-Message-ID: <CAAEAJfBUEj+4RnHmK9RvOv7cghQNr0xNqr5GdVTG+V88+Kzi8Q@mail.gmail.com>
-References: <20181014170431.GK3461@darkstar.musicnaut.iki.fi>
- <CA+7wUszkduiKMVx5Et3Q2-2tz72CXUKE1_kndC6V1d45uEY2Aw@mail.gmail.com> <20181017195050.GA20347@darkstar.musicnaut.iki.fi>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH V5 1/2] dt-bindings: mmc: sdhci-msm: Add SoC-specific
+ compatible strings
+Date: Mon, 12 Nov 2018 18:20:49 -0600
+Message-ID: <20181113002049.GA26402@bogus>
+References: <1542005537-19154-1-git-send-email-vbadigan@codeaurora.org>
+ <1542005537-19154-2-git-send-email-vbadigan@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181017195050.GA20347@darkstar.musicnaut.iki.fi>
+Content-Disposition: inline
+In-Reply-To: <1542005537-19154-2-git-send-email-vbadigan@codeaurora.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: aaro.koskinen@iki.fi
-Cc: Mathieu Malaterre <malat@debian.org>, Linux-MIPS <linux-mips@linux-mips.org>, linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Ezequiel Garcia <ezequiel@collabora.co.uk>
+Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, robh+dt@kernel.org, evgreen@chromium.org, dianders@google.com, asutoshd@codeaurora.org, riteshh@codeaurora.org, stummala@codeaurora.org, sayalil@codeaurora.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org, Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 17 Oct 2018 at 16:50, Aaro Koskinen <aaro.koskinen@iki.fi> wrote:
->
-> Hi,
->
-> On Wed, Oct 17, 2018 at 03:38:07PM +0200, Mathieu Malaterre wrote:
-> > Since CONFIG_PREEMPT has been 'y' since at least commit 0752f92934292
-> > could you confirm that the original mmc driver (kernel from imgtech
-> > people) did work ok with PREEMPT_NONE (sorry I did not do my homework)
-> > ?
->
-> Sorry, cannot confirm or test that. I have only used the mainline kernel
-> on this board, since v4.5 or so with my own custom config which has
-> been PREEMPT_NONE until now.
->
+On Mon, 12 Nov 2018 12:22:16 +0530, Veerabhadrarao Badiganti wrote:
+> Add SoC-specific compatible strings for qcom-sdhci controller.
+> 
+> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+> ---
+>  Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 21 +++++++++++++++++----
+>  1 file changed, 17 insertions(+), 4 deletions(-)
+> 
 
-Aaro,
-
-I spent some time today investigating this issue. I think this driver
-has a broken pre-request/post-request implementation.
-
-Will post some patches soon.
-
-Thanks for the report,
---=20
-Ezequiel Garc=C3=ADa, VanguardiaSur
-www.vanguardiasur.com.ar
+Reviewed-by: Rob Herring <robh@kernel.org>
