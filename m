@@ -1,7 +1,8 @@
 From: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
-Subject: [PATCH 11/16] drbd: don't override the queue_lock
-Date: Wed, 14 Nov 2018 17:02:14 +0100
-Message-ID: <20181114160219.28328-12-hch@lst.de>
+Subject: [PATCH 10/16] blk-cgroup: move locking into
+	blkg_destroy_all
+Date: Wed, 14 Nov 2018 17:02:13 +0100
+Message-ID: <20181114160219.28328-11-hch@lst.de>
 References: <20181114160219.28328-1-hch@lst.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,27 +22,53 @@ To: Jens Axboe <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>
 Cc: linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, drbd-dev-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-The DRBD req_lock and block layer queue_lock are used for entirely
-different resources.  Stop using the req_lock as the block layer
-queue_lock.
-
 Signed-off-by: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
 ---
- drivers/block/drbd/drbd_main.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ block/blk-cgroup.c | 9 ++-------
+ 1 file changed, 2 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/block/drbd/drbd_main.c b/drivers/block/drbd/drbd_main.c
-index fa8204214ac0..b66c59ce6260 100644
---- a/drivers/block/drbd/drbd_main.c
-+++ b/drivers/block/drbd/drbd_main.c
-@@ -2792,7 +2792,7 @@ enum drbd_ret_code drbd_create_device(struct drbd_config_context *adm_ctx, unsig
+diff --git a/block/blk-cgroup.c b/block/blk-cgroup.c
+index 717ab38a6c67..3ba23b9bfeb9 100644
+--- a/block/blk-cgroup.c
++++ b/block/blk-cgroup.c
+@@ -349,8 +349,7 @@ static void blkg_destroy_all(struct request_queue *q)
+ {
+ 	struct blkcg_gq *blkg, *n;
  
- 	drbd_init_set_defaults(device);
+-	lockdep_assert_held(q->queue_lock);
+-
++	spin_lock_irq(q->queue_lock);
+ 	list_for_each_entry_safe(blkg, n, &q->blkg_list, q_node) {
+ 		struct blkcg *blkcg = blkg->blkcg;
  
--	q = blk_alloc_queue_node(GFP_KERNEL, NUMA_NO_NODE, &resource->req_lock);
-+	q = blk_alloc_queue_node(GFP_KERNEL, NUMA_NO_NODE, NULL);
- 	if (!q)
- 		goto out_no_q;
- 	device->rq_queue = q;
+@@ -360,6 +359,7 @@ static void blkg_destroy_all(struct request_queue *q)
+ 	}
+ 
+ 	q->root_blkg = NULL;
++	spin_unlock_irq(q->queue_lock);
+ }
+ 
+ /*
+@@ -1182,9 +1182,7 @@ int blkcg_init_queue(struct request_queue *q)
+ 	return 0;
+ 
+ err_destroy_all:
+-	spin_lock_irq(q->queue_lock);
+ 	blkg_destroy_all(q);
+-	spin_unlock_irq(q->queue_lock);
+ 	return ret;
+ err_unlock:
+ 	spin_unlock_irq(q->queue_lock);
+@@ -1222,10 +1220,7 @@ void blkcg_drain_queue(struct request_queue *q)
+  */
+ void blkcg_exit_queue(struct request_queue *q)
+ {
+-	spin_lock_irq(q->queue_lock);
+ 	blkg_destroy_all(q);
+-	spin_unlock_irq(q->queue_lock);
+-
+ 	blk_throtl_exit(q);
+ }
+ 
 -- 
 2.19.1
