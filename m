@@ -1,7 +1,7 @@
 From: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
-Subject: [PATCH 12/16] umem: don't override the queue_lock
-Date: Wed, 14 Nov 2018 17:02:15 +0100
-Message-ID: <20181114160219.28328-13-hch@lst.de>
+Subject: [PATCH 11/16] drbd: don't override the queue_lock
+Date: Wed, 14 Nov 2018 17:02:14 +0100
+Message-ID: <20181114160219.28328-12-hch@lst.de>
 References: <20181114160219.28328-1-hch@lst.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,28 +21,27 @@ To: Jens Axboe <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>
 Cc: linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, drbd-dev-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-The umem card->lock and the block layer queue_lock are used for entirely
-different resources.  Stop using card->lock as the block layer
+The DRBD req_lock and block layer queue_lock are used for entirely
+different resources.  Stop using the req_lock as the block layer
 queue_lock.
 
 Signed-off-by: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
 ---
- drivers/block/umem.c | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+ drivers/block/drbd/drbd_main.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/block/umem.c b/drivers/block/umem.c
-index be3e3ab79950..8a27b5adc2b3 100644
---- a/drivers/block/umem.c
-+++ b/drivers/block/umem.c
-@@ -888,8 +888,7 @@ static int mm_pci_probe(struct pci_dev *dev, const struct pci_device_id *id)
- 	card->biotail = &card->bio;
- 	spin_lock_init(&card->lock);
+diff --git a/drivers/block/drbd/drbd_main.c b/drivers/block/drbd/drbd_main.c
+index fa8204214ac0..b66c59ce6260 100644
+--- a/drivers/block/drbd/drbd_main.c
++++ b/drivers/block/drbd/drbd_main.c
+@@ -2792,7 +2792,7 @@ enum drbd_ret_code drbd_create_device(struct drbd_config_context *adm_ctx, unsig
  
--	card->queue = blk_alloc_queue_node(GFP_KERNEL, NUMA_NO_NODE,
--					   &card->lock);
-+	card->queue = blk_alloc_queue_node(GFP_KERNEL, NUMA_NO_NODE, NULL);
- 	if (!card->queue)
- 		goto failed_alloc;
+ 	drbd_init_set_defaults(device);
  
+-	q = blk_alloc_queue_node(GFP_KERNEL, NUMA_NO_NODE, &resource->req_lock);
++	q = blk_alloc_queue_node(GFP_KERNEL, NUMA_NO_NODE, NULL);
+ 	if (!q)
+ 		goto out_no_q;
+ 	device->rq_queue = q;
 -- 
 2.19.1
