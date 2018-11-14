@@ -1,190 +1,163 @@
-From: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-Subject: Re: [PATCH V3 1/3] mmc: sdhci: Allow platform controlled voltage
- switching
-Date: Wed, 14 Nov 2018 20:06:04 +0530
-Message-ID: <9a4708c8-cc43-a690-7ef7-da351eb1f967@codeaurora.org>
-References: <1539004739-32060-1-git-send-email-vbadigan@codeaurora.org>
- <1539004739-32060-2-git-send-email-vbadigan@codeaurora.org>
- <CAE=gft631u+ie3PRFkc5t1f3iYwuhbxDbxKUqvdZS5cFJaJbsA@mail.gmail.com>
- <dcb4a579-b308-76c0-7cc3-22bb95147470@codeaurora.org>
+From: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
+Subject: [PATCH 02/16] block: remove deadline __deadline
+	manipulation helpers
+Date: Wed, 14 Nov 2018 17:02:05 +0100
+Message-ID: <20181114160219.28328-3-hch@lst.de>
+References: <20181114160219.28328-1-hch@lst.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <dcb4a579-b308-76c0-7cc3-22bb95147470@codeaurora.org>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Evan Green <evgreen@chromium.org>
-Cc: adrian.hunter@intel.com, Ulf Hansson <ulf.hansson@linaro.org>, robh+dt@kernel.org, Doug Anderson <dianders@google.com>, asutoshd@codeaurora.org, riteshh@codeaurora.org, stummala@codeaurora.org, sayali <sayalil@codeaurora.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, vviswana@codeaurora.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <drbd-dev-bounces-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org>
+In-Reply-To: <20181114160219.28328-1-hch-jcswGhMUV9g@public.gmane.org>
+List-Unsubscribe: <http://lists.linbit.com/mailman/options/drbd-dev>,
+	<mailto:drbd-dev-request-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linbit.com/pipermail/drbd-dev>
+List-Post: <mailto:drbd-dev-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org>
+List-Help: <mailto:drbd-dev-request-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.linbit.com/mailman/listinfo/drbd-dev>,
+	<mailto:drbd-dev-request-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org?subject=subscribe>
+Sender: drbd-dev-bounces-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org
+Errors-To: drbd-dev-bounces-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org
+To: Jens Axboe <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>
+Cc: linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, drbd-dev-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
+No users left since the removal of the legacy request interface, we can
+remove all the magic bit stealing now and make it a normal field.
 
+But use WRITE_ONCE/READ_ONCE on the new deadline field, given that we
+don't seem to have any mechanism to guarantee a new value actually
+gets seen by other threads.
 
-On 11/12/2018 10:49 PM, Veerabhadrarao Badiganti wrote:
->
-> On 10/17/2018 3:39 AM, Evan Green wrote:
->> On Mon, Oct 8, 2018 at 6:22 AM Veerabhadrarao Badiganti
->> <vbadigan@codeaurora.org> wrote:
->>> From: Vijay Viswanath <vviswana@codeaurora.org>
->>>
->>> Some controllers can have internal mechanism to inform the SW that it
->>> is ready for voltage switching. For such controllers, changing voltage
->>> before the HW is ready can result in various issues.
->>>
->>> During setup/cleanup of host, check whether regulator enable/disable
->>> was already done by platform driver.
->>>
->>> Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
->>> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
->>> ---
->>>   drivers/mmc/host/sdhci.c | 32 +++++++++++++++++++-------------
->>>   drivers/mmc/host/sdhci.h |  1 +
->>>   2 files changed, 20 insertions(+), 13 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>> index 99bdae5..ea7ce1d 100644
->>> --- a/drivers/mmc/host/sdhci.c
->>> +++ b/drivers/mmc/host/sdhci.c
->>> @@ -3616,6 +3616,7 @@ int sdhci_setup_host(struct sdhci_host *host)
->>>          unsigned int override_timeout_clk;
->>>          u32 max_clk;
->>>          int ret;
->>> +       bool enable_vqmmc = false;
->>>
->>>          WARN_ON(host == NULL);
->>>          if (host == NULL)
->>> @@ -3629,9 +3630,12 @@ int sdhci_setup_host(struct sdhci_host *host)
->>>           * the host can take the appropriate action if regulators 
->>> are not
->>>           * available.
->>>           */
->>> -       ret = mmc_regulator_get_supply(mmc);
->>> -       if (ret)
->>> -               return ret;
->>> +       if (!mmc->supply.vqmmc) {
->>> +               ret = mmc_regulator_get_supply(mmc);
->>> +               if (ret)
->>> +                       return ret;
->>> +               enable_vqmmc  = true;
->>> +       }
->> Did you not like my suggestion in the previous patch of changing
->> mmc_regulator_get_supply to only get supplies that were not set
->> previously? What you have here is almost the same, except you've got
->> this weird coupling where if vqmmc is already present, you implicitly
->> skip looking at vmmc entirely (since mmc_regulator_get_supply does
->> more than just get vqmmc).
->
-> sure. Will update mmc_regulator_get_supply() as you suggested.
->
->>>          DBG("Version:   0x%08x | Present:  0x%08x\n",
->>>              sdhci_readw(host, SDHCI_HOST_VERSION),
->>> @@ -3880,7 +3884,15 @@ int sdhci_setup_host(struct sdhci_host *host)
->>>                  mmc->caps |= MMC_CAP_NEEDS_POLL;
->>>
->>>          if (!IS_ERR(mmc->supply.vqmmc)) {
->>> -               ret = regulator_enable(mmc->supply.vqmmc);
->>> +               if (enable_vqmmc) {
->>> +                       ret = regulator_enable(mmc->supply.vqmmc);
->>> +                       if (ret) {
->>> +                               pr_warn("%s: Failed to enable vqmmc 
->>> regulator: %d\n",
->>> +                                       mmc_hostname(mmc), ret);
->>> +                               mmc->supply.vqmmc = ERR_PTR(-EINVAL);
->>> +                       }
->>> +                       host->vqmmc_enabled = !ret;
->>> +               }
->>>
->>>                  /* If vqmmc provides no 1.8V signalling, then 
->>> there's no UHS */
->>>                  if 
->>> (!regulator_is_supported_voltage(mmc->supply.vqmmc, 1700000,
->>> @@ -3893,12 +3905,6 @@ int sdhci_setup_host(struct sdhci_host *host)
->>>                  if 
->>> (!regulator_is_supported_voltage(mmc->supply.vqmmc, 2700000,
->>>                                                      3600000))
->>>                          host->flags &= ~SDHCI_SIGNALING_330;
->>> -
->>> -               if (ret) {
->>> -                       pr_warn("%s: Failed to enable vqmmc 
->>> regulator: %d\n",
->>> -                               mmc_hostname(mmc), ret);
->>> -                       mmc->supply.vqmmc = ERR_PTR(-EINVAL);
->>> -               }
->>>          }
->>>
->>>          if (host->quirks2 & SDHCI_QUIRK2_NO_1_8_V) {
->>> @@ -4136,7 +4142,7 @@ int sdhci_setup_host(struct sdhci_host *host)
->>>          return 0;
->>>
->>>   unreg:
->>> -       if (!IS_ERR(mmc->supply.vqmmc))
->>> +       if (host->vqmmc_enabled)
->>>                  regulator_disable(mmc->supply.vqmmc);
->>>   undma:
->>>          if (host->align_buffer)
->>> @@ -4154,7 +4160,7 @@ void sdhci_cleanup_host(struct sdhci_host *host)
->>>   {
->>>          struct mmc_host *mmc = host->mmc;
->>>
->>> -       if (!IS_ERR(mmc->supply.vqmmc))
->>> +       if (host->vqmmc_enabled)
->>>                  regulator_disable(mmc->supply.vqmmc);
->>>
->>>          if (host->align_buffer)
->>> @@ -4287,7 +4293,7 @@ void sdhci_remove_host(struct sdhci_host 
->>> *host, int dead)
->>>
->>>          tasklet_kill(&host->finish_tasklet);
->>>
->>> -       if (!IS_ERR(mmc->supply.vqmmc))
->>> +       if (host->vqmmc_enabled)
->>>                  regulator_disable(mmc->supply.vqmmc);
->>>
->>>          if (host->align_buffer)
->>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
->>> index b001cf4..3c28152 100644
->>> --- a/drivers/mmc/host/sdhci.h
->>> +++ b/drivers/mmc/host/sdhci.h
->>> @@ -524,6 +524,7 @@ struct sdhci_host {
->>>          bool pending_reset;     /* Cmd/data reset is pending */
->>>          bool irq_wake_enabled;  /* IRQ wakeup is enabled */
->>>          bool v4_mode;           /* Host Version 4 Enable */
->>> +       bool vqmmc_enabled;     /* Vqmmc is enabled */
->> I still don't love this, since it doesn't mean what it says. Everyone
->> else that has a vqmmc_enabled member uses it to actually mean "vqmmc
->> is enabled", but this doesn't mean that. For example, you don't clear
->> this when you disable the regulator in patch 3, so this would be set
->> even if the regulator is disabled, and you don't set it when sdhci
->> enables the regulator, so the regulator is on when this flag is not
->> set.
->>
-Hi Evan
+Signed-off-by: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
+---
+ block/blk-mq.c         |  4 ++--
+ block/blk-timeout.c    |  8 +++++---
+ block/blk.h            | 35 -----------------------------------
+ include/linux/blkdev.h |  4 +---
+ 4 files changed, 8 insertions(+), 43 deletions(-)
 
-This flag is meant to say "disable vqmmc *only* if it is enabled by host 
-driver (sdhci_host)".
-If host driver doesn't enable vqmmc (enabled by platfrm driver) or if it 
-fails to enable it, then don't call disable vqmmc.
-
-Agree with you, the present name is not conveying its purpose.
-It must be something like "vqmmc_enabled_by_host".
-
-Please let me know if you have any suggestions on this name.
-
-
->> At the very least, I think a rename is in order. I'm struggling with
->> the rename, since
->> "vqmmc_pltfrm_enable_but_feel_free_to_call_set_voltage_anywhere" is
->> too long. I guess vqmmc_pltfrm_enabled is the best I've got for now.
->
-> Sure. Will rename it.
->
->>>          struct mmc_request *mrqs_done[SDHCI_MAX_MRQS];  /* Requests 
->>> done */
->>>          struct mmc_command *cmd;        /* Current command */
->>> -- 
->>> Qualcomm India Private Limited, on behalf of Qualcomm Innovation 
->>> Center, Inc.
->>> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a 
->>> Linux Foundation Collaborative Project.
->>>
->
+diff --git a/block/blk-mq.c b/block/blk-mq.c
+index 411be60d0cb6..4c82b4b4fa3e 100644
+--- a/block/blk-mq.c
++++ b/block/blk-mq.c
+@@ -325,7 +325,7 @@ static struct request *blk_mq_rq_ctx_init(struct blk_mq_alloc_data *data,
+ 	rq->special = NULL;
+ 	/* tag was already set */
+ 	rq->extra_len = 0;
+-	rq->__deadline = 0;
++	WRITE_ONCE(rq->deadline, 0);
+ 
+ 	rq->timeout = 0;
+ 
+@@ -839,7 +839,7 @@ static bool blk_mq_req_expired(struct request *rq, unsigned long *next)
+ 	if (rq->rq_flags & RQF_TIMED_OUT)
+ 		return false;
+ 
+-	deadline = blk_rq_deadline(rq);
++	deadline = READ_ONCE(rq->deadline);
+ 	if (time_after_eq(jiffies, deadline))
+ 		return true;
+ 
+diff --git a/block/blk-timeout.c b/block/blk-timeout.c
+index 006cff4390c0..3b0179fbdd6a 100644
+--- a/block/blk-timeout.c
++++ b/block/blk-timeout.c
+@@ -84,7 +84,7 @@ void blk_abort_request(struct request *req)
+ 	 * immediately and that scan sees the new timeout value.
+ 	 * No need for fancy synchronizations.
+ 	 */
+-	blk_rq_set_deadline(req, jiffies);
++	WRITE_ONCE(req->deadline, jiffies);
+ 	kblockd_schedule_work(&req->q->timeout_work);
+ }
+ EXPORT_SYMBOL_GPL(blk_abort_request);
+@@ -121,14 +121,16 @@ void blk_add_timer(struct request *req)
+ 		req->timeout = q->rq_timeout;
+ 
+ 	req->rq_flags &= ~RQF_TIMED_OUT;
+-	blk_rq_set_deadline(req, jiffies + req->timeout);
++
++	expiry = jiffies + req->timeout;
++	WRITE_ONCE(req->deadline, expiry);
+ 
+ 	/*
+ 	 * If the timer isn't already pending or this timeout is earlier
+ 	 * than an existing one, modify the timer. Round up to next nearest
+ 	 * second.
+ 	 */
+-	expiry = blk_rq_timeout(round_jiffies_up(blk_rq_deadline(req)));
++	expiry = blk_rq_timeout(round_jiffies_up(expiry));
+ 
+ 	if (!timer_pending(&q->timeout) ||
+ 	    time_before(expiry, q->timeout.expires)) {
+diff --git a/block/blk.h b/block/blk.h
+index 41b64e6e101b..08a5845b03ba 100644
+--- a/block/blk.h
++++ b/block/blk.h
+@@ -238,26 +238,6 @@ void blk_account_io_start(struct request *req, bool new_io);
+ void blk_account_io_completion(struct request *req, unsigned int bytes);
+ void blk_account_io_done(struct request *req, u64 now);
+ 
+-/*
+- * EH timer and IO completion will both attempt to 'grab' the request, make
+- * sure that only one of them succeeds. Steal the bottom bit of the
+- * __deadline field for this.
+- */
+-static inline int blk_mark_rq_complete(struct request *rq)
+-{
+-	return test_and_set_bit(0, &rq->__deadline);
+-}
+-
+-static inline void blk_clear_rq_complete(struct request *rq)
+-{
+-	clear_bit(0, &rq->__deadline);
+-}
+-
+-static inline bool blk_rq_is_complete(struct request *rq)
+-{
+-	return test_bit(0, &rq->__deadline);
+-}
+-
+ /*
+  * Internal elevator interface
+  */
+@@ -322,21 +302,6 @@ static inline void req_set_nomerge(struct request_queue *q, struct request *req)
+ 		q->last_merge = NULL;
+ }
+ 
+-/*
+- * Steal a bit from this field for legacy IO path atomic IO marking. Note that
+- * setting the deadline clears the bottom bit, potentially clearing the
+- * completed bit. The user has to be OK with this (current ones are fine).
+- */
+-static inline void blk_rq_set_deadline(struct request *rq, unsigned long time)
+-{
+-	rq->__deadline = time & ~0x1UL;
+-}
+-
+-static inline unsigned long blk_rq_deadline(struct request *rq)
+-{
+-	return rq->__deadline & ~0x1UL;
+-}
+-
+ /*
+  * Internal io_context interface
+  */
+diff --git a/include/linux/blkdev.h b/include/linux/blkdev.h
+index c92aafcde0b8..1aa94759d219 100644
+--- a/include/linux/blkdev.h
++++ b/include/linux/blkdev.h
+@@ -224,9 +224,7 @@ struct request {
+ 	refcount_t ref;
+ 
+ 	unsigned int timeout;
+-
+-	/* access through blk_rq_set_deadline, blk_rq_deadline */
+-	unsigned long __deadline;
++	unsigned long deadline;
+ 
+ 	union {
+ 		struct __call_single_data csd;
+-- 
+2.19.1
