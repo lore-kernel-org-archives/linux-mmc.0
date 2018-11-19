@@ -1,67 +1,62 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/4] mmc: sdhci-omap: Add variable to indicate host is tuning
-Date: Mon, 19 Nov 2018 14:18:46 +0100
-Message-ID: <CAPDyKFqkscm9ZhJhk7SWFc_tmqqqXSx5_t2tzEL-DV6aE+Q=KA@mail.gmail.com>
-References: <20181119111618.2745-1-faiz_abbas@ti.com> <20181119111618.2745-3-faiz_abbas@ti.com>
+Subject: Re: [PATCH RFC 2/3] mmc: sdhci-omap: Add using external dma
+Date: Mon, 19 Nov 2018 17:32:25 +0100
+Message-ID: <CAPDyKFpomN9KyX5u8C9-gBwBNm-sdfHwxbDVYD0hs73WFJR53A@mail.gmail.com>
+References: <1541387810-24867-1-git-send-email-zhang.chunyan@linaro.org>
+ <1541387810-24867-3-git-send-email-zhang.chunyan@linaro.org>
+ <be0a18e8-8ee6-4d4e-6dcc-6ba6e39033c9@ti.com> <CAK8P3a2X4tbx_R-5VgfApF-UPmJ_XuzH3hO_uVAfffC6h8WrJw@mail.gmail.com>
+ <44e1a97e-0446-283f-72f7-fd8d39a74b0f@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181119111618.2745-3-faiz_abbas@ti.com>
+In-Reply-To: <44e1a97e-0446-283f-72f7-fd8d39a74b0f@ti.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Faiz Abbas <faiz_abbas@ti.com>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kishon <kishon@ti.com>, Adrian Hunter <adrian.hunter@intel.com>
+To: Kishon Vijay Abraham I <kishon@ti.com>, Arnd Bergmann <arnd@arndb.de>, Chunyan Zhang <zhang.chunyan@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Mark Brown <broonie@kernel.org>, Sekhar Nori <nsekhar@ti.com>, Chunyan Zhang <zhang.lyra@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 19 November 2018 at 12:16, Faiz Abbas <faiz_abbas@ti.com> wrote:
-> Add a variable in sdhc_omap_host to indicate whether a tuning
-> operation is ongoing.
+On 9 November 2018 at 06:27, Kishon Vijay Abraham I <kishon@ti.com> wrote:
+> Hi Arnd,
 >
-> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+> On 06/11/18 6:21 PM, Arnd Bergmann wrote:
+>> On 11/5/18, Kishon Vijay Abraham I <kishon@ti.com> wrote:
+>>> On 05/11/18 8:46 AM, Chunyan Zhang wrote:
+>>>>
+>>>> +   sdhci_switch_extdma(host, true);
+>>>
+>>> A number of devices using sdhci-omap supports ADMA. So switching to
+>>> external
+>>> DMA shouldn't be unconditional.
+>>>
+>>> IMHO sdhci.c should see if the device supports ADMA or SDMA. If not it
+>>> should
+>>> try switching to external DMA and if external DMA too is not supported, it
+>>> should use PIO.
+>>
+>> What's the reasoning for preferring ADMA/SDMA over external DMA if
+>> both are supported?
+>
+> Generally from our experiments we've found ADMA gives better throughput than
+> DMA. I have to ascertain the actual reasons for that.
+>>
+>> I'd expect that if the external DMA for some reason is worse than
+>> ADMA, we just wouldn't list it in the DT at all, but if it's listed and
+>> ADMA also works, then the driver should try to use it before falling
+>> back to ADMA.
+>
+> I would agree that for newer dtbs. However if you consider omap_hsmmc, external
+> DMA bindings are already added in dt. If we try to switch to sdhci-omap with
+> the same bindings, systems with older dtbs will use external DMA and give
+> lesser throughput.
 
-Please squash this into patch3 as it seems a bit silly to keep this a
-separate change.
+I was under the impression that the internal DMA (for old versions) is
+rather poor.
+
+However, in the end this is a software policy decision of what to use.
+I have no strong opinion, so feel free to pick what you think makes
+best sense.
+
+Maybe Adrian also have some thoughts?
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/host/sdhci-omap.c | 6 ++++++
->  1 file changed, 6 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-> index 87138067e334..cfffcf58be3f 100644
-> --- a/drivers/mmc/host/sdhci-omap.c
-> +++ b/drivers/mmc/host/sdhci-omap.c
-> @@ -115,6 +115,7 @@ struct sdhci_omap_host {
->
->         struct pinctrl          *pinctrl;
->         struct pinctrl_state    **pinctrl_state;
-> +       bool                    is_tuning;
->  };
->
->  static void sdhci_omap_start_clock(struct sdhci_omap_host *omap_host);
-> @@ -318,6 +319,8 @@ static int sdhci_omap_execute_tuning(struct mmc_host *mmc, u32 opcode)
->          */
->         host->ier &= ~SDHCI_INT_DATA_CRC;
->
-> +       omap_host->is_tuning = true;
-> +
->         while (phase_delay <= MAX_PHASE_DELAY) {
->                 sdhci_omap_set_dll(omap_host, phase_delay);
->
-> @@ -355,9 +358,12 @@ static int sdhci_omap_execute_tuning(struct mmc_host *mmc, u32 opcode)
->         phase_delay = max_window + 4 * (max_len >> 1);
->         sdhci_omap_set_dll(omap_host, phase_delay);
->
-> +       omap_host->is_tuning = false;
-> +
->         goto ret;
->
->  tuning_error:
-> +       omap_host->is_tuning = false;
->         dev_err(dev, "Tuning failed\n");
->         sdhci_omap_disable_tuning(omap_host);
->
-> --
-> 2.19.1
->
