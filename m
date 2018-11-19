@@ -1,70 +1,96 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 11/17] mmc: bcm2835: Switch to SPDX identifier
-Date: Mon, 19 Nov 2018 13:08:14 +0100
-Message-ID: <CAPDyKFpNiWVuz33Pnmijp3fkbsN_t2mbXqsh0vtJj2EbZUiYsw@mail.gmail.com>
-References: <1541866205-7737-1-git-send-email-stefan.wahren@i2se.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: core: Lower max_seg_size if too high for DMA
+Date: Mon, 19 Nov 2018 13:08:20 +0100
+Message-ID: <CAPDyKFqtMHRjHsJXcKTTzGYSsyab=2SfWdYiETS4Bo2f7Zw2CQ@mail.gmail.com>
+References: <20181031155738.18367-1-tony@atomide.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <1541866205-7737-1-git-send-email-stefan.wahren-eS4NqCHxEME@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rpi-kernel>,
- <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rpi-kernel/>
-List-Post: <mailto:linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rpi-kernel>,
- <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "linux-rpi-kernel" <linux-rpi-kernel-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>
-Cc: "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20181031155738.18367-1-tony@atomide.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Tony Lindgren <tony@atomide.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kishon Vijay Abraham I <kishon@ti.com>, Peter Ujfalusi <peter.ujfalusi@ti.com>, Russell King <rmk+kernel@armlinux.org.uk>, linux-omap <linux-omap@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 10 November 2018 at 17:10, Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org> wrote:
-> Adopt the SPDX license identifier headers to ease license compliance
-> management.
+On 31 October 2018 at 16:57, Tony Lindgren <tony@atomide.com> wrote:
+> With CONFIG_DMA_API_DEBUG_SG a device may produce the following warning:
 >
-> Cc: Phil Elwell <phil-FnsA7b+Nu9XbIbC87yuRow@public.gmane.org>
-> Signed-off-by: Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>
+> "DMA-API: mapping sg segment longer than device claims to support"
+>
+> We default to 64KiB if a DMA engine driver does not initialize dma_parms
+> and call dma_set_max_seg_size(). This may be lower that what many MMC
+> drivers do with mmc->max_seg_size = mmc->max_blk_size * mmc->max_blk_count.
+>
+> Let's do a sanity check for max_seg_size being higher than what DMA
+> supports in mmc_add_host() and lower it as needed.
+>
+> Cc: Kishon Vijay Abraham I <kishon@ti.com>
+> Cc: Peter Ujfalusi <peter.ujfalusi@ti.com>
+> Cc: Russell King <rmk+kernel@armlinux.org.uk>
+> Reported-by: Russell King <rmk+kernel@armlinux.org.uk>
+> Signed-off-by: Tony Lindgren <tony@atomide.com>
+> ---
+>  drivers/mmc/core/host.c | 16 ++++++++++++++++
+>  1 file changed, 16 insertions(+)
+>
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -13,6 +13,7 @@
+>   */
+>
+>  #include <linux/device.h>
+> +#include <linux/dma-mapping.h>
+>  #include <linux/err.h>
+>  #include <linux/idr.h>
+>  #include <linux/of.h>
+> @@ -415,6 +416,19 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+>
+>  EXPORT_SYMBOL(mmc_alloc_host);
+>
+> +static void mmc_check_max_seg_size(struct mmc_host *host)
+> +{
+> +       unsigned int max_seg_size = dma_get_max_seg_size(mmc_dev(host));
 
-Applied for next, thanks!
+Is dma_get_max_seg_size() really intended to be called for any struct
+device (representing the mmc controller) like this?
+
+My understanding is that the dma_get_max_seg_size() is supposed to be
+called by using the DMA engine device, no?
+
+> +
+> +       if (host->max_seg_size <= max_seg_size)
+> +               return;
+> +
+> +       dev_info(mmc_dev(host), "Lowering max_seg_size for DMA: %u vs %u\n",
+> +                host->max_seg_size, max_seg_size);
+> +
+> +       host->max_seg_size = max_seg_size;
+> +}
+> +
+>  /**
+>   *     mmc_add_host - initialise host hardware
+>   *     @host: mmc host
+> @@ -430,6 +444,8 @@ int mmc_add_host(struct mmc_host *host)
+>         WARN_ON((host->caps & MMC_CAP_SDIO_IRQ) &&
+>                 !host->ops->enable_sdio_irq);
+>
+> +       mmc_check_max_seg_size(host);
+> +
+>         err = device_add(&host->class_dev);
+>         if (err)
+>                 return err;
+> --
+> 2.19.1
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/host/bcm2835.c | 13 +------------
->  1 file changed, 1 insertion(+), 12 deletions(-)
->
-> diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
-> index 768972a..4301bc5 100644
-> --- a/drivers/mmc/host/bcm2835.c
-> +++ b/drivers/mmc/host/bcm2835.c
-> @@ -1,3 +1,4 @@
-> +// SPDX-License-Identifier: GPL-2.0
->  /*
->   * bcm2835 sdhost driver.
->   *
-> @@ -25,18 +26,6 @@
->   *  sdhci-bcm2708.c by Broadcom
->   *  sdhci-bcm2835.c by Stephen Warren and Oleksandr Tymoshenko
->   *  sdhci.c and sdhci-pci.c by Pierre Ossman
-> - *
-> - * This program is free software; you can redistribute it and/or modify it
-> - * under the terms and conditions of the GNU General Public License,
-> - * version 2, as published by the Free Software Foundation.
-> - *
-> - * This program is distributed in the hope it will be useful, but WITHOUT
-> - * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-> - * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
-> - * more details.
-> - *
-> - * You should have received a copy of the GNU General Public License
-> - * along with this program.  If not, see <http://www.gnu.org/licenses/>.
->   */
->  #include <linux/clk.h>
->  #include <linux/delay.h>
-> --
-> 2.7.4
->
