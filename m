@@ -1,96 +1,67 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: core: Lower max_seg_size if too high for DMA
-Date: Mon, 19 Nov 2018 13:08:20 +0100
-Message-ID: <CAPDyKFqtMHRjHsJXcKTTzGYSsyab=2SfWdYiETS4Bo2f7Zw2CQ@mail.gmail.com>
-References: <20181031155738.18367-1-tony@atomide.com>
+Subject: Re: [PATCH 1/4] mmc: sdhci-omap: Fix DCRC error handling during tuning
+Date: Mon, 19 Nov 2018 14:18:39 +0100
+Message-ID: <CAPDyKFo==Up-pTGZcjMvKWY70-m7i44A5Yr_qJjtpBFjWK8J5g@mail.gmail.com>
+References: <20181119111618.2745-1-faiz_abbas@ti.com> <20181119111618.2745-2-faiz_abbas@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20181031155738.18367-1-tony@atomide.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kishon Vijay Abraham I <kishon@ti.com>, Peter Ujfalusi <peter.ujfalusi@ti.com>, Russell King <rmk+kernel@armlinux.org.uk>, linux-omap <linux-omap@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20181119111618.2745-2-faiz_abbas@ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Faiz Abbas <faiz_abbas@ti.com>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kishon <kishon@ti.com>, Adrian Hunter <adrian.hunter@intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 31 October 2018 at 16:57, Tony Lindgren <tony@atomide.com> wrote:
-> With CONFIG_DMA_API_DEBUG_SG a device may produce the following warning:
+On 19 November 2018 at 12:16, Faiz Abbas <faiz_abbas@ti.com> wrote:
+> Commit 7d33c3581536 ("mmc: sdhci-omap: Workaround for Errata i802")
+> disabled DCRC interrupts during tuning. This write to the interrupt
+> enable register gets overwritten in sdhci_prepare_data() and the
+> interrupt is not in fact disabled. Fix this by disabling the interrupt
+> in the host->ier variable.
 >
-> "DMA-API: mapping sg segment longer than device claims to support"
->
-> We default to 64KiB if a DMA engine driver does not initialize dma_parms
-> and call dma_set_max_seg_size(). This may be lower that what many MMC
-> drivers do with mmc->max_seg_size = mmc->max_blk_size * mmc->max_blk_count.
->
-> Let's do a sanity check for max_seg_size being higher than what DMA
-> supports in mmc_add_host() and lower it as needed.
->
-> Cc: Kishon Vijay Abraham I <kishon@ti.com>
-> Cc: Peter Ujfalusi <peter.ujfalusi@ti.com>
-> Cc: Russell King <rmk+kernel@armlinux.org.uk>
-> Reported-by: Russell King <rmk+kernel@armlinux.org.uk>
-> Signed-off-by: Tony Lindgren <tony@atomide.com>
-> ---
->  drivers/mmc/core/host.c | 16 ++++++++++++++++
->  1 file changed, 16 insertions(+)
->
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -13,6 +13,7 @@
->   */
->
->  #include <linux/device.h>
-> +#include <linux/dma-mapping.h>
->  #include <linux/err.h>
->  #include <linux/idr.h>
->  #include <linux/of.h>
-> @@ -415,6 +416,19 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
->
->  EXPORT_SYMBOL(mmc_alloc_host);
->
-> +static void mmc_check_max_seg_size(struct mmc_host *host)
-> +{
-> +       unsigned int max_seg_size = dma_get_max_seg_size(mmc_dev(host));
+> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
 
-Is dma_get_max_seg_size() really intended to be called for any struct
-device (representing the mmc controller) like this?
-
-My understanding is that the dma_get_max_seg_size() is supposed to be
-called by using the DMA engine device, no?
-
-> +
-> +       if (host->max_seg_size <= max_seg_size)
-> +               return;
-> +
-> +       dev_info(mmc_dev(host), "Lowering max_seg_size for DMA: %u vs %u\n",
-> +                host->max_seg_size, max_seg_size);
-> +
-> +       host->max_seg_size = max_seg_size;
-> +}
-> +
->  /**
->   *     mmc_add_host - initialise host hardware
->   *     @host: mmc host
-> @@ -430,6 +444,8 @@ int mmc_add_host(struct mmc_host *host)
->         WARN_ON((host->caps & MMC_CAP_SDIO_IRQ) &&
->                 !host->ops->enable_sdio_irq);
->
-> +       mmc_check_max_seg_size(host);
-> +
->         err = device_add(&host->class_dev);
->         if (err)
->                 return err;
-> --
-> 2.19.1
+Should we have fixes/stable tag?
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/sdhci-omap.c | 7 +++----
+>  1 file changed, 3 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+> index 88347ce78f23..87138067e334 100644
+> --- a/drivers/mmc/host/sdhci-omap.c
+> +++ b/drivers/mmc/host/sdhci-omap.c
+> @@ -290,7 +290,6 @@ static int sdhci_omap_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>         u32 start_window = 0, max_window = 0;
+>         u8 cur_match, prev_match = 0;
+>         u32 length = 0, max_len = 0;
+> -       u32 ier = host->ier;
+>         u32 phase_delay = 0;
+>         int ret = 0;
+>         u32 reg;
+> @@ -317,9 +316,7 @@ static int sdhci_omap_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>          * during the tuning procedure. So disable it during the
+>          * tuning procedure.
+>          */
+> -       ier &= ~SDHCI_INT_DATA_CRC;
+> -       sdhci_writel(host, ier, SDHCI_INT_ENABLE);
+> -       sdhci_writel(host, ier, SDHCI_SIGNAL_ENABLE);
+> +       host->ier &= ~SDHCI_INT_DATA_CRC;
+>
+>         while (phase_delay <= MAX_PHASE_DELAY) {
+>                 sdhci_omap_set_dll(omap_host, phase_delay);
+> @@ -366,6 +363,8 @@ static int sdhci_omap_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>
+>  ret:
+>         sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
+> +       /* Reenable forbidden interrupt */
+> +       host->ier |= SDHCI_INT_DATA_CRC;
+>         sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
+>         sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
+>         return ret;
+> --
+> 2.19.1
+>
