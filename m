@@ -1,29 +1,26 @@
-From: Aaro Koskinen <aaro.koskinen@iki.fi>
-Subject: Re: [PATCH] MMC: OMAP: fix broken MMC on OMAP15XX/OMAP5912/OMAP310
-Date: Mon, 19 Nov 2018 20:04:18 +0200
-Message-ID: <20181119180418.GD16897@darkstar.musicnaut.iki.fi>
-References: <20181118201919.14401-1-aaro.koskinen@iki.fi>
- <ffdad271-943c-f4e7-8ec9-2af5769798a4@ti.com>
+From: Evan Green <evgreen@chromium.org>
+Subject: Re: [PATCH V5 2/2] mmc: sdhci-msm: Re-initialize DLL if MCLK is gated dynamically
+Date: Mon, 19 Nov 2018 10:50:43 -0800
+Message-ID: <CAE=gft7EFFEawCe02KOkB9T_fMPBfQTXEk-cddEQdDnVOQ+Yyg@mail.gmail.com>
+References: <1542005537-19154-1-git-send-email-vbadigan@codeaurora.org> <1542005537-19154-3-git-send-email-vbadigan@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <ffdad271-943c-f4e7-8ec9-2af5769798a4@ti.com>
+In-Reply-To: <1542005537-19154-3-git-send-email-vbadigan@codeaurora.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Peter Ujfalusi <peter.ujfalusi@ti.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>, Ladislav Michl <ladis@linux-mips.org>, linux-mmc@vger.kernel.org, Andrzej Zaborowski <balrogg@gmail.com>, linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org
+To: vbadigan@codeaurora.org
+Cc: adrian.hunter@intel.com, Ulf Hansson <ulf.hansson@linaro.org>, robh+dt@kernel.org, Doug Anderson <dianders@google.com>, asutoshd@codeaurora.org, riteshh@codeaurora.org, stummala@codeaurora.org, sayali <sayalil@codeaurora.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+On Sun, Nov 11, 2018 at 10:53 PM Veerabhadrarao Badiganti
+<vbadigan@codeaurora.org> wrote:
+>
+> On few SDHCI-MSM controllers, the host controller's clock tuning
+> circuit may go out of sync if controller clocks are gated which
+> eventually will result in data CRC, command CRC/timeout errors.
+> To overcome this h/w limitation, the DLL needs to be re-initialized
+> and restored with its old settings once clocks are ungated.
+>
+> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
 
-On Mon, Nov 19, 2018 at 11:58:32AM +0200, Peter Ujfalusi wrote:
-> On 2018-11-18 22:19, Aaro Koskinen wrote:
-> > Tested on OMAP15XX/OMAP310 (Palm TE), OMAP1710 (Nokia 770)
-> > and OMAP2420 (Nokia N810).
-> 
-> Do you know if the DMA is enabled for the MMC? It might not work via
-> DMAengine.
-
-DMA is enabled for MMC, and works OK on all of these devices.
-
-A.
+Reviewed-by: Evan Green <evgreen@chromium.org>
