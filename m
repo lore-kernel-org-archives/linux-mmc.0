@@ -1,48 +1,57 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: core: Remove timeout when enabling cache
-Date: Tue, 20 Nov 2018 10:24:53 +0100
-Message-ID: <CAPDyKFpedP1f4XZYvebFCuooYrBa2ux9F9mYRNi1Q=M-5eJ0Rg@mail.gmail.com>
-References: <20181106133007.12318-1-sjoerd.simons@collabora.co.uk>
- <9051c212-6e2a-bc39-3686-693e6cd87f1d@ti.com> <303b49cbb5b687d6b6a7ad4048eda459586c0806.camel@collabora.co.uk>
- <20181107084741.GA31092@kunai>
+Subject: Re: [PATCH V5 0/2] Re-initialize DLL when MCLK is gated dynamically
+Date: Tue, 20 Nov 2018 10:29:52 +0100
+Message-ID: <CAPDyKFq++isoJv75q+6uwrHwZSRJQ=WmxVihm1mKucJKB3Qzbg@mail.gmail.com>
+References: <1542005537-19154-1-git-send-email-vbadigan@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181107084741.GA31092@kunai>
+In-Reply-To: <1542005537-19154-1-git-send-email-vbadigan@codeaurora.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>, Faiz Abbas <faiz_abbas@ti.com>, Sjoerd Simons <sjoerd.simons@collabora.co.uk>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, kernel@collabora.com, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Hongjie Fang <hongjiefang@asrmicro.com>, Bastian Stender <bst@pengutronix.de>, Kyle Roeschley <kyle.roeschley@ni.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Shawn Lin <shawn.lin@rock-chips.com>, Harish Jenny K N <harish_kandiga@mentor.com>, Simon Horman <horms+renesas@verge.net.au>
+To: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Evan Green <evgreen@chromium.org>, Doug Anderson <dianders@google.com>, Asutosh Das <asutoshd@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Sahitya Tummala <stummala@codeaurora.org>, Sayali Lokhande <sayalil@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-arm-msm <linux-arm-msm@vger.kernel.org>, DTML <devicetree@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 7 November 2018 at 09:47, Wolfram Sang <wsa@the-dreams.de> wrote:
+On 12 November 2018 at 07:52, Veerabhadrarao Badiganti
+<vbadigan@codeaurora.org> wrote:
+> On few SDHCI-MSM controllers, the host controller's clock tuning
+> circuit may go out of sync if controller clocks are gated which
+> eventually, result in data CRC and command CRC/timeout errors.
+> To fix this issue, the DLL needs to be re-initialized and restored with
+> its old settings once clocks are ungated. SDHC cotroller on SDM845 SOC
+> has this limitation.
 >
->> That also happens to be one of the cards we deploy; However i did
->> wonder about adding a quirk but decided against it as it was not clear
->> to me from the specification that CACHE ON really is meant to complete
->> within GENERIC_CMD6_TIMEOUT. That and i fret about ending up in hit-a-
->> mole games as the failure is really quite tedious (boot failure).
+> Changes since V4:
+>         - Exactly same as V3, posted multiple mails for V4.
+>         So to avoid confusion updating it as V5.
 >
-> I agree that we should use the more defensive variant as a default. I
-> mean there should be no performance regression since most cards will
-> respond just faster, or? The only downside I could see is that we might
-> miss a real timeout with no bounds set and might get stuck?
+> Changes since V3:
+>         - Introduced SoC specific dt compatible string for sdhci-msm
+>         controller
+>         - Moved the condition which checks whether tuning is needed or
+>         not, to a common function.
+>
+> Changes since V2:
+>         - Removed an unused variable.
+>         - Renamed the newly introduced flags to be more meaningful.
+>         - Added new dt compatible string for SDM845 SOC.
+>
+> Changes since V1:
+>         - Replaced dt flag with a dt compatible string to
+>         indicate SHDCI-MSM controller varients which need this fix.
+>         - Moved the DLL settings restoration logic from request
+>         context to platform driver runtime pm context.
+>
+> Tested on: sdm845
+> Veerabhadrarao Badiganti (2):
+>   dt-bindings: mmc: sdhci-msm: Add SoC-specific compatible strings
+>   mmc: sdhci-msm: Re-initialize DLL if MCLK is gated dynamically
+>
+>  .../devicetree/bindings/mmc/sdhci-msm.txt          | 21 ++++--
+>  drivers/mmc/host/sdhci-msm.c                       | 78 +++++++++++++++++++---
+>  2 files changed, 84 insertions(+), 15 deletions(-)
 
-Well, you have a point, but still it's kind of nice to know which
-cards are behaving well and which ones that doesn't. Hence I think I
-prefer to stick using a quirk, unless you have a strong opinion.
-
-Note that, in this case we can use CMD13 to poll for busy, which then
-means it also works for those hosts that doesn't support HW busy
-detection, without getting additional delays. If this hasn't been the
-case, we must be using a quirk, but now we are more free to choose.
-
-> Maybe it is
-> worth contacting eMMC spec people to at least know what is the expected
-> behaviour?
-
-According to the spec, the GENERIC_CMD6_TIMEOUT should be sufficient.
-So this card is not conforming to the spec, I think it's as simple as
-that.
+Applied for next, thanks!
 
 Kind regards
 Uffe
