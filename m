@@ -1,64 +1,59 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V2 1/2] mmc: mmci: send stop command if sbc error issue
-Date: Tue, 20 Nov 2018 10:42:07 +0100
-Message-ID: <CAPDyKFpLTEwrBagJrd98Zyrd_pwJa9Zkgsi+geZainQV+OgpOQ@mail.gmail.com>
-References: <1541583041-17461-1-git-send-email-ludovic.Barre@st.com> <1541583041-17461-2-git-send-email-ludovic.Barre@st.com>
+From: Faiz Abbas <faiz_abbas@ti.com>
+Subject: Re: [PATCH] mmc: core: Remove timeout when enabling cache
+Date: Tue, 20 Nov 2018 15:39:16 +0530
+Message-ID: <327f0d23-efd7-a8e3-23d8-945132573c06@ti.com>
+References: <20181106133007.12318-1-sjoerd.simons@collabora.co.uk>
+ <9051c212-6e2a-bc39-3686-693e6cd87f1d@ti.com>
+ <303b49cbb5b687d6b6a7ad4048eda459586c0806.camel@collabora.co.uk>
+ <20181107084741.GA31092@kunai>
+ <CAPDyKFpedP1f4XZYvebFCuooYrBa2ux9F9mYRNi1Q=M-5eJ0Rg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1541583041-17461-2-git-send-email-ludovic.Barre@st.com>
+In-Reply-To: <CAPDyKFpedP1f4XZYvebFCuooYrBa2ux9F9mYRNi1Q=M-5eJ0Rg@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ludovic Barre <ludovic.Barre@st.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-stm32@st-md-mailman.stormreply.com
+To: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa@the-dreams.de>, Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, kernel@collabora.com, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Hongjie Fang <hongjiefang@asrmicro.com>, Bastian Stender <bst@pengutronix.de>, Kyle Roeschley <kyle.roeschley@ni.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Shawn Lin <shawn.lin@rock-chips.com>, Harish Jenny K N <harish_kandiga@mentor.com>, Simon Horman <horms+renesas@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
 
-On 7 November 2018 at 10:30, Ludovic Barre <ludovic.Barre@st.com> wrote:
-> From: Ludovic Barre <ludovic.barre@st.com>
->
-> Refer to "4.15 set block count command" of sd specification:
-> Host needs to issue CMD12 if any error is detected in
-> the CMD18 and CMD25 operations.
->
-> In sbc case, the data->stop is fill by framework.
->
-> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
-> ---
->  drivers/mmc/host/mmci.c | 5 ++---
->  1 file changed, 2 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index 82bab35..13fa640 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -1190,11 +1190,10 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
->                         /* The error clause is handled above, success! */
->                         data->bytes_xfered = data->blksz * data->blocks;
->
-> -               if (!data->stop || host->mrq->sbc) {
-> +               if (!data->stop || (host->mrq->sbc && !data->error))
->                         mmci_request_end(host, data->mrq);
-> -               } else {
-> +               else
->                         mmci_start_command(host, data->stop, 0);
+Hi Uffe,
 
-This looks correct to me!
+On 20/11/18 2:54 PM, Ulf Hansson wrote:
+> On 7 November 2018 at 09:47, Wolfram Sang <wsa@the-dreams.de> wrote:
+>>
+>>> That also happens to be one of the cards we deploy; However i did
+>>> wonder about adding a quirk but decided against it as it was not clear
+>>> to me from the specification that CACHE ON really is meant to complete
+>>> within GENERIC_CMD6_TIMEOUT. That and i fret about ending up in hit-a-
+>>> mole games as the failure is really quite tedious (boot failure).
+>>
+>> I agree that we should use the more defensive variant as a default. I
+>> mean there should be no performance regression since most cards will
+>> respond just faster, or? The only downside I could see is that we might
+>> miss a real timeout with no bounds set and might get stuck?
+> 
+> Well, you have a point, but still it's kind of nice to know which
+> cards are behaving well and which ones that doesn't. Hence I think I
+> prefer to stick using a quirk, unless you have a strong opinion.
+> 
+> Note that, in this case we can use CMD13 to poll for busy, which then
+> means it also works for those hosts that doesn't support HW busy
+> detection, without getting additional delays. If this hasn't been the
+> case, we must be using a quirk, but now we are more free to choose.
+> 
+>> Maybe it is
+>> worth contacting eMMC spec people to at least know what is the expected
+>> behaviour?
+> 
+> According to the spec, the GENERIC_CMD6_TIMEOUT should be sufficient.
+> So this card is not conforming to the spec, I think it's as simple as
+> that.
+> 
 
-Although, just wanted to double check that you tested this for a case
-where we have host->mrq->sbc set and got an error in data->error? I
-guess it can be tricky, so I was thinking of manually trying to
-instruct the code, to set an error in data->error, at some point to
-trigger this code. That would at least give us some confidence that it
-works as expected.
+Is the QUIRK patch acceptable as it is or do you require some sort of
+errata from the card manufacturers?
 
-Thoughts?
-
-> -               }
->         }
->  }
->
-> --
-> 2.7.4
->
-
-Kind regards
-Uffe
+Thanks,
+Faiz
