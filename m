@@ -1,47 +1,38 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: Re: [PATCH 4/4] mmc: sdhci-omap: Remove redundant structure
- assignments
-Date: Tue, 20 Nov 2018 10:31:35 +0530
-Message-ID: <e337e772-5581-c225-e1c1-58fa6d285988@ti.com>
+From: Faiz Abbas <faiz_abbas@ti.com>
+Subject: Re: [PATCH 1/4] mmc: sdhci-omap: Fix DCRC error handling during
+ tuning
+Date: Tue, 20 Nov 2018 12:58:06 +0530
+Message-ID: <4ff41f24-e152-521e-3fd7-0083b0d4ff98@ti.com>
 References: <20181119111618.2745-1-faiz_abbas@ti.com>
- <20181119111618.2745-5-faiz_abbas@ti.com>
+ <20181119111618.2745-2-faiz_abbas@ti.com>
+ <CAPDyKFo==Up-pTGZcjMvKWY70-m7i44A5Yr_qJjtpBFjWK8J5g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181119111618.2745-5-faiz_abbas@ti.com>
+In-Reply-To: <CAPDyKFo==Up-pTGZcjMvKWY70-m7i44A5Yr_qJjtpBFjWK8J5g@mail.gmail.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Faiz Abbas <faiz_abbas@ti.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kishon <kishon@ti.com>, Adrian Hunter <adrian.hunter@intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
+Hi Uffe
 
+On 19/11/18 6:48 PM, Ulf Hansson wrote:
+> On 19 November 2018 at 12:16, Faiz Abbas <faiz_abbas@ti.com> wrote:
+>> Commit 7d33c3581536 ("mmc: sdhci-omap: Workaround for Errata i802")
+>> disabled DCRC interrupts during tuning. This write to the interrupt
+>> enable register gets overwritten in sdhci_prepare_data() and the
+>> interrupt is not in fact disabled. Fix this by disabling the interrupt
+>> in the host->ier variable.
+>>
+>> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+> 
+> Should we have fixes/stable tag?
+> 
 
-On 19/11/18 4:46 PM, Faiz Abbas wrote:
-> The sdhci_execute_tuning() function has assignment of
-> private pointers multiple times. Remove the redundant assignment.
-> 
-> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+Ok. Will add that.
 
-Acked-by: Kishon Vijay Abraham I <kishon@ti.com>
-> ---
->   drivers/mmc/host/sdhci-omap.c | 4 ----
->   1 file changed, 4 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-> index bf268b38ddc8..b3cb39d0db6f 100644
-> --- a/drivers/mmc/host/sdhci-omap.c
-> +++ b/drivers/mmc/host/sdhci-omap.c
-> @@ -295,10 +295,6 @@ static int sdhci_omap_execute_tuning(struct mmc_host *mmc, u32 opcode)
->   	int ret = 0;
->   	u32 reg;
->   
-> -	pltfm_host = sdhci_priv(host);
-> -	omap_host = sdhci_pltfm_priv(pltfm_host);
-> -	dev = omap_host->dev;
-> -
->   	/* clock tuning is not needed for upto 52MHz */
->   	if (ios->clock <= 52000000)
->   		return 0;
-> 
+Thanks,
+Faiz
