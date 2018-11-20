@@ -1,38 +1,48 @@
-From: Faiz Abbas <faiz_abbas@ti.com>
-Subject: Re: [PATCH 1/4] mmc: sdhci-omap: Fix DCRC error handling during
- tuning
-Date: Tue, 20 Nov 2018 12:58:06 +0530
-Message-ID: <4ff41f24-e152-521e-3fd7-0083b0d4ff98@ti.com>
-References: <20181119111618.2745-1-faiz_abbas@ti.com>
- <20181119111618.2745-2-faiz_abbas@ti.com>
- <CAPDyKFo==Up-pTGZcjMvKWY70-m7i44A5Yr_qJjtpBFjWK8J5g@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: core: Remove timeout when enabling cache
+Date: Tue, 20 Nov 2018 10:24:53 +0100
+Message-ID: <CAPDyKFpedP1f4XZYvebFCuooYrBa2ux9F9mYRNi1Q=M-5eJ0Rg@mail.gmail.com>
+References: <20181106133007.12318-1-sjoerd.simons@collabora.co.uk>
+ <9051c212-6e2a-bc39-3686-693e6cd87f1d@ti.com> <303b49cbb5b687d6b6a7ad4048eda459586c0806.camel@collabora.co.uk>
+ <20181107084741.GA31092@kunai>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFo==Up-pTGZcjMvKWY70-m7i44A5Yr_qJjtpBFjWK8J5g@mail.gmail.com>
-Content-Language: en-US
+In-Reply-To: <20181107084741.GA31092@kunai>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kishon <kishon@ti.com>, Adrian Hunter <adrian.hunter@intel.com>
+To: Wolfram Sang <wsa@the-dreams.de>, Faiz Abbas <faiz_abbas@ti.com>, Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, kernel@collabora.com, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Hongjie Fang <hongjiefang@asrmicro.com>, Bastian Stender <bst@pengutronix.de>, Kyle Roeschley <kyle.roeschley@ni.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Shawn Lin <shawn.lin@rock-chips.com>, Harish Jenny K N <harish_kandiga@mentor.com>, Simon Horman <horms+renesas@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Uffe
+On 7 November 2018 at 09:47, Wolfram Sang <wsa@the-dreams.de> wrote:
+>
+>> That also happens to be one of the cards we deploy; However i did
+>> wonder about adding a quirk but decided against it as it was not clear
+>> to me from the specification that CACHE ON really is meant to complete
+>> within GENERIC_CMD6_TIMEOUT. That and i fret about ending up in hit-a-
+>> mole games as the failure is really quite tedious (boot failure).
+>
+> I agree that we should use the more defensive variant as a default. I
+> mean there should be no performance regression since most cards will
+> respond just faster, or? The only downside I could see is that we might
+> miss a real timeout with no bounds set and might get stuck?
 
-On 19/11/18 6:48 PM, Ulf Hansson wrote:
-> On 19 November 2018 at 12:16, Faiz Abbas <faiz_abbas@ti.com> wrote:
->> Commit 7d33c3581536 ("mmc: sdhci-omap: Workaround for Errata i802")
->> disabled DCRC interrupts during tuning. This write to the interrupt
->> enable register gets overwritten in sdhci_prepare_data() and the
->> interrupt is not in fact disabled. Fix this by disabling the interrupt
->> in the host->ier variable.
->>
->> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
-> 
-> Should we have fixes/stable tag?
-> 
+Well, you have a point, but still it's kind of nice to know which
+cards are behaving well and which ones that doesn't. Hence I think I
+prefer to stick using a quirk, unless you have a strong opinion.
 
-Ok. Will add that.
+Note that, in this case we can use CMD13 to poll for busy, which then
+means it also works for those hosts that doesn't support HW busy
+detection, without getting additional delays. If this hasn't been the
+case, we must be using a quirk, but now we are more free to choose.
 
-Thanks,
-Faiz
+> Maybe it is
+> worth contacting eMMC spec people to at least know what is the expected
+> behaviour?
+
+According to the spec, the GENERIC_CMD6_TIMEOUT should be sufficient.
+So this card is not conforming to the spec, I think it's as simple as
+that.
+
+Kind regards
+Uffe
