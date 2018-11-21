@@ -1,41 +1,35 @@
-From: Faiz Abbas <faiz_abbas@ti.com>
-Subject: [PATCH v2 3/3] mmc: sdhci-omap: Remove redundant structure assignments
-Date: Wed, 21 Nov 2018 16:03:57 +0530
-Message-ID: <20181121103357.3448-4-faiz_abbas@ti.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v2 0/3] Tuning Fixes for sdhci-omap
+Date: Wed, 21 Nov 2018 13:23:07 +0200
+Message-ID: <3f64fb93-ecdd-d439-1001-be8117f63990@intel.com>
 References: <20181121103357.3448-1-faiz_abbas@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20181121103357.3448-1-faiz_abbas@ti.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, kishon@ti.com, adrian.hunter@intel.com, faiz_abbas@ti.com
+To: Faiz Abbas <faiz_abbas@ti.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-The sdhci_execute_tuning() function has assignment of
-private pointers multiple times. Remove the redundant assignment.
+On 21/11/18 12:33 PM, Faiz Abbas wrote:
+> The following patches fix tuning related errors in the
+> sdhci-omap driver.
+> 
+> v2:
+> Added Fixes and stable tags for patch 1.
+> Re-enable DCRC in patch 1 only if it was enabled before
+> Squashed patches 2 & 3
+> 
+> Faiz Abbas (3):
+>   mmc: sdhci-omap: Fix DCRC error handling during tuning
+>   mmc: sdhci-omap: Add platform specific reset callback
+>   mmc: sdhci-omap: Remove redundant structure assignments
+> 
+>  drivers/mmc/host/sdhci-omap.c | 36 ++++++++++++++++++++++++++---------
+>  1 file changed, 27 insertions(+), 9 deletions(-)
+> 
 
-Acked-by: Kishon Vijay Abraham I <kishon@ti.com>
-Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
----
- drivers/mmc/host/sdhci-omap.c | 4 ----
- 1 file changed, 4 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-index 4fad47926743..f588ab679cb0 100644
---- a/drivers/mmc/host/sdhci-omap.c
-+++ b/drivers/mmc/host/sdhci-omap.c
-@@ -296,10 +296,6 @@ static int sdhci_omap_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	int ret = 0;
- 	u32 reg;
- 
--	pltfm_host = sdhci_priv(host);
--	omap_host = sdhci_pltfm_priv(pltfm_host);
--	dev = omap_host->dev;
--
- 	/* clock tuning is not needed for upto 52MHz */
- 	if (ios->clock <= 52000000)
- 		return 0;
--- 
-2.19.1
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
