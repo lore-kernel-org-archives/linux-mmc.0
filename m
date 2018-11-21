@@ -1,31 +1,78 @@
-From: JABLONSKY Jan <Jan.JABLONSKY@thalesgroup.com>
-Subject: dw_mmc: IDMAC Invalidate cache after read
-Date: Wed, 21 Nov 2018 07:42:49 +0000
-Message-ID: <1542786115.18775.83.camel@atviedlbe741.rss.d3s.at.thales>
+From: Faiz Abbas <faiz_abbas@ti.com>
+Subject: Re: [PATCH 1/4] mmc: sdhci-omap: Fix DCRC error handling during
+ tuning
+Date: Wed, 21 Nov 2018 15:09:02 +0530
+Message-ID: <c4c73144-eed1-2f34-953f-85da5b7ba955@ti.com>
+References: <20181119111618.2745-1-faiz_abbas@ti.com>
+ <20181119111618.2745-2-faiz_abbas@ti.com>
+ <b4568cfc-55c6-9dfc-6d26-1efc999e95ec@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <b4568cfc-55c6-9dfc-6d26-1efc999e95ec@ti.com>
 Content-Language: en-US
-Content-ID: <447A5C5E3632EB419ED9A2822D0C5505@iris.infra.thales>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Kishon Vijay Abraham I <kishon@ti.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com
 List-Id: linux-mmc@vger.kernel.org
 
-Q1BVIG1heSBub3Qgc2VlIG1vc3QgdXAtdG8tZGF0ZSBhbmQgY29ycmVjdCBjb3B5IG9mIERNQSBi
-dWZmZXIsIHdoZW4NCmludGVybmFsIERNQSBjb250cm9sbGVyIGlzIGluIHVzZS4NClByb2JsZW0g
-YXBwZWFycyBvbiBUaGUgQWx0ZXJhIFNvQyBGUEdBICh1c2VzIGludGVncmF0ZWQgRE1BIGNvbnRy
-b2xsZXIpLA0KZHVyaW5nIGhpZ2hlciBDUFUgYW5kIHN5c3RlbSBtZW1vcnkgbG9hZA0KDQpTaWdu
-ZWQtb2ZmLWJ5OiBKYW4gSmFibG9uc2t5IDxqYW4uamFibG9uc2t5QHRoYWxlc2dyb3VwLmNvbT4N
-Ci0tLQ0KIGRyaXZlcnMvbW1jL2hvc3QvZHdfbW1jLmMgfCAzICstLQ0KIDEgZmlsZSBjaGFuZ2Vk
-LCAxIGluc2VydGlvbigrKSwgMiBkZWxldGlvbnMoLSkNCg0KZGlmZiAtLWdpdCBhL2RyaXZlcnMv
-bW1jL2hvc3QvZHdfbW1jLmMgYi9kcml2ZXJzL21tYy9ob3N0L2R3X21tYy5jDQppbmRleCA4MGRj
-MmZkLi42Mzg3M2Q5IDEwMDY0NA0KLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9kd19tbWMuYw0KKysr
-IGIvZHJpdmVycy9tbWMvaG9zdC9kd19tbWMuYw0KQEAgLTQ5OSw4ICs0OTksNyBAQCBzdGF0aWMg
-dm9pZCBkd19tY2lfZG1hY19jb21wbGV0ZV9kbWEodm9pZCAqYXJnKQ0KIA0KIAlkZXZfdmRiZyho
-b3N0LT5kZXYsICJETUEgY29tcGxldGVcbiIpOw0KIA0KLQlpZiAoKGhvc3QtPnVzZV9kbWEgPT0g
-VFJBTlNfTU9ERV9FRE1BQykgJiYNCi0JICAgIGRhdGEgJiYgKGRhdGEtPmZsYWdzICYgTU1DX0RB
-VEFfUkVBRCkpDQorCWlmIChkYXRhICYmIChkYXRhLT5mbGFncyAmIE1NQ19EQVRBX1JFQUQpKQ0K
-IAkJLyogSW52YWxpZGF0ZSBjYWNoZSBhZnRlciByZWFkICovDQogCQlkbWFfc3luY19zZ19mb3Jf
-Y3B1KG1tY19kZXYoaG9zdC0+c2xvdC0+bW1jKSwNCiAJCQkJICAgIGRhdGEtPnNnLA0K
+Hi Kishon,
+
+On 20/11/18 10:23 AM, Kishon Vijay Abraham I wrote:
+> Hi,
+> 
+> On 19/11/18 4:46 PM, Faiz Abbas wrote:
+>> Commit 7d33c3581536 ("mmc: sdhci-omap: Workaround for Errata i802")
+>> disabled DCRC interrupts during tuning. This write to the interrupt
+>> enable register gets overwritten in sdhci_prepare_data() and the
+>> interrupt is not in fact disabled. Fix this by disabling the interrupt
+>> in the host->ier variable.
+>>
+>> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+>> ---
+>>   drivers/mmc/host/sdhci-omap.c | 7 +++----
+>>   1 file changed, 3 insertions(+), 4 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-omap.c
+>> b/drivers/mmc/host/sdhci-omap.c
+>> index 88347ce78f23..87138067e334 100644
+>> --- a/drivers/mmc/host/sdhci-omap.c
+>> +++ b/drivers/mmc/host/sdhci-omap.c
+>> @@ -290,7 +290,6 @@ static int sdhci_omap_execute_tuning(struct
+>> mmc_host *mmc, u32 opcode)
+>>       u32 start_window = 0, max_window = 0;
+>>       u8 cur_match, prev_match = 0;
+>>       u32 length = 0, max_len = 0;
+>> -    u32 ier = host->ier;
+>>       u32 phase_delay = 0;
+>>       int ret = 0;
+>>       u32 reg;
+>> @@ -317,9 +316,7 @@ static int sdhci_omap_execute_tuning(struct
+>> mmc_host *mmc, u32 opcode)
+>>        * during the tuning procedure. So disable it during the
+>>        * tuning procedure.
+>>        */
+>> -    ier &= ~SDHCI_INT_DATA_CRC;
+>> -    sdhci_writel(host, ier, SDHCI_INT_ENABLE);
+>> -    sdhci_writel(host, ier, SDHCI_SIGNAL_ENABLE);
+>> +    host->ier &= ~SDHCI_INT_DATA_CRC;
+>>         while (phase_delay <= MAX_PHASE_DELAY) {
+>>           sdhci_omap_set_dll(omap_host, phase_delay);
+>> @@ -366,6 +363,8 @@ static int sdhci_omap_execute_tuning(struct
+>> mmc_host *mmc, u32 opcode)
+>>     ret:
+>>       sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
+>> +    /* Reenable forbidden interrupt */
+>> +    host->ier |= SDHCI_INT_DATA_CRC;
+> 
+> It's better to have a backup of host->ier and restore the value here (in
+> case DATA_CRC is disabled for other cases).
+> 
+
+host->ier is modified everywhere during an mmc request. I would not
+expect it to hold its value after so many tuning commands. I can add a
+bool to check of DCRC was enabled before and only then re-enable it.
+
+Thanks,
+Faiz
