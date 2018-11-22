@@ -1,7 +1,7 @@
 From: Jjian Zhou <jjian.zhou@mediatek.com>
-Subject: [PATCH] mmc: mediatek: add MT8183 SDIO driver support
-Date: Thu, 22 Nov 2018 15:05:18 +0800
-Message-ID: <1542870318-10731-1-git-send-email-jjian.zhou@mediatek.com>
+Subject: [PATCH v2] mmc: mediatek: add MT8183 SDIO driver support
+Date: Thu, 22 Nov 2018 16:03:00 +0800
+Message-ID: <1542873780-13911-1-git-send-email-jjian.zhou@mediatek.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
@@ -10,18 +10,18 @@ To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Matthias Brugger <matthias.bgg@gmail.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Ryder Lee <ryder.lee@mediatek.com>, jjian zhou <jjian.zhou@mediatek.com>, Sean Wang <sean.wang@mediatek.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, srv_heupstream@mediatek.com, linux-kernel@vger.kernel.org, Yong Mao <yong.mao@mediatek.com>
 List-Id: linux-mmc@vger.kernel.org
 
-From: jjian zhou <jjian.zhou@mediatek.com>
-
 MT8183 need SDIO driver. So it need add new code
 to support it.
 
 Signed-off-by: Jjian Zhou <jjian.zhou@mediatek.com>
+Signed-off-by: Yong mao <yong.mao@mediatek.com>
+Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
 ---
  drivers/mmc/host/mtk-sd.c | 51 ++++++++++++++++++++++++++++++++++++++++++++---
  1 file changed, 48 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 6334cc7..3128ee7 100644
+index 6334cc7..da2a047 100644
 --- a/drivers/mmc/host/mtk-sd.c
 +++ b/drivers/mmc/host/mtk-sd.c
 @@ -1114,6 +1114,7 @@ static void msdc_start_command(struct msdc_host *host,
@@ -126,7 +126,7 @@ index 6334cc7..3128ee7 100644
  	else
  		mmc->f_min = DIV_ROUND_UP(host->src_clk_freq, 4 * 4095);
 
-+	if (mmc->caps & MMC_CAP_SDIO_IRQ) {
++	if (mmc->caps & MMC_CAP_SDIO_IRQ)
 +		mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;
 +
  	mmc->caps |= MMC_CAP_ERASE | MMC_CAP_CMD23;
