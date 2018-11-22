@@ -1,136 +1,55 @@
-From: Jjian Zhou <jjian.zhou@mediatek.com>
-Subject: [PATCH v2] mmc: mediatek: add MT8183 SDIO driver support
-Date: Thu, 22 Nov 2018 16:03:00 +0800
-Message-ID: <1542873780-13911-1-git-send-email-jjian.zhou@mediatek.com>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: Nicholas Mc Guire <hofrat@osadl.org>
+Subject: [PATCH] mmc: meson-mx-sdio: check devm_kasprintf for failure
+Date: Thu, 22 Nov 2018 10:35:19 +0100
+Message-ID: <1542879319-2196-1-git-send-email-hofrat@osadl.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Matthias Brugger <matthias.bgg@gmail.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Ryder Lee <ryder.lee@mediatek.com>, jjian zhou <jjian.zhou@mediatek.com>, Sean Wang <sean.wang@mediatek.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, srv_heupstream@mediatek.com, linux-kernel@vger.kernel.org, Yong Mao <yong.mao@mediatek.com>
+Cc: Carlo Caione <carlo@caione.org>, Kevin Hilman <khilman@baylibre.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org, Nicholas Mc Guire <hofrat@osadl.org>
 List-Id: linux-mmc@vger.kernel.org
 
-MT8183 need SDIO driver. So it need add new code
-to support it.
+devm_kasprintf() may return NULL on failure of internal allocation thus
+the assignments to  init.name  are not safe if not checked. On error
+meson_mx_mmc_register_clks() returns negative values so -ENOMEM in the
+(unlikely) failure case of devm_kasprintf() should be fine here.
 
-Signed-off-by: Jjian Zhou <jjian.zhou@mediatek.com>
-Signed-off-by: Yong mao <yong.mao@mediatek.com>
-Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+Signed-off-by: Nicholas Mc Guire <hofrat@osadl.org>
+Fixes: ed80a13bb4c4 ("mmc: meson-mx-sdio: Add a driver for the Amlogic Meson8 and Meson8b SoCs")
 ---
- drivers/mmc/host/mtk-sd.c | 51 ++++++++++++++++++++++++++++++++++++++++++++---
- 1 file changed, 48 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 6334cc7..da2a047 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -1114,6 +1114,7 @@ static void msdc_start_command(struct msdc_host *host,
- 		struct mmc_request *mrq, struct mmc_command *cmd)
- {
- 	u32 rawcmd;
-+	unsigned long flags;
+Problem located with an experimental coccinelle script
 
- 	WARN_ON(host->cmd);
- 	host->cmd = cmd;
-@@ -1131,7 +1132,12 @@ static void msdc_start_command(struct msdc_host *host,
- 	cmd->error = 0;
- 	rawcmd = msdc_cmd_prepare_raw_cmd(host, mrq, cmd);
+Patch was compile tested with: multi_v7_defconfig (implies ARCH_MESON=y &
+MMC_MESON_MX_SDIO=y)
 
-+	if (host->mmc->caps & MMC_CAP_SDIO_IRQ)
-+		spin_lock_irqsave(&host->lock, flags);
- 	sdr_set_bits(host->base + MSDC_INTEN, cmd_ints_mask);
-+	if (host->mmc->caps & MMC_CAP_SDIO_IRQ)
-+		spin_unlock_irqrestore(&host->lock, flags);
+Patch is against 4.20-rc3 (localversion-next is next-20181122)
+
+ drivers/mmc/host/meson-mx-sdio.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/drivers/mmc/host/meson-mx-sdio.c b/drivers/mmc/host/meson-mx-sdio.c
+index abe253c..ec980bd 100644
+--- a/drivers/mmc/host/meson-mx-sdio.c
++++ b/drivers/mmc/host/meson-mx-sdio.c
+@@ -596,6 +596,9 @@ static int meson_mx_mmc_register_clks(struct meson_mx_mmc_host *host)
+ 	init.name = devm_kasprintf(host->controller_dev, GFP_KERNEL,
+ 				   "%s#fixed_factor",
+ 				   dev_name(host->controller_dev));
++	if (!init.name)
++		return -ENOMEM;
 +
- 	writel(cmd->arg, host->base + SDC_ARG);
- 	writel(rawcmd, host->base + SDC_CMD);
- }
-@@ -1351,6 +1357,27 @@ static void msdc_request_timeout(struct work_struct *work)
- 	}
- }
-
-+static void msdc_enable_sdio_irq(struct mmc_host *mmc, int enb)
-+{
-+	unsigned long flags;
-+	struct msdc_host *host = mmc_priv(mmc);
+ 	init.ops = &clk_fixed_factor_ops;
+ 	init.flags = 0;
+ 	init.parent_names = &clk_fixed_factor_parent;
+@@ -612,6 +615,9 @@ static int meson_mx_mmc_register_clks(struct meson_mx_mmc_host *host)
+ 	clk_div_parent = __clk_get_name(host->fixed_factor_clk);
+ 	init.name = devm_kasprintf(host->controller_dev, GFP_KERNEL,
+ 				   "%s#div", dev_name(host->controller_dev));
++	if (!init.name)
++		return -ENOMEM;
 +
-+	if (enb)
-+		pm_runtime_get_sync(host->dev);
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+	if (enb)
-+		sdr_set_bits(host->base + MSDC_INTEN, MSDC_INTEN_SDIOIRQ);
-+	else
-+		sdr_clr_bits(host->base + MSDC_INTEN, MSDC_INTEN_SDIOIRQ);
-+	spin_unlock_irqrestore(&host->lock, flags);
-+
-+	if (!enb) {
-+		pm_runtime_mark_last_busy(host->dev);
-+		pm_runtime_put_autosuspend(host->dev);
-+	}
-+}
-+
- static irqreturn_t msdc_irq(int irq, void *dev_id)
- {
- 	struct msdc_host *host = (struct msdc_host *) dev_id;
-@@ -1373,7 +1400,12 @@ static irqreturn_t msdc_irq(int irq, void *dev_id)
- 		data = host->data;
- 		spin_unlock_irqrestore(&host->lock, flags);
-
--		if (!(events & event_mask))
-+		if ((events & event_mask) & MSDC_INT_SDIOIRQ) {
-+			msdc_enable_sdio_irq(host->mmc, 0);
-+			sdio_signal_irq(host->mmc);
-+		}
-+
-+		if (!(events & (event_mask & ~MSDC_INT_SDIOIRQ)))
- 			break;
-
- 		if (!mrq) {
-@@ -1493,8 +1525,11 @@ static void msdc_init_hw(struct msdc_host *host)
- 	 */
- 	sdr_set_bits(host->base + SDC_CFG, SDC_CFG_SDIO);
-
--	/* disable detect SDIO device interrupt function */
--	sdr_clr_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
-+	/* Config SDIO device detect interrupt function */
-+	if (host->mmc->caps & MMC_CAP_SDIO_IRQ)
-+		sdr_set_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
-+	else
-+		sdr_clr_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
-
- 	/* Configure to default data timeout */
- 	sdr_set_field(host->base + SDC_CFG, SDC_CFG_DTOC, 3);
-@@ -2013,6 +2048,11 @@ static void msdc_hw_reset(struct mmc_host *mmc)
- 	sdr_clr_bits(host->base + EMMC_IOCON, 1);
- }
-
-+static void msdc_ack_sdio_irq(struct mmc_host *mmc)
-+{
-+	msdc_enable_sdio_irq(mmc, 1);
-+}
-+
- static const struct mmc_host_ops mt_msdc_ops = {
- 	.post_req = msdc_post_req,
- 	.pre_req = msdc_pre_req,
-@@ -2020,6 +2060,8 @@ static void msdc_hw_reset(struct mmc_host *mmc)
- 	.set_ios = msdc_ops_set_ios,
- 	.get_ro = mmc_gpio_get_ro,
- 	.get_cd = mmc_gpio_get_cd,
-+	.enable_sdio_irq = msdc_enable_sdio_irq,
-+	.ack_sdio_irq = msdc_ack_sdio_irq,
- 	.start_signal_voltage_switch = msdc_ops_switch_volt,
- 	.card_busy = msdc_card_busy,
- 	.execute_tuning = msdc_execute_tuning,
-@@ -2147,6 +2189,9 @@ static int msdc_drv_probe(struct platform_device *pdev)
- 	else
- 		mmc->f_min = DIV_ROUND_UP(host->src_clk_freq, 4 * 4095);
-
-+	if (mmc->caps & MMC_CAP_SDIO_IRQ)
-+		mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;
-+
- 	mmc->caps |= MMC_CAP_ERASE | MMC_CAP_CMD23;
- 	/* MMC core transfer sizes tunable parameters */
- 	mmc->max_segs = MAX_BD_NUM;
---
-1.9.1
+ 	init.ops = &clk_divider_ops;
+ 	init.flags = CLK_SET_RATE_PARENT;
+ 	init.parent_names = &clk_div_parent;
+-- 
+2.1.4
