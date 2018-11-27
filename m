@@ -1,148 +1,73 @@
-From: Nicolas Boichat <drinkcat@chromium.org>
-Subject: Re: [PATCH v2] mmc: mediatek: add MT8183 SDIO driver support
-Date: Mon, 26 Nov 2018 19:47:10 +0800
-Message-ID: <CANMq1KCO7tUGpXBR6x8cWiVd+5if2sPxU5N9J2aiMtuWuff3eg@mail.gmail.com>
-References: <1542873780-13911-1-git-send-email-jjian.zhou@mediatek.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: dw_mmc: IDMAC Invalidate cache after read
+Date: Tue, 27 Nov 2018 08:43:11 +0800
+Message-ID: <d20a3c39-dea7-e324-e677-ec416c16559c@rock-chips.com>
+References: <1542786115.18775.83.camel@atviedlbe741.rss.d3s.at.thales>
+ <a45eca28-fd89-e595-5b34-689bc3a09b9c@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1542873780-13911-1-git-send-email-jjian.zhou@mediatek.com>
+In-Reply-To: <a45eca28-fd89-e595-5b34-689bc3a09b9c@arm.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: jjian.zhou@mediatek.com
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Matthias Brugger <matthias.bgg@gmail.com>, Chaotian Jing <chaotian.jing@mediatek.com>, ryder.lee@mediatek.com, sean.wang@mediatek.com, linux-mmc@vger.kernel.org, linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>, linux-mediatek@lists.infradead.org, srv_heupstream@mediatek.com, lkml <linux-kernel@vger.kernel.org>, yong.mao@mediatek.com, Hsin-Yi Wang <hsinyi@chromium.org>
+To: Robin Murphy <robin.murphy@arm.com>, JABLONSKY Jan <Jan.JABLONSKY@thalesgroup.com>, Jaehoon Chung <jh80.chung@samsung.com>
+Cc: shawn.lin@rock-chips.com, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Nov 22, 2018 at 4:03 PM Jjian Zhou <jjian.zhou@mediatek.com> wrote:
->
-> MT8183 need SDIO driver. So it need add new code
-> to support it.
+On 2018/11/23 23:29, Robin Murphy wrote:
+> Hi Jan,
+> 
+> [repeating some of the discussion from your other thread for the benefit 
+> of the MMC audience]
+> 
+> On 21/11/2018 07:42, JABLONSKY Jan wrote:
+>> CPU may not see most up-to-date and correct copy of DMA buffer, when
+>> internal DMA controller is in use.
+>> Problem appears on The Altera SoC FPGA (uses integrated DMA controller),
+>> during higher CPU and system memory load
+>>
+>> Signed-off-by: Jan Jablonsky <jan.jablonsky@thalesgroup.com>
+>> ---
+>>   drivers/mmc/host/dw_mmc.c | 3 +--
+>>   1 file changed, 1 insertion(+), 2 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index 80dc2fd..63873d9 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -499,8 +499,7 @@ static void dw_mci_dmac_complete_dma(void *arg)
+>>       dev_vdbg(host->dev, "DMA complete\n");
+>> -    if ((host->use_dma == TRANS_MODE_EDMAC) &&
+>> -        data && (data->flags & MMC_DATA_READ))
+>> +    if (data && (data->flags & MMC_DATA_READ))
+>>           /* Invalidate cache after read */
+>>           dma_sync_sg_for_cpu(mmc_dev(host->slot->mmc),
+>>                       data->sg,
+> 
+> It looks very dubious whether this is actually the right thing to do. 
+> Just considering this driver, edma has an complementary sync_sg call in 
+> its .start method, so if idma needed this one, logically shouldn't it 
+> also need the other one as well?
+> 
+> However, from a DMA API point of view, these syncs make no sense either 
+> way - the very next thing we do here is call host->dma_ops->cleanup(), 
+> which calls dma_unmap_sg(), which will perform the appropriate cache 
+> maintenance anyway. Thus I can't see why this code is even here to begin 
+> with. Similarly on the request path - the sg list really shouldn't have 
+> been touched since being mapped in dw_mci_pre_dma_transfer(), so that 
+> sync should also be an effective no-op unless it's papering over some 
+> race condition elsewhere.
+> 
+> Shawn - do you remember why these syncs were added in 3fc7eaef44dbc? 
+> Were you seeing actual coherency issues on RK31xx SoCs, or was it 
+> perhaps just some leftover or misunderstanding which missed getting 
+> cleaned up?
 
-The description does not seem to match what is going on below: I don't
-see anything that is obviously MT8183-specific. At first glance, this
-seems like a patch that makes it possible to enable MMC_CAP_SDIO_IRQ
-("cap-sdio-irq" dt property).
+I  can't remember too much details but looking at the dma-mapping code 
+again, it seems the complemetary sync-op here is useless.
 
-Can you describe in more detail what is going on here?
-
-> Signed-off-by: Jjian Zhou <jjian.zhou@mediatek.com>
-> Signed-off-by: Yong mao <yong.mao@mediatek.com>
-> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
-> ---
->  drivers/mmc/host/mtk-sd.c | 51 ++++++++++++++++++++++++++++++++++++++++++++---
->  1 file changed, 48 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 6334cc7..da2a047 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -1114,6 +1114,7 @@ static void msdc_start_command(struct msdc_host *host,
->                 struct mmc_request *mrq, struct mmc_command *cmd)
->  {
->         u32 rawcmd;
-> +       unsigned long flags;
->
->         WARN_ON(host->cmd);
->         host->cmd = cmd;
-> @@ -1131,7 +1132,12 @@ static void msdc_start_command(struct msdc_host *host,
->         cmd->error = 0;
->         rawcmd = msdc_cmd_prepare_raw_cmd(host, mrq, cmd);
->
-> +       if (host->mmc->caps & MMC_CAP_SDIO_IRQ)
-> +               spin_lock_irqsave(&host->lock, flags);
->         sdr_set_bits(host->base + MSDC_INTEN, cmd_ints_mask);
-> +       if (host->mmc->caps & MMC_CAP_SDIO_IRQ)
-> +               spin_unlock_irqrestore(&host->lock, flags);
-> +
->         writel(cmd->arg, host->base + SDC_ARG);
->         writel(rawcmd, host->base + SDC_CMD);
->  }
-> @@ -1351,6 +1357,27 @@ static void msdc_request_timeout(struct work_struct *work)
->         }
->  }
->
-> +static void msdc_enable_sdio_irq(struct mmc_host *mmc, int enb)
-> +{
-> +       unsigned long flags;
-> +       struct msdc_host *host = mmc_priv(mmc);
-> +
-> +       if (enb)
-> +               pm_runtime_get_sync(host->dev);
-> +
-> +       spin_lock_irqsave(&host->lock, flags);
-> +       if (enb)
-> +               sdr_set_bits(host->base + MSDC_INTEN, MSDC_INTEN_SDIOIRQ);
-> +       else
-> +               sdr_clr_bits(host->base + MSDC_INTEN, MSDC_INTEN_SDIOIRQ);
-> +       spin_unlock_irqrestore(&host->lock, flags);
-> +
-> +       if (!enb) {
-> +               pm_runtime_mark_last_busy(host->dev);
-> +               pm_runtime_put_autosuspend(host->dev);
-> +       }
-> +}
-> +
->  static irqreturn_t msdc_irq(int irq, void *dev_id)
->  {
->         struct msdc_host *host = (struct msdc_host *) dev_id;
-> @@ -1373,7 +1400,12 @@ static irqreturn_t msdc_irq(int irq, void *dev_id)
->                 data = host->data;
->                 spin_unlock_irqrestore(&host->lock, flags);
->
-> -               if (!(events & event_mask))
-> +               if ((events & event_mask) & MSDC_INT_SDIOIRQ) {
-> +                       msdc_enable_sdio_irq(host->mmc, 0);
-> +                       sdio_signal_irq(host->mmc);
-> +               }
-> +
-> +               if (!(events & (event_mask & ~MSDC_INT_SDIOIRQ)))
->                         break;
->
->                 if (!mrq) {
-> @@ -1493,8 +1525,11 @@ static void msdc_init_hw(struct msdc_host *host)
->          */
->         sdr_set_bits(host->base + SDC_CFG, SDC_CFG_SDIO);
->
-> -       /* disable detect SDIO device interrupt function */
-> -       sdr_clr_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
-> +       /* Config SDIO device detect interrupt function */
-> +       if (host->mmc->caps & MMC_CAP_SDIO_IRQ)
-> +               sdr_set_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
-> +       else
-> +               sdr_clr_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
->
->         /* Configure to default data timeout */
->         sdr_set_field(host->base + SDC_CFG, SDC_CFG_DTOC, 3);
-> @@ -2013,6 +2048,11 @@ static void msdc_hw_reset(struct mmc_host *mmc)
->         sdr_clr_bits(host->base + EMMC_IOCON, 1);
->  }
->
-> +static void msdc_ack_sdio_irq(struct mmc_host *mmc)
-> +{
-> +       msdc_enable_sdio_irq(mmc, 1);
-> +}
-> +
->  static const struct mmc_host_ops mt_msdc_ops = {
->         .post_req = msdc_post_req,
->         .pre_req = msdc_pre_req,
-> @@ -2020,6 +2060,8 @@ static void msdc_hw_reset(struct mmc_host *mmc)
->         .set_ios = msdc_ops_set_ios,
->         .get_ro = mmc_gpio_get_ro,
->         .get_cd = mmc_gpio_get_cd,
-> +       .enable_sdio_irq = msdc_enable_sdio_irq,
-> +       .ack_sdio_irq = msdc_ack_sdio_irq,
->         .start_signal_voltage_switch = msdc_ops_switch_volt,
->         .card_busy = msdc_card_busy,
->         .execute_tuning = msdc_execute_tuning,
-> @@ -2147,6 +2189,9 @@ static int msdc_drv_probe(struct platform_device *pdev)
->         else
->                 mmc->f_min = DIV_ROUND_UP(host->src_clk_freq, 4 * 4095);
->
-> +       if (mmc->caps & MMC_CAP_SDIO_IRQ)
-> +               mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;
-> +
->         mmc->caps |= MMC_CAP_ERASE | MMC_CAP_CMD23;
->         /* MMC core transfer sizes tunable parameters */
->         mmc->max_segs = MAX_BD_NUM;
-> --
-> 1.9.1
->
+> 
+> Robin.
+> 
+> 
+> 
