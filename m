@@ -1,67 +1,69 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v2 1/3] mmc: sdhci: add support for using external DMA
- devices
-Date: Thu, 29 Nov 2018 12:48:13 +0200
-Message-ID: <d9091e09-da8d-5fd2-0957-30d34c2a0e21@intel.com>
-References: <1542007566-9449-1-git-send-email-zhang.chunyan@linaro.org>
- <1542007566-9449-2-git-send-email-zhang.chunyan@linaro.org>
- <84836600-c705-9ac3-297e-bb67a611daca@intel.com>
- <CAAfSe-us5aKOv9F6KHwvJR_cMAF8KFo6W1Gs_B3zBiNOuD10Qg@mail.gmail.com>
- <f78de042-69cf-5345-f16f-236d04d57051@intel.com>
- <CAAfSe-sfe5A7b_8iBiUmvi_mo1zRZ_Oh0yu-uwXo8Hv+WBftWQ@mail.gmail.com>
+From: Faiz Abbas <faiz_abbas@ti.com>
+Subject: [PATCH 1/3] dt-bindings: mmc: sdhci-am654: Document bindings for the host controllers on TI's AM654 SOCs
+Date: Thu, 29 Nov 2018 21:45:11 +0530
+Message-ID: <20181129161513.31734-2-faiz_abbas@ti.com>
+References: <20181129161513.31734-1-faiz_abbas@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAAfSe-sfe5A7b_8iBiUmvi_mo1zRZ_Oh0yu-uwXo8Hv+WBftWQ@mail.gmail.com>
-Content-Language: en-US
+In-Reply-To: <20181129161513.31734-1-faiz_abbas@ti.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Chunyan Zhang <zhang.lyra@gmail.com>
-Cc: Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Mark Brown <broonie@kernel.org>, kishon@ti.com, nsekhar@ti.com
+To: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, adrian.hunter@intel.com, michal.simek@xilinx.com, kishon@ti.com, faiz_abbas@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-On 29/11/18 11:59 AM, Chunyan Zhang wrote:
-> Hi Adrian,
-> 
-> On Thu, 29 Nov 2018 at 15:36, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>
->> On 29/11/18 8:22 AM, Chunyan Zhang wrote:
->>> On Tue, 20 Nov 2018 at 21:41, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>>>
->>>> On 12/11/18 9:26 AM, Chunyan Zhang wrote:
->>>>> Some standard SD host controllers can support both external dma
->>>>> controllers as well as ADMA/SDMA in which the SD host controller
->>>>> acts as DMA master. TI's omap controller is the case as an example.
->>>>>
->>>>> Currently the generic SDHCI code supports ADMA/SDMA integrated in
->>>>> the host controller but does not have any support for external DMA
->>>>> controllers implemented using dmaengine, meaning that custom code is
->>>>> needed for any systems that use an external DMA controller with SDHCI.
->>>>
->>>> I still think you probably need to reset the DMA if there are transfer
->>>> errors - perhaps you could comment on that.  Also there are some comments below.
->>>
->>> With regard to "transfer error", do you mean if
->>> sdhci_external_dma_setup() failed?
->>
->> No, I mean any error interrupt that can leave the DMA uncompleted.  For
->> SDHCI, resetting the data circuit cleans that up, but presumably something
->> is needed for external DMA?
-> 
-> Yes, it should need a dmaengine_terminate_all().
-> 
-> How about adding that at here (I will wrap it up of course):
-> https://elixir.bootlin.com/linux/v4.19.5/source/drivers/mmc/host/sdhci.c#L2553
+Add binding documentation for mmc host controllers present on TI's AM654
+SOCs
 
-Yes except we really need to reverse
-	if (host->flags & SDHCI_REQ_USE_DMA) {
-	}
-	if (sdhci_needs_reset(host, mrq)) {
-	}
-so that we do not unmap before killing the dma
+Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+---
+ .../devicetree/bindings/mmc/sdhci-am654.txt   | 37 +++++++++++++++++++
+ 1 file changed, 37 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-am654.txt
 
-Perhaps you could send that as a separate patch.
-
-> Is there somewhere else I'm missing?
-
-Testing ;-)
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-am654.txt b/Documentation/devicetree/bindings/mmc/sdhci-am654.txt
+new file mode 100644
+index 000000000000..862b93051bfe
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/sdhci-am654.txt
+@@ -0,0 +1,37 @@
++Device Tree Bindings for the SDHCI Controllers present on TI's AM654 SOCs
++
++The bindings follow the mmc[1], clock[2] and interrupt[3] bindings.
++Only deviations are documented here.
++
++  [1] Documentation/devicetree/bindings/mmc/mmc.txt
++  [2] Documentation/devicetree/bindings/clock/clock-bindings.txt
++  [3] Documentation/devicetree/bindings/interrupt-controller/interrupts.txt
++
++Required Properties:
++	- compatible: should be "ti,am654-sdhci-5.1"
++	- reg: Must be two entries.
++		- The first should be the sdhci register space
++		- The second should the subsystem/phy register space
++	- clocks: Handles to the clock inputs.
++	- clock-names: Tuple including "clk_xin" and "clk_ahb"
++	- interrupts: Interrupt specifiers
++	- ti,otap-del-sel: Output Tap Delay select
++	- ti,trm-icp: DLL trim select
++	- ti,driver-strength-ohm: driver strength in ohms.
++				  Valid values are 33, 40, 50, 66 and 100 ohms.
++
++Example:
++
++	sdhci0: sdhci@4f80000 {
++		compatible = "ti,am654-sdhci-5.1";
++		reg = <0x0 0x4f80000 0x0 0x260>, <0x0 0x4f90000 0x0 0x134>;
++		power-domains = <&k3_pds 47>;
++		clocks = <&k3_clks 47 0>, <&k3_clks 47 1>;
++		clock-names = "clk_ahb", "clk_xin";
++		interrupts = <GIC_SPI 136 IRQ_TYPE_LEVEL_HIGH>;
++		sdhci-caps-mask = <0x80000007 0x0>;
++		mmc-ddr-1_8v;
++		ti,otap-del-sel = <0x2>;
++		ti,trm-icp = <0x8>;
++		status = "disabled";
++	};
+-- 
+2.19.2
