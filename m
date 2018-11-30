@@ -1,82 +1,67 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: core: Lower max_seg_size if too high for DMA
-Date: Thu, 29 Nov 2018 21:11:17 +0100
-Message-ID: <CAPDyKFpgOjr1Zp=31b-_+KVOnvRnXXdXt5e8b0X1pGNVAihtyA@mail.gmail.com>
-References: <20181031155738.18367-1-tony@atomide.com>
- <CAPDyKFqtMHRjHsJXcKTTzGYSsyab=2SfWdYiETS4Bo2f7Zw2CQ@mail.gmail.com>
- <20181129191332.GY53235@atomide.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH v2 1/3] mmc: sdhci: add support for using external DMA
+ devices
+Date: Fri, 30 Nov 2018 09:15:24 +0800
+Message-ID: <22591bc4-ea34-dcc6-a3d5-8a75e890ff2b@rock-chips.com>
+References: <1542007566-9449-1-git-send-email-zhang.chunyan@linaro.org>
+ <1542007566-9449-2-git-send-email-zhang.chunyan@linaro.org>
+ <84836600-c705-9ac3-297e-bb67a611daca@intel.com>
+ <CAAfSe-us5aKOv9F6KHwvJR_cMAF8KFo6W1Gs_B3zBiNOuD10Qg@mail.gmail.com>
+ <f78de042-69cf-5345-f16f-236d04d57051@intel.com>
+ <CAAfSe-sfe5A7b_8iBiUmvi_mo1zRZ_Oh0yu-uwXo8Hv+WBftWQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20181129191332.GY53235@atomide.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kishon <kishon@ti.com>, Peter Ujfalusi <peter.ujfalusi@ti.com>, Russell King <rmk+kernel@armlinux.org.uk>, linux-omap <linux-omap@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAAfSe-sfe5A7b_8iBiUmvi_mo1zRZ_Oh0yu-uwXo8Hv+WBftWQ@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chunyan Zhang <zhang.lyra@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: shawn.lin@rock-chips.com, Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Mark Brown <broonie@kernel.org>, kishon@ti.com, nsekhar@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 29 Nov 2018 at 20:13, Tony Lindgren <tony@atomide.com> wrote:
->
-> * Ulf Hansson <ulf.hansson@linaro.org> [181119 12:09]:
-> > On 31 October 2018 at 16:57, Tony Lindgren <tony@atomide.com> wrote:
-> > > With CONFIG_DMA_API_DEBUG_SG a device may produce the following warning:
-> > >
-> > > "DMA-API: mapping sg segment longer than device claims to support"
-> > >
-> > > We default to 64KiB if a DMA engine driver does not initialize dma_parms
-> > > and call dma_set_max_seg_size(). This may be lower that what many MMC
-> > > drivers do with mmc->max_seg_size = mmc->max_blk_size * mmc->max_blk_count.
-> > >
-> > > Let's do a sanity check for max_seg_size being higher than what DMA
-> > > supports in mmc_add_host() and lower it as needed.
-> > >
-> > > Cc: Kishon Vijay Abraham I <kishon@ti.com>
-> > > Cc: Peter Ujfalusi <peter.ujfalusi@ti.com>
-> > > Cc: Russell King <rmk+kernel@armlinux.org.uk>
-> > > Reported-by: Russell King <rmk+kernel@armlinux.org.uk>
-> > > Signed-off-by: Tony Lindgren <tony@atomide.com>
-> > > ---
-> > >  drivers/mmc/core/host.c | 16 ++++++++++++++++
-> > >  1 file changed, 16 insertions(+)
-> > >
-> > > diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> > > --- a/drivers/mmc/core/host.c
-> > > +++ b/drivers/mmc/core/host.c
-> > > @@ -13,6 +13,7 @@
-> > >   */
-> > >
-> > >  #include <linux/device.h>
-> > > +#include <linux/dma-mapping.h>
-> > >  #include <linux/err.h>
-> > >  #include <linux/idr.h>
-> > >  #include <linux/of.h>
-> > > @@ -415,6 +416,19 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
-> > >
-> > >  EXPORT_SYMBOL(mmc_alloc_host);
-> > >
-> > > +static void mmc_check_max_seg_size(struct mmc_host *host)
-> > > +{
-> > > +       unsigned int max_seg_size = dma_get_max_seg_size(mmc_dev(host));
-> >
-> > Is dma_get_max_seg_size() really intended to be called for any struct
-> > device (representing the mmc controller) like this?
-> >
-> > My understanding is that the dma_get_max_seg_size() is supposed to be
-> > called by using the DMA engine device, no?
->
-> Oh good catch sounds like I'm calling it for the wrong device,
-> need to check. In that case sounds like this can't be generic?
+On 2018/11/29 17:59, Chunyan Zhang wrote:
+> Hi Adrian,
+> 
+> On Thu, 29 Nov 2018 at 15:36, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>
+>> On 29/11/18 8:22 AM, Chunyan Zhang wrote:
+>>> On Tue, 20 Nov 2018 at 21:41, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>>
+>>>> On 12/11/18 9:26 AM, Chunyan Zhang wrote:
+>>>>> Some standard SD host controllers can support both external dma
+>>>>> controllers as well as ADMA/SDMA in which the SD host controller
+>>>>> acts as DMA master. TI's omap controller is the case as an example.
+>>>>>
+>>>>> Currently the generic SDHCI code supports ADMA/SDMA integrated in
+>>>>> the host controller but does not have any support for external DMA
+>>>>> controllers implemented using dmaengine, meaning that custom code is
+>>>>> needed for any systems that use an external DMA controller with SDHCI.
+>>>>
+>>>> I still think you probably need to reset the DMA if there are transfer
+>>>> errors - perhaps you could comment on that.  Also there are some comments below.
+>>>
+>>> With regard to "transfer error", do you mean if
+>>> sdhci_external_dma_setup() failed?
+>>
+>> No, I mean any error interrupt that can leave the DMA uncompleted.  For
+>> SDHCI, resetting the data circuit cleans that up, but presumably something
+>> is needed for external DMA?
+> 
+> Yes, it should need a dmaengine_terminate_all().
+> 
 
-No, I don't think so as it's only the mmc host driver that knows about
-the DMA engine device.
+No, dmaengine_terminate_all is deprecated for quite a long time.
+Please use dmaengine_terminate_{async, sync}() instead.
 
-Kind regards
-Uffe
+See Documentation/dmaengine/client.txt
+
+
+> How about adding that at here (I will wrap it up of course):
+> https://elixir.bootlin.com/linux/v4.19.5/source/drivers/mmc/host/sdhci.c#L2553
+> 
+> Is there somewhere else I'm missing?
+> 
+> Thanks,
+> Chunyan
+> 
+> 
