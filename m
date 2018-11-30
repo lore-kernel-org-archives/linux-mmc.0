@@ -1,110 +1,106 @@
-From: Faiz Abbas <faiz_abbas@ti.com>
-Subject: Re: [PATCH] mmc: sdhci-omap: Workaround errata regarding SDR104/HS200
- tuning failures (i929)
-Date: Fri, 30 Nov 2018 11:26:26 +0530
-Message-ID: <c4704766-7a58-8aa4-6bc0-b9373b15096c@ti.com>
-References: <20181129190503.6040-1-faiz_abbas@ti.com>
- <cb1e8e88-4c9d-741d-79cd-57b03c5e0808@ti.com>
+From: "Du, Alek" <alek.du@intel.com>
+Subject: [PATCH] sdhci: fix the fake timeout bug
+Date: Fri, 30 Nov 2018 15:00:28 +0800
+Message-ID: <20181130150028.732896d8@xdu1-mobl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <cb1e8e88-4c9d-741d-79cd-57b03c5e0808@ti.com>
-Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com
+To: linux-mmc@vger.kernel.org, adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc: linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Kishon,
+>From b893df3a1a937bd5fe22d39ceae93454a2e5e0e4 Mon Sep 17 00:00:00 2001
+From: Alek Du <alek.du@intel.com>
+Date: Fri, 30 Nov 2018 14:02:28 +0800
+Subject: [PATCH] sdhci: fix the fake timeout bug
 
-On 30/11/18 10:10 AM, Kishon Vijay Abraham I wrote:
-> Hi Faiz,
-> 
-> On 30/11/18 12:35 AM, Faiz Abbas wrote:
->> Errata i929 in certain OMAP5/DRA7XX/AM57XX silicon revisions
->> (SPRZ426D - November 2014 - Revised February 2018 [1]) mentions
->> unexpected tuning pattern errors. A small failure band may be present
->> in the tuning range which may be missed by the current algorithm.
->> Furthermore, the failure bands vary with temperature leading to
->> different optimum tuning values for different temperatures.
->>
->> As suggested in the related Application Report (SPRACA9B - October 2017
->> - Revised July 2018 [2]), tuning should be done in two stages.
->> In stage 1, assign the optimum ratio in the maximum pass window for the
->> current temperature. In stage 2, if the chosen value is close to the
->> small failure band, move away from it in the appropriate direction.
->>
->> References:
->> [1] http://www.ti.com/lit/pdf/sprz426
->> [2] http://www.ti.com/lit/pdf/SPRACA9
->>
->> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
->> ---
->>  drivers/mmc/host/Kconfig      |  2 +
->>  drivers/mmc/host/sdhci-omap.c | 90 ++++++++++++++++++++++++++++++++++-
->>  2 files changed, 91 insertions(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
->> index 1b58739d9744..6d3553f06f27 100644
->> --- a/drivers/mmc/host/Kconfig
->> +++ b/drivers/mmc/host/Kconfig
->> @@ -969,6 +969,8 @@ config MMC_SDHCI_XENON
->>  config MMC_SDHCI_OMAP
->>  	tristate "TI SDHCI Controller Support"
->>  	depends on MMC_SDHCI_PLTFM && OF
->> +	select THERMAL
->> +	select TI_SOC_THERMAL
->>  	help
->>  	  This selects the Secure Digital Host Controller Interface (SDHCI)
->>  	  support present in TI's DRA7 SOCs. The controller supports
->> diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
->> index b3cb39d0db6f..9ccce7ef3a60 100644
->> --- a/drivers/mmc/host/sdhci-omap.c
->> +++ b/drivers/mmc/host/sdhci-omap.c
->> @@ -27,6 +27,7 @@
->>  #include <linux/regulator/consumer.h>
->>  #include <linux/pinctrl/consumer.h>
->>  #include <linux/sys_soc.h>
->> +#include <linux/thermal.h>
->>  
->>  #include "sdhci-pltfm.h"
->>  
->> @@ -286,14 +287,18 @@ static int sdhci_omap_execute_tuning(struct mmc_host *mmc, u32 opcode)
->>  	struct sdhci_host *host = mmc_priv(mmc);
->>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->>  	struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
->> +	struct thermal_zone_device *thermal_dev;
->>  	struct device *dev = omap_host->dev;
->>  	struct mmc_ios *ios = &mmc->ios;
->>  	u32 start_window = 0, max_window = 0;
->> +	bool single_point_failure = false;
->>  	u8 cur_match, prev_match = 0;
->>  	u32 length = 0, max_len = 0;
->>  	u32 phase_delay = 0;
->> +	int temperature;
->>  	int ret = 0;
->>  	u32 reg;
->> +	int i;
->>  
->>  	/* clock tuning is not needed for upto 52MHz */
->>  	if (ios->clock <= 52000000)
->> @@ -303,6 +308,16 @@ static int sdhci_omap_execute_tuning(struct mmc_host *mmc, u32 opcode)
->>  	if (ios->timing == MMC_TIMING_UHS_SDR50 && !(reg & CAPA2_TSDR50))
->>  		return 0;
->>  
->> +	thermal_dev = thermal_zone_get_zone_by_name("cpu_thermal");
->> +	if (IS_ERR(thermal_dev)) {
->> +		dev_err(dev, "Unable to get thermal zone for tuning\n");
->> +		return PTR_ERR(thermal_dev);
->> +	}
-> 
-> Can't we get thermal zone once during probe?
-> 
+We observed some fake timeouts on some devices, the log is like this:
 
-Tuning is also (ideally) supposed to happen only once per enumeration.
-Also it doesn't make sense to get a thermal zone for lower speed systems
-that won't do tuning.
+[ 7586.290201] mmc1: Timeout waiting for hardware cmd interrupt.
+[ 7586.290420] mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
+...
+[ 7586.291774] mmc1: sdhci: Wake-up:   0x00000000 | Clock:    0x00000203
 
-Thanks,
-Faiz
+>From the clock control register dump, we are pretty sure the clock was
+stabilized.
+
+In other cases, we also observed:
+
+[ 7596.530171] mmc1: Timeout waiting for hardware cmd interrupt.
+
+and
+
+[ 1956.534634] mmc1: Reset 0x2 never completed.
+
+But we are pretty sure the mmc controller is working perfectly under low
+system load.
+
+After checking the sdhci code, we found the timeout check actually has a
+little window that the CPU can be scheduled out and when it comes back,
+the original time set or check is not valid.
+
+Signed-off-by: Alek Du <alek.du@intel.com>
+---
+ drivers/mmc/host/sdhci.c | 19 ++++++++++++++++---
+ 1 file changed, 16 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 99bdae53fa2e..f88c49fc574e 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -218,12 +218,17 @@ void sdhci_reset(struct sdhci_host *host, u8 mask)
+ 	/* hw clears the bit when it's done */
+ 	while (sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask) {
+ 		if (ktime_after(ktime_get(), timeout)) {
++			/* check it again, since there is a window between
++			   bit check and time check */
++			if (!(sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask))
++				break;
+ 			pr_err("%s: Reset 0x%x never completed.\n",
+ 				mmc_hostname(host->mmc), (int)mask);
+ 			sdhci_dumpregs(host);
+ 			return;
++		} else {
++			udelay(10);
+ 		}
+-		udelay(10);
+ 	}
+ }
+ EXPORT_SYMBOL_GPL(sdhci_reset);
+@@ -1395,9 +1400,10 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 		timeout += DIV_ROUND_UP(cmd->busy_timeout, 1000) * HZ + HZ;
+ 	else
+ 		timeout += 10 * HZ;
+-	sdhci_mod_timer(host, cmd->mrq, timeout);
+ 
+ 	sdhci_writew(host, SDHCI_MAKE_CMD(cmd->opcode, flags), SDHCI_COMMAND);
++	/* setup timer after command to avoid fake timeout */
++	sdhci_mod_timer(host, cmd->mrq, timeout);
+ }
+ EXPORT_SYMBOL_GPL(sdhci_send_command);
+ 
+@@ -1611,12 +1617,19 @@ void sdhci_enable_clk(struct sdhci_host *host, u16 clk)
+ 	while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
+ 		& SDHCI_CLOCK_INT_STABLE)) {
+ 		if (ktime_after(ktime_get(), timeout)) {
++			/* check it again since there is a window between
++			   status check and time check */
++			if ((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
++					& SDHCI_CLOCK_INT_STABLE)
++				break;
+ 			pr_err("%s: Internal clock never stabilised.\n",
+ 			       mmc_hostname(host->mmc));
+ 			sdhci_dumpregs(host);
+ 			return;
+ 		}
+-		udelay(10);
++		else {
++			udelay(10);
++		}
+ 	}
+ 
+ 	clk |= SDHCI_CLOCK_CARD_EN;
+-- 
+2.17.1
