@@ -1,106 +1,51 @@
-From: "Du, Alek" <alek.du@intel.com>
-Subject: [PATCH] sdhci: fix the fake timeout bug
-Date: Fri, 30 Nov 2018 15:00:28 +0800
-Message-ID: <20181130150028.732896d8@xdu1-mobl>
+From: Michal Simek <michal.simek@xilinx.com>
+Subject: Re: [PATCH 2/3] dt-bindings: mmc: sdhci-of-arasan: Add deprecated
+ message for am654
+Date: Fri, 30 Nov 2018 08:18:59 +0100
+Message-ID: <6f4734e6-8238-2e14-ae11-114e396df75c@xilinx.com>
+References: <20181129161513.31734-1-faiz_abbas@ti.com>
+ <20181129161513.31734-3-faiz_abbas@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20181129161513.31734-3-faiz_abbas@ti.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc: linux-kernel@vger.kernel.org
+To: Faiz Abbas <faiz_abbas@ti.com>, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, adrian.hunter@intel.com, michal.simek@xilinx.com, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
->From b893df3a1a937bd5fe22d39ceae93454a2e5e0e4 Mon Sep 17 00:00:00 2001
-From: Alek Du <alek.du@intel.com>
-Date: Fri, 30 Nov 2018 14:02:28 +0800
-Subject: [PATCH] sdhci: fix the fake timeout bug
+On 29. 11. 18 17:15, Faiz Abbas wrote:
+> The "ti,am654-sdhci-5.1" binding has been moved to a new driver. Indicate
+> this by a deprecated message.
+> 
+> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+> ---
+>  Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 4 ++++
+>  1 file changed, 4 insertions(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> index e2effe17f05e..1edbb049cccb 100644
+> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> @@ -16,6 +16,10 @@ Required Properties:
+>      - "rockchip,rk3399-sdhci-5.1", "arasan,sdhci-5.1": rk3399 eMMC PHY
+>        For this device it is strongly suggested to include arasan,soc-ctl-syscon.
+>      - "ti,am654-sdhci-5.1", "arasan,sdhci-5.1": TI AM654 MMC PHY
+> +	Note: This binding has been deprecated and moved to [5].
+> +
+> +  [5] Documentation/devicetree/bindings/mmc/sdhci-am654.txt
+> +
+>    - reg: From mmc bindings: Register location and length.
+>    - clocks: From clock bindings: Handles to clock inputs.
+>    - clock-names: From clock bindings: Tuple including "clk_xin" and "clk_ahb"
+> 
 
-We observed some fake timeouts on some devices, the log is like this:
+I would prefer if you can extend commit message by description you have
+in cover letter which explains reasons. When this is applied and someone
+look at git history none will understand from first read why you have
+done that.
 
-[ 7586.290201] mmc1: Timeout waiting for hardware cmd interrupt.
-[ 7586.290420] mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
-...
-[ 7586.291774] mmc1: sdhci: Wake-up:   0x00000000 | Clock:    0x00000203
-
->From the clock control register dump, we are pretty sure the clock was
-stabilized.
-
-In other cases, we also observed:
-
-[ 7596.530171] mmc1: Timeout waiting for hardware cmd interrupt.
-
-and
-
-[ 1956.534634] mmc1: Reset 0x2 never completed.
-
-But we are pretty sure the mmc controller is working perfectly under low
-system load.
-
-After checking the sdhci code, we found the timeout check actually has a
-little window that the CPU can be scheduled out and when it comes back,
-the original time set or check is not valid.
-
-Signed-off-by: Alek Du <alek.du@intel.com>
----
- drivers/mmc/host/sdhci.c | 19 ++++++++++++++++---
- 1 file changed, 16 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 99bdae53fa2e..f88c49fc574e 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -218,12 +218,17 @@ void sdhci_reset(struct sdhci_host *host, u8 mask)
- 	/* hw clears the bit when it's done */
- 	while (sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask) {
- 		if (ktime_after(ktime_get(), timeout)) {
-+			/* check it again, since there is a window between
-+			   bit check and time check */
-+			if (!(sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask))
-+				break;
- 			pr_err("%s: Reset 0x%x never completed.\n",
- 				mmc_hostname(host->mmc), (int)mask);
- 			sdhci_dumpregs(host);
- 			return;
-+		} else {
-+			udelay(10);
- 		}
--		udelay(10);
- 	}
- }
- EXPORT_SYMBOL_GPL(sdhci_reset);
-@@ -1395,9 +1400,10 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 		timeout += DIV_ROUND_UP(cmd->busy_timeout, 1000) * HZ + HZ;
- 	else
- 		timeout += 10 * HZ;
--	sdhci_mod_timer(host, cmd->mrq, timeout);
- 
- 	sdhci_writew(host, SDHCI_MAKE_CMD(cmd->opcode, flags), SDHCI_COMMAND);
-+	/* setup timer after command to avoid fake timeout */
-+	sdhci_mod_timer(host, cmd->mrq, timeout);
- }
- EXPORT_SYMBOL_GPL(sdhci_send_command);
- 
-@@ -1611,12 +1617,19 @@ void sdhci_enable_clk(struct sdhci_host *host, u16 clk)
- 	while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
- 		& SDHCI_CLOCK_INT_STABLE)) {
- 		if (ktime_after(ktime_get(), timeout)) {
-+			/* check it again since there is a window between
-+			   status check and time check */
-+			if ((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
-+					& SDHCI_CLOCK_INT_STABLE)
-+				break;
- 			pr_err("%s: Internal clock never stabilised.\n",
- 			       mmc_hostname(host->mmc));
- 			sdhci_dumpregs(host);
- 			return;
- 		}
--		udelay(10);
-+		else {
-+			udelay(10);
-+		}
- 	}
- 
- 	clk |= SDHCI_CLOCK_CARD_EN;
--- 
-2.17.1
+Thanks,
+Michal
