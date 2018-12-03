@@ -1,58 +1,53 @@
 From: Faiz Abbas <faiz_abbas@ti.com>
-Subject: Re: [PATCH 2/3] dt-bindings: mmc: sdhci-of-arasan: Add deprecated
- message for am654
-Date: Mon, 3 Dec 2018 13:33:50 +0530
-Message-ID: <e431f6f8-3c8d-3540-3d21-d3e9aa292574@ti.com>
-References: <20181129161513.31734-1-faiz_abbas@ti.com>
- <20181129161513.31734-3-faiz_abbas@ti.com>
- <6f4734e6-8238-2e14-ae11-114e396df75c@xilinx.com>
+Subject: Re: [PATCH V3 1/3] mmc: sdhci: add support for using external DMA
+ devices
+Date: Mon, 3 Dec 2018 14:33:45 +0530
+Message-ID: <42f994b2-ba98-8160-6eef-11eeb8a10f5e@ti.com>
+References: <1542007566-9449-2-git-send-email-zhang.chunyan@linaro.org>
+ <1543471664-22856-1-git-send-email-zhang.chunyan@linaro.org>
+ <cb2cdfb9-f3e6-72cd-2d55-734b08ea3e15@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <6f4734e6-8238-2e14-ae11-114e396df75c@xilinx.com>
+In-Reply-To: <cb2cdfb9-f3e6-72cd-2d55-734b08ea3e15@intel.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Michal Simek <michal.simek@xilinx.com>, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, adrian.hunter@intel.com, kishon@ti.com
+To: Adrian Hunter <adrian.hunter@intel.com>, Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Mark Brown <broonie@kernel.org>, Kishon Vijay Abraham I <kishon@ti.com>, Sekhar Nori <nsekhar@ti.com>, Chunyan Zhang <zhang.lyra@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Michal,
+Hi Chunyan,
 
-On 30/11/18 12:48 PM, Michal Simek wrote:
-> On 29. 11. 18 17:15, Faiz Abbas wrote:
->> The "ti,am654-sdhci-5.1" binding has been moved to a new driver. Indicate
->> this by a deprecated message.
+On 29/11/18 2:53 PM, Adrian Hunter wrote:
+> On 29/11/18 8:07 AM, Chunyan Zhang wrote:
+>> Some standard SD host controllers can support both external dma
+>> controllers as well as ADMA/SDMA in which the SD host controller
+>> acts as DMA master. TI's omap controller is the case as an example.
 >>
->> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+>> Currently the generic SDHCI code supports ADMA/SDMA integrated in
+>> the host controller but does not have any support for external DMA
+>> controllers implemented using dmaengine, meaning that custom code is
+>> needed for any systems that use an external DMA controller with SDHCI.
+>>
+>> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
 >> ---
->>  Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 4 ++++
->>  1 file changed, 4 insertions(+)
+>>  drivers/mmc/host/Kconfig |  14 ++++
+>>  drivers/mmc/host/sdhci.c | 185 ++++++++++++++++++++++++++++++++++++++++++++++-
+>>  drivers/mmc/host/sdhci.h |   8 ++
+>>  3 files changed, 206 insertions(+), 1 deletion(-)
 >>
->> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
->> index e2effe17f05e..1edbb049cccb 100644
->> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
->> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
->> @@ -16,6 +16,10 @@ Required Properties:
->>      - "rockchip,rk3399-sdhci-5.1", "arasan,sdhci-5.1": rk3399 eMMC PHY
->>        For this device it is strongly suggested to include arasan,soc-ctl-syscon.
->>      - "ti,am654-sdhci-5.1", "arasan,sdhci-5.1": TI AM654 MMC PHY
->> +	Note: This binding has been deprecated and moved to [5].
->> +
->> +  [5] Documentation/devicetree/bindings/mmc/sdhci-am654.txt
->> +
->>    - reg: From mmc bindings: Register location and length.
->>    - clocks: From clock bindings: Handles to clock inputs.
->>    - clock-names: From clock bindings: Tuple including "clk_xin" and "clk_ahb"
->>
-> 
-> I would prefer if you can extend commit message by description you have
-> in cover letter which explains reasons. When this is applied and someone
-> look at git history none will understand from first read why you have
-> done that.
-> 
+>> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+>> index 1b58739..4183f43 100644
+>> --- a/drivers/mmc/host/Kconfig
+>> +++ b/drivers/mmc/host/Kconfig
+>> @@ -969,6 +969,7 @@ config MMC_SDHCI_XENON
+>>  config MMC_SDHCI_OMAP
+>>  	tristate "TI SDHCI Controller Support">>  	depends on MMC_SDHCI_PLTFM && OF
+>> +	select MMC_SDHCI_EXTERNAL_DMA if DMA_ENGINE
 
-Ok. Will add full explanations to both documentation patches.
+
+This should be in patch 2.
 
 Thanks,
 Faiz
