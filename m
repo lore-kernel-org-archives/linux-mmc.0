@@ -1,37 +1,49 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V2] sdhci: fix the timeout check window for clock and
- reset
-Date: Tue, 4 Dec 2018 14:24:42 +0200
-Message-ID: <229dc468-1155-b81f-9fda-b71402387e3f@intel.com>
+Subject: Re: [PATCH] sdhci: fix the fake timeout bug
+Date: Tue, 4 Dec 2018 14:47:49 +0200
+Message-ID: <b349ed24-cfa4-8b85-7069-d328f41f4827@intel.com>
 References: <20181130150028.732896d8@xdu1-mobl>
  <81ba3745-8277-d16e-3aad-48324f51dc8a@intel.com>
  <20181130221300.4ef2956c@xdu1-mobl>
  <c580be57-8a49-59f3-791e-c605d892266b@intel.com>
- <20181201134251.26573207@xdu1-mobl> <20181204090120.63b5f0a4@xdu1-mobl>
+ <20181201134251.26573207@xdu1-mobl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181204090120.63b5f0a4@xdu1-mobl>
+In-Reply-To: <20181201134251.26573207@xdu1-mobl>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
 To: "Du, Alek" <alek.du@intel.com>
 Cc: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 4/12/18 3:01 AM, Du, Alek wrote:
->>From 87692fc090978bde8fe872f02d0023a57af6b492 Mon Sep 17 00:00:00 2001
-> From: Alek Du <alek.du@intel.com>
-> Date: Fri, 30 Nov 2018 14:02:28 +0800
-> Subject: [PATCH] sdhci: fix the timeout check window for clock and reset
+On 1/12/18 7:42 AM, Du, Alek wrote:
+> On Fri, 30 Nov 2018 16:40:04 +0200
+> Adrian Hunter <adrian.hunter@intel.com> wrote:
 > 
-> We observed some fake timeouts on some devices, the log is like this:
-
-Please change "fake timeouts" to "premature timeouts".  Also I think it is
-worth mentioning that this was with a virtualized environment.
-
+>> So you are saying this only happens under virtualization?
+>>
 > 
-> case 1:
+> Yes, I saw the issue under ACRN virtualization Service OS (4.19 kernel).
+> But theoretically it can happen in other case when scheduling is not
+> that good. (due to bad driver or other high priority task)
+> 
+> 
+>>>
+>>> Please look at the sdhci_enable_clk() below, there is a window in
+>>> clock stabilization check. The first check is to check status
+>>> register, the second check is to check if time passed. That's why I
+>>> can capture a case that after time passed, the actually clock
+>>> control register indicated that clock is stable. So the error
+>>> handling is wrong...  
+>>
+>> Sure, but "Internal clock never stabilised." is not one of the
+>> errors you listed.
+> 
+> Sorry my bad not listing all the error log:
+> 
+> Case 1. clock stabilization timeout: (the below clock control dump shows clock is good)
 > [159525.255629] mmc1: Internal clock never stabilised.
 > [159525.255818] mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
 > [159525.256049] mmc1: sdhci: Sys addr:  0x00000000 | Version:  0x00001002
@@ -40,103 +52,28 @@ worth mentioning that this was with a virtualized environment.
 > [159525.256752] mmc1: sdhci: Present:   0x1fff0000 | Host ctl: 0x00000000
 > [159525.256979] mmc1: sdhci: Power:     0x0000000b | Blk gap:  0x00000080
 > [159525.257205] mmc1: sdhci: Wake-up:   0x00000000 | Clock:    0x0000fa03
->>From the clock control register dump, we are pretty sure the clock was
-> stablized.
 > 
-> case 2:
-> [  914.550127] mmc1: Reset 0x2 never completed.
-> [  914.550321] mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
-> [  914.550608] mmc1: sdhci: Sys addr:  0x00000010 | Version:  0x00001002
+> Case 2. Reset timeout: (the same check window in sdhci_reset())
+> [ 7639.968613] mmc1: Reset 0x4 never completed.
 > 
-> After checking the sdhci code, we found the timeout check actually has a
-> little window that the CPU can be scheduled out and when it comes back,
-> the original time set or check is not valid.
+> Case 3. Hardware interrupt timeout
+> [ 1049.561728] mmc1: Timeout waiting for hardware interrupt.
 > 
-> Signed-off-by: Alek Du <alek.du@intel.com>
-
-Please add fixes tag:
-
-Fixes: 5a436cc0af62 ("mmc: sdhci: Optimize delay loops")
-
-And also a stable tag:
-
-Cc: stable@vger.kernel.org      # v4.12+
-
-> ---
->  drivers/mmc/host/sdhci.c | 16 ++++++++++++++--
->  1 file changed, 14 insertions(+), 2 deletions(-)
+>>
+>>>
+>>> Also the sdhci_send_command commands is not in spin lock There is a
+>>> windows between mod_timer and real command send...  
+>>
+>> What code path does not have a spin lock?
+> Ouch my bad, the sdhci_send_command are called either from spinlock or IRQ handler,
+> so this part is good ...
 > 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 99bdae53fa2e..af01f7d16eae 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -218,12 +218,17 @@ void sdhci_reset(struct sdhci_host *host, u8 mask)
->  	/* hw clears the bit when it's done */
->  	while (sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask) {
->  		if (ktime_after(ktime_get(), timeout)) {
-> +			/* check it again, since there is a window between
-> +			   bit check and time check */
-> +			if (!(sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask))
-> +				break;
+> I'll send a new patch to cover case 1 and case 2 if you agree.
 
-It would be neater like:
+Please do the mod_timer case also, but please make it a separate patch.
+Prior to v4.18 it was essentially a 10-second timer, without a
+preemptible gap afterwards, so extremely unlikely to timeout
+prematurely, hence:
 
-	while (1) {
-		bool timedout = ktime_after(ktime_get(), timeout);
-
-		if (!(sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask))
-			break;
-		if (timedout) {
-
-
->  			pr_err("%s: Reset 0x%x never completed.\n",
->  				mmc_hostname(host->mmc), (int)mask);
->  			sdhci_dumpregs(host);
->  			return;
-> +		} else {
-
-The if-clause does a 'return', so the 'else' is not needed
-
-> +			udelay(10);
->  		}
-> -		udelay(10);
->  	}
->  }
->  EXPORT_SYMBOL_GPL(sdhci_reset);
-> @@ -1611,12 +1616,19 @@ void sdhci_enable_clk(struct sdhci_host *host, u16 clk)
->  	while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
->  		& SDHCI_CLOCK_INT_STABLE)) {
->  		if (ktime_after(ktime_get(), timeout)) {
-> +			/* check it again since there is a window between
-> +			   status check and time check */
-> +			if ((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
-> +					& SDHCI_CLOCK_INT_STABLE)
-> +				break;
-
-Similarly:
-
-	while (1) {
-		bool timedout = ktime_after(ktime_get(), timeout);
-
-		clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-		if (clk & SDHCI_CLOCK_INT_STABLE)
-			break;
-		if (timedout) {
-
-
->  			pr_err("%s: Internal clock never stabilised.\n",
->  			       mmc_hostname(host->mmc));
->  			sdhci_dumpregs(host);
->  			return;
->  		}
-> -		udelay(10);
-> +		else {
-
-The if-clause does a 'return', so the 'else' is not needed
-
-> +			udelay(10);
-> +		}
->  	}
->  
->  	clk |= SDHCI_CLOCK_CARD_EN;
-> 
+Fixes: fc1fa1b7db275 ("mmc: sdhci: Program a relatively accurate SW timeout value")
+Cc: stable@vger.kernel.org      # v4.18+
