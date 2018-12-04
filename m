@@ -1,52 +1,81 @@
 From: Faiz Abbas <faiz_abbas@ti.com>
-Subject: Re: [PATCH V3 0/3] Add support for using external dma in SDHCI
-Date: Tue, 4 Dec 2018 16:06:10 +0530
-Message-ID: <4871e35d-08e4-9199-08bc-f80f83349020@ti.com>
+Subject: Re: [PATCH V3 1/3] mmc: sdhci: add support for using external DMA
+ devices
+Date: Tue, 4 Dec 2018 16:11:14 +0530
+Message-ID: <5167ffb5-77f8-ab66-2eca-602df5f4e3e8@ti.com>
 References: <1543908270-13953-1-git-send-email-zhang.chunyan@linaro.org>
+ <1543908270-13953-2-git-send-email-zhang.chunyan@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1543908270-13953-1-git-send-email-zhang.chunyan@linaro.org>
+In-Reply-To: <1543908270-13953-2-git-send-email-zhang.chunyan@linaro.org>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
 To: Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Mark Brown <broonie@kernel.org>, Kishon Vijay Abraham I <kishon@ti.com>, Sekhar Nori <nsekhar@ti.com>, Chunyan Zhang <zhang.lyra@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Chunyan,
+Hi,
 
 On 04/12/18 12:54 PM, Chunyan Zhang wrote:
-> Currently the generic SDHCI code in the Linux kernel supports the SD
-> standard DMA integrated into the host controller but does not have any
-> support for external DMA controllers implemented using dmaengine meaning
-> that custom code is needed for any systems that use a generic DMA
-> controller with SDHCI which in practice means any SDHCI controller that
-> doesn't have an integrated DMA controller so we should have this as a
-> generic feature.
+> Some standard SD host controllers can support both external dma
+> controllers as well as ADMA/SDMA in which the SD host controller
+> acts as DMA master. TI's omap controller is the case as an example.
 > 
-> There are already a number of controller specific drivers that have dmaengine
-> code, and some could use sdhci.c actually, but needed to implement mmc_ops->request()
-> in their specific driver for sending command with external dma using dmaengine
-> framework, with this patchset, them will take advantage of the generic support.
-> TI's omap controller is the case as an example.
+> Currently the generic SDHCI code supports ADMA/SDMA integrated in
+> the host controller but does not have any support for external DMA
+> controllers implemented using dmaengine, meaning that custom code is
+> needed for any systems that use an external DMA controller with SDHCI.
 > 
-> Any comments are very appreciated.
-> 
+...
 
-Following your comments, I added dmas in dra7.dtsi as shown in the patch
-below.
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index b001cf4..8e50a97 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -475,6 +475,7 @@ struct sdhci_host {
+>  
+>  	int irq;		/* Device IRQ */
+>  	void __iomem *ioaddr;	/* Mapped address */
+> +	phys_addr_t mapbase;	/* physical address base */
+>  	char *bounce_buffer;	/* For packing SDMA reads/writes */
+>  	dma_addr_t bounce_addr;
+>  	unsigned int bounce_buffer_size;
+> @@ -524,6 +525,7 @@ struct sdhci_host {
+>  	bool pending_reset;	/* Cmd/data reset is pending */
+>  	bool irq_wake_enabled;	/* IRQ wakeup is enabled */
+>  	bool v4_mode;		/* Host Version 4 Enable */
+> +	bool use_external_dma;
+>  
+>  	struct mmc_request *mrqs_done[SDHCI_MAX_MRQS];	/* Requests done */
+>  	struct mmc_command *cmd;	/* Current command */
+> @@ -552,6 +554,11 @@ struct sdhci_host {
+>  	struct timer_list timer;	/* Timer for timeouts */
+>  	struct timer_list data_timer;	/* Timer for data timeouts */
+>  
+> +#if IS_ENABLED(CONFIG_MMC_SDHCI_EXTERNAL_DMA)
+> +	struct dma_chan	*rx_chan;
+> +	struct dma_chan	*tx_chan;
+> +#endif
+> +
+>  	u32 caps;		/* CAPABILITY_0 */
+>  	u32 caps1;		/* CAPABILITY_1 */
+>  	bool read_caps;		/* Capability flags have been read */
+> @@ -785,5 +792,6 @@ void sdhci_start_tuning(struct sdhci_host *host);
+>  void sdhci_end_tuning(struct sdhci_host *host);
+>  void sdhci_reset_tuning(struct sdhci_host *host);
+>  void sdhci_send_tuning(struct sdhci_host *host, u32 opcode);
+> +void sdhci_switch_external_dma(struct sdhci_host *host, bool en);
+>  
 
-https://pastebin.ubuntu.com/p/J4F3xWZv5c/
+Can you also add a new attribute in sdhci_host->flags for external dma
+in this file? The log still shows
 
-This time the MMC devices enumerate successfully but I see a bunch of
+[    3.675028] mmc2: SDHCI controller on 4809c000.mmc [4809c000.mmc]
+using ADMA
 
-[  108.135736] omap-dma-engine 4a056000.dma-controller: t2_desc[10]
-allocation failed
-
-messages when I try to run a short ltp test.
-
-https://pastebin.ubuntu.com/p/WvRSkxBPpv/
+when using external dma.
 
 Thanks,
 Faiz
