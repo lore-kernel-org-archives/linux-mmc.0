@@ -1,81 +1,142 @@
-From: Faiz Abbas <faiz_abbas@ti.com>
-Subject: Re: [PATCH V3 1/3] mmc: sdhci: add support for using external DMA
- devices
-Date: Tue, 4 Dec 2018 16:11:14 +0530
-Message-ID: <5167ffb5-77f8-ab66-2eca-602df5f4e3e8@ti.com>
-References: <1543908270-13953-1-git-send-email-zhang.chunyan@linaro.org>
- <1543908270-13953-2-git-send-email-zhang.chunyan@linaro.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V2] sdhci: fix the timeout check window for clock and
+ reset
+Date: Tue, 4 Dec 2018 14:24:42 +0200
+Message-ID: <229dc468-1155-b81f-9fda-b71402387e3f@intel.com>
+References: <20181130150028.732896d8@xdu1-mobl>
+ <81ba3745-8277-d16e-3aad-48324f51dc8a@intel.com>
+ <20181130221300.4ef2956c@xdu1-mobl>
+ <c580be57-8a49-59f3-791e-c605d892266b@intel.com>
+ <20181201134251.26573207@xdu1-mobl> <20181204090120.63b5f0a4@xdu1-mobl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1543908270-13953-2-git-send-email-zhang.chunyan@linaro.org>
+In-Reply-To: <20181204090120.63b5f0a4@xdu1-mobl>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Mark Brown <broonie@kernel.org>, Kishon Vijay Abraham I <kishon@ti.com>, Sekhar Nori <nsekhar@ti.com>, Chunyan Zhang <zhang.lyra@gmail.com>
+To: "Du, Alek" <alek.du@intel.com>
+Cc: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
-
-On 04/12/18 12:54 PM, Chunyan Zhang wrote:
-> Some standard SD host controllers can support both external dma
-> controllers as well as ADMA/SDMA in which the SD host controller
-> acts as DMA master. TI's omap controller is the case as an example.
+On 4/12/18 3:01 AM, Du, Alek wrote:
+>>From 87692fc090978bde8fe872f02d0023a57af6b492 Mon Sep 17 00:00:00 2001
+> From: Alek Du <alek.du@intel.com>
+> Date: Fri, 30 Nov 2018 14:02:28 +0800
+> Subject: [PATCH] sdhci: fix the timeout check window for clock and reset
 > 
-> Currently the generic SDHCI code supports ADMA/SDMA integrated in
-> the host controller but does not have any support for external DMA
-> controllers implemented using dmaengine, meaning that custom code is
-> needed for any systems that use an external DMA controller with SDHCI.
+> We observed some fake timeouts on some devices, the log is like this:
+
+Please change "fake timeouts" to "premature timeouts".  Also I think it is
+worth mentioning that this was with a virtualized environment.
+
 > 
-...
+> case 1:
+> [159525.255629] mmc1: Internal clock never stabilised.
+> [159525.255818] mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
+> [159525.256049] mmc1: sdhci: Sys addr:  0x00000000 | Version:  0x00001002
+> [159525.256277] mmc1: sdhci: Blk size:  0x00000000 | Blk cnt:  0x00000000
+> [159525.256523] mmc1: sdhci: Argument:  0x00000000 | Trn mode: 0x00000000
+> [159525.256752] mmc1: sdhci: Present:   0x1fff0000 | Host ctl: 0x00000000
+> [159525.256979] mmc1: sdhci: Power:     0x0000000b | Blk gap:  0x00000080
+> [159525.257205] mmc1: sdhci: Wake-up:   0x00000000 | Clock:    0x0000fa03
+>>From the clock control register dump, we are pretty sure the clock was
+> stablized.
+> 
+> case 2:
+> [  914.550127] mmc1: Reset 0x2 never completed.
+> [  914.550321] mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
+> [  914.550608] mmc1: sdhci: Sys addr:  0x00000010 | Version:  0x00001002
+> 
+> After checking the sdhci code, we found the timeout check actually has a
+> little window that the CPU can be scheduled out and when it comes back,
+> the original time set or check is not valid.
+> 
+> Signed-off-by: Alek Du <alek.du@intel.com>
 
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index b001cf4..8e50a97 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -475,6 +475,7 @@ struct sdhci_host {
+Please add fixes tag:
+
+Fixes: 5a436cc0af62 ("mmc: sdhci: Optimize delay loops")
+
+And also a stable tag:
+
+Cc: stable@vger.kernel.org      # v4.12+
+
+> ---
+>  drivers/mmc/host/sdhci.c | 16 ++++++++++++++--
+>  1 file changed, 14 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 99bdae53fa2e..af01f7d16eae 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -218,12 +218,17 @@ void sdhci_reset(struct sdhci_host *host, u8 mask)
+>  	/* hw clears the bit when it's done */
+>  	while (sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask) {
+>  		if (ktime_after(ktime_get(), timeout)) {
+> +			/* check it again, since there is a window between
+> +			   bit check and time check */
+> +			if (!(sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask))
+> +				break;
+
+It would be neater like:
+
+	while (1) {
+		bool timedout = ktime_after(ktime_get(), timeout);
+
+		if (!(sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask))
+			break;
+		if (timedout) {
+
+
+>  			pr_err("%s: Reset 0x%x never completed.\n",
+>  				mmc_hostname(host->mmc), (int)mask);
+>  			sdhci_dumpregs(host);
+>  			return;
+> +		} else {
+
+The if-clause does a 'return', so the 'else' is not needed
+
+> +			udelay(10);
+>  		}
+> -		udelay(10);
+>  	}
+>  }
+>  EXPORT_SYMBOL_GPL(sdhci_reset);
+> @@ -1611,12 +1616,19 @@ void sdhci_enable_clk(struct sdhci_host *host, u16 clk)
+>  	while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
+>  		& SDHCI_CLOCK_INT_STABLE)) {
+>  		if (ktime_after(ktime_get(), timeout)) {
+> +			/* check it again since there is a window between
+> +			   status check and time check */
+> +			if ((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
+> +					& SDHCI_CLOCK_INT_STABLE)
+> +				break;
+
+Similarly:
+
+	while (1) {
+		bool timedout = ktime_after(ktime_get(), timeout);
+
+		clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+		if (clk & SDHCI_CLOCK_INT_STABLE)
+			break;
+		if (timedout) {
+
+
+>  			pr_err("%s: Internal clock never stabilised.\n",
+>  			       mmc_hostname(host->mmc));
+>  			sdhci_dumpregs(host);
+>  			return;
+>  		}
+> -		udelay(10);
+> +		else {
+
+The if-clause does a 'return', so the 'else' is not needed
+
+> +			udelay(10);
+> +		}
+>  	}
 >  
->  	int irq;		/* Device IRQ */
->  	void __iomem *ioaddr;	/* Mapped address */
-> +	phys_addr_t mapbase;	/* physical address base */
->  	char *bounce_buffer;	/* For packing SDMA reads/writes */
->  	dma_addr_t bounce_addr;
->  	unsigned int bounce_buffer_size;
-> @@ -524,6 +525,7 @@ struct sdhci_host {
->  	bool pending_reset;	/* Cmd/data reset is pending */
->  	bool irq_wake_enabled;	/* IRQ wakeup is enabled */
->  	bool v4_mode;		/* Host Version 4 Enable */
-> +	bool use_external_dma;
->  
->  	struct mmc_request *mrqs_done[SDHCI_MAX_MRQS];	/* Requests done */
->  	struct mmc_command *cmd;	/* Current command */
-> @@ -552,6 +554,11 @@ struct sdhci_host {
->  	struct timer_list timer;	/* Timer for timeouts */
->  	struct timer_list data_timer;	/* Timer for data timeouts */
->  
-> +#if IS_ENABLED(CONFIG_MMC_SDHCI_EXTERNAL_DMA)
-> +	struct dma_chan	*rx_chan;
-> +	struct dma_chan	*tx_chan;
-> +#endif
-> +
->  	u32 caps;		/* CAPABILITY_0 */
->  	u32 caps1;		/* CAPABILITY_1 */
->  	bool read_caps;		/* Capability flags have been read */
-> @@ -785,5 +792,6 @@ void sdhci_start_tuning(struct sdhci_host *host);
->  void sdhci_end_tuning(struct sdhci_host *host);
->  void sdhci_reset_tuning(struct sdhci_host *host);
->  void sdhci_send_tuning(struct sdhci_host *host, u32 opcode);
-> +void sdhci_switch_external_dma(struct sdhci_host *host, bool en);
->  
-
-Can you also add a new attribute in sdhci_host->flags for external dma
-in this file? The log still shows
-
-[    3.675028] mmc2: SDHCI controller on 4809c000.mmc [4809c000.mmc]
-using ADMA
-
-when using external dma.
-
-Thanks,
-Faiz
+>  	clk |= SDHCI_CLOCK_CARD_EN;
+> 
