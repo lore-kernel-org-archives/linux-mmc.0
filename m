@@ -1,46 +1,44 @@
-From: Chunyan Zhang <zhang.chunyan@linaro.org>
-Subject: [PATCH V3 3/3] dt-bindings: sdhci-omap: Add example for using external dma
-Date: Tue,  4 Dec 2018 15:24:30 +0800
-Message-ID: <1543908270-13953-4-git-send-email-zhang.chunyan@linaro.org>
-References: <1543908270-13953-1-git-send-email-zhang.chunyan@linaro.org>
+From: Faiz Abbas <faiz_abbas@ti.com>
+Subject: Re: [PATCH v2 0/3] Tuning Fixes for sdhci-omap
+Date: Tue, 4 Dec 2018 13:57:34 +0530
+Message-ID: <492f4851-8068-d20b-68e8-ece0fa493b05@ti.com>
+References: <20181121103357.3448-1-faiz_abbas@ti.com>
+ <3f64fb93-ecdd-d439-1001-be8117f63990@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1543908270-13953-1-git-send-email-zhang.chunyan@linaro.org>
+In-Reply-To: <3f64fb93-ecdd-d439-1001-be8117f63990@intel.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Faiz Abbas <faiz_abbas@ti.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Mark Brown <broonie@kernel.org>, Kishon Vijay Abraham I <kishon@ti.com>, Sekhar Nori <nsekhar@ti.com>, Chunyan Zhang <zhang.lyra@gmail.com>
+To: Adrian Hunter <adrian.hunter@intel.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-sdhci-omap can support both external dma controller via dmaengine
-framework as well as ADMA which standard SD host controller
-provides.
+Hi,
 
-Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
----
- Documentation/devicetree/bindings/mmc/sdhci-omap.txt | 7 +++++++
- 1 file changed, 7 insertions(+)
+On 21/11/18 4:53 PM, Adrian Hunter wrote:
+> On 21/11/18 12:33 PM, Faiz Abbas wrote:
+>> The following patches fix tuning related errors in the
+>> sdhci-omap driver.
+>>
+>> v2:
+>> Added Fixes and stable tags for patch 1.
+>> Re-enable DCRC in patch 1 only if it was enabled before
+>> Squashed patches 2 & 3
+>>
+>> Faiz Abbas (3):
+>>   mmc: sdhci-omap: Fix DCRC error handling during tuning
+>>   mmc: sdhci-omap: Add platform specific reset callback
+>>   mmc: sdhci-omap: Remove redundant structure assignments
+>>
+>>  drivers/mmc/host/sdhci-omap.c | 36 ++++++++++++++++++++++++++---------
+>>  1 file changed, 27 insertions(+), 9 deletions(-)
+>>
+> 
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-omap.txt b/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
-index 393848c..c73fd47 100644
---- a/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
-+++ b/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
-@@ -12,6 +12,11 @@ Required properties:
- 		 "ddr_1_8v-rev11", "ddr_1_8v" or "ddr_3_3v", "hs200_1_8v-rev11",
- 		 "hs200_1_8v",
- - pinctrl-<n> : Pinctrl states as described in bindings/pinctrl/pinctrl-bindings.txt
-+- dmas:		List of DMA specifiers with the controller specific format as described
-+		in the generic DMA client binding. A tx and rx specifier is required.
-+- dma-names:	List of DMA request names. These strings correspond 1:1 with the
-+		DMA specifiers listed in dmas. The string naming is to be "rx"
-+		and "tx" for RX and TX DMA requests, respectively.
- 
- Example:
- 	mmc1: mmc@4809c000 {
-@@ -20,4 +25,6 @@ Example:
- 		ti,hwmods = "mmc1";
- 		bus-width = <4>;
- 		vmmc-supply = <&vmmc>; /* phandle to regulator node */
-+		dmas = <&sdma 61 &sdma 62>;
-+		dma-names = "tx", "rx";
- 	};
--- 
-2.7.4
+Gentle ping.
+
+Thanks,
+Faiz
