@@ -1,42 +1,62 @@
-From: Stefan Wahren <stefan.wahren@i2se.com>
-Subject: Re: [PATCH V2 7/7] mmc: bcm2835: Properly handle
- dmaengine_prep_slave_sg
-Date: Tue, 4 Dec 2018 19:20:59 +0100 (CET)
-Message-ID: <1382521023.341849.1543947659588@email.ionos.de>
-References: <1541967839-2847-1-git-send-email-stefan.wahren@i2se.com>
- <1541967839-2847-8-git-send-email-stefan.wahren@i2se.com>
- <87y39d5czn.fsf@anholt.net>
+From: Liming Sun <lsun@mellanox.com>
+Subject: RE: [PATCH v1 1/1] mmc: core: control EXT_CSD_CACHE_CTRL from device
+ tree
+Date: Tue, 4 Dec 2018 22:19:14 +0000
+Message-ID: <DB6PR05MB32239F8202BF9FA1840C1942A1AF0@DB6PR05MB3223.eurprd05.prod.outlook.com>
+References: <c0e11e0a23fbb6b9867963c4b143fcb1c60b403c.1542744186.git.lsun@mellanox.com>
+ <99DF0CBE-2879-4869-861D-06097D9E12CB@wdc.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <87y39d5czn.fsf@anholt.net>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Florian Fainelli <f.fainelli@gmail.com>, Phil Elwell <phil@raspberrypi.org>, linux-mmc@vger.kernel.org, Eric Anholt <eric@anholt.net>, linux-rpi-kernel@lists.infradead.org, Michal Suchanek <msuchanek@suse.de>, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <99DF0CBE-2879-4869-861D-06097D9E12CB@wdc.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Alex Lemberg <Alex.Lemberg@wdc.com>, Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, David Woods <dwoods@mellanox.com>, Shawn Lin <shawn.lin@rock-chips.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Ulf,
-
-> Eric Anholt <eric@anholt.net> hat am 28. November 2018 um 18:27 geschrieben:
-> 
-> 
-> Stefan Wahren <stefan.wahren@i2se.com> writes:
-> 
-> > In case dmaengine_prep_slave_sg fails we need to call dma_unmap_sg.
-> >
-> > Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
-> 
-> This series is:
-> 
-> Acked-by: Eric Anholt <eric@anholt.net>
-
-should i resend with Eric's Ack?
+VGhhbmtzIGZvciB0aGUgY29tbWVudC4gWWVzLCBJIGFjdHVhbGx5IGhhdmUgdGhlIHNhbWUgcXVl
+c3Rpb24uDQpUaGUgY2hhbmdlIGhlcmUgaXMgdG8gZml4IGEgY29uZGl0aW9uIGJhc2VkIG9uIHRo
+ZSBleGlzdGluZyBjb2RlLiBQcm9iYWJseSBhIGJldHRlciBmaXggaXMgdG8gZ2V0IHJpZCBvZiB0
+aGUgJ2Nvbm5lY3Rpb24nLi4uDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBB
+bGV4IExlbWJlcmcgPEFsZXguTGVtYmVyZ0B3ZGMuY29tPiANClNlbnQ6IFR1ZXNkYXksIERlY2Vt
+YmVyIDQsIDIwMTggMTE6MjcgQU0NClRvOiBMaW1pbmcgU3VuIDxsc3VuQG1lbGxhbm94LmNvbT47
+IFVsZiBIYW5zc29uIDx1bGYuaGFuc3NvbkBsaW5hcm8ub3JnPjsgSmFlaG9vbiBDaHVuZyA8amg4
+MC5jaHVuZ0BzYW1zdW5nLmNvbT47IERhdmlkIFdvb2RzIDxkd29vZHNAbWVsbGFub3guY29tPjsg
+U2hhd24gTGluIDxzaGF3bi5saW5Acm9jay1jaGlwcy5jb20+DQpDYzogbGludXgtbW1jQHZnZXIu
+a2VybmVsLm9yZzsgbGludXgta2VybmVsQHZnZXIua2VybmVsLm9yZw0KU3ViamVjdDogUmU6IFtQ
+QVRDSCB2MSAxLzFdIG1tYzogY29yZTogY29udHJvbCBFWFRfQ1NEX0NBQ0hFX0NUUkwgZnJvbSBk
+ZXZpY2UgdHJlZQ0KDQoNCkhpLA0KDQoNCu+7v09uIDExLzIwLzE4LCAxMDowNyBQTSwgImxpbnV4
+LW1tYy1vd25lckB2Z2VyLmtlcm5lbC5vcmcgb24gYmVoYWxmIG9mIExpbWluZyBTdW4iIDxsaW51
+eC1tbWMtb3duZXJAdmdlci5rZXJuZWwub3JnIG9uIGJlaGFsZiBvZiBsc3VuQG1lbGxhbm94LmNv
+bT4gd3JvdGU6DQoNCiAgICBDdXJyZW50bHkgdGhlIEVYVF9DU0RfQ0FDSEVfQ1RSTCByZWdpc3Rl
+ciBpcyBjb250cm9sbGVkIGJ5IEFQSQ0KICAgIG1tY19jYXJkX2Jyb2tlbl9ocGkoKSwgd2hpY2gg
+b25seSB3b3JrcyBmb3IgdGhlIHF1aXJrcyBzZXR0aW5ncy4NCiAgICBUaGlzIGNvbW1pdCBlbmhh
+bmNlcyBpdCB0byB1c2UgY2FyZC0+ZXh0X2NzZC5ocGkgaW5zdGVhZC4gVGhpcw0KICAgIGZsYWcg
+d29ya3MgZm9yIGJvdGggdGhlIHF1aXJrcyBhbmQgdGhlIGJyb2tlbi1ocGkgY29uZmlndXJhdGlv
+bg0KICAgIGluIHRoZSBkZXZpY2UgdHJlZS4NCiAgICANCiAgICBTaWduZWQtb2ZmLWJ5OiBMaW1p
+bmcgU3VuIDxsc3VuQG1lbGxhbm94LmNvbT4NCiAgICAtLS0NCiAgICAgZHJpdmVycy9tbWMvY29y
+ZS9tbWMuYyB8IDMgKy0tDQogICAgIDEgZmlsZSBjaGFuZ2VkLCAxIGluc2VydGlvbigrKSwgMiBk
+ZWxldGlvbnMoLSkNCiAgICANCiAgICBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvY29yZS9tbWMu
+YyBiL2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMNCiAgICBpbmRleCBiYzFiZDJjLi4yZjJiNjVjIDEw
+MDY0NA0KICAgIC0tLSBhL2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMNCiAgICArKysgYi9kcml2ZXJz
+L21tYy9jb3JlL21tYy5jDQogICAgQEAgLTE3OTEsOCArMTc5MSw3IEBAIHN0YXRpYyBpbnQgbW1j
+X2luaXRfY2FyZChzdHJ1Y3QgbW1jX2hvc3QgKmhvc3QsIHUzMiBvY3IsDQogICAgIAkgKiBJZiBj
+YWNoZSBzaXplIGlzIGhpZ2hlciB0aGFuIDAsIHRoaXMgaW5kaWNhdGVzDQogICAgIAkgKiB0aGUg
+ZXhpc3RlbmNlIG9mIGNhY2hlIGFuZCBpdCBjYW4gYmUgdHVybmVkIG9uLg0KICAgICAJICovDQog
+ICAgLQlpZiAoIW1tY19jYXJkX2Jyb2tlbl9ocGkoY2FyZCkgJiYNCiAgICAtCSAgICBjYXJkLT5l
+eHRfY3NkLmNhY2hlX3NpemUgPiAwKSB7DQogICAgKwlpZiAoY2FyZC0+ZXh0X2NzZC5ocGkgJiYg
+Y2FyZC0+ZXh0X2NzZC5jYWNoZV9zaXplID4gMCkgew0KDQoNCkFueSByZWFzb24gZm9yIG1ha2lu
+ZyBhIGNvbm5lY3Rpb24gYmV0d2VlbiBIUEkgYW5kIENhY2hlIGluIGN1cnJlbnQgZHJpdmVyIGlt
+cGxlbWVudGF0aW9uPw0KQlRXLCBJIG1pc3NlZCBpdCBiZWZvcmUsIGJ1dCB0aGUgcHJldmlvdXMg
+Y29tbWl0IG1ha2luZyB0aGlzIGNvbm5lY3Rpb24gLSBpcyBhbHNvIGRvZXNuJ3QgbWFrZSBhbnkg
+c2Vuc2UuDQpBbHRob3VnaCBieSB0aGUgc3BlYyBGTFVTSF9DQUNIRSBpcyBpbnRlcnJ1cHRpYmxl
+IGNvbW1hbmQsIEkgZG9uJ3QgdGhpbmsgd2Ugc2hvdWxkIHByZXZlbnQgZGV2aWNlcyB3aXRoIG5v
+IEhQSSBzdXBwb3J0LCB1c2luZyB0aGUgQ2FjaGUuDQpQbGVhc2UgY29ycmVjdCBtZSBpZiBJIHdy
+b25nLCBidXQgdGhlIGN1cnJlbnQgZHJpdmVyIGltcGxlbWVudGF0aW9uIGFsbG93cyB0byBzZW5k
+IEhQSSBmb3IgQktPUFMgYW5kIFNhbml0aXplIChvbiB0aW1lb3V0IGVycm9yKSBjb21tYW5kcyBv
+bmx5IC0gc28gd2h5IHdlIHNob3VsZCBsaW1pdCB0aGUgRkxVU0hfQ0FDSEUgY29tbWFuZD8NCg0K
+DQogICAgIAkJZXJyID0gbW1jX3N3aXRjaChjYXJkLCBFWFRfQ1NEX0NNRF9TRVRfTk9STUFMLA0K
+ICAgICAJCQkJRVhUX0NTRF9DQUNIRV9DVFJMLCAxLA0KICAgICAJCQkJY2FyZC0+ZXh0X2NzZC5n
+ZW5lcmljX2NtZDZfdGltZSk7DQogICAgLS0gDQogICAgMS44LjMuMQ0KICAgIA0KICAgIA0KDQo=
