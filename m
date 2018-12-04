@@ -1,51 +1,42 @@
-From: Alex Lemberg <Alex.Lemberg@wdc.com>
-Subject: Re: [PATCH v1 1/1] mmc: core: control EXT_CSD_CACHE_CTRL from device
- tree
-Date: Tue, 4 Dec 2018 16:26:31 +0000
-Message-ID: <99DF0CBE-2879-4869-861D-06097D9E12CB@wdc.com>
-References: <c0e11e0a23fbb6b9867963c4b143fcb1c60b403c.1542744186.git.lsun@mellanox.com>
+From: Stefan Wahren <stefan.wahren@i2se.com>
+Subject: Re: [PATCH V2 7/7] mmc: bcm2835: Properly handle
+ dmaengine_prep_slave_sg
+Date: Tue, 4 Dec 2018 19:20:59 +0100 (CET)
+Message-ID: <1382521023.341849.1543947659588@email.ionos.de>
+References: <1541967839-2847-1-git-send-email-stefan.wahren@i2se.com>
+ <1541967839-2847-8-git-send-email-stefan.wahren@i2se.com>
+ <87y39d5czn.fsf@anholt.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <c0e11e0a23fbb6b9867963c4b143fcb1c60b403c.1542744186.git.lsun@mellanox.com>
-Content-Language: en-US
-Content-ID: <003F68CCAC33FD49B011C33ABD6DE006@namprd04.prod.outlook.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Liming Sun <lsun@mellanox.com>, Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, David Woods <dwoods@mellanox.com>, Shawn Lin <shawn.lin@rock-chips.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <87y39d5czn.fsf@anholt.net>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Florian Fainelli <f.fainelli@gmail.com>, Phil Elwell <phil@raspberrypi.org>, linux-mmc@vger.kernel.org, Eric Anholt <eric@anholt.net>, linux-rpi-kernel@lists.infradead.org, Michal Suchanek <msuchanek@suse.de>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-DQpIaSwNCg0KDQrvu79PbiAxMS8yMC8xOCwgMTA6MDcgUE0sICJsaW51eC1tbWMtb3duZXJAdmdl
-ci5rZXJuZWwub3JnIG9uIGJlaGFsZiBvZiBMaW1pbmcgU3VuIiA8bGludXgtbW1jLW93bmVyQHZn
-ZXIua2VybmVsLm9yZyBvbiBiZWhhbGYgb2YgbHN1bkBtZWxsYW5veC5jb20+IHdyb3RlOg0KDQog
-ICAgQ3VycmVudGx5IHRoZSBFWFRfQ1NEX0NBQ0hFX0NUUkwgcmVnaXN0ZXIgaXMgY29udHJvbGxl
-ZCBieSBBUEkNCiAgICBtbWNfY2FyZF9icm9rZW5faHBpKCksIHdoaWNoIG9ubHkgd29ya3MgZm9y
-IHRoZSBxdWlya3Mgc2V0dGluZ3MuDQogICAgVGhpcyBjb21taXQgZW5oYW5jZXMgaXQgdG8gdXNl
-IGNhcmQtPmV4dF9jc2QuaHBpIGluc3RlYWQuIFRoaXMNCiAgICBmbGFnIHdvcmtzIGZvciBib3Ro
-IHRoZSBxdWlya3MgYW5kIHRoZSBicm9rZW4taHBpIGNvbmZpZ3VyYXRpb24NCiAgICBpbiB0aGUg
-ZGV2aWNlIHRyZWUuDQogICAgDQogICAgU2lnbmVkLW9mZi1ieTogTGltaW5nIFN1biA8bHN1bkBt
-ZWxsYW5veC5jb20+DQogICAgLS0tDQogICAgIGRyaXZlcnMvbW1jL2NvcmUvbW1jLmMgfCAzICst
-LQ0KICAgICAxIGZpbGUgY2hhbmdlZCwgMSBpbnNlcnRpb24oKyksIDIgZGVsZXRpb25zKC0pDQog
-ICAgDQogICAgZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMgYi9kcml2ZXJzL21t
-Yy9jb3JlL21tYy5jDQogICAgaW5kZXggYmMxYmQyYy4uMmYyYjY1YyAxMDA2NDQNCiAgICAtLS0g
-YS9kcml2ZXJzL21tYy9jb3JlL21tYy5jDQogICAgKysrIGIvZHJpdmVycy9tbWMvY29yZS9tbWMu
-Yw0KICAgIEBAIC0xNzkxLDggKzE3OTEsNyBAQCBzdGF0aWMgaW50IG1tY19pbml0X2NhcmQoc3Ry
-dWN0IG1tY19ob3N0ICpob3N0LCB1MzIgb2NyLA0KICAgICAJICogSWYgY2FjaGUgc2l6ZSBpcyBo
-aWdoZXIgdGhhbiAwLCB0aGlzIGluZGljYXRlcw0KICAgICAJICogdGhlIGV4aXN0ZW5jZSBvZiBj
-YWNoZSBhbmQgaXQgY2FuIGJlIHR1cm5lZCBvbi4NCiAgICAgCSAqLw0KICAgIC0JaWYgKCFtbWNf
-Y2FyZF9icm9rZW5faHBpKGNhcmQpICYmDQogICAgLQkgICAgY2FyZC0+ZXh0X2NzZC5jYWNoZV9z
-aXplID4gMCkgew0KICAgICsJaWYgKGNhcmQtPmV4dF9jc2QuaHBpICYmIGNhcmQtPmV4dF9jc2Qu
-Y2FjaGVfc2l6ZSA+IDApIHsNCg0KDQpBbnkgcmVhc29uIGZvciBtYWtpbmcgYSBjb25uZWN0aW9u
-IGJldHdlZW4gSFBJIGFuZCBDYWNoZQ0KaW4gY3VycmVudCBkcml2ZXIgaW1wbGVtZW50YXRpb24/
-DQpCVFcsIEkgbWlzc2VkIGl0IGJlZm9yZSwgYnV0IHRoZSBwcmV2aW91cyBjb21taXQgbWFraW5n
-IHRoaXMgY29ubmVjdGlvbiAtDQppcyBhbHNvIGRvZXNuJ3QgbWFrZSBhbnkgc2Vuc2UuDQpBbHRo
-b3VnaCBieSB0aGUgc3BlYyBGTFVTSF9DQUNIRSBpcyBpbnRlcnJ1cHRpYmxlIGNvbW1hbmQsIEkg
-ZG9uJ3QgdGhpbmsNCndlIHNob3VsZCBwcmV2ZW50IGRldmljZXMgd2l0aCBubyBIUEkgc3VwcG9y
-dCwgdXNpbmcgdGhlIENhY2hlLg0KUGxlYXNlIGNvcnJlY3QgbWUgaWYgSSB3cm9uZywgYnV0IHRo
-ZSBjdXJyZW50IGRyaXZlciBpbXBsZW1lbnRhdGlvbiBhbGxvd3MNCnRvIHNlbmQgSFBJIGZvciBC
-S09QUyBhbmQgU2FuaXRpemUgKG9uIHRpbWVvdXQgZXJyb3IpIGNvbW1hbmRzIG9ubHkgLQ0Kc28g
-d2h5IHdlIHNob3VsZCBsaW1pdCB0aGUgRkxVU0hfQ0FDSEUgY29tbWFuZD8NCg0KDQogICAgIAkJ
-ZXJyID0gbW1jX3N3aXRjaChjYXJkLCBFWFRfQ1NEX0NNRF9TRVRfTk9STUFMLA0KICAgICAJCQkJ
-RVhUX0NTRF9DQUNIRV9DVFJMLCAxLA0KICAgICAJCQkJY2FyZC0+ZXh0X2NzZC5nZW5lcmljX2Nt
-ZDZfdGltZSk7DQogICAgLS0gDQogICAgMS44LjMuMQ0KICAgIA0KICAgIA0KDQo=
+Hi Ulf,
+
+> Eric Anholt <eric@anholt.net> hat am 28. November 2018 um 18:27 geschrieben:
+> 
+> 
+> Stefan Wahren <stefan.wahren@i2se.com> writes:
+> 
+> > In case dmaengine_prep_slave_sg fails we need to call dma_unmap_sg.
+> >
+> > Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
+> 
+> This series is:
+> 
+> Acked-by: Eric Anholt <eric@anholt.net>
+
+should i resend with Eric's Ack?
