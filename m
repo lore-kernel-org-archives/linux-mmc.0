@@ -1,62 +1,51 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v1 1/1] mmc: core: control EXT_CSD_CACHE_CTRL from device tree
-Date: Tue, 4 Dec 2018 15:19:48 +0100
-Message-ID: <CAPDyKFrrxQOz89kW9rXNRFoeVmw7r0=94Yo4-Dq9W8VEdRtLvg@mail.gmail.com>
+From: Alex Lemberg <Alex.Lemberg@wdc.com>
+Subject: Re: [PATCH v1 1/1] mmc: core: control EXT_CSD_CACHE_CTRL from device
+ tree
+Date: Tue, 4 Dec 2018 16:26:31 +0000
+Message-ID: <99DF0CBE-2879-4869-861D-06097D9E12CB@wdc.com>
 References: <c0e11e0a23fbb6b9867963c4b143fcb1c60b403c.1542744186.git.lsun@mellanox.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <c0e11e0a23fbb6b9867963c4b143fcb1c60b403c.1542744186.git.lsun@mellanox.com>
+Content-Language: en-US
+Content-ID: <003F68CCAC33FD49B011C33ABD6DE006@namprd04.prod.outlook.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Liming Sun <lsun@mellanox.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, David Woods <dwoods@mellanox.com>, Shawn Lin <shawn.lin@rock-chips.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Liming Sun <lsun@mellanox.com>, Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, David Woods <dwoods@mellanox.com>, Shawn Lin <shawn.lin@rock-chips.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 20 Nov 2018 at 21:06, Liming Sun <lsun@mellanox.com> wrote:
->
-> Currently the EXT_CSD_CACHE_CTRL register is controlled by API
-> mmc_card_broken_hpi(), which only works for the quirks settings.
-> This commit enhances it to use card->ext_csd.hpi instead. This
-> flag works for both the quirks and the broken-hpi configuration
-> in the device tree.
->
-> Signed-off-by: Liming Sun <lsun@mellanox.com>
-
-I realize that the code around the HPI support needs some additional
-love. Let me post some patches in a day or two, then you can have a
-look a let me know your thoughts.
-
-> ---
->  drivers/mmc/core/mmc.c | 3 +--
->  1 file changed, 1 insertion(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index bc1bd2c..2f2b65c 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1791,8 +1791,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
->          * If cache size is higher than 0, this indicates
->          * the existence of cache and it can be turned on.
->          */
-> -       if (!mmc_card_broken_hpi(card) &&
-> -           card->ext_csd.cache_size > 0) {
-> +       if (card->ext_csd.hpi && card->ext_csd.cache_size > 0) {
-
-Actually, I don't see a reason to why we should limit to use the
-cache, to whether HPI is supported or not.
-
-I guess the thinking behind this, was that we wanted an option to
-abort the cache flush as there is no timeout available for that
-operation. However, I don't see whenever we should allow a cache flush
-to be aborted, as it would introduce a potential option of getting
-corrupt data on the flash.
-
->                 err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->                                 EXT_CSD_CACHE_CTRL, 1,
->                                 card->ext_csd.generic_cmd6_time);
-> --
-> 1.8.3.1
->
-
-Kind regards
-Uffe
+DQpIaSwNCg0KDQrvu79PbiAxMS8yMC8xOCwgMTA6MDcgUE0sICJsaW51eC1tbWMtb3duZXJAdmdl
+ci5rZXJuZWwub3JnIG9uIGJlaGFsZiBvZiBMaW1pbmcgU3VuIiA8bGludXgtbW1jLW93bmVyQHZn
+ZXIua2VybmVsLm9yZyBvbiBiZWhhbGYgb2YgbHN1bkBtZWxsYW5veC5jb20+IHdyb3RlOg0KDQog
+ICAgQ3VycmVudGx5IHRoZSBFWFRfQ1NEX0NBQ0hFX0NUUkwgcmVnaXN0ZXIgaXMgY29udHJvbGxl
+ZCBieSBBUEkNCiAgICBtbWNfY2FyZF9icm9rZW5faHBpKCksIHdoaWNoIG9ubHkgd29ya3MgZm9y
+IHRoZSBxdWlya3Mgc2V0dGluZ3MuDQogICAgVGhpcyBjb21taXQgZW5oYW5jZXMgaXQgdG8gdXNl
+IGNhcmQtPmV4dF9jc2QuaHBpIGluc3RlYWQuIFRoaXMNCiAgICBmbGFnIHdvcmtzIGZvciBib3Ro
+IHRoZSBxdWlya3MgYW5kIHRoZSBicm9rZW4taHBpIGNvbmZpZ3VyYXRpb24NCiAgICBpbiB0aGUg
+ZGV2aWNlIHRyZWUuDQogICAgDQogICAgU2lnbmVkLW9mZi1ieTogTGltaW5nIFN1biA8bHN1bkBt
+ZWxsYW5veC5jb20+DQogICAgLS0tDQogICAgIGRyaXZlcnMvbW1jL2NvcmUvbW1jLmMgfCAzICst
+LQ0KICAgICAxIGZpbGUgY2hhbmdlZCwgMSBpbnNlcnRpb24oKyksIDIgZGVsZXRpb25zKC0pDQog
+ICAgDQogICAgZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMgYi9kcml2ZXJzL21t
+Yy9jb3JlL21tYy5jDQogICAgaW5kZXggYmMxYmQyYy4uMmYyYjY1YyAxMDA2NDQNCiAgICAtLS0g
+YS9kcml2ZXJzL21tYy9jb3JlL21tYy5jDQogICAgKysrIGIvZHJpdmVycy9tbWMvY29yZS9tbWMu
+Yw0KICAgIEBAIC0xNzkxLDggKzE3OTEsNyBAQCBzdGF0aWMgaW50IG1tY19pbml0X2NhcmQoc3Ry
+dWN0IG1tY19ob3N0ICpob3N0LCB1MzIgb2NyLA0KICAgICAJICogSWYgY2FjaGUgc2l6ZSBpcyBo
+aWdoZXIgdGhhbiAwLCB0aGlzIGluZGljYXRlcw0KICAgICAJICogdGhlIGV4aXN0ZW5jZSBvZiBj
+YWNoZSBhbmQgaXQgY2FuIGJlIHR1cm5lZCBvbi4NCiAgICAgCSAqLw0KICAgIC0JaWYgKCFtbWNf
+Y2FyZF9icm9rZW5faHBpKGNhcmQpICYmDQogICAgLQkgICAgY2FyZC0+ZXh0X2NzZC5jYWNoZV9z
+aXplID4gMCkgew0KICAgICsJaWYgKGNhcmQtPmV4dF9jc2QuaHBpICYmIGNhcmQtPmV4dF9jc2Qu
+Y2FjaGVfc2l6ZSA+IDApIHsNCg0KDQpBbnkgcmVhc29uIGZvciBtYWtpbmcgYSBjb25uZWN0aW9u
+IGJldHdlZW4gSFBJIGFuZCBDYWNoZQ0KaW4gY3VycmVudCBkcml2ZXIgaW1wbGVtZW50YXRpb24/
+DQpCVFcsIEkgbWlzc2VkIGl0IGJlZm9yZSwgYnV0IHRoZSBwcmV2aW91cyBjb21taXQgbWFraW5n
+IHRoaXMgY29ubmVjdGlvbiAtDQppcyBhbHNvIGRvZXNuJ3QgbWFrZSBhbnkgc2Vuc2UuDQpBbHRo
+b3VnaCBieSB0aGUgc3BlYyBGTFVTSF9DQUNIRSBpcyBpbnRlcnJ1cHRpYmxlIGNvbW1hbmQsIEkg
+ZG9uJ3QgdGhpbmsNCndlIHNob3VsZCBwcmV2ZW50IGRldmljZXMgd2l0aCBubyBIUEkgc3VwcG9y
+dCwgdXNpbmcgdGhlIENhY2hlLg0KUGxlYXNlIGNvcnJlY3QgbWUgaWYgSSB3cm9uZywgYnV0IHRo
+ZSBjdXJyZW50IGRyaXZlciBpbXBsZW1lbnRhdGlvbiBhbGxvd3MNCnRvIHNlbmQgSFBJIGZvciBC
+S09QUyBhbmQgU2FuaXRpemUgKG9uIHRpbWVvdXQgZXJyb3IpIGNvbW1hbmRzIG9ubHkgLQ0Kc28g
+d2h5IHdlIHNob3VsZCBsaW1pdCB0aGUgRkxVU0hfQ0FDSEUgY29tbWFuZD8NCg0KDQogICAgIAkJ
+ZXJyID0gbW1jX3N3aXRjaChjYXJkLCBFWFRfQ1NEX0NNRF9TRVRfTk9STUFMLA0KICAgICAJCQkJ
+RVhUX0NTRF9DQUNIRV9DVFJMLCAxLA0KICAgICAJCQkJY2FyZC0+ZXh0X2NzZC5nZW5lcmljX2Nt
+ZDZfdGltZSk7DQogICAgLS0gDQogICAgMS44LjMuMQ0KICAgIA0KICAgIA0KDQo=
