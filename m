@@ -1,62 +1,92 @@
-From: Liming Sun <lsun@mellanox.com>
-Subject: RE: [PATCH v1 1/1] mmc: core: control EXT_CSD_CACHE_CTRL from device
- tree
-Date: Tue, 4 Dec 2018 22:19:14 +0000
-Message-ID: <DB6PR05MB32239F8202BF9FA1840C1942A1AF0@DB6PR05MB3223.eurprd05.prod.outlook.com>
-References: <c0e11e0a23fbb6b9867963c4b143fcb1c60b403c.1542744186.git.lsun@mellanox.com>
- <99DF0CBE-2879-4869-861D-06097D9E12CB@wdc.com>
+From: "Du, Alek" <alek.du@intel.com>
+Subject: [PATCH V3] sdhci: fix the timeout check window for clock and reset
+Date: Wed, 5 Dec 2018 11:14:50 +0800
+Message-ID: <20181205111450.300e0478@xdu1-mobl>
+References: <20181130150028.732896d8@xdu1-mobl>
+        <81ba3745-8277-d16e-3aad-48324f51dc8a@intel.com>
+        <20181130221300.4ef2956c@xdu1-mobl>
+        <c580be57-8a49-59f3-791e-c605d892266b@intel.com>
+        <20181201134251.26573207@xdu1-mobl>
+        <20181204090120.63b5f0a4@xdu1-mobl>
+        <229dc468-1155-b81f-9fda-b71402387e3f@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <99DF0CBE-2879-4869-861D-06097D9E12CB@wdc.com>
-Content-Language: en-US
+In-Reply-To: <229dc468-1155-b81f-9fda-b71402387e3f@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Alex Lemberg <Alex.Lemberg@wdc.com>, Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, David Woods <dwoods@mellanox.com>, Shawn Lin <shawn.lin@rock-chips.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-VGhhbmtzIGZvciB0aGUgY29tbWVudC4gWWVzLCBJIGFjdHVhbGx5IGhhdmUgdGhlIHNhbWUgcXVl
-c3Rpb24uDQpUaGUgY2hhbmdlIGhlcmUgaXMgdG8gZml4IGEgY29uZGl0aW9uIGJhc2VkIG9uIHRo
-ZSBleGlzdGluZyBjb2RlLiBQcm9iYWJseSBhIGJldHRlciBmaXggaXMgdG8gZ2V0IHJpZCBvZiB0
-aGUgJ2Nvbm5lY3Rpb24nLi4uDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBB
-bGV4IExlbWJlcmcgPEFsZXguTGVtYmVyZ0B3ZGMuY29tPiANClNlbnQ6IFR1ZXNkYXksIERlY2Vt
-YmVyIDQsIDIwMTggMTE6MjcgQU0NClRvOiBMaW1pbmcgU3VuIDxsc3VuQG1lbGxhbm94LmNvbT47
-IFVsZiBIYW5zc29uIDx1bGYuaGFuc3NvbkBsaW5hcm8ub3JnPjsgSmFlaG9vbiBDaHVuZyA8amg4
-MC5jaHVuZ0BzYW1zdW5nLmNvbT47IERhdmlkIFdvb2RzIDxkd29vZHNAbWVsbGFub3guY29tPjsg
-U2hhd24gTGluIDxzaGF3bi5saW5Acm9jay1jaGlwcy5jb20+DQpDYzogbGludXgtbW1jQHZnZXIu
-a2VybmVsLm9yZzsgbGludXgta2VybmVsQHZnZXIua2VybmVsLm9yZw0KU3ViamVjdDogUmU6IFtQ
-QVRDSCB2MSAxLzFdIG1tYzogY29yZTogY29udHJvbCBFWFRfQ1NEX0NBQ0hFX0NUUkwgZnJvbSBk
-ZXZpY2UgdHJlZQ0KDQoNCkhpLA0KDQoNCu+7v09uIDExLzIwLzE4LCAxMDowNyBQTSwgImxpbnV4
-LW1tYy1vd25lckB2Z2VyLmtlcm5lbC5vcmcgb24gYmVoYWxmIG9mIExpbWluZyBTdW4iIDxsaW51
-eC1tbWMtb3duZXJAdmdlci5rZXJuZWwub3JnIG9uIGJlaGFsZiBvZiBsc3VuQG1lbGxhbm94LmNv
-bT4gd3JvdGU6DQoNCiAgICBDdXJyZW50bHkgdGhlIEVYVF9DU0RfQ0FDSEVfQ1RSTCByZWdpc3Rl
-ciBpcyBjb250cm9sbGVkIGJ5IEFQSQ0KICAgIG1tY19jYXJkX2Jyb2tlbl9ocGkoKSwgd2hpY2gg
-b25seSB3b3JrcyBmb3IgdGhlIHF1aXJrcyBzZXR0aW5ncy4NCiAgICBUaGlzIGNvbW1pdCBlbmhh
-bmNlcyBpdCB0byB1c2UgY2FyZC0+ZXh0X2NzZC5ocGkgaW5zdGVhZC4gVGhpcw0KICAgIGZsYWcg
-d29ya3MgZm9yIGJvdGggdGhlIHF1aXJrcyBhbmQgdGhlIGJyb2tlbi1ocGkgY29uZmlndXJhdGlv
-bg0KICAgIGluIHRoZSBkZXZpY2UgdHJlZS4NCiAgICANCiAgICBTaWduZWQtb2ZmLWJ5OiBMaW1p
-bmcgU3VuIDxsc3VuQG1lbGxhbm94LmNvbT4NCiAgICAtLS0NCiAgICAgZHJpdmVycy9tbWMvY29y
-ZS9tbWMuYyB8IDMgKy0tDQogICAgIDEgZmlsZSBjaGFuZ2VkLCAxIGluc2VydGlvbigrKSwgMiBk
-ZWxldGlvbnMoLSkNCiAgICANCiAgICBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvY29yZS9tbWMu
-YyBiL2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMNCiAgICBpbmRleCBiYzFiZDJjLi4yZjJiNjVjIDEw
-MDY0NA0KICAgIC0tLSBhL2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMNCiAgICArKysgYi9kcml2ZXJz
-L21tYy9jb3JlL21tYy5jDQogICAgQEAgLTE3OTEsOCArMTc5MSw3IEBAIHN0YXRpYyBpbnQgbW1j
-X2luaXRfY2FyZChzdHJ1Y3QgbW1jX2hvc3QgKmhvc3QsIHUzMiBvY3IsDQogICAgIAkgKiBJZiBj
-YWNoZSBzaXplIGlzIGhpZ2hlciB0aGFuIDAsIHRoaXMgaW5kaWNhdGVzDQogICAgIAkgKiB0aGUg
-ZXhpc3RlbmNlIG9mIGNhY2hlIGFuZCBpdCBjYW4gYmUgdHVybmVkIG9uLg0KICAgICAJICovDQog
-ICAgLQlpZiAoIW1tY19jYXJkX2Jyb2tlbl9ocGkoY2FyZCkgJiYNCiAgICAtCSAgICBjYXJkLT5l
-eHRfY3NkLmNhY2hlX3NpemUgPiAwKSB7DQogICAgKwlpZiAoY2FyZC0+ZXh0X2NzZC5ocGkgJiYg
-Y2FyZC0+ZXh0X2NzZC5jYWNoZV9zaXplID4gMCkgew0KDQoNCkFueSByZWFzb24gZm9yIG1ha2lu
-ZyBhIGNvbm5lY3Rpb24gYmV0d2VlbiBIUEkgYW5kIENhY2hlIGluIGN1cnJlbnQgZHJpdmVyIGlt
-cGxlbWVudGF0aW9uPw0KQlRXLCBJIG1pc3NlZCBpdCBiZWZvcmUsIGJ1dCB0aGUgcHJldmlvdXMg
-Y29tbWl0IG1ha2luZyB0aGlzIGNvbm5lY3Rpb24gLSBpcyBhbHNvIGRvZXNuJ3QgbWFrZSBhbnkg
-c2Vuc2UuDQpBbHRob3VnaCBieSB0aGUgc3BlYyBGTFVTSF9DQUNIRSBpcyBpbnRlcnJ1cHRpYmxl
-IGNvbW1hbmQsIEkgZG9uJ3QgdGhpbmsgd2Ugc2hvdWxkIHByZXZlbnQgZGV2aWNlcyB3aXRoIG5v
-IEhQSSBzdXBwb3J0LCB1c2luZyB0aGUgQ2FjaGUuDQpQbGVhc2UgY29ycmVjdCBtZSBpZiBJIHdy
-b25nLCBidXQgdGhlIGN1cnJlbnQgZHJpdmVyIGltcGxlbWVudGF0aW9uIGFsbG93cyB0byBzZW5k
-IEhQSSBmb3IgQktPUFMgYW5kIFNhbml0aXplIChvbiB0aW1lb3V0IGVycm9yKSBjb21tYW5kcyBv
-bmx5IC0gc28gd2h5IHdlIHNob3VsZCBsaW1pdCB0aGUgRkxVU0hfQ0FDSEUgY29tbWFuZD8NCg0K
-DQogICAgIAkJZXJyID0gbW1jX3N3aXRjaChjYXJkLCBFWFRfQ1NEX0NNRF9TRVRfTk9STUFMLA0K
-ICAgICAJCQkJRVhUX0NTRF9DQUNIRV9DVFJMLCAxLA0KICAgICAJCQkJY2FyZC0+ZXh0X2NzZC5n
-ZW5lcmljX2NtZDZfdGltZSk7DQogICAgLS0gDQogICAgMS44LjMuMQ0KICAgIA0KICAgIA0KDQo=
+>From bcb38577961823b4f8f2cc0aec7dd450a81b6ddc Mon Sep 17 00:00:00 2001
+From: Alek Du <alek.du@intel.com>
+Date: Fri, 30 Nov 2018 14:02:28 +0800
+Subject: [PATCH] sdhci: fix the timeout check window for clock and reset
+
+We observed some premature timeouts on a virtualization platform, the log
+is like this:
+
+case 1:
+[159525.255629] mmc1: Internal clock never stabilised.
+[159525.255818] mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
+[159525.256049] mmc1: sdhci: Sys addr:  0x00000000 | Version:  0x00001002
+...
+[159525.257205] mmc1: sdhci: Wake-up:   0x00000000 | Clock:    0x0000fa03
+>From the clock control register dump, we are pretty sure the clock was
+stablized.
+
+case 2:
+[  914.550127] mmc1: Reset 0x2 never completed.
+[  914.550321] mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
+[  914.550608] mmc1: sdhci: Sys addr:  0x00000010 | Version:  0x00001002
+
+After checking the sdhci code, we found the timeout check actually has a
+little window that the CPU can be scheduled out and when it comes back,
+the original time set or check is not valid.
+
+Fixes: 5a436cc0af62 ("mmc: sdhci: Optimize delay loops")
+Signed-off-by: Alek Du <alek.du@intel.com>
+Cc: stable@vger.kernel.org      # v4.12+
+---
+ drivers/mmc/host/sdhci.c | 18 +++++++++++++-----
+ 1 file changed, 13 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 99bdae53fa2e..451b08a818a9 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -216,8 +216,12 @@ void sdhci_reset(struct sdhci_host *host, u8 mask)
+ 	timeout = ktime_add_ms(ktime_get(), 100);
+ 
+ 	/* hw clears the bit when it's done */
+-	while (sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask) {
+-		if (ktime_after(ktime_get(), timeout)) {
++	while (1) {
++		bool timedout = ktime_after(ktime_get(), timeout);
++
++		if (!(sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask))
++			break;
++		if (timedout) {
+ 			pr_err("%s: Reset 0x%x never completed.\n",
+ 				mmc_hostname(host->mmc), (int)mask);
+ 			sdhci_dumpregs(host);
+@@ -1608,9 +1612,13 @@ void sdhci_enable_clk(struct sdhci_host *host, u16 clk)
+ 
+ 	/* Wait max 20 ms */
+ 	timeout = ktime_add_ms(ktime_get(), 20);
+-	while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
+-		& SDHCI_CLOCK_INT_STABLE)) {
+-		if (ktime_after(ktime_get(), timeout)) {
++	while (1) {
++		bool timedout = ktime_after(ktime_get(), timeout);
++
++		clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
++		if (clk & SDHCI_CLOCK_INT_STABLE)
++			break;
++		if (timedout) {
+ 			pr_err("%s: Internal clock never stabilised.\n",
+ 			       mmc_hostname(host->mmc));
+ 			sdhci_dumpregs(host);
+-- 
+2.17.1
