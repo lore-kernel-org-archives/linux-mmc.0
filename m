@@ -1,55 +1,67 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH V2 0/7] mmc: Several fixes for bcm2835 driver
-Date: Wed, 5 Dec 2018 15:23:05 +0100
-Message-ID: <CAPDyKFqM6RB58n-ZdTipDQZ6v9rQe89ndrSNdhd7OtRkcSozww@mail.gmail.com>
-References: <1541967839-2847-1-git-send-email-stefan.wahren@i2se.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V2 1/2] mmc: mmci: send stop command if sbc error issue
+Date: Wed, 5 Dec 2018 15:23:33 +0100
+Message-ID: <CAPDyKFp06tiMVgKyKLLKKwGtDPkAKuGWo=NaS+j=3oWGq-UV_A@mail.gmail.com>
+References: <1541583041-17461-1-git-send-email-ludovic.Barre@st.com>
+ <1541583041-17461-2-git-send-email-ludovic.Barre@st.com> <CAPDyKFpLTEwrBagJrd98Zyrd_pwJa9Zkgsi+geZainQV+OgpOQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <1541967839-2847-1-git-send-email-stefan.wahren-eS4NqCHxEME@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rpi-kernel>,
- <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rpi-kernel/>
-List-Post: <mailto:linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rpi-kernel>,
- <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "linux-rpi-kernel" <linux-rpi-kernel-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>
-Cc: "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, msuchanek-l3A5Bk7waGM@public.gmane.org, Linux ARM <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFpLTEwrBagJrd98Zyrd_pwJa9Zkgsi+geZainQV+OgpOQ@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ludovic Barre <ludovic.Barre@st.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-stm32@st-md-mailman.stormreply.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Sun, 11 Nov 2018 at 21:24, Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org> wrote:
+On Tue, 20 Nov 2018 at 10:42, Ulf Hansson <ulf.hansson@linaro.org> wrote:
 >
-> This patch series fixes several issues which has been discovered after
-> submission.
+> On 7 November 2018 at 10:30, Ludovic Barre <ludovic.Barre@st.com> wrote:
+> > From: Ludovic Barre <ludovic.barre@st.com>
+> >
+> > Refer to "4.15 set block count command" of sd specification:
+> > Host needs to issue CMD12 if any error is detected in
+> > the CMD18 and CMD25 operations.
+> >
+> > In sbc case, the data->stop is fill by framework.
+> >
+> > Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
+> > ---
+> >  drivers/mmc/host/mmci.c | 5 ++---
+> >  1 file changed, 2 insertions(+), 3 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> > index 82bab35..13fa640 100644
+> > --- a/drivers/mmc/host/mmci.c
+> > +++ b/drivers/mmc/host/mmci.c
+> > @@ -1190,11 +1190,10 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
+> >                         /* The error clause is handled above, success! */
+> >                         data->bytes_xfered = data->blksz * data->blocks;
+> >
+> > -               if (!data->stop || host->mrq->sbc) {
+> > +               if (!data->stop || (host->mrq->sbc && !data->error))
+> >                         mmci_request_end(host, data->mrq);
+> > -               } else {
+> > +               else
+> >                         mmci_start_command(host, data->stop, 0);
 >
-> Changes in V2:
-> - add my own signed-off-by to patches #1 and #2
+> This looks correct to me!
 >
-> Michal Suchanek (1):
->   mmc: bcm2835: reset host on timeout
->
-> Phil Elwell (1):
->   mmc: bcm2835: Recover from MMC_SEND_EXT_CSD
->
-> Stefan Wahren (5):
->   mmc: bcm2835: Release DMA channel on driver unload
->   mmc: bcm2835: Avoid possible races on data requests
->   mmc: bcm2835: Terminate timeout work synchronously
->   mmc: bcm2835: Refactor dma_map_sg handling
->   mmc: bcm2835: Properly handle dmaengine_prep_slave_sg
->
->  drivers/mmc/host/bcm2835.c | 58 ++++++++++++++++++++++++++++++----------------
->  1 file changed, 38 insertions(+), 20 deletions(-)
->
-> --
-> 2.7.4
->
+> Although, just wanted to double check that you tested this for a case
+> where we have host->mrq->sbc set and got an error in data->error? I
+> guess it can be tricky, so I was thinking of manually trying to
+> instruct the code, to set an error in data->error, at some point to
+> trigger this code. That would at least give us some confidence that it
+> works as expected.
 
-Applied for next, thanks!
+I did some manual tests to trigger the error path. As far as I can
+tell, it works as expected and I observes that the core is able to
+recover and re-send the request.
+
+[...]
+
+So, I have added my tested-by tag and applied this for next. Thanks!
+
+In regards to patch2/2 I am awaiting your update.
 
 Kind regards
 Uffe
