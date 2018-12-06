@@ -1,7 +1,7 @@
 From: Jerome Brunet <jbrunet@baylibre.com>
-Subject: [RFT PATCH 4/4] mmc: meson-gx: add signal resampling
-Date: Thu,  6 Dec 2018 16:18:28 +0100
-Message-ID: <20181206151828.24417-5-jbrunet@baylibre.com>
+Subject: [PATCH 1/4] mmc: meson-gx: make sure the descriptor is stopped on errors
+Date: Thu,  6 Dec 2018 16:18:25 +0100
+Message-ID: <20181206151828.24417-2-jbrunet@baylibre.com>
 References: <20181206151828.24417-1-jbrunet@baylibre.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -12,71 +12,172 @@ To: Ulf Hansson <ulf.hansson@linaro.org>, Carlo Caione <carlo@caione.org>, Kevin
 Cc: Jerome Brunet <jbrunet@baylibre.com>, linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-With some eMMC devices, there is still issues with the new phase
-settings. Enabling signal resampling seems to solve the problem
-for these.
+On errors, if we don't stop the descriptor chain, it may continue to
+run and raise IRQ after we have called mmc_request_done(). This is bad
+because we won't be able to get cmd anymore and properly deal with the
+IRQ.
 
+This patch makes sure the descriptor chain is stopped before
+calling mmc_request_done()
+
+Fixes: 79ed05e329c3 ("mmc: meson-gx: add support for descriptor chain mode")
 Signed-off-by: Jerome Brunet <jbrunet@baylibre.com>
 ---
- drivers/mmc/host/meson-gx-mmc.c | 12 +++++++++++-
- 1 file changed, 11 insertions(+), 1 deletion(-)
+ drivers/mmc/host/meson-gx-mmc.c | 73 ++++++++++++++++++++++++++++-----
+ 1 file changed, 63 insertions(+), 10 deletions(-)
 
 diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index 837bed0b8c01..c2690c1a50ff 100644
+index c201c378537e..fcb5d693c897 100644
 --- a/drivers/mmc/host/meson-gx-mmc.c
 +++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -66,6 +66,9 @@
+@@ -21,6 +21,7 @@
+ #include <linux/kernel.h>
+ #include <linux/module.h>
+ #include <linux/init.h>
++#include <linux/delay.h>
+ #include <linux/device.h>
+ #include <linux/of_device.h>
+ #include <linux/platform_device.h>
+@@ -90,9 +91,11 @@
+ #define   CFG_CLK_ALWAYS_ON BIT(18)
+ #define   CFG_CHK_DS BIT(20)
+ #define   CFG_AUTO_CLK BIT(23)
++#define   CFG_ERR_ABORT BIT(27)
  
- #define SD_EMMC_DELAY 0x4
- #define SD_EMMC_ADJUST 0x8
-+#define   ADJUST_ADJ_DELAY_MASK GENMASK(21, 16)
-+#define   ADJUST_DS_EN BIT(15)
-+#define   ADJUST_ADJ_EN BIT(13)
+ #define SD_EMMC_STATUS 0x48
+ #define   STATUS_BUSY BIT(31)
++#define   STATUS_DESC_BUSY BIT(30)
+ #define   STATUS_DATI GENMASK(23, 16)
  
- #define SD_EMMC_DELAY1 0x4
- #define SD_EMMC_DELAY2 0x8
-@@ -143,6 +146,7 @@ struct meson_mmc_data {
- 	unsigned int tx_delay_mask;
- 	unsigned int rx_delay_mask;
- 	unsigned int always_on;
-+	unsigned int adjust;
- };
+ #define SD_EMMC_IRQ_EN 0x4c
+@@ -928,6 +931,7 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
  
- struct sd_emmc_desc {
-@@ -1162,7 +1166,7 @@ static int meson_mmc_get_cd(struct mmc_host *mmc)
+ 	cmd_cfg |= FIELD_PREP(CMD_CFG_CMD_INDEX_MASK, cmd->opcode);
+ 	cmd_cfg |= CMD_CFG_OWNER;  /* owned by CPU */
++	cmd_cfg |= CMD_CFG_ERROR; /* stop in case of error */
  
- static void meson_mmc_cfg_init(struct meson_host *host)
- {
--	u32 cfg = 0;
-+	u32 cfg = 0, adj = 0;
+ 	meson_mmc_set_response_bits(cmd, &cmd_cfg);
  
- 	cfg |= FIELD_PREP(CFG_RESP_TIMEOUT_MASK,
- 			  ilog2(SD_EMMC_CFG_RESP_TIMEOUT));
-@@ -1173,6 +1177,10 @@ static void meson_mmc_cfg_init(struct meson_host *host)
- 	cfg |= CFG_ERR_ABORT;
+@@ -1022,6 +1026,17 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
+ 	u32 irq_en, status, raw_status;
+ 	irqreturn_t ret = IRQ_NONE;
  
- 	writel(cfg, host->regs + SD_EMMC_CFG);
++	irq_en = readl(host->regs + SD_EMMC_IRQ_EN);
++	raw_status = readl(host->regs + SD_EMMC_STATUS);
++	status = raw_status & irq_en;
 +
-+	/* enable signal resampling w/o delay */
-+	adj = ADJUST_ADJ_EN;
-+	writel(adj, host->regs + host->data->adjust);
++	if (!status) {
++		dev_dbg(host->dev,
++			"Unexpected IRQ! irq_en 0x%08x - status 0x%08x\n",
++			 irq_en, raw_status);
++		return IRQ_NONE;
++	}
++
+ 	if (WARN_ON(!host) || WARN_ON(!host->cmd))
+ 		return IRQ_NONE;
+ 
+@@ -1029,22 +1044,18 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
+ 
+ 	cmd = host->cmd;
+ 	data = cmd->data;
+-	irq_en = readl(host->regs + SD_EMMC_IRQ_EN);
+-	raw_status = readl(host->regs + SD_EMMC_STATUS);
+-	status = raw_status & irq_en;
+-
+ 	cmd->error = 0;
+ 	if (status & IRQ_CRC_ERR) {
+ 		dev_dbg(host->dev, "CRC Error - status 0x%08x\n", status);
+ 		cmd->error = -EILSEQ;
+-		ret = IRQ_HANDLED;
++		ret = IRQ_WAKE_THREAD;
+ 		goto out;
+ 	}
+ 
+ 	if (status & IRQ_TIMEOUTS) {
+ 		dev_dbg(host->dev, "Timeout - status 0x%08x\n", status);
+ 		cmd->error = -ETIMEDOUT;
+-		ret = IRQ_HANDLED;
++		ret = IRQ_WAKE_THREAD;
+ 		goto out;
+ 	}
+ 
+@@ -1069,17 +1080,49 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
+ 	/* ack all enabled interrupts */
+ 	writel(irq_en, host->regs + SD_EMMC_STATUS);
+ 
++	if (cmd->error) {
++		/* Stop desc in case of errors */
++		u32 start = readl(host->regs + SD_EMMC_START);
++
++		start &= ~START_DESC_BUSY;
++		writel(start, host->regs + SD_EMMC_START);
++	}
++
+ 	if (ret == IRQ_HANDLED)
+ 		meson_mmc_request_done(host->mmc, cmd->mrq);
+-	else if (ret == IRQ_NONE)
+-		dev_warn(host->dev,
+-			 "Unexpected IRQ! status=0x%08x, irq_en=0x%08x\n",
+-			 raw_status, irq_en);
+ 
+ 	spin_unlock(&host->lock);
+ 	return ret;
  }
  
- static int meson_mmc_card_busy(struct mmc_host *mmc)
-@@ -1396,12 +1404,14 @@ static const struct meson_mmc_data meson_gx_data = {
- 	.tx_delay_mask	= CLK_V2_TX_DELAY_MASK,
- 	.rx_delay_mask	= CLK_V2_RX_DELAY_MASK,
- 	.always_on	= CLK_V2_ALWAYS_ON,
-+	.adjust		= SD_EMMC_ADJUST,
- };
++static int meson_mmc_wait_desc_stop(struct meson_host *host)
++{
++	int loop;
++	u32 status;
++
++	/*
++	 * It may sometimes take a while for it to actually halt. Here, we
++	 * are giving it 5ms to comply
++	 *
++	 * If we don't confirm the descriptor is stopped, it might raise new
++	 * IRQs after we have called mmc_request_done() which is bad.
++	 */
++	for (loop = 50; loop; loop--) {
++		status = readl(host->regs + SD_EMMC_STATUS);
++		if (status & (STATUS_BUSY | STATUS_DESC_BUSY))
++			udelay(100);
++		else
++			break;
++	}
++
++	if (status & (STATUS_BUSY | STATUS_DESC_BUSY)) {
++		dev_err(host->dev, "Timed out waiting for host to stop\n");
++		return -ETIMEDOUT;
++	}
++
++	return 0;
++}
++
+ static irqreturn_t meson_mmc_irq_thread(int irq, void *dev_id)
+ {
+ 	struct meson_host *host = dev_id;
+@@ -1090,6 +1133,13 @@ static irqreturn_t meson_mmc_irq_thread(int irq, void *dev_id)
+ 	if (WARN_ON(!cmd))
+ 		return IRQ_NONE;
  
- static const struct meson_mmc_data meson_axg_data = {
- 	.tx_delay_mask	= CLK_V3_TX_DELAY_MASK,
- 	.rx_delay_mask	= CLK_V3_RX_DELAY_MASK,
- 	.always_on	= CLK_V3_ALWAYS_ON,
-+	.adjust		= SD_EMMC_V3_ADJUST,
- };
++	if (cmd->error) {
++		meson_mmc_wait_desc_stop(host);
++		meson_mmc_request_done(host->mmc, cmd->mrq);
++
++		return IRQ_HANDLED;
++	}
++
+ 	data = cmd->data;
+ 	if (meson_mmc_bounce_buf_read(data)) {
+ 		xfer_bytes = data->blksz * data->blocks;
+@@ -1130,6 +1180,9 @@ static void meson_mmc_cfg_init(struct meson_host *host)
+ 	cfg |= FIELD_PREP(CFG_RC_CC_MASK, ilog2(SD_EMMC_CFG_CMD_GAP));
+ 	cfg |= FIELD_PREP(CFG_BLK_LEN_MASK, ilog2(SD_EMMC_CFG_BLK_SIZE));
  
- static const struct of_device_id meson_mmc_of_match[] = {
++	/* abort chain on R/W errors */
++	cfg |= CFG_ERR_ABORT;
++
+ 	writel(cfg, host->regs + SD_EMMC_CFG);
+ }
+ 
 -- 
 2.19.2
