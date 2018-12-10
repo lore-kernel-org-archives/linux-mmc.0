@@ -1,137 +1,66 @@
-From: Jjian Zhou <jjian.zhou@mediatek.com>
-Subject: [PATCH v3] mmc: mediatek: Add MMC_CAP_SDIO_IRQ support
-Date: Mon, 10 Dec 2018 19:43:53 +0800
-Message-ID: <1544442233-20303-1-git-send-email-jjian.zhou@mediatek.com>
+From: Faiz Abbas <faiz_abbas@ti.com>
+Subject: Re: [PATCH 3/3] mmc: sdhci_am654: Add Initial Support for AM654 SDHCI
+ driver
+Date: Mon, 10 Dec 2018 17:34:20 +0530
+Message-ID: <94794998-2c22-1b7f-946c-7887116ee55b@ti.com>
+References: <20181129161513.31734-1-faiz_abbas@ti.com>
+ <20181129161513.31734-4-faiz_abbas@ti.com>
+ <2618ec91-09d1-26f3-361e-34a073b1e5ea@intel.com>
+ <dfe6c97a-6383-c697-88e5-279f6ca8136e@ti.com>
+ <970c3531-5d7d-fe94-55c1-13603735b43a@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <970c3531-5d7d-fe94-55c1-13603735b43a@intel.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Matthias Brugger <matthias.bgg@gmail.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Ryder Lee <ryder.lee@mediatek.com>, jjian zhou <jjian.zhou@mediatek.com>, Sean Wang <sean.wang@mediatek.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, srv_heupstream@mediatek.com, linux-kernel@vger.kernel.org, Yong Mao <yong.mao@mediatek.com>
+To: Adrian Hunter <adrian.hunter@intel.com>, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, michal.simek@xilinx.com, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-From: jjian zhou <jjian.zhou@mediatek.com>
+Hi Adrian,
 
-This patch enables support SDIO IRQs. It enables
-MMC_CAP_SDIO_IRQ & MMC_CAP2_SDIO_IRQ_NOTHREAD
-and implement the ->ack_sdio_irq callback.
+On 07/12/18 7:02 PM, Adrian Hunter wrote:
+> On 5/12/18 5:07 PM, Faiz Abbas wrote:
+>> Hi Adrian,
+>>
+>> On 05/12/18 7:12 PM, Adrian Hunter wrote:
+>>> On 29/11/18 6:15 PM, Faiz Abbas wrote:
+>>>> The host controllers on TI's AM654 SOCs are not compatible with
+>>>> the phy and consumer model of the sdhci-of-arasan driver. It turns out
+>>>> that for optimal operation at higher speeds, a special tuning procedure
+>>>> needs to be implemented which involves configuration of platform
+>>>> specific phy registers.
+>>>>
+>>>> Therefore, branch out to a new sdhci_am654 driver and add the phy
+>>>> register space with all phy configurations to it. Populate AM654
+>>>> specific callbacks to sdhci_ops and add SDHCI_QUIRKS wherever
+>>>> applicable.
+>>>>
+>>>> Only add support for upto High Speed for SD card and upto DDR52 speed
+>>>> mode for eMMC. Higher speeds will be added in subsequent patches.
+>>>>
+...
+>>>> +
+>>>> +	sdhci_am654->clk_ahb = devm_clk_get(dev, "clk_ahb");
+>>>> +	if (IS_ERR(sdhci_am654->clk_ahb)) {
+>>>> +		dev_err(dev, "clk_ahb clock not found.\n");
+>>>> +		ret = PTR_ERR(sdhci_am654->clk_ahb);
+>>>> +		goto err_pltfm_free;
+>>>> +	}
+>>>
+>>> Did you intend not to enable clks?
+>>
+>> Yes. Clocks get enabled as a part of pm_runtime calls.
+> 
+> Ok, but that could use an explanatory comment.  Also why get a reference to
+> clk_ahb if that reference is never used?
+> 
 
-Signed-off-by: Jjian Zhou <jjian.zhou@mediatek.com>
-Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
-Signed-off-by: Yong Mao <yong.mao@mediatek.com>
----
- drivers/mmc/host/mtk-sd.c | 49 ++++++++++++++++++++++++++++++++++++++++++++---
- 1 file changed, 46 insertions(+), 3 deletions(-)
+You're right. It was being used in sdhci-of-arasan because other users
+needed to call enable() and disable(). I missed out on removing it when
+porting over. Will remove it and add the comment.
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 6334cc7..40a1848 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -1114,6 +1114,7 @@ static void msdc_start_command(struct msdc_host *host,
- 		struct mmc_request *mrq, struct mmc_command *cmd)
- {
- 	u32 rawcmd;
-+	unsigned long flags;
-
- 	WARN_ON(host->cmd);
- 	host->cmd = cmd;
-@@ -1131,7 +1132,10 @@ static void msdc_start_command(struct msdc_host *host,
- 	cmd->error = 0;
- 	rawcmd = msdc_cmd_prepare_raw_cmd(host, mrq, cmd);
-
-+	spin_lock_irqsave(&host->lock, flags);
- 	sdr_set_bits(host->base + MSDC_INTEN, cmd_ints_mask);
-+	spin_unlock_irqrestore(&host->lock, flags);
-+
- 	writel(cmd->arg, host->base + SDC_ARG);
- 	writel(rawcmd, host->base + SDC_CMD);
- }
-@@ -1351,6 +1355,27 @@ static void msdc_request_timeout(struct work_struct *work)
- 	}
- }
-
-+static void msdc_enable_sdio_irq(struct mmc_host *mmc, int enb)
-+{
-+	unsigned long flags;
-+	struct msdc_host *host = mmc_priv(mmc);
-+
-+	if (enb)
-+		pm_runtime_get_sync(host->dev);
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+	if (enb)
-+		sdr_set_bits(host->base + MSDC_INTEN, MSDC_INTEN_SDIOIRQ);
-+	else
-+		sdr_clr_bits(host->base + MSDC_INTEN, MSDC_INTEN_SDIOIRQ);
-+	spin_unlock_irqrestore(&host->lock, flags);
-+
-+	if (!enb) {
-+		pm_runtime_mark_last_busy(host->dev);
-+		pm_runtime_put_autosuspend(host->dev);
-+	}
-+}
-+
- static irqreturn_t msdc_irq(int irq, void *dev_id)
- {
- 	struct msdc_host *host = (struct msdc_host *) dev_id;
-@@ -1373,7 +1398,12 @@ static irqreturn_t msdc_irq(int irq, void *dev_id)
- 		data = host->data;
- 		spin_unlock_irqrestore(&host->lock, flags);
-
--		if (!(events & event_mask))
-+		if ((events & event_mask) & MSDC_INT_SDIOIRQ) {
-+			msdc_enable_sdio_irq(host->mmc, 0);
-+			sdio_signal_irq(host->mmc);
-+		}
-+
-+		if (!(events & (event_mask & ~MSDC_INT_SDIOIRQ)))
- 			break;
-
- 		if (!mrq) {
-@@ -1493,8 +1523,11 @@ static void msdc_init_hw(struct msdc_host *host)
- 	 */
- 	sdr_set_bits(host->base + SDC_CFG, SDC_CFG_SDIO);
-
--	/* disable detect SDIO device interrupt function */
--	sdr_clr_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
-+	/* Config SDIO device detect interrupt function */
-+	if (host->mmc->caps & MMC_CAP_SDIO_IRQ)
-+		sdr_set_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
-+	else
-+		sdr_clr_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
-
- 	/* Configure to default data timeout */
- 	sdr_set_field(host->base + SDC_CFG, SDC_CFG_DTOC, 3);
-@@ -2013,6 +2046,11 @@ static void msdc_hw_reset(struct mmc_host *mmc)
- 	sdr_clr_bits(host->base + EMMC_IOCON, 1);
- }
-
-+static void msdc_ack_sdio_irq(struct mmc_host *mmc)
-+{
-+	msdc_enable_sdio_irq(mmc, 1);
-+}
-+
- static const struct mmc_host_ops mt_msdc_ops = {
- 	.post_req = msdc_post_req,
- 	.pre_req = msdc_pre_req,
-@@ -2020,6 +2058,8 @@ static void msdc_hw_reset(struct mmc_host *mmc)
- 	.set_ios = msdc_ops_set_ios,
- 	.get_ro = mmc_gpio_get_ro,
- 	.get_cd = mmc_gpio_get_cd,
-+	.enable_sdio_irq = msdc_enable_sdio_irq,
-+	.ack_sdio_irq = msdc_ack_sdio_irq,
- 	.start_signal_voltage_switch = msdc_ops_switch_volt,
- 	.card_busy = msdc_card_busy,
- 	.execute_tuning = msdc_execute_tuning,
-@@ -2147,6 +2187,9 @@ static int msdc_drv_probe(struct platform_device *pdev)
- 	else
- 		mmc->f_min = DIV_ROUND_UP(host->src_clk_freq, 4 * 4095);
-
-+	if (mmc->caps & MMC_CAP_SDIO_IRQ)
-+		mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;
-+
- 	mmc->caps |= MMC_CAP_ERASE | MMC_CAP_CMD23;
- 	/* MMC core transfer sizes tunable parameters */
- 	mmc->max_segs = MAX_BD_NUM;
---
-1.9.1
+Thanks,
+Faiz
