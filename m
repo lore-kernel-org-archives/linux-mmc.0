@@ -1,116 +1,126 @@
-From: Ludovic BARRE <ludovic.barre@st.com>
-Subject: Re: [PATCH V3 1/2] mmc: mmci: add variant property to set command
- stop bit
-Date: Tue, 11 Dec 2018 10:53:04 +0100
-Message-ID: <35f22c1a-888d-5abd-7ffe-ecf47a74b69a@st.com>
-References: <1544109212-12621-1-git-send-email-ludovic.Barre@st.com>
- <1544109212-12621-2-git-send-email-ludovic.Barre@st.com>
- <CAPDyKFq7TZMKWMqmoDR0yfr2N2cf2nr4-BuEs5DPgJSGy-nvAA@mail.gmail.com>
+From: Faiz Abbas <faiz_abbas@ti.com>
+Subject: Re: [PATCH] mmc: sdhci-omap: Workaround errata regarding SDR104/HS200
+ tuning failures (i929)
+Date: Tue, 11 Dec 2018 17:30:43 +0530
+Message-ID: <4d893ae8-f0a2-2e67-8100-b934340f4e4a@ti.com>
+References: <20181129190503.6040-1-faiz_abbas@ti.com>
+ <cb1e8e88-4c9d-741d-79cd-57b03c5e0808@ti.com>
+ <c4704766-7a58-8aa4-6bc0-b9373b15096c@ti.com>
+ <CAPDyKFqMW+tMaVsS_c=kPztZRjX97Nzr2W0egvDkyzkpWckHRA@mail.gmail.com>
+ <d1ae4e93-4b17-9574-00b1-bfa268cb7574@ti.com>
+ <CAPDyKFrLzEfGKkC3K9znjJUKO1MUjdBpaL0HEtHYOzbAgNO-fg@mail.gmail.com>
+ <e19a5c39-028e-8dda-aa0a-3968a213cd47@ti.com>
+ <CAPDyKFoO7tn1Xdu9ROqRVjZ1SZnzXcxduB97OQtmz2d2E_epUQ@mail.gmail.com>
+ <218be2af-8f81-47b4-f782-b774e10642c1@ti.com>
+ <CAPDyKFou7hSELknyOV-eP+6ROJozwc-7vPBy2Rkb7hSdL37Pqg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAPDyKFq7TZMKWMqmoDR0yfr2N2cf2nr4-BuEs5DPgJSGy-nvAA@mail.gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFou7hSELknyOV-eP+6ROJozwc-7vPBy2Rkb7hSdL37Pqg@mail.gmail.com>
 Content-Language: en-US
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: DTML <devicetree@vger.kernel.org>, Alexandre Torgue <alexandre.torgue@st.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, linux-stm32@st-md-mailman.stormreply.com, Linux ARM <linux-arm-kernel@lists.infradead.org>
+Cc: Kishon <kishon@ti.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
+Hi,
 
-
-On 12/11/18 10:47 AM, Ulf Hansson wrote:
-> On Thu, 6 Dec 2018 at 16:13, Ludovic Barre <ludovic.Barre@st.com> wrote:
+On 10/12/18 10:26 PM, Ulf Hansson wrote:
+> On Mon, 10 Dec 2018 at 17:43, Faiz Abbas <faiz_abbas@ti.com> wrote:
 >>
->> From: Ludovic Barre <ludovic.barre@st.com>
+>> Hi,
 >>
->> On cmd12 (STOP_TRANSMISSION), STM32 sdmmc variant needs to set
->> cmdstop bit in command register. The CPSM ("Command Path State Machine")
->> treats the command as a Stop Transmission command and signals
->> abort to the DPSM ("Data Path State Machine").
+>> On 10/12/18 8:55 PM, Ulf Hansson wrote:
+>>> On Mon, 10 Dec 2018 at 15:04, Faiz Abbas <faiz_abbas@ti.com> wrote:
+>>>>
+>>>> Hi,
+>>>>
+>>>> On 10/12/18 7:15 PM, Ulf Hansson wrote:
+>>>>> On Mon, 10 Dec 2018 at 14:23, Faiz Abbas <faiz_abbas@ti.com> wrote:
+>>>>>>
+>>>>>> Hi Uffe,
+>>>>>>
+>>>>>> On 05/12/18 7:20 PM, Ulf Hansson wrote:
+>>>>>>> On Fri, 30 Nov 2018 at 06:53, Faiz Abbas <faiz_abbas@ti.com> wrote:
+>>>>>>>>
+>>>>>>>> Hi Kishon,
+>>>>>>>>
+>>>>>>>> On 30/11/18 10:10 AM, Kishon Vijay Abraham I wrote:
+>>>>>>>>> Hi Faiz,
+>>>>>>>>>
+>>>>>>>>> On 30/11/18 12:35 AM, Faiz Abbas wrote:
+>>>>>>>>>> Errata i929 in certain OMAP5/DRA7XX/AM57XX silicon revisions
+>>>>>>>>>> (SPRZ426D - November 2014 - Revised February 2018 [1]) mentions
+>>>>>>>>>> unexpected tuning pattern errors. A small failure band may be present
+>>>>>>>>>> in the tuning range which may be missed by the current algorithm.
+>>>>>>>>>> Furthermore, the failure bands vary with temperature leading to
+>>>>>>>>>> different optimum tuning values for different temperatures.
+>>>>>>>>>>
+>>>>>>>>>> As suggested in the related Application Report (SPRACA9B - October 2017
+>>>>>>>>>> - Revised July 2018 [2]), tuning should be done in two stages.
+>>>>>>>>>> In stage 1, assign the optimum ratio in the maximum pass window for the
+>>>>>>>>>> current temperature. In stage 2, if the chosen value is close to the
+>>>>>>>>>> small failure band, move away from it in the appropriate direction.
+>>>>>>>>>>
+>>>>>>>>>> References:
+>>>>>>>>>> [1] http://www.ti.com/lit/pdf/sprz426
+>>>>>>>>>> [2] http://www.ti.com/lit/pdf/SPRACA9
+>>>>>>>>>>
+>>>>>>>>>> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+>>>>>>>>>> ---
+>>>> ...
+>>>>>>>>>
+>>>>>>>>> Can't we get thermal zone once during probe?
+>>>>>>>>>
+>>>>>>>>
+>>>>>>>> Tuning is also (ideally) supposed to happen only once per enumeration.
+>>>>>>>> Also it doesn't make sense to get a thermal zone for lower speed systems
+>>>>>>>> that won't do tuning.
+>>>>>>>
+>>>>>>> Currently sdhci-omap calls pm_runtime_get_sync() during probe, and
+>>>>>>> then keeps the host device runtime resumed until ->remove() is called
+>>>>>>> on it. I assume you are going to change that, at some point!?
+>>>>>>>
+>>>>>>> In other words, what will happen to the host device when it becomes
+>>>>>>> runtime suspended? Is re-tuning needed when it gets runtime resumed,
+>>>>>>> which is the case for many other sdhci variants?
+>>>>>>
+>>>>>> There are no plans to support runtime_suspend()/resume() any time in the
+>>>>>> near future. If its ok with you, I would like to get this patch in
+>>>>>> without any changes. We can change it in case a need for
+>>>>>> runtime_suspend()/_resume() does arise.
+>>>>>
+>>>>> Right, I am okay with that. Due to recent changes to sdhci-omap
+>>>>> $subject patch doesn't apply, can you please rebase!?
+>>>>>
+>>>>> Additionally, I realized that we should fold in patch updating the DT
+>>>>> doc for sdhci-omap, adding the property for the thermal zone. I
+>>>>> regards to that, I am wondering if "cpu_thermal", is really the
+>>>>> correct name of the zone. The point is, I am guessing the zone could
+>>>>> change along with the SoCs/platforms.
+>>>>>
+>>>>
+>>>> As you have probably noticed, we are introducing a new driver
+>>>> (sdhci_am654) for newer platforms. I don't foresee using sdhci-omap
+>>>> driver with any other platforms. In case we do use it, we can add the dt
+>>>> property at that point of time and default to "cpu_thermal" to maintain
+>>>> dt compatibility.
+>>>>
+>>>> Will rebase and send v2 if you are ok with above.
+>>>
+>>> I see, but you still need to update the DT doc for sdhci-omap.
+>>>
 >>
->> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
+>> I didn't get you. There are no changes in dt. What changes should I
+>> document?
 > 
-> Applied for next, thanks!
-
-thanks
-
+> Well, you are fetching a thermal zone using a specific name. It's
+> quite similar to how we document other resources (pinctrls for
+> example) that sdhci omap depends on, so that needs to be document too.
 > 
-> Withholding patch2 for a while, as I need some more time to review it.
 
-No problem,
+Ok. Will add a note for "cpu_thermal" in the documentation.
 
-Regards
-Ludo
-
-> 
-> Kind regards
-> Uffe
-> 
->> ---
->>   drivers/mmc/host/mmci.c | 6 ++++++
->>   drivers/mmc/host/mmci.h | 2 ++
->>   2 files changed, 8 insertions(+)
->>
->> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
->> index 13fa640..e352f5a 100644
->> --- a/drivers/mmc/host/mmci.c
->> +++ b/drivers/mmc/host/mmci.c
->> @@ -21,6 +21,7 @@
->>   #include <linux/err.h>
->>   #include <linux/highmem.h>
->>   #include <linux/log2.h>
->> +#include <linux/mmc/mmc.h>
->>   #include <linux/mmc/pm.h>
->>   #include <linux/mmc/host.h>
->>   #include <linux/mmc/card.h>
->> @@ -274,6 +275,7 @@ static struct variant_data variant_stm32_sdmmc = {
->>          .cmdreg_lrsp_crc        = MCI_CPSM_STM32_LRSP_CRC,
->>          .cmdreg_srsp_crc        = MCI_CPSM_STM32_SRSP_CRC,
->>          .cmdreg_srsp            = MCI_CPSM_STM32_SRSP,
->> +       .cmdreg_stop            = MCI_CPSM_STM32_CMDSTOP,
->>          .data_cmd_enable        = MCI_CPSM_STM32_CMDTRANS,
->>          .irq_pio_mask           = MCI_IRQ_PIO_STM32_MASK,
->>          .datactrl_first         = true,
->> @@ -1100,6 +1102,10 @@ mmci_start_command(struct mmci_host *host, struct mmc_command *cmd, u32 c)
->>                  mmci_reg_delay(host);
->>          }
->>
->> +       if (host->variant->cmdreg_stop &&
->> +           cmd->opcode == MMC_STOP_TRANSMISSION)
->> +               c |= host->variant->cmdreg_stop;
->> +
->>          c |= cmd->opcode | host->variant->cmdreg_cpsm_enable;
->>          if (cmd->flags & MMC_RSP_PRESENT) {
->>                  if (cmd->flags & MMC_RSP_136)
->> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
->> index 550dd39..2422909 100644
->> --- a/drivers/mmc/host/mmci.h
->> +++ b/drivers/mmc/host/mmci.h
->> @@ -264,6 +264,7 @@ struct mmci_host;
->>    * @cmdreg_lrsp_crc: enable value for long response with crc
->>    * @cmdreg_srsp_crc: enable value for short response with crc
->>    * @cmdreg_srsp: enable value for short response without crc
->> + * @cmdreg_stop: enable value for stop and abort transmission
->>    * @datalength_bits: number of bits in the MMCIDATALENGTH register
->>    * @fifosize: number of bytes that can be written when MMCI_TXFIFOEMPTY
->>    *           is asserted (likewise for RX)
->> @@ -316,6 +317,7 @@ struct variant_data {
->>          unsigned int            cmdreg_lrsp_crc;
->>          unsigned int            cmdreg_srsp_crc;
->>          unsigned int            cmdreg_srsp;
->> +       unsigned int            cmdreg_stop;
->>          unsigned int            datalength_bits;
->>          unsigned int            fifosize;
->>          unsigned int            fifohalfsize;
->> --
->> 2.7.4
->>
+Thanks,
+Faiz
