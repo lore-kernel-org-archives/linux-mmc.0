@@ -1,201 +1,132 @@
-From: Jjian Zhou <jjian.zhou@mediatek.com>
-Subject: Re: [PATCH v3] mmc: mediatek: Add MMC_CAP_SDIO_IRQ support
-Date: Tue, 11 Dec 2018 20:11:33 +0800
-Message-ID: <1544530293.29734.30.camel@mhfsdcap03>
-References: <1544442233-20303-1-git-send-email-jjian.zhou@mediatek.com>
-         <CAPDyKFq2xH2m4JTbOwbh38mqjbwLRNewuYEVyOKCsBAPrUm9Dg@mail.gmail.com>
+From: Russell King - ARM Linux <linux@armlinux.org.uk>
+Subject: Re: [PATCH] mmc: core: Lower max_seg_size if too high for DMA
+Date: Tue, 11 Dec 2018 13:13:36 +0000
+Message-ID: <20181211131336.GD9507@n2100.armlinux.org.uk>
+References: <20181031155738.18367-1-tony@atomide.com>
+ <CAPDyKFqtMHRjHsJXcKTTzGYSsyab=2SfWdYiETS4Bo2f7Zw2CQ@mail.gmail.com>
+ <20181129191332.GY53235@atomide.com>
+ <CAPDyKFpgOjr1Zp=31b-_+KVOnvRnXXdXt5e8b0X1pGNVAihtyA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFq2xH2m4JTbOwbh38mqjbwLRNewuYEVyOKCsBAPrUm9Dg@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFpgOjr1Zp=31b-_+KVOnvRnXXdXt5e8b0X1pGNVAihtyA@mail.gmail.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Matthias Brugger <matthias.bgg@gmail.com>, Chaotian Jing =?UTF-8?Q?=28=E4=BA=95=E6=9C=9D=E5=A4=A9=29?= <Chaotian.Jing@mediatek.com>, Ryder Lee =?UTF-8?Q?=28=E6=9D=8E=E5=BA=9A=E8=AB=BA=29?= <Ryder.Lee@mediatek.com>, Sean Wang <sean.wang@mediatek.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, "linux-mediatek@lists.infradead.org" <linux-mediatek@lists.infradead.org>, srv_heupstream <srv_heupstream@mediatek.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Yong Mao =?UTF-8?Q?=28=E6=AF=9B=E5=8B=87=29?= <yong.mao@mediatek.com>
+Cc: Tony Lindgren <tony@atomide.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kishon <kishon@ti.com>, Peter Ujfalusi <peter.ujfalusi@ti.com>, linux-omap <linux-omap@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 2018-12-11 at 17:29 +0800, Ulf Hansson wrote:
-> On Mon, 10 Dec 2018 at 12:44, Jjian Zhou <jjian.zhou@mediatek.com> wrote:
+On Thu, Nov 29, 2018 at 09:11:17PM +0100, Ulf Hansson wrote:
+> On Thu, 29 Nov 2018 at 20:13, Tony Lindgren <tony@atomide.com> wrote:
 > >
-> > From: jjian zhou <jjian.zhou@mediatek.com>
+> > * Ulf Hansson <ulf.hansson@linaro.org> [181119 12:09]:
+> > > On 31 October 2018 at 16:57, Tony Lindgren <tony@atomide.com> wrote:
+> > > > With CONFIG_DMA_API_DEBUG_SG a device may produce the following warning:
+> > > >
+> > > > "DMA-API: mapping sg segment longer than device claims to support"
+> > > >
+> > > > We default to 64KiB if a DMA engine driver does not initialize dma_parms
+> > > > and call dma_set_max_seg_size(). This may be lower that what many MMC
+> > > > drivers do with mmc->max_seg_size = mmc->max_blk_size * mmc->max_blk_count.
+> > > >
+> > > > Let's do a sanity check for max_seg_size being higher than what DMA
+> > > > supports in mmc_add_host() and lower it as needed.
+> > > >
+> > > > Cc: Kishon Vijay Abraham I <kishon@ti.com>
+> > > > Cc: Peter Ujfalusi <peter.ujfalusi@ti.com>
+> > > > Cc: Russell King <rmk+kernel@armlinux.org.uk>
+> > > > Reported-by: Russell King <rmk+kernel@armlinux.org.uk>
+> > > > Signed-off-by: Tony Lindgren <tony@atomide.com>
+> > > > ---
+> > > >  drivers/mmc/core/host.c | 16 ++++++++++++++++
+> > > >  1 file changed, 16 insertions(+)
+> > > >
+> > > > diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> > > > --- a/drivers/mmc/core/host.c
+> > > > +++ b/drivers/mmc/core/host.c
+> > > > @@ -13,6 +13,7 @@
+> > > >   */
+> > > >
+> > > >  #include <linux/device.h>
+> > > > +#include <linux/dma-mapping.h>
+> > > >  #include <linux/err.h>
+> > > >  #include <linux/idr.h>
+> > > >  #include <linux/of.h>
+> > > > @@ -415,6 +416,19 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+> > > >
+> > > >  EXPORT_SYMBOL(mmc_alloc_host);
+> > > >
+> > > > +static void mmc_check_max_seg_size(struct mmc_host *host)
+> > > > +{
+> > > > +       unsigned int max_seg_size = dma_get_max_seg_size(mmc_dev(host));
+> > >
+> > > Is dma_get_max_seg_size() really intended to be called for any struct
+> > > device (representing the mmc controller) like this?
+> > >
+> > > My understanding is that the dma_get_max_seg_size() is supposed to be
+> > > called by using the DMA engine device, no?
 > >
-> > This patch enables support SDIO IRQs. It enables
-> > MMC_CAP_SDIO_IRQ & MMC_CAP2_SDIO_IRQ_NOTHREAD
-> > and implement the ->ack_sdio_irq callback.
-> >
-> > Signed-off-by: Jjian Zhou <jjian.zhou@mediatek.com>
-> > Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
-> > Signed-off-by: Yong Mao <yong.mao@mediatek.com>
-> > ---
-> >  drivers/mmc/host/mtk-sd.c | 49 ++++++++++++++++++++++++++++++++++++++++++++---
-> >  1 file changed, 46 insertions(+), 3 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> > index 6334cc7..40a1848 100644
-> > --- a/drivers/mmc/host/mtk-sd.c
-> > +++ b/drivers/mmc/host/mtk-sd.c
-> > @@ -1114,6 +1114,7 @@ static void msdc_start_command(struct msdc_host *host,
-> >                 struct mmc_request *mrq, struct mmc_command *cmd)
-> >  {
-> >         u32 rawcmd;
-> > +       unsigned long flags;
-> >
-> >         WARN_ON(host->cmd);
-> >         host->cmd = cmd;
-> > @@ -1131,7 +1132,10 @@ static void msdc_start_command(struct msdc_host *host,
-> >         cmd->error = 0;
-> >         rawcmd = msdc_cmd_prepare_raw_cmd(host, mrq, cmd);
-> >
-> > +       spin_lock_irqsave(&host->lock, flags);
-> >         sdr_set_bits(host->base + MSDC_INTEN, cmd_ints_mask);
-> > +       spin_unlock_irqrestore(&host->lock, flags);
-> > +
+> > Oh good catch sounds like I'm calling it for the wrong device,
+> > need to check. In that case sounds like this can't be generic?
 > 
-> The above looks like a reasonable change, however does it really
-> belong in $subject patch. If so, can you explain why?
-> 
-> Maybe you should move this into a standalone separate patch?
-> 
+> No, I don't think so as it's only the mmc host driver that knows about
+> the DMA engine device.
 
-Thanks for your suggestion.
+We're nearing the merge window, and this is a regression that is yet
+to be solved.  It causes a kernel warning with backtrace, so it's
+very annoying.
 
-The modification of MSDC_INTEN is non-atomic operation. If it enanbles
-MMC_CAP_SDIO_IRQ, there is a race condition of access MSDC_INTEN in irq
-and thread context. So need make modification of MSDC_INTEN by atomic.
+The error is:
 
-> >         writel(cmd->arg, host->base + SDC_ARG);
-> >         writel(rawcmd, host->base + SDC_CMD);
-> >  }
-> > @@ -1351,6 +1355,27 @@ static void msdc_request_timeout(struct work_struct *work)
-> >         }
-> >  }
-> >
-> > +static void msdc_enable_sdio_irq(struct mmc_host *mmc, int enb)
-> > +{
-> > +       unsigned long flags;
-> > +       struct msdc_host *host = mmc_priv(mmc);
-> > +
-> > +       if (enb)
-> > +               pm_runtime_get_sync(host->dev);
-> 
-> I would convert to pm_runtime_get_noresume() as the host is already
-> been runtime resumed by the mmc core.
+omap-dma-engine 4a056000.dma-controller: DMA-API: mapping sg segment longer than device claims to support [len=69632] [max=65536]
 
-will do it in next version.
+which indicates that we have a SG segment length that exceeds thte
+published maximum segment size for a device - in this case the
+DMA engine device.  The maximum segment size for the DMA engine comes
+from the default per-device setting, in linux/dma-mapping.h, which is
+64K.
 
-> > +
-> > +       spin_lock_irqsave(&host->lock, flags);
-> > +       if (enb)
-> > +               sdr_set_bits(host->base + MSDC_INTEN, MSDC_INTEN_SDIOIRQ);
-> > +       else
-> > +               sdr_clr_bits(host->base + MSDC_INTEN, MSDC_INTEN_SDIOIRQ);
-> > +       spin_unlock_irqrestore(&host->lock, flags);
-> 
-> You should move the code above into a separate function. Along the lines of:
-> 
-> static void __msdc_enable_sdio_irq(struct mmc_host *mmc, int enb)
-> 
-> You need this, because you will otherwise mess up the runtime PM usage
-> count when acking the SDIO irq. More comments about that below.
+However, omap_hsmmc sets:
 
-will do it in next version.
+        mmc->max_blk_size = 512;       /* Block Length at max can be 1024 */
+        mmc->max_blk_count = 0xFFFF;    /* No. of Blocks is 16 bits */
+        mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
+        mmc->max_seg_size = mmc->max_req_size;
 
-> > +
-> > +       if (!enb) {
-> > +               pm_runtime_mark_lastwill do it in next version._busy(host->dev);
-> > +               pm_runtime_put_autosuspend(host->dev);
-> 
-> Convert to pm_runtime_put_noidle(), as the above is already managed by
-> the mmc core.
-> 
+which ends up telling the block layer that we support a maximum segment
+size of 65535*512, so of course it _will_ pass SG lists where a segment
+is longer than 64K.
 
-will do it in next version.
+The problem here is that the HSMMC driver doesn't take account of the
+DMA engine device's capabilities.
 
-> > +       }
-> > +}
-> > +
-> >  static irqreturn_t msdc_irq(int irq, void *dev_id)
-> >  {
-> >         struct msdc_host *host = (struct msdc_host *) dev_id;
-> > @@ -1373,7 +1398,12 @@ static irqreturn_t msdc_irq(int irq, void *dev_id)
-> >                 data = host->data;
-> >                 spin_unlock_irqrestore(&host->lock, flags);
-> >
-> > -               if (!(events & event_mask))
-> > +               if ((events & event_mask) & MSDC_INT_SDIOIRQ) {
-> > +                       msdc_enable_sdio_irq(host->mmc, 0);
-> 
-> To not mess up the runtime PM reference count and to avoid invoking
-> runtime PM callbacks from atomic context, I suggest you call
-> __msdc_enable_sdio_irq(host->mmc, 0) (new proposed function according
-> to earlier comment).
+We have something of an odd situation in that the omap-dma device's
+maximum SG size depends on the "address width" - it's 64K transfers
+of whatever unit "address width" is, so the current implementation of
+per-device parameters doesn't exactly work.  That means the default
+64K limit at the device-level is reasonable.
 
-will do it in next version.
+The only thing I can think of doing is adding into omap_hsmmc:
 
-> 
-> > +                       sdio_signal_irq(host->mmc);
-> > +               }
-> > +
-> > +               if (!(events & (event_mask & ~MSDC_INT_SDIOIRQ)))
-> >                         break;
-> >
-> >                 if (!mrq) {
-> > @@ -1493,8 +1523,11 @@ static void msdc_init_hw(struct msdc_host *host)
-> >          */
-> >         sdr_set_bits(host->base + SDC_CFG, SDC_CFG_SDIO);
-> >
-> > -       /* disable detect SDIO device interrupt function */
-> > -       sdr_clr_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
-> > +       /* Config SDIO device detect interrupt function */
-> > +       if (host->mmc->caps & MMC_CAP_SDIO_IRQ)
-> > +               sdr_set_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
-> > +       else
-> > +               sdr_clr_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
-> >
-> >         /* Configure to default data timeout */
-> >         sdr_set_field(host->base + SDC_CFG, SDC_CFG_DTOC, 3);
-> > @@ -2013,6 +2046,11 @@ static void msdc_hw_reset(struct mmc_host *mmc)
-> >         sdr_clr_bits(host->base + EMMC_IOCON, 1);
-> >  }
-> >
-> > +static void msdc_ack_sdio_irq(struct mmc_host *mmc)
-> > +{
-> > +       msdc_enable_sdio_irq(mmc, 1);
-> 
-> To not mess up the runtime PM reference count, I suggest you call
-> __msdc_enable_sdio_irq(host->mmc, 1) (new proposed function according
-> to earlier comment).
-> 
+	mmc->max_seg_size = min(mmc->max_req_size,
+				min(dma_get_max_seg_size(host->rx_chan->device->dev),
+				    dma_get_max_seg_size(host->tx_chan->device->dev)));
 
-will do it in next version.
+to limit the maximum segment size to that of the device _and_ dma
+engine's capabilities.
 
-> > +}
-> > +
-> >  static const struct mmc_host_ops mt_msdc_ops = {
-> >         .post_req = msdc_post_req,
-> >         .pre_req = msdc_pre_req,
-> > @@ -2020,6 +2058,8 @@ static void msdc_hw_reset(struct mmc_host *mmc)
-> >         .set_ios = msdc_ops_set_ios,
-> >         .get_ro = mmc_gpio_get_ro,
-> >         .get_cd = mmc_gpio_get_cd,
-> > +       .enable_sdio_irq = msdc_enable_sdio_irq,
-> > +       .ack_sdio_irq = msdc_ack_sdio_irq,
-> >         .start_signal_voltage_switch = msdc_ops_switch_volt,
-> >         .card_busy = msdc_card_busy,
-> >         .execute_tuning = msdc_execute_tuning,
-> > @@ -2147,6 +2187,9 @@ static int msdc_drv_probe(struct platform_device *pdev)
-> >         else
-> >                 mmc->f_min = DIV_ROUND_UP(host->src_clk_freq, 4 * 4095);
-> >
-> > +       if (mmc->caps & MMC_CAP_SDIO_IRQ)
-> > +               mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;
-> > +
-> >         mmc->caps |= MMC_CAP_ERASE | MMC_CAP_CMD23;
-> >         /* MMC core transfer sizes tunable parameters */
-> >         mmc->max_segs = MAX_BD_NUM;
-> > --
-> > 1.9.1
-> >
-> 
-> Kind regards
-> Uffe
+Doing this solves the problem for me.
+
+-- 
+RMK's Patch system: http://www.armlinux.org.uk/developer/patches/
+FTTC broadband for 0.8mile line in suburbia: sync at 12.1Mbps down 622kbps up
+According to speedtest.net: 11.9Mbps down 500kbps up
