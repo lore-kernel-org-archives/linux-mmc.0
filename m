@@ -1,20 +1,12 @@
-From: Peter Ujfalusi <peter.ujfalusi@ti.com>
-Subject: Re: [PATCH] mmc: core: Lower max_seg_size if too high for DMA
-Date: Tue, 11 Dec 2018 16:33:26 +0200
-Message-ID: <1ecb5b44-92a9-cf05-cb5f-eabb1f3b001f@ti.com>
-References: <20181031155738.18367-1-tony@atomide.com>
- <CAPDyKFqtMHRjHsJXcKTTzGYSsyab=2SfWdYiETS4Bo2f7Zw2CQ@mail.gmail.com>
- <20181129191332.GY53235@atomide.com>
- <CAPDyKFpgOjr1Zp=31b-_+KVOnvRnXXdXt5e8b0X1pGNVAihtyA@mail.gmail.com>
- <20181211131336.GD9507@n2100.armlinux.org.uk>
- <CAPDyKFr=vqNh+auGXjYJs+oq70+VksuOJNF7cFm-VifSKf6f9w@mail.gmail.com>
- <20181211134937.GE9507@n2100.armlinux.org.uk>
+From: Russell King <rmk+kernel@armlinux.org.uk>
+Subject: [PATCH] mmc: omap_hsmmc: fix DMA API warning
+Date: Tue, 11 Dec 2018 14:41:31 +0000
+Message-ID: <E1gWjE3-0006mG-2S@rmk-PC.armlinux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20181211134937.GE9507@n2100.armlinux.org.uk>
-Content-Language: en-US
+Content-Disposition: inline
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -24,46 +16,64 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Russell King - ARM Linux <linux@armlinux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Tony Lindgren <tony@atomide.com>, linux-omap <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Kishon <kishon@ti.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Peter Ujfalusi <peter.ujfalusi@ti.com>, Tony Lindgren <tony@atomide.com>
+Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-UnVzc2VsbCwKCk9uIDExLzEyLzIwMTggMTUuNDksIFJ1c3NlbGwgS2luZyAtIEFSTSBMaW51eCB3
-cm90ZToKPj4+IFRoZSBvbmx5IHRoaW5nIEkgY2FuIHRoaW5rIG9mIGRvaW5nIGlzIGFkZGluZyBp
-bnRvIG9tYXBfaHNtbWM6Cj4+Pgo+Pj4gICAgICAgICBtbWMtPm1heF9zZWdfc2l6ZSA9IG1pbiht
-bWMtPm1heF9yZXFfc2l6ZSwKPj4+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgbWlu
-KGRtYV9nZXRfbWF4X3NlZ19zaXplKGhvc3QtPnJ4X2NoYW4tPmRldmljZS0+ZGV2KSwKPj4+ICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGRtYV9nZXRfbWF4X3NlZ19zaXplKGhv
-c3QtPnR4X2NoYW4tPmRldmljZS0+ZGV2KSkpOwo+Pj4KPj4+IHRvIGxpbWl0IHRoZSBtYXhpbXVt
-IHNlZ21lbnQgc2l6ZSB0byB0aGF0IG9mIHRoZSBkZXZpY2UgX2FuZF8gZG1hCj4+PiBlbmdpbmUn
-cyBjYXBhYmlsaXRpZXMuCj4+Pgo+Pj4gRG9pbmcgdGhpcyBzb2x2ZXMgdGhlIHByb2JsZW0gZm9y
-IG1lLgo+Pgo+PiBUaGFua3MgZm9yIHRoZSBzdWdnZXN0aW9uIC0gaXQgc291bmRzIGxpa2UgYSBy
-ZWFzb25hYmxlIHdheSB0byBmaXggdGhlCj4+IHByb2JsZW0sIGF0IGxlYXN0IGZvciBub3cuCj4g
-Cj4gSSBkb24ndCB0aGluayB0aGVyZSdzIGFueSAiYXQgbGVhc3QgZm9yIG5vdyIgYWJvdXQgdGhp
-cyBhcHByb2FjaCAtIGl0J3MKPiBub3Qgc29tZXRoaW5nIHRoYXQgdGhlIE1NQyBjb3JlIGNhbiBr
-bm93IGFib3V0LCBiZWNhdXNlIHdoZXRoZXIgYSBkcml2ZXIKPiB1c2VzIERNQSBlbmdpbmUgb3Ig
-bm90LCBhbmQgaG93IG1hbnkgY2hhbm5lbHMgaXQgdXNlcyBpcyBjb21wbGV0ZWx5Cj4gZHJpdmVy
-IHNwZWNpZmljLgoKSSBhZ3JlZS4KCj4gVGhlIG9ubHkgcXVlc3Rpb25hYmxlIHRoaW5nIGlzIGFy
-b3VuZCB0aGUgZG1hX2dldF9tYXhfc2VnX3NpemUoKQo+IGludGVyZmFjZSwgYnV0IHRoZSBvbmx5
-IHdheSB0aGF0J3MgZ29pbmcgdG8gZ2V0IHNvbHZlZCBpcyB0byBlbGltaW5hdGUKPiBpdCBlbnRp
-cmVseSBhcyBpdCBpc24ndCBhIHBlci1kZXZpY2UgcHJvcGVydHkgd2l0aCBzb21lIERNQSBlbmdp
-bmVzCj4gc3VjaCBhcyBvbWFwLWRtYSAtIGl0J3MgYSBwZXItcmVxdWVzdCBwcm9wZXJ0eS4gIFRo
-YXQgYWxzbyBtZWFucwo+IGtpbGxpbmcgdGhlIGNoZWNrIGluIHRoZSBETUEgZGVidWcgY29kZSwg
-d2hpY2ggaXNuJ3QgZ29pbmcgdG8gZ28gZG93bgo+IHZlcnkgd2VsbC4KPiAKPj4gRG8geW91IHdh
-bnQgdG8gc2VuZCB0byBwYXRjaCBvciBkbyB5b3UgZXhwZWN0IHNvbWVvbmUgZWxzZSB0byBkbyBp
-dD8KPiAKPiBJJ2xsIHNlbmQgYSBwYXRjaCBvbmNlIEkndmUgY2hlY2tlZCB0aGUgY29ybmVyIGNh
-c2VzLCBhbmQgd2hldGhlcgo+IHdlIHNob3VsZCBnbyBmdXJ0aGVyIGFuZCBpbmNsdWRlIG90aGVy
-IERNQSBwYXJhbWV0ZXJzIGZyb20gdGhlCj4gZG1hIGVuZ2luZS4KClRoZXJlIGlzIG9uZSB0aGlu
-ZyB3aGljaCBJJ20gdHJ5aW5nIHRvIGZpZ3VyZSBvdXQ6CnNETUEgKGFuZCBFRE1BIGFsc28pIGhh
-dmUgbGltaXRhdGlvbiBvbiB0aGUgbGVuZ3RoIG9mIGVhY2ggc2cgc2VnbWVudC4KClRvIG1ha2Ug
-dGhpbmdzIGEgYml0IG1vcmUgaW50ZXJlc3RpbmcgdGhlIGxpbWl0IGlzIG5vdCBpbiBieXRlcywg
-YnV0IGluCm51bWJlciBvZiBidXJzdHM6Cgo2NTUzNSAqIGJ1cnN0ICogYWRkcl93aWR0aCA9IG1h
-eF9zZ19zZWdtZW50X2xlbiBpbiBieXRlcy4KCldlIGNhbiBub3Qgc2V0IHRoaXMgdG8gYSBzdGF0
-aWMgdmFsdWUgYXMgZGVwZW5kaW5nIG9uIHRoZSBhZGRyX3dpZHRoIGFuZApidXJzdCBpdCBjYW4g
-YmUgZGlmZmVyZW50IGZvciBlYWNoIHRyYW5zZmVyLgoKLSBQw6l0ZXIKClRleGFzIEluc3RydW1l
-bnRzIEZpbmxhbmQgT3ksIFBvcmtrYWxhbmthdHUgMjIsIDAwMTgwIEhlbHNpbmtpLgpZLXR1bm51
-cy9CdXNpbmVzcyBJRDogMDYxNTUyMS00LiBLb3RpcGFpa2thL0RvbWljaWxlOiBIZWxzaW5raQoK
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KbGludXgtYXJt
-LWtlcm5lbCBtYWlsaW5nIGxpc3QKbGludXgtYXJtLWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3Jn
-Cmh0dHA6Ly9saXN0cy5pbmZyYWRlYWQub3JnL21haWxtYW4vbGlzdGluZm8vbGludXgtYXJtLWtl
-cm5lbAo=
+While booting with rootfs on MMC, the following warning is encountered
+on OMAP4430:
+
+omap-dma-engine 4a056000.dma-controller: DMA-API: mapping sg segment longer than device claims to support [len=69632] [max=65536]
+
+This is because the DMA engine has a default maximum segment size of 64K
+but HSMMC sets:
+
+        mmc->max_blk_size = 512;       /* Block Length at max can be 1024 */
+        mmc->max_blk_count = 0xFFFF;    /* No. of Blocks is 16 bits */
+        mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
+        mmc->max_seg_size = mmc->max_req_size;
+
+which ends up telling the block layer that we support a maximum segment
+size of 65535*512, which exceeds the advertised DMA engine capabilities.
+
+Fix this by clamping the maximum segment size to the lower of the
+maximum request size and of the DMA engine device used for either DMA
+channel.
+
+Signed-off-by: Russell King <rmk+kernel@armlinux.org.uk>
+---
+ drivers/mmc/host/omap_hsmmc.c | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 467d889a1638..55100974fb95 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1909,7 +1909,6 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 	mmc->max_blk_size = 512;       /* Block Length at max can be 1024 */
+ 	mmc->max_blk_count = 0xFFFF;    /* No. of Blocks is 16 bits */
+ 	mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
+-	mmc->max_seg_size = mmc->max_req_size;
+ 
+ 	mmc->caps |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
+ 		     MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_ERASE | MMC_CAP_CMD23;
+@@ -1939,6 +1938,17 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 		goto err_irq;
+ 	}
+ 
++	/*
++	 * Limit the maximum segment size to the lower of the request size
++	 * and the DMA engine device segment size limits.  In reality, with
++	 * 32-bit transfers, the DMA engine can do longer segments than this
++	 * but there is no way to represent that in the DMA model - if we
++	 * increase this figure here, we get warnings from the DMA API debug.
++	 */
++	mmc->max_seg_size = min(mmc->max_req_size,
++				min(dma_get_max_seg_size(host->rx_chan->device->dev),
++				    dma_get_max_seg_size(host->tx_chan->device->dev)));
++
+ 	/* Request IRQ for MMC operations */
+ 	ret = devm_request_irq(&pdev->dev, host->irq, omap_hsmmc_irq, 0,
+ 			mmc_hostname(mmc), host);
+-- 
+2.7.4
