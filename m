@@ -1,19 +1,20 @@
-From: Tony Lindgren <tony@atomide.com>
+From: Peter Ujfalusi <peter.ujfalusi@ti.com>
 Subject: Re: [PATCH] mmc: core: Lower max_seg_size if too high for DMA
-Date: Tue, 11 Dec 2018 06:23:43 -0800
-Message-ID: <20181211142343.GO6707@atomide.com>
+Date: Tue, 11 Dec 2018 16:33:26 +0200
+Message-ID: <1ecb5b44-92a9-cf05-cb5f-eabb1f3b001f@ti.com>
 References: <20181031155738.18367-1-tony@atomide.com>
  <CAPDyKFqtMHRjHsJXcKTTzGYSsyab=2SfWdYiETS4Bo2f7Zw2CQ@mail.gmail.com>
  <20181129191332.GY53235@atomide.com>
  <CAPDyKFpgOjr1Zp=31b-_+KVOnvRnXXdXt5e8b0X1pGNVAihtyA@mail.gmail.com>
  <20181211131336.GD9507@n2100.armlinux.org.uk>
- <b88f7a3f-ed0e-c6d7-6e18-afc2378524bf@ti.com>
+ <CAPDyKFr=vqNh+auGXjYJs+oq70+VksuOJNF7cFm-VifSKf6f9w@mail.gmail.com>
+ <20181211134937.GE9507@n2100.armlinux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <b88f7a3f-ed0e-c6d7-6e18-afc2378524bf@ti.com>
+In-Reply-To: <20181211134937.GE9507@n2100.armlinux.org.uk>
+Content-Language: en-US
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -23,27 +24,46 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Peter Ujfalusi <peter.ujfalusi@ti.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Russell King - ARM Linux <linux@armlinux.org.uk>, Kishon <kishon@ti.com>, linux-omap <linux-omap@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+To: Russell King - ARM Linux <linux@armlinux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Tony Lindgren <tony@atomide.com>, linux-omap <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Kishon <kishon@ti.com>
 List-Id: linux-mmc@vger.kernel.org
 
-* Peter Ujfalusi <peter.ujfalusi@ti.com> [181211 13:47]:
-> On 11/12/2018 15.13, Russell King - ARM Linux wrote:
-> > The only thing I can think of doing is adding into omap_hsmmc:
-> > 
-> > 	mmc->max_seg_size = min(mmc->max_req_size,
-> > 				min(dma_get_max_seg_size(host->rx_chan->device->dev),
-> > 				    dma_get_max_seg_size(host->tx_chan->device->dev)));
-> > 
-> > to limit the maximum segment size to that of the device _and_ dma
-> > engine's capabilities.
-> 
-> Make sense.
-> 
-> > Doing this solves the problem for me.
-
-OK sounds good to me too.
-
-Thanks,
-
-Tony
+UnVzc2VsbCwKCk9uIDExLzEyLzIwMTggMTUuNDksIFJ1c3NlbGwgS2luZyAtIEFSTSBMaW51eCB3
+cm90ZToKPj4+IFRoZSBvbmx5IHRoaW5nIEkgY2FuIHRoaW5rIG9mIGRvaW5nIGlzIGFkZGluZyBp
+bnRvIG9tYXBfaHNtbWM6Cj4+Pgo+Pj4gICAgICAgICBtbWMtPm1heF9zZWdfc2l6ZSA9IG1pbiht
+bWMtPm1heF9yZXFfc2l6ZSwKPj4+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgbWlu
+KGRtYV9nZXRfbWF4X3NlZ19zaXplKGhvc3QtPnJ4X2NoYW4tPmRldmljZS0+ZGV2KSwKPj4+ICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGRtYV9nZXRfbWF4X3NlZ19zaXplKGhv
+c3QtPnR4X2NoYW4tPmRldmljZS0+ZGV2KSkpOwo+Pj4KPj4+IHRvIGxpbWl0IHRoZSBtYXhpbXVt
+IHNlZ21lbnQgc2l6ZSB0byB0aGF0IG9mIHRoZSBkZXZpY2UgX2FuZF8gZG1hCj4+PiBlbmdpbmUn
+cyBjYXBhYmlsaXRpZXMuCj4+Pgo+Pj4gRG9pbmcgdGhpcyBzb2x2ZXMgdGhlIHByb2JsZW0gZm9y
+IG1lLgo+Pgo+PiBUaGFua3MgZm9yIHRoZSBzdWdnZXN0aW9uIC0gaXQgc291bmRzIGxpa2UgYSBy
+ZWFzb25hYmxlIHdheSB0byBmaXggdGhlCj4+IHByb2JsZW0sIGF0IGxlYXN0IGZvciBub3cuCj4g
+Cj4gSSBkb24ndCB0aGluayB0aGVyZSdzIGFueSAiYXQgbGVhc3QgZm9yIG5vdyIgYWJvdXQgdGhp
+cyBhcHByb2FjaCAtIGl0J3MKPiBub3Qgc29tZXRoaW5nIHRoYXQgdGhlIE1NQyBjb3JlIGNhbiBr
+bm93IGFib3V0LCBiZWNhdXNlIHdoZXRoZXIgYSBkcml2ZXIKPiB1c2VzIERNQSBlbmdpbmUgb3Ig
+bm90LCBhbmQgaG93IG1hbnkgY2hhbm5lbHMgaXQgdXNlcyBpcyBjb21wbGV0ZWx5Cj4gZHJpdmVy
+IHNwZWNpZmljLgoKSSBhZ3JlZS4KCj4gVGhlIG9ubHkgcXVlc3Rpb25hYmxlIHRoaW5nIGlzIGFy
+b3VuZCB0aGUgZG1hX2dldF9tYXhfc2VnX3NpemUoKQo+IGludGVyZmFjZSwgYnV0IHRoZSBvbmx5
+IHdheSB0aGF0J3MgZ29pbmcgdG8gZ2V0IHNvbHZlZCBpcyB0byBlbGltaW5hdGUKPiBpdCBlbnRp
+cmVseSBhcyBpdCBpc24ndCBhIHBlci1kZXZpY2UgcHJvcGVydHkgd2l0aCBzb21lIERNQSBlbmdp
+bmVzCj4gc3VjaCBhcyBvbWFwLWRtYSAtIGl0J3MgYSBwZXItcmVxdWVzdCBwcm9wZXJ0eS4gIFRo
+YXQgYWxzbyBtZWFucwo+IGtpbGxpbmcgdGhlIGNoZWNrIGluIHRoZSBETUEgZGVidWcgY29kZSwg
+d2hpY2ggaXNuJ3QgZ29pbmcgdG8gZ28gZG93bgo+IHZlcnkgd2VsbC4KPiAKPj4gRG8geW91IHdh
+bnQgdG8gc2VuZCB0byBwYXRjaCBvciBkbyB5b3UgZXhwZWN0IHNvbWVvbmUgZWxzZSB0byBkbyBp
+dD8KPiAKPiBJJ2xsIHNlbmQgYSBwYXRjaCBvbmNlIEkndmUgY2hlY2tlZCB0aGUgY29ybmVyIGNh
+c2VzLCBhbmQgd2hldGhlcgo+IHdlIHNob3VsZCBnbyBmdXJ0aGVyIGFuZCBpbmNsdWRlIG90aGVy
+IERNQSBwYXJhbWV0ZXJzIGZyb20gdGhlCj4gZG1hIGVuZ2luZS4KClRoZXJlIGlzIG9uZSB0aGlu
+ZyB3aGljaCBJJ20gdHJ5aW5nIHRvIGZpZ3VyZSBvdXQ6CnNETUEgKGFuZCBFRE1BIGFsc28pIGhh
+dmUgbGltaXRhdGlvbiBvbiB0aGUgbGVuZ3RoIG9mIGVhY2ggc2cgc2VnbWVudC4KClRvIG1ha2Ug
+dGhpbmdzIGEgYml0IG1vcmUgaW50ZXJlc3RpbmcgdGhlIGxpbWl0IGlzIG5vdCBpbiBieXRlcywg
+YnV0IGluCm51bWJlciBvZiBidXJzdHM6Cgo2NTUzNSAqIGJ1cnN0ICogYWRkcl93aWR0aCA9IG1h
+eF9zZ19zZWdtZW50X2xlbiBpbiBieXRlcy4KCldlIGNhbiBub3Qgc2V0IHRoaXMgdG8gYSBzdGF0
+aWMgdmFsdWUgYXMgZGVwZW5kaW5nIG9uIHRoZSBhZGRyX3dpZHRoIGFuZApidXJzdCBpdCBjYW4g
+YmUgZGlmZmVyZW50IGZvciBlYWNoIHRyYW5zZmVyLgoKLSBQw6l0ZXIKClRleGFzIEluc3RydW1l
+bnRzIEZpbmxhbmQgT3ksIFBvcmtrYWxhbmthdHUgMjIsIDAwMTgwIEhlbHNpbmtpLgpZLXR1bm51
+cy9CdXNpbmVzcyBJRDogMDYxNTUyMS00LiBLb3RpcGFpa2thL0RvbWljaWxlOiBIZWxzaW5raQoK
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KbGludXgtYXJt
+LWtlcm5lbCBtYWlsaW5nIGxpc3QKbGludXgtYXJtLWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3Jn
+Cmh0dHA6Ly9saXN0cy5pbmZyYWRlYWQub3JnL21haWxtYW4vbGlzdGluZm8vbGludXgtYXJtLWtl
+cm5lbAo=
