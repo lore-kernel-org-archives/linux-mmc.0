@@ -1,48 +1,38 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH] mmc: omap_hsmmc: fix DMA API warning
-Date: Tue, 11 Dec 2018 07:04:12 -0800
-Message-ID: <20181211150412.GP6707@atomide.com>
-References: <E1gWjE3-0006mG-2S@rmk-PC.armlinux.org.uk>
+From: Uwe =?iso-8859-1?Q?Kleine-K=F6nig?=
+        <u.kleine-koenig@pengutronix.de>
+Subject: Re: MMC driver programming help request
+Date: Wed, 12 Dec 2018 08:50:30 +0100
+Message-ID: <20181212075030.rjx7zoa3dlxu6nya@pengutronix.de>
+References: <2352226718-734184@post.birjand.ac.ir>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <E1gWjE3-0006mG-2S@rmk-PC.armlinux.org.uk>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Russell King <rmk+kernel@armlinux.org.uk>
-Cc: Peter Ujfalusi <peter.ujfalusi@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+In-Reply-To: <2352226718-734184@post.birjand.ac.ir>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Hossein Radhasani <radhassani@birjand.ac.ir>
+Cc: svenkatr@ti.com, chris@printf.net, info@sang-engineering.com, wsa+renesas@sang-engineering.com, alexander.stein@systec-electronic.com, adrian.hunter@intel.com, info@pengutronix.de, tomas.melin@vaisala.com, alcooperx@gmail.com, markus.schuetterle@intel.com, Avi.Shchislowski@sandisk.com, yaniv.agman@sandisk.com, sebras@gmail.com, baolin.wang@linaro.org, marcus.folkesson@gmail.com, bengardiner@nanometrics.ca, cjb@laptop.org, peppe.cavallaro@st.com, iwamatsu@debian.org, wkernelteam@gmail.com, olivier.gay@a3.epfl.ch, ubuntu-motu@lists.ubuntu.com, linux-kernel@vger.kernel.org, will.newton@gmail.com, linux-mmc@vger.kernel.org, matt@console-pimps.org, linux-arm-kernel@lists.infradead.org, chris-github@printf.net, hashcode0f@gmail.com, ben.l.gardiner@gmail.com
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+Hello,
 
-* Russell King <rmk+kernel@armlinux.org.uk> [181211 14:41]:
-> @@ -1939,6 +1938,17 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
->  		goto err_irq;
->  	}
->  
-> +	/*
-> +	 * Limit the maximum segment size to the lower of the request size
-> +	 * and the DMA engine device segment size limits.  In reality, with
-> +	 * 32-bit transfers, the DMA engine can do longer segments than this
-> +	 * but there is no way to represent that in the DMA model - if we
-> +	 * increase this figure here, we get warnings from the DMA API debug.
-> +	 */
-> +	mmc->max_seg_size = min(mmc->max_req_size,
-> +				min(dma_get_max_seg_size(host->rx_chan->device->dev),
-> +				    dma_get_max_seg_size(host->tx_chan->device->dev)));
-> +
+On Wed, Dec 12, 2018 at 11:09:31AM +0330, Hossein Radhasani wrote:
+> I need some help.
+> I have device with eMMC storage and wnat to write on specific page of it.
+> I was trying to use MMC driver, but unfortunately have some problems.
+> Would you please help me?
 
-Looks like using min3() here would be handy?
+The usual approach to get help in the FOSS world is to start describing
+the problem you want to solve including the motivation for it. Then show
+the things you did to solve the problem including a description how they
+failed. And then choose the recipents of the resuling mail carefully and
+don't put everyone on Cc who might have mentioned a relevant keyword
+once.
 
-Regards,
+Thanks
+Uwe
 
-Tony
+-- 
+Pengutronix e.K.                           | Uwe Kleine-König            |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
