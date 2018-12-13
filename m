@@ -1,35 +1,56 @@
-From: Fabrizio Castro <fabrizio.castro@bp.renesas.com>
-Subject: [PATCH] mmc: renesas_sdhi_internal_dmac: Whitelist r8a774c0
-Date: Thu, 13 Dec 2018 20:22:27 +0000
-Message-ID: <1544732547-7094-1-git-send-email-fabrizio.castro@bp.renesas.com>
+From: Sowjanya Komatineni <skomatineni@nvidia.com>
+Subject: [PATCH V1] mmc: tegra: Fix for SDMMC pads autocal parsing from dt
+Date: Thu, 13 Dec 2018 12:25:43 -0800
+Message-ID: <1544732743-11106-1-git-send-email-skomatineni@nvidia.com>
+Mime-Version: 1.0
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Biju Das <biju.das@bp.renesas.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Simon Horman <horms@verge.net.au>, Geert Uytterhoeven <geert+renesas@glider.be>, Chris Paterson <Chris.Paterson2@renesas.com>, Fabrizio Castro <fabrizio.castro@bp.renesas.com>, linux-renesas-soc@vger.kernel.org
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
+Cc: thierry.reding@gmail.com, jonathanh@nvidia.com, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, Sowjanya Komatineni <skomatineni@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Biju Das <biju.das@bp.renesas.com>
+Some of the SDMMC pads auto calibration values parsed from
+devicetree are assigned incorrectly. This patch fixes it.
 
-We need r8a774c0 to be whitelisted for SDHI to work on the RZ/G2E,
-but we don't care about the revision of the SoC, so just whitelist
-the generic part number.
-
-Signed-off-by: Biju Das <biju.das@bp.renesas.com>
+Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
 ---
- drivers/mmc/host/renesas_sdhi_internal_dmac.c | 1 +
- 1 file changed, 1 insertion(+)
+ drivers/mmc/host/sdhci-tegra.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-index b6f5410..909a5c9 100644
---- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-+++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-@@ -298,6 +298,7 @@ static const struct soc_device_attribute soc_whitelist[] = {
- 	  .data = (void *)BIT(SDHI_INTERNAL_DMAC_ONE_RX_ONLY) },
- 	/* generic ones */
- 	{ .soc_id = "r8a774a1" },
-+	{ .soc_id = "r8a774c0" },
- 	{ .soc_id = "r8a77470" },
- 	{ .soc_id = "r8a7795" },
- 	{ .soc_id = "r8a7796" },
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index 7b95d088fdef..e6ace31e2a41 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -510,25 +510,25 @@ static void tegra_sdhci_parse_pad_autocal_dt(struct sdhci_host *host)
+ 
+ 	err = device_property_read_u32(host->mmc->parent,
+ 			"nvidia,pad-autocal-pull-up-offset-3v3-timeout",
+-			&autocal->pull_up_3v3);
++			&autocal->pull_up_3v3_timeout);
+ 	if (err)
+ 		autocal->pull_up_3v3_timeout = 0;
+ 
+ 	err = device_property_read_u32(host->mmc->parent,
+ 			"nvidia,pad-autocal-pull-down-offset-3v3-timeout",
+-			&autocal->pull_down_3v3);
++			&autocal->pull_down_3v3_timeout);
+ 	if (err)
+ 		autocal->pull_down_3v3_timeout = 0;
+ 
+ 	err = device_property_read_u32(host->mmc->parent,
+ 			"nvidia,pad-autocal-pull-up-offset-1v8-timeout",
+-			&autocal->pull_up_1v8);
++			&autocal->pull_up_1v8_timeout);
+ 	if (err)
+ 		autocal->pull_up_1v8_timeout = 0;
+ 
+ 	err = device_property_read_u32(host->mmc->parent,
+ 			"nvidia,pad-autocal-pull-down-offset-1v8-timeout",
+-			&autocal->pull_down_1v8);
++			&autocal->pull_down_1v8_timeout);
+ 	if (err)
+ 		autocal->pull_down_1v8_timeout = 0;
+ 
 -- 
 2.7.4
