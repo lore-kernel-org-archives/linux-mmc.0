@@ -1,54 +1,32 @@
-From: Thierry Reding <thierry.reding@gmail.com>
-Subject: Re: [PATCH V1] mmc: tegra: Fix for SDMMC pads autocal parsing from dt
-Date: Fri, 14 Dec 2018 09:46:59 +0100
-Message-ID: <20181214084659.GA19965@ulmo>
-References: <1544732743-11106-1-git-send-email-skomatineni@nvidia.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH] dt-bindings: mmc: renesas_sdhi: Add r8a774c0 support
+Date: Fri, 14 Dec 2018 11:35:40 +0100
+Message-ID: <CAMuHMdU_Kf11jGJB8wUfwdb6MEo=9Hp21GJp4197+BxymxbP1Q@mail.gmail.com>
+References: <1544732529-7003-1-git-send-email-fabrizio.castro@bp.renesas.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="LZvS9be/3tNcYl/X"
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1544732743-11106-1-git-send-email-skomatineni@nvidia.com>
+In-Reply-To: <1544732529-7003-1-git-send-email-fabrizio.castro@bp.renesas.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Sowjanya Komatineni <skomatineni@nvidia.com>
-Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, jonathanh@nvidia.com, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Fabrizio Castro <fabrizio.castro@bp.renesas.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Linux MMC List <linux-mmc@vger.kernel.org>, "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Simon Horman <horms@verge.net.au>, Geert Uytterhoeven <geert+renesas@glider.be>, Chris Paterson <Chris.Paterson2@renesas.com>, Biju Das <biju.das@bp.renesas.com>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
+On Thu, Dec 13, 2018 at 9:22 PM Fabrizio Castro
+<fabrizio.castro@bp.renesas.com> wrote:
+> Document RZ/G2E (R8A774C0) SoC bindings.
+>
+> Signed-off-by: Fabrizio Castro <fabrizio.castro@bp.renesas.com>
 
---LZvS9be/3tNcYl/X
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
-On Thu, Dec 13, 2018 at 12:25:43PM -0800, Sowjanya Komatineni wrote:
-> Some of the SDMMC pads auto calibration values parsed from
-> devicetree are assigned incorrectly. This patch fixes it.
->=20
-> Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
-> ---
->  drivers/mmc/host/sdhci-tegra.c | 8 ++++----
->  1 file changed, 4 insertions(+), 4 deletions(-)
+Gr{oetje,eeting}s,
 
-Acked-by: Thierry Reding <treding@nvidia.com>
+                        Geert
 
---LZvS9be/3tNcYl/X
-Content-Type: application/pgp-signature; name="signature.asc"
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
 
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAlwTbgEACgkQ3SOs138+
-s6G/Hw/9FRc0rkwbf8rQpR3O0Hqm4mr9fInom3F1We8s9MJAMFM8j+ZwcCi3fVir
-tBZn2vSvdm6H0isoXDa6ZaHERGWcgcKOO+K3gyMf+iC8qQyLfjEiv6UKWfgyUe/w
-2QhUN4h9XrjTaEKZzyXQE+1JHzYX/OOViA5ee8MzzK9C7L7+kcQ88q2SodLlYgxp
-JK1NbV6ijIoCz3w4jHJRZ83LUbWnm4kKt5UXWCPvGjx64MFEOSK8g96AMI1pl5b1
-wpBP6aLuTNgteNCg3OemFPtpKicKfeS6gCUBG5qh6IeAsbp5w3gXSlsNHBGLuBYJ
-5YuCuizy40/qZz/o5mLP+ektXQk2lLjzGsrcrwfLWISUk3Kbmnv0fFbds6IaTBNn
-83VbGd9xIwCqK0ItP73dw5lkEW8D+sOwIlKIBBwxCY0v1KovadAdYlYSBfjHpOGv
-Gx4Emi3AbW+nuAxHPtvgtMwCEc9JN+i9Vkks1mEZ0dU56FpmglWhq5ybJg3s2bf6
-9+/kSqpk8CDhA6YUfXnVfvYZAXAGb5xvbEOF1yE5iH38OJZPMPhwTlD6FNjj+cSR
-q/V97yN44x7bNrdaSB9GamzUYMkEVT96aglxdgsCXVo95VlmFZfO5dUf+oA6r8LA
-4dRZLri2sgILF2BFmSA4Ce1LfkfPVJpzV34FPcUDMENaK0lvmoc=
-=9eTQ
------END PGP SIGNATURE-----
-
---LZvS9be/3tNcYl/X--
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
