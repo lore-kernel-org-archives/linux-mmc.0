@@ -1,22 +1,26 @@
 From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH] dt-bindings: mmc: renesas_sdhi: Add r8a774c0 support
-Date: Fri, 14 Dec 2018 11:35:40 +0100
-Message-ID: <CAMuHMdU_Kf11jGJB8wUfwdb6MEo=9Hp21GJp4197+BxymxbP1Q@mail.gmail.com>
-References: <1544732529-7003-1-git-send-email-fabrizio.castro@bp.renesas.com>
+Subject: Re: [PATCH] mmc: renesas_sdhi_internal_dmac: Whitelist r8a774c0
+Date: Fri, 14 Dec 2018 11:37:36 +0100
+Message-ID: <CAMuHMdW3_MAFbue0T2sosKQ_YbsLWsw8PXhqc6dbiuo52eyBUw@mail.gmail.com>
+References: <1544732547-7094-1-git-send-email-fabrizio.castro@bp.renesas.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1544732529-7003-1-git-send-email-fabrizio.castro@bp.renesas.com>
+In-Reply-To: <1544732547-7094-1-git-send-email-fabrizio.castro@bp.renesas.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Fabrizio Castro <fabrizio.castro@bp.renesas.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Linux MMC List <linux-mmc@vger.kernel.org>, "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Simon Horman <horms@verge.net.au>, Geert Uytterhoeven <geert+renesas@glider.be>, Chris Paterson <Chris.Paterson2@renesas.com>, Biju Das <biju.das@bp.renesas.com>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Biju Das <biju.das@bp.renesas.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Simon Horman <horms@verge.net.au>, Geert Uytterhoeven <geert+renesas@glider.be>, Chris Paterson <Chris.Paterson2@renesas.com>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
 On Thu, Dec 13, 2018 at 9:22 PM Fabrizio Castro
 <fabrizio.castro@bp.renesas.com> wrote:
-> Document RZ/G2E (R8A774C0) SoC bindings.
+> From: Biju Das <biju.das@bp.renesas.com>
 >
-> Signed-off-by: Fabrizio Castro <fabrizio.castro@bp.renesas.com>
+> We need r8a774c0 to be whitelisted for SDHI to work on the RZ/G2E,
+> but we don't care about the revision of the SoC, so just whitelist
+> the generic part number.
+>
+> Signed-off-by: Biju Das <biju.das@bp.renesas.com>
 
 Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
