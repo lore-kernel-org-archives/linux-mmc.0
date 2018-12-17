@@ -1,7 +1,7 @@
 From: Sowjanya Komatineni <skomatineni@nvidia.com>
-Subject: [PATCH V2] mmc: tegra: HW Command Queue Support for Tegra SDMMC
-Date: Mon, 17 Dec 2018 10:41:20 -0800
-Message-ID: <1545072080-6176-1-git-send-email-skomatineni@nvidia.com>
+Subject: [PATCH V3] mmc: tegra: HW Command Queue Support for Tegra SDMMC
+Date: Mon, 17 Dec 2018 10:46:13 -0800
+Message-ID: <1545072373-6562-1-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
@@ -35,8 +35,7 @@ Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
  drivers/mmc/host/Kconfig       |  1 +
  drivers/mmc/host/sdhci-tegra.c | 89 +++++++++++++++++++++++++++++++++++++++++-
  drivers/mmc/host/sdhci.c       |  3 +-
- drivers/mmc/host/sdhci.h       |  1 +
- 4 files changed, 92 insertions(+), 2 deletions(-)
+ 3 files changed, 91 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
 index 1b58739d9744..5aa2de2c7609 100644
@@ -220,17 +219,5 @@ index 99bdae53fa2e..87375fbfca30 100644
  		ctrl |= SDHCI_CTRL_ADMA64;
  	else
  		ctrl |= SDHCI_CTRL_ADMA32;
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index b001cf4d3d7e..9ff7a138270e 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -777,6 +777,7 @@ void sdhci_cqe_enable(struct mmc_host *mmc);
- void sdhci_cqe_disable(struct mmc_host *mmc, bool recovery);
- bool sdhci_cqe_irq(struct sdhci_host *host, u32 intmask, int *cmd_error,
- 		   int *data_error);
-+u32 sdhci_cqhci_irq(struct sdhci_host *host, u32 intmask);
- 
- void sdhci_dumpregs(struct sdhci_host *host);
- void sdhci_enable_v4_mode(struct sdhci_host *host);
 -- 
 2.7.4
