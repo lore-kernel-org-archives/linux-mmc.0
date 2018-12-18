@@ -1,223 +1,253 @@
-From: Sowjanya Komatineni <skomatineni@nvidia.com>
-Subject: [PATCH V3] mmc: tegra: HW Command Queue Support for Tegra SDMMC
-Date: Mon, 17 Dec 2018 10:46:13 -0800
-Message-ID: <1545072373-6562-1-git-send-email-skomatineni@nvidia.com>
+From: "Ernest Zhang(WH)" <ernest.zhang@bayhubtech.com>
+Subject: [PATCH V2 1/2] mmc: sdhci: Fix O2 Host PLL and card detect issue
+Date: Tue, 18 Dec 2018 11:40:29 +0000
+Message-ID: <20181218114003.10002-1-ernest.zhang@bayhubtech.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
-Cc: thierry.reding@gmail.com, jonathanh@nvidia.com, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, Sowjanya Komatineni <skomatineni@nvidia.com>
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: "Andy Dai (WH)" <andy.dai@bayhubtech.com>, "Xiaoguang Yu (WH)" <xiaoguang.yu@bayhubtech.com>, "Shirley Her (SC)" <shirley.her@bayhubtech.com>, "Mike Li (WH)" <mike.li@bayhubtech.com>, "Ernest Zhang(WH)" <ernest.zhang@bayhubtech.com>
 List-Id: linux-mmc@vger.kernel.org
 
-This patch adds HW Command Queue for supported Tegra SDMMC
-controllers.
+From: "Ernest Zhang" <ernest.zhang@bayhubtech.com>
 
-Tegra SDHCI with Quirk SDHCI_QUIRK2_BROKEN_64_BIT_DMA disables the
-use of 64_BIT DMA to disable 64-bit addressing mode access to the
-system memory and sdhci_cqe_enable using flag SDHCI_USE_64_BIT_DMA
-for ADMA32/ADMA2 Vs ADMA64/ADMA3 DMA selection.
+1. O2 Host Controller PLL lock status is not in compliance with
+CLOCK_CONTROL register bit 1
+2. O2 Host Controller card detect function only work when PLL is
+enabled and locked
 
-CQE need to use ADMA3 as it need to fetch task descriptor along
-with transfer descriptor, so this patch forces DMA Select to be
-ADMA3 for CQE.
-
-Note that this patch depends on below patches
-[0] DMA Config prior to CQE
-    https://lkml.org/lkml/2018/12/14/1062
-[1] SDMMC address range
-    https://lkml.org/lkml/2018/12/14/1323
-[2] Fix sdhci_do_enable_v4_mode
-    https://lkml.org/lkml/2018/12/14/72
-
-Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
+Signed-off-by: Ernest Zhang <ernest.zhang@bayhubtech.com>
 ---
- drivers/mmc/host/Kconfig       |  1 +
- drivers/mmc/host/sdhci-tegra.c | 89 +++++++++++++++++++++++++++++++++++++++++-
- drivers/mmc/host/sdhci.c       |  3 +-
- 3 files changed, 91 insertions(+), 2 deletions(-)
+Change in V2:
+	1. Remove unused sdhci_ops function pointer
+	2. Change kind of timeout check, get the time first
+	3. Rename CARD PRESENT register bit16 and bit 18 macro
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 1b58739d9744..5aa2de2c7609 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -250,6 +250,7 @@ config MMC_SDHCI_TEGRA
- 	depends on ARCH_TEGRA
- 	depends on MMC_SDHCI_PLTFM
- 	select MMC_SDHCI_IO_ACCESSORS
-+	select MMC_CQHCI
- 	help
- 	  This selects the Tegra SD/MMC controller. If you have a Tegra
- 	  platform with SD or MMC devices, say Y or M here.
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 7b95d088fdef..ba8bd72ec59a 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -33,6 +33,7 @@
- #include <linux/ktime.h>
- 
- #include "sdhci-pltfm.h"
-+#include "cqhci.h"
- 
- /* Tegra SDHOST controller vendor register definitions */
- #define SDHCI_TEGRA_VENDOR_CLOCK_CTRL			0x100
-@@ -89,6 +90,10 @@
- #define NVQUIRK_NEEDS_PAD_CONTROL			BIT(7)
- #define NVQUIRK_DIS_CARD_CLK_CONFIG_TAP			BIT(8)
- 
-+/* SDMMC CQE Base Address for Tegra Host Ver 4.1 and Higher */
-+#define SDHCI_TEGRA_CQE_BASE_ADDR			0xF000
-+
-+
- struct sdhci_tegra_soc_data {
- 	const struct sdhci_pltfm_data *pdata;
- 	u32 nvquirks;
-@@ -128,6 +133,7 @@ struct sdhci_tegra {
- 	u32 default_tap;
- 	u32 default_trim;
- 	u32 dqs_trim;
-+	bool enable_hwcq;
- };
- 
- static u16 tegra_sdhci_readw(struct sdhci_host *host, int reg)
-@@ -836,6 +842,30 @@ static void tegra_sdhci_voltage_switch(struct sdhci_host *host)
- 		tegra_host->pad_calib_required = true;
+Change in V1:
+	N/A
+---
+ drivers/mmc/host/sdhci-pci-core.c    |   9 +++
+ drivers/mmc/host/sdhci-pci-o2micro.c | 121 +++++++++++++++++++++++++++++++=
++++-
+ drivers/mmc/host/sdhci-pci.h         |   1 +
+ drivers/mmc/host/sdhci.h             |   4 ++
+ 4 files changed, 132 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci=
+-core.c
+index 2a6eba74b94e..fc4f35653602 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -1257,6 +1257,14 @@ static int jmicron_resume(struct sdhci_pci_chip *chi=
+p)
  }
- 
-+static void sdhci_tegra_dumpregs(struct mmc_host *mmc)
-+{
-+	sdhci_dumpregs(mmc_priv(mmc));
-+}
-+
-+static u32 sdhci_tegra_cqhci_irq(struct sdhci_host *host, u32 intmask)
-+{
-+	int cmd_error = 0;
-+	int data_error = 0;
-+
-+	if (!sdhci_cqe_irq(host, intmask, &cmd_error, &data_error))
-+		return intmask;
-+
-+	cqhci_irq(host->mmc, intmask, cmd_error, data_error);
-+
-+	return 0;
-+}
-+
-+static const struct cqhci_host_ops sdhci_tegra_cqhci_ops = {
-+	.enable	= sdhci_cqe_enable,
-+	.disable = sdhci_cqe_disable,
-+	.dumpregs = sdhci_tegra_dumpregs,
+ #endif
+=20
++static const struct sdhci_ops sdhci_pci_o2_ops =3D {
++	.set_clock =3D sdhci_pci_o2_set_clock,
++	.enable_dma =3D sdhci_pci_enable_dma,
++	.set_bus_width =3D sdhci_set_bus_width,
++	.reset =3D sdhci_reset,
++	.set_uhs_signaling =3D sdhci_set_uhs_signaling,
 +};
 +
- static const struct sdhci_ops tegra_sdhci_ops = {
- 	.get_ro     = tegra_sdhci_get_ro,
- 	.read_w     = tegra_sdhci_readw,
-@@ -989,6 +1019,7 @@ static const struct sdhci_ops tegra186_sdhci_ops = {
- 	.set_uhs_signaling = tegra_sdhci_set_uhs_signaling,
- 	.voltage_switch = tegra_sdhci_voltage_switch,
- 	.get_max_clock = tegra_sdhci_get_max_clock,
-+	.irq = sdhci_tegra_cqhci_irq,
+ static const struct sdhci_pci_fixes sdhci_o2 =3D {
+ 	.probe =3D sdhci_pci_o2_probe,
+ 	.quirks =3D SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
+@@ -1265,6 +1273,7 @@ static const struct sdhci_pci_fixes sdhci_o2 =3D {
+ #ifdef CONFIG_PM_SLEEP
+ 	.resume =3D sdhci_pci_o2_resume,
+ #endif
++	.ops =3D &sdhci_pci_o2_ops,
  };
- 
- static const struct sdhci_pltfm_data sdhci_tegra186_pdata = {
-@@ -1030,6 +1061,55 @@ static const struct of_device_id sdhci_tegra_dt_match[] = {
- };
- MODULE_DEVICE_TABLE(of, sdhci_tegra_dt_match);
- 
-+static int sdhci_tegra_add_host(struct sdhci_host *host)
+=20
+ static const struct sdhci_pci_fixes sdhci_jmicron =3D {
+diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-=
+pci-o2micro.c
+index cc3ffeffd7a2..506b93e5dcd8 100644
+--- a/drivers/mmc/host/sdhci-pci-o2micro.c
++++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+@@ -60,6 +60,13 @@
+ #define O2_SD_VENDOR_SETTING2	0x1C8
+ #define O2_SD_HW_TUNING_DISABLE	BIT(4)
+=20
++#define O2_PLL_WDT_CONTROL1	0x1CC
++#define  O2_PLL_FORCE_ACTIVE	BIT(18)
++#define  O2_PLL_LOCK_STATUS	BIT(14)
++#define  O2_PLL_SOFT_RESET	BIT(12)
++
++#define O2_SD_DETECT_SETTING 0x324
++
+ static void sdhci_o2_set_tuning_mode(struct sdhci_host *host)
+ {
+ 	u16 reg;
+@@ -283,6 +290,113 @@ static void sdhci_pci_o2_enable_msi(struct sdhci_pci_=
+chip *chip,
+ 	host->irq =3D pci_irq_vector(chip->pdev, 0);
+ }
+=20
++static void sdhci_o2_wait_card_detect_stable(struct sdhci_host *host)
 +{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
-+	struct cqhci_host *cq_host;
-+	bool dma64;
-+	int ret;
++	ktime_t timeout;
++	u32 scratch32;
 +
-+	if (!tegra_host->enable_hwcq)
-+		return sdhci_add_host(host);
++	/* Wait max 50 ms */
++	timeout =3D ktime_add_ms(ktime_get(), 50);
++	while (1) {
++		bool timedout =3D ktime_after(ktime_get(), timeout);
 +
-+	host->v4_mode = true;
++		scratch32 =3D sdhci_readl(host, SDHCI_PRESENT_STATE);
++		if ((scratch32 & SDHCI_CARD_PRESENT) >> SDHCI_CARD_PRES_SHIFT
++		    =3D=3D (scratch32 & SDHCI_CD_LVL) >> SDHCI_CD_LVL_SHIFT)
++			break;
 +
-+	ret = sdhci_setup_host(host);
-+	if (ret)
-+		return ret;
-+
-+	host->mmc->caps2 |= MMC_CAP2_CQE | MMC_CAP2_CQE_DCMD;
-+
-+	cq_host = devm_kzalloc(host->mmc->parent,
-+				sizeof(*cq_host), GFP_KERNEL);
-+	if (!cq_host) {
-+		ret = -ENOMEM;
-+		goto cleanup;
++		if (timedout) {
++			pr_err("%s: Card Detect debounce never finished.\n",
++			       mmc_hostname(host->mmc));
++			sdhci_dumpregs(host);
++			return;
++		}
++		udelay(10);
 +	}
-+
-+	cq_host->mmio = host->ioaddr + SDHCI_TEGRA_CQE_BASE_ADDR;
-+	cq_host->ops = &sdhci_tegra_cqhci_ops;
-+
-+	dma64 = host->flags & SDHCI_USE_64_BIT_DMA;
-+	if (dma64)
-+		cq_host->caps |= CQHCI_TASK_DESC_SZ_128;
-+
-+	ret = cqhci_init(cq_host, host->mmc, dma64);
-+	if (ret)
-+		goto cleanup;
-+
-+	ret = __sdhci_add_host(host);
-+	if (ret)
-+		goto cleanup;
-+
-+	return 0;
-+
-+cleanup:
-+	sdhci_cleanup_host(host);
-+	return ret;
-+
 +}
 +
- static int sdhci_tegra_probe(struct platform_device *pdev)
- {
- 	const struct of_device_id *match;
-@@ -1039,6 +1119,7 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
- 	struct sdhci_tegra *tegra_host;
- 	struct clk *clk;
- 	int rc;
-+	struct resource *iomem;
- 
- 	match = of_match_device(sdhci_tegra_dt_match, &pdev->dev);
- 	if (!match)
-@@ -1056,6 +1137,12 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
- 	tegra_host->pad_control_available = false;
- 	tegra_host->soc_data = soc_data;
- 
-+	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-+	if (resource_size(iomem) > SDHCI_TEGRA_CQE_BASE_ADDR)
-+		tegra_host->enable_hwcq = true;
-+	else
-+		tegra_host->enable_hwcq = false;
++static void sdhci_o2_enable_internal_clock(struct sdhci_host *host)
++{
++	ktime_t timeout;
++	u16 scratch;
++	u32 scratch32;
 +
- 	if (soc_data->nvquirks & NVQUIRK_NEEDS_PAD_CONTROL) {
- 		rc = tegra_sdhci_init_pinctrl_info(&pdev->dev, tegra_host);
- 		if (rc == 0)
-@@ -1117,7 +1204,7 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
- 
- 	usleep_range(2000, 4000);
- 
--	rc = sdhci_add_host(host);
-+	rc = sdhci_tegra_add_host(host);
- 	if (rc)
- 		goto err_add_host;
- 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 99bdae53fa2e..87375fbfca30 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -3308,7 +3308,8 @@ void sdhci_cqe_enable(struct mmc_host *mmc)
- 
- 	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
- 	ctrl &= ~SDHCI_CTRL_DMA_MASK;
--	if (host->flags & SDHCI_USE_64_BIT_DMA)
-+	if ((host->flags & SDHCI_USE_64_BIT_DMA) ||
-+			(host->quirks2 & SDHCI_QUIRK2_BROKEN_64_BIT_DMA))
- 		ctrl |= SDHCI_CTRL_ADMA64;
- 	else
- 		ctrl |= SDHCI_CTRL_ADMA32;
--- 
-2.7.4
++	/* PLL software reset */
++	scratch32 =3D sdhci_readl(host, O2_PLL_WDT_CONTROL1);
++	scratch32 |=3D O2_PLL_SOFT_RESET;
++	sdhci_writel(host, scratch32, O2_PLL_WDT_CONTROL1);
++	udelay(1);
++	scratch32 &=3D ~(O2_PLL_SOFT_RESET);
++	sdhci_writel(host, scratch32, O2_PLL_WDT_CONTROL1);
++
++	/* PLL force active */
++	scratch32 |=3D O2_PLL_FORCE_ACTIVE;
++	sdhci_writel(host, scratch32, O2_PLL_WDT_CONTROL1);
++
++	/* Wait max 20 ms */
++	timeout =3D ktime_add_ms(ktime_get(), 20);
++	while (1) {
++		bool timedout =3D ktime_after(ktime_get(), timeout);
++
++		scratch =3D sdhci_readw(host, O2_PLL_WDT_CONTROL1);
++		if (scratch & O2_PLL_LOCK_STATUS)
++			break;
++		if (timedout) {
++			pr_err("%s: Internal clock never stabilised.\n",
++			       mmc_hostname(host->mmc));
++			sdhci_dumpregs(host);
++			goto out;
++		}
++		udelay(10);
++	}
++
++	/* Wait for card detect finish */
++	udelay(1);
++	sdhci_o2_wait_card_detect_stable(host);
++
++out:
++	/* Cancel PLL force active */
++	scratch32 =3D sdhci_readl(host, O2_PLL_WDT_CONTROL1);
++	scratch32 &=3D ~O2_PLL_FORCE_ACTIVE;
++	sdhci_writel(host, scratch32, O2_PLL_WDT_CONTROL1);
++}
++
++static int sdhci_o2_get_cd(struct mmc_host *mmc)
++{
++	struct sdhci_host *host =3D mmc_priv(mmc);
++
++	sdhci_o2_enable_internal_clock(host);
++
++	return !!(sdhci_readl(host, SDHCI_PRESENT_STATE) & SDHCI_CARD_PRESENT);
++}
++
++static void sdhci_o2_enable_clk(struct sdhci_host *host, u16 clk)
++{
++	/* Enable internal clock */
++	clk |=3D SDHCI_CLOCK_INT_EN;
++	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
++
++	if (sdhci_o2_get_cd(host->mmc)) {
++		clk |=3D SDHCI_CLOCK_CARD_EN;
++		sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
++	}
++}
++
++void sdhci_pci_o2_set_clock(struct sdhci_host *host, unsigned int clock)
++{
++	u16 clk;
++
++	host->mmc->actual_clock =3D 0;
++
++	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
++
++	if (clock =3D=3D 0)
++		return;
++
++	clk =3D sdhci_calc_clk(host, clock, &host->mmc->actual_clock);
++	sdhci_o2_enable_clk(host, clk);
++}
++
+ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+ {
+ 	struct sdhci_pci_chip *chip;
+@@ -316,7 +430,11 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slo=
+t)
+ 				host->flags |=3D SDHCI_SIGNALING_180;
+ 				host->mmc->caps2 |=3D MMC_CAP2_NO_SD;
+ 				host->mmc->caps2 |=3D MMC_CAP2_NO_SDIO;
++				pci_write_config_dword(chip->pdev,
++						       O2_SD_DETECT_SETTING, 3);
+ 			}
++
++			slot->host->mmc_host_ops.get_cd =3D sdhci_o2_get_cd;
+ 		}
+=20
+ 		host->mmc_host_ops.execute_tuning =3D sdhci_o2_execute_tuning;
+@@ -490,9 +608,6 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
+ 		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
+ 		break;
+ 	case PCI_DEVICE_ID_O2_SEABIRD0:
+-		if (chip->pdev->revision =3D=3D 0x01)
+-			chip->quirks |=3D SDHCI_QUIRK_DELAY_AFTER_POWER;
+-		/* fall through */
+ 	case PCI_DEVICE_ID_O2_SEABIRD1:
+ 		/* UnLock WP */
+ 		ret =3D pci_read_config_byte(chip->pdev,
+diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+index 2ef0bdca9197..e41a85f0b40a 100644
+--- a/drivers/mmc/host/sdhci-pci.h
++++ b/drivers/mmc/host/sdhci-pci.h
+@@ -184,6 +184,7 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip);
+ #ifdef CONFIG_PM_SLEEP
+ int sdhci_pci_o2_resume(struct sdhci_pci_chip *chip);
+ #endif
++void sdhci_pci_o2_set_clock(struct sdhci_host *host, unsigned int clock);
+=20
+ extern const struct sdhci_pci_fixes sdhci_arasan;
+ extern const struct sdhci_pci_fixes sdhci_snps;
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 6cc9a3c2ac66..924e03332cf7 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -73,6 +73,10 @@
+ #define  SDHCI_SPACE_AVAILABLE	0x00000400
+ #define  SDHCI_DATA_AVAILABLE	0x00000800
+ #define  SDHCI_CARD_PRESENT	0x00010000
++#define   SDHCI_CARD_PRES_SHIFT	16
++#define  SDHCI_CD_STABLE	0x00020000
++#define  SDHCI_CD_LVL		0x00040000
++#define   SDHCI_CD_LVL_SHIFT	18
+ #define  SDHCI_WRITE_PROTECT	0x00080000
+ #define  SDHCI_DATA_LVL_MASK	0x00F00000
+ #define   SDHCI_DATA_LVL_SHIFT	20
+--=20
+2.16.4
