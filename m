@@ -1,54 +1,43 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V1 2/2] mmc: tegra: SDMMC pads auto-calibration
-Date: Wed, 19 Dec 2018 12:39:14 +0100
-Message-ID: <CAPDyKFoVq4HwdrJ_X3jv41ahXHnp6MbU8fmC83HJ6bhN5MYMhw@mail.gmail.com>
-References: <1545160787-3157-1-git-send-email-skomatineni@nvidia.com> <1545160787-3157-2-git-send-email-skomatineni@nvidia.com>
+From: Sowjanya Komatineni <skomatineni@nvidia.com>
+Subject: [PATCH V2] DMA Block size configuration prior to CQE
+Date: Wed, 19 Dec 2018 12:33:03 -0800
+Message-ID: <1545251584-2105-1-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1545160787-3157-2-git-send-email-skomatineni@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Sowjanya Komatineni <skomatineni@nvidia.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Mikko Perttunen <mperttunen@nvidia.com>, Thierry Reding <thierry.reding@gmail.com>, Jon Hunter <jonathanh@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, DTML <devicetree@vger.kernel.org>, linux-tegra@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc: thierry.reding@gmail.com, jonathanh@nvidia.com, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Sowjanya Komatineni <skomatineni@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-[...]
+As per eMMC5.1 Spec Section 6.6.39.1, DMA Block size should be to 512 B
+before enabling command queue.
 
->         if (tegra_host->pad_calib_required)
-> @@ -805,8 +854,15 @@ static int tegra_sdhci_init_pinctrl_info(struct device *dev,
->                 return -1;
->         }
->
-> -       tegra_host->pinctrl_state_3v3 =
-> -               pinctrl_lookup_state(tegra_host->pinctrl_sdmmc, "sdmmc-3v3");
-> +       tegra_host->pinctrl_state_1v8_drv = pinctrl_lookup_state(
-> +                               tegra_host->pinctrl_sdmmc, "sdmmc-1v8-drv");
+Tegra SDHCI Host design strictly follows this sequence preventing write
+access to SDHCI_BLOCK_SIZE when CQE is set in CQHCI_CFG. Writing to
+SDHCI_BLOCK_SIZE register when CQE is enabled results in crash.
 
-This requires and updated DT doc for tegra sdhci. Please make that a
-separate patch and put it first in the series. Also don't forget to
-include the DT maintainers in the to field for that patch.
+This patch is needed for enabling HW Command queue for Tegra SDHCI.
 
-> +
-> +       tegra_host->pinctrl_state_3v3_drv = pinctrl_lookup_state(
-> +                               tegra_host->pinctrl_sdmmc, "sdmmc-3v3-drv");
+Note: couple more patches are needed for enabling HW CMDQ on Tegra SDHCI.
+Based on patch review feedback from Ulf on the other HW Command queue
+patch, I will resend new patch series with all these dependency patches
+together along with covering letter.
 
-Ditto.
+[0] DMA Config prior to CQE
+    https://lkml.org/lkml/2018/12/14/1062
+[1] SDMMC address range
+    https://lkml.org/lkml/2018/12/14/1323
+[2] Fix sdhci_do_enable_v4_mode
+    https://lkml.org/lkml/2018/12/14/72
+[3] Add HW Command Queue for Tegra SDHCI
+    https://patchwork.kernel.org/patch/10731915/
 
-> +
-> +       tegra_host->pinctrl_state_3v3 = pinctrl_lookup_state(
-> +                               tegra_host->pinctrl_sdmmc, "sdmmc-3v3");
-> +
+Sowjanya Komatineni (1):
+  mmc: cqhci: DMA Configuration prior to CQE
 
-The above looks like an unnecessary line change. Please just stick to
-the existing format and avoid changing code that doesn't need to be
-changed.
+ drivers/mmc/host/cqhci.c | 18 +++++++++++++++---
+ 1 file changed, 15 insertions(+), 3 deletions(-)
 
->         if (IS_ERR(tegra_host->pinctrl_state_3v3)) {
->                 dev_warn(dev, "Missing 3.3V pad state, err: %ld\n",
->                          PTR_ERR(tegra_host->pinctrl_state_3v3));
-> --
-> 2.7.4
->
-
-Kind regards
-Uffe
+-- 
+2.7.4
