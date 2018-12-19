@@ -1,84 +1,45 @@
 From: Sowjanya Komatineni <skomatineni@nvidia.com>
-Subject: [PATCH V2] mmc: cqhci: DMA Configuration prior to CQE
-Date: Wed, 19 Dec 2018 12:33:04 -0800
-Message-ID: <1545251584-2105-2-git-send-email-skomatineni@nvidia.com>
-References: <1545251584-2105-1-git-send-email-skomatineni@nvidia.com>
+Subject: [PATCH V2 1/3] dt-bindings: mmc: tegra: Add pinctrl for pad drive strength config
+Date: Wed, 19 Dec 2018 14:55:51 -0800
+Message-ID: <1545260153-11338-1-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1545251584-2105-1-git-send-email-skomatineni@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc: thierry.reding@gmail.com, jonathanh@nvidia.com, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Sowjanya Komatineni <skomatineni@nvidia.com>
+To: robh+dt@kernel.org, mark.rutland@arm.com, mperttunen@nvidia.com, thierry.reding@gmail.com, jonathanh@nvidia.com, adrian.hunter@intel.com, ulf.hansson@linaro.org, pchandru@nvidia.com
+Cc: devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Sowjanya Komatineni <skomatineni@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-eMMC-5.1 JESD84-B51 Spec (Section 6.6.39.1), mentions "Prior to
-enabling command queuing, the block size shall be set to 512 B.
-Device may respond with an error to CMD46/CMD47 if block size
-is not 512 B".
-
-This patch fixes the sequence to follow exact as per the spec.
+Add pinctrl for 3V3 and 1V8 pad drive strength configuration for
+Tegra210 sdmmc which has pad configuration registers in the pinmux
+reigster domain.
 
 Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
 ---
-Changes for v2:
-   - Updated commit message with JDEC Spec typo and exact spec reference
-     on the requirement.
+ Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
- drivers/mmc/host/cqhci.c | 18 +++++++++++++++---
- 1 file changed, 15 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/mmc/host/cqhci.c b/drivers/mmc/host/cqhci.c
-index 159270e947cf..f701342e7212 100644
---- a/drivers/mmc/host/cqhci.c
-+++ b/drivers/mmc/host/cqhci.c
-@@ -248,6 +248,9 @@ static void __cqhci_enable(struct cqhci_host *cq_host)
- 		cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
- 	}
+diff --git a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
+index 32b4b4e41923..2cecdc71d94c 100644
+--- a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
++++ b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
+@@ -39,12 +39,16 @@ sdhci@c8000200 {
+ 	bus-width = <8>;
+ };
  
-+	if (cq_host->ops->enable)
-+		cq_host->ops->enable(mmc);
-+
- 	cqcfg &= ~(CQHCI_DCMD | CQHCI_TASK_DESC_SZ);
- 
- 	if (mmc->caps2 & MMC_CAP2_CQE_DCMD)
-@@ -273,9 +276,6 @@ static void __cqhci_enable(struct cqhci_host *cq_host)
- 
- 	mmc->cqe_on = true;
- 
--	if (cq_host->ops->enable)
--		cq_host->ops->enable(mmc);
--
- 	/* Ensure all writes are done before interrupts are enabled */
- 	wmb();
- 
-@@ -561,6 +561,7 @@ static int cqhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	int tag = cqhci_tag(mrq);
- 	struct cqhci_host *cq_host = mmc->cqe_private;
- 	unsigned long flags;
-+	u32 cqcfg = 0;
- 
- 	if (!cq_host->enabled) {
- 		pr_err("%s: cqhci: not enabled\n", mmc_hostname(mmc));
-@@ -579,8 +580,19 @@ static int cqhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 			pr_err("%s: cqhci: CQE failed to exit halt state\n",
- 			       mmc_hostname(mmc));
- 		}
-+		/* Configuration must not be changed while enabled */
-+		cqcfg = cqhci_readl(cq_host, CQHCI_CFG);
-+		if (cqcfg & CQHCI_ENABLE) {
-+			cqcfg &= ~CQHCI_ENABLE;
-+			cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
-+		}
-+
- 		if (cq_host->ops->enable)
- 			cq_host->ops->enable(mmc);
-+
-+		cqcfg |= CQHCI_ENABLE;
-+		cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
-+
- 	}
- 
- 	if (mrq->data) {
+-Optional properties for Tegra210 and Tegra186:
++Optional properties for Tegra210, Tegra186 and Tegra194:
+ - pinctrl-names, pinctrl-0, pinctrl-1 : Specify pad voltage
+   configurations. Valid pinctrl-names are "sdmmc-3v3" and "sdmmc-1v8"
+   for controllers supporting multiple voltage levels. The order of names
+   should correspond to the pin configuration states in pinctrl-0 and
+   pinctrl-1.
++- pinctrl-names : "sdmmc-3v3-drv" and "sdmmc-1v8-drv" are applicable for
++  Tegra210 where pad config registers are in the pinmux register domain
++  for pull-up-strength and pull-down-strength values configuration when
++  using pads at 3V3 and 1V8 levels.
+ - nvidia,only-1-8-v : The presence of this property indicates that the
+   controller operates at a 1.8 V fixed I/O voltage.
+ - nvidia,pad-autocal-pull-up-offset-3v3,
 -- 
 2.7.4
