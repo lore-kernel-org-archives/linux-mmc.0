@@ -1,153 +1,243 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [v4] mmc: mediatek: Add MMC_CAP_SDIO_IRQ support
-Date: Wed, 19 Dec 2018 10:18:06 +0100
-Message-ID: <CAPDyKFr+TYXCEDtsdXQ5tLNqDv1yx2zPh+yiURmq_wji9q4cAg@mail.gmail.com>
-References: <1545136398-5066-1-git-send-email-jjian.zhou@mediatek.com>
+Subject: Re: [PATCH V3] mmc: tegra: HW Command Queue Support for Tegra SDMMC
+Date: Wed, 19 Dec 2018 12:26:20 +0100
+Message-ID: <CAPDyKFpkFy+8E8PnzQ+SXg=hGfDrfbiYw4ETe1qd=BYJ+eFbzA@mail.gmail.com>
+References: <1545072373-6562-1-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1545136398-5066-1-git-send-email-jjian.zhou@mediatek.com>
+In-Reply-To: <1545072373-6562-1-git-send-email-skomatineni@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jjian Zhou <jjian.zhou@mediatek.com>
-Cc: Matthias Brugger <matthias.bgg@gmail.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Ryder Lee <ryder.lee@mediatek.com>, Sean Wang <sean.wang@mediatek.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, linux-mediatek@lists.infradead.org, srv_heupstream <srv_heupstream@mediatek.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Yong Mao <yong.mao@mediatek.com>
+To: Sowjanya Komatineni <skomatineni@nvidia.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Thierry Reding <thierry.reding@gmail.com>, Jon Hunter <jonathanh@nvidia.com>, linux-tegra@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 18 Dec 2018 at 13:33, Jjian Zhou <jjian.zhou@mediatek.com> wrote:
+On Mon, 17 Dec 2018 at 19:46, Sowjanya Komatineni
+<skomatineni@nvidia.com> wrote:
 >
-> From: jjian zhou <jjian.zhou@mediatek.com>
+> This patch adds HW Command Queue for supported Tegra SDMMC
+> controllers.
 >
-> This patch enables support SDIO IRQs. It enables
-> MMC_CAP_SDIO_IRQ & MMC_CAP2_SDIO_IRQ_NOTHREAD
-> and implement the ->ack_sdio_irq callback.
+> Tegra SDHCI with Quirk SDHCI_QUIRK2_BROKEN_64_BIT_DMA disables the
+> use of 64_BIT DMA to disable 64-bit addressing mode access to the
+> system memory and sdhci_cqe_enable using flag SDHCI_USE_64_BIT_DMA
+> for ADMA32/ADMA2 Vs ADMA64/ADMA3 DMA selection.
 >
-> Signed-off-by: Jjian Zhou <jjian.zhou@mediatek.com>
-> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
-> Signed-off-by: Yong Mao <yong.mao@mediatek.com>
+> CQE need to use ADMA3 as it need to fetch task descriptor along
+> with transfer descriptor, so this patch forces DMA Select to be
+> ADMA3 for CQE.
+>
+> Note that this patch depends on below patches
+> [0] DMA Config prior to CQE
+>     https://lkml.org/lkml/2018/12/14/1062
+> [1] SDMMC address range
+>     https://lkml.org/lkml/2018/12/14/1323
+> [2] Fix sdhci_do_enable_v4_mode
+>     https://lkml.org/lkml/2018/12/14/72
 
-Applied for next, thanks!
+Okay, let me state this again.
+
+Please remove the listed dependencies from the changelog. If you have
+dependencies, please post a series instead, then the dependencies
+becomes obvious. While posting a series, I also recommend you to post
+a cover-letter, where you can give the overall story of what the
+series changes and why. For example:
+
+git format-patch -3 (the number of patches you have) --cover-letter
 
 Kind regards
 Uffe
 
-
+>
+> Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
 > ---
->  drivers/mmc/host/mtk-sd.c | 53 ++++++++++++++++++++++++++++++++++++++++++++---
->  1 file changed, 50 insertions(+), 3 deletions(-)
+>  drivers/mmc/host/Kconfig       |  1 +
+>  drivers/mmc/host/sdhci-tegra.c | 89 +++++++++++++++++++++++++++++++++++++++++-
+>  drivers/mmc/host/sdhci.c       |  3 +-
+>  3 files changed, 91 insertions(+), 2 deletions(-)
 >
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 6334cc7..8afeaf8 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -1114,6 +1114,7 @@ static void msdc_start_command(struct msdc_host *host,
->                 struct mmc_request *mrq, struct mmc_command *cmd)
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 1b58739d9744..5aa2de2c7609 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -250,6 +250,7 @@ config MMC_SDHCI_TEGRA
+>         depends on ARCH_TEGRA
+>         depends on MMC_SDHCI_PLTFM
+>         select MMC_SDHCI_IO_ACCESSORS
+> +       select MMC_CQHCI
+>         help
+>           This selects the Tegra SD/MMC controller. If you have a Tegra
+>           platform with SD or MMC devices, say Y or M here.
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+> index 7b95d088fdef..ba8bd72ec59a 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -33,6 +33,7 @@
+>  #include <linux/ktime.h>
+>
+>  #include "sdhci-pltfm.h"
+> +#include "cqhci.h"
+>
+>  /* Tegra SDHOST controller vendor register definitions */
+>  #define SDHCI_TEGRA_VENDOR_CLOCK_CTRL                  0x100
+> @@ -89,6 +90,10 @@
+>  #define NVQUIRK_NEEDS_PAD_CONTROL                      BIT(7)
+>  #define NVQUIRK_DIS_CARD_CLK_CONFIG_TAP                        BIT(8)
+>
+> +/* SDMMC CQE Base Address for Tegra Host Ver 4.1 and Higher */
+> +#define SDHCI_TEGRA_CQE_BASE_ADDR                      0xF000
+> +
+> +
+>  struct sdhci_tegra_soc_data {
+>         const struct sdhci_pltfm_data *pdata;
+>         u32 nvquirks;
+> @@ -128,6 +133,7 @@ struct sdhci_tegra {
+>         u32 default_tap;
+>         u32 default_trim;
+>         u32 dqs_trim;
+> +       bool enable_hwcq;
+>  };
+>
+>  static u16 tegra_sdhci_readw(struct sdhci_host *host, int reg)
+> @@ -836,6 +842,30 @@ static void tegra_sdhci_voltage_switch(struct sdhci_host *host)
+>                 tegra_host->pad_calib_required = true;
+>  }
+>
+> +static void sdhci_tegra_dumpregs(struct mmc_host *mmc)
+> +{
+> +       sdhci_dumpregs(mmc_priv(mmc));
+> +}
+> +
+> +static u32 sdhci_tegra_cqhci_irq(struct sdhci_host *host, u32 intmask)
+> +{
+> +       int cmd_error = 0;
+> +       int data_error = 0;
+> +
+> +       if (!sdhci_cqe_irq(host, intmask, &cmd_error, &data_error))
+> +               return intmask;
+> +
+> +       cqhci_irq(host->mmc, intmask, cmd_error, data_error);
+> +
+> +       return 0;
+> +}
+> +
+> +static const struct cqhci_host_ops sdhci_tegra_cqhci_ops = {
+> +       .enable = sdhci_cqe_enable,
+> +       .disable = sdhci_cqe_disable,
+> +       .dumpregs = sdhci_tegra_dumpregs,
+> +};
+> +
+>  static const struct sdhci_ops tegra_sdhci_ops = {
+>         .get_ro     = tegra_sdhci_get_ro,
+>         .read_w     = tegra_sdhci_readw,
+> @@ -989,6 +1019,7 @@ static const struct sdhci_ops tegra186_sdhci_ops = {
+>         .set_uhs_signaling = tegra_sdhci_set_uhs_signaling,
+>         .voltage_switch = tegra_sdhci_voltage_switch,
+>         .get_max_clock = tegra_sdhci_get_max_clock,
+> +       .irq = sdhci_tegra_cqhci_irq,
+>  };
+>
+>  static const struct sdhci_pltfm_data sdhci_tegra186_pdata = {
+> @@ -1030,6 +1061,55 @@ static const struct of_device_id sdhci_tegra_dt_match[] = {
+>  };
+>  MODULE_DEVICE_TABLE(of, sdhci_tegra_dt_match);
+>
+> +static int sdhci_tegra_add_host(struct sdhci_host *host)
+> +{
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +       struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
+> +       struct cqhci_host *cq_host;
+> +       bool dma64;
+> +       int ret;
+> +
+> +       if (!tegra_host->enable_hwcq)
+> +               return sdhci_add_host(host);
+> +
+> +       host->v4_mode = true;
+> +
+> +       ret = sdhci_setup_host(host);
+> +       if (ret)
+> +               return ret;
+> +
+> +       host->mmc->caps2 |= MMC_CAP2_CQE | MMC_CAP2_CQE_DCMD;
+> +
+> +       cq_host = devm_kzalloc(host->mmc->parent,
+> +                               sizeof(*cq_host), GFP_KERNEL);
+> +       if (!cq_host) {
+> +               ret = -ENOMEM;
+> +               goto cleanup;
+> +       }
+> +
+> +       cq_host->mmio = host->ioaddr + SDHCI_TEGRA_CQE_BASE_ADDR;
+> +       cq_host->ops = &sdhci_tegra_cqhci_ops;
+> +
+> +       dma64 = host->flags & SDHCI_USE_64_BIT_DMA;
+> +       if (dma64)
+> +               cq_host->caps |= CQHCI_TASK_DESC_SZ_128;
+> +
+> +       ret = cqhci_init(cq_host, host->mmc, dma64);
+> +       if (ret)
+> +               goto cleanup;
+> +
+> +       ret = __sdhci_add_host(host);
+> +       if (ret)
+> +               goto cleanup;
+> +
+> +       return 0;
+> +
+> +cleanup:
+> +       sdhci_cleanup_host(host);
+> +       return ret;
+> +
+> +}
+> +
+>  static int sdhci_tegra_probe(struct platform_device *pdev)
 >  {
->         u32 rawcmd;
-> +       unsigned long flags;
+>         const struct of_device_id *match;
+> @@ -1039,6 +1119,7 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
+>         struct sdhci_tegra *tegra_host;
+>         struct clk *clk;
+>         int rc;
+> +       struct resource *iomem;
 >
->         WARN_ON(host->cmd);
->         host->cmd = cmd;
-> @@ -1131,7 +1132,10 @@ static void msdc_start_command(struct msdc_host *host,
->         cmd->error = 0;
->         rawcmd = msdc_cmd_prepare_raw_cmd(host, mrq, cmd);
+>         match = of_match_device(sdhci_tegra_dt_match, &pdev->dev);
+>         if (!match)
+> @@ -1056,6 +1137,12 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
+>         tegra_host->pad_control_available = false;
+>         tegra_host->soc_data = soc_data;
 >
-> +       spin_lock_irqsave(&host->lock, flags);
->         sdr_set_bits(host->base + MSDC_INTEN, cmd_ints_mask);
-> +       spin_unlock_irqrestore(&host->lock, flags);
-> +
->         writel(cmd->arg, host->base + SDC_ARG);
->         writel(rawcmd, host->base + SDC_CMD);
->  }
-> @@ -1351,6 +1355,31 @@ static void msdc_request_timeout(struct work_struct *work)
->         }
->  }
->
-> +static void __msdc_enable_sdio_irq(struct mmc_host *mmc, int enb)
-> +{
-> +       unsigned long flags;
-> +       struct msdc_host *host = mmc_priv(mmc);
-> +
-> +       spin_lock_irqsave(&host->lock, flags);
-> +       if (enb)
-> +               sdr_set_bits(host->base + MSDC_INTEN, MSDC_INTEN_SDIOIRQ);
+> +       iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+> +       if (resource_size(iomem) > SDHCI_TEGRA_CQE_BASE_ADDR)
+> +               tegra_host->enable_hwcq = true;
 > +       else
-> +               sdr_clr_bits(host->base + MSDC_INTEN, MSDC_INTEN_SDIOIRQ);
-> +       spin_unlock_irqrestore(&host->lock, flags);
-> +}
+> +               tegra_host->enable_hwcq = false;
 > +
-> +static void msdc_enable_sdio_irq(struct mmc_host *mmc, int enb)
-> +{
-> +       struct msdc_host *host = mmc_priv(mmc);
-> +
-> +       __msdc_enable_sdio_irq(mmc, enb);
-> +
-> +       if (enb)
-> +               pm_runtime_get_noresume(host->dev);
-> +       else
-> +               pm_runtime_put_noidle(host->dev);
-> +}
-> +
->  static irqreturn_t msdc_irq(int irq, void *dev_id)
->  {
->         struct msdc_host *host = (struct msdc_host *) dev_id;
-> @@ -1373,7 +1402,12 @@ static irqreturn_t msdc_irq(int irq, void *dev_id)
->                 data = host->data;
->                 spin_unlock_irqrestore(&host->lock, flags);
+>         if (soc_data->nvquirks & NVQUIRK_NEEDS_PAD_CONTROL) {
+>                 rc = tegra_sdhci_init_pinctrl_info(&pdev->dev, tegra_host);
+>                 if (rc == 0)
+> @@ -1117,7 +1204,7 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
 >
-> -               if (!(events & event_mask))
-> +               if ((events & event_mask) & MSDC_INT_SDIOIRQ) {
-> +                       __msdc_enable_sdio_irq(host->mmc, 0);
-> +                       sdio_signal_irq(host->mmc);
-> +               }
-> +
-> +               if (!(events & (event_mask & ~MSDC_INT_SDIOIRQ)))
->                         break;
+>         usleep_range(2000, 4000);
 >
->                 if (!mrq) {
-> @@ -1493,8 +1527,11 @@ static void msdc_init_hw(struct msdc_host *host)
->          */
->         sdr_set_bits(host->base + SDC_CFG, SDC_CFG_SDIO);
+> -       rc = sdhci_add_host(host);
+> +       rc = sdhci_tegra_add_host(host);
+>         if (rc)
+>                 goto err_add_host;
 >
-> -       /* disable detect SDIO device interrupt function */
-> -       sdr_clr_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
-> +       /* Config SDIO device detect interrupt function */
-> +       if (host->mmc->caps & MMC_CAP_SDIO_IRQ)
-> +               sdr_set_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
-> +       else
-> +               sdr_clr_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 99bdae53fa2e..87375fbfca30 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -3308,7 +3308,8 @@ void sdhci_cqe_enable(struct mmc_host *mmc)
 >
->         /* Configure to default data timeout */
->         sdr_set_field(host->base + SDC_CFG, SDC_CFG_DTOC, 3);
-> @@ -2013,6 +2050,11 @@ static void msdc_hw_reset(struct mmc_host *mmc)
->         sdr_clr_bits(host->base + EMMC_IOCON, 1);
->  }
->
-> +static void msdc_ack_sdio_irq(struct mmc_host *mmc)
-> +{
-> +       __msdc_enable_sdio_irq(mmc, 1);
-> +}
-> +
->  static const struct mmc_host_ops mt_msdc_ops = {
->         .post_req = msdc_post_req,
->         .pre_req = msdc_pre_req,
-> @@ -2020,6 +2062,8 @@ static void msdc_hw_reset(struct mmc_host *mmc)
->         .set_ios = msdc_ops_set_ios,
->         .get_ro = mmc_gpio_get_ro,
->         .get_cd = mmc_gpio_get_cd,
-> +       .enable_sdio_irq = msdc_enable_sdio_irq,
-> +       .ack_sdio_irq = msdc_ack_sdio_irq,
->         .start_signal_voltage_switch = msdc_ops_switch_volt,
->         .card_busy = msdc_card_busy,
->         .execute_tuning = msdc_execute_tuning,
-> @@ -2147,6 +2191,9 @@ static int msdc_drv_probe(struct platform_device *pdev)
+>         ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+>         ctrl &= ~SDHCI_CTRL_DMA_MASK;
+> -       if (host->flags & SDHCI_USE_64_BIT_DMA)
+> +       if ((host->flags & SDHCI_USE_64_BIT_DMA) ||
+> +                       (host->quirks2 & SDHCI_QUIRK2_BROKEN_64_BIT_DMA))
+>                 ctrl |= SDHCI_CTRL_ADMA64;
 >         else
->                 mmc->f_min = DIV_ROUND_UP(host->src_clk_freq, 4 * 4095);
->
-> +       if (mmc->caps & MMC_CAP_SDIO_IRQ)
-> +               mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;
-> +
->         mmc->caps |= MMC_CAP_ERASE | MMC_CAP_CMD23;
->         /* MMC core transfer sizes tunable parameters */
->         mmc->max_segs = MAX_BD_NUM;
+>                 ctrl |= SDHCI_CTRL_ADMA32;
 > --
-> 1.9.1
+> 2.7.4
 >
