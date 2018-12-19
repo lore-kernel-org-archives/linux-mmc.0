@@ -1,43 +1,84 @@
 From: Sowjanya Komatineni <skomatineni@nvidia.com>
-Subject: [PATCH V2] DMA Block size configuration prior to CQE
-Date: Wed, 19 Dec 2018 12:33:03 -0800
-Message-ID: <1545251584-2105-1-git-send-email-skomatineni@nvidia.com>
+Subject: [PATCH V2] mmc: cqhci: DMA Configuration prior to CQE
+Date: Wed, 19 Dec 2018 12:33:04 -0800
+Message-ID: <1545251584-2105-2-git-send-email-skomatineni@nvidia.com>
+References: <1545251584-2105-1-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1545251584-2105-1-git-send-email-skomatineni@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: adrian.hunter@intel.com, ulf.hansson@linaro.org
 Cc: thierry.reding@gmail.com, jonathanh@nvidia.com, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Sowjanya Komatineni <skomatineni@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-As per eMMC5.1 Spec Section 6.6.39.1, DMA Block size should be to 512 B
-before enabling command queue.
+eMMC-5.1 JESD84-B51 Spec (Section 6.6.39.1), mentions "Prior to
+enabling command queuing, the block size shall be set to 512 B.
+Device may respond with an error to CMD46/CMD47 if block size
+is not 512 B".
 
-Tegra SDHCI Host design strictly follows this sequence preventing write
-access to SDHCI_BLOCK_SIZE when CQE is set in CQHCI_CFG. Writing to
-SDHCI_BLOCK_SIZE register when CQE is enabled results in crash.
+This patch fixes the sequence to follow exact as per the spec.
 
-This patch is needed for enabling HW Command queue for Tegra SDHCI.
-
-Note: couple more patches are needed for enabling HW CMDQ on Tegra SDHCI.
-Based on patch review feedback from Ulf on the other HW Command queue
-patch, I will resend new patch series with all these dependency patches
-together along with covering letter.
-
-[0] DMA Config prior to CQE
-    https://lkml.org/lkml/2018/12/14/1062
-[1] SDMMC address range
-    https://lkml.org/lkml/2018/12/14/1323
-[2] Fix sdhci_do_enable_v4_mode
-    https://lkml.org/lkml/2018/12/14/72
-[3] Add HW Command Queue for Tegra SDHCI
-    https://patchwork.kernel.org/patch/10731915/
-
-Sowjanya Komatineni (1):
-  mmc: cqhci: DMA Configuration prior to CQE
+Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
+---
+Changes for v2:
+   - Updated commit message with JDEC Spec typo and exact spec reference
+     on the requirement.
 
  drivers/mmc/host/cqhci.c | 18 +++++++++++++++---
  1 file changed, 15 insertions(+), 3 deletions(-)
 
+diff --git a/drivers/mmc/host/cqhci.c b/drivers/mmc/host/cqhci.c
+index 159270e947cf..f701342e7212 100644
+--- a/drivers/mmc/host/cqhci.c
++++ b/drivers/mmc/host/cqhci.c
+@@ -248,6 +248,9 @@ static void __cqhci_enable(struct cqhci_host *cq_host)
+ 		cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
+ 	}
+ 
++	if (cq_host->ops->enable)
++		cq_host->ops->enable(mmc);
++
+ 	cqcfg &= ~(CQHCI_DCMD | CQHCI_TASK_DESC_SZ);
+ 
+ 	if (mmc->caps2 & MMC_CAP2_CQE_DCMD)
+@@ -273,9 +276,6 @@ static void __cqhci_enable(struct cqhci_host *cq_host)
+ 
+ 	mmc->cqe_on = true;
+ 
+-	if (cq_host->ops->enable)
+-		cq_host->ops->enable(mmc);
+-
+ 	/* Ensure all writes are done before interrupts are enabled */
+ 	wmb();
+ 
+@@ -561,6 +561,7 @@ static int cqhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 	int tag = cqhci_tag(mrq);
+ 	struct cqhci_host *cq_host = mmc->cqe_private;
+ 	unsigned long flags;
++	u32 cqcfg = 0;
+ 
+ 	if (!cq_host->enabled) {
+ 		pr_err("%s: cqhci: not enabled\n", mmc_hostname(mmc));
+@@ -579,8 +580,19 @@ static int cqhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 			pr_err("%s: cqhci: CQE failed to exit halt state\n",
+ 			       mmc_hostname(mmc));
+ 		}
++		/* Configuration must not be changed while enabled */
++		cqcfg = cqhci_readl(cq_host, CQHCI_CFG);
++		if (cqcfg & CQHCI_ENABLE) {
++			cqcfg &= ~CQHCI_ENABLE;
++			cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
++		}
++
+ 		if (cq_host->ops->enable)
+ 			cq_host->ops->enable(mmc);
++
++		cqcfg |= CQHCI_ENABLE;
++		cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
++
+ 	}
+ 
+ 	if (mrq->data) {
 -- 
 2.7.4
