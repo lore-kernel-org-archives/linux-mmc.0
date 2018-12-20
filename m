@@ -1,7 +1,8 @@
 From: BOUGH CHEN <haibo.chen@nxp.com>
-Subject: [PATCH 2/3] mmc: sdhci-esdhc-imx: add SD clock limitation for imx6ull
-Date: Thu, 20 Dec 2018 07:49:46 +0000
-Message-ID: <1545292612-14471-2-git-send-email-haibo.chen@nxp.com>
+Subject: [PATCH 3/3] ARM: dts: imx6ull: change to use new compatible
+ "fsl,imx6ull-usdhc" for usdhc
+Date: Thu, 20 Dec 2018 07:49:55 +0000
+Message-ID: <1545292612-14471-3-git-send-email-haibo.chen@nxp.com>
 References: <1545292612-14471-1-git-send-email-haibo.chen@nxp.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,68 +23,34 @@ To: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "robh+dt@kernel.org" <rob
 Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, dl-linux-imx <linux-imx@nxp.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-i.MX6ULL has errata ERR010450, point out that due to SOC I/O
-timing limitation, for eMMC HS200 and SD/SDIO 3.0 SDR104, the
-clock rate can't exceed 150MHz. And for eMMC DDR52 and SD/SDIO
-DDR50 mode, the clock rate can't exceed 45MHz.
-
-This patch add this limit for imx6ull.
+i.MX6ULL has errata ERR010450, there is I/O timing limitation,
+for SDR mode, SD card clock can't exceed 150MHz, for DDR mode,
+SD card clock can't exceed 45MHz. This patch change to use the
+new compatible "fsl,imx6ull-usdhc" to follow this limitation.
 
 Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 19 ++++++++++++++++++-
- 1 file changed, 18 insertions(+), 1 deletion(-)
+ arch/arm/boot/dts/imx6ull.dtsi | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index d0d3193..75a2484 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -138,7 +138,11 @@
- #define ESDHC_FLAG_HS200		BIT(8)
- /* The IP supports HS400 mode */
- #define ESDHC_FLAG_HS400		BIT(9)
--
-+/* The IP has errata ERR010450
-+ * uSDHC: Due to the I/O timing limit, for SDR mode, SD card clock can't
-+ * exceed 150MHz, for DDR mode, SD card clock can't exceed 45MHz.
-+ */
-+#define ESDHC_FLAG_ERR010450           BIT(10)
- /* A clock frequency higher than this rate requires strobe dll control */
- #define ESDHC_STROBE_DLL_CLK_FREQ	100000000
- 
-@@ -177,6 +181,12 @@ struct esdhc_soc_data {
- 			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200,
+diff --git a/arch/arm/boot/dts/imx6ull.dtsi b/arch/arm/boot/dts/imx6ull.dtsi
+index f3668fe..4ad5828 100644
+--- a/arch/arm/boot/dts/imx6ull.dtsi
++++ b/arch/arm/boot/dts/imx6ull.dtsi
+@@ -30,6 +30,14 @@
+ 	>;
  };
  
-+static struct esdhc_soc_data usdhc_imx6ull_data = {
-+	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
-+			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
-+			| ESDHC_FLAG_ERR010450,
++&usdhc1 {
++	compatible = "fsl,imx6ull-usdhc", "fsl,imx6sx-usdhc";
 +};
 +
- static struct esdhc_soc_data usdhc_imx7d_data = {
- 	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
- 			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
-@@ -227,6 +237,7 @@ struct pltfm_imx_data {
- 	{ .compatible = "fsl,imx6sx-usdhc", .data = &usdhc_imx6sx_data, },
- 	{ .compatible = "fsl,imx6sl-usdhc", .data = &usdhc_imx6sl_data, },
- 	{ .compatible = "fsl,imx6q-usdhc", .data = &usdhc_imx6q_data, },
-+	{ .compatible = "fsl,imx6ull-usdhc", .data = &usdhc_imx6ull_data, },
- 	{ .compatible = "fsl,imx7d-usdhc", .data = &usdhc_imx7d_data, },
- 	{ /* sentinel */ }
- };
-@@ -733,6 +744,12 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
- 		| ESDHC_CLOCK_MASK);
- 	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
- 
-+	if (imx_data->socdata->flags & ESDHC_FLAG_ERR010450) {
-+		if (imx_data->is_ddr)
-+			clock = clock > 45000000 ? 45000000 : clock;
-+		else
-+			clock = clock > 150000000 ? 150000000 : clock;
++&usdhc2 {
++	compatible = "fsl,imx6ull-usdhc", "fsl,imx6sx-usdhc";
++};
 +
- 	while (host_clock / (16 * pre_div * ddr_pre_div) > clock &&
- 			pre_div < 256)
- 		pre_div *= 2;
+ / {
+ 	soc {
+ 		aips3: aips-bus@2200000 {
 -- 
 1.9.1
