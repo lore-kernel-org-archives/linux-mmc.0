@@ -1,43 +1,42 @@
 From: Sowjanya Komatineni <skomatineni@nvidia.com>
-Subject: RE: [PATCH V4 2/4] mmc: cqhci: DMA Configuration prior to CQE
-Date: Thu, 20 Dec 2018 21:01:18 +0000
-Message-ID: <BN7PR12MB2836A1467A21CAE50125727AC2BF0@BN7PR12MB2836.namprd12.prod.outlook.com>
-References: <1545262938-20636-1-git-send-email-skomatineni@nvidia.com>
- <1545262938-20636-3-git-send-email-skomatineni@nvidia.com>
- <b6789159-c4ce-cc28-e7f5-33ab1e95175f@intel.com>
+Subject: [PATCH V5 0/3] HW Command Queue support for Tegra SDMMC
+Date: Thu, 20 Dec 2018 17:25:06 -0800
+Message-ID: <1545355509-6914-1-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <b6789159-c4ce-cc28-e7f5-33ab1e95175f@intel.com>
-Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, "robh+dt@kernel.org" <robh+dt@kernel.org>, "mark.rutland@arm.com" <mark.rutland@arm.com>, Mikko Perttunen <mperttunen@nvidia.com>, "thierry.reding@gmail.com" <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
-Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: robh+dt@kernel.org, mark.rutland@arm.com, mperttunen@nvidia.com, thierry.reding@gmail.com, jonathanh@nvidia.com, adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc: devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Sowjanya Komatineni <skomatineni@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-SGkgQWRyaWFuLA0KDQpUaGFuayB5b3UgZm9yIHRoZSBmZWVkYmFjay4NCg0KPiBUaGlzIGRvZXNu
-J3Qgc2VlbSB0byByZWxhdGUgdG8gdGhlIGhvc3QgY29udHJvbGxlciBpbXBsZW1lbnRhdGlvbi4g
-IA0KPiAiVGhlIGRldmljZSIgbWVhbnMgdGhlIGVNTUMuDQoNClllcywgc2V0dGluZyBibG9jayBz
-aXplIG9mIDUxMkIgYmVmb3JlIGVuYWJsaW5nIGNvbW1hbmQgcXVldWUgaXMgYSBkZXZpY2Ugc3Bl
-Y2lmaWMgDQpyZXF1aXJlbWVudCBub3QgaG9zdCBzcGVjaWZpYy4gU28gdGhvdWdodCB0byB1cGRh
-dGUgaW4gY3FoY2kgZHJpdmVyIHRvIGZvbGxvdyB0aGlzIA0KZGV2aWNlIHNwZWNpZmljIHNlcXVl
-bmNlIHJlcXVpcmVtZW50LiBUaGlzIGFsc28gc2VydmVzIHRlZ3JhIHNkaGNpIGhvc3Qgc3RyaWN0
-bHkNCmZvbGxvd2luZyB0aGlzIGRldmljZSBzcGVjaWZpYyByZXF1aXJlbWVudC4NCg0KPiBXZSBk
-b24ndCB3YW50IHRvIGRpc2FibGUgYW5kIHJlLWVuYWJsZSBpbiB0aGUgcmVxdWVzdCBmdW5jdGlv
-biwNCj4gc28gdGhhdCBjaGFuZ2UgaXMgbm90IGdvb2QgZm9yIGNvbnRyb2xsZXJzIHRoYXQgZG9u
-J3QgaGF2ZSB5b3VyIHByb2JsZW0uDQo+IEFub3RoZXIgdGhpbmcgdG8gY29uc2lkZXIgaXMgdGhh
-dCB0aGUgYmxvY2sgc2l6ZSByZWdpc3RlciBtYXkgbm90IG5lZWQgdG8gYmUgY2hhbmdlZA0KPiAt
-IGZvciBleGFtcGxlIHdoZW4gY3FoY2kgaXMgaGFsdGVkIHRvIGFsbG93IGEgbWFudWFsIGRpc2Nh
-cmQsIHRoZSBibG9jayBzaXplIHJlZ2lzdGVyIGlzDQo+IG5vdCB1cGRhdGVkLCBzbyBJIHdvdWxk
-IGV4cGVjdCBpdHMgdmFsdWUgdG8gYmUgdW5jaGFuZ2VkLg0KDQpPbmNlIGJsb2NrIHNpemUgaXMg
-c2V0IHByaW9yIHRvIGVuYWJsaW5nIENRRSwgaXQgc3RheXMgc2FtZSB0aWxsIGNvbW1hbmQgcXVl
-dWUgaXMgDQpkaXNhYmxlZCBhbmQgSSBkb27igJl0IHRoaW5rIGl0IG5lZWRzIHJlY29uZmlndXJh
-dGlvbi4NCg0KPiBUaGVyZSBhcmUgd2F5cyB5b3UgY2FuIHNvbHZlIHRoaXMgaW4geW91ciBkcml2
-ZXIuICANCj4gWW91IGNvdWxkIGxvb2sgYXQgdXNpbmcgU0RIQ0kgSS9PIGFjY2Vzc29ycywgYW5k
-L29yIGltcGxlbWVudCB5b3VyIG93biAtPmVuYWJsZSgpIA0KPiBpbnN0ZWFkIG9mIGNhbGxpbmcg
-c2RoY2lfY3FlX2VuYWJsZSgpIGRpcmVjdGx5LiAgV291bGQgdGhhdCBiZSBmZWFzaWJsZT8NCg0K
-U3VyZSwgd2lsbCBwcm92aWRlIHVwZGF0ZWQgcGF0Y2ggdGhhdCB0YWtlcyBjYXJlIG9mIHRoaXMg
-aW5zaWRlIHRlZ3JhIHNkaGNpIGhvc3Qgb25jZSB5b3UgDQpjb25maXJtIHRoYXQgd2UgZG9u4oCZ
-dCBwbGFuIHRvIGZpeCB0aGlzIGRldmljZSBzcGVjaWZpYyBzZXF1ZW5jZSByZXF1aXJlbWVudCBp
-biBjcWhjaSBkcml2ZXIuDQoNCi1Tb3dqYW55YQ0KIA0K
+This patch series is for HW Command Queue support for Tegra SDMMC.
+
+Patch[3] adds HW Command Queue support for Tegra SDMMC and has
+dependencies on other patches in this series as explained below.
+
+Patch[2] SDMMC address range:
+This patch defines exact register space for all the SDMMC
+Controllers. Controllers supporting command queue are having
+CQHCI register space from offset 0xF000.
+Patch[3] uses address range of sdmmc controllers to identify command
+queue supported controllers
+
+Patch[1] Fix V4 Mode enable:
+V4 Mode need to be enabled to select Host Version 4.0 mode for HW Command
+queue support with Tegra SDHCI.
+
+Sowjanya Komatineni (3):
+  mmc: sdhci: Fix sdhci_do_enable_v4_mode
+  arm64: dtsi: Fix SDMMC address range
+  mmc: tegra: HW Command Queue Support for Tegra SDMMC
+
+ arch/arm64/boot/dts/nvidia/tegra186.dtsi |   6 +-
+ arch/arm64/boot/dts/nvidia/tegra194.dtsi |   4 +-
+ drivers/mmc/host/Kconfig                 |   1 +
+ drivers/mmc/host/sdhci-tegra.c           | 138 ++++++++++++++++++++++++++++++-
+ drivers/mmc/host/sdhci.c                 |   4 +-
+ 5 files changed, 145 insertions(+), 8 deletions(-)
+
+-- 
+2.7.4
