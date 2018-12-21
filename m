@@ -1,42 +1,84 @@
 From: Sowjanya Komatineni <skomatineni@nvidia.com>
-Subject: [PATCH V5 0/3] HW Command Queue support for Tegra SDMMC
-Date: Thu, 20 Dec 2018 17:25:06 -0800
-Message-ID: <1545355509-6914-1-git-send-email-skomatineni@nvidia.com>
+Subject: [PATCH V5 2/3] arm64: dtsi: Fix SDMMC address range
+Date: Thu, 20 Dec 2018 17:25:08 -0800
+Message-ID: <1545355509-6914-3-git-send-email-skomatineni@nvidia.com>
+References: <1545355509-6914-1-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1545355509-6914-1-git-send-email-skomatineni@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: robh+dt@kernel.org, mark.rutland@arm.com, mperttunen@nvidia.com, thierry.reding@gmail.com, jonathanh@nvidia.com, adrian.hunter@intel.com, ulf.hansson@linaro.org
 Cc: devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Sowjanya Komatineni <skomatineni@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-This patch series is for HW Command Queue support for Tegra SDMMC.
+This patch fixes the SDMMC Controllers address space to be exact
+defined register address range as per the design.
 
-Patch[3] adds HW Command Queue support for Tegra SDMMC and has
-dependencies on other patches in this series as explained below.
+SDMMC Controller supporting Command Queue has CQHCI registers at
+offset 0xF000.
 
-Patch[2] SDMMC address range:
-This patch defines exact register space for all the SDMMC
-Controllers. Controllers supporting command queue are having
-CQHCI register space from offset 0xF000.
-Patch[3] uses address range of sdmmc controllers to identify command
-queue supported controllers
+This fix helps to identify the Tegra SDMMC Controllers supporting
+Command Queue based on the size of address space.
 
-Patch[1] Fix V4 Mode enable:
-V4 Mode need to be enabled to select Host Version 4.0 mode for HW Command
-queue support with Tegra SDHCI.
+Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
+---
+ arch/arm64/boot/dts/nvidia/tegra186.dtsi | 6 +++---
+ arch/arm64/boot/dts/nvidia/tegra194.dtsi | 4 ++--
+ 2 files changed, 5 insertions(+), 5 deletions(-)
 
-Sowjanya Komatineni (3):
-  mmc: sdhci: Fix sdhci_do_enable_v4_mode
-  arm64: dtsi: Fix SDMMC address range
-  mmc: tegra: HW Command Queue Support for Tegra SDMMC
-
- arch/arm64/boot/dts/nvidia/tegra186.dtsi |   6 +-
- arch/arm64/boot/dts/nvidia/tegra194.dtsi |   4 +-
- drivers/mmc/host/Kconfig                 |   1 +
- drivers/mmc/host/sdhci-tegra.c           | 138 ++++++++++++++++++++++++++++++-
- drivers/mmc/host/sdhci.c                 |   4 +-
- 5 files changed, 145 insertions(+), 8 deletions(-)
-
+diff --git a/arch/arm64/boot/dts/nvidia/tegra186.dtsi b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
+index 2f3c8e29520d..6fda3d6a7f3d 100644
+--- a/arch/arm64/boot/dts/nvidia/tegra186.dtsi
++++ b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
+@@ -231,7 +231,7 @@
+ 
+ 	sdmmc1: sdhci@3400000 {
+ 		compatible = "nvidia,tegra186-sdhci";
+-		reg = <0x0 0x03400000 0x0 0x10000>;
++		reg = <0x0 0x03400000 0x0 0x220>;
+ 		interrupts = <GIC_SPI 62 IRQ_TYPE_LEVEL_HIGH>;
+ 		clocks = <&bpmp TEGRA186_CLK_SDMMC1>;
+ 		clock-names = "sdhci";
+@@ -256,7 +256,7 @@
+ 
+ 	sdmmc2: sdhci@3420000 {
+ 		compatible = "nvidia,tegra186-sdhci";
+-		reg = <0x0 0x03420000 0x0 0x10000>;
++		reg = <0x0 0x03420000 0x0 0x220>;
+ 		interrupts = <GIC_SPI 63 IRQ_TYPE_LEVEL_HIGH>;
+ 		clocks = <&bpmp TEGRA186_CLK_SDMMC2>;
+ 		clock-names = "sdhci";
+@@ -276,7 +276,7 @@
+ 
+ 	sdmmc3: sdhci@3440000 {
+ 		compatible = "nvidia,tegra186-sdhci";
+-		reg = <0x0 0x03440000 0x0 0x10000>;
++		reg = <0x0 0x03440000 0x0 0x220>;
+ 		interrupts = <GIC_SPI 64 IRQ_TYPE_LEVEL_HIGH>;
+ 		clocks = <&bpmp TEGRA186_CLK_SDMMC3>;
+ 		clock-names = "sdhci";
+diff --git a/arch/arm64/boot/dts/nvidia/tegra194.dtsi b/arch/arm64/boot/dts/nvidia/tegra194.dtsi
+index c2091bb16546..6510ef6492b1 100644
+--- a/arch/arm64/boot/dts/nvidia/tegra194.dtsi
++++ b/arch/arm64/boot/dts/nvidia/tegra194.dtsi
+@@ -295,7 +295,7 @@
+ 
+ 		sdmmc1: sdhci@3400000 {
+ 			compatible = "nvidia,tegra194-sdhci", "nvidia,tegra186-sdhci";
+-			reg = <0x03400000 0x10000>;
++			reg = <0x03400000 0x220>;
+ 			interrupts = <GIC_SPI 62 IRQ_TYPE_LEVEL_HIGH>;
+ 			clocks = <&bpmp TEGRA194_CLK_SDMMC1>;
+ 			clock-names = "sdhci";
+@@ -306,7 +306,7 @@
+ 
+ 		sdmmc3: sdhci@3440000 {
+ 			compatible = "nvidia,tegra194-sdhci", "nvidia,tegra186-sdhci";
+-			reg = <0x03440000 0x10000>;
++			reg = <0x03440000 0x220>;
+ 			interrupts = <GIC_SPI 64 IRQ_TYPE_LEVEL_HIGH>;
+ 			clocks = <&bpmp TEGRA194_CLK_SDMMC3>;
+ 			clock-names = "sdhci";
 -- 
 2.7.4
