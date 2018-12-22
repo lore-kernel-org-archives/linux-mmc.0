@@ -1,47 +1,37 @@
-From: Randy Dunlap <rdunlap@infradead.org>
-Subject: Re: linux-next: Tree for Dec 21 (mmc/host/sdhci-omap.c)
-Date: Fri, 21 Dec 2018 09:35:56 -0800
-Message-ID: <16ca363b-92a7-d1cd-8460-21514e0e964b@infradead.org>
-References: <20181221193244.3a6ed685@canb.auug.org.au>
+From: Sinan Kaya <okaya@kernel.org>
+Subject: [PATCH v1 09/11] mmc: add PCI dependency into IOSF_MBI
+Date: Sat, 22 Dec 2018 00:14:50 +0000
+Message-ID: <20181222001452.7474-10-okaya@kernel.org>
+References: <20181222001452.7474-1-okaya@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181221193244.3a6ed685@canb.auug.org.au>
-Content-Language: en-US
+In-Reply-To: <20181222001452.7474-1-okaya@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Stephen Rothwell <sfr@canb.auug.org.au>, Linux Next Mailing List <linux-next@vger.kernel.org>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, Kishon Vijay Abraham I <kishon@ti.com>
+To: linux-next@vger.kernel.org
+Cc: linux-acpi@vger.kernel.org, Sinan Kaya <okaya@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Faiz Abbas <faiz_abbas@ti.com>, Chunyan Zhang <chunyan.zhang@unisoc.com>, Jisheng Zhang <Jisheng.Zhang@synaptics.com>, Ludovic Barre <ludovic.barre@st.com>, Arnd Bergmann <arnd@arndb.de>, Alex Smith <alex.smith@imgtec.com>, Chris Brandt <chris.brandt@renesas.com>, "open list:MULTIMEDIA CARD MMC, SECURE
+        DIGITAL SD AND..." <linux-mmc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 12/21/18 12:32 AM, Stephen Rothwell wrote:
-> Hi all,
-> 
-> News: there will be no linux-next release until Jan 2.  Have a good break.
-> 
-> Changes since 20181220:
-> 
+Select IOSF_MBI only when PCI is set.
 
-on x86_64:
+Signed-off-by: Sinan Kaya <okaya@kernel.org>
+---
+ drivers/mmc/host/Kconfig | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-This change to drivers/mmc/host/Kconfig:
-
- config MMC_SDHCI_OMAP
- 	tristate "TI SDHCI Controller Support"
- 	depends on MMC_SDHCI_PLTFM && OF
-+	select THERMAL
-+	select TI_SOC_THERMAL
-
-causes a Kconfig warning:
-
-WARNING: unmet direct dependencies detected for TI_SOC_THERMAL
-  Depends on [n]: THERMAL [=y] && (ARCH_HAS_BANDGAP || COMPILE_TEST [=n]) && HAS_IOMEM [=y]
-  Selected by [m]:
-  - MMC_SDHCI_OMAP [=m] && MMC [=y] && MMC_SDHCI_PLTFM [=y] && OF [=y]
-
-
-because ARCH_HAS_BANDGAP is not set (nor is COMPILE_TEST).
-
-
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index e26b8145efb3..4c5f037b246d 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -117,7 +117,7 @@ config MMC_RICOH_MMC
+ config MMC_SDHCI_ACPI
+ 	tristate "SDHCI support for ACPI enumerated SDHCI controllers"
+ 	depends on MMC_SDHCI && ACPI
+-	select IOSF_MBI if X86
++	select IOSF_MBI if (X86 && PCI)
+ 	help
+ 	  This selects support for ACPI enumerated SDHCI controllers,
+ 	  identified by ACPI Compatibility ID PNP0D40 or specific
 -- 
-~Randy
+2.19.0
