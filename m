@@ -1,40 +1,49 @@
-From: Chunyan Zhang <zhang.lyra@gmail.com>
-Subject: Re: [PATCH V4 1/3] mmc: sdhci: add support for using external DMA devices
-Date: Thu, 27 Dec 2018 16:02:59 +0800
-Message-ID: <CAAfSe-tHu5m3Of6=KBCxBBH1T8=4tgN8aZP_7QaGERctECZPoQ@mail.gmail.com>
-References: <1544519572-21921-1-git-send-email-zhang.chunyan@linaro.org>
- <1544519572-21921-2-git-send-email-zhang.chunyan@linaro.org> <0e683aef-383c-8200-0059-44a9abb654b8@intel.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V5 1/3] mmc: sdhci: Fix sdhci_do_enable_v4_mode
+Date: Thu, 27 Dec 2018 10:13:35 +0200
+Message-ID: <9b1f6ba3-113a-7c65-81af-fe911c51a875@intel.com>
+References: <1545355509-6914-1-git-send-email-skomatineni@nvidia.com>
+ <1545355509-6914-2-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <0e683aef-383c-8200-0059-44a9abb654b8@intel.com>
+In-Reply-To: <1545355509-6914-2-git-send-email-skomatineni@nvidia.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, Faiz Abbas <faiz_abbas@ti.com>, linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Mark Brown <broonie@kernel.org>, Kishon Vijay Abraham I <kishon@ti.com>, Sekhar Nori <nsekhar@ti.com>
+To: Sowjanya Komatineni <skomatineni@nvidia.com>, robh+dt@kernel.org, mark.rutland@arm.com, mperttunen@nvidia.com, thierry.reding@gmail.com, jonathanh@nvidia.com, ulf.hansson@linaro.org
+Cc: devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 27 Dec 2018 at 15:44, Adrian Hunter <adrian.hunter@intel.com> wrote:
->
-> On 11/12/18 11:12 AM, Chunyan Zhang wrote:
-> > Some standard SD host controllers can support both external dma
-> > controllers as well as ADMA/SDMA in which the SD host controller
-> > acts as DMA master. TI's omap controller is the case as an example.
-> >
-> > Currently the generic SDHCI code supports ADMA/SDMA integrated in
-> > the host controller but does not have any support for external DMA
-> > controllers implemented using dmaengine, meaning that custom code is
-> > needed for any systems that use an external DMA controller with SDHCI.
-> >
-> > Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
->
-> FYI, I am waiting on successful testing before reviewing these patches again.
+On 21/12/18 3:25 AM, Sowjanya Komatineni wrote:
+> V4_MODE is Bit-15 of SDHCI_HOST_CONTROL2 register.
+> Need to perform word access to this register.
+> 
+> Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
 
-Yeah, that makes sense, thanks Adrian!
+This patch has already been applied.
 
-I intend to send out another new patchset after the holidays.
-After had another look at omap_hsmmc, I knew something need to be
-modified (emailed Faiz about this privately), but I was still not sure
-if it can fix the problem Faiz found.
-
-Happy new year to all,
-Chunyan
+> ---
+>  drivers/mmc/host/sdhci.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 99bdae53fa2e..fde984d10619 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -127,12 +127,12 @@ static void sdhci_do_enable_v4_mode(struct sdhci_host *host)
+>  {
+>  	u16 ctrl2;
+>  
+> -	ctrl2 = sdhci_readb(host, SDHCI_HOST_CONTROL2);
+> +	ctrl2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+>  	if (ctrl2 & SDHCI_CTRL_V4_MODE)
+>  		return;
+>  
+>  	ctrl2 |= SDHCI_CTRL_V4_MODE;
+> -	sdhci_writeb(host, ctrl2, SDHCI_HOST_CONTROL);
+> +	sdhci_writew(host, ctrl2, SDHCI_HOST_CONTROL2);
+>  }
+>  
+>  /*
+> 
