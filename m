@@ -1,43 +1,51 @@
-From: "Rafael J. Wysocki" <rafael@kernel.org>
-Subject: Re: [PATCH v3 09/11] mmc: add PCI dependency into IOSF_MBI
-Date: Wed, 26 Dec 2018 10:40:48 +0100
-Message-ID: <CAJZ5v0jFXvGJH_V9gJ8c3T5x80yYHQmk=0WfJi=vvkSJ_aShwg@mail.gmail.com>
-References: <20181223232521.11320-1-okaya@kernel.org> <20181223232521.11320-10-okaya@kernel.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 1/2] mmc: sdhci-iproc: handle mmc_of_parse() errors during
+ probe
+Date: Thu, 27 Dec 2018 09:02:49 +0200
+Message-ID: <eac48bca-b090-6c5a-ce5c-865476d3b948@intel.com>
+References: <1545598758-4502-1-git-send-email-stefan.wahren@i2se.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181223232521.11320-10-okaya@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: okaya@kernel.org
-Cc: Linux-Next Mailing List <linux-next@vger.kernel.org>, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, "Hunter, Adrian" <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, Geert Uytterhoeven <geert@linux-m68k.org>, faiz_abbas@ti.com, chunyan.zhang@unisoc.com, Jisheng.Zhang@synaptics.com, ludovic.barre@st.com, Arnd Bergmann <arnd@arndb.de>, alex.smith@imgtec.com, chris.brandt@renesas.com, linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <1545598758-4502-1-git-send-email-stefan.wahren@i2se.com>
+Content-Language: en-US
+Sender: stable-owner@vger.kernel.org
+To: Stefan Wahren <stefan.wahren@i2se.com>, Al Cooper <alcooperx@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Brian Norris <computersforpeace@gmail.com>, Gregory Fong <gregory.0xf0@gmail.com>, Florian Fainelli <f.fainelli@gmail.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Eric Anholt <eric@anholt.net>, bcm-kernel-feedback-list@broadcom.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, stable@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Dec 24, 2018 at 12:26 AM Sinan Kaya <okaya@kernel.org> wrote:
->
-> Select IOSF_MBI only when PCI is set.
->
-> Signed-off-by: Sinan Kaya <okaya@kernel.org>
+On 23/12/18 10:59 PM, Stefan Wahren wrote:
+> We need to handle mmc_of_parse() errors during probe.
+> 
+> This finally fixes the wifi regression on Raspberry Pi 3 series.
+> In error case the wifi chip was permanently in reset because of
+> the power sequence depending on the deferred probe of the GPIO expander.
+> 
+> Fixes: b580c52d58d9 ("mmc: sdhci-iproc: add IPROC SDHCI driver")
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
 > ---
->  drivers/mmc/host/Kconfig | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index e26b8145efb3..4c5f037b246d 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -117,7 +117,7 @@ config MMC_RICOH_MMC
->  config MMC_SDHCI_ACPI
->         tristate "SDHCI support for ACPI enumerated SDHCI controllers"
->         depends on MMC_SDHCI && ACPI
-
-It should depend on PCI as well, shouldn't it?
-
-As it stands with the patch applied, randconfig can still select it if
-PCI is unset AFAICS, can't it?
-
-> -       select IOSF_MBI if X86
-> +       select IOSF_MBI if (X86 && PCI)
->         help
->           This selects support for ACPI enumerated SDHCI controllers,
->           identified by ACPI Compatibility ID PNP0D40 or specific
-> --
+>  drivers/mmc/host/sdhci-iproc.c | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
+> index 0db9905..9d12c06 100644
+> --- a/drivers/mmc/host/sdhci-iproc.c
+> +++ b/drivers/mmc/host/sdhci-iproc.c
+> @@ -296,7 +296,10 @@ static int sdhci_iproc_probe(struct platform_device *pdev)
+>  
+>  	iproc_host->data = iproc_data;
+>  
+> -	mmc_of_parse(host->mmc);
+> +	ret = mmc_of_parse(host->mmc);
+> +	if (ret)
+> +		goto err;
+> +
+>  	sdhci_get_property(pdev);
+>  
+>  	host->mmc->caps |= iproc_host->data->mmc_caps;
+> 
