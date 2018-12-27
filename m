@@ -1,48 +1,78 @@
-From: BOUGH CHEN <haibo.chen@nxp.com>
-Subject: [PATCH] mmc: sdhci-esdhc-imx: fix HS400 timing issue
-Date: Thu, 27 Dec 2018 11:20:24 +0000
-Message-ID: <20181227112750.446-1-haibo.chen@nxp.com>
+From: Russell King - ARM Linux <linux@armlinux.org.uk>
+Subject: Re: [PATCH 2/3] mmc: sdhci-esdhc-imx: add SD clock limitation for
+ imx6ull
+Date: Thu, 27 Dec 2018 12:22:55 +0000
+Message-ID: <20181227122254.GB26090@n2100.armlinux.org.uk>
+References: <1545292612-14471-1-git-send-email-haibo.chen@nxp.com>
+ <1545292612-14471-2-git-send-email-haibo.chen@nxp.com>
+ <cff15a85-3f72-a8ea-2e5f-731963175fde@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <stable-owner@vger.kernel.org>
-Content-Language: en-US
-Sender: stable-owner@vger.kernel.org
-To: "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, dl-linux-imx <linux-imx@nxp.com>, "stable@vger.kernel.org" <stable@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <cff15a85-3f72-a8ea-2e5f-731963175fde@intel.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: "mark.rutland@arm.com" <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, BOUGH CHEN <haibo.chen@nxp.com>, "robh+dt@kernel.org" <robh+dt@kernel.org>, dl-linux-imx <linux-imx@nxp.com>, "kernel@pengutronix.de" <kernel@pengutronix.de>, Fabio Estevam <fabio.estevam@nxp.com>, "shawnguo@kernel.org" <shawnguo@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Now tuning reset will be done when the timing is MMC_TIMING_LEGACY/
-MMC_TIMING_MMC_HS/MMC_TIMING_SD_HS. But for timing MMC_TIMING_MMC_HS,
-we can not do tuning reset, otherwise HS400 timing is not right.
+On Thu, Dec 27, 2018 at 10:01:24AM +0200, Adrian Hunter wrote:
+> On 20/12/18 9:49 AM, BOUGH CHEN wrote:
+> > i.MX6ULL has errata ERR010450, point out that due to SOC I/O
+> > timing limitation, for eMMC HS200 and SD/SDIO 3.0 SDR104, the
+> > clock rate can't exceed 150MHz. And for eMMC DDR52 and SD/SDIO
+> > DDR50 mode, the clock rate can't exceed 45MHz.
+> > 
+> > This patch add this limit for imx6ull.
+> > 
+> > Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
+> 
+> Apart from the kbuild test robot complaints (do they need to be fixed?):
+> 
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Here is the process of init HS400, first finish tuning in HS200 mode,
-then switch to HS mode and 8 bit DDR mode, finally switch to HS400
-mode. If we do tuning reset in HS mode, this will cause HS400 mode
-lost the tuning setting, which will cause CRC error.
+Nacked-by: Russell King <rmk+kernel@armlinux.org.uk>
 
-This fix commit d9370424c948 ("mmc: sdhci-esdhc-imx: reset tuning
-circuit when power on mmc card").
+The kbuild test robot complaints do need to be fixed first.  They're
+confusing because GCC produces quite a lot of garbage in its error
+messages now.  If you look at the patch, there's a hunk that has:
 
-Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
-Cc: stable@vger.kernel.org # v4.12+
----
- drivers/mmc/host/sdhci-esdhc-imx.c | 1 +
- 1 file changed, 1 insertion(+)
++       if (imx_data->socdata->flags & ESDHC_FLAG_ERR010450) {
++               if (imx_data->is_ddr)
++                       clock = clock > 45000000 ? 45000000 : clock;
++               else
++                       clock = clock > 150000000 ? 150000000 : clock;
++
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-es=
-dhc-imx.c
-index d0d319398a54..984cc1a788cb 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -979,6 +979,7 @@ static void esdhc_set_uhs_signaling(struct sdhci_host *=
-host, unsigned timing)
- 	case MMC_TIMING_UHS_SDR25:
- 	case MMC_TIMING_UHS_SDR50:
- 	case MMC_TIMING_UHS_SDR104:
-+	case MMC_TIMING_MMC_HS:
- 	case MMC_TIMING_MMC_HS200:
- 		writel(m, host->ioaddr + ESDHC_MIX_CTRL);
- 		break;
---=20
-2.17.1
+which is missing a closing brace.  This patch could not have been
+build tested before it was mailed to the list, and the test robot
+is highlighting that fact.
+
+It may also be a good idea to encourage a different approach to the
+above anyway:
+
+	if (imx_data->socdata->flags & ESDHC_FLAG_ERR010450) {
+		unsigned long max_clock;
+
+		max_clock = imx_data->is_ddr ? 45000000 : 150000000;
+
+		clock = max(clock, max_clock);
+	}
+
+rather than open-coding the max() stuff in the driver.
+
+Thanks.
+
+-- 
+RMK's Patch system: http://www.armlinux.org.uk/developer/patches/
+FTTC broadband for 0.8mile line in suburbia: sync at 12.1Mbps down 622kbps up
+According to speedtest.net: 11.9Mbps down 500kbps up
