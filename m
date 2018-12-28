@@ -1,51 +1,32 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: fix HS400 timing issue
-Date: Fri, 28 Dec 2018 15:54:41 +0200
-Message-ID: <a90f184d-39b2-32a6-b09d-91a07d398b35@intel.com>
-References: <20181227112750.446-1-haibo.chen@nxp.com>
+From: Fabio Estevam <festevam@gmail.com>
+Subject: Re: [PATCH v2 1/3] dt-bindings: mmc: fsl-imx-esdhc: add imx6ull
+ compatible string
+Date: Fri, 28 Dec 2018 16:09:53 -0200
+Message-ID: <CAOMZO5BeUA2YwzH2Vme4xmpwiciX5xRmCqxA_-=VAV7zPmeQdw@mail.gmail.com>
+References: <20181228033323.32308-1-haibo.chen@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20181227112750.446-1-haibo.chen@nxp.com>
-Content-Language: en-US
-Sender: stable-owner@vger.kernel.org
-To: BOUGH CHEN <haibo.chen@nxp.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, dl-linux-imx <linux-imx@nxp.com>, "stable@vger.kernel.org" <stable@vger.kernel.org>
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20181228033323.32308-1-haibo.chen@nxp.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: BOUGH CHEN <haibo.chen@nxp.com>
+Cc: "mark.rutland@arm.com" <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "rmk+kernel@armlinux.org.uk" <rmk+kernel@armlinux.org.uk>, "robh+dt@kernel.org" <robh+dt@kernel.org>, dl-linux-imx <linux-imx@nxp.com>, "kernel@pengutronix.de" <kernel@pengutronix.de>, Fabio Estevam <fabio.estevam@nxp.com>, "shawnguo@kernel.org" <shawnguo@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 27/12/18 1:20 PM, BOUGH CHEN wrote:
-> Now tuning reset will be done when the timing is MMC_TIMING_LEGACY/
-> MMC_TIMING_MMC_HS/MMC_TIMING_SD_HS. But for timing MMC_TIMING_MMC_HS,
-> we can not do tuning reset, otherwise HS400 timing is not right.
-> 
-> Here is the process of init HS400, first finish tuning in HS200 mode,
-> then switch to HS mode and 8 bit DDR mode, finally switch to HS400
-> mode. If we do tuning reset in HS mode, this will cause HS400 mode
-> lost the tuning setting, which will cause CRC error.
-> 
-> This fix commit d9370424c948 ("mmc: sdhci-esdhc-imx: reset tuning
-> circuit when power on mmc card").
-> 
-> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
-> Cc: stable@vger.kernel.org # v4.12+
+Hi Bough,
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+On Fri, Dec 28, 2018 at 1:26 AM BOUGH CHEN <haibo.chen@nxp.com> wrote:
+>
+> Add imx6ull compatible string
 
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index d0d319398a54..984cc1a788cb 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -979,6 +979,7 @@ static void esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
->  	case MMC_TIMING_UHS_SDR25:
->  	case MMC_TIMING_UHS_SDR50:
->  	case MMC_TIMING_UHS_SDR104:
-> +	case MMC_TIMING_MMC_HS:
->  	case MMC_TIMING_MMC_HS200:
->  		writel(m, host->ioaddr + ESDHC_MIX_CTRL);
->  		break;
-> 
+Please explain the reason, like you did in the other commit log that
+explains the need for handling erratum ERR010450 on i.MX6ULL.
