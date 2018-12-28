@@ -1,17 +1,12 @@
 From: BOUGH CHEN <haibo.chen@nxp.com>
-Subject: RE: [PATCH 2/3] mmc: sdhci-esdhc-imx: add SD clock limitation for
- imx6ull
-Date: Fri, 28 Dec 2018 02:40:58 +0000
-Message-ID: <VI1PR04MB504033A6B1A1EC556C135FA190B70@VI1PR04MB5040.eurprd04.prod.outlook.com>
-References: <1545292612-14471-1-git-send-email-haibo.chen@nxp.com>
- <1545292612-14471-2-git-send-email-haibo.chen@nxp.com>
- <cff15a85-3f72-a8ea-2e5f-731963175fde@intel.com>
- <20181227122254.GB26090@n2100.armlinux.org.uk>
+Subject: [PATCH v2 1/3] dt-bindings: mmc: fsl-imx-esdhc: add imx6ull
+ compatible string
+Date: Fri, 28 Dec 2018 03:26:04 +0000
+Message-ID: <20181228033323.32308-1-haibo.chen@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20181227122254.GB26090@n2100.armlinux.org.uk>
 Content-Language: en-US
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
@@ -22,66 +17,28 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Russell King - ARM Linux <linux@armlinux.org.uk>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: "mark.rutland@arm.com" <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "robh+dt@kernel.org" <robh+dt@kernel.org>, dl-linux-imx <linux-imx@nxp.com>, "kernel@pengutronix.de" <kernel@pengutronix.de>, Fabio Estevam <fabio.estevam@nxp.com>, "shawnguo@kernel.org" <shawnguo@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "robh+dt@kernel.org" <robh+dt@kernel.org>, "mark.rutland@arm.com" <mark.rutland@arm.com>, "shawnguo@kernel.org" <shawnguo@kernel.org>, "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>, "kernel@pengutronix.de" <kernel@pengutronix.de>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "rmk+kernel@armlinux.org.uk" <rmk+kernel@armlinux.org.uk>
+Cc: Fabio Estevam <fabio.estevam@nxp.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, dl-linux-imx <linux-imx@nxp.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IFJ1c3NlbGwgS2luZyAtIEFS
-TSBMaW51eCBbbWFpbHRvOmxpbnV4QGFybWxpbnV4Lm9yZy51a10NCj4gU2VudDogMjAxOMTqMTLU
-wjI3yNUgMjA6MjMNCj4gVG86IEFkcmlhbiBIdW50ZXIgPGFkcmlhbi5odW50ZXJAaW50ZWwuY29t
-Pg0KPiBDYzogQk9VR0ggQ0hFTiA8aGFpYm8uY2hlbkBueHAuY29tPjsgdWxmLmhhbnNzb25AbGlu
-YXJvLm9yZzsNCj4gcm9iaCtkdEBrZXJuZWwub3JnOyBtYXJrLnJ1dGxhbmRAYXJtLmNvbTsgc2hh
-d25ndW9Aa2VybmVsLm9yZzsNCj4gcy5oYXVlckBwZW5ndXRyb25peC5kZTsga2VybmVsQHBlbmd1
-dHJvbml4LmRlOyBGYWJpbyBFc3RldmFtDQo+IDxmYWJpby5lc3RldmFtQG54cC5jb20+OyBkZXZp
-Y2V0cmVlQHZnZXIua2VybmVsLm9yZzsNCj4gbGludXgtbW1jQHZnZXIua2VybmVsLm9yZzsgZGwt
-bGludXgtaW14IDxsaW51eC1pbXhAbnhwLmNvbT47DQo+IGxpbnV4LWFybS1rZXJuZWxAbGlzdHMu
-aW5mcmFkZWFkLm9yZw0KPiBTdWJqZWN0OiBSZTogW1BBVENIIDIvM10gbW1jOiBzZGhjaS1lc2Ro
-Yy1pbXg6IGFkZCBTRCBjbG9jayBsaW1pdGF0aW9uIGZvcg0KPiBpbXg2dWxsDQo+IA0KPiBPbiBU
-aHUsIERlYyAyNywgMjAxOCBhdCAxMDowMToyNEFNICswMjAwLCBBZHJpYW4gSHVudGVyIHdyb3Rl
-Og0KPiA+IE9uIDIwLzEyLzE4IDk6NDkgQU0sIEJPVUdIIENIRU4gd3JvdGU6DQo+ID4gPiBpLk1Y
-NlVMTCBoYXMgZXJyYXRhIEVSUjAxMDQ1MCwgcG9pbnQgb3V0IHRoYXQgZHVlIHRvIFNPQyBJL08g
-dGltaW5nDQo+ID4gPiBsaW1pdGF0aW9uLCBmb3IgZU1NQyBIUzIwMCBhbmQgU0QvU0RJTyAzLjAg
-U0RSMTA0LCB0aGUgY2xvY2sgcmF0ZQ0KPiA+ID4gY2FuJ3QgZXhjZWVkIDE1ME1Iei4gQW5kIGZv
-ciBlTU1DIEREUjUyIGFuZCBTRC9TRElPDQo+ID4gPiBERFI1MCBtb2RlLCB0aGUgY2xvY2sgcmF0
-ZSBjYW4ndCBleGNlZWQgNDVNSHouDQo+ID4gPg0KPiA+ID4gVGhpcyBwYXRjaCBhZGQgdGhpcyBs
-aW1pdCBmb3IgaW14NnVsbC4NCj4gPiA+DQo+ID4gPiBTaWduZWQtb2ZmLWJ5OiBIYWlibyBDaGVu
-IDxoYWliby5jaGVuQG54cC5jb20+DQo+ID4NCj4gPiBBcGFydCBmcm9tIHRoZSBrYnVpbGQgdGVz
-dCByb2JvdCBjb21wbGFpbnRzIChkbyB0aGV5IG5lZWQgdG8gYmUgZml4ZWQ/KToNCj4gPg0KPiA+
-IEFja2VkLWJ5OiBBZHJpYW4gSHVudGVyIDxhZHJpYW4uaHVudGVyQGludGVsLmNvbT4NCj4gDQo+
-IE5hY2tlZC1ieTogUnVzc2VsbCBLaW5nIDxybWsra2VybmVsQGFybWxpbnV4Lm9yZy51az4NCj4g
-DQo+IFRoZSBrYnVpbGQgdGVzdCByb2JvdCBjb21wbGFpbnRzIGRvIG5lZWQgdG8gYmUgZml4ZWQg
-Zmlyc3QuICBUaGV5J3JlIGNvbmZ1c2luZw0KPiBiZWNhdXNlIEdDQyBwcm9kdWNlcyBxdWl0ZSBh
-IGxvdCBvZiBnYXJiYWdlIGluIGl0cyBlcnJvciBtZXNzYWdlcyBub3cuICBJZg0KPiB5b3UgbG9v
-ayBhdCB0aGUgcGF0Y2gsIHRoZXJlJ3MgYSBodW5rIHRoYXQgaGFzOg0KPiANCj4gKyAgICAgICBp
-ZiAoaW14X2RhdGEtPnNvY2RhdGEtPmZsYWdzICYgRVNESENfRkxBR19FUlIwMTA0NTApIHsNCj4g
-KyAgICAgICAgICAgICAgIGlmIChpbXhfZGF0YS0+aXNfZGRyKQ0KPiArICAgICAgICAgICAgICAg
-ICAgICAgICBjbG9jayA9IGNsb2NrID4gNDUwMDAwMDAgPyA0NTAwMDAwMCA6IGNsb2NrOw0KPiAr
-ICAgICAgICAgICAgICAgZWxzZQ0KPiArICAgICAgICAgICAgICAgICAgICAgICBjbG9jayA9IGNs
-b2NrID4gMTUwMDAwMDAwID8gMTUwMDAwMDAwIDogY2xvY2s7DQo+ICsNCj4gDQo+IHdoaWNoIGlz
-IG1pc3NpbmcgYSBjbG9zaW5nIGJyYWNlLiAgVGhpcyBwYXRjaCBjb3VsZCBub3QgaGF2ZSBiZWVu
-IGJ1aWxkIHRlc3RlZA0KPiBiZWZvcmUgaXQgd2FzIG1haWxlZCB0byB0aGUgbGlzdCwgYW5kIHRo
-ZSB0ZXN0IHJvYm90IGlzIGhpZ2hsaWdodGluZyB0aGF0IGZhY3QuDQo+IA0KDQpJJ20gcmVhbGx5
-IHNvcnJ5IGFib3V0IHRoYXQuICBUaGFua3MgZm9yIHBvaW50IG91dCB0aGF0LCBJIHdpbGwgZG91
-YmxlIGNoZWNrIG15IHBhdGNoIHdoZW4gSSBtYWlsIHRvIHRoZSBsaXN0IG5leHQgdGltZS4NCg0K
-PiBJdCBtYXkgYWxzbyBiZSBhIGdvb2QgaWRlYSB0byBlbmNvdXJhZ2UgYSBkaWZmZXJlbnQgYXBw
-cm9hY2ggdG8gdGhlIGFib3ZlDQo+IGFueXdheToNCj4gDQo+IAlpZiAoaW14X2RhdGEtPnNvY2Rh
-dGEtPmZsYWdzICYgRVNESENfRkxBR19FUlIwMTA0NTApIHsNCj4gCQl1bnNpZ25lZCBsb25nIG1h
-eF9jbG9jazsNCj4gDQo+IAkJbWF4X2Nsb2NrID0gaW14X2RhdGEtPmlzX2RkciA/IDQ1MDAwMDAw
-IDogMTUwMDAwMDAwOw0KPiANCj4gCQljbG9jayA9IG1heChjbG9jaywgbWF4X2Nsb2NrKTsNCj4g
-CX0NCj4gDQo+IHJhdGhlciB0aGFuIG9wZW4tY29kaW5nIHRoZSBtYXgoKSBzdHVmZiBpbiB0aGUg
-ZHJpdmVyLg0KDQpUaGFua3MgZm9yIGdpdmluZyBzdWNoIGEgZ29vZCBzdWdnZXN0aW9uLCBJIHdp
-bGwgdGFrZSBjYXJlIG9mIGl0LCB3aXRoIGEgbGl0dGxlIGNoYW5nZToNCgkJY2xvY2sgPSBtaW4o
-Y2xvY2ssIG1heF9jbG9jayk7DQoNCkJlc3QgUmVnYXJkDQpCb3VnaCBDaGVuDQo+IA0KPiBUaGFu
-a3MuDQo+IA0KPiAtLQ0KPiBSTUsncyBQYXRjaCBzeXN0ZW06DQo+IGh0dHBzOi8vZW1lYTAxLnNh
-ZmVsaW5rcy5wcm90ZWN0aW9uLm91dGxvb2suY29tLz91cmw9aHR0cCUzQSUyRiUyRnd3dy4NCj4g
-YXJtbGludXgub3JnLnVrJTJGZGV2ZWxvcGVyJTJGcGF0Y2hlcyUyRiZhbXA7ZGF0YT0wMiU3QzAx
-JTdDaGFpYm8uDQo+IGNoZW4lNDBueHAuY29tJTdDMTNhZTU5NzYwZGUyNGRlMjlhN2MwOGQ2NmJm
-NjExNzQlN0M2ODZlYTFkM2JjMg0KPiBiNGM2ZmE5MmNkOTljNWMzMDE2MzUlN0MwJTdDMCU3QzYz
-NjgxNTEwMTkzNzE0NjY0MiZhbXA7c2RhdGE9VVANCj4gUzd6MlVUTHBmZ3FneVdGUE0lMkZ5WFAl
-MkJRdTFxVUxvYXZGT0JMRldrUWp3JTNEJmFtcDtyZXNlcnZlZA0KPiA9MA0KPiBGVFRDIGJyb2Fk
-YmFuZCBmb3IgMC44bWlsZSBsaW5lIGluIHN1YnVyYmlhOiBzeW5jIGF0IDEyLjFNYnBzIGRvd24g
-NjIya2Jwcw0KPiB1cCBBY2NvcmRpbmcgdG8gc3BlZWR0ZXN0Lm5ldDogMTEuOU1icHMgZG93biA1
-MDBrYnBzIHVwDQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-XwpsaW51eC1hcm0ta2VybmVsIG1haWxpbmcgbGlzdApsaW51eC1hcm0ta2VybmVsQGxpc3RzLmlu
-ZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9s
-aW51eC1hcm0ta2VybmVsCg==
+Add imx6ull compatible string
+
+Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
+---
+ Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
+index 9201a7d8d7b0..540c65ed9cba 100644
+--- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
++++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
+@@ -15,6 +15,7 @@ Required properties:
+ 	       "fsl,imx6q-usdhc"
+ 	       "fsl,imx6sl-usdhc"
+ 	       "fsl,imx6sx-usdhc"
++	       "fsl,imx6ull-usdhc"
+ 	       "fsl,imx7d-usdhc"
+ 	       "fsl,imx8qxp-usdhc"
+ 
+-- 
+2.17.1
