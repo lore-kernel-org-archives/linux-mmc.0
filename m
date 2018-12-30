@@ -1,15 +1,15 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH 2/3] ARM: dts: meson8b: ec100: mark the SD card detection
- GPIO active-low
-Date: Sun, 30 Dec 2018 20:54:31 +0100
-Message-ID: <CACRpkdYQLvCEvNaA_O2SP4VXh7Lp7sD31wOBD9ZDoZwx3c+ZuQ@mail.gmail.com>
+Subject: Re: [PATCH 3/3] ARM: dts: meson8m2: mxiii-plus: mark the SD card
+ detection GPIO active-low
+Date: Sun, 30 Dec 2018 20:54:59 +0100
+Message-ID: <CACRpkdZ95J8LmVbBDJ=ms0sJwV+T4jvQeN-huXOE_pmtB+Ykwg@mail.gmail.com>
 References: <20181229125711.5205-1-martin.blumenstingl@googlemail.com>
- <20181229125711.5205-3-martin.blumenstingl@googlemail.com>
+ <20181229125711.5205-4-martin.blumenstingl@googlemail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20181229125711.5205-3-martin.blumenstingl@googlemail.com>
+In-Reply-To: <20181229125711.5205-4-martin.blumenstingl@googlemail.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -29,16 +29,16 @@ On Sat, Dec 29, 2018 at 1:57 PM Martin Blumenstingl
 > After commit 89a5e15bcba87d ("gpio/mmc/of: Respect polarity in the device
 > tree") SD cards are not detected anymore.
 >
-> The CD GPIO is "active low" on the EC-100. The MMC dt-bindings specify:
-> "[...] using the "cd-inverted" property means, that the CD line is active
-> high, i.e. it is high, when a card is inserted".
+> The CD GPIO is "active low" on the MXIII-Plus. The MMC dt-bindings
+> specify: "[...] using the "cd-inverted" property means, that the CD line
+> is active high, i.e. it is high, when a card is inserted".
 >
 > Fix the description of the SD card by marking it as GPIO_ACTIVE_LOW and
 > drop the "cd-inverted" property. This makes the definition consistent
 > with the existing dt-bindings and fixes the check whether an SD card is
 > inserted.
 >
-> Fixes: bbedc1f1d90e33 ("ARM: dts: meson8b: Add support for the Endless Mini (EC-100)")
+> Fixes: 35ee52bea66c74 ("ARM: dts: meson8m2: add support for the Tronsmart MXIII Plus")
 > Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
 
 Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
