@@ -1,51 +1,58 @@
-From: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Subject: Re: [PATCH 0/3] ARM: dts: meson: fix SD card cd-gpio (pre v4.21-rc)
-Date: Sat, 29 Dec 2018 15:29:20 +0100
-Message-ID: <CAFBinCCpsy40NuB124TqDUWy9zogeMrLsCGCanbbvpfd-yVDdQ@mail.gmail.com>
-References: <20181229125711.5205-1-martin.blumenstingl@googlemail.com>
+From: Sinan Kaya <Okaya@kernel.org>
+Subject: Re: [PATCH v3 09/11] mmc: add PCI dependency into IOSF_MBI
+Date: Sun, 30 Dec 2018 21:56:53 +0300
+Message-ID: <CAK9iUCPqqyK7KMvchM4jY_FBgujnQm019J27TpDJjXUXvu5sjQ@mail.gmail.com>
+References: <20181223232521.11320-1-okaya@kernel.org> <20181223232521.11320-10-okaya@kernel.org>
+ <CAJZ5v0jFXvGJH_V9gJ8c3T5x80yYHQmk=0WfJi=vvkSJ_aShwg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20181229125711.5205-1-martin.blumenstingl@googlemail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-amlogic@lists.infradead.org, khilman@baylibre.com, linus.walleij@linaro.org
-Cc: linus.luessing@c0d3.blue, bgolaszewski@baylibre.com, balbes-150@yandex.ru, linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux@roeck-us.net
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAJZ5v0jFXvGJH_V9gJ8c3T5x80yYHQmk=0WfJi=vvkSJ_aShwg@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Rafael J. Wysocki" <rafael@kernel.org>
+Cc: Linux-Next Mailing List <linux-next@vger.kernel.org>, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, "Hunter, Adrian" <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, Geert Uytterhoeven <geert@linux-m68k.org>, faiz_abbas@ti.com, chunyan.zhang@unisoc.com, Jisheng.Zhang@synaptics.com, ludovic.barre@st.com, Arnd Bergmann <arnd@arndb.de>, alex.smith@imgtec.com, chris.brandt@renesas.com, linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Sat, Dec 29, 2018 at 1:57 PM Martin Blumenstingl
-<martin.blumenstingl@googlemail.com> wrote:
+On Wed, Dec 26, 2018 at 12:41 PM Rafael J. Wysocki <rafael@kernel.org> wrote:
 >
-> Today I noticed that my Odroid-C1 doesn't see it's SD card anymore.
-> My board is not the only one, Odroid-C1 on KernelCI suffers from the
-> same problem:
-> v4.20-6428-g00c569b567c7 still sees the SD card (mmc0): [0]
-> v4.20-8955-g903b77c63167 doesn't see the SD card (mmc0) anymore: [1]
+> On Mon, Dec 24, 2018 at 12:26 AM Sinan Kaya <okaya@kernel.org> wrote:
+> >
+> > Select IOSF_MBI only when PCI is set.
+> >
+> > Signed-off-by: Sinan Kaya <okaya@kernel.org>
+> > ---
+> >  drivers/mmc/host/Kconfig | 2 +-
+> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> >
+> > diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> > index e26b8145efb3..4c5f037b246d 100644
+> > --- a/drivers/mmc/host/Kconfig
+> > +++ b/drivers/mmc/host/Kconfig
+> > @@ -117,7 +117,7 @@ config MMC_RICOH_MMC
+> >  config MMC_SDHCI_ACPI
+> >         tristate "SDHCI support for ACPI enumerated SDHCI controllers"
+> >         depends on MMC_SDHCI && ACPI
 >
-> My Endless Mini (EC-100) is also affected by this issue.
+> It should depend on PCI as well, shouldn't it?
 >
-> a git bisect run points to this commit:
-> 89a5e15bcba87df5120d4656e0ff33d4f7cd6152 ("gpio/mmc/of: Respect polarity
-> in the device tree")
+
+I don't think so. The PCI dependency is at IOSF_MBI code so code
+should select IOSF_MBI only when x86 and pci is defined as below.
+
+This driver does not depend on PCI.
+
+> As it stands with the patch applied, randconfig can still select it if
+> PCI is unset AFAICS, can't it?
+
+True, we also should be careful about separating ACPI from PCI.
+Someone should be able to define a sdhci acpi object without PCI.
+
+What do you think about this?
+
 >
-> and indeed, reverting it makes my Odroid-C1 and EC-100 see the SD card
-> again.
-I started a separate discussion for that topic on the linux-mmc and
-linux-gpio mailing list for this topic: [0]
-
-comments regarding this series are still welcome!
-
-
-Regards
-Martin
-
-
-[0] https://marc.info/?l=linux-mmc&m=154609359306732&w=3
+> > -       select IOSF_MBI if X86
+> > +       select IOSF_MBI if (X86 && PCI)
+> >         help
+> >           This selects support for ACPI enumerated SDHCI controllers,
+> >           identified by ACPI Compatibility ID PNP0D40 or specific
+> > --
