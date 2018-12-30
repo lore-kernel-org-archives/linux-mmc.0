@@ -1,15 +1,15 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH 1/3] ARM: dts: meson8b: odroidc1: mark the SD card
- detection GPIO active-low
-Date: Sun, 30 Dec 2018 20:54:03 +0100
-Message-ID: <CACRpkdY89oiTn1XRu5Dx8+HQBcUysVQ=LpjvKA_Mx2hbmGXdiw@mail.gmail.com>
+Subject: Re: [PATCH 2/3] ARM: dts: meson8b: ec100: mark the SD card detection
+ GPIO active-low
+Date: Sun, 30 Dec 2018 20:54:31 +0100
+Message-ID: <CACRpkdYQLvCEvNaA_O2SP4VXh7Lp7sD31wOBD9ZDoZwx3c+ZuQ@mail.gmail.com>
 References: <20181229125711.5205-1-martin.blumenstingl@googlemail.com>
- <20181229125711.5205-2-martin.blumenstingl@googlemail.com>
+ <20181229125711.5205-3-martin.blumenstingl@googlemail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20181229125711.5205-2-martin.blumenstingl@googlemail.com>
+In-Reply-To: <20181229125711.5205-3-martin.blumenstingl@googlemail.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -29,7 +29,7 @@ On Sat, Dec 29, 2018 at 1:57 PM Martin Blumenstingl
 > After commit 89a5e15bcba87d ("gpio/mmc/of: Respect polarity in the device
 > tree") SD cards are not detected anymore.
 >
-> The CD GPIO is "active low" on Odroid-C1. The MMC dt-bindings specify:
+> The CD GPIO is "active low" on the EC-100. The MMC dt-bindings specify:
 > "[...] using the "cd-inverted" property means, that the CD line is active
 > high, i.e. it is high, when a card is inserted".
 >
@@ -38,16 +38,10 @@ On Sat, Dec 29, 2018 at 1:57 PM Martin Blumenstingl
 > with the existing dt-bindings and fixes the check whether an SD card is
 > inserted.
 >
-> Fixes: e03efbce6bebf5 ("ARM: dts: meson8b-odroidc1: add microSD support")
+> Fixes: bbedc1f1d90e33 ("ARM: dts: meson8b: Add support for the Endless Mini (EC-100)")
 > Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
 
 Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
-
-This is definately a better way to do it (we should insert some text into the
-nindings about doing it this way).
-
-We also need to fix it for existing device trees using "cd-inverted"
-though.
 
 Yours,
 Linus Walleij
