@@ -1,47 +1,48 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH 0/3] ARM: dts: meson: fix SD card cd-gpio (pre v4.21-rc)
-Date: Sun, 30 Dec 2018 20:57:08 +0100
-Message-ID: <CACRpkdZ4bex+wm4vGWhDLSAsXnaVeHWEp6Rf4g8NQZmXnFfneQ@mail.gmail.com>
-References: <20181229125711.5205-1-martin.blumenstingl@googlemail.com>
+From: "Rafael J. Wysocki" <rafael@kernel.org>
+Subject: Re: [PATCH v3 09/11] mmc: add PCI dependency into IOSF_MBI
+Date: Mon, 31 Dec 2018 10:40:15 +0100
+Message-ID: <CAJZ5v0hw_=Odpok=6qWVWAfJ0wG7Z8NjwzMCpaFgxYnEAreKcg@mail.gmail.com>
+References: <20181223232521.11320-1-okaya@kernel.org> <20181223232521.11320-10-okaya@kernel.org>
+ <CAJZ5v0jFXvGJH_V9gJ8c3T5x80yYHQmk=0WfJi=vvkSJ_aShwg@mail.gmail.com> <CAK9iUCPqqyK7KMvchM4jY_FBgujnQm019J27TpDJjXUXvu5sjQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20181229125711.5205-1-martin.blumenstingl@googlemail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Cc: linus.luessing@c0d3.blue, Bartosz Golaszewski <bgolaszewski@baylibre.com>, balbes-150@yandex.ru, Kevin Hilman <khilman@baylibre.com>, linux-mmc <linux-mmc@vger.kernel.org>, "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>, Guenter Roeck <linux@roeck-us.net>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAK9iUCPqqyK7KMvchM4jY_FBgujnQm019J27TpDJjXUXvu5sjQ@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Sinan Kaya <Okaya@kernel.org>
+Cc: "Rafael J. Wysocki" <rafael@kernel.org>, Linux-Next Mailing List <linux-next@vger.kernel.org>, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, "Hunter, Adrian" <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, Geert Uytterhoeven <geert@linux-m68k.org>, faiz_abbas@ti.com, chunyan.zhang@unisoc.com, Jisheng.Zhang@synaptics.com, ludovic.barre@st.com, Arnd Bergmann <arnd@arndb.de>, alex.smith@imgtec.com, chris.brandt@renesas.com, linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Sat, Dec 29, 2018 at 1:57 PM Martin Blumenstingl
-<martin.blumenstingl@googlemail.com> wrote:
-
-> However, while reviewing the .dts files for the 32-bit Amlogic Meson
-> boards I found that the cd-gpios are specified incorrectly in the .dts.
-> Documentation/devicetree/bindings/mmc/mmc.txt states: "[...] using the
-> "cd-inverted" property means, that the CD line is active high, i.e. it
-> is high, when a card is inserted".
-> This is not the case on all currently supported 32-bit Meson boards, so
-> this switches the cd-gpios
-> - from GPIO_ACTIVE_HIGH with the "cd-inverted" property being set
-> - to GPIO_ACTIVE_LOW with the "cd-inverted" property being absent
+On Sun, Dec 30, 2018 at 7:57 PM Sinan Kaya <Okaya@kernel.org> wrote:
 >
-> This fix also works even if the following two commits are reverted:
-> - 89a5e15bcba87d ("gpio/mmc/of: Respect polarity in the device tree")
-> - 81c85ec15a1946 ("gpio: OF: Parse MMC-specific CD and WP properties")
+> On Wed, Dec 26, 2018 at 12:41 PM Rafael J. Wysocki <rafael@kernel.org> wrote:
+> >
+> > On Mon, Dec 24, 2018 at 12:26 AM Sinan Kaya <okaya@kernel.org> wrote:
+> > >
+> > > Select IOSF_MBI only when PCI is set.
+> > >
+> > > Signed-off-by: Sinan Kaya <okaya@kernel.org>
+> > > ---
+> > >  drivers/mmc/host/Kconfig | 2 +-
+> > >  1 file changed, 1 insertion(+), 1 deletion(-)
+> > >
+> > > diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> > > index e26b8145efb3..4c5f037b246d 100644
+> > > --- a/drivers/mmc/host/Kconfig
+> > > +++ b/drivers/mmc/host/Kconfig
+> > > @@ -117,7 +117,7 @@ config MMC_RICOH_MMC
+> > >  config MMC_SDHCI_ACPI
+> > >         tristate "SDHCI support for ACPI enumerated SDHCI controllers"
+> > >         depends on MMC_SDHCI && ACPI
+> >
+> > It should depend on PCI as well, shouldn't it?
+> >
+>
+> I don't think so. The PCI dependency is at IOSF_MBI code so code
+> should select IOSF_MBI only when x86 and pci is defined as below.
+>
+> This driver does not depend on PCI.
 
-Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+Are you sure?
 
-Thanks for looking into this, I think fixing the device trees is
-orthogonal to fixing the issue I created, let's fix both!
-
-Yours,
-Linus Walleij
+Do you know any systems in which to use it without PCI?
