@@ -1,56 +1,42 @@
 From: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Subject: Re: [PATCH 0/3] ARM: dts: meson: fix SD card cd-gpio (pre v4.21-rc)
-Date: Mon, 31 Dec 2018 12:03:05 +0100
-Message-ID: <CAFBinCBG-==df7swBsWvg9banuxH5JFyHRAwv2poZUMa3h3MVw@mail.gmail.com>
-References: <20181229125711.5205-1-martin.blumenstingl@googlemail.com>
- <CACRpkdZ4bex+wm4vGWhDLSAsXnaVeHWEp6Rf4g8NQZmXnFfneQ@mail.gmail.com>
+Subject: [PATCH 0/1] mmc: fix boards with CD GPIO and "cd-inverted"
+Date: Tue,  1 Jan 2019 20:44:13 +0100
+Message-ID: <20190101194414.24766-1-martin.blumenstingl@googlemail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CACRpkdZ4bex+wm4vGWhDLSAsXnaVeHWEp6Rf4g8NQZmXnFfneQ@mail.gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: linus.luessing@c0d3.blue, Bartosz Golaszewski <bgolaszewski@baylibre.com>, balbes-150@yandex.ru, Kevin Hilman <khilman@baylibre.com>, linux-mmc <linux-mmc@vger.kernel.org>, "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>, Guenter Roeck <linux@roeck-us.net>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linus.walleij@linaro.org, linux-gpio@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: linux@roeck-us.net, bgolaszewski@baylibre.com, ulf.hansson@linaro.org, linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org, Martin Blumenstingl <martin.blumenstingl@googlemail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Linus,
+As I explained in my original mail [0] I observed that some of my boards
+were not detecting their SD card anymore:
+- Meson8b Odroid-C1: the one one Kernel CI and another one on my desk
+- Meson8b EC-100: on my desk
+- Meson GXBB Odroid-C2: on Kernel CI
 
-On Sun, Dec 30, 2018 at 8:57 PM Linus Walleij <linus.walleij@linaro.org> wrote:
->
-> On Sat, Dec 29, 2018 at 1:57 PM Martin Blumenstingl
-> <martin.blumenstingl@googlemail.com> wrote:
->
-> > However, while reviewing the .dts files for the 32-bit Amlogic Meson
-> > boards I found that the cd-gpios are specified incorrectly in the .dts.
-> > Documentation/devicetree/bindings/mmc/mmc.txt states: "[...] using the
-> > "cd-inverted" property means, that the CD line is active high, i.e. it
-> > is high, when a card is inserted".
-> > This is not the case on all currently supported 32-bit Meson boards, so
-> > this switches the cd-gpios
-> > - from GPIO_ACTIVE_HIGH with the "cd-inverted" property being set
-> > - to GPIO_ACTIVE_LOW with the "cd-inverted" property being absent
-> >
-> > This fix also works even if the following two commits are reverted:
-> > - 89a5e15bcba87d ("gpio/mmc/of: Respect polarity in the device tree")
-> > - 81c85ec15a1946 ("gpio: OF: Parse MMC-specific CD and WP properties")
->
-> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
-thank you for reviewing my series!
+git bisect pointed to the following commit:
+89a5e15bcba87d ("gpio/mmc/of: Respect polarity in the device tree")
 
-> Thanks for looking into this, I think fixing the device trees is
-> orthogonal to fixing the issue I created, let's fix both!
-I fully agree. if I still have time I'll look into a patch for the MMC
-core later today, otherwise I'll try to do it tomorrow
+The one-line change from this series is supposed to fix this issue for
+v4.21 (mainline git master).
+As explained in the patch description the MMC core code which manages
+the GPIO inversion can be cleaned up once no driver depends on it
+anymore (it seems that only one driver is left, but I don't have
+hardware for it so I can't test it). More details can also be found
+in my discussion with Linus on this topic: [1]
 
 
-Regards
-Martin
+[0] https://marc.info/?l=linux-gpio&m=154609359306731&w=3
+[1] https://marc.info/?l=linux-mmc&m=154626524506451&w=3
+
+
+Martin Blumenstingl (1):
+  mmc: core: don't override the CD GPIO level when "cd-inverted" is set
+
+ drivers/mmc/core/host.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+-- 
+2.20.1
