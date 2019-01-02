@@ -1,54 +1,111 @@
-From: Faiz Abbas <faiz_abbas@ti.com>
-Subject: Re: [PATCH V4 1/3] mmc: sdhci: add support for using external DMA
- devices
-Date: Wed, 2 Jan 2019 13:56:25 +0530
-Message-ID: <f8adce24-99eb-7b65-a2f6-79536686511c@ti.com>
-References: <1544519572-21921-1-git-send-email-zhang.chunyan@linaro.org>
- <1544519572-21921-2-git-send-email-zhang.chunyan@linaro.org>
- <0e683aef-383c-8200-0059-44a9abb654b8@intel.com>
- <CAAfSe-tHu5m3Of6=KBCxBBH1T8=4tgN8aZP_7QaGERctECZPoQ@mail.gmail.com>
+From: Jerome Brunet <jbrunet@baylibre.com>
+Subject: Re: [PATCH 0/4] mmc: meson-gx: chained descriptor fixup and
+ improvements
+Date: Wed, 02 Jan 2019 13:46:19 +0100
+Message-ID: <db2580c8740ca202d02f37ef567be0e273eca6d7.camel@baylibre.com>
+References: <20181206151828.24417-1-jbrunet@baylibre.com>
+         <CAFBinCCUO6ihxNWDup5ZVKWBc8+oiW_-j8OUxRhb+tjpGsUBkg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAAfSe-tHu5m3Of6=KBCxBBH1T8=4tgN8aZP_7QaGERctECZPoQ@mail.gmail.com>
-Content-Language: en-US
+In-Reply-To: <CAFBinCCUO6ihxNWDup5ZVKWBc8+oiW_-j8OUxRhb+tjpGsUBkg@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Chunyan Zhang <zhang.lyra@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Mark Brown <broonie@kernel.org>, Kishon Vijay Abraham I <kishon@ti.com>, Sekhar Nori <nsekhar@ti.com>
+To: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Carlo Caione <carlo@caione.org>, Kevin Hilman <khilman@baylibre.com>, linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Adrian,
-
-On 27/12/18 1:32 PM, Chunyan Zhang wrote:
-> On Thu, 27 Dec 2018 at 15:44, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>
->> On 11/12/18 11:12 AM, Chunyan Zhang wrote:
->>> Some standard SD host controllers can support both external dma
->>> controllers as well as ADMA/SDMA in which the SD host controller
->>> acts as DMA master. TI's omap controller is the case as an example.
->>>
->>> Currently the generic SDHCI code supports ADMA/SDMA integrated in
->>> the host controller but does not have any support for external DMA
->>> controllers implemented using dmaengine, meaning that custom code is
->>> needed for any systems that use an external DMA controller with SDHCI.
->>>
->>> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
->>
->> FYI, I am waiting on successful testing before reviewing these patches again.
+On Sat, 2018-12-22 at 18:28 +0100, Martin Blumenstingl wrote:
+> Hi Jerome,
 > 
-> Yeah, that makes sense, thanks Adrian!
-> 
-> I intend to send out another new patchset after the holidays.
-> After had another look at omap_hsmmc, I knew something need to be
-> modified (emailed Faiz about this privately), but I was still not sure
-> if it can fix the problem Faiz found.
-> 
+> On Thu, Dec 6, 2018 at 4:18 PM Jerome Brunet <jbrunet@baylibre.com> wrote:
+> > The goal of the patchset was mainly to address the following warning:
+> > 
+> > WARNING: CPU: 0 PID: 0 at /usr/src/kernel/drivers/mmc/host/meson-gx-
+> > mmc.c:1025 meson_mmc_irq+0xc0/0x1e0
+> > Modules linked in: crc32_ce crct10dif_ce ipv6 overlay
+> > CPU: 0 PID: 0 Comm: swapper/0 Tainted: G        W         4.19.1 #1
+> > Hardware name: Some A113 Board (DT)
+> > pstate: 40000085 (nZcv daIf -PAN -UAO)
+> > pc : meson_mmc_irq+0xc0/0x1e0
+> > lr : __handle_irq_event_percpu+0x70/0x180
+> > sp : ffff000008003980
+> > x29: ffff000008003980 x28: 0000000000000000
+> > [...]
+> > x1 : ffff80001a71bd40 x0 : 0000000000000000
+> > Call trace:
+> >  meson_mmc_irq+0xc0/0x1e0
+> >  __handle_irq_event_percpu+0x70/0x180
+> >  handle_irq_event_percpu+0x34/0x88
+> >  handle_irq_event+0x48/0x78
+> >  handle_fasteoi_irq+0xa0/0x180
+> >  generic_handle_irq+0x24/0x38
+> >  __handle_domain_irq+0x5c/0xb8
+> >  gic_handle_irq+0x58/0xa8
+> > 
+> > This happens when using the chained descriptor mode. If there is an
+> > error, we call mmc_request_done(), loosing any reference to the cmd. It
+> > turns out that the chained descriptor does really stops when we do so, at
+> > least not completly. Most of the time, it can be seen with this harmless
+> > warning because the descriptor will raise another unexpected IRQ. On rare
+> > occasion, it will completly break the MMC.
+> > 
+> > This is mostly adressed by patch #1.
+> > With this fixed, I took (yet) another look at the ultra-high speed modes
+> > and the tuning.
+> > 
+> > I came up with new settings in patch 3 and 4. I've tested them on eMMC,
+> > sdcard and sdio on the following platforms:
+> >  * gxbb p200
+> >  * gxl p230, libretech (eMMC only), kvim.
+> >  * axg s400
+> > 
+> > So far, these new settings seems to be working great but I think it
+> > would be nice if others could test this and provide their feedback.
+> > This why  patch 3 and 4 are RFT tagged.
+> > 
+> > Jerome Brunet (4):
+> >   mmc: meson-gx: make sure the descriptor is stopped on errors
+> >   mmc: meson-gx: remove useless lock
+> >   mmc: meson-gx: align default phase on soc vendor tree
+> >   mmc: meson-gx: add signal resampling
+> I gave all four patches a go on my Khadas VIM2 Basic (16GB eMMC).
+> regardless of whether I have your patch applied or not: eMMC
+> sporadically fails tuning (if I reboot the board a few times it starts
+> to work)
+> [    4.172686] mmc1: tuning execution failed: -5
+> [    4.182535] mmc1: error -5 whilst initialising MMC card
 
-I am currently working on moving am335 and am43 devices from omap_hsmmc
-to sdhci-omap driver. External DMA would be an integral part of this.
-The plan is to post these patches as a part of my series after testing
-on all those devices.
+Damn ...
 
-Thanks,
-Faiz
+This particular device is set to use hs400 ATM. Could you try with hs200 only
+? (removing mmc-hs400-1_8v from meson-gxm-khadas-vim2.dts) 
+
+I might be wrong but I think tuning is supposed to be done with hs200, before
+activating DDR mode to switch to hs400. In theory, removing hs400 should not
+change anything (so I expect the tuning to still fail) but it is worth
+checking.
+
+> 
+> I'm not sure if this issue is specific to my Khadas VIM2 so this is
+> *not* a nack for your patches.
+
+I'll check if I can get my hands on this device.
+
+When cooking this series, I tried another trick which was cycling on the
+resampling delays (see ADJUST_ADJ_DELAY_MASK). At the time, I could not see
+any significant improvement while doing it, so I dropped it.
+
+If possible. could you check if any particular value in this field, between 0
+and 5, makes things any better ?
+
+Alternatively, if you find another combination of phase for the mmc_clk and
+tx_clk that works better for this device, feel free to let me know. Maybe we
+can work something out.
+
+Cheers
+
+> 
+> 
+> Regards
+> Martin
