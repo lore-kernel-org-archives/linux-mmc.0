@@ -1,161 +1,212 @@
-From: Eduardo Valentin <edubezval@gmail.com>
-Subject: Re: [PATCH v2 2/2] mmc: sdhci-omap: Workaround errata regarding
- SDR104/HS200 tuning failures (i929)
-Date: Wed, 2 Jan 2019 11:56:28 -0800
-Message-ID: <20190102195626.GA2024@localhost.localdomain>
-References: <20181211142253.23747-1-faiz_abbas@ti.com>
- <20181211142253.23747-3-faiz_abbas@ti.com>
- <CAPDyKFoi+NzS-d8E8oz-h_ab70jY7owwqPXsEoJWnRg6J2zcNA@mail.gmail.com>
- <CAOesGMjXcpY1c0Bpf2tMACVVXNW1W-Gp3HO+yjK8f6dQ-cp5bQ@mail.gmail.com>
+From: Sowjanya Komatineni <skomatineni@nvidia.com>
+Subject: [PATCH V3 3/3] mmc: tegra: SDMMC pads auto-calibration
+Date: Wed, 2 Jan 2019 12:57:54 -0800
+Message-ID: <1546462674-22856-3-git-send-email-skomatineni@nvidia.com>
+References: <1546462674-22856-1-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAOesGMjXcpY1c0Bpf2tMACVVXNW1W-Gp3HO+yjK8f6dQ-cp5bQ@mail.gmail.com>
+In-Reply-To: <1546462674-22856-1-git-send-email-skomatineni@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Olof Johansson <olof@lixom.net>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Faiz Abbas <faiz_abbas@ti.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Kishon <kishon@ti.com>, Keerthy <j-keerthy@ti.com>, Zhang Rui <rui.zhang@intel.com>, Daniel Lezcano <daniel.lezcano@linaro.org>, Santosh Shilimkar <ssantosh@kernel.org>, Tony Lindgren <tony@atomide.com>
+To: robh+dt@kernel.org, mark.rutland@arm.com, mperttunen@nvidia.com, thierry.reding@gmail.com, jonathanh@nvidia.com, adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc: devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Sowjanya Komatineni <skomatineni@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Jan 02, 2019 at 10:29:31AM -0800, Olof Johansson wrote:
-> Hi,
-> 
-> 
-> On Wed, Dec 12, 2018 at 1:20 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> >
-> > + Thermal maintainers
-> >
-> > On Tue, 11 Dec 2018 at 15:20, Faiz Abbas <faiz_abbas@ti.com> wrote:
-> > >
-> > > Errata i929 in certain OMAP5/DRA7XX/AM57XX silicon revisions
-> > > (SPRZ426D - November 2014 - Revised February 2018 [1]) mentions
-> > > unexpected tuning pattern errors. A small failure band may be present
-> > > in the tuning range which may be missed by the current algorithm.
-> > > Furthermore, the failure bands vary with temperature leading to
-> > > different optimum tuning values for different temperatures.
-> > >
-> > > As suggested in the related Application Report (SPRACA9B - October 2017
-> > > - Revised July 2018 [2]), tuning should be done in two stages.
-> > > In stage 1, assign the optimum ratio in the maximum pass window for the
-> > > current temperature. In stage 2, if the chosen value is close to the
-> > > small failure band, move away from it in the appropriate direction.
-> > >
-> > > References:
-> > > [1] http://www.ti.com/lit/pdf/sprz426
-> > > [2] http://www.ti.com/lit/pdf/SPRACA9
-> > >
-> > > Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
-> > > Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-> > > ---
-> > >  drivers/mmc/host/Kconfig      |  2 +
-> > >  drivers/mmc/host/sdhci-omap.c | 90 ++++++++++++++++++++++++++++++++++-
-> > >  2 files changed, 91 insertions(+), 1 deletion(-)
-> > >
-> > > diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> > > index 5fa580cec831..d8f984483ab0 100644
-> > > --- a/drivers/mmc/host/Kconfig
-> > > +++ b/drivers/mmc/host/Kconfig
-> > > @@ -977,6 +977,8 @@ config MMC_SDHCI_XENON
-> > >  config MMC_SDHCI_OMAP
-> > >         tristate "TI SDHCI Controller Support"
-> > >         depends on MMC_SDHCI_PLTFM && OF
-> > > +       select THERMAL
-> > > +       select TI_SOC_THERMAL
-> > >         help
-> > >           This selects the Secure Digital Host Controller Interface (SDHCI)
-> > >           support present in TI's DRA7 SOCs. The controller supports
-> > > diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-> > > index f588ab679cb0..b75c55011fcb 100644
-> > > --- a/drivers/mmc/host/sdhci-omap.c
-> > > +++ b/drivers/mmc/host/sdhci-omap.c
-> > > @@ -27,6 +27,7 @@
-> > >  #include <linux/regulator/consumer.h>
-> > >  #include <linux/pinctrl/consumer.h>
-> > >  #include <linux/sys_soc.h>
-> > > +#include <linux/thermal.h>
-> > >
-> > >  #include "sdhci-pltfm.h"
-> > >
-> > > @@ -286,15 +287,19 @@ static int sdhci_omap_execute_tuning(struct mmc_host *mmc, u32 opcode)
-> > >         struct sdhci_host *host = mmc_priv(mmc);
-> > >         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > >         struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
-> > > +       struct thermal_zone_device *thermal_dev;
-> > >         struct device *dev = omap_host->dev;
-> > >         struct mmc_ios *ios = &mmc->ios;
-> > >         u32 start_window = 0, max_window = 0;
-> > > +       bool single_point_failure = false;
-> > >         bool dcrc_was_enabled = false;
-> > >         u8 cur_match, prev_match = 0;
-> > >         u32 length = 0, max_len = 0;
-> > >         u32 phase_delay = 0;
-> > > +       int temperature;
-> > >         int ret = 0;
-> > >         u32 reg;
-> > > +       int i;
-> > >
-> > >         /* clock tuning is not needed for upto 52MHz */
-> > >         if (ios->clock <= 52000000)
-> > > @@ -304,6 +309,16 @@ static int sdhci_omap_execute_tuning(struct mmc_host *mmc, u32 opcode)
-> > >         if (ios->timing == MMC_TIMING_UHS_SDR50 && !(reg & CAPA2_TSDR50))
-> > >                 return 0;
-> > >
-> > > +       thermal_dev = thermal_zone_get_zone_by_name("cpu_thermal");
-> >
-> > I couldn't find a corresponding call to a put function, like
-> > "thermal_zone_put()" or whatever, which made me realize that the
-> > thermal zone API is incomplete. Or depending on how you put it, it
-> > lacks object reference counting, unless I am missing something.
-> >
-> > For example, what happens if the thermal zone becomes unregistered
-> > between this point and when you call thermal_zone_get_temp() a couple
-> > of line below. I assume it's a known problem, but just wanted to point
-> > it out.
-> >
+Programs initial drive code offsets which will be used by auto
+calibration process.
 
-Yes, there is no ref counting. Specially because the get zones usages
-were too specific, and mostly used in application cases that module
-would not really be removed. Though not a good excuse, still, not very
-problematic. Now, if the API is getting other usages, then refcounting
-may be necessary.
+Programs fixed drive strengths for SDMMC pads when auto cal
+timeouts. Fixed settings are based on Pre-SI analysis of the
+pad design.
 
-> > > +       if (IS_ERR(thermal_dev)) {
-> > > +               dev_err(dev, "Unable to get thermal zone for tuning\n");
-> > > +               return PTR_ERR(thermal_dev);
-> > > +       }
-> > > +
-> > > +       ret = thermal_zone_get_temp(thermal_dev, &temperature);
-> > > +       if (ret)
-> > > +               return ret;
-> > > +
-> >
-> > [...]
-> >
-> > Anyway, I have applied this for next, thanks!
-> 
-> This is throwing errors on builds of keystone_defconfig in next and mainline:
-> 
-> http://arm-soc.lixom.net/buildlogs/next/next-20190102/buildall.arm.keystone_defconfig.log.passed
-> 
-> WARNING: unmet direct dependencies detected for TI_SOC_THERMAL
->   Depends on [n]: THERMAL [=y] && (ARCH_HAS_BANDGAP [=n] ||
-> COMPILE_TEST [=n]) && HAS_IOMEM [=y]
->   Selected by [y]:
->   - MMC_SDHCI_OMAP [=y] && MMC [=y] && MMC_SDHCI_PLTFM [=y] && OF [=y]
-> 
-> So, thermal depends on ARCH_HAS_BANDGAP, which keystone doesn't provide.
-> 
-> Selecting a major framework such as THERMAL from a driver config is
-> likely not the right solution anyway, especially since THERMAL does
-> provide stubbed out versions of the functions if it's not enabled.
+Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
+---
+ drivers/mmc/host/sdhci-tegra.c | 107 +++++++++++++++++++++++++++++++----------
+ 1 file changed, 81 insertions(+), 26 deletions(-)
 
-Yeah, that seams a bit up-side-down. Can you guys give a bit more of
-context? Why do you need the cpu thermal zone ? From patch description,
-looks like you want to have your own zone then apply different tuning
-values based on temperature (range?). Why do you need to mess up with
-cpu_thermal zone? Don't you have a bandgap in the mem controller for
-this application?
-
-> 
-> 
-> -Olof
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index 7b95d088fdef..f8361249cf57 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -75,6 +75,7 @@
+ #define SDHCI_TEGRA_SDMEM_COMP_PADCTRL_VREF_SEL_MASK	0x0000000f
+ #define SDHCI_TEGRA_SDMEM_COMP_PADCTRL_VREF_SEL_VAL	0x7
+ #define SDHCI_TEGRA_SDMEM_COMP_PADCTRL_E_INPUT_E_PWRD	BIT(31)
++#define SDHCI_COMP_PADCTRL_DRVUPDN_OFFSET_MASK		0x07FFF000
+ 
+ #define SDHCI_TEGRA_AUTO_CAL_STATUS			0x1ec
+ #define SDHCI_TEGRA_AUTO_CAL_ACTIVE			BIT(31)
+@@ -121,6 +122,8 @@ struct sdhci_tegra {
+ 	struct pinctrl *pinctrl_sdmmc;
+ 	struct pinctrl_state *pinctrl_state_3v3;
+ 	struct pinctrl_state *pinctrl_state_1v8;
++	struct pinctrl_state *pinctrl_state_3v3_drv;
++	struct pinctrl_state *pinctrl_state_1v8_drv;
+ 
+ 	struct sdhci_tegra_autocal_offsets autocal_offsets;
+ 	ktime_t last_calib;
+@@ -130,6 +133,9 @@ struct sdhci_tegra {
+ 	u32 dqs_trim;
+ };
+ 
++static int tegra_sdhci_set_padctrl(struct sdhci_host *host, int voltage,
++							bool state_drvupdn);
++
+ static u16 tegra_sdhci_readw(struct sdhci_host *host, int reg)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+@@ -437,6 +443,7 @@ static void tegra_sdhci_pad_autocalib(struct sdhci_host *host)
+ 			pdpu = offsets.pull_down_3v3 << 8 | offsets.pull_up_3v3;
+ 	}
+ 
++	/* Set initial offset before auto-calibration */
+ 	tegra_sdhci_set_pad_autocal_offset(host, pdpu);
+ 
+ 	card_clk_enabled = tegra_sdhci_configure_card_clk(host, false);
+@@ -460,19 +467,15 @@ static void tegra_sdhci_pad_autocalib(struct sdhci_host *host)
+ 	if (ret) {
+ 		dev_err(mmc_dev(host->mmc), "Pad autocal timed out\n");
+ 
+-		if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_180)
+-			pdpu = offsets.pull_down_1v8_timeout << 8 |
+-			       offsets.pull_up_1v8_timeout;
+-		else
+-			pdpu = offsets.pull_down_3v3_timeout << 8 |
+-			       offsets.pull_up_3v3_timeout;
+-
+-		/* Disable automatic calibration and use fixed offsets */
++		/* Disable automatic cal and use fixed Drive Strengths */
+ 		reg = sdhci_readl(host, SDHCI_TEGRA_AUTO_CAL_CONFIG);
+ 		reg &= ~SDHCI_AUTO_CAL_ENABLE;
+ 		sdhci_writel(host, reg, SDHCI_TEGRA_AUTO_CAL_CONFIG);
+ 
+-		tegra_sdhci_set_pad_autocal_offset(host, pdpu);
++		ret = tegra_sdhci_set_padctrl(host, ios->signal_voltage, false);
++		if (ret < 0)
++			dev_err(mmc_dev(host->mmc),
++			"Setting drive strengths failed %d\n", PTR_ERR(ret));
+ 	}
+ }
+ 
+@@ -743,27 +746,73 @@ static int tegra_sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
+ 	return mmc_send_tuning(host->mmc, opcode, NULL);
+ }
+ 
+-static int tegra_sdhci_set_padctrl(struct sdhci_host *host, int voltage)
++static int tegra_sdhci_set_padctrl(struct sdhci_host *host, int voltage,
++							bool state_drvupdn)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
+-	int ret;
++	struct sdhci_tegra_autocal_offsets offsets =
++					tegra_host->autocal_offsets;
++	struct pinctrl_state *pinctrl_drvupdn = NULL;
++	int ret = 0;
++	u8 drvup = 0, drvdn = 0;
++	u32 reg;
+ 
+-	if (!tegra_host->pad_control_available)
+-		return 0;
++	if (!state_drvupdn) {
++		/* PADS Drive Strength */
++		if (voltage == MMC_SIGNAL_VOLTAGE_180) {
++			if (!IS_ERR(tegra_host->pinctrl_state_1v8_drv) &&
++				(tegra_host->pinctrl_state_1v8_drv != NULL)) {
++				pinctrl_drvupdn =
++					tegra_host->pinctrl_state_1v8_drv;
++			} else {
++				drvup = offsets.pull_up_1v8_timeout;
++				drvdn = offsets.pull_down_1v8_timeout;
++			}
++		} else {
++			if (!IS_ERR(tegra_host->pinctrl_state_3v3_drv) &&
++				(tegra_host->pinctrl_state_3v3_drv != NULL)) {
++				pinctrl_drvupdn =
++					tegra_host->pinctrl_state_3v3_drv;
++			} else {
++				drvup = offsets.pull_up_3v3_timeout;
++				drvdn = offsets.pull_down_3v3_timeout;
++			}
++		}
++
++		if (pinctrl_drvupdn != NULL) {
++			ret = pinctrl_select_state(tegra_host->pinctrl_sdmmc,
++							pinctrl_drvupdn);
++			if (ret < 0)
++				dev_err(mmc_dev(host->mmc),
++					"failed pads drvupdn, ret: %d\n", ret);
++		} else if ((drvup) || (drvdn)) {
++			reg = sdhci_readl(host,
++					SDHCI_TEGRA_SDMEM_COMP_PADCTRL);
++			reg &= ~SDHCI_COMP_PADCTRL_DRVUPDN_OFFSET_MASK;
++			reg |= (drvup << 20) | (drvdn << 12);
++			sdhci_writel(host, reg,
++					SDHCI_TEGRA_SDMEM_COMP_PADCTRL);
++		}
+ 
+-	if (voltage == MMC_SIGNAL_VOLTAGE_180) {
+-		ret = pinctrl_select_state(tegra_host->pinctrl_sdmmc,
+-					   tegra_host->pinctrl_state_1v8);
+-		if (ret < 0)
+-			dev_err(mmc_dev(host->mmc),
+-				"setting 1.8V failed, ret: %d\n", ret);
+ 	} else {
+-		ret = pinctrl_select_state(tegra_host->pinctrl_sdmmc,
+-					   tegra_host->pinctrl_state_3v3);
+-		if (ret < 0)
+-			dev_err(mmc_dev(host->mmc),
+-				"setting 3.3V failed, ret: %d\n", ret);
++		/* Dual Voltage PADS Voltage selection */
++		if (!tegra_host->pad_control_available)
++			return 0;
++
++		if (voltage == MMC_SIGNAL_VOLTAGE_180) {
++			ret = pinctrl_select_state(tegra_host->pinctrl_sdmmc,
++						tegra_host->pinctrl_state_1v8);
++			if (ret < 0)
++				dev_err(mmc_dev(host->mmc),
++					"setting 1.8V failed, ret: %d\n", ret);
++		} else {
++			ret = pinctrl_select_state(tegra_host->pinctrl_sdmmc,
++						tegra_host->pinctrl_state_3v3);
++			if (ret < 0)
++				dev_err(mmc_dev(host->mmc),
++					"setting 3.3V failed, ret: %d\n", ret);
++		}
+ 	}
+ 
+ 	return ret;
+@@ -778,7 +827,7 @@ static int sdhci_tegra_start_signal_voltage_switch(struct mmc_host *mmc,
+ 	int ret = 0;
+ 
+ 	if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330) {
+-		ret = tegra_sdhci_set_padctrl(host, ios->signal_voltage);
++		ret = tegra_sdhci_set_padctrl(host, ios->signal_voltage, true);
+ 		if (ret < 0)
+ 			return ret;
+ 		ret = sdhci_start_signal_voltage_switch(mmc, ios);
+@@ -786,7 +835,7 @@ static int sdhci_tegra_start_signal_voltage_switch(struct mmc_host *mmc,
+ 		ret = sdhci_start_signal_voltage_switch(mmc, ios);
+ 		if (ret < 0)
+ 			return ret;
+-		ret = tegra_sdhci_set_padctrl(host, ios->signal_voltage);
++		ret = tegra_sdhci_set_padctrl(host, ios->signal_voltage, true);
+ 	}
+ 
+ 	if (tegra_host->pad_calib_required)
+@@ -805,6 +854,12 @@ static int tegra_sdhci_init_pinctrl_info(struct device *dev,
+ 		return -1;
+ 	}
+ 
++	tegra_host->pinctrl_state_1v8_drv = pinctrl_lookup_state(
++				tegra_host->pinctrl_sdmmc, "sdmmc-1v8-drv");
++
++	tegra_host->pinctrl_state_3v3_drv = pinctrl_lookup_state(
++				tegra_host->pinctrl_sdmmc, "sdmmc-3v3-drv");
++
+ 	tegra_host->pinctrl_state_3v3 =
+ 		pinctrl_lookup_state(tegra_host->pinctrl_sdmmc, "sdmmc-3v3");
+ 	if (IS_ERR(tegra_host->pinctrl_state_3v3)) {
+-- 
+2.7.4
