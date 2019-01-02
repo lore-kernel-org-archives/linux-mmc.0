@@ -1,84 +1,161 @@
-From: Sowjanya Komatineni <skomatineni@nvidia.com>
-Subject: [PATCH V7 1/2] arm64: dtsi: Fix SDMMC address range
-Date: Wed, 2 Jan 2019 11:36:47 -0800
-Message-ID: <1546457808-18270-2-git-send-email-skomatineni@nvidia.com>
-References: <1546457808-18270-1-git-send-email-skomatineni@nvidia.com>
+From: Eduardo Valentin <edubezval@gmail.com>
+Subject: Re: [PATCH v2 2/2] mmc: sdhci-omap: Workaround errata regarding
+ SDR104/HS200 tuning failures (i929)
+Date: Wed, 2 Jan 2019 11:56:28 -0800
+Message-ID: <20190102195626.GA2024@localhost.localdomain>
+References: <20181211142253.23747-1-faiz_abbas@ti.com>
+ <20181211142253.23747-3-faiz_abbas@ti.com>
+ <CAPDyKFoi+NzS-d8E8oz-h_ab70jY7owwqPXsEoJWnRg6J2zcNA@mail.gmail.com>
+ <CAOesGMjXcpY1c0Bpf2tMACVVXNW1W-Gp3HO+yjK8f6dQ-cp5bQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1546457808-18270-1-git-send-email-skomatineni@nvidia.com>
+Content-Disposition: inline
+In-Reply-To: <CAOesGMjXcpY1c0Bpf2tMACVVXNW1W-Gp3HO+yjK8f6dQ-cp5bQ@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc: thierry.reding@gmail.com, jonathanh@nvidia.com, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Sowjanya Komatineni <skomatineni@nvidia.com>
+To: Olof Johansson <olof@lixom.net>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Faiz Abbas <faiz_abbas@ti.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Kishon <kishon@ti.com>, Keerthy <j-keerthy@ti.com>, Zhang Rui <rui.zhang@intel.com>, Daniel Lezcano <daniel.lezcano@linaro.org>, Santosh Shilimkar <ssantosh@kernel.org>, Tony Lindgren <tony@atomide.com>
 List-Id: linux-mmc@vger.kernel.org
 
-This patch fixes the SDMMC Controllers address space to be exact
-defined register address range as per the design.
+On Wed, Jan 02, 2019 at 10:29:31AM -0800, Olof Johansson wrote:
+> Hi,
+> 
+> 
+> On Wed, Dec 12, 2018 at 1:20 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> >
+> > + Thermal maintainers
+> >
+> > On Tue, 11 Dec 2018 at 15:20, Faiz Abbas <faiz_abbas@ti.com> wrote:
+> > >
+> > > Errata i929 in certain OMAP5/DRA7XX/AM57XX silicon revisions
+> > > (SPRZ426D - November 2014 - Revised February 2018 [1]) mentions
+> > > unexpected tuning pattern errors. A small failure band may be present
+> > > in the tuning range which may be missed by the current algorithm.
+> > > Furthermore, the failure bands vary with temperature leading to
+> > > different optimum tuning values for different temperatures.
+> > >
+> > > As suggested in the related Application Report (SPRACA9B - October 2017
+> > > - Revised July 2018 [2]), tuning should be done in two stages.
+> > > In stage 1, assign the optimum ratio in the maximum pass window for the
+> > > current temperature. In stage 2, if the chosen value is close to the
+> > > small failure band, move away from it in the appropriate direction.
+> > >
+> > > References:
+> > > [1] http://www.ti.com/lit/pdf/sprz426
+> > > [2] http://www.ti.com/lit/pdf/SPRACA9
+> > >
+> > > Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+> > > Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> > > ---
+> > >  drivers/mmc/host/Kconfig      |  2 +
+> > >  drivers/mmc/host/sdhci-omap.c | 90 ++++++++++++++++++++++++++++++++++-
+> > >  2 files changed, 91 insertions(+), 1 deletion(-)
+> > >
+> > > diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> > > index 5fa580cec831..d8f984483ab0 100644
+> > > --- a/drivers/mmc/host/Kconfig
+> > > +++ b/drivers/mmc/host/Kconfig
+> > > @@ -977,6 +977,8 @@ config MMC_SDHCI_XENON
+> > >  config MMC_SDHCI_OMAP
+> > >         tristate "TI SDHCI Controller Support"
+> > >         depends on MMC_SDHCI_PLTFM && OF
+> > > +       select THERMAL
+> > > +       select TI_SOC_THERMAL
+> > >         help
+> > >           This selects the Secure Digital Host Controller Interface (SDHCI)
+> > >           support present in TI's DRA7 SOCs. The controller supports
+> > > diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+> > > index f588ab679cb0..b75c55011fcb 100644
+> > > --- a/drivers/mmc/host/sdhci-omap.c
+> > > +++ b/drivers/mmc/host/sdhci-omap.c
+> > > @@ -27,6 +27,7 @@
+> > >  #include <linux/regulator/consumer.h>
+> > >  #include <linux/pinctrl/consumer.h>
+> > >  #include <linux/sys_soc.h>
+> > > +#include <linux/thermal.h>
+> > >
+> > >  #include "sdhci-pltfm.h"
+> > >
+> > > @@ -286,15 +287,19 @@ static int sdhci_omap_execute_tuning(struct mmc_host *mmc, u32 opcode)
+> > >         struct sdhci_host *host = mmc_priv(mmc);
+> > >         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> > >         struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
+> > > +       struct thermal_zone_device *thermal_dev;
+> > >         struct device *dev = omap_host->dev;
+> > >         struct mmc_ios *ios = &mmc->ios;
+> > >         u32 start_window = 0, max_window = 0;
+> > > +       bool single_point_failure = false;
+> > >         bool dcrc_was_enabled = false;
+> > >         u8 cur_match, prev_match = 0;
+> > >         u32 length = 0, max_len = 0;
+> > >         u32 phase_delay = 0;
+> > > +       int temperature;
+> > >         int ret = 0;
+> > >         u32 reg;
+> > > +       int i;
+> > >
+> > >         /* clock tuning is not needed for upto 52MHz */
+> > >         if (ios->clock <= 52000000)
+> > > @@ -304,6 +309,16 @@ static int sdhci_omap_execute_tuning(struct mmc_host *mmc, u32 opcode)
+> > >         if (ios->timing == MMC_TIMING_UHS_SDR50 && !(reg & CAPA2_TSDR50))
+> > >                 return 0;
+> > >
+> > > +       thermal_dev = thermal_zone_get_zone_by_name("cpu_thermal");
+> >
+> > I couldn't find a corresponding call to a put function, like
+> > "thermal_zone_put()" or whatever, which made me realize that the
+> > thermal zone API is incomplete. Or depending on how you put it, it
+> > lacks object reference counting, unless I am missing something.
+> >
+> > For example, what happens if the thermal zone becomes unregistered
+> > between this point and when you call thermal_zone_get_temp() a couple
+> > of line below. I assume it's a known problem, but just wanted to point
+> > it out.
+> >
 
-SDMMC Controller supporting Command Queue has CQHCI registers at
-offset 0xF000.
+Yes, there is no ref counting. Specially because the get zones usages
+were too specific, and mostly used in application cases that module
+would not really be removed. Though not a good excuse, still, not very
+problematic. Now, if the API is getting other usages, then refcounting
+may be necessary.
 
-This fix helps to identify the Tegra SDMMC Controllers supporting
-Command Queue based on the size of address space.
+> > > +       if (IS_ERR(thermal_dev)) {
+> > > +               dev_err(dev, "Unable to get thermal zone for tuning\n");
+> > > +               return PTR_ERR(thermal_dev);
+> > > +       }
+> > > +
+> > > +       ret = thermal_zone_get_temp(thermal_dev, &temperature);
+> > > +       if (ret)
+> > > +               return ret;
+> > > +
+> >
+> > [...]
+> >
+> > Anyway, I have applied this for next, thanks!
+> 
+> This is throwing errors on builds of keystone_defconfig in next and mainline:
+> 
+> http://arm-soc.lixom.net/buildlogs/next/next-20190102/buildall.arm.keystone_defconfig.log.passed
+> 
+> WARNING: unmet direct dependencies detected for TI_SOC_THERMAL
+>   Depends on [n]: THERMAL [=y] && (ARCH_HAS_BANDGAP [=n] ||
+> COMPILE_TEST [=n]) && HAS_IOMEM [=y]
+>   Selected by [y]:
+>   - MMC_SDHCI_OMAP [=y] && MMC [=y] && MMC_SDHCI_PLTFM [=y] && OF [=y]
+> 
+> So, thermal depends on ARCH_HAS_BANDGAP, which keystone doesn't provide.
+> 
+> Selecting a major framework such as THERMAL from a driver config is
+> likely not the right solution anyway, especially since THERMAL does
+> provide stubbed out versions of the functions if it's not enabled.
 
-Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
----
- arch/arm64/boot/dts/nvidia/tegra186.dtsi | 6 +++---
- arch/arm64/boot/dts/nvidia/tegra194.dtsi | 4 ++--
- 2 files changed, 5 insertions(+), 5 deletions(-)
+Yeah, that seams a bit up-side-down. Can you guys give a bit more of
+context? Why do you need the cpu thermal zone ? From patch description,
+looks like you want to have your own zone then apply different tuning
+values based on temperature (range?). Why do you need to mess up with
+cpu_thermal zone? Don't you have a bandgap in the mem controller for
+this application?
 
-diff --git a/arch/arm64/boot/dts/nvidia/tegra186.dtsi b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
-index 2f3c8e29520d..6fda3d6a7f3d 100644
---- a/arch/arm64/boot/dts/nvidia/tegra186.dtsi
-+++ b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
-@@ -231,7 +231,7 @@
- 
- 	sdmmc1: sdhci@3400000 {
- 		compatible = "nvidia,tegra186-sdhci";
--		reg = <0x0 0x03400000 0x0 0x10000>;
-+		reg = <0x0 0x03400000 0x0 0x220>;
- 		interrupts = <GIC_SPI 62 IRQ_TYPE_LEVEL_HIGH>;
- 		clocks = <&bpmp TEGRA186_CLK_SDMMC1>;
- 		clock-names = "sdhci";
-@@ -256,7 +256,7 @@
- 
- 	sdmmc2: sdhci@3420000 {
- 		compatible = "nvidia,tegra186-sdhci";
--		reg = <0x0 0x03420000 0x0 0x10000>;
-+		reg = <0x0 0x03420000 0x0 0x220>;
- 		interrupts = <GIC_SPI 63 IRQ_TYPE_LEVEL_HIGH>;
- 		clocks = <&bpmp TEGRA186_CLK_SDMMC2>;
- 		clock-names = "sdhci";
-@@ -276,7 +276,7 @@
- 
- 	sdmmc3: sdhci@3440000 {
- 		compatible = "nvidia,tegra186-sdhci";
--		reg = <0x0 0x03440000 0x0 0x10000>;
-+		reg = <0x0 0x03440000 0x0 0x220>;
- 		interrupts = <GIC_SPI 64 IRQ_TYPE_LEVEL_HIGH>;
- 		clocks = <&bpmp TEGRA186_CLK_SDMMC3>;
- 		clock-names = "sdhci";
-diff --git a/arch/arm64/boot/dts/nvidia/tegra194.dtsi b/arch/arm64/boot/dts/nvidia/tegra194.dtsi
-index c2091bb16546..6510ef6492b1 100644
---- a/arch/arm64/boot/dts/nvidia/tegra194.dtsi
-+++ b/arch/arm64/boot/dts/nvidia/tegra194.dtsi
-@@ -295,7 +295,7 @@
- 
- 		sdmmc1: sdhci@3400000 {
- 			compatible = "nvidia,tegra194-sdhci", "nvidia,tegra186-sdhci";
--			reg = <0x03400000 0x10000>;
-+			reg = <0x03400000 0x220>;
- 			interrupts = <GIC_SPI 62 IRQ_TYPE_LEVEL_HIGH>;
- 			clocks = <&bpmp TEGRA194_CLK_SDMMC1>;
- 			clock-names = "sdhci";
-@@ -306,7 +306,7 @@
- 
- 		sdmmc3: sdhci@3440000 {
- 			compatible = "nvidia,tegra194-sdhci", "nvidia,tegra186-sdhci";
--			reg = <0x03440000 0x10000>;
-+			reg = <0x03440000 0x220>;
- 			interrupts = <GIC_SPI 64 IRQ_TYPE_LEVEL_HIGH>;
- 			clocks = <&bpmp TEGRA194_CLK_SDMMC3>;
- 			clock-names = "sdhci";
--- 
-2.7.4
+> 
+> 
+> -Olof
