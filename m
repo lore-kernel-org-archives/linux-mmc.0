@@ -1,201 +1,174 @@
-From: Sowjanya Komatineni <skomatineni@nvidia.com>
-Subject: [PATCH V3 2/3] arm64: dts: tegra: Add SDMMC Auto-cal settings
-Date: Wed, 2 Jan 2019 12:57:53 -0800
-Message-ID: <1546462674-22856-2-git-send-email-skomatineni@nvidia.com>
-References: <1546462674-22856-1-git-send-email-skomatineni@nvidia.com>
+From: Faiz Abbas <faiz_abbas@ti.com>
+Subject: Re: [PATCH v2 2/2] mmc: sdhci-omap: Workaround errata regarding
+ SDR104/HS200 tuning failures (i929)
+Date: Thu, 3 Jan 2019 11:31:03 +0530
+Message-ID: <1d83e4df-78dc-10f6-f0c0-60e84b0e1094@ti.com>
+References: <20181211142253.23747-1-faiz_abbas@ti.com>
+ <20181211142253.23747-3-faiz_abbas@ti.com>
+ <CAPDyKFoi+NzS-d8E8oz-h_ab70jY7owwqPXsEoJWnRg6J2zcNA@mail.gmail.com>
+ <CAOesGMjXcpY1c0Bpf2tMACVVXNW1W-Gp3HO+yjK8f6dQ-cp5bQ@mail.gmail.com>
+ <20190102195626.GA2024@localhost.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1546462674-22856-1-git-send-email-skomatineni@nvidia.com>
+In-Reply-To: <20190102195626.GA2024@localhost.localdomain>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: robh+dt@kernel.org, mark.rutland@arm.com, mperttunen@nvidia.com, thierry.reding@gmail.com, jonathanh@nvidia.com, adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc: devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Sowjanya Komatineni <skomatineni@nvidia.com>
+To: Eduardo Valentin <edubezval@gmail.com>, Olof Johansson <olof@lixom.net>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Kishon <kishon@ti.com>, Keerthy <j-keerthy@ti.com>, Zhang Rui <rui.zhang@intel.com>, Daniel Lezcano <daniel.lezcano@linaro.org>, Santosh Shilimkar <ssantosh@kernel.org>, Tony Lindgren <tony@atomide.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Add SDMMC initial pad offsets used by auto calibration process.
+Hi Olof, Eduardo,
 
-Add SDMMC fixed drive strengths for Tegra210 and above which are
-used when calibration timeouts.
-Fixed drive strengths are based on Pre SI Analysis of the pads.
+On 03/01/19 1:26 AM, Eduardo Valentin wrote:
+> On Wed, Jan 02, 2019 at 10:29:31AM -0800, Olof Johansson wrote:
+>> Hi,
+>>
+>>
+>> On Wed, Dec 12, 2018 at 1:20 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>>
+>>> + Thermal maintainers
+>>>
+>>> On Tue, 11 Dec 2018 at 15:20, Faiz Abbas <faiz_abbas@ti.com> wrote:
+>>>>
+>>>> Errata i929 in certain OMAP5/DRA7XX/AM57XX silicon revisions
+>>>> (SPRZ426D - November 2014 - Revised February 2018 [1]) mentions
+>>>> unexpected tuning pattern errors. A small failure band may be present
+>>>> in the tuning range which may be missed by the current algorithm.
+>>>> Furthermore, the failure bands vary with temperature leading to
+>>>> different optimum tuning values for different temperatures.
+>>>>
+>>>> As suggested in the related Application Report (SPRACA9B - October 2017
+>>>> - Revised July 2018 [2]), tuning should be done in two stages.
+>>>> In stage 1, assign the optimum ratio in the maximum pass window for the
+>>>> current temperature. In stage 2, if the chosen value is close to the
+>>>> small failure band, move away from it in the appropriate direction.
+>>>>
+>>>> References:
+>>>> [1] http://www.ti.com/lit/pdf/sprz426
+>>>> [2] http://www.ti.com/lit/pdf/SPRACA9
+>>>>
+>>>> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+>>>> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+>>>> ---
+>>>>  drivers/mmc/host/Kconfig      |  2 +
+>>>>  drivers/mmc/host/sdhci-omap.c | 90 ++++++++++++++++++++++++++++++++++-
+>>>>  2 files changed, 91 insertions(+), 1 deletion(-)
+>>>>
+>>>> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+>>>> index 5fa580cec831..d8f984483ab0 100644
+>>>> --- a/drivers/mmc/host/Kconfig
+>>>> +++ b/drivers/mmc/host/Kconfig
+>>>> @@ -977,6 +977,8 @@ config MMC_SDHCI_XENON
+>>>>  config MMC_SDHCI_OMAP
+>>>>         tristate "TI SDHCI Controller Support"
+>>>>         depends on MMC_SDHCI_PLTFM && OF
+>>>> +       select THERMAL
+>>>> +       select TI_SOC_THERMAL
+>>>>         help
+>>>>           This selects the Secure Digital Host Controller Interface (SDHCI)
+>>>>           support present in TI's DRA7 SOCs. The controller supports
+>>>> diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+>>>> index f588ab679cb0..b75c55011fcb 100644
+>>>> --- a/drivers/mmc/host/sdhci-omap.c
+>>>> +++ b/drivers/mmc/host/sdhci-omap.c
+>>>> @@ -27,6 +27,7 @@
+>>>>  #include <linux/regulator/consumer.h>
+>>>>  #include <linux/pinctrl/consumer.h>
+>>>>  #include <linux/sys_soc.h>
+>>>> +#include <linux/thermal.h>
+>>>>
+>>>>  #include "sdhci-pltfm.h"
+>>>>
+>>>> @@ -286,15 +287,19 @@ static int sdhci_omap_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>>>>         struct sdhci_host *host = mmc_priv(mmc);
+>>>>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>>>>         struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
+>>>> +       struct thermal_zone_device *thermal_dev;
+>>>>         struct device *dev = omap_host->dev;
+>>>>         struct mmc_ios *ios = &mmc->ios;
+>>>>         u32 start_window = 0, max_window = 0;
+>>>> +       bool single_point_failure = false;
+>>>>         bool dcrc_was_enabled = false;
+>>>>         u8 cur_match, prev_match = 0;
+>>>>         u32 length = 0, max_len = 0;
+>>>>         u32 phase_delay = 0;
+>>>> +       int temperature;
+>>>>         int ret = 0;
+>>>>         u32 reg;
+>>>> +       int i;
+>>>>
+>>>>         /* clock tuning is not needed for upto 52MHz */
+>>>>         if (ios->clock <= 52000000)
+>>>> @@ -304,6 +309,16 @@ static int sdhci_omap_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>>>>         if (ios->timing == MMC_TIMING_UHS_SDR50 && !(reg & CAPA2_TSDR50))
+>>>>                 return 0;
+>>>>
+>>>> +       thermal_dev = thermal_zone_get_zone_by_name("cpu_thermal");
+>>>
+>>> I couldn't find a corresponding call to a put function, like
+>>> "thermal_zone_put()" or whatever, which made me realize that the
+>>> thermal zone API is incomplete. Or depending on how you put it, it
+>>> lacks object reference counting, unless I am missing something.
+>>>
+>>> For example, what happens if the thermal zone becomes unregistered
+>>> between this point and when you call thermal_zone_get_temp() a couple
+>>> of line below. I assume it's a known problem, but just wanted to point
+>>> it out.
+>>>
+> 
+> Yes, there is no ref counting. Specially because the get zones usages
+> were too specific, and mostly used in application cases that module
+> would not really be removed. Though not a good excuse, still, not very
+> problematic. Now, if the API is getting other usages, then refcounting
+> may be necessary.
+> 
+>>>> +       if (IS_ERR(thermal_dev)) {
+>>>> +               dev_err(dev, "Unable to get thermal zone for tuning\n");
+>>>> +               return PTR_ERR(thermal_dev);
+>>>> +       }
+>>>> +
+>>>> +       ret = thermal_zone_get_temp(thermal_dev, &temperature);
+>>>> +       if (ret)
+>>>> +               return ret;
+>>>> +
+>>>
+>>> [...]
+>>>
+>>> Anyway, I have applied this for next, thanks!
+>>
+>> This is throwing errors on builds of keystone_defconfig in next and mainline:
+>>
+>> http://arm-soc.lixom.net/buildlogs/next/next-20190102/buildall.arm.keystone_defconfig.log.passed
+>>
+>> WARNING: unmet direct dependencies detected for TI_SOC_THERMAL
+>>   Depends on [n]: THERMAL [=y] && (ARCH_HAS_BANDGAP [=n] ||
+>> COMPILE_TEST [=n]) && HAS_IOMEM [=y]
+>>   Selected by [y]:
+>>   - MMC_SDHCI_OMAP [=y] && MMC [=y] && MMC_SDHCI_PLTFM [=y] && OF [=y]
+>>
+>> So, thermal depends on ARCH_HAS_BANDGAP, which keystone doesn't provide.
+>>
+>> Selecting a major framework such as THERMAL from a driver config is
+>> likely not the right solution anyway, especially since THERMAL does
+>> provide stubbed out versions of the functions if it's not enabled.
+> 
+> Yeah, that seams a bit up-side-down. Can you guys give a bit more of
+> context? Why do you need the cpu thermal zone ? From patch description,
+> looks like you want to have your own zone then apply different tuning
+> values based on temperature (range?). Why do you need to mess up with
+> cpu_thermal zone? Don't you have a bandgap in the mem controller for
+> this application?
+> 
 
-Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
----
- arch/arm64/boot/dts/nvidia/tegra186.dtsi |  2 ++
- arch/arm64/boot/dts/nvidia/tegra194.dtsi | 34 +++++++++++++++++++
- arch/arm64/boot/dts/nvidia/tegra210.dtsi | 57 ++++++++++++++++++++++++++++++--
- 3 files changed, 91 insertions(+), 2 deletions(-)
+Thats correct. We don't have a bandgap in the MMC controller and thus we
+have to use the cpu one to measure temperature.
 
-diff --git a/arch/arm64/boot/dts/nvidia/tegra186.dtsi b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
-index 2f3c8e29520d..0631bb9bfcc3 100644
---- a/arch/arm64/boot/dts/nvidia/tegra186.dtsi
-+++ b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
-@@ -311,6 +311,8 @@
- 		nvidia,pad-autocal-pull-down-offset-hs400 = <0x05>;
- 		nvidia,pad-autocal-pull-up-offset-1v8-timeout = <0x0a>;
- 		nvidia,pad-autocal-pull-down-offset-1v8-timeout = <0x0a>;
-+		nvidia,pad-autocal-pull-up-offset-3v3-timeout = <0x0a>;
-+		nvidia,pad-autocal-pull-down-offset-3v3-timeout = <0x0a>;
- 		nvidia,default-tap = <0x5>;
- 		nvidia,default-trim = <0x9>;
- 		nvidia,dqs-trim = <63>;
-diff --git a/arch/arm64/boot/dts/nvidia/tegra194.dtsi b/arch/arm64/boot/dts/nvidia/tegra194.dtsi
-index c2091bb16546..3fab6802c335 100644
---- a/arch/arm64/boot/dts/nvidia/tegra194.dtsi
-+++ b/arch/arm64/boot/dts/nvidia/tegra194.dtsi
-@@ -301,6 +301,17 @@
- 			clock-names = "sdhci";
- 			resets = <&bpmp TEGRA194_RESET_SDMMC1>;
- 			reset-names = "sdhci";
-+			nvidia,pad-autocal-pull-up-offset-3v3-timeout =
-+									<0x07>;
-+			nvidia,pad-autocal-pull-down-offset-3v3-timeout =
-+									<0x07>;
-+			nvidia,pad-autocal-pull-up-offset-1v8-timeout = <0x06>;
-+			nvidia,pad-autocal-pull-down-offset-1v8-timeout =
-+									<0x07>;
-+			nvidia,pad-autocal-pull-up-offset-sdr104 = <0x00>;
-+			nvidia,pad-autocal-pull-down-offset-sdr104 = <0x00>;
-+			nvidia,default-tap = <0x9>;
-+			nvidia,default-trim = <0x5>;
- 			status = "disabled";
- 		};
- 
-@@ -312,6 +323,18 @@
- 			clock-names = "sdhci";
- 			resets = <&bpmp TEGRA194_RESET_SDMMC3>;
- 			reset-names = "sdhci";
-+			nvidia,pad-autocal-pull-up-offset-1v8 = <0x00>;
-+			nvidia,pad-autocal-pull-down-offset-1v8 = <0x7a>;
-+			nvidia,pad-autocal-pull-up-offset-3v3-timeout = <0x07>;
-+			nvidia,pad-autocal-pull-down-offset-3v3-timeout =
-+									<0x07>;
-+			nvidia,pad-autocal-pull-up-offset-1v8-timeout = <0x06>;
-+			nvidia,pad-autocal-pull-down-offset-1v8-timeout =
-+									<0x07>;
-+			nvidia,pad-autocal-pull-up-offset-sdr104 = <0x00>;
-+			nvidia,pad-autocal-pull-down-offset-sdr104 = <0x00>;
-+			nvidia,default-tap = <0x9>;
-+			nvidia,default-trim = <0x5>;
- 			status = "disabled";
- 		};
- 
-@@ -323,6 +346,17 @@
- 			clock-names = "sdhci";
- 			resets = <&bpmp TEGRA194_RESET_SDMMC4>;
- 			reset-names = "sdhci";
-+			nvidia,pad-autocal-pull-up-offset-hs400 = <0x00>;
-+			nvidia,pad-autocal-pull-down-offset-hs400 = <0x00>;
-+			nvidia,pad-autocal-pull-up-offset-1v8-timeout = <0x0a>;
-+			nvidia,pad-autocal-pull-down-offset-1v8-timeout =
-+									<0x0a>;
-+			nvidia,pad-autocal-pull-up-offset-3v3-timeout = <0x0a>;
-+			nvidia,pad-autocal-pull-down-offset-3v3-timeout =
-+									<0x0a>;
-+			nvidia,default-tap = <0x8>;
-+			nvidia,default-trim = <0x14>;
-+			nvidia,dqs-trim = <40>;
- 			status = "disabled";
- 		};
- 
-diff --git a/arch/arm64/boot/dts/nvidia/tegra210.dtsi b/arch/arm64/boot/dts/nvidia/tegra210.dtsi
-index 2205d66b0443..41408df9d4e9 100644
---- a/arch/arm64/boot/dts/nvidia/tegra210.dtsi
-+++ b/arch/arm64/boot/dts/nvidia/tegra210.dtsi
-@@ -476,6 +476,48 @@
- 		compatible = "nvidia,tegra210-pinmux";
- 		reg = <0x0 0x700008d4 0x0 0x29c>, /* Pad control registers */
- 		      <0x0 0x70003000 0x0 0x294>; /* Mux registers */
-+		sdmmc1_3v3_drv: sdmmc1-3v3-drv {
-+			sdmmc1 {
-+				nvidia,pins = "drive_sdmmc1";
-+				nvidia,pull-down-strength = <0x8>;
-+				nvidia,pull-up-strength = <0x8>;
-+			};
-+		};
-+		sdmmc1_1v8_drv: sdmmc1-1v8-drv {
-+			sdmmc1 {
-+				nvidia,pins = "drive_sdmmc1";
-+				nvidia,pull-down-strength = <0x4>;
-+				nvidia,pull-up-strength = <0x3>;
-+			};
-+		};
-+		sdmmc2_1v8_drv: sdmmc2-1v8-drv {
-+			sdmmc2 {
-+				nvidia,pins = "drive_sdmmc2";
-+				nvidia,pull-down-strength = <0x10>;
-+				nvidia,pull-up-strength = <0x10>;
-+			};
-+		};
-+		sdmmc3_3v3_drv: sdmmc3-3v3-drv {
-+			sdmmc3 {
-+				nvidia,pins = "drive_sdmmc3";
-+				nvidia,pull-down-strength = <0x8>;
-+				nvidia,pull-up-strength = <0x8>;
-+			};
-+		};
-+		sdmmc3_1v8_drv: sdmmc3-1v8-drv {
-+			sdmmc3 {
-+				nvidia,pins = "drive_sdmmc3";
-+				nvidia,pull-down-strength = <0x4>;
-+				nvidia,pull-up-strength = <0x3>;
-+			};
-+		};
-+		sdmmc4_1v8_drv: sdmmc4-1v8-drv {
-+			sdmmc4 {
-+				nvidia,pins = "drive_sdmmc4";
-+				nvidia,pull-down-strength = <0x10>;
-+				nvidia,pull-up-strength = <0x10>;
-+			};
-+		};
- 	};
- 
- 	/*
-@@ -1050,9 +1092,12 @@
- 		clock-names = "sdhci";
- 		resets = <&tegra_car 14>;
- 		reset-names = "sdhci";
--		pinctrl-names = "sdmmc-3v3", "sdmmc-1v8";
-+		pinctrl-names = "sdmmc-3v3", "sdmmc-1v8",
-+				"sdmmc-3v3-drv", "sdmmc-1v8-drv";
- 		pinctrl-0 = <&sdmmc1_3v3>;
- 		pinctrl-1 = <&sdmmc1_1v8>;
-+		pinctrl-2 = <&sdmmc1_3v3_drv>;
-+		pinctrl-3 = <&sdmmc1_1v8_drv>;
- 		nvidia,pad-autocal-pull-up-offset-3v3 = <0x00>;
- 		nvidia,pad-autocal-pull-down-offset-3v3 = <0x7d>;
- 		nvidia,pad-autocal-pull-up-offset-1v8 = <0x7b>;
-@@ -1075,6 +1120,8 @@
- 		clock-names = "sdhci";
- 		resets = <&tegra_car 9>;
- 		reset-names = "sdhci";
-+		pinctrl-names = "sdmmc-1v8-drv";
-+		pinctrl-0 = <&sdmmc2_1v8_drv>;
- 		nvidia,pad-autocal-pull-up-offset-1v8 = <0x05>;
- 		nvidia,pad-autocal-pull-down-offset-1v8 = <0x05>;
- 		nvidia,default-tap = <0x8>;
-@@ -1090,9 +1137,12 @@
- 		clock-names = "sdhci";
- 		resets = <&tegra_car 69>;
- 		reset-names = "sdhci";
--		pinctrl-names = "sdmmc-3v3", "sdmmc-1v8";
-+		pinctrl-names = "sdmmc-3v3", "sdmmc-1v8",
-+				"sdmmc-3v3-drv", "sdmmc-1v8-drv";
- 		pinctrl-0 = <&sdmmc3_3v3>;
- 		pinctrl-1 = <&sdmmc3_1v8>;
-+		pinctrl-2 = <&sdmmc3_3v3_drv>;
-+		pinctrl-3 = <&sdmmc3_1v8_drv>;
- 		nvidia,pad-autocal-pull-up-offset-3v3 = <0x00>;
- 		nvidia,pad-autocal-pull-down-offset-3v3 = <0x7d>;
- 		nvidia,pad-autocal-pull-up-offset-1v8 = <0x7b>;
-@@ -1110,6 +1160,9 @@
- 		clock-names = "sdhci";
- 		resets = <&tegra_car 15>;
- 		reset-names = "sdhci";
-+		pinctrl-names = "sdmmc-3v3-drv", "sdmmc-1v8-drv";
-+		pinctrl-0 = <&sdmmc4_1v8_drv>;
-+		pinctrl-1 = <&sdmmc4_1v8_drv>;
- 		nvidia,pad-autocal-pull-up-offset-1v8 = <0x05>;
- 		nvidia,pad-autocal-pull-down-offset-1v8 = <0x05>;
- 		nvidia,default-tap = <0x8>;
--- 
-2.7.4
+THERMAL is critical for tuning. The interface is supposed to fail if we
+can't get temperature. So IMO we should ensure that it is present.
+
+I can fix this by "select TI_SOC_THERMAL if ARCH_HAS_BANDGAP" if you
+guys agree.
+Thanks,
+Faiz
