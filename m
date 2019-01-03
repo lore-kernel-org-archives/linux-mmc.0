@@ -1,70 +1,53 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH V2 1/3] dt-bindings: mmc: tegra: Add pinctrl for pad drive
- strength config
-Date: Thu, 3 Jan 2019 12:35:10 -0600
-Message-ID: <CAL_JsqLWqhspMNPeqYvh-_ynej-KmwVW93OeQ3E7ic+XSDXngg@mail.gmail.com>
-References: <1545260153-11338-1-git-send-email-skomatineni@nvidia.com>
- <20181227213353.GA8110@bogus> <BN7PR12MB2836C77E851E7AC4BCD38BF0C2B00@BN7PR12MB2836.namprd12.prod.outlook.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH 1/1] mmc: core: don't override the CD GPIO level when
+ "cd-inverted" is set
+Date: Thu, 3 Jan 2019 23:05:57 +0100
+Message-ID: <CACRpkda8cSt7J8+2P1xpOn13KkS_xmeO1MBRR9dXZcWXgzpQwQ@mail.gmail.com>
+References: <20190101194414.24766-1-martin.blumenstingl@googlemail.com> <20190101194414.24766-2-martin.blumenstingl@googlemail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <BN7PR12MB2836C77E851E7AC4BCD38BF0C2B00@BN7PR12MB2836.namprd12.prod.outlook.com>
+In-Reply-To: <20190101194414.24766-2-martin.blumenstingl@googlemail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Sowjanya Komatineni <skomatineni@nvidia.com>
-Cc: "mark.rutland@arm.com" <mark.rutland@arm.com>, Mikko Perttunen <mperttunen@nvidia.com>, "thierry.reding@gmail.com" <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, Preetham Chandru <pchandru@nvidia.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Cc: "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Guenter Roeck <linux@roeck-us.net>, Bartosz Golaszewski <bgolaszewski@baylibre.com>, Ulf Hansson <ulf.hansson@linaro.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Dec 28, 2018 at 6:08 PM Sowjanya Komatineni
-<skomatineni@nvidia.com> wrote:
+On Tue, Jan 1, 2019 at 8:44 PM Martin Blumenstingl
+<martin.blumenstingl@googlemail.com> wrote:
+
+> Since commit 89a5e15bcba87d ("gpio/mmc/of: Respect polarity in the device
+> tree") gpiolib-of parses the "cd-gpios" property and flips the polarity
+> if "cd-inverted" is also set. This results in the "cd-inverted" property
+> being evaluated twice, which effectively makes it a no-op:
+> - first in drivers/gpio/gpiolib-of.c (of_xlate_and_get_gpiod_flags) when
+>   setting up the CD GPIO
+> - then again in drivers/mmc/core/slot-gpio.c (mmc_gpio_get_cd) when
+>   reading the CD GPIO value at runtime
 >
-> Hi Rob,
+> On boards which are using device-tree with the "cd-inverted" property
+> being set any inserted card are not detected anymore. This is due to the
+> MMC core treating the CD GPIO with the wrong polarity.
 >
-> >> Add pinctrl for 3V3 and 1V8 pad drive strength configuration for
-> >> Tegra210 sdmmc which has pad configuration registers in the pinmux
-> >> reigster domain.
-> >
-> > typo
-> >
-> >>
-> >> Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
-> >> ---
-> >>  Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt | 6
-> >> +++++-
-> >>  1 file changed, 5 insertions(+), 1 deletion(-)
-> >>
-> >> diff --git
-> >> a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-> >> b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-> >> index 32b4b4e41923..2cecdc71d94c 100644
-> >> --- a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-> >> +++ b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-> >> @@ -39,12 +39,16 @@ sdhci@c8000200 {
-> >>      bus-width = <8>;
-> >>  };
-> >>
-> >> -Optional properties for Tegra210 and Tegra186:
-> >> +Optional properties for Tegra210, Tegra186 and Tegra194:
-> >
-> >Adding Tegra194, but this patch concerns Tegra210...
-> Yes this is mainly part of Tegra210 Patch but pinctrls sdmmc-1v8 and sdmmc-3v3
-> also applies for Tegra194 and since it was not mentioned, added Tegra194 as well.
-> Does adding Tegra194 in this should come as separate patch?
+> Disable "override_cd_active_level" for the card detection GPIO which is
+> parsed using mmc_of_parse. This fixes SD card detection on the boards
+> which are currently using the "cd-inverted" device-tree property (tested
+> on Meson8b Odroid-C1 and Meson8b EC-100).
+>
+> This does not remove the CD GPIO inversion logic from the MMC core
+> because there's at least one driver (sdhci-pci-core for Intel BayTrail
+> based boards) which still passes "override_cd_active_level = true" to
+> mmc_gpiod_request_cd(). Due to lack of hardware for testing this is left
+> untouched.
+> In the future the GPIO inversion logic for both, card and read-only
+> detection can be removed once no driver is using it anymore.
+>
+> Fixes: 89a5e15bcba87d ("gpio/mmc/of: Respect polarity in the device tree")
+> Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
 
-Same patch is fine, just make the commit message match.
+OK two steps forward, one step back, that's a good fix for now, I
+can fix it properly for v4.22.
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 
-> >
-> >>  - pinctrl-names, pinctrl-0, pinctrl-1 : Specify pad voltage
-> >>    configurations. Valid pinctrl-names are "sdmmc-3v3" and "sdmmc-1v8"
-> >>    for controllers supporting multiple voltage levels. The order of names
-> >>    should correspond to the pin configuration states in pinctrl-0 and
-> >>    pinctrl-1.
-> >> +- pinctrl-names : "sdmmc-3v3-drv" and "sdmmc-1v8-drv" are applicable
-> >> +for
-> >
-> >These are in addition to the previous values?
-> Yes these are additional pinctrl states for pad drive settings which are in pinmux
-> Domain and are applicable during calibration process.
-
-Maybe '-cal' instead of '-drv' since that's the mode they apply to.
-
-Rob
+Yours,
+Linus Walleij
