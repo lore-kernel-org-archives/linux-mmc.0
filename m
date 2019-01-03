@@ -1,62 +1,70 @@
-From: Sinan Kaya <Okaya@kernel.org>
-Subject: Re: [PATCH v5 09/11] mmc: sdhci-acpi: Make PCI dependency explicit
-Date: Thu, 3 Jan 2019 14:57:40 +0000
-Message-ID: <CAK9iUCOSP+UMW0q0jW_SBgF-5sE-YtYEOaVwON6ndwHeOM7VBQ@mail.gmail.com>
-References: <20190102181038.4418-1-okaya@kernel.org> <20190102181038.4418-10-okaya@kernel.org>
- <b52d51a4-3310-7873-db3d-bf5d0dffb7f8@intel.com>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH V2 1/3] dt-bindings: mmc: tegra: Add pinctrl for pad drive
+ strength config
+Date: Thu, 3 Jan 2019 12:35:10 -0600
+Message-ID: <CAL_JsqLWqhspMNPeqYvh-_ynej-KmwVW93OeQ3E7ic+XSDXngg@mail.gmail.com>
+References: <1545260153-11338-1-git-send-email-skomatineni@nvidia.com>
+ <20181227213353.GA8110@bogus> <BN7PR12MB2836C77E851E7AC4BCD38BF0C2B00@BN7PR12MB2836.namprd12.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <b52d51a4-3310-7873-db3d-bf5d0dffb7f8@intel.com>
+In-Reply-To: <BN7PR12MB2836C77E851E7AC4BCD38BF0C2B00@BN7PR12MB2836.namprd12.prod.outlook.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Linux Next Mailing List <linux-next@vger.kernel.org>, ACPI Devel Mailing List <linux-acpi@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Faiz Abbas <faiz_abbas@ti.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Chunyan Zhang <chunyan.zhang@unisoc.com>, Jisheng Zhang <Jisheng.Zhang@synaptics.com>, Ludovic Barre <ludovic.barre@st.com>, Arnd Bergmann <arnd@arndb.de>, Alex Smith <alex.smith@imgtec.com>, Chris Brandt <chris.brandt@renesas.com>, "open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..." <linux-mmc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
+To: Sowjanya Komatineni <skomatineni@nvidia.com>
+Cc: "mark.rutland@arm.com" <mark.rutland@arm.com>, Mikko Perttunen <mperttunen@nvidia.com>, "thierry.reding@gmail.com" <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, Preetham Chandru <pchandru@nvidia.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Jan 3, 2019 at 2:50 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
+On Fri, Dec 28, 2018 at 6:08 PM Sowjanya Komatineni
+<skomatineni@nvidia.com> wrote:
 >
-> On 2/01/19 8:10 PM, Sinan Kaya wrote:
-> > After 'commit 5d32a66541c4 ("PCI/ACPI: Allow ACPI to be built without
-> > CONFIG_PCI set")' dependencies on CONFIG_PCI that previously were
-> > satisfied implicitly through dependencies on CONFIG_ACPI have to be
-> > specified directly. This driver relies on IOSF_MBI and IOSF_MBI depends
-> > on PCI. For this reason, add a direct dependency to CONFIG_PCI here.
+> Hi Rob,
 >
-> This driver does not rely on IOSF_MBI
->
+> >> Add pinctrl for 3V3 and 1V8 pad drive strength configuration for
+> >> Tegra210 sdmmc which has pad configuration registers in the pinmux
+> >> reigster domain.
+> >
+> > typo
+> >
+> >>
+> >> Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
+> >> ---
+> >>  Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt | 6
+> >> +++++-
+> >>  1 file changed, 5 insertions(+), 1 deletion(-)
+> >>
+> >> diff --git
+> >> a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
+> >> b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
+> >> index 32b4b4e41923..2cecdc71d94c 100644
+> >> --- a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
+> >> +++ b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
+> >> @@ -39,12 +39,16 @@ sdhci@c8000200 {
+> >>      bus-width = <8>;
+> >>  };
+> >>
+> >> -Optional properties for Tegra210 and Tegra186:
+> >> +Optional properties for Tegra210, Tegra186 and Tegra194:
+> >
+> >Adding Tegra194, but this patch concerns Tegra210...
+> Yes this is mainly part of Tegra210 Patch but pinctrls sdmmc-1v8 and sdmmc-3v3
+> also applies for Tegra194 and since it was not mentioned, added Tegra194 as well.
+> Does adding Tegra194 in this should come as separate patch?
 
-X86 version does.
-
-select IOSF_MBI if X86
-
-
-> You wrote on the other email QCOM doesn't use PCI but here you are making
-> them depend on it.  Please explain.
->
-
-I matched the behavior before my change. This code wouldn't be
-available without PCI and ACPI on previous kernel versions and left
-kconfig cleanup as another exercise for some other day.
+Same patch is fine, just make the commit message match.
 
 > >
-> > Fixes: 5d32a66541c46 ("PCI/ACPI: Allow ACPI to be built without CONFIG_PCI set")
-> > Signed-off-by: Sinan Kaya <okaya@kernel.org>
-> > ---
-> >  drivers/mmc/host/Kconfig | 2 +-
-> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> >>  - pinctrl-names, pinctrl-0, pinctrl-1 : Specify pad voltage
+> >>    configurations. Valid pinctrl-names are "sdmmc-3v3" and "sdmmc-1v8"
+> >>    for controllers supporting multiple voltage levels. The order of names
+> >>    should correspond to the pin configuration states in pinctrl-0 and
+> >>    pinctrl-1.
+> >> +- pinctrl-names : "sdmmc-3v3-drv" and "sdmmc-1v8-drv" are applicable
+> >> +for
 > >
-> > diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> > index e26b8145efb3..1b9401fe94c0 100644
-> > --- a/drivers/mmc/host/Kconfig
-> > +++ b/drivers/mmc/host/Kconfig
-> > @@ -116,7 +116,7 @@ config MMC_RICOH_MMC
-> >
-> >  config MMC_SDHCI_ACPI
-> >       tristate "SDHCI support for ACPI enumerated SDHCI controllers"
-> > -     depends on MMC_SDHCI && ACPI
-> > +     depends on MMC_SDHCI && ACPI && PCI
-> >       select IOSF_MBI if X86
-> >       help
-> >         This selects support for ACPI enumerated SDHCI controllers,
-> >
->
+> >These are in addition to the previous values?
+> Yes these are additional pinctrl states for pad drive settings which are in pinmux
+> Domain and are applicable during calibration process.
+
+Maybe '-cal' instead of '-drv' since that's the mode they apply to.
+
+Rob
