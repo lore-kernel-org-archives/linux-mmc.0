@@ -1,42 +1,82 @@
-From: Sinan Kaya <okaya@kernel.org>
-Subject: [PATCH v6 09/11] mmc: sdhci-acpi: Make PCI dependency explicit
-Date: Sat,  5 Jan 2019 10:06:04 +0000
-Message-ID: <20190105100606.6673-10-okaya@kernel.org>
-References: <20190105100606.6673-1-okaya@kernel.org>
+From: Anand Moon <linux.amoon@gmail.com>
+Subject: Re: [PATCH 1/3] ARM: dts: meson8b: odroidc1: mark the SD card
+ detection GPIO active-low
+Date: Mon, 7 Jan 2019 14:21:01 +0530
+Message-ID: <CANAwSgQjoXqbV2hDs4W3kR=7ULK0gkR24V6SiEJw2+mYsaNcVQ@mail.gmail.com>
+References: <20181229125711.5205-1-martin.blumenstingl@googlemail.com>
+ <20181229125711.5205-2-martin.blumenstingl@googlemail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190105100606.6673-1-okaya@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-next@vger.kernel.org
-Cc: linux-acpi@vger.kernel.org, Sinan Kaya <okaya@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, Paul Cercueil <paul@crapouillou.net>, Geert Uytterhoeven <geert@linux-m68k.org>, Faiz Abbas <faiz_abbas@ti.com>, Chunyan Zhang <chunyan.zhang@unisoc.com>, Jisheng Zhang <Jisheng.Zhang@synaptics.com>, Ludovic Barre <ludovic.barre@st.com>, Arnd Bergmann <arnd@arndb.de>, Alex Smith <alex.smith@imgtec.com>, Chris Brandt <chris.brandt@renesas.com>, "open list:MULTIMEDIA CARD MMC, SECURE
-        DIGITAL SD AND..." <linux-mmc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20181229125711.5205-2-martin.blumenstingl@googlemail.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Cc: =?UTF-8?Q?Linus_L=C3=BCssing?= <linus.luessing@c0d3.blue>, linux-gpio@vger.kernel.org, balbes-150@yandex.ru, Kevin Hilman <khilman@baylibre.com>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, bgolaszewski@baylibre.com, Guenter Roeck <linux@roeck-us.net>, linux-amlogic@lists.infradead.org, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-After 'commit 5d32a66541c4 ("PCI/ACPI: Allow ACPI to be built without
-CONFIG_PCI set")' dependencies on CONFIG_PCI that previously were
-satisfied implicitly through dependencies on CONFIG_ACPI have to be
-specified directly. This driver relies on IOSF_MBI and IOSF_MBI depends
-on PCI. For this reason, add a direct dependency to CONFIG_PCI here.
+Hi Martin,
 
-Fixes: 5d32a66541c46 ("PCI/ACPI: Allow ACPI to be built without CONFIG_PCI set")
-Signed-off-by: Sinan Kaya <okaya@kernel.org>
----
- drivers/mmc/host/Kconfig | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+On Sat, 29 Dec 2018 at 18:28, Martin Blumenstingl
+<martin.blumenstingl@googlemail.com> wrote:
+>
+> After commit 89a5e15bcba87d ("gpio/mmc/of: Respect polarity in the device
+> tree") SD cards are not detected anymore.
+>
+> The CD GPIO is "active low" on Odroid-C1. The MMC dt-bindings specify:
+> "[...] using the "cd-inverted" property means, that the CD line is active
+> high, i.e. it is high, when a card is inserted".
+>
+> Fix the description of the SD card by marking it as GPIO_ACTIVE_LOW and
+> drop the "cd-inverted" property. This makes the definition consistent
+> with the existing dt-bindings and fixes the check whether an SD card is
+> inserted.
+>
+> Fixes: e03efbce6bebf5 ("ARM: dts: meson8b-odroidc1: add microSD support")
+> Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+> ---
+>  arch/arm/boot/dts/meson8b-odroidc1.dts | 3 +--
+>  1 file changed, 1 insertion(+), 2 deletions(-)
+>
+> diff --git a/arch/arm/boot/dts/meson8b-odroidc1.dts b/arch/arm/boot/dts/meson8b-odroidc1.dts
+> index 58669abda259..070d69889f3e 100644
+> --- a/arch/arm/boot/dts/meson8b-odroidc1.dts
+> +++ b/arch/arm/boot/dts/meson8b-odroidc1.dts
+> @@ -273,8 +273,7 @@
+>                 cap-sd-highspeed;
+>                 disable-wp;
+>
+> -               cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_HIGH>;
+> -               cd-inverted;
+> +               cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_LOW>;
+>
+>                 vmmc-supply = <&tflash_vdd>;
+>                 vqmmc-supply = <&tf_io>;
+> --
+> 2.20.1
+>
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index e26b8145efb3..1b9401fe94c0 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -116,7 +116,7 @@ config MMC_RICOH_MMC
- 
- config MMC_SDHCI_ACPI
- 	tristate "SDHCI support for ACPI enumerated SDHCI controllers"
--	depends on MMC_SDHCI && ACPI
-+	depends on MMC_SDHCI && ACPI && PCI
- 	select IOSF_MBI if X86
- 	help
- 	  This selects support for ACPI enumerated SDHCI controllers,
--- 
-2.19.0
+Please add my on my Odroid c1+
+
+Tested-by: Anand Moon <linux.amoon@gmail.com>
+
+My Odroid C2 is also fails to bootup with out these changes.
+Can you send patch to fix them as well.
+
+Best Regards
+
+-Anand
+
+>
+> _______________________________________________
+> linux-amlogic mailing list
+> linux-amlogic@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/linux-amlogic
