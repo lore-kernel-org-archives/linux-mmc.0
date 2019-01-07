@@ -1,82 +1,123 @@
-From: Anand Moon <linux.amoon@gmail.com>
-Subject: Re: [PATCH 1/3] ARM: dts: meson8b: odroidc1: mark the SD card
- detection GPIO active-low
-Date: Mon, 7 Jan 2019 14:21:01 +0530
-Message-ID: <CANAwSgQjoXqbV2hDs4W3kR=7ULK0gkR24V6SiEJw2+mYsaNcVQ@mail.gmail.com>
-References: <20181229125711.5205-1-martin.blumenstingl@googlemail.com>
- <20181229125711.5205-2-martin.blumenstingl@googlemail.com>
+From: Faiz Abbas <faiz_abbas@ti.com>
+Subject: Re: [PATCH v2 2/2] mmc: sdhci-omap: Workaround errata regarding
+ SDR104/HS200 tuning failures (i929)
+Date: Mon, 7 Jan 2019 16:05:07 +0530
+Message-ID: <88ee183f-7997-45dd-d5c3-fab615340b21@ti.com>
+References: <20181211142253.23747-1-faiz_abbas@ti.com>
+ <20181211142253.23747-3-faiz_abbas@ti.com>
+ <CAPDyKFoi+NzS-d8E8oz-h_ab70jY7owwqPXsEoJWnRg6J2zcNA@mail.gmail.com>
+ <CAOesGMjXcpY1c0Bpf2tMACVVXNW1W-Gp3HO+yjK8f6dQ-cp5bQ@mail.gmail.com>
+ <20190102195626.GA2024@localhost.localdomain>
+ <1d83e4df-78dc-10f6-f0c0-60e84b0e1094@ti.com>
+ <CAOesGMiTmR6t2h1AzkPRWQon3onXKb5db5q6yVix9D5r+ExKfA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20181229125711.5205-2-martin.blumenstingl@googlemail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Cc: =?UTF-8?Q?Linus_L=C3=BCssing?= <linus.luessing@c0d3.blue>, linux-gpio@vger.kernel.org, balbes-150@yandex.ru, Kevin Hilman <khilman@baylibre.com>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, bgolaszewski@baylibre.com, Guenter Roeck <linux@roeck-us.net>, linux-amlogic@lists.infradead.org, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAOesGMiTmR6t2h1AzkPRWQon3onXKb5db5q6yVix9D5r+ExKfA@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Olof Johansson <olof@lixom.net>
+Cc: Eduardo Valentin <edubezval@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Kishon <kishon@ti.com>, Keerthy <j-keerthy@ti.com>, Zhang Rui <rui.zhang@intel.com>, Daniel Lezcano <daniel.lezcano@linaro.org>, Santosh Shilimkar <ssantosh@kernel.org>, Tony Lindgren <tony@atomide.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Martin,
+Hi Olof,
 
-On Sat, 29 Dec 2018 at 18:28, Martin Blumenstingl
-<martin.blumenstingl@googlemail.com> wrote:
->
-> After commit 89a5e15bcba87d ("gpio/mmc/of: Respect polarity in the device
-> tree") SD cards are not detected anymore.
->
-> The CD GPIO is "active low" on Odroid-C1. The MMC dt-bindings specify:
-> "[...] using the "cd-inverted" property means, that the CD line is active
-> high, i.e. it is high, when a card is inserted".
->
-> Fix the description of the SD card by marking it as GPIO_ACTIVE_LOW and
-> drop the "cd-inverted" property. This makes the definition consistent
-> with the existing dt-bindings and fixes the check whether an SD card is
-> inserted.
->
-> Fixes: e03efbce6bebf5 ("ARM: dts: meson8b-odroidc1: add microSD support")
-> Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-> ---
->  arch/arm/boot/dts/meson8b-odroidc1.dts | 3 +--
->  1 file changed, 1 insertion(+), 2 deletions(-)
->
-> diff --git a/arch/arm/boot/dts/meson8b-odroidc1.dts b/arch/arm/boot/dts/meson8b-odroidc1.dts
-> index 58669abda259..070d69889f3e 100644
-> --- a/arch/arm/boot/dts/meson8b-odroidc1.dts
-> +++ b/arch/arm/boot/dts/meson8b-odroidc1.dts
-> @@ -273,8 +273,7 @@
->                 cap-sd-highspeed;
->                 disable-wp;
->
-> -               cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_HIGH>;
-> -               cd-inverted;
-> +               cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_LOW>;
->
->                 vmmc-supply = <&tflash_vdd>;
->                 vqmmc-supply = <&tf_io>;
-> --
-> 2.20.1
->
+On 05/01/19 6:27 AM, Olof Johansson wrote:
+> On Wed, Jan 2, 2019 at 9:58 PM Faiz Abbas <faiz_abbas@ti.com> wrote:
+>>
+>> Hi Olof, Eduardo,
+>>
+>> On 03/01/19 1:26 AM, Eduardo Valentin wrote:
+>>> On Wed, Jan 02, 2019 at 10:29:31AM -0800, Olof Johansson wrote:
+>>>> Hi,
+>>>>
+>>>>
+...
+>>>>
+>>>> This is throwing errors on builds of keystone_defconfig in next and mainline:
+>>>>
+>>>> http://arm-soc.lixom.net/buildlogs/next/next-20190102/buildall.arm.keystone_defconfig.log.passed
+>>>>
+>>>> WARNING: unmet direct dependencies detected for TI_SOC_THERMAL
+>>>>   Depends on [n]: THERMAL [=y] && (ARCH_HAS_BANDGAP [=n] ||
+>>>> COMPILE_TEST [=n]) && HAS_IOMEM [=y]
+>>>>   Selected by [y]:
+>>>>   - MMC_SDHCI_OMAP [=y] && MMC [=y] && MMC_SDHCI_PLTFM [=y] && OF [=y]
+>>>>
+>>>> So, thermal depends on ARCH_HAS_BANDGAP, which keystone doesn't provide.
+>>>>
+>>>> Selecting a major framework such as THERMAL from a driver config is
+>>>> likely not the right solution anyway, especially since THERMAL does
+>>>> provide stubbed out versions of the functions if it's not enabled.
+>>>
+>>> Yeah, that seams a bit up-side-down. Can you guys give a bit more of
+>>> context? Why do you need the cpu thermal zone ? From patch description,
+>>> looks like you want to have your own zone then apply different tuning
+>>> values based on temperature (range?). Why do you need to mess up with
+>>> cpu_thermal zone? Don't you have a bandgap in the mem controller for
+>>> this application?
+>>>
+>>
+>> Thats correct. We don't have a bandgap in the MMC controller and thus we
+>> have to use the cpu one to measure temperature.
+>>
+>> THERMAL is critical for tuning. The interface is supposed to fail if we
+>> can't get temperature. So IMO we should ensure that it is present.
+>>
+>> I can fix this by "select TI_SOC_THERMAL if ARCH_HAS_BANDGAP" if you
+>> guys agree.
+> 
+> Building elaborate select statements is usually fragile, once
+> dependencies for TI_SOC_THERMAL changes you need to come back here to
+> fixup the select.
+> 
+> Supposedly this driver works on keystone (or does it?), it doesn't
 
-Please add my on my Odroid c1+
+Yes. This driver works on keystone.
 
-Tested-by: Anand Moon <linux.amoon@gmail.com>
+> actually need TI_SOC_THERMAL for basic functionality beyond tuning?
+> Or, at least, it needs to fall back to a reasonable behavior if it's
+> unavailable on keystone.
 
-My Odroid C2 is also fails to bootup with out these changes.
-Can you send patch to fix them as well.
+The scenario is this. dra7 devices (omap2plus_defconfig) support tuning
+which needs THERMAL and TI_SOC_THERMAL. Keystone devices don't need
+thermal at all. The tuning part of the code will never be touched by the
+keystone device.
 
-Best Regards
+In omap2plus_defconfig, THERMAL AND TI_SOC_THERMAL are modules by
+default. I need them to be built-in because MMC is built-in.
 
--Anand
+> 
+> Having the driver print a warning and refuse to tune to higher speeds
+> is a reasonable way to do this, I think. That would carry to all
+> platforms, i.e. even the ones who have TI_SOC_THERMAL and
+> ARCH_HAS_BANDGAP, without adding the select.
+> 
 
->
-> _______________________________________________
-> linux-amlogic mailing list
-> linux-amlogic@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-amlogic
+The MMC core today doesn't support a fallback to lower speeds when
+tuning fails. The interface just fails. This means a bunch cards that
+were working will now fail. Also, people building with olddefconfig will
+get build errors because of THERMAL=m. Thus the Kconfig architecture
+should automatically select the dependencies for SDHCI_OMAP in DRA7.
+
+An "imply TI_SOC_THERMAL" is even better here. It won't force
+TI_SOC_THERMAL for keystone and doesn't cause any warnings.
+
+So I propose the following patch:
+
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index e26b8145efb3..bc61eefcb695 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -978,7 +978,7 @@ config MMC_SDHCI_OMAP
+        tristate "TI SDHCI Controller Support"
+        depends on MMC_SDHCI_PLTFM && OF
+        select THERMAL
+-       select TI_SOC_THERMAL
++       imply TI_SOC_THERMAL
+        help
+--
+
+Thanks,
+Faiz
