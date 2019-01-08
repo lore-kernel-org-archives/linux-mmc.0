@@ -1,12 +1,12 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.19 55/97] mmc: atmel-mci: do not assume idle after atmci_request_end
-Date: Tue,  8 Jan 2019 14:29:04 -0500
-Message-ID: <20190108192949.122407-55-sashal@kernel.org>
-References: <20190108192949.122407-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.20 070/117] mmc: atmel-mci: do not assume idle after atmci_request_end
+Date: Tue,  8 Jan 2019 14:25:38 -0500
+Message-ID: <20190108192628.121270-70-sashal@kernel.org>
+References: <20190108192628.121270-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190108192949.122407-1-sashal@kernel.org>
+In-Reply-To: <20190108192628.121270-1-sashal@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Jonas Danielsson <jonas@orbital-systems.com>, Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
