@@ -1,12 +1,12 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 3.18 11/19] mmc: atmel-mci: do not assume idle after atmci_request_end
-Date: Tue,  8 Jan 2019 14:35:23 -0500
-Message-ID: <20190108193534.124555-11-sashal@kernel.org>
-References: <20190108193534.124555-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.4 17/28] mmc: atmel-mci: do not assume idle after atmci_request_end
+Date: Tue,  8 Jan 2019 14:34:34 -0500
+Message-ID: <20190108193445.124251-17-sashal@kernel.org>
+References: <20190108193445.124251-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190108193534.124555-1-sashal@kernel.org>
+In-Reply-To: <20190108193445.124251-1-sashal@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Jonas Danielsson <jonas@orbital-systems.com>, Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
@@ -55,10 +55,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index 6423083c5238..bacc0368db6b 100644
+index bf62e429f7fc..98be9eb3184b 100644
 --- a/drivers/mmc/host/atmel-mci.c
 +++ b/drivers/mmc/host/atmel-mci.c
-@@ -1838,13 +1838,14 @@ static void atmci_tasklet_func(unsigned long priv)
+@@ -1840,13 +1840,14 @@ static void atmci_tasklet_func(unsigned long priv)
  			}
  
  			atmci_request_end(host, host->mrq);
