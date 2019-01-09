@@ -1,63 +1,54 @@
-From: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Subject: Re: [PATCH 1/1] mmc: core: don't override the CD GPIO level when
- "cd-inverted" is set
-Date: Tue, 8 Jan 2019 23:20:11 +0100
-Message-ID: <CAFBinCDj-CpaQb2wfreJOCkFVj6ysV7943mqTs3xSvMfhy3yGw@mail.gmail.com>
-References: <20190101194414.24766-1-martin.blumenstingl@googlemail.com>
- <20190101194414.24766-2-martin.blumenstingl@googlemail.com> <CACRpkda8cSt7J8+2P1xpOn13KkS_xmeO1MBRR9dXZcWXgzpQwQ@mail.gmail.com>
+From: "Wang, Dongsheng" <dongsheng.wang@hxt-semitech.com>
+Subject: Re: [PATCH v6 09/11] mmc: sdhci-acpi: Make PCI dependency explicit
+Date: Wed, 9 Jan 2019 02:10:08 +0000
+Message-ID: <532b0481985641138516730fe01290d9@HXTBJIDCEMVIW02.hxtcorp.net>
+References: <20190105100606.6673-1-okaya@kernel.org>
+ <20190105100606.6673-10-okaya@kernel.org>
+ <CAJZ5v0gXM3d0uuaQPyeafVS3S1tNbo0gY5TMskpQptNGvmVKzA@mail.gmail.com>
+ <39fa9438-8928-5a1b-2a86-617df39e4c73@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CACRpkda8cSt7J8+2P1xpOn13KkS_xmeO1MBRR9dXZcWXgzpQwQ@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Guenter Roeck <linux@roeck-us.net>, Bartosz Golaszewski <bgolaszewski@baylibre.com>, Ulf Hansson <ulf.hansson@linaro.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Adrian Hunter <adrian.hunter@intel.com>, "Rafael J. Wysocki" <rafael@kernel.org>, Sinan Kaya <okaya@kernel.org>
+Cc: Linux-Next Mailing List <linux-next@vger.kernel.org>, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, Paul Cercueil <paul@crapouillou.net>, Geert Uytterhoeven <geert@linux-m68k.org>, Faiz Abbas <faiz_abbas@ti.com>, Chunyan Zhang <chunyan.zhang@unisoc.com>, Jisheng Zhang <Jisheng.Zhang@synaptics.com>, Ludovic Barre <ludovic.barre@st.com>, Arnd Bergmann <arnd@arndb.de>, Alex Smith <alex.smith@imgtec.com>, Chris Brandt <chris.brandt@renesas.com>, "open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..." <linux-mmc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>, Shah Nehal-Bakulchandra <Nehal-bakulchan>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Linus,
-
-On Thu, Jan 3, 2019 at 11:06 PM Linus Walleij <linus.walleij@linaro.org> wrote:
+On 2019/1/7 20:43, Adrian Hunter wrote:
+> On 7/01/19 1:17 PM, Rafael J. Wysocki wrote:
+>> On Sat, Jan 5, 2019 at 11:06 AM Sinan Kaya <okaya@kernel.org> wrote:
+>>> After 'commit 5d32a66541c4 ("PCI/ACPI: Allow ACPI to be built without
+>>> CONFIG_PCI set")' dependencies on CONFIG_PCI that previously were
+>>> satisfied implicitly through dependencies on CONFIG_ACPI have to be
+>>> specified directly. This driver relies on IOSF_MBI and IOSF_MBI depends
+>>> on PCI. For this reason, add a direct dependency to CONFIG_PCI here.
+>>>
+>>> Fixes: 5d32a66541c46 ("PCI/ACPI: Allow ACPI to be built without CONFIG_PCI set")
+>>> Signed-off-by: Sinan Kaya <okaya@kernel.org>
+>>> ---
+>>>  drivers/mmc/host/Kconfig | 2 +-
+>>>  1 file changed, 1 insertion(+), 1 deletion(-)
+>>>
+>>> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+>>> index e26b8145efb3..1b9401fe94c0 100644
+>>> --- a/drivers/mmc/host/Kconfig
+>>> +++ b/drivers/mmc/host/Kconfig
+>>> @@ -116,7 +116,7 @@ config MMC_RICOH_MMC
+>>>
+>>>  config MMC_SDHCI_ACPI
+>>>         tristate "SDHCI support for ACPI enumerated SDHCI controllers"
+>>> -       depends on MMC_SDHCI && ACPI
+>>> +       depends on MMC_SDHCI && ACPI && PCI
+>>>         select IOSF_MBI if X86
+>>>         help
+>>>           This selects support for ACPI enumerated SDHCI controllers,
+>>> --
+>> Any objections against this one from anyone?
+> + QCOM and AMD contributors
 >
-> On Tue, Jan 1, 2019 at 8:44 PM Martin Blumenstingl
-> <martin.blumenstingl@googlemail.com> wrote:
->
-> > Since commit 89a5e15bcba87d ("gpio/mmc/of: Respect polarity in the device
-> > tree") gpiolib-of parses the "cd-gpios" property and flips the polarity
-> > if "cd-inverted" is also set. This results in the "cd-inverted" property
-> > being evaluated twice, which effectively makes it a no-op:
-> > - first in drivers/gpio/gpiolib-of.c (of_xlate_and_get_gpiod_flags) when
-> >   setting up the CD GPIO
-> > - then again in drivers/mmc/core/slot-gpio.c (mmc_gpio_get_cd) when
-> >   reading the CD GPIO value at runtime
-> >
-> > On boards which are using device-tree with the "cd-inverted" property
-> > being set any inserted card are not detected anymore. This is due to the
-> > MMC core treating the CD GPIO with the wrong polarity.
-> >
-> > Disable "override_cd_active_level" for the card detection GPIO which is
-> > parsed using mmc_of_parse. This fixes SD card detection on the boards
-> > which are currently using the "cd-inverted" device-tree property (tested
-> > on Meson8b Odroid-C1 and Meson8b EC-100).
-> >
-> > This does not remove the CD GPIO inversion logic from the MMC core
-> > because there's at least one driver (sdhci-pci-core for Intel BayTrail
-> > based boards) which still passes "override_cd_active_level = true" to
-> > mmc_gpiod_request_cd(). Due to lack of hardware for testing this is left
-> > untouched.
-> > In the future the GPIO inversion logic for both, card and read-only
-> > detection can be removed once no driver is using it anymore.
-> >
-> > Fixes: 89a5e15bcba87d ("gpio/mmc/of: Respect polarity in the device tree")
-> > Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
->
-> OK two steps forward, one step back, that's a good fix for now, I
-> can fix it properly for v4.22.
-> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
-great, thanks for reviewing this!
+No issue with QCOM.
 
-feel free to keep me CC'ed on the "cleanup patches". I can review them
-if you don't mind that I usually need a few days to do that
-
-
-Regards
-Martin
+Cheers
+Dongsheng
