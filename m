@@ -1,240 +1,115 @@
-From: Loys Ollivier <lollivier@baylibre.com>
-Subject: [PATCH v3] arm64: dts: meson: Fix mmc cd-gpios polarity
-Date: Thu, 10 Jan 2019 16:40:22 +0100
-Message-ID: <1547134822-18498-1-git-send-email-lollivier@baylibre.com>
+From: Thierry Reding <thierry.reding@gmail.com>
+Subject: Re: [PATCH 1/2] mmc: sdhci: Properly set DMA mask
+Date: Thu, 10 Jan 2019 17:01:57 +0100
+Message-ID: <20190110160157.GA27895@ulmo>
+References: <20190104104753.3383-1-thierry.reding@gmail.com>
+ <a960e9a7-ff86-b000-1319-df85741fb380@intel.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="lrZ03NoBR/3+SXJZ"
 Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <a960e9a7-ff86-b000-1319-df85741fb380@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: devicetree@vger.kernel.org, Kevin Hilman <khilman@baylibre.com>, linux-amlogic@lists.infradead.org
-Cc: Loys Ollivier <lollivier@baylibre.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Jerome Brunet <jbrunet@baylibre.com>, Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Jonathan Hunter <jonathanh@nvidia.com>, Sowjanya Komatineni <skomatineni@nvidia.com>, Krishna Reddy <vdumpa@nvidia.com>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Commit 89a5e15bcba8 ("gpio/mmc/of: Respect polarity in the device tree")
-changed the behavior of "cd-inverted" to follow the device tree bindings
-specification.
-Lines specifying "cd-inverted" are now "active high".
 
-Fix the SD card for meson by setting the cd-gpios as "active low" according
-to the boards specifications.
+--lrZ03NoBR/3+SXJZ
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Fixes: 89a5e15bcba8 ("gpio/mmc/of: Respect polarity in the device tree")
-Signed-off-by: Loys Ollivier <lollivier@baylibre.com>
----
+On Thu, Jan 10, 2019 at 04:11:33PM +0200, Adrian Hunter wrote:
+> On 4/01/19 12:47 PM, Thierry Reding wrote:
+> > From: Thierry Reding <treding@nvidia.com>
+> >=20
+> > The implementation of sdhci_set_dma_mask() is conflating two things: on
+> > one hand it uses the SDHCI_USE_64_BIT_DMA flag to determine whether or
+> > not to use the 64-bit addressing capability of the controller and on the
+> > other hand it also uses that flag to set a DMA mask for the controller's
+> > parent device.
+> >=20
+> > However, a controller supporting 64-bit addressing doesn't mean that it
+> > needs to support addressing 64 bits of address range. It's perfectly
+> > acceptable to use 64-bit addressing for a 32-bit address range or even
+> > smaller, even if that makes little sense, considering the extra overhead
+> > of the 64-bit addressing descriptors.
+> >=20
+> > But it is fairly common for hardware to support somewhere between 32 and
+> > 64 bits of address range. Tegra124 and Tegra210, for example, support 34
+> > bits and the newer Tegra186 and Tegra194 support 40 bits. The latter can
+> > also use an IOMMU for address translation, which has an input address
+> > range of 48 bits. This causes problems with the current algorithm in the
+> > SDHCI core for choosing the DMA mask. If the DMA mask is set to 64 bits,
+> > the DMA memory allocations can (and usually do because the allocator
+> > starts from the top) end up beyond the 40 bit boundary addressable by
+> > the SDHCI controller, causing IOMMU faults.
+> >=20
+> > For Tegra specifically this problem is currently worked around by
+> > setting the SDHCI_QUIRK2_BROKEN_64_BIT_DMA quirk. This causes the DMA
+> > mask to always be set to 32 bits and therefore all allocations will fit
+> > within the range addressable by the controller.
+> >=20
+> > This commit reworks the code in sdhci_set_dma_mask() to fix the above
+> > issue. The rationale behind this change is that the SDHCI controller
+> > driver should be the authoritative source of the DMA mask setting. The
+> > SDHCI core has no way of knowing what the individual SDHCI controllers
+> > are capable of. So instead of overriding the DMA mask depending on
+> > whether or not 64-bit addressing mode is used, the DMA mask is only
+> > modified if absolutely necessary. On one hand, if the controller can
+> > only address 32 bits of memory or less, we disable use of 64-bit
+> > addressing mode because it is not needed. On the other hand, we also
+> > want to make sure that if we don't support 64-bit addressing mode, such
+> > as in the case where the BROKEN_64_BIT_DMA quirk is set, we do restrict
+> > the DMA mask to fit the capabilities. The latter is an inconsistency by
+> > the driver, so we warn about it to make sure it will be addressed in the
+> > driver.
+>=20
+> sdhci_set_dma_mask() was added because people did want sdhci to set the D=
+MA
+> mask.  Also using 64-bit DMA even with 32-bit systems has the advantage of
+> reducing exposure to problems i.e. the same logic is used with the same S=
+oC
+> irrespective of whether or not it is in 32-bit compatibility mode.  So the
+> policy for sdhci is always to use 64-bit DMA if it is supported.
+>=20
+> I suggest we add a new sdhci op for ->set_dma_mask() and call that instead
+> of sdhci_set_dma_mask() if it is not NULL.
 
-v3: fix typos in the commit message
+Some drivers are already doing something similar by overriding the DMA
+mask again in ->enable_dma(). I had briefly considered doing that for
+Tegra, but after thinking about it, it just became clear to me that we
+shouldn't need to override this in every driver. I just don't think it's
+correct for the MMC core to muck with the DMA mask. Just because the
+hardware supports the SDHCI 64-bit addressing mode doesn't mean that all
+64 bits can be addressed by the hardware. The DMA mask defines what the
+valid address range is for the device and it's already conventional for
+drivers to set this early in their ->probe() implementation (or have the
+bus set it up). It seems wasteful to have to redo that in a custom
+callback.
 
-v2: fix more occurences, also in other meson boards.
+Thierry
 
- arch/arm64/boot/dts/amlogic/meson-gx-p23x-q20x.dtsi            | 3 +--
- arch/arm64/boot/dts/amlogic/meson-gxbb-nanopi-k2.dts           | 3 +--
- arch/arm64/boot/dts/amlogic/meson-gxbb-nexbox-a95x.dts         | 3 +--
- arch/arm64/boot/dts/amlogic/meson-gxbb-odroidc2.dts            | 3 +--
- arch/arm64/boot/dts/amlogic/meson-gxbb-p20x.dtsi               | 3 +--
- arch/arm64/boot/dts/amlogic/meson-gxbb-vega-s95.dtsi           | 3 +--
- arch/arm64/boot/dts/amlogic/meson-gxbb-wetek.dtsi              | 3 +--
- arch/arm64/boot/dts/amlogic/meson-gxl-s905x-hwacom-amazetv.dts | 3 +--
- arch/arm64/boot/dts/amlogic/meson-gxl-s905x-libretech-cc.dts   | 3 +--
- arch/arm64/boot/dts/amlogic/meson-gxl-s905x-nexbox-a95x.dts    | 3 +--
- arch/arm64/boot/dts/amlogic/meson-gxl-s905x-p212.dtsi          | 3 +--
- arch/arm64/boot/dts/amlogic/meson-gxm-khadas-vim2.dts          | 3 +--
- arch/arm64/boot/dts/amlogic/meson-gxm-nexbox-a1.dts            | 3 +--
- arch/arm64/boot/dts/amlogic/meson-gxm-rbox-pro.dts             | 3 +--
- 14 files changed, 14 insertions(+), 28 deletions(-)
+--lrZ03NoBR/3+SXJZ
+Content-Type: application/pgp-signature; name="signature.asc"
 
-diff --git a/arch/arm64/boot/dts/amlogic/meson-gx-p23x-q20x.dtsi b/arch/arm64/boot/dts/amlogic/meson-gx-p23x-q20x.dtsi
-index e14e0ce7e89f..016641a41694 100644
---- a/arch/arm64/boot/dts/amlogic/meson-gx-p23x-q20x.dtsi
-+++ b/arch/arm64/boot/dts/amlogic/meson-gx-p23x-q20x.dtsi
-@@ -187,8 +187,7 @@
- 	max-frequency = <100000000>;
- 	disable-wp;
- 
--	cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_HIGH>;
--	cd-inverted;
-+	cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_LOW>;
- 
- 	vmmc-supply = <&vddao_3v3>;
- 	vqmmc-supply = <&vddio_boot>;
-diff --git a/arch/arm64/boot/dts/amlogic/meson-gxbb-nanopi-k2.dts b/arch/arm64/boot/dts/amlogic/meson-gxbb-nanopi-k2.dts
-index 8cd50b75171d..ade2ee09ae96 100644
---- a/arch/arm64/boot/dts/amlogic/meson-gxbb-nanopi-k2.dts
-+++ b/arch/arm64/boot/dts/amlogic/meson-gxbb-nanopi-k2.dts
-@@ -305,8 +305,7 @@
- 	max-frequency = <200000000>;
- 	disable-wp;
- 
--	cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_HIGH>;
--	cd-inverted;
-+	cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_LOW>;
- 
- 	vmmc-supply = <&vddio_ao3v3>;
- 	vqmmc-supply = <&vddio_tf>;
-diff --git a/arch/arm64/boot/dts/amlogic/meson-gxbb-nexbox-a95x.dts b/arch/arm64/boot/dts/amlogic/meson-gxbb-nexbox-a95x.dts
-index 4cf7f6e80c6a..25105ac96d55 100644
---- a/arch/arm64/boot/dts/amlogic/meson-gxbb-nexbox-a95x.dts
-+++ b/arch/arm64/boot/dts/amlogic/meson-gxbb-nexbox-a95x.dts
-@@ -238,8 +238,7 @@
- 	max-frequency = <100000000>;
- 	disable-wp;
- 
--	cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_HIGH>;
--	cd-inverted;
-+	cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_LOW>;
- 
- 	vmmc-supply = <&vddao_3v3>;
- 	vqmmc-supply = <&vddio_card>;
-diff --git a/arch/arm64/boot/dts/amlogic/meson-gxbb-odroidc2.dts b/arch/arm64/boot/dts/amlogic/meson-gxbb-odroidc2.dts
-index 2e1cd5e3a246..1cc9dc68ef00 100644
---- a/arch/arm64/boot/dts/amlogic/meson-gxbb-odroidc2.dts
-+++ b/arch/arm64/boot/dts/amlogic/meson-gxbb-odroidc2.dts
-@@ -258,8 +258,7 @@
- 	max-frequency = <100000000>;
- 	disable-wp;
- 
--	cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_HIGH>;
--	cd-inverted;
-+	cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_LOW>;
- 
- 	vmmc-supply = <&tflash_vdd>;
- 	vqmmc-supply = <&tf_io>;
-diff --git a/arch/arm64/boot/dts/amlogic/meson-gxbb-p20x.dtsi b/arch/arm64/boot/dts/amlogic/meson-gxbb-p20x.dtsi
-index ce862266b9aa..0be0f2a5d2fe 100644
---- a/arch/arm64/boot/dts/amlogic/meson-gxbb-p20x.dtsi
-+++ b/arch/arm64/boot/dts/amlogic/meson-gxbb-p20x.dtsi
-@@ -196,8 +196,7 @@
- 	max-frequency = <100000000>;
- 	disable-wp;
- 
--	cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_HIGH>;
--	cd-inverted;
-+	cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_LOW>;
- 
- 	vmmc-supply = <&vddao_3v3>;
- 	vqmmc-supply = <&vddio_card>;
-diff --git a/arch/arm64/boot/dts/amlogic/meson-gxbb-vega-s95.dtsi b/arch/arm64/boot/dts/amlogic/meson-gxbb-vega-s95.dtsi
-index 93a4acf2c46c..ad4d50bd9d77 100644
---- a/arch/arm64/boot/dts/amlogic/meson-gxbb-vega-s95.dtsi
-+++ b/arch/arm64/boot/dts/amlogic/meson-gxbb-vega-s95.dtsi
-@@ -154,8 +154,7 @@
- 	max-frequency = <100000000>;
- 	disable-wp;
- 
--	cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_HIGH>;
--	cd-inverted;
-+	cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_LOW>;
- 
- 	vmmc-supply = <&vcc_3v3>;
- };
-diff --git a/arch/arm64/boot/dts/amlogic/meson-gxbb-wetek.dtsi b/arch/arm64/boot/dts/amlogic/meson-gxbb-wetek.dtsi
-index ec09bb5792b7..2d2db783c44c 100644
---- a/arch/arm64/boot/dts/amlogic/meson-gxbb-wetek.dtsi
-+++ b/arch/arm64/boot/dts/amlogic/meson-gxbb-wetek.dtsi
-@@ -211,8 +211,7 @@
- 	max-frequency = <100000000>;
- 	disable-wp;
- 
--	cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_HIGH>;
--	cd-inverted;
-+	cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_LOW>;
- 
- 	vmmc-supply = <&vddao_3v3>;
- 	vqmmc-supply = <&vcc_3v3>;
-diff --git a/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-hwacom-amazetv.dts b/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-hwacom-amazetv.dts
-index f1c410e2da2b..796baea7a0bf 100644
---- a/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-hwacom-amazetv.dts
-+++ b/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-hwacom-amazetv.dts
-@@ -131,8 +131,7 @@
- 	max-frequency = <100000000>;
- 	disable-wp;
- 
--	cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_HIGH>;
--	cd-inverted;
-+	cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_LOW>;
- 
- 	vmmc-supply = <&vddao_3v3>;
- 	vqmmc-supply = <&vddio_card>;
-diff --git a/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-libretech-cc.dts b/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-libretech-cc.dts
-index db293440e4ca..255cede7b447 100644
---- a/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-libretech-cc.dts
-+++ b/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-libretech-cc.dts
-@@ -238,8 +238,7 @@
- 	max-frequency = <100000000>;
- 	disable-wp;
- 
--	cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_HIGH>;
--	cd-inverted;
-+	cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_LOW>;
- 
- 	vmmc-supply = <&vcc_3v3>;
- 	vqmmc-supply = <&vcc_card>;
-diff --git a/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-nexbox-a95x.dts b/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-nexbox-a95x.dts
-index 6739697be1de..9cbdb85fb591 100644
---- a/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-nexbox-a95x.dts
-+++ b/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-nexbox-a95x.dts
-@@ -183,8 +183,7 @@
- 	max-frequency = <100000000>;
- 	disable-wp;
- 
--	cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_HIGH>;
--	cd-inverted;
-+	cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_LOW>;
- 
- 	vmmc-supply = <&vddao_3v3>;
- 	vqmmc-supply = <&vddio_card>;
-diff --git a/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-p212.dtsi b/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-p212.dtsi
-index a1b31013ab6e..bc811a2faf42 100644
---- a/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-p212.dtsi
-+++ b/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-p212.dtsi
-@@ -137,8 +137,7 @@
- 	max-frequency = <100000000>;
- 	disable-wp;
- 
--	cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_HIGH>;
--	cd-inverted;
-+	cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_LOW>;
- 
- 	vmmc-supply = <&vddao_3v3>;
- 	vqmmc-supply = <&vddio_boot>;
-diff --git a/arch/arm64/boot/dts/amlogic/meson-gxm-khadas-vim2.dts b/arch/arm64/boot/dts/amlogic/meson-gxm-khadas-vim2.dts
-index 3c3a667a8df8..3f086ed7de05 100644
---- a/arch/arm64/boot/dts/amlogic/meson-gxm-khadas-vim2.dts
-+++ b/arch/arm64/boot/dts/amlogic/meson-gxm-khadas-vim2.dts
-@@ -356,8 +356,7 @@
- 	max-frequency = <100000000>;
- 	disable-wp;
- 
--	cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_HIGH>;
--	cd-inverted;
-+	cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_LOW>;
- 
- 	vmmc-supply = <&vddao_3v3>;
- 	vqmmc-supply = <&vddio_boot>;
-diff --git a/arch/arm64/boot/dts/amlogic/meson-gxm-nexbox-a1.dts b/arch/arm64/boot/dts/amlogic/meson-gxm-nexbox-a1.dts
-index f7a1cffab4a8..8acfd40090d2 100644
---- a/arch/arm64/boot/dts/amlogic/meson-gxm-nexbox-a1.dts
-+++ b/arch/arm64/boot/dts/amlogic/meson-gxm-nexbox-a1.dts
-@@ -147,8 +147,7 @@
- 	max-frequency = <100000000>;
- 	disable-wp;
- 
--	cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_HIGH>;
--	cd-inverted;
-+	cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_LOW>;
- 
- 	vmmc-supply = <&vddao_3v3>;
- 	vqmmc-supply = <&vddio_boot>;
-diff --git a/arch/arm64/boot/dts/amlogic/meson-gxm-rbox-pro.dts b/arch/arm64/boot/dts/amlogic/meson-gxm-rbox-pro.dts
-index 7212dc4531e4..7fa20a8ede17 100644
---- a/arch/arm64/boot/dts/amlogic/meson-gxm-rbox-pro.dts
-+++ b/arch/arm64/boot/dts/amlogic/meson-gxm-rbox-pro.dts
-@@ -170,8 +170,7 @@
- 	max-frequency = <100000000>;
- 	disable-wp;
- 
--	cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_HIGH>;
--	cd-inverted;
-+	cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_LOW>;
- 
- 	vmmc-supply = <&vddao_3v3>;
- 	vqmmc-supply = <&vddio_boot>;
--- 
-2.7.4
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAlw3bHEACgkQ3SOs138+
+s6E+6RAAo9MUU0egJn3CJ3V1aQt88FFoh/K8sq/6CWkSiEGgkZ9yl1eHE5KS5a7l
+jZ/UD9Q6mtU2DgdGO/k7as8Up2f2/OhSgJQR3sKGuph6D5shSChThqsO/wT0fODY
+wja5kmbFNhzi+U9Ernu+jj/E7DSnFDZ6q1V9KAyxDagxVsPNSgKItkOZQoLbrVdo
+i3yx81yaSEUV33FYx64dQGj/YGJ655lxo+Y2EMEc212kqeLRurCWlJqoz/iLQGEn
+hS+uwgNo55LvvI1BziNlWXHnMMiD/Xr3n9LAOppKpg5w1ZBIqln5GPLEr58O0SVF
+MFHmi3BRSvv/Fy5YaN7nJDO3UWvP1/airrHnM9dkOL3WVEmQJaz99pEpecd8ENtG
+yQKO71lQ0TdS0f311MZg+78Vp4zysmzTEXB6Ossf7nGNDdiJAKFnVss79qJG7oKk
+sT+Ayha478Eib/NAvWTezkWbUwKqdTX0e/9Vj/7gXZeIUQ/S4LrzapkknqjssDnG
+Mr0jmG/o+/CgLD3x2fOmcHLuGvnxRBfmpqAf9qRTCg+8B0txG12cPvN03oY3mUPF
+Nd+W0D8jllrge/B5/ota0+j+mFWOc7d0PMFoe04KgeBEnJxGRhgTXuWI6+XgJHMI
+/WXWaRaCRxfeFLROwiF+lDs6ZSGbORO1IXDQXuLifU31vDtlJ7U=
+=mm9/
+-----END PGP SIGNATURE-----
+
+--lrZ03NoBR/3+SXJZ--
