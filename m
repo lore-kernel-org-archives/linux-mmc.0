@@ -1,304 +1,329 @@
 From: Thierry Reding <thierry.reding@gmail.com>
-Subject: Re: [PATCH V3 3/3] mmc: tegra: SDMMC pads auto-calibration
-Date: Thu, 10 Jan 2019 16:06:02 +0100
-Message-ID: <20190110150602.GC25353@ulmo>
-References: <1546462674-22856-1-git-send-email-skomatineni@nvidia.com>
- <1546462674-22856-3-git-send-email-skomatineni@nvidia.com>
+Subject: Re: [PATCH V7 2/2] mmc: tegra: HW Command Queue Support for Tegra
+ SDMMC
+Date: Thu, 10 Jan 2019 16:12:00 +0100
+Message-ID: <20190110151200.GD25353@ulmo>
+References: <1546457808-18270-1-git-send-email-skomatineni@nvidia.com>
+ <1546457808-18270-3-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="JgQwtEuHJzHdouWu"
+        protocol="application/pgp-signature"; boundary="IDYEmSnFhs3mNXr+"
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1546462674-22856-3-git-send-email-skomatineni@nvidia.com>
+In-Reply-To: <1546457808-18270-3-git-send-email-skomatineni@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Sowjanya Komatineni <skomatineni@nvidia.com>
-Cc: robh+dt@kernel.org, mark.rutland@arm.com, mperttunen@nvidia.com, jonathanh@nvidia.com, adrian.hunter@intel.com, ulf.hansson@linaro.org, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, jonathanh@nvidia.com, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
 
---JgQwtEuHJzHdouWu
+--IDYEmSnFhs3mNXr+
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Wed, Jan 02, 2019 at 12:57:54PM -0800, Sowjanya Komatineni wrote:
-> Programs initial drive code offsets which will be used by auto
-> calibration process.
+On Wed, Jan 02, 2019 at 11:36:48AM -0800, Sowjanya Komatineni wrote:
+> This patch adds HW Command Queue for supported Tegra SDMMC
+> controllers.
 >=20
-> Programs fixed drive strengths for SDMMC pads when auto cal
-> timeouts. Fixed settings are based on Pre-SI analysis of the
-> pad design.
+> As per SD Host 4.20 Spec for Host Control 1 Register, DMA Select
+> options supported are
+>=20
+> With Host Version 4 Enable =3D 0,
+> b'00:SDMA, b'10:32-bit ADMA2, b'11:64-bit ADMA2
+>=20
+> With Host Version 4 Enable =3D 1,
+> b'00:SDMA, b'10:ADMA2, b'11:ADMA3
+> Support for 32-bit or 64-bit system addressing of DMAs is selected
+> thru 64-bit Addressing in Host Control 2 register.
+>=20
+> ADMA3 performs integrated descriptor and each command descriptor
+> is followed by ADMA2 descriptor. Command queuing need to fetch
+> command and transfer descriptors so need ADMA3 DMA Type.
+>=20
+> Tegra SDMMC Host design prevents write access to BLOCK_COUNT
+> registers when CQE is enabled to prevent SW from updating block
+> size during Command Queue mode so need tegra specific sdhci
+> cqe callback.
 >=20
 > Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
 > ---
->  drivers/mmc/host/sdhci-tegra.c | 107 +++++++++++++++++++++++++++++++----=
-------
->  1 file changed, 81 insertions(+), 26 deletions(-)
-
-Hi Sowjanya,
-
-this looks really good. Some minor comments below.
-
+>  drivers/mmc/host/Kconfig       |   1 +
+>  drivers/mmc/host/sdhci-tegra.c | 107 +++++++++++++++++++++++++++++++++++=
++++++-
+>  drivers/mmc/host/sdhci.c       |  16 ++++--
+>  drivers/mmc/host/sdhci.h       |   1 +
+>  4 files changed, 120 insertions(+), 5 deletions(-)
+>=20
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 1b58739d9744..5aa2de2c7609 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -250,6 +250,7 @@ config MMC_SDHCI_TEGRA
+>  	depends on ARCH_TEGRA
+>  	depends on MMC_SDHCI_PLTFM
+>  	select MMC_SDHCI_IO_ACCESSORS
+> +	select MMC_CQHCI
+>  	help
+>  	  This selects the Tegra SD/MMC controller. If you have a Tegra
+>  	  platform with SD or MMC devices, say Y or M here.
 > diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegr=
 a.c
-> index 7b95d088fdef..f8361249cf57 100644
+> index 7b95d088fdef..7beecd1da94a 100644
 > --- a/drivers/mmc/host/sdhci-tegra.c
 > +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -75,6 +75,7 @@
->  #define SDHCI_TEGRA_SDMEM_COMP_PADCTRL_VREF_SEL_MASK	0x0000000f
->  #define SDHCI_TEGRA_SDMEM_COMP_PADCTRL_VREF_SEL_VAL	0x7
->  #define SDHCI_TEGRA_SDMEM_COMP_PADCTRL_E_INPUT_E_PWRD	BIT(31)
-> +#define SDHCI_COMP_PADCTRL_DRVUPDN_OFFSET_MASK		0x07FFF000
+> @@ -33,6 +33,7 @@
+>  #include <linux/ktime.h>
 > =20
->  #define SDHCI_TEGRA_AUTO_CAL_STATUS			0x1ec
->  #define SDHCI_TEGRA_AUTO_CAL_ACTIVE			BIT(31)
-> @@ -121,6 +122,8 @@ struct sdhci_tegra {
->  	struct pinctrl *pinctrl_sdmmc;
->  	struct pinctrl_state *pinctrl_state_3v3;
->  	struct pinctrl_state *pinctrl_state_1v8;
-> +	struct pinctrl_state *pinctrl_state_3v3_drv;
-> +	struct pinctrl_state *pinctrl_state_1v8_drv;
+>  #include "sdhci-pltfm.h"
+> +#include "cqhci.h"
 > =20
->  	struct sdhci_tegra_autocal_offsets autocal_offsets;
->  	ktime_t last_calib;
-> @@ -130,6 +133,9 @@ struct sdhci_tegra {
+>  /* Tegra SDHOST controller vendor register definitions */
+>  #define SDHCI_TEGRA_VENDOR_CLOCK_CTRL			0x100
+> @@ -89,6 +90,9 @@
+>  #define NVQUIRK_NEEDS_PAD_CONTROL			BIT(7)
+>  #define NVQUIRK_DIS_CARD_CLK_CONFIG_TAP			BIT(8)
+> =20
+> +/* SDMMC CQE Base Address for Tegra Host Ver 4.1 and Higher */
+> +#define SDHCI_TEGRA_CQE_BASE_ADDR			0xF000
+> +
+>  struct sdhci_tegra_soc_data {
+>  	const struct sdhci_pltfm_data *pdata;
+>  	u32 nvquirks;
+> @@ -128,6 +132,7 @@ struct sdhci_tegra {
+>  	u32 default_tap;
+>  	u32 default_trim;
 >  	u32 dqs_trim;
+> +	bool enable_hwcq;
 >  };
 > =20
-> +static int tegra_sdhci_set_padctrl(struct sdhci_host *host, int voltage,
-> +							bool state_drvupdn);
-> +
-
-You're rewriting most of that function anyway, so might as well move it
-up here. The diff should be about the same in terms of readability, so
-you don't need the forward declaration.
-
 >  static u16 tegra_sdhci_readw(struct sdhci_host *host, int reg)
->  {
->  	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
-> @@ -437,6 +443,7 @@ static void tegra_sdhci_pad_autocalib(struct sdhci_ho=
-st *host)
->  			pdpu =3D offsets.pull_down_3v3 << 8 | offsets.pull_up_3v3;
->  	}
-> =20
-> +	/* Set initial offset before auto-calibration */
->  	tegra_sdhci_set_pad_autocal_offset(host, pdpu);
-> =20
->  	card_clk_enabled =3D tegra_sdhci_configure_card_clk(host, false);
-> @@ -460,19 +467,15 @@ static void tegra_sdhci_pad_autocalib(struct sdhci_=
+> @@ -836,6 +841,49 @@ static void tegra_sdhci_voltage_switch(struct sdhci_=
 host *host)
->  	if (ret) {
->  		dev_err(mmc_dev(host->mmc), "Pad autocal timed out\n");
-> =20
-> -		if (ios->signal_voltage =3D=3D MMC_SIGNAL_VOLTAGE_180)
-> -			pdpu =3D offsets.pull_down_1v8_timeout << 8 |
-> -			       offsets.pull_up_1v8_timeout;
-> -		else
-> -			pdpu =3D offsets.pull_down_3v3_timeout << 8 |
-> -			       offsets.pull_up_3v3_timeout;
-> -
-> -		/* Disable automatic calibration and use fixed offsets */
-> +		/* Disable automatic cal and use fixed Drive Strengths */
->  		reg =3D sdhci_readl(host, SDHCI_TEGRA_AUTO_CAL_CONFIG);
->  		reg &=3D ~SDHCI_AUTO_CAL_ENABLE;
->  		sdhci_writel(host, reg, SDHCI_TEGRA_AUTO_CAL_CONFIG);
-> =20
-> -		tegra_sdhci_set_pad_autocal_offset(host, pdpu);
-> +		ret =3D tegra_sdhci_set_padctrl(host, ios->signal_voltage, false);
-> +		if (ret < 0)
-> +			dev_err(mmc_dev(host->mmc),
-> +			"Setting drive strengths failed %d\n", PTR_ERR(ret));
-
-It's customary to align the first argument on subsequent lines with the
-first argument on the first line. Also, I find it more readable to have
-a ':' separating the error code:
-
-			dev_err(mmc_dev(host->mmc),
-				"Setting drive strengths failed: %d\n", ret);
-
-Also note how you don't need to cast the ret value because it is already
-an integer.
-
->  	}
+>  		tegra_host->pad_calib_required =3D true;
 >  }
 > =20
-> @@ -743,27 +746,73 @@ static int tegra_sdhci_execute_tuning(struct sdhci_=
-host *host, u32 opcode)
->  	return mmc_send_tuning(host->mmc, opcode, NULL);
->  }
+> +static void sdhci_tegra_cqe_enable(struct mmc_host *mmc)
+> +{
+> +	struct cqhci_host *cq_host =3D mmc->cqe_private;
+> +	u32 cqcfg =3D 0;
+> +
+> +	/* Tegra SDMMC Controller design prevents write access to BLOCK_COUNT
+> +	 * registers when CQE is enabled.
+> +	 */
+
+Block comments usually have the opening /* on a line by itself.
+
+> +	cqcfg =3D cqhci_readl(cq_host, CQHCI_CFG);
+> +	if (cqcfg & CQHCI_ENABLE)
+> +		cqhci_writel(cq_host, (cqcfg & ~CQHCI_ENABLE), CQHCI_CFG);
+> +
+> +	sdhci_cqe_enable(mmc);
+> +
+> +	if (cqcfg & CQHCI_ENABLE)
+> +		cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
+> +
+> +}
+
+Extra blank line above.
+
+> +
+> +static void sdhci_tegra_dumpregs(struct mmc_host *mmc)
+> +{
+> +	sdhci_dumpregs(mmc_priv(mmc));
+> +}
+> +
+> +static u32 sdhci_tegra_cqhci_irq(struct sdhci_host *host, u32 intmask)
+> +{
+> +	int cmd_error =3D 0;
+> +	int data_error =3D 0;
+> +
+> +	if (!sdhci_cqe_irq(host, intmask, &cmd_error, &data_error))
+> +		return intmask;
+> +
+> +	cqhci_irq(host->mmc, intmask, cmd_error, data_error);
+> +
+> +	return 0;
+> +}
+> +
+> +static const struct cqhci_host_ops sdhci_tegra_cqhci_ops =3D {
+> +	.enable	=3D sdhci_tegra_cqe_enable,
+> +	.disable =3D sdhci_cqe_disable,
+> +	.dumpregs =3D sdhci_tegra_dumpregs,
+> +};
+> +
+>  static const struct sdhci_ops tegra_sdhci_ops =3D {
+>  	.get_ro     =3D tegra_sdhci_get_ro,
+>  	.read_w     =3D tegra_sdhci_readw,
+> @@ -989,6 +1037,7 @@ static const struct sdhci_ops tegra186_sdhci_ops =3D=
+ {
+>  	.set_uhs_signaling =3D tegra_sdhci_set_uhs_signaling,
+>  	.voltage_switch =3D tegra_sdhci_voltage_switch,
+>  	.get_max_clock =3D tegra_sdhci_get_max_clock,
+> +	.irq =3D sdhci_tegra_cqhci_irq,
+>  };
 > =20
-> -static int tegra_sdhci_set_padctrl(struct sdhci_host *host, int voltage)
-> +static int tegra_sdhci_set_padctrl(struct sdhci_host *host, int voltage,
-> +							bool state_drvupdn)
+>  static const struct sdhci_pltfm_data sdhci_tegra186_pdata =3D {
+> @@ -1030,6 +1079,55 @@ static const struct of_device_id sdhci_tegra_dt_ma=
+tch[] =3D {
+>  };
+>  MODULE_DEVICE_TABLE(of, sdhci_tegra_dt_match);
+> =20
+> +static int sdhci_tegra_add_host(struct sdhci_host *host)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
+> +	struct sdhci_tegra *tegra_host =3D sdhci_pltfm_priv(pltfm_host);
+> +	struct cqhci_host *cq_host;
+> +	bool dma64;
+> +	int ret;
+> +
+> +	if (!tegra_host->enable_hwcq)
+> +		return sdhci_add_host(host);
+> +
+> +	host->v4_mode =3D true;
+> +
+> +	ret =3D sdhci_setup_host(host);
+> +	if (ret)
+> +		return ret;
+> +
+> +	host->mmc->caps2 |=3D MMC_CAP2_CQE | MMC_CAP2_CQE_DCMD;
+> +
+> +	cq_host =3D devm_kzalloc(host->mmc->parent,
+> +				sizeof(*cq_host), GFP_KERNEL);
+> +	if (!cq_host) {
+> +		ret =3D -ENOMEM;
+> +		goto cleanup;
+> +	}
+> +
+> +	cq_host->mmio =3D host->ioaddr + SDHCI_TEGRA_CQE_BASE_ADDR;
+> +	cq_host->ops =3D &sdhci_tegra_cqhci_ops;
+> +
+> +	dma64 =3D host->flags & SDHCI_USE_64_BIT_DMA;
+> +	if (dma64)
+> +		cq_host->caps |=3D CQHCI_TASK_DESC_SZ_128;
+> +
+> +	ret =3D cqhci_init(cq_host, host->mmc, dma64);
+> +	if (ret)
+> +		goto cleanup;
+> +
+> +	ret =3D __sdhci_add_host(host);
+> +	if (ret)
+> +		goto cleanup;
+> +
+> +	return 0;
+> +
+> +cleanup:
+> +	sdhci_cleanup_host(host);
+> +	return ret;
+> +
+> +}
 
-Same as above, make sure the bool state_drvupdn argument aligns with
-struct sdhc_host *host.
+Gratuituous blank line above.
 
+> +
+>  static int sdhci_tegra_probe(struct platform_device *pdev)
 >  {
->  	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
->  	struct sdhci_tegra *tegra_host =3D sdhci_pltfm_priv(pltfm_host);
-> -	int ret;
-> +	struct sdhci_tegra_autocal_offsets offsets =3D
-> +					tegra_host->autocal_offsets;
-
-Perhaps make this a pointer to avoid copying the whole structure? You
-could even make it const if you want to be very explicit that you're
-only referencing the autocalibration offsets.
-
-> +	struct pinctrl_state *pinctrl_drvupdn =3D NULL;
-> +	int ret =3D 0;
-> +	u8 drvup =3D 0, drvdn =3D 0;
-> +	u32 reg;
+>  	const struct of_device_id *match;
+> @@ -1039,6 +1137,7 @@ static int sdhci_tegra_probe(struct platform_device=
+ *pdev)
+>  	struct sdhci_tegra *tegra_host;
+>  	struct clk *clk;
+>  	int rc;
+> +	struct resource *iomem;
 > =20
-> -	if (!tegra_host->pad_control_available)
-> -		return 0;
-> +	if (!state_drvupdn) {
-> +		/* PADS Drive Strength */
-> +		if (voltage =3D=3D MMC_SIGNAL_VOLTAGE_180) {
-> +			if (!IS_ERR(tegra_host->pinctrl_state_1v8_drv) &&
-> +				(tegra_host->pinctrl_state_1v8_drv !=3D NULL)) {
-
-Perhaps:
-
-	IS_ERR_OR_NULL(tegra_host->pinctrl_state_1v8_drv)?
-
-but then, do we actually need this? It looks like pinctrl_lookup_state()
-will always return either an ERR_PTR() encoded error code or a valid
-pointer. Under what circumstances would pinctrl_state_1v8_drv be NULL?
-
-> +				pinctrl_drvupdn =3D
-> +					tegra_host->pinctrl_state_1v8_drv;
-> +			} else {
-> +				drvup =3D offsets.pull_up_1v8_timeout;
-> +				drvdn =3D offsets.pull_down_1v8_timeout;
-> +			}
-> +		} else {
-> +			if (!IS_ERR(tegra_host->pinctrl_state_3v3_drv) &&
-> +				(tegra_host->pinctrl_state_3v3_drv !=3D NULL)) {
-> +				pinctrl_drvupdn =3D
-> +					tegra_host->pinctrl_state_3v3_drv;
-> +			} else {
-> +				drvup =3D offsets.pull_up_3v3_timeout;
-> +				drvdn =3D offsets.pull_down_3v3_timeout;
-> +			}
-> +		}
+>  	match =3D of_match_device(sdhci_tegra_dt_match, &pdev->dev);
+>  	if (!match)
+> @@ -1056,6 +1155,12 @@ static int sdhci_tegra_probe(struct platform_devic=
+e *pdev)
+>  	tegra_host->pad_control_available =3D false;
+>  	tegra_host->soc_data =3D soc_data;
+> =20
+> +	iomem =3D platform_get_resource(pdev, IORESOURCE_MEM, 0);
+> +	if (resource_size(iomem) > SDHCI_TEGRA_CQE_BASE_ADDR)
+> +		tegra_host->enable_hwcq =3D true;
+> +	else
+> +		tegra_host->enable_hwcq =3D false;
 > +
-> +		if (pinctrl_drvupdn !=3D NULL) {
-> +			ret =3D pinctrl_select_state(tegra_host->pinctrl_sdmmc,
-> +							pinctrl_drvupdn);
-> +			if (ret < 0)
-> +				dev_err(mmc_dev(host->mmc),
-> +					"failed pads drvupdn, ret: %d\n", ret);
-> +		} else if ((drvup) || (drvdn)) {
-> +			reg =3D sdhci_readl(host,
-> +					SDHCI_TEGRA_SDMEM_COMP_PADCTRL);
-> +			reg &=3D ~SDHCI_COMP_PADCTRL_DRVUPDN_OFFSET_MASK;
-> +			reg |=3D (drvup << 20) | (drvdn << 12);
-> +			sdhci_writel(host, reg,
-> +					SDHCI_TEGRA_SDMEM_COMP_PADCTRL);
-> +		}
+>  	if (soc_data->nvquirks & NVQUIRK_NEEDS_PAD_CONTROL) {
+>  		rc =3D tegra_sdhci_init_pinctrl_info(&pdev->dev, tegra_host);
+>  		if (rc =3D=3D 0)
+> @@ -1117,7 +1222,7 @@ static int sdhci_tegra_probe(struct platform_device=
+ *pdev)
 > =20
-> -	if (voltage =3D=3D MMC_SIGNAL_VOLTAGE_180) {
-> -		ret =3D pinctrl_select_state(tegra_host->pinctrl_sdmmc,
-> -					   tegra_host->pinctrl_state_1v8);
-> -		if (ret < 0)
-> -			dev_err(mmc_dev(host->mmc),
-> -				"setting 1.8V failed, ret: %d\n", ret);
->  	} else {
-> -		ret =3D pinctrl_select_state(tegra_host->pinctrl_sdmmc,
-> -					   tegra_host->pinctrl_state_3v3);
-> -		if (ret < 0)
-> -			dev_err(mmc_dev(host->mmc),
-> -				"setting 3.3V failed, ret: %d\n", ret);
-> +		/* Dual Voltage PADS Voltage selection */
-> +		if (!tegra_host->pad_control_available)
-> +			return 0;
-> +
-> +		if (voltage =3D=3D MMC_SIGNAL_VOLTAGE_180) {
-> +			ret =3D pinctrl_select_state(tegra_host->pinctrl_sdmmc,
-> +						tegra_host->pinctrl_state_1v8);
-> +			if (ret < 0)
-> +				dev_err(mmc_dev(host->mmc),
-> +					"setting 1.8V failed, ret: %d\n", ret);
-> +		} else {
-> +			ret =3D pinctrl_select_state(tegra_host->pinctrl_sdmmc,
-> +						tegra_host->pinctrl_state_3v3);
-> +			if (ret < 0)
-> +				dev_err(mmc_dev(host->mmc),
-> +					"setting 3.3V failed, ret: %d\n", ret);
-> +		}
->  	}
+>  	usleep_range(2000, 4000);
 > =20
->  	return ret;
-> @@ -778,7 +827,7 @@ static int sdhci_tegra_start_signal_voltage_switch(st=
-ruct mmc_host *mmc,
->  	int ret =3D 0;
+> -	rc =3D sdhci_add_host(host);
+> +	rc =3D sdhci_tegra_add_host(host);
+>  	if (rc)
+>  		goto err_add_host;
 > =20
->  	if (ios->signal_voltage =3D=3D MMC_SIGNAL_VOLTAGE_330) {
-> -		ret =3D tegra_sdhci_set_padctrl(host, ios->signal_voltage);
-> +		ret =3D tegra_sdhci_set_padctrl(host, ios->signal_voltage, true);
->  		if (ret < 0)
->  			return ret;
->  		ret =3D sdhci_start_signal_voltage_switch(mmc, ios);
-> @@ -786,7 +835,7 @@ static int sdhci_tegra_start_signal_voltage_switch(st=
-ruct mmc_host *mmc,
->  		ret =3D sdhci_start_signal_voltage_switch(mmc, ios);
->  		if (ret < 0)
->  			return ret;
-> -		ret =3D tegra_sdhci_set_padctrl(host, ios->signal_voltage);
-> +		ret =3D tegra_sdhci_set_padctrl(host, ios->signal_voltage, true);
->  	}
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index fde984d10619..c368230c364d 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -3308,10 +3308,18 @@ void sdhci_cqe_enable(struct mmc_host *mmc)
 > =20
->  	if (tegra_host->pad_calib_required)
-> @@ -805,6 +854,12 @@ static int tegra_sdhci_init_pinctrl_info(struct devi=
-ce *dev,
->  		return -1;
->  	}
-> =20
-> +	tegra_host->pinctrl_state_1v8_drv =3D pinctrl_lookup_state(
-> +				tegra_host->pinctrl_sdmmc, "sdmmc-1v8-drv");
-> +
-> +	tegra_host->pinctrl_state_3v3_drv =3D pinctrl_lookup_state(
-> +				tegra_host->pinctrl_sdmmc, "sdmmc-3v3-drv");
+>  	ctrl =3D sdhci_readb(host, SDHCI_HOST_CONTROL);
+>  	ctrl &=3D ~SDHCI_CTRL_DMA_MASK;
+> -	if (host->flags & SDHCI_USE_64_BIT_DMA)
+> -		ctrl |=3D SDHCI_CTRL_ADMA64;
+> -	else
+> -		ctrl |=3D SDHCI_CTRL_ADMA32;
+> +	/* As per SD Host 4.20 Spec, Host with V4 Mode enable supports ADMA3
+> +	 * DMA type. ADMA3 performs integrated descriptor which is needed for
+> +	 * cmd queuing as it need to fetch both cmd and transfer descriptors.
+> +	 */
 
-If this truly is optional, then I suggest we do something like this
-instead:
+Correct block comment style, please.
 
-	tegra_host->pinctrl_state_1v8_drv =3D pinctrl_lookup_state(...);
-	if (IS_ERR(tegra_host->pinctrl_state_1v8_drv)) {
-		err =3D PTR_ERR(tegra_host->pinctrl_state_1v8_drv);
-
-		if (err =3D=3D -ENODEV)
-			tegra_host->pinctrl_state_1v8_drv =3D NULL;
-		else
-			return err;
-	}
-
-With that we can use the much simpler condition everywhere:
-
-	if (tegra_host->pinctrl_state_1v8_drv)
-		...
-
+Thanks,
 Thierry
 
---JgQwtEuHJzHdouWu
+> +	if (host->v4_mode) {
+> +		ctrl |=3D SDHCI_CTRL_ADMA3;
+> +	} else {
+> +		if (host->flags & SDHCI_USE_64_BIT_DMA)
+> +			ctrl |=3D SDHCI_CTRL_ADMA64;
+> +		else
+> +			ctrl |=3D SDHCI_CTRL_ADMA32;
+> +	}
+>  	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+> =20
+>  	sdhci_writew(host, SDHCI_MAKE_BLKSZ(host->sdma_boundary, 512),
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index b001cf4d3d7e..6e2a08f92645 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -88,6 +88,7 @@
+>  #define   SDHCI_CTRL_ADMA1	0x08
+>  #define   SDHCI_CTRL_ADMA32	0x10
+>  #define   SDHCI_CTRL_ADMA64	0x18
+> +#define   SDHCI_CTRL_ADMA3	0x18
+>  #define   SDHCI_CTRL_8BITBUS	0x20
+>  #define  SDHCI_CTRL_CDTEST_INS	0x40
+>  #define  SDHCI_CTRL_CDTEST_EN	0x80
+> --=20
+> 2.7.4
+>=20
+
+--IDYEmSnFhs3mNXr+
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAlw3X1cACgkQ3SOs138+
-s6EDTA/8DjnVSHIviys5AJDenprXWJrcg20SoNCTgMM05IuH2vDGw/ubbbrey+zw
-TmKnk0ww5ZBA+slQxNCq1ZIHWaH1t6u8oQUM5gy+gp/sYrOeEPtQB/ifwLr0yclS
-3CQEF1MdXpLHpzZsMb4Dk4hvKUxcREMzOavmEeUeKQ6DNlVvcoezsOhqP+TPx1dB
-BeQFus+oF6ZhL6u8d1p0mbrXHLC+eozW+6vLGgevBiX+n9bSQ2Y9ixwFBAzwweIY
-rrfj3YpLIqPxsD4XwrTmHXHNt/O6YAAilBMfYXUI0b+Tdn+pFWkOqWskqUeJLmPj
-TmmrpQIYaqwEZVvYVtd6CT43wc1nRy+6ak81/EMXmg8mugSvUyiwXlRB4MJrHecS
-k6mlS8glteDzQoYRQrCamlsF6745ngzUG+U1bW5QoZT0PzTSt2DphPze6VxF8ZYh
-TOTWNKvuJKSOyMEhszTIqr1XqdTsJiPXNc4XSQwcmFGigfJE0VXIMQ7OWK8enIXb
-yorgVM3/WqTP4CJy/0g5rXClpP/MLpEO7rqrU+qpbXQf44e1jMYZAVlLXTsMdvOu
-bOAe2UUWpeT7asQbQbVNNbA63FCf533fGCxL3bD9bGJjZh9WNlBDd/XajM01trCc
-Ti1Uz6aeVzmX358LhwjBMu0YBtRU5LbKCm9cul57uttdMgP/7qI=
-=Gdwa
+iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAlw3YMAACgkQ3SOs138+
+s6EH4Q//SVN4JRdUhc2pJvduFUs4enZhMmbqPjP1BDEUTgAgzOWTBgrtmYRYVXkA
+kBSuux1xvohOgua4RapPquYWOoreJFPLCfkCt3uE+maLKDWRFtDbTXKPk7WjSAEs
+vMVLRpUT3RAksUUzhvLCupS2RjezDF3JxEZAoUwYTNdLheWrhNykHDVjNMbyeV74
+6WLXs7oG+Md8ziG2dz/ROqRahISQtKU1dcY9rKdogVadFX3ck0+IaOj/5NeEH5b3
+UWAtheAaUHFeKkGbMYPXsFvYsinOstRBb6av63r+kOem/dNtl7YN5rXPKAh4zYI/
+GylHsq/aBU4mm4BtfuVAcTM/GipGtPw+nLXkTAYMmM2aHDAIe9BkMMR0zZ48C3M/
+iCcUjiqRtTjcW3xWzrckQqy7UfLUxV+eVXXiL9wvq3ukM/wLRYRUQbL2WB7BR7kj
+fDotSPQowhN0LJLFr3Dnn0d1w+JQxO2BVuftrfiLzpagJ/DrVm41kqshv0zQ+2PX
+dQtbzThuEQvdpt/L3zUXVvhunxaUusLXEsrA4qfUm9iiuvoc6C0SDi3hwQO/287W
+5WXBpZNLu3qbC0Sf8heuaBFp3aUkxKObT7caCdkp6eTx9msQvTUW6OHz1z0h3DR2
+3eiQSgvUCqMa98C8il1gBhYXZrYkTuGkl/Imz+ZthQZMG+jkJug=
+=6/7V
 -----END PGP SIGNATURE-----
 
---JgQwtEuHJzHdouWu--
+--IDYEmSnFhs3mNXr+--
