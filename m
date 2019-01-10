@@ -1,69 +1,51 @@
 From: Sowjanya Komatineni <skomatineni@nvidia.com>
-Subject: RE: [PATCH V3 3/3] mmc: tegra: SDMMC pads auto-calibration
-Date: Thu, 10 Jan 2019 19:19:47 +0000
-Message-ID: <BN7PR12MB283603C485B9B4B04E742FFFC2840@BN7PR12MB2836.namprd12.prod.outlook.com>
-References: <1546462674-22856-1-git-send-email-skomatineni@nvidia.com>
- <1546462674-22856-3-git-send-email-skomatineni@nvidia.com>
- <20190110150602.GC25353@ulmo>
+Subject: [PATCH V4 1/3] dt-bindings: mmc: tegra: Add pinctrl for SDMMC drive strengths
+Date: Thu, 10 Jan 2019 14:46:01 -0800
+Message-ID: <1547160363-25323-1-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190110150602.GC25353@ulmo>
-Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Thierry Reding <thierry.reding@gmail.com>
-Cc: "robh+dt@kernel.org" <robh+dt@kernel.org>, "mark.rutland@arm.com" <mark.rutland@arm.com>, Mikko Perttunen <mperttunen@nvidia.com>, Jonathan Hunter <jonathanh@nvidia.com>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: robh+dt@kernel.org, mark.rutland@arm.com, mperttunen@nvidia.com, thierry.reding@gmail.com, jonathanh@nvidia.com, adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc: anrao@nvidia.com, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Sowjanya Komatineni <skomatineni@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
->> @@ -805,6 +854,12 @@ static int tegra_sdhci_init_pinctrl_info(struct dev=
-ice *dev,
->>  		return -1;
->>  	}
->> =20
->> +	tegra_host->pinctrl_state_1v8_drv =3D pinctrl_lookup_state(
->> +				tegra_host->pinctrl_sdmmc, "sdmmc-1v8-drv");
->> +
->> +	tegra_host->pinctrl_state_3v3_drv =3D pinctrl_lookup_state(
->> +				tegra_host->pinctrl_sdmmc, "sdmmc-3v3-drv");
->
->If this truly is optional, then I suggest we do something like this
->instead:
+Add pinctrls for 3V3 and 1V8 pad drive strength configuration for
+Tegra210 sdmmc.
 
-On tegra210, these settings are part of pinmux so using pinctrl to pinmux d=
-evice node with existing properties pull-up and pull-down strength to confi=
-gure timeout values.
-On tegra186 and later, these settings are part of sdmmc controller itself s=
-o using existing pullup and pulldown timeout properties within sdmmc device=
- node itself.
+Tegra210 sdmmc has pad configuration registers in pinmux register
+domain and handled thru pinctrl to pinmux device node.
 
->From sdhci driver perspective, if pinctrl state exists (which is the case o=
-f tegra210), it uses it to configure drive settings otherwise (tegra186 & t=
-egra194) it configures drive settings in pad register with in sdmmc domain =
-itself.
-So in away presence of sdmmc-1v8-drv and sdmmc-3v3-drv state is optional as=
- they apply only for tegra210.
->From sdhci-tegra drive perspective,  it shouldn't return error on absence o=
-f these states as these states are not used for tegra186 and tegra194 and i=
-nstead use drive strengths time out properties.
-Will add check in drive to return error on absence of both sdmmc-3v3-drv, s=
-dmmc-1v8-drv pinctrl states along with drive settings properties with in sd=
-mmc device node...
+Tegra186 and Tegra194 has pad configuration register with in the
+SDMMC register domain itself and are handles thru drive strength
+properties in sdmmc device node.
 
->
->	tegra_host->pinctrl_state_1v8_drv =3D pinctrl_lookup_state(...);
->	if (IS_ERR(tegra_host->pinctrl_state_1v8_drv)) {
->		err =3D PTR_ERR(tegra_host->pinctrl_state_1v8_drv);
->
->		if (err =3D=3D -ENODEV)
->			tegra_host->pinctrl_state_1v8_drv =3D NULL;
->		else
->			return err;
->	}
->
->With that we can use the much simpler condition everywhere:
->
->	if (tegra_host->pinctrl_state_1v8_drv)
->		...
->
->Thierry
+Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
+---
+ Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
+index 32b4b4e41923..2cecdc71d94c 100644
+--- a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
++++ b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
+@@ -39,12 +39,16 @@ sdhci@c8000200 {
+ 	bus-width = <8>;
+ };
+ 
+-Optional properties for Tegra210 and Tegra186:
++Optional properties for Tegra210, Tegra186 and Tegra194:
+ - pinctrl-names, pinctrl-0, pinctrl-1 : Specify pad voltage
+   configurations. Valid pinctrl-names are "sdmmc-3v3" and "sdmmc-1v8"
+   for controllers supporting multiple voltage levels. The order of names
+   should correspond to the pin configuration states in pinctrl-0 and
+   pinctrl-1.
++- pinctrl-names : "sdmmc-3v3-drv" and "sdmmc-1v8-drv" are applicable for
++  Tegra210 where pad config registers are in the pinmux register domain
++  for pull-up-strength and pull-down-strength values configuration when
++  using pads at 3V3 and 1V8 levels.
+ - nvidia,only-1-8-v : The presence of this property indicates that the
+   controller operates at a 1.8 V fixed I/O voltage.
+ - nvidia,pad-autocal-pull-up-offset-3v3,
+-- 
+2.7.4
