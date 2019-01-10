@@ -1,90 +1,90 @@
 From: Thierry Reding <thierry.reding@gmail.com>
-Subject: Re: [PATCH V7 1/2] arm64: dtsi: Fix SDMMC address range
-Date: Thu, 10 Jan 2019 15:47:31 +0100
-Message-ID: <20190110144731.GA25353@ulmo>
-References: <1546457808-18270-1-git-send-email-skomatineni@nvidia.com>
- <1546457808-18270-2-git-send-email-skomatineni@nvidia.com>
+Subject: Re: [PATCH V3 1/3] dt-bindings: mmc: tegra: Add pinctrl for pad
+ drive strength config
+Date: Thu, 10 Jan 2019 15:48:53 +0100
+Message-ID: <20190110144853.GB25353@ulmo>
+References: <1546462674-22856-1-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="7AUc2qLy4jB3hD7Z"
+        protocol="application/pgp-signature"; boundary="xgyAXRrhYN0wYx8y"
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1546457808-18270-2-git-send-email-skomatineni@nvidia.com>
+In-Reply-To: <1546462674-22856-1-git-send-email-skomatineni@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Sowjanya Komatineni <skomatineni@nvidia.com>
-Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, jonathanh@nvidia.com, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: robh+dt@kernel.org, mark.rutland@arm.com, mperttunen@nvidia.com, jonathanh@nvidia.com, adrian.hunter@intel.com, ulf.hansson@linaro.org, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
 
---7AUc2qLy4jB3hD7Z
+--xgyAXRrhYN0wYx8y
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Wed, Jan 02, 2019 at 11:36:47AM -0800, Sowjanya Komatineni wrote:
-> This patch fixes the SDMMC Controllers address space to be exact
-> defined register address range as per the design.
->=20
-> SDMMC Controller supporting Command Queue has CQHCI registers at
-> offset 0xF000.
->=20
-> This fix helps to identify the Tegra SDMMC Controllers supporting
-> Command Queue based on the size of address space.
+On Wed, Jan 02, 2019 at 12:57:52PM -0800, Sowjanya Komatineni wrote:
+> Add pinctrl for 3V3 and 1V8 pad drive strength configuration for
+> Tegra210 sdmmc which has pad configuration registers in the pinmux
+> reigster domain.
+> Pad drive strengths for Tegra186 and Later are
+> part of SDMMC device node itself.
 >=20
 > Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
 > ---
->  arch/arm64/boot/dts/nvidia/tegra186.dtsi | 6 +++---
->  arch/arm64/boot/dts/nvidia/tegra194.dtsi | 4 ++--
->  2 files changed, 5 insertions(+), 5 deletions(-)
+>  Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt | 6 +++++-
+>  1 file changed, 5 insertions(+), 1 deletion(-)
 
-After applying these patches I'm having second thoughts about the DT
-aspect of this. I know you and Timo had originally argued to advertise
-the capability via an extra property in DT instead of updating the reg
-property. In retrospect, I think that's the right thing to do, after
-all.
+Hi Rob,
 
-The problem I'm running into is that if I apply patch 2/2 without the
-first patch, then both Jetson TX2 and Jetson AGX Xavier crash on boot
-because they try to access these registers (the I/O memory size is
-0x10000 for all controllers). So we're effectively breaking ABI with
-existing device trees.
+any chance you could take a look at this?
 
-I don't know of a way to work around that other than the separate
-property. Would you mind changing the series to contain:
-
-	1) a patch updating the device tree bindings with the new
-	   optional property that would mark SDMMC4 as CQE capable
-	   (make sure to Cc devicetree@vger.kernel.org on that patch)
-
-	2) replace this patch by one which only adds the new
-	   "supports-cqe" property
-
-	3) update the second patch to make the decision based on the
-	   flag rather than the I/O memory size
-
-Sorry for the back and forth on this. I evidently hadn't thought this
-through.
-
+Thanks,
 Thierry
 
---7AUc2qLy4jB3hD7Z
+> diff --git a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.t=
+xt b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
+> index 32b4b4e41923..2cecdc71d94c 100644
+> --- a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
+> +++ b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
+> @@ -39,12 +39,16 @@ sdhci@c8000200 {
+>  	bus-width =3D <8>;
+>  };
+> =20
+> -Optional properties for Tegra210 and Tegra186:
+> +Optional properties for Tegra210, Tegra186 and Tegra194:
+>  - pinctrl-names, pinctrl-0, pinctrl-1 : Specify pad voltage
+>    configurations. Valid pinctrl-names are "sdmmc-3v3" and "sdmmc-1v8"
+>    for controllers supporting multiple voltage levels. The order of names
+>    should correspond to the pin configuration states in pinctrl-0 and
+>    pinctrl-1.
+> +- pinctrl-names : "sdmmc-3v3-drv" and "sdmmc-1v8-drv" are applicable for
+> +  Tegra210 where pad config registers are in the pinmux register domain
+> +  for pull-up-strength and pull-down-strength values configuration when
+> +  using pads at 3V3 and 1V8 levels.
+>  - nvidia,only-1-8-v : The presence of this property indicates that the
+>    controller operates at a 1.8 V fixed I/O voltage.
+>  - nvidia,pad-autocal-pull-up-offset-3v3,
+> --=20
+> 2.7.4
+>=20
+
+--xgyAXRrhYN0wYx8y
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAlw3WwAACgkQ3SOs138+
-s6Er5hAAjcqLKJlSzT0ipK8NA2g937YzOBD4HRe/jMLXTbDcpjYTzndQVNGCttsY
-Zjw4SPTxjZRBEOZsb3DKmYWCbriqVJpi3Ym2JiG6afv/BVw0UlYmOhp9uBOlzp+Z
-MSXtkkwA5QKMUT+BYwhnTR50SzA0EBD/LCrCJKRX9Gr7d7XrZjgaGVMo/yIp9isj
-xYVZbg3+iKdf+U3bEQOYKWw53mg8+Zb91voWX/M+yEfRwjTPOH4Wu4B8geHQxCgo
-TX6uMZrJQvJX0N3puGaxZp/SzE8qficNnJXXPRSXQjXqRm5P73BN3D/1GZxJUlcb
-sIx0hte4/B9R/9N9OvpSsQAYPZzTXwG1khOcpU3lIzfozsttDCOvWoJCSXegaWFv
-BaKcwYj76luUxtiP39Fboe/aYROA+c1m5wl7uMz2/Gh921LbAuVCundN5f7VzH7g
-fiHcDX5DRtIF9qBHA5pXOueM6DXZS2Fh2StJBoqcVv9efFF5bogOoP/GgCJmjk7Z
-fvZu/KJkqitcNUAg3HuQ+JndDSz3s79ddU5zN7E7EAcHQxXX2HICPx5fhK4RDXei
-WK8WMU5kZmCN6xHBtAKYJgdZhjv3ySc1XNnJTSzcrcfZdE8KrwwNorMCALNfy3hU
-bam38+6lFyHNxrnSG+7CF0ySc6nZ07P/8XCFl+ZIP+YGDiD0ILQ=
-=JW8s
+iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAlw3W1UACgkQ3SOs138+
+s6H3axAAozYOuxywpdMdLfOIgXUnfWBigHXMNhK4eINNJyBlqfSnQmHLuNoWoXJ0
+6evDzZY6rHZ94K1UlsMIz7cNvZrxdn1Rt0lq1+ye8ohgWdCP5cFZoESZX59xGGLN
+E5iyiPEmUN+Ec8PKefOFLUAH2xPE+4syKqDbXQV4Lm9Maj7HzFT9YwK5Pwazv224
+AYDC45wZMP5U7QLm07bcaJ4clytxtRaPvDBxT+ugaJy4DrdWNcsbSI6jyEcjaxh2
+zzPLbb1ujVXSz+EFpZ/voAuxM85eruFMDmBIaKA640LDMjq1nEknSa0Y8wZYFwG5
+F3/59TdkuRFylNVRwCStt0n39tFNxsvxuqzkhM6gWgCMyVD7mBS/kXnp0v0v/DoB
+nkKIf+eJljrgTh4w4C4OS+edga9F7HS9DuH1a9iATq8HxSKkJjsLPkCKxwKOZhhk
+kDPUc7tFq7hwffkXsSoYNszEVM75kF2ujWUW5dqOPiTy7YxsyvjrJUgmViEBfYZO
+S1BM/N3c5QKMO+M2ilArDiIArZwfLaWi9OypGi50NBYskei+50IGMbMWLildV2sv
+UjRmWWN1Ms1kQxmHA9TphLUtUdArvWxMZPy+fe0bThMBKPrWtA30v/GkWWjhSI/C
+FY0j3+yBOPccAb0XlGDuEYLIHiXYuJtvJstET4Ky1fkpnVXSJBg=
+=aOWC
 -----END PGP SIGNATURE-----
 
---7AUc2qLy4jB3hD7Z--
+--xgyAXRrhYN0wYx8y--
