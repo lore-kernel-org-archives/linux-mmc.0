@@ -1,131 +1,90 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 1/2] mmc: sdhci: Properly set DMA mask
-Date: Thu, 10 Jan 2019 16:11:33 +0200
-Message-ID: <a960e9a7-ff86-b000-1319-df85741fb380@intel.com>
-References: <20190104104753.3383-1-thierry.reding@gmail.com>
+From: Thierry Reding <thierry.reding@gmail.com>
+Subject: Re: [PATCH V7 1/2] arm64: dtsi: Fix SDMMC address range
+Date: Thu, 10 Jan 2019 15:47:31 +0100
+Message-ID: <20190110144731.GA25353@ulmo>
+References: <1546457808-18270-1-git-send-email-skomatineni@nvidia.com>
+ <1546457808-18270-2-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="7AUc2qLy4jB3hD7Z"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190104104753.3383-1-thierry.reding@gmail.com>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <1546457808-18270-2-git-send-email-skomatineni@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Thierry Reding <thierry.reding@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jonathan Hunter <jonathanh@nvidia.com>, Sowjanya Komatineni <skomatineni@nvidia.com>, Krishna Reddy <vdumpa@nvidia.com>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Sowjanya Komatineni <skomatineni@nvidia.com>
+Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, jonathanh@nvidia.com, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 4/01/19 12:47 PM, Thierry Reding wrote:
-> From: Thierry Reding <treding@nvidia.com>
-> 
-> The implementation of sdhci_set_dma_mask() is conflating two things: on
-> one hand it uses the SDHCI_USE_64_BIT_DMA flag to determine whether or
-> not to use the 64-bit addressing capability of the controller and on the
-> other hand it also uses that flag to set a DMA mask for the controller's
-> parent device.
-> 
-> However, a controller supporting 64-bit addressing doesn't mean that it
-> needs to support addressing 64 bits of address range. It's perfectly
-> acceptable to use 64-bit addressing for a 32-bit address range or even
-> smaller, even if that makes little sense, considering the extra overhead
-> of the 64-bit addressing descriptors.
-> 
-> But it is fairly common for hardware to support somewhere between 32 and
-> 64 bits of address range. Tegra124 and Tegra210, for example, support 34
-> bits and the newer Tegra186 and Tegra194 support 40 bits. The latter can
-> also use an IOMMU for address translation, which has an input address
-> range of 48 bits. This causes problems with the current algorithm in the
-> SDHCI core for choosing the DMA mask. If the DMA mask is set to 64 bits,
-> the DMA memory allocations can (and usually do because the allocator
-> starts from the top) end up beyond the 40 bit boundary addressable by
-> the SDHCI controller, causing IOMMU faults.
-> 
-> For Tegra specifically this problem is currently worked around by
-> setting the SDHCI_QUIRK2_BROKEN_64_BIT_DMA quirk. This causes the DMA
-> mask to always be set to 32 bits and therefore all allocations will fit
-> within the range addressable by the controller.
-> 
-> This commit reworks the code in sdhci_set_dma_mask() to fix the above
-> issue. The rationale behind this change is that the SDHCI controller
-> driver should be the authoritative source of the DMA mask setting. The
-> SDHCI core has no way of knowing what the individual SDHCI controllers
-> are capable of. So instead of overriding the DMA mask depending on
-> whether or not 64-bit addressing mode is used, the DMA mask is only
-> modified if absolutely necessary. On one hand, if the controller can
-> only address 32 bits of memory or less, we disable use of 64-bit
-> addressing mode because it is not needed. On the other hand, we also
-> want to make sure that if we don't support 64-bit addressing mode, such
-> as in the case where the BROKEN_64_BIT_DMA quirk is set, we do restrict
-> the DMA mask to fit the capabilities. The latter is an inconsistency by
-> the driver, so we warn about it to make sure it will be addressed in the
-> driver.
 
-sdhci_set_dma_mask() was added because people did want sdhci to set the DMA
-mask.  Also using 64-bit DMA even with 32-bit systems has the advantage of
-reducing exposure to problems i.e. the same logic is used with the same SoC
-irrespective of whether or not it is in 32-bit compatibility mode.  So the
-policy for sdhci is always to use 64-bit DMA if it is supported.
+--7AUc2qLy4jB3hD7Z
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-I suggest we add a new sdhci op for ->set_dma_mask() and call that instead
-of sdhci_set_dma_mask() if it is not NULL.
-
-> 
-> Signed-off-by: Thierry Reding <treding@nvidia.com>
+On Wed, Jan 02, 2019 at 11:36:47AM -0800, Sowjanya Komatineni wrote:
+> This patch fixes the SDMMC Controllers address space to be exact
+> defined register address range as per the design.
+>=20
+> SDMMC Controller supporting Command Queue has CQHCI registers at
+> offset 0xF000.
+>=20
+> This fix helps to identify the Tegra SDMMC Controllers supporting
+> Command Queue based on the size of address space.
+>=20
+> Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
 > ---
->  drivers/mmc/host/sdhci.c | 36 ++++++++++++++++++++++--------------
->  1 file changed, 22 insertions(+), 14 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 7c6c93e85b7e..01f81e96be23 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -3499,27 +3499,35 @@ static int sdhci_set_dma_mask(struct sdhci_host *host)
->  {
->  	struct mmc_host *mmc = host->mmc;
->  	struct device *dev = mmc_dev(mmc);
-> -	int ret = -EINVAL;
-> +	u64 dma_mask = dma_get_mask(dev);
-> +	u64 dma32 = DMA_BIT_MASK(32);
-> +	int ret = 0;
->  
->  	if (host->quirks2 & SDHCI_QUIRK2_BROKEN_64_BIT_DMA)
->  		host->flags &= ~SDHCI_USE_64_BIT_DMA;
->  
-> -	/* Try 64-bit mask if hardware is capable  of it */
-> -	if (host->flags & SDHCI_USE_64_BIT_DMA) {
-> -		ret = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64));
-> -		if (ret) {
-> -			pr_warn("%s: Failed to set 64-bit DMA mask.\n",
-> -				mmc_hostname(mmc));
-> -			host->flags &= ~SDHCI_USE_64_BIT_DMA;
-> -		}
-> +	/*
-> +	 * Hardware that can't address more than the 32-bit address range does
-> +	 * not need to use 64-bit addressing mode, even if it supports it.
-> +	 */
-> +	if ((host->flags & SDHCI_USE_64_BIT_DMA) && (dma_mask <= dma32)) {
-> +		pr_debug("%s: controller needs addresses <= 32-bits\n",
-> +			mmc_hostname(mmc));
-> +		host->flags &= ~SDHCI_USE_64_BIT_DMA;
->  	}
->  
-> -	/* 32-bit mask as default & fallback */
-> -	if (ret) {
-> -		ret = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(32));
-> +	/*
-> +	 * If the hardware doesn't support 64-bit addressing, make sure to
-> +	 * restrict the DMA mask so we don't get buffers allocated beyond the
-> +	 * 32-bit boundary.
-> +	 */
-> +	if (!(host->flags & SDHCI_USE_64_BIT_DMA) && (dma_mask > dma32)) {
-> +		WARN(1, "64-bit DMA not supported, DMA mask %llx\n", dma_mask);
-> +
-> +		ret = dma_set_mask_and_coherent(dev, dma32);
->  		if (ret)
-> -			pr_warn("%s: Failed to set 32-bit DMA mask.\n",
-> -				mmc_hostname(mmc));
-> +			pr_warn("%s: failed to set 32-bit DMA mask: %d\n",
-> +				mmc_hostname(mmc), ret);
->  	}
->  
->  	return ret;
-> 
+>  arch/arm64/boot/dts/nvidia/tegra186.dtsi | 6 +++---
+>  arch/arm64/boot/dts/nvidia/tegra194.dtsi | 4 ++--
+>  2 files changed, 5 insertions(+), 5 deletions(-)
+
+After applying these patches I'm having second thoughts about the DT
+aspect of this. I know you and Timo had originally argued to advertise
+the capability via an extra property in DT instead of updating the reg
+property. In retrospect, I think that's the right thing to do, after
+all.
+
+The problem I'm running into is that if I apply patch 2/2 without the
+first patch, then both Jetson TX2 and Jetson AGX Xavier crash on boot
+because they try to access these registers (the I/O memory size is
+0x10000 for all controllers). So we're effectively breaking ABI with
+existing device trees.
+
+I don't know of a way to work around that other than the separate
+property. Would you mind changing the series to contain:
+
+	1) a patch updating the device tree bindings with the new
+	   optional property that would mark SDMMC4 as CQE capable
+	   (make sure to Cc devicetree@vger.kernel.org on that patch)
+
+	2) replace this patch by one which only adds the new
+	   "supports-cqe" property
+
+	3) update the second patch to make the decision based on the
+	   flag rather than the I/O memory size
+
+Sorry for the back and forth on this. I evidently hadn't thought this
+through.
+
+Thierry
+
+--7AUc2qLy4jB3hD7Z
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAlw3WwAACgkQ3SOs138+
+s6Er5hAAjcqLKJlSzT0ipK8NA2g937YzOBD4HRe/jMLXTbDcpjYTzndQVNGCttsY
+Zjw4SPTxjZRBEOZsb3DKmYWCbriqVJpi3Ym2JiG6afv/BVw0UlYmOhp9uBOlzp+Z
+MSXtkkwA5QKMUT+BYwhnTR50SzA0EBD/LCrCJKRX9Gr7d7XrZjgaGVMo/yIp9isj
+xYVZbg3+iKdf+U3bEQOYKWw53mg8+Zb91voWX/M+yEfRwjTPOH4Wu4B8geHQxCgo
+TX6uMZrJQvJX0N3puGaxZp/SzE8qficNnJXXPRSXQjXqRm5P73BN3D/1GZxJUlcb
+sIx0hte4/B9R/9N9OvpSsQAYPZzTXwG1khOcpU3lIzfozsttDCOvWoJCSXegaWFv
+BaKcwYj76luUxtiP39Fboe/aYROA+c1m5wl7uMz2/Gh921LbAuVCundN5f7VzH7g
+fiHcDX5DRtIF9qBHA5pXOueM6DXZS2Fh2StJBoqcVv9efFF5bogOoP/GgCJmjk7Z
+fvZu/KJkqitcNUAg3HuQ+JndDSz3s79ddU5zN7E7EAcHQxXX2HICPx5fhK4RDXei
+WK8WMU5kZmCN6xHBtAKYJgdZhjv3ySc1XNnJTSzcrcfZdE8KrwwNorMCALNfy3hU
+bam38+6lFyHNxrnSG+7CF0ySc6nZ07P/8XCFl+ZIP+YGDiD0ILQ=
+=JW8s
+-----END PGP SIGNATURE-----
+
+--7AUc2qLy4jB3hD7Z--
