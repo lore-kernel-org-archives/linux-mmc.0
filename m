@@ -1,115 +1,31 @@
-From: Remi Pommarel <repk@triplefau.lt>
-Subject: [PATCH v2] mmc: meson-gx: Free irq in release() callback
-Date: Fri, 11 Jan 2019 00:01:35 +0100
-Message-ID: <20190110230135.19555-1-repk@triplefau.lt>
+From: Sowjanya Komatineni <skomatineni@nvidia.com>
+Subject: RE: [PATCH V7 2/2] mmc: tegra: HW Command Queue Support for Tegra
+ SDMMC
+Date: Fri, 11 Jan 2019 00:34:57 +0000
+Message-ID: <BN7PR12MB2836750BAFFAEAF8436C7C58C2850@BN7PR12MB2836.namprd12.prod.outlook.com>
+References: <1546457808-18270-1-git-send-email-skomatineni@nvidia.com>
+ <1546457808-18270-3-git-send-email-skomatineni@nvidia.com>
+ <5722018a-7654-c6f9-c2aa-2817b39b1a35@intel.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <5722018a-7654-c6f9-c2aa-2817b39b1a35@intel.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>
-Cc: Elie Roudninski <xademax@gmail.com>, linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org, Remi Pommarel <repk@triplefau.lt>
+To: Adrian Hunter <adrian.hunter@intel.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, Chunyan Zhang <chunyan.zhang@unisoc.com>
+Cc: "thierry.reding@gmail.com" <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Because the irq was requested through device managed resources API
-(devm_request_threaded_irq()) it was freed after meson_mmc_remove()
-completion, thus after mmc_free_host() has reclaimed meson_host memory.
-As this irq is IRQF_SHARED, while using CONFIG_DEBUG_SHIRQ, its handler
-get called by free_irq(). So meson_mmc_irq() was called after the
-meson_host memory reclamation and was using invalid memory.
-
-We ended up with the following scenario:
-device_release_driver()
-	meson_mmc_remove()
-		mmc_free_host() /* Freeing host memory */
-	...
-	devres_release_all()
-		devm_irq_release()
-			__free_irq()
-				meson_mmc_irq() /* Uses freed memory */
-
-To avoid this, the irq is released in meson_mmc_remove() and in
-mseon_mmc_probe() error path before mmc_free_host() gets called.
-
-This fixes https://marc.info/?l=linux-mmc&m=154707415208716.
-
-Signed-off-by: Remi Pommarel <repk@triplefau.lt>
----
-Changes since v1:
-- Fix it also in the error handling of probe callback
----
- drivers/mmc/host/meson-gx-mmc.c | 18 +++++++++++-------
- 1 file changed, 11 insertions(+), 7 deletions(-)
-
-diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index c2690c1a50ff..f115d7c63ffe 100644
---- a/drivers/mmc/host/meson-gx-mmc.c
-+++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -179,6 +179,8 @@ struct meson_host {
- 	struct sd_emmc_desc *descs;
- 	dma_addr_t descs_dma_addr;
- 
-+	int irq;
-+
- 	bool vqmmc_enabled;
- };
- 
-@@ -1231,7 +1233,7 @@ static int meson_mmc_probe(struct platform_device *pdev)
- 	struct resource *res;
- 	struct meson_host *host;
- 	struct mmc_host *mmc;
--	int ret, irq;
-+	int ret;
- 
- 	mmc = mmc_alloc_host(sizeof(struct meson_host), &pdev->dev);
- 	if (!mmc)
-@@ -1276,8 +1278,8 @@ static int meson_mmc_probe(struct platform_device *pdev)
- 		goto free_host;
- 	}
- 
--	irq = platform_get_irq(pdev, 0);
--	if (irq <= 0) {
-+	host->irq = platform_get_irq(pdev, 0);
-+	if (host->irq <= 0) {
- 		dev_err(&pdev->dev, "failed to get interrupt resource.\n");
- 		ret = -EINVAL;
- 		goto free_host;
-@@ -1331,9 +1333,8 @@ static int meson_mmc_probe(struct platform_device *pdev)
- 	writel(IRQ_CRC_ERR | IRQ_TIMEOUTS | IRQ_END_OF_CHAIN,
- 	       host->regs + SD_EMMC_IRQ_EN);
- 
--	ret = devm_request_threaded_irq(&pdev->dev, irq, meson_mmc_irq,
--					meson_mmc_irq_thread, IRQF_SHARED,
--					NULL, host);
-+	ret = request_threaded_irq(host->irq, meson_mmc_irq,
-+			meson_mmc_irq_thread, IRQF_SHARED, NULL, host);
- 	if (ret)
- 		goto err_init_clk;
- 
-@@ -1351,7 +1352,7 @@ static int meson_mmc_probe(struct platform_device *pdev)
- 	if (host->bounce_buf == NULL) {
- 		dev_err(host->dev, "Unable to map allocate DMA bounce buffer.\n");
- 		ret = -ENOMEM;
--		goto err_init_clk;
-+		goto err_free_irq;
- 	}
- 
- 	host->descs = dma_alloc_coherent(host->dev, SD_EMMC_DESC_BUF_LEN,
-@@ -1370,6 +1371,8 @@ static int meson_mmc_probe(struct platform_device *pdev)
- err_bounce_buf:
- 	dma_free_coherent(host->dev, host->bounce_buf_size,
- 			  host->bounce_buf, host->bounce_dma_addr);
-+err_free_irq:
-+	free_irq(host->irq, host);
- err_init_clk:
- 	clk_disable_unprepare(host->mmc_clk);
- err_core_clk:
-@@ -1387,6 +1390,7 @@ static int meson_mmc_remove(struct platform_device *pdev)
- 
- 	/* disable interrupts */
- 	writel(0, host->regs + SD_EMMC_IRQ_EN);
-+	free_irq(host->irq, host);
- 
- 	dma_free_coherent(host->dev, SD_EMMC_DESC_BUF_LEN,
- 			  host->descs, host->descs_dma_addr);
--- 
-2.20.1
+Pj4gK3N0YXRpYyBpbnQgc2RoY2lfdGVncmFfYWRkX2hvc3Qoc3RydWN0IHNkaGNpX2hvc3QgKmhv
+c3QpIHsNCj4+ICsJc3RydWN0IHNkaGNpX3BsdGZtX2hvc3QgKnBsdGZtX2hvc3QgPSBzZGhjaV9w
+cml2KGhvc3QpOw0KPj4gKwlzdHJ1Y3Qgc2RoY2lfdGVncmEgKnRlZ3JhX2hvc3QgPSBzZGhjaV9w
+bHRmbV9wcml2KHBsdGZtX2hvc3QpOw0KPj4gKwlzdHJ1Y3QgY3FoY2lfaG9zdCAqY3FfaG9zdDsN
+Cj4+ICsJYm9vbCBkbWE2NDsNCj4+ICsJaW50IHJldDsNCj4+ICsNCj4+ICsJaWYgKCF0ZWdyYV9o
+b3N0LT5lbmFibGVfaHdjcSkNCj4+ICsJCXJldHVybiBzZGhjaV9hZGRfaG9zdChob3N0KTsNCj4+
+ICsNCj4+ICsJaG9zdC0+djRfbW9kZSA9IHRydWU7DQo+DQo+Q2FuIHlvdSB1c2Ugc2RoY2lfZW5h
+YmxlX3Y0X21vZGUoKSBoZXJlPw0KDQpIaSBBZHJpYW4sDQpzZGhjaV9yZWFkX2NhcHMgc2V0cyB2
+NCBtb2RlIHRocnUgc2RoY2lfZG9fZW5hYmxlX3Y0X21vZGUgaWYgdjRfbW9kZSBpcyB0cnVlDQpz
+ZGhjaV9zZXR1cF9ob3N0IGNhbGxzIHNkaGNpX3JlYWRfY2FwcyBzbyBJIHdhcyBzZXR0aW5nIHY0
+X21vZGUgdG8gdHJ1ZSBzbyB2NCBtb2RlIGdldHMgZW5hYmxlZCBkdXJpbmcgcmVhZCBjYXBzLg0K
+DQpUaGFua3MNCnNvd2phbnlhDQoNCg==
