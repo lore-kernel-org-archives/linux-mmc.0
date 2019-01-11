@@ -1,52 +1,35 @@
 From: Kevin Hilman <khilman@baylibre.com>
-Subject: Re: [PATCH 0/3] ARM: dts: meson: fix SD card cd-gpio (pre v4.21-rc)
-Date: Thu, 10 Jan 2019 17:18:16 -0800
-Message-ID: <7ho98oouuf.fsf@baylibre.com>
-References: <20181229125711.5205-1-martin.blumenstingl@googlemail.com>
- <CAFBinCCpsy40NuB124TqDUWy9zogeMrLsCGCanbbvpfd-yVDdQ@mail.gmail.com>
+Subject: Re: [PATCH v3] arm64: dts: meson: Fix mmc cd-gpios polarity
+Date: Thu, 10 Jan 2019 17:28:11 -0800
+Message-ID: <7hftu0oudw.fsf@baylibre.com>
+References: <1547134822-18498-1-git-send-email-lollivier@baylibre.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAFBinCCpsy40NuB124TqDUWy9zogeMrLsCGCanbbvpfd-yVDdQ@mail.gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Martin Blumenstingl <martin.blumenstingl@googlemail.com>, linux-amlogic@lists.infradead.org, linus.walleij@linaro.org
-Cc: linus.luessing@c0d3.blue, bgolaszewski@baylibre.com, balbes-150@yandex.ru, linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux@roeck-us.net
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1547134822-18498-1-git-send-email-lollivier@baylibre.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: devicetree@vger.kernel.org, linux-amlogic@lists.infradead.org
+Cc: Loys Ollivier <lollivier@baylibre.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Jerome Brunet <jbrunet@baylibre.com>, Martin Blumenstingl <martin.blumenstingl@googlemail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Martin Blumenstingl <martin.blumenstingl@googlemail.com> writes:
+Loys Ollivier <lollivier@baylibre.com> writes:
 
-> On Sat, Dec 29, 2018 at 1:57 PM Martin Blumenstingl
-> <martin.blumenstingl@googlemail.com> wrote:
->>
->> Today I noticed that my Odroid-C1 doesn't see it's SD card anymore.
->> My board is not the only one, Odroid-C1 on KernelCI suffers from the
->> same problem:
->> v4.20-6428-g00c569b567c7 still sees the SD card (mmc0): [0]
->> v4.20-8955-g903b77c63167 doesn't see the SD card (mmc0) anymore: [1]
->>
->> My Endless Mini (EC-100) is also affected by this issue.
->>
->> a git bisect run points to this commit:
->> 89a5e15bcba87df5120d4656e0ff33d4f7cd6152 ("gpio/mmc/of: Respect polarity
->> in the device tree")
->>
->> and indeed, reverting it makes my Odroid-C1 and EC-100 see the SD card
->> again.
-> I started a separate discussion for that topic on the linux-mmc and
-> linux-gpio mailing list for this topic: [0]
+> Commit 89a5e15bcba8 ("gpio/mmc/of: Respect polarity in the device tree")
+> changed the behavior of "cd-inverted" to follow the device tree bindings
+> specification.
+> Lines specifying "cd-inverted" are now "active high".
 >
-> comments regarding this series are still welcome!
+> Fix the SD card for meson by setting the cd-gpios as "active low" according
+> to the boards specifications.
+>
+> Fixes: 89a5e15bcba8 ("gpio/mmc/of: Respect polarity in the device tree")
+> Signed-off-by: Loys Ollivier <lollivier@baylibre.com>
 
-Like Linus mentioned, fixing the DTs is still important, so queuing as
-fixes for v5.0-rc (branch v4.21/fixes)
+Thanks for fixing this!
+
+Queued as a fix for v5.1-rc,
+
+I see that this is being fixed in the driver also, but I think fixing
+the DTs is necessary also.
 
 Kevin
