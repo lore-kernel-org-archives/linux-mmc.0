@@ -1,54 +1,29 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH 1/1] mmc: core: don't override the CD GPIO level when
- "cd-inverted" is set
-Date: Fri, 11 Jan 2019 15:28:44 +0100
-Message-ID: <CACRpkdYTQjiPbLGQ8E_mByAY0e_byN8iW=jBVPw3QRxh4_fB_A@mail.gmail.com>
-References: <20190101194414.24766-1-martin.blumenstingl@googlemail.com> <20190101194414.24766-2-martin.blumenstingl@googlemail.com>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH V3 1/3] dt-bindings: mmc: tegra: Add pinctrl for pad
+ drive strength config
+Date: Fri, 11 Jan 2019 10:11:20 -0600
+Message-ID: <20190111161120.GA6491@bogus>
+References: <1546462674-22856-1-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190101194414.24766-2-martin.blumenstingl@googlemail.com>
+Content-Disposition: inline
+In-Reply-To: <1546462674-22856-1-git-send-email-skomatineni@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Cc: "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Guenter Roeck <linux@roeck-us.net>, Bartosz Golaszewski <bgolaszewski@baylibre.com>, Ulf Hansson <ulf.hansson@linaro.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: robh+dt@kernel.org, mark.rutland@arm.com, mperttunen@nvidia.com, thierry.reding@gmail.com, jonathanh@nvidia.com, adrian.hunter@intel.com, ulf.hansson@linaro.org, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Sowjanya Komatineni <skomatineni@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Jan 1, 2019 at 8:44 PM Martin Blumenstingl
-<martin.blumenstingl@googlemail.com> wrote:
+On Wed, 2 Jan 2019 12:57:52 -0800, Sowjanya Komatineni wrote:
+> Add pinctrl for 3V3 and 1V8 pad drive strength configuration for
+> Tegra210 sdmmc which has pad configuration registers in the pinmux
+> reigster domain.
+> Pad drive strengths for Tegra186 and Later are
+> part of SDMMC device node itself.
+> 
+> Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
+> ---
+>  Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt | 6 +++++-
+>  1 file changed, 5 insertions(+), 1 deletion(-)
+> 
 
-> Since commit 89a5e15bcba87d ("gpio/mmc/of: Respect polarity in the device
-> tree") gpiolib-of parses the "cd-gpios" property and flips the polarity
-> if "cd-inverted" is also set. This results in the "cd-inverted" property
-> being evaluated twice, which effectively makes it a no-op:
-> - first in drivers/gpio/gpiolib-of.c (of_xlate_and_get_gpiod_flags) when
->   setting up the CD GPIO
-> - then again in drivers/mmc/core/slot-gpio.c (mmc_gpio_get_cd) when
->   reading the CD GPIO value at runtime
->
-> On boards which are using device-tree with the "cd-inverted" property
-> being set any inserted card are not detected anymore. This is due to the
-> MMC core treating the CD GPIO with the wrong polarity.
->
-> Disable "override_cd_active_level" for the card detection GPIO which is
-> parsed using mmc_of_parse. This fixes SD card detection on the boards
-> which are currently using the "cd-inverted" device-tree property (tested
-> on Meson8b Odroid-C1 and Meson8b EC-100).
->
-> This does not remove the CD GPIO inversion logic from the MMC core
-> because there's at least one driver (sdhci-pci-core for Intel BayTrail
-> based boards) which still passes "override_cd_active_level = true" to
-> mmc_gpiod_request_cd(). Due to lack of hardware for testing this is left
-> untouched.
-> In the future the GPIO inversion logic for both, card and read-only
-> detection can be removed once no driver is using it anymore.
->
-> Fixes: 89a5e15bcba87d ("gpio/mmc/of: Respect polarity in the device tree")
-> Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-
-I applied this to the GPIO fixes with the ACKs.
-
-Ulf is on vacation but I managed to get his ACK over chat,
-so I will try to get this upstream ASAP.
-
-Yours,
-Linus Walleij
+Reviewed-by: Rob Herring <robh@kernel.org>
