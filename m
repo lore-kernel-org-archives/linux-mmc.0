@@ -1,7 +1,7 @@
 From: Faiz Abbas <faiz_abbas@ti.com>
-Subject: [PATCH 2/7] mmc: sdhci-omap: Add using external dma
-Date: Fri, 11 Jan 2019 16:38:46 +0530
-Message-ID: <20190111110851.6805-3-faiz_abbas@ti.com>
+Subject: [PATCH 4/7] mmc: sdhci: Add quirk for disabling DTO during erase command
+Date: Fri, 11 Jan 2019 16:38:48 +0530
+Message-ID: <20190111110851.6805-5-faiz_abbas@ti.com>
 References: <20190111110851.6805-1-faiz_abbas@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -13,88 +13,47 @@ To: linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.ker
 Cc: zhang.chunyan@linaro.org, kishon@ti.com, adrian.hunter@intel.com, mark.rutland@arm.com, robh+dt@kernel.org, ulf.hansson@linaro.org, faiz_abbas@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-From: Chunyan Zhang <zhang.chunyan@linaro.org>
+Some controllers might prematurely issue a data timeout during an erase
+command. Add a quirk to disable the interrupt when an erase command is
+issued.
 
-sdhci-omap can support both external dma controller via dmaengine framework
-as well as ADMA which standard SD host controller provides.
-
-Fixes by Faiz Abbas <fazi_abbas@ti.com>:
-1. Switch to DMA slave mode when using external DMA
-2. Add offset to mapbase
-
-Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
 Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
 ---
- drivers/mmc/host/Kconfig      |  1 +
- drivers/mmc/host/sdhci-omap.c | 16 +++++++++++++++-
- 2 files changed, 16 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci.c | 8 ++++++++
+ drivers/mmc/host/sdhci.h | 2 ++
+ 2 files changed, 10 insertions(+)
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 333292e8ecdd..70e90b00cb37 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -979,6 +979,7 @@ config MMC_SDHCI_OMAP
- 	depends on MMC_SDHCI_PLTFM && OF
- 	select THERMAL
- 	select TI_SOC_THERMAL
-+	select MMC_SDHCI_EXTERNAL_DMA if DMA_ENGINE
- 	help
- 	  This selects the Secure Digital Host Controller Interface (SDHCI)
- 	  support present in TI's DRA7 SOCs. The controller supports
-diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-index c11c18a9aacb..8a05e94fe612 100644
---- a/drivers/mmc/host/sdhci-omap.c
-+++ b/drivers/mmc/host/sdhci-omap.c
-@@ -696,7 +696,11 @@ static int sdhci_omap_enable_dma(struct sdhci_host *host)
- 	struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 4a9044c06e21..cfd716aee552 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1560,6 +1560,14 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 	/* Initially, a command has no error */
+ 	cmd->error = 0;
  
- 	reg = sdhci_omap_readl(omap_host, SDHCI_OMAP_CON);
--	reg |= CON_DMA_MASTER;
-+	reg &= ~CON_DMA_MASTER;
-+	/* Switch to DMA slave mode when using external DMA */
-+	if (!host->use_external_dma)
-+		reg |= CON_DMA_MASTER;
++	if (cmd->opcode == MMC_ERASE &&
++	    (host->quirks2 & SDHCI_QUIRK2_DISABLE_DTO_FOR_ERASE)) {
++		mask = sdhci_readl(host, SDHCI_INT_ENABLE);
++		mask &= ~SDHCI_INT_DATA_TIMEOUT;
++		sdhci_writel(host, mask, SDHCI_INT_ENABLE);
++		sdhci_writel(host, mask, SDHCI_SIGNAL_ENABLE);
++	}
 +
- 	sdhci_omap_writel(omap_host, SDHCI_OMAP_CON, reg);
+ 	if ((host->quirks2 & SDHCI_QUIRK2_STOP_WITH_TC) &&
+ 	    cmd->opcode == MMC_STOP_TRANSMISSION)
+ 		cmd->flags |= MMC_RSP_BUSY;
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 7a52823ebef4..d0c6d4fe5371 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -479,6 +479,8 @@ struct sdhci_host {
+  * block count.
+  */
+ #define SDHCI_QUIRK2_USE_32BIT_BLK_CNT			(1<<18)
++/* Controller needs to disable DTO for erase command */
++#define SDHCI_QUIRK2_DISABLE_DTO_FOR_ERASE		(1<<19)
  
- 	return 0;
-@@ -1010,6 +1014,7 @@ static int sdhci_omap_probe(struct platform_device *pdev)
- 	const struct of_device_id *match;
- 	struct sdhci_omap_data *data;
- 	const struct soc_device_attribute *soc;
-+	struct resource *regs;
- 
- 	match = of_match_device(omap_sdhci_match, dev);
- 	if (!match)
-@@ -1022,6 +1027,10 @@ static int sdhci_omap_probe(struct platform_device *pdev)
- 	}
- 	offset = data->offset;
- 
-+	regs = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-+	if (!regs)
-+		return -ENXIO;
-+
- 	host = sdhci_pltfm_init(pdev, &sdhci_omap_pdata,
- 				sizeof(*omap_host));
- 	if (IS_ERR(host)) {
-@@ -1038,6 +1047,7 @@ static int sdhci_omap_probe(struct platform_device *pdev)
- 	omap_host->timing = MMC_TIMING_LEGACY;
- 	omap_host->flags = data->flags;
- 	host->ioaddr += offset;
-+	host->mapbase = regs->start + offset;
- 
- 	mmc = host->mmc;
- 	sdhci_get_of_property(pdev);
-@@ -1105,6 +1115,10 @@ static int sdhci_omap_probe(struct platform_device *pdev)
- 	host->mmc_host_ops.execute_tuning = sdhci_omap_execute_tuning;
- 	host->mmc_host_ops.enable_sdio_irq = sdhci_omap_enable_sdio_irq;
- 
-+	/* Switch to external DMA only if there is the "dmas" property */
-+	if (of_find_property(dev->of_node, "dmas", NULL))
-+		sdhci_switch_external_dma(host, true);
-+
- 	ret = sdhci_setup_host(host);
- 	if (ret)
- 		goto err_put_sync;
+ 	int irq;		/* Device IRQ */
+ 	void __iomem *ioaddr;	/* Mapped address */
 -- 
 2.19.2
