@@ -1,49 +1,54 @@
-From: Faiz Abbas <faiz_abbas@ti.com>
-Subject: [PATCH 0/7] Port am335 and am437 devices to sdhci-omap
-Date: Fri, 11 Jan 2019 16:38:44 +0530
-Message-ID: <20190111110851.6805-1-faiz_abbas@ti.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH 1/1] mmc: core: don't override the CD GPIO level when
+ "cd-inverted" is set
+Date: Fri, 11 Jan 2019 15:28:44 +0100
+Message-ID: <CACRpkdYTQjiPbLGQ8E_mByAY0e_byN8iW=jBVPw3QRxh4_fB_A@mail.gmail.com>
+References: <20190101194414.24766-1-martin.blumenstingl@googlemail.com> <20190101194414.24766-2-martin.blumenstingl@googlemail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190101194414.24766-2-martin.blumenstingl@googlemail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: zhang.chunyan@linaro.org, kishon@ti.com, adrian.hunter@intel.com, mark.rutland@arm.com, robh+dt@kernel.org, ulf.hansson@linaro.org, faiz_abbas@ti.com
+To: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Cc: "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Guenter Roeck <linux@roeck-us.net>, Bartosz Golaszewski <bgolaszewski@baylibre.com>, Ulf Hansson <ulf.hansson@linaro.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-The following add driver patches for porting TI's am335x and am437x
-devices to the sdhci-omap driver.
+On Tue, Jan 1, 2019 at 8:44 PM Martin Blumenstingl
+<martin.blumenstingl@googlemail.com> wrote:
 
-This involves adding external DMA support to sdhci (first 3 patches from
-Chunyan) plus some miscellaneous patches to take care of deviations of
-the controllers from the sdhci model.
+> Since commit 89a5e15bcba87d ("gpio/mmc/of: Respect polarity in the device
+> tree") gpiolib-of parses the "cd-gpios" property and flips the polarity
+> if "cd-inverted" is also set. This results in the "cd-inverted" property
+> being evaluated twice, which effectively makes it a no-op:
+> - first in drivers/gpio/gpiolib-of.c (of_xlate_and_get_gpiod_flags) when
+>   setting up the CD GPIO
+> - then again in drivers/mmc/core/slot-gpio.c (mmc_gpio_get_cd) when
+>   reading the CD GPIO value at runtime
+>
+> On boards which are using device-tree with the "cd-inverted" property
+> being set any inserted card are not detected anymore. This is due to the
+> MMC core treating the CD GPIO with the wrong polarity.
+>
+> Disable "override_cd_active_level" for the card detection GPIO which is
+> parsed using mmc_of_parse. This fixes SD card detection on the boards
+> which are currently using the "cd-inverted" device-tree property (tested
+> on Meson8b Odroid-C1 and Meson8b EC-100).
+>
+> This does not remove the CD GPIO inversion logic from the MMC core
+> because there's at least one driver (sdhci-pci-core for Intel BayTrail
+> based boards) which still passes "override_cd_active_level = true" to
+> mmc_gpiod_request_cd(). Due to lack of hardware for testing this is left
+> untouched.
+> In the future the GPIO inversion logic for both, card and read-only
+> detection can be removed once no driver is using it anymore.
+>
+> Fixes: 89a5e15bcba87d ("gpio/mmc/of: Respect polarity in the device tree")
+> Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
 
-DT changes will be posted in a separate series.
+I applied this to the GPIO fixes with the ACKs.
 
-Untested versions of Chunyan's patches were posted before[1].
+Ulf is on vacation but I managed to get his ACK over chat,
+so I will try to get this upstream ASAP.
 
-Tested on: am335x-evm, am335x-boneblack, am335x-sk, am437x-gpevm,
-am43xx-gpevm, am437x-idk, dra7xx-evm, dra72x-evm
-
-[1] https://patchwork.kernel.org/project/linux-mmc/list/?series=54897
-
-Chunyan Zhang (3):
-  mmc: sdhci: add support for using external DMA devices
-  mmc: sdhci-omap: Add using external dma
-  dt-bindings: sdhci-omap: Add example for using external dma
-
-Faiz Abbas (4):
-  mmc: sdhci: Add quirk for disabling DTO during erase command
-  mmc: sdhci_omap: Add DISABLE_DTO_FOR_ERASE Quirk
-  dt-bindings: sdhci-omap: Add am335x and am437x specific bindings
-  mmc: sdhci-omap: Add am335x and am437x specific compatibles
-
- .../devicetree/bindings/mmc/sdhci-omap.txt    |   9 +
- drivers/mmc/host/Kconfig                      |   4 +
- drivers/mmc/host/sdhci-omap.c                 |  27 +-
- drivers/mmc/host/sdhci.c                      | 274 +++++++++++++++++-
- drivers/mmc/host/sdhci.h                      |  10 +
- 5 files changed, 319 insertions(+), 5 deletions(-)
-
--- 
-2.19.2
+Yours,
+Linus Walleij
