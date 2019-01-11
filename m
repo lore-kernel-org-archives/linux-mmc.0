@@ -1,31 +1,52 @@
-From: Sowjanya Komatineni <skomatineni@nvidia.com>
-Subject: RE: [PATCH V7 2/2] mmc: tegra: HW Command Queue Support for Tegra
- SDMMC
-Date: Fri, 11 Jan 2019 00:34:57 +0000
-Message-ID: <BN7PR12MB2836750BAFFAEAF8436C7C58C2850@BN7PR12MB2836.namprd12.prod.outlook.com>
-References: <1546457808-18270-1-git-send-email-skomatineni@nvidia.com>
- <1546457808-18270-3-git-send-email-skomatineni@nvidia.com>
- <5722018a-7654-c6f9-c2aa-2817b39b1a35@intel.com>
+From: Kevin Hilman <khilman@baylibre.com>
+Subject: Re: [PATCH 0/3] ARM: dts: meson: fix SD card cd-gpio (pre v4.21-rc)
+Date: Thu, 10 Jan 2019 17:18:16 -0800
+Message-ID: <7ho98oouuf.fsf@baylibre.com>
+References: <20181229125711.5205-1-martin.blumenstingl@googlemail.com>
+ <CAFBinCCpsy40NuB124TqDUWy9zogeMrLsCGCanbbvpfd-yVDdQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <5722018a-7654-c6f9-c2aa-2817b39b1a35@intel.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, Chunyan Zhang <chunyan.zhang@unisoc.com>
-Cc: "thierry.reding@gmail.com" <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <CAFBinCCpsy40NuB124TqDUWy9zogeMrLsCGCanbbvpfd-yVDdQ@mail.gmail.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Martin Blumenstingl <martin.blumenstingl@googlemail.com>, linux-amlogic@lists.infradead.org, linus.walleij@linaro.org
+Cc: linus.luessing@c0d3.blue, bgolaszewski@baylibre.com, balbes-150@yandex.ru, linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux@roeck-us.net
 List-Id: linux-mmc@vger.kernel.org
 
-Pj4gK3N0YXRpYyBpbnQgc2RoY2lfdGVncmFfYWRkX2hvc3Qoc3RydWN0IHNkaGNpX2hvc3QgKmhv
-c3QpIHsNCj4+ICsJc3RydWN0IHNkaGNpX3BsdGZtX2hvc3QgKnBsdGZtX2hvc3QgPSBzZGhjaV9w
-cml2KGhvc3QpOw0KPj4gKwlzdHJ1Y3Qgc2RoY2lfdGVncmEgKnRlZ3JhX2hvc3QgPSBzZGhjaV9w
-bHRmbV9wcml2KHBsdGZtX2hvc3QpOw0KPj4gKwlzdHJ1Y3QgY3FoY2lfaG9zdCAqY3FfaG9zdDsN
-Cj4+ICsJYm9vbCBkbWE2NDsNCj4+ICsJaW50IHJldDsNCj4+ICsNCj4+ICsJaWYgKCF0ZWdyYV9o
-b3N0LT5lbmFibGVfaHdjcSkNCj4+ICsJCXJldHVybiBzZGhjaV9hZGRfaG9zdChob3N0KTsNCj4+
-ICsNCj4+ICsJaG9zdC0+djRfbW9kZSA9IHRydWU7DQo+DQo+Q2FuIHlvdSB1c2Ugc2RoY2lfZW5h
-YmxlX3Y0X21vZGUoKSBoZXJlPw0KDQpIaSBBZHJpYW4sDQpzZGhjaV9yZWFkX2NhcHMgc2V0cyB2
-NCBtb2RlIHRocnUgc2RoY2lfZG9fZW5hYmxlX3Y0X21vZGUgaWYgdjRfbW9kZSBpcyB0cnVlDQpz
-ZGhjaV9zZXR1cF9ob3N0IGNhbGxzIHNkaGNpX3JlYWRfY2FwcyBzbyBJIHdhcyBzZXR0aW5nIHY0
-X21vZGUgdG8gdHJ1ZSBzbyB2NCBtb2RlIGdldHMgZW5hYmxlZCBkdXJpbmcgcmVhZCBjYXBzLg0K
-DQpUaGFua3MNCnNvd2phbnlhDQoNCg==
+Martin Blumenstingl <martin.blumenstingl@googlemail.com> writes:
+
+> On Sat, Dec 29, 2018 at 1:57 PM Martin Blumenstingl
+> <martin.blumenstingl@googlemail.com> wrote:
+>>
+>> Today I noticed that my Odroid-C1 doesn't see it's SD card anymore.
+>> My board is not the only one, Odroid-C1 on KernelCI suffers from the
+>> same problem:
+>> v4.20-6428-g00c569b567c7 still sees the SD card (mmc0): [0]
+>> v4.20-8955-g903b77c63167 doesn't see the SD card (mmc0) anymore: [1]
+>>
+>> My Endless Mini (EC-100) is also affected by this issue.
+>>
+>> a git bisect run points to this commit:
+>> 89a5e15bcba87df5120d4656e0ff33d4f7cd6152 ("gpio/mmc/of: Respect polarity
+>> in the device tree")
+>>
+>> and indeed, reverting it makes my Odroid-C1 and EC-100 see the SD card
+>> again.
+> I started a separate discussion for that topic on the linux-mmc and
+> linux-gpio mailing list for this topic: [0]
+>
+> comments regarding this series are still welcome!
+
+Like Linus mentioned, fixing the DTs is still important, so queuing as
+fixes for v5.0-rc (branch v4.21/fixes)
+
+Kevin
