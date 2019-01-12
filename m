@@ -1,55 +1,58 @@
-From: Kevin Hilman <khilman@baylibre.com>
-Subject: Re: [PATCH v3] arm64: dts: meson: Fix mmc cd-gpios polarity
-Date: Fri, 11 Jan 2019 11:55:57 -0800
-Message-ID: <7hy37rm0j6.fsf@baylibre.com>
-References: <1547134822-18498-1-git-send-email-lollivier@baylibre.com> <CAFBinCDM4BTx0Ude-M=O6B2bXPE9EdfD=VxZfFzR9Dc=yT+xWQ@mail.gmail.com>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH] mmc: Fix Kconfig warnings on keystone_defconfig
+Date: Sat, 12 Jan 2019 22:12:42 +0100
+Message-ID: <20190112211242.GA4512@zn.tnic>
+References: <20190109124312.10154-1-faiz_abbas@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAFBinCDM4BTx0Ude-M=O6B2bXPE9EdfD=VxZfFzR9Dc=yT+xWQ@mail.gmail.com>
+Content-Disposition: inline
+In-Reply-To: <20190109124312.10154-1-faiz_abbas@ti.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Martin Blumenstingl <martin.blumenstingl@googlemail.com>, Loys Ollivier <lollivier@baylibre.com>
-Cc: devicetree@vger.kernel.org, linux-amlogic@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Jerome Brunet <jbrunet@baylibre.com>
+To: Faiz Abbas <faiz_abbas@ti.com>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, adrian.hunter@intel.com, j-keerthy@ti.com, edubezval@gmail.com, olof@lixom.net
 List-Id: linux-mmc@vger.kernel.org
 
-Martin Blumenstingl <martin.blumenstingl@googlemail.com> writes:
+On Wed, Jan 09, 2019 at 06:13:12PM +0530, Faiz Abbas wrote:
+> Commit 961de0a856e3 ("mmc: sdhci-omap: Workaround errata regarding
+> SDR104/HS200 tuning failures (i929)") added a select on TI_SOC_THERMAL
+> for the driver to get temperature for tuning.
+> 
+> However, this causes the following warning on keystone_defconfig because
+> keystone does not support TI_SOC_THERMAL:
+> 
+> "WARNING: unmet direct dependencies detected for TI_SOC_THERMAL"
+> 
+> Fix this by changing the select to imply.
+> 
+> Fixes: 961de0a856e3 ("mmc: sdhci-omap: Workaround errata regarding
+> SDR104/HS200 tuning failures (i929)")
+> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+> ---
+>  drivers/mmc/host/Kconfig | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index e26b8145efb3..bc61eefcb695 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -978,7 +978,7 @@ config MMC_SDHCI_OMAP
+>  	tristate "TI SDHCI Controller Support"
+>  	depends on MMC_SDHCI_PLTFM && OF
+>  	select THERMAL
+> -	select TI_SOC_THERMAL
+> +	imply TI_SOC_THERMAL
+>  	help
+>  	  This selects the Secure Digital Host Controller Interface (SDHCI)
+>  	  support present in TI's DRA7 SOCs. The controller supports
+> -- 
 
-> Hi,
->
-> some nit-picks as well as my Tested-by (in case it's not too late) below.
-> thank you for taking care of this!
->
-> On Thu, Jan 10, 2019 at 4:40 PM Loys Ollivier <lollivier@baylibre.com> wrote:
->>
->> Commit 89a5e15bcba8 ("gpio/mmc/of: Respect polarity in the device tree")
->> changed the behavior of "cd-inverted" to follow the device tree bindings
->> specification.
->> Lines specifying "cd-inverted" are now "active high".
-> this depends on the polarity from the cd-gpios property. above commit
-> caused cd-inverted to be applied twice (effectively making it a
-> no-op). thus "cd-inverted" only means "active high" if cd-gpios also
-> sets GPIO_ACTIVE_HIGH. if the polarity in cd-gpios is GPIO_ACTIVE_LOW
-> together with "cd-inverted" then the GPIO will be treated as active
-> low.
->
->> Fix the SD card for meson by setting the cd-gpios as "active low" according
->> to the boards specifications.
-> not only switching to GPIO_ACTIVE_LOW, also dropping "cd-inverted"
->
->> Fixes: 89a5e15bcba8 ("gpio/mmc/of: Respect polarity in the device tree")
-> in my patches for the 32-bit boards I used the commit which added SD
-> card support to the board for the Fixes tag. however, I'm fine with
-> this as well (I just wanted to point out that there's a small
-> difference in our commits).
->
->> Signed-off-by: Loys Ollivier <lollivier@baylibre.com>
-> on my Khadas VIM(1), using Kevin's v5.0/fixes branch:
-> Tested-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Fixes the warnings I'm seeing with randconfig builds.
 
-I can add this tested-by tag in my v5.0/fixes branch for now, and can
-replace it with a follow up if Loys can update the changelog with your
-suggestions/clarifications.
+Tested-by: Borislav Petkov <bp@suse.de>
 
-Thanks,
+-- 
+Regards/Gruss,
+    Boris.
 
-Kevin
+Good mailing practices for 400: avoid top-posting and trim the reply.
