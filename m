@@ -1,58 +1,55 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH] mmc: Fix Kconfig warnings on keystone_defconfig
-Date: Sat, 12 Jan 2019 22:12:42 +0100
-Message-ID: <20190112211242.GA4512@zn.tnic>
-References: <20190109124312.10154-1-faiz_abbas@ti.com>
+From: Shawn Guo <shawnguo@kernel.org>
+Subject: Re: [PATCH v1] ARM: dts: ls1021aqds: Enable the esdhc
+Date: Sun, 13 Jan 2019 10:39:18 +0800
+Message-ID: <20190113023917.GD11426@dragon>
+References: <20181228100251.25697-1-yinbo.zhu@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 Content-Disposition: inline
-In-Reply-To: <20190109124312.10154-1-faiz_abbas@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Faiz Abbas <faiz_abbas@ti.com>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, adrian.hunter@intel.com, j-keerthy@ti.com, edubezval@gmail.com, olof@lixom.net
+In-Reply-To: <20181228100251.25697-1-yinbo.zhu@nxp.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Yinbo Zhu <yinbo.zhu@nxp.com>
+Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, leoyang.li@nxp.com, Sascha Hauer <kernel@pengutronix.de>, yangbo.lu@nxp.com, Fabio Estevam <fabio.estevam@nxp.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Jan 09, 2019 at 06:13:12PM +0530, Faiz Abbas wrote:
-> Commit 961de0a856e3 ("mmc: sdhci-omap: Workaround errata regarding
-> SDR104/HS200 tuning failures (i929)") added a select on TI_SOC_THERMAL
-> for the driver to get temperature for tuning.
+On Fri, Dec 28, 2018 at 06:02:51PM +0800, Yinbo Zhu wrote:
+> This patch is to set the esdhc's status to "okay" in kernel.
 > 
-> However, this causes the following warning on keystone_defconfig because
-> keystone does not support TI_SOC_THERMAL:
-> 
-> "WARNING: unmet direct dependencies detected for TI_SOC_THERMAL"
-> 
-> Fix this by changing the select to imply.
-> 
-> Fixes: 961de0a856e3 ("mmc: sdhci-omap: Workaround errata regarding
-> SDR104/HS200 tuning failures (i929)")
-> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+> Signed-off-by: Yinbo Zhu <yinbo.zhu@nxp.com>
 > ---
->  drivers/mmc/host/Kconfig | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  arch/arm/boot/dts/ls1021a-qds.dts |    4 ++++
+>  1 files changed, 4 insertions(+), 0 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index e26b8145efb3..bc61eefcb695 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -978,7 +978,7 @@ config MMC_SDHCI_OMAP
->  	tristate "TI SDHCI Controller Support"
->  	depends on MMC_SDHCI_PLTFM && OF
->  	select THERMAL
-> -	select TI_SOC_THERMAL
-> +	imply TI_SOC_THERMAL
->  	help
->  	  This selects the Secure Digital Host Controller Interface (SDHCI)
->  	  support present in TI's DRA7 SOCs. The controller supports
+> diff --git a/arch/arm/boot/dts/ls1021a-qds.dts b/arch/arm/boot/dts/ls1021a-qds.dts
+> index bfd3746..98e562c 100644
+> --- a/arch/arm/boot/dts/ls1021a-qds.dts
+> +++ b/arch/arm/boot/dts/ls1021a-qds.dts
+> @@ -334,6 +334,10 @@
+>  	};
+>  };
+>  
+> +&esdhc {
+> +	status = "okay";
+> +};
+> +
+
+Please add it after &enet2 to keep them sort alphabetically.
+
+Shawn
+
+>  &sai2 {
+>  	status = "okay";
+>  };
 > -- 
-
-Fixes the warnings I'm seeing with randconfig builds.
-
-Tested-by: Borislav Petkov <bp@suse.de>
-
--- 
-Regards/Gruss,
-    Boris.
-
-Good mailing practices for 400: avoid top-posting and trim the reply.
+> 1.7.1
+> 
