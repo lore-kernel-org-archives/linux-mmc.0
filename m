@@ -1,7 +1,7 @@
 From: Christoph Hellwig <hch@lst.de>
-Subject: [PATCH 11/11] dma-mapping: remove dma_max_pfn
-Date: Mon, 14 Jan 2019 10:58:04 +0100
-Message-ID: <20190114095804.27978-12-hch@lst.de>
+Subject: [PATCH 10/11] mmc: core: don't use block layer bounce buffers
+Date: Mon, 14 Jan 2019 10:58:03 +0100
+Message-ID: <20190114095804.27978-11-hch@lst.de>
 References: <20190114095804.27978-1-hch@lst.de>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -12,51 +12,35 @@ To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Russell King <linux@armlinux.org.uk>, Nicolas Pitre <nico@fluxnic.net>, Aaro Koskinen <aaro.koskinen@iki.fi>, Ben Dooks <ben-linux@fluff.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, iommu@lists.linux-foundation.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-These days the DMA mapping code must bounce buffer for any not supported
-address, and if they driver needs to optimize for natively supported
-ranged it should use dma_get_required_mask.
+All MMC and SD host drivers are highmem safe now, and bounce buffering
+for addressing limitations is handled in the DMA layer now.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- arch/arm/include/asm/dma-mapping.h | 7 -------
- include/linux/dma-mapping.h        | 7 -------
- 2 files changed, 14 deletions(-)
+ drivers/mmc/core/queue.c | 5 -----
+ 1 file changed, 5 deletions(-)
 
-diff --git a/arch/arm/include/asm/dma-mapping.h b/arch/arm/include/asm/dma-mapping.h
-index 31d3b96f0f4b..496b36b9a7ff 100644
---- a/arch/arm/include/asm/dma-mapping.h
-+++ b/arch/arm/include/asm/dma-mapping.h
-@@ -89,13 +89,6 @@ static inline dma_addr_t virt_to_dma(struct device *dev, void *addr)
- }
- #endif
- 
--/* The ARM override for dma_max_pfn() */
--static inline unsigned long dma_max_pfn(struct device *dev)
--{
--	return dma_to_pfn(dev, *dev->dma_mask);
--}
--#define dma_max_pfn(dev) dma_max_pfn(dev)
--
- #define arch_setup_dma_ops arch_setup_dma_ops
- extern void arch_setup_dma_ops(struct device *dev, u64 dma_base, u64 size,
- 			       const struct iommu_ops *iommu, bool coherent);
-diff --git a/include/linux/dma-mapping.h b/include/linux/dma-mapping.h
-index f6ded992c183..c6dbc287e466 100644
---- a/include/linux/dma-mapping.h
-+++ b/include/linux/dma-mapping.h
-@@ -710,13 +710,6 @@ static inline int dma_set_seg_boundary(struct device *dev, unsigned long mask)
- 	return -EIO;
- }
- 
--#ifndef dma_max_pfn
--static inline unsigned long dma_max_pfn(struct device *dev)
--{
--	return (*dev->dma_mask >> PAGE_SHIFT) + dev->dma_pfn_offset;
--}
--#endif
--
- static inline int dma_get_cache_alignment(void)
+diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+index 35cc138b096d..26a18b851397 100644
+--- a/drivers/mmc/core/queue.c
++++ b/drivers/mmc/core/queue.c
+@@ -354,17 +354,12 @@ static const struct blk_mq_ops mmc_mq_ops = {
+ static void mmc_setup_queue(struct mmc_queue *mq, struct mmc_card *card)
  {
- #ifdef ARCH_DMA_MINALIGN
+ 	struct mmc_host *host = card->host;
+-	u64 limit = BLK_BOUNCE_HIGH;
+-
+-	if (mmc_dev(host)->dma_mask && *mmc_dev(host)->dma_mask)
+-		limit = (u64)dma_max_pfn(mmc_dev(host)) << PAGE_SHIFT;
+ 
+ 	blk_queue_flag_set(QUEUE_FLAG_NONROT, mq->queue);
+ 	blk_queue_flag_clear(QUEUE_FLAG_ADD_RANDOM, mq->queue);
+ 	if (mmc_can_erase(card))
+ 		mmc_queue_setup_discard(mq->queue, card);
+ 
+-	blk_queue_bounce_limit(mq->queue, limit);
+ 	blk_queue_max_hw_sectors(mq->queue,
+ 		min(host->max_blk_count, host->max_req_size / 512));
+ 	blk_queue_max_segments(mq->queue, host->max_segs);
 -- 
 2.20.1
