@@ -1,7 +1,7 @@
 From: Christoph Hellwig <hch@lst.de>
-Subject: [PATCH 02/11] mmc: moxart: handle highmem pages
-Date: Mon, 14 Jan 2019 10:57:55 +0100
-Message-ID: <20190114095804.27978-3-hch@lst.de>
+Subject: [PATCH 03/11] mmc: omap: handle highmem pages
+Date: Mon, 14 Jan 2019 10:57:56 +0100
+Message-ID: <20190114095804.27978-4-hch@lst.de>
 References: <20190114095804.27978-1-hch@lst.de>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -13,65 +13,74 @@ Cc: Russell King <linux@armlinux.org.uk>, Nicolas Pitre <nico@fluxnic.net>, Aaro
 List-Id: linux-mmc@vger.kernel.org
 
 Instead of setting up a kernel pointer to track the current PIO address,
-track the offset in the current page, and do a kmap for the page while
-doing the actual PIO operations.
+track the offset in the current page, and do an atomic kmap for the page
+while doing the actual PIO operations.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- drivers/mmc/host/moxart-mmc.c | 19 +++++++++++--------
- 1 file changed, 11 insertions(+), 8 deletions(-)
+ drivers/mmc/host/omap.c | 15 ++++++++++-----
+ 1 file changed, 10 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/mmc/host/moxart-mmc.c b/drivers/mmc/host/moxart-mmc.c
-index a0670e9cd012..7142bca425c8 100644
---- a/drivers/mmc/host/moxart-mmc.c
-+++ b/drivers/mmc/host/moxart-mmc.c
-@@ -311,7 +311,7 @@ static void moxart_transfer_pio(struct moxart_host *host)
- 	if (host->data_len == data->bytes_xfered)
- 		return;
+diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
+index c60a7625b1fa..0377ac6194a0 100644
+--- a/drivers/mmc/host/omap.c
++++ b/drivers/mmc/host/omap.c
+@@ -13,6 +13,7 @@
  
--	sgp = sg_virt(host->cur_sg);
-+	sgp = kmap(sg_page(host->cur_sg)) + host->cur_sg->offset;
- 	remain = host->data_remain;
+ #include <linux/module.h>
+ #include <linux/moduleparam.h>
++#include <linux/highmem.h>
+ #include <linux/init.h>
+ #include <linux/ioport.h>
+ #include <linux/platform_device.h>
+@@ -148,7 +149,7 @@ struct mmc_omap_host {
  
- 	if (data->flags & MMC_DATA_WRITE) {
-@@ -319,8 +319,7 @@ static void moxart_transfer_pio(struct moxart_host *host)
- 			if (moxart_wait_for_status(host, FIFO_URUN, &status)
- 			     == -ETIMEDOUT) {
- 				data->error = -ETIMEDOUT;
--				complete(&host->pio_complete);
--				return;
-+				goto done;
- 			}
- 			for (len = 0; len < remain && len < host->fifo_width;) {
- 				iowrite32(*sgp, host->base + REG_DATA_WINDOW);
-@@ -335,8 +334,7 @@ static void moxart_transfer_pio(struct moxart_host *host)
- 			if (moxart_wait_for_status(host, FIFO_ORUN, &status)
- 			    == -ETIMEDOUT) {
- 				data->error = -ETIMEDOUT;
--				complete(&host->pio_complete);
--				return;
-+				goto done;
- 			}
- 			for (len = 0; len < remain && len < host->fifo_width;) {
- 				/* SCR data must be read in big endian. */
-@@ -356,10 +354,15 @@ static void moxart_transfer_pio(struct moxart_host *host)
- 	data->bytes_xfered += host->data_remain - remain;
- 	host->data_remain = remain;
+ 	unsigned int		sg_len;
+ 	int			sg_idx;
+-	u16 *			buffer;
++	u32			buffer_offset;
+ 	u32			buffer_bytes_left;
+ 	u32			total_bytes_left;
  
--	if (host->data_len != data->bytes_xfered)
-+	if (host->data_len != data->bytes_xfered) {
-+		kunmap(sg_page(host->cur_sg));
- 		moxart_next_sg(host);
--	else
--		complete(&host->pio_complete);
-+		return;
-+	}
-+
-+done:
-+	kunmap(sg_page(host->cur_sg));
-+	complete(&host->pio_complete);
+@@ -649,7 +650,7 @@ mmc_omap_sg_to_buf(struct mmc_omap_host *host)
+ 
+ 	sg = host->data->sg + host->sg_idx;
+ 	host->buffer_bytes_left = sg->length;
+-	host->buffer = sg_virt(sg);
++	host->buffer_offset = sg->offset;
+ 	if (host->buffer_bytes_left > host->total_bytes_left)
+ 		host->buffer_bytes_left = host->total_bytes_left;
+ }
+@@ -666,7 +667,9 @@ mmc_omap_clk_timer(struct timer_list *t)
+ static void
+ mmc_omap_xfer_data(struct mmc_omap_host *host, int write)
+ {
++	struct scatterlist *sg = host->data->sg + host->sg_idx;
+ 	int n, nwords;
++	void *p;
+ 
+ 	if (host->buffer_bytes_left == 0) {
+ 		host->sg_idx++;
+@@ -684,15 +687,17 @@ mmc_omap_xfer_data(struct mmc_omap_host *host, int write)
+ 	host->total_bytes_left -= n;
+ 	host->data->bytes_xfered += n;
+ 
++	p = kmap_atomic(sg_page(sg));
+ 	if (write) {
+ 		__raw_writesw(host->virt_base + OMAP_MMC_REG(host, DATA),
+-			      host->buffer, nwords);
++			      p + host->buffer_offset, nwords);
+ 	} else {
+ 		__raw_readsw(host->virt_base + OMAP_MMC_REG(host, DATA),
+-			     host->buffer, nwords);
++			     p + host->buffer_offset, nwords);
+ 	}
++	kunmap_atomic(p);
+ 
+-	host->buffer += nwords;
++	host->buffer_offset += nwords;
  }
  
- static void moxart_prepare_data(struct moxart_host *host)
+ #ifdef CONFIG_MMC_DEBUG
 -- 
 2.20.1
