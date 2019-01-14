@@ -1,27 +1,33 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v6 09/11] mmc: sdhci-acpi: Make PCI dependency explicit
-Date: Mon, 14 Jan 2019 12:44:45 +0100
-Message-ID: <CAPDyKFo7gQCZQbKhCaTukf8cRnRg5TzgDdOprHyeRbps=sjNWA@mail.gmail.com>
-References: <20190105100606.6673-1-okaya@kernel.org> <20190105100606.6673-10-okaya@kernel.org>
+Subject: Re: [PATCH] mmc: Fix Kconfig warnings on keystone_defconfig
+Date: Mon, 14 Jan 2019 12:44:53 +0100
+Message-ID: <CAPDyKFr9e2MvhU2HTAEaKydfQ5=0hB-Qmcw5FUw=T7z0XDYKFA@mail.gmail.com>
+References: <20190109124312.10154-1-faiz_abbas@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190105100606.6673-10-okaya@kernel.org>
+In-Reply-To: <20190109124312.10154-1-faiz_abbas@ti.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Sinan Kaya <okaya@kernel.org>
-Cc: linux-next@vger.kernel.org, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, Paul Cercueil <paul@crapouillou.net>, Geert Uytterhoeven <geert@linux-m68k.org>, Faiz Abbas <faiz_abbas@ti.com>, Chunyan Zhang <chunyan.zhang@unisoc.com>, Jisheng Zhang <Jisheng.Zhang@synaptics.com>, Ludovic Barre <ludovic.barre@st.com>, Arnd Bergmann <arnd@arndb.de>, Alex Smith <alex.smith@imgtec.com>, Chris Brandt <chris.brandt@renesas.com>, "open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..." <linux-mmc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
+To: Faiz Abbas <faiz_abbas@ti.com>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Keerthy <j-keerthy@ti.com>, Eduardo Valentin <edubezval@gmail.com>, Olof Johansson <olof@lixom.net>
 List-Id: linux-mmc@vger.kernel.org
 
-On Sat, 5 Jan 2019 at 11:06, Sinan Kaya <okaya@kernel.org> wrote:
+On Wed, 9 Jan 2019 at 13:40, Faiz Abbas <faiz_abbas@ti.com> wrote:
 >
-> After 'commit 5d32a66541c4 ("PCI/ACPI: Allow ACPI to be built without
-> CONFIG_PCI set")' dependencies on CONFIG_PCI that previously were
-> satisfied implicitly through dependencies on CONFIG_ACPI have to be
-> specified directly. This driver relies on IOSF_MBI and IOSF_MBI depends
-> on PCI. For this reason, add a direct dependency to CONFIG_PCI here.
+> Commit 961de0a856e3 ("mmc: sdhci-omap: Workaround errata regarding
+> SDR104/HS200 tuning failures (i929)") added a select on TI_SOC_THERMAL
+> for the driver to get temperature for tuning.
 >
-> Fixes: 5d32a66541c46 ("PCI/ACPI: Allow ACPI to be built without CONFIG_PCI set")
-> Signed-off-by: Sinan Kaya <okaya@kernel.org>
+> However, this causes the following warning on keystone_defconfig because
+> keystone does not support TI_SOC_THERMAL:
+>
+> "WARNING: unmet direct dependencies detected for TI_SOC_THERMAL"
+>
+> Fix this by changing the select to imply.
+>
+> Fixes: 961de0a856e3 ("mmc: sdhci-omap: Workaround errata regarding
+> SDR104/HS200 tuning failures (i929)")
+> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
 
 Applied for fixes, thanks!
 
@@ -34,18 +40,18 @@ Uffe
 >  1 file changed, 1 insertion(+), 1 deletion(-)
 >
 > diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index e26b8145efb3..1b9401fe94c0 100644
+> index e26b8145efb3..bc61eefcb695 100644
 > --- a/drivers/mmc/host/Kconfig
 > +++ b/drivers/mmc/host/Kconfig
-> @@ -116,7 +116,7 @@ config MMC_RICOH_MMC
->
->  config MMC_SDHCI_ACPI
->         tristate "SDHCI support for ACPI enumerated SDHCI controllers"
-> -       depends on MMC_SDHCI && ACPI
-> +       depends on MMC_SDHCI && ACPI && PCI
->         select IOSF_MBI if X86
+> @@ -978,7 +978,7 @@ config MMC_SDHCI_OMAP
+>         tristate "TI SDHCI Controller Support"
+>         depends on MMC_SDHCI_PLTFM && OF
+>         select THERMAL
+> -       select TI_SOC_THERMAL
+> +       imply TI_SOC_THERMAL
 >         help
->           This selects support for ACPI enumerated SDHCI controllers,
+>           This selects the Secure Digital Host Controller Interface (SDHCI)
+>           support present in TI's DRA7 SOCs. The controller supports
 > --
-> 2.19.0
+> 2.19.2
 >
