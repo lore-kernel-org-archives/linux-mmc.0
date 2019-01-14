@@ -1,38 +1,52 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: remove block layer bounce buffering for MMC
-Date: Mon, 14 Jan 2019 11:26:11 +0100
-Message-ID: <CAPDyKFqCOWmd3kE=f3bgOgYX-aQKCmbuRH98sTr05sHN71vXZA@mail.gmail.com>
-References: <20190114095804.27978-1-hch@lst.de>
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH 1/2] mmc: sdhci: Properly set DMA mask
+Date: Mon, 14 Jan 2019 03:09:47 -0800
+Message-ID: <20190114110947.GA30778@infradead.org>
+References: <20190104104753.3383-1-thierry.reding@gmail.com>
+ <20190104174354.GA18110@infradead.org>
+ <20190110105911.GA32301@ulmo>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190114095804.27978-1-hch@lst.de>
+Content-Disposition: inline
+In-Reply-To: <20190110105911.GA32301@ulmo>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Christoph Hellwig <hch@lst.de>, Linus Walleij <linus.walleij@linaro.org>
-Cc: Russell King <linux@armlinux.org.uk>, Nicolas Pitre <nico@fluxnic.net>, Aaro Koskinen <aaro.koskinen@iki.fi>, Ben Dooks <ben-linux@fluff.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, linux-omap <linux-omap@vger.kernel.org>, "list@263.net:IOMMU DRIVERS <iommu@lists.linux-foundation.org>, Joerg
-        Roedel <joro@8bytes.org>," <iommu@lists.linux-foundation.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Thierry Reding <thierry.reding@gmail.com>
+Cc: Christoph Hellwig <hch@infradead.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Jonathan Hunter <jonathanh@nvidia.com>, Sowjanya Komatineni <skomatineni@nvidia.com>, Krishna Reddy <vdumpa@nvidia.com>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-+Linus Walleij (recently made a cleanup of the mmc bounce buffering code).
+On Thu, Jan 10, 2019 at 11:59:11AM +0100, Thierry Reding wrote:
+> On Fri, Jan 04, 2019 at 09:43:54AM -0800, Christoph Hellwig wrote:
+> > > +	u64 dma_mask = dma_get_mask(dev);
+> > 
+> > This is not a driver API.  I think what you want is
+> > dma_get_required_mask to query the mask.  But in that case
+> > you still need to always actually set a mask in the driver as well.
+> 
+> That's slightly different from what I want to do here. The purpose of
+> this part of the patch is that when the SDHCI hardware supports only 32
+> bits of address space, then we want to prevent 64-bit addressing mode
+> from being used because it isn't useful.
+> 
+> So what we do want to check here is the DMA mask configured by the
+> driver (or the default set by the bus, or wherever it came from).
+> dma_get_required_mask() returns the DMA mask required to address all of
+> system memory. That would perhaps be a useful additional check, but it's
+> orthogonal to what I'm trying to do here.
+> 
+> Is there something else appropriate that I could use to query the DMA
+> mask set for a device?
 
-On Mon, 14 Jan 2019 at 10:58, Christoph Hellwig <hch@lst.de> wrote:
->
-> Hi everyone,
->
-> this series converts the remaining MMC host drivers to properly kmap the
-> scatterlist entries it does PIO operations on, and then goes on to
-> remove the usage of block layer bounce buffering (which I plan to remove
-> eventually) from the MMC layer.
->
-> As a bonus I've converted various drivers to the proper scatterlist
-> helpers so that at least in theory they are ready for chained
-> scatterlists.
->
-> All the changes are compile tested only as I don't have any of the
-> hardware, so a careful review would be appreciated.
+I think the problem is that you try to mix up responsibility of who
+needs to set the DMA mask.  Either we want the core sdhci code set
+it as we do, or we move it to the driver, probably optionally.
 
-Thanks for posting this. I will have a look as soon as I can, but
-first needs to catch up with things since the holidays.
+So instead of trying to read something back you should either:
 
-Kind regards
-Uffe
+ - add a set_dma_mask to override it
+ - add a 64bit_mode_dma_mask field to strct mmc_host, initialize
+   that to 64-bit by default and let host drivers override it
+
+While the first one creates a little more boilerplate code it actually
+looks cleaner to me.  The added benefit is that it can also replace the
+usage of SDHCI_QUIRK2_BROKEN_64_BIT_DMA.
