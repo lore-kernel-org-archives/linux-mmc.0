@@ -1,7 +1,7 @@
 From: Christoph Hellwig <hch@lst.de>
-Subject: [PATCH 07/11] mmc: mvsdio: handle highmem pages
-Date: Mon, 14 Jan 2019 10:58:00 +0100
-Message-ID: <20190114095804.27978-8-hch@lst.de>
+Subject: [PATCH 09/11] mmc: sh_mmcif: handle chained sglists
+Date: Mon, 14 Jan 2019 10:58:02 +0100
+Message-ID: <20190114095804.27978-10-hch@lst.de>
 References: <20190114095804.27978-1-hch@lst.de>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -12,152 +12,60 @@ To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Russell King <linux@armlinux.org.uk>, Nicolas Pitre <nico@fluxnic.net>, Aaro Koskinen <aaro.koskinen@iki.fi>, Ben Dooks <ben-linux@fluff.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, iommu@lists.linux-foundation.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Instead of setting up a kernel pointer to track the current PIO address,
-track the offset in the current page, and do an atomic kmap for the page
-while doing the actual PIO operations.
+Use the proper sg_next() helper to move to the next scatterlist element
+to support chained scatterlists.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- drivers/mmc/host/mvsdio.c | 48 +++++++++++++++++++++++----------------
- 1 file changed, 29 insertions(+), 19 deletions(-)
+ drivers/mmc/host/sh_mmcif.c | 13 +++++--------
+ 1 file changed, 5 insertions(+), 8 deletions(-)
 
-diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
-index e22bbff89c8d..545e370d6dae 100644
---- a/drivers/mmc/host/mvsdio.c
-+++ b/drivers/mmc/host/mvsdio.c
-@@ -12,6 +12,7 @@
- #include <linux/module.h>
- #include <linux/init.h>
- #include <linux/io.h>
-+#include <linux/highmem.h>
- #include <linux/platform_device.h>
- #include <linux/mbus.h>
- #include <linux/delay.h>
-@@ -42,7 +43,8 @@ struct mvsd_host {
- 	unsigned int intr_en;
- 	unsigned int ctrl;
- 	unsigned int pio_size;
--	void *pio_ptr;
-+	struct scatterlist *pio_sg;
-+	unsigned int pio_offset; /* offset in words into the segment */
- 	unsigned int sg_frags;
- 	unsigned int ns_per_clk;
- 	unsigned int clock;
-@@ -96,9 +98,9 @@ static int mvsd_setup_data(struct mvsd_host *host, struct mmc_data *data)
- 	if (tmout_index > MVSD_HOST_CTRL_TMOUT_MAX)
- 		tmout_index = MVSD_HOST_CTRL_TMOUT_MAX;
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index 0d2bbb8943f5..a4116be5ebc7 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -234,7 +234,6 @@ struct sh_mmcif_host {
+ 	enum sh_mmcif_wait_for wait_for;
+ 	struct delayed_work timeout_work;
+ 	size_t blocksize;
+-	int sg_idx;
+ 	int sg_blkidx;
+ 	bool power;
+ 	bool ccs_enable;		/* Command Completion Signal support */
+@@ -606,13 +605,13 @@ static bool sh_mmcif_next_block(struct sh_mmcif_host *host)
  
--	dev_dbg(host->dev, "data %s at 0x%08x: blocks=%d blksz=%d tmout=%u (%d)\n",
-+	dev_dbg(host->dev, "data %s at 0x%08llx: blocks=%d blksz=%d tmout=%u (%d)\n",
- 		(data->flags & MMC_DATA_READ) ? "read" : "write",
--		(u32)sg_virt(data->sg), data->blocks, data->blksz,
-+		(u64)sg_phys(data->sg), data->blocks, data->blksz,
- 		tmout, tmout_index);
- 
- 	host->ctrl &= ~MVSD_HOST_CTRL_TMOUT_MASK;
-@@ -118,10 +120,11 @@ static int mvsd_setup_data(struct mvsd_host *host, struct mmc_data *data)
- 		 * boundary.
- 		 */
- 		host->pio_size = data->blocks * data->blksz;
--		host->pio_ptr = sg_virt(data->sg);
-+		host->pio_sg = data->sg;
-+		host->pio_offset = data->sg->offset / 2;
- 		if (!nodma)
--			dev_dbg(host->dev, "fallback to PIO for data at 0x%p size %d\n",
--				host->pio_ptr, host->pio_size);
-+			dev_dbg(host->dev, "fallback to PIO for data at 0x%x size %d\n",
-+				host->pio_offset, host->pio_size);
- 		return 1;
- 	} else {
- 		dma_addr_t phys_addr;
-@@ -291,8 +294,9 @@ static u32 mvsd_finish_data(struct mvsd_host *host, struct mmc_data *data,
- {
- 	void __iomem *iobase = host->base;
- 
--	if (host->pio_ptr) {
--		host->pio_ptr = NULL;
-+	if (host->pio_sg) {
-+		host->pio_sg = NULL;
-+		host->pio_offset = 0;
- 		host->pio_size = 0;
- 	} else {
- 		dma_unmap_sg(mmc_dev(host->mmc), data->sg, host->sg_frags,
-@@ -376,11 +380,12 @@ static irqreturn_t mvsd_irq(int irq, void *dev)
- 	if (host->pio_size &&
- 	    (intr_status & host->intr_en &
- 	     (MVSD_NOR_RX_READY | MVSD_NOR_RX_FIFO_8W))) {
--		u16 *p = host->pio_ptr;
-+		u16 *p = kmap_atomic(sg_page(host->pio_sg));
-+		unsigned int o = host->pio_offset;
- 		int s = host->pio_size;
- 		while (s >= 32 && (intr_status & MVSD_NOR_RX_FIFO_8W)) {
--			readsw(iobase + MVSD_FIFO, p, 16);
--			p += 16;
-+			readsw(iobase + MVSD_FIFO, p + o, 16);
-+			o += 16;
- 			s -= 32;
- 			intr_status = mvsd_read(MVSD_NOR_INTR_STATUS);
- 		}
-@@ -391,8 +396,10 @@ static irqreturn_t mvsd_irq(int irq, void *dev)
- 		 */
- 		if (s <= 32) {
- 			while (s >= 4 && (intr_status & MVSD_NOR_RX_READY)) {
--				put_unaligned(mvsd_read(MVSD_FIFO), p++);
--				put_unaligned(mvsd_read(MVSD_FIFO), p++);
-+				put_unaligned(mvsd_read(MVSD_FIFO), p + o);
-+				o++;
-+				put_unaligned(mvsd_read(MVSD_FIFO), p + o);
-+				o++;
- 				s -= 4;
- 				intr_status = mvsd_read(MVSD_NOR_INTR_STATUS);
- 			}
-@@ -400,7 +407,7 @@ static irqreturn_t mvsd_irq(int irq, void *dev)
- 				u16 val[2] = {0, 0};
- 				val[0] = mvsd_read(MVSD_FIFO);
- 				val[1] = mvsd_read(MVSD_FIFO);
--				memcpy(p, ((void *)&val) + 4 - s, s);
-+				memcpy(p + o, ((void *)&val) + 4 - s, s);
- 				s = 0;
- 				intr_status = mvsd_read(MVSD_NOR_INTR_STATUS);
- 			}
-@@ -416,13 +423,14 @@ static irqreturn_t mvsd_irq(int irq, void *dev)
- 		}
- 		dev_dbg(host->dev, "pio %d intr 0x%04x hw_state 0x%04x\n",
- 			s, intr_status, mvsd_read(MVSD_HW_STATE));
--		host->pio_ptr = p;
-+		host->pio_offset = o;
- 		host->pio_size = s;
- 		irq_handled = 1;
- 	} else if (host->pio_size &&
- 		   (intr_status & host->intr_en &
- 		    (MVSD_NOR_TX_AVAIL | MVSD_NOR_TX_FIFO_8W))) {
--		u16 *p = host->pio_ptr;
-+		u16 *p = kmap_atomic(sg_page(host->pio_sg));
-+		unsigned int o = host->pio_offset;
- 		int s = host->pio_size;
- 		/*
- 		 * The TX_FIFO_8W bit is unreliable. When set, bursting
-@@ -431,8 +439,10 @@ static irqreturn_t mvsd_irq(int irq, void *dev)
- 		 * TX_FIFO_8W remains set.
- 		 */
- 		while (s >= 4 && (intr_status & MVSD_NOR_TX_AVAIL)) {
--			mvsd_write(MVSD_FIFO, get_unaligned(p++));
--			mvsd_write(MVSD_FIFO, get_unaligned(p++));
-+			mvsd_write(MVSD_FIFO, get_unaligned(p + o));
-+			o++;
-+			mvsd_write(MVSD_FIFO, get_unaligned(p + o));
-+			o++;
- 			s -= 4;
- 			intr_status = mvsd_read(MVSD_NOR_INTR_STATUS);
- 		}
-@@ -453,7 +463,7 @@ static irqreturn_t mvsd_irq(int irq, void *dev)
- 		}
- 		dev_dbg(host->dev, "pio %d intr 0x%04x hw_state 0x%04x\n",
- 			s, intr_status, mvsd_read(MVSD_HW_STATE));
--		host->pio_ptr = p;
-+		host->pio_offset = o;
- 		host->pio_size = s;
- 		irq_handled = 1;
+ 	if (host->sg_blkidx == data->sg->length) {
+ 		host->sg_blkidx = 0;
+-		if (++host->sg_idx < data->sg_len) {
+-			data->sg++;
+-			host->pio_offset = data->sg->offset / 4;
+-		}
++		data->sg = sg_next(data->sg);
++		if (!data->sg)
++			return false;
++		host->pio_offset = data->sg->offset / 4;
  	}
+ 
+-	return host->sg_idx != data->sg_len;
++	return true;
+ }
+ 
+ static void sh_mmcif_single_read(struct sh_mmcif_host *host,
+@@ -665,7 +664,6 @@ static void sh_mmcif_multi_read(struct sh_mmcif_host *host,
+ 		BLOCK_SIZE_MASK;
+ 
+ 	host->wait_for = MMCIF_WAIT_FOR_MREAD;
+-	host->sg_idx = 0;
+ 	host->sg_blkidx = 0;
+ 	host->pio_offset = data->sg->offset / 4;
+ 
+@@ -752,7 +750,6 @@ static void sh_mmcif_multi_write(struct sh_mmcif_host *host,
+ 		BLOCK_SIZE_MASK;
+ 
+ 	host->wait_for = MMCIF_WAIT_FOR_MWRITE;
+-	host->sg_idx = 0;
+ 	host->sg_blkidx = 0;
+ 	host->pio_offset = data->sg->offset / 4;
+ 
 -- 
 2.20.1
