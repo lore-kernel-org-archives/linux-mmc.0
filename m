@@ -1,55 +1,69 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc:sdio: Remove unneeded variable ret
-Date: Mon, 14 Jan 2019 12:44:50 +0100
-Message-ID: <CAPDyKFq=AY=9hDDAPMjLpNPhN06+ZFpX5DvpFshW7+de1_b=NA@mail.gmail.com>
-References: <1547035833-3924-1-git-send-email-wdjjwb@163.com>
+Subject: Re: [PATCH 2/2] mmc: sdhci-brcmstb: handle mmc_of_parse() errors
+ during probe
+Date: Mon, 14 Jan 2019 12:44:21 +0100
+Message-ID: <CAPDyKFotvqtZ53QmPMQ8HXEAM4gVfZwD723dmAVHNJoPsg8Y+w@mail.gmail.com>
+References: <1545598758-4502-1-git-send-email-stefan.wahren@i2se.com>
+ <1545598758-4502-2-git-send-email-stefan.wahren@i2se.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1547035833-3924-1-git-send-email-wdjjwb@163.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: wangbo <wdjjwb@163.com>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, wang.bo116@zte.com.cn
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1545598758-4502-2-git-send-email-stefan.wahren@i2se.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Stefan Wahren <stefan.wahren@i2se.com>
+Cc: Florian Fainelli <f.fainelli@gmail.com>, Scott Branden <sbranden@broadcom.com>, Ray Jui <rjui@broadcom.com>, Al Cooper <alcooperx@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Eric Anholt <eric@anholt.net>, BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>, Gregory Fong <gregory.0xf0@gmail.com>, Brian Norris <computersforpeace@gmail.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 9 Jan 2019 at 13:11, wangbo <wdjjwb@163.com> wrote:
+On Sun, 23 Dec 2018 at 22:00, Stefan Wahren <stefan.wahren@i2se.com> wrote:
 >
-> In sdio_bus_remove the variable is unneeded,remove it now.
+> We need to handle mmc_of_parse() errors during probe otherwise the
+> MMC driver could start without proper initialization (e.g. power sequence).
 >
-> Signed-off-by: wangbo <wang.bo116@zte.com.cn>
+> Fixes: 476bf3d62d5c ("mmc: sdhci-brcmstb: Add driver for Broadcom BRCMSTB SoCs")
+> Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
 
-Thanks, applied for next!
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/core/sdio_bus.c | 3 +--
->  1 file changed, 1 insertion(+), 2 deletions(-)
+> Hi,
+> since i don't have this hardware, so it is only compile tested.
+> Would be nice to get a Tested-by.
 >
-> diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-> index b6d8203..62b0f5e 100644
-> --- a/drivers/mmc/core/sdio_bus.c
-> +++ b/drivers/mmc/core/sdio_bus.c
-> @@ -179,7 +179,6 @@ static int sdio_bus_remove(struct device *dev)
->  {
->         struct sdio_driver *drv = to_sdio_driver(dev->driver);
->         struct sdio_func *func = dev_to_sdio_func(dev);
-> -       int ret = 0;
+> Regards
+> Stefan
 >
->         /* Make sure card is powered before invoking ->remove() */
->         if (func->card->host->caps & MMC_CAP_POWER_OFF_CARD)
-> @@ -205,7 +204,7 @@ static int sdio_bus_remove(struct device *dev)
 >
->         dev_pm_domain_detach(dev, false);
+>  drivers/mmc/host/sdhci-brcmstb.c | 4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
 >
-> -       return ret;
-> +       return 0;
->  }
+> diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
+> index 552bddc..1cd1035 100644
+> --- a/drivers/mmc/host/sdhci-brcmstb.c
+> +++ b/drivers/mmc/host/sdhci-brcmstb.c
+> @@ -55,7 +55,9 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
+>         }
 >
->  static const struct dev_pm_ops sdio_bus_pm_ops = {
+>         sdhci_get_of_property(pdev);
+> -       mmc_of_parse(host->mmc);
+> +       res = mmc_of_parse(host->mmc);
+> +       if (res)
+> +               goto err;
+>
+>         /*
+>          * Supply the existing CAPS, but clear the UHS modes. This
 > --
 > 2.7.4
->
 >
