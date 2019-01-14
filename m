@@ -1,104 +1,55 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 2/3] mmc: sdhci-esdhc-imx: add SD clock limitation for
- imx6ull
-Date: Mon, 14 Jan 2019 12:43:58 +0100
-Message-ID: <CAPDyKFpM3O=Ye6K2cG4b0=E6EXt7HhUYs6HNhomf=azayRL0FA@mail.gmail.com>
-References: <20181228033323.32308-1-haibo.chen@nxp.com>
- <20181228033323.32308-2-haibo.chen@nxp.com>
+Subject: Re: [PATCH 1/2] mmc: sdhci-iproc: handle mmc_of_parse() errors during probe
+Date: Mon, 14 Jan 2019 12:44:14 +0100
+Message-ID: <CAPDyKFpTW07CsemS1=0kTEc88-ZXb6+HUVaviGb+8eWBOyRjvA@mail.gmail.com>
+References: <1545598758-4502-1-git-send-email-stefan.wahren@i2se.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20181228033323.32308-2-haibo.chen@nxp.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: BOUGH CHEN <haibo.chen@nxp.com>
-Cc: "mark.rutland@arm.com" <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "rmk+kernel@armlinux.org.uk" <rmk+kernel@armlinux.org.uk>, "robh+dt@kernel.org" <robh+dt@kernel.org>, dl-linux-imx <linux-imx@nxp.com>, "kernel@pengutronix.de" <kernel@pengutronix.de>, Fabio Estevam <fabio.estevam@nxp.com>, "shawnguo@kernel.org" <shawnguo@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <1545598758-4502-1-git-send-email-stefan.wahren@i2se.com>
+Sender: stable-owner@vger.kernel.org
+To: Stefan Wahren <stefan.wahren@i2se.com>
+Cc: Al Cooper <alcooperx@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, Brian Norris <computersforpeace@gmail.com>, Gregory Fong <gregory.0xf0@gmail.com>, Florian Fainelli <f.fainelli@gmail.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Eric Anholt <eric@anholt.net>, BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, "# 4.0+" <stable@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, 28 Dec 2018 at 04:26, BOUGH CHEN <haibo.chen@nxp.com> wrote:
+On Sun, 23 Dec 2018 at 22:00, Stefan Wahren <stefan.wahren@i2se.com> wrote:
 >
-> i.MX6ULL has errata ERR010450, point out that due to SOC I/O
-> timing limitation, for eMMC HS200 and SD/SDIO 3.0 SDR104, the
-> clock rate can't exceed 150MHz. And for eMMC DDR52 and SD/SDIO
-> DDR50 mode, the clock rate can't exceed 45MHz.
+> We need to handle mmc_of_parse() errors during probe.
 >
-> This patch add this limit for imx6ull.
+> This finally fixes the wifi regression on Raspberry Pi 3 series.
+> In error case the wifi chip was permanently in reset because of
+> the power sequence depending on the deferred probe of the GPIO expander.
 >
-> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> Fixes: b580c52d58d9 ("mmc: sdhci-iproc: add IPROC SDHCI driver")
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
 
-Applied for next (I amended the patch by fixing a trivial conflict and
-made the struct "const").
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 21 ++++++++++++++++++++-
->  1 file changed, 20 insertions(+), 1 deletion(-)
+>  drivers/mmc/host/sdhci-iproc.c | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index 7cfcc8618e45..e1d9b2985979 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -138,7 +138,11 @@
->  #define ESDHC_FLAG_HS200               BIT(8)
->  /* The IP supports HS400 mode */
->  #define ESDHC_FLAG_HS400               BIT(9)
-> -
-> +/* The IP has errata ERR010450
-> + * uSDHC: Due to the I/O timing limit, for SDR mode, SD card clock can't
-> + * exceed 150MHz, for DDR mode, SD card clock can't exceed 45MHz.
-> + */
-> +#define ESDHC_FLAG_ERR010450           BIT(10)
->  /* A clock frequency higher than this rate requires strobe dll control */
->  #define ESDHC_STROBE_DLL_CLK_FREQ      100000000
+> diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
+> index 0db9905..9d12c06 100644
+> --- a/drivers/mmc/host/sdhci-iproc.c
+> +++ b/drivers/mmc/host/sdhci-iproc.c
+> @@ -296,7 +296,10 @@ static int sdhci_iproc_probe(struct platform_device *pdev)
 >
-> @@ -177,6 +181,12 @@ static struct esdhc_soc_data usdhc_imx6sx_data = {
->                         | ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200,
->  };
+>         iproc_host->data = iproc_data;
 >
-> +static struct esdhc_soc_data usdhc_imx6ull_data = {
-> +       .flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
-> +                       | ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
-> +                       | ESDHC_FLAG_ERR010450,
-> +};
+> -       mmc_of_parse(host->mmc);
+> +       ret = mmc_of_parse(host->mmc);
+> +       if (ret)
+> +               goto err;
 > +
->  static struct esdhc_soc_data usdhc_imx7d_data = {
->         .flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
->                         | ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
-> @@ -227,6 +237,7 @@ static const struct of_device_id imx_esdhc_dt_ids[] = {
->         { .compatible = "fsl,imx6sx-usdhc", .data = &usdhc_imx6sx_data, },
->         { .compatible = "fsl,imx6sl-usdhc", .data = &usdhc_imx6sl_data, },
->         { .compatible = "fsl,imx6q-usdhc", .data = &usdhc_imx6q_data, },
-> +       { .compatible = "fsl,imx6ull-usdhc", .data = &usdhc_imx6ull_data, },
->         { .compatible = "fsl,imx7d-usdhc", .data = &usdhc_imx7d_data, },
->         { /* sentinel */ }
->  };
-> @@ -733,6 +744,14 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
->                 | ESDHC_CLOCK_MASK);
->         sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
+>         sdhci_get_property(pdev);
 >
-> +       if (imx_data->socdata->flags & ESDHC_FLAG_ERR010450) {
-> +               unsigned int max_clock;
-> +
-> +               max_clock = imx_data->is_ddr ? 45000000 : 150000000;
-> +
-> +               clock = min(clock, max_clock);
-> +       }
-> +
->         while (host_clock / (16 * pre_div * ddr_pre_div) > clock &&
->                         pre_div < 256)
->                 pre_div *= 2;
+>         host->mmc->caps |= iproc_host->data->mmc_caps;
 > --
-> 2.17.1
+> 2.7.4
 >
