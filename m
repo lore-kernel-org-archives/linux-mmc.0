@@ -1,21 +1,27 @@
-From: Loys Ollivier <lollivier@baylibre.com>
+From: Kevin Hilman <khilman@baylibre.com>
 Subject: Re: [PATCH v4] arm64: dts: meson: Fix mmc cd-gpios polarity
-Date: Mon, 14 Jan 2019 15:54:54 +0100
-Message-ID: <86zhs3l269.fsf@baylibre.com>
+Date: Mon, 14 Jan 2019 08:01:58 -0800
+Message-ID: <7hh8ebmdmx.fsf@baylibre.com>
 References: <1547477061-31543-1-git-send-email-lollivier@baylibre.com>
 Mime-Version: 1.0
-Content-Type: text/plain; format=flowed
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <1547477061-31543-1-git-send-email-lollivier@baylibre.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Cc: devicetree@vger.kernel.org, Kevin Hilman <khilman@baylibre.com>, linux-amlogic@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Jerome Brunet <jbrunet@baylibre.com>, Loys Ollivier <lollivier@baylibre.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1547477061-31543-1-git-send-email-lollivier@baylibre.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: devicetree@vger.kernel.org, linux-amlogic@lists.infradead.org
+Cc: Martin Blumenstingl <martin.blumenstingl@googlemail.com>, Linus Walleij <linus.walleij@linaro.org>, Loys Ollivier <lollivier@baylibre.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Jerome Brunet <jbrunet@baylibre.com>
 List-Id: linux-mmc@vger.kernel.org
 
-
-Martin,
-
-On Mon 14 Jan 2019 at 14:44, Loys Ollivier wrote:
+Loys Ollivier <lollivier@baylibre.com> writes:
 
 > Commit 89a5e15bcba8 ("gpio/mmc/of: Respect polarity in the device tree")
 > changed the behavior of "cd-inverted" to follow the device tree bindings
@@ -27,19 +33,14 @@ On Mon 14 Jan 2019 at 14:44, Loys Ollivier wrote:
 > "active low", according to the boards specifications, and dropping the
 > "cd-inverted" property.
 >
-I understood your point on the double op making it a no-op. I chose not
-to mention it as it can be somewhat misleading on the reason of this
-patch.
-That DT code is probably how you found the no-op bug. And that's how I
-noticed that the SD description was not perfect.
-
-But imho, that is not why the DTs should be changed. The main
-reason is because the previous description is not configuring the CD
-lines correctly, according to the specification.
-
-I hope this version is fine for everyone :)
 > Fixes: 89a5e15bcba8 ("gpio/mmc/of: Respect polarity in the device tree")
 > Signed-off-by: Loys Ollivier <lollivier@baylibre.com>
+
+Queued as fix for v5.0-rc. (I replaced v3 in my fixes branch with this
+one)
+
+Kevin
+
 > ---
 >
 > v4: commit message clarification on the "cd-inverted" property and usage.
@@ -64,8 +65,7 @@ I hope this version is fine for everyone :)
 >  arch/arm64/boot/dts/amlogic/meson-gxm-rbox-pro.dts             | 3 +--
 >  14 files changed, 14 insertions(+), 28 deletions(-)
 >
-> diff --git a/arch/arm64/boot/dts/amlogic/meson-gx-p23x-q20x.dtsi 
-> b/arch/arm64/boot/dts/amlogic/meson-gx-p23x-q20x.dtsi
+> diff --git a/arch/arm64/boot/dts/amlogic/meson-gx-p23x-q20x.dtsi b/arch/arm64/boot/dts/amlogic/meson-gx-p23x-q20x.dtsi
 > index e14e0ce7e89f..016641a41694 100644
 > --- a/arch/arm64/boot/dts/amlogic/meson-gx-p23x-q20x.dtsi
 > +++ b/arch/arm64/boot/dts/amlogic/meson-gx-p23x-q20x.dtsi
@@ -79,8 +79,7 @@ I hope this version is fine for everyone :)
 >  
 >  	vmmc-supply = <&vddao_3v3>;
 >  	vqmmc-supply = <&vddio_boot>;
-> diff --git a/arch/arm64/boot/dts/amlogic/meson-gxbb-nanopi-k2.dts 
-> b/arch/arm64/boot/dts/amlogic/meson-gxbb-nanopi-k2.dts
+> diff --git a/arch/arm64/boot/dts/amlogic/meson-gxbb-nanopi-k2.dts b/arch/arm64/boot/dts/amlogic/meson-gxbb-nanopi-k2.dts
 > index 8cd50b75171d..ade2ee09ae96 100644
 > --- a/arch/arm64/boot/dts/amlogic/meson-gxbb-nanopi-k2.dts
 > +++ b/arch/arm64/boot/dts/amlogic/meson-gxbb-nanopi-k2.dts
@@ -94,8 +93,7 @@ I hope this version is fine for everyone :)
 >  
 >  	vmmc-supply = <&vddio_ao3v3>;
 >  	vqmmc-supply = <&vddio_tf>;
-> diff --git a/arch/arm64/boot/dts/amlogic/meson-gxbb-nexbox-a95x.dts 
-> b/arch/arm64/boot/dts/amlogic/meson-gxbb-nexbox-a95x.dts
+> diff --git a/arch/arm64/boot/dts/amlogic/meson-gxbb-nexbox-a95x.dts b/arch/arm64/boot/dts/amlogic/meson-gxbb-nexbox-a95x.dts
 > index 4cf7f6e80c6a..25105ac96d55 100644
 > --- a/arch/arm64/boot/dts/amlogic/meson-gxbb-nexbox-a95x.dts
 > +++ b/arch/arm64/boot/dts/amlogic/meson-gxbb-nexbox-a95x.dts
@@ -109,8 +107,7 @@ I hope this version is fine for everyone :)
 >  
 >  	vmmc-supply = <&vddao_3v3>;
 >  	vqmmc-supply = <&vddio_card>;
-> diff --git a/arch/arm64/boot/dts/amlogic/meson-gxbb-odroidc2.dts 
-> b/arch/arm64/boot/dts/amlogic/meson-gxbb-odroidc2.dts
+> diff --git a/arch/arm64/boot/dts/amlogic/meson-gxbb-odroidc2.dts b/arch/arm64/boot/dts/amlogic/meson-gxbb-odroidc2.dts
 > index 2e1cd5e3a246..1cc9dc68ef00 100644
 > --- a/arch/arm64/boot/dts/amlogic/meson-gxbb-odroidc2.dts
 > +++ b/arch/arm64/boot/dts/amlogic/meson-gxbb-odroidc2.dts
@@ -124,8 +121,7 @@ I hope this version is fine for everyone :)
 >  
 >  	vmmc-supply = <&tflash_vdd>;
 >  	vqmmc-supply = <&tf_io>;
-> diff --git a/arch/arm64/boot/dts/amlogic/meson-gxbb-p20x.dtsi 
-> b/arch/arm64/boot/dts/amlogic/meson-gxbb-p20x.dtsi
+> diff --git a/arch/arm64/boot/dts/amlogic/meson-gxbb-p20x.dtsi b/arch/arm64/boot/dts/amlogic/meson-gxbb-p20x.dtsi
 > index ce862266b9aa..0be0f2a5d2fe 100644
 > --- a/arch/arm64/boot/dts/amlogic/meson-gxbb-p20x.dtsi
 > +++ b/arch/arm64/boot/dts/amlogic/meson-gxbb-p20x.dtsi
@@ -139,8 +135,7 @@ I hope this version is fine for everyone :)
 >  
 >  	vmmc-supply = <&vddao_3v3>;
 >  	vqmmc-supply = <&vddio_card>;
-> diff --git a/arch/arm64/boot/dts/amlogic/meson-gxbb-vega-s95.dtsi 
-> b/arch/arm64/boot/dts/amlogic/meson-gxbb-vega-s95.dtsi
+> diff --git a/arch/arm64/boot/dts/amlogic/meson-gxbb-vega-s95.dtsi b/arch/arm64/boot/dts/amlogic/meson-gxbb-vega-s95.dtsi
 > index 93a4acf2c46c..ad4d50bd9d77 100644
 > --- a/arch/arm64/boot/dts/amlogic/meson-gxbb-vega-s95.dtsi
 > +++ b/arch/arm64/boot/dts/amlogic/meson-gxbb-vega-s95.dtsi
@@ -154,8 +149,7 @@ I hope this version is fine for everyone :)
 >  
 >  	vmmc-supply = <&vcc_3v3>;
 >  };
-> diff --git a/arch/arm64/boot/dts/amlogic/meson-gxbb-wetek.dtsi 
-> b/arch/arm64/boot/dts/amlogic/meson-gxbb-wetek.dtsi
+> diff --git a/arch/arm64/boot/dts/amlogic/meson-gxbb-wetek.dtsi b/arch/arm64/boot/dts/amlogic/meson-gxbb-wetek.dtsi
 > index ec09bb5792b7..2d2db783c44c 100644
 > --- a/arch/arm64/boot/dts/amlogic/meson-gxbb-wetek.dtsi
 > +++ b/arch/arm64/boot/dts/amlogic/meson-gxbb-wetek.dtsi
@@ -169,8 +163,7 @@ I hope this version is fine for everyone :)
 >  
 >  	vmmc-supply = <&vddao_3v3>;
 >  	vqmmc-supply = <&vcc_3v3>;
-> diff --git a/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-hwacom-amazetv.dts 
-> b/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-hwacom-amazetv.dts
+> diff --git a/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-hwacom-amazetv.dts b/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-hwacom-amazetv.dts
 > index f1c410e2da2b..796baea7a0bf 100644
 > --- a/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-hwacom-amazetv.dts
 > +++ b/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-hwacom-amazetv.dts
@@ -184,8 +177,7 @@ I hope this version is fine for everyone :)
 >  
 >  	vmmc-supply = <&vddao_3v3>;
 >  	vqmmc-supply = <&vddio_card>;
-> diff --git a/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-libretech-cc.dts 
-> b/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-libretech-cc.dts
+> diff --git a/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-libretech-cc.dts b/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-libretech-cc.dts
 > index db293440e4ca..255cede7b447 100644
 > --- a/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-libretech-cc.dts
 > +++ b/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-libretech-cc.dts
@@ -199,8 +191,7 @@ I hope this version is fine for everyone :)
 >  
 >  	vmmc-supply = <&vcc_3v3>;
 >  	vqmmc-supply = <&vcc_card>;
-> diff --git a/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-nexbox-a95x.dts 
-> b/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-nexbox-a95x.dts
+> diff --git a/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-nexbox-a95x.dts b/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-nexbox-a95x.dts
 > index 6739697be1de..9cbdb85fb591 100644
 > --- a/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-nexbox-a95x.dts
 > +++ b/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-nexbox-a95x.dts
@@ -214,8 +205,7 @@ I hope this version is fine for everyone :)
 >  
 >  	vmmc-supply = <&vddao_3v3>;
 >  	vqmmc-supply = <&vddio_card>;
-> diff --git a/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-p212.dtsi 
-> b/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-p212.dtsi
+> diff --git a/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-p212.dtsi b/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-p212.dtsi
 > index a1b31013ab6e..bc811a2faf42 100644
 > --- a/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-p212.dtsi
 > +++ b/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-p212.dtsi
@@ -229,8 +219,7 @@ I hope this version is fine for everyone :)
 >  
 >  	vmmc-supply = <&vddao_3v3>;
 >  	vqmmc-supply = <&vddio_boot>;
-> diff --git a/arch/arm64/boot/dts/amlogic/meson-gxm-khadas-vim2.dts 
-> b/arch/arm64/boot/dts/amlogic/meson-gxm-khadas-vim2.dts
+> diff --git a/arch/arm64/boot/dts/amlogic/meson-gxm-khadas-vim2.dts b/arch/arm64/boot/dts/amlogic/meson-gxm-khadas-vim2.dts
 > index 3c3a667a8df8..3f086ed7de05 100644
 > --- a/arch/arm64/boot/dts/amlogic/meson-gxm-khadas-vim2.dts
 > +++ b/arch/arm64/boot/dts/amlogic/meson-gxm-khadas-vim2.dts
@@ -244,8 +233,7 @@ I hope this version is fine for everyone :)
 >  
 >  	vmmc-supply = <&vddao_3v3>;
 >  	vqmmc-supply = <&vddio_boot>;
-> diff --git a/arch/arm64/boot/dts/amlogic/meson-gxm-nexbox-a1.dts 
-> b/arch/arm64/boot/dts/amlogic/meson-gxm-nexbox-a1.dts
+> diff --git a/arch/arm64/boot/dts/amlogic/meson-gxm-nexbox-a1.dts b/arch/arm64/boot/dts/amlogic/meson-gxm-nexbox-a1.dts
 > index f7a1cffab4a8..8acfd40090d2 100644
 > --- a/arch/arm64/boot/dts/amlogic/meson-gxm-nexbox-a1.dts
 > +++ b/arch/arm64/boot/dts/amlogic/meson-gxm-nexbox-a1.dts
@@ -259,8 +247,7 @@ I hope this version is fine for everyone :)
 >  
 >  	vmmc-supply = <&vddao_3v3>;
 >  	vqmmc-supply = <&vddio_boot>;
-> diff --git a/arch/arm64/boot/dts/amlogic/meson-gxm-rbox-pro.dts 
-> b/arch/arm64/boot/dts/amlogic/meson-gxm-rbox-pro.dts
+> diff --git a/arch/arm64/boot/dts/amlogic/meson-gxm-rbox-pro.dts b/arch/arm64/boot/dts/amlogic/meson-gxm-rbox-pro.dts
 > index 7212dc4531e4..7fa20a8ede17 100644
 > --- a/arch/arm64/boot/dts/amlogic/meson-gxm-rbox-pro.dts
 > +++ b/arch/arm64/boot/dts/amlogic/meson-gxm-rbox-pro.dts
@@ -274,7 +261,5 @@ I hope this version is fine for everyone :)
 >  
 >  	vmmc-supply = <&vddao_3v3>;
 >  	vqmmc-supply = <&vddio_boot>;
-
-
--- 
--L
+> -- 
+> 2.7.4
