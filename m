@@ -1,85 +1,56 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: Constify driver data
-Date: Mon, 14 Jan 2019 12:42:50 +0100
-Message-ID: <CAPDyKFo5+aEmKjORs_h3Ts_-thRBnuBhc7M+F2m3mkXEiUqLJg@mail.gmail.com>
-References: <20181218232652.12700-1-andrew.smirnov@gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: fix HS400 timing issue
+Date: Mon, 14 Jan 2019 12:42:56 +0100
+Message-ID: <CAPDyKFqMJaBKzhD-HEsDXkP=rJXXQMLns_8=eQFtL9mnfJ+xOw@mail.gmail.com>
+References: <20181227112750.446-1-haibo.chen@nxp.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181218232652.12700-1-andrew.smirnov@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Andrey Smirnov <andrew.smirnov@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20181227112750.446-1-haibo.chen@nxp.com>
+Sender: stable-owner@vger.kernel.org
+To: BOUGH CHEN <haibo.chen@nxp.com>
+Cc: "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, dl-linux-imx <linux-imx@nxp.com>, "stable@vger.kernel.org" <stable@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 19 Dec 2018 at 00:27, Andrey Smirnov <andrew.smirnov@gmail.com> wrote:
+On Thu, 27 Dec 2018 at 12:20, BOUGH CHEN <haibo.chen@nxp.com> wrote:
 >
-> Variant specific driver data doesn't change at run-time, so mark it as
-> const to reflect that.
+> Now tuning reset will be done when the timing is MMC_TIMING_LEGACY/
+> MMC_TIMING_MMC_HS/MMC_TIMING_SD_HS. But for timing MMC_TIMING_MMC_HS,
+> we can not do tuning reset, otherwise HS400 timing is not right.
 >
-> Signed-off-by: Andrey Smirnov <andrew.smirnov@gmail.com>
+> Here is the process of init HS400, first finish tuning in HS200 mode,
+> then switch to HS mode and 8 bit DDR mode, finally switch to HS400
+> mode. If we do tuning reset in HS mode, this will cause HS400 mode
+> lost the tuning setting, which will cause CRC error.
+>
+> This fix commit d9370424c948 ("mmc: sdhci-esdhc-imx: reset tuning
+> circuit when power on mmc card").
+>
+> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
+> Cc: stable@vger.kernel.org # v4.12+
 
 Applied for next, thanks!
 
-Kind regrads
+Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 16 ++++++++--------
->  1 file changed, 8 insertions(+), 8 deletions(-)
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 1 +
+>  1 file changed, 1 insertion(+)
 >
 > diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index f44e49014a44..39ace4f1036b 100644
+> index d0d319398a54..984cc1a788cb 100644
 > --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 > +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -148,38 +148,38 @@ struct esdhc_soc_data {
->         u32 flags;
->  };
->
-> -static struct esdhc_soc_data esdhc_imx25_data = {
-> +static const struct esdhc_soc_data esdhc_imx25_data = {
->         .flags = ESDHC_FLAG_ERR004536,
->  };
->
-> -static struct esdhc_soc_data esdhc_imx35_data = {
-> +static const struct esdhc_soc_data esdhc_imx35_data = {
->         .flags = ESDHC_FLAG_ERR004536,
->  };
->
-> -static struct esdhc_soc_data esdhc_imx51_data = {
-> +static const struct esdhc_soc_data esdhc_imx51_data = {
->         .flags = 0,
->  };
->
-> -static struct esdhc_soc_data esdhc_imx53_data = {
-> +static const struct esdhc_soc_data esdhc_imx53_data = {
->         .flags = ESDHC_FLAG_MULTIBLK_NO_INT,
->  };
->
-> -static struct esdhc_soc_data usdhc_imx6q_data = {
-> +static const struct esdhc_soc_data usdhc_imx6q_data = {
->         .flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_MAN_TUNING,
->  };
->
-> -static struct esdhc_soc_data usdhc_imx6sl_data = {
-> +static const struct esdhc_soc_data usdhc_imx6sl_data = {
->         .flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
->                         | ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_ERR004536
->                         | ESDHC_FLAG_HS200,
->  };
->
-> -static struct esdhc_soc_data usdhc_imx6sx_data = {
-> +static const struct esdhc_soc_data usdhc_imx6sx_data = {
->         .flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
->                         | ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200,
->  };
->
-> -static struct esdhc_soc_data usdhc_imx7d_data = {
-> +static const struct esdhc_soc_data usdhc_imx7d_data = {
->         .flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
->                         | ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
->                         | ESDHC_FLAG_HS400,
+> @@ -979,6 +979,7 @@ static void esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
+>         case MMC_TIMING_UHS_SDR25:
+>         case MMC_TIMING_UHS_SDR50:
+>         case MMC_TIMING_UHS_SDR104:
+> +       case MMC_TIMING_MMC_HS:
+>         case MMC_TIMING_MMC_HS200:
+>                 writel(m, host->ioaddr + ESDHC_MIX_CTRL);
+>                 break;
 > --
-> 2.19.1
+> 2.17.1
 >
