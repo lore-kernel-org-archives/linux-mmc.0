@@ -1,52 +1,85 @@
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH 1/2] mmc: sdhci: Properly set DMA mask
-Date: Mon, 14 Jan 2019 03:09:47 -0800
-Message-ID: <20190114110947.GA30778@infradead.org>
-References: <20190104104753.3383-1-thierry.reding@gmail.com>
- <20190104174354.GA18110@infradead.org>
- <20190110105911.GA32301@ulmo>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: Constify driver data
+Date: Mon, 14 Jan 2019 12:42:50 +0100
+Message-ID: <CAPDyKFo5+aEmKjORs_h3Ts_-thRBnuBhc7M+F2m3mkXEiUqLJg@mail.gmail.com>
+References: <20181218232652.12700-1-andrew.smirnov@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20190110105911.GA32301@ulmo>
+In-Reply-To: <20181218232652.12700-1-andrew.smirnov@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Thierry Reding <thierry.reding@gmail.com>
-Cc: Christoph Hellwig <hch@infradead.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Jonathan Hunter <jonathanh@nvidia.com>, Sowjanya Komatineni <skomatineni@nvidia.com>, Krishna Reddy <vdumpa@nvidia.com>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Andrey Smirnov <andrew.smirnov@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Jan 10, 2019 at 11:59:11AM +0100, Thierry Reding wrote:
-> On Fri, Jan 04, 2019 at 09:43:54AM -0800, Christoph Hellwig wrote:
-> > > +	u64 dma_mask = dma_get_mask(dev);
-> > 
-> > This is not a driver API.  I think what you want is
-> > dma_get_required_mask to query the mask.  But in that case
-> > you still need to always actually set a mask in the driver as well.
-> 
-> That's slightly different from what I want to do here. The purpose of
-> this part of the patch is that when the SDHCI hardware supports only 32
-> bits of address space, then we want to prevent 64-bit addressing mode
-> from being used because it isn't useful.
-> 
-> So what we do want to check here is the DMA mask configured by the
-> driver (or the default set by the bus, or wherever it came from).
-> dma_get_required_mask() returns the DMA mask required to address all of
-> system memory. That would perhaps be a useful additional check, but it's
-> orthogonal to what I'm trying to do here.
-> 
-> Is there something else appropriate that I could use to query the DMA
-> mask set for a device?
+On Wed, 19 Dec 2018 at 00:27, Andrey Smirnov <andrew.smirnov@gmail.com> wrote:
+>
+> Variant specific driver data doesn't change at run-time, so mark it as
+> const to reflect that.
+>
+> Signed-off-by: Andrey Smirnov <andrew.smirnov@gmail.com>
 
-I think the problem is that you try to mix up responsibility of who
-needs to set the DMA mask.  Either we want the core sdhci code set
-it as we do, or we move it to the driver, probably optionally.
+Applied for next, thanks!
 
-So instead of trying to read something back you should either:
+Kind regrads
+Uffe
 
- - add a set_dma_mask to override it
- - add a 64bit_mode_dma_mask field to strct mmc_host, initialize
-   that to 64-bit by default and let host drivers override it
 
-While the first one creates a little more boilerplate code it actually
-looks cleaner to me.  The added benefit is that it can also replace the
-usage of SDHCI_QUIRK2_BROKEN_64_BIT_DMA.
+> ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 16 ++++++++--------
+>  1 file changed, 8 insertions(+), 8 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index f44e49014a44..39ace4f1036b 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -148,38 +148,38 @@ struct esdhc_soc_data {
+>         u32 flags;
+>  };
+>
+> -static struct esdhc_soc_data esdhc_imx25_data = {
+> +static const struct esdhc_soc_data esdhc_imx25_data = {
+>         .flags = ESDHC_FLAG_ERR004536,
+>  };
+>
+> -static struct esdhc_soc_data esdhc_imx35_data = {
+> +static const struct esdhc_soc_data esdhc_imx35_data = {
+>         .flags = ESDHC_FLAG_ERR004536,
+>  };
+>
+> -static struct esdhc_soc_data esdhc_imx51_data = {
+> +static const struct esdhc_soc_data esdhc_imx51_data = {
+>         .flags = 0,
+>  };
+>
+> -static struct esdhc_soc_data esdhc_imx53_data = {
+> +static const struct esdhc_soc_data esdhc_imx53_data = {
+>         .flags = ESDHC_FLAG_MULTIBLK_NO_INT,
+>  };
+>
+> -static struct esdhc_soc_data usdhc_imx6q_data = {
+> +static const struct esdhc_soc_data usdhc_imx6q_data = {
+>         .flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_MAN_TUNING,
+>  };
+>
+> -static struct esdhc_soc_data usdhc_imx6sl_data = {
+> +static const struct esdhc_soc_data usdhc_imx6sl_data = {
+>         .flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
+>                         | ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_ERR004536
+>                         | ESDHC_FLAG_HS200,
+>  };
+>
+> -static struct esdhc_soc_data usdhc_imx6sx_data = {
+> +static const struct esdhc_soc_data usdhc_imx6sx_data = {
+>         .flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
+>                         | ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200,
+>  };
+>
+> -static struct esdhc_soc_data usdhc_imx7d_data = {
+> +static const struct esdhc_soc_data usdhc_imx7d_data = {
+>         .flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
+>                         | ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
+>                         | ESDHC_FLAG_HS400,
+> --
+> 2.19.1
+>
