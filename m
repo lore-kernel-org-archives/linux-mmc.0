@@ -1,25 +1,33 @@
-From: Christoph Hellwig <hch@lst.de>
-Subject: Re: remove block layer bounce buffering for MMC
-Date: Mon, 14 Jan 2019 17:57:55 +0100
-Message-ID: <20190114165755.GA7456@lst.de>
-References: <20190114095804.27978-1-hch@lst.de> <5d09d233-8631-2a35-cbcf-ba87b0314b3a@arm.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Alamy Liu <alamy.liu@gmail.com>
+Subject: [PATCH 1/2] mmc: cqhci: replace NUM_SLOTS with cq_host->num_slots
+Date: Mon, 14 Jan 2019 11:17:21 -0800
+Message-ID: <20190114191724.29960-1-alamy.liu@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <5d09d233-8631-2a35-cbcf-ba87b0314b3a@arm.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Robin Murphy <robin.murphy@arm.com>
-Cc: Christoph Hellwig <hch@lst.de>, Ulf Hansson <ulf.hansson@linaro.org>, Aaro Koskinen <aaro.koskinen@iki.fi>, Nicolas Pitre <nico@fluxnic.net>, linux-mmc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, linux-kernel@vger.kernel.org, iommu@lists.linux-foundation.org, Ben Dooks <ben-linux@fluff.org>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Alamy Liu <alamy.liu@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Jan 14, 2019 at 04:52:40PM +0000, Robin Murphy wrote:
-> One general point for the kmap() conversions - it's not obvious (to me at 
-> least) whether or how that would work for a segment where sg->length > 
-> PAGE_SIZE. Or is there some cast-iron guarantee from the MMC mid-layer that 
-> it will never let the block layer generate such things in the first place?
+Prevent to use fixed value (NUM_SLOTS) after it had been determined
+and saved in a variable (cq_host->num_slots).
 
-None of this will with such segments.  But yes, I guess the old case
-could have worked as long as any physical contigous ranges are also
-virtually contigous.  So we might have to throw in a page size segment
-boundary here.
+Signed-off-by: Alamy Liu <alamy.liu@gmail.com>
+---
+ drivers/mmc/host/cqhci.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/cqhci.c b/drivers/mmc/host/cqhci.c
+index 159270e947..26d63594b7 100644
+--- a/drivers/mmc/host/cqhci.c
++++ b/drivers/mmc/host/cqhci.c
+@@ -699,7 +699,7 @@ static void cqhci_error_irq(struct mmc_host *mmc, u32 status, int cmd_error,
+ 		 * The only way to guarantee forward progress is to mark at
+ 		 * least one task in error, so if none is indicated, pick one.
+ 		 */
+-		for (tag = 0; tag < NUM_SLOTS; tag++) {
++		for (tag = 0; tag < cq_host->num_slots; tag++) {
+ 			slot = &cq_host->slot[tag];
+ 			if (!slot->mrq)
+ 				continue;
+-- 
+2.17.1
