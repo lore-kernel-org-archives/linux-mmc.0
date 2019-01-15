@@ -1,35 +1,55 @@
-From: Shawn Guo <shawnguo@kernel.org>
-Subject: Re: [PATCH v2 3/3] ARM: dts: imx6ull: change to use new compatible
- "fsl,imx6ull-usdhc" for usdhc
-Date: Tue, 15 Jan 2019 22:56:04 +0800
-Message-ID: <20190115145602.GB13895@dragon>
-References: <20181228033323.32308-1-haibo.chen@nxp.com>
- <20181228033323.32308-3-haibo.chen@nxp.com>
+From: Thomas Petazzoni <thomas.petazzoni@bootlin.com>
+Subject: [PATCH 0/3] Introduce support for WP GPIO in the core SDHCI
+Date: Tue, 15 Jan 2019 17:28:34 +0100
+Message-ID: <20190115162837.5399-1-thomas.petazzoni@bootlin.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <20181228033323.32308-3-haibo.chen@nxp.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: BOUGH CHEN <haibo.chen@nxp.com>
-Cc: "mark.rutland@arm.com" <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "rmk+kernel@armlinux.org.uk" <rmk+kernel@armlinux.org.uk>, "robh+dt@kernel.org" <robh+dt@kernel.org>, dl-linux-imx <linux-imx@nxp.com>, "kernel@pengutronix.de" <kernel@pengutronix.de>, Fabio Estevam <fabio.estevam@nxp.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Kishon Vijay Abraham I <kishon@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org, Gregory Clement <gregory.clement@bootlin.com>, Thomas Petazzoni <thomas.petazzoni@bootlin.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Dec 28, 2018 at 03:26:16AM +0000, BOUGH CHEN wrote:
-> i.MX6ULL has errata ERR010450, there is I/O timing limitation,
-> for SDR mode, SD card clock can't exceed 150MHz, for DDR mode,
-> SD card clock can't exceed 45MHz. This patch change to use the
-> new compatible "fsl,imx6ull-usdhc" to follow this limitation.
-> 
-> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
+Hello,
 
-Applied, thanks.
+While doing the bring up of a Zynq 7000 platform where the WP signal
+of a SD slot is connected to a regular GPIO rather than through the
+SDHCI WP pin, I realized that the GPIO described by wp-gpios was
+properly requested, but it was in fact not used at all.
+
+Indeed, the SDHCI core implements sdhci_check_ro() by:
+
+ - Calling a controller-specific ->get_ro() callback if it exists. A
+   few controller-specific drivers implement this, but not
+   sdhci-of-arasan, which is used on Zynq 7000.
+
+ - Using the SDHCI_PRESENT_STATE register, which reports the state of
+   the SDHCI interface WP pin, and obvisouly not the state of a
+   separate WP GPIO.
+
+This patch series therefore changes sdhci_check_ro() to behave like
+sdhci_get_cd(): use a GPIO first if available, and if not, fallback to
+using the SDHCI_PRESENT_STATE register. Indeed, if there's a wp-gpios
+described in the DT, it quite certainly indicates that the SDHCI WP
+signal is not used, and the WP GPIO should be used instead.
+
+As part of this series, two SDHCI drivers are modified to no longer
+implement their custom ->get_ro() hook, since the core SDHCI now does
+the right thing with the WP GPIO.
+
+Best regards,
+
+Thomas
+
+Thomas Petazzoni (3):
+  mmc: sdhci: use WP GPIO in sdhci_check_ro()
+  mmc: sdhci-omap: drop ->get_ro() implementation
+  mmc: sdhci-tegra: drop ->get_ro() implementation
+
+ drivers/mmc/host/sdhci-omap.c  | 1 -
+ drivers/mmc/host/sdhci-tegra.c | 9 ---------
+ drivers/mmc/host/sdhci.c       | 9 ++++++---
+ 3 files changed, 6 insertions(+), 13 deletions(-)
+
+-- 
+2.20.1
