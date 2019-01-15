@@ -1,80 +1,48 @@
-From: Thomas Petazzoni <thomas.petazzoni@bootlin.com>
-Subject: [PATCH 1/3] mmc: sdhci: use WP GPIO in sdhci_check_ro()
-Date: Tue, 15 Jan 2019 17:28:35 +0100
-Message-ID: <20190115162837.5399-2-thomas.petazzoni@bootlin.com>
-References: <20190115162837.5399-1-thomas.petazzoni@bootlin.com>
+From: Sowjanya Komatineni <skomatineni@nvidia.com>
+Subject: [PATCH V9 2/3] arm64: dts: tegra: Add CQE Support for SDMMC4
+Date: Tue, 15 Jan 2019 11:03:51 -0800
+Message-ID: <1547579032-18314-2-git-send-email-skomatineni@nvidia.com>
+References: <1547579032-18314-1-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190115162837.5399-1-thomas.petazzoni@bootlin.com>
+In-Reply-To: <1547579032-18314-1-git-send-email-skomatineni@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Kishon Vijay Abraham I <kishon@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org, Gregory Clement <gregory.clement@bootlin.com>, Thomas Petazzoni <thomas.petazzoni@bootlin.com>
+To: robh+dt@kernel.org, mark.rutland@arm.com, mperttunen@nvidia.com, chunyan.zhang@unisoc.com, thierry.reding@gmail.com, jonathanh@nvidia.com, adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc: anrao@nvidia.com, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Sowjanya Komatineni <skomatineni@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Even though SDHCI controllers may have a dedicated WP pin that can be
-queried using the SDHCI_PRESENT_STATE register, some platforms may
-chose to use a separate regular GPIO to route the WP signal. Such a
-GPIO is typically represented using the wp-gpios property in the
-Device Tree.
+Add CQE Support for Tegra186 and Tegra194 SDMMC4 controller
 
-Unfortunately, the current sdhci_check_ro() function does not make use
-of such GPIO when available: it either uses a host controller specific
-->get_ro() operation, or uses the SDHCI_PRESENT_STATE. Several host
-controller specific ->get_ro() functions are implemented just to use
-check a WP GPIO state.
-
-Instead of pushing this to more controller-specific implementations,
-let's handle this in the core SDHCI code, just like it is already done
-for the CD GPIO in sdhci_get_cd().
-
-The below patch simply changes sdhci_check_ro() to use the value of
-the WP GPIO if available. We need to adjust the prototype of the
-function to use a mmc_host* as argument instead of sdhci_host*, since
-the mmc_can_gpio_ro() and mmc_gpio_get_ro() helpers take a mmc_host*.
-
-Signed-off-by: Thomas Petazzoni <thomas.petazzoni@bootlin.com>
+Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
 ---
- drivers/mmc/host/sdhci.c | 9 ++++++---
- 1 file changed, 6 insertions(+), 3 deletions(-)
+ arch/arm64/boot/dts/nvidia/tegra186.dtsi | 1 +
+ arch/arm64/boot/dts/nvidia/tegra194.dtsi | 1 +
+ 2 files changed, 2 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index df05352b6a4a..63cc4bd033b9 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2022,8 +2022,9 @@ static int sdhci_get_cd(struct mmc_host *mmc)
- 	return !!(sdhci_readl(host, SDHCI_PRESENT_STATE) & SDHCI_CARD_PRESENT);
- }
+diff --git a/arch/arm64/boot/dts/nvidia/tegra186.dtsi b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
+index 22815db4a3ed..3dfdc4701934 100644
+--- a/arch/arm64/boot/dts/nvidia/tegra186.dtsi
++++ b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
+@@ -319,6 +319,7 @@
+ 		nvidia,default-trim = <0x9>;
+ 		nvidia,dqs-trim = <63>;
+ 		mmc-hs400-1_8v;
++		supports-cqe;
+ 		status = "disabled";
+ 	};
  
--static int sdhci_check_ro(struct sdhci_host *host)
-+static int sdhci_check_ro(struct mmc_host *mmc)
- {
-+	struct sdhci_host *host = mmc_priv(mmc);
- 	unsigned long flags;
- 	int is_readonly;
+diff --git a/arch/arm64/boot/dts/nvidia/tegra194.dtsi b/arch/arm64/boot/dts/nvidia/tegra194.dtsi
+index 6dfa1ca0b851..9ce1c91d4596 100644
+--- a/arch/arm64/boot/dts/nvidia/tegra194.dtsi
++++ b/arch/arm64/boot/dts/nvidia/tegra194.dtsi
+@@ -325,6 +325,7 @@
+ 			clock-names = "sdhci";
+ 			resets = <&bpmp TEGRA194_RESET_SDMMC4>;
+ 			reset-names = "sdhci";
++			supports-cqe;
+ 			status = "disabled";
+ 		};
  
-@@ -2031,6 +2032,8 @@ static int sdhci_check_ro(struct sdhci_host *host)
- 
- 	if (host->flags & SDHCI_DEVICE_DEAD)
- 		is_readonly = 0;
-+	else if (mmc_can_gpio_ro(mmc))
-+		is_readonly = mmc_gpio_get_ro(mmc);
- 	else if (host->ops->get_ro)
- 		is_readonly = host->ops->get_ro(host);
- 	else
-@@ -2052,11 +2055,11 @@ static int sdhci_get_ro(struct mmc_host *mmc)
- 	int i, ro_count;
- 
- 	if (!(host->quirks & SDHCI_QUIRK_UNSTABLE_RO_DETECT))
--		return sdhci_check_ro(host);
-+		return sdhci_check_ro(mmc);
- 
- 	ro_count = 0;
- 	for (i = 0; i < SAMPLE_COUNT; i++) {
--		if (sdhci_check_ro(host)) {
-+		if (sdhci_check_ro(mmc)) {
- 			if (++ro_count > SAMPLE_COUNT / 2)
- 				return 1;
- 		}
 -- 
-2.20.1
+2.7.4
