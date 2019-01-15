@@ -1,40 +1,38 @@
-From: Sowjanya Komatineni <skomatineni@nvidia.com>
-Subject: [PATCH V9 1/3] dt-bindings: mmc: tegra: Add supports-cqe property
-Date: Tue, 15 Jan 2019 11:03:50 -0800
-Message-ID: <1547579032-18314-1-git-send-email-skomatineni@nvidia.com>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: Alamy Liu <alamy.liu@gmail.com>
+Subject: [PATCH] mmc: cqhci: data size depending on queue depth
+Date: Tue, 15 Jan 2019 11:13:50 -0800
+Message-ID: <20190115191356.32714-1-alamy.liu@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: robh+dt@kernel.org, mark.rutland@arm.com, mperttunen@nvidia.com, chunyan.zhang@unisoc.com, thierry.reding@gmail.com, jonathanh@nvidia.com, adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc: anrao@nvidia.com, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Sowjanya Komatineni <skomatineni@nvidia.com>
+To: Venkat Gopalakrishnan <venkatg@codeaurora.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Add supports-cqe optional property for Tegra SDMMC.
+CQE_DCMD is not necessary to be enabled when CQE is enabled.
+(Software could halt CQE to send command, or via DCMD)
 
-Tegra186 and Tegra194 supports HW Command queue only
-on SDMMC4 controller. This property is used to identify
-command queue support controller in the tegra sdhci driver.
+In the case that CQE_DCMD is not enabled, it still needs to allocate
+space for data transfer. For instance:
+  CQE_DCMD is enabled:  32 slots space
+  CQE_DCMD is disabled: 31 slots space (is good enough)
 
-Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
+Signed-off-by: Alamy Liu <alamy.liu@gmail.com>
 ---
- Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt | 4 ++++
- 1 file changed, 4 insertions(+)
+ drivers/mmc/host/cqhci.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-index 32b4b4e41923..fb14c2c8d7ee 100644
---- a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-+++ b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-@@ -72,6 +72,10 @@ Optional properties for Tegra210 and Tegra186:
- - nvidia,default-trim : Specify the default outbound clock trimmer
-   value.
- - nvidia,dqs-trim : Specify DQS trim value for HS400 timing
-+- supports-cqe : The presence of this property indicates that the
-+  corresponding controller supports HW command queue feature.
-+  Tegra186 and Tegra194 has 4 SDMMC Controllers and only SDMMC4
-+  controller supports HW Command Queue with eMMC device.
+diff --git a/drivers/mmc/host/cqhci.c b/drivers/mmc/host/cqhci.c
+index 4cc7863c13..974997b6cb 100644
+--- a/drivers/mmc/host/cqhci.c
++++ b/drivers/mmc/host/cqhci.c
+@@ -202,7 +202,7 @@ static int cqhci_host_alloc_tdl(struct cqhci_host *cq_host)
+ 	cq_host->desc_size = cq_host->slot_sz * cq_host->num_slots;
  
-   Notes on the pad calibration pull up and pulldown offset values:
-     - The property values are drive codes which are programmed into the
+ 	cq_host->data_size = cq_host->trans_desc_len * cq_host->mmc->max_segs *
+-		(cq_host->num_slots - 1);
++		cq_host->mmc->cqe_qdepth;
+ 
+ 	pr_debug("%s: cqhci: desc_size: %zu data_sz: %zu slot-sz: %d\n",
+ 		 mmc_hostname(cq_host->mmc), cq_host->desc_size, cq_host->data_size,
 -- 
-2.7.4
+2.17.1
