@@ -1,67 +1,46 @@
-From: Alamy Liu <alamy.liu@gmail.com>
-Subject: [PATCH] mmc: cqhci: Fix a tiny potential memory leak on error condition
-Date: Tue, 15 Jan 2019 16:24:38 -0800
-Message-ID: <20190116002440.1678-1-alamy.liu@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Venkat Gopalakrishnan <venkatg@codeaurora.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "open list:MULTIMEDIA CARD MMC, SECURE
-        DIGITAL SD AND..." <linux-mmc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
+From: Wei Yongjun <weiyongjun1@huawei.com>
+Subject: [PATCH -next] mmc: sdhci-esdhc-imx: fix return value check in
+ sdhci_esdhc_imx_probe()
+Date: Wed, 16 Jan 2019 05:44:51 +0000
+Message-ID: <1547617491-60322-1-git-send-email-weiyongjun1@huawei.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>, Pengutronix Kernel Team <kernel@pengutronix.de>, Fabio Estevam <fabio.estevam@nxp.com>, NXP Linux Team <linux-imx@nxp.com>, BOUGH CHEN <haibo.chen@nxp.com>
+Cc: linux-mmc@vger.kernel.org, kernel-janitors@vger.kernel.org, Wei Yongjun <weiyongjun1@huawei.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-In the error case:
-   either cq_host->desc_base
-       or cq_host->trans_desc_base
-might have been granted memory successfully.
+In case of error, the function devm_kzalloc() returns NULL pointer not
+ERR_PTR(). The IS_ERR() test in the return value check should be
+replaced with NULL test.
 
-The value of mmc_host->cqe_enabled stays 'false'.
-Thus, cqhci_disable (mmc_cqe_ops->cqe_disable) won't be called to
-free the memory.
-Also, cqhci_disable() is designed to disable and free all resources,
-not suitable to handle this corner case.
-
-Signed-off-by: Alamy Liu <alamy.liu@gmail.com>
+Fixes: fadac7488064 ("mmc: sdhci-esdhc-imx: add CMDQ support")
+Signed-off-by: Wei Yongjun <weiyongjun1@huawei.com>
 ---
- drivers/mmc/host/cqhci.c | 20 +++++++++++++++++++-
- 1 file changed, 19 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/cqhci.c b/drivers/mmc/host/cqhci.c
-index 974997b6cb..58ad8cd613 100644
---- a/drivers/mmc/host/cqhci.c
-+++ b/drivers/mmc/host/cqhci.c
-@@ -223,7 +223,7 @@ static int cqhci_host_alloc_tdl(struct cqhci_host *cq_host)
- 					      &cq_host->trans_desc_dma_base,
- 					      GFP_KERNEL);
- 	if (!cq_host->desc_base || !cq_host->trans_desc_base)
--		return -ENOMEM;
-+		goto err_free_dma;
- 
- 	pr_debug("%s: cqhci: desc-base: 0x%p trans-base: 0x%p\n desc_dma 0x%llx trans_dma: 0x%llx\n",
- 		 mmc_hostname(cq_host->mmc), cq_host->desc_base, cq_host->trans_desc_base,
-@@ -234,6 +234,24 @@ static int cqhci_host_alloc_tdl(struct cqhci_host *cq_host)
- 		setup_trans_desc(cq_host, i);
- 
- 	return 0;
-+
-+err_free_dma:
-+	if (cq_host->desc_base) {
-+		dmam_free_coherent(mmc_dev(cq_host->mmc), cq_host->desc_size,
-+				   cq_host->desc_base,
-+				   cq_host->desc_dma_base);
-+		cq_host->desc_base = NULL;
-+		cq_host->desc_dma_base = 0;
-+	}
-+	if (cq_host->trans_desc_base) {
-+		dmam_free_coherent(mmc_dev(cq_host->mmc), cq_host->data_size,
-+				   cq_host->trans_desc_base,
-+				   cq_host->trans_desc_dma_base);
-+		cq_host->trans_desc_base = NULL;
-+		cq_host->trans_desc_dma_base = 0;
-+	}
-+
-+	return -ENOMEM;
- }
- 
- static void __cqhci_enable(struct cqhci_host *cq_host)
--- 
-2.17.1
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 75ad824..fad6007 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -1500,8 +1500,8 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 	if (imx_data->socdata->flags & ESDHC_FLAG_CQHCI) {
+ 		host->mmc->caps2 |= MMC_CAP2_CQE | MMC_CAP2_CQE_DCMD;
+ 		cq_host = devm_kzalloc(&pdev->dev, sizeof(*cq_host), GFP_KERNEL);
+-		if (IS_ERR(cq_host)) {
+-			err = PTR_ERR(cq_host);
++		if (!cq_host) {
++			err = -ENOMEM;
+ 			goto disable_ahb_clk;
+ 		}
