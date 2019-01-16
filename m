@@ -1,43 +1,47 @@
-From: Thomas Petazzoni <thomas.petazzoni@bootlin.com>
-Subject: Re: [PATCH 2/3] mmc: sdhci-omap: drop ->get_ro() implementation
-Date: Wed, 16 Jan 2019 16:58:12 +0100
-Message-ID: <20190116165812.1ca10804@windsurf>
-References: <20190115162837.5399-1-thomas.petazzoni@bootlin.com>
-        <20190115162837.5399-3-thomas.petazzoni@bootlin.com>
-        <20190116132747.GB11050@ulmo>
-        <20190116154717.GQ5544@atomide.com>
+From: Mathieu Malaterre <malat@debian.org>
+Subject: [PATCH] mmc: Annotate implicit fall through in jz_mmc_irq_worker
+Date: Wed, 16 Jan 2019 20:52:19 +0100
+Message-ID: <20190116195219.2897-1-malat@debian.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190116154717.GQ5544@atomide.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: Thierry Reding <thierry.reding@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, Kishon Vijay Abraham I <kishon@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>, Jonathan Hunter <jonathanh@nvidia.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org, Gregory Clement <gregory.clement@bootlin.com>, linux-omap@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Mathieu Malaterre <malat@debian.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hello,
+There is a plan to build the kernel with -Wimplicit-fallthrough and
+these places in the code produced warnings (W=1).
 
-On Wed, 16 Jan 2019 07:47:18 -0800, Tony Lindgren wrote:
+This commit removes the following warnings:
 
-> > Reviewed-by: Thierry Reding <treding@nvidia.com>
-> > 
-> > Adding Tony and linux-omap for a slightly wider audience and hopefully
-> > find someone to test this on. For reference, the whole series is here:
-> > 
-> > 	https://patchwork.kernel.org/project/linux-mmc/list/?series=66905  
-> 
-> Thanks Kishon can you please review and test?
+  drivers/mmc/host/jz4740_mmc.c:745:3: warning: this statement may fall through [-Wimplicit-fallthrough=]
+  drivers/mmc/host/jz4740_mmc.c:779:3: warning: this statement may fall through [-Wimplicit-fallthrough=]
 
-I think Adrian's comment that ->get_ro() should be called first in the
-core code makes sense, so I'll send a v2 with this change. Perhaps
-testing should be done on the v2 instead, even though I believe it
-should be functionally equivalent.
+Signed-off-by: Mathieu Malaterre <malat@debian.org>
+---
+ drivers/mmc/host/jz4740_mmc.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
-Best regards,
-
-Thomas
+diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
+index 33215d66afa2..a1df8bc0b964 100644
+--- a/drivers/mmc/host/jz4740_mmc.c
++++ b/drivers/mmc/host/jz4740_mmc.c
+@@ -743,6 +743,7 @@ static irqreturn_t jz_mmc_irq_worker(int irq, void *devid)
+ 			break;
+ 
+ 		jz_mmc_prepare_data_transfer(host);
++		/* fall through */
+ 
+ 	case JZ4740_MMC_STATE_TRANSFER_DATA:
+ 		if (host->use_dma) {
+@@ -777,6 +778,7 @@ static irqreturn_t jz_mmc_irq_worker(int irq, void *devid)
+ 			break;
+ 		}
+ 		jz4740_mmc_write_irq_reg(host, JZ_MMC_IRQ_DATA_TRAN_DONE);
++		/* fall through */
+ 
+ 	case JZ4740_MMC_STATE_SEND_STOP:
+ 		if (!req->stop)
 -- 
-Thomas Petazzoni, CTO, Bootlin
-Embedded Linux and Kernel engineering
-https://bootlin.com
+2.19.2
