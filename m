@@ -1,29 +1,32 @@
 From: Thierry Reding <thierry.reding@gmail.com>
-Subject: Re: [PATCH 3/3] mmc: sdhci-tegra: drop ->get_ro() implementation
-Date: Wed, 16 Jan 2019 14:22:21 +0100
-Message-ID: <20190116132221.GA11050@ulmo>
+Subject: Re: [PATCH 2/3] mmc: sdhci-omap: drop ->get_ro() implementation
+Date: Wed, 16 Jan 2019 14:27:47 +0100
+Message-ID: <20190116132747.GB11050@ulmo>
 References: <20190115162837.5399-1-thomas.petazzoni@bootlin.com>
- <20190115162837.5399-4-thomas.petazzoni@bootlin.com>
+ <20190115162837.5399-3-thomas.petazzoni@bootlin.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="M9NhX3UHpAaciwkO"
+        protocol="application/pgp-signature"; boundary="CdrF4e02JqNVZeln"
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20190115162837.5399-4-thomas.petazzoni@bootlin.com>
+In-Reply-To: <20190115162837.5399-3-thomas.petazzoni@bootlin.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Thomas Petazzoni <thomas.petazzoni@bootlin.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Kishon Vijay Abraham I <kishon@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>, Jonathan Hunter <jonathanh@nvidia.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org, Gregory Clement <gregory.clement@bootlin.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Kishon Vijay Abraham I <kishon@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>, Jonathan Hunter <jonathanh@nvidia.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org, Gregory Clement <gregory.clement@bootlin.com>, Tony Lindgren <tony@atomide.com>, linux-omap@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
 
---M9NhX3UHpAaciwkO
+--CdrF4e02JqNVZeln
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, Jan 15, 2019 at 05:28:37PM +0100, Thomas Petazzoni wrote:
+On Tue, Jan 15, 2019 at 05:28:36PM +0100, Thomas Petazzoni wrote:
 > The SDHCI core is know properly checking for the state of a WP GPIO,
-> so there is no longer any need for the sdhci-tegra code to implement
+
+"know" -> "now"
+
+> so there is no longer any need for the sdhci-omap code to implement
 > ->get_ro() using mmc_gpio_get_ro().
 >=20
 > Signed-off-by: Thomas Petazzoni <thomas.petazzoni@bootlin.com>
@@ -31,45 +34,58 @@ On Tue, Jan 15, 2019 at 05:28:37PM +0100, Thomas Petazzoni wrote:
 > Note: this patch has only been compiled tested, as I don't have the
 > hardware to test it.
 > ---
->  drivers/mmc/host/sdhci-tegra.c | 9 ---------
->  1 file changed, 9 deletions(-)
+>  drivers/mmc/host/sdhci-omap.c | 1 -
+>  1 file changed, 1 deletion(-)
 
-So, if I apply this on top of next-20180116 I do get a BUG from
-bio_split() on line 1833 in block/bio.c. However, that BUG also exists
-without these patches.
+I can't runtime test this myself, but it certainly looks like this would
+do the right thing because it calls the core now call the very same
+function as this used to, so:
 
-More importantly, read-only detection with this applied still works on
-for example Jetson TK1:
+Reviewed-by: Thierry Reding <treding@nvidia.com>
 
-	[   28.547261] mmc1: new high speed SDHC card at address 59b4
-	[   28.558814] mmcblk1: mmc1:59b4 SDC   14.7 GiB (ro)
+Adding Tony and linux-omap for a slightly wider audience and hopefully
+find someone to test this on. For reference, the whole series is here:
 
-So:
+	https://patchwork.kernel.org/project/linux-mmc/list/?series=3D66905
 
-Tested-by: Thierry Reding <treding@nvidia.com>
+Thierry
 
-and:
+>=20
+> diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+> index d264391616f9..c2a28930086f 100644
+> --- a/drivers/mmc/host/sdhci-omap.c
+> +++ b/drivers/mmc/host/sdhci-omap.c
+> @@ -987,7 +987,6 @@ static int sdhci_omap_probe(struct platform_device *p=
+dev)
+>  		goto err_put_sync;
+>  	}
+> =20
+> -	host->mmc_host_ops.get_ro =3D mmc_gpio_get_ro;
+>  	host->mmc_host_ops.start_signal_voltage_switch =3D
+>  					sdhci_omap_start_signal_voltage_switch;
+>  	host->mmc_host_ops.set_ios =3D sdhci_omap_set_ios;
+> --=20
+> 2.20.1
+>=20
 
-Acked-by: Thierry Reding <treding@nvidia.com>
-
---M9NhX3UHpAaciwkO
+--CdrF4e02JqNVZeln
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAlw/MAkACgkQ3SOs138+
-s6HgOg/9EJguIr3+CPkDImyXcLEzTTvJelPHUixE4x937+wH9whe3D0vbI3anIsl
-u7LclTY1qgNStdqzUpj8MVTTgPa0Y1dlQY/npJxzf1YECnLgsL0U6KUKWH/AmDlS
-XEtb9h4iyCKUGXgjUmKVtXV7ljNW1ZzydCaX+CD523zbd+uAzj/kDys64Y/owvnk
-2PhScdYXLH9L2+b0vNSTL/R9EaY/RZumucpRwhsPaiOZSEHkKeYmbpsUMUrMz4re
-PFjz62HG4kYJ4a5fO3S+kxIcCZtqHEsFM2CpDlu+hUx1JrPw66VdOD2ECog2Sta1
-p+NIVLv6TgUfjTvyn5g0yanJoIzDbKJeYp2btY5ENPx5mtqTiEm1OI/954N2EUAm
-S+wyHP/UkxKhu9+iZRpFYHULREMfceYH0UFtv3Wc8S511TON+6jmEVxPI3SxAj1k
-8I02iXMvWpzw8UIhbdinCX8o5N9ln4MYJRoiQ8tCF903L3hzI9YFAqCl2JvgaUgo
-hjWpjifabP+agFNOnaSteXzEVjWPFZJI0MNOlAlosVdkKdFsOlX/LIfFoVrZjR90
-fKs6USdx/TqHpICf/dlg47UwEqi5z9QuzUKNSvmxrl6/SsoGfqPbWHEZbwNOb47z
-z/Cbb0h9+5PictazpRr9XwCpqDmVGCZXiLLtvVV9l15q/ItNV6k=
-=JB/h
+iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAlw/MVMACgkQ3SOs138+
+s6HiJA/+PASp1njciDjqY+I9wKP97EQV3tpvJIzGCCFsL7iQ2O6p8f846Eo+OXBi
+aJmcEhUT8URqPeRZGm83NUaqBySGLZ17XyWIAOgx+pQEPgcRSvcV4Z7fUeSxlzp1
+tilRGoFwd4dgvXk/HSpYsgnWPOLBfnUuvHJZVMC31XykOiBcRNL8nNanq2tLXu5+
++7+bAw44SZbYjkMaEmkVnY1SoiaLCHXdbZekCjE205pWToOwjqy21GdZVc7hSNpG
+KS72f7xL23boeJ9R5RGJl7ez+Oq2EdfUpuC9a9D6P4iFpwmAlCvX2DrxeQycmyRJ
+IyFyRuvj+ucI27Oz9UQe9BDPNCy3BhaJLLrYlhMYZs0QPhE1lj6RXmmfH6yKMyRW
+YYr0XzWiC6gC5XoxVdhZJ7DPzkXEWpScybITgUj/kABRy9I9e9KpRmNWDo1KGeoG
+f/Cze3Q+Eg6HDotplopOhlDprFGunOSYbexvJkjyYsWw/75BzCqxIpcGSb3Dzmj+
+cI4rGS+i1BWZGSN5Js4Gzf9tasHaRUD4L8ITQCzNU1FdmGAJx/OHNcgqTr/nVqs/
+eqbgMf9W9Fwh5YhVc0293gTuXRrRtDGzoTXKhFuzfSKftHNR/peZQ8+zzp1iexK6
+4qeLEkNxH/dT16ZRzEBhQssBMO/XByXGcuU5unkCA9l0uR69auo=
+=TNNh
 -----END PGP SIGNATURE-----
 
---M9NhX3UHpAaciwkO--
+--CdrF4e02JqNVZeln--
