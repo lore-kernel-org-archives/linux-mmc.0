@@ -1,33 +1,67 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH V4 1/3] dt-bindings: mmc: tegra: Add pinctrl for SDMMC
- drive strengths
-Date: Tue, 15 Jan 2019 14:05:04 -0600
-Message-ID: <20190115200504.GA16841@bogus>
-References: <1547160363-25323-1-git-send-email-skomatineni@nvidia.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Alamy Liu <alamy.liu@gmail.com>
+Subject: [PATCH] mmc: cqhci: Fix a tiny potential memory leak on error condition
+Date: Tue, 15 Jan 2019 16:24:38 -0800
+Message-ID: <20190116002440.1678-1-alamy.liu@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1547160363-25323-1-git-send-email-skomatineni@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
-Cc: robh+dt@kernel.org, mark.rutland@arm.com, mperttunen@nvidia.com, thierry.reding@gmail.com, jonathanh@nvidia.com, adrian.hunter@intel.com, ulf.hansson@linaro.org, anrao@nvidia.com, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Sowjanya Komatineni <skomatineni@nvidia.com>
+To: Venkat Gopalakrishnan <venkatg@codeaurora.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, "open list:MULTIMEDIA CARD MMC, SECURE
+        DIGITAL SD AND..." <linux-mmc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 10 Jan 2019 14:46:01 -0800, Sowjanya Komatineni wrote:
-> Add pinctrls for 3V3 and 1V8 pad drive strength configuration for
-> Tegra210 sdmmc.
-> 
-> Tegra210 sdmmc has pad configuration registers in pinmux register
-> domain and handled thru pinctrl to pinmux device node.
-> 
-> Tegra186 and Tegra194 has pad configuration register with in the
-> SDMMC register domain itself and are handles thru drive strength
-> properties in sdmmc device node.
-> 
-> Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
-> ---
->  Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt | 6 +++++-
->  1 file changed, 5 insertions(+), 1 deletion(-)
-> 
+In the error case:
+   either cq_host->desc_base
+       or cq_host->trans_desc_base
+might have been granted memory successfully.
 
-Reviewed-by: Rob Herring <robh@kernel.org>
+The value of mmc_host->cqe_enabled stays 'false'.
+Thus, cqhci_disable (mmc_cqe_ops->cqe_disable) won't be called to
+free the memory.
+Also, cqhci_disable() is designed to disable and free all resources,
+not suitable to handle this corner case.
+
+Signed-off-by: Alamy Liu <alamy.liu@gmail.com>
+---
+ drivers/mmc/host/cqhci.c | 20 +++++++++++++++++++-
+ 1 file changed, 19 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/cqhci.c b/drivers/mmc/host/cqhci.c
+index 974997b6cb..58ad8cd613 100644
+--- a/drivers/mmc/host/cqhci.c
++++ b/drivers/mmc/host/cqhci.c
+@@ -223,7 +223,7 @@ static int cqhci_host_alloc_tdl(struct cqhci_host *cq_host)
+ 					      &cq_host->trans_desc_dma_base,
+ 					      GFP_KERNEL);
+ 	if (!cq_host->desc_base || !cq_host->trans_desc_base)
+-		return -ENOMEM;
++		goto err_free_dma;
+ 
+ 	pr_debug("%s: cqhci: desc-base: 0x%p trans-base: 0x%p\n desc_dma 0x%llx trans_dma: 0x%llx\n",
+ 		 mmc_hostname(cq_host->mmc), cq_host->desc_base, cq_host->trans_desc_base,
+@@ -234,6 +234,24 @@ static int cqhci_host_alloc_tdl(struct cqhci_host *cq_host)
+ 		setup_trans_desc(cq_host, i);
+ 
+ 	return 0;
++
++err_free_dma:
++	if (cq_host->desc_base) {
++		dmam_free_coherent(mmc_dev(cq_host->mmc), cq_host->desc_size,
++				   cq_host->desc_base,
++				   cq_host->desc_dma_base);
++		cq_host->desc_base = NULL;
++		cq_host->desc_dma_base = 0;
++	}
++	if (cq_host->trans_desc_base) {
++		dmam_free_coherent(mmc_dev(cq_host->mmc), cq_host->data_size,
++				   cq_host->trans_desc_base,
++				   cq_host->trans_desc_dma_base);
++		cq_host->trans_desc_base = NULL;
++		cq_host->trans_desc_dma_base = 0;
++	}
++
++	return -ENOMEM;
+ }
+ 
+ static void __cqhci_enable(struct cqhci_host *cq_host)
+-- 
+2.17.1
