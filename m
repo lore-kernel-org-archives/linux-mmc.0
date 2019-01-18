@@ -1,47 +1,45 @@
-From: Mathieu Malaterre <malat@debian.org>
-Subject: [PATCH] mmc: Annotate implicit fall through in jz_mmc_irq_worker
-Date: Wed, 16 Jan 2019 20:52:19 +0100
-Message-ID: <20190116195219.2897-1-malat@debian.org>
+From: Thomas Gleixner <tglx@linutronix.de>
+Subject: Re: [PATCH v7 1/3] mmc: dw_mmc-bluefield: Add driver extension
+Date: Fri, 18 Jan 2019 11:06:04 +0100 (CET)
+Message-ID: <alpine.DEB.2.21.1901181059100.1647@nanos.tec.linutronix.de>
+References: <026fa942828c54fda5bad225981e56abc808b949.1524497286.git.lsun@mellanox.com> <1525805210-15246-1-git-send-email-lsun@mellanox.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=US-ASCII
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1525805210-15246-1-git-send-email-lsun@mellanox.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Mathieu Malaterre <malat@debian.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Liming Sun <lsun@mellanox.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Jaehoon Chung <jh80.chung@samsung.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, Greg KH <gregkh@linuxfoundation.org>, Kate Stewart <kstewart@linuxfoundation.org>
 List-Id: linux-mmc@vger.kernel.org
 
-There is a plan to build the kernel with -Wimplicit-fallthrough and
-these places in the code produced warnings (W=1).
+Liming,
 
-This commit removes the following warnings:
+On Tue, 8 May 2018, Liming Sun wrote:
+> index 0000000..54c3fbb
+> --- /dev/null
+> +++ b/drivers/mmc/host/dw_mmc-bluefield.c
+> @@ -0,0 +1,81 @@
+> +// SPDX-License-Identifier: GPL-2.0
+> +/*
+> + * Copyright (C) 2018 Mellanox Technologies.
+> + *
+> + * This program is free software; you can redistribute it and/or modify
+> + * it under the terms of the GNU General Public License as published by
+> + * the Free Software Foundation; either version 2 of the License, or
+> + * (at your option) any later version.
+> + */
 
-  drivers/mmc/host/jz4740_mmc.c:745:3: warning: this statement may fall through [-Wimplicit-fallthrough=]
-  drivers/mmc/host/jz4740_mmc.c:779:3: warning: this statement may fall through [-Wimplicit-fallthrough=]
+This license information is broken. The SPDX license identifier and the
+boiler plate text are contradicting. The SPDX id is GPL v2 only and the
+boiler plate says v2 or later.
 
-Signed-off-by: Mathieu Malaterre <malat@debian.org>
----
- drivers/mmc/host/jz4740_mmc.c | 2 ++
- 1 file changed, 2 insertions(+)
+Please decide which version you want and fix ASAP. If you fix that up
+please add a Fixes: tag and cc stable. While at it please remove the boiler
+plate text as the SPDX id is sufficient and the boiler plate is redundant
+information.
 
-diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
-index 33215d66afa2..a1df8bc0b964 100644
---- a/drivers/mmc/host/jz4740_mmc.c
-+++ b/drivers/mmc/host/jz4740_mmc.c
-@@ -743,6 +743,7 @@ static irqreturn_t jz_mmc_irq_worker(int irq, void *devid)
- 			break;
- 
- 		jz_mmc_prepare_data_transfer(host);
-+		/* fall through */
- 
- 	case JZ4740_MMC_STATE_TRANSFER_DATA:
- 		if (host->use_dma) {
-@@ -777,6 +778,7 @@ static irqreturn_t jz_mmc_irq_worker(int irq, void *devid)
- 			break;
- 		}
- 		jz4740_mmc_write_irq_reg(host, JZ_MMC_IRQ_DATA_TRAN_DONE);
-+		/* fall through */
- 
- 	case JZ4740_MMC_STATE_SEND_STOP:
- 		if (!req->stop)
--- 
-2.19.2
+See Documentation/process/license-rules.txt
+
+Thanks,
+
+	tglx
