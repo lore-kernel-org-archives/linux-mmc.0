@@ -1,45 +1,56 @@
-From: Thomas Gleixner <tglx@linutronix.de>
-Subject: Re: [PATCH v7 1/3] mmc: dw_mmc-bluefield: Add driver extension
-Date: Fri, 18 Jan 2019 11:06:04 +0100 (CET)
-Message-ID: <alpine.DEB.2.21.1901181059100.1647@nanos.tec.linutronix.de>
-References: <026fa942828c54fda5bad225981e56abc808b949.1524497286.git.lsun@mellanox.com> <1525805210-15246-1-git-send-email-lsun@mellanox.com>
+From: Faiz Abbas <faiz_abbas@ti.com>
+Subject: Re: [PATCH 2/3] mmc: sdhci-omap: drop ->get_ro() implementation
+Date: Fri, 18 Jan 2019 16:27:11 +0530
+Message-ID: <fab3147f-10e3-51b0-6f58-a1aff751f4be@ti.com>
+References: <20190115162837.5399-1-thomas.petazzoni@bootlin.com>
+ <20190115162837.5399-3-thomas.petazzoni@bootlin.com>
+ <20190116132747.GB11050@ulmo> <20190116154717.GQ5544@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1525805210-15246-1-git-send-email-lsun@mellanox.com>
+In-Reply-To: <20190116154717.GQ5544@atomide.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Liming Sun <lsun@mellanox.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Jaehoon Chung <jh80.chung@samsung.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, Greg KH <gregkh@linuxfoundation.org>, Kate Stewart <kstewart@linuxfoundation.org>
+To: Tony Lindgren <tony@atomide.com>, Thierry Reding <thierry.reding@gmail.com>
+Cc: Thomas Petazzoni <thomas.petazzoni@bootlin.com>, Adrian Hunter <adrian.hunter@intel.com>, Kishon Vijay Abraham I <kishon@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>, Jonathan Hunter <jonathanh@nvidia.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org, Gregory Clement <gregory.clement@bootlin.com>, linux-omap@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Liming,
+Tony,
 
-On Tue, 8 May 2018, Liming Sun wrote:
-> index 0000000..54c3fbb
-> --- /dev/null
-> +++ b/drivers/mmc/host/dw_mmc-bluefield.c
-> @@ -0,0 +1,81 @@
-> +// SPDX-License-Identifier: GPL-2.0
-> +/*
-> + * Copyright (C) 2018 Mellanox Technologies.
-> + *
-> + * This program is free software; you can redistribute it and/or modify
-> + * it under the terms of the GNU General Public License as published by
-> + * the Free Software Foundation; either version 2 of the License, or
-> + * (at your option) any later version.
-> + */
+On 16/01/19 9:17 PM, Tony Lindgren wrote:
+> * Thierry Reding <thierry.reding@gmail.com> [190116 13:28]:
+>> On Tue, Jan 15, 2019 at 05:28:36PM +0100, Thomas Petazzoni wrote:
+>>> The SDHCI core is know properly checking for the state of a WP GPIO,
+>>
+>> "know" -> "now"
+>>
+>>> so there is no longer any need for the sdhci-omap code to implement
+>>> ->get_ro() using mmc_gpio_get_ro().
+>>>
+>>> Signed-off-by: Thomas Petazzoni <thomas.petazzoni@bootlin.com>
+>>> ---
+>>> Note: this patch has only been compiled tested, as I don't have the
+>>> hardware to test it.
+>>> ---
+>>>  drivers/mmc/host/sdhci-omap.c | 1 -
+>>>  1 file changed, 1 deletion(-)
+>>
+>> I can't runtime test this myself, but it certainly looks like this would
+>> do the right thing because it calls the core now call the very same
+>> function as this used to, so:
+>>
+>> Reviewed-by: Thierry Reding <treding@nvidia.com>
+>>
+>> Adding Tony and linux-omap for a slightly wider audience and hopefully
+>> find someone to test this on. For reference, the whole series is here:
+>>
+>> 	https://patchwork.kernel.org/project/linux-mmc/list/?series=66905
+> 
+> Thanks Kishon can you please review and test?
+> 
 
-This license information is broken. The SPDX license identifier and the
-boiler plate text are contradicting. The SPDX id is GPL v2 only and the
-boiler plate says v2 or later.
-
-Please decide which version you want and fix ASAP. If you fix that up
-please add a Fixes: tag and cc stable. While at it please remove the boiler
-plate text as the SPDX id is sufficient and the boiler plate is redundant
-information.
-
-See Documentation/process/license-rules.txt
+I can help with testing once Thomas posts a v2.
 
 Thanks,
-
-	tglx
+Faiz
