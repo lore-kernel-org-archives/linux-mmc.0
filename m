@@ -1,85 +1,64 @@
 From: Thierry Reding <thierry.reding@gmail.com>
-Subject: Re: [PATCH V9 1/3] dt-bindings: mmc: tegra: Add supports-cqe property
-Date: Mon, 21 Jan 2019 11:43:33 +0100
-Message-ID: <20190121104333.GD16756@ulmo>
+Subject: Re: [PATCH V9 3/3] mmc: tegra: HW Command Queue Support for Tegra
+ SDMMC
+Date: Mon, 21 Jan 2019 11:44:32 +0100
+Message-ID: <20190121104432.GE16756@ulmo>
 References: <1547579032-18314-1-git-send-email-skomatineni@nvidia.com>
+ <1547579032-18314-3-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="NklN7DEeGtkPCoo3"
+        protocol="application/pgp-signature"; boundary="cPi+lWm09sJ+d57q"
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1547579032-18314-1-git-send-email-skomatineni@nvidia.com>
+In-Reply-To: <1547579032-18314-3-git-send-email-skomatineni@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Sowjanya Komatineni <skomatineni@nvidia.com>
 Cc: robh+dt@kernel.org, mark.rutland@arm.com, mperttunen@nvidia.com, chunyan.zhang@unisoc.com, jonathanh@nvidia.com, adrian.hunter@intel.com, ulf.hansson@linaro.org, anrao@nvidia.com, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
 
---NklN7DEeGtkPCoo3
+--cPi+lWm09sJ+d57q
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, Jan 15, 2019 at 11:03:50AM -0800, Sowjanya Komatineni wrote:
-> Add supports-cqe optional property for Tegra SDMMC.
->=20
-> Tegra186 and Tegra194 supports HW Command queue only
-> on SDMMC4 controller. This property is used to identify
-> command queue support controller in the tegra sdhci driver.
+On Tue, Jan 15, 2019 at 11:03:52AM -0800, Sowjanya Komatineni wrote:
+> This patch adds HW Command Queue for supported Tegra SDMMC
+> controllers.
 >=20
 > Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
 > ---
->  Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt | 4 ++++
->  1 file changed, 4 insertions(+)
->=20
-> diff --git a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.t=
-xt b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-> index 32b4b4e41923..fb14c2c8d7ee 100644
-> --- a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-> +++ b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-> @@ -72,6 +72,10 @@ Optional properties for Tegra210 and Tegra186:
->  - nvidia,default-trim : Specify the default outbound clock trimmer
->    value.
->  - nvidia,dqs-trim : Specify DQS trim value for HS400 timing
-> +- supports-cqe : The presence of this property indicates that the
-> +  corresponding controller supports HW command queue feature.
-> +  Tegra186 and Tegra194 has 4 SDMMC Controllers and only SDMMC4
-> +  controller supports HW Command Queue with eMMC device.
+>  drivers/mmc/host/Kconfig       |   1 +
+>  drivers/mmc/host/sdhci-tegra.c | 117 +++++++++++++++++++++++++++++++++++=
+++++--
+>  drivers/mmc/host/sdhci.c       |   9 +++-
+>  drivers/mmc/host/sdhci.h       |   2 +
+>  4 files changed, 124 insertions(+), 5 deletions(-)
 
-Hi Rob,
+Looks good to me. It might be worth splitting off the SDHCI core changes
+into a separate patch, but that's for Adrian and Ulf to decide. From a
+Tegra point of view:
 
-are you okay with the property name for this. I'm wondering if it should
-have a vendor prefix or not, but I suspect that something like this may
-be needed for other vendors as well, so not having a vendor prefix could
-be warranted in this case.
+Acked-by: Thierry Reding <treding@nvidia.com>
 
-Thierry
-
-> =20
->    Notes on the pad calibration pull up and pulldown offset values:
->      - The property values are drive codes which are programmed into the
-> --=20
-> 2.7.4
->=20
-
---NklN7DEeGtkPCoo3
+--cPi+lWm09sJ+d57q
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAlxFolUACgkQ3SOs138+
-s6E7EQ//UNWSE3hytU7lm2GZMzGWL1JIUUfBHox5c+CLYu0FbjJb8hpsjBG8PM5K
-61CBgHndu7TCuU/6J+HRKLCBETJEJUa6h+Xkj7zWaPeKItFTYF0b+BB4O/WL5bHb
-1sXuktkVFezv2UM2m7Xy4AX4sIFzqj1eeWCi6xh2V6FkM3rofOawygqpN+DPhzuz
-aLJxuZ9+qIeNtzYdJqBs2AmMHenbvjhlwcNunyuCDyqTMnYf/bt9ny/gIwQ9X7xc
-UYsBKoirf7uBJDYyuDG2Bz3sk6+gr5X0Dc9NqtyUBEhZXmog4rr1oEnHQYjuqrXo
-UO+DMhNzKj9PNYzLnAbQG02GkcmMFTtx05+7igbI3pRoVr9SnLlALQUUP3bwcj2/
-JweBB1j75HH7g+TKJuiALOdQ46i9moTDUszSo8EByhmNUESbuZiXl7yGO6Iv/7HU
-dXyRENbiBx4lHTqoeI2z6vqnmdIfg6PL5f22Ei36t6j2ZtGmFrOrbT/BfWK7DSPB
-EvsTM20IGIUvUQwwAS9qPan7zeYMmVQkXcMxiMYLzTEfSMFzDMXNvrugRgndprff
-8rah2BMB0PeY97bXmLFagsrG8fmlTknEdBooWnSkZrICQonXbGo8A8psd7cNMK2c
-4Wmz3oNj8HEhxKOH+Rb/yp6iyAiHSPwVGIx67EDN8kAwiCowS28=
-=cgdy
+iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAlxFopAACgkQ3SOs138+
+s6Hxlg/9HITuwlKXqMJqQliyTbhELbKNJkPdJdBo4IDdYP3JLJIP4MmJfWsmEem2
+vAvMWal7V7J+IOq9sTrwcGXhglYiqnIoD51RPZdfO252/8jF4yxd/M+GNLKkaxAF
+EDQD6Jes6D7PQO2ff20Tu9Prhjy/YTfvEo2RhtGlhn59bSgYoD3RWyFgMv6bjZWX
+Zs6zoTcXisWfqb4iHvLgFWptqi++EpCv09TouNxQpb1BSjJye5EztlPbqp0aWc3a
+NfAog1bce3JeEfwgzrMVrjS7UHYtaxJxuW1ttSFvOkMy9I/Uf8oUcMpVaf6lYHNe
+/dGpgJkqAzXtnvskDJOxYdV6BizdTI8EdEg73E2CZEHjqUz9VjZUn6Fy8t0KUgqH
++1VpMAnqNGvkrNFfBnbnjVDasT7V8dobsOpEZBvzfK4tUubpnyRhPV4+lW6YsS+x
+IlSWMH/c1UaieE7tVAIQsDWP4KcSJzgBilRkqH/vFU+IF5w+EbNM0jfx2DtMASnh
+EINeheFHdNtEivfOq1ohKUQNo7gT1XOfZCQvIGKZzVia41DIQKoOUnOdI/Iwi0JO
+LvDwSE66C4gRYx4gwP7bKUJ3V8x8cS+dxJL2BEcBNszWkrt0mx6ojc47OXf+kRRU
+ndD4n3+C15ewPbiwHfWA9mUFJwnPEI3RbzyB0SRYue0izYIQihU=
+=vgaz
 -----END PGP SIGNATURE-----
 
---NklN7DEeGtkPCoo3--
+--cPi+lWm09sJ+d57q--
