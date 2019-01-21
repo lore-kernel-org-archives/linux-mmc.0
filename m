@@ -1,52 +1,63 @@
 From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH V9 1/3] dt-bindings: mmc: tegra: Add supports-cqe property
-Date: Mon, 21 Jan 2019 08:31:34 -0600
-Message-ID: <20190121143134.GA18401@bogus>
-References: <1547579032-18314-1-git-send-email-skomatineni@nvidia.com>
- <20190121104333.GD16756@ulmo>
+Subject: Re: [PATCH 3/7] dt-bindings: sdhci-omap: Add example for using
+ external dma
+Date: Mon, 21 Jan 2019 17:20:57 -0600
+Message-ID: <20190121232057.GA30919@bogus>
+References: <20190111110851.6805-1-faiz_abbas@ti.com>
+ <20190111110851.6805-4-faiz_abbas@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20190121104333.GD16756@ulmo>
+In-Reply-To: <20190111110851.6805-4-faiz_abbas@ti.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Thierry Reding <thierry.reding@gmail.com>
-Cc: Sowjanya Komatineni <skomatineni@nvidia.com>, mark.rutland@arm.com, mperttunen@nvidia.com, chunyan.zhang@unisoc.com, jonathanh@nvidia.com, adrian.hunter@intel.com, ulf.hansson@linaro.org, anrao@nvidia.com, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+To: Faiz Abbas <faiz_abbas@ti.com>
+Cc: linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, zhang.chunyan@linaro.org, kishon@ti.com, adrian.hunter@intel.com, mark.rutland@arm.com, ulf.hansson@linaro.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Jan 21, 2019 at 11:43:33AM +0100, Thierry Reding wrote:
-> On Tue, Jan 15, 2019 at 11:03:50AM -0800, Sowjanya Komatineni wrote:
-> > Add supports-cqe optional property for Tegra SDMMC.
-> > 
-> > Tegra186 and Tegra194 supports HW Command queue only
-> > on SDMMC4 controller. This property is used to identify
-> > command queue support controller in the tegra sdhci driver.
-> > 
-> > Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
-> > ---
-> >  Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt | 4 ++++
-> >  1 file changed, 4 insertions(+)
-> > 
-> > diff --git a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-> > index 32b4b4e41923..fb14c2c8d7ee 100644
-> > --- a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-> > +++ b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-> > @@ -72,6 +72,10 @@ Optional properties for Tegra210 and Tegra186:
-> >  - nvidia,default-trim : Specify the default outbound clock trimmer
-> >    value.
-> >  - nvidia,dqs-trim : Specify DQS trim value for HS400 timing
-> > +- supports-cqe : The presence of this property indicates that the
-> > +  corresponding controller supports HW command queue feature.
-> > +  Tegra186 and Tegra194 has 4 SDMMC Controllers and only SDMMC4
-> > +  controller supports HW Command Queue with eMMC device.
-> 
-> Hi Rob,
-> 
-> are you okay with the property name for this. I'm wondering if it should
-> have a vendor prefix or not, but I suspect that something like this may
-> be needed for other vendors as well, so not having a vendor prefix could
-> be warranted in this case.
+On Fri, Jan 11, 2019 at 04:38:47PM +0530, Faiz Abbas wrote:
+> From: Chunyan Zhang <zhang.chunyan@linaro.org>
 
-Seems likely. Please document with common MMC properties in that case.
+The subject is misleading. You are adding new properties, not just 
+changing an example.
 
-Rob
+> 
+> sdhci-omap can support both external dma controller via dmaengine
+> framework as well as ADMA which standard SD host controller
+> provides.
+> 
+> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
+> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+> ---
+>  Documentation/devicetree/bindings/mmc/sdhci-omap.txt | 7 +++++++
+>  1 file changed, 7 insertions(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-omap.txt b/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
+> index 72c4dec7e1db..f8914a2a2aec 100644
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
+> @@ -14,6 +14,11 @@ Required properties:
+>  		 "ddr_1_8v-rev11", "ddr_1_8v" or "ddr_3_3v", "hs200_1_8v-rev11",
+>  		 "hs200_1_8v",
+>  - pinctrl-<n> : Pinctrl states as described in bindings/pinctrl/pinctrl-bindings.txt
+> +- dmas:		List of DMA specifiers with the controller specific format as described
+> +		in the generic DMA client binding. A tx and rx specifier is required.
+> +- dma-names:	List of DMA request names. These strings correspond 1:1 with the
+> +		DMA specifiers listed in dmas. The string naming is to be "rx"
+> +		and "tx" for RX and TX DMA requests, respectively.
+
+The ordering of rx and tx should be defined and you have a mixture.
+
+>  
+>  Example:
+>  	mmc1: mmc@4809c000 {
+> @@ -22,4 +27,6 @@ Example:
+>  		ti,hwmods = "mmc1";
+>  		bus-width = <4>;
+>  		vmmc-supply = <&vmmc>; /* phandle to regulator node */
+> +		dmas = <&sdma 61 &sdma 62>;
+> +		dma-names = "tx", "rx";
+>  	};
+> -- 
+> 2.19.2
+> 
