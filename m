@@ -1,40 +1,82 @@
 From: Sowjanya Komatineni <skomatineni@nvidia.com>
-Subject: [PATCH V10 1/4] dt-bindings: mmc: Add supports-cqe property
-Date: Tue, 22 Jan 2019 11:56:30 -0800
-Message-ID: <1548186993-6229-1-git-send-email-skomatineni@nvidia.com>
+Subject: [PATCH V10 3/4] mmc: sdhci: Add ADMA3 DMA support for V4 enabled host
+Date: Tue, 22 Jan 2019 11:56:32 -0800
+Message-ID: <1548186993-6229-3-git-send-email-skomatineni@nvidia.com>
+References: <1548186993-6229-1-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1548186993-6229-1-git-send-email-skomatineni@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: robh+dt@kernel.org, mark.rutland@arm.com, mperttunen@nvidia.com, chunyan.zhang@unisoc.com, thierry.reding@gmail.com, jonathanh@nvidia.com, adrian.hunter@intel.com, ulf.hansson@linaro.org
 Cc: anrao@nvidia.com, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Sowjanya Komatineni <skomatineni@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Add supports-cqe optional property for MMC hosts.
+Below are the supported DMA types in Host Control1 Register
+with Version 4 enable
+b'00 - SDMA
+b'01 - Not Used
+b'10 - ADMA2
+b'11 - ADMA2 or ADMA3
 
-This property is used to identify the specific host controller
-supporting command queue.
+ADMA3 uses Command Descriptor to issue an SD command.
+A multi-block data transfer is performed by using a pair of CMD
+descriptor and ADMA2 descriptor.
+
+ADMA3 performs multiple of multi-block data transfer by using
+Integrated Descriptor which is more suitable for Command Queuing
+to fetch both Command and Transfer descriptors.
+
+Host Capabilities register indiactes the supports of ADMA3 DMA.
 
 Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
 ---
- [V10]: This patch version moves supports-cqe property from vendor
-	specific MMC property to common MMC property.
+ [V10]: Changes are same as V9 except this series has SDHCI core changes
+	into seperate patch 
 
- Documentation/devicetree/bindings/mmc/mmc.txt | 2 ++
- 1 file changed, 2 insertions(+)
+ drivers/mmc/host/sdhci.c | 9 ++++++++-
+ drivers/mmc/host/sdhci.h | 2 ++
+ 2 files changed, 10 insertions(+), 1 deletion(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
-index f5a0923b34ca..cdbcfd3a4ff2 100644
---- a/Documentation/devicetree/bindings/mmc/mmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/mmc.txt
-@@ -62,6 +62,8 @@ Optional properties:
-   be referred to mmc-pwrseq-simple.txt. But now it's reused as a tunable delay
-   waiting for I/O signalling and card power supply to be stable, regardless of
-   whether pwrseq-simple is used. Default to 10ms if no available.
-+- supports-cqe : The presence of this property indicates that the corresponding
-+  MMC host controller supports HW command queue feature.
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index a22e11a65658..c6afe793399e 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -3353,7 +3353,14 @@ void sdhci_cqe_enable(struct mmc_host *mmc)
  
- *NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
- polarity properties, we have to fix the meaning of the "normal" and "inverted"
+ 	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+ 	ctrl &= ~SDHCI_CTRL_DMA_MASK;
+-	if (host->flags & SDHCI_USE_64_BIT_DMA)
++	/*
++	 * Host from V4.10 supports ADMA3 DMA type.
++	 * ADMA3 performs integrated descriptor which is more suitable
++	 * for cmd queuing to fetch both command and transfer descriptors.
++	 */
++	if (host->v4_mode && (host->caps1 & SDHCI_CAN_DO_ADMA3))
++		ctrl |= SDHCI_CTRL_ADMA3;
++	else if (host->flags & SDHCI_USE_64_BIT_DMA)
+ 		ctrl |= SDHCI_CTRL_ADMA64;
+ 	else
+ 		ctrl |= SDHCI_CTRL_ADMA32;
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 6cc9a3c2ac66..4070be49d947 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -88,6 +88,7 @@
+ #define   SDHCI_CTRL_ADMA1	0x08
+ #define   SDHCI_CTRL_ADMA32	0x10
+ #define   SDHCI_CTRL_ADMA64	0x18
++#define   SDHCI_CTRL_ADMA3	0x18
+ #define   SDHCI_CTRL_8BITBUS	0x20
+ #define  SDHCI_CTRL_CDTEST_INS	0x40
+ #define  SDHCI_CTRL_CDTEST_EN	0x80
+@@ -230,6 +231,7 @@
+ #define  SDHCI_RETUNING_MODE_SHIFT		14
+ #define  SDHCI_CLOCK_MUL_MASK	0x00FF0000
+ #define  SDHCI_CLOCK_MUL_SHIFT	16
++#define  SDHCI_CAN_DO_ADMA3	0x08000000
+ #define  SDHCI_SUPPORT_HS400	0x80000000 /* Non-standard */
+ 
+ #define SDHCI_CAPABILITIES_1	0x44
 -- 
 2.7.4
