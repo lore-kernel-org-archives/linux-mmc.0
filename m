@@ -1,37 +1,40 @@
-From: Faiz Abbas <faiz_abbas@ti.com>
-Subject: Re: [PATCH] dt-bindings: sdhci-omap: Add properties for using
- external dma
-Date: Tue, 22 Jan 2019 15:50:10 +0530
-Message-ID: <7231fba8-de0d-dd22-5ec8-d62d34c6495d@ti.com>
-References: <20190121232057.GA30919@bogus>
- <20190122084706.11522-1-zhang.chunyan@linaro.org>
+From: Sowjanya Komatineni <skomatineni@nvidia.com>
+Subject: [PATCH V10 1/4] dt-bindings: mmc: Add supports-cqe property
+Date: Tue, 22 Jan 2019 11:56:30 -0800
+Message-ID: <1548186993-6229-1-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190122084706.11522-1-zhang.chunyan@linaro.org>
-Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Mark Brown <broonie@kernel.org>, Kishon Vijay Abraham I <kishon@ti.com>, Sekhar Nori <nsekhar@ti.com>, Chunyan Zhang <zhang.lyra@gmail.com>, Rob Herring <robh+dt@kernel.org>
+To: robh+dt@kernel.org, mark.rutland@arm.com, mperttunen@nvidia.com, chunyan.zhang@unisoc.com, thierry.reding@gmail.com, jonathanh@nvidia.com, adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc: anrao@nvidia.com, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Sowjanya Komatineni <skomatineni@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Chunyan,
+Add supports-cqe optional property for MMC hosts.
 
-+Rob Herring
+This property is used to identify the specific host controller
+supporting command queue.
 
-On 22/01/19 2:17 PM, Chunyan Zhang wrote:
-> sdhci-omap can support both external dma controller via dmaengine
-> framework as well as ADMA which standard SD host controller
-> provides.
-> 
-> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
-> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
-> ---
+Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
+---
+ [V10]: This patch version moves supports-cqe property from vendor
+	specific MMC property to common MMC property.
 
-Thanks for fixing this. However, this change should be part of the
-series (with a change log and a version number). I will send this as a
-part of my series after I get some Acks on the driver patches.
+ Documentation/devicetree/bindings/mmc/mmc.txt | 2 ++
+ 1 file changed, 2 insertions(+)
 
-Thanks,
-Faiz
+diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+index f5a0923b34ca..cdbcfd3a4ff2 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+@@ -62,6 +62,8 @@ Optional properties:
+   be referred to mmc-pwrseq-simple.txt. But now it's reused as a tunable delay
+   waiting for I/O signalling and card power supply to be stable, regardless of
+   whether pwrseq-simple is used. Default to 10ms if no available.
++- supports-cqe : The presence of this property indicates that the corresponding
++  MMC host controller supports HW command queue feature.
+ 
+ *NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
+ polarity properties, we have to fix the meaning of the "normal" and "inverted"
+-- 
+2.7.4
