@@ -1,27 +1,65 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH 6/7] dt-bindings: sdhci-omap: Add am335x and am437x
- specific bindings
-Date: Mon, 21 Jan 2019 17:21:43 -0600
-Message-ID: <20190121232143.GA15655@bogus>
-References: <20190111110851.6805-1-faiz_abbas@ti.com>
- <20190111110851.6805-7-faiz_abbas@ti.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V4 1/3] dt-bindings: mmc: tegra: Add pinctrl for SDMMC
+ drive strengths
+Date: Tue, 22 Jan 2019 08:47:37 +0100
+Message-ID: <CAPDyKFqHtg2TuUKNrg8Xue9jrni+8iw_KxDx5W0+4+FHsqsNZg@mail.gmail.com>
+References: <1547160363-25323-1-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20190111110851.6805-7-faiz_abbas@ti.com>
+In-Reply-To: <1547160363-25323-1-git-send-email-skomatineni@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, zhang.chunyan@linaro.org, kishon@ti.com, adrian.hunter@intel.com, mark.rutland@arm.com, robh+dt@kernel.org, ulf.hansson@linaro.org, faiz_abbas@ti.com
+To: Sowjanya Komatineni <skomatineni@nvidia.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Mikko Perttunen <mperttunen@nvidia.com>, Thierry Reding <thierry.reding@gmail.com>, Jon Hunter <jonathanh@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, anrao@nvidia.com, DTML <devicetree@vger.kernel.org>, linux-tegra@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, 11 Jan 2019 16:38:50 +0530, Faiz Abbas wrote:
-> Add binding for the TI's sdhci-omap controller present in am335x and
-> am437x devices.
-> 
-> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
-> ---
->  Documentation/devicetree/bindings/mmc/sdhci-omap.txt | 2 ++
->  1 file changed, 2 insertions(+)
-> 
+On Thu, 10 Jan 2019 at 23:46, Sowjanya Komatineni
+<skomatineni@nvidia.com> wrote:
+>
+> Add pinctrls for 3V3 and 1V8 pad drive strength configuration for
+> Tegra210 sdmmc.
+>
+> Tegra210 sdmmc has pad configuration registers in pinmux register
+> domain and handled thru pinctrl to pinmux device node.
+>
+> Tegra186 and Tegra194 has pad configuration register with in the
+> SDMMC register domain itself and are handles thru drive strength
+> properties in sdmmc device node.
+>
+> Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
 
-Reviewed-by: Rob Herring <robh@kernel.org>
+Applied for next, thanks!
+
+Kind regards
+Uffe
+
+
+> ---
+>  Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt | 6 +++++-
+>  1 file changed, 5 insertions(+), 1 deletion(-)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
+> index 32b4b4e41923..2cecdc71d94c 100644
+> --- a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
+> +++ b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
+> @@ -39,12 +39,16 @@ sdhci@c8000200 {
+>         bus-width = <8>;
+>  };
+>
+> -Optional properties for Tegra210 and Tegra186:
+> +Optional properties for Tegra210, Tegra186 and Tegra194:
+>  - pinctrl-names, pinctrl-0, pinctrl-1 : Specify pad voltage
+>    configurations. Valid pinctrl-names are "sdmmc-3v3" and "sdmmc-1v8"
+>    for controllers supporting multiple voltage levels. The order of names
+>    should correspond to the pin configuration states in pinctrl-0 and
+>    pinctrl-1.
+> +- pinctrl-names : "sdmmc-3v3-drv" and "sdmmc-1v8-drv" are applicable for
+> +  Tegra210 where pad config registers are in the pinmux register domain
+> +  for pull-up-strength and pull-down-strength values configuration when
+> +  using pads at 3V3 and 1V8 levels.
+>  - nvidia,only-1-8-v : The presence of this property indicates that the
+>    controller operates at a 1.8 V fixed I/O voltage.
+>  - nvidia,pad-autocal-pull-up-offset-3v3,
+> --
+> 2.7.4
+>
