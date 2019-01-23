@@ -1,47 +1,92 @@
-From: Chunyan Zhang <zhang.chunyan@linaro.org>
-Subject: Re: [PATCH] dt-bindings: sdhci-omap: Add properties for using
- external dma
-Date: Wed, 23 Jan 2019 10:44:35 +0800
-Message-ID: <CAG2=9p-JcAB0Re2hRB6bu_18Z_SJXjrynw2cRSKVFEBnWHPDKg@mail.gmail.com>
-References: <20190121232057.GA30919@bogus> <20190122084706.11522-1-zhang.chunyan@linaro.org>
- <7231fba8-de0d-dd22-5ec8-d62d34c6495d@ti.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V10 3/4] mmc: sdhci: Add ADMA3 DMA support for V4 enabled
+ host
+Date: Wed, 23 Jan 2019 09:27:38 +0200
+Message-ID: <459c7d2e-38a6-cfe1-f3d0-a6ecdc2de0a9@intel.com>
+References: <1548186993-6229-1-git-send-email-skomatineni@nvidia.com>
+ <1548186993-6229-3-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <7231fba8-de0d-dd22-5ec8-d62d34c6495d@ti.com>
+In-Reply-To: <1548186993-6229-3-git-send-email-skomatineni@nvidia.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Faiz Abbas <faiz_abbas@ti.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Mark Brown <broonie@kernel.org>, Kishon Vijay Abraham I <kishon@ti.com>, Sekhar Nori <nsekhar@ti.com>, Chunyan Zhang <zhang.lyra@gmail.com>, Rob Herring <robh+dt@kernel.org>
+To: Sowjanya Komatineni <skomatineni@nvidia.com>, robh+dt@kernel.org, mark.rutland@arm.com, mperttunen@nvidia.com, chunyan.zhang@unisoc.com, thierry.reding@gmail.com, jonathanh@nvidia.com, ulf.hansson@linaro.org
+Cc: anrao@nvidia.com, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 22 Jan 2019 at 18:17, Faiz Abbas <faiz_abbas@ti.com> wrote:
->
-> Hi Chunyan,
->
-> +Rob Herring
->
-> On 22/01/19 2:17 PM, Chunyan Zhang wrote:
-> > sdhci-omap can support both external dma controller via dmaengine
-> > framework as well as ADMA which standard SD host controller
-> > provides.
-> >
-> > Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
-> > Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
-> > ---
->
-> Thanks for fixing this. However, this change should be part of the
+On 22/01/19 9:56 PM, Sowjanya Komatineni wrote:
+> Below are the supported DMA types in Host Control1 Register
+> with Version 4 enable
+> b'00 - SDMA
+> b'01 - Not Used
+> b'10 - ADMA2
+> b'11 - ADMA2 or ADMA3
+> 
+> ADMA3 uses Command Descriptor to issue an SD command.
+> A multi-block data transfer is performed by using a pair of CMD
+> descriptor and ADMA2 descriptor.
+> 
+> ADMA3 performs multiple of multi-block data transfer by using
+> Integrated Descriptor which is more suitable for Command Queuing
+> to fetch both Command and Transfer descriptors.
+> 
+> Host Capabilities register indiactes the supports of ADMA3 DMA.
 
-Right, I actually used "--in-reply-to" with the parameter of
-Message-ID of Rob's mail, but it seems not work as I expected that it
-was expected a reply to Rob's mail for review.
+indiactes -> indicates
 
-> series (with a change log and a version number). I will send this as a
-> part of my series after I get some Acks on the driver patches.
+> 
+> Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
 
-Ok, thanks.
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Chunyan
-
->
-> Thanks,
-> Faiz
+> ---
+>  [V10]: Changes are same as V9 except this series has SDHCI core changes
+> 	into seperate patch 
+> 
+>  drivers/mmc/host/sdhci.c | 9 ++++++++-
+>  drivers/mmc/host/sdhci.h | 2 ++
+>  2 files changed, 10 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index a22e11a65658..c6afe793399e 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -3353,7 +3353,14 @@ void sdhci_cqe_enable(struct mmc_host *mmc)
+>  
+>  	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+>  	ctrl &= ~SDHCI_CTRL_DMA_MASK;
+> -	if (host->flags & SDHCI_USE_64_BIT_DMA)
+> +	/*
+> +	 * Host from V4.10 supports ADMA3 DMA type.
+> +	 * ADMA3 performs integrated descriptor which is more suitable
+> +	 * for cmd queuing to fetch both command and transfer descriptors.
+> +	 */
+> +	if (host->v4_mode && (host->caps1 & SDHCI_CAN_DO_ADMA3))
+> +		ctrl |= SDHCI_CTRL_ADMA3;
+> +	else if (host->flags & SDHCI_USE_64_BIT_DMA)
+>  		ctrl |= SDHCI_CTRL_ADMA64;
+>  	else
+>  		ctrl |= SDHCI_CTRL_ADMA32;
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 6cc9a3c2ac66..4070be49d947 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -88,6 +88,7 @@
+>  #define   SDHCI_CTRL_ADMA1	0x08
+>  #define   SDHCI_CTRL_ADMA32	0x10
+>  #define   SDHCI_CTRL_ADMA64	0x18
+> +#define   SDHCI_CTRL_ADMA3	0x18
+>  #define   SDHCI_CTRL_8BITBUS	0x20
+>  #define  SDHCI_CTRL_CDTEST_INS	0x40
+>  #define  SDHCI_CTRL_CDTEST_EN	0x80
+> @@ -230,6 +231,7 @@
+>  #define  SDHCI_RETUNING_MODE_SHIFT		14
+>  #define  SDHCI_CLOCK_MUL_MASK	0x00FF0000
+>  #define  SDHCI_CLOCK_MUL_SHIFT	16
+> +#define  SDHCI_CAN_DO_ADMA3	0x08000000
+>  #define  SDHCI_SUPPORT_HS400	0x80000000 /* Non-standard */
+>  
+>  #define SDHCI_CAPABILITIES_1	0x44
+> 
