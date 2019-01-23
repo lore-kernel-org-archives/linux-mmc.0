@@ -1,57 +1,48 @@
-From: Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>
-Subject: Re: [PATCH 3/4] mmc: bcm2835: Drop pointer to mmc_host from
- bcm2835_host
-Date: Wed, 23 Jan 2019 17:23:34 +0100 (CET)
-Message-ID: <403326446.711096.1548260614564@email.ionos.de>
-References: <9b09dda9817f61a0cfb3991abf11abb1fe7f41c9.1547911374.git.lukas@wunner.de>
- <2140f7852cd0186ec705057d83992a49fbc625f4.1547911374.git.lukas@wunner.de>
- <461f638c-7bf9-1db2-cdf1-6acfa2c8c51a@suse.de>
- <20190122134404.gcbjpbnm2tokrjc7@wunner.de>
+From: Sowjanya Komatineni <skomatineni@nvidia.com>
+Subject: [PATCH V11 2/4] arm64: dts: tegra: Add CQE Support for SDMMC4
+Date: Wed, 23 Jan 2019 11:30:52 -0800
+Message-ID: <1548271854-1765-2-git-send-email-skomatineni@nvidia.com>
+References: <1548271854-1765-1-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <20190122134404.gcbjpbnm2tokrjc7-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rpi-kernel>,
- <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rpi-kernel/>
-List-Post: <mailto:linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rpi-kernel>,
- <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "linux-rpi-kernel" <linux-rpi-kernel-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>, Alexander Graf <agraf-l3A5Bk7waGM@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Frank Pavlic <f.pavlic-XB/JSsFECOqzQB+pC5nmwQ@public.gmane.org>, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1548271854-1765-1-git-send-email-skomatineni@nvidia.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: robh+dt@kernel.org, mark.rutland@arm.com, mperttunen@nvidia.com, chunyan.zhang@unisoc.com, thierry.reding@gmail.com, jonathanh@nvidia.com, adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc: anrao@nvidia.com, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Sowjanya Komatineni <skomatineni@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-> Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org> hat am 22. Januar 2019 um 14:44 geschrieben:
-> 
-> 
-> On Mon, Jan 21, 2019 at 03:20:37PM +0100, Alexander Graf wrote:
-> > On 01/19/2019 04:31 PM, Lukas Wunner wrote:
-> > > --- a/include/linux/mmc/host.h
-> > > +++ b/include/linux/mmc/host.h
-> > > @@ -478,6 +478,11 @@ static inline void *mmc_priv(struct mmc_host *host)
-> > >   	return (void *)host->private;
-> > >   }
-> > > +static inline struct mmc_host *mmc_from_priv(void *priv)
-> > > +{
-> > > +	return priv - offsetof(struct mmc_host, private);
-> > 
-> > Can you use container_of() instead here?
-> 
-> Absolutely.  I've no idea why I didn't use it in the first place.
+Add CQE Support for Tegra186 and Tegra194 SDMMC4 controller
 
-Except of this i'm fine with the whole series:
+Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
+---
+ arch/arm64/boot/dts/nvidia/tegra186.dtsi | 1 +
+ arch/arm64/boot/dts/nvidia/tegra194.dtsi | 1 +
+ 2 files changed, 2 insertions(+)
 
-Tested-by: Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>
-
-Please add a cover letter for V2.
-
-Thanks
-
-> 
-> Thanks,
-> 
-> Lukas
+diff --git a/arch/arm64/boot/dts/nvidia/tegra186.dtsi b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
+index 22815db4a3ed..3dfdc4701934 100644
+--- a/arch/arm64/boot/dts/nvidia/tegra186.dtsi
++++ b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
+@@ -319,6 +319,7 @@
+ 		nvidia,default-trim = <0x9>;
+ 		nvidia,dqs-trim = <63>;
+ 		mmc-hs400-1_8v;
++		supports-cqe;
+ 		status = "disabled";
+ 	};
+ 
+diff --git a/arch/arm64/boot/dts/nvidia/tegra194.dtsi b/arch/arm64/boot/dts/nvidia/tegra194.dtsi
+index 6dfa1ca0b851..9ce1c91d4596 100644
+--- a/arch/arm64/boot/dts/nvidia/tegra194.dtsi
++++ b/arch/arm64/boot/dts/nvidia/tegra194.dtsi
+@@ -325,6 +325,7 @@
+ 			clock-names = "sdhci";
+ 			resets = <&bpmp TEGRA194_RESET_SDMMC4>;
+ 			reset-names = "sdhci";
++			supports-cqe;
+ 			status = "disabled";
+ 		};
+ 
+-- 
+2.7.4
