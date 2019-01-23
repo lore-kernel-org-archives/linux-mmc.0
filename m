@@ -1,92 +1,59 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V10 3/4] mmc: sdhci: Add ADMA3 DMA support for V4 enabled
- host
-Date: Wed, 23 Jan 2019 09:27:38 +0200
-Message-ID: <459c7d2e-38a6-cfe1-f3d0-a6ecdc2de0a9@intel.com>
+From: Thierry Reding <thierry.reding@gmail.com>
+Subject: Re: [PATCH V10 1/4] dt-bindings: mmc: Add supports-cqe property
+Date: Wed, 23 Jan 2019 10:15:07 +0100
+Message-ID: <20190123091507.GA24072@ulmo>
 References: <1548186993-6229-1-git-send-email-skomatineni@nvidia.com>
- <1548186993-6229-3-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="d6Gm4EdcadzBjdND"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1548186993-6229-3-git-send-email-skomatineni@nvidia.com>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <1548186993-6229-1-git-send-email-skomatineni@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Sowjanya Komatineni <skomatineni@nvidia.com>, robh+dt@kernel.org, mark.rutland@arm.com, mperttunen@nvidia.com, chunyan.zhang@unisoc.com, thierry.reding@gmail.com, jonathanh@nvidia.com, ulf.hansson@linaro.org
-Cc: anrao@nvidia.com, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+To: Sowjanya Komatineni <skomatineni@nvidia.com>
+Cc: robh+dt@kernel.org, mark.rutland@arm.com, mperttunen@nvidia.com, chunyan.zhang@unisoc.com, jonathanh@nvidia.com, adrian.hunter@intel.com, ulf.hansson@linaro.org, anrao@nvidia.com, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 22/01/19 9:56 PM, Sowjanya Komatineni wrote:
-> Below are the supported DMA types in Host Control1 Register
-> with Version 4 enable
-> b'00 - SDMA
-> b'01 - Not Used
-> b'10 - ADMA2
-> b'11 - ADMA2 or ADMA3
-> 
-> ADMA3 uses Command Descriptor to issue an SD command.
-> A multi-block data transfer is performed by using a pair of CMD
-> descriptor and ADMA2 descriptor.
-> 
-> ADMA3 performs multiple of multi-block data transfer by using
-> Integrated Descriptor which is more suitable for Command Queuing
-> to fetch both Command and Transfer descriptors.
-> 
-> Host Capabilities register indiactes the supports of ADMA3 DMA.
 
-indiactes -> indicates
+--d6Gm4EdcadzBjdND
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-> 
+On Tue, Jan 22, 2019 at 11:56:30AM -0800, Sowjanya Komatineni wrote:
+> Add supports-cqe optional property for MMC hosts.
+>=20
+> This property is used to identify the specific host controller
+> supporting command queue.
+>=20
 > Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
-
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-
 > ---
->  [V10]: Changes are same as V9 except this series has SDHCI core changes
-> 	into seperate patch 
-> 
->  drivers/mmc/host/sdhci.c | 9 ++++++++-
->  drivers/mmc/host/sdhci.h | 2 ++
->  2 files changed, 10 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index a22e11a65658..c6afe793399e 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -3353,7 +3353,14 @@ void sdhci_cqe_enable(struct mmc_host *mmc)
->  
->  	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
->  	ctrl &= ~SDHCI_CTRL_DMA_MASK;
-> -	if (host->flags & SDHCI_USE_64_BIT_DMA)
-> +	/*
-> +	 * Host from V4.10 supports ADMA3 DMA type.
-> +	 * ADMA3 performs integrated descriptor which is more suitable
-> +	 * for cmd queuing to fetch both command and transfer descriptors.
-> +	 */
-> +	if (host->v4_mode && (host->caps1 & SDHCI_CAN_DO_ADMA3))
-> +		ctrl |= SDHCI_CTRL_ADMA3;
-> +	else if (host->flags & SDHCI_USE_64_BIT_DMA)
->  		ctrl |= SDHCI_CTRL_ADMA64;
->  	else
->  		ctrl |= SDHCI_CTRL_ADMA32;
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 6cc9a3c2ac66..4070be49d947 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -88,6 +88,7 @@
->  #define   SDHCI_CTRL_ADMA1	0x08
->  #define   SDHCI_CTRL_ADMA32	0x10
->  #define   SDHCI_CTRL_ADMA64	0x18
-> +#define   SDHCI_CTRL_ADMA3	0x18
->  #define   SDHCI_CTRL_8BITBUS	0x20
->  #define  SDHCI_CTRL_CDTEST_INS	0x40
->  #define  SDHCI_CTRL_CDTEST_EN	0x80
-> @@ -230,6 +231,7 @@
->  #define  SDHCI_RETUNING_MODE_SHIFT		14
->  #define  SDHCI_CLOCK_MUL_MASK	0x00FF0000
->  #define  SDHCI_CLOCK_MUL_SHIFT	16
-> +#define  SDHCI_CAN_DO_ADMA3	0x08000000
->  #define  SDHCI_SUPPORT_HS400	0x80000000 /* Non-standard */
->  
->  #define SDHCI_CAPABILITIES_1	0x44
-> 
+>  [V10]: This patch version moves supports-cqe property from vendor
+> 	specific MMC property to common MMC property.
+>=20
+>  Documentation/devicetree/bindings/mmc/mmc.txt | 2 ++
+>  1 file changed, 2 insertions(+)
+
+Reviewed-by: Thierry Reding <treding@nvidia.com>
+
+--d6Gm4EdcadzBjdND
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAlxIMJgACgkQ3SOs138+
+s6HG3w//cxrFZWZQwgA1NKCvuES8D+RpOE/c1K8+foWs8q/kyfEOJ4ormoKWaM72
+o6aHTxNbIaoJY8PXgd8Dx3IsBy9DJ6mGbLTz6LZD1+TMegRFxjy4gOAFCe2UljXY
+H4tAXZEeeKQ++dsz0UPOddcmlnCQeROSFILth5Em2RQV81NTGSZEYh4xTL9207pw
+w2t6dpyt302cM7A1RO7bYWtIk+jW/VHM9UGzs8h5p4oXknzj50KlqL+2YuQ16vAO
+3iBQbzNofRyM7yMn9pzIQR2Lr/VAHqGEgbuf5ceVIwo5il/gnj27oyN8luZyXELC
+LZcjYnob4L87LdiQL/vnymcr03UrzIdEFXov7kGmLrhRD3WKrrpj8oqvnDJISFEH
+QToBuPGp9RIaKWtgimpI81XR0AcztuuMkOPZsDvzwItKr6v4iLvt9/1h3h+bSxWv
+I6fWcyfJYSjI8xlXmoWPRGyCcxi+U6y4l1X7c5EPD/uW9C3KYf4IPIsM8JuIb1YK
+yLepArovnU/hzIrkPNZimVk5l24lmgsXB6elorbauumiUUsTvxnV7VTxNcE4+IC9
+Ty/moEjN8CsWIqHxpJLO1I972RA+LH2an86mBHMO0OAEg4d5+a+n+E+/u+vKwa6a
+AOp7fU1HSoih5mf/vRJCZNErDP3AAmcXXx/HNZbiEtoAdMnAyXE=
+=doj9
+-----END PGP SIGNATURE-----
+
+--d6Gm4EdcadzBjdND--
