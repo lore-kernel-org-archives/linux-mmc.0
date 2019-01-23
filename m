@@ -1,72 +1,35 @@
-From: Thierry Reding <thierry.reding@gmail.com>
-Subject: Re: [PATCH V10 4/4] mmc: tegra: HW Command Queue Support for Tegra
- SDMMC
-Date: Wed, 23 Jan 2019 10:20:12 +0100
-Message-ID: <20190123092012.GC24072@ulmo>
-References: <1548186993-6229-1-git-send-email-skomatineni@nvidia.com>
- <1548186993-6229-4-git-send-email-skomatineni@nvidia.com>
+From: Chaotian Jing <chaotian.jing@mediatek.com>
+Subject: [PATCH] mmc: mediatek: fix incorrect register setting of hs400_cmd_int_delay
+Date: Wed, 23 Jan 2019 20:05:25 +0800
+Message-ID: <1548245125-31664-1-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="raC6veAxrt5nqIoY"
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1548186993-6229-4-git-send-email-skomatineni@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Sowjanya Komatineni <skomatineni@nvidia.com>
-Cc: robh+dt@kernel.org, mark.rutland@arm.com, mperttunen@nvidia.com, chunyan.zhang@unisoc.com, jonathanh@nvidia.com, adrian.hunter@intel.com, ulf.hansson@linaro.org, anrao@nvidia.com, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Matthias Brugger <matthias.bgg@gmail.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Ryder Lee <ryder.lee@mediatek.com>, Yong Mao <yong.mao@mediatek.com>, jjian zhou <jjian.zhou@mediatek.com>, Sean Wang <sean.wang@mediatek.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, srv_heupstream@mediatek.com
 List-Id: linux-mmc@vger.kernel.org
 
+to set cmd internal delay, need set PAD_TUNE register but not PAD_CMD_TUNE
+register.
 
---raC6veAxrt5nqIoY
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+---
+ drivers/mmc/host/mtk-sd.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-On Tue, Jan 22, 2019 at 11:56:33AM -0800, Sowjanya Komatineni wrote:
-> This patch adds HW Command Queue for supported Tegra SDMMC
-> controllers.
->=20
-> Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
-> ---
->  [V10]: Changes are same as V9 except this series has SDHCI core changes
-> 	into seperate patch=20
->=20
->  drivers/mmc/host/Kconfig       |   1 +
->  drivers/mmc/host/sdhci-tegra.c | 117 +++++++++++++++++++++++++++++++++++=
-++++--
->  2 files changed, 114 insertions(+), 4 deletions(-)
-
-Sowjanya,
-
-it's good practice to collect the various tags that you've received on
-patches when resending. I had already acked patches 1 and 3 of v9, so
-you should've added the Acked-by for at least this patch 4/4 because it
-is unchanged from v9. The Acked-by on patch 1 was also valid because you
-only moved the documentation, but it is otherwise unchanged.
-
-No worries, though, just something to keep in mind when you send v11
-with the typofix that Adrian pointed out.
-
-Acked-by: Thierry Reding <treding@nvidia.com>
-
---raC6veAxrt5nqIoY
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAlxIMcwACgkQ3SOs138+
-s6HjCg/7BEzZlYzmxabweiblsUj1bl1Cab3v45QDeCgs88YXI1MKXY69Z5BL483E
-2dk680JImRyLxh3elk838WgLAxn/fNRAO284BXKy0kB66bLZBpUXc96lSoWjpPKD
-+hLZmy85NLMuv966QGLxwMbKeIFgsWkPIH3VJ1noixtrKNNFiVjXAUdBqyj4sdXY
-8YigDcSMyL6jp+oourgLPuTUYPkYCb9h+rYrJe/tjhqTXRaXQ9VMv7NE97WYjjXA
-yf9m9Bn4weOnLBClVd2NEQQiy2YAQbNM/EL8I01vOTqZRU+/i4/PwhQo9s+5zAEk
-Mqz+NqkyBnFlhgRLkXG+Xqoip49rraP1h6JgiqUJlDYbI5VAuEK+3D06Nkid8sdK
-rwf7esBXV4z3m9iZ5O/3mEmdRrekCqcOn6QTFF1kR8U6D0sSl4heQyiAYTRBUqyv
-TysZgJ5F3l+s6JPsIL8N2jD+O3z6bL5sPK1ieUHjQ935QFdVyc8iSrpYA7uWSZkA
-gRo/AxlXLQ/xNFeGThZPDouOwwfGlcOv+DqsIOk3Rju8jdKsUil/jqwkI/8UDWsG
-aqE1cY9qZqoJhWRnbJ/JwXkUrhW8ZQUia87xCg9zOXhCVY/Nbe5FpSsqOIelxlib
-IX2UrsQatNWBnMqex421w6wWqbRGLvs12R3is8sZruv3iMDasCo=
-=hvy0
------END PGP SIGNATURE-----
-
---raC6veAxrt5nqIoY--
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index 8afeaf8..833ef05 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -846,7 +846,7 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
+ 
+ 	if (timing == MMC_TIMING_MMC_HS400 &&
+ 	    host->dev_comp->hs400_tune)
+-		sdr_set_field(host->base + PAD_CMD_TUNE,
++		sdr_set_field(host->base + tune_reg,
+ 			      MSDC_PAD_TUNE_CMDRRDLY,
+ 			      host->hs400_cmd_int_delay);
+ 	dev_dbg(host->dev, "sclk: %d, timing: %d\n", host->mmc->actual_clock,
+-- 
+1.8.1.1.dirty
