@@ -1,48 +1,47 @@
-From: Sowjanya Komatineni <skomatineni@nvidia.com>
-Subject: [PATCH V10 2/4] arm64: dts: tegra: Add CQE Support for SDMMC4
-Date: Tue, 22 Jan 2019 11:56:31 -0800
-Message-ID: <1548186993-6229-2-git-send-email-skomatineni@nvidia.com>
-References: <1548186993-6229-1-git-send-email-skomatineni@nvidia.com>
+From: Chunyan Zhang <zhang.chunyan@linaro.org>
+Subject: Re: [PATCH] dt-bindings: sdhci-omap: Add properties for using
+ external dma
+Date: Wed, 23 Jan 2019 10:44:35 +0800
+Message-ID: <CAG2=9p-JcAB0Re2hRB6bu_18Z_SJXjrynw2cRSKVFEBnWHPDKg@mail.gmail.com>
+References: <20190121232057.GA30919@bogus> <20190122084706.11522-1-zhang.chunyan@linaro.org>
+ <7231fba8-de0d-dd22-5ec8-d62d34c6495d@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1548186993-6229-1-git-send-email-skomatineni@nvidia.com>
+In-Reply-To: <7231fba8-de0d-dd22-5ec8-d62d34c6495d@ti.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: robh+dt@kernel.org, mark.rutland@arm.com, mperttunen@nvidia.com, chunyan.zhang@unisoc.com, thierry.reding@gmail.com, jonathanh@nvidia.com, adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc: anrao@nvidia.com, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Sowjanya Komatineni <skomatineni@nvidia.com>
+To: Faiz Abbas <faiz_abbas@ti.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Mark Brown <broonie@kernel.org>, Kishon Vijay Abraham I <kishon@ti.com>, Sekhar Nori <nsekhar@ti.com>, Chunyan Zhang <zhang.lyra@gmail.com>, Rob Herring <robh+dt@kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Add CQE Support for Tegra186 and Tegra194 SDMMC4 controller
+On Tue, 22 Jan 2019 at 18:17, Faiz Abbas <faiz_abbas@ti.com> wrote:
+>
+> Hi Chunyan,
+>
+> +Rob Herring
+>
+> On 22/01/19 2:17 PM, Chunyan Zhang wrote:
+> > sdhci-omap can support both external dma controller via dmaengine
+> > framework as well as ADMA which standard SD host controller
+> > provides.
+> >
+> > Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
+> > Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+> > ---
+>
+> Thanks for fixing this. However, this change should be part of the
 
-Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
----
- arch/arm64/boot/dts/nvidia/tegra186.dtsi | 1 +
- arch/arm64/boot/dts/nvidia/tegra194.dtsi | 1 +
- 2 files changed, 2 insertions(+)
+Right, I actually used "--in-reply-to" with the parameter of
+Message-ID of Rob's mail, but it seems not work as I expected that it
+was expected a reply to Rob's mail for review.
 
-diff --git a/arch/arm64/boot/dts/nvidia/tegra186.dtsi b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
-index 22815db4a3ed..3dfdc4701934 100644
---- a/arch/arm64/boot/dts/nvidia/tegra186.dtsi
-+++ b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
-@@ -319,6 +319,7 @@
- 		nvidia,default-trim = <0x9>;
- 		nvidia,dqs-trim = <63>;
- 		mmc-hs400-1_8v;
-+		supports-cqe;
- 		status = "disabled";
- 	};
- 
-diff --git a/arch/arm64/boot/dts/nvidia/tegra194.dtsi b/arch/arm64/boot/dts/nvidia/tegra194.dtsi
-index 6dfa1ca0b851..9ce1c91d4596 100644
---- a/arch/arm64/boot/dts/nvidia/tegra194.dtsi
-+++ b/arch/arm64/boot/dts/nvidia/tegra194.dtsi
-@@ -325,6 +325,7 @@
- 			clock-names = "sdhci";
- 			resets = <&bpmp TEGRA194_RESET_SDMMC4>;
- 			reset-names = "sdhci";
-+			supports-cqe;
- 			status = "disabled";
- 		};
- 
--- 
-2.7.4
+> series (with a change log and a version number). I will send this as a
+> part of my series after I get some Acks on the driver patches.
+
+Ok, thanks.
+
+Chunyan
+
+>
+> Thanks,
+> Faiz
