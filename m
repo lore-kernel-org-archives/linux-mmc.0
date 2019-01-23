@@ -1,48 +1,42 @@
 From: Sowjanya Komatineni <skomatineni@nvidia.com>
-Subject: [PATCH V11 2/4] arm64: dts: tegra: Add CQE Support for SDMMC4
-Date: Wed, 23 Jan 2019 11:30:52 -0800
-Message-ID: <1548271854-1765-2-git-send-email-skomatineni@nvidia.com>
-References: <1548271854-1765-1-git-send-email-skomatineni@nvidia.com>
+Subject: [PATCH V11 1/4] dt-bindings: mmc: Add supports-cqe property
+Date: Wed, 23 Jan 2019 11:30:51 -0800
+Message-ID: <1548271854-1765-1-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1548271854-1765-1-git-send-email-skomatineni@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: robh+dt@kernel.org, mark.rutland@arm.com, mperttunen@nvidia.com, chunyan.zhang@unisoc.com, thierry.reding@gmail.com, jonathanh@nvidia.com, adrian.hunter@intel.com, ulf.hansson@linaro.org
 Cc: anrao@nvidia.com, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Sowjanya Komatineni <skomatineni@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Add CQE Support for Tegra186 and Tegra194 SDMMC4 controller
+Add supports-cqe optional property for MMC hosts.
+
+This property is used to identify the specific host controller
+supporting command queue.
 
 Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
+Reviewed-by: Thierry Reding <treding@nvidia.com>
 ---
- arch/arm64/boot/dts/nvidia/tegra186.dtsi | 1 +
- arch/arm64/boot/dts/nvidia/tegra194.dtsi | 1 +
- 2 files changed, 2 insertions(+)
+ [V11]: Same as V10
+ [V10]: This patch version moves supports-cqe property from vendor
+	specific MMC property to common MMC property.
 
-diff --git a/arch/arm64/boot/dts/nvidia/tegra186.dtsi b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
-index 22815db4a3ed..3dfdc4701934 100644
---- a/arch/arm64/boot/dts/nvidia/tegra186.dtsi
-+++ b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
-@@ -319,6 +319,7 @@
- 		nvidia,default-trim = <0x9>;
- 		nvidia,dqs-trim = <63>;
- 		mmc-hs400-1_8v;
-+		supports-cqe;
- 		status = "disabled";
- 	};
+ Documentation/devicetree/bindings/mmc/mmc.txt | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+index f5a0923b34ca..cdbcfd3a4ff2 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+@@ -62,6 +62,8 @@ Optional properties:
+   be referred to mmc-pwrseq-simple.txt. But now it's reused as a tunable delay
+   waiting for I/O signalling and card power supply to be stable, regardless of
+   whether pwrseq-simple is used. Default to 10ms if no available.
++- supports-cqe : The presence of this property indicates that the corresponding
++  MMC host controller supports HW command queue feature.
  
-diff --git a/arch/arm64/boot/dts/nvidia/tegra194.dtsi b/arch/arm64/boot/dts/nvidia/tegra194.dtsi
-index 6dfa1ca0b851..9ce1c91d4596 100644
---- a/arch/arm64/boot/dts/nvidia/tegra194.dtsi
-+++ b/arch/arm64/boot/dts/nvidia/tegra194.dtsi
-@@ -325,6 +325,7 @@
- 			clock-names = "sdhci";
- 			resets = <&bpmp TEGRA194_RESET_SDMMC4>;
- 			reset-names = "sdhci";
-+			supports-cqe;
- 			status = "disabled";
- 		};
- 
+ *NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
+ polarity properties, we have to fix the meaning of the "normal" and "inverted"
 -- 
 2.7.4
