@@ -1,148 +1,87 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [Linux-stm32] [PATCH V3 1/2] mmc: mmci: add variant property to
- set command stop bit
-Date: Thu, 24 Jan 2019 16:12:35 +0100
-Message-ID: <CAPDyKFp+3E35KXVCACO3-6JcRyqdsNGJ-5mAEKmUK0nggGs9nQ@mail.gmail.com>
-References: <1544109212-12621-1-git-send-email-ludovic.Barre@st.com>
- <1544109212-12621-2-git-send-email-ludovic.Barre@st.com> <CAPDyKFq7TZMKWMqmoDR0yfr2N2cf2nr4-BuEs5DPgJSGy-nvAA@mail.gmail.com>
- <35f22c1a-888d-5abd-7ffe-ecf47a74b69a@st.com> <9e22fd3d-f029-2a2a-18d1-af1987c94e4e@st.com>
- <ab4cae87-0a5a-fe22-08ab-7c7661be7c8c@st.com>
+From: Martin Kepplinger <martink@posteo.de>
+Subject: [PATCH] mmc: mxs-mmc: Introduce regulator support
+Date: Fri, 25 Jan 2019 12:34:49 +0100
+Message-ID: <20190125113449.10128-1-martink@posteo.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <ab4cae87-0a5a-fe22-08ab-7c7661be7c8c@st.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ludovic BARRE <ludovic.barre@st.com>
-Cc: DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, linux-stm32@st-md-mailman.stormreply.com, Linux ARM <linux-arm-kernel@lists.infradead.org>
+To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, robin@protonic.nl
+Cc: ulf.hansson@linaro.org, shawnguo@kernel.org, s.hauer@pengutronix.de, linux-imx@nxp.com, linux-kernel@vger.kernel.org, Martin Kepplinger <martin.kepplinger@ginzinger.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 24 Jan 2019 at 16:03, Ludovic BARRE <ludovic.barre@st.com> wrote:
->
-> hi Ulf
->
-> I don't think you've seen my previous mail :-(
-> what is your feeling about "mmc: mmci: send stop command to clear the dpsm"
+From: Martin Kepplinger <martin.kepplinger@ginzinger.com>
 
-Apologize for the delay. I wanted to check this in detail so I applied
-your patch locally and started to play/test it.
+This adds support for explicitly switching the mmc's power on and off.
 
-However, a couple of other regressions was reported for v5.0 rcs, so I
-got sidetracked.
+Signed-off-by: Martin Kepplinger <martin.kepplinger@ginzinger.com>
+---
 
-Back on track by now, so I will have look asap. Thanks for pinging me!
+This is not my patch. It's taken from https://patchwork.kernel.org/patch/4365751/
+rebased and minimally changed; but we use this.
 
-Kind regards
-Uffe
+Are there any objections to this?
 
->
-> Regards
-> Ludo
->
-> On 1/3/19 11:35 AM, Ludovic BARRE wrote:
-> > hi Ulf
-> >
-> > happy new years.
-> >
-> > Just a gentleman ping about patch2 of this series
-> > "mmc: mmci: send stop command to clear the dpsm."
-> >
-> > Regards
-> > Ludo
-> >
-> > On 12/11/18 10:53 AM, Ludovic BARRE wrote:
-> >>
-> >>
-> >> On 12/11/18 10:47 AM, Ulf Hansson wrote:
-> >>> On Thu, 6 Dec 2018 at 16:13, Ludovic Barre <ludovic.Barre@st.com> wrote:
-> >>>>
-> >>>> From: Ludovic Barre <ludovic.barre@st.com>
-> >>>>
-> >>>> On cmd12 (STOP_TRANSMISSION), STM32 sdmmc variant needs to set
-> >>>> cmdstop bit in command register. The CPSM ("Command Path State
-> >>>> Machine")
-> >>>> treats the command as a Stop Transmission command and signals
-> >>>> abort to the DPSM ("Data Path State Machine").
-> >>>>
-> >>>> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
-> >>>
-> >>> Applied for next, thanks!
-> >>
-> >> thanks
-> >>
-> >>>
-> >>> Withholding patch2 for a while, as I need some more time to review it.
-> >>
-> >> No problem,
-> >>
-> >> Regards
-> >> Ludo
-> >>
-> >>>
-> >>> Kind regards
-> >>> Uffe
-> >>>
-> >>>> ---
-> >>>>   drivers/mmc/host/mmci.c | 6 ++++++
-> >>>>   drivers/mmc/host/mmci.h | 2 ++
-> >>>>   2 files changed, 8 insertions(+)
-> >>>>
-> >>>> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> >>>> index 13fa640..e352f5a 100644
-> >>>> --- a/drivers/mmc/host/mmci.c
-> >>>> +++ b/drivers/mmc/host/mmci.c
-> >>>> @@ -21,6 +21,7 @@
-> >>>>   #include <linux/err.h>
-> >>>>   #include <linux/highmem.h>
-> >>>>   #include <linux/log2.h>
-> >>>> +#include <linux/mmc/mmc.h>
-> >>>>   #include <linux/mmc/pm.h>
-> >>>>   #include <linux/mmc/host.h>
-> >>>>   #include <linux/mmc/card.h>
-> >>>> @@ -274,6 +275,7 @@ static struct variant_data variant_stm32_sdmmc = {
-> >>>>          .cmdreg_lrsp_crc        = MCI_CPSM_STM32_LRSP_CRC,
-> >>>>          .cmdreg_srsp_crc        = MCI_CPSM_STM32_SRSP_CRC,
-> >>>>          .cmdreg_srsp            = MCI_CPSM_STM32_SRSP,
-> >>>> +       .cmdreg_stop            = MCI_CPSM_STM32_CMDSTOP,
-> >>>>          .data_cmd_enable        = MCI_CPSM_STM32_CMDTRANS,
-> >>>>          .irq_pio_mask           = MCI_IRQ_PIO_STM32_MASK,
-> >>>>          .datactrl_first         = true,
-> >>>> @@ -1100,6 +1102,10 @@ mmci_start_command(struct mmci_host *host,
-> >>>> struct mmc_command *cmd, u32 c)
-> >>>>                  mmci_reg_delay(host);
-> >>>>          }
-> >>>>
-> >>>> +       if (host->variant->cmdreg_stop &&
-> >>>> +           cmd->opcode == MMC_STOP_TRANSMISSION)
-> >>>> +               c |= host->variant->cmdreg_stop;
-> >>>> +
-> >>>>          c |= cmd->opcode | host->variant->cmdreg_cpsm_enable;
-> >>>>          if (cmd->flags & MMC_RSP_PRESENT) {
-> >>>>                  if (cmd->flags & MMC_RSP_136)
-> >>>> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-> >>>> index 550dd39..2422909 100644
-> >>>> --- a/drivers/mmc/host/mmci.h
-> >>>> +++ b/drivers/mmc/host/mmci.h
-> >>>> @@ -264,6 +264,7 @@ struct mmci_host;
-> >>>>    * @cmdreg_lrsp_crc: enable value for long response with crc
-> >>>>    * @cmdreg_srsp_crc: enable value for short response with crc
-> >>>>    * @cmdreg_srsp: enable value for short response without crc
-> >>>> + * @cmdreg_stop: enable value for stop and abort transmission
-> >>>>    * @datalength_bits: number of bits in the MMCIDATALENGTH register
-> >>>>    * @fifosize: number of bytes that can be written when
-> >>>> MMCI_TXFIFOEMPTY
-> >>>>    *           is asserted (likewise for RX)
-> >>>> @@ -316,6 +317,7 @@ struct variant_data {
-> >>>>          unsigned int            cmdreg_lrsp_crc;
-> >>>>          unsigned int            cmdreg_srsp_crc;
-> >>>>          unsigned int            cmdreg_srsp;
-> >>>> +       unsigned int            cmdreg_stop;
-> >>>>          unsigned int            datalength_bits;
-> >>>>          unsigned int            fifosize;
-> >>>>          unsigned int            fifohalfsize;
-> >>>> --
-> >>>> 2.7.4
-> >>>>
-> > _______________________________________________
-> > Linux-stm32 mailing list
-> > Linux-stm32@st-md-mailman.stormreply.com
-> > https://st-md-mailman.stormreply.com/mailman/listinfo/linux-stm32
+Robin, can I still add your Signed-off-by to this? Also, should I set you
+as the author?
+
+thanks,
+
+                                martin
+
+ drivers/mmc/host/mxs-mmc.c | 31 +++++++++++++++++++++++--------
+ 1 file changed, 23 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+index add1e70195ea..e3c19fabb723 100644
+--- a/drivers/mmc/host/mxs-mmc.c
++++ b/drivers/mmc/host/mxs-mmc.c
+@@ -517,6 +517,26 @@ static void mxs_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	else
+ 		host->bus_width = 0;
+ 
++	if (ios->power_mode != host->power_mode) {
++		switch (ios->power_mode) {
++		case MMC_POWER_OFF:
++			if ((host->vmmc) && regulator_disable(host->vmmc)) {
++				dev_err(mmc_dev(host->mmc),
++					"Failed to disable vmmc regulator\n");
++			}
++			break;
++		case MMC_POWER_UP:
++			if ((host->vmmc) && regulator_enable(host->vmmc)) {
++				dev_err(mmc_dev(host->mmc),
++					"Failed to enable vmmc regulator\n");
++			}
++			break;
++		default:
++			break;
++		}
++		host->power_mode = ios->power_mode;
++	}
++
+ 	if (ios->clock)
+ 		mxs_ssp_set_clk_rate(&host->ssp, ios->clock);
+ }
+@@ -613,16 +633,11 @@ static int mxs_mmc_probe(struct platform_device *pdev)
+ 
+ 	host->mmc = mmc;
+ 	host->sdio_irq_en = 0;
++	host->power_mode = MMC_POWER_OFF;
+ 
+ 	reg_vmmc = devm_regulator_get(&pdev->dev, "vmmc");
+-	if (!IS_ERR(reg_vmmc)) {
+-		ret = regulator_enable(reg_vmmc);
+-		if (ret) {
+-			dev_err(&pdev->dev,
+-				"Failed to enable vmmc regulator: %d\n", ret);
+-			goto out_mmc_free;
+-		}
+-	}
++	if (!IS_ERR(reg_vmmc))
++		host->vmmc = reg_vmmc;
+ 
+ 	ssp->clk = devm_clk_get(&pdev->dev, NULL);
+ 	if (IS_ERR(ssp->clk)) {
+-- 
+2.20.1
