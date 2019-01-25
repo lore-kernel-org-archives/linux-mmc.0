@@ -1,87 +1,70 @@
-From: Martin Kepplinger <martink@posteo.de>
-Subject: [PATCH] mmc: mxs-mmc: Introduce regulator support
-Date: Fri, 25 Jan 2019 12:34:49 +0100
-Message-ID: <20190125113449.10128-1-martink@posteo.de>
-Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v5.0-rc4
+Date: Fri, 25 Jan 2019 14:50:43 +0100
+Message-ID: <20190125135043.22286-1-ulf.hansson@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, robin@protonic.nl
-Cc: ulf.hansson@linaro.org, shawnguo@kernel.org, s.hauer@pengutronix.de, linux-imx@nxp.com, linux-kernel@vger.kernel.org, Martin Kepplinger <martin.kepplinger@ginzinger.com>
+To: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Martin Kepplinger <martin.kepplinger@ginzinger.com>
+Hi Linus,
 
-This adds support for explicitly switching the mmc's power on and off.
+Here's a PR with a couple of MMC fixes intended for v5.0-rc4. Details about the
+highlights are as usual found in the signed tag.
 
-Signed-off-by: Martin Kepplinger <martin.kepplinger@ginzinger.com>
----
+Note that, my GPG-key expired last week, I have set a new expiration date for
+it and re-published it, however not sure if it's been replicated to all
+keyservers yet. Please tell if there is any issues from your side.
 
-This is not my patch. It's taken from https://patchwork.kernel.org/patch/4365751/
-rebased and minimally changed; but we use this.
+Please pull this in!
 
-Are there any objections to this?
+Kind regards
+Ulf Hansson
 
-Robin, can I still add your Signed-off-by to this? Also, should I set you
-as the author?
 
-thanks,
+The following changes since commit 1c7fc5cbc33980acd13d668f1c8f0313d6ae9fd8:
 
-                                martin
+  Linux 5.0-rc2 (2019-01-14 10:41:12 +1200)
 
- drivers/mmc/host/mxs-mmc.c | 31 +++++++++++++++++++++++--------
- 1 file changed, 23 insertions(+), 8 deletions(-)
+are available in the Git repository at:
 
-diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-index add1e70195ea..e3c19fabb723 100644
---- a/drivers/mmc/host/mxs-mmc.c
-+++ b/drivers/mmc/host/mxs-mmc.c
-@@ -517,6 +517,26 @@ static void mxs_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	else
- 		host->bus_width = 0;
- 
-+	if (ios->power_mode != host->power_mode) {
-+		switch (ios->power_mode) {
-+		case MMC_POWER_OFF:
-+			if ((host->vmmc) && regulator_disable(host->vmmc)) {
-+				dev_err(mmc_dev(host->mmc),
-+					"Failed to disable vmmc regulator\n");
-+			}
-+			break;
-+		case MMC_POWER_UP:
-+			if ((host->vmmc) && regulator_enable(host->vmmc)) {
-+				dev_err(mmc_dev(host->mmc),
-+					"Failed to enable vmmc regulator\n");
-+			}
-+			break;
-+		default:
-+			break;
-+		}
-+		host->power_mode = ios->power_mode;
-+	}
-+
- 	if (ios->clock)
- 		mxs_ssp_set_clk_rate(&host->ssp, ios->clock);
- }
-@@ -613,16 +633,11 @@ static int mxs_mmc_probe(struct platform_device *pdev)
- 
- 	host->mmc = mmc;
- 	host->sdio_irq_en = 0;
-+	host->power_mode = MMC_POWER_OFF;
- 
- 	reg_vmmc = devm_regulator_get(&pdev->dev, "vmmc");
--	if (!IS_ERR(reg_vmmc)) {
--		ret = regulator_enable(reg_vmmc);
--		if (ret) {
--			dev_err(&pdev->dev,
--				"Failed to enable vmmc regulator: %d\n", ret);
--			goto out_mmc_free;
--		}
--	}
-+	if (!IS_ERR(reg_vmmc))
-+		host->vmmc = reg_vmmc;
- 
- 	ssp->clk = devm_clk_get(&pdev->dev, NULL);
- 	if (IS_ERR(ssp->clk)) {
--- 
-2.20.1
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.0-rc2
+
+for you to fetch changes up to f3716b8ae9347797b73896725f192c3a7b0069b5:
+
+  mmc: dw_mmc-bluefield: : Fix the license information (2019-01-22 08:46:20 +0100)
+
+----------------------------------------------------------------
+MMC host:
+ - sdhci-acpi: Fixup build dependency for PCI
+ - sdhci-omap: Resolve Kconfig warnings on keystone
+ - sdhci-iproc: Propagate errors from DT parsing
+ - meson-gx: Fixup IRQ handling in release callback
+ - meson-gx: Use signal re-sampling to fixup tuning
+ - dw_mmc-bluefield: Fix the license information
+
+----------------------------------------------------------------
+Andreas Fenkart (1):
+      mmc: meson-gx: enable signal re-sampling together with tuning
+
+Faiz Abbas (1):
+      mmc: host: Fix Kconfig warnings on keystone_defconfig
+
+Liming Sun (1):
+      mmc: dw_mmc-bluefield: : Fix the license information
+
+Remi Pommarel (1):
+      mmc: meson-gx: Free irq in release() callback
+
+Sinan Kaya (1):
+      mmc: sdhci-acpi: Make PCI dependency explicit
+
+Stefan Wahren (1):
+      mmc: sdhci-iproc: handle mmc_of_parse() errors during probe
+
+ drivers/mmc/host/Kconfig            |  4 ++--
+ drivers/mmc/host/dw_mmc-bluefield.c |  5 -----
+ drivers/mmc/host/meson-gx-mmc.c     | 32 ++++++++++++++++++++------------
+ drivers/mmc/host/sdhci-iproc.c      |  5 ++++-
+ 4 files changed, 26 insertions(+), 20 deletions(-)
