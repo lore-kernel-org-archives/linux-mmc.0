@@ -1,23 +1,33 @@
-From: pr-tracker-bot@kernel.org
-Subject: Re: [GIT PULL] MMC fixes for v5.0-rc4
-Date: Fri, 25 Jan 2019 23:20:06 +0000
-Message-ID: <154845840612.30665.3305176793326452490.pr-tracker-bot@kernel.org>
-References: <20190125135043.22286-1-ulf.hansson@linaro.org>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH 1/3] mmc: jz4740: Remove platform data and use standard APIs
+Date: Sat, 26 Jan 2019 13:10:37 +0100
+Message-ID: <CACRpkdbhgpkEJ2B2bEDpmM9WLHxUxM8SWhWw28Of5ZRcZ7okSA@mail.gmail.com>
+References: <20190125200927.21045-1-paul@crapouillou.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190125135043.22286-1-ulf.hansson@linaro.org>
+In-Reply-To: <20190125200927.21045-1-paul@crapouillou.net>
 Sender: linux-kernel-owner@vger.kernel.org
-Cc: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+To: Paul Cercueil <paul@crapouillou.net>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ralf Baechle <ralf@linux-mips.org>, Paul Burton <paul.burton@mips.com>, James Hogan <jhogan@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree@vger.kernel.org>, linux-mips@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-The pull request you sent on Fri, 25 Jan 2019 14:50:43 +0100:
+On Fri, Jan 25, 2019 at 9:09 PM Paul Cercueil <paul@crapouillou.net> wrote:
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.0-rc2
+> Drop the custom code to get the 'cd' and 'wp' GPIOs. The driver now
+> calls mmc_of_parse() which will init these from devicetree or
+> device properties.
+>
+> Also drop the custom code to get the 'power' GPIO. The MMC core
+> provides us with the means to power the MMC card through an external
+> regulator.
+>
+> Signed-off-by: Paul Cercueil <paul@crapouillou.net>
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/ba606975938179b1e893e44e190d0001de8e5262
+Execellent patching!
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 
-Thank you!
+For all three patches.
 
--- 
-Deet-doot-dot, I am a bot.
-https://korg.wiki.kernel.org/userdoc/prtracker
+Yours,
+Linus Walleij
