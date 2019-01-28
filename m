@@ -1,47 +1,64 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: mediatek: fix incorrect register setting of hs400_cmd_int_delay
-Date: Mon, 28 Jan 2019 13:03:15 +0100
-Message-ID: <CAPDyKFoWDDrNx0+k+4AuXAThxLizmvXUUMHqmA0Cy2OgVm6iKA@mail.gmail.com>
-References: <1548245125-31664-1-git-send-email-chaotian.jing@mediatek.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 1/4] mmc: bcm2835: Fix DMA channel leak on probe error
+Date: Mon, 28 Jan 2019 13:03:12 +0100
+Message-ID: <CAPDyKFrFhnP-46wYd+JSpM4xR8fLm_jpynSURbmDsz6NwRuVvA@mail.gmail.com>
+References: <9b09dda9817f61a0cfb3991abf11abb1fe7f41c9.1547911374.git.lukas@wunner.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1548245125-31664-1-git-send-email-chaotian.jing@mediatek.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chaotian Jing <chaotian.jing@mediatek.com>
-Cc: Matthias Brugger <matthias.bgg@gmail.com>, Ryder Lee <ryder.lee@mediatek.com>, Yong Mao <yong.mao@mediatek.com>, jjian zhou <jjian.zhou@mediatek.com>, Sean Wang <sean.wang@mediatek.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, linux-mediatek@lists.infradead.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, srv_heupstream <srv_heupstream@mediatek.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <9b09dda9817f61a0cfb3991abf11abb1fe7f41c9.1547911374.git.lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rpi-kernel>,
+ <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rpi-kernel/>
+List-Post: <mailto:linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rpi-kernel>,
+ <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "linux-rpi-kernel" <linux-rpi-kernel-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Cc: Frank Pavlic <f.pavlic-XB/JSsFECOqzQB+pC5nmwQ@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 23 Jan 2019 at 13:05, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
+On Sat, 19 Jan 2019 at 16:31, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org> wrote:
 >
-> to set cmd internal delay, need set PAD_TUNE register but not PAD_CMD_TUNE
-> register.
+> The BCM2835 MMC host driver requests a DMA channel on probe but neglects
+> to release the channel in the probe error path.  The channel may
+> therefore be leaked, in particular if devm_clk_get() causes probe
+> deferral.  Fix it.
 >
-> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+> Fixes: 660fc733bd74 ("mmc: bcm2835: Add new driver for the sdhost controller.")
+> Signed-off-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+> Cc: stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org # v4.12+
+> Cc: Frank Pavlic <f.pavlic-XB/JSsFECOqzQB+pC5nmwQ@public.gmane.org>
 
-Applied for fixes, adding a fixes+stable tag, thanks!
+Applied for fixes and added Stefan's tested-by tag, thanks!
+
+For the rest of the series, I am expecting a you to re-post a v2.
 
 Kind regards
 Uffe
 
 
+
 > ---
->  drivers/mmc/host/mtk-sd.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  drivers/mmc/host/bcm2835.c | 2 ++
+>  1 file changed, 2 insertions(+)
 >
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 8afeaf8..833ef05 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -846,7 +846,7 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
+> diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
+> index 50293529d6de..c9e7aa50bb0a 100644
+> --- a/drivers/mmc/host/bcm2835.c
+> +++ b/drivers/mmc/host/bcm2835.c
+> @@ -1431,6 +1431,8 @@ static int bcm2835_probe(struct platform_device *pdev)
 >
->         if (timing == MMC_TIMING_MMC_HS400 &&
->             host->dev_comp->hs400_tune)
-> -               sdr_set_field(host->base + PAD_CMD_TUNE,
-> +               sdr_set_field(host->base + tune_reg,
->                               MSDC_PAD_TUNE_CMDRRDLY,
->                               host->hs400_cmd_int_delay);
->         dev_dbg(host->dev, "sclk: %d, timing: %d\n", host->mmc->actual_clock,
+>  err:
+>         dev_dbg(dev, "%s -> err %d\n", __func__, ret);
+> +       if (host->dma_chan_rxtx)
+> +               dma_release_channel(host->dma_chan_rxtx);
+>         mmc_free_host(mmc);
+>
+>         return ret;
 > --
-> 1.8.1.1.dirty
+> 2.20.1
 >
