@@ -1,82 +1,132 @@
-From: Faiz Abbas <faiz_abbas@ti.com>
-Subject: Re: [PATCH 4/7] mmc: sdhci: Add quirk for disabling DTO during erase
- command
-Date: Mon, 28 Jan 2019 16:49:20 +0530
-Message-ID: <3ca3f7d3-cc75-f616-4c13-b044c8e52d4d@ti.com>
-References: <20190111110851.6805-1-faiz_abbas@ti.com>
- <20190111110851.6805-5-faiz_abbas@ti.com>
- <8c5875db-016c-c416-7356-d7a26d8d2a0e@intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2] mmc: mxs-mmc: Introduce regulator support
+Date: Mon, 28 Jan 2019 12:33:19 +0100
+Message-ID: <CAPDyKFpbSMpfdpEd_CkcMzfDU1nwG3A8dnZ8HR30mM+WF22kZw@mail.gmail.com>
+References: <20190128102022.1880-1-martink@posteo.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <8c5875db-016c-c416-7356-d7a26d8d2a0e@intel.com>
-Content-Language: en-US
+In-Reply-To: <20190128102022.1880-1-martink@posteo.de>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: zhang.chunyan@linaro.org, kishon@ti.com, mark.rutland@arm.com, robh+dt@kernel.org, ulf.hansson@linaro.org
+To: Martin Kepplinger <martink@posteo.de>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Robin van der Gracht <robin@protonic.nl>, Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>, Sascha Hauer <kernel@pengutronix.de>, dl-linux-imx <linux-imx@nxp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Martin Kepplinger <martin.kepplinger@ginzinger.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Adrian,
+On Mon, 28 Jan 2019 at 11:20, Martin Kepplinger <martink@posteo.de> wrote:
+>
+> From: Martin Kepplinger <martin.kepplinger@ginzinger.com>
+>
+> This adds support for explicitly switching the mmc's power on and off
+> which is needed for example for WL1837 wifi controllers. ip link set wlan0 down
+> doesn't turn off the VMMC regulator which leads to hangs when loading firmware.
 
-On 24/01/19 5:38 PM, Adrian Hunter wrote:
-> On 11/01/19 1:08 PM, Faiz Abbas wrote:
->> Some controllers might prematurely issue a data timeout during an erase
->> command. Add a quirk to disable the interrupt when an erase command is
->> issued.
-> 
-> I might have already asked this, but would it be possible to use the
-> existing SDHCI_QUIRK2_DISABLE_HW_TIMEOUT quirk?
+Isn't there a GPIO that needs to be toggled and separate clk for the
+WiFi chip that needs to be enabled as well?
 
-This looks promising. Let me look into this. In any case, I should
-probably move this to something like sdhci_set_timeout and use
-sdhci_set_data_timeout_irq().
+>
+> Tested on i.MX28.
+>
+> Signed-off-by: Martin Kepplinger <martin.kepplinger@ginzinger.com>
+> ---
+>
+> again, this isn't new. it's (rebased and simplified)
+> https://patchwork.kernel.org/patch/4365751/
+>
+> Thanks Robin for your input!
+>
+> revision history
+> ----------------
+> v1: was just a question why this hasn't gone in earlier.
+>
+>
+>  drivers/mmc/host/mxs-mmc.c | 31 +++++++++++++++++++++++--------
+>  1 file changed, 23 insertions(+), 8 deletions(-)
+>
+> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+> index add1e70195ea..fdaca0fcec99 100644
+> --- a/drivers/mmc/host/mxs-mmc.c
+> +++ b/drivers/mmc/host/mxs-mmc.c
+> @@ -66,11 +66,13 @@ struct mxs_mmc_host {
+>         struct mmc_request              *mrq;
+>         struct mmc_command              *cmd;
+>         struct mmc_data                 *data;
+> +       struct regulator                *vmmc;
 
-I was following 93caf8e69eac ("omap_hsmmc: add erase capability") for
-adding this.
+You don't need this here as this is already part of the generic struct
+mmc_host (via the struct mmc_supply).
 
-Thanks,
-Faiz
+>
+>         unsigned char                   bus_width;
+>         spinlock_t                      lock;
+>         int                             sdio_irq_en;
+>         bool                            broken_cd;
+> +       unsigned char                   power_mode;
 
-> 
->>
->> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
->> ---
->>  drivers/mmc/host/sdhci.c | 8 ++++++++
->>  drivers/mmc/host/sdhci.h | 2 ++
->>  2 files changed, 10 insertions(+)
->>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index 4a9044c06e21..cfd716aee552 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -1560,6 +1560,14 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
->>  	/* Initially, a command has no error */
->>  	cmd->error = 0;
->>  
->> +	if (cmd->opcode == MMC_ERASE &&
->> +	    (host->quirks2 & SDHCI_QUIRK2_DISABLE_DTO_FOR_ERASE)) {
->> +		mask = sdhci_readl(host, SDHCI_INT_ENABLE);
->> +		mask &= ~SDHCI_INT_DATA_TIMEOUT;
->> +		sdhci_writel(host, mask, SDHCI_INT_ENABLE);
->> +		sdhci_writel(host, mask, SDHCI_SIGNAL_ENABLE);
->> +	}
->> +
->>  	if ((host->quirks2 & SDHCI_QUIRK2_STOP_WITH_TC) &&
->>  	    cmd->opcode == MMC_STOP_TRANSMISSION)
->>  		cmd->flags |= MMC_RSP_BUSY;
->> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
->> index 7a52823ebef4..d0c6d4fe5371 100644
->> --- a/drivers/mmc/host/sdhci.h
->> +++ b/drivers/mmc/host/sdhci.h
->> @@ -479,6 +479,8 @@ struct sdhci_host {
->>   * block count.
->>   */
->>  #define SDHCI_QUIRK2_USE_32BIT_BLK_CNT			(1<<18)
->> +/* Controller needs to disable DTO for erase command */
->> +#define SDHCI_QUIRK2_DISABLE_DTO_FOR_ERASE		(1<<19)
->>  
->>  	int irq;		/* Device IRQ */
->>  	void __iomem *ioaddr;	/* Mapped address */
->>
-> 
+Ditto.
+
+>  };
+>
+>  static int mxs_mmc_get_cd(struct mmc_host *mmc)
+> @@ -517,6 +519,24 @@ static void mxs_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>         else
+>                 host->bus_width = 0;
+>
+> +       if (host->vmmc && ios->power_mode != host->power_mode) {
+> +               switch (ios->power_mode) {
+> +               case MMC_POWER_OFF:
+> +                       if (regulator_disable(host->vmmc))
+> +                               dev_err(mmc_dev(host->mmc),
+> +                                       "Failed to disable vmmc regulator\n");
+
+You should use mmc_regulator_set_ocr() instead.
+
+> +                       break;
+> +               case MMC_POWER_UP:
+> +                       if (regulator_enable(host->vmmc))
+
+Ditto.
+
+> +                               dev_err(mmc_dev(host->mmc),
+> +                                       "Failed to enable vmmc regulator\n");
+> +                       break;
+> +               default:
+> +                       break;
+> +               }
+> +               host->power_mode = ios->power_mode;
+> +       }
+> +
+>         if (ios->clock)
+>                 mxs_ssp_set_clk_rate(&host->ssp, ios->clock);
+>  }
+> @@ -613,16 +633,11 @@ static int mxs_mmc_probe(struct platform_device *pdev)
+>
+>         host->mmc = mmc;
+>         host->sdio_irq_en = 0;
+> +       host->power_mode = MMC_POWER_OFF;
+
+This isn't needed. The state is already controlled by the mmc core.
+
+>
+>         reg_vmmc = devm_regulator_get(&pdev->dev, "vmmc");
+
+You should use mmc_regulator_get_supply() instead.
+
+> -       if (!IS_ERR(reg_vmmc)) {
+> -               ret = regulator_enable(reg_vmmc);
+> -               if (ret) {
+> -                       dev_err(&pdev->dev,
+> -                               "Failed to enable vmmc regulator: %d\n", ret);
+> -                       goto out_mmc_free;
+> -               }
+> -       }
+> +       if (!IS_ERR(reg_vmmc))
+> +               host->vmmc = reg_vmmc;
+>
+>         ssp->clk = devm_clk_get(&pdev->dev, NULL);
+>         if (IS_ERR(ssp->clk)) {
+> --
+> 2.20.1
+>
+
+Kind regards
+Uffe
