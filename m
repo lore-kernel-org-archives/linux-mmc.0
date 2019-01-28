@@ -1,7 +1,7 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.20 187/304] mmc: sdhci-omap: Fix timeout checks
-Date: Mon, 28 Jan 2019 10:41:44 -0500
-Message-ID: <20190128154341.47195-187-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.20 188/304] mmc: sdhci-xenon: Fix timeout checks
+Date: Mon, 28 Jan 2019 10:41:45 -0500
+Message-ID: <20190128154341.47195-188-sashal@kernel.org>
 References: <20190128154341.47195-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -14,51 +14,60 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Adrian Hunter <adrian.hunter@intel.com>
 
-[ Upstream commit 9f0ea0bda1d06120b053bb0c283f54afec59293d ]
+[ Upstream commit 0e6e7c2ff397e1bbebc882ca3132148aaaef1ddd ]
 
 Always check the wait condition before returning timeout.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-Acked-by: Kishon Vijay Abraham I <kishon@ti.com>
+Reviewed-by: Zhoujie Wu <zjwu@marvell.com>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/mmc/host/sdhci-omap.c | 16 ++++++++++++----
- 1 file changed, 12 insertions(+), 4 deletions(-)
+ drivers/mmc/host/sdhci-xenon-phy.c | 10 +++++++---
+ drivers/mmc/host/sdhci-xenon.c     | 10 +++++++---
+ 2 files changed, 14 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-index d264391616f9..d02f5cf76b3d 100644
---- a/drivers/mmc/host/sdhci-omap.c
-+++ b/drivers/mmc/host/sdhci-omap.c
-@@ -220,8 +220,12 @@ static void sdhci_omap_conf_bus_power(struct sdhci_omap_host *omap_host,
+diff --git a/drivers/mmc/host/sdhci-xenon-phy.c b/drivers/mmc/host/sdhci-xenon-phy.c
+index 5956e90380e8..5b5eb53a63d2 100644
+--- a/drivers/mmc/host/sdhci-xenon-phy.c
++++ b/drivers/mmc/host/sdhci-xenon-phy.c
+@@ -357,9 +357,13 @@ static int xenon_emmc_phy_enable_dll(struct sdhci_host *host)
  
- 	/* wait 1ms */
- 	timeout = ktime_add_ms(ktime_get(), SDHCI_OMAP_TIMEOUT);
--	while (!(sdhci_omap_readl(omap_host, SDHCI_OMAP_HCTL) & HCTL_SDBP)) {
--		if (WARN_ON(ktime_after(ktime_get(), timeout)))
+ 	/* Wait max 32 ms */
+ 	timeout = ktime_add_ms(ktime_get(), 32);
+-	while (!(sdhci_readw(host, XENON_SLOT_EXT_PRESENT_STATE) &
+-		XENON_DLL_LOCK_STATE)) {
+-		if (ktime_after(ktime_get(), timeout)) {
 +	while (1) {
 +		bool timedout = ktime_after(ktime_get(), timeout);
 +
-+		if (sdhci_omap_readl(omap_host, SDHCI_OMAP_HCTL) & HCTL_SDBP)
++		if (sdhci_readw(host, XENON_SLOT_EXT_PRESENT_STATE) &
++		    XENON_DLL_LOCK_STATE)
 +			break;
-+		if (WARN_ON(timedout))
- 			return;
- 		usleep_range(5, 10);
- 	}
-@@ -653,8 +657,12 @@ static void sdhci_omap_init_74_clocks(struct sdhci_host *host, u8 power_mode)
- 
- 	/* wait 1ms */
- 	timeout = ktime_add_ms(ktime_get(), SDHCI_OMAP_TIMEOUT);
--	while (!(sdhci_omap_readl(omap_host, SDHCI_OMAP_STAT) & INT_CC_EN)) {
--		if (WARN_ON(ktime_after(ktime_get(), timeout)))
++		if (timedout) {
+ 			dev_err(mmc_dev(host->mmc), "Wait for DLL Lock time-out\n");
+ 			return -ETIMEDOUT;
+ 		}
+diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
+index 4d0791f6ec23..a0b5089b3274 100644
+--- a/drivers/mmc/host/sdhci-xenon.c
++++ b/drivers/mmc/host/sdhci-xenon.c
+@@ -34,9 +34,13 @@ static int xenon_enable_internal_clk(struct sdhci_host *host)
+ 	sdhci_writel(host, reg, SDHCI_CLOCK_CONTROL);
+ 	/* Wait max 20 ms */
+ 	timeout = ktime_add_ms(ktime_get(), 20);
+-	while (!((reg = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
+-			& SDHCI_CLOCK_INT_STABLE)) {
+-		if (ktime_after(ktime_get(), timeout)) {
 +	while (1) {
 +		bool timedout = ktime_after(ktime_get(), timeout);
 +
-+		if (sdhci_omap_readl(omap_host, SDHCI_OMAP_STAT) & INT_CC_EN)
++		reg = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
++		if (reg & SDHCI_CLOCK_INT_STABLE)
 +			break;
-+		if (WARN_ON(timedout))
- 			return;
- 		usleep_range(5, 10);
- 	}
++		if (timedout) {
+ 			dev_err(mmc_dev(host->mmc), "Internal clock never stabilised.\n");
+ 			return -ETIMEDOUT;
+ 		}
 -- 
 2.19.1
