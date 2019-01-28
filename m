@@ -1,73 +1,58 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.19 157/258] mmc: sdhci-xenon: Fix timeout checks
-Date: Mon, 28 Jan 2019 10:57:43 -0500
-Message-ID: <20190128155924.51521-157-sashal@kernel.org>
-References: <20190128155924.51521-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.14 100/170] mmc: bcm2835: reset host on timeout
+Date: Mon, 28 Jan 2019 11:10:50 -0500
+Message-ID: <20190128161200.55107-100-sashal@kernel.org>
+References: <20190128161200.55107-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190128155924.51521-1-sashal@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20190128161200.55107-1-sashal@kernel.org>
+Sender: stable-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
+Cc: Michal Suchanek <msuchanek@suse.de>, Stefan Wahren <stefan.wahren@i2se.com>, Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Adrian Hunter <adrian.hunter@intel.com>
+From: Michal Suchanek <msuchanek@suse.de>
 
-[ Upstream commit 0e6e7c2ff397e1bbebc882ca3132148aaaef1ddd ]
+[ Upstream commit f6000a4eb34e6462bc0dd39809c1bb99f9633269 ]
 
-Always check the wait condition before returning timeout.
+The bcm2835 mmc host tends to lock up for unknown reason so reset it on
+timeout. The upper mmc block layer tries retransimitting with single
+blocks which tends to work out after a long wait.
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-Reviewed-by: Zhoujie Wu <zjwu@marvell.com>
+This is better than giving up and leaving the machine broken for no
+obvious reason.
+
+Fixes: 660fc733bd74 ("mmc: bcm2835: Add new driver for the sdhost controller.")
+Signed-off-by: Michal Suchanek <msuchanek@suse.de>
+Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
+Acked-by: Eric Anholt <eric@anholt.net>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/mmc/host/sdhci-xenon-phy.c | 10 +++++++---
- drivers/mmc/host/sdhci-xenon.c     | 10 +++++++---
- 2 files changed, 14 insertions(+), 6 deletions(-)
+ drivers/mmc/host/bcm2835.c | 3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-xenon-phy.c b/drivers/mmc/host/sdhci-xenon-phy.c
-index c335052d0c02..caccedc836dc 100644
---- a/drivers/mmc/host/sdhci-xenon-phy.c
-+++ b/drivers/mmc/host/sdhci-xenon-phy.c
-@@ -357,9 +357,13 @@ static int xenon_emmc_phy_enable_dll(struct sdhci_host *host)
+diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
+index aef40e1739ee..a251be266ad7 100644
+--- a/drivers/mmc/host/bcm2835.c
++++ b/drivers/mmc/host/bcm2835.c
+@@ -286,6 +286,7 @@ static void bcm2835_reset(struct mmc_host *mmc)
  
- 	/* Wait max 32 ms */
- 	timeout = ktime_add_ms(ktime_get(), 32);
--	while (!(sdhci_readw(host, XENON_SLOT_EXT_PRESENT_STATE) &
--		XENON_DLL_LOCK_STATE)) {
--		if (ktime_after(ktime_get(), timeout)) {
-+	while (1) {
-+		bool timedout = ktime_after(ktime_get(), timeout);
+ 	if (host->dma_chan)
+ 		dmaengine_terminate_sync(host->dma_chan);
++	host->dma_chan = NULL;
+ 	bcm2835_reset_internal(host);
+ }
+ 
+@@ -846,6 +847,8 @@ static void bcm2835_timeout(struct work_struct *work)
+ 		dev_err(dev, "timeout waiting for hardware interrupt.\n");
+ 		bcm2835_dumpregs(host);
+ 
++		bcm2835_reset(host->mmc);
 +
-+		if (sdhci_readw(host, XENON_SLOT_EXT_PRESENT_STATE) &
-+		    XENON_DLL_LOCK_STATE)
-+			break;
-+		if (timedout) {
- 			dev_err(mmc_dev(host->mmc), "Wait for DLL Lock time-out\n");
- 			return -ETIMEDOUT;
- 		}
-diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
-index 4d0791f6ec23..a0b5089b3274 100644
---- a/drivers/mmc/host/sdhci-xenon.c
-+++ b/drivers/mmc/host/sdhci-xenon.c
-@@ -34,9 +34,13 @@ static int xenon_enable_internal_clk(struct sdhci_host *host)
- 	sdhci_writel(host, reg, SDHCI_CLOCK_CONTROL);
- 	/* Wait max 20 ms */
- 	timeout = ktime_add_ms(ktime_get(), 20);
--	while (!((reg = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
--			& SDHCI_CLOCK_INT_STABLE)) {
--		if (ktime_after(ktime_get(), timeout)) {
-+	while (1) {
-+		bool timedout = ktime_after(ktime_get(), timeout);
-+
-+		reg = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-+		if (reg & SDHCI_CLOCK_INT_STABLE)
-+			break;
-+		if (timedout) {
- 			dev_err(mmc_dev(host->mmc), "Internal clock never stabilised.\n");
- 			return -ETIMEDOUT;
- 		}
+ 		if (host->data) {
+ 			host->data->error = -ETIMEDOUT;
+ 			bcm2835_finish_data(host);
 -- 
 2.19.1
