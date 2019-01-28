@@ -1,58 +1,117 @@
-From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.20 183/304] mmc: bcm2835: reset host on timeout
-Date: Mon, 28 Jan 2019 10:41:40 -0500
-Message-ID: <20190128154341.47195-183-sashal@kernel.org>
-References: <20190128154341.47195-1-sashal@kernel.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v4] mmc: mxs-mmc: Introduce regulator support
+Date: Mon, 28 Jan 2019 22:15:23 +0100
+Message-ID: <CAPDyKFo7949rcxEX5U2QUS0c2xhC_z+JGeOiF2HC6+QukVpEaQ@mail.gmail.com>
+References: <20190128144119.10092-1-martink@posteo.de>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190128154341.47195-1-sashal@kernel.org>
+In-Reply-To: <20190128144119.10092-1-martink@posteo.de>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: Michal Suchanek <msuchanek@suse.de>, Stefan Wahren <stefan.wahren@i2se.com>, Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
+To: Martin Kepplinger <martink@posteo.de>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Robin van der Gracht <robin@protonic.nl>, Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>, dl-linux-imx <linux-imx@nxp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Martin Kepplinger <martin.kepplinger@ginzinger.com>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Michal Suchanek <msuchanek@suse.de>
+On Mon, 28 Jan 2019 at 15:41, Martin Kepplinger <martink@posteo.de> wrote:
+>
+> From: Martin Kepplinger <martin.kepplinger@ginzinger.com>
+>
+> This adds support for explicitly switching the mmc's power on and off
+> which is needed for example for WL1837 WL1271 wifi controllers on imx28.
+>
+> While the wifi's vmmc-supply regulator can be configured in devicetree,
+> "ip link set wlan0 down" doesn't turn off the VMMC regulator which leads
+> to hangs when loading firmware, for example.
+>
+> Signed-off-by: Martin Kepplinger <martin.kepplinger@ginzinger.com>
+> ---
+>
+>
+> revision history
+> ----------------
+> v4: re-added forgotten regulator_enable() during probe
+> v3: improve API usage as suggested by Ulf
+> v2: tested patch with changes suggested by Robin
+> v1: question, why https://patchwork.kernel.org/patch/4365751/ didn't get in
+>
+>
+>  drivers/mmc/host/mxs-mmc.c | 34 +++++++++++++++++++++++++---------
+>  1 file changed, 25 insertions(+), 9 deletions(-)
+>
+> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+> index add1e70195ea..23d275269d61 100644
+> --- a/drivers/mmc/host/mxs-mmc.c
+> +++ b/drivers/mmc/host/mxs-mmc.c
+> @@ -517,6 +517,22 @@ static void mxs_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>         else
+>                 host->bus_width = 0;
+>
+> +       switch (ios->power_mode) {
+> +       case MMC_POWER_OFF:
+> +               if (!IS_ERR(host->mmc->supply.vmmc))
+> +                       mmc_regulator_set_ocr(host->mmc,
+> +                                             host->mmc->supply.vmmc, 0);
+> +               break;
+> +       case MMC_POWER_UP:
+> +               if (!IS_ERR(host->mmc->supply.vmmc))
+> +                       mmc_regulator_set_ocr(host->mmc,
+> +                                             host->mmc->supply.vmmc,
+> +                                             ios->vdd);
+> +               break;
+> +       default:
+> +               break;
+> +       }
+> +
+>         if (ios->clock)
+>                 mxs_ssp_set_clk_rate(&host->ssp, ios->clock);
+>  }
+> @@ -588,7 +604,6 @@ static int mxs_mmc_probe(struct platform_device *pdev)
+>         struct mmc_host *mmc;
+>         struct resource *iores;
+>         int ret = 0, irq_err;
+> -       struct regulator *reg_vmmc;
+>         struct mxs_ssp *ssp;
+>
+>         irq_err = platform_get_irq(pdev, 0);
+> @@ -614,14 +629,15 @@ static int mxs_mmc_probe(struct platform_device *pdev)
+>         host->mmc = mmc;
+>         host->sdio_irq_en = 0;
+>
+> -       reg_vmmc = devm_regulator_get(&pdev->dev, "vmmc");
+> -       if (!IS_ERR(reg_vmmc)) {
+> -               ret = regulator_enable(reg_vmmc);
+> -               if (ret) {
+> -                       dev_err(&pdev->dev,
+> -                               "Failed to enable vmmc regulator: %d\n", ret);
+> -                       goto out_mmc_free;
+> -               }
+> +       ret = mmc_regulator_get_supply(mmc);
+> +       if (ret == -EPROBE_DEFER)
+> +               goto out_mmc_free;
+> +
+> +       ret = regulator_enable(mmc->supply.vmmc);
 
-[ Upstream commit f6000a4eb34e6462bc0dd39809c1bb99f9633269 ]
+This is wrong, as it may cause the regulator usage count to become
+wrongly balanced.
 
-The bcm2835 mmc host tends to lock up for unknown reason so reset it on
-timeout. The upper mmc block layer tries retransimitting with single
-blocks which tends to work out after a long wait.
+Instead, via ->set_ios() when calling mmc_regulator_set_ocr(), it will
+take care of enabling and disabling the regulator depending of the
+requested vdd voltage level.
 
-This is better than giving up and leaving the machine broken for no
-obvious reason.
+> +       if (ret) {
+> +               dev_err(&pdev->dev,
+> +                       "Failed to enable vmmc regulator: %d\n", ret);
+> +               goto out_mmc_free;
+>         }
+>
+>         ssp->clk = devm_clk_get(&pdev->dev, NULL);
+> --
+> 2.20.1
+>
 
-Fixes: 660fc733bd74 ("mmc: bcm2835: Add new driver for the sdhost controller.")
-Signed-off-by: Michal Suchanek <msuchanek@suse.de>
-Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
-Acked-by: Eric Anholt <eric@anholt.net>
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
- drivers/mmc/host/bcm2835.c | 3 +++
- 1 file changed, 3 insertions(+)
+BTW, you didn't really answer my earlier question about the TI WiFi
+chip. Doesn't you need a special clock for WiFi chip as well? How do
+you intend to manage that?
 
-diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
-index aef40e1739ee..a251be266ad7 100644
---- a/drivers/mmc/host/bcm2835.c
-+++ b/drivers/mmc/host/bcm2835.c
-@@ -286,6 +286,7 @@ static void bcm2835_reset(struct mmc_host *mmc)
- 
- 	if (host->dma_chan)
- 		dmaengine_terminate_sync(host->dma_chan);
-+	host->dma_chan = NULL;
- 	bcm2835_reset_internal(host);
- }
- 
-@@ -846,6 +847,8 @@ static void bcm2835_timeout(struct work_struct *work)
- 		dev_err(dev, "timeout waiting for hardware interrupt.\n");
- 		bcm2835_dumpregs(host);
- 
-+		bcm2835_reset(host->mmc);
-+
- 		if (host->data) {
- 			host->data->error = -ETIMEDOUT;
- 			bcm2835_finish_data(host);
--- 
-2.19.1
+Kind regards
+Uffe
