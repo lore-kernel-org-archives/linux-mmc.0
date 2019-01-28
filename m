@@ -1,7 +1,7 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.20 184/304] mmc: meson-mx-sdio: check devm_kasprintf for failure
-Date: Mon, 28 Jan 2019 10:41:41 -0500
-Message-ID: <20190128154341.47195-184-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.20 187/304] mmc: sdhci-omap: Fix timeout checks
+Date: Mon, 28 Jan 2019 10:41:44 -0500
+Message-ID: <20190128154341.47195-187-sashal@kernel.org>
 References: <20190128154341.47195-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -9,50 +9,56 @@ Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20190128154341.47195-1-sashal@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: Nicholas Mc Guire <hofrat@osadl.org>, Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Nicholas Mc Guire <hofrat@osadl.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
 
-[ Upstream commit b0d06f1cb0e2079a3c64fb6e27c19d9a55c723a1 ]
+[ Upstream commit 9f0ea0bda1d06120b053bb0c283f54afec59293d ]
 
-devm_kasprintf() may return NULL on failure of internal allocation thus
-the assignments to  init.name  are not safe if not checked. On error
-meson_mx_mmc_register_clks() returns negative values so -ENOMEM in the
-(unlikely) failure case of devm_kasprintf() should be fine here.
+Always check the wait condition before returning timeout.
 
-Signed-off-by: Nicholas Mc Guire <hofrat@osadl.org>
-Fixes: ed80a13bb4c4 ("mmc: meson-mx-sdio: Add a driver for the Amlogic Meson8 and Meson8b SoCs")
-Acked-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+Acked-by: Kishon Vijay Abraham I <kishon@ti.com>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/mmc/host/meson-mx-sdio.c | 6 ++++++
- 1 file changed, 6 insertions(+)
+ drivers/mmc/host/sdhci-omap.c | 16 ++++++++++++----
+ 1 file changed, 12 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/host/meson-mx-sdio.c b/drivers/mmc/host/meson-mx-sdio.c
-index abe253c262a2..ec980bda071c 100644
---- a/drivers/mmc/host/meson-mx-sdio.c
-+++ b/drivers/mmc/host/meson-mx-sdio.c
-@@ -596,6 +596,9 @@ static int meson_mx_mmc_register_clks(struct meson_mx_mmc_host *host)
- 	init.name = devm_kasprintf(host->controller_dev, GFP_KERNEL,
- 				   "%s#fixed_factor",
- 				   dev_name(host->controller_dev));
-+	if (!init.name)
-+		return -ENOMEM;
+diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+index d264391616f9..d02f5cf76b3d 100644
+--- a/drivers/mmc/host/sdhci-omap.c
++++ b/drivers/mmc/host/sdhci-omap.c
+@@ -220,8 +220,12 @@ static void sdhci_omap_conf_bus_power(struct sdhci_omap_host *omap_host,
+ 
+ 	/* wait 1ms */
+ 	timeout = ktime_add_ms(ktime_get(), SDHCI_OMAP_TIMEOUT);
+-	while (!(sdhci_omap_readl(omap_host, SDHCI_OMAP_HCTL) & HCTL_SDBP)) {
+-		if (WARN_ON(ktime_after(ktime_get(), timeout)))
++	while (1) {
++		bool timedout = ktime_after(ktime_get(), timeout);
 +
- 	init.ops = &clk_fixed_factor_ops;
- 	init.flags = 0;
- 	init.parent_names = &clk_fixed_factor_parent;
-@@ -612,6 +615,9 @@ static int meson_mx_mmc_register_clks(struct meson_mx_mmc_host *host)
- 	clk_div_parent = __clk_get_name(host->fixed_factor_clk);
- 	init.name = devm_kasprintf(host->controller_dev, GFP_KERNEL,
- 				   "%s#div", dev_name(host->controller_dev));
-+	if (!init.name)
-+		return -ENOMEM;
++		if (sdhci_omap_readl(omap_host, SDHCI_OMAP_HCTL) & HCTL_SDBP)
++			break;
++		if (WARN_ON(timedout))
+ 			return;
+ 		usleep_range(5, 10);
+ 	}
+@@ -653,8 +657,12 @@ static void sdhci_omap_init_74_clocks(struct sdhci_host *host, u8 power_mode)
+ 
+ 	/* wait 1ms */
+ 	timeout = ktime_add_ms(ktime_get(), SDHCI_OMAP_TIMEOUT);
+-	while (!(sdhci_omap_readl(omap_host, SDHCI_OMAP_STAT) & INT_CC_EN)) {
+-		if (WARN_ON(ktime_after(ktime_get(), timeout)))
++	while (1) {
++		bool timedout = ktime_after(ktime_get(), timeout);
 +
- 	init.ops = &clk_divider_ops;
- 	init.flags = CLK_SET_RATE_PARENT;
- 	init.parent_names = &clk_div_parent;
++		if (sdhci_omap_readl(omap_host, SDHCI_OMAP_STAT) & INT_CC_EN)
++			break;
++		if (WARN_ON(timedout))
+ 			return;
+ 		usleep_range(5, 10);
+ 	}
 -- 
 2.19.1
