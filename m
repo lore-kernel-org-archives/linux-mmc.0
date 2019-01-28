@@ -1,7 +1,7 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.19 155/258] mmc: sdhci-of-esdhc: Fix timeout checks
-Date: Mon, 28 Jan 2019 10:57:41 -0500
-Message-ID: <20190128155924.51521-155-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 157/258] mmc: sdhci-xenon: Fix timeout checks
+Date: Mon, 28 Jan 2019 10:57:43 -0500
+Message-ID: <20190128155924.51521-157-sashal@kernel.org>
 References: <20190128155924.51521-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -14,51 +14,60 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Adrian Hunter <adrian.hunter@intel.com>
 
-[ Upstream commit ea6d027312111c6d96309ad1a684b33cb37e6764 ]
+[ Upstream commit 0e6e7c2ff397e1bbebc882ca3132148aaaef1ddd ]
 
 Always check the wait condition before returning timeout.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-Reviewed-by: Yangbo Lu <yangbo.lu@nxp.com>
+Reviewed-by: Zhoujie Wu <zjwu@marvell.com>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/mmc/host/sdhci-of-esdhc.c | 16 ++++++++++++----
- 1 file changed, 12 insertions(+), 4 deletions(-)
+ drivers/mmc/host/sdhci-xenon-phy.c | 10 +++++++---
+ drivers/mmc/host/sdhci-xenon.c     | 10 +++++++---
+ 2 files changed, 14 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 9cb7554a463d..a7bf8515116f 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -526,8 +526,12 @@ static void esdhc_clock_enable(struct sdhci_host *host, bool enable)
- 	/* Wait max 20 ms */
- 	timeout = ktime_add_ms(ktime_get(), 20);
- 	val = ESDHC_CLOCK_STABLE;
--	while (!(sdhci_readl(host, ESDHC_PRSSTAT) & val)) {
--		if (ktime_after(ktime_get(), timeout)) {
-+	while  (1) {
-+		bool timedout = ktime_after(ktime_get(), timeout);
-+
-+		if (sdhci_readl(host, ESDHC_PRSSTAT) & val)
-+			break;
-+		if (timedout) {
- 			pr_err("%s: Internal clock never stabilised.\n",
- 				mmc_hostname(host->mmc));
- 			break;
-@@ -591,8 +595,12 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
+diff --git a/drivers/mmc/host/sdhci-xenon-phy.c b/drivers/mmc/host/sdhci-xenon-phy.c
+index c335052d0c02..caccedc836dc 100644
+--- a/drivers/mmc/host/sdhci-xenon-phy.c
++++ b/drivers/mmc/host/sdhci-xenon-phy.c
+@@ -357,9 +357,13 @@ static int xenon_emmc_phy_enable_dll(struct sdhci_host *host)
  
- 	/* Wait max 20 ms */
- 	timeout = ktime_add_ms(ktime_get(), 20);
--	while (!(sdhci_readl(host, ESDHC_PRSSTAT) & ESDHC_CLOCK_STABLE)) {
+ 	/* Wait max 32 ms */
+ 	timeout = ktime_add_ms(ktime_get(), 32);
+-	while (!(sdhci_readw(host, XENON_SLOT_EXT_PRESENT_STATE) &
+-		XENON_DLL_LOCK_STATE)) {
 -		if (ktime_after(ktime_get(), timeout)) {
 +	while (1) {
 +		bool timedout = ktime_after(ktime_get(), timeout);
 +
-+		if (sdhci_readl(host, ESDHC_PRSSTAT) & ESDHC_CLOCK_STABLE)
++		if (sdhci_readw(host, XENON_SLOT_EXT_PRESENT_STATE) &
++		    XENON_DLL_LOCK_STATE)
 +			break;
 +		if (timedout) {
- 			pr_err("%s: Internal clock never stabilised.\n",
- 				mmc_hostname(host->mmc));
- 			return;
+ 			dev_err(mmc_dev(host->mmc), "Wait for DLL Lock time-out\n");
+ 			return -ETIMEDOUT;
+ 		}
+diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
+index 4d0791f6ec23..a0b5089b3274 100644
+--- a/drivers/mmc/host/sdhci-xenon.c
++++ b/drivers/mmc/host/sdhci-xenon.c
+@@ -34,9 +34,13 @@ static int xenon_enable_internal_clk(struct sdhci_host *host)
+ 	sdhci_writel(host, reg, SDHCI_CLOCK_CONTROL);
+ 	/* Wait max 20 ms */
+ 	timeout = ktime_add_ms(ktime_get(), 20);
+-	while (!((reg = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
+-			& SDHCI_CLOCK_INT_STABLE)) {
+-		if (ktime_after(ktime_get(), timeout)) {
++	while (1) {
++		bool timedout = ktime_after(ktime_get(), timeout);
++
++		reg = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
++		if (reg & SDHCI_CLOCK_INT_STABLE)
++			break;
++		if (timedout) {
+ 			dev_err(mmc_dev(host->mmc), "Internal clock never stabilised.\n");
+ 			return -ETIMEDOUT;
+ 		}
 -- 
 2.19.1
