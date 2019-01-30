@@ -1,41 +1,60 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 05/11] mmc: s3cmci: handle highmem pages
-Date: Wed, 30 Jan 2019 09:16:03 +0100
-Message-ID: <CAPDyKFq5mMPX6vfbJVqGPFBwSQ0+eG_UVcok74GQqcmTktgkXA@mail.gmail.com>
-References: <20190114095804.27978-1-hch@lst.de> <20190114095804.27978-6-hch@lst.de>
- <CAPDyKFpcHv7KwuVpWcKjxj--n4YOFADWD5WzOCJ6Dca_JjqnAw@mail.gmail.com> <20190130080423.GA29937@lst.de>
+Subject: Re: [PATCH] mmc: atmel-mci: enable 8 bits buswidth support
+Date: Wed, 30 Jan 2019 10:20:34 +0100
+Message-ID: <CAPDyKFrknwcbTDKQsGTSo9oZWX3B=fq39Ea=YkoFt_8LoEj5AQ@mail.gmail.com>
+References: <20190129164950.31052-1-nicolas.ferre@microchip.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190130080423.GA29937@lst.de>
+In-Reply-To: <20190129164950.31052-1-nicolas.ferre@microchip.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Christoph Hellwig <hch@lst.de>
-Cc: Russell King <linux@armlinux.org.uk>, Nicolas Pitre <nico@fluxnic.net>, Aaro Koskinen <aaro.koskinen@iki.fi>, Ben Dooks <ben-linux@fluff.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, linux-omap <linux-omap@vger.kernel.org>, "list@263.net:IOMMU DRIVERS <iommu@lists.linux-foundation.org>, Joerg
-        Roedel <joro@8bytes.org>," <iommu@lists.linux-foundation.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Nicolas Ferre <nicolas.ferre@microchip.com>
+Cc: Ludovic Desroches <ludovic.desroches@microchip.com>, Alexandre Belloni <alexandre.belloni@bootlin.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 30 Jan 2019 at 09:04, Christoph Hellwig <hch@lst.de> wrote:
+On Tue, 29 Jan 2019 at 17:50, Nicolas Ferre <nicolas.ferre@microchip.com> wrote:
 >
-> On Wed, Jan 30, 2019 at 08:57:47AM +0100, Ulf Hansson wrote:
-> > On Mon, 14 Jan 2019 at 10:58, Christoph Hellwig <hch@lst.de> wrote:
-> > >
-> > > Instead of setting up a kernel pointer to track the current PIO address,
-> > > track the offset in the current page, and do an atomic kmap for the page
-> > > while doing the actual PIO operations.
-> > >
-> > > Signed-off-by: Christoph Hellwig <hch@lst.de>
-> >
-> > Nitpick: This one have some trailing whitespace errors, which git
-> > complains about when I apply it.
-> >
-> > No need to re-spin due to this, I can fix it  up.
+> This patch adds support for 8-bit buswidth.
+> Relevant SDCR value modified.
 >
-> I'll need to respin to limit the segment size to a page anyway, so I
-> will take this into account as well for v2.
+> Signed-off-by: Nicolas Ferre <nicolas.ferre@microchip.com>
 
-Okay!
-
-FYI, I have no further comment on the series, it looks okay to me!
+Applied for next, thanks!
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/atmel-mci.c | 8 +++++++-
+>  1 file changed, 7 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+> index 47189f9ed4e2..735aa5871358 100644
+> --- a/drivers/mmc/host/atmel-mci.c
+> +++ b/drivers/mmc/host/atmel-mci.c
+> @@ -1410,6 +1410,9 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>         case MMC_BUS_WIDTH_4:
+>                 slot->sdc_reg |= ATMCI_SDCBUS_4BIT;
+>                 break;
+> +       case MMC_BUS_WIDTH_8:
+> +               slot->sdc_reg |= ATMCI_SDCBUS_8BIT;
+> +               break;
+>         }
+>
+>         if (ios->clock) {
+> @@ -2275,8 +2278,11 @@ static int atmci_init_slot(struct atmel_mci *host,
+>          * use only one bit for data to prevent fifo underruns and overruns
+>          * which will corrupt data.
+>          */
+> -       if ((slot_data->bus_width >= 4) && host->caps.has_rwproof)
+> +       if ((slot_data->bus_width >= 4) && host->caps.has_rwproof) {
+>                 mmc->caps |= MMC_CAP_4_BIT_DATA;
+> +               if (slot_data->bus_width >= 8)
+> +                       mmc->caps |= MMC_CAP_8_BIT_DATA;
+> +       }
+>
+>         if (atmci_get_version(host) < 0x200) {
+>                 mmc->max_segs = 256;
+> --
+> 2.17.1
+>
