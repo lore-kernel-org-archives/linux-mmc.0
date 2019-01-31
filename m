@@ -1,133 +1,177 @@
-From: Faiz Abbas <faiz_abbas@ti.com>
-Subject: Re: [PATCH 1/7] mmc: sdhci: add support for using external DMA
- devices
-Date: Thu, 31 Jan 2019 18:02:03 +0530
-Message-ID: <708d8bb6-6c64-b63d-398f-19c7f784020c@ti.com>
-References: <CAG2=9p_mUyY=hKLN4E-ZUaJNueE-h5hHKDnJV5cG5kjtLsEgPA@mail.gmail.com>
- <20190130110548.19151-1-zhang.chunyan@linaro.org>
+From: Robin van der Gracht <robin@protonic.nl>
+Subject: Re: [PATCH v4] mmc: mxs-mmc: Introduce regulator support
+Date: Thu, 31 Jan 2019 14:09:30 +0100
+Message-ID: <20190131140930.05c5b6a5@erd987>
+References: <20190128144119.10092-1-martink@posteo.de>
+        <CAPDyKFo7949rcxEX5U2QUS0c2xhC_z+JGeOiF2HC6+QukVpEaQ@mail.gmail.com>
+        <20190131092006.363d1dd4@erd987>
+        <CAPDyKFr=kcoGK0C2A8JH-nhfgUgoRVa-E=6KPRjFO51QQxjJLA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190130110548.19151-1-zhang.chunyan@linaro.org>
-Content-Language: en-US
+In-Reply-To: <CAPDyKFr=kcoGK0C2A8JH-nhfgUgoRVa-E=6KPRjFO51QQxjJLA@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Chunyan Zhang <zhang.chunyan@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Mark Brown <broonie@kernel.org>, Kishon Vijay Abraham I <kishon@ti.com>, Chunyan Zhang <zhang.lyra@gmail.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Martin Kepplinger <martink@posteo.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>, dl-linux-imx <linux-imx@nxp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Martin Kepplinger <martin.kepplinger@ginzinger.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Chunyan,
+On Thu, 31 Jan 2019 13:17:23 +0100
+Ulf Hansson <ulf.hansson@linaro.org> wrote:
 
-On 30/01/19 4:35 PM, Chunyan Zhang wrote:
-> Some standard SD host controllers can support both external dma
-> controllers as well as ADMA/SDMA in which the SD host controller
-> acts as DMA master. TI's omap controller is the case as an example.
+> On Thu, 31 Jan 2019 at 09:20, Robin van der Gracht <robin@protonic.nl> wrote:
+> >
+> > On Mon, 28 Jan 2019 22:15:23 +0100
+> > Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> >  
+> > > On Mon, 28 Jan 2019 at 15:41, Martin Kepplinger <martink@posteo.de> wrote:  
+> > > >
+> > > > From: Martin Kepplinger <martin.kepplinger@ginzinger.com>
+> > > >
+> > > > This adds support for explicitly switching the mmc's power on and off
+> > > > which is needed for example for WL1837 WL1271 wifi controllers on imx28.
+> > > >
+> > > > While the wifi's vmmc-supply regulator can be configured in devicetree,
+> > > > "ip link set wlan0 down" doesn't turn off the VMMC regulator which leads
+> > > > to hangs when loading firmware, for example.
+> > > >
+> > > > Signed-off-by: Martin Kepplinger <martin.kepplinger@ginzinger.com>
+> > > > ---
+> > > >
+> > > >
+> > > > revision history
+> > > > ----------------
+> > > > v4: re-added forgotten regulator_enable() during probe
+> > > > v3: improve API usage as suggested by Ulf
+> > > > v2: tested patch with changes suggested by Robin
+> > > > v1: question, why https://patchwork.kernel.org/patch/4365751/ didn't get in
+> > > >
+> > > >
+> > > >  drivers/mmc/host/mxs-mmc.c | 34 +++++++++++++++++++++++++---------
+> > > >  1 file changed, 25 insertions(+), 9 deletions(-)
+> > > >
+> > > > diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+> > > > index add1e70195ea..23d275269d61 100644
+> > > > --- a/drivers/mmc/host/mxs-mmc.c
+> > > > +++ b/drivers/mmc/host/mxs-mmc.c
+> > > > @@ -517,6 +517,22 @@ static void mxs_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+> > > >         else
+> > > >                 host->bus_width = 0;
+> > > >
+> > > > +       switch (ios->power_mode) {
+> > > > +       case MMC_POWER_OFF:
+> > > > +               if (!IS_ERR(host->mmc->supply.vmmc))
+> > > > +                       mmc_regulator_set_ocr(host->mmc,
+> > > > +                                             host->mmc->supply.vmmc, 0);
+> > > > +               break;
+> > > > +       case MMC_POWER_UP:
+> > > > +               if (!IS_ERR(host->mmc->supply.vmmc))
+> > > > +                       mmc_regulator_set_ocr(host->mmc,
+> > > > +                                             host->mmc->supply.vmmc,
+> > > > +                                             ios->vdd);
+> > > > +               break;
+> > > > +       default:
+> > > > +               break;
+> > > > +       }
+> > > > +
+> > > >         if (ios->clock)
+> > > >                 mxs_ssp_set_clk_rate(&host->ssp, ios->clock);
+> > > >  }
+> > > > @@ -588,7 +604,6 @@ static int mxs_mmc_probe(struct platform_device *pdev)
+> > > >         struct mmc_host *mmc;
+> > > >         struct resource *iores;
+> > > >         int ret = 0, irq_err;
+> > > > -       struct regulator *reg_vmmc;
+> > > >         struct mxs_ssp *ssp;
+> > > >
+> > > >         irq_err = platform_get_irq(pdev, 0);
+> > > > @@ -614,14 +629,15 @@ static int mxs_mmc_probe(struct platform_device *pdev)
+> > > >         host->mmc = mmc;
+> > > >         host->sdio_irq_en = 0;
+> > > >
+> > > > -       reg_vmmc = devm_regulator_get(&pdev->dev, "vmmc");
+> > > > -       if (!IS_ERR(reg_vmmc)) {
+> > > > -               ret = regulator_enable(reg_vmmc);
+> > > > -               if (ret) {
+> > > > -                       dev_err(&pdev->dev,
+> > > > -                               "Failed to enable vmmc regulator: %d\n", ret);
+> > > > -                       goto out_mmc_free;
+> > > > -               }
+> > > > +       ret = mmc_regulator_get_supply(mmc);
+> > > > +       if (ret == -EPROBE_DEFER)
+> > > > +               goto out_mmc_free;
+> > > > +
+> > > > +       ret = regulator_enable(mmc->supply.vmmc);  
+> > >
+> > > This is wrong, as it may cause the regulator usage count to become
+> > > wrongly balanced.
+> > >
+> > > Instead, via ->set_ios() when calling mmc_regulator_set_ocr(), it will
+> > > take care of enabling and disabling the regulator depending of the
+> > > requested vdd voltage level.
+> > >  
+> > > > +       if (ret) {
+> > > > +               dev_err(&pdev->dev,
+> > > > +                       "Failed to enable vmmc regulator: %d\n", ret);
+> > > > +               goto out_mmc_free;
+> > > >         }
+> > > >
+> > > >         ssp->clk = devm_clk_get(&pdev->dev, NULL);
+> > > > --
+> > > > 2.20.1
+> > > >  
+> > >
+> > > BTW, you didn't really answer my earlier question about the TI WiFi
+> > > chip. Doesn't you need a special clock for WiFi chip as well? How do
+> > > you intend to manage that?  
+> >
+> > I used an external 32K oscillator (SLOW_CLK) for my wl1271. Other
+> > clocks ware generated on the module.  
 > 
-> Currently the generic SDHCI code supports ADMA/SDMA integrated in
-> the host controller but does not have any support for external DMA
-> controllers implemented using dmaengine, meaning that custom code is
-> needed for any systems that use an external DMA controller with SDHCI.
+> Right. How do you control that clock? Did you model it as clock via
+> the common clock framework?
+
+No I didn't. The slow clock (sleep clock) was always 'on'.
+
 > 
-> Fixes by Faiz Abbas <faiz_abbas@ti.com>:
-> 1. Map scatterlists before dmaengine_prep_slave_sg()
-> 2. Use dma_async() functions inside of the send_command() path and
-> synchronize once at the start of each request.
+> >
+> > I had to supply a 'vmmc-supply' in your wl1271 devicetree node,
+> > which will be used to power on/off the wlan module. The supply should
+> > be a (delayed) GPIO controlled 'fixed-regulator' attached to the
+> > wlan_en pin on the module.  
 > 
-> Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
-> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
-> ---
-> Changes from the last version:
-> * Moved sdhci_set_timeout() from _prepare_data() to its caller -
->   sdhci_send_command();
-> * Factor out a new function sdhci_reset_data() which deal with sanity
->   checks for mmc_data and reset for host->data, these processes were
->   in _prepare_data();
-> * Factor out a new function sdhci_set_block_info() for configuring data
->   blocks which were processing at bottom of _prepare_data();
-> * Added a new tasklet and functions for handling external dma  error case;
-> * Removed sdhci_external_dma_cleanup() which is not used;
-> * Added an empty sdhci_external_dma_channel definition for
->   !IS_ENABLED(CONFIG_MMC_SDHCI_EXTERNAL_DMA);
-> * Addressed some other comments from Adrian:
-> - Removed check for MMC_SET_BLOCK_COUNT, left checking !cmd->data only
->   which is enough.
+> Right, thanks for explaining.
+> 
+> >
+> > 1: Documentation/devicetree/bindings/net/wireless/ti,wlcore.txt
+> >  
+> 
+> This sounds like a good fit for mmc pwrseq simple. There are already
+> similar users for it.
+> 
+> Have a look at: /drivers/mmc/core/pwrseq*
+> If the mmc host driver calls mmc_of_parse() during ->probe(), a pwrseq
+> instance will be hooked up to it. Once the mmc core tries to power up
+> the card it will make use of the attached pwrseq for the mmc host in
+> question.
+> 
+> In this way, you can control the clock and GPIO line, in more exact
+> ways that is needed by the WiFi chip.
 
-There should have been a v2 in the patch description. It lets reviewers
-know that they have seen this patch before and its not the same thing. I
-would have preferred you had me test this before posting it to the
-mailing list. Otherwise there should be a "not tested" in the description.
+Ack. Makes more sense than using a regulator (even without specifying
+'clocks').
 
-> ---
->  drivers/mmc/host/Kconfig |   3 +
->  drivers/mmc/host/sdhci.c | 333 +++++++++++++++++++++++++++++++++++----
->  drivers/mmc/host/sdhci.h |  10 ++
->  3 files changed, 317 insertions(+), 29 deletions
-[snip]
+> 
+> Here is a DT example (look for "mmc-pwrseq-simple"):
+> arch/arm/boot/dts/imx6qdl-sr-som-ti.dtsi
+> 
+> This should do the trick for you. On the other hand, I don't mind that
+> you still add regulator support to the driver, along the lines of what
+> $subject patch does, however it may not be exactly what you need for
+> the WiFi case.
 
-> +static void sdhci_external_dma_prepare_data(struct sdhci_host *host,
-> +					    struct mmc_command *cmd)
-> +{
-> +	struct mmc_data *data = cmd->data;
-> +	struct dma_chan *chan = sdhci_external_dma_channel(host, data);
-chan is not being used in this function.
-> +
-> +	if (!sdhci_external_dma_setup(host, cmd)) {
-> +		__sdhci_external_dma_prepare_data(host, cmd);
->  	} else {
-> -		sdhci_writew(host, data->blocks, SDHCI_BLOCK_COUNT);
-> +		sdhci_external_dma_release(host);
-> +		pr_err("%s: Cannot use external DMA, switch to the DMA/PIO which standard SDHCI provides.\n",
-> +		       mmc_hostname(host->mmc));
-> +		sdhci_prepare_data(host, cmd);
-> +	}
-> +}
-> +
-> +static void sdhci_external_dma_pre_transfer(struct sdhci_host *host,
-> +					    struct mmc_command *cmd)
-> +{
-> +	struct dma_chan *chan;
+@Martin; What do you think? Will you work this out with Ulf?
+Since I can't test this.
 
-I think you wanted to initialize this one.
-
-> +
-> +	if (!cmd->data)
-> +		return;
-> +
-> +	chan = sdhci_external_dma_channel(host, cmd->data);
-> +	if (chan)
-> +		dma_async_issue_pending(chan);
-> +}
-> +
-> +static bool sdhci_external_dma_request_done(struct sdhci_host *host)
-> +{
-> +	struct mmc_request *mrq;
-> +	struct dma_chan *chan;
-> +	int i;
-> +
-> +	spin_lock_irqsave(&host->lock, flags);
-
-flags is not declared.
-
-> +
-> +	for (i = 0; i < SDHCI_MAX_MRQS; i++) {
-> +		mrq = host->mrqs_done[i];
-> +		if (mrq)
-> +			break;
->  	}
-> +
-> +	spin_unlock_irqrestore(&host->lock, flags);
-> +
-> +	if (!mrq)
-> +		return true;
-> +
-> +	sdhci_tasklet_finish(host);
-
-This doesn't even build. sdhci_tasklet_finish is declared below this. In
-the future, if you don't have a platform to test things on, at least
-build and use checkpatch before posting it to the mailing list.
-
-Should we even be calling a tasklet callback function directly?
-Shouldn't we do a tasklet_schedule()?
-
-Thanks,
-Faiz
+Regards,
+Robin
