@@ -1,48 +1,23 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v5.0-rc5
-Date: Fri,  1 Feb 2019 10:59:54 +0100
-Message-ID: <20190201095954.18273-1-ulf.hansson@linaro.org>
+From: pr-tracker-bot@kernel.org
+Subject: Re: [GIT PULL] MMC fixes for v5.0-rc5
+Date: Fri, 01 Feb 2019 18:35:03 +0000
+Message-ID: <154904610349.32661.2751591799540747209.pr-tracker-bot@kernel.org>
+References: <20190201095954.18273-1-ulf.hansson@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190201095954.18273-1-ulf.hansson@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Linus,
+The pull request you sent on Fri,  1 Feb 2019 10:59:54 +0100:
 
-Here's a PR with a few MMC fixes intended for v5.0-rc5. Details about the
-highlights are as usual found in the signed tag.
+> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.0-rc4
 
-Please pull this in!
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/cca2e06ae8325b5280491954b919e6d8d430b12d
 
-Kind regards
-Ulf Hansson
+Thank you!
 
-
-The following changes since commit f17b5f06cb92ef2250513a1e154c47b78df07d40:
-
-  Linux 5.0-rc4 (2019-01-27 15:18:05 -0800)
-
-are available in the Git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.0-rc4
-
-for you to fetch changes up to 3751e008da0df4384031bd66a516c0292f915605:
-
-  mmc: mediatek: fix incorrect register setting of hs400_cmd_int_delay (2019-01-28 12:49:28 +0100)
-
-----------------------------------------------------------------
-MMC host:
- - mediatek: Fix incorrect register write for tunings
- - bcm2835: Fixup leakage of DMA channel on probe errors
-
-----------------------------------------------------------------
-Chaotian Jing (1):
-      mmc: mediatek: fix incorrect register setting of hs400_cmd_int_delay
-
-Lukas Wunner (1):
-      mmc: bcm2835: Fix DMA channel leak on probe error
-
- drivers/mmc/host/bcm2835.c | 2 ++
- drivers/mmc/host/mtk-sd.c  | 2 +-
- 2 files changed, 3 insertions(+), 1 deletion(-)
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.wiki.kernel.org/userdoc/prtracker
