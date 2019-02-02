@@ -1,23 +1,51 @@
-From: pr-tracker-bot@kernel.org
-Subject: Re: [GIT PULL] MMC fixes for v5.0-rc5
-Date: Fri, 01 Feb 2019 18:35:03 +0000
-Message-ID: <154904610349.32661.2751591799540747209.pr-tracker-bot@kernel.org>
-References: <20190201095954.18273-1-ulf.hansson@linaro.org>
+From: Aaro Koskinen <aaro.koskinen@iki.fi>
+Subject: [PATCH] MMC: OMAP: fix the maximum timeout setting
+Date: Sun,  3 Feb 2019 00:14:33 +0200
+Message-ID: <20190202221433.24717-1-aaro.koskinen@iki.fi>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190201095954.18273-1-ulf.hansson@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-Cc: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc: linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org, Tony Lindgren <tony@atomide.com>, Aaro Koskinen <aaro.koskinen@iki.fi>
 List-Id: linux-mmc@vger.kernel.org
 
-The pull request you sent on Fri,  1 Feb 2019 10:59:54 +0100:
+When running OMAP1 kernel on QEMU, MMC access is annoyingly noisy:
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.0-rc4
+	MMC: CTO of 0xff and 0xfe cannot be used!
+	MMC: CTO of 0xff and 0xfe cannot be used!
+	MMC: CTO of 0xff and 0xfe cannot be used!
+	[ad inf.]
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/cca2e06ae8325b5280491954b919e6d8d430b12d
+Emulator warnings appear to be valid. The TI document SPRU680 [1]
+("OMAP5910 Dual-Core Processor MultiMedia Card/Secure Data Memory Card
+(MMC/SD) Reference Guide") page 36 states that the maximum timeout
+is 253 cycles and "0xff and 0xfe cannot be used".
 
-Thank you!
+Fix by using 0xfd as the maximum timeout.
 
+Tested using QEMU 2.5 (Siemens SX1 machine, OMAP310), and also checked
+on real hardware using Palm TE (OMAP310), Nokia 770 (OMAP1710)
+and Nokia N810 (OMAP2420) that MMC works as before.
+
+[1] http://www.ti.com/lit/ug/spru680/spru680.pdf
+
+Fixes: 730c9b7e6630f ("[MMC] Add OMAP MMC host driver")
+Signed-off-by: Aaro Koskinen <aaro.koskinen@iki.fi>
+---
+ drivers/mmc/host/omap.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
+index c60a7625b1fa..b2873a2432b6 100644
+--- a/drivers/mmc/host/omap.c
++++ b/drivers/mmc/host/omap.c
+@@ -920,7 +920,7 @@ static inline void set_cmd_timeout(struct mmc_omap_host *host, struct mmc_reques
+ 	reg &= ~(1 << 5);
+ 	OMAP_MMC_WRITE(host, SDIO, reg);
+ 	/* Set maximum timeout */
+-	OMAP_MMC_WRITE(host, CTO, 0xff);
++	OMAP_MMC_WRITE(host, CTO, 0xfd);
+ }
+ 
+ static inline void set_data_timeout(struct mmc_omap_host *host, struct mmc_request *req)
 -- 
-Deet-doot-dot, I am a bot.
-https://korg.wiki.kernel.org/userdoc/prtracker
+2.17.0
