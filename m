@@ -1,95 +1,71 @@
-From: Avri Altman <avri.altman@wdc.com>
-Subject: [PATCH 3/3] mmc: core: Add discard support to sd
-Date: Sun,  3 Feb 2019 10:50:28 +0200
-Message-ID: <1549183828-17316-4-git-send-email-avri.altman@wdc.com>
-References: <1549183828-17316-1-git-send-email-avri.altman@wdc.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1549183828-17316-1-git-send-email-avri.altman@wdc.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Lin <shawn.lin@rock-chips.com>, Avi Shchislowski <avi.shchislowski@wdc.com>, Alex Lemberg <alex.lemberg@wdc.com>, linux-kernel@vger.kernel.org, Avri Altman <avri.altman@wdc.com>
+From: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+Subject: mmc: sunxi: Fix eMMC usage on H5 boards
+Date: Sun,  3 Feb 2019 23:56:25 +0800
+Message-ID: <20190203155628.16767-1-wens@csie.org>
+Reply-To: wens-jdAy2FN1RRM@public.gmane.org
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-sunxi+bncBCMILY6JWQBBBLU63TRAKGQEQOFYW7I-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org>
+Cc: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Chris Blake <chrisrblake93-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-SD spec v5.1 adds discard support. The flows and commands are similar to
-mmc, so just set the discard arg in CMD38.
+Hi everyone,
 
-Actually, there is no need to check for the spec version like we are
-doing, as it is assured that the reserved bits in earlier versions are
-null. Do that anyway to document the spec version that introduce it.
+Since the HS-DDR mode was enabled for the A64 eMMC controller, there
+have been reports of eMMC failing to work on some H5 boards. It seems
+that while the H5 and A64 share the same controller for eMMC, some H5
+boards don't have trace lengths that work under HS-DDR with the default
+delay chain settings. Unfortunately we don't support tuning them at the
+moment, and these boards didn't seem to come with any settings either.
+Instead HS-DDR just wasn't enabled.
 
-Signed-off-by: Avri Altman <avri.altman@wdc.com>
----
- drivers/mmc/core/core.c |  6 +++++-
- drivers/mmc/core/sd.c   | 10 ++++++++++
- include/linux/mmc/sd.h  |  6 ++++++
- 3 files changed, 21 insertions(+), 1 deletion(-)
+The failure is typically a data CRC error on data reads, such as the
+partition scanning when the device is first probed. While this in itself
+would result in the device being unusable, there seems to be a timing
+issue in the recovery of the MMC controller. After the CRC error, the
+driver manually issues a stop command to the device, which also fails.
+After this a following command would stall: the MMC subsystem waits for
+the completion notice of the request, which never happens. The stall
+also blocks udev, which kind of blocks the whole boot process. However
+if I turn on debug messages to try to narrow down the issue, it recovers
+just fine. Any help on this issue would be much appreciated.
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 5bd58b9..c495935 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2181,7 +2181,10 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
- 	if (!card->erase_size)
- 		return -EOPNOTSUPP;
- 
--	if (mmc_card_sd(card) && arg != MMC_ERASE_ARG)
-+	if (mmc_card_sd(card) && arg == SD_DISCARD_ARG)
-+		goto skip_arg_testing;
-+
-+	if (mmc_card_sd(card) && arg != SD_ERASE_ARG)
- 		return -EOPNOTSUPP;
- 
- 	if ((arg & MMC_SECURE_ARGS) &&
-@@ -2200,6 +2203,7 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
- 	if (arg == MMC_ERASE_ARG)
- 		nr = mmc_align_erase_size(card, &from, &to, nr);
- 
-+skip_arg_testing:
- 	if (nr == 0)
- 		return 0;
- 
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 44f4cbc..b554a17 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -231,6 +231,8 @@ static int mmc_read_ssr(struct mmc_card *card)
- {
- 	unsigned int au, es, et, eo;
- 	__be32 *raw_ssr;
-+	u32 resp[4] = {};
-+	u8 discard_support;
- 	int i;
- 
- 	if (!(card->csd.cmdclass & CCC_APP_SPEC)) {
-@@ -276,6 +278,14 @@ static int mmc_read_ssr(struct mmc_card *card)
- 		}
- 	}
- 
-+	/*
-+	 * starting SD5.1 discard is supported if DISCARD_SUPPORT (b313) is set
-+	 */
-+	resp[3] = card->raw_ssr[6];
-+	discard_support = UNSTUFF_BITS(resp, 313 - 288, 1);
-+	card->discard_arg = (card->scr.sda_specx && discard_support) ?
-+			    SD_DISCARD_ARG : SD_ERASE_ARG;
-+
- 	return 0;
- }
- 
-diff --git a/include/linux/mmc/sd.h b/include/linux/mmc/sd.h
-index 1ebcf9b..ec94a5a 100644
---- a/include/linux/mmc/sd.h
-+++ b/include/linux/mmc/sd.h
-@@ -91,4 +91,10 @@
- #define SD_SWITCH_ACCESS_DEF	0
- #define SD_SWITCH_ACCESS_HS	1
- 
-+/*
-+ * Erase/discard
-+ */
-+#define SD_ERASE_ARG			0x00000000
-+#define SD_DISCARD_ARG			0x00000001
-+
- #endif /* LINUX_MMC_SD_H */
+I propose we turn off HS-DDR on the H5 (maybe even the H6, but I don't
+have anything to test right now) by default, and enable it per-board
+using the common mmc binding properties for speed modes.
+
+Patch 1 disables HS-DDR for H5 eMMC.
+
+Patch 2 adds a check blocking (force disabling) any modes the driver
+doesn't support. In retrospect this should have been added a long time
+ago.
+
+Patch 3 enables HS-DDR for the Libre Computer ALL-H3-CC H5, which works
+normally.
+
+If possible please merge all of them as fixes.
+
+
+Regards
+ChenYu
+
+Chen-Yu Tsai (3):
+  mmc: sunxi: Disable HS-DDR mode for H5 eMMC controller by default
+  mmc: sunxi: Filter out unsupported modes declared in the device tree
+  arm64: dts: allwinner: h5: libretech-all-h3-cc: Mark eMMC HS-DDR 3.3V
+    capable
+
+ .../sun50i-h5-libretech-all-h3-cc.dts         |  4 +++
+ drivers/mmc/host/sunxi-mmc.c                  | 27 ++++++++++++++++++-
+ 2 files changed, 30 insertions(+), 1 deletion(-)
+
 -- 
-1.9.1
+2.20.1
