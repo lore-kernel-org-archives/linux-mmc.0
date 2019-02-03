@@ -1,49 +1,34 @@
-From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Subject: [PATCH v2 3/3] mmc: bcm2835: Deduplicate reset of driver data on
- remove
-Date: Sun, 3 Feb 2019 09:27:00 +0100
-Message-ID: <ba4de65471fdea3d8cb6e29efe9a54e8a8caa23f.1549181242.git.lukas@wunner.de>
-References: <cover.1549181242.git.lukas@wunner.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <cover.1549181242.git.lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rpi-kernel>,
- <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rpi-kernel/>
-List-Post: <mailto:linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rpi-kernel>,
- <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "linux-rpi-kernel" <linux-rpi-kernel-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Eric Anholt <eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org>, Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Shraddha Barke <shraddha.6596-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Vaishali Thakkar <me-c39Wob3KZ2c64PEq3mRLUp/QNRX+jHPU@public.gmane.org>, Frank Pavlic <f.pavlic-XB/JSsFECOqzQB+pC5nmwQ@public.gmane.org>, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+From: Avri Altman <avri.altman@wdc.com>
+Subject: [PATCH 0/3] mmc: core: Add SD Discard support
+Date: Sun,  3 Feb 2019 10:50:25 +0200
+Message-ID: <1549183828-17316-1-git-send-email-avri.altman@wdc.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Lin <shawn.lin@rock-chips.com>, Avi Shchislowski <avi.shchislowski@wdc.com>, Alex Lemberg <alex.lemberg@wdc.com>, linux-kernel@vger.kernel.org, Avri Altman <avri.altman@wdc.com>
 List-Id: linux-mmc@vger.kernel.org
 
-The BCM2835 MMC host driver sets the device's driver data pointer to
-NULL on ->remove() even though the driver core subsequently does the
-same in __device_release_driver().  Drop the duplicate assignment.
+D spec v5.1 adds discard support. The flows and commands matches those
+in eMMC, Which leaves to set the appropriate discard arg in CMD38 if
+DISCARD_SUPPORT (b313) is set in the SD_STATUS register.
 
-Tested-by: Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>
-Signed-off-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Cc: Frank Pavlic <f.pavlic-XB/JSsFECOqzQB+pC5nmwQ@public.gmane.org>
----
- drivers/mmc/host/bcm2835.c | 1 -
- 1 file changed, 1 deletion(-)
+We set this arg on card init: not in mmc_init_erase as one might expect
+but arbitrarily once the card indicated its discard support.  This is
+because unlike erase, it doesn't really involve any logic, and we want
+to avoid the unnecessary complication.
 
-diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
-index 246c8ec24148..7e0d3a49c06d 100644
---- a/drivers/mmc/host/bcm2835.c
-+++ b/drivers/mmc/host/bcm2835.c
-@@ -1455,7 +1455,6 @@ static int bcm2835_remove(struct platform_device *pdev)
- 		dma_release_channel(host->dma_chan_rxtx);
- 
- 	mmc_free_host(mmc);
--	platform_set_drvdata(pdev, NULL);
- 
- 	return 0;
- }
+Avri Altman (3):
+  mmc: core: Calculate the discard arg only once
+  mmc: core: Indicate SD specs higher than 4.0
+  mmc: core: Add discard support to sd
+
+ drivers/mmc/core/block.c | 12 +++---------
+ drivers/mmc/core/core.c  |  6 +++++-
+ drivers/mmc/core/mmc.c   |  8 ++++++++
+ drivers/mmc/core/sd.c    | 15 +++++++++++++++
+ include/linux/mmc/card.h |  4 ++++
+ include/linux/mmc/sd.h   |  6 ++++++
+ 6 files changed, 41 insertions(+), 10 deletions(-)
+
 -- 
-2.20.1
+1.9.1
