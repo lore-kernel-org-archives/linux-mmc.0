@@ -1,44 +1,68 @@
-From: Alexander Graf <agraf-l3A5Bk7waGM@public.gmane.org>
-Subject: Re: [PATCH v2 2/3] mmc: bcm2835: Drop pointer to mmc_host from
- bcm2835_host
-Date: Sun, 3 Feb 2019 16:57:28 +0100
-Message-ID: <06B4874F-5C1E-4502-9F60-CDAD37EAAEED@suse.de>
-References: <cover.1549181242.git.lukas@wunner.de>
- <ffa656c9f2c0e397a38e5827ba586f13e723f81b.1549181242.git.lukas@wunner.de>
-Mime-Version: 1.0 (1.0)
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <ffa656c9f2c0e397a38e5827ba586f13e723f81b.1549181242.git.lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rpi-kernel>,
- <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rpi-kernel/>
-List-Post: <mailto:linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rpi-kernel>,
- <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "linux-rpi-kernel" <linux-rpi-kernel-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Vaishali Thakkar <me-c39Wob3KZ2c64PEq3mRLUp/QNRX+jHPU@public.gmane.org>, Frank Pavlic <f.pavlic-XB/JSsFECOqzQB+pC5nmwQ@public.gmane.org>, Shraddha Barke <shraddha.6596-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+From: Chen-Yu Tsai <wens@csie.org>
+Subject: [PATCH 0/3] mmc: sunxi: Fix eMMC usage on H5 boards
+Date: Sun,  3 Feb 2019 23:59:40 +0800
+Message-ID: <20190203155940.18977-1-wens@csie.org>
+References: <20190203155628.16767-1-wens@csie.org>
+Mime-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190203155628.16767-1-wens@csie.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@bootlin.com>
+Cc: Chen-Yu Tsai <wens@csie.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-sunxi@googlegroups.com, Chris Blake <chrisrblake93@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
+(Resent with proper subject tag.)
+
+Hi everyone,
+
+Since the HS-DDR mode was enabled for the A64 eMMC controller, there
+have been reports of eMMC failing to work on some H5 boards. It seems
+that while the H5 and A64 share the same controller for eMMC, some H5
+boards don't have trace lengths that work under HS-DDR with the default
+delay chain settings. Unfortunately we don't support tuning them at the
+moment, and these boards didn't seem to come with any settings either.
+Instead HS-DDR just wasn't enabled.
+
+The failure is typically a data CRC error on data reads, such as the
+partition scanning when the device is first probed. While this in itself
+would result in the device being unusable, there seems to be a timing
+issue in the recovery of the MMC controller. After the CRC error, the
+driver manually issues a stop command to the device, which also fails.
+After this a following command would stall: the MMC subsystem waits for
+the completion notice of the request, which never happens. The stall
+also blocks udev, which kind of blocks the whole boot process. However
+if I turn on debug messages to try to narrow down the issue, it recovers
+just fine. Any help on this issue would be much appreciated.
+
+I propose we turn off HS-DDR on the H5 (maybe even the H6, but I don't
+have anything to test right now) by default, and enable it per-board
+using the common mmc binding properties for speed modes.
+
+Patch 1 disables HS-DDR for H5 eMMC.
+
+Patch 2 adds a check blocking (force disabling) any modes the driver
+doesn't support. In retrospect this should have been added a long time
+ago.
+
+Patch 3 enables HS-DDR for the Libre Computer ALL-H3-CC H5, which works
+normally.
+
+If possible please merge all of them as fixes.
 
 
-> Am 03.02.2019 um 09:27 schrieb Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>:
-> 
-> The BCM2835 MMC host driver uses a pointer to get from the private
-> bcm2835_host structure to the generic mmc_host structure.  However the
-> latter is always immediately preceding the former in memory, so compute
-> its address with a subtraction (which is cheaper than a dereference) and
-> drop the superfluous pointer.
-> 
-> No functional change intended.
-> 
-> Signed-off-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-> Cc: Frank Pavlic <f.pavlic-XB/JSsFECOqzQB+pC5nmwQ@public.gmane.org>
-> Cc: Alexander Graf <agraf-l3A5Bk7waGM@public.gmane.org>
+Regards
+ChenYu
 
-Reviewed-by: Alexander Graf <agraf-l3A5Bk7waGM@public.gmane.org>
+Chen-Yu Tsai (3):
+  mmc: sunxi: Disable HS-DDR mode for H5 eMMC controller by default
+  mmc: sunxi: Filter out unsupported modes declared in the device tree
+  arm64: dts: allwinner: h5: libretech-all-h3-cc: Mark eMMC HS-DDR 3.3V
+    capable
 
-Alex
+ .../sun50i-h5-libretech-all-h3-cc.dts         |  4 +++
+ drivers/mmc/host/sunxi-mmc.c                  | 27 ++++++++++++++++++-
+ 2 files changed, 30 insertions(+), 1 deletion(-)
+
+-- 
+2.20.1
