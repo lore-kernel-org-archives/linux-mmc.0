@@ -1,52 +1,56 @@
-From: Avri Altman <Avri.Altman@wdc.com>
-Subject: RE: [PATCH 1/3] mmc: core: Calculate the discard arg only once
-Date: Tue, 5 Feb 2019 14:06:11 +0000
-Message-ID: <SN6PR04MB4925571AA6EE81FD289F4BA4FC6E0@SN6PR04MB4925.namprd04.prod.outlook.com>
-References: <1549183828-17316-1-git-send-email-avri.altman@wdc.com>
- <1549183828-17316-2-git-send-email-avri.altman@wdc.com>
- <CAPDyKFqO0RX-Nz+WDo6VA5Sqh-npJKkqfHN9cpH6gxMPo1tJPw@mail.gmail.com>
+From: Chen-Yu Tsai <wens@csie.org>
+Subject: [PATCH v2 1/3] mmc: sunxi: Disable HS-DDR mode for H5 eMMC controller by default
+Date: Tue,  5 Feb 2019 23:42:23 +0800
+Message-ID: <20190205154225.14264-2-wens@csie.org>
+References: <20190205154225.14264-1-wens@csie.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFqO0RX-Nz+WDo6VA5Sqh-npJKkqfHN9cpH6gxMPo1tJPw@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Lin <shawn.lin@rock-chips.com>, Avi Shchislowski <Avi.Shchislowski@wdc.com>, Alex Lemberg <Alex.Lemberg@wdc.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Transfer-Encoding: 8bit
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20190205154225.14264-1-wens@csie.org>
+Sender: stable-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@bootlin.com>
+Cc: Chen-Yu Tsai <wens@csie.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-sunxi@googlegroups.com, Chris Blake <chrisrblake93@gmail.com>, stable@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-PiBPbiBTdW4sIDMgRmViIDIwMTkgYXQgMDk6NTEsIEF2cmkgQWx0bWFuIDxhdnJpLmFsdG1hbkB3
-ZGMuY29tPiB3cm90ZToNCj4gPg0KPiA+IFRoZSBkaXNjYXJkIGFyZyBpcyBhIHJlYWQtb25seSBl
-eHRfY3NkIHBhcmFtZXRlciAtDQo+ID4gc2V0IGl0IG9uY2Ugb24gY2FyZCBpbml0Lg0KPiANCj4g
-SSBsaWtlIHRoZSBpZGVhIGhlcmUuIFRoZXJlIGlzIHJlYWxseSBubyBwb2ludCBjaGVja2luZyB0
-aGlzIGZvciBldmVyeQ0KPiBjb3JyZXNwb25kaW5nIHJlcXVlc3QsIG5pY2UhDQo+IA0KPiBIb3dl
-dmVyLCB0aGUgImRpc2NhcmQgYXJnIiBpc24ndCBzcGVjaWZpYyB0byBlTU1DLCBhcyBpdCdzIGFs
-c28gdXNlZA0KPiBmb3IgU0QgY2FyZHMuIFNvLCB0aGUgY2hhbmdlIGxvZyBpcyBhIGJpdCBtaXNz
-LWxlYWRpbmcsIEkgdGhpbmsuIENhbg0KPiB5b3UgcGxlYXNlIGNsYXJpZnkgdGhpcy4NCkRvbmUu
-DQoNCj4gPg0KPiA+ICsgICAgICAgLyogc2V0IGRpc2NhcmRfYXJnICovDQo+ID4gKyAgICAgICBp
-ZiAobW1jX2Nhbl9kaXNjYXJkKGNhcmQpKQ0KPiA+ICsgICAgICAgICAgICAgICBjYXJkLT5kaXNj
-YXJkX2FyZyA9IE1NQ19ESVNDQVJEX0FSRzsNCj4gPiArICAgICAgIGVsc2UgaWYgKG1tY19jYW5f
-dHJpbShjYXJkKSkNCj4gPiArICAgICAgICAgICAgICAgY2FyZC0+ZGlzY2FyZF9hcmcgPSBNTUNf
-VFJJTV9BUkc7DQo+ID4gKyAgICAgICBlbHNlDQo+ID4gKyAgICAgICAgICAgICAgIGNhcmQtPmRp
-c2NhcmRfYXJnID0gTU1DX0VSQVNFX0FSRzsNCj4gDQo+IFlvdSBhcmUgYXNzaWduaW5nIGNhcmQt
-PmRpc2NhcmRfYXJnIG9ubHkgZm9yIChlKU1NQywgd2hpbGUgSSB0aGluayB5b3UNCj4gc2hvdWxk
-IGRvIHRoYXQgYWxzbyBmb3IgU0QuDQo+IA0KPiBJIGd1ZXNzIGl0IHByYWN0aWNlIGl0IGRvZXNu
-J3QgbWF0dGVyLCBiZWNhdXNlIE1NQ19FUkFTRV9BUkcgaXMgemVyby4NCj4gQWx0aG91Z2gsIEkg
-d291bGQgcHJlZmVyIHRvIGtlZXAgdGhlIGNvZGUgY29uc2lzdGVudCwgc28gSSB0aGluayB5b3UN
-Cj4gc2hvdWxkIGFzc2lnbiBjYXJkLT5kaXNjYXJkX2FyZyBmb3IgZm9yIFNEIGNhcmRzIGFzIHdl
-bGwuDQpEb25lLg0KDQo+ID4gZGlmZiAtLWdpdCBhL2luY2x1ZGUvbGludXgvbW1jL2NhcmQuaCBi
-L2luY2x1ZGUvbGludXgvbW1jL2NhcmQuaA0KPiA+IGluZGV4IGRlNzM3NzguLjQ0NzY0OGIgMTAw
-NjQ0DQo+ID4gLS0tIGEvaW5jbHVkZS9saW51eC9tbWMvY2FyZC5oDQo+ID4gKysrIGIvaW5jbHVk
-ZS9saW51eC9tbWMvY2FyZC5oDQo+ID4gQEAgLTMwOCw2ICszMDgsOCBAQCBzdHJ1Y3QgbW1jX2Nh
-cmQgew0KPiA+ICAgICAgICAgdW5zaWduZWQgaW50ICAgIG5yX3BhcnRzOw0KPiA+DQo+ID4gICAg
-ICAgICB1bnNpZ25lZCBpbnQgICAgICAgICAgICBib3VuY2VzejsgICAgICAgLyogQm91bmNlIGJ1
-ZmZlciBzaXplICovDQo+ID4gKw0KPiA+ICsgICAgICAgdW5zaWduZWQgaW50ICAgICAgICAgICAg
-ZGlzY2FyZF9hcmc7ICAgIC8qIGRpc2NhcmQgYXJncyAqLw0KPiANCj4gUGxlYXNlIG1vdmUgdGhp
-cyBhIGNvdXBsZSBvZiBsaW5lcyBhYm92ZSwgY2xvc2UgdG8gdGhlIG90aGVyICJlcmFzZSINCj4g
-cmVsYXRlZCB2YXJpYWJsZXMuDQpEb25lLg0KDQo+IA0KPiBZb3UgbWF5IGV2ZW4gY29uc2lkZXIg
-dG8gcmVuYW1lIHRoZSBhcmcgdG8gImVyYXNlX2FyZyIsIGJ1dCBJIGhhdmUgbm8NCj4gc3Ryb25n
-IG9waW5pb24gY2hhbmdpbmcgdG8gdGhhdC4NCkRvbmUuDQoNCj4gDQo+ID4gIH07DQo+ID4NCj4g
-PiAgc3RhdGljIGlubGluZSBib29sIG1tY19sYXJnZV9zZWN0b3Ioc3RydWN0IG1tY19jYXJkICpj
-YXJkKQ0KPiA+IC0tDQo+ID4gMS45LjENCj4gPg0KPiANCj4gS2luZCByZWdhcmRzDQo+IFVmZmUN
-Cg==
+Some H5 boards seem to not have proper trace lengths for eMMC to be able
+to use the default setting for the delay chains under HS-DDR mode. These
+include the Bananapi M2+ H5 and NanoPi NEO Core2. However the Libre
+Computer ALL-H3-CC-H5 works just fine.
+
+For the H5 (at least for now), default to not enabling HS-DDR modes in
+the driver, and expect the device tree to signal HS-DDR capability on
+boards that work.
+
+Reported-by: Chris Blake <chrisrblake93@gmail.com>
+Fixes: 07bafc1e3536 ("mmc: sunxi: Use new timing mode for A64 eMMC controller")
+Cc: <stable@vger.kernel.org>
+Acked-by: Maxime Ripard <maxime.ripard@bootlin.com>
+Signed-off-by: Chen-Yu Tsai <wens@csie.org>
+---
+ drivers/mmc/host/sunxi-mmc.c | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index 279e326e397e..7415af8c8ff6 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -1399,7 +1399,16 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
+ 	mmc->caps	       |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
+ 				  MMC_CAP_ERASE | MMC_CAP_SDIO_IRQ;
+ 
+-	if (host->cfg->clk_delays || host->use_new_timings)
++	/*
++	 * Some H5 devices do not have signal traces precise enough to
++	 * use HS DDR mode for their eMMC chips.
++	 *
++	 * We still enable HS DDR modes for all the other controller
++	 * variants that support them.
++	 */
++	if ((host->cfg->clk_delays || host->use_new_timings) &&
++	    !of_device_is_compatible(pdev->dev.of_node,
++				     "allwinner,sun50i-h5-emmc"))
+ 		mmc->caps      |= MMC_CAP_1_8V_DDR | MMC_CAP_3_3V_DDR;
+ 
+ 	ret = mmc_of_parse(mmc);
+-- 
+2.20.1
