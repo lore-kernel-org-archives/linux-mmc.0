@@ -1,56 +1,75 @@
-From: Chen-Yu Tsai <wens@csie.org>
-Subject: [PATCH v2 1/3] mmc: sunxi: Disable HS-DDR mode for H5 eMMC controller by default
-Date: Tue,  5 Feb 2019 23:42:23 +0800
-Message-ID: <20190205154225.14264-2-wens@csie.org>
+From: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+Subject: [PATCH v2 2/3] mmc: sunxi: Filter out unsupported modes
+ declared in the device tree
+Date: Tue,  5 Feb 2019 23:42:24 +0800
+Message-ID: <20190205154225.14264-3-wens@csie.org>
 References: <20190205154225.14264-1-wens@csie.org>
+Reply-To: wens-jdAy2FN1RRM@public.gmane.org
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20190205154225.14264-1-wens@csie.org>
-Sender: stable-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@bootlin.com>
-Cc: Chen-Yu Tsai <wens@csie.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-sunxi@googlegroups.com, Chris Blake <chrisrblake93@gmail.com>, stable@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-sunxi+bncBCMILY6JWQBBBZW543RAKGQEBTLYQ7Q-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+In-Reply-To: <20190205154225.14264-1-wens-jdAy2FN1RRM@public.gmane.org>
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org>
+Cc: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Chris Blake <chrisrblake93-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Some H5 boards seem to not have proper trace lengths for eMMC to be able
-to use the default setting for the delay chains under HS-DDR mode. These
-include the Bananapi M2+ H5 and NanoPi NEO Core2. However the Libre
-Computer ALL-H3-CC-H5 works just fine.
+The MMC device tree bindings include properties used to signal various
+signalling speed modes. Until now the sunxi driver was accepting them
+without any further filtering, while the sunxi device trees were not
+actually using them.
 
-For the H5 (at least for now), default to not enabling HS-DDR modes in
-the driver, and expect the device tree to signal HS-DDR capability on
-boards that work.
+Since some of the H5 boards can not run at higher speed modes stably,
+we are resorting to declaring the higher speed modes per-board.
 
-Reported-by: Chris Blake <chrisrblake93@gmail.com>
-Fixes: 07bafc1e3536 ("mmc: sunxi: Use new timing mode for A64 eMMC controller")
-Cc: <stable@vger.kernel.org>
-Acked-by: Maxime Ripard <maxime.ripard@bootlin.com>
-Signed-off-by: Chen-Yu Tsai <wens@csie.org>
+Regardless, having boards declare modes and blindly following them,
+even without proper support in the driver, is generally a bad thing.
+
+Filter out all unsupported modes from the capabilities mask after
+the device tree properties have been parsed.
+
+Cc: <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+
 ---
- drivers/mmc/host/sunxi-mmc.c | 11 ++++++++++-
- 1 file changed, 10 insertions(+), 1 deletion(-)
+
+This should be backported to stable kernels in case people try to run
+new device trees (that declare newly supported modes) with old kernels.
+---
+ drivers/mmc/host/sunxi-mmc.c | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
 
 diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index 279e326e397e..7415af8c8ff6 100644
+index 7415af8c8ff6..70fadc976795 100644
 --- a/drivers/mmc/host/sunxi-mmc.c
 +++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -1399,7 +1399,16 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
- 	mmc->caps	       |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
- 				  MMC_CAP_ERASE | MMC_CAP_SDIO_IRQ;
+@@ -1415,6 +1415,21 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		goto error_free_dma;
  
--	if (host->cfg->clk_delays || host->use_new_timings)
 +	/*
-+	 * Some H5 devices do not have signal traces precise enough to
-+	 * use HS DDR mode for their eMMC chips.
-+	 *
-+	 * We still enable HS DDR modes for all the other controller
-+	 * variants that support them.
++	 * If we don't support delay chains in the SoC, we can't use any
++	 * of the higher speed modes. Mask them out in case the device
++	 * tree specifies the properties for them, which gets added to
++	 * the caps by mmc_of_parse() above.
 +	 */
-+	if ((host->cfg->clk_delays || host->use_new_timings) &&
-+	    !of_device_is_compatible(pdev->dev.of_node,
-+				     "allwinner,sun50i-h5-emmc"))
- 		mmc->caps      |= MMC_CAP_1_8V_DDR | MMC_CAP_3_3V_DDR;
- 
- 	ret = mmc_of_parse(mmc);
++	if (!(host->cfg->clk_delays || host->use_new_timings)) {
++		mmc->caps &= ~(MMC_CAP_3_3V_DDR | MMC_CAP_1_8V_DDR |
++			       MMC_CAP_1_2V_DDR | MMC_CAP_UHS);
++		mmc->caps2 &= ~MMC_CAP2_HS200;
++	}
++
++	/* TODO: This driver doesn't support HS400 mode yet */
++	mmc->caps2 &= ~MMC_CAP2_HS400;
++
+ 	ret = sunxi_mmc_init_host(host);
+ 	if (ret)
+ 		goto error_free_dma;
 -- 
 2.20.1
