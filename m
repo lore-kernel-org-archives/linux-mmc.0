@@ -1,8 +1,8 @@
 From: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
-Subject: [PATCH v2 2/3] mmc: sunxi: Filter out unsupported modes
- declared in the device tree
-Date: Tue,  5 Feb 2019 23:42:24 +0800
-Message-ID: <20190205154225.14264-3-wens@csie.org>
+Subject: [PATCH v2 3/3] arm64: dts: allwinner: h5:
+ libretech-all-h3-cc: Mark eMMC HS-DDR 3.3V capable
+Date: Tue,  5 Feb 2019 23:42:25 +0800
+Message-ID: <20190205154225.14264-4-wens@csie.org>
 References: <20190205154225.14264-1-wens@csie.org>
 Reply-To: wens-jdAy2FN1RRM@public.gmane.org
 Mime-Version: 1.0
@@ -17,59 +17,28 @@ List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto
 List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
  <https://groups.google.com/group/linux-sunxi/subscribe>
 To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org>
-Cc: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Chris Blake <chrisrblake93-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Chris Blake <chrisrblake93-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-The MMC device tree bindings include properties used to signal various
-signalling speed modes. Until now the sunxi driver was accepting them
-without any further filtering, while the sunxi device trees were not
-actually using them.
+The Libre Computer ALL-H3-CC H5 is one of the few boards that can have
+its eMMC run at HS-DDR speed mode. Mark it as such.
 
-Since some of the H5 boards can not run at higher speed modes stably,
-we are resorting to declaring the higher speed modes per-board.
-
-Regardless, having boards declare modes and blindly following them,
-even without proper support in the driver, is generally a bad thing.
-
-Filter out all unsupported modes from the capabilities mask after
-the device tree properties have been parsed.
-
-Cc: <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
-
 ---
+ .../boot/dts/allwinner/sun50i-h5-libretech-all-h3-cc.dts      | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-This should be backported to stable kernels in case people try to run
-new device trees (that declare newly supported modes) with old kernels.
----
- drivers/mmc/host/sunxi-mmc.c | 15 +++++++++++++++
- 1 file changed, 15 insertions(+)
-
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index 7415af8c8ff6..70fadc976795 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -1415,6 +1415,21 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
- 	if (ret)
- 		goto error_free_dma;
- 
-+	/*
-+	 * If we don't support delay chains in the SoC, we can't use any
-+	 * of the higher speed modes. Mask them out in case the device
-+	 * tree specifies the properties for them, which gets added to
-+	 * the caps by mmc_of_parse() above.
-+	 */
-+	if (!(host->cfg->clk_delays || host->use_new_timings)) {
-+		mmc->caps &= ~(MMC_CAP_3_3V_DDR | MMC_CAP_1_8V_DDR |
-+			       MMC_CAP_1_2V_DDR | MMC_CAP_UHS);
-+		mmc->caps2 &= ~MMC_CAP2_HS200;
-+	}
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h5-libretech-all-h3-cc.dts b/arch/arm64/boot/dts/allwinner/sun50i-h5-libretech-all-h3-cc.dts
+index 95e113ce8699..d68bdfea2271 100644
+--- a/arch/arm64/boot/dts/allwinner/sun50i-h5-libretech-all-h3-cc.dts
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h5-libretech-all-h3-cc.dts
+@@ -12,3 +12,7 @@
+ 	model = "Libre Computer Board ALL-H3-CC H5";
+ 	compatible = "libretech,all-h3-cc-h5", "allwinner,sun50i-h5";
+ };
 +
-+	/* TODO: This driver doesn't support HS400 mode yet */
-+	mmc->caps2 &= ~MMC_CAP2_HS400;
-+
- 	ret = sunxi_mmc_init_host(host);
- 	if (ret)
- 		goto error_free_dma;
++&mmc2 {
++	mmc-ddr-3_3v;
++};
 -- 
 2.20.1
