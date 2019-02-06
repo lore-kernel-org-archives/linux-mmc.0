@@ -1,63 +1,44 @@
-From: Maxime Ripard <maxime.ripard@bootlin.com>
-Subject: Re: [PATCH v2 2/3] mmc: sunxi: Filter out unsupported modes declared
- in the device tree
-Date: Wed, 6 Feb 2019 13:20:08 +0100
-Message-ID: <20190206122008.ykldbk7kcfjfjxtv@flea>
+From: Maxime Ripard <maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [PATCH v2 3/3] arm64: dts: allwinner: h5:
+ libretech-all-h3-cc: Mark eMMC HS-DDR 3.3V capable
+Date: Wed, 6 Feb 2019 13:20:46 +0100
+Message-ID: <20190206122046.ph66qe4bhtlz4qup@flea>
 References: <20190205154225.14264-1-wens@csie.org>
- <20190205154225.14264-3-wens@csie.org>
+ <20190205154225.14264-4-wens@csie.org>
+Reply-To: maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="6r42epslv3udyodi"
-Return-path: <stable-owner@vger.kernel.org>
+	protocol="application/pgp-signature"; boundary="ubfrzttee5yydn45"
+Return-path: <linux-sunxi+bncBDSJBYGBRIMBBIFC5PRAKGQEJ4JRNOI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Content-Disposition: inline
-In-Reply-To: <20190205154225.14264-3-wens@csie.org>
-Sender: stable-owner@vger.kernel.org
-To: Chen-Yu Tsai <wens@csie.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-sunxi@googlegroups.com, Chris Blake <chrisrblake93@gmail.com>, stable@vger.kernel.org
+In-Reply-To: <20190205154225.14264-4-wens-jdAy2FN1RRM@public.gmane.org>
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Chris Blake <chrisrblake93-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
 
---6r42epslv3udyodi
-Content-Type: text/plain; charset=us-ascii
+--ubfrzttee5yydn45
+Content-Type: text/plain; charset="UTF-8"
 Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
 
-On Tue, Feb 05, 2019 at 11:42:24PM +0800, Chen-Yu Tsai wrote:
-> The MMC device tree bindings include properties used to signal various
-> signalling speed modes. Until now the sunxi driver was accepting them
-> without any further filtering, while the sunxi device trees were not
-> actually using them.
->=20
-> Since some of the H5 boards can not run at higher speed modes stably,
-> we are resorting to declaring the higher speed modes per-board.
->=20
-> Regardless, having boards declare modes and blindly following them,
-> even without proper support in the driver, is generally a bad thing.
->=20
-> Filter out all unsupported modes from the capabilities mask after
-> the device tree properties have been parsed.
->=20
-> Cc: <stable@vger.kernel.org>
-> Signed-off-by: Chen-Yu Tsai <wens@csie.org>
+On Tue, Feb 05, 2019 at 11:42:25PM +0800, Chen-Yu Tsai wrote:
+> The Libre Computer ALL-H3-CC H5 is one of the few boards that can have
+> its eMMC run at HS-DDR speed mode. Mark it as such.
+> 
+> Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
 
-Acked-by: Maxime Ripard <maxime.ripard@bootlin.com>
-
+Applied, thanks!
 Maxime
 
---=20
+-- 
 Maxime Ripard, Bootlin
 Embedded Linux and Kernel engineering
 https://bootlin.com
-
---6r42epslv3udyodi
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iHUEABYIAB0WIQRcEzekXsqa64kGDp7j7w1vZxhRxQUCXFrQ+AAKCRDj7w1vZxhR
-xVkkAP9N0HH9HJ0MV1En3HP7Ygb/UhglPAPAQA32AQ+OgFmxTAD9HB/mP3Wg05ux
-a/NdR+KsNS6hOmibmoCOuF4ym3tNWAA=
-=zFwy
------END PGP SIGNATURE-----
-
---6r42epslv3udyodi--
+--ubfrzttee5yydn45--
