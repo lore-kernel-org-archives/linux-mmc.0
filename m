@@ -1,85 +1,64 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 2/3] mmc: sunxi: Filter out unsupported
- modes declared in the device tree
-Date: Wed, 6 Feb 2019 16:14:33 +0100
-Message-ID: <CAPDyKFoZYY4O_eXExvZQvJcnyHLc+JfQMbDmUe9mxJwR6QtchA@mail.gmail.com>
-References: <20190205154225.14264-1-wens@csie.org> <20190205154225.14264-3-wens@csie.org>
-Reply-To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2 2/3] mmc: core: Indicate SD specs higher than 4.0
+Date: Wed, 6 Feb 2019 16:14:39 +0100
+Message-ID: <CAPDyKFpUMNOZSMt1J+3x4PRxyurBQET+QWp9QtzbF+G7McYrpg@mail.gmail.com>
+References: <1549452487-17193-1-git-send-email-avri.altman@wdc.com> <1549452487-17193-3-git-send-email-avri.altman@wdc.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-sunxi+bncBDF57NG2XIHRB7XT5PRAKGQEPD4TGSY-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-In-Reply-To: <20190205154225.14264-3-wens-jdAy2FN1RRM@public.gmane.org>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
-Cc: Maxime Ripard <maxime.ripard-LDxbnhwyfcJBDgjK7y7TUQ@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, DTML <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi <linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>, Chris Blake <chrisrblake93-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "# 4.0+" <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1549452487-17193-3-git-send-email-avri.altman@wdc.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Avri Altman <avri.altman@wdc.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Lin <shawn.lin@rock-chips.com>, Avi Shchislowski <avi.shchislowski@wdc.com>, Alex Lemberg <alex.lemberg@wdc.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 5 Feb 2019 at 16:42, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org> wrote:
+On Wed, 6 Feb 2019 at 12:29, Avri Altman <avri.altman@wdc.com> wrote:
 >
-> The MMC device tree bindings include properties used to signal various
-> signalling speed modes. Until now the sunxi driver was accepting them
-> without any further filtering, while the sunxi device trees were not
-> actually using them.
+> SD specs version 4.x and 5.x have a dedicated slices in the SCR register.
+> Higher versions will rely on a combination of the existing fields.
 >
-> Since some of the H5 boards can not run at higher speed modes stably,
-> we are resorting to declaring the higher speed modes per-board.
->
-> Regardless, having boards declare modes and blindly following them,
-> even without proper support in the driver, is generally a bad thing.
->
-> Filter out all unsupported modes from the capabilities mask after
-> the device tree properties have been parsed.
->
-> Cc: <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-> Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
->
+> Signed-off-by: Avri Altman <avri.altman@wdc.com>
 
-Applied for fixes, thanks!
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
+>  drivers/mmc/core/sd.c    | 5 +++++
+>  include/linux/mmc/card.h | 2 ++
+>  2 files changed, 7 insertions(+)
 >
-> This should be backported to stable kernels in case people try to run
-> new device trees (that declare newly supported modes) with old kernels.
-> ---
->  drivers/mmc/host/sunxi-mmc.c | 15 +++++++++++++++
->  1 file changed, 15 insertions(+)
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index bd48b28..c2db94d 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -209,6 +209,11 @@ static int mmc_decode_scr(struct mmc_card *card)
+>                 /* Check if Physical Layer Spec v3.0 is supported */
+>                 scr->sda_spec3 = UNSTUFF_BITS(resp, 47, 1);
 >
-> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index 7415af8c8ff6..70fadc976795 100644
-> --- a/drivers/mmc/host/sunxi-mmc.c
-> +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -1415,6 +1415,21 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
->         if (ret)
->                 goto error_free_dma;
->
-> +       /*
-> +        * If we don't support delay chains in the SoC, we can't use any
-> +        * of the higher speed modes. Mask them out in case the device
-> +        * tree specifies the properties for them, which gets added to
-> +        * the caps by mmc_of_parse() above.
-> +        */
-> +       if (!(host->cfg->clk_delays || host->use_new_timings)) {
-> +               mmc->caps &= ~(MMC_CAP_3_3V_DDR | MMC_CAP_1_8V_DDR |
-> +                              MMC_CAP_1_2V_DDR | MMC_CAP_UHS);
-> +               mmc->caps2 &= ~MMC_CAP2_HS200;
+> +       if (scr->sda_spec3) {
+> +               scr->sda_spec4 = UNSTUFF_BITS(resp, 42, 1);
+> +               scr->sda_specx = UNSTUFF_BITS(resp, 38, 4);
 > +       }
 > +
-> +       /* TODO: This driver doesn't support HS400 mode yet */
-> +       mmc->caps2 &= ~MMC_CAP2_HS400;
-> +
->         ret = sunxi_mmc_init_host(host);
->         if (ret)
->                 goto error_free_dma;
+>         if (UNSTUFF_BITS(resp, 55, 1))
+>                 card->erased_byte = 0xFF;
+>         else
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index 8f429b6..d791813f 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -133,6 +133,8 @@ struct mmc_ext_csd {
+>  struct sd_scr {
+>         unsigned char           sda_vsn;
+>         unsigned char           sda_spec3;
+> +       unsigned char           sda_spec4;
+> +       unsigned char           sda_specx;
+>         unsigned char           bus_widths;
+>  #define SD_SCR_BUS_WIDTH_1     (1<<0)
+>  #define SD_SCR_BUS_WIDTH_4     (1<<2)
 > --
-> 2.20.1
+> 1.9.1
 >
