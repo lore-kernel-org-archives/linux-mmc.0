@@ -1,110 +1,96 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 3/3] mmc: core: Add discard support to sd
-Date: Wed, 6 Feb 2019 16:14:42 +0100
-Message-ID: <CAPDyKFqrS+f4K-t6i0ZxAivtATddYepXLguX5svrQub-zH2JEw@mail.gmail.com>
-References: <1549452487-17193-1-git-send-email-avri.altman@wdc.com> <1549452487-17193-4-git-send-email-avri.altman@wdc.com>
+From: Jonathan =?utf-8?Q?Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>
+Subject: sdhci-esdhc-imx/v5.0-rc5: i.MX50 system hangs when "per" clock is
+ disabled
+Date: Thu, 7 Feb 2019 23:52:11 +0100
+Message-ID: <20190207225211.GA17552@latitude>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1549452487-17193-4-git-send-email-avri.altman@wdc.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Avri Altman <avri.altman@wdc.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Lin <shawn.lin@rock-chips.com>, Avi Shchislowski <avi.shchislowski@wdc.com>, Alex Lemberg <alex.lemberg@wdc.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============0725896704381766306=="
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-clk@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Stephen Boyd <sboyd@kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>, Adrian Hunter <adrian.hunter@intel.com>, NXP Linux Team <linux-imx@nxp.com>, Pengutronix Kernel Team <kernel@pengutronix.de>, Fabio Estevam <fabio.estevam@nxp.com>, Shawn Guo <shawnguo@kernel.org>, Michael Turquette <mturquette@baylibre.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 6 Feb 2019 at 12:29, Avri Altman <avri.altman@wdc.com> wrote:
->
-> SD spec v5.1 adds discard support. The flows and commands are similar to
-> mmc, so just set the discard arg in CMD38.
->
-> Actually, there is no need to check for the spec version like we are
-> doing, as it is assured that the reserved bits in earlier versions are
-> null. Do that anyway to document the spec version that introduce it.
->
-> Signed-off-by: Avri Altman <avri.altman@wdc.com>
 
-Deferring this a bit, need some more time to review.
-
-Kind regards
-Uffe
+--===============0725896704381766306==
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="pWyiEgJYm5f9v55/"
+Content-Disposition: inline
 
 
-> ---
->  drivers/mmc/core/core.c |  6 +++++-
->  drivers/mmc/core/sd.c   | 10 +++++++++-
->  include/linux/mmc/sd.h  |  1 +
->  3 files changed, 15 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index de0f1a1..4d62f28 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -2164,7 +2164,7 @@ static unsigned int mmc_align_erase_size(struct mmc_card *card,
->   * @card: card to erase
->   * @from: first sector to erase
->   * @nr: number of sectors to erase
-> - * @arg: erase command argument (SD supports only %SD_ERASE_ARG)
-> + * @arg: erase command argument
->   *
->   * Caller must claim host before calling this function.
->   */
-> @@ -2181,6 +2181,9 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
->         if (!card->erase_size)
->                 return -EOPNOTSUPP;
->
-> +       if (mmc_card_sd(card) && arg == SD_DISCARD_ARG)
-> +               goto skip_arg_testing;
-> +
->         if (mmc_card_sd(card) && arg != SD_ERASE_ARG)
->                 return -EOPNOTSUPP;
->
-> @@ -2200,6 +2203,7 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
->         if (arg == MMC_ERASE_ARG)
->                 nr = mmc_align_erase_size(card, &from, &to, nr);
->
-> +skip_arg_testing:
->         if (nr == 0)
->                 return 0;
->
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index c2db94d..2b4fc22 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -231,6 +231,8 @@ static int mmc_read_ssr(struct mmc_card *card)
->  {
->         unsigned int au, es, et, eo;
->         __be32 *raw_ssr;
-> +       u32 resp[4] = {};
-> +       u8 discard_support;
->         int i;
->
->         if (!(card->csd.cmdclass & CCC_APP_SPEC)) {
-> @@ -276,7 +278,13 @@ static int mmc_read_ssr(struct mmc_card *card)
->                 }
->         }
->
-> -       card->erase_arg = SD_ERASE_ARG;
-> +       /*
-> +        * starting SD5.1 discard is supported if DISCARD_SUPPORT (b313) is set
-> +        */
-> +       resp[3] = card->raw_ssr[6];
-> +       discard_support = UNSTUFF_BITS(resp, 313 - 288, 1);
-> +       card->erase_arg = (card->scr.sda_specx && discard_support) ?
-> +                           SD_DISCARD_ARG : SD_ERASE_ARG;
->
->         return 0;
->  }
-> diff --git a/include/linux/mmc/sd.h b/include/linux/mmc/sd.h
-> index 1a6d10f..ec94a5a 100644
-> --- a/include/linux/mmc/sd.h
-> +++ b/include/linux/mmc/sd.h
-> @@ -95,5 +95,6 @@
->   * Erase/discard
->   */
->  #define SD_ERASE_ARG                   0x00000000
-> +#define SD_DISCARD_ARG                 0x00000001
->
->  #endif /* LINUX_MMC_SD_H */
-> --
-> 1.9.1
->
+--pWyiEgJYm5f9v55/
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+Hi,
+
+I'm currently porting mainline Linux to an i.MX507-based board
+(preliminary DT here[1]). Recently I've enabled esdhc1 in the
+devicetree.
+
+However, as soon as the mmc driver (sdhci-esdhc-imx.c) disables clk_per
+in sdhci_esdhc_runtime_suspend[2], the whole system locks up in some way.
+Booting with CONFIG_PM=3Dn "fixes" the problem; commenting out the
+offending line in sdhci_esdhc_runtime_suspend lets the system survive,
+but leaves the MMC controller in an unusable state (of course it's not a
+proper solution anyway).
+
+I tried to compare the CCM's clocks between i.MX50 and i.MX53, but
+unfortunately, the i.MX50 reference manual doesn't have the table called
+"Output clocks from CCM".
+
+Does anyone have any ideas or patches that I could try in order to
+narrow the problem further down?
+
+
+Thanks,
+Jonathan Neusch=C3=A4fer
+
+[1]: https://gist.github.com/neuschaefer/27cacf0acf5411219be9372d728d1163
+[2]: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tre=
+e/drivers/mmc/host/sdhci-esdhc-imx.c?h=3Dv5.0-rc5#n1412
+
+--pWyiEgJYm5f9v55/
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEvHAHGBBjQPVy+qvDCDBEmo7zX9sFAlxctpQACgkQCDBEmo7z
+X9sCRhAAw9ITjTQEEXDivDeMdj/6i8kc+QsJ8gfnBBBykbRlr3Y9bgb1wLrJNKwv
++Ge6OSrQ3tlx3rSVrw2BQaLg6iCxjEuYdmklvOtJ/g58oNVGqi+ZHXz6g0I/2S87
+K7TQY+OTbbEd5RU69wRwe5XUYc+sGGovHxDORRghMGfulVz5a9LpHbClqEnNF/GV
+VeIkASq3D4xsRrMEoAHhqDWATLyBHxNvMp00BdXoAnswuxmVrNqFtkUOVF/D0F3I
+Ex8iBvVuGPbM05zQUXEc7EcBPh+pYYZAhbtfwZxLDgnG+ua18gVJcD3JVvxI8Fys
+4kK9Jf5yv45GPRwm0YmkA3edxqQBZEL+HyOCFnWVINzEd7+q4vS4PL7+zdPWuJnV
+cxul84iPn0AuO8yFOrFdsG1K6ETU2l+jnc95kJcTV4Wh2R041ZO64RkZkaExznLm
+alEL1eMHEZ9mQPdRmvXZsAIdE6OvBBOhsJnwnXShrGB5+CO6/QIl+clwaqTR5Prl
+mns8K60gBXA1B2NS6p0QgjeD9DGhTUTANlMA3X3dw5KHxaxnk1Y/tr2JxvdqE6Yo
+uliAwEFxFZUWFvUh6yi5oqunEY0bBUQmch5HPHWP2uXc4yuk4a05JjfhUjbczL2y
+42kPZzU8rCBLkowsLewstnxgoXcHUTwBkIootFGocsJpjckvlXo=
+=ajnv
+-----END PGP SIGNATURE-----
+
+--pWyiEgJYm5f9v55/--
+
+
+--===============0725896704381766306==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+linux-arm-kernel mailing list
+linux-arm-kernel@lists.infradead.org
+http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+
+--===============0725896704381766306==--
