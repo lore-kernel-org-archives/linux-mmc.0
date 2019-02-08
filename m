@@ -1,11 +1,14 @@
-From: Jonathan =?utf-8?Q?Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>
-Subject: sdhci-esdhc-imx/v5.0-rc5: i.MX50 system hangs when "per" clock is
+From: Fabio Estevam <festevam@gmail.com>
+Subject: Re: sdhci-esdhc-imx/v5.0-rc5: i.MX50 system hangs when "per" clock is
  disabled
-Date: Thu, 7 Feb 2019 23:52:11 +0100
-Message-ID: <20190207225211.GA17552@latitude>
+Date: Thu, 7 Feb 2019 22:50:28 -0200
+Message-ID: <CAOMZO5BH1Su=tKD8vV8+-i_0a_4fNDQKbk0q6DX5TZWYezeH9Q@mail.gmail.com>
+References: <20190207225211.GA17552@latitude>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0725896704381766306=="
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20190207225211.GA17552@latitude>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -15,82 +18,51 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-clk@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Stephen Boyd <sboyd@kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>, Adrian Hunter <adrian.hunter@intel.com>, NXP Linux Team <linux-imx@nxp.com>, Pengutronix Kernel Team <kernel@pengutronix.de>, Fabio Estevam <fabio.estevam@nxp.com>, Shawn Guo <shawnguo@kernel.org>, Michael Turquette <mturquette@baylibre.com>, linux-arm-kernel@lists.infradead.org
+To: =?UTF-8?Q?Jonathan_Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Stephen Boyd <sboyd@kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>, linux-mmc <linux-mmc@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Michael Turquette <mturquette@baylibre.com>, NXP Linux Team <linux-imx@nxp.com>, Pengutronix Kernel Team <kernel@pengutronix.de>, Fabio Estevam <fabio.estevam@nxp.com>, Shawn Guo <shawnguo@kernel.org>, linux-clk <linux-clk@vger.kernel.org>, "moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-
---===============0725896704381766306==
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="pWyiEgJYm5f9v55/"
-Content-Disposition: inline
-
-
---pWyiEgJYm5f9v55/
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-Hi,
-
-I'm currently porting mainline Linux to an i.MX507-based board
-(preliminary DT here[1]). Recently I've enabled esdhc1 in the
-devicetree.
-
-However, as soon as the mmc driver (sdhci-esdhc-imx.c) disables clk_per
-in sdhci_esdhc_runtime_suspend[2], the whole system locks up in some way.
-Booting with CONFIG_PM=3Dn "fixes" the problem; commenting out the
-offending line in sdhci_esdhc_runtime_suspend lets the system survive,
-but leaves the MMC controller in an unusable state (of course it's not a
-proper solution anyway).
-
-I tried to compare the CCM's clocks between i.MX50 and i.MX53, but
-unfortunately, the i.MX50 reference manual doesn't have the table called
-"Output clocks from CCM".
-
-Does anyone have any ideas or patches that I could try in order to
-narrow the problem further down?
-
-
-Thanks,
-Jonathan Neusch=C3=A4fer
-
-[1]: https://gist.github.com/neuschaefer/27cacf0acf5411219be9372d728d1163
-[2]: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tre=
-e/drivers/mmc/host/sdhci-esdhc-imx.c?h=3Dv5.0-rc5#n1412
-
---pWyiEgJYm5f9v55/
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEvHAHGBBjQPVy+qvDCDBEmo7zX9sFAlxctpQACgkQCDBEmo7z
-X9sCRhAAw9ITjTQEEXDivDeMdj/6i8kc+QsJ8gfnBBBykbRlr3Y9bgb1wLrJNKwv
-+Ge6OSrQ3tlx3rSVrw2BQaLg6iCxjEuYdmklvOtJ/g58oNVGqi+ZHXz6g0I/2S87
-K7TQY+OTbbEd5RU69wRwe5XUYc+sGGovHxDORRghMGfulVz5a9LpHbClqEnNF/GV
-VeIkASq3D4xsRrMEoAHhqDWATLyBHxNvMp00BdXoAnswuxmVrNqFtkUOVF/D0F3I
-Ex8iBvVuGPbM05zQUXEc7EcBPh+pYYZAhbtfwZxLDgnG+ua18gVJcD3JVvxI8Fys
-4kK9Jf5yv45GPRwm0YmkA3edxqQBZEL+HyOCFnWVINzEd7+q4vS4PL7+zdPWuJnV
-cxul84iPn0AuO8yFOrFdsG1K6ETU2l+jnc95kJcTV4Wh2R041ZO64RkZkaExznLm
-alEL1eMHEZ9mQPdRmvXZsAIdE6OvBBOhsJnwnXShrGB5+CO6/QIl+clwaqTR5Prl
-mns8K60gBXA1B2NS6p0QgjeD9DGhTUTANlMA3X3dw5KHxaxnk1Y/tr2JxvdqE6Yo
-uliAwEFxFZUWFvUh6yi5oqunEY0bBUQmch5HPHWP2uXc4yuk4a05JjfhUjbczL2y
-42kPZzU8rCBLkowsLewstnxgoXcHUTwBkIootFGocsJpjckvlXo=
-=ajnv
------END PGP SIGNATURE-----
-
---pWyiEgJYm5f9v55/--
-
-
---===============0725896704381766306==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-linux-arm-kernel mailing list
-linux-arm-kernel@lists.infradead.org
-http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
-
---===============0725896704381766306==--
+SGkgSm9uYXRoYW4sCgpPbiBUaHUsIEZlYiA3LCAyMDE5IGF0IDg6NTIgUE0gSm9uYXRoYW4gTmV1
+c2Now6RmZXIKPGoubmV1c2NoYWVmZXJAZ214Lm5ldD4gd3JvdGU6Cj4KPiBIaSwKPgo+IEknbSBj
+dXJyZW50bHkgcG9ydGluZyBtYWlubGluZSBMaW51eCB0byBhbiBpLk1YNTA3LWJhc2VkIGJvYXJk
+Cj4gKHByZWxpbWluYXJ5IERUIGhlcmVbMV0pLiBSZWNlbnRseSBJJ3ZlIGVuYWJsZWQgZXNkaGMx
+IGluIHRoZQo+IGRldmljZXRyZWUuCj4KPiBIb3dldmVyLCBhcyBzb29uIGFzIHRoZSBtbWMgZHJp
+dmVyIChzZGhjaS1lc2RoYy1pbXguYykgZGlzYWJsZXMgY2xrX3Blcgo+IGluIHNkaGNpX2VzZGhj
+X3J1bnRpbWVfc3VzcGVuZFsyXSwgdGhlIHdob2xlIHN5c3RlbSBsb2NrcyB1cCBpbiBzb21lIHdh
+eS4KPiBCb290aW5nIHdpdGggQ09ORklHX1BNPW4gImZpeGVzIiB0aGUgcHJvYmxlbTsgY29tbWVu
+dGluZyBvdXQgdGhlCj4gb2ZmZW5kaW5nIGxpbmUgaW4gc2RoY2lfZXNkaGNfcnVudGltZV9zdXNw
+ZW5kIGxldHMgdGhlIHN5c3RlbSBzdXJ2aXZlLAo+IGJ1dCBsZWF2ZXMgdGhlIE1NQyBjb250cm9s
+bGVyIGluIGFuIHVudXNhYmxlIHN0YXRlIChvZiBjb3Vyc2UgaXQncyBub3QgYQo+IHByb3BlciBz
+b2x1dGlvbiBhbnl3YXkpLgo+Cj4gSSB0cmllZCB0byBjb21wYXJlIHRoZSBDQ00ncyBjbG9ja3Mg
+YmV0d2VlbiBpLk1YNTAgYW5kIGkuTVg1MywgYnV0Cj4gdW5mb3J0dW5hdGVseSwgdGhlIGkuTVg1
+MCByZWZlcmVuY2UgbWFudWFsIGRvZXNuJ3QgaGF2ZSB0aGUgdGFibGUgY2FsbGVkCj4gIk91dHB1
+dCBjbG9ja3MgZnJvbSBDQ00iLgoKUGxlYXNlIGNoZWNrIFRhYmxlIDUtMTAuIENDTV9DQ0dSMyBH
+YXRlZCBDbG9jayBNYXBwaW5nIHRvIFRhcmdldApNb2R1bGUgZnJvbSB0aGUgTVg1MCBSZWZlcmVu
+ZSBNYW51YWwuCgo+Cj4gRG9lcyBhbnlvbmUgaGF2ZSBhbnkgaWRlYXMgb3IgcGF0Y2hlcyB0aGF0
+IEkgY291bGQgdHJ5IGluIG9yZGVyIHRvCj4gbmFycm93IHRoZSBwcm9ibGVtIGZ1cnRoZXIgZG93
+bj8KCkRvZXMgdGhlIGNoYW5nZSBiZWxvdyBoZWxwPwoKLS0tIGEvYXJjaC9hcm0vYm9vdC9kdHMv
+aW14NTAuZHRzaQorKysgYi9hcmNoL2FybS9ib290L2R0cy9pbXg1MC5kdHNpCkBAIC0xMDIsNyAr
+MTAyLDcgQEAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHJlZyA9IDww
+eDUwMDA0MDAwIDB4NDAwMD47CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICBpbnRlcnJ1cHRzID0gPDE+OwogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgY2xvY2tzID0gPCZjbGtzCklNWDVfQ0xLX0VTREhDMV9JUEdfR0FURT4sCi0gICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8JmNsa3MgSU1YNV9DTEtfRFVN
+TVk+LAorICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPCZj
+bGtzCklNWDVfQ0xLX0VTREhDMV9JUEdfR0FURT4sCiAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICA8JmNsa3MKSU1YNV9DTEtfRVNESEMxX1BFUl9HQVRFPjsK
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGNsb2NrLW5hbWVzID0gImlw
+ZyIsICJhaGIiLCAicGVyIjsKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+IGJ1cy13aWR0aCA9IDw0PjsKQEAgLTExNCw3ICsxMTQsNyBAQAogICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgcmVnID0gPDB4NTAwMDgwMDAgMHg0MDAwPjsKICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGludGVycnVwdHMgPSA8Mj47CiAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBjbG9ja3MgPSA8JmNsa3MKSU1YNV9DTEtf
+RVNESEMyX0lQR19HQVRFPiwKLSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgIDwmY2xrcyBJTVg1X0NMS19EVU1NWT4sCisgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICA8JmNsa3MKSU1YNV9DTEtfRVNESEMyX0lQR19HQVRF
+PiwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDwmY2xr
+cwpJTVg1X0NMS19FU0RIQzJfUEVSX0dBVEU+OwogICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgY2xvY2stbmFtZXMgPSAiaXBnIiwgImFoYiIsICJwZXIiOwogICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgYnVzLXdpZHRoID0gPDQ+OwoKX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KbGludXgtYXJtLWtlcm5lbCBt
+YWlsaW5nIGxpc3QKbGludXgtYXJtLWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnCmh0dHA6Ly9s
+aXN0cy5pbmZyYWRlYWQub3JnL21haWxtYW4vbGlzdGluZm8vbGludXgtYXJtLWtlcm5lbAo=
