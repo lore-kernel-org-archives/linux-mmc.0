@@ -1,68 +1,109 @@
-From: Fabio Estevam <festevam@gmail.com>
-Subject: Re: sdhci-esdhc-imx/v5.0-rc5: i.MX50 system hangs when "per" clock is
- disabled
-Date: Thu, 7 Feb 2019 22:50:28 -0200
-Message-ID: <CAOMZO5BH1Su=tKD8vV8+-i_0a_4fNDQKbk0q6DX5TZWYezeH9Q@mail.gmail.com>
-References: <20190207225211.GA17552@latitude>
+From: "Asutosh Das (asd)" <asutoshd@codeaurora.org>
+Subject: Re: [PATCH 1/2] mmc: cqhci: replace NUM_SLOTS with cq_host->num_slots
+Date: Fri, 8 Feb 2019 16:04:34 +0530
+Message-ID: <dcf57693-3daf-8277-53e9-1c4b094f2449@codeaurora.org>
+References: <20190114191724.29960-1-alamy.liu@gmail.com>
+ <ee3dc963-53f0-e362-caa5-069ce0e6eae7@intel.com>
+ <CAJ3kudsgJsZ1KFXdD9Vnfx0GypnEf+ba-D8t+Wy1e8GdLF=U0w@mail.gmail.com>
+ <362c073b-d795-4431-f1dd-c203cc606a6f@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20190207225211.GA17552@latitude>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: =?UTF-8?Q?Jonathan_Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Stephen Boyd <sboyd@kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>, linux-mmc <linux-mmc@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Michael Turquette <mturquette@baylibre.com>, NXP Linux Team <linux-imx@nxp.com>, Pengutronix Kernel Team <kernel@pengutronix.de>, Fabio Estevam <fabio.estevam@nxp.com>, Shawn Guo <shawnguo@kernel.org>, linux-clk <linux-clk@vger.kernel.org>, "moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <362c073b-d795-4431-f1dd-c203cc606a6f@codeaurora.org>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ritesh Harjani <riteshh@codeaurora.org>, Alamy Liu <alamy.liu@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, "open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..." <linux-mmc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-SGkgSm9uYXRoYW4sCgpPbiBUaHUsIEZlYiA3LCAyMDE5IGF0IDg6NTIgUE0gSm9uYXRoYW4gTmV1
-c2Now6RmZXIKPGoubmV1c2NoYWVmZXJAZ214Lm5ldD4gd3JvdGU6Cj4KPiBIaSwKPgo+IEknbSBj
-dXJyZW50bHkgcG9ydGluZyBtYWlubGluZSBMaW51eCB0byBhbiBpLk1YNTA3LWJhc2VkIGJvYXJk
-Cj4gKHByZWxpbWluYXJ5IERUIGhlcmVbMV0pLiBSZWNlbnRseSBJJ3ZlIGVuYWJsZWQgZXNkaGMx
-IGluIHRoZQo+IGRldmljZXRyZWUuCj4KPiBIb3dldmVyLCBhcyBzb29uIGFzIHRoZSBtbWMgZHJp
-dmVyIChzZGhjaS1lc2RoYy1pbXguYykgZGlzYWJsZXMgY2xrX3Blcgo+IGluIHNkaGNpX2VzZGhj
-X3J1bnRpbWVfc3VzcGVuZFsyXSwgdGhlIHdob2xlIHN5c3RlbSBsb2NrcyB1cCBpbiBzb21lIHdh
-eS4KPiBCb290aW5nIHdpdGggQ09ORklHX1BNPW4gImZpeGVzIiB0aGUgcHJvYmxlbTsgY29tbWVu
-dGluZyBvdXQgdGhlCj4gb2ZmZW5kaW5nIGxpbmUgaW4gc2RoY2lfZXNkaGNfcnVudGltZV9zdXNw
-ZW5kIGxldHMgdGhlIHN5c3RlbSBzdXJ2aXZlLAo+IGJ1dCBsZWF2ZXMgdGhlIE1NQyBjb250cm9s
-bGVyIGluIGFuIHVudXNhYmxlIHN0YXRlIChvZiBjb3Vyc2UgaXQncyBub3QgYQo+IHByb3BlciBz
-b2x1dGlvbiBhbnl3YXkpLgo+Cj4gSSB0cmllZCB0byBjb21wYXJlIHRoZSBDQ00ncyBjbG9ja3Mg
-YmV0d2VlbiBpLk1YNTAgYW5kIGkuTVg1MywgYnV0Cj4gdW5mb3J0dW5hdGVseSwgdGhlIGkuTVg1
-MCByZWZlcmVuY2UgbWFudWFsIGRvZXNuJ3QgaGF2ZSB0aGUgdGFibGUgY2FsbGVkCj4gIk91dHB1
-dCBjbG9ja3MgZnJvbSBDQ00iLgoKUGxlYXNlIGNoZWNrIFRhYmxlIDUtMTAuIENDTV9DQ0dSMyBH
-YXRlZCBDbG9jayBNYXBwaW5nIHRvIFRhcmdldApNb2R1bGUgZnJvbSB0aGUgTVg1MCBSZWZlcmVu
-ZSBNYW51YWwuCgo+Cj4gRG9lcyBhbnlvbmUgaGF2ZSBhbnkgaWRlYXMgb3IgcGF0Y2hlcyB0aGF0
-IEkgY291bGQgdHJ5IGluIG9yZGVyIHRvCj4gbmFycm93IHRoZSBwcm9ibGVtIGZ1cnRoZXIgZG93
-bj8KCkRvZXMgdGhlIGNoYW5nZSBiZWxvdyBoZWxwPwoKLS0tIGEvYXJjaC9hcm0vYm9vdC9kdHMv
-aW14NTAuZHRzaQorKysgYi9hcmNoL2FybS9ib290L2R0cy9pbXg1MC5kdHNpCkBAIC0xMDIsNyAr
-MTAyLDcgQEAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHJlZyA9IDww
-eDUwMDA0MDAwIDB4NDAwMD47CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICBpbnRlcnJ1cHRzID0gPDE+OwogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgY2xvY2tzID0gPCZjbGtzCklNWDVfQ0xLX0VTREhDMV9JUEdfR0FURT4sCi0gICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8JmNsa3MgSU1YNV9DTEtfRFVN
-TVk+LAorICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPCZj
-bGtzCklNWDVfQ0xLX0VTREhDMV9JUEdfR0FURT4sCiAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICA8JmNsa3MKSU1YNV9DTEtfRVNESEMxX1BFUl9HQVRFPjsK
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGNsb2NrLW5hbWVzID0gImlw
-ZyIsICJhaGIiLCAicGVyIjsKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-IGJ1cy13aWR0aCA9IDw0PjsKQEAgLTExNCw3ICsxMTQsNyBAQAogICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgcmVnID0gPDB4NTAwMDgwMDAgMHg0MDAwPjsKICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGludGVycnVwdHMgPSA8Mj47CiAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBjbG9ja3MgPSA8JmNsa3MKSU1YNV9DTEtf
-RVNESEMyX0lQR19HQVRFPiwKLSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgIDwmY2xrcyBJTVg1X0NMS19EVU1NWT4sCisgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICA8JmNsa3MKSU1YNV9DTEtfRVNESEMyX0lQR19HQVRF
-PiwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDwmY2xr
-cwpJTVg1X0NMS19FU0RIQzJfUEVSX0dBVEU+OwogICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgY2xvY2stbmFtZXMgPSAiaXBnIiwgImFoYiIsICJwZXIiOwogICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgYnVzLXdpZHRoID0gPDQ+OwoKX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KbGludXgtYXJtLWtlcm5lbCBt
-YWlsaW5nIGxpc3QKbGludXgtYXJtLWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnCmh0dHA6Ly9s
-aXN0cy5pbmZyYWRlYWQub3JnL21haWxtYW4vbGlzdGluZm8vbGludXgtYXJtLWtlcm5lbAo=
+On 2/8/2019 8:07 AM, Ritesh Harjani wrote:
+> Hi Alamy,
+> 
+> On 2/8/2019 1:00 AM, Alamy Liu wrote:
+>> It says in B.2.1 in the JESD84-B51.pdf (I don't have JESD84-B51A.pdf):
+>>
+>>     /The TDL is located in a memory location known to the CQE, and is
+>>     comprised of up to 32 fixed-size slots. Each slot is comprised of
+>>     one Task Descriptor and one Transfer Descriptor./
+>>
+>>
+>> So if the IP has 16 slots, it should still meet the specification. 
+>> Then the configuration could be moved to DTS, maybe:
+>>
+>>     cqhci-slotnum = <16>;
+>>
+>>     cqhci-dcmd-slotno = <15>;
+>>
+> Does your IP defines this as 16 slots & DCMD slot to be 15?
+> Because if there is a deviation then IP may also define num_slots by 
+> using some reserved registers.
+> Also in JESD84-B51.pdf, specific slot no. is used extensively for 
+> defining policies(like in case of DCMD & CQCFG), so in that case 
+> defining via DT may not be that helpful.
+> Unless there is no other way in your IP to determine the num_slots 
+> except going via DT?
+> 
+> Let others also provide an opinion here.
+> 
+> Regards
+> Ritesh
+> 
+> 
+>>
+>> Please comment.
+>>
+>> Regards,
+>> Alamy
+>>
+>>
+>>
+>> On Thu, Jan 31, 2019 at 1:34 AM Adrian Hunter <adrian.hunter@intel.com 
+>> <mailto:adrian.hunter@intel.com>> wrote:
+>>
+>>     On 14/01/19 9:17 PM, Alamy Liu wrote:
+>>     > Prevent to use fixed value (NUM_SLOTS) after it had been determined
+>>     > and saved in a variable (cq_host->num_slots).
+>>
+>>     num_slots is always 32 (i.e. NUM_SLOTS) so why not go the other
+>>     way and get
+>>     rid of num_slots and just use NUM_SLOTS?
+>>
+>>     >
+>>     > Signed-off-by: Alamy Liu <alamy.liu@gmail.com
+>>     <mailto:alamy.liu@gmail.com>>
+>>     > ---
+>>     >  drivers/mmc/host/cqhci.c | 2 +-
+>>     >  1 file changed, 1 insertion(+), 1 deletion(-)
+>>     >
+>>     > diff --git a/drivers/mmc/host/cqhci.c b/drivers/mmc/host/cqhci.c
+>>     > index 159270e947..26d63594b7 100644
+>>     > --- a/drivers/mmc/host/cqhci.c
+>>     > +++ b/drivers/mmc/host/cqhci.c
+>>     > @@ -699,7 +699,7 @@ static void cqhci_error_irq(struct mmc_host
+>>     *mmc, u32 status, int cmd_error,
+>>     >                * The only way to guarantee forward progress is
+>>     to mark at
+>>     >                * least one task in error, so if none is
+>>     indicated, pick one.
+>>     >                */
+>>     > -             for (tag = 0; tag < NUM_SLOTS; tag++) {
+>>     > +             for (tag = 0; tag < cq_host->num_slots; tag++) {
+>>     >                       slot = &cq_host->slot[tag];
+>>     >                       if (!slot->mrq)
+>>     >                               continue;
+>>     >
+>>
+Is it worth exploring to tie up the TDL memory allocations with the 
+queue-depth? Because the queue-depth may vary with vendor; in most host 
+controllers the slot size is 32. And since memory allocations are done 
+on the basis of host slot size there's unused slots in the case of card 
+advertising less than 32 queue-depth.
+The tricky part would be the DCMD handling though.
+
+In the IP in question, what slot is assigned to DCMD?
+
+
+-- 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a 
+Linux Foundation Collaborative Project
