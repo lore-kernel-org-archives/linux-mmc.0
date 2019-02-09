@@ -1,135 +1,56 @@
-From: Alamy Liu <alamy.liu@gmail.com>
-Subject: Re: [PATCH 1/2] mmc: cqhci: replace NUM_SLOTS with cq_host->num_slots
-Date: Fri, 8 Feb 2019 10:41:11 -0800
-Message-ID: <CAJ3kuds-XgrhjiyS8j-5twOHde3NHsGaH5hFqeOm8HLXHi59aA@mail.gmail.com>
-References: <20190114191724.29960-1-alamy.liu@gmail.com> <ee3dc963-53f0-e362-caa5-069ce0e6eae7@intel.com>
- <CAJ3kudsgJsZ1KFXdD9Vnfx0GypnEf+ba-D8t+Wy1e8GdLF=U0w@mail.gmail.com>
- <362c073b-d795-4431-f1dd-c203cc606a6f@codeaurora.org> <dcf57693-3daf-8277-53e9-1c4b094f2449@codeaurora.org>
+From: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Subject: [PATCH] mmc: meson-gx: fix interrupt name
+Date: Sat,  9 Feb 2019 01:58:50 +0100
+Message-ID: <20190209005850.11457-1-martin.blumenstingl@googlemail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <dcf57693-3daf-8277-53e9-1c4b094f2449@codeaurora.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Asutosh Das (asd)" <asutoshd@codeaurora.org>, Ritesh Harjani <riteshh@codeaurora.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, "open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..." <linux-mmc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org
+Cc: xademax@gmail.com, Martin Blumenstingl <martin.blumenstingl@googlemail.com>, repk@triplefau.lt, linux-arm-kernel@lists.infradead.org, jbrunet@baylibre.com
 List-Id: linux-mmc@vger.kernel.org
 
-The IP I'm using has fixed 32 slots for CQ once CQE is enabled in RTL.
-There is no other RO register to say the slot number & which slot that
-DCMD would use.
+Commit bb364890323cca ("mmc: meson-gx: Free irq in release() callback")
+changed the _probe code to use request_threaded_irq() instead of
+devm_request_threaded_irq().
+Unfortunately this removes a fallback for the interrupt name:
+devm_request_threaded_irq() uses the device name as fallback if the
+given IRQ name is NULL. request_threaded_irq() has no such fallback,
+thus /proc/interrupts shows "(null)" instead.
 
-I agree that most host controller would have 32 slots for CQ, and use
-the last one for DCMD if enabled (easier design & save gates
-count/size). (15th for DCMD if there were 16 slots in CQ, ...etc). It
-also doesn't make sense to use a slot in the middle of slots for DCMD,
-Both the code (both S.W. & H.W.) would become more complicated.
-Although I don't see it is defined somewhere, I believe that every
-designer would follow.
-(H.W.: increasing gate count -> increasing die size -> increase $;
-complicated design -> higher chance to have bug/error).
-(H.W.: SDHC cq_depth: longer cq_depth -> more memory -> more $. The
-decision would be the trade off between $ & performance. Also, the
-SDHC is not necessary to be used in Cortex-A/Linux. Thus, 16/8
-cq_depth is possible, although I don't know if there is one existed
-out there)
+Explicitly pass the dev_name() so we get the IRQ name shown in
+/proc/interrupts again.
+While here, also fix the indentation of the request_threaded_irq()
+parameter list.
 
-Another thinking: If all cq_depth is fixed to 32, the mmc driver core
-doesn't even have to detect the cq_depth and eventually choose the
-small one between HC & eMMC (queue.c::mmc_init_queue)
+Fixes: bb364890323cca ("mmc: meson-gx: Free irq in release() callback")
+Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+---
+ drivers/mmc/host/meson-gx-mmc.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-Best Regards
-
-
-On Fri, Feb 8, 2019 at 2:34 AM Asutosh Das (asd)
-<asutoshd@codeaurora.org> wrote:
->
-> On 2/8/2019 8:07 AM, Ritesh Harjani wrote:
-> > Hi Alamy,
-> >
-> > On 2/8/2019 1:00 AM, Alamy Liu wrote:
-> >> It says in B.2.1 in the JESD84-B51.pdf (I don't have JESD84-B51A.pdf):
-> >>
-> >>     /The TDL is located in a memory location known to the CQE, and is
-> >>     comprised of up to 32 fixed-size slots. Each slot is comprised of
-> >>     one Task Descriptor and one Transfer Descriptor./
-> >>
-> >>
-> >> So if the IP has 16 slots, it should still meet the specification.
-> >> Then the configuration could be moved to DTS, maybe:
-> >>
-> >>     cqhci-slotnum = <16>;
-> >>
-> >>     cqhci-dcmd-slotno = <15>;
-> >>
-> > Does your IP defines this as 16 slots & DCMD slot to be 15?
-> > Because if there is a deviation then IP may also define num_slots by
-> > using some reserved registers.
-> > Also in JESD84-B51.pdf, specific slot no. is used extensively for
-> > defining policies(like in case of DCMD & CQCFG), so in that case
-> > defining via DT may not be that helpful.
-> > Unless there is no other way in your IP to determine the num_slots
-> > except going via DT?
-> >
-> > Let others also provide an opinion here.
-> >
-> > Regards
-> > Ritesh
-> >
-> >
-> >>
-> >> Please comment.
-> >>
-> >> Regards,
-> >> Alamy
-> >>
-> >>
-> >>
-> >> On Thu, Jan 31, 2019 at 1:34 AM Adrian Hunter <adrian.hunter@intel.com
-> >> <mailto:adrian.hunter@intel.com>> wrote:
-> >>
-> >>     On 14/01/19 9:17 PM, Alamy Liu wrote:
-> >>     > Prevent to use fixed value (NUM_SLOTS) after it had been determined
-> >>     > and saved in a variable (cq_host->num_slots).
-> >>
-> >>     num_slots is always 32 (i.e. NUM_SLOTS) so why not go the other
-> >>     way and get
-> >>     rid of num_slots and just use NUM_SLOTS?
-> >>
-> >>     >
-> >>     > Signed-off-by: Alamy Liu <alamy.liu@gmail.com
-> >>     <mailto:alamy.liu@gmail.com>>
-> >>     > ---
-> >>     >  drivers/mmc/host/cqhci.c | 2 +-
-> >>     >  1 file changed, 1 insertion(+), 1 deletion(-)
-> >>     >
-> >>     > diff --git a/drivers/mmc/host/cqhci.c b/drivers/mmc/host/cqhci.c
-> >>     > index 159270e947..26d63594b7 100644
-> >>     > --- a/drivers/mmc/host/cqhci.c
-> >>     > +++ b/drivers/mmc/host/cqhci.c
-> >>     > @@ -699,7 +699,7 @@ static void cqhci_error_irq(struct mmc_host
-> >>     *mmc, u32 status, int cmd_error,
-> >>     >                * The only way to guarantee forward progress is
-> >>     to mark at
-> >>     >                * least one task in error, so if none is
-> >>     indicated, pick one.
-> >>     >                */
-> >>     > -             for (tag = 0; tag < NUM_SLOTS; tag++) {
-> >>     > +             for (tag = 0; tag < cq_host->num_slots; tag++) {
-> >>     >                       slot = &cq_host->slot[tag];
-> >>     >                       if (!slot->mrq)
-> >>     >                               continue;
-> >>     >
-> >>
-> Is it worth exploring to tie up the TDL memory allocations with the
-> queue-depth? Because the queue-depth may vary with vendor; in most host
-> controllers the slot size is 32. And since memory allocations are done
-> on the basis of host slot size there's unused slots in the case of card
-> advertising less than 32 queue-depth.
-> The tricky part would be the DCMD handling though.
->
-> In the IP in question, what slot is assigned to DCMD?
->
->
-> --
-> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a
-> Linux Foundation Collaborative Project
+diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+index f19ec60bcbdc..2eba507790e4 100644
+--- a/drivers/mmc/host/meson-gx-mmc.c
++++ b/drivers/mmc/host/meson-gx-mmc.c
+@@ -1338,7 +1338,8 @@ static int meson_mmc_probe(struct platform_device *pdev)
+ 	       host->regs + SD_EMMC_IRQ_EN);
+ 
+ 	ret = request_threaded_irq(host->irq, meson_mmc_irq,
+-			meson_mmc_irq_thread, IRQF_SHARED, NULL, host);
++				   meson_mmc_irq_thread, IRQF_SHARED,
++				   dev_name(&pdev->dev), host);
+ 	if (ret)
+ 		goto err_init_clk;
+ 
+-- 
+2.20.1
