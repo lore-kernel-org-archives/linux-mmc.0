@@ -1,149 +1,190 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 1/2] mmc: cqhci: replace NUM_SLOTS with cq_host->num_slots
-Date: Mon, 11 Feb 2019 10:56:18 +0200
-Message-ID: <7614ec08-aac4-a82e-2534-262828aeec19@intel.com>
-References: <20190114191724.29960-1-alamy.liu@gmail.com>
- <ee3dc963-53f0-e362-caa5-069ce0e6eae7@intel.com>
- <CAJ3kudsgJsZ1KFXdD9Vnfx0GypnEf+ba-D8t+Wy1e8GdLF=U0w@mail.gmail.com>
- <362c073b-d795-4431-f1dd-c203cc606a6f@codeaurora.org>
- <dcf57693-3daf-8277-53e9-1c4b094f2449@codeaurora.org>
- <CAJ3kuds-XgrhjiyS8j-5twOHde3NHsGaH5hFqeOm8HLXHi59aA@mail.gmail.com>
+From: Faiz Abbas <faiz_abbas@ti.com>
+Subject: Re: [PATCH 1/7] mmc: sdhci: add support for using external DMA
+ devices
+Date: Mon, 11 Feb 2019 17:53:57 +0530
+Message-ID: <00acd303-b3fa-f083-0412-0aa121a5394d@ti.com>
+References: <20190111110851.6805-1-faiz_abbas@ti.com>
+ <20190111110851.6805-2-faiz_abbas@ti.com>
+ <bcea7bae-41c8-358a-11c1-3886f9dc0351@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAJ3kuds-XgrhjiyS8j-5twOHde3NHsGaH5hFqeOm8HLXHi59aA@mail.gmail.com>
+In-Reply-To: <bcea7bae-41c8-358a-11c1-3886f9dc0351@intel.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Alamy Liu <alamy.liu@gmail.com>, "Asutosh Das (asd)" <asutoshd@codeaurora.org>, Ritesh Harjani <riteshh@codeaurora.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..." <linux-mmc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
+To: Adrian Hunter <adrian.hunter@intel.com>, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: zhang.chunyan@linaro.org, kishon@ti.com, mark.rutland@arm.com, robh+dt@kernel.org, ulf.hansson@linaro.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 8/02/19 8:41 PM, Alamy Liu wrote:
-> The IP I'm using has fixed 32 slots for CQ once CQE is enabled in RTL.
-> There is no other RO register to say the slot number & which slot that
-> DCMD would use.
-> 
-> I agree that most host controller would have 32 slots for CQ, and use
-> the last one for DCMD if enabled (easier design & save gates
-> count/size). (15th for DCMD if there were 16 slots in CQ, ...etc). It
-> also doesn't make sense to use a slot in the middle of slots for DCMD,
-> Both the code (both S.W. & H.W.) would become more complicated.
-> Although I don't see it is defined somewhere, I believe that every
-> designer would follow.
-> (H.W.: increasing gate count -> increasing die size -> increase $;
-> complicated design -> higher chance to have bug/error).
-> (H.W.: SDHC cq_depth: longer cq_depth -> more memory -> more $. The
-> decision would be the trade off between $ & performance. Also, the
-> SDHC is not necessary to be used in Cortex-A/Linux. Thus, 16/8
-> cq_depth is possible, although I don't know if there is one existed
-> out there)
-> 
-> Another thinking: If all cq_depth is fixed to 32, the mmc driver core
-> doesn't even have to detect the cq_depth and eventually choose the
-> small one between HC & eMMC (queue.c::mmc_init_queue)
+Hi Adrian,
 
-The cqe_qdepth changes depending on whether DCMD is supported.  That is the
-kind of detail that belongs to the CQHCI driver not the mmc core.  For
-example, theoretically there could be more than one CQE driver
-implementation, but it is also nicer to keep a separation between CQHCI and
-mmc core.
+On 24/01/19 5:10 PM, Adrian Hunter wrote:
+> On 11/01/19 1:08 PM, Faiz Abbas wrote:
+>> From: Chunyan Zhang <zhang.chunyan@linaro.org>
+>>
+>> Some standard SD host controllers can support both external dma
+>> controllers as well as ADMA/SDMA in which the SD host controller
+>> acts as DMA master. TI's omap controller is the case as an example.
+>>
+>> Currently the generic SDHCI code supports ADMA/SDMA integrated in
+>> the host controller but does not have any support for external DMA
+>> controllers implemented using dmaengine, meaning that custom code is
+>> needed for any systems that use an external DMA controller with SDHCI.
+>>
+>> Fixes by Faiz Abbas <faiz_abbas@ti.com>:
+>> 1. Map scatterlists before dmaengine_prep_slave_sg()
+>> 2. Use dma_async() functions inside of the send_command() path and
+>> synchronize once at the start of each request.
+> 
+> Sorry for the slow reply, but I do have some concerns.  Please see the comments.
+>[snip]>>  	/*
+>>  	 * Ensure we don't send the STOP for non-SET_BLOCK_COUNTED
+>>  	 * requests if Auto-CMD12 is enabled.
+>> @@ -2658,6 +2890,8 @@ static bool sdhci_request_done(struct sdhci_host *host)
+>>  				dma_unmap_sg(mmc_dev(host->mmc), data->sg,
+>>  					     data->sg_len,
+>>  					     mmc_get_dma_dir(data));
+>> +				if (host->use_external_dma)
+>> +					sdhci_external_dma_cleanup(host, data);
+> 
+> Is sdhci_external_dma_cleanup() only needed in the error case?
+> 
+> The DMA must be stopped before the memory is unmapped and potentially freed.
+> 
+> Isn't the DMA cleanup also needed in the bounce buffer case?
+> 
+> Isn't the DMA cleanup also needed in the COOKIE_PRE_MAPPED case?
+> 
+> dmaengine_terminate_async() doesn't stop the DMA but
+> dmaengine_terminate_sync() is not atomic, which looks like a problem.
+> 
+> Perhaps you look at scheduling some work for the external dma error case
+> instead of calling __sdhci_finish_mrq()?  Then the work can do the
+> dmaengine_terminate_sync() and call __sdhci_finish_mrq().
+> 
 
-> 
-> Best Regards
-> 
-> 
-> On Fri, Feb 8, 2019 at 2:34 AM Asutosh Das (asd)
-> <asutoshd@codeaurora.org> wrote:
->>
->> On 2/8/2019 8:07 AM, Ritesh Harjani wrote:
->>> Hi Alamy,
->>>
->>> On 2/8/2019 1:00 AM, Alamy Liu wrote:
->>>> It says in B.2.1 in the JESD84-B51.pdf (I don't have JESD84-B51A.pdf):
->>>>
->>>>     /The TDL is located in a memory location known to the CQE, and is
->>>>     comprised of up to 32 fixed-size slots. Each slot is comprised of
->>>>     one Task Descriptor and one Transfer Descriptor./
->>>>
->>>>
->>>> So if the IP has 16 slots, it should still meet the specification.
->>>> Then the configuration could be moved to DTS, maybe:
->>>>
->>>>     cqhci-slotnum = <16>;
->>>>
->>>>     cqhci-dcmd-slotno = <15>;
->>>>
->>> Does your IP defines this as 16 slots & DCMD slot to be 15?
->>> Because if there is a deviation then IP may also define num_slots by
->>> using some reserved registers.
->>> Also in JESD84-B51.pdf, specific slot no. is used extensively for
->>> defining policies(like in case of DCMD & CQCFG), so in that case
->>> defining via DT may not be that helpful.
->>> Unless there is no other way in your IP to determine the num_slots
->>> except going via DT?
->>>
->>> Let others also provide an opinion here.
->>>
->>> Regards
->>> Ritesh
->>>
->>>
->>>>
->>>> Please comment.
->>>>
->>>> Regards,
->>>> Alamy
->>>>
->>>>
->>>>
->>>> On Thu, Jan 31, 2019 at 1:34 AM Adrian Hunter <adrian.hunter@intel.com
->>>> <mailto:adrian.hunter@intel.com>> wrote:
->>>>
->>>>     On 14/01/19 9:17 PM, Alamy Liu wrote:
->>>>     > Prevent to use fixed value (NUM_SLOTS) after it had been determined
->>>>     > and saved in a variable (cq_host->num_slots).
->>>>
->>>>     num_slots is always 32 (i.e. NUM_SLOTS) so why not go the other
->>>>     way and get
->>>>     rid of num_slots and just use NUM_SLOTS?
->>>>
->>>>     >
->>>>     > Signed-off-by: Alamy Liu <alamy.liu@gmail.com
->>>>     <mailto:alamy.liu@gmail.com>>
->>>>     > ---
->>>>     >  drivers/mmc/host/cqhci.c | 2 +-
->>>>     >  1 file changed, 1 insertion(+), 1 deletion(-)
->>>>     >
->>>>     > diff --git a/drivers/mmc/host/cqhci.c b/drivers/mmc/host/cqhci.c
->>>>     > index 159270e947..26d63594b7 100644
->>>>     > --- a/drivers/mmc/host/cqhci.c
->>>>     > +++ b/drivers/mmc/host/cqhci.c
->>>>     > @@ -699,7 +699,7 @@ static void cqhci_error_irq(struct mmc_host
->>>>     *mmc, u32 status, int cmd_error,
->>>>     >                * The only way to guarantee forward progress is
->>>>     to mark at
->>>>     >                * least one task in error, so if none is
->>>>     indicated, pick one.
->>>>     >                */
->>>>     > -             for (tag = 0; tag < NUM_SLOTS; tag++) {
->>>>     > +             for (tag = 0; tag < cq_host->num_slots; tag++) {
->>>>     >                       slot = &cq_host->slot[tag];
->>>>     >                       if (!slot->mrq)
->>>>     >                               continue;
->>>>     >
->>>>
->> Is it worth exploring to tie up the TDL memory allocations with the
->> queue-depth? Because the queue-depth may vary with vendor; in most host
->> controllers the slot size is 32. And since memory allocations are done
->> on the basis of host slot size there's unused slots in the case of card
->> advertising less than 32 queue-depth.
->> The tricky part would be the DCMD handling though.
->>
->> In the IP in question, what slot is assigned to DCMD?
->>
->>
->> --
->> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a
->> Linux Foundation Collaborative Project
-> 
+Why don't we get rid of the finish_tasklet and use the already existing
+threaded_irq for everything? I tested the following patch out and it
+seems to work well. This enables us to just call
+dmaengine_terminate_sync() in sdhci_request_done().
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index a22e11a65658..beff2ac2dee5 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1232,7 +1232,7 @@ static void __sdhci_finish_mrq(struct sdhci_host
+*host, struct mmc_request *mrq)
+
+ 	WARN_ON(i >= SDHCI_MAX_MRQS);
+
+-	tasklet_schedule(&host->finish_tasklet);
++	host->threaded_irq_needed = true;
+ }
+
+ static void sdhci_finish_mrq(struct sdhci_host *host, struct
+mmc_request *mrq)
+@@ -2705,14 +2705,6 @@ static bool sdhci_request_done(struct sdhci_host
+*host)
+ 	return false;
+ }
+
+-static void sdhci_tasklet_finish(unsigned long param)
+-{
+-	struct sdhci_host *host = (struct sdhci_host *)param;
+-
+-	while (!sdhci_request_done(host))
+-		;
+-}
+-
+ static void sdhci_timeout_timer(struct timer_list *t)
+ {
+ 	struct sdhci_host *host;
+@@ -3000,6 +2992,8 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
+ 	u32 intmask, mask, unexpected = 0;
+ 	int max_loops = 16;
+
++	host->threaded_irq_needed = false;
++
+ 	spin_lock(&host->lock);
+
+ 	if (host->runtime_suspended && !sdhci_sdio_irq_enabled(host)) {
+@@ -3077,6 +3071,9 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
+ 			result = IRQ_WAKE_THREAD;
+ 		}
+
++		if (host->threaded_irq_needed)
++			result = IRQ_WAKE_THREAD;
++
+ 		intmask &= ~(SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE |
+ 			     SDHCI_INT_CMD_MASK | SDHCI_INT_DATA_MASK |
+ 			     SDHCI_INT_ERROR | SDHCI_INT_BUS_POWER |
+@@ -3131,6 +3128,10 @@ static irqreturn_t sdhci_thread_irq(int irq, void
+*dev_id)
+ 		spin_unlock_irqrestore(&host->lock, flags);
+ 	}
+
++	do {
++		isr = sdhci_request_done(host);
++	} while(isr);
++
+ 	return isr ? IRQ_HANDLED : IRQ_NONE;
+ }
+
+@@ -4211,12 +4212,6 @@ int __sdhci_add_host(struct sdhci_host *host)
+ 	struct mmc_host *mmc = host->mmc;
+ 	int ret;
+
+-	/*
+-	 * Init tasklets.
+-	 */
+-	tasklet_init(&host->finish_tasklet,
+-		sdhci_tasklet_finish, (unsigned long)host);
+-
+ 	timer_setup(&host->timer, sdhci_timeout_timer, 0);
+ 	timer_setup(&host->data_timer, sdhci_timeout_data_timer, 0);
+
+@@ -4229,7 +4224,7 @@ int __sdhci_add_host(struct sdhci_host *host)
+ 	if (ret) {
+ 		pr_err("%s: Failed to request IRQ %d: %d\n",
+ 		       mmc_hostname(mmc), host->irq, ret);
+-		goto untasklet;
++		return ret;
+ 	}
+
+ 	ret = sdhci_led_register(host);
+@@ -4262,8 +4257,6 @@ int __sdhci_add_host(struct sdhci_host *host)
+ 	sdhci_writel(host, 0, SDHCI_INT_ENABLE);
+ 	sdhci_writel(host, 0, SDHCI_SIGNAL_ENABLE);
+ 	free_irq(host->irq, host);
+-untasklet:
+-	tasklet_kill(&host->finish_tasklet);
+
+ 	return ret;
+ }
+@@ -4325,8 +4318,6 @@ void sdhci_remove_host(struct sdhci_host *host,
+int dead)
+ 	del_timer_sync(&host->timer);
+ 	del_timer_sync(&host->data_timer);
+
+-	tasklet_kill(&host->finish_tasklet);
+-
+ 	if (!IS_ERR(mmc->supply.vqmmc))
+ 		regulator_disable(mmc->supply.vqmmc);
+
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 6cc9a3c2ac66..abf4f77650b5 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -554,7 +554,7 @@ struct sdhci_host {
+
+ 	unsigned int desc_sz;	/* ADMA descriptor size */
+
+-	struct tasklet_struct finish_tasklet;	/* Tasklet structures */
++	bool threaded_irq_needed;
+
+ 	struct timer_list timer;	/* Timer for timeouts */
+ 	struct timer_list data_timer;	/* Timer for data timeouts */
+
+Thanks,
+Faiz
