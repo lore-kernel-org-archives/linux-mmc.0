@@ -1,7 +1,7 @@
 From: Christoph Hellwig <hch@lst.de>
-Subject: [PATCH 13/14] mmc: core: don't use block layer bounce buffers
-Date: Tue, 12 Feb 2019 08:25:27 +0100
-Message-ID: <20190212072528.13167-14-hch@lst.de>
+Subject: [PATCH 12/14] mmc: sh_mmcif: handle chained sglists
+Date: Tue, 12 Feb 2019 08:25:26 +0100
+Message-ID: <20190212072528.13167-13-hch@lst.de>
 References: <20190212072528.13167-1-hch@lst.de>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -12,35 +12,60 @@ To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Russell King <linux@armlinux.org.uk>, Nicolas Pitre <nico@fluxnic.net>, Aaro Koskinen <aaro.koskinen@iki.fi>, Ben Dooks <ben-linux@fluff.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, iommu@lists.linux-foundation.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-All MMC and SD host drivers are highmem safe now, and bounce buffering
-for addressing limitations is handled in the DMA layer now.
+Use the proper sg_next() helper to move to the next scatterlist element
+to support chained scatterlists.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- drivers/mmc/core/queue.c | 5 -----
- 1 file changed, 5 deletions(-)
+ drivers/mmc/host/sh_mmcif.c | 13 +++++--------
+ 1 file changed, 5 insertions(+), 8 deletions(-)
 
-diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-index 71cd2411329e..1c92a2a4d641 100644
---- a/drivers/mmc/core/queue.c
-+++ b/drivers/mmc/core/queue.c
-@@ -354,17 +354,12 @@ static const struct blk_mq_ops mmc_mq_ops = {
- static void mmc_setup_queue(struct mmc_queue *mq, struct mmc_card *card)
- {
- 	struct mmc_host *host = card->host;
--	u64 limit = BLK_BOUNCE_HIGH;
--
--	if (mmc_dev(host)->dma_mask && *mmc_dev(host)->dma_mask)
--		limit = (u64)dma_max_pfn(mmc_dev(host)) << PAGE_SHIFT;
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index 24c3f13bafdb..9e59dbe6ef30 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -234,7 +234,6 @@ struct sh_mmcif_host {
+ 	enum sh_mmcif_wait_for wait_for;
+ 	struct delayed_work timeout_work;
+ 	size_t blocksize;
+-	int sg_idx;
+ 	int sg_blkidx;
+ 	bool power;
+ 	bool ccs_enable;		/* Command Completion Signal support */
+@@ -606,13 +605,13 @@ static bool sh_mmcif_next_block(struct sh_mmcif_host *host)
  
- 	blk_queue_flag_set(QUEUE_FLAG_NONROT, mq->queue);
- 	blk_queue_flag_clear(QUEUE_FLAG_ADD_RANDOM, mq->queue);
- 	if (mmc_can_erase(card))
- 		mmc_queue_setup_discard(mq->queue, card);
+ 	if (host->sg_blkidx == data->sg->length) {
+ 		host->sg_blkidx = 0;
+-		if (++host->sg_idx < data->sg_len) {
+-			data->sg++;
+-			host->pio_offset = data->sg->offset / 4;
+-		}
++		data->sg = sg_next(data->sg);
++		if (!data->sg)
++			return false;
++		host->pio_offset = data->sg->offset / 4;
+ 	}
  
--	blk_queue_bounce_limit(mq->queue, limit);
- 	blk_queue_max_hw_sectors(mq->queue,
- 		min(host->max_blk_count, host->max_req_size / 512));
- 	blk_queue_max_segments(mq->queue, host->max_segs);
+-	return host->sg_idx != data->sg_len;
++	return true;
+ }
+ 
+ static void sh_mmcif_single_read(struct sh_mmcif_host *host,
+@@ -665,7 +664,6 @@ static void sh_mmcif_multi_read(struct sh_mmcif_host *host,
+ 		BLOCK_SIZE_MASK;
+ 
+ 	host->wait_for = MMCIF_WAIT_FOR_MREAD;
+-	host->sg_idx = 0;
+ 	host->sg_blkidx = 0;
+ 	host->pio_offset = data->sg->offset / 4;
+ 
+@@ -752,7 +750,6 @@ static void sh_mmcif_multi_write(struct sh_mmcif_host *host,
+ 		BLOCK_SIZE_MASK;
+ 
+ 	host->wait_for = MMCIF_WAIT_FOR_MWRITE;
+-	host->sg_idx = 0;
+ 	host->sg_blkidx = 0;
+ 	host->pio_offset = data->sg->offset / 4;
+ 
 -- 
 2.20.1
