@@ -1,127 +1,72 @@
 From: Christoph Hellwig <hch@lst.de>
-Subject: [PATCH 10/14] mmc: mvsdio: handle highmem pages
-Date: Tue, 12 Feb 2019 08:25:24 +0100
-Message-ID: <20190212072528.13167-11-hch@lst.de>
+Subject: [PATCH 03/14] mmc: add a need_kmap flag to struct mmc_host
+Date: Tue, 12 Feb 2019 08:25:17 +0100
+Message-ID: <20190212072528.13167-4-hch@lst.de>
 References: <20190212072528.13167-1-hch@lst.de>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <20190212072528.13167-1-hch@lst.de>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Russell King <linux@armlinux.org.uk>, Nicolas Pitre <nico@fluxnic.net>, Aaro Koskinen <aaro.koskinen@iki.fi>, Ben Dooks <ben-linux@fluff.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, iommu@lists.linux-foundation.org, linux-kernel@vger.kernel.org
+Cc: Aaro Koskinen <aaro.koskinen@iki.fi>, Nicolas Pitre <nico@fluxnic.net>, linux-mmc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, linux-kernel@vger.kernel.org, iommu@lists.linux-foundation.org, Ben Dooks <ben-linux@fluff.org>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Instead of setting up a kernel pointer to track the current PIO address,
-track the offset in the current page, and do an atomic kmap for the page
-while doing the actual PIO operations.
+If we want to get rid of the block layer bounce buffering for highmem we
+need to ensure no segment spans multiple pages so that we can kmap it.
+Add a flag to struct mmc_host so that we can handle the block and DMA
+layer interactions in common code.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- drivers/mmc/host/mvsdio.c | 33 +++++++++++++++++++++------------
- 1 file changed, 21 insertions(+), 12 deletions(-)
+ drivers/mmc/core/queue.c | 13 +++++++++++++
+ include/linux/mmc/host.h |  1 +
+ 2 files changed, 14 insertions(+)
 
-diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
-index e22bbff89c8d..d04c78125a4d 100644
---- a/drivers/mmc/host/mvsdio.c
-+++ b/drivers/mmc/host/mvsdio.c
-@@ -42,7 +42,8 @@ struct mvsd_host {
- 	unsigned int intr_en;
- 	unsigned int ctrl;
- 	unsigned int pio_size;
--	void *pio_ptr;
-+	struct scatterlist *pio_sg;
-+	unsigned int pio_offset; /* offset in words into the segment */
- 	unsigned int sg_frags;
- 	unsigned int ns_per_clk;
- 	unsigned int clock;
-@@ -96,9 +97,9 @@ static int mvsd_setup_data(struct mvsd_host *host, struct mmc_data *data)
- 	if (tmout_index > MVSD_HOST_CTRL_TMOUT_MAX)
- 		tmout_index = MVSD_HOST_CTRL_TMOUT_MAX;
+diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+index 35cc138b096d..71cd2411329e 100644
+--- a/drivers/mmc/core/queue.c
++++ b/drivers/mmc/core/queue.c
+@@ -370,6 +370,19 @@ static void mmc_setup_queue(struct mmc_queue *mq, struct mmc_card *card)
+ 	blk_queue_max_segments(mq->queue, host->max_segs);
+ 	blk_queue_max_segment_size(mq->queue, host->max_seg_size);
  
--	dev_dbg(host->dev, "data %s at 0x%08x: blocks=%d blksz=%d tmout=%u (%d)\n",
-+	dev_dbg(host->dev, "data %s at 0x%08llx: blocks=%d blksz=%d tmout=%u (%d)\n",
- 		(data->flags & MMC_DATA_READ) ? "read" : "write",
--		(u32)sg_virt(data->sg), data->blocks, data->blksz,
-+		(u64)sg_phys(data->sg), data->blocks, data->blksz,
- 		tmout, tmout_index);
- 
- 	host->ctrl &= ~MVSD_HOST_CTRL_TMOUT_MASK;
-@@ -118,10 +119,11 @@ static int mvsd_setup_data(struct mvsd_host *host, struct mmc_data *data)
- 		 * boundary.
- 		 */
- 		host->pio_size = data->blocks * data->blksz;
--		host->pio_ptr = sg_virt(data->sg);
-+		host->pio_sg = data->sg;
-+		host->pio_offset = data->sg->offset / 2;
- 		if (!nodma)
--			dev_dbg(host->dev, "fallback to PIO for data at 0x%p size %d\n",
--				host->pio_ptr, host->pio_size);
-+			dev_dbg(host->dev, "fallback to PIO for data at 0x%x size %d\n",
-+				host->pio_offset, host->pio_size);
- 		return 1;
- 	} else {
- 		dma_addr_t phys_addr;
-@@ -291,8 +293,9 @@ static u32 mvsd_finish_data(struct mvsd_host *host, struct mmc_data *data,
- {
- 	void __iomem *iobase = host->base;
- 
--	if (host->pio_ptr) {
--		host->pio_ptr = NULL;
-+	if (host->pio_sg) {
-+		host->pio_sg = NULL;
-+		host->pio_offset = 0;
- 		host->pio_size = 0;
- 	} else {
- 		dma_unmap_sg(mmc_dev(host->mmc), data->sg, host->sg_frags,
-@@ -376,8 +379,10 @@ static irqreturn_t mvsd_irq(int irq, void *dev)
- 	if (host->pio_size &&
- 	    (intr_status & host->intr_en &
- 	     (MVSD_NOR_RX_READY | MVSD_NOR_RX_FIFO_8W))) {
--		u16 *p = host->pio_ptr;
-+		u16 *base = sg_kmap_atomic(host->pio_sg);
-+		u16 *p = base + host->pio_offset;
- 		int s = host->pio_size;
++	/*
++	 * If the host requires kmapping for PIO we need to ensure
++	 * that no segment spans a page boundary.
++	 */
++	if (host->need_kmap) {
++		unsigned int dma_boundary = host->max_seg_size - 1;
 +
- 		while (s >= 32 && (intr_status & MVSD_NOR_RX_FIFO_8W)) {
- 			readsw(iobase + MVSD_FIFO, p, 16);
- 			p += 16;
-@@ -416,13 +421,15 @@ static irqreturn_t mvsd_irq(int irq, void *dev)
- 		}
- 		dev_dbg(host->dev, "pio %d intr 0x%04x hw_state 0x%04x\n",
- 			s, intr_status, mvsd_read(MVSD_HW_STATE));
--		host->pio_ptr = p;
-+		host->pio_offset = p - base;
- 		host->pio_size = s;
-+		sg_kunmap_atomic(host->pio_sg, base);
- 		irq_handled = 1;
- 	} else if (host->pio_size &&
- 		   (intr_status & host->intr_en &
- 		    (MVSD_NOR_TX_AVAIL | MVSD_NOR_TX_FIFO_8W))) {
--		u16 *p = host->pio_ptr;
-+		u16 *base = sg_kmap_atomic(host->pio_sg);
-+		u16 *p = base + host->pio_offset;
- 		int s = host->pio_size;
- 		/*
- 		 * The TX_FIFO_8W bit is unreliable. When set, bursting
-@@ -453,8 +460,9 @@ static irqreturn_t mvsd_irq(int irq, void *dev)
- 		}
- 		dev_dbg(host->dev, "pio %d intr 0x%04x hw_state 0x%04x\n",
- 			s, intr_status, mvsd_read(MVSD_HW_STATE));
--		host->pio_ptr = p;
-+		host->pio_offset = p - base;
- 		host->pio_size = s;
-+		sg_kunmap_atomic(host->pio_sg, base);
- 		irq_handled = 1;
- 	}
++		if (dma_boundary >= PAGE_SIZE)
++			dma_boundary = PAGE_SIZE - 1;
++		blk_queue_segment_boundary(mq->queue, dma_boundary);
++		dma_set_seg_boundary(mmc_dev(host), dma_boundary);
++	}
++
+ 	INIT_WORK(&mq->recovery_work, mmc_mq_recovery_handler);
+ 	INIT_WORK(&mq->complete_work, mmc_blk_mq_complete_work);
  
-@@ -737,6 +745,7 @@ static int mvsd_probe(struct platform_device *pdev)
- 	clk_prepare_enable(host->clk);
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 4eadf01b4a93..87f8a89d2f70 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -397,6 +397,7 @@ struct mmc_host {
+ 	unsigned int		doing_retune:1;	/* re-tuning in progress */
+ 	unsigned int		retune_now:1;	/* do re-tuning at next req */
+ 	unsigned int		retune_paused:1; /* re-tuning is temporarily disabled */
++	unsigned int		need_kmap:1;	/* only allow single page segments */
  
- 	mmc->ops = &mvsd_ops;
-+	mmc->need_kmap = 1;
- 
- 	mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
- 
+ 	int			rescan_disable;	/* disable card detection */
+ 	int			rescan_entered;	/* used with nonremovable devices */
 -- 
 2.20.1
