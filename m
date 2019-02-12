@@ -1,75 +1,57 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v3 1/3] mmc: sdhci: use WP GPIO in sdhci_check_ro()
-Date: Tue, 12 Feb 2019 16:09:51 +0200
-Message-ID: <1d4ce18e-bc43-bd7e-f4a6-5d5d1c408948@intel.com>
-References: <20190212140737.8668-1-thomas.petazzoni@bootlin.com>
- <20190212140737.8668-2-thomas.petazzoni@bootlin.com>
+From: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
+Subject: [PATCH] mmc: sdhci-xenon: Mark expected switch fall-through
+Date: Tue, 12 Feb 2019 09:25:58 -0600
+Message-ID: <20190212152558.GA21933@embeddedor>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190212140737.8668-2-thomas.petazzoni@bootlin.com>
-Content-Language: en-US
+Content-Disposition: inline
 Sender: linux-kernel-owner@vger.kernel.org
-To: Thomas Petazzoni <thomas.petazzoni@bootlin.com>, Kishon Vijay Abraham I <kishon@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org, Gregory Clement <gregory.clement@bootlin.com>
+To: Adrian Hunter <adrian.hunter@intel.com>, Hu Ziji <huziji@marvell.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, "Gustavo A. R. Silva" <gustavo@embeddedor.com>, Kees Cook <keescook@chromium.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 12/02/19 4:07 PM, Thomas Petazzoni wrote:
-> Even though SDHCI controllers may have a dedicated WP pin that can be
-> queried using the SDHCI_PRESENT_STATE register, some platforms may
-> chose to use a separate regular GPIO to route the WP signal. Such a
-> GPIO is typically represented using the wp-gpios property in the
-> Device Tree.
-> 
-> Unfortunately, the current sdhci_check_ro() function does not make use
-> of such GPIO when available: it either uses a host controller specific
-> ->get_ro() operation, or uses the SDHCI_PRESENT_STATE. Several host
-> controller specific ->get_ro() functions are implemented just to check
-> a WP GPIO state.
-> 
-> Instead of pushing this to more controller-specific implementations,
-> let's handle this in the core SDHCI code, just like it is already done
-> for the CD GPIO in sdhci_get_cd().
-> 
-> The below patch simply changes sdhci_check_ro() to use the value of
-> the WP GPIO if available.
-> 
-> Signed-off-by: Thomas Petazzoni <thomas.petazzoni@bootlin.com>
+In preparation to enabling -Wimplicit-fallthrough, mark switch
+cases where we are expecting to fall through.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+This patch fixes the following warning:
 
-> ---
-> Changes since v2:
-> 
->  - As suggested by Adrian Hunter, keep the argument of
->    sdhci_check_ro() as it is: a "struct sdhci_host*"
-> 
-> Changes since v1:
-> 
->  - As suggested by Adrian Hunter, call the ->get_ro() if it exists
->    before falling back to using mmc_gpio_get_ro(). Indeed, if the
->    controller-specific code has implemented a ->get_ro() callback, it
->    should take precedence over what the SDHCI core does.
-> 
->    Due to this change, I have not added Thierry Redding Reviewed-by.
-> 
->  - Fix typo in the commit log noticed by Thierry Redding.
-> ---
->  drivers/mmc/host/sdhci.c | 2 ++
->  1 file changed, 2 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index df05352b6a4a..b3444d12c8c8 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2033,6 +2033,8 @@ static int sdhci_check_ro(struct sdhci_host *host)
->  		is_readonly = 0;
->  	else if (host->ops->get_ro)
->  		is_readonly = host->ops->get_ro(host);
-> +	else if (mmc_can_gpio_ro(host->mmc))
-> +		is_readonly = mmc_gpio_get_ro(host->mmc);
->  	else
->  		is_readonly = !(sdhci_readl(host, SDHCI_PRESENT_STATE)
->  				& SDHCI_WRITE_PROTECT);
-> 
+drivers/mmc/host/sdhci-xenon-phy.c: In function ‘xenon_emmc_phy_slow_mode’:
+drivers/mmc/host/sdhci-xenon-phy.c:527:47: warning: this statement may fall through [-Wimplicit-fallthrough=]
+   if ((priv->init_card_type == MMC_TYPE_SDIO) ||
+       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~
+       params->slow_mode) {
+       ~~~~~~~~~~~~~~~~~
+drivers/mmc/host/sdhci-xenon-phy.c:534:2: note: here
+  default:
+  ^~~~~~~
+
+Warning level 3 was used: -Wimplicit-fallthrough=3
+
+Notice that, in this particular case, the code comment is modified
+in accordance with what GCC is expecting to find.
+
+This patch is part of the ongoing efforts to enable
+-Wimplicit-fallthrough.
+
+Signed-off-by: Gustavo A. R. Silva <gustavo@embeddedor.com>
+---
+ drivers/mmc/host/sdhci-xenon-phy.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci-xenon-phy.c b/drivers/mmc/host/sdhci-xenon-phy.c
+index 5b5eb53a63d2..8d07ee1b8f08 100644
+--- a/drivers/mmc/host/sdhci-xenon-phy.c
++++ b/drivers/mmc/host/sdhci-xenon-phy.c
+@@ -530,7 +530,7 @@ static bool xenon_emmc_phy_slow_mode(struct sdhci_host *host,
+ 			ret = true;
+ 			break;
+ 		}
+-		/* else: fall through */
++		/* fall through */
+ 	default:
+ 		reg &= ~XENON_TIMING_ADJUST_SLOW_MODE;
+ 		ret = false;
+-- 
+2.20.1
