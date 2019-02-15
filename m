@@ -1,7 +1,7 @@
 From: Faiz Abbas <faiz_abbas@ti.com>
-Subject: [PATCH v2 3/8] dt-bindings: sdhci-omap: Add properties for using external dma
-Date: Sat, 16 Feb 2019 00:50:28 +0530
-Message-ID: <20190215192033.24203-4-faiz_abbas@ti.com>
+Subject: [PATCH v2 5/8] mmc: sdhci: Add quirk for disabling DTO during erase command
+Date: Sat, 16 Feb 2019 00:50:30 +0530
+Message-ID: <20190215192033.24203-6-faiz_abbas@ti.com>
 References: <20190215192033.24203-1-faiz_abbas@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -13,40 +13,44 @@ To: linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.ker
 Cc: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, adrian.hunter@intel.com, kishon@ti.com, zhang.chunyan@linaro.org, faiz_abbas@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-From: Chunyan Zhang <zhang.chunyan@linaro.org>
+Some controllers might prematurely issue a data timeout during an erase
+command. Add a quirk to disable the interrupt when an erase command is
+issued.
 
-sdhci-omap can support both external dma controller via dmaengine
-framework as well as ADMA which standard SD host controller
-provides.
-
-Signed-off-by: Chunyan Zhang <zhang.chunyan@linaro.org>
 Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
 ---
- Documentation/devicetree/bindings/mmc/sdhci-omap.txt | 7 +++++++
- 1 file changed, 7 insertions(+)
+ drivers/mmc/host/sdhci.c | 5 +++++
+ drivers/mmc/host/sdhci.h | 2 ++
+ 2 files changed, 7 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-omap.txt b/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
-index 72c4dec7e1db..4485dbceb373 100644
---- a/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
-+++ b/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
-@@ -14,6 +14,11 @@ Required properties:
- 		 "ddr_1_8v-rev11", "ddr_1_8v" or "ddr_3_3v", "hs200_1_8v-rev11",
- 		 "hs200_1_8v",
- - pinctrl-<n> : Pinctrl states as described in bindings/pinctrl/pinctrl-bindings.txt
-+- dmas:		List of DMA specifiers with the controller specific format as described
-+		in the generic DMA client binding. A tx and rx specifier is required.
-+- dma-names:	List of DMA request names. These strings correspond 1:1 with the
-+		DMA specifiers listed in dmas. The string naming is to be "tx"
-+		and "rx" for TX and RX DMA requests, respectively.
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 2f5f64efad16..608f7306742c 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1522,6 +1522,11 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 	/* Initially, a command has no error */
+ 	cmd->error = 0;
  
- Example:
- 	mmc1: mmc@4809c000 {
-@@ -22,4 +27,6 @@ Example:
- 		ti,hwmods = "mmc1";
- 		bus-width = <4>;
- 		vmmc-supply = <&vmmc>; /* phandle to regulator node */
-+		dmas = <&sdma 61 &sdma 62>;
-+		dma-names = "tx", "rx";
- 	};
++	if (cmd->opcode == MMC_ERASE &&
++	    (host->quirks2 & SDHCI_QUIRK2_DISABLE_DTO_FOR_ERASE)) {
++		sdhci_set_data_timeout_irq(host, false);
++	}
++
+ 	if ((host->quirks2 & SDHCI_QUIRK2_STOP_WITH_TC) &&
+ 	    cmd->opcode == MMC_STOP_TRANSMISSION)
+ 		cmd->flags |= MMC_RSP_BUSY;
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 6ff3e29791ee..60282721f827 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -479,6 +479,8 @@ struct sdhci_host {
+  * block count.
+  */
+ #define SDHCI_QUIRK2_USE_32BIT_BLK_CNT			(1<<18)
++/* Controller needs to disable DTO for erase command */
++#define SDHCI_QUIRK2_DISABLE_DTO_FOR_ERASE		(1<<19)
+ 
+ 	int irq;		/* Device IRQ */
+ 	void __iomem *ioaddr;	/* Mapped address */
 -- 
 2.19.2
