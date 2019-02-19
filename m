@@ -1,103 +1,75 @@
-From: Jonas Karlman <jonas-uIzNG4q0ceqzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [RFC] mmc: core: set initial signal voltage on power off
-Date: Tue, 19 Feb 2019 10:12:38 +0000
-Message-ID: <AM3PR03MB09666AFE4FC60E324C7EBDA8AC7C0@AM3PR03MB0966.eurprd03.prod.outlook.com>
-References: <AM3PR03MB09664161A7FA2BD68B2800A7AC620@AM3PR03MB0966.eurprd03.prod.outlook.com>
- <CAPDyKFpfjKbbCF=wyERXpcLk2LDJD6zsPHTYegwtHrv5qPv8HA@mail.gmail.com>
+From: Faiz Abbas <faiz_abbas@ti.com>
+Subject: Re: Linux-next 20190218: am57xx-evm: mmc1: ADMA error
+Date: Tue, 19 Feb 2019 18:38:33 +0530
+Message-ID: <34c78d7f-cc3c-853d-b3fd-a70abdb66293@ti.com>
+References: <CA+G9fYsmC5ckLXfQxSUn-tqxLZ4NofEyb9RA69Q07RUoxc79RQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <CAPDyKFpfjKbbCF=wyERXpcLk2LDJD6zsPHTYegwtHrv5qPv8HA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CA+G9fYsmC5ckLXfQxSUn-tqxLZ4NofEyb9RA69Q07RUoxc79RQ@mail.gmail.com>
 Content-Language: en-US
-Content-ID: <ABF345B54081D84D8DB2817CDF495460-yI6K9L9iJZCcE4WynfumptQqCkab/8FMAL8bYrjMMd8@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Naresh Kamboju <naresh.kamboju@linaro.org>, open list <linux-kernel@vger.kernel.org>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Cc: t-kristo@ti.com, nm@ti.com, Mark Rutland <mark.rutland@arm.com>, robh+dt@kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 2019-02-18 12:54, Ulf Hansson wrote:
-> On Sun, 17 Feb 2019 at 23:14, Jonas Karlman <jonas-uIzNG4q0ceqzQB+pC5nmwQ@public.gmane.org> wrote:
->> Some boards have SD card connectors where the power rail cannot be switched
->> off by the driver. If the card has not been power cycled, it may still be
->> using 1.8V signaling after a warm re-boot. Bootroms expecting 3.3V signaling
->> will fail to boot from a UHS card that continue to use 1.8V signaling.
-> Is the problem limited to a "warm manual re-boot" or does it exists
-> for an emergency reboot as well!?
+Hi Naresh,
 
-I think the issue may also exist for emergency reboot based on the Asus Tinker Board kernel commit at [1],
-not sure how this could be solved in an acceptable way. Personally I do not have sysrq enabled on my boards.
+On 18/02/19 6:57 PM, Naresh Kamboju wrote:
+> Do you see this error on am57xx-evm running Linux next 20190218 ?
+> I have tested on multiple devices and found this error.
+> Please find the full boot log [1].
+> Am i missing any pre required configs [2] ?
+> 
+> [    5.620263] mmc1: ADMA error
+> [    5.623266] mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
+> [    5.629740] mmc1: sdhci: Sys addr:  0x00000000 | Version:  0x00003302
+> [    5.636215] mmc1: sdhci: Blk size:  0x00000200 | Blk cnt:  0x0000ffff
+> [    5.642690] mmc1: sdhci: Argument:  0x002cec70 | Trn mode: 0x00000033
+> [    5.649162] mmc1: sdhci: Present:   0x01f00000 | Host ctl: 0x00000010
+> [    5.655634] mmc1: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+> [    5.662108] mmc1: sdhci: Wake-up:   0x00000000 | Clock:    0x00000107
+> [    5.668582] mmc1: sdhci: Timeout:   0x0000000c | Int stat: 0x00000000
+> [    5.675055] mmc1: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
+> [    5.681529] mmc1: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+> [    5.688002] mmc1: sdhci: Caps:      0x21e90080 | Caps_1:   0x00000f77
+> [    5.694474] mmc1: sdhci: Cmd:       0x0000123a | Max curr: 0x00000000
+> [    5.700949] mmc1: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0xffffffef
+> [    5.707423] mmc1: sdhci: Resp[2]:   0x0f5903ff | Resp[3]:  0xd04f0132
+> [    5.713896] mmc1: sdhci: Host ctl2: 0x00000004
+> [    5.718364] mmc1: sdhci: ADMA Err:  0x00000007 | ADMA Ptr: 0xab868218
+> 
 
-[1] https://github.com/TinkerBoard/debian_kernel/commit/1e8970dbfc20166788e3428ec5203f7673f6087b
+I see this as well on my setup. Trying to bisect now. Will keep you posted.
 
->
->> Set initial signal voltage in mmc_power_off() to allow re-boot to function.
-> I think this sounds like a reasonable way forward, to improve the situation.
+Thanks,
+Faiz
 
-I may have exaggerated the issue in the above line, the board will reboot as long as
-UHS 1.8V signaling is not used, current upstream device trees is missing the sd-uhs-* flags
-and will thus reboot as they are capped at sd high speed and 3.3V signaling.
-
->
->> This fixes re-boot with UHS cards on Asus Tinker Board (Rockchip RK3288),
->> same issue have been seen on some Rockchip RK3399 boards.
->>
->> I am sending this as a RFC because I have no insights into SD/MMC subsystem,
->> this change fix a re-boot issue on my boards and does not break emmc/sdio.
->> Is this an acceptable workaround? Any advice is appreciated.
->>
->> Signed-off-by: Jonas Karlman <jonas-uIzNG4q0ceqzQB+pC5nmwQ@public.gmane.org>
->> ---
->>  drivers/mmc/core/core.c | 8 ++++++++
->>  1 file changed, 8 insertions(+)
->>
->> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->> index 5bd58b95d318..69d7021916ae 100644
->> --- a/drivers/mmc/core/core.c
->> +++ b/drivers/mmc/core/core.c
->> @@ -1684,6 +1684,14 @@ void mmc_power_off(struct mmc_host *host)
->>         if (host->ios.power_mode == MMC_POWER_OFF)
->>                 return;
->>
->> +       mmc_set_initial_signal_voltage(host);
-> I would rather try to move this below mmc_set_initial_state() a few
-> lines below in mmc_power_off(). To me, it seems safer to do the
-> regular power off thingy first.
->
-> Additionally, I would drop the added delay below, as there is already
-> a delay after calling mmc_set_initial_state() and I think/hope that
-> should be sufficient.
-
-Thanks for the suggestion, the reason I put the mmc_set_initial_signal_voltage() call
-before mmc_pwrseq_power_off() call was to do it in reverse order of mmc_power_on(),
-
-I will run some more tests on my boards to see if moving it below mmc_set_initial_state()
-also makes it possible to reboot with UHS cards using 1.8V signaling enabled.
-
-Regards,
-Jonas
-
->
->> +
->> +       /*
->> +        * This delay should be sufficient to allow the power supply
->> +        * to reach the minimum voltage.
->> +        */
->> +       mmc_delay(host->ios.power_delay_ms);
->> +
->>         mmc_pwrseq_power_off(host);
->>
->>         host->ios.clock = 0;
->> --
->> 2.17.1
->>
-> Kind regards
-> Uffe
+> <>
+> [   42.425587] print_req_error: I/O error, dev mmcblk1, sector 4542872 flags 1
+> [   42.429013] mmc1: ADMA error
+> [   42.432606] EXT4-fs warning (device mmcblk1p9): ext4_end_bio:324:
+> I/O error 10 writing to inode 35321 (offset 0 size 4096 starting block
+> 567860)
+> [   42.435475] mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
+> [   42.448543] Buffer I/O error on device mmcblk1p9, logical block 226675
+> [   42.454944] mmc1: sdhci: Sys addr:  0x00000000 | Version:  0x00003302
+> [   42.461528] EXT4-fs warning (device mmcblk1p9): ext4_end_bio:324:
+> I/O error 10 writing to inode 35322 (offset 0 size 4096 starting block
+> 567861)
+> [   42.467960] mmc1: sdhci: Blk size:  0x00000200 | Blk cnt:  0x0000ffff
+> [   42.480982] Buffer I/O error on device mmcblk1p9, logical block 226676
+> [   42.487427] mmc1: sdhci: Argument:  0x002cae20 | Trn mode: 0x00000033
+> [   42.494007] EXT4-fs warning (device mmcblk1p9): ext4_end_bio:324:
+> I/O error 10 writing to inode 315 (offset 0 size 4096 starting block
+> 567862)
+> 
+> Full boot log,
+> [1] https://lkft.validation.linaro.org/scheduler/job/610989#L4354
+> config,
+> [2] http://snapshots.linaro.org/openembedded/lkft/lkft/rocko/am57xx-evm/lkft/linux-next/467/config
+> 
+> Best regards
+> Naresh Kamboju
+> 
