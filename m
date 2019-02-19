@@ -1,40 +1,103 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH v2 3/8] dt-bindings: sdhci-omap: Add properties for using
- external dma
-Date: Mon, 18 Feb 2019 14:12:40 -0600
-Message-ID: <20190218201240.GA14067@bogus>
-References: <20190215192033.24203-1-faiz_abbas@ti.com>
- <20190215192033.24203-4-faiz_abbas@ti.com>
- <20190215200718.GB15711@atomide.com>
- <2aa0f7e4-c880-ee88-2e88-dc2c3187f0c9@ti.com>
+From: Jonas Karlman <jonas-uIzNG4q0ceqzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [RFC] mmc: core: set initial signal voltage on power off
+Date: Tue, 19 Feb 2019 10:12:38 +0000
+Message-ID: <AM3PR03MB09666AFE4FC60E324C7EBDA8AC7C0@AM3PR03MB0966.eurprd03.prod.outlook.com>
+References: <AM3PR03MB09664161A7FA2BD68B2800A7AC620@AM3PR03MB0966.eurprd03.prod.outlook.com>
+ <CAPDyKFpfjKbbCF=wyERXpcLk2LDJD6zsPHTYegwtHrv5qPv8HA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <2aa0f7e4-c880-ee88-2e88-dc2c3187f0c9@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Faiz Abbas <faiz_abbas@ti.com>
-Cc: Tony Lindgren <tony@atomide.com>, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, ulf.hansson@linaro.org, mark.rutland@arm.com, adrian.hunter@intel.com, kishon@ti.com, zhang.chunyan@linaro.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <CAPDyKFpfjKbbCF=wyERXpcLk2LDJD6zsPHTYegwtHrv5qPv8HA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-US
+Content-ID: <ABF345B54081D84D8DB2817CDF495460-yI6K9L9iJZCcE4WynfumptQqCkab/8FMAL8bYrjMMd8@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Feb 18, 2019 at 07:11:32PM +0530, Faiz Abbas wrote:
-> Hi Tony,
-> 
-> On 16/02/19 1:37 AM, Tony Lindgren wrote:
-> > * Faiz Abbas <faiz_abbas@ti.com> [190215 19:18]:
-> >> From: Chunyan Zhang <zhang.chunyan@linaro.org>
-> >>
-> >> sdhci-omap can support both external dma controller via dmaengine
-> >> framework as well as ADMA which standard SD host controller
-> >> provides.
-> > 
-> > Care to describe here also how to configure things for ADMA and
-> > instead of DMA? Just leave out dmas property?
-> > 
-> 
-> That's correct. If dmas property is populated, then use external DMA.
-> Otherwise use ADMA/SDMA depending on what you read from the CAPS register.
+On 2019-02-18 12:54, Ulf Hansson wrote:
+> On Sun, 17 Feb 2019 at 23:14, Jonas Karlman <jonas-uIzNG4q0ceqzQB+pC5nmwQ@public.gmane.org> wrote:
+>> Some boards have SD card connectors where the power rail cannot be switched
+>> off by the driver. If the card has not been power cycled, it may still be
+>> using 1.8V signaling after a warm re-boot. Bootroms expecting 3.3V signaling
+>> will fail to boot from a UHS card that continue to use 1.8V signaling.
+> Is the problem limited to a "warm manual re-boot" or does it exists
+> for an emergency reboot as well!?
 
-Then the properties should be optional.
+I think the issue may also exist for emergency reboot based on the Asus Tinker Board kernel commit at [1],
+not sure how this could be solved in an acceptable way. Personally I do not have sysrq enabled on my boards.
 
-Rob
+[1] https://github.com/TinkerBoard/debian_kernel/commit/1e8970dbfc20166788e3428ec5203f7673f6087b
+
+>
+>> Set initial signal voltage in mmc_power_off() to allow re-boot to function.
+> I think this sounds like a reasonable way forward, to improve the situation.
+
+I may have exaggerated the issue in the above line, the board will reboot as long as
+UHS 1.8V signaling is not used, current upstream device trees is missing the sd-uhs-* flags
+and will thus reboot as they are capped at sd high speed and 3.3V signaling.
+
+>
+>> This fixes re-boot with UHS cards on Asus Tinker Board (Rockchip RK3288),
+>> same issue have been seen on some Rockchip RK3399 boards.
+>>
+>> I am sending this as a RFC because I have no insights into SD/MMC subsystem,
+>> this change fix a re-boot issue on my boards and does not break emmc/sdio.
+>> Is this an acceptable workaround? Any advice is appreciated.
+>>
+>> Signed-off-by: Jonas Karlman <jonas-uIzNG4q0ceqzQB+pC5nmwQ@public.gmane.org>
+>> ---
+>>  drivers/mmc/core/core.c | 8 ++++++++
+>>  1 file changed, 8 insertions(+)
+>>
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index 5bd58b95d318..69d7021916ae 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -1684,6 +1684,14 @@ void mmc_power_off(struct mmc_host *host)
+>>         if (host->ios.power_mode == MMC_POWER_OFF)
+>>                 return;
+>>
+>> +       mmc_set_initial_signal_voltage(host);
+> I would rather try to move this below mmc_set_initial_state() a few
+> lines below in mmc_power_off(). To me, it seems safer to do the
+> regular power off thingy first.
+>
+> Additionally, I would drop the added delay below, as there is already
+> a delay after calling mmc_set_initial_state() and I think/hope that
+> should be sufficient.
+
+Thanks for the suggestion, the reason I put the mmc_set_initial_signal_voltage() call
+before mmc_pwrseq_power_off() call was to do it in reverse order of mmc_power_on(),
+
+I will run some more tests on my boards to see if moving it below mmc_set_initial_state()
+also makes it possible to reboot with UHS cards using 1.8V signaling enabled.
+
+Regards,
+Jonas
+
+>
+>> +
+>> +       /*
+>> +        * This delay should be sufficient to allow the power supply
+>> +        * to reach the minimum voltage.
+>> +        */
+>> +       mmc_delay(host->ios.power_delay_ms);
+>> +
+>>         mmc_pwrseq_power_off(host);
+>>
+>>         host->ios.clock = 0;
+>> --
+>> 2.17.1
+>>
+> Kind regards
+> Uffe
