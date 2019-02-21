@@ -1,106 +1,94 @@
-From: Marek Szyprowski <m.szyprowski@samsung.com>
-Subject: Re: [PATCH V15 14/18] block: enable multipage bvecs
-Date: Thu, 21 Feb 2019 11:08:19 +0100
-Message-ID: <ba39138d-d65b-335d-d709-b95dbde1fd5c@samsung.com>
-References: <20190215111324.30129-1-ming.lei@redhat.com>
-        <20190215111324.30129-15-ming.lei@redhat.com>
-        <CGME20190221084301eucas1p11e8841a62b4b1da3cccca661b6f4c29d@eucas1p1.samsung.com>
-        <6c9ae4de-c56f-a2b3-2542-da7d8b95601d@samsung.com>
-        <20190221095733.GA12448@ming.t460p>
+From: Ludovic Barre <ludovic.Barre@st.com>
+Subject: [PATCH 2/2] mmc: mmci: add quirk property to add stm32 transfer mode
+Date: Thu, 21 Feb 2019 11:10:51 +0100
+Message-ID: <1550743851-13588-3-git-send-email-ludovic.Barre@st.com>
+References: <1550743851-13588-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190221095733.GA12448@ming.t460p>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ming Lei <ming.lei@redhat.com>
-Cc: Jens Axboe <axboe@kernel.dk>, linux-block@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mm@kvack.org, Theodore Ts'o <tytso@mit.edu>, Omar Sandoval <osandov@fb.com>, Sagi Grimberg <sagi@grimberg.me>, Dave Chinner <dchinner@redhat.com>, Kent Overstreet <kent.overstreet@gmail.com>, Mike Snitzer <snitzer@redhat.com>, dm-devel@redhat.com, Alexander Viro <viro@zeniv.linux.org.uk>, linux-fsdevel@vger.kernel.org, linux-raid@vger.kernel.org, David Sterba <dsterba@suse.com>, linux-btrfs@vger.kernel.org, "Darrick J . Wong" <darrick.wong@oracle.com>, linux-xfs@vger.kernel.org, Gao Xiang <gaoxiang25@huawei.com>, Christoph Hellwig <hch@lst.de>, linux-ext4@vger.kernel.org, Coly Li <colyli@suse.de>, linux-bcache@vger.kernel.org, Boaz Harrosh <ooo@electrozaur.com>, Bob
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1550743851-13588-1-git-send-email-ludovic.Barre@st.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
+Cc: devicetree@vger.kernel.org, Alexandre Torgue <alexandre.torgue@st.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, srinivas.kandagatla@linaro.org, Ludovic Barre <ludovic.barre@st.com>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, linux-stm32@st-md-mailman.stormreply.com, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Ming,
+From: Ludovic Barre <ludovic.barre@st.com>
 
-On 2019-02-21 10:57, Ming Lei wrote:
-> On Thu, Feb 21, 2019 at 09:42:59AM +0100, Marek Szyprowski wrote:
->> On 2019-02-15 12:13, Ming Lei wrote:
->>> This patch pulls the trigger for multi-page bvecs.
->>>
->>> Reviewed-by: Omar Sandoval <osandov@fb.com>
->>> Signed-off-by: Ming Lei <ming.lei@redhat.com>
->> Since Linux next-20190218 I've observed problems with block layer on one
->> of my test devices (Odroid U3 with EXT4 rootfs on SD card). Bisecting
->> this issue led me to this change. This is also the first linux-next
->> release with this change merged. The issue is fully reproducible and can
->> be observed in the following kernel log:
->>
->> sdhci: Secure Digital Host Controller Interface driver
->> sdhci: Copyright(c) Pierre Ossman
->> s3c-sdhci 12530000.sdhci: clock source 2: mmc_busclk.2 (100000000 Hz)
->> s3c-sdhci 12530000.sdhci: Got CD GPIO
->> mmc0: SDHCI controller on samsung-hsmmc [12530000.sdhci] using ADMA
->> mmc0: new high speed SDHC card at address aaaa
->> mmcblk0: mmc0:aaaa SL16G 14.8 GiB
->>
->> ...
->>
->> EXT4-fs (mmcblk0p2): INFO: recovery required on readonly filesystem
->> EXT4-fs (mmcblk0p2): write access will be enabled during recovery
->> EXT4-fs (mmcblk0p2): recovery complete
->> EXT4-fs (mmcblk0p2): mounted filesystem with ordered data mode. Opts: (null)
->> VFS: Mounted root (ext4 filesystem) readonly on device 179:2.
->> devtmpfs: mounted
->> Freeing unused kernel memory: 1024K
->> hub 1-3:1.0: USB hub found
->> Run /sbin/init as init process
->> hub 1-3:1.0: 3 ports detected
->> *** stack smashing detected ***: <unknown> terminated
->> Kernel panic - not syncing: Attempted to kill init! exitcode=0x00000004
->> CPU: 1 PID: 1 Comm: init Not tainted 5.0.0-rc6-next-20190218 #1546
->> Hardware name: SAMSUNG EXYNOS (Flattened Device Tree)
->> [<c01118d0>] (unwind_backtrace) from [<c010d794>] (show_stack+0x10/0x14)
->> [<c010d794>] (show_stack) from [<c09ff8a4>] (dump_stack+0x90/0xc8)
->> [<c09ff8a4>] (dump_stack) from [<c0125944>] (panic+0xfc/0x304)
->> [<c0125944>] (panic) from [<c012bc98>] (do_exit+0xabc/0xc6c)
->> [<c012bc98>] (do_exit) from [<c012c100>] (do_group_exit+0x3c/0xbc)
->> [<c012c100>] (do_group_exit) from [<c0138908>] (get_signal+0x130/0xbf4)
->> [<c0138908>] (get_signal) from [<c010c7a0>] (do_work_pending+0x130/0x618)
->> [<c010c7a0>] (do_work_pending) from [<c0101034>]
->> (slow_work_pending+0xc/0x20)
->> Exception stack(0xe88c3fb0 to 0xe88c3ff8)
->> 3fa0:                                     00000000 bea7787c 00000005
->> b6e8d0b8
->> 3fc0: bea77a18 b6f92010 b6e8d0b8 00000001 b6e8d0c8 00000001 b6e8c000
->> bea77b60
->> 3fe0: 00000020 bea77998 ffffffff b6d52368 60000050 ffffffff
->> CPU3: stopping
->>
->> I would like to help debugging and fixing this issue, but I don't really
->> have idea where to start. Here are some more detailed information about
->> my test system:
->>
->> 1. Board: ARM 32bit Samsung Exynos4412-based Odroid U3 (device tree
->> source: arch/arm/boot/dts/exynos4412-odroidu3.dts)
->>
->> 2. Block device: MMC/SDHCI/SDHCI-S3C with SD card
->> (drivers/mmc/host/sdhci-s3c.c driver, sdhci_2 device node in the device
->> tree)
->>
->> 3. Rootfs: Ext4
->>
->> 4. Kernel config: arch/arm/configs/exynos_defconfig
->>
->> I can gather more logs if needed, just let me which kernel option to
->> enable. Reverting this commit on top of next-20190218 as well as current
->> linux-next (tested with next-20190221) fixes this issue and makes the
->> system bootable again.
-> Could you test the patch in following link and see if it can make a difference?
->
-> https://marc.info/?l=linux-aio&m=155070355614541&w=2
+This patch adds a quirk bit to define specific stm32 transfer
+modes. sdmmc data transfer mode selection could be:
+-Block data transfer ending on block count.
+-SDIO multibyte data transfer.
+-MMC Stream data transfer (not used).
+-Block data transfer ending with STOP_TRANSMISSION command.
 
-I've tested that patch, but it doesn't make any difference on the test
-system. In the log I see no warning added by it.
+Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
+---
+ drivers/mmc/host/mmci.c | 11 +++++++++++
+ drivers/mmc/host/mmci.h |  7 +++++++
+ 2 files changed, 18 insertions(+)
 
-Best regards
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 387ff14..44c721a 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -284,6 +284,7 @@ static struct variant_data variant_stm32_sdmmc = {
+ 	.datactrl_blocksz	= 14,
+ 	.stm32_idmabsize_mask	= GENMASK(12, 5),
+ 	.init			= sdmmc_variant_init,
++	.quirks			= MMCI_QUIRK_STM32_DTMODE,
+ };
+ 
+ static struct variant_data variant_qcom = {
+@@ -1028,6 +1029,16 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
+ 	else
+ 		datactrl = variant->datactrl_dpsm_enable | blksz_bits << 4;
+ 
++	if (variant->quirks & MMCI_QUIRK_STM32_DTMODE) {
++		if (host->mmc->card && mmc_card_sdio(host->mmc->card) &&
++		    data->blocks == 1)
++			datactrl |= MCI_DPSM_STM32_MODE_SDIO;
++		else if (data->stop && !host->mrq->sbc)
++			datactrl |= MCI_DPSM_STM32_MODE_BLOCK_STOP;
++		else
++			datactrl |= MCI_DPSM_STM32_MODE_BLOCK;
++	}
++
+ 	if (data->flags & MMC_DATA_READ)
+ 		datactrl |= MCI_DPSM_DIRECTION;
+ 
+diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+index 474f4fa..9fbd0a4 100644
+--- a/drivers/mmc/host/mmci.h
++++ b/drivers/mmc/host/mmci.h
+@@ -131,6 +131,11 @@
+ /* Control register extensions in the Qualcomm versions */
+ #define MCI_DPSM_QCOM_DATA_PEND	BIT(17)
+ #define MCI_DPSM_QCOM_RX_DATA_PEND BIT(20)
++/* Control register extensions in STM32 versions */
++#define MCI_DPSM_STM32_MODE_BLOCK	(0 << 2)
++#define MCI_DPSM_STM32_MODE_SDIO	(1 << 2)
++#define MCI_DPSM_STM32_MODE_STREAM	(2 << 2)
++#define MCI_DPSM_STM32_MODE_BLOCK_STOP	(3 << 2)
+ 
+ #define MMCIDATACNT		0x030
+ #define MMCISTATUS		0x034
+@@ -357,6 +362,8 @@ struct variant_data {
+ 	void (*init)(struct mmci_host *host);
+ };
+ 
++#define MMCI_QUIRK_STM32_DTMODE	BIT(0)
++
+ /* mmci variant callbacks */
+ struct mmci_host_ops {
+ 	int (*validate_data)(struct mmci_host *host, struct mmc_data *data);
 -- 
-Marek Szyprowski, PhD
-Samsung R&D Institute Poland
+2.7.4
