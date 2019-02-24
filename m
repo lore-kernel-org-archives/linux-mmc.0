@@ -1,35 +1,31 @@
-From: Chaotian Jing <chaotian.jing@mediatek.com>
-Subject: Re: [PATCH v2] Fix HS setting in mmc_hs400_to_hs200()
-Date: Sat, 23 Feb 2019 14:42:46 +0800
-Message-ID: <1550904166.16070.33.camel@mhfsdcap03>
-References: <1550210375-32270-1-git-send-email-chaotian.jing@mediatek.com>
+From: Avri Altman <Avri.Altman@wdc.com>
+Subject: RE: [PATCH v2 3/3] mmc: core: Add discard support to sd
+Date: Sun, 24 Feb 2019 07:08:00 +0000
+Message-ID: <SN6PR04MB4925F4144BA19933F80B7D08FC790@SN6PR04MB4925.namprd04.prod.outlook.com>
+References: <1549452487-17193-1-git-send-email-avri.altman@wdc.com>
+ <1549452487-17193-4-git-send-email-avri.altman@wdc.com>
+ <CAPDyKFqrS+f4K-t6i0ZxAivtATddYepXLguX5svrQub-zH2JEw@mail.gmail.com>
+ <SN6PR04MB492532246A5968F6C60F84F3FC670@SN6PR04MB4925.namprd04.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1550210375-32270-1-git-send-email-chaotian.jing@mediatek.com>
+In-Reply-To: <SN6PR04MB492532246A5968F6C60F84F3FC670@SN6PR04MB4925.namprd04.prod.outlook.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Matthias Brugger <matthias.bgg@gmail.com>, Shawn Lin <shawn.lin@rock-chips.com>, Simon Horman <horms+renesas@verge.net.au>, Avri Altman <avri.altman@wdc.com>, Kyle Roeschley <kyle.roeschley@ni.com>, Hongjie Fang <hongjiefang@asrmicro.com>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, srv_heupstream@mediatek.com
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Lin <shawn.lin@rock-chips.com>, Avi Shchislowski <Avi.Shchislowski@wdc.com>, Alex Lemberg <Alex.Lemberg@wdc.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Ulf,
-
-this is just a ping, do you have any comments of this series of
-patches ?
-
-Thx!
-
-On Fri, 2019-02-15 at 13:59 +0800, Chaotian Jing wrote:
-> Change vs v1:
->   do not retry CMD6 in __mmc_switch()
->   do not move the reduce clock operation after switch HS
-> 
-> Chaotian Jing (2):
->   mmc: core: do not retry CMD6 in __mmc_switch()
->   mmc: mmc: Fix HS setting in mmc_hs400_to_hs200()
-> 
->  drivers/mmc/core/mmc.c     | 21 +++++++++++++++++++--
->  drivers/mmc/core/mmc_ops.c |  2 +-
->  2 files changed, 20 insertions(+), 3 deletions(-)
-> 
+PiA+DQo+ID4gT24gV2VkLCA2IEZlYiAyMDE5IGF0IDEyOjI5LCBBdnJpIEFsdG1hbiA8YXZyaS5h
+bHRtYW5Ad2RjLmNvbT4gd3JvdGU6DQo+ID4gPg0KPiA+ID4gU0Qgc3BlYyB2NS4xIGFkZHMgZGlz
+Y2FyZCBzdXBwb3J0LiBUaGUgZmxvd3MgYW5kIGNvbW1hbmRzIGFyZSBzaW1pbGFyDQo+IHRvDQo+
+ID4gPiBtbWMsIHNvIGp1c3Qgc2V0IHRoZSBkaXNjYXJkIGFyZyBpbiBDTUQzOC4NCj4gPiA+DQo+
+ID4gPiBBY3R1YWxseSwgdGhlcmUgaXMgbm8gbmVlZCB0byBjaGVjayBmb3IgdGhlIHNwZWMgdmVy
+c2lvbiBsaWtlIHdlIGFyZQ0KPiA+ID4gZG9pbmcsIGFzIGl0IGlzIGFzc3VyZWQgdGhhdCB0aGUg
+cmVzZXJ2ZWQgYml0cyBpbiBlYXJsaWVyIHZlcnNpb25zIGFyZQ0KPiA+ID4gbnVsbC4gRG8gdGhh
+dCBhbnl3YXkgdG8gZG9jdW1lbnQgdGhlIHNwZWMgdmVyc2lvbiB0aGF0IGludHJvZHVjZSBpdC4N
+Cj4gPiA+DQo+ID4gPiBTaWduZWQtb2ZmLWJ5OiBBdnJpIEFsdG1hbiA8YXZyaS5hbHRtYW5Ad2Rj
+LmNvbT4NCj4gPg0KPiA+IERlZmVycmluZyB0aGlzIGEgYml0LCBuZWVkIHNvbWUgbW9yZSB0aW1l
+IHRvIHJldmlldy4NCj4gQSBraW5kIHJlbWluZGVyLg0KQSBnZW50bGUgcGluZy4NCg0KVGhhbmtz
+LA0KQXZyaQ0KDQo+IFRoYW5rcywNCj4gQXZyaQ0K
