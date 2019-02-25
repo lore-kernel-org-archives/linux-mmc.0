@@ -1,151 +1,94 @@
-From: Ludovic BARRE <ludovic.barre@st.com>
-Subject: Re: [PATCH 0/2] mmc: mmci: add quirk property to add stm32 transfer
- mode
-Date: Mon, 25 Feb 2019 11:48:56 +0100
-Message-ID: <9c88d76c-2080-71b1-c9c6-c24d0f0aeb91@st.com>
-References: <1550743851-13588-1-git-send-email-ludovic.Barre@st.com>
- <20190221102739.cc37au6elqu6gvfe@shell.armlinux.org.uk>
- <20190221103049.tspc5igoe6wmt3jd@shell.armlinux.org.uk>
- <a736b773-d6e6-eb81-90d6-ebeab7b401cb@st.com>
- <20190221140300.y3tunrvsh3gyig5f@shell.armlinux.org.uk>
+From: Faiz Abbas <faiz_abbas@ti.com>
+Subject: Re: Linux-next 20190218: am57xx-evm: mmc1: ADMA error
+Date: Mon, 25 Feb 2019 18:46:05 +0530
+Message-ID: <22ccca46-7390-1707-cfca-43b3577b79f2@ti.com>
+References: <CA+G9fYsmC5ckLXfQxSUn-tqxLZ4NofEyb9RA69Q07RUoxc79RQ@mail.gmail.com>
+ <34c78d7f-cc3c-853d-b3fd-a70abdb66293@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20190221140300.y3tunrvsh3gyig5f@shell.armlinux.org.uk>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <34c78d7f-cc3c-853d-b3fd-a70abdb66293@ti.com>
 Content-Language: en-US
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Russell King - ARM Linux admin <linux@armlinux.org.uk>
-Cc: devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Alexandre Torgue <alexandre.torgue@st.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, srinivas.kandagatla@linaro.org, Maxime Coquelin <mcoquelin.stm32@gmail.com>, linux-stm32@st-md-mailman.stormreply.com, linux-arm-kernel@lists.infradead.org
+Sender: linux-kernel-owner@vger.kernel.org
+To: Naresh Kamboju <naresh.kamboju@linaro.org>, open list <linux-kernel@vger.kernel.org>, "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree@vger.kernel.org>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Cc: t-kristo@ti.com, nm@ti.com, Mark Rutland <mark.rutland@arm.com>, robh+dt@kernel.org, osandov@fb.com, ming.lei@redhat.com, Jens Axboe <axboe@kernel.dk>
 List-Id: linux-mmc@vger.kernel.org
 
-hi Russell & Ulf
+Hi Naresh,
 
-On 2/21/19 3:03 PM, Russell King - ARM Linux admin wrote:
-> On Thu, Feb 21, 2019 at 02:38:36PM +0100, Ludovic BARRE wrote:
->> hi Russell & Ulf
->>
->> On 2/21/19 11:30 AM, Russell King - ARM Linux admin wrote:
->>> On Thu, Feb 21, 2019 at 10:27:39AM +0000, Russell King - ARM Linux admin wrote:
->>>> On Thu, Feb 21, 2019 at 11:10:49AM +0100, Ludovic Barre wrote:
->>>>> From: Ludovic Barre <ludovic.barre@st.com>
->>>>>
->>>>> This patch series introduces a bitmap of hardware quirks that require
->>>>> some special action. This should reduce the number of boolean
->>>>> into variant structure.
->>>>> And adds quirk bit to define sdmmc specific transfer modes.
->>>>
->>>> Please find some other way to deal with these differences.  As far as
->>>> I'm concerned, introducing a quirk bitmask such as what was done in
->>>> sdhci is a complete disaster and leads to long-term maintanability
->>>> problems.
->>>>
->>>> We already have a way to deal with variants in mmci.
->>>
->>> ... to finish what I was saying ...
->>>
->>> and I think that:
->>>
->>>           if (variant->blksz_datactrl16)
->>>                   datactrl = variant->datactrl_dpsm_enable | (data->blksz << 16);
->>>           else if (variant->blksz_datactrl4)
->>>                   datactrl = variant->datactrl_dpsm_enable | (data->blksz << 4);
->>>           else
->>>                   datactrl = variant->datactrl_dpsm_enable | blksz_bits << 4;
->>>
->>> ought to become a variant function call which returns the appropriate
->>> datactrl value.  This would shrink the amount of variant testing in this
->>> path, and also means that going forward we aren't facing an endlessly
->>> increasing number of tests here.
->>
->> For blksz_datactrl case:
->> We could create an inline function for datactrl16 and blksz_datactrl4
->> which returns the appropriate datactrl value (specific for ux500v2 and
->> qcom). This function could be register in mmci_host_ops structure.
-> 
-> Yes, this is what I'm proposing (except for the "inline" bit which
-> seems meaningless if it's called via the mmci_host_ops structure.)
-> I'm also proposing that it shouldn't just be the blksz that's
-> returned but anything that the variant needs to take account of,
-> including the stm transfer mode.
++ Commit authors.
 
-Ulf, are you alright with this callback approach (just to be sure that 
-every body is align, before send a patch)?
+On 19/02/19 6:38 PM, Faiz Abbas wrote:
+> Hi Naresh,
+> 
+> On 18/02/19 6:57 PM, Naresh Kamboju wrote:
+>> Do you see this error on am57xx-evm running Linux next 20190218 ?
+>> I have tested on multiple devices and found this error.
+>> Please find the full boot log [1].
+>> Am i missing any pre required configs [2] ?
+>>
+>> [    5.620263] mmc1: ADMA error
+>> [    5.623266] mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
+>> [    5.629740] mmc1: sdhci: Sys addr:  0x00000000 | Version:  0x00003302
+>> [    5.636215] mmc1: sdhci: Blk size:  0x00000200 | Blk cnt:  0x0000ffff
+>> [    5.642690] mmc1: sdhci: Argument:  0x002cec70 | Trn mode: 0x00000033
+>> [    5.649162] mmc1: sdhci: Present:   0x01f00000 | Host ctl: 0x00000010
+>> [    5.655634] mmc1: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+>> [    5.662108] mmc1: sdhci: Wake-up:   0x00000000 | Clock:    0x00000107
+>> [    5.668582] mmc1: sdhci: Timeout:   0x0000000c | Int stat: 0x00000000
+>> [    5.675055] mmc1: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
+>> [    5.681529] mmc1: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+>> [    5.688002] mmc1: sdhci: Caps:      0x21e90080 | Caps_1:   0x00000f77
+>> [    5.694474] mmc1: sdhci: Cmd:       0x0000123a | Max curr: 0x00000000
+>> [    5.700949] mmc1: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0xffffffef
+>> [    5.707423] mmc1: sdhci: Resp[2]:   0x0f5903ff | Resp[3]:  0xd04f0132
+>> [    5.713896] mmc1: sdhci: Host ctl2: 0x00000004
+>> [    5.718364] mmc1: sdhci: ADMA Err:  0x00000007 | ADMA Ptr: 0xab868218
+>>
+> 
+> I see this as well on my setup. Trying to bisect now. Will keep you posted.
 
-This mmci_host_ops callback could return datactrl config to
-start data (defined by variant).
 
-> 
->> in mmci_start_data function we could call a common function which call a
->> hook if defined.
+Reverting the following commit fixes this.
+commit 07173c3ec276cbb18dc0e0687d37d310e98a1480
+Author: Ming Lei <ming.lei@redhat.com>
+Date:   Fri Feb 15 19:13:20 2019 +0800
+
+    block: enable multipage bvecs
+
+    This patch pulls the trigger for multi-page bvecs.
+
+    Reviewed-by: Omar Sandoval <osandov@fb.com>
+    Signed-off-by: Ming Lei <ming.lei@redhat.com>
+    Signed-off-by: Jens Axboe <axboe@kernel.dk>
+
+
+
+>> <>
+>> [   42.425587] print_req_error: I/O error, dev mmcblk1, sector 4542872 flags 1
+>> [   42.429013] mmc1: ADMA error
+>> [   42.432606] EXT4-fs warning (device mmcblk1p9): ext4_end_bio:324:
+>> I/O error 10 writing to inode 35321 (offset 0 size 4096 starting block
+>> 567860)
+>> [   42.435475] mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
+>> [   42.448543] Buffer I/O error on device mmcblk1p9, logical block 226675
+>> [   42.454944] mmc1: sdhci: Sys addr:  0x00000000 | Version:  0x00003302
+>> [   42.461528] EXT4-fs warning (device mmcblk1p9): ext4_end_bio:324:
+>> I/O error 10 writing to inode 35322 (offset 0 size 4096 starting block
+>> 567861)
+>> [   42.467960] mmc1: sdhci: Blk size:  0x00000200 | Blk cnt:  0x0000ffff
+>> [   42.480982] Buffer I/O error on device mmcblk1p9, logical block 226676
+>> [   42.487427] mmc1: sdhci: Argument:  0x002cae20 | Trn mode: 0x00000033
+>> [   42.494007] EXT4-fs warning (device mmcblk1p9): ext4_end_bio:324:
+>> I/O error 10 writing to inode 315 (offset 0 size 4096 starting block
+>> 567862)
 >>
->> int mmci_dblksz(struct mmci_host *host)
-> 
-> As this is returning a register value, "u32" would be more appropriate
-> than "int".
-> 
->> {
->> 	if (host->ops && host->ops->dblksz)
->> 		return host->ops->dblk(host);
+>> Full boot log,
+>> [1] https://lkft.validation.linaro.org/scheduler/job/610989#L4354
+>> config,
+>> [2] http://snapshots.linaro.org/openembedded/lkft/lkft/rocko/am57xx-evm/lkft/linux-next/467/config
 >>
->> 	/* default data block size definition */
->> 	blksz_bits = ffs(data->blksz) - 1;
->> 	return blksz_bits << 4;
->> }
+>> Best regards
+>> Naresh Kamboju
 >>
->> what do you think about it?
-> 
-> I don't see any reason not to make the call unconditional and have every
-> variant supply an appropriate function pointer.  IMHO that keeps stuff
-> cleaner.
-> 
->> After, I'm afraid to multiply callback function in mmci_host_ops.
->>
->> For stm32 transfer mode:
->> ditto, a callback function or I keep a boolean?
->>
->> BR
->> Ludo
->>
->>>
->>>>
->>>>>
->>>>> Ludovic Barre (2):
->>>>>     mmc: mmci: introduce a quirks property into variant struct
->>>>>     mmc: mmci: add quirk property to add stm32 transfer mode
->>>>>
->>>>>    drivers/mmc/host/mmci.c | 11 +++++++++++
->>>>>    drivers/mmc/host/mmci.h |  9 +++++++++
->>>>>    2 files changed, 20 insertions(+)
->>>>>
->>>>> -- 
->>>>> 2.7.4
->>>>>
->>>>>
->>>>> _______________________________________________
->>>>> linux-arm-kernel mailing list
->>>>> linux-arm-kernel@lists.infradead.org
->>>>> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
->>>>>
->>>>
->>>> -- 
->>>> RMK's Patch system: https://www.armlinux.org.uk/developer/patches/
->>>> FTTC broadband for 0.8mile line in suburbia: sync at 12.1Mbps down 622kbps up
->>>> According to speedtest.net: 11.9Mbps down 500kbps up
->>>>
->>>> _______________________________________________
->>>> linux-arm-kernel mailing list
->>>> linux-arm-kernel@lists.infradead.org
->>>> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
->>>>
->>>
->>
-> 
