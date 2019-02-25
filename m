@@ -1,75 +1,44 @@
-From: Aaro Koskinen <aaro.koskinen-X3B1VOXEql0@public.gmane.org>
-Subject: Re: Linux v5.0-rc7: bcm2835 MMC issues
-Date: Sun, 24 Feb 2019 22:15:42 +0200
-Message-ID: <20190224201542.GA31163@darkstar.musicnaut.iki.fi>
-References: <20190224150746.GC26495@darkstar.musicnaut.iki.fi>
- <155745885.93258.1551034990363@email.ionos.de>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v2 1/8] mmc: sdhci: Get rid of finish_tasklet
+Date: Mon, 25 Feb 2019 10:17:55 +0200
+Message-ID: <abcc1506-cd38-5ff4-aaeb-57e9a9622e90@intel.com>
+References: <20190215192033.24203-1-faiz_abbas@ti.com>
+ <20190215192033.24203-2-faiz_abbas@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <155745885.93258.1551034990363-uEpKuDZ350hmhno068Nerg@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rpi-kernel>,
- <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rpi-kernel/>
-List-Post: <mailto:linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rpi-kernel>,
- <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "linux-rpi-kernel" <linux-rpi-kernel-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190215192033.24203-2-faiz_abbas@ti.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Faiz Abbas <faiz_abbas@ti.com>, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Cc: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, kishon@ti.com, zhang.chunyan@linaro.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
-
-On Sun, Feb 24, 2019 at 08:03:10PM +0100, Stefan Wahren wrote:
-> > Aaro Koskinen <aaro.koskinen-X3B1VOXEql0@public.gmane.org> hat am 24. Februar 2019 um 16:07 geschrieben:
-> > After upgrading from v4.20 -> v5.0-rc7, I'm getting MMC issues on
-> > RPi3. Below is one example, system just ends up being completely freezed
-> > after couple hours into GCC bootstrap (passed fine with v4.20).
-> > 
-> > Happened three times already (also after replacing the MMC card just
-> > in case).
-> > 
+On 15/02/19 9:20 PM, Faiz Abbas wrote:
+> sdhci.c has two bottom halves implemented. A threaded_irq for handling
+> card insert/remove operations and a tasklet for finishing mmc requests.
+> With the addition of external dma support, dmaengine APIs need to
+> terminate in non-atomic context before unmapping the dma buffers.
 > 
-> thanks for your report. 
-> 
-> Can you give us a more detailed test scenario?
+> To facilitate this, remove the finish_tasklet and move the call of
+> sdhci_request_done() to the threaded_irq() callback.
 
-Well, I have minimal arm64 rootfs + swap on MMC. Then I extract GCC
-8.3.0 sources and try to do the compiler bootstrap:
+The irq thread has a higher latency than the tasklet.  The performance drop
+is measurable on the system I tried:
 
-  mkdir build
-  cd build
-  ../gcc-8.3.0/configure <long list of options here>
-  make -j4
+Before:
 
-Then just wait. :)
+# dd if=/dev/mmcblk1 of=/dev/null bs=1G count=1 &
+1+0 records in
+1+0 records out
+1073741824 bytes (1.1 GB) copied, 4.44502 s, 242 MB/s
 
-> How long does it take until the issue occur?
+After:
 
-I would say 1-2 hours. The serial log shows ~6500 seconds, and I started the
-build right after the boot.
+# dd if=/dev/mmcblk1 of=/dev/null bs=1G count=1 &
+1+0 records in
+1+0 records out
+1073741824 bytes (1.1 GB) copied, 4.50898 s, 238 MB/s
 
-My guess is that the issue occurs during the stage in the build where there
-is some really heavy swapping going on (almost 1 GB swap used).
-
-> Did you already tested v4.20.12 or only v4.20?
-
-Only v4.20, and it was already few weeks ago when I did the GCC 8.2.0
-bootstrap. It went fine (5 hours build + 12 hours testsuite) without
-any errors in dmesg.
-
-> Does the issue occur in v5.0-rc7 if you make sdhost use PIO mode
-> (CONFIG_DMA_BCM2835=m)?
-
-I have currently test running where I moved the file system and swap from
-SD card slot behind an USB SD card adapter (still the same physical SD
-card). And that has been running fine for 4 hours already. I want to
-first see if that one finishes properly, then I can start a new test
-using sdhost and PIO mode.
-
-A.
+So we only want to resort to the thread for the error case.
