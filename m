@@ -1,133 +1,98 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 2/2] mmc: mmc: Fix HS setting in mmc_hs400_to_hs200()
-Date: Mon, 25 Feb 2019 17:08:14 +0100
-Message-ID: <CAPDyKFquyyXx1MqNLVXuFxcEDB9nKzN8LGGNUP2yxoVMQrWiUg@mail.gmail.com>
-References: <1550210375-32270-1-git-send-email-chaotian.jing@mediatek.com>
- <1550210375-32270-3-git-send-email-chaotian.jing@mediatek.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [RFC] mmc: core: set initial signal voltage on power off
+Date: Mon, 25 Feb 2019 17:19:14 +0100
+Message-ID: <CAPDyKFpCTN1CfMvSWAPC8CyASjF=uxRhf8KWcU8MRRsUjUbKHQ@mail.gmail.com>
+References: <AM3PR03MB09664161A7FA2BD68B2800A7AC620@AM3PR03MB0966.eurprd03.prod.outlook.com>
+ <CAPDyKFpfjKbbCF=wyERXpcLk2LDJD6zsPHTYegwtHrv5qPv8HA@mail.gmail.com>
+ <AM3PR03MB09666AFE4FC60E324C7EBDA8AC7C0@AM3PR03MB0966.eurprd03.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1550210375-32270-3-git-send-email-chaotian.jing@mediatek.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Chaotian Jing <chaotian.jing@mediatek.com>
-Cc: srv_heupstream <srv_heupstream@mediatek.com>, Shawn Lin <shawn.lin@rock-chips.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Avri Altman <avri.altman@wdc.com>, linux-mediatek@lists.infradead.org, Hongjie Fang <hongjiefang@asrmicro.com>, Matthias Brugger <matthias.bgg@gmail.com>, Simon Horman <horms+renesas@verge.net.au>, Kyle Roeschley <kyle.roeschley@ni.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <AM3PR03MB09666AFE4FC60E324C7EBDA8AC7C0-XQTXrJX/giFAc9da7WRX18eAHadYHfrlvxpqHgZTriW3zl9H0oFU5g@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Jonas Karlman <jonas-uIzNG4q0ceqzQB+pC5nmwQ@public.gmane.org>
+Cc: "linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, 15 Feb 2019 at 06:59, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
+On Tue, 19 Feb 2019 at 11:12, Jonas Karlman <jonas-uIzNG4q0ceqzQB+pC5nmwQ@public.gmane.org> wrote:
 >
-> mmc_hs400_to_hs200() begins with the card and host in HS400 mode.
-> before send CMD6 to switch card's timing to HS mode, it reduce clock
-> frequency to 50Mhz firstly, the original intention of reduce clock
-> is to make "more stable" when doing HS switch. however,reduce clock
-> frequency to 50Mhz but without host timming change may cause CMD6
-> response CRC error. because host is still running at hs400 mode,
-> and it's hard to find a suitable setting for all eMMC cards when
-> clock frequency reduced to 50Mhz but card & host still in hs400 mode.
+> On 2019-02-18 12:54, Ulf Hansson wrote:
+> > On Sun, 17 Feb 2019 at 23:14, Jonas Karlman <jonas-uIzNG4q0ceqzQB+pC5nmwQ@public.gmane.org> wrote:
+> >> Some boards have SD card connectors where the power rail cannot be switched
+> >> off by the driver. If the card has not been power cycled, it may still be
+> >> using 1.8V signaling after a warm re-boot. Bootroms expecting 3.3V signaling
+> >> will fail to boot from a UHS card that continue to use 1.8V signaling.
+> > Is the problem limited to a "warm manual re-boot" or does it exists
+> > for an emergency reboot as well!?
 >
-> so that We consider that CMD6 response CRC error is not a fatal error,
-> if host gets CMD6 response CRC error, it means that card has already
-> received this command.
+> I think the issue may also exist for emergency reboot based on the Asus Tinker Board kernel commit at [1],
+> not sure how this could be solved in an acceptable way. Personally I do not have sysrq enabled on my boards.
 >
-> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
-> Fixes: ef3d232245ab ("mmc: mmc: Relax checking for switch errors after HS200 switch")
-> ---
->  drivers/mmc/core/mmc.c | 21 +++++++++++++++++++--
->  1 file changed, 19 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 09c688f..03d1c17 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1248,8 +1248,25 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
->         err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_HS_TIMING,
->                            val, card->ext_csd.generic_cmd6_time, 0,
->                            true, false, true);
-> -       if (err)
-> -               goto out_err;
-> +       /*
-> +        * as we are on the way to do re-tune, so if the CMD6 got response CRC
-> +        * error, do not treat it as error.
-> +        */
-> +       if (err) {
-> +               if (err == -EILSEQ) {
-
-Well, I am having seconds thoughts about this. Sorry.
-
-There are different scenarios of why we end up doing a re-tune and
-thus call mmc_hs400_to_hs200(). These are:
-
-1) Because of a periodic re-tuning - to avoid CRC errors in the future.
-2) Because the host controller needs to do a re-tune when it gets
-runtime resumed, due to that it lost its tuning data (and is unable to
-restore it).
-3) Because we encountered a CRC (-EILSEQ) error for a block I/O
-request and want to try re-cover.
-
-I assume you are looking at case 3), because mtk-sd don't use periodic
-re-tuning and nor does it need re-tune at runtime resume, right?
-
-So, when thinking a bit about these cases, more closely, I think we
-need to admit that these are actually quite fundamentally different
-cases. Therefore, we should probably start treat them like that as
-well.
-
-For 1), There are no reason to decrease the clock rate before invoking
-__mmc_switch(), but rather we should decrease it afterwards instead.
-For 2), The clock rate must to be decreased to HS speed (50 MHz),
-before invoking __mmc_switch(), as there are really no tuning
-parameters available at all to use for the controller.
-For 3). Similar to 1) and for the reasons you also have brought up
-earlier, the clock rate should remain at HS400 speed before invoking
-__mmc_switch(). This is because the controller are still using the
-tuned data for the HS400 clock rate. So, even if the conditions
-started to become fragile, I think it's better to try with the HS400
-MHz than on any other rate.
-
-Moreover, as I stated in an earlier reply, if the call to
-__mmc_switch() ends up with a CRC error, how can we ever be sure that
-the command was accepted by the card? We can't, hence that solution
-will probably never fly.
-
-> +                       /*
-> +                        * card will busy after sending out response and host
-> +                        * driver may not wait busy de-assert when get
-> +                        * response CRC error. so just wait enough time to
-> +                        * ensure card leave busy state.
-> +                        */
-> +                       mmc_delay(card->ext_csd.generic_cmd6_time);
-> +                       pr_debug("%s: %s switch to HS got CRC error\n",
-> +                                mmc_hostname(host), __func__);
-> +               } else {
-> +                       goto out_err;
-> +               }
-> +       }
->
->         mmc_set_timing(host, MMC_TIMING_MMC_DDR52);
->
-> --
-> 1.8.1.1.dirty
+> [1] https://github.com/TinkerBoard/debian_kernel/commit/1e8970dbfc20166788e3428ec5203f7673f6087b
 >
 
-If you take into account my comments above, it seems like we need to
-add a new tuning flag somewhere, to tell the reason for why the tuning
-is needed. Then we can let mmc_hs400_to_hs200() act on that flag, and
-depending on its value it can either change the clock rate before or
-after the call to __mmc_switch(). If we can make this work, that would
-be the best solution, I think.
+For eMMC we have pwrseq_emmc.c, where we register a restart handler to
+cover these cases. Not very nice, but the best we could come up with.
 
-The fallback method, is to add a specific host cap bit, that instructs
-the mmc core to adjust clock rate before/after the switch, but I would
-rather avoid this solution, but perhaps there is no other way. Let's
-see.
+> >
+> >> Set initial signal voltage in mmc_power_off() to allow re-boot to function.
+> > I think this sounds like a reasonable way forward, to improve the situation.
+>
+> I may have exaggerated the issue in the above line, the board will reboot as long as
+> UHS 1.8V signaling is not used, current upstream device trees is missing the sd-uhs-* flags
+> and will thus reboot as they are capped at sd high speed and 3.3V signaling.
+
+Okay, I see.
+
+>
+> >
+> >> This fixes re-boot with UHS cards on Asus Tinker Board (Rockchip RK3288),
+> >> same issue have been seen on some Rockchip RK3399 boards.
+> >>
+> >> I am sending this as a RFC because I have no insights into SD/MMC subsystem,
+> >> this change fix a re-boot issue on my boards and does not break emmc/sdio.
+> >> Is this an acceptable workaround? Any advice is appreciated.
+> >>
+> >> Signed-off-by: Jonas Karlman <jonas-uIzNG4q0ceqzQB+pC5nmwQ@public.gmane.org>
+> >> ---
+> >>  drivers/mmc/core/core.c | 8 ++++++++
+> >>  1 file changed, 8 insertions(+)
+> >>
+> >> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> >> index 5bd58b95d318..69d7021916ae 100644
+> >> --- a/drivers/mmc/core/core.c
+> >> +++ b/drivers/mmc/core/core.c
+> >> @@ -1684,6 +1684,14 @@ void mmc_power_off(struct mmc_host *host)
+> >>         if (host->ios.power_mode == MMC_POWER_OFF)
+> >>                 return;
+> >>
+> >> +       mmc_set_initial_signal_voltage(host);
+> > I would rather try to move this below mmc_set_initial_state() a few
+> > lines below in mmc_power_off(). To me, it seems safer to do the
+> > regular power off thingy first.
+> >
+> > Additionally, I would drop the added delay below, as there is already
+> > a delay after calling mmc_set_initial_state() and I think/hope that
+> > should be sufficient.
+>
+> Thanks for the suggestion, the reason I put the mmc_set_initial_signal_voltage() call
+> before mmc_pwrseq_power_off() call was to do it in reverse order of mmc_power_on(),
+>
+> I will run some more tests on my boards to see if moving it below mmc_set_initial_state()
+> also makes it possible to reboot with UHS cards using 1.8V signaling enabled.
+
+Great, so I am expecting an update from you, thanks!
+
+[...]
 
 Kind regards
 Uffe
