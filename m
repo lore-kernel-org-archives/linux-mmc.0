@@ -1,17 +1,15 @@
-From: David Summers <beagleboard-8lkWs+DogrrqRUWtDFdff/XRex20P6io@public.gmane.org>
+From: Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
 Subject: Re: [PATCH 1/3 v2] ARM: dts: rk3288-tinker.dtsi: Fix SD card detection
-Date: Mon, 25 Feb 2019 21:00:24 +0000
-Message-ID: <31863095-94b5-5fec-0293-b30172426b93@davidjohnsummers.uk>
+Date: Mon, 25 Feb 2019 23:20:08 +0100
+Message-ID: <19889336.iz2VfdP0Nf@diego>
 References: <20190217121513.22965-2-beagleboard@davidjohnsummers.uk>
- <AM3PR03MB09663F32FC40000E42C1A722AC790@AM3PR03MB0966.eurprd03.prod.outlook.com>
- <e1f1a93e-505b-bf53-a253-5c1ddaeaebf8@davidjohnsummers.uk>
- <1827776.DXBEgXTPyu@diego>
+ <9e90c5dd-7b1e-9e53-81ac-fb3b515215ca@davidjohnsummers.uk>
+ <CAD=FV=XEPKpDVLdpCVB9eMzJNE8C5Pr=fRgRmJXgxzrDFJ39mQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <1827776.DXBEgXTPyu@diego>
-Content-Language: en-PH
+In-Reply-To: <CAD=FV=XEPKpDVLdpCVB9eMzJNE8C5Pr=fRgRmJXgxzrDFJ39mQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
  <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
@@ -21,122 +19,136 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
  <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
 Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: =?UTF-8?Q?Heiko_St=c3=bcbner?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "mark.rutland-5wv7dgnIgG8@public.gmane.org" <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jonas Karlman <jonas-uIzNG4q0ceqzQB+pC5nmwQ@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+To: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, David Summers <beagleboard-8lkWs+DogrrqRUWtDFdff/XRex20P6io@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-T24gMjQvMDIvMjAxOSAyMjo1NCwgSGVpa28gU3TDvGJuZXIgd3JvdGU6Cj4gQW0gU29ubnRhZywg
-MjQuIEZlYnJ1YXIgMjAxOSwgMjE6MTA6NTAgQ0VUIHNjaHJpZWIgRGF2aWQgU3VtbWVyczoKPj4g
-T24gMjQvMDIvMjAxOSAxOTo1NiwgSm9uYXMgS2FybG1hbiB3cm90ZToKPj4+IE9uIDIwMTktMDIt
-MjQgMjA6MzUsIERhdmlkIFN1bW1lcnMgd3JvdGU6Cj4+Pj4gT24gMjQvMDIvMjAxOSAxOToyNiwg
-Sm9uYXMgS2FybG1hbiB3cm90ZToKPj4+Pj4gT24gMjAxOS0wMi0yMiAxOTo0NywgRGF2aWQgU3Vt
-bWVycyB3cm90ZToKPj4+Pj4+IFRoZSBQcm9ibGVtOgo+Pj4+Pj4KPj4+Pj4+IE9uIEFTVVMgVGlu
-a2VyIEJvYXJkIFMsIHdoZW4gYm9vdGluZyBmcm9tIHRoZSBlTU1DLCBhbmQgdGhlcmUgaXMgbm8K
-Pj4+Pj4+IGNhcmQgc2Qgc2xvdCwgdGhlbiB0aGVyZSBhcmUgY29uc3RhbnQgZXJyb3JzLgo+Pj4+
-Pj4KPj4+Pj4+IENhdXNlOgo+Pj4+Pj4KPj4+Pj4+IFRoYW5rcyBtdXN0IGdvIHRvIFJvYmluIE11
-cnBoeSBAIEFSTSBmb3IgaWRlbmlmeWluZyB0aGUgcHJvYmxlbS4gVGhlCj4+Pj4+PiByazgwOCBv
-biB0aGUgVGlua2VyIEJvYXJkIGFuZCBUaW5rZXIgQm9hcmQgUyBoYXMgbWFueSByZWd1bGF0b3Jz
-LCBvbmUKPj4+Pj4+IHZjY2lvX3NkIHBvd2VycyB0aGUgSU8gZm9yIHRoZSBzZCBjYXJkLiBVbmZv
-cnR1bmF0bHkgdGhpcyBpcyBhbHNvIHVzZWQKPj4+Pj4+IGluIHRoZSBjYXJkIGRldGVjdC4gTm93
-IHdoZW4gbm8gY2FyZCBpcyBpbnN0YWxsLCB0aGUgcmVndWxhdG9yIGlzCj4+Pj4+PiBwb3dlcmVk
-IGRvd24uIFRoaXMgbWVhbnMgdGhhdCB0aGUgY2FyZCBkZXRlY3QgZmxvYXRzLCBhbmQgdGhpcyBt
-ZWFucwo+Pj4+Pj4gcmFuZG9tIGNhcmQgZGV0ZWN0aW9uLgo+Pj4+Pj4KPj4+Pj4+IFRoZSBTb2x1
-dGlvbjoKPj4+Pj4+Cj4+Pj4+PiBNYWtlIHN1cmUgdGhhdCB0aGUgc2QgSU8gaXMgYWx3YXlzIHBv
-d2VyZWQsIHRoaXMgbWVhbnMgY2FyZCBkZXRlY3Rpb24KPj4+Pj4+IGlzIGFsd2F5cyBhY3RpdmUs
-IHdoaWNoIGlzIHdoYXQgc2hvdWxkIGJlIGRvbmUgb24gYSBib2FyZCB3aXRoIGFuIHNkCj4+Pj4+
-PiBzbG90LCB3aGljaCBib3RoIHRoZSBUaW5rZXIgQm9hcmQgYW5kIFRpbmtlciBCb2FyZCBTIGFy
-ZS4gSGVuY2UgY2hhbmdlCj4+Pj4+PiBpcyBtYWRlIHRvIHRoZSAuZHRzaSB3aGljaCB0YWtlcyBl
-ZmZlY3Qgb24gYWxsIFRpbmtlciBCb2FyZHMgYXMKPj4+Pj4+IHJlcXVpcmVkLgo+Pj4+Pj4KPj4+
-Pj4+IFRoZSBjaGFuZ2UgYWxzbyBhZGRzICJyZWd1bGF0b3ItYm9vdC1vbiIgdGhlIFRpbmtlciBC
-b2FyZCBib290IGZyb20KPj4+Pj4+IHVib290LCBhbmQgdGhlIHNkIGNhcmQgaXMgYWx3YXlzIG9u
-ZSBvcHRpb24uIEhlbmNlIHRoZSBJTyBtdXN0IGJlCj4+Pj4+PiBwb3dlcmVkIGluIHVib290LCBh
-bmQgc28gc2V0dGluZyB0aGlzIGZsYWcuCj4+Pj4+Pgo+Pj4+Pj4gQWxzbyByZW1vdmVkIGlzICJk
-aXNhYmxlLXdwIiB0aGUgbWljcm8gc2QgY2FyZCB3aGljaCBhcmUgdXNlZCBoYXZlIG5vCj4+Pj4+
-PiB3cml0ZSAgcHJvdGVjdGlvbiwgc28gdGhlIGNvbmNlcHQgZG9lc24ndCBtZWFuIGFueXRoaW5n
-LCBhbmQgdGhlCj4+Pj4+PiBUaW5rZXIgQm9hcmRzIHdvcmsgd2l0aG91dCB0aGlzLiBIZW5jZSBp
-dCBpcyByZW1vdmVkIHRvIHNpbXBseS4KPj4+Pj4+Cj4+Pj4+PiBUaGlzIGNoYW5nZSBjYW1lIGZy
-b20gQXJjaExpbnV4IEFybSwgYnV0IHdlIG5vdGUgaXQgaXMgdGhlIGZpeCBhbHNvCj4+Pj4+PiB1
-c2VkIGJ5IEFybWJpYW46Cj4+Pj4+Pgo+Pj4+Pj4gaHR0cHM6Ly9uYW0wMi5zYWZlbGlua3MucHJv
-dGVjdGlvbi5vdXRsb29rLmNvbS8/dXJsPWh0dHBzJTNBJTJGJTJGZ2l0aHUKPj4+Pj4+IGIuY29t
-JTJGTWlvdXlvdXlvdSUyRlJvY2tNeXklMkZibG9iJTJGbWFzdGVyJTJGcGF0Y2hlcyUyRmtlcm5l
-bCUyRnY1LjAlCj4+Pj4+PiAyRkRUUyUyRjAwMTYtQVJNLURUU0ktcmszMjg4LXRpbmtlci1TZXR0
-aW5nLXVwLXRoZS1TRC1yZWd1bGF0b3JzLnBhdGNoJgo+Pj4+Pj4gYW1wO2RhdGE9MDIlN0MwMSU3
-QyU3Q2Y1OTM3MDgyOTM5ZTQxNjNjODRiMDhkNjlhOGYzYjYxJTdDODRkZjllN2ZlOWY2NDAKPj4+
-Pj4+IGFmYjQzNWFhYWFhYWFhYWFhYSU3QzElN0MwJTdDNjM2ODY2MzM3Mjk1NzY3Mjk0JmFtcDtz
-ZGF0YT10SzhRRTNic0c5TFclCj4+Pj4+PiAyRkpjdkZ6TEthOCUyQlBqNXUlMkY4ZXhiRW44bTJ2
-cUtseTAlM0QmYW1wO3Jlc2VydmVkPTAKPj4+Pj4+Cj4+Pj4+PiBTaWduZWQtb2ZmLWJ5OiBEYXZp
-ZCBTdW1tZXJzIDxiZWFnbGVib2FyZEBkYXZpZGpvaG5zdW1tZXJzLnVrPgo+Pj4+Pj4gLS0tCj4+
-Pj4+Pgo+Pj4+Pj4gICAgIGFyY2gvYXJtL2Jvb3QvZHRzL3JrMzI4OC10aW5rZXIuZHRzaSB8IDMg
-KystCj4+Pj4+PiAgICAgMSBmaWxlIGNoYW5nZWQsIDIgaW5zZXJ0aW9ucygrKSwgMSBkZWxldGlv
-bigtKQo+Pj4+Pj4KPj4+Pj4+IGRpZmYgLS1naXQgYS9hcmNoL2FybS9ib290L2R0cy9yazMyODgt
-dGlua2VyLmR0c2kKPj4+Pj4+IGIvYXJjaC9hcm0vYm9vdC9kdHMvcmszMjg4LXRpbmtlci5kdHNp
-IGluZGV4Cj4+Pj4+PiBhYTEwN2VlNDFiOGIuLjZiN2U1NTA4NWIwYyAxMDA2NDQKPj4+Pj4+IC0t
-LSBhL2FyY2gvYXJtL2Jvb3QvZHRzL3JrMzI4OC10aW5rZXIuZHRzaQo+Pj4+Pj4gKysrIGIvYXJj
-aC9hcm0vYm9vdC9kdHMvcmszMjg4LXRpbmtlci5kdHNpCj4+Pj4+PiBAQCAtMjU0LDYgKzI1NCw4
-IEBACj4+Pj4+Pgo+Pj4+Pj4gICAgIAkJCX07Cj4+Pj4+PiAgICAgCQkJCj4+Pj4+PiAgICAgCQkJ
-dmNjaW9fc2Q6IExET19SRUc1IHsKPj4+Pj4+Cj4+Pj4+PiArCQkJCXJlZ3VsYXRvci1hbHdheXMt
-b247Cj4+Pj4+PiArCQkJCXJlZ3VsYXRvci1ib290LW9uOwo+Pj4+Pj4KPj4+Pj4+ICAgICAJCQkJ
-cmVndWxhdG9yLW1pbi1taWNyb3ZvbHQgPSA8MTgwMDAwMD47Cj4+Pj4+PiAgICAgCQkJCXJlZ3Vs
-YXRvci1tYXgtbWljcm92b2x0ID0gPDMzMDAwMDA+Owo+Pj4+Pj4gICAgIAkJCQlyZWd1bGF0b3It
-bmFtZSA9ICJ2Y2Npb19zZCI7Cj4+Pj4+Pgo+Pj4+Pj4gQEAgLTQzMSw3ICs0MzMsNiBAQAo+Pj4+
-Pj4KPj4+Pj4+ICAgICAJY2FwLW1tYy1oaWdoc3BlZWQ7Cj4+Pj4+PiAgICAgCWNhcC1zZC1oaWdo
-c3BlZWQ7Cj4+Pj4+PiAgICAgCWNhcmQtZGV0ZWN0LWRlbGF5ID0gPDIwMD47Cj4+Pj4+Pgo+Pj4+
-Pj4gLQlkaXNhYmxlLXdwOwkJCS8qIHdwIG5vdCBob29rZWQgdXAgKi8KPj4+Pj4gSSB0aGluayBk
-aXNhYmxlLXdwIGNvcnJlY3RseSBkZXNjcmliZXMgdGhhdCB3cCBpcyBub3QgZXhwZWN0ZWQgdG8g
-d29yawo+Pj4+PiBhbmQgc2hvdWxkIG5vdCBiZSByZW1vdmVkLj4+Pgo+Pj4+PiAgICBGcm9tIGNv
-bW1lbnQgaW4gbW1jX3NkX2dldF9ybygpOgo+Pj4+PiAiU29tZSBzeXN0ZW1zIGRvbid0IGZlYXR1
-cmUgYSB3cml0ZS1wcm90ZWN0IHBpbiBhbmQgZG9uJ3QgbmVlZCBvbmUuCj4+Pj4+IEUuZy4gYmVj
-YXVzZSB0aGV5IG9ubHkgaGF2ZSBtaWNyby1TRCBjYXJkIHNsb3QuIEZvciB0aG9zZSBzeXN0ZW1z
-Cj4+Pj4+IGFzc3VtZSB0aGF0IHRoZSBTRCBjYXJkIGlzIGFsd2F5cyByZWFkLXdyaXRlLiIKPj4+
-Pj4KPj4+Pj4gV2l0aG91dCBkaXNhYmxlLXdwIGNvcmUgd2lsbCBjYWxsIGR3X21jaV9nZXRfcm8o
-KSB0byBnZXQgd3Agc3RhdHVzLgo+Pj4+Pgo+Pj4+Pgo+Pj4+PiBUaGlzIHBhdGNoIGFsc28gZml4
-ZXMgcmVib290IHdoZW4gYm9vdGluZyBmcm9tIHNkLWNhcmQgYW5kIGhhdmluZyBlbW1jCj4+Pj4+
-IHplcm9lZCBvdXQuCj4+Pj4+Cj4+Pj4+IFRlc3RlZC1ieTogSm9uYXMgS2FybG1hbiA8am9uYXNA
-a3dpYm9vLnNlPgo+Pj4+Pgo+Pj4+PiBSZWdhcmRzLAo+Pj4+PiBKb25hcwo+Pj4+Pgo+Pj4+Pj4g
-ICAgIAlwaW5jdHJsLW5hbWVzID0gImRlZmF1bHQiOwo+Pj4+Pj4gICAgIAlwaW5jdHJsLTAgPSA8
-JnNkbW1jX2NsayAmc2RtbWNfY21kICZzZG1tY19jZCAmc2RtbWNfYnVzND47Cj4+Pj4+PiAgICAg
-CXN0YXR1cyA9ICJva2F5IjsKPj4+PiBIaSBKb25hcywKPj4+Pgo+Pj4+IFRoYW5rcyBmb3IgdGVz
-dGluZyAtIGRpZCB5b3UgZ2V0IGFuIGVycm9yIHdpdGggImRpc2FibGUtd3AiID8KPj4+Pgo+Pj4+
-IFdlIHRlc3RlZCB0aGlzIHdpdGggQFRoZVNhaW50IE9uIEFyY2hMaW51eCBBcm0sIGFuZCBpdCB3
-b3JrZWQhCj4+Pj4KPj4+PiBXaXRoIHRoZSAicmVndWxhdG9yLWJvb3Qtb24iIGFuZCBvbiByZWJv
-b3QsIGl0IHNob3VsZCBrZWVwIHBvd2VyIG9uIHRoZQo+Pj4+IHNkIGNhcmQgLSBzbyByZWJvb3Qg
-c2hvdWxkIHdvcmsuCj4+PiBJIHRlc3RlZCBib3RoIHdpdGggYW5kIHdpdGhvdXQgImRpc2FibGUt
-d3AiIHJlbW92ZWQgYW5kIGJvdGggd29ya3Mgd2l0aG91dAo+Pj4gZXJyb3IuIFNELWNhcmQgcmVi
-b290cyBub3cgd29ya3MgYXMgaXQgc2hvdWxkIHRoYW5rcyB0bwo+Pj4gInJlZ3VsYXRvci1hbHdh
-eXMtb24iIGFuZCAicmVndWxhdG9yLWJvb3Qtb24iLCBJIG9ubHkgdGVzdGVkIHVzaW5nIGJvdGgu
-Cj4+Pgo+Pj4gT24gYSBzaWRlIG5vdGUgSSBoYXZlIGFsc28gYmVlbiB0ZXN0aW5nIFsxXSB0byBt
-YWtlIHJlYm9vdCB3aXRoIFVIUyBzaWduYWwKPj4+IHZvbHRhZ2Ugd29yayBhbmQgd2lsbCBzZW5k
-IG91dCBhIFJGQyB2MiBhZnRlciBJIGhhdmUgY29uY2x1ZGVkIHRlc3Rpbmcgb24KPj4+IG15IG90
-aGVyIGRldmljZXMgc3VwcG9ydGluZyBVSFMgc2lnbmFsIHZvbHRhZ2UuCj4+Pgo+Pj4gWzFdCj4+
-PiBodHRwczovL2dpdGh1Yi5jb20vS3dpYm9vL2xpbnV4LXJvY2tjaGlwL2NvbXBhcmUvcGF0Y2gt
-cmstNS54LXRpbmtlci11aHMlCj4+PiA1RSU1RSU1RS4uLnBhdGNoLXJrLTUueC10aW5rZXItdWhz
-Cj4+Pgo+Pj4gUmVnYXJkcywKPj4+IEpvbmFzCj4+IFRoYW5rcy4KPj4KPj4gR2xhZCB5b3VyIGFy
-ZSB0ZXN0aW5nIC0gYW5kIEkgaG9wZSB0aGUgdWhzIHRlc3RzIHdvcmsuCj4+Cj4+IEFsYXMgZm9y
-IHVzIHRvIHRlc3QgdWhzIC0gYW5kIG91ciB1c2VyIG9uIEFyY2ggaXNuJ3Qgc28gZXhwZXJpZW5j
-ZWQuIEkKPj4gY291bGQgcHVzaCBoaW0gdG8gdHJ5IGRpZmZlcmVudCBzcGVlZHMgLSBidXQgdG8g
-YmUgaG9uZXN0IEkgZXhwZWN0IGl0IHRvCj4+IGJlIGJleW9uZCBoaXMgY29tZm9ydCB6b25lLgo+
-Pgo+PiBCdXQgaXRzIGdvb2QgdG8gaGVyZSB5b3UgY29uZmlybSAiZGlzYWJsZS13cCIgd29ya3Mu
-IFRvIG15IG1pbmQgaXQgc2F5cwo+PiB3ZSBhcmUgc3VyZSB0aGF0ICBhbGwgdGhyZWUgY2hhbmdl
-cyBpbiB0aGUgcGF0Y2ggYXJlIGFyZSBjb3JyZWN0Lgo+Pgo+PiBIb3BlZnVsbHkgdGhpcyB3aWxs
-IGJlIHN0cmFpZ2h0IGZvcndhcmQgdG8gSGVpa28gdG8gYWNjZXB0LiBJdHMgdGhlCj4+IHNpbXBs
-ZSBwYXRjaCBvZiB0aGUgMyB0byBhY2NlcHQgOykKPiAgRnJvbSBKb25hcycgZXhwbGFuYXRpb24s
-IEknZCBndWVzcyB3ZSB3YW50IGRpc2FibGUtd3AgdG8gc3RheSBpbiB0aGUgbm9kZSwKPiBhbmQg
-bm90IHJlbW92ZSBpdCBhcyBpdCB0ZWxscyB0aGUgc3lzdGVtLCB0aGF0ICJ0aGVyZSBpcyBubyB3
-cml0ZSBwcm90ZWN0Cj4gc3RhdHVzIGF2YWlsYWJsZSIgaGVuY2UgaXQgZG9lc24ndCBuZWVkIHRv
-IGNoZWNrIGZvciBpdC4KPgo+Cj4gSGVpa28KPgo+CkhpIEhlaWtvLAoKSSB3YXMgZ29pbmcgdG8g
-c2F5IHRoYXQ6IApodHRwczovL2dpdGh1Yi5jb20vdG9ydmFsZHMvbGludXgvYmxvYi9tYXN0ZXIv
-RG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9tbWMudHh0IApzYXlzOgoKLSBk
-aXNhYmxlLXdwOiBXaGVuIHNldCBubyBwaHlzaWNhbCBXUCBsaW5lIGlzIHByZXNlbnQuIFRoaXMg
-cHJvcGVydHkgc2hvdWxkCiDCoCBvbmx5IGJlIHNwZWNpZmllZCB3aGVuIHRoZSBjb250cm9sbGVy
-IGhhcyBhIGRlZGljYXRlZCB3cml0ZS1wcm90ZWN0CmRldGVjdGlvbiBsb2dpYy4KCkRvIHdlIGtu
-b3cgdGhhdCBkd19tbWMtcm9ja2NoaXAuYyBoYXMgd3JpdGUtcHJvdGVjdCBkZXRlY3Rpb24gbG9n
-aWM/IEl0cyAKbm90IG1lbnRpb25lZCBpbiB0aGUgY29kZSwgYnV0IEkgZG9uJ3Qga25vdyBteSB3
-YXkgcm91bmQgdGhlIG1tYyBjb2RlLgoKSG93ZXZlciBxdWljayBncmVwIGZvciBvdGhlciByazMy
-ODggZHRzLCBhbmQgYWxtb3N0IGFsbCBoYXZlIGRpc2FibGUtd3AuIApTbyBpbiBsaW5lIHdpdGgg
-dGhpcyAtIHllcyBhZ3JlZSB0byBkbyBhIHBhdGNoIHdpdGhvdXQgdGhhdCwgZGVwZW5kaW5nIApv
-biBob3cgYW5vdGhlciBwb3N0IC4uLgoKTm93IEkndmUgaW5jbHVkZWQgSmFlaG9vbiBhbmQgVWxm
-IChhbmQgbGludXgtbW1jKSBjYW4geW91IHNheSBpZiB0aGUgCnJvY2tjaGlwIGNvbnRyb2xsZXIg
-Y2FuIGRvIHdyaXRlLXByb3RlY3QgZGV0ZWN0aW9uIGxvZ2ljPwoKVGhhbmtzLAoKRGF2aWQuCgoK
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KTGludXgtcm9j
-a2NoaXAgbWFpbGluZyBsaXN0CkxpbnV4LXJvY2tjaGlwQGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0
-cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1yb2NrY2hpcAo=
+Am Montag, 25. Februar 2019, 22:18:28 CET schrieb Doug Anderson:
+> Hi,
+> On Mon, Feb 25, 2019 at 1:11 PM David Summers
+> 
+> <beagleboard-8lkWs+DogrrqRUWtDFdff/XRex20P6io@public.gmane.org> wrote:
+> > On 25/02/2019 17:13, Doug Anderson wrote:
+> > > Hi,
+> > > 
+> > > On Fri, Feb 22, 2019 at 10:48 AM David Summers
+> > > 
+> > > <beagleboard-8lkWs+DogrrqRUWtDFdff/XRex20P6io@public.gmane.org> wrote:
+> > >> The Problem:
+> > >> 
+> > >> On ASUS Tinker Board S, when booting from the eMMC, and there is no
+> > >> card sd slot, then there are constant errors.
+> > >> 
+> > >> Cause:
+> > >> 
+> > >> Thanks must go to Robin Murphy @ ARM for idenifying the problem. The
+> > >> rk808 on the Tinker Board and Tinker Board S has many regulators, one
+> > >> vccio_sd powers the IO for the sd card. Unfortunatly this is also used
+> > >> in the card detect. Now when no card is install, the regulator is
+> > >> powered down. This means that the card detect floats, and this means
+> > >> random card detection.
+> > > 
+> > > Yeah, this is broken on a lot of SoCs that use dw_mmc.  :(  Really the
+> > > card detect line needs to be on a different rail and this is why all
+> > > boards I've worked on recently have a the card detect going to a GPIO
+> > > instead of the dw_mmc CD.
+> > > 
+> > > IIRC Rockchip moved the Card Detect to a different rail on newer SoCs
+> > > (like rk3399) but we still used a GPIO even there since we didn't like
+> > > the default/automatic muxing of JTAG and SD signals.
+> > > 
+> > > The one board I was involved in that did it wrong (where we discovered
+> > > this issue) was exynos5250-snow.  You can see some discussion about
+> > > the issue at:
+> > > 
+> > > http://lists.infradead.org/pipermail/linux-arm-kernel/2014-August/282474
+> > > .html
+> > > 
+> > > In that discussion I'm pretty sure that Ulf suggested that a better
+> > > way to go was to use something like "broken-cd" which I think was
+> > > supposed to switch us to use polling.  AKA periodically the SD card
+> > > would be powered on and we'd check for a card, then we'd power
+> > > everything off.  ...but that was never implemented for snow at least
+> > > so there may be something more than just adding the property.  You can
+> > > read through the whole thread for more details.
+> > > 
+> > > 
+> > > IIRC leaving the IO rail always on like you're proposing can also work
+> > > OK but there may be some corner cases, especially if you are trying to
+> > > reach UHS speeds and/or if the bootloader ever tries to use UHS
+> > > speeds.  It's almost certainly busted if the bootloader did UHS since
+> > > it will leave the line at ~1.8 V and the kernel will expect it to be
+> > > at ~3.3 V.  ...but maybe you rely on the bootloader not doing UHS and
+> > > maybe things are generally OK if not?  There may also be cases where
+> > > you can't properly power down / reset a card because the card may be
+> > > drawing power through the IO lines when you power off its main lines.
+> > > That's not good for the card and can also put it in a bad state.  I
+> > > haven't done all the research here so this may be a bit of FUD--it's
+> > > just a vague recollection from many years ago.
+> > > 
+> > > 
+> > > ...so to make a long story short, a better solution is to allow the IO
+> > > lines to be powered off but then poll for the card periodically.
+> > > 
+> > >> The Solution:
+> > >> 
+> > >> Make sure that the sd IO is always powered, this means card detection
+> > >> is always active, which is what should be done on a board with an sd
+> > >> slot, which both the Tinker Board and Tinker Board S are. Hence change
+> > >> is made to the .dtsi which takes effect on all Tinker Boards as
+> > >> required.
+> > >> 
+> > >> The change also adds "regulator-boot-on" the Tinker Board boot from
+> > >> uboot, and the sd card is always one option. Hence the IO must be
+> > >> powered in uboot, and so setting this flag.
+> > >> 
+> > >> Also removed is "disable-wp" the micro sd card which are used have no
+> > >> write  protection, so the concept doesn't mean anything, and the
+> > >> Tinker Boards work without this. Hence it is removed to simply.
+> > > 
+> > > As others have said, please leave disable-wp.  There's no way for the
+> > > kernel to know if you have a SD or uSD slot and the only difference
+> > > between the two (electrically) is that there's no write protect for
+> > > micro SD.
+> > > 
+> > > 
+> > > Also: please CC dw_mmc people on future patches in this area.
+> > > 
+> > > $ ./scripts/get_maintainer.pl -f drivers/mmc/host/dw_mmc.c
+> > > Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org> (maintainer:SYNOPSYS DESIGNWARE
+> > > MMC/SD/SDIO DRIVER)
+> > > Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> (maintainer:MULTIMEDIA CARD
+> > > (MMC), SECURE DIGITAL (SD) AND...)
+> > > linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org (open list:SYNOPSYS DESIGNWARE MMC/SD/SDIO
+> > > DRIVER)
+> > > 
+> > > -Doug
+> > 
+> > I think the possible problem is that without this we were getting a lot
+> > of errors. Now as the errors happen when the sd io is power down, and so
+> > CD floats; then the IO will be powered back up gain - to access the
+> > card, only to find no card.
+> 
+> I definitely haven't thought through all the consequences of adding
+> polling.  ...but given that the problem is really common with SoCs
+> using dw_mmc it's probably worth it to figure out out something sane.
+> In theory you could have some code that knows that the card detect
+> becomes reliable once the IOs are powered on...
+> 
+> > So this means the power line goes up and down a lot. Now if we have
+> > broken-cd, and polling has to be used, doesn't this also have to power
+> > up the IO so it can poll, and the poll puts a bit more load on the
+> > processor.
+> > 
+> > So question is which is better? To keep the IO powered up, or to have it
+> > going up and down?
+> > 
+> > Anyway I'm happy with either solution. So if we can agree which is best,
+> > I'll do the patch for that.
+> 
+> I don't know which is better.  ...but I wouldn't expect that turning
+> on regulators and checking a GPIO ever second or so would burn much
+> power.
+
+and should also save actual power if the regulator isn't running all
+the time :-)
