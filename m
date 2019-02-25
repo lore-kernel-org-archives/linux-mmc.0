@@ -1,94 +1,138 @@
-From: Faiz Abbas <faiz_abbas@ti.com>
-Subject: Re: Linux-next 20190218: am57xx-evm: mmc1: ADMA error
-Date: Mon, 25 Feb 2019 18:46:05 +0530
-Message-ID: <22ccca46-7390-1707-cfca-43b3577b79f2@ti.com>
-References: <CA+G9fYsmC5ckLXfQxSUn-tqxLZ4NofEyb9RA69Q07RUoxc79RQ@mail.gmail.com>
- <34c78d7f-cc3c-853d-b3fd-a70abdb66293@ti.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2 3/3] mmc: core: Add discard support to sd
+Date: Mon, 25 Feb 2019 14:42:29 +0100
+Message-ID: <CAPDyKFobAAGU+=H1y-nGgQXAbRh7ybQxm0zkdBi_DJqSWRApvg@mail.gmail.com>
+References: <1549452487-17193-1-git-send-email-avri.altman@wdc.com> <1549452487-17193-4-git-send-email-avri.altman@wdc.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <34c78d7f-cc3c-853d-b3fd-a70abdb66293@ti.com>
-Content-Language: en-US
+In-Reply-To: <1549452487-17193-4-git-send-email-avri.altman@wdc.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Naresh Kamboju <naresh.kamboju@linaro.org>, open list <linux-kernel@vger.kernel.org>, "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree@vger.kernel.org>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
-Cc: t-kristo@ti.com, nm@ti.com, Mark Rutland <mark.rutland@arm.com>, robh+dt@kernel.org, osandov@fb.com, ming.lei@redhat.com, Jens Axboe <axboe@kernel.dk>
+To: Avri Altman <avri.altman@wdc.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Lin <shawn.lin@rock-chips.com>, Avi Shchislowski <avi.shchislowski@wdc.com>, Alex Lemberg <alex.lemberg@wdc.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Naresh,
+On Wed, 6 Feb 2019 at 12:29, Avri Altman <avri.altman@wdc.com> wrote:
+>
+> SD spec v5.1 adds discard support. The flows and commands are similar to
+> mmc, so just set the discard arg in CMD38.
 
-+ Commit authors.
+So this means that we from now on, if the SD card supports discard, we
+are going to use it in favor of erase. This is consistent with how we
+treat eMMC, so I think it makes sense. Could you perhaps fold in some
+information about this in the changelog, to make this clear on what
+this change means.
 
-On 19/02/19 6:38 PM, Faiz Abbas wrote:
-> Hi Naresh,
-> 
-> On 18/02/19 6:57 PM, Naresh Kamboju wrote:
->> Do you see this error on am57xx-evm running Linux next 20190218 ?
->> I have tested on multiple devices and found this error.
->> Please find the full boot log [1].
->> Am i missing any pre required configs [2] ?
->>
->> [    5.620263] mmc1: ADMA error
->> [    5.623266] mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
->> [    5.629740] mmc1: sdhci: Sys addr:  0x00000000 | Version:  0x00003302
->> [    5.636215] mmc1: sdhci: Blk size:  0x00000200 | Blk cnt:  0x0000ffff
->> [    5.642690] mmc1: sdhci: Argument:  0x002cec70 | Trn mode: 0x00000033
->> [    5.649162] mmc1: sdhci: Present:   0x01f00000 | Host ctl: 0x00000010
->> [    5.655634] mmc1: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
->> [    5.662108] mmc1: sdhci: Wake-up:   0x00000000 | Clock:    0x00000107
->> [    5.668582] mmc1: sdhci: Timeout:   0x0000000c | Int stat: 0x00000000
->> [    5.675055] mmc1: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
->> [    5.681529] mmc1: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
->> [    5.688002] mmc1: sdhci: Caps:      0x21e90080 | Caps_1:   0x00000f77
->> [    5.694474] mmc1: sdhci: Cmd:       0x0000123a | Max curr: 0x00000000
->> [    5.700949] mmc1: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0xffffffef
->> [    5.707423] mmc1: sdhci: Resp[2]:   0x0f5903ff | Resp[3]:  0xd04f0132
->> [    5.713896] mmc1: sdhci: Host ctl2: 0x00000004
->> [    5.718364] mmc1: sdhci: ADMA Err:  0x00000007 | ADMA Ptr: 0xab868218
->>
-> 
-> I see this as well on my setup. Trying to bisect now. Will keep you posted.
+You may also want to explain a little bit what the difference is from
+the SD card storage point of view. Like after an erase, it either 1 or
+0s on the media, while after a discard it can be whatever.
 
+>
+> Actually, there is no need to check for the spec version like we are
+> doing, as it is assured that the reserved bits in earlier versions are
+> null. Do that anyway to document the spec version that introduce it.
 
-Reverting the following commit fixes this.
-commit 07173c3ec276cbb18dc0e0687d37d310e98a1480
-Author: Ming Lei <ming.lei@redhat.com>
-Date:   Fri Feb 15 19:13:20 2019 +0800
+The check is needed for other purposes, so please just drop this statement.
 
-    block: enable multipage bvecs
+>
+> Signed-off-by: Avri Altman <avri.altman@wdc.com>
+> ---
+>  drivers/mmc/core/core.c |  6 +++++-
+>  drivers/mmc/core/sd.c   | 10 +++++++++-
+>  include/linux/mmc/sd.h  |  1 +
+>  3 files changed, 15 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index de0f1a1..4d62f28 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2164,7 +2164,7 @@ static unsigned int mmc_align_erase_size(struct mmc_card *card,
+>   * @card: card to erase
+>   * @from: first sector to erase
+>   * @nr: number of sectors to erase
+> - * @arg: erase command argument (SD supports only %SD_ERASE_ARG)
+> + * @arg: erase command argument
+>   *
+>   * Caller must claim host before calling this function.
+>   */
+> @@ -2181,6 +2181,9 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
+>         if (!card->erase_size)
+>                 return -EOPNOTSUPP;
+>
+> +       if (mmc_card_sd(card) && arg == SD_DISCARD_ARG)
+> +               goto skip_arg_testing;
+> +
 
-    This patch pulls the trigger for multi-page bvecs.
+This isn't consistent with the rest of the code path in this function,
+please adopt to that.
 
-    Reviewed-by: Omar Sandoval <osandov@fb.com>
-    Signed-off-by: Ming Lei <ming.lei@redhat.com>
-    Signed-off-by: Jens Axboe <axboe@kernel.dk>
+>         if (mmc_card_sd(card) && arg != SD_ERASE_ARG)
 
+Couldn't you add a check for !SD_DISCARD_ARG here instead?
 
+>                 return -EOPNOTSUPP;
+>
+> @@ -2200,6 +2203,7 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
+>         if (arg == MMC_ERASE_ARG)
+>                 nr = mmc_align_erase_size(card, &from, &to, nr);
+>
+> +skip_arg_testing:
+>         if (nr == 0)
+>                 return 0;
+>
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index c2db94d..2b4fc22 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -231,6 +231,8 @@ static int mmc_read_ssr(struct mmc_card *card)
+>  {
+>         unsigned int au, es, et, eo;
+>         __be32 *raw_ssr;
+> +       u32 resp[4] = {};
+> +       u8 discard_support;
+>         int i;
+>
+>         if (!(card->csd.cmdclass & CCC_APP_SPEC)) {
+> @@ -276,7 +278,13 @@ static int mmc_read_ssr(struct mmc_card *card)
+>                 }
+>         }
+>
+> -       card->erase_arg = SD_ERASE_ARG;
+> +       /*
+> +        * starting SD5.1 discard is supported if DISCARD_SUPPORT (b313) is set
+> +        */
+> +       resp[3] = card->raw_ssr[6];
+> +       discard_support = UNSTUFF_BITS(resp, 313 - 288, 1);
 
->> <>
->> [   42.425587] print_req_error: I/O error, dev mmcblk1, sector 4542872 flags 1
->> [   42.429013] mmc1: ADMA error
->> [   42.432606] EXT4-fs warning (device mmcblk1p9): ext4_end_bio:324:
->> I/O error 10 writing to inode 35321 (offset 0 size 4096 starting block
->> 567860)
->> [   42.435475] mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
->> [   42.448543] Buffer I/O error on device mmcblk1p9, logical block 226675
->> [   42.454944] mmc1: sdhci: Sys addr:  0x00000000 | Version:  0x00003302
->> [   42.461528] EXT4-fs warning (device mmcblk1p9): ext4_end_bio:324:
->> I/O error 10 writing to inode 35322 (offset 0 size 4096 starting block
->> 567861)
->> [   42.467960] mmc1: sdhci: Blk size:  0x00000200 | Blk cnt:  0x0000ffff
->> [   42.480982] Buffer I/O error on device mmcblk1p9, logical block 226676
->> [   42.487427] mmc1: sdhci: Argument:  0x002cae20 | Trn mode: 0x00000033
->> [   42.494007] EXT4-fs warning (device mmcblk1p9): ext4_end_bio:324:
->> I/O error 10 writing to inode 315 (offset 0 size 4096 starting block
->> 567862)
->>
->> Full boot log,
->> [1] https://lkft.validation.linaro.org/scheduler/job/610989#L4354
->> config,
->> [2] http://snapshots.linaro.org/openembedded/lkft/lkft/rocko/am57xx-evm/lkft/linux-next/467/config
->>
->> Best regards
->> Naresh Kamboju
->>
+Couldn't you just replace this with "discard_support =
+UNSTUFF_BITS(card->raw_ssr, 313 - 256, 1);" ?
+
+> +       card->erase_arg = (card->scr.sda_specx && discard_support) ?
+> +                           SD_DISCARD_ARG : SD_ERASE_ARG;
+>
+>         return 0;
+>  }
+> diff --git a/include/linux/mmc/sd.h b/include/linux/mmc/sd.h
+> index 1a6d10f..ec94a5a 100644
+> --- a/include/linux/mmc/sd.h
+> +++ b/include/linux/mmc/sd.h
+> @@ -95,5 +95,6 @@
+>   * Erase/discard
+>   */
+>  #define SD_ERASE_ARG                   0x00000000
+> +#define SD_DISCARD_ARG                 0x00000001
+>
+>  #endif /* LINUX_MMC_SD_H */
+> --
+> 1.9.1
+>
+
+Besides the above changes, there is more important thing I think you
+have left out to consider. With discard the operation should be
+completed by the card within 250ms, while for erase the timeout
+depends on the number of blocks to be erased. I am fine if we address
+that on top this change though, just want to point it out so we don't
+forget it.
+
+Kind regards
+Uffe
