@@ -1,111 +1,117 @@
-From: Avri Altman <Avri.Altman@wdc.com>
-Subject: RE: [PATCH v2 3/3] mmc: core: Add discard support to sd
-Date: Mon, 25 Feb 2019 16:45:49 +0000
-Message-ID: <SN6PR04MB4925410B68CF390757081F6EFC7A0@SN6PR04MB4925.namprd04.prod.outlook.com>
-References: <1549452487-17193-1-git-send-email-avri.altman@wdc.com>
- <1549452487-17193-4-git-send-email-avri.altman@wdc.com>
- <CAPDyKFobAAGU+=H1y-nGgQXAbRh7ybQxm0zkdBi_DJqSWRApvg@mail.gmail.com>
+From: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Subject: Re: [PATCH 1/3 v2] ARM: dts: rk3288-tinker.dtsi: Fix SD card detection
+Date: Mon, 25 Feb 2019 09:13:01 -0800
+Message-ID: <CAD=FV=UkQ7pEan4aGezvQZZjBc0gDJ1R7YRbN1Lbv9HBVQRgHQ@mail.gmail.com>
+References: <20190217121513.22965-2-beagleboard@davidjohnsummers.uk>
+ <20190222184708.32004-1-beagleboard@davidjohnsummers.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFobAAGU+=H1y-nGgQXAbRh7ybQxm0zkdBi_DJqSWRApvg@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Lin <shawn.lin@rock-chips.com>, Avi Shchislowski <Avi.Shchislowski@wdc.com>, Alex Lemberg <Alex.Lemberg@wdc.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <20190222184708.32004-1-beagleboard-8lkWs+DogrrqRUWtDFdff/XRex20P6io@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: David Summers <beagleboard-8lkWs+DogrrqRUWtDFdff/XRex20P6io@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-VWxmIGhpLA0KVGhhbmtzIGEgbG90IGZvciB5b3VyIGNvbW1lbnRzLg0KDQo+IA0KPiBPbiBXZWQs
-IDYgRmViIDIwMTkgYXQgMTI6MjksIEF2cmkgQWx0bWFuIDxhdnJpLmFsdG1hbkB3ZGMuY29tPiB3
-cm90ZToNCj4gPg0KPiA+IFNEIHNwZWMgdjUuMSBhZGRzIGRpc2NhcmQgc3VwcG9ydC4gVGhlIGZs
-b3dzIGFuZCBjb21tYW5kcyBhcmUgc2ltaWxhciB0bw0KPiA+IG1tYywgc28ganVzdCBzZXQgdGhl
-IGRpc2NhcmQgYXJnIGluIENNRDM4Lg0KPiANCj4gU28gdGhpcyBtZWFucyB0aGF0IHdlIGZyb20g
-bm93IG9uLCBpZiB0aGUgU0QgY2FyZCBzdXBwb3J0cyBkaXNjYXJkLCB3ZQ0KPiBhcmUgZ29pbmcg
-dG8gdXNlIGl0IGluIGZhdm9yIG9mIGVyYXNlLiBUaGlzIGlzIGNvbnNpc3RlbnQgd2l0aCBob3cg
-d2UNCj4gdHJlYXQgZU1NQywgc28gSSB0aGluayBpdCBtYWtlcyBzZW5zZS4gQ291bGQgeW91IHBl
-cmhhcHMgZm9sZCBpbiBzb21lDQo+IGluZm9ybWF0aW9uIGFib3V0IHRoaXMgaW4gdGhlIGNoYW5n
-ZWxvZywgdG8gbWFrZSB0aGlzIGNsZWFyIG9uIHdoYXQNCj4gdGhpcyBjaGFuZ2UgbWVhbnMuDQpE
-b25lLg0KDQo+IA0KPiBZb3UgbWF5IGFsc28gd2FudCB0byBleHBsYWluIGEgbGl0dGxlIGJpdCB3
-aGF0IHRoZSBkaWZmZXJlbmNlIGlzIGZyb20NCj4gdGhlIFNEIGNhcmQgc3RvcmFnZSBwb2ludCBv
-ZiB2aWV3LiBMaWtlIGFmdGVyIGFuIGVyYXNlLCBpdCBlaXRoZXIgMSBvcg0KPiAwcyBvbiB0aGUg
-bWVkaWEsIHdoaWxlIGFmdGVyIGEgZGlzY2FyZCBpdCBjYW4gYmUgd2hhdGV2ZXIuDQpEb25lLg0K
-DQo+IA0KPiA+DQo+ID4gQWN0dWFsbHksIHRoZXJlIGlzIG5vIG5lZWQgdG8gY2hlY2sgZm9yIHRo
-ZSBzcGVjIHZlcnNpb24gbGlrZSB3ZSBhcmUNCj4gPiBkb2luZywgYXMgaXQgaXMgYXNzdXJlZCB0
-aGF0IHRoZSByZXNlcnZlZCBiaXRzIGluIGVhcmxpZXIgdmVyc2lvbnMgYXJlDQo+ID4gbnVsbC4g
-RG8gdGhhdCBhbnl3YXkgdG8gZG9jdW1lbnQgdGhlIHNwZWMgdmVyc2lvbiB0aGF0IGludHJvZHVj
-ZSBpdC4NCj4gDQo+IFRoZSBjaGVjayBpcyBuZWVkZWQgZm9yIG90aGVyIHB1cnBvc2VzLCBzbyBw
-bGVhc2UganVzdCBkcm9wIHRoaXMgc3RhdGVtZW50Lg0KRG9uZS4NCg0KPiANCj4gPg0KPiA+IFNp
-Z25lZC1vZmYtYnk6IEF2cmkgQWx0bWFuIDxhdnJpLmFsdG1hbkB3ZGMuY29tPg0KPiA+IC0tLQ0K
-PiA+ICBkcml2ZXJzL21tYy9jb3JlL2NvcmUuYyB8ICA2ICsrKysrLQ0KPiA+ICBkcml2ZXJzL21t
-Yy9jb3JlL3NkLmMgICB8IDEwICsrKysrKysrKy0NCj4gPiAgaW5jbHVkZS9saW51eC9tbWMvc2Qu
-aCAgfCAgMSArDQo+ID4gIDMgZmlsZXMgY2hhbmdlZCwgMTUgaW5zZXJ0aW9ucygrKSwgMiBkZWxl
-dGlvbnMoLSkNCj4gPg0KPiA+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9jb3JlL2NvcmUuYyBi
-L2RyaXZlcnMvbW1jL2NvcmUvY29yZS5jDQo+ID4gaW5kZXggZGUwZjFhMS4uNGQ2MmYyOCAxMDA2
-NDQNCj4gPiAtLS0gYS9kcml2ZXJzL21tYy9jb3JlL2NvcmUuYw0KPiA+ICsrKyBiL2RyaXZlcnMv
-bW1jL2NvcmUvY29yZS5jDQo+ID4gQEAgLTIxNjQsNyArMjE2NCw3IEBAIHN0YXRpYyB1bnNpZ25l
-ZCBpbnQgbW1jX2FsaWduX2VyYXNlX3NpemUoc3RydWN0DQo+IG1tY19jYXJkICpjYXJkLA0KPiA+
-ICAgKiBAY2FyZDogY2FyZCB0byBlcmFzZQ0KPiA+ICAgKiBAZnJvbTogZmlyc3Qgc2VjdG9yIHRv
-IGVyYXNlDQo+ID4gICAqIEBucjogbnVtYmVyIG9mIHNlY3RvcnMgdG8gZXJhc2UNCj4gPiAtICog
-QGFyZzogZXJhc2UgY29tbWFuZCBhcmd1bWVudCAoU0Qgc3VwcG9ydHMgb25seSAlU0RfRVJBU0Vf
-QVJHKQ0KPiA+ICsgKiBAYXJnOiBlcmFzZSBjb21tYW5kIGFyZ3VtZW50DQo+ID4gICAqDQo+ID4g
-ICAqIENhbGxlciBtdXN0IGNsYWltIGhvc3QgYmVmb3JlIGNhbGxpbmcgdGhpcyBmdW5jdGlvbi4N
-Cj4gPiAgICovDQo+ID4gQEAgLTIxODEsNiArMjE4MSw5IEBAIGludCBtbWNfZXJhc2Uoc3RydWN0
-IG1tY19jYXJkICpjYXJkLCB1bnNpZ25lZA0KPiBpbnQgZnJvbSwgdW5zaWduZWQgaW50IG5yLA0K
-PiA+ICAgICAgICAgaWYgKCFjYXJkLT5lcmFzZV9zaXplKQ0KPiA+ICAgICAgICAgICAgICAgICBy
-ZXR1cm4gLUVPUE5PVFNVUFA7DQo+ID4NCj4gPiArICAgICAgIGlmIChtbWNfY2FyZF9zZChjYXJk
-KSAmJiBhcmcgPT0gU0RfRElTQ0FSRF9BUkcpDQo+ID4gKyAgICAgICAgICAgICAgIGdvdG8gc2tp
-cF9hcmdfdGVzdGluZzsNCj4gPiArDQo+IA0KPiBUaGlzIGlzbid0IGNvbnNpc3RlbnQgd2l0aCB0
-aGUgcmVzdCBvZiB0aGUgY29kZSBwYXRoIGluIHRoaXMgZnVuY3Rpb24sDQo+IHBsZWFzZSBhZG9w
-dCB0byB0aGF0Lg0KRG9uZS4NCg0KPiANCj4gPiAgICAgICAgIGlmIChtbWNfY2FyZF9zZChjYXJk
-KSAmJiBhcmcgIT0gU0RfRVJBU0VfQVJHKQ0KPiANCj4gQ291bGRuJ3QgeW91IGFkZCBhIGNoZWNr
-IGZvciAhU0RfRElTQ0FSRF9BUkcgaGVyZSBpbnN0ZWFkPw0KRG9uZS4NCg0KPiANCj4gPiAgICAg
-ICAgICAgICAgICAgcmV0dXJuIC1FT1BOT1RTVVBQOw0KPiA+DQo+ID4gQEAgLTIyMDAsNiArMjIw
-Myw3IEBAIGludCBtbWNfZXJhc2Uoc3RydWN0IG1tY19jYXJkICpjYXJkLCB1bnNpZ25lZA0KPiBp
-bnQgZnJvbSwgdW5zaWduZWQgaW50IG5yLA0KPiA+ICAgICAgICAgaWYgKGFyZyA9PSBNTUNfRVJB
-U0VfQVJHKQ0KPiA+ICAgICAgICAgICAgICAgICBuciA9IG1tY19hbGlnbl9lcmFzZV9zaXplKGNh
-cmQsICZmcm9tLCAmdG8sIG5yKTsNCj4gPg0KPiA+ICtza2lwX2FyZ190ZXN0aW5nOg0KPiA+ICAg
-ICAgICAgaWYgKG5yID09IDApDQo+ID4gICAgICAgICAgICAgICAgIHJldHVybiAwOw0KPiA+DQo+
-ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2NvcmUvc2QuYyBiL2RyaXZlcnMvbW1jL2NvcmUv
-c2QuYw0KPiA+IGluZGV4IGMyZGI5NGQuLjJiNGZjMjIgMTAwNjQ0DQo+ID4gLS0tIGEvZHJpdmVy
-cy9tbWMvY29yZS9zZC5jDQo+ID4gKysrIGIvZHJpdmVycy9tbWMvY29yZS9zZC5jDQo+ID4gQEAg
-LTIzMSw2ICsyMzEsOCBAQCBzdGF0aWMgaW50IG1tY19yZWFkX3NzcihzdHJ1Y3QgbW1jX2NhcmQg
-KmNhcmQpDQo+ID4gIHsNCj4gPiAgICAgICAgIHVuc2lnbmVkIGludCBhdSwgZXMsIGV0LCBlbzsN
-Cj4gPiAgICAgICAgIF9fYmUzMiAqcmF3X3NzcjsNCj4gPiArICAgICAgIHUzMiByZXNwWzRdID0g
-e307DQo+ID4gKyAgICAgICB1OCBkaXNjYXJkX3N1cHBvcnQ7DQo+ID4gICAgICAgICBpbnQgaTsN
-Cj4gPg0KPiA+ICAgICAgICAgaWYgKCEoY2FyZC0+Y3NkLmNtZGNsYXNzICYgQ0NDX0FQUF9TUEVD
-KSkgew0KPiA+IEBAIC0yNzYsNyArMjc4LDEzIEBAIHN0YXRpYyBpbnQgbW1jX3JlYWRfc3NyKHN0
-cnVjdCBtbWNfY2FyZCAqY2FyZCkNCj4gPiAgICAgICAgICAgICAgICAgfQ0KPiA+ICAgICAgICAg
-fQ0KPiA+DQo+ID4gLSAgICAgICBjYXJkLT5lcmFzZV9hcmcgPSBTRF9FUkFTRV9BUkc7DQo+ID4g
-KyAgICAgICAvKg0KPiA+ICsgICAgICAgICogc3RhcnRpbmcgU0Q1LjEgZGlzY2FyZCBpcyBzdXBw
-b3J0ZWQgaWYgRElTQ0FSRF9TVVBQT1JUIChiMzEzKSBpcw0KPiBzZXQNCj4gPiArICAgICAgICAq
-Lw0KPiA+ICsgICAgICAgcmVzcFszXSA9IGNhcmQtPnJhd19zc3JbNl07DQo+ID4gKyAgICAgICBk
-aXNjYXJkX3N1cHBvcnQgPSBVTlNUVUZGX0JJVFMocmVzcCwgMzEzIC0gMjg4LCAxKTsNCj4gDQo+
-IENvdWxkbid0IHlvdSBqdXN0IHJlcGxhY2UgdGhpcyB3aXRoICJkaXNjYXJkX3N1cHBvcnQgPQ0K
-PiBVTlNUVUZGX0JJVFMoY2FyZC0+cmF3X3NzciwgMzEzIC0gMjU2LCAxKTsiID8NClNEIHN0YXR1
-cyByZWdpc3RlciBpcyAgdHJhbnNtaXR0ZWQgZnJvbSA1MTJiaXQgb253YXJkcy4gDQpUaGUgNTEy
-dGggYml0IGlzIHRoZSBvbmUgdHJhbnNtaXR0ZWQgZmlyc3QgYW5kIHNvIG9uLiANClNvIHRoZSAz
-MTN0aCBiaXQgaGFzIHRvIGJlIGNoZWNrZWQgYXQgYnl0ZSBvZmZzZXQgMHgxOCBpbiB3aGljaCBi
-b3RoIGRpc2NhcmQgYW5kIEZVTEUgd2VyZSBlbmFibGVkLg0KQnl0ZSBvZmZzZXQgMHgxOCBtZWFu
-cyBkd29yZCBvZmZzZXQgNiwgYW5kIFVOU1RVRkZfQklUUyBhY2NvdW50cyBmb3IgNCBkd29yZHMg
-b25seS4NClVzaW5nIFVOU1RVRkZfQklUUyhjYXJkLT5yYXdfc3NyLC4uLi4pIHlvdSBjYW4gb25s
-eSBhY2Nlc3MgYml0cyA1MTEuLjM4MywgYnV0IG5vdCAzMTMuDQoNCj4gDQo+ID4gKyAgICAgICBj
-YXJkLT5lcmFzZV9hcmcgPSAoY2FyZC0+c2NyLnNkYV9zcGVjeCAmJiBkaXNjYXJkX3N1cHBvcnQp
-ID8NCj4gPiArICAgICAgICAgICAgICAgICAgICAgICAgICAgU0RfRElTQ0FSRF9BUkcgOiBTRF9F
-UkFTRV9BUkc7DQo+ID4NCj4gPiAgICAgICAgIHJldHVybiAwOw0KPiA+ICB9DQo+ID4gZGlmZiAt
-LWdpdCBhL2luY2x1ZGUvbGludXgvbW1jL3NkLmggYi9pbmNsdWRlL2xpbnV4L21tYy9zZC5oDQo+
-ID4gaW5kZXggMWE2ZDEwZi4uZWM5NGE1YSAxMDA2NDQNCj4gPiAtLS0gYS9pbmNsdWRlL2xpbnV4
-L21tYy9zZC5oDQo+ID4gKysrIGIvaW5jbHVkZS9saW51eC9tbWMvc2QuaA0KPiA+IEBAIC05NSw1
-ICs5NSw2IEBADQo+ID4gICAqIEVyYXNlL2Rpc2NhcmQNCj4gPiAgICovDQo+ID4gICNkZWZpbmUg
-U0RfRVJBU0VfQVJHICAgICAgICAgICAgICAgICAgIDB4MDAwMDAwMDANCj4gPiArI2RlZmluZSBT
-RF9ESVNDQVJEX0FSRyAgICAgICAgICAgICAgICAgMHgwMDAwMDAwMQ0KPiA+DQo+ID4gICNlbmRp
-ZiAvKiBMSU5VWF9NTUNfU0RfSCAqLw0KPiA+IC0tDQo+ID4gMS45LjENCj4gPg0KPiANCj4gQmVz
-aWRlcyB0aGUgYWJvdmUgY2hhbmdlcywgdGhlcmUgaXMgbW9yZSBpbXBvcnRhbnQgdGhpbmcgSSB0
-aGluayB5b3UNCj4gaGF2ZSBsZWZ0IG91dCB0byBjb25zaWRlci4gV2l0aCBkaXNjYXJkIHRoZSBv
-cGVyYXRpb24gc2hvdWxkIGJlDQo+IGNvbXBsZXRlZCBieSB0aGUgY2FyZCB3aXRoaW4gMjUwbXMs
-IHdoaWxlIGZvciBlcmFzZSB0aGUgdGltZW91dA0KPiBkZXBlbmRzIG9uIHRoZSBudW1iZXIgb2Yg
-YmxvY2tzIHRvIGJlIGVyYXNlZC4gSSBhbSBmaW5lIGlmIHdlIGFkZHJlc3MNCj4gdGhhdCBvbiB0
-b3AgdGhpcyBjaGFuZ2UgdGhvdWdoLCBqdXN0IHdhbnQgdG8gcG9pbnQgaXQgb3V0IHNvIHdlIGRv
-bid0DQo+IGZvcmdldCBpdC4NCkRvbmUuDQpXaWxsIGFkZCBhbm90aGVyIHBhdGNoIHRvIGFjY291
-bnQgZm9yIHRoYXQuDQoNCg0KVGhhbmtzIGEgbG90LA0KQXZyaQ0KPiANCj4gS2luZCByZWdhcmRz
-DQo+IFVmZmUNCg==
+Hi,
+
+On Fri, Feb 22, 2019 at 10:48 AM David Summers
+<beagleboard-8lkWs+DogrrqRUWtDFdff/XRex20P6io@public.gmane.org> wrote:
+>
+> The Problem:
+>
+> On ASUS Tinker Board S, when booting from the eMMC, and there is no
+> card sd slot, then there are constant errors.
+>
+> Cause:
+>
+> Thanks must go to Robin Murphy @ ARM for idenifying the problem. The
+> rk808 on the Tinker Board and Tinker Board S has many regulators, one
+> vccio_sd powers the IO for the sd card. Unfortunatly this is also used
+> in the card detect. Now when no card is install, the regulator is
+> powered down. This means that the card detect floats, and this means
+> random card detection.
+
+Yeah, this is broken on a lot of SoCs that use dw_mmc.  :(  Really the
+card detect line needs to be on a different rail and this is why all
+boards I've worked on recently have a the card detect going to a GPIO
+instead of the dw_mmc CD.
+
+IIRC Rockchip moved the Card Detect to a different rail on newer SoCs
+(like rk3399) but we still used a GPIO even there since we didn't like
+the default/automatic muxing of JTAG and SD signals.
+
+The one board I was involved in that did it wrong (where we discovered
+this issue) was exynos5250-snow.  You can see some discussion about
+the issue at:
+
+http://lists.infradead.org/pipermail/linux-arm-kernel/2014-August/282474.html
+
+In that discussion I'm pretty sure that Ulf suggested that a better
+way to go was to use something like "broken-cd" which I think was
+supposed to switch us to use polling.  AKA periodically the SD card
+would be powered on and we'd check for a card, then we'd power
+everything off.  ...but that was never implemented for snow at least
+so there may be something more than just adding the property.  You can
+read through the whole thread for more details.
+
+
+IIRC leaving the IO rail always on like you're proposing can also work
+OK but there may be some corner cases, especially if you are trying to
+reach UHS speeds and/or if the bootloader ever tries to use UHS
+speeds.  It's almost certainly busted if the bootloader did UHS since
+it will leave the line at ~1.8 V and the kernel will expect it to be
+at ~3.3 V.  ...but maybe you rely on the bootloader not doing UHS and
+maybe things are generally OK if not?  There may also be cases where
+you can't properly power down / reset a card because the card may be
+drawing power through the IO lines when you power off its main lines.
+That's not good for the card and can also put it in a bad state.  I
+haven't done all the research here so this may be a bit of FUD--it's
+just a vague recollection from many years ago.
+
+
+...so to make a long story short, a better solution is to allow the IO
+lines to be powered off but then poll for the card periodically.
+
+
+> The Solution:
+>
+> Make sure that the sd IO is always powered, this means card detection
+> is always active, which is what should be done on a board with an sd
+> slot, which both the Tinker Board and Tinker Board S are. Hence change
+> is made to the .dtsi which takes effect on all Tinker Boards as
+> required.
+>
+> The change also adds "regulator-boot-on" the Tinker Board boot from
+> uboot, and the sd card is always one option. Hence the IO must be
+> powered in uboot, and so setting this flag.
+>
+> Also removed is "disable-wp" the micro sd card which are used have no
+> write  protection, so the concept doesn't mean anything, and the
+> Tinker Boards work without this. Hence it is removed to simply.
+
+As others have said, please leave disable-wp.  There's no way for the
+kernel to know if you have a SD or uSD slot and the only difference
+between the two (electrically) is that there's no write protect for
+micro SD.
+
+
+Also: please CC dw_mmc people on future patches in this area.
+
+$ ./scripts/get_maintainer.pl -f drivers/mmc/host/dw_mmc.c
+Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org> (maintainer:SYNOPSYS DESIGNWARE
+MMC/SD/SDIO DRIVER)
+Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> (maintainer:MULTIMEDIA CARD
+(MMC), SECURE DIGITAL (SD) AND...)
+linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org (open list:SYNOPSYS DESIGNWARE MMC/SD/SDIO DRIVER)
+
+-Doug
