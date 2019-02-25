@@ -1,98 +1,111 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [RFC] mmc: core: set initial signal voltage on power off
-Date: Mon, 25 Feb 2019 17:19:14 +0100
-Message-ID: <CAPDyKFpCTN1CfMvSWAPC8CyASjF=uxRhf8KWcU8MRRsUjUbKHQ@mail.gmail.com>
-References: <AM3PR03MB09664161A7FA2BD68B2800A7AC620@AM3PR03MB0966.eurprd03.prod.outlook.com>
- <CAPDyKFpfjKbbCF=wyERXpcLk2LDJD6zsPHTYegwtHrv5qPv8HA@mail.gmail.com>
- <AM3PR03MB09666AFE4FC60E324C7EBDA8AC7C0@AM3PR03MB0966.eurprd03.prod.outlook.com>
+From: Avri Altman <Avri.Altman@wdc.com>
+Subject: RE: [PATCH v2 3/3] mmc: core: Add discard support to sd
+Date: Mon, 25 Feb 2019 16:45:49 +0000
+Message-ID: <SN6PR04MB4925410B68CF390757081F6EFC7A0@SN6PR04MB4925.namprd04.prod.outlook.com>
+References: <1549452487-17193-1-git-send-email-avri.altman@wdc.com>
+ <1549452487-17193-4-git-send-email-avri.altman@wdc.com>
+ <CAPDyKFobAAGU+=H1y-nGgQXAbRh7ybQxm0zkdBi_DJqSWRApvg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <AM3PR03MB09666AFE4FC60E324C7EBDA8AC7C0-XQTXrJX/giFAc9da7WRX18eAHadYHfrlvxpqHgZTriW3zl9H0oFU5g@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Jonas Karlman <jonas-uIzNG4q0ceqzQB+pC5nmwQ@public.gmane.org>
-Cc: "linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFobAAGU+=H1y-nGgQXAbRh7ybQxm0zkdBi_DJqSWRApvg@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Lin <shawn.lin@rock-chips.com>, Avi Shchislowski <Avi.Shchislowski@wdc.com>, Alex Lemberg <Alex.Lemberg@wdc.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 19 Feb 2019 at 11:12, Jonas Karlman <jonas-uIzNG4q0ceqzQB+pC5nmwQ@public.gmane.org> wrote:
->
-> On 2019-02-18 12:54, Ulf Hansson wrote:
-> > On Sun, 17 Feb 2019 at 23:14, Jonas Karlman <jonas-uIzNG4q0ceqzQB+pC5nmwQ@public.gmane.org> wrote:
-> >> Some boards have SD card connectors where the power rail cannot be switched
-> >> off by the driver. If the card has not been power cycled, it may still be
-> >> using 1.8V signaling after a warm re-boot. Bootroms expecting 3.3V signaling
-> >> will fail to boot from a UHS card that continue to use 1.8V signaling.
-> > Is the problem limited to a "warm manual re-boot" or does it exists
-> > for an emergency reboot as well!?
->
-> I think the issue may also exist for emergency reboot based on the Asus Tinker Board kernel commit at [1],
-> not sure how this could be solved in an acceptable way. Personally I do not have sysrq enabled on my boards.
->
-> [1] https://github.com/TinkerBoard/debian_kernel/commit/1e8970dbfc20166788e3428ec5203f7673f6087b
->
-
-For eMMC we have pwrseq_emmc.c, where we register a restart handler to
-cover these cases. Not very nice, but the best we could come up with.
-
-> >
-> >> Set initial signal voltage in mmc_power_off() to allow re-boot to function.
-> > I think this sounds like a reasonable way forward, to improve the situation.
->
-> I may have exaggerated the issue in the above line, the board will reboot as long as
-> UHS 1.8V signaling is not used, current upstream device trees is missing the sd-uhs-* flags
-> and will thus reboot as they are capped at sd high speed and 3.3V signaling.
-
-Okay, I see.
-
->
-> >
-> >> This fixes re-boot with UHS cards on Asus Tinker Board (Rockchip RK3288),
-> >> same issue have been seen on some Rockchip RK3399 boards.
-> >>
-> >> I am sending this as a RFC because I have no insights into SD/MMC subsystem,
-> >> this change fix a re-boot issue on my boards and does not break emmc/sdio.
-> >> Is this an acceptable workaround? Any advice is appreciated.
-> >>
-> >> Signed-off-by: Jonas Karlman <jonas-uIzNG4q0ceqzQB+pC5nmwQ@public.gmane.org>
-> >> ---
-> >>  drivers/mmc/core/core.c | 8 ++++++++
-> >>  1 file changed, 8 insertions(+)
-> >>
-> >> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> >> index 5bd58b95d318..69d7021916ae 100644
-> >> --- a/drivers/mmc/core/core.c
-> >> +++ b/drivers/mmc/core/core.c
-> >> @@ -1684,6 +1684,14 @@ void mmc_power_off(struct mmc_host *host)
-> >>         if (host->ios.power_mode == MMC_POWER_OFF)
-> >>                 return;
-> >>
-> >> +       mmc_set_initial_signal_voltage(host);
-> > I would rather try to move this below mmc_set_initial_state() a few
-> > lines below in mmc_power_off(). To me, it seems safer to do the
-> > regular power off thingy first.
-> >
-> > Additionally, I would drop the added delay below, as there is already
-> > a delay after calling mmc_set_initial_state() and I think/hope that
-> > should be sufficient.
->
-> Thanks for the suggestion, the reason I put the mmc_set_initial_signal_voltage() call
-> before mmc_pwrseq_power_off() call was to do it in reverse order of mmc_power_on(),
->
-> I will run some more tests on my boards to see if moving it below mmc_set_initial_state()
-> also makes it possible to reboot with UHS cards using 1.8V signaling enabled.
-
-Great, so I am expecting an update from you, thanks!
-
-[...]
-
-Kind regards
-Uffe
+VWxmIGhpLA0KVGhhbmtzIGEgbG90IGZvciB5b3VyIGNvbW1lbnRzLg0KDQo+IA0KPiBPbiBXZWQs
+IDYgRmViIDIwMTkgYXQgMTI6MjksIEF2cmkgQWx0bWFuIDxhdnJpLmFsdG1hbkB3ZGMuY29tPiB3
+cm90ZToNCj4gPg0KPiA+IFNEIHNwZWMgdjUuMSBhZGRzIGRpc2NhcmQgc3VwcG9ydC4gVGhlIGZs
+b3dzIGFuZCBjb21tYW5kcyBhcmUgc2ltaWxhciB0bw0KPiA+IG1tYywgc28ganVzdCBzZXQgdGhl
+IGRpc2NhcmQgYXJnIGluIENNRDM4Lg0KPiANCj4gU28gdGhpcyBtZWFucyB0aGF0IHdlIGZyb20g
+bm93IG9uLCBpZiB0aGUgU0QgY2FyZCBzdXBwb3J0cyBkaXNjYXJkLCB3ZQ0KPiBhcmUgZ29pbmcg
+dG8gdXNlIGl0IGluIGZhdm9yIG9mIGVyYXNlLiBUaGlzIGlzIGNvbnNpc3RlbnQgd2l0aCBob3cg
+d2UNCj4gdHJlYXQgZU1NQywgc28gSSB0aGluayBpdCBtYWtlcyBzZW5zZS4gQ291bGQgeW91IHBl
+cmhhcHMgZm9sZCBpbiBzb21lDQo+IGluZm9ybWF0aW9uIGFib3V0IHRoaXMgaW4gdGhlIGNoYW5n
+ZWxvZywgdG8gbWFrZSB0aGlzIGNsZWFyIG9uIHdoYXQNCj4gdGhpcyBjaGFuZ2UgbWVhbnMuDQpE
+b25lLg0KDQo+IA0KPiBZb3UgbWF5IGFsc28gd2FudCB0byBleHBsYWluIGEgbGl0dGxlIGJpdCB3
+aGF0IHRoZSBkaWZmZXJlbmNlIGlzIGZyb20NCj4gdGhlIFNEIGNhcmQgc3RvcmFnZSBwb2ludCBv
+ZiB2aWV3LiBMaWtlIGFmdGVyIGFuIGVyYXNlLCBpdCBlaXRoZXIgMSBvcg0KPiAwcyBvbiB0aGUg
+bWVkaWEsIHdoaWxlIGFmdGVyIGEgZGlzY2FyZCBpdCBjYW4gYmUgd2hhdGV2ZXIuDQpEb25lLg0K
+DQo+IA0KPiA+DQo+ID4gQWN0dWFsbHksIHRoZXJlIGlzIG5vIG5lZWQgdG8gY2hlY2sgZm9yIHRo
+ZSBzcGVjIHZlcnNpb24gbGlrZSB3ZSBhcmUNCj4gPiBkb2luZywgYXMgaXQgaXMgYXNzdXJlZCB0
+aGF0IHRoZSByZXNlcnZlZCBiaXRzIGluIGVhcmxpZXIgdmVyc2lvbnMgYXJlDQo+ID4gbnVsbC4g
+RG8gdGhhdCBhbnl3YXkgdG8gZG9jdW1lbnQgdGhlIHNwZWMgdmVyc2lvbiB0aGF0IGludHJvZHVj
+ZSBpdC4NCj4gDQo+IFRoZSBjaGVjayBpcyBuZWVkZWQgZm9yIG90aGVyIHB1cnBvc2VzLCBzbyBw
+bGVhc2UganVzdCBkcm9wIHRoaXMgc3RhdGVtZW50Lg0KRG9uZS4NCg0KPiANCj4gPg0KPiA+IFNp
+Z25lZC1vZmYtYnk6IEF2cmkgQWx0bWFuIDxhdnJpLmFsdG1hbkB3ZGMuY29tPg0KPiA+IC0tLQ0K
+PiA+ICBkcml2ZXJzL21tYy9jb3JlL2NvcmUuYyB8ICA2ICsrKysrLQ0KPiA+ICBkcml2ZXJzL21t
+Yy9jb3JlL3NkLmMgICB8IDEwICsrKysrKysrKy0NCj4gPiAgaW5jbHVkZS9saW51eC9tbWMvc2Qu
+aCAgfCAgMSArDQo+ID4gIDMgZmlsZXMgY2hhbmdlZCwgMTUgaW5zZXJ0aW9ucygrKSwgMiBkZWxl
+dGlvbnMoLSkNCj4gPg0KPiA+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9jb3JlL2NvcmUuYyBi
+L2RyaXZlcnMvbW1jL2NvcmUvY29yZS5jDQo+ID4gaW5kZXggZGUwZjFhMS4uNGQ2MmYyOCAxMDA2
+NDQNCj4gPiAtLS0gYS9kcml2ZXJzL21tYy9jb3JlL2NvcmUuYw0KPiA+ICsrKyBiL2RyaXZlcnMv
+bW1jL2NvcmUvY29yZS5jDQo+ID4gQEAgLTIxNjQsNyArMjE2NCw3IEBAIHN0YXRpYyB1bnNpZ25l
+ZCBpbnQgbW1jX2FsaWduX2VyYXNlX3NpemUoc3RydWN0DQo+IG1tY19jYXJkICpjYXJkLA0KPiA+
+ICAgKiBAY2FyZDogY2FyZCB0byBlcmFzZQ0KPiA+ICAgKiBAZnJvbTogZmlyc3Qgc2VjdG9yIHRv
+IGVyYXNlDQo+ID4gICAqIEBucjogbnVtYmVyIG9mIHNlY3RvcnMgdG8gZXJhc2UNCj4gPiAtICog
+QGFyZzogZXJhc2UgY29tbWFuZCBhcmd1bWVudCAoU0Qgc3VwcG9ydHMgb25seSAlU0RfRVJBU0Vf
+QVJHKQ0KPiA+ICsgKiBAYXJnOiBlcmFzZSBjb21tYW5kIGFyZ3VtZW50DQo+ID4gICAqDQo+ID4g
+ICAqIENhbGxlciBtdXN0IGNsYWltIGhvc3QgYmVmb3JlIGNhbGxpbmcgdGhpcyBmdW5jdGlvbi4N
+Cj4gPiAgICovDQo+ID4gQEAgLTIxODEsNiArMjE4MSw5IEBAIGludCBtbWNfZXJhc2Uoc3RydWN0
+IG1tY19jYXJkICpjYXJkLCB1bnNpZ25lZA0KPiBpbnQgZnJvbSwgdW5zaWduZWQgaW50IG5yLA0K
+PiA+ICAgICAgICAgaWYgKCFjYXJkLT5lcmFzZV9zaXplKQ0KPiA+ICAgICAgICAgICAgICAgICBy
+ZXR1cm4gLUVPUE5PVFNVUFA7DQo+ID4NCj4gPiArICAgICAgIGlmIChtbWNfY2FyZF9zZChjYXJk
+KSAmJiBhcmcgPT0gU0RfRElTQ0FSRF9BUkcpDQo+ID4gKyAgICAgICAgICAgICAgIGdvdG8gc2tp
+cF9hcmdfdGVzdGluZzsNCj4gPiArDQo+IA0KPiBUaGlzIGlzbid0IGNvbnNpc3RlbnQgd2l0aCB0
+aGUgcmVzdCBvZiB0aGUgY29kZSBwYXRoIGluIHRoaXMgZnVuY3Rpb24sDQo+IHBsZWFzZSBhZG9w
+dCB0byB0aGF0Lg0KRG9uZS4NCg0KPiANCj4gPiAgICAgICAgIGlmIChtbWNfY2FyZF9zZChjYXJk
+KSAmJiBhcmcgIT0gU0RfRVJBU0VfQVJHKQ0KPiANCj4gQ291bGRuJ3QgeW91IGFkZCBhIGNoZWNr
+IGZvciAhU0RfRElTQ0FSRF9BUkcgaGVyZSBpbnN0ZWFkPw0KRG9uZS4NCg0KPiANCj4gPiAgICAg
+ICAgICAgICAgICAgcmV0dXJuIC1FT1BOT1RTVVBQOw0KPiA+DQo+ID4gQEAgLTIyMDAsNiArMjIw
+Myw3IEBAIGludCBtbWNfZXJhc2Uoc3RydWN0IG1tY19jYXJkICpjYXJkLCB1bnNpZ25lZA0KPiBp
+bnQgZnJvbSwgdW5zaWduZWQgaW50IG5yLA0KPiA+ICAgICAgICAgaWYgKGFyZyA9PSBNTUNfRVJB
+U0VfQVJHKQ0KPiA+ICAgICAgICAgICAgICAgICBuciA9IG1tY19hbGlnbl9lcmFzZV9zaXplKGNh
+cmQsICZmcm9tLCAmdG8sIG5yKTsNCj4gPg0KPiA+ICtza2lwX2FyZ190ZXN0aW5nOg0KPiA+ICAg
+ICAgICAgaWYgKG5yID09IDApDQo+ID4gICAgICAgICAgICAgICAgIHJldHVybiAwOw0KPiA+DQo+
+ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2NvcmUvc2QuYyBiL2RyaXZlcnMvbW1jL2NvcmUv
+c2QuYw0KPiA+IGluZGV4IGMyZGI5NGQuLjJiNGZjMjIgMTAwNjQ0DQo+ID4gLS0tIGEvZHJpdmVy
+cy9tbWMvY29yZS9zZC5jDQo+ID4gKysrIGIvZHJpdmVycy9tbWMvY29yZS9zZC5jDQo+ID4gQEAg
+LTIzMSw2ICsyMzEsOCBAQCBzdGF0aWMgaW50IG1tY19yZWFkX3NzcihzdHJ1Y3QgbW1jX2NhcmQg
+KmNhcmQpDQo+ID4gIHsNCj4gPiAgICAgICAgIHVuc2lnbmVkIGludCBhdSwgZXMsIGV0LCBlbzsN
+Cj4gPiAgICAgICAgIF9fYmUzMiAqcmF3X3NzcjsNCj4gPiArICAgICAgIHUzMiByZXNwWzRdID0g
+e307DQo+ID4gKyAgICAgICB1OCBkaXNjYXJkX3N1cHBvcnQ7DQo+ID4gICAgICAgICBpbnQgaTsN
+Cj4gPg0KPiA+ICAgICAgICAgaWYgKCEoY2FyZC0+Y3NkLmNtZGNsYXNzICYgQ0NDX0FQUF9TUEVD
+KSkgew0KPiA+IEBAIC0yNzYsNyArMjc4LDEzIEBAIHN0YXRpYyBpbnQgbW1jX3JlYWRfc3NyKHN0
+cnVjdCBtbWNfY2FyZCAqY2FyZCkNCj4gPiAgICAgICAgICAgICAgICAgfQ0KPiA+ICAgICAgICAg
+fQ0KPiA+DQo+ID4gLSAgICAgICBjYXJkLT5lcmFzZV9hcmcgPSBTRF9FUkFTRV9BUkc7DQo+ID4g
+KyAgICAgICAvKg0KPiA+ICsgICAgICAgICogc3RhcnRpbmcgU0Q1LjEgZGlzY2FyZCBpcyBzdXBw
+b3J0ZWQgaWYgRElTQ0FSRF9TVVBQT1JUIChiMzEzKSBpcw0KPiBzZXQNCj4gPiArICAgICAgICAq
+Lw0KPiA+ICsgICAgICAgcmVzcFszXSA9IGNhcmQtPnJhd19zc3JbNl07DQo+ID4gKyAgICAgICBk
+aXNjYXJkX3N1cHBvcnQgPSBVTlNUVUZGX0JJVFMocmVzcCwgMzEzIC0gMjg4LCAxKTsNCj4gDQo+
+IENvdWxkbid0IHlvdSBqdXN0IHJlcGxhY2UgdGhpcyB3aXRoICJkaXNjYXJkX3N1cHBvcnQgPQ0K
+PiBVTlNUVUZGX0JJVFMoY2FyZC0+cmF3X3NzciwgMzEzIC0gMjU2LCAxKTsiID8NClNEIHN0YXR1
+cyByZWdpc3RlciBpcyAgdHJhbnNtaXR0ZWQgZnJvbSA1MTJiaXQgb253YXJkcy4gDQpUaGUgNTEy
+dGggYml0IGlzIHRoZSBvbmUgdHJhbnNtaXR0ZWQgZmlyc3QgYW5kIHNvIG9uLiANClNvIHRoZSAz
+MTN0aCBiaXQgaGFzIHRvIGJlIGNoZWNrZWQgYXQgYnl0ZSBvZmZzZXQgMHgxOCBpbiB3aGljaCBi
+b3RoIGRpc2NhcmQgYW5kIEZVTEUgd2VyZSBlbmFibGVkLg0KQnl0ZSBvZmZzZXQgMHgxOCBtZWFu
+cyBkd29yZCBvZmZzZXQgNiwgYW5kIFVOU1RVRkZfQklUUyBhY2NvdW50cyBmb3IgNCBkd29yZHMg
+b25seS4NClVzaW5nIFVOU1RVRkZfQklUUyhjYXJkLT5yYXdfc3NyLC4uLi4pIHlvdSBjYW4gb25s
+eSBhY2Nlc3MgYml0cyA1MTEuLjM4MywgYnV0IG5vdCAzMTMuDQoNCj4gDQo+ID4gKyAgICAgICBj
+YXJkLT5lcmFzZV9hcmcgPSAoY2FyZC0+c2NyLnNkYV9zcGVjeCAmJiBkaXNjYXJkX3N1cHBvcnQp
+ID8NCj4gPiArICAgICAgICAgICAgICAgICAgICAgICAgICAgU0RfRElTQ0FSRF9BUkcgOiBTRF9F
+UkFTRV9BUkc7DQo+ID4NCj4gPiAgICAgICAgIHJldHVybiAwOw0KPiA+ICB9DQo+ID4gZGlmZiAt
+LWdpdCBhL2luY2x1ZGUvbGludXgvbW1jL3NkLmggYi9pbmNsdWRlL2xpbnV4L21tYy9zZC5oDQo+
+ID4gaW5kZXggMWE2ZDEwZi4uZWM5NGE1YSAxMDA2NDQNCj4gPiAtLS0gYS9pbmNsdWRlL2xpbnV4
+L21tYy9zZC5oDQo+ID4gKysrIGIvaW5jbHVkZS9saW51eC9tbWMvc2QuaA0KPiA+IEBAIC05NSw1
+ICs5NSw2IEBADQo+ID4gICAqIEVyYXNlL2Rpc2NhcmQNCj4gPiAgICovDQo+ID4gICNkZWZpbmUg
+U0RfRVJBU0VfQVJHICAgICAgICAgICAgICAgICAgIDB4MDAwMDAwMDANCj4gPiArI2RlZmluZSBT
+RF9ESVNDQVJEX0FSRyAgICAgICAgICAgICAgICAgMHgwMDAwMDAwMQ0KPiA+DQo+ID4gICNlbmRp
+ZiAvKiBMSU5VWF9NTUNfU0RfSCAqLw0KPiA+IC0tDQo+ID4gMS45LjENCj4gPg0KPiANCj4gQmVz
+aWRlcyB0aGUgYWJvdmUgY2hhbmdlcywgdGhlcmUgaXMgbW9yZSBpbXBvcnRhbnQgdGhpbmcgSSB0
+aGluayB5b3UNCj4gaGF2ZSBsZWZ0IG91dCB0byBjb25zaWRlci4gV2l0aCBkaXNjYXJkIHRoZSBv
+cGVyYXRpb24gc2hvdWxkIGJlDQo+IGNvbXBsZXRlZCBieSB0aGUgY2FyZCB3aXRoaW4gMjUwbXMs
+IHdoaWxlIGZvciBlcmFzZSB0aGUgdGltZW91dA0KPiBkZXBlbmRzIG9uIHRoZSBudW1iZXIgb2Yg
+YmxvY2tzIHRvIGJlIGVyYXNlZC4gSSBhbSBmaW5lIGlmIHdlIGFkZHJlc3MNCj4gdGhhdCBvbiB0
+b3AgdGhpcyBjaGFuZ2UgdGhvdWdoLCBqdXN0IHdhbnQgdG8gcG9pbnQgaXQgb3V0IHNvIHdlIGRv
+bid0DQo+IGZvcmdldCBpdC4NCkRvbmUuDQpXaWxsIGFkZCBhbm90aGVyIHBhdGNoIHRvIGFjY291
+bnQgZm9yIHRoYXQuDQoNCg0KVGhhbmtzIGEgbG90LA0KQXZyaQ0KPiANCj4gS2luZCByZWdhcmRz
+DQo+IFVmZmUNCg==
