@@ -1,72 +1,48 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: spi: Fix card detection during probe
-Date: Tue, 26 Feb 2019 09:18:06 +0100
-Message-ID: <CAPDyKFpinj0-DbfzJ3ioUkjdUAg7cJQuZD-xjbfQXB+VV2fTpw@mail.gmail.com>
-References: <20190210173109.12602-1-j.neuschaefer@gmx.net>
+Subject: Re: [PATCH v2 1/2] mmc: core: do not retry CMD6 in __mmc_switch()
+Date: Tue, 26 Feb 2019 09:18:16 +0100
+Message-ID: <CAPDyKFq8FQLhbuDYsuV3nJ9pgLYFwaE3smPgkBO3VPsrAQF7cQ@mail.gmail.com>
+References: <1550210375-32270-1-git-send-email-chaotian.jing@mediatek.com> <1550210375-32270-2-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190210173109.12602-1-j.neuschaefer@gmx.net>
+In-Reply-To: <1550210375-32270-2-git-send-email-chaotian.jing@mediatek.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: =?UTF-8?Q?Jonathan_Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Chaotian Jing <chaotian.jing@mediatek.com>
+Cc: Matthias Brugger <matthias.bgg@gmail.com>, Shawn Lin <shawn.lin@rock-chips.com>, Simon Horman <horms+renesas@verge.net.au>, Avri Altman <avri.altman@wdc.com>, Kyle Roeschley <kyle.roeschley@ni.com>, Hongjie Fang <hongjiefang@asrmicro.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, linux-mediatek@lists.infradead.org, srv_heupstream <srv_heupstream@mediatek.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Sun, 10 Feb 2019 at 18:31, Jonathan Neusch=C3=A4fer <j.neuschaefer@gmx.n=
-et> wrote:
+On Fri, 15 Feb 2019 at 06:59, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
 >
-> When using the mmc_spi driver with a card-detect pin, I noticed that the
-> card was not detected immediately after probe, but only after it was
-> unplugged and plugged back in (and the CD IRQ fired).
+> the response type of CMD6 is R1B, when the first CMD6 gets response
+> CRC error, do retry may get timeout error due to card may still in
+> busy state, which cause this retry make no sense.
 >
-> The call tree looks something like this:
->
-> mmc_spi_probe
->   mmc_add_host
->     mmc_start_host
->       _mmc_detect_change
->         mmc_schedule_delayed_work(&host->detect, 0)
->           mmc_rescan
->             host->bus_ops->detect(host)
->               mmc_detect
->                 _mmc_detect_card_removed
->                   host->ops->get_cd(host)
->                     mmc_gpio_get_cd -> -ENOSYS (ctx->cd_gpio not set)
->   mmc_gpiod_request_cd
->     ctx->cd_gpio =3D desc
->
-> To fix this issue, call mmc_detect_change after the card-detect GPIO/IRQ
-> is registered.
->
-> Signed-off-by: Jonathan Neusch=C3=A4fer <j.neuschaefer@gmx.net>
+> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
 
-This works well as fix and for stable! However, we should probably
-clean up the code in ->probe() to avoid this thing altogether. Anyway,
-I send a patch for that - on top.
-
-Applied for fixes and added a stable tag, thanks!
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/mmc_spi.c | 1 +
->  1 file changed, 1 insertion(+)
+>  drivers/mmc/core/mmc_ops.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
-> index 10ba46b728e8..8ade14fb2148 100644
-> --- a/drivers/mmc/host/mmc_spi.c
-> +++ b/drivers/mmc/host/mmc_spi.c
-> @@ -1450,6 +1450,7 @@ static int mmc_spi_probe(struct spi_device *spi)
->                 mmc->caps &=3D ~MMC_CAP_NEEDS_POLL;
->                 mmc_gpiod_request_cd_irq(mmc);
->         }
-> +       mmc_detect_change(mmc, 0);
+> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> index 9054329..c5208fb 100644
+> --- a/drivers/mmc/core/mmc_ops.c
+> +++ b/drivers/mmc/core/mmc_ops.c
+> @@ -562,7 +562,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>         if (index == EXT_CSD_SANITIZE_START)
+>                 cmd.sanitize_busy = true;
 >
->         /* Index 1 is write protect/read only */
->         status =3D mmc_gpiod_request_ro(mmc, NULL, 1, false, 0, NULL);
+> -       err = mmc_wait_for_cmd(host, &cmd, MMC_CMD_RETRIES);
+> +       err = mmc_wait_for_cmd(host, &cmd, 0);
+>         if (err)
+>                 goto out;
+>
 > --
-> 2.20.1
+> 1.8.1.1.dirty
 >
