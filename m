@@ -1,109 +1,72 @@
-From: Faiz Abbas <faiz_abbas@ti.com>
-Subject: Re: Linux-next 20190218: am57xx-evm: mmc1: ADMA error
-Date: Tue, 26 Feb 2019 12:20:18 +0530
-Message-ID: <236a3ac2-5988-9150-4a53-4a33a45d595e@ti.com>
-References: <CA+G9fYsmC5ckLXfQxSUn-tqxLZ4NofEyb9RA69Q07RUoxc79RQ@mail.gmail.com>
- <34c78d7f-cc3c-853d-b3fd-a70abdb66293@ti.com>
- <22ccca46-7390-1707-cfca-43b3577b79f2@ti.com>
- <CACVXFVP0h-xvJaW1HaMrhozwhR484x0owc6XX63JT-59N08Fag@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: spi: Fix card detection during probe
+Date: Tue, 26 Feb 2019 09:18:06 +0100
+Message-ID: <CAPDyKFpinj0-DbfzJ3ioUkjdUAg7cJQuZD-xjbfQXB+VV2fTpw@mail.gmail.com>
+References: <20190210173109.12602-1-j.neuschaefer@gmx.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CACVXFVP0h-xvJaW1HaMrhozwhR484x0owc6XX63JT-59N08Fag@mail.gmail.com>
-Content-Language: en-US
+In-Reply-To: <20190210173109.12602-1-j.neuschaefer@gmx.net>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ming Lei <tom.leiming@gmail.com>
-Cc: Naresh Kamboju <naresh.kamboju@linaro.org>, open list <linux-kernel@vger.kernel.org>, "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree@vger.kernel.org>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Tero Kristo <t-kristo@ti.com>, nm@ti.com, Mark Rutland <mark.rutland@arm.com>, Rob Herring <robh+dt@kernel.org>, Omar Sandoval <osandov@fb.com>, Ming Lei <ming.lei@redhat.com>, Jens Axboe <axboe@kernel.dk>
+To: =?UTF-8?Q?Jonathan_Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Ming Lei,
+On Sun, 10 Feb 2019 at 18:31, Jonathan Neusch=C3=A4fer <j.neuschaefer@gmx.n=
+et> wrote:
+>
+> When using the mmc_spi driver with a card-detect pin, I noticed that the
+> card was not detected immediately after probe, but only after it was
+> unplugged and plugged back in (and the CD IRQ fired).
+>
+> The call tree looks something like this:
+>
+> mmc_spi_probe
+>   mmc_add_host
+>     mmc_start_host
+>       _mmc_detect_change
+>         mmc_schedule_delayed_work(&host->detect, 0)
+>           mmc_rescan
+>             host->bus_ops->detect(host)
+>               mmc_detect
+>                 _mmc_detect_card_removed
+>                   host->ops->get_cd(host)
+>                     mmc_gpio_get_cd -> -ENOSYS (ctx->cd_gpio not set)
+>   mmc_gpiod_request_cd
+>     ctx->cd_gpio =3D desc
+>
+> To fix this issue, call mmc_detect_change after the card-detect GPIO/IRQ
+> is registered.
+>
+> Signed-off-by: Jonathan Neusch=C3=A4fer <j.neuschaefer@gmx.net>
 
-On 26/02/19 7:11 AM, Ming Lei wrote:
-> On Mon, Feb 25, 2019 at 9:14 PM Faiz Abbas <faiz_abbas@ti.com> wrote:
->>
->> Hi Naresh,
->>
->> + Commit authors.
->>
->> On 19/02/19 6:38 PM, Faiz Abbas wrote:
->>> Hi Naresh,
->>>
->>> On 18/02/19 6:57 PM, Naresh Kamboju wrote:
->>>> Do you see this error on am57xx-evm running Linux next 20190218 ?
->>>> I have tested on multiple devices and found this error.
->>>> Please find the full boot log [1].
->>>> Am i missing any pre required configs [2] ?
->>>>
->>>> [    5.620263] mmc1: ADMA error
->>>> [    5.623266] mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
->>>> [    5.629740] mmc1: sdhci: Sys addr:  0x00000000 | Version:  0x00003302
->>>> [    5.636215] mmc1: sdhci: Blk size:  0x00000200 | Blk cnt:  0x0000ffff
->>>> [    5.642690] mmc1: sdhci: Argument:  0x002cec70 | Trn mode: 0x00000033
->>>> [    5.649162] mmc1: sdhci: Present:   0x01f00000 | Host ctl: 0x00000010
->>>> [    5.655634] mmc1: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
->>>> [    5.662108] mmc1: sdhci: Wake-up:   0x00000000 | Clock:    0x00000107
->>>> [    5.668582] mmc1: sdhci: Timeout:   0x0000000c | Int stat: 0x00000000
->>>> [    5.675055] mmc1: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
->>>> [    5.681529] mmc1: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
->>>> [    5.688002] mmc1: sdhci: Caps:      0x21e90080 | Caps_1:   0x00000f77
->>>> [    5.694474] mmc1: sdhci: Cmd:       0x0000123a | Max curr: 0x00000000
->>>> [    5.700949] mmc1: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0xffffffef
->>>> [    5.707423] mmc1: sdhci: Resp[2]:   0x0f5903ff | Resp[3]:  0xd04f0132
->>>> [    5.713896] mmc1: sdhci: Host ctl2: 0x00000004
->>>> [    5.718364] mmc1: sdhci: ADMA Err:  0x00000007 | ADMA Ptr: 0xab868218
->>>>
->>>
->>> I see this as well on my setup. Trying to bisect now. Will keep you posted.
->>
->>
->> Reverting the following commit fixes this.
->> commit 07173c3ec276cbb18dc0e0687d37d310e98a1480
->> Author: Ming Lei <ming.lei@redhat.com>
->> Date:   Fri Feb 15 19:13:20 2019 +0800
->>
->>     block: enable multipage bvecs
->>
->>     This patch pulls the trigger for multi-page bvecs.
->>
->>     Reviewed-by: Omar Sandoval <osandov@fb.com>
->>     Signed-off-by: Ming Lei <ming.lei@redhat.com>
->>     Signed-off-by: Jens Axboe <axboe@kernel.dk>
-> 
-> Hi,
-> 
-> Thanks for your report & bisect.
-> 
-> Could you test the following patch?
-> 
-> https://git.kernel.org/pub/scm/linux/kernel/git/axboe/linux-block.git/commit/?h=for-5.1/block&id=8f4e80da764ec1ca44c83f3e17dbc9bf0209bccc
-> 
-> Or  simply run the latest -next?
+This works well as fix and for stable! However, we should probably
+clean up the code in ->probe() to avoid this thing altogether. Anyway,
+I send a patch for that - on top.
 
-That didn't fix it for me. Still see ADMA error.
+Applied for fixes and added a stable tag, thanks!
 
-[   13.126186] mmc0: ADMA error
-[   13.129084] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
-[   13.135552] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00003302
-[   13.142019] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000000
-[   13.148485] mmc0: sdhci: Argument:  0x00000089 | Trn mode: 0x00000033
-[   13.154952] mmc0: sdhci: Present:   0x00000000 | Host ctl: 0x00000012
-[   13.161418] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
-[   13.167885] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00000107
-[   13.174351] mmc0: sdhci: Timeout:   0x0000000a | Int stat: 0x00000000
-[   13.180817] mmc0: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
-[   13.187282] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
-[   13.193748] mmc0: sdhci: Caps:      0x25e90080 | Caps_1:   0x00000f77
-[   13.200215] mmc0: sdhci: Cmd:       0x0000123a | Max curr: 0x00000000
-[   13.206682] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0x3b377f80
-[   13.213148] mmc0: sdhci: Resp[2]:   0x5b590000 | Resp[3]:  0x400e0032
-[   13.219613] mmc0: sdhci: Host ctl2: 0x00000000
-[   13.224073] mmc0: sdhci: ADMA Err:  0x00000007 | ADMA Ptr: 0xae857288
-[   13.230538] mmc0: sdhci: ============================================
+Kind regards
+Uffe
 
-Full Log:
 
-https://pastebin.ubuntu.com/p/4yGqgJCGZQ/
-
-Thanks,
-Faiz
+> ---
+>  drivers/mmc/host/mmc_spi.c | 1 +
+>  1 file changed, 1 insertion(+)
+>
+> diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
+> index 10ba46b728e8..8ade14fb2148 100644
+> --- a/drivers/mmc/host/mmc_spi.c
+> +++ b/drivers/mmc/host/mmc_spi.c
+> @@ -1450,6 +1450,7 @@ static int mmc_spi_probe(struct spi_device *spi)
+>                 mmc->caps &=3D ~MMC_CAP_NEEDS_POLL;
+>                 mmc_gpiod_request_cd_irq(mmc);
+>         }
+> +       mmc_detect_change(mmc, 0);
+>
+>         /* Index 1 is write protect/read only */
+>         status =3D mmc_gpiod_request_ro(mmc, NULL, 1, false, 0, NULL);
+> --
+> 2.20.1
+>
