@@ -1,212 +1,171 @@
-From: Ming Lei <ming.lei@redhat.com>
-Subject: Re: Linux-next 20190218: am57xx-evm: mmc1: ADMA error
-Date: Tue, 26 Feb 2019 21:06:48 +0800
-Message-ID: <20190226130647.GA7150@ming.t460p>
-References: <CA+G9fYsmC5ckLXfQxSUn-tqxLZ4NofEyb9RA69Q07RUoxc79RQ@mail.gmail.com>
- <34c78d7f-cc3c-853d-b3fd-a70abdb66293@ti.com>
- <22ccca46-7390-1707-cfca-43b3577b79f2@ti.com>
- <CACVXFVP0h-xvJaW1HaMrhozwhR484x0owc6XX63JT-59N08Fag@mail.gmail.com>
- <236a3ac2-5988-9150-4a53-4a33a45d595e@ti.com>
- <CACVXFVNqtPnWHp+b0-ED70n1pcv9EkARKYWVKaWtFEEgh0N1XA@mail.gmail.com>
- <c6d72393-cf42-a4f6-06b3-589ca1f3de19@ti.com>
+From: Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH 1/3 v2] ARM: dts: rk3288-tinker.dtsi: Fix SD card detection
+Date: Tue, 26 Feb 2019 14:46:12 +0000
+Message-ID: <108411d8-9607-d92d-e546-d0c85bcabc51@arm.com>
+References: <20190217121513.22965-2-beagleboard@davidjohnsummers.uk>
+ <9e90c5dd-7b1e-9e53-81ac-fb3b515215ca@davidjohnsummers.uk>
+ <CAD=FV=XEPKpDVLdpCVB9eMzJNE8C5Pr=fRgRmJXgxzrDFJ39mQ@mail.gmail.com>
+ <19889336.iz2VfdP0Nf@diego>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <c6d72393-cf42-a4f6-06b3-589ca1f3de19@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Faiz Abbas <faiz_abbas@ti.com>
-Cc: Ming Lei <tom.leiming@gmail.com>, Naresh Kamboju <naresh.kamboju@linaro.org>, open list <linux-kernel@vger.kernel.org>, "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree@vger.kernel.org>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Tero Kristo <t-kristo@ti.com>, nm@ti.com, Mark Rutland <mark.rutland@arm.com>, Rob Herring <robh+dt@kernel.org>, Omar Sandoval <osandov@fb.com>, Jens Axboe <axboe@kernel.dk>
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <19889336.iz2VfdP0Nf@diego>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: =?UTF-8?Q?Heiko_St=c3=bcbner?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, David Summers <beagleboard-8lkWs+DogrrqRUWtDFdff/XRex20P6io@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Feb 26, 2019 at 05:04:40PM +0530, Faiz Abbas wrote:
-> Hi,
-> 
-> On 26/02/19 3:36 PM, Ming Lei wrote:
-> > On Tue, Feb 26, 2019 at 2:47 PM Faiz Abbas <faiz_abbas@ti.com> wrote:
-> >>
-> >> Hi Ming Lei,
-> >>
-> >> On 26/02/19 7:11 AM, Ming Lei wrote:
-> >>> On Mon, Feb 25, 2019 at 9:14 PM Faiz Abbas <faiz_abbas@ti.com> wrote:
-> >>>>
-> >>>> Hi Naresh,
-> >>>>
-> >>>> + Commit authors.
-> >>>>
-> >>>> On 19/02/19 6:38 PM, Faiz Abbas wrote:
-> >>>>> Hi Naresh,
-> >>>>>
-> >>>>> On 18/02/19 6:57 PM, Naresh Kamboju wrote:
-> >>>>>> Do you see this error on am57xx-evm running Linux next 20190218 ?
-> >>>>>> I have tested on multiple devices and found this error.
-> >>>>>> Please find the full boot log [1].
-> >>>>>> Am i missing any pre required configs [2] ?
-> >>>>>>
-> >>>>>> [    5.620263] mmc1: ADMA error
-> >>>>>> [    5.623266] mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
-> >>>>>> [    5.629740] mmc1: sdhci: Sys addr:  0x00000000 | Version:  0x00003302
-> >>>>>> [    5.636215] mmc1: sdhci: Blk size:  0x00000200 | Blk cnt:  0x0000ffff
-> >>>>>> [    5.642690] mmc1: sdhci: Argument:  0x002cec70 | Trn mode: 0x00000033
-> >>>>>> [    5.649162] mmc1: sdhci: Present:   0x01f00000 | Host ctl: 0x00000010
-> >>>>>> [    5.655634] mmc1: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
-> >>>>>> [    5.662108] mmc1: sdhci: Wake-up:   0x00000000 | Clock:    0x00000107
-> >>>>>> [    5.668582] mmc1: sdhci: Timeout:   0x0000000c | Int stat: 0x00000000
-> >>>>>> [    5.675055] mmc1: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
-> >>>>>> [    5.681529] mmc1: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
-> >>>>>> [    5.688002] mmc1: sdhci: Caps:      0x21e90080 | Caps_1:   0x00000f77
-> >>>>>> [    5.694474] mmc1: sdhci: Cmd:       0x0000123a | Max curr: 0x00000000
-> >>>>>> [    5.700949] mmc1: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0xffffffef
-> >>>>>> [    5.707423] mmc1: sdhci: Resp[2]:   0x0f5903ff | Resp[3]:  0xd04f0132
-> >>>>>> [    5.713896] mmc1: sdhci: Host ctl2: 0x00000004
-> >>>>>> [    5.718364] mmc1: sdhci: ADMA Err:  0x00000007 | ADMA Ptr: 0xab868218
-> >>>>>>
-> >>>>>
-> >>>>> I see this as well on my setup. Trying to bisect now. Will keep you posted.
-> >>>>
-> >>>>
-> >>>> Reverting the following commit fixes this.
-> >>>> commit 07173c3ec276cbb18dc0e0687d37d310e98a1480
-> >>>> Author: Ming Lei <ming.lei@redhat.com>
-> >>>> Date:   Fri Feb 15 19:13:20 2019 +0800
-> >>>>
-> >>>>     block: enable multipage bvecs
-> >>>>
-> >>>>     This patch pulls the trigger for multi-page bvecs.
-> >>>>
-> >>>>     Reviewed-by: Omar Sandoval <osandov@fb.com>
-> >>>>     Signed-off-by: Ming Lei <ming.lei@redhat.com>
-> >>>>     Signed-off-by: Jens Axboe <axboe@kernel.dk>
-> >>>
-> >>> Hi,
-> >>>
-> >>> Thanks for your report & bisect.
-> >>>
-> >>> Could you test the following patch?
-> >>>
-> >>> https://git.kernel.org/pub/scm/linux/kernel/git/axboe/linux-block.git/commit/?h=for-5.1/block&id=8f4e80da764ec1ca44c83f3e17dbc9bf0209bccc
-> >>>
-> >>> Or  simply run the latest -next?
-> >>
-> >> That didn't fix it for me. Still see ADMA error.
-> >>
-> >> [   13.126186] mmc0: ADMA error
-> >> [   13.129084] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
-> >> [   13.135552] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00003302
-> >> [   13.142019] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000000
-> >> [   13.148485] mmc0: sdhci: Argument:  0x00000089 | Trn mode: 0x00000033
-> >> [   13.154952] mmc0: sdhci: Present:   0x00000000 | Host ctl: 0x00000012
-> >> [   13.161418] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
-> >> [   13.167885] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00000107
-> >> [   13.174351] mmc0: sdhci: Timeout:   0x0000000a | Int stat: 0x00000000
-> >> [   13.180817] mmc0: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
-> >> [   13.187282] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
-> >> [   13.193748] mmc0: sdhci: Caps:      0x25e90080 | Caps_1:   0x00000f77
-> >> [   13.200215] mmc0: sdhci: Cmd:       0x0000123a | Max curr: 0x00000000
-> >> [   13.206682] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0x3b377f80
-> >> [   13.213148] mmc0: sdhci: Resp[2]:   0x5b590000 | Resp[3]:  0x400e0032
-> >> [   13.219613] mmc0: sdhci: Host ctl2: 0x00000000
-> >> [   13.224073] mmc0: sdhci: ADMA Err:  0x00000007 | ADMA Ptr: 0xae857288
-> >> [   13.230538] mmc0: sdhci: ============================================
-> > 
-> > OK, I will write a debug patch to dump the sg data and see if it is
-> > generated as wrong.
-> > 
-> > BTW, which kind of failure can you find from the mmc dma error log?
-> > 
-> 
-> It looks like it only happens for some requests. More verbose log with
-> dma descriptor entries:
-> 
-> [   14.840865] mmc0: ADMA error
-> [   14.840869] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
-> [   14.840874] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00003302
-> [   14.840879] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000000
-> [   14.840884] mmc0: sdhci: Argument:  0x00000200 | Trn mode: 0x00000033
-> [   14.840889] mmc0: sdhci: Present:   0x00000000 | Host ctl: 0x00000012
-> [   14.840893] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
-> [   14.840898] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00000107
-> [   14.840903] mmc0: sdhci: Timeout:   0x0000000a | Int stat: 0x00000000
-> [   14.840908] mmc0: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
-> [   14.840912] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
-> [   14.840917] mmc0: sdhci: Caps:      0x25e90080 | Caps_1:   0x00000f77
-> [   14.840922] mmc0: sdhci: Cmd:       0x0000123a | Max curr: 0x00000000
-> [   14.840926] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0x20050044
-> [   14.840931] mmc0: sdhci: Resp[2]:   0x53445531 | Resp[3]:  0x744a6055
-> [   14.840935] mmc0: sdhci: Host ctl2: 0x00000000
-> [   14.840939] mmc0: sdhci: ADMA Err:  0x00000007 | ADMA Ptr: 0xae857300
-> [   14.840943] mmc0: sdhci: ============================================
-> [   14.840950] mmc0: sdhci: be2c9004: DMA 0xab1bd000, LEN 0x1000, Attr=0x21
-> [   14.840956] mmc0: sdhci: 92173e21: DMA 0xab1bc000, LEN 0x1000, Attr=0x21
-> [   14.840962] mmc0: sdhci: c8a0cde4: DMA 0xab1bb000, LEN 0x1000, Attr=0x21
-> [   14.840967] mmc0: sdhci: 4bb03017: DMA 0xab1ba000, LEN 0x1000, Attr=0x21
-> [   14.840972] mmc0: sdhci: 2fb0d59e: DMA 0xab1b9000, LEN 0x1000, Attr=0x21
-> [   14.840978] mmc0: sdhci: c3024ff2: DMA 0xab1b8000, LEN 0x1000, Attr=0x21
-> [   14.840983] mmc0: sdhci: 0738188d: DMA 0xab179000, LEN 0x1000, Attr=0x21
-> [   14.840989] mmc0: sdhci: 78ecca83: DMA 0xab178000, LEN 0x1000, Attr=0x21
-> [   14.840994] mmc0: sdhci: 1432e5a9: DMA 0xab0d7000, LEN 0x1000, Attr=0x21
-> [   14.840999] mmc0: sdhci: 8a36c77c: DMA 0xab0d6000, LEN 0x1000, Attr=0x21
-> [   14.841005] mmc0: sdhci: b7196410: DMA 0xab0d5000, LEN 0x1000, Attr=0x21
-> [   14.841010] mmc0: sdhci: dcb25259: DMA 0xab0d4000, LEN 0x1000, Attr=0x21
-> [   14.841015] mmc0: sdhci: ef1e5d32: DMA 0xab0d3000, LEN 0x1000, Attr=0x21
-> [   14.841020] mmc0: sdhci: 0319c66c: DMA 0xab0d2000, LEN 0x1000, Attr=0x21
-> [   14.841026] mmc0: sdhci: 2e6b85d9: DMA 0xab0d1000, LEN 0x1000, Attr=0x21
-> [   14.841031] mmc0: sdhci: d4dd19da: DMA 0xab0d0000, LEN 0x1000, Attr=0x21
-> [   14.841036] mmc0: sdhci: 55cdc0f6: DMA 0xab27f000, LEN 0x1000, Attr=0x21
-> [   14.841041] mmc0: sdhci: a172f4f3: DMA 0xab27e000, LEN 0x1000, Attr=0x21
-> [   14.841046] mmc0: sdhci: ed27e53e: DMA 0xab27d000, LEN 0x1000, Attr=0x21
-> [   14.841051] mmc0: sdhci: c04971ce: DMA 0xab27c000, LEN 0x1000, Attr=0x21
-> [   14.841057] mmc0: sdhci: f43985d3: DMA 0xab27b000, LEN 0x1000, Attr=0x21
-> [   14.841062] mmc0: sdhci: b977bd17: DMA 0xab27a000, LEN 0x1000, Attr=0x21
-> [   14.841067] mmc0: sdhci: 8b74ee6f: DMA 0xab279000, LEN 0x1000, Attr=0x21
-> [   14.841072] mmc0: sdhci: 12e52bc8: DMA 0xab30d000, LEN 0xffff, Attr=0x21
-> [   14.841077] mmc0: sdhci: b39efa31: DMA 0xae857000, LEN 0x0001, Attr=0x21
-> [   14.841082] mmc0: sdhci: bc4b71f0: DMA 0xab31d000, LEN 0x3000, Attr=0x21
-> [   14.841087] mmc0: sdhci: 4cb5aa08: DMA 0xab2a8000, LEN 0x2000, Attr=0x21
-> [   14.841092] mmc0: sdhci: 5e717781: DMA 0xab12a000, LEN 0x2000, Attr=0x21
-> [   14.841098] mmc0: sdhci: 125d82b5: DMA 0xab2b4000, LEN 0x4000, Attr=0x21
-> [   14.841103] mmc0: sdhci: b33874b9: DMA 0xab148000, LEN 0x4000, Attr=0x21
-> [   14.841108] mmc0: sdhci: 9b0e47a5: DMA 0xab218000, LEN 0x8000, Attr=0x21
-> [   14.841113] mmc0: sdhci: 47ce17da: DMA 0xab2a0000, LEN 0x2000, Attr=0x21
-> [   14.841118] mmc0: sdhci: 97ea0d9f: DMA 0x00000000, LEN 0x0000, Attr=0x03
-> 
-> There is a big transfer of 0xffff length followed by a smaller transfer
-> of 0x1 (at address 0xae857000 above) and that is where it fails. This is
-> the same signature every time it happens.
-
-Thanks for the investigation, and that is very helpful!
-
-Then I guess it is caused by bad segment size, see sdhci_setup_host():
-
-        if (host->flags & SDHCI_USE_ADMA) {
-                if (host->quirks & SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC)
-                        mmc->max_seg_size = 65535;
-                else
-                        mmc->max_seg_size = 65536;
-        } else {
-                mmc->max_seg_size = mmc->max_req_size;
-        }
-
-Could you confirm it by collecting the following log?
-
-(cd  /sys/block/mmcblk0/queue && find . -type f -exec grep -aH . {} \;)
-
-If 'max_segment_size' is 65535, we may need the following patch:
-
-diff --git a/block/blk-settings.c b/block/blk-settings.c
-index 6375afaedcec..6fb7a312b4ea 100644
---- a/block/blk-settings.c
-+++ b/block/blk-settings.c
-@@ -309,7 +309,7 @@ void blk_queue_max_segment_size(struct request_queue *q, unsigned int max_size)
- 		       __func__, max_size);
- 	}
- 
--	q->limits.max_segment_size = max_size;
-+	q->limits.max_segment_size = round_down(max_size, 512);
- }
- EXPORT_SYMBOL(blk_queue_max_segment_size);
- 
-
-
-Thanks,
-Ming
+T24gMjUvMDIvMjAxOSAyMjoyMCwgSGVpa28gU3TDvGJuZXIgd3JvdGU6Cj4gQW0gTW9udGFnLCAy
+NS4gRmVicnVhciAyMDE5LCAyMjoxODoyOCBDRVQgc2NocmllYiBEb3VnIEFuZGVyc29uOgo+PiBI
+aSwKPj4gT24gTW9uLCBGZWIgMjUsIDIwMTkgYXQgMToxMSBQTSBEYXZpZCBTdW1tZXJzCj4+Cj4+
+IDxiZWFnbGVib2FyZEBkYXZpZGpvaG5zdW1tZXJzLnVrPiB3cm90ZToKPj4+IE9uIDI1LzAyLzIw
+MTkgMTc6MTMsIERvdWcgQW5kZXJzb24gd3JvdGU6Cj4+Pj4gSGksCj4+Pj4KPj4+PiBPbiBGcmks
+IEZlYiAyMiwgMjAxOSBhdCAxMDo0OCBBTSBEYXZpZCBTdW1tZXJzCj4+Pj4KPj4+PiA8YmVhZ2xl
+Ym9hcmRAZGF2aWRqb2huc3VtbWVycy51az4gd3JvdGU6Cj4+Pj4+IFRoZSBQcm9ibGVtOgo+Pj4+
+Pgo+Pj4+PiBPbiBBU1VTIFRpbmtlciBCb2FyZCBTLCB3aGVuIGJvb3RpbmcgZnJvbSB0aGUgZU1N
+QywgYW5kIHRoZXJlIGlzIG5vCj4+Pj4+IGNhcmQgc2Qgc2xvdCwgdGhlbiB0aGVyZSBhcmUgY29u
+c3RhbnQgZXJyb3JzLgo+Pj4+Pgo+Pj4+PiBDYXVzZToKPj4+Pj4KPj4+Pj4gVGhhbmtzIG11c3Qg
+Z28gdG8gUm9iaW4gTXVycGh5IEAgQVJNIGZvciBpZGVuaWZ5aW5nIHRoZSBwcm9ibGVtLiBUaGUK
+Pj4+Pj4gcms4MDggb24gdGhlIFRpbmtlciBCb2FyZCBhbmQgVGlua2VyIEJvYXJkIFMgaGFzIG1h
+bnkgcmVndWxhdG9ycywgb25lCj4+Pj4+IHZjY2lvX3NkIHBvd2VycyB0aGUgSU8gZm9yIHRoZSBz
+ZCBjYXJkLiBVbmZvcnR1bmF0bHkgdGhpcyBpcyBhbHNvIHVzZWQKPj4+Pj4gaW4gdGhlIGNhcmQg
+ZGV0ZWN0LiBOb3cgd2hlbiBubyBjYXJkIGlzIGluc3RhbGwsIHRoZSByZWd1bGF0b3IgaXMKPj4+
+Pj4gcG93ZXJlZCBkb3duLiBUaGlzIG1lYW5zIHRoYXQgdGhlIGNhcmQgZGV0ZWN0IGZsb2F0cywg
+YW5kIHRoaXMgbWVhbnMKPj4+Pj4gcmFuZG9tIGNhcmQgZGV0ZWN0aW9uLgo+Pj4+Cj4+Pj4gWWVh
+aCwgdGhpcyBpcyBicm9rZW4gb24gYSBsb3Qgb2YgU29DcyB0aGF0IHVzZSBkd19tbWMuICA6KCAg
+UmVhbGx5IHRoZQo+Pj4+IGNhcmQgZGV0ZWN0IGxpbmUgbmVlZHMgdG8gYmUgb24gYSBkaWZmZXJl
+bnQgcmFpbCBhbmQgdGhpcyBpcyB3aHkgYWxsCj4+Pj4gYm9hcmRzIEkndmUgd29ya2VkIG9uIHJl
+Y2VudGx5IGhhdmUgYSB0aGUgY2FyZCBkZXRlY3QgZ29pbmcgdG8gYSBHUElPCj4+Pj4gaW5zdGVh
+ZCBvZiB0aGUgZHdfbW1jIENELgo+Pj4+Cj4+Pj4gSUlSQyBSb2NrY2hpcCBtb3ZlZCB0aGUgQ2Fy
+ZCBEZXRlY3QgdG8gYSBkaWZmZXJlbnQgcmFpbCBvbiBuZXdlciBTb0NzCj4+Pj4gKGxpa2Ugcmsz
+Mzk5KSBidXQgd2Ugc3RpbGwgdXNlZCBhIEdQSU8gZXZlbiB0aGVyZSBzaW5jZSB3ZSBkaWRuJ3Qg
+bGlrZQo+Pj4+IHRoZSBkZWZhdWx0L2F1dG9tYXRpYyBtdXhpbmcgb2YgSlRBRyBhbmQgU0Qgc2ln
+bmFscy4KPj4+Pgo+Pj4+IFRoZSBvbmUgYm9hcmQgSSB3YXMgaW52b2x2ZWQgaW4gdGhhdCBkaWQg
+aXQgd3JvbmcgKHdoZXJlIHdlIGRpc2NvdmVyZWQKPj4+PiB0aGlzIGlzc3VlKSB3YXMgZXh5bm9z
+NTI1MC1zbm93LiAgWW91IGNhbiBzZWUgc29tZSBkaXNjdXNzaW9uIGFib3V0Cj4+Pj4gdGhlIGlz
+c3VlIGF0Ogo+Pj4+Cj4+Pj4gaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvcGlwZXJtYWlsL2xp
+bnV4LWFybS1rZXJuZWwvMjAxNC1BdWd1c3QvMjgyNDc0Cj4+Pj4gLmh0bWwKPj4+Pgo+Pj4+IElu
+IHRoYXQgZGlzY3Vzc2lvbiBJJ20gcHJldHR5IHN1cmUgdGhhdCBVbGYgc3VnZ2VzdGVkIHRoYXQg
+YSBiZXR0ZXIKPj4+PiB3YXkgdG8gZ28gd2FzIHRvIHVzZSBzb21ldGhpbmcgbGlrZSAiYnJva2Vu
+LWNkIiB3aGljaCBJIHRoaW5rIHdhcwo+Pj4+IHN1cHBvc2VkIHRvIHN3aXRjaCB1cyB0byB1c2Ug
+cG9sbGluZy4gIEFLQSBwZXJpb2RpY2FsbHkgdGhlIFNEIGNhcmQKPj4+PiB3b3VsZCBiZSBwb3dl
+cmVkIG9uIGFuZCB3ZSdkIGNoZWNrIGZvciBhIGNhcmQsIHRoZW4gd2UnZCBwb3dlcgo+Pj4+IGV2
+ZXJ5dGhpbmcgb2ZmLiAgLi4uYnV0IHRoYXQgd2FzIG5ldmVyIGltcGxlbWVudGVkIGZvciBzbm93
+IGF0IGxlYXN0Cj4+Pj4gc28gdGhlcmUgbWF5IGJlIHNvbWV0aGluZyBtb3JlIHRoYW4ganVzdCBh
+ZGRpbmcgdGhlIHByb3BlcnR5LiAgWW91IGNhbgo+Pj4+IHJlYWQgdGhyb3VnaCB0aGUgd2hvbGUg
+dGhyZWFkIGZvciBtb3JlIGRldGFpbHMuCj4+Pj4KPj4+Pgo+Pj4+IElJUkMgbGVhdmluZyB0aGUg
+SU8gcmFpbCBhbHdheXMgb24gbGlrZSB5b3UncmUgcHJvcG9zaW5nIGNhbiBhbHNvIHdvcmsKPj4+
+PiBPSyBidXQgdGhlcmUgbWF5IGJlIHNvbWUgY29ybmVyIGNhc2VzLCBlc3BlY2lhbGx5IGlmIHlv
+dSBhcmUgdHJ5aW5nIHRvCj4+Pj4gcmVhY2ggVUhTIHNwZWVkcyBhbmQvb3IgaWYgdGhlIGJvb3Rs
+b2FkZXIgZXZlciB0cmllcyB0byB1c2UgVUhTCj4+Pj4gc3BlZWRzLiAgSXQncyBhbG1vc3QgY2Vy
+dGFpbmx5IGJ1c3RlZCBpZiB0aGUgYm9vdGxvYWRlciBkaWQgVUhTIHNpbmNlCj4+Pj4gaXQgd2ls
+bCBsZWF2ZSB0aGUgbGluZSBhdCB+MS44IFYgYW5kIHRoZSBrZXJuZWwgd2lsbCBleHBlY3QgaXQg
+dG8gYmUKPj4+PiBhdCB+My4zIFYuICAuLi5idXQgbWF5YmUgeW91IHJlbHkgb24gdGhlIGJvb3Rs
+b2FkZXIgbm90IGRvaW5nIFVIUyBhbmQKPj4+PiBtYXliZSB0aGluZ3MgYXJlIGdlbmVyYWxseSBP
+SyBpZiBub3Q/ICBUaGVyZSBtYXkgYWxzbyBiZSBjYXNlcyB3aGVyZQo+Pj4+IHlvdSBjYW4ndCBw
+cm9wZXJseSBwb3dlciBkb3duIC8gcmVzZXQgYSBjYXJkIGJlY2F1c2UgdGhlIGNhcmQgbWF5IGJl
+Cj4+Pj4gZHJhd2luZyBwb3dlciB0aHJvdWdoIHRoZSBJTyBsaW5lcyB3aGVuIHlvdSBwb3dlciBv
+ZmYgaXRzIG1haW4gbGluZXMuCj4+Pj4gVGhhdCdzIG5vdCBnb29kIGZvciB0aGUgY2FyZCBhbmQg
+Y2FuIGFsc28gcHV0IGl0IGluIGEgYmFkIHN0YXRlLiAgSQo+Pj4+IGhhdmVuJ3QgZG9uZSBhbGwg
+dGhlIHJlc2VhcmNoIGhlcmUgc28gdGhpcyBtYXkgYmUgYSBiaXQgb2YgRlVELS1pdCdzCj4+Pj4g
+anVzdCBhIHZhZ3VlIHJlY29sbGVjdGlvbiBmcm9tIG1hbnkgeWVhcnMgYWdvLgo+Pj4+Cj4+Pj4K
+Pj4+PiAuLi5zbyB0byBtYWtlIGEgbG9uZyBzdG9yeSBzaG9ydCwgYSBiZXR0ZXIgc29sdXRpb24g
+aXMgdG8gYWxsb3cgdGhlIElPCj4+Pj4gbGluZXMgdG8gYmUgcG93ZXJlZCBvZmYgYnV0IHRoZW4g
+cG9sbCBmb3IgdGhlIGNhcmQgcGVyaW9kaWNhbGx5Lgo+Pj4+Cj4+Pj4+IFRoZSBTb2x1dGlvbjoK
+Pj4+Pj4KPj4+Pj4gTWFrZSBzdXJlIHRoYXQgdGhlIHNkIElPIGlzIGFsd2F5cyBwb3dlcmVkLCB0
+aGlzIG1lYW5zIGNhcmQgZGV0ZWN0aW9uCj4+Pj4+IGlzIGFsd2F5cyBhY3RpdmUsIHdoaWNoIGlz
+IHdoYXQgc2hvdWxkIGJlIGRvbmUgb24gYSBib2FyZCB3aXRoIGFuIHNkCj4+Pj4+IHNsb3QsIHdo
+aWNoIGJvdGggdGhlIFRpbmtlciBCb2FyZCBhbmQgVGlua2VyIEJvYXJkIFMgYXJlLiBIZW5jZSBj
+aGFuZ2UKPj4+Pj4gaXMgbWFkZSB0byB0aGUgLmR0c2kgd2hpY2ggdGFrZXMgZWZmZWN0IG9uIGFs
+bCBUaW5rZXIgQm9hcmRzIGFzCj4+Pj4+IHJlcXVpcmVkLgo+Pj4+Pgo+Pj4+PiBUaGUgY2hhbmdl
+IGFsc28gYWRkcyAicmVndWxhdG9yLWJvb3Qtb24iIHRoZSBUaW5rZXIgQm9hcmQgYm9vdCBmcm9t
+Cj4+Pj4+IHVib290LCBhbmQgdGhlIHNkIGNhcmQgaXMgYWx3YXlzIG9uZSBvcHRpb24uIEhlbmNl
+IHRoZSBJTyBtdXN0IGJlCj4+Pj4+IHBvd2VyZWQgaW4gdWJvb3QsIGFuZCBzbyBzZXR0aW5nIHRo
+aXMgZmxhZy4KPj4+Pj4KPj4+Pj4gQWxzbyByZW1vdmVkIGlzICJkaXNhYmxlLXdwIiB0aGUgbWlj
+cm8gc2QgY2FyZCB3aGljaCBhcmUgdXNlZCBoYXZlIG5vCj4+Pj4+IHdyaXRlICBwcm90ZWN0aW9u
+LCBzbyB0aGUgY29uY2VwdCBkb2Vzbid0IG1lYW4gYW55dGhpbmcsIGFuZCB0aGUKPj4+Pj4gVGlu
+a2VyIEJvYXJkcyB3b3JrIHdpdGhvdXQgdGhpcy4gSGVuY2UgaXQgaXMgcmVtb3ZlZCB0byBzaW1w
+bHkuCj4+Pj4KPj4+PiBBcyBvdGhlcnMgaGF2ZSBzYWlkLCBwbGVhc2UgbGVhdmUgZGlzYWJsZS13
+cC4gIFRoZXJlJ3Mgbm8gd2F5IGZvciB0aGUKPj4+PiBrZXJuZWwgdG8ga25vdyBpZiB5b3UgaGF2
+ZSBhIFNEIG9yIHVTRCBzbG90IGFuZCB0aGUgb25seSBkaWZmZXJlbmNlCj4+Pj4gYmV0d2VlbiB0
+aGUgdHdvIChlbGVjdHJpY2FsbHkpIGlzIHRoYXQgdGhlcmUncyBubyB3cml0ZSBwcm90ZWN0IGZv
+cgo+Pj4+IG1pY3JvIFNELgo+Pj4+Cj4+Pj4KPj4+PiBBbHNvOiBwbGVhc2UgQ0MgZHdfbW1jIHBl
+b3BsZSBvbiBmdXR1cmUgcGF0Y2hlcyBpbiB0aGlzIGFyZWEuCj4+Pj4KPj4+PiAkIC4vc2NyaXB0
+cy9nZXRfbWFpbnRhaW5lci5wbCAtZiBkcml2ZXJzL21tYy9ob3N0L2R3X21tYy5jCj4+Pj4gSmFl
+aG9vbiBDaHVuZyA8amg4MC5jaHVuZ0BzYW1zdW5nLmNvbT4gKG1haW50YWluZXI6U1lOT1BTWVMg
+REVTSUdOV0FSRQo+Pj4+IE1NQy9TRC9TRElPIERSSVZFUikKPj4+PiBVbGYgSGFuc3NvbiA8dWxm
+LmhhbnNzb25AbGluYXJvLm9yZz4gKG1haW50YWluZXI6TVVMVElNRURJQSBDQVJECj4+Pj4gKE1N
+QyksIFNFQ1VSRSBESUdJVEFMIChTRCkgQU5ELi4uKQo+Pj4+IGxpbnV4LW1tY0B2Z2VyLmtlcm5l
+bC5vcmcgKG9wZW4gbGlzdDpTWU5PUFNZUyBERVNJR05XQVJFIE1NQy9TRC9TRElPCj4+Pj4gRFJJ
+VkVSKQo+Pj4+Cj4+Pj4gLURvdWcKPj4+Cj4+PiBJIHRoaW5rIHRoZSBwb3NzaWJsZSBwcm9ibGVt
+IGlzIHRoYXQgd2l0aG91dCB0aGlzIHdlIHdlcmUgZ2V0dGluZyBhIGxvdAo+Pj4gb2YgZXJyb3Jz
+LiBOb3cgYXMgdGhlIGVycm9ycyBoYXBwZW4gd2hlbiB0aGUgc2QgaW8gaXMgcG93ZXIgZG93biwg
+YW5kIHNvCj4+PiBDRCBmbG9hdHM7IHRoZW4gdGhlIElPIHdpbGwgYmUgcG93ZXJlZCBiYWNrIHVw
+IGdhaW4gLSB0byBhY2Nlc3MgdGhlCj4+PiBjYXJkLCBvbmx5IHRvIGZpbmQgbm8gY2FyZC4KPj4K
+Pj4gSSBkZWZpbml0ZWx5IGhhdmVuJ3QgdGhvdWdodCB0aHJvdWdoIGFsbCB0aGUgY29uc2VxdWVu
+Y2VzIG9mIGFkZGluZwo+PiBwb2xsaW5nLiAgLi4uYnV0IGdpdmVuIHRoYXQgdGhlIHByb2JsZW0g
+aXMgcmVhbGx5IGNvbW1vbiB3aXRoIFNvQ3MKPj4gdXNpbmcgZHdfbW1jIGl0J3MgcHJvYmFibHkg
+d29ydGggaXQgdG8gZmlndXJlIG91dCBvdXQgc29tZXRoaW5nIHNhbmUuCj4+IEluIHRoZW9yeSB5
+b3UgY291bGQgaGF2ZSBzb21lIGNvZGUgdGhhdCBrbm93cyB0aGF0IHRoZSBjYXJkIGRldGVjdAo+
+PiBiZWNvbWVzIHJlbGlhYmxlIG9uY2UgdGhlIElPcyBhcmUgcG93ZXJlZCBvbi4uLgoKUmlnaHQs
+IGZvcmNpbmcgaXQgYXQgdGhlIHJlZ3VsYXRvciBlbmQgaXMgc29tZXdoYXQgb2YgYSBibHVudCBp
+bnN0cnVtZW50IAp3aGVuIGZhY2VkIHdpdGggYWxsIHBvc3NpYmxlIHN1YnRsZXRpZXMgKGJ1dCBp
+dCBpcyB3aGF0IGFsbCB0aGUgdmVuZG9yIAprZXJuZWxzIHNlZW0gdG8gZG8pLiBNeSBuZXh0IHRo
+b3VnaHQgd291bGQgYmUgc29tZSAKImNkLXB1bGxlZC11cC1ieS12cW1tYyIgcXVpcmsgd2hlcmUg
+dGhlIG9ubHkgZGlmZmVyZW5jZSBpcyB0aGF0IGF0IHRoZSAKcG9pbnQgd2Uga25vdyB3ZSAqZG9u
+J3QqIGhhdmUgYSBjYXJkIHByZXNlbnQgYW5kIGdvIHRvIHJlbGVhc2UgdnFtbWMsIAp0aGUgcXVp
+cmsgdHVybnMgaXQgYmFjayBvbiAob3Igc2tpcHMgdHVybmluZyBpdCBvZmYgYXQgYWxsKS4gSG93
+ZXZlciBpdCAKc2VlbXMgbGlrZSB0aGF0IHRoYXQncyBhbG1vc3QgZXhhY3RseSB3aGF0IHdhcyBw
+cm9wb3NlZCBsYXN0IHRpbWUgLSBJIApoYWRuJ3Qgc2VlbiB0aGF0IHRocmVhZCwgc28gSSdsbCB0
+YWtlIHNvbWUgdGltZSB0byBkaWdlc3QgaXQgZnVsbHkgYXQgCnNvbWUgcG9pbnQuCgo+Pj4gU28g
+dGhpcyBtZWFucyB0aGUgcG93ZXIgbGluZSBnb2VzIHVwIGFuZCBkb3duIGEgbG90LiBOb3cgaWYg
+d2UgaGF2ZQo+Pj4gYnJva2VuLWNkLCBhbmQgcG9sbGluZyBoYXMgdG8gYmUgdXNlZCwgZG9lc24n
+dCB0aGlzIGFsc28gaGF2ZSB0byBwb3dlcgo+Pj4gdXAgdGhlIElPIHNvIGl0IGNhbiBwb2xsLCBh
+bmQgdGhlIHBvbGwgcHV0cyBhIGJpdCBtb3JlIGxvYWQgb24gdGhlCj4+PiBwcm9jZXNzb3IuCj4+
+Pgo+Pj4gU28gcXVlc3Rpb24gaXMgd2hpY2ggaXMgYmV0dGVyPyBUbyBrZWVwIHRoZSBJTyBwb3dl
+cmVkIHVwLCBvciB0byBoYXZlIGl0Cj4+PiBnb2luZyB1cCBhbmQgZG93bj8KPj4+Cj4+PiBBbnl3
+YXkgSSdtIGhhcHB5IHdpdGggZWl0aGVyIHNvbHV0aW9uLiBTbyBpZiB3ZSBjYW4gYWdyZWUgd2hp
+Y2ggaXMgYmVzdCwKPj4+IEknbGwgZG8gdGhlIHBhdGNoIGZvciB0aGF0Lgo+Pgo+PiBJIGRvbid0
+IGtub3cgd2hpY2ggaXMgYmV0dGVyLiAgLi4uYnV0IEkgd291bGRuJ3QgZXhwZWN0IHRoYXQgdHVy
+bmluZwo+PiBvbiByZWd1bGF0b3JzIGFuZCBjaGVja2luZyBhIEdQSU8gZXZlciBzZWNvbmQgb3Ig
+c28gd291bGQgYnVybiBtdWNoCj4+IHBvd2VyLgoKSXQncyBub3Qgc28gbXVjaCBwb3dlciB0aGF0
+IGJvdGhlcnMgbWUgaGVyZSBhcyB0aGUgZ2VuZXJhbCAiZG9pbmcgbW9yZSAKd29yayIgaW1wYWN0
+IG9mIHBvbGxpbmcgLSBzcGVjaWZpY2FsbHkgSSdtIHJlY2FsbGluZyB0aGUgdGltZSB3ZSAKZGlz
+Y292ZXJlZCB0aGF0IEFNRCBPdmVyZHJpdmUgYm9hcmRzIGdhaW5lZCBzb21ldGhpbmcgcmlkaWN1
+bG91cyBsaWtlIDUlIApwZXJmb3JtYW5jZSB1cGxpZnQgaW4gaGFja2JlbmNoIGp1c3QgZnJvbSBo
+YXZpbmcgYSBjYXJkIGluIHRoZSBNTUMgc2xvdC4gCkFkbWl0dGVkbHkgZHdfbW1jIGRvZXNuJ3Qg
+c2VlbSB0byBiZSAqdGhhdCogYmFkIC0gYSBxdWljayBwbGF5IHdpdGggYW5kIAp3aXRob3V0ICJi
+cm9rZW4tY2QiIG9uIG15IGxpdHRsZSByazMzMjggc3VnZ2VzdHMgdGhhdCBhbnkgZGlmZmVyZW5j
+ZSBpcyAKcHJvYmFibHkgd2F5IGRvd24gaW4gdGhlIG5vaXNlLCBzbyBtYXliZSBpdCdzIE9LLgoK
+V2hhdCB3b3VsZCBiZSByZWFsbHkgZnVuLCB0aG91Z2gsIHdvdWxkIGJlIHRvIHRha2UgYWR2YW50
+YWdlIG9mIHRoZSBmYWN0IAp0aGF0IENEIGlzIG9ubHkgaGFsZi1icm9rZW4gLSBpdCBzaG91bGQg
+c3RpbGwgZGV0ZWN0IGEgY2FyZCBieSB2aXJ0dWUgb2YgCnRoZSBwaW4gYmVpbmcgcHJvcGVybHkg
+cHVsbGVkIHRvIGdyb3VuZCwgaXQganVzdCBjYW4ndCByZWxpYWJseSBkZXRlY3QgCm5vdC1hLWNh
+cmQuIEFGQUlDUyB3ZSBjb3VsZCBoYXZlIGEgcXVpcmsgdG8gaGFuZGxlIHBoYW50b20gaW5zZXJ0
+aW9ucywgCndoaWNoIGRvdWJsZS1jaGVja3MgQ0QgYWZ0ZXIgcG93ZXJpbmcgdXAgYWxsIHRoZSBy
+ZWd1bGF0b3JzIHRvIHNlZSBpZiBpdCAKc3RheWVkIGxvdyAoaG1tLCBJIHdvdWxkIGhvcGUgY2Fy
+ZC1kZXRlY3QtZGVsYXkgbWlnaHQgZG8gdGhhdCBhbnl3YXkuLi4pIAphbmQgaWdub3JlcyB0aGUg
+ZXZlbnQgd2l0aG91dCBlcnJvciBpZiBpdCBkaWRuJ3QuIEV2ZW4gaWYgd2Ugc3RpbGwgdXNlIGEg
+CnRpbWVyIHRvIGRlbGF5IHVubWFza2luZyB0aGUgaW50ZXJydXB0IGZvciByYXRlLWxpbWl0aW5n
+LCB0aGF0IG91Z2h0IHRvIApiZSBhIGZhaXIgYml0IGxpZ2h0ZXItd2VpZ2h0IHRoYW4gdGhlIHJp
+Z21hcm9sZSBvZiB0cnlpbmcgdG8gaW5pdGlhdGUgCmNvbW11bmljYXRpb24gd2l0aCBhIHBvc3Np
+YmxlIGNhcmQgYW5kIHdhaXRpbmcgZm9yIGl0IHRvIHRpbWUgb3V0LgoKPiBhbmQgc2hvdWxkIGFs
+c28gc2F2ZSBhY3R1YWwgcG93ZXIgaWYgdGhlIHJlZ3VsYXRvciBpc24ndCBydW5uaW5nIGFsbAo+
+IHRoZSB0aW1lIDotKQoKSSdkIGJlIHN1cnByaXNlZCBpZiBpdCBtYWRlIGFueSBub3RpY2FibGUg
+ZGlmZmVyZW5jZSBpbiB0aGUgdHlwaWNhbCBTQkMgCmNhc2UsIGJ1dCBub3cgSSdtIGdvaW5nIHRv
+IGhhdmUgdG8gaGF2ZSBhIGdvIGF0IGZpbmRpbmcgc29tZSBzdWl0YWJsZSAKY3VycmVudC1tZWFz
+dXJlbWVudCBwb2ludHMgdG8gYWN0dWFsbHkgdGVzdCB0aGF0IGFzc3VtcHRpb24gOykKClJvYmlu
+LgoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KTGludXgt
+cm9ja2NoaXAgbWFpbGluZyBsaXN0CkxpbnV4LXJvY2tjaGlwQGxpc3RzLmluZnJhZGVhZC5vcmcK
+aHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1yb2NrY2hp
+cAo=
