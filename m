@@ -1,7 +1,7 @@
 From: Faiz Abbas <faiz_abbas@ti.com>
-Subject: [PATCH 2/2] mmc: sdhci-omap: Don't finish_mrq() on a command error during tuning
-Date: Tue, 26 Feb 2019 21:46:06 +0530
-Message-ID: <20190226161606.18569-3-faiz_abbas@ti.com>
+Subject: [PATCH 1/2] mmc: sdhci: Add platform_cmd_err() to sdhci_ops
+Date: Tue, 26 Feb 2019 21:46:05 +0530
+Message-ID: <20190226161606.18569-2-faiz_abbas@ti.com>
 References: <20190226161606.18569-1-faiz_abbas@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -13,65 +13,104 @@ To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.ker
 Cc: ulf.hansson@linaro.org, kishon@ti.com, adrian.hunter@intel.com, faiz_abbas@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-commit 5b0d62108b46 ("mmc: sdhci-omap: Add platform specific reset
-callback") skips data resets during tuning operation. Because of this,
-a data error or data finish interrupt might still arrive after a command
-error has been handled and the mrq ended. This ends up with a "mmc0: Got
-data interrupt 0x00000002 even though no data operation was in progress"
-error message.
-
-Fix this by adding a platform specific callback for command errors. Mark
-the mrq as a failure but wait for a data interrupt instead of calling
-finish_mrq().
+Some platforms might need a custom method for handling command error
+interrupts. Add a callback to sdhci_ops to facilitate the same. Move
+default command error handling to its own non-static function so it can
+be called from platform drivers. Also make sdhci_finish_command()
+non-static.
 
 Fixes: 5b0d62108b46 ("mmc: sdhci-omap: Add platform specific reset
 callback")
 Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
 ---
- drivers/mmc/host/sdhci-omap.c | 24 ++++++++++++++++++++++++
- 1 file changed, 24 insertions(+)
+ drivers/mmc/host/sdhci.c | 37 +++++++++++++++++++++++--------------
+ drivers/mmc/host/sdhci.h |  4 ++++
+ 2 files changed, 27 insertions(+), 14 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-index c11c18a9aacb..f73ded5cc527 100644
---- a/drivers/mmc/host/sdhci-omap.c
-+++ b/drivers/mmc/host/sdhci-omap.c
-@@ -797,6 +797,29 @@ void sdhci_omap_reset(struct sdhci_host *host, u8 mask)
- 	sdhci_reset(host, mask);
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index eba9bcc92ad3..12302432605c 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1440,7 +1440,7 @@ static void sdhci_read_rsp_136(struct sdhci_host *host, struct mmc_command *cmd)
+ 	}
  }
  
-+void sdhci_omap_cmd_err(struct sdhci_host *host, u32 intmask, u32 *intmask_p)
+-static void sdhci_finish_command(struct sdhci_host *host)
++void sdhci_finish_command(struct sdhci_host *host)
+ {
+ 	struct mmc_command *cmd = host->cmd;
+ 
+@@ -2772,6 +2772,25 @@ static void sdhci_timeout_data_timer(struct timer_list *t)
+  *                                                                           *
+ \*****************************************************************************/
+ 
++void sdhci_cmd_err(struct sdhci_host *host, u32 intmask, u32 *intmask_p)
 +{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
-+
-+	if (omap_host->is_tuning) {
-+		/*
-+		 * Since we are not resetting data lines during tuning
-+		 * operation, data error or data complete interrupts
-+		 * might still arrive. Mark this request as a failure
-+		 * but still wait for the data interrupt
-+		 */
 +		if (intmask & SDHCI_INT_TIMEOUT)
 +			host->cmd->error = -ETIMEDOUT;
 +		else
 +			host->cmd->error = -EILSEQ;
 +
-+		sdhci_finish_command(host);
-+	} else {
-+		sdhci_cmd_err(host, intmask, intmask_p);
-+	}
++		/* Treat data command CRC error the same as data CRC error */
++		if (host->cmd->data &&
++		    (intmask & (SDHCI_INT_CRC | SDHCI_INT_TIMEOUT)) ==
++		     SDHCI_INT_CRC) {
++			host->cmd = NULL;
++			*intmask_p |= SDHCI_INT_DATA_CRC;
++			return;
++		}
++
++		sdhci_finish_mrq(host, host->cmd->mrq);
 +}
 +
- static struct sdhci_ops sdhci_omap_ops = {
- 	.set_clock = sdhci_omap_set_clock,
- 	.set_power = sdhci_omap_set_power,
-@@ -807,6 +830,7 @@ static struct sdhci_ops sdhci_omap_ops = {
- 	.platform_send_init_74_clocks = sdhci_omap_init_74_clocks,
- 	.reset = sdhci_omap_reset,
- 	.set_uhs_signaling = sdhci_omap_set_uhs_signaling,
-+	.platform_cmd_err = sdhci_omap_cmd_err,
+ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask, u32 *intmask_p)
+ {
+ 	/* Handle auto-CMD12 error */
+@@ -2805,21 +2824,11 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask, u32 *intmask_p)
+ 
+ 	if (intmask & (SDHCI_INT_TIMEOUT | SDHCI_INT_CRC |
+ 		       SDHCI_INT_END_BIT | SDHCI_INT_INDEX)) {
+-		if (intmask & SDHCI_INT_TIMEOUT)
+-			host->cmd->error = -ETIMEDOUT;
++		if (host->ops->platform_cmd_err)
++			host->ops->platform_cmd_err(host, intmask, intmask_p);
+ 		else
+-			host->cmd->error = -EILSEQ;
++			sdhci_cmd_err(host, intmask, intmask_p);
+ 
+-		/* Treat data command CRC error the same as data CRC error */
+-		if (host->cmd->data &&
+-		    (intmask & (SDHCI_INT_CRC | SDHCI_INT_TIMEOUT)) ==
+-		     SDHCI_INT_CRC) {
+-			host->cmd = NULL;
+-			*intmask_p |= SDHCI_INT_DATA_CRC;
+-			return;
+-		}
+-
+-		sdhci_finish_mrq(host, host->cmd->mrq);
+ 		return;
+ 	}
+ 
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 6cc9a3c2ac66..523a47c4efa4 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -639,6 +639,8 @@ struct sdhci_ops {
+ 	void	(*voltage_switch)(struct sdhci_host *host);
+ 	void	(*adma_write_desc)(struct sdhci_host *host, void **desc,
+ 				   dma_addr_t addr, int len, unsigned int cmd);
++	void	(*platform_cmd_err)(struct sdhci_host *host, u32 intmask,
++				    u32 *intmask_p);
  };
  
- static int sdhci_omap_set_capabilities(struct sdhci_omap_host *omap_host)
+ #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+@@ -792,5 +794,7 @@ void sdhci_start_tuning(struct sdhci_host *host);
+ void sdhci_end_tuning(struct sdhci_host *host);
+ void sdhci_reset_tuning(struct sdhci_host *host);
+ void sdhci_send_tuning(struct sdhci_host *host, u32 opcode);
++void sdhci_cmd_err(struct sdhci_host *host, u32 intmask, u32 *intmask_p);
++void sdhci_finish_command(struct sdhci_host *host);
+ 
+ #endif /* __SDHCI_HW_H */
 -- 
 2.19.2
