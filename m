@@ -1,187 +1,111 @@
-From: Faiz Abbas <faiz_abbas@ti.com>
-Subject: Re: Linux-next 20190218: am57xx-evm: mmc1: ADMA error
-Date: Wed, 27 Feb 2019 15:15:50 +0530
-Message-ID: <34184f5e-429e-e02d-3fa1-17bb33028a91@ti.com>
-References: <CA+G9fYsmC5ckLXfQxSUn-tqxLZ4NofEyb9RA69Q07RUoxc79RQ@mail.gmail.com>
- <34c78d7f-cc3c-853d-b3fd-a70abdb66293@ti.com>
- <22ccca46-7390-1707-cfca-43b3577b79f2@ti.com>
- <CACVXFVP0h-xvJaW1HaMrhozwhR484x0owc6XX63JT-59N08Fag@mail.gmail.com>
- <236a3ac2-5988-9150-4a53-4a33a45d595e@ti.com>
- <CACVXFVNqtPnWHp+b0-ED70n1pcv9EkARKYWVKaWtFEEgh0N1XA@mail.gmail.com>
- <c6d72393-cf42-a4f6-06b3-589ca1f3de19@ti.com>
- <20190226130647.GA7150@ming.t460p>
+From: Jonas Karlman <jonas-uIzNG4q0ceqzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [RFC] mmc: core: set initial signal voltage on power off
+Date: Wed, 27 Feb 2019 09:47:59 +0000
+Message-ID: <AM3PR03MB09663CB7F05563E9143611EDAC740@AM3PR03MB0966.eurprd03.prod.outlook.com>
+References: <AM3PR03MB09664161A7FA2BD68B2800A7AC620@AM3PR03MB0966.eurprd03.prod.outlook.com>
+ <CAPDyKFpfjKbbCF=wyERXpcLk2LDJD6zsPHTYegwtHrv5qPv8HA@mail.gmail.com>
+ <AM3PR03MB09666AFE4FC60E324C7EBDA8AC7C0@AM3PR03MB0966.eurprd03.prod.outlook.com>
+ <CAPDyKFpCTN1CfMvSWAPC8CyASjF=uxRhf8KWcU8MRRsUjUbKHQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190226130647.GA7150@ming.t460p>
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <CAPDyKFpCTN1CfMvSWAPC8CyASjF=uxRhf8KWcU8MRRsUjUbKHQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ming Lei <ming.lei@redhat.com>
-Cc: Ming Lei <tom.leiming@gmail.com>, Naresh Kamboju <naresh.kamboju@linaro.org>, open list <linux-kernel@vger.kernel.org>, "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree@vger.kernel.org>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Tero Kristo <t-kristo@ti.com>, nm@ti.com, Mark Rutland <mark.rutland@arm.com>, Rob Herring <robh+dt@kernel.org>, Omar Sandoval <osandov@fb.com>, Jens Axboe <axboe@kernel.dk>
+Content-ID: <A95FBF1DDBF97C4DBE8DED78C65A226A-yI6K9L9iJZCcE4WynfumptQqCkab/8FMAL8bYrjMMd8@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
-
-On 26/02/19 6:36 PM, Ming Lei wrote:
-> On Tue, Feb 26, 2019 at 05:04:40PM +0530, Faiz Abbas wrote:
->> Hi,
+On 2019-02-25 17:19, Ulf Hansson wrote:
+> On Tue, 19 Feb 2019 at 11:12, Jonas Karlman <jonas-uIzNG4q0ceqzQB+pC5nmwQ@public.gmane.org> wrote:
+>> On 2019-02-18 12:54, Ulf Hansson wrote:
+>>> On Sun, 17 Feb 2019 at 23:14, Jonas Karlman <jonas-uIzNG4q0ceqzQB+pC5nmwQ@public.gmane.org> wrote:
+>>>> Some boards have SD card connectors where the power rail cannot be switched
+>>>> off by the driver. If the card has not been power cycled, it may still be
+>>>> using 1.8V signaling after a warm re-boot. Bootroms expecting 3.3V signaling
+>>>> will fail to boot from a UHS card that continue to use 1.8V signaling.
+>>> Is the problem limited to a "warm manual re-boot" or does it exists
+>>> for an emergency reboot as well!?
+>> I think the issue may also exist for emergency reboot based on the Asus Tinker Board kernel commit at [1],
+>> not sure how this could be solved in an acceptable way. Personally I do not have sysrq enabled on my boards.
 >>
->> On 26/02/19 3:36 PM, Ming Lei wrote:
->>> On Tue, Feb 26, 2019 at 2:47 PM Faiz Abbas <faiz_abbas@ti.com> wrote:
+>> [1] https://github.com/TinkerBoard/debian_kernel/commit/1e8970dbfc20166788e3428ec5203f7673f6087b
+>>
+> For eMMC we have pwrseq_emmc.c, where we register a restart handler to
+> cover these cases. Not very nice, but the best we could come up with.
+
+Thanks, I will see if I can adopt something similar in a followup patch.
+
+>
+>>>> Set initial signal voltage in mmc_power_off() to allow re-boot to function.
+>>> I think this sounds like a reasonable way forward, to improve the situation.
+>> I may have exaggerated the issue in the above line, the board will reboot as long as
+>> UHS 1.8V signaling is not used, current upstream device trees is missing the sd-uhs-* flags
+>> and will thus reboot as they are capped at sd high speed and 3.3V signaling.
+> Okay, I see.
+>
+>>>> This fixes re-boot with UHS cards on Asus Tinker Board (Rockchip RK3288),
+>>>> same issue have been seen on some Rockchip RK3399 boards.
 >>>>
->>>> Hi Ming Lei,
+>>>> I am sending this as a RFC because I have no insights into SD/MMC subsystem,
+>>>> this change fix a re-boot issue on my boards and does not break emmc/sdio.
+>>>> Is this an acceptable workaround? Any advice is appreciated.
 >>>>
->>>> On 26/02/19 7:11 AM, Ming Lei wrote:
->>>>> On Mon, Feb 25, 2019 at 9:14 PM Faiz Abbas <faiz_abbas@ti.com> wrote:
->>>>>>
->>>>>> Hi Naresh,
->>>>>>
->>>>>> + Commit authors.
->>>>>>
->>>>>> On 19/02/19 6:38 PM, Faiz Abbas wrote:
->>>>>>> Hi Naresh,
->>>>>>>
-...
->> It looks like it only happens for some requests. More verbose log with
->> dma descriptor entries:
+>>>> Signed-off-by: Jonas Karlman <jonas-uIzNG4q0ceqzQB+pC5nmwQ@public.gmane.org>
+>>>> ---
+>>>>  drivers/mmc/core/core.c | 8 ++++++++
+>>>>  1 file changed, 8 insertions(+)
+>>>>
+>>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>>>> index 5bd58b95d318..69d7021916ae 100644
+>>>> --- a/drivers/mmc/core/core.c
+>>>> +++ b/drivers/mmc/core/core.c
+>>>> @@ -1684,6 +1684,14 @@ void mmc_power_off(struct mmc_host *host)
+>>>>         if (host->ios.power_mode == MMC_POWER_OFF)
+>>>>                 return;
+>>>>
+>>>> +       mmc_set_initial_signal_voltage(host);
+>>> I would rather try to move this below mmc_set_initial_state() a few
+>>> lines below in mmc_power_off(). To me, it seems safer to do the
+>>> regular power off thingy first.
+>>>
+>>> Additionally, I would drop the added delay below, as there is already
+>>> a delay after calling mmc_set_initial_state() and I think/hope that
+>>> should be sufficient.
+>> Thanks for the suggestion, the reason I put the mmc_set_initial_signal_voltage() call
+>> before mmc_pwrseq_power_off() call was to do it in reverse order of mmc_power_on(),
 >>
->> [   14.840865] mmc0: ADMA error
->> [   14.840869] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
->> [   14.840874] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00003302
->> [   14.840879] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000000
->> [   14.840884] mmc0: sdhci: Argument:  0x00000200 | Trn mode: 0x00000033
->> [   14.840889] mmc0: sdhci: Present:   0x00000000 | Host ctl: 0x00000012
->> [   14.840893] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
->> [   14.840898] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00000107
->> [   14.840903] mmc0: sdhci: Timeout:   0x0000000a | Int stat: 0x00000000
->> [   14.840908] mmc0: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f000b
->> [   14.840912] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
->> [   14.840917] mmc0: sdhci: Caps:      0x25e90080 | Caps_1:   0x00000f77
->> [   14.840922] mmc0: sdhci: Cmd:       0x0000123a | Max curr: 0x00000000
->> [   14.840926] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0x20050044
->> [   14.840931] mmc0: sdhci: Resp[2]:   0x53445531 | Resp[3]:  0x744a6055
->> [   14.840935] mmc0: sdhci: Host ctl2: 0x00000000
->> [   14.840939] mmc0: sdhci: ADMA Err:  0x00000007 | ADMA Ptr: 0xae857300
->> [   14.840943] mmc0: sdhci: ============================================
->> [   14.840950] mmc0: sdhci: be2c9004: DMA 0xab1bd000, LEN 0x1000, Attr=0x21
->> [   14.840956] mmc0: sdhci: 92173e21: DMA 0xab1bc000, LEN 0x1000, Attr=0x21
->> [   14.840962] mmc0: sdhci: c8a0cde4: DMA 0xab1bb000, LEN 0x1000, Attr=0x21
->> [   14.840967] mmc0: sdhci: 4bb03017: DMA 0xab1ba000, LEN 0x1000, Attr=0x21
->> [   14.840972] mmc0: sdhci: 2fb0d59e: DMA 0xab1b9000, LEN 0x1000, Attr=0x21
->> [   14.840978] mmc0: sdhci: c3024ff2: DMA 0xab1b8000, LEN 0x1000, Attr=0x21
->> [   14.840983] mmc0: sdhci: 0738188d: DMA 0xab179000, LEN 0x1000, Attr=0x21
->> [   14.840989] mmc0: sdhci: 78ecca83: DMA 0xab178000, LEN 0x1000, Attr=0x21
->> [   14.840994] mmc0: sdhci: 1432e5a9: DMA 0xab0d7000, LEN 0x1000, Attr=0x21
->> [   14.840999] mmc0: sdhci: 8a36c77c: DMA 0xab0d6000, LEN 0x1000, Attr=0x21
->> [   14.841005] mmc0: sdhci: b7196410: DMA 0xab0d5000, LEN 0x1000, Attr=0x21
->> [   14.841010] mmc0: sdhci: dcb25259: DMA 0xab0d4000, LEN 0x1000, Attr=0x21
->> [   14.841015] mmc0: sdhci: ef1e5d32: DMA 0xab0d3000, LEN 0x1000, Attr=0x21
->> [   14.841020] mmc0: sdhci: 0319c66c: DMA 0xab0d2000, LEN 0x1000, Attr=0x21
->> [   14.841026] mmc0: sdhci: 2e6b85d9: DMA 0xab0d1000, LEN 0x1000, Attr=0x21
->> [   14.841031] mmc0: sdhci: d4dd19da: DMA 0xab0d0000, LEN 0x1000, Attr=0x21
->> [   14.841036] mmc0: sdhci: 55cdc0f6: DMA 0xab27f000, LEN 0x1000, Attr=0x21
->> [   14.841041] mmc0: sdhci: a172f4f3: DMA 0xab27e000, LEN 0x1000, Attr=0x21
->> [   14.841046] mmc0: sdhci: ed27e53e: DMA 0xab27d000, LEN 0x1000, Attr=0x21
->> [   14.841051] mmc0: sdhci: c04971ce: DMA 0xab27c000, LEN 0x1000, Attr=0x21
->> [   14.841057] mmc0: sdhci: f43985d3: DMA 0xab27b000, LEN 0x1000, Attr=0x21
->> [   14.841062] mmc0: sdhci: b977bd17: DMA 0xab27a000, LEN 0x1000, Attr=0x21
->> [   14.841067] mmc0: sdhci: 8b74ee6f: DMA 0xab279000, LEN 0x1000, Attr=0x21
->> [   14.841072] mmc0: sdhci: 12e52bc8: DMA 0xab30d000, LEN 0xffff, Attr=0x21
->> [   14.841077] mmc0: sdhci: b39efa31: DMA 0xae857000, LEN 0x0001, Attr=0x21
->> [   14.841082] mmc0: sdhci: bc4b71f0: DMA 0xab31d000, LEN 0x3000, Attr=0x21
->> [   14.841087] mmc0: sdhci: 4cb5aa08: DMA 0xab2a8000, LEN 0x2000, Attr=0x21
->> [   14.841092] mmc0: sdhci: 5e717781: DMA 0xab12a000, LEN 0x2000, Attr=0x21
->> [   14.841098] mmc0: sdhci: 125d82b5: DMA 0xab2b4000, LEN 0x4000, Attr=0x21
->> [   14.841103] mmc0: sdhci: b33874b9: DMA 0xab148000, LEN 0x4000, Attr=0x21
->> [   14.841108] mmc0: sdhci: 9b0e47a5: DMA 0xab218000, LEN 0x8000, Attr=0x21
->> [   14.841113] mmc0: sdhci: 47ce17da: DMA 0xab2a0000, LEN 0x2000, Attr=0x21
->> [   14.841118] mmc0: sdhci: 97ea0d9f: DMA 0x00000000, LEN 0x0000, Attr=0x03
->>
->> There is a big transfer of 0xffff length followed by a smaller transfer
->> of 0x1 (at address 0xae857000 above) and that is where it fails. This is
->> the same signature every time it happens.
-> 
-> Thanks for the investigation, and that is very helpful!
-> 
-> Then I guess it is caused by bad segment size, see sdhci_setup_host():
-> 
->         if (host->flags & SDHCI_USE_ADMA) {
->                 if (host->quirks & SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC)
->                         mmc->max_seg_size = 65535;
->                 else
->                         mmc->max_seg_size = 65536;
->         } else {
->                 mmc->max_seg_size = mmc->max_req_size;
->         }
-> 
-> Could you confirm it by collecting the following log?
-> 
-> (cd  /sys/block/mmcblk0/queue && find . -type f -exec grep -aH . {} \;)
+>> I will run some more tests on my boards to see if moving it below mmc_set_initial_state()
+>> also makes it possible to reboot with UHS cards using 1.8V signaling enabled.
+> Great, so I am expecting an update from you, thanks!
 
-The max_segment_size is 65535.
+I have done some more testing and concluded that mmc_set_initial_signal_voltage() must be called
+before host->ios.vdd = 0 statement or the Tinker Board would not reboot from sd-card when 1.8V signal voltage is used.
+The sleep was not needed on my device.
 
-root@dra7xx-evm:~# (cd  /sys/block/mmcblk0/queue && find . -type f -exec
-grep -aH . {} \;)
-./hw_sector_size:512
-./max_discard_segments:1
-./max_segment_size:65535
-./physical_block_size:512
-./discard_max_bytes:4194304
-./rotational:0
-./iosched/fifo_batch:16
-./iosched/read_expire:500
-./iosched/writes_starved:2
-./iosched/write_expire:5000
-./iosched/front_merges:1
-./write_same_max_bytes:0
-./zoned:none
-./max_sectors_kb:512
-./discard_zeroes_data:0
-./read_ahead_kb:128
-./discard_max_hw_bytes:4194304
-./nomerges:0
-./max_segments:128
-./rq_affinity:1
-./iostats:1
-./dax:0
-./minimum_io_size:512
-./chunk_sectors:0
-./io_poll:0
-./write_zeroes_max_bytes:0
-./max_hw_sectors_kb:512
-./add_random:0
-./optimal_io_size:0
-./nr_requests:128
-./scheduler:[mq-deadline] kyber none
-./io_timeout:60000
-./discard_granularity:4194304
-./logical_block_size:512
-./nr_zones:0
-./fua:1
-./io_poll_delay:-1
-./max_integrity_segments:0
-./write_cache:write back
-root@dra7xx-evm:~#
+I still want to do more tests on my other rockchip boards that have UHS support and is not enabled in device tree.
+Currently I test [1] where vccio_sd regulator-always-on/regulator-boot-on ensures the IO regulator is not powered off,
+sd-uhs-sdr* flags to enable UHS and mmc_set_initial_signal_voltage() to change IO regulator to 3.3V before reboot.
 
-> 
-> If 'max_segment_size' is 65535, we may need the following patch:
-> 
-> diff --git a/block/blk-settings.c b/block/blk-settings.c
-> index 6375afaedcec..6fb7a312b4ea 100644
-> --- a/block/blk-settings.c
-> +++ b/block/blk-settings.c
-> @@ -309,7 +309,7 @@ void blk_queue_max_segment_size(struct request_queue *q, unsigned int max_size)
->  		       __func__, max_size);
->  	}
->  
-> -	q->limits.max_segment_size = max_size;
-> +	q->limits.max_segment_size = round_down(max_size, 512);
->  }
->  EXPORT_SYMBOL(blk_queue_max_segment_size);
->  
+I will follow up with more test results next week after I have tested on other rockchip rk3328/rk3399 devices.
 
-This patch fixes it for me. Thanks!
+[1] https://github.com/Kwiboo/linux-rockchip/compare/v5.0-rc7...patch-rk-5.x-tinker-uhs
 
 Regards,
-Faiz
+Jonas
+
+>
+> [...]
+>
+> Kind regards
+> Uffe
