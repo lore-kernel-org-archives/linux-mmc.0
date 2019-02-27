@@ -1,84 +1,54 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/2] mmc: mmci: add quirk property to add stm32 transfer mode
-Date: Wed, 27 Feb 2019 10:11:17 +0100
-Message-ID: <CAPDyKFpgvLdcmpFkhAm8vPNZruF9e6GT8wnhpLQYsG9L=h_5Cg@mail.gmail.com>
-References: <1550743851-13588-1-git-send-email-ludovic.Barre@st.com>
- <20190221102739.cc37au6elqu6gvfe@shell.armlinux.org.uk> <20190221103049.tspc5igoe6wmt3jd@shell.armlinux.org.uk>
- <a736b773-d6e6-eb81-90d6-ebeab7b401cb@st.com> <20190221140300.y3tunrvsh3gyig5f@shell.armlinux.org.uk>
- <9c88d76c-2080-71b1-c9c6-c24d0f0aeb91@st.com>
+Subject: Re: [PATCH v3 0/2] mmc: core: Add SD Discard support
+Date: Wed, 27 Feb 2019 10:39:53 +0100
+Message-ID: <CAPDyKFqKPQWUSLTCndEiCztp0jSpLDrxbrK1quisVzcG8qeg8w@mail.gmail.com>
+References: <1551193825-31074-1-git-send-email-avri.altman@wdc.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <9c88d76c-2080-71b1-c9c6-c24d0f0aeb91@st.com>
+In-Reply-To: <1551193825-31074-1-git-send-email-avri.altman@wdc.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ludovic BARRE <ludovic.barre@st.com>
-Cc: Russell King - ARM Linux admin <linux@armlinux.org.uk>, DTML <devicetree@vger.kernel.org>, Alexandre Torgue <alexandre.torgue@st.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, linux-stm32@st-md-mailman.stormreply.com, Linux ARM <linux-arm-kernel@lists.infradead.org>
+To: Avri Altman <avri.altman@wdc.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Lin <shawn.lin@rock-chips.com>, Avi Shchislowski <avi.shchislowski@wdc.com>, Alex Lemberg <alex.lemberg@wdc.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, 25 Feb 2019 at 11:49, Ludovic BARRE <ludovic.barre@st.com> wrote:
+On Tue, 26 Feb 2019 at 16:10, Avri Altman <avri.altman@wdc.com> wrote:
 >
-> hi Russell & Ulf
+> SD spec v5.1 adds discard support. The flows and commands matches those
+> in eMMC, Which leaves to set the appropriate discard arg in CMD38 if
+> DISCARD_SUPPORT (b313) is set in the SD_STATUS register.
 >
-> On 2/21/19 3:03 PM, Russell King - ARM Linux admin wrote:
-> > On Thu, Feb 21, 2019 at 02:38:36PM +0100, Ludovic BARRE wrote:
-> >> hi Russell & Ulf
-> >>
-> >> On 2/21/19 11:30 AM, Russell King - ARM Linux admin wrote:
-> >>> On Thu, Feb 21, 2019 at 10:27:39AM +0000, Russell King - ARM Linux admin wrote:
-> >>>> On Thu, Feb 21, 2019 at 11:10:49AM +0100, Ludovic Barre wrote:
-> >>>>> From: Ludovic Barre <ludovic.barre@st.com>
-> >>>>>
-> >>>>> This patch series introduces a bitmap of hardware quirks that require
-> >>>>> some special action. This should reduce the number of boolean
-> >>>>> into variant structure.
-> >>>>> And adds quirk bit to define sdmmc specific transfer modes.
-> >>>>
-> >>>> Please find some other way to deal with these differences.  As far as
-> >>>> I'm concerned, introducing a quirk bitmask such as what was done in
-> >>>> sdhci is a complete disaster and leads to long-term maintanability
-> >>>> problems.
-> >>>>
-> >>>> We already have a way to deal with variants in mmci.
-> >>>
-> >>> ... to finish what I was saying ...
-> >>>
-> >>> and I think that:
-> >>>
-> >>>           if (variant->blksz_datactrl16)
-> >>>                   datactrl = variant->datactrl_dpsm_enable | (data->blksz << 16);
-> >>>           else if (variant->blksz_datactrl4)
-> >>>                   datactrl = variant->datactrl_dpsm_enable | (data->blksz << 4);
-> >>>           else
-> >>>                   datactrl = variant->datactrl_dpsm_enable | blksz_bits << 4;
-> >>>
-> >>> ought to become a variant function call which returns the appropriate
-> >>> datactrl value.  This would shrink the amount of variant testing in this
-> >>> path, and also means that going forward we aren't facing an endlessly
-> >>> increasing number of tests here.
-> >>
-> >> For blksz_datactrl case:
-> >> We could create an inline function for datactrl16 and blksz_datactrl4
-> >> which returns the appropriate datactrl value (specific for ux500v2 and
-> >> qcom). This function could be register in mmci_host_ops structure.
-> >
-> > Yes, this is what I'm proposing (except for the "inline" bit which
-> > seems meaningless if it's called via the mmci_host_ops structure.)
-> > I'm also proposing that it shouldn't just be the blksz that's
-> > returned but anything that the variant needs to take account of,
-> > including the stm transfer mode.
+> We set this arg on card init: not in mmc_init_erase as one might expect
+> but arbitrarily once the card indicated its discard support.  This is
+> because unlike erase, it doesn't really involve any logic, and we want
+> to avoid the unnecessary complication.
 >
-> Ulf, are you alright with this callback approach (just to be sure that
-> every body is align, before send a patch)?
-
-Go ahead, let's see how it looks!
-
+> V2->v3:
+> The first 2 patches in the series got accepted.
+> Elaborate the changelog of some of the differences between discard and
+> erase. Clean some inconsistency in arg checking in mmc_erase().
+> Add a patch to set the timeout for sd discard.
 >
-> This mmci_host_ops callback could return datactrl config to
-> start data (defined by variant).
+> V1->v2:
+> In the first patch, assign the discard arg for SD cards as well to keep
+> the code consistent. Rename "discard_arg" to "erase_arg", and elaborate
+> the change log.
+>
+>
+> Avri Altman (2):
+>   mmc: core: Add discard support to sd
+>   mmc: core: Add sd discard timeout
+>
+>  drivers/mmc/core/core.c | 15 +++++++++++----
+>  drivers/mmc/core/sd.c   | 10 +++++++++-
+>  include/linux/mmc/sd.h  |  1 +
+>  3 files changed, 21 insertions(+), 5 deletions(-)
+>
+> --
+> 1.9.1
+>
 
-Yes.
-
-[...]
+Looks good, applied for next, thanks!
 
 Kind regards
 Uffe
