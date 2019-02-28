@@ -1,103 +1,116 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: correct the fix of ERR004536
-Date: Thu, 28 Feb 2019 09:24:39 +0100
-Message-ID: <CAPDyKFp1_gp8BXQrHYpS09NQFR=SWB61O9-tqsSbq8+Mo3S8JA@mail.gmail.com>
+From: BOUGH CHEN <haibo.chen@nxp.com>
+Subject: RE: [PATCH] mmc: sdhci-esdhc-imx: correct the fix of ERR004536
+Date: Thu, 28 Feb 2019 08:41:30 +0000
+Message-ID: <VI1PR04MB50403160E8138D0E3790875890750@VI1PR04MB5040.eurprd04.prod.outlook.com>
 References: <20190228080859.32520-1-haibo.chen@nxp.com>
+ <CAPDyKFp1_gp8BXQrHYpS09NQFR=SWB61O9-tqsSbq8+Mo3S8JA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20190228080859.32520-1-haibo.chen@nxp.com>
+In-Reply-To: <CAPDyKFp1_gp8BXQrHYpS09NQFR=SWB61O9-tqsSbq8+Mo3S8JA@mail.gmail.com>
+Content-Language: en-US
 Sender: stable-owner@vger.kernel.org
-To: BOUGH CHEN <haibo.chen@nxp.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: "adrian.hunter@intel.com" <adrian.hunter@intel.com>, Aisheng Dong <aisheng.dong@nxp.com>, "shawnguo@kernel.org" <shawnguo@kernel.org>, "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>, "kernel@pengutronix.de" <kernel@pengutronix.de>, "festevam@gmail.com" <festevam@gmail.com>, dl-linux-imx <linux-imx@nxp.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "stable@vger.kernel.org" <stable@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 28 Feb 2019 at 09:01, BOUGH CHEN <haibo.chen@nxp.com> wrote:
->
-> Commit 18094430d6b5 ("mmc: sdhci-esdhc-imx: add ADMA Length
-> Mismatch errata fix") involve the fix of ERR004536, but the
-> fix is incorrect. Double confirm with IC, need to clear the
-> bit 7 of register 0x6c rather than set this bit 7.
-> Here is the definition of bit 7 of 0x6c:
->     0: enable the new IC fix for ERR004536
->     1: do not use the IC fix, keep the same as before
->
-> Due to the reset value of this bit 7 is 0, ROM code and
-> bootloader do not touch this bit 7, so here directly remove
-> the operation of this bit 7, make sure the fix of ERR004536
-> can work.
-
-Well, rather than relying on the bootloader, let the kernel do the
-right thing. That is, write a zero to the register bit rather than a
-one.
-
-Is the code doing that?
-
-Kind regards
-Uffe
-
->
-> Find this issue on i.MX845s-evk board when enable CMDQ, and
-> let system in heavy loading.
->
-> root@imx8mmevk:~# dd if=/dev/mmcblk2 of=/dev/null bs=1M &
-> root@imx8mmevk:~# memtester 1000M > /dev/zero &
-> root@imx8mmevk:~# [  139.897220] mmc2: cqhci: timeout for tag 16
-> [  139.901417] mmc2: cqhci: ============ CQHCI REGISTER DUMP ===========
-> [  139.907862] mmc2: cqhci: Caps:      0x0000310a | Version:  0x00000510
-> [  139.914311] mmc2: cqhci: Config:    0x00001001 | Control:  0x00000000
-> [  139.920753] mmc2: cqhci: Int stat:  0x00000000 | Int enab: 0x00000006
-> [  139.927193] mmc2: cqhci: Int sig:   0x00000006 | Int Coal: 0x00000000
-> [  139.933634] mmc2: cqhci: TDL base:  0x7809c000 | TDL up32: 0x00000000
-> [  139.940073] mmc2: cqhci: Doorbell:  0x00030000 | TCN:      0x00000000
-> [  139.946518] mmc2: cqhci: Dev queue: 0x00010000 | Dev Pend: 0x00010000
-> [  139.952967] mmc2: cqhci: Task clr:  0x00000000 | SSC1:     0x00011000
-> [  139.959411] mmc2: cqhci: SSC2:      0x00000001 | DCMD rsp: 0x00000000
-> [  139.965857] mmc2: cqhci: RED mask:  0xfdf9a080 | TERRI:    0x00000000
-> [  139.972308] mmc2: cqhci: Resp idx:  0x0000002e | Resp arg: 0x00000900
-> [  139.978761] mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
-> [  139.985214] mmc2: sdhci: Sys addr:  0xb2c19000 | Version:  0x00000002
-> [  139.991669] mmc2: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000400
-> [  139.998127] mmc2: sdhci: Argument:  0x40110400 | Trn mode: 0x00000033
-> [  140.004618] mmc2: sdhci: Present:   0x01088a8f | Host ctl: 0x00000030
-> [  140.011113] mmc2: sdhci: Power:     0x00000002 | Blk gap:  0x00000080
-> [  140.017583] mmc2: sdhci: Wake-up:   0x00000008 | Clock:    0x0000000f
-> [  140.024039] mmc2: sdhci: Timeout:   0x0000008f | Int stat: 0x00000000
-> [  140.030497] mmc2: sdhci: Int enab:  0x107f4000 | Sig enab: 0x107f4000
-> [  140.036972] mmc2: sdhci: AC12 err:  0x00000000 | Slot int: 0x00000502
-> [  140.043426] mmc2: sdhci: Caps:      0x07eb0000 | Caps_1:   0x8000b407
-> [  140.049867] mmc2: sdhci: Cmd:       0x00002c1a | Max curr: 0x00ffffff
-> [  140.056314] mmc2: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0xffffffff
-> [  140.062755] mmc2: sdhci: Resp[2]:   0x328f5903 | Resp[3]:  0x00d00f00
-> [  140.069195] mmc2: sdhci: Host ctl2: 0x00000008
-> [  140.073640] mmc2: sdhci: ADMA Err:  0x00000007 | ADMA Ptr: 0x7809c108
-> [  140.080079] mmc2: sdhci: ============================================
-> [  140.086662] mmc2: running CQE recovery
->
-> Fixes commit 18094430d6b5 ("mmc: sdhci-esdhc-imx: add ADMA Length Mismatch errata fix")
-> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
-> Cc: stable@vger.kernel.org
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 6 ------
->  1 file changed, 6 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index 32ca3703b432..5ee7613c818f 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -1171,12 +1171,6 @@ static void sdhci_esdhc_imx_hwinit(struct sdhci_host *host)
->                 writel(readl(host->ioaddr + SDHCI_HOST_CONTROL)
->                         | ESDHC_BURST_LEN_EN_INCR,
->                         host->ioaddr + SDHCI_HOST_CONTROL);
-> -               /*
-> -               * erratum ESDHC_FLAG_ERR004536 fix for MX6Q TO1.2 and MX6DL
-> -               * TO1.1, it's harmless for MX6SL
-> -               */
-> -               writel(readl(host->ioaddr + 0x6c) | BIT(7),
-> -                       host->ioaddr + 0x6c);
->
->                 /* disable DLL_CTRL delay line settings */
->                 writel(0x0, host->ioaddr + ESDHC_DLL_CTRL);
-> --
-> 2.17.1
->
+DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IFVsZiBIYW5zc29uIFttYWls
+dG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4gU2VudDogMjAxOeW5tDLmnIgyOOaXpSAxNjoy
+NQ0KPiBUbzogQk9VR0ggQ0hFTiA8aGFpYm8uY2hlbkBueHAuY29tPg0KPiBDYzogYWRyaWFuLmh1
+bnRlckBpbnRlbC5jb207IEFpc2hlbmcgRG9uZyA8YWlzaGVuZy5kb25nQG54cC5jb20+Ow0KPiBz
+aGF3bmd1b0BrZXJuZWwub3JnOyBzLmhhdWVyQHBlbmd1dHJvbml4LmRlOyBrZXJuZWxAcGVuZ3V0
+cm9uaXguZGU7DQo+IGZlc3RldmFtQGdtYWlsLmNvbTsgZGwtbGludXgtaW14IDxsaW51eC1pbXhA
+bnhwLmNvbT47DQo+IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc7IHN0YWJsZUB2Z2VyLmtlcm5l
+bC5vcmcNCj4gU3ViamVjdDogUmU6IFtQQVRDSF0gbW1jOiBzZGhjaS1lc2RoYy1pbXg6IGNvcnJl
+Y3QgdGhlIGZpeCBvZiBFUlIwMDQ1MzYNCj4gDQo+IE9uIFRodSwgMjggRmViIDIwMTkgYXQgMDk6
+MDEsIEJPVUdIIENIRU4gPGhhaWJvLmNoZW5AbnhwLmNvbT4gd3JvdGU6DQo+ID4NCj4gPiBDb21t
+aXQgMTgwOTQ0MzBkNmI1ICgibW1jOiBzZGhjaS1lc2RoYy1pbXg6IGFkZCBBRE1BIExlbmd0aA0K
+PiBNaXNtYXRjaA0KPiA+IGVycmF0YSBmaXgiKSBpbnZvbHZlIHRoZSBmaXggb2YgRVJSMDA0NTM2
+LCBidXQgdGhlIGZpeCBpcyBpbmNvcnJlY3QuDQo+ID4gRG91YmxlIGNvbmZpcm0gd2l0aCBJQywg
+bmVlZCB0byBjbGVhciB0aGUgYml0IDcgb2YgcmVnaXN0ZXIgMHg2Yw0KPiA+IHJhdGhlciB0aGFu
+IHNldCB0aGlzIGJpdCA3Lg0KPiA+IEhlcmUgaXMgdGhlIGRlZmluaXRpb24gb2YgYml0IDcgb2Yg
+MHg2YzoNCj4gPiAgICAgMDogZW5hYmxlIHRoZSBuZXcgSUMgZml4IGZvciBFUlIwMDQ1MzYNCj4g
+PiAgICAgMTogZG8gbm90IHVzZSB0aGUgSUMgZml4LCBrZWVwIHRoZSBzYW1lIGFzIGJlZm9yZQ0K
+PiA+DQo+ID4gRHVlIHRvIHRoZSByZXNldCB2YWx1ZSBvZiB0aGlzIGJpdCA3IGlzIDAsIFJPTSBj
+b2RlIGFuZCBib290bG9hZGVyIGRvDQo+ID4gbm90IHRvdWNoIHRoaXMgYml0IDcsIHNvIGhlcmUg
+ZGlyZWN0bHkgcmVtb3ZlIHRoZSBvcGVyYXRpb24gb2YgdGhpcw0KPiA+IGJpdCA3LCBtYWtlIHN1
+cmUgdGhlIGZpeCBvZiBFUlIwMDQ1MzYgY2FuIHdvcmsuDQo+IA0KPiBXZWxsLCByYXRoZXIgdGhh
+biByZWx5aW5nIG9uIHRoZSBib290bG9hZGVyLCBsZXQgdGhlIGtlcm5lbCBkbyB0aGUgcmlnaHQg
+dGhpbmcuDQo+IFRoYXQgaXMsIHdyaXRlIGEgemVybyB0byB0aGUgcmVnaXN0ZXIgYml0IHJhdGhl
+ciB0aGFuIGEgb25lLg0KPiANCj4gSXMgdGhlIGNvZGUgZG9pbmcgdGhhdD8NCj4gDQoNClllcywg
+d3JpdGUgYSB6ZXJvIHRvIHRoZSByZWdpc3RlciBiaXQgaXMgY29ycmVjdC4NCldoeSBJIGp1c3Qg
+cmVtb3ZlIHRoZSBjb2RlIHJhdGhlciB0aGFuIGRpcmVjdGx5IHdyaXRlIDAgdG8gdGhpcyBiaXQg
+aXMgYmVjYXVzZSB0aGUgcmVnaXN0ZXIgMHg2YyBzaG91bGQgYmUgaW52aXNpYmxlIHRvIHNvZnR3
+YXJlLCBhbmQgaXMgbm90IGRlZmluZWQgaW4gcmVmZXJlbmNlIG1hbnVhbC4gSXQgaXMgYSByZWdp
+c3RlciBvbmx5IG9wZW4gZm9yIElDIHRvIHRlc3QuDQpJZiB5b3UgcHJlZmVyIHRvIHdyaXRlIGEg
+emVybyB0byB0aGUgcmVnaXN0ZXIgYml0LCBJIGNhbiBkbyB0aGF0Lg0KDQpCZXN0IFJlZ2FyZHMN
+CkhhaWJvIENoZW4gDQoNCj4gS2luZCByZWdhcmRzDQo+IFVmZmUNCj4gDQo+ID4NCj4gPiBGaW5k
+IHRoaXMgaXNzdWUgb24gaS5NWDg0NXMtZXZrIGJvYXJkIHdoZW4gZW5hYmxlIENNRFEsIGFuZCBs
+ZXQgc3lzdGVtDQo+ID4gaW4gaGVhdnkgbG9hZGluZy4NCj4gPg0KPiA+IHJvb3RAaW14OG1tZXZr
+On4jIGRkIGlmPS9kZXYvbW1jYmxrMiBvZj0vZGV2L251bGwgYnM9MU0gJg0KPiA+IHJvb3RAaW14
+OG1tZXZrOn4jIG1lbXRlc3RlciAxMDAwTSA+IC9kZXYvemVybyAmDQo+IHJvb3RAaW14OG1tZXZr
+On4jIFsNCj4gPiAxMzkuODk3MjIwXSBtbWMyOiBjcWhjaTogdGltZW91dCBmb3IgdGFnIDE2IFsg
+IDEzOS45MDE0MTddIG1tYzI6DQo+ID4gY3FoY2k6ID09PT09PT09PT09PSBDUUhDSSBSRUdJU1RF
+UiBEVU1QID09PT09PT09PT09DQo+ID4gWyAgMTM5LjkwNzg2Ml0gbW1jMjogY3FoY2k6IENhcHM6
+ICAgICAgMHgwMDAwMzEwYSB8IFZlcnNpb246DQo+IDB4MDAwMDA1MTANCj4gPiBbICAxMzkuOTE0
+MzExXSBtbWMyOiBjcWhjaTogQ29uZmlnOiAgICAweDAwMDAxMDAxIHwgQ29udHJvbDoNCj4gMHgw
+MDAwMDAwMA0KPiA+IFsgIDEzOS45MjA3NTNdIG1tYzI6IGNxaGNpOiBJbnQgc3RhdDogIDB4MDAw
+MDAwMDAgfCBJbnQgZW5hYjogMHgwMDAwMDAwNg0KPiA+IFsgIDEzOS45MjcxOTNdIG1tYzI6IGNx
+aGNpOiBJbnQgc2lnOiAgIDB4MDAwMDAwMDYgfCBJbnQgQ29hbDogMHgwMDAwMDAwMA0KPiA+IFsg
+IDEzOS45MzM2MzRdIG1tYzI6IGNxaGNpOiBUREwgYmFzZTogIDB4NzgwOWMwMDAgfCBUREwgdXAz
+MjoNCj4gMHgwMDAwMDAwMA0KPiA+IFsgIDEzOS45NDAwNzNdIG1tYzI6IGNxaGNpOiBEb29yYmVs
+bDogIDB4MDAwMzAwMDAgfCBUQ046DQo+IDB4MDAwMDAwMDANCj4gPiBbICAxMzkuOTQ2NTE4XSBt
+bWMyOiBjcWhjaTogRGV2IHF1ZXVlOiAweDAwMDEwMDAwIHwgRGV2IFBlbmQ6DQo+IDB4MDAwMTAw
+MDANCj4gPiBbICAxMzkuOTUyOTY3XSBtbWMyOiBjcWhjaTogVGFzayBjbHI6ICAweDAwMDAwMDAw
+IHwgU1NDMToNCj4gMHgwMDAxMTAwMA0KPiA+IFsgIDEzOS45NTk0MTFdIG1tYzI6IGNxaGNpOiBT
+U0MyOiAgICAgIDB4MDAwMDAwMDEgfCBEQ01EIHJzcDoNCj4gMHgwMDAwMDAwMA0KPiA+IFsgIDEz
+OS45NjU4NTddIG1tYzI6IGNxaGNpOiBSRUQgbWFzazogIDB4ZmRmOWEwODAgfCBURVJSSToNCj4g
+MHgwMDAwMDAwMA0KPiA+IFsgIDEzOS45NzIzMDhdIG1tYzI6IGNxaGNpOiBSZXNwIGlkeDogIDB4
+MDAwMDAwMmUgfCBSZXNwIGFyZzoNCj4gPiAweDAwMDAwOTAwIFsgIDEzOS45Nzg3NjFdIG1tYzI6
+IHNkaGNpOiA9PT09PT09PT09PT0gU0RIQ0kgUkVHSVNURVINCj4gPiBEVU1QID09PT09PT09PT09
+IFsgIDEzOS45ODUyMTRdIG1tYzI6IHNkaGNpOiBTeXMgYWRkcjogIDB4YjJjMTkwMDAgfA0KPiA+
+IFZlcnNpb246ICAweDAwMDAwMDAyIFsgIDEzOS45OTE2NjldIG1tYzI6IHNkaGNpOiBCbGsgc2l6
+ZTogIDB4MDAwMDAyMDANCj4gPiB8IEJsayBjbnQ6ICAweDAwMDAwNDAwIFsgIDEzOS45OTgxMjdd
+IG1tYzI6IHNkaGNpOiBBcmd1bWVudDoNCj4gMHg0MDExMDQwMCB8IFRybiBtb2RlOiAweDAwMDAw
+MDMzDQo+ID4gWyAgMTQwLjAwNDYxOF0gbW1jMjogc2RoY2k6IFByZXNlbnQ6ICAgMHgwMTA4OGE4
+ZiB8IEhvc3QgY3RsOiAweDAwMDAwMDMwDQo+ID4gWyAgMTQwLjAxMTExM10gbW1jMjogc2RoY2k6
+IFBvd2VyOiAgICAgMHgwMDAwMDAwMiB8IEJsayBnYXA6DQo+IDB4MDAwMDAwODANCj4gPiBbICAx
+NDAuMDE3NTgzXSBtbWMyOiBzZGhjaTogV2FrZS11cDogICAweDAwMDAwMDA4IHwgQ2xvY2s6DQo+
+IDB4MDAwMDAwMGYNCj4gPiBbICAxNDAuMDI0MDM5XSBtbWMyOiBzZGhjaTogVGltZW91dDogICAw
+eDAwMDAwMDhmIHwgSW50IHN0YXQ6IDB4MDAwMDAwMDANCj4gPiBbICAxNDAuMDMwNDk3XSBtbWMy
+OiBzZGhjaTogSW50IGVuYWI6ICAweDEwN2Y0MDAwIHwgU2lnIGVuYWI6DQo+ID4gMHgxMDdmNDAw
+MCBbICAxNDAuMDM2OTcyXSBtbWMyOiBzZGhjaTogQUMxMiBlcnI6ICAweDAwMDAwMDAwIHwgU2xv
+dCBpbnQ6DQo+IDB4MDAwMDA1MDINCj4gPiBbICAxNDAuMDQzNDI2XSBtbWMyOiBzZGhjaTogQ2Fw
+czogICAgICAweDA3ZWIwMDAwIHwgQ2Fwc18xOg0KPiAweDgwMDBiNDA3DQo+ID4gWyAgMTQwLjA0
+OTg2N10gbW1jMjogc2RoY2k6IENtZDogICAgICAgMHgwMDAwMmMxYSB8IE1heCBjdXJyOiAweDAw
+ZmZmZmZmDQo+ID4gWyAgMTQwLjA1NjMxNF0gbW1jMjogc2RoY2k6IFJlc3BbMF06ICAgMHgwMDAw
+MDkwMCB8IFJlc3BbMV06ICAweGZmZmZmZmZmDQo+ID4gWyAgMTQwLjA2Mjc1NV0gbW1jMjogc2Ro
+Y2k6IFJlc3BbMl06ICAgMHgzMjhmNTkwMyB8IFJlc3BbM106DQo+IDB4MDBkMDBmMDANCj4gPiBb
+ICAxNDAuMDY5MTk1XSBtbWMyOiBzZGhjaTogSG9zdCBjdGwyOiAweDAwMDAwMDA4IFsgIDE0MC4w
+NzM2NDBdIG1tYzI6DQo+ID4gc2RoY2k6IEFETUEgRXJyOiAgMHgwMDAwMDAwNyB8IEFETUEgUHRy
+OiAweDc4MDljMTA4IFsgIDE0MC4wODAwNzldDQo+ID4gbW1jMjogc2RoY2k6ID09PT09PT09PT09
+PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09DQo+ID4gWyAgMTQwLjA4NjY2Ml0gbW1j
+MjogcnVubmluZyBDUUUgcmVjb3ZlcnkNCj4gPg0KPiA+IEZpeGVzIGNvbW1pdCAxODA5NDQzMGQ2
+YjUgKCJtbWM6IHNkaGNpLWVzZGhjLWlteDogYWRkIEFETUEgTGVuZ3RoDQo+ID4gTWlzbWF0Y2gg
+ZXJyYXRhIGZpeCIpDQo+ID4gU2lnbmVkLW9mZi1ieTogSGFpYm8gQ2hlbiA8aGFpYm8uY2hlbkBu
+eHAuY29tPg0KPiA+IENjOiBzdGFibGVAdmdlci5rZXJuZWwub3JnDQo+ID4gLS0tDQo+ID4gIGRy
+aXZlcnMvbW1jL2hvc3Qvc2RoY2ktZXNkaGMtaW14LmMgfCA2IC0tLS0tLQ0KPiA+ICAxIGZpbGUg
+Y2hhbmdlZCwgNiBkZWxldGlvbnMoLSkNCj4gPg0KPiA+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21t
+Yy9ob3N0L3NkaGNpLWVzZGhjLWlteC5jDQo+ID4gYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLWVz
+ZGhjLWlteC5jDQo+ID4gaW5kZXggMzJjYTM3MDNiNDMyLi41ZWU3NjEzYzgxOGYgMTAwNjQ0DQo+
+ID4gLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1lc2RoYy1pbXguYw0KPiA+ICsrKyBiL2Ry
+aXZlcnMvbW1jL2hvc3Qvc2RoY2ktZXNkaGMtaW14LmMNCj4gPiBAQCAtMTE3MSwxMiArMTE3MSw2
+IEBAIHN0YXRpYyB2b2lkIHNkaGNpX2VzZGhjX2lteF9od2luaXQoc3RydWN0DQo+IHNkaGNpX2hv
+c3QgKmhvc3QpDQo+ID4gICAgICAgICAgICAgICAgIHdyaXRlbChyZWFkbChob3N0LT5pb2FkZHIg
+KyBTREhDSV9IT1NUX0NPTlRST0wpDQo+ID4gICAgICAgICAgICAgICAgICAgICAgICAgfCBFU0RI
+Q19CVVJTVF9MRU5fRU5fSU5DUiwNCj4gPiAgICAgICAgICAgICAgICAgICAgICAgICBob3N0LT5p
+b2FkZHIgKyBTREhDSV9IT1NUX0NPTlRST0wpOw0KPiA+IC0gICAgICAgICAgICAgICAvKg0KPiA+
+IC0gICAgICAgICAgICAgICAqIGVycmF0dW0gRVNESENfRkxBR19FUlIwMDQ1MzYgZml4IGZvciBN
+WDZRIFRPMS4yDQo+IGFuZCBNWDZETA0KPiA+IC0gICAgICAgICAgICAgICAqIFRPMS4xLCBpdCdz
+IGhhcm1sZXNzIGZvciBNWDZTTA0KPiA+IC0gICAgICAgICAgICAgICAqLw0KPiA+IC0gICAgICAg
+ICAgICAgICB3cml0ZWwocmVhZGwoaG9zdC0+aW9hZGRyICsgMHg2YykgfCBCSVQoNyksDQo+ID4g
+LSAgICAgICAgICAgICAgICAgICAgICAgaG9zdC0+aW9hZGRyICsgMHg2Yyk7DQo+ID4NCj4gPiAg
+ICAgICAgICAgICAgICAgLyogZGlzYWJsZSBETExfQ1RSTCBkZWxheSBsaW5lIHNldHRpbmdzICov
+DQo+ID4gICAgICAgICAgICAgICAgIHdyaXRlbCgweDAsIGhvc3QtPmlvYWRkciArIEVTREhDX0RM
+TF9DVFJMKTsNCj4gPiAtLQ0KPiA+IDIuMTcuMQ0KPiA+DQo=
