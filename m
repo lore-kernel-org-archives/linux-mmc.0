@@ -1,71 +1,81 @@
-From: Jon Hunter <jonathanh@nvidia.com>
-Subject: Re: [PATCH V15 14/18] block: enable multipage bvecs
-Date: Thu, 28 Feb 2019 12:39:10 +0000
-Message-ID: <83c1e25b-4aab-4374-e160-b506eea9e68f@nvidia.com>
-References: <20190215111324.30129-1-ming.lei@redhat.com>
- <20190215111324.30129-15-ming.lei@redhat.com>
- <CGME20190221084301eucas1p11e8841a62b4b1da3cccca661b6f4c29d@eucas1p1.samsung.com>
- <6c9ae4de-c56f-a2b3-2542-da7d8b95601d@samsung.com>
- <0dbbee64-5c6b-0374-4360-6dc218c70d58@nvidia.com>
- <20190227232940.GA13319@ming.t460p>
- <01155e88-f021-fbe2-d048-42e303fe2935@samsung.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v5.0-rc9
+Date: Thu, 28 Feb 2019 15:22:39 +0100
+Message-ID: <20190228142239.4078-1-ulf.hansson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <01155e88-f021-fbe2-d048-42e303fe2935@samsung.com>
-Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Marek Szyprowski <m.szyprowski@samsung.com>, Ming Lei <ming.lei@redhat.com>
-Cc: Jens Axboe <axboe@kernel.dk>, linux-block@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mm@kvack.org, Theodore Ts'o <tytso@mit.edu>, Omar Sandoval <osandov@fb.com>, Sagi Grimberg <sagi@grimberg.me>, Dave Chinner <dchinner@redhat.com>, Kent Overstreet <kent.overstreet@gmail.com>, Mike Snitzer <snitzer@redhat.com>, dm-devel@redhat.com, Alexander Viro <viro@zeniv.linux.org.uk>, linux-fsdevel@vger.kernel.org, linux-raid@vger.kernel.org, David Sterba <dsterba@suse.com>, linux-btrfs@vger.kernel.org, "Darrick J . Wong" <darrick.wong@oracle.com>, linux-xfs@vger.kernel.org, Gao Xiang <gaoxiang25@huawei.com>, Christoph Hellwig <hch@lst.de>, linux-ext4@vger.kernel.org, Coly Li <colyli@suse.de>, linux-bcache@vger.kernel.org, Boaz Harrosh <ooo@electrozaur.com>
+To: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
+Hi Linus,
 
-On 28/02/2019 07:51, Marek Szyprowski wrote:
-> Hi Ming,
-> 
-> On 2019-02-28 00:29, Ming Lei wrote:
->> On Wed, Feb 27, 2019 at 08:47:09PM +0000, Jon Hunter wrote:
->>> On 21/02/2019 08:42, Marek Szyprowski wrote:
->>>> On 2019-02-15 12:13, Ming Lei wrote:
->>>>> This patch pulls the trigger for multi-page bvecs.
->>>>>
->>>>> Reviewed-by: Omar Sandoval <osandov@fb.com>
->>>>> Signed-off-by: Ming Lei <ming.lei@redhat.com>
->>>> Since Linux next-20190218 I've observed problems with block layer on one
->>>> of my test devices (Odroid U3 with EXT4 rootfs on SD card). Bisecting
->>>> this issue led me to this change. This is also the first linux-next
->>>> release with this change merged. The issue is fully reproducible and can
->>>> be observed in the following kernel log:
->>>>
->>>> sdhci: Secure Digital Host Controller Interface driver
->>>> sdhci: Copyright(c) Pierre Ossman
->>>> s3c-sdhci 12530000.sdhci: clock source 2: mmc_busclk.2 (100000000 Hz)
->>>> s3c-sdhci 12530000.sdhci: Got CD GPIO
->>>> mmc0: SDHCI controller on samsung-hsmmc [12530000.sdhci] using ADMA
->>>> mmc0: new high speed SDHC card at address aaaa
->>>> mmcblk0: mmc0:aaaa SL16G 14.8 GiB
->>> I have also noticed some failures when writing to an eMMC device on one
->>> of our Tegra boards. We have a simple eMMC write/read test and it is
->>> currently failing because the data written does not match the source.
->>>
->>> I did not seem the same crash as reported here, however, in our case the
->>> rootfs is NFS mounted and so probably would not. However, the bisect
->>> points to this commit and reverting on top of -next fixes the issues.
->> It is sdhci, probably related with max segment size, could you test the
->> following patch:
->>
->> https://marc.info/?l=linux-mmc&m=155128334122951&w=2
-> 
-> This seems to be fixing my issue too! Thanks!
+Here's a PR with a couple of MMC fixes intended for v5.0-rc9 (final). Details
+about the highlights are as usual found in the signed tag.
 
-Thanks, I can confirm this fixes the issue for Tegra. So feel free to
-add my ...
+Please pull this in!
 
-Tested-by: Jon Hunter <jonathanh@nvidia.com>
+Kind regards
+Ulf Hansson
 
-Cheers!
-Jon
 
--- 
-nvpublic
+The following changes since commit 5908e6b738e3357af42c10e1183753c70a0117a9:
+
+  Linux 5.0-rc8 (2019-02-24 16:46:45 -0800)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.0-rc8
+
+for you to fetch changes up to e30be063d6dbcc0f18b1eb25fa709fdef89201fb:
+
+  mmc: sdhci-esdhc-imx: correct the fix of ERR004536 (2019-02-28 12:18:31 +0100)
+
+----------------------------------------------------------------
+MMC core:
+ - Fix NULL ptr crash for a special test case
+ - Align max segment size with logical block size to prevent bugs in
+   v5.1-rc1.
+MMC host:
+ - cqhci: Minor fixes
+ - tmio: Prevent interrupt storm
+ - tmio: Fixup SD/MMC card initialization
+ - spi: Allow card to be detected during probe
+ - sdhci-esdhc-imx: Fixup fix for ERR004536
+
+----------------------------------------------------------------
+Alamy Liu (2):
+      mmc: cqhci: fix space allocated for transfer descriptor
+      mmc: cqhci: Fix a tiny potential memory leak on error condition
+
+BOUGH CHEN (1):
+      mmc: sdhci-esdhc-imx: correct the fix of ERR004536
+
+Jonathan Neuschäfer (1):
+      mmc: spi: Fix card detection during probe
+
+Ming Lei (1):
+      mmc: core: align max segment size with logical block size
+
+Ritesh Harjani (1):
+      mmc: core: Fix NULL ptr crash from mmc_should_fail_request
+
+Sergei Shtylyov (1):
+      mmc: tmio_mmc_core: don't claim spurious interrupts
+
+Takeshi Saito (1):
+      mmc: tmio: fix access width of Block Count Register
+
+ drivers/mmc/core/block.c                 |  6 ------
+ drivers/mmc/core/core.c                  |  2 +-
+ drivers/mmc/core/queue.c                 |  9 ++++++++-
+ drivers/mmc/host/cqhci.c                 | 13 +++++++++++--
+ drivers/mmc/host/mmc_spi.c               |  1 +
+ drivers/mmc/host/renesas_sdhi_sys_dmac.c |  1 +
+ drivers/mmc/host/sdhci-esdhc-imx.c       |  9 +++++----
+ drivers/mmc/host/tmio_mmc.h              |  5 +++++
+ drivers/mmc/host/tmio_mmc_core.c         | 17 ++++++++++++-----
+ 9 files changed, 44 insertions(+), 19 deletions(-)
