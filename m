@@ -1,116 +1,63 @@
-From: BOUGH CHEN <haibo.chen@nxp.com>
-Subject: RE: [PATCH] mmc: sdhci-esdhc-imx: correct the fix of ERR004536
-Date: Thu, 28 Feb 2019 08:41:30 +0000
-Message-ID: <VI1PR04MB50403160E8138D0E3790875890750@VI1PR04MB5040.eurprd04.prod.outlook.com>
-References: <20190228080859.32520-1-haibo.chen@nxp.com>
- <CAPDyKFp1_gp8BXQrHYpS09NQFR=SWB61O9-tqsSbq8+Mo3S8JA@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: correct the fix of ERR004536
+Date: Thu, 28 Feb 2019 10:19:08 +0100
+Message-ID: <CAPDyKFqWqBgCX3iB8U5S_DAER8G-gw+N9Ow-4mtvEb-nVfzAeQ@mail.gmail.com>
+References: <20190228080859.32520-1-haibo.chen@nxp.com> <CAPDyKFp1_gp8BXQrHYpS09NQFR=SWB61O9-tqsSbq8+Mo3S8JA@mail.gmail.com>
+ <VI1PR04MB50403160E8138D0E3790875890750@VI1PR04MB5040.eurprd04.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFp1_gp8BXQrHYpS09NQFR=SWB61O9-tqsSbq8+Mo3S8JA@mail.gmail.com>
-Content-Language: en-US
+In-Reply-To: <VI1PR04MB50403160E8138D0E3790875890750@VI1PR04MB5040.eurprd04.prod.outlook.com>
 Sender: stable-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
+To: BOUGH CHEN <haibo.chen@nxp.com>
 Cc: "adrian.hunter@intel.com" <adrian.hunter@intel.com>, Aisheng Dong <aisheng.dong@nxp.com>, "shawnguo@kernel.org" <shawnguo@kernel.org>, "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>, "kernel@pengutronix.de" <kernel@pengutronix.de>, "festevam@gmail.com" <festevam@gmail.com>, dl-linux-imx <linux-imx@nxp.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "stable@vger.kernel.org" <stable@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IFVsZiBIYW5zc29uIFttYWls
-dG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4gU2VudDogMjAxOeW5tDLmnIgyOOaXpSAxNjoy
-NQ0KPiBUbzogQk9VR0ggQ0hFTiA8aGFpYm8uY2hlbkBueHAuY29tPg0KPiBDYzogYWRyaWFuLmh1
-bnRlckBpbnRlbC5jb207IEFpc2hlbmcgRG9uZyA8YWlzaGVuZy5kb25nQG54cC5jb20+Ow0KPiBz
-aGF3bmd1b0BrZXJuZWwub3JnOyBzLmhhdWVyQHBlbmd1dHJvbml4LmRlOyBrZXJuZWxAcGVuZ3V0
-cm9uaXguZGU7DQo+IGZlc3RldmFtQGdtYWlsLmNvbTsgZGwtbGludXgtaW14IDxsaW51eC1pbXhA
-bnhwLmNvbT47DQo+IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc7IHN0YWJsZUB2Z2VyLmtlcm5l
-bC5vcmcNCj4gU3ViamVjdDogUmU6IFtQQVRDSF0gbW1jOiBzZGhjaS1lc2RoYy1pbXg6IGNvcnJl
-Y3QgdGhlIGZpeCBvZiBFUlIwMDQ1MzYNCj4gDQo+IE9uIFRodSwgMjggRmViIDIwMTkgYXQgMDk6
-MDEsIEJPVUdIIENIRU4gPGhhaWJvLmNoZW5AbnhwLmNvbT4gd3JvdGU6DQo+ID4NCj4gPiBDb21t
-aXQgMTgwOTQ0MzBkNmI1ICgibW1jOiBzZGhjaS1lc2RoYy1pbXg6IGFkZCBBRE1BIExlbmd0aA0K
-PiBNaXNtYXRjaA0KPiA+IGVycmF0YSBmaXgiKSBpbnZvbHZlIHRoZSBmaXggb2YgRVJSMDA0NTM2
-LCBidXQgdGhlIGZpeCBpcyBpbmNvcnJlY3QuDQo+ID4gRG91YmxlIGNvbmZpcm0gd2l0aCBJQywg
-bmVlZCB0byBjbGVhciB0aGUgYml0IDcgb2YgcmVnaXN0ZXIgMHg2Yw0KPiA+IHJhdGhlciB0aGFu
-IHNldCB0aGlzIGJpdCA3Lg0KPiA+IEhlcmUgaXMgdGhlIGRlZmluaXRpb24gb2YgYml0IDcgb2Yg
-MHg2YzoNCj4gPiAgICAgMDogZW5hYmxlIHRoZSBuZXcgSUMgZml4IGZvciBFUlIwMDQ1MzYNCj4g
-PiAgICAgMTogZG8gbm90IHVzZSB0aGUgSUMgZml4LCBrZWVwIHRoZSBzYW1lIGFzIGJlZm9yZQ0K
-PiA+DQo+ID4gRHVlIHRvIHRoZSByZXNldCB2YWx1ZSBvZiB0aGlzIGJpdCA3IGlzIDAsIFJPTSBj
-b2RlIGFuZCBib290bG9hZGVyIGRvDQo+ID4gbm90IHRvdWNoIHRoaXMgYml0IDcsIHNvIGhlcmUg
-ZGlyZWN0bHkgcmVtb3ZlIHRoZSBvcGVyYXRpb24gb2YgdGhpcw0KPiA+IGJpdCA3LCBtYWtlIHN1
-cmUgdGhlIGZpeCBvZiBFUlIwMDQ1MzYgY2FuIHdvcmsuDQo+IA0KPiBXZWxsLCByYXRoZXIgdGhh
-biByZWx5aW5nIG9uIHRoZSBib290bG9hZGVyLCBsZXQgdGhlIGtlcm5lbCBkbyB0aGUgcmlnaHQg
-dGhpbmcuDQo+IFRoYXQgaXMsIHdyaXRlIGEgemVybyB0byB0aGUgcmVnaXN0ZXIgYml0IHJhdGhl
-ciB0aGFuIGEgb25lLg0KPiANCj4gSXMgdGhlIGNvZGUgZG9pbmcgdGhhdD8NCj4gDQoNClllcywg
-d3JpdGUgYSB6ZXJvIHRvIHRoZSByZWdpc3RlciBiaXQgaXMgY29ycmVjdC4NCldoeSBJIGp1c3Qg
-cmVtb3ZlIHRoZSBjb2RlIHJhdGhlciB0aGFuIGRpcmVjdGx5IHdyaXRlIDAgdG8gdGhpcyBiaXQg
-aXMgYmVjYXVzZSB0aGUgcmVnaXN0ZXIgMHg2YyBzaG91bGQgYmUgaW52aXNpYmxlIHRvIHNvZnR3
-YXJlLCBhbmQgaXMgbm90IGRlZmluZWQgaW4gcmVmZXJlbmNlIG1hbnVhbC4gSXQgaXMgYSByZWdp
-c3RlciBvbmx5IG9wZW4gZm9yIElDIHRvIHRlc3QuDQpJZiB5b3UgcHJlZmVyIHRvIHdyaXRlIGEg
-emVybyB0byB0aGUgcmVnaXN0ZXIgYml0LCBJIGNhbiBkbyB0aGF0Lg0KDQpCZXN0IFJlZ2FyZHMN
-CkhhaWJvIENoZW4gDQoNCj4gS2luZCByZWdhcmRzDQo+IFVmZmUNCj4gDQo+ID4NCj4gPiBGaW5k
-IHRoaXMgaXNzdWUgb24gaS5NWDg0NXMtZXZrIGJvYXJkIHdoZW4gZW5hYmxlIENNRFEsIGFuZCBs
-ZXQgc3lzdGVtDQo+ID4gaW4gaGVhdnkgbG9hZGluZy4NCj4gPg0KPiA+IHJvb3RAaW14OG1tZXZr
-On4jIGRkIGlmPS9kZXYvbW1jYmxrMiBvZj0vZGV2L251bGwgYnM9MU0gJg0KPiA+IHJvb3RAaW14
-OG1tZXZrOn4jIG1lbXRlc3RlciAxMDAwTSA+IC9kZXYvemVybyAmDQo+IHJvb3RAaW14OG1tZXZr
-On4jIFsNCj4gPiAxMzkuODk3MjIwXSBtbWMyOiBjcWhjaTogdGltZW91dCBmb3IgdGFnIDE2IFsg
-IDEzOS45MDE0MTddIG1tYzI6DQo+ID4gY3FoY2k6ID09PT09PT09PT09PSBDUUhDSSBSRUdJU1RF
-UiBEVU1QID09PT09PT09PT09DQo+ID4gWyAgMTM5LjkwNzg2Ml0gbW1jMjogY3FoY2k6IENhcHM6
-ICAgICAgMHgwMDAwMzEwYSB8IFZlcnNpb246DQo+IDB4MDAwMDA1MTANCj4gPiBbICAxMzkuOTE0
-MzExXSBtbWMyOiBjcWhjaTogQ29uZmlnOiAgICAweDAwMDAxMDAxIHwgQ29udHJvbDoNCj4gMHgw
-MDAwMDAwMA0KPiA+IFsgIDEzOS45MjA3NTNdIG1tYzI6IGNxaGNpOiBJbnQgc3RhdDogIDB4MDAw
-MDAwMDAgfCBJbnQgZW5hYjogMHgwMDAwMDAwNg0KPiA+IFsgIDEzOS45MjcxOTNdIG1tYzI6IGNx
-aGNpOiBJbnQgc2lnOiAgIDB4MDAwMDAwMDYgfCBJbnQgQ29hbDogMHgwMDAwMDAwMA0KPiA+IFsg
-IDEzOS45MzM2MzRdIG1tYzI6IGNxaGNpOiBUREwgYmFzZTogIDB4NzgwOWMwMDAgfCBUREwgdXAz
-MjoNCj4gMHgwMDAwMDAwMA0KPiA+IFsgIDEzOS45NDAwNzNdIG1tYzI6IGNxaGNpOiBEb29yYmVs
-bDogIDB4MDAwMzAwMDAgfCBUQ046DQo+IDB4MDAwMDAwMDANCj4gPiBbICAxMzkuOTQ2NTE4XSBt
-bWMyOiBjcWhjaTogRGV2IHF1ZXVlOiAweDAwMDEwMDAwIHwgRGV2IFBlbmQ6DQo+IDB4MDAwMTAw
-MDANCj4gPiBbICAxMzkuOTUyOTY3XSBtbWMyOiBjcWhjaTogVGFzayBjbHI6ICAweDAwMDAwMDAw
-IHwgU1NDMToNCj4gMHgwMDAxMTAwMA0KPiA+IFsgIDEzOS45NTk0MTFdIG1tYzI6IGNxaGNpOiBT
-U0MyOiAgICAgIDB4MDAwMDAwMDEgfCBEQ01EIHJzcDoNCj4gMHgwMDAwMDAwMA0KPiA+IFsgIDEz
-OS45NjU4NTddIG1tYzI6IGNxaGNpOiBSRUQgbWFzazogIDB4ZmRmOWEwODAgfCBURVJSSToNCj4g
-MHgwMDAwMDAwMA0KPiA+IFsgIDEzOS45NzIzMDhdIG1tYzI6IGNxaGNpOiBSZXNwIGlkeDogIDB4
-MDAwMDAwMmUgfCBSZXNwIGFyZzoNCj4gPiAweDAwMDAwOTAwIFsgIDEzOS45Nzg3NjFdIG1tYzI6
-IHNkaGNpOiA9PT09PT09PT09PT0gU0RIQ0kgUkVHSVNURVINCj4gPiBEVU1QID09PT09PT09PT09
-IFsgIDEzOS45ODUyMTRdIG1tYzI6IHNkaGNpOiBTeXMgYWRkcjogIDB4YjJjMTkwMDAgfA0KPiA+
-IFZlcnNpb246ICAweDAwMDAwMDAyIFsgIDEzOS45OTE2NjldIG1tYzI6IHNkaGNpOiBCbGsgc2l6
-ZTogIDB4MDAwMDAyMDANCj4gPiB8IEJsayBjbnQ6ICAweDAwMDAwNDAwIFsgIDEzOS45OTgxMjdd
-IG1tYzI6IHNkaGNpOiBBcmd1bWVudDoNCj4gMHg0MDExMDQwMCB8IFRybiBtb2RlOiAweDAwMDAw
-MDMzDQo+ID4gWyAgMTQwLjAwNDYxOF0gbW1jMjogc2RoY2k6IFByZXNlbnQ6ICAgMHgwMTA4OGE4
-ZiB8IEhvc3QgY3RsOiAweDAwMDAwMDMwDQo+ID4gWyAgMTQwLjAxMTExM10gbW1jMjogc2RoY2k6
-IFBvd2VyOiAgICAgMHgwMDAwMDAwMiB8IEJsayBnYXA6DQo+IDB4MDAwMDAwODANCj4gPiBbICAx
-NDAuMDE3NTgzXSBtbWMyOiBzZGhjaTogV2FrZS11cDogICAweDAwMDAwMDA4IHwgQ2xvY2s6DQo+
-IDB4MDAwMDAwMGYNCj4gPiBbICAxNDAuMDI0MDM5XSBtbWMyOiBzZGhjaTogVGltZW91dDogICAw
-eDAwMDAwMDhmIHwgSW50IHN0YXQ6IDB4MDAwMDAwMDANCj4gPiBbICAxNDAuMDMwNDk3XSBtbWMy
-OiBzZGhjaTogSW50IGVuYWI6ICAweDEwN2Y0MDAwIHwgU2lnIGVuYWI6DQo+ID4gMHgxMDdmNDAw
-MCBbICAxNDAuMDM2OTcyXSBtbWMyOiBzZGhjaTogQUMxMiBlcnI6ICAweDAwMDAwMDAwIHwgU2xv
-dCBpbnQ6DQo+IDB4MDAwMDA1MDINCj4gPiBbICAxNDAuMDQzNDI2XSBtbWMyOiBzZGhjaTogQ2Fw
-czogICAgICAweDA3ZWIwMDAwIHwgQ2Fwc18xOg0KPiAweDgwMDBiNDA3DQo+ID4gWyAgMTQwLjA0
-OTg2N10gbW1jMjogc2RoY2k6IENtZDogICAgICAgMHgwMDAwMmMxYSB8IE1heCBjdXJyOiAweDAw
-ZmZmZmZmDQo+ID4gWyAgMTQwLjA1NjMxNF0gbW1jMjogc2RoY2k6IFJlc3BbMF06ICAgMHgwMDAw
-MDkwMCB8IFJlc3BbMV06ICAweGZmZmZmZmZmDQo+ID4gWyAgMTQwLjA2Mjc1NV0gbW1jMjogc2Ro
-Y2k6IFJlc3BbMl06ICAgMHgzMjhmNTkwMyB8IFJlc3BbM106DQo+IDB4MDBkMDBmMDANCj4gPiBb
-ICAxNDAuMDY5MTk1XSBtbWMyOiBzZGhjaTogSG9zdCBjdGwyOiAweDAwMDAwMDA4IFsgIDE0MC4w
-NzM2NDBdIG1tYzI6DQo+ID4gc2RoY2k6IEFETUEgRXJyOiAgMHgwMDAwMDAwNyB8IEFETUEgUHRy
-OiAweDc4MDljMTA4IFsgIDE0MC4wODAwNzldDQo+ID4gbW1jMjogc2RoY2k6ID09PT09PT09PT09
-PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09DQo+ID4gWyAgMTQwLjA4NjY2Ml0gbW1j
-MjogcnVubmluZyBDUUUgcmVjb3ZlcnkNCj4gPg0KPiA+IEZpeGVzIGNvbW1pdCAxODA5NDQzMGQ2
-YjUgKCJtbWM6IHNkaGNpLWVzZGhjLWlteDogYWRkIEFETUEgTGVuZ3RoDQo+ID4gTWlzbWF0Y2gg
-ZXJyYXRhIGZpeCIpDQo+ID4gU2lnbmVkLW9mZi1ieTogSGFpYm8gQ2hlbiA8aGFpYm8uY2hlbkBu
-eHAuY29tPg0KPiA+IENjOiBzdGFibGVAdmdlci5rZXJuZWwub3JnDQo+ID4gLS0tDQo+ID4gIGRy
-aXZlcnMvbW1jL2hvc3Qvc2RoY2ktZXNkaGMtaW14LmMgfCA2IC0tLS0tLQ0KPiA+ICAxIGZpbGUg
-Y2hhbmdlZCwgNiBkZWxldGlvbnMoLSkNCj4gPg0KPiA+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21t
-Yy9ob3N0L3NkaGNpLWVzZGhjLWlteC5jDQo+ID4gYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLWVz
-ZGhjLWlteC5jDQo+ID4gaW5kZXggMzJjYTM3MDNiNDMyLi41ZWU3NjEzYzgxOGYgMTAwNjQ0DQo+
-ID4gLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1lc2RoYy1pbXguYw0KPiA+ICsrKyBiL2Ry
-aXZlcnMvbW1jL2hvc3Qvc2RoY2ktZXNkaGMtaW14LmMNCj4gPiBAQCAtMTE3MSwxMiArMTE3MSw2
-IEBAIHN0YXRpYyB2b2lkIHNkaGNpX2VzZGhjX2lteF9od2luaXQoc3RydWN0DQo+IHNkaGNpX2hv
-c3QgKmhvc3QpDQo+ID4gICAgICAgICAgICAgICAgIHdyaXRlbChyZWFkbChob3N0LT5pb2FkZHIg
-KyBTREhDSV9IT1NUX0NPTlRST0wpDQo+ID4gICAgICAgICAgICAgICAgICAgICAgICAgfCBFU0RI
-Q19CVVJTVF9MRU5fRU5fSU5DUiwNCj4gPiAgICAgICAgICAgICAgICAgICAgICAgICBob3N0LT5p
-b2FkZHIgKyBTREhDSV9IT1NUX0NPTlRST0wpOw0KPiA+IC0gICAgICAgICAgICAgICAvKg0KPiA+
-IC0gICAgICAgICAgICAgICAqIGVycmF0dW0gRVNESENfRkxBR19FUlIwMDQ1MzYgZml4IGZvciBN
-WDZRIFRPMS4yDQo+IGFuZCBNWDZETA0KPiA+IC0gICAgICAgICAgICAgICAqIFRPMS4xLCBpdCdz
-IGhhcm1sZXNzIGZvciBNWDZTTA0KPiA+IC0gICAgICAgICAgICAgICAqLw0KPiA+IC0gICAgICAg
-ICAgICAgICB3cml0ZWwocmVhZGwoaG9zdC0+aW9hZGRyICsgMHg2YykgfCBCSVQoNyksDQo+ID4g
-LSAgICAgICAgICAgICAgICAgICAgICAgaG9zdC0+aW9hZGRyICsgMHg2Yyk7DQo+ID4NCj4gPiAg
-ICAgICAgICAgICAgICAgLyogZGlzYWJsZSBETExfQ1RSTCBkZWxheSBsaW5lIHNldHRpbmdzICov
-DQo+ID4gICAgICAgICAgICAgICAgIHdyaXRlbCgweDAsIGhvc3QtPmlvYWRkciArIEVTREhDX0RM
-TF9DVFJMKTsNCj4gPiAtLQ0KPiA+IDIuMTcuMQ0KPiA+DQo=
+On Thu, 28 Feb 2019 at 09:41, BOUGH CHEN <haibo.chen@nxp.com> wrote:
+>
+>
+> > -----Original Message-----
+> > From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
+> > Sent: 2019=E5=B9=B42=E6=9C=8828=E6=97=A5 16:25
+> > To: BOUGH CHEN <haibo.chen@nxp.com>
+> > Cc: adrian.hunter@intel.com; Aisheng Dong <aisheng.dong@nxp.com>;
+> > shawnguo@kernel.org; s.hauer@pengutronix.de; kernel@pengutronix.de;
+> > festevam@gmail.com; dl-linux-imx <linux-imx@nxp.com>;
+> > linux-mmc@vger.kernel.org; stable@vger.kernel.org
+> > Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: correct the fix of ERR004536
+> >
+> > On Thu, 28 Feb 2019 at 09:01, BOUGH CHEN <haibo.chen@nxp.com> wrote:
+> > >
+> > > Commit 18094430d6b5 ("mmc: sdhci-esdhc-imx: add ADMA Length
+> > Mismatch
+> > > errata fix") involve the fix of ERR004536, but the fix is incorrect.
+> > > Double confirm with IC, need to clear the bit 7 of register 0x6c
+> > > rather than set this bit 7.
+> > > Here is the definition of bit 7 of 0x6c:
+> > >     0: enable the new IC fix for ERR004536
+> > >     1: do not use the IC fix, keep the same as before
+> > >
+> > > Due to the reset value of this bit 7 is 0, ROM code and bootloader do
+> > > not touch this bit 7, so here directly remove the operation of this
+> > > bit 7, make sure the fix of ERR004536 can work.
+> >
+> > Well, rather than relying on the bootloader, let the kernel do the righ=
+t thing.
+> > That is, write a zero to the register bit rather than a one.
+> >
+> > Is the code doing that?
+> >
+>
+> Yes, write a zero to the register bit is correct.
+> Why I just remove the code rather than directly write 0 to this bit is be=
+cause the register 0x6c should be invisible to software, and is not defined=
+ in reference manual. It is a register only open for IC to test.
+> If you prefer to write a zero to the register bit, I can do that.
+
+I think that would be more safe, so yes, please.
+
+[...]
+
+Kind regards
+Uffe
