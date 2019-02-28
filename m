@@ -1,51 +1,103 @@
-From: Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>
-Subject: Re: Linux v5.0-rc7: bcm2835 MMC issues
-Date: Thu, 28 Feb 2019 09:09:41 +0100
-Message-ID: <7122d61d-eca7-e571-7840-99987d271c97@i2se.com>
-References: <20190224150746.GC26495@darkstar.musicnaut.iki.fi>
- <155745885.93258.1551034990363@email.ionos.de>
- <20190226011509.GB31163@darkstar.musicnaut.iki.fi>
- <06528ceb-ff1d-626b-f520-477b0ea49d6f@i2se.com>
- <20190227185101.GA28051@darkstar.musicnaut.iki.fi>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: correct the fix of ERR004536
+Date: Thu, 28 Feb 2019 09:24:39 +0100
+Message-ID: <CAPDyKFp1_gp8BXQrHYpS09NQFR=SWB61O9-tqsSbq8+Mo3S8JA@mail.gmail.com>
+References: <20190228080859.32520-1-haibo.chen@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <20190227185101.GA28051-4/PLUo9XfK9owWHViPbQSXlKr5M7+etX9Sl0XMgJPXI@public.gmane.org>
-Content-Language: de-DE
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rpi-kernel>,
- <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rpi-kernel/>
-List-Post: <mailto:linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rpi-kernel>,
- <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "linux-rpi-kernel" <linux-rpi-kernel-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Aaro Koskinen <aaro.koskinen-X3B1VOXEql0@public.gmane.org>
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20190228080859.32520-1-haibo.chen@nxp.com>
+Sender: stable-owner@vger.kernel.org
+To: BOUGH CHEN <haibo.chen@nxp.com>
+Cc: "adrian.hunter@intel.com" <adrian.hunter@intel.com>, Aisheng Dong <aisheng.dong@nxp.com>, "shawnguo@kernel.org" <shawnguo@kernel.org>, "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>, "kernel@pengutronix.de" <kernel@pengutronix.de>, "festevam@gmail.com" <festevam@gmail.com>, dl-linux-imx <linux-imx@nxp.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "stable@vger.kernel.org" <stable@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Aaro,
+On Thu, 28 Feb 2019 at 09:01, BOUGH CHEN <haibo.chen@nxp.com> wrote:
+>
+> Commit 18094430d6b5 ("mmc: sdhci-esdhc-imx: add ADMA Length
+> Mismatch errata fix") involve the fix of ERR004536, but the
+> fix is incorrect. Double confirm with IC, need to clear the
+> bit 7 of register 0x6c rather than set this bit 7.
+> Here is the definition of bit 7 of 0x6c:
+>     0: enable the new IC fix for ERR004536
+>     1: do not use the IC fix, keep the same as before
+>
+> Due to the reset value of this bit 7 is 0, ROM code and
+> bootloader do not touch this bit 7, so here directly remove
+> the operation of this bit 7, make sure the fix of ERR004536
+> can work.
 
-Am 27.02.2019 um 19:51 schrieb Aaro Koskinen:
-> On Tue, Feb 26, 2019 at 09:31:14AM +0100, Stefan Wahren wrote:
->> it will take some time for to setup this test scenario. Could you please
->> do me a favor and test 4.20.12 which has some backports of recent mmc /
->> DMA fixes.
-> Both 4.20 and 4.20.12 work fine. Only 5.0-rc fails reliably.
+Well, rather than relying on the bootloader, let the kernel do the
+right thing. That is, write a zero to the register bit rather than a
+one.
 
-thanks. Yesterday i ran the gcc bootstraping with multi_v7_defconfig on 
-a 32 bit rootfs. It completed the build without any issues (took several 
-hours).
+Is the code doing that?
 
-We need to find a faster scenario.
-
-I think of something like this:
-|stress-ng --vm 2 --vm-bytes 1G --timeout 60s|
-
-|Stefan
-|
+Kind regards
+Uffe
 
 >
-> A.
+> Find this issue on i.MX845s-evk board when enable CMDQ, and
+> let system in heavy loading.
+>
+> root@imx8mmevk:~# dd if=/dev/mmcblk2 of=/dev/null bs=1M &
+> root@imx8mmevk:~# memtester 1000M > /dev/zero &
+> root@imx8mmevk:~# [  139.897220] mmc2: cqhci: timeout for tag 16
+> [  139.901417] mmc2: cqhci: ============ CQHCI REGISTER DUMP ===========
+> [  139.907862] mmc2: cqhci: Caps:      0x0000310a | Version:  0x00000510
+> [  139.914311] mmc2: cqhci: Config:    0x00001001 | Control:  0x00000000
+> [  139.920753] mmc2: cqhci: Int stat:  0x00000000 | Int enab: 0x00000006
+> [  139.927193] mmc2: cqhci: Int sig:   0x00000006 | Int Coal: 0x00000000
+> [  139.933634] mmc2: cqhci: TDL base:  0x7809c000 | TDL up32: 0x00000000
+> [  139.940073] mmc2: cqhci: Doorbell:  0x00030000 | TCN:      0x00000000
+> [  139.946518] mmc2: cqhci: Dev queue: 0x00010000 | Dev Pend: 0x00010000
+> [  139.952967] mmc2: cqhci: Task clr:  0x00000000 | SSC1:     0x00011000
+> [  139.959411] mmc2: cqhci: SSC2:      0x00000001 | DCMD rsp: 0x00000000
+> [  139.965857] mmc2: cqhci: RED mask:  0xfdf9a080 | TERRI:    0x00000000
+> [  139.972308] mmc2: cqhci: Resp idx:  0x0000002e | Resp arg: 0x00000900
+> [  139.978761] mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
+> [  139.985214] mmc2: sdhci: Sys addr:  0xb2c19000 | Version:  0x00000002
+> [  139.991669] mmc2: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000400
+> [  139.998127] mmc2: sdhci: Argument:  0x40110400 | Trn mode: 0x00000033
+> [  140.004618] mmc2: sdhci: Present:   0x01088a8f | Host ctl: 0x00000030
+> [  140.011113] mmc2: sdhci: Power:     0x00000002 | Blk gap:  0x00000080
+> [  140.017583] mmc2: sdhci: Wake-up:   0x00000008 | Clock:    0x0000000f
+> [  140.024039] mmc2: sdhci: Timeout:   0x0000008f | Int stat: 0x00000000
+> [  140.030497] mmc2: sdhci: Int enab:  0x107f4000 | Sig enab: 0x107f4000
+> [  140.036972] mmc2: sdhci: AC12 err:  0x00000000 | Slot int: 0x00000502
+> [  140.043426] mmc2: sdhci: Caps:      0x07eb0000 | Caps_1:   0x8000b407
+> [  140.049867] mmc2: sdhci: Cmd:       0x00002c1a | Max curr: 0x00ffffff
+> [  140.056314] mmc2: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0xffffffff
+> [  140.062755] mmc2: sdhci: Resp[2]:   0x328f5903 | Resp[3]:  0x00d00f00
+> [  140.069195] mmc2: sdhci: Host ctl2: 0x00000008
+> [  140.073640] mmc2: sdhci: ADMA Err:  0x00000007 | ADMA Ptr: 0x7809c108
+> [  140.080079] mmc2: sdhci: ============================================
+> [  140.086662] mmc2: running CQE recovery
+>
+> Fixes commit 18094430d6b5 ("mmc: sdhci-esdhc-imx: add ADMA Length Mismatch errata fix")
+> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
+> Cc: stable@vger.kernel.org
+> ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 6 ------
+>  1 file changed, 6 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index 32ca3703b432..5ee7613c818f 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -1171,12 +1171,6 @@ static void sdhci_esdhc_imx_hwinit(struct sdhci_host *host)
+>                 writel(readl(host->ioaddr + SDHCI_HOST_CONTROL)
+>                         | ESDHC_BURST_LEN_EN_INCR,
+>                         host->ioaddr + SDHCI_HOST_CONTROL);
+> -               /*
+> -               * erratum ESDHC_FLAG_ERR004536 fix for MX6Q TO1.2 and MX6DL
+> -               * TO1.1, it's harmless for MX6SL
+> -               */
+> -               writel(readl(host->ioaddr + 0x6c) | BIT(7),
+> -                       host->ioaddr + 0x6c);
+>
+>                 /* disable DLL_CTRL delay line settings */
+>                 writel(0x0, host->ioaddr + ESDHC_DLL_CTRL);
+> --
+> 2.17.1
+>
