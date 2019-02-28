@@ -1,103 +1,71 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: sdhci-esdhc-imx: correct the fix of ERR004536
-Date: Thu, 28 Feb 2019 12:20:46 +0100
-Message-ID: <CAPDyKFrSzW9hz34EgYKyOsh5kyfb2hBVfJutkaw-OeUWh_Z8OQ@mail.gmail.com>
-References: <20190228102004.9695-1-haibo.chen@nxp.com>
+From: Jon Hunter <jonathanh@nvidia.com>
+Subject: Re: [PATCH V15 14/18] block: enable multipage bvecs
+Date: Thu, 28 Feb 2019 12:39:10 +0000
+Message-ID: <83c1e25b-4aab-4374-e160-b506eea9e68f@nvidia.com>
+References: <20190215111324.30129-1-ming.lei@redhat.com>
+ <20190215111324.30129-15-ming.lei@redhat.com>
+ <CGME20190221084301eucas1p11e8841a62b4b1da3cccca661b6f4c29d@eucas1p1.samsung.com>
+ <6c9ae4de-c56f-a2b3-2542-da7d8b95601d@samsung.com>
+ <0dbbee64-5c6b-0374-4360-6dc218c70d58@nvidia.com>
+ <20190227232940.GA13319@ming.t460p>
+ <01155e88-f021-fbe2-d048-42e303fe2935@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20190228102004.9695-1-haibo.chen@nxp.com>
-Sender: stable-owner@vger.kernel.org
-To: BOUGH CHEN <haibo.chen@nxp.com>
-Cc: "adrian.hunter@intel.com" <adrian.hunter@intel.com>, Aisheng Dong <aisheng.dong@nxp.com>, "shawnguo@kernel.org" <shawnguo@kernel.org>, "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>, "kernel@pengutronix.de" <kernel@pengutronix.de>, "festevam@gmail.com" <festevam@gmail.com>, dl-linux-imx <linux-imx@nxp.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "stable@vger.kernel.org" <stable@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <01155e88-f021-fbe2-d048-42e303fe2935@samsung.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Marek Szyprowski <m.szyprowski@samsung.com>, Ming Lei <ming.lei@redhat.com>
+Cc: Jens Axboe <axboe@kernel.dk>, linux-block@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mm@kvack.org, Theodore Ts'o <tytso@mit.edu>, Omar Sandoval <osandov@fb.com>, Sagi Grimberg <sagi@grimberg.me>, Dave Chinner <dchinner@redhat.com>, Kent Overstreet <kent.overstreet@gmail.com>, Mike Snitzer <snitzer@redhat.com>, dm-devel@redhat.com, Alexander Viro <viro@zeniv.linux.org.uk>, linux-fsdevel@vger.kernel.org, linux-raid@vger.kernel.org, David Sterba <dsterba@suse.com>, linux-btrfs@vger.kernel.org, "Darrick J . Wong" <darrick.wong@oracle.com>, linux-xfs@vger.kernel.org, Gao Xiang <gaoxiang25@huawei.com>, Christoph Hellwig <hch@lst.de>, linux-ext4@vger.kernel.org, Coly Li <colyli@suse.de>, linux-bcache@vger.kernel.org, Boaz Harrosh <ooo@electrozaur.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 28 Feb 2019 at 11:15, BOUGH CHEN <haibo.chen@nxp.com> wrote:
->
-> Commit 18094430d6b5 ("mmc: sdhci-esdhc-imx: add ADMA Length
-> Mismatch errata fix") involve the fix of ERR004536, but the
-> fix is incorrect. Double confirm with IC, need to clear the
-> bit 7 of register 0x6c rather than set this bit 7.
-> Here is the definition of bit 7 of 0x6c:
->     0: enable the new IC fix for ERR004536
->     1: do not use the IC fix, keep the same as before
->
-> Find this issue on i.MX845s-evk board when enable CMDQ, and
-> let system in heavy loading.
->
-> root@imx8mmevk:~# dd if=/dev/mmcblk2 of=/dev/null bs=1M &
-> root@imx8mmevk:~# memtester 1000M > /dev/zero &
-> root@imx8mmevk:~# [  139.897220] mmc2: cqhci: timeout for tag 16
-> [  139.901417] mmc2: cqhci: ============ CQHCI REGISTER DUMP ===========
-> [  139.907862] mmc2: cqhci: Caps:      0x0000310a | Version:  0x00000510
-> [  139.914311] mmc2: cqhci: Config:    0x00001001 | Control:  0x00000000
-> [  139.920753] mmc2: cqhci: Int stat:  0x00000000 | Int enab: 0x00000006
-> [  139.927193] mmc2: cqhci: Int sig:   0x00000006 | Int Coal: 0x00000000
-> [  139.933634] mmc2: cqhci: TDL base:  0x7809c000 | TDL up32: 0x00000000
-> [  139.940073] mmc2: cqhci: Doorbell:  0x00030000 | TCN:      0x00000000
-> [  139.946518] mmc2: cqhci: Dev queue: 0x00010000 | Dev Pend: 0x00010000
-> [  139.952967] mmc2: cqhci: Task clr:  0x00000000 | SSC1:     0x00011000
-> [  139.959411] mmc2: cqhci: SSC2:      0x00000001 | DCMD rsp: 0x00000000
-> [  139.965857] mmc2: cqhci: RED mask:  0xfdf9a080 | TERRI:    0x00000000
-> [  139.972308] mmc2: cqhci: Resp idx:  0x0000002e | Resp arg: 0x00000900
-> [  139.978761] mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
-> [  139.985214] mmc2: sdhci: Sys addr:  0xb2c19000 | Version:  0x00000002
-> [  139.991669] mmc2: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000400
-> [  139.998127] mmc2: sdhci: Argument:  0x40110400 | Trn mode: 0x00000033
-> [  140.004618] mmc2: sdhci: Present:   0x01088a8f | Host ctl: 0x00000030
-> [  140.011113] mmc2: sdhci: Power:     0x00000002 | Blk gap:  0x00000080
-> [  140.017583] mmc2: sdhci: Wake-up:   0x00000008 | Clock:    0x0000000f
-> [  140.024039] mmc2: sdhci: Timeout:   0x0000008f | Int stat: 0x00000000
-> [  140.030497] mmc2: sdhci: Int enab:  0x107f4000 | Sig enab: 0x107f4000
-> [  140.036972] mmc2: sdhci: AC12 err:  0x00000000 | Slot int: 0x00000502
-> [  140.043426] mmc2: sdhci: Caps:      0x07eb0000 | Caps_1:   0x8000b407
-> [  140.049867] mmc2: sdhci: Cmd:       0x00002c1a | Max curr: 0x00ffffff
-> [  140.056314] mmc2: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0xffffffff
-> [  140.062755] mmc2: sdhci: Resp[2]:   0x328f5903 | Resp[3]:  0x00d00f00
-> [  140.069195] mmc2: sdhci: Host ctl2: 0x00000008
-> [  140.073640] mmc2: sdhci: ADMA Err:  0x00000007 | ADMA Ptr: 0x7809c108
-> [  140.080079] mmc2: sdhci: ============================================
-> [  140.086662] mmc2: running CQE recovery
->
-> Fixes commit 18094430d6b5 ("mmc: sdhci-esdhc-imx: add ADMA Length Mismatch errata fix")
-> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
-> Cc: stable@vger.kernel.org
 
-Applied for fixes, thanks!
+On 28/02/2019 07:51, Marek Szyprowski wrote:
+> Hi Ming,
+> 
+> On 2019-02-28 00:29, Ming Lei wrote:
+>> On Wed, Feb 27, 2019 at 08:47:09PM +0000, Jon Hunter wrote:
+>>> On 21/02/2019 08:42, Marek Szyprowski wrote:
+>>>> On 2019-02-15 12:13, Ming Lei wrote:
+>>>>> This patch pulls the trigger for multi-page bvecs.
+>>>>>
+>>>>> Reviewed-by: Omar Sandoval <osandov@fb.com>
+>>>>> Signed-off-by: Ming Lei <ming.lei@redhat.com>
+>>>> Since Linux next-20190218 I've observed problems with block layer on one
+>>>> of my test devices (Odroid U3 with EXT4 rootfs on SD card). Bisecting
+>>>> this issue led me to this change. This is also the first linux-next
+>>>> release with this change merged. The issue is fully reproducible and can
+>>>> be observed in the following kernel log:
+>>>>
+>>>> sdhci: Secure Digital Host Controller Interface driver
+>>>> sdhci: Copyright(c) Pierre Ossman
+>>>> s3c-sdhci 12530000.sdhci: clock source 2: mmc_busclk.2 (100000000 Hz)
+>>>> s3c-sdhci 12530000.sdhci: Got CD GPIO
+>>>> mmc0: SDHCI controller on samsung-hsmmc [12530000.sdhci] using ADMA
+>>>> mmc0: new high speed SDHC card at address aaaa
+>>>> mmcblk0: mmc0:aaaa SL16G 14.8 GiB
+>>> I have also noticed some failures when writing to an eMMC device on one
+>>> of our Tegra boards. We have a simple eMMC write/read test and it is
+>>> currently failing because the data written does not match the source.
+>>>
+>>> I did not seem the same crash as reported here, however, in our case the
+>>> rootfs is NFS mounted and so probably would not. However, the bisect
+>>> points to this commit and reverting on top of -next fixes the issues.
+>> It is sdhci, probably related with max segment size, could you test the
+>> following patch:
+>>
+>> https://marc.info/?l=linux-mmc&m=155128334122951&w=2
+> 
+> This seems to be fixing my issue too! Thanks!
 
-Kind regards
-Uffe
+Thanks, I can confirm this fixes the issue for Tegra. So feel free to
+add my ...
 
->
-> ---
-> Changes for V2
-> - write 0 to register bit 7 rather than remove this operation
-> - make comment align
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 9 +++++----
->  1 file changed, 5 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index 32ca3703b432..d8b0b8e81865 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -1171,11 +1171,12 @@ static void sdhci_esdhc_imx_hwinit(struct sdhci_host *host)
->                 writel(readl(host->ioaddr + SDHCI_HOST_CONTROL)
->                         | ESDHC_BURST_LEN_EN_INCR,
->                         host->ioaddr + SDHCI_HOST_CONTROL);
-> +
->                 /*
-> -               * erratum ESDHC_FLAG_ERR004536 fix for MX6Q TO1.2 and MX6DL
-> -               * TO1.1, it's harmless for MX6SL
-> -               */
-> -               writel(readl(host->ioaddr + 0x6c) | BIT(7),
-> +                * erratum ESDHC_FLAG_ERR004536 fix for MX6Q TO1.2 and MX6DL
-> +                * TO1.1, it's harmless for MX6SL
-> +                */
-> +               writel(readl(host->ioaddr + 0x6c) & ~BIT(7),
->                         host->ioaddr + 0x6c);
->
->                 /* disable DLL_CTRL delay line settings */
-> --
-> 2.17.1
->
+Tested-by: Jon Hunter <jonathanh@nvidia.com>
+
+Cheers!
+Jon
+
+-- 
+nvpublic
