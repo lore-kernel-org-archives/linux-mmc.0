@@ -1,36 +1,126 @@
 From: Faiz Abbas <faiz_abbas@ti.com>
-Subject: [PATCH v2 0/2] Fixes for command errors during tuning
-Date: Fri, 1 Mar 2019 14:08:22 +0530
-Message-ID: <20190301083824.23918-1-faiz_abbas@ti.com>
+Subject: [PATCH v2 1/2] mmc: sdhci: Add platform_cmd_err() to sdhci_ops
+Date: Fri, 1 Mar 2019 14:08:23 +0530
+Message-ID: <20190301083824.23918-2-faiz_abbas@ti.com>
+References: <20190301083824.23918-1-faiz_abbas@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190301083824.23918-1-faiz_abbas@ti.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
 Cc: ulf.hansson@linaro.org, kishon@ti.com, adrian.hunter@intel.com, faiz_abbas@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-These patches fix the following error message in dra7xx boards:
+Some platforms might need a custom method for handling command error
+interrupts. Add a callback to sdhci_ops to facilitate the same. Move
+default command error handling to its own non-static function so it can
+be called from platform drivers. Also make sdhci_finish_command()
+non-static.
 
-[4.833198] mmc1: Got data interrupt 0x00000002 even though no data
-operation was in progress.
+Fixes: 5b0d62108b46 ("mmc: sdhci-omap: Add platform specific reset
+callback")
+Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+---
+ drivers/mmc/host/sdhci.c | 40 ++++++++++++++++++++++++++--------------
+ drivers/mmc/host/sdhci.h |  4 ++++
+ 2 files changed, 30 insertions(+), 14 deletions(-)
 
-Tested with 100 times boot tests on dra71x-evm, dra72x-evm and
-dra7xx-evm.
-
-v2:
-Added EXPORT_SYMBOL_GPL for sdhci_cmd_err and sdhci_send_command to fix
-errors when built as module.
-
-Faiz Abbas (2):
-  mmc: sdhci: Add platform_cmd_err() to sdhci_ops
-  mmc: sdhci-omap: Don't finish_mrq() on a command error during tuning
-
- drivers/mmc/host/sdhci-omap.c | 24 +++++++++++++++++++++
- drivers/mmc/host/sdhci.c      | 40 +++++++++++++++++++++++------------
- drivers/mmc/host/sdhci.h      |  4 ++++
- 3 files changed, 54 insertions(+), 14 deletions(-)
-
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index a8141ff9be03..ff60b1830896 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1445,7 +1445,7 @@ static void sdhci_read_rsp_136(struct sdhci_host *host, struct mmc_command *cmd)
+ 	}
+ }
+ 
+-static void sdhci_finish_command(struct sdhci_host *host)
++void sdhci_finish_command(struct sdhci_host *host)
+ {
+ 	struct mmc_command *cmd = host->cmd;
+ 
+@@ -1495,6 +1495,8 @@ static void sdhci_finish_command(struct sdhci_host *host)
+ 			sdhci_finish_mrq(host, cmd->mrq);
+ 	}
+ }
++EXPORT_SYMBOL_GPL(sdhci_finish_command);
++
+ 
+ static u16 sdhci_get_preset_value(struct sdhci_host *host)
+ {
+@@ -2780,6 +2782,26 @@ static void sdhci_timeout_data_timer(struct timer_list *t)
+  *                                                                           *
+ \*****************************************************************************/
+ 
++void sdhci_cmd_err(struct sdhci_host *host, u32 intmask, u32 *intmask_p)
++{
++		if (intmask & SDHCI_INT_TIMEOUT)
++			host->cmd->error = -ETIMEDOUT;
++		else
++			host->cmd->error = -EILSEQ;
++
++		/* Treat data command CRC error the same as data CRC error */
++		if (host->cmd->data &&
++		    (intmask & (SDHCI_INT_CRC | SDHCI_INT_TIMEOUT)) ==
++		     SDHCI_INT_CRC) {
++			host->cmd = NULL;
++			*intmask_p |= SDHCI_INT_DATA_CRC;
++			return;
++		}
++
++		sdhci_finish_mrq(host, host->cmd->mrq);
++}
++EXPORT_SYMBOL_GPL(sdhci_cmd_err);
++
+ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask, u32 *intmask_p)
+ {
+ 	/* Handle auto-CMD12 error */
+@@ -2813,21 +2835,11 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask, u32 *intmask_p)
+ 
+ 	if (intmask & (SDHCI_INT_TIMEOUT | SDHCI_INT_CRC |
+ 		       SDHCI_INT_END_BIT | SDHCI_INT_INDEX)) {
+-		if (intmask & SDHCI_INT_TIMEOUT)
+-			host->cmd->error = -ETIMEDOUT;
++		if (host->ops->platform_cmd_err)
++			host->ops->platform_cmd_err(host, intmask, intmask_p);
+ 		else
+-			host->cmd->error = -EILSEQ;
+-
+-		/* Treat data command CRC error the same as data CRC error */
+-		if (host->cmd->data &&
+-		    (intmask & (SDHCI_INT_CRC | SDHCI_INT_TIMEOUT)) ==
+-		     SDHCI_INT_CRC) {
+-			host->cmd = NULL;
+-			*intmask_p |= SDHCI_INT_DATA_CRC;
+-			return;
+-		}
++			sdhci_cmd_err(host, intmask, intmask_p);
+ 
+-		sdhci_finish_mrq(host, host->cmd->mrq);
+ 		return;
+ 	}
+ 
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 01002cba1359..ca427d8efc29 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -645,6 +645,8 @@ struct sdhci_ops {
+ 	void	(*voltage_switch)(struct sdhci_host *host);
+ 	void	(*adma_write_desc)(struct sdhci_host *host, void **desc,
+ 				   dma_addr_t addr, int len, unsigned int cmd);
++	void	(*platform_cmd_err)(struct sdhci_host *host, u32 intmask,
++				    u32 *intmask_p);
+ };
+ 
+ #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+@@ -798,5 +800,7 @@ void sdhci_start_tuning(struct sdhci_host *host);
+ void sdhci_end_tuning(struct sdhci_host *host);
+ void sdhci_reset_tuning(struct sdhci_host *host);
+ void sdhci_send_tuning(struct sdhci_host *host, u32 opcode);
++void sdhci_cmd_err(struct sdhci_host *host, u32 intmask, u32 *intmask_p);
++void sdhci_finish_command(struct sdhci_host *host);
+ 
+ #endif /* __SDHCI_HW_H */
 -- 
 2.19.2
