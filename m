@@ -1,41 +1,36 @@
 From: Sowjanya Komatineni <skomatineni@nvidia.com>
-Subject: [PATCH V1 01/11] mmc: tegra: fix ddr signaling for non-ddr modes
-Date: Fri, 1 Mar 2019 21:20:15 -0800
-Message-ID: <1551504025-3541-1-git-send-email-skomatineni@nvidia.com>
+Subject: [PATCH V1 05/11] dt-bindings: mmc: tegra: document Tegra194 compatible string
+Date: Fri, 1 Mar 2019 21:20:19 -0800
+Message-ID: <1551504025-3541-5-git-send-email-skomatineni@nvidia.com>
+References: <1551504025-3541-1-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1551504025-3541-1-git-send-email-skomatineni@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: adrian.hunter@intel.com, ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, riteshh@codeaurora.org
 Cc: thierry.reding@gmail.com, jonathanh@nvidia.com, anrao@nvidia.com, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, Sowjanya Komatineni <skomatineni@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-ddr_signaling is set to true for DDR50 and DDR52 modes but is
-not set back to false for other modes. This programs incorrect
-host clock when mode change happens from DDR52/DDR50 to other
-SDR or HS modes like incase of mmc_retune where it switches
-from HS400 to HS DDR and then from HS DDR to HS mode and then
-to HS200.
-
-This patch fixes the ddr_signaling to set properly for non DDR
-modes.
+SDHCI controller of Tegra194 is similar to SDHCI controller in Tegra186.
+This patch documents Tegra194 sdhci compatible string.
 
 Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
 ---
- drivers/mmc/host/sdhci-tegra.c | 1 +
+ Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt | 1 +
  1 file changed, 1 insertion(+)
 
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 32e62904c0d3..46086dd43bfb 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -779,6 +779,7 @@ static void tegra_sdhci_set_uhs_signaling(struct sdhci_host *host,
- 	bool set_dqs_trim = false;
- 	bool do_hs400_dll_cal = false;
- 
-+	tegra_host->ddr_signaling = false;
- 	switch (timing) {
- 	case MMC_TIMING_UHS_SDR50:
- 	case MMC_TIMING_UHS_SDR104:
+diff --git a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
+index 2cecdc71d94c..2cf3affa1be7 100644
+--- a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
++++ b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
+@@ -14,6 +14,7 @@ Required properties:
+   - "nvidia,tegra124-sdhci": for Tegra124 and Tegra132
+   - "nvidia,tegra210-sdhci": for Tegra210
+   - "nvidia,tegra186-sdhci": for Tegra186
++  - "nvidia,tegra194-sdhci": for Tegra194
+ - clocks : Must contain one entry, for the module clock.
+   See ../clocks/clock-bindings.txt for details.
+ - resets : Must contain an entry for each entry in reset-names.
 -- 
 2.7.4
