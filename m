@@ -1,7 +1,7 @@
 From: Sowjanya Komatineni <skomatineni@nvidia.com>
-Subject: [PATCH V1 07/11] mmc: cqhci: add quirk for setting DCMD CMD_TIMING
-Date: Fri, 1 Mar 2019 21:20:21 -0800
-Message-ID: <1551504025-3541-7-git-send-email-skomatineni@nvidia.com>
+Subject: [PATCH V1 08/11] mmc: tegra: add Tegra186 WAR for CQE
+Date: Fri, 1 Mar 2019 21:20:22 -0800
+Message-ID: <1551504025-3541-8-git-send-email-skomatineni@nvidia.com>
 References: <1551504025-3541-1-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,56 +12,56 @@ To: adrian.hunter@intel.com, ulf.hansson@linaro.org, robh+dt@kernel.org, mark.ru
 Cc: thierry.reding@gmail.com, jonathanh@nvidia.com, anrao@nvidia.com, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, Sowjanya Komatineni <skomatineni@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-This patch adds a quirk for setting CMD_TIMING to 1 in descriptor
-for DCMD with R1B response type to allow the command to be sent to
-device during data activity or busy time.
+Tegra186 design has a known bug where CQE does not generated task
+complete interrupt for data transfer tasks issued after DCMD task
+with R1b response type and results in timeout.
 
-Tegra186 CQHCI host has bug where it selects DATA_PRESENT_SELECT
-to 1 by CQHCI controller for DCMDs with R1B response type and
-since DCMD does not trigger any data transfer, DCMD task complete
-happens leaving the DATA FSM of host controller in wait state for
-data.
+SW WAR is to set CMD_TIMING to 1 in task descriptor for DCMDs with
+R1b response type. This bug and SW WAR is applicable only for
+Tegra186 and not for Tegra194.
 
-This effects the data transfer task issued after R1B DCMD task
-and no interrupt is generated for the data transfer task.
-
-SW WAR for this issue is to set CMD_TIMING bit to 1 in DCMD task
-descriptor and as DCMD task descriptor preparation is done by
-cqhci driver, this patch adds cqequirk to handle this.
+This patch adds this WAR to Tegra186.
 
 Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
 ---
- drivers/mmc/host/cqhci.c | 5 ++++-
- drivers/mmc/host/cqhci.h | 1 +
- 2 files changed, 5 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-tegra.c | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-diff --git a/drivers/mmc/host/cqhci.c b/drivers/mmc/host/cqhci.c
-index a8af682a9182..b34c07125f32 100644
---- a/drivers/mmc/host/cqhci.c
-+++ b/drivers/mmc/host/cqhci.c
-@@ -521,7 +521,10 @@ static void cqhci_prep_dcmd_desc(struct mmc_host *mmc,
- 	} else {
- 		if (mrq->cmd->flags & MMC_RSP_R1B) {
- 			resp_type = 0x3;
--			timing = 0x0;
-+			if (cq_host->quirks & CQHCI_QUIRK_CMD_TIMING_R1B_DCMD)
-+				timing = 0x1;
-+			else
-+				timing = 0x0;
- 		} else {
- 			resp_type = 0x2;
- 			timing = 0x1;
-diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
-index 9e68286a07b4..f96d8565cc07 100644
---- a/drivers/mmc/host/cqhci.h
-+++ b/drivers/mmc/host/cqhci.h
-@@ -170,6 +170,7 @@ struct cqhci_host {
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index 2086e0eced88..2b63626dc2fa 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -116,6 +116,7 @@ struct sdhci_tegra_soc_data {
+ 	u32 nvquirks;
+ 	u8 min_tap_delay;
+ 	u8 max_tap_delay;
++	u32 cqequirks;
+ };
  
- 	u32 quirks;
- #define CQHCI_QUIRK_SHORT_TXFR_DESC_SZ	0x1
-+#define CQHCI_QUIRK_CMD_TIMING_R1B_DCMD	0x2
+ /* Magic pull up and pull down pad calibration offsets */
+@@ -1354,6 +1355,7 @@ static const struct sdhci_tegra_soc_data soc_data_tegra186 = {
+ 		    NVQUIRK_ENABLE_SDR104,
+ 	.min_tap_delay = 84,
+ 	.max_tap_delay = 136,
++	.cqequirks = CQHCI_QUIRK_CMD_TIMING_R1B_DCMD,
+ };
  
- 	bool enabled;
- 	bool halted;
+ static const struct sdhci_tegra_soc_data soc_data_tegra194 = {
+@@ -1383,6 +1385,7 @@ static int sdhci_tegra_add_host(struct sdhci_host *host)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
++	const struct sdhci_tegra_soc_data *soc_data = tegra_host->soc_data;
+ 	struct cqhci_host *cq_host;
+ 	bool dma64;
+ 	int ret;
+@@ -1407,6 +1410,7 @@ static int sdhci_tegra_add_host(struct sdhci_host *host)
+ 
+ 	cq_host->mmio = host->ioaddr + SDHCI_TEGRA_CQE_BASE_ADDR;
+ 	cq_host->ops = &sdhci_tegra_cqhci_ops;
++	cq_host->quirks = soc_data->cqequirks;
+ 
+ 	dma64 = host->flags & SDHCI_USE_64_BIT_DMA;
+ 	if (dma64)
 -- 
 2.7.4
