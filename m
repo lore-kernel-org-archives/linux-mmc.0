@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH  4/5] mmc: mmci: stm32: define get_dctrl_cfg
-Date: Mon, 4 Mar 2019 11:17:04 +0100
-Message-ID: <1551694625-6414-5-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH  2/5] mmc: mmci: define get_dctrl_cfg for legacy variant
+Date: Mon, 4 Mar 2019 11:17:02 +0100
+Message-ID: <1551694625-6414-3-git-send-email-ludovic.Barre@st.com>
 References: <1551694625-6414-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,71 +14,96 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-This patch defines get_dctrl_cfg callback for sdmmc variant.
-sdmmc variant has specific stm32 transfer modes.
-sdmmc data transfer mode selection could be:
--Block data transfer ending on block count.
--SDIO multibyte data transfer.
--MMC Stream data transfer (not used).
--Block data transfer ending with STOP_TRANSMISSION command.
+This patch defines get_dctrl_cfg callback for legacy variants
+whatever DMA_ENGINE configuration.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.h             |  5 +++++
- drivers/mmc/host/mmci_stm32_sdmmc.c | 21 +++++++++++++++++++++
- 2 files changed, 26 insertions(+)
+ drivers/mmc/host/mmci.c | 38 ++++++++++++++++++++++++++++++++------
+ 1 file changed, 32 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 6f28f71..eb5d99af 100644
---- a/drivers/mmc/host/mmci.h
-+++ b/drivers/mmc/host/mmci.h
-@@ -131,6 +131,11 @@
- /* Control register extensions in the Qualcomm versions */
- #define MCI_DPSM_QCOM_DATA_PEND	BIT(17)
- #define MCI_DPSM_QCOM_RX_DATA_PEND BIT(20)
-+/* Control register extensions in STM32 versions */
-+#define MCI_DPSM_STM32_MODE_BLOCK	(0 << 2)
-+#define MCI_DPSM_STM32_MODE_SDIO	(1 << 2)
-+#define MCI_DPSM_STM32_MODE_STREAM	(2 << 2)
-+#define MCI_DPSM_STM32_MODE_BLOCK_STOP	(3 << 2)
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 387ff14..e1d3f42 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -47,11 +47,8 @@
  
- #define MMCIDATACNT		0x030
- #define MMCISTATUS		0x034
-diff --git a/drivers/mmc/host/mmci_stm32_sdmmc.c b/drivers/mmc/host/mmci_stm32_sdmmc.c
-index cfbfc6f..e7bf744 100644
---- a/drivers/mmc/host/mmci_stm32_sdmmc.c
-+++ b/drivers/mmc/host/mmci_stm32_sdmmc.c
-@@ -265,10 +265,31 @@ static void mmci_sdmmc_set_pwrreg(struct mmci_host *host, unsigned int pwr)
- 	}
+ #define DRIVER_NAME "mmci-pl18x"
+ 
+-#ifdef CONFIG_DMA_ENGINE
+ void mmci_variant_init(struct mmci_host *host);
+-#else
+-static inline void mmci_variant_init(struct mmci_host *host) {}
+-#endif
++void mmci_ux500v2_variant_init(struct mmci_host *host);
+ 
+ #ifdef CONFIG_MMC_STM32_SDMMC
+ void sdmmc_variant_init(struct mmci_host *host);
+@@ -238,7 +235,7 @@ static struct variant_data variant_ux500v2 = {
+ 	.irq_pio_mask		= MCI_IRQ_PIO_MASK,
+ 	.start_err		= MCI_STARTBITERR,
+ 	.opendrain		= MCI_OD,
+-	.init			= mmci_variant_init,
++	.init			= mmci_ux500v2_variant_init,
+ };
+ 
+ static struct variant_data variant_stm32 = {
+@@ -624,6 +621,24 @@ static void mmci_init_sg(struct mmci_host *host, struct mmc_data *data)
+ 	sg_miter_start(&host->sg_miter, data->sg, data->sg_len, flags);
  }
  
-+u32 sdmmc_get_dctrl_cfg(struct mmci_host *host)
++u32 mmci_get_dctrl_cfg(struct mmci_host *host)
 +{
 +	struct variant_data *variant = host->variant;
 +	int blksz_bits;
-+	u32 datactrl;
 +
 +	blksz_bits = ffs(host->data->blksz) - 1;
-+	datactrl = variant->datactrl_dpsm_enable | blksz_bits << 4;
++	BUG_ON(1 << blksz_bits != host->data->blksz);
 +
-+	if (host->mmc->card && mmc_card_sdio(host->mmc->card) &&
-+	    host->data->blocks == 1)
-+		datactrl |= MCI_DPSM_STM32_MODE_SDIO;
-+	else if (host->data->stop && !host->mrq->sbc)
-+		datactrl |= MCI_DPSM_STM32_MODE_BLOCK_STOP;
-+	else
-+		datactrl |= MCI_DPSM_STM32_MODE_BLOCK;
-+
-+	return datactrl;
++	return variant->datactrl_dpsm_enable | blksz_bits << 4;
 +}
 +
- static struct mmci_host_ops sdmmc_variant_ops = {
- 	.validate_data = sdmmc_idma_validate_data,
- 	.prep_data = sdmmc_idma_prep_data,
- 	.unprep_data = sdmmc_idma_unprep_data,
-+	.get_datactrl_cfg = sdmmc_get_dctrl_cfg,
- 	.dma_setup = sdmmc_idma_setup,
- 	.dma_start = sdmmc_idma_start,
- 	.dma_finalize = sdmmc_idma_finalize,
++u32 mmci_ux500v2_get_dctrl_cfg(struct mmci_host *host)
++{
++	struct variant_data *variant = host->variant;
++
++	return variant->datactrl_dpsm_enable | (host->data->blksz << 16);
++}
++
+ /*
+  * All the DMA operation mode stuff goes inside this ifdef.
+  * This assumes that you have a generic DMA device interface,
+@@ -952,6 +967,7 @@ void mmci_dmae_unprep_data(struct mmci_host *host,
+ static struct mmci_host_ops mmci_variant_ops = {
+ 	.prep_data = mmci_dmae_prep_data,
+ 	.unprep_data = mmci_dmae_unprep_data,
++	.get_datactrl_cfg = mmci_get_dctrl_cfg,
+ 	.get_next_data = mmci_dmae_get_next_data,
+ 	.dma_setup = mmci_dmae_setup,
+ 	.dma_release = mmci_dmae_release,
+@@ -959,12 +975,22 @@ static struct mmci_host_ops mmci_variant_ops = {
+ 	.dma_finalize = mmci_dmae_finalize,
+ 	.dma_error = mmci_dmae_error,
+ };
++#else
++static struct mmci_host_ops mmci_variant_ops = {
++	.get_datactrl_cfg = mmci_get_dctrl_cfg,
++}
++#endif
+ 
+ void mmci_variant_init(struct mmci_host *host)
+ {
+ 	host->ops = &mmci_variant_ops;
+ }
+-#endif
++
++void mmci_ux500v2_variant_init(struct mmci_host *host)
++{
++	host->ops = &mmci_variant_ops;
++	host->ops->get_datactrl_cfg = mmci_ux500v2_get_dctrl_cfg;
++}
+ 
+ static void mmci_pre_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ {
 -- 
 2.7.4
