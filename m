@@ -1,122 +1,57 @@
-From: David Summers <beagleboard-8lkWs+DogrrqRUWtDFdff/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH 1/3 v2] ARM: dts: rk3288-tinker.dtsi: Fix SD card detection
-Date: Sun, 3 Mar 2019 11:08:08 +0000
-Message-ID: <c5079feb-6549-b30a-76a6-fc9fd19a9b84@davidjohnsummers.uk>
-References: <20190217121513.22965-2-beagleboard@davidjohnsummers.uk>
- <20190222184708.32004-1-beagleboard@davidjohnsummers.uk>
+From: Shawn Guo <shawnguo@kernel.org>
+Subject: Re: [PATCH v2] ls1021aqds: enable esdhc controller
+Date: Mon, 4 Mar 2019 09:21:33 +0800
+Message-ID: <20190304012131.GS26041@dragon>
+References: <20190226084121.41499-1-yinbo.zhu@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <20190222184708.32004-1-beagleboard-8lkWs+DogrrqRUWtDFdff/XRex20P6io@public.gmane.org>
-Content-Language: en-PH
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org
-Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Jonas Karlman <jonas-uIzNG4q0ceqzQB+pC5nmwQ@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Tony McKahan <tonymckahan-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20190226084121.41499-1-yinbo.zhu@nxp.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Yinbo Zhu <yinbo.zhu@nxp.com>
+Cc: Leo Li <leoyang.li@nxp.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Xiaobo Xie <xiaobo.xie@nxp.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Y.b. Lu" <yangbo.lu@nxp.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-RGVhciBBbGwsCgpTbyBsZXRzIGRvIGEgc3ludGhlc2lzIG9mIHdoZXJlIHdlIGFyZSwgUGVvcGxl
-IHdobyBoYXZlIGFuIGludGVyZXN0OgoKMSkgTWUKMikgSm9uYXMgS2FybG1hbiAtIGRpc2FibGUt
-d3Agc2hvdWxkIGJlIHNldCwgYW5kIFRlc3RlZC4gQnV0IGNvbW1lbnRlZCAKImZpeGVzIHJlYm9v
-dCB3aGVuIGJvb3RpbmcgZnJvbSBzZC1jYXJkIGFuZCBoYXZpbmcgZW1tYyB6ZXJvZWQgb3V0IiB3
-aGVuIApyZWd1bGF0b3ItYm9vdC1vbiBpcyBzZXQKMykgSGVpa28gU3R1Ym5lciAoUm9ja2NoaXAg
-bWFpbnRhaW5lcikgLSBhZ3JlZXMgZGlzYWJsZS13cCBzaG91bGQgc2V0CjQpIERvdWcgQW5kZXJz
-b24gLSBDYXJkIERldGVjdCBzaG91bGRuJ3QgYmUgcG93ZXIgYnkgdmNjaW9fc2QuIFNvIHRoaXMg
-CmVycm9yIGluIGJvYXJkIGNvbnN0cnVjdGlvbiwgbWVhbnMgc2hvdWxkIGRvICJicm9rZW4tY2Qi
-IGFzIENhcmQgRGV0ZWN0IApkb2Vzbid0IHdvcmsgd2hlbiB2Y2Npb19zZCBpcyBkb3duCjUpIEph
-ZWhvb24gQ2h1bmcgJiBVbGYgSGFuc3Nvbiwgbm90IHBvc3RlZCBvbiB0aGlzIHRocmVhZCAtIGJ1
-dCBNTUMgU0QgCm1haW50YWluZXIuIEluIHBhc3QgdGhyZWFkIDQtNSB5ZWFycyBhZ28sIHN0cm9u
-Z2x5IHNhaWQgdGhpcyBpcyBhIGJyb2tlbiAKY2QsIGhlbmNlIHVzZSAiYnJva2VuLWNkIgo2KSBS
-b2JpbiBNdXJwaHnCoCAtIHdobyBpZGVudGlmaWVkIHRoZSBwcm9ibGVtIHdpdGggY2FyZCBkZXRl
-Y3RlZCBwb3dlcmVkIApieSB2Y2Npb19zZC4gU28gcG93ZXIgb24gdmNjaW9fc2QgYWx3YXlzLCBi
-dXQgY2FuIGJlIHN3YXllZC4gTWF5YmUgd2UgCnNob3VsZCBoYXZlIGEgc29mdHdhcmUgY29ycmVj
-dGlvbiB0byB0aGlzIHByb2JsZW0uCjcpIFRvbnkgTWNLYWhhbiAtIGludm9sdmVkIGluIEFybWJp
-YW4sIHNvIGludGVyZXN0ZWQgaW4gVGlua2VyIEJvYXJkIFMgCnN1cHBvcnQgYnkgbWFpbmxpbmUg
-TGludXgKCkFuZCBzbyB3aGF0IHRvIGNvbmNsdWRlLgoKV2VsbCwgYWx0aG91Z2ggSmFlaG9vbiBh
-bmQgVWxmIGhhdmVuJ3QgcG9zdGVkIG9uIHRoaXMgdGhyZWFkLCB0aGUgdGhyZWFkIApmcm9tIGZv
-dXIgeWVhcnMgYWdvOgoKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvcGlwZXJtYWlsL2xpbnV4
-LWFybS1rZXJuZWwvMjAxNC1BdWd1c3QvMjgxMTUzLmh0bWwKCkFuZCBpdCBtYWtlcyBjbGVhciB0
-aGF0IGl0cyB0cmVhdGVkIGFzIGEgYnJva2VuIGNhcmQgZGV0ZWN0LCBhbmQgc28gCiJicm9rZW4t
-Y2QiIGlzIHRoZSBjb3JyZWN0IHNvbHV0aW9uLCBub3cgUm9iaW4gc2F5cyBvbiBzb21lIG1hY2hp
-bmVzIAp0aGlzIGNhdXNlcyBhIGhpZ2ggbG9hZCBkdWUgdG8gdGhlIHBvbGxpbmc7IGJ1dCB0aGlz
-IGhhc24ndCBjbGVhcmx5IGJlZW4gCnNlZW4gb24gcmszMjg4IG1hY2hpbmVzLCBlaXRoZXIgb24g
-dGhpcyB0aHJlYWQgb3Igb24gQXJjaExpbnV4IEFybS4gVG8gCm15IG1pbmQgdGhpcyBtZWFucyB0
-aGF0IFVsZiBhbmQgSmFlaG9vbiBhcyBtYWludGFpbmVycywgZXZlbiB3aXRoIGEgNCAKeWVhciBv
-bGQgcG9zdCwgdHJ1bXAgYW5kIHdpbiAtIGFuZCBzbyB3ZSBnbyB3aXRoICJicm9rZW4tY2QiIG92
-ZXIgCmVuYWJsaW5nIHRoZSByZWd1bGF0b3IgYWxsIHRoZSB0aW1lLgoKSm9uYXMgY29tbWVudCB0
-aG91Z2gsIGFib3V0IHdhcm0gcmVib290cyBvbiBzZCBjYXJkLiBTdWdnZXN0cyB3ZSBkbyBoYXZl
-IAoicmVndWxhdG9yLWJvb3Qtb24iLiBIYXZlbid0IGJlZW4gYWJsZSB0byBjb25maXJtIHRoaXM7
-IHNvIHdvdWxkIGJlIGdvb2QgCmlmIEpvbmFzIGNvdWxkIGNvbmZpcm0gdGhpcyBpcyAqZXhhY3Rs
-eSogd2hhdCBpcyBuZWVkZWQ/CgpTbyB1bmxlc3MgYW55b25lIHNheXMgYW55dGhpbmcgdG8gY29u
-dmluY2UgbWUgb3RoZXJ3aXNlLCBteSBwbGFuIGlzIHRvIApzdWJtaXQgdjMgb2YgdGhpcyBwYXRj
-aCBpbiBuZXh0IGZldyBkYXlzIHdpdGg6CgoxKSAiYnJva2VuLWNkIgoyKSAiZGlzYWJsZS13cCIK
-MykgInJlZ3VsYXRvci1ib290LW9uIgoKTm93IHF1ZXN0aW9uIGZvciBIZWlrbyBpcyB3aGF0IHNj
-aGVkdWxlIGFyZSB3ZSBsb29raW5nIGF0PyBNeSBndWVzcyBpcyAKdGhhdCB0aGUgbGludXggNS4x
-IGJvb3QgaGFzIGJlZW4gbWlzc2VkPyBTbyB3aGF0cyB0aGUgc2NoZWR1bGUgZm9yIDUuMj8KCkd1
-ZXNzIEkgc2hvdWxkIGFsc28gc2F5IHNvbWUgd29yZHMgb24gdGhlIHRhbGsgb2Ygc2hvdWxkIHRo
-ZXJlIGJlIGEgCnNvZnR3YXJlIHdvcmsgYXJvdW5kIGZvciB0aGlzIGNvbW1vbiBoYXJkd2FyZSBm
-YXVsdCwgd2hlcmUgdGhlIENEIGlzIApwb3dlcmVkIGJ5IHZjY2lvX3NkLiBBcyBJIHNlZSBpdCB3
-aXRoICJicm9rZW4tY2QiIHdoZW4gd2Ugd2FudCBzZCBzdGF0dXMgCnRoZSBrZXJuZWwgZG9lczoK
-CjEpIFBvd2VyIG9uIHZjY2lvX3NkCjIpIFBvbGwgdGhlIGNhcmQgd2l0aCB0aW1lb3V0cwozKSBQ
-b3dlciBkb3duIHRoZSB2Y2Npb19zZAoKTm93IHdpdGggYW4gYWRkaXRpb25hbCBzb2Z0d2FyZSB3
-b3JrIGFyb3VuZCwgd291bGQgaW52b2x2ZSBzdGVwIDIgCnJlcGxhY2VkIHdpdGggInRlc3QgY2Qg
-cGluIiAtIGJ1dCBzdGlsbCBuZWVkIHN0ZXBzIDEgYW5kIDMuIE5vdyB0ZXN0aW5nIAp0aGUgY2Qg
-cGluLCBzaG91bGQgYmUgbG93ZXIgbG9hZCB0aGFuIHBvbGxpbmcgYW5kIHRpbWVvdXRzIC0gYnV0
-IHN0aWxsIApoYXZlIHRoZSByZWd1bGF0b3Igb24tb2ZmIG92ZXJoZWFkLgoKQW55d2F5IEkgZG9u
-J3QgaGF2ZSB0aW1lIHJpZ2h0IG5vdyB0byBmb2xsb3cgc3VjaCBhIHNvZnR3YXJlIHdvcmsgCmFy
-b3VuZC4gU28gcGxhbiB0aGlzIHBhdGNoIHRvIGJlIGluZGVwZW5kZW50LgoKQW55IHZpZXdzIGxl
-dCBtZSBrbm93IC0gb3RoZXJ3aXNlIHYzIG9mIHRoZSBwYXRjaCB+V2VkbmVzZGF5LgoKRGF2aWQu
-CgoKT24gMjIvMDIvMjAxOSAxODo0NywgRGF2aWQgU3VtbWVycyB3cm90ZToKPiBUaGUgUHJvYmxl
-bToKPgo+IE9uIEFTVVMgVGlua2VyIEJvYXJkIFMsIHdoZW4gYm9vdGluZyBmcm9tIHRoZSBlTU1D
-LCBhbmQgdGhlcmUgaXMgbm8KPiBjYXJkIHNkIHNsb3QsIHRoZW4gdGhlcmUgYXJlIGNvbnN0YW50
-IGVycm9ycy4KPgo+IENhdXNlOgo+Cj4gVGhhbmtzIG11c3QgZ28gdG8gUm9iaW4gTXVycGh5IEAg
-QVJNIGZvciBpZGVuaWZ5aW5nIHRoZSBwcm9ibGVtLiBUaGUKPiByazgwOCBvbiB0aGUgVGlua2Vy
-IEJvYXJkIGFuZCBUaW5rZXIgQm9hcmQgUyBoYXMgbWFueSByZWd1bGF0b3JzLCBvbmUKPiB2Y2Np
-b19zZCBwb3dlcnMgdGhlIElPIGZvciB0aGUgc2QgY2FyZC4gVW5mb3J0dW5hdGx5IHRoaXMgaXMg
-YWxzbyB1c2VkCj4gaW4gdGhlIGNhcmQgZGV0ZWN0LiBOb3cgd2hlbiBubyBjYXJkIGlzIGluc3Rh
-bGwsIHRoZSByZWd1bGF0b3IgaXMKPiBwb3dlcmVkIGRvd24uIFRoaXMgbWVhbnMgdGhhdCB0aGUg
-Y2FyZCBkZXRlY3QgZmxvYXRzLCBhbmQgdGhpcyBtZWFucwo+IHJhbmRvbSBjYXJkIGRldGVjdGlv
-bi4KPgo+IFRoZSBTb2x1dGlvbjoKPgo+IE1ha2Ugc3VyZSB0aGF0IHRoZSBzZCBJTyBpcyBhbHdh
-eXMgcG93ZXJlZCwgdGhpcyBtZWFucyBjYXJkIGRldGVjdGlvbgo+IGlzIGFsd2F5cyBhY3RpdmUs
-IHdoaWNoIGlzIHdoYXQgc2hvdWxkIGJlIGRvbmUgb24gYSBib2FyZCB3aXRoIGFuIHNkCj4gc2xv
-dCwgd2hpY2ggYm90aCB0aGUgVGlua2VyIEJvYXJkIGFuZCBUaW5rZXIgQm9hcmQgUyBhcmUuIEhl
-bmNlIGNoYW5nZQo+IGlzIG1hZGUgdG8gdGhlIC5kdHNpIHdoaWNoIHRha2VzIGVmZmVjdCBvbiBh
-bGwgVGlua2VyIEJvYXJkcyBhcwo+IHJlcXVpcmVkLgo+Cj4gVGhlIGNoYW5nZSBhbHNvIGFkZHMg
-InJlZ3VsYXRvci1ib290LW9uIiB0aGUgVGlua2VyIEJvYXJkIGJvb3QgZnJvbQo+IHVib290LCBh
-bmQgdGhlIHNkIGNhcmQgaXMgYWx3YXlzIG9uZSBvcHRpb24uIEhlbmNlIHRoZSBJTyBtdXN0IGJl
-Cj4gcG93ZXJlZCBpbiB1Ym9vdCwgYW5kIHNvIHNldHRpbmcgdGhpcyBmbGFnLgo+Cj4gQWxzbyBy
-ZW1vdmVkIGlzICJkaXNhYmxlLXdwIiB0aGUgbWljcm8gc2QgY2FyZCB3aGljaCBhcmUgdXNlZCBo
-YXZlIG5vCj4gd3JpdGUgIHByb3RlY3Rpb24sIHNvIHRoZSBjb25jZXB0IGRvZXNuJ3QgbWVhbiBh
-bnl0aGluZywgYW5kIHRoZQo+IFRpbmtlciBCb2FyZHMgd29yayB3aXRob3V0IHRoaXMuIEhlbmNl
-IGl0IGlzIHJlbW92ZWQgdG8gc2ltcGx5Lgo+Cj4gVGhpcyBjaGFuZ2UgY2FtZSBmcm9tIEFyY2hM
-aW51eCBBcm0sIGJ1dCB3ZSBub3RlIGl0IGlzIHRoZSBmaXggYWxzbwo+IHVzZWQgYnkgQXJtYmlh
-bjoKPgo+IGh0dHBzOi8vZ2l0aHViLmNvbS9NaW91eW91eW91L1JvY2tNeXkvYmxvYi9tYXN0ZXIv
-cGF0Y2hlcy9rZXJuZWwvdjUuMC9EVFMvMDAxNi1BUk0tRFRTSS1yazMyODgtdGlua2VyLVNldHRp
-bmctdXAtdGhlLVNELXJlZ3VsYXRvcnMucGF0Y2gKPgo+IFNpZ25lZC1vZmYtYnk6IERhdmlkIFN1
-bW1lcnMgPGJlYWdsZWJvYXJkQGRhdmlkam9obnN1bW1lcnMudWs+Cj4gLS0tCj4gICBhcmNoL2Fy
-bS9ib290L2R0cy9yazMyODgtdGlua2VyLmR0c2kgfCAzICsrLQo+ICAgMSBmaWxlIGNoYW5nZWQs
-IDIgaW5zZXJ0aW9ucygrKSwgMSBkZWxldGlvbigtKQo+Cj4gZGlmZiAtLWdpdCBhL2FyY2gvYXJt
-L2Jvb3QvZHRzL3JrMzI4OC10aW5rZXIuZHRzaSBiL2FyY2gvYXJtL2Jvb3QvZHRzL3JrMzI4OC10
-aW5rZXIuZHRzaQo+IGluZGV4IGFhMTA3ZWU0MWI4Yi4uNmI3ZTU1MDg1YjBjIDEwMDY0NAo+IC0t
-LSBhL2FyY2gvYXJtL2Jvb3QvZHRzL3JrMzI4OC10aW5rZXIuZHRzaQo+ICsrKyBiL2FyY2gvYXJt
-L2Jvb3QvZHRzL3JrMzI4OC10aW5rZXIuZHRzaQo+IEBAIC0yNTQsNiArMjU0LDggQEAKPiAgIAkJ
-CX07Cj4gICAKPiAgIAkJCXZjY2lvX3NkOiBMRE9fUkVHNSB7Cj4gKwkJCQlyZWd1bGF0b3ItYWx3
-YXlzLW9uOwo+ICsJCQkJcmVndWxhdG9yLWJvb3Qtb247Cj4gICAJCQkJcmVndWxhdG9yLW1pbi1t
-aWNyb3ZvbHQgPSA8MTgwMDAwMD47Cj4gICAJCQkJcmVndWxhdG9yLW1heC1taWNyb3ZvbHQgPSA8
-MzMwMDAwMD47Cj4gICAJCQkJcmVndWxhdG9yLW5hbWUgPSAidmNjaW9fc2QiOwo+IEBAIC00MzEs
-NyArNDMzLDYgQEAKPiAgIAljYXAtbW1jLWhpZ2hzcGVlZDsKPiAgIAljYXAtc2QtaGlnaHNwZWVk
-Owo+ICAgCWNhcmQtZGV0ZWN0LWRlbGF5ID0gPDIwMD47Cj4gLQlkaXNhYmxlLXdwOwkJCS8qIHdw
-IG5vdCBob29rZWQgdXAgKi8KPiAgIAlwaW5jdHJsLW5hbWVzID0gImRlZmF1bHQiOwo+ICAgCXBp
-bmN0cmwtMCA9IDwmc2RtbWNfY2xrICZzZG1tY19jbWQgJnNkbW1jX2NkICZzZG1tY19idXM0PjsK
-PiAgIAlzdGF0dXMgPSAib2theSI7CgoKCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fCkxpbnV4LXJvY2tjaGlwIG1haWxpbmcgbGlzdApMaW51eC1yb2NrY2hp
-cEBsaXN0cy5pbmZyYWRlYWQub3JnCmh0dHA6Ly9saXN0cy5pbmZyYWRlYWQub3JnL21haWxtYW4v
-bGlzdGluZm8vbGludXgtcm9ja2NoaXAK
+On Tue, Feb 26, 2019 at 08:40:22AM +0000, Yinbo Zhu wrote:
+> From: Yinbo Zhu <yinbo.zhu@nxp.com>
+> 
+> This patch is to enable esdhc controller in ls1021aqds
+> 
+> Signed-off-by: Yinbo Zhu <yinbo.zhu@nxp.com>
+
+Changed the subject prefix to 'ARM: dts: ls1021a-qds: ...' and applied
+the patch.
+
+Shawn
+
+> ---
+> Change in v2:
+> 		Add patch code after &enet2 to keep them sort alphabetically.
+> 
+>  arch/arm/boot/dts/ls1021a-qds.dts |    4 ++++
+>  1 files changed, 4 insertions(+), 0 deletions(-)
+> 
+> diff --git a/arch/arm/boot/dts/ls1021a-qds.dts b/arch/arm/boot/dts/ls1021a-qds.dts
+> index dac61e7..ae26f8b 100644
+> --- a/arch/arm/boot/dts/ls1021a-qds.dts
+> +++ b/arch/arm/boot/dts/ls1021a-qds.dts
+> @@ -160,6 +160,10 @@
+>  	status = "okay";
+>  };
+>  
+> +&esdhc {
+> +	status = "okay";
+> +};
+> +
+>  &i2c0 {
+>  	status = "okay";
+>  
+> -- 
+> 1.7.1
+> 
+> 
+> _______________________________________________
+> linux-arm-kernel mailing list
+> linux-arm-kernel@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
