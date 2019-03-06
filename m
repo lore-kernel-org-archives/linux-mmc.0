@@ -1,139 +1,45 @@
-From: Ludovic BARRE <ludovic.barre@st.com>
-Subject: Re: [PATCH 1/4] mmc: mmci: avoid fake busy polling
-Date: Wed, 6 Mar 2019 11:08:57 +0100
-Message-ID: <15ce68e6-136f-7e9b-553c-968a0653a9b8@st.com>
-References: <1551802205-32188-1-git-send-email-ludovic.Barre@st.com>
- <1551802205-32188-2-git-send-email-ludovic.Barre@st.com>
- <CAPDyKFo_O36=N9wM2jFnUvkga1TFjPMibr+0MRU6bLOpq7nH7g@mail.gmail.com>
- <5b531f55-b8a0-5a83-4a7c-727013a66820@st.com>
- <CAPDyKFp=AO27hmG9u8JHrRa3JW7RNMbxC8+vMb2y_qGo=mLWQg@mail.gmail.com>
+From: Faiz Abbas <faiz_abbas@ti.com>
+Subject: Re: [PATCH v2 0/2] Fixes for command errors during tuning
+Date: Wed, 6 Mar 2019 15:48:23 +0530
+Message-ID: <e5fb69c2-72a4-4b82-ea65-e0b314fdf28f@ti.com>
+References: <20190301083824.23918-1-faiz_abbas@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFp=AO27hmG9u8JHrRa3JW7RNMbxC8+vMb2y_qGo=mLWQg@mail.gmail.com>
+In-Reply-To: <20190301083824.23918-1-faiz_abbas@ti.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Rob Herring <robh+dt@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-stm32@st-md-mailman.stormreply.com
+To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Cc: ulf.hansson@linaro.org, kishon@ti.com, adrian.hunter@intel.com
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Ulf
+Hi,
 
-I could have a snowball board, I don't remember if it a ux500v1 or v2?
-This board has been removed of u-boot mainline, do you have a specific
-repository for snowball or what branch do you advise?
-do you have a snowball wiki (up-to-date) for flashing...
+On 01/03/19 2:08 PM, Faiz Abbas wrote:
+> These patches fix the following error message in dra7xx boards:
+> 
+> [4.833198] mmc1: Got data interrupt 0x00000002 even though no data
+> operation was in progress.
+> 
+> Tested with 100 times boot tests on dra71x-evm, dra72x-evm and
+> dra7xx-evm.
+> 
+> v2:
+> Added EXPORT_SYMBOL_GPL for sdhci_cmd_err and sdhci_send_command to fix
+> errors when built as module.
+> 
+> Faiz Abbas (2):
+>   mmc: sdhci: Add platform_cmd_err() to sdhci_ops
+>   mmc: sdhci-omap: Don't finish_mrq() on a command error during tuning
+> 
+>  drivers/mmc/host/sdhci-omap.c | 24 +++++++++++++++++++++
+>  drivers/mmc/host/sdhci.c      | 40 +++++++++++++++++++++++------------
+>  drivers/mmc/host/sdhci.h      |  4 ++++
+>  3 files changed, 54 insertions(+), 14 deletions(-)
+>
 
-BR
-Ludo
-On 3/6/19 10:49 AM, Ulf Hansson wrote:
-> On Wed, 6 Mar 2019 at 10:04, Ludovic BARRE <ludovic.barre@st.com> wrote:
->>
->> Hi Ulf
->>
->> On 3/6/19 10:00 AM, Ulf Hansson wrote:
->>> On Tue, 5 Mar 2019 at 17:10, Ludovic Barre <ludovic.Barre@st.com> wrote:
->>>>
->>>> From: Ludovic Barre <ludovic.barre@st.com>
->>>>
->>>> The busy status bit could occurred even if no busy response is
->>>> expected (example cmd11). On sdmmc variant, the busy_detect_flag
->>>> reflects inverted value of d0 state, it's sampled at the end of a
->>>> CMD response and a second time 2 clk cycles after the CMD response.
->>>> To avoid a fake busy, the busy status could be checked and polled
->>>> only if the command has RSP_BUSY flag.
->>>>
->>>> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
->>>
->>> Before I review this, can you tell what HW you have tested this on?
->>
->> I tested on stm32mp157c (stm32_sdmmc variant)
-> 
-> Okay, I see. So we need to get this tested for the ux500v2 variant as
-> well. I try to get some time to do that, soon.
-> 
-> However it seems like you could benefit from having one of those
-> boards yourself. It would speed up the process, as you wouldn't have
-> to rely on me doing the test. :-) Is there a chance of you could dig
-> up some of these old boards from somewhere?
-> 
-> Kind regards
-> Uffe
-> 
->>
->>>
->>> Kind regards
->>> Uffe
->>>
->>>> ---
->>>>    drivers/mmc/host/mmci.c | 19 +++++++++++++------
->>>>    1 file changed, 13 insertions(+), 6 deletions(-)
->>>>
->>>> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
->>>> index 387ff14..4901b73 100644
->>>> --- a/drivers/mmc/host/mmci.c
->>>> +++ b/drivers/mmc/host/mmci.c
->>>> @@ -1220,12 +1220,13 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
->>>>                unsigned int status)
->>>>    {
->>>>           void __iomem *base = host->base;
->>>> -       bool sbc;
->>>> +       bool sbc, busy_resp;
->>>>
->>>>           if (!cmd)
->>>>                   return;
->>>>
->>>>           sbc = (cmd == host->mrq->sbc);
->>>> +       busy_resp = !!(cmd->flags & MMC_RSP_BUSY);
->>>>
->>>>           /*
->>>>            * We need to be one of these interrupts to be considered worth
->>>> @@ -1239,8 +1240,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
->>>>           /*
->>>>            * ST Micro variant: handle busy detection.
->>>>            */
->>>> -       if (host->variant->busy_detect) {
->>>> -               bool busy_resp = !!(cmd->flags & MMC_RSP_BUSY);
->>>> +       if (busy_resp && host->variant->busy_detect) {
->>>>
->>>>                   /* We are busy with a command, return */
->>>>                   if (host->busy_status &&
->>>> @@ -1253,7 +1253,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
->>>>                    * that the special busy status bit is still set before
->>>>                    * proceeding.
->>>>                    */
->>>> -               if (!host->busy_status && busy_resp &&
->>>> +               if (!host->busy_status &&
->>>>                       !(status & (MCI_CMDCRCFAIL|MCI_CMDTIMEOUT)) &&
->>>>                       (readl(base + MMCISTATUS) & host->variant->busy_detect_flag)) {
->>>>
->>>> @@ -1508,6 +1508,7 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
->>>>    {
->>>>           struct mmci_host *host = dev_id;
->>>>           u32 status;
->>>> +       bool busy_resp;
->>>>           int ret = 0;
->>>>
->>>>           spin_lock(&host->lock);
->>>> @@ -1550,9 +1551,15 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
->>>>                   }
->>>>
->>>>                   /*
->>>> -                * Don't poll for busy completion in irq context.
->>>> +                * Don't poll for:
->>>> +                * -busy completion in irq context.
->>>> +                * -no busy response expected.
->>>>                    */
->>>> -               if (host->variant->busy_detect && host->busy_status)
->>>> +               busy_resp = host->cmd ?
->>>> +                       !!(host->cmd->flags & MMC_RSP_BUSY) : false;
->>>> +
->>>> +               if (host->variant->busy_detect &&
->>>> +                   (!busy_resp || host->busy_status))
->>>>                           status &= ~host->variant->busy_detect_flag;
->>>>
->>>>                   ret = 1;
->>>> --
->>>> 2.7.4
->>>>
+Gentle ping.
+
+Thanks,
+Faiz
