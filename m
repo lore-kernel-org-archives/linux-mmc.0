@@ -1,77 +1,139 @@
-From: Faiz Abbas <faiz_abbas@ti.com>
-Subject: Re: [PATCH v2 1/8] mmc: sdhci: Get rid of finish_tasklet
-Date: Wed, 6 Mar 2019 15:30:06 +0530
-Message-ID: <8d72ff93-e07f-52b9-da85-acd54f046694@ti.com>
-References: <20190215192033.24203-1-faiz_abbas@ti.com>
- <20190215192033.24203-2-faiz_abbas@ti.com>
- <abcc1506-cd38-5ff4-aaeb-57e9a9622e90@intel.com>
+From: Ludovic BARRE <ludovic.barre@st.com>
+Subject: Re: [PATCH 1/4] mmc: mmci: avoid fake busy polling
+Date: Wed, 6 Mar 2019 11:08:57 +0100
+Message-ID: <15ce68e6-136f-7e9b-553c-968a0653a9b8@st.com>
+References: <1551802205-32188-1-git-send-email-ludovic.Barre@st.com>
+ <1551802205-32188-2-git-send-email-ludovic.Barre@st.com>
+ <CAPDyKFo_O36=N9wM2jFnUvkga1TFjPMibr+0MRU6bLOpq7nH7g@mail.gmail.com>
+ <5b531f55-b8a0-5a83-4a7c-727013a66820@st.com>
+ <CAPDyKFp=AO27hmG9u8JHrRa3JW7RNMbxC8+vMb2y_qGo=mLWQg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset="utf-8"; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <abcc1506-cd38-5ff4-aaeb-57e9a9622e90@intel.com>
+In-Reply-To: <CAPDyKFp=AO27hmG9u8JHrRa3JW7RNMbxC8+vMb2y_qGo=mLWQg@mail.gmail.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
-Cc: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, kishon@ti.com, zhang.chunyan@linaro.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Rob Herring <robh+dt@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-stm32@st-md-mailman.stormreply.com
 List-Id: linux-mmc@vger.kernel.org
 
-Adrian,
+Hi Ulf
 
-On 25/02/19 1:47 PM, Adrian Hunter wrote:
-> On 15/02/19 9:20 PM, Faiz Abbas wrote:
->> sdhci.c has two bottom halves implemented. A threaded_irq for handling
->> card insert/remove operations and a tasklet for finishing mmc requests.
->> With the addition of external dma support, dmaengine APIs need to
->> terminate in non-atomic context before unmapping the dma buffers.
+I could have a snowball board, I don't remember if it a ux500v1 or v2?
+This board has been removed of u-boot mainline, do you have a specific
+repository for snowball or what branch do you advise?
+do you have a snowball wiki (up-to-date) for flashing...
+
+BR
+Ludo
+On 3/6/19 10:49 AM, Ulf Hansson wrote:
+> On Wed, 6 Mar 2019 at 10:04, Ludovic BARRE <ludovic.barre@st.com> wrote:
 >>
->> To facilitate this, remove the finish_tasklet and move the call of
->> sdhci_request_done() to the threaded_irq() callback.
+>> Hi Ulf
+>>
+>> On 3/6/19 10:00 AM, Ulf Hansson wrote:
+>>> On Tue, 5 Mar 2019 at 17:10, Ludovic Barre <ludovic.Barre@st.com> wrote:
+>>>>
+>>>> From: Ludovic Barre <ludovic.barre@st.com>
+>>>>
+>>>> The busy status bit could occurred even if no busy response is
+>>>> expected (example cmd11). On sdmmc variant, the busy_detect_flag
+>>>> reflects inverted value of d0 state, it's sampled at the end of a
+>>>> CMD response and a second time 2 clk cycles after the CMD response.
+>>>> To avoid a fake busy, the busy status could be checked and polled
+>>>> only if the command has RSP_BUSY flag.
+>>>>
+>>>> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
+>>>
+>>> Before I review this, can you tell what HW you have tested this on?
+>>
+>> I tested on stm32mp157c (stm32_sdmmc variant)
 > 
-> The irq thread has a higher latency than the tasklet.  The performance drop
-> is measurable on the system I tried:
+> Okay, I see. So we need to get this tested for the ux500v2 variant as
+> well. I try to get some time to do that, soon.
 > 
-> Before:
+> However it seems like you could benefit from having one of those
+> boards yourself. It would speed up the process, as you wouldn't have
+> to rely on me doing the test. :-) Is there a chance of you could dig
+> up some of these old boards from somewhere?
 > 
-> # dd if=/dev/mmcblk1 of=/dev/null bs=1G count=1 &
-> 1+0 records in
-> 1+0 records out
-> 1073741824 bytes (1.1 GB) copied, 4.44502 s, 242 MB/s
+> Kind regards
+> Uffe
 > 
-> After:
-> 
-> # dd if=/dev/mmcblk1 of=/dev/null bs=1G count=1 &
-> 1+0 records in
-> 1+0 records out
-> 1073741824 bytes (1.1 GB) copied, 4.50898 s, 238 MB/s
-> 
-> So we only want to resort to the thread for the error case.
-> 
-
-Sorry for the late response here, but this is about 1.6% decrease. I
-tried out the same commands on a dra7xx board here (with about 5
-consecutive dd of 1GB) and the average decrease was 0.3%. I believe you
-will also find a lesser percentage change if you average over multiple
-dd commands.
-
-Is this really so significant that we have to maintain two different
-bottom halves and keep having difficulty with adding APIs that can sleep?
-
-Also I am not sure how to implement only the error handling part in the
-threaded_irq. We need to enter sdhci_request_done() and get the current
-mrq before we can check for error conditions like I've done in patch 2:
-
-/* Terminate and synchronize dma in case of an error */
-if (data && (mrq->cmd->error || data->error) &&
-    host->use_external_dma) {
-	struct dma_chan *chan = sdhci_external_dma_channel(host, data);
-	dmaengine_terminate_sync(chan);
-}
-
-On a related note, do we really need to protect everything in
-sdhci_request_done() with spinlocks? In patch 2 I have only removed lock
-for the terminate_sync() parts that I added but the whole
-dma_unmap/dma_sync parts should be left unprotected IMO.
-
-Thanks,
-Faiz
+>>
+>>>
+>>> Kind regards
+>>> Uffe
+>>>
+>>>> ---
+>>>>    drivers/mmc/host/mmci.c | 19 +++++++++++++------
+>>>>    1 file changed, 13 insertions(+), 6 deletions(-)
+>>>>
+>>>> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+>>>> index 387ff14..4901b73 100644
+>>>> --- a/drivers/mmc/host/mmci.c
+>>>> +++ b/drivers/mmc/host/mmci.c
+>>>> @@ -1220,12 +1220,13 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+>>>>                unsigned int status)
+>>>>    {
+>>>>           void __iomem *base = host->base;
+>>>> -       bool sbc;
+>>>> +       bool sbc, busy_resp;
+>>>>
+>>>>           if (!cmd)
+>>>>                   return;
+>>>>
+>>>>           sbc = (cmd == host->mrq->sbc);
+>>>> +       busy_resp = !!(cmd->flags & MMC_RSP_BUSY);
+>>>>
+>>>>           /*
+>>>>            * We need to be one of these interrupts to be considered worth
+>>>> @@ -1239,8 +1240,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+>>>>           /*
+>>>>            * ST Micro variant: handle busy detection.
+>>>>            */
+>>>> -       if (host->variant->busy_detect) {
+>>>> -               bool busy_resp = !!(cmd->flags & MMC_RSP_BUSY);
+>>>> +       if (busy_resp && host->variant->busy_detect) {
+>>>>
+>>>>                   /* We are busy with a command, return */
+>>>>                   if (host->busy_status &&
+>>>> @@ -1253,7 +1253,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+>>>>                    * that the special busy status bit is still set before
+>>>>                    * proceeding.
+>>>>                    */
+>>>> -               if (!host->busy_status && busy_resp &&
+>>>> +               if (!host->busy_status &&
+>>>>                       !(status & (MCI_CMDCRCFAIL|MCI_CMDTIMEOUT)) &&
+>>>>                       (readl(base + MMCISTATUS) & host->variant->busy_detect_flag)) {
+>>>>
+>>>> @@ -1508,6 +1508,7 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
+>>>>    {
+>>>>           struct mmci_host *host = dev_id;
+>>>>           u32 status;
+>>>> +       bool busy_resp;
+>>>>           int ret = 0;
+>>>>
+>>>>           spin_lock(&host->lock);
+>>>> @@ -1550,9 +1551,15 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
+>>>>                   }
+>>>>
+>>>>                   /*
+>>>> -                * Don't poll for busy completion in irq context.
+>>>> +                * Don't poll for:
+>>>> +                * -busy completion in irq context.
+>>>> +                * -no busy response expected.
+>>>>                    */
+>>>> -               if (host->variant->busy_detect && host->busy_status)
+>>>> +               busy_resp = host->cmd ?
+>>>> +                       !!(host->cmd->flags & MMC_RSP_BUSY) : false;
+>>>> +
+>>>> +               if (host->variant->busy_detect &&
+>>>> +                   (!busy_resp || host->busy_status))
+>>>>                           status &= ~host->variant->busy_detect_flag;
+>>>>
+>>>>                   ret = 1;
+>>>> --
+>>>> 2.7.4
+>>>>
