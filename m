@@ -1,131 +1,107 @@
-From: Bjorn Andersson <bjorn.andersson@linaro.org>
-Subject: Re: [PATCH v3 1/3] mmc: mmci: Support any block sizes for ux500v2
- and qcom variant
-Date: Wed, 6 Mar 2019 09:03:51 -0800
-Message-ID: <20190306170351.GB3522@tuxbook-pro>
-References: <1408683219-7939-1-git-send-email-srinivas.kandagatla@linaro.org>
- <1408683272-7984-1-git-send-email-srinivas.kandagatla@linaro.org>
- <CACRpkdZtUJim0d0iC26d-Z8xBckdCX7uwh_v4PhJSKkHEcmmrw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: "Enrico Weigelt, metux IT consult" <info@metux.net>
+Subject: [PATCH] drivers: mmc: Kconfig: pedantic cleanups
+Date: Wed,  6 Mar 2019 19:27:51 +0100
+Message-ID: <1551896871-30654-1-git-send-email-info@metux.net>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CACRpkdZtUJim0d0iC26d-Z8xBckdCX7uwh_v4PhJSKkHEcmmrw@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Niklas Cassel <niklas.cassel@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Russell King <linux@arm.linux.org.uk>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm-msm@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue 05 Mar 14:25 PST 2019, Linus Walleij wrote:
+Signed-off-by: Enrico Weigelt, metux IT consult <info@metux.net>
+---
+ drivers/mmc/host/Kconfig | 43 ++++++++++++++++++++++---------------------
+ 1 file changed, 22 insertions(+), 21 deletions(-)
 
-> Sorry for top-posting, patch included for context.
-> 
-> I saw today that Brian has the Nexus 5 working with Broadcom/Cypress
-> 4339 over SDIO on the MMCI.
-> 
-> Brian are you managing to use the WLAN without this patch or is this
-> something you stacked up to make it work? (If you want context I
-> can forward the rest of the conversation where we discuss how to
-> fix it properly.)
-> 
-
-Brian's Nexus 5 is on 8974 where the MMCI block has become the sdhci-msm
-block, so while being a superset (afaict) of the old MMCI block we use
-the sdhci driver instead.
-
-> I discussed this patch several times with Ulf and I think Niklas looked
-> at it too, but we never got around to fix it up properly.
-> 
-
-This is still needed for at least 8064 to have working sdio wifi (and
-perhaps your 8060?).
-
-Regards,
-Bjorn
-
-> Yours,
-> Linus Walleij
-> 
-> 
-> On Fri, Aug 22, 2014 at 6:54 AM Srinivas Kandagatla
-> <srinivas.kandagatla@linaro.org> wrote:
-> 
-> > From: Ulf Hansson <ulf.hansson@linaro.org>
-> >
-> > For the ux500v2 variant of the PL18x block, any block sizes are
-> > supported. This will make it possible to decrease data overhead
-> > for SDIO transfers.
-> >
-> > This patch is based on Ulf Hansson patch
-> > http://www.spinics.net/lists/linux-mmc/msg12160.html
-> >
-> > Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-> >         enabled this support on qcom variant.
-> >
-> > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> > Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
-> > ---
-> >  drivers/mmc/host/mmci.c | 10 +++++++---
-> >  1 file changed, 7 insertions(+), 3 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> > index c11cb05..533ad2b 100644
-> > --- a/drivers/mmc/host/mmci.c
-> > +++ b/drivers/mmc/host/mmci.c
-> > @@ -77,6 +77,7 @@ static unsigned int fmax = 515633;
-> >   * @qcom_fifo: enables qcom specific fifo pio read logic.
-> >   * @reversed_irq_handling: handle data irq before cmd irq.
-> >   * @qcom_dml: enables qcom specific dma glue for dma transfers.
-> > + * @any_blksize: true if block any sizes are supported
-> >   */
-> >  struct variant_data {
-> >         unsigned int            clkreg;
-> > @@ -102,6 +103,7 @@ struct variant_data {
-> >         bool                    qcom_fifo;
-> >         bool                    reversed_irq_handling;
-> >         bool                    qcom_dml;
-> > +       bool                    any_blksize;
-> >  };
-> >
-> >  static struct variant_data variant_arm = {
-> > @@ -194,6 +196,7 @@ static struct variant_data variant_ux500v2 = {
-> >         .pwrreg_clkgate         = true,
-> >         .busy_detect            = true,
-> >         .pwrreg_nopower         = true,
-> > +       .any_blksize            = true,
-> >  };
-> >
-> >  static struct variant_data variant_qcom = {
-> > @@ -212,6 +215,7 @@ static struct variant_data variant_qcom = {
-> >         .explicit_mclk_control  = true,
-> >         .qcom_fifo              = true,
-> >         .qcom_dml               = true,
-> > +       .any_blksize            = true,
-> >  };
-> >
-> >  static int mmci_card_busy(struct mmc_host *mmc)
-> > @@ -239,10 +243,11 @@ static int mmci_card_busy(struct mmc_host *mmc)
-> >  static int mmci_validate_data(struct mmci_host *host,
-> >                               struct mmc_data *data)
-> >  {
-> > +       struct variant_data *variant = host->variant;
-> > +
-> >         if (!data)
-> >                 return 0;
-> > -
-> > -       if (!is_power_of_2(data->blksz)) {
-> > +       if (!is_power_of_2(data->blksz) && !variant->any_blksize) {
-> >                 dev_err(mmc_dev(host->mmc),
-> >                         "unsupported block size (%d bytes)\n", data->blksz);
-> >                 return -EINVAL;
-> > @@ -796,7 +801,6 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
-> >         writel(host->size, base + MMCIDATALENGTH);
-> >
-> >         blksz_bits = ffs(data->blksz) - 1;
-> > -       BUG_ON(1 << blksz_bits != data->blksz);
-> >
-> >         if (variant->blksz_datactrl16)
-> >                 datactrl = MCI_DPSM_ENABLE | (data->blksz << 16);
-> > --
-> > 1.9.1
-> >
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 28fcd8f..de7a38d 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -437,7 +437,7 @@ config MMC_WBSD
+ 	depends on ISA_DMA_API
+ 	help
+ 	  This selects the Winbond(R) W83L51xD Secure digital and
+-          Multimedia card Interface.
++	  Multimedia card Interface.
+ 	  If you have a machine with a integrated W83L518D or W83L519D
+ 	  SD/MMC card reader, say Y or M here.
+ 
+@@ -515,7 +515,7 @@ config MMC_TIFM_SD
+ 	  'Misc devices: TI Flash Media PCI74xx/PCI76xx host adapter support
+ 	  (TIFM_7XX1)'.
+ 
+-          To compile this driver as a module, choose M here: the
++	  To compile this driver as a module, choose M here: the
+ 	  module will be called tifm_sd.
+ 
+ config MMC_MVSDIO
+@@ -531,12 +531,12 @@ config MMC_MVSDIO
+ 	  module will be called mvsdio.
+ 
+ config MMC_DAVINCI
+-        tristate "TI DAVINCI Multimedia Card Interface support"
+-        depends on ARCH_DAVINCI
+-        help
+-          This selects the TI DAVINCI Multimedia card Interface.
+-          If you have an DAVINCI board with a Multimedia Card slot,
+-          say Y or M here.  If unsure, say N.
++	tristate "TI DAVINCI Multimedia Card Interface support"
++	depends on ARCH_DAVINCI
++	help
++	  This selects the TI DAVINCI Multimedia card Interface.
++	  If you have an DAVINCI board with a Multimedia Card slot,
++	  say Y or M here.  If unsure, say N.
+ 
+ config MMC_GOLDFISH
+ 	tristate "goldfish qemu Multimedia Card Interface support"
+@@ -565,18 +565,18 @@ config MMC_S3C
+ 	depends on S3C24XX_DMAC
+ 	help
+ 	  This selects a driver for the MCI interface found in
+-          Samsung's S3C2410, S3C2412, S3C2440, S3C2442 CPUs.
++	  Samsung's S3C2410, S3C2412, S3C2440, S3C2442 CPUs.
+ 	  If you have a board based on one of those and a MMC/SD
+ 	  slot, say Y or M here.
+ 
+ 	  If unsure, say N.
+ 
+ config MMC_S3C_HW_SDIO_IRQ
+-       bool "Hardware support for SDIO IRQ"
+-       depends on MMC_S3C
+-       help
+-         Enable the hardware support for SDIO interrupts instead of using
+-	 the generic polling code.
++	bool "Hardware support for SDIO IRQ"
++	depends on MMC_S3C
++	help
++	  Enable the hardware support for SDIO interrupts instead of using
++	  the generic polling code.
+ 
+ choice
+ 	prompt "Samsung S3C SD/MMC transfer code"
+@@ -948,15 +948,16 @@ config MMC_MTK
+ 	  If unsure, say N.
+ 
+ config MMC_SDHCI_MICROCHIP_PIC32
+-        tristate "Microchip PIC32MZDA SDHCI support"
+-        depends on MMC_SDHCI && PIC32MZDA && MMC_SDHCI_PLTFM
+-        help
+-          This selects the Secure Digital Host Controller Interface (SDHCI)
+-          for PIC32MZDA platform.
++	tristate "Microchip PIC32MZDA SDHCI support"
++	depends on MMC_SDHCI && PIC32MZDA && MMC_SDHCI_PLTFM
++	help
++	  This selects the Secure Digital Host Controller Interface (SDHCI)
++	  for PIC32MZDA platform.
++
++	  If you have a controller with this interface, say Y or M here.
+ 
+-          If you have a controller with this interface, say Y or M here.
++	  If unsure, say N.
+ 
+-          If unsure, say N.
+ config MMC_SDHCI_BRCMSTB
+ 	tristate "Broadcom SDIO/SD/MMC support"
+ 	depends on ARCH_BRCMSTB || BMIPS_GENERIC
+-- 
+1.9.1
