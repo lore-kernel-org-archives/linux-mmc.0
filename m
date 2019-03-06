@@ -1,139 +1,131 @@
-From: Ludovic BARRE <ludovic.barre@st.com>
-Subject: Re: [PATCH 4/5] mmc: mmci: stm32: define get_dctrl_cfg
-Date: Wed, 6 Mar 2019 18:01:54 +0100
-Message-ID: <bbbb79de-b480-718c-abec-ee4af0e88d71@st.com>
-References: <1551694625-6414-1-git-send-email-ludovic.Barre@st.com>
- <1551694625-6414-5-git-send-email-ludovic.Barre@st.com>
- <CAPDyKFr3PLOdozCmfE7Lin0FhzgLnN120RZmMwk=K8RzGvveow@mail.gmail.com>
+From: Bjorn Andersson <bjorn.andersson@linaro.org>
+Subject: Re: [PATCH v3 1/3] mmc: mmci: Support any block sizes for ux500v2
+ and qcom variant
+Date: Wed, 6 Mar 2019 09:03:51 -0800
+Message-ID: <20190306170351.GB3522@tuxbook-pro>
+References: <1408683219-7939-1-git-send-email-srinivas.kandagatla@linaro.org>
+ <1408683272-7984-1-git-send-email-srinivas.kandagatla@linaro.org>
+ <CACRpkdZtUJim0d0iC26d-Z8xBckdCX7uwh_v4PhJSKkHEcmmrw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFr3PLOdozCmfE7Lin0FhzgLnN120RZmMwk=K8RzGvveow@mail.gmail.com>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <CACRpkdZtUJim0d0iC26d-Z8xBckdCX7uwh_v4PhJSKkHEcmmrw@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Rob Herring <robh+dt@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-stm32@st-md-mailman.stormreply.com
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Niklas Cassel <niklas.cassel@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Russell King <linux@arm.linux.org.uk>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
+On Tue 05 Mar 14:25 PST 2019, Linus Walleij wrote:
 
-
-On 3/6/19 2:31 PM, Ulf Hansson wrote:
-> On Mon, 4 Mar 2019 at 11:17, Ludovic Barre <ludovic.Barre@st.com> wrote:
->>
->> From: Ludovic Barre <ludovic.barre@st.com>
->>
->> This patch defines get_dctrl_cfg callback for sdmmc variant.
->> sdmmc variant has specific stm32 transfer modes.
->> sdmmc data transfer mode selection could be:
->> -Block data transfer ending on block count.
->> -SDIO multibyte data transfer.
->> -MMC Stream data transfer (not used).
->> -Block data transfer ending with STOP_TRANSMISSION command.
->>
->> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
->> ---
->>   drivers/mmc/host/mmci.h             |  5 +++++
->>   drivers/mmc/host/mmci_stm32_sdmmc.c | 21 +++++++++++++++++++++
->>   2 files changed, 26 insertions(+)
->>
->> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
->> index 6f28f71..eb5d99af 100644
->> --- a/drivers/mmc/host/mmci.h
->> +++ b/drivers/mmc/host/mmci.h
->> @@ -131,6 +131,11 @@
->>   /* Control register extensions in the Qualcomm versions */
->>   #define MCI_DPSM_QCOM_DATA_PEND        BIT(17)
->>   #define MCI_DPSM_QCOM_RX_DATA_PEND BIT(20)
->> +/* Control register extensions in STM32 versions */
->> +#define MCI_DPSM_STM32_MODE_BLOCK      (0 << 2)
->> +#define MCI_DPSM_STM32_MODE_SDIO       (1 << 2)
->> +#define MCI_DPSM_STM32_MODE_STREAM     (2 << 2)
->> +#define MCI_DPSM_STM32_MODE_BLOCK_STOP (3 << 2)
->>
->>   #define MMCIDATACNT            0x030
->>   #define MMCISTATUS             0x034
->> diff --git a/drivers/mmc/host/mmci_stm32_sdmmc.c b/drivers/mmc/host/mmci_stm32_sdmmc.c
->> index cfbfc6f..e7bf744 100644
->> --- a/drivers/mmc/host/mmci_stm32_sdmmc.c
->> +++ b/drivers/mmc/host/mmci_stm32_sdmmc.c
->> @@ -265,10 +265,31 @@ static void mmci_sdmmc_set_pwrreg(struct mmci_host *host, unsigned int pwr)
->>          }
->>   }
->>
->> +u32 sdmmc_get_dctrl_cfg(struct mmci_host *host)
->> +{
->> +       struct variant_data *variant = host->variant;
->> +       int blksz_bits;
->> +       u32 datactrl;
->> +
->> +       blksz_bits = ffs(host->data->blksz) - 1;
->> +       datactrl = variant->datactrl_dpsm_enable | blksz_bits << 4;
->> +
->> +       if (host->mmc->card && mmc_card_sdio(host->mmc->card) &&
->> +           host->data->blocks == 1)
+> Sorry for top-posting, patch included for context.
 > 
-> These settings are not limited to deal with the block size bits.
+> I saw today that Brian has the Nexus 5 working with Broadcom/Cypress
+> 4339 over SDIO on the MMCI.
 > 
-> Don't get me wrong, it seems reasonable to include them, but the
-> generic code in mmci_start_data() also have code to cope with SDIO. I
-> think we should start by splitting that up into a couple of
-> helper/library functions, and make the legacy variant to use them.
-> This should probably be done as a preparation to your series, so you
-> can build on top of that.
-
-I think you wish helper functions for each group of datactrl feature,
-like for dpsm direction|sdio|ios timming. Each variant call theses 
-helpers to define its own datactrl value. it's possible, no problem.
-
-In mmci_start_data will remain the part on clk_reg for sdio card
-	if (host->mmc->card && mmc_card_sdio(host->mmc->card)) {
-		u32 clk;
-
-		/*
-		 * The ST Micro variant for SDIO small write transfers
-		 * needs to have clock H/W flow control disabled,
-		 * otherwise the transfer will not start. The threshold
-		 * depends on the rate of MCLK.
-		 */
-		if (variant->st_sdio && data->flags & MMC_DATA_WRITE &&
-		    (host->size < 8 ||
-		     (host->size <= 8 && host->mclk > 50000000)))
-			clk = host->clk_reg & ~variant->clkreg_enable;
-		else
-			clk = host->clk_reg | variant->clkreg_enable;
-
-		mmci_write_clkreg(host, clk);
-	}
-
-it's OK ?
-
+> Brian are you managing to use the WLAN without this patch or is this
+> something you stacked up to make it work? (If you want context I
+> can forward the rest of the conversation where we discuss how to
+> fix it properly.)
 > 
-> Does it make sense? If not, please tell and I can try to provide some
-> patch to show you what I mean.
+
+Brian's Nexus 5 is on 8974 where the MMCI block has become the sdhci-msm
+block, so while being a superset (afaict) of the old MMCI block we use
+the sdhci driver instead.
+
+> I discussed this patch several times with Ulf and I think Niklas looked
+> at it too, but we never got around to fix it up properly.
+> 
+
+This is still needed for at least 8064 to have working sdio wifi (and
+perhaps your 8060?).
+
+Regards,
+Bjorn
+
+> Yours,
+> Linus Walleij
 > 
 > 
->> +               datactrl |= MCI_DPSM_STM32_MODE_SDIO;
->> +       else if (host->data->stop && !host->mrq->sbc)
->> +               datactrl |= MCI_DPSM_STM32_MODE_BLOCK_STOP;
->> +       else
->> +               datactrl |= MCI_DPSM_STM32_MODE_BLOCK;
->> +
->> +       return datactrl;
->> +}
->> +
->>   static struct mmci_host_ops sdmmc_variant_ops = {
->>          .validate_data = sdmmc_idma_validate_data,
->>          .prep_data = sdmmc_idma_prep_data,
->>          .unprep_data = sdmmc_idma_unprep_data,
->> +       .get_datactrl_cfg = sdmmc_get_dctrl_cfg,
->>          .dma_setup = sdmmc_idma_setup,
->>          .dma_start = sdmmc_idma_start,
->>          .dma_finalize = sdmmc_idma_finalize,
->> --
->> 2.7.4
->>
+> On Fri, Aug 22, 2014 at 6:54 AM Srinivas Kandagatla
+> <srinivas.kandagatla@linaro.org> wrote:
 > 
-> Kind regards
-> Uffe
-> 
+> > From: Ulf Hansson <ulf.hansson@linaro.org>
+> >
+> > For the ux500v2 variant of the PL18x block, any block sizes are
+> > supported. This will make it possible to decrease data overhead
+> > for SDIO transfers.
+> >
+> > This patch is based on Ulf Hansson patch
+> > http://www.spinics.net/lists/linux-mmc/msg12160.html
+> >
+> > Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+> >         enabled this support on qcom variant.
+> >
+> > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> > Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+> > ---
+> >  drivers/mmc/host/mmci.c | 10 +++++++---
+> >  1 file changed, 7 insertions(+), 3 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> > index c11cb05..533ad2b 100644
+> > --- a/drivers/mmc/host/mmci.c
+> > +++ b/drivers/mmc/host/mmci.c
+> > @@ -77,6 +77,7 @@ static unsigned int fmax = 515633;
+> >   * @qcom_fifo: enables qcom specific fifo pio read logic.
+> >   * @reversed_irq_handling: handle data irq before cmd irq.
+> >   * @qcom_dml: enables qcom specific dma glue for dma transfers.
+> > + * @any_blksize: true if block any sizes are supported
+> >   */
+> >  struct variant_data {
+> >         unsigned int            clkreg;
+> > @@ -102,6 +103,7 @@ struct variant_data {
+> >         bool                    qcom_fifo;
+> >         bool                    reversed_irq_handling;
+> >         bool                    qcom_dml;
+> > +       bool                    any_blksize;
+> >  };
+> >
+> >  static struct variant_data variant_arm = {
+> > @@ -194,6 +196,7 @@ static struct variant_data variant_ux500v2 = {
+> >         .pwrreg_clkgate         = true,
+> >         .busy_detect            = true,
+> >         .pwrreg_nopower         = true,
+> > +       .any_blksize            = true,
+> >  };
+> >
+> >  static struct variant_data variant_qcom = {
+> > @@ -212,6 +215,7 @@ static struct variant_data variant_qcom = {
+> >         .explicit_mclk_control  = true,
+> >         .qcom_fifo              = true,
+> >         .qcom_dml               = true,
+> > +       .any_blksize            = true,
+> >  };
+> >
+> >  static int mmci_card_busy(struct mmc_host *mmc)
+> > @@ -239,10 +243,11 @@ static int mmci_card_busy(struct mmc_host *mmc)
+> >  static int mmci_validate_data(struct mmci_host *host,
+> >                               struct mmc_data *data)
+> >  {
+> > +       struct variant_data *variant = host->variant;
+> > +
+> >         if (!data)
+> >                 return 0;
+> > -
+> > -       if (!is_power_of_2(data->blksz)) {
+> > +       if (!is_power_of_2(data->blksz) && !variant->any_blksize) {
+> >                 dev_err(mmc_dev(host->mmc),
+> >                         "unsupported block size (%d bytes)\n", data->blksz);
+> >                 return -EINVAL;
+> > @@ -796,7 +801,6 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
+> >         writel(host->size, base + MMCIDATALENGTH);
+> >
+> >         blksz_bits = ffs(data->blksz) - 1;
+> > -       BUG_ON(1 << blksz_bits != data->blksz);
+> >
+> >         if (variant->blksz_datactrl16)
+> >                 datactrl = MCI_DPSM_ENABLE | (data->blksz << 16);
+> > --
+> > 1.9.1
+> >
