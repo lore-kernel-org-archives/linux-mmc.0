@@ -1,114 +1,103 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH v3 1/3] mmc: mmci: Support any block sizes for ux500v2 and
- qcom variant
-Date: Tue, 5 Mar 2019 23:25:16 +0100
-Message-ID: <CACRpkdZtUJim0d0iC26d-Z8xBckdCX7uwh_v4PhJSKkHEcmmrw@mail.gmail.com>
-References: <1408683219-7939-1-git-send-email-srinivas.kandagatla@linaro.org> <1408683272-7984-1-git-send-email-srinivas.kandagatla@linaro.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/4] mmc: mmci: avoid fake busy polling
+Date: Wed, 6 Mar 2019 10:00:42 +0100
+Message-ID: <CAPDyKFo_O36=N9wM2jFnUvkga1TFjPMibr+0MRU6bLOpq7nH7g@mail.gmail.com>
+References: <1551802205-32188-1-git-send-email-ludovic.Barre@st.com> <1551802205-32188-2-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1408683272-7984-1-git-send-email-srinivas.kandagatla@linaro.org>
+In-Reply-To: <1551802205-32188-2-git-send-email-ludovic.Barre@st.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Bjorn Andersson <bjorn.andersson@linaro.org>, Niklas Cassel <niklas.cassel@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Russell King <linux@arm.linux.org.uk>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm-msm@vger.kernel.org
+To: Ludovic Barre <ludovic.Barre@st.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-stm32@st-md-mailman.stormreply.com
 List-Id: linux-mmc@vger.kernel.org
 
-Sorry for top-posting, patch included for context.
-
-I saw today that Brian has the Nexus 5 working with Broadcom/Cypress
-4339 over SDIO on the MMCI.
-
-Brian are you managing to use the WLAN without this patch or is this
-something you stacked up to make it work? (If you want context I
-can forward the rest of the conversation where we discuss how to
-fix it properly.)
-
-I discussed this patch several times with Ulf and I think Niklas looked
-at it too, but we never got around to fix it up properly.
-
-Yours,
-Linus Walleij
-
-
-On Fri, Aug 22, 2014 at 6:54 AM Srinivas Kandagatla
-<srinivas.kandagatla@linaro.org> wrote:
-
-> From: Ulf Hansson <ulf.hansson@linaro.org>
+On Tue, 5 Mar 2019 at 17:10, Ludovic Barre <ludovic.Barre@st.com> wrote:
 >
-> For the ux500v2 variant of the PL18x block, any block sizes are
-> supported. This will make it possible to decrease data overhead
-> for SDIO transfers.
+> From: Ludovic Barre <ludovic.barre@st.com>
 >
-> This patch is based on Ulf Hansson patch
-> http://www.spinics.net/lists/linux-mmc/msg12160.html
+> The busy status bit could occurred even if no busy response is
+> expected (example cmd11). On sdmmc variant, the busy_detect_flag
+> reflects inverted value of d0 state, it's sampled at the end of a
+> CMD response and a second time 2 clk cycles after the CMD response.
+> To avoid a fake busy, the busy status could be checked and polled
+> only if the command has RSP_BUSY flag.
 >
-> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
->         enabled this support on qcom variant.
->
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
+
+Before I review this, can you tell what HW you have tested this on?
+
+Kind regards
+Uffe
+
 > ---
->  drivers/mmc/host/mmci.c | 10 +++++++---
->  1 file changed, 7 insertions(+), 3 deletions(-)
+>  drivers/mmc/host/mmci.c | 19 +++++++++++++------
+>  1 file changed, 13 insertions(+), 6 deletions(-)
 >
 > diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index c11cb05..533ad2b 100644
+> index 387ff14..4901b73 100644
 > --- a/drivers/mmc/host/mmci.c
 > +++ b/drivers/mmc/host/mmci.c
-> @@ -77,6 +77,7 @@ static unsigned int fmax = 515633;
->   * @qcom_fifo: enables qcom specific fifo pio read logic.
->   * @reversed_irq_handling: handle data irq before cmd irq.
->   * @qcom_dml: enables qcom specific dma glue for dma transfers.
-> + * @any_blksize: true if block any sizes are supported
->   */
->  struct variant_data {
->         unsigned int            clkreg;
-> @@ -102,6 +103,7 @@ struct variant_data {
->         bool                    qcom_fifo;
->         bool                    reversed_irq_handling;
->         bool                    qcom_dml;
-> +       bool                    any_blksize;
->  };
->
->  static struct variant_data variant_arm = {
-> @@ -194,6 +196,7 @@ static struct variant_data variant_ux500v2 = {
->         .pwrreg_clkgate         = true,
->         .busy_detect            = true,
->         .pwrreg_nopower         = true,
-> +       .any_blksize            = true,
->  };
->
->  static struct variant_data variant_qcom = {
-> @@ -212,6 +215,7 @@ static struct variant_data variant_qcom = {
->         .explicit_mclk_control  = true,
->         .qcom_fifo              = true,
->         .qcom_dml               = true,
-> +       .any_blksize            = true,
->  };
->
->  static int mmci_card_busy(struct mmc_host *mmc)
-> @@ -239,10 +243,11 @@ static int mmci_card_busy(struct mmc_host *mmc)
->  static int mmci_validate_data(struct mmci_host *host,
->                               struct mmc_data *data)
+> @@ -1220,12 +1220,13 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+>              unsigned int status)
 >  {
-> +       struct variant_data *variant = host->variant;
+>         void __iomem *base = host->base;
+> -       bool sbc;
+> +       bool sbc, busy_resp;
+>
+>         if (!cmd)
+>                 return;
+>
+>         sbc = (cmd == host->mrq->sbc);
+> +       busy_resp = !!(cmd->flags & MMC_RSP_BUSY);
+>
+>         /*
+>          * We need to be one of these interrupts to be considered worth
+> @@ -1239,8 +1240,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+>         /*
+>          * ST Micro variant: handle busy detection.
+>          */
+> -       if (host->variant->busy_detect) {
+> -               bool busy_resp = !!(cmd->flags & MMC_RSP_BUSY);
+> +       if (busy_resp && host->variant->busy_detect) {
+>
+>                 /* We are busy with a command, return */
+>                 if (host->busy_status &&
+> @@ -1253,7 +1253,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+>                  * that the special busy status bit is still set before
+>                  * proceeding.
+>                  */
+> -               if (!host->busy_status && busy_resp &&
+> +               if (!host->busy_status &&
+>                     !(status & (MCI_CMDCRCFAIL|MCI_CMDTIMEOUT)) &&
+>                     (readl(base + MMCISTATUS) & host->variant->busy_detect_flag)) {
+>
+> @@ -1508,6 +1508,7 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
+>  {
+>         struct mmci_host *host = dev_id;
+>         u32 status;
+> +       bool busy_resp;
+>         int ret = 0;
+>
+>         spin_lock(&host->lock);
+> @@ -1550,9 +1551,15 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
+>                 }
+>
+>                 /*
+> -                * Don't poll for busy completion in irq context.
+> +                * Don't poll for:
+> +                * -busy completion in irq context.
+> +                * -no busy response expected.
+>                  */
+> -               if (host->variant->busy_detect && host->busy_status)
+> +               busy_resp = host->cmd ?
+> +                       !!(host->cmd->flags & MMC_RSP_BUSY) : false;
 > +
->         if (!data)
->                 return 0;
-> -
-> -       if (!is_power_of_2(data->blksz)) {
-> +       if (!is_power_of_2(data->blksz) && !variant->any_blksize) {
->                 dev_err(mmc_dev(host->mmc),
->                         "unsupported block size (%d bytes)\n", data->blksz);
->                 return -EINVAL;
-> @@ -796,7 +801,6 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
->         writel(host->size, base + MMCIDATALENGTH);
+> +               if (host->variant->busy_detect &&
+> +                   (!busy_resp || host->busy_status))
+>                         status &= ~host->variant->busy_detect_flag;
 >
->         blksz_bits = ffs(data->blksz) - 1;
-> -       BUG_ON(1 << blksz_bits != data->blksz);
->
->         if (variant->blksz_datactrl16)
->                 datactrl = MCI_DPSM_ENABLE | (data->blksz << 16);
+>                 ret = 1;
 > --
-> 1.9.1
+> 2.7.4
 >
