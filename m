@@ -1,56 +1,48 @@
 From: Nathan Chancellor <natechancellor@gmail.com>
-Subject: Re: [PATCH] mmc: pxamci: fix enum type confusion
-Date: Thu, 7 Mar 2019 08:20:29 -0700
-Message-ID: <20190307152029.GD20201@archlinux-ryzen>
-References: <20190307100948.570006-1-arnd@arndb.de>
+Subject: Re: [PATCH] mmc: davinci: remove extraneous __init annotation
+Date: Thu, 7 Mar 2019 08:21:18 -0700
+Message-ID: <20190307152118.GE20201@archlinux-ryzen>
+References: <20190307101024.594587-1-arnd@arndb.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20190307100948.570006-1-arnd@arndb.de>
+In-Reply-To: <20190307101024.594587-1-arnd@arndb.de>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Arnd Bergmann <arnd@arndb.de>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Robert Jarzmik <robert.jarzmik@free.fr>, Nick Desaulniers <ndesaulniers@google.com>, Daniel Mack <daniel@zonque.org>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Nick Desaulniers <ndesaulniers@google.com>, Linus Walleij <linus.walleij@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Mar 07, 2019 at 11:09:19AM +0100, Arnd Bergmann wrote:
-> clang points out several instances of mismatched types in this drivers,
-> all coming from a single declaration:
+On Thu, Mar 07, 2019 at 11:10:11AM +0100, Arnd Bergmann wrote:
+> Building with clang finds a mistaken __init tag:
 > 
-> drivers/mmc/host/pxamci.c:193:15: error: implicit conversion from enumeration type 'enum dma_transfer_direction' to
->       different enumeration type 'enum dma_data_direction' [-Werror,-Wenum-conversion]
->                 direction = DMA_DEV_TO_MEM;
->                           ~ ^~~~~~~~~~~~~~
-> drivers/mmc/host/pxamci.c:212:62: error: implicit conversion from enumeration type 'enum dma_data_direction' to
->       different enumeration type 'enum dma_transfer_direction' [-Werror,-Wenum-conversion]
->         tx = dmaengine_prep_slave_sg(chan, data->sg, host->dma_len, direction,
+> WARNING: vmlinux.o(.text+0x5e4250): Section mismatch in reference from the function davinci_mmcsd_probe() to the function .init.text:init_mmcsd_host()
+> The function davinci_mmcsd_probe() references
+> the function __init init_mmcsd_host().
+> This is often because davinci_mmcsd_probe lacks a __init
+> annotation or the annotation of init_mmcsd_host is wrong.
 > 
-> The behavior is correct, so this must be a simply typo from
-> dma_data_direction and dma_transfer_direction being similarly named
-> types with a similar purpose.
-> 
-> Fixes: 6464b7140951 ("mmc: pxamci: switch over to dmaengine use")
 > Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 
 Reviewed-by: Nathan Chancellor <natechancellor@gmail.com>
 
 > ---
->  drivers/mmc/host/pxamci.c | 2 +-
+>  drivers/mmc/host/davinci_mmc.c | 2 +-
 >  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
-> index c907bf502a12..c1d3f0e38921 100644
-> --- a/drivers/mmc/host/pxamci.c
-> +++ b/drivers/mmc/host/pxamci.c
-> @@ -162,7 +162,7 @@ static void pxamci_dma_irq(void *param);
->  static void pxamci_setup_data(struct pxamci_host *host, struct mmc_data *data)
+> diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
+> index 49e0daf2ef5e..f37003df1e01 100644
+> --- a/drivers/mmc/host/davinci_mmc.c
+> +++ b/drivers/mmc/host/davinci_mmc.c
+> @@ -1117,7 +1117,7 @@ static inline void mmc_davinci_cpufreq_deregister(struct mmc_davinci_host *host)
 >  {
->  	struct dma_async_tx_descriptor *tx;
-> -	enum dma_data_direction direction;
-> +	enum dma_transfer_direction direction;
->  	struct dma_slave_config	config;
->  	struct dma_chan *chan;
->  	unsigned int nob = data->blocks;
+>  }
+>  #endif
+> -static void __init init_mmcsd_host(struct mmc_davinci_host *host)
+> +static void init_mmcsd_host(struct mmc_davinci_host *host)
+>  {
+>  
+>  	mmc_davinci_reset_ctrl(host, 1);
 > -- 
 > 2.20.0
 > 
