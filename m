@@ -1,44 +1,57 @@
-From: Robert Jarzmik <robert.jarzmik@free.fr>
-Subject: Re: [PATCH] mmc: pxamci: fix enum type confusion
-Date: Thu, 07 Mar 2019 20:15:39 +0100
-Message-ID: <87mum65wdg.fsf@belgarion.home>
-References: <20190307100948.570006-1-arnd@arndb.de>
-        <20190307152029.GD20201@archlinux-ryzen>
+From: Jon Hunter <jonathanh@nvidia.com>
+Subject: Re: [PATCH V1 01/11] mmc: tegra: fix ddr signaling for non-ddr modes
+Date: Thu, 7 Mar 2019 21:31:36 +0000
+Message-ID: <ff9d8656-fc4b-e460-d72b-2cb7ec4985ea@nvidia.com>
+References: <1551504025-3541-1-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190307152029.GD20201@archlinux-ryzen> (Nathan Chancellor's
-        message of "Thu, 7 Mar 2019 08:20:29 -0700")
+In-Reply-To: <1551504025-3541-1-git-send-email-skomatineni@nvidia.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Nathan Chancellor <natechancellor@gmail.com>
-Cc: Arnd Bergmann <arnd@arndb.de>, Ulf Hansson <ulf.hansson@linaro.org>, Nick Desaulniers <ndesaulniers@google.com>, Daniel Mack <daniel@zonque.org>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Sowjanya Komatineni <skomatineni@nvidia.com>, adrian.hunter@intel.com, ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, riteshh@codeaurora.org
+Cc: thierry.reding@gmail.com, anrao@nvidia.com, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Nathan Chancellor <natechancellor@gmail.com> writes:
+Hi Sowjanya,
 
-> On Thu, Mar 07, 2019 at 11:09:19AM +0100, Arnd Bergmann wrote:
->> clang points out several instances of mismatched types in this drivers,
->> all coming from a single declaration:
->> 
->> drivers/mmc/host/pxamci.c:193:15: error: implicit conversion from enumeration type 'enum dma_transfer_direction' to
->>       different enumeration type 'enum dma_data_direction' [-Werror,-Wenum-conversion]
->>                 direction = DMA_DEV_TO_MEM;
->>                           ~ ^~~~~~~~~~~~~~
->> drivers/mmc/host/pxamci.c:212:62: error: implicit conversion from enumeration type 'enum dma_data_direction' to
->>       different enumeration type 'enum dma_transfer_direction' [-Werror,-Wenum-conversion]
->>         tx = dmaengine_prep_slave_sg(chan, data->sg, host->dma_len, direction,
->> 
->> The behavior is correct, so this must be a simply typo from
->> dma_data_direction and dma_transfer_direction being similarly named
->> types with a similar purpose.
->> 
->> Fixes: 6464b7140951 ("mmc: pxamci: switch over to dmaengine use")
->> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
->
-> Reviewed-by: Nathan Chancellor <natechancellor@gmail.com>
-Acked-by: Robert Jarzmik <robert.jarzmik@free.fr>
+On 02/03/2019 05:20, Sowjanya Komatineni wrote:
+> ddr_signaling is set to true for DDR50 and DDR52 modes but is
+> not set back to false for other modes. This programs incorrect
+> host clock when mode change happens from DDR52/DDR50 to other
+> SDR or HS modes like incase of mmc_retune where it switches
+> from HS400 to HS DDR and then from HS DDR to HS mode and then
+> to HS200.
+> 
+> This patch fixes the ddr_signaling to set properly for non DDR
+> modes.
+> 
+> Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
+> ---
+>  drivers/mmc/host/sdhci-tegra.c | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+> index 32e62904c0d3..46086dd43bfb 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -779,6 +779,7 @@ static void tegra_sdhci_set_uhs_signaling(struct sdhci_host *host,
+>  	bool set_dqs_trim = false;
+>  	bool do_hs400_dll_cal = false;
+>  
+> +	tegra_host->ddr_signaling = false;
+>  	switch (timing) {
+>  	case MMC_TIMING_UHS_SDR50:
+>  	case MMC_TIMING_UHS_SDR104:
 
-Cheers.
+I have tested this series on Tegra210, Tegra186 and Tegra194 and see no
+further issues. Thanks for getting this out! Feel free to add my ...
 
---
-Robert
+Tested-by: Jon Hunter <jonathanh@nvidia.com>
+
+Cheers
+Jon
+
+-- 
+nvpublic
