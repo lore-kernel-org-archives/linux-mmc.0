@@ -1,48 +1,38 @@
-From: Nathan Chancellor <natechancellor@gmail.com>
-Subject: Re: [PATCH] mmc: davinci: remove extraneous __init annotation
-Date: Thu, 7 Mar 2019 08:21:18 -0700
-Message-ID: <20190307152118.GE20201@archlinux-ryzen>
-References: <20190307101024.594587-1-arnd@arndb.de>
+From: Ludovic Barre <ludovic.Barre@st.com>
+Subject: [PATCH V2 1/6] mmc: mmci: add get_datactrl_cfg callback
+Date: Thu, 7 Mar 2019 17:38:57 +0100
+Message-ID: <1551976742-4358-2-git-send-email-ludovic.Barre@st.com>
+References: <1551976742-4358-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20190307101024.594587-1-arnd@arndb.de>
+In-Reply-To: <1551976742-4358-1-git-send-email-ludovic.Barre@st.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Nick Desaulniers <ndesaulniers@google.com>, Linus Walleij <linus.walleij@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
+Cc: srinivas.kandagatla@linaro.org, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com, Ludovic Barre <ludovic.barre@st.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Mar 07, 2019 at 11:10:11AM +0100, Arnd Bergmann wrote:
-> Building with clang finds a mistaken __init tag:
-> 
-> WARNING: vmlinux.o(.text+0x5e4250): Section mismatch in reference from the function davinci_mmcsd_probe() to the function .init.text:init_mmcsd_host()
-> The function davinci_mmcsd_probe() references
-> the function __init init_mmcsd_host().
-> This is often because davinci_mmcsd_probe lacks a __init
-> annotation or the annotation of init_mmcsd_host is wrong.
-> 
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+From: Ludovic Barre <ludovic.barre@st.com>
 
-Reviewed-by: Nathan Chancellor <natechancellor@gmail.com>
+This patch adds get_datactrl_cfg callback in mmci_host_ops
+to allow to get datactrl configuration specific at variant.
 
-> ---
->  drivers/mmc/host/davinci_mmc.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
-> index 49e0daf2ef5e..f37003df1e01 100644
-> --- a/drivers/mmc/host/davinci_mmc.c
-> +++ b/drivers/mmc/host/davinci_mmc.c
-> @@ -1117,7 +1117,7 @@ static inline void mmc_davinci_cpufreq_deregister(struct mmc_davinci_host *host)
->  {
->  }
->  #endif
-> -static void __init init_mmcsd_host(struct mmc_davinci_host *host)
-> +static void init_mmcsd_host(struct mmc_davinci_host *host)
->  {
->  
->  	mmc_davinci_reset_ctrl(host, 1);
-> -- 
-> 2.20.0
-> 
+Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
+---
+ drivers/mmc/host/mmci.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+index 6bde28c..a59049b 100644
+--- a/drivers/mmc/host/mmci.h
++++ b/drivers/mmc/host/mmci.h
+@@ -362,6 +362,7 @@ struct mmci_host_ops {
+ 			 bool next);
+ 	void (*unprep_data)(struct mmci_host *host, struct mmc_data *data,
+ 			    int err);
++	u32 (*get_datactrl_cfg)(struct mmci_host *host);
+ 	void (*get_next_data)(struct mmci_host *host, struct mmc_data *data);
+ 	int (*dma_setup)(struct mmci_host *host);
+ 	void (*dma_release)(struct mmci_host *host);
+-- 
+2.7.4
