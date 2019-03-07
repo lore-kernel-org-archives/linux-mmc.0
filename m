@@ -1,107 +1,99 @@
-From: "Enrico Weigelt, metux IT consult" <info@metux.net>
-Subject: [PATCH] drivers: mmc: Kconfig: pedantic cleanups
-Date: Wed,  6 Mar 2019 19:27:51 +0100
-Message-ID: <1551896871-30654-1-git-send-email-info@metux.net>
+From: Ritesh Harjani <riteshh@codeaurora.org>
+Subject: Re: [PATCH V1 07/11] mmc: cqhci: add quirk for setting DCMD
+ CMD_TIMING
+Date: Thu, 7 Mar 2019 08:13:55 +0530
+Message-ID: <a544bc6d-7b23-53e8-16d0-ee0eaf576eb2@codeaurora.org>
+References: <1551504025-3541-1-git-send-email-skomatineni@nvidia.com>
+ <1551504025-3541-7-git-send-email-skomatineni@nvidia.com>
+ <a320c841-7e58-4d3e-5df6-61e10520d9d8@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <a320c841-7e58-4d3e-5df6-61e10520d9d8@intel.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Sowjanya Komatineni <skomatineni@nvidia.com>, ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, Asutosh Das <asutoshd@codeaurora.org>
+Cc: thierry.reding@gmail.com, jonathanh@nvidia.com, anrao@nvidia.com, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Signed-off-by: Enrico Weigelt, metux IT consult <info@metux.net>
----
- drivers/mmc/host/Kconfig | 43 ++++++++++++++++++++++---------------------
- 1 file changed, 22 insertions(+), 21 deletions(-)
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 28fcd8f..de7a38d 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -437,7 +437,7 @@ config MMC_WBSD
- 	depends on ISA_DMA_API
- 	help
- 	  This selects the Winbond(R) W83L51xD Secure digital and
--          Multimedia card Interface.
-+	  Multimedia card Interface.
- 	  If you have a machine with a integrated W83L518D or W83L519D
- 	  SD/MMC card reader, say Y or M here.
- 
-@@ -515,7 +515,7 @@ config MMC_TIFM_SD
- 	  'Misc devices: TI Flash Media PCI74xx/PCI76xx host adapter support
- 	  (TIFM_7XX1)'.
- 
--          To compile this driver as a module, choose M here: the
-+	  To compile this driver as a module, choose M here: the
- 	  module will be called tifm_sd.
- 
- config MMC_MVSDIO
-@@ -531,12 +531,12 @@ config MMC_MVSDIO
- 	  module will be called mvsdio.
- 
- config MMC_DAVINCI
--        tristate "TI DAVINCI Multimedia Card Interface support"
--        depends on ARCH_DAVINCI
--        help
--          This selects the TI DAVINCI Multimedia card Interface.
--          If you have an DAVINCI board with a Multimedia Card slot,
--          say Y or M here.  If unsure, say N.
-+	tristate "TI DAVINCI Multimedia Card Interface support"
-+	depends on ARCH_DAVINCI
-+	help
-+	  This selects the TI DAVINCI Multimedia card Interface.
-+	  If you have an DAVINCI board with a Multimedia Card slot,
-+	  say Y or M here.  If unsure, say N.
- 
- config MMC_GOLDFISH
- 	tristate "goldfish qemu Multimedia Card Interface support"
-@@ -565,18 +565,18 @@ config MMC_S3C
- 	depends on S3C24XX_DMAC
- 	help
- 	  This selects a driver for the MCI interface found in
--          Samsung's S3C2410, S3C2412, S3C2440, S3C2442 CPUs.
-+	  Samsung's S3C2410, S3C2412, S3C2440, S3C2442 CPUs.
- 	  If you have a board based on one of those and a MMC/SD
- 	  slot, say Y or M here.
- 
- 	  If unsure, say N.
- 
- config MMC_S3C_HW_SDIO_IRQ
--       bool "Hardware support for SDIO IRQ"
--       depends on MMC_S3C
--       help
--         Enable the hardware support for SDIO interrupts instead of using
--	 the generic polling code.
-+	bool "Hardware support for SDIO IRQ"
-+	depends on MMC_S3C
-+	help
-+	  Enable the hardware support for SDIO interrupts instead of using
-+	  the generic polling code.
- 
- choice
- 	prompt "Samsung S3C SD/MMC transfer code"
-@@ -948,15 +948,16 @@ config MMC_MTK
- 	  If unsure, say N.
- 
- config MMC_SDHCI_MICROCHIP_PIC32
--        tristate "Microchip PIC32MZDA SDHCI support"
--        depends on MMC_SDHCI && PIC32MZDA && MMC_SDHCI_PLTFM
--        help
--          This selects the Secure Digital Host Controller Interface (SDHCI)
--          for PIC32MZDA platform.
-+	tristate "Microchip PIC32MZDA SDHCI support"
-+	depends on MMC_SDHCI && PIC32MZDA && MMC_SDHCI_PLTFM
-+	help
-+	  This selects the Secure Digital Host Controller Interface (SDHCI)
-+	  for PIC32MZDA platform.
-+
-+	  If you have a controller with this interface, say Y or M here.
- 
--          If you have a controller with this interface, say Y or M here.
-+	  If unsure, say N.
- 
--          If unsure, say N.
- config MMC_SDHCI_BRCMSTB
- 	tristate "Broadcom SDIO/SD/MMC support"
- 	depends on ARCH_BRCMSTB || BMIPS_GENERIC
--- 
-1.9.1
+On 3/6/2019 6:30 PM, Adrian Hunter wrote:
+> On 2/03/19 7:20 AM, Sowjanya Komatineni wrote:
+>> This patch adds a quirk for setting CMD_TIMING to 1 in descriptor
+>> for DCMD with R1B response type to allow the command to be sent to
+>> device during data activity or busy time.
+>>
+>> Tegra186 CQHCI host has bug where it selects DATA_PRESENT_SELECT
+>> to 1 by CQHCI controller for DCMDs with R1B response type and
+>> since DCMD does not trigger any data transfer, DCMD task complete
+>> happens leaving the DATA FSM of host controller in wait state for
+>> data.
+>>
+>> This effects the data transfer task issued after R1B DCMD task
+>> and no interrupt is generated for the data transfer task.
+>>
+>> SW WAR for this issue is to set CMD_TIMING bit to 1 in DCMD task
+>> descriptor and as DCMD task descriptor preparation is done by
+>> cqhci driver, this patch adds cqequirk to handle this.
+>>
+>> Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
+>> ---
+>>   drivers/mmc/host/cqhci.c | 5 ++++-
+>>   drivers/mmc/host/cqhci.h | 1 +
+>>   2 files changed, 5 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/mmc/host/cqhci.c b/drivers/mmc/host/cqhci.c
+>> index a8af682a9182..b34c07125f32 100644
+>> --- a/drivers/mmc/host/cqhci.c
+>> +++ b/drivers/mmc/host/cqhci.c
+>> @@ -521,7 +521,10 @@ static void cqhci_prep_dcmd_desc(struct mmc_host *mmc,
+>>   	} else {
+>>   		if (mrq->cmd->flags & MMC_RSP_R1B) {
+>>   			resp_type = 0x3;
+>> -			timing = 0x0;
+>> +			if (cq_host->quirks & CQHCI_QUIRK_CMD_TIMING_R1B_DCMD)
+>> +				timing = 0x1;
+>> +			else
+>> +				timing = 0x0;
+> I was thinking it would be nice if there was a generic way for drivers to
+> make changes to descriptors before a task is started.  Currently there is
+> host->ops->write_l() which would make it possible by checking for CQHCI_TDBR
+> register and, in this case, the DCMD tag.  We would need to export
+> get_desc(), perhaps rename it cqhci_get_desc() and put it in cqhci.h since
+> it is an inline function.
+
+We take spin_lock_irqsave after the descriptor is prepared and before 
+writing to TDBR.
+Not sure but tomorrow this may become a limitation for drivers to make 
+changes to
+descriptors if they edit descriptors in host->ops->write_l() call.
+Though in this case it is not required here.
+
+>
+> Alternatively we could add host->ops for descriptor preparation.
+
+Both ways sounds good to me.
+But maybe adding a host->ops for descriptor preparation is better way to go,
+since that will be the right interface exposed to make changes to 
+descriptors.
+
+>
+> What do people think?
+>
+>>   		} else {
+>>   			resp_type = 0x2;
+>>   			timing = 0x1;
+>> diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
+>> index 9e68286a07b4..f96d8565cc07 100644
+>> --- a/drivers/mmc/host/cqhci.h
+>> +++ b/drivers/mmc/host/cqhci.h
+>> @@ -170,6 +170,7 @@ struct cqhci_host {
+>>   
+>>   	u32 quirks;
+>>   #define CQHCI_QUIRK_SHORT_TXFR_DESC_SZ	0x1
+>> +#define CQHCI_QUIRK_CMD_TIMING_R1B_DCMD	0x2
+>>   
+>>   	bool enabled;
+>>   	bool halted;
+>>
