@@ -1,52 +1,48 @@
-From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: Re: [PATCH 0/3] Add hardware unbusy interrupt support for dw_mmc
-Date: Fri, 8 Mar 2019 14:37:20 +0800
-Message-ID: <d9049d70-822a-186d-9b18-d6082b97353b@rock-chips.com>
-References: <1551238603-82412-1-git-send-email-shawn.lin@rock-chips.com>
- <8d18eac0-d9f9-8785-75f4-bd304b5f3078@rock-chips.com>
+From: Ludovic BARRE <ludovic.barre@st.com>
+Subject: Re: [PATCH V2 6/6] mmc: mmci: replace blksz_datactrlXX by
+ get_datactrl_cfg callback
+Date: Fri, 8 Mar 2019 09:44:40 +0100
+Message-ID: <eb213e3e-a574-b11e-ad4f-dd270d964707@st.com>
+References: <1551976742-4358-1-git-send-email-ludovic.Barre@st.com>
+ <1551976742-4358-7-git-send-email-ludovic.Barre@st.com>
+ <20190307164649.ywhgdikxf4nhb2sd@shell.armlinux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <8d18eac0-d9f9-8785-75f4-bd304b5f3078-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: ziyuan <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190307164649.ywhgdikxf4nhb2sd@shell.armlinux.org.uk>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Russell King - ARM Linux admin <linux@armlinux.org.uk>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, Alexandre Torgue <alexandre.torgue@st.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, srinivas.kandagatla@linaro.org, Maxime Coquelin <mcoquelin.stm32@gmail.com>, linux-stm32@st-md-mailman.stormreply.com, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-T24gMjAxOS8zLzcgMTY6MjEsIHppeXVhbiB3cm90ZToKPiBUaGFua3MgZm9yIHF1aWNrbHkgd29y
-ayB0aGlzIG91dCwgaXQgd29ya3MgZmluZSBieSB0ZXN0aW5nIHVudGlsIG5vdywgCj4gYW5kIGl0
-IHBlcmZhY3RseSBtYWtlIHRoZSBzeXN0ZW0gd29yayBiZXR0ZXIgaW4gc2luZ2xlIGNvcmUgcGxh
-dGZvcm0uCj4gCj4gVGVzdGVkLWJ5OiBaaXl1YW4gWHUgPHh6eS54dUByb2NrLWNoaXBzLmNvbT4K
-ClRoYW5rcyBmb3IgdGVzdGluZy4gSSdtIHN0aWxsIHdhaXRpbmcgZm9yIGFueSBvdGhlcgpjb21t
-ZW50cyBiZWZvcmUgcmVzcGluIHYyLgoKPiAKPiBPbiAyMDE5LzIvMjcg5LiK5Y2IMTE6MzYsIFNo
-YXduIExpbiB3cm90ZToKPj4gRGVzaWduV2FyZSBNTUMgY29udHJvbGVyIGxhY2tzIHByb3BlciBo
-YXJkd2FyZSB3YWl0Cj4+IGJ1c3kgc3VwcG9ydCwgc28gdGhlIHNvZnR3YXJlIG11c3QgY2hlY2sg
-dGhlIGJ1c3kKPj4gc3RhdGUgaWYgdGhlIGZvbGxvd2luZyB0cmFuZnNlciBuZWVkIHVzZSBkYXRh
-IGxpbmUuCj4+IEFuZCBkd19tY2lfd2FpdF93aGlsZV9idXN5KCkgbm93IHVzZSBidXN5IGNoZWNr
-IG1vc3RseQo+PiB3aXRoIGhvc3QncyBsb2NrIGhvbGQsIGFuZCB3ZSBjYW4ndCByZWxpbmd1aXNo
-IENQVQo+PiBhdCB0aGlzIG1vbWVudCwgd2hpY2ggbWFrZXMgaXQgcmF0aGVyIHBhaW5mdWwgd2hl
-biB1c2VkCj4+IGluIGxvdy1lbmQgcGxhdGZvcm0uIFRvIHNvbHZlIHRoaXMsIFJvY2tjaGlwIGlu
-dmVudAo+PiBhIG5ldyBoYXJkd2FyZSB1bmJ1c3kgaW50ZXJydXB0IG1vZHVsZSwgd2hpY2ggY291
-bGQKPj4gZ2VuZXJhdGUgaW50ZXJydXB0IGlmIHRoZSBzdGF0ZSBtYWNoaW5lIHJ1bnMgZnJvbQo+
-PiBidXN5IHN0YXRlIGludG8gaWRsZSBzdGF0ZS4KPj4KPj4KPj4KPj4gU2hhd24gTGluICgzKToK
-Pj4gwqDCoCBtbWM6IGR3X21tYzogQ2hlY2sgYnVzeSBzdGF0ZSBpbiBkd19tY2lfcmVxdWVzdCgp
-Cj4+IMKgwqAgbW1jOiBkd19tbWM6IEFkZCBoYXJkd2FyZSB1bmJ1c3kgaW50ZXJydXB0IHN1cHBv
-cnQKPj4gwqDCoCBtbWM6IGR3X21tYy1yb2NrY2hpcDogRW5hYmxlIGhhcmR3YXJlIHVuYnVzeSBp
-bnRlcnJ1cHQgc3VwcG9ydAo+Pgo+PiDCoCBkcml2ZXJzL21tYy9ob3N0L2R3X21tYy1yb2NrY2hp
-cC5jIHwgMzAgKysrKysrKysrKysrKysrKysrKwo+PiDCoCBkcml2ZXJzL21tYy9ob3N0L2R3X21t
-Yy5jwqDCoMKgwqDCoMKgwqDCoMKgIHwgNjAgCj4+ICsrKysrKysrKysrKysrKysrKysrKysrKysr
-KysrKysrKysrKystCj4+IMKgIGRyaXZlcnMvbW1jL2hvc3QvZHdfbW1jLmjCoMKgwqDCoMKgwqDC
-oMKgwqAgfMKgIDYgKysrKwo+PiDCoCAzIGZpbGVzIGNoYW5nZWQsIDk1IGluc2VydGlvbnMoKyks
-IDEgZGVsZXRpb24oLSkKPj4KCgoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX18KTGludXgtcm9ja2NoaXAgbWFpbGluZyBsaXN0CkxpbnV4LXJvY2tjaGlwQGxp
-c3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9saXN0
-aW5mby9saW51eC1yb2NrY2hpcAo=
+hi Russell, Ulf
+
+On 3/7/19 5:46 PM, Russell King - ARM Linux admin wrote:
+> On Thu, Mar 07, 2019 at 05:39:02PM +0100, Ludovic Barre wrote:
+>> -	if (data->flags & MMC_DATA_READ)
+>> -		datactrl |= MCI_DPSM_DIRECTION;
+> 
+> Given that this is currently an invariant between all, it doesn't make
+> sense to have a separate public function and combine it into the
+> get_datactrl_cfg() implementations.  You may as well leave it in place
+> here, after you call get_datactrl_cfg().
+> 
+>> +	datactrl = host->ops->get_datactrl_cfg(host);
+> 
+> Otherwise, I don't see a problem with this, although it would be nice to
+> avoid the overhead of so many public functions, which could be done by
+> adding them as inline functions in mmci.h
+> 
+
+To combine your comments (above and https://lkml.org/lkml/2019/3/6/318).
+I could regroup mmci_dctrl_dir & mmci_dctrl_ddr & mmci_dctrl_sdio in a
+common function mmci_dctrl_common and call by:
+-Each get_datactrl_cfg variant
+-Or in mmci_start_data
+
+What do you prefer ?
+
+Regards,
+Ludo
