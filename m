@@ -1,32 +1,48 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: remove block layer bounce buffering for MMC v2
-Date: Fri, 8 Mar 2019 10:43:48 +0100
-Message-ID: <CAPDyKFrKkmzrH++g88JLxbLkJh3iTUXfjjuxysr0iEigjYA5ig@mail.gmail.com>
-References: <20190212072528.13167-1-hch@lst.de> <CAPDyKFr6gDYttazFJJzyFm04qiy=9oQAeW9a-cFxHE1vP+DhLA@mail.gmail.com>
- <20190308091853.GA14021@lst.de>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V1 01/11] mmc: tegra: fix ddr signaling for non-ddr modes
+Date: Fri, 8 Mar 2019 13:44:07 +0200
+Message-ID: <9787b070-e5e6-3f80-e0f9-1133529be174@intel.com>
+References: <1551504025-3541-1-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190308091853.GA14021@lst.de>
+In-Reply-To: <1551504025-3541-1-git-send-email-skomatineni@nvidia.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Christoph Hellwig <hch@lst.de>
-Cc: Russell King <linux@armlinux.org.uk>, Nicolas Pitre <nico@fluxnic.net>, Aaro Koskinen <aaro.koskinen@iki.fi>, Ben Dooks <ben-linux@fluff.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, linux-omap <linux-omap@vger.kernel.org>, "list@263.net:IOMMU DRIVERS <iommu@lists.linux-foundation.org>, Joerg
-        Roedel <joro@8bytes.org>," <iommu@lists.linux-foundation.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Sowjanya Komatineni <skomatineni@nvidia.com>, ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, riteshh@codeaurora.org
+Cc: thierry.reding@gmail.com, jonathanh@nvidia.com, anrao@nvidia.com, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, 8 Mar 2019 at 10:18, Christoph Hellwig <hch@lst.de> wrote:
->
-> On Mon, Feb 25, 2019 at 02:54:13PM +0100, Ulf Hansson wrote:
-> > This looks good to me, however the lack of feedback/tests worries me a
-> > bit. So, unless you think it's a bad idea, I intend to apply this when
-> > v5.1 rc1 is out, which allows a lengthy test period in linux-next.
->
-> Please don't rush to merge this.  Based on a talk to some folks I
-> have an idea for a sg iterator that can hide the kmapping from
-> the drivers, which should allow for some less scary driver code and
-> clean this up a bit further.
+On 2/03/19 7:20 AM, Sowjanya Komatineni wrote:
+> ddr_signaling is set to true for DDR50 and DDR52 modes but is
+> not set back to false for other modes. This programs incorrect
+> host clock when mode change happens from DDR52/DDR50 to other
+> SDR or HS modes like incase of mmc_retune where it switches
+> from HS400 to HS DDR and then from HS DDR to HS mode and then
+> to HS200.
+> 
+> This patch fixes the ddr_signaling to set properly for non DDR
+> modes.
+> 
+> Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
 
-Okay, I see. Thanks for letting me know!
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Kind regards
-Uffe
+> ---
+>  drivers/mmc/host/sdhci-tegra.c | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+> index 32e62904c0d3..46086dd43bfb 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -779,6 +779,7 @@ static void tegra_sdhci_set_uhs_signaling(struct sdhci_host *host,
+>  	bool set_dqs_trim = false;
+>  	bool do_hs400_dll_cal = false;
+>  
+> +	tegra_host->ddr_signaling = false;
+>  	switch (timing) {
+>  	case MMC_TIMING_UHS_SDR50:
+>  	case MMC_TIMING_UHS_SDR104:
+> 
