@@ -1,60 +1,97 @@
-From: =?utf-8?Q?Christoph_M=C3=BCllner?=
-        <christoph.muellner@theobroma-systems.com>
-Subject: Re: [PATCH v2 2/3] dt-bindings: mmc: Add a new property
- disable-cqe-dcmd.
-Date: Fri, 8 Mar 2019 14:10:45 +0100
-Message-ID: <3BCC2A27-3AF4-4E5E-BBD4-6A5B49831D3C@theobroma-systems.com>
-References: <20190307084329.25416-1-christoph.muellner@theobroma-systems.com>
- <20190307084329.25416-2-christoph.muellner@theobroma-systems.com>
- <37a96eda-196e-bacf-7ae2-5b9354c70273@intel.com>
-Mime-Version: 1.0 (Mac OS X Mail 11.5 \(3445.9.1\))
-Content-Type: text/plain;
-        charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v2 1/8] mmc: sdhci: Get rid of finish_tasklet
+Date: Fri, 8 Mar 2019 15:36:02 +0200
+Message-ID: <63b6631d-86e7-b8ef-ffaf-40e7d4e96cfb@intel.com>
+References: <20190215192033.24203-1-faiz_abbas@ti.com>
+ <20190215192033.24203-2-faiz_abbas@ti.com>
+ <abcc1506-cd38-5ff4-aaeb-57e9a9622e90@intel.com>
+ <8d72ff93-e07f-52b9-da85-acd54f046694@ti.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <37a96eda-196e-bacf-7ae2-5b9354c70273@intel.com>
+In-Reply-To: <8d72ff93-e07f-52b9-da85-acd54f046694@ti.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: robh+dt@kernel.org, mark.rutland@arm.com, Heiko Stuebner <heiko@sntech.de>, shawn.lin@rock-chips.com, ulf.hansson@linaro.org, Philipp Tomsich <philipp.tomsich@theobroma-systems.com>, Michal Simek <michal.simek@xilinx.com>, Douglas Anderson <dianders@chromium.org>, Viresh Kumar <viresh.kumar@linaro.org>, Enric Balletbo i Serra <enric.balletbo@collabora.com>, Vicente Bergas <vicencb@gmail.com>, Emil Renner Berthing <kernel@esmil.dk>, Randy Li <ayaka@soulik.info>, Tony Xie <tony.xie@rock-chips.com>, Ezequiel Garcia <ezequiel@collabora.com>, Klaus Goger <klaus.goger@theobroma-systems.com>, Lin Huang <hl@rock-chips.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchi
+To: Faiz Abbas <faiz_abbas@ti.com>, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Cc: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, kishon@ti.com, zhang.chunyan@linaro.org
 List-Id: linux-mmc@vger.kernel.org
 
-
-> On 08.03.2019, at 13:46, Adrian Hunter <adrian.hunter@intel.com> wrote:
+On 6/03/19 12:00 PM, Faiz Abbas wrote:
+> Adrian,
 > 
-> On 7/03/19 10:43 AM, Christoph Muellner wrote:
->> This patch documents the new property disable-cqe-dcmd
->> for the Arasan eMMC 5.1 driver.
->> 
->> Signed-off-by: Christoph Muellner <christoph.muellner@theobroma-systems.com>
->> Signed-off-by: Philipp Tomsich <philipp.tomsich@theobroma-systems.com>
->> ---
->> Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 4 ++++
->> 1 file changed, 4 insertions(+)
->> 
->> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
->> index 1edbb049cccb..ec699bf98b7c 100644
->> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
->> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
->> @@ -44,6 +44,10 @@ Optional Properties:
->>     properly. Test mode can be used to force the controller to function.
->>   - xlnx,int-clock-stable-broken: when present, the controller always reports
->>     that the internal clock is stable even when it is not.
->> +  - disable-cqe-dcmd: The eMMC 5.1 standard specifies direct commands (DCMDs)
->> +    as part of the command queue engine (CQE). On controllers with a CQHCI,
->> +    such as the Arasan eMMC 5.1 host controller, the driver has to enable DCMDs.
->> +    This is done unless disable-cqe-dcmd is specified.
+> On 25/02/19 1:47 PM, Adrian Hunter wrote:
+>> On 15/02/19 9:20 PM, Faiz Abbas wrote:
+>>> sdhci.c has two bottom halves implemented. A threaded_irq for handling
+>>> card insert/remove operations and a tasklet for finishing mmc requests.
+>>> With the addition of external dma support, dmaengine APIs need to
+>>> terminate in non-atomic context before unmapping the dma buffers.
+>>>
+>>> To facilitate this, remove the finish_tasklet and move the call of
+>>> sdhci_request_done() to the threaded_irq() callback.
+>>
+>> The irq thread has a higher latency than the tasklet.  The performance drop
+>> is measurable on the system I tried:
+>>
+>> Before:
+>>
+>> # dd if=/dev/mmcblk1 of=/dev/null bs=1G count=1 &
+>> 1+0 records in
+>> 1+0 records out
+>> 1073741824 bytes (1.1 GB) copied, 4.44502 s, 242 MB/s
+>>
+>> After:
+>>
+>> # dd if=/dev/mmcblk1 of=/dev/null bs=1G count=1 &
+>> 1+0 records in
+>> 1+0 records out
+>> 1073741824 bytes (1.1 GB) copied, 4.50898 s, 238 MB/s
+>>
+>> So we only want to resort to the thread for the error case.
+>>
 > 
-> If "supports-cqe" is in mmc.txt, should "disable-cqe-dcmd" be there also?
+> Sorry for the late response here, but this is about 1.6% decrease. I
+> tried out the same commands on a dra7xx board here (with about 5
+> consecutive dd of 1GB) and the average decrease was 0.3%. I believe you
+> will also find a lesser percentage change if you average over multiple
+> dd commands.
+> 
+> Is this really so significant that we have to maintain two different
+> bottom halves and keep having difficulty with adding APIs that can sleep?
 
-The file mmc.txt says on top:
-"These properties are common to multiple MMC host controllers".
-As my patchset introduces "disable-cqe-dcmd" just for sdhci-of-arasan,
-I would say it should not go into that file.
+It is a performance drop that can be avoided, so it might as well be.
+Splitting the success path from the failure path is common for I/O drivers
+for similar reasons as here: the success path can be optimized whereas the
+failure path potentially needs to sleep.
 
-Also I wonder why "supports-cqe" is in mmc.txt, because
-only sdhci-tegra.c is evaluating that property.
-So I would expect it to be documented in
-Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
+> 
+> Also I am not sure how to implement only the error handling part in the
+> threaded_irq. We need to enter sdhci_request_done() and get the current
+> mrq before we can check for error conditions like I've done in patch 2:
+> 
+> /* Terminate and synchronize dma in case of an error */
+> if (data && (mrq->cmd->error || data->error) &&
+>     host->use_external_dma) {
+> 	struct dma_chan *chan = sdhci_external_dma_channel(host, data);
+> 	dmaengine_terminate_sync(chan);
+> }
+> 
+> On a related note, do we really need to protect everything in
+> sdhci_request_done() with spinlocks?
+>                                      In patch 2 I have only removed lock
+> for the terminate_sync() parts that I added but the whole
+> dma_unmap/dma_sync parts should be left unprotected IMO.
 
-However, I see that "disable-cqe-dcmd" could go into other drivers as well.
-But is this enough to document it in mmc.txt?
+As it is written, synchronization is needed to stop the same mrq being
+finished twice.
+
+I suggest doing the dmaengine_terminate_sync() before calling
+sdhci_request_done().  Perhaps you could record the channel that needs to be
+sync'd and then do:
+
+	struct dma_chan *chan = READ_ONCE(host->sync_chan);
+
+	if (chan) {
+		dmaengine_terminate_sync(chan);
+		host->sync_chan = NULL;
+	}
