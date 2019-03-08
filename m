@@ -1,10 +1,12 @@
 From: <sean.wang@mediatek.com>
-Subject: [PATCH v1 0/2] Bluetooth: mediatek: add support for MediaTek MT7663S and MT7668S SDIO devices
-Date: Fri, 8 Mar 2019 09:15:42 +0800
-Message-ID: <cover.1552007058.git.sean.wang@mediatek.com>
+Subject: [PATCH v1 1/2] mmc: add SDIO identifiers for MediaTek Bluetooth devices
+Date: Fri, 8 Mar 2019 09:15:43 +0800
+Message-ID: <97d7949c00bd78f8ec282fb9cd380ad161244616.1552007059.git.sean.wang@mediatek.com>
+References: <cover.1552007058.git.sean.wang@mediatek.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <cover.1552007058.git.sean.wang@mediatek.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: marcel@holtmann.org, johan.hedberg@gmail.com, ulf.hansson@linaro.org
 Cc: linux-bluetooth@vger.kernel.org, linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Sean Wang <sean.wang@mediatek.com>
@@ -12,22 +14,27 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Sean Wang <sean.wang@mediatek.com>
 
-This adds the support of enabling MT7663S and MT7668S SDIO-based Bluetooth function.
+The SDIO identifier for MediaTek Bluetooth devices were defined in the
+MediaTek Bluetooth driver. Moving the definitions in MMC header file
+seems common sense.
 
-patch 1: add MediaTek SDIO identifiers
-patch 2: add support for MediaTek MT7663S and MT7668S SDIO devices
+Signed-off-by: Sean Wang <sean.wang@mediatek.com>
+---
+ include/linux/mmc/sdio_ids.h | 2 ++
+ 1 file changed, 2 insertions(+)
 
-Sean Wang (2):
-  mmc: add SDIO identifiers for MediaTek Bluetooth devices
-  Bluetooth: mediatek: add support for MediaTek MT7663S and MT7668S SDIO
-    devices
-
- drivers/bluetooth/Kconfig     |  11 +
- drivers/bluetooth/Makefile    |   1 +
- drivers/bluetooth/btmtksdio.c | 979 ++++++++++++++++++++++++++++++++++
- include/linux/mmc/sdio_ids.h  |   2 +
- 4 files changed, 993 insertions(+)
- create mode 100644 drivers/bluetooth/btmtksdio.c
-
+diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
+index 4332199c71c2..d1a5d5df02f5 100644
+--- a/include/linux/mmc/sdio_ids.h
++++ b/include/linux/mmc/sdio_ids.h
+@@ -59,6 +59,8 @@
+ #define SDIO_DEVICE_ID_MARVELL_8797_F0		0x9128
+ #define SDIO_DEVICE_ID_MARVELL_8887WLAN	0x9134
+ 
++#define SDIO_VENDOR_ID_MEDIATEK			0x037a
++
+ #define SDIO_VENDOR_ID_SIANO			0x039a
+ #define SDIO_DEVICE_ID_SIANO_NOVA_B0		0x0201
+ #define SDIO_DEVICE_ID_SIANO_NICE		0x0202
 -- 
 2.18.0
