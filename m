@@ -1,7 +1,7 @@
 From: David Summers <beagleboard@davidjohnsummers.uk>
 Subject: [PATCH v3 1/3] arm: dts: rk3288-tinker.dtsi: Fix SD card detection
-Date: Sat,  9 Mar 2019 15:36:24 +0000
-Message-ID: <20190309153626.22734-1-beagleboard@davidjohnsummers.uk>
+Date: Sat,  9 Mar 2019 15:39:21 +0000
+Message-ID: <20190309153923.22806-1-beagleboard@davidjohnsummers.uk>
 References: <20190217121513.22965-1-beagleboard@davidjohnsummers.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -58,9 +58,9 @@ regulator-boot-on.
 This solutions has been fairly widely reviewed and tested.
 
 Signed-off-by: David Summers <beagleboard@davidjohnsummers.uk>
-Reviewed by: Robin Murphy <robin.murphy at arm.com>
-Reviewed by: Jonas Karlman <jonas at kwiboo.se>
-Test by: TheSaint < @ ArchLinux Arm >
+Reviewed by: Robin Murphy <robin.murphy@arm.com>
+Reviewed by: Jonas Karlman <jonas@kwiboo.se>
+Test by: TheSaint @ ArchLinux Arm
 ---
  arch/arm/boot/dts/rk3288-tinker.dtsi | 3 ++-
  1 file changed, 2 insertions(+), 1 deletion(-)
