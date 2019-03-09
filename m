@@ -1,97 +1,100 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v2 1/8] mmc: sdhci: Get rid of finish_tasklet
-Date: Fri, 8 Mar 2019 15:36:02 +0200
-Message-ID: <63b6631d-86e7-b8ef-ffaf-40e7d4e96cfb@intel.com>
-References: <20190215192033.24203-1-faiz_abbas@ti.com>
- <20190215192033.24203-2-faiz_abbas@ti.com>
- <abcc1506-cd38-5ff4-aaeb-57e9a9622e90@intel.com>
- <8d72ff93-e07f-52b9-da85-acd54f046694@ti.com>
+From: Sowjanya Komatineni <skomatineni@nvidia.com>
+Subject: RE: [PATCH V1 07/11] mmc: cqhci: add quirk for setting DCMD
+ CMD_TIMING
+Date: Sat, 9 Mar 2019 05:14:30 +0000
+Message-ID: <BYAPR12MB3398438AEB0E9D2625758406C24E0@BYAPR12MB3398.namprd12.prod.outlook.com>
+References: <1551504025-3541-1-git-send-email-skomatineni@nvidia.com>
+ <1551504025-3541-7-git-send-email-skomatineni@nvidia.com>
+ <a320c841-7e58-4d3e-5df6-61e10520d9d8@intel.com>
+ <a544bc6d-7b23-53e8-16d0-ee0eaf576eb2@codeaurora.org>
+ <BYAPR12MB33984D80A404EF919F3A86A0C24C0@BYAPR12MB3398.namprd12.prod.outlook.com>
+ <1fa6f529-2cb8-0108-2041-99ad9b39498f@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <8d72ff93-e07f-52b9-da85-acd54f046694@ti.com>
+In-Reply-To: <1fa6f529-2cb8-0108-2041-99ad9b39498f@intel.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Faiz Abbas <faiz_abbas@ti.com>, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
-Cc: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, kishon@ti.com, zhang.chunyan@linaro.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Ritesh Harjani <riteshh@codeaurora.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "robh+dt@kernel.org" <robh+dt@kernel.org>, "mark.rutland@arm.com" <mark.rutland@arm.com>, Asutosh Das <asutoshd@codeaurora.org>
+Cc: "thierry.reding@gmail.com" <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Aniruddha Tvs Rao <anrao@nvidia.com>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 6/03/19 12:00 PM, Faiz Abbas wrote:
-> Adrian,
-> 
-> On 25/02/19 1:47 PM, Adrian Hunter wrote:
->> On 15/02/19 9:20 PM, Faiz Abbas wrote:
->>> sdhci.c has two bottom halves implemented. A threaded_irq for handling
->>> card insert/remove operations and a tasklet for finishing mmc requests.
->>> With the addition of external dma support, dmaengine APIs need to
->>> terminate in non-atomic context before unmapping the dma buffers.
->>>
->>> To facilitate this, remove the finish_tasklet and move the call of
->>> sdhci_request_done() to the threaded_irq() callback.
->>
->> The irq thread has a higher latency than the tasklet.  The performance drop
->> is measurable on the system I tried:
->>
->> Before:
->>
->> # dd if=/dev/mmcblk1 of=/dev/null bs=1G count=1 &
->> 1+0 records in
->> 1+0 records out
->> 1073741824 bytes (1.1 GB) copied, 4.44502 s, 242 MB/s
->>
->> After:
->>
->> # dd if=/dev/mmcblk1 of=/dev/null bs=1G count=1 &
->> 1+0 records in
->> 1+0 records out
->> 1073741824 bytes (1.1 GB) copied, 4.50898 s, 238 MB/s
->>
->> So we only want to resort to the thread for the error case.
->>
-> 
-> Sorry for the late response here, but this is about 1.6% decrease. I
-> tried out the same commands on a dra7xx board here (with about 5
-> consecutive dd of 1GB) and the average decrease was 0.3%. I believe you
-> will also find a lesser percentage change if you average over multiple
-> dd commands.
-> 
-> Is this really so significant that we have to maintain two different
-> bottom halves and keep having difficulty with adding APIs that can sleep?
-
-It is a performance drop that can be avoided, so it might as well be.
-Splitting the success path from the failure path is common for I/O drivers
-for similar reasons as here: the success path can be optimized whereas the
-failure path potentially needs to sleep.
-
-> 
-> Also I am not sure how to implement only the error handling part in the
-> threaded_irq. We need to enter sdhci_request_done() and get the current
-> mrq before we can check for error conditions like I've done in patch 2:
-> 
-> /* Terminate and synchronize dma in case of an error */
-> if (data && (mrq->cmd->error || data->error) &&
->     host->use_external_dma) {
-> 	struct dma_chan *chan = sdhci_external_dma_channel(host, data);
-> 	dmaengine_terminate_sync(chan);
-> }
-> 
-> On a related note, do we really need to protect everything in
-> sdhci_request_done() with spinlocks?
->                                      In patch 2 I have only removed lock
-> for the terminate_sync() parts that I added but the whole
-> dma_unmap/dma_sync parts should be left unprotected IMO.
-
-As it is written, synchronization is needed to stop the same mrq being
-finished twice.
-
-I suggest doing the dmaengine_terminate_sync() before calling
-sdhci_request_done().  Perhaps you could record the channel that needs to be
-sync'd and then do:
-
-	struct dma_chan *chan = READ_ONCE(host->sync_chan);
-
-	if (chan) {
-		dmaengine_terminate_sync(chan);
-		host->sync_chan = NULL;
-	}
+PiBPbiA3LzAzLzE5IDg6MTYgUE0sIFNvd2phbnlhIEtvbWF0aW5lbmkgd3JvdGU6DQo+PiANCj4+
+PiBPbiAzLzYvMjAxOSA2OjMwIFBNLCBBZHJpYW4gSHVudGVyIHdyb3RlOg0KPj4+PiBPbiAyLzAz
+LzE5IDc6MjAgQU0sIFNvd2phbnlhIEtvbWF0aW5lbmkgd3JvdGU6DQo+Pj4+PiBUaGlzIHBhdGNo
+IGFkZHMgYSBxdWlyayBmb3Igc2V0dGluZyBDTURfVElNSU5HIHRvIDEgaW4gZGVzY3JpcHRvciAN
+Cj4+Pj4+IGZvciBEQ01EIHdpdGggUjFCIHJlc3BvbnNlIHR5cGUgdG8gYWxsb3cgdGhlIGNvbW1h
+bmQgdG8gYmUgc2VudCB0byANCj4+Pj4+IGRldmljZSBkdXJpbmcgZGF0YSBhY3Rpdml0eSBvciBi
+dXN5IHRpbWUuDQo+Pj4+Pg0KPj4+Pj4gVGVncmExODYgQ1FIQ0kgaG9zdCBoYXMgYnVnIHdoZXJl
+IGl0IHNlbGVjdHMgREFUQV9QUkVTRU5UX1NFTEVDVCB0byANCj4+Pj4+IDEgYnkgQ1FIQ0kgY29u
+dHJvbGxlciBmb3IgRENNRHMgd2l0aCBSMUIgcmVzcG9uc2UgdHlwZSBhbmQgc2luY2UgDQo+Pj4+
+PiBEQ01EIGRvZXMgbm90IHRyaWdnZXIgYW55IGRhdGEgdHJhbnNmZXIsIERDTUQgdGFzayBjb21w
+bGV0ZSBoYXBwZW5zIA0KPj4+Pj4gbGVhdmluZyB0aGUgREFUQSBGU00gb2YgaG9zdCBjb250cm9s
+bGVyIGluIHdhaXQgc3RhdGUgZm9yIGRhdGEuDQo+Pj4+Pg0KPj4+Pj4gVGhpcyBlZmZlY3RzIHRo
+ZSBkYXRhIHRyYW5zZmVyIHRhc2sgaXNzdWVkIGFmdGVyIFIxQiBEQ01EIHRhc2sgYW5kIA0KPj4+
+Pj4gbm8gaW50ZXJydXB0IGlzIGdlbmVyYXRlZCBmb3IgdGhlIGRhdGEgdHJhbnNmZXIgdGFzay4N
+Cj4+Pj4+DQo+Pj4+PiBTVyBXQVIgZm9yIHRoaXMgaXNzdWUgaXMgdG8gc2V0IENNRF9USU1JTkcg
+Yml0IHRvIDEgaW4gRENNRCB0YXNrIA0KPj4+Pj4gZGVzY3JpcHRvciBhbmQgYXMgRENNRCB0YXNr
+IGRlc2NyaXB0b3IgcHJlcGFyYXRpb24gaXMgZG9uZSBieSBjcWhjaSANCj4+Pj4+IGRyaXZlciwg
+dGhpcyBwYXRjaCBhZGRzIGNxZXF1aXJrIHRvIGhhbmRsZSB0aGlzLg0KPj4+Pj4NCj4+Pj4+IFNp
+Z25lZC1vZmYtYnk6IFNvd2phbnlhIEtvbWF0aW5lbmkgPHNrb21hdGluZW5pQG52aWRpYS5jb20+
+DQo+Pj4+PiAtLS0NCj4+Pj4+ICAgZHJpdmVycy9tbWMvaG9zdC9jcWhjaS5jIHwgNSArKysrLQ0K
+Pj4+Pj4gICBkcml2ZXJzL21tYy9ob3N0L2NxaGNpLmggfCAxICsNCj4+Pj4+ICAgMiBmaWxlcyBj
+aGFuZ2VkLCA1IGluc2VydGlvbnMoKyksIDEgZGVsZXRpb24oLSkNCj4+Pj4+DQo+Pj4+PiBkaWZm
+IC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9jcWhjaS5jIGIvZHJpdmVycy9tbWMvaG9zdC9jcWhj
+aS5jIA0KPj4+Pj4gaW5kZXggYThhZjY4MmE5MTgyLi5iMzRjMDcxMjVmMzIgMTAwNjQ0DQo+Pj4+
+PiAtLS0gYS9kcml2ZXJzL21tYy9ob3N0L2NxaGNpLmMNCj4+Pj4+ICsrKyBiL2RyaXZlcnMvbW1j
+L2hvc3QvY3FoY2kuYw0KPj4+Pj4gQEAgLTUyMSw3ICs1MjEsMTAgQEAgc3RhdGljIHZvaWQgY3Fo
+Y2lfcHJlcF9kY21kX2Rlc2Moc3RydWN0IG1tY19ob3N0ICptbWMsDQo+Pj4+PiAgIAl9IGVsc2Ug
+ew0KPj4+Pj4gICAJCWlmIChtcnEtPmNtZC0+ZmxhZ3MgJiBNTUNfUlNQX1IxQikgew0KPj4+Pj4g
+ICAJCQlyZXNwX3R5cGUgPSAweDM7DQo+Pj4+PiAtCQkJdGltaW5nID0gMHgwOw0KPj4+Pj4gKwkJ
+CWlmIChjcV9ob3N0LT5xdWlya3MgJiBDUUhDSV9RVUlSS19DTURfVElNSU5HX1IxQl9EQ01EKQ0K
+Pj4+Pj4gKwkJCQl0aW1pbmcgPSAweDE7DQo+Pj4+PiArCQkJZWxzZQ0KPj4+Pj4gKwkJCQl0aW1p
+bmcgPSAweDA7DQo+Pj4+IEkgd2FzIHRoaW5raW5nIGl0IHdvdWxkIGJlIG5pY2UgaWYgdGhlcmUg
+d2FzIGEgZ2VuZXJpYyB3YXkgZm9yIA0KPj4+PiBkcml2ZXJzIHRvIG1ha2UgY2hhbmdlcyB0byBk
+ZXNjcmlwdG9ycyBiZWZvcmUgYSB0YXNrIGlzIHN0YXJ0ZWQuICANCj4+Pj4gQ3VycmVudGx5IHRo
+ZXJlIGlzDQo+Pj4+IGhvc3QtPm9wcy0+d3JpdGVfbCgpIHdoaWNoIHdvdWxkIG1ha2UgaXQgcG9z
+c2libGUgYnkgY2hlY2tpbmcgZm9yIA0KPj4+PiBob3N0LT5vcHMtPkNRSENJX1REQlINCj4+Pj4g
+cmVnaXN0ZXIgYW5kLCBpbiB0aGlzIGNhc2UsIHRoZSBEQ01EIHRhZy4gIFdlIHdvdWxkIG5lZWQg
+dG8gZXhwb3J0IA0KPj4+PiBnZXRfZGVzYygpLCBwZXJoYXBzIHJlbmFtZSBpdCBjcWhjaV9nZXRf
+ZGVzYygpIGFuZCBwdXQgaXQgaW4gY3FoY2kuaCANCj4+Pj4gc2luY2UgaXQgaXMgYW4gaW5saW5l
+IGZ1bmN0aW9uLg0KPj4+DQo+Pj4gV2UgdGFrZSBzcGluX2xvY2tfaXJxc2F2ZSBhZnRlciB0aGUg
+ZGVzY3JpcHRvciBpcyBwcmVwYXJlZCBhbmQgYmVmb3JlIHdyaXRpbmcgdG8gVERCUi4NCj4+PiBO
+b3Qgc3VyZSBidXQgdG9tb3Jyb3cgdGhpcyBtYXkgYmVjb21lIGEgbGltaXRhdGlvbiBmb3IgZHJp
+dmVycyB0byBtYWtlIGNoYW5nZXMgdG8gZGVzY3JpcHRvcnMgaWYgdGhleSBlZGl0IGRlc2NyaXB0
+b3JzIGluIGhvc3QtPm9wcy0+d3JpdGVfbCgpIGNhbGwuDQo+Pj4gVGhvdWdoIGluIHRoaXMgY2Fz
+ZSBpdCBpcyBub3QgcmVxdWlyZWQgaGVyZS4NCj4+Pg0KPj4+Pg0KPj4+PiBBbHRlcm5hdGl2ZWx5
+IHdlIGNvdWxkIGFkZCBob3N0LT5vcHMgZm9yIGRlc2NyaXB0b3IgcHJlcGFyYXRpb24uDQo+Pj4N
+Cj4+PiBCb3RoIHdheXMgc291bmRzIGdvb2QgdG8gbWUuDQo+Pj4gQnV0IG1heWJlIGFkZGluZyBh
+IGhvc3QtPm9wcyBmb3IgZGVzY3JpcHRvciBwcmVwYXJhdGlvbiBpcyBiZXR0ZXIgd2F5IA0KPj4+
+IHRvIGdvLCBzaW5jZSB0aGF0IHdpbGwgYmUgdGhlIHJpZ2h0IGludGVyZmFjZSBleHBvc2VkIHRv
+IG1ha2UgY2hhbmdlcyANCj4+PiB0byBkZXNjcmlwdG9ycy4NCj4+Pg0KPj4gDQo+PiBEQ01EIGRl
+c2NyaXB0b3IgYXR0cmlidXRlcyByZW1haW4gc2FtZSBmb3IgYW55IGhvc3QgYW5kIGFsc28gdGFz
+ayBwYXJhbWV0ZXJzIGFzIFFCUiBuZWVkIHRvIGJlIGVuYWJsZWQgd2l0aCBEQ01ELg0KPj4gU28g
+SSBiZWxpZXZlIGl0IHNob3VsZCBiZSBvayBpZiB3ZSBqdXN0IGFkZCBjYWxsYmFjayB0byBhbGxv
+dyBob3N0cyB0byB1cGRhdGUgY29tbWFuZCBwYXJhbWV0ZXJzIG9mIERDTUQgZGVzY3JpcHRvciBv
+bmx5IHRocnUgY3FoY2lfaG9zdF9vcHMuDQo+DQo+VGhhdCBzb3VuZHMgZmluZSB0byBtZS4gIE1h
+eWJlIGRvIHRoYXQgZm9yIHRoZSBuZXh0IHZlcnNpb24gb2YgdGhpcyBwYXRjaHNldC4NCg0KVGhh
+bmtzIEFkcmlhbi4gQWN0dWFsbHksIERDTUQgY29tbWFuZCBwYXJhbWV0ZXJzIGluY2x1ZGUgb3Bj
+b2RlLCB0aW1pbmcsIGFuZCByZXNwb25zZSB0eXBlIHdoZXJlIG9wY29kZSBhbmQgcmVzcG9uc2Ug
+dHlwZSBzdGF5cyBzYW1lLg0KU28gSSBvbmx5IHNlZSBuZWVkIGZvciBob3N0cyB0byBjaG9vc2Ug
+Y21kIHRpbWluZyB0byBjb250cm9sIGlmIGhhcmR3YXJlIHNob3VsZCB3YWl0IGZvciBidXN5IHRp
+bWUgb3Igbm90IGJhc2ljYWxseSB0byBzZW5kIGNvbW1hbmQgZHVyaW5nIGJ1c3kgb3IgaWRsZSB0
+aW1lLg0KDQpXaWxsIGFkZCBjcWhjaV9ob3N0X29wcyBpbnRlcmZhY2UgdG8gYWxsb3cgaG9zdCBk
+cml2ZXIgdG8gY2hvb3NlIGNtZCB0aW1pbmcgYW5kIHdpbGwgc2VuZCBhbG9uZyB3aXRoIHRoZSBv
+dGhlciB0dW5pbmcgcmVsYXRlZCBmZWVkYmFjayBmaXhlcyBvZiB0aGlzIHNlcmllcy4NCg0KPj4g
+DQo+PiBBbHNvLCBkb27igJl0IHNlZSBhbnkgcmVxdWlyZW1lbnQgZm9yIGhvc3Qgc3BlY2lmaWMg
+VGFzayBwYXJhbWV0ZXIgdXBkYXRlcyBpbiBUYXNrIGRlc2NyaXB0b3Igc28gbm90IHN1cmUgaWYg
+dGhlcmUgaXMgYW55IG5lZWQgdG8gcHJvdmlkZSBjYWxsYmFjayBmb3IgdGFzayBkZXNjcmlwdG9y
+IGRhdGEgcHJlcGFyYXRpb24gdG8gaG9zdHMuDQo+PiBQbGVhc2UgY29uZmlybS4NCj4+IA0KPj4+
+Pg0KPj4+PiBXaGF0IGRvIHBlb3BsZSB0aGluaz8NCj4+Pj4NCj4+Pj4+ICAgCQl9IGVsc2Ugew0K
+Pj4+Pj4gICAJCQlyZXNwX3R5cGUgPSAweDI7DQo+Pj4+PiAgIAkJCXRpbWluZyA9IDB4MTsNCj4+
+Pj4+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L2NxaGNpLmggYi9kcml2ZXJzL21tYy9o
+b3N0L2NxaGNpLmggDQo+Pj4+PiBpbmRleCA5ZTY4Mjg2YTA3YjQuLmY5NmQ4NTY1Y2MwNyAxMDA2
+NDQNCj4+Pj4+IC0tLSBhL2RyaXZlcnMvbW1jL2hvc3QvY3FoY2kuaA0KPj4+Pj4gKysrIGIvZHJp
+dmVycy9tbWMvaG9zdC9jcWhjaS5oDQo+Pj4+PiBAQCAtMTcwLDYgKzE3MCw3IEBAIHN0cnVjdCBj
+cWhjaV9ob3N0IHsNCj4+Pj4+ICAgDQo+Pj4+PiAgIAl1MzIgcXVpcmtzOw0KPj4+Pj4gICAjZGVm
+aW5lIENRSENJX1FVSVJLX1NIT1JUX1RYRlJfREVTQ19TWgkweDENCj4+Pj4+ICsjZGVmaW5lIENR
+SENJX1FVSVJLX0NNRF9USU1JTkdfUjFCX0RDTUQJMHgyDQo+Pj4+PiAgIA0KPj4+Pj4gICAJYm9v
+bCBlbmFibGVkOw0KPj4+Pj4gICAJYm9vbCBoYWx0ZWQ7DQo+Pj4+Pg0KDQo=
