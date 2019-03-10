@@ -1,90 +1,49 @@
-From: David Summers <beagleboard@davidjohnsummers.uk>
-Subject: [PATCH v3 1/3] arm: dts: rk3288-tinker.dtsi: Fix SD card detection
-Date: Sat,  9 Mar 2019 15:39:21 +0000
-Message-ID: <20190309153923.22806-1-beagleboard@davidjohnsummers.uk>
-References: <20190217121513.22965-1-beagleboard@davidjohnsummers.uk>
+From: Aaro Koskinen <aaro.koskinen-X3B1VOXEql0@public.gmane.org>
+Subject: Re: Linux v5.0-rc7: bcm2835 MMC issues
+Date: Sun, 10 Mar 2019 02:51:31 +0200
+Message-ID: <20190310005131.GF30189@darkstar.musicnaut.iki.fi>
+References: <20190224150746.GC26495@darkstar.musicnaut.iki.fi>
+ <155745885.93258.1551034990363@email.ionos.de>
+ <20190226011509.GB31163@darkstar.musicnaut.iki.fi>
+ <06528ceb-ff1d-626b-f520-477b0ea49d6f@i2se.com>
+ <20190227185101.GA28051@darkstar.musicnaut.iki.fi>
+ <1685719010.348465.1552129077871@email.ionos.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20190217121513.22965-1-beagleboard@davidjohnsummers.uk>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: heiko@sntech.de, robh+dt@kernel.org, frowand.list@gmail.com, ulf.hansson@linaro.org, jh80.chung@samsung.com
-Cc: linux-rockchip@lists.infradead.org, linux-mmc@vger.kernel.org, David Summers <beagleboard@davidjohnsummers.uk>, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org
+Return-path: <linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1685719010.348465.1552129077871-uEpKuDZ350hmhno068Nerg@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rpi-kernel>,
+ <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rpi-kernel/>
+List-Post: <mailto:linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rpi-kernel>,
+ <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "linux-rpi-kernel" <linux-rpi-kernel-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-The Problem:
+Hi,
 
-On ASUS Tinker Board S, when booting from the eMMC, and there is card
-in the sd slot, there are constant errors.
+On Sat, Mar 09, 2019 at 11:57:57AM +0100, Stefan Wahren wrote:
+> > Aaro Koskinen <aaro.koskinen-X3B1VOXEql0@public.gmane.org> hat am 27. Februar 2019 um 19:51 geschrieben:
+> > On Tue, Feb 26, 2019 at 09:31:14AM +0100, Stefan Wahren wrote:
+> > > it will take some time for to setup this test scenario. Could you please
+> > > do me a favor and test 4.20.12 which has some backports of recent mmc /
+> > > DMA fixes.
+> > 
+> > Both 4.20 and 4.20.12 work fine. Only 5.0-rc fails reliably.
+> 
+> I tried to reproduce the issue by compiling gcc and using stress on
+> Raspberry Pi 3 (arm64/defconfig) with Arch Linux ARM without any luck.
+> 
+> Were you able to reproduce the issue using stress?
 
-Also when warm reboot, uboot can not access the sd slot
+No, not yet. I'll let you know if I'm able to come up with a more reliable
+reproducer.
 
-Cause:
-
-Identified by Robin Murphy @ ARM. The Card Detect on rk3288
-devices is pulled up by vccio-sd; so when the regulator powers this
-off, card detect gives spurious errors. A second problem, is during
-power down, vccio-sd apprears to be powered down. This causes a
-problem when warm rebooting from the sd card. This was identified by
-Jonas Karlman.
-
-History:
-
-A common fault on these rk3288 board, which impliment the reference
-design.
-
-When this arose before:
-
-http://lists.infradead.org/pipermail/linux-arm-kernel/2014-August/281153.html
-
-And Ulf and Jaehoon clearly said this was a broken card detect design,
-which should be solved via polling
-
-Solution:
-
-Hence broken-cd is set as a property. This cures the errors. The
-powering down of vccio-sd during reboot is cured by adding
-regulator-boot-on.
-
-This solutions has been fairly widely reviewed and tested.
-
-Signed-off-by: David Summers <beagleboard@davidjohnsummers.uk>
-Reviewed by: Robin Murphy <robin.murphy@arm.com>
-Reviewed by: Jonas Karlman <jonas@kwiboo.se>
-Test by: TheSaint @ ArchLinux Arm
----
- arch/arm/boot/dts/rk3288-tinker.dtsi | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
-
-diff --git a/arch/arm/boot/dts/rk3288-tinker.dtsi b/arch/arm/boot/dts/rk3288-tinker.dtsi
-index aa107ee41b8b..ef653c3209bc 100644
---- a/arch/arm/boot/dts/rk3288-tinker.dtsi
-+++ b/arch/arm/boot/dts/rk3288-tinker.dtsi
-@@ -254,6 +254,7 @@
- 			};
- 
- 			vccio_sd: LDO_REG5 {
-+				regulator-boot-on;
- 				regulator-min-microvolt = <1800000>;
- 				regulator-max-microvolt = <3300000>;
- 				regulator-name = "vccio_sd";
-@@ -430,7 +431,7 @@
- 	bus-width = <4>;
- 	cap-mmc-highspeed;
- 	cap-sd-highspeed;
--	card-detect-delay = <200>;
-+	broken-cd;
- 	disable-wp;			/* wp not hooked up */
- 	pinctrl-names = "default";
- 	pinctrl-0 = <&sdmmc_clk &sdmmc_cmd &sdmmc_cd &sdmmc_bus4>;
--- 
-beagleboard@davidjohnsummers.uk
+A.
