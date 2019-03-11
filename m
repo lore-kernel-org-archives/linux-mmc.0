@@ -1,38 +1,43 @@
-From: Marcel Holtmann <marcel@holtmann.org>
-Subject: Re: [PATCH v1 1/2] mmc: add SDIO identifiers for MediaTek Bluetooth
- devices
-Date: Mon, 11 Mar 2019 17:38:52 +0100
-Message-ID: <7C99941A-306E-4233-9EA4-5D681308C490@holtmann.org>
-References: <cover.1552007058.git.sean.wang@mediatek.com>
- <97d7949c00bd78f8ec282fb9cd380ad161244616.1552007059.git.sean.wang@mediatek.com>
-Mime-Version: 1.0 (Mac OS X Mail 12.2 \(3445.102.3\))
-Content-Type: text/plain;
-        charset=us-ascii
-Content-Transfer-Encoding: 7bit
+From: Sowjanya Komatineni <skomatineni@nvidia.com>
+Subject: [PATCH V2 01/10] mmc: tegra: fix ddr signaling for non-ddr modes
+Date: Mon, 11 Mar 2019 11:02:30 -0700
+Message-ID: <1552327359-8036-1-git-send-email-skomatineni@nvidia.com>
+Mime-Version: 1.0
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <97d7949c00bd78f8ec282fb9cd380ad161244616.1552007059.git.sean.wang@mediatek.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Sean Wang <sean.wang@mediatek.com>
-Cc: Johan Hedberg <johan.hedberg@gmail.com>, ulf.hansson@linaro.org, linux-bluetooth@vger.kernel.org, linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, riteshh@codeaurora.org
+Cc: thierry.reding@gmail.com, jonathanh@nvidia.com, anrao@nvidia.com, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Sean,
+ddr_signaling is set to true for DDR50 and DDR52 modes but is
+not set back to false for other modes. This programs incorrect
+host clock when mode change happens from DDR52/DDR50 to other
+SDR or HS modes like incase of mmc_retune where it switches
+from HS400 to HS DDR and then from HS DDR to HS mode and then
+to HS200.
 
-> The SDIO identifier for MediaTek Bluetooth devices were defined in the
-> MediaTek Bluetooth driver. Moving the definitions in MMC header file
-> seems common sense.
-> 
-> Signed-off-by: Sean Wang <sean.wang@mediatek.com>
-> ---
-> include/linux/mmc/sdio_ids.h | 2 ++
-> 1 file changed, 2 insertions(+)
+This patch fixes the ddr_signaling to set properly for non DDR
+modes.
 
-patch has been applied to bluetooth-next tree.
+Tested-by: Jon Hunter <jonathanh@nvidia.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
+---
+ drivers/mmc/host/sdhci-tegra.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-Can we also update the sdio.ids database inside systemd.
-
-https://github.com/systemd/systemd/blob/master/hwdb/sdio.ids
-
-Regards
-
-Marcel
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index 32e62904c0d3..46086dd43bfb 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -779,6 +779,7 @@ static void tegra_sdhci_set_uhs_signaling(struct sdhci_host *host,
+ 	bool set_dqs_trim = false;
+ 	bool do_hs400_dll_cal = false;
+ 
++	tegra_host->ddr_signaling = false;
+ 	switch (timing) {
+ 	case MMC_TIMING_UHS_SDR50:
+ 	case MMC_TIMING_UHS_SDR104:
+-- 
+2.7.4
