@@ -1,11 +1,13 @@
 From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: [PATCH v2 0/3] Add hardware unbusy interrupt support for dw_mmc
-Date: Tue, 12 Mar 2019 15:35:06 +0800
-Message-ID: <1552376109-126335-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: [PATCH v2 1/3] mmc: dw_mmc: Check busy state in dw_mci_request()
+Date: Tue, 12 Mar 2019 15:35:07 +0800
+Message-ID: <1552376109-126335-2-git-send-email-shawn.lin@rock-chips.com>
+References: <1552376109-126335-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <1552376109-126335-1-git-send-email-shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
  <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
@@ -19,32 +21,41 @@ To: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Ulf Hans
 Cc: linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
+Move it from dw_mci_start_command() to dw_mci_request().
+Then dw_mci_wait_while_busy() isn't called with host's
+lock hold.
 
-DesignWare MMC controler lacks proper hardware wait
-busy support, so the software must check the busy
-state if the following tranfser need use data line.
-And dw_mci_wait_while_busy() now use busy check mostly
-with host's lock hold, and we can't relinguish CPU
-at this moment, which makes it rather painful when used
-in low-end platform. To solve this, Rockchip invent
-a new hardware unbusy interrupt module, which could
-generate interrupt if the state machine runs from
-busy state into idle state.
+Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Tested-by: Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+---
 
+Changes in v2: None
 
-Changes in v2:
-- add tag from Ziyuan Xu
-- remove lock for checking event since it's already atomic operation
+ drivers/mmc/host/dw_mmc.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
-Shawn Lin (3):
-  mmc: dw_mmc: Check busy state in dw_mci_request()
-  mmc: dw_mmc: Add hardware unbusy interrupt support
-  mmc: dw_mmc-rockchip: Enable hardware unbusy interrupt support
-
- drivers/mmc/host/dw_mmc-rockchip.c | 30 ++++++++++++++++++++
- drivers/mmc/host/dw_mmc.c          | 56 +++++++++++++++++++++++++++++++++++++-
- drivers/mmc/host/dw_mmc.h          |  6 ++++
- 3 files changed, 91 insertions(+), 1 deletion(-)
-
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 80dc2fd..703dedf 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -426,7 +426,6 @@ static void dw_mci_start_command(struct dw_mci *host,
+ 
+ 	mci_writel(host, CMDARG, cmd->arg);
+ 	wmb(); /* drain writebuffer */
+-	dw_mci_wait_while_busy(host, cmd_flags);
+ 
+ 	mci_writel(host, CMD, cmd_flags | SDMMC_CMD_START);
+ 
+@@ -1419,6 +1418,10 @@ static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 		return;
+ 	}
+ 
++	if ((mrq->cmd->opcode != MMC_SEND_STATUS && mrq->cmd->data) &&
++	    !(mrq->cmd->opcode == SD_SWITCH_VOLTAGE))
++		dw_mci_wait_while_busy(host, SDMMC_CMD_PRV_DAT_WAIT);
++
+ 	spin_lock_bh(&host->lock);
+ 
+ 	dw_mci_queue_request(host, slot, mrq);
 -- 
 1.9.1
