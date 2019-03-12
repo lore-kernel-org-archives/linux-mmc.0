@@ -1,7 +1,8 @@
 From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: [PATCH v2 2/3] mmc: dw_mmc: Add hardware unbusy interrupt support
-Date: Tue, 12 Mar 2019 15:35:08 +0800
-Message-ID: <1552376109-126335-3-git-send-email-shawn.lin@rock-chips.com>
+Subject: [PATCH v2 3/3] mmc: dw_mmc-rockchip: Enable hardware unbusy interrupt
+ support
+Date: Tue, 12 Mar 2019 15:35:09 +0800
+Message-ID: <1552376109-126335-4-git-send-email-shawn.lin@rock-chips.com>
 References: <1552376109-126335-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,166 +22,113 @@ To: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Ulf Hans
 Cc: linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-So that we don't need to busy checking the busy state,
-but relinguish the CPU and rely on the hareware interrupt
-if available.
+The new register for controlling hardware unbusy interrupt
+is in 0x120. It looks like:
+
+|------------------------------------------------------------|
+|Bit    |  Attribute |  Reset Value  | Description           |
+|------------------------------------------------------------|
+|31:25  |    RO      |      0x0      |  reserved             |
+|------------------------------------------------------------|
+|24     |    RO      |      0x0      |  rdyint_cnt_finish    |
+|       |            |               |When high, it indicates|
+|	|            |               |that the rdyint counter|
+|       |            |               |is finished.           |
+|------------------------------------------------------------|
+|23:16  |    RO      |      0x0      |  rdyint_cnt_status    |
+|       |            |               |Couner status, reflect |
+|       |            |               |internal counter value.|
+|------------------------------------------------------------|
+|15:9   |    RO      |      0x0      |  reserved             |
+|------------------------------------------------------------|
+|8      |    RW      |      0x0      |  rdyint_gen_working   |
+|       |            |               |When set, IP starts to |
+|       |            |               |count and generate one |
+|       |            |               |rdyint trigger. After  |
+|       |            |               |the rdyint trigger is  |
+|       |            |               |generated, it will be  |
+|       |            |               |cleaned automatically. |
+|       |            |               |Software should set it |
+|       |            |               |again next time.       |
+|------------------------------------------------------------|
+|7:0    |    RW      |      0xff     |   rdyint_gen_maxval   |
+|       |            |               |Max counter value for  |
+|       |            |               |the IP to count when   |
+|       |            |               |rdyint_gen_working is  |
+|       |            |               |set. This counter is   |
+|       |            |               |based on biu_clk.      |
+|------------------------------------------------------------|
 
 Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 Tested-by: Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 ---
 
-Changes in v2:
-- add tag from Ziyuan Xu
-- remove lock for checking event since it's already atomic operation
+Changes in v2: None
 
- drivers/mmc/host/dw_mmc.c | 51 +++++++++++++++++++++++++++++++++++++++++++++++
- drivers/mmc/host/dw_mmc.h |  6 ++++++
- 2 files changed, 57 insertions(+)
+ drivers/mmc/host/dw_mmc-rockchip.c | 30 ++++++++++++++++++++++++++++++
+ 1 file changed, 30 insertions(+)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 703dedf..f58d878 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -107,6 +107,8 @@ struct idmac_desc {
- /* Each descriptor can transfer up to 4KB of data in chained mode */
- #define DW_MCI_DESC_DATA_LENGTH	0x1000
+diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+index 8c86a80..85b1e42 100644
+--- a/drivers/mmc/host/dw_mmc-rockchip.c
++++ b/drivers/mmc/host/dw_mmc-rockchip.c
+@@ -20,6 +20,9 @@
+ #include "dw_mmc-pltfm.h"
  
-+DECLARE_WAIT_QUEUE_HEAD(unbusy_waiter);
-+
- #if defined(CONFIG_DEBUG_FS)
- static int dw_mci_req_show(struct seq_file *s, void *v)
- {
-@@ -231,9 +233,35 @@ static bool dw_mci_ctrl_reset(struct dw_mci *host, u32 reset)
- 	return true;
- }
+ #define RK3288_CLKGEN_DIV       2
++#define RKMMC_RDYINT_GEN	0x120
++#define RKMMC_RDYINT_GEN_WORKING BIT(8)
++#define RKMMC_RDYINT_GEN_MAXVAL GENMASK(7, 0)
  
-+static inline int dw_mci_wait_hw_unbusy(struct dw_mci *host,
-+					unsigned long timeout)
+ struct dw_mci_rockchip_priv_data {
+ 	struct clk		*drv_clk;
+@@ -28,6 +31,23 @@ struct dw_mci_rockchip_priv_data {
+ 	int			num_phases;
+ };
+ 
++static int dw_mci_rockchip_prepare_hw_unbusy(struct dw_mci *host,
++					     bool enable)
 +{
-+	unsigned long irqflags;
-+	int err;
++	u32 reg = readl(host->regs + RKMMC_RDYINT_GEN);
 +
-+	set_bit(EVENT_UNBUSY_COMPLETE, &host->pending_events);
-+	err = host->drv_data->prepare_hw_unbusy(host, true);
-+	if (err)
-+		return err;
++	if (enable)
++		/* Self-clean when generating unbusy int */
++		reg |= RKMMC_RDYINT_GEN_WORKING;
++	else
++		/* Otherwise do it manually to avoid racing condition */
++		reg &= ~RKMMC_RDYINT_GEN_WORKING;
 +
-+	wait_event_interruptible_timeout(unbusy_waiter,
-+					 !test_bit(EVENT_UNBUSY_COMPLETE,
-+						   &host->pending_events),
-+					 timeout);
-+
-+	if (test_and_clear_bit(EVENT_UNBUSY_COMPLETE,
-+			       &host->pending_events)) {
-+		dev_err(host->dev, "Busy; trying anyway\n");
-+		host->drv_data->prepare_hw_unbusy(host, false);
-+	}
++	writel(reg, host->regs + RKMMC_RDYINT_GEN);
 +
 +	return 0;
 +}
 +
- static void dw_mci_wait_while_busy(struct dw_mci *host, u32 cmd_flags)
+ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
  {
- 	u32 status;
-+	int err;
+ 	struct dw_mci_rockchip_priv_data *priv = host->priv;
+@@ -301,6 +321,15 @@ static int dw_mci_rockchip_init(struct dw_mci *host)
+ 				    "rockchip,rk3288-dw-mshc"))
+ 		host->bus_hz /= RK3288_CLKGEN_DIV;
  
- 	/*
- 	 * Databook says that before issuing a new data transfer command
-@@ -245,6 +273,14 @@ static void dw_mci_wait_while_busy(struct dw_mci *host, u32 cmd_flags)
- 	 */
- 	if ((cmd_flags & SDMMC_CMD_PRV_DAT_WAIT) &&
- 	    !(cmd_flags & SDMMC_CMD_VOLT_SWITCH)) {
-+		/* Resort to hw unbusy interrupt first */
-+		if (host->drv_data->prepare_hw_unbusy) {
-+			err = dw_mci_wait_hw_unbusy(host,
-+					jiffies + msecs_to_jiffies(500));
-+			if (!err)
-+				return;
-+		}
++	/* Some Rockchip SoCs use hw unbusy int */
++	if (of_device_is_compatible(host->dev->of_node,
++				    "rockchip,rk1808-dw-mshc")) {
++		host->hw_unbusy_int = 16;
++		writel(~(RKMMC_RDYINT_GEN_WORKING |
++			 RKMMC_RDYINT_GEN_MAXVAL),
++		       host->regs + RKMMC_RDYINT_GEN);
++	}
 +
- 		if (readl_poll_timeout_atomic(host->regs + SDMMC_STATUS,
- 					      status,
- 					      !(status & SDMMC_STATUS_BUSY),
-@@ -2734,6 +2770,14 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
- 			dw_mci_handle_cd(host);
- 		}
+ 	return 0;
+ }
  
-+		/* Check hardware unbusy interrupt */
-+		if (host->hw_unbusy_int != -EINVAL &&
-+		    pending & BIT(host->hw_unbusy_int)) {
-+			mci_writel(host, RINTSTS, BIT(host->hw_unbusy_int));
-+			clear_bit(EVENT_UNBUSY_COMPLETE, &host->pending_events);
-+			wake_up_interruptible(&unbusy_waiter);
-+		}
-+
- 		if (pending & SDMMC_INT_SDIO(slot->sdio_id)) {
- 			mci_writel(host, RINTSTS,
- 				   SDMMC_INT_SDIO(slot->sdio_id));
-@@ -3249,6 +3293,8 @@ int dw_mci_probe(struct dw_mci *host)
- 		reset_control_deassert(host->pdata->rstc);
- 	}
- 
-+	host->hw_unbusy_int = -EINVAL;
-+
- 	if (drv_data && drv_data->init) {
- 		ret = drv_data->init(host);
- 		if (ret) {
-@@ -3360,6 +3406,11 @@ int dw_mci_probe(struct dw_mci *host)
- 	mci_writel(host, INTMASK, SDMMC_INT_CMD_DONE | SDMMC_INT_DATA_OVER |
- 		   SDMMC_INT_TXDR | SDMMC_INT_RXDR |
- 		   DW_MCI_ERROR_FLAGS);
-+
-+	if (host->hw_unbusy_int != -EINVAL)
-+		mci_writel(host, INTMASK,
-+			   mci_readl(host, INTMASK) | BIT(host->hw_unbusy_int));
-+
- 	/* Enable mci interrupt */
- 	mci_writel(host, CTRL, SDMMC_CTRL_INT_ENABLE);
- 
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 46e9f8e..fb4c173 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -33,6 +33,7 @@ enum dw_mci_state {
- 
- enum {
- 	EVENT_CMD_COMPLETE = 0,
-+	EVENT_UNBUSY_COMPLETE,
- 	EVENT_XFER_COMPLETE,
- 	EVENT_DATA_COMPLETE,
- 	EVENT_DATA_ERROR,
-@@ -124,6 +125,7 @@ struct dw_mci_dma_slave {
-  * @irq_flags: The flags to be passed to request_irq.
-  * @irq: The irq value to be passed to request_irq.
-  * @sdio_id0: Number of slot0 in the SDIO interrupt registers.
-+ * @hw_unbusy_int: Number of unbusy interrupt in the interrupt registers.
-  * @cmd11_timer: Timer for SD3.0 voltage switch over scheme.
-  * @cto_timer: Timer for broken command transfer over scheme.
-  * @dto_timer: Timer for broken data transfer over scheme.
-@@ -230,6 +232,7 @@ struct dw_mci {
- 	int			irq;
- 
- 	int			sdio_id0;
-+	int                     hw_unbusy_int;
- 
- 	struct timer_list       cmd11_timer;
- 	struct timer_list       cto_timer;
-@@ -551,6 +554,8 @@ struct dw_mci_slot {
-  * @set_ios: handle bus specific extensions.
-  * @parse_dt: parse implementation specific device tree properties.
-  * @execute_tuning: implementation specific tuning procedure.
-+ * @prepare_hw_unbusy: implementation specific procedure for
-+ *                    controlling hw unbusy interrupt.
-  *
-  * Provide controller implementation specific extensions. The usage of this
-  * data structure is fully optional and usage of each member in this structure
-@@ -565,6 +570,7 @@ struct dw_mci_drv_data {
- 	int		(*execute_tuning)(struct dw_mci_slot *slot, u32 opcode);
- 	int		(*prepare_hs400_tuning)(struct dw_mci *host,
- 						struct mmc_ios *ios);
-+	int             (*prepare_hw_unbusy)(struct dw_mci *host, bool enable);
- 	int		(*switch_voltage)(struct mmc_host *mmc,
- 					  struct mmc_ios *ios);
+@@ -322,6 +351,7 @@ static int dw_mci_rockchip_init(struct dw_mci *host)
+ 	.set_ios		= dw_mci_rk3288_set_ios,
+ 	.execute_tuning		= dw_mci_rk3288_execute_tuning,
+ 	.parse_dt		= dw_mci_rk3288_parse_dt,
++	.prepare_hw_unbusy      = dw_mci_rockchip_prepare_hw_unbusy,
+ 	.init			= dw_mci_rockchip_init,
  };
+ 
 -- 
 1.9.1
