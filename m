@@ -1,113 +1,147 @@
-From: "Hunter, Adrian" <adrian.hunter@intel.com>
-Subject: RE: [PATCH V1 07/11] mmc: cqhci: add quirk for setting DCMD
- CMD_TIMING
-Date: Wed, 13 Mar 2019 09:56:59 +0000
-Message-ID: <363DA0ED52042842948283D2FC38E4649C48E59C@IRSMSX106.ger.corp.intel.com>
-References: <1551504025-3541-1-git-send-email-skomatineni@nvidia.com>
- <1551504025-3541-7-git-send-email-skomatineni@nvidia.com>
- <a320c841-7e58-4d3e-5df6-61e10520d9d8@intel.com>
- <a544bc6d-7b23-53e8-16d0-ee0eaf576eb2@codeaurora.org>
- <BYAPR12MB33984D80A404EF919F3A86A0C24C0@BYAPR12MB3398.namprd12.prod.outlook.com>
- <05a6e500-9dc9-1984-9576-44b3a9fdc595@codeaurora.org>
+From: Jonas Karlman <jonas@kwiboo.se>
+Subject: Re: [PATCH v3 1/3] arm: dts: rk3288-tinker.dtsi: Fix SD card detection
+Date: Tue, 12 Mar 2019 21:04:51 +0000
+Message-ID: <AM3PR03MB09669404B737D39ADF5709F9AC490@AM3PR03MB0966.eurprd03.prod.outlook.com>
+References: <20190217121513.22965-1-beagleboard@davidjohnsummers.uk>
+ <50094675.5IylMcgSg6@phil>
+ <4a1ad220-103d-543e-56d1-3c6d6ad906ec@davidjohnsummers.uk>
+ <4202578.jOHf0ez5fE@diego>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <05a6e500-9dc9-1984-9576-44b3a9fdc595@codeaurora.org>
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <4202578.jOHf0ez5fE@diego>
 Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ritesh Harjani <riteshh@codeaurora.org>, Sowjanya Komatineni <skomatineni@nvidia.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "robh+dt@kernel.org" <robh+dt@kernel.org>, "mark.rutland@arm.com" <mark.rutland@arm.com>, Asutosh Das <asutoshd@codeaurora.org>
-Cc: "thierry.reding@gmail.com" <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Aniruddha Tvs Rao <anrao@nvidia.com>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
+Content-ID: <53B447488D46304EA87F28F0E5A30D52@eurprd03.prod.outlook.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: =?Windows-1252?Q?Heiko_St=FCbner?= <heiko@sntech.de>, David Summers <beagleboard@davidjohnsummers.uk>
+Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "jh80.chung@samsung.com" <jh80.chung@samsung.com>, "linux-rockchip@lists.infradead.org" <linux-rockchip@lists.infradead.org>, "robh+dt@kernel.org" <robh+dt@kernel.org>, "frowand.list@gmail.com" <frowand.list@gmail.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBSaXRlc2ggSGFyamFuaSBbbWFp
-bHRvOnJpdGVzaGhAY29kZWF1cm9yYS5vcmddDQo+IFNlbnQ6IFdlZG5lc2RheSwgTWFyY2ggMTMs
-IDIwMTkgNDozMSBBTQ0KPiBUbzogU293amFueWEgS29tYXRpbmVuaSA8c2tvbWF0aW5lbmlAbnZp
-ZGlhLmNvbT47IEh1bnRlciwgQWRyaWFuDQo+IDxhZHJpYW4uaHVudGVyQGludGVsLmNvbT47IHVs
-Zi5oYW5zc29uQGxpbmFyby5vcmc7IHJvYmgrZHRAa2VybmVsLm9yZzsNCj4gbWFyay5ydXRsYW5k
-QGFybS5jb207IEFzdXRvc2ggRGFzIDxhc3V0b3NoZEBjb2RlYXVyb3JhLm9yZz4NCj4gQ2M6IHRo
-aWVycnkucmVkaW5nQGdtYWlsLmNvbTsgSm9uYXRoYW4gSHVudGVyIDxqb25hdGhhbmhAbnZpZGlh
-LmNvbT47DQo+IEFuaXJ1ZGRoYSBUdnMgUmFvIDxhbnJhb0BudmlkaWEuY29tPjsgbGludXgtdGVn
-cmFAdmdlci5rZXJuZWwub3JnOyBsaW51eC0NCj4ga2VybmVsQHZnZXIua2VybmVsLm9yZzsgbGlu
-dXgtbW1jQHZnZXIua2VybmVsLm9yZzsNCj4gZGV2aWNldHJlZUB2Z2VyLmtlcm5lbC5vcmcNCj4g
-U3ViamVjdDogUmU6IFtQQVRDSCBWMSAwNy8xMV0gbW1jOiBjcWhjaTogYWRkIHF1aXJrIGZvciBz
-ZXR0aW5nIERDTUQNCj4gQ01EX1RJTUlORw0KPiANCj4gDQo+IE9uIDMvNy8yMDE5IDExOjQ2IFBN
-LCBTb3dqYW55YSBLb21hdGluZW5pIHdyb3RlOg0KPiA+PiBPbiAzLzYvMjAxOSA2OjMwIFBNLCBB
-ZHJpYW4gSHVudGVyIHdyb3RlOg0KPiA+Pj4gT24gMi8wMy8xOSA3OjIwIEFNLCBTb3dqYW55YSBL
-b21hdGluZW5pIHdyb3RlOg0KPiA+Pj4+IFRoaXMgcGF0Y2ggYWRkcyBhIHF1aXJrIGZvciBzZXR0
-aW5nIENNRF9USU1JTkcgdG8gMSBpbiBkZXNjcmlwdG9yDQo+ID4+Pj4gZm9yIERDTUQgd2l0aCBS
-MUIgcmVzcG9uc2UgdHlwZSB0byBhbGxvdyB0aGUgY29tbWFuZCB0byBiZSBzZW50IHRvDQo+ID4+
-Pj4gZGV2aWNlIGR1cmluZyBkYXRhIGFjdGl2aXR5IG9yIGJ1c3kgdGltZS4NCj4gPj4+Pg0KPiA+
-Pj4+IFRlZ3JhMTg2IENRSENJIGhvc3QgaGFzIGJ1ZyB3aGVyZSBpdCBzZWxlY3RzIERBVEFfUFJF
-U0VOVF9TRUxFQ1QNCj4gdG8NCj4gPj4+PiAxIGJ5IENRSENJIGNvbnRyb2xsZXIgZm9yIERDTURz
-IHdpdGggUjFCIHJlc3BvbnNlIHR5cGUgYW5kIHNpbmNlDQo+ID4+Pj4gRENNRCBkb2VzIG5vdCB0
-cmlnZ2VyIGFueSBkYXRhIHRyYW5zZmVyLCBEQ01EIHRhc2sgY29tcGxldGUNCj4gaGFwcGVucw0K
-PiA+Pj4+IGxlYXZpbmcgdGhlIERBVEEgRlNNIG9mIGhvc3QgY29udHJvbGxlciBpbiB3YWl0IHN0
-YXRlIGZvciBkYXRhLg0KPiA+Pj4+DQo+ID4+Pj4gVGhpcyBlZmZlY3RzIHRoZSBkYXRhIHRyYW5z
-ZmVyIHRhc2sgaXNzdWVkIGFmdGVyIFIxQiBEQ01EIHRhc2sgYW5kDQo+ID4+Pj4gbm8gaW50ZXJy
-dXB0IGlzIGdlbmVyYXRlZCBmb3IgdGhlIGRhdGEgdHJhbnNmZXIgdGFzay4NCj4gPj4+Pg0KPiA+
-Pj4+IFNXIFdBUiBmb3IgdGhpcyBpc3N1ZSBpcyB0byBzZXQgQ01EX1RJTUlORyBiaXQgdG8gMSBp
-biBEQ01EIHRhc2sNCj4gPj4+PiBkZXNjcmlwdG9yIGFuZCBhcyBEQ01EIHRhc2sgZGVzY3JpcHRv
-ciBwcmVwYXJhdGlvbiBpcyBkb25lIGJ5IGNxaGNpDQo+ID4+Pj4gZHJpdmVyLCB0aGlzIHBhdGNo
-IGFkZHMgY3FlcXVpcmsgdG8gaGFuZGxlIHRoaXMuDQo+ID4+Pj4NCj4gPj4+PiBTaWduZWQtb2Zm
-LWJ5OiBTb3dqYW55YSBLb21hdGluZW5pIDxza29tYXRpbmVuaUBudmlkaWEuY29tPg0KPiA+Pj4+
-IC0tLQ0KPiA+Pj4+ICAgIGRyaXZlcnMvbW1jL2hvc3QvY3FoY2kuYyB8IDUgKysrKy0NCj4gPj4+
-PiAgICBkcml2ZXJzL21tYy9ob3N0L2NxaGNpLmggfCAxICsNCj4gPj4+PiAgICAyIGZpbGVzIGNo
-YW5nZWQsIDUgaW5zZXJ0aW9ucygrKSwgMSBkZWxldGlvbigtKQ0KPiA+Pj4+DQo+ID4+Pj4gZGlm
-ZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3QvY3FoY2kuYyBiL2RyaXZlcnMvbW1jL2hvc3QvY3Fo
-Y2kuYw0KPiA+Pj4+IGluZGV4IGE4YWY2ODJhOTE4Mi4uYjM0YzA3MTI1ZjMyIDEwMDY0NA0KPiA+
-Pj4+IC0tLSBhL2RyaXZlcnMvbW1jL2hvc3QvY3FoY2kuYw0KPiA+Pj4+ICsrKyBiL2RyaXZlcnMv
-bW1jL2hvc3QvY3FoY2kuYw0KPiA+Pj4+IEBAIC01MjEsNyArNTIxLDEwIEBAIHN0YXRpYyB2b2lk
-IGNxaGNpX3ByZXBfZGNtZF9kZXNjKHN0cnVjdA0KPiBtbWNfaG9zdCAqbW1jLA0KPiA+Pj4+ICAg
-IAl9IGVsc2Ugew0KPiA+Pj4+ICAgIAkJaWYgKG1ycS0+Y21kLT5mbGFncyAmIE1NQ19SU1BfUjFC
-KSB7DQo+ID4+Pj4gICAgCQkJcmVzcF90eXBlID0gMHgzOw0KPiA+Pj4+IC0JCQl0aW1pbmcgPSAw
-eDA7DQo+ID4+Pj4gKwkJCWlmIChjcV9ob3N0LT5xdWlya3MgJg0KPiBDUUhDSV9RVUlSS19DTURf
-VElNSU5HX1IxQl9EQ01EKQ0KPiA+Pj4+ICsJCQkJdGltaW5nID0gMHgxOw0KPiA+Pj4+ICsJCQll
-bHNlDQo+ID4+Pj4gKwkJCQl0aW1pbmcgPSAweDA7DQo+ID4+PiBJIHdhcyB0aGlua2luZyBpdCB3
-b3VsZCBiZSBuaWNlIGlmIHRoZXJlIHdhcyBhIGdlbmVyaWMgd2F5IGZvcg0KPiA+Pj4gZHJpdmVy
-cyB0byBtYWtlIGNoYW5nZXMgdG8gZGVzY3JpcHRvcnMgYmVmb3JlIGEgdGFzayBpcyBzdGFydGVk
-Lg0KPiA+Pj4gQ3VycmVudGx5IHRoZXJlIGlzDQo+ID4+PiBob3N0LT5vcHMtPndyaXRlX2woKSB3
-aGljaCB3b3VsZCBtYWtlIGl0IHBvc3NpYmxlIGJ5IGNoZWNraW5nIGZvcg0KPiA+Pj4gaG9zdC0+
-b3BzLT5DUUhDSV9UREJSDQo+ID4+PiByZWdpc3RlciBhbmQsIGluIHRoaXMgY2FzZSwgdGhlIERD
-TUQgdGFnLiAgV2Ugd291bGQgbmVlZCB0byBleHBvcnQNCj4gPj4+IGdldF9kZXNjKCksIHBlcmhh
-cHMgcmVuYW1lIGl0IGNxaGNpX2dldF9kZXNjKCkgYW5kIHB1dCBpdCBpbiBjcWhjaS5oDQo+ID4+
-PiBzaW5jZSBpdCBpcyBhbiBpbmxpbmUgZnVuY3Rpb24uDQo+ID4+IFdlIHRha2Ugc3Bpbl9sb2Nr
-X2lycXNhdmUgYWZ0ZXIgdGhlIGRlc2NyaXB0b3IgaXMgcHJlcGFyZWQgYW5kIGJlZm9yZQ0KPiB3
-cml0aW5nIHRvIFREQlIuDQo+ID4+IE5vdCBzdXJlIGJ1dCB0b21vcnJvdyB0aGlzIG1heSBiZWNv
-bWUgYSBsaW1pdGF0aW9uIGZvciBkcml2ZXJzIHRvIG1ha2UNCj4gY2hhbmdlcyB0byBkZXNjcmlw
-dG9ycyBpZiB0aGV5IGVkaXQgZGVzY3JpcHRvcnMgaW4gaG9zdC0+b3BzLT53cml0ZV9sKCkgY2Fs
-bC4NCj4gPj4gVGhvdWdoIGluIHRoaXMgY2FzZSBpdCBpcyBub3QgcmVxdWlyZWQgaGVyZS4NCj4g
-Pj4NCj4gPj4+IEFsdGVybmF0aXZlbHkgd2UgY291bGQgYWRkIGhvc3QtPm9wcyBmb3IgZGVzY3Jp
-cHRvciBwcmVwYXJhdGlvbi4NCj4gPj4gQm90aCB3YXlzIHNvdW5kcyBnb29kIHRvIG1lLg0KPiA+
-PiBCdXQgbWF5YmUgYWRkaW5nIGEgaG9zdC0+b3BzIGZvciBkZXNjcmlwdG9yIHByZXBhcmF0aW9u
-IGlzIGJldHRlciB3YXkNCj4gPj4gdG8gZ28sIHNpbmNlIHRoYXQgd2lsbCBiZSB0aGUgcmlnaHQg
-aW50ZXJmYWNlIGV4cG9zZWQgdG8gbWFrZSBjaGFuZ2VzDQo+ID4+IHRvIGRlc2NyaXB0b3JzLg0K
-PiA+Pg0KPiA+IERDTUQgZGVzY3JpcHRvciBhdHRyaWJ1dGVzIHJlbWFpbiBzYW1lIGZvciBhbnkg
-aG9zdCBhbmQgYWxzbyB0YXNrDQo+IHBhcmFtZXRlcnMgYXMgUUJSIG5lZWQgdG8gYmUgZW5hYmxl
-ZCB3aXRoIERDTUQuDQo+ID4gU28gSSBiZWxpZXZlIGl0IHNob3VsZCBiZSBvayBpZiB3ZSBqdXN0
-IGFkZCBjYWxsYmFjayB0byBhbGxvdyBob3N0cyB0byB1cGRhdGUNCj4gY29tbWFuZCBwYXJhbWV0
-ZXJzIG9mIERDTUQgZGVzY3JpcHRvciBvbmx5IHRocnUgY3FoY2lfaG9zdF9vcHMuDQo+IA0KPiBG
-b3Igbm93IHdlIGNhbiBhZGQgaG9zdC0+b3BzIGFzIHVwZGF0ZV9kY21kX2Rlc2MgYW5kIHBhc3Mg
-dGhlDQo+IHRhc2tfZGVzYyBvZiBEQ01EIGZvciB1cGRhdGluZyBhbnkgcGFyYW1zIHdoaWNoIGhv
-c3QgbWF5IHdhbnQgdG8gdXBkYXRlLg0KPiANCj4gPg0KPiA+IEFsc28sIGRvbuKAmXQgc2VlIGFu
-eSByZXF1aXJlbWVudCBmb3IgaG9zdCBzcGVjaWZpYyBUYXNrIHBhcmFtZXRlciB1cGRhdGVzDQo+
-IGluIFRhc2sgZGVzY3JpcHRvciBzbyBub3Qgc3VyZSBpZiB0aGVyZSBpcyBhbnkgbmVlZCB0byBw
-cm92aWRlIGNhbGxiYWNrIGZvciB0YXNrDQo+IGRlc2NyaXB0b3IgZGF0YSBwcmVwYXJhdGlvbiB0
-byBob3N0cy4NCj4gPiBQbGVhc2UgY29uZmlybS4NCj4gDQo+IFN1cmUsIGZvciBub3cgdGhlIHJl
-cXVpcmVtZW50IGhhcyBjb21lIHVwIG9ubHkgZm9yIERDTUQgZGVzYyB1cGRhdGUuDQo+IFN1cmUg
-d2UgY2FuIGFkZCB0YXNrIGRlc2NyaXB0b3Igb3BzIGluIHRoZSBzaW1pbGFyIHdheSBsYXRlciB3
-aGVuIHJlcXVpcmVkLg0KPiANCj4gQWRyaWFuLCBwbGVhc2UgY29uZmlybSBpZiB5b3UgYXJlIGZp
-bmUgd2l0aCBib3RoIG9mIGFib3ZlPw0KDQpZZXMsIEkgYWdyZWUuICBTb3dqYW55YSdzIFYyIDA2
-LzEwIHBhdGNoIGlzIHF1aXRlIG5hcnJvd2x5IGZvY3VzZWQsIHdoZXJlYXMNCnVwZGF0ZV9kY21k
-X2Rlc2MgYXMgeW91IGRlc2NyaWJlZCBzZWVtcyBqdXN0IGFzIGVhc3kgdG8gaW1wbGVtZW50LCBi
-dXQNCklzIG1vcmUgZmxleGlibGUuDQoNCj4gDQo+ID4NCj4gPj4+IFdoYXQgZG8gcGVvcGxlIHRo
-aW5rPw0KPiA+Pj4NCj4gPj4+PiAgICAJCX0gZWxzZSB7DQo+ID4+Pj4gICAgCQkJcmVzcF90eXBl
-ID0gMHgyOw0KPiA+Pj4+ICAgIAkJCXRpbWluZyA9IDB4MTsNCj4gPj4+PiBkaWZmIC0tZ2l0IGEv
-ZHJpdmVycy9tbWMvaG9zdC9jcWhjaS5oIGIvZHJpdmVycy9tbWMvaG9zdC9jcWhjaS5oDQo+ID4+
-Pj4gaW5kZXggOWU2ODI4NmEwN2I0Li5mOTZkODU2NWNjMDcgMTAwNjQ0DQo+ID4+Pj4gLS0tIGEv
-ZHJpdmVycy9tbWMvaG9zdC9jcWhjaS5oDQo+ID4+Pj4gKysrIGIvZHJpdmVycy9tbWMvaG9zdC9j
-cWhjaS5oDQo+ID4+Pj4gQEAgLTE3MCw2ICsxNzAsNyBAQCBzdHJ1Y3QgY3FoY2lfaG9zdCB7DQo+
-ID4+Pj4NCj4gPj4+PiAgICAJdTMyIHF1aXJrczsNCj4gPj4+PiAgICAjZGVmaW5lIENRSENJX1FV
-SVJLX1NIT1JUX1RYRlJfREVTQ19TWgkweDENCj4gPj4+PiArI2RlZmluZSBDUUhDSV9RVUlSS19D
-TURfVElNSU5HX1IxQl9EQ01ECTB4Mg0KPiA+Pj4+DQo+ID4+Pj4gICAgCWJvb2wgZW5hYmxlZDsN
-Cj4gPj4+PiAgICAJYm9vbCBoYWx0ZWQ7DQo+ID4+Pj4NCg==
+On 2019-03-12 21:52, Heiko St=FCbner wrote:
+> Hi David,
+>
+> Am Dienstag, 12. M=E4rz 2019, 21:34:00 CET schrieb David Summers:
+>> On 12/03/2019 14:22, Heiko Stuebner wrote:
+>>> Hi Jonas,
+>>>
+>>> Am Samstag, 9. M=E4rz 2019, 16:39:21 CET schrieb David Summers:
+>>>> The Problem:
+>>>>
+>>>> On ASUS Tinker Board S, when booting from the eMMC, and there is card
+>>>> in the sd slot, there are constant errors.
+>>>>
+>>>> Also when warm reboot, uboot can not access the sd slot
+>>>>
+>>>> Cause:
+>>>>
+>>>> Identified by Robin Murphy @ ARM. The Card Detect on rk3288
+>>>> devices is pulled up by vccio-sd; so when the regulator powers this
+>>>> off, card detect gives spurious errors. A second problem, is during
+>>>> power down, vccio-sd apprears to be powered down. This causes a
+>>>> problem when warm rebooting from the sd card. This was identified by
+>>>> Jonas Karlman.
+>>>>
+>>>> History:
+>>>>
+>>>> A common fault on these rk3288 board, which impliment the reference
+>>>> design.
+>>>>
+>>>> When this arose before:
+>>>>
+>>>> http://lists.infradead.org/pipermail/linux-arm-kernel/2014-August/2811=
+53.
+>>>> html
+>>>>
+>>>> And Ulf and Jaehoon clearly said this was a broken card detect design,
+>>>> which should be solved via polling
+>>>>
+>>>> Solution:
+>>>>
+>>>> Hence broken-cd is set as a property. This cures the errors. The
+>>>> powering down of vccio-sd during reboot is cured by adding
+>>>> regulator-boot-on.
+>>>>
+>>>> This solutions has been fairly widely reviewed and tested.
+>>>>
+>>>> Signed-off-by: David Summers <beagleboard@davidjohnsummers.uk>
+>>>> Reviewed by: Robin Murphy <robin.murphy@arm.com>
+>>>> Reviewed by: Jonas Karlman <jonas@kwiboo.se>
+>>> in v2, you gave a
+>>> Tested-by: Jonas Karlman <jonas@kwiboo.se>
+>>> it seems, which somehow transformed into a reviewed-by in v3.
+>>>
+>>> V3 did change a bit in its approach - for the better, but do you approve
+>>> of adding that Reviewed-by above (and maybe also providing a Tested-by
+>>> for the new approach)?
+>>>
+>>> Thanks
+>>> Heiko
+>> Hi all,
+>>
+>> Yes apologies for these signed-off lines etc wrong. Its still a learning
+>> experiment for me!
+>>
+>> Both Robin and Jonas added a lot to Patch, as explained in the write up.
+>> Robin came up with the cause of the fault, and Jonas noticed a second
+>> fault. So the question is to give these two their due. I think what they
+>> both added was important.
+>>
+>> Thanks Robin for the official "Reviewed-by".
+>>
+>> Jonas tested the second version, which kept power on vccio-sd all the
+>> time, whereas v1 and v3 cured the problem with broken-cd. So although
+>> both fixed the problem, they way performed is different. So don't think
+>> I can say Jonas Tested-by v3.
+> We'll just give Jonas a bit more time to reply then :-) .
+
+I have now tested v3 on a Tinker Board and a Tinker Board S using u-boot 20=
+19.01 on sd-card,
+both devices can now soft reboot when running bootloader from sd-card thank=
+s to the "regulator-boot-on".
+
+I am happy to add both tags :-)
+
+Reviewed-by: Jonas Karlman <jonas@kwiboo.se>
+Tested-by: Jonas Karlman <jonas@kwiboo.se>
+
+Regards,
+Jonas
+
+>
+>> As for the tested by "TheSaint @ ArchLinux Arm", he actually tested just
+>> above every single version of the patch, and a whole lot more before it
+>> was sent in - he is our ASUS Tinker Board user on arch. He doesn't
+>> really want his email in the open, but if push comes to shove he'll
+>> allow it. Question is do you need this for the Patch to pass?
+> No, that is not necessary. I'll just drop the line when applying.
+> In general for a tag to mean something we need the Name, but any
+> tags other than Signed-off-by are optional anyway.
+>
+>
+>> Heiko, I'm happy to change the sign off etc, and resent the patch (as
+>> v4). But would be the same patch. Think the question is what is best for
+>> you. Don't want to send unneeded email ... anyway let me know (private
+>> email?) and I'll do whatever is best for you.
+> No, re-sending just to correct tags is not necessary in _my_ case
+> as I generally just fix up the relevant lines myself when applying.
+> Just keep in mind, other maintainers may handle this differently :-) .
+>
+>
+>> P.S. Eventually I'll get better at these patches , alas the day job
+>> keeps me too busy - and I forget the rules :(
+> Really no problem, it's always a learning experience.
+> So don't worry too much :-) .
+>
+>
+> Heiko
+>
+>
