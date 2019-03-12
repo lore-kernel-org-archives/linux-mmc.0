@@ -1,109 +1,83 @@
 From: "Rizvi, Mohammad Faiz Abbas" <faiz_abbas@ti.com>
-Subject: Re: [PATCH v2 1/8] mmc: sdhci: Get rid of finish_tasklet
-Date: Tue, 12 Mar 2019 23:00:38 +0530
-Message-ID: <842caafd-1547-1ea6-faf0-27a85a912622@ti.com>
-References: <20190215192033.24203-1-faiz_abbas@ti.com>
- <20190215192033.24203-2-faiz_abbas@ti.com>
- <abcc1506-cd38-5ff4-aaeb-57e9a9622e90@intel.com>
- <8d72ff93-e07f-52b9-da85-acd54f046694@ti.com>
- <63b6631d-86e7-b8ef-ffaf-40e7d4e96cfb@intel.com>
+Subject: Re: [PATCH v2 2/2] mmc: sdhci-omap: Don't finish_mrq() on a command
+ error during tuning
+Date: Tue, 12 Mar 2019 23:04:47 +0530
+Message-ID: <eb76397b-aa02-f1b8-ef0d-df7569275144@ti.com>
+References: <20190301083824.23918-1-faiz_abbas@ti.com>
+ <20190301083824.23918-3-faiz_abbas@ti.com>
+ <0283e92e-9e01-227d-0987-7801dd88cf78@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <63b6631d-86e7-b8ef-ffaf-40e7d4e96cfb@intel.com>
+In-Reply-To: <0283e92e-9e01-227d-0987-7801dd88cf78@intel.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
-Cc: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, kishon@ti.com, zhang.chunyan@linaro.org
+To: Adrian Hunter <adrian.hunter@intel.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Cc: ulf.hansson@linaro.org, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
 Hi Adrian,
 
-On 3/8/2019 7:06 PM, Adrian Hunter wrote:
-> On 6/03/19 12:00 PM, Faiz Abbas wrote:
->> Adrian,
+On 3/6/2019 5:39 PM, Adrian Hunter wrote:
+> On 1/03/19 10:38 AM, Faiz Abbas wrote:
+>> commit 5b0d62108b46 ("mmc: sdhci-omap: Add platform specific reset
+>> callback") skips data resets during tuning operation. Because of this,
+>> a data error or data finish interrupt might still arrive after a command
+>> error has been handled and the mrq ended. This ends up with a "mmc0: Got
+>> data interrupt 0x00000002 even though no data operation was in progress"
+>> error message.
 >>
->> On 25/02/19 1:47 PM, Adrian Hunter wrote:
->>> On 15/02/19 9:20 PM, Faiz Abbas wrote:
->>>> sdhci.c has two bottom halves implemented. A threaded_irq for handling
->>>> card insert/remove operations and a tasklet for finishing mmc requests.
->>>> With the addition of external dma support, dmaengine APIs need to
->>>> terminate in non-atomic context before unmapping the dma buffers.
->>>>
->>>> To facilitate this, remove the finish_tasklet and move the call of
->>>> sdhci_request_done() to the threaded_irq() callback.
->>>
->>> The irq thread has a higher latency than the tasklet.  The performance drop
->>> is measurable on the system I tried:
->>>
->>> Before:
->>>
->>> # dd if=/dev/mmcblk1 of=/dev/null bs=1G count=1 &
->>> 1+0 records in
->>> 1+0 records out
->>> 1073741824 bytes (1.1 GB) copied, 4.44502 s, 242 MB/s
->>>
->>> After:
->>>
->>> # dd if=/dev/mmcblk1 of=/dev/null bs=1G count=1 &
->>> 1+0 records in
->>> 1+0 records out
->>> 1073741824 bytes (1.1 GB) copied, 4.50898 s, 238 MB/s
->>>
->>> So we only want to resort to the thread for the error case.
->>>
+>> Fix this by adding a platform specific callback for command errors. Mark
+>> the mrq as a failure but wait for a data interrupt instead of calling
+>> finish_mrq().
 >>
->> Sorry for the late response here, but this is about 1.6% decrease. I
->> tried out the same commands on a dra7xx board here (with about 5
->> consecutive dd of 1GB) and the average decrease was 0.3%. I believe you
->> will also find a lesser percentage change if you average over multiple
->> dd commands.
+>> Fixes: 5b0d62108b46 ("mmc: sdhci-omap: Add platform specific reset
+>> callback")
+>> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+>> ---
+>>  drivers/mmc/host/sdhci-omap.c | 24 ++++++++++++++++++++++++
+>>  1 file changed, 24 insertions(+)
 >>
->> Is this really so significant that we have to maintain two different
->> bottom halves and keep having difficulty with adding APIs that can sleep?
+>> diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+>> index b1a66ca3821a..67b361a403bc 100644
+>> --- a/drivers/mmc/host/sdhci-omap.c
+>> +++ b/drivers/mmc/host/sdhci-omap.c
+>> @@ -797,6 +797,29 @@ void sdhci_omap_reset(struct sdhci_host *host, u8 mask)
+>>  	sdhci_reset(host, mask);
+>>  }
+>>  
+>> +void sdhci_omap_cmd_err(struct sdhci_host *host, u32 intmask, u32 *intmask_p)
+>> +{
+>> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>> +	struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
+>> +
+>> +	if (omap_host->is_tuning) {
+>> +		/*
+>> +		 * Since we are not resetting data lines during tuning
+>> +		 * operation, data error or data complete interrupts
+>> +		 * might still arrive. Mark this request as a failure
+>> +		 * but still wait for the data interrupt
+>> +		 */
+>> +		if (intmask & SDHCI_INT_TIMEOUT)
+>> +			host->cmd->error = -ETIMEDOUT;
+>> +		else
+>> +			host->cmd->error = -EILSEQ;
+>> +
+>> +		sdhci_finish_command(host);
+>> +	} else {
+>> +		sdhci_cmd_err(host, intmask, intmask_p);
+>> +	}
+>> +}
 > 
-> It is a performance drop that can be avoided, so it might as well be.
-> Splitting the success path from the failure path is common for I/O drivers
-> for similar reasons as here: the success path can be optimized whereas the
-> failure path potentially needs to sleep.
-
-Understood. You wanna keep the success path as fast as possible.
-> 
->>
->> Also I am not sure how to implement only the error handling part in the
->> threaded_irq. We need to enter sdhci_request_done() and get the current
->> mrq before we can check for error conditions like I've done in patch 2:
->>
->> /* Terminate and synchronize dma in case of an error */
->> if (data && (mrq->cmd->error || data->error) &&
->>     host->use_external_dma) {
->> 	struct dma_chan *chan = sdhci_external_dma_channel(host, data);
->> 	dmaengine_terminate_sync(chan);
->> }
->>
->> On a related note, do we really need to protect everything in
->> sdhci_request_done() with spinlocks?
->>                                      In patch 2 I have only removed lock
->> for the terminate_sync() parts that I added but the whole
->> dma_unmap/dma_sync parts should be left unprotected IMO.
-> 
-> As it is written, synchronization is needed to stop the same mrq being
-> finished twice.
-> 
-> I suggest doing the dmaengine_terminate_sync() before calling
-> sdhci_request_done().  Perhaps you could record the channel that needs to be
-> sync'd and then do:
-> 
-> 	struct dma_chan *chan = READ_ONCE(host->sync_chan);
-> 
-> 	if (chan) {
-> 		dmaengine_terminate_sync(chan);
-> 		host->sync_chan = NULL;
-> 	}
+> Could this be done by the existing ->irq() callback? i.e. mask the error
+> bits in intmask (have to write them back to SDHCI_INT_STATUS also) but set
+> cmd->error.
 > 
 
-Will try this out and send next version.
+It is possible but I really don't want the callback to be unnecessarily
+called for every single interrupt that happens. I think we should only
+use the callback in the case of an actual error interrupt :-)
 
 Thanks,
 Faiz
