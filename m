@@ -1,116 +1,109 @@
-From: =?utf-8?Q?Christoph_M=C3=BCllner?=
- <christoph.muellner@theobroma-systems.com>
-Subject: Re: [PATCH v2 2/3] dt-bindings: mmc: Add a new property
- disable-cqe-dcmd.
-Date: Tue, 12 Mar 2019 18:16:40 +0100
-Message-ID: <B1575425-14BA-496D-A295-FF956C8F3346@theobroma-systems.com>
-References: <20190307084329.25416-1-christoph.muellner@theobroma-systems.com>
- <4793843.T1TZ7EF8k3@phil>
- <D7EF0176-0EBD-4401-83BE-E7F951F88CAA@theobroma-systems.com>
- <2038789.ZmMFo7ZELZ@diego>
-Mime-Version: 1.0 (Mac OS X Mail 11.5 \(3445.9.1\))
+From: "Rizvi, Mohammad Faiz Abbas" <faiz_abbas@ti.com>
+Subject: Re: [PATCH v2 1/8] mmc: sdhci: Get rid of finish_tasklet
+Date: Tue, 12 Mar 2019 23:00:38 +0530
+Message-ID: <842caafd-1547-1ea6-faf0-27a85a912622@ti.com>
+References: <20190215192033.24203-1-faiz_abbas@ti.com>
+ <20190215192033.24203-2-faiz_abbas@ti.com>
+ <abcc1506-cd38-5ff4-aaeb-57e9a9622e90@intel.com>
+ <8d72ff93-e07f-52b9-da85-acd54f046694@ti.com>
+ <63b6631d-86e7-b8ef-ffaf-40e7d4e96cfb@intel.com>
+Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <2038789.ZmMFo7ZELZ@diego>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: =?utf-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>
-Cc: mark.rutland@arm.com, ulf.hansson@linaro.org, Emil Renner Berthing <kernel@esmil.dk>, Viresh Kumar <viresh.kumar@linaro.org>, shawn.lin@rock-chips.com, Adrian Hunter <adrian.hunter@intel.com>, Tony Xie <tony.xie@rock-chips.com>, Klaus Goger <klaus.goger@theobroma-systems.com>, Philipp Tomsich <philipp.tomsich@theobroma-systems.com>, Michal Simek <michal.simek@xilinx.com>, linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org, Randy Li <ayaka@soulik.info>, Vicente Bergas <vicencb@gmail.com>, robh+dt@kernel.org, Ezequiel Garcia <ezequiel@collabora.com>, linux-arm-kernel@lists.infradead.org, Lin Huang <hl@rock-chips.com>, linux-mmc@vger.kernel.org, Douglas Anderson <dianders@chromium.org>, linux-kernel@vger.kernel.org, Enric Balletbo i Serra <enric.balletbo@collabora.com>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <63b6631d-86e7-b8ef-ffaf-40e7d4e96cfb@intel.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Cc: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, kishon@ti.com, zhang.chunyan@linaro.org
 List-Id: linux-mmc@vger.kernel.org
 
-Cj4gT24gMTIuMDMuMjAxOSwgYXQgMTg6MTAsIEhlaWtvIFN0w7xibmVyIDxoZWlrb0BzbnRlY2gu
-ZGU+IHdyb3RlOgo+IAo+IEhpIENocmlzdG9waCwKPiAKPiBBbSBEaWVuc3RhZywgMTIuIE3DpHJ6
-IDIwMTksIDE1OjQ2OjQ0IENFVCBzY2hyaWViIENocmlzdG9waCBNw7xsbG5lcjoKPj4+IE9uIDEy
-LjAzLjIwMTksIGF0IDE0OjE3LCBIZWlrbyBTdHVlYm5lciA8aGVpa29Ac250ZWNoLmRlPiB3cm90
-ZToKPj4+IAo+Pj4gQW0gRnJlaXRhZywgOC4gTcOkcnogMjAxOSwgMTQ6MTA6NDUgQ0VUIHNjaHJp
-ZWIgQ2hyaXN0b3BoIE3DvGxsbmVyOgo+Pj4+PiBPbiAwOC4wMy4yMDE5LCBhdCAxMzo0NiwgQWRy
-aWFuIEh1bnRlciA8YWRyaWFuLmh1bnRlckBpbnRlbC5jb20+IHdyb3RlOgo+Pj4+PiAKPj4+Pj4g
-T24gNy8wMy8xOSAxMDo0MyBBTSwgQ2hyaXN0b3BoIE11ZWxsbmVyIHdyb3RlOgo+Pj4+Pj4gVGhp
-cyBwYXRjaCBkb2N1bWVudHMgdGhlIG5ldyBwcm9wZXJ0eSBkaXNhYmxlLWNxZS1kY21kCj4+Pj4+
-PiBmb3IgdGhlIEFyYXNhbiBlTU1DIDUuMSBkcml2ZXIuCj4+Pj4+PiAKPj4+Pj4+IFNpZ25lZC1v
-ZmYtYnk6IENocmlzdG9waCBNdWVsbG5lcgo+Pj4+Pj4gPGNocmlzdG9waC5tdWVsbG5lckB0aGVv
-YnJvbWEtc3lzdGVtcy5jb20+IFNpZ25lZC1vZmYtYnk6IFBoaWxpcHAKPj4+Pj4+IFRvbXNpY2gg
-PHBoaWxpcHAudG9tc2ljaEB0aGVvYnJvbWEtc3lzdGVtcy5jb20+IC0tLQo+Pj4+Pj4gRG9jdW1l
-bnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9hcmFzYW4sc2RoY2kudHh0IHwgNCArKysr
-Cj4+Pj4+PiAxIGZpbGUgY2hhbmdlZCwgNCBpbnNlcnRpb25zKCspCj4+Pj4+PiAKPj4+Pj4+IGRp
-ZmYgLS1naXQgYS9Eb2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGluZ3MvbW1jL2FyYXNhbixz
-ZGhjaS50eHQKPj4+Pj4+IGIvRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9h
-cmFzYW4sc2RoY2kudHh0IGluZGV4Cj4+Pj4+PiAxZWRiYjA0OWNjY2IuLmVjNjk5YmY5OGI3YyAx
-MDA2NDQKPj4+Pj4+IC0tLSBhL0RvY3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9tbWMv
-YXJhc2FuLHNkaGNpLnR4dAo+Pj4+Pj4gKysrIGIvRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2Jp
-bmRpbmdzL21tYy9hcmFzYW4sc2RoY2kudHh0Cj4+Pj4+PiAKPj4+Pj4+IEBAIC00NCw2ICs0NCwx
-MCBAQCBPcHRpb25hbCBQcm9wZXJ0aWVzOgo+Pj4+Pj4gICBwcm9wZXJseS4gVGVzdCBtb2RlIGNh
-biBiZSB1c2VkIHRvIGZvcmNlIHRoZSBjb250cm9sbGVyIHRvIGZ1bmN0aW9uLgo+Pj4+Pj4gCj4+
-Pj4+PiAtIHhsbngsaW50LWNsb2NrLXN0YWJsZS1icm9rZW46IHdoZW4gcHJlc2VudCwgdGhlIGNv
-bnRyb2xsZXIgYWx3YXlzCj4+Pj4+PiByZXBvcnRzCj4+Pj4+PiAKPj4+Pj4+ICAgdGhhdCB0aGUg
-aW50ZXJuYWwgY2xvY2sgaXMgc3RhYmxlIGV2ZW4gd2hlbiBpdCBpcyBub3QuCj4+Pj4+PiAKPj4+
-Pj4+ICsgIC0gZGlzYWJsZS1jcWUtZGNtZDogVGhlIGVNTUMgNS4xIHN0YW5kYXJkIHNwZWNpZmll
-cyBkaXJlY3QgY29tbWFuZHMKPj4+Pj4+IChEQ01EcykgKyAgICBhcyBwYXJ0IG9mIHRoZSBjb21t
-YW5kIHF1ZXVlIGVuZ2luZSAoQ1FFKS4gT24gY29udHJvbGxlcnMKPj4+Pj4+IHdpdGggYSBDUUhD
-SSwgKyAgICBzdWNoIGFzIHRoZSBBcmFzYW4gZU1NQyA1LjEgaG9zdCBjb250cm9sbGVyLCB0aGUK
-Pj4+Pj4+IGRyaXZlciBoYXMgdG8gZW5hYmxlIERDTURzLiArICAgIFRoaXMgaXMgZG9uZSB1bmxl
-c3MgZGlzYWJsZS1jcWUtZGNtZAo+Pj4+Pj4gaXMgc3BlY2lmaWVkLgo+Pj4gCj4+PiBUaGlzIG5l
-ZWRzIGEgcmV3b3JkaW5nIHBsZWFzZS4gU2VlIGJlbG93IGZvciBody1kZXNjcmlwdGlvbiB2cy4g
-ZHJpdmVyLCBzbwo+Pj4gdGhlIGRlc2NyaXB0aW9uIHNob3VsZCBiZSBjZW50ZXJlZCBhcm91bmQg
-d2h5IHRoaXMgaXMgYSBwcm9wZXJ0eSBvZiB0aGUgaHcKPj4+IFtsaWtlIGZhdWx0eSBjb250cm9s
-bGVyIGltcGxlbWVudGF0aW9uIG9yIHdoYXRldmVyXQo+PiAKPj4gSSB1bmRlcnN0YW5kLCB0aGF0
-IHlvdSBwcmVmZXIgYSBIVy1zcGVjaWZpYyBuYW1lIGZvciBhIHByb3BlcnR5Cj4+IG92ZXIgb25l
-LCB0aGF0IGV4cGxhaW5zIHRoZSBhY3R1YWwgZWZmZWN0Lgo+IAo+IEFjdHVhbGx5IEkgdGhpbmsg
-dGhlIHByb3BlcnR5LW5hbWUgaXMganVzdCBmaW5lIDotKSAuCj4gCj4gVGhlIGRlc2NyaXB0aW9u
-IG1pZ2h0IHByb2ZpdCBmcm9tIGEgcmV3b3JkaW5nIHRob3VnaC4gQWthIG5vdCBkcml2ZXItCj4g
-Y2VudHJpYyBidXQgaHctY2VudHJpYywgZGVzY3JpYmluZyB3aHkgc29tZSBjb250cm9sbGVycyBt
-YXkgbmVlZCB0aGUKPiBvcHRpb24gdG8gZGlzYWJsZSB0aGVzZSBkY21kcyAoY29udHJvbGxlciBi
-dWdzIG9yIHdoYXRldmVyKS4KCkFoLCBvay4gTm93IEkgdW5kZXJzdGFuZCB3aGF0IHlvdSBtZWFu
-LgpXaWxsIGRvIGZvciB2My4KClRoYW5rcywKQ2hyaXN0b3BoCgo+IAo+IAo+IEhlaWtvCj4gCj4g
-Cj4gCj4+IEhvd2V2ZXIsIHVzaW5nIGRpc2FibGUtPGZlYXR1cmU+ICh3aGljaCBpcyBhbHdheXMg
-YSBkaXJlY3RpdmUgZm9yIHRoZSBkcml2ZXIKPj4gYW5kIG5vdCBhIEhXIGRlc2NyaXB0aW9uKSBp
-cyBub3QgdW5jb21tb246Cj4+IAo+PiAqIGRpc2FibGUtd3Agc2hvdWxkIGJlICJuby13cC1saW5l
-LWNvbm5lY3Rpb24iCj4+ICogZGlzYWJsZS1vdmVyLWN1cnJlbnQgLT4gIm5vLW92ZXItY3VycmVu
-dC1saW5lLWNvbm5lY3Rpb24iCj4+ICogc3JwLWRpc2FibGUgLT4gIm5vdC1leGlzdGluZy1zcnAt
-aW1wbGVtZW50YXRpb24iCj4+ICogLi4uCj4+IAo+PiBCdXQgSSBkb24ndCBtaW5kIHVzaW5nIHNv
-bWV0aGluZyBlbHNlLgo+PiBXb3VsZCAiYnJva2VuLWNxZS1kY21kIiAobGlrZSBicm9rZW4tY2Qg
-b3IgYnJva2VuLWZsYXNoLXJlc2V0KSBiZSBvaz8KPj4gT3Igb3RoZXIgc3VnZ2VzdGlvbnM/Cj4+
-IAo+PiBBbHNvIEknZCBsaWtlIHRvIG1lbnRpb24sIHRoYXQgbXkgZmlyc3QgaW1wbGVtZW50YXRp
-b24gd2FzCj4+ICJzdXBwb3J0cy1jcWUtZGNtZCIuIEkgZ3Vlc3MgdGhhdCB3b3VsZCBiZSBhIGdv
-b2QgY2hvaWNlLCBpZiBpdCB3b3VsZCBoYXZlCj4+IGJlZW4gdGhlcmUKPj4gZnJvbSB0aGUgYmVn
-aW5uaW5nLiBJbnRyb2R1Y2luZyBpdCBub3csIHdvdWxkIHNpbGVudGx5IGRpc2FibGUgRENNRAo+
-PiBmb3IgZXhpc3RpbmcgRFRCcy4gVGhlcmVmb3JlIEkgd2VudCBvbiB0byAiZGlzYWJsZS1jcWUt
-ZGNtZCIuCj4+IAo+Pj4+PiBJZiAic3VwcG9ydHMtY3FlIiBpcyBpbiBtbWMudHh0LCBzaG91bGQg
-ImRpc2FibGUtY3FlLWRjbWQiIGJlIHRoZXJlCj4+Pj4+IGFsc28/Cj4+Pj4gCj4+Pj4gVGhlIGZp
-bGUgbW1jLnR4dCBzYXlzIG9uIHRvcDoKPj4+PiAiVGhlc2UgcHJvcGVydGllcyBhcmUgY29tbW9u
-IHRvIG11bHRpcGxlIE1NQyBob3N0IGNvbnRyb2xsZXJzIi4KPj4+PiBBcyBteSBwYXRjaHNldCBp
-bnRyb2R1Y2VzICJkaXNhYmxlLWNxZS1kY21kIiBqdXN0IGZvciBzZGhjaS1vZi1hcmFzYW4sCj4+
-Pj4gSSB3b3VsZCBzYXkgaXQgc2hvdWxkIG5vdCBnbyBpbnRvIHRoYXQgZmlsZS4KPj4+PiAKPj4+
-PiBBbHNvIEkgd29uZGVyIHdoeSAic3VwcG9ydHMtY3FlIiBpcyBpbiBtbWMudHh0LCBiZWNhdXNl
-Cj4+Pj4gb25seSBzZGhjaS10ZWdyYS5jIGlzIGV2YWx1YXRpbmcgdGhhdCBwcm9wZXJ0eS4KPj4+
-PiBTbyBJIHdvdWxkIGV4cGVjdCBpdCB0byBiZSBkb2N1bWVudGVkIGluCj4+Pj4gRG9jdW1lbnRh
-dGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9udmlkaWEsdGVncmEyMC1zZGhjaS50eHQKPj4+
-PiAKPj4+PiBIb3dldmVyLCBJIHNlZSB0aGF0ICJkaXNhYmxlLWNxZS1kY21kIiBjb3VsZCBnbyBp
-bnRvIG90aGVyIGRyaXZlcnMgYXMKPj4+PiB3ZWxsLgo+Pj4+IEJ1dCBpcyB0aGlzIGVub3VnaCB0
-byBkb2N1bWVudCBpdCBpbiBtbWMudHh0Pwo+Pj4gCj4+PiBEZXZpY2V0cmVlIGlzIGFsd2F5cyBh
-Ym91dCBkZXNjcmliaW5nIHRoZSBoYXJkd2FyZSBjYXBhYmlsaXRlcyBhbmQgbmV2ZXIKPj4+IGFi
-b3V0IHRoZSBhY3R1YWwgbml0dHktZ3JpdHR5IG9mIGRyaXZlciBpbXBsZW1lbnRhdGlvbiwgYWth
-IGl0IGlzIG5vdAo+Pj4gbWVhbnQKPj4+IGFzIGEgc3BhY2UgZm9yIGhhcmR3YXJlLWluZGVwZW5k
-ZW50IGNvbmZpZy1zZXR0aW5ncyBvciBzdWNoLgo+Pj4gCj4+PiBBcyBmb3Igb25seSB0ZWdyYSBl
-dmFsdWF0aW5nIHRoaXMsIGlzIHByb2JhYmx5IGJlY2F1c2UgaXQgaXMgc3RpbGwgc28gbmV3LAo+
-Pj4gbGlrZSBqYW51YXJ5IDIwMTkgYW5kIFJvYiBleHBsaWNpdGx5IHN1Z2dlc3RlZCBpdCBiZWNv
-bWluZyBjb21tb24gWzBdLAo+Pj4gd2hpY2ggc3VnZ2VzdHMgdGhhdCB0aGUgZGlzYWJsZS1jcWUt
-ZGNtZHMgc2hvdWxkIHByb2JhYmx5IGFsc28gYmUgY29tbW9uLgo+PiBTbyBtbWMudHh0IGxpc3Rz
-ICJzdGFuZGFyZGlzZWQiIG5hbWVzIGZvciBwcm9wZXJ0aWVzIHRvIHJlZHVjZSB0aGUgcmlzawo+
-PiBvZiBoYXZpbmcgc2ltaWxhciwgYnV0IGRpc3RpbmN0IG5hbWVzIGZvciBkaWZmZXJlbnQgTU1D
-IGRyaXZlcnMuCj4+IFNvIHdoZW5ldmVyIHlvdSB3YW50IHRvIGludHJvZHVjZSBhIG5ldyBwcm9w
-ZXJ0eSBmb3IgYSBkcml2ZXIsCj4+IGNoZWNrIGlmIHRoZXJlIGlzbid0IGFscmVhZHkgc29tZXRo
-aW5nIGRlZmluZWQgaW4gbW1jLnR4dC4KPj4gCj4+IFdoZW4gc2VlaW5nIGl0IHRoaXMgd2F5LCBp
-dCBjbGVhcmx5IG1ha2VzIHNlbnNlIHRvIGhhdmUgdGhlIHByb3BlcnR5IHRoZXJlLgo+PiAKPj4g
-VGhhbmtzLAo+PiBDaHJpc3RvcGgKCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fXwpsaW51eC1hcm0ta2VybmVsIG1haWxpbmcgbGlzdApsaW51eC1hcm0ta2Vy
-bmVsQGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1h
-bi9saXN0aW5mby9saW51eC1hcm0ta2VybmVsCg==
+Hi Adrian,
+
+On 3/8/2019 7:06 PM, Adrian Hunter wrote:
+> On 6/03/19 12:00 PM, Faiz Abbas wrote:
+>> Adrian,
+>>
+>> On 25/02/19 1:47 PM, Adrian Hunter wrote:
+>>> On 15/02/19 9:20 PM, Faiz Abbas wrote:
+>>>> sdhci.c has two bottom halves implemented. A threaded_irq for handling
+>>>> card insert/remove operations and a tasklet for finishing mmc requests.
+>>>> With the addition of external dma support, dmaengine APIs need to
+>>>> terminate in non-atomic context before unmapping the dma buffers.
+>>>>
+>>>> To facilitate this, remove the finish_tasklet and move the call of
+>>>> sdhci_request_done() to the threaded_irq() callback.
+>>>
+>>> The irq thread has a higher latency than the tasklet.  The performance drop
+>>> is measurable on the system I tried:
+>>>
+>>> Before:
+>>>
+>>> # dd if=/dev/mmcblk1 of=/dev/null bs=1G count=1 &
+>>> 1+0 records in
+>>> 1+0 records out
+>>> 1073741824 bytes (1.1 GB) copied, 4.44502 s, 242 MB/s
+>>>
+>>> After:
+>>>
+>>> # dd if=/dev/mmcblk1 of=/dev/null bs=1G count=1 &
+>>> 1+0 records in
+>>> 1+0 records out
+>>> 1073741824 bytes (1.1 GB) copied, 4.50898 s, 238 MB/s
+>>>
+>>> So we only want to resort to the thread for the error case.
+>>>
+>>
+>> Sorry for the late response here, but this is about 1.6% decrease. I
+>> tried out the same commands on a dra7xx board here (with about 5
+>> consecutive dd of 1GB) and the average decrease was 0.3%. I believe you
+>> will also find a lesser percentage change if you average over multiple
+>> dd commands.
+>>
+>> Is this really so significant that we have to maintain two different
+>> bottom halves and keep having difficulty with adding APIs that can sleep?
+> 
+> It is a performance drop that can be avoided, so it might as well be.
+> Splitting the success path from the failure path is common for I/O drivers
+> for similar reasons as here: the success path can be optimized whereas the
+> failure path potentially needs to sleep.
+
+Understood. You wanna keep the success path as fast as possible.
+> 
+>>
+>> Also I am not sure how to implement only the error handling part in the
+>> threaded_irq. We need to enter sdhci_request_done() and get the current
+>> mrq before we can check for error conditions like I've done in patch 2:
+>>
+>> /* Terminate and synchronize dma in case of an error */
+>> if (data && (mrq->cmd->error || data->error) &&
+>>     host->use_external_dma) {
+>> 	struct dma_chan *chan = sdhci_external_dma_channel(host, data);
+>> 	dmaengine_terminate_sync(chan);
+>> }
+>>
+>> On a related note, do we really need to protect everything in
+>> sdhci_request_done() with spinlocks?
+>>                                      In patch 2 I have only removed lock
+>> for the terminate_sync() parts that I added but the whole
+>> dma_unmap/dma_sync parts should be left unprotected IMO.
+> 
+> As it is written, synchronization is needed to stop the same mrq being
+> finished twice.
+> 
+> I suggest doing the dmaengine_terminate_sync() before calling
+> sdhci_request_done().  Perhaps you could record the channel that needs to be
+> sync'd and then do:
+> 
+> 	struct dma_chan *chan = READ_ONCE(host->sync_chan);
+> 
+> 	if (chan) {
+> 		dmaengine_terminate_sync(chan);
+> 		host->sync_chan = NULL;
+> 	}
+> 
+
+Will try this out and send next version.
+
+Thanks,
+Faiz
