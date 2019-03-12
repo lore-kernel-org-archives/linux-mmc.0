@@ -1,14 +1,16 @@
-From: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+From: Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>
 Subject: Re: [PATCH v3 1/3] arm: dts: rk3288-tinker.dtsi: Fix SD card detection
-Date: Tue, 12 Mar 2019 15:08:15 +0100
-Message-ID: <10436027.DUyLE1RSiR@phil>
+Date: Tue, 12 Mar 2019 14:17:39 +0000
+Message-ID: <d12c29af-147a-34b5-f660-98b3d85c7126@arm.com>
 References: <20190217121513.22965-1-beagleboard@davidjohnsummers.uk>
  <20190309153923.22806-1-beagleboard@davidjohnsummers.uk>
+ <10436027.DUyLE1RSiR@phil>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
 Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <20190309153923.22806-1-beagleboard-8lkWs+DogrrqRUWtDFdff/XRex20P6io@public.gmane.org>
+In-Reply-To: <10436027.DUyLE1RSiR@phil>
+Content-Language: en-GB
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
  <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
@@ -18,104 +20,63 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
  <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
 Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: David Summers <beagleboard-8lkWs+DogrrqRUWtDFdff/XRex20P6io@public.gmane.org>
-Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, frowand.list-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, David Summers <beagleboard-8lkWs+DogrrqRUWtDFdff/XRex20P6io@public.gmane.org>
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, frowand.list-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Am Samstag, 9. M=E4rz 2019, 16:39:21 CET schrieb David Summers:
-> The Problem:
-> =
-
-> On ASUS Tinker Board S, when booting from the eMMC, and there is card
-> in the sd slot, there are constant errors.
-> =
-
-> Also when warm reboot, uboot can not access the sd slot
-> =
-
-> Cause:
-> =
-
-> Identified by Robin Murphy @ ARM. The Card Detect on rk3288
-> devices is pulled up by vccio-sd; so when the regulator powers this
-> off, card detect gives spurious errors. A second problem, is during
-> power down, vccio-sd apprears to be powered down. This causes a
-> problem when warm rebooting from the sd card. This was identified by
-> Jonas Karlman.
-> =
-
-> History:
-> =
-
-> A common fault on these rk3288 board, which impliment the reference
-> design.
-> =
-
-> When this arose before:
-> =
-
-> http://lists.infradead.org/pipermail/linux-arm-kernel/2014-August/281153.=
-html
-> =
-
-> And Ulf and Jaehoon clearly said this was a broken card detect design,
-> which should be solved via polling
-> =
-
-> Solution:
-> =
-
-> Hence broken-cd is set as a property. This cures the errors. The
-> powering down of vccio-sd during reboot is cured by adding
-> regulator-boot-on.
-> =
-
-> This solutions has been fairly widely reviewed and tested.
-> =
-
-> Signed-off-by: David Summers <beagleboard-8lkWs+DogrrqRUWtDFdff/XRex20P6io@public.gmane.org>
-> Reviewed by: Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>
-> Reviewed by: Jonas Karlman <jonas-uIzNG4q0ceqzQB+pC5nmwQ@public.gmane.org>
-> Test by: TheSaint @ ArchLinux Arm
-
-please follow patch submission guidelines, here it would be
-Tested-by: ... with an actual Name + mail address
-
-Also I did try to go through the way big mail thread but didn't
-find an actual "Reviewed-by" from Robin Murphy, similar to what
-he pointed out in patch2
-
-Other than that and including the past discussions, this looks good.
-
-
-Heiko
-
-> ---
->  arch/arm/boot/dts/rk3288-tinker.dtsi | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
-> =
-
-> diff --git a/arch/arm/boot/dts/rk3288-tinker.dtsi b/arch/arm/boot/dts/rk3=
-288-tinker.dtsi
-> index aa107ee41b8b..ef653c3209bc 100644
-> --- a/arch/arm/boot/dts/rk3288-tinker.dtsi
-> +++ b/arch/arm/boot/dts/rk3288-tinker.dtsi
-> @@ -254,6 +254,7 @@
->  			};
->  =
-
->  			vccio_sd: LDO_REG5 {
-> +				regulator-boot-on;
->  				regulator-min-microvolt =3D <1800000>;
->  				regulator-max-microvolt =3D <3300000>;
->  				regulator-name =3D "vccio_sd";
-> @@ -430,7 +431,7 @@
->  	bus-width =3D <4>;
->  	cap-mmc-highspeed;
->  	cap-sd-highspeed;
-> -	card-detect-delay =3D <200>;
-> +	broken-cd;
->  	disable-wp;			/* wp not hooked up */
->  	pinctrl-names =3D "default";
->  	pinctrl-0 =3D <&sdmmc_clk &sdmmc_cmd &sdmmc_cd &sdmmc_bus4>;
-> =
+T24gMjAxOS0wMy0xMiAyOjA4IHBtLCBIZWlrbyBTdHVlYm5lciB3cm90ZToKPiBBbSBTYW1zdGFn
+LCA5LiBNw6RyeiAyMDE5LCAxNjozOToyMSBDRVQgc2NocmllYiBEYXZpZCBTdW1tZXJzOgo+PiBU
+aGUgUHJvYmxlbToKPj4KPj4gT24gQVNVUyBUaW5rZXIgQm9hcmQgUywgd2hlbiBib290aW5nIGZy
+b20gdGhlIGVNTUMsIGFuZCB0aGVyZSBpcyBjYXJkCj4+IGluIHRoZSBzZCBzbG90LCB0aGVyZSBh
+cmUgY29uc3RhbnQgZXJyb3JzLgo+Pgo+PiBBbHNvIHdoZW4gd2FybSByZWJvb3QsIHVib290IGNh
+biBub3QgYWNjZXNzIHRoZSBzZCBzbG90Cj4+Cj4+IENhdXNlOgo+Pgo+PiBJZGVudGlmaWVkIGJ5
+IFJvYmluIE11cnBoeSBAIEFSTS4gVGhlIENhcmQgRGV0ZWN0IG9uIHJrMzI4OAo+PiBkZXZpY2Vz
+IGlzIHB1bGxlZCB1cCBieSB2Y2Npby1zZDsgc28gd2hlbiB0aGUgcmVndWxhdG9yIHBvd2VycyB0
+aGlzCj4+IG9mZiwgY2FyZCBkZXRlY3QgZ2l2ZXMgc3B1cmlvdXMgZXJyb3JzLiBBIHNlY29uZCBw
+cm9ibGVtLCBpcyBkdXJpbmcKPj4gcG93ZXIgZG93biwgdmNjaW8tc2QgYXBwcmVhcnMgdG8gYmUg
+cG93ZXJlZCBkb3duLiBUaGlzIGNhdXNlcyBhCj4+IHByb2JsZW0gd2hlbiB3YXJtIHJlYm9vdGlu
+ZyBmcm9tIHRoZSBzZCBjYXJkLiBUaGlzIHdhcyBpZGVudGlmaWVkIGJ5Cj4+IEpvbmFzIEthcmxt
+YW4uCj4+Cj4+IEhpc3Rvcnk6Cj4+Cj4+IEEgY29tbW9uIGZhdWx0IG9uIHRoZXNlIHJrMzI4OCBi
+b2FyZCwgd2hpY2ggaW1wbGltZW50IHRoZSByZWZlcmVuY2UKPj4gZGVzaWduLgo+Pgo+PiBXaGVu
+IHRoaXMgYXJvc2UgYmVmb3JlOgo+Pgo+PiBodHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9waXBl
+cm1haWwvbGludXgtYXJtLWtlcm5lbC8yMDE0LUF1Z3VzdC8yODExNTMuaHRtbAo+Pgo+PiBBbmQg
+VWxmIGFuZCBKYWVob29uIGNsZWFybHkgc2FpZCB0aGlzIHdhcyBhIGJyb2tlbiBjYXJkIGRldGVj
+dCBkZXNpZ24sCj4+IHdoaWNoIHNob3VsZCBiZSBzb2x2ZWQgdmlhIHBvbGxpbmcKPj4KPj4gU29s
+dXRpb246Cj4+Cj4+IEhlbmNlIGJyb2tlbi1jZCBpcyBzZXQgYXMgYSBwcm9wZXJ0eS4gVGhpcyBj
+dXJlcyB0aGUgZXJyb3JzLiBUaGUKPj4gcG93ZXJpbmcgZG93biBvZiB2Y2Npby1zZCBkdXJpbmcg
+cmVib290IGlzIGN1cmVkIGJ5IGFkZGluZwo+PiByZWd1bGF0b3ItYm9vdC1vbi4KPj4KPj4gVGhp
+cyBzb2x1dGlvbnMgaGFzIGJlZW4gZmFpcmx5IHdpZGVseSByZXZpZXdlZCBhbmQgdGVzdGVkLgo+
+Pgo+PiBTaWduZWQtb2ZmLWJ5OiBEYXZpZCBTdW1tZXJzIDxiZWFnbGVib2FyZEBkYXZpZGpvaG5z
+dW1tZXJzLnVrPgo+PiBSZXZpZXdlZCBieTogUm9iaW4gTXVycGh5IDxyb2Jpbi5tdXJwaHlAYXJt
+LmNvbT4KPj4gUmV2aWV3ZWQgYnk6IEpvbmFzIEthcmxtYW4gPGpvbmFzQGt3aWJvby5zZT4KPj4g
+VGVzdCBieTogVGhlU2FpbnQgQCBBcmNoTGludXggQXJtCj4gCj4gcGxlYXNlIGZvbGxvdyBwYXRj
+aCBzdWJtaXNzaW9uIGd1aWRlbGluZXMsIGhlcmUgaXQgd291bGQgYmUKPiBUZXN0ZWQtYnk6IC4u
+LiB3aXRoIGFuIGFjdHVhbCBOYW1lICsgbWFpbCBhZGRyZXNzCj4gCj4gQWxzbyBJIGRpZCB0cnkg
+dG8gZ28gdGhyb3VnaCB0aGUgd2F5IGJpZyBtYWlsIHRocmVhZCBidXQgZGlkbid0Cj4gZmluZCBh
+biBhY3R1YWwgIlJldmlld2VkLWJ5IiBmcm9tIFJvYmluIE11cnBoeSwgc2ltaWxhciB0byB3aGF0
+Cj4gaGUgcG9pbnRlZCBvdXQgaW4gcGF0Y2gyCgpBaCwgSSBkaWRuJ3QgZ2V0IGEgZGlyZWN0IEND
+IG9mIHRoaXMgcGF0Y2ggc28gSSBoYWRuJ3Qgc3BvdHRlZCB0aGF0IC0gCkZXSVcgdGhvdWdoLCBJ
+J20gaGFwcHkgd2l0aCBEb3VnJ3MgcmVhc29uaW5nIGZvciAiYnJva2VuLWNkIiBiZWluZyB0aGUg
+Cm1vc3Qgcm9idXN0IHNvbHV0aW9uIGZvciBub3csIHNvIGZlZWwgZnJlZSB0byBrZWVwCgpSZXZp
+ZXdlZC1ieTogUm9iaW4gTXVycGh5IDxyb2Jpbi5tdXJwaHlAYXJtLmNvbT4KCmZvciB0aGlzIG9u
+ZS4KCkNoZWVycywKUm9iaW4uCgo+IAo+IE90aGVyIHRoYW4gdGhhdCBhbmQgaW5jbHVkaW5nIHRo
+ZSBwYXN0IGRpc2N1c3Npb25zLCB0aGlzIGxvb2tzIGdvb2QuCj4gCj4gCj4gSGVpa28KPiAKPj4g
+LS0tCj4+ICAgYXJjaC9hcm0vYm9vdC9kdHMvcmszMjg4LXRpbmtlci5kdHNpIHwgMyArKy0KPj4g
+ICAxIGZpbGUgY2hhbmdlZCwgMiBpbnNlcnRpb25zKCspLCAxIGRlbGV0aW9uKC0pCj4+Cj4+IGRp
+ZmYgLS1naXQgYS9hcmNoL2FybS9ib290L2R0cy9yazMyODgtdGlua2VyLmR0c2kgYi9hcmNoL2Fy
+bS9ib290L2R0cy9yazMyODgtdGlua2VyLmR0c2kKPj4gaW5kZXggYWExMDdlZTQxYjhiLi5lZjY1
+M2MzMjA5YmMgMTAwNjQ0Cj4+IC0tLSBhL2FyY2gvYXJtL2Jvb3QvZHRzL3JrMzI4OC10aW5rZXIu
+ZHRzaQo+PiArKysgYi9hcmNoL2FybS9ib290L2R0cy9yazMyODgtdGlua2VyLmR0c2kKPj4gQEAg
+LTI1NCw2ICsyNTQsNyBAQAo+PiAgIAkJCX07Cj4+ICAgCj4+ICAgCQkJdmNjaW9fc2Q6IExET19S
+RUc1IHsKPj4gKwkJCQlyZWd1bGF0b3ItYm9vdC1vbjsKPj4gICAJCQkJcmVndWxhdG9yLW1pbi1t
+aWNyb3ZvbHQgPSA8MTgwMDAwMD47Cj4+ICAgCQkJCXJlZ3VsYXRvci1tYXgtbWljcm92b2x0ID0g
+PDMzMDAwMDA+Owo+PiAgIAkJCQlyZWd1bGF0b3ItbmFtZSA9ICJ2Y2Npb19zZCI7Cj4+IEBAIC00
+MzAsNyArNDMxLDcgQEAKPj4gICAJYnVzLXdpZHRoID0gPDQ+Owo+PiAgIAljYXAtbW1jLWhpZ2hz
+cGVlZDsKPj4gICAJY2FwLXNkLWhpZ2hzcGVlZDsKPj4gLQljYXJkLWRldGVjdC1kZWxheSA9IDwy
+MDA+Owo+PiArCWJyb2tlbi1jZDsKPj4gICAJZGlzYWJsZS13cDsJCQkvKiB3cCBub3QgaG9va2Vk
+IHVwICovCj4+ICAgCXBpbmN0cmwtbmFtZXMgPSAiZGVmYXVsdCI7Cj4+ICAgCXBpbmN0cmwtMCA9
+IDwmc2RtbWNfY2xrICZzZG1tY19jbWQgJnNkbW1jX2NkICZzZG1tY19idXM0PjsKPj4KPiAKPiAK
+PiAKPiAKCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCkxp
+bnV4LXJvY2tjaGlwIG1haWxpbmcgbGlzdApMaW51eC1yb2NrY2hpcEBsaXN0cy5pbmZyYWRlYWQu
+b3JnCmh0dHA6Ly9saXN0cy5pbmZyYWRlYWQub3JnL21haWxtYW4vbGlzdGluZm8vbGludXgtcm9j
+a2NoaXAK
