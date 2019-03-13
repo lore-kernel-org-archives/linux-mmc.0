@@ -1,7 +1,7 @@
 From: Sowjanya Komatineni <skomatineni@nvidia.com>
-Subject: [PATCH V3 02/10] mmc: sdhci: allow host to specify maximum tuning loops
-Date: Wed, 13 Mar 2019 14:45:44 -0700
-Message-ID: <1552513552-23423-2-git-send-email-skomatineni@nvidia.com>
+Subject: [PATCH V3 04/10] dt-bindings: mmc: tegra: document Tegra194 compatible string
+Date: Wed, 13 Mar 2019 14:45:46 -0700
+Message-ID: <1552513552-23423-4-git-send-email-skomatineni@nvidia.com>
 References: <1552513552-23423-1-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,61 +12,25 @@ To: adrian.hunter@intel.com, ulf.hansson@linaro.org, robh+dt@kernel.org, mark.ru
 Cc: skomatineni@nvidia.com, thierry.reding@gmail.com, jonathanh@nvidia.com, anrao@nvidia.com, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-As per the Host Controller Standard Specification Version 4.20,
-limitation of tuning iteration count is removed as PLL locking
-time can be longer than UHS-1 tuning due to larger PVT fluctuation
-and it will result in increase of tuning iteration to complete the
-tuning.
+SDHCI controller of Tegra194 is similar to SDHCI controller in Tegra186.
+This patch documents Tegra194 sdhci compatible string.
 
-This patch creates sdhci_host member tuning_loop_count to allow
-hosts to specify maximum tuning iterations and also updates
-execute_tuning to use this specified maximum tuning iteration count.
-
-Default tuning_loop_count is set to same as existing loop count of
-MAX_TUNING_LOOP which is 40 iterations.
-
-Tested-by: Jon Hunter <jonathanh@nvidia.com>
 Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
 ---
- drivers/mmc/host/sdhci.c | 5 +++--
- drivers/mmc/host/sdhci.h | 1 +
- 2 files changed, 4 insertions(+), 2 deletions(-)
+ Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index a8141ff9be03..bbc0e0bb7128 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2369,9 +2369,9 @@ static int __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
- 
- 	/*
- 	 * Issue opcode repeatedly till Execute Tuning is set to 0 or the number
--	 * of loops reaches 40 times.
-+	 * of loops reaches tuning loop count.
- 	 */
--	for (i = 0; i < MAX_TUNING_LOOP; i++) {
-+	for (i = 0; i < host->tuning_loop_count; i++) {
- 		u16 ctrl;
- 
- 		sdhci_send_tuning(host, opcode);
-@@ -3494,6 +3494,7 @@ struct sdhci_host *sdhci_alloc_host(struct device *dev,
- 	host->cqe_err_ier = SDHCI_CQE_INT_ERR_MASK;
- 
- 	host->tuning_delay = -1;
-+	host->tuning_loop_count = MAX_TUNING_LOOP;
- 
- 	host->sdma_boundary = SDHCI_DEFAULT_BOUNDARY_ARG;
- 
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 01002cba1359..57bb3e3dca89 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -596,6 +596,7 @@ struct sdhci_host {
- #define SDHCI_TUNING_MODE_3	2
- 	/* Delay (ms) between tuning commands */
- 	int			tuning_delay;
-+	int			tuning_loop_count;
- 
- 	/* Host SDMA buffer boundary. */
- 	u32			sdma_boundary;
+diff --git a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
+index 2cecdc71d94c..2cf3affa1be7 100644
+--- a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
++++ b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
+@@ -14,6 +14,7 @@ Required properties:
+   - "nvidia,tegra124-sdhci": for Tegra124 and Tegra132
+   - "nvidia,tegra210-sdhci": for Tegra210
+   - "nvidia,tegra186-sdhci": for Tegra186
++  - "nvidia,tegra194-sdhci": for Tegra194
+ - clocks : Must contain one entry, for the module clock.
+   See ../clocks/clock-bindings.txt for details.
+ - resets : Must contain an entry for each entry in reset-names.
 -- 
 2.7.4
