@@ -1,41 +1,112 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH v2 2/3] dt-bindings: mmc: Add a new property
- disable-cqe-dcmd.
-Date: Tue, 12 Mar 2019 14:28:03 -0500
-Message-ID: <20190312192803.GA19594@bogus>
-References: <20190307084329.25416-1-christoph.muellner@theobroma-systems.com>
- <20190307084329.25416-2-christoph.muellner@theobroma-systems.com>
+From: Ritesh Harjani <riteshh@codeaurora.org>
+Subject: Re: [PATCH V1 07/11] mmc: cqhci: add quirk for setting DCMD
+ CMD_TIMING
+Date: Wed, 13 Mar 2019 08:01:05 +0530
+Message-ID: <05a6e500-9dc9-1984-9576-44b3a9fdc595@codeaurora.org>
+References: <1551504025-3541-1-git-send-email-skomatineni@nvidia.com>
+ <1551504025-3541-7-git-send-email-skomatineni@nvidia.com>
+ <a320c841-7e58-4d3e-5df6-61e10520d9d8@intel.com>
+ <a544bc6d-7b23-53e8-16d0-ee0eaf576eb2@codeaurora.org>
+ <BYAPR12MB33984D80A404EF919F3A86A0C24C0@BYAPR12MB3398.namprd12.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20190307084329.25416-2-christoph.muellner@theobroma-systems.com>
+In-Reply-To: <BYAPR12MB33984D80A404EF919F3A86A0C24C0@BYAPR12MB3398.namprd12.prod.outlook.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Christoph Muellner <christoph.muellner@theobroma-systems.com>
-Cc: mark.rutland@arm.com, heiko@sntech.de, shawn.lin@rock-chips.com, ulf.hansson@linaro.org, adrian.hunter@intel.com, Philipp Tomsich <philipp.tomsich@theobroma-systems.com>, Michal Simek <michal.simek@xilinx.com>, Douglas Anderson <dianders@chromium.org>, Viresh Kumar <viresh.kumar@linaro.org>, Enric Balletbo i Serra <enric.balletbo@collabora.com>, Vicente Bergas <vicencb@gmail.com>, Emil Renner Berthing <kernel@esmil.dk>, Randy Li <ayaka@soulik.info>, Tony Xie <tony.xie@rock-chips.com>, Ezequiel Garcia <ezequiel@collabora.com>, Klaus Goger <klaus.goger@theobroma-systems.com>, Lin Huang <hl@rock-chips.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.or
+To: Sowjanya Komatineni <skomatineni@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "robh+dt@kernel.org" <robh+dt@kernel.org>, "mark.rutland@arm.com" <mark.rutland@arm.com>, Asutosh Das <asutoshd@codeaurora.org>
+Cc: "thierry.reding@gmail.com" <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Aniruddha Tvs Rao <anrao@nvidia.com>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Mar 07, 2019 at 09:43:27AM +0100, Christoph Muellner wrote:
-> This patch documents the new property disable-cqe-dcmd
-> for the Arasan eMMC 5.1 driver.
-> 
-> Signed-off-by: Christoph Muellner <christoph.muellner@theobroma-systems.com>
-> Signed-off-by: Philipp Tomsich <philipp.tomsich@theobroma-systems.com>
-> ---
->  Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 4 ++++
->  1 file changed, 4 insertions(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> index 1edbb049cccb..ec699bf98b7c 100644
-> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> @@ -44,6 +44,10 @@ Optional Properties:
->      properly. Test mode can be used to force the controller to function.
->    - xlnx,int-clock-stable-broken: when present, the controller always reports
->      that the internal clock is stable even when it is not.
-> +  - disable-cqe-dcmd: The eMMC 5.1 standard specifies direct commands (DCMDs)
-> +    as part of the command queue engine (CQE). On controllers with a CQHCI,
-> +    such as the Arasan eMMC 5.1 host controller, the driver has to enable DCMDs.
-> +    This is done unless disable-cqe-dcmd is specified.
 
-Should be common either for all controllers or all SDHCI controllers?
+On 3/7/2019 11:46 PM, Sowjanya Komatineni wrote:
+>> On 3/6/2019 6:30 PM, Adrian Hunter wrote:
+>>> On 2/03/19 7:20 AM, Sowjanya Komatineni wrote:
+>>>> This patch adds a quirk for setting CMD_TIMING to 1 in descriptor for
+>>>> DCMD with R1B response type to allow the command to be sent to device
+>>>> during data activity or busy time.
+>>>>
+>>>> Tegra186 CQHCI host has bug where it selects DATA_PRESENT_SELECT to 1
+>>>> by CQHCI controller for DCMDs with R1B response type and since DCMD
+>>>> does not trigger any data transfer, DCMD task complete happens
+>>>> leaving the DATA FSM of host controller in wait state for data.
+>>>>
+>>>> This effects the data transfer task issued after R1B DCMD task and no
+>>>> interrupt is generated for the data transfer task.
+>>>>
+>>>> SW WAR for this issue is to set CMD_TIMING bit to 1 in DCMD task
+>>>> descriptor and as DCMD task descriptor preparation is done by cqhci
+>>>> driver, this patch adds cqequirk to handle this.
+>>>>
+>>>> Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
+>>>> ---
+>>>>    drivers/mmc/host/cqhci.c | 5 ++++-
+>>>>    drivers/mmc/host/cqhci.h | 1 +
+>>>>    2 files changed, 5 insertions(+), 1 deletion(-)
+>>>>
+>>>> diff --git a/drivers/mmc/host/cqhci.c b/drivers/mmc/host/cqhci.c
+>>>> index a8af682a9182..b34c07125f32 100644
+>>>> --- a/drivers/mmc/host/cqhci.c
+>>>> +++ b/drivers/mmc/host/cqhci.c
+>>>> @@ -521,7 +521,10 @@ static void cqhci_prep_dcmd_desc(struct mmc_host *mmc,
+>>>>    	} else {
+>>>>    		if (mrq->cmd->flags & MMC_RSP_R1B) {
+>>>>    			resp_type = 0x3;
+>>>> -			timing = 0x0;
+>>>> +			if (cq_host->quirks & CQHCI_QUIRK_CMD_TIMING_R1B_DCMD)
+>>>> +				timing = 0x1;
+>>>> +			else
+>>>> +				timing = 0x0;
+>>> I was thinking it would be nice if there was a generic way for drivers
+>>> to make changes to descriptors before a task is started.  Currently
+>>> there is
+>>> host->ops->write_l() which would make it possible by checking for
+>>> host->ops->CQHCI_TDBR
+>>> register and, in this case, the DCMD tag.  We would need to export
+>>> get_desc(), perhaps rename it cqhci_get_desc() and put it in cqhci.h
+>>> since it is an inline function.
+>> We take spin_lock_irqsave after the descriptor is prepared and before writing to TDBR.
+>> Not sure but tomorrow this may become a limitation for drivers to make changes to descriptors if they edit descriptors in host->ops->write_l() call.
+>> Though in this case it is not required here.
+>>
+>>> Alternatively we could add host->ops for descriptor preparation.
+>> Both ways sounds good to me.
+>> But maybe adding a host->ops for descriptor preparation is better way to go,
+>> since that will be the right interface exposed to make changes to
+>> descriptors.
+>>
+> DCMD descriptor attributes remain same for any host and also task parameters as QBR need to be enabled with DCMD.
+> So I believe it should be ok if we just add callback to allow hosts to update command parameters of DCMD descriptor only thru cqhci_host_ops.
+
+For now we can add host->ops as update_dcmd_desc and pass the task_desc 
+of DCMD for updating any params which host may want to update.
+
+>
+> Also, don’t see any requirement for host specific Task parameter updates in Task descriptor so not sure if there is any need to provide callback for task descriptor data preparation to hosts.
+> Please confirm.
+
+Sure, for now the requirement has come up only for DCMD desc update. 
+Sure we can add task descriptor ops in the similar way later when required.
+
+Adrian, please confirm if you are fine with both of above?
+
+>
+>>> What do people think?
+>>>
+>>>>    		} else {
+>>>>    			resp_type = 0x2;
+>>>>    			timing = 0x1;
+>>>> diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
+>>>> index 9e68286a07b4..f96d8565cc07 100644
+>>>> --- a/drivers/mmc/host/cqhci.h
+>>>> +++ b/drivers/mmc/host/cqhci.h
+>>>> @@ -170,6 +170,7 @@ struct cqhci_host {
+>>>>    
+>>>>    	u32 quirks;
+>>>>    #define CQHCI_QUIRK_SHORT_TXFR_DESC_SZ	0x1
+>>>> +#define CQHCI_QUIRK_CMD_TIMING_R1B_DCMD	0x2
+>>>>    
+>>>>    	bool enabled;
+>>>>    	bool halted;
+>>>>
