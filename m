@@ -1,112 +1,78 @@
-From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: Re: [PATCH V1 07/11] mmc: cqhci: add quirk for setting DCMD
- CMD_TIMING
-Date: Wed, 13 Mar 2019 08:01:05 +0530
-Message-ID: <05a6e500-9dc9-1984-9576-44b3a9fdc595@codeaurora.org>
-References: <1551504025-3541-1-git-send-email-skomatineni@nvidia.com>
- <1551504025-3541-7-git-send-email-skomatineni@nvidia.com>
- <a320c841-7e58-4d3e-5df6-61e10520d9d8@intel.com>
- <a544bc6d-7b23-53e8-16d0-ee0eaf576eb2@codeaurora.org>
- <BYAPR12MB33984D80A404EF919F3A86A0C24C0@BYAPR12MB3398.namprd12.prod.outlook.com>
+From: "Hunter, Adrian" <adrian.hunter@intel.com>
+Subject: RE: [PATCH v2 2/2] mmc: sdhci-omap: Don't finish_mrq() on a command
+ error during tuning
+Date: Wed, 13 Mar 2019 09:35:36 +0000
+Message-ID: <363DA0ED52042842948283D2FC38E4649C48E550@IRSMSX106.ger.corp.intel.com>
+References: <20190301083824.23918-1-faiz_abbas@ti.com>
+ <20190301083824.23918-3-faiz_abbas@ti.com>
+ <0283e92e-9e01-227d-0987-7801dd88cf78@intel.com>
+ <eb76397b-aa02-f1b8-ef0d-df7569275144@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <BYAPR12MB33984D80A404EF919F3A86A0C24C0@BYAPR12MB3398.namprd12.prod.outlook.com>
+In-Reply-To: <eb76397b-aa02-f1b8-ef0d-df7569275144@ti.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Sowjanya Komatineni <skomatineni@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "robh+dt@kernel.org" <robh+dt@kernel.org>, "mark.rutland@arm.com" <mark.rutland@arm.com>, Asutosh Das <asutoshd@codeaurora.org>
-Cc: "thierry.reding@gmail.com" <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Aniruddha Tvs Rao <anrao@nvidia.com>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
+To: "Rizvi, Mohammad Faiz Abbas" <faiz_abbas@ti.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>
+Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "kishon@ti.com" <kishon@ti.com>
 List-Id: linux-mmc@vger.kernel.org
 
-
-On 3/7/2019 11:46 PM, Sowjanya Komatineni wrote:
->> On 3/6/2019 6:30 PM, Adrian Hunter wrote:
->>> On 2/03/19 7:20 AM, Sowjanya Komatineni wrote:
->>>> This patch adds a quirk for setting CMD_TIMING to 1 in descriptor for
->>>> DCMD with R1B response type to allow the command to be sent to device
->>>> during data activity or busy time.
->>>>
->>>> Tegra186 CQHCI host has bug where it selects DATA_PRESENT_SELECT to 1
->>>> by CQHCI controller for DCMDs with R1B response type and since DCMD
->>>> does not trigger any data transfer, DCMD task complete happens
->>>> leaving the DATA FSM of host controller in wait state for data.
->>>>
->>>> This effects the data transfer task issued after R1B DCMD task and no
->>>> interrupt is generated for the data transfer task.
->>>>
->>>> SW WAR for this issue is to set CMD_TIMING bit to 1 in DCMD task
->>>> descriptor and as DCMD task descriptor preparation is done by cqhci
->>>> driver, this patch adds cqequirk to handle this.
->>>>
->>>> Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
->>>> ---
->>>>    drivers/mmc/host/cqhci.c | 5 ++++-
->>>>    drivers/mmc/host/cqhci.h | 1 +
->>>>    2 files changed, 5 insertions(+), 1 deletion(-)
->>>>
->>>> diff --git a/drivers/mmc/host/cqhci.c b/drivers/mmc/host/cqhci.c
->>>> index a8af682a9182..b34c07125f32 100644
->>>> --- a/drivers/mmc/host/cqhci.c
->>>> +++ b/drivers/mmc/host/cqhci.c
->>>> @@ -521,7 +521,10 @@ static void cqhci_prep_dcmd_desc(struct mmc_host *mmc,
->>>>    	} else {
->>>>    		if (mrq->cmd->flags & MMC_RSP_R1B) {
->>>>    			resp_type = 0x3;
->>>> -			timing = 0x0;
->>>> +			if (cq_host->quirks & CQHCI_QUIRK_CMD_TIMING_R1B_DCMD)
->>>> +				timing = 0x1;
->>>> +			else
->>>> +				timing = 0x0;
->>> I was thinking it would be nice if there was a generic way for drivers
->>> to make changes to descriptors before a task is started.  Currently
->>> there is
->>> host->ops->write_l() which would make it possible by checking for
->>> host->ops->CQHCI_TDBR
->>> register and, in this case, the DCMD tag.  We would need to export
->>> get_desc(), perhaps rename it cqhci_get_desc() and put it in cqhci.h
->>> since it is an inline function.
->> We take spin_lock_irqsave after the descriptor is prepared and before writing to TDBR.
->> Not sure but tomorrow this may become a limitation for drivers to make changes to descriptors if they edit descriptors in host->ops->write_l() call.
->> Though in this case it is not required here.
->>
->>> Alternatively we could add host->ops for descriptor preparation.
->> Both ways sounds good to me.
->> But maybe adding a host->ops for descriptor preparation is better way to go,
->> since that will be the right interface exposed to make changes to
->> descriptors.
->>
-> DCMD descriptor attributes remain same for any host and also task parameters as QBR need to be enabled with DCMD.
-> So I believe it should be ok if we just add callback to allow hosts to update command parameters of DCMD descriptor only thru cqhci_host_ops.
-
-For now we can add host->ops as update_dcmd_desc and pass the task_desc 
-of DCMD for updating any params which host may want to update.
-
->
-> Also, don’t see any requirement for host specific Task parameter updates in Task descriptor so not sure if there is any need to provide callback for task descriptor data preparation to hosts.
-> Please confirm.
-
-Sure, for now the requirement has come up only for DCMD desc update. 
-Sure we can add task descriptor ops in the similar way later when required.
-
-Adrian, please confirm if you are fine with both of above?
-
->
->>> What do people think?
->>>
->>>>    		} else {
->>>>    			resp_type = 0x2;
->>>>    			timing = 0x1;
->>>> diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
->>>> index 9e68286a07b4..f96d8565cc07 100644
->>>> --- a/drivers/mmc/host/cqhci.h
->>>> +++ b/drivers/mmc/host/cqhci.h
->>>> @@ -170,6 +170,7 @@ struct cqhci_host {
->>>>    
->>>>    	u32 quirks;
->>>>    #define CQHCI_QUIRK_SHORT_TXFR_DESC_SZ	0x1
->>>> +#define CQHCI_QUIRK_CMD_TIMING_R1B_DCMD	0x2
->>>>    
->>>>    	bool enabled;
->>>>    	bool halted;
->>>>
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBSaXp2aSwgTW9oYW1tYWQgRmFp
+eiBBYmJhcyBbbWFpbHRvOmZhaXpfYWJiYXNAdGkuY29tXQ0KPiBTZW50OiBUdWVzZGF5LCBNYXJj
+aCAxMiwgMjAxOSA3OjM1IFBNDQo+IFRvOiBIdW50ZXIsIEFkcmlhbiA8YWRyaWFuLmh1bnRlckBp
+bnRlbC5jb20+OyBsaW51eC0NCj4ga2VybmVsQHZnZXIua2VybmVsLm9yZzsgbGludXgtbW1jQHZn
+ZXIua2VybmVsLm9yZzsgbGludXgtDQo+IG9tYXBAdmdlci5rZXJuZWwub3JnDQo+IENjOiB1bGYu
+aGFuc3NvbkBsaW5hcm8ub3JnOyBraXNob25AdGkuY29tDQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0gg
+djIgMi8yXSBtbWM6IHNkaGNpLW9tYXA6IERvbid0IGZpbmlzaF9tcnEoKSBvbiBhDQo+IGNvbW1h
+bmQgZXJyb3IgZHVyaW5nIHR1bmluZw0KPiANCj4gSGkgQWRyaWFuLA0KPiANCj4gT24gMy82LzIw
+MTkgNTozOSBQTSwgQWRyaWFuIEh1bnRlciB3cm90ZToNCj4gPiBPbiAxLzAzLzE5IDEwOjM4IEFN
+LCBGYWl6IEFiYmFzIHdyb3RlOg0KPiA+PiBjb21taXQgNWIwZDYyMTA4YjQ2ICgibW1jOiBzZGhj
+aS1vbWFwOiBBZGQgcGxhdGZvcm0gc3BlY2lmaWMgcmVzZXQNCj4gPj4gY2FsbGJhY2siKSBza2lw
+cyBkYXRhIHJlc2V0cyBkdXJpbmcgdHVuaW5nIG9wZXJhdGlvbi4gQmVjYXVzZSBvZg0KPiA+PiB0
+aGlzLCBhIGRhdGEgZXJyb3Igb3IgZGF0YSBmaW5pc2ggaW50ZXJydXB0IG1pZ2h0IHN0aWxsIGFy
+cml2ZSBhZnRlcg0KPiA+PiBhIGNvbW1hbmQgZXJyb3IgaGFzIGJlZW4gaGFuZGxlZCBhbmQgdGhl
+IG1ycSBlbmRlZC4gVGhpcyBlbmRzIHVwIHdpdGgNCj4gPj4gYSAibW1jMDogR290IGRhdGEgaW50
+ZXJydXB0IDB4MDAwMDAwMDIgZXZlbiB0aG91Z2ggbm8gZGF0YSBvcGVyYXRpb24NCj4gd2FzIGlu
+IHByb2dyZXNzIg0KPiA+PiBlcnJvciBtZXNzYWdlLg0KPiA+Pg0KPiA+PiBGaXggdGhpcyBieSBh
+ZGRpbmcgYSBwbGF0Zm9ybSBzcGVjaWZpYyBjYWxsYmFjayBmb3IgY29tbWFuZCBlcnJvcnMuDQo+
+ID4+IE1hcmsgdGhlIG1ycSBhcyBhIGZhaWx1cmUgYnV0IHdhaXQgZm9yIGEgZGF0YSBpbnRlcnJ1
+cHQgaW5zdGVhZCBvZg0KPiA+PiBjYWxsaW5nIGZpbmlzaF9tcnEoKS4NCj4gPj4NCj4gPj4gRml4
+ZXM6IDViMGQ2MjEwOGI0NiAoIm1tYzogc2RoY2ktb21hcDogQWRkIHBsYXRmb3JtIHNwZWNpZmlj
+IHJlc2V0DQo+ID4+IGNhbGxiYWNrIikNCj4gPj4gU2lnbmVkLW9mZi1ieTogRmFpeiBBYmJhcyA8
+ZmFpel9hYmJhc0B0aS5jb20+DQo+ID4+IC0tLQ0KPiA+PiAgZHJpdmVycy9tbWMvaG9zdC9zZGhj
+aS1vbWFwLmMgfCAyNCArKysrKysrKysrKysrKysrKysrKysrKysNCj4gPj4gIDEgZmlsZSBjaGFu
+Z2VkLCAyNCBpbnNlcnRpb25zKCspDQo+ID4+DQo+ID4+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21t
+Yy9ob3N0L3NkaGNpLW9tYXAuYw0KPiA+PiBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb21hcC5j
+IGluZGV4IGIxYTY2Y2EzODIxYS4uNjdiMzYxYTQwM2JjDQo+ID4+IDEwMDY0NA0KPiA+PiAtLS0g
+YS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9tYXAuYw0KPiA+PiArKysgYi9kcml2ZXJzL21tYy9o
+b3N0L3NkaGNpLW9tYXAuYw0KPiA+PiBAQCAtNzk3LDYgKzc5NywyOSBAQCB2b2lkIHNkaGNpX29t
+YXBfcmVzZXQoc3RydWN0IHNkaGNpX2hvc3QgKmhvc3QsDQo+IHU4IG1hc2spDQo+ID4+ICAJc2Ro
+Y2lfcmVzZXQoaG9zdCwgbWFzayk7DQo+ID4+ICB9DQo+ID4+DQo+ID4+ICt2b2lkIHNkaGNpX29t
+YXBfY21kX2VycihzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdCwgdTMyIGludG1hc2ssIHUzMg0KPiA+
+PiArKmludG1hc2tfcCkgew0KPiA+PiArCXN0cnVjdCBzZGhjaV9wbHRmbV9ob3N0ICpwbHRmbV9o
+b3N0ID0gc2RoY2lfcHJpdihob3N0KTsNCj4gPj4gKwlzdHJ1Y3Qgc2RoY2lfb21hcF9ob3N0ICpv
+bWFwX2hvc3QgPQ0KPiBzZGhjaV9wbHRmbV9wcml2KHBsdGZtX2hvc3QpOw0KPiA+PiArDQo+ID4+
+ICsJaWYgKG9tYXBfaG9zdC0+aXNfdHVuaW5nKSB7DQo+ID4+ICsJCS8qDQo+ID4+ICsJCSAqIFNp
+bmNlIHdlIGFyZSBub3QgcmVzZXR0aW5nIGRhdGEgbGluZXMgZHVyaW5nIHR1bmluZw0KPiA+PiAr
+CQkgKiBvcGVyYXRpb24sIGRhdGEgZXJyb3Igb3IgZGF0YSBjb21wbGV0ZSBpbnRlcnJ1cHRzDQo+
+ID4+ICsJCSAqIG1pZ2h0IHN0aWxsIGFycml2ZS4gTWFyayB0aGlzIHJlcXVlc3QgYXMgYSBmYWls
+dXJlDQo+ID4+ICsJCSAqIGJ1dCBzdGlsbCB3YWl0IGZvciB0aGUgZGF0YSBpbnRlcnJ1cHQNCj4g
+Pj4gKwkJICovDQo+ID4+ICsJCWlmIChpbnRtYXNrICYgU0RIQ0lfSU5UX1RJTUVPVVQpDQo+ID4+
+ICsJCQlob3N0LT5jbWQtPmVycm9yID0gLUVUSU1FRE9VVDsNCj4gPj4gKwkJZWxzZQ0KPiA+PiAr
+CQkJaG9zdC0+Y21kLT5lcnJvciA9IC1FSUxTRVE7DQo+ID4+ICsNCj4gPj4gKwkJc2RoY2lfZmlu
+aXNoX2NvbW1hbmQoaG9zdCk7DQo+ID4+ICsJfSBlbHNlIHsNCj4gPj4gKwkJc2RoY2lfY21kX2Vy
+cihob3N0LCBpbnRtYXNrLCBpbnRtYXNrX3ApOw0KPiA+PiArCX0NCj4gPj4gK30NCj4gPg0KPiA+
+IENvdWxkIHRoaXMgYmUgZG9uZSBieSB0aGUgZXhpc3RpbmcgLT5pcnEoKSBjYWxsYmFjaz8gaS5l
+LiBtYXNrIHRoZQ0KPiA+IGVycm9yIGJpdHMgaW4gaW50bWFzayAoaGF2ZSB0byB3cml0ZSB0aGVt
+IGJhY2sgdG8gU0RIQ0lfSU5UX1NUQVRVUw0KPiA+IGFsc28pIGJ1dCBzZXQNCj4gPiBjbWQtPmVy
+cm9yLg0KPiA+DQo+IA0KPiBJdCBpcyBwb3NzaWJsZSBidXQgSSByZWFsbHkgZG9uJ3Qgd2FudCB0
+aGUgY2FsbGJhY2sgdG8gYmUgdW5uZWNlc3NhcmlseSBjYWxsZWQgZm9yDQo+IGV2ZXJ5IHNpbmds
+ZSBpbnRlcnJ1cHQgdGhhdCBoYXBwZW5zLiBJIHRoaW5rIHdlIHNob3VsZCBvbmx5IHVzZSB0aGUg
+Y2FsbGJhY2sgaW4NCj4gdGhlIGNhc2Ugb2YgYW4gYWN0dWFsIGVycm9yIGludGVycnVwdCA6LSkN
+Cg0KWW91IG1lYW4gZm9yIHBlcmZvcm1hbmNlIHJlYXNvbnM/ICBJIHdvdWxkIGhhdmUgdGhvdWdo
+dCBpdCB3b3VsZCBiZQ0Kb25seSBhIGhhbmRmdWwgb2YgY3ljbGVzIHRvIGNhbGwgaW50byBhIGZ1
+bmN0aW9uLCBmaW5kIG5vdGhpbmcgdG8gZG8sIGFuZCByZXR1cm4uDQpUaGF0IHNob3VsZCBiZSBu
+ZWdsaWdpYmxlIGNvbXBhcmVkIHRvIHRoZSByZXN0IG9mIHRoZSBpbnRlcnJ1cHQgaGFuZGxlci4N
+CklmIHRoYXQgaXMgdGhlIGNvbmNlcm4sIHRoZW4gaXQgbWlnaHQgYmUgd29ydGggbWVhc3VyaW5n
+IGl0Lg0KDQo=
