@@ -1,54 +1,43 @@
-From: <sean.wang@mediatek.com>
-Subject: [PATCH v1 1/3] mmc: sdio: Add helper macro for sdio_driver boilerplate
-Date: Thu, 14 Mar 2019 05:01:58 +0800
-Message-ID: <6cb7e75934bc7ac56a0e7c6cbbc963f98a6730b0.1552510141.git.sean.wang@mediatek.com>
-References: <cover.1552510141.git.sean.wang@mediatek.com>
+From: Sowjanya Komatineni <skomatineni@nvidia.com>
+Subject: [PATCH V3 01/10] mmc: tegra: fix ddr signaling for non-ddr modes
+Date: Wed, 13 Mar 2019 14:45:43 -0700
+Message-ID: <1552513552-23423-1-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <cover.1552510141.git.sean.wang@mediatek.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: marcel@holtmann.org, johan.hedberg@gmail.com, ulf.hansson@linaro.org
-Cc: linux-bluetooth@vger.kernel.org, linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Sean Wang <sean.wang@mediatek.com>
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, riteshh@codeaurora.org
+Cc: skomatineni@nvidia.com, thierry.reding@gmail.com, jonathanh@nvidia.com, anrao@nvidia.com, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Sean Wang <sean.wang@mediatek.com>
+ddr_signaling is set to true for DDR50 and DDR52 modes but is
+not set back to false for other modes. This programs incorrect
+host clock when mode change happens from DDR52/DDR50 to other
+SDR or HS modes like incase of mmc_retune where it switches
+from HS400 to HS DDR and then from HS DDR to HS mode and then
+to HS200.
 
-This patch introduces the module_sdio_driver macro which is a convenience
-macro for SDIO driver modules similar to module_usb_driver. It is intended
-to be used by drivers which init/exit section does nothing but register/
-unregister the SDIO driver. By using this macro it is possible to eliminate
-a few lines of boilerplate code per SDIO driver.
+This patch fixes the ddr_signaling to set properly for non DDR
+modes.
 
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Suggested-by: Marcel Holtmann <marcel@holtmann.org>
-Signed-off-by: Sean Wang <sean.wang@mediatek.com>
+Tested-by: Jon Hunter <jonathanh@nvidia.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
 ---
- include/linux/mmc/sdio_func.h | 12 ++++++++++++
- 1 file changed, 12 insertions(+)
+ drivers/mmc/host/sdhci-tegra.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/include/linux/mmc/sdio_func.h b/include/linux/mmc/sdio_func.h
-index 97ca105347a6..5685805533b5 100644
---- a/include/linux/mmc/sdio_func.h
-+++ b/include/linux/mmc/sdio_func.h
-@@ -111,6 +111,18 @@ struct sdio_driver {
- extern int sdio_register_driver(struct sdio_driver *);
- extern void sdio_unregister_driver(struct sdio_driver *);
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index 32e62904c0d3..46086dd43bfb 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -779,6 +779,7 @@ static void tegra_sdhci_set_uhs_signaling(struct sdhci_host *host,
+ 	bool set_dqs_trim = false;
+ 	bool do_hs400_dll_cal = false;
  
-+/**
-+ * module_sdio_driver() - Helper macro for registering a SDIO driver
-+ * @__sdio_driver: sdio_driver struct
-+ *
-+ * Helper macro for SDIO drivers which do not do anything special in module
-+ * init/exit. This eliminates a lot of boilerplate. Each module may only
-+ * use this macro once, and calling it replaces module_init() and module_exit()
-+ */
-+#define module_sdio_driver(__sdio_driver) \
-+	module_driver(__sdio_driver, sdio_register_driver, \
-+		      sdio_unregister_driver)
-+
- /*
-  * SDIO I/O operations
-  */
++	tegra_host->ddr_signaling = false;
+ 	switch (timing) {
+ 	case MMC_TIMING_UHS_SDR50:
+ 	case MMC_TIMING_UHS_SDR104:
 -- 
-2.18.0
+2.7.4
