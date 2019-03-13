@@ -1,85 +1,91 @@
-From: David Summers <beagleboard@davidjohnsummers.uk>
+From: Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
 Subject: Re: [PATCH v3 1/3] arm: dts: rk3288-tinker.dtsi: Fix SD card detection
-Date: Tue, 12 Mar 2019 20:34:00 +0000
-Message-ID: <4a1ad220-103d-543e-56d1-3c6d6ad906ec@davidjohnsummers.uk>
+Date: Wed, 13 Mar 2019 11:40:45 +0100
+Message-ID: <3123627.puci4abFsC@diego>
 References: <20190217121513.22965-1-beagleboard@davidjohnsummers.uk>
  <20190309153923.22806-1-beagleboard@davidjohnsummers.uk>
- <50094675.5IylMcgSg6@phil>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <50094675.5IylMcgSg6@phil>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Heiko Stuebner <heiko@sntech.de>, Jonas Karlman <jonas@kwiboo.se>
-Cc: devicetree@vger.kernel.org, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, jh80.chung@samsung.com, linux-rockchip@lists.infradead.org, robh+dt@kernel.org, frowand.list@gmail.com, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <20190309153923.22806-1-beagleboard-8lkWs+DogrrqRUWtDFdff/XRex20P6io@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: David Summers <beagleboard-8lkWs+DogrrqRUWtDFdff/XRex20P6io@public.gmane.org>
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, frowand.list-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-T24gMTIvMDMvMjAxOSAxNDoyMiwgSGVpa28gU3R1ZWJuZXIgd3JvdGU6Cj4gSGkgSm9uYXMsCj4K
-PiBBbSBTYW1zdGFnLCA5LiBNw6RyeiAyMDE5LCAxNjozOToyMSBDRVQgc2NocmllYiBEYXZpZCBT
-dW1tZXJzOgo+PiBUaGUgUHJvYmxlbToKPj4KPj4gT24gQVNVUyBUaW5rZXIgQm9hcmQgUywgd2hl
-biBib290aW5nIGZyb20gdGhlIGVNTUMsIGFuZCB0aGVyZSBpcyBjYXJkCj4+IGluIHRoZSBzZCBz
-bG90LCB0aGVyZSBhcmUgY29uc3RhbnQgZXJyb3JzLgo+Pgo+PiBBbHNvIHdoZW4gd2FybSByZWJv
-b3QsIHVib290IGNhbiBub3QgYWNjZXNzIHRoZSBzZCBzbG90Cj4+Cj4+IENhdXNlOgo+Pgo+PiBJ
-ZGVudGlmaWVkIGJ5IFJvYmluIE11cnBoeSBAIEFSTS4gVGhlIENhcmQgRGV0ZWN0IG9uIHJrMzI4
-OAo+PiBkZXZpY2VzIGlzIHB1bGxlZCB1cCBieSB2Y2Npby1zZDsgc28gd2hlbiB0aGUgcmVndWxh
-dG9yIHBvd2VycyB0aGlzCj4+IG9mZiwgY2FyZCBkZXRlY3QgZ2l2ZXMgc3B1cmlvdXMgZXJyb3Jz
-LiBBIHNlY29uZCBwcm9ibGVtLCBpcyBkdXJpbmcKPj4gcG93ZXIgZG93biwgdmNjaW8tc2QgYXBw
-cmVhcnMgdG8gYmUgcG93ZXJlZCBkb3duLiBUaGlzIGNhdXNlcyBhCj4+IHByb2JsZW0gd2hlbiB3
-YXJtIHJlYm9vdGluZyBmcm9tIHRoZSBzZCBjYXJkLiBUaGlzIHdhcyBpZGVudGlmaWVkIGJ5Cj4+
-IEpvbmFzIEthcmxtYW4uCj4+Cj4+IEhpc3Rvcnk6Cj4+Cj4+IEEgY29tbW9uIGZhdWx0IG9uIHRo
-ZXNlIHJrMzI4OCBib2FyZCwgd2hpY2ggaW1wbGltZW50IHRoZSByZWZlcmVuY2UKPj4gZGVzaWdu
-Lgo+Pgo+PiBXaGVuIHRoaXMgYXJvc2UgYmVmb3JlOgo+Pgo+PiBodHRwOi8vbGlzdHMuaW5mcmFk
-ZWFkLm9yZy9waXBlcm1haWwvbGludXgtYXJtLWtlcm5lbC8yMDE0LUF1Z3VzdC8yODExNTMuaHRt
-bAo+Pgo+PiBBbmQgVWxmIGFuZCBKYWVob29uIGNsZWFybHkgc2FpZCB0aGlzIHdhcyBhIGJyb2tl
-biBjYXJkIGRldGVjdCBkZXNpZ24sCj4+IHdoaWNoIHNob3VsZCBiZSBzb2x2ZWQgdmlhIHBvbGxp
-bmcKPj4KPj4gU29sdXRpb246Cj4+Cj4+IEhlbmNlIGJyb2tlbi1jZCBpcyBzZXQgYXMgYSBwcm9w
-ZXJ0eS4gVGhpcyBjdXJlcyB0aGUgZXJyb3JzLiBUaGUKPj4gcG93ZXJpbmcgZG93biBvZiB2Y2Np
-by1zZCBkdXJpbmcgcmVib290IGlzIGN1cmVkIGJ5IGFkZGluZwo+PiByZWd1bGF0b3ItYm9vdC1v
-bi4KPj4KPj4gVGhpcyBzb2x1dGlvbnMgaGFzIGJlZW4gZmFpcmx5IHdpZGVseSByZXZpZXdlZCBh
-bmQgdGVzdGVkLgo+Pgo+PiBTaWduZWQtb2ZmLWJ5OiBEYXZpZCBTdW1tZXJzIDxiZWFnbGVib2Fy
-ZEBkYXZpZGpvaG5zdW1tZXJzLnVrPgo+PiBSZXZpZXdlZCBieTogUm9iaW4gTXVycGh5IDxyb2Jp
-bi5tdXJwaHlAYXJtLmNvbT4KPj4gUmV2aWV3ZWQgYnk6IEpvbmFzIEthcmxtYW4gPGpvbmFzQGt3
-aWJvby5zZT4KPiBpbiB2MiwgeW91IGdhdmUgYQo+IFRlc3RlZC1ieTogSm9uYXMgS2FybG1hbiA8
-am9uYXNAa3dpYm9vLnNlPgo+IGl0IHNlZW1zLCB3aGljaCBzb21laG93IHRyYW5zZm9ybWVkIGlu
-dG8gYSByZXZpZXdlZC1ieSBpbiB2My4KPgo+IFYzIGRpZCBjaGFuZ2UgYSBiaXQgaW4gaXRzIGFw
-cHJvYWNoIC0gZm9yIHRoZSBiZXR0ZXIsIGJ1dCBkbyB5b3UgYXBwcm92ZQo+IG9mIGFkZGluZyB0
-aGF0IFJldmlld2VkLWJ5IGFib3ZlIChhbmQgbWF5YmUgYWxzbyBwcm92aWRpbmcgYSBUZXN0ZWQt
-YnkKPiBmb3IgdGhlIG5ldyBhcHByb2FjaCk/Cj4KPiBUaGFua3MKPiBIZWlrbwo+Cj4KSGkgYWxs
-LAoKWWVzIGFwb2xvZ2llcyBmb3IgdGhlc2Ugc2lnbmVkLW9mZiBsaW5lcyBldGMgd3JvbmcuIEl0
-cyBzdGlsbCBhIGxlYXJuaW5nIApleHBlcmltZW50IGZvciBtZSEKCkJvdGggUm9iaW4gYW5kIEpv
-bmFzIGFkZGVkIGEgbG90IHRvIFBhdGNoLCBhcyBleHBsYWluZWQgaW4gdGhlIHdyaXRlIHVwLiAK
-Um9iaW4gY2FtZSB1cCB3aXRoIHRoZSBjYXVzZSBvZiB0aGUgZmF1bHQsIGFuZCBKb25hcyBub3Rp
-Y2VkIGEgc2Vjb25kIApmYXVsdC4gU28gdGhlIHF1ZXN0aW9uIGlzIHRvIGdpdmUgdGhlc2UgdHdv
-IHRoZWlyIGR1ZS4gSSB0aGluayB3aGF0IHRoZXkgCmJvdGggYWRkZWQgd2FzIGltcG9ydGFudC4K
-ClRoYW5rcyBSb2JpbiBmb3IgdGhlIG9mZmljaWFsICJSZXZpZXdlZC1ieSIuCgpKb25hcyB0ZXN0
-ZWQgdGhlIHNlY29uZCB2ZXJzaW9uLCB3aGljaCBrZXB0IHBvd2VyIG9uIHZjY2lvLXNkIGFsbCB0
-aGUgCnRpbWUsIHdoZXJlYXMgdjEgYW5kIHYzIGN1cmVkIHRoZSBwcm9ibGVtIHdpdGggYnJva2Vu
-LWNkLiBTbyBhbHRob3VnaCAKYm90aCBmaXhlZCB0aGUgcHJvYmxlbSwgdGhleSB3YXkgcGVyZm9y
-bWVkIGlzIGRpZmZlcmVudC4gU28gZG9uJ3QgdGhpbmsgCkkgY2FuIHNheSBKb25hcyBUZXN0ZWQt
-YnkgdjMuCgpBcyBmb3IgdGhlIHRlc3RlZCBieSAiVGhlU2FpbnQgQCBBcmNoTGludXggQXJtIiwg
-aGUgYWN0dWFsbHkgdGVzdGVkIGp1c3QgCmFib3ZlIGV2ZXJ5IHNpbmdsZSB2ZXJzaW9uIG9mIHRo
-ZSBwYXRjaCwgYW5kIGEgd2hvbGUgbG90IG1vcmUgYmVmb3JlIGl0IAp3YXMgc2VudCBpbiAtIGhl
-IGlzIG91ciBBU1VTIFRpbmtlciBCb2FyZCB1c2VyIG9uIGFyY2guIEhlIGRvZXNuJ3QgCnJlYWxs
-eSB3YW50IGhpcyBlbWFpbCBpbiB0aGUgb3BlbiwgYnV0IGlmIHB1c2ggY29tZXMgdG8gc2hvdmUg
-aGUnbGwgCmFsbG93IGl0LiBRdWVzdGlvbiBpcyBkbyB5b3UgbmVlZCB0aGlzIGZvciB0aGUgUGF0
-Y2ggdG8gcGFzcz8KCkhlaWtvLCBJJ20gaGFwcHkgdG8gY2hhbmdlIHRoZSBzaWduIG9mZiBldGMs
-IGFuZCByZXNlbnQgdGhlIHBhdGNoIChhcyAKdjQpLiBCdXQgd291bGQgYmUgdGhlIHNhbWUgcGF0
-Y2guIFRoaW5rIHRoZSBxdWVzdGlvbiBpcyB3aGF0IGlzIGJlc3QgZm9yIAp5b3UuIERvbid0IHdh
-bnQgdG8gc2VuZCB1bm5lZWRlZCBlbWFpbCAuLi4gYW55d2F5IGxldCBtZSBrbm93IChwcml2YXRl
-IAplbWFpbD8pIGFuZCBJJ2xsIGRvIHdoYXRldmVyIGlzIGJlc3QgZm9yIHlvdS4KClJlZ2FyZHMs
-CgpEYXZpZC4KClAuUy4gRXZlbnR1YWxseSBJJ2xsIGdldCBiZXR0ZXIgYXQgdGhlc2UgcGF0Y2hl
-cyAsIGFsYXMgdGhlIGRheSBqb2IgCmtlZXBzIG1lIHRvbyBidXN5IC0gYW5kIEkgZm9yZ2V0IHRo
-ZSBydWxlcyA6KAoKCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fCmxpbnV4LWFybS1rZXJuZWwgbWFpbGluZyBsaXN0CmxpbnV4LWFybS1rZXJuZWxAbGlzdHMu
-aW5mcmFkZWFkLm9yZwpodHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9tYWlsbWFuL2xpc3RpbmZv
-L2xpbnV4LWFybS1rZXJuZWwK
+Am Samstag, 9. M=E4rz 2019, 16:39:21 CET schrieb David Summers:
+> The Problem:
+> =
+
+> On ASUS Tinker Board S, when booting from the eMMC, and there is card
+> in the sd slot, there are constant errors.
+> =
+
+> Also when warm reboot, uboot can not access the sd slot
+> =
+
+> Cause:
+> =
+
+> Identified by Robin Murphy @ ARM. The Card Detect on rk3288
+> devices is pulled up by vccio-sd; so when the regulator powers this
+> off, card detect gives spurious errors. A second problem, is during
+> power down, vccio-sd apprears to be powered down. This causes a
+> problem when warm rebooting from the sd card. This was identified by
+> Jonas Karlman.
+> =
+
+> History:
+> =
+
+> A common fault on these rk3288 board, which impliment the reference
+> design.
+> =
+
+> When this arose before:
+> =
+
+> http://lists.infradead.org/pipermail/linux-arm-kernel/2014-August/281153.=
+htm
+> l
+> =
+
+> And Ulf and Jaehoon clearly said this was a broken card detect design,
+> which should be solved via polling
+> =
+
+> Solution:
+> =
+
+> Hence broken-cd is set as a property. This cures the errors. The
+> powering down of vccio-sd during reboot is cured by adding
+> regulator-boot-on.
+> =
+
+> This solutions has been fairly widely reviewed and tested.
+> =
+
+> Signed-off-by: David Summers <beagleboard-8lkWs+DogrrqRUWtDFdff/XRex20P6io@public.gmane.org>
+> Reviewed by: Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>
+> Reviewed by: Jonas Karlman <jonas-uIzNG4q0ceqzQB+pC5nmwQ@public.gmane.org>
+> Test by: TheSaint @ ArchLinux Arm
+
+applied as fix for 5.1 with the following modifications:
+- new subject: "ARM: dts: rockchip: Fix SD card detection on rk3288-tinker"
+  to match the subsystem
+- adapted Reviewed and Tested tags as collected from involved parties
+- added Fixes and Cc-stable tags (pointing to the dtsi-split only to ease
+  load of stable maintainers, as hopefully most people will use somewhat
+  recent kernels on sbcs]
+
+
+Heiko
