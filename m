@@ -1,40 +1,61 @@
-From: Sowjanya Komatineni <skomatineni@nvidia.com>
-Subject: [PATCH V3 05/10] arm64: tegra: fix default tap and trim values
-Date: Wed, 13 Mar 2019 14:45:47 -0700
-Message-ID: <1552513552-23423-5-git-send-email-skomatineni@nvidia.com>
+From: Ritesh Harjani <riteshh@codeaurora.org>
+Subject: Re: [PATCH V3 06/10] mmc: cqhci: allow hosts to update dcmd cmd desc
+Date: Thu, 14 Mar 2019 11:02:28 +0530
+Message-ID: <8a90c2e5-fd0a-9ea3-59a5-c237c0003a3b@codeaurora.org>
 References: <1552513552-23423-1-git-send-email-skomatineni@nvidia.com>
+ <1552513552-23423-6-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1552513552-23423-1-git-send-email-skomatineni@nvidia.com>
+In-Reply-To: <1552513552-23423-6-git-send-email-skomatineni@nvidia.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, riteshh@codeaurora.org
-Cc: skomatineni@nvidia.com, thierry.reding@gmail.com, jonathanh@nvidia.com, anrao@nvidia.com, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
+To: Sowjanya Komatineni <skomatineni@nvidia.com>, adrian.hunter@intel.com, ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com
+Cc: thierry.reding@gmail.com, jonathanh@nvidia.com, anrao@nvidia.com, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Default tap and trim values are incorrect for Tegra186 SDMMC4.
-This patch fixes it.
 
-Tested-by: Jon Hunter <jonathanh@nvidia.com>
-Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
----
- arch/arm64/boot/dts/nvidia/tegra186.dtsi | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+On 3/14/2019 3:15 AM, Sowjanya Komatineni wrote:
+> This patch adds update_dcmd_desc interface to cqhci_host_ops to
+> allow hosts to update any of the DCMD task descriptor attributes
+> and parameters.
+>
+> Tested-by: Jon Hunter <jonathanh@nvidia.com>
+> Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
 
-diff --git a/arch/arm64/boot/dts/nvidia/tegra186.dtsi b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
-index 97aeb946ed5e..472f55fe9488 100644
---- a/arch/arm64/boot/dts/nvidia/tegra186.dtsi
-+++ b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
-@@ -317,8 +317,8 @@
- 		nvidia,pad-autocal-pull-down-offset-1v8-timeout = <0x0a>;
- 		nvidia,pad-autocal-pull-up-offset-3v3-timeout = <0x0a>;
- 		nvidia,pad-autocal-pull-down-offset-3v3-timeout = <0x0a>;
--		nvidia,default-tap = <0x5>;
--		nvidia,default-trim = <0x9>;
-+		nvidia,default-tap = <0x9>;
-+		nvidia,default-trim = <0x5>;
- 		nvidia,dqs-trim = <63>;
- 		mmc-hs400-1_8v;
- 		status = "disabled";
--- 
-2.7.4
+Thanks,
+
+Reviewed-by: Ritesh Harjani <riteshh@codeaurora.org>
+
+> ---
+>   drivers/mmc/host/cqhci.c | 2 ++
+>   drivers/mmc/host/cqhci.h | 2 ++
+>   2 files changed, 4 insertions(+)
+>
+> diff --git a/drivers/mmc/host/cqhci.c b/drivers/mmc/host/cqhci.c
+> index a8af682a9182..d59cb0a51964 100644
+> --- a/drivers/mmc/host/cqhci.c
+> +++ b/drivers/mmc/host/cqhci.c
+> @@ -537,6 +537,8 @@ static void cqhci_prep_dcmd_desc(struct mmc_host *mmc,
+>   		 CQHCI_ACT(0x5) |
+>   		 CQHCI_CMD_INDEX(mrq->cmd->opcode) |
+>   		 CQHCI_CMD_TIMING(timing) | CQHCI_RESP_TYPE(resp_type));
+> +	if (cq_host->ops->update_dcmd_desc)
+> +		cq_host->ops->update_dcmd_desc(mmc, mrq, &data);
+>   	*task_desc |= data;
+>   	desc = (u8 *)task_desc;
+>   	pr_debug("%s: cqhci: dcmd: cmd: %d timing: %d resp: %d\n",
+> diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
+> index 9e68286a07b4..8c8ec6f01c45 100644
+> --- a/drivers/mmc/host/cqhci.h
+> +++ b/drivers/mmc/host/cqhci.h
+> @@ -210,6 +210,8 @@ struct cqhci_host_ops {
+>   	u32 (*read_l)(struct cqhci_host *host, int reg);
+>   	void (*enable)(struct mmc_host *mmc);
+>   	void (*disable)(struct mmc_host *mmc, bool recovery);
+> +	void (*update_dcmd_desc)(struct mmc_host *mmc, struct mmc_request *mrq,
+> +				 u64 *data);
+>   };
+>   
+>   static inline void cqhci_writel(struct cqhci_host *host, u32 val, int reg)
