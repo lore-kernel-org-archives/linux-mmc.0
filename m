@@ -1,94 +1,88 @@
-From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: Re: [PATCH V3 07/10] mmc: tegra: add Tegra186 WAR for CQE
-Date: Thu, 14 Mar 2019 11:04:59 +0530
-Message-ID: <55701d04-1e55-e0a0-ecd7-d31eaec5240d@codeaurora.org>
-References: <1552513552-23423-1-git-send-email-skomatineni@nvidia.com>
- <1552513552-23423-7-git-send-email-skomatineni@nvidia.com>
+From: Grygorii Strashko <grygorii.strashko@ti.com>
+Subject: Re: [PATCH v2 1/8] mmc: sdhci: Get rid of finish_tasklet
+Date: Thu, 14 Mar 2019 13:15:34 +0200
+Message-ID: <2a74ed21-2e6f-1ba3-3d49-6826a5ab3e66@ti.com>
+References: <20190215192033.24203-1-faiz_abbas@ti.com>
+ <20190215192033.24203-2-faiz_abbas@ti.com>
+ <abcc1506-cd38-5ff4-aaeb-57e9a9622e90@intel.com>
+ <8d72ff93-e07f-52b9-da85-acd54f046694@ti.com>
+ <63b6631d-86e7-b8ef-ffaf-40e7d4e96cfb@intel.com>
+ <842caafd-1547-1ea6-faf0-27a85a912622@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1552513552-23423-7-git-send-email-skomatineni@nvidia.com>
+In-Reply-To: <842caafd-1547-1ea6-faf0-27a85a912622@ti.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Sowjanya Komatineni <skomatineni@nvidia.com>, adrian.hunter@intel.com, ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com
-Cc: thierry.reding@gmail.com, jonathanh@nvidia.com, anrao@nvidia.com, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
+To: "Rizvi, Mohammad Faiz Abbas" <faiz_abbas@ti.com>, Adrian Hunter <adrian.hunter@intel.com>, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Cc: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, kishon@ti.com, zhang.chunyan@linaro.org
 List-Id: linux-mmc@vger.kernel.org
 
 
-On 3/14/2019 3:15 AM, Sowjanya Komatineni wrote:
-> Tegra186 CQHCI host has a known bug where CQHCI controller selects
-> DATA_PRESENT_SELECT bit to 1 for DCMDs with R1B response type and
-> since DCMD does not trigger any data transfer, DCMD task complete
-> happens leaving the DATA FSM of host controller in wait state for
-> the data.
->
-> This effects the data transfer tasks issued after the DCMDs with
-> R1b response type resulting in timeout.
->
-> SW WAR is to set CMD_TIMING to 1 in DCMD task descriptor. This bug
-> and SW WAR is applicable only for Tegra186 and not for Tegra194.
->
-> This patch implements this WAR thru NVQUIRK_CQHCI_DCMD_R1B_CMD_TIMING
-> for Tegra186 and also implements update_dcmd_desc of cqhci_host_ops
-> interface to set CMD_TIMING bit depending on the NVQUIRK.
->
-> Tested-by: Jon Hunter <jonathanh@nvidia.com>
-> Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
 
-Thanks,
+On 12.03.19 19:30, Rizvi, Mohammad Faiz Abbas wrote:
+> Hi Adrian,
+> 
+> On 3/8/2019 7:06 PM, Adrian Hunter wrote:
+>> On 6/03/19 12:00 PM, Faiz Abbas wrote:
+>>> Adrian,
+>>>
+>>> On 25/02/19 1:47 PM, Adrian Hunter wrote:
+>>>> On 15/02/19 9:20 PM, Faiz Abbas wrote:
+>>>>> sdhci.c has two bottom halves implemented. A threaded_irq for handling
+>>>>> card insert/remove operations and a tasklet for finishing mmc requests.
+>>>>> With the addition of external dma support, dmaengine APIs need to
+>>>>> terminate in non-atomic context before unmapping the dma buffers.
+>>>>>
+>>>>> To facilitate this, remove the finish_tasklet and move the call of
+>>>>> sdhci_request_done() to the threaded_irq() callback.
+>>>>
+>>>> The irq thread has a higher latency than the tasklet.  The performance drop
+>>>> is measurable on the system I tried:
+>>>>
+>>>> Before:
+>>>>
+>>>> # dd if=/dev/mmcblk1 of=/dev/null bs=1G count=1 &
+>>>> 1+0 records in
+>>>> 1+0 records out
+>>>> 1073741824 bytes (1.1 GB) copied, 4.44502 s, 242 MB/s
+>>>>
+>>>> After:
+>>>>
+>>>> # dd if=/dev/mmcblk1 of=/dev/null bs=1G count=1 &
+>>>> 1+0 records in
+>>>> 1+0 records out
+>>>> 1073741824 bytes (1.1 GB) copied, 4.50898 s, 238 MB/s
+>>>>
+>>>> So we only want to resort to the thread for the error case.
+>>>>
+>>>
+>>> Sorry for the late response here, but this is about 1.6% decrease. I
+>>> tried out the same commands on a dra7xx board here (with about 5
+>>> consecutive dd of 1GB) and the average decrease was 0.3%. I believe you
+>>> will also find a lesser percentage change if you average over multiple
+>>> dd commands.
+>>>
+>>> Is this really so significant that we have to maintain two different
+>>> bottom halves and keep having difficulty with adding APIs that can sleep?
+>>
+>> It is a performance drop that can be avoided, so it might as well be.
+>> Splitting the success path from the failure path is common for I/O drivers
+>> for similar reasons as here: the success path can be optimized whereas the
+>> failure path potentially needs to sleep.
+> 
+> Understood. You wanna keep the success path as fast as possible.
 
-Reviewed-by: Ritesh Harjani <riteshh@codeaurora.org>
-> ---
->   drivers/mmc/host/sdhci-tegra.c | 17 ++++++++++++++++-
->   1 file changed, 16 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index f1aa0591112a..2f08b6e480df 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -106,6 +106,7 @@
->   #define NVQUIRK_HAS_PADCALIB				BIT(6)
->   #define NVQUIRK_NEEDS_PAD_CONTROL			BIT(7)
->   #define NVQUIRK_DIS_CARD_CLK_CONFIG_TAP			BIT(8)
-> +#define NVQUIRK_CQHCI_DCMD_R1B_CMD_TIMING		BIT(9)
->   
->   /* SDMMC CQE Base Address for Tegra Host Ver 4.1 and Higher */
->   #define SDHCI_TEGRA_CQE_BASE_ADDR			0xF000
-> @@ -1123,6 +1124,18 @@ static void tegra_sdhci_voltage_switch(struct sdhci_host *host)
->   		tegra_host->pad_calib_required = true;
->   }
->   
-> +static void sdhci_tegra_update_dcmd_desc(struct mmc_host *mmc,
-> +					 struct mmc_request *mrq, u64 *data)
-> +{
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(mmc_priv(mmc));
-> +	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
-> +	const struct sdhci_tegra_soc_data *soc_data = tegra_host->soc_data;
-> +
-> +	if (soc_data->nvquirks & NVQUIRK_CQHCI_DCMD_R1B_CMD_TIMING &&
-> +	    mrq->cmd->flags & MMC_RSP_R1B)
-> +		*data |= CQHCI_CMD_TIMING(1);
-> +}
-> +
->   static void sdhci_tegra_cqe_enable(struct mmc_host *mmc)
->   {
->   	struct cqhci_host *cq_host = mmc->cqe_private;
-> @@ -1164,6 +1177,7 @@ static const struct cqhci_host_ops sdhci_tegra_cqhci_ops = {
->   	.enable	= sdhci_tegra_cqe_enable,
->   	.disable = sdhci_cqe_disable,
->   	.dumpregs = sdhci_tegra_dumpregs,
-> +	.update_dcmd_desc = sdhci_tegra_update_dcmd_desc,
->   };
->   
->   static const struct sdhci_ops tegra_sdhci_ops = {
-> @@ -1345,7 +1359,8 @@ static const struct sdhci_tegra_soc_data soc_data_tegra186 = {
->   		    NVQUIRK_HAS_PADCALIB |
->   		    NVQUIRK_DIS_CARD_CLK_CONFIG_TAP |
->   		    NVQUIRK_ENABLE_SDR50 |
-> -		    NVQUIRK_ENABLE_SDR104,
-> +		    NVQUIRK_ENABLE_SDR104 |
-> +		    NVQUIRK_CQHCI_DCMD_R1B_CMD_TIMING,
->   	.min_tap_delay = 84,
->   	.max_tap_delay = 136,
->   };
+Sry, I've not completely followed this series, but I'd like to add 5c
+
+It's good thing to get rid of tasklets hence RT Linux kernel is actively moving towards to LKML
+and there everything handled in threads (even networking trying to get rid of softirqs).
+
+Performance is pretty relative thing here - just try to run network traffic in parallel, and
+there are no control over it comparing to threads. Now way to assign priority or pin to CPU.
+
+
+-- 
+Best regards,
+grygorii
