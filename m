@@ -1,127 +1,115 @@
-From: Tim Harvey <tharvey@gateworks.com>
+From: Marek Vasut <marex-ynQEQJNshbs@public.gmane.org>
 Subject: Re: [PATCH v2 0/4] Patches to allow consistent mmc / mmcblk numbering
  w/ device tree
-Date: Fri, 15 Mar 2019 14:52:10 -0700
-Message-ID: <CAJ+vNU1PxK-B63Dc3AgzYb9POyxxoF-xPOWBEpxJ+3eVNK8xqw@mail.gmail.com>
-References: <1461951139-6109-1-git-send-email-dianders@chromium.org> <yw1x5zsx5wc7.fsf@mansr.com>
+Date: Sat, 16 Mar 2019 00:00:08 +0100
+Message-ID: <d5310138-7fdd-973d-5210-3fc91c4686ee@denx.de>
+References: <1461951139-6109-1-git-send-email-dianders@chromium.org>
+ <yw1x5zsx5wc7.fsf@mansr.com>
+ <CAJ+vNU1PxK-B63Dc3AgzYb9POyxxoF-xPOWBEpxJ+3eVNK8xqw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <yw1x5zsx5wc7.fsf@mansr.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: =?UTF-8?B?TcOlbnMgUnVsbGfDpXJk?= <mans@mansr.com>, Marek Vasut <marex@denx.de>
-Cc: Douglas Anderson <dianders@chromium.org>, Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, shawn.lin@rock-chips.com, Adrian Hunter <adrian.hunter@intel.com>, stefan@agner.ch, Linux MMC List <linux-mmc@vger.kernel.org>, Brian Norris <computersforpeace@gmail.com>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, Heiko Stuebner <heiko@sntech.de>, Jisheng Zhang <jszhang@marvell.com>, linux-rockchip@lists.infradead.org, devicetree-spec@vger.kernel.org, Mark Rutland <mark.rutland@arm.com>, open list <linux-kernel@vger.kernel.org>, vbyravarasu@nvidia.com, Lars-Peter Clausen <lars@metafoo.de>, Russell King - ARM Linux <linux@arm.linux.org.uk>, jonathanh@nvidia.com, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, Pawel
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <CAJ+vNU1PxK-B63Dc3AgzYb9POyxxoF-xPOWBEpxJ+3eVNK8xqw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Tim Harvey <tharvey-UMMOYl/HMS+akBO8gow8eQ@public.gmane.org>, =?UTF-8?B?TcOlbnMgUnVsbGfDpXJk?= <mans-2StjZFpD7GcAvxtiuMwx3w@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, devicetree-spec-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, stefan-XLVq0VzYD2Y@public.gmane.org, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, vbyravarasu-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org, Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Lars-Peter Clausen <lars-Qo5EllUWu/uELgA04lAiVw@public.gmane.org>, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, grundler-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, sudeep.holla-5wv7dgnIgG8@public.gmane.org, lporzio-AL4WhLSQfzjQT0dZR+AlfA@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Sergei Shtylyov <sergei.shtylyov-M4DtvfQ/ZS1MRgGoP+s0PdBPR1lH4CV8@public.gmane.org>, Dmitry Torokhov <dmitry.torokhov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Tim Harvey - Principal Software EngineerGateworks Corporation -
-http://www.gateworks.com/3026 S. Higuera St. San Luis Obispo CA
-93401805-781-2000
-On Tue, Mar 5, 2019 at 4:39 AM M=C3=A5ns Rullg=C3=A5rd <mans@mansr.com> wro=
-te:
->
-> Douglas Anderson <dianders@chromium.org> writes:
->
-> > This series picks patches from various different places to produce what
-> > I consider the best solution to getting consistent mmc and mmcblk
-> > ordering.
-> >
-> > Why consistent ordering and why not just use UUIDs?  IMHO consistent
-> > ordering solves a few different problems:
-> >
-> > 1. For poor, feeble-minded humans like me, have sane numbering for
-> >    devices helps a lot.  When grepping through dmesg it's terribly hand=
-y
-> >    if a given SDMMC device has a consistent number.  I know that I can
-> >    do "dmesg | grep mmc0" or "dmesg | grep mmcblk0" to find info about
-> >    the eMMC.  I know that I can do "dmesg | grep mmc1" to find info
-> >    about the SD card slot.  I don't want it to matter which one probed
-> >    first, I don't want it to matter if I'm working on a variant of the
-> >    hardware that has the SD card slot disabled, and I don't want to car=
-e
-> >    what my boot device was.  Worrying about what device number I got
-> >    increases my cognitive load.
-> >
-> > 2. There are cases where it's not trivially easy during development to
-> >    use the UUID.  Specifically I work a lot with coreboot / depthcharge
-> >    as a BIOS.  When configured properly, that BIOS has a nice feature t=
-o
-> >    allow you to fetch the kernel and kernel command line from TFTP by
-> >    pressing Ctrl-N.  In this particular case the BIOS doesn't actually
-> >    know which disk I'd like for my root filesystem, so it's not so easy
-> >    for it to put the right UUID into the command line.  For this
-> >    purpose, knowing that "mmcblk0" will always refer to eMMC is handy.
-> >
-> > Changes in v2:
-> > - Rebased atop mmc-next
-> > - Stat dynamic allocation after fixed allocation; thanks Wolfram!
-> > - rk3288 patch new for v2
-> >
-> > Douglas Anderson (1):
-> >   ARM: dts: rockchip: Add mmc aliases for rk3288 platform
-> >
-> > Jaehoon Chung (1):
-> >   Documentation: mmc: Document mmc aliases
-> >
-> > Stefan Agner (2):
-> >   mmc: read mmc alias from device tree
-> >   mmc: use SD/MMC host ID for block device name ID
-> >
-> >  Documentation/devicetree/bindings/mmc/mmc.txt | 11 +++++++++++
-> >  arch/arm/boot/dts/rk3288.dtsi                 |  4 ++++
-> >  drivers/mmc/card/block.c                      |  2 +-
-> >  drivers/mmc/core/host.c                       | 17 ++++++++++++++++-
-> >  4 files changed, 32 insertions(+), 2 deletions(-)
->
-> Did anyone ever come up with an acceptable solution for this?  After
-> three years, I'm getting tired of rebasing these patches onto every new
-> kernel.
->
-> UUIDs or similar are NOT an option for multiple reasons:
->
-> - We have two rootfs partitions for ping-pong updates, so simply
->   referring to "the thing with ID foo" doesn't work.
->
-> - Installing said updates needs direct access the device/partition,
->   which may not even have a filesystem.
->
-> - The u-boot environment is stored in an eMMC "boot" partition, and
->   userspace needs to know where to find it.
->
-> I'm sure I'm not the only one in a similar situation.
->
-> Russel, feel free to shout abuse at me.  I don't care, but it makes you
-> look stupid.
->
-
-Completely agree here - we need a dt solution that allows us to
-specify ordering.
-
-I support a variety of IMX6 boards where for PCB routing reasons the
-bootable MMC device is not always the first sdhc (sometimes the first
-one is an SDIO radio for example). It seems ridiculous that I can't
-handle this with:
-
-        aliases {
-                mmc0 =3D &usdhc3; /* MMC boot device */
-                mmc1 =3D &usdhc2; /* SDIO radio */
-        };
-
-I see the imx6q-dhcom-som added in
-52c7a088badd665a09ca9307ffa91e88d5686a7d re-defines the default
-imx6qdl.dtsi mmc0-mmc3 aiases but I don't see any handling of this in
-code anywhere - am I missing something?
-
-Marek, why did you change the alias ordering for imx6q-dhcom-som.dtsi?
-(maybe your carrying around a patch to make this useful?)
-
-+       aliases {
-+               mmc0 =3D &usdhc2;
-+               mmc1 =3D &usdhc3;
-+               mmc2 =3D &usdhc4;
-+               mmc3 =3D &usdhc1;
-+       };
-
-Regards,
-
-Tim
+T24gMy8xNS8xOSAxMDo1MiBQTSwgVGltIEhhcnZleSB3cm90ZToKPiBUaW0gSGFydmV5IC0gUHJp
+bmNpcGFsIFNvZnR3YXJlIEVuZ2luZWVyR2F0ZXdvcmtzIENvcnBvcmF0aW9uIC0KPiBodHRwOi8v
+d3d3LmdhdGV3b3Jrcy5jb20vMzAyNiBTLiBIaWd1ZXJhIFN0LiBTYW4gTHVpcyBPYmlzcG8gQ0EK
+PiA5MzQwMTgwNS03ODEtMjAwMAo+IE9uIFR1ZSwgTWFyIDUsIDIwMTkgYXQgNDozOSBBTSBNw6Vu
+cyBSdWxsZ8OlcmQgPG1hbnNAbWFuc3IuY29tPiB3cm90ZToKPj4KPj4gRG91Z2xhcyBBbmRlcnNv
+biA8ZGlhbmRlcnNAY2hyb21pdW0ub3JnPiB3cml0ZXM6Cj4+Cj4+PiBUaGlzIHNlcmllcyBwaWNr
+cyBwYXRjaGVzIGZyb20gdmFyaW91cyBkaWZmZXJlbnQgcGxhY2VzIHRvIHByb2R1Y2Ugd2hhdAo+
+Pj4gSSBjb25zaWRlciB0aGUgYmVzdCBzb2x1dGlvbiB0byBnZXR0aW5nIGNvbnNpc3RlbnQgbW1j
+IGFuZCBtbWNibGsKPj4+IG9yZGVyaW5nLgo+Pj4KPj4+IFdoeSBjb25zaXN0ZW50IG9yZGVyaW5n
+IGFuZCB3aHkgbm90IGp1c3QgdXNlIFVVSURzPyAgSU1ITyBjb25zaXN0ZW50Cj4+PiBvcmRlcmlu
+ZyBzb2x2ZXMgYSBmZXcgZGlmZmVyZW50IHByb2JsZW1zOgo+Pj4KPj4+IDEuIEZvciBwb29yLCBm
+ZWVibGUtbWluZGVkIGh1bWFucyBsaWtlIG1lLCBoYXZlIHNhbmUgbnVtYmVyaW5nIGZvcgo+Pj4g
+ICAgZGV2aWNlcyBoZWxwcyBhIGxvdC4gIFdoZW4gZ3JlcHBpbmcgdGhyb3VnaCBkbWVzZyBpdCdz
+IHRlcnJpYmx5IGhhbmR5Cj4+PiAgICBpZiBhIGdpdmVuIFNETU1DIGRldmljZSBoYXMgYSBjb25z
+aXN0ZW50IG51bWJlci4gIEkga25vdyB0aGF0IEkgY2FuCj4+PiAgICBkbyAiZG1lc2cgfCBncmVw
+IG1tYzAiIG9yICJkbWVzZyB8IGdyZXAgbW1jYmxrMCIgdG8gZmluZCBpbmZvIGFib3V0Cj4+PiAg
+ICB0aGUgZU1NQy4gIEkga25vdyB0aGF0IEkgY2FuIGRvICJkbWVzZyB8IGdyZXAgbW1jMSIgdG8g
+ZmluZCBpbmZvCj4+PiAgICBhYm91dCB0aGUgU0QgY2FyZCBzbG90LiAgSSBkb24ndCB3YW50IGl0
+IHRvIG1hdHRlciB3aGljaCBvbmUgcHJvYmVkCj4+PiAgICBmaXJzdCwgSSBkb24ndCB3YW50IGl0
+IHRvIG1hdHRlciBpZiBJJ20gd29ya2luZyBvbiBhIHZhcmlhbnQgb2YgdGhlCj4+PiAgICBoYXJk
+d2FyZSB0aGF0IGhhcyB0aGUgU0QgY2FyZCBzbG90IGRpc2FibGVkLCBhbmQgSSBkb24ndCB3YW50
+IHRvIGNhcmUKPj4+ICAgIHdoYXQgbXkgYm9vdCBkZXZpY2Ugd2FzLiAgV29ycnlpbmcgYWJvdXQg
+d2hhdCBkZXZpY2UgbnVtYmVyIEkgZ290Cj4+PiAgICBpbmNyZWFzZXMgbXkgY29nbml0aXZlIGxv
+YWQuCj4+Pgo+Pj4gMi4gVGhlcmUgYXJlIGNhc2VzIHdoZXJlIGl0J3Mgbm90IHRyaXZpYWxseSBl
+YXN5IGR1cmluZyBkZXZlbG9wbWVudCB0bwo+Pj4gICAgdXNlIHRoZSBVVUlELiAgU3BlY2lmaWNh
+bGx5IEkgd29yayBhIGxvdCB3aXRoIGNvcmVib290IC8gZGVwdGhjaGFyZ2UKPj4+ICAgIGFzIGEg
+QklPUy4gIFdoZW4gY29uZmlndXJlZCBwcm9wZXJseSwgdGhhdCBCSU9TIGhhcyBhIG5pY2UgZmVh
+dHVyZSB0bwo+Pj4gICAgYWxsb3cgeW91IHRvIGZldGNoIHRoZSBrZXJuZWwgYW5kIGtlcm5lbCBj
+b21tYW5kIGxpbmUgZnJvbSBURlRQIGJ5Cj4+PiAgICBwcmVzc2luZyBDdHJsLU4uICBJbiB0aGlz
+IHBhcnRpY3VsYXIgY2FzZSB0aGUgQklPUyBkb2Vzbid0IGFjdHVhbGx5Cj4+PiAgICBrbm93IHdo
+aWNoIGRpc2sgSSdkIGxpa2UgZm9yIG15IHJvb3QgZmlsZXN5c3RlbSwgc28gaXQncyBub3Qgc28g
+ZWFzeQo+Pj4gICAgZm9yIGl0IHRvIHB1dCB0aGUgcmlnaHQgVVVJRCBpbnRvIHRoZSBjb21tYW5k
+IGxpbmUuICBGb3IgdGhpcwo+Pj4gICAgcHVycG9zZSwga25vd2luZyB0aGF0ICJtbWNibGswIiB3
+aWxsIGFsd2F5cyByZWZlciB0byBlTU1DIGlzIGhhbmR5Lgo+Pj4KPj4+IENoYW5nZXMgaW4gdjI6
+Cj4+PiAtIFJlYmFzZWQgYXRvcCBtbWMtbmV4dAo+Pj4gLSBTdGF0IGR5bmFtaWMgYWxsb2NhdGlv
+biBhZnRlciBmaXhlZCBhbGxvY2F0aW9uOyB0aGFua3MgV29sZnJhbSEKPj4+IC0gcmszMjg4IHBh
+dGNoIG5ldyBmb3IgdjIKPj4+Cj4+PiBEb3VnbGFzIEFuZGVyc29uICgxKToKPj4+ICAgQVJNOiBk
+dHM6IHJvY2tjaGlwOiBBZGQgbW1jIGFsaWFzZXMgZm9yIHJrMzI4OCBwbGF0Zm9ybQo+Pj4KPj4+
+IEphZWhvb24gQ2h1bmcgKDEpOgo+Pj4gICBEb2N1bWVudGF0aW9uOiBtbWM6IERvY3VtZW50IG1t
+YyBhbGlhc2VzCj4+Pgo+Pj4gU3RlZmFuIEFnbmVyICgyKToKPj4+ICAgbW1jOiByZWFkIG1tYyBh
+bGlhcyBmcm9tIGRldmljZSB0cmVlCj4+PiAgIG1tYzogdXNlIFNEL01NQyBob3N0IElEIGZvciBi
+bG9jayBkZXZpY2UgbmFtZSBJRAo+Pj4KPj4+ICBEb2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmlu
+ZGluZ3MvbW1jL21tYy50eHQgfCAxMSArKysrKysrKysrKwo+Pj4gIGFyY2gvYXJtL2Jvb3QvZHRz
+L3JrMzI4OC5kdHNpICAgICAgICAgICAgICAgICB8ICA0ICsrKysKPj4+ICBkcml2ZXJzL21tYy9j
+YXJkL2Jsb2NrLmMgICAgICAgICAgICAgICAgICAgICAgfCAgMiArLQo+Pj4gIGRyaXZlcnMvbW1j
+L2NvcmUvaG9zdC5jICAgICAgICAgICAgICAgICAgICAgICB8IDE3ICsrKysrKysrKysrKysrKyst
+Cj4+PiAgNCBmaWxlcyBjaGFuZ2VkLCAzMiBpbnNlcnRpb25zKCspLCAyIGRlbGV0aW9ucygtKQo+
+Pgo+PiBEaWQgYW55b25lIGV2ZXIgY29tZSB1cCB3aXRoIGFuIGFjY2VwdGFibGUgc29sdXRpb24g
+Zm9yIHRoaXM/ICBBZnRlcgo+PiB0aHJlZSB5ZWFycywgSSdtIGdldHRpbmcgdGlyZWQgb2YgcmVi
+YXNpbmcgdGhlc2UgcGF0Y2hlcyBvbnRvIGV2ZXJ5IG5ldwo+PiBrZXJuZWwuCj4+Cj4+IFVVSURz
+IG9yIHNpbWlsYXIgYXJlIE5PVCBhbiBvcHRpb24gZm9yIG11bHRpcGxlIHJlYXNvbnM6Cj4+Cj4+
+IC0gV2UgaGF2ZSB0d28gcm9vdGZzIHBhcnRpdGlvbnMgZm9yIHBpbmctcG9uZyB1cGRhdGVzLCBz
+byBzaW1wbHkKPj4gICByZWZlcnJpbmcgdG8gInRoZSB0aGluZyB3aXRoIElEIGZvbyIgZG9lc24n
+dCB3b3JrLgo+Pgo+PiAtIEluc3RhbGxpbmcgc2FpZCB1cGRhdGVzIG5lZWRzIGRpcmVjdCBhY2Nl
+c3MgdGhlIGRldmljZS9wYXJ0aXRpb24sCj4+ICAgd2hpY2ggbWF5IG5vdCBldmVuIGhhdmUgYSBm
+aWxlc3lzdGVtLgo+Pgo+PiAtIFRoZSB1LWJvb3QgZW52aXJvbm1lbnQgaXMgc3RvcmVkIGluIGFu
+IGVNTUMgImJvb3QiIHBhcnRpdGlvbiwgYW5kCj4+ICAgdXNlcnNwYWNlIG5lZWRzIHRvIGtub3cg
+d2hlcmUgdG8gZmluZCBpdC4KPj4KPj4gSSdtIHN1cmUgSSdtIG5vdCB0aGUgb25seSBvbmUgaW4g
+YSBzaW1pbGFyIHNpdHVhdGlvbi4KPj4KPj4gUnVzc2VsLCBmZWVsIGZyZWUgdG8gc2hvdXQgYWJ1
+c2UgYXQgbWUuICBJIGRvbid0IGNhcmUsIGJ1dCBpdCBtYWtlcyB5b3UKPj4gbG9vayBzdHVwaWQu
+Cj4+Cj4gCj4gQ29tcGxldGVseSBhZ3JlZSBoZXJlIC0gd2UgbmVlZCBhIGR0IHNvbHV0aW9uIHRo
+YXQgYWxsb3dzIHVzIHRvCj4gc3BlY2lmeSBvcmRlcmluZy4KCk5vcGUsIG9yZGVyaW5nIHdvdWxk
+IGJlIGEgcG9saWN5IGFuZCBkb2VzIG5vdCBkZXNjcmliZSBoYXJkd2FyZSwgdGh1cyBpdApzaG91
+bGRuJ3QgYmUgaW4gdGhlIERULiBVc2UgVVVJRCBvciBQQVJUVVVJRCwgdGhleSBhcHBseSBib3Ro
+IHRvIHJhdyBGUwooZnN1dWlkKSBhbmQgdG8gcGFydGl0aW9ucyAocGFydCB1dWlkKS4gTGludXgg
+a2VybmVsIGNhbiBtb3VudCBGUyB1c2luZwpQQVJUVVVJRCwgdG8gc3VwcG9ydCBVVUlEIHlvdSBu
+ZWVkIGluaXRyYW1mcy4KCj4gSSBzdXBwb3J0IGEgdmFyaWV0eSBvZiBJTVg2IGJvYXJkcyB3aGVy
+ZSBmb3IgUENCIHJvdXRpbmcgcmVhc29ucyB0aGUKPiBib290YWJsZSBNTUMgZGV2aWNlIGlzIG5v
+dCBhbHdheXMgdGhlIGZpcnN0IHNkaGMgKHNvbWV0aW1lcyB0aGUgZmlyc3QKPiBvbmUgaXMgYW4g
+U0RJTyByYWRpbyBmb3IgZXhhbXBsZSkuIEl0IHNlZW1zIHJpZGljdWxvdXMgdGhhdCBJIGNhbid0
+Cj4gaGFuZGxlIHRoaXMgd2l0aDoKPiAKPiAgICAgICAgIGFsaWFzZXMgewo+ICAgICAgICAgICAg
+ICAgICBtbWMwID0gJnVzZGhjMzsgLyogTU1DIGJvb3QgZGV2aWNlICovCj4gICAgICAgICAgICAg
+ICAgIG1tYzEgPSAmdXNkaGMyOyAvKiBTRElPIHJhZGlvICovCj4gICAgICAgICB9Owo+IAo+IEkg
+c2VlIHRoZSBpbXg2cS1kaGNvbS1zb20gYWRkZWQgaW4KPiA1MmM3YTA4OGJhZGQ2NjVhMDljYTkz
+MDdmZmE5MWU4OGQ1Njg2YTdkIHJlLWRlZmluZXMgdGhlIGRlZmF1bHQKPiBpbXg2cWRsLmR0c2kg
+bW1jMC1tbWMzIGFpYXNlcyBidXQgSSBkb24ndCBzZWUgYW55IGhhbmRsaW5nIG9mIHRoaXMgaW4K
+PiBjb2RlIGFueXdoZXJlIC0gYW0gSSBtaXNzaW5nIHNvbWV0aGluZz8KPiAKPiBNYXJlaywgd2h5
+IGRpZCB5b3UgY2hhbmdlIHRoZSBhbGlhcyBvcmRlcmluZyBmb3IgaW14NnEtZGhjb20tc29tLmR0
+c2k/Cj4gKG1heWJlIHlvdXIgY2FycnlpbmcgYXJvdW5kIGEgcGF0Y2ggdG8gbWFrZSB0aGlzIHVz
+ZWZ1bD8pCgpOb3BlLCBsaWtlbHkgYSBjbGVhbnVwIHJlbW5hbnQgd2hpY2ggY2FuIGJlIGRyb3Bw
+ZWQuCgo+ICsgICAgICAgYWxpYXNlcyB7Cj4gKyAgICAgICAgICAgICAgIG1tYzAgPSAmdXNkaGMy
+Owo+ICsgICAgICAgICAgICAgICBtbWMxID0gJnVzZGhjMzsKPiArICAgICAgICAgICAgICAgbW1j
+MiA9ICZ1c2RoYzQ7Cj4gKyAgICAgICAgICAgICAgIG1tYzMgPSAmdXNkaGMxOwo+ICsgICAgICAg
+fTsKPiAKPiBSZWdhcmRzLAo+IAo+IFRpbQo+IAoKCi0tIApCZXN0IHJlZ2FyZHMsCk1hcmVrIFZh
+c3V0CgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpMaW51
+eC1yb2NrY2hpcCBtYWlsaW5nIGxpc3QKTGludXgtcm9ja2NoaXBAbGlzdHMuaW5mcmFkZWFkLm9y
+ZwpodHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9tYWlsbWFuL2xpc3RpbmZvL2xpbnV4LXJvY2tj
+aGlwCg==
