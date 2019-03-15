@@ -1,165 +1,127 @@
-From: Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>
-Subject: Re: Linux v5.0-rc7: bcm2835 MMC issues
-Date: Fri, 15 Mar 2019 18:12:43 +0100 (CET)
-Message-ID: <1666432441.475569.1552669963095@email.ionos.de>
-References: <20190224150746.GC26495@darkstar.musicnaut.iki.fi>
- <155745885.93258.1551034990363@email.ionos.de>
- <20190226011509.GB31163@darkstar.musicnaut.iki.fi>
- <06528ceb-ff1d-626b-f520-477b0ea49d6f@i2se.com>
- <20190227185101.GA28051@darkstar.musicnaut.iki.fi>
- <1685719010.348465.1552129077871@email.ionos.de>
- <20190310005131.GF30189@darkstar.musicnaut.iki.fi>
+From: Tim Harvey <tharvey@gateworks.com>
+Subject: Re: [PATCH v2 0/4] Patches to allow consistent mmc / mmcblk numbering
+ w/ device tree
+Date: Fri, 15 Mar 2019 14:52:10 -0700
+Message-ID: <CAJ+vNU1PxK-B63Dc3AgzYb9POyxxoF-xPOWBEpxJ+3eVNK8xqw@mail.gmail.com>
+References: <1461951139-6109-1-git-send-email-dianders@chromium.org> <yw1x5zsx5wc7.fsf@mansr.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <20190310005131.GF30189-4/PLUo9XfK9owWHViPbQSXlKr5M7+etX9Sl0XMgJPXI@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rpi-kernel>,
- <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rpi-kernel/>
-List-Post: <mailto:linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rpi-kernel>,
- <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "linux-rpi-kernel" <linux-rpi-kernel-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Aaro Koskinen <aaro.koskinen-X3B1VOXEql0@public.gmane.org>
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <yw1x5zsx5wc7.fsf@mansr.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: =?UTF-8?B?TcOlbnMgUnVsbGfDpXJk?= <mans@mansr.com>, Marek Vasut <marex@denx.de>
+Cc: Douglas Anderson <dianders@chromium.org>, Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, shawn.lin@rock-chips.com, Adrian Hunter <adrian.hunter@intel.com>, stefan@agner.ch, Linux MMC List <linux-mmc@vger.kernel.org>, Brian Norris <computersforpeace@gmail.com>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, Heiko Stuebner <heiko@sntech.de>, Jisheng Zhang <jszhang@marvell.com>, linux-rockchip@lists.infradead.org, devicetree-spec@vger.kernel.org, Mark Rutland <mark.rutland@arm.com>, open list <linux-kernel@vger.kernel.org>, vbyravarasu@nvidia.com, Lars-Peter Clausen <lars@metafoo.de>, Russell King - ARM Linux <linux@arm.linux.org.uk>, jonathanh@nvidia.com, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, Pawel
 List-Id: linux-mmc@vger.kernel.org
 
-SGkgQWFybywKCj4gQWFybyBLb3NraW5lbiA8YWFyby5rb3NraW5lbkBpa2kuZmk+IGhhdCBhbSAx
-MC4gTcOkcnogMjAxOSB1bSAwMTo1MSBnZXNjaHJpZWJlbjoKPiAKPiAKPiBIaSwKPiAKPiBPbiBT
-YXQsIE1hciAwOSwgMjAxOSBhdCAxMTo1Nzo1N0FNICswMTAwLCBTdGVmYW4gV2FocmVuIHdyb3Rl
-Ogo+ID4gPiBBYXJvIEtvc2tpbmVuIDxhYXJvLmtvc2tpbmVuQGlraS5maT4gaGF0IGFtIDI3LiBG
-ZWJydWFyIDIwMTkgdW0gMTk6NTEgZ2VzY2hyaWViZW46Cj4gPiA+IE9uIFR1ZSwgRmViIDI2LCAy
-MDE5IGF0IDA5OjMxOjE0QU0gKzAxMDAsIFN0ZWZhbiBXYWhyZW4gd3JvdGU6Cj4gPiA+ID4gaXQg
-d2lsbCB0YWtlIHNvbWUgdGltZSBmb3IgdG8gc2V0dXAgdGhpcyB0ZXN0IHNjZW5hcmlvLiBDb3Vs
-ZCB5b3UgcGxlYXNlCj4gPiA+ID4gZG8gbWUgYSBmYXZvciBhbmQgdGVzdCA0LjIwLjEyIHdoaWNo
-IGhhcyBzb21lIGJhY2twb3J0cyBvZiByZWNlbnQgbW1jIC8KPiA+ID4gPiBETUEgZml4ZXMuCj4g
-PiA+IAo+ID4gPiBCb3RoIDQuMjAgYW5kIDQuMjAuMTIgd29yayBmaW5lLiBPbmx5IDUuMC1yYyBm
-YWlscyByZWxpYWJseS4KPiA+IAo+ID4gSSB0cmllZCB0byByZXByb2R1Y2UgdGhlIGlzc3VlIGJ5
-IGNvbXBpbGluZyBnY2MgYW5kIHVzaW5nIHN0cmVzcyBvbgo+ID4gUmFzcGJlcnJ5IFBpIDMgKGFy
-bTY0L2RlZmNvbmZpZykgd2l0aCBBcmNoIExpbnV4IEFSTSB3aXRob3V0IGFueSBsdWNrLgo+ID4g
-Cj4gPiBXZXJlIHlvdSBhYmxlIHRvIHJlcHJvZHVjZSB0aGUgaXNzdWUgdXNpbmcgc3RyZXNzPwo+
-IAo+IE5vLCBub3QgeWV0LiBJJ2xsIGxldCB5b3Uga25vdyBpZiBJJ20gYWJsZSB0byBjb21lIHVw
-IHdpdGggYSBtb3JlIHJlbGlhYmxlCj4gcmVwcm9kdWNlci4KCnRoYXQgd291bGQgYmUgZ3JlYXQu
-CgpJIHdhc24ndCBhYmxlIHRvIGJvb3QgQXJjaCBMaW51eCBBUk0gcm9vdGZzIHdpdGggeW91ciBj
-b25maWcsIHNvIGkgdHJpZWQgdG8gbWVyZ2UgYXJtNjQvZGVmY29uZmlnIGFuZCB5b3VyIGNvbmZp
-ZyB3aGljaCByZXN1bHRlZCBpbnRvIHRoZSBmb2xsb3dpbmcuIEJ1dCBzdGlsbCBubyBsdWtlIHdp
-dGggc3RyZXNzIGFuZCBjb21waWxpbmcgZ2NjLgoKQ09ORklHX1NZU1ZJUEM9eQpDT05GSUdfTk9f
-SFo9eQpDT05GSUdfSElHSF9SRVNfVElNRVJTPXkKQ09ORklHX1BSRUVNUFQ9eQojIENPTkZJR19D
-UFVfSVNPTEFUSU9OIGlzIG5vdCBzZXQKQ09ORklHX0xPR19CVUZfU0hJRlQ9MTkKQ09ORklHX0NH
-Uk9VUF9GUkVFWkVSPXkKQ09ORklHX0NHUk9VUF9ERVZJQ0U9eQpDT05GSUdfQ0dST1VQX0NQVUFD
-Q1Q9eQpDT05GSUdfQ0dST1VQX1BFUkY9eQpDT05GSUdfTkFNRVNQQUNFUz15CkNPTkZJR19TQ0hF
-RF9BVVRPR1JPVVA9eQpDT05GSUdfQkxLX0RFVl9JTklUUkQ9eQpDT05GSUdfRVhQRVJUPXkKQ09O
-RklHX1BFUkZfRVZFTlRTPXkKIyBDT05GSUdfU0xBQl9GUkVFTElTVF9SQU5ET00gaXMgbm90IHNl
-dApDT05GSUdfQVJDSF9CQ00yODM1PXkKIyBDT05GSUdfQVJNNjRfRVJSQVRVTV8xMTg4ODczIGlz
-IG5vdCBzZXQKIyBDT05GSUdfQVJNNjRfRVJSQVRVTV8xMjg2ODA3IGlzIG5vdCBzZXQKIyBDT05G
-SUdfUUNPTV9GQUxLT1JfRVJSQVRVTV8xMDAzIGlzIG5vdCBzZXQKIyBDT05GSUdfUUNPTV9GQUxL
-T1JfRVJSQVRVTV8xMDA5IGlzIG5vdCBzZXQKIyBDT05GSUdfUUNPTV9RREYyNDAwX0VSUkFUVU1f
-MDA2NSBpcyBub3Qgc2V0CkNPTkZJR19TQ0hFRF9NQz15CkNPTkZJR19TQ0hFRF9TTVQ9eQpDT05G
-SUdfTlJfQ1BVUz00CkNPTkZJR19IWl8xMDAwPXkKIyBDT05GSUdfQVJNNjRfTFNFX0FUT01JQ1Mg
-aXMgbm90IHNldAojIENPTkZJR19BUk02NF9DTlAgaXMgbm90IHNldApDT05GSUdfQ09NUEFUPXkK
-IyBDT05GSUdfU1VTUEVORCBpcyBub3Qgc2V0CkNPTkZJR19DUFVfSURMRT15CkNPTkZJR19BUk1f
-Q1BVSURMRT15CkNPTkZJR19SQVNQQkVSUllQSV9GSVJNV0FSRT15CkNPTkZJR19FRklfQ0FQU1VM
-RV9MT0FERVI9eQpDT05GSUdfQVJNNjRfQ1JZUFRPPXkKQ09ORklHX0NSWVBUT19TSEExX0FSTTY0
-X0NFPXkKQ09ORklHX0NSWVBUT19TSEEyX0FSTTY0X0NFPXkKQ09ORklHX0NSWVBUT19TSEE1MTJf
-QVJNNjRfQ0U9eQpDT05GSUdfQ1JZUFRPX1NIQTNfQVJNNjQ9eQpDT05GSUdfQ1JZUFRPX1NNM19B
-Uk02NF9DRT15CkNPTkZJR19DUllQVE9fR0hBU0hfQVJNNjRfQ0U9eQpDT05GSUdfQ1JZUFRPX0NS
-Q1QxMERJRl9BUk02NF9DRT15CkNPTkZJR19DUllQVE9fQUVTX0FSTTY0X0NFX0NDTT15CkNPTkZJ
-R19DUllQVE9fQUVTX0FSTTY0X0NFX0JMSz15CkNPTkZJR19DUllQVE9fQ0hBQ0hBMjBfTkVPTj15
-CkNPTkZJR19DUllQVE9fQUVTX0FSTTY0X0JTPXkKQ09ORklHX0JMS19ERVZfQlNHTElCPXkKQ09O
-RklHX0JMS19ERVZfSU5URUdSSVRZPXkKIyBDT05GSUdfQ09SRV9EVU1QX0RFRkFVTFRfRUxGX0hF
-QURFUlMgaXMgbm90IHNldApDT05GSUdfQ01BPXkKQ09ORklHX05FVD15CkNPTkZJR19QQUNLRVQ9
-eQpDT05GSUdfVU5JWD15CkNPTkZJR19JTkVUPXkKQ09ORklHX1NZTl9DT09LSUVTPXkKIyBDT05G
-SUdfSU5FVF9YRlJNX01PREVfVFJBTlNQT1JUIGlzIG5vdCBzZXQKIyBDT05GSUdfSU5FVF9YRlJN
-X01PREVfVFVOTkVMIGlzIG5vdCBzZXQKIyBDT05GSUdfSU5FVF9YRlJNX01PREVfQkVFVCBpcyBu
-b3Qgc2V0CiMgQ09ORklHX0lORVRfRElBRyBpcyBub3Qgc2V0CiMgQ09ORklHX0lQVjYgaXMgbm90
-IHNldApDT05GSUdfTkVURklMVEVSPXkKIyBDT05GSUdfTkVURklMVEVSX0lOR1JFU1MgaXMgbm90
-IHNldApDT05GSUdfTkZfQ09OTlRSQUNLPXkKIyBDT05GSUdfTkZfQ1RfUFJPVE9fRENDUCBpcyBu
-b3Qgc2V0CiMgQ09ORklHX05GX0NUX1BST1RPX1NDVFAgaXMgbm90IHNldAojIENPTkZJR19ORl9D
-VF9QUk9UT19VRFBMSVRFIGlzIG5vdCBzZXQKQ09ORklHX05FVEZJTFRFUl9YVF9NQVRDSF9DT05O
-VFJBQ0s9eQpDT05GSUdfSVBfTkZfSVBUQUJMRVM9eQpDT05GSUdfSVBfTkZfRklMVEVSPXkKQ09O
-RklHX0lQX05GX1RBUkdFVF9SRUpFQ1Q9eQpDT05GSUdfSVBfTkZfTkFUPXkKQ09ORklHX0lQX05G
-X1RBUkdFVF9NQVNRVUVSQURFPXkKQ09ORklHX0lQX05GX1JBVz15CkNPTkZJR19CVD15CkNPTkZJ
-R19CVF9ISURQPXkKIyBDT05GSUdfQlRfSFMgaXMgbm90IHNldAojIENPTkZJR19CVF9MRSBpcyBu
-b3Qgc2V0CkNPTkZJR19CVF9MRURTPXkKIyBDT05GSUdfQlRfREVCVUdGUyBpcyBub3Qgc2V0CkNP
-TkZJR19CVF9IQ0lCVFVTQj15CkNPTkZJR19CVF9IQ0lVQVJUPXkKQ09ORklHX0JUX0hDSVVBUlRf
-SDQ9eQpDT05GSUdfQ0ZHODAyMTE9eQpDT05GSUdfTUFDODAyMTE9eQpDT05GSUdfTUFDODAyMTFf
-TEVEUz15CkNPTkZJR19VRVZFTlRfSEVMUEVSX1BBVEg9Ii9zYmluL2hvdHBsdWciCkNPTkZJR19E
-RVZUTVBGUz15CkNPTkZJR19ERVZUTVBGU19NT1VOVD15CkNPTkZJR19ETUFfQ01BPXkKQ09ORklH
-X0NNQV9TSVpFX01CWVRFUz0zMgpDT05GSUdfTVREPXkKQ09ORklHX01URF9CTE9DSz15CkNPTkZJ
-R19NVERfTTI1UDgwPXkKQ09ORklHX01URF9OQU5EPXkKQ09ORklHX01URF9OQU5EX0RFTkFMSV9E
-VD15CkNPTkZJR19NVERfU1BJX05PUj15CkNPTkZJR19PRl9PVkVSTEFZPXkKQ09ORklHX0JMS19E
-RVZfTE9PUD15CkNPTkZJR19CTEtfREVWX05CRD15CkNPTkZJR19WSVJUSU9fQkxLPXkKQ09ORklH
-X1NSQU09eQpDT05GSUdfU0NTST15CiMgQ09ORklHX1NDU0lfUFJPQ19GUyBpcyBub3Qgc2V0CkNP
-TkZJR19CTEtfREVWX1NEPXkKIyBDT05GSUdfU0NTSV9MT1dMRVZFTCBpcyBub3Qgc2V0CkNPTkZJ
-R19JTlBVVF9NQVRSSVhLTUFQPXkKQ09ORklHX0lOUFVUX0VWREVWPXkKQ09ORklHX0tFWUJPQVJE
-X0FEQz15CkNPTkZJR19LRVlCT0FSRF9HUElPPXkKQ09ORklHX0lOUFVUX1RPVUNIU0NSRUVOPXkK
-Q09ORklHX0lOUFVUX01JU0M9eQpDT05GSUdfTEVHQUNZX1BUWV9DT1VOVD0xNgpDT05GSUdfU0VS
-SUFMXzgyNTA9eQpDT05GSUdfU0VSSUFMXzgyNTBfQ09OU09MRT15CkNPTkZJR19TRVJJQUxfODI1
-MF9FWFRFTkRFRD15CkNPTkZJR19TRVJJQUxfODI1MF9TSEFSRV9JUlE9eQpDT05GSUdfU0VSSUFM
-XzgyNTBfQkNNMjgzNUFVWD15CkNPTkZJR19TRVJJQUxfODI1MF9EVz15CkNPTkZJR19TRVJJQUxf
-T0ZfUExBVEZPUk09eQpDT05GSUdfU0VSSUFMX0FNQkFfUEwwMTE9eQpDT05GSUdfU0VSSUFMX0FN
-QkFfUEwwMTFfQ09OU09MRT15CkNPTkZJR19WSVJUSU9fQ09OU09MRT15CkNPTkZJR19JUE1JX0hB
-TkRMRVI9eQpDT05GSUdfSVBNSV9ERVZJQ0VfSU5URVJGQUNFPXkKQ09ORklHX0lQTUlfU0k9eQpD
-T05GSUdfVENHX1RQTT15CkNPTkZJR19UQ0dfVElTX0kyQ19JTkZJTkVPTj15CkNPTkZJR19JMkNf
-Q0hBUkRFVj15CkNPTkZJR19JMkNfTVVYPXkKQ09ORklHX0kyQ19CQ00yODM1PXkKQ09ORklHX0ky
-Q19HUElPPXkKQ09ORklHX1NQST15CkNPTkZJR19TUElfQkNNMjgzNT15CkNPTkZJR19TUElfQkNN
-MjgzNUFVWD15CkNPTkZJR19TUE1JPXkKQ09ORklHX1BQUz15CkNPTkZJR19HUElPX0dFTkVSSUNf
-UExBVEZPUk09eQpDT05GSUdfUE9XRVJfQVZTPXkKQ09ORklHX1BPV0VSX1JFU0VUX0JSQ01TVEI9
-eQpDT05GSUdfU1lTQ09OX1JFQk9PVF9NT0RFPXkKQ09ORklHX1NFTlNPUlNfUkFTUEJFUlJZUElf
-SFdNT049eQpDT05GSUdfVEhFUk1BTD15CkNPTkZJR19USEVSTUFMX0dPVl9QT1dFUl9BTExPQ0FU
-T1I9eQpDT05GSUdfVEhFUk1BTF9FTVVMQVRJT049eQpDT05GSUdfQkNNMjgzNV9USEVSTUFMPXkK
-Q09ORklHX1dBVENIRE9HPXkKQ09ORklHX0JDTTI4MzVfV0RUPXkKQ09ORklHX01GRF9TWVNDT049
-eQpDT05GSUdfUkVHVUxBVE9SPXkKQ09ORklHX1JFR1VMQVRPUl9GSVhFRF9WT0xUQUdFPXkKQ09O
-RklHX1JFR1VMQVRPUl9HUElPPXkKQ09ORklHX1JFR1VMQVRPUl9QV009eQpDT05GSUdfUkNfQ09S
-RT15CkNPTkZJR19EUk09eQpDT05GSUdfRFJNX1BBTkVMX1NJTVBMRT15CkNPTkZJR19EUk1fVkM0
-PXkKQ09ORklHX0ZCX01PREVfSEVMUEVSUz15CkNPTkZJR19CQUNLTElHSFRfTENEX1NVUFBPUlQ9
-eQpDT05GSUdfQkFDS0xJR0hUX1BXTT15CkNPTkZJR19GUkFNRUJVRkZFUl9DT05TT0xFPXkKQ09O
-RklHX0xPR089eQojIENPTkZJR19MT0dPX0xJTlVYX01PTk8gaXMgbm90IHNldAojIENPTkZJR19M
-T0dPX0xJTlVYX1ZHQTE2IGlzIG5vdCBzZXQKQ09ORklHX1NPVU5EPXkKQ09ORklHX1NORD15CkNP
-TkZJR19TTkRfU09DPXkKQ09ORklHX1NORF9CQ00yODM1X1NPQ19JMlM9eQpDT05GSUdfU05EX1NJ
-TVBMRV9DQVJEPXkKQ09ORklHX1NORF9BVURJT19HUkFQSF9DQVJEPXkKQ09ORklHX0hJRF9BNFRF
-Q0g9eQpDT05GSUdfSElEX0FQUExFPXkKQ09ORklHX0hJRF9CRUxLSU49eQpDT05GSUdfSElEX0NI
-RVJSWT15CkNPTkZJR19ISURfQ0hJQ09OWT15CkNPTkZJR19ISURfQ1lQUkVTUz15CkNPTkZJR19I
-SURfRVpLRVk9eQpDT05GSUdfSElEX0lURT15CkNPTkZJR19ISURfS0VOU0lOR1RPTj15CkNPTkZJ
-R19ISURfTE9HSVRFQ0g9eQpDT05GSUdfSElEX1JFRFJBR09OPXkKQ09ORklHX0hJRF9NSUNST1NP
-RlQ9eQpDT05GSUdfSElEX01PTlRFUkVZPXkKQ09ORklHX0kyQ19ISUQ9eQpDT05GSUdfVVNCPXkK
-Q09ORklHX1VTQl9TVE9SQUdFPXkKQ09ORklHX1VTQl9EV0MyPXkKQ09ORklHX05PUF9VU0JfWENF
-SVY9eQpDT05GSUdfVVNCX1VMUEk9eQpDT05GSUdfVVNCX0dBREdFVD15CkNPTkZJR19VU0JfU05Q
-X1VEQ19QTEFUPXkKQ09ORklHX1VTQl9CRENfVURDPXkKQ09ORklHX1VTQl9ST0xFX1NXSVRDSD15
-CkNPTkZJR19VU0JfVUxQSV9CVVM9eQpDT05GSUdfTU1DPXkKQ09ORklHX01NQ19CTE9DS19NSU5P
-UlM9MzIKQ09ORklHX01NQ19TREhDST15CkNPTkZJR19NTUNfU0RIQ0lfUExURk09eQpDT05GSUdf
-TU1DX1NESENJX09GX0FSQVNBTj15CkNPTkZJR19NTUNfU0RIQ0lfSVBST0M9eQpDT05GSUdfTU1D
-X0JDTTI4MzU9eQpDT05GSUdfTkVXX0xFRFM9eQpDT05GSUdfTEVEU19DTEFTUz15CkNPTkZJR19M
-RURTX0dQSU89eQpDT05GSUdfTEVEU19QV009eQpDT05GSUdfTEVEU19TWVNDT049eQpDT05GSUdf
-TEVEU19UUklHR0VSX0hFQVJUQkVBVD15CkNPTkZJR19MRURTX1RSSUdHRVJfQ1BVPXkKQ09ORklH
-X0xFRFNfVFJJR0dFUl9ERUZBVUxUX09OPXkKQ09ORklHX0xFRFNfVFJJR0dFUl9QQU5JQz15CkNP
-TkZJR19SVENfQ0xBU1M9eQpDT05GSUdfRE1BREVWSUNFUz15CkNPTkZJR19ETUFfQkNNMjgzNT15
-CkNPTkZJR19DT01NT05fQ0xLX1ZFUlNBVElMRT15CkNPTkZJR19DT01NT05fQ0xLX1BXTT15CkNP
-TkZJR19IV1NQSU5MT0NLPXkKQ09ORklHX01BSUxCT1g9eQpDT05GSUdfQVJNX01IVT15CkNPTkZJ
-R19CQ00yODM1X01CT1g9eQpDT05GSUdfQVJNX1NNTVU9eQpDT05GSUdfQVJNX1NNTVVfVjM9eQpD
-T05GSUdfUkVNT1RFUFJPQz15CkNPTkZJR19SQVNQQkVSUllQSV9QT1dFUj15CkNPTkZJR19FWFRD
-T05fVVNCX0dQSU89eQpDT05GSUdfTUVNT1JZPXkKQ09ORklHX0lJTz15CkNPTkZJR19JSU9fQlVG
-RkVSPXkKQ09ORklHX0lJT19LRklGT19CVUY9eQpDT05GSUdfSUlPX1RSSUdHRVI9eQpDT05GSUdf
-UFdNPXkKQ09ORklHX1BXTV9CQ00yODM1PXkKQ09ORklHX0dFTkVSSUNfUEhZPXkKQ09ORklHX0RB
-WD15CkNPTkZJR19FWFQyX0ZTPXkKQ09ORklHX0VYVDNfRlM9eQpDT05GSUdfRVhUNF9GU19QT1NJ
-WF9BQ0w9eQpDT05GSUdfQlRSRlNfRlM9eQpDT05GSUdfQlRSRlNfRlNfUE9TSVhfQUNMPXkKQ09O
-RklHX0ZBTk9USUZZPXkKQ09ORklHX1FVT1RBPXkKQ09ORklHX0FVVE9GUzRfRlM9eQpDT05GSUdf
-RlVTRV9GUz15CkNPTkZJR19DVVNFPXkKQ09ORklHX09WRVJMQVlfRlM9eQpDT05GSUdfVkZBVF9G
-Uz15CkNPTkZJR19UTVBGUz15CkNPTkZJR19IVUdFVExCRlM9eQpDT05GSUdfQ09ORklHRlNfRlM9
-eQpDT05GSUdfU1FVQVNIRlM9eQpDT05GSUdfUFNUT1JFPXkKQ09ORklHX05GU19GUz15CkNPTkZJ
-R19ORlNfVjQ9eQpDT05GSUdfTkZTX1Y0XzE9eQpDT05GSUdfTkZTX1Y0XzI9eQpDT05GSUdfTkxT
-X0NPREVQQUdFXzQzNz15CkNPTkZJR19OTFNfSVNPODg1OV8xPXkKIyBDT05GSUdfU0VDVVJJVFlG
-UyBpcyBub3Qgc2V0CkNPTkZJR19DUllQVE9fQVVUSEVOQz15CkNPTkZJR19DUllQVE9fTUQ1PXkK
-Q09ORklHX0NSWVBUT19TSEE1MTI9eQpDT05GSUdfQ1JZUFRPX0RFUz15CkNPTkZJR19DUllQVE9f
-QU5TSV9DUFJORz15CkNPTkZJR19JTkRJUkVDVF9QSU89eQpDT05GSUdfQ1JDX0lUVV9UPXkKQ09O
-RklHX0NSQzc9eQpDT05GSUdfUFJJTlRLX1RJTUU9eQpDT05GSUdfREVCVUdfSU5GTz15CkNPTkZJ
-R19ERUJVR19GUz15CkNPTkZJR19NQUdJQ19TWVNSUT15CkNPTkZJR19ERUJVR19NRU1PUllfSU5J
-VD15CiMgQ09ORklHX1NDSEVEX0RFQlVHIGlzIG5vdCBzZXQKIyBDT05GSUdfREVCVUdfUFJFRU1Q
-VCBpcyBub3Qgc2V0CiMgQ09ORklHX0ZUUkFDRSBpcyBub3Qgc2V0CkNPTkZJR19NRU1URVNUPXkK
-Cl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmxpbnV4LXJw
-aS1rZXJuZWwgbWFpbGluZyBsaXN0CmxpbnV4LXJwaS1rZXJuZWxAbGlzdHMuaW5mcmFkZWFkLm9y
-ZwpodHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9tYWlsbWFuL2xpc3RpbmZvL2xpbnV4LXJwaS1r
-ZXJuZWwK
+Tim Harvey - Principal Software EngineerGateworks Corporation -
+http://www.gateworks.com/3026 S. Higuera St. San Luis Obispo CA
+93401805-781-2000
+On Tue, Mar 5, 2019 at 4:39 AM M=C3=A5ns Rullg=C3=A5rd <mans@mansr.com> wro=
+te:
+>
+> Douglas Anderson <dianders@chromium.org> writes:
+>
+> > This series picks patches from various different places to produce what
+> > I consider the best solution to getting consistent mmc and mmcblk
+> > ordering.
+> >
+> > Why consistent ordering and why not just use UUIDs?  IMHO consistent
+> > ordering solves a few different problems:
+> >
+> > 1. For poor, feeble-minded humans like me, have sane numbering for
+> >    devices helps a lot.  When grepping through dmesg it's terribly hand=
+y
+> >    if a given SDMMC device has a consistent number.  I know that I can
+> >    do "dmesg | grep mmc0" or "dmesg | grep mmcblk0" to find info about
+> >    the eMMC.  I know that I can do "dmesg | grep mmc1" to find info
+> >    about the SD card slot.  I don't want it to matter which one probed
+> >    first, I don't want it to matter if I'm working on a variant of the
+> >    hardware that has the SD card slot disabled, and I don't want to car=
+e
+> >    what my boot device was.  Worrying about what device number I got
+> >    increases my cognitive load.
+> >
+> > 2. There are cases where it's not trivially easy during development to
+> >    use the UUID.  Specifically I work a lot with coreboot / depthcharge
+> >    as a BIOS.  When configured properly, that BIOS has a nice feature t=
+o
+> >    allow you to fetch the kernel and kernel command line from TFTP by
+> >    pressing Ctrl-N.  In this particular case the BIOS doesn't actually
+> >    know which disk I'd like for my root filesystem, so it's not so easy
+> >    for it to put the right UUID into the command line.  For this
+> >    purpose, knowing that "mmcblk0" will always refer to eMMC is handy.
+> >
+> > Changes in v2:
+> > - Rebased atop mmc-next
+> > - Stat dynamic allocation after fixed allocation; thanks Wolfram!
+> > - rk3288 patch new for v2
+> >
+> > Douglas Anderson (1):
+> >   ARM: dts: rockchip: Add mmc aliases for rk3288 platform
+> >
+> > Jaehoon Chung (1):
+> >   Documentation: mmc: Document mmc aliases
+> >
+> > Stefan Agner (2):
+> >   mmc: read mmc alias from device tree
+> >   mmc: use SD/MMC host ID for block device name ID
+> >
+> >  Documentation/devicetree/bindings/mmc/mmc.txt | 11 +++++++++++
+> >  arch/arm/boot/dts/rk3288.dtsi                 |  4 ++++
+> >  drivers/mmc/card/block.c                      |  2 +-
+> >  drivers/mmc/core/host.c                       | 17 ++++++++++++++++-
+> >  4 files changed, 32 insertions(+), 2 deletions(-)
+>
+> Did anyone ever come up with an acceptable solution for this?  After
+> three years, I'm getting tired of rebasing these patches onto every new
+> kernel.
+>
+> UUIDs or similar are NOT an option for multiple reasons:
+>
+> - We have two rootfs partitions for ping-pong updates, so simply
+>   referring to "the thing with ID foo" doesn't work.
+>
+> - Installing said updates needs direct access the device/partition,
+>   which may not even have a filesystem.
+>
+> - The u-boot environment is stored in an eMMC "boot" partition, and
+>   userspace needs to know where to find it.
+>
+> I'm sure I'm not the only one in a similar situation.
+>
+> Russel, feel free to shout abuse at me.  I don't care, but it makes you
+> look stupid.
+>
+
+Completely agree here - we need a dt solution that allows us to
+specify ordering.
+
+I support a variety of IMX6 boards where for PCB routing reasons the
+bootable MMC device is not always the first sdhc (sometimes the first
+one is an SDIO radio for example). It seems ridiculous that I can't
+handle this with:
+
+        aliases {
+                mmc0 =3D &usdhc3; /* MMC boot device */
+                mmc1 =3D &usdhc2; /* SDIO radio */
+        };
+
+I see the imx6q-dhcom-som added in
+52c7a088badd665a09ca9307ffa91e88d5686a7d re-defines the default
+imx6qdl.dtsi mmc0-mmc3 aiases but I don't see any handling of this in
+code anywhere - am I missing something?
+
+Marek, why did you change the alias ordering for imx6q-dhcom-som.dtsi?
+(maybe your carrying around a patch to make this useful?)
+
++       aliases {
++               mmc0 =3D &usdhc2;
++               mmc1 =3D &usdhc3;
++               mmc2 =3D &usdhc4;
++               mmc3 =3D &usdhc1;
++       };
+
+Regards,
+
+Tim
