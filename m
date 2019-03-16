@@ -1,61 +1,111 @@
-From: Doug Anderson <dianders@chromium.org>
+From: Marek Vasut <marex@denx.de>
 Subject: Re: [PATCH v2 0/4] Patches to allow consistent mmc / mmcblk numbering
  w/ device tree
-Date: Fri, 15 Mar 2019 16:23:26 -0700
-Message-ID: <CAD=FV=XLuPWKjQBMLApRQxk0K30p_TPcztB7g_1DB7iRA9BGRQ@mail.gmail.com>
+Date: Sat, 16 Mar 2019 13:33:58 +0100
+Message-ID: <1fcd4dad-1e00-67cc-ac5d-24640ae34340@denx.de>
 References: <1461951139-6109-1-git-send-email-dianders@chromium.org>
- <yw1x5zsx5wc7.fsf@mansr.com> <CAJ+vNU1PxK-B63Dc3AgzYb9POyxxoF-xPOWBEpxJ+3eVNK8xqw@mail.gmail.com>
- <d5310138-7fdd-973d-5210-3fc91c4686ee@denx.de>
+ <yw1x5zsx5wc7.fsf@mansr.com>
+ <CAJ+vNU1PxK-B63Dc3AgzYb9POyxxoF-xPOWBEpxJ+3eVNK8xqw@mail.gmail.com>
+ <d5310138-7fdd-973d-5210-3fc91c4686ee@denx.de> <yw1xftrn2em9.fsf@mansr.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <d5310138-7fdd-973d-5210-3fc91c4686ee@denx.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Marek Vasut <marex@denx.de>
-Cc: Tim Harvey <tharvey@gateworks.com>, =?UTF-8?B?TcOlbnMgUnVsbGfDpXJk?= <mans@mansr.com>, Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Stefan Agner <stefan@agner.ch>, Linux MMC List <linux-mmc@vger.kernel.org>, Brian Norris <computersforpeace@gmail.com>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, Heiko Stuebner <heiko@sntech.de>, Jisheng Zhang <jszhang@marvell.com>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, devicetree-spec@vger.kernel.org, Mark Rutland <mark.rutland@arm.com>, open list <linux-kernel@vger.kernel.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Lars-Peter Clausen <lars@metafoo.de>, Russell
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <yw1xftrn2em9.fsf@mansr.com>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: =?UTF-8?B?TcOlbnMgUnVsbGfDpXJk?= <mans@mansr.com>
+Cc: Mark Rutland <mark.rutland@arm.com>, Ulf Hansson <ulf.hansson@linaro.org>, Douglas Anderson <dianders@chromium.org>, Heiko Stuebner <heiko@sntech.de>, devicetree-spec@vger.kernel.org, shawn.lin@rock-chips.com, stefan@agner.ch, Adrian Hunter <adrian.hunter@intel.com>, vbyravarasu@nvidia.com, Jisheng Zhang <jszhang@marvell.com>, Lars-Peter Clausen <lars@metafoo.de>, Russell King - ARM Linux <linux@arm.linux.org.uk>, jonathanh@nvidia.com, Jaehoon Chung <jh80.chung@samsung.com>, linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org, Pawel Moll <pawel.moll@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, grundler@chromium.org, Tim Harvey <tharvey@gateworks.com>, sudeep.holla@arm.com, lporzio@micron.com, Rob Herring <robh+dt@kernel.org>, "chaotian.j ing"@mediatek.com, linux-arm-kernel@lists.infradead.org, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Dm
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
-
-On Fri, Mar 15, 2019 at 4:00 PM Marek Vasut <marex@denx.de> wrote:
->
-> > Completely agree here - we need a dt solution that allows us to
-> > specify ordering.
->
-> Nope, ordering would be a policy and does not describe hardware, thus it
-> shouldn't be in the DT. Use UUID or PARTUUID, they apply both to raw FS
-> (fsuuid) and to partitions (part uuid). Linux kernel can mount FS using
-> PARTUUID, to support UUID you need initramfs.
-
-Two thoughts about that:
-
-1. Some amount of policy is allowed in device tree.  At some point in
-time there was a big discussion about the need for a separate "config
-tree" that was totally parallel to the device tree so we could put
-policy stuff in that.  Nobody wanted that and (as I recall) it was
-agreed that in some cases policy could go there if that policy
-expressed policy that was the generic intent of how the board ought to
-be run.  I believe this is how things like the assigned-clocks is
-justified.
-
-2. In some cases this number does describe the hardware.  You look at
-the hardware reference manual and see that there are 3 MMC
-controllers: 0, 1, and 2.  In such cases it seems like it's an OK
-description of the hardware to encode this info into the DTS.
-
-...from what I recall, one big objection is for SoCs that didn't just
-have numbers for their controllers.  AKA I think some SoCs might call
-their controllers the "eMMC" controller, the "SD" controller, and the
-"SDIO" controller.  They may be nearly the same hardware, but perhaps
-the SoC allows for a GPIO interrupt on the SDIO controller and perhaps
-the eMMC controller exposes the strobe line or has an 8-bit wide
-datapath.  In this case making up numbers does become a bit more
-arbitrary and folks didn't like it.
-
-IIRC there was general consensus that it'd be OK to somehow specify a
-string (AKA non-numeric) name for different SD controllers.  I don't
-have pointers to that conversation offhand and it's possible I
-imagined it.
-
-
--Doug
+T24gMy8xNi8xOSAxOjIyIFBNLCBNw6VucyBSdWxsZ8OlcmQgd3JvdGU6Cj4gTWFyZWsgVmFzdXQg
+PG1hcmV4QGRlbnguZGU+IHdyaXRlczoKPiAKPj4gT24gMy8xNS8xOSAxMDo1MiBQTSwgVGltIEhh
+cnZleSB3cm90ZToKPj4+IFRpbSBIYXJ2ZXkgLSBQcmluY2lwYWwgU29mdHdhcmUgRW5naW5lZXJH
+YXRld29ya3MgQ29ycG9yYXRpb24gLQo+Pj4gaHR0cDovL3d3dy5nYXRld29ya3MuY29tLzMwMjYg
+Uy4gSGlndWVyYSBTdC4gU2FuIEx1aXMgT2Jpc3BvIENBCj4+PiA5MzQwMTgwNS03ODEtMjAwMAo+
+Pj4gT24gVHVlLCBNYXIgNSwgMjAxOSBhdCA0OjM5IEFNIE3DpW5zIFJ1bGxnw6VyZCA8bWFuc0Bt
+YW5zci5jb20+IHdyb3RlOgo+Pj4+Cj4+Pj4gRG91Z2xhcyBBbmRlcnNvbiA8ZGlhbmRlcnNAY2hy
+b21pdW0ub3JnPiB3cml0ZXM6Cj4+Pj4KPj4+Pj4gVGhpcyBzZXJpZXMgcGlja3MgcGF0Y2hlcyBm
+cm9tIHZhcmlvdXMgZGlmZmVyZW50IHBsYWNlcyB0byBwcm9kdWNlIHdoYXQKPj4+Pj4gSSBjb25z
+aWRlciB0aGUgYmVzdCBzb2x1dGlvbiB0byBnZXR0aW5nIGNvbnNpc3RlbnQgbW1jIGFuZCBtbWNi
+bGsKPj4+Pj4gb3JkZXJpbmcuCj4+Pj4+Cj4+Pj4+IFdoeSBjb25zaXN0ZW50IG9yZGVyaW5nIGFu
+ZCB3aHkgbm90IGp1c3QgdXNlIFVVSURzPyAgSU1ITyBjb25zaXN0ZW50Cj4+Pj4+IG9yZGVyaW5n
+IHNvbHZlcyBhIGZldyBkaWZmZXJlbnQgcHJvYmxlbXM6Cj4+Pj4+Cj4+Pj4+IDEuIEZvciBwb29y
+LCBmZWVibGUtbWluZGVkIGh1bWFucyBsaWtlIG1lLCBoYXZlIHNhbmUgbnVtYmVyaW5nIGZvcgo+
+Pj4+PiAgICBkZXZpY2VzIGhlbHBzIGEgbG90LiAgV2hlbiBncmVwcGluZyB0aHJvdWdoIGRtZXNn
+IGl0J3MgdGVycmlibHkgaGFuZHkKPj4+Pj4gICAgaWYgYSBnaXZlbiBTRE1NQyBkZXZpY2UgaGFz
+IGEgY29uc2lzdGVudCBudW1iZXIuICBJIGtub3cgdGhhdCBJIGNhbgo+Pj4+PiAgICBkbyAiZG1l
+c2cgfCBncmVwIG1tYzAiIG9yICJkbWVzZyB8IGdyZXAgbW1jYmxrMCIgdG8gZmluZCBpbmZvIGFi
+b3V0Cj4+Pj4+ICAgIHRoZSBlTU1DLiAgSSBrbm93IHRoYXQgSSBjYW4gZG8gImRtZXNnIHwgZ3Jl
+cCBtbWMxIiB0byBmaW5kIGluZm8KPj4+Pj4gICAgYWJvdXQgdGhlIFNEIGNhcmQgc2xvdC4gIEkg
+ZG9uJ3Qgd2FudCBpdCB0byBtYXR0ZXIgd2hpY2ggb25lIHByb2JlZAo+Pj4+PiAgICBmaXJzdCwg
+SSBkb24ndCB3YW50IGl0IHRvIG1hdHRlciBpZiBJJ20gd29ya2luZyBvbiBhIHZhcmlhbnQgb2Yg
+dGhlCj4+Pj4+ICAgIGhhcmR3YXJlIHRoYXQgaGFzIHRoZSBTRCBjYXJkIHNsb3QgZGlzYWJsZWQs
+IGFuZCBJIGRvbid0IHdhbnQgdG8gY2FyZQo+Pj4+PiAgICB3aGF0IG15IGJvb3QgZGV2aWNlIHdh
+cy4gIFdvcnJ5aW5nIGFib3V0IHdoYXQgZGV2aWNlIG51bWJlciBJIGdvdAo+Pj4+PiAgICBpbmNy
+ZWFzZXMgbXkgY29nbml0aXZlIGxvYWQuCj4+Pj4+Cj4+Pj4+IDIuIFRoZXJlIGFyZSBjYXNlcyB3
+aGVyZSBpdCdzIG5vdCB0cml2aWFsbHkgZWFzeSBkdXJpbmcgZGV2ZWxvcG1lbnQgdG8KPj4+Pj4g
+ICAgdXNlIHRoZSBVVUlELiAgU3BlY2lmaWNhbGx5IEkgd29yayBhIGxvdCB3aXRoIGNvcmVib290
+IC8gZGVwdGhjaGFyZ2UKPj4+Pj4gICAgYXMgYSBCSU9TLiAgV2hlbiBjb25maWd1cmVkIHByb3Bl
+cmx5LCB0aGF0IEJJT1MgaGFzIGEgbmljZSBmZWF0dXJlIHRvCj4+Pj4+ICAgIGFsbG93IHlvdSB0
+byBmZXRjaCB0aGUga2VybmVsIGFuZCBrZXJuZWwgY29tbWFuZCBsaW5lIGZyb20gVEZUUCBieQo+
+Pj4+PiAgICBwcmVzc2luZyBDdHJsLU4uICBJbiB0aGlzIHBhcnRpY3VsYXIgY2FzZSB0aGUgQklP
+UyBkb2Vzbid0IGFjdHVhbGx5Cj4+Pj4+ICAgIGtub3cgd2hpY2ggZGlzayBJJ2QgbGlrZSBmb3Ig
+bXkgcm9vdCBmaWxlc3lzdGVtLCBzbyBpdCdzIG5vdCBzbyBlYXN5Cj4+Pj4+ICAgIGZvciBpdCB0
+byBwdXQgdGhlIHJpZ2h0IFVVSUQgaW50byB0aGUgY29tbWFuZCBsaW5lLiAgRm9yIHRoaXMKPj4+
+Pj4gICAgcHVycG9zZSwga25vd2luZyB0aGF0ICJtbWNibGswIiB3aWxsIGFsd2F5cyByZWZlciB0
+byBlTU1DIGlzIGhhbmR5Lgo+Pj4+Pgo+Pj4+PiBDaGFuZ2VzIGluIHYyOgo+Pj4+PiAtIFJlYmFz
+ZWQgYXRvcCBtbWMtbmV4dAo+Pj4+PiAtIFN0YXQgZHluYW1pYyBhbGxvY2F0aW9uIGFmdGVyIGZp
+eGVkIGFsbG9jYXRpb247IHRoYW5rcyBXb2xmcmFtIQo+Pj4+PiAtIHJrMzI4OCBwYXRjaCBuZXcg
+Zm9yIHYyCj4+Pj4+Cj4+Pj4+IERvdWdsYXMgQW5kZXJzb24gKDEpOgo+Pj4+PiAgIEFSTTogZHRz
+OiByb2NrY2hpcDogQWRkIG1tYyBhbGlhc2VzIGZvciByazMyODggcGxhdGZvcm0KPj4+Pj4KPj4+
+Pj4gSmFlaG9vbiBDaHVuZyAoMSk6Cj4+Pj4+ICAgRG9jdW1lbnRhdGlvbjogbW1jOiBEb2N1bWVu
+dCBtbWMgYWxpYXNlcwo+Pj4+Pgo+Pj4+PiBTdGVmYW4gQWduZXIgKDIpOgo+Pj4+PiAgIG1tYzog
+cmVhZCBtbWMgYWxpYXMgZnJvbSBkZXZpY2UgdHJlZQo+Pj4+PiAgIG1tYzogdXNlIFNEL01NQyBo
+b3N0IElEIGZvciBibG9jayBkZXZpY2UgbmFtZSBJRAo+Pj4+Pgo+Pj4+PiAgRG9jdW1lbnRhdGlv
+bi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9tbWMudHh0IHwgMTEgKysrKysrKysrKysKPj4+Pj4g
+IGFyY2gvYXJtL2Jvb3QvZHRzL3JrMzI4OC5kdHNpICAgICAgICAgICAgICAgICB8ICA0ICsrKysK
+Pj4+Pj4gIGRyaXZlcnMvbW1jL2NhcmQvYmxvY2suYyAgICAgICAgICAgICAgICAgICAgICB8ICAy
+ICstCj4+Pj4+ICBkcml2ZXJzL21tYy9jb3JlL2hvc3QuYyAgICAgICAgICAgICAgICAgICAgICAg
+fCAxNyArKysrKysrKysrKysrKysrLQo+Pj4+PiAgNCBmaWxlcyBjaGFuZ2VkLCAzMiBpbnNlcnRp
+b25zKCspLCAyIGRlbGV0aW9ucygtKQo+Pj4+Cj4+Pj4gRGlkIGFueW9uZSBldmVyIGNvbWUgdXAg
+d2l0aCBhbiBhY2NlcHRhYmxlIHNvbHV0aW9uIGZvciB0aGlzPyAgQWZ0ZXIKPj4+PiB0aHJlZSB5
+ZWFycywgSSdtIGdldHRpbmcgdGlyZWQgb2YgcmViYXNpbmcgdGhlc2UgcGF0Y2hlcyBvbnRvIGV2
+ZXJ5IG5ldwo+Pj4+IGtlcm5lbC4KPj4+Pgo+Pj4+IFVVSURzIG9yIHNpbWlsYXIgYXJlIE5PVCBh
+biBvcHRpb24gZm9yIG11bHRpcGxlIHJlYXNvbnM6Cj4+Pj4KPj4+PiAtIFdlIGhhdmUgdHdvIHJv
+b3RmcyBwYXJ0aXRpb25zIGZvciBwaW5nLXBvbmcgdXBkYXRlcywgc28gc2ltcGx5Cj4+Pj4gICBy
+ZWZlcnJpbmcgdG8gInRoZSB0aGluZyB3aXRoIElEIGZvbyIgZG9lc24ndCB3b3JrLgo+Pj4+Cj4+
+Pj4gLSBJbnN0YWxsaW5nIHNhaWQgdXBkYXRlcyBuZWVkcyBkaXJlY3QgYWNjZXNzIHRoZSBkZXZp
+Y2UvcGFydGl0aW9uLAo+Pj4+ICAgd2hpY2ggbWF5IG5vdCBldmVuIGhhdmUgYSBmaWxlc3lzdGVt
+Lgo+Pj4+Cj4+Pj4gLSBUaGUgdS1ib290IGVudmlyb25tZW50IGlzIHN0b3JlZCBpbiBhbiBlTU1D
+ICJib290IiBwYXJ0aXRpb24sIGFuZAo+Pj4+ICAgdXNlcnNwYWNlIG5lZWRzIHRvIGtub3cgd2hl
+cmUgdG8gZmluZCBpdC4KPj4+Pgo+Pj4+IEknbSBzdXJlIEknbSBub3QgdGhlIG9ubHkgb25lIGlu
+IGEgc2ltaWxhciBzaXR1YXRpb24uCj4+Pj4KPj4+PiBSdXNzZWwsIGZlZWwgZnJlZSB0byBzaG91
+dCBhYnVzZSBhdCBtZS4gIEkgZG9uJ3QgY2FyZSwgYnV0IGl0IG1ha2VzIHlvdQo+Pj4+IGxvb2sg
+c3R1cGlkLgo+Pj4+Cj4+Pgo+Pj4gQ29tcGxldGVseSBhZ3JlZSBoZXJlIC0gd2UgbmVlZCBhIGR0
+IHNvbHV0aW9uIHRoYXQgYWxsb3dzIHVzIHRvCj4+PiBzcGVjaWZ5IG9yZGVyaW5nLgo+Pgo+PiBO
+b3BlLCBvcmRlcmluZyB3b3VsZCBiZSBhIHBvbGljeSBhbmQgZG9lcyBub3QgZGVzY3JpYmUgaGFy
+ZHdhcmUsIHRodXMgaXQKPj4gc2hvdWxkbid0IGJlIGluIHRoZSBEVC4gVXNlIFVVSUQgb3IgUEFS
+VFVVSUQsIHRoZXkgYXBwbHkgYm90aCB0byByYXcgRlMKPj4gKGZzdXVpZCkgYW5kIHRvIHBhcnRp
+dGlvbnMgKHBhcnQgdXVpZCkuIExpbnV4IGtlcm5lbCBjYW4gbW91bnQgRlMgdXNpbmcKPj4gUEFS
+VFVVSUQsIHRvIHN1cHBvcnQgVVVJRCB5b3UgbmVlZCBpbml0cmFtZnMuCj4gCj4gVGhhdCBkb2Vz
+bid0IGFkZHJlc3MgaG93IHRvIGZpbmQgZU1NQyBib290IHBhcnRpdGlvbnMuCgpJZiB5b3UgaGF2
+ZSBhIEZTIG9yIHBhcnRpdGlvbiB0YWJsZSB0aGVyZSwgaXQgZG9lcy4KSWYgeW91IGRvbid0LCBJ
+IGFncmVlIC4uLiB0aGF0J3MgYSBwcm9ibGVtLgoKPiBJIGRvbid0IGNhcmUgdGhlIHNsaWdodGVz
+dCB3aGF0IHRoZSBudW1iZXJpbmcgaXMsIGFzIGxvbmcgYXMgaXQgaXMKPiBzdGFibGUuICBPbiBz
+b21lIGhhcmR3YXJlLCB3aXRoIGFuIHVucGF0Y2hlZCBrZXJuZWwsIHRoZSBtbWMgZGV2aWNlCj4g
+bnVtYmVyaW5nIGNoYW5nZXMgZGVwZW5kaW5nIG9uIHdoZXRoZXIgb3Igbm90IGFuIFNEIGNhcmQg
+aXMgaW5zZXJ0ZWQgb24KPiBib290LiAgR2V0dGluZyByaWQgb2YgdGhhdCBiZWhhdmlvdXIgaXMg
+cmVhbGx5IGFsbCBJIHdhbnQuCgpBZ3JlZWQsIHRoYXQgd291bGQgYmUgYW4gaW1wcm92ZW1lbnQu
+CgotLSAKQmVzdCByZWdhcmRzLApNYXJlayBWYXN1dAoKX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX18KbGludXgtYXJtLWtlcm5lbCBtYWlsaW5nIGxpc3QKbGlu
+dXgtYXJtLWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnCmh0dHA6Ly9saXN0cy5pbmZyYWRlYWQu
+b3JnL21haWxtYW4vbGlzdGluZm8vbGludXgtYXJtLWtlcm5lbAo=
