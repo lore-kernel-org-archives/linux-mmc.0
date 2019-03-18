@@ -1,58 +1,37 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: mxs-mmc: Enable MMC_CAP_ERASE
-Date: Mon, 18 Mar 2019 11:52:01 +0100
-Message-ID: <CAPDyKFrpZ8ok8w_ezH+3rHZ=Q68Y=OauH2jfu-6CqyESdK4dFA@mail.gmail.com>
-References: <1552580302-11393-1-git-send-email-stefan.wahren@i2se.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1552580302-11393-1-git-send-email-stefan.wahren@i2se.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Stefan Wahren <stefan.wahren@i2se.com>
-Cc: Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, dl-linux-imx <linux-imx@nxp.com>, Sascha Hauer <kernel@pengutronix.de>, Fabio Estevam <festevam@gmail.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+From: Marcel Holtmann <marcel@holtmann.org>
+Subject: Re: [PATCH v1 0/3] add module_sdio_driver and enable a few users
+Date: Mon, 18 Mar 2019 18:17:39 +0100
+Message-ID: <D233C009-8EA4-4C47-9CB3-A26C74C200D1@holtmann.org>
+References: <cover.1552510141.git.sean.wang@mediatek.com>
+Mime-Version: 1.0 (Mac OS X Mail 12.2 \(3445.102.3\))
+Content-Type: text/plain;
+        charset=us-ascii
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <cover.1552510141.git.sean.wang@mediatek.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: sean.wang@mediatek.com
+Cc: Johan Hedberg <johan.hedberg@gmail.com>, ulf.hansson@linaro.org, linux-bluetooth@vger.kernel.org, linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 14 Mar 2019 at 17:18, Stefan Wahren <stefan.wahren@i2se.com> wrote:
->
-> According to the i.MX23/28 reference manuals both mmc interfaces support
-> the MMC_ERASE command. So enable this capability in the driver to allow
-> erase/discard/trim requests.
->
-> Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
+Hi Sean,
 
-Applied for next, thanks!
+> Add module_sdio_driver exactly like the function module_usb_drivear offers to
+> and enable a few users to eliminate a few lines of boilerplate code per SDIO
+> driver.
+> 
+> Sean Wang (3):
+>  mmc: sdio: Add helper macro for sdio_driver boilerplate
+>  Bluetooth: mediatek: Use module_sdio_driver helper
+>  Bluetooth: btsdio: Use module_sdio_driver helper
+> 
+> drivers/bluetooth/btmtksdio.c | 15 +--------------
+> drivers/bluetooth/btsdio.c    | 15 +--------------
+> include/linux/mmc/sdio_func.h | 12 ++++++++++++
+> 3 files changed, 14 insertions(+), 28 deletions(-)
 
-Kind regards
-Uffe
+all 3 patches have been applied to bluetooth-next tree.
 
+Regards
 
-> ---
->  drivers/mmc/host/mxs-mmc.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-> index 4f06fb0..c021d43 100644
-> --- a/drivers/mmc/host/mxs-mmc.c
-> +++ b/drivers/mmc/host/mxs-mmc.c
-> @@ -648,7 +648,8 @@ static int mxs_mmc_probe(struct platform_device *pdev)
->         /* set mmc core parameters */
->         mmc->ops = &mxs_mmc_ops;
->         mmc->caps = MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED |
-> -                   MMC_CAP_SDIO_IRQ | MMC_CAP_NEEDS_POLL | MMC_CAP_CMD23;
-> +                   MMC_CAP_SDIO_IRQ | MMC_CAP_NEEDS_POLL | MMC_CAP_CMD23 |
-> +                   MMC_CAP_ERASE;
->
->         host->broken_cd = of_property_read_bool(np, "broken-cd");
->
-> --
-> 2.7.4
->
+Marcel
