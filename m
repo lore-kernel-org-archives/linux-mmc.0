@@ -1,42 +1,60 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v1 0/3] add module_sdio_driver and enable a few users
-Date: Mon, 18 Mar 2019 11:26:57 +0100
-Message-ID: <CAPDyKFrvZQBXYU3T=pPYYyx1TEu26U8Z3Nky+n5p8rfkxCqtKw@mail.gmail.com>
-References: <cover.1552510141.git.sean.wang@mediatek.com>
+Subject: Re: [PATCH] mmc: pxamci: fix enum type confusion
+Date: Mon, 18 Mar 2019 11:51:26 +0100
+Message-ID: <CAPDyKFq00AV6bhR0M-ZA5D0tO5S-cTx2bK=0w4DEGttb8khcOw@mail.gmail.com>
+References: <20190307100948.570006-1-arnd@arndb.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <cover.1552510141.git.sean.wang@mediatek.com>
+In-Reply-To: <20190307100948.570006-1-arnd@arndb.de>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Sean Wang <sean.wang@mediatek.com>
-Cc: Marcel Holtmann <marcel@holtmann.org>, Johan Hedberg <johan.hedberg@gmail.com>, linux-bluetooth@vger.kernel.org, linux-mediatek@lists.infradead.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Robert Jarzmik <robert.jarzmik@free.fr>, Nick Desaulniers <ndesaulniers@google.com>, Daniel Mack <daniel@zonque.org>, Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 13 Mar 2019 at 22:02, <sean.wang@mediatek.com> wrote:
+On Thu, 7 Mar 2019 at 11:09, Arnd Bergmann <arnd@arndb.de> wrote:
 >
-> From: Sean Wang <sean.wang@mediatek.com>
+> clang points out several instances of mismatched types in this drivers,
+> all coming from a single declaration:
 >
-> Add module_sdio_driver exactly like the function module_usb_drivear offers to
-> and enable a few users to eliminate a few lines of boilerplate code per SDIO
-> driver.
+> drivers/mmc/host/pxamci.c:193:15: error: implicit conversion from enumeration type 'enum dma_transfer_direction' to
+>       different enumeration type 'enum dma_data_direction' [-Werror,-Wenum-conversion]
+>                 direction = DMA_DEV_TO_MEM;
+>                           ~ ^~~~~~~~~~~~~~
+> drivers/mmc/host/pxamci.c:212:62: error: implicit conversion from enumeration type 'enum dma_data_direction' to
+>       different enumeration type 'enum dma_transfer_direction' [-Werror,-Wenum-conversion]
+>         tx = dmaengine_prep_slave_sg(chan, data->sg, host->dma_len, direction,
 >
-> Sean Wang (3):
->   mmc: sdio: Add helper macro for sdio_driver boilerplate
->   Bluetooth: mediatek: Use module_sdio_driver helper
->   Bluetooth: btsdio: Use module_sdio_driver helper
+> The behavior is correct, so this must be a simply typo from
+> dma_data_direction and dma_transfer_direction being similarly named
+> types with a similar purpose.
 >
->  drivers/bluetooth/btmtksdio.c | 15 +--------------
->  drivers/bluetooth/btsdio.c    | 15 +--------------
->  include/linux/mmc/sdio_func.h | 12 ++++++++++++
->  3 files changed, 14 insertions(+), 28 deletions(-)
->
-> --
-> 2.18.0
->
+> Fixes: 6464b7140951 ("mmc: pxamci: switch over to dmaengine use")
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 
-For series:
-
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+Applied for fixes and by adding a stable tag, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>  drivers/mmc/host/pxamci.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
+> index c907bf502a12..c1d3f0e38921 100644
+> --- a/drivers/mmc/host/pxamci.c
+> +++ b/drivers/mmc/host/pxamci.c
+> @@ -162,7 +162,7 @@ static void pxamci_dma_irq(void *param);
+>  static void pxamci_setup_data(struct pxamci_host *host, struct mmc_data *data)
+>  {
+>         struct dma_async_tx_descriptor *tx;
+> -       enum dma_data_direction direction;
+> +       enum dma_transfer_direction direction;
+>         struct dma_slave_config config;
+>         struct dma_chan *chan;
+>         unsigned int nob = data->blocks;
+> --
+> 2.20.0
+>
