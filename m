@@ -1,62 +1,58 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 0/3] Add hardware unbusy interrupt support for dw_mmc
-Date: Mon, 18 Mar 2019 11:51:57 +0100
-Message-ID: <CAPDyKFq6mBrs0qFpBJbD0QAOBKJ68yL=L-_iEb7spfODZLYDBg@mail.gmail.com>
-References: <1552376109-126335-1-git-send-email-shawn.lin@rock-chips.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: mxs-mmc: Enable MMC_CAP_ERASE
+Date: Mon, 18 Mar 2019 11:52:01 +0100
+Message-ID: <CAPDyKFrpZ8ok8w_ezH+3rHZ=Q68Y=OauH2jfu-6CqyESdK4dFA@mail.gmail.com>
+References: <1552580302-11393-1-git-send-email-stefan.wahren@i2se.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <1552376109-126335-1-git-send-email-shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Cc: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1552580302-11393-1-git-send-email-stefan.wahren@i2se.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Stefan Wahren <stefan.wahren@i2se.com>
+Cc: Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, dl-linux-imx <linux-imx@nxp.com>, Sascha Hauer <kernel@pengutronix.de>, Fabio Estevam <festevam@gmail.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 12 Mar 2019 at 08:36, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org> wrote:
+On Thu, 14 Mar 2019 at 17:18, Stefan Wahren <stefan.wahren@i2se.com> wrote:
 >
+> According to the i.MX23/28 reference manuals both mmc interfaces support
+> the MMC_ERASE command. So enable this capability in the driver to allow
+> erase/discard/trim requests.
 >
-> DesignWare MMC controler lacks proper hardware wait
-> busy support, so the software must check the busy
-> state if the following tranfser need use data line.
-> And dw_mci_wait_while_busy() now use busy check mostly
-> with host's lock hold, and we can't relinguish CPU
-> at this moment, which makes it rather painful when used
-> in low-end platform. To solve this, Rockchip invent
-> a new hardware unbusy interrupt module, which could
-> generate interrupt if the state machine runs from
-> busy state into idle state.
->
->
-> Changes in v2:
-> - add tag from Ziyuan Xu
-> - remove lock for checking event since it's already atomic operation
->
-> Shawn Lin (3):
->   mmc: dw_mmc: Check busy state in dw_mci_request()
->   mmc: dw_mmc: Add hardware unbusy interrupt support
->   mmc: dw_mmc-rockchip: Enable hardware unbusy interrupt support
->
->  drivers/mmc/host/dw_mmc-rockchip.c | 30 ++++++++++++++++++++
->  drivers/mmc/host/dw_mmc.c          | 56 +++++++++++++++++++++++++++++++++++++-
->  drivers/mmc/host/dw_mmc.h          |  6 ++++
->  3 files changed, 91 insertions(+), 1 deletion(-)
->
-> --
-> 1.9.1
->
->
->
+> Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
 
 Applied for next, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>  drivers/mmc/host/mxs-mmc.c | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+> index 4f06fb0..c021d43 100644
+> --- a/drivers/mmc/host/mxs-mmc.c
+> +++ b/drivers/mmc/host/mxs-mmc.c
+> @@ -648,7 +648,8 @@ static int mxs_mmc_probe(struct platform_device *pdev)
+>         /* set mmc core parameters */
+>         mmc->ops = &mxs_mmc_ops;
+>         mmc->caps = MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED |
+> -                   MMC_CAP_SDIO_IRQ | MMC_CAP_NEEDS_POLL | MMC_CAP_CMD23;
+> +                   MMC_CAP_SDIO_IRQ | MMC_CAP_NEEDS_POLL | MMC_CAP_CMD23 |
+> +                   MMC_CAP_ERASE;
+>
+>         host->broken_cd = of_property_read_bool(np, "broken-cd");
+>
+> --
+> 2.7.4
+>
