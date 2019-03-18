@@ -1,52 +1,122 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: davinci: remove extraneous __init annotation
-Date: Mon, 18 Mar 2019 11:51:29 +0100
-Message-ID: <CAPDyKFpod7t4T46Ag6SzLgzRPr3T_XDhrDfRGTuJ0Ru5_0MQ2Q@mail.gmail.com>
-References: <20190307101024.594587-1-arnd@arndb.de>
+Subject: Re: [PATCH] drivers: mmc: Kconfig: pedantic cleanups
+Date: Mon, 18 Mar 2019 11:51:50 +0100
+Message-ID: <CAPDyKFqheGy3hsqurabG0m7fmURkUThJDw2p4JhBQzi9yUMUWQ@mail.gmail.com>
+References: <1551896871-30654-1-git-send-email-info@metux.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190307101024.594587-1-arnd@arndb.de>
+In-Reply-To: <1551896871-30654-1-git-send-email-info@metux.net>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Nick Desaulniers <ndesaulniers@google.com>, Linus Walleij <linus.walleij@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: "Enrico Weigelt, metux IT consult" <info@metux.net>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 7 Mar 2019 at 11:10, Arnd Bergmann <arnd@arndb.de> wrote:
+On Wed, 6 Mar 2019 at 19:27, Enrico Weigelt, metux IT consult
+<info@metux.net> wrote:
 >
-> Building with clang finds a mistaken __init tag:
->
-> WARNING: vmlinux.o(.text+0x5e4250): Section mismatch in reference from the function davinci_mmcsd_probe() to the function .init.text:init_mmcsd_host()
-> The function davinci_mmcsd_probe() references
-> the function __init init_mmcsd_host().
-> This is often because davinci_mmcsd_probe lacks a __init
-> annotation or the annotation of init_mmcsd_host is wrong.
->
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+> Signed-off-by: Enrico Weigelt, metux IT consult <info@metux.net>
 
-Applied for fixes, thanks!
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/davinci_mmc.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  drivers/mmc/host/Kconfig | 43 ++++++++++++++++++++++---------------------
+>  1 file changed, 22 insertions(+), 21 deletions(-)
 >
-> diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
-> index 49e0daf2ef5e..f37003df1e01 100644
-> --- a/drivers/mmc/host/davinci_mmc.c
-> +++ b/drivers/mmc/host/davinci_mmc.c
-> @@ -1117,7 +1117,7 @@ static inline void mmc_davinci_cpufreq_deregister(struct mmc_davinci_host *host)
->  {
->  }
->  #endif
-> -static void __init init_mmcsd_host(struct mmc_davinci_host *host)
-> +static void init_mmcsd_host(struct mmc_davinci_host *host)
->  {
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 28fcd8f..de7a38d 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -437,7 +437,7 @@ config MMC_WBSD
+>         depends on ISA_DMA_API
+>         help
+>           This selects the Winbond(R) W83L51xD Secure digital and
+> -          Multimedia card Interface.
+> +         Multimedia card Interface.
+>           If you have a machine with a integrated W83L518D or W83L519D
+>           SD/MMC card reader, say Y or M here.
 >
->         mmc_davinci_reset_ctrl(host, 1);
+> @@ -515,7 +515,7 @@ config MMC_TIFM_SD
+>           'Misc devices: TI Flash Media PCI74xx/PCI76xx host adapter support
+>           (TIFM_7XX1)'.
+>
+> -          To compile this driver as a module, choose M here: the
+> +         To compile this driver as a module, choose M here: the
+>           module will be called tifm_sd.
+>
+>  config MMC_MVSDIO
+> @@ -531,12 +531,12 @@ config MMC_MVSDIO
+>           module will be called mvsdio.
+>
+>  config MMC_DAVINCI
+> -        tristate "TI DAVINCI Multimedia Card Interface support"
+> -        depends on ARCH_DAVINCI
+> -        help
+> -          This selects the TI DAVINCI Multimedia card Interface.
+> -          If you have an DAVINCI board with a Multimedia Card slot,
+> -          say Y or M here.  If unsure, say N.
+> +       tristate "TI DAVINCI Multimedia Card Interface support"
+> +       depends on ARCH_DAVINCI
+> +       help
+> +         This selects the TI DAVINCI Multimedia card Interface.
+> +         If you have an DAVINCI board with a Multimedia Card slot,
+> +         say Y or M here.  If unsure, say N.
+>
+>  config MMC_GOLDFISH
+>         tristate "goldfish qemu Multimedia Card Interface support"
+> @@ -565,18 +565,18 @@ config MMC_S3C
+>         depends on S3C24XX_DMAC
+>         help
+>           This selects a driver for the MCI interface found in
+> -          Samsung's S3C2410, S3C2412, S3C2440, S3C2442 CPUs.
+> +         Samsung's S3C2410, S3C2412, S3C2440, S3C2442 CPUs.
+>           If you have a board based on one of those and a MMC/SD
+>           slot, say Y or M here.
+>
+>           If unsure, say N.
+>
+>  config MMC_S3C_HW_SDIO_IRQ
+> -       bool "Hardware support for SDIO IRQ"
+> -       depends on MMC_S3C
+> -       help
+> -         Enable the hardware support for SDIO interrupts instead of using
+> -        the generic polling code.
+> +       bool "Hardware support for SDIO IRQ"
+> +       depends on MMC_S3C
+> +       help
+> +         Enable the hardware support for SDIO interrupts instead of using
+> +         the generic polling code.
+>
+>  choice
+>         prompt "Samsung S3C SD/MMC transfer code"
+> @@ -948,15 +948,16 @@ config MMC_MTK
+>           If unsure, say N.
+>
+>  config MMC_SDHCI_MICROCHIP_PIC32
+> -        tristate "Microchip PIC32MZDA SDHCI support"
+> -        depends on MMC_SDHCI && PIC32MZDA && MMC_SDHCI_PLTFM
+> -        help
+> -          This selects the Secure Digital Host Controller Interface (SDHCI)
+> -          for PIC32MZDA platform.
+> +       tristate "Microchip PIC32MZDA SDHCI support"
+> +       depends on MMC_SDHCI && PIC32MZDA && MMC_SDHCI_PLTFM
+> +       help
+> +         This selects the Secure Digital Host Controller Interface (SDHCI)
+> +         for PIC32MZDA platform.
+> +
+> +         If you have a controller with this interface, say Y or M here.
+>
+> -          If you have a controller with this interface, say Y or M here.
+> +         If unsure, say N.
+>
+> -          If unsure, say N.
+>  config MMC_SDHCI_BRCMSTB
+>         tristate "Broadcom SDIO/SD/MMC support"
+>         depends on ARCH_BRCMSTB || BMIPS_GENERIC
 > --
-> 2.20.0
+> 1.9.1
 >
