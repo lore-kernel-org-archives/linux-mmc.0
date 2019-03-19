@@ -1,111 +1,74 @@
-From: Robin Murphy <robin.murphy@arm.com>
-Subject: Re: [PATCH v2] mmc: dw_mmc: Fix to avoid potential NULL pointer
- dereference
-Date: Tue, 19 Mar 2019 11:09:48 +0000
-Message-ID: <f3363524-f764-6652-9b16-3a8b0d30e6df@arm.com>
-References: <20190319014551.16559-1-pakki001@umn.edu>
+From: Faiz Abbas <faiz_abbas@ti.com>
+Subject: Re: [PATCH v3 2/2] mmc: sdhci-omap: Don't finish_mrq() on a command
+ error during tuning
+Date: Tue, 19 Mar 2019 17:15:29 +0530
+Message-ID: <b52277dd-39aa-b6ea-313e-55ed65afba1e@ti.com>
+References: <20190319063533.12171-1-faiz_abbas@ti.com>
+ <20190319063533.12171-3-faiz_abbas@ti.com>
+ <8261c01f-fd8e-0930-fee5-793b02071542@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190319014551.16559-1-pakki001@umn.edu>
-Content-Language: en-GB
+In-Reply-To: <8261c01f-fd8e-0930-fee5-793b02071542@ti.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Aditya Pakki <pakki001@umn.edu>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-samsung-soc@vger.kernel.org, Heiko Stuebner <heiko@sntech.de>, linux-mmc@vger.kernel.org, kjlu@umn.edu, linux-kernel@vger.kernel.org, Krzysztof Kozlowski <krzk@kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, linux-rockchip@lists.infradead.org, Kukjin Kim <kgene@kernel.org>, Jun Nie <jun.nie@linaro.org>, Shawn Guo <shawnguo@kernel.org>, linux-arm-kernel@lists.infradead.org
+To: Kishon Vijay Abraham I <kishon@ti.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com
 List-Id: linux-mmc@vger.kernel.org
 
-On 19/03/2019 01:45, Aditya Pakki wrote:
-> of_match_node can fail and return NULL in case no matching structure.
-> The patches checks for such a scenario and returns -ENXIO.
+Hi Kishon,
 
-FWIW, it looks like most of these instances could be cleaned up even 
-more with of_device_get_match_data().
-
-In general, do bear in mind that adding these NULL checks *everywhere* 
-will in many cases just amount to useless dead code - a pure DT-based 
-driver can usually freely assume of_match_node() returns non-NULL for 
-its own device and match table in its probe routine, because that probe 
-routine only ever gets called if of_driver_match_device() has already 
-made the same match in the first place.
-
-Robin.
-
-> ---
-> V1: Added files dw_mmc-zx.c and dw_mmc-rockchip.c
+On 19/03/19 1:37 PM, Kishon Vijay Abraham I wrote:
+> Hi Faiz,
 > 
-> Signed-off-by: Aditya Pakki <pakki001@umn.edu>
-> ---
->   drivers/mmc/host/dw_mmc-exynos.c   | 2 ++
->   drivers/mmc/host/dw_mmc-k3.c       | 2 ++
->   drivers/mmc/host/dw_mmc-pltfm.c    | 2 ++
->   drivers/mmc/host/dw_mmc-rockchip.c | 2 ++
->   drivers/mmc/host/dw_mmc-zx.c       | 2 ++
->   5 files changed, 10 insertions(+)
+> On 19/03/19 12:05 PM, Faiz Abbas wrote:
+>> commit 5b0d62108b46 ("mmc: sdhci-omap: Add platform specific reset
+>> callback") skips data resets during tuning operation. Because of this,
+>> a data error or data finish interrupt might still arrive after a command
+>> error has been handled and the mrq ended. This ends up with a "mmc0: Got
+>> data interrupt 0x00000002 even though no data operation was in progress"
+>> error message.
+>>
+>> Fix this by adding a platform specific callback for sdhci_irq. Mark the
+>> mrq as a failure but wait for a data interrupt instead of calling
+>> finish_mrq().
+>>
+>> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+>> ---
+>>  drivers/mmc/host/sdhci-omap.c | 36 +++++++++++++++++++++++++++++++++++
+>>  1 file changed, 36 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+>> index b1a66ca3821a..765873dff7ca 100644
+>> --- a/drivers/mmc/host/sdhci-omap.c
+>> +++ b/drivers/mmc/host/sdhci-omap.c
+>> @@ -797,6 +797,41 @@ void sdhci_omap_reset(struct sdhci_host *host, u8 mask)
+>>  	sdhci_reset(host, mask);
+>>  }
+>>  
+>> +#define CMD_ERR_MASK (SDHCI_INT_CRC | SDHCI_INT_END_BIT | SDHCI_INT_INDEX)
+>> +#define CMD_MASK (CMD_ERR_MASK | SDHCI_INT_RESPONSE)
+>> +
+>> +static irqreturn_t sdhci_omap_irq(struct sdhci_host *host, u32 intmask)
+>> +{
+>> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>> +	struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
+>> +
+>> +	if (omap_host->is_tuning && (intmask & CMD_ERR_MASK)) {
+>> +
+>> +		/*
+>> +		 * Since we are not resetting data lines during tuning
+>> +		 * operation, data error or data complete interrupts
+>> +		 * might still arrive. Mark this request as a failure
+>> +		 * but still wait for the data interrupt
+>> +		 */
+>> +		if (intmask & SDHCI_INT_TIMEOUT)
 > 
-> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-> index d46c3439b508..8a75d7314606 100644
-> --- a/drivers/mmc/host/dw_mmc-exynos.c
-> +++ b/drivers/mmc/host/dw_mmc-exynos.c
-> @@ -554,6 +554,8 @@ static int dw_mci_exynos_probe(struct platform_device *pdev)
->   	int ret;
->   
->   	match = of_match_node(dw_mci_exynos_match, pdev->dev.of_node);
-> +	if (!match)
-> +		return -ENXIO;
->   	drv_data = match->data;
->   
->   	pm_runtime_get_noresume(&pdev->dev);
-> diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
-> index 89cdb3d533bb..cc50b7546a20 100644
-> --- a/drivers/mmc/host/dw_mmc-k3.c
-> +++ b/drivers/mmc/host/dw_mmc-k3.c
-> @@ -459,6 +459,8 @@ static int dw_mci_k3_probe(struct platform_device *pdev)
->   	const struct of_device_id *match;
->   
->   	match = of_match_node(dw_mci_k3_match, pdev->dev.of_node);
-> +	if (!match)
-> +		return -ENXIO;
->   	drv_data = match->data;
->   
->   	return dw_mci_pltfm_register(pdev, drv_data);
-> diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
-> index 58c13e21bd5a..b1948989f617 100644
-> --- a/drivers/mmc/host/dw_mmc-pltfm.c
-> +++ b/drivers/mmc/host/dw_mmc-pltfm.c
-> @@ -82,6 +82,8 @@ static int dw_mci_pltfm_probe(struct platform_device *pdev)
->   
->   	if (pdev->dev.of_node) {
->   		match = of_match_node(dw_mci_pltfm_match, pdev->dev.of_node);
-> +		if (!match)
-> +			return -ENXIO;
->   		drv_data = match->data;
->   	}
->   
-> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-> index 8c86a800a8fd..20e3471260ea 100644
-> --- a/drivers/mmc/host/dw_mmc-rockchip.c
-> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
-> @@ -344,6 +344,8 @@ static int dw_mci_rockchip_probe(struct platform_device *pdev)
->   		return -ENODEV;
->   
->   	match = of_match_node(dw_mci_rockchip_match, pdev->dev.of_node);
-> +	if (!match)
-> +		return -ENXIO;
->   	drv_data = match->data;
->   
->   	pm_runtime_get_noresume(&pdev->dev);
-> diff --git a/drivers/mmc/host/dw_mmc-zx.c b/drivers/mmc/host/dw_mmc-zx.c
-> index c06b5393312f..abea35431045 100644
-> --- a/drivers/mmc/host/dw_mmc-zx.c
-> +++ b/drivers/mmc/host/dw_mmc-zx.c
-> @@ -213,6 +213,8 @@ static int dw_mci_zx_probe(struct platform_device *pdev)
->   	const struct of_device_id *match;
->   
->   	match = of_match_node(dw_mci_zx_match, pdev->dev.of_node);
-> +	if (!match)
-> +		return -ENXIO;
->   	drv_data = match->data;
->   
->   	return dw_mci_pltfm_register(pdev, drv_data);
+> CMD_ERR_MASK doesn't have SDHCI_INT_TIMEOUT. So this will never be true.
 > 
+
+Yeah, need to SDHCI_INT_TIMEOUT to CMD_ERR_MASK.
+
+Thanks,
+Faiz
