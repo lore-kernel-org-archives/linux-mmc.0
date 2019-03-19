@@ -1,67 +1,52 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: Re: [PATCH v3 2/2] mmc: sdhci-omap: Don't finish_mrq() on a command
- error during tuning
-Date: Tue, 19 Mar 2019 13:37:39 +0530
-Message-ID: <8261c01f-fd8e-0930-fee5-793b02071542@ti.com>
-References: <20190319063533.12171-1-faiz_abbas@ti.com>
- <20190319063533.12171-3-faiz_abbas@ti.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: =?UTF-8?B?UmU6IHVsZmgvbmV4dCBib290IGJpc2VjdGlvbjogdjUuMS1yYzEtMjItZ2IzNzI1ZDk3Yg==?=
+        =?UTF-8?B?YTc1IG9uIHJrMzM5OS1ncnUta2V2aW7jgJDor7fms6jmhI/vvIzpgq7ku7bnlLFsaW51eC1tbWMtb3du?=
+        =?UTF-8?B?ZXJAdmdlci5rZXJuZWwub3Jn5Luj5Y+R44CR?=
+Date: Tue, 19 Mar 2019 09:48:28 +0100
+Message-ID: <CAPDyKFoYgXuH_mJPwaqBsrpFjnrx8x6O5aVJ4LTfSVzFwO+8aw@mail.gmail.com>
+References: <5c9020bc.1c69fb81.6977e.d27a@mx.google.com> <f75224ca-c0e5-94be-84b0-90c252784eb0@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190319063533.12171-3-faiz_abbas@ti.com>
-Content-Language: en-US
+In-Reply-To: <f75224ca-c0e5-94be-84b0-90c252784eb0@rock-chips.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Faiz Abbas <faiz_abbas@ti.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
-Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Tomeu Vizoso <tomeu.vizoso@collabora.com>, guillaume.tucker@collabora.com, mgalka@collabora.com, Ziyuan Xu <xzy.xu@rock-chips.com>, Mark Brown <broonie@kernel.org>, matthew.hart@linaro.org, Kevin Hilman <khilman@baylibre.com>, Enric Balletbo i Serra <enric.balletbo@collabora.com>, Heiko Stuebner <heiko@sntech.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Faiz,
+On Tue, 19 Mar 2019 at 01:38, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+>
+>
+> On 2019/3/19 6:50, kernelci.org bot wrote:
+> > * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+> > * This automated bisection report was sent to you on the basis  *
+> > * that you may be involved with the breaking commit it has      *
+> > * found.  No manual investigation has been done to verify it,   *
+> > * and the root cause of the problem may be somewhere else.      *
+> > * Hope this helps!                                              *
+> > * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+> >
+> > ulfh/next boot bisection: v5.1-rc1-22-gb3725d97ba75 on rk3399-gru-kevin
+> >
+> > Summary:
+> >    Start:      b3725d97ba75 Merge branch 'fixes' into next
+> >    Details:    https://kernelci.org/boot/id/5c8fa85d59b5148afcfe6052
+> >    Plain log:  https://storage.kernelci.org//ulfh/next/v5.1-rc1-22-gb3725d97ba75/arm64/defconfig/gcc-7/lab-collabora/boot-rk3399-gru-kevin.txt
+> >    HTML log:   https://storage.kernelci.org//ulfh/next/v5.1-rc1-22-gb3725d97ba75/arm64/defconfig/gcc-7/lab-collabora/boot-rk3399-gru-kevin.html
+> >    Result:     d6a6d722481f mmc: dw_mmc-rockchip: Enable hardware unbusy interrupt support
+>
+> Thanks for report!
+>
+> Ulf,
+>
+> It's a known issue already but didn't got managed to post v3 due to
+> weekend. Should I post a increamental patch on top? or just resend a
+> v3 series?
 
-On 19/03/19 12:05 PM, Faiz Abbas wrote:
-> commit 5b0d62108b46 ("mmc: sdhci-omap: Add platform specific reset
-> callback") skips data resets during tuning operation. Because of this,
-> a data error or data finish interrupt might still arrive after a command
-> error has been handled and the mrq ended. This ends up with a "mmc0: Got
-> data interrupt 0x00000002 even though no data operation was in progress"
-> error message.
-> 
-> Fix this by adding a platform specific callback for sdhci_irq. Mark the
-> mrq as a failure but wait for a data interrupt instead of calling
-> finish_mrq().
-> 
-> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
-> ---
->  drivers/mmc/host/sdhci-omap.c | 36 +++++++++++++++++++++++++++++++++++
->  1 file changed, 36 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-> index b1a66ca3821a..765873dff7ca 100644
-> --- a/drivers/mmc/host/sdhci-omap.c
-> +++ b/drivers/mmc/host/sdhci-omap.c
-> @@ -797,6 +797,41 @@ void sdhci_omap_reset(struct sdhci_host *host, u8 mask)
->  	sdhci_reset(host, mask);
->  }
->  
-> +#define CMD_ERR_MASK (SDHCI_INT_CRC | SDHCI_INT_END_BIT | SDHCI_INT_INDEX)
-> +#define CMD_MASK (CMD_ERR_MASK | SDHCI_INT_RESPONSE)
-> +
-> +static irqreturn_t sdhci_omap_irq(struct sdhci_host *host, u32 intmask)
-> +{
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
-> +
-> +	if (omap_host->is_tuning && (intmask & CMD_ERR_MASK)) {
-> +
-> +		/*
-> +		 * Since we are not resetting data lines during tuning
-> +		 * operation, data error or data complete interrupts
-> +		 * might still arrive. Mark this request as a failure
-> +		 * but still wait for the data interrupt
-> +		 */
-> +		if (intmask & SDHCI_INT_TIMEOUT)
+I have just dropped the offending patches (the series), please post a
+new version.
 
-CMD_ERR_MASK doesn't have SDHCI_INT_TIMEOUT. So this will never be true.
+[...]
 
-Thanks
-Kishon
+Kind regards
+Uffe
