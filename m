@@ -1,52 +1,54 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: =?UTF-8?B?UmU6IHVsZmgvbmV4dCBib290IGJpc2VjdGlvbjogdjUuMS1yYzEtMjItZ2IzNzI1ZDk3Yg==?=
-        =?UTF-8?B?YTc1IG9uIHJrMzM5OS1ncnUta2V2aW7jgJDor7fms6jmhI/vvIzpgq7ku7bnlLFsaW51eC1tbWMtb3du?=
-        =?UTF-8?B?ZXJAdmdlci5rZXJuZWwub3Jn5Luj5Y+R44CR?=
-Date: Tue, 19 Mar 2019 09:48:28 +0100
-Message-ID: <CAPDyKFoYgXuH_mJPwaqBsrpFjnrx8x6O5aVJ4LTfSVzFwO+8aw@mail.gmail.com>
-References: <5c9020bc.1c69fb81.6977e.d27a@mx.google.com> <f75224ca-c0e5-94be-84b0-90c252784eb0@rock-chips.com>
+From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Subject: [PATCH v3 0/3] Add hardware unbusy interrupt support for dw_mmc
+Date: Tue, 19 Mar 2019 17:12:55 +0800
+Message-ID: <1552986778-33904-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <f75224ca-c0e5-94be-84b0-90c252784eb0@rock-chips.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Tomeu Vizoso <tomeu.vizoso@collabora.com>, guillaume.tucker@collabora.com, mgalka@collabora.com, Ziyuan Xu <xzy.xu@rock-chips.com>, Mark Brown <broonie@kernel.org>, matthew.hart@linaro.org, Kevin Hilman <khilman@baylibre.com>, Enric Balletbo i Serra <enric.balletbo@collabora.com>, Heiko Stuebner <heiko@sntech.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 19 Mar 2019 at 01:38, Shawn Lin <shawn.lin@rock-chips.com> wrote:
->
->
-> On 2019/3/19 6:50, kernelci.org bot wrote:
-> > * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-> > * This automated bisection report was sent to you on the basis  *
-> > * that you may be involved with the breaking commit it has      *
-> > * found.  No manual investigation has been done to verify it,   *
-> > * and the root cause of the problem may be somewhere else.      *
-> > * Hope this helps!                                              *
-> > * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-> >
-> > ulfh/next boot bisection: v5.1-rc1-22-gb3725d97ba75 on rk3399-gru-kevin
-> >
-> > Summary:
-> >    Start:      b3725d97ba75 Merge branch 'fixes' into next
-> >    Details:    https://kernelci.org/boot/id/5c8fa85d59b5148afcfe6052
-> >    Plain log:  https://storage.kernelci.org//ulfh/next/v5.1-rc1-22-gb3725d97ba75/arm64/defconfig/gcc-7/lab-collabora/boot-rk3399-gru-kevin.txt
-> >    HTML log:   https://storage.kernelci.org//ulfh/next/v5.1-rc1-22-gb3725d97ba75/arm64/defconfig/gcc-7/lab-collabora/boot-rk3399-gru-kevin.html
-> >    Result:     d6a6d722481f mmc: dw_mmc-rockchip: Enable hardware unbusy interrupt support
->
-> Thanks for report!
->
-> Ulf,
->
-> It's a known issue already but didn't got managed to post v3 due to
-> weekend. Should I post a increamental patch on top? or just resend a
-> v3 series?
 
-I have just dropped the offending patches (the series), please post a
-new version.
+DesignWare MMC controler lacks proper hardware wait
+busy support, so the software must check the busy
+state if the following tranfser need use data line.
+And dw_mci_wait_while_busy() now use busy check mostly
+with host's lock hold, and we can't relinguish CPU
+at this moment, which makes it rather painful when used
+in low-end platform. To solve this, Rockchip invent
+a new hardware unbusy interrupt module, which could
+generate interrupt if the state machine runs from
+busy state into idle state.
 
-[...]
 
-Kind regards
-Uffe
+Changes in v3:
+- remove unused irqflags and check hw_unbusy_int in
+  dw_mci_wait_hw_unbusy() as well.
+
+Changes in v2:
+- add tag from Ziyuan Xu
+- remove lock for checking event since it's already atomic operation
+
+Shawn Lin (3):
+  mmc: dw_mmc: Check busy state in dw_mci_request()
+  mmc: dw_mmc: Add hardware unbusy interrupt support
+  mmc: dw_mmc-rockchip: Enable hardware unbusy interrupt support
+
+ drivers/mmc/host/dw_mmc-rockchip.c | 30 ++++++++++++++++++++
+ drivers/mmc/host/dw_mmc.c          | 56 +++++++++++++++++++++++++++++++++++++-
+ drivers/mmc/host/dw_mmc.h          |  6 ++++
+ 3 files changed, 91 insertions(+), 1 deletion(-)
+
+-- 
+1.9.1
