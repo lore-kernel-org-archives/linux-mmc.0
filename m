@@ -1,74 +1,92 @@
-From: Faiz Abbas <faiz_abbas@ti.com>
-Subject: Re: [PATCH v3 2/2] mmc: sdhci-omap: Don't finish_mrq() on a command
- error during tuning
-Date: Tue, 19 Mar 2019 17:15:29 +0530
-Message-ID: <b52277dd-39aa-b6ea-313e-55ed65afba1e@ti.com>
-References: <20190319063533.12171-1-faiz_abbas@ti.com>
- <20190319063533.12171-3-faiz_abbas@ti.com>
- <8261c01f-fd8e-0930-fee5-793b02071542@ti.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v3 1/3] mmc: dw_mmc: Check busy state in dw_mci_request()
+Date: Tue, 19 Mar 2019 15:41:11 +0100
+Message-ID: <CAPDyKFqMjEbM1L5=AjDv46xZt5KxOk8GLMGbWsdq2Xcxoi3gTg@mail.gmail.com>
+References: <1552986778-33904-1-git-send-email-shawn.lin@rock-chips.com>
+ <1552986778-33904-2-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <8261c01f-fd8e-0930-fee5-793b02071542@ti.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
-Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <1552986778-33904-2-git-send-email-shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Cc: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Kishon,
+On Tue, 19 Mar 2019 at 10:14, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org> wrote:
+>
+> Move it from dw_mci_start_command() to dw_mci_request().
+> Then dw_mci_wait_while_busy() isn't called with host's
+> lock hold.
 
-On 19/03/19 1:37 PM, Kishon Vijay Abraham I wrote:
-> Hi Faiz,
-> 
-> On 19/03/19 12:05 PM, Faiz Abbas wrote:
->> commit 5b0d62108b46 ("mmc: sdhci-omap: Add platform specific reset
->> callback") skips data resets during tuning operation. Because of this,
->> a data error or data finish interrupt might still arrive after a command
->> error has been handled and the mrq ended. This ends up with a "mmc0: Got
->> data interrupt 0x00000002 even though no data operation was in progress"
->> error message.
->>
->> Fix this by adding a platform specific callback for sdhci_irq. Mark the
->> mrq as a failure but wait for a data interrupt instead of calling
->> finish_mrq().
->>
->> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
->> ---
->>  drivers/mmc/host/sdhci-omap.c | 36 +++++++++++++++++++++++++++++++++++
->>  1 file changed, 36 insertions(+)
->>
->> diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
->> index b1a66ca3821a..765873dff7ca 100644
->> --- a/drivers/mmc/host/sdhci-omap.c
->> +++ b/drivers/mmc/host/sdhci-omap.c
->> @@ -797,6 +797,41 @@ void sdhci_omap_reset(struct sdhci_host *host, u8 mask)
->>  	sdhci_reset(host, mask);
->>  }
->>  
->> +#define CMD_ERR_MASK (SDHCI_INT_CRC | SDHCI_INT_END_BIT | SDHCI_INT_INDEX)
->> +#define CMD_MASK (CMD_ERR_MASK | SDHCI_INT_RESPONSE)
->> +
->> +static irqreturn_t sdhci_omap_irq(struct sdhci_host *host, u32 intmask)
->> +{
->> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> +	struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
->> +
->> +	if (omap_host->is_tuning && (intmask & CMD_ERR_MASK)) {
->> +
->> +		/*
->> +		 * Since we are not resetting data lines during tuning
->> +		 * operation, data error or data complete interrupts
->> +		 * might still arrive. Mark this request as a failure
->> +		 * but still wait for the data interrupt
->> +		 */
->> +		if (intmask & SDHCI_INT_TIMEOUT)
-> 
-> CMD_ERR_MASK doesn't have SDHCI_INT_TIMEOUT. So this will never be true.
-> 
+So, I decided to have a closer look at this.
 
-Yeah, need to SDHCI_INT_TIMEOUT to CMD_ERR_MASK.
+>
+> Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+> Tested-by: Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+> ---
+>
+> Changes in v3: None
+> Changes in v2: None
+>
+>  drivers/mmc/host/dw_mmc.c | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 80dc2fd..703dedf 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -426,7 +426,6 @@ static void dw_mci_start_command(struct dw_mci *host,
+>
+>         mci_writel(host, CMDARG, cmd->arg);
+>         wmb(); /* drain writebuffer */
+> -       dw_mci_wait_while_busy(host, cmd_flags);
+>
+>         mci_writel(host, CMD, cmd_flags | SDMMC_CMD_START);
+>
+> @@ -1419,6 +1418,10 @@ static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>                 return;
+>         }
+>
+> +       if ((mrq->cmd->opcode != MMC_SEND_STATUS && mrq->cmd->data) &&
+> +           !(mrq->cmd->opcode == SD_SWITCH_VOLTAGE))
+> +               dw_mci_wait_while_busy(host, SDMMC_CMD_PRV_DAT_WAIT);
+> +
 
-Thanks,
-Faiz
+This looks weird, because according to the change-log it sounds like
+you are moving things around to just avoid having the "lock" held.
+
+To me, there seems to be more changes because of the new checks for
+the "opcode" above, no?
+
+ Moreover, dw_mci_wait_while_busy() is also called from
+mci_send_cmd(), which means it may still be called with the "lock" is
+held. That is really confusing and needs more explanation.
+
+>         spin_lock_bh(&host->lock);
+>
+>         dw_mci_queue_request(host, slot, mrq);
+> --
+> 1.9.1
+>
+>
+>
+
+Finally, I am not sure I understand why dw_mci_wait_while_busy() is
+called before starting a command, at all. That seems wrong to me.
+Instead, shouldn't we look at cmd->flags & MMC_RSP_BUSY, for the
+request in question and don't call mmc_request_done() for it, before
+the card have stop signaled busy. At least that the behavior the mmc
+core expects by the driver.
+
+Kind regards
+Uffe
