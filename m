@@ -1,7 +1,7 @@
 From: Alexander Kochetkov <al.kochet@gmail.com>
-Subject: [PATCH 1/2] mmc: dw_mmc: add init_slot() hook to platform function table
-Date: Wed, 20 Mar 2019 20:48:04 +0300
-Message-ID: <1553104085-32312-2-git-send-email-al.kochet@gmail.com>
+Subject: [PATCH 2/2] mmc: dw_mmc-rockchip: fix transfer hangs on rk3188
+Date: Wed, 20 Mar 2019 20:48:05 +0300
+Message-ID: <1553104085-32312-3-git-send-email-al.kochet@gmail.com>
 References: <1553104085-32312-1-git-send-email-al.kochet@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1553104085-32312-1-git-send-email-al.kochet@gmail.com>
@@ -10,57 +10,69 @@ To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Alexander Kochetkov <al.kochet@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-The init_slot() hook allow platform driver override slot defaults
-provided by generic dw_mmc driver. It's required to fix EDMA based
-transfer hangs observed on rockchip rk3188.
+I've found that sometimes dw_mmc in my rk3188 based board stop transfer
+any data with error:
+
+kernel: dwmmc_rockchip 1021c000.dwmmc: Unexpected command timeout, state 3
+
+Further digging into problem showed that sometimes one of EDMA-based
+transfers hangs and abort with HTO error. I've made test, that 100%
+reproduce the error. I found, that setting max_segs parameter to 1 fix
+the problem.
+
+I guess the problem is hardware related and relates to DMA controller
+implementation for rk3188. Probably it can relates to missed FLUSHP,
+see commit 271e1b86e691 ("dmaengine: pl330: add quirk for broken no
+flushp"). It is possible that pl330 and dw_mmc become out of sync then
+pl330 driver switch from one scatterlist to another. If we limit
+scatterlist size to 1, we can avoid switching scatterlists and avoid
+hardware problem. Setting max_segs to 1 tells mmc core to use maximum
+one scatterlist for one transfer.
+
+I guess that all other rk3xxx chips that lacks FLUSHP also affected by
+the problem. So I made fix for all rk3xxx chips from rk2928 to rk3188.
 
 Signed-off-by: Alexander Kochetkov <al.kochet@gmail.com>
 ---
- drivers/mmc/host/dw_mmc.c |    4 ++++
- drivers/mmc/host/dw_mmc.h |    2 ++
- 2 files changed, 6 insertions(+)
+ drivers/mmc/host/dw_mmc-rockchip.c |   19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 80dc2fd..d3ecee9 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -2819,6 +2819,7 @@ static int dw_mci_init_slot_caps(struct dw_mci_slot *slot)
+diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+index 8c86a80..2eed922 100644
+--- a/drivers/mmc/host/dw_mmc-rockchip.c
++++ b/drivers/mmc/host/dw_mmc-rockchip.c
+@@ -292,6 +292,24 @@ static int dw_mci_rk3288_parse_dt(struct dw_mci *host)
+ 	return 0;
+ }
  
- static int dw_mci_init_slot(struct dw_mci *host)
- {
-+	const struct dw_mci_drv_data *drv_data = host->drv_data;
- 	struct mmc_host *mmc;
- 	struct dw_mci_slot *slot;
- 	int ret;
-@@ -2876,6 +2877,9 @@ static int dw_mci_init_slot(struct dw_mci *host)
- 		mmc->max_seg_size = mmc->max_req_size;
- 	}
- 
-+	if (drv_data && drv_data->init_slot)
-+		drv_data->init_slot(host);
++static void dw_mci_rk2928_init_slot(struct dw_mci *host)
++{
++	struct mmc_host *mmc = host->slot->mmc;
 +
- 	dw_mci_get_cd(mmc);
++	if (host->use_dma == TRANS_MODE_EDMAC) {
++		/*
++		 * Using max_segs > 1 leads to rare EDMA transfer hangs
++		 * resulting in HTO errors.
++		 */
++		mmc->max_segs = 1;
++		mmc->max_blk_size = 65535;
++		mmc->max_blk_count = 64 * 512;
++		mmc->max_req_size =
++				mmc->max_blk_size * mmc->max_blk_count;
++		mmc->max_seg_size = mmc->max_req_size;
++	}
++}
++
+ static int dw_mci_rockchip_init(struct dw_mci *host)
+ {
+ 	/* It is slot 8 on Rockchip SoCs */
+@@ -314,6 +332,7 @@ static int dw_mci_rockchip_init(struct dw_mci *host)
  
- 	ret = mmc_add_host(mmc);
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 46e9f8e..de51c59 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -548,6 +548,7 @@ struct dw_mci_slot {
-  * @caps: mmc subsystem specified capabilities of the controller(s).
-  * @num_caps: number of capabilities specified by @caps.
-  * @init: early implementation specific initialization.
-+ * @init_slot: platform specific slot initialization.
-  * @set_ios: handle bus specific extensions.
-  * @parse_dt: parse implementation specific device tree properties.
-  * @execute_tuning: implementation specific tuning procedure.
-@@ -560,6 +561,7 @@ struct dw_mci_drv_data {
- 	unsigned long	*caps;
- 	u32		num_caps;
- 	int		(*init)(struct dw_mci *host);
-+	void		(*init_slot)(struct dw_mci *host);
- 	void		(*set_ios)(struct dw_mci *host, struct mmc_ios *ios);
- 	int		(*parse_dt)(struct dw_mci *host);
- 	int		(*execute_tuning)(struct dw_mci_slot *slot, u32 opcode);
+ static const struct dw_mci_drv_data rk2928_drv_data = {
+ 	.init			= dw_mci_rockchip_init,
++	.init_slot		= dw_mci_rk2928_init_slot,
+ };
+ 
+ static const struct dw_mci_drv_data rk3288_drv_data = {
 -- 
 1.7.9.5
