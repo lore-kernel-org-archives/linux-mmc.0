@@ -1,111 +1,43 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: usdhi6rol0: mark expected switch fall-throughs
-Date: Thu, 21 Mar 2019 11:46:28 +0100
-Message-ID: <CAPDyKFq7Qcp+WZazg2CiB_nBV7Bsmns2aD-Na_k72Kk9sf9X2g@mail.gmail.com>
-References: <20190320200010.GA14527@embeddedor>
+From: Sowjanya Komatineni <skomatineni@nvidia.com>
+Subject: RE: [PATCH V3 05/10] arm64: tegra: fix default tap and trim values
+Date: Thu, 21 Mar 2019 15:22:47 +0000
+Message-ID: <BYAPR12MB3398F91B190D9B1C56FDC4F7C2420@BYAPR12MB3398.namprd12.prod.outlook.com>
+References: <1552513552-23423-1-git-send-email-skomatineni@nvidia.com>
+ <1552513552-23423-5-git-send-email-skomatineni@nvidia.com>
+ <CAPDyKFq4ZVaMmvefuVqGs84E7xg5VgvU-Ecq1MYJdmBhuEm7xA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190320200010.GA14527@embeddedor>
+In-Reply-To: <CAPDyKFq4ZVaMmvefuVqGs84E7xg5VgvU-Ecq1MYJdmBhuEm7xA@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Kees Cook <keescook@chromium.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Harjani Ritesh <riteshh@codeaurora.org>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Aniruddha Tvs Rao <anrao@nvidia.com>, linux-tegra <linux-tegra@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, DTML <devicetree@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 20 Mar 2019 at 21:02, Gustavo A. R. Silva
-<gustavo@embeddedor.com> wrote:
->
-> In preparation to enabling -Wimplicit-fallthrough, mark switch
-> cases where we are expecting to fall through.
->
-> This patch fixes the following warnings:
->
-> In file included from drivers/mmc/host/usdhi6rol0.c:9:
-> drivers/mmc/host/usdhi6rol0.c: In function =E2=80=98usdhi6_timeout_work=
-=E2=80=99:
-> ./include/linux/device.h:1483:2: warning: this statement may fall through=
- [-Wimplicit-fallthrough=3D]
->   _dev_err(dev, dev_fmt(fmt), ##__VA_ARGS__)
->   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-> drivers/mmc/host/usdhi6rol0.c:1689:3: note: in expansion of macro =E2=80=
-=98dev_err=E2=80=99
->    dev_err(mmc_dev(host->mmc), "Invalid state %u\n", host->wait);
->    ^~~~~~~
-> drivers/mmc/host/usdhi6rol0.c:1691:2: note: here
->   case USDHI6_WAIT_FOR_CMD:
->   ^~~~
-> drivers/mmc/host/usdhi6rol0.c:1711:3: warning: this statement may fall th=
-rough [-Wimplicit-fallthrough=3D]
->    usdhi6_sg_unmap(host, true);
->    ^~~~~~~~~~~~~~~~~~~~~~~~~~~
-> drivers/mmc/host/usdhi6rol0.c:1716:2: note: here
->   case USDHI6_WAIT_FOR_DATA_END:
->   ^~~~
-> drivers/mmc/host/usdhi6rol0.c: In function =E2=80=98usdhi6_stop_cmd=E2=80=
-=99:
-> drivers/mmc/host/usdhi6rol0.c:1338:6: warning: this statement may fall th=
-rough [-Wimplicit-fallthrough=3D]
->    if (mrq->stop->opcode =3D=3D MMC_STOP_TRANSMISSION) {
->       ^
-> drivers/mmc/host/usdhi6rol0.c:1343:2: note: here
->   default:
->   ^~~~~~~
->
-> Warning level 3 was used: -Wimplicit-fallthrough=3D3
->
-> This patch is part of the ongoing efforts to enable
-> -Wimplicit-fallthrough.
->
-> Signed-off-by: Gustavo A. R. Silva <gustavo@embeddedor.com>
-> ---
->  drivers/mmc/host/usdhi6rol0.c | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/usdhi6rol0.c b/drivers/mmc/host/usdhi6rol0.=
-c
-> index cd8b1b9d4d8a..b9712ac96be5 100644
-> --- a/drivers/mmc/host/usdhi6rol0.c
-> +++ b/drivers/mmc/host/usdhi6rol0.c
-> @@ -1339,7 +1339,7 @@ static int usdhi6_stop_cmd(struct usdhi6_host *host=
-)
->                         host->wait =3D USDHI6_WAIT_FOR_STOP;
->                         return 0;
->                 }
-> -               /* Unsupported STOP command */
-> +               /* fall through - Unsupported STOP command */
->         default:
->                 dev_err(mmc_dev(host->mmc),
->                         "unsupported stop CMD%d for CMD%d\n",
-> @@ -1688,6 +1688,7 @@ static void usdhi6_timeout_work(struct work_struct =
-*work)
->         default:
->                 dev_err(mmc_dev(host->mmc), "Invalid state %u\n", host->w=
-ait);
->                 /* mrq can be NULL in this actually impossible case */
-> +               /* fall through */
-
-Please make this one comment.
-
->         case USDHI6_WAIT_FOR_CMD:
->                 usdhi6_error_code(host);
->                 if (mrq)
-> @@ -1713,6 +1714,7 @@ static void usdhi6_timeout_work(struct work_struct =
-*work)
->                  * If USDHI6_WAIT_FOR_DATA_END times out, we have already=
- unmapped
->                  * the page
->                  */
-> +               /* fall through */
-
-Ditto.
-
->         case USDHI6_WAIT_FOR_DATA_END:
->                 usdhi6_error_code(host);
->                 data->error =3D -ETIMEDOUT;
-> --
-> 2.21.0
->
-
-Kind regards
-Uffe
+PiA+DQo+ID4gRGVmYXVsdCB0YXAgYW5kIHRyaW0gdmFsdWVzIGFyZSBpbmNvcnJlY3QgZm9yIFRl
+Z3JhMTg2IFNETU1DNC4NCj4gPiBUaGlzIHBhdGNoIGZpeGVzIGl0Lg0KPiA+DQo+ID4gVGVzdGVk
+LWJ5OiBKb24gSHVudGVyIDxqb25hdGhhbmhAbnZpZGlhLmNvbT4NCj4gPiBTaWduZWQtb2ZmLWJ5
+OiBTb3dqYW55YSBLb21hdGluZW5pIDxza29tYXRpbmVuaUBudmlkaWEuY29tPg0KPg0KPiBJcyB0
+aGlzIGEgZml4IGFuZC9vciBmb3Igc3RhYmxlPw0KPg0KPiBJbiBlaXRoZXIgY2FzZSwgSSBhbSBs
+ZWF2aW5nIHRoaXMgZm9yIGFybS1zb2MuDQo+DQo+IEtpbmQgcmVnYXJkcw0KPiBVZmZlDQo+DQoN
+ClRoYW5rcyBVZmZlLiBZZXMgdGhpcyBpcyBhcHBsaWNhYmxlIGZvciBzdGFibGUuDQoNCj4gPiAt
+LS0NCj4gPiAgYXJjaC9hcm02NC9ib290L2R0cy9udmlkaWEvdGVncmExODYuZHRzaSB8IDQgKyst
+LQ0KPiA+ICAxIGZpbGUgY2hhbmdlZCwgMiBpbnNlcnRpb25zKCspLCAyIGRlbGV0aW9ucygtKQ0K
+PiA+DQo+ID4gZGlmZiAtLWdpdCBhL2FyY2gvYXJtNjQvYm9vdC9kdHMvbnZpZGlhL3RlZ3JhMTg2
+LmR0c2kgDQo+ID4gYi9hcmNoL2FybTY0L2Jvb3QvZHRzL252aWRpYS90ZWdyYTE4Ni5kdHNpDQo+
+ID4gaW5kZXggOTdhZWI5NDZlZDVlLi40NzJmNTVmZTk0ODggMTAwNjQ0DQo+ID4gLS0tIGEvYXJj
+aC9hcm02NC9ib290L2R0cy9udmlkaWEvdGVncmExODYuZHRzaQ0KPiA+ICsrKyBiL2FyY2gvYXJt
+NjQvYm9vdC9kdHMvbnZpZGlhL3RlZ3JhMTg2LmR0c2kNCj4gPiBAQCAtMzE3LDggKzMxNyw4IEBA
+DQo+ID4gICAgICAgICAgICAgICAgIG52aWRpYSxwYWQtYXV0b2NhbC1wdWxsLWRvd24tb2Zmc2V0
+LTF2OC10aW1lb3V0ID0gPDB4MGE+Ow0KPiA+ICAgICAgICAgICAgICAgICBudmlkaWEscGFkLWF1
+dG9jYWwtcHVsbC11cC1vZmZzZXQtM3YzLXRpbWVvdXQgPSA8MHgwYT47DQo+ID4gICAgICAgICAg
+ICAgICAgIG52aWRpYSxwYWQtYXV0b2NhbC1wdWxsLWRvd24tb2Zmc2V0LTN2My10aW1lb3V0ID0g
+PDB4MGE+Ow0KPiA+IC0gICAgICAgICAgICAgICBudmlkaWEsZGVmYXVsdC10YXAgPSA8MHg1PjsN
+Cj4gPiAtICAgICAgICAgICAgICAgbnZpZGlhLGRlZmF1bHQtdHJpbSA9IDwweDk+Ow0KPiA+ICsg
+ICAgICAgICAgICAgICBudmlkaWEsZGVmYXVsdC10YXAgPSA8MHg5PjsNCj4gPiArICAgICAgICAg
+ICAgICAgbnZpZGlhLGRlZmF1bHQtdHJpbSA9IDwweDU+Ow0KPiA+ICAgICAgICAgICAgICAgICBu
+dmlkaWEsZHFzLXRyaW0gPSA8NjM+Ow0KPiA+ICAgICAgICAgICAgICAgICBtbWMtaHM0MDAtMV84
+djsNCj4gPiAgICAgICAgICAgICAgICAgc3RhdHVzID0gImRpc2FibGVkIjsNCj4gPiAtLQ0KPiA+
+IDIuNy40DQo+ID4NCg==
