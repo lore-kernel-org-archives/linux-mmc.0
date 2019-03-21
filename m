@@ -1,48 +1,113 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V2 1/6] mmc: mmci: add get_datactrl_cfg callback
-Date: Thu, 21 Mar 2019 17:57:38 +0100
-Message-ID: <CAPDyKFq52dXPP+-peh82uCqTDFhmXvYWbTyncHDr_Oyo8Bd1VA@mail.gmail.com>
-References: <1551976742-4358-1-git-send-email-ludovic.Barre@st.com> <1551976742-4358-2-git-send-email-ludovic.Barre@st.com>
+From: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
+Subject: Re: [PATCH] mmc: usdhi6rol0: mark expected switch fall-throughs
+Date: Thu, 21 Mar 2019 12:14:18 -0500
+Message-ID: <a69a2138-0515-82f7-ab32-21d62c248829@embeddedor.com>
+References: <20190320200010.GA14527@embeddedor>
+ <CAPDyKFq7Qcp+WZazg2CiB_nBV7Bsmns2aD-Na_k72Kk9sf9X2g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1551976742-4358-2-git-send-email-ludovic.Barre@st.com>
+In-Reply-To: <CAPDyKFq7Qcp+WZazg2CiB_nBV7Bsmns2aD-Na_k72Kk9sf9X2g@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ludovic Barre <ludovic.Barre@st.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-stm32@st-md-mailman.stormreply.com
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Kees Cook <keescook@chromium.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 7 Mar 2019 at 17:39, Ludovic Barre <ludovic.Barre@st.com> wrote:
->
-> From: Ludovic Barre <ludovic.barre@st.com>
->
-> This patch adds get_datactrl_cfg callback in mmci_host_ops
-> to allow to get datactrl configuration specific at variant.
->
-> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
-> ---
->  drivers/mmc/host/mmci.h | 1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-> index 6bde28c..a59049b 100644
-> --- a/drivers/mmc/host/mmci.h
-> +++ b/drivers/mmc/host/mmci.h
-> @@ -362,6 +362,7 @@ struct mmci_host_ops {
->                          bool next);
->         void (*unprep_data)(struct mmci_host *host, struct mmc_data *data,
->                             int err);
-> +       u32 (*get_datactrl_cfg)(struct mmci_host *host);
->         void (*get_next_data)(struct mmci_host *host, struct mmc_data *data);
->         int (*dma_setup)(struct mmci_host *host);
->         void (*dma_release)(struct mmci_host *host);
-> --
-> 2.7.4
->
 
-Perhaps squash this change with patch2, they seems to belong to each
-other as they are both the preparation that is needed for the
-following changes on top.
 
-Kind regards
-Uffe
+On 3/21/19 5:46 AM, Ulf Hansson wrote:
+> On Wed, 20 Mar 2019 at 21:02, Gustavo A. R. Silva
+> <gustavo@embeddedor.com> wrote:
+>>
+>> In preparation to enabling -Wimplicit-fallthrough, mark switch
+>> cases where we are expecting to fall through.
+>>
+>> This patch fixes the following warnings:
+>>
+>> In file included from drivers/mmc/host/usdhi6rol0.c:9:
+>> drivers/mmc/host/usdhi6rol0.c: In function ‘usdhi6_timeout_work’:
+>> ./include/linux/device.h:1483:2: warning: this statement may fall through [-Wimplicit-fallthrough=]
+>>   _dev_err(dev, dev_fmt(fmt), ##__VA_ARGS__)
+>>   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>> drivers/mmc/host/usdhi6rol0.c:1689:3: note: in expansion of macro ‘dev_err’
+>>    dev_err(mmc_dev(host->mmc), "Invalid state %u\n", host->wait);
+>>    ^~~~~~~
+>> drivers/mmc/host/usdhi6rol0.c:1691:2: note: here
+>>   case USDHI6_WAIT_FOR_CMD:
+>>   ^~~~
+>> drivers/mmc/host/usdhi6rol0.c:1711:3: warning: this statement may fall through [-Wimplicit-fallthrough=]
+>>    usdhi6_sg_unmap(host, true);
+>>    ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+>> drivers/mmc/host/usdhi6rol0.c:1716:2: note: here
+>>   case USDHI6_WAIT_FOR_DATA_END:
+>>   ^~~~
+>> drivers/mmc/host/usdhi6rol0.c: In function ‘usdhi6_stop_cmd’:
+>> drivers/mmc/host/usdhi6rol0.c:1338:6: warning: this statement may fall through [-Wimplicit-fallthrough=]
+>>    if (mrq->stop->opcode == MMC_STOP_TRANSMISSION) {
+>>       ^
+>> drivers/mmc/host/usdhi6rol0.c:1343:2: note: here
+>>   default:
+>>   ^~~~~~~
+>>
+>> Warning level 3 was used: -Wimplicit-fallthrough=3
+>>
+>> This patch is part of the ongoing efforts to enable
+>> -Wimplicit-fallthrough.
+>>
+>> Signed-off-by: Gustavo A. R. Silva <gustavo@embeddedor.com>
+>> ---
+>>  drivers/mmc/host/usdhi6rol0.c | 4 +++-
+>>  1 file changed, 3 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/mmc/host/usdhi6rol0.c b/drivers/mmc/host/usdhi6rol0.c
+>> index cd8b1b9d4d8a..b9712ac96be5 100644
+>> --- a/drivers/mmc/host/usdhi6rol0.c
+>> +++ b/drivers/mmc/host/usdhi6rol0.c
+>> @@ -1339,7 +1339,7 @@ static int usdhi6_stop_cmd(struct usdhi6_host *host)
+>>                         host->wait = USDHI6_WAIT_FOR_STOP;
+>>                         return 0;
+>>                 }
+>> -               /* Unsupported STOP command */
+>> +               /* fall through - Unsupported STOP command */
+>>         default:
+>>                 dev_err(mmc_dev(host->mmc),
+>>                         "unsupported stop CMD%d for CMD%d\n",
+>> @@ -1688,6 +1688,7 @@ static void usdhi6_timeout_work(struct work_struct *work)
+>>         default:
+>>                 dev_err(mmc_dev(host->mmc), "Invalid state %u\n", host->wait);
+>>                 /* mrq can be NULL in this actually impossible case */
+>> +               /* fall through */
+> 
+> Please make this one comment.
+> 
+>>         case USDHI6_WAIT_FOR_CMD:
+>>                 usdhi6_error_code(host);
+>>                 if (mrq)
+>> @@ -1713,6 +1714,7 @@ static void usdhi6_timeout_work(struct work_struct *work)
+>>                  * If USDHI6_WAIT_FOR_DATA_END times out, we have already unmapped
+>>                  * the page
+>>                  */
+>> +               /* fall through */
+> 
+> Ditto.
+> 
+
+OK.  The reason why I didn't do that is because the line would exceed the 80 characters
+in both cases. But I'll respin if you are OK with that.
+
+Thanks
+--
+Gustavo
+
+>>         case USDHI6_WAIT_FOR_DATA_END:
+>>                 usdhi6_error_code(host);
+>>                 data->error = -ETIMEDOUT;
+>> --
+>> 2.21.0
+>>
+> 
+> Kind regards
+> Uffe
+> 
