@@ -1,85 +1,95 @@
-From: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
-Subject: [PATCH] mmc: usdhi6rol0: mark expected switch fall-throughs
-Date: Wed, 20 Mar 2019 15:00:10 -0500
-Message-ID: <20190320200010.GA14527@embeddedor>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: =?UTF-8?Q?Re=3a_=5bPATCH_2/2=5d_mmc=3a_dw=5fmmc-rockchip=3a_fix_tra?=
+ =?UTF-8?B?bnNmZXIgaGFuZ3Mgb24gcmszMTg444CQ6K+35rOo5oSP77yM6YKu5Lu255SxbGlu?=
+ =?UTF-8?B?dXgtbW1jLW93bmVyQHZnZXIua2VybmVsLm9yZ+S7o+WPkeOAkQ==?=
+Date: Thu, 21 Mar 2019 10:31:29 +0800
+Message-ID: <8293b346-15a0-a70d-1bfd-c9b2251c729c@rock-chips.com>
+References: <1553104085-32312-1-git-send-email-al.kochet@gmail.com>
+ <1553104085-32312-3-git-send-email-al.kochet@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=gbk; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
+In-Reply-To: <1553104085-32312-3-git-send-email-al.kochet@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, "Gustavo A. R. Silva" <gustavo@embeddedor.com>, Kees Cook <keescook@chromium.org>
+To: Alexander Kochetkov <al.kochet@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Heiko Stuebner <heiko@sntech.de>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org
+Cc: shawn.lin@rock-chips.com, wxt@rock-chips.com
 List-Id: linux-mmc@vger.kernel.org
 
-In preparation to enabling -Wimplicit-fallthrough, mark switch
-cases where we are expecting to fall through.
++ Caesar Wang
 
-This patch fixes the following warnings:
+On 2019/3/21 1:48, Alexander Kochetkov wrote:
+> I've found that sometimes dw_mmc in my rk3188 based board stop transfer
+> any data with error:
+> 
+> kernel: dwmmc_rockchip 1021c000.dwmmc: Unexpected command timeout, state 3
+> 
+> Further digging into problem showed that sometimes one of EDMA-based
+> transfers hangs and abort with HTO error. I've made test, that 100%
 
-In file included from drivers/mmc/host/usdhi6rol0.c:9:
-drivers/mmc/host/usdhi6rol0.c: In function ‘usdhi6_timeout_work’:
-./include/linux/device.h:1483:2: warning: this statement may fall through [-Wimplicit-fallthrough=]
-  _dev_err(dev, dev_fmt(fmt), ##__VA_ARGS__)
-  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-drivers/mmc/host/usdhi6rol0.c:1689:3: note: in expansion of macro ‘dev_err’
-   dev_err(mmc_dev(host->mmc), "Invalid state %u\n", host->wait);
-   ^~~~~~~
-drivers/mmc/host/usdhi6rol0.c:1691:2: note: here
-  case USDHI6_WAIT_FOR_CMD:
-  ^~~~
-drivers/mmc/host/usdhi6rol0.c:1711:3: warning: this statement may fall through [-Wimplicit-fallthrough=]
-   usdhi6_sg_unmap(host, true);
-   ^~~~~~~~~~~~~~~~~~~~~~~~~~~
-drivers/mmc/host/usdhi6rol0.c:1716:2: note: here
-  case USDHI6_WAIT_FOR_DATA_END:
-  ^~~~
-drivers/mmc/host/usdhi6rol0.c: In function ‘usdhi6_stop_cmd’:
-drivers/mmc/host/usdhi6rol0.c:1338:6: warning: this statement may fall through [-Wimplicit-fallthrough=]
-   if (mrq->stop->opcode == MMC_STOP_TRANSMISSION) {
-      ^
-drivers/mmc/host/usdhi6rol0.c:1343:2: note: here
-  default:
-  ^~~~~~~
+I'm not sure what 100% means, but Caesar fired QA test for RK3036 with
+EDMA-based dwmmc in vendor 4.4 kernel, and seems not big deal. The
+vendor 4.4 kernel didn't patch anything else wrt EDMA code, but we did
+enhance PL330 code and fix some bug there, so you may have a try.
 
-Warning level 3 was used: -Wimplicit-fallthrough=3
+> reproduce the error. I found, that setting max_segs parameter to 1 fix
+> the problem.
+> 
+> I guess the problem is hardware related and relates to DMA controller
+> implementation for rk3188. Probably it can relates to missed FLUSHP,
+> see commit 271e1b86e691 ("dmaengine: pl330: add quirk for broken no
+> flushp"). It is possible that pl330 and dw_mmc become out of sync then
+> pl330 driver switch from one scatterlist to another. If we limit
+> scatterlist size to 1, we can avoid switching scatterlists and avoid
+> hardware problem. Setting max_segs to 1 tells mmc core to use maximum
+> one scatterlist for one transfer.
+> 
+> I guess that all other rk3xxx chips that lacks FLUSHP also affected by
+> the problem. So I made fix for all rk3xxx chips from rk2928 to rk3188.
 
-This patch is part of the ongoing efforts to enable
--Wimplicit-fallthrough.
+Hard to find these acient platforms to test, expecially some was EOL....
 
-Signed-off-by: Gustavo A. R. Silva <gustavo@embeddedor.com>
----
- drivers/mmc/host/usdhi6rol0.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/usdhi6rol0.c b/drivers/mmc/host/usdhi6rol0.c
-index cd8b1b9d4d8a..b9712ac96be5 100644
---- a/drivers/mmc/host/usdhi6rol0.c
-+++ b/drivers/mmc/host/usdhi6rol0.c
-@@ -1339,7 +1339,7 @@ static int usdhi6_stop_cmd(struct usdhi6_host *host)
- 			host->wait = USDHI6_WAIT_FOR_STOP;
- 			return 0;
- 		}
--		/* Unsupported STOP command */
-+		/* fall through - Unsupported STOP command */
- 	default:
- 		dev_err(mmc_dev(host->mmc),
- 			"unsupported stop CMD%d for CMD%d\n",
-@@ -1688,6 +1688,7 @@ static void usdhi6_timeout_work(struct work_struct *work)
- 	default:
- 		dev_err(mmc_dev(host->mmc), "Invalid state %u\n", host->wait);
- 		/* mrq can be NULL in this actually impossible case */
-+		/* fall through */
- 	case USDHI6_WAIT_FOR_CMD:
- 		usdhi6_error_code(host);
- 		if (mrq)
-@@ -1713,6 +1714,7 @@ static void usdhi6_timeout_work(struct work_struct *work)
- 		 * If USDHI6_WAIT_FOR_DATA_END times out, we have already unmapped
- 		 * the page
- 		 */
-+		/* fall through */
- 	case USDHI6_WAIT_FOR_DATA_END:
- 		usdhi6_error_code(host);
- 		data->error = -ETIMEDOUT;
--- 
-2.21.0
+> 
+> Signed-off-by: Alexander Kochetkov <al.kochet@gmail.com>
+> ---
+>   drivers/mmc/host/dw_mmc-rockchip.c |   19 +++++++++++++++++++
+>   1 file changed, 19 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+> index 8c86a80..2eed922 100644
+> --- a/drivers/mmc/host/dw_mmc-rockchip.c
+> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
+> @@ -292,6 +292,24 @@ static int dw_mci_rk3288_parse_dt(struct dw_mci *host)
+>   	return 0;
+>   }
+>   
+> +static void dw_mci_rk2928_init_slot(struct dw_mci *host)
+> +{
+> +	struct mmc_host *mmc = host->slot->mmc;
+> +
+> +	if (host->use_dma == TRANS_MODE_EDMAC) {
+> +		/*
+> +		 * Using max_segs > 1 leads to rare EDMA transfer hangs
+> +		 * resulting in HTO errors.
+> +		 */
+> +		mmc->max_segs = 1;
+> +		mmc->max_blk_size = 65535;
+> +		mmc->max_blk_count = 64 * 512;
+> +		mmc->max_req_size =
+> +				mmc->max_blk_size * mmc->max_blk_count;
+> +		mmc->max_seg_size = mmc->max_req_size;
+> +	}
+> +}
+> +
+>   static int dw_mci_rockchip_init(struct dw_mci *host)
+>   {
+>   	/* It is slot 8 on Rockchip SoCs */
+> @@ -314,6 +332,7 @@ static int dw_mci_rockchip_init(struct dw_mci *host)
+>   
+>   static const struct dw_mci_drv_data rk2928_drv_data = {
+>   	.init			= dw_mci_rockchip_init,
+> +	.init_slot		= dw_mci_rk2928_init_slot,
+>   };
+>   
+>   static const struct dw_mci_drv_data rk3288_drv_data = {
+> 
