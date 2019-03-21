@@ -1,44 +1,114 @@
-From: Sowjanya Komatineni <skomatineni@nvidia.com>
-Subject: RE: [PATCH V3 01/10] mmc: tegra: fix ddr signaling for non-ddr modes
-Date: Thu, 21 Mar 2019 15:24:37 +0000
-Message-ID: <BYAPR12MB339888D3A370E790A29E217EC2420@BYAPR12MB3398.namprd12.prod.outlook.com>
-References: <1552513552-23423-1-git-send-email-skomatineni@nvidia.com>
- <CAPDyKFp30v1H0KfPFeOc5Ut1dW5tec7cT7NFk6j0VT+DWkAODw@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V2 2/6] mmc: mmci: add helper functions to define datactrl
+ value for variants
+Date: Thu, 21 Mar 2019 17:43:28 +0100
+Message-ID: <CAPDyKFoq-pvw=KNPK4XzNu=0Jeu_OPDB0KZrhWVQ88LjNAu5nw@mail.gmail.com>
+References: <1551976742-4358-1-git-send-email-ludovic.Barre@st.com> <1551976742-4358-3-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFp30v1H0KfPFeOc5Ut1dW5tec7cT7NFk6j0VT+DWkAODw@mail.gmail.com>
-Content-Language: en-US
+In-Reply-To: <1551976742-4358-3-git-send-email-ludovic.Barre@st.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Harjani Ritesh <riteshh@codeaurora.org>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Aniruddha Tvs Rao <anrao@nvidia.com>, linux-tegra <linux-tegra@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, DTML <devicetree@vger.kernel.org>
+To: Ludovic Barre <ludovic.Barre@st.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-stm32@st-md-mailman.stormreply.com
 List-Id: linux-mmc@vger.kernel.org
 
-PiA+DQo+ID4gZGRyX3NpZ25hbGluZyBpcyBzZXQgdG8gdHJ1ZSBmb3IgRERSNTAgYW5kIEREUjUy
-IG1vZGVzIGJ1dCBpcyBub3Qgc2V0IA0KPiA+IGJhY2sgdG8gZmFsc2UgZm9yIG90aGVyIG1vZGVz
-LiBUaGlzIHByb2dyYW1zIGluY29ycmVjdCBob3N0IGNsb2NrIHdoZW4gDQo+ID4gbW9kZSBjaGFu
-Z2UgaGFwcGVucyBmcm9tIEREUjUyL0REUjUwIHRvIG90aGVyIFNEUiBvciBIUyBtb2RlcyBsaWtl
-IA0KPiA+IGluY2FzZSBvZiBtbWNfcmV0dW5lIHdoZXJlIGl0IHN3aXRjaGVzIGZyb20gSFM0MDAg
-dG8gSFMgRERSIGFuZCB0aGVuIA0KPiA+IGZyb20gSFMgRERSIHRvIEhTIG1vZGUgYW5kIHRoZW4g
-dG8gSFMyMDAuDQo+ID4NCj4gPiBUaGlzIHBhdGNoIGZpeGVzIHRoZSBkZHJfc2lnbmFsaW5nIHRv
-IHNldCBwcm9wZXJseSBmb3Igbm9uIEREUiBtb2Rlcy4NCj4gPg0KPiA+IFRlc3RlZC1ieTogSm9u
-IEh1bnRlciA8am9uYXRoYW5oQG52aWRpYS5jb20+DQo+ID4gQWNrZWQtYnk6IEFkcmlhbiBIdW50
-ZXIgPGFkcmlhbi5odW50ZXJAaW50ZWwuY29tPg0KPiA+IFNpZ25lZC1vZmYtYnk6IFNvd2phbnlh
-IEtvbWF0aW5lbmkgPHNrb21hdGluZW5pQG52aWRpYS5jb20+DQo+DQo+IElzIHRoaXMgYSBmaXgg
-YW5kL29yIHNoYWxsIEkgdGFnIGl0IGZvciBzdGFibGU/DQo+DQo+IFRoZSBzZXJpZXMgbG9va3Mg
-Z29vZCB0byBtZSwgaG93ZXZlciBJIGFtIGF3YWl0aW5nIHR3byBtb3JlIGFja3MgZnJvbSBBZHJp
-YW4gb24gcGF0Y2ggMiBhbmQgcGF0Y2gzLg0KPg0KPiBLaW5kIHJlZ2FyZHMNCj4gVWZmZQ0KPg0K
-Pg0KVGhhbmtzIFVmZmUuIFllcyB0aGlzIGlzIGFwcGxpY2FibGUgZm9yIHN0YWJsZS4NCg0KPiA+
-IC0tLQ0KPiA+ICBkcml2ZXJzL21tYy9ob3N0L3NkaGNpLXRlZ3JhLmMgfCAxICsNCj4gPiAgMSBm
-aWxlIGNoYW5nZWQsIDEgaW5zZXJ0aW9uKCspDQo+ID4NCj4gPiBkaWZmIC0tZ2l0IGEvZHJpdmVy
-cy9tbWMvaG9zdC9zZGhjaS10ZWdyYS5jIA0KPiA+IGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS10
-ZWdyYS5jIGluZGV4IDMyZTYyOTA0YzBkMy4uNDYwODZkZDQzYmZiIA0KPiA+IDEwMDY0NA0KPiA+
-IC0tLSBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktdGVncmEuYw0KPiA+ICsrKyBiL2RyaXZlcnMv
-bW1jL2hvc3Qvc2RoY2ktdGVncmEuYw0KPiA+IEBAIC03NzksNiArNzc5LDcgQEAgc3RhdGljIHZv
-aWQgdGVncmFfc2RoY2lfc2V0X3Voc19zaWduYWxpbmcoc3RydWN0IHNkaGNpX2hvc3QgKmhvc3Qs
-DQo+ID4gICAgICAgICBib29sIHNldF9kcXNfdHJpbSA9IGZhbHNlOw0KPiA+ICAgICAgICAgYm9v
-bCBkb19oczQwMF9kbGxfY2FsID0gZmFsc2U7DQo+ID4NCj4gPiArICAgICAgIHRlZ3JhX2hvc3Qt
-PmRkcl9zaWduYWxpbmcgPSBmYWxzZTsNCj4gPiAgICAgICAgIHN3aXRjaCAodGltaW5nKSB7DQo+
-ID4gICAgICAgICBjYXNlIE1NQ19USU1JTkdfVUhTX1NEUjUwOg0KPiA+ICAgICAgICAgY2FzZSBN
-TUNfVElNSU5HX1VIU19TRFIxMDQ6DQo+ID4gLS0NCj4gPiAyLjcuNA0KPiA+DQo=
+On Thu, 7 Mar 2019 at 17:39, Ludovic Barre <ludovic.Barre@st.com> wrote:
+>
+> From: Ludovic Barre <ludovic.barre@st.com>
+>
+> This patch adds default helper functions to define datactrl value.
+> Each variant could use these helpers to define datactrl and adds
+> their specific field.
+>
+> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
+> ---
+>  drivers/mmc/host/mmci.c | 25 +++++++++++++++++++++++++
+>  drivers/mmc/host/mmci.h |  5 +++++
+>  2 files changed, 30 insertions(+)
+>
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index 9e6a2c1..28b76c5 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -983,6 +983,31 @@ static void mmci_post_request(struct mmc_host *mmc, struct mmc_request *mrq,
+>         mmci_unprep_data(host, data, err);
+>  }
+>
+> +u32 mmci_dctrl_blksz(struct mmci_host *host)
+> +{
+> +       return (ffs(host->data->blksz) - 1) << 4;
+> +}
+
+Overall, this function and the other helpers added here, could be made
+static inline functions, implemented in mmci.h.
+
+If I understood Russell's point correctly, that's also we he suggested.
+
+> +
+> +u32 mmci_dctrl_dir(struct mmci_host *host)
+> +{
+> +       return host->data->flags & MMC_DATA_READ ? MCI_DPSM_DIRECTION : 0;
+
+As pointed out by Russell, drop this and keep this in the common
+mmci_start_data().
+
+Or you need this for the stm32_sdmmc later? Then perhaps make that a
+separate change on top.
+
+> +}
+> +
+> +u32 mmci_dctrl_ddr(struct mmci_host *host)
+> +{
+> +       if (host->mmc->ios.timing == MMC_TIMING_UHS_DDR50 ||
+> +           host->mmc->ios.timing == MMC_TIMING_MMC_DDR52)
+> +               return host->variant->datactrl_mask_ddrmode;
+
+This seems a bit like an unnecessary helper. How about moving this
+into the ux500v2 and qcom variants ->datactrl() callbacks instead,
+thus we can also remove ->datactrl_mask_ddrmode from the variant
+struct.
+
+Does that make sense?
+
+> +       return 0;
+> +}
+> +
+> +u32 mmci_dctrl_sdio(struct mmci_host *host)
+> +{
+> +       if (host->mmc->card && mmc_card_sdio(host->mmc->card))
+> +               return host->variant->datactrl_mask_sdio;
+> +       return 0;
+> +}
+> +
+>  static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
+>  {
+>         struct variant_data *variant = host->variant;
+> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+> index a59049b..32ae41d 100644
+> --- a/drivers/mmc/host/mmci.h
+> +++ b/drivers/mmc/host/mmci.h
+> @@ -430,6 +430,11 @@ struct mmci_host {
+>  void mmci_write_clkreg(struct mmci_host *host, u32 clk);
+>  void mmci_write_pwrreg(struct mmci_host *host, u32 pwr);
+>
+> +u32 mmci_dctrl_blksz(struct mmci_host *host);
+> +u32 mmci_dctrl_dir(struct mmci_host *host);
+> +u32 mmci_dctrl_ddr(struct mmci_host *host);
+> +u32 mmci_dctrl_sdio(struct mmci_host *host);
+> +
+>  #ifdef CONFIG_DMA_ENGINE
+>  int mmci_dmae_prep_data(struct mmci_host *host, struct mmc_data *data,
+>                         bool next);
+> --
+> 2.7.4
+>
+
+Overall, I have to admit that it's tricky to fine a decent balance of
+callbacks/helpers/variant-data. I guess we simply have to continue
+evolve this, along the lines of what suggest here and just see how it
+turns out. We can always patch the code on top if we find other/better
+solutions along the road.
+
+Kind regards
+Uffe
