@@ -1,45 +1,88 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: [BACKPORT 4.4.y 17/25] mmc: core: don't try to switch block size for dual rate mode
-Date: Fri, 22 Mar 2019 16:44:08 +0100
-Message-ID: <20190322154425.3852517-18-arnd@arndb.de>
-References: <20190322154425.3852517-1-arnd@arndb.de>
+From: Michal =?UTF-8?B?U3VjaMOhbmVr?= <msuchanek@suse.de>
+Subject: Re: [PATCH V2 0/7] mmc: Several fixes for bcm2835 driver
+Date: Fri, 22 Mar 2019 17:06:43 +0100
+Message-ID: <20190322170643.2e56d220@naga.suse.cz>
+References: <1541967839-2847-1-git-send-email-stefan.wahren@i2se.com>
+ <20190321210307.58e33ea4@kitsune.suse.cz>
+ <1ff03f96-2575-f65e-c96e-6dc52de00c3a@i2se.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20190322154425.3852517-1-arnd@arndb.de>
-Sender: stable-owner@vger.kernel.org
-To: stable@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Avri Altman <avri.altman@wdc.com>, Ritesh Harjani <riteshh@codeaurora.org>, Jiong Wu <lohengrin1024@gmail.com>, Martin Hicks <mort@bork.org>
-Cc: Ziyuan Xu <xzy.xu@rock-chips.com>, Arnd Bergmann <arnd@arndb.de>, Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1ff03f96-2575-f65e-c96e-6dc52de00c3a@i2se.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Stefan Wahren <stefan.wahren@i2se.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Florian Fainelli <f.fainelli@gmail.com>, Phil Elwell <phil@raspberrypi.org>, linux-mmc@vger.kernel.org, Eric Anholt <eric@anholt.net>, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Ziyuan Xu <xzy.xu@rock-chips.com>
-
-Per spec, block size should always be 512 bytes for dual rate mode,
-so any attempts to switch the block size under dual rate mode should
-be neglected.
-
-Signed-off-by: Ziyuan Xu <xzy.xu@rock-chips.com>
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-(cherry picked from commit 1712c9373f98ae8ed41599a8d7841a6fba29c264)
-Signed-off-by: Arnd Bergmann <arnd@arndb.de>
----
- drivers/mmc/core/core.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index df074f8c7cb7..3e17268b9994 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2406,7 +2406,8 @@ int mmc_set_blocklen(struct mmc_card *card, unsigned int blocklen)
- {
- 	struct mmc_command cmd = {0};
- 
--	if (mmc_card_blockaddr(card) || mmc_card_ddr52(card))
-+	if (mmc_card_blockaddr(card) || mmc_card_ddr52(card) ||
-+	    mmc_card_hs400(card) || mmc_card_hs400es(card))
- 		return 0;
- 
- 	cmd.opcode = MMC_SET_BLOCKLEN;
--- 
-2.20.0
+T24gRnJpLCAyMiBNYXIgMjAxOSAxNTo0NToxMyArMDEwMApTdGVmYW4gV2FocmVuIDxzdGVmYW4u
+d2FocmVuQGkyc2UuY29tPiB3cm90ZToKCj4gSGkgTWljaGFsLAo+IAo+IEFtIDIxLjAzLjE5IHVt
+IDIxOjAzIHNjaHJpZWIgTWljaGFsIFN1Y2jDoW5lazoKPiA+IE9uIFN1biwgMTEgTm92IDIwMTgg
+MjE6MjM6NTIgKzAxMDAKPiA+IFN0ZWZhbiBXYWhyZW4gPHN0ZWZhbi53YWhyZW5AaTJzZS5jb20+
+IHdyb3RlOgo+ID4gIAo+ID4+IFRoaXMgcGF0Y2ggc2VyaWVzIGZpeGVzIHNldmVyYWwgaXNzdWVz
+IHdoaWNoIGhhcyBiZWVuIGRpc2NvdmVyZWQgYWZ0ZXIKPiA+PiBzdWJtaXNzaW9uLgo+ID4+Cj4g
+Pj4gQ2hhbmdlcyBpbiBWMjoKPiA+PiAtIGFkZCBteSBvd24gc2lnbmVkLW9mZi1ieSB0byBwYXRj
+aGVzICMxIGFuZCAjMgo+ID4+Cj4gPj4gTWljaGFsIFN1Y2hhbmVrICgxKToKPiA+PiAgIG1tYzog
+YmNtMjgzNTogcmVzZXQgaG9zdCBvbiB0aW1lb3V0Cj4gPj4KPiA+PiBQaGlsIEVsd2VsbCAoMSk6
+Cj4gPj4gICBtbWM6IGJjbTI4MzU6IFJlY292ZXIgZnJvbSBNTUNfU0VORF9FWFRfQ1NECj4gPj4K
+PiA+PiBTdGVmYW4gV2FocmVuICg1KToKPiA+PiAgIG1tYzogYmNtMjgzNTogUmVsZWFzZSBETUEg
+Y2hhbm5lbCBvbiBkcml2ZXIgdW5sb2FkCj4gPj4gICBtbWM6IGJjbTI4MzU6IEF2b2lkIHBvc3Np
+YmxlIHJhY2VzIG9uIGRhdGEgcmVxdWVzdHMKPiA+PiAgIG1tYzogYmNtMjgzNTogVGVybWluYXRl
+IHRpbWVvdXQgd29yayBzeW5jaHJvbm91c2x5Cj4gPj4gICBtbWM6IGJjbTI4MzU6IFJlZmFjdG9y
+IGRtYV9tYXBfc2cgaGFuZGxpbmcKPiA+PiAgIG1tYzogYmNtMjgzNTogUHJvcGVybHkgaGFuZGxl
+IGRtYWVuZ2luZV9wcmVwX3NsYXZlX3NnCj4gPj4KPiA+PiAgZHJpdmVycy9tbWMvaG9zdC9iY20y
+ODM1LmMgfCA1OCArKysrKysrKysrKysrKysrKysrKysrKysrKysrKystLS0tLS0tLS0tLS0tLS0t
+Cj4gPj4gIDEgZmlsZSBjaGFuZ2VkLCAzOCBpbnNlcnRpb25zKCspLCAyMCBkZWxldGlvbnMoLSkK
+PiA+PiAgCj4gPiBIZWxsbywKPiA+Cj4gPiB0aGFua3MgZm9yIHRoZSBwYXRjaGVzLgo+ID4KPiA+
+IEkgdHJpZWQgdG8gcmVwbGFjZSB0aGUgYmNtMjgzNSBzZGhvc3QgZHJpdmVyIGluIG15IDQuNCBr
+ZXJuZWwgd2l0aCB0aGUKPiA+IHVwc3RyZWFtIGRyaXZlciArIHRoZXNlIHVwZGF0ZXMgYnV0IHRo
+ZSAxNkdCIG9yYW5nZSBFVk8gY2FyZCBzdGlsbAo+ID4gbG9ja3MgdXAgdGhlIG1tYyBjb250cm9s
+bGVyLiBJdCBzZWVtcyBpdCBsb2NrcyB1cCBtdWNoIGxlc3MgYnV0IGlzCj4gPiBjZXJ0YWlubHkg
+bm90IHNvbGlkLiAgCj4gCj4gY291bGQgeW91IHBsZWFzZSByZXRyeSB3aXRoIG1haW5saW5lIGtl
+cm5lbCA1LjA/CgpJIGNhbiB0cnkgdGhhdC4gV2hhdCBJIGhhdmUgaXMgcHJldHR5IG11Y2ggNS4w
+IGFueXdheSBzbyBJIGRvbid0IGV4cGVjdAptdWNoIGRpZmZlcmVuY2U6Cgo2NjBmYzczM2JkNzQz
+NmY0ZmExYTM1MTM3NjQ5M2U2MzU1MTRlZDY0ICBtbWM6IGJjbTI4MzU6IEFkZCBuZXcgZHJpdmVy
+IGZvciB0aGUgc2Rob3N0IGNvbnRyb2xsZXIuCmJmMzI0MGJhZGEwMjExYjRhNTU1ZDc1ZjAyNzE4
+MWM4NDMyYjJkMjAgIG1tYzogYmNtMjgzNTogRml4IHBvc3NpYmxlIE5VTEwgcHRyIGRlcmVmZXJl
+bmNlIGluCmMwMGEyMzFiYTA1M2E5YjBiZThkNTEyOTU3Yjk5Mzk1YjkyYmM2MjAgIG1tYzogYmNt
+MjgzNTogZml4IHBvdGVudGlhbCBudWxsIHBvaW50ZXIgZGVyZWZlcmVuY2VzCjJjOWU4OWExZDYw
+MmMxMmE0ZjJiZDRjN2E1N2EzMzE1MjQ3ZTNmMjEgIG1tYzogYmNtMjgzNTogY29uc3RpZnkgbW1j
+X2hvc3Rfb3BzIHN0cnVjdHVyZXMKMTE4MDMyYmUzODkwMDliMDdlY2I1YTAzZmZlMjE5YTg5ZDQy
+MWRlZiAgbW1jOiBiY20yODM1OiBEb24ndCBvdmVyd3JpdGUgbWF4IGZyZXF1ZW5jeSB1bmNvbmRp
+dGlvbmFsbHkKZjYwMDBhNGViMzRlNjQ2MmJjMGRkMzk4MDljMWJiOTlmOTYzMzI2OSAgbW1jOiBi
+Y20yODM1OiByZXNldCBob3N0IG9uIHRpbWVvdXQKMDdkNDA1NzY5YWZlYTU3MTg1MjlmYzllMzQx
+ZjBiMTNiMzE4OWI2ZiAgbW1jOiBiY20yODM1OiBSZWNvdmVyIGZyb20gTU1DX1NFTkRfRVhUX0NT
+RAo1ZWFlMjUyZGIzODU2ZTYyYzc3ODgzMmQ0ZDU5ZjZlZmM1YjBhYWY5ICBtbWM6IGJjbTI4MzU6
+IFJlbGVhc2UgRE1BIGNoYW5uZWwgb24gZHJpdmVyIHVubG9hZAphZjE5YjdjZTc2YmEyMjBmMzU4
+YzgyYjBhNWU3ZDY4OTA5YTIzYWE1ICBtbWM6IGJjbTI4MzU6IEF2b2lkIHBvc3NpYmxlIHJhY2Vz
+IG9uIGRhdGEgcmVxdWVzdHMKMzdmZWZhZGVlOGJiNjY1YWUzMzdhMTVhYTYzNWRhYmZmOWY2NmFk
+ZSAgbW1jOiBiY20yODM1OiBUZXJtaW5hdGUgdGltZW91dCB3b3JrIHN5bmNocm9ub3VzbHkKNmRj
+NmYyNjE5MDE3MTA5ZTQ1NTUwYWNjYzEyMGY4MjNmZGMzMWMzZSAgbW1jOiBiY20yODM1OiBSZWZh
+Y3RvciBkbWFfbWFwX3NnIGhhbmRsaW5nCjJmNWRhNjc4MzUxZjBkNTA0OTY2ZmFiMTEzOTY4MjAy
+YWE1NzEzZmIgIG1tYzogYmNtMjgzNTogUHJvcGVybHkgaGFuZGxlIGRtYWVuZ2luZV9wcmVwX3Ns
+YXZlX3NnCjhjOTYyMGIxY2M5YjY5ZTgyZmE4ZDQwODFkNjQ2ZDAwMTZiNjAyZTcgIG1tYzogYmNt
+MjgzNTogRml4IERNQSBjaGFubmVsIGxlYWsgb24gcHJvYmUgZXJyb3IKZTVjMWU2M2M5MzIzNzli
+ODlkNzQwNGQ0ZTVmZGUxYmY4YWJmZjk1MSAgbW1jOiBiY20yODM1OiBEcm9wIERNQSBjaGFubmVs
+IGVycm9yIHBvaW50ZXIgY2hlY2sKCldoYXQgSSBoYWQgYmVmb3JlIHdhcyBzb21lIHByZXZpb3Vz
+IGRyYWZ0IG9mCjY2MGZjNzMzYmQ3NDM2ZjRmYTFhMzUxMzc2NDkzZTYzNTUxNGVkNjQgKwpmNjAw
+MGE0ZWIzNGU2NDYyYmMwZGQzOTgwOWMxYmI5OWY5NjMzMjY5IHdoaWNoIHdvdWxkIGV2ZW50dWFs
+bHkgcmVjb3ZlcgpvbiB0aGUgZXJyb3IgYnV0IHRoZSBlcnJvcnMgd2VyZSBtb3JlIGZyZXF1ZW50
+IHdpdGggbXkgY2FyZC4KCj4gCj4gTWF5YmUgdGhpcyBpcyByZWxhdGVkOgo+IAo+IGh0dHA6Ly9s
+aXN0cy5pbmZyYWRlYWQub3JnL3BpcGVybWFpbC9saW51eC1ycGkta2VybmVsLzIwMTktRmVicnVh
+cnkvMDA4NTQyLmh0bWwKCkkgc3VzcGVjdCB0aGF0IG9uZSBvZiB0aGUgbG9ja2luZyBmaXhlcyB0
+aGF0IHdlbnQgaW50byBtYWlubGluZQpyZWNlbnRseSBwcmV2ZW50cyByZWNvdmVyaW5nIGZyb20g
+dGhlIGVycm9yIGJ1dCBJIGRpZCBub3QgdHJ5CnJldmVydGluZyB0aGVtIHlldC4gSXQgdGFrZXMg
+cXVpdGUgYSB3aGlsZSB0byByZWltYWdlLCBib290IGRpZmZlcmVudAprZXJuZWwsIHJ1biBzeXN0
+ZW0gdXBkYXRlICh3aGljaCBub3cgaW52YXJpYWJseSBjcmFzaGVzL2xvY2tzIHVwIHdpdGgKYW55
+IGtlcm5lbCkuIAoKVGhhbmtzCgpNaWNoYWwKCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fCmxpbnV4LWFybS1rZXJuZWwgbWFpbGluZyBsaXN0CmxpbnV4LWFy
+bS1rZXJuZWxAbGlzdHMuaW5mcmFkZWFkLm9yZwpodHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9t
+YWlsbWFuL2xpc3RpbmZvL2xpbnV4LWFybS1rZXJuZWwK
