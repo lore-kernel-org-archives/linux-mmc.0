@@ -1,84 +1,43 @@
 From: Arnd Bergmann <arnd@arndb.de>
-Subject: [BACKPORT 4.4.y 03/25] mmc: pwrseq_simple: Make reset-gpios optional to match doc
-Date: Fri, 22 Mar 2019 16:43:54 +0100
-Message-ID: <20190322154425.3852517-4-arnd@arndb.de>
+Subject: [BACKPORT 4.4.y 05/25] mmc: debugfs: Add a restriction to mmc debugfs clock setting
+Date: Fri, 22 Mar 2019 16:43:56 +0100
+Message-ID: <20190322154425.3852517-6-arnd@arndb.de>
 References: <20190322154425.3852517-1-arnd@arndb.de>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20190322154425.3852517-1-arnd@arndb.de>
 Sender: linux-kernel-owner@vger.kernel.org
-To: stable@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Janusz Krzysztofik <jmkrzyszt@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, Geert Uytterhoeven <geert+renesas@glider.be>, "Tobin C. Harding" <me@tobin.cc>
-Cc: Martin Fuzzey <mfuzzey@parkeon.com>, Tony Lindgren <tony@atomide.com>, Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: stable@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chuanxiao Dong <chuanxiao.dong@intel.com>, Yuan Juntao <juntaox.yuan@intel.com>, Pawel Wodkowski <pawelx.wodkowski@intel.com>, Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Martin Fuzzey <mfuzzey@parkeon.com>
+From: Chuanxiao Dong <chuanxiao.dong@intel.com>
 
-The DT binding doc says reset-gpios is an optional property but the code
-currently bails out if it is omitted.
+Clock frequency values written to an mmc host should not be less than
+the minimum clock frequency which the mmc host supports.
 
-This is a regression since it breaks previously working device trees.
-Fix it by restoring the original documented behaviour.
-
-Fixes: ce037275861e ("mmc: pwrseq_simple: use GPIO descriptors array API")
-Tested-by: Tony Lindgren <tony@atomide.com>
-Signed-off-by: Martin Fuzzey <mfuzzey@parkeon.com>
+Signed-off-by: Yuan Juntao <juntaox.yuan@intel.com>
+Signed-off-by: Pawel Wodkowski <pawelx.wodkowski@intel.com>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-(cherry picked from commit 64a67d4762ce3ce4c9466eadd152d825fbf84967)
+(cherry picked from commit e5905ff1281f0a0f5c9863c430ac1ed5faaf5707)
 Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 ---
- drivers/mmc/core/pwrseq_simple.c | 22 ++++++++++++++--------
- 1 file changed, 14 insertions(+), 8 deletions(-)
+ drivers/mmc/core/debugfs.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
-index 2b16263458af..aba786daebca 100644
---- a/drivers/mmc/core/pwrseq_simple.c
-+++ b/drivers/mmc/core/pwrseq_simple.c
-@@ -29,15 +29,18 @@ struct mmc_pwrseq_simple {
- static void mmc_pwrseq_simple_set_gpios_value(struct mmc_pwrseq_simple *pwrseq,
- 					      int value)
- {
--	int i;
- 	struct gpio_descs *reset_gpios = pwrseq->reset_gpios;
--	int values[reset_gpios->ndescs];
+diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+index 154aced0b91b..705586dcd9fa 100644
+--- a/drivers/mmc/core/debugfs.c
++++ b/drivers/mmc/core/debugfs.c
+@@ -220,7 +220,7 @@ static int mmc_clock_opt_set(void *data, u64 val)
+ 	struct mmc_host *host = data;
  
--	for (i = 0; i < reset_gpios->ndescs; i++)
--		values[i] = value;
-+	if (!IS_ERR(reset_gpios)) {
-+		int i;
-+		int values[reset_gpios->ndescs];
+ 	/* We need this check due to input value is u64 */
+-	if (val > host->f_max)
++	if (val != 0 && (val > host->f_max || val < host->f_min))
+ 		return -EINVAL;
  
--	gpiod_set_array_value_cansleep(reset_gpios->ndescs, reset_gpios->desc,
--				       values);
-+		for (i = 0; i < reset_gpios->ndescs; i++)
-+			values[i] = value;
-+
-+		gpiod_set_array_value_cansleep(
-+			reset_gpios->ndescs, reset_gpios->desc, values);
-+	}
- }
- 
- static void mmc_pwrseq_simple_pre_power_on(struct mmc_host *host)
-@@ -79,7 +82,8 @@ static void mmc_pwrseq_simple_free(struct mmc_host *host)
- 	struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
- 					struct mmc_pwrseq_simple, pwrseq);
- 
--	gpiod_put_array(pwrseq->reset_gpios);
-+	if (!IS_ERR(pwrseq->reset_gpios))
-+		gpiod_put_array(pwrseq->reset_gpios);
- 
- 	if (!IS_ERR(pwrseq->ext_clk))
- 		clk_put(pwrseq->ext_clk);
-@@ -112,7 +116,9 @@ struct mmc_pwrseq *mmc_pwrseq_simple_alloc(struct mmc_host *host,
- 	}
- 
- 	pwrseq->reset_gpios = gpiod_get_array(dev, "reset", GPIOD_OUT_HIGH);
--	if (IS_ERR(pwrseq->reset_gpios)) {
-+	if (IS_ERR(pwrseq->reset_gpios) &&
-+	    PTR_ERR(pwrseq->reset_gpios) != -ENOENT &&
-+	    PTR_ERR(pwrseq->reset_gpios) != -ENOSYS) {
- 		ret = PTR_ERR(pwrseq->reset_gpios);
- 		goto clk_put;
- 	}
+ 	mmc_claim_host(host);
 -- 
 2.20.0
