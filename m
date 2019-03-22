@@ -1,48 +1,52 @@
-From: David Sterba <dsterba-AlSwsSmVLrQ@public.gmane.org>
-Subject: Re: [PATCH 1/2] treewide: Switch printk users from %pf and %pF to
- %ps and %pS, respectively
-Date: Fri, 22 Mar 2019 15:30:28 +0100
-Message-ID: <20190322143028.GD28481@twin.jikos.cz>
-References: <20190322132108.25501-1-sakari.ailus@linux.intel.com>
- <20190322132108.25501-2-sakari.ailus@linux.intel.com>
-Reply-To: dsterba-AlSwsSmVLrQ@public.gmane.org
+From: Stefan Wahren <stefan.wahren@i2se.com>
+Subject: Re: [PATCH V2 0/7] mmc: Several fixes for bcm2835 driver
+Date: Fri, 22 Mar 2019 15:45:13 +0100
+Message-ID: <1ff03f96-2575-f65e-c96e-6dc52de00c3a@i2se.com>
+References: <1541967839-2847-1-git-send-email-stefan.wahren@i2se.com>
+ <20190321210307.58e33ea4@kitsune.suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20190322132108.25501-2-sakari.ailus-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-List-Unsubscribe: <https://lists.01.org/mailman/options/linux-nvdimm>,
- <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.01.org/pipermail/linux-nvdimm/>
-List-Post: <mailto:linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
-List-Help: <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.01.org/mailman/listinfo/linux-nvdimm>,
- <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=subscribe>
-Errors-To: linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org
-Sender: "Linux-nvdimm" <linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
-To: Sakari Ailus <sakari.ailus-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Cc: Petr Mladek <pmladek-IBi9RG/b67k@public.gmane.org>, linux-scsi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org, linux-um-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-f2fs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-btrfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, sparclinux-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, drbd-dev-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20190321210307.58e33ea4@kitsune.suse.cz>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: =?UTF-8?Q?Michal_Such=c3=a1nek?= <msuchanek@suse.de>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Florian Fainelli <f.fainelli@gmail.com>, Phil Elwell <phil@raspberrypi.org>, linux-mmc@vger.kernel.org, Eric Anholt <eric@anholt.net>, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Mar 22, 2019 at 03:21:07PM +0200, Sakari Ailus wrote:
-> %pF and %pf are functionally equivalent to %pS and %ps conversion
-> specifiers. The former are deprecated, therefore switch the current users
-> to use the preferred variant.
-> 
-> The changes have been produced by the following command:
-> 
-> 	git grep -l '%p[fF]' | grep -v '^\(tools\|Documentation\)/' | \
-> 	while read i; do perl -i -pe 's/%pf/%ps/g; s/%pF/%pS/g;' $i; done
-> 
-> And verifying the result.
-> 
-> Signed-off-by: Sakari Ailus <sakari.ailus-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-> ---
-
-For 
-
->  fs/btrfs/tests/free-space-tree-tests.c  |  4 ++--
->  include/trace/events/btrfs.h            |  2 +-
-
-Acked-by: David Sterba <dsterba-IBi9RG/b67k@public.gmane.org>
+SGkgTWljaGFsLAoKQW0gMjEuMDMuMTkgdW0gMjE6MDMgc2NocmllYiBNaWNoYWwgU3VjaMOhbmVr
+Ogo+IE9uIFN1biwgMTEgTm92IDIwMTggMjE6MjM6NTIgKzAxMDAKPiBTdGVmYW4gV2FocmVuIDxz
+dGVmYW4ud2FocmVuQGkyc2UuY29tPiB3cm90ZToKPgo+PiBUaGlzIHBhdGNoIHNlcmllcyBmaXhl
+cyBzZXZlcmFsIGlzc3VlcyB3aGljaCBoYXMgYmVlbiBkaXNjb3ZlcmVkIGFmdGVyCj4+IHN1Ym1p
+c3Npb24uCj4+Cj4+IENoYW5nZXMgaW4gVjI6Cj4+IC0gYWRkIG15IG93biBzaWduZWQtb2ZmLWJ5
+IHRvIHBhdGNoZXMgIzEgYW5kICMyCj4+Cj4+IE1pY2hhbCBTdWNoYW5layAoMSk6Cj4+ICAgbW1j
+OiBiY20yODM1OiByZXNldCBob3N0IG9uIHRpbWVvdXQKPj4KPj4gUGhpbCBFbHdlbGwgKDEpOgo+
+PiAgIG1tYzogYmNtMjgzNTogUmVjb3ZlciBmcm9tIE1NQ19TRU5EX0VYVF9DU0QKPj4KPj4gU3Rl
+ZmFuIFdhaHJlbiAoNSk6Cj4+ICAgbW1jOiBiY20yODM1OiBSZWxlYXNlIERNQSBjaGFubmVsIG9u
+IGRyaXZlciB1bmxvYWQKPj4gICBtbWM6IGJjbTI4MzU6IEF2b2lkIHBvc3NpYmxlIHJhY2VzIG9u
+IGRhdGEgcmVxdWVzdHMKPj4gICBtbWM6IGJjbTI4MzU6IFRlcm1pbmF0ZSB0aW1lb3V0IHdvcmsg
+c3luY2hyb25vdXNseQo+PiAgIG1tYzogYmNtMjgzNTogUmVmYWN0b3IgZG1hX21hcF9zZyBoYW5k
+bGluZwo+PiAgIG1tYzogYmNtMjgzNTogUHJvcGVybHkgaGFuZGxlIGRtYWVuZ2luZV9wcmVwX3Ns
+YXZlX3NnCj4+Cj4+ICBkcml2ZXJzL21tYy9ob3N0L2JjbTI4MzUuYyB8IDU4ICsrKysrKysrKysr
+KysrKysrKysrKysrKysrKysrKy0tLS0tLS0tLS0tLS0tLS0KPj4gIDEgZmlsZSBjaGFuZ2VkLCAz
+OCBpbnNlcnRpb25zKCspLCAyMCBkZWxldGlvbnMoLSkKPj4KPiBIZWxsbywKPgo+IHRoYW5rcyBm
+b3IgdGhlIHBhdGNoZXMuCj4KPiBJIHRyaWVkIHRvIHJlcGxhY2UgdGhlIGJjbTI4MzUgc2Rob3N0
+IGRyaXZlciBpbiBteSA0LjQga2VybmVsIHdpdGggdGhlCj4gdXBzdHJlYW0gZHJpdmVyICsgdGhl
+c2UgdXBkYXRlcyBidXQgdGhlIDE2R0Igb3JhbmdlIEVWTyBjYXJkIHN0aWxsCj4gbG9ja3MgdXAg
+dGhlIG1tYyBjb250cm9sbGVyLiBJdCBzZWVtcyBpdCBsb2NrcyB1cCBtdWNoIGxlc3MgYnV0IGlz
+Cj4gY2VydGFpbmx5IG5vdCBzb2xpZC4KCmNvdWxkIHlvdSBwbGVhc2UgcmV0cnkgd2l0aCBtYWlu
+bGluZSBrZXJuZWwgNS4wPwoKTWF5YmUgdGhpcyBpcyByZWxhdGVkOgoKaHR0cDovL2xpc3RzLmlu
+ZnJhZGVhZC5vcmcvcGlwZXJtYWlsL2xpbnV4LXJwaS1rZXJuZWwvMjAxOS1GZWJydWFyeS8wMDg1
+NDIuaHRtbAoKPgo+IFRoYW5rcwo+Cj4gTWljaGFsCgoKX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX18KbGludXgtYXJtLWtlcm5lbCBtYWlsaW5nIGxpc3QKbGlu
+dXgtYXJtLWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnCmh0dHA6Ly9saXN0cy5pbmZyYWRlYWQu
+b3JnL21haWxtYW4vbGlzdGluZm8vbGludXgtYXJtLWtlcm5lbAo=
