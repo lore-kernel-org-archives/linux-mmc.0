@@ -1,35 +1,45 @@
-From: Fabien Parent <fparent@baylibre.com>
-Subject: [PATCH 22/24] dt-bindings: i2c: i2c-mtk: add support for MT8516
-Date: Sat, 23 Mar 2019 22:16:10 +0100
-Message-ID: <20190323211612.860-23-fparent@baylibre.com>
+From: Fabien Parent <fparent-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>
+Subject: [PATCH 03/24] dt-bindings: pwrap: mediatek: add pwrap support for
+ MT8516
+Date: Sat, 23 Mar 2019 22:15:51 +0100
+Message-ID: <20190323211612.860-4-fparent@baylibre.com>
 References: <20190323211612.860-1-fparent@baylibre.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190323211612.860-1-fparent@baylibre.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: matthias.bgg@gmail.com, robh+dt@kernel.org, mark.rutland@arm.com
-Cc: sean.wang@kernel.org, ryder.lee@mediatek.com, hsin-hsiung.wang@mediatek.com, wenzhen.yu@mediatek.com, chaotian.jing@mediatek.com, yong.mao@mediatek.com, jjian.zhou@mediatek.com, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-i2c@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org, linux-serial@vger.kernel.org, linux-spi@vger.kernel.org, linux-watchdog@vger.kernel.org, linux-clk@vger.kernel.org, stephane.leprovost@mediatek.com, Fabien Parent <fparent@baylibre.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <20190323211612.860-1-fparent-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mediatek>,
+ <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mediatek/>
+List-Post: <mailto:linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mediatek>,
+ <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-mediatek" <linux-mediatek-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ryder.lee-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, linux-watchdog-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jjian.zhou-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, wenzhen.yu-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, stephane.leprovost-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, sean.wang-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, hsin-hsiung.wang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, linux-serial-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Fabien Parent <fparent-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Add binding documentation of i2c-mtk for MT8516 SoC.
+Add binding documentation of pwrap for MT8516 SoCs.
 
-Signed-off-by: Fabien Parent <fparent@baylibre.com>
+Signed-off-by: Fabien Parent <fparent-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>
 ---
- Documentation/devicetree/bindings/i2c/i2c-mtk.txt | 1 +
+ Documentation/devicetree/bindings/soc/mediatek/pwrap.txt | 1 +
  1 file changed, 1 insertion(+)
 
-diff --git a/Documentation/devicetree/bindings/i2c/i2c-mtk.txt b/Documentation/devicetree/bindings/i2c/i2c-mtk.txt
-index ee4c32454198..aac7b56f251f 100644
---- a/Documentation/devicetree/bindings/i2c/i2c-mtk.txt
-+++ b/Documentation/devicetree/bindings/i2c/i2c-mtk.txt
-@@ -12,6 +12,7 @@ Required properties:
-       "mediatek,mt7623-i2c", "mediatek,mt6577-i2c": for MediaTek MT7623
-       "mediatek,mt7629-i2c", "mediatek,mt2712-i2c": for MediaTek MT7629
-       "mediatek,mt8173-i2c": for MediaTek MT8173
-+      "mediatek,mt8516-i2c", "mediatek,mt2712-i2c": for MediaTek MT8516
-   - reg: physical base address of the controller and dma base, length of memory
-     mapped region.
-   - interrupts: interrupt number to the cpu.
+diff --git a/Documentation/devicetree/bindings/soc/mediatek/pwrap.txt b/Documentation/devicetree/bindings/soc/mediatek/pwrap.txt
+index 5a2ef1726e2a..7a32404c6114 100644
+--- a/Documentation/devicetree/bindings/soc/mediatek/pwrap.txt
++++ b/Documentation/devicetree/bindings/soc/mediatek/pwrap.txt
+@@ -25,6 +25,7 @@ Required properties in pwrap device node.
+ 	"mediatek,mt8135-pwrap" for MT8135 SoCs
+ 	"mediatek,mt8173-pwrap" for MT8173 SoCs
+ 	"mediatek,mt8183-pwrap" for MT8183 SoCs
++	"mediatek,mt8516-pwrap" for MT8516 SoCs
+ - interrupts: IRQ for pwrap in SOC
+ - reg-names: Must include the following entries:
+   "pwrap": Main registers base
 -- 
 2.20.1
