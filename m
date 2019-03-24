@@ -1,7 +1,7 @@
 From: Sowjanya Komatineni <skomatineni@nvidia.com>
-Subject: [PATCH V4 05/10] arm64: tegra: fix default tap and trim values
-Date: Sat, 23 Mar 2019 21:45:22 -0700
-Message-ID: <1553402727-23130-5-git-send-email-skomatineni@nvidia.com>
+Subject: [PATCH V4 04/10] dt-bindings: mmc: tegra: document Tegra194 compatible string
+Date: Sat, 23 Mar 2019 21:45:21 -0700
+Message-ID: <1553402727-23130-4-git-send-email-skomatineni@nvidia.com>
 References: <1553402727-23130-1-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,29 +12,25 @@ To: adrian.hunter@intel.com, ulf.hansson@linaro.org, robh+dt@kernel.org, mark.ru
 Cc: skomatineni@nvidia.com, thierry.reding@gmail.com, jonathanh@nvidia.com, anrao@nvidia.com, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Default tap and trim values are incorrect for Tegra186 SDMMC4.
-This patch fixes it.
+SDHCI controller of Tegra194 is similar to SDHCI controller in Tegra186.
+This patch documents Tegra194 sdhci compatible string.
 
-Tested-by: Jon Hunter <jonathanh@nvidia.com>
 Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
 ---
- arch/arm64/boot/dts/nvidia/tegra186.dtsi | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/arch/arm64/boot/dts/nvidia/tegra186.dtsi b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
-index 97aeb946ed5e..472f55fe9488 100644
---- a/arch/arm64/boot/dts/nvidia/tegra186.dtsi
-+++ b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
-@@ -317,8 +317,8 @@
- 		nvidia,pad-autocal-pull-down-offset-1v8-timeout = <0x0a>;
- 		nvidia,pad-autocal-pull-up-offset-3v3-timeout = <0x0a>;
- 		nvidia,pad-autocal-pull-down-offset-3v3-timeout = <0x0a>;
--		nvidia,default-tap = <0x5>;
--		nvidia,default-trim = <0x9>;
-+		nvidia,default-tap = <0x9>;
-+		nvidia,default-trim = <0x5>;
- 		nvidia,dqs-trim = <63>;
- 		mmc-hs400-1_8v;
- 		status = "disabled";
+diff --git a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
+index 2cecdc71d94c..2cf3affa1be7 100644
+--- a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
++++ b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
+@@ -14,6 +14,7 @@ Required properties:
+   - "nvidia,tegra124-sdhci": for Tegra124 and Tegra132
+   - "nvidia,tegra210-sdhci": for Tegra210
+   - "nvidia,tegra186-sdhci": for Tegra186
++  - "nvidia,tegra194-sdhci": for Tegra194
+ - clocks : Must contain one entry, for the module clock.
+   See ../clocks/clock-bindings.txt for details.
+ - resets : Must contain an entry for each entry in reset-names.
 -- 
 2.7.4
