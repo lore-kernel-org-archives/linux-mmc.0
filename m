@@ -1,53 +1,67 @@
-From: Fabien Parent <fparent@baylibre.com>
-Subject: Re: [PATCH 09/24] mmc: mtk-sd: check for valid optional memory resource
-Date: Sun, 24 Mar 2019 16:18:45 +0100
-Message-ID: <CAOwMV_zkHMZv8y_8C9kRCUsPtSbm+vPkJUNzU-_LK5=OhTkiPw@mail.gmail.com>
-References: <20190323211612.860-1-fparent@baylibre.com> <20190323211612.860-10-fparent@baylibre.com>
- <1553398466.26628.0.camel@mtksdaap41>
+From: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+Subject: [PATCH v4.4.y] mmc: tmio_mmc_core: don't claim spurious interrupts
+Date: Sun, 24 Mar 2019 20:32:12 +0300
+Message-ID: <948c139f-aef2-efb9-6b73-c293883ab368@cogentembedded.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1553398466.26628.0.camel@mtksdaap41>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Yingjoe Chen <yingjoe.chen@mediatek.com>
-Cc: Matthias Brugger <matthias.bgg@gmail.com>, robh+dt@kernel.org, mark.rutland@arm.com, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, ryder.lee@mediatek.com, linux-watchdog@vger.kernel.org, jjian.zhou@mediatek.com, wenzhen.yu@mediatek.com, Stephane Le Provost <stephane.leprovost@mediatek.com>, sean.wang@kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, yong.mao@mediatek.com, linux-spi@vger.kernel.org, linux-gpio@vger.kernel.org, linux-mediatek@lists.infradead.org, hsin-hsiung.wang@mediatek.com, linux-serial@vger.kernel.org, linux-clk@vger.kernel.org, Chaotian Jing <chaotian.jing@mediatek.com>, linux-i2c@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <stable-owner@vger.kernel.org>
+Content-Language: en-MW
+Sender: stable-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, GregKH <gregkh@linuxfoundation.org>
+Cc: linux-renesas-soc@vger.kernel.org, stable@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Sun, Mar 24, 2019 at 4:34 AM Yingjoe Chen <yingjoe.chen@mediatek.com> wrote:
->
-> On Sat, 2019-03-23 at 22:15 +0100, Fabien Parent wrote:
-> > 'top_base' memory region is optional. Check that the resource is valid
-> > before using it. This avoid getting a "invalid resource" error message
-> > printed by the kernel.
-> >
-> > Signed-off-by: Fabien Parent <fparent@baylibre.com>
-> > ---
-> >  drivers/mmc/host/mtk-sd.c | 8 +++++---
-> >  1 file changed, 5 insertions(+), 3 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> > index 833ef0590af8..573aa127d00b 100644
-> > --- a/drivers/mmc/host/mtk-sd.c
-> > +++ b/drivers/mmc/host/mtk-sd.c
-> > @@ -2123,9 +2123,11 @@ static int msdc_drv_probe(struct platform_device *pdev)
-> >       }
-> >
-> >       res = platform_get_resource(pdev, IORESOURCE_MEM, 1);
-> > -     host->top_base = devm_ioremap_resource(&pdev->dev, res);
-> > -     if (IS_ERR(host->top_base))
-> > -             host->top_base = NULL;
-> > +     if (ret) {
->
-> This should be res?
+Commit 5c27ff5db1491a947264d6d4e4cbe43ae6535bae upstream.
 
-Indeed. Thanks, I will fix it in v2.
+I have encountered an interrupt storm during the eMMC chip probing (and
+the chip finally didn't get detected).  It turned out that U-Boot left
+the DMAC interrupts enabled while the Linux driver  didn't use those.
+The SDHI driver's interrupt handler somehow assumes that, even if an
+SDIO interrupt didn't happen, it should return IRQ_HANDLED.  I think
+that if none of the enabled interrupts happened and got handled, we
+should return IRQ_NONE -- that way the kernel IRQ code recoginizes
+a spurious interrupt and masks it off pretty quickly...
 
-> > +             host->top_base = devm_ioremap_resource(&pdev->dev, res);
-> > +             if (IS_ERR(host->top_base))
-> > +                     host->top_base = NULL;
-> > +     }
-> >
-> >       ret = mmc_regulator_get_supply(mmc);
-> >       if (ret)
->
->
+Fixes: 7729c7a232a9 ("mmc: tmio: Provide separate interrupt handlers")
+Signed-off-by: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+
+---
+The patch is against the 'linux-4.4.y' branch of the -stable repo.
+
+ drivers/mmc/host/tmio_mmc_pio.c |    8 +++-----
+ 1 file changed, 3 insertions(+), 5 deletions(-)
+
+Index: linux-stable/drivers/mmc/host/tmio_mmc_pio.c
+===================================================================
+--- linux-stable.orig/drivers/mmc/host/tmio_mmc_pio.c
++++ linux-stable/drivers/mmc/host/tmio_mmc_pio.c
+@@ -716,7 +716,7 @@ irqreturn_t tmio_mmc_sdio_irq(int irq, v
+ 	unsigned int sdio_status;
+ 
+ 	if (!(pdata->flags & TMIO_MMC_SDIO_IRQ))
+-		return IRQ_HANDLED;
++		return IRQ_NONE;
+ 
+ 	status = sd_ctrl_read16(host, CTL_SDIO_STATUS);
+ 	ireg = status & TMIO_SDIO_MASK_ALL & ~host->sdcard_irq_mask;
+@@ -730,7 +730,7 @@ irqreturn_t tmio_mmc_sdio_irq(int irq, v
+ 	if (mmc->caps & MMC_CAP_SDIO_IRQ && ireg & TMIO_SDIO_STAT_IOIRQ)
+ 		mmc_signal_sdio_irq(mmc);
+ 
+-	return IRQ_HANDLED;
++	return IRQ_RETVAL(ireg);
+ }
+ EXPORT_SYMBOL(tmio_mmc_sdio_irq);
+ 
+@@ -747,9 +747,7 @@ irqreturn_t tmio_mmc_irq(int irq, void *
+ 	if (__tmio_mmc_sdcard_irq(host, ireg, status))
+ 		return IRQ_HANDLED;
+ 
+-	tmio_mmc_sdio_irq(irq, devid);
+-
+-	return IRQ_HANDLED;
++	return tmio_mmc_sdio_irq(irq, devid);
+ }
+ EXPORT_SYMBOL(tmio_mmc_irq);
+ 
