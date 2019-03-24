@@ -1,36 +1,48 @@
 From: Sowjanya Komatineni <skomatineni@nvidia.com>
-Subject: [PATCH V4 04/10] dt-bindings: mmc: tegra: document Tegra194 compatible string
-Date: Sat, 23 Mar 2019 21:45:21 -0700
-Message-ID: <1553402727-23130-4-git-send-email-skomatineni@nvidia.com>
-References: <1553402727-23130-1-git-send-email-skomatineni@nvidia.com>
+Subject: RE: [PATCH V3 01/10] mmc: tegra: fix ddr signaling for non-ddr modes
+Date: Sun, 24 Mar 2019 04:49:17 +0000
+Message-ID: <BYAPR12MB3398DDACBBD120C77CABD14FC25D0@BYAPR12MB3398.namprd12.prod.outlook.com>
+References: <1552513552-23423-1-git-send-email-skomatineni@nvidia.com>
+ <CAPDyKFp30v1H0KfPFeOc5Ut1dW5tec7cT7NFk6j0VT+DWkAODw@mail.gmail.com>
+ <BYAPR12MB339888D3A370E790A29E217EC2420@BYAPR12MB3398.namprd12.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1553402727-23130-1-git-send-email-skomatineni@nvidia.com>
+In-Reply-To: <BYAPR12MB339888D3A370E790A29E217EC2420@BYAPR12MB3398.namprd12.prod.outlook.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, riteshh@codeaurora.org
-Cc: skomatineni@nvidia.com, thierry.reding@gmail.com, jonathanh@nvidia.com, anrao@nvidia.com, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Harjani Ritesh <riteshh@codeaurora.org>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Aniruddha Tvs Rao <anrao@nvidia.com>, linux-tegra <linux-tegra@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, DTML <devicetree@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-SDHCI controller of Tegra194 is similar to SDHCI controller in Tegra186.
-This patch documents Tegra194 sdhci compatible string.
-
-Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
----
- Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-index 2cecdc71d94c..2cf3affa1be7 100644
---- a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-+++ b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-@@ -14,6 +14,7 @@ Required properties:
-   - "nvidia,tegra124-sdhci": for Tegra124 and Tegra132
-   - "nvidia,tegra210-sdhci": for Tegra210
-   - "nvidia,tegra186-sdhci": for Tegra186
-+  - "nvidia,tegra194-sdhci": for Tegra194
- - clocks : Must contain one entry, for the module clock.
-   See ../clocks/clock-bindings.txt for details.
- - resets : Must contain an entry for each entry in reset-names.
--- 
-2.7.4
+PiA+DQo+ID4gZGRyX3NpZ25hbGluZyBpcyBzZXQgdG8gdHJ1ZSBmb3IgRERSNTAgYW5kIEREUjUy
+IG1vZGVzIGJ1dCBpcyBub3QgDQo+ID4gc2V0IGJhY2sgdG8gZmFsc2UgZm9yIG90aGVyIG1vZGVz
+LiBUaGlzIHByb2dyYW1zIGluY29ycmVjdCBob3N0IA0KPiA+IGNsb2NrIHdoZW4gbW9kZSBjaGFu
+Z2UgaGFwcGVucyBmcm9tIEREUjUyL0REUjUwIHRvIG90aGVyIFNEUiBvciBIUyANCj4gPiBtb2Rl
+cyBsaWtlIGluY2FzZSBvZiBtbWNfcmV0dW5lIHdoZXJlIGl0IHN3aXRjaGVzIGZyb20gSFM0MDAg
+dG8gSFMgDQo+ID4gRERSIGFuZCB0aGVuIGZyb20gSFMgRERSIHRvIEhTIG1vZGUgYW5kIHRoZW4g
+dG8gSFMyMDAuDQo+ID4NCj4gPiBUaGlzIHBhdGNoIGZpeGVzIHRoZSBkZHJfc2lnbmFsaW5nIHRv
+IHNldCBwcm9wZXJseSBmb3Igbm9uIEREUiBtb2Rlcy4NCj4gPg0KPiA+IFRlc3RlZC1ieTogSm9u
+IEh1bnRlciA8am9uYXRoYW5oQG52aWRpYS5jb20+DQo+ID4gQWNrZWQtYnk6IEFkcmlhbiBIdW50
+ZXIgPGFkcmlhbi5odW50ZXJAaW50ZWwuY29tPg0KPiA+IFNpZ25lZC1vZmYtYnk6IFNvd2phbnlh
+IEtvbWF0aW5lbmkgPHNrb21hdGluZW5pQG52aWRpYS5jb20+DQo+DQo+IElzIHRoaXMgYSBmaXgg
+YW5kL29yIHNoYWxsIEkgdGFnIGl0IGZvciBzdGFibGU/DQo+DQo+IFRoZSBzZXJpZXMgbG9va3Mg
+Z29vZCB0byBtZSwgaG93ZXZlciBJIGFtIGF3YWl0aW5nIHR3byBtb3JlIGFja3MgZnJvbSBBZHJp
+YW4gb24gcGF0Y2ggMiBhbmQgcGF0Y2gzLg0KPg0KPiBLaW5kIHJlZ2FyZHMNCj4gVWZmZQ0KPg0K
+Pg0KVGhhbmtzIFVmZmUuIFllcyB0aGlzIGlzIGFwcGxpY2FibGUgZm9yIHN0YWJsZS4NCg0KSnVz
+dCBzZW50IHVwZGF0ZWQgcGF0Y2ggc2VyaWVzIFY0IHdpdGggbWlub3IgZml4IGZvciBhdm9pZGlu
+ZyBidWlsZCBlcnJvciB3YXJuaW5nLg0KRGlkbuKAmXQgc2VlIGVhcmxpZXIgYW5kIGZvdW5kIG1p
+c3NpbmcgLVdlcnJvciBmbGFnIGR1cmluZyBidWlsZC4gU28gZml4ZWQgaW4gVjQuDQoNCj4gPiAt
+LS0NCj4gPiAgZHJpdmVycy9tbWMvaG9zdC9zZGhjaS10ZWdyYS5jIHwgMSArDQo+ID4gIDEgZmls
+ZSBjaGFuZ2VkLCAxIGluc2VydGlvbigrKQ0KPiA+DQo+ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMv
+bW1jL2hvc3Qvc2RoY2ktdGVncmEuYyANCj4gPiBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktdGVn
+cmEuYyBpbmRleCAzMmU2MjkwNGMwZDMuLjQ2MDg2ZGQ0M2JmYg0KPiA+IDEwMDY0NA0KPiA+IC0t
+LSBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktdGVncmEuYw0KPiA+ICsrKyBiL2RyaXZlcnMvbW1j
+L2hvc3Qvc2RoY2ktdGVncmEuYw0KPiA+IEBAIC03NzksNiArNzc5LDcgQEAgc3RhdGljIHZvaWQg
+dGVncmFfc2RoY2lfc2V0X3Voc19zaWduYWxpbmcoc3RydWN0IHNkaGNpX2hvc3QgKmhvc3QsDQo+
+ID4gICAgICAgICBib29sIHNldF9kcXNfdHJpbSA9IGZhbHNlOw0KPiA+ICAgICAgICAgYm9vbCBk
+b19oczQwMF9kbGxfY2FsID0gZmFsc2U7DQo+ID4NCj4gPiArICAgICAgIHRlZ3JhX2hvc3QtPmRk
+cl9zaWduYWxpbmcgPSBmYWxzZTsNCj4gPiAgICAgICAgIHN3aXRjaCAodGltaW5nKSB7DQo+ID4g
+ICAgICAgICBjYXNlIE1NQ19USU1JTkdfVUhTX1NEUjUwOg0KPiA+ICAgICAgICAgY2FzZSBNTUNf
+VElNSU5HX1VIU19TRFIxMDQ6DQo+ID4gLS0NCj4gPiAyLjcuNA0KPiA+DQo=
