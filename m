@@ -1,7 +1,7 @@
 From: Sowjanya Komatineni <skomatineni@nvidia.com>
-Subject: [PATCH V4 08/10] mmc: cqhci: add CQHCI_SSC1 register CBC field mask
-Date: Sat, 23 Mar 2019 21:45:25 -0700
-Message-ID: <1553402727-23130-8-git-send-email-skomatineni@nvidia.com>
+Subject: [PATCH V4 05/10] arm64: tegra: fix default tap and trim values
+Date: Sat, 23 Mar 2019 21:45:22 -0700
+Message-ID: <1553402727-23130-5-git-send-email-skomatineni@nvidia.com>
 References: <1553402727-23130-1-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,27 +12,29 @@ To: adrian.hunter@intel.com, ulf.hansson@linaro.org, robh+dt@kernel.org, mark.ru
 Cc: skomatineni@nvidia.com, thierry.reding@gmail.com, jonathanh@nvidia.com, anrao@nvidia.com, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-This patch adds define for CBC field mask of the register
-CQHCI_SSC1.
+Default tap and trim values are incorrect for Tegra186 SDMMC4.
+This patch fixes it.
 
 Tested-by: Jon Hunter <jonathanh@nvidia.com>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
 ---
- drivers/mmc/host/cqhci.h | 1 +
- 1 file changed, 1 insertion(+)
+ arch/arm64/boot/dts/nvidia/tegra186.dtsi | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
-index 928ec491eecf..1e8e01d81015 100644
---- a/drivers/mmc/host/cqhci.h
-+++ b/drivers/mmc/host/cqhci.h
-@@ -88,6 +88,7 @@
- 
- /* send status config 1 */
- #define CQHCI_SSC1			0x40
-+#define CQHCI_SSC1_CBC_MASK		GENMASK(19, 16)
- 
- /* send status config 2 */
- #define CQHCI_SSC2			0x44
+diff --git a/arch/arm64/boot/dts/nvidia/tegra186.dtsi b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
+index 97aeb946ed5e..472f55fe9488 100644
+--- a/arch/arm64/boot/dts/nvidia/tegra186.dtsi
++++ b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
+@@ -317,8 +317,8 @@
+ 		nvidia,pad-autocal-pull-down-offset-1v8-timeout = <0x0a>;
+ 		nvidia,pad-autocal-pull-up-offset-3v3-timeout = <0x0a>;
+ 		nvidia,pad-autocal-pull-down-offset-3v3-timeout = <0x0a>;
+-		nvidia,default-tap = <0x5>;
+-		nvidia,default-trim = <0x9>;
++		nvidia,default-tap = <0x9>;
++		nvidia,default-trim = <0x5>;
+ 		nvidia,dqs-trim = <63>;
+ 		mmc-hs400-1_8v;
+ 		status = "disabled";
 -- 
 2.7.4
