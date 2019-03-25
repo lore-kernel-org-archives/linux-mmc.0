@@ -1,59 +1,74 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 2/3] mmc: sdhci-of-arasan: Add DTS property to disable DCMDs.
-Date: Mon, 25 Mar 2019 14:54:16 +0100
-Message-ID: <CAPDyKFrPBY14bvG7ZLON2xTTWEc2a1JjLdeDSkGmtdAZy5hokQ@mail.gmail.com>
-References: <20190322113808.16858-1-christoph.muellner@theobroma-systems.com>
- <20190322113808.16858-2-christoph.muellner@theobroma-systems.com>
- <CAPDyKFrDq-zBsqqe23hj4ynfYnrGxAr0tWxvYEJu8Kvh0i=h9A@mail.gmail.com> <2D2515D6-1E11-4EA3-B016-EC37A9E3091D@theobroma-systems.com>
+From: Sakari Ailus <sakari.ailus-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Subject: Re: [PATCH 0/2] Remove support for deprecated %pf and %pF in vsprintf
+Date: Mon, 25 Mar 2019 17:13:00 +0200
+Message-ID: <20190325151259.2w22y4ijqilrbaxj@kekkonen.localdomain>
+References: <20190322132108.25501-1-sakari.ailus@linux.intel.com>
+ <CAMuHMdVmqqjVx7As9AAywYxYXG=grijF5rF77OBn6TUjM9+xKw@mail.gmail.com>
+ <20190322135350.2btpno7vspvewxvk@paasikivi.fi.intel.com>
+ <20190322170550.GX9224@smile.fi.intel.com>
+ <20190324211008.lypghym3gqcp62th@mara.localdomain>
+ <20190324211932.GK9224@smile.fi.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <2D2515D6-1E11-4EA3-B016-EC37A9E3091D@theobroma-systems.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: =?UTF-8?Q?Christoph_M=C3=BCllner?= <christoph.muellner@theobroma-systems.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Heiko Stuebner <heiko@sntech.de>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Philipp Tomsich <philipp.tomsich@theobroma-systems.com>, Michal Simek <michal.simek@xilinx.com>, Viresh Kumar <viresh.kumar@linaro.org>, Enric Balletbo i Serra <enric.balletbo@collabora.com>, Matthias Brugger <matthias.bgg@gmail.com>, Douglas Anderson <dianders@chromium.org>, Tony Xie <tony.xie@rock-chips.com>, Randy Li <ayaka@soulik.info>, Vicente Bergas <vicencb@gmail.com>, Ezequiel Garcia <ezequiel@collabora.com>, Klaus Goger <klaus.goger@theobroma-systems.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, Linux
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20190324211932.GK9224-XvqNBM/wLWRrdx17CPfAsdBPR1lH4CV8@public.gmane.org>
+List-Unsubscribe: <https://lists.01.org/mailman/options/linux-nvdimm>,
+ <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.01.org/pipermail/linux-nvdimm/>
+List-Post: <mailto:linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
+List-Help: <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.01.org/mailman/listinfo/linux-nvdimm>,
+ <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=subscribe>
+Errors-To: linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org
+Sender: "Linux-nvdimm" <linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
+To: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Cc: Petr Mladek <pmladek-IBi9RG/b67k@public.gmane.org>, scsi <linux-scsi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux PM list <linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-pci <linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-um-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, "linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org" <linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-f2fs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ACPI Devel Maling List <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>, Linux ARM <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, netdev <netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, sparclinux <sparclinux-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux MM <linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org>, linux-btrfs <linux-btrfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Lars Ellenberg <drbd-dev-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, 25 Mar 2019 at 14:39, Christoph M=C3=BCllner
-<christoph.muellner@theobroma-systems.com> wrote:
->
->
-> > On 25.03.2019, at 14:27, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> >
-> > On Fri, 22 Mar 2019 at 12:39, Christoph Muellner
-> > <christoph.muellner@theobroma-systems.com> wrote:
-> >>
-> >> Direct commands (DCMDs) are an optional feature of eMMC 5.1's command
-> >> queue engine (CQE). The Arasan eMMC 5.1 controller uses the CQHCI,
-> >> which exposes a control register bit to enable the feature.
-> >> The current implementation sets this bit unconditionally.
-> >>
-> >> This patch allows to suppress the feature activation,
-> >> by specifying the property disable-cqe-dcmd.
-> >>
-> >> Signed-off-by: Christoph Muellner <christoph.muellner@theobroma-system=
-s.com>
-> >> Signed-off-by: Philipp Tomsich <philipp.tomsich@theobroma-systems.com>
-> >> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-> >
-> > Applied for next, thanks!
-> >
-> > Perhaps both patch1 and patch2 should be tagged for stable? Then
-> > please tell me and I can add a tag.
->
-> Hi Ulf,
->
-> yes tagging for stable would be nice.
-> I guess, the following would fit:
->
-> Fixes: 84362d79f436 ("mmc: sdhci-of-arasan: Add CQHCI support for arasan,=
-sdhci-5.1")
->
+Hi Andy,
 
-Great, I have added that to both of the commits and a stable tag. Thanks!
+On Sun, Mar 24, 2019 at 11:19:32PM +0200, Andy Shevchenko wrote:
+> On Sun, Mar 24, 2019 at 11:10:08PM +0200, Sakari Ailus wrote:
+> > On Fri, Mar 22, 2019 at 07:05:50PM +0200, Andy Shevchenko wrote:
+> > > On Fri, Mar 22, 2019 at 03:53:50PM +0200, Sakari Ailus wrote:
+> > > 
+> > > > Porting a patch
+> > > > forward should have no issues either as checkpatch.pl has been complaining
+> > > > of the use of %pf and %pF for a while now.
+> > > 
+> > > And that's exactly the reason why I think instead of removing warning on
+> > > checkpatch, it makes sense to convert to an error for a while. People are
+> > > tending read documentation on internet and thus might have outdated one. And
+> > > yes, the compiler doesn't tell a thing about it.
+> > > 
+> > > P.S. Though, if majority of people will tell that I'm wrong, then it's okay to
+> > > remove.
+> > 
+> > I wonder if you wrote this before seeing my other patchset.
+> 
+> Yes, I wrote it before seeing another series.
+> 
+> > What I think could be done is to warn of plain %pf (without following "w")
+> > in checkpatch.pl, and %pf that is not followed by "w" in the kernel.
+> > Although we didn't have such checks to begin with. The case is still a
+> > little bit different as %pf used to be a valid conversion specifier whereas
+> > %pO likely has never existed.
+> > 
+> > So, how about adding such checks in the other set? I can retain %p[fF] check
+> > here, too, if you like.
+> 
+> Consistency tells me that the warning->error transformation in checkpatch.pl
+> belongs this series.
 
-[...]
+All other invalid pointer conversion specifiers currently result into a
+warning only. I see that as an orthogonal change to this set. I found
+another issue in checkpatch.pl that may require some discussion; would you
+be ok with addressing this in another set?
 
-Kind regards
-Uffe
+-- 
+Regards,
+
+Sakari Ailus
+sakari.ailus-VuQAYsv1563Yd54FQh9/CA@public.gmane.org
