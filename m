@@ -1,44 +1,45 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] net: liquidio: fix NULL pointer dereferences
-Date: Mon, 25 Mar 2019 13:41:29 +0100
-Message-ID: <CAPDyKFr6QhDz2f12MuugQ5wnBBnn+y=5QsEQFy5Ve3h2XB6FVw@mail.gmail.com>
-References: <20190311.121710.968693621648443243.davem@davemloft.net> <20190323032420.21162-1-kjlu@umn.edu>
+Subject: Re: [PATCH] mmc: usdhi6rol0: mark expected switch fall-throughs
+Date: Mon, 25 Mar 2019 14:26:35 +0100
+Message-ID: <CAPDyKFoJPZBWZk+htuuvDyAYRVMML=tOMrij5P1v02XGm2DU3Q@mail.gmail.com>
+References: <20190320200010.GA14527@embeddedor> <CAPDyKFq7Qcp+WZazg2CiB_nBV7Bsmns2aD-Na_k72Kk9sf9X2g@mail.gmail.com>
+ <a69a2138-0515-82f7-ab32-21d62c248829@embeddedor.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190323032420.21162-1-kjlu@umn.edu>
+In-Reply-To: <a69a2138-0515-82f7-ab32-21d62c248829@embeddedor.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Kangjie Lu <kjlu@umn.edu>
-Cc: pakki001@umn.edu, Derek Chickles <dchickles@marvell.com>, Satanand Burla <sburla@marvell.com>, Felix Manlunas <fmanlunas@marvell.com>, "David S. Miller" <davem@davemloft.net>, Linus Walleij <linus.walleij@linaro.org>, Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, =?UTF-8?Q?Jonathan_Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, netdev@vger.kernel.org
+To: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Kees Cook <keescook@chromium.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Sat, 23 Mar 2019 at 04:24, Kangjie Lu <kjlu@umn.edu> wrote:
->
-> In case octeon_alloc_soft_command fails, the fix reports the
-> error and goes to cleanup to avoid NULL pointer dereferences.
->
-> Signed-off-by: Kangjie Lu <kjlu@umn.edu>
-> ---
-> V2: goto setup_nic_dev_free for cleanup
-> ---
->  drivers/mmc/host/mmc_spi.c                         |  2 +-
->  drivers/net/ethernet/cavium/liquidio/lio_vf_main.c | 12 ++++++++++++
->  2 files changed, 13 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
-> index 32fea585262b..a3533935e282 100644
-> --- a/drivers/mmc/host/mmc_spi.c
-> +++ b/drivers/mmc/host/mmc_spi.c
-> @@ -820,7 +820,7 @@ mmc_spi_readblock(struct mmc_spi_host *host, struct spi_transfer *t,
->
->         status = spi_sync_locked(spi, &host->m);
->         if (status < 0) {
-> -               dev_dbg(&spi->dev, "read error %02x (%d)\n", status, status);
-> +               dev_dbg(&spi->dev, "read error %d\n", status);
-
-Looks like a leftover from debugging?
-
 [...]
+
+> >> @@ -1688,6 +1688,7 @@ static void usdhi6_timeout_work(struct work_struct *work)
+> >>         default:
+> >>                 dev_err(mmc_dev(host->mmc), "Invalid state %u\n", host->wait);
+> >>                 /* mrq can be NULL in this actually impossible case */
+> >> +               /* fall through */
+> >
+> > Please make this one comment.
+> >
+> >>         case USDHI6_WAIT_FOR_CMD:
+> >>                 usdhi6_error_code(host);
+> >>                 if (mrq)
+> >> @@ -1713,6 +1714,7 @@ static void usdhi6_timeout_work(struct work_struct *work)
+> >>                  * If USDHI6_WAIT_FOR_DATA_END times out, we have already unmapped
+> >>                  * the page
+> >>                  */
+> >> +               /* fall through */
+> >
+> > Ditto.
+> >
+>
+> OK.  The reason why I didn't do that is because the line would exceed the 80 characters
+> in both cases. But I'll respin if you are OK with that.
+>
+
+What's wrong with having several lines per comment-section?
 
 Kind regards
 Uffe
