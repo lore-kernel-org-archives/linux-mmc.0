@@ -1,50 +1,53 @@
-From: Greg KH <gregkh@linuxfoundation.org>
-Subject: Re: [BACKPORT 4.4.y 17/25] mmc: core: don't try to switch block size
- for dual rate mode
-Date: Tue, 26 Mar 2019 10:27:31 +0900
-Message-ID: <20190326012731.GA30723@kroah.com>
+From: Greg KH <greg@kroah.com>
+Subject: Re: [BACKPORT 4.4.y 00/25] candidates from spreadtrum 4.4 product
+ kernel
+Date: Tue, 26 Mar 2019 11:18:54 +0900
+Message-ID: <20190326021854.GA19395@kroah.com>
 References: <20190322154425.3852517-1-arnd@arndb.de>
- <20190322154425.3852517-18-arnd@arndb.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <stable-owner@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20190322154425.3852517-18-arnd@arndb.de>
-Sender: stable-owner@vger.kernel.org
+In-Reply-To: <20190322154425.3852517-1-arnd@arndb.de>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Arnd Bergmann <arnd@arndb.de>
-Cc: stable@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Avri Altman <avri.altman@wdc.com>, Ritesh Harjani <riteshh@codeaurora.org>, Jiong Wu <lohengrin1024@gmail.com>, Martin Hicks <mort@bork.org>, Ziyuan Xu <xzy.xu@rock-chips.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: stable@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-serial@vger.kernel.org, linux-usb@vger.kernel.org, linux-fsdevel@vger.kernel.org, netdev@vger.kernel.org, linux-mm@kvack.org, dccp@vger.kernel.org, alsa-devel@alsa-project.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Mar 22, 2019 at 04:44:08PM +0100, Arnd Bergmann wrote:
-> From: Ziyuan Xu <xzy.xu@rock-chips.com>
+On Fri, Mar 22, 2019 at 04:43:51PM +0100, Arnd Bergmann wrote:
+> I took a scripted approach to look at some product kernels for patches
+> backported into vendor kernels. This is a set of (mostly) bugfixes I found
+> in Spreadtrum's linux-4.4 kernel that are missing in 4.4.176:
 > 
-> Per spec, block size should always be 512 bytes for dual rate mode,
-> so any attempts to switch the block size under dual rate mode should
-> be neglected.
-> 
-> Signed-off-by: Ziyuan Xu <xzy.xu@rock-chips.com>
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> (cherry picked from commit 1712c9373f98ae8ed41599a8d7841a6fba29c264)
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
-> ---
->  drivers/mmc/core/core.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index df074f8c7cb7..3e17268b9994 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -2406,7 +2406,8 @@ int mmc_set_blocklen(struct mmc_card *card, unsigned int blocklen)
->  {
->  	struct mmc_command cmd = {0};
->  
-> -	if (mmc_card_blockaddr(card) || mmc_card_ddr52(card))
-> +	if (mmc_card_blockaddr(card) || mmc_card_ddr52(card) ||
-> +	    mmc_card_hs400(card) || mmc_card_hs400es(card))
+> ffedbd2210f2 mmc: pwrseq: constify mmc_pwrseq_ops structures
+> c10368897e10 ALSA: compress: add support for 32bit calls in a 64bit kernel
+> 64a67d4762ce mmc: pwrseq_simple: Make reset-gpios optional to match doc
+> 4ec0ef3a8212 USB: iowarrior: fix oops with malicious USB descriptors
+> e5905ff1281f mmc: debugfs: Add a restriction to mmc debugfs clock setting
+> 4ec96b4cbde8 mmc: make MAN_BKOPS_EN message a debug
+> ed9feec72fc1 mmc: sanitize 'bus width' in debug output
+> 10a16a01d8f7 mmc: core: shut up "voltage-ranges unspecified" pr_info()
+> 9772b47a4c29 usb: dwc3: gadget: Fix suspend/resume during device mode
+> 6afedcd23cfd arm64: mm: Add trace_irqflags annotations to do_debug_exception()
+> 437db4c6e798 mmc: mmc: Attempt to flush cache before reset
+> e51534c80660 mmc: core: fix using wrong io voltage if mmc_select_hs200 fails
+> e4c5800a3991 mm/rmap: replace BUG_ON(anon_vma->degree) with VM_WARN_ON
+> 04c080080855 extcon: usb-gpio: Don't miss event during suspend/resume
+> 78283edf2c01 kbuild: setlocalversion: print error to STDERR
+> c526c62d565e usb: gadget: composite: fix dereference after null check coverify warning
+> 511a36d2f357 usb: gadget: Add the gserial port checking in gs_start_tx()
+> 1712c9373f98 mmc: core: don't try to switch block size for dual rate mode
+> 5ea8ea2cb7f1 tcp/dccp: drop SYN packets if accept queue is full
+> e1dc9b08051a serial: sprd: adjust TIMEOUT to a big value
+> 81be24d263db Hang/soft lockup in d_invalidate with simultaneous calls
+> 6f44a0bacb79 arm64: traps: disable irq in die()
+> b7d44c36a6f6 usb: renesas_usbhs: gadget: fix unused-but-set-variable warning
+> 4350782570b9 serial: sprd: clear timeout interrupt only rather than all interrupts
+> 3f3295709ede lib/int_sqrt: optimize small argument
+> 32fd87b3bbf5 USB: core: only clean up what we allocated
 
-This breaks the build, there is no mmc_card_hs400es() call in 4.4.y.
+All now queued up, except for the exceptions I have responded to.
 
-How did this build for you?
+thanks,
 
 greg k-h
