@@ -1,45 +1,50 @@
-From: Bjorn Helgaas <helgaas-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 1/1] treewide: Switch printk users from %pf and %pF to
- %ps and %pS, respectively
-Date: Mon, 25 Mar 2019 16:19:06 -0500
-Message-ID: <20190325211906.GA24180@google.com>
-References: <20190325193229.23390-1-sakari.ailus@linux.intel.com>
+From: David Miller <davem@davemloft.net>
+Subject: Re: [PATCH v2] net: liquidio: fix NULL pointer dereferences
+Date: Mon, 25 Mar 2019 17:14:28 -0700 (PDT)
+Message-ID: <20190325.171428.816775455885557497.davem@davemloft.net>
+References: <20190311.121710.968693621648443243.davem@davemloft.net>
+        <20190323032420.21162-1-kjlu@umn.edu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: Text/Plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20190325193229.23390-1-sakari.ailus-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-List-Unsubscribe: <https://lists.01.org/mailman/options/linux-nvdimm>,
- <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.01.org/pipermail/linux-nvdimm/>
-List-Post: <mailto:linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
-List-Help: <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.01.org/mailman/listinfo/linux-nvdimm>,
- <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=subscribe>
-Errors-To: linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org
-Sender: "Linux-nvdimm" <linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
-To: Sakari Ailus <sakari.ailus-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Cc: Petr Mladek <pmladek-IBi9RG/b67k@public.gmane.org>, linux-scsi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org, linux-um-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-f2fs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-btrfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, sparclinux-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, drbd-dev-cunTk1MwBs8qoQakbn7OcQ@public.gmane.org
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <20190323032420.21162-1-kjlu@umn.edu>
+Sender: netdev-owner@vger.kernel.org
+To: kjlu@umn.edu
+Cc: pakki001@umn.edu, ulf.hansson@linaro.org, dchickles@marvell.com, sburla@marvell.com, fmanlunas@marvell.com, linus.walleij@linaro.org, laurent.pinchart+renesas@ideasonboard.com, j.neuschaefer@gmx.net, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, netdev@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Mar 25, 2019 at 09:32:28PM +0200, Sakari Ailus wrote:
-> %pF and %pf are functionally equivalent to %pS and %ps conversion
-> specifiers. The former are deprecated, therefore switch the current users
-> to use the preferred variant.
-> 
-> The changes have been produced by the following command:
-> 
-> 	git grep -l '%p[fF]' | grep -v '^\(tools\|Documentation\)/' | \
-> 	while read i; do perl -i -pe 's/%pf/%ps/g; s/%pF/%pS/g;' $i; done
-> 
-> And verifying the result.
-> 
-> Signed-off-by: Sakari Ailus <sakari.ailus-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-> Acked-by: David Sterba <dsterba-IBi9RG/b67k@public.gmane.org> (for btrfs)
-> Acked-by: Mike Rapoport <rppt-tEXmvtCZX7AybS5Ee8rs3A@public.gmane.org> (for mm/memblock.c)
-> Acked-by: Rafael J. Wysocki <rafael.j.wysocki-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+From: Kangjie Lu <kjlu@umn.edu>
+Date: Fri, 22 Mar 2019 22:24:19 -0500
 
-Acked-by: Bjorn Helgaas <bhelgaas-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org> (for drivers/pci)
+> In case octeon_alloc_soft_command fails, the fix reports the
+> error and goes to cleanup to avoid NULL pointer dereferences.
+> 
+> Signed-off-by: Kangjie Lu <kjlu@umn.edu>
+> ---
+> V2: goto setup_nic_dev_free for cleanup
+> ---
+>  drivers/mmc/host/mmc_spi.c                         |  2 +-
+>  drivers/net/ethernet/cavium/liquidio/lio_vf_main.c | 12 ++++++++++++
+>  2 files changed, 13 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
+> index 32fea585262b..a3533935e282 100644
+> --- a/drivers/mmc/host/mmc_spi.c
+> +++ b/drivers/mmc/host/mmc_spi.c
+> @@ -820,7 +820,7 @@ mmc_spi_readblock(struct mmc_spi_host *host, struct spi_transfer *t,
+>  
+>  	status = spi_sync_locked(spi, &host->m);
+>  	if (status < 0) {
+> -		dev_dbg(&spi->dev, "read error %02x (%d)\n", status, status);
+> +		dev_dbg(&spi->dev, "read error %d\n", status);
+>  		return status;
+>  	}
 
-Thanks a lot for cleaning this up.  This has been annoying for a long time.
+This is:
+
+1) Unrelated to your bug fix.
+
+2) It is often the case that people print values in hex and decimal
+   intentionally for debugging.  I've done this myself countless
+   times.
