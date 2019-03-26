@@ -1,81 +1,50 @@
 From: Greg KH <gregkh@linuxfoundation.org>
-Subject: Re: [BACKPORT 4.4.y 01/25] mmc: pwrseq: constify mmc_pwrseq_ops
- structures
-Date: Tue, 26 Mar 2019 10:08:31 +0900
-Message-ID: <20190326010831.GA29420@kroah.com>
+Subject: Re: [BACKPORT 4.4.y 17/25] mmc: core: don't try to switch block size
+ for dual rate mode
+Date: Tue, 26 Mar 2019 10:27:31 +0900
+Message-ID: <20190326012731.GA30723@kroah.com>
 References: <20190322154425.3852517-1-arnd@arndb.de>
- <20190322154425.3852517-2-arnd@arndb.de>
+ <20190322154425.3852517-18-arnd@arndb.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <stable-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20190322154425.3852517-2-arnd@arndb.de>
-Sender: linux-kernel-owner@vger.kernel.org
+In-Reply-To: <20190322154425.3852517-18-arnd@arndb.de>
+Sender: stable-owner@vger.kernel.org
 To: Arnd Bergmann <arnd@arndb.de>
-Cc: stable@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Janusz Krzysztofik <jmkrzyszt@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, "Tobin C. Harding" <me@tobin.cc>, Geert Uytterhoeven <geert+renesas@glider.be>, Julia Lawall <Julia.Lawall@lip6.fr>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: stable@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Avri Altman <avri.altman@wdc.com>, Ritesh Harjani <riteshh@codeaurora.org>, Jiong Wu <lohengrin1024@gmail.com>, Martin Hicks <mort@bork.org>, Ziyuan Xu <xzy.xu@rock-chips.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Mar 22, 2019 at 04:43:52PM +0100, Arnd Bergmann wrote:
-> From: Julia Lawall <Julia.Lawall@lip6.fr>
+On Fri, Mar 22, 2019 at 04:44:08PM +0100, Arnd Bergmann wrote:
+> From: Ziyuan Xu <xzy.xu@rock-chips.com>
 > 
-> The mmc_pwrseq_ops structures are never modified, so declare them as const.
+> Per spec, block size should always be 512 bytes for dual rate mode,
+> so any attempts to switch the block size under dual rate mode should
+> be neglected.
 > 
-> Done with the help of Coccinelle.
-> 
-> Signed-off-by: Julia Lawall <Julia.Lawall@lip6.fr>
+> Signed-off-by: Ziyuan Xu <xzy.xu@rock-chips.com>
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> (cherry picked from commit ffedbd2210f2f4cba490a9205adc11fd1b89a852)
+> (cherry picked from commit 1712c9373f98ae8ed41599a8d7841a6fba29c264)
 > Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 > ---
->  drivers/mmc/core/pwrseq.h        | 2 +-
->  drivers/mmc/core/pwrseq_emmc.c   | 2 +-
->  drivers/mmc/core/pwrseq_simple.c | 2 +-
->  3 files changed, 3 insertions(+), 3 deletions(-)
+>  drivers/mmc/core/core.c | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
 > 
-> diff --git a/drivers/mmc/core/pwrseq.h b/drivers/mmc/core/pwrseq.h
-> index 096da48c6a7e..133de0426687 100644
-> --- a/drivers/mmc/core/pwrseq.h
-> +++ b/drivers/mmc/core/pwrseq.h
-> @@ -16,7 +16,7 @@ struct mmc_pwrseq_ops {
->  };
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index df074f8c7cb7..3e17268b9994 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2406,7 +2406,8 @@ int mmc_set_blocklen(struct mmc_card *card, unsigned int blocklen)
+>  {
+>  	struct mmc_command cmd = {0};
 >  
->  struct mmc_pwrseq {
-> -	struct mmc_pwrseq_ops *ops;
-> +	const struct mmc_pwrseq_ops *ops;
->  };
->  
->  #ifdef CONFIG_OF
-> diff --git a/drivers/mmc/core/pwrseq_emmc.c b/drivers/mmc/core/pwrseq_emmc.c
-> index ad4f94ec7e8d..4a82bc77fe49 100644
-> --- a/drivers/mmc/core/pwrseq_emmc.c
-> +++ b/drivers/mmc/core/pwrseq_emmc.c
-> @@ -51,7 +51,7 @@ static void mmc_pwrseq_emmc_free(struct mmc_host *host)
->  	kfree(pwrseq);
->  }
->  
-> -static struct mmc_pwrseq_ops mmc_pwrseq_emmc_ops = {
-> +static const struct mmc_pwrseq_ops mmc_pwrseq_emmc_ops = {
->  	.post_power_on = mmc_pwrseq_emmc_reset,
->  	.free = mmc_pwrseq_emmc_free,
->  };
-> diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
-> index d10538bb5e07..2b16263458af 100644
-> --- a/drivers/mmc/core/pwrseq_simple.c
-> +++ b/drivers/mmc/core/pwrseq_simple.c
-> @@ -87,7 +87,7 @@ static void mmc_pwrseq_simple_free(struct mmc_host *host)
->  	kfree(pwrseq);
->  }
->  
-> -static struct mmc_pwrseq_ops mmc_pwrseq_simple_ops = {
-> +static const struct mmc_pwrseq_ops mmc_pwrseq_simple_ops = {
->  	.pre_power_on = mmc_pwrseq_simple_pre_power_on,
->  	.post_power_on = mmc_pwrseq_simple_post_power_on,
->  	.power_off = mmc_pwrseq_simple_power_off,
+> -	if (mmc_card_blockaddr(card) || mmc_card_ddr52(card))
+> +	if (mmc_card_blockaddr(card) || mmc_card_ddr52(card) ||
+> +	    mmc_card_hs400(card) || mmc_card_hs400es(card))
 
-Why is this needed for a stable patch?  It doesn't fix a bug, it just
-looks like it is a "nice thing" to have, right?  I don't think any later
-patch in this series relies it it, or am I missing something?
+This breaks the build, there is no mmc_card_hs400es() call in 4.4.y.
 
-thanks,
+How did this build for you?
 
 greg k-h
