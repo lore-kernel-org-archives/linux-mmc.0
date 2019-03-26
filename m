@@ -1,53 +1,41 @@
-From: Greg KH <greg@kroah.com>
-Subject: Re: [BACKPORT 4.4.y 00/25] candidates from spreadtrum 4.4 product
- kernel
-Date: Tue, 26 Mar 2019 11:18:54 +0900
-Message-ID: <20190326021854.GA19395@kroah.com>
-References: <20190322154425.3852517-1-arnd@arndb.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Takao Orito <orito.takao@socionext.com>
+Subject: [Milbeaut PATCH v0.4 0/2] mmc: sdhci_f_sdh30: Add support for Milbeaut
+Date: Tue, 26 Mar 2019 13:58:01 +0900
+Message-ID: <1553576281-5813-1-git-send-email-orito.takao@socionext.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20190322154425.3852517-1-arnd@arndb.de>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: stable@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-serial@vger.kernel.org, linux-usb@vger.kernel.org, linux-fsdevel@vger.kernel.org, netdev@vger.kernel.org, linux-mm@kvack.org, dccp@vger.kernel.org, alsa-devel@alsa-project.org
+To: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, masami.hiramatsu@linaro.org, jaswinder.singh@linaro.org, sugaya.taichi@socionext.com, kasai.kazuhiro@socionext.com, kanematsu.shinji@socionext.com, orito.takao@socionext.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Mar 22, 2019 at 04:43:51PM +0100, Arnd Bergmann wrote:
-> I took a scripted approach to look at some product kernels for patches
-> backported into vendor kernels. This is a set of (mostly) bugfixes I found
-> in Spreadtrum's linux-4.4 kernel that are missing in 4.4.176:
-> 
-> ffedbd2210f2 mmc: pwrseq: constify mmc_pwrseq_ops structures
-> c10368897e10 ALSA: compress: add support for 32bit calls in a 64bit kernel
-> 64a67d4762ce mmc: pwrseq_simple: Make reset-gpios optional to match doc
-> 4ec0ef3a8212 USB: iowarrior: fix oops with malicious USB descriptors
-> e5905ff1281f mmc: debugfs: Add a restriction to mmc debugfs clock setting
-> 4ec96b4cbde8 mmc: make MAN_BKOPS_EN message a debug
-> ed9feec72fc1 mmc: sanitize 'bus width' in debug output
-> 10a16a01d8f7 mmc: core: shut up "voltage-ranges unspecified" pr_info()
-> 9772b47a4c29 usb: dwc3: gadget: Fix suspend/resume during device mode
-> 6afedcd23cfd arm64: mm: Add trace_irqflags annotations to do_debug_exception()
-> 437db4c6e798 mmc: mmc: Attempt to flush cache before reset
-> e51534c80660 mmc: core: fix using wrong io voltage if mmc_select_hs200 fails
-> e4c5800a3991 mm/rmap: replace BUG_ON(anon_vma->degree) with VM_WARN_ON
-> 04c080080855 extcon: usb-gpio: Don't miss event during suspend/resume
-> 78283edf2c01 kbuild: setlocalversion: print error to STDERR
-> c526c62d565e usb: gadget: composite: fix dereference after null check coverify warning
-> 511a36d2f357 usb: gadget: Add the gserial port checking in gs_start_tx()
-> 1712c9373f98 mmc: core: don't try to switch block size for dual rate mode
-> 5ea8ea2cb7f1 tcp/dccp: drop SYN packets if accept queue is full
-> e1dc9b08051a serial: sprd: adjust TIMEOUT to a big value
-> 81be24d263db Hang/soft lockup in d_invalidate with simultaneous calls
-> 6f44a0bacb79 arm64: traps: disable irq in die()
-> b7d44c36a6f6 usb: renesas_usbhs: gadget: fix unused-but-set-variable warning
-> 4350782570b9 serial: sprd: clear timeout interrupt only rather than all interrupts
-> 3f3295709ede lib/int_sqrt: optimize small argument
-> 32fd87b3bbf5 USB: core: only clean up what we allocated
+The following patches add driver support for SD Host controller on
+Socionext's Milbeaut M10V platforms.
 
-All now queued up, except for the exceptions I have responded to.
+SD Host controller on Milbeaut is consist of two controller parts.
+One is core controller F_SDH30, this is similar to sdhci-fujitsu
+controller.
+Another is bridge controller. This bridge controller is not compatible
+with sdhci-fujitsu controller. This is special for Milbeaut series.
 
-thanks,
+It has the several parts,
+ - reset control
+ - clock enable / select for SDR50/25/12
+ - hold control of DATA/CMD line
+ - select characteristics for WP/CD/LED line
+ - Re-tuning control for mode3
+ - Capability setting
+   Timeout Clock / Base Clock / Timer Count for Re-Tuning /
+   Debounce period
+These requires special procedures at reset or clock enable/change or
+ further tuning of clock.
 
-greg k-h
+Takao Orito (2):
+  dt-bindings: mmc: sdhci-fujitsu.txt: add miilbeaut driver
+  mmc: sdhci_f_sdh30: Add support for Milbeaut M10V host controller
+
+ .../devicetree/bindings/mmc/sdhci-fujitsu.txt      |  22 +-
+ drivers/mmc/host/sdhci_f_sdh30.c                   | 324 +++++++++++++++++++--
+ 2 files changed, 315 insertions(+), 31 deletions(-)
+
+-- 
+1.9.1
