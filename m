@@ -1,44 +1,41 @@
-From: <orito.takao@socionext.com>
-Subject: Re: [Milbeaut PATCH v0.4 0/2] mmc: sdhci_f_sdh30: Add support for
- Milbeaut
-Date: Tue, 26 Mar 2019 05:41:55 +0000
-Message-ID: <20190326144149.6AAC.F0D17A80@socionext.com>
-References: <1553576281-5813-1-git-send-email-orito.takao@socionext.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-2022-jp"
-Content-Transfer-Encoding: base64
+From: Takao Orito <orito.takao@socionext.com>
+Subject: [PATCH v1 0/2] mmc: sdhci_f_sdh30: Add support for Milbeaut
+Date: Tue, 26 Mar 2019 14:53:29 +0900
+Message-ID: <1553579609-6100-1-git-send-email-orito.takao@socionext.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1553576281-5813-1-git-send-email-orito.takao@socionext.com>
-Content-Language: ja-JP
-Content-ID: <A2BA792336201C4B8D85972951CB0429@socionext.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com
 Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, masami.hiramatsu@linaro.org, jaswinder.singh@linaro.org, sugaya.taichi@socionext.com, kasai.kazuhiro@socionext.com, kanematsu.shinji@socionext.com, orito.takao@socionext.com
 List-Id: linux-mmc@vger.kernel.org
 
-DQpIaSBBbGwNCg0KSSdtIHNvcnJ5LCBJIGhhZCBtaXN0YWtlbiB0aGUgU3ViamVjdCBmb3JtYXQg
-b2YgbXkgcGF0Y2ggc2VyaWVzLg0KSSB3aWxsIHNlbmQgbmV3IHBhdGNoZXMgd2l0aCByaWdodCBm
-b3JtYXQuDQpQbGVhc2UgaWdub3JlIHRoaXMgc2VyaWVzLg0KDQpPcml0bw0KDQo+IFRoZSBmb2xs
-b3dpbmcgcGF0Y2hlcyBhZGQgZHJpdmVyIHN1cHBvcnQgZm9yIFNEIEhvc3QgY29udHJvbGxlciBv
-bg0KPiBTb2Npb25leHQncyBNaWxiZWF1dCBNMTBWIHBsYXRmb3Jtcy4NCj4gDQo+IFNEIEhvc3Qg
-Y29udHJvbGxlciBvbiBNaWxiZWF1dCBpcyBjb25zaXN0IG9mIHR3byBjb250cm9sbGVyIHBhcnRz
-Lg0KPiBPbmUgaXMgY29yZSBjb250cm9sbGVyIEZfU0RIMzAsIHRoaXMgaXMgc2ltaWxhciB0byBz
-ZGhjaS1mdWppdHN1DQo+IGNvbnRyb2xsZXIuDQo+IEFub3RoZXIgaXMgYnJpZGdlIGNvbnRyb2xs
-ZXIuIFRoaXMgYnJpZGdlIGNvbnRyb2xsZXIgaXMgbm90IGNvbXBhdGlibGUNCj4gd2l0aCBzZGhj
-aS1mdWppdHN1IGNvbnRyb2xsZXIuIFRoaXMgaXMgc3BlY2lhbCBmb3IgTWlsYmVhdXQgc2VyaWVz
-Lg0KPiANCj4gSXQgaGFzIHRoZSBzZXZlcmFsIHBhcnRzLA0KPiAgLSByZXNldCBjb250cm9sDQo+
-ICAtIGNsb2NrIGVuYWJsZSAvIHNlbGVjdCBmb3IgU0RSNTAvMjUvMTINCj4gIC0gaG9sZCBjb250
-cm9sIG9mIERBVEEvQ01EIGxpbmUNCj4gIC0gc2VsZWN0IGNoYXJhY3RlcmlzdGljcyBmb3IgV1Av
-Q0QvTEVEIGxpbmUNCj4gIC0gUmUtdHVuaW5nIGNvbnRyb2wgZm9yIG1vZGUzDQo+ICAtIENhcGFi
-aWxpdHkgc2V0dGluZw0KPiAgICBUaW1lb3V0IENsb2NrIC8gQmFzZSBDbG9jayAvIFRpbWVyIENv
-dW50IGZvciBSZS1UdW5pbmcgLw0KPiAgICBEZWJvdW5jZSBwZXJpb2QNCj4gVGhlc2UgcmVxdWly
-ZXMgc3BlY2lhbCBwcm9jZWR1cmVzIGF0IHJlc2V0IG9yIGNsb2NrIGVuYWJsZS9jaGFuZ2Ugb3IN
-Cj4gIGZ1cnRoZXIgdHVuaW5nIG9mIGNsb2NrLg0KPiANCj4gVGFrYW8gT3JpdG8gKDIpOg0KPiAg
-IGR0LWJpbmRpbmdzOiBtbWM6IHNkaGNpLWZ1aml0c3UudHh0OiBhZGQgbWlpbGJlYXV0IGRyaXZl
-cg0KPiAgIG1tYzogc2RoY2lfZl9zZGgzMDogQWRkIHN1cHBvcnQgZm9yIE1pbGJlYXV0IE0xMFYg
-aG9zdCBjb250cm9sbGVyDQo+IA0KPiAgLi4uL2RldmljZXRyZWUvYmluZGluZ3MvbW1jL3NkaGNp
-LWZ1aml0c3UudHh0ICAgICAgfCAgMjIgKy0NCj4gIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2lfZl9z
-ZGgzMC5jICAgICAgICAgICAgICAgICAgIHwgMzI0ICsrKysrKysrKysrKysrKysrKystLQ0KPiAg
-MiBmaWxlcyBjaGFuZ2VkLCAzMTUgaW5zZXJ0aW9ucygrKSwgMzEgZGVsZXRpb25zKC0pDQo+IA0K
-PiAtLSANCj4gMS45LjENCj4gDQoNCi0tIA0KVGFrYW8gT3JpdG8gPG9yaXRvLnRha2FvQHNvY2lv
-bmV4dC5jb20+DQo=
+The following patches add driver support for SD Host controller on
+Socionext's Milbeaut M10V platforms.
+
+SD Host controller on Milbeaut is consist of two controller parts.
+One is core controller F_SDH30, this is similar to sdhci-fujitsu
+controller.
+Another is bridge controller. This bridge controller is not compatible
+with sdhci-fujitsu controller. This is special for Milbeaut series.
+
+It has the several parts,
+ - reset control
+ - clock enable / select for SDR50/25/12
+ - hold control of DATA/CMD line
+ - select characteristics for WP/CD/LED line
+ - Re-tuning control for mode3
+ - Capability setting
+   Timeout Clock / Base Clock / Timer Count for Re-Tuning /
+   Debounce period
+These requires special procedures at reset or clock enable/change or
+ further tuning of clock.
+
+Takao Orito (2):
+  dt-bindings: mmc: sdhci-fujitsu.txt: add miilbeaut driver
+  mmc: sdhci_f_sdh30: Add support for Milbeaut M10V host controller
+
+ .../devicetree/bindings/mmc/sdhci-fujitsu.txt      |  22 +-
+ drivers/mmc/host/sdhci_f_sdh30.c                   | 324 +++++++++++++++++++--
+ 2 files changed, 315 insertions(+), 31 deletions(-)
+
+-- 
+1.9.1
