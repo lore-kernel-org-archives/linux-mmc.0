@@ -1,91 +1,95 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V4 4/5] mmc: mmci: stm32: define get_dctrl_cfg
-Date: Wed, 27 Mar 2019 11:54:45 +0100
-Message-ID: <CAPDyKFrGRojw5jmGZ_J-nmP4bHqd0BnKwyKweAr6aLD4C4NMPQ@mail.gmail.com>
-References: <1553677532-3539-1-git-send-email-ludovic.Barre@st.com> <1553677532-3539-5-git-send-email-ludovic.Barre@st.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v4 2/2] mmc: sdhci-omap: Don't finish_mrq() on a command
+ error during tuning
+Date: Wed, 27 Mar 2019 13:15:25 +0200
+Message-ID: <508e9423-c1f9-f2cc-4aa9-2cc5b1cf40a8@intel.com>
+References: <20190326110057.7055-1-faiz_abbas@ti.com>
+ <20190326110057.7055-3-faiz_abbas@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1553677532-3539-5-git-send-email-ludovic.Barre@st.com>
+In-Reply-To: <20190326110057.7055-3-faiz_abbas@ti.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ludovic Barre <ludovic.Barre@st.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-stm32@st-md-mailman.stormreply.com
+To: Faiz Abbas <faiz_abbas@ti.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Cc: ulf.hansson@linaro.org, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 27 Mar 2019 at 10:05, Ludovic Barre <ludovic.Barre@st.com> wrote:
->
-> From: Ludovic Barre <ludovic.barre@st.com>
->
-> This patch defines get_dctrl_cfg callback for sdmmc variant.
-> sdmmc variant has specific stm32 transfer modes.
-> sdmmc data transfer mode selection could be:
-> -Block data transfer ending on block count.
-> -SDIO multibyte data transfer.
-> -MMC Stream data transfer (not used).
-> -Block data transfer ending with STOP_TRANSMISSION command.
->
-> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
+On 26/03/19 1:00 PM, Faiz Abbas wrote:
+> commit 5b0d62108b46 ("mmc: sdhci-omap: Add platform specific reset
+> callback") skips data resets during tuning operation. Because of this,
+> a data error or data finish interrupt might still arrive after a command
+> error has been handled and the mrq ended. This ends up with a "mmc0: Got
+> data interrupt 0x00000002 even though no data operation was in progress"
+> error message.
+> 
+> Fix this by adding a platform specific callback for sdhci_irq. Mark the
+> mrq as a failure but wait for a data interrupt instead of calling
+> finish_mrq().
+> 
+> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
 > ---
->  drivers/mmc/host/mmci.h             |  5 +++++
->  drivers/mmc/host/mmci_stm32_sdmmc.c | 18 ++++++++++++++++++
->  2 files changed, 23 insertions(+)
->
-> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-> index 35c91d0..82e9f94 100644
-> --- a/drivers/mmc/host/mmci.h
-> +++ b/drivers/mmc/host/mmci.h
-> @@ -131,6 +131,11 @@
->  /* Control register extensions in the Qualcomm versions */
->  #define MCI_DPSM_QCOM_DATA_PEND        BIT(17)
->  #define MCI_DPSM_QCOM_RX_DATA_PEND BIT(20)
-> +/* Control register extensions in STM32 versions */
-> +#define MCI_DPSM_STM32_MODE_BLOCK      (0 << 2)
-> +#define MCI_DPSM_STM32_MODE_SDIO       (1 << 2)
-> +#define MCI_DPSM_STM32_MODE_STREAM     (2 << 2)
-> +#define MCI_DPSM_STM32_MODE_BLOCK_STOP (3 << 2)
->
->  #define MMCIDATACNT            0x030
->  #define MMCISTATUS             0x034
-> diff --git a/drivers/mmc/host/mmci_stm32_sdmmc.c b/drivers/mmc/host/mmci_stm32_sdmmc.c
-> index cfbfc6f..8e83ae6 100644
-> --- a/drivers/mmc/host/mmci_stm32_sdmmc.c
-> +++ b/drivers/mmc/host/mmci_stm32_sdmmc.c
-> @@ -265,10 +265,28 @@ static void mmci_sdmmc_set_pwrreg(struct mmci_host *host, unsigned int pwr)
->         }
+>  drivers/mmc/host/sdhci-omap.c | 37 +++++++++++++++++++++++++++++++++++
+>  1 file changed, 37 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+> index 5bbed477c9b1..9da2ff9ede8b 100644
+> --- a/drivers/mmc/host/sdhci-omap.c
+> +++ b/drivers/mmc/host/sdhci-omap.c
+> @@ -797,6 +797,42 @@ void sdhci_omap_reset(struct sdhci_host *host, u8 mask)
+>  	sdhci_reset(host, mask);
 >  }
->
-> +static u32 sdmmc_get_dctrl_cfg(struct mmci_host *host)
+>  
+> +#define CMD_ERR_MASK (SDHCI_INT_CRC | SDHCI_INT_END_BIT | SDHCI_INT_INDEX |\
+> +		      SDHCI_INT_TIMEOUT)
+> +#define CMD_MASK (CMD_ERR_MASK | SDHCI_INT_RESPONSE)
+> +
+> +static irqreturn_t sdhci_omap_irq(struct sdhci_host *host, u32 intmask)
 > +{
-> +       u32 datactrl;
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
 > +
-> +       datactrl = mmci_dctrl_blksz(host);
+> +	if (omap_host->is_tuning && (intmask & CMD_ERR_MASK)) {
 > +
-> +       if (host->mmc->card && mmc_card_sdio(host->mmc->card) &&
-> +           host->data->blocks == 1)
-> +               datactrl |= MCI_DPSM_STM32_MODE_SDIO;
-> +       else if (host->data->stop && !host->mrq->sbc)
-> +               datactrl |= MCI_DPSM_STM32_MODE_BLOCK_STOP;
+> +		/*
+> +		 * Since we are not resetting data lines during tuning
+> +		 * operation, data error or data complete interrupts
+> +		 * might still arrive. Mark this request as a failure
+> +		 * but still wait for the data interrupt
+> +		 */
+> +		if (intmask & SDHCI_INT_TIMEOUT)
+> +			host->cmd->error = -ETIMEDOUT;
+> +		else
+> +			host->cmd->error = -EILSEQ;
+> +
+> +		sdhci_finish_command(host);
 
-Just a question here. Does this mean that the controller sends the
-stop command automatically when a transfer has finished successfully?
+Would it be possible to set SDHCI_INT_RESPONSE instead of calling
+sdhci_finish_command() directly?
 
-> +       else
-> +               datactrl |= MCI_DPSM_STM32_MODE_BLOCK;
 > +
-> +       return datactrl;
+> +		/*
+> +		 * Sometimes command error interrupts and command complete
+> +		 * interrupt will arrive together. Clear all command related
+> +		 * interrupts here.
+> +		 */
+> +		sdhci_writel(host, intmask & CMD_MASK, SDHCI_INT_STATUS);
+> +		intmask &= ~CMD_MASK;
+> +	}
+> +
+> +	return intmask;
 > +}
 > +
->  static struct mmci_host_ops sdmmc_variant_ops = {
->         .validate_data = sdmmc_idma_validate_data,
->         .prep_data = sdmmc_idma_prep_data,
->         .unprep_data = sdmmc_idma_unprep_data,
-> +       .get_datactrl_cfg = sdmmc_get_dctrl_cfg,
->         .dma_setup = sdmmc_idma_setup,
->         .dma_start = sdmmc_idma_start,
->         .dma_finalize = sdmmc_idma_finalize,
-> --
-> 2.7.4
->
-
-Kind regards
-Uffe
+>  static struct sdhci_ops sdhci_omap_ops = {
+>  	.set_clock = sdhci_omap_set_clock,
+>  	.set_power = sdhci_omap_set_power,
+> @@ -807,6 +843,7 @@ static struct sdhci_ops sdhci_omap_ops = {
+>  	.platform_send_init_74_clocks = sdhci_omap_init_74_clocks,
+>  	.reset = sdhci_omap_reset,
+>  	.set_uhs_signaling = sdhci_omap_set_uhs_signaling,
+> +	.irq = sdhci_omap_irq,
+>  };
+>  
+>  static int sdhci_omap_set_capabilities(struct sdhci_omap_host *omap_host)
+> 
