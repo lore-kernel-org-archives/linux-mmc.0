@@ -1,12 +1,12 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.14 044/123] mmc: omap: fix the maximum timeout setting
-Date: Wed, 27 Mar 2019 14:15:08 -0400
-Message-ID: <20190327181628.15899-44-sashal@kernel.org>
-References: <20190327181628.15899-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 3.18 15/41] mmc: omap: fix the maximum timeout setting
+Date: Wed, 27 Mar 2019 14:24:52 -0400
+Message-ID: <20190327182518.19394-15-sashal@kernel.org>
+References: <20190327182518.19394-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190327181628.15899-1-sashal@kernel.org>
+In-Reply-To: <20190327182518.19394-1-sashal@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Aaro Koskinen <aaro.koskinen@iki.fi>, Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
@@ -45,10 +45,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
-index c28c51ad650f..f11245a0521c 100644
+index 11e5bfedab70..b9f4f39f9359 100644
 --- a/drivers/mmc/host/omap.c
 +++ b/drivers/mmc/host/omap.c
-@@ -920,7 +920,7 @@ static inline void set_cmd_timeout(struct mmc_omap_host *host, struct mmc_reques
+@@ -921,7 +921,7 @@ static inline void set_cmd_timeout(struct mmc_omap_host *host, struct mmc_reques
  	reg &= ~(1 << 5);
  	OMAP_MMC_WRITE(host, SDIO, reg);
  	/* Set maximum timeout */
