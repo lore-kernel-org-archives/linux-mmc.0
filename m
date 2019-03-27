@@ -1,263 +1,213 @@
-From: Russell King - ARM Linux admin <linux@armlinux.org.uk>
-Subject: Re: [PATCH v2 0/4] Patches to allow consistent mmc / mmcblk
- numbering w/ device tree
-Date: Wed, 27 Mar 2019 20:54:24 +0000
-Message-ID: <20190327205424.5qivtnyufiapkbor@shell.armlinux.org.uk>
-References: <yw1x5zsx5wc7.fsf@mansr.com>
- <CAJ+vNU1PxK-B63Dc3AgzYb9POyxxoF-xPOWBEpxJ+3eVNK8xqw@mail.gmail.com>
- <d5310138-7fdd-973d-5210-3fc91c4686ee@denx.de>
- <yw1xftrn2em9.fsf@mansr.com>
- <1fcd4dad-1e00-67cc-ac5d-24640ae34340@denx.de>
- <20190316153900.xqi55awrockovmsi@shell.armlinux.org.uk>
- <c23d6c4edf92d58aec86da811eaa97a5@agner.ch>
- <yw1xbm2930rr.fsf@mansr.com>
- <20190317165957.k6lxxaq3hbs2owqz@shell.armlinux.org.uk>
- <CAJ+vNU0v8FXStXCfJUk5uJXiPuGGFLNW7aHOYfSoNJgu9qXHKw@mail.gmail.com>
+From: jean-luc malet <jeanluc.malet@gmail.com>
+Subject: Re: linux 4.17, drivers/mmc/host/sdhci-pci-o2micro.c, crash with
+ sdcard >128G
+Date: Wed, 27 Mar 2019 21:57:57 +0100
+Message-ID: <CAMjKNNM8T0N2Lam96x8YOWTVTztcwsq5U6-tFmtfZxP6W5g=9w@mail.gmail.com>
+References: <CAMjKNNM=f5pKgYh+ZAB+hvxeDG5B_5PsYX8YWZMZrmF9qS2DZA@mail.gmail.com>
+ <e6ab8c4a-2371-c4a4-a95e-4c72cefa8696@intel.com> <CAMjKNNN+umpQOFALiC9capRyLm_X3eT10Rwt0rW1e4xAO5aaJA@mail.gmail.com>
+ <CAMjKNNNL-xW3pwz4Uh47=JJhXq0p-hOPrEEbbdMq+ZnUGa+ryQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: 8bit
+Content-Type: multipart/mixed; boundary="00000000000024999a058519b3f9"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAJ+vNU0v8FXStXCfJUk5uJXiPuGGFLNW7aHOYfSoNJgu9qXHKw@mail.gmail.com>
+In-Reply-To: <CAMjKNNNL-xW3pwz4Uh47=JJhXq0p-hOPrEEbbdMq+ZnUGa+ryQ@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Tim Harvey <tharvey@gateworks.com>
-Cc: =?iso-8859-1?Q?M=E5ns_Rullg=E5rd?= <mans@mansr.com>, Stefan Agner <stefan@agner.ch>, Marek Vasut <marex@denx.de>, Douglas Anderson <dianders@chromium.org>, Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, shawn.lin@rock-chips.com, Adrian Hunter <adrian.hunter@intel.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Brian Norris <computersforpeace@gmail.com>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, Heiko Stuebner <heiko@sntech.de>, Jisheng Zhang <jszhang@marvell.com>, linux-rockchip@lists.infradead.org, devicetree-spec@vger.kernel.org, Mark Rutland <mark.rutland@arm.com>, open list <linux-kernel@vger.kernel.org>, Venu Byravarasu IN <vbyravarasu@nvidia.com>, Lars-Peter Clausen <lars@metafoo.de>, jonathanh@nvidia.comli
+To: adrian.hunter@intel.com
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, chuanjin.pang@bayhubtech.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Mar 27, 2019 at 10:37:19AM -0700, Tim Harvey wrote:
-> On Sun, Mar 17, 2019 at 10:00 AM Russell King - ARM Linux admin
-> <linux@armlinux.org.uk> wrote:
-> >
-> > On Sun, Mar 17, 2019 at 04:48:24PM +0000, Måns Rullgård wrote:
-> > > Stefan Agner <stefan@agner.ch> writes:
-> > >
-> > > > On 16.03.2019 16:39, Russell King - ARM Linux admin wrote:
-> > > >> On Sat, Mar 16, 2019 at 01:33:58PM +0100, Marek Vasut wrote:
-> > > >>> If you have a FS or partition table there, it does.
-> > > >>> If you don't, I agree ... that's a problem.
-> > > >>
-> > > >> eMMC boot partitions are called mmcblkXbootY, and unless you have more
-> > > >> than one eMMC device on the system, they can be found either by looking
-> > > >> for /dev/mmcblk*boot* or by querying udev.  The advantage of using udev
-> > > >> is you can discover the physical device behind it by looking at DEVPATH,
-> > > >> ID_PATH, etc, but you may not have that installed on an embedded device.
-> > > >>
-> > > >> However, as I say, just looking for /dev/mmcblk*boot* is sufficient to
-> > > >> find the eMMC boot partitions where there is just one eMMC device
-> > > >> present (which seems to be the standard setup.)
-> > > >>
-> > > >>> > I don't care the slightest what the numbering is, as long as it is
-> > > >>> > stable.  On some hardware, with an unpatched kernel, the mmc device
-> > > >>> > numbering changes depending on whether or not an SD card is inserted on
-> > > >>> > boot.  Getting rid of that behaviour is really all I want.
-> > > >>>
-> > > >>> Agreed, that would be an improvement.
-> > > >>
-> > > >> The mmc device numbering was tied to the mmc host numbering a while back
-> > > >> and the order that the hosts are probed should be completely independent
-> > > >> of whether a card is inserted or not:
-> > > >>
-> > > >>         snprintf(md->disk->disk_name, sizeof(md->disk->disk_name),
-> > > >>                  "mmcblk%u%s", card->host->index, subname ? subname : "");
-> > > >>
-> > > >>         snprintf(rpmb_name, sizeof(rpmb_name),
-> > > >>                  "mmcblk%u%s", card->host->index, subname ? subname : "");
-> > > >>
-> > > >> I suspect that Mans is quoting something from the dim and distant past
-> > > >> to confuse the issue - as shown above, it is now dependent on the host
-> > > >> numbering order not the order in which cards are inserted.
-> > > >
-> > > > Commit 9aaf3437aa72 ("mmc: block: Use the mmc host device index as the
-> > > > mmcblk device index") which came in with v4.6 enables constant mmc block
-> > > > device numbering. I can confirm that it works nicely, and it improved
-> > > > the situation a lot.
-> > >
-> > > That's the answer I was looking for.  I guess we can drop these patches
-> > > from our kernels then.
-> > >
-> > > > That being said, we still use a patch downstream which allows
-> > > > renumbering using an alias. We deal with a bunch of different boards
-> > > > with different SoC's. I have a couple of SD cards with various rootfs
-> > > > and use internal eMMC boot quite often as well. Remembering which board
-> > > > uses which numbering is a pain. Maintaining a patch is just easier...
-> > > > Furthermore, U-Boot allows reordering and all boards I deal with use mmc
-> > > > 0 for the internal eMMC. The aliases allow consistency.
-> > >
-> > > Since pretty much every other device type supports renumbering with DT
-> > > aliases, it would make sense to do this for mmc as well.
-> >
-> > SATA does not.  SCSI devices, whether they are disks, cdroms, tape
-> > drives or whatever have always been allocated dynamically in the
-> > order that they are discovered.
-> >
-> > Ethernet also does not, and davem remains opposed the idea of fixed
-> > allocation in the kernel.
-> >
-> > It's only a minority that demand fixed enumeration of devices.
-> >
-> 
-> Russell,
-> 
-> How does this case differ form defining a 'stdout-path' in the chosen
-> node of the device-tree [1] purposed to provide a path to the boot
-> console device among multiple UART's a board may have.
+--00000000000024999a058519b3f9
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-You are comparing apples and oranges.
+resentding in plain text
 
-stdout-path defines which output device is the "standard output", but
-it doesn't define that it shall be called "output device number zero".
 
-So, stdout-path has nothing to do with device naming.
+On Wed, Mar 27, 2019 at 9:56 PM jean-luc malet <jeanluc.malet@gmail.com> wr=
+ote:
+>
+> Hi everybody
+> thanks to chuanjin pang, it's almost a year that I use my controler with =
+sdcards >128G without issue, I upgraded my kernel to 5.0.4 and noticed that=
+ the sdcard bug was still present... so I applied the patch again and it di=
+d fixed the issue as it did on my previous kernel build
+> since the stability seems very good, please consider applying this patch =
+for futur kernel release
+> thanks and regards
+> JLM
+>
+> On Mon, Jun 11, 2018 at 2:04 PM jean-luc malet <jeanluc.malet@gmail.com> =
+wrote:
+>>
+>> something has changed.... the sdcard wasn't working at all on 4.16.11 ke=
+rnel  (crash on reading but sdcard discovery was working)  for any card and=
+ not at all on 4.9.? kernel (not even listing the sdcard when inserting) , =
+in 4.17 it works with all card below 256G that I have... so there is obviou=
+lsy a change somewhere that made this controler works....
+>> best regards
+>>
+>> On Mon, Jun 11, 2018 at 1:11 PM Adrian Hunter <adrian.hunter@intel.com> =
+wrote:
+>>>
+>>> On 09/06/18 11:38, jean-luc malet wrote:
+>>> > Hi everybody!
+>>> > thanks for adding support to my O2 Micro, Inc. Device 8620 in last ke=
+rnel!!!
+>>> > I was looking for it since long time!!!!
+>>> >
+>>> > # lspci -kv
+>>> > 02:00.0 SD Host controller: O2 Micro, Inc. Device 8620 (rev 01) (prog=
+-if 01)
+>>> > Subsystem: Lenovo Device 3800
+>>> > Flags: bus master, fast devsel, latency 0, IRQ 17
+>>> > Memory at a1001000 (32-bit, non-prefetchable) [size=3D4K]
+>>> > Memory at a1000000 (32-bit, non-prefetchable) [size=3D2K]
+>>> > Capabilities: [6c] Power Management version 3
+>>> > Capabilities: [48] MSI: Enable- Count=3D1/1 Maskable+ 64bit+
+>>> > Capabilities: [80] Express Endpoint, MSI 00
+>>> > Capabilities: [100] Virtual Channel
+>>> > Capabilities: [200] Advanced Error Reporting
+>>> > Capabilities: [230] Latency Tolerance Reporting
+>>> > Capabilities: [240] L1 PM Substates
+>>> > Kernel driver in use: sdhci-pci
+>>> > Kernel modules: sdhci_pci
+>>> >
+>>> > it works fine with sdcard up to 128G but crash on my samsung 256G evo=
+ plus
+>>> > card
+>>> > (https://www.samsung.com/fr/memory-storage/evo-plus-microsd-card-with=
+-sd-adapter/MB-MC256DAEU/)
+>>> >
+>>> > insert 256G card
+>>> > #dmesg
+>>> >
+>>> >     [94815.892525] mmc0: Tuning timeout, falling back to fixed sampli=
+ng clock
+>>> >     [94815.892627] mmc0: new ultra high speed SDR104 SDXC card at add=
+ress 0001
+>>> >     [94815.893398] mmcblk0: mmc0:0001 EE8QT 239 GiB
+>>> >     [94815.945330] mmc0: Tuning timeout, falling back to fixed sampli=
+ng clock
+>>> >
+>>> > # dd if=3D/dev/mmcblk0 of=3Dtest bs=3D512 count=3D1
+>>> >
+>>> >     dd: error reading '/dev/mmcblk0': Input/output error
+>>> >     0+0 records in
+>>> >     0+0 records out
+>>> >     0 bytes copied, 42.829 s, 0.0 kB/s
+>>> >
+>>> > #dmesg
+>>> >
+>>> >     [94825.956285] mmc0: Timeout waiting for hardware interrupt.
+>>> >     [94825.956289] mmc0: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D =
+SDHCI REGISTER DUMP =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>>> >     [94825.956297] mmc0: sdhci: Sys addr:  0x00000008 | Version:  0x0=
+0000603
+>>> >     [94825.956304] mmc0: sdhci: Blk size:  0x00007200 | Blk cnt:  0x0=
+0000008
+>>> >     [94825.956310] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x0=
+000003b
+>>> >     [94825.956316] mmc0: sdhci: Present:   0x01ff0000 | Host ctl: 0x0=
+0000017
+>>> >     [94825.956322] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x0=
+0000000
+>>> >     [94825.956327] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x0=
+0000007
+>>> >     [94825.956333] mmc0: sdhci: Timeout:   0x0000000a | Int stat: 0x0=
+0000000
+>>> >     [94825.956339] mmc0: sdhci: Int enab:  0x02ff008b | Sig enab: 0x0=
+2ff008b
+>>> >     [94825.956344] mmc0: sdhci: AC12 err:  0x00000004 | Slot int: 0x0=
+0000000
+>>> >     [94825.956350] mmc0: sdhci: Caps:      0x25fcc8bf | Caps_1:   0x0=
+0002077
+>>> >     [94825.956356] mmc0: sdhci: Cmd:       0x0000123a | Max curr: 0x0=
+05800c8
+>>> >     [94825.956362] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0x0=
+0000000
+>>> >     [94825.956368] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x0=
+0001b00
+>>> >     [94825.956371] mmc0: sdhci: Host ctl2: 0x0000800b
+>>> >     [94825.956378] mmc0: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0xf=
+ffff208
+>>> >     [94825.956380] mmc0: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D
+>>> >     [94826.007314] mmc0: Tuning timeout, falling back to fixed sampli=
+ng clock
+>>> >
+>>> > remove card
+>>> > insert 128G card (http://www.toshiba-sdcard.com/microsd/microsd_m302.=
+html)
+>>> > #dmesg
+>>> >
+>>> >     [95214.753428] mmc0: Tuning timeout, falling back to fixed sampli=
+ng clock
+>>> >     [95214.753530] mmc0: new ultra high speed SDR104 SDXC card at add=
+ress 1234
+>>> >     [95214.754399] mmcblk0: mmc0:1234 SA128 116 GiB
+>>> >     [95214.756474]  mmcblk0: p1
+>>> >
+>>> >
+>>> >     # dd if=3D/dev/mmcblk0 of=3Dtest bs=3D512 count=3D1
+>>> >     1+0 records in
+>>> >     1+0 records out
+>>> >     512 bytes copied, 0.00209609 s, 244 kB/s
+>>> >
+>>> >
+>>> > remove card
+>>> > insert 128G card (samsung 128Gb evo U1 card)
+>>> > #dmseg
+>>> >
+>>> >     [95438.053427] mmc0: Tuning timeout, falling back to fixed sampli=
+ng clock
+>>> >     [95438.053552] mmc0: new ultra high speed DDR50 SDXC card at addr=
+ess 59b4
+>>> >     [95438.054139] mmcblk0: mmc0:59b4 00000 120 GiB
+>>> >     [95438.056451]  mmcblk0: p1
+>>> >
+>>> >
+>>> > # dd if=3D/dev/mmcblk0 of=3Dtest bs=3D512 count=3D1
+>>> >
+>>> >     1+0 records in
+>>> >     1+0 records out
+>>> >     512 bytes copied, 0.0346192 s, 14.8 kB/s
+>>> >
+>>> >
+>>> > since the toshiba a 256G samsung are both U3 this seems not related t=
+o this
+>>> > since one of the samsung card works, this don't seems to be related t=
+o the
+>>> > brand....
+>>> > so this seems related to the size of the card....
+>>> > if you need more information, I'll try to provide the best accurate o=
+nes :)
+>>>
+>>> Tuning fails for all the cards, it is just some of them still work with
+>>> fixed sampling.  You need to find someone who knows about the O2 Micro
+>>> controllers. but no one has touched the driver since 2015.
 
-> Again, I'm merely trying to overcome the fact that on one of my IMX6
-> boards usdhc2 registers as 'mmcblk0' and is an SDIO radio while usdhc3
-> registers as 'mmcblk1' and is the only 'bootable' device. I'm not all
-> that familiar with SDIO drivers... perhaps its completely wrong that
-> the IMX6 MMC driver is registering usdhc2 as a 'block device'?
+--00000000000024999a058519b3f9
+Content-Type: text/x-patch; charset="US-ASCII";
+	name="0001-clean-bayhub-quirks2-flag-for-tuning-UHS-timeout-iss.patch"
+Content-Disposition: attachment;
+	filename="0001-clean-bayhub-quirks2-flag-for-tuning-UHS-timeout-iss.patch"
+Content-Transfer-Encoding: base64
+Content-ID: <f_jtroxcsv0>
+X-Attachment-Id: f_jtroxcsv0
 
-Right, you probably only have the usdhc2 and usdhc3 devices enabled
-in device tree, and usdhc2 gets probed first (and allocated the first
-MMC host index) followed by usdhc3.
-
-Prior to the commit I mentioned, your case would have been quite sane
-in that the SD card would always show up as mmcblk0 irrespective of
-the order that the two SD host interfaces were discovered.  However,
-the commit that ties the MMC/SD host number to the MMC block device
-number has two effects:
-
-1. the MMC block device numbers are equal to the MMC/SD host numbers.
-2. the MMC standard supports multiple cards attached to a single host
-   which became unsupportable.  (This is why MMC block device numbers
-   were dynamic - the MMC code was written in the days when MMC cards
-   were popular and SD was "new".  There is no way to really know how
-   many MMC block devices there could be showing up per host.)  That
-   became obsolete with SD, and I don't believe anyone ever produced
-   a multi-MMC card setup.
-
-I had realised that setups such as yours (SDIO in first host, SD in
-second host) would result in a sane numbering becoming weird, but the
-voices demanding (and I use demand, because that's exactly the tone
-of the discussion) that MMC block devices not be dynamic were very
-loud and strong - and remains so, as you can see from the tone of
-Mans message bring this subject back up.
-
-I should point out that as a result of this, MMC block devices follow
-different behaviour from other devices in Linux.  For example:
-
-- ATA HDDs devices get allocated SCSI disk numbers starting at zero
-  according to the order they are detected.  The same goes for all
-  other devices such as scanners, tape drives, optical drives, etc.
-- Ethernet devices get allocated ethX numbers starting at zero
-  according to the order that the drivers register the devices.
-- USB devices are exactly the same - entirely dynamic device names.
-
-For all of these, there are solutions in userspace.  For block devices
-with partitions, there is PARTUUID, which is an identifier from the
-partition table plus a partition number which the kernel can interpret.
-There are filesystem labels and UUIDs which an initramfs can probe to
-locate the root filesystem.  These can also be used with udev to
-create persistent device names in /dev - see /dev/disk/by-* for
-example.
-
-Ethernet devices in modern distros have udev rules to rename them to
-a name that somehow represents their location - eg, enp1s0.
-
-USB devices, such as serial ports, do not have static names, but if
-you have a lot of them (like I do) udev really helps - I have custom
-udev rules which create symlinks to the USB serial devices I care
-about in /dev/serial, so for example:
-
-lrwxrwxrwx 1 root root 10 Mar 20 00:43 /dev/serial/usb-cubox-es -> ../ttyUSB0
-...
-lrwxrwxrwx 1 root root 11 Mar 20 00:43 /dev/serial/usb-mcbin-ds-es -> ../ttyUSB10
-lrwxrwxrwx 1 root root 11 Mar 20 00:43 /dev/serial/usb-mcbin-ss -> ../ttyUSB11
-...
-lrwxrwxrwx 1 root root 10 Mar 20 00:43 /dev/serial/usb-ttl -> ../ttyUSB1
-...
-lrwxrwxrwx 1 root root 10 Mar 20 00:43 /dev/serial/usb-zii-b -> ../ttyUSB8
-
-so I no longer need to worry about which order these are discovered,
-which bus they're connected to, which hub, or anything, which is
-kind of important when you consider that this machine is laptop on a
-docking station, and all these devices are connected via hubs on
-four USB ports on the docking station.
-
-In the absence of such custom rules, there are persistent names by
-both the device name/serial number (/dev/serial/by-id) and by the
-bus path (/dev/serial/by-path).  Both of these are created by udev
-using the policy set in its rules database.
-
-The kernel really does not set the userspace device name policy,
-although it has a "default" policy.  Userspace has, for many years,
-been at liberty to change the policy in any way it sees fit, even if
-devtmpfs is being used.
-
-devtmpfs is just a tmpfs filesystem which the kernel adds devices
-to using the kernel's naming policy, and will remove its own 
-devices when they disappear.  Userspace is at liberty to create
-additional names, rename the devices, even delete them if it so
-wishes.
-
-Sure, some people may not wish to run udev, which is fine.  In the
-absence of udev, it is entirely possible to find out the device
-names by looking in /sys/class or /sys/devices.  For example, on
-my Armada 8040 platform (where I have eMMC and a SD card), I can
-look at all the block devices present using the default kernel
-device name:
-
-$ ls -al /sys/class/block
-
-and each one is a symlink (that can be read using readlink in shell
-code) to discover where it is on the system.  For example, in bash:
-
-for dev in /sys/class/block/mmcblk*; do
-  path=`readlink -f $dev`
-  if [[ $path =~ /f06e0000.sdhci/ ]]; then
-     basename $dev
-  fi
-done
-
-yields:
-
-mmcblk0
-mmcblk0boot0
-mmcblk0boot1
-
-which are found under /dev:
-
-brw-rw---- 1 root disk 179,  0 Mar 26 19:30 /dev/mmcblk0
-brw-rw---- 1 root disk 179,  8 Mar 26 19:30 /dev/mmcblk0boot0
-brw-rw---- 1 root disk 179, 16 Mar 26 19:30 /dev/mmcblk0boot1
-
-Here's another way, which is simpler if you have the path of the
-device in DT, which will always be constant:
-
-$ basename
-/sys/devices/platform/ap806/ap806\:config-space@f0000000/f06e0000.sdhci/mmc_host/mmc*/mmc*/block/mmcblk*
-mmcblk0
-
-or if you prefer:
-
-$ find /sys/devices/platform/ap806/ap806\:config-space@f0000000/f06e0000.sdhci -name 'mmcblk?' -printf '%f\n'
-mmcblk0
-
-or:
-
-$ find /sys/devices/platform/ap806 -name 'mmcblk*' -printf '%f\n'
-mmcblk0rpmb
-mmcblk0
-mmcblk0boot0
-mmcblk0boot1
-$ find /sys/devices/platform/cp0 -name 'mmcblk*' -printf '%f\n'
-mmcblk1
-mmcblk1p3
-mmcblk1p1
-mmcblk1p2
-
-There are many ways to solve the "what name is my device using" problem
-in userspace that does not require coding policy into the kernel.
-
--- 
-RMK's Patch system: https://www.armlinux.org.uk/developer/patches/
-FTTC broadband for 0.8mile line in suburbia: sync at 12.1Mbps down 622kbps up
-According to speedtest.net: 11.9Mbps down 500kbps up
+RnJvbSA2M2MzZTI3YmU2MTlkYjFiMTMyNDFjYzNhZmY0NmZmZGNjODExZWUwIE1vbiBTZXAgMTcg
+MDA6MDA6MDAgMjAwMQpGcm9tOiAiY2h1YW5qaW4ucGFuZyIgPGNodWFuamluLnBhbmdAYmF5aHVi
+dGVjaC5jb20+CkRhdGU6IFNhdCwgMTUgU2VwIDIwMTggMDA6Mjc6MjcgKzA4MDAKU3ViamVjdDog
+W1BBVENIXSBjbGVhbiBiYXlodWIgcXVpcmtzMiBmbGFnIGZvciB0dW5pbmcgVUhTIHRpbWVvdXQg
+aXNzdWUKCi0tLQogbW1jL2hvc3Qvc2RoY2ktcGNpLWNvcmUuYyB8IDEgLQogMSBmaWxlIGNoYW5n
+ZWQsIDEgZGVsZXRpb24oLSkKCmRpZmYgLS1naXQgYS9tbWMvaG9zdC9zZGhjaS1wY2ktY29yZS5j
+IGIvbW1jL2hvc3Qvc2RoY2ktcGNpLWNvcmUuYwppbmRleCA3N2RkMzUyLi42NTczZjQ0IDEwMDY0
+NAotLS0gYS9tbWMvaG9zdC9zZGhjaS1wY2ktY29yZS5jCisrKyBiL21tYy9ob3N0L3NkaGNpLXBj
+aS1jb3JlLmMKQEAgLTExNzYsNyArMTE3Niw2IEBAIHN0YXRpYyBpbnQgam1pY3Jvbl9yZXN1bWUo
+c3RydWN0IHNkaGNpX3BjaV9jaGlwICpjaGlwKQogc3RhdGljIGNvbnN0IHN0cnVjdCBzZGhjaV9w
+Y2lfZml4ZXMgc2RoY2lfbzIgPSB7CiAJLnByb2JlID0gc2RoY2lfcGNpX28yX3Byb2JlLAogCS5x
+dWlya3MgPSBTREhDSV9RVUlSS19OT19FTkRBVFRSX0lOX05PUERFU0MsCi0JLnF1aXJrczIgPSBT
+REhDSV9RVUlSSzJfQ0xFQVJfVFJBTlNGRVJNT0RFX1JFR19CRUZPUkVfQ01ELAogCS5wcm9iZV9z
+bG90ID0gc2RoY2lfcGNpX28yX3Byb2JlX3Nsb3QsCiAjaWZkZWYgQ09ORklHX1BNX1NMRUVQCiAJ
+LnJlc3VtZSA9IHNkaGNpX3BjaV9vMl9yZXN1bWUsCi0tIAoyLjcuNAoK
+--00000000000024999a058519b3f9--
