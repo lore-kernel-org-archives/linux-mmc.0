@@ -1,7 +1,7 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V4 1/5] mmc: mmci: add get_datactrl_cfg callback and helper functions
-Date: Wed, 27 Mar 2019 10:05:28 +0100
-Message-ID: <1553677532-3539-2-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V4 3/5] mmc: mmci: qcom: define get_dctrl_cfg
+Date: Wed, 27 Mar 2019 10:05:30 +0100
+Message-ID: <1553677532-3539-4-git-send-email-ludovic.Barre@st.com>
 References: <1553677532-3539-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,38 +14,33 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-This patch adds get_datactrl_cfg callback in mmci_host_ops
-to allow to get datactrl configuration specific at variant.
-Common helper function is defined and could be call by variant.
+This patch defines get_dctrl_cfg callback for qcom variant.
+qcom variant has a specific block size definition.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.h | 6 ++++++
+ drivers/mmc/host/mmci_qcom_dml.c | 6 ++++++
  1 file changed, 6 insertions(+)
 
-diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 6bde28c..35c91d0 100644
---- a/drivers/mmc/host/mmci.h
-+++ b/drivers/mmc/host/mmci.h
-@@ -362,6 +362,7 @@ struct mmci_host_ops {
- 			 bool next);
- 	void (*unprep_data)(struct mmci_host *host, struct mmc_data *data,
- 			    int err);
-+	u32 (*get_datactrl_cfg)(struct mmci_host *host);
- 	void (*get_next_data)(struct mmci_host *host, struct mmc_data *data);
- 	int (*dma_setup)(struct mmci_host *host);
- 	void (*dma_release)(struct mmci_host *host);
-@@ -429,6 +430,11 @@ struct mmci_host {
- void mmci_write_clkreg(struct mmci_host *host, u32 clk);
- void mmci_write_pwrreg(struct mmci_host *host, u32 pwr);
+diff --git a/drivers/mmc/host/mmci_qcom_dml.c b/drivers/mmc/host/mmci_qcom_dml.c
+index ccc1b18..3af396b 100644
+--- a/drivers/mmc/host/mmci_qcom_dml.c
++++ b/drivers/mmc/host/mmci_qcom_dml.c
+@@ -188,9 +188,15 @@ static int qcom_dma_setup(struct mmci_host *host)
+ 	return 0;
+ }
  
-+static inline u32 mmci_dctrl_blksz(struct mmci_host *host)
++static u32 qcom_get_dctrl_cfg(struct mmci_host *host)
 +{
-+	return (ffs(host->data->blksz) - 1) << 4;
++	return MCI_DPSM_ENABLE | (host->data->blksz << 4);
 +}
 +
- #ifdef CONFIG_DMA_ENGINE
- int mmci_dmae_prep_data(struct mmci_host *host, struct mmc_data *data,
- 			bool next);
+ static struct mmci_host_ops qcom_variant_ops = {
+ 	.prep_data = mmci_dmae_prep_data,
+ 	.unprep_data = mmci_dmae_unprep_data,
++	.get_datactrl_cfg = qcom_get_dctrl_cfg,
+ 	.get_next_data = mmci_dmae_get_next_data,
+ 	.dma_setup = qcom_dma_setup,
+ 	.dma_release = mmci_dmae_release,
 -- 
 2.7.4
