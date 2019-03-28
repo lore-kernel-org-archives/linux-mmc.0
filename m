@@ -1,32 +1,81 @@
-From: Rob Herring <robh+dt@kernel.org>
-Subject: Re: [PATCH 23/24] arm64: dts: mediatek: add dtsi for MT8516
-Date: Thu, 28 Mar 2019 14:22:12 -0500
-Message-ID: <CAL_Jsq+Q06O84-MTpgTWGG312VXm_vGOkjMCjtWuS0eZ-j_0yw@mail.gmail.com>
-References: <20190323211612.860-1-fparent@baylibre.com> <20190323211612.860-24-fparent@baylibre.com>
+From: Michal =?UTF-8?B?U3VjaMOhbmVr?= <msuchanek@suse.de>
+Subject: Re: [PATCH V2 0/7] mmc: Several fixes for bcm2835 driver
+Date: Thu, 28 Mar 2019 21:43:51 +0100
+Message-ID: <20190328214351.358e615a@kitsune.suse.cz>
+References: <1541967839-2847-1-git-send-email-stefan.wahren@i2se.com>
+ <20190321210307.58e33ea4@kitsune.suse.cz>
+ <1ff03f96-2575-f65e-c96e-6dc52de00c3a@i2se.com>
+ <20190322170643.2e56d220@naga.suse.cz>
+ <1210065308.73665.1553274611385@email.ionos.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190323211612.860-24-fparent@baylibre.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Fabien Parent <fparent@baylibre.com>
-Cc: Matthias Brugger <matthias.bgg@gmail.com>, Mark Rutland <mark.rutland@arm.com>, Sean Wang <sean.wang@kernel.org>, Ryder Lee <ryder.lee@mediatek.com>, Hsin-Hsiung Wang <hsin-hsiung.wang@mediatek.com>, Wenzhen Yu <wenzhen.yu@mediatek.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Yong Mao <yong.mao@mediatek.com>, jjian.zhou@mediatek.com, devicetree@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Linux I2C <linux-i2c@vger.kernel.org>, "moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE" <linux-arm-kernel@lists.infradead.org>, "moderated list:ARM/Mediatek SoC support" <linux-mediatek@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>, open list:SE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1210065308.73665.1553274611385@email.ionos.de>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Stefan Wahren <stefan.wahren@i2se.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Florian Fainelli <f.fainelli@gmail.com>, Phil Elwell <phil@raspberrypi.org>, linux-mmc@vger.kernel.org, Eric Anholt <eric@anholt.net>, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Sat, Mar 23, 2019 at 4:17 PM Fabien Parent <fparent@baylibre.com> wrote:
->
-> The MT8516 SoC provides the following peripherals: GPIO, UART, USB2,
-> SPI, eMMC, SDIO, NAND, Flash, ADC, I2C, PWM, Timers, IR, Ethernet, and
-> Audio (I2S, SPDIF, TDM).
->
-> This commit is adding the basic dtsi file with the support of the
-> following IOs: GPIO, UART, SPI, eMMC, I2C, Timers.
->
-> Signed-off-by: Fabien Parent <fparent@baylibre.com>
-> ---
->  arch/arm64/boot/dts/mediatek/mt8516-pinfunc.h | 663 ++++++++++++++++++
->  arch/arm64/boot/dts/mediatek/mt8516.dtsi      | 409 +++++++++++
->  2 files changed, 1072 insertions(+)
->  create mode 100644 arch/arm64/boot/dts/mediatek/mt8516-pinfunc.h
->  create mode 100644 arch/arm64/boot/dts/mediatek/mt8516.dtsi
-
-Reviewed-by: Rob Herring <robh@kernel.org>
+T24gRnJpLCAyMiBNYXIgMjAxOSAxODoxMDoxMSArMDEwMCAoQ0VUKQpTdGVmYW4gV2FocmVuIDxz
+dGVmYW4ud2FocmVuQGkyc2UuY29tPiB3cm90ZToKCj4gSGkgTWljaGFsLAo+IAo+ID4gTWljaGFs
+IFN1Y2jDoW5layA8bXN1Y2hhbmVrQHN1c2UuZGU+IGhhdCBhbSAyMi4gTcOkcnogMjAxOSB1bSAx
+NzowNiBnZXNjaHJpZWJlbjoKPiA+IAo+ID4gCj4gPiBPbiBGcmksIDIyIE1hciAyMDE5IDE1OjQ1
+OjEzICswMTAwCj4gPiBTdGVmYW4gV2FocmVuIDxzdGVmYW4ud2FocmVuQGkyc2UuY29tPiB3cm90
+ZToKPiA+ICAgCj4gPiA+IEhpIE1pY2hhbCwKPiA+ID4gCj4gPiA+IEFtIDIxLjAzLjE5IHVtIDIx
+OjAzIHNjaHJpZWIgTWljaGFsIFN1Y2jDoW5lazoKPiA+ID4gCj4gPiA+IGNvdWxkIHlvdSBwbGVh
+c2UgcmV0cnkgd2l0aCBtYWlubGluZSBrZXJuZWwgNS4wPyAgCj4gPiAKPiA+IEkgY2FuIHRyeSB0
+aGF0LiBXaGF0IEkgaGF2ZSBpcyBwcmV0dHkgbXVjaCA1LjAgYW55d2F5IHNvIEkgZG9uJ3QgZXhw
+ZWN0Cj4gPiBtdWNoIGRpZmZlcmVuY2U6Cj4gPiAgIAo+IAo+IGFzIGxvbmcgYXMgdGhlIGlzc3Vl
+IGxpZXMgaW4gdGhlIHNkaG9zdCBkcml2ZXIgY29kZS4gVGhlcmUgYWxzbyBoYXMgYmVlbiBhIGxv
+dCBvZiBmaXhlcyBieSBMdWthcyBXdW5uZXIgdG8gdGhlIERNQSBlbmdpbmUgZHJpdmVyLiBJIHBy
+ZWZlciBhIHdlbGwgZGVmaW5lZCBzb3VyY2UgYmFzZS4KPiAKPiA+IAo+ID4gSSBzdXNwZWN0IHRo
+YXQgb25lIG9mIHRoZSBsb2NraW5nIGZpeGVzIHRoYXQgd2VudCBpbnRvIG1haW5saW5lCj4gPiBy
+ZWNlbnRseSBwcmV2ZW50cyByZWNvdmVyaW5nIGZyb20gdGhlIGVycm9yIGJ1dCBJIGRpZCBub3Qg
+dHJ5Cj4gPiByZXZlcnRpbmcgdGhlbSB5ZXQuICAKPiAKPiBXb3VsZCBiZSBuaWNlIGlmIHlvdSBj
+YW4gZmluZCB0aGlzIHJlZ3Jlc3Npb24uCgpEb2VzIG5vdCBsb29rIHRoYXQgZ29vZC4KCiMgYmFk
+OiBbYTQ4Y2FlYTE3NDVmMzBlODdhYjVhOGRiYTVlMzY1ZDAzNDZhYTYwMF0gbW1jOiBiY20yODM1
+OiBEcm9wIERNQSBjaGFubmVsIGVycm9yIHBvaW50ZXIgY2hlY2sgKGJzYyM5ODMxNDUpLgojIGdv
+b2Q6IFtjNmIyNjU0N2NhYTgxNjYwOGVhNWM1NzE3YjI5Yzc4NzY5YTIyOTcyXSBtbWM6IGJjbTI4
+MzU6IHJlc2V0IGhvc3Qgb24gdGltZW91dCAoYnNjIzk4MzE0NSwgYnNjIzEwNzA4NzIpLgpnaXQg
+YmlzZWN0IHN0YXJ0ICdhNDhjYWVhMTc0NWYzMGU4N2FiNWE4ZGJhNWUzNjVkMDM0NmFhNjAwJyAn
+YzZiMjY1NDdjYWE4MTY2MDhlYTVjNTcxN2IyOWM3ODc2OWEyMjk3MicKIyBnb29kOiBbM2ViMWZl
+NzUyZjUyODY1ZWZmMGY5YjhlZGQ5NWI2MWI2YTljMTAxMF0gbW1jOiBiY20yODM1OiBUZXJtaW5h
+dGUgdGltZW91dCB3b3JrIHN5bmNocm9ub3VzbHkgKGJzYyM5ODMxNDUsIGJzYyMxMDcwODcyKS4K
+Z2l0IGJpc2VjdCBnb29kIDNlYjFmZTc1MmY1Mjg2NWVmZjBmOWI4ZWRkOTViNjFiNmE5YzEwMTAK
+IyBnb29kOiBbNTBiNGRkMDNiZDExZmJiNjQ3ZjBlZGJlZDg1MDEyOTBmNmY5ZWE0Nl0gbW1jOiBi
+Y20yODM1OiBQcm9wZXJseSBoYW5kbGUgZG1hZW5naW5lX3ByZXBfc2xhdmVfc2cgKGJzYyM5ODMx
+NDUpLgpnaXQgYmlzZWN0IGdvb2QgNTBiNGRkMDNiZDExZmJiNjQ3ZjBlZGJlZDg1MDEyOTBmNmY5
+ZWE0NgoKT24gdGhlIGdvb2QgY29tbWl0cyBhIGZldyB0aW1lb3V0cyBvY2N1ciBhbmQgYXJlIHJl
+Y292ZXJlZC4gVGhpcyBsZWF2ZXMgCgo4Yzk2MjBiMWNjOWI2OWU4MmZhOGQ0MDgxZDY0NmQwMDE2
+YjYwMmU3ICBtbWM6IGJjbTI4MzU6IEZpeCBETUEgY2hhbm5lbCBsZWFrIG9uIHByb2JlIGVycm9y
+CmU1YzFlNjNjOTMyMzc5Yjg5ZDc0MDRkNGU1ZmRlMWJmOGFiZmY5NTEgIG1tYzogYmNtMjgzNTog
+RHJvcCBETUEgY2hhbm5lbCBlcnJvciBwb2ludGVyIGNoZWNrCgp3aGljaCBhcmUgbm90IG92ZXJs
+eSBzdXNwZWN0LiBUaGUgbGF0dGVyIHNob3VsZCBiZSBub29wIGF0IGxlYXN0LiBTbwptYXliZSB0
+aGUgaW5kZWZpbml0ZSBsb2NrdXAgZGVwZW5kcyBvbiBjYXJkIHN0YXRlIG9yIHNvbWUgb3RoZXIg
+ZmFjdG9yLgpBbHNvIHRoZSByZWNvdmVyeSBpbiB0aGUgY2FzZSB3aGVuIGl0IGRvZXMgcmVjb3Zl
+ciBkb2VzIHRha2UgcXVpdGUgbG9uZwoobGlrZSBtaW51dGVzKSB3aXRoIHRoZSBzeXN0ZW0gcHJl
+dHR5IG11Y2ggY29tcGxldGVseSBub24tcmVzcG9uc2l2ZS4KTm90IHdhaXRpbmcgbG9uZyBlbm91
+Z2ggZm9yIHRoZSBzeXN0ZW0gdG8gcmVjb3ZlciBtaWdodCBiZSBhbHNvIGEKZmFjdG9yLgoKPiAK
+PiA+IEl0IHRha2VzIHF1aXRlIGEgd2hpbGUgdG8gcmVpbWFnZSwgYm9vdCBkaWZmZXJlbnQKPiA+
+IGtlcm5lbCwgcnVuIHN5c3RlbSB1cGRhdGUgKHdoaWNoIG5vdyBpbnZhcmlhYmx5IGNyYXNoZXMv
+bG9ja3MgdXAgd2l0aAo+ID4gYW55IGtlcm5lbCkuICAgCj4gCj4gVGhhdCdzIHdoeSBpIHByZWZl
+ciBSYXNwYmlhbiBkdXJpbmcgZGV2ZWxvcG1lbnQsIHdoZXJlIGkgY2FuIHNpbXBseSByZXBsYWNl
+IHRoZSBrZXJuZWwgLyBtb2R1bGVzIHdpdGggYSBzZCBjYXJkIHJlYWRlciBvbiBhIFBDOgo+IAo+
+IGh0dHBzOi8vZ2lzdC5naXRodWIuY29tL2xhdGVnb29kYnllL2M3MzE3YTQyYmY3ZjljMDdmNWE5
+MWJhZWQ4YzY4Zjc1Cj4gCj4gVGhpcyBzaG91bGQgcmVkdWNlIHRoZSByb3VuZC10cmlwLCBidXQg
+dGhpcyBjb3VsZCBhY2NpZGVudGx5IGhpZGUgdGhlIHByb2JsZW0gYXMgd2VsbC4KCkkgY2FuIHJl
+cGxhY2UgdGhlIGtlcm5lbCBlYXNpbHkgYnV0IHdpdGhvdXQgZ29pbmcgYmFjayB0byB0aGUgb2Jz
+b2xldGUKc3lzdGVtIHN0YXRlIEkgbG9zZSB0aGUgc3lzdGVtIHVwZ3JhZGUgYXMgdGVzdCBjYXNl
+LgoKVGhhbmtzIAoKTWljaGFsCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fXwpsaW51eC1hcm0ta2VybmVsIG1haWxpbmcgbGlzdApsaW51eC1hcm0ta2VybmVs
+QGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9s
+aXN0aW5mby9saW51eC1hcm0ta2VybmVsCg==
