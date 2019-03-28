@@ -1,100 +1,66 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v4 2/2] mmc: sdhci-omap: Don't finish_mrq() on a command
- error during tuning
-Date: Thu, 28 Mar 2019 10:13:58 +0200
-Message-ID: <ee4c90b8-aed8-ba3b-3aea-9e4257771cfe@intel.com>
-References: <20190326110057.7055-1-faiz_abbas@ti.com>
- <20190326110057.7055-3-faiz_abbas@ti.com>
- <508e9423-c1f9-f2cc-4aa9-2cc5b1cf40a8@intel.com>
- <05a2f5ef-1fee-15f4-6a9b-e3f3f3ee5a82@ti.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V4 0/5] mmc: mmci: add get_datactrl_cfg callback
+Date: Thu, 28 Mar 2019 13:52:23 +0100
+Message-ID: <CAPDyKFqi0FwUuB56GQPRtuioNeFSSg-QdtWzk4S6BDnuYbfeAg@mail.gmail.com>
+References: <1553677532-3539-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <05a2f5ef-1fee-15f4-6a9b-e3f3f3ee5a82@ti.com>
-Content-Language: en-US
+In-Reply-To: <1553677532-3539-1-git-send-email-ludovic.Barre@st.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Faiz Abbas <faiz_abbas@ti.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
-Cc: ulf.hansson@linaro.org, kishon@ti.com
+To: Ludovic Barre <ludovic.Barre@st.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-stm32@st-md-mailman.stormreply.com
 List-Id: linux-mmc@vger.kernel.org
 
-On 27/03/19 1:47 PM, Faiz Abbas wrote:
-> Hi Adrian,
-> 
-> On 27/03/19 4:45 PM, Adrian Hunter wrote:
->> On 26/03/19 1:00 PM, Faiz Abbas wrote:
->>> commit 5b0d62108b46 ("mmc: sdhci-omap: Add platform specific reset
->>> callback") skips data resets during tuning operation. Because of this,
->>> a data error or data finish interrupt might still arrive after a command
->>> error has been handled and the mrq ended. This ends up with a "mmc0: Got
->>> data interrupt 0x00000002 even though no data operation was in progress"
->>> error message.
->>>
->>> Fix this by adding a platform specific callback for sdhci_irq. Mark the
->>> mrq as a failure but wait for a data interrupt instead of calling
->>> finish_mrq().
->>>
->>> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
->>> ---
->>>  drivers/mmc/host/sdhci-omap.c | 37 +++++++++++++++++++++++++++++++++++
->>>  1 file changed, 37 insertions(+)
->>>
->>> diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
->>> index 5bbed477c9b1..9da2ff9ede8b 100644
->>> --- a/drivers/mmc/host/sdhci-omap.c
->>> +++ b/drivers/mmc/host/sdhci-omap.c
->>> @@ -797,6 +797,42 @@ void sdhci_omap_reset(struct sdhci_host *host, u8 mask)
->>>  	sdhci_reset(host, mask);
->>>  }
->>>  
->>> +#define CMD_ERR_MASK (SDHCI_INT_CRC | SDHCI_INT_END_BIT | SDHCI_INT_INDEX |\
->>> +		      SDHCI_INT_TIMEOUT)
->>> +#define CMD_MASK (CMD_ERR_MASK | SDHCI_INT_RESPONSE)
->>> +
->>> +static irqreturn_t sdhci_omap_irq(struct sdhci_host *host, u32 intmask)
->>> +{
->>> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->>> +	struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
->>> +
->>> +	if (omap_host->is_tuning && (intmask & CMD_ERR_MASK)) {
->>> +
->>> +		/*
->>> +		 * Since we are not resetting data lines during tuning
->>> +		 * operation, data error or data complete interrupts
->>> +		 * might still arrive. Mark this request as a failure
->>> +		 * but still wait for the data interrupt
->>> +		 */
->>> +		if (intmask & SDHCI_INT_TIMEOUT)
->>> +			host->cmd->error = -ETIMEDOUT;
->>> +		else
->>> +			host->cmd->error = -EILSEQ;
->>> +
->>> +		sdhci_finish_command(host);
->>
->> Would it be possible to set SDHCI_INT_RESPONSE instead of calling
->> sdhci_finish_command() directly?
->>
-> 
-> It should be possible. But what we are trying to do won't be very clear
-> from the code. Ideally an interrupt handler should not set any interrupt
-> bits, just handle and clear them. Also, setting the RESPONSE bit even
-> when there has been no response seems wrong and makes the code more
-> convoluted.
+On Wed, 27 Mar 2019 at 10:05, Ludovic Barre <ludovic.Barre@st.com> wrote:
+>
+> From: Ludovic Barre <ludovic.barre@st.com>
+>
+> This patch series adds get_datactrl_cfg callback in mmci_host_ops
+> to allow to get datactrl configuration specific at variant.
+>
+> change V4:
+> -keep mmci and ux500v2 variant init in the c file.
+>
+> change V3:
+> -keep the common functions in mmci_start_data. define
+> function used by some variants like an helper
+> (example mmci_dctrl_blks used by mmci and sdmmc).
+> -To be consistent rename callback for ux500v2
+>
+> change V2:
+> -This V2 has been rebased on
+> "mmc: mmci: Cleanup some variant related code" series
+> -add helpers functions to define default datactrl value,
+> each variant could use these helpers to define datactrl
+> and adds their specific bits.
+> -use static in qcom and stm32
+> -regroup mmci_(ux500v2)variant_init in header file
+> to avoid checkpatch warning:
+> "WARNING: externs should be avoided in .c files"
+> -remove unused variant properties:
+>  "datactrl_dpsm_enable"
+>  "blksz_datactrl16"
+>  "blksz_datactrl4"
+>
+> Ludovic Barre (5):
+>   mmc: mmci: add get_datactrl_cfg callback and helper functions
+>   mmc: mmci: define get_dctrl_cfg for legacy variant
+>   mmc: mmci: qcom: define get_dctrl_cfg
+>   mmc: mmci: stm32: define get_dctrl_cfg
+>   mmc: mmci: replace blksz_datactrlXX by get_datactrl_cfg callback
+>
+>  drivers/mmc/host/mmci.c             | 56 +++++++++++++++++--------------------
+>  drivers/mmc/host/mmci.h             | 18 +++++++-----
+>  drivers/mmc/host/mmci_qcom_dml.c    |  6 ++++
+>  drivers/mmc/host/mmci_stm32_sdmmc.c | 18 ++++++++++++
+>  4 files changed, 61 insertions(+), 37 deletions(-)
+>
+> --
+> 2.7.4
+>
 
-Well, I am not in favour of exporting sdhci_finish_command().
-So I had a look and it is not obvious why you need to call it.
-What about something this:
+Applied for next, thanks!
 
-	if (omap_host->is_tuning && host->cmd && !host->data_early &&
-	    (intmask & CMD_ERR_MASK)) {
-
-		if (intmask & SDHCI_INT_TIMEOUT)
-			host->cmd->error = -ETIMEDOUT;
-		else
-			host->cmd->error = -EILSEQ;
-
-		host->cmd = NULL;
-
-		sdhci_writel(host, intmask & CMD_MASK, SDHCI_INT_STATUS);
-		intmask &= ~CMD_MASK;
-	}
+Kind regards
+Uffe
