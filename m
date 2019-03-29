@@ -1,112 +1,108 @@
 From: Faiz Abbas <faiz_abbas@ti.com>
-Subject: Re: [PATCH v4 2/2] mmc: sdhci-omap: Don't finish_mrq() on a command
- error during tuning
-Date: Fri, 29 Mar 2019 13:12:38 +0530
-Message-ID: <5a8d57ae-3417-95bc-6dcd-6ed0f1336288@ti.com>
-References: <20190326110057.7055-1-faiz_abbas@ti.com>
- <20190326110057.7055-3-faiz_abbas@ti.com>
- <508e9423-c1f9-f2cc-4aa9-2cc5b1cf40a8@intel.com>
- <05a2f5ef-1fee-15f4-6a9b-e3f3f3ee5a82@ti.com>
- <ee4c90b8-aed8-ba3b-3aea-9e4257771cfe@intel.com>
+Subject: [PATCH v5] mmc: sdhci-omap: Don't finish_mrq() on a command error during tuning
+Date: Fri, 29 Mar 2019 17:40:42 +0530
+Message-ID: <20190329121042.24415-1-faiz_abbas@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <ee4c90b8-aed8-ba3b-3aea-9e4257771cfe@intel.com>
-Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
-Cc: ulf.hansson@linaro.org, kishon@ti.com
+To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Cc: ulf.hansson@linaro.org, kishon@ti.com, adrian.hunter@intel.com, faiz_abbas@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Adrian,
+commit 5b0d62108b46 ("mmc: sdhci-omap: Add platform specific reset
+callback") skips data resets during tuning operation. Because of this,
+a data error or data finish interrupt might still arrive after a command
+error has been handled and the mrq ended. This ends up with a "mmc0: Got
+data interrupt 0x00000002 even though no data operation was in progress"
+error message.
 
-On 28/03/19 1:43 PM, Adrian Hunter wrote:
-> On 27/03/19 1:47 PM, Faiz Abbas wrote:
->> Hi Adrian,
->>
->> On 27/03/19 4:45 PM, Adrian Hunter wrote:
->>> On 26/03/19 1:00 PM, Faiz Abbas wrote:
->>>> commit 5b0d62108b46 ("mmc: sdhci-omap: Add platform specific reset
->>>> callback") skips data resets during tuning operation. Because of this,
->>>> a data error or data finish interrupt might still arrive after a command
->>>> error has been handled and the mrq ended. This ends up with a "mmc0: Got
->>>> data interrupt 0x00000002 even though no data operation was in progress"
->>>> error message.
->>>>
->>>> Fix this by adding a platform specific callback for sdhci_irq. Mark the
->>>> mrq as a failure but wait for a data interrupt instead of calling
->>>> finish_mrq().
->>>>
->>>> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
->>>> ---
->>>>  drivers/mmc/host/sdhci-omap.c | 37 +++++++++++++++++++++++++++++++++++
->>>>  1 file changed, 37 insertions(+)
->>>>
->>>> diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
->>>> index 5bbed477c9b1..9da2ff9ede8b 100644
->>>> --- a/drivers/mmc/host/sdhci-omap.c
->>>> +++ b/drivers/mmc/host/sdhci-omap.c
->>>> @@ -797,6 +797,42 @@ void sdhci_omap_reset(struct sdhci_host *host, u8 mask)
->>>>  	sdhci_reset(host, mask);
->>>>  }
->>>>  
->>>> +#define CMD_ERR_MASK (SDHCI_INT_CRC | SDHCI_INT_END_BIT | SDHCI_INT_INDEX |\
->>>> +		      SDHCI_INT_TIMEOUT)
->>>> +#define CMD_MASK (CMD_ERR_MASK | SDHCI_INT_RESPONSE)
->>>> +
->>>> +static irqreturn_t sdhci_omap_irq(struct sdhci_host *host, u32 intmask)
->>>> +{
->>>> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->>>> +	struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
->>>> +
->>>> +	if (omap_host->is_tuning && (intmask & CMD_ERR_MASK)) {
->>>> +
->>>> +		/*
->>>> +		 * Since we are not resetting data lines during tuning
->>>> +		 * operation, data error or data complete interrupts
->>>> +		 * might still arrive. Mark this request as a failure
->>>> +		 * but still wait for the data interrupt
->>>> +		 */
->>>> +		if (intmask & SDHCI_INT_TIMEOUT)
->>>> +			host->cmd->error = -ETIMEDOUT;
->>>> +		else
->>>> +			host->cmd->error = -EILSEQ;
->>>> +
->>>> +		sdhci_finish_command(host);
->>>
->>> Would it be possible to set SDHCI_INT_RESPONSE instead of calling
->>> sdhci_finish_command() directly?
->>>
->>
->> It should be possible. But what we are trying to do won't be very clear
->> from the code. Ideally an interrupt handler should not set any interrupt
->> bits, just handle and clear them. Also, setting the RESPONSE bit even
->> when there has been no response seems wrong and makes the code more
->> convoluted.
-> 
-> Well, I am not in favour of exporting sdhci_finish_command().
-> So I had a look and it is not obvious why you need to call it.
-> What about something this:
-> 
-> 	if (omap_host->is_tuning && host->cmd && !host->data_early &&
-> 	    (intmask & CMD_ERR_MASK)) {
-> 
-> 		if (intmask & SDHCI_INT_TIMEOUT)
-> 			host->cmd->error = -ETIMEDOUT;
-> 		else
-> 			host->cmd->error = -EILSEQ;
-> 
-> 		host->cmd = NULL;
-> 
-> 		sdhci_writel(host, intmask & CMD_MASK, SDHCI_INT_STATUS);
-> 		intmask &= ~CMD_MASK;
-> 	}
-> 
+Fix this by adding a platform specific callback for sdhci_irq. Mark the
+mrq as a failure but wait for a data interrupt instead of calling
+finish_mrq().
 
-Yeah. I guess host->cmd = NULL was the only thing that was being done
-sdhci_finish_command(). This works with 100 time boot tests for me. Will
-post next version.
+Fixes: 5b0d62108b46 ("mmc: sdhci-omap: Add platform specific reset
+callback")
+Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+---
+Tested with 100 times boot tests on dra71x-evm, dra72x-evm and
+dra7xx-evm.
 
-Thanks,
-Faiz
+v5:
+Drop patch 1 and replace call to sdhci_finish_command() with
+host->cmd = NULL
+
+v4:
+Fixed commit description for patch 1.
+Added SDHCI_INT_TIMEOUT to CMD_ERR_MASK in patch 2.
+
+v3:
+Removed the command error specific callback and using the already
+existing sdhci_irq callback instead. No measurable drop in performance.
+
+v2:
+Added EXPORT_SYMBOL_GPL for sdhci_cmd_err and sdhci_send_command to fix
+errors when built as module.
+
+ drivers/mmc/host/sdhci-omap.c | 38 +++++++++++++++++++++++++++++++++++
+ 1 file changed, 38 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+index 5bbed477c9b1..9f2af89ae9b5 100644
+--- a/drivers/mmc/host/sdhci-omap.c
++++ b/drivers/mmc/host/sdhci-omap.c
+@@ -797,6 +797,43 @@ void sdhci_omap_reset(struct sdhci_host *host, u8 mask)
+ 	sdhci_reset(host, mask);
+ }
+ 
++#define CMD_ERR_MASK (SDHCI_INT_CRC | SDHCI_INT_END_BIT | SDHCI_INT_INDEX |\
++		      SDHCI_INT_TIMEOUT)
++#define CMD_MASK (CMD_ERR_MASK | SDHCI_INT_RESPONSE)
++
++static irqreturn_t sdhci_omap_irq(struct sdhci_host *host, u32 intmask)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
++
++	if (omap_host->is_tuning && host->cmd && !host->data_early &&
++	    (intmask & CMD_ERR_MASK)) {
++
++		/*
++		 * Since we are not resetting data lines during tuning
++		 * operation, data error or data complete interrupts
++		 * might still arrive. Mark this request as a failure
++		 * but still wait for the data interrupt
++		 */
++		if (intmask & SDHCI_INT_TIMEOUT)
++			host->cmd->error = -ETIMEDOUT;
++		else
++			host->cmd->error = -EILSEQ;
++
++		host->cmd = NULL;
++
++		/*
++		 * Sometimes command error interrupts and command complete
++		 * interrupt will arrive together. Clear all command related
++		 * interrupts here.
++		 */
++		sdhci_writel(host, intmask & CMD_MASK, SDHCI_INT_STATUS);
++		intmask &= ~CMD_MASK;
++	}
++
++	return intmask;
++}
++
+ static struct sdhci_ops sdhci_omap_ops = {
+ 	.set_clock = sdhci_omap_set_clock,
+ 	.set_power = sdhci_omap_set_power,
+@@ -807,6 +844,7 @@ static struct sdhci_ops sdhci_omap_ops = {
+ 	.platform_send_init_74_clocks = sdhci_omap_init_74_clocks,
+ 	.reset = sdhci_omap_reset,
+ 	.set_uhs_signaling = sdhci_omap_set_uhs_signaling,
++	.irq = sdhci_omap_irq,
+ };
+ 
+ static int sdhci_omap_set_capabilities(struct sdhci_omap_host *omap_host)
+-- 
+2.19.2
