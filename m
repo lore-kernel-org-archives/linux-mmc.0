@@ -1,7 +1,7 @@
-From: Aaro Koskinen <aaro.koskinen-X3B1VOXEql0@public.gmane.org>
+From: Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>
 Subject: Re: Linux v5.0-rc7: bcm2835 MMC issues
-Date: Sat, 30 Mar 2019 16:53:00 +0200
-Message-ID: <20190330145300.GI16484@darkstar.musicnaut.iki.fi>
+Date: Sat, 30 Mar 2019 16:13:01 +0100 (CET)
+Message-ID: <1917947427.237135.1553958781997@email.ionos.de>
 References: <20190224150746.GC26495@darkstar.musicnaut.iki.fi>
  <155745885.93258.1551034990363@email.ionos.de>
  <20190226011509.GB31163@darkstar.musicnaut.iki.fi>
@@ -12,12 +12,12 @@ References: <20190224150746.GC26495@darkstar.musicnaut.iki.fi>
  <20190328225818.GE16484@darkstar.musicnaut.iki.fi>
  <20190329191926.GG16484@darkstar.musicnaut.iki.fi>
  <1632685811.158736.1553951733181@email.ionos.de>
+ <20190330145300.GI16484@darkstar.musicnaut.iki.fi>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1632685811.158736.1553951733181-uEpKuDZ350hmhno068Nerg@public.gmane.org>
+In-Reply-To: <20190330145300.GI16484-4/PLUo9XfK9owWHViPbQSXlKr5M7+etX9Sl0XMgJPXI@public.gmane.org>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rpi-kernel>,
  <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-rpi-kernel/>
@@ -27,67 +27,64 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rpi-kernel>,
  <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
 Sender: "linux-rpi-kernel" <linux-rpi-kernel-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Errors-To: linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>
+To: Aaro Koskinen <aaro.koskinen-X3B1VOXEql0@public.gmane.org>
 Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
-
-On Sat, Mar 30, 2019 at 02:15:33PM +0100, Stefan Wahren wrote:
-> > > [ 1164.390902] 
-> > > [ 1164.398302] ======================================================
-> > > [ 1164.416501] WARNING: possible circular locking dependency detected
-> > > [ 1164.434710] 5.1.0-rc2-rpi3-los_6ba38c+-00247-g9936328b41ce-dirty #1 Not tainted
-> > > [ 1164.454495] ------------------------------------------------------
-> > > [ 1164.472908] cc1plus/30873 is trying to acquire lock:
-> > > [ 1164.489750] 0000000040a8ff57 (&mq->complete_lock){+.+.}, at: mmc_blk_mq_complete_prev_req.part.12+0x3c/0x220
-> > > [ 1164.518548] 
-> > > [ 1164.518548] but task is already holding lock:
-> > > [ 1164.541662] 0000000059d7e9bb (fs_reclaim){+.+.}, at: fs_reclaim_acquire.part.19+0x0/0x40
-> > > [ 1164.567105] 
-> > > [ 1164.567105] which lock already depends on the new lock.
-> > > [ 1164.567105] 
-> > > [ 1164.595691] 
-> > > [ 1164.595691] the existing dependency chain (in reverse order) is:
-> > > [ 1164.616711] 
-> > > [ 1164.616711] -> #2 (fs_reclaim){+.+.}:
-> > > [ 1164.630507]        lock_acquire+0xe8/0x250
-> > > [ 1164.638922]        fs_reclaim_acquire.part.19+0x34/0x40
-> > > [ 1164.652170]        fs_reclaim_acquire+0x20/0x28
-> > > [ 1164.665139]        __kmalloc+0x50/0x390
-> > > [ 1164.673717]        bcm2835_dma_create_cb_chain+0x70/0x270
-> >
-> > I think the bug is that it's using GFP_KERNEL here.
-> 
-> Hm, i'm not sure about how to solve this properly. Can you try this,
-> because i wasn't able to reproduce this:
-
-Steps to reproduce:
-- Enable LOCKDEP (Kernel hacking -> Lock debugging -> prove locking correctness)
-- File system and swap on MMC
-- Disable watchdog if it's running
-- Create a process that eats all memory:
-
-  perl -e ' $x = "foo"; while (1) { $x .= $x } '
-
-The warning shows up almost instantly. Also beware, the system gets
-totally stuck in a while, so it seems the deadlock actually happens
-(if you enable CONFIG_DETECT_HUNG_TASK it shows MMC is stuck).
-
-> diff --git a/drivers/dma/bcm2835-dma.c b/drivers/dma/bcm2835-dma.c
-> index ec8a291..54093ff 100644
-> --- a/drivers/dma/bcm2835-dma.c
-> +++ b/drivers/dma/bcm2835-dma.c
-> @@ -671,7 +671,7 @@ static struct dma_async_tx_descriptor *bcm2835_dma_prep_slave_sg(
->         d = bcm2835_dma_create_cb_chain(chan, direction, false,
->                                         info, extra,
->                                         frames, src, dst, 0, 0,
-> -                                       GFP_KERNEL);
-> +                                       GFP_NOWAIT);
->         if (!d)
->                 return NULL;
-
-Yeah, that helps. I think bcm2835_dma_prep_dma_memcpy needs it as well,
-so bcm2835_dma_create_cb_chain could just always use GFP_NOWAIT. 
-
-A.
+Cj4gQWFybyBLb3NraW5lbiA8YWFyby5rb3NraW5lbkBpa2kuZmk+IGhhdCBhbSAzMC4gTcOkcnog
+MjAxOSB1bSAxNTo1MyBnZXNjaHJpZWJlbjoKPiAKPiAKPiBIaSwKPiAKPiBPbiBTYXQsIE1hciAz
+MCwgMjAxOSBhdCAwMjoxNTozM1BNICswMTAwLCBTdGVmYW4gV2FocmVuIHdyb3RlOgo+ID4gPiA+
+IFsgMTE2NC4zOTA5MDJdIAo+ID4gPiA+IFsgMTE2NC4zOTgzMDJdID09PT09PT09PT09PT09PT09
+PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQo+ID4gPiA+IFsgMTE2NC40MTY1
+MDFdIFdBUk5JTkc6IHBvc3NpYmxlIGNpcmN1bGFyIGxvY2tpbmcgZGVwZW5kZW5jeSBkZXRlY3Rl
+ZAo+ID4gPiA+IFsgMTE2NC40MzQ3MTBdIDUuMS4wLXJjMi1ycGkzLWxvc182YmEzOGMrLTAwMjQ3
+LWc5OTM2MzI4YjQxY2UtZGlydHkgIzEgTm90IHRhaW50ZWQKPiA+ID4gPiBbIDExNjQuNDU0NDk1
+XSAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0K
+PiA+ID4gPiBbIDExNjQuNDcyOTA4XSBjYzFwbHVzLzMwODczIGlzIHRyeWluZyB0byBhY3F1aXJl
+IGxvY2s6Cj4gPiA+ID4gWyAxMTY0LjQ4OTc1MF0gMDAwMDAwMDA0MGE4ZmY1NyAoJm1xLT5jb21w
+bGV0ZV9sb2NrKXsrLisufSwgYXQ6IG1tY19ibGtfbXFfY29tcGxldGVfcHJldl9yZXEucGFydC4x
+MisweDNjLzB4MjIwCj4gPiA+ID4gWyAxMTY0LjUxODU0OF0gCj4gPiA+ID4gWyAxMTY0LjUxODU0
+OF0gYnV0IHRhc2sgaXMgYWxyZWFkeSBob2xkaW5nIGxvY2s6Cj4gPiA+ID4gWyAxMTY0LjU0MTY2
+Ml0gMDAwMDAwMDA1OWQ3ZTliYiAoZnNfcmVjbGFpbSl7Ky4rLn0sIGF0OiBmc19yZWNsYWltX2Fj
+cXVpcmUucGFydC4xOSsweDAvMHg0MAo+ID4gPiA+IFsgMTE2NC41NjcxMDVdIAo+ID4gPiA+IFsg
+MTE2NC41NjcxMDVdIHdoaWNoIGxvY2sgYWxyZWFkeSBkZXBlbmRzIG9uIHRoZSBuZXcgbG9jay4K
+PiA+ID4gPiBbIDExNjQuNTY3MTA1XSAKPiA+ID4gPiBbIDExNjQuNTk1NjkxXSAKPiA+ID4gPiBb
+IDExNjQuNTk1NjkxXSB0aGUgZXhpc3RpbmcgZGVwZW5kZW5jeSBjaGFpbiAoaW4gcmV2ZXJzZSBv
+cmRlcikgaXM6Cj4gPiA+ID4gWyAxMTY0LjYxNjcxMV0gCj4gPiA+ID4gWyAxMTY0LjYxNjcxMV0g
+LT4gIzIgKGZzX3JlY2xhaW0peysuKy59Ogo+ID4gPiA+IFsgMTE2NC42MzA1MDddICAgICAgICBs
+b2NrX2FjcXVpcmUrMHhlOC8weDI1MAo+ID4gPiA+IFsgMTE2NC42Mzg5MjJdICAgICAgICBmc19y
+ZWNsYWltX2FjcXVpcmUucGFydC4xOSsweDM0LzB4NDAKPiA+ID4gPiBbIDExNjQuNjUyMTcwXSAg
+ICAgICAgZnNfcmVjbGFpbV9hY3F1aXJlKzB4MjAvMHgyOAo+ID4gPiA+IFsgMTE2NC42NjUxMzld
+ICAgICAgICBfX2ttYWxsb2MrMHg1MC8weDM5MAo+ID4gPiA+IFsgMTE2NC42NzM3MTddICAgICAg
+ICBiY20yODM1X2RtYV9jcmVhdGVfY2JfY2hhaW4rMHg3MC8weDI3MAo+ID4gPgo+ID4gPiBJIHRo
+aW5rIHRoZSBidWcgaXMgdGhhdCBpdCdzIHVzaW5nIEdGUF9LRVJORUwgaGVyZS4KPiA+IAo+ID4g
+SG0sIGknbSBub3Qgc3VyZSBhYm91dCBob3cgdG8gc29sdmUgdGhpcyBwcm9wZXJseS4gQ2FuIHlv
+dSB0cnkgdGhpcywKPiA+IGJlY2F1c2UgaSB3YXNuJ3QgYWJsZSB0byByZXByb2R1Y2UgdGhpczoK
+PiAKPiBTdGVwcyB0byByZXByb2R1Y2U6Cj4gLSBFbmFibGUgTE9DS0RFUCAoS2VybmVsIGhhY2tp
+bmcgLT4gTG9jayBkZWJ1Z2dpbmcgLT4gcHJvdmUgbG9ja2luZyBjb3JyZWN0bmVzcykKClRoYW5r
+cyBmb3IgY2xhcmlmeWluZy4gVGhpcyBpcyBQUk9WRV9MT0NLSU5HLCBub3QganVzdCBERUJVR19M
+T0NLREVQLgoKPiAtIEZpbGUgc3lzdGVtIGFuZCBzd2FwIG9uIE1NQwo+IC0gRGlzYWJsZSB3YXRj
+aGRvZyBpZiBpdCdzIHJ1bm5pbmcKPiAtIENyZWF0ZSBhIHByb2Nlc3MgdGhhdCBlYXRzIGFsbCBt
+ZW1vcnk6Cj4gCj4gICBwZXJsIC1lICcgJHggPSAiZm9vIjsgd2hpbGUgKDEpIHsgJHggLj0gJHgg
+fSAnCj4gCj4gVGhlIHdhcm5pbmcgc2hvd3MgdXAgYWxtb3N0IGluc3RhbnRseS4gQWxzbyBiZXdh
+cmUsIHRoZSBzeXN0ZW0gZ2V0cwo+IHRvdGFsbHkgc3R1Y2sgaW4gYSB3aGlsZSwgc28gaXQgc2Vl
+bXMgdGhlIGRlYWRsb2NrIGFjdHVhbGx5IGhhcHBlbnMKPiAoaWYgeW91IGVuYWJsZSBDT05GSUdf
+REVURUNUX0hVTkdfVEFTSyBpdCBzaG93cyBNTUMgaXMgc3R1Y2spLgo+IAo+ID4gZGlmZiAtLWdp
+dCBhL2RyaXZlcnMvZG1hL2JjbTI4MzUtZG1hLmMgYi9kcml2ZXJzL2RtYS9iY20yODM1LWRtYS5j
+Cj4gPiBpbmRleCBlYzhhMjkxLi41NDA5M2ZmIDEwMDY0NAo+ID4gLS0tIGEvZHJpdmVycy9kbWEv
+YmNtMjgzNS1kbWEuYwo+ID4gKysrIGIvZHJpdmVycy9kbWEvYmNtMjgzNS1kbWEuYwo+ID4gQEAg
+LTY3MSw3ICs2NzEsNyBAQCBzdGF0aWMgc3RydWN0IGRtYV9hc3luY190eF9kZXNjcmlwdG9yICpi
+Y20yODM1X2RtYV9wcmVwX3NsYXZlX3NnKAo+ID4gICAgICAgICBkID0gYmNtMjgzNV9kbWFfY3Jl
+YXRlX2NiX2NoYWluKGNoYW4sIGRpcmVjdGlvbiwgZmFsc2UsCj4gPiAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgaW5mbywgZXh0cmEsCj4gPiAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgZnJhbWVzLCBzcmMsIGRzdCwgMCwgMCwKPiA+IC0gICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBHRlBfS0VSTkVMKTsKPiA+ICsgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBHRlBfTk9XQUlUKTsKPiA+ICAgICAg
+ICAgaWYgKCFkKQo+ID4gICAgICAgICAgICAgICAgIHJldHVybiBOVUxMOwo+IAo+IFllYWgsIHRo
+YXQgaGVscHMuIEkgdGhpbmsgYmNtMjgzNV9kbWFfcHJlcF9kbWFfbWVtY3B5IG5lZWRzIGl0IGFz
+IHdlbGwsCj4gc28gYmNtMjgzNV9kbWFfY3JlYXRlX2NiX2NoYWluIGNvdWxkIGp1c3QgYWx3YXlz
+IHVzZSBHRlBfTk9XQUlULiAKCkFzIGxvbmcgdGhlcmUgaXMgbm8gaXNzdWUsIGkgd291bGQga2Vl
+cCBpdC4KCj4gCj4gQS4KCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fCmxpbnV4LXJwaS1rZXJuZWwgbWFpbGluZyBsaXN0CmxpbnV4LXJwaS1rZXJuZWxAbGlz
+dHMuaW5mcmFkZWFkLm9yZwpodHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9tYWlsbWFuL2xpc3Rp
+bmZvL2xpbnV4LXJwaS1rZXJuZWwK
