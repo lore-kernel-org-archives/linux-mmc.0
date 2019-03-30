@@ -1,13 +1,13 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.0 16/67] mmc: davinci: remove extraneous __init annotation
-Date: Fri, 29 Mar 2019 20:49:56 -0400
-Message-ID: <20190330005047.25998-16-sashal@kernel.org>
-References: <20190330005047.25998-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 15/52] mmc: davinci: remove extraneous __init annotation
+Date: Fri, 29 Mar 2019 20:52:22 -0400
+Message-ID: <20190330005301.26868-15-sashal@kernel.org>
+References: <20190330005301.26868-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20190330005047.25998-1-sashal@kernel.org>
-Sender: stable-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190330005301.26868-1-sashal@kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Arnd Bergmann <arnd@arndb.de>, Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
