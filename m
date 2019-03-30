@@ -1,61 +1,95 @@
-From: kbuild test robot <lkp@intel.com>
-Subject: Re: [PATCH v5] mmc: sdhci-omap: Don't finish_mrq() on a command
- error during tuning
-Date: Sat, 30 Mar 2019 13:53:17 +0800
-Message-ID: <201903301321.kfK13ZG5%lkp@intel.com>
-References: <20190329121042.24415-1-faiz_abbas@ti.com>
+From: Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>
+Subject: Re: Linux v5.0-rc7: bcm2835 MMC issues
+Date: Sat, 30 Mar 2019 14:15:33 +0100 (CET)
+Message-ID: <1632685811.158736.1553951733181@email.ionos.de>
+References: <20190224150746.GC26495@darkstar.musicnaut.iki.fi>
+ <155745885.93258.1551034990363@email.ionos.de>
+ <20190226011509.GB31163@darkstar.musicnaut.iki.fi>
+ <06528ceb-ff1d-626b-f520-477b0ea49d6f@i2se.com>
+ <20190227185101.GA28051@darkstar.musicnaut.iki.fi>
+ <1685719010.348465.1552129077871@email.ionos.de>
+ <20190310005131.GF30189@darkstar.musicnaut.iki.fi>
+ <20190328225818.GE16484@darkstar.musicnaut.iki.fi>
+ <20190329191926.GG16484@darkstar.musicnaut.iki.fi>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20190329121042.24415-1-faiz_abbas@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-Cc: kbuild-all@01.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, ulf.hansson@linaro.org, kishon@ti.com, adrian.hunter@intel.com, faiz_abbas@ti.com
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <20190329191926.GG16484-4/PLUo9XfK9owWHViPbQSXlKr5M7+etX9Sl0XMgJPXI@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rpi-kernel>,
+ <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rpi-kernel/>
+List-Post: <mailto:linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rpi-kernel>,
+ <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "linux-rpi-kernel" <linux-rpi-kernel-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Aaro Koskinen <aaro.koskinen-X3B1VOXEql0@public.gmane.org>
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Faiz,
-
-Thank you for the patch! Perhaps something to improve:
-
-[auto build test WARNING on ulf.hansson-mmc/next]
-[also build test WARNING on v5.1-rc2 next-20190329]
-[if your patch is applied to the wrong git tree, please drop us a note to help improve the system]
-
-url:    https://github.com/0day-ci/linux/commits/Faiz-Abbas/mmc-sdhci-omap-Don-t-finish_mrq-on-a-command-error-during-tuning/20190330-093057
-base:   git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git next
-reproduce:
-        # apt-get install sparse
-        make ARCH=x86_64 allmodconfig
-        make C=1 CF='-fdiagnostic-prefix -D__CHECK_ENDIAN__'
-
-
-sparse warnings: (new ones prefixed by >>)
-
-   drivers/mmc/host/sdhci-omap.c:386:31: sparse: expression using sizeof(void)
-   drivers/mmc/host/sdhci-omap.c:386:31: sparse: expression using sizeof(void)
->> drivers/mmc/host/sdhci-omap.c:847:16: sparse: incorrect type in initializer (different signedness) @@    expected unsigned int ( *irq )( ... ) @@    got int enunsigned int ( *irq )( ... ) @@
-   drivers/mmc/host/sdhci-omap.c:847:16:    expected unsigned int ( *irq )( ... )
-   drivers/mmc/host/sdhci-omap.c:847:16:    got int enum irqreturn ( *<noident> )( ... )
-   include/linux/device.h:688:13: sparse: undefined identifier '__builtin_mul_overflow'
-   include/linux/device.h:688:13: sparse: call with no type!
-
-vim +847 drivers/mmc/host/sdhci-omap.c
-
-   836	
-   837	static struct sdhci_ops sdhci_omap_ops = {
-   838		.set_clock = sdhci_omap_set_clock,
-   839		.set_power = sdhci_omap_set_power,
-   840		.enable_dma = sdhci_omap_enable_dma,
-   841		.get_max_clock = sdhci_pltfm_clk_get_max_clock,
-   842		.get_min_clock = sdhci_omap_get_min_clock,
-   843		.set_bus_width = sdhci_omap_set_bus_width,
-   844		.platform_send_init_74_clocks = sdhci_omap_init_74_clocks,
-   845		.reset = sdhci_omap_reset,
-   846		.set_uhs_signaling = sdhci_omap_set_uhs_signaling,
- > 847		.irq = sdhci_omap_irq,
-   848	};
-   849	
-
----
-0-DAY kernel test infrastructure                Open Source Technology Center
-https://lists.01.org/pipermail/kbuild-all                   Intel Corporation
+Cj4gQWFybyBLb3NraW5lbiA8YWFyby5rb3NraW5lbkBpa2kuZmk+IGhhdCBhbSAyOS4gTcOkcnog
+MjAxOSB1bSAyMDoxOSBnZXNjaHJpZWJlbjoKPiAKPiAKPiBIaSwKPiAKPiBPbiBGcmksIE1hciAy
+OSwgMjAxOSBhdCAxMjo1ODoxOEFNICswMjAwLCBBYXJvIEtvc2tpbmVuIHdyb3RlOgo+ID4gT24g
+U3VuLCBNYXIgMTAsIDIwMTkgYXQgMDI6NTE6MzFBTSArMDIwMCwgQWFybyBLb3NraW5lbiB3cm90
+ZToKPiA+ID4gT24gU2F0LCBNYXIgMDksIDIwMTkgYXQgMTE6NTc6NTdBTSArMDEwMCwgU3RlZmFu
+IFdhaHJlbiB3cm90ZToKPiA+ID4gPiA+IEFhcm8gS29za2luZW4gPGFhcm8ua29za2luZW5AaWtp
+LmZpPiBoYXQgYW0gMjcuIEZlYnJ1YXIgMjAxOSB1bSAxOTo1MSBnZXNjaHJpZWJlbjoKPiA+ID4g
+PiA+IE9uIFR1ZSwgRmViIDI2LCAyMDE5IGF0IDA5OjMxOjE0QU0gKzAxMDAsIFN0ZWZhbiBXYWhy
+ZW4gd3JvdGU6Cj4gPiA+ID4gPiA+IGl0IHdpbGwgdGFrZSBzb21lIHRpbWUgZm9yIHRvIHNldHVw
+IHRoaXMgdGVzdCBzY2VuYXJpby4gQ291bGQgeW91IHBsZWFzZQo+ID4gPiA+ID4gPiBkbyBtZSBh
+IGZhdm9yIGFuZCB0ZXN0IDQuMjAuMTIgd2hpY2ggaGFzIHNvbWUgYmFja3BvcnRzIG9mIHJlY2Vu
+dCBtbWMgLwo+ID4gPiA+ID4gPiBETUEgZml4ZXMuCj4gPiA+ID4gPiAKPiA+ID4gPiA+IEJvdGgg
+NC4yMCBhbmQgNC4yMC4xMiB3b3JrIGZpbmUuIE9ubHkgNS4wLXJjIGZhaWxzIHJlbGlhYmx5Lgo+
+ID4gPiA+IAo+ID4gPiA+IEkgdHJpZWQgdG8gcmVwcm9kdWNlIHRoZSBpc3N1ZSBieSBjb21waWxp
+bmcgZ2NjIGFuZCB1c2luZyBzdHJlc3Mgb24KPiA+ID4gPiBSYXNwYmVycnkgUGkgMyAoYXJtNjQv
+ZGVmY29uZmlnKSB3aXRoIEFyY2ggTGludXggQVJNIHdpdGhvdXQgYW55IGx1Y2suCj4gPiA+ID4g
+Cj4gPiA+ID4gV2VyZSB5b3UgYWJsZSB0byByZXByb2R1Y2UgdGhlIGlzc3VlIHVzaW5nIHN0cmVz
+cz8KPiA+ID4gCj4gPiA+IE5vLCBub3QgeWV0LiBJJ2xsIGxldCB5b3Uga25vdyBpZiBJJ20gYWJs
+ZSB0byBjb21lIHVwIHdpdGggYSBtb3JlIHJlbGlhYmxlCj4gPiA+IHJlcHJvZHVjZXIuCj4gPiAK
+PiA+IEkgdHJpZWQgR0NDIGJvb3RzdHJhcCBhZ2FpbiB3aXRoIDUuMS1yYzIgYW5kIExPQ0tERVAg
+ZW5hYmxlZCwgYW5kIGdldAo+ID4gdGhlIGJlbG93IHdhcm5pbmcuIE1pZ2h0IHNvbWUgZGlmZmVy
+ZW50IHVucmVsYXRlZCBpc3N1ZSwgaG93ZXZlci4KPiAKPiBTbyB3aXRoIDUuMS1yYzIsIHRoZSBH
+Q0MgYm9vdHN0cmFwICYgdGVzdHN1aXRlIHdlbnQgZmluZSAoc29tZSAyMCBob3VycykKPiB3aXRo
+b3V0IGFueSBNTUMgdGltZW91dCBlcnJvcnMgb3IgbG9ja3Vwcy4gQWxzbyBJIHRoaW5rIHRoZSBi
+ZWxvdyBtYXkKPiBiZSB0aGUgY2F1c2Ugb2YgdGhlIGVhcmxpZXIgcHJvYmxlbXMgSSBoYWQ6Cj4g
+Cj4gPiBbIDExNjQuMzkwOTAyXSAKPiA+IFsgMTE2NC4zOTgzMDJdID09PT09PT09PT09PT09PT09
+PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQo+ID4gWyAxMTY0LjQxNjUwMV0g
+V0FSTklORzogcG9zc2libGUgY2lyY3VsYXIgbG9ja2luZyBkZXBlbmRlbmN5IGRldGVjdGVkCj4g
+PiBbIDExNjQuNDM0NzEwXSA1LjEuMC1yYzItcnBpMy1sb3NfNmJhMzhjKy0wMDI0Ny1nOTkzNjMy
+OGI0MWNlLWRpcnR5ICMxIE5vdCB0YWludGVkCj4gPiBbIDExNjQuNDU0NDk1XSAtLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KPiA+IFsgMTE2NC40
+NzI5MDhdIGNjMXBsdXMvMzA4NzMgaXMgdHJ5aW5nIHRvIGFjcXVpcmUgbG9jazoKPiA+IFsgMTE2
+NC40ODk3NTBdIDAwMDAwMDAwNDBhOGZmNTcgKCZtcS0+Y29tcGxldGVfbG9jayl7Ky4rLn0sIGF0
+OiBtbWNfYmxrX21xX2NvbXBsZXRlX3ByZXZfcmVxLnBhcnQuMTIrMHgzYy8weDIyMAo+ID4gWyAx
+MTY0LjUxODU0OF0gCj4gPiBbIDExNjQuNTE4NTQ4XSBidXQgdGFzayBpcyBhbHJlYWR5IGhvbGRp
+bmcgbG9jazoKPiA+IFsgMTE2NC41NDE2NjJdIDAwMDAwMDAwNTlkN2U5YmIgKGZzX3JlY2xhaW0p
+eysuKy59LCBhdDogZnNfcmVjbGFpbV9hY3F1aXJlLnBhcnQuMTkrMHgwLzB4NDAKPiA+IFsgMTE2
+NC41NjcxMDVdIAo+ID4gWyAxMTY0LjU2NzEwNV0gd2hpY2ggbG9jayBhbHJlYWR5IGRlcGVuZHMg
+b24gdGhlIG5ldyBsb2NrLgo+ID4gWyAxMTY0LjU2NzEwNV0gCj4gPiBbIDExNjQuNTk1NjkxXSAK
+PiA+IFsgMTE2NC41OTU2OTFdIHRoZSBleGlzdGluZyBkZXBlbmRlbmN5IGNoYWluIChpbiByZXZl
+cnNlIG9yZGVyKSBpczoKPiA+IFsgMTE2NC42MTY3MTFdIAo+ID4gWyAxMTY0LjYxNjcxMV0gLT4g
+IzIgKGZzX3JlY2xhaW0peysuKy59Ogo+ID4gWyAxMTY0LjYzMDUwN10gICAgICAgIGxvY2tfYWNx
+dWlyZSsweGU4LzB4MjUwCj4gPiBbIDExNjQuNjM4OTIyXSAgICAgICAgZnNfcmVjbGFpbV9hY3F1
+aXJlLnBhcnQuMTkrMHgzNC8weDQwCj4gPiBbIDExNjQuNjUyMTcwXSAgICAgICAgZnNfcmVjbGFp
+bV9hY3F1aXJlKzB4MjAvMHgyOAo+ID4gWyAxMTY0LjY2NTEzOV0gICAgICAgIF9fa21hbGxvYysw
+eDUwLzB4MzkwCj4gPiBbIDExNjQuNjczNzE3XSAgICAgICAgYmNtMjgzNV9kbWFfY3JlYXRlX2Ni
+X2NoYWluKzB4NzAvMHgyNzAKPiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKPiBJ
+IHRoaW5rIHRoZSBidWcgaXMgdGhhdCBpdCdzIHVzaW5nIEdGUF9LRVJORUwgaGVyZS4KCkhtLCBp
+J20gbm90IHN1cmUgYWJvdXQgaG93IHRvIHNvbHZlIHRoaXMgcHJvcGVybHkuIENhbiB5b3UgdHJ5
+IHRoaXMsIGJlY2F1c2UgaSB3YXNuJ3QgYWJsZSB0byByZXByb2R1Y2UgdGhpczoKCmRpZmYgLS1n
+aXQgYS9kcml2ZXJzL2RtYS9iY20yODM1LWRtYS5jIGIvZHJpdmVycy9kbWEvYmNtMjgzNS1kbWEu
+YwppbmRleCBlYzhhMjkxLi41NDA5M2ZmIDEwMDY0NAotLS0gYS9kcml2ZXJzL2RtYS9iY20yODM1
+LWRtYS5jCisrKyBiL2RyaXZlcnMvZG1hL2JjbTI4MzUtZG1hLmMKQEAgLTY3MSw3ICs2NzEsNyBA
+QCBzdGF0aWMgc3RydWN0IGRtYV9hc3luY190eF9kZXNjcmlwdG9yICpiY20yODM1X2RtYV9wcmVw
+X3NsYXZlX3NnKAogICAgICAgIGQgPSBiY20yODM1X2RtYV9jcmVhdGVfY2JfY2hhaW4oY2hhbiwg
+ZGlyZWN0aW9uLCBmYWxzZSwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+IGluZm8sIGV4dHJhLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZnJh
+bWVzLCBzcmMsIGRzdCwgMCwgMCwKLSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgIEdGUF9LRVJORUwpOworICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+R0ZQX05PV0FJVCk7CiAgICAgICAgaWYgKCFkKQogICAgICAgICAgICAgICAgcmV0dXJuIE5VTEw7
+CgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpsaW51eC1y
+cGkta2VybmVsIG1haWxpbmcgbGlzdApsaW51eC1ycGkta2VybmVsQGxpc3RzLmluZnJhZGVhZC5v
+cmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1ycGkt
+a2VybmVsCg==
