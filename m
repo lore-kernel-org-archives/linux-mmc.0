@@ -1,13 +1,13 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 3.18 06/15] mmc: davinci: remove extraneous __init annotation
-Date: Fri, 29 Mar 2019 20:57:21 -0400
-Message-ID: <20190330005730.28777-6-sashal@kernel.org>
-References: <20190330005730.28777-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.4 07/21] mmc: davinci: remove extraneous __init annotation
+Date: Fri, 29 Mar 2019 20:56:35 -0400
+Message-ID: <20190330005649.28475-7-sashal@kernel.org>
+References: <20190330005649.28475-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20190330005730.28777-1-sashal@kernel.org>
-Sender: stable-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190330005649.28475-1-sashal@kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Arnd Bergmann <arnd@arndb.de>, Ulf Hansson <ulf.hansson@linaro.org>, Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -34,7 +34,7 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
-index 5d4c5e0fba2f..7e154a8213e2 100644
+index ea2a2ebc6b91..dba7565571a5 100644
 --- a/drivers/mmc/host/davinci_mmc.c
 +++ b/drivers/mmc/host/davinci_mmc.c
 @@ -1147,7 +1147,7 @@ static inline void mmc_davinci_cpufreq_deregister(struct mmc_davinci_host *host)
