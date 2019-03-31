@@ -1,52 +1,87 @@
-From: Stefan Wahren <stefan.wahren@i2se.com>
-Subject: Re: [PATCH V2 0/7] mmc: Several fixes for bcm2835 driver
-Date: Sat, 30 Mar 2019 16:15:14 +0100 (CET)
-Message-ID: <1920951985.237156.1553958914902@email.ionos.de>
-References: <1541967839-2847-1-git-send-email-stefan.wahren@i2se.com>
- <20190321210307.58e33ea4@kitsune.suse.cz>
- <1ff03f96-2575-f65e-c96e-6dc52de00c3a@i2se.com>
- <20190322170643.2e56d220@naga.suse.cz>
- <1210065308.73665.1553274611385@email.ionos.de>
- <20190328214351.358e615a@kitsune.suse.cz>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH v1 1/2] dt-bindings: mmc: sdhci-fujitsu.txt: add
+ miilbeaut driver
+Date: Sun, 31 Mar 2019 01:42:01 -0500
+Message-ID: <5ca0613a.1c69fb81.6e7bf.859e@mx.google.com>
+References: <1553579617-6139-1-git-send-email-orito.takao@socionext.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20190328214351.358e615a@kitsune.suse.cz>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: =?UTF-8?Q?Michal_Such=C3=A1nek?= <msuchanek@suse.de>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Florian Fainelli <f.fainelli@gmail.com>, Phil Elwell <phil@raspberrypi.org>, linux-mmc@vger.kernel.org, Eric Anholt <eric@anholt.net>, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1553579617-6139-1-git-send-email-orito.takao@socionext.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Takao Orito <orito.takao@socionext.com>
+Cc: ulf.hansson@linaro.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, masami.hiramatsu@linaro.org, jaswinder.singh@linaro.org, sugaya.taichi@socionext.com, kasai.kazuhiro@socionext.com, kanematsu.shinji@socionext.com
 List-Id: linux-mmc@vger.kernel.org
 
-SGkgTWljaGFsLAoKPiBNaWNoYWwgU3VjaMOhbmVrIDxtc3VjaGFuZWtAc3VzZS5kZT4gaGF0IGFt
-IDI4LiBNw6RyeiAyMDE5IHVtIDIxOjQzIGdlc2NocmllYmVuOgo+IAo+IAo+IE9uIEZyaSwgMjIg
-TWFyIDIwMTkgMTg6MTA6MTEgKzAxMDAgKENFVCkKPiBTdGVmYW4gV2FocmVuIDxzdGVmYW4ud2Fo
-cmVuQGkyc2UuY29tPiB3cm90ZToKPiAKPiA+IEhpIE1pY2hhbCwKPiA+IAo+ID4gPiBNaWNoYWwg
-U3VjaMOhbmVrIDxtc3VjaGFuZWtAc3VzZS5kZT4gaGF0IGFtIDIyLiBNw6RyeiAyMDE5IHVtIDE3
-OjA2IGdlc2NocmllYmVuOgo+ID4gPiAKPiA+ID4gCj4gPiA+IE9uIEZyaSwgMjIgTWFyIDIwMTkg
-MTU6NDU6MTMgKzAxMDAKPiA+ID4gU3RlZmFuIFdhaHJlbiA8c3RlZmFuLndhaHJlbkBpMnNlLmNv
-bT4gd3JvdGU6Cj4gPiA+ICAgCj4gPiA+ID4gSGkgTWljaGFsLAo+ID4gPiA+IAo+ID4gPiA+IEFt
-IDIxLjAzLjE5IHVtIDIxOjAzIHNjaHJpZWIgTWljaGFsIFN1Y2jDoW5lazoKPiA+ID4gPiAKPiA+
-ID4gPiBjb3VsZCB5b3UgcGxlYXNlIHJldHJ5IHdpdGggbWFpbmxpbmUga2VybmVsIDUuMD8gIAo+
-ID4gPiAKPiA+ID4gSSBjYW4gdHJ5IHRoYXQuIFdoYXQgSSBoYXZlIGlzIHByZXR0eSBtdWNoIDUu
-MCBhbnl3YXkgc28gSSBkb24ndCBleHBlY3QKPiA+ID4gbXVjaCBkaWZmZXJlbmNlOgo+ID4gPiAg
-IAo+ID4gCj4gPiBhcyBsb25nIGFzIHRoZSBpc3N1ZSBsaWVzIGluIHRoZSBzZGhvc3QgZHJpdmVy
-IGNvZGUuIFRoZXJlIGFsc28gaGFzIGJlZW4gYSBsb3Qgb2YgZml4ZXMgYnkgTHVrYXMgV3VubmVy
-IHRvIHRoZSBETUEgZW5naW5lIGRyaXZlci4gSSBwcmVmZXIgYSB3ZWxsIGRlZmluZWQgc291cmNl
-IGJhc2UuCj4gPiAKPiA+ID4gCj4gPiA+IEkgc3VzcGVjdCB0aGF0IG9uZSBvZiB0aGUgbG9ja2lu
-ZyBmaXhlcyB0aGF0IHdlbnQgaW50byBtYWlubGluZQo+ID4gPiByZWNlbnRseSBwcmV2ZW50cyBy
-ZWNvdmVyaW5nIGZyb20gdGhlIGVycm9yIGJ1dCBJIGRpZCBub3QgdHJ5Cj4gPiA+IHJldmVydGlu
-ZyB0aGVtIHlldC4gIAo+ID4gCgpjb3VsZCB5b3UgcGxlYXNlIHRyeSB0aGlzIHBhdGNoOgoKaHR0
-cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvcGlwZXJtYWlsL2xpbnV4LXJwaS1rZXJuZWwvMjAxOS1N
-YXJjaC8wMDg2MjcuaHRtbAoKU3RlZmFuCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fXwpsaW51eC1hcm0ta2VybmVsIG1haWxpbmcgbGlzdApsaW51eC1hcm0t
-a2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFp
-bG1hbi9saXN0aW5mby9saW51eC1hcm0ta2VybmVsCg==
+On Tue, Mar 26, 2019 at 02:53:37PM +0900, Takao Orito wrote:
+> Add new compatible description for Milbeaut SoC. Socionext
+> inherits F_SDH30 IP from Fujitsu. Then new Soc series "Milbeaut"
+> has F_SDH30 controller specified by "socionext,milbeaut-m10v-sdhci-3.0".
+
+Subject is wrong, you're not adding a driver.
+
+> 
+> Signed-off-by: Takao Orito <orito.takao@socionext.com>
+> ---
+>  .../devicetree/bindings/mmc/sdhci-fujitsu.txt      | 22 +++++++++++++++++++---
+>  1 file changed, 19 insertions(+), 3 deletions(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt b/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
+> index 3ee9263..405811f 100644
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
+> @@ -1,10 +1,10 @@
+> -* Fujitsu SDHCI controller
+> +* Fujitsu/Socionext SDHCI controller
+>  
+>  This file documents differences between the core properties in mmc.txt
+> -and the properties used by the sdhci_f_sdh30 driver.
+> +and the properties used by the sdhci_f_sdh30.
+>  
+>  Required properties:
+> -- compatible: "fujitsu,mb86s70-sdhci-3.0"
+> +- compatible: "fujitsu,mb86s70-sdhci-3.0", "socionext,milbeaut-m10v-sdhci-3.0"
+
+One per line please.
+
+>  - clocks: Must contain an entry for each entry in clock-names. It is a
+>    list of phandles and clock-specifier pairs.
+>    See ../clocks/clock-bindings.txt for details.
+> @@ -17,6 +17,8 @@ Optional properties:
+>    as the VCCQ/VDD_IO supply in the eMMC/SD specs.
+>  - fujitsu,cmd-dat-delay-select: boolean property indicating that this host
+>    requires the CMD_DAT_DELAY control to be enabled.
+> +- sni,mmc-power-gpio: set property indicating that power on or off needs
+> +  control of gpio. This is for only "socionext,milbeaut-m10v-sdhci-3.0".
+
+s/-gpio/-gpios/
+
+>  
+>  Example:
+>  
+> @@ -30,3 +32,17 @@ Example:
+>  		clocks = <&clock 2 2 0>, <&clock 2 3 0>;
+>  		clock-names = "iface", "core";
+>  	};
+> +
+> +Exsample2:
+> +	sdhci3: mmc@1b010000 {
+> +		compatible = "socionext,milbeaut-m10v-sdhci-3.0";
+> +		reg = <0x1b010000 0x10000>;
+> +		interrupts = <0 265 0x4>;
+> +		voltage-ranges = <3300 3300>;
+> +		bus-width = <4>;
+> +		clocks = <&uhs1clk2>, <&ahb_clk>;
+> +		clock-names = "core", "iface";
+> +		cap-sdio-irq;
+> +		sni,mmc-power-gpio = <&pinctrl 53 GPIO_ACTIVE_HIGH>;
+> +			   fujitsu,cmd-dat-delay-select;
+
+Indentation problem.
+
+> +	};
+> -- 
+> 1.9.1
+> 
+> 
