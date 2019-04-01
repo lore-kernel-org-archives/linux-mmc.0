@@ -1,87 +1,87 @@
-From: Faiz Abbas <faiz_abbas@ti.com>
-Subject: [PATCH v2] mmc: sdhci_am654: Clear HISPD_ENA in some lower speed modes
-Date: Mon, 1 Apr 2019 18:28:04 +0530
-Message-ID: <20190401125804.5665-1-faiz_abbas@ti.com>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: [PATCH 3.18 10/50] mmc: block: Allow more than 8 partitions per card
+Date: Mon,  1 Apr 2019 19:02:53 +0200
+Message-ID: <20190401170042.140216660@linuxfoundation.org>
+References: <20190401170041.257273804@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190401170041.257273804@linuxfoundation.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com, faiz_abbas@ti.com
+To: linux-kernel@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Ben Hutchings <ben@decadent.org.uk>, Chuanxiao Dong <chuanxiao.dong@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Austin S Hemmelgarn <ahferroin7@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Android Kernel Team <kernel-team@android.com>, linux-mmc@vger.kernel.org, Colin Cross <ccross@android.com>, John Stultz <john.stultz@linaro.org>, Sasha Levin <sashal@kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-According to the AM654x Data Manual[1], the setup timing in lower speed
-modes can only be met if the controller uses a falling edge data launch.
+3.18-stable review patch.  If anyone has any objections, please let me know.
 
-To ensure this, the HIGH_SPEED_ENA (HOST_CONTROL[2]) bit should be
-cleared in default speed, SD high speed, MMC high speed, SDR12 and SDR25
-speed modes.
+------------------
 
-Use the sdhci writeb callback to implement this condition.
+[ Upstream commit 382c55f88ffeb218c446bf0c46d0fc25d2795fe2 ]
 
-[1] http://www.ti.com/lit/gpn/am6546 Section 5.10.5.16.1
+It is quite common for Android devices to utilize more
+then 8 partitions on internal eMMC storage.
 
-Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+The vanilla kernel can support this via
+CONFIG_MMC_BLOCK_MINORS, however that solution caps the
+system to 256 minors total, which limits the number of
+mmc cards the system can support.
+
+This patch, which has been carried for quite awhile in
+the AOSP common tree, provides an alternative solution
+that doesn't seem to limit the total card count. So I
+wanted to submit it for consideration upstream.
+
+This patch sets the GENHD_FL_EXT_DEVT flag, which will
+allocate minor number in major 259 for partitions past
+disk->minors.
+
+It also removes the use of disk_devt to determine devidx
+from md->disk. md->disk->first_minor is always initialized
+from devidx and can always be used to recover it.
+
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ben Hutchings <ben@decadent.org.uk>
+Cc: Chuanxiao Dong <chuanxiao.dong@intel.com>
+Cc: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Austin S Hemmelgarn <ahferroin7@gmail.com>
+Cc: Arnd Bergmann <arnd@arndb.de>
+Cc: Android Kernel Team <kernel-team@android.com>
+Cc: linux-mmc@vger.kernel.org
+Signed-off-by: Colin Cross <ccross@android.com>
+[jstultz: Added context to commit message]
+Signed-off-by: John Stultz <john.stultz@linaro.org>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
+ drivers/mmc/card/block.c | 7 ++-----
+ 1 file changed, 2 insertions(+), 5 deletions(-)
 
-v2: Dropped QUIRK in favour of writeb callback
-
- drivers/mmc/host/Kconfig       |  1 +
- drivers/mmc/host/sdhci_am654.c | 22 ++++++++++++++++++++++
- 2 files changed, 23 insertions(+)
-
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 28fcd8f580a1..6379fba8b122 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -993,6 +993,7 @@ config MMC_SDHCI_OMAP
- config MMC_SDHCI_AM654
- 	tristate "Support for the SDHCI Controller in TI's AM654 SOCs"
- 	depends on MMC_SDHCI_PLTFM && OF
-+	select MMC_SDHCI_IO_ACCESSORS
- 	help
- 	  This selects the Secure Digital Host Controller Interface (SDHCI)
- 	  support present in TI's AM654 SOCs. The controller supports
-diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-index eea183e90f1b..a91c0b45c48d 100644
---- a/drivers/mmc/host/sdhci_am654.c
-+++ b/drivers/mmc/host/sdhci_am654.c
-@@ -158,6 +158,27 @@ static void sdhci_am654_set_power(struct sdhci_host *host, unsigned char mode,
- 	sdhci_set_power_noreg(host, mode, vdd);
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index dec6b0ec4def..8688ac7a45da 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -166,11 +166,7 @@ static struct mmc_blk_data *mmc_blk_get(struct gendisk *disk)
+ 
+ static inline int mmc_get_devidx(struct gendisk *disk)
+ {
+-	int devmaj = MAJOR(disk_devt(disk));
+-	int devidx = MINOR(disk_devt(disk)) / perdev_minors;
+-
+-	if (!devmaj)
+-		devidx = disk->first_minor / perdev_minors;
++	int devidx = disk->first_minor / perdev_minors;
+ 	return devidx;
  }
  
-+static void sdhci_am654_write_b(struct sdhci_host *host, u8 val, int reg)
-+{
-+	unsigned char timing = host->mmc->ios.timing;
-+
-+	if (reg == SDHCI_HOST_CONTROL) {
-+		switch (timing) {
-+		/*
-+		 * According to the data manual, HISPD bit
-+		 * should not be set in these speed modes.
-+		 */
-+		case MMC_TIMING_SD_HS:
-+		case MMC_TIMING_MMC_HS:
-+		case MMC_TIMING_UHS_SDR12:
-+		case MMC_TIMING_UHS_SDR25:
-+			val &= ~SDHCI_CTRL_HISPD;
-+		}
-+	}
-+
-+	writeb(val, host->ioaddr + reg);
-+}
-+
- static struct sdhci_ops sdhci_am654_ops = {
- 	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
- 	.get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
-@@ -165,6 +186,7 @@ static struct sdhci_ops sdhci_am654_ops = {
- 	.set_bus_width = sdhci_set_bus_width,
- 	.set_power = sdhci_am654_set_power,
- 	.set_clock = sdhci_am654_set_clock,
-+	.write_b = sdhci_am654_write_b,
- 	.reset = sdhci_reset,
- };
+@@ -2152,6 +2148,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 	md->disk->queue = md->queue.queue;
+ 	md->disk->driverfs_dev = parent;
+ 	set_disk_ro(md->disk, md->read_only || default_ro);
++	md->disk->flags = GENHD_FL_EXT_DEVT;
+ 	if (area_type & (MMC_BLK_DATA_AREA_RPMB | MMC_BLK_DATA_AREA_BOOT))
+ 		md->disk->flags |= GENHD_FL_NO_PART_SCAN;
  
 -- 
-2.19.2
+2.19.1
