@@ -1,51 +1,87 @@
 From: Faiz Abbas <faiz_abbas@ti.com>
-Subject: Re: [PATCH 1/2] mmc: sdhci: Add Quirk for enabling HISPD under
- special conditions
-Date: Mon, 1 Apr 2019 16:14:21 +0530
-Message-ID: <51104203-068b-a25c-299b-ac9a2f720680@ti.com>
-References: <20190329142202.15000-1-faiz_abbas@ti.com>
- <20190329142202.15000-2-faiz_abbas@ti.com>
- <f1417015-0e78-6df5-7917-a33e235fa1a9@intel.com>
- <350cd133-302f-4002-4b54-d95e7e5d3500@ti.com>
- <6d8f9b8c-dd5c-a091-7a82-10e5f6606b4e@intel.com>
+Subject: [PATCH v2] mmc: sdhci_am654: Clear HISPD_ENA in some lower speed modes
+Date: Mon, 1 Apr 2019 18:28:04 +0530
+Message-ID: <20190401125804.5665-1-faiz_abbas@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <6d8f9b8c-dd5c-a091-7a82-10e5f6606b4e@intel.com>
-Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org
+To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com, faiz_abbas@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Adrian,
+According to the AM654x Data Manual[1], the setup timing in lower speed
+modes can only be met if the controller uses a falling edge data launch.
 
-On 01/04/19 2:42 PM, Adrian Hunter wrote:
-> On 1/04/19 12:01 PM, Faiz Abbas wrote:
->> Hi Adrian,
->>
->> On 01/04/19 2:21 PM, Adrian Hunter wrote:
->>> On 29/03/19 4:22 PM, Faiz Abbas wrote:
->>>> Some controllers on TI devices requires the HISPD bit to be cleared
->>>> even in some high speed modes. Add a quirk that facilitates this
->>>> requirement.
->>>
->>> Could you use sdhci I/O accessors for this?
->>
->> Can you elaborate? Not sure how this would be solved with
->> CONFIG_MMC_SDHCI_IO_ACCESSORS.
-> 
-> In ->writeb()
-> 
-> if (reg == SDHCI_HOST_CONTROL) {
-> 	if (host->mmc->ios->timing == whatever)
-> 		val &= ~SDHCI_CTRL_HISPD;
-> }
-> 
-> writeb(val, host->ioaddr + reg);
+To ensure this, the HIGH_SPEED_ENA (HOST_CONTROL[2]) bit should be
+cleared in default speed, SD high speed, MMC high speed, SDR12 and SDR25
+speed modes.
 
-This is a really good idea. Will use it in v2. Thanks.
+Use the sdhci writeb callback to implement this condition.
 
-Regards,
-Faiz
+[1] http://www.ti.com/lit/gpn/am6546 Section 5.10.5.16.1
+
+Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+---
+
+v2: Dropped QUIRK in favour of writeb callback
+
+ drivers/mmc/host/Kconfig       |  1 +
+ drivers/mmc/host/sdhci_am654.c | 22 ++++++++++++++++++++++
+ 2 files changed, 23 insertions(+)
+
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 28fcd8f580a1..6379fba8b122 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -993,6 +993,7 @@ config MMC_SDHCI_OMAP
+ config MMC_SDHCI_AM654
+ 	tristate "Support for the SDHCI Controller in TI's AM654 SOCs"
+ 	depends on MMC_SDHCI_PLTFM && OF
++	select MMC_SDHCI_IO_ACCESSORS
+ 	help
+ 	  This selects the Secure Digital Host Controller Interface (SDHCI)
+ 	  support present in TI's AM654 SOCs. The controller supports
+diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+index eea183e90f1b..a91c0b45c48d 100644
+--- a/drivers/mmc/host/sdhci_am654.c
++++ b/drivers/mmc/host/sdhci_am654.c
+@@ -158,6 +158,27 @@ static void sdhci_am654_set_power(struct sdhci_host *host, unsigned char mode,
+ 	sdhci_set_power_noreg(host, mode, vdd);
+ }
+ 
++static void sdhci_am654_write_b(struct sdhci_host *host, u8 val, int reg)
++{
++	unsigned char timing = host->mmc->ios.timing;
++
++	if (reg == SDHCI_HOST_CONTROL) {
++		switch (timing) {
++		/*
++		 * According to the data manual, HISPD bit
++		 * should not be set in these speed modes.
++		 */
++		case MMC_TIMING_SD_HS:
++		case MMC_TIMING_MMC_HS:
++		case MMC_TIMING_UHS_SDR12:
++		case MMC_TIMING_UHS_SDR25:
++			val &= ~SDHCI_CTRL_HISPD;
++		}
++	}
++
++	writeb(val, host->ioaddr + reg);
++}
++
+ static struct sdhci_ops sdhci_am654_ops = {
+ 	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+ 	.get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
+@@ -165,6 +186,7 @@ static struct sdhci_ops sdhci_am654_ops = {
+ 	.set_bus_width = sdhci_set_bus_width,
+ 	.set_power = sdhci_am654_set_power,
+ 	.set_clock = sdhci_am654_set_clock,
++	.write_b = sdhci_am654_write_b,
+ 	.reset = sdhci_reset,
+ };
+ 
+-- 
+2.19.2
