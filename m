@@ -1,47 +1,87 @@
-From: Sowjanya Komatineni <skomatineni@nvidia.com>
-Subject: RE: [PATCH V3 05/10] arm64: tegra: fix default tap and trim values
-Date: Mon, 1 Apr 2019 17:42:58 +0000
-Message-ID: <BYAPR12MB339845B4C5A37468841E256AC2550@BYAPR12MB3398.namprd12.prod.outlook.com>
-References: <1552513552-23423-1-git-send-email-skomatineni@nvidia.com>
- <1552513552-23423-5-git-send-email-skomatineni@nvidia.com>
- <CAPDyKFq4ZVaMmvefuVqGs84E7xg5VgvU-Ecq1MYJdmBhuEm7xA@mail.gmail.com>
- <BYAPR12MB3398F91B190D9B1C56FDC4F7C2420@BYAPR12MB3398.namprd12.prod.outlook.com>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: [PATCH 4.4 041/131] mmc: block: Allow more than 8 partitions per card
+Date: Mon,  1 Apr 2019 19:01:51 +0200
+Message-ID: <20190401170055.758383574@linuxfoundation.org>
+References: <20190401170051.645954551@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <BYAPR12MB3398F91B190D9B1C56FDC4F7C2420@BYAPR12MB3398.namprd12.prod.outlook.com>
-Content-Language: en-US
+In-Reply-To: <20190401170051.645954551@linuxfoundation.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Harjani Ritesh <riteshh@codeaurora.org>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Aniruddha Tvs Rao <anrao@nvidia.com>, linux-tegra <linux-tegra@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, DTML <devicetree@vger.kernel.org>
+To: linux-kernel@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Ben Hutchings <ben@decadent.org.uk>, Chuanxiao Dong <chuanxiao.dong@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Austin S Hemmelgarn <ahferroin7@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Android Kernel Team <kernel-team@android.com>, linux-mmc@vger.kernel.org, Colin Cross <ccross@android.com>, John Stultz <john.stultz@linaro.org>, Sasha Levin <sashal@kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-PiA+ID4NCj4gPiA+IERlZmF1bHQgdGFwIGFuZCB0cmltIHZhbHVlcyBhcmUgaW5jb3JyZWN0IGZv
-ciBUZWdyYTE4NiBTRE1NQzQuDQo+ID4gPiBUaGlzIHBhdGNoIGZpeGVzIGl0Lg0KPiA+ID4NCj4g
-PiA+IFRlc3RlZC1ieTogSm9uIEh1bnRlciA8am9uYXRoYW5oQG52aWRpYS5jb20+DQo+ID4gPiBT
-aWduZWQtb2ZmLWJ5OiBTb3dqYW55YSBLb21hdGluZW5pIDxza29tYXRpbmVuaUBudmlkaWEuY29t
-Pg0KPiA+DQo+ID4gSXMgdGhpcyBhIGZpeCBhbmQvb3IgZm9yIHN0YWJsZT8NCj4gPg0KPiA+IElu
-IGVpdGhlciBjYXNlLCBJIGFtIGxlYXZpbmcgdGhpcyBmb3IgYXJtLXNvYy4NCj4gPg0KPiA+IEtp
-bmQgcmVnYXJkcw0KPiA+IFVmZmUNCj4gPg0KPg0KPiBUaGFua3MgVWZmZS4gWWVzIHRoaXMgaXMg
-YXBwbGljYWJsZSBmb3Igc3RhYmxlLg0KDQpJIGRvbuKAmXQgc2VlIGFueSBjb25maXJtYXRpb24g
-b2YgdGhpcyBiZWluZyBhcHBsaWVkIGJ5IGFybS1zb2MuDQpTbyB0aG91Z2h0IHRvIHJlLWNoZWNr
-IGlmIHRoaXMgaXMgYXBwbGllZD8NCg0KPiA+ID4gLS0tDQo+ID4gPiAgYXJjaC9hcm02NC9ib290
-L2R0cy9udmlkaWEvdGVncmExODYuZHRzaSB8IDQgKystLQ0KPiA+ID4gIDEgZmlsZSBjaGFuZ2Vk
-LCAyIGluc2VydGlvbnMoKyksIDIgZGVsZXRpb25zKC0pDQo+ID4gPg0KPiA+ID4gZGlmZiAtLWdp
-dCBhL2FyY2gvYXJtNjQvYm9vdC9kdHMvbnZpZGlhL3RlZ3JhMTg2LmR0c2kgDQo+ID4gPiBiL2Fy
-Y2gvYXJtNjQvYm9vdC9kdHMvbnZpZGlhL3RlZ3JhMTg2LmR0c2kNCj4gPiA+IGluZGV4IDk3YWVi
-OTQ2ZWQ1ZS4uNDcyZjU1ZmU5NDg4IDEwMDY0NA0KPiA+ID4gLS0tIGEvYXJjaC9hcm02NC9ib290
-L2R0cy9udmlkaWEvdGVncmExODYuZHRzaQ0KPiA+ID4gKysrIGIvYXJjaC9hcm02NC9ib290L2R0
-cy9udmlkaWEvdGVncmExODYuZHRzaQ0KPiA+ID4gQEAgLTMxNyw4ICszMTcsOCBAQA0KPiA+ID4g
-ICAgICAgICAgICAgICAgIG52aWRpYSxwYWQtYXV0b2NhbC1wdWxsLWRvd24tb2Zmc2V0LTF2OC10
-aW1lb3V0ID0gPDB4MGE+Ow0KPiA+ID4gICAgICAgICAgICAgICAgIG52aWRpYSxwYWQtYXV0b2Nh
-bC1wdWxsLXVwLW9mZnNldC0zdjMtdGltZW91dCA9IDwweDBhPjsNCj4gPiA+ICAgICAgICAgICAg
-ICAgICBudmlkaWEscGFkLWF1dG9jYWwtcHVsbC1kb3duLW9mZnNldC0zdjMtdGltZW91dCA9IDww
-eDBhPjsNCj4gPiA+IC0gICAgICAgICAgICAgICBudmlkaWEsZGVmYXVsdC10YXAgPSA8MHg1PjsN
-Cj4gPiA+IC0gICAgICAgICAgICAgICBudmlkaWEsZGVmYXVsdC10cmltID0gPDB4OT47DQo+ID4g
-PiArICAgICAgICAgICAgICAgbnZpZGlhLGRlZmF1bHQtdGFwID0gPDB4OT47DQo+ID4gPiArICAg
-ICAgICAgICAgICAgbnZpZGlhLGRlZmF1bHQtdHJpbSA9IDwweDU+Ow0KPiA+ID4gICAgICAgICAg
-ICAgICAgIG52aWRpYSxkcXMtdHJpbSA9IDw2Mz47DQo+ID4gPiAgICAgICAgICAgICAgICAgbW1j
-LWhzNDAwLTFfOHY7DQo+ID4gPiAgICAgICAgICAgICAgICAgc3RhdHVzID0gImRpc2FibGVkIjsN
-Cj4gPiA+IC0tDQo+ID4gPiAyLjcuNA0KPiA+ID4NCg==
+4.4-stable review patch.  If anyone has any objections, please let me know.
+
+------------------
+
+[ Upstream commit 382c55f88ffeb218c446bf0c46d0fc25d2795fe2 ]
+
+It is quite common for Android devices to utilize more
+then 8 partitions on internal eMMC storage.
+
+The vanilla kernel can support this via
+CONFIG_MMC_BLOCK_MINORS, however that solution caps the
+system to 256 minors total, which limits the number of
+mmc cards the system can support.
+
+This patch, which has been carried for quite awhile in
+the AOSP common tree, provides an alternative solution
+that doesn't seem to limit the total card count. So I
+wanted to submit it for consideration upstream.
+
+This patch sets the GENHD_FL_EXT_DEVT flag, which will
+allocate minor number in major 259 for partitions past
+disk->minors.
+
+It also removes the use of disk_devt to determine devidx
+from md->disk. md->disk->first_minor is always initialized
+from devidx and can always be used to recover it.
+
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ben Hutchings <ben@decadent.org.uk>
+Cc: Chuanxiao Dong <chuanxiao.dong@intel.com>
+Cc: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Austin S Hemmelgarn <ahferroin7@gmail.com>
+Cc: Arnd Bergmann <arnd@arndb.de>
+Cc: Android Kernel Team <kernel-team@android.com>
+Cc: linux-mmc@vger.kernel.org
+Signed-off-by: Colin Cross <ccross@android.com>
+[jstultz: Added context to commit message]
+Signed-off-by: John Stultz <john.stultz@linaro.org>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ drivers/mmc/card/block.c | 7 ++-----
+ 1 file changed, 2 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index f2b733275a0a..c15b879c3070 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -171,11 +171,7 @@ static struct mmc_blk_data *mmc_blk_get(struct gendisk *disk)
+ 
+ static inline int mmc_get_devidx(struct gendisk *disk)
+ {
+-	int devmaj = MAJOR(disk_devt(disk));
+-	int devidx = MINOR(disk_devt(disk)) / perdev_minors;
+-
+-	if (!devmaj)
+-		devidx = disk->first_minor / perdev_minors;
++	int devidx = disk->first_minor / perdev_minors;
+ 	return devidx;
+ }
+ 
+@@ -2252,6 +2248,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 	md->disk->queue = md->queue.queue;
+ 	md->disk->driverfs_dev = parent;
+ 	set_disk_ro(md->disk, md->read_only || default_ro);
++	md->disk->flags = GENHD_FL_EXT_DEVT;
+ 	if (area_type & (MMC_BLK_DATA_AREA_RPMB | MMC_BLK_DATA_AREA_BOOT))
+ 		md->disk->flags |= GENHD_FL_NO_PART_SCAN;
+ 
+-- 
+2.19.1
