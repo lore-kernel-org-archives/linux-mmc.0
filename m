@@ -1,70 +1,81 @@
-From: <orito.takao@socionext.com>
-Subject: Re: [PATCH v1 1/2] dt-bindings: mmc: sdhci-fujitsu.txt: add miilbeaut
- driver
-Date: Tue, 2 Apr 2019 02:05:46 +0000
-Message-ID: <20190402110537.CB01.F0D17A80@socionext.com>
-References: <1553579617-6139-1-git-send-email-orito.takao@socionext.com>
- <5ca0613a.1c69fb81.6e7bf.859e@mx.google.com>
+From: Sowjanya Komatineni <skomatineni@nvidia.com>
+Subject: [PATCH V1] mmc: tegra: add sdhci tegra suspend and resume
+Date: Mon, 1 Apr 2019 22:27:33 -0700
+Message-ID: <1554182853-31612-1-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-2022-jp"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <5ca0613a.1c69fb81.6e7bf.859e@mx.google.com>
-Content-Language: ja-JP
-Content-ID: <35894A9848BD52409BD292B2CA5BE79D@socionext.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: robh@kernel.org
-Cc: ulf.hansson@linaro.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, masami.hiramatsu@linaro.org, jaswinder.singh@linaro.org, sugaya.taichi@socionext.com, kasai.kazuhiro@socionext.com, kanematsu.shinji@socionext.com
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc: skomatineni@nvidia.com, thierry.reding@gmail.com, jonathanh@nvidia.com, anrao@nvidia.com, talho@nvidia.com, bbiswas@nvidia.com, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-DQpIaQ0KDQo+IE9uIFR1ZSwgTWFyIDI2LCAyMDE5IGF0IDAyOjUzOjM3UE0gKzA5MDAsIFRha2Fv
-IE9yaXRvIHdyb3RlOg0KPiA+IEFkZCBuZXcgY29tcGF0aWJsZSBkZXNjcmlwdGlvbiBmb3IgTWls
-YmVhdXQgU29DLiBTb2Npb25leHQNCj4gPiBpbmhlcml0cyBGX1NESDMwIElQIGZyb20gRnVqaXRz
-dS4gVGhlbiBuZXcgU29jIHNlcmllcyAiTWlsYmVhdXQiDQo+ID4gaGFzIEZfU0RIMzAgY29udHJv
-bGxlciBzcGVjaWZpZWQgYnkgInNvY2lvbmV4dCxtaWxiZWF1dC1tMTB2LXNkaGNpLTMuMCIuDQo+
-IA0KPiBTdWJqZWN0IGlzIHdyb25nLCB5b3UncmUgbm90IGFkZGluZyBhIGRyaXZlci4NCg0KT0ss
-IEkgd2lsbCBjaGFuZ2UgImR0LWJpbmRpbmdzOiBtbWM6IHNkaGNpLWZ1aml0c3UudHh0OiBhZGQg
-bWlsYmVhdXQgc3VwcG9ydCINCg0KPiANCj4gPiANCj4gPiBTaWduZWQtb2ZmLWJ5OiBUYWthbyBP
-cml0byA8b3JpdG8udGFrYW9Ac29jaW9uZXh0LmNvbT4NCj4gPiAtLS0NCj4gPiAgLi4uL2Rldmlj
-ZXRyZWUvYmluZGluZ3MvbW1jL3NkaGNpLWZ1aml0c3UudHh0ICAgICAgfCAyMiArKysrKysrKysr
-KysrKysrKysrLS0tDQo+ID4gIDEgZmlsZSBjaGFuZ2VkLCAxOSBpbnNlcnRpb25zKCspLCAzIGRl
-bGV0aW9ucygtKQ0KPiA+IA0KPiA+IGRpZmYgLS1naXQgYS9Eb2N1bWVudGF0aW9uL2RldmljZXRy
-ZWUvYmluZGluZ3MvbW1jL3NkaGNpLWZ1aml0c3UudHh0IGIvRG9jdW1lbnRhdGlvbi9kZXZpY2V0
-cmVlL2JpbmRpbmdzL21tYy9zZGhjaS1mdWppdHN1LnR4dA0KPiA+IGluZGV4IDNlZTkyNjMuLjQw
-NTgxMWYgMTAwNjQ0DQo+ID4gLS0tIGEvRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdz
-L21tYy9zZGhjaS1mdWppdHN1LnR4dA0KPiA+ICsrKyBiL0RvY3VtZW50YXRpb24vZGV2aWNldHJl
-ZS9iaW5kaW5ncy9tbWMvc2RoY2ktZnVqaXRzdS50eHQNCj4gPiBAQCAtMSwxMCArMSwxMCBAQA0K
-PiA+IC0qIEZ1aml0c3UgU0RIQ0kgY29udHJvbGxlcg0KPiA+ICsqIEZ1aml0c3UvU29jaW9uZXh0
-IFNESENJIGNvbnRyb2xsZXINCj4gPiAgDQo+ID4gIFRoaXMgZmlsZSBkb2N1bWVudHMgZGlmZmVy
-ZW5jZXMgYmV0d2VlbiB0aGUgY29yZSBwcm9wZXJ0aWVzIGluIG1tYy50eHQNCj4gPiAtYW5kIHRo
-ZSBwcm9wZXJ0aWVzIHVzZWQgYnkgdGhlIHNkaGNpX2Zfc2RoMzAgZHJpdmVyLg0KPiA+ICthbmQg
-dGhlIHByb3BlcnRpZXMgdXNlZCBieSB0aGUgc2RoY2lfZl9zZGgzMC4NCj4gPiAgDQo+ID4gIFJl
-cXVpcmVkIHByb3BlcnRpZXM6DQo+ID4gLS0gY29tcGF0aWJsZTogImZ1aml0c3UsbWI4NnM3MC1z
-ZGhjaS0zLjAiDQo+ID4gKy0gY29tcGF0aWJsZTogImZ1aml0c3UsbWI4NnM3MC1zZGhjaS0zLjAi
-LCAic29jaW9uZXh0LG1pbGJlYXV0LW0xMHYtc2RoY2ktMy4wIg0KPiANCj4gT25lIHBlciBsaW5l
-IHBsZWFzZS4NCg0KSSBzZWUsIEkgd2lsbCBmaXguDQoNCj4gDQo+ID4gIC0gY2xvY2tzOiBNdXN0
-IGNvbnRhaW4gYW4gZW50cnkgZm9yIGVhY2ggZW50cnkgaW4gY2xvY2stbmFtZXMuIEl0IGlzIGEN
-Cj4gPiAgICBsaXN0IG9mIHBoYW5kbGVzIGFuZCBjbG9jay1zcGVjaWZpZXIgcGFpcnMuDQo+ID4g
-ICAgU2VlIC4uL2Nsb2Nrcy9jbG9jay1iaW5kaW5ncy50eHQgZm9yIGRldGFpbHMuDQo+ID4gQEAg
-LTE3LDYgKzE3LDggQEAgT3B0aW9uYWwgcHJvcGVydGllczoNCj4gPiAgICBhcyB0aGUgVkNDUS9W
-RERfSU8gc3VwcGx5IGluIHRoZSBlTU1DL1NEIHNwZWNzLg0KPiA+ICAtIGZ1aml0c3UsY21kLWRh
-dC1kZWxheS1zZWxlY3Q6IGJvb2xlYW4gcHJvcGVydHkgaW5kaWNhdGluZyB0aGF0IHRoaXMgaG9z
-dA0KPiA+ICAgIHJlcXVpcmVzIHRoZSBDTURfREFUX0RFTEFZIGNvbnRyb2wgdG8gYmUgZW5hYmxl
-ZC4NCj4gPiArLSBzbmksbW1jLXBvd2VyLWdwaW86IHNldCBwcm9wZXJ0eSBpbmRpY2F0aW5nIHRo
-YXQgcG93ZXIgb24gb3Igb2ZmIG5lZWRzDQo+ID4gKyAgY29udHJvbCBvZiBncGlvLiBUaGlzIGlz
-IGZvciBvbmx5ICJzb2Npb25leHQsbWlsYmVhdXQtbTEwdi1zZGhjaS0zLjAiLg0KPiANCj4gcy8t
-Z3Bpby8tZ3Bpb3MvDQoNCkkgd2lsbCBmaXguDQoNCj4gDQo+ID4gIA0KPiA+ICBFeGFtcGxlOg0K
-PiA+ICANCj4gPiBAQCAtMzAsMyArMzIsMTcgQEAgRXhhbXBsZToNCj4gPiAgCQljbG9ja3MgPSA8
-JmNsb2NrIDIgMiAwPiwgPCZjbG9jayAyIDMgMD47DQo+ID4gIAkJY2xvY2stbmFtZXMgPSAiaWZh
-Y2UiLCAiY29yZSI7DQo+ID4gIAl9Ow0KPiA+ICsNCj4gPiArRXhzYW1wbGUyOg0KPiA+ICsJc2Ro
-Y2kzOiBtbWNAMWIwMTAwMDAgew0KPiA+ICsJCWNvbXBhdGlibGUgPSAic29jaW9uZXh0LG1pbGJl
-YXV0LW0xMHYtc2RoY2ktMy4wIjsNCj4gPiArCQlyZWcgPSA8MHgxYjAxMDAwMCAweDEwMDAwPjsN
-Cj4gPiArCQlpbnRlcnJ1cHRzID0gPDAgMjY1IDB4ND47DQo+ID4gKwkJdm9sdGFnZS1yYW5nZXMg
-PSA8MzMwMCAzMzAwPjsNCj4gPiArCQlidXMtd2lkdGggPSA8ND47DQo+ID4gKwkJY2xvY2tzID0g
-PCZ1aHMxY2xrMj4sIDwmYWhiX2Nsaz47DQo+ID4gKwkJY2xvY2stbmFtZXMgPSAiY29yZSIsICJp
-ZmFjZSI7DQo+ID4gKwkJY2FwLXNkaW8taXJxOw0KPiA+ICsJCXNuaSxtbWMtcG93ZXItZ3BpbyA9
-IDwmcGluY3RybCA1MyBHUElPX0FDVElWRV9ISUdIPjsNCj4gPiArCQkJICAgZnVqaXRzdSxjbWQt
-ZGF0LWRlbGF5LXNlbGVjdDsNCj4gDQo+IEluZGVudGF0aW9uIHByb2JsZW0uDQoNClNvcnJ5LCBJ
-IHdpbGwgZml4Lg0KDQpUaGFuayB5b3UNCk9yaXRvDQoNCj4gDQo+ID4gKwl9Ow0KPiA+IC0tIA0K
-PiA+IDEuOS4xDQo+ID4gDQo+ID4gDQoNCi0tIA0KVGFrYW8gT3JpdG8gPG9yaXRvLnRha2FvQHNv
-Y2lvbmV4dC5jb20+DQo=
+This patch adds suspend and resume PM ops for tegra SDHCI.
+
+Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
+---
+ drivers/mmc/host/sdhci-tegra.c | 45 +++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 44 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index eafaaefab4a6..68263ea4a93e 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -1611,11 +1611,54 @@ static int sdhci_tegra_remove(struct platform_device *pdev)
+ 	return 0;
+ }
+ 
++#ifdef CONFIG_PM_SLEEP
++static int sdhci_tegra_suspend(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	int ret;
++
++	if (host->mmc->caps2 & MMC_CAP2_CQE) {
++		ret = cqhci_suspend(host->mmc);
++		if (ret)
++			return ret;
++	}
++
++	ret = sdhci_suspend_host(host);
++	if (ret)
++		return ret;
++
++	clk_disable_unprepare(pltfm_host->clk);
++	return 0;
++}
++
++static int sdhci_tegra_resume(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	int ret;
++
++	clk_prepare_enable(pltfm_host->clk);
++
++	ret = sdhci_resume_host(host);
++	if (ret)
++		return ret;
++
++	if (host->mmc->caps2 & MMC_CAP2_CQE)
++		return cqhci_resume(host->mmc);
++
++	return 0;
++}
++#endif
++
++static SIMPLE_DEV_PM_OPS(sdhci_tegra_dev_pm_ops, sdhci_tegra_suspend,
++			 sdhci_tegra_resume);
++
+ static struct platform_driver sdhci_tegra_driver = {
+ 	.driver		= {
+ 		.name	= "sdhci-tegra",
+ 		.of_match_table = sdhci_tegra_dt_match,
+-		.pm	= &sdhci_pltfm_pmops,
++		.pm	= &sdhci_tegra_dev_pm_ops,
+ 	},
+ 	.probe		= sdhci_tegra_probe,
+ 	.remove		= sdhci_tegra_remove,
+-- 
+2.7.4
