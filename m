@@ -1,92 +1,69 @@
-From: Sowjanya Komatineni <skomatineni@nvidia.com>
-Subject: [PATCH V2] mmc: tegra: add sdhci tegra suspend and resume
-Date: Tue, 2 Apr 2019 10:37:21 -0700
-Message-ID: <1554226641-22612-1-git-send-email-skomatineni@nvidia.com>
+From: Michal =?UTF-8?B?U3VjaMOhbmVr?= <msuchanek-l3A5Bk7waGM@public.gmane.org>
+Subject: Re: [PATCH V2 0/7] mmc: Several fixes for bcm2835 driver
+Date: Tue, 2 Apr 2019 20:58:29 +0200
+Message-ID: <20190402205829.3b885969@kitsune.suse.cz>
+References: <1541967839-2847-1-git-send-email-stefan.wahren@i2se.com>
+ <20190321210307.58e33ea4@kitsune.suse.cz>
+ <1ff03f96-2575-f65e-c96e-6dc52de00c3a@i2se.com>
+ <20190322170643.2e56d220@naga.suse.cz>
+ <1210065308.73665.1553274611385@email.ionos.de>
+ <20190328214351.358e615a@kitsune.suse.cz>
+ <1920951985.237156.1553958914902@email.ionos.de>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc: skomatineni@nvidia.com, thierry.reding@gmail.com, jonathanh@nvidia.com, anrao@nvidia.com, talho@nvidia.com, bbiswas@nvidia.com, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <1920951985.237156.1553958914902-uEpKuDZ350hmhno068Nerg@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rpi-kernel>,
+ <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rpi-kernel/>
+List-Post: <mailto:linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rpi-kernel>,
+ <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "linux-rpi-kernel" <linux-rpi-kernel-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-This patch adds suspend and resume PM ops for tegra SDHCI.
-
-Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
----
- drivers/mmc/host/sdhci-tegra.c | 56 +++++++++++++++++++++++++++++++++++++++++-
- 1 file changed, 55 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index eafaaefab4a6..6c91926a012c 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -1611,11 +1611,65 @@ static int sdhci_tegra_remove(struct platform_device *pdev)
- 	return 0;
- }
- 
-+#ifdef CONFIG_PM_SLEEP
-+static int sdhci_tegra_suspend(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	int ret;
-+
-+	if (host->mmc->caps2 & MMC_CAP2_CQE) {
-+		ret = cqhci_suspend(host->mmc);
-+		if (ret)
-+			return ret;
-+	}
-+
-+	ret = sdhci_suspend_host(host);
-+	if (ret)
-+		return ret;
-+
-+	clk_disable_unprepare(pltfm_host->clk);
-+	return 0;
-+}
-+
-+static int sdhci_tegra_resume(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	int ret;
-+
-+	ret = clk_prepare_enable(pltfm_host->clk);
-+	if (ret)
-+		return ret;
-+
-+	ret = sdhci_resume_host(host);
-+	if (ret)
-+		goto disable_clk;
-+
-+	if (host->mmc->caps2 & MMC_CAP2_CQE) {
-+		ret = cqhci_resume(host->mmc);
-+		if (ret)
-+			goto suspend_host;
-+	}
-+
-+	return 0;
-+
-+suspend_host:
-+	sdhci_suspend_host(host);
-+disable_clk:
-+	clk_disable_unprepare(pltfm_host->clk);
-+	return ret;
-+}
-+#endif
-+
-+static SIMPLE_DEV_PM_OPS(sdhci_tegra_dev_pm_ops, sdhci_tegra_suspend,
-+			 sdhci_tegra_resume);
-+
- static struct platform_driver sdhci_tegra_driver = {
- 	.driver		= {
- 		.name	= "sdhci-tegra",
- 		.of_match_table = sdhci_tegra_dt_match,
--		.pm	= &sdhci_pltfm_pmops,
-+		.pm	= &sdhci_tegra_dev_pm_ops,
- 	},
- 	.probe		= sdhci_tegra_probe,
- 	.remove		= sdhci_tegra_remove,
--- 
-2.7.4
+SGVsbG8sCgpPbiBTYXQsIDMwIE1hciAyMDE5IDE2OjE1OjE0ICswMTAwIChDRVQpClN0ZWZhbiBX
+YWhyZW4gPHN0ZWZhbi53YWhyZW5AaTJzZS5jb20+IHdyb3RlOgoKPiBIaSBNaWNoYWwsCj4gCj4g
+PiBNaWNoYWwgU3VjaMOhbmVrIDxtc3VjaGFuZWtAc3VzZS5kZT4gaGF0IGFtIDI4LiBNw6RyeiAy
+MDE5IHVtIDIxOjQzIGdlc2NocmllYmVuOgo+ID4gCj4gPiAKPiA+IE9uIEZyaSwgMjIgTWFyIDIw
+MTkgMTg6MTA6MTEgKzAxMDAgKENFVCkKPiA+IFN0ZWZhbiBXYWhyZW4gPHN0ZWZhbi53YWhyZW5A
+aTJzZS5jb20+IHdyb3RlOgo+ID4gICAKPiA+ID4gSGkgTWljaGFsLAo+ID4gPiAgIAo+ID4gPiA+
+IE1pY2hhbCBTdWNow6FuZWsgPG1zdWNoYW5la0BzdXNlLmRlPiBoYXQgYW0gMjIuIE3DpHJ6IDIw
+MTkgdW0gMTc6MDYgZ2VzY2hyaWViZW46Cj4gPiA+ID4gCj4gPiA+ID4gCj4gPiA+ID4gT24gRnJp
+LCAyMiBNYXIgMjAxOSAxNTo0NToxMyArMDEwMAo+ID4gPiA+IFN0ZWZhbiBXYWhyZW4gPHN0ZWZh
+bi53YWhyZW5AaTJzZS5jb20+IHdyb3RlOgo+ID4gPiA+ICAgICAKPiA+ID4gPiA+IEhpIE1pY2hh
+bCwKPiA+ID4gPiA+IAo+ID4gPiA+ID4gQW0gMjEuMDMuMTkgdW0gMjE6MDMgc2NocmllYiBNaWNo
+YWwgU3VjaMOhbmVrOgo+ID4gPiA+ID4gCj4gPiA+ID4gPiBjb3VsZCB5b3UgcGxlYXNlIHJldHJ5
+IHdpdGggbWFpbmxpbmUga2VybmVsIDUuMD8gICAgCj4gPiA+ID4gCj4gPiA+ID4gSSBjYW4gdHJ5
+IHRoYXQuIFdoYXQgSSBoYXZlIGlzIHByZXR0eSBtdWNoIDUuMCBhbnl3YXkgc28gSSBkb24ndCBl
+eHBlY3QKPiA+ID4gPiBtdWNoIGRpZmZlcmVuY2U6Cj4gPiA+ID4gICAgIAo+ID4gPiAKPiA+ID4g
+YXMgbG9uZyBhcyB0aGUgaXNzdWUgbGllcyBpbiB0aGUgc2Rob3N0IGRyaXZlciBjb2RlLiBUaGVy
+ZSBhbHNvIGhhcyBiZWVuIGEgbG90IG9mIGZpeGVzIGJ5IEx1a2FzIFd1bm5lciB0byB0aGUgRE1B
+IGVuZ2luZSBkcml2ZXIuIEkgcHJlZmVyIGEgd2VsbCBkZWZpbmVkIHNvdXJjZSBiYXNlLgo+ID4g
+PiAgIAo+ID4gPiA+IAo+ID4gPiA+IEkgc3VzcGVjdCB0aGF0IG9uZSBvZiB0aGUgbG9ja2luZyBm
+aXhlcyB0aGF0IHdlbnQgaW50byBtYWlubGluZQo+ID4gPiA+IHJlY2VudGx5IHByZXZlbnRzIHJl
+Y292ZXJpbmcgZnJvbSB0aGUgZXJyb3IgYnV0IEkgZGlkIG5vdCB0cnkKPiA+ID4gPiByZXZlcnRp
+bmcgdGhlbSB5ZXQuICAgIAo+ID4gPiAgIAoKU28gSSBzdXNwZWN0IHdlIGhhdmUgdHdvIGRpZmZl
+cmVudCBpc3N1ZXMgaGVyZToKCm1tYzE6IENhcmQgc3R1Y2sgaW4gcHJvZ3JhbW1pbmcgc3RhdGUh
+IG1tY2JsazAgY2FyZF9idXN5X2RldGVjdAoKdGhpcyBpcyBhbiBpc3N1ZSB0byB3aGljaCBwYXJ0
+aWN1bGFyIGNhcmQgbW9kZWxzIGFyZSBtb3JlIHN1c3BlY3RpYmxlCmFuZCB0aGUgd29ya2Fyb3Vu
+ZCBpcyB0byByZXNldCB0aGUgY29udHJvbGxlciB3aGljaCB3ZSBhbHJlYWR5IGRvLgpJdCB0eXBp
+Y2FsbHkgaGFwcGVucyB1bmRlciBzb21lIElPIGxvYWQuIDkwJSBvZiB0aGUgdGltZSBJIGdldCB0
+aGlzCndoZW4gZG9pbmcgc3lzdGVtIHVwZ3JhZGUgd2hlbiBzeXN0ZW0gaXMgaW5zdGFsbGVkIG9u
+IGEgcGFydGljdWxhcgpvcmFuZ2UgY2FyZC4KClRoZSBvdGhlciB3aGljaCBpcyBldmVuIGhhcmRl
+ciB0byByZXByb2R1Y2UgaXMKCnNkaG9zdC1iY20yODM1IDNmMjAyMDAwLnNkaG9zdDogdGltZW91
+dCB3YWl0aW5nIGZvciBoYXJkd2FyZSBpbnRlcnJ1cHQuCgpJdCB0eXBpY2FsbHkgaGFwcGVucyBz
+aG9ydGx5IGFmdGVyIGltYWdpbmcgdGhlIGNhcmQgZm9yIG1lLgoKPiAKPiBjb3VsZCB5b3UgcGxl
+YXNlIHRyeSB0aGlzIHBhdGNoOgo+IAo+IGh0dHA6Ly9saXN0cy5pbmZyYWRlYWQub3JnL3BpcGVy
+bWFpbC9saW51eC1ycGkta2VybmVsLzIwMTktTWFyY2gvMDA4NjI3Lmh0bWwKCkkgY2FuIHRyeSB0
+aGF0IGJ1dCB0aGUgcXVlc3Rpb24gaXMgd2hhdCBzeW1wdG9tIGlzIGl0IHN1cHBvc2VkIHRvIGN1
+cmUKYW5kIHdoYXQgaXMgdGhlIHJhdGlvbmFsZSBmb3IgdGhlIGNoYW5nZS4KClRoYW5rcwoKTWlj
+aGFsCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpsaW51
+eC1ycGkta2VybmVsIG1haWxpbmcgbGlzdApsaW51eC1ycGkta2VybmVsQGxpc3RzLmluZnJhZGVh
+ZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1y
+cGkta2VybmVsCg==
