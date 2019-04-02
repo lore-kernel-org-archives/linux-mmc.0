@@ -1,65 +1,110 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v2 1/8] mmc: sdhci: Get rid of finish_tasklet
-Date: Tue, 2 Apr 2019 16:12:29 +0300
-Message-ID: <99e1b9cb-8eef-9ef2-4caa-3d5c98e9c6f3@intel.com>
-References: <20190215192033.24203-1-faiz_abbas@ti.com>
- <20190215192033.24203-2-faiz_abbas@ti.com>
- <CAPDyKFqN4s1CZa9z5C3YzCUO01V-=Xhtao5352Pmytd-Tusv9A@mail.gmail.com>
- <65f24027-005a-4372-8819-45e6a360bfce@intel.com>
- <987a3616-8530-7247-ce00-6513a6c2d4bc@ti.com>
+From: Thierry Reding <thierry.reding@gmail.com>
+Subject: Re: [PATCH V1] mmc: tegra: add sdhci tegra suspend and resume
+Date: Tue, 2 Apr 2019 16:59:01 +0200
+Message-ID: <20190402145901.GF8017@ulmo>
+References: <1554182853-31612-1-git-send-email-skomatineni@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="FoLtEtfbNGMjfgrs"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <987a3616-8530-7247-ce00-6513a6c2d4bc@ti.com>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <1554182853-31612-1-git-send-email-skomatineni@nvidia.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Faiz Abbas <faiz_abbas@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Kishon <kishon@ti.com>, Chunyan Zhang <zhang.chunyan@linaro.org>, Grygorii Strashko <grygorii.strashko@ti.com>
+To: Sowjanya Komatineni <skomatineni@nvidia.com>
+Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, jonathanh@nvidia.com, anrao@nvidia.com, talho@nvidia.com, bbiswas@nvidia.com, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 2/04/19 10:59 AM, Faiz Abbas wrote:
-> Hi Adrian,
-> 
-> On 26/03/19 1:03 PM, Adrian Hunter wrote:
->> On 18/03/19 11:33 AM, Ulf Hansson wrote:
->>> + Arnd, Grygorii
->>>
->>> On Fri, 15 Feb 2019 at 20:17, Faiz Abbas <faiz_abbas@ti.com> wrote:
->>>>
->>>> sdhci.c has two bottom halves implemented. A threaded_irq for handling
->>>> card insert/remove operations and a tasklet for finishing mmc requests.
->>>> With the addition of external dma support, dmaengine APIs need to
->>>> terminate in non-atomic context before unmapping the dma buffers.
->>>>
->>>> To facilitate this, remove the finish_tasklet and move the call of
->>>> sdhci_request_done() to the threaded_irq() callback. Also move the
->>>> interrupt result variable to sdhci_host so it can be populated from
->>>> anywhere inside the sdhci_irq handler.
->>>>
->>>> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
->>>
->>> Adrian, I think it makes sense to apply this patch, even if there is
->>> very minor negative impact throughput wise.
->>>
->>> To me, it doesn't seems like MMC/SD/SDIO has good justification for
->>> using tasklets, besides from the legacy point of view, of course.
->>> Instead, I think we should try to move all mmc hosts into using
->>> threaded IRQs.
->>>
->>> So, what do you think? Can you overlook the throughput drop and
->>> instead we can try to recover this on top with other optimizations?
->>
->> I tend to favour good results as expressed here:
->>
->> 	https://lkml.org/lkml/2007/6/22/360
->>
->> So I want to do optimization first.
->>
->> But performance is not the only problem with the patch.  Give me a few
->> days and I will see what I can come up with.
->>
-> 
-> Gentle ping on this.
 
-Working on it :-)
+--FoLtEtfbNGMjfgrs
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Mon, Apr 01, 2019 at 10:27:33PM -0700, Sowjanya Komatineni wrote:
+> This patch adds suspend and resume PM ops for tegra SDHCI.
+>=20
+> Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
+> ---
+>  drivers/mmc/host/sdhci-tegra.c | 45 ++++++++++++++++++++++++++++++++++++=
++++++-
+>  1 file changed, 44 insertions(+), 1 deletion(-)
+>=20
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegr=
+a.c
+> index eafaaefab4a6..68263ea4a93e 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -1611,11 +1611,54 @@ static int sdhci_tegra_remove(struct platform_dev=
+ice *pdev)
+>  	return 0;
+>  }
+> =20
+> +#ifdef CONFIG_PM_SLEEP
+> +static int sdhci_tegra_suspend(struct device *dev)
+> +{
+> +	struct sdhci_host *host =3D dev_get_drvdata(dev);
+> +	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
+> +	int ret;
+> +
+> +	if (host->mmc->caps2 & MMC_CAP2_CQE) {
+> +		ret =3D cqhci_suspend(host->mmc);
+> +		if (ret)
+> +			return ret;
+> +	}
+> +
+> +	ret =3D sdhci_suspend_host(host);
+> +	if (ret)
+> +		return ret;
+> +
+> +	clk_disable_unprepare(pltfm_host->clk);
+> +	return 0;
+> +}
+> +
+> +static int sdhci_tegra_resume(struct device *dev)
+> +{
+> +	struct sdhci_host *host =3D dev_get_drvdata(dev);
+> +	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
+> +	int ret;
+> +
+> +	clk_prepare_enable(pltfm_host->clk);
+
+You need to check this for errors here.
+
+> +
+> +	ret =3D sdhci_resume_host(host);
+> +	if (ret)
+> +		return ret;
+
+And clk_disable_unprepare() in case of failure.
+
+> +
+> +	if (host->mmc->caps2 & MMC_CAP2_CQE)
+> +		return cqhci_resume(host->mmc);
+
+Same here. Also make sure to sdhci_suspend_host() if cqhci_resume()
+fails. It's probably best to have a standard error cleanup path for
+this.
+
+Thierry
+
+--FoLtEtfbNGMjfgrs
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAlyjeLMACgkQ3SOs138+
+s6ENvA/+LkCvdh3owTukZ+MogvqrxofbtGNH4nHaaXtN/Jew7QYNGL/5Hr3l9hHt
+4TboAQ+J9Fyx/uwLa6wVp/rSInwZFnfkzDYfJEyJHE6ev8eTLkzEAPaEQ+lY0Fn8
+Vq0Sg7Z4PaJKf8flwNBeT3OCXgEUaUowO/udTPlRGHiA04RZSRXF3s4d/lr8oWpw
+FDVu/bCDQWJSrElVY5mkAyScUw2OkJpiNsVC/hClOwXPfvbsCzpdjdiOl9yeGgDp
+Q/f+ZQhyGr+CxW9LxzJYy085Yl3S/02gcABoFF1GB+U7qnLY24ND2UbrcdM2j0kG
+h8mQ02gMghii88fsqUjGP00D4hXpccRzGVEiVbtvhSjN+BZRPoVvbrebmKH6CETV
+GVqA8Yi/2mKDSgsFYYk8wzbK0UBYgCOnx2Y6JU4w0kV+0G2GEdgupUy6hoPBLcMC
+U791byj7Uwwknn1QZE2a/psx5n8p4BJlRJMRn1b2gdCmnQCNsQNx6ACKYRfn5nMX
+rv9Mo/v+LE95uSHM9mODCDoRyOYC9rEVZsEYyL1Cd6OuSGH4cjxPOObmRAq6Gf7N
+B8c3/PYIc160+leRIz/0INofaVORMU/4ppGdCKFOZ88tagzSY+3AcZFMLzmw76kz
+TbxGonOnuTsfkpUkAkdw/YsdasOH5dS/YdKTrROp7BVBqZ0LpoE=
+=3vRk
+-----END PGP SIGNATURE-----
+
+--FoLtEtfbNGMjfgrs--
