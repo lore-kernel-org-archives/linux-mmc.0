@@ -1,47 +1,68 @@
-From: Fabien Parent <fparent@baylibre.com>
-Subject: [PATCH v2] mmc: mtk-sd: check for valid optional memory resource
-Date: Wed,  3 Apr 2019 21:30:50 +0200
-Message-ID: <20190403193050.22180-1-fparent@baylibre.com>
+From: Michal =?UTF-8?B?U3VjaMOhbmVr?= <msuchanek@suse.de>
+Subject: Re: [PATCH V2 0/7] mmc: Several fixes for bcm2835 driver
+Date: Mon, 8 Apr 2019 16:55:26 +0200
+Message-ID: <20190408165526.00defdf7@kitsune.suse.cz>
+References: <1541967839-2847-1-git-send-email-stefan.wahren@i2se.com>
+ <20190321210307.58e33ea4@kitsune.suse.cz>
+ <1ff03f96-2575-f65e-c96e-6dc52de00c3a@i2se.com>
+ <20190322170643.2e56d220@naga.suse.cz>
+ <1210065308.73665.1553274611385@email.ionos.de>
+ <20190328214351.358e615a@kitsune.suse.cz>
+ <1920951985.237156.1553958914902@email.ionos.de>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, matthias.bgg@gmail.com, yingjoe.chen@mediatek.com
-Cc: chaotian.jing@mediatek.com, ryder.lee@mediatek.com, jjian.zhou@mediatek.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, Fabien Parent <fparent@baylibre.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1920951985.237156.1553958914902@email.ionos.de>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Stefan Wahren <stefan.wahren@i2se.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Florian Fainelli <f.fainelli@gmail.com>, Phil Elwell <phil@raspberrypi.org>, linux-mmc@vger.kernel.org, Eric Anholt <eric@anholt.net>, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-'top_base' memory region is optional. Check that the resource is valid
-before using it. This avoid getting a "invalid resource" error message
-printed by the kernel.
-
-Signed-off-by: Fabien Parent <fparent@baylibre.com>
----
-
-V2:
-	Fix invalid condition: check against 'res' variable instead of 'ret'.
-
----
- drivers/mmc/host/mtk-sd.c | 8 +++++---
- 1 file changed, 5 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 833ef0590af8..61bf8704491c 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -2123,9 +2123,11 @@ static int msdc_drv_probe(struct platform_device *pdev)
- 	}
- 
- 	res = platform_get_resource(pdev, IORESOURCE_MEM, 1);
--	host->top_base = devm_ioremap_resource(&pdev->dev, res);
--	if (IS_ERR(host->top_base))
--		host->top_base = NULL;
-+	if (res) {
-+		host->top_base = devm_ioremap_resource(&pdev->dev, res);
-+		if (IS_ERR(host->top_base))
-+			host->top_base = NULL;
-+	}
- 
- 	ret = mmc_regulator_get_supply(mmc);
- 	if (ret)
--- 
-2.20.1
+T24gU2F0LCAzMCBNYXIgMjAxOSAxNjoxNToxNCArMDEwMCAoQ0VUKQpTdGVmYW4gV2FocmVuIDxz
+dGVmYW4ud2FocmVuQGkyc2UuY29tPiB3cm90ZToKCj4gSGkgTWljaGFsLAo+IAo+ID4gTWljaGFs
+IFN1Y2jDoW5layA8bXN1Y2hhbmVrQHN1c2UuZGU+IGhhdCBhbSAyOC4gTcOkcnogMjAxOSB1bSAy
+MTo0MyBnZXNjaHJpZWJlbjoKPiA+IAo+ID4gCj4gPiBPbiBGcmksIDIyIE1hciAyMDE5IDE4OjEw
+OjExICswMTAwIChDRVQpCj4gPiBTdGVmYW4gV2FocmVuIDxzdGVmYW4ud2FocmVuQGkyc2UuY29t
+PiB3cm90ZToKPiA+ICAgCj4gPiA+IEhpIE1pY2hhbCwKPiA+ID4gICAKPiA+ID4gPiBNaWNoYWwg
+U3VjaMOhbmVrIDxtc3VjaGFuZWtAc3VzZS5kZT4gaGF0IGFtIDIyLiBNw6RyeiAyMDE5IHVtIDE3
+OjA2IGdlc2NocmllYmVuOgo+ID4gPiA+IAo+ID4gPiA+IAo+ID4gPiA+IE9uIEZyaSwgMjIgTWFy
+IDIwMTkgMTU6NDU6MTMgKzAxMDAKPiA+ID4gPiBTdGVmYW4gV2FocmVuIDxzdGVmYW4ud2FocmVu
+QGkyc2UuY29tPiB3cm90ZToKPiA+ID4gPiAgICAgCj4gPiA+ID4gPiBIaSBNaWNoYWwsCj4gPiA+
+ID4gPiAKPiA+ID4gPiA+IEFtIDIxLjAzLjE5IHVtIDIxOjAzIHNjaHJpZWIgTWljaGFsIFN1Y2jD
+oW5lazoKPiA+ID4gPiA+IAo+ID4gPiA+ID4gY291bGQgeW91IHBsZWFzZSByZXRyeSB3aXRoIG1h
+aW5saW5lIGtlcm5lbCA1LjA/ICAgIAo+ID4gPiA+IAo+ID4gPiA+IEkgY2FuIHRyeSB0aGF0LiBX
+aGF0IEkgaGF2ZSBpcyBwcmV0dHkgbXVjaCA1LjAgYW55d2F5IHNvIEkgZG9uJ3QgZXhwZWN0Cj4g
+PiA+ID4gbXVjaCBkaWZmZXJlbmNlOgo+ID4gPiA+ICAgICAKPiA+ID4gCj4gPiA+IGFzIGxvbmcg
+YXMgdGhlIGlzc3VlIGxpZXMgaW4gdGhlIHNkaG9zdCBkcml2ZXIgY29kZS4gVGhlcmUgYWxzbyBo
+YXMgYmVlbiBhIGxvdCBvZiBmaXhlcyBieSBMdWthcyBXdW5uZXIgdG8gdGhlIERNQSBlbmdpbmUg
+ZHJpdmVyLiBJIHByZWZlciBhIHdlbGwgZGVmaW5lZCBzb3VyY2UgYmFzZS4KPiA+ID4gICAKPiA+
+ID4gPiAKPiA+ID4gPiBJIHN1c3BlY3QgdGhhdCBvbmUgb2YgdGhlIGxvY2tpbmcgZml4ZXMgdGhh
+dCB3ZW50IGludG8gbWFpbmxpbmUKPiA+ID4gPiByZWNlbnRseSBwcmV2ZW50cyByZWNvdmVyaW5n
+IGZyb20gdGhlIGVycm9yIGJ1dCBJIGRpZCBub3QgdHJ5Cj4gPiA+ID4gcmV2ZXJ0aW5nIHRoZW0g
+eWV0LiAgICAKPiA+ID4gICAKPiAKPiBjb3VsZCB5b3UgcGxlYXNlIHRyeSB0aGlzIHBhdGNoOgo+
+IAo+IGh0dHA6Ly9saXN0cy5pbmZyYWRlYWQub3JnL3BpcGVybWFpbC9saW51eC1ycGkta2VybmVs
+LzIwMTktTWFyY2gvMDA4NjI3Lmh0bWwKPiAKPiBTdGVmYW4KClNvIEkgdXBkYXRlZCB0aGUgZG1h
+IGRyaXZlciB0byBiZSBhYmxlIHRvIGFwcGx5IHRoaXMgcGF0Y2gsIGFwcGxpZWQgaXQsCmFuZCB0
+aGUgc3lzdGVtIGxvY2tlZCB1cC4gSXQgZXZlbiBzdG9wcGVkIGxvZ2dpbmcgb3ZlciB0aGUgbmV0
+d29yayAtCm9ubHkgdGhlIHNlcmlhbCBjb25zb2xlIHNob3dzIHRoZSBtZXNzYWdlOgoKTGludXgg
+dmVyc2lvbiA0LjQuMTc2LTEuZzc1NTQ5OWYtZGVmYXVsdCAoZ2Vla29AYnVpbGRob3N0KSAoZ2Nj
+IHZlcnNpb24gNC44LjUgKFNVU0UgTGludXgpICkKLi4uLgooICA3LzUyNikgSW5zdGFsbGluZzog
+aW5mbzJodG1sLTIuMC0yMjMuMS5ub2FyY2ggLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLltkb25l
+XQooICA4LzUyNikgSW5zdGFsbGluZzogbGliWDExLWRhdGEtMS42LjMtMTAuMy4xLm5vYXJjaCAu
+Li4uLi4uLi4uLi4uLi48ODklPj09PVt8XVsgIDY2NC42NzA1ODJdIHNkaG9zdC1iY20yODM1IDNm
+MjAyMDAwLnNkaG9zdDogdGkuClsgIDY3NC43NTA1MDFdIHNkaG9zdC1iY20yODM1IDNmMjAyMDAw
+LnNkaG9zdDogdGltZW91dCB3YWl0aW5nIGZvciBoYXJkd2FyZSBpbnRlcnJ1cHQuCgpTbyBhdCBs
+ZWFzdCBvbiA0LjQga2VybmVsIHRoaXMgZG9lcyBub3QgaGVscC4KClRoYW5rcwoKTWljaGFsCgpf
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpsaW51eC1hcm0t
+a2VybmVsIG1haWxpbmcgbGlzdApsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmcK
+aHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1hcm0ta2Vy
+bmVsCg==
