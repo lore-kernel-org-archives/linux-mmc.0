@@ -1,68 +1,25 @@
-From: Michal =?UTF-8?B?U3VjaMOhbmVr?= <msuchanek@suse.de>
-Subject: Re: [PATCH V2 0/7] mmc: Several fixes for bcm2835 driver
-Date: Mon, 8 Apr 2019 16:55:26 +0200
-Message-ID: <20190408165526.00defdf7@kitsune.suse.cz>
-References: <1541967839-2847-1-git-send-email-stefan.wahren@i2se.com>
- <20190321210307.58e33ea4@kitsune.suse.cz>
- <1ff03f96-2575-f65e-c96e-6dc52de00c3a@i2se.com>
- <20190322170643.2e56d220@naga.suse.cz>
- <1210065308.73665.1553274611385@email.ionos.de>
- <20190328214351.358e615a@kitsune.suse.cz>
- <1920951985.237156.1553958914902@email.ionos.de>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH 15/24] dt-bindings: pinctrl: pinctrl-mt65xx: add support
+ for MT8516
+Date: Mon, 8 Apr 2019 22:44:59 +0200
+Message-ID: <CACRpkdZZ6-+MVdK4bOP4SHxQ8uQ8zENcir7DSteHy4g+B5uySQ@mail.gmail.com>
+References: <20190323211612.860-1-fparent@baylibre.com> <20190323211612.860-16-fparent@baylibre.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1920951985.237156.1553958914902@email.ionos.de>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Stefan Wahren <stefan.wahren@i2se.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Florian Fainelli <f.fainelli@gmail.com>, Phil Elwell <phil@raspberrypi.org>, linux-mmc@vger.kernel.org, Eric Anholt <eric@anholt.net>, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190323211612.860-16-fparent@baylibre.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Fabien Parent <fparent@baylibre.com>
+Cc: Matthias Brugger <matthias.bgg@gmail.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Sean Wang <sean.wang@kernel.org>, Ryder Lee <ryder.lee@mediatek.com>, hsin-hsiung.wang@mediatek.com, wenzhen.yu@mediatek.com, Chaotian Jing <chaotian.jing@mediatek.com>, Yong Mao <yong.mao@mediatek.com>, jjian.zhou@mediatek.com, "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-i2c@vger.kernel.org, Linux ARM <linux-arm-kernel@lists.infradead.org>, "moderated list:ARM/Mediatek SoC support" <linux-mediatek@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>, linux-se
 List-Id: linux-mmc@vger.kernel.org
 
-T24gU2F0LCAzMCBNYXIgMjAxOSAxNjoxNToxNCArMDEwMCAoQ0VUKQpTdGVmYW4gV2FocmVuIDxz
-dGVmYW4ud2FocmVuQGkyc2UuY29tPiB3cm90ZToKCj4gSGkgTWljaGFsLAo+IAo+ID4gTWljaGFs
-IFN1Y2jDoW5layA8bXN1Y2hhbmVrQHN1c2UuZGU+IGhhdCBhbSAyOC4gTcOkcnogMjAxOSB1bSAy
-MTo0MyBnZXNjaHJpZWJlbjoKPiA+IAo+ID4gCj4gPiBPbiBGcmksIDIyIE1hciAyMDE5IDE4OjEw
-OjExICswMTAwIChDRVQpCj4gPiBTdGVmYW4gV2FocmVuIDxzdGVmYW4ud2FocmVuQGkyc2UuY29t
-PiB3cm90ZToKPiA+ICAgCj4gPiA+IEhpIE1pY2hhbCwKPiA+ID4gICAKPiA+ID4gPiBNaWNoYWwg
-U3VjaMOhbmVrIDxtc3VjaGFuZWtAc3VzZS5kZT4gaGF0IGFtIDIyLiBNw6RyeiAyMDE5IHVtIDE3
-OjA2IGdlc2NocmllYmVuOgo+ID4gPiA+IAo+ID4gPiA+IAo+ID4gPiA+IE9uIEZyaSwgMjIgTWFy
-IDIwMTkgMTU6NDU6MTMgKzAxMDAKPiA+ID4gPiBTdGVmYW4gV2FocmVuIDxzdGVmYW4ud2FocmVu
-QGkyc2UuY29tPiB3cm90ZToKPiA+ID4gPiAgICAgCj4gPiA+ID4gPiBIaSBNaWNoYWwsCj4gPiA+
-ID4gPiAKPiA+ID4gPiA+IEFtIDIxLjAzLjE5IHVtIDIxOjAzIHNjaHJpZWIgTWljaGFsIFN1Y2jD
-oW5lazoKPiA+ID4gPiA+IAo+ID4gPiA+ID4gY291bGQgeW91IHBsZWFzZSByZXRyeSB3aXRoIG1h
-aW5saW5lIGtlcm5lbCA1LjA/ICAgIAo+ID4gPiA+IAo+ID4gPiA+IEkgY2FuIHRyeSB0aGF0LiBX
-aGF0IEkgaGF2ZSBpcyBwcmV0dHkgbXVjaCA1LjAgYW55d2F5IHNvIEkgZG9uJ3QgZXhwZWN0Cj4g
-PiA+ID4gbXVjaCBkaWZmZXJlbmNlOgo+ID4gPiA+ICAgICAKPiA+ID4gCj4gPiA+IGFzIGxvbmcg
-YXMgdGhlIGlzc3VlIGxpZXMgaW4gdGhlIHNkaG9zdCBkcml2ZXIgY29kZS4gVGhlcmUgYWxzbyBo
-YXMgYmVlbiBhIGxvdCBvZiBmaXhlcyBieSBMdWthcyBXdW5uZXIgdG8gdGhlIERNQSBlbmdpbmUg
-ZHJpdmVyLiBJIHByZWZlciBhIHdlbGwgZGVmaW5lZCBzb3VyY2UgYmFzZS4KPiA+ID4gICAKPiA+
-ID4gPiAKPiA+ID4gPiBJIHN1c3BlY3QgdGhhdCBvbmUgb2YgdGhlIGxvY2tpbmcgZml4ZXMgdGhh
-dCB3ZW50IGludG8gbWFpbmxpbmUKPiA+ID4gPiByZWNlbnRseSBwcmV2ZW50cyByZWNvdmVyaW5n
-IGZyb20gdGhlIGVycm9yIGJ1dCBJIGRpZCBub3QgdHJ5Cj4gPiA+ID4gcmV2ZXJ0aW5nIHRoZW0g
-eWV0LiAgICAKPiA+ID4gICAKPiAKPiBjb3VsZCB5b3UgcGxlYXNlIHRyeSB0aGlzIHBhdGNoOgo+
-IAo+IGh0dHA6Ly9saXN0cy5pbmZyYWRlYWQub3JnL3BpcGVybWFpbC9saW51eC1ycGkta2VybmVs
-LzIwMTktTWFyY2gvMDA4NjI3Lmh0bWwKPiAKPiBTdGVmYW4KClNvIEkgdXBkYXRlZCB0aGUgZG1h
-IGRyaXZlciB0byBiZSBhYmxlIHRvIGFwcGx5IHRoaXMgcGF0Y2gsIGFwcGxpZWQgaXQsCmFuZCB0
-aGUgc3lzdGVtIGxvY2tlZCB1cC4gSXQgZXZlbiBzdG9wcGVkIGxvZ2dpbmcgb3ZlciB0aGUgbmV0
-d29yayAtCm9ubHkgdGhlIHNlcmlhbCBjb25zb2xlIHNob3dzIHRoZSBtZXNzYWdlOgoKTGludXgg
-dmVyc2lvbiA0LjQuMTc2LTEuZzc1NTQ5OWYtZGVmYXVsdCAoZ2Vla29AYnVpbGRob3N0KSAoZ2Nj
-IHZlcnNpb24gNC44LjUgKFNVU0UgTGludXgpICkKLi4uLgooICA3LzUyNikgSW5zdGFsbGluZzog
-aW5mbzJodG1sLTIuMC0yMjMuMS5ub2FyY2ggLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLltkb25l
-XQooICA4LzUyNikgSW5zdGFsbGluZzogbGliWDExLWRhdGEtMS42LjMtMTAuMy4xLm5vYXJjaCAu
-Li4uLi4uLi4uLi4uLi48ODklPj09PVt8XVsgIDY2NC42NzA1ODJdIHNkaG9zdC1iY20yODM1IDNm
-MjAyMDAwLnNkaG9zdDogdGkuClsgIDY3NC43NTA1MDFdIHNkaG9zdC1iY20yODM1IDNmMjAyMDAw
-LnNkaG9zdDogdGltZW91dCB3YWl0aW5nIGZvciBoYXJkd2FyZSBpbnRlcnJ1cHQuCgpTbyBhdCBs
-ZWFzdCBvbiA0LjQga2VybmVsIHRoaXMgZG9lcyBub3QgaGVscC4KClRoYW5rcwoKTWljaGFsCgpf
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpsaW51eC1hcm0t
-a2VybmVsIG1haWxpbmcgbGlzdApsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmcK
-aHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1hcm0ta2Vy
-bmVsCg==
+On Sat, Mar 23, 2019 at 10:17 PM Fabien Parent <fparent@baylibre.com> wrote:
+
+> Add binding documentation of pinctrl-mt65xx for MT8516 SoC.
+>
+> Signed-off-by: Fabien Parent <fparent@baylibre.com>
+
+Patch applied with Rob's ACK.
+
+Yours,
+Linus Walleij
