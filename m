@@ -1,44 +1,37 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] MAINTAINERS: Add section for MediaTek MMC/SD/SDIO driver
-Date: Thu, 11 Apr 2019 11:49:42 +0200
-Message-ID: <CAPDyKFqNih3kEuRM9HHkmcVOzaT2RZLRjb=0ifq6hGB+OCxUug@mail.gmail.com>
-References: <20190325122442.30644-1-ulf.hansson@linaro.org>
+Subject: Re: [PATCH 2/2] MAINTAINERS: Add Ulf Hansson to the MEMORYSTICK section
+Date: Thu, 11 Apr 2019 11:54:19 +0200
+Message-ID: <CAPDyKFrJeV4bFSuhx8aO8108WqJ9k_X3igzQ75_B93XLUrmPVQ@mail.gmail.com>
+References: <20190322114345.26532-1-ulf.hansson@linaro.org> <CACAwPwY=rhfyoLvkPNB4Pdagv_wjKgnybeW1Az1gd3vAF_0exg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190325122442.30644-1-ulf.hansson@linaro.org>
+In-Reply-To: <CACAwPwY=rhfyoLvkPNB4Pdagv_wjKgnybeW1Az1gd3vAF_0exg@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Chaotian Jing <chaotian.jing@mediatek.com>
-Cc: Matthias Brugger <matthias.bgg@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Maxim Levitsky <maximlevitsky@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, Alex Dubov <oakad@yahoo.com>, Alex Dubov <alex.dubov@gmail.com>, Kai-Heng Feng <kai.heng.feng@canonical.com>, Rui Feng <rui_feng@realsil.com.cn>
 List-Id: linux-mmc@vger.kernel.org
 
-Chaotian,
+On Fri, 22 Mar 2019 at 18:03, Maxim Levitsky <maximlevitsky@gmail.com> wrote:
+>
+> Thanks!
+> I also expect to start contributing again to maintain the code I have
+> in the kernel, after I done with upsteaming the nvme-mdev driver I
+> have just sent for initial review.
+> I work for Red Hat now, so I hope I'll find some time for that in the
+> future (still on a hobby basis of course).
 
-On Mon, 25 Mar 2019 at 13:24, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> Cc: Chaotian Jing <chaotian.jing@mediatek.com>
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> ---
->  MAINTAINERS | 6 ++++++
->  1 file changed, 6 insertions(+)
->
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index 3e5a5d263f29..b43e563b4c95 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -9775,6 +9775,12 @@ F:       drivers/media/platform/mtk-vpu/
->  F:     Documentation/devicetree/bindings/media/mediatek-vcodec.txt
->  F:     Documentation/devicetree/bindings/media/mediatek-vpu.txt
->
-> +MEDIATEK MMC/SD/SDIO DRIVER
-> +M:     Chaotian Jing <chaotian.jing@mediatek.com>
-> +S:     Maintained
-> +F:     drivers/mmc/host/mtk-sd.c
-> +F:     Documentation/devicetree/bindings/mmc/mtk-sd.txt
-> +
+Thanks Maxim, I consider this as an ack from you.
 
-Are you fine with this, or do you have any other guys at your side
-that can help with reviewing patches for the mtk-sd driver?
+>
+> Best regards,
+>      Maxim Levitsky
+>
+> PS: my work email is mlevitsk@redhat.com
+
+If you want to change/add your email to the section in the
+MAINTAINERS, please just send a patch. I think otherwise people will
+continue to send to your gmail address.
 
 [...]
 
