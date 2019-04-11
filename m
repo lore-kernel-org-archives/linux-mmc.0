@@ -1,79 +1,40 @@
-From: Ludovic BARRE <ludovic.barre@st.com>
-Subject: Re: [PATCH 0/4] mmc: mmci: add busy detect for stm32 sdmmc variant
-Date: Thu, 11 Apr 2019 15:51:10 +0200
-Message-ID: <6cae3029-b40c-d43c-0712-47a472e8b1af@st.com>
-References: <1551802205-32188-1-git-send-email-ludovic.Barre@st.com>
- <5b9fe100-6147-d64f-f676-6a5370a03016@st.com>
- <CAPDyKFpRA4mP-SHt_JuWk-Ee7=2Jgv6jKFh_08n_V20czKyvNg@mail.gmail.com>
+From: Christoph Hellwig <hch@lst.de>
+Subject: Re: [PATCH 1/2] mmc: let the dma map ops handle bouncing
+Date: Thu, 11 Apr 2019 16:34:30 +0200
+Message-ID: <20190411143430.GA17371@lst.de>
+References: <20190411070948.29564-1-hch@lst.de> <20190411070948.29564-2-hch@lst.de> <CAPDyKFqHrvz_5taNTx7k6Skx=Ox+9XgQHHz0LZyr4QNV9orvRw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAPDyKFpRA4mP-SHt_JuWk-Ee7=2Jgv6jKFh_08n_V20czKyvNg@mail.gmail.com>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFqHrvz_5taNTx7k6Skx=Ox+9XgQHHz0LZyr4QNV9orvRw@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: DTML <devicetree@vger.kernel.org>, Alexandre Torgue <alexandre.torgue@st.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, linux-stm32@st-md-mailman.stormreply.com, Linux ARM <linux-arm-kernel@lists.infradead.org>
+Cc: Christoph Hellwig <hch@lst.de>, Russell King <linux@armlinux.org.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, "list@263.net:IOMMU DRIVERS <iommu@lists.linux-foundation.org>, Joerg
+        Roedel <joro@8bytes.org>," <iommu@lists.linux-foundation.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-hi Ulf
-
-On 4/11/19 3:29 PM, Ulf Hansson wrote:
-> On Thu, 11 Apr 2019 at 14:37, Ludovic BARRE <ludovic.barre@st.com> wrote:
->>
->> Hi Ulf
->>
->> Just a gentleman ping about this series.
->> I sent this series at same time of dt_mode
->> (no dependence between both).
+On Thu, Apr 11, 2019 at 11:00:56AM +0200, Ulf Hansson wrote:
+> >         blk_queue_flag_clear(QUEUE_FLAG_ADD_RANDOM, mq->queue);
+> >         if (mmc_can_erase(card))
+> >                 mmc_queue_setup_discard(mq->queue, card);
+> >
+> > -       blk_queue_bounce_limit(mq->queue, limit);
+> > +       if (!mmc_dev(host)->dma_mask || !*mmc_dev(host)->dma_mask)
+> > +               blk_queue_bounce_limit(mq->queue, BLK_BOUNCE_HIGH);
 > 
-> Thanks for pinging.
+> So this means we are not going to set a bounce limit for the queue, in
+> case we have a dma mask.
 > 
-> It's been a busy period, with travels etc. I am just catching up on
-> everything and I will soon come back to this.
+> Why isn't that needed no more? Whats has changed?
 
-No problem, I saw lot of power group presentations at linaro connect :-)
-
-> 
-> I haven't tried to apply this on top of the other recent queued
-> changes for mmci, but perhaps you can check if a rebase is needed?
-
-I try on the last mmc next, rebase, build and stm32mp157 test OK
-
-> Especially since I plan to run this on my ux500 board.
-> 
-> Kind regards
-> Uffe
-> 
->>
->> BR
->> Ludo
->>
->> On 3/5/19 5:10 PM, Ludovic Barre wrote:
->>> From: Ludovic Barre <ludovic.barre@st.com>
->>>
->>> This patch series adds busy detect for stm32 sdmmc variant.
->>> Some adaptations are required:
->>> -Avoid to check and poll busy status when is not expected.
->>> -Clear busy status bit if busy_detect_flag and busy_detect_mask are
->>>    different.
->>> -Add hardware busy timeout with MMCIDATATIMER register.
->>>
->>> Ludovic Barre (4):
->>>     mmc: mmci: avoid fake busy polling
->>>     mmc: mmci: fix clear of busy detect status
->>>     mmc: mmci: add hardware busy timeout feature
->>>     mmc: mmci: add busy detect for stm32 sdmmc variant
->>>
->>>    drivers/mmc/host/mmci.c | 67 +++++++++++++++++++++++++++++++++++++++----------
->>>    drivers/mmc/host/mmci.h |  3 +++
->>>    2 files changed, 57 insertions(+), 13 deletions(-)
->>>
+On most architectures it was never needed, the major hold out was x86-32
+with PAE.  In general the dma_mask tells the DMA API layer what is
+supported, and if the physical addressing doesn't support that it has to
+use bounce buffering like swiotlb (or dmabounce on arm32).  A couple
+month ago I finally fixes x86-32 to also properly set up swiotlb,
+and remove the block layerer bounce buffering that wasn't for highmem
+(which is about having a kernel mapping, not addressing), and ISA DMA
+(which is not handled like everything else, but we'll get there).
+But for some reason I missed mmc back then, so mmc right now is the
+only remaining user of address based block layer bouncing.
