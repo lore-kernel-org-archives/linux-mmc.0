@@ -1,62 +1,113 @@
-From: Christoph Hellwig <hch@lst.de>
-Subject: [PATCH 2/2] dma-mapping: remove dma_max_pfn
-Date: Thu, 11 Apr 2019 09:09:48 +0200
-Message-ID: <20190411070948.29564-3-hch@lst.de>
-References: <20190411070948.29564-1-hch@lst.de>
+From: Faiz Abbas <faiz_abbas@ti.com>
+Subject: [PATCH v6] mmc: sdhci-omap: Don't finish_mrq() on a command error during tuning
+Date: Thu, 11 Apr 2019 14:29:37 +0530
+Message-ID: <20190411085937.633-1-faiz_abbas@ti.com>
 Mime-Version: 1.0
+Content-Type: text/plain
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190411070948.29564-1-hch@lst.de>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, iommu@lists.linux-foundation.org, linux-kernel@vger.kernel.org
+To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Cc: ulf.hansson@linaro.org, kishon@ti.com, adrian.hunter@intel.com, faiz_abbas@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-These days the DMA mapping code must bounce buffer for any not supported
-address, and if they driver needs to optimize for natively supported
-ranged it should use dma_get_required_mask.
+commit 5b0d62108b46 ("mmc: sdhci-omap: Add platform specific reset
+callback") skips data resets during tuning operation. Because of this,
+a data error or data finish interrupt might still arrive after a command
+error has been handled and the mrq ended. This ends up with a "mmc0: Got
+data interrupt 0x00000002 even though no data operation was in progress"
+error message.
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
+Fix this by adding a platform specific callback for sdhci_irq. Mark the
+mrq as a failure but wait for a data interrupt instead of calling
+finish_mrq().
+
+Fixes: 5b0d62108b46 ("mmc: sdhci-omap: Add platform specific reset
+callback")
+Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- arch/arm/include/asm/dma-mapping.h | 7 -------
- include/linux/dma-mapping.h        | 7 -------
- 2 files changed, 14 deletions(-)
 
-diff --git a/arch/arm/include/asm/dma-mapping.h b/arch/arm/include/asm/dma-mapping.h
-index 03ba90ffc0f8..7e0486ad1318 100644
---- a/arch/arm/include/asm/dma-mapping.h
-+++ b/arch/arm/include/asm/dma-mapping.h
-@@ -89,13 +89,6 @@ static inline dma_addr_t virt_to_dma(struct device *dev, void *addr)
+Tested with 100 times boot tests on dra71x-evm, dra72x-evm and
+dra7xx-evm.
+
+v6:
+Changed return value to u32 to fix the build warning.
+
+v5:
+Drop patch 1 and replace call to sdhci_finish_command() with
+host->cmd = NULL
+
+v4:
+Fixed commit description for patch 1.
+Added SDHCI_INT_TIMEOUT to CMD_ERR_MASK in patch 2.
+
+v3:
+Removed the command error specific callback and using the already
+existing sdhci_irq callback instead. No measurable drop in performance.
+
+v2:
+Added EXPORT_SYMBOL_GPL for sdhci_cmd_err and sdhci_send_command to fix
+errors when built as module.
+
+ drivers/mmc/host/sdhci-omap.c | 38 +++++++++++++++++++++++++++++++++++
+ 1 file changed, 38 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+index 5bbed477c9b1..9f20fff9781b 100644
+--- a/drivers/mmc/host/sdhci-omap.c
++++ b/drivers/mmc/host/sdhci-omap.c
+@@ -797,6 +797,43 @@ void sdhci_omap_reset(struct sdhci_host *host, u8 mask)
+ 	sdhci_reset(host, mask);
  }
- #endif
  
--/* The ARM override for dma_max_pfn() */
--static inline unsigned long dma_max_pfn(struct device *dev)
--{
--	return dma_to_pfn(dev, *dev->dma_mask);
--}
--#define dma_max_pfn(dev) dma_max_pfn(dev)
--
- /* do not use this function in a driver */
- static inline bool is_device_dma_coherent(struct device *dev)
- {
-diff --git a/include/linux/dma-mapping.h b/include/linux/dma-mapping.h
-index 75e60be91e5f..6976d36c05de 100644
---- a/include/linux/dma-mapping.h
-+++ b/include/linux/dma-mapping.h
-@@ -729,13 +729,6 @@ static inline int dma_set_seg_boundary(struct device *dev, unsigned long mask)
- 	return -EIO;
- }
++#define CMD_ERR_MASK (SDHCI_INT_CRC | SDHCI_INT_END_BIT | SDHCI_INT_INDEX |\
++		      SDHCI_INT_TIMEOUT)
++#define CMD_MASK (CMD_ERR_MASK | SDHCI_INT_RESPONSE)
++
++static u32 sdhci_omap_irq(struct sdhci_host *host, u32 intmask)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
++
++	if (omap_host->is_tuning && host->cmd && !host->data_early &&
++	    (intmask & CMD_ERR_MASK)) {
++
++		/*
++		 * Since we are not resetting data lines during tuning
++		 * operation, data error or data complete interrupts
++		 * might still arrive. Mark this request as a failure
++		 * but still wait for the data interrupt
++		 */
++		if (intmask & SDHCI_INT_TIMEOUT)
++			host->cmd->error = -ETIMEDOUT;
++		else
++			host->cmd->error = -EILSEQ;
++
++		host->cmd = NULL;
++
++		/*
++		 * Sometimes command error interrupts and command complete
++		 * interrupt will arrive together. Clear all command related
++		 * interrupts here.
++		 */
++		sdhci_writel(host, intmask & CMD_MASK, SDHCI_INT_STATUS);
++		intmask &= ~CMD_MASK;
++	}
++
++	return intmask;
++}
++
+ static struct sdhci_ops sdhci_omap_ops = {
+ 	.set_clock = sdhci_omap_set_clock,
+ 	.set_power = sdhci_omap_set_power,
+@@ -807,6 +844,7 @@ static struct sdhci_ops sdhci_omap_ops = {
+ 	.platform_send_init_74_clocks = sdhci_omap_init_74_clocks,
+ 	.reset = sdhci_omap_reset,
+ 	.set_uhs_signaling = sdhci_omap_set_uhs_signaling,
++	.irq = sdhci_omap_irq,
+ };
  
--#ifndef dma_max_pfn
--static inline unsigned long dma_max_pfn(struct device *dev)
--{
--	return (*dev->dma_mask >> PAGE_SHIFT) + dev->dma_pfn_offset;
--}
--#endif
--
- static inline int dma_get_cache_alignment(void)
- {
- #ifdef ARCH_DMA_MINALIGN
+ static int sdhci_omap_set_capabilities(struct sdhci_omap_host *omap_host)
 -- 
-2.20.1
+2.19.2
