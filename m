@@ -1,29 +1,49 @@
 From: Christoph Hellwig <hch@lst.de>
-Subject: get rid of dma_max_pfn
-Date: Thu, 11 Apr 2019 09:09:46 +0200
-Message-ID: <20190411070948.29564-1-hch@lst.de>
+Subject: [PATCH 1/2] mmc: let the dma map ops handle bouncing
+Date: Thu, 11 Apr 2019 09:09:47 +0200
+Message-ID: <20190411070948.29564-2-hch@lst.de>
+References: <20190411070948.29564-1-hch@lst.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190411070948.29564-1-hch@lst.de>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: iommu@lists.linux-foundation.org, linux-mmc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Cc: Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, iommu@lists.linux-foundation.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi everyone,
+Just like we do for all other block drivers.  Especially as the limit
+imposed at the moment might be way to pessimistic for iommus.
 
-I though I got rid of all non-highmem, non-ISA block layer bounce
-buffering a while ago, but I missed the MMC case.  While I still plan to
-also kill off the highmem bouncing there I won't get to it this merge
-window, so for now I'd like to make some progress and move MMC to the
-DMA layer (swiotlb or arm dmabounce) bouncing for addressing limitations
-and kill off the dma_max_pfn helper.
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ drivers/mmc/core/queue.c | 7 ++-----
+ 1 file changed, 2 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+index 7c364a9c4eeb..eb9c0692062c 100644
+--- a/drivers/mmc/core/queue.c
++++ b/drivers/mmc/core/queue.c
+@@ -354,18 +354,15 @@ static const struct blk_mq_ops mmc_mq_ops = {
+ static void mmc_setup_queue(struct mmc_queue *mq, struct mmc_card *card)
+ {
+ 	struct mmc_host *host = card->host;
+-	u64 limit = BLK_BOUNCE_HIGH;
+ 	unsigned block_size = 512;
+ 
+-	if (mmc_dev(host)->dma_mask && *mmc_dev(host)->dma_mask)
+-		limit = (u64)dma_max_pfn(mmc_dev(host)) << PAGE_SHIFT;
+-
+ 	blk_queue_flag_set(QUEUE_FLAG_NONROT, mq->queue);
+ 	blk_queue_flag_clear(QUEUE_FLAG_ADD_RANDOM, mq->queue);
+ 	if (mmc_can_erase(card))
+ 		mmc_queue_setup_discard(mq->queue, card);
+ 
+-	blk_queue_bounce_limit(mq->queue, limit);
++	if (!mmc_dev(host)->dma_mask || !*mmc_dev(host)->dma_mask)
++		blk_queue_bounce_limit(mq->queue, BLK_BOUNCE_HIGH);
+ 	blk_queue_max_hw_sectors(mq->queue,
+ 		min(host->max_blk_count, host->max_req_size / 512));
+ 	blk_queue_max_segments(mq->queue, host->max_segs);
+-- 
+2.20.1
