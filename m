@@ -1,58 +1,50 @@
-From: Sowjanya Komatineni <skomatineni@nvidia.com>
-Subject: RE: [PATCH V3 05/10] arm64: tegra: fix default tap and trim values
-Date: Thu, 11 Apr 2019 19:42:35 +0000
-Message-ID: <BYAPR12MB3398FC694371926446B377D3C22F0@BYAPR12MB3398.namprd12.prod.outlook.com>
-References: <1552513552-23423-1-git-send-email-skomatineni@nvidia.com>
- <1552513552-23423-5-git-send-email-skomatineni@nvidia.com>
- <CAPDyKFq4ZVaMmvefuVqGs84E7xg5VgvU-Ecq1MYJdmBhuEm7xA@mail.gmail.com>
- <BYAPR12MB3398F91B190D9B1C56FDC4F7C2420@BYAPR12MB3398.namprd12.prod.outlook.com>
- <BYAPR12MB339845B4C5A37468841E256AC2550@BYAPR12MB3398.namprd12.prod.outlook.com>
- <CAPDyKFqwESQ9_gDxLXhzBzu236+8p6rnqricULA7GrZguVZQWQ@mail.gmail.com>
+From: Raul E Rangel <rrangel@chromium.org>
+Subject: [PATCH v1 0/4] Add tracing for SDHCI register access
+Date: Thu, 11 Apr 2019 16:08:18 -0600
+Message-ID: <20190411220822.81845-1-rrangel@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFqwESQ9_gDxLXhzBzu236+8p6rnqricULA7GrZguVZQWQ@mail.gmail.com>
-Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Harjani Ritesh <riteshh@codeaurora.org>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Aniruddha Tvs Rao <anrao@nvidia.com>, linux-tegra <linux-tegra@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, DTML <devicetree@vger.kernel.org>
+To: linux-trace-devel@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: djkurtz@chromium.org, zwisler@chromium.org, Raul E Rangel <rrangel@chromium.org>, Ludovic Barre <ludovic.barre@st.com>, Steven Rostedt <rostedt@goodmis.org>, Jisheng Zhang <Jisheng.Zhang@synaptics.com>, Adrian Hunter <adrian.hunter@intel.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, Faiz Abbas <faiz_abbas@ti.com>, linux-kernel@vger.kernel.org, Oleksij Rempel <linux@rempel-privat.de>, Liming Sun <lsun@mellanox.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Ingo Molnar <mingo@redhat.com>, Prabu Thangamuthu <Prabu.T@synopsys.com>, Chunyan Zhang <chunyan.zhang@unisoc.com>, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-PiBPbiBNb24sIDEgQXByIDIwMTkgYXQgMTk6NDMsIFNvd2phbnlhIEtvbWF0aW5lbmkgPHNrb21h
-dGluZW5pQG52aWRpYS5jb20+IHdyb3RlOg0KPiA+DQo+ID4gPiA+ID4NCj4gPiA+ID4gPiBEZWZh
-dWx0IHRhcCBhbmQgdHJpbSB2YWx1ZXMgYXJlIGluY29ycmVjdCBmb3IgVGVncmExODYgU0RNTUM0
-Lg0KPiA+ID4gPiA+IFRoaXMgcGF0Y2ggZml4ZXMgaXQuDQo+ID4gPiA+ID4NCj4gPiA+ID4gPiBU
-ZXN0ZWQtYnk6IEpvbiBIdW50ZXIgPGpvbmF0aGFuaEBudmlkaWEuY29tPg0KPiA+ID4gPiA+IFNp
-Z25lZC1vZmYtYnk6IFNvd2phbnlhIEtvbWF0aW5lbmkgPHNrb21hdGluZW5pQG52aWRpYS5jb20+
-DQo+ID4gPiA+DQo+ID4gPiA+IElzIHRoaXMgYSBmaXggYW5kL29yIGZvciBzdGFibGU/DQo+ID4g
-PiA+DQo+ID4gPiA+IEluIGVpdGhlciBjYXNlLCBJIGFtIGxlYXZpbmcgdGhpcyBmb3IgYXJtLXNv
-Yy4NCj4gPiA+ID4NCj4gPiA+ID4gS2luZCByZWdhcmRzDQo+ID4gPiA+IFVmZmUNCj4gPiA+ID4N
-Cj4gPiA+DQo+ID4gPiBUaGFua3MgVWZmZS4gWWVzIHRoaXMgaXMgYXBwbGljYWJsZSBmb3Igc3Rh
-YmxlLg0KPiA+DQo+ID4gSSBkb27igJl0IHNlZSBhbnkgY29uZmlybWF0aW9uIG9mIHRoaXMgYmVp
-bmcgYXBwbGllZCBieSBhcm0tc29jLg0KPiA+IFNvIHRob3VnaHQgdG8gcmUtY2hlY2sgaWYgdGhp
-cyBpcyBhcHBsaWVkPw0KPg0KPiBQZXJoYXBzIHJlcG9zdCBpdCB0byByZW1pbmQgdGhlIHNvYyBt
-YWludGFpbmVyIHRvIHBpY2sgaXQgdXAuDQo+DQo+IEtpbmQgcmVnYXJkcw0KPiBVZmZlDQo+DQoN
-ClJlcG9zdGVkIHBhdGNoIDUgYW5kIDEwIGluIHRoaXMgc2VyaWVzIHRoYXQgYXJlIHdhaXRpbmcg
-Zm9yIHNvYyBtYWludGFpbmVycyBhcyBmcmVzaCBpbmRpdmlkdWFsIHBhdGNoZXMuDQoNClRoYW5r
-cw0KU293amFueWENCg0KPiA+DQo+ID4gPiA+ID4gLS0tDQo+ID4gPiA+ID4gIGFyY2gvYXJtNjQv
-Ym9vdC9kdHMvbnZpZGlhL3RlZ3JhMTg2LmR0c2kgfCA0ICsrLS0NCj4gPiA+ID4gPiAgMSBmaWxl
-IGNoYW5nZWQsIDIgaW5zZXJ0aW9ucygrKSwgMiBkZWxldGlvbnMoLSkNCj4gPiA+ID4gPg0KPiA+
-ID4gPiA+IGRpZmYgLS1naXQgYS9hcmNoL2FybTY0L2Jvb3QvZHRzL252aWRpYS90ZWdyYTE4Ni5k
-dHNpDQo+ID4gPiA+ID4gYi9hcmNoL2FybTY0L2Jvb3QvZHRzL252aWRpYS90ZWdyYTE4Ni5kdHNp
-DQo+ID4gPiA+ID4gaW5kZXggOTdhZWI5NDZlZDVlLi40NzJmNTVmZTk0ODggMTAwNjQ0DQo+ID4g
-PiA+ID4gLS0tIGEvYXJjaC9hcm02NC9ib290L2R0cy9udmlkaWEvdGVncmExODYuZHRzaQ0KPiA+
-ID4gPiA+ICsrKyBiL2FyY2gvYXJtNjQvYm9vdC9kdHMvbnZpZGlhL3RlZ3JhMTg2LmR0c2kNCj4g
-PiA+ID4gPiBAQCAtMzE3LDggKzMxNyw4IEBADQo+ID4gPiA+ID4gICAgICAgICAgICAgICAgIG52
-aWRpYSxwYWQtYXV0b2NhbC1wdWxsLWRvd24tb2Zmc2V0LTF2OC10aW1lb3V0ID0gPDB4MGE+Ow0K
-PiA+ID4gPiA+ICAgICAgICAgICAgICAgICBudmlkaWEscGFkLWF1dG9jYWwtcHVsbC11cC1vZmZz
-ZXQtM3YzLXRpbWVvdXQgPSA8MHgwYT47DQo+ID4gPiA+ID4gICAgICAgICAgICAgICAgIG52aWRp
-YSxwYWQtYXV0b2NhbC1wdWxsLWRvd24tb2Zmc2V0LTN2My10aW1lb3V0ID0gPDB4MGE+Ow0KPiA+
-ID4gPiA+IC0gICAgICAgICAgICAgICBudmlkaWEsZGVmYXVsdC10YXAgPSA8MHg1PjsNCj4gPiA+
-ID4gPiAtICAgICAgICAgICAgICAgbnZpZGlhLGRlZmF1bHQtdHJpbSA9IDwweDk+Ow0KPiA+ID4g
-PiA+ICsgICAgICAgICAgICAgICBudmlkaWEsZGVmYXVsdC10YXAgPSA8MHg5PjsNCj4gPiA+ID4g
-PiArICAgICAgICAgICAgICAgbnZpZGlhLGRlZmF1bHQtdHJpbSA9IDwweDU+Ow0KPiA+ID4gPiA+
-ICAgICAgICAgICAgICAgICBudmlkaWEsZHFzLXRyaW0gPSA8NjM+Ow0KPiA+ID4gPiA+ICAgICAg
-ICAgICAgICAgICBtbWMtaHM0MDAtMV84djsNCj4gPiA+ID4gPiAgICAgICAgICAgICAgICAgc3Rh
-dHVzID0gImRpc2FibGVkIjsNCj4gPiA+ID4gPiAtLQ0KPiA+ID4gPiA+IDIuNy40DQo+ID4gPiA+
-ID4NCg==
+I was debugging a SDHC hardware bug and got tired of having to
+translate the register values by hand. This patch set makes it so all
+SDHC register read and write operations can be traced and easily read by
+a human.
+
+An example trace can be seen here: https://pastebin.com/x73d5cvL
+
+I ended up defining a new tracing function `trace_print_register`. This
+method takes a register definition and pretty prints it. It's a hybrid
+of `trace_print_flags_seq` and `trace_print_symbols_seq`. It supports
+printing bit fields, enum fields, and numeric fields. See the
+documentation for usage.
+
+I hope this makes someone else's life easier when debugging SDHC
+hardware problems.
+
+Raul E Rangel (4):
+  trace_events: Add trace_print_register to print register fields
+  mmc/sdhci: Rename sdhci.c to sdhci-core.c
+  mmc/host/sdhci: Add register read and write trace events
+  mmc/host/sdhci: Make sdhci_read/sdhci_write call trace functions
+
+ drivers/mmc/host/Makefile                  |   4 +
+ drivers/mmc/host/{sdhci.c => sdhci-core.c} | 136 +++++++++
+ drivers/mmc/host/sdhci-trace.c             | 319 +++++++++++++++++++++
+ drivers/mmc/host/sdhci-trace.h             |  93 ++++++
+ drivers/mmc/host/sdhci.h                   |  89 +-----
+ include/linux/trace_events.h               |   4 +
+ include/linux/tracepoint-defs.h            |   6 +
+ include/trace/trace_events.h               |   9 +
+ kernel/trace/trace_output.c                | 121 ++++++++
+ 9 files changed, 698 insertions(+), 83 deletions(-)
+ rename drivers/mmc/host/{sdhci.c => sdhci-core.c} (97%)
+ create mode 100644 drivers/mmc/host/sdhci-trace.c
+ create mode 100644 drivers/mmc/host/sdhci-trace.h
+
+-- 
+2.21.0.392.gf8f6787159e-goog
