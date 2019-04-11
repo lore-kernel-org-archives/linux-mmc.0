@@ -1,113 +1,68 @@
-From: Faiz Abbas <faiz_abbas@ti.com>
-Subject: [PATCH v6] mmc: sdhci-omap: Don't finish_mrq() on a command error during tuning
-Date: Thu, 11 Apr 2019 14:29:37 +0530
-Message-ID: <20190411085937.633-1-faiz_abbas@ti.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/2] mmc: let the dma map ops handle bouncing
+Date: Thu, 11 Apr 2019 11:00:56 +0200
+Message-ID: <CAPDyKFqHrvz_5taNTx7k6Skx=Ox+9XgQHHz0LZyr4QNV9orvRw@mail.gmail.com>
+References: <20190411070948.29564-1-hch@lst.de> <20190411070948.29564-2-hch@lst.de>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190411070948.29564-2-hch@lst.de>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
-Cc: ulf.hansson@linaro.org, kishon@ti.com, adrian.hunter@intel.com, faiz_abbas@ti.com
+To: Christoph Hellwig <hch@lst.de>
+Cc: Russell King <linux@armlinux.org.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, "list@263.net:IOMMU DRIVERS <iommu@lists.linux-foundation.org>, Joerg
+        Roedel <joro@8bytes.org>," <iommu@lists.linux-foundation.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-commit 5b0d62108b46 ("mmc: sdhci-omap: Add platform specific reset
-callback") skips data resets during tuning operation. Because of this,
-a data error or data finish interrupt might still arrive after a command
-error has been handled and the mrq ended. This ends up with a "mmc0: Got
-data interrupt 0x00000002 even though no data operation was in progress"
-error message.
+Hi Christoph,
 
-Fix this by adding a platform specific callback for sdhci_irq. Mark the
-mrq as a failure but wait for a data interrupt instead of calling
-finish_mrq().
+On Thu, 11 Apr 2019 at 09:10, Christoph Hellwig <hch@lst.de> wrote:
+>
+> Just like we do for all other block drivers.  Especially as the limit
+> imposed at the moment might be way to pessimistic for iommus.
 
-Fixes: 5b0d62108b46 ("mmc: sdhci-omap: Add platform specific reset
-callback")
-Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
----
+I would appreciate some information in the changelog, as it's quite
+unclear of what this change really means.
 
-Tested with 100 times boot tests on dra71x-evm, dra72x-evm and
-dra7xx-evm.
+>
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
+>  drivers/mmc/core/queue.c | 7 ++-----
+>  1 file changed, 2 insertions(+), 5 deletions(-)
+>
+> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+> index 7c364a9c4eeb..eb9c0692062c 100644
+> --- a/drivers/mmc/core/queue.c
+> +++ b/drivers/mmc/core/queue.c
+> @@ -354,18 +354,15 @@ static const struct blk_mq_ops mmc_mq_ops = {
+>  static void mmc_setup_queue(struct mmc_queue *mq, struct mmc_card *card)
+>  {
+>         struct mmc_host *host = card->host;
+> -       u64 limit = BLK_BOUNCE_HIGH;
+>         unsigned block_size = 512;
+>
+> -       if (mmc_dev(host)->dma_mask && *mmc_dev(host)->dma_mask)
+> -               limit = (u64)dma_max_pfn(mmc_dev(host)) << PAGE_SHIFT;
+> -
+>         blk_queue_flag_set(QUEUE_FLAG_NONROT, mq->queue);
+>         blk_queue_flag_clear(QUEUE_FLAG_ADD_RANDOM, mq->queue);
+>         if (mmc_can_erase(card))
+>                 mmc_queue_setup_discard(mq->queue, card);
+>
+> -       blk_queue_bounce_limit(mq->queue, limit);
+> +       if (!mmc_dev(host)->dma_mask || !*mmc_dev(host)->dma_mask)
+> +               blk_queue_bounce_limit(mq->queue, BLK_BOUNCE_HIGH);
 
-v6:
-Changed return value to u32 to fix the build warning.
+So this means we are not going to set a bounce limit for the queue, in
+case we have a dma mask.
 
-v5:
-Drop patch 1 and replace call to sdhci_finish_command() with
-host->cmd = NULL
+Why isn't that needed no more? Whats has changed?
 
-v4:
-Fixed commit description for patch 1.
-Added SDHCI_INT_TIMEOUT to CMD_ERR_MASK in patch 2.
+>         blk_queue_max_hw_sectors(mq->queue,
+>                 min(host->max_blk_count, host->max_req_size / 512));
+>         blk_queue_max_segments(mq->queue, host->max_segs);
+> --
+> 2.20.1
+>
 
-v3:
-Removed the command error specific callback and using the already
-existing sdhci_irq callback instead. No measurable drop in performance.
-
-v2:
-Added EXPORT_SYMBOL_GPL for sdhci_cmd_err and sdhci_send_command to fix
-errors when built as module.
-
- drivers/mmc/host/sdhci-omap.c | 38 +++++++++++++++++++++++++++++++++++
- 1 file changed, 38 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-index 5bbed477c9b1..9f20fff9781b 100644
---- a/drivers/mmc/host/sdhci-omap.c
-+++ b/drivers/mmc/host/sdhci-omap.c
-@@ -797,6 +797,43 @@ void sdhci_omap_reset(struct sdhci_host *host, u8 mask)
- 	sdhci_reset(host, mask);
- }
- 
-+#define CMD_ERR_MASK (SDHCI_INT_CRC | SDHCI_INT_END_BIT | SDHCI_INT_INDEX |\
-+		      SDHCI_INT_TIMEOUT)
-+#define CMD_MASK (CMD_ERR_MASK | SDHCI_INT_RESPONSE)
-+
-+static u32 sdhci_omap_irq(struct sdhci_host *host, u32 intmask)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
-+
-+	if (omap_host->is_tuning && host->cmd && !host->data_early &&
-+	    (intmask & CMD_ERR_MASK)) {
-+
-+		/*
-+		 * Since we are not resetting data lines during tuning
-+		 * operation, data error or data complete interrupts
-+		 * might still arrive. Mark this request as a failure
-+		 * but still wait for the data interrupt
-+		 */
-+		if (intmask & SDHCI_INT_TIMEOUT)
-+			host->cmd->error = -ETIMEDOUT;
-+		else
-+			host->cmd->error = -EILSEQ;
-+
-+		host->cmd = NULL;
-+
-+		/*
-+		 * Sometimes command error interrupts and command complete
-+		 * interrupt will arrive together. Clear all command related
-+		 * interrupts here.
-+		 */
-+		sdhci_writel(host, intmask & CMD_MASK, SDHCI_INT_STATUS);
-+		intmask &= ~CMD_MASK;
-+	}
-+
-+	return intmask;
-+}
-+
- static struct sdhci_ops sdhci_omap_ops = {
- 	.set_clock = sdhci_omap_set_clock,
- 	.set_power = sdhci_omap_set_power,
-@@ -807,6 +844,7 @@ static struct sdhci_ops sdhci_omap_ops = {
- 	.platform_send_init_74_clocks = sdhci_omap_init_74_clocks,
- 	.reset = sdhci_omap_reset,
- 	.set_uhs_signaling = sdhci_omap_set_uhs_signaling,
-+	.irq = sdhci_omap_irq,
- };
- 
- static int sdhci_omap_set_capabilities(struct sdhci_omap_host *omap_host)
--- 
-2.19.2
+Kind regards
+Uffe
