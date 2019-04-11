@@ -1,111 +1,74 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V3] mmc: tegra: add sdhci tegra suspend and resume
-Date: Thu, 11 Apr 2019 12:08:34 +0200
-Message-ID: <CAPDyKFpJ6S2oS3Zz+RAwhJG+gdXwwbDUSWTOJdji2wm2AV1Bng@mail.gmail.com>
-References: <1554305964-19347-1-git-send-email-skomatineni@nvidia.com>
+Subject: Re: [PATCH V3 05/10] arm64: tegra: fix default tap and trim values
+Date: Thu, 11 Apr 2019 12:11:38 +0200
+Message-ID: <CAPDyKFqwESQ9_gDxLXhzBzu236+8p6rnqricULA7GrZguVZQWQ@mail.gmail.com>
+References: <1552513552-23423-1-git-send-email-skomatineni@nvidia.com>
+ <1552513552-23423-5-git-send-email-skomatineni@nvidia.com>
+ <CAPDyKFq4ZVaMmvefuVqGs84E7xg5VgvU-Ecq1MYJdmBhuEm7xA@mail.gmail.com>
+ <BYAPR12MB3398F91B190D9B1C56FDC4F7C2420@BYAPR12MB3398.namprd12.prod.outlook.com>
+ <BYAPR12MB339845B4C5A37468841E256AC2550@BYAPR12MB3398.namprd12.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1554305964-19347-1-git-send-email-skomatineni@nvidia.com>
+In-Reply-To: <BYAPR12MB339845B4C5A37468841E256AC2550@BYAPR12MB3398.namprd12.prod.outlook.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Sowjanya Komatineni <skomatineni@nvidia.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Thierry Reding <thierry.reding@gmail.com>, Jon Hunter <jonathanh@nvidia.com>, Timo Alho <talho@nvidia.com>, anrao@nvidia.com, bbiswas@nvidia.com, linux-tegra <linux-tegra@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Harjani Ritesh <riteshh@codeaurora.org>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Aniruddha Tvs Rao <anrao@nvidia.com>, linux-tegra <linux-tegra@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, DTML <devicetree@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 3 Apr 2019 at 17:39, Sowjanya Komatineni <skomatineni@nvidia.com> wrote:
+On Mon, 1 Apr 2019 at 19:43, Sowjanya Komatineni <skomatineni@nvidia.com> w=
+rote:
 >
-> This patch adds suspend and resume PM ops for tegra SDHCI.
+> > > >
+> > > > Default tap and trim values are incorrect for Tegra186 SDMMC4.
+> > > > This patch fixes it.
+> > > >
+> > > > Tested-by: Jon Hunter <jonathanh@nvidia.com>
+> > > > Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
+> > >
+> > > Is this a fix and/or for stable?
+> > >
+> > > In either case, I am leaving this for arm-soc.
+> > >
+> > > Kind regards
+> > > Uffe
+> > >
+> >
+> > Thanks Uffe. Yes this is applicable for stable.
 >
-> Acked-by: Thierry Reding <treding@nvidia.com>
-> Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
-> ---
->  drivers/mmc/host/sdhci-tegra.c | 56 +++++++++++++++++++++++++++++++++++++++++-
->  1 file changed, 55 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index eafaaefab4a6..5ec304166566 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -1611,11 +1611,65 @@ static int sdhci_tegra_remove(struct platform_device *pdev)
->         return 0;
->  }
->
+> I don=E2=80=99t see any confirmation of this being applied by arm-soc.
+> So thought to re-check if this is applied?
 
-sdhci_suspend_host() exists only if CONFIG_PM is set. Therefore, I
-think it's better to add explicit check for that. So add the ifdef
-like below, and a corresponding #endif, after the implementation of
-sdhci_tegra_resume().
-
-#ifdef CONFIG_PM_SLEEP
-
-> +static int __maybe_unused sdhci_tegra_suspend(struct device *dev)
-> +{
-> +       struct sdhci_host *host = dev_get_drvdata(dev);
-> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +       int ret;
-> +
-> +       if (host->mmc->caps2 & MMC_CAP2_CQE) {
-> +               ret = cqhci_suspend(host->mmc);
-> +               if (ret)
-> +                       return ret;
-> +       }
-> +
-> +       ret = sdhci_suspend_host(host);
-> +       if (ret) {
-> +               cqhci_resume(host->mmc);
-> +               return ret;
-> +       }
-> +
-> +       clk_disable_unprepare(pltfm_host->clk);
-> +       return 0;
-> +}
-> +
-> +static int __maybe_unused sdhci_tegra_resume(struct device *dev)
-> +{
-> +       struct sdhci_host *host = dev_get_drvdata(dev);
-> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +       int ret;
-> +
-> +       ret = clk_prepare_enable(pltfm_host->clk);
-> +       if (ret)
-> +               return ret;
-> +
-> +       ret = sdhci_resume_host(host);
-> +       if (ret)
-> +               goto disable_clk;
-> +
-> +       if (host->mmc->caps2 & MMC_CAP2_CQE) {
-> +               ret = cqhci_resume(host->mmc);
-> +               if (ret)
-> +                       goto suspend_host;
-> +       }
-> +
-> +       return 0;
-> +
-> +suspend_host:
-> +       sdhci_suspend_host(host);
-> +disable_clk:
-> +       clk_disable_unprepare(pltfm_host->clk);
-> +       return ret;
-> +}
-> +
-> +static SIMPLE_DEV_PM_OPS(sdhci_tegra_dev_pm_ops, sdhci_tegra_suspend,
-> +                        sdhci_tegra_resume);
-> +
->  static struct platform_driver sdhci_tegra_driver = {
->         .driver         = {
->                 .name   = "sdhci-tegra",
->                 .of_match_table = sdhci_tegra_dt_match,
-> -               .pm     = &sdhci_pltfm_pmops,
-> +               .pm     = &sdhci_tegra_dev_pm_ops,
->         },
->         .probe          = sdhci_tegra_probe,
->         .remove         = sdhci_tegra_remove,
-> --
-> 2.7.4
->
-
-Otherwise this looks good to me.
+Perhaps repost it to remind the soc maintainer to pick it up.
 
 Kind regards
 Uffe
+
+>
+> > > > ---
+> > > >  arch/arm64/boot/dts/nvidia/tegra186.dtsi | 4 ++--
+> > > >  1 file changed, 2 insertions(+), 2 deletions(-)
+> > > >
+> > > > diff --git a/arch/arm64/boot/dts/nvidia/tegra186.dtsi
+> > > > b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
+> > > > index 97aeb946ed5e..472f55fe9488 100644
+> > > > --- a/arch/arm64/boot/dts/nvidia/tegra186.dtsi
+> > > > +++ b/arch/arm64/boot/dts/nvidia/tegra186.dtsi
+> > > > @@ -317,8 +317,8 @@
+> > > >                 nvidia,pad-autocal-pull-down-offset-1v8-timeout =3D=
+ <0x0a>;
+> > > >                 nvidia,pad-autocal-pull-up-offset-3v3-timeout =3D <=
+0x0a>;
+> > > >                 nvidia,pad-autocal-pull-down-offset-3v3-timeout =3D=
+ <0x0a>;
+> > > > -               nvidia,default-tap =3D <0x5>;
+> > > > -               nvidia,default-trim =3D <0x9>;
+> > > > +               nvidia,default-tap =3D <0x9>;
+> > > > +               nvidia,default-trim =3D <0x5>;
+> > > >                 nvidia,dqs-trim =3D <63>;
+> > > >                 mmc-hs400-1_8v;
+> > > >                 status =3D "disabled";
+> > > > --
+> > > > 2.7.4
+> > > >
