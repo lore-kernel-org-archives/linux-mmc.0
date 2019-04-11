@@ -1,51 +1,98 @@
-From: Chaotian Jing <chaotian.jing@mediatek.com>
-Subject: Re: [PATCH] MAINTAINERS: Add section for MediaTek MMC/SD/SDIO driver
-Date: Thu, 11 Apr 2019 18:42:32 +0800
-Message-ID: <1554979352.18628.0.camel@mhfsdcap03>
-References: <20190325122442.30644-1-ulf.hansson@linaro.org>
-         <CAPDyKFqNih3kEuRM9HHkmcVOzaT2RZLRjb=0ifq6hGB+OCxUug@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2] mmc: sdhci_am654: Clear HISPD_ENA in some lower speed modes
+Date: Thu, 11 Apr 2019 12:42:51 +0200
+Message-ID: <CAPDyKFpTc-RTQtbV+Q1_ebPoYa-3phmGpjvvCNRnG8-tSiCm=w@mail.gmail.com>
+References: <20190401125804.5665-1-faiz_abbas@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFqNih3kEuRM9HHkmcVOzaT2RZLRjb=0ifq6hGB+OCxUug@mail.gmail.com>
+In-Reply-To: <20190401125804.5665-1-faiz_abbas@ti.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Matthias Brugger <matthias.bgg@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Faiz Abbas <faiz_abbas@ti.com>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 2019-04-11 at 11:49 +0200, Ulf Hansson wrote:
-> Chaotian,
-> 
-> On Mon, 25 Mar 2019 at 13:24, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> >
-> > Cc: Chaotian Jing <chaotian.jing@mediatek.com>
-> > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> > ---
-> >  MAINTAINERS | 6 ++++++
-> >  1 file changed, 6 insertions(+)
-> >
-> > diff --git a/MAINTAINERS b/MAINTAINERS
-> > index 3e5a5d263f29..b43e563b4c95 100644
-> > --- a/MAINTAINERS
-> > +++ b/MAINTAINERS
-> > @@ -9775,6 +9775,12 @@ F:       drivers/media/platform/mtk-vpu/
-> >  F:     Documentation/devicetree/bindings/media/mediatek-vcodec.txt
-> >  F:     Documentation/devicetree/bindings/media/mediatek-vpu.txt
-> >
-> > +MEDIATEK MMC/SD/SDIO DRIVER
-> > +M:     Chaotian Jing <chaotian.jing@mediatek.com>
-> > +S:     Maintained
-> > +F:     drivers/mmc/host/mtk-sd.c
-> > +F:     Documentation/devicetree/bindings/mmc/mtk-sd.txt
-> > +
-> 
-> Are you fine with this, or do you have any other guys at your side
-> that can help with reviewing patches for the mtk-sd driver?
-> 
-Yes, It's fine for me.
-Thx!
-> [...]
-> 
-> Kind regards
-> Uffe
+On Mon, 1 Apr 2019 at 14:58, Faiz Abbas <faiz_abbas@ti.com> wrote:
+>
+> According to the AM654x Data Manual[1], the setup timing in lower speed
+> modes can only be met if the controller uses a falling edge data launch.
+>
+> To ensure this, the HIGH_SPEED_ENA (HOST_CONTROL[2]) bit should be
+> cleared in default speed, SD high speed, MMC high speed, SDR12 and SDR25
+> speed modes.
+>
+> Use the sdhci writeb callback to implement this condition.
+>
+> [1] http://www.ti.com/lit/gpn/am6546 Section 5.10.5.16.1
+>
+> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+
+Applied for next, thanks!
+
+Kind regards
+Uffe
+
+
+> ---
+>
+> v2: Dropped QUIRK in favour of writeb callback
+>
+>  drivers/mmc/host/Kconfig       |  1 +
+>  drivers/mmc/host/sdhci_am654.c | 22 ++++++++++++++++++++++
+>  2 files changed, 23 insertions(+)
+>
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 28fcd8f580a1..6379fba8b122 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -993,6 +993,7 @@ config MMC_SDHCI_OMAP
+>  config MMC_SDHCI_AM654
+>         tristate "Support for the SDHCI Controller in TI's AM654 SOCs"
+>         depends on MMC_SDHCI_PLTFM && OF
+> +       select MMC_SDHCI_IO_ACCESSORS
+>         help
+>           This selects the Secure Digital Host Controller Interface (SDHCI)
+>           support present in TI's AM654 SOCs. The controller supports
+> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+> index eea183e90f1b..a91c0b45c48d 100644
+> --- a/drivers/mmc/host/sdhci_am654.c
+> +++ b/drivers/mmc/host/sdhci_am654.c
+> @@ -158,6 +158,27 @@ static void sdhci_am654_set_power(struct sdhci_host *host, unsigned char mode,
+>         sdhci_set_power_noreg(host, mode, vdd);
+>  }
+>
+> +static void sdhci_am654_write_b(struct sdhci_host *host, u8 val, int reg)
+> +{
+> +       unsigned char timing = host->mmc->ios.timing;
+> +
+> +       if (reg == SDHCI_HOST_CONTROL) {
+> +               switch (timing) {
+> +               /*
+> +                * According to the data manual, HISPD bit
+> +                * should not be set in these speed modes.
+> +                */
+> +               case MMC_TIMING_SD_HS:
+> +               case MMC_TIMING_MMC_HS:
+> +               case MMC_TIMING_UHS_SDR12:
+> +               case MMC_TIMING_UHS_SDR25:
+> +                       val &= ~SDHCI_CTRL_HISPD;
+> +               }
+> +       }
+> +
+> +       writeb(val, host->ioaddr + reg);
+> +}
+> +
+>  static struct sdhci_ops sdhci_am654_ops = {
+>         .get_max_clock = sdhci_pltfm_clk_get_max_clock,
+>         .get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
+> @@ -165,6 +186,7 @@ static struct sdhci_ops sdhci_am654_ops = {
+>         .set_bus_width = sdhci_set_bus_width,
+>         .set_power = sdhci_am654_set_power,
+>         .set_clock = sdhci_am654_set_clock,
+> +       .write_b = sdhci_am654_write_b,
+>         .reset = sdhci_reset,
+>  };
+>
+> --
+> 2.19.2
+>
