@@ -1,79 +1,46 @@
-From: Steven Rostedt <rostedt@goodmis.org>
-Subject: Re: [PATCH v1 1/4] trace_events: Add trace_print_register to print
- register fields
-Date: Fri, 12 Apr 2019 11:42:00 -0400
-Message-ID: <20190412114200.6c1a8593@gandalf.local.home>
-References: <20190411220822.81845-1-rrangel@chromium.org>
-        <20190411220822.81845-2-rrangel@chromium.org>
-        <20190411183934.28e6ad65@gandalf.local.home>
-        <20190412153036.GB101407@google.com>
+From: Matthias Brugger <matthias.bgg@gmail.com>
+Subject: Re: [PATCH 03/24] dt-bindings: pwrap: mediatek: add pwrap support for
+ MT8516
+Date: Fri, 12 Apr 2019 19:44:05 +0200
+Message-ID: <effcf905-92c9-0181-2518-5a8e943f36ac@gmail.com>
+References: <20190323211612.860-1-fparent@baylibre.com>
+ <20190323211612.860-4-fparent@baylibre.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190412153036.GB101407@google.com>
+In-Reply-To: <20190323211612.860-4-fparent@baylibre.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Raul Rangel <rrangel@chromium.org>
-Cc: linux-trace-devel@vger.kernel.org, linux-mmc@vger.kernel.org, djkurtz@chromium.org, zwisler@chromium.org, linux-kernel@vger.kernel.org, Ingo Molnar <mingo@redhat.com>
+To: Fabien Parent <fparent@baylibre.com>, robh+dt@kernel.org, mark.rutland@arm.com
+Cc: sean.wang@kernel.org, ryder.lee@mediatek.com, hsin-hsiung.wang@mediatek.com, wenzhen.yu@mediatek.com, chaotian.jing@mediatek.com, yong.mao@mediatek.com, jjian.zhou@mediatek.com, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-i2c@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org, linux-serial@vger.kernel.org, linux-spi@vger.kernel.org, linux-watchdog@vger.kernel.org, linux-clk@vger.kernel.org, stephane.leprovost@mediatek.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, 12 Apr 2019 09:30:36 -0600
-Raul Rangel <rrangel@chromium.org> wrote:
 
-> Ah, I wasn't aware that the format was exposed via sysfs. That makes
-> sense why the macros are used. I was using xhci-trace as my reference
-> point which just calls arbitrary functions.
-> 
-> cat /sys/kernel/debug/tracing/events/xhci-hcd/xhci_handle_event/format
-> print fmt: "%s: %s",
-> xhci_ring_type_string(REC->type),
-> xhci_decode_trb(REC->field0, REC->field1, REC->field2, REC->field3)
-> 
-> I'm guessing calling out to a function is not the way the framework was
-> intended to be used. Does this mean that every TRB type in xhci_decode_trb
-> should be its own trace event so the printf format isn't hidden inside
-> the code?
 
-You can add plugins to handle this. See tools/lib/traceevent/plugin_*.c
+On 23/03/2019 22:15, Fabien Parent wrote:
+> Add binding documentation of pwrap for MT8516 SoCs.
+> 
+> Signed-off-by: Fabien Parent <fparent@baylibre.com>
+> ---
+>  Documentation/devicetree/bindings/soc/mediatek/pwrap.txt | 1 +
+>  1 file changed, 1 insertion(+)
 
-> 
-> > 
-> > How does perf or trace-cmd parse this? To add something like this, you
-> > need them to have the same output as what is displayed by the trace
-> > file otherwise NAK.  
-> 
-> So for the short term I can remove __print_register. The SDHCI tracing
-> doesn't use it, but instead calls out to a method that calls
-> trace_print_register directly. Or I could move trace_print_register
-> into the sdhci-trace module.
-
-For the short term yeah. And you can add a plugin to the libtraceevent
-to teach trace-cmd and perf how to parse it.
-See "tep_register_print_function()"
-
-> 
-> cat /sys/kernel/debug/tracing/events/sdhci/sdhci_read/format
-> 
-> print fmt: "%s: %#x [%s] => %#x: %s",
->   __get_str(name),
->   REC->reg,
->   __print_symbolic(REC->reg & ~3UL, {0x00, "DMA_ADDRESS"}, ...),
->   REC->val,
->   sdhci_decode_register( p, REC->reg, REC->val, REC->mask )
-> 
-> The format prints out the raw value, so using perf or trace-cmd
-> will still have value, you just won't get the pretty print.
-> 
-> For the long term I could make event-parser handle __print_register. I'm
-> assuming it just needs to handle the additional case?
-> https://github.com/torvalds/linux/blob/master/tools/lib/traceevent/event-parse.c#L3040
-> 
-
-Yes, I'm fine with adding new generic functions that can parse the code
-properly to libtraceevent. Anything added to the trace_event code
-should have a corresponding routine added to libtraceevent. Just
-remember, that those *are* user API, and once made, they can not change.
+applied to v5.1-next/soc
 
 Thanks!
 
--- Steve
+> 
+> diff --git a/Documentation/devicetree/bindings/soc/mediatek/pwrap.txt b/Documentation/devicetree/bindings/soc/mediatek/pwrap.txt
+> index 5a2ef1726e2a..7a32404c6114 100644
+> --- a/Documentation/devicetree/bindings/soc/mediatek/pwrap.txt
+> +++ b/Documentation/devicetree/bindings/soc/mediatek/pwrap.txt
+> @@ -25,6 +25,7 @@ Required properties in pwrap device node.
+>  	"mediatek,mt8135-pwrap" for MT8135 SoCs
+>  	"mediatek,mt8173-pwrap" for MT8173 SoCs
+>  	"mediatek,mt8183-pwrap" for MT8183 SoCs
+> +	"mediatek,mt8516-pwrap" for MT8516 SoCs
+>  - interrupts: IRQ for pwrap in SOC
+>  - reg-names: Must include the following entries:
+>    "pwrap": Main registers base
+> 
