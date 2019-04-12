@@ -1,58 +1,79 @@
-From: Thierry Reding <thierry.reding@gmail.com>
-Subject: Re: [PATCH V1 2/2] arm64: tegra: enable command queue for tegra186
- sdmmc4
-Date: Fri, 12 Apr 2019 17:37:21 +0200
-Message-ID: <20190412153721.GB21159@ulmo>
-References: <1555011474-20107-1-git-send-email-skomatineni@nvidia.com>
- <1555011474-20107-2-git-send-email-skomatineni@nvidia.com>
+From: Steven Rostedt <rostedt@goodmis.org>
+Subject: Re: [PATCH v1 1/4] trace_events: Add trace_print_register to print
+ register fields
+Date: Fri, 12 Apr 2019 11:42:00 -0400
+Message-ID: <20190412114200.6c1a8593@gandalf.local.home>
+References: <20190411220822.81845-1-rrangel@chromium.org>
+        <20190411220822.81845-2-rrangel@chromium.org>
+        <20190411183934.28e6ad65@gandalf.local.home>
+        <20190412153036.GB101407@google.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="FkmkrVfFsRoUs1wW"
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1555011474-20107-2-git-send-email-skomatineni@nvidia.com>
+In-Reply-To: <20190412153036.GB101407@google.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Sowjanya Komatineni <skomatineni@nvidia.com>
-Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, catalin.marinas@arm.com, will.deacon@arm.com, robh+dt@kernel.org, mark.rutland@arm.com, riteshh@codeaurora.org, jonathanh@nvidia.com, anrao@nvidia.com, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Raul Rangel <rrangel@chromium.org>
+Cc: linux-trace-devel@vger.kernel.org, linux-mmc@vger.kernel.org, djkurtz@chromium.org, zwisler@chromium.org, linux-kernel@vger.kernel.org, Ingo Molnar <mingo@redhat.com>
 List-Id: linux-mmc@vger.kernel.org
 
+On Fri, 12 Apr 2019 09:30:36 -0600
+Raul Rangel <rrangel@chromium.org> wrote:
 
---FkmkrVfFsRoUs1wW
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+> Ah, I wasn't aware that the format was exposed via sysfs. That makes
+> sense why the macros are used. I was using xhci-trace as my reference
+> point which just calls arbitrary functions.
+> 
+> cat /sys/kernel/debug/tracing/events/xhci-hcd/xhci_handle_event/format
+> print fmt: "%s: %s",
+> xhci_ring_type_string(REC->type),
+> xhci_decode_trb(REC->field0, REC->field1, REC->field2, REC->field3)
+> 
+> I'm guessing calling out to a function is not the way the framework was
+> intended to be used. Does this mean that every TRB type in xhci_decode_trb
+> should be its own trace event so the printf format isn't hidden inside
+> the code?
 
-On Thu, Apr 11, 2019 at 12:37:54PM -0700, Sowjanya Komatineni wrote:
-> This patch enables command queue support for Tegra186 SDMMC4.
->=20
-> Tested-by: Jon Hunter <jonathanh@nvidia.com>
-> Signed-off-by: Sowjanya Komatineni <skomatineni@nvidia.com>
-> ---
->  arch/arm64/boot/dts/nvidia/tegra186.dtsi | 1 +
->  1 file changed, 1 insertion(+)
+You can add plugins to handle this. See tools/lib/traceevent/plugin_*.c
 
-Applied, thanks.
+> 
+> > 
+> > How does perf or trace-cmd parse this? To add something like this, you
+> > need them to have the same output as what is displayed by the trace
+> > file otherwise NAK.  
+> 
+> So for the short term I can remove __print_register. The SDHCI tracing
+> doesn't use it, but instead calls out to a method that calls
+> trace_print_register directly. Or I could move trace_print_register
+> into the sdhci-trace module.
 
-Thierry
+For the short term yeah. And you can add a plugin to the libtraceevent
+to teach trace-cmd and perf how to parse it.
+See "tep_register_print_function()"
 
---FkmkrVfFsRoUs1wW
-Content-Type: application/pgp-signature; name="signature.asc"
+> 
+> cat /sys/kernel/debug/tracing/events/sdhci/sdhci_read/format
+> 
+> print fmt: "%s: %#x [%s] => %#x: %s",
+>   __get_str(name),
+>   REC->reg,
+>   __print_symbolic(REC->reg & ~3UL, {0x00, "DMA_ADDRESS"}, ...),
+>   REC->val,
+>   sdhci_decode_register( p, REC->reg, REC->val, REC->mask )
+> 
+> The format prints out the raw value, so using perf or trace-cmd
+> will still have value, you just won't get the pretty print.
+> 
+> For the long term I could make event-parser handle __print_register. I'm
+> assuming it just needs to handle the additional case?
+> https://github.com/torvalds/linux/blob/master/tools/lib/traceevent/event-parse.c#L3040
+> 
 
------BEGIN PGP SIGNATURE-----
+Yes, I'm fine with adding new generic functions that can parse the code
+properly to libtraceevent. Anything added to the trace_event code
+should have a corresponding routine added to libtraceevent. Just
+remember, that those *are* user API, and once made, they can not change.
 
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAlywsLAACgkQ3SOs138+
-s6Ez6w/9G4OglGZXk/Rwe6TE1G1g92cvW4k1u/TwGWo/UyM5xrs9deo04ZSns8dJ
-svV/yRsNRMIh3yyDAxj/nBmsybtMDzhtUTK6YmZMrPkZtbgrzOINaYltP8Yjd9Lj
-+Fj3sDyak3pD9CJo9r3fni24rIbdqMhCYx3ozspf72NOdRG3IF0OecbqI3o+oxKZ
-HiNs3e10cvSSWurK3oyIxLVvk0RO+PqL4TKGn2GXlXJbP7Zp5JL0c5nSohTzqfrQ
-mC/qPXR4z8UBIwdHysffk/CoJYOQmQ0G6PGqoDC2yCjy8r+6pyx1K8ZTSFY1KamD
-xCZ339xQyRYERDPxLZWv7tRDYf00sY8YRetbZKUP0+87yxwwVJtjUN6sHzE/5iua
-qGklQU+uUBI3FxDUZulv8MHsRFUc2gW9HMU5XnUP0BwW/7H9cr89JoIwla0t2d1P
-jFqYZLjUXtXaMlbNAoX5vh+Jblj9TSYplJ17olPdLZ/kvju8wnIi4atLhNI9P7LC
-6NK+8b0IQGmPfibNXzAumlC9EJB/gEoo2BA6Wuj++AxAPJXUqXBDMnjqb+CJ+IQj
-McazrlPUA6HD8D3hN2rVDf+ThGROADQnOrgjaUm9ZbkwB0/VD9l85SejOrpQ922w
-sdXzrZxS7KQlYkCR950cgb7HhJv13C1SqA9LAzBsgWP4mN0g4nA=
-=0Tdg
------END PGP SIGNATURE-----
+Thanks!
 
---FkmkrVfFsRoUs1wW--
+-- Steve
