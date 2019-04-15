@@ -1,115 +1,89 @@
 From: Steven Rostedt <rostedt@goodmis.org>
-Subject: Re: [PATCH v1 1/4] mmc: core: Add trace event for SD SCR response
-Date: Mon, 15 Apr 2019 19:31:33 -0400
-Message-ID: <20190415193133.2cdbc6d0@gandalf.local.home>
+Subject: Re: [PATCH v1 2/4] mmc: core: Add trace event for SD SSR response
+Date: Mon, 15 Apr 2019 19:34:10 -0400
+Message-ID: <20190415193410.2b33d1d6@gandalf.local.home>
 References: <20190415225241.70088-1-rrangel@chromium.org>
+        <20190415225241.70088-2-rrangel@chromium.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190415225241.70088-1-rrangel@chromium.org>
+In-Reply-To: <20190415225241.70088-2-rrangel@chromium.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Raul E Rangel <rrangel@chromium.org>
-Cc: linux-mmc@vger.kernel.org, linux-trace-devel@vger.kernel.org, djkurtz@chromium.org, zwisler@chromium.org, hongjiefang <hongjiefang@asrmicro.com>, Ingo Molnar <mingo@redhat.com>, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>, Kyle Roeschley <kyle.roeschley@ni.com>, Avri Altman <avri.altman@wdc.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-trace-devel@vger.kernel.org, djkurtz@chromium.org, zwisler@chromium.org, hongjiefang <hongjiefang@asrmicro.com>, Ingo Molnar <mingo@redhat.com>, linux-kernel@vger.kernel.org, Kyle Roeschley <kyle.roeschley@ni.com>, Avri Altman <avri.altman@wdc.com>, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, 15 Apr 2019 16:52:38 -0600
+On Mon, 15 Apr 2019 16:52:39 -0600
 Raul E Rangel <rrangel@chromium.org> wrote:
 
 > Example:
-> sd_scr: mmc0: version: 2, spec3: 1, width: 5, cmds: 0, raw: {0x2b58000,0x0}
+> sd_ssr: mmc0: au: 8192, erase time: 0, erase offset: 0x0, raw: {0x0,0x3000000,0x1019000,0x10000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0}
 > 
 > Signed-off-by: Raul E Rangel <rrangel@chromium.org>
 > ---
 > 
->  drivers/mmc/core/sd.c      |  4 ++++
->  include/trace/events/mmc.h | 42 ++++++++++++++++++++++++++++++++++++++
->  2 files changed, 46 insertions(+)
+>  drivers/mmc/core/sd.c      |  2 ++
+>  include/trace/events/mmc.h | 31 +++++++++++++++++++++++++++++++
+>  2 files changed, 33 insertions(+)
 > 
 > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index 265e1aeeb9d8..3bed7c4b6d75 100644
+> index 3bed7c4b6d75..cc33a4f96c6a 100644
 > --- a/drivers/mmc/core/sd.c
 > +++ b/drivers/mmc/core/sd.c
-> @@ -21,6 +21,8 @@
->  #include <linux/mmc/mmc.h>
->  #include <linux/mmc/sd.h>
->  
-> +#include <trace/events/mmc.h>
-> +
->  #include "core.h"
->  #include "card.h"
->  #include "host.h"
-> @@ -200,6 +202,7 @@ static int mmc_decode_scr(struct mmc_card *card)
->  	if (scr_struct != 0) {
->  		pr_err("%s: unrecognised SCR structure version %d\n",
->  			mmc_hostname(card->host), scr_struct);
-> +		trace_sd_scr(card, NULL);
->  		return -EINVAL;
+> @@ -282,6 +282,8 @@ static int mmc_read_ssr(struct mmc_card *card)
+>  		}
 >  	}
 >  
-> @@ -221,6 +224,7 @@ static int mmc_decode_scr(struct mmc_card *card)
->  
->  	if (scr->sda_spec3)
->  		scr->cmds = UNSTUFF_BITS(resp, 32, 2);
-> +	trace_sd_scr(card, scr);
->  	return 0;
->  }
->  
+> +	trace_sd_ssr(card);
+> +
+>  	/*
+>  	 * starting SD5.1 discard is supported if DISCARD_SUPPORT (b313) is set
+>  	 */
 > diff --git a/include/trace/events/mmc.h b/include/trace/events/mmc.h
-> index 7b706ff21335..e45258e8a6cb 100644
+> index e45258e8a6cb..cad604ee800f 100644
 > --- a/include/trace/events/mmc.h
 > +++ b/include/trace/events/mmc.h
-> @@ -10,6 +10,48 @@
->  #include <linux/mmc/host.h>
->  #include <linux/tracepoint.h>
+> @@ -52,6 +52,37 @@ TRACE_EVENT(sd_scr,
+>  	)
+>  );
 >  
-> +TRACE_EVENT(sd_scr,
+> +TRACE_EVENT(sd_ssr,
 > +
-> +	TP_PROTO(struct mmc_card *card, struct sd_scr *scr),
+> +	TP_PROTO(struct mmc_card *card),
 > +
-> +	TP_ARGS(card, scr),
+> +	TP_ARGS(card),
 > +
 > +	TP_STRUCT__entry(
-> +		__array(u32,			raw,	2)
-> +		__field(unsigned char,		sda_vsn)
-> +		__field(unsigned char,		sda_spec3)
-> +		__field(unsigned char,		bus_widths)
-> +		__field(unsigned char,		cmds)
+> +		__array(u32,			raw,	16)
+> +		__field(unsigned int,		au)
+> +		__field(unsigned int,		erase_timeout)
+> +		__field(unsigned int,		erase_offset)
 > +		__string(name,			mmc_hostname(card->host))
 > +	),
 > +
 > +	TP_fast_assign(
-> +		memcpy(__entry->raw, card->raw_scr, sizeof(card->raw_scr));
+> +		memcpy(__entry->raw, card->raw_ssr, sizeof(card->raw_ssr));
 
-Having the memcpy() size be that of the source is dangerous. Not that
-the destination will every be smaller, but I would highly suggest
-either trying to see if "sizeof(__entry->raw)" works or at worse,
-sizeof(u32)*2.
+Again, memcpy() with the size of the source is dangerous.
+
+Hmm, I wonder if a BUILD_BUG_ON(sizeof(u32)*16 < sizeof(card->raw_ssr))
+would work here too. If it does, then that would be another approach.
 
 -- Steve
 
-> +		if (scr) {
-> +			__entry->sda_vsn = scr->sda_vsn;
-> +			__entry->sda_spec3 = scr->sda_spec3;
-> +			__entry->bus_widths = scr->bus_widths;
-> +			__entry->cmds = scr->cmds;
-> +		} else {
-> +			__entry->sda_vsn = 0;
-> +			__entry->sda_spec3 = 0;
-> +			__entry->bus_widths = 0;
-> +			__entry->cmds = 0;
-> +		}
+> +		__entry->au = card->ssr.au;
+> +		__entry->erase_timeout = card->ssr.erase_timeout;
+> +		__entry->erase_offset = card->ssr.erase_offset;
 > +		__assign_str(name, mmc_hostname(card->host));
 > +	),
 > +
-> +	TP_printk("%s: version: %d, spec3: %d, width: %d, cmds: %d, "
-> +		"raw: %s",
+> +	TP_printk("%s: au: %d, erase time: %d, erase offset: %#x, raw: %s",
 > +		  __get_str(name),
-> +		  __entry->sda_vsn,
-> +		  __entry->sda_spec3,
-> +		  __entry->bus_widths,
-> +		  __entry->cmds,
-> +		  __print_array(__entry->raw, 2, sizeof(u32))
+> +		  __entry->au,
+> +		  __entry->erase_timeout,
+> +		  __entry->erase_offset,
+> +		  __print_array(__entry->raw, 16, sizeof(u32))
 > +	)
 > +);
 > +
