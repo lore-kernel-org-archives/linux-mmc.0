@@ -1,7 +1,7 @@
 From: Raul E Rangel <rrangel@chromium.org>
-Subject: [PATCH v1 3/4] mmc: core: Add trace event for SD OCR response
-Date: Mon, 15 Apr 2019 16:52:40 -0600
-Message-ID: <20190415225241.70088-3-rrangel@chromium.org>
+Subject: [PATCH v1 4/4] mmc: core: Add trace event for CSD response
+Date: Mon, 15 Apr 2019 16:52:41 -0600
+Message-ID: <20190415225241.70088-4-rrangel@chromium.org>
 References: <20190415225241.70088-1-rrangel@chromium.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -9,150 +9,93 @@ Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20190415225241.70088-1-rrangel@chromium.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-trace-devel@vger.kernel.org
-Cc: djkurtz@chromium.org, zwisler@chromium.org, Raul E Rangel <rrangel@chromium.org>, Steven Rostedt <rostedt@goodmis.org>, Ingo Molnar <mingo@redhat.com>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: djkurtz@chromium.org, zwisler@chromium.org, Raul E Rangel <rrangel@chromium.org>, Steven Rostedt <rostedt@goodmis.org>, hongjiefang <hongjiefang@asrmicro.com>, Jennifer Dahm <jennifer.dahm@ni.com>, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>, Kyle Roeschley <kyle.roeschley@ni.com>, Ingo Molnar <mingo@redhat.com>, Avri Altman <avri.altman@wdc.com>, Ulf Hansson <ulf.hansson@linaro.org>, Simon Horman <horms+renesas@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
 
 Example:
-ocr_request: mmc0: 0x51200000 SDHC or SDXC Supported (HCS) | Maximum Performance (XPC) | Switch to 1.8V (S18R) | 3.3 ~ 3.4
-ocr_response: mmc0: 0xff8000 2.7 ~ 2.8 | 2.8 ~ 2.9 | 2.9 ~ 3.0 | 3.0 ~ 3.1 | 3.1 ~ 3.2 | 3.2 ~ 3.3 | 3.3 ~ 3.4 | 3.4 ~ 3.5 | 3.5 ~ 3.6
+mmc_csd: mmc0: struct: 0, cmdclass: 0x5b5, raw: {0x400e0032,0x5b590000,0x3b4b7f80,0xa404000}
 
 Signed-off-by: Raul E Rangel <rrangel@chromium.org>
 ---
 
- drivers/mmc/core/sd_ops.c  |  6 +++
- include/trace/events/mmc.h | 91 ++++++++++++++++++++++++++++++++++++++
- 2 files changed, 97 insertions(+)
+ drivers/mmc/core/mmc.c     |  4 ++++
+ drivers/mmc/core/sd.c      |  2 ++
+ include/trace/events/mmc.h | 28 ++++++++++++++++++++++++++++
+ 3 files changed, 34 insertions(+)
 
-diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
-index 0bb0b8419016..4cf0f040f896 100644
---- a/drivers/mmc/core/sd_ops.c
-+++ b/drivers/mmc/core/sd_ops.c
-@@ -19,6 +19,8 @@
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 3e786ba204c3..46ce894f7c03 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -20,6 +20,8 @@
+ #include <linux/mmc/card.h>
  #include <linux/mmc/mmc.h>
- #include <linux/mmc/sd.h>
  
 +#include <trace/events/mmc.h>
 +
  #include "core.h"
- #include "sd_ops.h"
+ #include "card.h"
+ #include "host.h"
+@@ -182,6 +184,8 @@ static int mmc_decode_csd(struct mmc_card *card)
+ 		csd->erase_size <<= csd->write_blkbits - 9;
+ 	}
  
-@@ -130,11 +132,15 @@ int mmc_send_app_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
- 		cmd.arg = ocr;
- 	cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R3 | MMC_CMD_BCR;
- 
-+	trace_sd_ocr_request(host, ocr);
++	trace_mmc_csd(card);
 +
- 	for (i = 100; i; i--) {
- 		err = mmc_wait_for_app_cmd(host, NULL, &cmd);
- 		if (err)
- 			break;
+ 	return 0;
+ }
  
-+		trace_sd_ocr_response(host, cmd.resp[0]);
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index cc33a4f96c6a..4e704a7280ba 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -183,6 +183,8 @@ static int mmc_decode_csd(struct mmc_card *card)
+ 
+ 	card->erase_size = csd->erase_size;
+ 
++	trace_mmc_csd(card);
 +
- 		/* if we're just probing, do a single pass */
- 		if (ocr == 0)
- 			break;
+ 	return 0;
+ }
+ 
 diff --git a/include/trace/events/mmc.h b/include/trace/events/mmc.h
-index cad604ee800f..fa82c010ae4e 100644
+index fa82c010ae4e..58f6f7808974 100644
 --- a/include/trace/events/mmc.h
 +++ b/include/trace/events/mmc.h
-@@ -10,6 +10,97 @@
- #include <linux/mmc/host.h>
- #include <linux/tracepoint.h>
+@@ -174,6 +174,34 @@ TRACE_EVENT(sd_ssr,
+ 	)
+ );
  
-+#define SD_OCR_REQUEST \
-+	{SD_OCR_CCS, "SDHC or SDXC Supported (HCS)"}, \
-+	{SD_OCR_XPC, "Maximum Performance (XPC)"}, \
-+	{SD_ROCR_S18A, "Switch to 1.8V (S18R)"}, \
-+	{MMC_VDD_165_195, "1.65 - 1.95"}, \
-+	{MMC_VDD_20_21, "2.0 ~ 2.1"}, \
-+	{MMC_VDD_21_22, "2.1 ~ 2.2"}, \
-+	{MMC_VDD_22_23, "2.2 ~ 2.3"}, \
-+	{MMC_VDD_23_24, "2.3 ~ 2.4"}, \
-+	{MMC_VDD_24_25, "2.4 ~ 2.5"}, \
-+	{MMC_VDD_25_26, "2.5 ~ 2.6"}, \
-+	{MMC_VDD_26_27, "2.6 ~ 2.7"}, \
-+	{MMC_VDD_27_28, "2.7 ~ 2.8"}, \
-+	{MMC_VDD_28_29, "2.8 ~ 2.9"}, \
-+	{MMC_VDD_29_30, "2.9 ~ 3.0"}, \
-+	{MMC_VDD_30_31, "3.0 ~ 3.1"}, \
-+	{MMC_VDD_31_32, "3.1 ~ 3.2"}, \
-+	{MMC_VDD_32_33, "3.2 ~ 3.3"}, \
-+	{MMC_VDD_33_34, "3.3 ~ 3.4"}, \
-+	{MMC_VDD_34_35, "3.4 ~ 3.5"}, \
-+	{MMC_VDD_35_36, "3.5 ~ 3.6"} \
++TRACE_EVENT(mmc_csd,
 +
-+TRACE_EVENT(sd_ocr_request,
++	TP_PROTO(struct mmc_card *card),
 +
-+	TP_PROTO(struct mmc_host *host, u32 ocr),
-+
-+	TP_ARGS(host, ocr),
++	TP_ARGS(card),
 +
 +	TP_STRUCT__entry(
-+		__field(u32,			ocr)
-+		__string(name,			mmc_hostname(host))
++		__array(u32,			raw,	4)
++		__field(unsigned char,		structure)
++		__field(unsigned short,		cmdclass)
++		__string(name,			mmc_hostname(card->host))
 +	),
 +
 +	TP_fast_assign(
-+		__entry->ocr = ocr;
-+		__assign_str(name, mmc_hostname(host));
++		__entry->structure = card->csd.structure;
++		__entry->cmdclass = card->csd.cmdclass;
++		memcpy(__entry->raw, card->raw_csd, sizeof(card->raw_csd));
++		__assign_str(name, mmc_hostname(card->host));
 +	),
 +
-+	TP_printk("%s: %#x %s",
++	TP_printk("%s: struct: %d, cmdclass: %#x, raw: %s",
 +		  __get_str(name),
-+		  __entry->ocr,
-+		  __print_flags(__entry->ocr, " | ", SD_OCR_REQUEST)
++		  __entry->structure,
++		  __entry->cmdclass,
++		  __print_array(__entry->raw, 4, sizeof(u32))
 +	)
 +);
 +
-+#define SD_OCR_RESPONSE \
-+	{MMC_CARD_BUSY, "Ready"}, \
-+	{SD_OCR_CCS, "SDHC or SDXC (CCS)"}, \
-+	{(1<<29), "UHS-II Card"}, \
-+	{SD_ROCR_S18A, "1.8V Accepted (S18A)"}, \
-+	{MMC_VDD_165_195, "1.65 - 1.95"}, \
-+	{MMC_VDD_20_21, "2.0 ~ 2.1"}, \
-+	{MMC_VDD_21_22, "2.1 ~ 2.2"}, \
-+	{MMC_VDD_22_23, "2.2 ~ 2.3"}, \
-+	{MMC_VDD_23_24, "2.3 ~ 2.4"}, \
-+	{MMC_VDD_24_25, "2.4 ~ 2.5"}, \
-+	{MMC_VDD_25_26, "2.5 ~ 2.6"}, \
-+	{MMC_VDD_26_27, "2.6 ~ 2.7"}, \
-+	{MMC_VDD_27_28, "2.7 ~ 2.8"}, \
-+	{MMC_VDD_28_29, "2.8 ~ 2.9"}, \
-+	{MMC_VDD_29_30, "2.9 ~ 3.0"}, \
-+	{MMC_VDD_30_31, "3.0 ~ 3.1"}, \
-+	{MMC_VDD_31_32, "3.1 ~ 3.2"}, \
-+	{MMC_VDD_32_33, "3.2 ~ 3.3"}, \
-+	{MMC_VDD_33_34, "3.3 ~ 3.4"}, \
-+	{MMC_VDD_34_35, "3.4 ~ 3.5"}, \
-+	{MMC_VDD_35_36, "3.5 ~ 3.6"}
-+
-+TRACE_EVENT(sd_ocr_response,
-+
-+	TP_PROTO(struct mmc_host *host, u32 ocr),
-+
-+	TP_ARGS(host, ocr),
-+
-+	TP_STRUCT__entry(
-+		__field(u32,			ocr)
-+		__string(name,			mmc_hostname(host))
-+	),
-+
-+	TP_fast_assign(
-+		__entry->ocr = ocr;
-+		__assign_str(name, mmc_hostname(host));
-+	),
-+
-+	TP_printk("%s: %#x %s",
-+		  __get_str(name),
-+		  __entry->ocr,
-+		  __print_flags(__entry->ocr, " | ", SD_OCR_RESPONSE)
-+	)
-+);
-+
- TRACE_EVENT(sd_scr,
+ TRACE_EVENT(mmc_request_start,
  
- 	TP_PROTO(struct mmc_card *card, struct sd_scr *scr),
+ 	TP_PROTO(struct mmc_host *host, struct mmc_request *mrq),
 -- 
 2.21.0.392.gf8f6787159e-goog
