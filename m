@@ -1,95 +1,84 @@
-From: Raul E Rangel <rrangel@chromium.org>
-Subject: [PATCH v2] mmc: core: Verify SD bus width
-Date: Tue, 16 Apr 2019 12:57:05 -0600
-Message-ID: <20190416185705.256369-1-rrangel@chromium.org>
+From: NeilBrown <neil@brown.name>
+Subject: Re: [PATCH 2/5] mmc: mtk-sd: don't hard-code interrupt trigger type
+Date: Wed, 17 Apr 2019 08:12:28 +1000
+Message-ID: <878sw97g6r.fsf@notabene.neil.brown.name>
+References: <155538933003.25108.3338569916935462285.stgit@noble.brown> <155539004923.25108.12499096383277776864.stgit@noble.brown> <1555402302.18628.17.camel@mhfsdcap03>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: multipart/signed; boundary="=-=-=";
+        micalg=pgp-sha256; protocol="application/pgp-signature"
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1555402302.18628.17.camel@mhfsdcap03>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: djkurtz@chromium.org, zwisler@chromium.org, Raul E Rangel <rrangel@chromium.org>, Avri Altman <avri.altman@wdc.com>, hongjiefang <hongjiefang@asrmicro.com>, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>, Kyle Roeschley <kyle.roeschley@ni.com>, Ulf Hansson <ulf.hansson@linaro.org>
+To: Chaotian Jing <chaotian.jing@mediatek.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, thirtythreeforty@gmail.com
 List-Id: linux-mmc@vger.kernel.org
 
-The SD Physical Layer Spec says the following: Since the SD Memory Card
-shall support at least the two bus modes 1-bit or 4-bit width, then any SD
-Card shall set at least bits 0 and 2 (SD_BUS_WIDTH="0101").
+--=-=-=
+Content-Type: text/plain
+Content-Transfer-Encoding: quoted-printable
 
-This change verifies the card has specified a bus width.
+On Tue, Apr 16 2019, Chaotian Jing wrote:
 
-AMD SDHC Device 7806 can get into a bad state after a card disconnect
-where anything transferred via the DATA lines will always result in a
-zero filled buffer. Currently the driver will continue without error if
-the HC is in this condition. A block device will be created, but reading
-from it will result in a zero buffer. This makes it seem like the SD
-device has been erased, when in actuality the data is never getting
-copied from the DATA lines to the data buffer.
+> On Tue, 2019-04-16 at 14:47 +1000, NeilBrown wrote:
+>> When using devicetree for configuration, interrupt trigger type
+>> should be described in the dts file, not hard-coded in the C code.
+>>=20
+>> The mtk-sd silicon in the mt7621 soc uses an active-high interrupt
+>> and so cannot be used with the current code.
+>>=20
+>> So remove the trigger and leave it to be set from devicetree.
+>>=20
+>> Signed-off-by: NeilBrown <neil@brown.name>
+>> ---
+>>  drivers/mmc/host/mtk-sd.c |    2 +-
+>>  1 file changed, 1 insertion(+), 1 deletion(-)
+>>=20
+>> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+>> index 4492a4465c0e..14e048239143 100644
+>> --- a/drivers/mmc/host/mtk-sd.c
+>> +++ b/drivers/mmc/host/mtk-sd.c
+>> @@ -2243,7 +2243,7 @@ static int msdc_drv_probe(struct platform_device *=
+pdev)
+>>  	msdc_init_hw(host);
+>>=20=20
+>>  	ret =3D devm_request_irq(&pdev->dev, host->irq, msdc_irq,
+>> -		IRQF_TRIGGER_LOW | IRQF_ONESHOT, pdev->name, host);
+>> +
+> change it to IRQF_TRIGGER_NONE | IRQF_ONESHOT
 
-SCR is the first command in the SD initialization sequence that uses the
-DATA lines. By checking that the response was invalid, we can abort
-mounting the card.
+Why do we need IRQF_ONESHOT.  That is for threaded interrupted
+handlers...
+msdc_irq() clears the interrupts, so ONESHOT isn't needed.
 
-Acked-by: Avri Altman <avri.altman@wdc.com>
+???
 
-Signed-off-by: Raul E Rangel <rrangel@chromium.org>
----
-This patch currently requires the SD trace events patch to be applied
-first for it to apply cleanly.
+NeilBrown
 
-See: https://patchwork.kernel.org/cover/10903761
 
-This is because I want the check to happen after the trace call. This
-way the invalid valid response is traced.
+>> 			       0, pdev->name, host);
+>>  	if (ret)
+>>  		goto release;
+>>=20=20
+>>=20
+>>=20
 
-I can also change the base so it applies cleanly to master if that is
-desired.
+--=-=-=
+Content-Type: application/pgp-signature; name="signature.asc"
 
-Here is the testing I did:
+-----BEGIN PGP SIGNATURE-----
 
-Good Trace: https://paste.fedoraproject.org/paste/oVEI5b0IzHD23Yo7CDZgEg
-[   30.103686] mmc0: new high speed SDHC card at address 0001
-[   30.105262] mmcblk0: mmc0:0001 00000 7.41 GiB
-[   30.108258]  mmcblk0: p1
-[   31.947250] mmc0: card 0001 removed
-
-Bad Trace (before patch): https://paste.fedoraproject.org/paste/jBWfpFBM8gdEmGOzxij~hw
-
-Bad Trace (after patch): https://paste.fedoraproject.org/paste/8gB8MLYOKEUZEgHXmQ0W1Q
-[   33.810760] mmc0: invalid bus width
-[   33.810782] mmc0: error -22 whilst initialising SD card
-[   34.068818] mmc0: invalid bus width
-[   34.068839] mmc0: error -22 whilst initialising SD card
-[   34.329521] mmc0: invalid bus width
-[   34.329543] mmc0: error -22 whilst initialising SD card
-[   34.592061] mmc0: invalid bus width
-[   34.592084] mmc0: error -22 whilst initialising SD card
-
-In the traces you can see sd_scr is different
-
-Changes in v2:
-- Made the bus width check stricter. It now requires the value to match
-  the spec.
-- Rebased on SD Trace Event patch
-
- drivers/mmc/core/sd.c | 7 +++++++
- 1 file changed, 7 insertions(+)
-
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 3b2e09fa72c5..a73f3dbb6029 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -229,6 +229,13 @@ static int mmc_decode_scr(struct mmc_card *card)
- 
- 	trace_sd_scr(card, scr);
- 
-+	/* SD Spec says: any SD Card shall set at least bits 0 and 2 */
-+	if (!(scr->bus_widths & SD_SCR_BUS_WIDTH_1) ||
-+	    !(scr->bus_widths & SD_SCR_BUS_WIDTH_4)) {
-+		pr_err("%s: invalid bus width\n", mmc_hostname(card->host));
-+		return -EINVAL;
-+	}
-+
- 	return 0;
- }
- 
--- 
-2.21.0.392.gf8f6787159e-goog
+iQIzBAEBCAAdFiEEG8Yp69OQ2HB7X0l6Oeye3VZigbkFAly2U0wACgkQOeye3VZi
+gbljERAAtkbTW3fr0lNdKM5Qsh7w1WZVpv7b7n0OUcL6menI0j1novdyKfV83FJz
+IljS2rbbngDCe0COqfZGLlCSmHSatVRvUWZzYrLQENPnmuecu72VCRyrJbWLyMHQ
+HQJyozpLN3y/DD6bmuReUrBv4MS6OfTdYNtFE+gTLAvmnVDzSuugKHMBtoh6XCXm
+k6hgFrGAwV6YBtzJIYxBxb2R06WVgT1ciT65g+uEdv9FWeTqilS/foTRo/baw6VR
+EHxnvoL6TTYzr1RX2jBp5zjERB/gWtyFDw6zinuIBswLt+8p21/k9ZY4fLKNPqdF
+hJUgpuq0I0Fsbh4ru/z2tZj3Uki522JYATHFcyzPxQgXTD9bnV4KlMHPxNkIWMzm
+8AJXE8G2f9R55lzEH7VCEBPsi3Xmb9bTFPiEcqI01Fc6qx9axwSqDTTqAGlhKYs6
+a/1Y0UsG9rmP7FPcanw4VJQl4BTnXdFVS9NqlZq6Z6TWTbw0d3r2Mj717YXYWKLm
+cvCsEO0oZTReDs3WvEuwMZVCJcozaeZlnp1WyFs/2VHTQ+dOQduKI0IjbfyZOi2M
+j9fjQXa9lWg1FZhR1OajQeWkL3DyqTLldiFPc++l5Q6Xpt4D0Qy0/aw9tL13B1q9
+U3zbB4iU85APZBbYstR7JC+pNjsRaFuSRHD5M+4QLTJ32KdInHo=
+=7WTR
+-----END PGP SIGNATURE-----
+--=-=-=--
