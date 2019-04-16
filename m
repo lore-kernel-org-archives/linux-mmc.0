@@ -1,85 +1,79 @@
-From: NeilBrown <neil@brown.name>
-Subject: [PATCH 5/5] mmc: mtk-sd: enable internal write-protect logic.
-Date: Tue, 16 Apr 2019 14:47:29 +1000
-Message-ID: <155539004934.25108.642381572389480964.stgit@noble.brown>
-References: <155538933003.25108.3338569916935462285.stgit@noble.brown>
+From: Peng Fan <peng.fan@nxp.com>
+Subject: [RFC] mmc: cqhci: clear pending interrupt and halt
+Date: Tue, 16 Apr 2019 06:48:24 +0000
+Message-ID: <20190416070128.12039-1-peng.fan@nxp.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <155538933003.25108.3338569916935462285.stgit@noble.brown>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, thirtythreeforty@gmail.com
+To: "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "riteshh@codeaurora.org" <riteshh@codeaurora.org>, "asutoshd@codeaurora.org" <asutoshd@codeaurora.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Marie Cheng <haibo.cheng@nxp.com>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, dl-linux-imx <linux-imx@nxp.com>, "van.freenix@gmail.com" <van.freenix@gmail.com>, Peng Fan <peng.fan@nxp.com>
 List-Id: linux-mmc@vger.kernel.org
 
-The mtk-sd silicon has integrated write-protect detection logic.
-
-If the sdhci isn't marked no-write-protect and doesn't have a
-ro-gpio configured, assume the internal wp logic should be used.
-
-Signed-off-by: NeilBrown <neil@brown.name>
----
- drivers/mmc/host/mtk-sd.c |   30 +++++++++++++++++++++++++++++-
- 1 file changed, 29 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 341cf5f03429..d63d6b62f49a 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -433,6 +433,7 @@ struct msdc_host {
- 				 /* cmd response sample selection for HS400 */
- 	bool hs400_mode;	/* current eMMC will run at hs400 mode */
- 	bool internal_cd;	/* Use internal card-detect logic */
-+	bool internal_ro;	/* Use internal write-protect logic */
- 	struct msdc_save_para save_para; /* used when gate HCLK */
- 	struct msdc_tune_para def_tune_para; /* default tune setting */
- 	struct msdc_tune_para saved_tune_para; /* tune result of CMD21/CMD19 */
-@@ -2119,12 +2120,30 @@ static int msdc_get_cd(struct mmc_host *mmc)
- 		return !val;
- }
- 
-+static int msdc_get_ro(struct mmc_host *mmc)
-+{
-+	struct msdc_host *host = mmc_priv(mmc);
-+	int val;
-+
-+	if (mmc->caps2 & MMC_CAP2_NO_WRITE_PROTECT)
-+		return 0;
-+
-+	if (!host->internal_ro)
-+		return mmc_gpio_get_ro(mmc);
-+
-+	val = readl(host->base + MSDC_PS) & MSDC_PS_WP;
-+	if (mmc->caps2 & MMC_CAP2_RO_ACTIVE_HIGH)
-+		return !!val;
-+	else
-+		return !val;
-+}
-+
- static const struct mmc_host_ops mt_msdc_ops = {
- 	.post_req = msdc_post_req,
- 	.pre_req = msdc_pre_req,
- 	.request = msdc_ops_request,
- 	.set_ios = msdc_ops_set_ios,
--	.get_ro = mmc_gpio_get_ro,
-+	.get_ro = msdc_get_ro,
- 	.get_cd = msdc_get_cd,
- 	.enable_sdio_irq = msdc_enable_sdio_irq,
- 	.ack_sdio_irq = msdc_ack_sdio_irq,
-@@ -2256,6 +2275,15 @@ static int msdc_drv_probe(struct platform_device *pdev)
- 		host->internal_cd = true;
- 	}
- 
-+	if (!(mmc->caps2 & MMC_CAP2_NO_WRITE_PROTECT) &&
-+	    !mmc_can_gpio_ro(mmc)) {
-+		/*
-+		 * Has write-protect but no GPIO declared, so
-+		 * use internal functionality.
-+		 */
-+		host->internal_ro = true;
-+	}
-+
- 	msdc_of_property_parse(pdev, host);
- 
- 	host->dev = &pdev->dev;
+T24gaS5NWDhNTSwgd2UgYXJlIHJ1bm5pbmcgRHVhbCBMaW51eCBPUywgd2l0aCAxc3QgTGludXgg
+dXNpbmcgU0QgQ2FyZA0KYXMgcm9vdGZzIHN0b3JhZ2UsIDJuZCBMaW51eCB1c2luZyBlTU1DIGFz
+IHJvb3RmcyBzdG9yYWdlLiBXZSBsZXQgdGhlDQp0aGUgMXN0IGxpbnV4IGNvbmZpZ3VyZSBwb3dl
+ci9jbG9jayBmb3IgdGhlIDJuZCBMaW51eC4NCg0KV2hlbiB0aGUgMm5kIExpbnV4IGlzIGJvb3Rp
+bmcgaW50byByb290ZnMgc3RhZ2UsIHdlIGxldCB0aGUgMXN0IExpbnV4DQp0byBkZXN0cm95IHRo
+ZSAybmQgbGludXgsIHRoZW4gcmVzdGFydCB0aGUgMXN0IGxpbnV4LCB3ZSBtZXQgU0RIQ0kgZHVt
+cA0KYXMgZm9sbG93aW5nLCBhZnRlciB3ZSBjbGVhciB0aGUgcGVuZGluZyBpbnRlcnJ1cHQgYW5k
+IGhhbHQgQ1FDVEwsIGlzc3VlDQpnb25lLg0KDQpbIDEuMzM0NTk0XSBtbWMyOiBHb3QgY29tbWFu
+ZCBpbnRlcnJ1cHQgMHgwMDAwMDAwMSBldmVuIHRob3VnaCBubyBjb21tYW5kIG9wZXJhdGlvbiB3
+YXMgaW4gcHJvZ3Jlc3MuDQpbIDEuMzM0NTk1XSBtbWMyOiBzZGhjaTogPT09PT09PT09PT09IFNE
+SENJIFJFR0lTVEVSIERVTVAgPT09PT09PT09PT0NClsgMS4zMzQ1OTldIG1tYzI6IHNkaGNpOiBT
+eXMgYWRkcjogMHhhMDVkY2MwMCB8IFZlcnNpb246IDB4MDAwMDAwMDINClsgMS4zNDA4MTldIGxp
+YjgwMjExOiBjb21tb24gcm91dGluZXMgZm9yIElFRUU4MDIuMTEgZHJpdmVycw0KWyAxLjM0NTUz
+OF0gbW1jMjogc2RoY2k6IEJsayBzaXplOiAweDAwMDAwMjAwIHwgQmxrIGNudDogMHgwMDAwMDAw
+MA0KWyAxLjM0NTU0MV0gbW1jMjogc2RoY2k6IEFyZ3VtZW50OiAweDAwMDE4MDAwIHwgVHJuIG1v
+ZGU6IDB4MDAwMDAwMzMNClsgMS4zNDU1NDNdIG1tYzI6IHNkaGNpOiBQcmVzZW50OiAweDAxZjg4
+MDA4IHwgSG9zdCBjdGw6IDB4MDAwMDAwMzENClsgMS4zNDU1NDddIG1tYzI6IHNkaGNpOiBQb3dl
+cjogMHgwMDAwMDAwMiB8IEJsayBnYXA6IDB4MDAwMDAwODANClsgMS4zNTc5MDNdIG1tYzI6IHNk
+aGNpOiBXYWtlLXVwOiAweDAwMDAwMDA4IHwgQ2xvY2s6IDB4MDAwMDAwM2YNClsgMS4zNTc5MDVd
+IG1tYzI6IHNkaGNpOiBUaW1lb3V0OiAweDAwMDAwMDhmIHwgSW50IHN0YXQ6IDB4MDAwMDAwMDAN
+ClsgMS4zNTc5MDhdIG1tYzI6IHNkaGNpOiBJbnQgZW5hYjogMHgxMDdmMTAwYiB8IFNpZyBlbmFi
+OiAweDEwN2YxMDBiDQpbIDEuMzU3OTExXSBtbWMyOiBzZGhjaTogQUMxMiBlcnI6IDB4MDAwMDAw
+MDAgfCBTbG90IGludDogMHgwMDAwMDUwMg0KWyAxLjM3MDI2OF0gbW1jMjogc2RoY2k6IENhcHM6
+IDB4MDdlYjAwMDAgfCBDYXBzXzE6IDB4MDAwMGI0MDANClsgMS4zNzAyNzBdIG1tYzI6IHNkaGNp
+OiBDbWQ6IDB4MDAwMDBkMWEgfCBNYXggY3VycjogMHgwMGZmZmZmZg0KWyAxLjM3MDI3M10gbW1j
+Mjogc2RoY2k6IFJlc3BbMF06IDB4MDAwMDBiMDAgfCBSZXNwWzFdOiAweGZmZmZmZmZmDQpbIDEu
+MzcwMjc2XSBtbWMyOiBzZGhjaTogUmVzcFsyXTogMHgzMjhmNTkwMyB8IFJlc3BbM106IDB4MDBk
+MDBmMDANClsgMS4zODIxMzJdIG1tYzI6IHNkaGNpOiBIb3N0IGN0bDI6IDB4MDAwMDAwMDANClsg
+MS4zODIxMzVdIG1tYzI6IHNkaGNpOiBBRE1BIEVycjogMHgwMDAwMDAwMCB8IEFETUEgUHRyOiAw
+eGEyMDQwMjA4DQoNClsgMi4wNjA5MzJdIG1tYzI6IFVuZXhwZWN0ZWQgaW50ZXJydXB0IDB4MDAw
+MDQwMDAuDQpbIDIuMDY1NTM4XSBtbWMyOiBzZGhjaTogPT09PT09PT09PT09IFNESENJIFJFR0lT
+VEVSIERVTVAgPT09PT09PT09PT0NClsgMi4wNzE3MjBdIG1tYzI6IHNkaGNpOiBTeXMgYWRkcjog
+MHgwMDAwMDAwMCB8IFZlcnNpb246IDB4MDAwMDAwMDINClsgMi4wNzc5MDJdIG1tYzI6IHNkaGNp
+OiBCbGsgc2l6ZTogMHgwMDAwMDIwMCB8IEJsayBjbnQ6IDB4MDAwMDAwMDENClsgMi4wODQwODNd
+IG1tYzI6IHNkaGNpOiBBcmd1bWVudDogMHgwMDAwMDAwMCB8IFRybiBtb2RlOiAweDAwMDAwMDAw
+DQpbIDIuMDkwMjY0XSBtbWMyOiBzZGhjaTogUHJlc2VudDogMHgwMWY4ODAwOSB8IEhvc3QgY3Rs
+OiAweDAwMDAwMDExDQpbIDIuMDk2NDQ2XSBtbWMyOiBzZGhjaTogUG93ZXI6IDB4MDAwMDAwMDIg
+fCBCbGsgZ2FwOiAweDAwMDAwMDgwDQpbIDIuMTAyNjI3XSBtbWMyOiBzZGhjaTogV2FrZS11cDog
+MHgwMDAwMDAwOCB8IENsb2NrOiAweDAwMDAxMGZmDQpbIDIuMTA4ODA5XSBtbWMyOiBzZGhjaTog
+VGltZW91dDogMHgwMDAwMDA4ZiB8IEludCBzdGF0OiAweDAwMDA0MDAwDQpbIDIuMTE0OTkwXSBt
+bWMyOiBzZGhjaTogSW50IGVuYWI6IDB4MDA3ZjEwMDMgfCBTaWcgZW5hYjogMHgwMDdmMTAwMw0K
+WyAyLjEyMTE3MV0gbW1jMjogc2RoY2k6IEFDMTIgZXJyOiAweDAwMDAwMDAwIHwgU2xvdCBpbnQ6
+IDB4MDAwMDA1MDINClsgMi4xMjczNTNdIG1tYzI6IHNkaGNpOiBDYXBzOiAweDA3ZWIwMDAwIHwg
+Q2Fwc18xOiAweDAwMDBiNDAwDQpbIDIuMTMzNTM0XSBtbWMyOiBzZGhjaTogQ21kOiAweDAwMDAz
+NzFhIHwgTWF4IGN1cnI6IDB4MDBmZmZmZmYNClsgMi4xMzk3MTVdIG1tYzI6IHNkaGNpOiBSZXNw
+WzBdOiAweDAwMDAwOTAwIHwgUmVzcFsxXTogMHhmZmZmZmZmZg0KWyAyLjE0NTg5Nl0gbW1jMjog
+c2RoY2k6IFJlc3BbMl06IDB4MzI4ZjU5MDMgfCBSZXNwWzNdOiAweDAwZDAwZjAwDQpbIDIuMTUy
+MDc3XSBtbWMyOiBzZGhjaTogSG9zdCBjdGwyOiAweDAwMDAwMDAwDQpbIDIuMTU2MzQyXSBtbWMy
+OiBzZGhjaTogQURNQSBFcnI6IDB4MDAwMDAwMDAgfCBBRE1BIFB0cjogMHgwMDAwMDAwMA0KDQpT
+aWduZWQtb2ZmLWJ5OiBQZW5nIEZhbiA8cGVuZy5mYW5AbnhwLmNvbT4NCi0tLQ0KIGRyaXZlcnMv
+bW1jL2hvc3QvY3FoY2kuYyB8IDUgKysrKysNCiAxIGZpbGUgY2hhbmdlZCwgNSBpbnNlcnRpb25z
+KCspDQoNCmRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L2NxaGNpLmMgYi9kcml2ZXJzL21t
+Yy9ob3N0L2NxaGNpLmMNCmluZGV4IGQ1OWNiMGE1MTk2NC4uNGY0MTk2MGFjN2FkIDEwMDY0NA0K
+LS0tIGEvZHJpdmVycy9tbWMvaG9zdC9jcWhjaS5jDQorKysgYi9kcml2ZXJzL21tYy9ob3N0L2Nx
+aGNpLmMNCkBAIC0xMTE2LDYgKzExMTYsNyBAQCBpbnQgY3FoY2lfaW5pdChzdHJ1Y3QgY3FoY2lf
+aG9zdCAqY3FfaG9zdCwgc3RydWN0IG1tY19ob3N0ICptbWMsDQogCSAgICAgIGJvb2wgZG1hNjQp
+DQogew0KIAlpbnQgZXJyOw0KKwl1MzIgc3RhdHVzOw0KIA0KIAljcV9ob3N0LT5kbWE2NCA9IGRt
+YTY0Ow0KIAljcV9ob3N0LT5tbWMgPSBtbWM7DQpAQCAtMTEzOSw2ICsxMTQwLDEwIEBAIGludCBj
+cWhjaV9pbml0KHN0cnVjdCBjcWhjaV9ob3N0ICpjcV9ob3N0LCBzdHJ1Y3QgbW1jX2hvc3QgKm1t
+YywNCiANCiAJc3Bpbl9sb2NrX2luaXQoJmNxX2hvc3QtPmxvY2spOw0KIA0KKwlzdGF0dXMgPSBj
+cWhjaV9yZWFkbChjcV9ob3N0LCBDUUhDSV9JUyk7DQorCWNxaGNpX3dyaXRlbChjcV9ob3N0LCBz
+dGF0dXMsIENRSENJX0lTKTsNCisJY3FoY2lfd3JpdGVsKGNxX2hvc3QsIENRSENJX0hBTFQsIENR
+SENJX0NUTCk7DQorDQogCWluaXRfY29tcGxldGlvbigmY3FfaG9zdC0+aGFsdF9jb21wKTsNCiAJ
+aW5pdF93YWl0cXVldWVfaGVhZCgmY3FfaG9zdC0+d2FpdF9xdWV1ZSk7DQogDQotLSANCjIuMTYu
+NA0KDQo=
