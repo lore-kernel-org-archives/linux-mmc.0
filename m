@@ -1,8 +1,7 @@
 From: NeilBrown <neil@brown.name>
-Subject: [PATCH 3/5] mmc: mtk-sd: add support for config found in mt7620
- family SOCs.
+Subject: [PATCH 4/5] mmc: mtk-sd: enable internal card-detect logic.
 Date: Tue, 16 Apr 2019 14:47:29 +1000
-Message-ID: <155539004927.25108.8723794030985494935.stgit@noble.brown>
+Message-ID: <155539004931.25108.17076624786044710325.stgit@noble.brown>
 References: <155538933003.25108.3338569916935462285.stgit@noble.brown>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -14,57 +13,136 @@ To: Ulf Hansson <ulf.hansson@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, thirtythreeforty@gmail.com
 List-Id: linux-mmc@vger.kernel.org
 
-mt7620 family MIPS SOCs contain the mtk-sd silicon.
-Add support for this.
+The mtk-sd silicon has integrated card-detect logic that is
+enabled, at least, on the MT7621 as used in the GNUBEE NAS.
+
+If the sdhci isn't marked non-removable and doesn't have a
+cd-gpio configured, assume the internal cd logic should be used.
 
 Signed-off-by: NeilBrown <neil@brown.name>
-
-# Conflicts:
-#	drivers/mmc/host/mtk-sd.c
 ---
- Documentation/devicetree/bindings/mmc/mtk-sd.txt |    1 +
- drivers/mmc/host/mtk-sd.c                        |   12 ++++++++++++
- 2 files changed, 13 insertions(+)
+ drivers/mmc/host/mtk-sd.c |   58 ++++++++++++++++++++++++++++++++++++++++++---
+ 1 file changed, 54 insertions(+), 4 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.txt b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-index ed61cd5a5b8f..b6daa9773b25 100644
---- a/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-+++ b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-@@ -15,6 +15,7 @@ Required properties:
- 	"mediatek,mt2712-mmc": for mmc host ip compatible with mt2712
- 	"mediatek,mt7622-mmc": for MT7622 SoC
- 	"mediatek,mt7623-mmc", "mediatek,mt2701-mmc": for MT7623 SoC
-+	"ralink,mt7620-sdhci", for MT7621 SoC (and others)
- 
- - reg: physical base address of the controller and length
- - interrupts: Should contain MSDC interrupt number
 diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 14e048239143..d379f2ece305 100644
+index d379f2ece305..341cf5f03429 100644
 --- a/drivers/mmc/host/mtk-sd.c
 +++ b/drivers/mmc/host/mtk-sd.c
-@@ -517,6 +517,17 @@ static const struct mtk_mmc_compatible mt8516_compat = {
- 	.stop_clk_fix = true,
- };
+@@ -300,6 +300,8 @@
+ #define CMD_TIMEOUT         (HZ/10 * 5)	/* 100ms x5 */
+ #define DAT_TIMEOUT         (HZ    * 5)	/* 1000ms x5 */
  
-+static const struct mtk_mmc_compatible mt7620_compat = {
-+	.clk_div_bits = 8,
-+	.hs400_tune = false,
-+	.pad_tune_reg = MSDC_PAD_TUNE,
-+	.async_fifo = false,
-+	.data_tune = false,
-+	.busy_check = false,
-+	.stop_clk_fix = false,
-+	.enhance_rx = false,
-+};
++#define DEFAULT_DEBOUNCE	(8)	/* 8 cycles CD debounce */
 +
- static const struct of_device_id msdc_of_ids[] = {
- 	{ .compatible = "mediatek,mt8135-mmc", .data = &mt8135_compat},
- 	{ .compatible = "mediatek,mt8173-mmc", .data = &mt8173_compat},
-@@ -525,6 +536,7 @@ static const struct of_device_id msdc_of_ids[] = {
- 	{ .compatible = "mediatek,mt2712-mmc", .data = &mt2712_compat},
- 	{ .compatible = "mediatek,mt7622-mmc", .data = &mt7622_compat},
- 	{ .compatible = "mediatek,mt8516-mmc", .data = &mt8516_compat},
-+	{ .compatible = "ralink,mt7620-sdhci", .data = &mt7620_compat},
- 	{}
- };
- MODULE_DEVICE_TABLE(of, msdc_of_ids);
+ #define PAD_DELAY_MAX	32 /* PAD delay cells */
+ /*--------------------------------------------------------------------------*/
+ /* Descriptor Structure                                                     */
+@@ -430,6 +432,7 @@ struct msdc_host {
+ 	bool hs400_cmd_resp_sel_rising;
+ 				 /* cmd response sample selection for HS400 */
+ 	bool hs400_mode;	/* current eMMC will run at hs400 mode */
++	bool internal_cd;	/* Use internal card-detect logic */
+ 	struct msdc_save_para save_para; /* used when gate HCLK */
+ 	struct msdc_tune_para def_tune_para; /* default tune setting */
+ 	struct msdc_tune_para saved_tune_para; /* tune result of CMD21/CMD19 */
+@@ -1430,6 +1433,11 @@ static irqreturn_t msdc_irq(int irq, void *dev_id)
+ 			sdio_signal_irq(host->mmc);
+ 		}
+ 
++		if ((events & event_mask) & MSDC_INT_CDSC) {
++			mmc_detect_change(host->mmc, msecs_to_jiffies(20));
++			events &= ~MSDC_INT_CDSC;
++		}
++
+ 		if (!(events & (event_mask & ~MSDC_INT_SDIOIRQ)))
+ 			break;
+ 
+@@ -1463,14 +1471,24 @@ static void msdc_init_hw(struct msdc_host *host)
+ 	/* Reset */
+ 	msdc_reset_hw(host);
+ 
+-	/* Disable card detection */
+-	sdr_clr_bits(host->base + MSDC_PS, MSDC_PS_CDEN);
+-
+ 	/* Disable and clear all interrupts */
+ 	writel(0, host->base + MSDC_INTEN);
+ 	val = readl(host->base + MSDC_INT);
+ 	writel(val, host->base + MSDC_INT);
+ 
++	/* Configure card detection */
++	if (host->internal_cd) {
++		sdr_set_field(host->base + MSDC_PS, MSDC_PS_CDDEBOUNCE,
++			      DEFAULT_DEBOUNCE);
++		sdr_set_bits(host->base + MSDC_PS, MSDC_PS_CDEN);
++		sdr_set_bits(host->base + MSDC_INTEN, MSDC_INTEN_CDSC);
++		sdr_set_bits(host->base + SDC_CFG, SDC_CFG_INSWKUP);
++	} else {
++		sdr_clr_bits(host->base + SDC_CFG, SDC_CFG_INSWKUP);
++		sdr_clr_bits(host->base + MSDC_PS, MSDC_PS_CDEN);
++		sdr_clr_bits(host->base + MSDC_INTEN, MSDC_INTEN_CDSC);
++	}
++
+ 	if (host->top_base) {
+ 		writel(0, host->top_base + EMMC_TOP_CONTROL);
+ 		writel(0, host->top_base + EMMC_TOP_CMD);
+@@ -1580,6 +1598,11 @@ static void msdc_init_hw(struct msdc_host *host)
+ static void msdc_deinit_hw(struct msdc_host *host)
+ {
+ 	u32 val;
++
++	/* Disabled card-detect */
++	sdr_clr_bits(host->base + MSDC_PS, MSDC_PS_CDEN);
++	sdr_clr_bits(host->base + SDC_CFG, SDC_CFG_INSWKUP);
++
+ 	/* Disable and clear all interrupts */
+ 	writel(0, host->base + MSDC_INTEN);
+ 
+@@ -2078,13 +2101,31 @@ static void msdc_ack_sdio_irq(struct mmc_host *mmc)
+ 	__msdc_enable_sdio_irq(mmc, 1);
+ }
+ 
++static int msdc_get_cd(struct mmc_host *mmc)
++{
++	struct msdc_host *host = mmc_priv(mmc);
++	int val;
++
++	if (mmc->caps & MMC_CAP_NONREMOVABLE)
++		return 1;
++
++	if (!host->internal_cd)
++		return mmc_gpio_get_cd(mmc);
++
++	val = readl(host->base + MSDC_PS) & MSDC_PS_CDSTS;
++	if (mmc->caps2 & MMC_CAP2_CD_ACTIVE_HIGH)
++		return !!val;
++	else
++		return !val;
++}
++
+ static const struct mmc_host_ops mt_msdc_ops = {
+ 	.post_req = msdc_post_req,
+ 	.pre_req = msdc_pre_req,
+ 	.request = msdc_ops_request,
+ 	.set_ios = msdc_ops_set_ios,
+ 	.get_ro = mmc_gpio_get_ro,
+-	.get_cd = mmc_gpio_get_cd,
++	.get_cd = msdc_get_cd,
+ 	.enable_sdio_irq = msdc_enable_sdio_irq,
+ 	.ack_sdio_irq = msdc_ack_sdio_irq,
+ 	.start_signal_voltage_switch = msdc_ops_switch_volt,
+@@ -2206,6 +2247,15 @@ static int msdc_drv_probe(struct platform_device *pdev)
+ 		goto host_free;
+ 	}
+ 
++	if (!(mmc->caps & MMC_CAP_NONREMOVABLE) &&
++	    !mmc_can_gpio_cd(mmc)) {
++		/*
++		 * Is removable but no GPIO declared, so
++		 * use internal functionality.
++		 */
++		host->internal_cd = true;
++	}
++
+ 	msdc_of_property_parse(pdev, host);
+ 
+ 	host->dev = &pdev->dev;
