@@ -1,160 +1,95 @@
 From: Raul E Rangel <rrangel@chromium.org>
-Subject: [PATCH v2 3/4] mmc: core: Add trace event for SD OCR response
-Date: Tue, 16 Apr 2019 12:32:56 -0600
-Message-ID: <20190416183257.247902-4-rrangel@chromium.org>
-References: <20190416183257.247902-1-rrangel@chromium.org>
+Subject: [PATCH v2] mmc: core: Verify SD bus width
+Date: Tue, 16 Apr 2019 12:57:05 -0600
+Message-ID: <20190416185705.256369-1-rrangel@chromium.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190416183257.247902-1-rrangel@chromium.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-trace-devel@vger.kernel.org
-Cc: djkurtz@chromium.org, zwisler@chromium.org, Raul E Rangel <rrangel@chromium.org>, Steven Rostedt <rostedt@goodmis.org>, Ingo Molnar <mingo@redhat.com>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+To: linux-mmc@vger.kernel.org
+Cc: djkurtz@chromium.org, zwisler@chromium.org, Raul E Rangel <rrangel@chromium.org>, Avri Altman <avri.altman@wdc.com>, hongjiefang <hongjiefang@asrmicro.com>, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>, Kyle Roeschley <kyle.roeschley@ni.com>, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Example:
-sd_ocr_request: mmc0: 0x0 []
-sd_ocr_request: mmc0: 0x51200000 [SDHC or SDXC Supported (HCS) | Maximum Performance (XPC) | Switch to 1.8V (S18R) | 3.3 ~ 3.4]
-sd_ocr_response: mmc0: 0xff8000 [2.7 ~ 2.8 | 2.8 ~ 2.9 | 2.9 ~ 3.0 | 3.0 ~ 3.1 | 3.1 ~ 3.2 | 3.2 ~ 3.3 | 3.3 ~ 3.4 | 3.4 ~ 3.5 | 3.5 ~ 3.6]
+The SD Physical Layer Spec says the following: Since the SD Memory Card
+shall support at least the two bus modes 1-bit or 4-bit width, then any SD
+Card shall set at least bits 0 and 2 (SD_BUS_WIDTH="0101").
+
+This change verifies the card has specified a bus width.
+
+AMD SDHC Device 7806 can get into a bad state after a card disconnect
+where anything transferred via the DATA lines will always result in a
+zero filled buffer. Currently the driver will continue without error if
+the HC is in this condition. A block device will be created, but reading
+from it will result in a zero buffer. This makes it seem like the SD
+device has been erased, when in actuality the data is never getting
+copied from the DATA lines to the data buffer.
+
+SCR is the first command in the SD initialization sequence that uses the
+DATA lines. By checking that the response was invalid, we can abort
+mounting the card.
+
+Acked-by: Avri Altman <avri.altman@wdc.com>
 
 Signed-off-by: Raul E Rangel <rrangel@chromium.org>
 ---
+This patch currently requires the SD trace events patch to be applied
+first for it to apply cleanly.
 
- drivers/mmc/core/sd_ops.c  |  6 +++
- include/trace/events/mmc.h | 92 ++++++++++++++++++++++++++++++++++++++
- 2 files changed, 98 insertions(+)
+See: https://patchwork.kernel.org/cover/10903761
 
-diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
-index 0bb0b8419016..4cf0f040f896 100644
---- a/drivers/mmc/core/sd_ops.c
-+++ b/drivers/mmc/core/sd_ops.c
-@@ -19,6 +19,8 @@
- #include <linux/mmc/mmc.h>
- #include <linux/mmc/sd.h>
+This is because I want the check to happen after the trace call. This
+way the invalid valid response is traced.
+
+I can also change the base so it applies cleanly to master if that is
+desired.
+
+Here is the testing I did:
+
+Good Trace: https://paste.fedoraproject.org/paste/oVEI5b0IzHD23Yo7CDZgEg
+[   30.103686] mmc0: new high speed SDHC card at address 0001
+[   30.105262] mmcblk0: mmc0:0001 00000 7.41 GiB
+[   30.108258]  mmcblk0: p1
+[   31.947250] mmc0: card 0001 removed
+
+Bad Trace (before patch): https://paste.fedoraproject.org/paste/jBWfpFBM8gdEmGOzxij~hw
+
+Bad Trace (after patch): https://paste.fedoraproject.org/paste/8gB8MLYOKEUZEgHXmQ0W1Q
+[   33.810760] mmc0: invalid bus width
+[   33.810782] mmc0: error -22 whilst initialising SD card
+[   34.068818] mmc0: invalid bus width
+[   34.068839] mmc0: error -22 whilst initialising SD card
+[   34.329521] mmc0: invalid bus width
+[   34.329543] mmc0: error -22 whilst initialising SD card
+[   34.592061] mmc0: invalid bus width
+[   34.592084] mmc0: error -22 whilst initialising SD card
+
+In the traces you can see sd_scr is different
+
+Changes in v2:
+- Made the bus width check stricter. It now requires the value to match
+  the spec.
+- Rebased on SD Trace Event patch
+
+ drivers/mmc/core/sd.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index 3b2e09fa72c5..a73f3dbb6029 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -229,6 +229,13 @@ static int mmc_decode_scr(struct mmc_card *card)
  
-+#include <trace/events/mmc.h>
-+
- #include "core.h"
- #include "sd_ops.h"
+ 	trace_sd_scr(card, scr);
  
-@@ -130,11 +132,15 @@ int mmc_send_app_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
- 		cmd.arg = ocr;
- 	cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R3 | MMC_CMD_BCR;
++	/* SD Spec says: any SD Card shall set at least bits 0 and 2 */
++	if (!(scr->bus_widths & SD_SCR_BUS_WIDTH_1) ||
++	    !(scr->bus_widths & SD_SCR_BUS_WIDTH_4)) {
++		pr_err("%s: invalid bus width\n", mmc_hostname(card->host));
++		return -EINVAL;
++	}
++
+ 	return 0;
+ }
  
-+	trace_sd_ocr_request(host, ocr);
-+
- 	for (i = 100; i; i--) {
- 		err = mmc_wait_for_app_cmd(host, NULL, &cmd);
- 		if (err)
- 			break;
- 
-+		trace_sd_ocr_response(host, cmd.resp[0]);
-+
- 		/* if we're just probing, do a single pass */
- 		if (ocr == 0)
- 			break;
-diff --git a/include/trace/events/mmc.h b/include/trace/events/mmc.h
-index 463cf318d762..8d97810221cd 100644
---- a/include/trace/events/mmc.h
-+++ b/include/trace/events/mmc.h
-@@ -10,6 +10,98 @@
- #include <linux/mmc/host.h>
- #include <linux/tracepoint.h>
- 
-+
-+#define SD_OCR_REQUEST \
-+	{SD_OCR_CCS, "SDHC or SDXC Supported (HCS)"}, \
-+	{SD_OCR_XPC, "Maximum Performance (XPC)"}, \
-+	{SD_ROCR_S18A, "Switch to 1.8V (S18R)"}, \
-+	{MMC_VDD_165_195, "1.65 - 1.95"}, \
-+	{MMC_VDD_20_21, "2.0 ~ 2.1"}, \
-+	{MMC_VDD_21_22, "2.1 ~ 2.2"}, \
-+	{MMC_VDD_22_23, "2.2 ~ 2.3"}, \
-+	{MMC_VDD_23_24, "2.3 ~ 2.4"}, \
-+	{MMC_VDD_24_25, "2.4 ~ 2.5"}, \
-+	{MMC_VDD_25_26, "2.5 ~ 2.6"}, \
-+	{MMC_VDD_26_27, "2.6 ~ 2.7"}, \
-+	{MMC_VDD_27_28, "2.7 ~ 2.8"}, \
-+	{MMC_VDD_28_29, "2.8 ~ 2.9"}, \
-+	{MMC_VDD_29_30, "2.9 ~ 3.0"}, \
-+	{MMC_VDD_30_31, "3.0 ~ 3.1"}, \
-+	{MMC_VDD_31_32, "3.1 ~ 3.2"}, \
-+	{MMC_VDD_32_33, "3.2 ~ 3.3"}, \
-+	{MMC_VDD_33_34, "3.3 ~ 3.4"}, \
-+	{MMC_VDD_34_35, "3.4 ~ 3.5"}, \
-+	{MMC_VDD_35_36, "3.5 ~ 3.6"} \
-+
-+TRACE_EVENT(sd_ocr_request,
-+
-+	TP_PROTO(struct mmc_host *host, u32 ocr),
-+
-+	TP_ARGS(host, ocr),
-+
-+	TP_STRUCT__entry(
-+		__field(u32,			ocr)
-+		__string(name,			mmc_hostname(host))
-+	),
-+
-+	TP_fast_assign(
-+		__entry->ocr = ocr;
-+		__assign_str(name, mmc_hostname(host));
-+	),
-+
-+	TP_printk("%s: %#x [%s]",
-+		  __get_str(name),
-+		  __entry->ocr,
-+		  __print_flags(__entry->ocr, " | ", SD_OCR_REQUEST)
-+	)
-+);
-+
-+#define SD_OCR_RESPONSE \
-+	{MMC_CARD_BUSY, "Ready"}, \
-+	{SD_OCR_CCS, "SDHC or SDXC (CCS)"}, \
-+	{(1<<29), "UHS-II Card"}, \
-+	{SD_ROCR_S18A, "1.8V Accepted (S18A)"}, \
-+	{MMC_VDD_165_195, "1.65 - 1.95"}, \
-+	{MMC_VDD_20_21, "2.0 ~ 2.1"}, \
-+	{MMC_VDD_21_22, "2.1 ~ 2.2"}, \
-+	{MMC_VDD_22_23, "2.2 ~ 2.3"}, \
-+	{MMC_VDD_23_24, "2.3 ~ 2.4"}, \
-+	{MMC_VDD_24_25, "2.4 ~ 2.5"}, \
-+	{MMC_VDD_25_26, "2.5 ~ 2.6"}, \
-+	{MMC_VDD_26_27, "2.6 ~ 2.7"}, \
-+	{MMC_VDD_27_28, "2.7 ~ 2.8"}, \
-+	{MMC_VDD_28_29, "2.8 ~ 2.9"}, \
-+	{MMC_VDD_29_30, "2.9 ~ 3.0"}, \
-+	{MMC_VDD_30_31, "3.0 ~ 3.1"}, \
-+	{MMC_VDD_31_32, "3.1 ~ 3.2"}, \
-+	{MMC_VDD_32_33, "3.2 ~ 3.3"}, \
-+	{MMC_VDD_33_34, "3.3 ~ 3.4"}, \
-+	{MMC_VDD_34_35, "3.4 ~ 3.5"}, \
-+	{MMC_VDD_35_36, "3.5 ~ 3.6"}
-+
-+TRACE_EVENT(sd_ocr_response,
-+
-+	TP_PROTO(struct mmc_host *host, u32 ocr),
-+
-+	TP_ARGS(host, ocr),
-+
-+	TP_STRUCT__entry(
-+		__field(u32,			ocr)
-+		__string(name,			mmc_hostname(host))
-+	),
-+
-+	TP_fast_assign(
-+		__entry->ocr = ocr;
-+		__assign_str(name, mmc_hostname(host));
-+	),
-+
-+	TP_printk("%s: %#x [%s]",
-+		  __get_str(name),
-+		  __entry->ocr,
-+		  __print_flags(__entry->ocr, " | ", SD_OCR_RESPONSE)
-+	)
-+);
-+
- #define SD_SCR_WIDTH_FLAGS		\
- 	{SD_SCR_BUS_WIDTH_1, "1-BIT"},	\
- 	{SD_SCR_BUS_WIDTH_4, "4-BIT"}
 -- 
 2.21.0.392.gf8f6787159e-goog
