@@ -1,79 +1,96 @@
-From: Peng Fan <peng.fan@nxp.com>
-Subject: [RFC] mmc: cqhci: clear pending interrupt and halt
-Date: Tue, 16 Apr 2019 06:48:24 +0000
-Message-ID: <20190416070128.12039-1-peng.fan@nxp.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [RFC] mmc: cqhci: clear pending interrupt and halt
+Date: Tue, 16 Apr 2019 10:19:03 +0300
+Message-ID: <32bf3efd-a29c-1105-73b3-b4a6f8c51277@intel.com>
+References: <20190416070128.12039-1-peng.fan@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190416070128.12039-1-peng.fan@nxp.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "riteshh@codeaurora.org" <riteshh@codeaurora.org>, "asutoshd@codeaurora.org" <asutoshd@codeaurora.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Marie Cheng <haibo.cheng@nxp.com>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, dl-linux-imx <linux-imx@nxp.com>, "van.freenix@gmail.com" <van.freenix@gmail.com>, Peng Fan <peng.fan@nxp.com>
+To: Peng Fan <peng.fan@nxp.com>, "riteshh@codeaurora.org" <riteshh@codeaurora.org>, "asutoshd@codeaurora.org" <asutoshd@codeaurora.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Marie Cheng <haibo.cheng@nxp.com>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, dl-linux-imx <linux-imx@nxp.com>, "van.freenix@gmail.com" <van.freenix@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-T24gaS5NWDhNTSwgd2UgYXJlIHJ1bm5pbmcgRHVhbCBMaW51eCBPUywgd2l0aCAxc3QgTGludXgg
-dXNpbmcgU0QgQ2FyZA0KYXMgcm9vdGZzIHN0b3JhZ2UsIDJuZCBMaW51eCB1c2luZyBlTU1DIGFz
-IHJvb3RmcyBzdG9yYWdlLiBXZSBsZXQgdGhlDQp0aGUgMXN0IGxpbnV4IGNvbmZpZ3VyZSBwb3dl
-ci9jbG9jayBmb3IgdGhlIDJuZCBMaW51eC4NCg0KV2hlbiB0aGUgMm5kIExpbnV4IGlzIGJvb3Rp
-bmcgaW50byByb290ZnMgc3RhZ2UsIHdlIGxldCB0aGUgMXN0IExpbnV4DQp0byBkZXN0cm95IHRo
-ZSAybmQgbGludXgsIHRoZW4gcmVzdGFydCB0aGUgMXN0IGxpbnV4LCB3ZSBtZXQgU0RIQ0kgZHVt
-cA0KYXMgZm9sbG93aW5nLCBhZnRlciB3ZSBjbGVhciB0aGUgcGVuZGluZyBpbnRlcnJ1cHQgYW5k
-IGhhbHQgQ1FDVEwsIGlzc3VlDQpnb25lLg0KDQpbIDEuMzM0NTk0XSBtbWMyOiBHb3QgY29tbWFu
-ZCBpbnRlcnJ1cHQgMHgwMDAwMDAwMSBldmVuIHRob3VnaCBubyBjb21tYW5kIG9wZXJhdGlvbiB3
-YXMgaW4gcHJvZ3Jlc3MuDQpbIDEuMzM0NTk1XSBtbWMyOiBzZGhjaTogPT09PT09PT09PT09IFNE
-SENJIFJFR0lTVEVSIERVTVAgPT09PT09PT09PT0NClsgMS4zMzQ1OTldIG1tYzI6IHNkaGNpOiBT
-eXMgYWRkcjogMHhhMDVkY2MwMCB8IFZlcnNpb246IDB4MDAwMDAwMDINClsgMS4zNDA4MTldIGxp
-YjgwMjExOiBjb21tb24gcm91dGluZXMgZm9yIElFRUU4MDIuMTEgZHJpdmVycw0KWyAxLjM0NTUz
-OF0gbW1jMjogc2RoY2k6IEJsayBzaXplOiAweDAwMDAwMjAwIHwgQmxrIGNudDogMHgwMDAwMDAw
-MA0KWyAxLjM0NTU0MV0gbW1jMjogc2RoY2k6IEFyZ3VtZW50OiAweDAwMDE4MDAwIHwgVHJuIG1v
-ZGU6IDB4MDAwMDAwMzMNClsgMS4zNDU1NDNdIG1tYzI6IHNkaGNpOiBQcmVzZW50OiAweDAxZjg4
-MDA4IHwgSG9zdCBjdGw6IDB4MDAwMDAwMzENClsgMS4zNDU1NDddIG1tYzI6IHNkaGNpOiBQb3dl
-cjogMHgwMDAwMDAwMiB8IEJsayBnYXA6IDB4MDAwMDAwODANClsgMS4zNTc5MDNdIG1tYzI6IHNk
-aGNpOiBXYWtlLXVwOiAweDAwMDAwMDA4IHwgQ2xvY2s6IDB4MDAwMDAwM2YNClsgMS4zNTc5MDVd
-IG1tYzI6IHNkaGNpOiBUaW1lb3V0OiAweDAwMDAwMDhmIHwgSW50IHN0YXQ6IDB4MDAwMDAwMDAN
-ClsgMS4zNTc5MDhdIG1tYzI6IHNkaGNpOiBJbnQgZW5hYjogMHgxMDdmMTAwYiB8IFNpZyBlbmFi
-OiAweDEwN2YxMDBiDQpbIDEuMzU3OTExXSBtbWMyOiBzZGhjaTogQUMxMiBlcnI6IDB4MDAwMDAw
-MDAgfCBTbG90IGludDogMHgwMDAwMDUwMg0KWyAxLjM3MDI2OF0gbW1jMjogc2RoY2k6IENhcHM6
-IDB4MDdlYjAwMDAgfCBDYXBzXzE6IDB4MDAwMGI0MDANClsgMS4zNzAyNzBdIG1tYzI6IHNkaGNp
-OiBDbWQ6IDB4MDAwMDBkMWEgfCBNYXggY3VycjogMHgwMGZmZmZmZg0KWyAxLjM3MDI3M10gbW1j
-Mjogc2RoY2k6IFJlc3BbMF06IDB4MDAwMDBiMDAgfCBSZXNwWzFdOiAweGZmZmZmZmZmDQpbIDEu
-MzcwMjc2XSBtbWMyOiBzZGhjaTogUmVzcFsyXTogMHgzMjhmNTkwMyB8IFJlc3BbM106IDB4MDBk
-MDBmMDANClsgMS4zODIxMzJdIG1tYzI6IHNkaGNpOiBIb3N0IGN0bDI6IDB4MDAwMDAwMDANClsg
-MS4zODIxMzVdIG1tYzI6IHNkaGNpOiBBRE1BIEVycjogMHgwMDAwMDAwMCB8IEFETUEgUHRyOiAw
-eGEyMDQwMjA4DQoNClsgMi4wNjA5MzJdIG1tYzI6IFVuZXhwZWN0ZWQgaW50ZXJydXB0IDB4MDAw
-MDQwMDAuDQpbIDIuMDY1NTM4XSBtbWMyOiBzZGhjaTogPT09PT09PT09PT09IFNESENJIFJFR0lT
-VEVSIERVTVAgPT09PT09PT09PT0NClsgMi4wNzE3MjBdIG1tYzI6IHNkaGNpOiBTeXMgYWRkcjog
-MHgwMDAwMDAwMCB8IFZlcnNpb246IDB4MDAwMDAwMDINClsgMi4wNzc5MDJdIG1tYzI6IHNkaGNp
-OiBCbGsgc2l6ZTogMHgwMDAwMDIwMCB8IEJsayBjbnQ6IDB4MDAwMDAwMDENClsgMi4wODQwODNd
-IG1tYzI6IHNkaGNpOiBBcmd1bWVudDogMHgwMDAwMDAwMCB8IFRybiBtb2RlOiAweDAwMDAwMDAw
-DQpbIDIuMDkwMjY0XSBtbWMyOiBzZGhjaTogUHJlc2VudDogMHgwMWY4ODAwOSB8IEhvc3QgY3Rs
-OiAweDAwMDAwMDExDQpbIDIuMDk2NDQ2XSBtbWMyOiBzZGhjaTogUG93ZXI6IDB4MDAwMDAwMDIg
-fCBCbGsgZ2FwOiAweDAwMDAwMDgwDQpbIDIuMTAyNjI3XSBtbWMyOiBzZGhjaTogV2FrZS11cDog
-MHgwMDAwMDAwOCB8IENsb2NrOiAweDAwMDAxMGZmDQpbIDIuMTA4ODA5XSBtbWMyOiBzZGhjaTog
-VGltZW91dDogMHgwMDAwMDA4ZiB8IEludCBzdGF0OiAweDAwMDA0MDAwDQpbIDIuMTE0OTkwXSBt
-bWMyOiBzZGhjaTogSW50IGVuYWI6IDB4MDA3ZjEwMDMgfCBTaWcgZW5hYjogMHgwMDdmMTAwMw0K
-WyAyLjEyMTE3MV0gbW1jMjogc2RoY2k6IEFDMTIgZXJyOiAweDAwMDAwMDAwIHwgU2xvdCBpbnQ6
-IDB4MDAwMDA1MDINClsgMi4xMjczNTNdIG1tYzI6IHNkaGNpOiBDYXBzOiAweDA3ZWIwMDAwIHwg
-Q2Fwc18xOiAweDAwMDBiNDAwDQpbIDIuMTMzNTM0XSBtbWMyOiBzZGhjaTogQ21kOiAweDAwMDAz
-NzFhIHwgTWF4IGN1cnI6IDB4MDBmZmZmZmYNClsgMi4xMzk3MTVdIG1tYzI6IHNkaGNpOiBSZXNw
-WzBdOiAweDAwMDAwOTAwIHwgUmVzcFsxXTogMHhmZmZmZmZmZg0KWyAyLjE0NTg5Nl0gbW1jMjog
-c2RoY2k6IFJlc3BbMl06IDB4MzI4ZjU5MDMgfCBSZXNwWzNdOiAweDAwZDAwZjAwDQpbIDIuMTUy
-MDc3XSBtbWMyOiBzZGhjaTogSG9zdCBjdGwyOiAweDAwMDAwMDAwDQpbIDIuMTU2MzQyXSBtbWMy
-OiBzZGhjaTogQURNQSBFcnI6IDB4MDAwMDAwMDAgfCBBRE1BIFB0cjogMHgwMDAwMDAwMA0KDQpT
-aWduZWQtb2ZmLWJ5OiBQZW5nIEZhbiA8cGVuZy5mYW5AbnhwLmNvbT4NCi0tLQ0KIGRyaXZlcnMv
-bW1jL2hvc3QvY3FoY2kuYyB8IDUgKysrKysNCiAxIGZpbGUgY2hhbmdlZCwgNSBpbnNlcnRpb25z
-KCspDQoNCmRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L2NxaGNpLmMgYi9kcml2ZXJzL21t
-Yy9ob3N0L2NxaGNpLmMNCmluZGV4IGQ1OWNiMGE1MTk2NC4uNGY0MTk2MGFjN2FkIDEwMDY0NA0K
-LS0tIGEvZHJpdmVycy9tbWMvaG9zdC9jcWhjaS5jDQorKysgYi9kcml2ZXJzL21tYy9ob3N0L2Nx
-aGNpLmMNCkBAIC0xMTE2LDYgKzExMTYsNyBAQCBpbnQgY3FoY2lfaW5pdChzdHJ1Y3QgY3FoY2lf
-aG9zdCAqY3FfaG9zdCwgc3RydWN0IG1tY19ob3N0ICptbWMsDQogCSAgICAgIGJvb2wgZG1hNjQp
-DQogew0KIAlpbnQgZXJyOw0KKwl1MzIgc3RhdHVzOw0KIA0KIAljcV9ob3N0LT5kbWE2NCA9IGRt
-YTY0Ow0KIAljcV9ob3N0LT5tbWMgPSBtbWM7DQpAQCAtMTEzOSw2ICsxMTQwLDEwIEBAIGludCBj
-cWhjaV9pbml0KHN0cnVjdCBjcWhjaV9ob3N0ICpjcV9ob3N0LCBzdHJ1Y3QgbW1jX2hvc3QgKm1t
-YywNCiANCiAJc3Bpbl9sb2NrX2luaXQoJmNxX2hvc3QtPmxvY2spOw0KIA0KKwlzdGF0dXMgPSBj
-cWhjaV9yZWFkbChjcV9ob3N0LCBDUUhDSV9JUyk7DQorCWNxaGNpX3dyaXRlbChjcV9ob3N0LCBz
-dGF0dXMsIENRSENJX0lTKTsNCisJY3FoY2lfd3JpdGVsKGNxX2hvc3QsIENRSENJX0hBTFQsIENR
-SENJX0NUTCk7DQorDQogCWluaXRfY29tcGxldGlvbigmY3FfaG9zdC0+aGFsdF9jb21wKTsNCiAJ
-aW5pdF93YWl0cXVldWVfaGVhZCgmY3FfaG9zdC0+d2FpdF9xdWV1ZSk7DQogDQotLSANCjIuMTYu
-NA0KDQo=
+On 16/04/19 9:48 AM, Peng Fan wrote:
+> On i.MX8MM, we are running Dual Linux OS, with 1st Linux using SD Card
+> as rootfs storage, 2nd Linux using eMMC as rootfs storage. We let the
+> the 1st linux configure power/clock for the 2nd Linux.
+> 
+> When the 2nd Linux is booting into rootfs stage, we let the 1st Linux
+> to destroy the 2nd linux, then restart the 1st linux, we met SDHCI dump
+> as following, after we clear the pending interrupt and halt CQCTL, issue
+> gone.
+
+I think it is better if the vendor driver does any necessary resets before
+initialization.
+
+> 
+> [ 1.334594] mmc2: Got command interrupt 0x00000001 even though no command operation was in progress.
+> [ 1.334595] mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
+> [ 1.334599] mmc2: sdhci: Sys addr: 0xa05dcc00 | Version: 0x00000002
+> [ 1.340819] lib80211: common routines for IEEE802.11 drivers
+> [ 1.345538] mmc2: sdhci: Blk size: 0x00000200 | Blk cnt: 0x00000000
+> [ 1.345541] mmc2: sdhci: Argument: 0x00018000 | Trn mode: 0x00000033
+> [ 1.345543] mmc2: sdhci: Present: 0x01f88008 | Host ctl: 0x00000031
+> [ 1.345547] mmc2: sdhci: Power: 0x00000002 | Blk gap: 0x00000080
+> [ 1.357903] mmc2: sdhci: Wake-up: 0x00000008 | Clock: 0x0000003f
+> [ 1.357905] mmc2: sdhci: Timeout: 0x0000008f | Int stat: 0x00000000
+> [ 1.357908] mmc2: sdhci: Int enab: 0x107f100b | Sig enab: 0x107f100b
+> [ 1.357911] mmc2: sdhci: AC12 err: 0x00000000 | Slot int: 0x00000502
+> [ 1.370268] mmc2: sdhci: Caps: 0x07eb0000 | Caps_1: 0x0000b400
+> [ 1.370270] mmc2: sdhci: Cmd: 0x00000d1a | Max curr: 0x00ffffff
+> [ 1.370273] mmc2: sdhci: Resp[0]: 0x00000b00 | Resp[1]: 0xffffffff
+> [ 1.370276] mmc2: sdhci: Resp[2]: 0x328f5903 | Resp[3]: 0x00d00f00
+> [ 1.382132] mmc2: sdhci: Host ctl2: 0x00000000
+> [ 1.382135] mmc2: sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0xa2040208
+> 
+> [ 2.060932] mmc2: Unexpected interrupt 0x00004000.
+> [ 2.065538] mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
+> [ 2.071720] mmc2: sdhci: Sys addr: 0x00000000 | Version: 0x00000002
+> [ 2.077902] mmc2: sdhci: Blk size: 0x00000200 | Blk cnt: 0x00000001
+> [ 2.084083] mmc2: sdhci: Argument: 0x00000000 | Trn mode: 0x00000000
+> [ 2.090264] mmc2: sdhci: Present: 0x01f88009 | Host ctl: 0x00000011
+> [ 2.096446] mmc2: sdhci: Power: 0x00000002 | Blk gap: 0x00000080
+> [ 2.102627] mmc2: sdhci: Wake-up: 0x00000008 | Clock: 0x000010ff
+> [ 2.108809] mmc2: sdhci: Timeout: 0x0000008f | Int stat: 0x00004000
+> [ 2.114990] mmc2: sdhci: Int enab: 0x007f1003 | Sig enab: 0x007f1003
+> [ 2.121171] mmc2: sdhci: AC12 err: 0x00000000 | Slot int: 0x00000502
+> [ 2.127353] mmc2: sdhci: Caps: 0x07eb0000 | Caps_1: 0x0000b400
+> [ 2.133534] mmc2: sdhci: Cmd: 0x0000371a | Max curr: 0x00ffffff
+> [ 2.139715] mmc2: sdhci: Resp[0]: 0x00000900 | Resp[1]: 0xffffffff
+> [ 2.145896] mmc2: sdhci: Resp[2]: 0x328f5903 | Resp[3]: 0x00d00f00
+> [ 2.152077] mmc2: sdhci: Host ctl2: 0x00000000
+> [ 2.156342] mmc2: sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0x00000000
+> 
+> Signed-off-by: Peng Fan <peng.fan@nxp.com>
+> ---
+>  drivers/mmc/host/cqhci.c | 5 +++++
+>  1 file changed, 5 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/cqhci.c b/drivers/mmc/host/cqhci.c
+> index d59cb0a51964..4f41960ac7ad 100644
+> --- a/drivers/mmc/host/cqhci.c
+> +++ b/drivers/mmc/host/cqhci.c
+> @@ -1116,6 +1116,7 @@ int cqhci_init(struct cqhci_host *cq_host, struct mmc_host *mmc,
+>  	      bool dma64)
+>  {
+>  	int err;
+> +	u32 status;
+>  
+>  	cq_host->dma64 = dma64;
+>  	cq_host->mmc = mmc;
+> @@ -1139,6 +1140,10 @@ int cqhci_init(struct cqhci_host *cq_host, struct mmc_host *mmc,
+>  
+>  	spin_lock_init(&cq_host->lock);
+>  
+> +	status = cqhci_readl(cq_host, CQHCI_IS);
+> +	cqhci_writel(cq_host, status, CQHCI_IS);
+> +	cqhci_writel(cq_host, CQHCI_HALT, CQHCI_CTL);
+> +
+>  	init_completion(&cq_host->halt_comp);
+>  	init_waitqueue_head(&cq_host->wait_queue);
+>  
+> 
