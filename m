@@ -1,44 +1,35 @@
 From: Matthias Brugger <matthias.bgg@gmail.com>
-Subject: Re: [PATCH 22/24] dt-bindings: i2c: i2c-mtk: add support for MT8516
-Date: Tue, 16 Apr 2019 10:53:24 +0200
-Message-ID: <120787ce-7f83-a828-89df-196edd400143@gmail.com>
+Subject: Re: [PATCH 15/24] dt-bindings: pinctrl: pinctrl-mt65xx: add support
+ for MT8516
+Date: Tue, 16 Apr 2019 11:12:04 +0200
+Message-ID: <b1e4eb6c-0d53-0307-99e4-9fef9e2b33d8@gmail.com>
 References: <20190323211612.860-1-fparent@baylibre.com>
- <20190323211612.860-23-fparent@baylibre.com>
- <2a384e4b-a23d-450b-ee37-57af8c097bae@gmail.com>
- <20190416081433.GA1012@kunai>
+ <20190323211612.860-16-fparent@baylibre.com>
+ <CACRpkdZZ6-+MVdK4bOP4SHxQ8uQ8zENcir7DSteHy4g+B5uySQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190416081433.GA1012@kunai>
+In-Reply-To: <CACRpkdZZ6-+MVdK4bOP4SHxQ8uQ8zENcir7DSteHy4g+B5uySQ@mail.gmail.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: Fabien Parent <fparent@baylibre.com>, robh+dt@kernel.org, mark.rutland@arm.com, sean.wang@kernel.org, ryder.lee@mediatek.com, hsin-hsiung.wang@mediatek.com, wenzhen.yu@mediatek.com, chaotian.jing@mediatek.com, yong.mao@mediatek.com, jjian.zhou@mediatek.com, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-i2c@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org, linux-serial@vger.kernel.org, linux-spi@vger.kernel.org, linux-watchdog@vger.kernel.org, linux-clk@vger.kernel.org, stephane.leprovost@mediatek.com
+To: Linus Walleij <linus.walleij@linaro.org>, Fabien Parent <fparent@baylibre.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Sean Wang <sean.wang@kernel.org>, Ryder Lee <ryder.lee@mediatek.com>, hsin-hsiung.wang@mediatek.com, wenzhen.yu@mediatek.com, Chaotian Jing <chaotian.jing@mediatek.com>, Yong Mao <yong.mao@mediatek.com>, jjian.zhou@mediatek.com, "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-i2c@vger.kernel.org, Linux ARM <linux-arm-kernel@lists.infradead.org>, "moderated list:ARM/Mediatek SoC support" <linux-mediatek@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>, linux-serial@vger.kernel.org, linux-spi <linux-spi@>
 List-Id: linux-mmc@vger.kernel.org
 
+Hi Linus,
 
-
-On 16/04/2019 10:14, Wolfram Sang wrote:
-> On Tue, Apr 16, 2019 at 09:58:09AM +0200, Matthias Brugger wrote:
->> 
->> 
->> On 23/03/2019 22:16, Fabien Parent wrote:
->>> Add binding documentation of i2c-mtk for MT8516 SoC.
->>> 
->>> Signed-off-by: Fabien Parent <fparent@baylibre.com> --- 
->>> Documentation/devicetree/bindings/i2c/i2c-mtk.txt | 1 + 1 file changed,
->>> 1 insertion(+)
->>> 
->> 
->> 
->> applied to v5.1-next/dts64
->> 
->> Wolfram let me know if you want to take it through your tree and I drop
->> the patch.
+On 08/04/2019 22:44, Linus Walleij wrote:
+> On Sat, Mar 23, 2019 at 10:17 PM Fabien Parent <fparent@baylibre.com> wrote:
 > 
-> I'd like to take it via my tree to reduce conflicts. It already needs 
-> rebasing on top of i2c/for-next because of Qii's MT8183 patches.
+>> Add binding documentation of pinctrl-mt65xx for MT8516 SoC.
+>>
+>> Signed-off-by: Fabien Parent <fparent@baylibre.com>
+> 
+> Patch applied with Rob's ACK.
 > 
 
-Ok, dropped, the patch is all yours :)
+I don't see this in your for-next branch. Did the patch got lost?
+
+Regards,
+Matthias
