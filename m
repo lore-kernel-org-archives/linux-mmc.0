@@ -1,48 +1,59 @@
-From: Matthias Brugger <matthias.bgg@gmail.com>
-Subject: Re: [PATCH 23/24] arm64: dts: mediatek: add dtsi for MT8516
-Date: Tue, 16 Apr 2019 10:04:02 +0200
-Message-ID: <24517390-0015-d804-8c57-4e1030edba02@gmail.com>
+From: Daniel Lezcano <daniel.lezcano@linaro.org>
+Subject: Re: [PATCH 18/24] dt-bindings: timer: mtk-timer: add support for
+ MT8516
+Date: Tue, 16 Apr 2019 10:09:47 +0200
+Message-ID: <e4895191-c267-7b0b-6203-8e4ff44927e0@linaro.org>
 References: <20190323211612.860-1-fparent@baylibre.com>
- <20190323211612.860-24-fparent@baylibre.com>
- <CAL_Jsq+Q06O84-MTpgTWGG312VXm_vGOkjMCjtWuS0eZ-j_0yw@mail.gmail.com>
+ <20190323211612.860-19-fparent@baylibre.com>
+ <182f1ae5-9f4f-8ef4-695f-353bbd1966c6@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAL_Jsq+Q06O84-MTpgTWGG312VXm_vGOkjMCjtWuS0eZ-j_0yw@mail.gmail.com>
+In-Reply-To: <182f1ae5-9f4f-8ef4-695f-353bbd1966c6@gmail.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Rob Herring <robh+dt@kernel.org>, Fabien Parent <fparent@baylibre.com>
-Cc: Mark Rutland <mark.rutland@arm.com>, Sean Wang <sean.wang@kernel.org>, Ryder Lee <ryder.lee@mediatek.com>, Hsin-Hsiung Wang <hsin-hsiung.wang@mediatek.com>, Wenzhen Yu <wenzhen.yu@mediatek.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Yong Mao <yong.mao@mediatek.com>, jjian.zhou@mediatek.com, devicetree@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Linux I2C <linux-i2c@vger.kernel.org>, "moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE" <linux-arm-kernel@lists.infradead.org>, "moderated list:ARM/Mediatek SoC support" <linux-mediatek@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>, "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>
+To: Matthias Brugger <matthias.bgg@gmail.com>, Fabien Parent <fparent@baylibre.com>, robh+dt@kernel.org, mark.rutland@arm.com
+Cc: sean.wang@kernel.org, ryder.lee@mediatek.com, hsin-hsiung.wang@mediatek.com, wenzhen.yu@mediatek.com, chaotian.jing@mediatek.com, yong.mao@mediatek.com, jjian.zhou@mediatek.com, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-i2c@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org, linux-serial@vger.kernel.org, linux-spi@vger.kernel.org, linux-watchdog@vger.kernel.org, linux-clk@vger.kernel.org, stephane.leprovost@mediatek.com
 List-Id: linux-mmc@vger.kernel.org
 
-
-
-On 28/03/2019 20:22, Rob Herring wrote:
-> On Sat, Mar 23, 2019 at 4:17 PM Fabien Parent <fparent@baylibre.com> wrote:
->>
->> The MT8516 SoC provides the following peripherals: GPIO, UART, USB2,
->> SPI, eMMC, SDIO, NAND, Flash, ADC, I2C, PWM, Timers, IR, Ethernet, and
->> Audio (I2S, SPDIF, TDM).
->>
->> This commit is adding the basic dtsi file with the support of the
->> following IOs: GPIO, UART, SPI, eMMC, I2C, Timers.
+On 16/04/2019 09:54, Matthias Brugger wrote:
+> 
+> 
+> On 23/03/2019 22:16, Fabien Parent wrote:
+>> Add binding documentation of mtk-timer for MT8516 SoC.
 >>
 >> Signed-off-by: Fabien Parent <fparent@baylibre.com>
 >> ---
->>  arch/arm64/boot/dts/mediatek/mt8516-pinfunc.h | 663 ++++++++++++++++++
->>  arch/arm64/boot/dts/mediatek/mt8516.dtsi      | 409 +++++++++++
->>  2 files changed, 1072 insertions(+)
->>  create mode 100644 arch/arm64/boot/dts/mediatek/mt8516-pinfunc.h
->>  create mode 100644 arch/arm64/boot/dts/mediatek/mt8516.dtsi
+>>  Documentation/devicetree/bindings/timer/mediatek,mtk-timer.txt | 1 +
+>>  1 file changed, 1 insertion(+)
 > 
-> Reviewed-by: Rob Herring <robh@kernel.org>
+> applied to v5.1-next/dts64
 > 
+> Daniel let me know if you want to take it through your tree and I drop the patch.
 
-Fabien, before taking this through my tree, I'd like to see the drivers merged.
-Can you please resubmit taking into account the outcome of get_maintainers.pl
-script. From my experience it is easier to send one series per driver, as it
-makes the amount of emails every maintainer gets more manageable.
+It is ok.
 
-Regards,
-Matthias
+Acked-by: Daniel Lezcano <daniel.lezcano@linaro.org>
+
+>> diff --git a/Documentation/devicetree/bindings/timer/mediatek,mtk-timer.txt b/Documentation/devicetree/bindings/timer/mediatek,mtk-timer.txt
+>> index ff7c567a7972..74c3eadad844 100644
+>> --- a/Documentation/devicetree/bindings/timer/mediatek,mtk-timer.txt
+>> +++ b/Documentation/devicetree/bindings/timer/mediatek,mtk-timer.txt
+>> @@ -17,6 +17,7 @@ Required properties:
+>>  	* "mediatek,mt8127-timer" for MT8127 compatible timers (GPT)
+>>  	* "mediatek,mt8135-timer" for MT8135 compatible timers (GPT)
+>>  	* "mediatek,mt8173-timer" for MT8173 compatible timers (GPT)
+>> +	* "mediatek,mt8516-timer" for MT8516 compatible timers (GPT)
+>>  	* "mediatek,mt6577-timer" for MT6577 and all above compatible timers (GPT)
+>>  
+>>  	For those SoCs that use SYST
+>>
+
+
+-- 
+ <http://www.linaro.org/> Linaro.org │ Open source software for ARM SoCs
+
+Follow Linaro:  <http://www.facebook.com/pages/Linaro> Facebook |
+<http://twitter.com/#!/linaroorg> Twitter |
+<http://www.linaro.org/linaro-blog/> Blog
