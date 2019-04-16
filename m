@@ -1,56 +1,76 @@
-From: lei liu <leilk.liu@mediatek.com>
-Subject: Re: [PATCH 19/24] dt-bindings: spi: spi-mt65xx: add support for
- MT8516
-Date: Tue, 16 Apr 2019 16:25:51 +0800
-Message-ID: <1555403151.7441.4.camel@mhfsdcap03>
-References: <20190323211612.860-1-fparent@baylibre.com>
-         <20190323211612.860-20-fparent@baylibre.com>
-         <5bc3fbfa-6d7e-08d3-116c-a8f78bc680cd@gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [RFC] mmc: cqhci: clear pending interrupt and halt
+Date: Tue, 16 Apr 2019 11:32:03 +0300
+Message-ID: <83ba5bb2-2d59-1f67-b1a1-cb5e20985a1f@intel.com>
+References: <DB7PR04MB44904965E8F1BF09A5C150B288240@DB7PR04MB4490.eurprd04.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <5bc3fbfa-6d7e-08d3-116c-a8f78bc680cd@gmail.com>
+In-Reply-To: <DB7PR04MB44904965E8F1BF09A5C150B288240@DB7PR04MB4490.eurprd04.prod.outlook.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Matthias Brugger <matthias.bgg@gmail.com>
-Cc: Fabien Parent <fparent@baylibre.com>, robh+dt@kernel.org, mark.rutland@arm.com, Mark Brown <broonie@kernel.org>, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, ryder.lee@mediatek.com, linux-watchdog@vger.kernel.org, jjian.zhou@mediatek.com, wenzhen.yu@mediatek.com, stephane.leprovost@mediatek.com, sean.wang@kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, yong.mao@mediatek.com, linux-spi@vger.kernel.org, linux-gpio@vger.kernel.org, linux-mediatek@lists.infradead.org, hsin-hsiung.wang@mediatek.com, linux-serial@vger.kernel.org, linux-clk@vger.kernel.org, chaotian.jing@mediatek.com, linux-i2c@vger.kernel.org
+To: Peng Fan <peng.fan@nxp.com>, "riteshh@codeaurora.org" <riteshh@codeaurora.org>, "asutoshd@codeaurora.org" <asutoshd@codeaurora.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, BOUGH CHEN <haibo.chen@nxp.com>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, dl-linux-imx <linux-imx@nxp.com>, "van.freenix@gmail.com" <van.freenix@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 2019-04-16 at 09:55 +0200, Matthias Brugger wrote:
+On 16/04/19 10:27 AM, Peng Fan wrote:
+> Hi Adrian,
 > 
-> On 23/03/2019 22:16, Fabien Parent wrote:
-> > Add binding documentation of spi-mt65xx for MT8516 SoC.
-> > 
-> > Signed-off-by: Fabien Parent <fparent@baylibre.com>
-> > ---
-> >  Documentation/devicetree/bindings/spi/spi-mt65xx.txt | 1 +
-> >  1 file changed, 1 insertion(+)
-> > 
+>>
+>> On 16/04/19 9:48 AM, Peng Fan wrote:
+>>> On i.MX8MM, we are running Dual Linux OS, with 1st Linux using SD Card
+>>> as rootfs storage, 2nd Linux using eMMC as rootfs storage. We let the
+>>> the 1st linux configure power/clock for the 2nd Linux.
+>>>
+>>> When the 2nd Linux is booting into rootfs stage, we let the 1st Linux
+>>> to destroy the 2nd linux, then restart the 1st linux, we met SDHCI
+>>> dump as following, after we clear the pending interrupt and halt
+>>> CQCTL, issue gone.
+>>
+>> I think it is better if the vendor driver does any necessary resets before
+>> initialization.
 > 
+> In drivers/mmc/host/sdhci-esdhc-imx.c, there is a call to cqhci_init
+> " 1525                 err = cqhci_init(cq_host, host->mmc, false);"
 > 
-> applied to v5.1-next/dts64
+> You mean I put the following piece code into sdhci-esdhc-imx.c?
 > 
-> Mark let me know if you want to take it through your tree and I drop the patch.
+> "
+>      status = cqhci_readl(cq_host, CQHCI_IS);
+>      cqhci_writel(cq_host, status, CQHCI_IS);
+>      cqhci_writel(cq_host, CQHCI_HALT, CQHCI_CTL);
+> "
 > 
-> > diff --git a/Documentation/devicetree/bindings/spi/spi-mt65xx.txt b/Documentation/devicetree/bindings/spi/spi-mt65xx.txt
-> > index 69c356767cf8..69ac5976b952 100644
-> > --- a/Documentation/devicetree/bindings/spi/spi-mt65xx.txt
-> > +++ b/Documentation/devicetree/bindings/spi/spi-mt65xx.txt
-> > @@ -10,6 +10,7 @@ Required properties:
-> >      - mediatek,mt8135-spi: for mt8135 platforms
-> >      - mediatek,mt8173-spi: for mt8173 platforms
-> >      - mediatek,mt8183-spi: for mt8183 platforms
-> > +    - "mediatek,mt8516-spi", "mediatek,mt2701-spi": for mt8516 platforms
-Hi Fabien,
-mt8516 SPI design comes from mt2712 and it's different from mt2701. Here
-it should compatible with mt2712.
+> How about the following patch?
+> 
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index b8e11a77e274..f2e46ddf9695 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -1435,6 +1435,7 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+>         struct cqhci_host *cq_host;
+>         int err;
+>         struct pltfm_imx_data *imx_data;
+> +       u32 status;
+> 
+>         host = sdhci_pltfm_init(pdev, &sdhci_esdhc_imx_pdata,
+>                                 sizeof(*imx_data));
+> @@ -1542,6 +1543,11 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+>                 err = cqhci_init(cq_host, host->mmc, false);
+>                 if (err)
+>                         goto disable_ahb_clk;
+> +
+> +               status = cqhci_readl(cq_host, CQHCI_IS);
+> +               cqhci_writel(cq_host, status, CQHCI_IS);
+> +               cqhci_writel(cq_host, CQHCI_HALT, CQHCI_CTL);
+> +
+>         }
+> 
 
-> >  
-> >  - #address-cells: should be 1.
-> >  
-> > 
-> 
-> _______________________________________________
-> Linux-mediatek mailing list
-> Linux-mediatek@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-mediatek
+It would be nicer to:
+1. Define how CQHCI gets reset.  For example, with our controllers
+SDHCI_RESET_ALL also resets CQHCI.
+2. Define when CQHCI should be reset. e.g. using the ->reset() host op for
+example.
+3. Implement a patch that meets those requirements.
