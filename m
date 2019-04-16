@@ -1,59 +1,47 @@
-From: Daniel Lezcano <daniel.lezcano@linaro.org>
-Subject: Re: [PATCH 18/24] dt-bindings: timer: mtk-timer: add support for
- MT8516
-Date: Tue, 16 Apr 2019 10:09:47 +0200
-Message-ID: <e4895191-c267-7b0b-6203-8e4ff44927e0@linaro.org>
-References: <20190323211612.860-1-fparent@baylibre.com>
- <20190323211612.860-19-fparent@baylibre.com>
- <182f1ae5-9f4f-8ef4-695f-353bbd1966c6@gmail.com>
+From: Chaotian Jing <chaotian.jing@mediatek.com>
+Subject: Re: [PATCH 2/5] mmc: mtk-sd: don't hard-code interrupt trigger type
+Date: Tue, 16 Apr 2019 16:11:42 +0800
+Message-ID: <1555402302.18628.17.camel@mhfsdcap03>
+References: <155538933003.25108.3338569916935462285.stgit@noble.brown>
+         <155539004923.25108.12499096383277776864.stgit@noble.brown>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <182f1ae5-9f4f-8ef4-695f-353bbd1966c6@gmail.com>
-Content-Language: en-US
+In-Reply-To: <155539004923.25108.12499096383277776864.stgit@noble.brown>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Matthias Brugger <matthias.bgg@gmail.com>, Fabien Parent <fparent@baylibre.com>, robh+dt@kernel.org, mark.rutland@arm.com
-Cc: sean.wang@kernel.org, ryder.lee@mediatek.com, hsin-hsiung.wang@mediatek.com, wenzhen.yu@mediatek.com, chaotian.jing@mediatek.com, yong.mao@mediatek.com, jjian.zhou@mediatek.com, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-i2c@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org, linux-serial@vger.kernel.org, linux-spi@vger.kernel.org, linux-watchdog@vger.kernel.org, linux-clk@vger.kernel.org, stephane.leprovost@mediatek.com
+To: NeilBrown <neil@brown.name>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, thirtythreeforty@gmail.com
 List-Id: linux-mmc@vger.kernel.org
 
-On 16/04/2019 09:54, Matthias Brugger wrote:
+On Tue, 2019-04-16 at 14:47 +1000, NeilBrown wrote:
+> When using devicetree for configuration, interrupt trigger type
+> should be described in the dts file, not hard-coded in the C code.
+> 
+> The mtk-sd silicon in the mt7621 soc uses an active-high interrupt
+> and so cannot be used with the current code.
+> 
+> So remove the trigger and leave it to be set from devicetree.
+> 
+> Signed-off-by: NeilBrown <neil@brown.name>
+> ---
+>  drivers/mmc/host/mtk-sd.c |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index 4492a4465c0e..14e048239143 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -2243,7 +2243,7 @@ static int msdc_drv_probe(struct platform_device *pdev)
+>  	msdc_init_hw(host);
+>  
+>  	ret = devm_request_irq(&pdev->dev, host->irq, msdc_irq,
+> -		IRQF_TRIGGER_LOW | IRQF_ONESHOT, pdev->name, host);
+> +
+change it to IRQF_TRIGGER_NONE | IRQF_ONESHOT
+> 			       0, pdev->name, host);
+>  	if (ret)
+>  		goto release;
+>  
 > 
 > 
-> On 23/03/2019 22:16, Fabien Parent wrote:
->> Add binding documentation of mtk-timer for MT8516 SoC.
->>
->> Signed-off-by: Fabien Parent <fparent@baylibre.com>
->> ---
->>  Documentation/devicetree/bindings/timer/mediatek,mtk-timer.txt | 1 +
->>  1 file changed, 1 insertion(+)
-> 
-> applied to v5.1-next/dts64
-> 
-> Daniel let me know if you want to take it through your tree and I drop the patch.
-
-It is ok.
-
-Acked-by: Daniel Lezcano <daniel.lezcano@linaro.org>
-
->> diff --git a/Documentation/devicetree/bindings/timer/mediatek,mtk-timer.txt b/Documentation/devicetree/bindings/timer/mediatek,mtk-timer.txt
->> index ff7c567a7972..74c3eadad844 100644
->> --- a/Documentation/devicetree/bindings/timer/mediatek,mtk-timer.txt
->> +++ b/Documentation/devicetree/bindings/timer/mediatek,mtk-timer.txt
->> @@ -17,6 +17,7 @@ Required properties:
->>  	* "mediatek,mt8127-timer" for MT8127 compatible timers (GPT)
->>  	* "mediatek,mt8135-timer" for MT8135 compatible timers (GPT)
->>  	* "mediatek,mt8173-timer" for MT8173 compatible timers (GPT)
->> +	* "mediatek,mt8516-timer" for MT8516 compatible timers (GPT)
->>  	* "mediatek,mt6577-timer" for MT6577 and all above compatible timers (GPT)
->>  
->>  	For those SoCs that use SYST
->>
-
-
--- 
- <http://www.linaro.org/> Linaro.org │ Open source software for ARM SoCs
-
-Follow Linaro:  <http://www.facebook.com/pages/Linaro> Facebook |
-<http://twitter.com/#!/linaroorg> Twitter |
-<http://www.linaro.org/linaro-blog/> Blog
