@@ -1,96 +1,111 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
+From: Peng Fan <peng.fan@nxp.com>
 Subject: Re: [RFC] mmc: cqhci: clear pending interrupt and halt
-Date: Tue, 16 Apr 2019 10:19:03 +0300
-Message-ID: <32bf3efd-a29c-1105-73b3-b4a6f8c51277@intel.com>
-References: <20190416070128.12039-1-peng.fan@nxp.com>
+Date: Tue, 16 Apr 2019 07:27:35 +0000
+Message-ID: <DB7PR04MB44904965E8F1BF09A5C150B288240@DB7PR04MB4490.eurprd04.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190416070128.12039-1-peng.fan@nxp.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Peng Fan <peng.fan@nxp.com>, "riteshh@codeaurora.org" <riteshh@codeaurora.org>, "asutoshd@codeaurora.org" <asutoshd@codeaurora.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Marie Cheng <haibo.cheng@nxp.com>
+To: Adrian Hunter <adrian.hunter@intel.com>, "riteshh@codeaurora.org" <riteshh@codeaurora.org>, "asutoshd@codeaurora.org" <asutoshd@codeaurora.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, BOUGH CHEN <haibo.chen@nxp.com>
 Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, dl-linux-imx <linux-imx@nxp.com>, "van.freenix@gmail.com" <van.freenix@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 16/04/19 9:48 AM, Peng Fan wrote:
-> On i.MX8MM, we are running Dual Linux OS, with 1st Linux using SD Card
-> as rootfs storage, 2nd Linux using eMMC as rootfs storage. We let the
-> the 1st linux configure power/clock for the 2nd Linux.
-> 
-> When the 2nd Linux is booting into rootfs stage, we let the 1st Linux
-> to destroy the 2nd linux, then restart the 1st linux, we met SDHCI dump
-> as following, after we clear the pending interrupt and halt CQCTL, issue
-> gone.
-
-I think it is better if the vendor driver does any necessary resets before
-initialization.
-
-> 
-> [ 1.334594] mmc2: Got command interrupt 0x00000001 even though no command operation was in progress.
-> [ 1.334595] mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
-> [ 1.334599] mmc2: sdhci: Sys addr: 0xa05dcc00 | Version: 0x00000002
-> [ 1.340819] lib80211: common routines for IEEE802.11 drivers
-> [ 1.345538] mmc2: sdhci: Blk size: 0x00000200 | Blk cnt: 0x00000000
-> [ 1.345541] mmc2: sdhci: Argument: 0x00018000 | Trn mode: 0x00000033
-> [ 1.345543] mmc2: sdhci: Present: 0x01f88008 | Host ctl: 0x00000031
-> [ 1.345547] mmc2: sdhci: Power: 0x00000002 | Blk gap: 0x00000080
-> [ 1.357903] mmc2: sdhci: Wake-up: 0x00000008 | Clock: 0x0000003f
-> [ 1.357905] mmc2: sdhci: Timeout: 0x0000008f | Int stat: 0x00000000
-> [ 1.357908] mmc2: sdhci: Int enab: 0x107f100b | Sig enab: 0x107f100b
-> [ 1.357911] mmc2: sdhci: AC12 err: 0x00000000 | Slot int: 0x00000502
-> [ 1.370268] mmc2: sdhci: Caps: 0x07eb0000 | Caps_1: 0x0000b400
-> [ 1.370270] mmc2: sdhci: Cmd: 0x00000d1a | Max curr: 0x00ffffff
-> [ 1.370273] mmc2: sdhci: Resp[0]: 0x00000b00 | Resp[1]: 0xffffffff
-> [ 1.370276] mmc2: sdhci: Resp[2]: 0x328f5903 | Resp[3]: 0x00d00f00
-> [ 1.382132] mmc2: sdhci: Host ctl2: 0x00000000
-> [ 1.382135] mmc2: sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0xa2040208
-> 
-> [ 2.060932] mmc2: Unexpected interrupt 0x00004000.
-> [ 2.065538] mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
-> [ 2.071720] mmc2: sdhci: Sys addr: 0x00000000 | Version: 0x00000002
-> [ 2.077902] mmc2: sdhci: Blk size: 0x00000200 | Blk cnt: 0x00000001
-> [ 2.084083] mmc2: sdhci: Argument: 0x00000000 | Trn mode: 0x00000000
-> [ 2.090264] mmc2: sdhci: Present: 0x01f88009 | Host ctl: 0x00000011
-> [ 2.096446] mmc2: sdhci: Power: 0x00000002 | Blk gap: 0x00000080
-> [ 2.102627] mmc2: sdhci: Wake-up: 0x00000008 | Clock: 0x000010ff
-> [ 2.108809] mmc2: sdhci: Timeout: 0x0000008f | Int stat: 0x00004000
-> [ 2.114990] mmc2: sdhci: Int enab: 0x007f1003 | Sig enab: 0x007f1003
-> [ 2.121171] mmc2: sdhci: AC12 err: 0x00000000 | Slot int: 0x00000502
-> [ 2.127353] mmc2: sdhci: Caps: 0x07eb0000 | Caps_1: 0x0000b400
-> [ 2.133534] mmc2: sdhci: Cmd: 0x0000371a | Max curr: 0x00ffffff
-> [ 2.139715] mmc2: sdhci: Resp[0]: 0x00000900 | Resp[1]: 0xffffffff
-> [ 2.145896] mmc2: sdhci: Resp[2]: 0x328f5903 | Resp[3]: 0x00d00f00
-> [ 2.152077] mmc2: sdhci: Host ctl2: 0x00000000
-> [ 2.156342] mmc2: sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0x00000000
-> 
-> Signed-off-by: Peng Fan <peng.fan@nxp.com>
-> ---
->  drivers/mmc/host/cqhci.c | 5 +++++
->  1 file changed, 5 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/cqhci.c b/drivers/mmc/host/cqhci.c
-> index d59cb0a51964..4f41960ac7ad 100644
-> --- a/drivers/mmc/host/cqhci.c
-> +++ b/drivers/mmc/host/cqhci.c
-> @@ -1116,6 +1116,7 @@ int cqhci_init(struct cqhci_host *cq_host, struct mmc_host *mmc,
->  	      bool dma64)
->  {
->  	int err;
-> +	u32 status;
->  
->  	cq_host->dma64 = dma64;
->  	cq_host->mmc = mmc;
-> @@ -1139,6 +1140,10 @@ int cqhci_init(struct cqhci_host *cq_host, struct mmc_host *mmc,
->  
->  	spin_lock_init(&cq_host->lock);
->  
-> +	status = cqhci_readl(cq_host, CQHCI_IS);
-> +	cqhci_writel(cq_host, status, CQHCI_IS);
-> +	cqhci_writel(cq_host, CQHCI_HALT, CQHCI_CTL);
-> +
->  	init_completion(&cq_host->halt_comp);
->  	init_waitqueue_head(&cq_host->wait_queue);
->  
-> 
+SGkgQWRyaWFuLA0KDQo+IA0KPiBPbiAxNi8wNC8xOSA5OjQ4IEFNLCBQZW5nIEZhbiB3cm90ZToN
+Cj4gPiBPbiBpLk1YOE1NLCB3ZSBhcmUgcnVubmluZyBEdWFsIExpbnV4IE9TLCB3aXRoIDFzdCBM
+aW51eCB1c2luZyBTRCBDYXJkDQo+ID4gYXMgcm9vdGZzIHN0b3JhZ2UsIDJuZCBMaW51eCB1c2lu
+ZyBlTU1DIGFzIHJvb3RmcyBzdG9yYWdlLiBXZSBsZXQgdGhlDQo+ID4gdGhlIDFzdCBsaW51eCBj
+b25maWd1cmUgcG93ZXIvY2xvY2sgZm9yIHRoZSAybmQgTGludXguDQo+ID4NCj4gPiBXaGVuIHRo
+ZSAybmQgTGludXggaXMgYm9vdGluZyBpbnRvIHJvb3RmcyBzdGFnZSwgd2UgbGV0IHRoZSAxc3Qg
+TGludXgNCj4gPiB0byBkZXN0cm95IHRoZSAybmQgbGludXgsIHRoZW4gcmVzdGFydCB0aGUgMXN0
+IGxpbnV4LCB3ZSBtZXQgU0RIQ0kNCj4gPiBkdW1wIGFzIGZvbGxvd2luZywgYWZ0ZXIgd2UgY2xl
+YXIgdGhlIHBlbmRpbmcgaW50ZXJydXB0IGFuZCBoYWx0DQo+ID4gQ1FDVEwsIGlzc3VlIGdvbmUu
+DQo+IA0KPiBJIHRoaW5rIGl0IGlzIGJldHRlciBpZiB0aGUgdmVuZG9yIGRyaXZlciBkb2VzIGFu
+eSBuZWNlc3NhcnkgcmVzZXRzIGJlZm9yZQ0KPiBpbml0aWFsaXphdGlvbi4NCg0KSW4gZHJpdmVy
+cy9tbWMvaG9zdC9zZGhjaS1lc2RoYy1pbXguYywgdGhlcmUgaXMgYSBjYWxsIHRvIGNxaGNpX2lu
+aXQNCiIgMTUyNSAgICAgICAgICAgICAgICAgZXJyID0gY3FoY2lfaW5pdChjcV9ob3N0LCBob3N0
+LT5tbWMsIGZhbHNlKTsiDQoNCllvdSBtZWFuIEkgcHV0IHRoZSBmb2xsb3dpbmcgcGllY2UgY29k
+ZSBpbnRvIHNkaGNpLWVzZGhjLWlteC5jPw0KDQoiDQogICAgIHN0YXR1cyA9IGNxaGNpX3JlYWRs
+KGNxX2hvc3QsIENRSENJX0lTKTsNCiAgICAgY3FoY2lfd3JpdGVsKGNxX2hvc3QsIHN0YXR1cywg
+Q1FIQ0lfSVMpOw0KICAgICBjcWhjaV93cml0ZWwoY3FfaG9zdCwgQ1FIQ0lfSEFMVCwgQ1FIQ0lf
+Q1RMKTsNCiINCg0KSG93IGFib3V0IHRoZSBmb2xsb3dpbmcgcGF0Y2g/DQoNCmRpZmYgLS1naXQg
+YS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLWVzZGhjLWlteC5jIGIvZHJpdmVycy9tbWMvaG9zdC9z
+ZGhjaS1lc2RoYy1pbXguYw0KaW5kZXggYjhlMTFhNzdlMjc0Li5mMmU0NmRkZjk2OTUgMTAwNjQ0
+DQotLS0gYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLWVzZGhjLWlteC5jDQorKysgYi9kcml2ZXJz
+L21tYy9ob3N0L3NkaGNpLWVzZGhjLWlteC5jDQpAQCAtMTQzNSw2ICsxNDM1LDcgQEAgc3RhdGlj
+IGludCBzZGhjaV9lc2RoY19pbXhfcHJvYmUoc3RydWN0IHBsYXRmb3JtX2RldmljZSAqcGRldikN
+CiAgICAgICAgc3RydWN0IGNxaGNpX2hvc3QgKmNxX2hvc3Q7DQogICAgICAgIGludCBlcnI7DQog
+ICAgICAgIHN0cnVjdCBwbHRmbV9pbXhfZGF0YSAqaW14X2RhdGE7DQorICAgICAgIHUzMiBzdGF0
+dXM7DQoNCiAgICAgICAgaG9zdCA9IHNkaGNpX3BsdGZtX2luaXQocGRldiwgJnNkaGNpX2VzZGhj
+X2lteF9wZGF0YSwNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgc2l6ZW9mKCppbXhf
+ZGF0YSkpOw0KQEAgLTE1NDIsNiArMTU0MywxMSBAQCBzdGF0aWMgaW50IHNkaGNpX2VzZGhjX2lt
+eF9wcm9iZShzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlICpwZGV2KQ0KICAgICAgICAgICAgICAgIGVy
+ciA9IGNxaGNpX2luaXQoY3FfaG9zdCwgaG9zdC0+bW1jLCBmYWxzZSk7DQogICAgICAgICAgICAg
+ICAgaWYgKGVycikNCiAgICAgICAgICAgICAgICAgICAgICAgIGdvdG8gZGlzYWJsZV9haGJfY2xr
+Ow0KKw0KKyAgICAgICAgICAgICAgIHN0YXR1cyA9IGNxaGNpX3JlYWRsKGNxX2hvc3QsIENRSENJ
+X0lTKTsNCisgICAgICAgICAgICAgICBjcWhjaV93cml0ZWwoY3FfaG9zdCwgc3RhdHVzLCBDUUhD
+SV9JUyk7DQorICAgICAgICAgICAgICAgY3FoY2lfd3JpdGVsKGNxX2hvc3QsIENRSENJX0hBTFQs
+IENRSENJX0NUTCk7DQorDQogICAgICAgIH0NCg0KVGhhbmtzLA0KUGVuZy4NCg0KPiANCj4gPg0K
+PiA+IFsgMS4zMzQ1OTRdIG1tYzI6IEdvdCBjb21tYW5kIGludGVycnVwdCAweDAwMDAwMDAxIGV2
+ZW4gdGhvdWdoIG5vDQo+IGNvbW1hbmQgb3BlcmF0aW9uIHdhcyBpbiBwcm9ncmVzcy4NCj4gPiBb
+IDEuMzM0NTk1XSBtbWMyOiBzZGhjaTogPT09PT09PT09PT09IFNESENJIFJFR0lTVEVSIERVTVAN
+Cj4gPT09PT09PT09PT0NCj4gPiBbIDEuMzM0NTk5XSBtbWMyOiBzZGhjaTogU3lzIGFkZHI6IDB4
+YTA1ZGNjMDAgfCBWZXJzaW9uOiAweDAwMDAwMDAyIFsNCj4gPiAxLjM0MDgxOV0gbGliODAyMTE6
+IGNvbW1vbiByb3V0aW5lcyBmb3IgSUVFRTgwMi4xMSBkcml2ZXJzIFsgMS4zNDU1MzhdDQo+ID4g
+bW1jMjogc2RoY2k6IEJsayBzaXplOiAweDAwMDAwMjAwIHwgQmxrIGNudDogMHgwMDAwMDAwMCBb
+IDEuMzQ1NTQxXQ0KPiA+IG1tYzI6IHNkaGNpOiBBcmd1bWVudDogMHgwMDAxODAwMCB8IFRybiBt
+b2RlOiAweDAwMDAwMDMzIFsgMS4zNDU1NDNdDQo+ID4gbW1jMjogc2RoY2k6IFByZXNlbnQ6IDB4
+MDFmODgwMDggfCBIb3N0IGN0bDogMHgwMDAwMDAzMSBbIDEuMzQ1NTQ3XQ0KPiA+IG1tYzI6IHNk
+aGNpOiBQb3dlcjogMHgwMDAwMDAwMiB8IEJsayBnYXA6IDB4MDAwMDAwODAgWyAxLjM1NzkwM10N
+Cj4gbW1jMjoNCj4gPiBzZGhjaTogV2FrZS11cDogMHgwMDAwMDAwOCB8IENsb2NrOiAweDAwMDAw
+MDNmIFsgMS4zNTc5MDVdIG1tYzI6DQo+ID4gc2RoY2k6IFRpbWVvdXQ6IDB4MDAwMDAwOGYgfCBJ
+bnQgc3RhdDogMHgwMDAwMDAwMCBbIDEuMzU3OTA4XSBtbWMyOg0KPiA+IHNkaGNpOiBJbnQgZW5h
+YjogMHgxMDdmMTAwYiB8IFNpZyBlbmFiOiAweDEwN2YxMDBiIFsgMS4zNTc5MTFdIG1tYzI6DQo+
+ID4gc2RoY2k6IEFDMTIgZXJyOiAweDAwMDAwMDAwIHwgU2xvdCBpbnQ6IDB4MDAwMDA1MDIgWyAx
+LjM3MDI2OF0gbW1jMjoNCj4gPiBzZGhjaTogQ2FwczogMHgwN2ViMDAwMCB8IENhcHNfMTogMHgw
+MDAwYjQwMCBbIDEuMzcwMjcwXSBtbWMyOiBzZGhjaToNCj4gPiBDbWQ6IDB4MDAwMDBkMWEgfCBN
+YXggY3VycjogMHgwMGZmZmZmZiBbIDEuMzcwMjczXSBtbWMyOiBzZGhjaToNCj4gPiBSZXNwWzBd
+OiAweDAwMDAwYjAwIHwgUmVzcFsxXTogMHhmZmZmZmZmZiBbIDEuMzcwMjc2XSBtbWMyOiBzZGhj
+aToNCj4gPiBSZXNwWzJdOiAweDMyOGY1OTAzIHwgUmVzcFszXTogMHgwMGQwMGYwMCBbIDEuMzgy
+MTMyXSBtbWMyOiBzZGhjaToNCj4gPiBIb3N0IGN0bDI6IDB4MDAwMDAwMDAgWyAxLjM4MjEzNV0g
+bW1jMjogc2RoY2k6IEFETUEgRXJyOiAweDAwMDAwMDAwIHwNCj4gPiBBRE1BIFB0cjogMHhhMjA0
+MDIwOA0KPiA+DQo+ID4gWyAyLjA2MDkzMl0gbW1jMjogVW5leHBlY3RlZCBpbnRlcnJ1cHQgMHgw
+MDAwNDAwMC4NCj4gPiBbIDIuMDY1NTM4XSBtbWMyOiBzZGhjaTogPT09PT09PT09PT09IFNESENJ
+IFJFR0lTVEVSIERVTVANCj4gPT09PT09PT09PT0NCj4gPiBbIDIuMDcxNzIwXSBtbWMyOiBzZGhj
+aTogU3lzIGFkZHI6IDB4MDAwMDAwMDAgfCBWZXJzaW9uOiAweDAwMDAwMDAyIFsNCj4gPiAyLjA3
+NzkwMl0gbW1jMjogc2RoY2k6IEJsayBzaXplOiAweDAwMDAwMjAwIHwgQmxrIGNudDogMHgwMDAw
+MDAwMSBbDQo+ID4gMi4wODQwODNdIG1tYzI6IHNkaGNpOiBBcmd1bWVudDogMHgwMDAwMDAwMCB8
+IFRybiBtb2RlOiAweDAwMDAwMDAwIFsNCj4gPiAyLjA5MDI2NF0gbW1jMjogc2RoY2k6IFByZXNl
+bnQ6IDB4MDFmODgwMDkgfCBIb3N0IGN0bDogMHgwMDAwMDAxMSBbDQo+ID4gMi4wOTY0NDZdIG1t
+YzI6IHNkaGNpOiBQb3dlcjogMHgwMDAwMDAwMiB8IEJsayBnYXA6IDB4MDAwMDAwODAgWw0KPiA+
+IDIuMTAyNjI3XSBtbWMyOiBzZGhjaTogV2FrZS11cDogMHgwMDAwMDAwOCB8IENsb2NrOiAweDAw
+MDAxMGZmIFsNCj4gPiAyLjEwODgwOV0gbW1jMjogc2RoY2k6IFRpbWVvdXQ6IDB4MDAwMDAwOGYg
+fCBJbnQgc3RhdDogMHgwMDAwNDAwMCBbDQo+ID4gMi4xMTQ5OTBdIG1tYzI6IHNkaGNpOiBJbnQg
+ZW5hYjogMHgwMDdmMTAwMyB8IFNpZyBlbmFiOiAweDAwN2YxMDAzIFsNCj4gPiAyLjEyMTE3MV0g
+bW1jMjogc2RoY2k6IEFDMTIgZXJyOiAweDAwMDAwMDAwIHwgU2xvdCBpbnQ6IDB4MDAwMDA1MDIg
+Ww0KPiA+IDIuMTI3MzUzXSBtbWMyOiBzZGhjaTogQ2FwczogMHgwN2ViMDAwMCB8IENhcHNfMTog
+MHgwMDAwYjQwMCBbDQo+ID4gMi4xMzM1MzRdIG1tYzI6IHNkaGNpOiBDbWQ6IDB4MDAwMDM3MWEg
+fCBNYXggY3VycjogMHgwMGZmZmZmZiBbDQo+ID4gMi4xMzk3MTVdIG1tYzI6IHNkaGNpOiBSZXNw
+WzBdOiAweDAwMDAwOTAwIHwgUmVzcFsxXTogMHhmZmZmZmZmZiBbDQo+ID4gMi4xNDU4OTZdIG1t
+YzI6IHNkaGNpOiBSZXNwWzJdOiAweDMyOGY1OTAzIHwgUmVzcFszXTogMHgwMGQwMGYwMCBbDQo+
+ID4gMi4xNTIwNzddIG1tYzI6IHNkaGNpOiBIb3N0IGN0bDI6IDB4MDAwMDAwMDAgWyAyLjE1NjM0
+Ml0gbW1jMjogc2RoY2k6DQo+ID4gQURNQSBFcnI6IDB4MDAwMDAwMDAgfCBBRE1BIFB0cjogMHgw
+MDAwMDAwMA0KPiA+DQo+ID4gU2lnbmVkLW9mZi1ieTogUGVuZyBGYW4gPHBlbmcuZmFuQG54cC5j
+b20+DQo+ID4gLS0tDQo+ID4gIGRyaXZlcnMvbW1jL2hvc3QvY3FoY2kuYyB8IDUgKysrKysNCj4g
+PiAgMSBmaWxlIGNoYW5nZWQsIDUgaW5zZXJ0aW9ucygrKQ0KPiA+DQo+ID4gZGlmZiAtLWdpdCBh
+L2RyaXZlcnMvbW1jL2hvc3QvY3FoY2kuYyBiL2RyaXZlcnMvbW1jL2hvc3QvY3FoY2kuYyBpbmRl
+eA0KPiA+IGQ1OWNiMGE1MTk2NC4uNGY0MTk2MGFjN2FkIDEwMDY0NA0KPiA+IC0tLSBhL2RyaXZl
+cnMvbW1jL2hvc3QvY3FoY2kuYw0KPiA+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3QvY3FoY2kuYw0K
+PiA+IEBAIC0xMTE2LDYgKzExMTYsNyBAQCBpbnQgY3FoY2lfaW5pdChzdHJ1Y3QgY3FoY2lfaG9z
+dCAqY3FfaG9zdCwgc3RydWN0DQo+IG1tY19ob3N0ICptbWMsDQo+ID4gICAgICAgICAgICAgYm9v
+bCBkbWE2NCkNCj4gPiAgew0KPiA+ICAgICAgIGludCBlcnI7DQo+ID4gKyAgICAgdTMyIHN0YXR1
+czsNCj4gPg0KPiA+ICAgICAgIGNxX2hvc3QtPmRtYTY0ID0gZG1hNjQ7DQo+ID4gICAgICAgY3Ff
+aG9zdC0+bW1jID0gbW1jOw0KPiA+IEBAIC0xMTM5LDYgKzExNDAsMTAgQEAgaW50IGNxaGNpX2lu
+aXQoc3RydWN0IGNxaGNpX2hvc3QgKmNxX2hvc3QsDQo+ID4gc3RydWN0IG1tY19ob3N0ICptbWMs
+DQo+ID4NCj4gPiAgICAgICBzcGluX2xvY2tfaW5pdCgmY3FfaG9zdC0+bG9jayk7DQo+ID4NCj4g
+PiArICAgICBzdGF0dXMgPSBjcWhjaV9yZWFkbChjcV9ob3N0LCBDUUhDSV9JUyk7DQo+ID4gKyAg
+ICAgY3FoY2lfd3JpdGVsKGNxX2hvc3QsIHN0YXR1cywgQ1FIQ0lfSVMpOw0KPiA+ICsgICAgIGNx
+aGNpX3dyaXRlbChjcV9ob3N0LCBDUUhDSV9IQUxULCBDUUhDSV9DVEwpOw0KPiA+ICsNCj4gPiAg
+ICAgICBpbml0X2NvbXBsZXRpb24oJmNxX2hvc3QtPmhhbHRfY29tcCk7DQo+ID4gICAgICAgaW5p
+dF93YWl0cXVldWVfaGVhZCgmY3FfaG9zdC0+d2FpdF9xdWV1ZSk7DQo+ID4NCj4gPg0KDQo=
