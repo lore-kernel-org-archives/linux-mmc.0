@@ -1,7 +1,7 @@
 From: Jerome Brunet <jbrunet@baylibre.com>
-Subject: [PATCH 4/7] mmc: meson-gx: disable HS400
-Date: Wed, 17 Apr 2019 22:43:52 +0200
-Message-ID: <20190417204355.469-5-jbrunet@baylibre.com>
+Subject: [PATCH 1/7] mmc: meson-gx: remove open coded read with timeout
+Date: Wed, 17 Apr 2019 22:43:49 +0200
+Message-ID: <20190417204355.469-2-jbrunet@baylibre.com>
 References: <20190417204355.469-1-jbrunet@baylibre.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -12,43 +12,57 @@ To: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>
 Cc: Jerome Brunet <jbrunet@baylibre.com>, linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-At the moment, all our attempts to enable HS400 on Amlogic chipsets have
-been unsuccessful or unreliable. Until we can figure out how to enable this
-mode safely and reliably, let's force it off.
+There is already a function available to poll a register until a
+condition is met. Let's use it instead of open coding it.
 
 Signed-off-by: Jerome Brunet <jbrunet@baylibre.com>
 ---
- drivers/mmc/host/meson-gx-mmc.c | 11 +++++++----
- 1 file changed, 7 insertions(+), 4 deletions(-)
+ drivers/mmc/host/meson-gx-mmc.c | 18 ++++--------------
+ 1 file changed, 4 insertions(+), 14 deletions(-)
 
 diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index 3df50b53f834..118f09da8dfb 100644
+index 2eba507790e4..2deeacc051b1 100644
 --- a/drivers/mmc/host/meson-gx-mmc.c
 +++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -823,10 +823,6 @@ static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	if (meson_mmc_timing_is_ddr(ios))
- 		val |= CFG_DDR;
+@@ -23,6 +23,7 @@
+ #include <linux/init.h>
+ #include <linux/delay.h>
+ #include <linux/device.h>
++#include <linux/iopoll.h>
+ #include <linux/of_device.h>
+ #include <linux/platform_device.h>
+ #include <linux/ioport.h>
+@@ -1100,7 +1101,6 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
  
--	val &= ~CFG_CHK_DS;
--	if (ios->timing == MMC_TIMING_MMC_HS400)
--		val |= CFG_CHK_DS;
+ static int meson_mmc_wait_desc_stop(struct meson_host *host)
+ {
+-	int loop;
+ 	u32 status;
+ 
+ 	/*
+@@ -1110,20 +1110,10 @@ static int meson_mmc_wait_desc_stop(struct meson_host *host)
+ 	 * If we don't confirm the descriptor is stopped, it might raise new
+ 	 * IRQs after we have called mmc_request_done() which is bad.
+ 	 */
+-	for (loop = 50; loop; loop--) {
+-		status = readl(host->regs + SD_EMMC_STATUS);
+-		if (status & (STATUS_BUSY | STATUS_DESC_BUSY))
+-			udelay(100);
+-		else
+-			break;
+-	}
+ 
+-	if (status & (STATUS_BUSY | STATUS_DESC_BUSY)) {
+-		dev_err(host->dev, "Timed out waiting for host to stop\n");
+-		return -ETIMEDOUT;
+-	}
 -
- 	err = meson_mmc_clk_set(host, ios);
- 	if (err)
- 		dev_err(host->dev, "Failed to set clock: %d\n,", err);
-@@ -1339,6 +1335,13 @@ static int meson_mmc_probe(struct platform_device *pdev)
- 	mmc->max_segs = SD_EMMC_DESC_BUF_LEN / sizeof(struct sd_emmc_desc);
- 	mmc->max_seg_size = mmc->max_req_size;
+-	return 0;
++	return readl_poll_timeout(host->regs + SD_EMMC_STATUS, status,
++				  !(status & (STATUS_BUSY | STATUS_DESC_BUSY)),
++				  100, 5000);
+ }
  
-+	/*
-+	 * At the moment, we don't know how to reliably enable HS400.
-+	 * From the different datasheets, it is not even clear if this mode
-+	 * is officially supported by any of the SoCs
-+	 */
-+	mmc->caps2 &= ~MMC_CAP2_HS400;
-+
- 	/* data bounce buffer */
- 	host->bounce_buf_size = mmc->max_req_size;
- 	host->bounce_buf =
+ static irqreturn_t meson_mmc_irq_thread(int irq, void *dev_id)
 -- 
 2.20.1
