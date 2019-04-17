@@ -1,7 +1,7 @@
 From: Jerome Brunet <jbrunet@baylibre.com>
-Subject: [PATCH 5/7] mmc: meson-gx: avoid clock glitch when switching to DDR modes
-Date: Wed, 17 Apr 2019 22:43:53 +0200
-Message-ID: <20190417204355.469-6-jbrunet@baylibre.com>
+Subject: [PATCH 7/7] mmc: meson-gx: add signal resampling tuning
+Date: Wed, 17 Apr 2019 22:43:55 +0200
+Message-ID: <20190417204355.469-8-jbrunet@baylibre.com>
 References: <20190417204355.469-1-jbrunet@baylibre.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -12,160 +12,129 @@ To: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>
 Cc: Jerome Brunet <jbrunet@baylibre.com>, linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Activating DDR in the Amlogic mmc controller, among other things, will
-divide the output clock by 2. So by activating it with clock on, we are
-creating a glitch on the output.
+Use signal resampling tuning for the UHS and HS200 modes.
+Instead of trying to get the *best* resampling setting with complex
+window calculation, we just stop on the first working setting.
 
-Instead, let's deal with DDR when the clock output is off, when setting
-the clock.
+If the tuning setting later proves unstable, we will just continue the
+tuning where we left it.
 
 Signed-off-by: Jerome Brunet <jbrunet@baylibre.com>
 ---
- drivers/mmc/host/meson-gx-mmc.c | 72 +++++++++++++++++++--------------
- 1 file changed, 42 insertions(+), 30 deletions(-)
+ drivers/mmc/host/meson-gx-mmc.c | 73 +++++++++++++++++++++++++++++++--
+ 1 file changed, 70 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index 118f09da8dfb..f77b9327a590 100644
+index 50b03c167435..207c65b3ddf1 100644
 --- a/drivers/mmc/host/meson-gx-mmc.c
 +++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -169,6 +169,7 @@ struct meson_host {
- 	struct clk *rx_clk;
- 	struct clk *tx_clk;
- 	unsigned long req_rate;
-+	bool ddr;
- 
- 	struct pinctrl *pinctrl;
- 	struct pinctrl_state *pins_default;
-@@ -384,16 +385,6 @@ static void meson_mmc_post_req(struct mmc_host *mmc, struct mmc_request *mrq,
- 			     mmc_get_dma_dir(data));
+@@ -488,6 +488,61 @@ static int meson_mmc_clk_init(struct meson_host *host)
+ 	return clk_prepare_enable(host->mmc_clk);
  }
  
--static bool meson_mmc_timing_is_ddr(struct mmc_ios *ios)
--{
--	if (ios->timing == MMC_TIMING_MMC_DDR52 ||
--	    ios->timing == MMC_TIMING_UHS_DDR50 ||
--	    ios->timing == MMC_TIMING_MMC_HS400)
--		return true;
--
--	return false;
--}
--
- /*
-  * Gating the clock on this controller is tricky.  It seems the mmc clock
-  * is also used by the controller.  It may crash during some operation if the
-@@ -430,36 +421,41 @@ static void meson_mmc_clk_ungate(struct meson_host *host)
- 	writel(cfg, host->regs + SD_EMMC_CFG);
- }
- 
--static int meson_mmc_clk_set(struct meson_host *host, struct mmc_ios *ios)
-+static int meson_mmc_clk_set(struct meson_host *host, unsigned long rate,
-+			     bool ddr)
- {
- 	struct mmc_host *mmc = host->mmc;
--	unsigned long rate = ios->clock;
- 	int ret;
- 	u32 cfg;
- 
--	/* DDR modes require higher module clock */
--	if (meson_mmc_timing_is_ddr(ios))
--		rate <<= 1;
--
- 	/* Same request - bail-out */
--	if (host->req_rate == rate)
-+	if (host->ddr == ddr && host->req_rate == rate)
- 		return 0;
- 
- 	/* stop clock */
- 	meson_mmc_clk_gate(host);
- 	host->req_rate = 0;
-+	mmc->actual_clock = 0;
- 
--	if (!rate) {
--		mmc->actual_clock = 0;
--		/* return with clock being stopped */
-+	/* return with clock being stopped */
-+	if (!rate)
- 		return 0;
--	}
- 
- 	/* Stop the clock during rate change to avoid glitches */
- 	cfg = readl(host->regs + SD_EMMC_CFG);
- 	cfg |= CFG_STOP_CLOCK;
- 	writel(cfg, host->regs + SD_EMMC_CFG);
- 
-+	if (ddr) {
-+		/* DDR modes require higher module clock */
-+		rate <<= 1;
-+		cfg |= CFG_DDR;
-+	} else {
-+		cfg &= ~CFG_DDR;
-+	}
-+	writel(cfg, host->regs + SD_EMMC_CFG);
-+	host->ddr = ddr;
++static void meson_mmc_disable_resampling(struct meson_host *host)
++{
++	unsigned int val = readl(host->regs + host->data->adjust);
 +
- 	ret = clk_set_rate(host->mmc_clk, rate);
- 	if (ret) {
- 		dev_err(host->dev, "Unable to set cfg_div_clk to %lu. ret=%d\n",
-@@ -471,12 +467,14 @@ static int meson_mmc_clk_set(struct meson_host *host, struct mmc_ios *ios)
- 	mmc->actual_clock = clk_get_rate(host->mmc_clk);
- 
- 	/* We should report the real output frequency of the controller */
--	if (meson_mmc_timing_is_ddr(ios))
-+	if (ddr) {
-+		host->req_rate >>= 1;
- 		mmc->actual_clock >>= 1;
++	val &= ~ADJUST_ADJ_EN;
++	writel(val, host->regs + host->data->adjust);
++}
++
++static void meson_mmc_reset_resampling(struct meson_host *host)
++{
++	unsigned int val;
++
++	meson_mmc_disable_resampling(host);
++
++	val = readl(host->regs + host->data->adjust);
++	val &= ~ADJUST_ADJ_DELAY_MASK;
++	writel(val, host->regs + host->data->adjust);
++}
++
++static int meson_mmc_resampling_tuning(struct mmc_host *mmc, u32 opcode)
++{
++	struct meson_host *host = mmc_priv(mmc);
++	unsigned int val, dly, max_dly, i;
++	int ret;
++
++	/* Resampling is done using the source clock */
++	max_dly = DIV_ROUND_UP(clk_get_rate(host->mux_clk),
++			       clk_get_rate(host->mmc_clk));
++
++	val = readl(host->regs + host->data->adjust);
++	val |= ADJUST_ADJ_EN;
++	writel(val, host->regs + host->data->adjust);
++
++	if (mmc->doing_retune)
++		dly = FIELD_GET(ADJUST_ADJ_DELAY_MASK, val) + 1;
++	else
++		dly = 0;
++
++	for (i = 0; i < max_dly; i++) {
++		val &= ~ADJUST_ADJ_DELAY_MASK;
++		val |= FIELD_PREP(ADJUST_ADJ_DELAY_MASK, (dly + i) % max_dly);
++		writel(val, host->regs + host->data->adjust);
++
++		ret = mmc_send_tuning(mmc, opcode, NULL);
++		if (!ret) {
++			dev_dbg(mmc_dev(mmc), "resampling delay: %u\n",
++				(dly + i) % max_dly);
++			return 0;
++		}
 +	}
- 
- 	dev_dbg(host->dev, "clk rate: %u Hz\n", mmc->actual_clock);
--	if (ios->clock != mmc->actual_clock)
--		dev_dbg(host->dev, "requested rate was %u\n", ios->clock);
-+	if (rate != mmc->actual_clock)
-+		dev_dbg(host->dev, "requested rate was %lu\n", rate);
- 
- 	/* (re)start clock */
- 	meson_mmc_clk_ungate(host);
-@@ -750,6 +748,25 @@ static int meson_mmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	return meson_mmc_clk_phase_tuning(mmc, opcode, host->rx_clk);
++
++	meson_mmc_reset_resampling(host);
++	return -EIO;
++}
++
+ static int meson_mmc_prepare_ios_clock(struct meson_host *host,
+ 				       struct mmc_ios *ios)
+ {
+@@ -507,6 +562,19 @@ static int meson_mmc_prepare_ios_clock(struct meson_host *host,
+ 	return meson_mmc_clk_set(host, ios->clock, ddr);
  }
  
-+static int meson_mmc_prepare_ios_clock(struct meson_host *host,
++static void meson_mmc_check_resampling(struct meson_host *host,
 +				       struct mmc_ios *ios)
 +{
-+	bool ddr;
-+
 +	switch (ios->timing) {
++	case MMC_TIMING_LEGACY:
++	case MMC_TIMING_MMC_HS:
++	case MMC_TIMING_SD_HS:
 +	case MMC_TIMING_MMC_DDR52:
-+	case MMC_TIMING_UHS_DDR50:
-+		ddr = true;
-+		break;
-+
-+	default:
-+		ddr = false;
++		meson_mmc_disable_resampling(host);
 +		break;
 +	}
-+
-+	return meson_mmc_clk_set(host, ios->clock, ddr);
 +}
 +
  static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
  {
  	struct meson_host *host = mmc_priv(mmc);
-@@ -819,15 +836,10 @@ static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+@@ -533,9 +601,6 @@ static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		if (!IS_ERR(mmc->supply.vmmc))
+ 			mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, ios->vdd);
+ 
+-		/* disable signal resampling */
+-		writel(0, host->regs + host->data->adjust);
+-
+ 		break;
+ 
+ 	case MMC_POWER_ON:
+@@ -573,6 +638,7 @@ static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
  	val &= ~CFG_BUS_WIDTH_MASK;
  	val |= FIELD_PREP(CFG_BUS_WIDTH_MASK, bus_width);
  
--	val &= ~CFG_DDR;
--	if (meson_mmc_timing_is_ddr(ios))
--		val |= CFG_DDR;
--
--	err = meson_mmc_clk_set(host, ios);
-+	err = meson_mmc_prepare_ios_clock(host, ios);
++	meson_mmc_check_resampling(host, ios);
+ 	err = meson_mmc_prepare_ios_clock(host, ios);
  	if (err)
  		dev_err(host->dev, "Failed to set clock: %d\n,", err);
- 
--	writel(val, host->regs + SD_EMMC_CFG);
- 	dev_dbg(host->dev, "SD_EMMC_CFG:  0x%08x\n", val);
- }
- 
+@@ -962,6 +1028,7 @@ static const struct mmc_host_ops meson_mmc_ops = {
+ 	.get_cd         = meson_mmc_get_cd,
+ 	.pre_req	= meson_mmc_pre_req,
+ 	.post_req	= meson_mmc_post_req,
++	.execute_tuning = meson_mmc_resampling_tuning,
+ 	.card_busy	= meson_mmc_card_busy,
+ 	.start_signal_voltage_switch = meson_mmc_voltage_switch,
+ };
 -- 
 2.20.1
