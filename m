@@ -1,38 +1,65 @@
-From: Pan Bian <bianpan2016@163.com>
-Subject: mmc: core: fix possible use after free of host
-Date: Wed, 17 Apr 2019 16:28:37 +0800
-Message-ID: <1555489717-28294-1-git-send-email-bianpan2016@163.com>
+From: Jerome Brunet <jbrunet@baylibre.com>
+Subject: [PATCH 0/7] mmc: meson-gx: clean up and tuning update
+Date: Wed, 17 Apr 2019 22:43:48 +0200
+Message-ID: <20190417204355.469-1-jbrunet@baylibre.com>
+Mime-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Martin Blumenstingl <martin.blumenstingl@googlemail.com>, "Gustavo A. R. Silva" <gustavo@embeddedor.com>
-Cc: Tony Lindgren <tony@atomide.com>, Mathieu Malaterre <malat@debian.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Pan Bian <bianpan2016@163.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>
+Cc: Jerome Brunet <jbrunet@baylibre.com>, linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-In the function mmc_alloc_host, the function put_device is called to
-release allocated resources when mmc_gpio_alloc fails. Finally, the
-function pointed by host->class_dev.class->dev_release (i.e.,
-mmc_host_classdev_release) is used to release resources including the
-host structure. However, after put_device, host is used and released
-again. Resulting in a use-after-free bug.
+The purpose of this series is too improve reliability of the amlogic mmc
+driver on new (g12a) and old ones (axg, gxl, gxbb, etc...)
 
-Fixes: 1ed21719448("mmc: core: fix error path in mmc_host_alloc")
-Signed-off-by: Pan Bian <bianpan2016@163.com>
----
- drivers/mmc/core/host.c | 2 --
- 1 file changed, 2 deletions(-)
+* The 3 first patches are just harmless clean ups.
+* Patch 4 makes sure HS400 can't be enabled, we still have not been able
+  to crack this modes.
+* Patch 5 removes some clock glitches when switching to DDR modes
+* Patch 6 and 7 changes the tuning method from Rx phase to signal
+  resampling. It could have been done in a single patch but the unified
+  diff was extremely ugly. The change has been split in two patches to
+  ease review.
 
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 3a4402a..f8ac567 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -429,8 +429,6 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
- 
- 	if (mmc_gpio_alloc(host)) {
- 		put_device(&host->class_dev);
--		ida_simple_remove(&mmc_host_ida, host->index);
--		kfree(host);
- 		return NULL;
- 	}
- 
+The last tuning update that went through was meant to improve the axg
+support. Since then, it was reported to break some other boards, like the
+s912 vim2.
+
+Also with the current tuning method, it was impossible to find phase
+settings which would work on all the SoC, including the new ones.
+
+After redoing all the tests from scratch, it appeared that Rx phase made
+(strangely) almost no difference, especially on g12a and axg.
+It is important to have a phase shift between the Core and Tx clock, 180
+works best.
+
+I discussed the test results with Amlogic. They suggested to use 180/0 or
+0/180 for the Core and Tx phase. For tuning, they suggested to use
+signal resampling.
+
+So far, so good ... here the platform and modes tested:
+
+NanoPi-K2 (S905): SD UHS SDR50/DDR50, SDIO HS
+Odroid-C2 (S905): SD UHS SDR50/DDR50, eMMC DDR52/HS200
+Khadas Vim (S905X): SD HS, SDIO HS, eMMC HS200
+Libretech CC (S905X): SD HS, eMMC HS200
+Khadas Vim2 (S912): SD HS, SDIO HS, eMMC HS200
+S400 (A113D): SDIO UHS SDR104, eMMC DDR52/HS200
+U200 (S905D2): SD HS, eMMC DDR52/HS200
+SEI510 (S905X2): SD HS, eMMC DDR52/HS200
+
+Jerome Brunet (7):
+  mmc: meson-gx: remove open coded read with timeout
+  mmc: meson-gx: ack only raised irq
+  mmc: meson-gx: irq is not shared
+  mmc: meson-gx: disable HS400
+  mmc: meson-gx: avoid clock glitch when switching to DDR modes
+  mmc: meson-gx: remove Rx phase tuning
+  mmc: meson-gx: add signal resampling tuning
+
+ drivers/mmc/host/meson-gx-mmc.c | 418 +++++++++-----------------------
+ 1 file changed, 113 insertions(+), 305 deletions(-)
+
 -- 
-2.7.4
+2.20.1
