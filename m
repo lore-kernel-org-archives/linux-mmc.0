@@ -1,47 +1,64 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v1 0/4] Add tracing for SDHCI register access
-Date: Thu, 18 Apr 2019 09:24:16 +0300
-Message-ID: <bd3a1df1-5ac4-e23c-35a3-78361a5c356e@intel.com>
-References: <20190411220822.81845-1-rrangel@chromium.org>
- <7b77ebcb-b42b-2d14-f5f1-b37e07b88469@intel.com>
- <20190412145012.GA101407@google.com>
+From: Chaotian Jing <chaotian.jing@mediatek.com>
+Subject: Re: [PATCH 2/5] mmc: mtk-sd: don't hard-code interrupt trigger type
+Date: Thu, 18 Apr 2019 14:36:52 +0800
+Message-ID: <1555569412.18628.27.camel@mhfsdcap03>
+References: <155538933003.25108.3338569916935462285.stgit@noble.brown>
+         <155539004923.25108.12499096383277776864.stgit@noble.brown>
+         <1555402302.18628.17.camel@mhfsdcap03>
+         <878sw97g6r.fsf@notabene.neil.brown.name>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190412145012.GA101407@google.com>
-Content-Language: en-US
+In-Reply-To: <878sw97g6r.fsf@notabene.neil.brown.name>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Raul Rangel <rrangel@chromium.org>
-Cc: linux-trace-devel@vger.kernel.org, linux-mmc@vger.kernel.org, djkurtz@chromium.org, zwisler@chromium.org, Ludovic Barre <ludovic.barre@st.com>, Steven Rostedt <rostedt@goodmis.org>, Jisheng Zhang <Jisheng.Zhang@synaptics.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, Faiz Abbas <faiz_abbas@ti.com>, linux-kernel@vger.kernel.org, Oleksij Rempel <linux@rempel-privat.de>, Liming Sun <lsun@mellanox.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Ingo Molnar <mingo@redhat.com>, Prabu Thangamuthu <Prabu.T@synopsys.com>, Chunyan Zhang <chunyan.zhang@unisoc.com>, Ulf Hansson <ulf.hansson@linaro.org>
+To: NeilBrown <neil@brown.name>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, thirtythreeforty@gmail.com
 List-Id: linux-mmc@vger.kernel.org
 
-On 12/04/19 5:50 PM, Raul Rangel wrote:
-> On Fri, Apr 12, 2019 at 09:26:44AM +0300, Adrian Hunter wrote:
->> On 12/04/19 1:08 AM, Raul E Rangel wrote:
->>> I was debugging a SDHC hardware bug and got tired of having to
->>> translate the register values by hand. This patch set makes it so all
->>> SDHC register read and write operations can be traced and easily read by
->>> a human.
->>
->> While this might be useful for people unfamiliar with SDHCI, I am not sure
->> it should be in the upstream kernel.
-> Can you help me understand your hesitation? Would you prefer removing the
-> pretty printing? Or would you prefer not having any trace events at all?
-
-It is just cost/benefit.  I am not sure the cost of maintaining it is worth
-the benefit of having it upstream.
-
-> The xhci driver has a bunch of pretty print trace events that make it
-> invaluable when debugging.
-> https://github.com/torvalds/linux/blob/d7563ca5bfca53398e100eb74345c5d3ef06bf9d/drivers/usb/host/xhci.h#L2160
+On Wed, 2019-04-17 at 08:12 +1000, NeilBrown wrote:
+> On Tue, Apr 16 2019, Chaotian Jing wrote:
 > 
->> Also, it doesn't seem ideal for every
->> driver to add its own plumbing for such a feature.
-> What do you mean by every driver having to add it's own plumbing? Any
-> driver that uses sdhci_readX or sdhci_writeX get the functionality for
-> free.
-
-I/O memory mappings are recorded for devices. e.g. /proc/iomem so it could
-be possible to add tracing for all I/O memory accesses via readx/writex etc,
-configurable / filterable by device id.
+> > On Tue, 2019-04-16 at 14:47 +1000, NeilBrown wrote:
+> >> When using devicetree for configuration, interrupt trigger type
+> >> should be described in the dts file, not hard-coded in the C code.
+> >> 
+> >> The mtk-sd silicon in the mt7621 soc uses an active-high interrupt
+> >> and so cannot be used with the current code.
+> >> 
+> >> So remove the trigger and leave it to be set from devicetree.
+> >> 
+> >> Signed-off-by: NeilBrown <neil@brown.name>
+> >> ---
+> >>  drivers/mmc/host/mtk-sd.c |    2 +-
+> >>  1 file changed, 1 insertion(+), 1 deletion(-)
+> >> 
+> >> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> >> index 4492a4465c0e..14e048239143 100644
+> >> --- a/drivers/mmc/host/mtk-sd.c
+> >> +++ b/drivers/mmc/host/mtk-sd.c
+> >> @@ -2243,7 +2243,7 @@ static int msdc_drv_probe(struct platform_device *pdev)
+> >>  	msdc_init_hw(host);
+> >>  
+> >>  	ret = devm_request_irq(&pdev->dev, host->irq, msdc_irq,
+> >> -		IRQF_TRIGGER_LOW | IRQF_ONESHOT, pdev->name, host);
+> >> +
+> > change it to IRQF_TRIGGER_NONE | IRQF_ONESHOT
+> 
+> Why do we need IRQF_ONESHOT.  That is for threaded interrupted
+> handlers...
+> msdc_irq() clears the interrupts, so ONESHOT isn't needed.
+> 
+> ???
+> 
+> NeilBrown
+> 
+> 
+I just want to change it to IRQF_TRIGGER_NONE, Since IRQF_TRIGGER_NONE
+is defined as 0, it's ok to use 0 instead of it.
+> >> 			       0, pdev->name, host);
+> >>  	if (ret)
+> >>  		goto release;
+> >>  
+> >> 
+> >> 
