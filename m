@@ -1,156 +1,59 @@
-From: Chaotian Jing <chaotian.jing@mediatek.com>
-Subject: Re: [PATCH 4/5] mmc: mtk-sd: enable internal card-detect logic.
-Date: Thu, 18 Apr 2019 14:39:43 +0800
-Message-ID: <1555569583.18628.29.camel@mhfsdcap03>
-References: <155538933003.25108.3338569916935462285.stgit@noble.brown>
-         <155539004931.25108.17076624786044710325.stgit@noble.brown>
+From: Fabien Parent <fparent@baylibre.com>
+Subject: Re: [PATCH 19/24] dt-bindings: spi: spi-mt65xx: add support for MT8516
+Date: Thu, 18 Apr 2019 10:05:13 +0200
+Message-ID: <CAOwMV_yKAm1zar6buhe25O56AkAX8e0nXnm4GmqhvHC-yagKfQ@mail.gmail.com>
+References: <20190323211612.860-1-fparent@baylibre.com> <20190323211612.860-20-fparent@baylibre.com>
+ <5bc3fbfa-6d7e-08d3-116c-a8f78bc680cd@gmail.com> <1555403151.7441.4.camel@mhfsdcap03>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <155539004931.25108.17076624786044710325.stgit@noble.brown>
+In-Reply-To: <1555403151.7441.4.camel@mhfsdcap03>
 Sender: linux-kernel-owner@vger.kernel.org
-To: NeilBrown <neil@brown.name>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, thirtythreeforty@gmail.com
+To: lei liu <leilk.liu@mediatek.com>
+Cc: Matthias Brugger <matthias.bgg@gmail.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Mark Brown <broonie@kernel.org>, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, ryder.lee@mediatek.com, linux-watchdog@vger.kernel.org, jjian.zhou@mediatek.com, wenzhen.yu@mediatek.com, Stephane Le Provost <stephane.leprovost@mediatek.com>, sean.wang@kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, yong.mao@mediatek.com, linux-spi@vger.kernel.org, linux-gpio@vger.kernel.org, linux-mediatek@lists.infradead.org, hsin-hsiung.wang@mediatek.com, linux-serial@vger.kernel.org, linux-clk@vger.kernel.org, Chaotian Jing <chaotian.jing@mediatek.com>, linux-i2c@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 2019-04-16 at 14:47 +1000, NeilBrown wrote:
-> The mtk-sd silicon has integrated card-detect logic that is
-> enabled, at least, on the MT7621 as used in the GNUBEE NAS.
-> 
-> If the sdhci isn't marked non-removable and doesn't have a
-> cd-gpio configured, assume the internal cd logic should be used.
-> 
-> Signed-off-by: NeilBrown <neil@brown.name>
-> ---
->  drivers/mmc/host/mtk-sd.c |   58 ++++++++++++++++++++++++++++++++++++++++++---
->  1 file changed, 54 insertions(+), 4 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index d379f2ece305..341cf5f03429 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -300,6 +300,8 @@
->  #define CMD_TIMEOUT         (HZ/10 * 5)	/* 100ms x5 */
->  #define DAT_TIMEOUT         (HZ    * 5)	/* 1000ms x5 */
->  
-> +#define DEFAULT_DEBOUNCE	(8)	/* 8 cycles CD debounce */
-> +
->  #define PAD_DELAY_MAX	32 /* PAD delay cells */
->  /*--------------------------------------------------------------------------*/
->  /* Descriptor Structure                                                     */
-> @@ -430,6 +432,7 @@ struct msdc_host {
->  	bool hs400_cmd_resp_sel_rising;
->  				 /* cmd response sample selection for HS400 */
->  	bool hs400_mode;	/* current eMMC will run at hs400 mode */
-> +	bool internal_cd;	/* Use internal card-detect logic */
->  	struct msdc_save_para save_para; /* used when gate HCLK */
->  	struct msdc_tune_para def_tune_para; /* default tune setting */
->  	struct msdc_tune_para saved_tune_para; /* tune result of CMD21/CMD19 */
-> @@ -1430,6 +1433,11 @@ static irqreturn_t msdc_irq(int irq, void *dev_id)
->  			sdio_signal_irq(host->mmc);
->  		}
->  
-> +		if ((events & event_mask) & MSDC_INT_CDSC) {
-> +			mmc_detect_change(host->mmc, msecs_to_jiffies(20));
-> +			events &= ~MSDC_INT_CDSC;
-> +		}
-> +
->  		if (!(events & (event_mask & ~MSDC_INT_SDIOIRQ)))
->  			break;
->  
-> @@ -1463,14 +1471,24 @@ static void msdc_init_hw(struct msdc_host *host)
->  	/* Reset */
->  	msdc_reset_hw(host);
->  
-> -	/* Disable card detection */
-> -	sdr_clr_bits(host->base + MSDC_PS, MSDC_PS_CDEN);
-> -
->  	/* Disable and clear all interrupts */
->  	writel(0, host->base + MSDC_INTEN);
->  	val = readl(host->base + MSDC_INT);
->  	writel(val, host->base + MSDC_INT);
->  
-> +	/* Configure card detection */
-> +	if (host->internal_cd) {
-> +		sdr_set_field(host->base + MSDC_PS, MSDC_PS_CDDEBOUNCE,
-> +			      DEFAULT_DEBOUNCE);
-> +		sdr_set_bits(host->base + MSDC_PS, MSDC_PS_CDEN);
-> +		sdr_set_bits(host->base + MSDC_INTEN, MSDC_INTEN_CDSC);
-> +		sdr_set_bits(host->base + SDC_CFG, SDC_CFG_INSWKUP);
-> +	} else {
-> +		sdr_clr_bits(host->base + SDC_CFG, SDC_CFG_INSWKUP);
-> +		sdr_clr_bits(host->base + MSDC_PS, MSDC_PS_CDEN);
-> +		sdr_clr_bits(host->base + MSDC_INTEN, MSDC_INTEN_CDSC);
-> +	}
-> +
->  	if (host->top_base) {
->  		writel(0, host->top_base + EMMC_TOP_CONTROL);
->  		writel(0, host->top_base + EMMC_TOP_CMD);
-> @@ -1580,6 +1598,11 @@ static void msdc_init_hw(struct msdc_host *host)
->  static void msdc_deinit_hw(struct msdc_host *host)
->  {
->  	u32 val;
-> +
-> +	/* Disabled card-detect */
-> +	sdr_clr_bits(host->base + MSDC_PS, MSDC_PS_CDEN);
-> +	sdr_clr_bits(host->base + SDC_CFG, SDC_CFG_INSWKUP);
-> +
->  	/* Disable and clear all interrupts */
->  	writel(0, host->base + MSDC_INTEN);
->  
-> @@ -2078,13 +2101,31 @@ static void msdc_ack_sdio_irq(struct mmc_host *mmc)
->  	__msdc_enable_sdio_irq(mmc, 1);
->  }
->  
-> +static int msdc_get_cd(struct mmc_host *mmc)
-> +{
-> +	struct msdc_host *host = mmc_priv(mmc);
-> +	int val;
-> +
-> +	if (mmc->caps & MMC_CAP_NONREMOVABLE)
-> +		return 1;
-> +
-> +	if (!host->internal_cd)
-> +		return mmc_gpio_get_cd(mmc);
-> +
-> +	val = readl(host->base + MSDC_PS) & MSDC_PS_CDSTS;
-> +	if (mmc->caps2 & MMC_CAP2_CD_ACTIVE_HIGH)
-> +		return !!val;
-> +	else
-> +		return !val;
-> +}
-> +
->  static const struct mmc_host_ops mt_msdc_ops = {
->  	.post_req = msdc_post_req,
->  	.pre_req = msdc_pre_req,
->  	.request = msdc_ops_request,
->  	.set_ios = msdc_ops_set_ios,
->  	.get_ro = mmc_gpio_get_ro,
-> -	.get_cd = mmc_gpio_get_cd,
-> +	.get_cd = msdc_get_cd,
->  	.enable_sdio_irq = msdc_enable_sdio_irq,
->  	.ack_sdio_irq = msdc_ack_sdio_irq,
->  	.start_signal_voltage_switch = msdc_ops_switch_volt,
-> @@ -2206,6 +2247,15 @@ static int msdc_drv_probe(struct platform_device *pdev)
->  		goto host_free;
->  	}
->  
-> +	if (!(mmc->caps & MMC_CAP_NONREMOVABLE) &&
-> +	    !mmc_can_gpio_cd(mmc)) {
+On Tue, Apr 16, 2019 at 10:25 AM lei liu <leilk.liu@mediatek.com> wrote:
+>
+> On Tue, 2019-04-16 at 09:55 +0200, Matthias Brugger wrote:
+> >
+> > On 23/03/2019 22:16, Fabien Parent wrote:
+> > > Add binding documentation of spi-mt65xx for MT8516 SoC.
+> > >
+> > > Signed-off-by: Fabien Parent <fparent@baylibre.com>
+> > > ---
+> > >  Documentation/devicetree/bindings/spi/spi-mt65xx.txt | 1 +
+> > >  1 file changed, 1 insertion(+)
+> > >
+> >
+> >
+> > applied to v5.1-next/dts64
+> >
+> > Mark let me know if you want to take it through your tree and I drop the patch.
+> >
+> > > diff --git a/Documentation/devicetree/bindings/spi/spi-mt65xx.txt b/Documentation/devicetree/bindings/spi/spi-mt65xx.txt
+> > > index 69c356767cf8..69ac5976b952 100644
+> > > --- a/Documentation/devicetree/bindings/spi/spi-mt65xx.txt
+> > > +++ b/Documentation/devicetree/bindings/spi/spi-mt65xx.txt
+> > > @@ -10,6 +10,7 @@ Required properties:
+> > >      - mediatek,mt8135-spi: for mt8135 platforms
+> > >      - mediatek,mt8173-spi: for mt8173 platforms
+> > >      - mediatek,mt8183-spi: for mt8183 platforms
+> > > +    - "mediatek,mt8516-spi", "mediatek,mt2701-spi": for mt8516 platforms
+> Hi Fabien,
+> mt8516 SPI design comes from mt2712 and it's different from mt2701. Here
+> it should compatible with mt2712.
 
-Should not do this assume!
-better to add "mediatek,internal-cd" in your DTS, then no impact to
-other Soc.
-> +		/*
-> +		 * Is removable but no GPIO declared, so
-> +		 * use internal functionality.
-> +		 */
-> +		host->internal_cd = true;
-> +	}
-> +
->  	msdc_of_property_parse(pdev, host);
->  
->  	host->dev = &pdev->dev;
-> 
-> 
+Ok, thanks. I will retry with the mt2712 compatible.
+
+> > >
+> > >  - #address-cells: should be 1.
+> > >
+> > >
+> >
+> > _______________________________________________
+> > Linux-mediatek mailing list
+> > Linux-mediatek@lists.infradead.org
+> > http://lists.infradead.org/mailman/listinfo/linux-mediatek
+>
+>
