@@ -1,69 +1,47 @@
-From: lei liu <leilk.liu@mediatek.com>
-Subject: Re: [PATCH 19/24] dt-bindings: spi: spi-mt65xx: add support for
- MT8516
-Date: Thu, 18 Apr 2019 16:18:07 +0800
-Message-ID: <1555575487.7441.6.camel@mhfsdcap03>
-References: <20190323211612.860-1-fparent@baylibre.com>
-         <20190323211612.860-20-fparent@baylibre.com>
-         <5bc3fbfa-6d7e-08d3-116c-a8f78bc680cd@gmail.com>
-         <1555403151.7441.4.camel@mhfsdcap03>
-         <CAOwMV_yKAm1zar6buhe25O56AkAX8e0nXnm4GmqhvHC-yagKfQ@mail.gmail.com>
+From: <sean.wang@mediatek.com>
+Subject: [PATCH v1 3/4] Bluetooth: btmtksdio: Fix hdev->stat.byte_rx accumulation
+Date: Thu, 18 Apr 2019 17:08:01 +0800
+Message-ID: <ea8d491b7e737a51a6cfbc6d9078ba98012b0e66.1555577565.git.sean.wang@mediatek.com>
+References: <cover.1555577565.git.sean.wang@mediatek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAOwMV_yKAm1zar6buhe25O56AkAX8e0nXnm4GmqhvHC-yagKfQ@mail.gmail.com>
+In-Reply-To: <cover.1555577565.git.sean.wang@mediatek.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Fabien Parent <fparent@baylibre.com>
-Cc: Matthias Brugger <matthias.bgg@gmail.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Mark Brown <broonie@kernel.org>, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, ryder.lee@mediatek.com, linux-watchdog@vger.kernel.org, jjian.zhou@mediatek.com, wenzhen.yu@mediatek.com, Stephane Le Provost <stephane.leprovost@mediatek.com>, sean.wang@kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, yong.mao@mediatek.com, linux-spi@vger.kernel.org, linux-gpio@vger.kernel.org, linux-mediatek@lists.infradead.org, hsin-hsiung.wang@mediatek.com, linux-serial@vger.kernel.org, linux-clk@vger.kernel.org, Chaotian Jing <chaotian.jing@mediatek.com>, linux-i2c@vger.kernel.org
+To: marcel@holtmann.org, johan.hedberg@gmail.com
+Cc: ulf.hansson@linaro.org, linux-bluetooth@vger.kernel.org, linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Sean Wang <sean.wang@mediatek.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 2019-04-18 at 10:05 +0200, Fabien Parent wrote:
-> On Tue, Apr 16, 2019 at 10:25 AM lei liu <leilk.liu@mediatek.com> wrote:
-> >
-> > On Tue, 2019-04-16 at 09:55 +0200, Matthias Brugger wrote:
-> > >
-> > > On 23/03/2019 22:16, Fabien Parent wrote:
-> > > > Add binding documentation of spi-mt65xx for MT8516 SoC.
-> > > >
-> > > > Signed-off-by: Fabien Parent <fparent@baylibre.com>
-> > > > ---
-> > > >  Documentation/devicetree/bindings/spi/spi-mt65xx.txt | 1 +
-> > > >  1 file changed, 1 insertion(+)
-> > > >
-> > >
-> > >
-> > > applied to v5.1-next/dts64
-> > >
-> > > Mark let me know if you want to take it through your tree and I drop the patch.
-> > >
-> > > > diff --git a/Documentation/devicetree/bindings/spi/spi-mt65xx.txt b/Documentation/devicetree/bindings/spi/spi-mt65xx.txt
-> > > > index 69c356767cf8..69ac5976b952 100644
-> > > > --- a/Documentation/devicetree/bindings/spi/spi-mt65xx.txt
-> > > > +++ b/Documentation/devicetree/bindings/spi/spi-mt65xx.txt
-> > > > @@ -10,6 +10,7 @@ Required properties:
-> > > >      - mediatek,mt8135-spi: for mt8135 platforms
-> > > >      - mediatek,mt8173-spi: for mt8173 platforms
-> > > >      - mediatek,mt8183-spi: for mt8183 platforms
-> > > > +    - "mediatek,mt8516-spi", "mediatek,mt2701-spi": for mt8516 platforms
-> > Hi Fabien,
-> > mt8516 SPI design comes from mt2712 and it's different from mt2701. Here
-> > it should compatible with mt2712.
-> 
-> Ok, thanks. I will retry with the mt2712 compatible.
-> 
+From: Sean Wang <sean.wang@mediatek.com>
 
-Hi, I already send mt8516 spi patch and it's applied by Mark. Please
-don't do it again. Thanks.
+Accumulate hdev->stat.byte_rx only for valid packets as btmtkuart doing.
 
-> > > >
-> > > >  - #address-cells: should be 1.
-> > > >
-> > > >
-> > >
-> > > _______________________________________________
-> > > Linux-mediatek mailing list
-> > > Linux-mediatek@lists.infradead.org
-> > > http://lists.infradead.org/mailman/listinfo/linux-mediatek
-> >
-> >
+Signed-off-by: Sean Wang <sean.wang@mediatek.com>
+---
+ drivers/bluetooth/btmtksdio.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/bluetooth/btmtksdio.c b/drivers/bluetooth/btmtksdio.c
+index 9c123a9de673..877c0a831775 100644
+--- a/drivers/bluetooth/btmtksdio.c
++++ b/drivers/bluetooth/btmtksdio.c
+@@ -391,8 +391,6 @@ static int btmtksdio_rx_packet(struct btmtksdio_dev *bdev, u16 rx_size)
+ 	if (err < 0)
+ 		goto err_kfree_skb;
+ 
+-	bdev->hdev->stat.byte_rx += rx_size;
+-
+ 	sdio_hdr = (void *)skb->data;
+ 
+ 	/* We assume the default error as -EILSEQ simply to make the error path
+@@ -457,6 +455,8 @@ static int btmtksdio_rx_packet(struct btmtksdio_dev *bdev, u16 rx_size)
+ 	/* Complete frame */
+ 	(&pkts[i])->recv(bdev->hdev, skb);
+ 
++	bdev->hdev->stat.byte_rx += rx_size;
++
+ 	return 0;
+ 
+ err_kfree_skb:
+-- 
+2.18.0
