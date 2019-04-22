@@ -1,86 +1,78 @@
-From: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Subject: Re: [PATCH 5/7] mmc: meson-gx: avoid clock glitch when switching to
- DDR modes
-Date: Sat, 20 Apr 2019 11:23:51 +0200
-Message-ID: <CAFBinCBtc=Yb3WDgLzgnyd=NauaZnkQRnc08_j-XbiDybh=7cg@mail.gmail.com>
-References: <20190417204355.469-1-jbrunet@baylibre.com> <20190417204355.469-6-jbrunet@baylibre.com>
- <CAFBinCCAbMpWYY6-W+909Q=jLpweC2F6ED6CVf6zVGrRiA1hxg@mail.gmail.com>
- <8316d7875bf0479e91cc11ce5fbf3b2e21f92a2c.camel@baylibre.com>
- <CAFBinCBQPSsqwDSd6nQMLqOuApiESwHXn4wQbOp49WLpXfBk=Q@mail.gmail.com>
- <5b19d32be23fbe630339fd48f93b16e9301385d1.camel@baylibre.com> <5d65cc12e18f9a4b86c097fbade0cef91b3b5d9b.camel@baylibre.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH] mmc: dw_mmc: Disable SDIO interrupts while suspended to
+ fix suspend/resume
+Date: Mon, 22 Apr 2019 08:21:27 -0700
+Message-ID: <CAD=FV=Wm+T+W=LWTSiwBT3UQWG7YKQdGuL2+BmAFQhk8CYY1mQ@mail.gmail.com>
+References: <20190410221237.160856-1-dianders@chromium.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <5d65cc12e18f9a4b86c097fbade0cef91b3b5d9b.camel@baylibre.com>
+In-Reply-To: <20190410221237.160856-1-dianders@chromium.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jerome Brunet <jbrunet@baylibre.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>, linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Kalle Valo <kvalo@codeaurora.org>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Brian Norris <briannorris@chromium.org>, linux-wireless <linux-wireless@vger.kernel.org>, Matthias Kaehlcke <mka@chromium.org>, Ryan Case <ryandcase@chromium.org>, stable@vger.kernel.org, Linux MMC List <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Jerome,
+Hi,
 
-On Fri, Apr 19, 2019 at 10:53 AM Jerome Brunet <jbrunet@baylibre.com> wrote:
+On Wed, Apr 10, 2019 at 3:13 PM Douglas Anderson <dianders@chromium.org> wrote:
 >
-> On Thu, 2019-04-18 at 23:15 +0200, Jerome Brunet wrote:
-> > On Thu, 2019-04-18 at 22:53 +0200, Martin Blumenstingl wrote:
-> > > Hi Jerome,
-> > >
-> > > On Thu, Apr 18, 2019 at 10:46 PM Jerome Brunet <jbrunet@baylibre.com> wrote:
-> > > > On Thu, 2019-04-18 at 22:16 +0200, Martin Blumenstingl wrote:
-> > > > > Hi Jerome,
-> > > > >
-> > > > > On Wed, Apr 17, 2019 at 10:44 PM Jerome Brunet <jbrunet@baylibre.com> wrote:
-> > > > > > Activating DDR in the Amlogic mmc controller, among other things, will
-> > > > > > divide the output clock by 2. So by activating it with clock on, we are
-> > > > > > creating a glitch on the output.
-> > > > > >
-> > > > > > Instead, let's deal with DDR when the clock output is off, when setting
-> > > > > > the clock.
-> > > > > >
-> > > > > > Signed-off-by: Jerome Brunet <jbrunet@baylibre.com>
-> > > > > it seems that this patch breaks SD card on my Khadas VIM and Khadas VIM2.
-> > > >
-> > > > The error I see in your logs is with eMMC and hs200, not SD card.
-> > > sorry, I should have been more clear that there are two errors:
-> > > eMMC, this is what I have been seeing for a while on my Khadas VIM2
-> > > (it's probably not related to this patch):
-> > >    mmc1: mmc_select_hs200 failed, error -84
-> > >    mmc1: error -84 whilst initialising MMC card
-> >
-> > Following patches were also supposed to help the vim2.
-> > ... something I tested numerous time on this particular board.
-> >
-> > > however, then there's this other error:
-> > >    print_req_error: I/O error, dev mmcblk0, sector 0 flags 0
-> > >    Buffer I/O error on dev mmcblk0, logical block 0, async page read
-> > > as result of this the partition table cannot be read and my kernel
-> > > cannot find the rootfs.
-> >
-> > I don't know what the problem is (probably some CRC error - you can check the log
-> > in interrupt for this) but I'm pretty sure it is not related to this patch.
-> >
-> > I see in the log SD is indeed in HS mode, so not in any DDR mode.
-> > I also see that the SDIO fails as well. There something really weird, which can't
-> > be explained by this patch alone AFAICT.
+> Processing SDIO interrupts while dw_mmc is suspended (or partly
+> suspended) seems like a bad idea.  We really don't want to be
+> processing them until we've gotten ourselves fully powered up.
 >
-> Ok, I think I got it. It is indeed not linked to DDR, but a more trivial mistake.
-> It looks like a writel went AWOL during the final rebase (and after the test campaign).
+> You might be wondering how it's even possible to become suspended when
+> an SDIO interrupt is active.  As can be seen in
+> dw_mci_enable_sdio_irq(), we explicitly keep dw_mmc out of runtime
+> suspend when the SDIO interrupt is enabled.  ...but even though we
+> stop normal runtime suspend transitions when SDIO interrupts are
+> enabled, the dw_mci_runtime_suspend() can still get called for a full
+> system suspend.
 >
-> in meson_mmc_set_ios, after:
-> val |= FIELD_PREP(CFG_BUS_WIDTH_MASK, bus_width);
+> Let's handle all this by explicitly masking SDIO interrupts in the
+> suspend call and unmasking them later in the resume call.  To do this
+> cleanly I'll keep track of whether the client requested that SDIO
+> interrupts be enabled so that we can reliably restore them regardless
+> of whether we're masking them for one reason or another.
 >
-> Could you try adding
-> writel(val, host->regs + SD_EMMC_CFG);
-good catch!
+> Without this fix it can be seen that rk3288-veyron Chromebooks with
+> Marvell WiFi would sometimes fail to resume WiFi even after picking my
+> recent mwifiex patch [1].  Specifically you'd see messages like this:
+>   mwifiex_sdio mmc1:0001:1: Firmware wakeup failed
+>   mwifiex_sdio mmc1:0001:1: PREP_CMD: FW in reset state
+>
+> ...and tracing through the resume code in the failing cases showed
+> that we were processing a SDIO interrupt really early in the resume
+> call.
+>
+> NOTE: downstream in Chrome OS 3.14 and 3.18 kernels (both of which
+> support the Marvell SDIO WiFi card) we had a patch ("CHROMIUM: sdio:
+> Defer SDIO interrupt handling until after resume") [2].  Presumably
+> this is the same problem that was solved by that patch.
+>
+> [1] https://lkml.kernel.org/r/20190404040106.40519-1-dianders@chromium.org
+> [2] https://crrev.com/c/230765
+>
+> Cc: <stable@vger.kernel.org>
+> Signed-off-by: Douglas Anderson <dianders@chromium.org>
+> ---
+> I didn't put any "Fixes" tag here, but presumably this could be
+> backported to whichever kernels folks found it useful for.  I have at
+> least confirmed that kernels v4.14 and v4.19 (as well as v5.1-rc2)
+> show the problem.  It is very easy to pick this to v4.19 and it
+> definitely fixes the problem there.
+>
+> I haven't spent the time to pick this to 4.14 myself, but presumably
+> it wouldn't be too hard to backport this as far as v4.13 since that
+> contains commit 32dba73772f8 ("mmc: dw_mmc: Convert to use
+> MMC_CAP2_SDIO_IRQ_NOTHREAD for SDIO IRQs").  Prior to that it might
+> make sense for anyone experiencing this problem to just pick the old
+> CHROMIUM patch to fix them.
+>
+>  drivers/mmc/host/dw_mmc.c | 24 ++++++++++++++++++++----
+>  drivers/mmc/host/dw_mmc.h |  3 +++
+>  2 files changed, 23 insertions(+), 4 deletions(-)
 
-> Without this, the bus width is not changed, which explains why eMMC, SD and SDIO fail
-> on init.
-I have added that missing writel on top of the whole series and now:
-- SD card is detected again (same as without this series)
-- SDIO wifi is detected again (same as without this series)
-- eMMC is detected (was not working before)
+Jaehoon / Shawn: any thoughts on this patch?
 
-I will give my Tested-by on v2 of these patches
-
-
-Martin
+-Doug
