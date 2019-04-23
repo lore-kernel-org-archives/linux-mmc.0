@@ -1,40 +1,61 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH 15/24] dt-bindings: pinctrl: pinctrl-mt65xx: add support
- for MT8516
-Date: Tue, 23 Apr 2019 13:01:00 +0200
-Message-ID: <CACRpkdZ8gq+hGRT6EAyP2w9K0jz5RAzWeZ6_UrW+v-BOjd-wbg@mail.gmail.com>
-References: <20190323211612.860-1-fparent@baylibre.com> <20190323211612.860-16-fparent@baylibre.com>
- <CACRpkdZZ6-+MVdK4bOP4SHxQ8uQ8zENcir7DSteHy4g+B5uySQ@mail.gmail.com> <b1e4eb6c-0d53-0307-99e4-9fef9e2b33d8@gmail.com>
+From: Yinbo Zhu <yinbo.zhu@nxp.com>
+Subject: [PATCH v1] arm64: ls1028: dtsi: Add esdhc node in dtsi
+Date: Tue, 23 Apr 2019 11:42:50 +0000
+Message-ID: <20190423114424.3578-1-yinbo.zhu@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <b1e4eb6c-0d53-0307-99e4-9fef9e2b33d8@gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Matthias Brugger <matthias.bgg@gmail.com>
-Cc: Fabien Parent <fparent@baylibre.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Sean Wang <sean.wang@kernel.org>, Ryder Lee <ryder.lee@mediatek.com>, hsin-hsiung.wang@mediatek.com, wenzhen.yu@mediatek.com, Chaotian Jing <chaotian.jing@mediatek.com>, Yong Mao <yong.mao@mediatek.com>, jjian.zhou@mediatek.com, "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-i2c@vger.kernel.org, Linux ARM <linux-arm-kernel@lists.infradead.org>, "moderated list:ARM/Mediatek SoC support" <linux-mediatek@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>, linux-serial@
+To: Shawn Guo <shawnguo@kernel.org>, Leo Li <leoyang.li@nxp.com>, Rob Herring <robh+dt@kernel.org>
+Cc: Yinbo Zhu <yinbo.zhu@nxp.com>, Xiaobo Xie <xiaobo.xie@nxp.com>, Mark Rutland <mark.rutland@arm.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Y.b. Lu" <yangbo.lu@nxp.com>, Jiafei Pan <jiafei.pan@nxp.com>, Ashish Kumar <ashish.kumar@nxp.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Apr 16, 2019 at 11:12 AM Matthias Brugger
-<matthias.bgg@gmail.com> wrote:
-
-> Hi Linus,
->
-> On 08/04/2019 22:44, Linus Walleij wrote:
-> > On Sat, Mar 23, 2019 at 10:17 PM Fabien Parent <fparent@baylibre.com> wrote:
-> >
-> >> Add binding documentation of pinctrl-mt65xx for MT8516 SoC.
-> >>
-> >> Signed-off-by: Fabien Parent <fparent@baylibre.com>
-> >
-> > Patch applied with Rob's ACK.
-> >
->
-> I don't see this in your for-next branch. Did the patch got lost?
-
-I usually push the devel branch to be tested by the build robots
-and then mix down the for-next branch.
-
-Recent week(s) the build robot was not responding so it got delayed.
-
-Yours,
-Linus Walleij
+RnJvbTogQXNoaXNoIEt1bWFyIDxBc2hpc2guS3VtYXJAbnhwLmNvbT4NCg0KVGhpcyBwYXRjaCBp
+cyB0byBhZGQgZXNkaGMgbm9kZSBhbmQgZW5hYmxlIFNEIFVIUy1JLA0KZU1NQyBIUzIwMCBmb3Ig
+bHMxMDI4YXJkYi9sczEwMjhhcWRzIGJvYXJkLg0KDQpTaWduZWQtb2ZmLWJ5OiBBc2hpc2ggS3Vt
+YXIgPEFzaGlzaC5LdW1hckBueHAuY29tPg0KU2lnbmVkLW9mZi1ieTogWWFuZ2JvIEx1IDx5YW5n
+Ym8ubHVAbnhwLmNvbT4NClNpZ25lZC1vZmYtYnk6IFlpbmJvIFpodSA8eWluYm8uemh1QG54cC5j
+b20+DQotLS0NCiAuLi4vYm9vdC9kdHMvZnJlZXNjYWxlL2ZzbC1sczEwMjhhLXFkcy5kdHMgICAg
+fCAgOCArKysrKysNCiAuLi4vYm9vdC9kdHMvZnJlZXNjYWxlL2ZzbC1sczEwMjhhLXJkYi5kdHMg
+ICAgfCAxMyArKysrKysrKysNCiAuLi4vYXJtNjQvYm9vdC9kdHMvZnJlZXNjYWxlL2ZzbC1sczEw
+MjhhLmR0c2kgfCAyNyArKysrKysrKysrKysrKysrKysrDQogMyBmaWxlcyBjaGFuZ2VkLCA0OCBp
+bnNlcnRpb25zKCspDQoNCmRpZmYgLS1naXQgYS9hcmNoL2FybTY0L2Jvb3QvZHRzL2ZyZWVzY2Fs
+ZS9mc2wtbHMxMDI4YS1xZHMuZHRzIGIvYXJjaC9hcm02NC9ib290L2R0cy9mcmVlc2NhbGUvZnNs
+LWxzMTAyOGEtcWRzLmR0cw0KaW5kZXggMTRjNzlmNDY5MWVhLi4xODBlNWQyYTAwZDEgMTAwNjQ0
+DQotLS0gYS9hcmNoL2FybTY0L2Jvb3QvZHRzL2ZyZWVzY2FsZS9mc2wtbHMxMDI4YS1xZHMuZHRz
+DQorKysgYi9hcmNoL2FybTY0L2Jvb3QvZHRzL2ZyZWVzY2FsZS9mc2wtbHMxMDI4YS1xZHMuZHRz
+DQpAQCAtNDIsNiArNDIsMTQgQEANCiAJc3RhdHVzID0gIm9rYXkiOw0KIH07DQogDQorJmVzZGhj
+IHsNCisJc3RhdHVzID0gIm9rYXkiOw0KK307DQorDQorJmVzZGhjMSB7DQorCXN0YXR1cyA9ICJv
+a2F5IjsNCit9Ow0KKw0KICZpMmMwIHsNCiAJc3RhdHVzID0gIm9rYXkiOw0KIA0KZGlmZiAtLWdp
+dCBhL2FyY2gvYXJtNjQvYm9vdC9kdHMvZnJlZXNjYWxlL2ZzbC1sczEwMjhhLXJkYi5kdHMgYi9h
+cmNoL2FybTY0L2Jvb3QvZHRzL2ZyZWVzY2FsZS9mc2wtbHMxMDI4YS1yZGIuZHRzDQppbmRleCBm
+ODZiMDU0YTc0YWUuLjFiZmFmNDI5NGRiNCAxMDA2NDQNCi0tLSBhL2FyY2gvYXJtNjQvYm9vdC9k
+dHMvZnJlZXNjYWxlL2ZzbC1sczEwMjhhLXJkYi5kdHMNCisrKyBiL2FyY2gvYXJtNjQvYm9vdC9k
+dHMvZnJlZXNjYWxlL2ZzbC1sczEwMjhhLXJkYi5kdHMNCkBAIC0zMCw2ICszMCwxOSBAQA0KIAl9
+Ow0KIH07DQogDQorJmVzZGhjIHsNCisJc3RhdHVzID0gIm9rYXkiOw0KKwlzZC11aHMtc2RyMTA0
+Ow0KKwlzZC11aHMtc2RyNTA7DQorCXNkLXVocy1zZHIyNTsNCisJc2QtdWhzLXNkcjEyOw0KKwl9
+Ow0KKw0KKyZlc2RoYzEgew0KKwlzdGF0dXMgPSAib2theSI7DQorCW1tYy1oczIwMC0xXzh2Ow0K
+Kwl9Ow0KKw0KICZpMmMwIHsNCiAJc3RhdHVzID0gIm9rYXkiOw0KIA0KZGlmZiAtLWdpdCBhL2Fy
+Y2gvYXJtNjQvYm9vdC9kdHMvZnJlZXNjYWxlL2ZzbC1sczEwMjhhLmR0c2kgYi9hcmNoL2FybTY0
+L2Jvb3QvZHRzL2ZyZWVzY2FsZS9mc2wtbHMxMDI4YS5kdHNpDQppbmRleCAyODk2YmJjZmEzYmIu
+LmQxM2NkM2ZiNDU1YiAxMDA2NDQNCi0tLSBhL2FyY2gvYXJtNjQvYm9vdC9kdHMvZnJlZXNjYWxl
+L2ZzbC1sczEwMjhhLmR0c2kNCisrKyBiL2FyY2gvYXJtNjQvYm9vdC9kdHMvZnJlZXNjYWxlL2Zz
+bC1sczEwMjhhLmR0c2kNCkBAIC0yNzQsNiArMjc0LDMzIEBADQogCQkJc3RhdHVzID0gImRpc2Fi
+bGVkIjsNCiAJCX07DQogDQorCQllc2RoYzogZXNkaGNAMjE0MDAwMCB7DQorCQkJY29tcGF0aWJs
+ZSA9ICJmc2wsbHMxMDI4YS1lc2RoYyIsICJmc2wsZXNkaGMiOw0KKwkJCXJlZyA9IDwweDAgMHgy
+MTQwMDAwIDB4MCAweDEwMDAwPjsNCisJCQlpbnRlcnJ1cHRzID0gPDAgMjggMHg0PjsgLyogTGV2
+ZWwgaGlnaCB0eXBlICovDQorCQkJY2xvY2stZnJlcXVlbmN5ID0gPDA+Ow0KKwkJCWNsb2NrcyA9
+IDwmY2xvY2tnZW4gMiAxPjsNCisJCQl2b2x0YWdlLXJhbmdlcyA9IDwxODAwIDE4MDAgMzMwMCAz
+MzAwPjsNCisJCQlzZGhjaSxhdXRvLWNtZDEyOw0KKwkJCWxpdHRsZS1lbmRpYW47DQorCQkJYnVz
+LXdpZHRoID0gPDQ+Ow0KKwkJCXN0YXR1cyA9ICJkaXNhYmxlZCI7DQorCQl9Ow0KKw0KKwkJZXNk
+aGMxOiBlc2RoY0AyMTUwMDAwIHsNCisJCQljb21wYXRpYmxlID0gImZzbCxsczEwMjhhLWVzZGhj
+IiwgImZzbCxlc2RoYyI7DQorCQkJcmVnID0gPDB4MCAweDIxNTAwMDAgMHgwIDB4MTAwMDA+Ow0K
+KwkJCWludGVycnVwdHMgPSA8MCA2MyAweDQ+OyAvKiBMZXZlbCBoaWdoIHR5cGUgKi8NCisJCQlj
+bG9jay1mcmVxdWVuY3kgPSA8MD47DQorCQkJY2xvY2tzID0gPCZjbG9ja2dlbiAyIDE+Ow0KKwkJ
+CXZvbHRhZ2UtcmFuZ2VzID0gPDE4MDAgMTgwMCAzMzAwIDMzMDA+Ow0KKwkJCXNkaGNpLGF1dG8t
+Y21kMTI7DQorCQkJYnJva2VuLWNkOw0KKwkJCWxpdHRsZS1lbmRpYW47DQorCQkJYnVzLXdpZHRo
+ID0gPDQ+Ow0KKwkJCXN0YXR1cyA9ICJkaXNhYmxlZCI7DQorCQl9Ow0KKw0KIAkJc2F0YTogc2F0
+YUAzMjAwMDAwIHsNCiAJCQljb21wYXRpYmxlID0gImZzbCxsczEwMjhhLWFoY2kiOw0KIAkJCXJl
+ZyA9IDwweDAgMHgzMjAwMDAwIDB4MCAweDEwMDAwPiwNCi0tIA0KMi4xNy4xDQoNCg==
