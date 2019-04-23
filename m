@@ -1,48 +1,40 @@
-From: Jerome Brunet <jbrunet@baylibre.com>
-Subject: [PATCH v2 2/7] mmc: meson-gx: ack only raised irq
-Date: Tue, 23 Apr 2019 11:02:30 +0200
-Message-ID: <20190423090235.17244-3-jbrunet@baylibre.com>
-References: <20190423090235.17244-1-jbrunet@baylibre.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH 15/24] dt-bindings: pinctrl: pinctrl-mt65xx: add support
+ for MT8516
+Date: Tue, 23 Apr 2019 13:01:00 +0200
+Message-ID: <CACRpkdZ8gq+hGRT6EAyP2w9K0jz5RAzWeZ6_UrW+v-BOjd-wbg@mail.gmail.com>
+References: <20190323211612.860-1-fparent@baylibre.com> <20190323211612.860-16-fparent@baylibre.com>
+ <CACRpkdZZ6-+MVdK4bOP4SHxQ8uQ8zENcir7DSteHy4g+B5uySQ@mail.gmail.com> <b1e4eb6c-0d53-0307-99e4-9fef9e2b33d8@gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190423090235.17244-1-jbrunet@baylibre.com>
+In-Reply-To: <b1e4eb6c-0d53-0307-99e4-9fef9e2b33d8@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>
-Cc: Jerome Brunet <jbrunet@baylibre.com>, linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
+To: Matthias Brugger <matthias.bgg@gmail.com>
+Cc: Fabien Parent <fparent@baylibre.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Sean Wang <sean.wang@kernel.org>, Ryder Lee <ryder.lee@mediatek.com>, hsin-hsiung.wang@mediatek.com, wenzhen.yu@mediatek.com, Chaotian Jing <chaotian.jing@mediatek.com>, Yong Mao <yong.mao@mediatek.com>, jjian.zhou@mediatek.com, "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-i2c@vger.kernel.org, Linux ARM <linux-arm-kernel@lists.infradead.org>, "moderated list:ARM/Mediatek SoC support" <linux-mediatek@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>, linux-serial@
 List-Id: linux-mmc@vger.kernel.org
 
-This is merely a clean up. It makes sense to only ack raised irqs
-instead of acking everything all the time.
+On Tue, Apr 16, 2019 at 11:12 AM Matthias Brugger
+<matthias.bgg@gmail.com> wrote:
 
-Signed-off-by: Jerome Brunet <jbrunet@baylibre.com>
----
- drivers/mmc/host/meson-gx-mmc.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+> Hi Linus,
+>
+> On 08/04/2019 22:44, Linus Walleij wrote:
+> > On Sat, Mar 23, 2019 at 10:17 PM Fabien Parent <fparent@baylibre.com> wrote:
+> >
+> >> Add binding documentation of pinctrl-mt65xx for MT8516 SoC.
+> >>
+> >> Signed-off-by: Fabien Parent <fparent@baylibre.com>
+> >
+> > Patch applied with Rob's ACK.
+> >
+>
+> I don't see this in your for-next branch. Did the patch got lost?
 
-diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index 2deeacc051b1..8b690ecde4c5 100644
---- a/drivers/mmc/host/meson-gx-mmc.c
-+++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -1082,9 +1082,6 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
- 	}
- 
- out:
--	/* ack all enabled interrupts */
--	writel(irq_en, host->regs + SD_EMMC_STATUS);
--
- 	if (cmd->error) {
- 		/* Stop desc in case of errors */
- 		u32 start = readl(host->regs + SD_EMMC_START);
-@@ -1096,6 +1093,9 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
- 	if (ret == IRQ_HANDLED)
- 		meson_mmc_request_done(host->mmc, cmd->mrq);
- 
-+	/* ack all raised interrupts */
-+	writel(status, host->regs + SD_EMMC_STATUS);
-+
- 	return ret;
- }
- 
--- 
-2.20.1
+I usually push the devel branch to be tested by the build robots
+and then mix down the for-next branch.
+
+Recent week(s) the build robot was not responding so it got delayed.
+
+Yours,
+Linus Walleij
