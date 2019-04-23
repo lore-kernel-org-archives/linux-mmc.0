@@ -1,118 +1,51 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/4] mmc: mmci: avoid fake busy polling
-Date: Tue, 23 Apr 2019 15:39:57 +0200
-Message-ID: <CAPDyKFoZuQ+hshZpj-qjchKf7enW4ChPd=r_QhK2xtuJcSvqxQ@mail.gmail.com>
-References: <1551802205-32188-1-git-send-email-ludovic.Barre@st.com> <1551802205-32188-2-git-send-email-ludovic.Barre@st.com>
+From: Matthias Brugger <matthias.bgg@gmail.com>
+Subject: Re: [PATCH 15/24] dt-bindings: pinctrl: pinctrl-mt65xx: add support
+ for MT8516
+Date: Tue, 23 Apr 2019 16:24:44 +0200
+Message-ID: <470d475e-b694-ab6a-5ff7-b5635af629bb@gmail.com>
+References: <20190323211612.860-1-fparent@baylibre.com>
+ <20190323211612.860-16-fparent@baylibre.com>
+ <CACRpkdZZ6-+MVdK4bOP4SHxQ8uQ8zENcir7DSteHy4g+B5uySQ@mail.gmail.com>
+ <b1e4eb6c-0d53-0307-99e4-9fef9e2b33d8@gmail.com>
+ <CACRpkdZ8gq+hGRT6EAyP2w9K0jz5RAzWeZ6_UrW+v-BOjd-wbg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1551802205-32188-2-git-send-email-ludovic.Barre@st.com>
+In-Reply-To: <CACRpkdZ8gq+hGRT6EAyP2w9K0jz5RAzWeZ6_UrW+v-BOjd-wbg@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ludovic Barre <ludovic.Barre@st.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-stm32@st-md-mailman.stormreply.com
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Fabien Parent <fparent@baylibre.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Sean Wang <sean.wang@kernel.org>, Ryder Lee <ryder.lee@mediatek.com>, hsin-hsiung.wang@mediatek.com, wenzhen.yu@mediatek.com, Chaotian Jing <chaotian.jing@mediatek.com>, Yong Mao <yong.mao@mediatek.com>, jjian.zhou@mediatek.com, "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-i2c@vger.kernel.org, Linux ARM <linux-arm-kernel@lists.infradead.org>, "moderated list:ARM/Mediatek SoC support" <linux-mediatek@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>, linux-serial@
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 5 Mar 2019 at 17:10, Ludovic Barre <ludovic.Barre@st.com> wrote:
->
-> From: Ludovic Barre <ludovic.barre@st.com>
->
-> The busy status bit could occurred even if no busy response is
-> expected (example cmd11). On sdmmc variant, the busy_detect_flag
-> reflects inverted value of d0 state, it's sampled at the end of a
-> CMD response and a second time 2 clk cycles after the CMD response.
-> To avoid a fake busy, the busy status could be checked and polled
-> only if the command has RSP_BUSY flag.
 
-I would appreciate a better explanation of what this patch really changes.
 
-The above is giving some background to the behavior of sdmmc variant,
-but at this point that variant doesn't even have the
-->variant->busy_detect flag set.
+On 23/04/2019 13:01, Linus Walleij wrote:
+> On Tue, Apr 16, 2019 at 11:12 AM Matthias Brugger
+> <matthias.bgg@gmail.com> wrote:
+> 
+>> Hi Linus,
+>>
+>> On 08/04/2019 22:44, Linus Walleij wrote:
+>>> On Sat, Mar 23, 2019 at 10:17 PM Fabien Parent <fparent@baylibre.com> wrote:
+>>>
+>>>> Add binding documentation of pinctrl-mt65xx for MT8516 SoC.
+>>>>
+>>>> Signed-off-by: Fabien Parent <fparent@baylibre.com>
+>>>
+>>> Patch applied with Rob's ACK.
+>>>
+>>
+>> I don't see this in your for-next branch. Did the patch got lost?
+> 
+> I usually push the devel branch to be tested by the build robots
+> and then mix down the for-next branch.
+> 
+> Recent week(s) the build robot was not responding so it got delayed.
+> 
 
->
-> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
-> ---
->  drivers/mmc/host/mmci.c | 19 +++++++++++++------
->  1 file changed, 13 insertions(+), 6 deletions(-)
->
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index 387ff14..4901b73 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -1220,12 +1220,13 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
->              unsigned int status)
->  {
->         void __iomem *base = host->base;
-> -       bool sbc;
-> +       bool sbc, busy_resp;
->
->         if (!cmd)
->                 return;
->
->         sbc = (cmd == host->mrq->sbc);
-> +       busy_resp = !!(cmd->flags & MMC_RSP_BUSY);
->
->         /*
->          * We need to be one of these interrupts to be considered worth
-> @@ -1239,8 +1240,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
->         /*
->          * ST Micro variant: handle busy detection.
->          */
-> -       if (host->variant->busy_detect) {
-> -               bool busy_resp = !!(cmd->flags & MMC_RSP_BUSY);
-> +       if (busy_resp && host->variant->busy_detect) {
->
->                 /* We are busy with a command, return */
->                 if (host->busy_status &&
-> @@ -1253,7 +1253,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
->                  * that the special busy status bit is still set before
->                  * proceeding.
->                  */
-> -               if (!host->busy_status && busy_resp &&
-> +               if (!host->busy_status &&
->                     !(status & (MCI_CMDCRCFAIL|MCI_CMDTIMEOUT)) &&
->                     (readl(base + MMCISTATUS) & host->variant->busy_detect_flag)) {
+I don't see it in the devel branch [1]. Can you please double check?
 
-All the changes above makes perfect sense to me, but looks more like a
-cleanup of the code, rather than actually changing the behavior.
-
->
-> @@ -1508,6 +1508,7 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
->  {
->         struct mmci_host *host = dev_id;
->         u32 status;
-> +       bool busy_resp;
->         int ret = 0;
->
->         spin_lock(&host->lock);
-> @@ -1550,9 +1551,15 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
->                 }
->
->                 /*
-> -                * Don't poll for busy completion in irq context.
-> +                * Don't poll for:
-> +                * -busy completion in irq context.
-> +                * -no busy response expected.
->                  */
-> -               if (host->variant->busy_detect && host->busy_status)
-> +               busy_resp = host->cmd ?
-> +                       !!(host->cmd->flags & MMC_RSP_BUSY) : false;
-
-This doesn't make sense to me, but I may be missing something.
-
-host->busy_status is being updated by mmci_cmd_irq() and only when
-MMC_RSP_BUSY is set for the command in flight. In other words,
-checking for MMC_RSP_BUSY here as well is redundant. No?
-
-> +
-> +               if (host->variant->busy_detect &&
-> +                   (!busy_resp || host->busy_status))
->                         status &= ~host->variant->busy_detect_flag;
->
->                 ret = 1;
-> --
-> 2.7.4
->
-
-Kind regards
-Uffe
+[1]
+https://git.kernel.org/pub/scm/linux/kernel/git/linusw/linux-pinctrl.git/log/?h=devel
