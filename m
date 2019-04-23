@@ -1,47 +1,50 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 0/4] Add trace events for SD registers.
-Date: Tue, 23 Apr 2019 08:29:15 +0200
-Message-ID: <CAPDyKFqYNMhDKy94zV8Bk80OUiS9JNFf2EmkbhJ0W_N=5=bZJQ@mail.gmail.com>
-References: <20190416183257.247902-1-rrangel@chromium.org>
+From: Kefeng Wang <wangkefeng.wang@huawei.com>
+Subject: [PATCH next 17/25] mmc: omap_hsmmc: Use dev_get_drvdata()
+Date: Tue, 23 Apr 2019 15:50:12 +0800
+Message-ID: <20190423075020.173734-18-wangkefeng.wang@huawei.com>
+References: <20190423075020.173734-1-wangkefeng.wang@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190416183257.247902-1-rrangel@chromium.org>
+In-Reply-To: <20190423075020.173734-1-wangkefeng.wang@huawei.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Raul E Rangel <rrangel@chromium.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-trace-devel@vger.kernel.org, Daniel Kurtz <djkurtz@chromium.org>, zwisler@chromium.org, Steven Rostedt <rostedt@goodmis.org>, hongjiefang <hongjiefang@asrmicro.com>, Jennifer Dahm <jennifer.dahm@ni.com>, Ingo Molnar <mingo@redhat.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, Kyle Roeschley <kyle.roeschley@ni.com>, Avri Altman <avri.altman@wdc.com>, Simon Horman <horms+renesas@verge.net.au>
+To: linux-kernel@vger.kernel.org
+Cc: Masahiro Yamada <yamada.masahiro@socionext.com>, Kefeng Wang <wangkefeng.wang@huawei.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 16 Apr 2019 at 20:33, Raul E Rangel <rrangel@chromium.org> wrote:
->
-> I am not able to make a single event class for all these registers. They
-> all have different struct sizes and different printf formats.
->
-> Thanks for the reviews!
->
-> Changes in v2:
-> - Made trace_sd_scr print out flags.
-> - Add BUILD_BUG_ON to make sure tracing stays in sync with structs.
-> - memcpy using sizeof(__entry->raw)
->
-> Raul E Rangel (4):
->   mmc: core: Add trace event for SD SCR response
->   mmc: core: Add trace event for SD SSR response
->   mmc: core: Add trace event for SD OCR response
->   mmc: core: Add trace event for CSD response
->
->  drivers/mmc/core/mmc.c     |   4 +
->  drivers/mmc/core/sd.c      |  10 ++
->  drivers/mmc/core/sd_ops.c  |   6 ++
->  include/trace/events/mmc.h | 204 +++++++++++++++++++++++++++++++++++++
->  4 files changed, 224 insertions(+)
->
-> --
-> 2.21.0.392.gf8f6787159e-goog
->
+Using dev_get_drvdata directly.
 
-Why do you need this? We already have these card registers reflected
-though sysfs files, isn't that sufficient?
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Linus Walleij <linus.walleij@linaro.org>
+Cc: linux-mmc@vger.kernel.org
+Cc: linux-omap@vger.kernel.org
+Signed-off-by: Kefeng Wang <wangkefeng.wang@huawei.com>
+---
+ drivers/mmc/host/omap_hsmmc.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-Kind regards
-Uffe
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 29a1ddaa7466..952fa4063ff8 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -2077,7 +2077,7 @@ static int omap_hsmmc_runtime_suspend(struct device *dev)
+ 	unsigned long flags;
+ 	int ret = 0;
+ 
+-	host = platform_get_drvdata(to_platform_device(dev));
++	host = dev_get_drvdata(dev);
+ 	omap_hsmmc_context_save(host);
+ 	dev_dbg(dev, "disabled\n");
+ 
+@@ -2118,7 +2118,7 @@ static int omap_hsmmc_runtime_resume(struct device *dev)
+ 	struct omap_hsmmc_host *host;
+ 	unsigned long flags;
+ 
+-	host = platform_get_drvdata(to_platform_device(dev));
++	host = dev_get_drvdata(dev);
+ 	omap_hsmmc_context_restore(host);
+ 	dev_dbg(dev, "enabled\n");
+ 
+-- 
+2.20.1
