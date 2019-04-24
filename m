@@ -1,60 +1,194 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: sg_dma_page_iter offset & length considerations
-Date: Wed, 24 Apr 2019 09:57:28 +0200
-Message-ID: <CAK8P3a2cGnTP_Qr4AjPvLA8X7cP+u_dNQQWZsWreKkKkqOwLdw@mail.gmail.com>
-References: <CAD8Lp47JYdZzbV9F+asNwvSfLF_po_J7ir6R_Vb-Dab21_=Krw@mail.gmail.com>
+From: Emil Renner Berthing <emil.renner.berthing@gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: Disable SDIO interrupts while suspended to
+ fix suspend/resume
+Date: Wed, 24 Apr 2019 10:19:06 +0200
+Message-ID: <CANBLGcwmNowj9GSmE3bbo1t1o6EF8q-RiJftfdOQnJB9_8aSKg@mail.gmail.com>
+References: <20190410221237.160856-1-dianders@chromium.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAD8Lp47JYdZzbV9F+asNwvSfLF_po_J7ir6R_Vb-Dab21_=Krw@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Daniel Drake <drake@endlessm.com>
-Cc: Jason Gunthorpe <jgg@mellanox.com>, Imre Deak <imre.deak@intel.com>, Linux Kernel <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Oleksij Rempel <linux@rempel-privat.de>
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20190410221237.160856-1-dianders@chromium.org>
+Sender: stable-owner@vger.kernel.org
+To: Douglas Anderson <dianders@chromium.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Heiko Stuebner <heiko@sntech.de>, linux-mmc@vger.kernel.org, Brian Norris <briannorris@chromium.org>, linux-wireless@vger.kernel.org, stable@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Matthias Kaehlcke <mka@chromium.org>, ryandcase@chromium.org, Kalle Valo <kvalo@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Apr 24, 2019 at 9:22 AM Daniel Drake <drake@endlessm.com> wrote:
-> In drivers/mmc/alcor.c we're working with a MMC controller which
-> supports DMA transfers split up into page-sized chunks. A DMA transfer
-> consists of multiple pages, after each page is transferred there is an
-> interrupt so that the driver can program the DMA address of the next
-> page in the sequence. All pages must be complete in length, only the
-> last one can be a partial transfer.
->
-> I thought that the sg_dma_page_iter API looked like a great fit here:
-> the driver can accept any old sglist, and then use this new API to
-> collapse it into a list of pages that can be easily iterated over, and
-> fed to the hardware one at a time.
->
-> But looking closer I think I may have made some bad assumptions, and
-> I'm left with some fundamental questions about this API.
->
-> Specifically I can see userspace generates requests which present a
-> sglist such as:
->  - first entry with offset=1536 length=2560
->  - 7 entries with offset=0 length=4096
->  - last entry with offset=0 length=1536
->
-> I gather that dma_map_sg() will take care off the offsets, i.e. any
-> physical address I get with sg_page_iter_dma_address() will already
-> have the offset applied, so I don't have to worry about tracking that.
->
-> But what about the length? For every page returned by the iterator, I
-> can't assume that I am being asked to work with the full page, right?
-> Such as the first and last page in the above example. I need to go
-> back to the sglist to check the corresponding length variable, and
-> having to go back to check the sglist seems to defeat the convenience
-> of having the sglist collapsed into a list of pages by the iterator.
->
-> Any comments?
+Hi Douglas,
 
-I would assume that 4K aligned data is the common case, as that
-is the smallest page size we allow in the page cache, and SDHC
-cards expect FAT32 with at least 4K aligned clusters as well
-in order to get into their fast path.
+Unfortunately this seems to beak resume on my rk3399-gru-kevin. I have
+a semi-complicated setup with my rootfs as a btrfs on dmcrypt on
+mmcblk0 which is the dw_mmc, so I'm guessing something goes wrong when
+waking up the dm_mmc which probably wasn't suspended before this
+patch. It's not 100% consistent though. Sometimes I see it resume the
+first time I try suspending, but then 2nd time I suspend it won't come
+back.
 
-I'd keep that assumption by default, and would suggest you fall
-back to to a kmalloc() bounce buffer if you get a buffer from user
-space that is not fully aligned. I suppose the only way to create
-those would be using O_DIRECT writes.
+Let me know if I can do something to help debug this.
 
-     Arnd
+/Emil
+
+
+On Thu, 11 Apr 2019 at 00:13, Douglas Anderson <dianders@chromium.org> wrote:
+>
+> Processing SDIO interrupts while dw_mmc is suspended (or partly
+> suspended) seems like a bad idea.  We really don't want to be
+> processing them until we've gotten ourselves fully powered up.
+>
+> You might be wondering how it's even possible to become suspended when
+> an SDIO interrupt is active.  As can be seen in
+> dw_mci_enable_sdio_irq(), we explicitly keep dw_mmc out of runtime
+> suspend when the SDIO interrupt is enabled.  ...but even though we
+> stop normal runtime suspend transitions when SDIO interrupts are
+> enabled, the dw_mci_runtime_suspend() can still get called for a full
+> system suspend.
+>
+> Let's handle all this by explicitly masking SDIO interrupts in the
+> suspend call and unmasking them later in the resume call.  To do this
+> cleanly I'll keep track of whether the client requested that SDIO
+> interrupts be enabled so that we can reliably restore them regardless
+> of whether we're masking them for one reason or another.
+>
+> Without this fix it can be seen that rk3288-veyron Chromebooks with
+> Marvell WiFi would sometimes fail to resume WiFi even after picking my
+> recent mwifiex patch [1].  Specifically you'd see messages like this:
+>   mwifiex_sdio mmc1:0001:1: Firmware wakeup failed
+>   mwifiex_sdio mmc1:0001:1: PREP_CMD: FW in reset state
+>
+> ...and tracing through the resume code in the failing cases showed
+> that we were processing a SDIO interrupt really early in the resume
+> call.
+>
+> NOTE: downstream in Chrome OS 3.14 and 3.18 kernels (both of which
+> support the Marvell SDIO WiFi card) we had a patch ("CHROMIUM: sdio:
+> Defer SDIO interrupt handling until after resume") [2].  Presumably
+> this is the same problem that was solved by that patch.
+>
+> [1] https://lkml.kernel.org/r/20190404040106.40519-1-dianders@chromium.org
+> [2] https://crrev.com/c/230765
+>
+> Cc: <stable@vger.kernel.org>
+> Signed-off-by: Douglas Anderson <dianders@chromium.org>
+> ---
+> I didn't put any "Fixes" tag here, but presumably this could be
+> backported to whichever kernels folks found it useful for.  I have at
+> least confirmed that kernels v4.14 and v4.19 (as well as v5.1-rc2)
+> show the problem.  It is very easy to pick this to v4.19 and it
+> definitely fixes the problem there.
+>
+> I haven't spent the time to pick this to 4.14 myself, but presumably
+> it wouldn't be too hard to backport this as far as v4.13 since that
+> contains commit 32dba73772f8 ("mmc: dw_mmc: Convert to use
+> MMC_CAP2_SDIO_IRQ_NOTHREAD for SDIO IRQs").  Prior to that it might
+> make sense for anyone experiencing this problem to just pick the old
+> CHROMIUM patch to fix them.
+>
+>  drivers/mmc/host/dw_mmc.c | 24 ++++++++++++++++++++----
+>  drivers/mmc/host/dw_mmc.h |  3 +++
+>  2 files changed, 23 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 80dc2fd6576c..432f6e3ddd43 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1664,7 +1664,8 @@ static void dw_mci_init_card(struct mmc_host *mmc, struct mmc_card *card)
+>         }
+>  }
+>
+> -static void __dw_mci_enable_sdio_irq(struct dw_mci_slot *slot, int enb)
+> +static void __dw_mci_enable_sdio_irq(struct dw_mci_slot *slot, bool enb,
+> +                                    bool client_requested)
+>  {
+>         struct dw_mci *host = slot->host;
+>         unsigned long irqflags;
+> @@ -1672,6 +1673,17 @@ static void __dw_mci_enable_sdio_irq(struct dw_mci_slot *slot, int enb)
+>
+>         spin_lock_irqsave(&host->irq_lock, irqflags);
+>
+> +       /*
+> +        * If this was requested by the client save the request.  If this
+> +        * wasn't required by the client then logically AND it with the
+> +        * client request since we want to disable if either the client
+> +        * disabled OR we have some other reason to disable.
+> +        */
+> +       if (client_requested)
+> +               host->client_sdio_enb = enb;
+> +       else if (!host->client_sdio_enb)
+> +               enb = 0;
+> +
+>         /* Enable/disable Slot Specific SDIO interrupt */
+>         int_mask = mci_readl(host, INTMASK);
+>         if (enb)
+> @@ -1688,7 +1700,7 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
+>         struct dw_mci_slot *slot = mmc_priv(mmc);
+>         struct dw_mci *host = slot->host;
+>
+> -       __dw_mci_enable_sdio_irq(slot, enb);
+> +       __dw_mci_enable_sdio_irq(slot, enb, true);
+>
+>         /* Avoid runtime suspending the device when SDIO IRQ is enabled */
+>         if (enb)
+> @@ -1701,7 +1713,7 @@ static void dw_mci_ack_sdio_irq(struct mmc_host *mmc)
+>  {
+>         struct dw_mci_slot *slot = mmc_priv(mmc);
+>
+> -       __dw_mci_enable_sdio_irq(slot, 1);
+> +       __dw_mci_enable_sdio_irq(slot, true, false);
+>  }
+>
+>  static int dw_mci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+> @@ -2734,7 +2746,7 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+>                 if (pending & SDMMC_INT_SDIO(slot->sdio_id)) {
+>                         mci_writel(host, RINTSTS,
+>                                    SDMMC_INT_SDIO(slot->sdio_id));
+> -                       __dw_mci_enable_sdio_irq(slot, 0);
+> +                       __dw_mci_enable_sdio_irq(slot, false, false);
+>                         sdio_signal_irq(slot->mmc);
+>                 }
+>
+> @@ -3424,6 +3436,8 @@ int dw_mci_runtime_suspend(struct device *dev)
+>  {
+>         struct dw_mci *host = dev_get_drvdata(dev);
+>
+> +       __dw_mci_enable_sdio_irq(host->slot, false, false);
+> +
+>         if (host->use_dma && host->dma_ops->exit)
+>                 host->dma_ops->exit(host);
+>
+> @@ -3490,6 +3504,8 @@ int dw_mci_runtime_resume(struct device *dev)
+>         /* Now that slots are all setup, we can enable card detect */
+>         dw_mci_enable_cd(host);
+>
+> +       __dw_mci_enable_sdio_irq(host->slot, true, false);
+> +
+>         return 0;
+>
+>  err:
+> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+> index 46e9f8ec5398..dfbace0f5043 100644
+> --- a/drivers/mmc/host/dw_mmc.h
+> +++ b/drivers/mmc/host/dw_mmc.h
+> @@ -127,6 +127,7 @@ struct dw_mci_dma_slave {
+>   * @cmd11_timer: Timer for SD3.0 voltage switch over scheme.
+>   * @cto_timer: Timer for broken command transfer over scheme.
+>   * @dto_timer: Timer for broken data transfer over scheme.
+> + * @client_sdio_enb: The value last passed to enable_sdio_irq.
+>   *
+>   * Locking
+>   * =======
+> @@ -234,6 +235,8 @@ struct dw_mci {
+>         struct timer_list       cmd11_timer;
+>         struct timer_list       cto_timer;
+>         struct timer_list       dto_timer;
+> +
+> +       bool                    client_sdio_enb;
+>  };
+>
+>  /* DMA ops for Internal/External DMAC interface */
+> --
+> 2.21.0.392.gf8f6787159e-goog
+>
+>
+> _______________________________________________
+> Linux-rockchip mailing list
+> Linux-rockchip@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/linux-rockchip
