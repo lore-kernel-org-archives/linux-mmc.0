@@ -1,62 +1,47 @@
 From: Raul Rangel <rrangel@chromium.org>
-Subject: Re: [PATCH v2 0/4] Add trace events for SD registers.
-Date: Wed, 24 Apr 2019 09:31:15 -0600
-Message-ID: <20190424153115.GA186956@google.com>
-References: <20190416183257.247902-1-rrangel@chromium.org>
- <CAPDyKFqYNMhDKy94zV8Bk80OUiS9JNFf2EmkbhJ0W_N=5=bZJQ@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: core: Verify SD bus width
+Date: Wed, 24 Apr 2019 09:56:59 -0600
+Message-ID: <20190424155659.GA193321@google.com>
+References: <20190416185705.256369-1-rrangel@chromium.org>
+ <SN6PR04MB4925C1C304B992339621808AFC260@SN6PR04MB4925.namprd04.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <CAPDyKFqYNMhDKy94zV8Bk80OUiS9JNFf2EmkbhJ0W_N=5=bZJQ@mail.gmail.com>
+In-Reply-To: <SN6PR04MB4925C1C304B992339621808AFC260@SN6PR04MB4925.namprd04.prod.outlook.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-trace-devel@vger.kernel.org, Daniel Kurtz <djkurtz@chromium.org>, zwisler@chromium.org, Steven Rostedt <rostedt@goodmis.org>, hongjiefang <hongjiefang@asrmicro.com>, Jennifer Dahm <jennifer.dahm@ni.com>, Ingo Molnar <mingo@redhat.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, Kyle Roeschley <kyle.roeschley@ni.com>, Avri Altman <avri.altman@wdc.com>, Simon Horman <horms+renesas@verge.net.au>, Raul Rangel <rrangel@chromium.org>
+To: Avri Altman <Avri.Altman@wdc.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "djkurtz@chromium.org" <djkurtz@chromium.org>, "zwisler@chromium.org" <zwisler@chromium.org>, hongjiefang <hongjiefang@asrmicro.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, Kyle Roeschley <kyle.roeschley@ni.com>, Ulf Hansson <ulf.hansson@linaro.org>, Raul Rangel <rrangel@chromium.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Apr 23, 2019 at 08:29:15AM +0200, Ulf Hansson wrote:
-> On Tue, 16 Apr 2019 at 20:33, Raul E Rangel <rrangel@chromium.org> wrote:
-> >
-> > I am not able to make a single event class for all these registers. They
-> > all have different struct sizes and different printf formats.
-> >
-> > Thanks for the reviews!
-> >
-> > Changes in v2:
-> > - Made trace_sd_scr print out flags.
-> > - Add BUILD_BUG_ON to make sure tracing stays in sync with structs.
-> > - memcpy using sizeof(__entry->raw)
-> >
-> > Raul E Rangel (4):
-> >   mmc: core: Add trace event for SD SCR response
-> >   mmc: core: Add trace event for SD SSR response
-> >   mmc: core: Add trace event for SD OCR response
-> >   mmc: core: Add trace event for CSD response
-> >
-> >  drivers/mmc/core/mmc.c     |   4 +
-> >  drivers/mmc/core/sd.c      |  10 ++
-> >  drivers/mmc/core/sd_ops.c  |   6 ++
-> >  include/trace/events/mmc.h | 204 +++++++++++++++++++++++++++++++++++++
-> >  4 files changed, 224 insertions(+)
-> >
-> > --
-> > 2.21.0.392.gf8f6787159e-goog
-> >
+On Thu, Apr 18, 2019 at 06:20:26AM +0000, Avri Altman wrote:
+> > 
+> > The SD Physical Layer Spec says the following: Since the SD Memory Card
+> > shall support at least the two bus modes 1-bit or 4-bit width, then any SD
+> > Card shall set at least bits 0 and 2 (SD_BUS_WIDTH="0101").
+> > 
+> > This change verifies the card has specified a bus width.
+> > 
+> > AMD SDHC Device 7806 can get into a bad state after a card disconnect
+> > where anything transferred via the DATA lines will always result in a
+> > zero filled buffer. Currently the driver will continue without error if
+> > the HC is in this condition. A block device will be created, but reading
+> > from it will result in a zero buffer. This makes it seem like the SD
+> > device has been erased, when in actuality the data is never getting
+> > copied from the DATA lines to the data buffer.
+> > 
+> > SCR is the first command in the SD initialization sequence that uses the
+> > DATA lines. By checking that the response was invalid, we can abort
+> > mounting the card.
+> > 
+> > Acked-by: Avri Altman <avri.altman@wdc.com>
+> > 
+> > Signed-off-by: Raul E Rangel <rrangel@chromium.org>
+> Reviewed-by: Avri Altman <avri.altman@wdc.com>
 > 
-> Why do you need this? We already have these card registers reflected
-> though sysfs files, isn't that sufficient?
-> 
-I was not actually aware that the registers were exposed via sysfs. I
-was debugging a problem where the host controller was returning all
-zeros when reading from the card. I wasn't aware that it was returning
-all zeros until I added tracing. It made it quite easy to diagnose the
-problem by just diffing the two traces.
+> Thanks,
+> Avri
+Thanks for the review. Should I rebase this on master so it applies
+cleanly without the MMC trace patches?
 
-Also if the card fails to mount because the data is invalid, the
-registers would not be exposed via sysfs. So tracing makes gives us an
-easy way to debug these types of failures.
-
-Thanks,
 Raul
-> Kind regards
-> Uffe
