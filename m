@@ -1,47 +1,57 @@
-From: Raul Rangel <rrangel@chromium.org>
-Subject: Re: [PATCH v2] mmc: core: Verify SD bus width
-Date: Wed, 24 Apr 2019 09:56:59 -0600
-Message-ID: <20190424155659.GA193321@google.com>
-References: <20190416185705.256369-1-rrangel@chromium.org>
- <SN6PR04MB4925C1C304B992339621808AFC260@SN6PR04MB4925.namprd04.prod.outlook.com>
+From: Daniel Drake <drake@endlessm.com>
+Subject: Re: sg_dma_page_iter offset & length considerations
+Date: Thu, 25 Apr 2019 15:38:45 +0800
+Message-ID: <CAD8Lp47uacAFKTz8dtpDq3AXuQE9UKoBtw9VqxZdLeL5UoHCXA@mail.gmail.com>
+References: <CAD8Lp47JYdZzbV9F+asNwvSfLF_po_J7ir6R_Vb-Dab21_=Krw@mail.gmail.com>
+ <20190424112153.GB16077@mellanox.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <SN6PR04MB4925C1C304B992339621808AFC260@SN6PR04MB4925.namprd04.prod.outlook.com>
+In-Reply-To: <20190424112153.GB16077@mellanox.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Avri Altman <Avri.Altman@wdc.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "djkurtz@chromium.org" <djkurtz@chromium.org>, "zwisler@chromium.org" <zwisler@chromium.org>, hongjiefang <hongjiefang@asrmicro.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, Kyle Roeschley <kyle.roeschley@ni.com>, Ulf Hansson <ulf.hansson@linaro.org>, Raul Rangel <rrangel@chromium.org>
+To: Jason Gunthorpe <jgg@mellanox.com>
+Cc: "imre.deak@intel.com" <imre.deak@intel.com>, Linux Kernel <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Oleksij Rempel <linux@rempel-privat.de>, Arnd Bergmann <arnd@arndb.de>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Apr 18, 2019 at 06:20:26AM +0000, Avri Altman wrote:
-> > 
-> > The SD Physical Layer Spec says the following: Since the SD Memory Card
-> > shall support at least the two bus modes 1-bit or 4-bit width, then any SD
-> > Card shall set at least bits 0 and 2 (SD_BUS_WIDTH="0101").
-> > 
-> > This change verifies the card has specified a bus width.
-> > 
-> > AMD SDHC Device 7806 can get into a bad state after a card disconnect
-> > where anything transferred via the DATA lines will always result in a
-> > zero filled buffer. Currently the driver will continue without error if
-> > the HC is in this condition. A block device will be created, but reading
-> > from it will result in a zero buffer. This makes it seem like the SD
-> > device has been erased, when in actuality the data is never getting
-> > copied from the DATA lines to the data buffer.
-> > 
-> > SCR is the first command in the SD initialization sequence that uses the
-> > DATA lines. By checking that the response was invalid, we can abort
-> > mounting the card.
-> > 
-> > Acked-by: Avri Altman <avri.altman@wdc.com>
-> > 
-> > Signed-off-by: Raul E Rangel <rrangel@chromium.org>
-> Reviewed-by: Avri Altman <avri.altman@wdc.com>
-> 
-> Thanks,
-> Avri
-Thanks for the review. Should I rebase this on master so it applies
-cleanly without the MMC trace patches?
+On Wed, Apr 24, 2019 at 7:22 PM Jason Gunthorpe <jgg@mellanox.com> wrote:
+> A driver that simply wants a SGL with a capped max size (ie 4k?)
+> should use the dma_set_max_seg_size() API and just never get a SGE
+> with a larger length.
 
-Raul
+That sounds like exactly what we want here. However I tried that
+function and it seems to have no effect. Larger SGEs still appear just
+as readily as before.
+
+I tried to find the code that honours the value set here, but didn't
+find anything. Sure there are some non-x86 archs and some iommu
+drivers that appear to do something with it, but in this case
+(standard Intel x86_64) it seems like nothing observes/honours this
+value.
+
+That did lead me back to the similarly-named mmc_host.max_seg_size
+though, which is passed through to blk_queue_max_segment_size().
+That is documented as "Enables a low level driver to set an upper
+limit on the size of a coalesced segment", but perhaps I don't fully
+grasp what it means by "coalesced segment".
+
+The alcor driver currently has:
+    mmc->max_segs = 64;
+    mmc->max_seg_size = 240 * 512;
+
+which I had interpreted to mean "we can accept a sglist with maximum
+64 entries, and if you sum the size of all entries in that sglist, the
+total must not exceed 240 sectors". i.e. with "coalesced" referring to
+the overall sum; the description does not suggest to me that we can
+influence the size of an individual segment here.
+
+Other mmc drivers may also share a similar interpretation, e.g. see atmel-mci.c:
+    mmc->max_seg_size = mmc->max_blk_size * mmc->max_segs;
+
+but I just experimented with the driver again, and setting
+mmc_host.max_seg_size to 4096 does seem to do what we want here. Now
+we get multi-entry sg lists but each sge is max 4096 bytes in size.
+
+I'll do some more verification and then send a patch along these
+lines. Thanks for your comments!
+
+Daniel
