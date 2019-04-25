@@ -1,108 +1,179 @@
-From: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Subject: Re: [PATCH] mmc: dw_mmc: Disable SDIO interrupts while suspended to
- fix suspend/resume
-Date: Thu, 25 Apr 2019 14:24:56 -0700
-Message-ID: <CAD=FV=UW6d2QHzxx-Vtr+WwC1dkpUfCjxCLnfaP5S2UQxRh1oQ@mail.gmail.com>
-References: <20190410221237.160856-1-dianders@chromium.org> <CANBLGcwmNowj9GSmE3bbo1t1o6EF8q-RiJftfdOQnJB9_8aSKg@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/4] mmc: mmci: avoid fake busy polling
+Date: Thu, 25 Apr 2019 23:32:30 +0200
+Message-ID: <CAPDyKFr_SNVrnZy74bOa_f46yb8CcEozvFu=wdhSz9=Zme=XAw@mail.gmail.com>
+References: <1551802205-32188-1-git-send-email-ludovic.Barre@st.com>
+ <1551802205-32188-2-git-send-email-ludovic.Barre@st.com> <CAPDyKFoZuQ+hshZpj-qjchKf7enW4ChPd=r_QhK2xtuJcSvqxQ@mail.gmail.com>
+ <fd57fd63-093e-dd23-5ca4-6bd4f99ecda9@st.com> <CAPDyKFrmTX6w1ZgwBkEmieCQ5swUQx_O864mHofhNsz3LFC32A@mail.gmail.com>
+ <30eae958-fd66-96a2-52a2-661c0646a302@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CANBLGcwmNowj9GSmE3bbo1t1o6EF8q-RiJftfdOQnJB9_8aSKg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Emil Renner Berthing <emil.renner.berthing-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-wireless <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Ryan Case <ryandcase-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <30eae958-fd66-96a2-52a2-661c0646a302@st.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ludovic BARRE <ludovic.barre@st.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-stm32@st-md-mailman.stormreply.com
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
-
-On Wed, Apr 24, 2019 at 1:19 AM Emil Renner Berthing
-<emil.renner.berthing-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+On Thu, 25 Apr 2019 at 16:09, Ludovic BARRE <ludovic.barre@st.com> wrote:
 >
-> Hi Douglas,
 >
-> Unfortunately this seems to beak resume on my rk3399-gru-kevin. I have
-> a semi-complicated setup with my rootfs as a btrfs on dmcrypt on
-> mmcblk0 which is the dw_mmc, so I'm guessing something goes wrong when
-> waking up the dm_mmc which probably wasn't suspended before this
-> patch. It's not 100% consistent though. Sometimes I see it resume the
-> first time I try suspending, but then 2nd time I suspend it won't come
-> back.
+> On 4/25/19 12:08 PM, Ulf Hansson wrote:
+> > On Thu, 25 Apr 2019 at 11:22, Ludovic BARRE <ludovic.barre@st.com> wrote:
+> >>
+> >> hi Ulf
+> >>
+> >> On 4/23/19 3:39 PM, Ulf Hansson wrote:
+> >>> On Tue, 5 Mar 2019 at 17:10, Ludovic Barre <ludovic.Barre@st.com> wrote:
+> >>>>
+> >>>> From: Ludovic Barre <ludovic.barre@st.com>
+> >>>>
+> >>>> The busy status bit could occurred even if no busy response is
+> >>>> expected (example cmd11). On sdmmc variant, the busy_detect_flag
+> >>>> reflects inverted value of d0 state, it's sampled at the end of a
+> >>>> CMD response and a second time 2 clk cycles after the CMD response.
+> >>>> To avoid a fake busy, the busy status could be checked and polled
+> >>>> only if the command has RSP_BUSY flag.
+> >>>
+> >>> I would appreciate a better explanation of what this patch really changes.
+> >>>
+> >>> The above is giving some background to the behavior of sdmmc variant,
+> >>> but at this point that variant doesn't even have the
+> >>> ->variant->busy_detect flag set.
+> >>>
+> >>
+> >> Yes, I will try to explain more and focus on common behavior.
+> >>
+> >>>>
+> >>>> Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
+> >>>> ---
+> >>>>    drivers/mmc/host/mmci.c | 19 +++++++++++++------
+> >>>>    1 file changed, 13 insertions(+), 6 deletions(-)
+> >>>>
+> >>>> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> >>>> index 387ff14..4901b73 100644
+> >>>> --- a/drivers/mmc/host/mmci.c
+> >>>> +++ b/drivers/mmc/host/mmci.c
+> >>>> @@ -1220,12 +1220,13 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+> >>>>                unsigned int status)
+> >>>>    {
+> >>>>           void __iomem *base = host->base;
+> >>>> -       bool sbc;
+> >>>> +       bool sbc, busy_resp;
+> >>>>
+> >>>>           if (!cmd)
+> >>>>                   return;
+> >>>>
+> >>>>           sbc = (cmd == host->mrq->sbc);
+> >>>> +       busy_resp = !!(cmd->flags & MMC_RSP_BUSY);
+> >>>>
+> >>>>           /*
+> >>>>            * We need to be one of these interrupts to be considered worth
+> >>>> @@ -1239,8 +1240,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+> >>>>           /*
+> >>>>            * ST Micro variant: handle busy detection.
+> >>>>            */
+> >>>> -       if (host->variant->busy_detect) {
+> >>>> -               bool busy_resp = !!(cmd->flags & MMC_RSP_BUSY);
+> >>>> +       if (busy_resp && host->variant->busy_detect) {
+> >>>>
+> >>>>                   /* We are busy with a command, return */
+> >>>>                   if (host->busy_status &&
+> >>>> @@ -1253,7 +1253,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+> >>>>                    * that the special busy status bit is still set before
+> >>>>                    * proceeding.
+> >>>>                    */
+> >>>> -               if (!host->busy_status && busy_resp &&
+> >>>> +               if (!host->busy_status &&
+> >>>>                       !(status & (MCI_CMDCRCFAIL|MCI_CMDTIMEOUT)) &&
+> >>>>                       (readl(base + MMCISTATUS) & host->variant->busy_detect_flag)) {
+> >>>
+> >>> All the changes above makes perfect sense to me, but looks more like a
+> >>> cleanup of the code, rather than actually changing the behavior.
+> >>
+> >> yes, few changing (this just avoid to enter in
+> >> "if (host->variant->busy_detect)") at each time.
+> >> I could move this part in cleanup patch (before this patch)
+> >
+> > Sounds good to me!
+> >
+> >>
+> >>>
+> >>>>
+> >>>> @@ -1508,6 +1508,7 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
+> >>>>    {
+> >>>>           struct mmci_host *host = dev_id;
+> >>>>           u32 status;
+> >>>> +       bool busy_resp;
+> >>>>           int ret = 0;
+> >>>>
+> >>>>           spin_lock(&host->lock);
+> >>>> @@ -1550,9 +1551,15 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
+> >>>>                   }
+> >>>>
+> >>>>                   /*
+> >>>> -                * Don't poll for busy completion in irq context.
+> >>>> +                * Don't poll for:
+> >>>> +                * -busy completion in irq context.
+> >>>> +                * -no busy response expected.
+> >>>>                    */
+> >>>> -               if (host->variant->busy_detect && host->busy_status)
+> >>>> +               busy_resp = host->cmd ?
+> >>>> +                       !!(host->cmd->flags & MMC_RSP_BUSY) : false;
+> >>>
+> >>> This doesn't make sense to me, but I may be missing something.
+> >>>
+> >>> host->busy_status is being updated by mmci_cmd_irq() and only when
+> >>> MMC_RSP_BUSY is set for the command in flight. In other words,
+> >>> checking for MMC_RSP_BUSY here as well is redundant. No?
+> >>
+> >> In mmci_irq the "do while" loops until the status is totally cleared.
+> >>
+> >> Today (for variant with busy_detect option), the status busy_detect_flag
+> >> is excluded only while busy_status period (command with MMC_RSP_BUSY and
+> >> while busy line is low => "busy_status=1")
+> >>
+> >> On SDMMC variant I noticed that busy_detect_flag status could be enabled
+> >> even if the command is not MMC_RSP_BUSY, for example sdmmc variant stay
+> >> in loop while cmd11 voltage switch.
+> >
+> > Right, I see.
+> >
+> >>
+> >> So I wish extend host->variant->busy_detect_flag exclusion for all
+> >> commands which is not a MMC_RSP_BUSY. I suppose that other variants
+> >> could have the same behavior, and else there is no impact, normally.
+> >
+> > I am guessing this is because the variant->busy_dpsm_flag has been set
+> > in the datactrl register, which is needed for mmci_card_busy().
+> >
+> > That said, I am kind of wondering if we ever should need repeat the
+> > while loop if 'status' contains the bit for
+> > host->variant->busy_detect_flag. I mean we have already called
+> > mmci_cmd_irq() to handle it.
+> >
+> > So, couldn't we just always do:
+> >
+> > if (host->variant->busy_detect_flag)
+> >      status &= ~host->variant->busy_detect_flag;
+> >
+> > No?
+>
+> yes that make sense, I launched tests on sdmmc and it's ok.
+> I think, that we could take on this solution.
 
-Thanks for testing!
+Great!
 
-Can you give me more details about your kernel version?  Any local
-patches?  What config are you using?
+>
+> If it's ok for you, I resend a series with all modifications.
 
-I tried booting up my rk3388-gru-kevin on the Chrome OS 4.19 kernel (I
-know, not quite fully upstream, but linuxnext just crashed upon boot
-for me when I tried it).  I have this patch in place and I booted from
-SD card.  I ran a Chrome OS tool which will test 20 cycles of
-suspend/resume (uses the RTC to schedule a wakeup):
+Yes, please do. I haven't reviewed the rest of the series yet, but it
+may be better to do that when the next version is ready.
 
-suspend_stress_test -c20 --suspend_min=15 --suspend_max=20
+In either case, I should have some time to run some tests of the next
+version, if you manage to send it within a couple of days or so.
 
-...and I didn't see failures.
+[...]
 
-...so I'm pretty baffled.  On rk3399-gru-kevin you should have no SDIO
-devices unless you've managed to cram an SDIO card into your micro SD
-slot.  Specifically WiFi is connected via PCIE.
-
-As I wrote Shawn, I'm pretty sure my patch is a effectively a no-op in
-these cases.  "client_sdio_enb" should always be 0 and thus runtime
-suspend and resume should just be:
-
-spin_lock_irqsave(&host->irq_lock, irqflags);
-int_mask = mci_readl(host, INTMASK);
-mci_writel(host, INTMASK, int_mask);
-spin_unlock_irqrestore(&host->irq_lock, irqflags);
-
-...other than changing the timing slightly that shouldn't do anything at all.
-
-
-My first guess is that this patch is your (un)lucky shirt, as in
-"every time I wear my lucky shirt I win at slots in Las Vegas".  Since
-the problem you're seeing doesn't happen every time I'm going to guess
-that you got lucky in that it seemed to go away when you reverted my
-patch.
-
-
-> Let me know if I can do something to help debug this.
-
-Assuming the failure and this patch aren't just correlated by luck...
-
-Logs would be a start.  If you don't have serial console then
-hopefully you've got console-ramoops working?  Then if it's wedged you
-can do the warmest reset you can (Alt-topRowVolUp-R) and hopefully the
-ramoops will give you some logs.
-
-Presumably you could also add some logs to double-check that all my
-assertions are true.  That is:
-
-1. host->client_sdio_enb should always be false in __dw_mci_enable_sdio_irq()
-
-2. In __dw_mci_enable_sdio_irq() confirm that the int_mask we are
-writing is the same as the one we're reading.  AKA the "if (enb) ...
-else ..." makes no change to the value of int_mask.
-
-
-Assuming my assertions are correct then pretty much everything is
-_supposed_ to be a no-op on your system, so you can start gutting
-things one at a time and see when the problem goes away:
-
-a) Delete the call from suspend.  Does it fix it?
-
-b) Delete the call from resume.  Does it fix it?
-
-c) Delete parts of __dw_mci_enable_sdio_irq().  Get rid of the
-mci_wirtel().  Does it fix it?  What about if you get rid of the read
-and the write and just have the spinlock?
-
-===
-
-If I can help with real-time debugging let me know.  I'm in California
-time zone and can be found as dianders in the #linux-rockchip channel
-on freenode.
-
-
-
--Doug
+Kind regards
+Uffe
