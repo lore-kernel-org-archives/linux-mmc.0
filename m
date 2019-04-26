@@ -1,45 +1,41 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 2/2] mmc: sdhci_am654: Fix SLOTTYPE write
-Date: Fri, 26 Apr 2019 09:00:35 +0300
-Message-ID: <c2dcc343-395f-03a2-67a8-d89ab6a6b192@intel.com>
-References: <20190425155727.20010-1-faiz_abbas@ti.com>
- <20190425155727.20010-3-faiz_abbas@ti.com>
+From: Ludovic Barre <ludovic.Barre@st.com>
+Subject: [PATCH V2 0/5] mmc: mmci: add busy detect for stm32 sdmmc variant
+Date: Fri, 26 Apr 2019 09:46:33 +0200
+Message-ID: <1556264798-18540-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190425155727.20010-3-faiz_abbas@ti.com>
-Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Faiz Abbas <faiz_abbas@ti.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
+Cc: srinivas.kandagatla@linaro.org, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com, Ludovic Barre <ludovic.barre@st.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 25/04/19 6:57 PM, Faiz Abbas wrote:
-> In the call to regmap_update_bits() for SLOTTYPE, the mask and value
-> fields are exchanged. Fix this.
+From: Ludovic Barre <ludovic.barre@st.com>
 
-Could you also comment on whether this has any known effect on the driver.
+This patch series adds busy detect for stm32 sdmmc variant.
+Some adaptations are required:
+-Avoid to check and poll busy status when is not expected.
+-Clear busy status bit if busy_detect_flag and busy_detect_mask are
+ different.
+-Add hardware busy timeout with MMCIDATATIMER register.
 
-> 
-> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
-> ---
->  drivers/mmc/host/sdhci_am654.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-> index 866a9082705f..613b151a73c5 100644
-> --- a/drivers/mmc/host/sdhci_am654.c
-> +++ b/drivers/mmc/host/sdhci_am654.c
-> @@ -205,8 +205,8 @@ static int sdhci_am654_init(struct sdhci_host *host)
->  	if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
->  		ctl_cfg_2 = SLOTTYPE_EMBEDDED;
->  
-> -	regmap_update_bits(sdhci_am654->base, CTL_CFG_2, ctl_cfg_2,
-> -			   SLOTTYPE_MASK);
-> +	regmap_update_bits(sdhci_am654->base, CTL_CFG_2, SLOTTYPE_MASK,
-> +			   ctl_cfg_2);
->  
->  	return sdhci_add_host(host);
->  }
-> 
+V2:
+-mmci_cmd_irq cleanup in separate patch.
+-simplify the busy_detect_flag exclude
+-replace sdmmc specific comment in
+"mmc: mmci: avoid fake busy polling in mmci_irq"
+to focus on common behavior
+
+Ludovic Barre (5):
+  mmc: mmci: cleanup mmci_cmd_irq for busy detect feature
+  mmc: mmci: avoid fake busy polling in mmci_irq
+  mmc: mmci: fix clear of busy detect status
+  mmc: mmci: add hardware busy timeout feature
+  mmc: mmci: add busy detect for stm32 sdmmc variant
+
+ drivers/mmc/host/mmci.c | 61 ++++++++++++++++++++++++++++++++++++++-----------
+ drivers/mmc/host/mmci.h |  3 +++
+ 2 files changed, 51 insertions(+), 13 deletions(-)
+
+-- 
+2.7.4
