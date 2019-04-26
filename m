@@ -1,63 +1,50 @@
-From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V2 1/5] mmc: mmci: cleanup mmci_cmd_irq for busy detect feature
-Date: Fri, 26 Apr 2019 09:46:34 +0200
-Message-ID: <1556264798-18540-2-git-send-email-ludovic.Barre@st.com>
-References: <1556264798-18540-1-git-send-email-ludovic.Barre@st.com>
+From: Mathieu Malaterre <malat@debian.org>
+Subject: Re: mmc: core: fix possible use after free of host
+Date: Fri, 26 Apr 2019 10:41:43 +0200
+Message-ID: <CA+7wUswSXNvLbYG4RxquH1rc9KmtCaE5N2iWe9K6SWG8MOnsdw@mail.gmail.com>
+References: <1555489717-28294-1-git-send-email-bianpan2016@163.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1556264798-18540-1-git-send-email-ludovic.Barre@st.com>
+In-Reply-To: <1555489717-28294-1-git-send-email-bianpan2016@163.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
-Cc: srinivas.kandagatla@linaro.org, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com, Ludovic Barre <ludovic.barre@st.com>
+To: Pan Bian <bianpan2016@163.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Martin Blumenstingl <martin.blumenstingl@googlemail.com>, "Gustavo A. R. Silva" <gustavo@embeddedor.com>, Tony Lindgren <tony@atomide.com>, linux-mmc@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, Heiner Kallweit <hkallweit1@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Ludovic Barre <ludovic.barre@st.com>
+On Wed, Apr 17, 2019 at 10:28 AM Pan Bian <bianpan2016@163.com> wrote:
+>
+> In the function mmc_alloc_host, the function put_device is called to
+> release allocated resources when mmc_gpio_alloc fails. Finally, the
+> function pointed by host->class_dev.class->dev_release (i.e.,
+> mmc_host_classdev_release) is used to release resources including the
+> host structure. However, after put_device, host is used and released
+> again. Resulting in a use-after-free bug.
+>
+> Fixes: 1ed21719448("mmc: core: fix error path in mmc_host_alloc")
 
-This patch cleans mmci_cmd_irq function for busy detect feature.
+The original commit 1ed21719448 looks correct to me (see
+mmc_host_classdev_release).
 
-Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
----
- drivers/mmc/host/mmci.c | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
-
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 9e9596a..049f8e3 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -1205,12 +1205,13 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
- 	     unsigned int status)
- {
- 	void __iomem *base = host->base;
--	bool sbc;
-+	bool sbc, busy_resp;
- 
- 	if (!cmd)
- 		return;
- 
- 	sbc = (cmd == host->mrq->sbc);
-+	busy_resp = !!(cmd->flags & MMC_RSP_BUSY);
- 
- 	/*
- 	 * We need to be one of these interrupts to be considered worth
-@@ -1224,8 +1225,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
- 	/*
- 	 * ST Micro variant: handle busy detection.
- 	 */
--	if (host->variant->busy_detect) {
--		bool busy_resp = !!(cmd->flags & MMC_RSP_BUSY);
-+	if (busy_resp && host->variant->busy_detect) {
- 
- 		/* We are busy with a command, return */
- 		if (host->busy_status &&
-@@ -1238,7 +1238,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
- 		 * that the special busy status bit is still set before
- 		 * proceeding.
- 		 */
--		if (!host->busy_status && busy_resp &&
-+		if (!host->busy_status &&
- 		    !(status & (MCI_CMDCRCFAIL|MCI_CMDTIMEOUT)) &&
- 		    (readl(base + MMCISTATUS) & host->variant->busy_detect_flag)) {
- 
--- 
-2.7.4
+> Signed-off-by: Pan Bian <bianpan2016@163.com>
+> ---
+>  drivers/mmc/core/host.c | 2 --
+>  1 file changed, 2 deletions(-)
+>
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index 3a4402a..f8ac567 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -429,8 +429,6 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+>
+>         if (mmc_gpio_alloc(host)) {
+>                 put_device(&host->class_dev);
+> -               ida_simple_remove(&mmc_host_ida, host->index);
+> -               kfree(host);
+>                 return NULL;
+>         }
+>
+> --
+> 2.7.4
+>
+>
