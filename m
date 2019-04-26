@@ -1,53 +1,58 @@
 From: Ludovic Barre <ludovic.Barre@st.com>
-Subject: [PATCH V2 3/5] mmc: mmci: fix clear of busy detect status
-Date: Fri, 26 Apr 2019 09:46:36 +0200
-Message-ID: <1556264798-18540-4-git-send-email-ludovic.Barre@st.com>
+Subject: [PATCH V2 5/5] mmc: mmci: add busy detect for stm32 sdmmc variant
+Date: Fri, 26 Apr 2019 09:46:38 +0200
+Message-ID: <1556264798-18540-6-git-send-email-ludovic.Barre@st.com>
 References: <1556264798-18540-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1556264798-18540-1-git-send-email-ludovic.Barre@st.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
-Cc: devicetree@vger.kernel.org, Alexandre Torgue <alexandre.torgue@st.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, srinivas.kandagatla@linaro.org, Ludovic Barre <ludovic.barre@st.com>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, linux-stm32@st-md-mailman.stormreply.com, linux-arm-kernel@lists.infradead.org
+Cc: srinivas.kandagatla@linaro.org, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com, Ludovic Barre <ludovic.barre@st.com>
 List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Barre <ludovic.barre@st.com>
 
-The "busy_detect_flag" is used to read/clear busy value of
-mmci status. The "busy_detect_mask" is used to manage busy irq of
-mmci mask.
-For sdmmc variant, the 2 properties have not the same offset.
-To clear the busyd0 status bit, we must add busy detect flag,
-the mmci mask is not enough.
+This patch enables busy detection for stm32 sdmmc which requires
+to set data timer to define the busy timeout.
+sdmmc has 2 flags:
+-busyd0: inverted value of d0 line.
+-busyd0end which indicates only end of busy following a cmd response.
+Only one interrupt on busyd0end.
 
 Signed-off-by: Ludovic Barre <ludovic.barre@st.com>
 ---
- drivers/mmc/host/mmci.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ drivers/mmc/host/mmci.c | 4 ++++
+ drivers/mmc/host/mmci.h | 1 +
+ 2 files changed, 5 insertions(+)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index a040f54..3cd52e8 100644
+index 8dcb980..02a3cdd 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -1517,7 +1517,8 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
- 		 * to make sure that both start and end interrupts are always
- 		 * cleared one after the other.
- 		 */
--		status &= readl(host->base + MMCIMASK0);
-+		status &= readl(host->base + MMCIMASK0) |
-+			host->variant->busy_detect_flag;
- 		if (host->variant->busy_detect)
- 			writel(status & ~host->variant->busy_detect_mask,
- 			       host->base + MMCICLEAR);
+@@ -264,6 +264,10 @@ static struct variant_data variant_stm32_sdmmc = {
+ 	.datalength_bits	= 25,
+ 	.datactrl_blocksz	= 14,
+ 	.stm32_idmabsize_mask	= GENMASK(12, 5),
++	.busy_detect		= true,
++	.busy_timeout		= true,
++	.busy_detect_flag	= MCI_STM32_BUSYD0,
++	.busy_detect_mask	= MCI_STM32_BUSYD0ENDMASK,
+ 	.init			= sdmmc_variant_init,
+ };
+ 
+diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+index b43a958..ac19de8 100644
+--- a/drivers/mmc/host/mmci.h
++++ b/drivers/mmc/host/mmci.h
+@@ -167,6 +167,7 @@
+ #define MCI_ST_CARDBUSY		(1 << 24)
+ /* Extended status bits for the STM32 variants */
+ #define MCI_STM32_BUSYD0	BIT(20)
++#define MCI_STM32_BUSYD0END	BIT(21)
+ 
+ #define MMCICLEAR		0x038
+ #define MCI_CMDCRCFAILCLR	(1 << 0)
 -- 
 2.7.4
