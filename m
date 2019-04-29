@@ -1,83 +1,58 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 0/7] mmc: meson-gx: clean up and tuning update
-Date: Mon, 29 Apr 2019 12:44:50 +0200
-Message-ID: <CAPDyKFoQyPKERckAdU+kkw3go=161PWc+5GAkz7y=xWMGbq+SQ@mail.gmail.com>
-References: <20190423090235.17244-1-jbrunet@baylibre.com>
+Subject: Re: [PATCH next 17/25] mmc: omap_hsmmc: Use dev_get_drvdata()
+Date: Mon, 29 Apr 2019 12:45:13 +0200
+Message-ID: <CAPDyKFoQ07RF00aKc+G8OTtvwP+ret8XFRa6d5kEQKbDbzwEHQ@mail.gmail.com>
+References: <20190423075020.173734-1-wangkefeng.wang@huawei.com> <20190423075020.173734-18-wangkefeng.wang@huawei.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190423090235.17244-1-jbrunet@baylibre.com>
+In-Reply-To: <20190423075020.173734-18-wangkefeng.wang@huawei.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jerome Brunet <jbrunet@baylibre.com>
-Cc: Kevin Hilman <khilman@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Kefeng Wang <wangkefeng.wang@huawei.com>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 23 Apr 2019 at 11:02, Jerome Brunet <jbrunet@baylibre.com> wrote:
+On Tue, 23 Apr 2019 at 09:40, Kefeng Wang <wangkefeng.wang@huawei.com> wrote:
 >
-> The purpose of this series is too improve reliability of the amlogic mmc
-> driver on new (g12a) and old ones (axg, gxl, gxbb, etc...)
+> Using dev_get_drvdata directly.
 >
-> * The 3 first patches are just harmless clean ups.
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: Linus Walleij <linus.walleij@linaro.org>
+> Cc: linux-mmc@vger.kernel.org
+> Cc: linux-omap@vger.kernel.org
+> Signed-off-by: Kefeng Wang <wangkefeng.wang@huawei.com>
 
-Applied these first three, postponing the the rest until Martin are
-happy with all of them. Thanks!
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
 
-> * Patch 4 makes sure HS400 can't be enabled, we still have not been able
->   to crack this modes.
-> * Patch 5 removes some clock glitches when switching to DDR modes
-> * Patch 6 and 7 changes the tuning method from Rx phase to signal
->   resampling. It could have been done in a single patch but the unified
->   diff was extremely ugly. The change has been split in two patches to
->   ease review.
+> ---
+>  drivers/mmc/host/omap_hsmmc.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 >
-> The last tuning update that went through was meant to improve the axg
-> support. Since then, it was reported to break some other boards, like the
-> s912 vim2.
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 29a1ddaa7466..952fa4063ff8 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -2077,7 +2077,7 @@ static int omap_hsmmc_runtime_suspend(struct device *dev)
+>         unsigned long flags;
+>         int ret = 0;
 >
-> Also with the current tuning method, it was impossible to find phase
-> settings which would work on all the SoCs, including the new ones.
+> -       host = platform_get_drvdata(to_platform_device(dev));
+> +       host = dev_get_drvdata(dev);
+>         omap_hsmmc_context_save(host);
+>         dev_dbg(dev, "disabled\n");
 >
-> After redoing all the tests from scratch, it appeared that Rx phase made
-> (strangely) almost no difference, especially on g12a and axg. However, it
-> showed that it is important to have a phase shift between the Core and Tx
-> clock, 180 works best.
+> @@ -2118,7 +2118,7 @@ static int omap_hsmmc_runtime_resume(struct device *dev)
+>         struct omap_hsmmc_host *host;
+>         unsigned long flags;
 >
-> I discussed the test results with Amlogic. They suggested to use 180/0 or
-> 0/180 for the Core and Tx phase. For tuning, they suggested to use
-> signal resampling.
->
-> So far, so good ... here the platform and modes tested:
->
-> NanoPi-K2 (S905): SD UHS SDR50/DDR50, SDIO HS
-> Odroid-C2 (S905): SD UHS SDR50/DDR50, eMMC DDR52/HS200 (16GB module)
-> Khadas Vim (S905X): SD HS, SDIO HS, eMMC HS200
-> Libretech CC (S905X): SD HS, eMMC HS200
-> Khadas Vim2 (S912): SD HS, SDIO HS, eMMC HS200
-> S400 (A113D): SDIO UHS SDR104, eMMC DDR52/HS200
-> U200 (S905D2): SD HS, eMMC DDR52/HS200
-> SEI510 (S905X2): SD HS, eMMC DDR52/HS200
->
-> Changes since v1 [0]:
-> * Add missing writel in patch 5 (error when switching width)
-> * Change patch 3 commit description
->
-> [0]: https://lkml.kernel.org/r/20190417204355.469-1-jbrunet@baylibre.com
->
-> Jerome Brunet (7):
->   mmc: meson-gx: remove open coded read with timeout
->   mmc: meson-gx: ack only raised irq
->   mmc: meson-gx: correct irq flag
->   mmc: meson-gx: disable HS400
->   mmc: meson-gx: avoid clock glitch when switching to DDR modes
->   mmc: meson-gx: remove Rx phase tuning
->   mmc: meson-gx: add signal resampling tuning
->
->  drivers/mmc/host/meson-gx-mmc.c | 419 +++++++++-----------------------
->  1 file changed, 114 insertions(+), 305 deletions(-)
+> -       host = platform_get_drvdata(to_platform_device(dev));
+> +       host = dev_get_drvdata(dev);
+>         omap_hsmmc_context_restore(host);
+>         dev_dbg(dev, "enabled\n");
 >
 > --
 > 2.20.1
