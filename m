@@ -1,44 +1,51 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/2] mmc: sdhci-milbeaut: add Milbeaut SD controller driver
-Date: Mon, 29 Apr 2019 12:31:57 +0200
-Message-ID: <CAPDyKFrBJeBNOPh9H3Yn-6-um2B-9Gt6_pW8Qh0ZGQB26-tq+Q@mail.gmail.com>
-References: <1556244405-15863-1-git-send-email-orito.takao@socionext.com>
+Subject: Re: [PATCH] mmc: core: Fix warning and undefined behavior in mmc
+ voltage handling
+Date: Mon, 29 Apr 2019 12:44:38 +0200
+Message-ID: <CAPDyKFrORt9P1f2NmZRQkwY353K2jicRueWxY-aKVO9oTG_qOQ@mail.gmail.com>
+References: <20190416075845.GA15615@amd>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1556244405-15863-1-git-send-email-orito.takao@socionext.com>
+In-Reply-To: <20190416075845.GA15615@amd>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Takao Orito <orito.takao@socionext.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Masami Hiramatsu <masami.hiramatsu@linaro.org>, Jaswinder Singh <jaswinder.singh@linaro.org>, sugaya.taichi@socionext.com, kasai.kazuhiro@socionext.com, kanematsu.shinji@socionext.com
+To: Pavel Machek <pavel@ucw.cz>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-[...]
+On Tue, 16 Apr 2019 at 09:58, Pavel Machek <pavel@ucw.cz> wrote:
+>
+>
+> !voltage_ranges is tested for too late, allowing warning and undefined
+> behavior. Fix that.
+>
+> Signed-off-by: Pavel Machek <pavel@ucw.cz>
 
-> +
-> +static void sdhci_milbeaut_power_off(struct sdhci_host *host)
-> +{
-> +       struct f_sdhost_priv *priv = sdhci_priv(host);
-> +
-> +       gpiod_set_value(priv->power_gpio, 0);
-> +       udelay(1000);
-> +}
-> +
-> +static void sdhci_milbeaut_power_on(struct sdhci_host *host)
-> +{
-> +       struct f_sdhost_priv *priv = sdhci_priv(host);
-> +
-> +       gpiod_set_value(priv->power_gpio, 1);
-> +}
-> +
-
-As stated for the DT doc patch, please use a fixed GPIO regulator
-instead. In this way you will also get a the OCR mask based upon the
-GPIO regulator, which is parsed out by the mmc core when sdhci calls
-mmc_regulator_get_supply().
-
-Otherwise, this looks good to me.
-
-[...]
+Applied for next, thanks!
 
 Kind regards
 Uffe
+
+
+>
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index 3a4402a..b3fa9c9 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -363,11 +363,11 @@ int mmc_of_parse_voltage(struct device_node *np, u32 *mask)
+>         int num_ranges, i;
+>
+>         voltage_ranges = of_get_property(np, "voltage-ranges", &num_ranges);
+> -       num_ranges = num_ranges / sizeof(*voltage_ranges) / 2;
+>         if (!voltage_ranges) {
+>                 pr_debug("%pOF: voltage-ranges unspecified\n", np);
+>                 return 0;
+>         }
+> +       num_ranges = num_ranges / sizeof(*voltage_ranges) / 2;
+>         if (!num_ranges) {
+>                 pr_err("%pOF: voltage-ranges empty\n", np);
+>                 return -EINVAL;
+>
+> --
+> (english) http://www.livejournal.com/~pavelmachek
+> (cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
