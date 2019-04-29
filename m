@@ -1,57 +1,66 @@
-From: Jerome Brunet <jbrunet@baylibre.com>
-Subject: Re: [PATCH v2 4/7] mmc: meson-gx: disable HS400
-Date: Mon, 29 Apr 2019 10:29:17 +0200
-Message-ID: <17c5978419c8778eb1f2c2a6e2aee66e864ac53d.camel@baylibre.com>
-References: <20190423090235.17244-1-jbrunet@baylibre.com>
-         <20190423090235.17244-5-jbrunet@baylibre.com>
-         <CAFBinCCf8fkBPR5aoPMensjhYKpan_UzG+HCEB5yNaYs+mB8OA@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2 0/4] Add trace events for SD registers.
+Date: Mon, 29 Apr 2019 11:57:02 +0200
+Message-ID: <CAPDyKFqerMeQey0wJW3Ctohh77CJs6-PxSaR=T6ive_Rx-oMMA@mail.gmail.com>
+References: <20190416183257.247902-1-rrangel@chromium.org> <CAPDyKFqYNMhDKy94zV8Bk80OUiS9JNFf2EmkbhJ0W_N=5=bZJQ@mail.gmail.com>
+ <20190424153115.GA186956@google.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAFBinCCf8fkBPR5aoPMensjhYKpan_UzG+HCEB5yNaYs+mB8OA@mail.gmail.com>
+In-Reply-To: <20190424153115.GA186956@google.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>, linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Raul Rangel <rrangel@chromium.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-trace-devel@vger.kernel.org, Daniel Kurtz <djkurtz@chromium.org>, zwisler@chromium.org, Steven Rostedt <rostedt@goodmis.org>, hongjiefang <hongjiefang@asrmicro.com>, Jennifer Dahm <jennifer.dahm@ni.com>, Ingo Molnar <mingo@redhat.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, Kyle Roeschley <kyle.roeschley@ni.com>, Avri Altman <avri.altman@wdc.com>, Simon Horman <horms+renesas@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
 
-On Sat, 2019-04-27 at 22:02 +0200, Martin Blumenstingl wrote:
-> Hi Jerome,
-> 
-> On Tue, Apr 23, 2019 at 11:03 AM Jerome Brunet <jbrunet@baylibre.com> wrote:
-> > At the moment, all our attempts to enable HS400 on Amlogic chipsets have
-> > been unsuccessful or unreliable. Until we can figure out how to enable this
-> > mode safely and reliably, let's force it off.
-> last year I have seen issues with HS400 on my Khadas VIM2: [0]
-> have you tested all other patches from this series and HS400 is still
-> not working for you?
+On Wed, 24 Apr 2019 at 17:31, Raul Rangel <rrangel@chromium.org> wrote:
+>
+> On Tue, Apr 23, 2019 at 08:29:15AM +0200, Ulf Hansson wrote:
+> > On Tue, 16 Apr 2019 at 20:33, Raul E Rangel <rrangel@chromium.org> wrote:
+> > >
+> > > I am not able to make a single event class for all these registers. They
+> > > all have different struct sizes and different printf formats.
+> > >
+> > > Thanks for the reviews!
+> > >
+> > > Changes in v2:
+> > > - Made trace_sd_scr print out flags.
+> > > - Add BUILD_BUG_ON to make sure tracing stays in sync with structs.
+> > > - memcpy using sizeof(__entry->raw)
+> > >
+> > > Raul E Rangel (4):
+> > >   mmc: core: Add trace event for SD SCR response
+> > >   mmc: core: Add trace event for SD SSR response
+> > >   mmc: core: Add trace event for SD OCR response
+> > >   mmc: core: Add trace event for CSD response
+> > >
+> > >  drivers/mmc/core/mmc.c     |   4 +
+> > >  drivers/mmc/core/sd.c      |  10 ++
+> > >  drivers/mmc/core/sd_ops.c  |   6 ++
+> > >  include/trace/events/mmc.h | 204 +++++++++++++++++++++++++++++++++++++
+> > >  4 files changed, 224 insertions(+)
+> > >
+> > > --
+> > > 2.21.0.392.gf8f6787159e-goog
+> > >
+> >
+> > Why do you need this? We already have these card registers reflected
+> > though sysfs files, isn't that sufficient?
+> >
+> I was not actually aware that the registers were exposed via sysfs. I
+> was debugging a problem where the host controller was returning all
+> zeros when reading from the card. I wasn't aware that it was returning
+> all zeros until I added tracing. It made it quite easy to diagnose the
+> problem by just diffing the two traces.
 
-Because HS400 was never really stable to begin with.
-It was a mistake to enable it on the VIM2
+This sounds like a quite an unusual problem, and I don't think having
+the buffers printed via tracing is worth it.
 
-> 
-> I'm curious because this patch is early in the series and all the
-> tuning fixes and improvements are after this patch.
+Moreover, we already have tracing per command/request (but don't print
+the buffers), that should cover most of error cases during init, don't
+you think?
 
-There are several reasons why this new tuning won't solve the HS400 problem:
-- Signal resampling tuning granularity gets worse when rate rises. The resampling 
-is done using the input frequency. We can basically resample up to the value of 
-internal divider.
+[...]
 
-In HS200 - Fin is 1GHz, Fout is 200MHz (1/5) so the resample range is [0, 4]
-In HS400 - Fin should be fdiv5 (400MHZ) and in such case, no resampling is
-           possible (internal div = 1)
-           Even if we keep 1GHz, then out is 333MHz max giving a range of [0, 2]
-           that's not enough to tune
-
-Going further, tuning the Rx path does not make much sense in HS400 since we
-should be using the data strobe signal to account for the round trip delay of
-the clock and correctly sample Rx. AFAICT, If there is a tuning to be done for
-HS400, it is most likely linked to the data strobe.
-
-> 
-> 
-> Martin
-> 
-> 
-> [0] http://lists.infradead.org/pipermail/linux-amlogic/2018-January/006251.html
+Kind regards
+Uffe
