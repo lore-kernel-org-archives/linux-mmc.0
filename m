@@ -1,123 +1,88 @@
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Subject: Re: [PATCH] driver core: platform: Fix the usage of platform device name(pdev->name)
-Date: Mon, 29 Apr 2019 17:07:56 +0200
-Message-ID: <CAJKOXPeCPWPdE1d3EYr4bD1hLMRDXohaz-7yrmk_R-V6ZD6rhQ@mail.gmail.com>
-References: <1555978589-4998-1-git-send-email-vnkgutta@codeaurora.org>
+From: Raul E Rangel <rrangel@chromium.org>
+Subject: [PATCH v3] mmc: core: Verify SD bus width
+Date: Mon, 29 Apr 2019 11:32:39 -0600
+Message-ID: <20190429173239.51305-1-rrangel@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1555978589-4998-1-git-send-email-vnkgutta@codeaurora.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Venkata Narendra Kumar Gutta <vnkgutta@codeaurora.org>
-Cc: gregkh@linuxfoundation.org, davem@davemloft.net, alexander.deucher@amd.com, tsoni@codeaurora.org, psodagud@codeaurora.org, jshriram@codeaurora.org, linux-kernel@vger.kernel.org, Russell King <linux@armlinux.org.uk>, Liviu Dudau <liviu.dudau@arm.com>, Sudeep Holla <sudeep.holla@arm.com>, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: linux-mmc@vger.kernel.org
+Cc: djkurtz@chromium.org, zwisler@chromium.org, Raul E Rangel <rrangel@chromium.org>, Avri Altman <avri.altman@wdc.com>, hongjiefang <hongjiefang@asrmicro.com>, Jennifer Dahm <jennifer.dahm@ni.com>, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>, Kyle Roeschley <kyle.roeschley@ni.com>, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 23 Apr 2019 at 05:36, Venkata Narendra Kumar Gutta
-<vnkgutta@codeaurora.org> wrote:
->
-> Platform core is using pdev->name as the platform device name to do
-> the binding of the devices with the drivers. But, when the platform
-> driver overrides the platform device name with dev_set_name(),
-> the pdev->name is pointing to a location which is freed and becomes
+The SD Physical Layer Spec says the following: Since the SD Memory Card
+shall support at least the two bus modes 1-bit or 4-bit width, then any SD
+Card shall set at least bits 0 and 2 (SD_BUS_WIDTH="0101").
 
-If pdev->name is invalid then it should be removed/fixed. Why leaving
-it pointing to wrong place and changing the users to something else?
-This looks like either duct-tape for real problem.
+This change verifies the card has specified a bus width.
 
-> an invalid parameter to do the binding match.
->
-> use-after-free instance:
->
-> [   33.325013] BUG: KASAN: use-after-free in strcmp+0x8c/0xb0
-> [   33.330646] Read of size 1 at addr ffffffc10beae600 by task modprobe
-> [   33.339068] CPU: 5 PID: 518 Comm: modprobe Tainted:
->                         G S      W  O      4.19.30+ #3
-> [   33.346835] Hardware name: MTP (DT)
-> [   33.350419] Call trace:
-> [   33.352941]  dump_backtrace+0x0/0x3b8
-> [   33.356713]  show_stack+0x24/0x30
-> [   33.360119]  dump_stack+0x160/0x1d8
-> [   33.363709]  print_address_description+0x84/0x2e0
-> [   33.368549]  kasan_report+0x26c/0x2d0
-> [   33.372322]  __asan_report_load1_noabort+0x2c/0x38
-> [   33.377248]  strcmp+0x8c/0xb0
-> [   33.380306]  platform_match+0x70/0x1f8
-> [   33.384168]  __driver_attach+0x78/0x3a0
-> [   33.388111]  bus_for_each_dev+0x13c/0x1b8
-> [   33.392237]  driver_attach+0x4c/0x58
-> [   33.395910]  bus_add_driver+0x350/0x560
-> [   33.399854]  driver_register+0x23c/0x328
-> [   33.403886]  __platform_driver_register+0xd0/0xe0
->
-> So, use dev_name(&pdev->dev), which fetches the platform device name from
-> the kobject(dev->kobj->name) of the device instead of the pdev->name.
->
-> Signed-off-by: Venkata Narendra Kumar Gutta <vnkgutta@codeaurora.org>
-> ---
->  drivers/base/platform.c | 8 ++++----
->  1 file changed, 4 insertions(+), 4 deletions(-)
-> diff --git a/drivers/base/platform.c b/drivers/base/platform.c
-> index dab0a5a..0e23aa2 100644
-> --- a/drivers/base/platform.c
-> +++ b/drivers/base/platform.c
-> @@ -888,7 +888,7 @@ static ssize_t modalias_show(struct device *dev, struct device_attribute *a,
->         if (len != -ENODEV)
->                 return len;
->
-> -       len = snprintf(buf, PAGE_SIZE, "platform:%s\n", pdev->name);
-> +       len = snprintf(buf, PAGE_SIZE, "platform:%s\n", dev_name(&pdev->dev));
->
->         return (len >= PAGE_SIZE) ? (PAGE_SIZE - 1) : len;
->  }
-> @@ -964,7 +964,7 @@ static int platform_uevent(struct device *dev, struct kobj_uevent_env *env)
->                 return rc;
->
->         add_uevent_var(env, "MODALIAS=%s%s", PLATFORM_MODULE_PREFIX,
-> -                       pdev->name);
-> +                       dev_name(&pdev->dev));
+AMD SDHC Device 7806 can get into a bad state after a card disconnect
+where anything transferred via the DATA lines will always result in a
+zero filled buffer. Currently the driver will continue without error if
+the HC is in this condition. A block device will be created, but reading
+from it will result in a zero buffer. This makes it seem like the SD
+device has been erased, when in actuality the data is never getting
+copied from the DATA lines to the data buffer.
 
-This is wrong fix and it causes ARM Vexpress board fail to boot under
-QEMU (but probably in real world as well). The problem is in not
-mached drivers. For example the pdev->name is "vexpress-syscfg" and
-dev_name(&pdev->dev) is "vexpress-syscfg.6.auto". The effect - none of
-AMBA devices are registered, including missing MMC device (mmci.c,
-arm,pl180).
+SCR is the first command in the SD initialization sequence that uses the
+DATA lines. By checking that the response was invalid, we can abort
+mounting the card.
 
-One can see the error of missing root device:
-[   13.458982] VFS: Cannot open root device "mmcblk0" or
-unknown-block(0,0): error -6
+Acked-by: Avri Altman <avri.altman@wdc.com>
+Reviewed-by: Avri Altman <avri.altman@wdc.com>
 
-... also before there is a warning like:
-[    0.285029] ------------[ cut here ]------------
-[    0.285507] WARNING: CPU: 0 PID: 1 at
-/home/krzk/dev/yocto-proceq/build/workspace/sources/linux-mainline-next/drivers/bus/vexpress-config.c:183
-vexpress_config_init+0x90/0xe0
-[    0.285936] Modules linked in:
-[    0.286251] CPU: 0 PID: 1 Comm: swapper Tainted: G        W
-5.1.0-rc6-next-20190429-g0593ae1f5df5 #27
-[    0.286507] Hardware name: ARM-Versatile Express
-[    0.286977] [<8010e05c>] (unwind_backtrace) from [<8010b76c>]
-(show_stack+0x10/0x14)
-[    0.287219] [<8010b76c>] (show_stack) from [<8011ac64>] (__warn+0xf8/0x110)
-[    0.287400] [<8011ac64>] (__warn) from [<8011ad94>]
-(warn_slowpath_null+0x40/0x48)
-[    0.287579] [<8011ad94>] (warn_slowpath_null) from [<809151bc>]
-(vexpress_config_init+0x90/0xe0)
-[    0.287811] [<809151bc>] (vexpress_config_init) from [<80102710>]
-(do_one_initcall+0x54/0x1b4)
-[    0.288014] [<80102710>] (do_one_initcall) from [<80900e84>]
-(kernel_init_freeable+0x12c/0x1c8)
-[    0.288214] [<80900e84>] (kernel_init_freeable) from [<80634048>]
-(kernel_init+0x8/0x110)
-[    0.288388] [<80634048>] (kernel_init) from [<801010e8>]
-(ret_from_fork+0x14/0x2c)
-[    0.288597] Exception stack(0x86835fb0 to 0x86835ff8)
-[    0.288882] 5fa0:                                     00000000
-00000000 00000000 00000000
-[    0.289193] 5fc0: 00000000 00000000 00000000 00000000 00000000
-00000000 00000000 00000000
-[    0.289479] 5fe0: 00000000 00000000 00000000 00000000 00000013 00000000
-[    0.289776] ---[ end trace 3f0995a2bae83983 ]---
+Signed-off-by: Raul E Rangel <rrangel@chromium.org>
+---
+Here is the testing I did:
 
-Best regards,
-Krzysztof
+Good Trace: https://paste.fedoraproject.org/paste/oVEI5b0IzHD23Yo7CDZgEg
+[   30.103686] mmc0: new high speed SDHC card at address 0001
+[   30.105262] mmcblk0: mmc0:0001 00000 7.41 GiB
+[   30.108258]  mmcblk0: p1
+[   31.947250] mmc0: card 0001 removed
+
+Bad Trace (before patch): https://paste.fedoraproject.org/paste/jBWfpFBM8gdEmGOzxij~hw
+
+Bad Trace (after patch): https://paste.fedoraproject.org/paste/8gB8MLYOKEUZEgHXmQ0W1Q
+[   33.810760] mmc0: invalid bus width
+[   33.810782] mmc0: error -22 whilst initialising SD card
+[   34.068818] mmc0: invalid bus width
+[   34.068839] mmc0: error -22 whilst initialising SD card
+[   34.329521] mmc0: invalid bus width
+[   34.329543] mmc0: error -22 whilst initialising SD card
+[   34.592061] mmc0: invalid bus width
+[   34.592084] mmc0: error -22 whilst initialising SD card
+
+In the traces you can see sd_scr is different
+
+Changes in v3:
+- Rebased on mmc/next
+
+Changes in v2:
+- Made the bus width check stricter. It now requires the value to match
+  the spec.
+
+ drivers/mmc/core/sd.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index 265e1aeeb9d8..d3d32f9a2cb1 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -221,6 +221,14 @@ static int mmc_decode_scr(struct mmc_card *card)
+ 
+ 	if (scr->sda_spec3)
+ 		scr->cmds = UNSTUFF_BITS(resp, 32, 2);
++
++	/* SD Spec says: any SD Card shall set at least bits 0 and 2 */
++	if (!(scr->bus_widths & SD_SCR_BUS_WIDTH_1) ||
++	    !(scr->bus_widths & SD_SCR_BUS_WIDTH_4)) {
++		pr_err("%s: invalid bus width\n", mmc_hostname(card->host));
++		return -EINVAL;
++	}
++
+ 	return 0;
+ }
+ 
+-- 
+2.21.0.593.g511ec345e18-goog
