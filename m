@@ -1,28 +1,57 @@
-From: Yinbo Zhu <yinbo.zhu@nxp.com>
-Subject: [PATCH v1] mmc: dt: add DT bindings for ls1028a eSDHC host controller
-Date: Tue, 30 Apr 2019 05:15:47 +0000
-Message-ID: <20190430051723.31345-1-yinbo.zhu@nxp.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V2 0/5] mmc: mmci: add busy detect for stm32 sdmmc variant
+Date: Tue, 30 Apr 2019 13:13:57 +0200
+Message-ID: <CAPDyKFqbn=UcbwoH_z+yjrjvHQZaMtmsD=n0yrBV7DAK5VRJEQ@mail.gmail.com>
+References: <1556264798-18540-1-git-send-email-ludovic.Barre@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Language: en-US
+In-Reply-To: <1556264798-18540-1-git-send-email-ludovic.Barre@st.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Leo Li <leoyang.li@nxp.com>
-Cc: Yinbo Zhu <yinbo.zhu@nxp.com>, Xiaobo Xie <xiaobo.xie@nxp.com>, "Y.b. Lu" <yangbo.lu@nxp.com>, Jiafei Pan <jiafei.pan@nxp.com>
+To: Ludovic Barre <ludovic.Barre@st.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-stm32@st-md-mailman.stormreply.com
 List-Id: linux-mmc@vger.kernel.org
 
-RnJvbTogWWluYm8gWmh1IDx5aW5iby56aHVAbnhwLmNvbT4NCg0KQWRkICJmc2wsbHMxMDI4YS1l
-c2RoYyIgYmluZGluZ3MgZm9yIGxzMTAyOGEgZVNESEMgaG9zdCBjb250cm9sbGVyDQoNClNpZ25l
-ZC1vZmYtYnk6IFlpbmJvIFpodSA8eWluYm8uemh1QG54cC5jb20+DQotLS0NCiAuLi4vZGV2aWNl
-dHJlZS9iaW5kaW5ncy9tbWMvZnNsLWVzZGhjLnR4dCAgICAgICAgICB8ICAgIDEgKw0KIDEgZmls
-ZXMgY2hhbmdlZCwgMSBpbnNlcnRpb25zKCspLCAwIGRlbGV0aW9ucygtKQ0KDQpkaWZmIC0tZ2l0
-IGEvRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9mc2wtZXNkaGMudHh0IGIv
-RG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9mc2wtZXNkaGMudHh0DQppbmRl
-eCA5OWM1Y2Y4Li5hNzI1MGI5IDEwMDY0NA0KLS0tIGEvRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVl
-L2JpbmRpbmdzL21tYy9mc2wtZXNkaGMudHh0DQorKysgYi9Eb2N1bWVudGF0aW9uL2RldmljZXRy
-ZWUvYmluZGluZ3MvbW1jL2ZzbC1lc2RoYy50eHQNCkBAIC0yMSw2ICsyMSw3IEBAIFJlcXVpcmVk
-IHByb3BlcnRpZXM6DQogCSJmc2wsbHMxMDQzYS1lc2RoYyINCiAJImZzbCxsczEwNDZhLWVzZGhj
-Ig0KIAkiZnNsLGxzMjA4MGEtZXNkaGMiDQorCSJmc2wsbHMxMDI4YS1lc2RoYyINCiAgIC0gY2xv
-Y2stZnJlcXVlbmN5IDogc3BlY2lmaWVzIGVTREhDIGJhc2UgY2xvY2sgZnJlcXVlbmN5Lg0KIA0K
-IE9wdGlvbmFsIHByb3BlcnRpZXM6DQotLSANCjEuNy4xDQoNCg==
+On Fri, 26 Apr 2019 at 09:46, Ludovic Barre <ludovic.Barre@st.com> wrote:
+>
+> From: Ludovic Barre <ludovic.barre@st.com>
+>
+> This patch series adds busy detect for stm32 sdmmc variant.
+> Some adaptations are required:
+> -Avoid to check and poll busy status when is not expected.
+> -Clear busy status bit if busy_detect_flag and busy_detect_mask are
+>  different.
+> -Add hardware busy timeout with MMCIDATATIMER register.
+>
+> V2:
+> -mmci_cmd_irq cleanup in separate patch.
+> -simplify the busy_detect_flag exclude
+> -replace sdmmc specific comment in
+> "mmc: mmci: avoid fake busy polling in mmci_irq"
+> to focus on common behavior
+>
+> Ludovic Barre (5):
+>   mmc: mmci: cleanup mmci_cmd_irq for busy detect feature
+>   mmc: mmci: avoid fake busy polling in mmci_irq
+>   mmc: mmci: fix clear of busy detect status
+>   mmc: mmci: add hardware busy timeout feature
+>   mmc: mmci: add busy detect for stm32 sdmmc variant
+>
+>  drivers/mmc/host/mmci.c | 61 ++++++++++++++++++++++++++++++++++++++-----------
+>  drivers/mmc/host/mmci.h |  3 +++
+>  2 files changed, 51 insertions(+), 13 deletions(-)
+>
+> --
+> 2.7.4
+>
+
+Ludovic, just wanted to let you know that I am reviewing and testing
+this series.
+
+However, while running some tests on Ux500 for validating the busy
+detection code, even without your series applied, I encounter some odd
+behaviors. I am looking into the problem to understand better and will
+let you know as soon as I have some more data to share.
+
+Kind regards
+Uffe
