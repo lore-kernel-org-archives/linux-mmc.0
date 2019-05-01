@@ -1,123 +1,103 @@
-From: Rob Herring <robh+dt@kernel.org>
-Subject: Re: [PATCH v1] arm64: ls1028: dtsi: Add esdhc node in dtsi
-Date: Wed, 1 May 2019 12:50:29 -0500
-Message-ID: <CAL_Jsq+4g+inxc+qcC3oLrXuR+L9AMvXFShGaU5Y3iRDsK3P6A@mail.gmail.com>
-References: <20190423114424.3578-1-yinbo.zhu@nxp.com>
+From: Raul E Rangel <rrangel@chromium.org>
+Subject: [RFC PATCH 2/2] mmc: sdhci: Quirk for AMD SDHC Device 0x7906
+Date: Wed,  1 May 2019 11:54:57 -0600
+Message-ID: <20190501175457.195855-2-rrangel@chromium.org>
+References: <20190501175457.195855-1-rrangel@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190423114424.3578-1-yinbo.zhu@nxp.com>
+In-Reply-To: <20190501175457.195855-1-rrangel@chromium.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Yinbo Zhu <yinbo.zhu@nxp.com>
-Cc: Shawn Guo <shawnguo@kernel.org>, Leo Li <leoyang.li@nxp.com>, Xiaobo Xie <xiaobo.xie@nxp.com>, Mark Rutland <mark.rutland@arm.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Y.b. Lu" <yangbo.lu@nxp.com>, Jiafei Pan <jiafei.pan@nxp.com>, Ashish Kumar <ashish.kumar@nxp.com>
+To: linux-mmc@vger.kernel.org
+Cc: djkurtz@chromium.org, Raul E Rangel <rrangel@chromium.org>, linux-kernel@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Apr 23, 2019 at 6:42 AM Yinbo Zhu <yinbo.zhu@nxp.com> wrote:
->
-> From: Ashish Kumar <Ashish.Kumar@nxp.com>
->
-> This patch is to add esdhc node and enable SD UHS-I,
-> eMMC HS200 for ls1028ardb/ls1028aqds board.
->
-> Signed-off-by: Ashish Kumar <Ashish.Kumar@nxp.com>
-> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
-> Signed-off-by: Yinbo Zhu <yinbo.zhu@nxp.com>
-> ---
->  .../boot/dts/freescale/fsl-ls1028a-qds.dts    |  8 ++++++
->  .../boot/dts/freescale/fsl-ls1028a-rdb.dts    | 13 +++++++++
->  .../arm64/boot/dts/freescale/fsl-ls1028a.dtsi | 27 +++++++++++++++++++
->  3 files changed, 48 insertions(+)
->
-> diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1028a-qds.dts b/arch/arm64/boot/dts/freescale/fsl-ls1028a-qds.dts
-> index 14c79f4691ea..180e5d2a00d1 100644
-> --- a/arch/arm64/boot/dts/freescale/fsl-ls1028a-qds.dts
-> +++ b/arch/arm64/boot/dts/freescale/fsl-ls1028a-qds.dts
-> @@ -42,6 +42,14 @@
->         status = "okay";
->  };
->
-> +&esdhc {
-> +       status = "okay";
-> +};
-> +
-> +&esdhc1 {
-> +       status = "okay";
-> +};
-> +
->  &i2c0 {
->         status = "okay";
->
-> diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb.dts b/arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb.dts
-> index f86b054a74ae..1bfaf4294db4 100644
-> --- a/arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb.dts
-> +++ b/arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb.dts
-> @@ -30,6 +30,19 @@
->         };
->  };
->
-> +&esdhc {
-> +       status = "okay";
-> +       sd-uhs-sdr104;
-> +       sd-uhs-sdr50;
-> +       sd-uhs-sdr25;
-> +       sd-uhs-sdr12;
-> +       };
-> +
-> +&esdhc1 {
-> +       status = "okay";
-> +       mmc-hs200-1_8v;
-> +       };
-> +
->  &i2c0 {
->         status = "okay";
->
-> diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi b/arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi
-> index 2896bbcfa3bb..d13cd3fb455b 100644
-> --- a/arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi
-> +++ b/arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi
-> @@ -274,6 +274,33 @@
->                         status = "disabled";
->                 };
->
-> +               esdhc: esdhc@2140000 {
+AMD SDHC 0x7906 requires a hard reset to clear all internal state.
+Otherwise it can get into a bad state where the DATA lines are always
+read as zeros.
 
-mmc@...
+This change requires firmware that can transition the device into
+D3Cold for it to work correctly. If the firmware does not support
+transitioning to D3Cold then the power state transitions are a no-op.
 
-> +                       compatible = "fsl,ls1028a-esdhc", "fsl,esdhc";
-> +                       reg = <0x0 0x2140000 0x0 0x10000>;
-> +                       interrupts = <0 28 0x4>; /* Level high type */
-> +                       clock-frequency = <0>;
+Signed-off-by: Raul E Rangel <rrangel@chromium.org>
+---
 
-Filled in by bootloader? If so, add a comment.
+ drivers/mmc/host/sdhci-pci-core.c | 51 ++++++++++++++++++++++++++++++-
+ 1 file changed, 50 insertions(+), 1 deletion(-)
 
-> +                       clocks = <&clockgen 2 1>;
-> +                       voltage-ranges = <1800 1800 3300 3300>;
-> +                       sdhci,auto-cmd12;
-> +                       little-endian;
-> +                       bus-width = <4>;
-> +                       status = "disabled";
-> +               };
-> +
-> +               esdhc1: esdhc@2150000 {
-
-mmc@...
-
-> +                       compatible = "fsl,ls1028a-esdhc", "fsl,esdhc";
-> +                       reg = <0x0 0x2150000 0x0 0x10000>;
-> +                       interrupts = <0 63 0x4>; /* Level high type */
-> +                       clock-frequency = <0>;
-> +                       clocks = <&clockgen 2 1>;
-> +                       voltage-ranges = <1800 1800 3300 3300>;
-> +                       sdhci,auto-cmd12;
-> +                       broken-cd;
-> +                       little-endian;
-> +                       bus-width = <4>;
-> +                       status = "disabled";
-> +               };
-> +
->                 sata: sata@3200000 {
->                         compatible = "fsl,ls1028a-ahci";
->                         reg = <0x0 0x3200000 0x0 0x10000>,
-> --
-> 2.17.1
->
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 99b0fec2836b..532fbcbd373b 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -25,6 +25,7 @@
+ #include <linux/mmc/mmc.h>
+ #include <linux/scatterlist.h>
+ #include <linux/io.h>
++#include <linux/iopoll.h>
+ #include <linux/gpio.h>
+ #include <linux/pm_runtime.h>
+ #include <linux/mmc/slot-gpio.h>
+@@ -1498,11 +1499,59 @@ static int amd_probe(struct sdhci_pci_chip *chip)
+ 	return 0;
+ }
+ 
++static u32 sdhci_read_present_state(struct sdhci_host *host)
++{
++	return sdhci_readl(host, SDHCI_PRESENT_STATE);
++}
++
++void amd_sdhci_reset(struct sdhci_host *host, u8 mask)
++{
++	struct sdhci_pci_slot *slot = sdhci_priv(host);
++	struct pci_dev *pdev = slot->chip->pdev;
++	u32 present_state;
++
++	/*
++	 * SDHC 0x7906 requires a hard reset to clear all internal state.
++	 * Otherwise it can get into a bad state where the DATA lines are always
++	 * read as zeros.
++	 */
++	if (pdev->device == 0x7906 && (mask & SDHCI_RESET_ALL)) {
++		pci_clear_master(pdev);
++
++		pci_save_state(pdev);
++
++		pci_set_power_state(pdev, PCI_D3cold);
++		pr_debug("%s: power_state=%u\n", mmc_hostname(host->mmc),
++			pdev->current_state);
++		pci_set_power_state(pdev, PCI_D0);
++
++		pci_restore_state(pdev);
++
++		/*
++		 * SDHCI_RESET_ALL says the card detect logic should not be
++		 * reset, but since we need to reset the entire controller
++		 * we should wait until the card detect logic has stabilized.
++		 *
++		 * This normally takes about 40ms.
++		 */
++		readx_poll_timeout(
++			sdhci_read_present_state,
++			host,
++			present_state,
++			present_state & SDHCI_CD_STABLE,
++			10000,
++			100000
++		);
++	}
++
++	return sdhci_reset(host, mask);
++}
++
+ static const struct sdhci_ops amd_sdhci_pci_ops = {
+ 	.set_clock			= sdhci_set_clock,
+ 	.enable_dma			= sdhci_pci_enable_dma,
+ 	.set_bus_width			= sdhci_set_bus_width,
+-	.reset				= sdhci_reset,
++	.reset				= amd_sdhci_reset,
+ 	.set_uhs_signaling		= sdhci_set_uhs_signaling,
+ };
+ 
+-- 
+2.21.0.593.g511ec345e18-goog
