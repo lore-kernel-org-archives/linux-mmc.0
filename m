@@ -1,103 +1,105 @@
 From: Raul E Rangel <rrangel@chromium.org>
-Subject: [RFC PATCH 2/2] mmc: sdhci: Quirk for AMD SDHC Device 0x7906
-Date: Wed,  1 May 2019 11:54:57 -0600
-Message-ID: <20190501175457.195855-2-rrangel@chromium.org>
-References: <20190501175457.195855-1-rrangel@chromium.org>
+Subject: [RFC PATCH 1/2] mmc: sdhci: Manually check card status after reset
+Date: Wed,  1 May 2019 11:54:56 -0600
+Message-ID: <20190501175457.195855-1-rrangel@chromium.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190501175457.195855-1-rrangel@chromium.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: djkurtz@chromium.org, Raul E Rangel <rrangel@chromium.org>, linux-kernel@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: djkurtz@chromium.org, Raul E Rangel <rrangel@chromium.org>, hongjiefang <hongjiefang@asrmicro.com>, Jennifer Dahm <jennifer.dahm@ni.com>, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>, Kyle Roeschley <kyle.roeschley@ni.com>, Avri Altman <avri.altman@wdc.com>, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-AMD SDHC 0x7906 requires a hard reset to clear all internal state.
-Otherwise it can get into a bad state where the DATA lines are always
-read as zeros.
+There is a race condition between resetting the SDHCI controller and
+disconnecting the card.
 
-This change requires firmware that can transition the device into
-D3Cold for it to work correctly. If the firmware does not support
-transitioning to D3Cold then the power state transitions are a no-op.
+For example:
+0) Card is connected and transferring data
+1) mmc_sd_reset is called to reset the controller due to a data error
+2) sdhci_set_ios calls sdhci_do_reset
+3) SOFT_RESET_ALL is toggled which clears the IRQs the controller has
+configured.
+4) Wait for SOFT_RESET_ALL to clear
+5) CD logic notices card is gone and CARD_PRESENT goes low, but since the
+   IRQs are not configured a CARD_REMOVED interrupt is never raised.
+6) IRQs are enabled again
+7) mmc layer never notices the device is disconnected. The SDHCI layer
+   will keep returning -ENOMEDIUM. This results in a card that is always
+   present and not functional.
 
 Signed-off-by: Raul E Rangel <rrangel@chromium.org>
 ---
+You can see an example of the following two patches here:
+https://privatebin.net/?b0f5953716d34ca6#C699bCBQ99NdvspfDW7CMucT8CJG4DgL+yUNPyepDCo=
+Line 8213: EILSEQ
+Line 8235: SDHC is hard reset
+Line 8240: Controller completes reset and card is no longer present
+Line 8379: mmc_sd_reset notices card is missing and issues a card_event
+           and schedules a detect change.
+Line 8402: Don't init the card since it's already gone.
+Line 8717: Marks card as removed
+Line 8820: mmc_sd_remove removes the block device
 
- drivers/mmc/host/sdhci-pci-core.c | 51 ++++++++++++++++++++++++++++++-
- 1 file changed, 50 insertions(+), 1 deletion(-)
+I am running into a kernel panic. A task gets stuck for more than 120
+seconds. I keep seeing blkdev_close in the stack trace, so maybe I'm not
+calling something correctly?
 
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 99b0fec2836b..532fbcbd373b 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -25,6 +25,7 @@
- #include <linux/mmc/mmc.h>
- #include <linux/scatterlist.h>
- #include <linux/io.h>
-+#include <linux/iopoll.h>
- #include <linux/gpio.h>
- #include <linux/pm_runtime.h>
- #include <linux/mmc/slot-gpio.h>
-@@ -1498,11 +1499,59 @@ static int amd_probe(struct sdhci_pci_chip *chip)
- 	return 0;
- }
+Here is the panic: https://privatebin.net/?8ec48c1547d19975#dq/h189w5jmTlbMKKAwZjUr4bhm7Q2AgvGdRqc5BxAc=
+
+I sometimes see the following:
+[  547.943974] udevd[144]: seq 2350 '/devices/pci0000:00/0000:00:14.7/mmc_host/mmc0/mmc0:0001/block/mmcblk0/mmcblk0p1' is taking a long time
+
+I was getting the kernel panic on a 4.14 kernel: https://chromium.googlesource.com/chromiumos/third_party/kernel/+/f3dc032faf4d074f20ada437e2d081a28ac699da/drivers/mmc/host
+So I'm guessing I'm missing an upstream fix.
+
+Do the patches look correct or am I doing something that would cause a
+kernel panic?
+
+I have a DUT setup with a GPIO I can use to toggle the CD pin. I ran a
+test where I connect and then randomly, between 0s - 1s disconnect the
+card. This got over 20k iterations before the panic. Though when I do it
+manually and stop for 2 minutes the panic happens.
+
+Any help would be appreciated.
+
+Thanks,
+Raul
+
+
+ drivers/mmc/core/sd.c | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
+
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index 265e1aeeb9d8..9206c4297d66 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -1242,7 +1242,27 @@ static int mmc_sd_runtime_resume(struct mmc_host *host)
  
-+static u32 sdhci_read_present_state(struct sdhci_host *host)
-+{
-+	return sdhci_readl(host, SDHCI_PRESENT_STATE);
-+}
+ static int mmc_sd_hw_reset(struct mmc_host *host)
+ {
++	int present;
+ 	mmc_power_cycle(host, host->card->ocr);
 +
-+void amd_sdhci_reset(struct sdhci_host *host, u8 mask)
-+{
-+	struct sdhci_pci_slot *slot = sdhci_priv(host);
-+	struct pci_dev *pdev = slot->chip->pdev;
-+	u32 present_state;
++	present = host->ops->get_cd(host);
 +
-+	/*
-+	 * SDHC 0x7906 requires a hard reset to clear all internal state.
-+	 * Otherwise it can get into a bad state where the DATA lines are always
-+	 * read as zeros.
-+	 */
-+	if (pdev->device == 0x7906 && (mask & SDHCI_RESET_ALL)) {
-+		pci_clear_master(pdev);
-+
-+		pci_save_state(pdev);
-+
-+		pci_set_power_state(pdev, PCI_D3cold);
-+		pr_debug("%s: power_state=%u\n", mmc_hostname(host->mmc),
-+			pdev->current_state);
-+		pci_set_power_state(pdev, PCI_D0);
-+
-+		pci_restore_state(pdev);
-+
-+		/*
-+		 * SDHCI_RESET_ALL says the card detect logic should not be
-+		 * reset, but since we need to reset the entire controller
-+		 * we should wait until the card detect logic has stabilized.
-+		 *
-+		 * This normally takes about 40ms.
-+		 */
-+		readx_poll_timeout(
-+			sdhci_read_present_state,
-+			host,
-+			present_state,
-+			present_state & SDHCI_CD_STABLE,
-+			10000,
-+			100000
-+		);
++	/* The card status could have changed while resetting. */
++	if ((mmc_card_removed(host->card) && present) ||
++	    (!mmc_card_removed(host->card) && !present)) {
++		pr_info("%s: card status changed during reset\n",
++		       mmc_hostname(host));
++		host->ops->card_event(host);
++		mmc_detect_change(host, 0);
 +	}
 +
-+	return sdhci_reset(host, mask);
-+}
++	/* Don't perform unnecessary transactions if the card is missing. */
++	if (!present) {
++		pr_info("%s: card was removed during reset\n",
++			mmc_hostname(host));
++		return -ENOMEDIUM;
++	}
 +
- static const struct sdhci_ops amd_sdhci_pci_ops = {
- 	.set_clock			= sdhci_set_clock,
- 	.enable_dma			= sdhci_pci_enable_dma,
- 	.set_bus_width			= sdhci_set_bus_width,
--	.reset				= sdhci_reset,
-+	.reset				= amd_sdhci_reset,
- 	.set_uhs_signaling		= sdhci_set_uhs_signaling,
- };
+ 	return mmc_sd_init_card(host, host->card->ocr, host->card);
+ }
  
 -- 
 2.21.0.593.g511ec345e18-goog
