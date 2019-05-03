@@ -1,35 +1,36 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
 Subject: Re: [PATCH] mmc: Fix tag set memory leak
-Date: Fri, 3 May 2019 09:29:47 +0300
-Message-ID: <681b2cba-4442-ae9a-5a3c-461c384198bd@intel.com>
+Date: Fri, 3 May 2019 12:06:32 +0200
+Message-ID: <CAPDyKFqNZeOZLgY4ntn=OPmP9Zo5S8HbtUtZ5MFVtz=BJ78LzQ@mail.gmail.com>
 References: <20190502190714.181664-1-rrangel@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20190502190714.181664-1-rrangel@chromium.org>
-Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Raul E Rangel <rrangel@chromium.org>, linux-mmc@vger.kernel.org
-Cc: avri.altman@wdc.com, djkurtz@chromium.org, zwisler@chromium.org, Ming Lei <ming.lei@redhat.com>, Hannes Reinecke <hare@suse.com>, linux-kernel@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Omar Sandoval <osandov@fb.com>, Ulf Hansson <ulf.hansson@linaro.org>
+To: Raul E Rangel <rrangel@chromium.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Avri Altman <avri.altman@wdc.com>, Daniel Kurtz <djkurtz@chromium.org>, zwisler@chromium.org, Ming Lei <ming.lei@redhat.com>, Adrian Hunter <adrian.hunter@intel.com>, Hannes Reinecke <hare@suse.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Jens Axboe <axboe@kernel.dk>, Omar Sandoval <osandov@fb.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 2/05/19 10:07 PM, Raul E Rangel wrote:
+On Thu, 2 May 2019 at 21:07, Raul E Rangel <rrangel@chromium.org> wrote:
+>
 > The tag set is allocated in mmc_init_queue but never freed. This results
 > in a memory leak. This change makes sure we free the tag set when the
 > queue is also freed.
-> 
+>
 > Signed-off-by: Raul E Rangel <rrangel@chromium.org>
 
-One comment below, otherwise:
+Applied for fixes (it may not make it for v5.1 unless there is a rc8), thanks!
 
-Fixes: 81196976ed94 ("mmc: block: Add blk-mq support")
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+I also dropped the white space fixup, for the reasons explained by Adrian.
+
+Kind regards
+Uffe
 
 > ---
 > I found this using kmemleak and plugging and unplugging an SD card in a
 > few times.
-> 
+>
 > Here is an example of the output of kmemleak:
 > unreferenced object 0xffff888125be4ce8 (size 8):
 >   comm "kworker/1:0", pid 17, jiffies 4294901575 (age 204.773s)
@@ -52,37 +53,35 @@ Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 >     [<00000000e5b49c26>] process_one_work+0x1d3/0x31f
 >     [<0000000068c8cd3c>] worker_thread+0x1cd/0x2bf
 >     [<00000000326e2e22>] kthread+0x14f/0x157
-> 
+>
 > Once I applied this patch the leak went away.
-> 
+>
 > p.s., I included a small white space fix. Hope that's ok.
-
-Not really.  For example, the patch does not apply cleanly to stable trees
-only because of that chunk.
-
-> 
+>
 >  drivers/mmc/core/queue.c | 3 ++-
 >  1 file changed, 2 insertions(+), 1 deletion(-)
-> 
+>
 > diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
 > index 7c364a9c4eeb..176a08748cf1 100644
 > --- a/drivers/mmc/core/queue.c
 > +++ b/drivers/mmc/core/queue.c
 > @@ -402,7 +402,7 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card)
->  
->  	mq->card = card;
->  	mq->use_cqe = host->cqe_enabled;
-> -	
+>
+>         mq->card = card;
+>         mq->use_cqe = host->cqe_enabled;
+> -
 > +
->  	spin_lock_init(&mq->lock);
->  
->  	memset(&mq->tag_set, 0, sizeof(mq->tag_set));
+>         spin_lock_init(&mq->lock);
+>
+>         memset(&mq->tag_set, 0, sizeof(mq->tag_set));
 > @@ -472,6 +472,7 @@ void mmc_cleanup_queue(struct mmc_queue *mq)
->  		blk_mq_unquiesce_queue(q);
->  
->  	blk_cleanup_queue(q);
-> +	blk_mq_free_tag_set(&mq->tag_set);
->  
->  	/*
->  	 * A request can be completed before the next request, potentially
-> 
+>                 blk_mq_unquiesce_queue(q);
+>
+>         blk_cleanup_queue(q);
+> +       blk_mq_free_tag_set(&mq->tag_set);
+>
+>         /*
+>          * A request can be completed before the next request, potentially
+> --
+> 2.21.0.593.g511ec345e18-goog
+>
