@@ -1,90 +1,106 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V2 0/5] mmc: mmci: add busy detect for stm32 sdmmc variant
-Date: Fri, 3 May 2019 15:29:15 +0200
-Message-ID: <CAPDyKFoURwnai1hbCbO+Uh6+hc7A4dYHjWkqeFAEgMQET-BzwA@mail.gmail.com>
-References: <1556264798-18540-1-git-send-email-ludovic.Barre@st.com>
- <CAPDyKFqbn=UcbwoH_z+yjrjvHQZaMtmsD=n0yrBV7DAK5VRJEQ@mail.gmail.com> <74b91eb4-e5a3-38b2-f732-29cdd058eb6a@st.com>
+From: Raul Rangel <rrangel@chromium.org>
+Subject: Re: [RFC PATCH 1/2] mmc: sdhci: Manually check card status after
+ reset
+Date: Fri, 3 May 2019 09:12:24 -0600
+Message-ID: <20190503151224.GA3650@google.com>
+References: <20190501175457.195855-1-rrangel@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <74b91eb4-e5a3-38b2-f732-29cdd058eb6a@st.com>
+Content-Disposition: inline
+In-Reply-To: <20190501175457.195855-1-rrangel@chromium.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ludovic BARRE <ludovic.barre@st.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, DTML <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-stm32@st-md-mailman.stormreply.com
+To: linux-mmc@vger.kernel.org
+Cc: djkurtz@chromium.org, hongjiefang <hongjiefang@asrmicro.com>, Jennifer Dahm <jennifer.dahm@ni.com>, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>, Kyle Roeschley <kyle.roeschley@ni.com>, Avri Altman <avri.altman@wdc.com>, Ulf Hansson <ulf.hansson@linaro.org>, Raul Rangel <rrangel@chromium.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 30 Apr 2019 at 14:06, Ludovic BARRE <ludovic.barre@st.com> wrote:
->
->
->
-> On 4/30/19 1:13 PM, Ulf Hansson wrote:
-> > On Fri, 26 Apr 2019 at 09:46, Ludovic Barre <ludovic.Barre@st.com> wrote:
-> >>
-> >> From: Ludovic Barre <ludovic.barre@st.com>
-> >>
-> >> This patch series adds busy detect for stm32 sdmmc variant.
-> >> Some adaptations are required:
-> >> -Avoid to check and poll busy status when is not expected.
-> >> -Clear busy status bit if busy_detect_flag and busy_detect_mask are
-> >>   different.
-> >> -Add hardware busy timeout with MMCIDATATIMER register.
-> >>
-> >> V2:
-> >> -mmci_cmd_irq cleanup in separate patch.
-> >> -simplify the busy_detect_flag exclude
-> >> -replace sdmmc specific comment in
-> >> "mmc: mmci: avoid fake busy polling in mmci_irq"
-> >> to focus on common behavior
-> >>
-> >> Ludovic Barre (5):
-> >>    mmc: mmci: cleanup mmci_cmd_irq for busy detect feature
-> >>    mmc: mmci: avoid fake busy polling in mmci_irq
-> >>    mmc: mmci: fix clear of busy detect status
-> >>    mmc: mmci: add hardware busy timeout feature
-> >>    mmc: mmci: add busy detect for stm32 sdmmc variant
-> >>
-> >>   drivers/mmc/host/mmci.c | 61 ++++++++++++++++++++++++++++++++++++++-----------
-> >>   drivers/mmc/host/mmci.h |  3 +++
-> >>   2 files changed, 51 insertions(+), 13 deletions(-)
-> >>
-> >> --
-> >> 2.7.4
-> >>
-> >
-> > Ludovic, just wanted to let you know that I am reviewing and testing
-> > this series.
-> >
-> > However, while running some tests on Ux500 for validating the busy
-> > detection code, even without your series applied, I encounter some odd
-> > behaviors. I am looking into the problem to understand better and will
-> > let you know as soon as I have some more data to share.
->
-> Oops, don't hesitate to share your status, if I could help.
+On Wed, May 01, 2019 at 11:54:56AM -0600, Raul E Rangel wrote:
+> I am running into a kernel panic. A task gets stuck for more than 120
+> seconds. I keep seeing blkdev_close in the stack trace, so maybe I'm not
+> calling something correctly?
+> 
+> Here is the panic: https://privatebin.net/?8ec48c1547d19975#dq/h189w5jmTlbMKKAwZjUr4bhm7Q2AgvGdRqc5BxAc=
+> 
+> I sometimes see the following:
+> [  547.943974] udevd[144]: seq 2350 '/devices/pci0000:00/0000:00:14.7/mmc_host/mmc0/mmc0:0001/block/mmcblk0/mmcblk0p1' is taking a long time
+> 
+> I was getting the kernel panic on a 4.14 kernel: https://chromium.googlesource.com/chromiumos/third_party/kernel/+/f3dc032faf4d074f20ada437e2d081a28ac699da/drivers/mmc/host
+> So I'm guessing I'm missing an upstream fix.
+> 
+So I tried these patches on the 5.1 with the memory leak patch applied:
+https://patchwork.kernel.org/patch/10927541/
 
-Thanks! Good and bad news here, then.
+Everything works as expected:
+    mmc0: new high speed SDHC card at address 0001
+    mmcblk0: mmc0:0001 00000 7.41 GiB
+     mmcblk0: p1 p2
+    mmc0: card status changed during reset
+    mmc0: card was removed during reset
+    mmc0: tried to HW reset card, got error -123
+    print_req_error: I/O error, dev mmcblk0, sector 2072 flags 80700
+    print_req_error: I/O error, dev mmcblk0, sector 2073 flags 80700
+    mmc0: card 0001 removed
 
-I now understand what is going on - and there is certainly room for
-improvements here, but more importantly the actual mmci busy detection
-works as expected.
+    mmc0: new high speed SDHC card at address 0001
+    mmcblk0: mmc0:0001 00000 7.41 GiB
+     mmcblk0: p1 p2
+    mmc0: card status changed during reset
+    mmc0: card was removed during reset
+    mmc0: tried to HW reset card, got error -123
+    print_req_error: I/O error, dev mmcblk0, sector 12584832 flags 80700
+    print_req_error: I/O error, dev mmcblk0, sector 12584833 flags 80700
+    mmc0: card 0001 removed
+    Buffer I/O error on dev mmcblk0p2, logical block 369904, async page read
 
-When it comes to improvements, the main issue I have found is how we
-treat DATA WRITES. In many cases we simply don't use the HW busy
-detection at all, but instead rely on the mmc core to send CMD13 in a
-loop to poll. Well, then if the polling would have consisted of a
-couple of CMD13s that wouldn't be an issue, but my observations is
-rather that the numbers of CMD13 sent to poll is in the range or
-hundreds/thousands - per each WRITE request!
+    mmc0: new high speed SDHC card at address 0001
+    mmcblk0: mmc0:0001 00000 7.41 GiB
+     mmcblk0: p1 p2
+    mmc0: card 0001 removed
 
-I am going to send a patch (or two) that improves the behavior. It
-might even involve changing parts in core layer, not sure how the end
-result will look like yet.
+I also ran another test. Using the DUT with a GPIO to randomly toggle the
+CD pin I was able to get 4k+ iterations without any problems. So I think
+the patches are good.
 
-In any case, I have applied patch 1 and patch2 for next, as the tests
-turned out well at my side. I also took the liberty of updating some
-of the comments/changelogs, please have look and tell if there is
-something you want to change.
+    --- Iteration 4506 ----
+    Disconnecting card
+    [ 7444.370169] mmc0: card 0001 removed
+    Connecting Card and sleeping for 0.31476s
+    [ 7444.682177] mmc0: new high speed SDHC card at address 0001
+    [ 7444.719038] mmcblk0: mmc0:0001 00000 7.41 GiB
+    [ 7444.727375]  mmcblk0: p1 p2
+    Card Disconnected
+    [ 7444.831896] mmc0: Card removed during transfer!
+    [ 7444.831914] mmc0: Resetting controller.
+    --- Iteration 4507 ----
+    Connecting Card and sleeping for 0.30259s
+    [ 7445.033649] mmc0: card 0001 removed
+    Card Disconnected
+    [ 7445.307008] mmc0: error -123 whilst initialising SD card
+    --- Iteration 4508 ----
+    Connecting Card and sleeping for 0.24827s
+    Card Disconnected
+    [ 7445.716033] mmc0: Card removed during transfer!
+    [ 7445.716052] mmc0: Resetting controller.
+    [ 7445.716489] mmc0: error -123 whilst initialising SD card
+    --- Iteration 4509 ----
+    Connecting Card and sleeping for 0.14132s
+    Card Disconnected
+    --- Iteration 4510 ----
+    Connecting Card and sleeping for 0.26001s
+    Card Disconnected
+    [ 7446.436079] mmc0: error -123 whilst initialising SD card
+    Connecting card to verify if it died
+    [ 7446.906804] mmc0: new high speed SDHC card at address 0001
+    [ 7446.933631] mmcblk0: mmc0:0001 00000 7.41 GiB
+    [ 7446.949224]  mmcblk0: p1 p2
+    SDHC still functional
 
-I will continue with the rest of series next week.
+Should I send the patches out again without the RFC tag?
 
-Kind regards
-Uffe
+I'll keep trying to track down the hung task I was seeing on 4.14. But I
+don't think that's related to these patches. I might just end up
+backporting the blk-mq patches to our 4.14 branch since I suspect that
+fixes it.
+
+Thanks,
+Raul
