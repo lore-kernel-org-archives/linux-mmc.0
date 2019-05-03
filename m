@@ -1,125 +1,105 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: usdhi6rol0: mark expected switch fall-throughs
-Date: Fri, 3 May 2019 15:29:10 +0200
-Message-ID: <CAPDyKFr0KrUCuBpYyypKiUsin98XaYOVUx8MuDEpxvm6knxrzw@mail.gmail.com>
-References: <20190501203621.GA11352@embeddedor>
+Subject: Re: [PATCH v3] mmc: core: Verify SD bus width
+Date: Fri, 3 May 2019 15:29:06 +0200
+Message-ID: <CAPDyKFraD8BmnscX8Lu2SQ53AetFFsf5SLKydmut4EwORj0ATQ@mail.gmail.com>
+References: <20190429173239.51305-1-rrangel@chromium.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190501203621.GA11352@embeddedor>
+In-Reply-To: <20190429173239.51305-1-rrangel@chromium.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Kees Cook <keescook@chromium.org>
+To: Raul E Rangel <rrangel@chromium.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Daniel Kurtz <djkurtz@chromium.org>, zwisler@chromium.org, Avri Altman <avri.altman@wdc.com>, hongjiefang <hongjiefang@asrmicro.com>, Jennifer Dahm <jennifer.dahm@ni.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, Kyle Roeschley <kyle.roeschley@ni.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 1 May 2019 at 22:36, Gustavo A. R. Silva <gustavo@embeddedor.com> w=
-rote:
+On Mon, 29 Apr 2019 at 19:32, Raul E Rangel <rrangel@chromium.org> wrote:
 >
-> In preparation to enabling -Wimplicit-fallthrough, mark switch
-> cases where we are expecting to fall through.
+> The SD Physical Layer Spec says the following: Since the SD Memory Card
+> shall support at least the two bus modes 1-bit or 4-bit width, then any SD
+> Card shall set at least bits 0 and 2 (SD_BUS_WIDTH="0101").
 >
-> This patch fixes the following warnings:
+> This change verifies the card has specified a bus width.
 >
-> In file included from drivers/mmc/host/usdhi6rol0.c:9:
-> drivers/mmc/host/usdhi6rol0.c: In function =E2=80=98usdhi6_timeout_work=
-=E2=80=99:
-> ./include/linux/device.h:1483:2: warning: this statement may fall through=
- [-Wimplicit-fallthrough=3D]
->   _dev_err(dev, dev_fmt(fmt), ##__VA_ARGS__)
->   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-> drivers/mmc/host/usdhi6rol0.c:1689:3: note: in expansion of macro =E2=80=
-=98dev_err=E2=80=99
->    dev_err(mmc_dev(host->mmc), "Invalid state %u\n", host->wait);
->    ^~~~~~~
-> drivers/mmc/host/usdhi6rol0.c:1691:2: note: here
->   case USDHI6_WAIT_FOR_CMD:
->   ^~~~
-> drivers/mmc/host/usdhi6rol0.c:1711:3: warning: this statement may fall th=
-rough [-Wimplicit-fallthrough=3D]
->    usdhi6_sg_unmap(host, true);
->    ^~~~~~~~~~~~~~~~~~~~~~~~~~~
-> drivers/mmc/host/usdhi6rol0.c:1716:2: note: here
->   case USDHI6_WAIT_FOR_DATA_END:
->   ^~~~
->   CC [M]  drivers/isdn/hisax/hisax_isac.o
-> drivers/mmc/host/usdhi6rol0.c: In function =E2=80=98usdhi6_stop_cmd=E2=80=
-=99:
-> drivers/mmc/host/usdhi6rol0.c:1338:6: warning: this statement may fall th=
-rough [-Wimplicit-fallthrough=3D]
->    if (mrq->stop->opcode =3D=3D MMC_STOP_TRANSMISSION) {
->       ^
-> drivers/mmc/host/usdhi6rol0.c:1343:2: note: here
->   default:
->   ^~~~~~~
+> AMD SDHC Device 7806 can get into a bad state after a card disconnect
+> where anything transferred via the DATA lines will always result in a
+> zero filled buffer. Currently the driver will continue without error if
+> the HC is in this condition. A block device will be created, but reading
+> from it will result in a zero buffer. This makes it seem like the SD
+> device has been erased, when in actuality the data is never getting
+> copied from the DATA lines to the data buffer.
 >
-> Warning level 3 was used: -Wimplicit-fallthrough=3D3
+> SCR is the first command in the SD initialization sequence that uses the
+> DATA lines. By checking that the response was invalid, we can abort
+> mounting the card.
 >
-> This patch is part of the ongoing efforts to enable
-> -Wimplicit-fallthrough.
+> Acked-by: Avri Altman <avri.altman@wdc.com>
+> Reviewed-by: Avri Altman <avri.altman@wdc.com>
+
+No need for both ack/review tags, the latter is superior so keeping only that.
 >
-> Signed-off-by: Gustavo A. R. Silva <gustavo@embeddedor.com>
+> Signed-off-by: Raul E Rangel <rrangel@chromium.org>
 
 Applied for next, thanks!
 
-I took the liberty to clean up the comments, avoiding to break 80
-chars per line.
+Let's how the testing turns out, we may consider sending a backport to
+stable later on.
 
 Kind regards
 Uffe
 
 
 > ---
+> Here is the testing I did:
+>
+> Good Trace: https://paste.fedoraproject.org/paste/oVEI5b0IzHD23Yo7CDZgEg
+> [   30.103686] mmc0: new high speed SDHC card at address 0001
+> [   30.105262] mmcblk0: mmc0:0001 00000 7.41 GiB
+> [   30.108258]  mmcblk0: p1
+> [   31.947250] mmc0: card 0001 removed
+>
+> Bad Trace (before patch): https://paste.fedoraproject.org/paste/jBWfpFBM8gdEmGOzxij~hw
+>
+> Bad Trace (after patch): https://paste.fedoraproject.org/paste/8gB8MLYOKEUZEgHXmQ0W1Q
+> [   33.810760] mmc0: invalid bus width
+> [   33.810782] mmc0: error -22 whilst initialising SD card
+> [   34.068818] mmc0: invalid bus width
+> [   34.068839] mmc0: error -22 whilst initialising SD card
+> [   34.329521] mmc0: invalid bus width
+> [   34.329543] mmc0: error -22 whilst initialising SD card
+> [   34.592061] mmc0: invalid bus width
+> [   34.592084] mmc0: error -22 whilst initialising SD card
+>
+> In the traces you can see sd_scr is different
+>
+> Changes in v3:
+> - Rebased on mmc/next
+>
 > Changes in v2:
->  - Turn multiple line comments into single line comments.
->  - Fix additional fall-through warning.
+> - Made the bus width check stricter. It now requires the value to match
+>   the spec.
 >
->  drivers/mmc/host/usdhi6rol0.c | 9 +++------
->  1 file changed, 3 insertions(+), 6 deletions(-)
+>  drivers/mmc/core/sd.c | 8 ++++++++
+>  1 file changed, 8 insertions(+)
 >
-> diff --git a/drivers/mmc/host/usdhi6rol0.c b/drivers/mmc/host/usdhi6rol0.=
-c
-> index cd8b1b9d4d8a..f0cc5e0dbf79 100644
-> --- a/drivers/mmc/host/usdhi6rol0.c
-> +++ b/drivers/mmc/host/usdhi6rol0.c
-> @@ -1339,7 +1339,7 @@ static int usdhi6_stop_cmd(struct usdhi6_host *host=
-)
->                         host->wait =3D USDHI6_WAIT_FOR_STOP;
->                         return 0;
->                 }
-> -               /* Unsupported STOP command */
-> +               /* fall through - Unsupported STOP command */
->         default:
->                 dev_err(mmc_dev(host->mmc),
->                         "unsupported stop CMD%d for CMD%d\n",
-> @@ -1687,7 +1687,7 @@ static void usdhi6_timeout_work(struct work_struct =
-*work)
->         switch (host->wait) {
->         default:
->                 dev_err(mmc_dev(host->mmc), "Invalid state %u\n", host->w=
-ait);
-> -               /* mrq can be NULL in this actually impossible case */
-> +               /* fall through - mrq can be NULL in this actually imposs=
-ible case */
->         case USDHI6_WAIT_FOR_CMD:
->                 usdhi6_error_code(host);
->                 if (mrq)
-> @@ -1709,10 +1709,7 @@ static void usdhi6_timeout_work(struct work_struct=
- *work)
->                         host->offset, data->blocks, data->blksz, data->sg=
-_len,
->                         sg_dma_len(sg), sg->offset);
->                 usdhi6_sg_unmap(host, true);
-> -               /*
-> -                * If USDHI6_WAIT_FOR_DATA_END times out, we have already=
- unmapped
-> -                * the page
-> -                */
-> +               /* fall through - If USDHI6_WAIT_FOR_DATA_END times out, =
-we have already unmapped the page */
->         case USDHI6_WAIT_FOR_DATA_END:
->                 usdhi6_error_code(host);
->                 data->error =3D -ETIMEDOUT;
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index 265e1aeeb9d8..d3d32f9a2cb1 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -221,6 +221,14 @@ static int mmc_decode_scr(struct mmc_card *card)
+>
+>         if (scr->sda_spec3)
+>                 scr->cmds = UNSTUFF_BITS(resp, 32, 2);
+> +
+> +       /* SD Spec says: any SD Card shall set at least bits 0 and 2 */
+> +       if (!(scr->bus_widths & SD_SCR_BUS_WIDTH_1) ||
+> +           !(scr->bus_widths & SD_SCR_BUS_WIDTH_4)) {
+> +               pr_err("%s: invalid bus width\n", mmc_hostname(card->host));
+> +               return -EINVAL;
+> +       }
+> +
+>         return 0;
+>  }
+>
 > --
-> 2.21.0
+> 2.21.0.593.g511ec345e18-goog
 >
