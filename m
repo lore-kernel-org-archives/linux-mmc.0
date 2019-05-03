@@ -1,69 +1,69 @@
-From: Fabien Parent <fparent-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>
-Subject: Re: [PATCH 08/24] dt-bindings: mmc: mtk-sd: add mtk-sd support for
- MT8516
-Date: Fri, 3 May 2019 17:12:34 +0200
-Message-ID: <CAOwMV_z8RrmoK+bfEqgwOv97uJarnuTCUo7aczZz=gyvg8CDzQ@mail.gmail.com>
-References: <20190323211612.860-1-fparent@baylibre.com>
- <20190323211612.860-9-fparent@baylibre.com>
- <CAPDyKFrAxmBv+1i3qJpD=M1Wq33U2PMfQv_99xDm9MLhLxSWYg@mail.gmail.com>
+From: Douglas Anderson <dianders@chromium.org>
+Subject: [PATCH] mmc: block: Fix memory leak in blk-mq when cleaning up
+Date: Fri,  3 May 2019 16:35:26 -0700
+Message-ID: <20190503233526.226272-1-dianders@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <CAPDyKFrAxmBv+1i3qJpD=M1Wq33U2PMfQv_99xDm9MLhLxSWYg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mediatek>,
- <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-mediatek/>
-List-Post: <mailto:linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mediatek>,
- <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-mediatek" <linux-mediatek-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: DTML <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>
+Cc: linux-rockchip@lists.infradead.org, groeck@chromium.org, mka@chromium.org, drinkcat@chromium.org, Douglas Anderson <dianders@chromium.org>, Ming Lei <ming.lei@redhat.com>, linux-mmc@vger.kernel.org, Hannes Reinecke <hare@suse.com>, linux-kernel@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Omar Sandoval <osandov@fb.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Ulf,
+If I run the following on rk3288-veyron-minnie (a 2GB machine)
 
-On Mon, Mar 25, 2019 at 2:27 PM Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->
-> - trimmed cc list
->
-> On Sat, 23 Mar 2019 at 22:17, Fabien Parent <fparent-rdvid1DuHRBWk0Htik3J/w@public.gmane.org> wrote:
-> >
-> > Add binding documentation of mtk-sd for MT8516 SoCs.
-> >
-> > Signed-off-by: Fabien Parent <fparent-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>
->
-> Applied for next, thanks!
+  cd /sys/bus/platform/drivers/dwmmc_rockchip
+  for i in $(seq 1 3000); do
+    echo "========================" $i
+    echo ff0f0000.dwmmc > unbind
+    sleep .5
+    echo ff0f0000.dwmmc > bind
+    while true; do
+      if [ -e /dev/mmcblk2 ]; then
+        break;
+      fi
+      sleep .1
+    done
+  done
 
-I think this patch got lost since I cannot see it in your tree.
+Then I start OOMing somewhere between iteration 200 and 250.  Using
+kmemleak, I see reports like:
 
-Thanks,
-Fabien
+unreferenced object 0xe39c5580 (size 64):
+  comm "kworker/1:0", pid 17, jiffies 4294821091 (age 96.952s)
+  hex dump (first 32 bytes):
+    00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+    00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+  backtrace:
+    [<ad19d10a>] __kmalloc+0x1ec/0x2dc
+    [<a28614c3>] blk_mq_alloc_tag_set+0x27c/0x2bc
+    [<0955ae01>] mmc_init_queue+0xa8/0x2a8
+    [<5102b986>] mmc_blk_alloc_req+0xf8/0x2d4
+    [<f1c2214f>] mmc_blk_probe+0x4a8/0x6c0
+    [<0dfdd9d5>] mmc_bus_probe+0x24/0x28
 
->
-> Kind regards
-> Uffe
->
->
-> > ---
-> >  Documentation/devicetree/bindings/mmc/mtk-sd.txt | 1 +
-> >  1 file changed, 1 insertion(+)
-> >
-> > diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.txt b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-> > index f5bcda3980cc..91a2ec59e497 100644
-> > --- a/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-> > +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-> > @@ -11,6 +11,7 @@ Required properties:
-> >         "mediatek,mt8135-mmc": for mmc host ip compatible with mt8135
-> >         "mediatek,mt8173-mmc": for mmc host ip compatible with mt8173
-> >         "mediatek,mt8183-mmc": for mmc host ip compatible with mt8183
-> > +       "mediatek,mt8516-mmc": for mmc host ip compatible with mt8516
-> >         "mediatek,mt2701-mmc": for mmc host ip compatible with mt2701
-> >         "mediatek,mt2712-mmc": for mmc host ip compatible with mt2712
-> >         "mediatek,mt7622-mmc": for MT7622 SoC
-> > --
-> > 2.20.1
-> >
+It's pretty clear that we're missing a call to blk_mq_free_tag_set().
+Let's add it.
+
+Fixes: 81196976ed94 ("mmc: block: Add blk-mq support")
+Signed-off-by: Douglas Anderson <dianders@chromium.org>
+---
+
+ drivers/mmc/core/queue.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+index 7c364a9c4eeb..09071e13282e 100644
+--- a/drivers/mmc/core/queue.c
++++ b/drivers/mmc/core/queue.c
+@@ -480,6 +480,8 @@ void mmc_cleanup_queue(struct mmc_queue *mq)
+ 	 */
+ 	flush_work(&mq->complete_work);
+ 
++	blk_mq_free_tag_set(&mq->tag_set);
++
+ 	mq->card = NULL;
+ }
+ 
+-- 
+2.21.0.1020.gf2820cf01a-goog
