@@ -1,87 +1,125 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: Fix tag set memory leak
-Date: Fri, 3 May 2019 12:06:32 +0200
-Message-ID: <CAPDyKFqNZeOZLgY4ntn=OPmP9Zo5S8HbtUtZ5MFVtz=BJ78LzQ@mail.gmail.com>
-References: <20190502190714.181664-1-rrangel@chromium.org>
+Subject: Re: [PATCH v2] mmc: usdhi6rol0: mark expected switch fall-throughs
+Date: Fri, 3 May 2019 15:29:10 +0200
+Message-ID: <CAPDyKFr0KrUCuBpYyypKiUsin98XaYOVUx8MuDEpxvm6knxrzw@mail.gmail.com>
+References: <20190501203621.GA11352@embeddedor>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190502190714.181664-1-rrangel@chromium.org>
+In-Reply-To: <20190501203621.GA11352@embeddedor>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Raul E Rangel <rrangel@chromium.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Avri Altman <avri.altman@wdc.com>, Daniel Kurtz <djkurtz@chromium.org>, zwisler@chromium.org, Ming Lei <ming.lei@redhat.com>, Adrian Hunter <adrian.hunter@intel.com>, Hannes Reinecke <hare@suse.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Jens Axboe <axboe@kernel.dk>, Omar Sandoval <osandov@fb.com>
+To: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Kees Cook <keescook@chromium.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 2 May 2019 at 21:07, Raul E Rangel <rrangel@chromium.org> wrote:
+On Wed, 1 May 2019 at 22:36, Gustavo A. R. Silva <gustavo@embeddedor.com> w=
+rote:
 >
-> The tag set is allocated in mmc_init_queue but never freed. This results
-> in a memory leak. This change makes sure we free the tag set when the
-> queue is also freed.
+> In preparation to enabling -Wimplicit-fallthrough, mark switch
+> cases where we are expecting to fall through.
 >
-> Signed-off-by: Raul E Rangel <rrangel@chromium.org>
+> This patch fixes the following warnings:
+>
+> In file included from drivers/mmc/host/usdhi6rol0.c:9:
+> drivers/mmc/host/usdhi6rol0.c: In function =E2=80=98usdhi6_timeout_work=
+=E2=80=99:
+> ./include/linux/device.h:1483:2: warning: this statement may fall through=
+ [-Wimplicit-fallthrough=3D]
+>   _dev_err(dev, dev_fmt(fmt), ##__VA_ARGS__)
+>   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+> drivers/mmc/host/usdhi6rol0.c:1689:3: note: in expansion of macro =E2=80=
+=98dev_err=E2=80=99
+>    dev_err(mmc_dev(host->mmc), "Invalid state %u\n", host->wait);
+>    ^~~~~~~
+> drivers/mmc/host/usdhi6rol0.c:1691:2: note: here
+>   case USDHI6_WAIT_FOR_CMD:
+>   ^~~~
+> drivers/mmc/host/usdhi6rol0.c:1711:3: warning: this statement may fall th=
+rough [-Wimplicit-fallthrough=3D]
+>    usdhi6_sg_unmap(host, true);
+>    ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+> drivers/mmc/host/usdhi6rol0.c:1716:2: note: here
+>   case USDHI6_WAIT_FOR_DATA_END:
+>   ^~~~
+>   CC [M]  drivers/isdn/hisax/hisax_isac.o
+> drivers/mmc/host/usdhi6rol0.c: In function =E2=80=98usdhi6_stop_cmd=E2=80=
+=99:
+> drivers/mmc/host/usdhi6rol0.c:1338:6: warning: this statement may fall th=
+rough [-Wimplicit-fallthrough=3D]
+>    if (mrq->stop->opcode =3D=3D MMC_STOP_TRANSMISSION) {
+>       ^
+> drivers/mmc/host/usdhi6rol0.c:1343:2: note: here
+>   default:
+>   ^~~~~~~
+>
+> Warning level 3 was used: -Wimplicit-fallthrough=3D3
+>
+> This patch is part of the ongoing efforts to enable
+> -Wimplicit-fallthrough.
+>
+> Signed-off-by: Gustavo A. R. Silva <gustavo@embeddedor.com>
 
-Applied for fixes (it may not make it for v5.1 unless there is a rc8), thanks!
+Applied for next, thanks!
 
-I also dropped the white space fixup, for the reasons explained by Adrian.
+I took the liberty to clean up the comments, avoiding to break 80
+chars per line.
 
 Kind regards
 Uffe
 
+
 > ---
-> I found this using kmemleak and plugging and unplugging an SD card in a
-> few times.
+> Changes in v2:
+>  - Turn multiple line comments into single line comments.
+>  - Fix additional fall-through warning.
 >
-> Here is an example of the output of kmemleak:
-> unreferenced object 0xffff888125be4ce8 (size 8):
->   comm "kworker/1:0", pid 17, jiffies 4294901575 (age 204.773s)
->   hex dump (first 8 bytes):
->     00 00 00 00 00 00 00 00                          ........
->   backtrace:
->     [<0000000061cb8887>] blk_mq_alloc_tag_set+0xe9/0x234
->     [<00000000cf532a0f>] mmc_init_queue+0xa9/0x2f0
->     [<000000001e085171>] mmc_blk_alloc_req+0x125/0x2f9
->     [<00000000eae1bd01>] mmc_blk_probe+0x1e2/0x6c1
->     [<00000000a0b4a87d>] really_probe+0x1bd/0x3b0
->     [<00000000e58f3eb9>] driver_probe_device+0xe1/0x115
->     [<00000000358f3b3c>] bus_for_each_drv+0x89/0xac
->     [<00000000ef52ccbe>] __device_attach+0xb0/0x14a
->     [<00000000c9daafa7>] bus_probe_device+0x33/0x9f
->     [<0000000008ac5779>] device_add+0x34b/0x5e2
->     [<00000000b42623cc>] mmc_add_card+0x1f5/0x20d
->     [<00000000f114ebc3>] mmc_attach_sd+0xc5/0x14b
->     [<000000006e915e0d>] mmc_rescan+0x261/0x2b6
->     [<00000000e5b49c26>] process_one_work+0x1d3/0x31f
->     [<0000000068c8cd3c>] worker_thread+0x1cd/0x2bf
->     [<00000000326e2e22>] kthread+0x14f/0x157
+>  drivers/mmc/host/usdhi6rol0.c | 9 +++------
+>  1 file changed, 3 insertions(+), 6 deletions(-)
 >
-> Once I applied this patch the leak went away.
->
-> p.s., I included a small white space fix. Hope that's ok.
->
->  drivers/mmc/core/queue.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-> index 7c364a9c4eeb..176a08748cf1 100644
-> --- a/drivers/mmc/core/queue.c
-> +++ b/drivers/mmc/core/queue.c
-> @@ -402,7 +402,7 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card)
->
->         mq->card = card;
->         mq->use_cqe = host->cqe_enabled;
-> -
-> +
->         spin_lock_init(&mq->lock);
->
->         memset(&mq->tag_set, 0, sizeof(mq->tag_set));
-> @@ -472,6 +472,7 @@ void mmc_cleanup_queue(struct mmc_queue *mq)
->                 blk_mq_unquiesce_queue(q);
->
->         blk_cleanup_queue(q);
-> +       blk_mq_free_tag_set(&mq->tag_set);
->
->         /*
->          * A request can be completed before the next request, potentially
+> diff --git a/drivers/mmc/host/usdhi6rol0.c b/drivers/mmc/host/usdhi6rol0.=
+c
+> index cd8b1b9d4d8a..f0cc5e0dbf79 100644
+> --- a/drivers/mmc/host/usdhi6rol0.c
+> +++ b/drivers/mmc/host/usdhi6rol0.c
+> @@ -1339,7 +1339,7 @@ static int usdhi6_stop_cmd(struct usdhi6_host *host=
+)
+>                         host->wait =3D USDHI6_WAIT_FOR_STOP;
+>                         return 0;
+>                 }
+> -               /* Unsupported STOP command */
+> +               /* fall through - Unsupported STOP command */
+>         default:
+>                 dev_err(mmc_dev(host->mmc),
+>                         "unsupported stop CMD%d for CMD%d\n",
+> @@ -1687,7 +1687,7 @@ static void usdhi6_timeout_work(struct work_struct =
+*work)
+>         switch (host->wait) {
+>         default:
+>                 dev_err(mmc_dev(host->mmc), "Invalid state %u\n", host->w=
+ait);
+> -               /* mrq can be NULL in this actually impossible case */
+> +               /* fall through - mrq can be NULL in this actually imposs=
+ible case */
+>         case USDHI6_WAIT_FOR_CMD:
+>                 usdhi6_error_code(host);
+>                 if (mrq)
+> @@ -1709,10 +1709,7 @@ static void usdhi6_timeout_work(struct work_struct=
+ *work)
+>                         host->offset, data->blocks, data->blksz, data->sg=
+_len,
+>                         sg_dma_len(sg), sg->offset);
+>                 usdhi6_sg_unmap(host, true);
+> -               /*
+> -                * If USDHI6_WAIT_FOR_DATA_END times out, we have already=
+ unmapped
+> -                * the page
+> -                */
+> +               /* fall through - If USDHI6_WAIT_FOR_DATA_END times out, =
+we have already unmapped the page */
+>         case USDHI6_WAIT_FOR_DATA_END:
+>                 usdhi6_error_code(host);
+>                 data->error =3D -ETIMEDOUT;
 > --
-> 2.21.0.593.g511ec345e18-goog
+> 2.21.0
 >
