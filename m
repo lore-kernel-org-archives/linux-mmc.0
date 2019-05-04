@@ -1,79 +1,79 @@
-From: Guenter Roeck <groeck@google.com>
-Subject: Re: [PATCH] mmc: block: Fix memory leak in blk-mq when cleaning up
-Date: Fri, 3 May 2019 17:20:41 -0700
-Message-ID: <CABXOdTdsB82EGn_9ZTQCS2TfcNSR6Mq5J9WjGYbdrKOPsd-jzg@mail.gmail.com>
-References: <20190503233526.226272-1-dianders@chromium.org>
+From: NeilBrown <neil@brown.name>
+Subject: Re: [PATCH 4/5] mmc: mtk-sd: enable internal card-detect logic.
+Date: Sat, 04 May 2019 18:18:31 +1000
+Message-ID: <87o94i3a5k.fsf@notabene.neil.brown.name>
+References: <155538933003.25108.3338569916935462285.stgit@noble.brown> <155539004931.25108.17076624786044710325.stgit@noble.brown> <1555569583.18628.29.camel@mhfsdcap03>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; boundary="=-=-=";
+        micalg=pgp-sha256; protocol="application/pgp-signature"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190503233526.226272-1-dianders@chromium.org>
+In-Reply-To: <1555569583.18628.29.camel@mhfsdcap03>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Douglas Anderson <dianders@chromium.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Guenter Roeck <groeck@chromium.org>, Matthias Kaehlcke <mka@chromium.org>, Nicolas Boichat <drinkcat@chromium.org>, Ming Lei <ming.lei@redhat.com>, linux-mmc@vger.kernel.org, Hannes Reinecke <hare@suse.com>, linux-kernel <linux-kernel@vger.kernel.org>, Jens Axboe <axboe@kernel.dk>, Omar Sandoval <osandov@fb.com>
+To: Chaotian Jing <chaotian.jing@mediatek.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, thirtythreeforty@gmail.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, May 3, 2019 at 4:35 PM Douglas Anderson <dianders@chromium.org> wrote:
->
-> If I run the following on rk3288-veyron-minnie (a 2GB machine)
->
->   cd /sys/bus/platform/drivers/dwmmc_rockchip
->   for i in $(seq 1 3000); do
->     echo "========================" $i
->     echo ff0f0000.dwmmc > unbind
->     sleep .5
->     echo ff0f0000.dwmmc > bind
->     while true; do
->       if [ -e /dev/mmcblk2 ]; then
->         break;
->       fi
->       sleep .1
->     done
->   done
->
-> Then I start OOMing somewhere between iteration 200 and 250.  Using
-> kmemleak, I see reports like:
->
-> unreferenced object 0xe39c5580 (size 64):
->   comm "kworker/1:0", pid 17, jiffies 4294821091 (age 96.952s)
->   hex dump (first 32 bytes):
->     00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
->     00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
->   backtrace:
->     [<ad19d10a>] __kmalloc+0x1ec/0x2dc
->     [<a28614c3>] blk_mq_alloc_tag_set+0x27c/0x2bc
->     [<0955ae01>] mmc_init_queue+0xa8/0x2a8
->     [<5102b986>] mmc_blk_alloc_req+0xf8/0x2d4
->     [<f1c2214f>] mmc_blk_probe+0x4a8/0x6c0
->     [<0dfdd9d5>] mmc_bus_probe+0x24/0x28
->
-> It's pretty clear that we're missing a call to blk_mq_free_tag_set().
-> Let's add it.
->
-> Fixes: 81196976ed94 ("mmc: block: Add blk-mq support")
-> Signed-off-by: Douglas Anderson <dianders@chromium.org>
+--=-=-=
+Content-Type: text/plain
+Content-Transfer-Encoding: quoted-printable
 
-Nice one.
+On Thu, Apr 18 2019, Chaotian Jing wrote:
 
-Reviewed-by: Guenter Roeck <groeck@chromium.org>
+> On Tue, 2019-04-16 at 14:47 +1000, NeilBrown wrote:
+>> The mtk-sd silicon has integrated card-detect logic that is
+>> enabled, at least, on the MT7621 as used in the GNUBEE NAS.
+>>=20
+>> If the sdhci isn't marked non-removable and doesn't have a
+>> cd-gpio configured, assume the internal cd logic should be used.
+>>=20
+>> Signed-off-by: NeilBrown <neil@brown.name>
+...
 
-> ---
+>> @@ -2206,6 +2247,15 @@ static int msdc_drv_probe(struct platform_device =
+*pdev)
+>>  		goto host_free;
+>>  	}
+>>=20=20
+>> +	if (!(mmc->caps & MMC_CAP_NONREMOVABLE) &&
+>> +	    !mmc_can_gpio_cd(mmc)) {
 >
->  drivers/mmc/core/queue.c | 2 ++
->  1 file changed, 2 insertions(+)
->
-> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-> index 7c364a9c4eeb..09071e13282e 100644
-> --- a/drivers/mmc/core/queue.c
-> +++ b/drivers/mmc/core/queue.c
-> @@ -480,6 +480,8 @@ void mmc_cleanup_queue(struct mmc_queue *mq)
->          */
->         flush_work(&mq->complete_work);
->
-> +       blk_mq_free_tag_set(&mq->tag_set);
-> +
->         mq->card = NULL;
->  }
->
-> --
-> 2.21.0.1020.gf2820cf01a-goog
->
+> Should not do this assume!
+> better to add "mediatek,internal-cd" in your DTS, then no impact to
+> other Soc.
+
+(Sorry for the delay).
+
+Documentation/devicetree/bindings/mmc/mmc.txt
+
+says:
+   If no property below is supplied, host native card detect is used.
+
+So this assumption is *exactly* what the documentation said we should
+do.
+
+How about I limit this assumption to mt7621 using a flag in the
+mtk_mmc_compatible structure?
+
+Thanks,
+NeilBrown
+
+--=-=-=
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAEBCAAdFiEEG8Yp69OQ2HB7X0l6Oeye3VZigbkFAlzNStcACgkQOeye3VZi
+gbnPBA//eN9sE9P0TV5+KckYl7NgUH1whziK3Ot5PrCfyuwxOQIqSxuIF7ZRDS+X
+6gk6CDYO59Y2DAvCTUJNUWWwEoSrB21EMbKTBmcTLywiaBqTPGn4k8usUQ3xchnh
+oZQzfUrwyOM8b0O1jBRh0CJkk345rFMaew30WO1Qvyq4PGUAIEtFpDap1Xd5KWOP
+ax8hG1FX/G3mmd2gIxMp8HJmIRvEhnXZOPQ2lI4PRktLO8jG1ltBjF8schg/v8Fh
+aIGO+F4bjQRdGrnSPIFbIbu5p5s5oXPW1KDJSzvim7IUFrg9iyBkpgkpnkgT6Id4
+oa1x05CG01yNQ5LKtZZGkyiU1XH602964hbzZ9Qvtw7KYV9QqRniDvCx3XxRIIea
+MW77EhImTh98jwhjj9hP5R1i/hBUJ3nYs7vVF4AMfSik+dyJyhu1+j26tnD7JQdp
+efMeOX1grtDqGrlw1aCWsRBrTA343H/zUMHoRPHnCusOSuSZ7kVDkJ4b/306Gfyi
+hGckqJ6+9XTFFWG2r7WfTS+XDVgvZbtcPj0OZhpsg+kWN+/6CfY9zv0ZdK2erPdi
+ZTOlse/zGjzTh4vqHV2ajkreK/LRDmR4s4m1iXoynx7SCzR7bjTDcso6bP15ihdc
+pHPLL2kBlScb9RZYc3ldl9LFAnQhsMV5uOM0mzrYSR+eb419kkY=
+=Q94r
+-----END PGP SIGNATURE-----
+--=-=-=--
