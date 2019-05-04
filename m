@@ -1,45 +1,68 @@
-From: NeilBrown <neil@brown.name>
-Subject: [PATCH 1/4] mmc: mtk-sd: don't hard-code interrupt trigger type
-Date: Sat, 04 May 2019 20:24:56 +1000
-Message-ID: <155696549653.8632.3279283591868841381.stgit@noble.brown>
-References: <155696540998.8632.5242582397805128125.stgit@noble.brown>
+From: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] mmc: block: Fix memory leak in blk-mq when cleaning up
+Date: Sat, 4 May 2019 13:57:15 +0200
+Message-ID: <CACRpkdagZCpFJmZ7+-DAQBD7mg5Zs4+mrT3uByXKoGYTS5yERg@mail.gmail.com>
+References: <20190503233526.226272-1-dianders@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <155696540998.8632.5242582397805128125.stgit@noble.brown>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, thirtythreeforty@gmail.com
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <20190503233526.226272-1-dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: Jens Axboe <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, drinkcat-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ming Lei <ming.lei-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Hannes Reinecke <hare-IBi9RG/b67k@public.gmane.org>, groeck-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, Omar Sandoval <osandov-b10kYP2dOMg@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-When using devicetree for configuration, interrupt trigger type
-should be described in the dts file, not hard-coded in the C code.
+On Sat, May 4, 2019 at 1:35 AM Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
 
-The mtk-sd silicon in the mt7621 soc uses an active-high interrupt
-and so cannot be used with the current code.
+> If I run the following on rk3288-veyron-minnie (a 2GB machine)
+>
+>   cd /sys/bus/platform/drivers/dwmmc_rockchip
+>   for i in $(seq 1 3000); do
+>     echo "========================" $i
+>     echo ff0f0000.dwmmc > unbind
+>     sleep .5
+>     echo ff0f0000.dwmmc > bind
+>     while true; do
+>       if [ -e /dev/mmcblk2 ]; then
+>         break;
+>       fi
+>       sleep .1
+>     done
+>   done
+>
+> Then I start OOMing somewhere between iteration 200 and 250.  Using
+> kmemleak, I see reports like:
+>
+> unreferenced object 0xe39c5580 (size 64):
+>   comm "kworker/1:0", pid 17, jiffies 4294821091 (age 96.952s)
+>   hex dump (first 32 bytes):
+>     00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+>     00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+>   backtrace:
+>     [<ad19d10a>] __kmalloc+0x1ec/0x2dc
+>     [<a28614c3>] blk_mq_alloc_tag_set+0x27c/0x2bc
+>     [<0955ae01>] mmc_init_queue+0xa8/0x2a8
+>     [<5102b986>] mmc_blk_alloc_req+0xf8/0x2d4
+>     [<f1c2214f>] mmc_blk_probe+0x4a8/0x6c0
+>     [<0dfdd9d5>] mmc_bus_probe+0x24/0x28
+>
+> It's pretty clear that we're missing a call to blk_mq_free_tag_set().
+> Let's add it.
+>
+> Fixes: 81196976ed94 ("mmc: block: Add blk-mq support")
+> Signed-off-by: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 
-So replace IRQF_TRIGGER_LOW with IRQF_TRIGGER_NONE.
+Looks correct to me:
+Reviewed-by: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
-Also IRQF_ONESHOT is not needed - it is used for threaded interrupt
-handlers, and this driver does not used a threaded interrupt handler.
-So remove that setting.
-
-Signed-off-by: NeilBrown <neil@brown.name>
----
- drivers/mmc/host/mtk-sd.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 0798f0ba6d34..469d4a717175 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -2240,7 +2240,7 @@ static int msdc_drv_probe(struct platform_device *pdev)
- 	msdc_init_hw(host);
- 
- 	ret = devm_request_irq(&pdev->dev, host->irq, msdc_irq,
--		IRQF_TRIGGER_LOW | IRQF_ONESHOT, pdev->name, host);
-+			       IRQF_TRIGGER_NONE, pdev->name, host);
- 	if (ret)
- 		goto release;
- 
+Yours,
+Linus Walleij
