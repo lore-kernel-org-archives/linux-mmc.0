@@ -1,98 +1,50 @@
-From: Yinbo Zhu <yinbo.zhu@nxp.com>
-Subject: RE: [EXT] Re: [PATCH v1] arm64: ls1028: dtsi: Add esdhc node in dtsi
-Date: Sun, 5 May 2019 06:06:46 +0000
-Message-ID: <VI1PR04MB415896DA3F0AF8BA6AB149C9E9370@VI1PR04MB4158.eurprd04.prod.outlook.com>
-References: <20190423114424.3578-1-yinbo.zhu@nxp.com>
- <CAL_Jsq+4g+inxc+qcC3oLrXuR+L9AMvXFShGaU5Y3iRDsK3P6A@mail.gmail.com>
+From: Chaotian Jing <chaotian.jing@mediatek.com>
+Subject: Re: [PATCH 1/4] mmc: mtk-sd: don't hard-code interrupt trigger type
+Date: Sun, 5 May 2019 15:43:53 +0800
+Message-ID: <1557042233.18628.33.camel@mhfsdcap03>
+References: <155696540998.8632.5242582397805128125.stgit@noble.brown>
+         <155696549653.8632.3279283591868841381.stgit@noble.brown>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAL_Jsq+4g+inxc+qcC3oLrXuR+L9AMvXFShGaU5Y3iRDsK3P6A@mail.gmail.com>
-Content-Language: en-US
+In-Reply-To: <155696549653.8632.3279283591868841381.stgit@noble.brown>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Rob Herring <robh+dt@kernel.org>
-Cc: Shawn Guo <shawnguo@kernel.org>, Leo Li <leoyang.li@nxp.com>, Xiaobo Xie <xiaobo.xie@nxp.com>, Mark Rutland <mark.rutland@arm.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Y.b. Lu" <yangbo.lu@nxp.com>, Jiafei Pan <jiafei.pan@nxp.com>, Ashish Kumar <ashish.kumar@nxp.com>
+To: NeilBrown <neil@brown.name>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, thirtythreeforty@gmail.com
 List-Id: linux-mmc@vger.kernel.org
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogUm9iIEhlcnJpbmcgW21h
-aWx0bzpyb2JoK2R0QGtlcm5lbC5vcmddDQo+IFNlbnQ6IDIwMTnlubQ15pyIMuaXpSAxOjUwDQo+
-IFRvOiBZaW5ibyBaaHUgPHlpbmJvLnpodUBueHAuY29tPg0KPiBDYzogU2hhd24gR3VvIDxzaGF3
-bmd1b0BrZXJuZWwub3JnPjsgTGVvIExpIDxsZW95YW5nLmxpQG54cC5jb20+OyBYaWFvYm8NCj4g
-WGllIDx4aWFvYm8ueGllQG54cC5jb20+OyBNYXJrIFJ1dGxhbmQgPG1hcmsucnV0bGFuZEBhcm0u
-Y29tPjsNCj4gbGludXgtYXJtLWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnOyBkZXZpY2V0cmVl
-QHZnZXIua2VybmVsLm9yZzsNCj4gbGludXgta2VybmVsQHZnZXIua2VybmVsLm9yZzsgbGludXgt
-bW1jQHZnZXIua2VybmVsLm9yZzsgWS5iLiBMdQ0KPiA8eWFuZ2JvLmx1QG54cC5jb20+OyBKaWFm
-ZWkgUGFuIDxqaWFmZWkucGFuQG54cC5jb20+OyBBc2hpc2ggS3VtYXINCj4gPGFzaGlzaC5rdW1h
-ckBueHAuY29tPg0KPiBTdWJqZWN0OiBbRVhUXSBSZTogW1BBVENIIHYxXSBhcm02NDogbHMxMDI4
-OiBkdHNpOiBBZGQgZXNkaGMgbm9kZSBpbiBkdHNpDQo+IA0KPiBDYXV0aW9uOiBFWFQgRW1haWwN
-Cj4gDQo+IE9uIFR1ZSwgQXByIDIzLCAyMDE5IGF0IDY6NDIgQU0gWWluYm8gWmh1IDx5aW5iby56
-aHVAbnhwLmNvbT4gd3JvdGU6DQo+ID4NCj4gPiBGcm9tOiBBc2hpc2ggS3VtYXIgPEFzaGlzaC5L
-dW1hckBueHAuY29tPg0KPiA+DQo+ID4gVGhpcyBwYXRjaCBpcyB0byBhZGQgZXNkaGMgbm9kZSBh
-bmQgZW5hYmxlIFNEIFVIUy1JLCBlTU1DIEhTMjAwIGZvcg0KPiA+IGxzMTAyOGFyZGIvbHMxMDI4
-YXFkcyBib2FyZC4NCj4gPg0KPiA+IFNpZ25lZC1vZmYtYnk6IEFzaGlzaCBLdW1hciA8QXNoaXNo
-Lkt1bWFyQG54cC5jb20+DQo+ID4gU2lnbmVkLW9mZi1ieTogWWFuZ2JvIEx1IDx5YW5nYm8ubHVA
-bnhwLmNvbT4NCj4gPiBTaWduZWQtb2ZmLWJ5OiBZaW5ibyBaaHUgPHlpbmJvLnpodUBueHAuY29t
-Pg0KPiA+IC0tLQ0KPiA+ICAuLi4vYm9vdC9kdHMvZnJlZXNjYWxlL2ZzbC1sczEwMjhhLXFkcy5k
-dHMgICAgfCAgOCArKysrKysNCj4gPiAgLi4uL2Jvb3QvZHRzL2ZyZWVzY2FsZS9mc2wtbHMxMDI4
-YS1yZGIuZHRzICAgIHwgMTMgKysrKysrKysrDQo+ID4gIC4uLi9hcm02NC9ib290L2R0cy9mcmVl
-c2NhbGUvZnNsLWxzMTAyOGEuZHRzaSB8IDI3DQo+ID4gKysrKysrKysrKysrKysrKysrKw0KPiA+
-ICAzIGZpbGVzIGNoYW5nZWQsIDQ4IGluc2VydGlvbnMoKykNCj4gPg0KPiA+IGRpZmYgLS1naXQg
-YS9hcmNoL2FybTY0L2Jvb3QvZHRzL2ZyZWVzY2FsZS9mc2wtbHMxMDI4YS1xZHMuZHRzDQo+ID4g
-Yi9hcmNoL2FybTY0L2Jvb3QvZHRzL2ZyZWVzY2FsZS9mc2wtbHMxMDI4YS1xZHMuZHRzDQo+ID4g
-aW5kZXggMTRjNzlmNDY5MWVhLi4xODBlNWQyYTAwZDEgMTAwNjQ0DQo+ID4gLS0tIGEvYXJjaC9h
-cm02NC9ib290L2R0cy9mcmVlc2NhbGUvZnNsLWxzMTAyOGEtcWRzLmR0cw0KPiA+ICsrKyBiL2Fy
-Y2gvYXJtNjQvYm9vdC9kdHMvZnJlZXNjYWxlL2ZzbC1sczEwMjhhLXFkcy5kdHMNCj4gPiBAQCAt
-NDIsNiArNDIsMTQgQEANCj4gPiAgICAgICAgIHN0YXR1cyA9ICJva2F5IjsNCj4gPiAgfTsNCj4g
-Pg0KPiA+ICsmZXNkaGMgew0KPiA+ICsgICAgICAgc3RhdHVzID0gIm9rYXkiOw0KPiA+ICt9Ow0K
-PiA+ICsNCj4gPiArJmVzZGhjMSB7DQo+ID4gKyAgICAgICBzdGF0dXMgPSAib2theSI7DQo+ID4g
-K307DQo+ID4gKw0KPiA+ICAmaTJjMCB7DQo+ID4gICAgICAgICBzdGF0dXMgPSAib2theSI7DQo+
-ID4NCj4gPiBkaWZmIC0tZ2l0IGEvYXJjaC9hcm02NC9ib290L2R0cy9mcmVlc2NhbGUvZnNsLWxz
-MTAyOGEtcmRiLmR0cw0KPiA+IGIvYXJjaC9hcm02NC9ib290L2R0cy9mcmVlc2NhbGUvZnNsLWxz
-MTAyOGEtcmRiLmR0cw0KPiA+IGluZGV4IGY4NmIwNTRhNzRhZS4uMWJmYWY0Mjk0ZGI0IDEwMDY0
-NA0KPiA+IC0tLSBhL2FyY2gvYXJtNjQvYm9vdC9kdHMvZnJlZXNjYWxlL2ZzbC1sczEwMjhhLXJk
-Yi5kdHMNCj4gPiArKysgYi9hcmNoL2FybTY0L2Jvb3QvZHRzL2ZyZWVzY2FsZS9mc2wtbHMxMDI4
-YS1yZGIuZHRzDQo+ID4gQEAgLTMwLDYgKzMwLDE5IEBADQo+ID4gICAgICAgICB9Ow0KPiA+ICB9
-Ow0KPiA+DQo+ID4gKyZlc2RoYyB7DQo+ID4gKyAgICAgICBzdGF0dXMgPSAib2theSI7DQo+ID4g
-KyAgICAgICBzZC11aHMtc2RyMTA0Ow0KPiA+ICsgICAgICAgc2QtdWhzLXNkcjUwOw0KPiA+ICsg
-ICAgICAgc2QtdWhzLXNkcjI1Ow0KPiA+ICsgICAgICAgc2QtdWhzLXNkcjEyOw0KPiA+ICsgICAg
-ICAgfTsNCj4gPiArDQo+ID4gKyZlc2RoYzEgew0KPiA+ICsgICAgICAgc3RhdHVzID0gIm9rYXki
-Ow0KPiA+ICsgICAgICAgbW1jLWhzMjAwLTFfOHY7DQo+ID4gKyAgICAgICB9Ow0KPiA+ICsNCj4g
-PiAgJmkyYzAgew0KPiA+ICAgICAgICAgc3RhdHVzID0gIm9rYXkiOw0KPiA+DQo+ID4gZGlmZiAt
-LWdpdCBhL2FyY2gvYXJtNjQvYm9vdC9kdHMvZnJlZXNjYWxlL2ZzbC1sczEwMjhhLmR0c2kNCj4g
-PiBiL2FyY2gvYXJtNjQvYm9vdC9kdHMvZnJlZXNjYWxlL2ZzbC1sczEwMjhhLmR0c2kNCj4gPiBp
-bmRleCAyODk2YmJjZmEzYmIuLmQxM2NkM2ZiNDU1YiAxMDA2NDQNCj4gPiAtLS0gYS9hcmNoL2Fy
-bTY0L2Jvb3QvZHRzL2ZyZWVzY2FsZS9mc2wtbHMxMDI4YS5kdHNpDQo+ID4gKysrIGIvYXJjaC9h
-cm02NC9ib290L2R0cy9mcmVlc2NhbGUvZnNsLWxzMTAyOGEuZHRzaQ0KPiA+IEBAIC0yNzQsNiAr
-Mjc0LDMzIEBADQo+ID4gICAgICAgICAgICAgICAgICAgICAgICAgc3RhdHVzID0gImRpc2FibGVk
-IjsNCj4gPiAgICAgICAgICAgICAgICAgfTsNCj4gPg0KPiA+ICsgICAgICAgICAgICAgICBlc2Ro
-YzogZXNkaGNAMjE0MDAwMCB7DQo+IA0KPiBtbWNALi4uDQo+IA0KPiA+ICsgICAgICAgICAgICAg
-ICAgICAgICAgIGNvbXBhdGlibGUgPSAiZnNsLGxzMTAyOGEtZXNkaGMiLCAiZnNsLGVzZGhjIjsN
-Cj4gPiArICAgICAgICAgICAgICAgICAgICAgICByZWcgPSA8MHgwIDB4MjE0MDAwMCAweDAgMHgx
-MDAwMD47DQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgaW50ZXJydXB0cyA9IDwwIDI4IDB4
-ND47IC8qIExldmVsIGhpZ2ggdHlwZSAqLw0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIGNs
-b2NrLWZyZXF1ZW5jeSA9IDwwPjsNCj4gDQo+IEZpbGxlZCBpbiBieSBib290bG9hZGVyPyBJZiBz
-bywgYWRkIGEgY29tbWVudC4NCkhpIHJvYiwNCkZpbGxlZCBpbiBieSBrZXJuZWwsIHBsZWFzZSB5
-b3Ugbm90ZS4NCg0KUmVnYXJkcywNCllpbmJvLg0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAg
-IGNsb2NrcyA9IDwmY2xvY2tnZW4gMiAxPjsNCj4gPiArICAgICAgICAgICAgICAgICAgICAgICB2
-b2x0YWdlLXJhbmdlcyA9IDwxODAwIDE4MDAgMzMwMCAzMzAwPjsNCj4gPiArICAgICAgICAgICAg
-ICAgICAgICAgICBzZGhjaSxhdXRvLWNtZDEyOw0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAg
-IGxpdHRsZS1lbmRpYW47DQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgYnVzLXdpZHRoID0g
-PDQ+Ow0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIHN0YXR1cyA9ICJkaXNhYmxlZCI7DQo+
-ID4gKyAgICAgICAgICAgICAgIH07DQo+ID4gKw0KPiA+ICsgICAgICAgICAgICAgICBlc2RoYzE6
-IGVzZGhjQDIxNTAwMDAgew0KPiANCj4gbW1jQC4uLg0KPiANCj4gPiArICAgICAgICAgICAgICAg
-ICAgICAgICBjb21wYXRpYmxlID0gImZzbCxsczEwMjhhLWVzZGhjIiwgImZzbCxlc2RoYyI7DQo+
-ID4gKyAgICAgICAgICAgICAgICAgICAgICAgcmVnID0gPDB4MCAweDIxNTAwMDAgMHgwIDB4MTAw
-MDA+Ow0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIGludGVycnVwdHMgPSA8MCA2MyAweDQ+
-OyAvKiBMZXZlbCBoaWdoIHR5cGUgKi8NCj4gPiArICAgICAgICAgICAgICAgICAgICAgICBjbG9j
-ay1mcmVxdWVuY3kgPSA8MD47DQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgY2xvY2tzID0g
-PCZjbG9ja2dlbiAyIDE+Ow0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIHZvbHRhZ2UtcmFu
-Z2VzID0gPDE4MDAgMTgwMCAzMzAwIDMzMDA+Ow0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAg
-IHNkaGNpLGF1dG8tY21kMTI7DQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgYnJva2VuLWNk
-Ow0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIGxpdHRsZS1lbmRpYW47DQo+ID4gKyAgICAg
-ICAgICAgICAgICAgICAgICAgYnVzLXdpZHRoID0gPDQ+Ow0KPiA+ICsgICAgICAgICAgICAgICAg
-ICAgICAgIHN0YXR1cyA9ICJkaXNhYmxlZCI7DQo+ID4gKyAgICAgICAgICAgICAgIH07DQo+ID4g
-Kw0KPiA+ICAgICAgICAgICAgICAgICBzYXRhOiBzYXRhQDMyMDAwMDAgew0KPiA+ICAgICAgICAg
-ICAgICAgICAgICAgICAgIGNvbXBhdGlibGUgPSAiZnNsLGxzMTAyOGEtYWhjaSI7DQo+ID4gICAg
-ICAgICAgICAgICAgICAgICAgICAgcmVnID0gPDB4MCAweDMyMDAwMDAgMHgwIDB4MTAwMDA+LA0K
-PiA+IC0tDQo+ID4gMi4xNy4xDQo+ID4NCg==
+On Sat, 2019-05-04 at 20:24 +1000, NeilBrown wrote:
+> When using devicetree for configuration, interrupt trigger type
+> should be described in the dts file, not hard-coded in the C code.
+> 
+> The mtk-sd silicon in the mt7621 soc uses an active-high interrupt
+> and so cannot be used with the current code.
+> 
+> So replace IRQF_TRIGGER_LOW with IRQF_TRIGGER_NONE.
+> 
+> Also IRQF_ONESHOT is not needed - it is used for threaded interrupt
+> handlers, and this driver does not used a threaded interrupt handler.
+> So remove that setting.
+> 
+> Signed-off-by: NeilBrown <neil@brown.name>
+ Reviewed-by:Chaotian Jing <chaotian.jing@mediatek.com>
+> ---
+>  drivers/mmc/host/mtk-sd.c |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index 0798f0ba6d34..469d4a717175 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -2240,7 +2240,7 @@ static int msdc_drv_probe(struct platform_device *pdev)
+>  	msdc_init_hw(host);
+>  
+>  	ret = devm_request_irq(&pdev->dev, host->irq, msdc_irq,
+> -		IRQF_TRIGGER_LOW | IRQF_ONESHOT, pdev->name, host);
+> +			       IRQF_TRIGGER_NONE, pdev->name, host);
+>  	if (ret)
+>  		goto release;
+>  
+> 
+> 
