@@ -1,266 +1,67 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC and MEMSTICK updates for v5.2
-Date: Tue,  7 May 2019 08:36:34 +0200
-Message-ID: <20190507063634.8389-1-ulf.hansson@linaro.org>
+From: <orito.takao@socionext.com>
+Subject: Re: [PATCH 1/2] dt-bindings: mmc: add DT bindings for Milbeaut SD
+ controller
+Date: Tue, 7 May 2019 09:14:47 +0000
+Message-ID: <20190507181439.9D74.F0D17A80@socionext.com>
+References: <1556244392-15822-1-git-send-email-orito.takao@socionext.com>
+ <CAPDyKFouv1MDJXwDryqhC=X4mLycoAigB3x6Xee09U+QNGTa-Q@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="iso-2022-jp"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFouv1MDJXwDryqhC=X4mLycoAigB3x6Xee09U+QNGTa-Q@mail.gmail.com>
+Content-Language: ja-JP
+Content-ID: <4B9D2BC15922934897589C9947C4EF2C@socionext.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
+To: ulf.hansson@linaro.org
+Cc: robh+dt@kernel.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, masami.hiramatsu@linaro.org, jaswinder.singh@linaro.org, sugaya.taichi@socionext.com, kasai.kazuhiro@socionext.com, kanematsu.shinji@socionext.com
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Linus,
-
-Here's the PR with MMC updates for v5.1. This time and onwards I will continue
-to include changes also for the MEMSTICK subsystem in the PR, please tell me if
-you prefer another setup.
-
-Details about the highlights are as usual found in the signed tag.
-
-Please pull this in!
-
-Kind regards
-Ulf Hansson
-
-
-The following changes since commit dc4060a5dc2557e6b5aa813bf5b73677299d62d2:
-
-  Linux 5.1-rc5 (2019-04-14 15:17:41 -0700)
-
-are available in the Git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.2
-
-for you to fetch changes up to 0a49a619e7e1aeb3f5f5511ca59314423c83dae2:
-
-  mmc: sdhci-pci: Fix BYT OCP setting (2019-05-06 12:33:03 +0200)
-
-----------------------------------------------------------------
-MMC core:
- - Fix a few memoryleaks
- - Minor improvements to the card initialization sequence
- - Partially support sleepy GPIO controllers for pwrseq eMMC
-
-MMC host:
- - alcor: Work with multiple-entry sglists
- - alcor: Enable DMA for writes
- - meson-gx: Improve tuning support
- - meson-gx: Avoid clock glitch when switching to DDR modes
- - meson-gx: Disable unreliable HS400 mode
- - mmci: Minor updates for support of HW busy detection
- - mmci: Support data transfers for the stm32_sdmmc variant
- - mmci: Restructure code to better support different variants
- - mtk-sd: Add support for version found on MT7620 family SOCs
- - mtk-sd: Add support for the MT8516 version
- - mtk-sd: Add Chaotian Jing as the maintainer
- - sdhci: Reorganize request-code to convert from tasklet to workqueue
- - sdhci_am654: Stabilize support for lower speed modes
- - sdhci-esdhc-imx: Add HS400 support for iMX7ULP
- - sdhci-esdhc-imx: Add support for iMX7ULP version
- - sdhci-of-arasan: Allow to disable DCMDs via DT for CQE
- - sdhci-of-esdhc: Add support for the ls1028a version
- - sdhci-of-esdhc: Several fixups for errata
- - sdhci-pci: Fix BYT OCP setting
- - sdhci-pci: Add support for Intel CML
- - sdhci-tegra: Add support for system suspend/resume
- - sdhci-tegra: Add CQE support for Tegra186 WAR
- - sdhci-tegra: Add support for Tegra194
- - sdhci-tegra: Update HW tuning process
-
-MEMSTICK:
- - I volunteered to help as a maintainer for the memstick subsystem, which is
-   reflected by an update to the MAINTAINERS file. Changes are funneled through
-   my MMC git and we will use the linux-mmc mailing list.
-
-MEMSTICK host:
- - A few minor cleanups
-
-----------------------------------------------------------------
-Adrian Hunter (7):
-      mmc: sdhci-pci: Add support for Intel CML
-      mmc: sdhci: Reorganize sdhci_finish_mrq() and __sdhci_finish_mrq()
-      mmc: sdhci: Move timer and has_requests functions
-      mmc: sdhci: Move some processing to __sdhci_finish_mrq()
-      mmc: sdhci: Call mmc_request_done() from IRQ handler if possible
-      mmc: sdhci: Remove finish_tasklet
-      mmc: sdhci-pci: Fix BYT OCP setting
-
-Andrea Merello (1):
-      mmc: core: make pwrseq_emmc (partially) support sleepy GPIO controllers
-
-Andy Shevchenko (5):
-      mmc: mmc_spi: Remove redundant dev_set_drvdata()
-      mmc: mmc_spi: Remove useless NULL check at ->remove()
-      mmc: mmc_spi: Join string literals back
-      mmc: mmc_spi: Indentation fixes
-      mmc: mmc_spi: Convert to use SPDX identifier
-
-BOUGH CHEN (3):
-      dt-bindings: mmc: fsl-imx-esdhc: add imx7ulp compatible string
-      mmc: sdhci-esdhc-imx: add pm_qos to interact with cpuidle
-      mmc: sdhci-esdhc-imx: Add HS400 support for iMX7ULP
-
-Christoph Muellner (2):
-      dt-bindings: mmc: Add disable-cqe-dcmd property.
-      mmc: sdhci-of-arasan: Add DTS property to disable DCMDs.
-
-Daniel Drake (4):
-      mmc: alcor: enable DMA for writes
-      mmc: alcor: enable DMA transfer of large buffers
-      Revert "mmc: alcor: enable DMA transfer of large buffers"
-      mmc: alcor: work with multiple-entry sglists
-
-Enrico Weigelt, metux IT consult (1):
-      mmc: host: Pedantic cleanups to Kconfig
-
-Fabien Parent (3):
-      mmc: mtk-sd: add support for MT8516
-      mmc: mtk-sd: check for valid optional memory resource
-      dt-bindings: mmc: Add support for MT8516 to mtk-sd
-
-Faiz Abbas (1):
-      mmc: sdhci_am654: Clear HISPD_ENA in some lower speed modes
-
-Gustavo A. R. Silva (1):
-      mmc: usdhi6rol0: mark expected switch fall-throughs
-
-Jerome Brunet (7):
-      mmc: meson-gx: remove open coded read with timeout
-      mmc: meson-gx: ack only raised irq
-      mmc: meson-gx: correct irq flag
-      mmc: meson-gx: disable HS400
-      mmc: meson-gx: avoid clock glitch when switching to DDR modes
-      mmc: meson-gx: remove Rx phase tuning
-      mmc: meson-gx: add signal resampling tuning
-
-Kamlesh Gurudasani (1):
-      mmc: alcor: Drop pointer to mmc_host from alcor_sdmmc_host
-
-Kangjie Lu (1):
-      mmc_spi: add a status check for spi_sync_locked
-
-Kefeng Wang (1):
-      mmc: omap_hsmmc: Use dev_get_drvdata()
-
-Ludovic Barre (7):
-      mmc: mmci: add get_datactrl_cfg callback and helper functions
-      mmc: mmci: define get_dctrl_cfg for legacy variant
-      mmc: mmci: qcom: define get_dctrl_cfg
-      mmc: mmci: stm32: define get_dctrl_cfg
-      mmc: mmci: replace blksz_datactrlXX by get_datactrl_cfg callback
-      mmc: mmci: Cleanup mmci_cmd_irq() for busy detect
-      mmc: mmci: Prevent polling for busy detection in IRQ context
-
-NeilBrown (4):
-      mmc: mtk-sd: don't hard-code interrupt trigger type
-      mmc: mtk-sd: add support for config found in mt7620 family SOCs.
-      mmc: mtk-sd: enable internal card-detect logic.
-      mmc: mtk-sd: select REGULATOR
-
-Pan Bian (1):
-      mmc: core: fix possible use after free of host
-
-Pavel Machek (1):
-      mmc: core: Fix warning and undefined behavior in mmc voltage handling
-
-Raul E Rangel (2):
-      mmc: core: Verify SD bus width
-      mmc: core: Fix tag set memory leak
-
-Sowjanya Komatineni (9):
-      mmc: tegra: fix ddr signaling for non-ddr modes
-      mmc: sdhci: allow host to specify maximum tuning loops
-      mmc: tegra: update hw tuning process
-      dt-bindings: mmc: tegra: document Tegra194 compatible string
-      mmc: cqhci: allow hosts to update dcmd cmd desc
-      mmc: tegra: add Tegra186 WAR for CQE
-      mmc: cqhci: add CQHCI_SSC1 register CBC field mask
-      mmc: tegra: fix CQE enable and resume sequence
-      mmc: tegra: add sdhci tegra suspend and resume
-
-Stefan Wahren (1):
-      mmc: mxs-mmc: Enable MMC_CAP_ERASE
-
-Ulf Hansson (9):
-      mmc: mmci: Don't share un-implemented DMA functions
-      mmc: mmci: Drop unnecessary clear of variant->qcom_dml flag
-      mmc: mmci: Re-work code starting DMA for the qcom variant
-      mmc: mmci: Drop qcom specific header file
-      mmc: mmci: Share sdmmc_variant_init() via the common header file
-      mmc: mmci: Make mmci_variant_init() static
-      MAINTAINERS: Collect TI FLASH MEDIA drivers into one section
-      MAINTAINERS: Add Ulf Hansson to the MEMORYSTICK section
-      MAINTAINERS: Add section for MediaTek MMC/SD/SDIO driver
-
-Wolfram Sang (4):
-      mmc: renesas_sdhi: update copyright information
-      mmc: tmio: introduce macro for max block size
-      mmc: renesas_sdhi: prevent overflow for max_req_size
-      mmc: renesas_sdhi: set CBSY flag before probing TMIO host
-
-Yangbo Lu (1):
-      mmc: sdhci-of-esdhc: add quirk to ignore command inhibit for data
-
-Yinbo Zhu (6):
-      mmc: sdhci-of-esdhc: add erratum A011334 support in lx2160 2.0 SoC
-      mmc: sdhci-of-esdhc: add erratum eSDHC5 support
-      mmc: sdhci-of-esdhc: add erratum eSDHC-A001 and A-008358 support
-      mmc: sdhci-of-esdhc: add erratum A-009204 support
-      mmc: sdhci-of-esdhc: add erratum eSDHC7 support
-      dt-bindings: mmc: add DT bindings for ls1028a eSDHC host controller
-
-Yoshihiro Shimoda (1):
-      mmc: core: retry CMD1 in mmc_send_op_cond() even if the ocr = 0
-
-YueHaibing (3):
-      mmc: sdhci-omap: Make sdhci_omap_reset static
-      memstick: jmb38x_ms: remove set but not used variable 'data'
-      memstick: tifm: remove set but not used variable 'data'
-
- .../devicetree/bindings/mmc/fsl-esdhc.txt          |   1 +
- .../devicetree/bindings/mmc/fsl-imx-esdhc.txt      |   1 +
- Documentation/devicetree/bindings/mmc/mmc.txt      |   2 +
- Documentation/devicetree/bindings/mmc/mtk-sd.txt   |   2 +
- .../bindings/mmc/nvidia,tegra20-sdhci.txt          |   1 +
- MAINTAINERS                                        |  25 +-
- drivers/memstick/host/jmb38x_ms.c                  |   3 -
- drivers/memstick/host/tifm_ms.c                    |   3 -
- drivers/mmc/core/host.c                            |   4 +-
- drivers/mmc/core/mmc_ops.c                         |  16 +-
- drivers/mmc/core/pwrseq_emmc.c                     |  38 +-
- drivers/mmc/core/queue.c                           |   1 +
- drivers/mmc/core/sd.c                              |   8 +
- drivers/mmc/host/Kconfig                           |  46 +--
- drivers/mmc/host/alcor.c                           |  72 ++--
- drivers/mmc/host/cqhci.c                           |   2 +
- drivers/mmc/host/cqhci.h                           |   4 +
- drivers/mmc/host/meson-gx-mmc.c                    | 419 ++++++---------------
- drivers/mmc/host/mmc_spi.c                         |  98 ++---
- drivers/mmc/host/mmci.c                            |  82 ++--
- drivers/mmc/host/mmci.h                            |  32 +-
- drivers/mmc/host/mmci_qcom_dml.c                   |  17 +-
- drivers/mmc/host/mmci_qcom_dml.h                   |  30 --
- drivers/mmc/host/mmci_stm32_sdmmc.c                |  18 +
- drivers/mmc/host/mtk-sd.c                          |  97 ++++-
- drivers/mmc/host/mxs-mmc.c                         |   3 +-
- drivers/mmc/host/of_mmc_spi.c                      |   6 +-
- drivers/mmc/host/omap_hsmmc.c                      |   4 +-
- drivers/mmc/host/renesas_sdhi.h                    |   2 +-
- drivers/mmc/host/renesas_sdhi_core.c               |  12 +-
- drivers/mmc/host/renesas_sdhi_internal_dmac.c      |  11 +-
- drivers/mmc/host/renesas_sdhi_sys_dmac.c           |   6 +-
- drivers/mmc/host/sdhci-esdhc-imx.c                 |  41 +-
- drivers/mmc/host/sdhci-of-arasan.c                 |   5 +-
- drivers/mmc/host/sdhci-of-esdhc.c                  |  47 +++
- drivers/mmc/host/sdhci-omap.c                      |   2 +-
- drivers/mmc/host/sdhci-pci-core.c                  |  98 +++++
- drivers/mmc/host/sdhci-pci.h                       |   2 +
- drivers/mmc/host/sdhci-tegra.c                     | 362 +++++++++++++++++-
- drivers/mmc/host/sdhci.c                           | 164 +++++---
- drivers/mmc/host/sdhci.h                           |   4 +-
- drivers/mmc/host/sdhci_am654.c                     |  22 ++
- drivers/mmc/host/tmio_mmc.h                        |   6 +-
- drivers/mmc/host/tmio_mmc_core.c                   |   6 +-
- drivers/mmc/host/usdhi6rol0.c                      |   9 +-
- include/linux/alcor_pci.h                          |   2 +-
- 46 files changed, 1170 insertions(+), 666 deletions(-)
- delete mode 100644 drivers/mmc/host/mmci_qcom_dml.h
+DQpUaGFuayB5b3UgZm9yIHJldmlld2luZyBteSBwYXRjaGVzLg0KU29ycnkgZm9yIG15IGxhdGUg
+cmVwbHkuIEphcGFuIHdhcyBpbiBTcHJpbmcgVmFjYXRpb24uDQoNCj4gT24gRnJpLCAyNiBBcHIg
+MjAxOSBhdCAwNDowNCwgVGFrYW8gT3JpdG8gPG9yaXRvLnRha2FvQHNvY2lvbmV4dC5jb20+IHdy
+b3RlOg0KPiA+DQo+ID4gU2lnbmVkLW9mZi1ieTogVGFrYW8gT3JpdG8gPG9yaXRvLnRha2FvQHNv
+Y2lvbmV4dC5jb20+DQo+ID4gLS0tDQo+ID4gIC4uLi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9z
+ZGhjaS1taWxiZWF1dC50eHQgICAgIHwgMzUgKysrKysrKysrKysrKysrKysrKysrKw0KPiA+ICAx
+IGZpbGUgY2hhbmdlZCwgMzUgaW5zZXJ0aW9ucygrKQ0KPiA+ICBjcmVhdGUgbW9kZSAxMDA2NDQg
+RG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9zZGhjaS1taWxiZWF1dC50eHQN
+Cj4gPg0KPiA+IGRpZmYgLS1naXQgYS9Eb2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGluZ3Mv
+bW1jL3NkaGNpLW1pbGJlYXV0LnR4dCBiL0RvY3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5n
+cy9tbWMvc2RoY2ktbWlsYmVhdXQudHh0DQo+ID4gbmV3IGZpbGUgbW9kZSAxMDA2NDQNCj4gPiBp
+bmRleCAwMDAwMDAwLi43MDA4NDYyDQo+ID4gLS0tIC9kZXYvbnVsbA0KPiA+ICsrKyBiL0RvY3Vt
+ZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9tbWMvc2RoY2ktbWlsYmVhdXQudHh0DQo+ID4g
+QEAgLTAsMCArMSwzNSBAQA0KPiA+ICsqIFNPQ0lPTkVYVCBTREhDSSBjb250cm9sbGVyDQo+ID4g
+Kw0KPiA+ICtUaGlzIGZpbGUgZG9jdW1lbnRzIGRpZmZlcmVuY2VzIGJldHdlZW4gdGhlIGNvcmUg
+cHJvcGVydGllcyBpbiBtbWMudHh0DQo+ID4gK2FuZCB0aGUgcHJvcGVydGllcyB1c2VkIGJ5IHRo
+ZSBzZGhjaV9taWxiZWF1dCBkcml2ZXIuDQo+ID4gKw0KPiA+ICtSZXF1aXJlZCBwcm9wZXJ0aWVz
+Og0KPiA+ICstIGNvbXBhdGlibGU6ICJzb2Npb25leHQsbWlsYmVhdXQtbTEwdi1zZGhjaS0zLjAi
+DQo+ID4gKy0gY2xvY2tzOiBNdXN0IGNvbnRhaW4gYW4gZW50cnkgZm9yIGVhY2ggZW50cnkgaW4g
+Y2xvY2stbmFtZXMuIEl0IGlzIGENCj4gPiArICBsaXN0IG9mIHBoYW5kbGVzIGFuZCBjbG9jay1z
+cGVjaWZpZXIgcGFpcnMuDQo+ID4gKyAgU2VlIC4uL2Nsb2Nrcy9jbG9jay1iaW5kaW5ncy50eHQg
+Zm9yIGRldGFpbHMuDQo+ID4gKy0gY2xvY2stbmFtZXM6IFNob3VsZCBjb250YWluIHRoZSBmb2xs
+b3dpbmcgdHdvIGVudHJpZXM6DQo+ID4gKyAgICAgICAiaWZhY2UiIC0gY2xvY2sgdXNlZCBmb3Ig
+c2RoY2kgaW50ZXJmYWNlDQo+ID4gKyAgICAgICAiY29yZSIgIC0gY29yZSBjbG9jayBmb3Igc2Ro
+Y2kgY29udHJvbGxlcg0KPiA+ICsNCj4gPiArT3B0aW9uYWwgcHJvcGVydGllczoNCj4gPiArLSB2
+cW1tYy1zdXBwbHk6IHBoYW5kbGUgdG8gdGhlIHJlZ3VsYXRvciBkZXZpY2UgdHJlZSBub2RlLCBt
+ZW50aW9uZWQNCj4gPiArICBhcyB0aGUgVkNDUS9WRERfSU8gc3VwcGx5IGluIHRoZSBlTU1DL1NE
+IHNwZWNzLg0KPiA+ICstIGZ1aml0c3UsY21kLWRhdC1kZWxheS1zZWxlY3Q6IGJvb2xlYW4gcHJv
+cGVydHkgaW5kaWNhdGluZyB0aGF0IHRoaXMgaG9zdA0KPiA+ICsgIHJlcXVpcmVzIHRoZSBDTURf
+REFUX0RFTEFZIGNvbnRyb2wgdG8gYmUgZW5hYmxlZC4NCj4gPiArLSBzbmksbW1jLXBvd2VyLWdw
+aW86IHNldCBwcm9wZXJ0eSBpbmRpY2F0aW5nIHRoYXQgcG93ZXIgb24gb3Igb2ZmIG5lZWRzDQo+
+ID4gKyAgY29udHJvbCBvZiBncGlvcy4NCj4gDQo+IFBsZWFzZSB1c2UgYSB2bW1jLXN1cHBseSBp
+bnN0ZWFkIG9mICJwb3dlci1ncGlvIiAod2hpY2ggbWVhbnMgeW91IG5lZWQNCj4gdG8gbW9kZWwg
+dGhpcyBhcyBhIGZpeGVkIEdQSU8gcmVndWxhdG9yKS4NCg0KT0ssIEkgd2lsbCBzdHVkeSBhYm91
+dCByZWd1bGF0b3Ivdm1tYy1zdXBwbHkgYW5kIGNoYW5nZSB0byB1c2UgaXQuDQoNClRoYW5rcw0K
+T3JpdG8NCg0KPiANCj4gPiArDQo+ID4gK0V4YW1wbGU6DQo+ID4gKyAgICAgICBzZGhjaTM6IG1t
+Y0AxYjAxMDAwMCB7DQo+ID4gKyAgICAgICAgICAgICAgIGNvbXBhdGlibGUgPSAic29jaW9uZXh0
+LG1pbGJlYXV0LW0xMHYtc2RoY2ktMy4wIjsNCj4gPiArICAgICAgICAgICAgICAgcmVnID0gPDB4
+MWIwMTAwMDAgMHgxMDAwMD47DQo+ID4gKyAgICAgICAgICAgICAgIGludGVycnVwdHMgPSA8MCAy
+NjUgMHg0PjsNCj4gPiArICAgICAgICAgICAgICAgdm9sdGFnZS1yYW5nZXMgPSA8MzMwMCAzMzAw
+PjsNCj4gPiArICAgICAgICAgICAgICAgYnVzLXdpZHRoID0gPDQ+Ow0KPiA+ICsgICAgICAgICAg
+ICAgICBjbG9ja3MgPSA8JmNsayA3PiwgPCZhaGJfY2xrPjsNCj4gPiArICAgICAgICAgICAgICAg
+Y2xvY2stbmFtZXMgPSAiY29yZSIsICJpZmFjZSI7DQo+ID4gKyAgICAgICAgICAgICAgIGNhcC1z
+ZGlvLWlycTsNCj4gPiArICAgICAgICAgICAgICAgc25pLG1tYy1wb3dlci1ncGlvID0gPCZwaW5j
+dHJsIDUzIEdQSU9fQUNUSVZFX0hJR0g+Ow0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIGZ1
+aml0c3UsY21kLWRhdC1kZWxheS1zZWxlY3Q7DQo+ID4gKyAgICAgICB9Ow0KPiA+IC0tDQo+ID4g
+MS45LjENCj4gPg0KPiA+DQo+IA0KPiBLaW5kIHJlZ2FyZHMNCj4gVWZmZQ0KDQotLSANClRha2Fv
+IE9yaXRvIDxvcml0by50YWthb0Bzb2Npb25leHQuY29tPg0K
