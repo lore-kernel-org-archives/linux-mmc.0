@@ -1,15 +1,15 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 2/2] mmc: sdhci-iproc: Set NO_HISPD bit to fix HS50 data
- hold time problem
-Date: Tue, 7 May 2019 09:31:16 +0300
-Message-ID: <673b3d25-0256-9cd7-c89a-673546e69f3a@intel.com>
+Subject: Re: [PATCH 1/2] mmc: sdhci-iproc: cygnus: Set NO_HISPD bit to fix
+ HS50 data hold time problem
+Date: Tue, 7 May 2019 09:32:58 +0300
+Message-ID: <195374db-9a9a-2807-d8be-50ec4e8fedcb@intel.com>
 References: <20190506170115.10840-1-scott.branden@broadcom.com>
- <20190506170115.10840-3-scott.branden@broadcom.com>
+ <20190506170115.10840-2-scott.branden@broadcom.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190506170115.10840-3-scott.branden@broadcom.com>
+In-Reply-To: <20190506170115.10840-2-scott.branden@broadcom.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
 To: Scott Branden <scott.branden@broadcom.com>, Ulf Hansson <ulf.hansson@linaro.org>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Stefan Wahren <stefan.wahren@i2se.com>
@@ -20,34 +20,35 @@ On 6/05/19 8:01 PM, Scott Branden wrote:
 > From: Trac Hoang <trac.hoang@broadcom.com>
 > 
 > The iproc host eMMC/SD controller hold time does not meet the
-> specification in the HS50 mode.  This problem can be mitigated
+> specification in the HS50 mode. This problem can be mitigated
 > by disabling the HISPD bit; thus forcing the controller output
 > data to be driven on the falling clock edges rather than the
 > rising clock edges.
 > 
-> Fixes: f5f968f2371c ("mmc: sdhci-iproc: suppress spurious interrupt with Multiblock read")
-
-Is this fixes tag correct, because it doesn't seem related.  Maybe explain
-that in the commit message.
-
+> This change applies only to the Cygnus platform.
+> 
+> Fixes: c833e92bbb60 ("mmc: sdhci-iproc: support standard byte register accesses")
 > Signed-off-by: Trac Hoang <trac.hoang@broadcom.com>
 > Signed-off-by: Scott Branden <scott.branden@broadcom.com>
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
 > ---
 >  drivers/mmc/host/sdhci-iproc.c | 3 ++-
 >  1 file changed, 2 insertions(+), 1 deletion(-)
 > 
 > diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
-> index 9d4071c41c94..2feb4ef32035 100644
+> index 9d12c06c7fd6..9d4071c41c94 100644
 > --- a/drivers/mmc/host/sdhci-iproc.c
 > +++ b/drivers/mmc/host/sdhci-iproc.c
-> @@ -220,7 +220,8 @@ static const struct sdhci_iproc_data iproc_cygnus_data = {
+> @@ -196,7 +196,8 @@ static const struct sdhci_ops sdhci_iproc_32only_ops = {
+>  };
 >  
->  static const struct sdhci_pltfm_data sdhci_iproc_pltfm_data = {
->  	.quirks = SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
-> -		  SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12,
-> +		  SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12 |
+>  static const struct sdhci_pltfm_data sdhci_iproc_cygnus_pltfm_data = {
+> -	.quirks = SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK,
+> +	.quirks = SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
 > +		  SDHCI_QUIRK_NO_HISPD_BIT,
->  	.quirks2 = SDHCI_QUIRK2_ACMD23_BROKEN,
->  	.ops = &sdhci_iproc_ops,
+>  	.quirks2 = SDHCI_QUIRK2_ACMD23_BROKEN | SDHCI_QUIRK2_HOST_OFF_CARD_ON,
+>  	.ops = &sdhci_iproc_32only_ops,
 >  };
 > 
