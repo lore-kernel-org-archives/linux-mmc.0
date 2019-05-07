@@ -1,27 +1,23 @@
-From: Linus Torvalds <torvalds@linux-foundation.org>
+From: pr-tracker-bot@kernel.org
 Subject: Re: [GIT PULL] MMC and MEMSTICK updates for v5.2
-Date: Tue, 7 May 2019 13:00:28 -0700
-Message-ID: <CAHk-=wh+d+dWT6g6DO5QgZkp_CAFJyXt7RPtXn59=c8bvdKtKA@mail.gmail.com>
+Date: Tue, 07 May 2019 20:50:11 +0000
+Message-ID: <155726221151.25781.8513027415507932258.pr-tracker-bot@kernel.org>
 References: <20190507063634.8389-1-ulf.hansson@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20190507063634.8389-1-ulf.hansson@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Linux List Kernel Mailing <linux-kernel@vger.kernel.org>
+Cc: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, May 6, 2019 at 11:36 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> Here's the PR with MMC updates for v5.1. This time and onwards I will continue
-> to include changes also for the MEMSTICK subsystem in the PR, please tell me if
-> you prefer another setup.
+The pull request you sent on Tue,  7 May 2019 08:36:34 +0200:
 
-I'll just consider it all "MMC", not worrying about the memory stick
-part. I'm assuming it's not going to be all that active or noticeable
-in the big picture anyway... Sending them together sounds fine to me.
+> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.2
 
-Thanks,
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/01e5d1830cf54ac45768ef9ceb3e79cea2e1198c
 
-                 Linus
+Thank you!
+
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.wiki.kernel.org/userdoc/prtracker
