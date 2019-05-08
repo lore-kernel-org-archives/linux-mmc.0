@@ -1,7 +1,7 @@
 From: Alexandru Ardelean <alexandru.ardelean@analog.com>
-Subject: [PATCH 13/16] drm/edid: use new match_string() helper/macro
-Date: Wed, 8 May 2019 14:28:39 +0300
-Message-ID: <20190508112842.11654-15-alexandru.ardelean@analog.com>
+Subject: [PATCH 14/16] staging: gdm724x: use new match_string() helper/macro
+Date: Wed, 8 May 2019 14:28:40 +0300
+Message-ID: <20190508112842.11654-16-alexandru.ardelean@analog.com>
 References: <20190508112842.11654-1-alexandru.ardelean@analog.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,7 +12,7 @@ To: linuxppc-dev@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-ide@vger.
 Cc: gregkh@linuxfoundation.org, andriy.shevchenko@linux.intel.com, Alexandru Ardelean <alexandru.ardelean@analog.com>
 List-Id: linux-mmc@vger.kernel.org
 
-The `generic_edid_name` is a static array of strings.
+The `DRIVER_STRING` array is a static array of strings.
 Using match_string() (which computes the array size via ARRAY_SIZE())
 is possible.
 
@@ -21,21 +21,22 @@ No functionality change.
 
 Signed-off-by: Alexandru Ardelean <alexandru.ardelean@analog.com>
 ---
- drivers/gpu/drm/drm_edid_load.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/staging/gdm724x/gdm_tty.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
 
-diff --git a/drivers/gpu/drm/drm_edid_load.c b/drivers/gpu/drm/drm_edid_load.c
-index 1450051972ea..66e1e325ff37 100644
---- a/drivers/gpu/drm/drm_edid_load.c
-+++ b/drivers/gpu/drm/drm_edid_load.c
-@@ -186,7 +186,7 @@ static void *edid_load(struct drm_connector *connector, const char *name,
- 	int i, valid_extensions = 0;
- 	bool print_bad_edid = !connector->bad_edid_counter || (drm_debug & DRM_UT_KMS);
+diff --git a/drivers/staging/gdm724x/gdm_tty.c b/drivers/staging/gdm724x/gdm_tty.c
+index 6e147a324652..81dd6795599f 100644
+--- a/drivers/staging/gdm724x/gdm_tty.c
++++ b/drivers/staging/gdm724x/gdm_tty.c
+@@ -56,8 +56,7 @@ static int gdm_tty_install(struct tty_driver *driver, struct tty_struct *tty)
+ 	struct gdm *gdm = NULL;
+ 	int ret;
  
--	builtin = __match_string(generic_edid_name, GENERIC_EDIDS, name);
-+	builtin = match_string(generic_edid_name, name);
- 	if (builtin >= 0) {
- 		fwdata = generic_edid[builtin];
- 		fwsize = sizeof(generic_edid[builtin]);
+-	ret = __match_string(DRIVER_STRING, TTY_MAX_COUNT,
+-			     tty->driver->driver_name);
++	ret = match_string(DRIVER_STRING, tty->driver->driver_name);
+ 	if (ret < 0)
+ 		return -ENODEV;
+ 
 -- 
 2.17.1
