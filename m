@@ -1,43 +1,61 @@
-From: Scott Branden <scott.branden@broadcom.com>
-Subject: [PATCH v2 2/2] mmc: sdhci-iproc: Set NO_HISPD bit to fix HS50 data hold time problem
-Date: Wed,  8 May 2019 09:40:44 -0700
-Message-ID: <20190508164044.22451-3-scott.branden@broadcom.com>
-References: <20190508164044.22451-1-scott.branden@broadcom.com>
+From: Raul E Rangel <rrangel@chromium.org>
+Subject: [PATCH 1/2] mmc: v4.14: Fix null pointer dereference in mmc_init_request
+Date: Wed,  8 May 2019 12:58:32 -0600
+Message-ID: <20190508185833.187068-1-rrangel@chromium.org>
+Mime-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190508164044.22451-1-scott.branden@broadcom.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Stefan Wahren <stefan.wahren@i2se.com>
-Cc: BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Trac Hoang <trac.hoang@broadcom.com>, stable@vger.kernel.org, Scott Branden <scott.branden@broadcom.com>
+To: linux-mmc@vger.kernel.org
+Cc: djkurtz@google.com, adrian.hunter@intel.com, zwisler@chromium.org, Raul E Rangel <rrangel@chromium.org>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Trac Hoang <trac.hoang@broadcom.com>
+It is possible for queuedata to be cleared in mmc_cleanup_queue before
+the request has been started. This will result in dereferencing a null
+pointer.
 
-The iproc host eMMC/SD controller hold time does not meet the
-specification in the HS50 mode.  This problem can be mitigated
-by disabling the HISPD bit; thus forcing the controller output
-data to be driven on the falling clock edges rather than the
-rising clock edges.
-
-Cc: stable@vger.kernel.org # v4.12+
-Signed-off-by: Trac Hoang <trac.hoang@broadcom.com>
-Signed-off-by: Scott Branden <scott.branden@broadcom.com>
+Signed-off-by: Raul E Rangel <rrangel@chromium.org>
 ---
- drivers/mmc/host/sdhci-iproc.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+I think we should cherry-pick 41e3efd07d5a02c80f503e29d755aa1bbb4245de
+https://lore.kernel.org/patchwork/patch/856512/ into 4.14. It fixes a
+potential resource leak when shutting down the request queue. Once this
+patch is applied, there is a potential for a null pointer dereference.
+That's what this patch fixes. The next patch is just an optimization to
+stop processing earlier.
 
-diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
-index 9d4071c41c94..2feb4ef32035 100644
---- a/drivers/mmc/host/sdhci-iproc.c
-+++ b/drivers/mmc/host/sdhci-iproc.c
-@@ -220,7 +220,8 @@ static const struct sdhci_iproc_data iproc_cygnus_data = {
+See https://patchwork.kernel.org/patch/10925469/ for the initial
+motivation.
+
+This commit applies to v4.14.116.
+
+This doesn't apply to 5.1 since mmc has been migrated to blk-mq.
+
+Thanks,
+Raul
+
+ drivers/mmc/core/queue.c | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+index 0a4e77a5ba33..4bf1a9c6440b 100644
+--- a/drivers/mmc/core/queue.c
++++ b/drivers/mmc/core/queue.c
+@@ -159,8 +159,14 @@ static int mmc_init_request(struct request_queue *q, struct request *req,
+ {
+ 	struct mmc_queue_req *mq_rq = req_to_mmc_queue_req(req);
+ 	struct mmc_queue *mq = q->queuedata;
+-	struct mmc_card *card = mq->card;
+-	struct mmc_host *host = card->host;
++	struct mmc_card *card;
++	struct mmc_host *host;
++
++	if (!mq)
++		return -ENODEV;
++
++	card = mq->card;
++	host = card->host;
  
- static const struct sdhci_pltfm_data sdhci_iproc_pltfm_data = {
- 	.quirks = SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
--		  SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12,
-+		  SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12 |
-+		  SDHCI_QUIRK_NO_HISPD_BIT,
- 	.quirks2 = SDHCI_QUIRK2_ACMD23_BROKEN,
- 	.ops = &sdhci_iproc_ops,
- };
+ 	mq_rq->sg = mmc_alloc_sg(host->max_segs, gfp);
+ 	if (!mq_rq->sg)
 -- 
-2.17.1
+2.21.0.1020.gf2820cf01a-goog
