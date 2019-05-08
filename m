@@ -1,7 +1,7 @@
 From: Alexandru Ardelean <alexandru.ardelean@analog.com>
-Subject: [PATCH 12/16] rdmacg: use new match_string() helper/macro
-Date: Wed, 8 May 2019 14:28:38 +0300
-Message-ID: <20190508112842.11654-14-alexandru.ardelean@analog.com>
+Subject: [PATCH 13/16] drm/edid: use new match_string() helper/macro
+Date: Wed, 8 May 2019 14:28:39 +0300
+Message-ID: <20190508112842.11654-15-alexandru.ardelean@analog.com>
 References: <20190508112842.11654-1-alexandru.ardelean@analog.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,7 +12,7 @@ To: linuxppc-dev@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-ide@vger.
 Cc: gregkh@linuxfoundation.org, andriy.shevchenko@linux.intel.com, Alexandru Ardelean <alexandru.ardelean@analog.com>
 List-Id: linux-mmc@vger.kernel.org
 
-The `rdmacg_resource_names` array is a static array of strings.
+The `generic_edid_name` is a static array of strings.
 Using match_string() (which computes the array size via ARRAY_SIZE())
 is possible.
 
@@ -21,21 +21,21 @@ No functionality change.
 
 Signed-off-by: Alexandru Ardelean <alexandru.ardelean@analog.com>
 ---
- kernel/cgroup/rdma.c | 2 +-
+ drivers/gpu/drm/drm_edid_load.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/kernel/cgroup/rdma.c b/kernel/cgroup/rdma.c
-index 65d4df148603..71c3d305bd1f 100644
---- a/kernel/cgroup/rdma.c
-+++ b/kernel/cgroup/rdma.c
-@@ -367,7 +367,7 @@ static int parse_resource(char *c, int *intval)
- 	if (!name || !value)
- 		return -EINVAL;
+diff --git a/drivers/gpu/drm/drm_edid_load.c b/drivers/gpu/drm/drm_edid_load.c
+index 1450051972ea..66e1e325ff37 100644
+--- a/drivers/gpu/drm/drm_edid_load.c
++++ b/drivers/gpu/drm/drm_edid_load.c
+@@ -186,7 +186,7 @@ static void *edid_load(struct drm_connector *connector, const char *name,
+ 	int i, valid_extensions = 0;
+ 	bool print_bad_edid = !connector->bad_edid_counter || (drm_debug & DRM_UT_KMS);
  
--	i = __match_string(rdmacg_resource_names, RDMACG_RESOURCE_MAX, name);
-+	i = match_string(rdmacg_resource_names, name);
- 	if (i < 0)
- 		return i;
- 
+-	builtin = __match_string(generic_edid_name, GENERIC_EDIDS, name);
++	builtin = match_string(generic_edid_name, name);
+ 	if (builtin >= 0) {
+ 		fwdata = generic_edid[builtin];
+ 		fwsize = sizeof(generic_edid[builtin]);
 -- 
 2.17.1
