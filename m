@@ -1,7 +1,7 @@
 From: Alexandru Ardelean <alexandru.ardelean@analog.com>
-Subject: [PATCH 05/16] ALSA: oxygen: use new match_string() helper/macro
-Date: Wed, 8 May 2019 14:28:31 +0300
-Message-ID: <20190508112842.11654-7-alexandru.ardelean@analog.com>
+Subject: [PATCH 04/16] powerpc/xmon: use new match_string() helper/macro
+Date: Wed, 8 May 2019 14:28:30 +0300
+Message-ID: <20190508112842.11654-6-alexandru.ardelean@analog.com>
 References: <20190508112842.11654-1-alexandru.ardelean@analog.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -24,27 +24,29 @@ List-Id: linux-mmc@vger.kernel.org
 The change is purely cosmetic at this point in time, but it does highlight
 the change done in lib/string.c for match_string().
 
-Particularly for this change, a control mode can be removed/added at a
-different index/enum-value, and the match_string() helper will continue
-until the end of the array and ignore the NULL.
+Particularly for this change, if a regname is removed (replaced with NULL)
+in the list, the match_string() helper will continue until the end of the
+array and ignore the NULL.
+This would technically allow for "reserved" regs, though here it's not the
+case.
 
 Signed-off-by: Alexandru Ardelean <alexandru.ardelean@analog.com>
 ---
- sound/pci/oxygen/oxygen_mixer.c | 2 +-
+ arch/powerpc/xmon/xmon.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/sound/pci/oxygen/oxygen_mixer.c b/sound/pci/oxygen/oxygen_mixer.c
-index 13c2fb75fd71..961fd1cbc712 100644
---- a/sound/pci/oxygen/oxygen_mixer.c
-+++ b/sound/pci/oxygen/oxygen_mixer.c
-@@ -1086,7 +1086,7 @@ static int add_controls(struct oxygen *chip,
- 		err = snd_ctl_add(chip->card, ctl);
- 		if (err < 0)
- 			return err;
--		j = __match_string(known_ctl_names, CONTROL_COUNT, ctl->id.name);
-+		j = match_string(known_ctl_names, ctl->id.name);
- 		if (j >= 0) {
- 			chip->controls[j] = ctl;
- 			ctl->private_free = oxygen_any_ctl_free;
+diff --git a/arch/powerpc/xmon/xmon.c b/arch/powerpc/xmon/xmon.c
+index efca104ac0cb..b84a7fc1112b 100644
+--- a/arch/powerpc/xmon/xmon.c
++++ b/arch/powerpc/xmon/xmon.c
+@@ -3231,7 +3231,7 @@ scanhex(unsigned long *vp)
+ 			regname[i] = c;
+ 		}
+ 		regname[i] = 0;
+-		i = __match_string(regnames, N_PTREGS, regname);
++		i = match_string(regnames, regname);
+ 		if (i < 0) {
+ 			printf("invalid register name '%%%s'\n", regname);
+ 			return 0;
 -- 
 2.17.1
